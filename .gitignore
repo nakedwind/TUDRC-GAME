@@ -1,0 +1,7 @@
+# 繪圖原始檔（PSD 又大又常改，不上 GitHub；請自行在本機／雲端保存備份）
+*.psd
+
+# 系統雜項
+Thumbs.db
+.DS_Store
+desktop.ini
