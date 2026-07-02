@@ -1,0 +1,40 @@
+/* ===== 台北地下災害應變中心 — 樣式 =====
+   這裡放所有「畫面外觀」的設定（顏色、大小、排版）。
+   想改介面長相就改這裡，不會動到遊戲邏輯。
+*/
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: #14171c; color: #e6e9ee;
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+  display: flex; flex-direction: column; align-items: center;
+  padding: 10px; min-height: 100vh;
+}
+h1 { font-size: 18px; margin: 2px 0 6px; color: #8fd3ff; font-weight: 600; }
+#hud {
+  display: flex; gap: 16px; flex-wrap: wrap; justify-content: center;
+  background: #1d222b; padding: 8px 14px; border-radius: 8px; margin-bottom: 8px; font-size: 14px;
+}
+#hud b { color: #ffd479; }
+#hud .guide b { color: #7ee0c0; }
+#hud .hp b { color: #ff8f8f; }
+#wrap { position: relative; width: 100%; max-width: 1280px; }
+canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; height: auto; cursor: pointer; }
+#tools { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; justify-content: center; }
+.tbtn {
+  background: #232a35; border: 2px solid #333c49; color: #e6e9ee;
+  padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; text-align: left; min-width: 120px;
+}
+.tbtn small { display: block; color: #9aa4b2; font-size: 11px; margin-top: 2px; }
+.tbtn.sel { border-color: #8fd3ff; background: #2b3a4a; }
+#editBtn { min-width: 150px; border-color: #6a5acd; }
+#editBtn.on { border-color: #b39ddb; background: #3a2f55; color: #fff; }
+#hint { font-size: 12px; color: #9aa4b2; max-width: 900px; text-align: center; line-height: 1.7; margin-top: 4px; }
+#overlay {
+  position: absolute; inset: 0; background: rgba(8,10,14,.86);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  border-radius: 8px; text-align: center; padding: 20px;
+}
+#overlay h2 { margin: 0 0 8px; font-size: 26px; }
+#overlay p { margin: 4px 0 16px; color: #c3ccd8; font-size: 15px; line-height: 1.7; }
+#overlay button { background: #2b6cb0; color: #fff; border: none; padding: 10px 24px; border-radius: 8px; font-size: 15px; cursor: pointer; }
+.hidden { display: none !important; }

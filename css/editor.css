@@ -1,0 +1,98 @@
+/* ===== 地圖編輯器 — 樣式 ===== */
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: #14171c; color: #e6e9ee;
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+  padding: 12px; min-height: 100vh;
+}
+h1 { font-size: 18px; margin: 0 0 10px; color: #8fd3ff; font-weight: 600; }
+a.backlink { color: #8fd3ff; font-size: 13px; text-decoration: none; }
+
+.layout { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.left { flex: 1 1 720px; min-width: 320px; }
+.right { flex: 0 0 300px; min-width: 260px; }
+
+/* 上方：地圖選擇列 */
+#mapbar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  background: #1d222b; padding: 8px 10px; border-radius: 8px; margin-bottom: 8px;
+}
+#mapbar select { background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 6px; padding: 5px 8px; font-size: 14px; }
+.btn { background: #232a35; border: 1px solid #333c49; color: #e6e9ee; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.btn:hover { border-color: #8fd3ff; }
+.btn.danger { border-color: #7a3540; }
+.btn.primary { background: #2b6cb0; border-color: #2b6cb0; color: #fff; }
+
+button, .tile {
+  transform-origin: center;
+  will-change: transform;
+}
+button.ui-pressing, .tile.ui-pressing { transform: scale(.93); }
+button.ui-bounce, .tile.ui-bounce { animation: ui-button-bounce 220ms cubic-bezier(.2, .9, .3, 1.35); }
+
+@keyframes ui-button-bounce {
+  0% { transform: scale(.93); }
+  58% { transform: scale(1.045); }
+  100% { transform: scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button.ui-pressing, .tile.ui-pressing { transform: none; }
+  button.ui-bounce, .tile.ui-bounce { animation: none; }
+}
+
+/* 畫布 */
+#wrap { position: relative; width: 100%; max-width: 1280px; }
+canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }
+
+/* 圖層切換 */
+#layerbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #1d222b; padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
+.layer-group { display: inline-flex; align-items: stretch; }
+.layer { background: #232a35; border: 2px solid #333c49; color: #e6e9ee; padding: 5px 12px; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 13px; }
+.layer.sel { border-color: #b39ddb; background: #3a2f55; color: #fff; }
+.layer-eye { width: 34px; border: 2px solid #333c49; border-left: 0; border-radius: 0 8px 8px 0; background: #232a35; color: #8fd3ff; cursor: pointer; font-size: 14px; }
+.layer-eye:hover { background: #2b3a4a; }
+.layer-eye.off { color: #697382; background: #181d24; }
+.layerhint { color: #9aa4b2; font-size: 11px; }
+
+/* 磚塊調色盤 */
+#palette { display: flex; gap: 6px; flex-wrap: wrap; background: #1d222b; padding: 8px; border-radius: 8px; margin-bottom: 8px; }
+.tile { position: relative; width: 66px; background: #232a35; border: 2px solid #333c49; border-radius: 8px; padding: 4px; cursor: pointer; text-align: center; }
+.tile.sel { border-color: #8fd3ff; background: #2b3a4a; }
+.tile .thumb { display: block; width: 100%; height: 40px; object-fit: cover; border-radius: 4px; image-rendering: pixelated; background: #0e1116; }
+.tile .thumb.swatch.floor { background: #20262f; }
+.tile .thumb.swatch.wall { background: #3f434b; border: 1px solid #565b64; }
+.tile .thumb.swatch.obstacle { background: #7a5a3a; }
+.tile .tname { display: block; font-size: 11px; margin-top: 3px; }
+.tile small { display: block; font-size: 10px; color: #9aa4b2; }
+.tile .del { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; line-height: 16px; background: #7a3540; color: #fff; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; display: none; }
+.tile:hover .del { display: block; }
+
+/* 工具列 */
+#tools { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.tool { background: #232a35; border: 2px solid #333c49; color: #e6e9ee; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.tool small { display: block; color: #9aa4b2; font-size: 11px; margin-top: 2px; }
+.tool.sel { border-color: #8fd3ff; background: #2b3a4a; }
+#tools .sep { flex: 1; }
+
+#selPanel { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #2b3a4a; border: 1px solid #3d5468; padding: 8px 10px; border-radius: 8px; margin: 6px 0; font-size: 13px; }
+#selPanel select { background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; padding: 4px 6px; font-size: 13px; }
+#selPanel b { color: #ffd479; }
+
+#status { font-size: 12px; color: #7ee0c0; min-height: 16px; margin: 2px 0; }
+#hint { font-size: 12px; color: #9aa4b2; line-height: 1.7; }
+
+/* 右側：規則面板 */
+.panel { background: #1d222b; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+.panel h2 { font-size: 14px; margin: 0 0 8px; color: #8fd3ff; }
+.field { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; font-size: 13px; }
+.field label { color: #c3ccd8; }
+.field input { width: 90px; background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; padding: 4px 6px; font-size: 13px; text-align: right; }
+.field input.wide { width: 100%; text-align: left; }
+.field.col { flex-direction: column; align-items: stretch; }
+.field.col label { margin-bottom: 3px; }
+.subhead { font-size: 12px; color: #ffd479; margin: 10px 0 2px; }
+
+/* 匯出區 */
+#exportOut { width: 100%; height: 150px; background: #0e1116; color: #b7c2d0; border: 1px solid #333c49; border-radius: 6px; padding: 8px; font-family: monospace; font-size: 11px; resize: vertical; }
+.exrow { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }

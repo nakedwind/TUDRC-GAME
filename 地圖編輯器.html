@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台北地下災害應變中心 — 地圖編輯器</title>
+<link rel="stylesheet" href="css/editor.css">
+</head>
+<body>
+  <h1>🗺️ 地圖編輯器　<a class="backlink" href="塔防原型.html">← 回遊戲</a></h1>
+
+  <div class="layout">
+    <!-- 左邊：地圖選擇 + 畫布 + 工具 -->
+    <div class="left">
+      <div id="mapbar">
+        <span>目前地圖：</span>
+        <select id="mapSelect"></select>
+        <button class="btn" id="newMap">＋ 新增</button>
+        <button class="btn" id="dupMap">⧉ 複製</button>
+        <button class="btn" id="renameMap">✎ 改名</button>
+        <button class="btn danger" id="delMap">🗑 刪除</button>
+      </div>
+
+      <div id="wrap">
+        <canvas id="cv" width="1280" height="720"></canvas>
+      </div>
+
+      <!-- 圖層切換 -->
+      <div id="layerbar">
+        <span>目前圖層：</span>
+        <span id="layerBtns"></span>
+        <span class="layerhint">（貼圖會畫到選中的這層；上層疊在下層之上、透明處透出下層）</span>
+      </div>
+
+      <!-- 磚塊調色盤（由程式產生：內建地板/牆/障礙物 + 你加入的磚塊）-->
+      <div id="palette"></div>
+
+      <div id="tools">
+        <button class="tool" data-mode="select">👆 選取<small>選物件・改圖層</small></button>
+        <button class="tool" data-mode="solid">🧱 不可穿透<small>怪穿不過・繞路</small></button>
+        <button class="tool" data-mode="breakable">💥 可破壞<small>怪停下打破</small></button>
+        <button class="tool" data-mode="entrance">🔻 怪物入口<small>怪從這裡出</small></button>
+        <button class="tool" data-mode="camp">🏠 營地<small>要守住的地方</small></button>
+        <button class="tool" data-mode="erase">🧽 清除<small>只擦掉圖片</small></button>
+        <span class="sep"></span>
+        <button class="btn" id="addTile">＋ 加入磚塊</button>
+        <button class="btn" id="fillAll">🪣 全部填滿</button>
+        <button class="btn" id="undoBtn">↶ 回復 (Ctrl+Z)</button>
+        <button class="btn" id="checkPath">🔍 檢查路徑</button>
+        <button class="btn danger" id="clearLayout">全部清空</button>
+      </div>
+      <input type="file" id="tileFile" accept="image/*" style="display:none">
+
+      <div id="selPanel" class="hidden">
+        <span>已選取：<b id="selName">—</b></span>
+        <label>圖層：<select id="selLayer"></select></label>
+        <button class="btn" id="selUp">↑ 上移一層</button>
+        <button class="btn" id="selDown">↓ 下移一層</button>
+        <button class="btn danger" id="selDelete">🗑 刪除</button>
+        <button class="btn" id="selClear">取消選取</button>
+      </div>
+
+      <div id="status"></div>
+      <div id="hint">
+        先選<b>圖層</b>（🟫地板／✨裝飾），再選<b>磚塊</b>貼圖 —— 圖片<b>純外觀</b>。選取工具可<b>拖曳物件</b>移動，按住 <b>Shift</b> 點擊可多選後整組移動，按 <b>Delete</b> 可刪除選取物件。小圖(1×1)可<b>點/拖曳</b>鋪；<b>大圖(多格)</b>移過去看虛線框、<b>點一下</b>放置。<br>
+        遊戲效果要另外標：<b>🧱 不可穿透</b>（紅框，怪繞路）、<b>💥 可破壞</b>（橙框，怪打破）。兩者互斥、再點一次可取消。<br>
+        <b>入口</b>／<b>營地</b>留空＝預設（最上排／最下兩排）。「🔍 檢查路徑」只看 🧱。按 <b>Ctrl+Z</b> 或「↶ 回復」可回上一步。所有變更會<b>自動存檔</b>。
+      </div>
+    </div>
+
+    <!-- 右邊：這張地圖的規則 + 匯出 -->
+    <div class="right">
+      <div class="panel">
+        <h2>📋 地圖規則</h2>
+        <div class="field col"><label>地圖名稱</label><input id="f_name" class="wide" type="text"></div>
+        <div class="field col"><label>說明</label><input id="f_desc" class="wide" type="text"></div>
+
+        <div class="subhead">起始資源</div>
+        <div class="field"><label>起始資源</label><input id="f_money" type="number"></div>
+        <div class="field"><label>營地HP</label><input id="f_lives" type="number"></div>
+        <div class="field"><label>起始嚮導能量</label><input id="f_guide" type="number"></div>
+        <div class="field"><label>嚮導能量/秒</label><input id="f_guideRegen" type="number"></div>
+
+        <div class="subhead">波次難度</div>
+        <div class="field"><label>幾波怪</label><input id="f_waves" type="number"></div>
+        <div class="field"><label>每波數量(基礎)</label><input id="f_count" type="number"></div>
+        <div class="field"><label>每波數量(遞增)</label><input id="f_countAdd" type="number"></div>
+        <div class="field"><label>血量(基礎)</label><input id="f_hp" type="number"></div>
+        <div class="field"><label>血量(遞增)</label><input id="f_hpAdd" type="number"></div>
+        <div class="field"><label>速度(基礎)</label><input id="f_speed" type="number"></div>
+        <div class="field"><label>速度(遞增)</label><input id="f_speedAdd" type="number"></div>
+        <div class="field"><label>出怪間隔(基礎)</label><input id="f_gap" type="number" step="0.05"></div>
+        <div class="field"><label>間隔遞減</label><input id="f_gapSub" type="number" step="0.05"></div>
+        <div class="field"><label>殺怪回資源</label><input id="f_reward" type="number"></div>
+      </div>
+
+      <div class="panel">
+        <h2>💾 匯出 / 存檔</h2>
+        <div class="exrow">
+          <button class="btn primary" id="genExport">產生匯出文字</button>
+          <button class="btn" id="copyExport">複製</button>
+          <button class="btn" id="downloadExport">下載 maps.js</button>
+        </div>
+        <textarea id="exportOut" readonly placeholder="按「產生匯出文字」後，這裡會出現要貼回 data/maps.js 的內容"></textarea>
+        <div class="exrow">
+          <button class="btn danger" id="resetFile">從檔案重設（丟棄瀏覽器暫存）</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 依序載入 -->
+  <script src="js/config.js"></script>       <!-- 格線與座標 -->
+  <script src="data/maps.js"></script>        <!-- 地圖資料 -->
+  <script src="js/editor.js"></script>        <!-- 編輯器程式 -->
+</body>
+</html>
