@@ -79,11 +79,15 @@
         <span class="layerhint">貼圖會畫到選中的圖層；上層疊在下層之上、透明處透出下層。</span>
       </div>
 
-      <details class="panel collapsible" id="rulesPanel" open>
+      <details class="panel collapsible" id="rulesPanel">
         <summary class="panel-head">📋 地圖規則</summary>
         <div class="panel-body">
         <div class="field col"><label>地圖名稱</label><input id="f_name" class="wide" type="text"></div>
         <div class="field col"><label>說明</label><input id="f_desc" class="wide" type="text"></div>
+
+        <div class="subhead">地圖大小（可比畫面 32×18 大，遊戲鏡頭會跟著玩家捲動）</div>
+        <div class="field"><label>寬（格數）</label><input id="f_cols" type="number" min="8" max="200"></div>
+        <div class="field"><label>高（格數）</label><input id="f_rows" type="number" min="8" max="200"></div>
 
         <div class="subhead">起始資源</div>
         <div class="field"><label>起始資源</label><input id="f_money" type="number"></div>

@@ -87,7 +87,7 @@ const emptyLayers = () => { const o = {}; LAYERS.forEach(l => o[l.id] = {}); ret
 
 // ---- 內建磚塊（純圖片；牆/障礙先用色塊當佔位圖）----
 const BUILTIN_TILES = [
-  { id: 'floor', name: '地板', role: 'floor', file: 'background/Back-room-floor.png', w: 1, h: 1, builtin: true },
+  { id: 'floor', name: '地板', role: 'floor', file: 'images/background/Back-room-floor.png', w: 1, h: 1, builtin: true },
   { id: 'wall', name: '牆(灰)', role: 'wall', file: null, w: 1, h: 1, builtin: true },
   { id: 'obstacle', name: '障礙(棕)', role: 'obstacle', file: null, w: 1, h: 1, builtin: true },
 ];
@@ -116,6 +116,13 @@ function loadTiles() {
   else customTiles = clone(TILES_CUSTOM);
   if (!Array.isArray(customTiles)) customTiles = [];
   customTiles.forEach(t => { t.w = t.w || 1; t.h = t.h || 1; });
+  // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
+  let migrated = false;
+  customTiles.forEach(t => {
+    if (t.file === 'background/roadblocks.png') { t.file = 'images/item-obstacle/04roadblocks.png'; migrated = true; }
+    else if (t.file && t.file.startsWith('background/')) { t.file = 'images/' + t.file; migrated = true; }
+  });
+  if (migrated) saveTiles();
 }
 function saveTiles() { localStorage.setItem(STORAGE_TILES, JSON.stringify(customTiles)); }
 
@@ -153,7 +160,21 @@ function fixMap(m) {
     gap: 0.85, gapSub: 0.05, reward: 8,
   }, m.rules || {});
   m.name = m.name || '未命名地圖'; m.desc = m.desc || '';
+  m.cols = m.cols || 32; m.rows = m.rows || 18;   // 地圖大小（舊地圖沒存就用預設）
   return m;
+}
+// 依目前地圖的大小調整格數與畫布（畫布太大時外框會出現捲軸）
+function applyMapSize() {
+  const m = curMap();
+  COLS = m.cols; ROWS = m.rows;
+  const w = COLS * CELL, h = ROWS * CELL;
+  if (cv.width !== w || cv.height !== h) {
+    cv.width = w; cv.height = h;
+    ctx.imageSmoothingEnabled = false;   // 改畫布大小會重置設定，要再關一次模糊
+  }
+  // 小地圖照舊縮放塞滿版面；大地圖維持原尺寸，用捲軸捲動編輯
+  cv.style.width = (w <= 1280) ? '100%' : w + 'px';
+  cv.style.maxWidth = (w <= 1280) ? '' : 'none';
 }
 function saveMaps() { localStorage.setItem(STORAGE_MAPS, JSON.stringify(maps)); setStatus('已自動存檔 ✓', '#7ee0c0'); }
 const curMap = () => maps.find(m => m.id === curId) || maps[0];
@@ -174,7 +195,7 @@ function undo() {
   localStorage.setItem(STORAGE_MAPS, JSON.stringify(maps));
   localStorage.setItem(STORAGE_TILES, JSON.stringify(customTiles));
   checkResult = null;
-  refreshMapSelect(); renderPalette(); loadRules(); draw();
+  applyMapSize(); refreshMapSelect(); renderPalette(); loadRules(); draw();
   setStatus('已回復上一步（還剩 ' + undoStack.length + ' 步可回復）', '#7ee0c0');
 }
 window.addEventListener('keydown', e => {
@@ -680,7 +701,8 @@ document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('addTile').addEventListener('click', () => tileFile.click());
 tileFile.addEventListener('change', () => {
   const f = tileFile.files[0]; if (!f) return;
-  const path = 'background/' + f.name, nameDefault = f.name.replace(/\.[^.]+$/, '');
+  const folder = (prompt('這張圖放在哪個資料夾？', 'images/background') || 'images/background').trim().replace(/\/+$/, '');
+  const path = folder + '/' + f.name, nameDefault = f.name.replace(/\.[^.]+$/, '');
   const url = URL.createObjectURL(f), probe = new Image();
   probe.onload = () => { const wS = Math.max(1, Math.round(probe.naturalWidth / CELL)), hS = Math.max(1, Math.round(probe.naturalHeight / CELL)); URL.revokeObjectURL(url); finishAddTile(path, nameDefault, wS, hS); };
   probe.onerror = () => { URL.revokeObjectURL(url); finishAddTile(path, nameDefault, 1, 1); };
@@ -688,7 +710,7 @@ tileFile.addEventListener('change', () => {
   tileFile.value = '';
 });
 function finishAddTile(path, nameDefault, wS, hS) {
-  const name = (prompt('磚塊名稱？（圖片會從 background/ 載入）', nameDefault) || nameDefault).trim();
+  const name = (prompt('磚塊名稱？', nameDefault) || nameDefault).trim();
   const w = Math.max(1, parseInt(prompt('這塊圖佔「幾格寬」？（依圖片大小建議）', wS), 10) || wS);
   const h = Math.max(1, parseInt(prompt('這塊圖佔「幾格高」？', hS), 10) || hS);
   pushUndo();
@@ -756,7 +778,7 @@ function refreshMapSelect() {
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], entrances: [], camp: [], rules: {} }); }
-function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
+function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
 
 mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
 document.getElementById('newMap').addEventListener('click', () => {
@@ -786,8 +808,23 @@ function loadRules() {
   const m = curMap();
   document.getElementById('f_name').value = m.name;
   document.getElementById('f_desc').value = m.desc;
+  document.getElementById('f_cols').value = m.cols;
+  document.getElementById('f_rows').value = m.rows;
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
 }
+// 地圖大小欄位（用 change：打完數字離開欄位才生效，避免打到一半就縮圖）
+function bindSizeField(id, key) {
+  document.getElementById(id).addEventListener('change', e => {
+    const v = Math.max(8, Math.min(200, parseInt(e.target.value, 10) || 0));
+    e.target.value = v;
+    const m = curMap(); if (m[key] === v) return;
+    pushUndo(); m[key] = v;
+    applyMapSize(); checkResult = null; saveMaps(); draw();
+    setStatus('地圖大小改為 ' + m.cols + '×' + m.rows + ' 格（縮小時超出範圍的內容不會顯示，改回來就恢復）', '#8fd3ff');
+  });
+}
+bindSizeField('f_cols', 'cols');
+bindSizeField('f_rows', 'rows');
 document.getElementById('f_name').addEventListener('input', e => { curMap().name = e.target.value; refreshMapSelect(); saveMaps(); });
 document.getElementById('f_desc').addEventListener('input', e => { curMap().desc = e.target.value; saveMaps(); });
 RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).addEventListener('input', e => { const v = parseFloat(e.target.value); curMap().rules[k] = isNaN(v) ? 0 : v; saveMaps(); }); });
@@ -814,13 +851,14 @@ document.getElementById('resetFile').addEventListener('click', () => {
   if (!confirm('確定丟棄瀏覽器暫存，改用 data/maps.js 檔案的內容？未匯出的變更會不見。')) return;
   localStorage.removeItem(STORAGE_MAPS); localStorage.removeItem(STORAGE_TILES);
   selection = null; selections = [];
-  loadTiles(); loadMaps(); preloadTiles(); renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
+  loadTiles(); loadMaps(); applyMapSize(); preloadTiles(); renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
   setStatus('已重設為檔案內容', '#ffd24a');
 });
 
 // ================= 啟動 =================
 loadTiles();
 loadMaps();
+applyMapSize();
 preloadTiles();
 renderPalette();
 selectTile('floor');

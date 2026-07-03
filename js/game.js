@@ -9,7 +9,31 @@ const ctx = cv.getContext('2d');
 const floorImg = new Image();
 let floorPattern = null;
 floorImg.onload = () => { floorPattern = ctx.createPattern(floorImg, 'repeat'); };
-floorImg.src = 'background/Back-room-floor.png';
+floorImg.src = 'images/background/Back-room-floor.png';
+
+// ---- 玩家角色（嚮導本人，可用 WASD／方向鍵操縱）----
+const PLAYER = { speed: 230, r: 14 };   // 移動速度（像素/秒）與碰撞半徑
+const keys = {};                         // 目前按住的按鍵
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase(); keys[k] = true;
+  if (k.startsWith('arrow')) e.preventDefault();   // 方向鍵不要捲動網頁
+});
+window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+window.addEventListener('keydown', e => { if (!e.repeat && e.key.toLowerCase() === 'r') rotateBuild(); });   // R＝建築轉向
+
+// ---- 滑鼠所在格（建築放置預覽用）----
+let hoverCell = null;
+
+// ---- 鏡頭（相框位置）：跟著玩家，碰到地圖邊緣就停 ----
+let cam = { x: 0, y: 0 };
+function updateCamera() {
+  const p = G && G.player;
+  const mapW = COLS * CELL, mapH = ROWS * CELL;
+  cam.x = p ? Math.max(0, Math.min(mapW - VIEW_W, p.x - VIEW_W / 2)) : 0;
+  cam.y = p ? Math.max(0, Math.min(mapH - VIEW_H, p.y - VIEW_H / 2)) : 0;
+  if (mapW <= VIEW_W) cam.x = (mapW - VIEW_W) / 2;   // 地圖比畫面小 → 置中
+  if (mapH <= VIEW_H) cam.y = (mapH - VIEW_H) / 2;
+}
 
 // ---- 遊戲狀態 ----
 let G, editMode = false;
@@ -23,6 +47,10 @@ function newGame() {
     running: false, over: false, won: false,
   };
   computeFlow();
+  seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
+  const [px, py] = playerSpawnPos();
+  G.player = { x: px, y: py };
+  updateCamera();
   updateHUD();
 }
 function buildWaves() {
@@ -44,25 +72,109 @@ function startWave() {
   for (let i = 0; i < w.count; i++) G.spawnQueue.push({ hp: w.hp, speed: w.speed, reward: w.reward });
   G.spawnTimer = 0; G.curGap = w.gap;
 }
-function validSpawnCols() {
-  const cols = [];
-  for (let c = 0; c < COLS; c++) if (!isWall(c, SPAWN_ROW) && isFinite(flowAt(c, SPAWN_ROW))) cols.push(c);
-  return cols;
+
+// ---- 玩家出生點：優先站營地，找不到就從下往上找空地 ----
+function playerSpawnPos() {
+  const cand = [];
+  campCells.forEach(k => cand.push(k.split(',').map(Number)));
+  for (let r = ROWS - 1; r >= 0; r--) for (let c = 0; c < COLS; c++) cand.push([c, r]);
+  for (const [c, r] of cand) if (inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r)) return center(c, r);
+  return center(Math.floor(COLS / 2), ROWS - 1);
+}
+// ---- 玩家移動與碰撞（牆、哨兵、障礙物都擋路；水平垂直分開判斷可貼牆滑行）----
+function playerBlocked(x, y) {
+  const r = PLAYER.r;
+  for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
+    const [c, rr] = cellAt(x + sx, y + sy);
+    if (!inGrid(c, rr) || isWall(c, rr) || G.grid[c + ',' + rr]) return true;
+  }
+  return false;
+}
+function updatePlayer(dt) {
+  const p = G.player; if (!p) return;
+  const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
+  const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
+  if (!dx && !dy) return;
+  const len = Math.hypot(dx, dy), step = PLAYER.speed * dt;
+  const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
+  if (!playerBlocked(nx, p.y)) p.x = nx;
+  if (!playerBlocked(p.x, ny)) p.y = ny;
 }
 
 // ---- 佈署物件查詢 ----
 const buildAt = (c, r) => G.grid[c + ',' + r];
 const barrierAt = (c, r) => { const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle') ? o : null; };
-function removeBarrier(o) { delete G.grid[o.c + ',' + o.r]; G.obstacles = G.obstacles.filter(x => x !== o); }
+function removeBarrier(o) {
+  const w = o.w || 1, h = o.h || 1;   // 舊格式（地圖內建）沒有 w/h，當 1×1
+  for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) delete G.grid[(o.c + dc) + ',' + (o.r + dr)];
+  G.obstacles = G.obstacles.filter(x => x !== o);
+}
 
-// ---- 輸入：選擇要放置的哨兵/障礙物 ----
+// ---- 建築放置：檢查整個佔地範圍是否可放 ----
+function canPlaceObstacle(v, c, r) {
+  for (let dc = 0; dc < v.w; dc++) for (let dr = 0; dr < v.h; dr++) {
+    const cc = c + dc, rr = r + dr;
+    if (!inGrid(cc, rr) || isWall(cc, rr) || isEntrance(cc, rr) || G.grid[cc + ',' + rr]) return false;
+  }
+  return true;
+}
+function placeObstacle(ob, c, r) {
+  const v = ob[buildOrient];
+  if (!canPlaceObstacle(v, c, r)) { flash('這裡放不下', ...center(c, r), '#ff8f8f'); return; }
+  if (G.money < ob.cost) { flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
+  G.money -= ob.cost;
+  const o = { kind: 'obstacle', type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, hp: ob.hp, maxhp: ob.hp };
+  for (let dc = 0; dc < v.w; dc++) for (let dr = 0; dr < v.h; dr++) G.grid[(c + dc) + ',' + (r + dr)] = o;
+  G.obstacles.push(o);
+}
+
+// ---- 輸入：選擇要放置的哨兵 ----
 document.querySelectorAll('.tbtn[data-type]').forEach(btn => {
   btn.addEventListener('click', () => {
     if (editMode) return;
     const t = btn.dataset.type;
     G.selType = (G.selType === t) ? null : t;
     document.querySelectorAll('.tbtn[data-type]').forEach(b => b.classList.toggle('sel', b.dataset.type === G.selType));
+    renderBuildBar();   // 選了哨兵就取消建築選單的高亮
   });
+});
+
+// ---- 建築選單（依 data/balance.js 的 OBSTACLES 產生）----
+const buildBar = document.getElementById('buildbar');
+const buildToggle = document.getElementById('buildToggle');
+let buildOrient = 'h';        // 目前方向：h 橫版 / v 直版（按 R 切換）
+const obstacleImgs = {};      // 預先載入每種障礙物的兩張圖
+OBSTACLES.forEach(o => {
+  obstacleImgs[o.id] = {};
+  ['h', 'v'].forEach(k => { const im = new Image(); im.src = o[k].file; obstacleImgs[o.id][k] = im; });
+});
+function renderBuildBar() {
+  buildBar.innerHTML = '';
+  OBSTACLES.forEach(o => {
+    const v = o[buildOrient];
+    const b = document.createElement('button');
+    b.className = 'tbtn build' + (G && G.selType === 'build:' + o.id ? ' sel' : '');
+    b.innerHTML = '<img src="' + v.file + '" alt=""><span>' + o.name + ' (' + o.cost + ')<small>' + v.w + '×' + v.h + '格・HP ' + o.hp + '</small></span>';
+    b.addEventListener('click', () => {
+      if (editMode) return;
+      G.selType = (G.selType === 'build:' + o.id) ? null : 'build:' + o.id;
+      document.querySelectorAll('.tbtn[data-type]').forEach(x => x.classList.remove('sel'));
+      renderBuildBar();
+    });
+    buildBar.appendChild(b);
+  });
+  const rot = document.createElement('button');
+  rot.className = 'tbtn rotate';
+  rot.innerHTML = '↻ 轉向 (R)<small>目前：' + (buildOrient === 'h' ? '橫版' : '直版') + '</small>';
+  rot.addEventListener('click', rotateBuild);
+  buildBar.appendChild(rot);
+}
+function rotateBuild() { buildOrient = buildOrient === 'h' ? 'v' : 'h'; renderBuildBar(); }
+buildToggle.addEventListener('click', () => {
+  const opening = buildBar.classList.contains('hidden');
+  buildBar.classList.toggle('hidden', !opening);
+  buildToggle.classList.toggle('sel', opening);
+  if (!opening && G.selType && G.selType.startsWith('build:')) { G.selType = null; renderBuildBar(); }
 });
 
 // ---- 輸入：編輯地圖模式 ----
@@ -73,6 +185,7 @@ editBtn.addEventListener('click', () => {
   if (editMode) {
     editBtn.innerHTML = '✅ 完成編輯<small>回到遊戲</small>';
     G.selType = null; document.querySelectorAll('.tbtn[data-type]').forEach(b => b.classList.remove('sel'));
+    renderBuildBar();
     G.running = false; hideOverlay();
   } else {
     editBtn.innerHTML = '🏗️ 編輯地圖<small>放／移除固定牆（打不破）</small>';
@@ -86,14 +199,14 @@ editBtn.addEventListener('click', () => {
 // ---- 輸入：點畫面（放置 / 疏導 / 編輯牆）----
 cv.addEventListener('click', e => {
   const rect = cv.getBoundingClientRect();
-  const x = (e.clientX - rect.left) * (cv.width / rect.width);
-  const y = (e.clientY - rect.top) * (cv.height / rect.height);
+  const x = (e.clientX - rect.left) * (cv.width / rect.width) + cam.x;   // 加上鏡頭位置＝世界座標
+  const y = (e.clientY - rect.top) * (cv.height / rect.height) + cam.y;
   const [c, r] = cellAt(x, y);
   if (!inGrid(c, r)) return;
 
   // 編輯模式：切換固定牆
   if (editMode) {
-    if (r === SPAWN_ROW) { flash('入口那排不能設牆', ...center(c, r), '#ff8f8f'); return; }
+    if (isEntrance(c, r)) { flash('怪物入口不能設牆', ...center(c, r), '#ff8f8f'); return; }
     const key = c + ',' + r;
     if (mapWalls.has(key)) mapWalls.delete(key);
     else { if (buildAt(c, r)) return; mapWalls.add(key); }
@@ -107,13 +220,11 @@ cv.addEventListener('click', e => {
   if (occ) { if (occ.kind === 'tower') soothe(occ); return; }
   // 放置
   if (!G.selType) return;
-  if (r === SPAWN_ROW) { flash('這裡是怪物入口', ...center(c, r), '#ff8f8f'); return; }
+  if (isEntrance(c, r)) { flash('這裡是怪物入口', ...center(c, r), '#ff8f8f'); return; }
   if (isWall(c, r)) { flash('這裡是固定牆', ...center(c, r), '#ff8f8f'); return; }
-  if (G.selType === 'barrier') {
-    if (G.money < BARRIER.cost) { flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
-    G.money -= BARRIER.cost;
-    const o = { kind: 'obstacle', c, r, hp: BARRIER.hp, maxhp: BARRIER.hp };
-    G.grid[c + ',' + r] = o; G.obstacles.push(o);
+  if (G.selType.startsWith('build:')) {
+    const ob = OBSTACLES.find(o => 'build:' + o.id === G.selType);
+    if (ob) placeObstacle(ob, c, r);
   } else {
     const spec = TYPES[G.selType];
     if (G.money < spec.cost) { flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
@@ -124,6 +235,16 @@ cv.addEventListener('click', e => {
   }
   updateHUD();
 });
+
+// ---- 滑鼠移動：記住目前指到哪一格（世界座標）----
+cv.addEventListener('mousemove', e => {
+  const rect = cv.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (cv.width / rect.width) + cam.x;
+  const y = (e.clientY - rect.top) * (cv.height / rect.height) + cam.y;
+  const [c, r] = cellAt(x, y);
+  hoverCell = inGrid(c, r) ? [c, r] : null;
+});
+cv.addEventListener('mouseleave', () => { hoverCell = null; });
 
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
 function soothe(t) {
@@ -137,7 +258,12 @@ function soothe(t) {
 // ---- 怪物尋路：走向流場更低的相鄰格 ----
 function commitNext(e) {
   const [cc, cr] = cellAt(e.x, e.y);
-  if (cr >= ROWS - 1 && !isWall(cc, cr)) { e.exiting = true; e.hasTarget = true; e.tcell = null; return; }
+  if (isCamp(cc, cr) && !isWall(cc, cr)) {
+    // 到達營地：預設營地（最下排）走出畫面；自訂營地直接算攻入
+    if (campCells.size) { e.reached = true; }
+    else { e.exiting = true; }
+    e.hasTarget = true; e.tcell = null; return;
+  }
   let best = null, bestd = flowAt(cc, cr);
   for (const [dc, dr] of [[0, 1], [-1, 0], [1, 0], [0, -1]]) {
     const nc = cc + dc, nr = cr + dr, fd = flowAt(nc, nr);
@@ -163,6 +289,8 @@ function stepEnemy(e, dt) {
 let last = 0;
 function loop(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
+  if (!editMode && !G.over) updatePlayer(dt);   // 玩家隨時可走動（編輯地圖時除外）
+  updateCamera();
   if (G.running && !G.over && !editMode) update(dt);
   draw();
   requestAnimationFrame(loop);
@@ -173,11 +301,11 @@ function update(dt) {
   if (G.spawnQueue.length > 0) {
     G.spawnTimer -= dt;
     if (G.spawnTimer <= 0) {
-      const cols = validSpawnCols();
-      if (cols.length) {
+      const cells = spawnCells();   // 地圖的「入口」格（沒設定就用最上排）
+      if (cells.length) {
         const s = G.spawnQueue.shift();
-        const col = cols[Math.floor(Math.random() * cols.length)];
-        const [sx, sy] = center(col, SPAWN_ROW);
+        const [sc, sr] = cells[Math.floor(Math.random() * cells.length)];
+        const [sx, sy] = center(sc, sr);
         G.enemies.push({ x: sx, y: sy, hp: s.hp, maxhp: s.hp, speed: s.speed, reward: s.reward, hasTarget: false });
       }
       G.spawnTimer = G.curGap;
@@ -229,15 +357,20 @@ function flash(text, x, y, color) { G.effects.push({ text, x, y, life: 0.8, colo
 // ---- 繪製 ----
 function draw() {
   ctx.clearRect(0, 0, cv.width, cv.height);
+  // 之後畫的都是「世界座標」：整體平移鏡頭位置，畫面就會跟著玩家捲動
+  ctx.save();
+  ctx.translate(-Math.round(cam.x), -Math.round(cam.y));
   // 地板貼圖鋪滿整個地圖（未載入時用深色底）
   if (floorPattern) { ctx.fillStyle = floorPattern; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL); }
   else { ctx.fillStyle = '#161b22'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL); }
+  // 地圖編輯器做的圖層與大型圖片
+  drawMapImages(ctx);
   // 區域色（半透明疊上，貼圖仍可見）＋ 格線 ＋ 固定牆
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
     const [cx, cy] = [OX + c * CELL, OY + r * CELL];
-    if (r === SPAWN_ROW) { ctx.fillStyle = 'rgba(150,40,70,.32)'; ctx.fillRect(cx, cy, CELL, CELL); }
-    else if (r >= CAMP_ROW) { ctx.fillStyle = 'rgba(40,160,115,.22)'; ctx.fillRect(cx, cy, CELL, CELL); }
-    if (isWall(c, r)) {
+    if (isEntrance(c, r)) { ctx.fillStyle = 'rgba(150,40,70,.32)'; ctx.fillRect(cx, cy, CELL, CELL); }
+    else if (isCamp(c, r)) { ctx.fillStyle = 'rgba(40,160,115,.22)'; ctx.fillRect(cx, cy, CELL, CELL); }
+    if (isWall(c, r) && !hasImageAt(c, r)) {
       ctx.fillStyle = '#3f434b'; ctx.fillRect(cx + 2, cy + 2, CELL - 4, CELL - 4);
       ctx.strokeStyle = '#565b64'; ctx.lineWidth = 2; ctx.strokeRect(cx + 5, cy + 5, CELL - 10, CELL - 10);
     }
@@ -247,13 +380,20 @@ function draw() {
   ctx.fillStyle = '#5aa88f'; ctx.textAlign = 'right';
   ctx.fillText('營地（守住這裡）', OX + COLS * CELL - 6, OY + ROWS * CELL - 8);
 
-  // 障礙物
+  // 障礙物（建築用圖片；地圖內建的舊格式用棕色方塊）
   for (const o of G.obstacles) {
-    const [x, y] = center(o.c, o.r);
-    ctx.fillStyle = '#7a5a3a'; roundRect(x - 17, y - 17, 34, 34, 5); ctx.fill();
-    ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke();
-    ctx.fillStyle = '#000'; ctx.fillRect(x - 16, y + 12, 32, 4);
-    ctx.fillStyle = '#c9a26a'; ctx.fillRect(x - 16, y + 12, 32 * Math.max(0, o.hp) / o.maxhp, 4);
+    const w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
+    const x = OX + o.c * CELL, y = OY + o.r * CELL;
+    const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
+    if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
+    else {
+      ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill();
+      ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke();
+    }
+    if (o.hp < o.maxhp) {   // 受損才顯示血條
+      ctx.fillStyle = '#000'; ctx.fillRect(x + 2, y + h - 6, w - 4, 4);
+      ctx.fillStyle = '#c9a26a'; ctx.fillRect(x + 2, y + h - 6, (w - 4) * Math.max(0, o.hp) / o.maxhp, 4);
+    }
   }
   // 哨兵
   for (const t of G.towers) {
@@ -274,6 +414,14 @@ function draw() {
     ctx.fillStyle = '#000'; ctx.fillRect(e.x - 14, e.y - 20, 28, 3);
     ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
   }
+  // 玩家（嚮導）
+  const p = G.player;
+  if (p) {
+    ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
+    ctx.strokeStyle = '#bfe6ff'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#0e1116'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('你', p.x, p.y + 3);
+  }
   // 特效
   for (const f of G.effects) {
     if (f.text) {
@@ -284,6 +432,23 @@ function draw() {
       ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke(); ctx.globalAlpha = 1;
     }
   }
+  // 建築放置預覽（40% 半透明，放不下時紅框）
+  if (hoverCell && G.running && !editMode && G.selType && G.selType.startsWith('build:')) {
+    const ob = OBSTACLES.find(o => 'build:' + o.id === G.selType);
+    if (ob) {
+      const v = ob[buildOrient], [c, r] = hoverCell;
+      const x = OX + c * CELL, y = OY + r * CELL, w = v.w * CELL, h = v.h * CELL;
+      const ok = canPlaceObstacle(v, c, r);
+      const img = obstacleImgs[ob.id][buildOrient];
+      ctx.globalAlpha = 0.4;
+      if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
+      else { ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x + 3, y + 3, w - 6, h - 6); }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = ok ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+      ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.setLineDash([]);
+    }
+  }
+  ctx.restore();   // 世界座標畫完，回到螢幕座標（下面的提示固定在畫面上）
   // 編輯模式提示
   if (editMode) {
     ctx.fillStyle = 'rgba(90,70,160,.25)'; ctx.fillRect(0, 0, cv.width, cv.height);
@@ -311,7 +476,7 @@ function showOverlay(title, text, btn) { ovTitle.textContent = title; ovText.inn
 function hideOverlay() { overlay.classList.add('hidden'); }
 function showStart() {
   showOverlay('台北地下災害應變中心 · 塔防原型',
-    '怪物<b>由上往下</b>攻進<b>營地</b>，碰到固定牆會繞路。<br>用<b>哨兵</b>火力清怪、<b>障礙物</b>卡位，並在哨兵<b>暴走</b>前<b>疏導</b>。<br>可先按下方 🏗️<b>編輯地圖</b> 佈置固定牆。守住 5 波即可控制 Y 區。',
+    '用 <b>WASD／方向鍵</b>移動嚮導，鏡頭會跟著你探索地圖。<br>怪物<b>由上往下</b>攻進<b>營地</b>，碰到固定牆會繞路。<br>用<b>哨兵</b>火力清怪、<b>障礙物</b>卡位，並在哨兵<b>暴走</b>前<b>疏導</b>。<br>可先按下方 🏗️<b>編輯地圖</b> 佈置固定牆。守住 5 波即可控制 Y 區。',
     '開始防禦');
 }
 function winOverlay() { showOverlay('✅ Y 區已控制', '你守住了營地、擋下所有波次！', '再玩一次'); }
@@ -323,5 +488,5 @@ function lose() { G.over = true; G.running = false; G.phase = 'lost'; loseOverla
 ovBtn.addEventListener('click', begin);
 
 // ---- 啟動遊戲 ----
-newGame(); showStart();
+newGame(); renderBuildBar(); showStart();
 requestAnimationFrame(loop);

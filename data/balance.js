@@ -29,10 +29,34 @@ const TYPES = {
 
 // ---- 障礙物（可被打破的牆）----
 const BARRIER = {
-  cost: 20,      // 放置花多少資源
+  cost: 20,      // 放置花多少資源（地圖內建的可破壞格用這組）
   hp: 150,       // 障礙物血量
   breakDps: 20,  // 怪物每秒對障礙物造成多少傷害
 };
+
+// ---- 建築選單：玩家可放置的障礙物種類 ----
+// 每種都有「橫版 h」與「直版 v」兩個方向（遊戲中按 R 或「轉向」鈕切換）。
+// w,h = 佔幾格；cost = 花費；hp = 血量（想調整強度就改這裡）。
+const OBSTACLES = [
+  { id: 'wirecloth', name: '鐵絲網', cost: 10, hp: 80,
+    h: { file: 'images/item-obstacle/01-wirecloth.png', w: 1, h: 1 },
+    v: { file: 'images/item-obstacle/01-wirecloth-vertical.png', w: 1, h: 1 } },
+  { id: 'redroadblocks', name: '紅色路障', cost: 20, hp: 160,
+    h: { file: 'images/item-obstacle/02-redroadblocks.png', w: 2, h: 1 },
+    v: { file: 'images/item-obstacle/02-redroadblocks-vertical.png', w: 1, h: 2 } },
+  { id: 'wirefence', name: '鐵圍籬', cost: 35, hp: 300,
+    h: { file: 'images/item-obstacle/03-wirefence.png', w: 2, h: 2 },
+    v: { file: 'images/item-obstacle/03wire-fence-vertical.png', w: 2, h: 2 } },
+  { id: 'roadblocks', name: '路障', cost: 30, hp: 260,
+    h: { file: 'images/item-obstacle/04roadblocks.png', w: 2, h: 2 },
+    v: { file: 'images/item-obstacle/04-roadblocks - vertical.png', w: 2, h: 2 } },
+  { id: 'barricades', name: '拒馬', cost: 45, hp: 420,
+    h: { file: 'images/item-obstacle/05-barricades.png', w: 2, h: 3 },
+    v: { file: 'images/item-obstacle/05-barricades-vertical.png', w: 1, h: 2 } },
+  { id: 'searchlight', name: '探照燈', cost: 40, hp: 220,
+    h: { file: 'images/item-obstacle/06-searchlight.png', w: 2, h: 2 },
+    v: { file: 'images/item-obstacle/06-searchlight-vertical.png', w: 2, h: 2 } },
+];
 
 // ---- 暴走 ----
 const BERSERK = {

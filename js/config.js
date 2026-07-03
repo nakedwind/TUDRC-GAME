@@ -1,14 +1,19 @@
 /* ===== 格線與座標設定 =====
    這裡定義地圖的格子大小、行列數，以及「格子 <-> 畫面座標」的換算工具。
-   一般不太需要改；除非你想調整地圖格數或格子大小。
-*/
-const CELL = 40, COLS = 32, ROWS = 18;
-const OX = (1280 - COLS * CELL) / 2, OY = 0;   // 40px 格子 → 32×18 剛好鋪滿 1280×720
-const SPAWN_ROW = 0, CAMP_ROW = ROWS - 2;
 
-// 格子中心的畫面座標
+   地圖大小（COLS×ROWS）可以比畫面大：
+   - 每張地圖可在「地圖編輯器 → 地圖規則」自訂寬高，載入時會覆蓋這裡的預設值。
+   - 遊戲畫面固定 VIEW_W×VIEW_H（相框），鏡頭會跟著玩家移動，露出地圖其他部分。
+*/
+const CELL = 40;                      // 一格 40 像素
+let COLS = 32, ROWS = 18;             // 地圖格數（預設剛好一個畫面；地圖檔可覆蓋）
+const VIEW_W = 1280, VIEW_H = 720;    // 遊戲畫面（相框）大小
+const OX = 0, OY = 0;                 // 地圖世界座標的原點
+const SPAWN_ROW = 0;                  // 預設怪物入口＝最上排
+
+// 格子中心的世界座標
 const center = (c, r) => [OX + c * CELL + CELL / 2, OY + r * CELL + CELL / 2];
-// 畫面座標對應到哪一格
+// 世界座標對應到哪一格
 const cellAt = (x, y) => [Math.floor((x - OX) / CELL), Math.floor((y - OY) / CELL)];
 // 這一格在地圖範圍內嗎
 const inGrid = (c, r) => c >= 0 && c < COLS && r >= 0 && r < ROWS;

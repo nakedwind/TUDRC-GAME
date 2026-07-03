@@ -30,20 +30,26 @@
     <button class="tbtn" data-type="theonie">🔥 希奧妮 (50)<small>遠程單體・傷害高・汙染快</small></button>
     <button class="tbtn" data-type="amber">⚡ 安柏 (40)<small>範圍・會誤失・汙染中</small></button>
     <button class="tbtn" data-type="red">🛡️ 雷德 (45)<small>近戰・汙染會自動降</small></button>
-    <button class="tbtn" data-type="barrier">🧱 障礙物 (20)<small>可被怪物打破</small></button>
+    <button class="tbtn" id="buildToggle">🧱 建築<small>放置障礙物・R 轉向</small></button>
     <button class="tbtn" id="editBtn">🏗️ 編輯地圖<small>放／移除固定牆（打不破）</small></button>
   </div>
 
+  <!-- 建築選單（按「🧱 建築」展開；內容由 game.js 依 data/balance.js 的 OBSTACLES 產生） -->
+  <div id="buildbar" class="hidden"></div>
+
   <div id="hint">
+    用 <b>WASD／方向鍵</b>移動你的角色（嚮導），<b>鏡頭會跟著你</b>——地圖比畫面大時，走過去才看得到其他區域。<br>
     怪物<b>由上往下</b>攻進最下方<b>營地</b>；碰到<b>固定牆</b>會自動繞路。點下方按鈕→再點空地放置。<br>
-    用<b>障礙物</b>把怪物卡在哨兵火網裡（怪物會停下來打牆）。點<b>已放置的哨兵</b>可花「嚮導能量」<b>疏導</b>。<br>
+    按 <b>🧱 建築</b>展開障礙物選單（鐵絲網、拒馬、探照燈…），按 <b>R</b> 或「轉向」切換橫直版，把怪物卡在哨兵火網裡。點<b>已放置的哨兵</b>可花「嚮導能量」<b>疏導</b>。<br>
     ⚠️ 汙染值滿會<b>暴走</b>：停止攻擊＋營地扣血，要疏導才恢復。&nbsp;🏗️<b>編輯地圖</b>可自訂固定牆（設計會保留）。
   </div>
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/balance.js"></script>    <!-- 2. 遊戲數值（最常調整） -->
-  <script src="js/pathfinding.js"></script>  <!-- 3. 固定牆與怪物尋路 -->
-  <script src="js/game.js"></script>         <!-- 4. 遊戲主邏輯（啟動遊戲） -->
+  <script src="data/maps.js"></script>       <!-- 3. 地圖資料（地圖編輯器匯出） -->
+  <script src="js/pathfinding.js"></script>  <!-- 4. 固定牆與怪物尋路 -->
+  <script src="js/maploader.js"></script>    <!-- 5. 把編輯器地圖接進遊戲 -->
+  <script src="js/game.js"></script>         <!-- 6. 遊戲主邏輯（啟動遊戲） -->
 </body>
 </html>

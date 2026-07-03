@@ -28,6 +28,19 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 .tbtn.sel { border-color: #8fd3ff; background: #2b3a4a; }
 #editBtn { min-width: 150px; border-color: #6a5acd; }
 #editBtn.on { border-color: #b39ddb; background: #3a2f55; color: #fff; }
+
+/* 建築選單 */
+#buildbar {
+  display: flex; gap: 8px; flex-wrap: wrap; justify-content: center;
+  background: #1d222b; padding: 8px 10px; border-radius: 8px; margin-bottom: 8px;
+  width: 100%; max-width: 1280px;
+}
+#buildbar .tbtn.build { display: flex; align-items: center; gap: 8px; min-width: 150px; }
+#buildbar .tbtn.build img {
+  width: 40px; height: 40px; object-fit: contain; image-rendering: pixelated;
+  background: #0e1116; border-radius: 6px; flex: none;
+}
+#buildbar .tbtn.rotate { border-color: #6a5acd; }
 #hint { font-size: 12px; color: #9aa4b2; max-width: 900px; text-align: center; line-height: 1.7; margin-top: 4px; }
 #overlay {
   position: absolute; inset: 0; background: rgba(8,10,14,.86);

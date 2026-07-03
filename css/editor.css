@@ -43,8 +43,8 @@ button.ui-bounce, .tile.ui-bounce { animation: ui-button-bounce 220ms cubic-bezi
   button.ui-bounce, .tile.ui-bounce { animation: none; }
 }
 
-/* 畫布 */
-#wrap { position: relative; width: 100%; max-width: 1280px; }
+/* 畫布：地圖比畫面大時，外框出現捲軸，可捲動編輯 */
+#wrap { position: relative; width: 100%; max-width: 1280px; overflow: auto; max-height: 82vh; }
 canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }
 
 /* 圖層切換（右側・直排）*/
