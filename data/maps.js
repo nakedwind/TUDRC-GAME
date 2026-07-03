@@ -1108,6 +1108,41 @@ const MAPS_DEFAULT = [
       "27,17"
     ],
     "rules": {
+      "money": 300,
+      "lives": 12,
+      "guide": 100,
+      "guideRegen": 9,
+      "waves": 5,
+      "count": 8,
+      "countAdd": 3,
+      "hp": 40,
+      "hpAdd": 28,
+      "speed": 44,
+      "speedAdd": 5,
+      "gap": 0.85,
+      "gapSub": 0.05,
+      "reward": 8
+    },
+    "cols": 32,
+    "rows": 18
+  },
+  {
+    "id": "map_mr4mbd88",
+    "name": "新地圖 2",
+    "desc": "",
+    "layers": {
+      "floor": {},
+      "ground": {},
+      "object": {},
+      "overlay": {},
+      "top": {}
+    },
+    "stamps": [],
+    "solid": [],
+    "breakable": [],
+    "entrances": [],
+    "camp": [],
+    "rules": {
       "money": 150,
       "lives": 12,
       "guide": 100,
@@ -1122,6 +1157,8 @@ const MAPS_DEFAULT = [
       "gap": 0.85,
       "gapSub": 0.05,
       "reward": 8
-    }
+    },
+    "cols": 40,
+    "rows": 26
   }
 ];

@@ -12,7 +12,33 @@ floorImg.onload = () => { floorPattern = ctx.createPattern(floorImg, 'repeat'); 
 floorImg.src = 'images/background/Back-room-floor.png';
 
 // ---- 玩家角色（嚮導本人，可用 WASD／方向鍵操縱）----
-const PLAYER = { speed: 230, r: 14 };   // 移動速度（像素/秒）與碰撞半徑
+const PLAYER = { speed: 230, r: 14, drawSize: 64 };   // 移動速度、碰撞半徑、角色圖尺寸
+const playerSpriteFiles = {
+  front: [
+    'eldrin_0000_Front.png', 'eldrin_0001_Front-Walking01.png', 'eldrin_0002_Front-Walking02.png'
+  ],
+  back: [
+    'eldrin_0009_back.png', 'eldrin_0010_back-walking01.png', 'eldrin_0011_back-walking02.png'
+  ],
+  left: [
+    'eldrin_0003_Leftside.png', 'eldrin_0004_Leftside-walking01.png', 'eldrin_0005_Leftside-walking02.png'
+  ],
+  right: [
+    'eldrin_0006_right-side.png', 'eldrin_0007_right-side-walking01.png', 'eldrin_0008_right-side-walking02.png'
+  ],
+};
+const playerSprites = {};
+for (const dir of Object.keys(playerSpriteFiles)) {
+  playerSprites[dir] = playerSpriteFiles[dir].map(file => {
+    const img = new Image(); img.src = 'images/character/eldrin/' + file; return img;
+  });
+}
+// 正面待機眨眼：半閉眼 → 閉眼 → 全閉，再倒放回張眼。
+const playerBlinkSprites = [
+  'eldrin_0014_closeeyes01.png',
+  'eldrin_0013_closeeyes02.png',
+  'eldrin_0012_closeeyes03.png',
+].map(file => { const img = new Image(); img.src = 'images/character/eldrin/' + file; return img; });
 const keys = {};                         // 目前按住的按鍵
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase(); keys[k] = true;
@@ -49,7 +75,7 @@ function newGame() {
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
   const [px, py] = playerSpawnPos();
-  G.player = { x: px, y: py };
+  G.player = { x: px, y: py, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
   updateCamera();
   updateHUD();
 }
@@ -94,7 +120,24 @@ function updatePlayer(dt) {
   const p = G.player; if (!p) return;
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
-  if (!dx && !dy) return;
+  p.moving = !!(dx || dy);
+  if (!p.moving) {
+    p.anim = 0;
+    if (p.dir === 'front') {
+      if (p.blinkTime >= 0) {
+        p.blinkTime += dt;
+        if (p.blinkTime >= 0.42) { p.blinkTime = -1; p.blinkWait = 2 + Math.random() * 4; }
+      } else {
+        p.blinkWait -= dt;
+        if (p.blinkWait <= 0) p.blinkTime = 0;
+      }
+    } else p.blinkTime = -1;
+    return;
+  }
+  p.blinkTime = -1;
+  if (Math.abs(dx) >= Math.abs(dy) && dx) p.dir = dx < 0 ? 'left' : 'right';
+  else if (dy) p.dir = dy < 0 ? 'back' : 'front';
+  p.anim += dt;
   const len = Math.hypot(dx, dy), step = PLAYER.speed * dt;
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   if (!playerBlocked(nx, p.y)) p.x = nx;
@@ -104,17 +147,34 @@ function updatePlayer(dt) {
 // ---- 佈署物件查詢 ----
 const buildAt = (c, r) => G.grid[c + ',' + r];
 const barrierAt = (c, r) => { const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle') ? o : null; };
+// 放置時仍保留整張圖片的空間，避免兩張物件互相疊住；移動與尋路則只看 solid。
+function placementOccupiedAt(c, r) {
+  if (G.grid[c + ',' + r]) return true;
+  return G.obstacles.some(o => c >= o.c && c < o.c + (o.w || 1) && r >= o.r && r < o.r + (o.h || 1));
+}
 function removeBarrier(o) {
-  const w = o.w || 1, h = o.h || 1;   // 舊格式（地圖內建）沒有 w/h，當 1×1
-  for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) delete G.grid[(o.c + dc) + ',' + (o.r + dr)];
+  obstacleSolidCells(o).forEach(([dc, dr]) => delete G.grid[(o.c + dc) + ',' + (o.r + dr)]);
   G.obstacles = G.obstacles.filter(x => x !== o);
 }
 
-// ---- 建築放置：檢查整個佔地範圍是否可放 ----
+// 沒有 solid 的舊資料仍以整張圖片範圍擋路。
+function variantSolidCells(v) {
+  if (Array.isArray(v.solid)) return v.solid;
+  const cells = [];
+  for (let dc = 0; dc < (v.w || 1); dc++) for (let dr = 0; dr < (v.h || 1); dr++) cells.push([dc, dr]);
+  return cells;
+}
+function obstacleSolidCells(o) {
+  if (Array.isArray(o.solid)) return o.solid;
+  return variantSolidCells({ w: o.w || 1, h: o.h || 1 });
+}
+
+// ---- 建築放置：圖片須在地圖內，只有 solid 格會擋路／不可重疊 ----
 function canPlaceObstacle(v, c, r) {
+  if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;
   for (let dc = 0; dc < v.w; dc++) for (let dr = 0; dr < v.h; dr++) {
     const cc = c + dc, rr = r + dr;
-    if (!inGrid(cc, rr) || isWall(cc, rr) || isEntrance(cc, rr) || G.grid[cc + ',' + rr]) return false;
+    if (!inGrid(cc, rr) || isWall(cc, rr) || isEntrance(cc, rr) || placementOccupiedAt(cc, rr)) return false;
   }
   return true;
 }
@@ -123,8 +183,9 @@ function placeObstacle(ob, c, r) {
   if (!canPlaceObstacle(v, c, r)) { flash('這裡放不下', ...center(c, r), '#ff8f8f'); return; }
   if (G.money < ob.cost) { flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
   G.money -= ob.cost;
-  const o = { kind: 'obstacle', type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, hp: ob.hp, maxhp: ob.hp };
-  for (let dc = 0; dc < v.w; dc++) for (let dr = 0; dr < v.h; dr++) G.grid[(c + dc) + ',' + (r + dr)] = o;
+  const solid = variantSolidCells(v).map(cell => cell.slice());
+  const o = { kind: 'obstacle', type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp };
+  solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
 }
 
@@ -154,7 +215,7 @@ function renderBuildBar() {
     const v = o[buildOrient];
     const b = document.createElement('button');
     b.className = 'tbtn build' + (G && G.selType === 'build:' + o.id ? ' sel' : '');
-    b.innerHTML = '<img src="' + v.file + '" alt=""><span>' + o.name + ' (' + o.cost + ')<small>' + v.w + '×' + v.h + '格・HP ' + o.hp + '</small></span>';
+    b.innerHTML = '<img src="' + v.file + '" alt=""><span>' + o.name + ' (' + o.cost + ')<small>圖片 ' + v.w + '×' + v.h + '格・擋路 ' + variantSolidCells(v).length + '格・HP ' + o.hp + '</small></span>';
     b.addEventListener('click', () => {
       if (editMode) return;
       G.selType = (G.selType === 'build:' + o.id) ? null : 'build:' + o.id;
@@ -227,6 +288,7 @@ cv.addEventListener('click', e => {
     if (ob) placeObstacle(ob, c, r);
   } else {
     const spec = TYPES[G.selType];
+    if (placementOccupiedAt(c, r)) { flash('這裡已有物件', ...center(c, r), '#ff8f8f'); return; }
     if (G.money < spec.cost) { flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
     G.money -= spec.cost;
     const [tx, ty] = center(c, r);
@@ -414,13 +476,25 @@ function draw() {
     ctx.fillStyle = '#000'; ctx.fillRect(e.x - 14, e.y - 20, 28, 3);
     ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
   }
-  // 玩家（嚮導）
+  // 玩家（艾德林）：依移動方向切換站立／走路圖
   const p = G.player;
   if (p) {
-    ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
-    ctx.strokeStyle = '#bfe6ff'; ctx.lineWidth = 2; ctx.stroke();
-    ctx.fillStyle = '#0e1116'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('你', p.x, p.y + 3);
+    const frames = playerSprites[p.dir || 'front'];
+    const walkOrder = [1, 0, 2, 0];
+    const frame = p.moving ? walkOrder[Math.floor(p.anim * 8) % walkOrder.length] : 0;
+    let img = frames && frames[frame];
+    if (!p.moving && p.dir === 'front' && p.blinkTime >= 0) {
+      const blinkOrder = [0, 1, 2, 2, 1, 0];
+      img = playerBlinkSprites[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(p.blinkTime / 0.07))]];
+    }
+    const size = PLAYER.drawSize;
+    if (img && img.complete && img.naturalWidth) {
+      ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
+      ctx.imageSmoothingEnabled = true;
+    } else {
+      ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
+    }
   }
   // 特效
   for (const f of G.effects) {
@@ -446,6 +520,8 @@ function draw() {
       ctx.globalAlpha = 1;
       ctx.strokeStyle = ok ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.setLineDash([]);
+      ctx.fillStyle = ok ? 'rgba(80,210,150,.28)' : 'rgba(255,80,80,.3)';
+      for (const [dc, dr] of variantSolidCells(v)) ctx.fillRect(x + dc * CELL, y + dr * CELL, CELL, CELL);
     }
   }
   ctx.restore();   // 世界座標畫完，回到螢幕座標（下面的提示固定在畫面上）
