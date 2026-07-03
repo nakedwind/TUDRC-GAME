@@ -101,6 +101,8 @@ const effCamp = (m) => new Set(m.camp.length ? m.camp : defCamp());
 // ================= 資料 =================
 let maps, curId, customTiles = [], brush = { mode: 'tile', tile: 'floor' }, activeLayer = 'floor';
 let checkResult = null, hoverCell = null, painting = false, lastPaint = '', selection = null, selections = [];
+let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（只作用於大圖）
+let tempTool = null, savedBrush = null, pickResult = null;   // Alt=臨時吸管 / Ctrl=臨時選取
 let selectionDrag = null;
 const hiddenLayers = new Set();
 
@@ -177,9 +179,19 @@ function undo() {
 }
 window.addEventListener('keydown', e => {
   const inField = /^(input|textarea)$/i.test(e.target.tagName || '');
+  if (!inField && e.key === 'Alt' && !tempTool) { e.preventDefault(); enterTemp('pick'); return; }
+  if (!inField && (e.key === 'Control' || e.key === 'Meta') && !tempTool) { enterTemp('select'); return; }
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) { if (inField) return; e.preventDefault(); undo(); }
   if (e.key === 'Delete' && !inField && selections.length) { e.preventDefault(); deleteSelection(); }
+  if (!inField && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); flipAction('x'); }
+  if (!inField && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); flipAction('y'); }
 });
+window.addEventListener('keyup', e => {
+  if (!tempTool) return;
+  if (tempTool === 'pick' && !e.altKey) exitTemp();
+  else if (tempTool === 'select' && !e.ctrlKey && !e.metaKey) exitTemp();
+});
+window.addEventListener('blur', () => { if (tempTool) exitTemp(); });
 
 // ================= 磚塊圖片載入 =================
 const tileImgCache = {};
@@ -218,11 +230,20 @@ function drawTile(id, x, y) {
     ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke();
   } else { ctx.fillStyle = '#20262f'; ctx.fillRect(x, y, CELL, CELL); }
 }
+// 畫圖片（可左右／上下翻轉）
+function drawImageFlipped(img, x, y, w, h, fx, fy) {
+  if (!fx && !fy) { ctx.drawImage(img, x, y, w, h); return; }
+  ctx.save();
+  ctx.translate(x + (fx ? w : 0), y + (fy ? h : 0));
+  ctx.scale(fx ? -1 : 1, fy ? -1 : 1);
+  ctx.drawImage(img, 0, 0, w, h);
+  ctx.restore();
+}
 // 畫多格大圖
 function drawStamp(s) {
   const t = tileById(s.id); if (!t) return;
   const x = OX + s.c * CELL, y = OY + s.r * CELL, w = tileW(t) * CELL, h = tileH(t) * CELL;
-  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { ctx.drawImage(rec.img, x, y, w, h); return; } }
+  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { drawImageFlipped(rec.img, x, y, w, h, s.fx, s.fy); return; } }
   ctx.fillStyle = t.role === 'wall' ? '#3f434b' : (t.role === 'obstacle' ? '#7a5a3a' : '#2b3446');
   ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
   ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 1; ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
@@ -231,6 +252,7 @@ function drawStamp(s) {
 }
 
 // ================= 畫布繪製 =================
+let showGrid = true;   // 格線開關（可用工具列按鈕切換）
 function draw() {
   const m = curMap();
   const ent = effEntrances(m), camp = effCamp(m);
@@ -261,7 +283,7 @@ function draw() {
     if (ent.has(key)) { ctx.fillStyle = entIsDefault ? 'rgba(210,60,90,.22)' : 'rgba(210,60,90,.45)'; ctx.fillRect(x, y, CELL, CELL); }
     if (camp.has(key)) { ctx.fillStyle = campIsDefault ? 'rgba(40,180,120,.18)' : 'rgba(40,180,120,.42)'; ctx.fillRect(x, y, CELL, CELL); }
     if (checkResult && checkResult.unreachable.has(key)) { ctx.fillStyle = 'rgba(255,80,80,.28)'; ctx.fillRect(x, y, CELL, CELL); }
-    ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, CELL, CELL);
+    if (showGrid) { ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, CELL, CELL); }
   }
   if (checkResult) {
     ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 3;
@@ -271,15 +293,28 @@ function draw() {
   ctx.fillText('🔻 怪物入口' + (entIsDefault ? '（預設：最上排）' : ''), OX + 6, OY + 16);
   ctx.fillStyle = '#5ec89f'; ctx.textAlign = 'right';
   ctx.fillText('🏠 營地' + (campIsDefault ? '（預設：最下兩排）' : ''), OX + COLS * CELL - 6, OY + ROWS * CELL - 8);
-  // 懸停：大圖顯示範圍，小圖顯示單格
+  // 懸停：選到磚塊圖時先顯示 40% 半透明預覽（放置前看得到圖與位置），再加外框
   if (hoverCell) {
     const [c, r] = hoverCell;
     const sel = brush.mode === 'tile' ? tileById(brush.tile) : null;
-    if (sel && isBig(sel)) {
-      const w = tileW(sel), h = tileH(sel), fits = c + w <= COLS && r + h <= ROWS;
-      ctx.strokeStyle = fits ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
-      ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, w * CELL - 2, h * CELL - 2); ctx.setLineDash([]);
+    if (sel) {
+      const big = isBig(sel), w = big ? tileW(sel) : 1, h = big ? tileH(sel) : 1;
+      const fits = c + w <= COLS && r + h <= ROWS;
+      // 半透明預覽圖
+      ctx.save();
+      ctx.globalAlpha = 0.4;
+      if (big) drawStamp({ c, r, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy });
+      else drawTile(brush.tile, OX + c * CELL, OY + r * CELL);
+      ctx.restore();
+      // 外框（放不下時變紅）
+      if (big) {
+        ctx.strokeStyle = fits ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+        ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, w * CELL - 2, h * CELL - 2); ctx.setLineDash([]);
+      } else {
+        ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, CELL - 2, CELL - 2);
+      }
     } else {
+      // 非貼圖工具（選取／不可穿透／清除等）維持單格外框
       ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, CELL - 2, CELL - 2);
     }
   }
@@ -303,7 +338,10 @@ function placeStamp(c, r, t) {
     const overlap = !(c + w <= s.c || s.c + sw <= c || r + h <= s.r || s.r + sh <= r);
     return !overlap;
   });
-  m.stamps.push({ id: t.id, c, r, layer: activeLayer });
+  const st = { id: t.id, c, r, layer: activeLayer };
+  if (brushFlip.fx) st.fx = true;
+  if (brushFlip.fy) st.fy = true;
+  m.stamps.push(st);
   checkResult = null; saveMaps(); draw();
 }
 function stampIndexAt(m, c, r) {
@@ -312,6 +350,22 @@ function stampIndexAt(m, c, r) {
     if (c >= s.c && c < s.c + tileW(t) && r >= s.r && r < s.r + tileH(t)) return i;
   }
   return -1;
+}
+
+// 吸管：偵測某格「最上層可見」的圖片 id（隱藏的圖層跳過）
+function pickAt(m, c, r) {
+  for (let i = LAYERS.length - 1; i >= 0; i--) {
+    const lid = LAYERS[i].id;
+    if (hiddenLayers.has(lid)) continue;
+    for (let k = m.stamps.length - 1; k >= 0; k--) {
+      const s = m.stamps[k]; if ((s.layer || 'top') !== lid) continue;
+      const t = tileById(s.id) || {};
+      if (c >= s.c && c < s.c + tileW(t) && r >= s.r && r < s.r + tileH(t)) return s.id;
+    }
+    const id = m.layers[lid] && m.layers[lid][c + ',' + r];
+    if (id) return id;
+  }
+  return null;
 }
 
 // ================= 畫格子（依目前畫筆）=================
@@ -336,6 +390,17 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       if (!picked) setStatus('這格沒有可選的物件', '#9aa4b2');
       else setStatus('已選取 ' + selections.length + ' 個物件' + (additiveSelect ? '（Shift 多選）' : ''), '#ffd479');
       refreshSelPanel(); draw();
+    }
+    return;
+  }
+  if (brush.mode === 'pick') {
+    if (isDown) {
+      const id = pickAt(m, c, r);
+      if (id) {
+        pickResult = id; const t = tileById(id) || {};
+        if (tempTool === 'pick') { brush = { mode: 'pick', tile: id }; renderPalette(); setStatus('已吸取「' + (t.name || id) + '」（放開 Alt 開始畫）', '#7ee0c0'); }
+        else { selectTile(id); setStatus('已吸取「' + (t.name || id) + '」，筆刷已切換', '#7ee0c0'); }
+      } else setStatus('這格沒有圖片可吸取', '#ffd24a');
     }
     return;
   }
@@ -436,7 +501,8 @@ cv.addEventListener('pointerleave', () => { hoverCell = null; draw(); });
 const layerBtnsEl = document.getElementById('layerBtns');
 function renderLayers() {
   layerBtnsEl.innerHTML = '';
-  LAYERS.forEach(l => {
+  // 顯示順序反轉：上層在最上、地板在最下（不改 LAYERS 本身的疊圖 z 順序）
+  [...LAYERS].reverse().forEach(l => {
     const group = document.createElement('span'); group.className = 'layer-group';
     const b = document.createElement('button'); b.className = 'layer' + (l.id === activeLayer ? ' sel' : ''); b.textContent = l.name; b.dataset.layer = l.id;
     b.addEventListener('click', () => { activeLayer = l.id; updateLayerUI(); setStatus('目前在「' + l.name + '」上編輯', '#b39ddb'); });
@@ -505,6 +571,24 @@ document.querySelectorAll('.tool').forEach(btn => {
   btn.addEventListener('click', () => { brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); });
 });
 
+// Alt=臨時吸管、Ctrl=臨時選取；放開還原（吸到圖則保留新筆刷）
+function enterTemp(mode) {
+  if (tempTool || brush.mode === mode) return;
+  tempTool = mode; savedBrush = { mode: brush.mode, tile: brush.tile }; pickResult = null;
+  brush = { mode: mode, tile: brush.tile };
+  updateToolUI(); renderPalette();
+  setStatus(mode === 'pick' ? '吸管（放開 Alt 還原）' : '選取（放開 Ctrl 還原）', '#8fd3ff');
+}
+function exitTemp() {
+  if (!tempTool) return;
+  const keepPick = tempTool === 'pick' && pickResult, picked = pickResult;   // 吸到圖：放開後用該圖進入繪製
+  tempTool = null;
+  if (keepPick) brush = { mode: 'tile', tile: picked };
+  else brush = savedBrush || brush;
+  savedBrush = null; pickResult = null;
+  updateToolUI(); renderPalette();
+}
+
 // ================= 選取物件・改圖層 =================
 function selectionId(sel) { return sel.type === 'stamp' ? 'stamp:' + sel.index : 'tile:' + sel.layer + ':' + sel.key; }
 function clearSelection() { selection = null; selections = []; refreshSelPanel(); draw(); }
@@ -514,7 +598,7 @@ function selLayerId() {
   return layers.every(id => id === layers[0]) ? layers[0] : null;
 }
 function refreshSelPanel() {
-  const panel = document.getElementById('selPanel');
+  const panel = document.getElementById('selControls');   // 只隱藏／顯示內層控制項，選取鈕永遠在
   const m = curMap();
   selections = selections.filter(sel => sel.type === 'stamp' ? !!m.stamps[sel.index] : !!(m.layers[sel.layer] && m.layers[sel.layer][sel.key] !== undefined));
   selection = selections.length ? selections[selections.length - 1] : null;
@@ -563,6 +647,32 @@ document.getElementById('selUp').addEventListener('click', () => moveSelBy(1));
 document.getElementById('selDown').addEventListener('click', () => moveSelBy(-1));
 document.getElementById('selDelete').addEventListener('click', deleteSelection);
 document.getElementById('selClear').addEventListener('click', clearSelection);
+
+// ================= 翻轉（只作用於大圖）=================
+function updateFlipUI() {
+  const bx = document.getElementById('flipX'), by = document.getElementById('flipY');
+  if (bx) bx.classList.toggle('on', brushFlip.fx);
+  if (by) by.classList.toggle('on', brushFlip.fy);
+}
+function toggleBrushFlip(axis) {
+  if (axis === 'x') brushFlip.fx = !brushFlip.fx; else brushFlip.fy = !brushFlip.fy;
+  updateFlipUI(); draw();
+  setStatus('筆刷' + (axis === 'x' ? '左右' : '上下') + '翻：' + ((axis === 'x' ? brushFlip.fx : brushFlip.fy) ? '開' : '關') + '（只作用於大圖）', '#b39ddb');
+}
+function flipSelection(axis) {
+  const stampSels = selections.filter(s => s.type === 'stamp');
+  if (!stampSels.length) { setStatus('只有大圖可以翻轉', '#ffd24a'); return; }
+  pushUndo(); const m = curMap();
+  stampSels.forEach(sel => { const s = m.stamps[sel.index]; if (!s) return; if (axis === 'x') s.fx = !s.fx; else s.fy = !s.fy; });
+  saveMaps(); draw();
+  setStatus('已' + (axis === 'x' ? '左右' : '上下') + '翻轉 ' + stampSels.length + ' 個大圖', '#7ee0c0');
+}
+// F / V 快捷鍵：有選到大圖就翻選取，否則翻筆刷
+function flipAction(axis) { if (selections.some(s => s.type === 'stamp')) flipSelection(axis); else toggleBrushFlip(axis); }
+document.getElementById('flipX').addEventListener('click', () => toggleBrushFlip('x'));
+document.getElementById('flipY').addEventListener('click', () => toggleBrushFlip('y'));
+document.getElementById('selFlipX').addEventListener('click', () => flipSelection('x'));
+document.getElementById('selFlipY').addEventListener('click', () => flipSelection('y'));
 
 // 加入磚塊（純圖片，依圖片大小自動猜佔幾格）
 const tileFile = document.getElementById('tileFile');
@@ -620,6 +730,15 @@ document.getElementById('checkPath').addEventListener('click', () => {
   checkResult = { unreachable, badEntrances }; draw();
   if (badEntrances.size === 0) setStatus('✓ 所有入口都走得到營地，路線沒問題！', '#7ee0c0');
   else setStatus('⚠ 有 ' + badEntrances.size + ' 個入口被「不可穿透」完全擋死、走不到營地（黃框處）', '#ffd24a');
+});
+
+// 格線開關
+document.getElementById('gridToggle').addEventListener('click', e => {
+  showGrid = !showGrid;
+  e.currentTarget.textContent = showGrid ? '🔳 格線：開' : '🔲 格線：關';
+  e.currentTarget.classList.toggle('off', !showGrid);
+  draw();
+  setStatus(showGrid ? '格線已開啟' : '格線已關閉', '#8fd3ff');
 });
 
 document.getElementById('clearLayout').addEventListener('click', () => {

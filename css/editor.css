@@ -22,6 +22,8 @@ a.backlink { color: #8fd3ff; font-size: 13px; text-decoration: none; }
 .btn:hover { border-color: #8fd3ff; }
 .btn.danger { border-color: #7a3540; }
 .btn.primary { background: #2b6cb0; border-color: #2b6cb0; color: #fff; }
+.btn.off { color: #697382; background: #181d24; }
+.btn.on { border-color: #b39ddb; background: #3a2f55; color: #fff; }
 
 button, .tile {
   transform-origin: center;
@@ -45,15 +47,17 @@ button.ui-bounce, .tile.ui-bounce { animation: ui-button-bounce 220ms cubic-bezi
 #wrap { position: relative; width: 100%; max-width: 1280px; }
 canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }
 
-/* 圖層切換 */
-#layerbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #1d222b; padding: 6px 10px; border-radius: 8px; margin-bottom: 8px; font-size: 13px; }
-.layer-group { display: inline-flex; align-items: stretch; }
-.layer { background: #232a35; border: 2px solid #333c49; color: #e6e9ee; padding: 5px 12px; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 13px; }
+/* 圖層切換（右側・直排）*/
+#layerbar { display: flex; flex-direction: column; gap: 8px; align-items: stretch; background: #1d222b; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; }
+.layerbar-title { font-size: 14px; color: #8fd3ff; font-weight: 600; }
+#layerBtns { display: flex; flex-direction: column; gap: 6px; }
+.layer-group { display: flex; align-items: stretch; width: 100%; }
+.layer { flex: 1; background: #232a35; border: 2px solid #333c49; color: #e6e9ee; padding: 7px 12px; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 13px; text-align: left; }
 .layer.sel { border-color: #b39ddb; background: #3a2f55; color: #fff; }
-.layer-eye { width: 34px; border: 2px solid #333c49; border-left: 0; border-radius: 0 8px 8px 0; background: #232a35; color: #8fd3ff; cursor: pointer; font-size: 14px; }
+.layer-eye { width: 40px; border: 2px solid #333c49; border-left: 0; border-radius: 0 8px 8px 0; background: #232a35; color: #8fd3ff; cursor: pointer; font-size: 14px; }
 .layer-eye:hover { background: #2b3a4a; }
 .layer-eye.off { color: #697382; background: #181d24; }
-.layerhint { color: #9aa4b2; font-size: 11px; }
+.layerhint { color: #9aa4b2; font-size: 11px; line-height: 1.5; }
 
 /* 磚塊調色盤 */
 #palette { display: flex; gap: 6px; flex-wrap: wrap; background: #1d222b; padding: 8px; border-radius: 8px; margin-bottom: 8px; }
@@ -75,7 +79,10 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 .tool.sel { border-color: #8fd3ff; background: #2b3a4a; }
 #tools .sep { flex: 1; }
 
+.hidden { display: none !important; }
 #selPanel { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #2b3a4a; border: 1px solid #3d5468; padding: 8px 10px; border-radius: 8px; margin: 6px 0; font-size: 13px; }
+#selControls { display: contents; }
+#selPanel .tool { padding: 5px 12px; }
 #selPanel select { background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; padding: 4px 6px; font-size: 13px; }
 #selPanel b { color: #ffd479; }
 
@@ -85,6 +92,18 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 /* 右側：規則面板 */
 .panel { background: #1d222b; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
 .panel h2 { font-size: 14px; margin: 0 0 8px; color: #8fd3ff; }
+
+/* 可收合面板 */
+details.collapsible > summary.panel-head {
+  font-size: 14px; color: #8fd3ff; font-weight: 600; cursor: pointer;
+  list-style: none; display: flex; align-items: center; gap: 6px; user-select: none;
+}
+details.collapsible > summary.panel-head::-webkit-details-marker { display: none; }
+details.collapsible > summary.panel-head::before {
+  content: '▾'; font-size: 12px; color: #8fd3ff; transition: transform .15s;
+}
+details.collapsible:not([open]) > summary.panel-head::before { transform: rotate(-90deg); }
+details.collapsible[open] > .panel-body { margin-top: 8px; }
 .field { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; font-size: 13px; }
 .field label { color: #c3ccd8; }
 .field input { width: 90px; background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; padding: 4px 6px; font-size: 13px; text-align: right; }
