@@ -130,5 +130,41 @@ function hasImageAt(c, r) {
   return false;
 }
 
+// ---- 深度排序：判斷一張圖是「會遮擋角色的立體物」還是「平的地面」----
+//   規則：'top' 圖層永遠在角色上面（樹冠/屋簷）；
+//   其餘圖層中，高度≥2格 或 放在 object/overlay 圖層 的，視為立體物 → 和角色一起排序；
+//   剩下扁平的（多半是地板）留在地面、永遠在角色下面。
+const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
+const isOccLayer = lid => lid === 'object' || lid === 'overlay';
+const stampIsOcc = s => (mapTileH(mapTileById(s.id) || {}) >= OCC_MIN_H) || isOccLayer(s.layer || 'top');
+
+// 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
+function drawMapGround(ctx) {
+  if (!MAP) return;
+  for (const lid of MAP_LAYER_ORDER) {
+    if (lid === 'top') continue;
+    const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
+    if (!isOccLayer(lid)) for (const key in layer) { const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+    for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === lid && !stampIsOcc(s)) drawMapStampImg(ctx, s);
+  }
+}
+// 上層：'top' 圖層，永遠畫在角色上面
+function drawMapTop(ctx) {
+  if (!MAP) return;
+  const layer = MAP.layers ? (MAP.layers.top || {}) : {};
+  for (const key in layer) { const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+  for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === 'top') drawMapStampImg(ctx, s);
+}
+// 立體物：會和角色互相遮擋，回傳 {y:底部Y, draw:畫它} 加進 out
+function collectMapOccluders(ctx, out) {
+  if (!MAP) return;
+  for (const lid of MAP_LAYER_ORDER) {
+    if (lid === 'top') continue;
+    const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
+    if (isOccLayer(lid)) for (const key in layer) { const [c, r] = key.split(',').map(Number), id = layer[key]; out.push({ y: (r + 1) * CELL, draw: () => drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL) }); }
+    for (const s of (MAP.stamps || [])) { if ((s.layer || 'top') !== lid || !stampIsOcc(s)) continue; const t = mapTileById(s.id) || {}; out.push({ y: (s.r + mapTileH(t)) * CELL, draw: () => drawMapStampImg(ctx, s) }); }
+  }
+}
+
 // 載入時立即套用地圖（在 game.js 之前）
 initMap();

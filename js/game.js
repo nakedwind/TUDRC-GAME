@@ -416,6 +416,54 @@ function update(dt) {
 }
 function flash(text, x, y, color) { G.effects.push({ text, x, y, life: 0.8, color, vy: -22 }); }
 
+// ---- 各種角色/物件的畫法（拆成函式，方便深度排序時逐一呼叫）----
+function drawObstacle(o) {
+  const w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
+  const x = OX + o.c * CELL, y = OY + o.r * CELL;
+  const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
+  if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
+  else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
+  if (o.hp < o.maxhp) {   // 受損才顯示血條
+    ctx.fillStyle = '#000'; ctx.fillRect(x + 2, y + h - 6, w - 4, 4);
+    ctx.fillStyle = '#c9a26a'; ctx.fillRect(x + 2, y + h - 6, (w - 4) * Math.max(0, o.hp) / o.maxhp, 4);
+  }
+}
+function drawTower(t) {
+  const spec = TYPES[t.type];
+  ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
+  ctx.fillStyle = '#0e1116'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(spec.name, t.x, t.y + 3);
+  const w = 34, tx = t.x - 17, ty = t.y + 12;
+  ctx.fillStyle = '#000'; ctx.fillRect(tx, ty, w, 4);
+  ctx.fillStyle = t.taint > 75 ? '#ff4d4d' : (t.taint > 45 ? '#ffb84d' : '#7ee0c0'); ctx.fillRect(tx, ty, w * t.taint / 100, 4);
+  if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('暴走', t.x, t.y - 20); }
+}
+function drawEnemy(e) {
+  ctx.fillStyle = '#c25bce'; ctx.beginPath(); ctx.arc(e.x, e.y, 13, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 2.4, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 2.4, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = '#000'; ctx.fillRect(e.x - 14, e.y - 20, 28, 3);
+  ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
+}
+function drawPlayer(p) {
+  const frames = playerSprites[p.dir || 'front'];
+  const walkOrder = [1, 0, 2, 0];
+  const frame = p.moving ? walkOrder[Math.floor(p.anim * 8) % walkOrder.length] : 0;
+  let img = frames && frames[frame];
+  if (!p.moving && p.dir === 'front' && p.blinkTime >= 0) {
+    const blinkOrder = [0, 1, 2, 2, 1, 0];
+    img = playerBlinkSprites[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(p.blinkTime / 0.07))]];
+  }
+  const size = PLAYER.drawSize;
+  if (img && img.complete && img.naturalWidth) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
+    ctx.imageSmoothingEnabled = true;
+  } else {
+    ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
+  }
+}
+
 // ---- 繪製 ----
 function draw() {
   ctx.clearRect(0, 0, cv.width, cv.height);
@@ -425,9 +473,9 @@ function draw() {
   // 地板貼圖鋪滿整個地圖（未載入時用深色底）
   if (floorPattern) { ctx.fillStyle = floorPattern; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL); }
   else { ctx.fillStyle = '#161b22'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL); }
-  // 地圖編輯器做的圖層與大型圖片
-  drawMapImages(ctx);
-  // 區域色（半透明疊上，貼圖仍可見）＋ 格線 ＋ 固定牆
+  // 地面層（地板、地面裝飾）：永遠畫在角色下方
+  drawMapGround(ctx);
+  // 區域色（半透明疊上，貼圖仍可見）＋ 格線 ＋ 沒有美術的固定牆
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
     const [cx, cy] = [OX + c * CELL, OY + r * CELL];
     if (isEntrance(c, r)) { ctx.fillStyle = 'rgba(150,40,70,.32)'; ctx.fillRect(cx, cy, CELL, CELL); }
@@ -442,60 +490,19 @@ function draw() {
   ctx.fillStyle = '#5aa88f'; ctx.textAlign = 'right';
   ctx.fillText('營地（守住這裡）', OX + COLS * CELL - 6, OY + ROWS * CELL - 8);
 
-  // 障礙物（建築用圖片；地圖內建的舊格式用棕色方塊）
-  for (const o of G.obstacles) {
-    const w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
-    const x = OX + o.c * CELL, y = OY + o.r * CELL;
-    const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
-    if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
-    else {
-      ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill();
-      ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke();
-    }
-    if (o.hp < o.maxhp) {   // 受損才顯示血條
-      ctx.fillStyle = '#000'; ctx.fillRect(x + 2, y + h - 6, w - 4, 4);
-      ctx.fillStyle = '#c9a26a'; ctx.fillRect(x + 2, y + h - 6, (w - 4) * Math.max(0, o.hp) / o.maxhp, 4);
-    }
-  }
-  // 哨兵
-  for (const t of G.towers) {
-    const spec = TYPES[t.type];
-    ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
-    ctx.fillStyle = '#0e1116'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(spec.name, t.x, t.y + 3);
-    const w = 34, tx = t.x - 17, ty = t.y + 12;
-    ctx.fillStyle = '#000'; ctx.fillRect(tx, ty, w, 4);
-    ctx.fillStyle = t.taint > 75 ? '#ff4d4d' : (t.taint > 45 ? '#ffb84d' : '#7ee0c0'); ctx.fillRect(tx, ty, w * t.taint / 100, 4);
-    if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('暴走', t.x, t.y - 20); }
-  }
-  // 怪物
-  for (const e of G.enemies) {
-    ctx.fillStyle = '#c25bce'; ctx.beginPath(); ctx.arc(e.x, e.y, 13, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 2.4, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 2.4, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.fill();
-    ctx.fillStyle = '#000'; ctx.fillRect(e.x - 14, e.y - 20, 28, 3);
-    ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
-  }
-  // 玩家（艾德林）：依移動方向切換站立／走路圖
-  const p = G.player;
-  if (p) {
-    const frames = playerSprites[p.dir || 'front'];
-    const walkOrder = [1, 0, 2, 0];
-    const frame = p.moving ? walkOrder[Math.floor(p.anim * 8) % walkOrder.length] : 0;
-    let img = frames && frames[frame];
-    if (!p.moving && p.dir === 'front' && p.blinkTime >= 0) {
-      const blinkOrder = [0, 1, 2, 2, 1, 0];
-      img = playerBlinkSprites[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(p.blinkTime / 0.07))]];
-    }
-    const size = PLAYER.drawSize;
-    if (img && img.complete && img.naturalWidth) {
-      ctx.imageSmoothingEnabled = false;
-      ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
-      ctx.imageSmoothingEnabled = true;
-    } else {
-      ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
-    }
-  }
+  // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
+  //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
+  const sortables = [];
+  collectMapOccluders(ctx, sortables);
+  for (const o of G.obstacles) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });
+  for (const t of G.towers) sortables.push({ y: t.y + 17, draw: () => drawTower(t) });
+  for (const e of G.enemies) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });
+  if (G.player) sortables.push({ y: G.player.y + 16, draw: () => drawPlayer(G.player) });
+  sortables.sort((a, b) => a.y - b.y);
+  for (const it of sortables) it.draw();
+
+  // 上層（樹冠、屋簷等，永遠蓋在最上面）
+  drawMapTop(ctx);
   // 特效
   for (const f of G.effects) {
     if (f.text) {
