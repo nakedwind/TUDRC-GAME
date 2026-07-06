@@ -8,40 +8,34 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <h1>台北地下災害應變中心 · 塔防原型</h1>
-
-  <div id="hud">
-    <span>資源 <b id="money">0</b></span>
-    <span class="hp">營地HP <b id="lives">0</b></span>
-    <span class="guide">嚮導能量 <b id="guide">0</b></span>
-    <span>波次 <b id="wave">0</b> / <b id="wavemax">0</b></span>
-  </div>
-
   <div id="wrap">
     <canvas id="cv" width="1280" height="720"></canvas>
+    <!-- HUD 疊在遊戲畫面左上角 -->
+    <div id="hud">
+      <span>資源 <b id="money">0</b></span>
+      <span class="hp">營地HP <b id="lives">0</b></span>
+      <span class="guide">嚮導能量 <b id="guide">0</b></span>
+      <span>波次 <b id="wave">0</b> / <b id="wavemax">0</b></span>
+    </div>
     <div id="overlay">
       <h2 id="ov-title">塔防原型</h2>
       <p id="ov-text"></p>
       <button id="ov-btn">開始</button>
     </div>
+    <!-- 哨兵選單（點哨兵時彈出，內容由 game.js 產生） -->
+    <div id="sentryMenu" class="hidden"></div>
+    <!-- 建築按鈕與選單：浮在遊戲畫面左下角 -->
+    <button class="tbtn" id="buildToggle">🧱 建築</button>
+    <div id="buildbar" class="hidden"></div>
   </div>
-
-  <div id="tools">
-    <button class="tbtn" data-type="theonie">🔥 希奧妮 (50)<small>遠程單體・傷害高・汙染快</small></button>
-    <button class="tbtn" data-type="amber">⚡ 安柏 (40)<small>範圍・會誤失・汙染中</small></button>
-    <button class="tbtn" data-type="red">🛡️ 雷德 (45)<small>近戰・汙染會自動降</small></button>
-    <button class="tbtn" id="buildToggle">🧱 建築<small>放置障礙物・R 轉向</small></button>
-    <button class="tbtn" id="editBtn">🏗️ 編輯地圖<small>放／移除固定牆（打不破）</small></button>
-  </div>
-
-  <!-- 建築選單（按「🧱 建築」展開；內容由 game.js 依 data/balance.js 的 OBSTACLES 產生） -->
-  <div id="buildbar" class="hidden"></div>
 
   <div id="hint">
     用 <b>WASD／方向鍵</b>移動你的角色（嚮導），<b>鏡頭會跟著你</b>——地圖比畫面大時，走過去才看得到其他區域。<br>
+    🌑 後室一片<b>漆黑</b>：只有<b>營地</b>、<b>你身上的燈</b>和<b>探照燈</b>周圍是亮的。<b>亮處才能放建築／哨兵</b>；<b>探照燈可蓋在光圈邊緣附近</b>、一步步往黑暗推光。黑暗中的怪物<b>看不見</b>（哨兵仍打得到）。<br>
     怪物<b>由上往下</b>攻進最下方<b>營地</b>；碰到<b>固定牆</b>會自動繞路。點下方按鈕→再點空地放置。<br>
-    按 <b>🧱 建築</b>展開障礙物選單（鐵絲網、拒馬、探照燈…），按 <b>R</b> 或「轉向」切換橫直版，把怪物卡在哨兵火網裡。點<b>已放置的哨兵</b>可花「嚮導能量」<b>疏導</b>。<br>
-    ⚠️ 汙染值滿會<b>暴走</b>：停止攻擊＋營地扣血，要疏導才恢復。&nbsp;🏗️<b>編輯地圖</b>可自訂固定牆（設計會保留）。<br>
+    按 <b>🧱 建築</b>展開障礙物選單（鐵絲網、拒馬、探照燈…），按 <b>R</b> 或「轉向」切換橫直版，把怪物卡在哨兵火網裡。<br>
+    🚶 三位哨兵<b>開場就在基地</b>，會在亮處自由走動。<b>點擊哨兵</b>彈出選單：自由走動／<b>在原地巡邏</b>／<b>指派位置巡邏</b>／疏導。<br>
+    ⚠️ 汙染值滿會<b>暴走</b>：停止攻擊＋營地扣血，要疏導才恢復。地圖佈局請用「地圖編輯器.html」製作。<br>
     美術圖片與實際擋路格可在 <a href="物件編輯器.html">🧱 物件編輯器</a> 分開設定。
   </div>
 

@@ -530,7 +530,6 @@ const MAPS_DEFAULT = [
         "25,12": "floor",
         "25,13": "floor",
         "25,14": "floor",
-        "25,15": "floor",
         "25,16": "floor",
         "25,17": "floor",
         "26,0": "floor",
@@ -952,42 +951,6 @@ const MAPS_DEFAULT = [
         "c": 28,
         "r": 9,
         "layer": "object"
-      },
-      {
-        "id": "tile_mr4ja2cb",
-        "c": 17,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4ja2cb",
-        "c": 15,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4ja2cb",
-        "c": 4,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4ja2cb",
-        "c": 6,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4ja2cb",
-        "c": 26,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4ja2cb",
-        "c": 24,
-        "r": 14,
-        "layer": "floor"
       }
     ],
     "solid": [
@@ -1049,11 +1012,7 @@ const MAPS_DEFAULT = [
       "28,8",
       "28,7",
       "28,6",
-      "28,5",
-      "18,11",
-      "17,11",
-      "16,11",
-      "15,11"
+      "28,5"
     ],
     "breakable": [],
     "entrances": [],
@@ -1109,19 +1068,19 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 300,
-      "lives": 12,
+      "lives": 30,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
-      "count": 8,
-      "countAdd": 3,
-      "hp": 40,
-      "hpAdd": 28,
-      "speed": 44,
-      "speedAdd": 5,
-      "gap": 0.85,
+      "count": 5,
+      "countAdd": 2,
+      "hp": 10,
+      "hpAdd": 5,
+      "speed": 35,
+      "speedAdd": 4,
+      "gap": 1,
       "gapSub": 0.05,
-      "reward": 8
+      "reward": 15
     },
     "cols": 32,
     "rows": 18

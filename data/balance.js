@@ -18,13 +18,15 @@ const SOOTHE = {
   heal: 55,   // 每次疏導降多少汙染值
 };
 
-// ---- 哨兵（砲塔）數值 ----
+// ---- 哨兵數值 ----
+// 哨兵是「人」：一個名字只有一位，會在亮處走動巡邏。
 // range=射程(格) dmg=傷害 rate=每秒攻擊次數 taint=每次攻擊累積的汙染
 // splash=範圍傷害半徑(格,0=單體) accuracy=命中率(1=必中) taintRegen=汙染每秒自動下降
+// walkSpeed=走路速度(像素/秒)
 const TYPES = {
-  theonie: { name: '希奧妮', cost: 50, range: 2.8, dmg: 22, rate: 1.0, taint: 7, splash: 0,   color: '#ff7b39', accuracy: 1.0, taintRegen: 0 },
-  amber:   { name: '安柏',   cost: 40, range: 2.2, dmg: 11, rate: 1.2, taint: 5, splash: 1.0, color: '#ffd24a', accuracy: 0.7, taintRegen: 0 },
-  red:     { name: '雷德',   cost: 45, range: 1.5, dmg: 16, rate: 1.0, taint: 3, splash: 0,   color: '#ff5b6e', accuracy: 1.0, taintRegen: 6 },
+  theonie: { name: '希奧妮', cost: 50, range: 2.8, dmg: 22, rate: 1.0, taint: 7, splash: 0,   color: '#ff7b39', accuracy: 1.0, taintRegen: 0, walkSpeed: 75 },
+  amber:   { name: '安柏',   cost: 40, range: 2.2, dmg: 11, rate: 1.2, taint: 5, splash: 1.0, color: '#ffd24a', accuracy: 0.7, taintRegen: 0, walkSpeed: 95 },
+  red:     { name: '雷德',   cost: 45, range: 1.5, dmg: 16, rate: 1.0, taint: 3, splash: 0,   color: '#ff5b6e', accuracy: 1.0, taintRegen: 6, walkSpeed: 85 },
 };
 
 // ---- 障礙物（可被打破的牆）----
@@ -39,6 +41,20 @@ const BARRIER = {
 // ---- 暴走 ----
 const BERSERK = {
   livesPenalty: 2,  // 哨兵暴走瞬間，營地HP扣多少
+};
+
+// ---- 黑暗與光源（後室一片漆黑，要靠光源照亮）----
+// 規則：黑暗中的怪物「看不到」（哨兵仍打得到）；建築與哨兵「只能放在亮處」。
+// 想暫時關掉黑暗系統：把 enabled 改成 false。
+const LIGHT = {
+  enabled: true,
+  darkness: 0.98,    // 黑暗濃度（0～1，越大越黑；留一點點可隱約看到地形輪廓）
+  playerR: 140,      // 玩家（嚮導）身上的光圈半徑（像素）
+  campR: 120,        // 營地每一格的光圈半徑
+  buildings: {       // 會發光的建築：物件id → 光圈半徑（放這裡不會被物件編輯器匯出洗掉）
+    searchlight: 280,
+  },
+  placeMargin: 150,  // 發光建築（探照燈）可以蓋在「光圈邊緣往外再多這麼多像素」的範圍內
 };
 
 // ---- 波次設定 ----
