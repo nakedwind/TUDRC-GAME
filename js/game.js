@@ -397,7 +397,8 @@ function canPlaceObstacle(v, c, r, lightExtra = 0) {
   return true;
 }
 function footprintNearLight(v, c, r, extra) {
-  for (let dc = 0; dc < v.w; dc++) for (let dr = 0; dr < v.h; dr++) if (!cellNearLight(c + dc, r + dr, extra)) return false;
+  // 亮度只看「擋路格」，跟放置判定／預覽框一致
+  for (const [dc, dr] of variantSolidCells(v)) if (!cellNearLight(c + dc, r + dr, extra)) return false;
   return true;
 }
 function placeObstacle(ob, c, r) {
@@ -488,10 +489,8 @@ cv.addEventListener('click', e => {
   closeSentryMenu();
   // 點到障礙物：不動作
   if (buildAt(c, r)) return;
-  // 放置
+  // 放置（合不合法由 placeObstacle 檢查「擋路格」決定，跟預覽框一致）
   if (!G.selType) return;
-  if (isEntrance(c, r)) { flash('這裡是怪物入口', ...center(c, r), '#ff8f8f'); return; }
-  if (isWall(c, r)) { flash('這裡是固定牆', ...center(c, r), '#ff8f8f'); return; }
   if (G.selType.startsWith('build:')) {
     const ob = OBSTACLES.find(o => 'build:' + o.id === G.selType);
     if (ob) placeObstacle(ob, c, r);
@@ -805,8 +804,16 @@ function draw() {
   // 特效
   for (const f of G.effects) {
     if (f.text) {
-      ctx.globalAlpha = Math.max(0, f.life / 0.8); ctx.fillStyle = f.color; ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
-      ctx.fillText(f.text, f.x, f.y + (f.vy || 0) * (0.8 - f.life)); ctx.globalAlpha = 1;
+      const alpha = Math.max(0, f.life / 0.8);
+      const ty = f.y + (f.vy || 0) * (0.8 - f.life);
+      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+      // 黑底標籤：讓提示字在任何背景上都看得清楚
+      const tw = ctx.measureText(f.text).width;
+      ctx.globalAlpha = alpha * 0.72; ctx.fillStyle = '#000';
+      roundRect(f.x - tw / 2 - 8, ty - 15, tw + 16, 21, 6); ctx.fill();
+      ctx.globalAlpha = alpha; ctx.fillStyle = f.color;
+      ctx.fillText(f.text, f.x, ty);
+      ctx.globalAlpha = 1;
     } else if (f.dust) {   // 塵埃：淡土色小圓點，隨時間變淡、略微放大
       const p = Math.max(0, f.life / f.life0);
       ctx.globalAlpha = 0.45 * p;
