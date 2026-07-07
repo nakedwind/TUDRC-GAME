@@ -101,6 +101,7 @@ function startWave() {
   G.spawnQueue = [];
   for (let i = 0; i < w.count; i++) G.spawnQueue.push({ hp: w.hp, speed: w.speed, reward: w.reward });
   G.spawnTimer = 0; G.curGap = w.gap;
+  sfx('wave');   // 新一波開始
 }
 
 // ---- 玩家出生點：優先站營地，找不到就從下往上找空地 ----
@@ -175,9 +176,10 @@ cv.addEventListener('click', e => {
   // 「指派位置巡邏」模式：這一下點擊＝指定目的地
   if (assigning) {
     const t = assigning;
-    if (!isLit(x, y)) { flash('要指派在亮處', x, y, '#ffd24a'); return; }
-    if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
+    if (!isLit(x, y)) { sfx('error'); flash('要指派在亮處', x, y, '#ffd24a'); return; }
+    if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
     t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; assigning = null;
+    sfx('button');
     flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
     return;
   }
@@ -190,7 +192,7 @@ cv.addEventListener('click', e => {
   // 放置（合不合法由 placeObstacle 檢查「擋路格」決定，跟預覽框一致）
   if (!G.selType) return;
   if (G.selType.startsWith('build:')) {
-    const ob = OBSTACLES.find(o => 'build:' + o.id === G.selType);
+    const ob = buildableById(G.selType.slice(6));   // 去掉 'build:' 前綴，跨障礙物/裝飾查找
     if (ob) placeObstacle(ob, c, r);
   }
   updateHUD();
@@ -228,9 +230,19 @@ function stepEnemy(e, dt) {
   if (!e.hasTarget) commitNext(e);
   if (e.stuck) return;
   if (e.exiting) { e.y += e.speed * dt; if (e.y > OY + ROWS * CELL + 18) e.reached = true; return; }
-  // 目標格有障礙物 → 停下打牆
+  // 目標格有障礙物 → 停下打牆（每隔 breakInterval 秒攻擊一次）
   const tc = e.tcell, o = tc ? barrierAt(tc[0], tc[1]) : null;
-  if (o) { o.hp -= BARRIER.breakDps * dt; if (o.hp <= 0) { removeBarrier(o); e.hasTarget = false; } return; }
+  if (o) {
+    e.atkCd = (e.atkCd || 0) - dt;
+    if (e.atkCd <= 0) {
+      e.atkCd = BARRIER.breakInterval;
+      o.hp -= BARRIER.breakDmg;
+      o.hitT = HIT_DUR;                        // 觸發閃紅＋震動
+      sfx('hit');                              // 敲擊聲
+      if (o.hp <= 0) { removeBarrier(o); e.hasTarget = false; }
+    }
+    return;
+  }
   const dx = e.tx - e.x, dy = e.ty - e.y, d = Math.hypot(dx, dy), step = e.speed * dt;
   if (d <= step) { e.x = e.tx; e.y = e.ty; e.hasTarget = false; }
   else { e.x += dx / d * step; e.y += dy / d * step; }
@@ -287,17 +299,18 @@ function update(dt) {
         G.effects.push({ x1: t.x, y1: t.y, x2: target.x, y2: target.y, life: 0.12, color: spec.color });
       } else flash('MISS', t.x, t.y - 26, '#9aa4b2');
       t.taint = Math.min(100, t.taint + spec.taint);
-      if (t.taint >= 100 && !t.berserk) { t.berserk = true; G.lives -= BERSERK.livesPenalty; flash('暴走!', t.x, t.y - 30, '#ff4d4d'); }
+      if (t.taint >= 100 && !t.berserk) { t.berserk = true; G.lives -= BERSERK.livesPenalty; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d'); }
     }
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; sfx('kill'); } }
   G.enemies = G.enemies.filter(e => !e.dead);
-  // 建築放置動畫計時（落地瞬間揚塵）
+  // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
   for (const o of G.obstacles) {
     if (o.spawnT !== undefined && o.spawnT < DROP_TOTAL) {
       const before = o.spawnT; o.spawnT += dt;
       if (before < DROP.fall && o.spawnT >= DROP.fall) spawnDust(o);
     }
+    if (o.hitT > 0) o.hitT -= dt;
   }
   for (const f of G.effects) {
     f.life -= dt;
@@ -318,12 +331,18 @@ function update(dt) {
   if (G.lives <= 0) { G.lives = 0; lose(); }
   updateHUD();
 }
-function flash(text, x, y, color) { G.effects.push({ text, x, y, life: 0.8, color, vy: -22 }); }
+const FLASH_LIFE = 1.5;   // 提示字停留時間（秒）；想更久／更短改這裡
+function flash(text, x, y, color) { G.effects.push({ text, x, y, life: FLASH_LIFE, life0: FLASH_LIFE, color, vy: -22 }); }
 
 // ---- 各種角色/物件的畫法（拆成函式，方便深度排序時逐一呼叫）----
+const HIT_DUR = 0.3;   // 建築被攻擊時「閃紅＋震動」持續秒數
 function drawObstacle(o) {
   const w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
-  const x = OX + o.c * CELL, y = OY + o.r * CELL;
+  // 受擊震動：依剩餘 hitT 隨機抖動，越接近結束越小
+  const hit = o.hitT > 0 ? o.hitT / HIT_DUR : 0;
+  const shX = hit ? (Math.random() * 2 - 1) * 4 * hit : 0;
+  const shY = hit ? (Math.random() * 2 - 1) * 4 * hit : 0;
+  const x = OX + o.c * CELL + shX, y = OY + o.r * CELL + shY;
   // 放置動畫：位移＋以「底部中央」為錨點的壓扁/回彈縮放
   const a = dropAnim(o.spawnT);
   if (a) {
@@ -336,6 +355,10 @@ function drawObstacle(o) {
   const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
   if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
   else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
+  if (hit) {   // 閃紅：半透明紅疊在圖上
+    ctx.globalAlpha = 0.55 * hit; ctx.fillStyle = '#ff3030';
+    ctx.fillRect(x, y, w, h); ctx.globalAlpha = 1;
+  }
   if (a) ctx.restore();
   if (o.hp < o.maxhp) {   // 受損才顯示血條
     ctx.fillStyle = '#000'; ctx.fillRect(x + 2, y + h - 6, w - 4, 4);
@@ -422,8 +445,9 @@ function draw() {
   // 特效
   for (const f of G.effects) {
     if (f.text) {
-      const alpha = Math.max(0, f.life / 0.8);
-      const ty = f.y + (f.vy || 0) * (0.8 - f.life);
+      const life0 = f.life0 || 0.8;
+      const alpha = Math.min(1, f.life / 0.6);                 // 最後 0.6 秒才淡出，其餘維持清晰
+      const ty = f.y + (f.vy || 0) * Math.min(0.8, life0 - f.life);   // 只在前段緩緩上飄
       ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
       // 黑底標籤：讓提示字在任何背景上都看得清楚
       const tw = ctx.measureText(f.text).width;
@@ -445,7 +469,7 @@ function draw() {
   }
   // 建築放置預覽（40% 半透明，放不下時紅框）
   if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
-    const ob = OBSTACLES.find(o => 'build:' + o.id === G.selType);
+    const ob = buildableById(G.selType.slice(6));   // 去掉 'build:' 前綴，跨障礙物/裝飾查找
     if (ob) {
       const v = ob[buildOrient], [c, r] = hoverCell;
       const x = OX + c * CELL, y = OY + r * CELL, w = v.w * CELL, h = v.h * CELL;
@@ -496,9 +520,9 @@ function showStart() {
 function winOverlay() { showOverlay('✅ Y 區已控制', '你守住了營地、擋下所有波次！', '再玩一次'); }
 function loseOverlay() { showOverlay('💀 營地失守', '怪物攻進了營地。<br>試試多築牆卡位、提早疏導快暴走的哨兵。', '再挑戰'); }
 
-function begin() { closeSentryMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
-function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; winOverlay(); }
-function lose() { G.over = true; G.running = false; G.phase = 'lost'; loseOverlay(); }
+function begin() { sfx('button'); closeSentryMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; sfx('win'); winOverlay(); }
+function lose() { G.over = true; G.running = false; G.phase = 'lost'; sfx('lose'); loseOverlay(); }
 ovBtn.addEventListener('click', begin);
 
 // ---- 啟動遊戲 ----

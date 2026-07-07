@@ -78,7 +78,8 @@ function updateSentry(t, dt) {
 const sentryMenu = document.getElementById('sentryMenu');
 let menuSentry = null;    // 目前開著選單的哨兵
 let assigning = null;     // 「指派位置巡邏」等待點地圖的哨兵
-function openSentryMenu(t) {
+function openSentryMenu(t, silent) {
+  if (!silent) sfx('menu');
   menuSentry = t; assigning = null;
   const spec = TYPES[t.type];
   sentryMenu.innerHTML =
@@ -98,10 +99,10 @@ function openSentryMenu(t) {
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
 function sentryMenuAct(act) {
   const t = menuSentry; if (!t) return;
-  if (act === 'free') { t.mode = 'free'; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
-  else if (act === 'hold') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
-  else if (act === 'goto') { assigning = t; closeSentryMenu(); flash('點地圖指定巡邏位置（Esc 取消）', t.x, t.y - 24, '#ffd479'); return; }
-  else if (act === 'soothe') { soothe(t); openSentryMenu(t); return; }   // 疏導後選單留著、更新汙染數字
+  if (act === 'free') { sfx('button'); t.mode = 'free'; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
+  else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
+  else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); flash('點地圖指定巡邏位置（Esc 取消）', t.x, t.y - 24, '#ffd479'); return; }
+  else if (act === 'soothe') { soothe(t); openSentryMenu(t, true); return; }   // soothe() 自帶音效；選單靜默重開、更新汙染數字
   closeSentryMenu();
 }
 window.addEventListener('keydown', e => {
@@ -109,9 +110,10 @@ window.addEventListener('keydown', e => {
 });
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
 function soothe(t) {
-  if (t.taint <= 0 && !t.berserk) { flash('無需疏導', t.x, t.y - 26, '#9aa4b2'); return; }
-  if (G.guide < SOOTHE.cost) { flash('嚮導能量不足', t.x, t.y - 26, '#ff8f8f'); return; }
+  if (t.taint <= 0 && !t.berserk) { sfx('error'); flash('無需疏導', t.x, t.y - 26, '#9aa4b2'); return; }
+  if (G.guide < SOOTHE.cost) { sfx('error'); flash('嚮導能量不足', t.x, t.y - 26, '#ff8f8f'); return; }
   G.guide -= SOOTHE.cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
+  sfx('soothe');
   flash('疏導 -' + SOOTHE.heal, t.x, t.y - 26, '#7ee0c0'); updateHUD();
 }

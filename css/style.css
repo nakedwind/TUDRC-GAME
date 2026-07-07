@@ -55,6 +55,13 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
   background: rgba(20, 25, 34, .85); padding: 8px; border-radius: 10px;
   max-height: calc(100% - 84px); overflow-y: auto;
 }
+/* 建築選單分類頁籤（障礙物 / 裝飾） */
+#buildbar .buildtabs { display: flex; gap: 6px; }
+#buildbar .buildcat {
+  flex: 1; background: #232a35; border: 1px solid #333c49; color: #9aa4b2;
+  padding: 5px 8px; border-radius: 7px; cursor: pointer; font-size: 12px;
+}
+#buildbar .buildcat.sel { border-color: #8fd3ff; background: #2b3a4a; color: #e6e9ee; }
 #buildbar .tbtn.build { display: flex; align-items: center; gap: 6px; min-width: 0; padding: 5px 9px; font-size: 12px; }
 #buildbar .tbtn.build img {
   width: 32px; height: 32px; object-fit: contain; image-rendering: pixelated;

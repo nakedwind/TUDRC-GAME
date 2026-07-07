@@ -51,36 +51,57 @@ function footprintNearLight(v, c, r, extra) {
 function placeObstacle(ob, c, r) {
   const v = ob[buildOrient], extra = placeExtra(ob);
   if (!footprintNearLight(v, c, r, extra)) {
+    sfx('error');
     flash(emitsLight(ob) ? '離光太遠了，要蓋在光圈邊緣附近' : '太暗了，要先照亮這裡', ...center(c, r), '#ffd24a');
     return;
   }
-  if (!canPlaceObstacle(v, c, r, extra)) { flash('這裡放不下', ...center(c, r), '#ff8f8f'); return; }
-  if (G.money < ob.cost) { flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
+  if (!canPlaceObstacle(v, c, r, extra)) { sfx('error'); flash('這裡放不下', ...center(c, r), '#ff8f8f'); return; }
+  if (G.money < ob.cost) { sfx('error'); flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
   G.money -= ob.cost;
   const solid = variantSolidCells(v).map(cell => cell.slice());
   const o = { kind: 'obstacle', type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0 };
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
+  sfx('place');   // 放置成功（落地「叩」聲）
 }
 
-// ---- 建築選單（依 data/balance.js 的 OBSTACLES 產生）----
+// ---- 建築選單（障礙物 = data/objects.js；裝飾 = data/decorations.js）----
 const buildBar = document.getElementById('buildbar');
 const buildToggle = document.getElementById('buildToggle');
-let buildOrient = 'h';        // 目前方向：h 橫版 / v 直版（按 R 切換）
-const obstacleImgs = {};      // 預先載入每種障礙物的兩張圖
-OBSTACLES.forEach(o => {
+let buildOrient = 'h';         // 目前方向：h 橫版 / v 直版（按 R 切換）
+let buildCat = 'obstacle';     // 目前選單分類：obstacle 障礙物 / decor 裝飾物件
+const BUILD_CATS = [['obstacle', '🧱 障礙物'], ['decor', '🪑 裝飾']];
+const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
+const buildList = cat => (cat === 'decor' ? DECOS : OBSTACLES);
+// 依 id 找建築（跨兩類），放置時用
+const buildableById = id => OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id);
+
+const obstacleImgs = {};       // 預先載入每種物件的兩張圖（障礙物＋裝飾共用）
+[...OBSTACLES, ...DECOS].forEach(o => {
   obstacleImgs[o.id] = {};
   ['h', 'v'].forEach(k => { const im = new Image(); im.src = o[k].file; obstacleImgs[o.id][k] = im; });
 });
 function renderBuildBar() {
   buildBar.innerHTML = '';
-  OBSTACLES.forEach(o => {
+  // 分類頁籤
+  const tabs = document.createElement('div'); tabs.className = 'buildtabs';
+  BUILD_CATS.forEach(([cat, label]) => {
+    const tb = document.createElement('button');
+    tb.className = 'buildcat' + (buildCat === cat ? ' sel' : '');
+    tb.textContent = label;
+    tb.addEventListener('click', () => { buildCat = cat; sfx('switch'); renderBuildBar(); });
+    tabs.appendChild(tb);
+  });
+  buildBar.appendChild(tabs);
+  // 目前分類的項目
+  buildList(buildCat).forEach(o => {
     const v = o[buildOrient];
     const b = document.createElement('button');
     b.className = 'tbtn build' + (G && G.selType === 'build:' + o.id ? ' sel' : '');
     b.innerHTML = '<img src="' + v.file + '" alt=""><span>' + o.name + '　$' + o.cost + '　HP ' + o.hp + '</span>';
     b.addEventListener('click', () => {
       G.selType = (G.selType === 'build:' + o.id) ? null : 'build:' + o.id;
+      sfx('button');
       renderBuildBar();
       if (G.selType) { buildBar.classList.add('hidden'); }   // 選好就收起選單，開始放置（可連放）
       updateBuildToggle();
@@ -93,7 +114,7 @@ function renderBuildBar() {
   rot.addEventListener('click', rotateBuild);
   buildBar.appendChild(rot);
 }
-function rotateBuild() { buildOrient = buildOrient === 'h' ? 'v' : 'h'; renderBuildBar(); }
+function rotateBuild() { buildOrient = buildOrient === 'h' ? 'v' : 'h'; sfx('switch'); renderBuildBar(); }
 // 「🧱 建築」按鈕高亮＝選單開著或已選好建築
 function updateBuildToggle() {
   const active = !buildBar.classList.contains('hidden') || (G && G.selType && G.selType.startsWith('build:'));
@@ -102,6 +123,7 @@ function updateBuildToggle() {
 buildToggle.addEventListener('click', () => {
   const opening = buildBar.classList.contains('hidden');
   buildBar.classList.toggle('hidden', !opening);
+  sfx(opening ? 'menu' : 'switch');
   if (!opening && G.selType && G.selType.startsWith('build:')) { G.selType = null; renderBuildBar(); }   // 手動收起＝取消選取
   updateBuildToggle();
 });
