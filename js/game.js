@@ -50,13 +50,64 @@ window.addEventListener('keydown', e => { if (!e.repeat && e.key.toLowerCase() =
 // ---- 滑鼠所在格（建築放置預覽用）----
 let hoverCell = null;
 
-// ---- 黑暗與光源（黑幕挖洞法）----
-// 原理：準備一張跟畫面一樣大的「黑幕」，每幀先整張塗黑，
-// 再於每個光源位置用圓形漸層把黑幕「擦掉」一塊（中心全亮、邊緣漸暗），最後蓋到畫面上。
-const lightCv = document.createElement('canvas');
-lightCv.width = VIEW_W; lightCv.height = VIEW_H;
-const lightCtx = lightCv.getContext('2d');
+// ---- 黑暗與光源（格子擴散光）----
+// 原理：光從光源所在的格子出發，沿格子一格一格往外「流」，每走一格亮度衰減，
+// 碰到固定牆就停（牆本身會被照亮、但光不會穿到牆後）。
+// 渲染：把每格亮度畫成「一格一像素」的小圖，再放大貼到畫面上，
+// 瀏覽器的平滑縮放會自動把格子感柔化成漸層。
 let lightsCache = [];   // 這一幀的所有光源（世界座標），每幀在 draw() 開頭更新
+
+const LIT_MIN = 0.1;                                   // 亮度低於這個值視為「黑暗」
+const lightField = new Float32Array(COLS * ROWS);      // 每格亮度 0～1
+const lightDist = new Float32Array(COLS * ROWS);       // BFS 暫存
+const fieldCv = document.createElement('canvas');      // 一格一像素的黑幕小圖
+fieldCv.width = COLS; fieldCv.height = ROWS;
+const fieldCtx = fieldCv.getContext('2d');
+const fieldImg = fieldCtx.createImageData(COLS, ROWS);
+
+// 8 方向擴散（斜向成本 1.4，讓光圈接近圓形）
+const LIGHT_DIRS = [[0, 1, 1], [0, -1, 1], [1, 0, 1], [-1, 0, 1], [1, 1, 1.4], [1, -1, 1.4], [-1, 1, 1.4], [-1, -1, 1.4]];
+function computeLightField() {
+  lightField.fill(0);
+  if (!LIGHT.enabled) return;
+  for (const l of lightsCache) {
+    const steps = l.r / CELL;                          // 這盞燈的光能走幾格
+    const [sc, sr] = cellAt(l.x, l.y);
+    if (!inGrid(sc, sr)) continue;
+    lightDist.fill(Infinity);
+    // 平滑補間：用光源「實際座標」到附近格子中心的真實距離當起始距離，
+    // 角色在格子內移動時亮度會連續滑動，光就不會一格一格跳。
+    const q = [];
+    for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
+      const c0 = sc + dc, r0 = sr + dr;
+      if (!inGrid(c0, r0)) continue;
+      if (dc && dr && isWall(sc + dc, sr) && isWall(sc, sr + dr)) continue;   // 斜角不穿牆縫
+      const [cx, cy] = center(c0, r0);
+      const d0 = Math.hypot(cx - l.x, cy - l.y) / CELL;
+      const i0 = r0 * COLS + c0;
+      if (d0 < lightDist[i0]) { lightDist[i0] = d0; q.push(i0); }
+    }
+    let head = 0;
+    while (head < q.length) {
+      const idx = q[head++], c = idx % COLS, r = (idx - c) / COLS, d = lightDist[idx];
+      if (d >= steps) continue;
+      if (isWall(c, r) && idx !== sr * COLS + sc) continue;   // 牆會被照亮，但光到此為止
+      for (const [dc, dr, w] of LIGHT_DIRS) {
+        const nc = c + dc, nr = r + dr;
+        if (!inGrid(nc, nr)) continue;
+        if (dc && dr && isWall(c + dc, r) && isWall(c, r + dr)) continue;   // 斜向不能穿牆角
+        const nd = d + w, ni = nr * COLS + nc;
+        if (nd < lightDist[ni]) { lightDist[ni] = nd; q.push(ni); }
+      }
+    }
+    for (let i = 0; i < lightField.length; i++) {
+      if (lightDist[i] < Infinity) {
+        const b = 1 - lightDist[i] / steps;
+        if (b > lightField[i]) lightField[i] = b;
+      }
+    }
+  }
+}
 
 function getLights() {
   const L = [];
@@ -75,36 +126,23 @@ function getLights() {
 }
 function isLit(x, y) {
   if (!LIGHT.enabled) return true;
-  for (const l of lightsCache) if (Math.hypot(x - l.x, y - l.y) <= l.r) return true;
-  return false;
+  const [c, r] = cellAt(x, y);
+  return inGrid(c, r) && lightField[r * COLS + c] > LIT_MIN;
 }
-const cellLit = (c, r) => { const [x, y] = center(c, r); return isLit(x, y); };
-// 「靠近光」判定：在光圈半徑再往外 extra 像素內都算（探照燈蓋在光圈邊緣用）
-function isNearLight(x, y, extra) {
+const cellLit = (c, r) => inGrid(c, r) && (!LIGHT.enabled || lightField[r * COLS + c] > LIT_MIN);
+// 「靠近光」判定：自己亮、或距離亮格在 extra 像素（換算格數）以內（探照燈蓋在光圈邊緣用）
+function cellNearLight(c, r, extra) {
   if (!LIGHT.enabled) return true;
-  for (const l of lightsCache) if (Math.hypot(x - l.x, y - l.y) <= l.r + extra) return true;
+  const k = Math.ceil(extra / CELL);
+  for (let dc = -k; dc <= k; dc++) for (let dr = -k; dr <= k; dr++) {
+    if (cellLit(c + dc, r + dr)) return true;
+  }
   return false;
 }
-const cellNearLight = (c, r, extra) => { const [x, y] = center(c, r); return isNearLight(x, y, extra); };
 
 function drawDarkness() {
   if (!LIGHT.enabled) return;
-  lightCtx.globalCompositeOperation = 'source-over';
-  lightCtx.clearRect(0, 0, VIEW_W, VIEW_H);
-  lightCtx.fillStyle = 'rgba(0,0,0,' + LIGHT.darkness + ')';
-  lightCtx.fillRect(0, 0, VIEW_W, VIEW_H);
-  lightCtx.globalCompositeOperation = 'destination-out';   // 之後畫的形狀＝把黑幕擦掉
-  for (const l of lightsCache) {
-    const sx = l.x - cam.x, sy = l.y - cam.y;   // 世界座標 → 畫面座標
-    if (sx < -l.r || sy < -l.r || sx > VIEW_W + l.r || sy > VIEW_H + l.r) continue;
-    const g = lightCtx.createRadialGradient(sx, sy, l.r * 0.3, sx, sy, l.r);
-    g.addColorStop(0, 'rgba(0,0,0,1)');   // 中心：全亮
-    g.addColorStop(1, 'rgba(0,0,0,0)');   // 邊緣：漸暗
-    lightCtx.fillStyle = g;
-    lightCtx.beginPath(); lightCtx.arc(sx, sy, l.r, 0, Math.PI * 2); lightCtx.fill();
-  }
-  ctx.drawImage(lightCv, 0, 0);
-  // 探照燈的暖色呼吸光暈：黑幕蓋上後，在燈的位置疊一層淡淡的暖橘光
+  // 探照燈的暖色呼吸光暈：畫在黑幕「之前」，牆後陰影會自然把它蓋掉
   const now = performance.now() / 1000;
   for (const l of lightsCache) {
     if (!l.warm) continue;
@@ -117,6 +155,24 @@ function drawDarkness() {
     ctx.fillStyle = g;
     ctx.beginPath(); ctx.arc(sx, sy, l.r * 0.85, 0, Math.PI * 2); ctx.fill();
   }
+  // 亮度場 → 黑幕小圖（一格一像素），放大貼上時自動平滑成漸層
+  const px = fieldImg.data, maxA = Math.round(LIGHT.darkness * 255);
+  for (let i = 0; i < lightField.length; i++) {
+    const b = Math.min(1, lightField[i]);
+    const o = i * 4;
+    px[o] = 0; px[o + 1] = 0; px[o + 2] = 0;
+    px[o + 3] = Math.round(maxA * (1 - b));
+  }
+  fieldCtx.putImageData(fieldImg, 0, 0);
+  const mx = OX - cam.x, my = OY - cam.y, mw = COLS * CELL, mh = ROWS * CELL;
+  ctx.imageSmoothingEnabled = true;
+  ctx.drawImage(fieldCv, mx, my, mw, mh);
+  // 地圖範圍以外的畫面也保持黑暗
+  ctx.fillStyle = 'rgba(0,0,0,' + LIGHT.darkness + ')';
+  if (my > 0) ctx.fillRect(0, 0, VIEW_W, my);
+  if (my + mh < VIEW_H) ctx.fillRect(0, my + mh, VIEW_W, VIEW_H - my - mh);
+  if (mx > 0) ctx.fillRect(0, Math.max(0, my), mx, Math.min(VIEW_H, mh));
+  if (mx + mw < VIEW_W) ctx.fillRect(mx + mw, Math.max(0, my), VIEW_W - mx - mw, Math.min(VIEW_H, mh));
 }
 
 // ---- 鏡頭（相框位置）：跟著玩家，碰到地圖邊緣就停 ----
@@ -199,8 +255,23 @@ function playerBlocked(x, y) {
   }
   return false;
 }
+// 救援機制：角色若被卡在牆／建築裡（例如放置時的邊角誤差），
+// 由近到遠繞圈找最近的空位，把角色推出去。
+function rescueStuck(p, blockedFn) {
+  if (!blockedFn(p.x, p.y)) return false;
+  for (let d = 6; d <= CELL * 5; d += 6) {
+    for (let a = 0; a < 16; a++) {
+      const ang = (a / 16) * Math.PI * 2;
+      const x = p.x + Math.cos(ang) * d, y = p.y + Math.sin(ang) * d;
+      if (!blockedFn(x, y)) { p.x = x; p.y = y; return true; }
+    }
+  }
+  return false;
+}
+
 function updatePlayer(dt) {
   const p = G.player; if (!p) return;
+  if (rescueStuck(p, playerBlocked)) flash('!', p.x, p.y - 30, '#ffd479');   // 被卡住→自動脫困
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
   p.moving = !!(dx || dy);
@@ -250,6 +321,7 @@ function sampleWanderTarget(cx, cy, radius) {
   return null;
 }
 function updateSentry(t, dt) {
+  rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
   if (menuSentry === t) return;                       // 選單開著時先站好
   // 光沒了（探照燈被拆等）→ 走向最近的光
@@ -320,8 +392,7 @@ function canPlaceObstacle(v, c, r, lightExtra = 0) {
     if (isWall(cc, rr) || isEntrance(cc, rr)) return false;
     if (G.grid[cc + ',' + rr]) return false;         // 既有建築的擋路格
     if (!cellNearLight(cc, rr, lightExtra)) return false;
-    // 不能蓋在哨兵（人）站的格子上
-    if (G.towers.some(t => { const [tc, tr] = cellAt(t.x, t.y); return tc === cc && tr === rr; })) return false;
+    // （蓋在玩家／哨兵身上是允許的：放下去的瞬間，救援機制會自動把人推到旁邊空位）
   }
   return true;
 }
@@ -693,6 +764,7 @@ function drawPlayer(p) {
 // ---- 繪製 ----
 function draw() {
   lightsCache = LIGHT.enabled ? getLights() : [];   // 更新這一幀的光源
+  computeLightField();                              // 光沿格子擴散、碰牆停（牆後全黑）
   ctx.clearRect(0, 0, cv.width, cv.height);
   // 之後畫的都是「世界座標」：整體平移鏡頭位置，畫面就會跟著玩家捲動
   ctx.save();
