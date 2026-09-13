@@ -17,32 +17,35 @@ floorImg.src = 'images/background/Back-room-floor.png';
 
 // ---- 玩家角色（嚮導本人，可用 WASD／方向鍵操縱）----
 const PLAYER = { speed: 230, r: 14, drawSize: 64 };   // 移動速度、碰撞半徑、角色圖尺寸
+const PLAYER_CHARACTER = 'winter';
+const PLAYER_OUTFIT = 'B';
+const PLAYER_SPRITE_DIR = `images/character/${PLAYER_CHARACTER}_${PLAYER_OUTFIT}/`;
 const playerSpriteFiles = {
   front: [
-    'eldrin_0000_Front.png', 'eldrin_0001_Front-Walking01.png', 'eldrin_0002_Front-Walking02.png'
+    'winter_0000_Front.png', 'winter_0001_Front-Walking01.png', 'winter_0002_Front-Walking02.png'
   ],
   back: [
-    'eldrin_0009_back.png', 'eldrin_0010_back-walking01.png', 'eldrin_0011_back-walking02.png'
+    'winter_0009_back.png', 'winter_0010_back-walking01.png', 'winter_0011_back-walking02.png'
   ],
   left: [
-    'eldrin_0003_Leftside.png', 'eldrin_0004_Leftside-walking01.png', 'eldrin_0005_Leftside-walking02.png'
+    'winter_0003_Leftside.png', 'winter_0004_Leftside-walking01.png', 'winter_0005_Leftside-walking02.png'
   ],
   right: [
-    'eldrin_0006_right-side.png', 'eldrin_0007_right-side-walking01.png', 'eldrin_0008_right-side-walking02.png'
+    'winter_0006_right-side.png', 'winter_0007_right-side-walking01.png', 'winter_0008_right-side-walking02.png'
   ],
 };
 const playerSprites = {};
 for (const dir of Object.keys(playerSpriteFiles)) {
   playerSprites[dir] = playerSpriteFiles[dir].map(file => {
-    const img = new Image(); img.src = 'images/character/eldrin/' + file; return img;
+    const img = new Image(); img.src = PLAYER_SPRITE_DIR + file; return img;
   });
 }
 // 正面待機眨眼：半閉眼 → 閉眼 → 全閉，再倒放回張眼。
 const playerBlinkSprites = [
-  'eldrin_0014_closeeyes01.png',
-  'eldrin_0013_closeeyes02.png',
-  'eldrin_0012_closeeyes03.png',
-].map(file => { const img = new Image(); img.src = 'images/character/eldrin/' + file; return img; });
+  'winter_0014_closeeyes01.png',
+  'winter_0013_closeeyes02.png',
+  'winter_0012_closeeyes03.png',
+].map(file => { const img = new Image(); img.src = PLAYER_SPRITE_DIR + file; return img; });
 const keys = {};                         // 目前按住的按鍵
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase(); keys[k] = true;
