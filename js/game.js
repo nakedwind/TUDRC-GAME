@@ -19,33 +19,59 @@ floorImg.src = 'images/background/Back-room-floor.png';
 const PLAYER = { speed: 230, r: 14, drawSize: 64 };   // 移動速度、碰撞半徑、角色圖尺寸
 const PLAYER_CHARACTER = 'winter';
 const PLAYER_OUTFIT = 'B';
-const PLAYER_SPRITE_DIR = `images/character/${PLAYER_CHARACTER}_${PLAYER_OUTFIT}/`;
-const playerSpriteFiles = {
-  front: [
-    'winter_0000_Front.png', 'winter_0001_Front-Walking01.png', 'winter_0002_Front-Walking02.png'
-  ],
-  back: [
-    'winter_0009_back.png', 'winter_0010_back-walking01.png', 'winter_0011_back-walking02.png'
-  ],
-  left: [
-    'winter_0003_Leftside.png', 'winter_0004_Leftside-walking01.png', 'winter_0005_Leftside-walking02.png'
-  ],
-  right: [
-    'winter_0006_right-side.png', 'winter_0007_right-side-walking01.png', 'winter_0008_right-side-walking02.png'
-  ],
+// ---- 角色精靈圖（玩家與哨兵共用）----
+// 資料夾 images/character/<角色>_<服裝>/，檔名 <角色><服裝>_0000_Front.png …
+const CHARACTER_SPRITE_FILES = {
+  front: ['0000_Front.png', '0001_Front-Walking01.png', '0002_Front-Walking02.png'],
+  back:  ['0009_back.png', '0010_back-walking01.png', '0011_back-walking02.png'],
+  left:  ['0003_Leftside.png', '0004_Leftside-walking01.png', '0005_Leftside-walking02.png'],
+  right: ['0006_right-side.png', '0007_right-side-walking01.png', '0008_right-side-walking02.png'],
+  // 正面待機眨眼：半閉眼 → 閉眼 → 全閉，再倒放回張眼。
+  blink: ['0014_closeeyes01.png', '0013_closeeyes02.png', '0012_closeeyes03.png'],
 };
-const playerSprites = {};
-for (const dir of Object.keys(playerSpriteFiles)) {
-  playerSprites[dir] = playerSpriteFiles[dir].map(file => {
-    const img = new Image(); img.src = PLAYER_SPRITE_DIR + file; return img;
-  });
+function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
+  const prefix = folder.replace('_', '') + '_';
+  const set = {};
+  for (const k of Object.keys(CHARACTER_SPRITE_FILES)) {
+    set[k] = CHARACTER_SPRITE_FILES[k].map(file => {
+      const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}`; return img;
+    });
+  }
+  return set;
 }
-// 正面待機眨眼：半閉眼 → 閉眼 → 全閉，再倒放回張眼。
-const playerBlinkSprites = [
-  'winter_0014_closeeyes01.png',
-  'winter_0013_closeeyes02.png',
-  'winter_0012_closeeyes03.png',
-].map(file => { const img = new Image(); img.src = PLAYER_SPRITE_DIR + file; return img; });
+const playerSprites = loadCharacterSprites(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`);
+const sentrySprites = {};   // 哨兵類型 → 精靈圖（data/balance.js 的 TYPES 有填 sprite 才有）
+for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = loadCharacterSprites(TYPES[type].sprite);
+
+// 站著不動時的眨眼計時（玩家與哨兵共用）
+function updateBlink(who, dt) {
+  if (who.dir !== 'front') { who.blinkTime = -1; return; }
+  if (who.blinkTime >= 0) {
+    who.blinkTime += dt;
+    if (who.blinkTime >= 0.42) { who.blinkTime = -1; who.blinkWait = 2 + Math.random() * 4; }
+  } else {
+    who.blinkWait = (who.blinkWait ?? 2 + Math.random() * 3) - dt;
+    if (who.blinkWait <= 0) who.blinkTime = 0;
+  }
+}
+// 依朝向／走路／眨眼狀態挑出這一幀要畫的圖
+function pickCharacterFrame(set, who) {
+  if (!who.moving && who.dir === 'front' && who.blinkTime >= 0) {
+    const blinkOrder = [0, 1, 2, 2, 1, 0];
+    return set.blink[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(who.blinkTime / 0.07))]];
+  }
+  const frames = set[who.dir || 'front'];
+  const walkOrder = [1, 0, 2, 0];
+  return frames && frames[who.moving ? walkOrder[Math.floor(who.anim * 8) % walkOrder.length] : 0];
+}
+// 哨兵走路動畫：用這一幀實際移動的距離決定朝向與是否在走
+function animateSentry(t, mx, my, dt) {
+  t.moving = Math.hypot(mx, my) > 0.01;
+  if (!t.moving) { t.anim = 0; t.dir = t.dir || 'front'; updateBlink(t, dt); return; }
+  t.blinkTime = -1;
+  t.dir = Math.abs(mx) >= Math.abs(my) ? (mx < 0 ? 'left' : 'right') : (my < 0 ? 'back' : 'front');
+  t.anim = (t.anim || 0) + dt;
+}
 const keys = {};                         // 目前按住的按鍵
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase(); keys[k] = true;
@@ -146,15 +172,7 @@ function updatePlayer(dt) {
   p.moving = !!(dx || dy);
   if (!p.moving) {
     p.anim = 0;
-    if (p.dir === 'front') {
-      if (p.blinkTime >= 0) {
-        p.blinkTime += dt;
-        if (p.blinkTime >= 0.42) { p.blinkTime = -1; p.blinkWait = 2 + Math.random() * 4; }
-      } else {
-        p.blinkWait -= dt;
-        if (p.blinkWait <= 0) p.blinkTime = 0;
-      }
-    } else p.blinkTime = -1;
+    updateBlink(p, dt);
     return;
   }
   p.blinkTime = -1;
@@ -187,7 +205,8 @@ cv.addEventListener('click', e => {
     return;
   }
   // 點到哨兵 → 開選單
-  const hit = G.towers.find(t => Math.hypot(t.x - x, t.y - y) <= 22);
+  // 有精靈圖的哨兵比色塊高，判定圈往上移到身體中間、放大一點
+  const hit = G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
   if (hit) { openSentryMenu(hit); return; }
   closeSentryMenu();
   // 點到障礙物：不動作
@@ -281,7 +300,11 @@ function update(dt) {
   for (const e of G.enemies) stepEnemy(e, dt);
   for (const e of G.enemies) { if (e.reached) { G.lives--; e.dead = true; } }
   // 哨兵走動（巡邏）
-  for (const t of G.towers) updateSentry(t, dt);
+  for (const t of G.towers) {
+    const ox = t.x, oy = t.y;
+    updateSentry(t, dt);
+    animateSentry(t, t.x - ox, t.y - oy, dt);
+  }
   // 哨兵攻擊
   for (const t of G.towers) {
     const spec = TYPES[t.type];
@@ -370,13 +393,29 @@ function drawObstacle(o) {
 }
 function drawTower(t) {
   const spec = TYPES[t.type];
-  ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
-  ctx.fillStyle = '#0e1116'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText(spec.name, t.x, t.y + 3);
-  const w = 34, tx = t.x - 17, ty = t.y + 12;
+  const set = sentrySprites[t.type];
+  const img = set && pickCharacterFrame(set, t);
+  let ty = t.y + 12, labelY = t.y - 20;   // 汙染條／「暴走」字的位置（色塊版）
+  if (img && img.complete && img.naturalWidth) {
+    const size = PLAYER.drawSize;
+    const shX = t.berserk ? (Math.random() * 2 - 1) * 1.5 : 0;   // 暴走：微微發抖
+    if (t.berserk) {   // 暴走：腳下紅光
+      ctx.fillStyle = 'rgba(255,60,60,0.45)';
+      ctx.beginPath(); ctx.ellipse(t.x, t.y + 14, 20, 7, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
+    ctx.imageSmoothingEnabled = true;
+    ty = t.y + 20; labelY = t.y - size + 14;
+  } else {
+    ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
+    ctx.fillStyle = '#0e1116'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(spec.name, t.x, t.y + 3);
+  }
+  const w = 34, tx = t.x - 17;
   ctx.fillStyle = '#000'; ctx.fillRect(tx, ty, w, 4);
   ctx.fillStyle = t.taint > 75 ? '#ff4d4d' : (t.taint > 45 ? '#ffb84d' : '#7ee0c0'); ctx.fillRect(tx, ty, w * t.taint / 100, 4);
-  if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('暴走', t.x, t.y - 20); }
+  if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('暴走', t.x, labelY); }
 }
 function drawEnemy(e) {
   ctx.fillStyle = '#c25bce'; ctx.beginPath(); ctx.arc(e.x, e.y, 13, 0, Math.PI * 2); ctx.fill();
@@ -386,14 +425,7 @@ function drawEnemy(e) {
   ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
 }
 function drawPlayer(p) {
-  const frames = playerSprites[p.dir || 'front'];
-  const walkOrder = [1, 0, 2, 0];
-  const frame = p.moving ? walkOrder[Math.floor(p.anim * 8) % walkOrder.length] : 0;
-  let img = frames && frames[frame];
-  if (!p.moving && p.dir === 'front' && p.blinkTime >= 0) {
-    const blinkOrder = [0, 1, 2, 2, 1, 0];
-    img = playerBlinkSprites[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(p.blinkTime / 0.07))]];
-  }
+  const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
   if (img && img.complete && img.naturalWidth) {
     ctx.imageSmoothingEnabled = false;

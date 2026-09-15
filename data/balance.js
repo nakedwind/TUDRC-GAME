@@ -23,10 +23,11 @@ const SOOTHE = {
 // range=射程(格) dmg=傷害 rate=每秒攻擊次數 taint=每次攻擊累積的汙染
 // splash=範圍傷害半徑(格,0=單體) accuracy=命中率(1=必中) taintRegen=汙染每秒自動下降
 // walkSpeed=走路速度(像素/秒)
+// sprite=角色造型資料夾（images/character/ 底下，例如 'red_B'）；沒填就畫成色塊
 const TYPES = {
   theonie: { name: '希奧妮', cost: 50, range: 2.8, dmg: 22, rate: 1.0, taint: 7, splash: 0,   color: '#ff7b39', accuracy: 1.0, taintRegen: 0, walkSpeed: 75 },
   amber:   { name: '安柏',   cost: 40, range: 2.2, dmg: 11, rate: 1.2, taint: 5, splash: 1.0, color: '#ffd24a', accuracy: 0.7, taintRegen: 0, walkSpeed: 95 },
-  red:     { name: '雷德',   cost: 45, range: 1.5, dmg: 16, rate: 1.0, taint: 3, splash: 0,   color: '#ff5b6e', accuracy: 1.0, taintRegen: 6, walkSpeed: 85 },
+  red:     { name: '雷德',   cost: 45, range: 1.5, dmg: 16, rate: 1.0, taint: 3, splash: 0,   color: '#ff5b6e', accuracy: 1.0, taintRegen: 6, walkSpeed: 85, sprite: 'red_B' },
 };
 
 // ---- 障礙物（可被打破的牆）----
