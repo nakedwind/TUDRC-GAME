@@ -640,7 +640,8 @@ const MAPS_DEFAULT = [
         "31,15": "floor",
         "31,16": "floor",
         "31,17": "floor",
-        "20,3": "floor"
+        "20,3": "floor",
+        "25,15": "floor"
       },
       "ground": {
         "6,8": "tile_mr4czvpx",
@@ -676,30 +677,6 @@ const MAPS_DEFAULT = [
       "top": {}
     },
     "stamps": [
-      {
-        "id": "tile_mr4ct8od",
-        "c": 8,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4ct8od",
-        "c": 8,
-        "r": 13,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4cyc49",
-        "c": 11,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4cyc49",
-        "c": 11,
-        "r": 13,
-        "layer": "floor"
-      },
       {
         "id": "tile_mr4cyy36",
         "c": 0,
@@ -747,12 +724,6 @@ const MAPS_DEFAULT = [
         "c": 13,
         "r": 9,
         "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyq54",
-        "c": 19,
-        "r": 9,
-        "layer": "floor"
       },
       {
         "id": "tile_mr4cyq54",
@@ -882,12 +853,6 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 20,
-        "r": 9,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4cyy36",
         "c": 21,
         "r": 9,
         "layer": "floor"
@@ -951,6 +916,78 @@ const MAPS_DEFAULT = [
         "c": 28,
         "r": 9,
         "layer": "object"
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 14,
+        "r": 15,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 14,
+        "r": 13,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 14,
+        "r": 11,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 14,
+        "r": 9,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 14,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 17,
+        "r": 7,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 17,
+        "r": 9,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 17,
+        "r": 11,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 17,
+        "r": 13,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4ct8od",
+        "c": 17,
+        "r": 15,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 20,
+        "r": 9,
+        "layer": "floor",
+        "fx": true
       }
     ],
     "solid": [
@@ -988,8 +1025,6 @@ const MAPS_DEFAULT = [
       "18,4",
       "19,4",
       "13,4",
-      "19,11",
-      "20,11",
       "21,11",
       "22,11",
       "23,11",
@@ -1015,7 +1050,11 @@ const MAPS_DEFAULT = [
       "28,5"
     ],
     "breakable": [],
-    "entrances": [],
+    "entrances": [
+      "29,0",
+      "30,0",
+      "31,0"
+    ],
     "camp": [
       "4,16",
       "4,17",
@@ -1074,13 +1113,13 @@ const MAPS_DEFAULT = [
       "waves": 5,
       "count": 5,
       "countAdd": 2,
-      "hp": 10,
-      "hpAdd": 5,
-      "speed": 35,
-      "speedAdd": 4,
+      "hp": 5,
+      "hpAdd": 3,
+      "speed": 30,
+      "speedAdd": 2,
       "gap": 1,
-      "gapSub": 0.05,
-      "reward": 15
+      "gapSub": 1,
+      "reward": 19
     },
     "cols": 32,
     "rows": 18
