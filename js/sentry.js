@@ -47,6 +47,37 @@ function updateSentry(t, dt) {
     for (const l of lightsCache) { const d = Math.hypot(l.x - t.x, l.y - t.y) - l.r; if (d < bd) { bd = d; best = l; } }
     if (best) t.target = { x: best.x, y: best.y };
   }
+  // 主動接敵：看到亮處的怪物就靠近攻擊（開火由 game.js 處理；這裡只負責走過去）
+  // 追多遠依模式：自由走動＝追得遠、原地巡邏／指派＝只追崗位附近，怪死或跑遠就回去巡邏。
+  const litHere = !LIGHT.enabled || isLit(t.x, t.y);
+  if (litHere && G.enemies.length) {
+    const spec = TYPES[t.type];
+    const atkR = spec.range * CELL;                       // 射程（像素）
+    const anchor = (t.mode !== 'free' && t.anchor) ? t.anchor : t;
+    const leashR = t.mode === 'free' ? 260 : 110;         // 離崗上限：自由＝大、原地＝小
+    const detectR = atkR + CELL * 1.5;                    // 比射程略遠就開始靠近
+    let foe = null, fd = Infinity;
+    for (const e of G.enemies) {
+      if (e.dead) continue;
+      if (LIGHT.enabled && !isLit(e.x, e.y)) continue;    // 只追亮處看得見的怪
+      if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
+      const d = Math.hypot(e.x - t.x, e.y - t.y);
+      if (d < fd && d <= detectR) { fd = d; foe = e; }
+    }
+    if (foe) {
+      t.target = null; t.waitT = 0;                       // 取消原本的閒逛
+      if (fd > atkR - 6) {                                // 還沒進射程→靠過去
+        const dx = foe.x - t.x, dy = foe.y - t.y, d = fd || 1;
+        const step = (spec.walkSpeed || 80) * 1.25 * dt;  // 追敵略快
+        const nx = t.x + dx / d * step, ny = t.y + dy / d * step;
+        if (!LIGHT.enabled || isLit(nx, ny)) {            // 不追進黑暗
+          if (!sentryBlocked(nx, t.y)) t.x = nx;
+          if (!sentryBlocked(t.x, ny)) t.y = ny;
+        }
+      }
+      return;                                             // 接敵中：不進入閒逛邏輯
+    }
+  }
   if (t.waitT > 0) { t.waitT -= dt; return; }
   if (!t.target) {
     const anchor = t.mode === 'hold' && t.anchor ? t.anchor : t;

@@ -179,18 +179,9 @@ const OBSTACLES = [
     "hp": 220,
     "h": {
       "file": "images/item-obstacle/06-searchlight.png",
-      "w": 2,
+      "w": 1,
       "h": 2,
-      "solid": [
-        [
-          0,
-          1
-        ],
-        [
-          1,
-          1
-        ]
-      ]
+      "solid": []
     },
     "v": {
       "file": "images/item-obstacle/06-searchlight-vertical.png",
@@ -200,6 +191,34 @@ const OBSTACLES = [
         [
           0,
           1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "obj_mu3pe7kk",
+    "name": "新物件",
+    "cost": 20,
+    "hp": 100,
+    "h": {
+      "file": "images/item-obstacle/06-searchlight.png",
+      "w": 1,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ]
+      ]
+    },
+    "v": {
+      "file": "",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
         ]
       ]
     }

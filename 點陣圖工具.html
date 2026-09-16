@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>點陣圖工具</title>
+<style>
+  :root { color-scheme: dark; }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 14px/1.5 "Noto Sans TC", system-ui, sans-serif; background: #14181f; color: #e6ebf2; }
+  h1 { font-size: 18px; margin: 0; padding: 12px 16px; background: #1b2129; border-bottom: 1px solid #2a3240; }
+  h1 small { color: #8a94a3; font-weight: normal; font-size: 12px; margin-left: 8px; }
+  .layout { display: flex; gap: 16px; padding: 16px; align-items: flex-start; flex-wrap: wrap; }
+  .panel { background: #1b2129; border: 1px solid #2a3240; border-radius: 8px; padding: 12px; }
+  .left { width: 250px; display: flex; flex-direction: column; gap: 12px; }
+  .center { flex: 1; min-width: 320px; display: flex; flex-direction: column; gap: 10px; align-items: flex-start; }
+  h2 { font-size: 13px; margin: 0 0 8px; color: #9fb0c3; }
+  button { font: inherit; color: #e6ebf2; background: #242c37; border: 1px solid #34404f; border-radius: 6px; padding: 7px 10px; cursor: pointer; }
+  button:hover { background: #2c3644; }
+  button.on { background: #2b4a63; border-color: #4f8fbf; color: #fff; }
+  button.primary { background: #2b5a45; border-color: #4fbf8f; }
+  button.danger { background: #5a2b2f; border-color: #bf4f57; }
+  .tools { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+  .row { display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  label { font-size: 12px; color: #9fb0c3; }
+  input[type=number] { width: 58px; font: inherit; background: #0f141b; color: #e6ebf2; border: 1px solid #34404f; border-radius: 5px; padding: 4px 6px; }
+  input[type=color] { width: 40px; height: 32px; padding: 0; border: 1px solid #34404f; border-radius: 5px; background: #0f141b; cursor: pointer; }
+  .swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 4px; margin-top: 8px; }
+  .sw { width: 100%; aspect-ratio: 1; border-radius: 4px; border: 1px solid rgba(0,0,0,.4); cursor: pointer; }
+  .sw.sel { outline: 2px solid #fff; outline-offset: 1px; }
+  .sw.erase { background:
+      linear-gradient(45deg,#666 25%,transparent 25%,transparent 75%,#666 75%),
+      linear-gradient(45deg,#666 25%,#333 25%,#333 75%,#666 75%);
+      background-size: 10px 10px; background-position: 0 0, 5px 5px; }
+  .curcolor { width: 100%; height: 30px; border-radius: 6px; border: 1px solid #34404f; }
+  #wrap { border: 1px solid #2a3240; border-radius: 8px; background: #0f141b; overflow: auto; max-width: 100%; max-height: 70vh; padding: 8px; }
+  canvas { display: block; image-rendering: pixelated; cursor: crosshair; touch-action: none; }
+  #status { font-size: 12px; color: #8a94a3; min-height: 18px; }
+  .hint { font-size: 12px; color: #8a94a3; line-height: 1.7; }
+  .zoombar { display: flex; align-items: center; gap: 8px; }
+</style>
+</head>
+<body>
+  <h1>🎨 點陣圖工具 <small>畫遊戲素材用・雙擊即可用瀏覽器開啟・自動存檔</small></h1>
+
+  <div class="layout">
+    <!-- 左側工具面板 -->
+    <div class="left">
+      <div class="panel">
+        <h2>🛠️ 工具</h2>
+        <div class="tools">
+          <button class="tool on" data-tool="pencil">✏️ 鉛筆</button>
+          <button class="tool" data-tool="eraser">🧽 橡皮擦</button>
+          <button class="tool" data-tool="bucket">🪣 填滿</button>
+          <button class="tool" data-tool="pick">💧 滴管</button>
+        </div>
+      </div>
+
+      <div class="panel">
+        <h2>🎨 顏色</h2>
+        <div class="curcolor" id="curcolor"></div>
+        <div class="row" style="margin-top:8px">
+          <input type="color" id="colorPicker" value="#ff7b39">
+          <button id="addSwatch">＋ 加入色盤</button>
+        </div>
+        <div class="swatches" id="swatches"></div>
+      </div>
+
+      <div class="panel">
+        <h2>📐 畫布大小</h2>
+        <div class="row">
+          <label>寬<input type="number" id="w" min="1" max="256" value="32"></label>
+          <label>高<input type="number" id="h" min="1" max="256" value="32"></label>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button id="resize">套用大小</button>
+          <button id="gridToggle" class="on">格線</button>
+        </div>
+        <div class="hint" style="margin-top:6px">改大小會保留左上角原本的圖。</div>
+      </div>
+
+      <div class="panel">
+        <h2>💾 檔案</h2>
+        <div class="row">
+          <button id="undo">↶ 復原</button>
+          <button class="danger" id="clear">🗑 清空</button>
+        </div>
+        <div class="row" style="margin-top:8px">
+          <label>匯出放大<input type="number" id="scale" min="1" max="32" value="8"></label>倍
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="primary" id="exportPng">⬇ 匯出 PNG</button>
+          <button id="importBtn">⬆ 匯入 PNG</button>
+        </div>
+        <input type="file" id="importFile" accept="image/png,image/*" style="display:none">
+      </div>
+    </div>
+
+    <!-- 中間畫布 -->
+    <div class="center">
+      <div class="zoombar">
+        <label>顯示縮放</label>
+        <button id="zoomOut">－</button>
+        <span id="zoomLabel">14x</span>
+        <button id="zoomIn">＋</button>
+      </div>
+      <div id="wrap"><canvas id="cv"></canvas></div>
+      <div id="status">準備就緒。用鉛筆點格子開始畫吧！</div>
+      <div class="hint">
+        滑鼠<b>點／拖曳</b>畫圖。<b>滴管</b>可吸取格子的顏色。<b>橡皮擦</b>＝擦成透明（做遊戲素材用）。<br>
+        <b>Ctrl+Z</b> 復原。所有變更會<b>自動存到瀏覽器</b>，關掉再開還在。匯出 PNG 會存到你的「下載」資料夾。
+      </div>
+    </div>
+  </div>
+
+<script>
+// ===== 狀態 =====
+const cv = document.getElementById('cv');
+const ctx = cv.getContext('2d');
+ctx.imageSmoothingEnabled = false;
+const STORAGE = 'tudrc_pixel_v1';
+
+let W = 32, H = 32, cell = 14;          // 畫布格數與顯示放大
+let grid = [];                           // 每格顏色字串或 null(透明)
+let tool = 'pencil';
+let curColor = '#ff7b39';
+let showGrid = true;
+let painting = false, lastKey = '';
+let undoStack = [];
+
+// 預設色盤（含常用遊戲色）
+let palette = [
+  '#000000','#ffffff','#7f7f7f','#c3c3c3',
+  '#ff7b39','#ffd24a','#ff5b6e','#5ec8ff',
+  '#7ee0c0','#4fbf8f','#b39ddb','#6a5acd',
+  '#8a5a3a','#c9a26a','#3f434b','#20262f',
+];
+
+// ===== 資料 =====
+function blankGrid(w, h) { return Array.from({length: w*h}, () => null); }
+function idx(c, r) { return r*W + c; }
+function inGrid(c, r) { return c>=0 && c<W && r>=0 && r<H; }
+
+function load() {
+  try {
+    const s = JSON.parse(localStorage.getItem(STORAGE));
+    if (s && s.w && s.h && Array.isArray(s.grid)) {
+      W = s.w; H = s.h; grid = s.grid;
+      if (Array.isArray(s.palette)) palette = s.palette;
+      if (s.curColor) curColor = s.curColor;
+      document.getElementById('w').value = W;
+      document.getElementById('h').value = H;
+      return;
+    }
+  } catch(e) {}
+  grid = blankGrid(W, H);
+}
+function save() {
+  try { localStorage.setItem(STORAGE, JSON.stringify({ w: W, h: H, grid, palette, curColor })); } catch(e) {}
+}
+function setStatus(t) { document.getElementById('status').textContent = t; }
+
+// ===== 復原 =====
+function pushUndo() { undoStack.push(JSON.stringify(grid)); if (undoStack.length > 60) undoStack.shift(); }
+function undo() {
+  if (!undoStack.length) { setStatus('沒有可復原的步驟了'); return; }
+  grid = JSON.parse(undoStack.pop());
+  render(); save(); setStatus('已復原一步（還剩 ' + undoStack.length + ' 步）');
+}
+
+// ===== 繪製 =====
+function render() {
+  cv.width = W * cell; cv.height = H * cell;
+  ctx.imageSmoothingEnabled = false;
+  const s = Math.max(4, cell / 2);
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+    const x = c*cell, y = r*cell;
+    // 透明棋盤底
+    ctx.fillStyle = '#2b323c'; ctx.fillRect(x, y, cell, cell);
+    ctx.fillStyle = '#232a33';
+    ctx.fillRect(x, y, cell/2, cell/2); ctx.fillRect(x+cell/2, y+cell/2, cell/2, cell/2);
+    const col = grid[idx(c, r)];
+    if (col) { ctx.fillStyle = col; ctx.fillRect(x, y, cell, cell); }
+  }
+  if (showGrid && cell >= 6) {
+    ctx.strokeStyle = 'rgba(255,255,255,.08)'; ctx.lineWidth = 1;
+    for (let c = 0; c <= W; c++) { ctx.beginPath(); ctx.moveTo(c*cell+.5, 0); ctx.lineTo(c*cell+.5, H*cell); ctx.stroke(); }
+    for (let r = 0; r <= H; r++) { ctx.beginPath(); ctx.moveTo(0, r*cell+.5); ctx.lineTo(W*cell, r*cell+.5); ctx.stroke(); }
+  }
+}
+
+// ===== 調色盤 UI =====
+function renderPalette() {
+  const el = document.getElementById('swatches'); el.innerHTML = '';
+  // 橡皮擦（透明）方塊
+  const er = document.createElement('div'); er.className = 'sw erase' + (tool === 'eraser' ? ' sel' : '');
+  er.title = '透明（橡皮擦）'; er.onclick = () => selectTool('eraser'); el.appendChild(er);
+  palette.forEach(col => {
+    const b = document.createElement('div');
+    b.className = 'sw' + (tool !== 'eraser' && col === curColor ? ' sel' : '');
+    b.style.background = col; b.title = col;
+    b.onclick = () => { curColor = col; if (tool === 'eraser') tool = 'pencil'; updateUI(); };
+    el.appendChild(b);
+  });
+  document.getElementById('curcolor').style.background = tool === 'eraser' ? 'transparent' : curColor;
+}
+function updateUI() {
+  document.querySelectorAll('.tool').forEach(b => b.classList.toggle('on', b.dataset.tool === tool));
+  document.getElementById('colorPicker').value = curColor;
+  renderPalette();
+}
+function selectTool(t) { tool = t; updateUI(); }
+
+// ===== 畫格子 =====
+function cellFromEvent(e) {
+  const rect = cv.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (cv.width / rect.width);
+  const y = (e.clientY - rect.top) * (cv.height / rect.height);
+  return [Math.floor(x / cell), Math.floor(y / cell)];
+}
+function floodFill(c, r, target) {
+  const repl = curColor;
+  if (target === repl) return;
+  const stack = [[c, r]];
+  while (stack.length) {
+    const [cc, rr] = stack.pop();
+    if (!inGrid(cc, rr)) continue;
+    if (grid[idx(cc, rr)] !== target) continue;
+    grid[idx(cc, rr)] = repl;
+    stack.push([cc+1, rr], [cc-1, rr], [cc, rr+1], [cc, rr-1]);
+  }
+}
+function applyAt(c, r) {
+  if (!inGrid(c, r)) return;
+  if (tool === 'pencil') grid[idx(c, r)] = curColor;
+  else if (tool === 'eraser') grid[idx(c, r)] = null;
+  else if (tool === 'bucket') floodFill(c, r, grid[idx(c, r)]);
+  else if (tool === 'pick') {
+    const col = grid[idx(c, r)];
+    if (col) { curColor = col; tool = 'pencil'; updateUI(); setStatus('已吸取顏色 ' + col); }
+    else { setStatus('這格是透明的'); }
+    return;
+  }
+  render();
+}
+
+cv.addEventListener('pointerdown', e => {
+  cv.setPointerCapture(e.pointerId);
+  const [c, r] = cellFromEvent(e);
+  if (tool === 'pick') { applyAt(c, r); return; }
+  pushUndo(); painting = true; lastKey = c + ',' + r; applyAt(c, r);
+});
+cv.addEventListener('pointermove', e => {
+  if (!painting) return;
+  const [c, r] = cellFromEvent(e);
+  const key = c + ',' + r;
+  if (key === lastKey) return;
+  lastKey = key;
+  if (tool === 'pencil' || tool === 'eraser') applyAt(c, r);
+});
+cv.addEventListener('pointerup', () => { if (painting) { painting = false; save(); } });
+cv.addEventListener('pointerleave', () => { if (painting) { painting = false; save(); } });
+
+// ===== 按鈕 =====
+document.querySelectorAll('.tool').forEach(b => b.addEventListener('click', () => selectTool(b.dataset.tool)));
+document.getElementById('colorPicker').addEventListener('input', e => { curColor = e.target.value; if (tool === 'eraser') tool = 'pencil'; updateUI(); save(); });
+document.getElementById('addSwatch').addEventListener('click', () => {
+  if (!palette.includes(curColor)) { palette.push(curColor); renderPalette(); save(); setStatus('已把 ' + curColor + ' 加入色盤'); }
+});
+document.getElementById('gridToggle').addEventListener('click', e => { showGrid = !showGrid; e.target.classList.toggle('on', showGrid); render(); });
+document.getElementById('resize').addEventListener('click', () => {
+  const nw = Math.max(1, Math.min(256, parseInt(document.getElementById('w').value) || W));
+  const nh = Math.max(1, Math.min(256, parseInt(document.getElementById('h').value) || H));
+  pushUndo();
+  const ng = Array.from({length: nw*nh}, () => null);
+  for (let r = 0; r < Math.min(H, nh); r++) for (let c = 0; c < Math.min(W, nw); c++) ng[r*nw + c] = grid[idx(c, r)];
+  W = nw; H = nh; grid = ng; render(); save(); setStatus('畫布已改為 ' + W + '×' + H);
+});
+document.getElementById('clear').addEventListener('click', () => {
+  if (!confirm('確定清空整張圖？（可用復原救回）')) return;
+  pushUndo(); grid = blankGrid(W, H); render(); save(); setStatus('已清空');
+});
+document.getElementById('undo').addEventListener('click', undo);
+window.addEventListener('keydown', e => { if ((e.ctrlKey || e.metaKey) && (e.key === 'z' || e.key === 'Z')) { e.preventDefault(); undo(); } });
+
+// 縮放
+function setZoom(v) { cell = Math.max(2, Math.min(40, v)); document.getElementById('zoomLabel').textContent = cell + 'x'; render(); }
+document.getElementById('zoomIn').addEventListener('click', () => setZoom(cell + 2));
+document.getElementById('zoomOut').addEventListener('click', () => setZoom(cell - 2));
+
+// 匯出 PNG（原尺寸放大 N 倍、透明背景）
+document.getElementById('exportPng').addEventListener('click', () => {
+  const scale = Math.max(1, Math.min(32, parseInt(document.getElementById('scale').value) || 1));
+  const out = document.createElement('canvas'); out.width = W*scale; out.height = H*scale;
+  const octx = out.getContext('2d'); octx.imageSmoothingEnabled = false;
+  for (let r = 0; r < H; r++) for (let c = 0; c < W; c++) {
+    const col = grid[idx(c, r)];
+    if (col) { octx.fillStyle = col; octx.fillRect(c*scale, r*scale, scale, scale); }
+  }
+  const a = document.createElement('a');
+  a.href = out.toDataURL('image/png');
+  a.download = 'pixel_' + W + 'x' + H + '.png';
+  a.click();
+  setStatus('已匯出 PNG（' + out.width + '×' + out.height + '，透明背景）');
+});
+
+// 匯入 PNG（讀每個像素，畫布改成該圖大小）
+document.getElementById('importBtn').addEventListener('click', () => document.getElementById('importFile').click());
+document.getElementById('importFile').addEventListener('change', e => {
+  const f = e.target.files[0]; if (!f) return;
+  const img = new Image();
+  img.onload = () => {
+    let iw = img.naturalWidth, ih = img.naturalHeight;
+    if (iw > 256 || ih > 256) { alert('圖太大了（超過 256×256）。請先縮小再匯入。'); return; }
+    const tmp = document.createElement('canvas'); tmp.width = iw; tmp.height = ih;
+    const tctx = tmp.getContext('2d'); tctx.imageSmoothingEnabled = false; tctx.drawImage(img, 0, 0);
+    const data = tctx.getImageData(0, 0, iw, ih).data;
+    pushUndo();
+    W = iw; H = ih; grid = blankGrid(W, H);
+    document.getElementById('w').value = W; document.getElementById('h').value = H;
+    for (let r = 0; r < ih; r++) for (let c = 0; c < iw; c++) {
+      const p = (r*iw + c) * 4, al = data[p+3];
+      if (al > 10) {
+        const hex = '#' + [data[p], data[p+1], data[p+2]].map(v => v.toString(16).padStart(2, '0')).join('');
+        grid[idx(c, r)] = hex;
+      }
+    }
+    render(); save(); setStatus('已匯入 ' + f.name + '（' + W + '×' + H + '）');
+  };
+  img.onerror = () => alert('讀取圖片失敗。');
+  img.src = URL.createObjectURL(f);
+  e.target.value = '';
+});
+
+// ===== 啟動 =====
+load();
+setZoom(cell);
+updateUI();
+render();
+</script>
+</body>
+</html>
