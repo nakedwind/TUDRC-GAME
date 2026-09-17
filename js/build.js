@@ -53,16 +53,17 @@ function placeObstacle(ob, c, r) {
   if (!footprintNearLight(v, c, r, extra)) {
     sfx('error');
     flash(emitsLight(ob) ? '離光太遠了，要蓋在光圈邊緣附近' : '太暗了，要先照亮這裡', ...center(c, r), '#ffd24a');
-    return;
+    return false;
   }
-  if (!canPlaceObstacle(v, c, r, extra)) { sfx('error'); flash('這裡放不下', ...center(c, r), '#ff8f8f'); return; }
-  if (G.money < ob.cost) { sfx('error'); flash('資源不足', ...center(c, r), '#ff8f8f'); return; }
+  if (!canPlaceObstacle(v, c, r, extra)) { sfx('error'); flash('這裡放不下', ...center(c, r), '#ff8f8f'); return false; }
+  if (G.money < ob.cost) { sfx('error'); flash('資源不足', ...center(c, r), '#ff8f8f'); return false; }
   G.money -= ob.cost;
   const solid = variantSolidCells(v).map(cell => cell.slice());
   const o = { kind: 'obstacle', type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0 };
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
   sfx('place');   // 放置成功（落地「叩」聲）
+  return true;
 }
 
 // ---- 建築選單（障礙物 = data/objects.js；裝飾 = data/decorations.js）----
@@ -70,6 +71,7 @@ const buildBar = document.getElementById('buildbar');
 const buildToggle = document.getElementById('buildToggle');
 let buildOrient = 'h';         // 目前方向：h 橫版 / v 直版（按 R 切換）
 let buildCat = 'obstacle';     // 目前選單分類：obstacle 障礙物 / decor 裝飾物件
+let buildTargetCell = null;    // 從地面情境選單指定的建築格
 const BUILD_CATS = [['obstacle', '🧱 障礙物'], ['decor', '🪑 裝飾']];
 const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
 const buildList = cat => (cat === 'decor' ? DECOS : OBSTACLES);
@@ -83,6 +85,11 @@ const obstacleImgs = {};       // 預先載入每種物件的兩張圖（障礙�
 });
 function renderBuildBar() {
   buildBar.innerHTML = '';
+  if (buildTargetCell) {
+    const note = document.createElement('div'); note.className = 'build-target';
+    note.textContent = '選擇要建造的物件';
+    buildBar.appendChild(note);
+  }
   // 分類頁籤
   const tabs = document.createElement('div'); tabs.className = 'buildtabs';
   BUILD_CATS.forEach(([cat, label]) => {
@@ -100,6 +107,15 @@ function renderBuildBar() {
     b.className = 'tbtn build' + (G && G.selType === 'build:' + o.id ? ' sel' : '');
     b.innerHTML = '<img src="' + v.file + '" alt=""><span>' + o.name + '　$' + o.cost + '　HP ' + o.hp + '</span>';
     b.addEventListener('click', () => {
+      if (buildTargetCell) {
+        const [targetC, targetR] = buildTargetCell;
+        G.selType = 'build:' + o.id;
+        const placed = placeObstacle(o, targetC, targetR);
+        G.selType = null;
+        if (placed) { buildTargetCell = null; buildBar.classList.add('hidden'); }
+        sfx('button'); renderBuildBar(); updateBuildToggle(); updateHUD();
+        return;
+      }
       G.selType = (G.selType === 'build:' + o.id) ? null : 'build:' + o.id;
       sfx('button');
       renderBuildBar();
@@ -121,6 +137,9 @@ function updateBuildToggle() {
   buildToggle.classList.toggle('sel', !!active);
 }
 buildToggle.addEventListener('click', () => {
+  const hadTarget = !!buildTargetCell;
+  buildTargetCell = null;
+  if (hadTarget) renderBuildBar();
   const opening = buildBar.classList.contains('hidden');
   buildBar.classList.toggle('hidden', !opening);
   sfx(opening ? 'menu' : 'switch');
@@ -129,6 +148,9 @@ buildToggle.addEventListener('click', () => {
 });
 // 關閉建築選單並取消選取（Esc 或程式呼叫）
 function closeBuildMenu() {
+  const hadTarget = !!buildTargetCell;
+  buildTargetCell = null;
+  if (hadTarget) renderBuildBar();
   buildBar.classList.add('hidden');
   if (G.selType && G.selType.startsWith('build:')) { G.selType = null; renderBuildBar(); }
   updateBuildToggle();

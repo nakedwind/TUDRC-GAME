@@ -1,4 +1,4 @@
-/* ===== 地圖編輯器 — 核心程式（圖層 + 大圖 + 圖片效果分離）=====
+/* ===== 地圖編輯器 — 核心程式（圖層 + 可翻轉圖片 + 圖片效果分離）=====
    圖片分兩層：🟫 地板層(floor) 在底、✨ 裝飾層(deco) 疊在上面(透明處透出地板)。
    另有多格大圖(stamps)疊最上面。以上都只是外觀。
    遊戲效果獨立標記：🧱 不可穿透(solid) / 💥 可破壞(breakable)。
@@ -11,6 +11,10 @@ const ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;   // 像素圖不要模糊
 const STORAGE_MAPS = 'tudrc_maps_v1';
 const STORAGE_TILES = 'tudrc_tiles_v1';
+const STORAGE_DECOR_PACK = 'tudrc_asset_pack_item_decorate_v1';
+const STORAGE_OBSTACLE_PACK = 'tudrc_asset_pack_item_obstacle_v1';
+const STORAGE_NEW_ASSETS_PACK = 'tudrc_asset_pack_new_materials_v6';
+const STORAGE_STATION_HALL_PACK = 'tudrc_asset_pack_station_hall_v2';
 
 // ---- UI 按鈕回饋 ----
 const buttonSound = new Audio('music/Sound effects/按紐.mp3');
@@ -78,6 +82,8 @@ const isBig = (t) => tileW(t) > 1 || tileH(t) > 1;
 const LAYERS = [
   { id: 'floor', name: '🟫 地板' },
   { id: 'ground', name: '🌿 地面裝飾' },
+  { id: 'ground2', name: '🍂 地面裝飾 2' },
+  { id: 'ground3', name: '🩹 地面裝飾 3' },
   { id: 'object', name: '📦 物件' },
   { id: 'overlay', name: '🎯 物件裝飾' },
   { id: 'top', name: '☁️ 上層' },
@@ -101,7 +107,7 @@ const effCamp = (m) => new Set(m.camp.length ? m.camp : defCamp());
 // ================= 資料 =================
 let maps, curId, customTiles = [], brush = { mode: 'tile', tile: 'floor' }, activeLayer = 'floor';
 let checkResult = null, hoverCell = null, painting = false, lastPaint = '', selection = null, selections = [];
-let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（只作用於大圖）
+let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（大小圖都可用）
 let tempTool = null, savedBrush = null, pickResult = null;   // Alt=臨時吸管 / Ctrl=臨時選取
 let selectionDrag = null;
 const hiddenLayers = new Set();
@@ -110,12 +116,38 @@ const palette = () => BUILTIN_TILES.concat(customTiles);
 const tileById = (id) => palette().find(t => t.id === id);
 const wallCells = (m) => new Set(m.solid);   // 只有「不可穿透」才擋路
 
+function mergeDefaultAssetPack(idPrefix, storageKey) {
+  if (localStorage.getItem(storageKey)) return false;
+  const packTiles = TILES_CUSTOM.filter(t => String(t.id).startsWith(idPrefix));
+  packTiles.forEach(t => {
+    const filename = String(t.file || '').replace(/\\/g, '/').split('/').pop().toLowerCase();
+    const existing = customTiles.find(x => {
+      const oldName = String(x.file || '').replace(/\\/g, '/').split('/').pop().toLowerCase();
+      return x.id === t.id || (filename && oldName === filename);
+    });
+    if (existing) {
+      existing.file = t.file; existing.w = t.w; existing.h = t.h;
+      if (t.flat) existing.flat = true; else delete existing.flat;   // 讓「平貼地面」標記同步到編輯器暫存，匯出才不會掉
+    } else customTiles.push(clone(t));
+  });
+  localStorage.setItem(storageKey, '1');
+  return packTiles.length > 0;
+}
+
 function loadTiles() {
   const saved = localStorage.getItem(STORAGE_TILES);
   if (saved) { try { customTiles = JSON.parse(saved); } catch (e) { customTiles = clone(TILES_CUSTOM); } }
   else customTiles = clone(TILES_CUSTOM);
   if (!Array.isArray(customTiles)) customTiles = [];
   customTiles.forEach(t => { t.w = t.w || 1; t.h = t.h || 1; });
+
+  // 新素材包各自只自動補入一次；保留使用者原有素材與地圖內容。
+  const decorAdded = mergeDefaultAssetPack('tile_decor_', STORAGE_DECOR_PACK);
+  const obstaclesAdded = mergeDefaultAssetPack('tile_obstacle_', STORAGE_OBSTACLE_PACK);
+  const newAssetsAdded = mergeDefaultAssetPack('tile_new_', STORAGE_NEW_ASSETS_PACK);
+  const stationHallAdded = mergeDefaultAssetPack('tile_station_hall_', STORAGE_STATION_HALL_PACK);
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded) saveTiles();
+
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
   customTiles.forEach(t => {
@@ -172,10 +204,29 @@ function applyMapSize() {
     cv.width = w; cv.height = h;
     ctx.imageSmoothingEnabled = false;   // 改畫布大小會重置設定，要再關一次模糊
   }
-  // 小地圖照舊縮放塞滿版面；大地圖維持原尺寸，用捲軸捲動編輯
-  cv.style.width = (w <= 1280) ? '100%' : w + 'px';
-  cv.style.maxWidth = (w <= 1280) ? '' : 'none';
+  applyZoom();   // 依目前縮放倍率設定顯示大小
 }
+// ---- 縮放：只改「顯示大小」，畫布內部解析度不變；點擊座標會自動換算，不受影響 ----
+let editorZoom = 0;   // 0＝尚未設定；第一次載入會自動「全覽整張」
+function fitZoom() {
+  const wrap = document.getElementById('wrap');
+  const availW = Math.max(120, wrap.clientWidth - 4);
+  const availH = Math.max(200, window.innerHeight * 0.82 - 4);
+  return Math.max(0.1, Math.min(1, Math.min(availW / cv.width, availH / cv.height)));
+}
+function applyZoom() {
+  if (!editorZoom) editorZoom = fitZoom();
+  cv.style.maxWidth = 'none';
+  cv.style.width = Math.round(cv.width * editorZoom) + 'px';
+  cv.style.height = Math.round(cv.height * editorZoom) + 'px';
+  const lbl = document.getElementById('zoomLabel');
+  if (lbl) lbl.textContent = Math.round(editorZoom * 100) + '%';
+}
+function setZoom(z) { editorZoom = Math.max(0.1, Math.min(3, z)); applyZoom(); }
+document.getElementById('zoomIn').onclick = () => setZoom(editorZoom * 1.25);
+document.getElementById('zoomOut').onclick = () => setZoom(editorZoom / 1.25);
+document.getElementById('zoomFit').onclick = () => { editorZoom = fitZoom(); applyZoom(); };
+document.getElementById('zoom100').onclick = () => setZoom(1);
 function saveMaps() { localStorage.setItem(STORAGE_MAPS, JSON.stringify(maps)); setStatus('已自動存檔 ✓', '#7ee0c0'); }
 const curMap = () => maps.find(m => m.id === curId) || maps[0];
 
@@ -206,6 +257,19 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Delete' && !inField && selections.length) { e.preventDefault(); deleteSelection(); }
   if (!inField && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); flipAction('x'); }
   if (!inField && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); flipAction('y'); }
+  // 方向鍵：微調選取大圖的位置（不貼齊格線；按住 Shift 一次移多一點）
+  if (!inField && /^Arrow(Left|Right|Up|Down)$/.test(e.key) && selections.some(s => s.type === 'stamp')) {
+    e.preventDefault();
+    const step = e.shiftKey ? 10 : 2;
+    const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+    const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+    const m = curMap();
+    selections.filter(s => s.type === 'stamp').forEach(sel => {
+      const s = m.stamps[sel.index]; if (!s) return;
+      s.ox = (s.ox || 0) + dx; s.oy = (s.oy || 0) + dy;
+    });
+    saveMaps(); draw();
+  }
 });
 window.addEventListener('keyup', e => {
   if (!tempTool) return;
@@ -216,13 +280,51 @@ window.addEventListener('blur', () => { if (tempTool) exitTemp(); });
 
 // ================= 磚塊圖片載入 =================
 const tileImgCache = {};
+const TILE_IMAGE_FOLDERS = [
+  'images/background',
+  'images/item-decorate',
+  'images/item-obstacle',
+  'images/01-station-hall',
+];
+function tileImageSources(file) {
+  if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
+  const clean = file.replace(/\\/g, '/');
+  const filename = clean.split('/').pop();
+  return [...new Set([clean, ...TILE_IMAGE_FOLDERS.map(folder => folder + '/' + filename)])];
+}
+function findProjectImagePath(filename) {
+  const sources = TILE_IMAGE_FOLDERS.map(folder => folder + '/' + filename);
+  return new Promise(resolve => {
+    let index = 0;
+    const tryNext = () => {
+      if (index >= sources.length) { resolve(null); return; }
+      const source = sources[index++];
+      const probe = new Image();
+      probe.onload = () => resolve(source);
+      probe.onerror = tryNext;
+      probe.src = source;
+    };
+    tryNext();
+  });
+}
 function ensureTileImg(t) {
   if (!t.file) return null;
   if (tileImgCache[t.id]) return tileImgCache[t.id];
-  const img = new Image(); const rec = { img, loaded: false, error: false };
-  img.onload = () => { rec.loaded = true; draw(); renderPalette(); };
-  img.onerror = () => { rec.error = true; };
-  img.src = t.file;
+  const img = new Image(); const rec = { img, loaded: false, error: false, source: '' };
+  const sources = tileImageSources(t.file);
+  let sourceIndex = 0;
+  const tryNext = () => {
+    if (sourceIndex >= sources.length) { rec.error = true; renderPalette(); return; }
+    rec.source = sources[sourceIndex++];
+    img.src = rec.source;
+  };
+  img.onload = () => {
+    rec.loaded = true; rec.error = false;
+    if (t.file !== rec.source) { t.file = rec.source; saveTiles(); }
+    draw(); renderPalette();
+  };
+  img.onerror = tryNext;
+  tryNext();
   tileImgCache[t.id] = rec; return rec;
 }
 function preloadTiles() { palette().forEach(t => { if (t.file) ensureTileImg(t); }); }
@@ -263,7 +365,7 @@ function drawImageFlipped(img, x, y, w, h, fx, fy) {
 // 畫多格大圖
 function drawStamp(s) {
   const t = tileById(s.id); if (!t) return;
-  const x = OX + s.c * CELL, y = OY + s.r * CELL, w = tileW(t) * CELL, h = tileH(t) * CELL;
+  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = tileW(t) * CELL, h = tileH(t) * CELL;
   if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { drawImageFlipped(rec.img, x, y, w, h, s.fx, s.fy); return; } }
   ctx.fillStyle = t.role === 'wall' ? '#3f434b' : (t.role === 'obstacle' ? '#7a5a3a' : '#2b3446');
   ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
@@ -320,11 +422,11 @@ function draw() {
     const sel = brush.mode === 'tile' ? tileById(brush.tile) : null;
     if (sel) {
       const big = isBig(sel), w = big ? tileW(sel) : 1, h = big ? tileH(sel) : 1;
-      const fits = c + w <= COLS && r + h <= ROWS;
+      const fits = c < COLS && r < ROWS && c + w > 0 && r + h > 0;   // 允許超出邊緣（純外觀），只要有一格在地圖內
       // 半透明預覽圖
       ctx.save();
       ctx.globalAlpha = 0.4;
-      if (big) drawStamp({ c, r, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy });
+      if (big || brushFlip.fx || brushFlip.fy) drawStamp({ c, r, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy });
       else drawTile(brush.tile, OX + c * CELL, OY + r * CELL);
       ctx.restore();
       // 外框（放不下時變紅）
@@ -342,16 +444,16 @@ function draw() {
   // 選取高亮（黃色虛線框）
   for (const selected of selections) {
     let rx = null, ry = 0, rw = CELL, rh = CELL;
-    if (selected.type === 'stamp') { const s = m.stamps[selected.index]; if (s) { const t = tileById(s.id) || {}; rx = OX + s.c * CELL; ry = OY + s.r * CELL; rw = tileW(t) * CELL; rh = tileH(t) * CELL; } }
+    if (selected.type === 'stamp') { const s = m.stamps[selected.index]; if (s) { const t = tileById(s.id) || {}; rx = OX + s.c * CELL + (s.ox || 0); ry = OY + s.r * CELL + (s.oy || 0); rw = tileW(t) * CELL; rh = tileH(t) * CELL; } }
     else { const [c, r] = selected.key.split(',').map(Number); rx = OX + c * CELL; ry = OY + r * CELL; }
     if (rx != null) { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3; ctx.setLineDash([7, 4]); ctx.strokeRect(rx + 1.5, ry + 1.5, rw - 3, rh - 3); ctx.setLineDash([]); }
   }
 }
 
-// ================= 大圖放置 / 查詢 =================
+// ================= 可翻轉圖片放置 / 查詢 =================
 function placeStamp(c, r, t) {
   const m = curMap(), w = tileW(t), h = tileH(t);
-  if (c + w > COLS || r + h > ROWS) { setStatus('放不下：超出地圖邊界', '#ff8f8f'); return; }
+  if (c >= COLS || r >= ROWS || c + w <= 0 || r + h <= 0) { setStatus('放不下：整張圖都在地圖外', '#ff8f8f'); return; }   // 允許超出邊緣（大圖純外觀），只要有一格落在地圖內就能放
   // 只移除「同一圖層」上重疊的大圖（不同層可疊放）
   m.stamps = m.stamps.filter(s => {
     if ((s.layer || 'top') !== activeLayer) return true;
@@ -359,6 +461,8 @@ function placeStamp(c, r, t) {
     const overlap = !(c + w <= s.c || s.c + sw <= c || r + h <= s.r || s.r + sh <= r);
     return !overlap;
   });
+  // 1×1 小圖翻轉後改用 stamp 儲存，先移除同格同層的普通小圖。
+  if (w === 1 && h === 1) delete m.layers[activeLayer][c + ',' + r];
   const st = { id: t.id, c, r, layer: activeLayer };
   if (brushFlip.fx) st.fx = true;
   if (brushFlip.fy) st.fy = true;
@@ -367,7 +471,9 @@ function placeStamp(c, r, t) {
 }
 function stampIndexAt(m, c, r) {
   for (let i = m.stamps.length - 1; i >= 0; i--) {
-    const s = m.stamps[i], t = tileById(s.id) || {};
+    const s = m.stamps[i];
+    if (hiddenLayers.has(s.layer || 'top')) continue;   // 隱藏的圖層：選不到／擦不到
+    const t = tileById(s.id) || {};
     if (c >= s.c && c < s.c + tileW(t) && r >= s.r && r < s.r + tileH(t)) return i;
   }
   return -1;
@@ -398,7 +504,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       let picked = null;
       const si = stampIndexAt(m, c, r);
       if (si >= 0) picked = { type: 'stamp', index: si };
-      else for (let i = LAYERS.length - 1; i >= 0; i--) { const id = LAYERS[i].id; if (m.layers[id][key]) { picked = { type: 'tile', layer: id, key }; break; } }
+      else for (let i = LAYERS.length - 1; i >= 0; i--) { const id = LAYERS[i].id; if (!hiddenLayers.has(id) && m.layers[id][key]) { picked = { type: 'tile', layer: id, key }; break; } }
       if (!additiveSelect) {
         const alreadySelected = picked && selections.some(s => selectionId(s) === selectionId(picked));
         if (!alreadySelected) selections = picked ? [picked] : [];
@@ -427,8 +533,12 @@ function paintCell(c, r, isDown, additiveSelect = false) {
   }
   checkResult = null;
   if (brush.mode === 'tile') {
+    if (hiddenLayers.has(activeLayer)) { if (isDown) setStatus('「' + layerName(activeLayer) + '」被隱藏中，請先打開眼睛才能貼圖', '#ffd24a'); return; }
     const t = tileById(brush.tile); if (!t) return;
     if (isBig(t)) { if (isDown) placeStamp(c, r, t); return; }   // 大圖：只在按下時放一張
+    if (brushFlip.fx || brushFlip.fy) { placeStamp(c, r, t); return; }   // 翻轉小圖：以 1×1 stamp 保存方向
+    // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
+    m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
   } else if (brush.mode === 'solid') {
     if (effEntrances(m).has(key) || effCamp(m).has(key)) { setStatus('入口／營地上不能設不可穿透', '#ff8f8f'); return; }
@@ -446,7 +556,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     // 由上往下擦：大圖 → 最上面有圖的那層
     const si = stampIndexAt(m, c, r);
     if (si >= 0) m.stamps.splice(si, 1);
-    else for (let i = LAYERS.length - 1; i >= 0; i--) { const id = LAYERS[i].id; if (m.layers[id][key]) { delete m.layers[id][key]; break; } }
+    else for (let i = LAYERS.length - 1; i >= 0; i--) { const id = LAYERS[i].id; if (!hiddenLayers.has(id) && m.layers[id][key]) { delete m.layers[id][key]; break; } }
   }
   saveMaps(); draw();
 }
@@ -479,8 +589,9 @@ function beginSelectionDrag(c, r) {
 function dragSelectionTo(c, r) {
   if (!selectionDrag) return;
   const d = selectionDrag, m = curMap();
-  const dc = Math.max(-d.minC, Math.min(COLS - d.maxC, c - d.startC));
-  const dr = Math.max(-d.minR, Math.min(ROWS - d.maxR, r - d.startR));
+  // 允許拖出地圖邊緣（純外觀），只要選取範圍還有一格留在地圖內
+  const dc = Math.max(1 - d.maxC, Math.min(COLS - 1 - d.minC, c - d.startC));
+  const dr = Math.max(1 - d.maxR, Math.min(ROWS - 1 - d.minR, r - d.startR));
   if (dc === d.dc && dr === d.dr) return;
   d.dc = dc; d.dr = dr; d.moved = dc !== 0 || dr !== 0;
   m.layers = clone(d.layers); m.stamps = clone(d.stamps);
@@ -552,13 +663,43 @@ function updateLayerUI() {
 
 // ================= 調色盤 =================
 const paletteEl = document.getElementById('palette');
+const PALETTE_CATEGORIES = [
+  { id: 'all', name: '全部' },
+  { id: 'map', name: '地圖建材' },
+  { id: 'decor', name: '裝飾物' },
+  { id: 'obstacle', name: '障礙物' },
+  { id: 'other', name: '其他' },
+];
+let activePaletteCategory = 'all';
+function tileCategory(t) {
+  const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
+  if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
+  if (file.includes('/item-decorate/')) return 'decor';
+  if (file.includes('/item-obstacle/')) return 'obstacle';
+  return 'other';
+}
 function renderPalette() {
   paletteEl.innerHTML = '';
-  palette().forEach(t => {
+  const allTiles = palette();
+  const tabs = document.createElement('div'); tabs.className = 'palette-tabs';
+  PALETTE_CATEGORIES.forEach(category => {
+    const count = category.id === 'all' ? allTiles.length : allTiles.filter(t => tileCategory(t) === category.id).length;
+    const tab = document.createElement('button');
+    tab.type = 'button'; tab.className = 'palette-tab' + (activePaletteCategory === category.id ? ' sel' : '');
+    tab.innerHTML = category.name + '<span class="count">' + count + '</span>';
+    tab.addEventListener('click', () => { activePaletteCategory = category.id; renderPalette(); });
+    tabs.appendChild(tab);
+  });
+  paletteEl.appendChild(tabs);
+
+  const grid = document.createElement('div'); grid.className = 'palette-grid';
+  const visibleTiles = activePaletteCategory === 'all' ? allTiles : allTiles.filter(t => tileCategory(t) === activePaletteCategory);
+  visibleTiles.forEach(t => {
     const b = document.createElement('div'); b.className = 'tile' + (brush.mode === 'tile' && brush.tile === t.id ? ' sel' : '');
     let thumb;
     const rec = t.file ? ensureTileImg(t) : null;
-    if (t.file && rec && rec.loaded) thumb = '<img class="thumb" src="' + t.file + '">';
+    if (t.file) b.classList.add('has-image');
+    if (t.file && rec && rec.loaded) thumb = '<img class="thumb" src="' + t.file + '" alt="完整圖片預覽">';
     else thumb = '<span class="thumb swatch ' + t.role + '"></span>';
     const sizeTxt = isBig(t) ? (' ' + tileW(t) + '×' + tileH(t)) : '';
     b.innerHTML = thumb + '<span class="tname">' + t.name + '</span><small>' + (t.builtin ? roleLabel(t.role) : '圖片') + sizeTxt + '</small>';
@@ -568,10 +709,51 @@ function renderPalette() {
       del.addEventListener('click', ev => { ev.stopPropagation(); deleteTile(t.id); });
       b.appendChild(del);
     }
-    paletteEl.appendChild(b);
+    grid.appendChild(b);
   });
+  if (!visibleTiles.length) grid.innerHTML = '<div class="palette-empty">這個分類目前沒有素材</div>';
+  paletteEl.appendChild(grid);
+  updateFlatUI();
 }
-function selectTile(id) { brush = { mode: 'tile', tile: id }; clearSelection(); updateToolUI(); renderPalette(); }
+// ---- 素材屬性列：選到自訂磚塊時出現，可改「寬×高格數」與「平貼地面」----
+const tilePropsRow = document.getElementById('tilePropsRow');
+const tileFlatCb = document.getElementById('tileFlat');
+const tileWInput = document.getElementById('tileW');
+const tileHInput = document.getElementById('tileH');
+const brushTile = () => (brush.mode === 'tile' ? tileById(brush.tile) : null);
+function updateFlatUI() {   // 名稱沿用；現在也負責寬高欄位
+  const t = brushTile();
+  if (t && !t.builtin) {
+    tileFlatCb.checked = !!t.flat;
+    tileWInput.value = tileW(t); tileHInput.value = tileH(t);
+    tilePropsRow.classList.remove('hidden');
+  } else tilePropsRow.classList.add('hidden');
+}
+if (tileFlatCb) tileFlatCb.addEventListener('change', () => {
+  const t = brushTile(); if (!t || t.builtin) return;
+  if (tileFlatCb.checked) t.flat = true; else delete t.flat;
+  saveTiles(); draw();
+  setStatus('「' + t.name + '」' + (t.flat ? '已設為平貼地面（不遮角色）' : '已設為立體物（會遮角色）'), '#8fd3ff');
+});
+function setTileSize() {
+  const t = brushTile(); if (!t || t.builtin) return;
+  const w = Math.max(1, Math.min(20, parseInt(tileWInput.value, 10) || tileW(t)));
+  const h = Math.max(1, Math.min(20, parseInt(tileHInput.value, 10) || tileH(t)));
+  tileWInput.value = w; tileHInput.value = h;
+  if (t.w === w && t.h === h) return;
+  t.w = w; t.h = h;
+  saveTiles(); renderPalette(); draw();
+  setStatus('「' + t.name + '」尺寸改為 ' + w + '×' + h + ' 格', '#7ee0c0');
+}
+if (tileWInput) tileWInput.addEventListener('change', setTileSize);
+if (tileHInput) tileHInput.addEventListener('change', setTileSize);
+function selectTile(id) {
+  const selectedTile = tileById(id);
+  if (activePaletteCategory !== 'all' && selectedTile && tileCategory(selectedTile) !== activePaletteCategory) {
+    activePaletteCategory = tileCategory(selectedTile);
+  }
+  brush = { mode: 'tile', tile: id }; clearSelection(); updateToolUI(); renderPalette();
+}
 function deleteTile(id) {
   const t = tileById(id); if (!t || t.builtin) return;
   if (!confirm('刪除磚塊「' + t.name + '」？（已經貼到地圖上的會一起消失）')) return;
@@ -669,7 +851,7 @@ document.getElementById('selDown').addEventListener('click', () => moveSelBy(-1)
 document.getElementById('selDelete').addEventListener('click', deleteSelection);
 document.getElementById('selClear').addEventListener('click', clearSelection);
 
-// ================= 翻轉（只作用於大圖）=================
+// ================= 翻轉（大小圖皆可）=================
 function updateFlipUI() {
   const bx = document.getElementById('flipX'), by = document.getElementById('flipY');
   if (bx) bx.classList.toggle('on', brushFlip.fx);
@@ -678,22 +860,42 @@ function updateFlipUI() {
 function toggleBrushFlip(axis) {
   if (axis === 'x') brushFlip.fx = !brushFlip.fx; else brushFlip.fy = !brushFlip.fy;
   updateFlipUI(); draw();
-  setStatus('筆刷' + (axis === 'x' ? '左右' : '上下') + '翻：' + ((axis === 'x' ? brushFlip.fx : brushFlip.fy) ? '開' : '關') + '（只作用於大圖）', '#b39ddb');
+  setStatus('筆刷' + (axis === 'x' ? '左右' : '上下') + '翻：' + ((axis === 'x' ? brushFlip.fx : brushFlip.fy) ? '開' : '關') + '（大小圖皆可）', '#b39ddb');
 }
 function flipSelection(axis) {
-  const stampSels = selections.filter(s => s.type === 'stamp');
-  if (!stampSels.length) { setStatus('只有大圖可以翻轉', '#ffd24a'); return; }
+  if (!selections.length) { setStatus('請先選取要翻轉的圖片', '#ffd24a'); return; }
   pushUndo(); const m = curMap();
-  stampSels.forEach(sel => { const s = m.stamps[sel.index]; if (!s) return; if (axis === 'x') s.fx = !s.fx; else s.fy = !s.fy; });
-  saveMaps(); draw();
-  setStatus('已' + (axis === 'x' ? '左右' : '上下') + '翻轉 ' + stampSels.length + ' 個大圖', '#7ee0c0');
+  selections = selections.map(sel => {
+    if (sel.type === 'stamp') {
+      const s = m.stamps[sel.index];
+      if (s) { if (axis === 'x') s.fx = !s.fx; else s.fy = !s.fy; }
+      return sel;
+    }
+    const id = m.layers[sel.layer] && m.layers[sel.layer][sel.key];
+    if (!id) return sel;
+    const [c, r] = sel.key.split(',').map(Number);
+    delete m.layers[sel.layer][sel.key];
+    const stamp = { id, c, r, layer: sel.layer };
+    if (axis === 'x') stamp.fx = true; else stamp.fy = true;
+    m.stamps.push(stamp);
+    return { type: 'stamp', index: m.stamps.length - 1 };
+  });
+  selection = selections[selections.length - 1];
+  saveMaps(); draw(); refreshSelPanel();
+  setStatus('已' + (axis === 'x' ? '左右' : '上下') + '翻轉 ' + selections.length + ' 個圖片', '#7ee0c0');
 }
-// F / V 快捷鍵：有選到大圖就翻選取，否則翻筆刷
-function flipAction(axis) { if (selections.some(s => s.type === 'stamp')) flipSelection(axis); else toggleBrushFlip(axis); }
+// F / V 快捷鍵：有選取物件就翻選取，否則翻筆刷
+function flipAction(axis) { if (selections.length) flipSelection(axis); else toggleBrushFlip(axis); }
 document.getElementById('flipX').addEventListener('click', () => toggleBrushFlip('x'));
 document.getElementById('flipY').addEventListener('click', () => toggleBrushFlip('y'));
 document.getElementById('selFlipX').addEventListener('click', () => flipSelection('x'));
 document.getElementById('selFlipY').addEventListener('click', () => flipSelection('y'));
+document.getElementById('selReset').addEventListener('click', () => {
+  const m = curMap(); let n = 0;
+  selections.filter(s => s.type === 'stamp').forEach(sel => { const s = m.stamps[sel.index]; if (s && (s.ox || s.oy)) { delete s.ox; delete s.oy; n++; } });
+  if (n) { saveMaps(); draw(); setStatus('已把 ' + n + ' 個物件貼回格線', '#7ee0c0'); }
+  else setStatus('選取的物件沒有微調位置', '#9aa4b2');
+});
 
 // 加入磚塊（純圖片，依圖片大小自動猜佔幾格）
 const tileFile = document.getElementById('tileFile');
@@ -701,21 +903,33 @@ document.getElementById('undoBtn').addEventListener('click', undo);
 document.getElementById('addTile').addEventListener('click', () => tileFile.click());
 tileFile.addEventListener('change', () => {
   const f = tileFile.files[0]; if (!f) return;
-  const folder = (prompt('這張圖放在哪個資料夾？', 'images/background') || 'images/background').trim().replace(/\/+$/, '');
-  const path = folder + '/' + f.name, nameDefault = f.name.replace(/\.[^.]+$/, '');
-  const url = URL.createObjectURL(f), probe = new Image();
-  probe.onload = () => { const wS = Math.max(1, Math.round(probe.naturalWidth / CELL)), hS = Math.max(1, Math.round(probe.naturalHeight / CELL)); URL.revokeObjectURL(url); finishAddTile(path, nameDefault, wS, hS); };
-  probe.onerror = () => { URL.revokeObjectURL(url); finishAddTile(path, nameDefault, 1, 1); };
-  probe.src = url;
+  const nameDefault = f.name.replace(/\.[^.]+$/, '');
+  const reader = new FileReader();
+  reader.onload = () => {
+    const dataUrl = reader.result, probe = new Image();
+    probe.onload = async () => {
+      const wS = Math.max(1, Math.round(probe.naturalWidth / CELL));
+      const hS = Math.max(1, Math.round(probe.naturalHeight / CELL));
+      const projectPath = await findProjectImagePath(f.name);
+      finishAddTile(projectPath || dataUrl, nameDefault, wS, hS);
+    };
+    probe.onerror = () => setStatus('圖片讀取失敗，請確認檔案格式是否正確', '#ff8f8f');
+    probe.src = dataUrl;
+  };
+  reader.onerror = () => setStatus('圖片檔案讀取失敗，請重新選取', '#ff8f8f');
+  reader.readAsDataURL(f);
   tileFile.value = '';
 });
 function finishAddTile(path, nameDefault, wS, hS) {
   const name = (prompt('磚塊名稱？', nameDefault) || nameDefault).trim();
   const w = Math.max(1, parseInt(prompt('這塊圖佔「幾格寬」？（依圖片大小建議）', wS), 10) || wS);
   const h = Math.max(1, parseInt(prompt('這塊圖佔「幾格高」？', hS), 10) || hS);
+  const flat = confirm('這張圖是「平貼地面」嗎？\n\n【確定】＝平貼地面（地板、裂痕、紅線…）：永遠畫在角色下方，不會遮住角色。\n【取消】＝立體物（牆、柱子、家具…）：角色走到它後面時會被擋住。');
   pushUndo();
   const id = 'tile_' + Date.now().toString(36);
-  customTiles.push({ id, name, role: 'floor', file: path, w, h });
+  const tile = { id, name, role: 'floor', file: path, w, h };
+  if (flat) tile.flat = true;
+  customTiles.push(tile);
   saveTiles(); ensureTileImg(customTiles[customTiles.length - 1]);
   selectTile(id);
   setStatus('已加入磚塊「' + name + '」（' + w + '×' + h + ' 格，圖片： ' + path + '）', '#7ee0c0');
@@ -724,6 +938,7 @@ function finishAddTile(path, nameDefault, wS, hS) {
 // 全部填滿（只適用 1×1 小圖，填到目前圖層）
 document.getElementById('fillAll').addEventListener('click', () => {
   if (brush.mode !== 'tile') { setStatus('請先在上面選一塊磚塊圖', '#ff8f8f'); return; }
+  if (hiddenLayers.has(activeLayer)) { setStatus('「' + layerName(activeLayer) + '」被隱藏中，請先打開眼睛才能填滿', '#ffd24a'); return; }
   const t = tileById(brush.tile); if (!t) return;
   if (isBig(t)) { setStatus('「全部填滿」只能用 1×1 的小圖', '#ff8f8f'); return; }
   pushUndo();

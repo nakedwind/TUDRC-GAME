@@ -81,6 +81,87 @@ window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
 // ---- 滑鼠所在格（建築放置預覽用）----
 let hoverCell = null;
+function spawnGroundRipple(clientX, clientY) {
+  const wrap = document.getElementById('wrap'), rect = wrap.getBoundingClientRect();
+  const ripple = document.createElement('span'); ripple.className = 'ground-ripple';
+  ripple.style.left = (clientX - rect.left) + 'px'; ripple.style.top = (clientY - rect.top) + 'px';
+  ripple.addEventListener('animationend', () => ripple.remove(), { once: true });
+  wrap.appendChild(ripple);
+}
+
+// ---- 地面情境選單：指定格子建築／召喚哨兵 ----
+const groundMenu = document.getElementById('groundMenu');
+let groundTarget = null;
+function closeGroundMenu() {
+  groundTarget = null;
+  groundMenu.classList.add('hidden');
+}
+function positionGroundMenu(clientX, clientY) {
+  const wrapRect = document.getElementById('wrap').getBoundingClientRect();
+  const menuW = 178, menuH = 260;
+  const left = Math.max(8, Math.min(clientX - wrapRect.left + 10, wrapRect.width - menuW - 8));
+  const top = Math.max(8, Math.min(clientY - wrapRect.top + 10, wrapRect.height - menuH - 8));
+  groundMenu.style.left = Math.round(left) + 'px';
+  groundMenu.style.top = Math.round(top) + 'px';
+}
+function addGroundCloseButton() {
+  const close = document.createElement('button');
+  close.type = 'button'; close.className = 'gm-close'; close.textContent = '×'; close.title = '關閉';
+  close.setAttribute('aria-label', '關閉選單');
+  close.addEventListener('click', () => { sfx('switch'); closeGroundMenu(); });
+  groundMenu.appendChild(close);
+}
+function assignSentryToGround(t) {
+  if (!groundTarget) return;
+  const { c, r } = groundTarget, [x, y] = center(c, r);
+  if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '正在暴走，無法指派', x, y, '#ff8f8f'); return; }
+  if (!isLit(x, y)) { sfx('error'); flash('巡邏點必須在亮處', x, y, '#ffd24a'); return; }
+  if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
+  t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0;
+  sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
+  closeGroundMenu();
+}
+function renderGroundActions() {
+  if (!groundTarget) return;
+  const { c, r } = groundTarget;
+  groundMenu.innerHTML = '';
+  addGroundCloseButton();
+  const build = document.createElement('button');
+  build.textContent = '🏗️ 建築';
+  build.addEventListener('click', () => {
+    buildTargetCell = [c, r]; G.selType = null;
+    renderBuildBar(); buildBar.classList.remove('hidden'); updateBuildToggle();
+    sfx('menu'); closeGroundMenu();
+  });
+  const patrol = document.createElement('button');
+  patrol.textContent = '📣 召喚哨兵';
+  patrol.addEventListener('click', renderGroundSentryChoices);
+  groundMenu.append(build, patrol);
+}
+function renderGroundSentryChoices() {
+  if (!groundTarget) return;
+  groundMenu.innerHTML = '<div class="gm-title">選擇要召喚的哨兵</div>';
+  addGroundCloseButton();
+  for (const t of G.towers) {
+    const b = document.createElement('button');
+    b.innerHTML = '🎯 ' + TYPES[t.type].name + '<small>' + (t.berserk ? '暴走中，暫時無法指派' : '汙染 ' + Math.round(t.taint)) + '</small>';
+    b.disabled = !!t.berserk;
+    b.addEventListener('click', () => assignSentryToGround(t));
+    groundMenu.appendChild(b);
+  }
+  const back = document.createElement('button'); back.textContent = '← 返回';
+  back.addEventListener('click', renderGroundActions); groundMenu.appendChild(back);
+}
+function openGroundMenu(c, r, clientX, clientY) {
+  closeBuildMenu();
+  groundTarget = { c, r };
+  closeSentryMenu();
+  renderGroundActions(); positionGroundMenu(clientX, clientY);
+  groundMenu.classList.remove('hidden');
+  // 彈窗已開著時換位置，也強制重新播放展開動畫。
+  groundMenu.style.animation = 'none'; void groundMenu.offsetWidth; groundMenu.style.animation = '';
+  sfx('menu');
+}
 
 // ---- 鏡頭（相框位置）：跟著玩家，碰到地圖邊緣就停 ----
 let cam = { x: 0, y: 0 };
@@ -196,6 +277,8 @@ cv.addEventListener('click', e => {
   if (!G.running) return;
   // 「指派位置巡邏」模式：這一下點擊＝指定目的地
   if (assigning) {
+    spawnGroundRipple(e.clientX, e.clientY);
+    closeGroundMenu();
     const t = assigning;
     if (!isLit(x, y)) { sfx('error'); flash('要指派在亮處', x, y, '#ffd24a'); return; }
     if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
@@ -207,12 +290,14 @@ cv.addEventListener('click', e => {
   // 點到哨兵 → 開選單
   // 有精靈圖的哨兵比色塊高，判定圈往上移到身體中間、放大一點
   const hit = G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
-  if (hit) { openSentryMenu(hit); return; }
+  if (hit) { closeGroundMenu(); openSentryMenu(hit); return; }
   closeSentryMenu();
   // 點到障礙物：不動作
-  if (buildAt(c, r)) return;
+  if (buildAt(c, r) || isWall(c, r) || isEntrance(c, r)) { closeGroundMenu(); return; }
+  spawnGroundRipple(e.clientX, e.clientY);
   // 放置（合不合法由 placeObstacle 檢查「擋路格」決定，跟預覽框一致）
-  if (!G.selType) return;
+  if (!G.selType) { openGroundMenu(c, r, e.clientX, e.clientY); return; }
+  closeGroundMenu();
   if (G.selType.startsWith('build:')) {
     const ob = buildableById(G.selType.slice(6));   // 去掉 'build:' 前綴，跨障礙物/裝飾查找
     if (ob) placeObstacle(ob, c, r);
@@ -228,7 +313,9 @@ cv.addEventListener('mousemove', e => {
   const [c, r] = cellAt(x, y);
   hoverCell = inGrid(c, r) ? [c, r] : null;
 });
-cv.addEventListener('mouseleave', () => { hoverCell = null; });
+cv.addEventListener('mousedown', () => cv.classList.add('cursor-pressed'));
+window.addEventListener('mouseup', () => cv.classList.remove('cursor-pressed'));
+cv.addEventListener('mouseleave', () => { hoverCell = null; cv.classList.remove('cursor-pressed'); });
 
 // ---- 怪物尋路：走向流場更低的相鄰格 ----
 function commitNext(e) {
@@ -520,8 +607,17 @@ function draw() {
       for (const [dc, dr] of variantSolidCells(v)) ctx.fillRect(x + dc * CELL, y + dr * CELL, CELL, CELL);
     }
   }
+  // 情境選單或指定建築的目標格
+  const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
   ctx.restore();   // 世界座標畫完，回到螢幕座標（下面的提示固定在畫面上）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞
+  // 目標框畫在黑幕上方，黑暗區域也能清楚看到所選格子。
+  if (actionCell) {
+    const [ac, ar] = actionCell, ax = OX + ac * CELL - cam.x, ay = OY + ar * CELL - cam.y;
+    ctx.fillStyle = 'rgba(143,211,255,.13)'; ctx.fillRect(ax + 1, ay + 1, CELL - 2, CELL - 2);
+    ctx.strokeStyle = '#9fddff'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+    ctx.strokeRect(ax + 2, ay + 2, CELL - 4, CELL - 4); ctx.setLineDash([]);
+  }
   // 指派巡邏位置中：畫面上方顯示提示
   if (assigning) {
     ctx.fillStyle = 'rgba(20,25,35,.75)'; ctx.fillRect(0, 0, cv.width, 44);
@@ -555,10 +651,24 @@ function showStart() {
 function winOverlay() { showOverlay('✅ Y 區已控制', '你守住了營地、擋下所有波次！', '再玩一次'); }
 function loseOverlay() { showOverlay('💀 營地失守', '怪物攻進了營地。<br>試試多築牆卡位、提早疏導快暴走的哨兵。', '再挑戰'); }
 
-function begin() { sfx('button'); closeSentryMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function begin() { sfx('button'); closeSentryMenu(); closeGroundMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; sfx('win'); winOverlay(); }
 function lose() { G.over = true; G.running = false; G.phase = 'lost'; sfx('lose'); loseOverlay(); }
 ovBtn.addEventListener('click', begin);
+
+// ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
+const mapPick = document.getElementById('mapPick');
+const mapPickRow = document.getElementById('mapPickRow');
+if (mapPick && mapPickRow && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {
+  MAPS_DEFAULT.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m.name || ('地圖 ' + (i + 1)); mapPick.appendChild(o); });
+  mapPick.value = MAP_INDEX;
+  mapPickRow.classList.remove('hidden');
+  mapPick.addEventListener('change', () => {
+    switchMap(Number(mapPick.value));   // 換地圖、重算尺寸與路徑
+    newGame();                          // 重新佈署哨兵、玩家、鏡頭
+    showStart(); draw();                // 回到開始畫面
+  });
+}
 
 // ---- 啟動遊戲 ----
 newGame(); renderBuildBar(); showStart();

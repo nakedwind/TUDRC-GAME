@@ -8,30 +8,51 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
+  <header id="gameHeader">
+    <div>
+      <div class="eyebrow">DISASTER RESPONSE CENTER</div>
+      <h1>台北地下災害應變中心</h1>
+    </div>
+    <div class="header-note">Y 區防線原型 · 嚮導實地指揮</div>
+  </header>
+
   <div id="wrap">
     <canvas id="cv" width="1280" height="720"></canvas>
-    <!-- HUD 疊在遊戲畫面左上角 -->
+    <div id="screenShade"></div>
+
+    <div id="missionText">目前任務：守住營地</div>
+
+    <!-- HUD 疊在遊戲畫面右上角 -->
     <div id="hud">
-      <span>資源 <b id="money">0</b></span>
-      <span class="hp">營地HP <b id="lives">0</b></span>
-      <span class="guide">嚮導能量 <b id="guide">0</b></span>
-      <span>波次 <b id="wave">0</b> / <b id="wavemax">0</b></span>
+      <span class="stat money"><small>資源</small><b id="money">0</b></span>
+      <span class="stat hp"><small>營地 HP</small><b id="lives">0</b></span>
+      <span class="stat guide"><small>嚮導能量</small><b id="guide">0</b></span>
+      <span class="stat wave"><small>波次</small><b><span id="wave">0</span>/<span id="wavemax">0</span></b></span>
     </div>
+
     <div id="overlay">
-      <h2 id="ov-title">塔防原型</h2>
-      <p id="ov-text"></p>
+      <div class="overlay-card">
+        <div class="panel-kicker">緊急簡報</div>
+        <h2 id="ov-title">塔防原型</h2>
+        <p id="ov-text"></p>
+        <div id="mapPickRow" class="hidden" style="margin-top:10px;font-size:15px;color:#cfd8e3">
+          🗺️ 選擇地圖：<select id="mapPick" style="font-size:15px;padding:6px 10px;border-radius:6px;background:#232a35;color:#e6ebf2;border:1px solid #4f8fbf"></select>
+        </div>
+      </div>
       <button id="ov-btn">開始</button>
     </div>
     <!-- 哨兵選單（點哨兵時彈出，內容由 game.js 產生） -->
     <div id="sentryMenu" class="hidden"></div>
+    <!-- 地面情境選單（點空地時彈出） -->
+    <div id="groundMenu" class="hidden"></div>
     <!-- 建築按鈕與選單：浮在遊戲畫面左下角 -->
     <button class="tbtn" id="buildToggle">🧱 建築</button>
     <div id="buildbar" class="hidden"></div>
   </div>
 
-  <div id="editors" style="text-align:center;margin-top:10px;display:flex;gap:12px;justify-content:center;flex-wrap:wrap">
-    <a href="地圖編輯器.html" style="display:inline-block;padding:9px 16px;border-radius:8px;background:#242c37;border:1px solid #4f8fbf;color:#e6ebf2;text-decoration:none;font-size:14px">🗺️ 地圖編輯器</a>
-    <a href="物件編輯器.html" style="display:inline-block;padding:9px 16px;border-radius:8px;background:#242c37;border:1px solid #6a5acd;color:#e6ebf2;text-decoration:none;font-size:14px">🧱 物件編輯器</a>
+  <div id="editors">
+    <a href="地圖編輯器.html">🗺️ 地圖編輯器</a>
+    <a href="物件編輯器.html">🧱 物件編輯器</a>
   </div>
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->

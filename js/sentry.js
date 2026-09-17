@@ -137,7 +137,7 @@ function sentryMenuAct(act) {
   closeSentryMenu();
 }
 window.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { assigning = null; closeSentryMenu(); closeBuildMenu(); }
+  if (e.key === 'Escape') { assigning = null; closeSentryMenu(); closeGroundMenu(); closeBuildMenu(); }
 });
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
 function soothe(t) {

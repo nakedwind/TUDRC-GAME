@@ -8,7 +8,7 @@
 */
 
 // ---- 磚塊登錄（內建 + 編輯器匯出的自訂磚塊）----
-const MAP_LAYER_ORDER = ['floor', 'ground', 'object', 'overlay', 'top'];
+const MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'overlay', 'top'];
 const TILE_REGISTRY = {};
 function buildTileRegistry() {
   const builtin = [
@@ -36,9 +36,15 @@ function preloadMapTiles() { Object.values(TILE_REGISTRY).forEach(t => { if (t.f
 // ---- 當前地圖 ----
 let MAP = null, mapEntrances = [], mapBreakable = [];
 
+let MAP_INDEX = 0;   // 目前玩第幾張地圖（由開始畫面的地圖選單切換）
+function mapList() { return (typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length) ? MAPS_DEFAULT : []; }
 function pickMap() {
-  const list = (typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length) ? MAPS_DEFAULT : [];
-  return list[0] || null;   // 目前固定玩第一張；日後可加選單
+  const list = mapList();
+  return list[MAP_INDEX] || list[0] || null;
+}
+function switchMap(i) {                 // 切換到第 i 張並重新載入地圖
+  const list = mapList();
+  if (i >= 0 && i < list.length) { MAP_INDEX = i; initMap(); }
 }
 function initMap() {
   buildTileRegistry(); preloadMapTiles();
@@ -102,7 +108,7 @@ function drawMapTileImg(ctx, id, x, y) {
 }
 function drawMapStampImg(ctx, s) {
   const t = mapTileById(s.id); if (!t) return;
-  const x = OX + s.c * CELL, y = OY + s.r * CELL, w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
   const img = tileImage(t);
   if (img) {
     if (s.fx || s.fy) {
@@ -136,7 +142,8 @@ function hasImageAt(c, r) {
 //   剩下扁平的（多半是地板）留在地面、永遠在角色下面。
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => lid === 'object' || lid === 'overlay';
-const stampIsOcc = s => (mapTileH(mapTileById(s.id) || {}) >= OCC_MIN_H) || isOccLayer(s.layer || 'top');
+// flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !t.flat && (mapTileH(t) >= OCC_MIN_H || isOccLayer(s.layer || 'top')); };
 
 // 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
 function drawMapGround(ctx) {
