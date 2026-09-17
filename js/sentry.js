@@ -9,9 +9,35 @@ function spawnSentries() {
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
   const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r]);
   for (const type of Object.keys(TYPES)) {
+    const spec = TYPES[type];
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
-    G.towers.push({ kind: 'tower', type, x, y, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() });
+    G.towers.push({ kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() });
+  }
+}
+
+// ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
+function spawnWanderers() {
+  const candidates = [], seen = new Set();
+  const occupied = new Set(G.towers.map(t => cellAt(t.x, t.y).join(',')));
+  const addCell = (c, r) => {
+    const key = c + ',' + r;
+    if (seen.has(key) || occupied.has(key) || !inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[key]) return;
+    seen.add(key); candidates.push([c, r]);
+  };
+
+  if (campCells.size) campCells.forEach(key => addCell(...key.split(',').map(Number)));
+  else for (let c = 0; c < COLS; c++) addCell(c, ROWS - 1);
+  for (let r = ROWS - 1; r >= 0; r--) for (let c = 0; c < COLS; c++) addCell(c, r);
+
+  for (const profile of WANDERERS) {
+    const cell = candidates.shift() || [Math.floor(COLS / 2), ROWS - 1];
+    const [x, y] = center(cell[0], cell[1]);
+    G.npcs.push({
+      kind: 'npc', id: profile.id, x, y, target: null,
+      waitT: 0.5 + Math.random() * 1.5, dir: 'front', moving: false, anim: 0,
+      blinkWait: 2 + Math.random() * 3, blinkTime: -1,
+    });
   }
 }
 
@@ -103,6 +129,30 @@ function updateSentry(t, dt) {
     t.target = null;
     if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('路被擋住了，就地巡邏', t.x, t.y - 24, '#ffd24a'); }
   }
+}
+
+function updateWanderer(npc, dt) {
+  rescueStuck(npc, sentryBlocked);
+  if (npc.waitT > 0) { npc.waitT -= dt; return; }
+  if (!npc.target) {
+    npc.target = sampleWanderTarget(npc.x, npc.y, 180);
+    if (!npc.target) npc.waitT = 0.8;
+    return;
+  }
+
+  const dx = npc.target.x - npc.x, dy = npc.target.y - npc.y, distance = Math.hypot(dx, dy);
+  const step = 65 * dt;
+  if (distance <= step) {
+    npc.x = npc.target.x; npc.y = npc.target.y; npc.target = null;
+    npc.waitT = 0.8 + Math.random() * 2;
+    return;
+  }
+
+  const nx = npc.x + dx / distance * step, ny = npc.y + dy / distance * step;
+  const blockedX = sentryBlocked(nx, npc.y), blockedY = sentryBlocked(npc.x, ny);
+  if (!blockedX) npc.x = nx;
+  if (!blockedY) npc.y = ny;
+  if (blockedX && blockedY) npc.target = null;
 }
 
 // ---- 哨兵選單（點哨兵彈出：自由走動／原地巡邏／指派位置／疏導）----

@@ -42,6 +42,8 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
 const playerSprites = loadCharacterSprites(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`);
 const sentrySprites = {};   // 哨兵類型 → 精靈圖（data/balance.js 的 TYPES 有填 sprite 才有）
 for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = loadCharacterSprites(TYPES[type].sprite);
+const wandererSprites = {};
+for (const profile of WANDERERS) wandererSprites[profile.id] = loadCharacterSprites(profile.sprite);
 
 // 站著不動時的眨眼計時（玩家與哨兵共用）
 function updateBlink(who, dt) {
@@ -180,7 +182,7 @@ function newGame() {
   G = {
     phase: 'ready', money: START.money, lives: START.lives,
     guide: START.guide, guideMax: START.guideMax, guideRegen: START.guideRegen,
-    grid: {}, towers: [], obstacles: [], enemies: [], effects: [],
+    grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [],
     selType: null, waveIndex: 0, waves: buildWaves(),
     spawnQueue: [], spawnTimer: 0, curGap: 0.9, betweenWaves: 0,
     running: false, over: false, won: false,
@@ -188,6 +190,7 @@ function newGame() {
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
+  spawnWanderers();     // 場景 NPC 只會在亮處自由走動
   const [px, py] = playerSpawnPos();
   G.player = { x: px, y: py, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
   updateCamera();
@@ -392,6 +395,11 @@ function update(dt) {
     updateSentry(t, dt);
     animateSentry(t, t.x - ox, t.y - oy, dt);
   }
+  for (const npc of G.npcs) {
+    const ox = npc.x, oy = npc.y;
+    updateWanderer(npc, dt);
+    animateSentry(npc, npc.x - ox, npc.y - oy, dt);
+  }
   // 哨兵攻擊
   for (const t of G.towers) {
     const spec = TYPES[t.type];
@@ -482,9 +490,10 @@ function drawTower(t) {
   const spec = TYPES[t.type];
   const set = sentrySprites[t.type];
   const img = set && pickCharacterFrame(set, t);
-  let ty = t.y + 12, labelY = t.y - 20;   // 汙染條／「暴走」字的位置（色塊版）
+  let visualTop = t.y - 17;
   if (img && img.complete && img.naturalWidth) {
     const size = PLAYER.drawSize;
+    visualTop = t.y - size + 18;
     const shX = t.berserk ? (Math.random() * 2 - 1) * 1.5 : 0;   // 暴走：微微發抖
     if (t.berserk) {   // 暴走：腳下紅光
       ctx.fillStyle = 'rgba(255,60,60,0.45)';
@@ -493,16 +502,25 @@ function drawTower(t) {
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
     ctx.imageSmoothingEnabled = true;
-    ty = t.y + 20; labelY = t.y - size + 14;
   } else {
     ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
-    ctx.fillStyle = '#0e1116'; ctx.font = 'bold 9px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText(spec.name, t.x, t.y + 3);
   }
-  const w = 34, tx = t.x - 17;
-  ctx.fillStyle = '#000'; ctx.fillRect(tx, ty, w, 4);
-  ctx.fillStyle = t.taint > 75 ? '#ff4d4d' : (t.taint > 45 ? '#ffb84d' : '#7ee0c0'); ctx.fillRect(tx, ty, w * t.taint / 100, 4);
-  if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('暴走', t.x, labelY); }
+
+  // NPC 頭頂資訊：名字在上，HP 條在下。
+  const nameY = visualTop - 11;
+  ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, t.x, nameY);
+  ctx.fillStyle = t.berserk ? '#ff7777' : '#fff'; ctx.fillText(spec.name, t.x, nameY);
+
+  const maxhp = t.maxhp || spec.hp || 100;
+  const hp = Math.max(0, Math.min(maxhp, t.hp ?? maxhp));
+  const barW = 42, barH = 3, barX = t.x - barW / 2, barY = visualTop - 7;
+  ctx.fillStyle = 'rgba(0,0,0,.85)'; roundRect(barX - 1, barY - 1, barW + 2, barH + 2, 2); ctx.fill();
+  if (hp > 0) {
+    ctx.fillStyle = hp / maxhp > 0.5 ? '#57d879' : (hp / maxhp > 0.25 ? '#f1c84b' : '#ef5b5b');
+    roundRect(barX, barY, barW * hp / maxhp, barH, 1); ctx.fill();
+  }
+  if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('暴走', t.x, nameY - 14); }
 }
 function drawEnemy(e) {
   ctx.fillStyle = '#c25bce'; ctx.beginPath(); ctx.arc(e.x, e.y, 13, 0, Math.PI * 2); ctx.fill();
@@ -510,6 +528,16 @@ function drawEnemy(e) {
   ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#000'; ctx.fillRect(e.x - 14, e.y - 20, 28, 3);
   ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
+}
+function drawWanderer(npc) {
+  const set = wandererSprites[npc.id];
+  const img = set && pickCharacterFrame(set, npc);
+  const size = PLAYER.drawSize;
+  if (img && img.complete && img.naturalWidth) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(img, npc.x - size / 2, npc.y - size + 18, size, size);
+    ctx.imageSmoothingEnabled = true;
+  }
 }
 function drawPlayer(p) {
   const img = pickCharacterFrame(playerSprites, p);
@@ -557,6 +585,7 @@ function draw() {
   collectMapOccluders(ctx, sortables);
   for (const o of G.obstacles) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });
   for (const t of G.towers) sortables.push({ y: t.y + 17, draw: () => drawTower(t) });
+  for (const npc of G.npcs) sortables.push({ y: npc.y + 17, draw: () => drawWanderer(npc) });
   for (const e of G.enemies) if (isLit(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到
   if (G.player) sortables.push({ y: G.player.y + 16, draw: () => drawPlayer(G.player) });
   sortables.sort((a, b) => a.y - b.y);
