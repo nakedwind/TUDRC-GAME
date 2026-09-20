@@ -8,6 +8,11 @@
 const CELL = 40;                      // 一格 40 像素
 let COLS = 32, ROWS = 18;             // 地圖格數（預設剛好一個畫面；地圖檔可覆蓋）
 const VIEW_W = 1280, VIEW_H = 720;    // 遊戲畫面（相框）大小
+// 畫面縮放：地圖比相框小時自動放大填滿（等比例、不裁切），由 maploader 依地圖大小計算。
+// viewW()/viewH()＝相框換算成「世界座標」的大小，鏡頭與黑幕都用它。
+let VIEW_SCALE = 1;
+const viewW = () => VIEW_W / VIEW_SCALE;
+const viewH = () => VIEW_H / VIEW_SCALE;
 const OX = 0, OY = 0;                 // 地圖世界座標的原點
 const SPAWN_ROW = 0;                  // 預設怪物入口＝最上排
 

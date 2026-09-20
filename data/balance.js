@@ -33,11 +33,29 @@ const TYPES = {
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。
 const WANDERERS = [
-  { id: 'chris',  sprite: 'chris_B' },
-  { id: 'claire', sprite: 'claire_A' },
-  { id: 'luther', sprite: 'luther_B' },
-  { id: 'mumu',   sprite: 'mumu_A' },
+  { id: 'chris',  name: '克莉思', sprite: 'chris_B' },
+  { id: 'claire', name: '克萊兒', sprite: 'claire_A' },
+  { id: 'luther', name: '路德',   sprite: 'luther_B' },
+  { id: 'mumu',   name: '穆穆',   sprite: 'mumu_A' },
+  { id: 'eldrin', name: '艾德林', sprite: 'eldrin_B' },
+  { id: 'noah',   name: '諾亞',   sprite: 'noah_B' },
+  { id: 'avaren', name: '阿瓦倫', sprite: 'avaren_B' },
 ];
+
+// ---- 可以坐的東西（椅子）----
+// 玩家靠近時會冒出「坐」的提示，按 key 坐上去；坐著時會畫在椅子上面，按移動鍵起身。
+// tiles：磚塊 id → seatDy＝從圖片頂端往下幾像素當作屁股的位置（愈大愈低）；
+//        seatDx＝左右微調（正的往右）；dir＝坐著時角色的朝向。
+//        椅子若在編輯器左右翻轉過，seatDx 和 dir 都會自動鏡射，坐的相對位置不變。
+const SIT = {
+  key: 'e',        // 互動鍵
+  radius: 62,      // 離座位多近才會出現提示（像素）
+  tiles: {
+    tile_new_decor_chair_front:  { seatDy: 25, seatDx: -10, dir: 'front' },
+    tile_new_decor_chair_side:   { seatDy: 25, seatDx: -10, dir: 'left' },
+    tile_decor_foldingchair:     { seatDy: 24, dir: 'front' },
+  },
+};
 
 // ---- 障礙物（可被打破的牆）----
 const BARRIER = {

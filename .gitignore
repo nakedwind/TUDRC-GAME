@@ -5,3 +5,11 @@
 Thumbs.db
 .DS_Store
 desktop.ini
+
+# 產圖／暫存工作資料夾（本機保留即可，不上 GitHub）
+output/
+backups/
+tools/normalize_image_canvases.py
+
+# 瀏覽器下載的重複檔
+data/maps (*).js

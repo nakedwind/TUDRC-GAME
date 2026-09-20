@@ -142,7 +142,7 @@ function drawDarkness() {
   }
   for (const l of lightsCache) {
     if (!l.warm) continue;
-    const sx = (l.visualX ?? l.x) - cam.x, sy = (l.visualY ?? l.y) - cam.y;
+    const sx = (l.visualX ?? l.x), sy = (l.visualY ?? l.y);   // 世界座標（黑幕跟著畫面縮放一起畫）
     const beamLen = Math.min(l.r * 0.78, 220);
     const pulse = 0.95 + 0.05 * Math.sin(now * 1.8 + l.phase);
     // 外層低透明度負責柔邊，內層窄光束提供方向感。
@@ -163,7 +163,7 @@ function drawDarkness() {
     px[o + 3] = Math.round(maxA * (1 - b));
   }
   fieldCtx.putImageData(fieldImg, 0, 0);
-  const mx = OX - cam.x, my = OY - cam.y, mw = COLS * CELL, mh = ROWS * CELL;
+  const mx = OX, my = OY, mw = COLS * CELL, mh = ROWS * CELL;
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(fieldCv, mx, my, mw, mh);
 
@@ -186,8 +186,8 @@ function drawDarkness() {
   ctx.globalCompositeOperation = 'lighter';
   for (const l of lightsCache) {
     if (!l.warm) continue;
-    const sx = (l.visualX ?? l.x) - cam.x, sy = (l.visualY ?? l.y) - cam.y;
-    if (sx < -80 || sy < -80 || sx > VIEW_W + 80 || sy > VIEW_H + 80) continue;
+    const sx = (l.visualX ?? l.x), sy = (l.visualY ?? l.y);
+    if (sx < cam.x - 80 || sy < cam.y - 80 || sx > cam.x + viewW() + 80 || sy > cam.y + viewH() + 80) continue;
     const pulse = 1 + 0.045 * Math.sin(now * 1.8 + l.phase);
     const haloR = 42 * pulse;
     const halo = ctx.createRadialGradient(sx, sy, 0, sx, sy, haloR);
@@ -208,10 +208,11 @@ function drawDarkness() {
   }
   ctx.restore();
 
-  // 地圖範圍以外的畫面也保持黑暗
+  // 地圖範圍以外的畫面也保持黑暗（vx/vy/vw/vh＝目前看得到的世界範圍）
+  const vx = cam.x, vy = cam.y, vw = viewW(), vh = viewH();
   ctx.fillStyle = 'rgba(0,0,0,' + LIGHT.darkness + ')';
-  if (my > 0) ctx.fillRect(0, 0, VIEW_W, my);
-  if (my + mh < VIEW_H) ctx.fillRect(0, my + mh, VIEW_W, VIEW_H - my - mh);
-  if (mx > 0) ctx.fillRect(0, Math.max(0, my), mx, Math.min(VIEW_H, mh));
-  if (mx + mw < VIEW_W) ctx.fillRect(mx + mw, Math.max(0, my), VIEW_W - mx - mw, Math.min(VIEW_H, mh));
+  if (my > vy) ctx.fillRect(vx, vy, vw, my - vy);
+  if (my + mh < vy + vh) ctx.fillRect(vx, my + mh, vw, vy + vh - my - mh);
+  if (mx > vx) ctx.fillRect(vx, Math.max(vy, my), mx - vx, Math.min(vh, mh));
+  if (mx + mw < vx + vw) ctx.fillRect(mx + mw, Math.max(vy, my), vx + vw - mx - mw, Math.min(vh, mh));
 }

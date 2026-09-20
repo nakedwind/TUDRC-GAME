@@ -9,11 +9,8 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 
-// ---- 地板貼圖（後室地板）----
-const floorImg = new Image();
-let floorPattern = null;
-floorImg.onload = () => { floorPattern = ctx.createPattern(floorImg, 'repeat'); };
-floorImg.src = 'images/background/Back-room-floor.png';
+// ---- 地板 ----
+// 不再自動鋪滿地板貼圖：沒鋪素材的格子就是黑的（地板請在地圖編輯器裡鋪）
 
 // ---- 玩家角色（嚮導本人，可用 WASD／方向鍵操縱）----
 const PLAYER = { speed: 230, r: 14, drawSize: 64 };   // 移動速度、碰撞半徑、角色圖尺寸
@@ -75,9 +72,12 @@ function animateSentry(t, mx, my, dt) {
   t.anim = (t.anim || 0) + dt;
 }
 const keys = {};                         // 目前按住的按鍵
+const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'];
+const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase(); keys[k] = true;
   if (k.startsWith('arrow')) e.preventDefault();   // 方向鍵不要捲動網頁
+  if (k === SIT.key && G && G.running && !G.over) toggleSit();
 });
 window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
@@ -170,10 +170,11 @@ let cam = { x: 0, y: 0 };
 function updateCamera() {
   const p = G && G.player;
   const mapW = COLS * CELL, mapH = ROWS * CELL;
-  cam.x = p ? Math.max(0, Math.min(mapW - VIEW_W, p.x - VIEW_W / 2)) : 0;
-  cam.y = p ? Math.max(0, Math.min(mapH - VIEW_H, p.y - VIEW_H / 2)) : 0;
-  if (mapW <= VIEW_W) cam.x = (mapW - VIEW_W) / 2;   // 地圖比畫面小 → 置中
-  if (mapH <= VIEW_H) cam.y = (mapH - VIEW_H) / 2;
+  const vw = viewW(), vh = viewH();                  // 相框換算成世界座標的大小（含縮放）
+  cam.x = p ? Math.max(0, Math.min(mapW - vw, p.x - vw / 2)) : 0;
+  cam.y = p ? Math.max(0, Math.min(mapH - vh, p.y - vh / 2)) : 0;
+  if (mapW <= vw) cam.x = (mapW - vw) / 2;           // 地圖比畫面小 → 置中
+  if (mapH <= vh) cam.y = (mapH - vh) / 2;
 }
 
 // ---- 遊戲狀態 ----
@@ -197,6 +198,7 @@ function newGame() {
   updateHUD();
 }
 function buildWaves() {
+  if (MAP_SAFE) return [];        // 安全場景：完全不生怪
   const w = [], W = WAVE_CFG;
   for (let i = 0; i < W.total; i++) {
     w.push({
@@ -248,8 +250,67 @@ function rescueStuck(p, blockedFn) {
   return false;
 }
 
+// ---- 坐椅子 ----
+// 座位＝地圖上「可以坐的磚塊」，位置含編輯器的微調位移；
+// sortY 沿用那張圖在深度排序裡的值，坐上去時 +0.5 就會畫在椅子上面。
+let seatCache = null, seatCacheFor = null;
+function mapSeats() {
+  if (seatCache && seatCacheFor === MAP) return seatCache;
+  const occByStamp = new Map();
+  for (const it of mapOccluders()) if (it.kind === 'stamp') occByStamp.set(it.stamp, it);
+  const seats = [];
+  for (const s of (MAP && MAP.stamps) || []) {
+    const cfg = SIT.tiles[s.id]; if (!cfg) continue;
+    const t = mapTileById(s.id) || {};
+    const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
+    const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+    let dir = cfg.dir || 'front';
+    if (s.fx && (dir === 'left' || dir === 'right')) dir = dir === 'left' ? 'right' : 'left';   // 椅子翻面→人也跟著翻
+    const dx = (cfg.seatDx || 0) * (s.fx ? -1 : 1);                                             // 翻面時左右微調也鏡射
+    const occ = occByStamp.get(s);
+    seats.push({
+      x: x0 + w / 2 + dx,
+      y: y0 + (cfg.seatDy != null ? cfg.seatDy : h * 0.7),
+      top: y0, dir,
+      sortY: occ ? occ.y : y0 + h,
+    });
+  }
+  seatCache = seats; seatCacheFor = MAP;
+  return seats;
+}
+function seatNearPlayer() {
+  const p = G.player; if (!p) return null;
+  let best = null, bd = SIT.radius;
+  for (const s of mapSeats()) {
+    const d = Math.hypot(s.x - p.x, s.y - p.y);
+    if (d < bd) { bd = d; best = s; }
+  }
+  return best;
+}
+function toggleSit() {
+  const p = G.player; if (!p) return;
+  if (p.sitting) { standUp(); return; }
+  const seat = seatNearPlayer(); if (!seat) return;
+  p.sitFrom = { x: p.x, y: p.y };      // 記住原本站的位置，起身時回到那裡
+  p.sitting = seat;
+  p.x = seat.x; p.y = seat.y; p.dir = seat.dir;
+  p.moving = false; p.anim = 0; p.blinkTime = -1;
+  sfx('button');
+}
+function standUp() {
+  const p = G.player; if (!p || !p.sitting) return;
+  const from = p.sitFrom || { x: p.x, y: p.y + CELL };
+  p.x = from.x; p.y = from.y;
+  p.sitting = null; p.sitFrom = null;
+  sfx('switch');
+}
+
 function updatePlayer(dt) {
   const p = G.player; if (!p) return;
+  if (p.sitting) {                      // 坐著：不判定碰撞（椅子本來就是不可穿透），按移動鍵才起身
+    if (!anyMoveKey()) { p.moving = false; p.anim = 0; updateBlink(p, dt); return; }
+    standUp();
+  }
   if (rescueStuck(p, playerBlocked)) flash('!', p.x, p.y - 30, '#ffd479');   // 被卡住→自動脫困
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
@@ -272,8 +333,8 @@ function updatePlayer(dt) {
 // ---- 輸入：點畫面（放置 / 哨兵選單）----
 cv.addEventListener('click', e => {
   const rect = cv.getBoundingClientRect();
-  const x = (e.clientX - rect.left) * (cv.width / rect.width) + cam.x;   // 加上鏡頭位置＝世界座標
-  const y = (e.clientY - rect.top) * (cv.height / rect.height) + cam.y;
+  const x = (e.clientX - rect.left) * (cv.width / rect.width) / VIEW_SCALE + cam.x;   // 去掉縮放、加上鏡頭＝世界座標
+  const y = (e.clientY - rect.top) * (cv.height / rect.height) / VIEW_SCALE + cam.y;
   const [c, r] = cellAt(x, y);
   if (!inGrid(c, r)) return;
 
@@ -295,6 +356,8 @@ cv.addEventListener('click', e => {
   const hit = G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
   if (hit) { closeGroundMenu(); openSentryMenu(hit); return; }
   closeSentryMenu();
+  // 安全區域：地面點擊不做事（不能蓋建築、也不能召喚哨兵）
+  if (MAP_SAFE) { closeGroundMenu(); return; }
   // 點到障礙物：不動作
   if (buildAt(c, r) || isWall(c, r) || isEntrance(c, r)) { closeGroundMenu(); return; }
   spawnGroundRipple(e.clientX, e.clientY);
@@ -311,8 +374,8 @@ cv.addEventListener('click', e => {
 // ---- 滑鼠移動：記住目前指到哪一格（世界座標）----
 cv.addEventListener('mousemove', e => {
   const rect = cv.getBoundingClientRect();
-  const x = (e.clientX - rect.left) * (cv.width / rect.width) + cam.x;
-  const y = (e.clientY - rect.top) * (cv.height / rect.height) + cam.y;
+  const x = (e.clientX - rect.left) * (cv.width / rect.width) / VIEW_SCALE + cam.x;
+  const y = (e.clientY - rect.top) * (cv.height / rect.height) / VIEW_SCALE + cam.y;
   const [c, r] = cellAt(x, y);
   hoverCell = inGrid(c, r) ? [c, r] : null;
 });
@@ -441,8 +504,8 @@ function update(dt) {
     }
   }
   G.effects = G.effects.filter(f => f.life > 0);
-  // 波次
-  if (G.spawnQueue.length === 0 && G.enemies.length === 0) {
+  // 波次（安全場景沒有波次，也不會有勝負）
+  if (!MAP_SAFE && G.spawnQueue.length === 0 && G.enemies.length === 0) {
     if (G.betweenWaves <= 0) {
       G.waveIndex++;
       if (G.waveIndex >= G.waves.length) win();
@@ -506,19 +569,22 @@ function drawTower(t) {
     ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
   }
 
-  // NPC 頭頂資訊：名字在上，HP 條在下。
-  const nameY = visualTop - 11;
+  // 頭頂資訊：名字在上，HP 條在下。
+  // 安全區域沒有血條，名字往下 5px 貼近頭頂（跟 NPC 一致）；戰鬥區域維持原本的名字＋血條間距。
+  const nameY = visualTop - (MAP_SAFE ? 6 : 11);
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, t.x, nameY);
   ctx.fillStyle = t.berserk ? '#ff7777' : '#fff'; ctx.fillText(spec.name, t.x, nameY);
 
-  const maxhp = t.maxhp || spec.hp || 100;
-  const hp = Math.max(0, Math.min(maxhp, t.hp ?? maxhp));
-  const barW = 42, barH = 3, barX = t.x - barW / 2, barY = visualTop - 7;
-  ctx.fillStyle = 'rgba(0,0,0,.85)'; roundRect(barX - 1, barY - 1, barW + 2, barH + 2, 2); ctx.fill();
-  if (hp > 0) {
-    ctx.fillStyle = hp / maxhp > 0.5 ? '#57d879' : (hp / maxhp > 0.25 ? '#f1c84b' : '#ef5b5b');
-    roundRect(barX, barY, barW * hp / maxhp, barH, 1); ctx.fill();
+  if (!MAP_SAFE) {        // 安全區域沒有戰鬥，頭上不顯示血條（名字留著）
+    const maxhp = t.maxhp || spec.hp || 100;
+    const hp = Math.max(0, Math.min(maxhp, t.hp ?? maxhp));
+    const barW = 42, barH = 3, barX = t.x - barW / 2, barY = visualTop - 7;
+    ctx.fillStyle = 'rgba(0,0,0,.85)'; roundRect(barX - 1, barY - 1, barW + 2, barH + 2, 2); ctx.fill();
+    if (hp > 0) {
+      ctx.fillStyle = hp / maxhp > 0.5 ? '#57d879' : (hp / maxhp > 0.25 ? '#f1c84b' : '#ef5b5b');
+      roundRect(barX, barY, barW * hp / maxhp, barH, 1); ctx.fill();
+    }
   }
   if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('暴走', t.x, nameY - 14); }
 }
@@ -538,6 +604,28 @@ function drawWanderer(npc) {
     ctx.drawImage(img, npc.x - size / 2, npc.y - size + 18, size, size);
     ctx.imageSmoothingEnabled = true;
   }
+  // 頭頂名字（跟哨兵同樣式；NPC 沒有血條）
+  const name = (WANDERERS.find(w => w.id === npc.id) || {}).name;
+  if (!name) return;
+  ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  const nameY = npc.y - size + 12;   // 比圖片頂端再往下 5px
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, npc.x, nameY);
+  ctx.fillStyle = '#fff'; ctx.fillText(name, npc.x, nameY);
+}
+// 椅子上方的「[E] 坐」提示框
+function drawSitPrompt(seat) {
+  const label = '坐', keyLabel = SIT.key.toUpperCase();
+  ctx.font = 'bold 13px sans-serif'; ctx.textBaseline = 'alphabetic';
+  const keyW = 18, gap = 6, pad = 9, textW = ctx.measureText(label).width;
+  const boxW = pad * 2 + keyW + gap + textW, boxH = 24;
+  const x = Math.round(seat.x - boxW / 2), y = Math.round(seat.top - boxH - 10);
+  ctx.fillStyle = 'rgba(12,16,22,.9)'; roundRect(x, y, boxW, boxH, 6); ctx.fill();
+  ctx.strokeStyle = 'rgba(143,211,255,.85)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = '#8fd3ff'; roundRect(x + pad, y + 5, keyW, 14, 3); ctx.fill();
+  ctx.fillStyle = '#0e1116'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+  ctx.fillText(keyLabel, x + pad + keyW / 2, y + 15.5);
+  ctx.fillStyle = '#e6ebf2'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText(label, x + pad + keyW + gap, y + 17);
 }
 function drawPlayer(p) {
   const img = pickCharacterFrame(playerSprites, p);
@@ -556,29 +644,23 @@ function draw() {
   lightsCache = LIGHT.enabled ? getLights() : [];   // 更新這一幀的光源
   computeLightField();                              // 光沿格子擴散、碰牆停（牆後全黑）
   ctx.clearRect(0, 0, cv.width, cv.height);
-  // 之後畫的都是「世界座標」：整體平移鏡頭位置，畫面就會跟著玩家捲動
+  // 之後畫的都是「世界座標」：先套畫面縮放，再平移鏡頭位置，畫面就會跟著玩家捲動
   ctx.save();
-  ctx.translate(-Math.round(cam.x), -Math.round(cam.y));
-  // 地板貼圖鋪滿整個地圖（未載入時用深色底）
-  if (floorPattern) { ctx.fillStyle = floorPattern; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL); }
-  else { ctx.fillStyle = '#161b22'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL); }
+  ctx.scale(VIEW_SCALE, VIEW_SCALE);
+  ctx.translate(-Math.round(cam.x * VIEW_SCALE) / VIEW_SCALE, -Math.round(cam.y * VIEW_SCALE) / VIEW_SCALE);
+  ctx.imageSmoothingEnabled = false;   // 放大時保持像素銳利
+  // 底色＝純黑：沒有鋪任何素材的格子就是黑的（跟地圖編輯器看到的一致）
+  ctx.fillStyle = '#000'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
-  // 區域色（半透明疊上，貼圖仍可見）＋ 格線 ＋ 沒有美術的固定牆
+  // 沒有美術的固定牆（入口／營地的區域色已取消，改用地圖美術自己表現）
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
     const [cx, cy] = [OX + c * CELL, OY + r * CELL];
-    if (isEntrance(c, r)) { ctx.fillStyle = 'rgba(150,40,70,.32)'; ctx.fillRect(cx, cy, CELL, CELL); }
-    else if (isCamp(c, r)) { ctx.fillStyle = 'rgba(40,160,115,.22)'; ctx.fillRect(cx, cy, CELL, CELL); }
     if (isWall(c, r) && !hasImageAt(c, r)) {
       ctx.fillStyle = '#3f434b'; ctx.fillRect(cx + 2, cy + 2, CELL - 4, CELL - 4);
       ctx.strokeStyle = '#565b64'; ctx.lineWidth = 2; ctx.strokeRect(cx + 5, cy + 5, CELL - 10, CELL - 10);
     }
   }
-  ctx.fillStyle = '#8a5a6a'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText('▼ 怪物入口', OX + 6, OY + 16);
-  ctx.fillStyle = '#5aa88f'; ctx.textAlign = 'right';
-  ctx.fillText('營地（守住這裡）', OX + COLS * CELL - 6, OY + ROWS * CELL - 8);
-
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
@@ -587,12 +669,18 @@ function draw() {
   for (const t of G.towers) sortables.push({ y: t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.y + 17, draw: () => drawWanderer(npc) });
   for (const e of G.enemies) if (isLit(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到
-  if (G.player) sortables.push({ y: G.player.y + 16, draw: () => drawPlayer(G.player) });
+  // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
+  if (G.player) sortables.push({ y: G.player.sitting ? G.player.sitting.sortY + 0.5 : G.player.y + 16, draw: () => drawPlayer(G.player) });
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
 
   // 上層（樹冠、屋簷等，永遠蓋在最上面）
   drawMapTop(ctx);
+  // 椅子互動提示（靠近且還沒坐下時）
+  if (G.player && !G.player.sitting && !G.over) {
+    const seat = seatNearPlayer();
+    if (seat) drawSitPrompt(seat);
+  }
   // 特效
   for (const f of G.effects) {
     if (f.text) {
@@ -638,15 +726,15 @@ function draw() {
   }
   // 情境選單或指定建築的目標格
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
-  ctx.restore();   // 世界座標畫完，回到螢幕座標（下面的提示固定在畫面上）
-  drawDarkness();  // 蓋上黑幕、在光源處挖洞
+  drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
   // 目標框畫在黑幕上方，黑暗區域也能清楚看到所選格子。
   if (actionCell) {
-    const [ac, ar] = actionCell, ax = OX + ac * CELL - cam.x, ay = OY + ar * CELL - cam.y;
+    const [ac, ar] = actionCell, ax = OX + ac * CELL, ay = OY + ar * CELL;
     ctx.fillStyle = 'rgba(143,211,255,.13)'; ctx.fillRect(ax + 1, ay + 1, CELL - 2, CELL - 2);
     ctx.strokeStyle = '#9fddff'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
     ctx.strokeRect(ax + 2, ay + 2, CELL - 4, CELL - 4); ctx.setLineDash([]);
   }
+  ctx.restore();   // 世界座標畫完，回到螢幕座標（下面的提示固定在畫面上）
   // 指派巡邏位置中：畫面上方顯示提示
   if (assigning) {
     ctx.fillStyle = 'rgba(20,25,35,.75)'; ctx.fillRect(0, 0, cv.width, 44);
@@ -662,17 +750,30 @@ function roundRect(x, y, w, h, r) {
 
 // ---- HUD / 狀態畫面 ----
 function updateHUD() {
+  // 安全區域：資源／營地HP／嚮導能量／波次都沒有意義，連同「建築」按鈕一起收起來
+  const hud = document.getElementById('hud');
+  if (hud) hud.classList.toggle('hidden', MAP_SAFE);
+  if (typeof buildToggle !== 'undefined' && buildToggle) buildToggle.classList.toggle('hidden', MAP_SAFE);
+  if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
   document.getElementById('lives').textContent = Math.max(0, G.lives);
   document.getElementById('guide').textContent = Math.floor(G.guide);
-  document.getElementById('wave').textContent = Math.min(G.waveIndex + 1, G.waves.length);
-  document.getElementById('wavemax').textContent = G.waves.length;
+  document.getElementById('wave').textContent = G.waves.length ? Math.min(G.waveIndex + 1, G.waves.length) : '—';
+  document.getElementById('wavemax').textContent = G.waves.length || '—';
+  const mission = document.getElementById('missionText');
+  if (mission) mission.textContent = MAP_SAFE ? '目前任務：休息一下（安全區域）' : '目前任務：守住營地';
 }
 const overlay = document.getElementById('overlay');
 const ovTitle = document.getElementById('ov-title'), ovText = document.getElementById('ov-text'), ovBtn = document.getElementById('ov-btn');
 function showOverlay(title, text, btn) { ovTitle.textContent = title; ovText.innerHTML = text; ovBtn.textContent = btn; overlay.classList.remove('hidden'); }
 function hideOverlay() { overlay.classList.add('hidden'); }
 function showStart() {
+  if (MAP_SAFE) {   // 安全場景（基地）：沒有怪物、沒有黑幕，純走動看場景
+    showOverlay((MAP && MAP.name) || '安全區域',
+      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，點哨兵一樣可以下指令、疏導。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
+      '進入');
+    return;
+  }
   showOverlay('台北地下災害應變中心 · 塔防原型',
     '後室<b>一片漆黑</b>——只有營地和你身上的燈是亮的。<br><b>三位哨兵已在基地待命</b>：點擊哨兵可下指令（巡邏／指派位置／疏導）。<br>放置<b>探照燈</b>照亮區域：<b>亮處才能放建築</b>，黑暗中的怪物<b>看不見</b>。<br>用 <b>WASD／方向鍵</b>移動嚮導，怪物<b>由上往下</b>攻進<b>營地</b>；在哨兵<b>暴走</b>前記得<b>疏導</b>。守住 5 波即可控制 Y 區。',
     '開始防禦');
@@ -688,7 +789,7 @@ ovBtn.addEventListener('click', begin);
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
-if (mapPick && mapPickRow && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {
+if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {
   MAPS_DEFAULT.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m.name || ('地圖 ' + (i + 1)); mapPick.appendChild(o); });
   mapPick.value = MAP_INDEX;
   mapPickRow.classList.remove('hidden');
@@ -700,5 +801,10 @@ if (mapPick && mapPickRow && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT
 }
 
 // ---- 啟動遊戲 ----
-newGame(); renderBuildBar(); showStart();
+newGame(); renderBuildBar();
+if (PREVIEW) {                 // 從地圖編輯器來的預覽：直接進場，標題列標示是預覽
+  const note = document.querySelector('.header-note');
+  if (note) note.textContent = '🔍 預覽模式 · ' + ((MAP && MAP.name) || '編輯中的地圖');
+  begin();
+} else showStart();
 requestAnimationFrame(loop);

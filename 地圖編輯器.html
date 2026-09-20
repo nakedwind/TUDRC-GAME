@@ -33,13 +33,26 @@
         <button class="btn" id="flipY" title="上下翻筆刷（快捷鍵 V）">⇅ 上下翻</button>
         <span class="sep"></span>
         <button class="btn" id="addTile">＋ 加入磚塊</button>
+        <button class="btn" id="addColorBlock">■ 新增色塊</button>
         <button class="btn" id="fillAll">🪣 全部填滿</button>
         <button class="btn" id="undoBtn">↶ 回復 (Ctrl+Z)</button>
         <button class="btn" id="checkPath">🔍 檢查路徑</button>
+        <button class="btn" id="previewGame" title="用目前編輯中的地圖開遊戲畫面（不用先匯出）">▶ 預覽遊戲</button>
         <button class="btn" id="gridToggle">🔳 格線：開</button>
+        <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透的紅色標記（只影響顯示，不會改掉設定）">🧱 紅格：開</button>
         <button class="btn danger" id="clearLayout">全部清空</button>
       </div>
       <input type="file" id="tileFile" accept="image/*" style="display:none">
+
+      <div id="colorBlockPanel" class="color-block-panel hidden">
+        <strong>新增系統色塊</strong>
+        <label>名稱 <input type="text" id="colorBlockName" value="色塊"></label>
+        <label>顏色 <input type="color" id="colorBlockColor" value="#4f8fbf"></label>
+        <label>寬 <input type="number" id="colorBlockW" min="20" max="2000" step="1" value="40"> px</label>
+        <label>高 <input type="number" id="colorBlockH" min="20" max="2000" step="1" value="40"> px</label>
+        <button class="btn primary" id="createColorBlock">建立</button>
+        <button class="btn" id="cancelColorBlock">取消</button>
+      </div>
 
       <div id="selControls" class="hidden">
         <span>已選取：<b id="selName">—</b></span>
@@ -68,8 +81,9 @@
 
       <div id="tilePropsRow" class="hidden" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0;font-size:13px;color:#b9c3d0">
         <span style="color:#8fd3ff">選中素材：</span>
-        <label>寬 <input type="number" id="tileW" min="1" max="20" style="width:52px"> 格</label>
-        <label>高 <input type="number" id="tileH" min="1" max="20" style="width:52px"> 格</label>
+        <label>寬 <input type="number" id="tileW" min="1" max="20" style="width:64px"> <span id="tileWUnit">格</span></label>
+        <label>高 <input type="number" id="tileH" min="1" max="20" style="width:64px"> <span id="tileHUnit">格</span></label>
+        <label id="tileColorLabel" class="hidden">顏色 <input type="color" id="tileColor"></label>
         <label style="cursor:pointer"><input type="checkbox" id="tileFlat"> 平貼地面（不遮角色）</label>
       </div>
 
@@ -99,6 +113,9 @@
         <div class="panel-body">
         <div class="field col"><label>地圖名稱</label><input id="f_name" class="wide" type="text"></div>
         <div class="field col"><label>說明</label><input id="f_desc" class="wide" type="text"></div>
+
+        <div class="field col"><label><input id="f_safe" type="checkbox"> 安全場景（沒有怪物、沒有黑幕）</label></div>
+        <div class="field col"><label><input id="f_npcs" type="checkbox"> 場景 NPC（克莉思、路德等人會在這張地圖走動）</label></div>
 
         <div class="subhead">地圖大小（可比畫面 32×18 大，遊戲鏡頭會跟著玩家捲動）</div>
         <div class="field"><label>寬（格數）</label><input id="f_cols" type="number" min="8" max="200"></div>

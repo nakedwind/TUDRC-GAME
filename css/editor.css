@@ -57,6 +57,9 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 .layer-eye { width: 40px; border: 2px solid #333c49; border-left: 0; border-radius: 0 8px 8px 0; background: #232a35; color: #8fd3ff; cursor: pointer; font-size: 14px; }
 .layer-eye:hover { background: #2b3a4a; }
 .layer-eye.off { color: #697382; background: #181d24; }
+.layer-lock { width: 36px; border: 2px solid #333c49; border-left: 0; border-right: 0; background: #232a35; color: #697382; cursor: pointer; font-size: 13px; }
+.layer-lock:hover { background: #2b3a4a; }
+.layer-lock.on { color: #ffd479; background: #3a3320; }
 .layerhint { color: #9aa4b2; font-size: 11px; line-height: 1.5; }
 
 /* 磚塊調色盤 */
@@ -101,6 +104,21 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 .tool small { display: block; color: #9aa4b2; font-size: 11px; margin-top: 2px; }
 .tool.sel { border-color: #8fd3ff; background: #2b3a4a; }
 #tools .sep { width: 1px; align-self: stretch; background: #3a4553; margin: 2px 4px; }
+.color-block-panel {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: 8px 0; padding: 9px 10px; border: 1px solid #3a4656; border-radius: 8px;
+  background: #1d222b; color: #c3ccd8; font-size: 13px;
+}
+.color-block-panel strong { color: #8fd3ff; }
+.color-block-panel label { display: flex; align-items: center; gap: 5px; }
+.color-block-panel input[type="text"], .color-block-panel input[type="number"] {
+  width: 82px; padding: 5px 7px; border: 1px solid #3a4656; border-radius: 5px;
+  background: #141920; color: #e6e9ee;
+}
+.color-block-panel input[type="color"], #tileColor {
+  width: 36px; height: 30px; padding: 2px; border: 1px solid #3a4656; border-radius: 5px;
+  background: #141920; cursor: pointer;
+}
 
 .hidden { display: none !important; }
 /* 選取控制列：選到物件才出現（class hidden 收起，不占位置）*/

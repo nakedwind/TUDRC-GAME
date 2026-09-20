@@ -18,6 +18,7 @@ function spawnSentries() {
 
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
 function spawnWanderers() {
+  if (!MAP_NPCS) return;            // 只有勾了「場景 NPC」的地圖才會有這些人
   const candidates = [], seen = new Set();
   const occupied = new Set(G.towers.map(t => cellAt(t.x, t.y).join(',')));
   const addCell = (c, r) => {
@@ -172,7 +173,7 @@ function openSentryMenu(t, silent) {
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
   const rect = cv.getBoundingClientRect();
-  const sx = (t.x - cam.x) * (rect.width / VIEW_W), sy = (t.y - cam.y) * (rect.height / VIEW_H);
+  const sx = (t.x - cam.x) * VIEW_SCALE * (rect.width / VIEW_W), sy = (t.y - cam.y) * VIEW_SCALE * (rect.height / VIEW_H);
   sentryMenu.style.left = Math.round(Math.min(sx + 22, rect.width - 170)) + 'px';
   sentryMenu.style.top = Math.round(Math.max(6, sy - 30)) + 'px';
   sentryMenu.classList.remove('hidden');

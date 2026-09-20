@@ -7,8 +7,17 @@
    想換玩哪張地圖，改最下面 pickMap() 的索引即可。
 */
 
+// ---- 預覽模式：地圖編輯器按「▶ 預覽遊戲」時，用它暫存的地圖取代內建清單 ----
+//      網址帶 ?preview=1 才會啟用；沒有暫存資料就照常跑內建地圖。
+const PREVIEW_KEY = 'tudrc_map_preview_v1';
+let PREVIEW = null;
+if (/[?&]preview=1(&|$)/.test(location.search)) {
+  try { PREVIEW = JSON.parse(localStorage.getItem(PREVIEW_KEY) || 'null'); } catch (e) { PREVIEW = null; }
+  if (PREVIEW && !PREVIEW.map) PREVIEW = null;
+}
+
 // ---- 磚塊登錄（內建 + 編輯器匯出的自訂磚塊）----
-const MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'overlay', 'top'];
+const MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'object2', 'object3', 'object4', 'overlay', 'top'];
 const TILE_REGISTRY = {};
 function buildTileRegistry() {
   const builtin = [
@@ -16,7 +25,8 @@ function buildTileRegistry() {
     { id: 'wall', role: 'wall', file: null, w: 1, h: 1 },
     { id: 'obstacle', role: 'obstacle', file: null, w: 1, h: 1 },
   ];
-  const custom = (typeof TILES_CUSTOM !== 'undefined' && TILES_CUSTOM) ? TILES_CUSTOM : [];
+  const custom = (PREVIEW && PREVIEW.tiles) ? PREVIEW.tiles
+    : ((typeof TILES_CUSTOM !== 'undefined' && TILES_CUSTOM) ? TILES_CUSTOM : []);
   [...builtin, ...custom].forEach(t => { TILE_REGISTRY[t.id] = t; });
 }
 const mapTileById = id => TILE_REGISTRY[id];
@@ -35,9 +45,17 @@ function preloadMapTiles() { Object.values(TILE_REGISTRY).forEach(t => { if (t.f
 
 // ---- 當前地圖 ----
 let MAP = null, mapEntrances = [], mapBreakable = [];
+// 安全場景（例如回基地）：不生怪、不套黑幕。由地圖的 safe 欄位決定（地圖編輯器可勾選）
+let MAP_SAFE = false;
+// 場景 NPC（克莉思、路德…）只在有勾「場景 NPC」的地圖出現
+let MAP_NPCS = false;
+const LIGHT_BASE_ENABLED = LIGHT.enabled;   // balance.js 的原始設定，離開安全場景要還原
 
 let MAP_INDEX = 0;   // 目前玩第幾張地圖（由開始畫面的地圖選單切換）
-function mapList() { return (typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length) ? MAPS_DEFAULT : []; }
+function mapList() {
+  if (PREVIEW) return [PREVIEW.map];                 // 預覽模式：只有編輯中的那一張
+  return (typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length) ? MAPS_DEFAULT : [];
+}
 function pickMap() {
   const list = mapList();
   return list[MAP_INDEX] || list[0] || null;
@@ -54,6 +72,14 @@ function initMap() {
   // 地圖大小（可比畫面大；鏡頭會跟著玩家捲動）
   if (MAP.cols) COLS = MAP.cols;
   if (MAP.rows) ROWS = MAP.rows;
+
+  // 小地圖放大到填滿相框（等比例、取較小的倍率所以不會裁切）；地圖夠大就維持 1:1
+  VIEW_SCALE = Math.max(1, Math.min(VIEW_W / (COLS * CELL), VIEW_H / (ROWS * CELL)));
+
+  // 安全場景：沒有怪物、沒有黑幕（整張地圖都是亮的）
+  MAP_SAFE = !!MAP.safe;
+  MAP_NPCS = !!MAP.npcs;
+  LIGHT.enabled = LIGHT_BASE_ENABLED && !MAP_SAFE;
 
   // 規則覆蓋數值（沒填的沿用 balance.js 預設）
   const R = MAP.rules || {};
@@ -100,6 +126,7 @@ function seedMapObstacles() {
 // ---- 繪製地圖圖片（圖層由下往上，最後大圖）----
 function drawMapTileImg(ctx, id, x, y) {
   const t = mapTileById(id); if (!t) return;
+  if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, CELL, CELL); return; }
   const img = tileImage(t);
   if (img) { ctx.drawImage(img, x, y, CELL, CELL); return; }
   if (t.role === 'wall') { ctx.fillStyle = '#3f434b'; ctx.fillRect(x + 2, y + 2, CELL - 4, CELL - 4); }
@@ -109,6 +136,7 @@ function drawMapTileImg(ctx, id, x, y) {
 function drawMapStampImg(ctx, s) {
   const t = mapTileById(s.id); if (!t) return;
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+  if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
   const img = tileImage(t);
   if (img) {
     if (s.fx || s.fy) {
@@ -141,7 +169,7 @@ function hasImageAt(c, r) {
 //   其餘圖層中，高度≥2格 或 放在 object/overlay 圖層 的，視為立體物 → 和角色一起排序；
 //   剩下扁平的（多半是地板）留在地面、永遠在角色下面。
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
-const isOccLayer = lid => lid === 'object' || lid === 'overlay';
+const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
 const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !t.flat && (mapTileH(t) >= OCC_MIN_H || isOccLayer(s.layer || 'top')); };
 
@@ -163,13 +191,47 @@ function drawMapTop(ctx) {
   for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === 'top') drawMapStampImg(ctx, s);
 }
 // 立體物：會和角色互相遮擋，回傳 {y:底部Y, draw:畫它} 加進 out
+//
+// 排序用的「底部Y」有個例外：靠在別的東西上的裝飾（牆上的海報窗戶、櫃子上的咖啡機）自己很矮，
+// 底部Y 比它依附的牆／櫃子小 → 只按自己的底部排，就會被後畫的牆／櫃子蓋掉。
+// 所以先算「有效底部Y」：跟它重疊、而且在更下層的圖，底部比它低就跟著用那個的，
+// 這樣它會緊接在那張圖之後畫出來，跟編輯器看到的上下關係一致。
+// 重疊用「實際像素範圍」判斷（含方向鍵微調的 ox/oy），因為常常是靠微調才疊在一起、格子並沒有交集。
+let occCache = null, occCacheFor = null;
+function mapOccluders() {
+  if (occCache && occCacheFor === MAP) return occCache;
+  const items = [];
+  MAP_LAYER_ORDER.forEach((lid, li) => {
+    if (lid === 'top') return;
+    const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
+    if (isOccLayer(lid)) for (const key in layer) {
+      const [c, r] = key.split(',').map(Number), id = layer[key];
+      items.push({ li, x0: c * CELL, y0: r * CELL, x1: (c + 1) * CELL, y1: (r + 1) * CELL, kind: 'cell', id, c, r });
+    }
+    for (const s of (MAP.stamps || [])) {
+      if ((s.layer || 'top') !== lid || !stampIsOcc(s)) continue;
+      const t = mapTileById(s.id) || {};
+      const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
+      items.push({ li, x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL, kind: 'stamp', stamp: s });
+    }
+  });
+  // items 已依圖層由下往上排好，所以下層的 y 一定先算完；
+  // 這裡直接取下層「算完的 y」，疊好幾層也能接力（櫃子 → 咖啡機 → 杯子）。
+  for (const it of items) {
+    it.y = it.y1;
+    for (const other of items) {                    // 找它底下那層、又跟它重疊的東西（牆、櫃子…）
+      if (other.li >= it.li || other.y <= it.y) continue;
+      if (it.x0 < other.x1 && it.x1 > other.x0 && it.y0 < other.y1 && it.y1 > other.y0) it.y = other.y;
+    }
+  }
+  occCache = items; occCacheFor = MAP;
+  return items;
+}
 function collectMapOccluders(ctx, out) {
   if (!MAP) return;
-  for (const lid of MAP_LAYER_ORDER) {
-    if (lid === 'top') continue;
-    const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    if (isOccLayer(lid)) for (const key in layer) { const [c, r] = key.split(',').map(Number), id = layer[key]; out.push({ y: (r + 1) * CELL, draw: () => drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL) }); }
-    for (const s of (MAP.stamps || [])) { if ((s.layer || 'top') !== lid || !stampIsOcc(s)) continue; const t = mapTileById(s.id) || {}; out.push({ y: (s.r + mapTileH(t)) * CELL, draw: () => drawMapStampImg(ctx, s) }); }
+  for (const it of mapOccluders()) {
+    if (it.kind === 'cell') { const { id, c, r } = it; out.push({ y: it.y, draw: () => drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL) }); }
+    else { const s = it.stamp; out.push({ y: it.y, draw: () => drawMapStampImg(ctx, s) }); }
   }
 }
 
