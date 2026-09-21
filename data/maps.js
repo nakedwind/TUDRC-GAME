@@ -3002,7 +3002,8 @@ const MAPS_DEFAULT = [
     "cols": 40,
     "rows": 30,
     "safe": false,
-    "npcs": false
+    "npcs": false,
+    "portals": []
   },
   {
     "id": "map_mr4mbd88",
@@ -6057,7 +6058,8 @@ const MAPS_DEFAULT = [
     "cols": 40,
     "rows": 36,
     "safe": false,
-    "npcs": false
+    "npcs": false,
+    "portals": []
   },
   {
     "id": "map_mu5ad7t2",
@@ -6995,6 +6997,18 @@ const MAPS_DEFAULT = [
         "layer": "object",
         "ox": 4,
         "oy": 16
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 24,
+        "r": 10,
+        "layer": "object4"
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 33,
+        "r": 10,
+        "layer": "object4"
       }
     ],
     "solid": [
@@ -7084,7 +7098,19 @@ const MAPS_DEFAULT = [
     "cols": 38,
     "rows": 18,
     "safe": true,
-    "npcs": false
+    "npcs": true,
+    "portals": [
+      {
+        "c": 24,
+        "r": 11,
+        "to": "map_mua3askw"
+      },
+      {
+        "c": 25,
+        "r": 11,
+        "to": "map_mua3askw"
+      }
+    ]
   },
   {
     "id": "map_mua3askw",
@@ -7911,6 +7937,18 @@ const MAPS_DEFAULT = [
     "safe": true,
     "cols": 17,
     "rows": 12,
-    "npcs": false
+    "npcs": true,
+    "portals": [
+      {
+        "c": 5,
+        "r": 11,
+        "to": "map_mu5ad7t2"
+      },
+      {
+        "c": 6,
+        "r": 11,
+        "to": "map_mu5ad7t2"
+      }
+    ]
   }
 ];

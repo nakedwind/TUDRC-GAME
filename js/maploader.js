@@ -44,7 +44,7 @@ function tileImage(t) {
 function preloadMapTiles() { Object.values(TILE_REGISTRY).forEach(t => { if (t.file) tileImage(t); }); }
 
 // ---- 當前地圖 ----
-let MAP = null, mapEntrances = [], mapBreakable = [];
+let MAP = null, mapEntrances = [], mapBreakable = [], mapPortals = [];
 // 安全場景（例如回基地）：不生怪、不套黑幕。由地圖的 safe 欄位決定（地圖編輯器可勾選）
 let MAP_SAFE = false;
 // 場景 NPC（克莉思、路德…）只在有勾「場景 NPC」的地圖出現
@@ -103,7 +103,11 @@ function initMap() {
   campCells = new Set((MAP.camp && MAP.camp.length) ? MAP.camp : []);    // 空＝預設最下排
   mapEntrances = (MAP.entrances || []).map(k => k.split(',').map(Number));
   mapBreakable = (MAP.breakable || []).map(k => k.split(',').map(Number));
+  mapPortals = (MAP.portals || []).map(p => ({ c: p.c, r: p.r, to: p.to }));   // 出入口：走到門旁按鍵可換地圖
 }
+// 出入口查詢
+function mapIndexById(id) { const list = mapList(); return list.findIndex(m => m && m.id === id); }
+function returnPortalCell(fromId) { return mapPortals.find(p => p.to === fromId) || null; }
 
 // ---- 提供給 game.js 用的查詢 ----
 function defaultEntranceCells() { const a = []; for (let c = 0; c < COLS; c++) a.push([c, SPAWN_ROW]); return a; }

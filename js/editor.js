@@ -18,6 +18,7 @@ const STORAGE_NEW_ASSETS_PACK = 'tudrc_asset_pack_new_materials_v6';
 const STORAGE_STATION_HALL_PACK = 'tudrc_asset_pack_station_hall_v2';
 const STORAGE_EOC_PACK = 'tudrc_asset_pack_eoc_v1';        // 應變中心素材包
 const STORAGE_BG_EXTRA_PACK = 'tudrc_asset_pack_bg_extra_v1';   // 後補的背景建材（牆面前緣 2／3）
+const STORAGE_DAMAGE_ASSETS_CLEANUP = 'tudrc_remove_unapproved_damage_assets_v1';
 
 // ---- UI 按鈕回饋 ----
 const buttonSound = new Audio('music/Sound effects/按紐.mp3');
@@ -159,6 +160,15 @@ function loadTiles() {
   if (!Array.isArray(customTiles)) customTiles = [];
   customTiles.forEach(t => { t.w = t.w || 1; t.h = t.h || 1; });
 
+  // 尚未確認的破損建築概念圖不應留在素材清單；只清理先前誤匯入的一批。
+  let damageAssetsRemoved = false;
+  if (!localStorage.getItem(STORAGE_DAMAGE_ASSETS_CLEANUP)) {
+    const before = customTiles.length;
+    customTiles = customTiles.filter(t => !String(t.id).startsWith('tile_damage_'));
+    damageAssetsRemoved = customTiles.length !== before;
+    localStorage.setItem(STORAGE_DAMAGE_ASSETS_CLEANUP, '1');
+  }
+
   // 新素材包各自只自動補入一次；保留使用者原有素材與地圖內容。
   const decorAdded = mergeDefaultAssetPack('tile_decor_', STORAGE_DECOR_PACK);
   const obstaclesAdded = mergeDefaultAssetPack('tile_obstacle_', STORAGE_OBSTACLE_PACK);
@@ -166,7 +176,7 @@ function loadTiles() {
   const stationHallAdded = mergeDefaultAssetPack('tile_station_hall_', STORAGE_STATION_HALL_PACK);
   const eocAdded = mergeDefaultAssetPack('tile_eoc_', STORAGE_EOC_PACK);
   const bgExtraAdded = mergeDefaultAssetPack('tile_bg_', STORAGE_BG_EXTRA_PACK);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded) saveTiles();
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -214,6 +224,7 @@ function fixMap(m) {
   m.name = m.name || '未命名地圖'; m.desc = m.desc || '';
   m.safe = !!m.safe;   // 安全場景：遊戲裡不生怪、不套黑幕
   m.npcs = !!m.npcs;   // 場景 NPC：這張地圖會不會出現克莉思、路德等人
+  m.portals = Array.isArray(m.portals) ? m.portals : [];   // 出入口：[{c,r,to:目標地圖id}]
   m.cols = m.cols || 32; m.rows = m.rows || 18;   // 地圖大小（舊地圖沒存就用預設）
   return m;
 }
@@ -455,6 +466,19 @@ function draw() {
   ctx.fillText('🔻 怪物入口' + (entIsDefault ? '（預設：最上排）' : ''), OX + 6, OY + 16);
   ctx.fillStyle = '#5ec89f'; ctx.textAlign = 'right';
   ctx.fillText('🏠 營地' + (campIsDefault ? '（預設：最下兩排）' : ''), OX + COLS * CELL - 6, OY + ROWS * CELL - 8);
+  // 出入口記號（紫格＋🚪＋通往哪張地圖）
+  for (const pt of (m.portals || [])) {
+    const x = OX + pt.c * CELL, y = OY + pt.r * CELL;
+    ctx.fillStyle = 'rgba(150,90,220,.45)'; ctx.fillRect(x, y, CELL, CELL);
+    ctx.strokeStyle = '#b58cff'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
+    ctx.fillStyle = '#fff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText('🚪', x + CELL / 2, y + CELL / 2);
+    const target = (maps.find(mm => mm.id === pt.to) || {}).name || '（目標已刪除）';
+    ctx.font = 'bold 10px sans-serif'; ctx.textBaseline = 'top';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText('→' + target, x + CELL / 2, y + CELL + 1);
+    ctx.fillStyle = '#d9c6ff'; ctx.fillText('→' + target, x + CELL / 2, y + CELL + 1);
+  }
+  ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   // 懸停：選到磚塊圖時先顯示 40% 半透明預覽（放置前看得到圖與位置），再加外框
   if (hoverCell) {
     const [c, r] = hoverCell;
@@ -592,6 +616,19 @@ function paintCell(c, r, isDown, additiveSelect = false) {
   } else if (brush.mode === 'camp') {
     if (m.camp.length === 0) m.camp = defCamp();
     removeFrom(m.solid, key); removeFrom(m.breakable, key); toggle(m.camp, key);
+  } else if (brush.mode === 'portal') {
+    if (!isDown) return;   // 只在按下時處理，避免拖曳一直跳視窗
+    const pi = m.portals.findIndex(p => p.c === c && p.r === r);
+    if (pi >= 0) { m.portals.splice(pi, 1); saveMaps(); draw(); setStatus('已移除出入口', '#ffd24a'); return; }
+    const others = maps.filter(x => x.id !== m.id);
+    if (!others.length) { setStatus('只有一張地圖，先新增另一張才能設出入口', '#ff8f8f'); return; }
+    const listTxt = others.map((x, idx) => (idx + 1) + ') ' + x.name).join('\n');
+    const ans = prompt('這個出入口要通到哪一張地圖？輸入編號：\n' + listTxt, '1');
+    if (ans === null) return;
+    const n = parseInt(ans, 10);
+    if (!(n >= 1 && n <= others.length)) { setStatus('編號不正確', '#ff8f8f'); return; }
+    m.portals.push({ c, r, to: others[n - 1].id });
+    setStatus('已設出入口 → ' + others[n - 1].name, '#7ee0c0');
   } else if (brush.mode === 'erase') {
     // 由上往下擦：大圖 → 最上面有圖的那層
     const si = stampIndexAt(m, c, r);

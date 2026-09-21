@@ -42,6 +42,110 @@ for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[typ
 const wandererSprites = {};
 for (const profile of WANDERERS) wandererSprites[profile.id] = loadCharacterSprites(profile.sprite);
 
+// ---- NPC 正式對話（靠近後按 Space／E）----
+const dialogueBox = document.getElementById('dialogueBox');
+const dialoguePortrait = document.getElementById('dialoguePortrait');
+const dialogueName = document.getElementById('dialogueName');
+const dialogueProgress = document.getElementById('dialogueProgress');
+const dialogueText = document.getElementById('dialogueText');
+const dialogueNext = document.getElementById('dialogueNext');
+let dialogueState = null;
+let dialogueTypeTimer = null;
+
+function dialogueKey(actor) { return actor.kind === 'tower' ? actor.type : actor.id; }
+function dialogueProfile(actor) {
+  return actor.kind === 'tower' ? TYPES[actor.type] : WANDERERS.find(profile => profile.id === actor.id);
+}
+function dialogueNearPlayer() {
+  const p = G && G.player; if (!p || p.sitting) return null;
+  let best = null, bestDistance = NPC_TALK.radius;
+  const actors = [...(G.npcs || []), ...(G.towers || [])];
+  for (const actor of actors) {
+    if (actor.berserk) continue;
+    const distance = Math.hypot(actor.x - p.x, actor.y - p.y);
+    if (distance < bestDistance) { best = actor; bestDistance = distance; }
+  }
+  return best;
+}
+function faceEachOther(actor) {
+  const p = G.player, dx = actor.x - p.x, dy = actor.y - p.y;
+  if (Math.abs(dx) >= Math.abs(dy)) { p.dir = dx < 0 ? 'left' : 'right'; actor.dir = dx < 0 ? 'right' : 'left'; }
+  else { p.dir = dy < 0 ? 'back' : 'front'; actor.dir = dy < 0 ? 'front' : 'back'; }
+  p.moving = false; p.anim = 0; actor.moving = false; actor.anim = 0;
+}
+function renderDialogueLine() {
+  if (!dialogueState) return;
+  const { actor, lines, index } = dialogueState, profile = dialogueProfile(actor) || { name: '？？？' };
+  const line = lines[index], text = typeof line === 'string' ? line : line.text;
+  dialogueName.textContent = typeof line === 'object' && line.speaker ? line.speaker : profile.name;
+  dialogueProgress.textContent = (index + 1) + ' / ' + lines.length;
+  dialogueText.classList.remove('line-in'); void dialogueText.offsetWidth; dialogueText.classList.add('line-in');
+  startDialogueTyping(text || '……');
+}
+function setDialogueNextLabel(label) {
+  dialogueNext.lastChild.textContent = ' ' + label;
+}
+function clearDialogueTypeTimer() {
+  if (dialogueTypeTimer != null) clearTimeout(dialogueTypeTimer);
+  dialogueTypeTimer = null;
+}
+function finishDialogueTyping() {
+  if (!dialogueState || !dialogueState.typing) return false;
+  clearDialogueTypeTimer();
+  dialogueState.typing = false;
+  dialogueText.textContent = dialogueState.fullText;
+  dialogueText.classList.remove('typing');
+  setDialogueNextLabel(dialogueState.index >= dialogueState.lines.length - 1 ? '結束' : '下一句');
+  return true;
+}
+function startDialogueTyping(text) {
+  clearDialogueTypeTimer();
+  const chars = Array.from(text), speed = Math.max(5, Number(NPC_TALK.typeSpeed) || 24);
+  dialogueState.fullText = text; dialogueState.typing = true;
+  dialogueText.textContent = ''; dialogueText.classList.add('typing'); setDialogueNextLabel('快速顯示');
+  let index = 0;
+  const typeNext = () => {
+    if (!dialogueState || !dialogueState.typing) return;
+    dialogueText.textContent += chars[index++] || '';
+    if (index >= chars.length) { finishDialogueTyping(); return; }
+    dialogueTypeTimer = setTimeout(typeNext, speed);
+  };
+  typeNext();
+}
+function openDialogue(actor) {
+  if (!actor || dialogueState) return;
+  if (actor.berserk) { flash('污染失控，現在無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
+  const key = dialogueKey(actor), profile = dialogueProfile(actor);
+  const lines = chapterPick(actor.kind === 'tower' ? SENTRY_DIALOGUES[key] : NPC_DIALOGUES[key]) || chapterPick(WANDER_LINES[key]) || ['……'];
+  dialogueState = { actor, lines, index: 0 };
+  actor.target = null; actor.say = null; actor.sayWait = 2;
+  MOVE_KEYS.forEach(key => { keys[key] = false; });
+  faceEachOther(actor);
+  closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
+  const set = actor.kind === 'tower' ? sentrySprites[actor.type] : wandererSprites[actor.id];
+  const portrait = set && set.front && set.front[0];
+  dialoguePortrait.src = portrait ? portrait.src : '';
+  dialoguePortrait.alt = profile ? profile.name : 'NPC';
+  dialogueBox.classList.remove('hidden');
+  renderDialogueLine(); sfx('menu');
+}
+function advanceDialogue() {
+  if (!dialogueState) return;
+  if (finishDialogueTyping()) { sfx('blip'); return; }
+  if (dialogueState.index >= dialogueState.lines.length - 1) { closeDialogue(); return; }
+  dialogueState.index++; renderDialogueLine(); sfx('blip');
+}
+function closeDialogue(silent = false) {
+  clearDialogueTypeTimer();
+  if (!dialogueState) { dialogueBox.classList.add('hidden'); return; }
+  const actor = dialogueState.actor;
+  if (actor) actor.waitT = 0.6;
+  dialogueState = null; dialogueText.classList.remove('typing'); dialogueBox.classList.add('hidden');
+  if (!silent) sfx('switch');
+}
+dialogueNext.addEventListener('click', advanceDialogue);
+document.getElementById('dialogueClose').addEventListener('click', () => closeDialogue());
+
 // 站著不動時的眨眼計時（玩家與哨兵共用）
 function updateBlink(who, dt) {
   if (who.dir !== 'front') { who.blinkTime = -1; return; }
@@ -75,10 +179,48 @@ const keys = {};                         // 目前按住的按鍵
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'];
 const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
 window.addEventListener('keydown', e => {
-  const k = e.key.toLowerCase(); keys[k] = true;
-  if (k.startsWith('arrow')) e.preventDefault();   // 方向鍵不要捲動網頁
-  if (k === SIT.key && G && G.running && !G.over) toggleSit();
+  const k = e.key.toLowerCase();
+  if (dialogueState) {
+    if (k.startsWith('arrow') || k === ' ' || k === 'enter') e.preventDefault();
+    if (!e.repeat && (isInteractKey(k) || k === 'enter')) advanceDialogue();
+    else if (!e.repeat && k === 'escape') closeDialogue();
+    return;
+  }
+  keys[k] = true;
+  if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
+  if (isInteractKey(k) && G && G.running && !G.over) {          // 互動鍵：空白鍵 或 E
+    const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
+    if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else {
+      const npc = dialogueNearPlayer();
+      if (npc) openDialogue(npc);
+      else toggleSit();                   // 附近沒有 NPC 才判定座位
+    }
+  }
 });
+const isInteractKey = k => k === ' ' || k === SIT.key;   // 空白鍵為主，E 也可觸發
+// ---- 出入口（走到門旁按 E 進入另一張地圖）----
+const PORTAL_RADIUS = 52;   // 離門多近才會出現提示（像素）
+function portalNearPlayer() {
+  const p = G.player; if (!p || typeof mapPortals === 'undefined') return null;
+  let best = null, bd = PORTAL_RADIUS;
+  for (const pt of mapPortals) {
+    const [x, y] = center(pt.c, pt.r), d = Math.hypot(x - p.x, y - p.y);
+    if (d < bd) { bd = d; best = { portal: pt, x, y }; }
+  }
+  return best;
+}
+function portalTargetName(pt) { const i = mapIndexById(pt.to), list = mapList(); return (i >= 0 && list[i] && list[i].name) || '另一張地圖'; }
+function enterPortal(pt) {
+  if (mapIndexById(pt.to) < 0) { flash('目標地圖不存在（可能已被刪除）', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
+  const fromId = MAP.id;
+  sfx('switch');
+  switchMap(mapIndexById(pt.to));           // 換地圖＋重算尺寸/路徑
+  begin();                                  // 重建並進入遊玩狀態
+  const back = returnPortalCell(fromId);    // 落在新地圖「通回原地圖」的門旁
+  if (back && G.player) { const [x, y] = center(back.c, back.r); G.player.x = x; G.player.y = y; }
+  updateCamera(); draw();
+}
 window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
 // ---- 滑鼠所在格（建築放置預覽用）----
@@ -338,7 +480,7 @@ cv.addEventListener('click', e => {
   const [c, r] = cellAt(x, y);
   if (!inGrid(c, r)) return;
 
-  if (!G.running) return;
+  if (!G.running || dialogueState) return;
   // 「指派位置巡邏」模式：這一下點擊＝指定目的地
   if (assigning) {
     spawnGroundRipple(e.clientX, e.clientY);
@@ -425,11 +567,25 @@ function stepEnemy(e, dt) {
 
 // ---- 主迴圈（幀率校正）----
 let last = 0;
+// ---- 腳步聲（走路時循環播放；安全場景=footsteps02、戰鬥場景=footsteps01）----
+const FOOT = { audio: null, file: '' };
+function updateFootsteps() {
+  const p = G && G.player;
+  const walking = !!(p && p.moving && !p.sitting && G.running && !G.over);
+  if (!FOOT.audio) { FOOT.audio = new Audio(); FOOT.audio.loop = true; FOOT.audio.volume = 0.5; }
+  const a = FOOT.audio;
+  const want = MAP_SAFE ? 'Sound effects/footsteps02.mp3' : 'Sound effects/footsteps01.mp3';
+  if (FOOT.file !== want) { FOOT.file = want; a.src = want; }
+  a.muted = !SFX.enabled;                       // 跟著 M 鍵一起靜音
+  if (walking) { if (a.paused) a.play().catch(() => {}); }
+  else if (!a.paused) a.pause();
+}
 function loop(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
-  if (!G.over) updatePlayer(dt);   // 玩家隨時可走動
+  if (!G.over && !dialogueState) updatePlayer(dt);   // 對話時暫停玩家與戰場
+  updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (G.running && !G.over) update(dt);
+  if (G.running && !G.over && !dialogueState) update(dt);
   draw();
   requestAnimationFrame(loop);
 }
@@ -467,6 +623,7 @@ function update(dt) {
   for (const t of G.towers) {
     const spec = TYPES[t.type];
     if (spec.taintRegen && !t.berserk) t.taint = Math.max(0, t.taint - spec.taintRegen * dt);
+    if (spec.aura && !t.berserk) for (const o of G.towers) { if (o !== t && Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL) o.taint = Math.max(0, o.taint - spec.aura.rate * dt); }   // 嚮導隨身疏導：降低附近哨兵負荷
     t.cd -= dt;
     if (t.berserk || t.cd > 0) continue;
     const R = spec.range * CELL;
@@ -587,6 +744,7 @@ function drawTower(t) {
     }
   }
   if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('暴走', t.x, nameY - 14); }
+  if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - 13, t.say.text, BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡
 }
 function drawEnemy(e) {
   ctx.fillStyle = '#c25bce'; ctx.beginPath(); ctx.arc(e.x, e.y, 13, 0, Math.PI * 2); ctx.fill();
@@ -611,14 +769,42 @@ function drawWanderer(npc) {
   const nameY = npc.y - size + 12;   // 比圖片頂端再往下 5px
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, npc.x, nameY);
   ctx.fillStyle = '#fff'; ctx.fillText(name, npc.x, nameY);
+  if (npc.say && npc.say.text) drawSpeechBubble(npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]);   // 頭上對話泡泡（角色專屬色）
+}
+// 對話泡泡：參考《苦艾與甘露》——深色半透明底＋角色專屬色邊框/文字＋圓角＋向下小尾巴＋淡光暈
+// 淺底色＋深色字，每個角色一種顏色（bg 淺底／bd 邊框＋尾巴／tx 深色文字）
+const BUBBLE_COLORS = {
+  avaren:  { bg: '#dce8fb', bd: '#3a5fa0', tx: '#1c3766' },   // 淺藍
+  eldrin:  { bg: '#d8efe6', bd: '#2f8a68', tx: '#123f2e' },   // 青綠
+  noah:    { bg: '#f3ecd9', bd: '#a89355', tx: '#4a3f1c' },   // 米黃
+  chris:   { bg: '#eef2f6', bd: '#8a97a8', tx: '#2b3541' },   // 冷白
+  claire:  { bg: '#f5ecd6', bd: '#a07a3a', tx: '#4d3712' },   // 金
+  luther:  { bg: '#e4f0d6', bd: '#5f8a35', tx: '#2c4014' },   // 草綠
+  mumu:    { bg: '#d6edf2', bd: '#2f8598', tx: '#123842' },   // 藍綠
+  theonie: { bg: '#fbe0ec', bd: '#c04a7a', tx: '#5a1c38' },   // 粉紅
+  amber:   { bg: '#e5e2f7', bd: '#5f52a8', tx: '#2a2356' },   // 藍紫
+  red:     { bg: '#f7dee1', bd: '#a8303a', tx: '#5a1a20' },   // 紅
+};
+const BUBBLE_DEFAULT = { bg: '#eef2f7', bd: '#5a6a86', tx: '#232a36' };
+function drawSpeechBubble(cx, bottomY, text, col) {
+  const c = col || BUBBLE_DEFAULT, tail = 6, rad = 9;
+  ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  const tw = ctx.measureText(text).width, w = tw + 24, h = 26;
+  const x = Math.round(cx - w / 2), y = Math.round(bottomY - tail - h);
+  ctx.fillStyle = c.bg; roundRect(x, y, w, h, rad); ctx.fill();
+  ctx.strokeStyle = c.bd; ctx.lineWidth = 1.2; roundRect(x, y, w, h, rad); ctx.stroke();
+  ctx.fillStyle = c.bd;                                       // 向下小三角尾巴（同邊框色）
+  ctx.beginPath(); ctx.moveTo(cx - 5, y + h); ctx.lineTo(cx + 5, y + h); ctx.lineTo(cx, y + h + tail); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = c.tx; ctx.fillText(text, cx, y + h - 8);    // 角色色文字
 }
 // 椅子上方的「[E] 坐」提示框
-function drawSitPrompt(seat) {
-  const label = '坐', keyLabel = SIT.key.toUpperCase();
-  ctx.font = 'bold 13px sans-serif'; ctx.textBaseline = 'alphabetic';
-  const keyW = 18, gap = 6, pad = 9, textW = ctx.measureText(label).width;
+function drawInteractPrompt(cx, topY, label) {
+  const keyLabel = 'Space';
+  ctx.textBaseline = 'alphabetic';
+  ctx.font = 'bold 10px sans-serif'; const keyW = Math.max(18, ctx.measureText(keyLabel).width + 10);
+  ctx.font = 'bold 13px sans-serif'; const gap = 6, pad = 9, textW = ctx.measureText(label).width;
   const boxW = pad * 2 + keyW + gap + textW, boxH = 24;
-  const x = Math.round(seat.x - boxW / 2), y = Math.round(seat.top - boxH - 10);
+  const x = Math.round(cx - boxW / 2), y = Math.round(topY - boxH - 10);
   ctx.fillStyle = 'rgba(12,16,22,.9)'; roundRect(x, y, boxW, boxH, 6); ctx.fill();
   ctx.strokeStyle = 'rgba(143,211,255,.85)'; ctx.lineWidth = 1.5; ctx.stroke();
   ctx.fillStyle = '#8fd3ff'; roundRect(x + pad, y + 5, keyW, 14, 3); ctx.fill();
@@ -627,6 +813,7 @@ function drawSitPrompt(seat) {
   ctx.fillStyle = '#e6ebf2'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText(label, x + pad + keyW + gap, y + 17);
 }
+function drawSitPrompt(seat) { drawInteractPrompt(seat.x, seat.top, '坐'); }
 function drawPlayer(p) {
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
@@ -676,10 +863,15 @@ function draw() {
 
   // 上層（樹冠、屋簷等，永遠蓋在最上面）
   drawMapTop(ctx);
-  // 椅子互動提示（靠近且還沒坐下時）
-  if (G.player && !G.player.sitting && !G.over) {
-    const seat = seatNearPlayer();
-    if (seat) drawSitPrompt(seat);
+  // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
+  if (G.player && !G.player.sitting && !G.over && !dialogueState) {
+    const near = G.running ? portalNearPlayer() : null;
+    if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    else {
+      const actor = dialogueNearPlayer(), profile = actor && dialogueProfile(actor);
+      if (actor) drawInteractPrompt(actor.x, actor.y - 57, '與 ' + (profile ? profile.name : '角色') + ' 對話');
+      else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
+    }
   }
   // 特效
   for (const f of G.effects) {
@@ -754,6 +946,7 @@ function updateHUD() {
   const hud = document.getElementById('hud');
   if (hud) hud.classList.toggle('hidden', MAP_SAFE);
   if (typeof buildToggle !== 'undefined' && buildToggle) buildToggle.classList.toggle('hidden', MAP_SAFE);
+  if (typeof updateTeamButton === 'function') updateTeamButton();   // 安全場景才顯示「出勤編隊」按鈕
   if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
   document.getElementById('lives').textContent = Math.max(0, G.lives);
@@ -770,7 +963,7 @@ function hideOverlay() { overlay.classList.add('hidden'); }
 function showStart() {
   if (MAP_SAFE) {   // 安全場景（基地）：沒有怪物、沒有黑幕，純走動看場景
     showOverlay((MAP && MAP.name) || '安全區域',
-      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，點哨兵一樣可以下指令、疏導。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
+      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，靠近 NPC 或哨兵按 <b>Space／E</b> 可以對話。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
       '進入');
     return;
   }
@@ -781,7 +974,7 @@ function showStart() {
 function winOverlay() { showOverlay('✅ Y 區已控制', '你守住了營地、擋下所有波次！', '再玩一次'); }
 function loseOverlay() { showOverlay('💀 營地失守', '怪物攻進了營地。<br>試試多築牆卡位、提早疏導快暴走的哨兵。', '再挑戰'); }
 
-function begin() { sfx('button'); closeSentryMenu(); closeGroundMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function begin() { sfx('button'); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; sfx('win'); winOverlay(); }
 function lose() { G.over = true; G.running = false; G.phase = 'lost'; sfx('lose'); loseOverlay(); }
 ovBtn.addEventListener('click', begin);

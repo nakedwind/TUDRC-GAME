@@ -8,8 +8,9 @@ function spawnSentries() {
   if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
   const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r]);
-  for (const type of Object.keys(TYPES)) {
-    const spec = TYPES[type];
+  const team = (typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES);
+  for (const type of team) {
+    const spec = TYPES[type]; if (!spec) continue;
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
     G.towers.push({ kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() });
@@ -38,6 +39,7 @@ function spawnWanderers() {
       kind: 'npc', id: profile.id, x, y, target: null,
       waitT: 0.5 + Math.random() * 1.5, dir: 'front', moving: false, anim: 0,
       blinkWait: 2 + Math.random() * 3, blinkTime: -1,
+      say: null, sayWait: 2 + Math.random() * 8,   // 平時對話：倒數到 0 冒一句
     });
   }
 }
@@ -66,6 +68,7 @@ function sampleWanderTarget(cx, cy, radius) {
 }
 function updateSentry(t, dt) {
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
+  updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
   if (menuSentry === t) return;                       // 選單開著時先站好
   // 光沒了（探照燈被拆等）→ 走向最近的光
@@ -105,6 +108,15 @@ function updateSentry(t, dt) {
       return;                                             // 接敵中：不進入閒逛邏輯
     }
   }
+  // 阿瓦倫（哨兵）在「自由走動」模式時緊跟著艾德林（沒敵人可打時）
+  if (t.type === 'avaren' && t.mode === 'free' && typeof FOLLOW !== 'undefined') {
+    const eldrin = (G.towers || []).find(x => x.type === 'eldrin') || (G.npcs || []).find(n => n.id === 'eldrin');
+    if (eldrin) { followTarget(t, eldrin, FOLLOW.avaren, dt); t.target = null; t.waitT = 0; return; }
+  }
+  // 雷德在「自由走動」模式時慢慢跟著玩家（沒敵人可打時）
+  if (t.type === 'red' && t.mode === 'free' && typeof FOLLOW !== 'undefined' && G.player) {
+    followTarget(t, G.player, FOLLOW.red, dt); t.target = null; t.waitT = 0; return;
+  }
   if (t.waitT > 0) { t.waitT -= dt; return; }
   if (!t.target) {
     const anchor = t.mode === 'hold' && t.anchor ? t.anchor : t;
@@ -132,8 +144,44 @@ function updateSentry(t, dt) {
   }
 }
 
+// 平時對話：倒數到 0 隨機冒一句話，顯示幾秒後消失、再排下一次
+function updateNpcTalk(npc, dt) {
+  if (typeof WANDER_TALK === 'undefined') return;
+  if (npc.berserk) { npc.say = null; return; }   // 暴走的哨兵不說話
+  const nextGap = () => WANDER_TALK.minGap + Math.random() * (WANDER_TALK.maxGap - WANDER_TALK.minGap);
+  if (npc.sayWait == null) npc.sayWait = nextGap();
+  if (npc.say) {
+    npc.say.life -= dt;
+    if (npc.say.life <= 0) { npc.say = null; npc.sayWait = nextGap(); }
+    return;
+  }
+  npc.sayWait -= dt;
+  if (npc.sayWait <= 0) {
+    const key = npc.id || npc.type;   // NPC 用 id、哨兵用 type
+    const lines = (typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null;
+    if (lines && lines.length) npc.say = { text: lines[Math.floor(Math.random() * lines.length)], life: WANDER_TALK.duration };
+    else npc.sayWait = 4;   // 沒台詞：晚點再檢查
+  }
+}
+// 跟隨：朝目標移動，保持 cfg.dist 的距離就停（只改座標，走路動畫由主迴圈處理）
+function followTarget(mover, target, cfg, dt) {
+  if (!target) return false;
+  const dx = target.x - mover.x, dy = target.y - mover.y, d = Math.hypot(dx, dy);
+  if (d <= cfg.dist) return true;          // 夠近了就停
+  const step = cfg.speed * dt;
+  const nx = mover.x + dx / d * step, ny = mover.y + dy / d * step;
+  if (!sentryBlocked(nx, mover.y)) mover.x = nx;
+  if (!sentryBlocked(mover.x, ny)) mover.y = ny;
+  return true;
+}
 function updateWanderer(npc, dt) {
   rescueStuck(npc, sentryBlocked);
+  updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）
+  // 阿瓦倫緊跟著艾德林
+  if (npc.id === 'avaren' && typeof FOLLOW !== 'undefined') {
+    const eldrin = G.npcs.find(n => n.id === 'eldrin');
+    if (eldrin) { followTarget(npc, eldrin, FOLLOW.avaren, dt); npc.target = null; npc.waitT = 0; return; }
+  }
   if (npc.waitT > 0) { npc.waitT -= dt; return; }
   if (!npc.target) {
     npc.target = sampleWanderTarget(npc.x, npc.y, 180);
@@ -169,6 +217,7 @@ function openSentryMenu(t, silent) {
     '<button data-act="free">🚶 自由走動</button>' +
     '<button data-act="hold">📍 在原地巡邏</button>' +
     '<button data-act="goto">🎯 指派位置巡邏</button>' +
+    '<button data-act="talk">💬 對話</button>' +
     '<button data-act="soothe">💗 疏導（-' + SOOTHE.cost + ' 能量）</button>';
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
@@ -184,6 +233,7 @@ function sentryMenuAct(act) {
   if (act === 'free') { sfx('button'); t.mode = 'free'; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
   else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
   else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); flash('點地圖指定巡邏位置（Esc 取消）', t.x, t.y - 24, '#ffd479'); return; }
+  else if (act === 'talk') { openDialogue(t); return; }
   else if (act === 'soothe') { soothe(t); openSentryMenu(t, true); return; }   // soothe() 自帶音效；選單靜默重開、更新汙染數字
   closeSentryMenu();
 }
