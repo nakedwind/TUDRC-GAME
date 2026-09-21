@@ -100,6 +100,7 @@ function initMap() {
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
+  mapSolidOffsets = MAP.solidOffsets || {};                              // 不可穿透格的像素微調
   campCells = new Set((MAP.camp && MAP.camp.length) ? MAP.camp : []);    // 空＝預設最下排
   mapEntrances = (MAP.entrances || []).map(k => k.split(',').map(Number));
   mapBreakable = (MAP.breakable || []).map(k => k.split(',').map(Number));
@@ -108,6 +109,25 @@ function initMap() {
 // 出入口查詢
 function mapIndexById(id) { const list = mapList(); return list.findIndex(m => m && m.id === id); }
 function returnPortalCell(fromId) { return mapPortals.find(p => p.to === fromId) || null; }
+
+// ---- 不可穿透格的像素微調 ----
+// 一般的不可穿透格＝整格 40×40 都擋。地圖編輯器可以幫某些格子加上像素位移，
+// 讓擋路範圍對齊美術（例如沙發用方向鍵微調過位置）。位移後的方框可能跨到鄰格，
+// 所以判定時要連周圍 8 格一起看。怪物尋路仍然以「整格」為單位（見 pathfinding.js）。
+let mapSolidOffsets = {};
+const solidOffsetAt = (c, r) => mapSolidOffsets[c + ',' + r];
+function solidBlocksPoint(x, y) {
+  const [c, r] = cellAt(x, y);
+  if (isWall(c, r) && !solidOffsetAt(c, r)) return true;        // 沒微調過：整格都擋
+  for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
+    const cc = c + dc, rr = r + dr;
+    const off = solidOffsetAt(cc, rr);
+    if (!off || !isWall(cc, rr)) continue;
+    const x0 = OX + cc * CELL + off[0], y0 = OY + rr * CELL + off[1];
+    if (x >= x0 && x < x0 + CELL && y >= y0 && y < y0 + CELL) return true;
+  }
+  return false;
+}
 
 // ---- 提供給 game.js 用的查詢 ----
 function defaultEntranceCells() { const a = []; for (let c = 0; c < COLS; c++) a.push([c, SPAWN_ROW]); return a; }

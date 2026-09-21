@@ -269,7 +269,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_rock01",
     "name": "碎石 1",
     "role": "floor",
-    "file": "images/item-decorate/rock01.png",
+    "file": "images/破損建築/rock01.png",
     "w": 1,
     "h": 1,
     "flat": true
@@ -278,7 +278,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_rock02",
     "name": "碎石 2",
     "role": "floor",
-    "file": "images/item-decorate/rock02.png",
+    "file": "images/破損建築/rock02.png",
     "w": 2,
     "h": 1,
     "flat": true
@@ -287,7 +287,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_rock03",
     "name": "碎石 3",
     "role": "floor",
-    "file": "images/item-decorate/rock03.png",
+    "file": "images/破損建築/rock03.png",
     "w": 2,
     "h": 2,
     "flat": true
@@ -408,8 +408,8 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_crack01",
     "name": "地面裂痕 1",
     "role": "floor",
-    "file": "images/item-decorate/crack01.png",
-    "w": 1,
+    "file": "images/破損建築/crack01.png",
+    "w": 2,
     "h": 1,
     "flat": true
   },
@@ -417,7 +417,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_crack02",
     "name": "地面裂痕 2",
     "role": "floor",
-    "file": "images/item-decorate/crack02.png",
+    "file": "images/破損建築/crack02.png",
     "w": 2,
     "h": 2,
     "flat": true
@@ -426,18 +426,18 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_crack03",
     "name": "地面裂痕 3",
     "role": "floor",
-    "file": "images/item-decorate/crack03.png",
-    "w": 5,
-    "h": 3,
+    "file": "images/破損建築/crack03.png",
+    "w": 6,
+    "h": 4,
     "flat": true
   },
   {
     "id": "tile_new_decor_crack04",
     "name": "地面裂痕 4",
     "role": "floor",
-    "file": "images/item-decorate/crack04.png",
-    "w": 2,
-    "h": 2,
+    "file": "images/破損建築/crack04.png",
+    "w": 3,
+    "h": 3,
     "flat": true
   },
   {
@@ -576,8 +576,8 @@ const TILES_CUSTOM = [
     "name": "大廳高柱",
     "role": "floor",
     "file": "images/01-station-hall/pillar.png",
-    "w": 1,
-    "h": 5
+    "w": 2,
+    "h": 8
   },
   {
     "id": "tile_station_hall_red_line01",
@@ -939,6 +939,183 @@ const TILES_CUSTOM = [
     "file": "images/background/station-wall-front-edge03.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_eoc_pillar",
+    "name": "柱子",
+    "role": "floor",
+    "file": "images/應變中心/eoc-pillar.png",
+    "w": 1,
+    "h": 5
+  },
+  {
+    "id": "tile_eoc_distance_poster",
+    "name": "安全距離海報",
+    "role": "floor",
+    "file": "images/應變中心/distance-poster.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_eoc_security_door",
+    "name": "門（電子鎖）",
+    "role": "floor",
+    "file": "images/應變中心/door-security.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_eoc_fire_hydrant",
+    "name": "消防栓箱",
+    "role": "floor",
+    "file": "images/應變中心/fire-hydrant-cabinet.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_dmg_broken_wall_right",
+    "name": "破牆（右斷）",
+    "role": "floor",
+    "file": "images/破損建築/broken-wall-right.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_dmg_broken_wall_left",
+    "name": "破牆（左斷）",
+    "role": "floor",
+    "file": "images/破損建築/broken-wall-left.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_dmg_broken_wall_breach",
+    "name": "破牆（破洞）",
+    "role": "floor",
+    "file": "images/破損建築/broken-wall-breach.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_dmg_broken_pillar_cracked",
+    "name": "裂柱",
+    "role": "floor",
+    "file": "images/破損建築/broken-pillar-cracked.png",
+    "w": 1,
+    "h": 3
+  },
+  {
+    "id": "tile_dmg_broken_pillar_rebar",
+    "name": "斷柱（鋼筋）",
+    "role": "floor",
+    "file": "images/破損建築/broken-pillar-rebar.png",
+    "w": 1,
+    "h": 3
+  },
+  {
+    "id": "tile_dmg_crack05",
+    "name": "地面裂痕 5",
+    "role": "floor",
+    "file": "images/破損建築/crack05.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_crack06",
+    "name": "地面裂痕 6",
+    "role": "floor",
+    "file": "images/破損建築/crack06.png",
+    "w": 3,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_crack07",
+    "name": "地面裂痕 7",
+    "role": "floor",
+    "file": "images/破損建築/crack07.png",
+    "w": 3,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_floor_crater",
+    "name": "地面坑洞",
+    "role": "floor",
+    "file": "images/破損建築/floor-crater.png",
+    "w": 3,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_scatter",
+    "name": "碎石散落",
+    "role": "floor",
+    "file": "images/破損建築/rubble-scatter.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_debris_dust",
+    "name": "細碎石屑",
+    "role": "floor",
+    "file": "images/破損建築/debris-dust.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_strip",
+    "name": "碎石帶",
+    "role": "floor",
+    "file": "images/破損建築/rubble-strip.png",
+    "w": 3,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_rocks",
+    "name": "石塊",
+    "role": "floor",
+    "file": "images/破損建築/rubble-rocks.png",
+    "w": 2,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_small",
+    "name": "瓦礫（小）",
+    "role": "floor",
+    "file": "images/破損建築/rubble-small.png",
+    "w": 2,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_block_dark",
+    "name": "焦黑瓦礫",
+    "role": "floor",
+    "file": "images/破損建築/rubble-block-dark.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_dmg_rubble_pile_medium",
+    "name": "瓦礫堆（中）",
+    "role": "floor",
+    "file": "images/破損建築/rubble-pile-medium.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_dmg_rubble_pile_large",
+    "name": "瓦礫堆（大）",
+    "role": "floor",
+    "file": "images/破損建築/rubble-pile-large.png",
+    "w": 3,
+    "h": 2
   }
 ];
 
@@ -3003,7 +3180,8 @@ const MAPS_DEFAULT = [
     "rows": 30,
     "safe": false,
     "npcs": false,
-    "portals": []
+    "portals": [],
+    "solidOffsets": {}
   },
   {
     "id": "map_mr4mbd88",
@@ -6059,7 +6237,8 @@ const MAPS_DEFAULT = [
     "rows": 36,
     "safe": false,
     "npcs": false,
-    "portals": []
+    "portals": [],
+    "solidOffsets": {}
   },
   {
     "id": "map_mu5ad7t2",
@@ -7110,7 +7289,8 @@ const MAPS_DEFAULT = [
         "r": 11,
         "to": "map_mua3askw"
       }
-    ]
+    ],
+    "solidOffsets": {}
   },
   {
     "id": "map_mua3askw",
@@ -7949,6 +8129,36 @@ const MAPS_DEFAULT = [
         "r": 11,
         "to": "map_mu5ad7t2"
       }
-    ]
+    ],
+    "solidOffsets": {
+      "14,3": [
+        0,
+        -4
+      ],
+      "15,3": [
+        0,
+        -4
+      ],
+      "5,3": [
+        0,
+        -5
+      ],
+      "5,4": [
+        0,
+        -12
+      ],
+      "6,4": [
+        0,
+        -11
+      ],
+      "4,5": [
+        -5,
+        0
+      ],
+      "4,6": [
+        -6,
+        0
+      ]
+    }
   }
 ];

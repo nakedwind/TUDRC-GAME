@@ -18,6 +18,10 @@ const STORAGE_NEW_ASSETS_PACK = 'tudrc_asset_pack_new_materials_v6';
 const STORAGE_STATION_HALL_PACK = 'tudrc_asset_pack_station_hall_v2';
 const STORAGE_EOC_PACK = 'tudrc_asset_pack_eoc_v1';        // 應變中心素材包
 const STORAGE_BG_EXTRA_PACK = 'tudrc_asset_pack_bg_extra_v1';   // 後補的背景建材（牆面前緣 2／3）
+const STORAGE_DAMAGED_PACK = 'tudrc_asset_pack_damaged_v1';     // 破損建築素材包（含搬過來的裂痕／碎石）
+const STORAGE_TILE_SIZE_FIX = 'tudrc_fix_tile_sizes_v1';         // 修正登記尺寸與圖片不符的素材
+const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應變中心素材：安全距離海報
+const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應變中心素材：門（電子鎖）、消防栓箱
 const STORAGE_DAMAGE_ASSETS_CLEANUP = 'tudrc_remove_unapproved_damage_assets_v1';
 
 // ---- UI 按鈕回饋 ----
@@ -135,15 +139,19 @@ const palette = () => BUILTIN_TILES.concat(customTiles);
 const tileById = (id) => palette().find(t => t.id === id);
 const wallCells = (m) => new Set(m.solid);   // 只有「不可穿透」才擋路
 
-function mergeDefaultAssetPack(idPrefix, storageKey) {
+// match：id 前綴字串，或是 (tile) => boolean 的篩選函式（例如依資料夾挑素材）
+function mergeDefaultAssetPack(match, storageKey) {
   if (localStorage.getItem(storageKey)) return false;
-  const packTiles = TILES_CUSTOM.filter(t => String(t.id).startsWith(idPrefix));
+  const picks = typeof match === 'function' ? match : (t => String(t.id).startsWith(match));
+  const packTiles = TILES_CUSTOM.filter(picks);
+  const baseName = f => String(f || '').replace(/\\/g, '/').split('/').pop().toLowerCase();
+  const knownIds = new Set(TILES_CUSTOM.map(x => x.id));
   packTiles.forEach(t => {
-    const filename = String(t.file || '').replace(/\\/g, '/').split('/').pop().toLowerCase();
-    const existing = customTiles.find(x => {
-      const oldName = String(x.file || '').replace(/\\/g, '/').split('/').pop().toLowerCase();
-      return x.id === t.id || (filename && oldName === filename);
-    });
+    const filename = baseName(t.file);
+    // 先用 id 找；找不到才用檔名找，而且只認「使用者自己加的素材」——
+    // 不能拿別的內建素材來改（曾經因為兩張圖都叫 pillar.png，把大廳高柱改壞）。
+    const existing = customTiles.find(x => x.id === t.id)
+      || customTiles.find(x => !knownIds.has(x.id) && filename && baseName(x.file) === filename);
     if (existing) {
       existing.file = t.file; existing.w = t.w; existing.h = t.h;
       if (t.flat) existing.flat = true; else delete existing.flat;   // 讓「平貼地面」標記同步到編輯器暫存，匯出才不會掉
@@ -176,7 +184,13 @@ function loadTiles() {
   const stationHallAdded = mergeDefaultAssetPack('tile_station_hall_', STORAGE_STATION_HALL_PACK);
   const eocAdded = mergeDefaultAssetPack('tile_eoc_', STORAGE_EOC_PACK);
   const bgExtraAdded = mergeDefaultAssetPack('tile_bg_', STORAGE_BG_EXTRA_PACK);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved) saveTiles();
+  // 破損建築：新素材（tile_dmg_）＋從 item-decorate 搬過來的裂痕／碎石（更新路徑與尺寸，地圖上的擺放不變）
+  const damagedAdded = mergeDefaultAssetPack(t => String(t.file || '').includes('/破損建築/'), STORAGE_DAMAGED_PACK);
+  // 兩個「柱子」曾因同檔名互相覆蓋：大廳高柱改回 2×8、補回應變中心的柱子
+  const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
+  const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
+  const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -222,6 +236,8 @@ function fixMap(m) {
     gap: 0.85, gapSub: 0.05, reward: 8,
   }, m.rules || {});
   m.name = m.name || '未命名地圖'; m.desc = m.desc || '';
+  m.solidOffsets = m.solidOffsets || {};   // 不可穿透格的像素微調：'c,r' → [dx, dy]
+  Object.keys(m.solidOffsets).forEach(k => { if (m.solid.indexOf(k) < 0) delete m.solidOffsets[k]; });   // 沒有紅格就不留微調
   m.safe = !!m.safe;   // 安全場景：遊戲裡不生怪、不套黑幕
   m.npcs = !!m.npcs;   // 場景 NPC：這張地圖會不會出現克莉思、路德等人
   m.portals = Array.isArray(m.portals) ? m.portals : [];   // 出入口：[{c,r,to:目標地圖id}]
@@ -292,6 +308,29 @@ window.addEventListener('keydown', e => {
   if (!inField && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); flipAction('y'); }
   // 方向鍵：微調選取物件的位置（不貼齊格線；按住 Shift 一次移多一點）
   // 1×1 小圖原本存成「格子」，格子只有格座標、沒有像素位移 → 第一次微調時先轉成 1×1 大圖。
+  // 碰撞微調：方向鍵移動選中紅格的擋路範圍（Shift 一次多移一點，Delete 歸零）
+  if (!inField && brush.mode === 'solidnudge' && solidNudgeCell) {
+    const m = curMap();
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      e.preventDefault(); delete m.solidOffsets[solidNudgeCell];
+      saveMaps(); draw(); setStatus('這格的碰撞範圍已歸零（回到整格對齊）', '#7ee0c0');
+      return;
+    }
+    if (/^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
+      e.preventDefault();
+      const step = e.shiftKey ? 10 : 1;
+      const off = m.solidOffsets[solidNudgeCell] || [0, 0];
+      const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
+      const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
+      const clamp = v => Math.max(-39, Math.min(39, v));      // 最多偏移一格內，避免跳到別格
+      const next = [clamp(off[0] + dx), clamp(off[1] + dy)];
+      if (next[0] === 0 && next[1] === 0) delete m.solidOffsets[solidNudgeCell];
+      else m.solidOffsets[solidNudgeCell] = next;
+      saveMaps(); draw();
+      setStatus('碰撞範圍偏移：' + next[0] + ', ' + next[1] + ' px', '#ffd479');
+      return;
+    }
+  }
   if (!inField && /^Arrow(Left|Right|Up|Down)$/.test(e.key) && selections.length) {
     e.preventDefault();
     if (dropLockedSelections('微調位置')) return;
@@ -334,6 +373,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/item-obstacle',
   'images/01-station-hall',
   'images/應變中心',
+  'images/破損建築',
 ];
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -425,7 +465,8 @@ function drawStamp(s) {
 
 // ================= 畫布繪製 =================
 let showGrid = true;    // 格線開關（可用工具列按鈕切換）
-let showSolid = true;   // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）
+let showSolid = true;        // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）
+let solidNudgeCell = null;   // 目前用「碰撞微調」選中的紅格（'c,r'）
 function draw() {
   const m = curMap();
   const ent = effEntrances(m), camp = effCamp(m);
@@ -445,8 +486,18 @@ function draw() {
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
     const x = OX + c * CELL, y = OY + r * CELL, key = c + ',' + r;
     if (showSolid && solid.has(key)) {
-      ctx.fillStyle = 'rgba(200,50,50,.30)'; ctx.fillRect(x, y, CELL, CELL);
-      ctx.strokeStyle = '#ff5b5b'; ctx.lineWidth = 2; ctx.strokeRect(x + 2.5, y + 2.5, CELL - 5, CELL - 5);
+      const off = m.solidOffsets[key] || [0, 0];                 // 像素微調後的實際擋路範圍
+      const sx2 = x + off[0], sy2 = y + off[1];
+      ctx.fillStyle = 'rgba(200,50,50,.30)'; ctx.fillRect(sx2, sy2, CELL, CELL);
+      ctx.strokeStyle = '#ff5b5b'; ctx.lineWidth = 2; ctx.strokeRect(sx2 + 2.5, sy2 + 2.5, CELL - 5, CELL - 5);
+      if (off[0] || off[1]) {   // 有微調：用虛線標出原本的格子位置，方便對照
+        ctx.strokeStyle = 'rgba(255,140,140,.45)'; ctx.lineWidth = 1; ctx.setLineDash([4, 3]);
+        ctx.strokeRect(x + .5, y + .5, CELL - 1, CELL - 1); ctx.setLineDash([]);
+      }
+      if (solidNudgeCell === key) {   // 目前選中的格子
+        ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 2; ctx.setLineDash([6, 3]);
+        ctx.strokeRect(sx2 + 1, sy2 + 1, CELL - 2, CELL - 2); ctx.setLineDash([]);
+      }
     }
     if (breakable.has(key)) {
       ctx.fillStyle = 'rgba(230,150,40,.26)'; ctx.fillRect(x, y, CELL, CELL);
@@ -607,6 +658,15 @@ function paintCell(c, r, isDown, additiveSelect = false) {
   } else if (brush.mode === 'solid') {
     if (effEntrances(m).has(key) || effCamp(m).has(key)) { setStatus('入口／營地上不能設不可穿透', '#ff8f8f'); return; }
     removeFrom(m.breakable, key); toggle(m.solid, key);
+    if (m.solid.indexOf(key) < 0) { delete m.solidOffsets[key]; if (solidNudgeCell === key) solidNudgeCell = null; }   // 取消紅格時一併清掉微調
+  } else if (brush.mode === 'solidnudge') {
+    if (!isDown) return;
+    if (m.solid.indexOf(key) < 0) { solidNudgeCell = null; setStatus('這格不是「不可穿透」，先用 🧱 畫上紅格再微調', '#ffd24a'); draw(); return; }
+    solidNudgeCell = key;
+    const off = m.solidOffsets[key] || [0, 0];
+    setStatus('已選這格碰撞範圍（目前偏移 ' + off[0] + ', ' + off[1] + '）：方向鍵移動、Shift 移多一點、Delete 歸零', '#ffd479');
+    draw();
+    return;
   } else if (brush.mode === 'breakable') {
     if (effEntrances(m).has(key) || effCamp(m).has(key)) { setStatus('入口／營地上不能設可破壞', '#ff8f8f'); return; }
     removeFrom(m.solid, key); toggle(m.breakable, key);
@@ -773,6 +833,7 @@ const PALETTE_CATEGORIES = [
   { id: 'decor', name: '裝飾物' },
   { id: 'obstacle', name: '障礙物' },
   { id: 'eoc', name: '應變中心' },
+  { id: 'damaged', name: '破損建築' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -781,6 +842,7 @@ function tileCategory(t) {
   if (t.systemColor) return 'color';
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
   if (file.includes('/應變中心/')) return 'eoc';
+  if (file.includes('/破損建築/')) return 'damaged';
   if (file.includes('/item-decorate/')) return 'decor';
   if (file.includes('/item-obstacle/')) return 'obstacle';
   return 'other';
@@ -1161,7 +1223,7 @@ document.getElementById('solidToggle').addEventListener('click', e => {
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞、入口、營地？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(); m.stamps = []; m.solid = []; m.breakable = []; m.entrances = []; m.camp = []; checkResult = null;
+  const m = curMap(); m.layers = emptyLayers(); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.entrances = []; m.camp = []; checkResult = null; solidNudgeCell = null;
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 

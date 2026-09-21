@@ -373,8 +373,10 @@ function playerSpawnPos() {
 function playerBlocked(x, y) {
   const r = PLAYER.r;
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
-    const [c, rr] = cellAt(x + sx, y + sy);
-    if (!inGrid(c, rr) || isWall(c, rr) || G.grid[c + ',' + rr]) return true;
+    const px = x + sx, py = y + sy;
+    const [c, rr] = cellAt(px, py);
+    if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
+    if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
   return false;
 }
