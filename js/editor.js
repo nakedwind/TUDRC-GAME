@@ -9,7 +9,7 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;   // 像素圖不要模糊
-const STORAGE_MAPS = 'tudrc_maps_v1';
+const STORAGE_MAPS = 'tudrc_maps_v2';   // 2026-09-22：改用今天 10:38 首次 pull 的地圖紀錄；舊 v1 仍保留在瀏覽器內
 const STORAGE_TILES = 'tudrc_tiles_v1';
 const STORAGE_PREVIEW = 'tudrc_map_preview_v1';   // 「預覽遊戲」用：把編輯中的地圖交給遊戲畫面
 const STORAGE_DECOR_PACK = 'tudrc_asset_pack_item_decorate_v1';
@@ -19,6 +19,9 @@ const STORAGE_STATION_HALL_PACK = 'tudrc_asset_pack_station_hall_v2';
 const STORAGE_EOC_PACK = 'tudrc_asset_pack_eoc_v1';        // 應變中心素材包
 const STORAGE_BG_EXTRA_PACK = 'tudrc_asset_pack_bg_extra_v1';   // 後補的背景建材（牆面前緣 2／3）
 const STORAGE_DAMAGED_PACK = 'tudrc_asset_pack_damaged_v1';     // 破損建築素材包（含搬過來的裂痕／碎石）
+const STORAGE_FIELD_PACK = 'tudrc_asset_pack_field_v1';        // 野營／軍用素材包（帳篷、貨櫃、發電機、彈藥箱、置物櫃）
+const STORAGE_FIELD_BASE = 'tudrc_asset_field_base_v4';         // 可破壞臨時基地（v4：預設深度線改為第 4 格）
+const STORAGE_SCENE_PROPS_PACK = 'tudrc_asset_pack_scene_props_v1'; // 場景專用物件（不屬於玩家建築選單）
 const STORAGE_TILE_SIZE_FIX = 'tudrc_fix_tile_sizes_v1';         // 修正登記尺寸與圖片不符的素材
 const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應變中心素材：安全距離海報
 const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應變中心素材：門（電子鎖）、消防栓箱
@@ -155,6 +158,11 @@ function mergeDefaultAssetPack(match, storageKey) {
     if (existing) {
       existing.file = t.file; existing.w = t.w; existing.h = t.h;
       if (t.flat) existing.flat = true; else delete existing.flat;   // 讓「平貼地面」標記同步到編輯器暫存，匯出才不會掉
+      if (t.baseHp) {
+        existing.baseHp = t.baseHp;
+        existing.baseDepth = t.baseDepth;
+        existing.baseSolid = clone(t.baseSolid || []);
+      }
     } else customTiles.push(clone(t));
   });
   localStorage.setItem(storageKey, '1');
@@ -184,13 +192,16 @@ function loadTiles() {
   const stationHallAdded = mergeDefaultAssetPack('tile_station_hall_', STORAGE_STATION_HALL_PACK);
   const eocAdded = mergeDefaultAssetPack('tile_eoc_', STORAGE_EOC_PACK);
   const bgExtraAdded = mergeDefaultAssetPack('tile_bg_', STORAGE_BG_EXTRA_PACK);
+  const fieldAdded = mergeDefaultAssetPack('tile_field_', STORAGE_FIELD_PACK);   // 野營／軍用素材
+  const fieldBaseAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_base', STORAGE_FIELD_BASE);
+  const scenePropsAdded = mergeDefaultAssetPack(t => String(t.file || '').includes('/scene-props/'), STORAGE_SCENE_PROPS_PACK);
   // 破損建築：新素材（tile_dmg_）＋從 item-decorate 搬過來的裂痕／碎石（更新路徑與尺寸，地圖上的擺放不變）
   const damagedAdded = mergeDefaultAssetPack(t => String(t.file || '').includes('/破損建築/'), STORAGE_DAMAGED_PACK);
   // 兩個「柱子」曾因同檔名互相覆蓋：大廳高柱改回 2×8、補回應變中心的柱子
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded) saveTiles();
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -463,6 +474,13 @@ function drawStamp(s) {
   ctx.fillText(t.name, x + w / 2, y + h / 2);
 }
 
+// 基地碰撞以「每次擺放的 stamp」為單位保存；舊地圖沒有資料時沿用素材預設。
+function baseSolidForStamp(s, t) {
+  if (Array.isArray(s.baseSolid)) return s.baseSolid;
+  const w = tileW(t), h = tileH(t);
+  return clone(t.baseSolid || []).map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
+}
+
 // ================= 畫布繪製 =================
 let showGrid = true;    // 格線開關（可用工具列按鈕切換）
 let showSolid = true;        // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）
@@ -562,6 +580,23 @@ function draw() {
     else { const [c, r] = selected.key.split(',').map(Number); rx = OX + c * CELL; ry = OY + r * CELL; }
     if (rx != null) { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3; ctx.setLineDash([7, 4]); ctx.strokeRect(rx + 1.5, ry + 1.5, rw - 3, rh - 3); ctx.setLineDash([]); }
   }
+  // 選到基地時，把目前的碰撞格直接疊在基地圖上，所見即所得。
+  if (selections.length === 1 && selections[0].type === 'stamp') {
+    const s = m.stamps[selections[0].index], t = s && tileById(s.id);
+    if (s && t && t.baseHp) {
+      for (const [dc, dr] of baseSolidForStamp(s, t)) {
+        const x = OX + (s.c + dc) * CELL + (s.ox || 0), y = OY + (s.r + dr) * CELL + (s.oy || 0);
+        ctx.fillStyle = 'rgba(235,55,55,.34)'; ctx.fillRect(x, y, CELL, CELL);
+        ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
+      }
+      const depth = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, tileH(t) - 2));
+      const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0) + depth * CELL;
+      ctx.strokeStyle = '#55d9ff'; ctx.lineWidth = 3; ctx.setLineDash([9, 5]);
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + tileW(t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+      ctx.fillText('深度線 ' + depth, x + 5, y - 4);
+    }
+  }
 }
 
 // ================= 可翻轉圖片放置 / 查詢 =================
@@ -580,6 +615,12 @@ function placeStamp(c, r, t) {
   const st = { id: t.id, c, r, layer: activeLayer };
   if (brushFlip.fx) st.fx = true;
   if (brushFlip.fy) st.fy = true;
+  if (t.baseHp) {
+    st.baseHp = t.baseHp;
+    const defaultDepth = Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2);
+    st.baseDepth = brushFlip.fy ? h - defaultDepth : defaultDepth;
+    st.baseSolid = clone(t.baseSolid || []).map(([dc, dr]) => [brushFlip.fx ? w - 1 - dc : dc, brushFlip.fy ? h - 1 - dr : dr]);
+  }
   m.stamps.push(st);
   checkResult = null; saveMaps(); draw();
 }
@@ -834,6 +875,8 @@ const PALETTE_CATEGORIES = [
   { id: 'obstacle', name: '障礙物' },
   { id: 'eoc', name: '應變中心' },
   { id: 'damaged', name: '破損建築' },
+  { id: 'field', name: '野戰基地' },
+  { id: 'scene', name: '場景物件' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -843,6 +886,8 @@ function tileCategory(t) {
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
   if (file.includes('/應變中心/')) return 'eoc';
   if (file.includes('/破損建築/')) return 'damaged';
+  if (file.includes('/field-camp/')) return 'field';
+  if (file.includes('/scene-props/')) return 'scene';
   if (file.includes('/item-decorate/')) return 'decor';
   if (file.includes('/item-obstacle/')) return 'obstacle';
   return 'other';
@@ -992,17 +1037,53 @@ function selLayerId() {
   const layers = selections.map(sel => sel.type === 'stamp' ? ((curMap().stamps[sel.index] || {}).layer || 'top') : sel.layer);
   return layers.every(id => id === layers[0]) ? layers[0] : null;
 }
+function selectedBaseStamp() {
+  if (selections.length !== 1 || selections[0].type !== 'stamp') return null;
+  const s = curMap().stamps[selections[0].index];
+  const t = s && tileById(s.id);
+  return s && t && t.baseHp ? { s, t } : null;
+}
+function refreshBaseCollisionPanel() {
+  const panel = document.getElementById('baseCollisionPanel');
+  const grid = document.getElementById('baseCollisionGrid');
+  const picked = selectedBaseStamp();
+  if (!picked) { panel.classList.add('hidden'); grid.innerHTML = ''; return; }
+  const { s, t } = picked, w = tileW(t), h = tileH(t);
+  const solid = baseSolidForStamp(s, t), blocked = new Set(solid.map(([c, r]) => c + ',' + r));
+  panel.classList.remove('hidden');
+  document.getElementById('baseHpInput').value = s.baseHp || t.baseHp || 2000;
+  const depthInput = document.getElementById('baseDepthInput');
+  depthInput.max = h;
+  depthInput.value = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2));
+  grid.style.gridTemplateColumns = 'repeat(' + w + ', 23px)';
+  grid.innerHTML = '';
+  for (let r = 0; r < h; r++) for (let c = 0; c < w; c++) {
+    const key = c + ',' + r, b = document.createElement('button');
+    b.type = 'button'; b.className = 'base-collision-cell' + (blocked.has(key) ? ' blocked' : '');
+    b.title = blocked.has(key) ? '阻擋／可受攻擊（點擊改為可走）' : '可走動（點擊改為阻擋）';
+    b.addEventListener('click', () => {
+      pushUndo();
+      const cells = baseSolidForStamp(s, t).map(cell => cell.slice());
+      const index = cells.findIndex(([dc, dr]) => dc === c && dr === r);
+      if (index >= 0) cells.splice(index, 1); else cells.push([c, r]);
+      s.baseSolid = cells;
+      saveMaps(); draw(); refreshBaseCollisionPanel();
+      setStatus(index >= 0 ? '已改為可走動格' : '已改為基地碰撞格', index >= 0 ? '#7ee0c0' : '#ff8f8f');
+    });
+    grid.appendChild(b);
+  }
+}
 function refreshSelPanel() {
   const panel = document.getElementById('selControls');   // 只隱藏／顯示內層控制項，選取鈕永遠在
   const m = curMap();
   selections = selections.filter(sel => sel.type === 'stamp' ? !!m.stamps[sel.index] : !!(m.layers[sel.layer] && m.layers[sel.layer][sel.key] !== undefined));
   selection = selections.length ? selections[selections.length - 1] : null;
-  if (!selection) { panel.classList.add('hidden'); return; }
+  if (!selection) { panel.classList.add('hidden'); refreshBaseCollisionPanel(); return; }
   if (selections.length > 1) {
     document.getElementById('selName').textContent = selections.length + ' 個物件';
     const sl = document.getElementById('selLayer'); sl.innerHTML = '<option value="">選擇目標圖層</option>';
     LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; sl.appendChild(o); });
-    panel.classList.remove('hidden'); return;
+    panel.classList.remove('hidden'); refreshBaseCollisionPanel(); return;
   }
   let name, curLayer;
   if (selection.type === 'stamp') {
@@ -1019,6 +1100,7 @@ function refreshSelPanel() {
   const sl = document.getElementById('selLayer'); sl.innerHTML = '';
   LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; if (l.id === curLayer) o.selected = true; sl.appendChild(o); });
   panel.classList.remove('hidden');
+  refreshBaseCollisionPanel();
 }
 function moveSelectionToLayer(newLayerId) {
   if (!selections.length || !newLayerId) return;
@@ -1048,6 +1130,28 @@ document.getElementById('selUp').addEventListener('click', () => moveSelBy(1));
 document.getElementById('selDown').addEventListener('click', () => moveSelBy(-1));
 document.getElementById('selDelete').addEventListener('click', deleteSelection);
 document.getElementById('selClear').addEventListener('click', clearSelection);
+document.getElementById('baseHpInput').addEventListener('change', e => {
+  const picked = selectedBaseStamp(); if (!picked) return;
+  pushUndo(); picked.s.baseHp = Math.max(1, parseInt(e.target.value, 10) || picked.t.baseHp || 2000);
+  saveMaps(); refreshBaseCollisionPanel(); setStatus('基地 HP 已改為 ' + picked.s.baseHp, '#7ee0c0');
+});
+document.getElementById('baseDepthInput').addEventListener('change', e => {
+  const picked = selectedBaseStamp(); if (!picked) return;
+  const h = tileH(picked.t), next = Math.max(0, Math.min(h, parseInt(e.target.value, 10) || 0));
+  pushUndo(); picked.s.baseDepth = next;
+  saveMaps(); draw(); refreshBaseCollisionPanel();
+  setStatus('基地深度線已設在第 ' + next + ' 格', '#55d9ff');
+});
+document.getElementById('baseCollisionReset').addEventListener('click', () => {
+  const picked = selectedBaseStamp(); if (!picked) return;
+  const { s, t } = picked, w = tileW(t), h = tileH(t);
+  pushUndo();
+  s.baseHp = t.baseHp || 2000;
+  const defaultDepth = Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2);
+  s.baseDepth = s.fy ? h - defaultDepth : defaultDepth;
+  s.baseSolid = clone(t.baseSolid || []).map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
+  saveMaps(); draw(); refreshBaseCollisionPanel(); setStatus('基地碰撞、HP 與深度線已恢復預設', '#7ee0c0');
+});
 
 // ================= 翻轉（大小圖皆可）=================
 function updateFlipUI() {
@@ -1077,7 +1181,18 @@ function flipSelection(axis) {
   selections = selections.map(sel => {
     if (sel.type === 'stamp') {
       const s = m.stamps[sel.index];
-      if (s) { if (axis === 'x') s.fx = !s.fx; else s.fy = !s.fy; }
+      if (s) {
+        const t = tileById(s.id) || {}, w = tileW(t), h = tileH(t);
+        if (t.baseHp) {
+          const cells = baseSolidForStamp(s, t);
+          s.baseSolid = cells.map(([dc, dr]) => axis === 'x' ? [w - 1 - dc, dr] : [dc, h - 1 - dr]);
+          if (axis === 'y') {
+            const depth = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2));
+            s.baseDepth = h - depth;
+          }
+        }
+        if (axis === 'x') s.fx = !s.fx; else s.fy = !s.fy;
+      }
       return sel;
     }
     const id = m.layers[sel.layer] && m.layers[sel.layer][sel.key];

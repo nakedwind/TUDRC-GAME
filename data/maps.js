@@ -117,7 +117,7 @@ const TILES_CUSTOM = [
     "id": "tile_decor_waterboxes",
     "name": "水箱",
     "role": "floor",
-    "file": "images/item-decorate/Waterboxes.png",
+    "file": "images/scene-props/Waterboxes.png",
     "w": 1,
     "h": 1
   },
@@ -296,7 +296,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_refrigerator",
     "name": "冰箱",
     "role": "floor",
-    "file": "images/item-decorate/refrigerator.png",
+    "file": "images/scene-props/refrigerator.png",
     "w": 1,
     "h": 2
   },
@@ -304,7 +304,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_coffee_cup",
     "name": "咖啡杯",
     "role": "floor",
-    "file": "images/item-decorate/coffee-cup.png",
+    "file": "images/scene-props/coffee-cup.png",
     "w": 1,
     "h": 1
   },
@@ -312,7 +312,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_coffee_machine",
     "name": "咖啡機",
     "role": "floor",
-    "file": "images/item-decorate/coffee-machine.png",
+    "file": "images/scene-props/coffee-machine.png",
     "w": 1,
     "h": 1
   },
@@ -336,15 +336,15 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_plant02",
     "name": "盆栽 2",
     "role": "floor",
-    "file": "images/item-decorate/plant02.png",
-    "w": 2,
+    "file": "images/scene-props/plant02.png",
+    "w": 1,
     "h": 2
   },
   {
     "id": "tile_new_decor_plant03",
     "name": "盆栽 3",
     "role": "floor",
-    "file": "images/item-decorate/plant03.png",
+    "file": "images/scene-props/plant03.png",
     "w": 1,
     "h": 2
   },
@@ -352,7 +352,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_table",
     "name": "桌子",
     "role": "floor",
-    "file": "images/item-decorate/table.png",
+    "file": "images/scene-props/table.png",
     "w": 2,
     "h": 2
   },
@@ -360,7 +360,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_fire_extinguisher",
     "name": "滅火器",
     "role": "floor",
-    "file": "images/item-decorate/fire-extinguisher.png",
+    "file": "images/scene-props/fire-extinguisher.png",
     "w": 1,
     "h": 1
   },
@@ -368,41 +368,41 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_exit_sign",
     "name": "逃生指示燈",
     "role": "floor",
-    "file": "images/item-decorate/exit-sign.png",
-    "w": 1,
+    "file": "images/scene-props/exit-sign.png",
+    "w": 2,
     "h": 1
   },
   {
     "id": "tile_new_decor_vending_red",
     "name": "紅色販賣機",
     "role": "floor",
-    "file": "images/item-decorate/vending-machine-red.png",
-    "w": 2,
+    "file": "images/scene-props/vending-machine-red.png",
+    "w": 1,
     "h": 2
   },
   {
     "id": "tile_new_decor_vending_green",
     "name": "綠色販賣機",
     "role": "floor",
-    "file": "images/item-decorate/vending-machine-green.png",
-    "w": 2,
+    "file": "images/scene-props/vending-machine-green.png",
+    "w": 1,
     "h": 2
   },
   {
     "id": "tile_new_decor_chair_front",
     "name": "椅子（正面）",
     "role": "floor",
-    "file": "images/item-decorate/chair-front.png",
+    "file": "images/scene-props/chair-front.png",
     "w": 1,
-    "h": 2
+    "h": 1
   },
   {
     "id": "tile_new_decor_chair_side",
     "name": "椅子（側面）",
     "role": "floor",
-    "file": "images/item-decorate/chair-side.png",
+    "file": "images/scene-props/chair-side.png",
     "w": 1,
-    "h": 2
+    "h": 1
   },
   {
     "id": "tile_new_decor_crack01",
@@ -444,7 +444,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_water_dispenser",
     "name": "飲水機",
     "role": "floor",
-    "file": "images/item-decorate/water-dispenser.png",
+    "file": "images/scene-props/water-dispenser.png",
     "w": 1,
     "h": 2
   },
@@ -452,8 +452,8 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_poster",
     "name": "宣導海報",
     "role": "floor",
-    "file": "images/item-decorate/anti-harassment-poster.png",
-    "w": 2,
+    "file": "images/scene-props/anti-harassment-poster.png",
+    "w": 1,
     "h": 2
   },
   {
@@ -461,7 +461,7 @@ const TILES_CUSTOM = [
     "name": "三個小箱",
     "role": "floor",
     "file": "images/item-decorate/box-three-small.png",
-    "w": 2,
+    "w": 1,
     "h": 1
   },
   {
@@ -493,14 +493,14 @@ const TILES_CUSTOM = [
     "name": "側放紙箱",
     "role": "floor",
     "file": "images/item-decorate/box-side.png",
-    "w": 2,
+    "w": 1,
     "h": 1
   },
   {
     "id": "tile_new_decor_cabinet_tall_metal",
     "name": "高鐵櫃",
     "role": "floor",
-    "file": "images/item-decorate/cabinet-tall-metal.png",
+    "file": "images/scene-props/cabinet-tall-metal.png",
     "w": 1,
     "h": 2
   },
@@ -508,7 +508,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_cabinet_tall",
     "name": "高櫃",
     "role": "floor",
-    "file": "images/item-decorate/cabinet-tall.png",
+    "file": "images/scene-props/cabinet-tall.png",
     "w": 1,
     "h": 2
   },
@@ -516,7 +516,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_cabinet_low",
     "name": "矮櫃",
     "role": "floor",
-    "file": "images/item-decorate/cabinet-low.png",
+    "file": "images/scene-props/cabinet-low.png",
     "w": 1,
     "h": 1
   },
@@ -634,7 +634,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_station_timetable_board",
     "name": "車站時刻表看板",
     "role": "decor",
-    "file": "images/item-decorate/station-timetable-board.png",
+    "file": "images/scene-props/station-timetable-board.png",
     "w": 5,
     "h": 3
   },
@@ -642,7 +642,7 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_station_timetable_base",
     "name": "時刻表底座",
     "role": "decor",
-    "file": "images/item-decorate/station-timetable-base.png",
+    "file": "images/scene-props/station-timetable-base.png",
     "w": 1,
     "h": 3
   },
@@ -658,47 +658,9 @@ const TILES_CUSTOM = [
     "id": "tile_new_decor_person",
     "name": "人物",
     "role": "floor",
-    "file": "images/item-decorate/person.png",
+    "file": "images/scene-props/person.png",
     "w": 2,
     "h": 2
-  },
-  {
-    "id": "color_mu8nx3ez",
-    "name": "色塊",
-    "role": "floor",
-    "color": "#000000",
-    "w": 0.5,
-    "h": 0.5,
-    "systemColor": true,
-    "flat": true
-  },
-  {
-    "id": "color_mu8nxukw",
-    "name": "色塊",
-    "role": "floor",
-    "color": "#000000",
-    "w": 1,
-    "h": 4,
-    "systemColor": true,
-    "flat": true
-  },
-  {
-    "id": "color_mu8nzceg",
-    "name": "色塊",
-    "role": "floor",
-    "color": "#000000",
-    "w": 0.5,
-    "h": 6,
-    "systemColor": true,
-    "flat": true
-  },
-  {
-    "id": "tile_mu8rra80",
-    "name": "cabinet-low-02",
-    "role": "floor",
-    "file": "images/item-decorate/cabinet-low-02.png",
-    "w": 1,
-    "h": 4
   },
   {
     "id": "tile_eoc_plant_small_01",
@@ -941,36 +903,181 @@ const TILES_CUSTOM = [
     "h": 1
   },
   {
-    "id": "tile_eoc_pillar",
-    "name": "柱子",
+    "id": "tile_field_military_tent",
+    "name": "軍用帳篷",
     "role": "floor",
-    "file": "images/應變中心/eoc-pillar.png",
-    "w": 1,
-    "h": 5
+    "file": "images/field-camp/military-tent.png",
+    "w": 3,
+    "h": 3
   },
   {
-    "id": "tile_eoc_distance_poster",
-    "name": "安全距離海報",
+    "id": "tile_field_camp_bed",
+    "name": "行軍床",
     "role": "floor",
-    "file": "images/應變中心/distance-poster.png",
+    "file": "images/field-camp/camp-bed.png",
     "w": 2,
     "h": 2
   },
   {
-    "id": "tile_eoc_security_door",
-    "name": "門（電子鎖）",
+    "id": "tile_field_camp_bed_v",
+    "name": "行軍床（直）",
     "role": "floor",
-    "file": "images/應變中心/door-security.png",
+    "file": "images/field-camp/camp-bed-vertical.png",
     "w": 1,
     "h": 2
   },
   {
-    "id": "tile_eoc_fire_hydrant",
-    "name": "消防栓箱",
+    "id": "tile_field_generator",
+    "name": "野戰發電機",
     "role": "floor",
-    "file": "images/應變中心/fire-hydrant-cabinet.png",
+    "file": "images/field-camp/field-generator.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_field_ammo_crate",
+    "name": "彈藥箱",
+    "role": "floor",
+    "file": "images/field-camp/ammo-crate.png",
     "w": 1,
-    "h": 2
+    "h": 1
+  },
+  {
+    "id": "tile_field_base",
+    "name": "臨時基地（可破壞）",
+    "role": "floor",
+    "file": "images/field-camp/field-base.png",
+    "w": 11,
+    "h": 8,
+    "flat": true,
+    "baseHp": 2000,
+    "baseSolid": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        3,
+        0
+      ],
+      [
+        4,
+        0
+      ],
+      [
+        5,
+        0
+      ],
+      [
+        6,
+        0
+      ],
+      [
+        7,
+        0
+      ],
+      [
+        8,
+        0
+      ],
+      [
+        9,
+        0
+      ],
+      [
+        10,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        10,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        10,
+        2
+      ],
+      [
+        0,
+        3
+      ],
+      [
+        10,
+        3
+      ],
+      [
+        0,
+        4
+      ],
+      [
+        10,
+        4
+      ],
+      [
+        0,
+        5
+      ],
+      [
+        10,
+        5
+      ],
+      [
+        0,
+        6
+      ],
+      [
+        10,
+        6
+      ],
+      [
+        0,
+        7
+      ],
+      [
+        1,
+        7
+      ],
+      [
+        2,
+        7
+      ],
+      [
+        3,
+        7
+      ],
+      [
+        7,
+        7
+      ],
+      [
+        8,
+        7
+      ],
+      [
+        9,
+        7
+      ],
+      [
+        10,
+        7
+      ]
+    ],
+    "baseDepth": 4
   },
   {
     "id": "tile_dmg_broken_wall_right",
@@ -1116,6 +1223,46 @@ const TILES_CUSTOM = [
     "file": "images/破損建築/rubble-pile-large.png",
     "w": 3,
     "h": 2
+  },
+  {
+    "id": "tile_eoc_pillar",
+    "name": "柱子",
+    "role": "floor",
+    "file": "images/應變中心/eoc-pillar.png",
+    "w": 1,
+    "h": 5
+  },
+  {
+    "id": "tile_eoc_distance_poster",
+    "name": "安全距離海報",
+    "role": "floor",
+    "file": "images/應變中心/distance-poster.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_eoc_security_door",
+    "name": "門（電子鎖）",
+    "role": "floor",
+    "file": "images/應變中心/door-security.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_eoc_fire_hydrant",
+    "name": "消防栓箱",
+    "role": "floor",
+    "file": "images/應變中心/fire-hydrant-cabinet.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_scene_cabinet_low_02",
+    "name": "窄櫃",
+    "role": "floor",
+    "file": "images/scene-props/cabinet-low-02.png",
+    "w": 1,
+    "h": 4
   }
 ];
 
@@ -3017,6 +3164,246 @@ const MAPS_DEFAULT = [
         "c": 4,
         "r": 18,
         "layer": "object"
+      },
+      {
+        "id": "tile_field_base",
+        "c": 13,
+        "r": 18,
+        "layer": "object",
+        "baseHp": 2000,
+        "baseDepth": 4,
+        "baseSolid": [
+          [
+            0,
+            1
+          ],
+          [
+            10,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            10,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            10,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            10,
+            4
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            10,
+            5
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            8,
+            6
+          ],
+          [
+            7,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            2,
+            6
+          ],
+          [
+            2,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            7,
+            3
+          ],
+          [
+            8,
+            3
+          ],
+          [
+            8,
+            4
+          ],
+          [
+            8,
+            5
+          ],
+          [
+            7,
+            4
+          ],
+          [
+            7,
+            5
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            5,
+            6
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            6,
+            4
+          ]
+        ],
+        "ox": 0,
+        "oy": 10
       }
     ],
     "solid": [
@@ -3177,7 +3564,7 @@ const MAPS_DEFAULT = [
       "reward": 30
     },
     "cols": 40,
-    "rows": 30,
+    "rows": 29,
     "safe": false,
     "npcs": false,
     "portals": [],
@@ -3346,7 +3733,9 @@ const MAPS_DEFAULT = [
       "object": {},
       "overlay": {},
       "top": {},
-      "ground2": {},
+      "ground2": {
+        "13,32": "tile_dmg_debris_dust"
+      },
       "ground3": {},
       "object2": {},
       "object3": {},
@@ -6117,6 +6506,78 @@ const MAPS_DEFAULT = [
         "c": 32,
         "r": 30,
         "layer": "overlay"
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 18,
+        "r": 28,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 10,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 25,
+        "r": 28,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 29,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 32,
+        "r": 28,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 25,
+        "r": 20,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 9,
+        "r": 28,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_dmg_rubble_scatter",
+        "c": 27,
+        "r": 31,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_dmg_rubble_pile_large",
+        "c": 12,
+        "r": 12,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_dmg_rubble_pile_large",
+        "c": 34,
+        "r": 16,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_dmg_broken_wall_right",
+        "c": 0,
+        "r": 18,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_dmg_broken_wall_right",
+        "c": 0,
+        "r": 14,
+        "layer": "ground2"
       }
     ],
     "solid": [
@@ -7032,7 +7493,7 @@ const MAPS_DEFAULT = [
         "oy": -28
       },
       {
-        "id": "tile_mu8rra80",
+        "id": "tile_scene_cabinet_low_02",
         "c": 10,
         "r": 5,
         "layer": "ground2",
@@ -7064,7 +7525,7 @@ const MAPS_DEFAULT = [
         "oy": 18
       },
       {
-        "id": "tile_mu8rra80",
+        "id": "tile_scene_cabinet_low_02",
         "c": 19,
         "r": 6,
         "layer": "ground",
@@ -7885,7 +8346,7 @@ const MAPS_DEFAULT = [
         "oy": -14
       },
       {
-        "id": "tile_mu8rra80",
+        "id": "tile_scene_cabinet_low_02",
         "c": 13,
         "r": 7,
         "layer": "object",

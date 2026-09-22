@@ -44,7 +44,7 @@ function tileImage(t) {
 function preloadMapTiles() { Object.values(TILE_REGISTRY).forEach(t => { if (t.file) tileImage(t); }); }
 
 // ---- 當前地圖 ----
-let MAP = null, mapEntrances = [], mapBreakable = [], mapPortals = [];
+let MAP = null, mapEntrances = [], mapBreakable = [], mapPortals = [], mapBases = [];
 // 安全場景（例如回基地）：不生怪、不套黑幕。由地圖的 safe 欄位決定（地圖編輯器可勾選）
 let MAP_SAFE = false;
 // 場景 NPC（克莉思、路德…）只在有勾「場景 NPC」的地圖出現
@@ -101,7 +101,17 @@ function initMap() {
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
   mapSolidOffsets = MAP.solidOffsets || {};                              // 不可穿透格的像素微調
-  campCells = new Set((MAP.camp && MAP.camp.length) ? MAP.camp : []);    // 空＝預設最下排
+  mapBases = (MAP.stamps || []).filter(s => {
+    const t = mapTileById(s.id);
+    return !!(t && t.baseHp);
+  });
+  // 地圖上有基地時，怪物自動把基地中央當成營地目標；不必另外手動畫營地格。
+  const baseTargets = mapBases.map(s => {
+    const t = mapTileById(s.id);
+    const baseC = s.c + Math.round((s.ox || 0) / CELL), baseR = s.r + Math.round((s.oy || 0) / CELL);
+    return (baseC + Math.floor(mapTileW(t) / 2)) + ',' + (baseR + Math.floor(mapTileH(t) / 2));
+  });
+  campCells = new Set(baseTargets.length ? baseTargets : ((MAP.camp && MAP.camp.length) ? MAP.camp : []));    // 空＝預設最下排
   mapEntrances = (MAP.entrances || []).map(k => k.split(',').map(Number));
   mapBreakable = (MAP.breakable || []).map(k => k.split(',').map(Number));
   mapPortals = (MAP.portals || []).map(p => ({ c: p.c, r: p.r, to: p.to }));   // 出入口：走到門旁按鍵可換地圖
@@ -140,6 +150,26 @@ const isEntrance = (c, r) => mapEntrances.length ? mapEntrances.some(([ec, er]) 
 // 開局時把「可破壞」擺成障礙物（每次 newGame 呼叫）
 function seedMapObstacles() {
   if (!MAP) return;
+  for (const s of mapBases) {
+    const t = mapTileById(s.id);
+    if (!t) continue;
+    const w = mapTileW(t), h = mapTileH(t);
+    const baseC = s.c + Math.round((s.ox || 0) / CELL), baseR = s.r + Math.round((s.oy || 0) / CELL);
+    const hasCustomSolid = Array.isArray(s.baseSolid);
+    const sourceSolid = hasCustomSolid ? s.baseSolid : (Array.isArray(t.baseSolid) ? t.baseSolid : []);
+    const solid = sourceSolid.map(([dc, dr]) => hasCustomSolid ? [dc, dr] : [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
+    const hp = Math.max(1, Number(s.baseHp != null ? s.baseHp : t.baseHp) || 2000);
+    const o = {
+      kind: 'obstacle', isBase: true, mapTileId: t.id,
+      c: baseC, r: baseR, w, h, solid, hp, maxhp: hp,
+      orient: 'h', spawnT: undefined, hitT: 0,
+    };
+    solid.forEach(([dc, dr]) => {
+      const c = baseC + dc, r = baseR + dr;
+      if (inGrid(c, r)) G.grid[c + ',' + r] = o;
+    });
+    G.obstacles.push(o);
+  }
   for (const [c, r] of mapBreakable) {
     if (G.grid[c + ',' + r]) continue;
     const o = { kind: 'obstacle', c, r, hp: BARRIER.hp, maxhp: BARRIER.hp };
@@ -195,7 +225,7 @@ function hasImageAt(c, r) {
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
-const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !t.flat && (mapTileH(t) >= OCC_MIN_H || isOccLayer(s.layer || 'top')); };
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !!t.baseHp || (!t.flat && (mapTileH(t) >= OCC_MIN_H || isOccLayer(s.layer || 'top'))); };
 
 // 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
 function drawMapGround(ctx) {
@@ -212,7 +242,11 @@ function drawMapTop(ctx) {
   if (!MAP) return;
   const layer = MAP.layers ? (MAP.layers.top || {}) : {};
   for (const key in layer) { const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
-  for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === 'top') drawMapStampImg(ctx, s);
+  for (const s of (MAP.stamps || [])) {
+    if ((s.layer || 'top') !== 'top') continue;
+    const t = mapTileById(s.id) || {};
+    if (!t.baseHp) drawMapStampImg(ctx, s);
+  }
 }
 // 立體物：會和角色互相遮擋，回傳 {y:底部Y, draw:畫它} 加進 out
 //
@@ -226,23 +260,25 @@ function mapOccluders() {
   if (occCache && occCacheFor === MAP) return occCache;
   const items = [];
   MAP_LAYER_ORDER.forEach((lid, li) => {
-    if (lid === 'top') return;
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    if (isOccLayer(lid)) for (const key in layer) {
+    if (lid !== 'top' && isOccLayer(lid)) for (const key in layer) {
       const [c, r] = key.split(',').map(Number), id = layer[key];
       items.push({ li, x0: c * CELL, y0: r * CELL, x1: (c + 1) * CELL, y1: (r + 1) * CELL, kind: 'cell', id, c, r });
     }
     for (const s of (MAP.stamps || [])) {
       if ((s.layer || 'top') !== lid || !stampIsOcc(s)) continue;
       const t = mapTileById(s.id) || {};
+      if (lid === 'top' && !t.baseHp) continue;
       const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
-      items.push({ li, x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL, kind: 'stamp', stamp: s });
+      const depth = t.baseHp ? Math.max(0, Math.min(mapTileH(t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapTileH(t) - 2)))) : null;
+      items.push({ li, x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL, sortY: depth == null ? null : y0 + depth * CELL, fixedDepth: depth != null, kind: 'stamp', stamp: s });
     }
   });
   // items 已依圖層由下往上排好，所以下層的 y 一定先算完；
   // 這裡直接取下層「算完的 y」，疊好幾層也能接力（櫃子 → 咖啡機 → 杯子）。
   for (const it of items) {
-    it.y = it.y1;
+    it.y = it.fixedDepth ? it.sortY : it.y1;
+    if (it.fixedDepth) continue;
     for (const other of items) {                    // 找它底下那層、又跟它重疊的東西（牆、櫃子…）
       if (other.li >= it.li || other.y <= it.y) continue;
       if (it.x0 < other.x1 && it.x1 > other.x0 && it.y0 < other.y1 && it.y1 > other.y0) it.y = other.y;

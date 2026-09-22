@@ -8,14 +8,6 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-  <header id="gameHeader">
-    <div>
-      <div class="eyebrow">DISASTER RESPONSE CENTER</div>
-      <h1>台北地下災害應變中心</h1>
-    </div>
-    <div class="header-note">Y 區防線原型 · 嚮導實地指揮</div>
-  </header>
-
   <div id="wrap">
     <canvas id="cv" width="1280" height="720"></canvas>
     <div id="screenShade"></div>
@@ -27,7 +19,7 @@
       <span class="stat money"><small>資源</small><b id="money">0</b></span>
       <span class="stat hp"><small>營地 HP</small><b id="lives">0</b></span>
       <span class="stat guide"><small>嚮導能量</small><b id="guide">0</b></span>
-      <span class="stat wave"><small>波次</small><b><span id="wave">0</span>/<span id="wavemax">0</span></b></span>
+      <span class="stat wave"><small>核心清除</small><b><span id="wave">0</span>/<span id="wavemax">0</span></b></span>
     </div>
 
     <div id="overlay">
@@ -82,6 +74,7 @@
   <script src="js/build.js"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/progression.js"></script>
   <script src="js/game.js"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

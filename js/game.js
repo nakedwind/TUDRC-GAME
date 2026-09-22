@@ -332,6 +332,7 @@ function newGame() {
   };
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
+  seedCores();
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
   spawnWanderers();     // 場景 NPC 只會在亮處自由走動
   const [px, py] = playerSpawnPos();
@@ -354,6 +355,7 @@ function buildWaves() {
   return w;
 }
 function startWave() {
+  if (G.cores) { G.spawnQueue=[]; return; }
   const w = G.waves[G.waveIndex];
   G.spawnQueue = [];
   for (let i = 0; i < w.count; i++) G.spawnQueue.push({ hp: w.hp, speed: w.speed, reward: w.reward });
@@ -531,8 +533,10 @@ cv.addEventListener('mouseleave', () => { hoverCell = null; cv.classList.remove(
 function commitNext(e) {
   const [cc, cr] = cellAt(e.x, e.y);
   if (isCamp(cc, cr) && !isWall(cc, cr)) {
-    // 到達營地：預設營地（最下排）走出畫面；自訂營地直接算攻入
-    if (campCells.size) { e.reached = true; }
+    // 有可破壞基地時，走進開放入口的怪物會停下攻擊基地，而不是略過基地 HP。
+    const base = G.obstacles.find(o => o.isBase && o.hp > 0);
+    if (base) { e.baseTarget = base; }
+    else if (campCells.size) { e.reached = true; }
     else { e.exiting = true; }
     e.hasTarget = true; e.tcell = null; return;
   }
@@ -545,21 +549,81 @@ function commitNext(e) {
   e.tcell = best; [e.tx, e.ty] = center(best[0], best[1]);
   e.hasTarget = true; e.stuck = false; e.exiting = false;
 }
+function enemyAttackObstacle(e, o, dt) {
+  e.atkCd = (e.atkCd || 0) - dt;
+  if (e.atkCd > 0) return;
+  e.atkCd = BARRIER.breakInterval;
+  o.hp -= BARRIER.breakDmg;
+  o.hitT = HIT_DUR;
+  sfx('hit');
+  if (o.hp > 0) return;
+  removeBarrier(o); e.hasTarget = false; e.baseTarget = null;
+  if (o.isBase) {
+    G.lives = 0;
+    flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b');
+    if (!G.over) lose();
+  }
+}
+function enemyAttackSentry(e, target, dt) {
+  e.atkCd = (e.atkCd || 0) - dt;
+  if (e.atkCd > 0 || !target || target.hp <= 0) return;
+  e.atkCd = 1;
+  const spec = TYPES[target.type], defense = Math.max(0, Math.min(.75, spec.defense || 0));
+  target.hp = Math.max(0, target.hp - 14 * (1 - defense));
+  flash('-' + Math.round(14 * (1 - defense)), target.x, target.y - 30, '#ff8f8f');
+  if (target.hp <= 0) { target.target = null; flash('失去戰鬥能力', target.x, target.y - 42, '#ff5b6e'); }
+}
+function moveEnemyToward(e, target, dt) {
+  const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
+  const step = e.speed * dt;
+  const nx=e.x+dx/d*Math.min(step,d),ny=e.y+dy/d*Math.min(step,d),[c,r]=cellAt(nx,ny);
+  if (!inGrid(c,r) || isWall(c,r) || barrierAt(c,r)) return false;
+  e.x=nx;e.y=ny;
+  e.hasTarget = false; e.baseTarget = null;
+  return true;
+}
+function updateEnemyEffects(e, dt) {
+  if (e.burnT > 0) {
+    e.burnT -= dt; e.burnTick = (e.burnTick || 0) - dt;
+    if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flash('燒傷', e.x, e.y - 25, '#ff8a42'); }
+  }
+  if (e.stunT > 0) e.stunT -= dt;
+  if (e.confuseT > 0) e.confuseT -= dt;
+}
 function stepEnemy(e, dt) {
+  updateEnemyEffects(e, dt);
+  if (e.hp <= 0) return;
+  if (e.confuseT > 0) {
+    const allies = G.enemies.filter(o => o !== e && !o.dead && o.hp > 0).sort((a,b) => Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y));
+    const foe = allies[0];
+    if (foe) {
+      const d = Math.hypot(foe.x-e.x,foe.y-e.y);
+      if (d > 22) moveEnemyToward(e, foe, dt);
+      else { e.confuseCd=(e.confuseCd||0)-dt; if(e.confuseCd<=0){e.confuseCd=.8;foe.hp-=10;flash('混亂攻擊',foe.x,foe.y-24,'#c791ff');} }
+    }
+    return;
+  }
+  if (e.stunT > 0) return;
+  const living = G.towers.filter(t => t.hp > 0 && !t.berserk);
+  let taunter = null, tauntDistance = Infinity;
+  for (const t of living) {
+    const taunt = TYPES[t.type].taunt || 0, d = Math.hypot(t.x-e.x,t.y-e.y);
+    if (taunt && d <= taunt * CELL && d < tauntDistance) { taunter=t; tauntDistance=d; }
+  }
+  if (taunter) {
+    if (tauntDistance <= 22) { enemyAttackSentry(e, taunter, dt); return; }
+    if (moveEnemyToward(e, taunter, dt)) return;
+  }
+  const contact = living.filter(t => Math.hypot(t.x-e.x,t.y-e.y) <= 20).sort((a,b) => Number(TYPES[a.type].noAggro)-Number(TYPES[b.type].noAggro))[0];
+  if (contact) { enemyAttackSentry(e, contact, dt); return; }
   if (!e.hasTarget) commitNext(e);
   if (e.stuck) return;
   if (e.exiting) { e.y += e.speed * dt; if (e.y > OY + ROWS * CELL + 18) e.reached = true; return; }
+  if (e.baseTarget) { enemyAttackObstacle(e, e.baseTarget, dt); return; }
   // 目標格有障礙物 → 停下打牆（每隔 breakInterval 秒攻擊一次）
   const tc = e.tcell, o = tc ? barrierAt(tc[0], tc[1]) : null;
   if (o) {
-    e.atkCd = (e.atkCd || 0) - dt;
-    if (e.atkCd <= 0) {
-      e.atkCd = BARRIER.breakInterval;
-      o.hp -= BARRIER.breakDmg;
-      o.hitT = HIT_DUR;                        // 觸發閃紅＋震動
-      sfx('hit');                              // 敲擊聲
-      if (o.hp <= 0) { removeBarrier(o); e.hasTarget = false; }
-    }
+    enemyAttackObstacle(e, o, dt);
     return;
   }
   const dx = e.tx - e.x, dy = e.ty - e.y, d = Math.hypot(dx, dy), step = e.speed * dt;
@@ -592,6 +656,7 @@ function loop(ts) {
   requestAnimationFrame(loop);
 }
 function update(dt) {
+  updateCores(dt);
   G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);
   // 生怪
   if (G.spawnQueue.length > 0) {
@@ -624,13 +689,15 @@ function update(dt) {
   // 哨兵攻擊
   for (const t of G.towers) {
     const spec = TYPES[t.type];
+    if (t.hp <= 0) continue;
+    if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (spec.taintRegen && !t.berserk) t.taint = Math.max(0, t.taint - spec.taintRegen * dt);
-    if (spec.aura && !t.berserk) for (const o of G.towers) { if (o !== t && Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL) o.taint = Math.max(0, o.taint - spec.aura.rate * dt); }   // 嚮導隨身疏導：降低附近哨兵負荷
+    if (spec.aura && !t.berserk) for (const o of G.towers) { if (o !== t && o.hp > 0 && Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL) { o.taint = Math.max(0, o.taint - spec.aura.rate * dt); o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * dt); } }   // 嚮導隨身疏導與治療
     t.cd -= dt;
     if (t.berserk || t.cd > 0) continue;
     const R = spec.range * CELL;
     let target = null, bestY = -1;
-    for (const e of G.enemies) {
+    for (const e of [...G.enemies, ...G.cores]) {
       if (e.dead) continue;
       if (Math.hypot(e.x - t.x, e.y - t.y) <= R && e.y > bestY) { target = e; bestY = e.y; }
     }
@@ -638,14 +705,27 @@ function update(dt) {
       t.cd = 1 / spec.rate;
       if (Math.random() < spec.accuracy) {
         target.hp -= spec.dmg;
-        if (spec.splash > 0) for (const e of G.enemies) { if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= spec.splash * CELL) e.hp -= spec.dmg * 0.6; }
+        const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
+        if (spec.splash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= spec.splash * CELL) { e.hp -= spec.dmg * .6; affected.push(e); }
+        for (const e of affected) {
+          if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
+          if (spec.stun) e.stunT=Math.max(e.stunT||0,spec.stun);
+          if (spec.confuse) e.confuseT=Math.max(e.confuseT||0,spec.confuse);
+          if (spec.knockback) {
+            const dx=e.x-t.x,dy=e.y-t.y,d=Math.hypot(dx,dy)||1;
+            e.x+=dx/d*CELL*spec.knockback;e.y+=dy/d*CELL*spec.knockback;e.hasTarget=false;e.baseTarget=null;
+          }
+        }
         G.effects.push({ x1: t.x, y1: t.y, x2: target.x, y2: target.y, life: 0.12, color: spec.color });
       } else flash('MISS', t.x, t.y - 26, '#9aa4b2');
-      t.taint = Math.min(100, t.taint + spec.taint);
+      if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
       if (t.taint >= 100 && !t.berserk) { t.berserk = true; G.lives -= BERSERK.livesPenalty; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d'); }
     }
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(3); sfx('kill'); } }
+  for (const core of G.cores) if(core.hp<=0 && !core.dead) {
+    core.dead=true; earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff');
+  }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
   for (const o of G.obstacles) {
@@ -664,13 +744,7 @@ function update(dt) {
   }
   G.effects = G.effects.filter(f => f.life > 0);
   // 波次（安全場景沒有波次，也不會有勝負）
-  if (!MAP_SAFE && G.spawnQueue.length === 0 && G.enemies.length === 0) {
-    if (G.betweenWaves <= 0) {
-      G.waveIndex++;
-      if (G.waveIndex >= G.waves.length) win();
-      else G.betweenWaves = 2.5;
-    } else { G.betweenWaves -= dt; if (G.betweenWaves <= 0) startWave(); }
-  }
+  if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   if (G.lives <= 0) { G.lives = 0; lose(); }
   updateHUD();
 }
@@ -696,14 +770,32 @@ function drawObstacle(o) {
     ctx.translate(-(x + w / 2), -(y + h));
   }
   const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
-  if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
-  else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
+  // 基地本體是地圖上的平面大圖，這裡只負責碰撞、受擊效果與血條，避免重複繪製。
+  if (!o.isBase) {
+    if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
+    else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
+  }
   if (hit) {   // 閃紅：半透明紅疊在圖上
     ctx.globalAlpha = 0.55 * hit; ctx.fillStyle = '#ff3030';
-    ctx.fillRect(x, y, w, h); ctx.globalAlpha = 1;
+    if (o.isBase) {
+      ctx.lineWidth = 6; ctx.strokeStyle = '#ff3030'; ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
+    } else ctx.fillRect(x, y, w, h);
+    ctx.globalAlpha = 1;
   }
   if (a) ctx.restore();
-  if (o.hp < o.maxhp) {   // 受損才顯示血條
+  if (o.isBase) {         // 基地血條永久顯示，並依剩餘 HP 變色
+    const ratio = Math.max(0, Math.min(1, o.hp / o.maxhp));
+    const barW = Math.max(120, w - 48), barH = 10;
+    const barX = x + (w - barW) / 2, barY = y - 22;
+    ctx.fillStyle = 'rgba(0,0,0,.82)'; roundRect(barX - 3, barY - 3, barW + 6, barH + 6, 4); ctx.fill();
+    ctx.fillStyle = '#352d2d'; roundRect(barX, barY, barW, barH, 2); ctx.fill();
+    ctx.fillStyle = ratio > 0.5 ? '#59d26f' : (ratio > 0.25 ? '#f0c54d' : '#ef5b5b');
+    if (ratio > 0) { roundRect(barX, barY, barW * ratio, barH, 2); ctx.fill(); }
+    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)';
+    const label = '基地 HP ' + Math.max(0, Math.ceil(o.hp)) + ' / ' + o.maxhp;
+    ctx.strokeText(label, x + w / 2, barY - 4); ctx.fillStyle = '#fff'; ctx.fillText(label, x + w / 2, barY - 4);
+  } else if (o.hp < o.maxhp) {   // 一般障礙物受損才顯示血條
     ctx.fillStyle = '#000'; ctx.fillRect(x + 2, y + h - 6, w - 4, 4);
     ctx.fillStyle = '#c9a26a'; ctx.fillRect(x + 2, y + h - 6, (w - 4) * Math.max(0, o.hp) / o.maxhp, 4);
   }
@@ -754,6 +846,9 @@ function drawEnemy(e) {
   ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.fill();
   ctx.fillStyle = '#000'; ctx.fillRect(e.x - 14, e.y - 20, 28, 3);
   ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
+  if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
+  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('顫抖',e.x,e.y-27); }
+  if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-27); }
 }
 function drawWanderer(npc) {
   const set = wandererSprites[npc.id];
@@ -854,6 +949,7 @@ function draw() {
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
   collectMapOccluders(ctx, sortables);
+  for(const core of G.cores) if(!core.dead && isLit(core.x,core.y)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });
   for (const t of G.towers) sortables.push({ y: t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.y + 17, draw: () => drawWanderer(npc) });
@@ -953,8 +1049,8 @@ function updateHUD() {
   document.getElementById('money').textContent = Math.floor(G.money);
   document.getElementById('lives').textContent = Math.max(0, G.lives);
   document.getElementById('guide').textContent = Math.floor(G.guide);
-  document.getElementById('wave').textContent = G.waves.length ? Math.min(G.waveIndex + 1, G.waves.length) : '—';
-  document.getElementById('wavemax').textContent = G.waves.length || '—';
+  document.getElementById('wave').textContent = G.cores.filter(c=>c.dead).length;
+  document.getElementById('wavemax').textContent = G.cores.length || '—';
   const mission = document.getElementById('missionText');
   if (mission) mission.textContent = MAP_SAFE ? '目前任務：休息一下（安全區域）' : '目前任務：守住營地';
 }
@@ -973,7 +1069,7 @@ function showStart() {
     '後室<b>一片漆黑</b>——只有營地和你身上的燈是亮的。<br><b>三位哨兵已在基地待命</b>：點擊哨兵可下指令（巡邏／指派位置／疏導）。<br>放置<b>探照燈</b>照亮區域：<b>亮處才能放建築</b>，黑暗中的怪物<b>看不見</b>。<br>用 <b>WASD／方向鍵</b>移動嚮導，怪物<b>由上往下</b>攻進<b>營地</b>；在哨兵<b>暴走</b>前記得<b>疏導</b>。守住 5 波即可控制 Y 區。',
     '開始防禦');
 }
-function winOverlay() { showOverlay('✅ Y 區已控制', '你守住了營地、擋下所有波次！', '再玩一次'); }
+function winOverlay() { showOverlay('✅ Y 區已控制', '所有異質核心與殘存異質體已清除！異質結晶已儲存，可用於哨兵培養。', '再玩一次'); }
 function loseOverlay() { showOverlay('💀 營地失守', '怪物攻進了營地。<br>試試多築牆卡位、提早疏導快暴走的哨兵。', '再挑戰'); }
 
 function begin() { sfx('button'); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }

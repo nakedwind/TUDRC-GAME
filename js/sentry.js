@@ -56,6 +56,77 @@ function sentryBlocked(x, y) {
   }
   return false;
 }
+function sentryCellWalkable(c, r) {
+  if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
+  const [x, y] = center(c, r);
+  if (sentryBlocked(x, y)) return false;
+  if (LIGHT.enabled && !isLit(x, y)) return false;
+  return true;
+}
+function nearestSentryGoal(c, r) {
+  for (let radius = 0; radius <= 4; radius++) {
+    let best = null, bestDistance = Infinity;
+    for (let dc = -radius; dc <= radius; dc++) for (let dr = -radius; dr <= radius; dr++) {
+      if (radius && Math.abs(dc) !== radius && Math.abs(dr) !== radius) continue;
+      const nc = c + dc, nr = r + dr;
+      if (!sentryCellWalkable(nc, nr)) continue;
+      const distance = Math.abs(dc) + Math.abs(dr);
+      if (distance < bestDistance) { best = [nc, nr]; bestDistance = distance; }
+    }
+    if (best) return best;
+  }
+  return null;
+}
+// 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
+function buildSentryPath(t, targetX, targetY) {
+  const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
+  const goal = nearestSentryGoal(rawGc, rawGr); if (!goal) return [];
+  const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
+  if (startKey === goalKey) return [];
+  const queue = [[sc, sr]], cameFrom = new Map([[startKey, null]]);
+  let head = 0;
+  while (head < queue.length) {
+    const [c, r] = queue[head++];
+    if (c === gc && r === gr) break;
+    for (const [dc, dr] of [[0,-1],[1,0],[0,1],[-1,0]]) {
+      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
+      if (cameFrom.has(key) || !sentryCellWalkable(nc, nr)) continue;
+      cameFrom.set(key, c + ',' + r); queue.push([nc, nr]);
+    }
+  }
+  if (!cameFrom.has(goalKey)) return [];
+  const path = []; let key = goalKey;
+  while (key && key !== startKey) {
+    const [c, r] = key.split(',').map(Number); path.push({ c, r }); key = cameFrom.get(key);
+  }
+  return path.reverse();
+}
+function moveSentryWithPath(t, targetX, targetY, speed, dt) {
+  const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
+  t.navTimer = (t.navTimer || 0) - dt;
+  const next = t.navPath && t.navPath[0];
+  if (!t.navPath || t.navGoal !== goalKey || t.navTimer <= 0 || (next && !sentryCellWalkable(next.c, next.r))) {
+    t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
+  }
+  const [currentC, currentR] = cellAt(t.x, t.y);
+  while (t.navPath && t.navPath.length && t.navPath[0].c === currentC && t.navPath[0].r === currentR) t.navPath.shift();
+  const waypoint = t.navPath && t.navPath[0];
+  let moveX = targetX, moveY = targetY;
+  if (waypoint) [moveX, moveY] = center(waypoint.c, waypoint.r);
+  const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt;
+  if (distance <= step) {
+    t.x = moveX; t.y = moveY;
+    if (waypoint) t.navPath.shift();
+    return !waypoint && Math.hypot(targetX - t.x, targetY - t.y) < 2;
+  }
+  if (distance <= 0) return true;
+  const nx = t.x + dx / distance * step, ny = t.y + dy / distance * step;
+  let moved = false;
+  if (!sentryBlocked(nx, t.y) && (!LIGHT.enabled || isLit(nx, t.y))) { t.x = nx; moved = true; }
+  if (!sentryBlocked(t.x, ny) && (!LIGHT.enabled || isLit(t.x, ny))) { t.y = ny; moved = true; }
+  if (!moved) t.navTimer = 0;
+  return false;
+}
 // 在 (cx,cy) 周圍找一個「亮的、走得到」的隨機點
 function sampleWanderTarget(cx, cy, radius) {
   for (let i = 0; i < 12; i++) {
@@ -69,6 +140,7 @@ function sampleWanderTarget(cx, cy, radius) {
   return null;
 }
 function updateSentry(t, dt) {
+  if (t.hp <= 0) { t.target = null; t.moving = false; return; }
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
@@ -79,17 +151,35 @@ function updateSentry(t, dt) {
     for (const l of lightsCache) { const d = Math.hypot(l.x - t.x, l.y - t.y) - l.r; if (d < bd) { bd = d; best = l; } }
     if (best) t.target = { x: best.x, y: best.y };
   }
+  // 嚮導保持安全距離：敵人靠近時優先往反方向撤退，仍可在遠處攻擊與治療。
+  const ownSpec = TYPES[t.type];
+  if (ownSpec.guide && G.enemies.length) {
+    let threat = null, threatD = Infinity;
+    for (const e of G.enemies) {
+      if (e.dead || e.confuseT > 0) continue;
+      const d = Math.hypot(e.x - t.x, e.y - t.y);
+      if (d < threatD) { threat = e; threatD = d; }
+    }
+    const safeDistance = (ownSpec.evade || 3) * CELL;
+    if (threat && threatD < safeDistance) {
+      const dx=t.x-threat.x,dy=t.y-threat.y,d=threatD||1,step=(ownSpec.walkSpeed||80)*1.35*dt;
+      const nx=t.x+dx/d*step,ny=t.y+dy/d*step;
+      if ((!LIGHT.enabled || isLit(nx,t.y)) && !sentryBlocked(nx,t.y)) t.x=nx;
+      if ((!LIGHT.enabled || isLit(t.x,ny)) && !sentryBlocked(t.x,ny)) t.y=ny;
+      t.target=null; t.waitT=0; return;
+    }
+  }
   // 主動接敵：看到亮處的怪物就靠近攻擊（開火由 game.js 處理；這裡只負責走過去）
   // 追多遠依模式：自由走動＝追得遠、原地巡邏／指派＝只追崗位附近，怪死或跑遠就回去巡邏。
   const litHere = !LIGHT.enabled || isLit(t.x, t.y);
-  if (litHere && G.enemies.length) {
+  if (litHere && (G.enemies.length || G.cores.some(c=>!c.dead))) {
     const spec = TYPES[t.type];
     const atkR = spec.range * CELL;                       // 射程（像素）
     const anchor = (t.mode !== 'free' && t.anchor) ? t.anchor : t;
-    const leashR = t.mode === 'free' ? 260 : 110;         // 離崗上限：自由＝大、原地＝小
-    const detectR = atkR + CELL * 1.5;                    // 比射程略遠就開始靠近
+    const detectR = (spec.aggroRange || spec.range + 1.5) * CELL; // 每名隊員獨立的主動索敵距離
+    const leashR = t.mode === 'free' ? Math.max(260, detectR) : 110; // 自由行動不限制設定好的索敵距離
     let foe = null, fd = Infinity;
-    for (const e of G.enemies) {
+    for (const e of [...G.enemies, ...G.cores]) {
       if (e.dead) continue;
       if (LIGHT.enabled && !isLit(e.x, e.y)) continue;    // 只追亮處看得見的怪
       if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
@@ -99,13 +189,7 @@ function updateSentry(t, dt) {
     if (foe) {
       t.target = null; t.waitT = 0;                       // 取消原本的閒逛
       if (fd > atkR - 6) {                                // 還沒進射程→靠過去
-        const dx = foe.x - t.x, dy = foe.y - t.y, d = fd || 1;
-        const step = (spec.walkSpeed || 80) * 1.25 * dt;  // 追敵略快
-        const nx = t.x + dx / d * step, ny = t.y + dy / d * step;
-        if (!LIGHT.enabled || isLit(nx, ny)) {            // 不追進黑暗
-          if (!sentryBlocked(nx, t.y)) t.x = nx;
-          if (!sentryBlocked(t.x, ny)) t.y = ny;
-        }
+        moveSentryWithPath(t, foe.x, foe.y, (spec.walkSpeed || 80) * 1.25, dt); // 追敵時也會繞過障礙
       }
       return;                                             // 接敵中：不進入閒逛邏輯
     }
@@ -127,22 +211,12 @@ function updateSentry(t, dt) {
     if (!tgt) { t.waitT = 0.8; return; }
     t.target = tgt; return;
   }
-  const dx = t.target.x - t.x, dy = t.target.y - t.y, d = Math.hypot(dx, dy);
   const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 : 1);   // 指派時走快一點
-  const step = sp * dt;
-  if (d <= step) {
-    t.x = t.target.x; t.y = t.target.y; t.target = null;
+  if (moveSentryWithPath(t, t.target.x, t.target.y, sp, dt)) {
+    t.target = null; t.navPath = null;
     if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0'); }
     else t.waitT = 0.6 + Math.random() * 1.8;         // 到點後停一下再逛
     return;
-  }
-  const nx = t.x + dx / d * step, ny = t.y + dy / d * step;
-  let blockedX = sentryBlocked(nx, t.y), blockedY = sentryBlocked(t.x, ny);
-  if (!blockedX) t.x = nx;
-  if (!blockedY) t.y = ny;
-  if (blockedX && blockedY) {                          // 路被完全擋住
-    t.target = null;
-    if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('路被擋住了，就地巡邏', t.x, t.y - 24, '#ffd24a'); }
   }
 }
 
@@ -170,10 +244,8 @@ function followTarget(mover, target, cfg, dt) {
   if (!target) return false;
   const dx = target.x - mover.x, dy = target.y - mover.y, d = Math.hypot(dx, dy);
   if (d <= cfg.dist) return true;          // 夠近了就停
-  const step = cfg.speed * dt;
-  const nx = mover.x + dx / d * step, ny = mover.y + dy / d * step;
-  if (!sentryBlocked(nx, mover.y)) mover.x = nx;
-  if (!sentryBlocked(mover.x, ny)) mover.y = ny;
+  const tx = target.x - dx / d * cfg.dist, ty = target.y - dy / d * cfg.dist;
+  moveSentryWithPath(mover, tx, ty, cfg.speed, dt);
   return true;
 }
 function updateWanderer(npc, dt) {

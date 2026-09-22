@@ -68,6 +68,17 @@
         <button class="btn" id="selClear">取消選取</button>
       </div>
 
+      <div id="baseCollisionPanel" class="base-collision-panel hidden">
+        <div class="base-collision-head">
+          <strong>🏠 基地可走動區域</strong>
+          <label>HP <input id="baseHpInput" type="number" min="1" step="100"></label>
+          <label>深度線 <input id="baseDepthInput" type="number" min="0" max="8" step="1"></label>
+          <button class="btn" id="baseCollisionReset">恢復預設</button>
+        </div>
+        <p>點格子切換：<b>紅格</b>會阻擋並承受攻擊，空格可讓玩家通行。<b class="depth-help">藍線</b>上方的玩家會被基地遮住，下方會顯示在基地前面。</p>
+        <div id="baseCollisionGrid" class="base-collision-grid"></div>
+      </div>
+
       <div id="zoombar" style="display:flex;gap:8px;align-items:center;margin:8px 0;color:#b9c3d0;font-size:13px">
         <span>🔍 縮放</span>
         <button class="btn" id="zoomOut">－</button>

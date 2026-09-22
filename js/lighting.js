@@ -91,6 +91,20 @@ function getLights() {
   // 會發光的建築（探照燈等，半徑設定在 balance.js 的 LIGHT.buildings）
   // 光照範圍固定；warm/phase 是給「暖色呼吸光暈」裝飾用的（每盞燈相位錯開）
   if (G) for (const o of G.obstacles) {
+    if (o.isBase) {
+      const x0 = OX + o.c * CELL, y0 = OY + o.r * CELL;
+      const w = (o.w || 11) * CELL, h = (o.h || 8) * CELL;
+      // 基地中央提供穩定環境光；四角燈各自提供暖色光與光暈。
+      L.push({ x: x0 + w / 2, y: y0 + h / 2, r: LIGHT.baseR || 300 });
+      const lampR = LIGHT.baseLampR || 190;
+      const lamps = [
+        [x0 + 0.55 * CELL, y0 + 1.05 * CELL],
+        [x0 + w - 0.65 * CELL, y0 + 1.05 * CELL],
+        [x0 + 0.55 * CELL, y0 + h - 1.05 * CELL],
+        [x0 + w - 0.65 * CELL, y0 + h - 1.05 * CELL],
+      ];
+      lamps.forEach(([x, y], i) => L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }));
+    }
     const lr = o.type && LIGHT.buildings[o.type];
     if (lr) {
       const x = OX + (o.c + (o.w || 1) / 2) * CELL;
@@ -146,10 +160,15 @@ function drawDarkness() {
     const beamLen = Math.min(l.r * 0.78, 220);
     const pulse = 0.95 + 0.05 * Math.sin(now * 1.8 + l.phase);
     // 外層低透明度負責柔邊，內層窄光束提供方向感。
-    drawBeam(sx - 9, sy - 2, sx - 38, sy - beamLen, 5, 55, 0.075 * pulse);
-    drawBeam(sx + 9, sy - 2, sx + 38, sy - beamLen, 5, 55, 0.075 * pulse);
-    drawBeam(sx - 9, sy - 2, sx - 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse);
-    drawBeam(sx + 9, sy - 2, sx + 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse);
+    if (l.single) {
+      drawBeam(sx, sy - 2, sx, sy - beamLen, 5, 52, 0.08 * pulse);
+      drawBeam(sx, sy - 2, sx, sy - beamLen * 0.9, 3, 29, 0.11 * pulse);
+    } else {
+      drawBeam(sx - 9, sy - 2, sx - 38, sy - beamLen, 5, 55, 0.075 * pulse);
+      drawBeam(sx + 9, sy - 2, sx + 38, sy - beamLen, 5, 55, 0.075 * pulse);
+      drawBeam(sx - 9, sy - 2, sx - 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse);
+      drawBeam(sx + 9, sy - 2, sx + 25, sy - beamLen * 0.9, 3, 31, 0.105 * pulse);
+    }
   }
   ctx.restore();
 
@@ -197,7 +216,7 @@ function drawDarkness() {
     halo.addColorStop(1, 'rgba(255,154,45,0)');
     ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(sx, sy, haloR, 0, Math.PI * 2); ctx.fill();
 
-    for (const lampX of [sx - 9, sx + 9]) {
+    for (const lampX of (l.single ? [sx] : [sx - 9, sx + 9])) {
       const coreR = 5.5 * pulse;
       const core = ctx.createRadialGradient(lampX, sy, 0, lampX, sy, coreR);
       core.addColorStop(0, 'rgba(255,255,238,.82)');

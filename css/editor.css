@@ -127,6 +127,28 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 #selControls select { background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; padding: 4px 6px; font-size: 13px; }
 #selControls b { color: #ffd479; }
 
+.base-collision-panel {
+  margin: 6px 0 10px; padding: 10px; border: 1px solid #826c3f; border-radius: 8px;
+  background: #29261d; color: #d8d0bd; font-size: 12px;
+}
+.base-collision-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.base-collision-head strong { color: #ffd479; }
+.base-collision-head label { display: flex; align-items: center; gap: 5px; }
+.base-collision-head input {
+  width: 82px; padding: 4px 6px; border: 1px solid #554c39; border-radius: 5px;
+  background: #171a1f; color: #fff; text-align: right;
+}
+.base-collision-panel p { margin: 7px 0; color: #b9b09d; }
+.base-collision-panel p b { color: #ff7777; }
+.base-collision-panel p b.depth-help { color: #55d9ff; }
+.base-collision-grid { display: grid; gap: 2px; width: max-content; padding: 5px; background: #11151a; border-radius: 6px; }
+.base-collision-cell {
+  width: 23px; height: 23px; padding: 0; border: 1px solid #43505e; border-radius: 2px;
+  background: #26313a; cursor: pointer;
+}
+.base-collision-cell:hover { border-color: #8fd3ff; }
+.base-collision-cell.blocked { background: rgba(220,65,65,.78); border-color: #ff7777; }
+
 #status { font-size: 12px; color: #7ee0c0; min-height: 16px; margin: 2px 0; }
 #hint { font-size: 12px; color: #9aa4b2; line-height: 1.7; }
 
