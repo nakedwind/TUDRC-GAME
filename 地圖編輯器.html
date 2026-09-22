@@ -134,6 +134,23 @@
         <div class="field"><label>寬（格數）</label><input id="f_cols" type="number" min="8" max="200"></div>
         <div class="field"><label>高（格數）</label><input id="f_rows" type="number" min="8" max="200"></div>
 
+        <div class="subhead">往指定方向增減格子（往上／往左時，地圖內容會一起跟著移動）</div>
+        <div class="field"><label>一次幾格</label><input id="f_growN" type="number" min="1" max="50" value="1"></div>
+        <div class="field col grow-pad">
+          <div class="grow-row"><span class="grow-label">增加</span>
+            <button class="btn" id="growUp" title="在上面加一排">⬆ 上</button>
+            <button class="btn" id="growDown" title="在下面加一排">⬇ 下</button>
+            <button class="btn" id="growLeft" title="在左邊加一排">⬅ 左</button>
+            <button class="btn" id="growRight" title="在右邊加一排">➡ 右</button>
+          </div>
+          <div class="grow-row"><span class="grow-label">減少</span>
+            <button class="btn" id="trimUp" title="從上面刪一排（該排的內容會被刪掉）">⬆ 上</button>
+            <button class="btn" id="trimDown" title="從下面刪一排（該排的內容會被刪掉）">⬇ 下</button>
+            <button class="btn" id="trimLeft" title="從左邊刪一排（該排的內容會被刪掉）">⬅ 左</button>
+            <button class="btn" id="trimRight" title="從右邊刪一排（該排的內容會被刪掉）">➡ 右</button>
+          </div>
+        </div>
+
         <div class="subhead">起始資源</div>
         <div class="field"><label>起始資源</label><input id="f_money" type="number"></div>
         <div class="field"><label>營地HP</label><input id="f_lives" type="number"></div>

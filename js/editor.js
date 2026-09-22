@@ -22,6 +22,10 @@ const STORAGE_DAMAGED_PACK = 'tudrc_asset_pack_damaged_v1';     // 破損建築�
 const STORAGE_FIELD_PACK = 'tudrc_asset_pack_field_v1';        // 野營／軍用素材包（帳篷、貨櫃、發電機、彈藥箱、置物櫃）
 const STORAGE_FIELD_BASE = 'tudrc_asset_field_base_v4';         // 可破壞臨時基地（v4：預設深度線改為第 4 格）
 const STORAGE_SCENE_PROPS_PACK = 'tudrc_asset_pack_scene_props_v1'; // 場景專用物件（不屬於玩家建築選單）
+const STORAGE_PROPS_FURNITURE = 'tudrc_asset_pack_props_furniture_v1'; // 後補家具（工作桌、沙發、層架、電視、床…）
+const STORAGE_EOC_HYDRANTS = 'tudrc_asset_eoc_hydrants_v1';            // 後補消防栓箱（紅／白）
+const STORAGE_COUNSELING_TISSUE_FIX = 'tudrc_fix_counseling_tissue_v1'; // 疏導室面紙盒改名，避免與應變中心的同檔名
+const STORAGE_COUNSELING_ROOM_PACK = 'tudrc_asset_pack_counseling_room_v1'; // 疏導室素材包
 const STORAGE_TILE_SIZE_FIX = 'tudrc_fix_tile_sizes_v1';         // 修正登記尺寸與圖片不符的素材
 const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應變中心素材：安全距離海報
 const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應變中心素材：門（電子鎖）、消防栓箱
@@ -195,13 +199,17 @@ function loadTiles() {
   const fieldAdded = mergeDefaultAssetPack('tile_field_', STORAGE_FIELD_PACK);   // 野營／軍用素材
   const fieldBaseAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_base', STORAGE_FIELD_BASE);
   const scenePropsAdded = mergeDefaultAssetPack(t => String(t.file || '').includes('/scene-props/'), STORAGE_SCENE_PROPS_PACK);
+  const propsFurnitureAdded = mergeDefaultAssetPack('tile_prop_', STORAGE_PROPS_FURNITURE);
+  const eocHydrantsAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_hydrant_red' || t.id === 'tile_eoc_hydrant_white', STORAGE_EOC_HYDRANTS);
+  const counselingTissueFixed = mergeDefaultAssetPack(t => t.id === 'tile_counseling_tissue_box', STORAGE_COUNSELING_TISSUE_FIX);
+  const counselingRoomAdded = mergeDefaultAssetPack('tile_counseling_', STORAGE_COUNSELING_ROOM_PACK);
   // 破損建築：新素材（tile_dmg_）＋從 item-decorate 搬過來的裂痕／碎石（更新路徑與尺寸，地圖上的擺放不變）
   const damagedAdded = mergeDefaultAssetPack(t => String(t.file || '').includes('/破損建築/'), STORAGE_DAMAGED_PACK);
   // 兩個「柱子」曾因同檔名互相覆蓋：大廳高柱改回 2×8、補回應變中心的柱子
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded) saveTiles();
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -218,7 +226,16 @@ function loadMaps() {
   if (saved) { try { maps = JSON.parse(saved); } catch (e) { maps = clone(MAPS_DEFAULT); } }
   else maps = clone(MAPS_DEFAULT);
   if (!Array.isArray(maps) || maps.length === 0) maps = clone(MAPS_DEFAULT);
+  // 專案資料中若有瀏覽器暫存缺少的地圖，只補上缺少的項目，保留使用者目前的編輯內容。
+  let restoredDefaults = false;
+  MAPS_DEFAULT.forEach(defaultMap => {
+    if (!maps.some(map => map.id === defaultMap.id)) {
+      maps.push(clone(defaultMap));
+      restoredDefaults = true;
+    }
+  });
   maps.forEach(fixMap);
+  if (restoredDefaults) localStorage.setItem(STORAGE_MAPS, JSON.stringify(maps));
   curId = maps[0].id;
 }
 // 補齊欄位；把舊格式一次性遷移（tiles平面→layers.floor；walls→solid）
@@ -1399,6 +1416,78 @@ function bindSizeField(id, key) {
 }
 bindSizeField('f_cols', 'cols');
 bindSizeField('f_rows', 'rows');
+
+// ---- 往指定方向增減格子 ----
+// 往上／往左增加時，地圖上所有東西（圖層、大圖、不可穿透、入口、營地、出入口…）都要一起位移，
+// 否則內容會相對跑掉。往上／往左減少時同理，並且要丟掉被切掉那幾排的內容。
+function shiftMapContent(m, dc, dr) {
+  const shiftKey = k => { const [c, r] = k.split(',').map(Number); return (c + dc) + ',' + (r + dr); };
+  LAYERS.forEach(l => {
+    const src = m.layers[l.id] || {}, out = {};
+    for (const k in src) out[shiftKey(k)] = src[k];
+    m.layers[l.id] = out;
+  });
+  (m.stamps || []).forEach(s => { s.c += dc; s.r += dr; });
+  ['solid', 'breakable', 'entrances', 'camp'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
+  const off = {};
+  for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
+  m.solidOffsets = off;
+  (m.portals || []).forEach(p => { p.c += dc; p.r += dr; });
+  if (solidNudgeCell) solidNudgeCell = shiftKey(solidNudgeCell);
+}
+// 把落在地圖外的內容清掉（縮小後用）
+function dropOutsideContent(m) {
+  const inside = (c, r) => c >= 0 && r >= 0 && c < m.cols && r < m.rows;
+  const insideKey = k => { const [c, r] = k.split(',').map(Number); return inside(c, r); };
+  let removed = 0;
+  LAYERS.forEach(l => {
+    const src = m.layers[l.id] || {}, out = {};
+    for (const k in src) { if (insideKey(k)) out[k] = src[k]; else removed++; }
+    m.layers[l.id] = out;
+  });
+  const before = (m.stamps || []).length;
+  m.stamps = (m.stamps || []).filter(s => {
+    const t = tileById(s.id) || {};
+    return s.c + tileW(t) > 0 && s.r + tileH(t) > 0 && s.c < m.cols && s.r < m.rows;   // 還有一格在地圖內就留著
+  });
+  removed += before - m.stamps.length;
+  ['solid', 'breakable', 'entrances', 'camp'].forEach(key => {
+    const n = (m[key] || []).length;
+    m[key] = (m[key] || []).filter(insideKey);
+    removed += n - m[key].length;
+  });
+  const off = {};
+  for (const k in (m.solidOffsets || {})) { if (insideKey(k)) off[k] = m.solidOffsets[k]; }
+  m.solidOffsets = off;
+  const pn = (m.portals || []).length;
+  m.portals = (m.portals || []).filter(p => inside(p.c, p.r));
+  removed += pn - m.portals.length;
+  if (solidNudgeCell && !insideKey(solidNudgeCell)) solidNudgeCell = null;
+  return removed;
+}
+const DIR_LABEL = { up: '上', down: '下', left: '左', right: '右' };
+function resizeMapSide(dir, amount) {
+  const m = curMap();
+  const horizontal = (dir === 'left' || dir === 'right');
+  const key = horizontal ? 'cols' : 'rows';
+  const next = m[key] + amount;
+  if (next < 8) { setStatus('地圖最小 8 格，不能再縮了', '#ff8f8f'); return; }
+  if (next > 200) { setStatus('地圖最大 200 格', '#ff8f8f'); return; }
+  pushUndo();
+  m[key] = next;
+  // 從上面／左邊增減時，內容要跟著位移（增加是正、減少是負）
+  if (dir === 'up') shiftMapContent(m, 0, amount);
+  else if (dir === 'left') shiftMapContent(m, amount, 0);
+  const dropped = amount < 0 ? dropOutsideContent(m) : 0;
+  clearSelection(); checkResult = null;
+  applyMapSize(); saveMaps(); refreshSelPanel(); loadRules(); draw();
+  const act = amount > 0 ? ('往' + DIR_LABEL[dir] + '加 ' + amount + ' 格') : ('從' + DIR_LABEL[dir] + '刪 ' + (-amount) + ' 格');
+  setStatus(act + '：地圖變成 ' + m.cols + '×' + m.rows + (dropped ? '（有 ' + dropped + ' 個超出範圍的內容被刪掉，可用 Ctrl+Z 復原）' : ''), dropped ? '#ffd24a' : '#7ee0c0');
+}
+function growAmount() { return Math.max(1, Math.min(50, parseInt(document.getElementById('f_growN').value, 10) || 1)); }
+[['growUp', 'up', 1], ['growDown', 'down', 1], ['growLeft', 'left', 1], ['growRight', 'right', 1],
+ ['trimUp', 'up', -1], ['trimDown', 'down', -1], ['trimLeft', 'left', -1], ['trimRight', 'right', -1]]
+  .forEach(([id, dir, sign]) => document.getElementById(id).addEventListener('click', () => resizeMapSide(dir, sign * growAmount())));
 document.getElementById('f_name').addEventListener('input', e => { curMap().name = e.target.value; refreshMapSelect(); saveMaps(); });
 document.getElementById('f_desc').addEventListener('input', e => { curMap().desc = e.target.value; saveMaps(); });
 document.getElementById('f_npcs').addEventListener('change', e => {
