@@ -25,14 +25,14 @@ const SOOTHE = {
 // walkSpeed=走路速度(像素/秒) hp=生命值
 // sprite=角色造型資料夾（images/character/ 底下，例如 'red_B'）；沒填就畫成色塊
 const TYPES = {
-  theonie: { name: '希奧妮', rank: 'S', role: '遠程火力', ability: '火焰', cost: 50, range: 5, aggroRange: 7, dmg: 30, rate: 1, taint: 5, splash: 0, color: '#ff7b39', accuracy: 1, taintRegen: 0, walkSpeed: 75, hp: 80, defense: .05, sprite: 'theonie_B', ratings: { combat:5, defense:1, hp:1, load:2 }, burn: { duration:5, damage:5 }, trait: '單體攻擊；使目標燒傷 5 秒，每秒受到一次傷害。' },
-  amber:   { name: '安柏', rank: 'C', role: '範圍雷擊', ability: '雷電', cost: 40, range: 5, aggroRange: 5, dmg: 12, rate: .5, taint: 5, splash: 1.3, color: '#ffd24a', accuracy: .6, taintRegen: 0, walkSpeed: 95, hp: 150, defense: .15, sprite: 'amber_B', ratings: { combat:2, defense:2, hp:3, load:2 }, stun: 2, trait: '範圍攻擊；在小片區域降下雷電，使異質體顫抖並停止 2 秒。' },
-  red:     { name: '雷德', rank: 'A', role: '前衛防禦', ability: '自癒', cost: 45, range: 1, aggroRange: 8, dmg: 12, rate: 1, taint: 2, splash: 1, color: '#ff5b6e', accuracy: .9, taintRegen: 6, walkSpeed: 85, hp: 240, defense: .45, sprite: 'red_B', ratings: { combat:2, defense:5, hp:5, load:1 }, taunt: 3.2, hpRegen: 4, trait: '範圍攻擊；吸引異質體仇恨，並持續恢復生命與精神負荷。' },
-  avaren:  { name: '阿瓦倫', rank: 'S', role: '腐蝕特攻', ability: '腐蝕', cost: 70, range: 2, aggroRange: 4, dmg: 30, rate: .5, taint: 8, splash: 1.1, color: '#5e9bff', accuracy: .9, taintRegen: 0, walkSpeed: 75, hp: 160, defense: .25, sprite: 'avaren_B', ratings: { combat:5, defense:3, hp:3, load:3 }, noAggro: true, confuse: 3, trait: '範圍攻擊；不主動吸引仇恨。腐蝕使異質體混亂 3 秒並攻擊同類。' },
-  luther:  { name: '路德', rank: 'A', role: '近戰重擊', ability: '怪力', cost: 55, range: 1, aggroRange: 8, dmg: 24, rate: .5, taint: 8, splash: 1, color: '#6fae55', accuracy: .9, taintRegen: 0, walkSpeed: 80, hp: 160, defense: .25, sprite: 'luther_B', ratings: { combat:4, defense:3, hp:3, load:3 }, taunt: 2.6, knockback: 1, stun: 1, trait: '範圍攻擊；吸引異質體仇恨，擊退 1 格並使其停止 1 秒。' },
+  theonie: { name: '希奧妮', rank: 'S', role: '遠程火力', ability: '火焰', cost: 50, range: 5, aggroRange: 12, dmg: 30, rate: 1, taint: 5, splash: 0, color: '#ff7b39', accuracy: 1, taintRegen: 0, walkSpeed: 75, hp: 80, defense: .05, sprite: 'theonie_B', ratings: { combat:5, defense:1, hp:1, load:2 }, burn: { duration:5, damage:5 }, trait: '單體攻擊；使目標燒傷 5 秒，每秒受到一次傷害。' },
+  amber:   { name: '安柏', rank: 'C', role: '範圍雷擊', ability: '雷電', cost: 40, range: 5, aggroRange: 12, dmg: 12, rate: .5, taint: 5, splash: 1.3, color: '#ffd24a', accuracy: .6, taintRegen: 0, walkSpeed: 95, hp: 150, defense: .15, sprite: 'amber_B', ratings: { combat:2, defense:2, hp:3, load:2 }, stun: 2, trait: '範圍攻擊；在小片區域降下雷電，使異質體顫抖並停止 2 秒。' },
+  red:     { name: '雷德', rank: 'A', role: '前衛防禦', ability: '自癒', cost: 45, range: 1, aggroRange: 18, dmg: 12, rate: 1, taint: 2, splash: 1, color: '#ff5b6e', accuracy: .9, taintRegen: 6, walkSpeed: 85, hp: 240, defense: .45, sprite: 'red_B', ratings: { combat:2, defense:5, hp:5, load:1 }, taunt: 3.2, hpRegen: 4, trait: '範圍攻擊；吸引異質體仇恨，並持續恢復生命與精神負荷。' },
+  avaren:  { name: '阿瓦倫', rank: 'S', role: '腐蝕特攻', ability: '腐蝕', cost: 70, range: 2, aggroRange: 12, dmg: 30, rate: .5, taint: 8, splash: 1.1, color: '#5e9bff', accuracy: .9, taintRegen: 0, walkSpeed: 75, hp: 160, defense: .25, sprite: 'avaren_B', ratings: { combat:5, defense:3, hp:3, load:3 }, noAggro: true, confuse: 3, trait: '範圍攻擊；不主動吸引仇恨。腐蝕使異質體混亂 3 秒並攻擊同類。' },
+  luther:  { name: '路德', rank: 'A', role: '近戰重擊', ability: '怪力', cost: 55, range: 1, aggroRange: 16, dmg: 24, rate: .5, taint: 8, splash: 1, color: '#6fae55', accuracy: .9, taintRegen: 0, walkSpeed: 80, hp: 160, defense: .25, sprite: 'luther_B', ratings: { combat:4, defense:3, hp:3, load:3 }, taunt: 2.6, knockback: 1, stun: 1, trait: '範圍攻擊；吸引異質體仇恨，擊退 1 格並使其停止 1 秒。' },
   // 嚮導也可編入任務：戰鬥力弱、HP／防禦低，但有「隨身疏導光環」aura（持續降低附近哨兵的負荷）
-  eldrin:  { name: '艾德林', rank: 'B', role: '醫療支援', ability: '疏導', cost: 35, range: 5, aggroRange: 6.5, dmg: 12, rate: 1/3, taint: 0, splash: 0, color: '#2f8a68', accuracy: .9, taintRegen: 0, walkSpeed: 80, hp: 150, defense: .25, sprite: 'eldrin_B', guide: true, aura: { r: 2.8, rate: 6, heal: 6 }, ratings: { guide:3, combat:2, defense:3, hp:3, heal:3 }, evade: 3, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
-  chris:   { name: '克莉思', rank: 'A', role: '戰鬥嚮導', ability: '疏導', cost: 35, range: 6, aggroRange: 7, dmg: 18, rate: 2/3, taint: 0, splash: 0, color: '#8a97a8', accuracy: 1, taintRegen: 0, walkSpeed: 85, hp: 150, defense: .35, sprite: 'chris_B', guide: true, aura: { r: 2.5, rate: 3, heal: 4 }, ratings: { guide:1, combat:3, defense:4, hp:3, heal:2 }, evade: 3.5, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
+  eldrin:  { name: '艾德林', rank: 'B', role: '醫療支援', ability: '疏導', cost: 35, range: 5, aggroRange: 8, dmg: 12, rate: 1/3, taint: 0, splash: 0, color: '#2f8a68', accuracy: .9, taintRegen: 0, walkSpeed: 80, hp: 150, defense: .25, sprite: 'eldrin_B', guide: true, aura: { r: 2.8, rate: 6, heal: 6 }, ratings: { guide:3, combat:2, defense:3, hp:3, heal:3 }, evade: 3, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
+  chris:   { name: '克莉思', rank: 'A', role: '戰鬥嚮導', ability: '疏導', cost: 35, range: 6, aggroRange: 8, dmg: 18, rate: 2/3, taint: 0, splash: 0, color: '#8a97a8', accuracy: 1, taintRegen: 0, walkSpeed: 85, hp: 150, defense: .35, sprite: 'chris_B', guide: true, aura: { r: 2.5, rate: 3, heal: 4 }, ratings: { guide:1, combat:3, defense:4, hp:3, heal:2 }, evade: 3.5, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
 };
 
 // ---- 出勤隊伍 ----
@@ -83,7 +83,18 @@ const WANDER_LINES = {
   amber:  ['射界確認，開始執行任務。', '非常抱歉！我會重新校正。', '請各位不要進入攻擊範圍。', '克萊兒……她在安全區嗎？'],
   red:    ['嗨！今天也一起加油吧！', '我會擋在前面，放心！', '我的負荷會自己恢復，先照顧別人。', '少一個人受傷都是好事！'],
 };
+// 戰鬥區專用泡泡台詞。安全區仍使用上面的日常內容。
+const BATTLE_WANDER_LINES = {
+  theonie: ['保持射界，別站到我前面。', '左側交給我處理。', '異質體正在接近，準備迎擊。', '火焰壓制開始。'],
+  red:     ['不要脫離隊形！', '我來擋住牠們！', '後方交給你們了。', '發現異質體，準備接敵！'],
+  amber:   ['偵測到異質體反應。', '雷擊座標正在校正。', '請離開落雷範圍。', '確認射界，開始攻擊。'],
+  luther:  ['退後，這裡我來擋。', '前方障礙由我清除。', '別讓牠們突破防線。', '目標接近，準備擊退。'],
+  avaren:  ['……目標確認。', '別讓牠們靠近艾德林。', '腐蝕已經擴散。', '下一個。'],
+  eldrin:  ['負荷升高的人立刻回報。', '有人受傷嗎？不要硬撐。', '維持隊形，我會負責疏導。', '阿瓦倫，不准追得太遠。'],
+  chris:   ['需要疏導就快點說。', '別倒下，我可搬不動你們。', '我會顧著後方，專心打。', '嘖，又有異質體過來了。'],
+};
 const WANDER_TALK = { minGap: 5, maxGap: 13, duration: 3.4 };   // 每隔 5~13 秒說一次、泡泡顯示 3.4 秒
+const BATTLE_WANDER_TALK = { minGap: 11, maxGap: 22, duration: 3.2 };
 
 // ---- 玩家主動與 NPC 對話 ----
 // 玩家走近角色後按 Space／E 開始對話；陣列中的每一項就是一句台詞。
@@ -112,10 +123,10 @@ const SENTRY_DIALOGUES = {
 };
 
 // ---- 跟隨行為 ----
-// dist＝保持的距離(像素，越小跟越緊)；speed＝移動速度(像素/秒，越大跟越快)。
+// radiusCells＝可自由活動的護衛圈半徑（格）；超出後才會追上對方。
 const FOLLOW = {
-  avaren: { dist: 30, speed: 72 },   // 阿瓦倫跟著艾德林：跟得緊
-  red:    { dist: 66, speed: 48 },   // 雷德跟著玩家：慢慢地跟、保持距離
+  avaren: { radiusCells: 4, speed: 96 },  // 阿瓦倫：艾德林周圍 4 格
+  red:    { radiusCells: 7, speed: 92 },  // 雷德：溫特周圍 7 格
 };
 
 // ---- 可以坐的東西（椅子）----

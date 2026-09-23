@@ -244,7 +244,7 @@ function commandFieldMember(type, destination) {
     ? nearestPatrolPoint(G.player.x, G.player.y)
     : basePatrolPoint(member);
   if (!point) { if (typeof sfx === 'function') sfx('error'); closeFieldCommandMenu(); return; }
-  member.mode = 'goto'; member.target = point; member.anchor = null; member.waitT = 0;
+  member.mode = 'goto'; member.target = point; member.anchor = null; member.waitT = 0; member.navPath = null; member.navGoal = null;
   if (typeof sfx === 'function') sfx('button');
   if (typeof flash === 'function') flash(destination === 'player' ? '前往部隊長身邊巡邏' : '返回基地巡邏', member.x, member.y - 24, '#8fd3ff');
   closeFieldCommandMenu();

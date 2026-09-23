@@ -41,6 +41,8 @@ const sentrySprites = {};   // 哨兵類型 → 精靈圖（data/balance.js 的 
 for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = loadCharacterSprites(TYPES[type].sprite);
 const wandererSprites = {};
 for (const profile of WANDERERS) wandererSprites[profile.id] = loadCharacterSprites(profile.sprite);
+const monsterSlimeSprite = new Image();
+monsterSlimeSprite.src = 'images/monster/Monster_Slime.png';
 
 // ---- NPC 正式對話（靠近後按 Space／E）----
 const dialogueBox = document.getElementById('dialogueBox');
@@ -261,7 +263,7 @@ function assignSentryToGround(t) {
   if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '正在暴走，無法指派', x, y, '#ff8f8f'); return; }
   if (!isLit(x, y)) { sfx('error'); flash('巡邏點必須在亮處', x, y, '#ffd24a'); return; }
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
-  t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0;
+  t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
   closeGroundMenu();
 }
@@ -281,6 +283,39 @@ function renderGroundActions() {
   patrol.textContent = '📣 召喚哨兵';
   patrol.addEventListener('click', renderGroundSentryChoices);
   groundMenu.append(build, patrol);
+}
+function playerBuildingAt(c, r) {
+  return [...G.obstacles].reverse().find(o =>
+    o.playerBuilt && c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)
+  ) || null;
+}
+function renderBuildingActions(o) {
+  if (!groundTarget || !o || !G.obstacles.includes(o)) { closeGroundMenu(); return; }
+  const data = typeof buildableById === 'function' ? buildableById(o.type) : null;
+  groundMenu.innerHTML = '<div class="gm-title">' + (data?.name || '建築') + '</div>';
+  addGroundCloseButton();
+  const demolish = document.createElement('button');
+  demolish.className = 'gm-demolish';
+  demolish.textContent = '🔨 拆除';
+  demolish.addEventListener('click', () => {
+    if (!o.playerBuilt || !G.obstacles.includes(o)) { closeGroundMenu(); return; }
+    const [fx, fy] = center(o.c + ((o.w || 1) - 1) / 2, o.r + ((o.h || 1) - 1) / 2);
+    removeBarrier(o);
+    for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }
+    for (const enemy of G.enemies) { enemy.aiPath = null; enemy.aiGoal = null; enemy.aiRouteTimer = 0; }
+    computeFlow();
+    sfx('hit'); flash('已拆除', fx, fy - 20, '#ffd479');
+    closeGroundMenu(); updateHUD();
+  });
+  groundMenu.appendChild(demolish);
+}
+function openBuildingMenu(o, c, r, clientX, clientY) {
+  closeBuildMenu(); closeSentryMenu();
+  groundTarget = { c, r, obstacle: o };
+  renderBuildingActions(o); positionGroundMenu(clientX, clientY);
+  groundMenu.classList.remove('hidden');
+  groundMenu.style.animation = 'none'; void groundMenu.offsetWidth; groundMenu.style.animation = '';
+  sfx('menu');
 }
 function renderGroundSentryChoices() {
   if (!groundTarget) return;
@@ -326,6 +361,7 @@ function newGame() {
     phase: 'ready', money: START.money, lives: START.lives,
     guide: START.guide, guideMax: START.guideMax, guideRegen: START.guideRegen,
     grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [],
+    recentMonsterSpawns: [],
     selType: null, waveIndex: 0, waves: buildWaves(),
     spawnQueue: [], spawnTimer: 0, curGap: 0.9, betweenWaves: 0,
     running: false, over: false, won: false,
@@ -336,7 +372,7 @@ function newGame() {
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
   spawnWanderers();     // 場景 NPC 只會在亮處自由走動
   const [px, py] = playerSpawnPos();
-  G.player = { x: px, y: py, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
+  G.player = { x: px, y: py, hp: 100, maxhp: 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
   updateCamera();
   updateHUD();
 }
@@ -492,7 +528,7 @@ cv.addEventListener('click', e => {
     const t = assigning;
     if (!isLit(x, y)) { sfx('error'); flash('要指派在亮處', x, y, '#ffd24a'); return; }
     if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
-    t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; assigning = null;
+    t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
     sfx('button');
     flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
     return;
@@ -504,7 +540,14 @@ cv.addEventListener('click', e => {
   closeSentryMenu();
   // 安全區域：地面點擊不做事（不能蓋建築、也不能召喚哨兵）
   if (MAP_SAFE) { closeGroundMenu(); return; }
-  // 點到障礙物：不動作
+  // 點到玩家蓋的建築：在建築旁開啟操作選單，可用槌子按鈕拆除。
+  const clickedBuilding = playerBuildingAt(c, r);
+  if (clickedBuilding) {
+    spawnGroundRipple(e.clientX, e.clientY);
+    openBuildingMenu(clickedBuilding, c, r, e.clientX, e.clientY);
+    return;
+  }
+  // 地圖原生障礙物與基地不能由玩家拆除。
   if (buildAt(c, r) || isWall(c, r) || isEntrance(c, r)) { closeGroundMenu(); return; }
   spawnGroundRipple(e.clientX, e.clientY);
   // 放置（合不合法由 placeObstacle 檢查「擋路格」決定，跟預覽框一致）
@@ -573,6 +616,29 @@ function enemyAttackSentry(e, target, dt) {
   flash('-' + Math.round(14 * (1 - defense)), target.x, target.y - 30, '#ff8f8f');
   if (target.hp <= 0) { target.target = null; flash('失去戰鬥能力', target.x, target.y - 42, '#ff5b6e'); }
 }
+function enemyAttackPlayer(e, dt) {
+  const p = G.player;
+  if (!p || p.hp <= 0) return;
+  e.atkCd = (e.atkCd || 0) - dt;
+  if (e.atkCd > 0) return;
+  e.atkCd = 1;
+  p.hp = Math.max(0, p.hp - 12);
+  p.hitT = .3; p.underAttackT = 5;
+  flash('-12', p.x, p.y - 46, '#ff6b6b');
+  sfx('hit');
+  if (p.hp <= 0 && !G.over) {
+    flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e');
+    lose();
+  }
+}
+function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
+  if (!G.player || G.player.hp <= 0 || playerDistance > ENEMY_SENSE_RANGE) return false;
+  if (playerDistance <= 30) { enemyAttackPlayer(e, dt); return true; }
+  const [gc, gr] = cellAt(G.player.x, G.player.y);
+  const nav = enemyNavigate(e, gc, gr, moveDt, 'player:' + gc + ',' + gr, true);
+  if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
+  return true;
+}
 function moveEnemyToward(e, target, dt) {
   const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
   const step = e.speed * dt;
@@ -582,7 +648,82 @@ function moveEnemyToward(e, target, dt) {
   e.hasTarget = false; e.baseTarget = null;
   return true;
 }
+
+// ---- 異質體行為：18 格感知、尋路與黑暗遊蕩 ----
+const ENEMY_SENSE_RANGE = 18 * CELL;
+const ENEMY_NEIGHBORS = [[0, -1], [-1, 0], [1, 0], [0, 1]];
+function enemyObstacleDistance(e, o) {
+  let best = Infinity;
+  for (const [dc, dr] of obstacleSolidCells(o)) {
+    const [x, y] = center(o.c + dc, o.r + dr);
+    best = Math.min(best, Math.hypot(x - e.x, y - e.y));
+  }
+  return best;
+}
+function closestObstacleCell(e, o) {
+  let best = [o.c, o.r], bestD = Infinity;
+  for (const [dc, dr] of obstacleSolidCells(o)) {
+    const c = o.c + dc, r = o.r + dr, [x, y] = center(c, r);
+    const d = Math.hypot(x - e.x, y - e.y);
+    if (d < bestD) { best = [c, r]; bestD = d; }
+  }
+  return best;
+}
+function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
+  const [startC, startR] = cellAt(e.x, e.y);
+  if (!inGrid(goalC, goalR) || isWall(goalC, goalR)) return null;
+  const startKey = startC + ',' + startR, goalKey = goalC + ',' + goalR;
+  const queue = [[startC, startR]], cameFrom = new Map([[startKey, null]]);
+  for (let qi = 0; qi < queue.length; qi++) {
+    const [c, r] = queue[qi];
+    if (c === goalC && r === goalR) break;
+    for (const [dc, dr] of ENEMY_NEIGHBORS) {
+      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
+      if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key)) continue;
+      if (barrierAt(nc, nr) && !canBreakBuildings) continue;
+      cameFrom.set(key, [c, r]); queue.push([nc, nr]);
+    }
+  }
+  if (!cameFrom.has(goalKey)) return null;
+  const path = [];
+  for (let cur = [goalC, goalR]; cur && (cur[0] !== startC || cur[1] !== startR); ) {
+    path.push(cur); cur = cameFrom.get(cur[0] + ',' + cur[1]);
+  }
+  path.reverse();
+  return path;
+}
+function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
+  e.aiRouteTimer = (e.aiRouteTimer || 0) - moveDt;
+  const goal = goalC + ',' + goalR;
+  if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || !e.aiPath || !e.aiPath.length) {
+    e.aiPath = buildEnemyRoute(e, goalC, goalR, canBreakBuildings);
+    e.aiRouteKey = routeKey; e.aiGoal = goal; e.aiRouteTimer = .65 + Math.random() * .35;
+  }
+  if (!e.aiPath || !e.aiPath.length) return { reached: true };
+  const [nc, nr] = e.aiPath[0], blocker = barrierAt(nc, nr);
+  if (blocker) return { blocker };
+  const [tx, ty] = center(nc, nr), d = Math.hypot(tx - e.x, ty - e.y);
+  if (d <= Math.max(2, e.speed * moveDt)) {
+    e.x = tx; e.y = ty; e.aiPath.shift();
+    return { reached: !e.aiPath.length };
+  }
+  moveEnemyToward(e, { x: tx, y: ty }, moveDt);
+  return {};
+}
+function chooseDarkWanderCell(e) {
+  const [ec, er] = cellAt(e.x, e.y), choices = [];
+  for (let r = Math.max(0, er - 7); r <= Math.min(ROWS - 1, er + 7); r++) {
+    for (let c = Math.max(0, ec - 7); c <= Math.min(COLS - 1, ec + 7); c++) {
+      const distance = Math.abs(c - ec) + Math.abs(r - er);
+      if (distance < 2 || distance > 9 || isWall(c, r) || barrierAt(c, r) || cellLit(c, r)) continue;
+      choices.push([c, r]);
+    }
+  }
+  if (!choices.length) return null;
+  return choices[Math.floor(Math.random() * choices.length)];
+}
 function updateEnemyEffects(e, dt) {
+  if (e.hitT > 0) e.hitT -= dt;
   if (e.burnT > 0) {
     e.burnT -= dt; e.burnTick = (e.burnTick || 0) - dt;
     if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flash('燒傷', e.x, e.y - 25, '#ff8a42'); }
@@ -590,45 +731,144 @@ function updateEnemyEffects(e, dt) {
   if (e.stunT > 0) e.stunT -= dt;
   if (e.confuseT > 0) e.confuseT -= dt;
 }
+
+const SLIME_JUMP = { ready: .14, air: .34, land: .14, height: 9 };
+SLIME_JUMP.total = SLIME_JUMP.ready + SLIME_JUMP.air + SLIME_JUMP.land;
+function updateSlimeJump(e, dt) {
+  if (e.slimeClock == null) e.slimeClock = Math.random() * SLIME_JUMP.total;
+  e.slimeClock = (e.slimeClock + dt) % SLIME_JUMP.total;
+  const time = e.slimeClock;
+  e.slimeLift = 0; e.slimeScaleX = 1; e.slimeScaleY = 1;
+  if (time < SLIME_JUMP.ready) {
+    const p = time / SLIME_JUMP.ready;
+    e.slimeScaleX = 1 + .1 * p;
+    e.slimeScaleY = 1 - .08 * p;
+    return 0; // 蓄力時停在原地
+  }
+  if (time < SLIME_JUMP.ready + SLIME_JUMP.air) {
+    const p = (time - SLIME_JUMP.ready) / SLIME_JUMP.air;
+    e.slimeLift = Math.sin(Math.PI * p) * SLIME_JUMP.height;
+    e.slimeScaleX = 1 - .05 * Math.sin(Math.PI * p);
+    e.slimeScaleY = 1 + .09 * Math.sin(Math.PI * p);
+    return dt * (SLIME_JUMP.total / SLIME_JUMP.air); // 只在空中前進，維持原本平均速度
+  }
+  const p = (time - SLIME_JUMP.ready - SLIME_JUMP.air) / SLIME_JUMP.land;
+  e.slimeScaleX = 1 + .18 * (1 - p);
+  e.slimeScaleY = 1 - .14 * (1 - p);
+  return 0; // 落地壓扁並停頓
+}
+
+function spawnAttackVisual(attacker, target, spec, affected) {
+  const kind = spec.ability === '火焰' ? 'flame'
+    : spec.ability === '雷電' ? 'lightning'
+    : spec.ability === '怪力' || spec.ability === '自癒' ? 'melee'
+    : spec.ability === '腐蝕' ? 'corrosion' : 'shot';
+  const duration = kind === 'lightning' ? .34 : (kind === 'melee' ? .24 : .28);
+  G.effects.push({ attack: true, kind, x1: attacker.x, y1: attacker.y - 9, x2: target.x, y2: target.y, life: duration, life0: duration, color: spec.color, seed: Math.random() * 1000 });
+  const hitTargets = affected && affected.length ? affected : [target];
+  for (const enemy of hitTargets) {
+    enemy.hitT = Math.max(enemy.hitT || 0, .16);
+    enemy.hitColor = spec.color;
+  }
+  const particleCount = kind === 'lightning' ? 12 : (kind === 'melee' ? 9 : 7);
+  for (let i = 0; i < particleCount; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const speed = (kind === 'corrosion' ? 20 : 35) + Math.random() * 55;
+    G.effects.push({
+      particle: true, kind, x: target.x, y: target.y,
+      vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed - (kind === 'flame' ? 22 : 0),
+      r: 1.5 + Math.random() * 2.2, life: .24 + Math.random() * .2, life0: .44,
+      color: kind === 'lightning' ? '#fff3a3' : (kind === 'flame' ? '#ffb347' : spec.color)
+    });
+  }
+  if (typeof sfx === 'function') sfx('hit');
+}
 function stepEnemy(e, dt) {
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
+  if (e.stunT > 0) { e.slimeLift = 0; e.slimeScaleX = 1.08; e.slimeScaleY = .92; return; }
+  const moveDt = updateSlimeJump(e, dt);
   if (e.confuseT > 0) {
     const allies = G.enemies.filter(o => o !== e && !o.dead && o.hp > 0).sort((a,b) => Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y));
     const foe = allies[0];
     if (foe) {
       const d = Math.hypot(foe.x-e.x,foe.y-e.y);
-      if (d > 22) moveEnemyToward(e, foe, dt);
+      if (d > 22) moveEnemyToward(e, foe, moveDt);
       else { e.confuseCd=(e.confuseCd||0)-dt; if(e.confuseCd<=0){e.confuseCd=.8;foe.hp-=10;flash('混亂攻擊',foe.x,foe.y-24,'#c791ff');} }
     }
     return;
   }
-  if (e.stunT > 0) return;
-  const living = G.towers.filter(t => t.hp > 0 && !t.berserk);
-  let taunter = null, tauntDistance = Infinity;
-  for (const t of living) {
-    const taunt = TYPES[t.type].taunt || 0, d = Math.hypot(t.x-e.x,t.y-e.y);
-    if (taunt && d <= taunt * CELL && d < tauntDistance) { taunter=t; tauntDistance=d; }
-  }
-  if (taunter) {
-    if (tauntDistance <= 22) { enemyAttackSentry(e, taunter, dt); return; }
-    if (moveEnemyToward(e, taunter, dt)) return;
-  }
-  const contact = living.filter(t => Math.hypot(t.x-e.x,t.y-e.y) <= 20).sort((a,b) => Number(TYPES[a.type].noAggro)-Number(TYPES[b.type].noAggro))[0];
-  if (contact) { enemyAttackSentry(e, contact, dt); return; }
-  if (!e.hasTarget) commitNext(e);
-  if (e.stuck) return;
-  if (e.exiting) { e.y += e.speed * dt; if (e.y > OY + ROWS * CELL + 18) e.reached = true; return; }
-  if (e.baseTarget) { enemyAttackObstacle(e, e.baseTarget, dt); return; }
-  // 目標格有障礙物 → 停下打牆（每隔 breakInterval 秒攻擊一次）
-  const tc = e.tcell, o = tc ? barrierAt(tc[0], tc[1]) : null;
-  if (o) {
-    enemyAttackObstacle(e, o, dt);
+  // 發光建築是異質體的最高優先目標：先破壞探照燈，讓周圍重新陷入黑暗。
+  const lightChoice = G.obstacles
+    .filter(o => o.hp > 0 && o.type && LIGHT.buildings && LIGHT.buildings[o.type])
+    .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
+    .filter(item => item.d <= ENEMY_SENSE_RANGE)
+    .sort((a, b) => a.d - b.d)[0];
+  if (lightChoice) {
+    const [gc, gr] = closestObstacleCell(e, lightChoice.o);
+    const nav = enemyNavigate(e, gc, gr, moveDt, 'light:' + gc + ',' + gr, true);
+    if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
     return;
   }
-  const dx = e.tx - e.x, dy = e.ty - e.y, d = Math.hypot(dx, dy), step = e.speed * dt;
-  if (d <= step) { e.x = e.tx; e.y = e.ty; e.hasTarget = false; }
-  else { e.x += dx / d * step; e.y += dy / d * step; }
+  const living = G.towers.filter(t => t.hp > 0 && !t.berserk);
+  const sensedSentries = living
+    .map(t => ({ t, d: Math.hypot(t.x - e.x, t.y - e.y) }))
+    .filter(item => item.d <= ENEMY_SENSE_RANGE)
+    .sort((a, b) => a.d - b.d);
+
+  // 哨兵是第一優先；具有嘲諷能力者若在嘲諷範圍內，會覆蓋最近目標。
+  let sentryChoice = sensedSentries[0] || null;
+  const taunter = sensedSentries.find(item => {
+    const taunt = TYPES[item.t.type].taunt || 0;
+    return taunt && item.d <= taunt * CELL;
+  });
+  if (taunter) sentryChoice = taunter;
+  const playerDistance = G.player && G.player.hp > 0 ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
+  // 玩家貼近怪物時一定會引起攻擊；距離明顯比哨兵近時也會成為目標。
+  // 嘲諷中的哨兵仍能把遠處怪物的注意力拉回自己身上。
+  const playerIsImmediate = playerDistance <= CELL * 2.25;
+  const playerIsMuchCloser = !taunter && playerDistance <= ENEMY_SENSE_RANGE &&
+    (!sentryChoice || playerDistance + CELL * 1.5 < sentryChoice.d);
+  if ((playerIsImmediate || playerIsMuchCloser) && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
+  if (sentryChoice) {
+    const target = sentryChoice.t;
+    if (sentryChoice.d <= 22) { enemyAttackSentry(e, target, dt); return; }
+    const [gc, gr] = cellAt(target.x, target.y);
+    const nav = enemyNavigate(e, gc, gr, moveDt, 'sentry:' + target.type + ':' + gc + ',' + gr, true);
+    // 追擊途中碰到任何建築，立刻先拆掉擋路的建築。
+    if (nav.blocker) { enemyAttackObstacle(e, nav.blocker, dt); return; }
+    return;
+  }
+
+  // 沒有哨兵攔截時，異質體會主動追擊 18 格內的玩家。
+  if (enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
+
+  // 沒有哨兵時，才搜尋 18 格內由玩家建造的設施。
+  const buildingChoice = G.obstacles
+    .filter(o => o.playerBuilt && o.hp > 0)
+    .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
+    .filter(item => item.d <= ENEMY_SENSE_RANGE)
+    .sort((a, b) => a.d - b.d)[0];
+  if (buildingChoice) {
+    const [gc, gr] = closestObstacleCell(e, buildingChoice.o);
+    const nav = enemyNavigate(e, gc, gr, moveDt, 'building:' + gc + ',' + gr, true);
+    if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
+    return;
+  }
+
+  // 沒有感知到目標時不再直衝營地，而是在附近黑暗處走走停停。
+  e.wanderWait = Math.max(0, (e.wanderWait || 0) - dt);
+  if (!e.wanderCell && e.wanderWait <= 0) e.wanderCell = chooseDarkWanderCell(e);
+  if (e.wanderCell) {
+    const [wc, wr] = e.wanderCell;
+    const nav = enemyNavigate(e, wc, wr, moveDt, 'wander:' + wc + ',' + wr, false);
+    if (nav.reached) {
+      e.wanderCell = null; e.aiPath = null;
+      e.wanderWait = .35 + Math.random() * 1.35;
+    }
+  } else if (e.wanderWait <= 0) {
+    e.wanderWait = .5 + Math.random();
+  }
 }
 
 // ---- 主迴圈（幀率校正）----
@@ -657,6 +897,10 @@ function loop(ts) {
 }
 function update(dt) {
   updateCores(dt);
+  if (G.player) {
+    G.player.hitT = Math.max(0, (G.player.hitT || 0) - dt);
+    G.player.underAttackT = Math.max(0, (G.player.underAttackT || 0) - dt);
+  }
   G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);
   // 生怪
   if (G.spawnQueue.length > 0) {
@@ -692,7 +936,21 @@ function update(dt) {
     if (t.hp <= 0) continue;
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (spec.taintRegen && !t.berserk) t.taint = Math.max(0, t.taint - spec.taintRegen * dt);
-    if (spec.aura && !t.berserk) for (const o of G.towers) { if (o !== t && o.hp > 0 && Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL) { o.taint = Math.max(0, o.taint - spec.aura.rate * dt); o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * dt); } }   // 嚮導隨身疏導與治療
+    if (spec.aura && !t.berserk) {
+      t.supportFxCd = Math.max(0, (t.supportFxCd || 0) - dt);
+      for (const o of G.towers) {
+        if (o === t || o.hp <= 0 || TYPES[o.type].guide || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
+        const beforeTaint = o.taint || 0, beforeHp = o.hp;
+        o.taint = Math.max(0, beforeTaint - spec.aura.rate * dt);
+        o.hp = Math.min(o.maxhp, beforeHp + (spec.aura.heal || 0) * dt);
+        if (o.berserk && o.taint < 60) o.berserk = false;
+        if ((o.taint < beforeTaint || o.hp > beforeHp) && t.supportFxCd <= 0) {
+          G.effects.push({ heal: true, x: o.x, y: o.y - 9, life: .72, life0: .72, color: '#72e0bd' });
+          G.effects.push({ support: true, x1: t.x, y1: t.y - 8, x2: o.x, y2: o.y - 8, life: .32, life0: .32, color: '#72e0bd' });
+          t.supportFxCd = .55;
+        }
+      }
+    }   // 嚮導隨身疏導與治療
     t.cd -= dt;
     if (t.berserk || t.cd > 0) continue;
     const R = spec.range * CELL;
@@ -716,7 +974,7 @@ function update(dt) {
             e.x+=dx/d*CELL*spec.knockback;e.y+=dy/d*CELL*spec.knockback;e.hasTarget=false;e.baseTarget=null;
           }
         }
-        G.effects.push({ x1: t.x, y1: t.y, x2: target.x, y2: target.y, life: 0.12, color: spec.color });
+        spawnAttackVisual(t, target, spec, affected);
       } else flash('MISS', t.x, t.y - 26, '#9aa4b2');
       if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
       if (t.taint >= 100 && !t.berserk) { t.berserk = true; G.lives -= BERSERK.livesPenalty; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d'); }
@@ -740,6 +998,10 @@ function update(dt) {
     if (f.dust) {   // 塵埃：往外飄、逐漸減速
       f.x += f.vx * dt; f.y += f.vy * dt;
       f.vx *= (1 - 2.5 * dt); f.vy *= (1 - 2.5 * dt);
+    } else if (f.particle) {
+      f.x += f.vx * dt; f.y += f.vy * dt;
+      f.vx *= (1 - 3.4 * dt); f.vy *= (1 - 3.4 * dt);
+      if (f.kind === 'flame') f.vy -= 18 * dt;
     }
   }
   G.effects = G.effects.filter(f => f.life > 0);
@@ -841,14 +1103,34 @@ function drawTower(t) {
   if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - 13, t.say.text, BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡
 }
 function drawEnemy(e) {
-  ctx.fillStyle = '#c25bce'; ctx.beginPath(); ctx.arc(e.x, e.y, 13, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 2.4, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 2.4, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#000'; ctx.beginPath(); ctx.arc(e.x - 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.arc(e.x + 4, e.y - 2, 1.1, 0, Math.PI * 2); ctx.fill();
-  ctx.fillStyle = '#000'; ctx.fillRect(e.x - 14, e.y - 20, 28, 3);
-  ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 14, e.y - 20, 28 * Math.max(0, e.hp) / e.maxhp, 3);
+  ctx.save();
+  if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
+  const lift = e.slimeLift || 0;
+  const slimeW = 42 * (e.slimeScaleX || 1), slimeH = 33 * (e.slimeScaleY || 1);
+  const bottomY = e.y + 13 - lift;
+  const shadowScale = Math.max(.55, 1 - lift / 22);
+  ctx.globalAlpha = .28 * shadowScale; ctx.fillStyle = '#071015';
+  ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.globalAlpha = 1;
+  if (monsterSlimeSprite.complete && monsterSlimeSprite.naturalWidth) {
+    ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(monsterSlimeSprite, Math.round(e.x - slimeW / 2), Math.round(bottomY - slimeH), Math.round(slimeW), Math.round(slimeH));
+    ctx.imageSmoothingEnabled = true;
+  } else {
+    ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.fillStyle = '#000'; ctx.fillRect(e.x - 16, e.y - 26, 32, 3);
+  ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 16, e.y - 26, 32 * Math.max(0, e.hp) / e.maxhp, 3);
   if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
-  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('顫抖',e.x,e.y-27); }
-  if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-27); }
+  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('顫抖',e.x,e.y-33); }
+  if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
+  if (e.hitT > 0) {
+    ctx.globalAlpha = Math.min(1, e.hitT / .16);
+    ctx.strokeStyle = e.hitColor || '#fff'; ctx.lineWidth = 2.5;
+    ctx.beginPath(); ctx.arc(e.x, e.y, 15 + (1 - e.hitT / .16) * 5, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = 1;
+  }
+  ctx.restore();
 }
 function drawWanderer(npc) {
   const set = wandererSprites[npc.id];
@@ -921,6 +1203,15 @@ function drawPlayer(p) {
   } else {
     ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
   }
+  if (p.hitT > 0) {
+    ctx.fillStyle = `rgba(255,70,70,${Math.min(.38, p.hitT)})`;
+    ctx.beginPath(); ctx.arc(p.x, p.y - 15, 25, 0, Math.PI * 2); ctx.fill();
+  }
+  if (!MAP_SAFE) {
+    const w = 46, h = 5, ratio = Math.max(0, p.hp / p.maxhp), x = p.x - w / 2, y = p.y - size + 13;
+    ctx.fillStyle = 'rgba(8,12,18,.88)'; roundRect(x - 1, y - 1, w + 2, h + 2, 3); ctx.fill();
+    ctx.fillStyle = ratio > .35 ? '#63d7aa' : '#ff6363'; roundRect(x, y, w * ratio, h, 2); ctx.fill();
+  }
 }
 
 // ---- 繪製 ----
@@ -984,6 +1275,58 @@ function draw() {
       roundRect(f.x - tw / 2 - 8, ty - 15, tw + 16, 21, 6); ctx.fill();
       ctx.globalAlpha = alpha; ctx.fillStyle = f.color;
       ctx.fillText(f.text, f.x, ty);
+      ctx.globalAlpha = 1;
+    } else if (f.heal) {
+      const p = Math.max(0, f.life / f.life0), grow = 1 - p;
+      ctx.globalAlpha = p; ctx.strokeStyle = f.color; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(f.x, f.y, 8 + grow * 10, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#bfffe8';
+      ctx.fillRect(f.x - 2, f.y - 10 - grow * 7, 4, 14);
+      ctx.fillRect(f.x - 7, f.y - 5 - grow * 7, 14, 4);
+      ctx.globalAlpha = 1;
+    } else if (f.support) {
+      const p = Math.max(0, f.life / f.life0);
+      ctx.globalAlpha = p * .72; ctx.strokeStyle = f.color; ctx.lineWidth = 2;
+      ctx.setLineDash([4, 4]); ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke();
+      ctx.setLineDash([]); ctx.globalAlpha = 1;
+    } else if (f.attack) {
+      const p = Math.max(0, f.life / f.life0), grow = 1 - p;
+      ctx.save(); ctx.globalAlpha = Math.min(1, p * 1.35);
+      if (f.kind === 'lightning') {
+        ctx.strokeStyle = '#fff4a8'; ctx.lineWidth = 3; ctx.shadowColor = '#ffe55e'; ctx.shadowBlur = 11;
+        ctx.beginPath(); ctx.moveTo(f.x2 + 5, f.y2 - 92);
+        for (let i = 1; i <= 6; i++) {
+          const y = f.y2 - 92 + i * 15.5;
+          const x = f.x2 + Math.sin(f.seed + i * 7.3) * (i === 6 ? 0 : 9);
+          ctx.lineTo(x, y);
+        }
+        ctx.stroke(); ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#ffe36e'; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(f.x2, f.y2, 12 + grow * 18, 0, Math.PI * 2); ctx.stroke();
+      } else if (f.kind === 'melee') {
+        const angle = Math.atan2(f.y2 - f.y1, f.x2 - f.x1);
+        ctx.strokeStyle = '#fff2cf'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.shadowColor = f.color; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.arc(f.x2, f.y2, 19 + grow * 9, angle - 1.25, angle + .85); ctx.stroke();
+        ctx.shadowBlur = 0; ctx.strokeStyle = f.color; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.arc(f.x2, f.y2 + 5, 8 + grow * 24, 0, Math.PI * 2); ctx.stroke();
+      } else {
+        const dx = f.x2 - f.x1, dy = f.y2 - f.y1, d = Math.hypot(dx, dy) || 1;
+        ctx.strokeStyle = f.kind === 'flame' ? '#ffd080' : (f.kind === 'corrosion' ? '#8db8ff' : f.color);
+        ctx.lineWidth = f.kind === 'flame' ? 4 : 2.5; ctx.lineCap = 'round'; ctx.shadowColor = f.color; ctx.shadowBlur = 8;
+        ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2 - dx / d * 5, f.y2 - dy / d * 5); ctx.stroke();
+        ctx.shadowBlur = 0; ctx.fillStyle = f.color;
+        ctx.beginPath(); ctx.arc(f.x2, f.y2, 5 + grow * (f.kind === 'corrosion' ? 13 : 9), 0, Math.PI * 2); ctx.fill();
+      }
+      ctx.restore();
+    } else if (f.particle) {
+      const p = Math.max(0, f.life / f.life0);
+      ctx.globalAlpha = p; ctx.fillStyle = f.color;
+      if (f.kind === 'lightning') {
+        ctx.fillRect(f.x - f.r, f.y - .8, f.r * 2, 1.6);
+        ctx.fillRect(f.x - .8, f.y - f.r, 1.6, f.r * 2);
+      } else {
+        ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.5, f.r * p), 0, Math.PI * 2); ctx.fill();
+      }
       ctx.globalAlpha = 1;
     } else if (f.dust) {   // 塵埃：淡土色小圓點，隨時間變淡、略微放大
       const p = Math.max(0, f.life / f.life0);
@@ -1066,7 +1409,7 @@ function showStart() {
     return;
   }
   showOverlay('台北地下災害應變中心 · 塔防原型',
-    '後室<b>一片漆黑</b>——只有營地和你身上的燈是亮的。<br><b>三位哨兵已在基地待命</b>：點擊哨兵可下指令（巡邏／指派位置／疏導）。<br>放置<b>探照燈</b>照亮區域：<b>亮處才能放建築</b>，黑暗中的怪物<b>看不見</b>。<br>用 <b>WASD／方向鍵</b>移動嚮導，怪物<b>由上往下</b>攻進<b>營地</b>；在哨兵<b>暴走</b>前記得<b>疏導</b>。守住 5 波即可控制 Y 區。',
+    '後室<b>一片漆黑</b>——只有營地和你身上的燈是亮的。<br><b>哨兵已在基地待命</b>：點擊哨兵可下指令（巡邏／指派位置／疏導）。<br>異質體會成群出現在<b>不同的黑暗角落</b>並四處遊蕩；進入感知範圍後會優先追擊哨兵，若被建築擋住就會先破壞建築。<br>放置<b>探照燈</b>與防禦設施控制戰場，在哨兵<b>暴走</b>前記得<b>疏導</b>。破壞所有異質核心並清除異質體即可控制 Y 區。',
     '開始防禦');
 }
 function winOverlay() { showOverlay('✅ Y 區已控制', '所有異質核心與殘存異質體已清除！異質結晶已儲存，可用於哨兵培養。', '再玩一次'); }

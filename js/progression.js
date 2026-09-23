@@ -53,7 +53,36 @@ function seedCores() {
   for(let i=0;i<Math.min(count,cells.length);i++) {
     const [c,r]=cells[Math.floor(i*cells.length/Math.min(count,cells.length))];
     const [x,y]=center(c,r);
-    G.cores.push({x,y,hp:200*difficulty,maxhp:200*difficulty,dead:false,timer:2+i,reward:100*difficulty});
+    G.cores.push({x,y,hp:200*difficulty,maxhp:200*difficulty,dead:false,timer:1.8+i*.7+Math.random()*2.4,reward:100*difficulty});
+  }
+}
+function darkMonsterSpawnCells() {
+  const recent = new Set((G.recentMonsterSpawns || []).slice(-12));
+  const candidates = [], fallback = [];
+  for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
+    const key = c + ',' + r;
+    if (isWall(c,r) || G.grid[key]) continue;
+    const [x,y] = center(c,r);
+    if (G.player && Math.hypot(x-G.player.x,y-G.player.y) < CELL*4) continue;
+    if (G.towers.some(t=>t.hp>0 && Math.hypot(x-t.x,y-t.y)<CELL*3)) continue;
+    if (!cellLit(c,r)) {
+      fallback.push([c,r]);
+      if (!recent.has(key) && !G.enemies.some(e=>Math.hypot(x-e.x,y-e.y)<CELL*1.5)) candidates.push([c,r]);
+    }
+  }
+  return candidates.length ? candidates : fallback;
+}
+function spawnCoreGroup(core) {
+  const cells = darkMonsterSpawnCells();
+  if (!cells.length) return;
+  const count = Math.min(1 + Math.floor(Math.random()*3), 60-G.enemies.length, cells.length);
+  for (let i=0;i<count;i++) {
+    const index = Math.floor(Math.random()*cells.length), [c,r] = cells.splice(index,1)[0];
+    const [x,y] = center(c,r);
+    G.enemies.push({x,y,hp:WAVE_CFG.baseHp,maxhp:WAVE_CFG.baseHp,speed:WAVE_CFG.baseSpeed,reward:WAVE_CFG.reward,hasTarget:false,wanderWait:Math.random()*.8,slimeClock:Math.random()*.62});
+    G.recentMonsterSpawns = G.recentMonsterSpawns || [];
+    G.recentMonsterSpawns.push(c+','+r);
+    if (G.recentMonsterSpawns.length>18) G.recentMonsterSpawns.shift();
   }
 }
 function updateCores(dt) {
@@ -61,8 +90,8 @@ function updateCores(dt) {
     if(core.dead) continue;
     core.timer-=dt;
     if(core.timer<=0 && G.enemies.length<60) {
-      G.enemies.push({x:core.x,y:core.y,hp:WAVE_CFG.baseHp,maxhp:WAVE_CFG.baseHp,speed:WAVE_CFG.baseSpeed,reward:WAVE_CFG.reward,hasTarget:false});
-      core.timer=4;
+      spawnCoreGroup(core);
+      core.timer=2.6+Math.random()*4.2;
     }
   }
 }

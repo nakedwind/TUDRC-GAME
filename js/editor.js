@@ -9,8 +9,24 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;   // 像素圖不要模糊
-const STORAGE_MAPS = 'tudrc_maps_v2';   // 2026-09-22：改用今天 10:38 首次 pull 的地圖紀錄；舊 v1 仍保留在瀏覽器內
-const STORAGE_TILES = 'tudrc_tiles_v1';
+// 2026-09-23：先備份這台電腦的舊瀏覽器暫存，再切換到全新的儲存區。
+// 這能避免 pull 下來的 data/maps.js 再次被另一台電腦留下的舊 localStorage 覆蓋。
+const PULL_RESTORE_MARKER = 'tudrc_pull_restore_e4142e5_done';
+const PULL_RESTORE_APPLIED = (() => {
+  if (localStorage.getItem(PULL_RESTORE_MARKER)) return false;
+  const oldMaps = localStorage.getItem('tudrc_maps_v2');
+  const oldTiles = localStorage.getItem('tudrc_tiles_v1');
+  if (oldMaps && !localStorage.getItem('tudrc_maps_backup_before_e4142e5_20260923'))
+    localStorage.setItem('tudrc_maps_backup_before_e4142e5_20260923', oldMaps);
+  if (oldTiles && !localStorage.getItem('tudrc_tiles_backup_before_e4142e5_20260923'))
+    localStorage.setItem('tudrc_tiles_backup_before_e4142e5_20260923', oldTiles);
+  localStorage.removeItem('tudrc_maps_v2');
+  localStorage.removeItem('tudrc_tiles_v1');
+  localStorage.setItem(PULL_RESTORE_MARKER, '1');
+  return true;
+})();
+const STORAGE_MAPS = 'tudrc_maps_v3';
+const STORAGE_TILES = 'tudrc_tiles_v2';
 const STORAGE_PREVIEW = 'tudrc_map_preview_v1';   // 「預覽遊戲」用：把編輯中的地圖交給遊戲畫面
 const STORAGE_DECOR_PACK = 'tudrc_asset_pack_item_decorate_v1';
 const STORAGE_OBSTACLE_PACK = 'tudrc_asset_pack_item_obstacle_v1';
@@ -1552,4 +1568,5 @@ renderLayers();
 refreshMapSelect();
 loadRules();
 draw();
+if (PULL_RESTORE_APPLIED) setStatus('舊瀏覽器紀錄已備份；目前已載入 Git 地圖版本 ✓', '#7ee0c0');
 setStatus('編輯器已就緒。目前有 ' + maps.length + ' 張地圖、' + palette().length + ' 塊磚塊。', '#7ee0c0');

@@ -139,10 +139,35 @@ function sampleWanderTarget(cx, cy, radius) {
   }
   return null;
 }
+function sentryCompanionRule(t) {
+  if (t.mode !== 'free' || typeof FOLLOW === 'undefined') return null;
+  if (t.type === 'avaren') {
+    const anchor = (G.towers || []).find(x => x !== t && x.type === 'eldrin' && x.hp > 0);
+    if (anchor) return { anchor, radius: (FOLLOW.avaren.radiusCells || 4) * CELL, speed: FOLLOW.avaren.speed || 96 };
+  }
+  if (t.type === 'red' && G.player) {
+    return { anchor: G.player, radius: (FOLLOW.red.radiusCells || 7) * CELL, speed: FOLLOW.red.speed || 92 };
+  }
+  return null;
+}
+// 索敵範圍內有沒有看得見的敵人／核心（有的話護衛圈先讓位給接敵，避免在圈邊抖動）
+function hasAggroTarget(t) {
+  const spec = TYPES[t.type]; if (!spec) return false;
+  const cores = (typeof G.cores !== 'undefined') ? G.cores : [];
+  if (!G.enemies.length && !cores.some(c => !c.dead)) return false;
+  const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
+  for (const e of [...G.enemies, ...cores]) {
+    if (e.dead) continue;
+    if (LIGHT.enabled && !isLit(e.x, e.y)) continue;
+    if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
+  }
+  return false;
+}
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; return; }
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
+  t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
   if (menuSentry === t) return;                       // 選單開著時先站好
   // 光沒了（探照燈被拆等）→ 走向最近的光
@@ -153,6 +178,16 @@ function updateSentry(t, dt) {
   }
   // 嚮導保持安全距離：敵人靠近時優先往反方向撤退，仍可在遠處攻擊與治療。
   const ownSpec = TYPES[t.type];
+  // 玩家受襲時，雷德會立刻回到溫特身邊護衛；此行為優先於巡邏與一般接敵。
+  if (t.type === 'red' && G.player && (G.player.underAttackT || 0) > 0) {
+    if (t.guardSpeechCd <= 0) {
+      t.say = { text: '部隊長！請躲在我身後！', life: 3.4 };
+      t.guardSpeechCd = 6;
+    }
+    t.target = null; t.waitT = 0;
+    followTarget(t, G.player, { dist: CELL * 1.15, speed: Math.max(118, (ownSpec.walkSpeed || 80) * 1.55) }, dt);
+    return;
+  }
   if (ownSpec.guide && G.enemies.length) {
     let threat = null, threatD = Infinity;
     for (const e of G.enemies) {
@@ -167,6 +202,51 @@ function updateSentry(t, dt) {
       if ((!LIGHT.enabled || isLit(nx,t.y)) && !sentryBlocked(nx,t.y)) t.x=nx;
       if ((!LIGHT.enabled || isLit(t.x,ny)) && !sentryBlocked(t.x,ny)) t.y=ny;
       t.target=null; t.waitT=0; return;
+    }
+  }
+  // 嚮導的預設行為是支援哨兵：精神負荷最高者優先，其次才看傷勢與距離。
+  // 被玩家下達巡邏指令時（hold / goto）會遵守指令，不會擅自離開崗位。
+  if (ownSpec.guide && t.mode === 'free') {
+    const sentinels = G.towers.filter(o =>
+      o !== t && o.hp > 0 && !TYPES[o.type].guide && (o.taint || 0) > 30
+    );
+    if (sentinels.length) {
+      sentinels.sort((a, b) => {
+        const loadDiff = (b.taint || 0) - (a.taint || 0);
+        if (Math.abs(loadDiff) > 1) return loadDiff;
+        const injuryDiff = (b.maxhp - b.hp) - (a.maxhp - a.hp);
+        if (Math.abs(injuryDiff) > 1) return injuryDiff;
+        return Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y);
+      });
+      const supportTarget = sentinels[0];
+      t.supportTarget = supportTarget.type;
+      followTarget(t, supportTarget, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
+      t.target = null; t.waitT = 0;
+      return; // 支援位置優先；攻擊仍由 game.js 對射程內目標自動執行
+    }
+  }
+  // 玩家明確下達的前往指令優先於追敵與角色跟隨關係，避免目的地被接敵邏輯清除。
+  if (t.mode === 'goto' && t.target) {
+    const speed = (ownSpec.walkSpeed || 80) * 1.5;
+    if (moveSentryWithPath(t, t.target.x, t.target.y, speed, dt)) {
+      t.target = null; t.navPath = null; t.navGoal = null;
+      t.mode = 'hold'; t.anchor = { x: t.x, y: t.y };
+      flash('開始巡邏', t.x, t.y - 24, '#7ee0c0');
+    }
+    return;
+  }
+  // 護衛圈：圈內可自行巡邏；距離被拉開時，會先追上指定角色再恢復自由行動。
+  // 玩家明確下達的 goto / hold 指令仍優先，不會被護衛關係覆蓋。
+  const companion = sentryCompanionRule(t);
+  if (companion && !hasAggroTarget(t)) {   // 有敵可打時交給接敵邏輯，護衛圈先讓位（避免圈邊抖動）
+    const companionDistance = Math.hypot(companion.anchor.x - t.x, companion.anchor.y - t.y);
+    if (companionDistance > companion.radius) {
+      t.target = null; t.waitT = 0;
+      followTarget(t, companion.anchor, { dist: companion.radius * .82, speed: companion.speed }, dt);
+      return;
+    }
+    if (t.target && Math.hypot(t.target.x - companion.anchor.x, t.target.y - companion.anchor.y) > companion.radius) {
+      t.target = null; t.navPath = null;
     }
   }
   // 主動接敵：看到亮處的怪物就靠近攻擊（開火由 game.js 處理；這裡只負責走過去）
@@ -194,19 +274,10 @@ function updateSentry(t, dt) {
       return;                                             // 接敵中：不進入閒逛邏輯
     }
   }
-  // 阿瓦倫（哨兵）在「自由走動」模式時緊跟著艾德林（沒敵人可打時）
-  if (t.type === 'avaren' && t.mode === 'free' && typeof FOLLOW !== 'undefined') {
-    const eldrin = (G.towers || []).find(x => x.type === 'eldrin') || (G.npcs || []).find(n => n.id === 'eldrin');
-    if (eldrin) { followTarget(t, eldrin, FOLLOW.avaren, dt); t.target = null; t.waitT = 0; return; }
-  }
-  // 雷德在「自由走動」模式時慢慢跟著玩家（沒敵人可打時）
-  if (t.type === 'red' && t.mode === 'free' && typeof FOLLOW !== 'undefined' && G.player) {
-    followTarget(t, G.player, FOLLOW.red, dt); t.target = null; t.waitT = 0; return;
-  }
   if (t.waitT > 0) { t.waitT -= dt; return; }
   if (!t.target) {
-    const anchor = t.mode === 'hold' && t.anchor ? t.anchor : t;
-    const radius = t.mode === 'hold' ? 70 : 200;      // 原地巡邏＝小圈；自由走動＝大範圍
+    const anchor = companion ? companion.anchor : (t.mode === 'hold' && t.anchor ? t.anchor : t);
+    const radius = companion ? companion.radius * .92 : (t.mode === 'hold' ? 70 : 200);
     const tgt = sampleWanderTarget(anchor.x, anchor.y, radius);
     if (!tgt) { t.waitT = 0.8; return; }
     t.target = tgt; return;
@@ -224,7 +295,9 @@ function updateSentry(t, dt) {
 function updateNpcTalk(npc, dt) {
   if (typeof WANDER_TALK === 'undefined') return;
   if (npc.berserk) { npc.say = null; return; }   // 暴走的哨兵不說話
-  const nextGap = () => WANDER_TALK.minGap + Math.random() * (WANDER_TALK.maxGap - WANDER_TALK.minGap);
+  const battle = !MAP_SAFE && npc.kind === 'tower' && typeof BATTLE_WANDER_LINES !== 'undefined';
+  const talkCfg = battle && typeof BATTLE_WANDER_TALK !== 'undefined' ? BATTLE_WANDER_TALK : WANDER_TALK;
+  const nextGap = () => talkCfg.minGap + Math.random() * (talkCfg.maxGap - talkCfg.minGap);
   if (npc.sayWait == null) npc.sayWait = nextGap();
   if (npc.say) {
     npc.say.life -= dt;
@@ -234,8 +307,9 @@ function updateNpcTalk(npc, dt) {
   npc.sayWait -= dt;
   if (npc.sayWait <= 0) {
     const key = npc.id || npc.type;   // NPC 用 id、哨兵用 type
-    const lines = (typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null;
-    if (lines && lines.length) npc.say = { text: lines[Math.floor(Math.random() * lines.length)], life: WANDER_TALK.duration };
+    const battleLines = battle ? chapterPick(BATTLE_WANDER_LINES[key]) : null;
+    const lines = battleLines || ((typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null);
+    if (lines && lines.length) npc.say = { text: lines[Math.floor(Math.random() * lines.length)], life: talkCfg.duration };
     else npc.sayWait = 4;   // 沒台詞：晚點再檢查
   }
 }

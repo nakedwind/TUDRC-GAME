@@ -59,7 +59,7 @@ function placeObstacle(ob, c, r) {
   if (G.money < ob.cost) { sfx('error'); flash('資源不足', ...center(c, r), '#ff8f8f'); return false; }
   G.money -= ob.cost;
   const solid = variantSolidCells(v).map(cell => cell.slice());
-  const o = { kind: 'obstacle', type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0 };
+  const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0 };
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
   sfx('place');   // 放置成功（落地「叩」聲）
