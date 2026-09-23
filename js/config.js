@@ -8,7 +8,7 @@
 const CELL = 40;                      // 一格 40 像素
 let COLS = 32, ROWS = 18;             // 地圖格數（預設剛好一個畫面；地圖檔可覆蓋）
 const VIEW_W = 1280, VIEW_H = 720;    // 遊戲畫面（相框）大小
-// 畫面縮放：地圖比相框小時自動放大填滿（等比例、不裁切），由 maploader 依地圖大小計算。
+// 畫面縮放：小房間等比例放大；短而寬的地圖放大到畫面高度，左右可由鏡頭捲動。
 // viewW()/viewH()＝相框換算成「世界座標」的大小，鏡頭與黑幕都用它。
 let VIEW_SCALE = 1;
 const viewW = () => VIEW_W / VIEW_SCALE;

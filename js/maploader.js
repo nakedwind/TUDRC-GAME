@@ -73,8 +73,10 @@ function initMap() {
   if (MAP.cols) COLS = MAP.cols;
   if (MAP.rows) ROWS = MAP.rows;
 
-  // 小地圖放大到填滿相框（等比例、取較小的倍率所以不會裁切）；地圖夠大就維持 1:1
-  VIEW_SCALE = Math.max(1, Math.min(VIEW_W / (COLS * CELL), VIEW_H / (ROWS * CELL)));
+  // 短而寬的地圖以高度填滿畫面，左右由鏡頭跟隨玩家捲動；小房間仍等比例完整置中。
+  const fitWidth = VIEW_W / (COLS * CELL), fitHeight = VIEW_H / (ROWS * CELL);
+  VIEW_SCALE = Math.max(1, Math.min(fitWidth, fitHeight));
+  if (fitWidth < 1 && fitHeight > 1) VIEW_SCALE = fitHeight;
 
   // 安全場景：沒有怪物、沒有黑幕（整張地圖都是亮的）
   MAP_SAFE = !!MAP.safe;
@@ -270,7 +272,9 @@ function mapOccluders() {
       const t = mapTileById(s.id) || {};
       if (lid === 'top' && !t.baseHp) continue;
       const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
-      const depth = t.baseHp ? Math.max(0, Math.min(mapTileH(t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapTileH(t) - 2)))) : null;
+      const depth = t.baseHp
+        ? Math.max(0, Math.min(mapTileH(t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapTileH(t) - 2))))
+        : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapTileH(t), s.sortDepth)) : null);
       items.push({ li, x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL, sortY: depth == null ? null : y0 + depth * CELL, fixedDepth: depth != null, kind: 'stamp', stamp: s });
     }
   });
@@ -281,7 +285,11 @@ function mapOccluders() {
     if (it.fixedDepth) continue;
     for (const other of items) {                    // 找它底下那層、又跟它重疊的東西（牆、櫃子…）
       if (other.li >= it.li || other.y <= it.y) continue;
-      if (it.x0 < other.x1 && it.x1 > other.x0 && it.y0 < other.y1 && it.y1 > other.y0) it.y = other.y;
+      const overlapX = Math.min(it.x1, other.x1) - Math.max(it.x0, other.x0);
+      const overlapY = Math.min(it.y1, other.y1) - Math.max(it.y0, other.y0);
+      // 小杯子、海報等可貼在下層物件上；大型家具只碰到幾個像素的邊緣時不能借用對方的深度。
+      const smallDecoration = it.y1 - it.y0 <= CELL;
+      if (overlapX > 0 && (smallDecoration ? overlapY > 0 : overlapY >= CELL / 4)) it.y = other.y;
     }
   }
   occCache = items; occCacheFor = MAP;
