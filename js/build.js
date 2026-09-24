@@ -8,7 +8,11 @@ window.addEventListener('keydown', e => { if (!e.repeat && e.key.toLowerCase() =
 const buildAt = (c, r) => G.grid[c + ',' + r];
 const barrierAt = (c, r) => { const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle') ? o : null; };
 function removeBarrier(o) {
-  obstacleSolidCells(o).forEach(([dc, dr]) => delete G.grid[(o.c + dc) + ',' + (o.r + dr)]);
+  obstacleSolidCells(o).forEach(([dc, dr]) => {
+    const key = (o.c + dc) + ',' + (o.r + dr);
+    if (G.grid[key] === o) delete G.grid[key];
+  });
+  if (o.mapSource) G.mapDestroyed.add(o.mapSource);
   G.obstacles = G.obstacles.filter(x => x !== o);
 }
 
@@ -69,6 +73,8 @@ function placeObstacle(ob, c, r) {
 // ---- 建築選單（障礙物 = data/objects.js；裝飾 = data/decorations.js）----
 const buildBar = document.getElementById('buildbar');
 const buildToggle = document.getElementById('buildToggle');
+const buildQuickSlots = document.getElementById('buildQuickSlots');
+const demolishToggle = document.getElementById('demolishToggle');
 let buildOrient = 'h';         // 目前方向：h 橫版 / v 直版（按 R 切換）
 let buildCat = 'obstacle';     // 目前選單分類：obstacle 障礙物 / decor 裝飾物件
 let buildTargetCell = null;    // 從地面情境選單指定的建築格
@@ -77,6 +83,53 @@ const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
 const buildList = cat => (cat === 'decor' ? DECOS : OBSTACLES);
 // 依 id 找建築（跨兩類），放置時用
 const buildableById = id => OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id);
+const BUILD_QUICK_KEY = 'tudrc-build-quick-slots-v1';
+const DEFAULT_BUILD_QUICK = ['camping_lights', 'searchlight', 'wirecloth', 'redroadblocks', 'wirefence'];
+let buildQuickIds = DEFAULT_BUILD_QUICK.slice();
+try {
+  const saved = JSON.parse(localStorage.getItem(BUILD_QUICK_KEY) || 'null');
+  if (Array.isArray(saved) && saved.length === 5 && saved.every(id => buildableById(id))) buildQuickIds = saved;
+} catch (_) {}
+function saveBuildQuickSlots() {
+  try { localStorage.setItem(BUILD_QUICK_KEY, JSON.stringify(buildQuickIds)); } catch (_) {}
+}
+function renderBuildQuickSlots() {
+  buildQuickSlots.innerHTML = '';
+  buildQuickIds.forEach((id, index) => {
+    const ob = buildableById(id);
+    const button = document.createElement('button');
+    button.type = 'button'; button.className = 'build-quick-slot';
+    button.title = (index + 1) + '：' + ob.name + '（經費 ' + ob.cost + '）';
+    button.setAttribute('aria-label', '快捷鍵 ' + (index + 1) + '：建造' + ob.name);
+    button.innerHTML = '<img src="' + ob[buildOrient].file + '" alt=""><span>' + ob.name + '</span>';
+    button.addEventListener('click', () => selectBuildType(id));
+    button.addEventListener('dragover', e => { e.preventDefault(); button.classList.add('drag-over'); e.dataTransfer.dropEffect = 'copy'; });
+    button.addEventListener('dragleave', () => button.classList.remove('drag-over'));
+    button.addEventListener('drop', e => {
+      e.preventDefault(); button.classList.remove('drag-over');
+      const dragged = e.dataTransfer.getData('application/x-tudrc-build') || e.dataTransfer.getData('text/plain');
+      if (!buildableById(dragged)) return;
+      const previous = buildQuickIds[index], other = buildQuickIds.indexOf(dragged);
+      if (other >= 0 && other !== index) buildQuickIds[other] = previous;
+      buildQuickIds[index] = dragged;
+      saveBuildQuickSlots(); renderBuildQuickSlots(); updateBuildToggle(); sfx('switch');
+    });
+    buildQuickSlots.appendChild(button);
+  });
+}
+function selectBuildType(id) {
+  if (!G || !G.running || MAP_SAFE || !buildableById(id)) return;
+  if (buildTargetCell) {
+    const [c, r] = buildTargetCell;
+    const placed = placeObstacle(buildableById(id), c, r);
+    if (placed) { buildTargetCell = null; buildBar.classList.add('hidden'); }
+    renderBuildBar(); updateBuildToggle(); updateHUD();
+    return;
+  }
+  G.selType = G.selType === 'build:' + id ? null : 'build:' + id;
+  buildBar.classList.add('hidden');
+  closeGroundMenu(); sfx('button'); renderBuildBar(); updateBuildToggle();
+}
 
 const obstacleImgs = {};       // 預先載入每種物件的兩張圖（障礙物＋裝飾共用）
 [...OBSTACLES, ...DECOS].forEach(o => {
@@ -85,6 +138,10 @@ const obstacleImgs = {};       // 預先載入每種物件的兩張圖（障礙�
 });
 function renderBuildBar() {
   buildBar.innerHTML = '';
+  const quickHint = document.createElement('div');
+  quickHint.className = 'build-quick-hint';
+  quickHint.textContent = '拖曳建築到下方快捷欄，可替換 1～5';
+  buildBar.appendChild(quickHint);
   if (buildTargetCell) {
     const note = document.createElement('div'); note.className = 'build-target';
     note.textContent = '選擇要建造的物件';
@@ -105,6 +162,13 @@ function renderBuildBar() {
     const v = o[buildOrient];
     const b = document.createElement('button');
     b.className = 'tbtn build' + (G && G.selType === 'build:' + o.id ? ' sel' : '');
+    b.draggable = true;
+    b.title = '點擊建造，或拖到下方快捷欄替換';
+    b.addEventListener('dragstart', e => {
+      e.dataTransfer.effectAllowed = 'copy';
+      e.dataTransfer.setData('application/x-tudrc-build', o.id);
+      e.dataTransfer.setData('text/plain', o.id);
+    });
     b.innerHTML = '<img src="' + v.file + '" alt=""><span>' + o.name + '　$' + o.cost + '　HP ' + o.hp + '</span>';
     b.addEventListener('click', () => {
       if (buildTargetCell) {
@@ -116,11 +180,7 @@ function renderBuildBar() {
         sfx('button'); renderBuildBar(); updateBuildToggle(); updateHUD();
         return;
       }
-      G.selType = (G.selType === 'build:' + o.id) ? null : 'build:' + o.id;
-      sfx('button');
-      renderBuildBar();
-      if (G.selType) { buildBar.classList.add('hidden'); }   // 選好就收起選單，開始放置（可連放）
-      updateBuildToggle();
+      selectBuildType(o.id);
     });
     buildBar.appendChild(b);
   });
@@ -130,18 +190,33 @@ function renderBuildBar() {
   rot.addEventListener('click', rotateBuild);
   buildBar.appendChild(rot);
 }
-function rotateBuild() { buildOrient = buildOrient === 'h' ? 'v' : 'h'; sfx('switch'); renderBuildBar(); }
+function rotateBuild() { buildOrient = buildOrient === 'h' ? 'v' : 'h'; sfx('switch'); renderBuildBar(); renderBuildQuickSlots(); updateBuildToggle(); }
 // 「🧱 建築」按鈕高亮＝選單開著或已選好建築
 function updateBuildToggle() {
-  const active = !buildBar.classList.contains('hidden') || (G && G.selType && G.selType.startsWith('build:'));
+  const placing = !!(G && G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish'));
+  const active = !buildBar.classList.contains('hidden') || !!(G && G.selType && G.selType.startsWith('build:'));
   buildToggle.classList.toggle('sel', !!active);
+  demolishToggle.classList.toggle('sel', !!(G && G.selType === 'demolish'));
+  buildQuickSlots.querySelectorAll('.build-quick-slot').forEach((button, index) =>
+    button.classList.toggle('sel', !!(G && G.selType === 'build:' + buildQuickIds[index])));
+  document.getElementById('wrap').classList.toggle('placing-building', placing);
+  if (placing && typeof closeFieldCommandMenu === 'function') closeFieldCommandMenu();
 }
+demolishToggle.addEventListener('click', () => {
+  if (!G || !G.running || MAP_SAFE) return;
+  const wasActive = G.selType === 'demolish';
+  closeBuildMenu(); closeGroundMenu();
+  G.selType = wasActive ? null : 'demolish';
+  if (!wasActive && G.player) flash('點選要拆除的建築', G.player.x, G.player.y - 28, '#ffd479');
+  sfx('button'); updateBuildToggle();
+});
 buildToggle.addEventListener('click', () => {
   const hadTarget = !!buildTargetCell;
   buildTargetCell = null;
   if (hadTarget) renderBuildBar();
   const opening = buildBar.classList.contains('hidden');
   buildBar.classList.toggle('hidden', !opening);
+  if (G.selType === 'demolish') G.selType = null;
   sfx(opening ? 'menu' : 'switch');
   if (!opening && G.selType && G.selType.startsWith('build:')) { G.selType = null; renderBuildBar(); }   // 手動收起＝取消選取
   updateBuildToggle();
@@ -152,9 +227,18 @@ function closeBuildMenu() {
   buildTargetCell = null;
   if (hadTarget) renderBuildBar();
   buildBar.classList.add('hidden');
-  if (G.selType && G.selType.startsWith('build:')) { G.selType = null; renderBuildBar(); }
+  if (G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish')) { G.selType = null; renderBuildBar(); }
   updateBuildToggle();
 }
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && (!buildBar.classList.contains('hidden') || (G && G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish')))) {
+    closeBuildMenu(); return;
+  }
+  if (e.repeat || !/^[1-5]$/.test(e.key) || !G || !G.running || MAP_SAFE || dialogueState) return;
+  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  selectBuildType(buildQuickIds[Number(e.key) - 1]);
+});
+renderBuildQuickSlots();
 
 // ---- 建築放置動畫：從上方掉下 → 落地壓扁 → 回彈，落地瞬間揚起塵埃 ----
 const DROP = {

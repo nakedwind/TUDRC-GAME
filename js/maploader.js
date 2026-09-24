@@ -32,6 +32,17 @@ function buildTileRegistry() {
 const mapTileById = id => TILE_REGISTRY[id];
 const mapTileW = t => (t && t.w) || 1;
 const mapTileH = t => (t && t.h) || 1;
+const isMapObstacleTile = t => !!(t && (t.role === 'obstacle' || String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/')));
+function mapObstacleSpec(t) {
+  const file = String(t.file || '').replace(/\\/g, '/');
+  for (const ob of OBSTACLES) for (const orient of ['h', 'v']) {
+    if (ob[orient] && ob[orient].file === file) return { type: ob.id, hp: ob.hp, solid: ob[orient].solid };
+  }
+  if (file.includes('07-Camping lights.png')) return { type: 'camping_lights', hp: 120, solid: [[0, mapTileH(t) - 1]] };
+  const solid = [];
+  for (let c = 0; c < mapTileW(t); c++) solid.push([c, mapTileH(t) - 1]);
+  return { type: t.id, hp: BARRIER.hp, solid };
+}
 
 // ---- 圖片快取 ----
 const mapImgCache = {};
@@ -172,6 +183,34 @@ function seedMapObstacles() {
     });
     G.obstacles.push(o);
   }
+  // 地圖編輯器的「障礙物」素材沿用可放置建築的碰撞格與 HP。
+  // 不修改原始地圖；拆毀後只在本局隱藏該圖片。
+  const addMapObstacle = (t, c, r, source, stamp = null) => {
+    if (!isMapObstacleTile(t)) return;
+    const spec = mapObstacleSpec(t), w = mapTileW(t), h = mapTileH(t);
+    const solid = (spec.solid || []).map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr])
+      .filter(([dc, dr]) => inGrid(c + dc, r + dr) && !G.grid[(c + dc) + ',' + (r + dr)]);
+    if (!solid.length) return;
+    const o = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type,
+      c, r, w, h, solid, hp: spec.hp, maxhp: spec.hp, hitT: 0 };
+    for (const [dc, dr] of solid) {
+      const key = (c + dc) + ',' + (r + dr);
+      mapWalls.delete(key); // 舊地圖若另畫了固定碰撞，改由可破壞物件接管。
+      G.grid[key] = o;
+    }
+    G.obstacles.push(o);
+  };
+  for (const lid of MAP_LAYER_ORDER) {
+    const layer = MAP.layers && MAP.layers[lid] || {};
+    for (const [key, id] of Object.entries(layer)) {
+      const [c, r] = key.split(',').map(Number);
+      addMapObstacle(mapTileById(id), c, r, lid + ':' + key);
+    }
+  }
+  for (const s of MAP.stamps || []) {
+    const c = s.c + Math.round((s.ox || 0) / CELL), r = s.r + Math.round((s.oy || 0) / CELL);
+    addMapObstacle(mapTileById(s.id), c, r, s, s);
+  }
   for (const [c, r] of mapBreakable) {
     if (G.grid[c + ',' + r]) continue;
     const o = { kind: 'obstacle', c, r, hp: BARRIER.hp, maxhp: BARRIER.hp };
@@ -190,6 +229,7 @@ function drawMapTileImg(ctx, id, x, y) {
   else { ctx.fillStyle = '#20262f'; ctx.fillRect(x, y, CELL, CELL); }
 }
 function drawMapStampImg(ctx, s) {
+  if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   const t = mapTileById(s.id); if (!t) return;
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
@@ -208,7 +248,7 @@ function drawMapImages(ctx) {
   if (!MAP) return;
   for (const lid of MAP_LAYER_ORDER) {
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    for (const key in layer) { const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+    for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key)) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
     for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === lid) drawMapStampImg(ctx, s);
   }
 }
@@ -235,7 +275,7 @@ function drawMapGround(ctx) {
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    if (!isOccLayer(lid)) for (const key in layer) { const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+    if (!isOccLayer(lid)) for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key)) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
     for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === lid && !stampIsOcc(s)) drawMapStampImg(ctx, s);
   }
 }
@@ -243,7 +283,7 @@ function drawMapGround(ctx) {
 function drawMapTop(ctx) {
   if (!MAP) return;
   const layer = MAP.layers ? (MAP.layers.top || {}) : {};
-  for (const key in layer) { const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+  for (const key in layer) { if (G.mapDestroyed.has('top:' + key)) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
   for (const s of (MAP.stamps || [])) {
     if ((s.layer || 'top') !== 'top') continue;
     const t = mapTileById(s.id) || {};
@@ -298,7 +338,7 @@ function mapOccluders() {
 function collectMapOccluders(ctx, out) {
   if (!MAP) return;
   for (const it of mapOccluders()) {
-    if (it.kind === 'cell') { const { id, c, r } = it; out.push({ y: it.y, draw: () => drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL) }); }
+    if (it.kind === 'cell') { const { id, c, r, li } = it; const source = MAP_LAYER_ORDER[li] + ':' + c + ',' + r; if (!G.mapDestroyed.has(source)) out.push({ y: it.y, draw: () => drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL) }); }
     else { const s = it.stamp; out.push({ y: it.y, draw: () => drawMapStampImg(ctx, s) }); }
   }
 }

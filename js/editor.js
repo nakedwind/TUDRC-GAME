@@ -283,7 +283,7 @@ function loadMaps() {
       }
     }
     if ((eoc.stamps || []).some(s => s.r >= 14)) onlyAddedFloor = false;
-    if (['solid', 'breakable', 'entrances', 'camp'].some(field =>
+    if (['solid', 'breakable', 'entrances', 'camp', 'coreSpots'].some(field =>
       (eoc[field] || []).some(key => Number(key.split(',')[1]) >= 14))) onlyAddedFloor = false;
     if ((eoc.portals || []).some(p => p.r >= 14)) onlyAddedFloor = false;
     if (onlyAddedFloor) {
@@ -315,6 +315,10 @@ function fixMap(m) {
   m.breakable = m.breakable || [];
   delete m.walls;
   m.entrances = m.entrances || []; m.camp = m.camp || [];
+  m.coreSpots = Array.isArray(m.coreSpots) ? [...new Set(m.coreSpots)] : [];
+  m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
+    ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
+    : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
   m.rules = Object.assign({
     money: 150, lives: 12, guide: 100, guideRegen: 9, waves: 5,
     count: 8, countAdd: 3, hp: 40, hpAdd: 28, speed: 44, speedAdd: 5,
@@ -561,9 +565,8 @@ let showSolid = true;        // 不可穿透紅格的顯示開關（只影響顯
 let solidNudgeCell = null;   // 目前用「碰撞微調」選中的紅格（'c,r'）
 function draw() {
   const m = curMap();
-  const ent = effEntrances(m), camp = effCamp(m);
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
-  const entIsDefault = m.entrances.length === 0, campIsDefault = m.camp.length === 0;
+  const coreSpots = new Set(m.coreSpots);
 
   ctx.clearRect(0, 0, cv.width, cv.height);
   // 每格先鋪棋盤底
@@ -596,19 +599,16 @@ function draw() {
       ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6); ctx.setLineDash([]);
     }
-    if (ent.has(key)) { ctx.fillStyle = entIsDefault ? 'rgba(210,60,90,.22)' : 'rgba(210,60,90,.45)'; ctx.fillRect(x, y, CELL, CELL); }
-    if (camp.has(key)) { ctx.fillStyle = campIsDefault ? 'rgba(40,180,120,.18)' : 'rgba(40,180,120,.42)'; ctx.fillRect(x, y, CELL, CELL); }
-    if (checkResult && checkResult.unreachable.has(key)) { ctx.fillStyle = 'rgba(255,80,80,.28)'; ctx.fillRect(x, y, CELL, CELL); }
+    if (coreSpots.has(key)) {
+      ctx.fillStyle = 'rgba(158,83,241,.38)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = '#dab5ff'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+      ctx.fillStyle = '#fff'; ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('💠', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
+    }
     if (showGrid) { ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, CELL, CELL); }
   }
-  if (checkResult) {
-    ctx.strokeStyle = '#ffd24a'; ctx.lineWidth = 3;
-    checkResult.badEntrances.forEach(key => { const [c, r] = key.split(',').map(Number); ctx.strokeRect(OX + c * CELL + 2, OY + r * CELL + 2, CELL - 4, CELL - 4); });
-  }
-  ctx.fillStyle = '#e79'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
-  ctx.fillText('🔻 怪物入口' + (entIsDefault ? '（預設：最上排）' : ''), OX + 6, OY + 16);
-  ctx.fillStyle = '#5ec89f'; ctx.textAlign = 'right';
-  ctx.fillText('🏠 營地' + (campIsDefault ? '（預設：最下兩排）' : ''), OX + COLS * CELL - 6, OY + ROWS * CELL - 8);
+  ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
   // 出入口記號（紫格＋🚪＋通往哪張地圖）
   for (const pt of (m.portals || [])) {
     const x = OX + pt.c * CELL, y = OY + pt.r * CELL;
@@ -778,7 +778,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
   } else if (brush.mode === 'solid') {
-    if (effEntrances(m).has(key) || effCamp(m).has(key)) { setStatus('入口／營地上不能設不可穿透', '#ff8f8f'); return; }
+    if (m.coreSpots.includes(key)) { setStatus('核心候選點不能設不可穿透，請先取消候選點', '#ff8f8f'); return; }
     removeFrom(m.breakable, key); toggle(m.solid, key);
     if (m.solid.indexOf(key) < 0) { delete m.solidOffsets[key]; if (solidNudgeCell === key) solidNudgeCell = null; }   // 取消紅格時一併清掉微調
   } else if (brush.mode === 'solidnudge') {
@@ -790,14 +790,14 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     draw();
     return;
   } else if (brush.mode === 'breakable') {
-    if (effEntrances(m).has(key) || effCamp(m).has(key)) { setStatus('入口／營地上不能設可破壞', '#ff8f8f'); return; }
+    if (m.coreSpots.includes(key)) { setStatus('核心候選點不能設可破壞，請先取消候選點', '#ff8f8f'); return; }
     removeFrom(m.solid, key); toggle(m.breakable, key);
-  } else if (brush.mode === 'entrance') {
-    if (m.entrances.length === 0) m.entrances = defEntrances();
-    removeFrom(m.solid, key); removeFrom(m.breakable, key); toggle(m.entrances, key);
-  } else if (brush.mode === 'camp') {
-    if (m.camp.length === 0) m.camp = defCamp();
-    removeFrom(m.solid, key); removeFrom(m.breakable, key); toggle(m.camp, key);
+  } else if (brush.mode === 'core') {
+    if (!isDown) return;
+    if (!m.coreSpots.includes(key) && (m.solid.includes(key) || m.breakable.includes(key))) {
+      setStatus('請選空格作為核心候選點', '#ff8f8f'); return;
+    }
+    toggle(m.coreSpots, key);
   } else if (brush.mode === 'portal') {
     if (!isDown) return;   // 只在按下時處理，避免拖曳一直跳視窗
     const pi = m.portals.findIndex(p => p.c === c && p.r === r);
@@ -975,7 +975,8 @@ function tileCategory(t) {
 }
 function renderPalette() {
   paletteEl.innerHTML = '';
-  const allTiles = palette();
+  // 舊地圖仍可讀取內建佔位格，但不再提供灰牆與棕色障礙作為新素材。
+  const allTiles = palette().filter(t => t.id !== 'wall' && t.id !== 'obstacle');
   const tabs = document.createElement('div'); tabs.className = 'palette-tabs';
   PALETTE_CATEGORIES.forEach(category => {
     const count = category.id === 'all' ? allTiles.length : allTiles.filter(t => tileCategory(t) === category.id).length;
@@ -998,7 +999,10 @@ function renderPalette() {
     else if (t.color) thumb = '<span class="thumb swatch" style="background:' + t.color + '"></span>';
     else thumb = '<span class="thumb swatch ' + t.role + '"></span>';
     const sizeTxt = t.systemColor ? (' ' + tilePixelW(t) + '×' + tilePixelH(t) + ' px') : (isBig(t) ? (' ' + tileW(t) + '×' + tileH(t)) : '');
-    const typeTxt = t.systemColor ? '系統色塊' : (t.builtin ? roleLabel(t.role) : '圖片');
+    const isObstacleArt = String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/');
+    const typeTxt = isObstacleArt
+      ? (t.id === 'tile_obstacle_camping_lights' ? '可擋路・可破壞・小範圍發光' : '可擋路・可破壞')
+      : (t.systemColor ? '系統色塊' : (t.builtin ? roleLabel(t.role) : '圖片'));
     b.innerHTML = thumb + '<span class="tname">' + t.name + '</span><small>' + typeTxt + sizeTxt + '</small>';
     b.addEventListener('click', () => selectTile(t.id));
     if (!t.builtin) {
@@ -1407,26 +1411,16 @@ document.getElementById('fillAll').addEventListener('click', () => {
   saveMaps(); draw(); setStatus('已用「' + t.name + '」填滿「' + layerName(activeLayer) + '」', '#7ee0c0');
 });
 
-// ================= 檢查路徑（只看不可穿透）=================
+// ================= 檢查核心候選位置 =================
 document.getElementById('checkPath').addEventListener('click', () => {
-  const m = curMap(), wall = wallCells(m), camp = effCamp(m), ent = effEntrances(m);
-  const reachable = new Set(), q = [];
-  camp.forEach(key => { if (!wall.has(key)) { reachable.add(key); q.push(key.split(',').map(Number)); } });
-  let head = 0;
-  while (head < q.length) {
-    const [c, r] = q[head++];
-    for (const [dc, dr] of [[0, 1], [0, -1], [-1, 0], [1, 0]]) {
-      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (!inGrid(nc, nr) || wall.has(key) || reachable.has(key)) continue;
-      reachable.add(key); q.push([nc, nr]);
-    }
-  }
-  const unreachable = new Set(), badEntrances = new Set();
-  for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) { const key = c + ',' + r; if (!wall.has(key) && !reachable.has(key)) unreachable.add(key); }
-  ent.forEach(key => { if (!reachable.has(key)) badEntrances.add(key); });
-  checkResult = { unreachable, badEntrances }; draw();
-  if (badEntrances.size === 0) setStatus('✓ 所有入口都走得到營地，路線沒問題！', '#7ee0c0');
-  else setStatus('⚠ 有 ' + badEntrances.size + ' 個入口被「不可穿透」完全擋死、走不到營地（黃框處）', '#ffd24a');
+  const m = curMap();
+  const valid = m.coreSpots.filter(key => {
+    const [c, r] = key.split(',').map(Number);
+    return inGrid(c, r) && !m.solid.includes(key) && !m.breakable.includes(key);
+  });
+  if (m.safe) setStatus('這是安全區域，不會生成異質核心', '#ffd24a');
+  else if (valid.length < m.coreCount) setStatus('⚠ 目前只有 ' + valid.length + ' 個可用候選點，請至少標記 ' + m.coreCount + ' 個', '#ffd24a');
+  else setStatus('✓ ' + valid.length + ' 個可用候選點，每局隨機抽取 ' + m.coreCount + ' 個', '#7ee0c0');
 });
 
 // 格線開關
@@ -1448,9 +1442,9 @@ document.getElementById('solidToggle').addEventListener('click', e => {
 });
 
 document.getElementById('clearLayout').addEventListener('click', () => {
-  if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞、入口、營地？（規則數值不變）')) return;
+  if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.entrances = []; m.camp = []; checkResult = null; solidNudgeCell = null;
+  const m = curMap(); m.layers = emptyLayers(); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.entrances = []; m.camp = []; m.coreSpots = []; checkResult = null; solidNudgeCell = null;
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -1461,7 +1455,7 @@ function refreshMapSelect() {
   maps.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
 }
 function newId() { return 'map_' + Date.now().toString(36); }
-function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], entrances: [], camp: [], rules: {} }); }
+function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], coreCount: 1, entrances: [], camp: [], rules: {} }); }
 function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
 
 mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
@@ -1496,17 +1490,18 @@ function loadRules() {
   document.getElementById('f_rows').value = m.rows;
   document.getElementById('f_safe').checked = !!m.safe;
   document.getElementById('f_npcs').checked = !!m.npcs;
+  document.getElementById('f_coreCount').value = m.coreCount;
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
 }
-// 地圖大小欄位（用 change：打完數字離開欄位才生效，避免打到一半就縮圖）
+// 寬、高旁的方向選單決定從哪一側增加／裁掉。
 function bindSizeField(id, key) {
   document.getElementById(id).addEventListener('change', e => {
-    const v = Math.max(8, Math.min(200, parseInt(e.target.value, 10) || 0));
+    const m = curMap();
+    const requested = parseInt(e.target.value, 10);
+    if (!Number.isFinite(requested)) { e.target.value = m[key]; return; }
+    const v = Math.max(8, Math.min(200, requested));
     e.target.value = v;
-    const m = curMap(); if (m[key] === v) return;
-    pushUndo(); m[key] = v;
-    applyMapSize(); checkResult = null; saveMaps(); draw();
-    setStatus('地圖大小改為 ' + m.cols + '×' + m.rows + ' 格（縮小時超出範圍的內容不會顯示，改回來就恢復）', '#8fd3ff');
+    if (m[key] !== v) resizeMapSide(document.getElementById(id + 'Side').value, v - m[key]);
   });
 }
 bindSizeField('f_cols', 'cols');
@@ -1523,7 +1518,7 @@ function shiftMapContent(m, dc, dr) {
     m.layers[l.id] = out;
   });
   (m.stamps || []).forEach(s => { s.c += dc; s.r += dr; });
-  ['solid', 'breakable', 'entrances', 'camp'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
+  ['solid', 'breakable', 'entrances', 'camp', 'coreSpots'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -1546,7 +1541,7 @@ function dropOutsideContent(m) {
     return s.c + tileW(t) > 0 && s.r + tileH(t) > 0 && s.c < m.cols && s.r < m.rows;   // 還有一格在地圖內就留著
   });
   removed += before - m.stamps.length;
-  ['solid', 'breakable', 'entrances', 'camp'].forEach(key => {
+  ['solid', 'breakable', 'entrances', 'camp', 'coreSpots'].forEach(key => {
     const n = (m[key] || []).length;
     m[key] = (m[key] || []).filter(insideKey);
     removed += n - m[key].length;
@@ -1579,10 +1574,6 @@ function resizeMapSide(dir, amount) {
   const act = amount > 0 ? ('往' + DIR_LABEL[dir] + '加 ' + amount + ' 格') : ('從' + DIR_LABEL[dir] + '刪 ' + (-amount) + ' 格');
   setStatus(act + '：地圖變成 ' + m.cols + '×' + m.rows + (dropped ? '（有 ' + dropped + ' 個超出範圍的內容被刪掉，可用 Ctrl+Z 復原）' : ''), dropped ? '#ffd24a' : '#7ee0c0');
 }
-function growAmount() { return Math.max(1, Math.min(50, parseInt(document.getElementById('f_growN').value, 10) || 1)); }
-[['growUp', 'up', 1], ['growDown', 'down', 1], ['growLeft', 'left', 1], ['growRight', 'right', 1],
- ['trimUp', 'up', -1], ['trimDown', 'down', -1], ['trimLeft', 'left', -1], ['trimRight', 'right', -1]]
-  .forEach(([id, dir, sign]) => document.getElementById(id).addEventListener('click', () => resizeMapSide(dir, sign * growAmount())));
 document.getElementById('f_name').addEventListener('input', e => { curMap().name = e.target.value; refreshMapSelect(); saveMaps(); });
 document.getElementById('f_desc').addEventListener('input', e => { curMap().desc = e.target.value; saveMaps(); });
 document.getElementById('f_npcs').addEventListener('change', e => {
@@ -1594,6 +1585,11 @@ document.getElementById('f_safe').addEventListener('change', e => {
   setStatus(e.target.checked ? '這張地圖設為安全場景：遊戲裡不生怪、不套黑幕' : '這張地圖恢復成一般關卡（會生怪、有黑幕）', '#8fd3ff');
 });
 RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).addEventListener('input', e => { const v = parseFloat(e.target.value); curMap().rules[k] = isNaN(v) ? 0 : v; saveMaps(); }); });
+document.getElementById('f_coreCount').addEventListener('change', e => {
+  const count = Math.max(1, Math.min(20, Math.floor(Number(e.target.value) || 1)));
+  pushUndo(); curMap().coreCount = count; e.target.value = count;
+  saveMaps(); draw();
+});
 
 // ================= 預覽遊戲畫面 =================
 // 把「目前這張地圖」和自訂磚塊暫存起來，再開遊戲頁（?preview=1）讀它。

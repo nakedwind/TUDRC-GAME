@@ -4,7 +4,7 @@ const OBSTACLES = [
     "id": "wirecloth",
     "name": "鐵絲網",
     "cost": 10,
-    "hp": 80,
+    "hp": 200,
     "h": {
       "file": "images/item-obstacle/01-wirecloth.png",
       "w": 1,
@@ -32,7 +32,7 @@ const OBSTACLES = [
     "id": "redroadblocks",
     "name": "紅色路障",
     "cost": 20,
-    "hp": 160,
+    "hp": 300,
     "h": {
       "file": "images/item-obstacle/02-redroadblocks.png",
       "w": 2,
@@ -67,8 +67,8 @@ const OBSTACLES = [
   {
     "id": "wirefence",
     "name": "鐵圍籬",
-    "cost": 35,
-    "hp": 300,
+    "cost": 30,
+    "hp": 500,
     "h": {
       "file": "images/item-obstacle/03-wirefence.png",
       "w": 2,
@@ -103,8 +103,8 @@ const OBSTACLES = [
   {
     "id": "roadblocks",
     "name": "路障",
-    "cost": 30,
-    "hp": 260,
+    "cost": 40,
+    "hp": 600,
     "h": {
       "file": "images/item-obstacle/04roadblocks.png",
       "w": 2,
@@ -139,8 +139,8 @@ const OBSTACLES = [
   {
     "id": "barricades",
     "name": "拒馬",
-    "cost": 45,
-    "hp": 420,
+    "cost": 50,
+    "hp": 1000,
     "h": {
       "file": "images/item-obstacle/05-barricades.png",
       "w": 2,
@@ -173,9 +173,17 @@ const OBSTACLES = [
     }
   },
   {
+    "id": "camping_lights",
+    "name": "露營燈",
+    "cost": 15,
+    "hp": 120,
+    "h": { "file": "images/item-obstacle/07-Camping lights.png", "w": 1, "h": 1, "solid": [[0, 0]] },
+    "v": { "file": "images/item-obstacle/07-Camping lights.png", "w": 1, "h": 1, "solid": [[0, 0]] }
+  },
+  {
     "id": "searchlight",
     "name": "探照燈",
-    "cost": 40,
+    "cost": 30,
     "hp": 220,
     "h": {
       "file": "images/item-obstacle/06-searchlight.png",

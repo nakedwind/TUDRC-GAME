@@ -8,7 +8,9 @@ function spawnSentries() {
   if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
   const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r]);
-  const team = (typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES);
+  // 應變中心是全員集合的安全區；戰鬥地圖仍只生成已編入的出勤隊伍。
+  const team = (MAP_SAFE && MAP_NPCS && typeof ROSTER !== 'undefined')
+    ? ROSTER : ((typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES));
   for (const type of team) {
     const spec = TYPES[type]; if (!spec) continue;
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
@@ -56,11 +58,25 @@ function sentryBlocked(x, y) {
   }
   return false;
 }
+// 身體邊緣也要留在光內，避免中心仍亮、人物已踏進黑暗。
+function personnelInLight(x, y) {
+  if (MAP_SAFE || !LIGHT.enabled) return true;
+  return [[0,0],[-12,-12],[12,-12],[-12,12],[12,12]]
+    .every(([dx,dy]) => isLit(x + dx, y + dy));
+}
+function personnelStepAllowed(x, y, tx, ty) {
+  const steps = Math.max(1, Math.ceil(Math.hypot(tx-x, ty-y) / 4));
+  for (let i = 1; i <= steps; i++) {
+    const px = x + (tx-x)*i/steps, py = y + (ty-y)*i/steps;
+    if (sentryBlocked(px, py) || !personnelInLight(px, py)) return false;
+  }
+  return true;
+}
 function sentryCellWalkable(c, r) {
   if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
   const [x, y] = center(c, r);
   if (sentryBlocked(x, y)) return false;
-  if (LIGHT.enabled && !isLit(x, y)) return false;
+  if (!personnelInLight(x, y)) return false;
   return true;
 }
 function nearestSentryGoal(c, r) {
@@ -80,7 +96,7 @@ function nearestSentryGoal(c, r) {
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
 function buildSentryPath(t, targetX, targetY) {
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
-  const goal = nearestSentryGoal(rawGc, rawGr); if (!goal) return [];
+  const goal = nearestSentryGoal(rawGc, rawGr); if (!goal) return null;
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
   if (startKey === goalKey) return [];
   const queue = [[sc, sr]], cameFrom = new Map([[startKey, null]]);
@@ -94,7 +110,7 @@ function buildSentryPath(t, targetX, targetY) {
       cameFrom.set(key, c + ',' + r); queue.push([nc, nr]);
     }
   }
-  if (!cameFrom.has(goalKey)) return [];
+  if (!cameFrom.has(goalKey)) return null;
   const path = []; let key = goalKey;
   while (key && key !== startKey) {
     const [c, r] = key.split(',').map(Number); path.push({ c, r }); key = cameFrom.get(key);
@@ -105,26 +121,40 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
-  if (!t.navPath || t.navGoal !== goalKey || t.navTimer <= 0 || (next && !sentryCellWalkable(next.c, next.r))) {
+  if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r))) {
     t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
+    t.navStall = 0;
   }
-  const [currentC, currentR] = cellAt(t.x, t.y);
-  while (t.navPath && t.navPath.length && t.navPath[0].c === currentC && t.navPath[0].r === currentR) t.navPath.shift();
+  if (!t.navPath) { t.navFailed = true; return false; }
+  t.navFailed = false;
+  // 必須到達轉彎格中心，不能剛跨入格子就跳過路點，否則會切角卡牆。
+  while (t.navPath.length) {
+    const [wx, wy] = center(t.navPath[0].c, t.navPath[0].r);
+    if (Math.hypot(wx - t.x, wy - t.y) > 1) break;
+    t.navPath.shift();
+  }
   const waypoint = t.navPath && t.navPath[0];
   let moveX = targetX, moveY = targetY;
+  if (!waypoint && (sentryBlocked(moveX, moveY) || !personnelInLight(moveX, moveY))) {
+    const goal = nearestSentryGoal(goalC, goalR);
+    if (!goal) { t.navFailed = true; return false; }
+    [moveX, moveY] = center(...goal);
+  }
   if (waypoint) [moveX, moveY] = center(waypoint.c, waypoint.r);
   const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt;
-  if (distance <= step) {
+  if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY)) {
     t.x = moveX; t.y = moveY;
     if (waypoint) t.navPath.shift();
-    return !waypoint && Math.hypot(targetX - t.x, targetY - t.y) < 2;
+    return !waypoint;
   }
   if (distance <= 0) return true;
   const nx = t.x + dx / distance * step, ny = t.y + dy / distance * step;
-  let moved = false;
-  if (!sentryBlocked(nx, t.y) && (!LIGHT.enabled || isLit(nx, t.y))) { t.x = nx; moved = true; }
-  if (!sentryBlocked(t.x, ny) && (!LIGHT.enabled || isLit(t.x, ny))) { t.y = ny; moved = true; }
-  if (!moved) t.navTimer = 0;
+  const oldX = t.x, oldY = t.y;
+  if (personnelStepAllowed(t.x, t.y, nx, t.y)) t.x = nx;
+  if (personnelStepAllowed(t.x, t.y, t.x, ny)) t.y = ny;
+  const moved = Math.hypot(t.x - oldX, t.y - oldY) > .001;
+  t.navStall = Math.hypot(dx, dy) > 2 && !moved ? (t.navStall || 0) + dt : 0;
+  if (t.navStall > .8) { t.navTimer = 0; t.navFailed = true; }
   return false;
 }
 // 在 (cx,cy) 周圍找一個「亮的、走得到」的隨機點
@@ -134,7 +164,7 @@ function sampleWanderTarget(cx, cy, radius) {
     const x = cx + Math.cos(ang) * d, y = cy + Math.sin(ang) * d;
     const [c, r] = cellAt(x, y);
     if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;
-    if (!isLit(x, y)) continue;
+    if (sentryBlocked(x, y) || !personnelInLight(x, y)) continue;
     return { x, y };
   }
   return null;
@@ -199,8 +229,8 @@ function updateSentry(t, dt) {
     if (threat && threatD < safeDistance) {
       const dx=t.x-threat.x,dy=t.y-threat.y,d=threatD||1,step=(ownSpec.walkSpeed||80)*1.35*dt;
       const nx=t.x+dx/d*step,ny=t.y+dy/d*step;
-      if ((!LIGHT.enabled || isLit(nx,t.y)) && !sentryBlocked(nx,t.y)) t.x=nx;
-      if ((!LIGHT.enabled || isLit(t.x,ny)) && !sentryBlocked(t.x,ny)) t.y=ny;
+      if (personnelStepAllowed(t.x,t.y,nx,t.y)) t.x=nx;
+      if (personnelStepAllowed(t.x,t.y,t.x,ny)) t.y=ny;
       t.target=null; t.waitT=0; return;
     }
   }
@@ -289,6 +319,7 @@ function updateSentry(t, dt) {
     else t.waitT = 0.6 + Math.random() * 1.8;         // 到點後停一下再逛
     return;
   }
+  if (t.navFailed) { t.target = null; t.navPath = null; t.waitT = .5; }
 }
 
 // 平時對話：倒數到 0 隨機冒一句話，顯示幾秒後消失、再排下一次
@@ -337,19 +368,13 @@ function updateWanderer(npc, dt) {
     return;
   }
 
-  const dx = npc.target.x - npc.x, dy = npc.target.y - npc.y, distance = Math.hypot(dx, dy);
-  const step = 65 * dt;
-  if (distance <= step) {
-    npc.x = npc.target.x; npc.y = npc.target.y; npc.target = null;
+  if (moveSentryWithPath(npc, npc.target.x, npc.target.y, 65, dt)) {
+    npc.target = null; npc.navPath = null;
     npc.waitT = 0.8 + Math.random() * 2;
     return;
   }
 
-  const nx = npc.x + dx / distance * step, ny = npc.y + dy / distance * step;
-  const blockedX = sentryBlocked(nx, npc.y), blockedY = sentryBlocked(npc.x, ny);
-  if (!blockedX) npc.x = nx;
-  if (!blockedY) npc.y = ny;
-  if (blockedX && blockedY) npc.target = null;
+  if (npc.navFailed) { npc.target = null; npc.navPath = null; npc.waitT = .5; }
 }
 
 // ---- 哨兵選單（點哨兵彈出：自由走動／原地巡邏／指派位置／疏導）----

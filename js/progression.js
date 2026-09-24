@@ -48,10 +48,22 @@ function seedCores() {
   if(MAP_SAFE) return;
   const map=typeof MAP!=='undefined'?MAP:{};
   const difficulty=Math.max(1,Math.min(5,Number(map.difficulty)||1));
-  const count=Math.max(1,Math.min(5,Math.floor(Number(map.coreCount)||difficulty)));
-  const cells=spawnCells().filter(([c,r])=>!isWall(c,r)&&!G.grid[c+','+r]);
+  const count=Math.max(1,Math.min(20,Math.floor(Number(map.coreCount)||difficulty)));
+  // 新地圖從編輯器指定的候選點抽取；舊地圖保留原入口作為相容候選點。
+  const marked=Array.isArray(map.coreSpots)&&map.coreSpots.length
+    ? map.coreSpots.map(key=>key.split(',').map(Number)) : spawnCells();
+  const seen=new Set();
+  const cells=marked.filter(([c,r])=>{
+    const key=c+','+r;
+    if(seen.has(key)||!inGrid(c,r)||isWall(c,r)||G.grid[key]) return false;
+    seen.add(key); return true;
+  });
+  for(let i=cells.length-1;i>0;i--) {
+    const j=Math.floor(Math.random()*(i+1));
+    [cells[i],cells[j]]=[cells[j],cells[i]];
+  }
   for(let i=0;i<Math.min(count,cells.length);i++) {
-    const [c,r]=cells[Math.floor(i*cells.length/Math.min(count,cells.length))];
+    const [c,r]=cells[i];
     const [x,y]=center(c,r);
     G.cores.push({x,y,hp:200*difficulty,maxhp:200*difficulty,dead:false,timer:1.8+i*.7+Math.random()*2.4,reward:100*difficulty});
   }
@@ -79,7 +91,7 @@ function spawnCoreGroup(core) {
   for (let i=0;i<count;i++) {
     const index = Math.floor(Math.random()*cells.length), [c,r] = cells.splice(index,1)[0];
     const [x,y] = center(c,r);
-    G.enemies.push({x,y,hp:WAVE_CFG.baseHp,maxhp:WAVE_CFG.baseHp,speed:WAVE_CFG.baseSpeed,reward:WAVE_CFG.reward,hasTarget:false,wanderWait:Math.random()*.8,slimeClock:Math.random()*.62});
+    G.enemies.push({x,y,hp:WAVE_CFG.baseHp,maxhp:WAVE_CFG.baseHp,speed:WAVE_CFG.baseSpeed,reward:WAVE_CFG.reward,hasTarget:false,wanderWait:Math.random()*.8,slimeClock:Math.random()*1.83});
     G.recentMonsterSpawns = G.recentMonsterSpawns || [];
     G.recentMonsterSpawns.push(c+','+r);
     if (G.recentMonsterSpawns.length>18) G.recentMonsterSpawns.shift();

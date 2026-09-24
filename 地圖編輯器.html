@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 地圖編輯器</title>
-<link rel="stylesheet" href="css/editor.css">
+<link rel="stylesheet" href="css/editor.css?v=map-size-2">
 </head>
 <body>
   <h1>🗺️ 地圖編輯器　<a class="backlink" href="塔防原型.html">← 回遊戲</a></h1>
@@ -26,8 +26,7 @@
         <button class="tool" data-mode="solid">🧱 不可穿透<small>怪穿不過・繞路</small></button>
         <button class="tool" data-mode="solidnudge">🎯 碰撞微調<small>點紅格・方向鍵移動</small></button>
         <button class="tool" data-mode="breakable">💥 可破壞<small>怪停下打破</small></button>
-        <button class="tool" data-mode="entrance">🔻 怪物入口<small>怪從這裡出</small></button>
-        <button class="tool" data-mode="camp">🏠 營地<small>要守住的地方</small></button>
+        <button class="tool" data-mode="core">💠 異質核心候選點<small>點格子標記／取消</small></button>
         <button class="tool" data-mode="portal">🚪 出入口<small>通往另一張地圖</small></button>
         <button class="tool" data-mode="erase">🧽 清除<small>只擦掉圖片</small></button>
         <button class="tool" data-mode="pick">💧 吸管<small>吸取格子的圖・Alt</small></button>
@@ -38,7 +37,7 @@
         <button class="btn" id="addColorBlock">■ 新增色塊</button>
         <button class="btn" id="fillAll">🪣 全部填滿</button>
         <button class="btn" id="undoBtn">↶ 回復 (Ctrl+Z)</button>
-        <button class="btn" id="checkPath">🔍 檢查路徑</button>
+        <button class="btn" id="checkPath">🔍 檢查核心</button>
         <button class="btn" id="previewGame" title="用目前編輯中的地圖開遊戲畫面（不用先匯出）">▶ 預覽遊戲</button>
         <button class="btn" id="gridToggle">🔳 格線：開</button>
         <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透的紅色標記（只影響顯示，不會改掉設定）">🧱 紅格：開</button>
@@ -109,7 +108,7 @@
       <div id="hint">
         先選<b>圖層</b>（🟫地板／✨裝飾），再選<b>磚塊</b>貼圖 —— 圖片<b>純外觀</b>。選取工具可<b>拖曳物件</b>移動，按住 <b>Shift</b> 點擊可多選後整組移動，按 <b>Delete</b> 可刪除選取物件。小圖(1×1)可<b>點/拖曳</b>鋪；<b>大圖(多格)</b>移過去看虛線框、<b>點一下</b>放置。小圖和大圖都能用<b>左右翻／上下翻</b>（F／V），已放置的圖片可先選取再翻轉。<br>
         遊戲效果要另外標：<b>🧱 不可穿透</b>（紅框，怪繞路）、<b>💥 可破壞</b>（橙框，怪打破）。兩者互斥、再點一次可取消。<br>
-        <b>入口</b>／<b>營地</b>留空＝預設（最上排／最下兩排）。「🔍 檢查路徑」只看 🧱。按 <b>Ctrl+Z</b> 或「↶ 回復」可回上一步。所有變更會<b>自動存檔</b>。<br>
+        用 <b>💠 異質核心候選點</b>標記可能出現的位置，再設定本局核心數量；每次開始會從候選點隨機抽取。候選點不可與不可穿透或可破壞格重疊。按 <b>Ctrl+Z</b> 或「↶ 回復」可回上一步。所有變更會<b>自動存檔</b>。<br>
         <b>💧 吸管</b>：點格子把筆刷換成那格的圖。按住 <b>Alt</b> 臨時吸管、按住 <b>Ctrl</b> 臨時選取，放開還原原本的工具。
       </div>
     </div>
@@ -132,25 +131,14 @@
         <div class="field col"><label><input id="f_safe" type="checkbox"> 安全場景（沒有怪物、沒有黑幕）</label></div>
         <div class="field col"><label><input id="f_npcs" type="checkbox"> 場景 NPC（克莉思、路德等人會走動並可對話）</label></div>
 
-        <div class="subhead">地圖大小（可比畫面 32×18 大，遊戲鏡頭會跟著玩家捲動）</div>
-        <div class="field"><label>寬（格數）</label><input id="f_cols" type="number" min="8" max="200"></div>
-        <div class="field"><label>高（格數）</label><input id="f_rows" type="number" min="8" max="200"></div>
-
-        <div class="subhead">往指定方向增減格子（往上／往左時，地圖內容會一起跟著移動）</div>
-        <div class="field"><label>一次幾格</label><input id="f_growN" type="number" min="1" max="50" value="1"></div>
-        <div class="field col grow-pad">
-          <div class="grow-row"><span class="grow-label">增加</span>
-            <button class="btn" id="growUp" title="在上面加一排">⬆ 上</button>
-            <button class="btn" id="growDown" title="在下面加一排">⬇ 下</button>
-            <button class="btn" id="growLeft" title="在左邊加一排">⬅ 左</button>
-            <button class="btn" id="growRight" title="在右邊加一排">➡ 右</button>
+        <div class="subhead">地圖大小</div>
+        <div class="map-size-panel">
+          <div class="map-size-current">
+            <label>寬 <select id="f_colsSide" aria-label="調整寬度的方向"><option value="left">⬅ 左</option><option value="right" selected>右 ➡</option></select><input id="f_cols" type="number" min="8" max="200" aria-label="地圖寬度">格</label>
+            <span>×</span>
+            <label>高 <select id="f_rowsSide" aria-label="調整高度的方向"><option value="up">⬆ 上</option><option value="down" selected>下 ⬇</option></select><input id="f_rows" type="number" min="8" max="200" aria-label="地圖高度">格</label>
           </div>
-          <div class="grow-row"><span class="grow-label">減少</span>
-            <button class="btn" id="trimUp" title="從上面刪一排（該排的內容會被刪掉）">⬆ 上</button>
-            <button class="btn" id="trimDown" title="從下面刪一排（該排的內容會被刪掉）">⬇ 下</button>
-            <button class="btn" id="trimLeft" title="從左邊刪一排（該排的內容會被刪掉）">⬅ 左</button>
-            <button class="btn" id="trimRight" title="從右邊刪一排（該排的內容會被刪掉）">➡ 右</button>
-          </div>
+          <p class="map-size-note">先選擇調整哪一側，再修改格數。數字變大＝增加；變小＝裁掉。裁掉內容可按 Ctrl+Z 復原。</p>
         </div>
 
         <div class="subhead">起始資源</div>
@@ -158,6 +146,9 @@
         <div class="field"><label>營地HP</label><input id="f_lives" type="number"></div>
         <div class="field"><label>起始嚮導能量</label><input id="f_guide" type="number"></div>
         <div class="field"><label>嚮導能量/秒</label><input id="f_guideRegen" type="number"></div>
+        <div class="subhead">異質核心</div>
+        <div class="field"><label>本局核心數量</label><input id="f_coreCount" type="number" min="1" max="20" step="1"></div>
+        <div class="field"><small>先在地圖上標記候選點；每次進場會隨機抽取指定數量。</small></div>
 
         <div class="subhead">波次難度</div>
         <div class="field"><label>幾波怪</label><input id="f_waves" type="number"></div>
@@ -191,6 +182,6 @@
   <!-- 依序載入 -->
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/maps.js?v=eoc-zoom"></script>        <!-- 地圖資料 -->
-  <script src="js/editor.js?v=object-depth-2"></script>        <!-- 編輯器程式 -->
+  <script src="js/editor.js?v=map-size-2"></script>        <!-- 編輯器程式 -->
 </body>
 </html>

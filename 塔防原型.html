@@ -12,15 +12,7 @@
     <canvas id="cv" width="1280" height="720"></canvas>
     <div id="screenShade"></div>
 
-    <div id="missionText">目前任務：守住營地</div>
-
-    <!-- HUD 疊在遊戲畫面右上角 -->
-    <div id="hud">
-      <span class="stat money"><small>資源</small><b id="money">0</b></span>
-      <span class="stat hp"><small>營地 HP</small><b id="lives">0</b></span>
-      <span class="stat guide"><small>嚮導能量</small><b id="guide">0</b></span>
-      <span class="stat wave"><small>核心清除</small><b><span id="wave">0</span>/<span id="wavemax">0</span></b></span>
-    </div>
+    <div id="missionText">目前任務：守住營地 <span class="mission-secondary">| 破壞異質核心</span></div>
 
     <div id="overlay">
       <div class="overlay-card">
@@ -50,9 +42,27 @@
         <button id="dialogueNext" type="button"><span>Space／E</span> 下一句</button>
       </div>
     </div>
-    <!-- 建築按鈕與選單：浮在遊戲畫面左下角 -->
-    <button class="tbtn" id="buildToggle">🧱 建築</button>
+    <!-- 建築快捷欄與完整清單：浮在遊戲畫面左下角 -->
+    <div id="buildToolbar">
+      <button class="tbtn" id="demolishToggle" type="button" title="點擊後，再點選自己建造的建築">🔨 拆除</button>
+      <div id="buildQuickSlots" aria-label="建築快捷欄"></div>
+      <button class="tbtn" id="buildToggle" type="button">🧱 更多建築</button>
+    </div>
     <div id="buildbar" class="hidden"></div>
+  </div>
+
+  <div id="hud" aria-label="戰鬥資訊">
+    <div class="hud-player" aria-label="溫特狀態">
+      <span class="hud-player-avatar"><img src="images/character/winter_B/winterB_0000_Front.png" alt="溫特"></span>
+      <div class="hud-player-status">
+        <b>溫特．嚮導部隊長</b>
+        <div class="hud-player-bar hp" role="meter" aria-label="溫特 HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="playerHpBar"></i></div>
+        <div class="hud-player-bar energy" role="meter" aria-label="精神能量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="playerEnergyBar"></i></div>
+      </div>
+    </div>
+    <span class="stat money"><small>經費</small><b id="money">0</b></span>
+    <span class="stat hp"><small>營地 HP</small><b id="lives">0</b></span>
+    <span class="stat crystal"><small>異質碎片</small><b id="crystals">0</b></span>
   </div>
 
   <div id="editors">

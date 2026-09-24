@@ -43,6 +43,17 @@ const wandererSprites = {};
 for (const profile of WANDERERS) wandererSprites[profile.id] = loadCharacterSprites(profile.sprite);
 const monsterSlimeSprite = new Image();
 monsterSlimeSprite.src = 'images/monster/Monster_Slime.png';
+let lastSlimeLandSound = 0;
+function playSlimeAudio(kind, slime = null) {
+  if (typeof SFX !== 'undefined' && !SFX.enabled) return;
+  if (kind === 'land' && slime && (!G.player || Math.hypot(slime.x - G.player.x, slime.y - G.player.y) > CELL * 15)) return;
+  const now = performance.now();
+  if (kind === 'land' && now - lastSlimeLandSound < 90) return;
+  if (kind === 'land') lastSlimeLandSound = now;
+  const audio = new Audio(kind === 'hit' ? 'Sound effects/slime-hit.mp3' : 'Sound effects/slime-land.mp3');
+  audio.volume = kind === 'hit' ? .72 : .28;
+  audio.play().catch(() => {});
+}
 
 // ---- NPC 正式對話（靠近後按 Space／E）----
 const dialogueBox = document.getElementById('dialogueBox');
@@ -289,6 +300,17 @@ function playerBuildingAt(c, r) {
     o.playerBuilt && c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)
   ) || null;
 }
+function demolishPlayerBuilding(o) {
+  if (!o || !o.playerBuilt || !G.obstacles.includes(o)) return false;
+  const [fx, fy] = center(o.c + ((o.w || 1) - 1) / 2, o.r + ((o.h || 1) - 1) / 2);
+  removeBarrier(o);
+  for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }
+  for (const enemy of G.enemies) { enemy.aiPath = null; enemy.aiGoal = null; enemy.aiRouteTimer = 0; }
+  computeFlow();
+  sfx('hit'); flash('已拆除', fx, fy - 20, '#ffd479');
+  closeGroundMenu(); updateHUD();
+  return true;
+}
 function renderBuildingActions(o) {
   if (!groundTarget || !o || !G.obstacles.includes(o)) { closeGroundMenu(); return; }
   const data = typeof buildableById === 'function' ? buildableById(o.type) : null;
@@ -298,14 +320,7 @@ function renderBuildingActions(o) {
   demolish.className = 'gm-demolish';
   demolish.textContent = '🔨 拆除';
   demolish.addEventListener('click', () => {
-    if (!o.playerBuilt || !G.obstacles.includes(o)) { closeGroundMenu(); return; }
-    const [fx, fy] = center(o.c + ((o.w || 1) - 1) / 2, o.r + ((o.h || 1) - 1) / 2);
-    removeBarrier(o);
-    for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }
-    for (const enemy of G.enemies) { enemy.aiPath = null; enemy.aiGoal = null; enemy.aiRouteTimer = 0; }
-    computeFlow();
-    sfx('hit'); flash('已拆除', fx, fy - 20, '#ffd479');
-    closeGroundMenu(); updateHUD();
+    if (!demolishPlayerBuilding(o)) closeGroundMenu();
   });
   groundMenu.appendChild(demolish);
 }
@@ -360,14 +375,15 @@ function newGame() {
   G = {
     phase: 'ready', money: START.money, lives: START.lives,
     guide: START.guide, guideMax: START.guideMax, guideRegen: START.guideRegen,
-    grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [],
+    grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [], mapDestroyed: new Set(),
     recentMonsterSpawns: [],
     selType: null, waveIndex: 0, waves: buildWaves(),
     spawnQueue: [], spawnTimer: 0, curGap: 0.9, betweenWaves: 0,
-    running: false, over: false, won: false,
+    running: false, over: false, won: false, damageVignetteT: 0, cameraShakeT: 0,
   };
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
+  computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
   spawnWanderers();     // 場景 NPC 只會在亮處自由走動
@@ -375,6 +391,7 @@ function newGame() {
   G.player = { x: px, y: py, hp: 100, maxhp: 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
   updateCamera();
   updateHUD();
+  updateBuildToggle();
 }
 function buildWaves() {
   if (MAP_SAFE) return [];        // 安全場景：完全不生怪
@@ -533,6 +550,12 @@ cv.addEventListener('click', e => {
     flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
     return;
   }
+  if (G.selType === 'demolish') {
+    const target = playerBuildingAt(c, r);
+    if (target) { spawnGroundRipple(e.clientX, e.clientY); demolishPlayerBuilding(target); }
+    else { sfx('error'); flash('只能拆除自己建造的建築', x, y - 18, '#ff8f8f'); }
+    return;
+  }
   // 點到哨兵 → 開選單
   // 有精靈圖的哨兵比色塊高，判定圈往上移到身體中間、放大一點
   const hit = G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
@@ -619,13 +642,21 @@ function enemyAttackSentry(e, target, dt) {
 function enemyAttackPlayer(e, dt) {
   const p = G.player;
   if (!p || p.hp <= 0) return;
-  e.atkCd = (e.atkCd || 0) - dt;
-  if (e.atkCd > 0) return;
-  e.atkCd = 1;
+  if ((e.playerTouchCd || 0) > 0) return;
+  e.playerTouchCd = 1;
   p.hp = Math.max(0, p.hp - 12);
-  p.hitT = .3; p.underAttackT = 5;
+  p.hitT = .45; p.underAttackT = 5;
+  G.damageVignetteT = .45; G.cameraShakeT = .2;
+  // 沿史萊姆撞擊方向將玩家推開；若後方是牆或建築，就逐步縮短擊退距離。
+  const dx = p.x - e.x, dy = p.y - e.y, distance = Math.hypot(dx, dy) || 1;
+  for (let push = 18; push >= 2; push -= 2) {
+    const nx = p.x + dx / distance * push, ny = p.y + dy / distance * push;
+    if (!playerBlocked(nx, ny)) { p.x = nx; p.y = ny; break; }
+    if (!playerBlocked(nx, p.y)) { p.x = nx; break; }
+    if (!playerBlocked(p.x, ny)) { p.y = ny; break; }
+  }
   flash('-12', p.x, p.y - 46, '#ff6b6b');
-  sfx('hit');
+  playSlimeAudio('hit');
   if (p.hp <= 0 && !G.over) {
     flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e');
     lose();
@@ -724,6 +755,7 @@ function chooseDarkWanderCell(e) {
 }
 function updateEnemyEffects(e, dt) {
   if (e.hitT > 0) e.hitT -= dt;
+  e.playerTouchCd = Math.max(0, (e.playerTouchCd || 0) - dt);
   if (e.burnT > 0) {
     e.burnT -= dt; e.burnTick = (e.burnTick || 0) - dt;
     if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flash('燒傷', e.x, e.y - 25, '#ff8a42'); }
@@ -732,30 +764,29 @@ function updateEnemyEffects(e, dt) {
   if (e.confuseT > 0) e.confuseT -= dt;
 }
 
-const SLIME_JUMP = { ready: .14, air: .34, land: .14, height: 9 };
-SLIME_JUMP.total = SLIME_JUMP.ready + SLIME_JUMP.air + SLIME_JUMP.land;
+// 與《苦艾與甘露》一致：完整週期約 1.83 秒，前 62% 騰空移動，落地後壓扁並停住。
+const SLIME_JUMP = { total: 1.83, airRatio: .62, height: 14 };
+function slimeLerp(a, b, p) { return a + (b - a) * Math.max(0, Math.min(1, p)); }
 function updateSlimeJump(e, dt) {
   if (e.slimeClock == null) e.slimeClock = Math.random() * SLIME_JUMP.total;
+  const previous = e.slimeClock / SLIME_JUMP.total;
   e.slimeClock = (e.slimeClock + dt) % SLIME_JUMP.total;
-  const time = e.slimeClock;
-  e.slimeLift = 0; e.slimeScaleX = 1; e.slimeScaleY = 1;
-  if (time < SLIME_JUMP.ready) {
-    const p = time / SLIME_JUMP.ready;
-    e.slimeScaleX = 1 + .1 * p;
-    e.slimeScaleY = 1 - .08 * p;
-    return 0; // 蓄力時停在原地
+  const phase = e.slimeClock / SLIME_JUMP.total;
+  if (previous < SLIME_JUMP.airRatio && phase >= SLIME_JUMP.airRatio) playSlimeAudio('land', e);
+  if (phase < .35) {
+    const p = phase / .35;
+    e.slimeLift = slimeLerp(0, 14, p); e.slimeScaleX = slimeLerp(1, .96, p); e.slimeScaleY = slimeLerp(1, 1.07, p);
+  } else if (phase < .62) {
+    const p = (phase - .35) / .27;
+    e.slimeLift = slimeLerp(14, 0, p); e.slimeScaleX = slimeLerp(.96, 1.08, p); e.slimeScaleY = slimeLerp(1.07, .88, p);
+  } else if (phase < .78) {
+    const p = (phase - .62) / .16;
+    e.slimeLift = slimeLerp(0, 1, p); e.slimeScaleX = slimeLerp(1.08, .98, p); e.slimeScaleY = slimeLerp(.88, 1.02, p);
+  } else {
+    const p = (phase - .78) / .22;
+    e.slimeLift = slimeLerp(1, 0, p); e.slimeScaleX = slimeLerp(.98, 1, p); e.slimeScaleY = slimeLerp(1.02, 1, p);
   }
-  if (time < SLIME_JUMP.ready + SLIME_JUMP.air) {
-    const p = (time - SLIME_JUMP.ready) / SLIME_JUMP.air;
-    e.slimeLift = Math.sin(Math.PI * p) * SLIME_JUMP.height;
-    e.slimeScaleX = 1 - .05 * Math.sin(Math.PI * p);
-    e.slimeScaleY = 1 + .09 * Math.sin(Math.PI * p);
-    return dt * (SLIME_JUMP.total / SLIME_JUMP.air); // 只在空中前進，維持原本平均速度
-  }
-  const p = (time - SLIME_JUMP.ready - SLIME_JUMP.air) / SLIME_JUMP.land;
-  e.slimeScaleX = 1 + .18 * (1 - p);
-  e.slimeScaleY = 1 - .14 * (1 - p);
-  return 0; // 落地壓扁並停頓
+  return phase < SLIME_JUMP.airRatio ? dt / SLIME_JUMP.airRatio : 0;
 }
 
 function spawnAttackVisual(attacker, target, spec, affected) {
@@ -786,6 +817,12 @@ function spawnAttackVisual(attacker, target, spec, affected) {
 function stepEnemy(e, dt) {
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
+  // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
+  // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
+  if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= 30) {
+    enemyAttackPlayer(e, dt);
+    return;
+  }
   if (e.stunT > 0) { e.slimeLift = 0; e.slimeScaleX = 1.08; e.slimeScaleY = .92; return; }
   const moveDt = updateSlimeJump(e, dt);
   if (e.confuseT > 0) {
@@ -901,6 +938,8 @@ function update(dt) {
     G.player.hitT = Math.max(0, (G.player.hitT || 0) - dt);
     G.player.underAttackT = Math.max(0, (G.player.underAttackT || 0) - dt);
   }
+  G.damageVignetteT = Math.max(0, (G.damageVignetteT || 0) - dt);
+  G.cameraShakeT = Math.max(0, (G.cameraShakeT || 0) - dt);
   G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);
   // 生怪
   if (G.spawnQueue.length > 0) {
@@ -1033,7 +1072,7 @@ function drawObstacle(o) {
   }
   const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
   // 基地本體是地圖上的平面大圖，這裡只負責碰撞、受擊效果與血條，避免重複繪製。
-  if (!o.isBase) {
+  if (!o.isBase && !o.mapSource) {
     if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
     else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
   }
@@ -1048,7 +1087,7 @@ function drawObstacle(o) {
   if (o.isBase) {         // 基地血條永久顯示，並依剩餘 HP 變色
     const ratio = Math.max(0, Math.min(1, o.hp / o.maxhp));
     const barW = Math.max(120, w - 48), barH = 10;
-    const barX = x + (w - barW) / 2, barY = y - 22;
+    const barX = x + (w - barW) / 2, barY = y + 8;
     ctx.fillStyle = 'rgba(0,0,0,.82)'; roundRect(barX - 3, barY - 3, barW + 6, barH + 6, 4); ctx.fill();
     ctx.fillStyle = '#352d2d'; roundRect(barX, barY, barW, barH, 2); ctx.fill();
     ctx.fillStyle = ratio > 0.5 ? '#59d26f' : (ratio > 0.25 ? '#f0c54d' : '#ef5b5b');
@@ -1197,20 +1236,19 @@ function drawPlayer(p) {
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
   if (img && img.complete && img.naturalWidth) {
+    ctx.save();
+    if (p.hitT > 0) ctx.filter = 'sepia(1) saturate(4) hue-rotate(-38deg) brightness(1.32)';
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
     ctx.imageSmoothingEnabled = true;
+    ctx.restore();
   } else {
     ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
-  }
-  if (p.hitT > 0) {
-    ctx.fillStyle = `rgba(255,70,70,${Math.min(.38, p.hitT)})`;
-    ctx.beginPath(); ctx.arc(p.x, p.y - 15, 25, 0, Math.PI * 2); ctx.fill();
   }
   if (!MAP_SAFE) {
     const w = 46, h = 5, ratio = Math.max(0, p.hp / p.maxhp), x = p.x - w / 2, y = p.y - size + 13;
     ctx.fillStyle = 'rgba(8,12,18,.88)'; roundRect(x - 1, y - 1, w + 2, h + 2, 3); ctx.fill();
-    ctx.fillStyle = ratio > .35 ? '#63d7aa' : '#ff6363'; roundRect(x, y, w * ratio, h, 2); ctx.fill();
+    if (ratio > 0) { ctx.fillStyle = ratio > .35 ? '#63d7aa' : '#ff6363'; roundRect(x, y, w * ratio, h, 2); ctx.fill(); }
   }
 }
 
@@ -1221,6 +1259,10 @@ function draw() {
   ctx.clearRect(0, 0, cv.width, cv.height);
   // 之後畫的都是「世界座標」：先套畫面縮放，再平移鏡頭位置，畫面就會跟著玩家捲動
   ctx.save();
+  if ((G.cameraShakeT || 0) > 0) {
+    const power = 4 * Math.min(1, G.cameraShakeT / .2);
+    ctx.translate((Math.random() * 2 - 1) * power, (Math.random() * 2 - 1) * power);
+  }
   ctx.scale(VIEW_SCALE, VIEW_SCALE);
   ctx.translate(-Math.round(cam.x * VIEW_SCALE) / VIEW_SCALE, -Math.round(cam.y * VIEW_SCALE) / VIEW_SCALE);
   ctx.imageSmoothingEnabled = false;   // 放大時保持像素銳利
@@ -1228,14 +1270,7 @@ function draw() {
   ctx.fillStyle = '#000'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
-  // 沒有美術的固定牆（入口／營地的區域色已取消，改用地圖美術自己表現）
-  for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
-    const [cx, cy] = [OX + c * CELL, OY + r * CELL];
-    if (isWall(c, r) && !hasImageAt(c, r)) {
-      ctx.fillStyle = '#3f434b'; ctx.fillRect(cx + 2, cy + 2, CELL - 4, CELL - 4);
-      ctx.strokeStyle = '#565b64'; ctx.lineWidth = 2; ctx.strokeRect(cx + 5, cy + 5, CELL - 10, CELL - 10);
-    }
-  }
+  // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
@@ -1360,6 +1395,23 @@ function draw() {
   // 情境選單或指定建築的目標格
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
+  // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。
+  if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
+    const ob = buildableById(G.selType.slice(6));
+    if (ob) {
+      const v = ob[buildOrient], [c, r] = hoverCell;
+      const labelX = OX + (c + v.w / 2) * CELL;
+      const labelBottom = Math.max(OY + 28, OY + r * CELL - 7);
+      ctx.save();
+      ctx.font = 'bold 12px "Microsoft JhengHei", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = 'rgba(10, 16, 23, .88)';
+      ctx.fillRect(labelX - 43, labelBottom - 23, 86, 23);
+      ctx.fillStyle = '#f1f7fc';
+      ctx.fillText('［R］旋轉', labelX, labelBottom - 6);
+      ctx.restore();
+    }
+  }
   // 目標框畫在黑幕上方，黑暗區域也能清楚看到所選格子。
   if (actionCell) {
     const [ac, ar] = actionCell, ax = OX + ac * CELL, ay = OY + ar * CELL;
@@ -1374,6 +1426,17 @@ function draw() {
     ctx.fillStyle = '#ffd479'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText('🎯 點擊地圖，指定「' + TYPES[assigning.type].name + '」的巡邏位置（Esc 取消）', cv.width / 2, 29);
   }
+  // 玩家受擊：畫面四周紅暈快速閃現後淡出（同《苦艾與甘露》的受擊回饋）。
+  if ((G.damageVignetteT || 0) > 0) {
+    const elapsed = 1 - G.damageVignetteT / .45;
+    const strength = elapsed < .25 ? elapsed / .25 : Math.max(0, 1 - (elapsed - .25) / .75);
+    const radius = Math.max(cv.width, cv.height) * .72;
+    const vignette = ctx.createRadialGradient(cv.width / 2, cv.height / 2, radius * .35, cv.width / 2, cv.height / 2, radius);
+    vignette.addColorStop(0, 'rgba(170,0,0,0)');
+    vignette.addColorStop(.62, `rgba(190,0,0,${.08 * strength})`);
+    vignette.addColorStop(1, `rgba(210,0,0,${.72 * strength})`);
+    ctx.fillStyle = vignette; ctx.fillRect(0, 0, cv.width, cv.height);
+  }
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y);
@@ -1383,19 +1446,36 @@ function roundRect(x, y, w, h, r) {
 
 // ---- HUD / 狀態畫面 ----
 function updateHUD() {
-  // 安全區域：資源／營地HP／嚮導能量／波次都沒有意義，連同「建築」按鈕一起收起來
+  // 安全區域不顯示戰鬥資訊條，連同「建築」按鈕一起收起來
   const hud = document.getElementById('hud');
   if (hud) hud.classList.toggle('hidden', MAP_SAFE);
-  if (typeof buildToggle !== 'undefined' && buildToggle) buildToggle.classList.toggle('hidden', MAP_SAFE);
+  const buildToolbar = document.getElementById('buildToolbar');
+  if (buildToolbar) buildToolbar.classList.toggle('hidden', MAP_SAFE);
   if (typeof updateTeamButton === 'function') updateTeamButton();   // 安全場景才顯示「出勤編隊」按鈕
   if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
   document.getElementById('lives').textContent = Math.max(0, G.lives);
-  document.getElementById('guide').textContent = Math.floor(G.guide);
-  document.getElementById('wave').textContent = G.cores.filter(c=>c.dead).length;
-  document.getElementById('wavemax').textContent = G.cores.length || '—';
+  document.getElementById('crystals').textContent = training.crystals;
+  const playerHpBar = document.getElementById('playerHpBar');
+  const playerHp = Math.max(0, G.player?.hp ?? 0);
+  const playerMaxHp = Math.max(1, G.player?.maxhp ?? 100);
+  playerHpBar.style.width = Math.min(100, playerHp / playerMaxHp * 100) + '%';
+  playerHpBar.parentElement.setAttribute('aria-valuenow', Math.ceil(playerHp));
+  playerHpBar.parentElement.setAttribute('aria-valuemax', playerMaxHp);
+  const playerEnergyBar = document.getElementById('playerEnergyBar');
+  playerEnergyBar.style.width = Math.max(0, Math.min(100, G.guide / Math.max(1, G.guideMax) * 100)) + '%';
+  playerEnergyBar.parentElement.setAttribute('aria-valuenow', Math.floor(G.guide));
+  playerEnergyBar.parentElement.setAttribute('aria-valuemax', G.guideMax);
   const mission = document.getElementById('missionText');
-  if (mission) mission.textContent = MAP_SAFE ? '目前任務：休息一下（安全區域）' : '目前任務：守住營地';
+  if (mission) {
+    if (MAP_SAFE) {
+      if (mission.dataset.mode !== 'safe') mission.textContent = '目前任務：休息一下（安全區域）';
+      mission.dataset.mode = 'safe';
+    } else {
+      if (mission.dataset.mode !== 'combat') mission.innerHTML = '目前任務：守住營地 <span class="mission-secondary">| 破壞異質核心</span>';
+      mission.dataset.mode = 'combat';
+    }
+  }
 }
 const overlay = document.getElementById('overlay');
 const ovTitle = document.getElementById('ov-title'), ovText = document.getElementById('ov-text'), ovBtn = document.getElementById('ov-btn');
