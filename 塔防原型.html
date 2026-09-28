@@ -5,14 +5,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/style.css?v=nearest-sentry-20260925">
 </head>
 <body>
   <div id="wrap">
     <canvas id="cv" width="1280" height="720"></canvas>
     <div id="screenShade"></div>
+    <div id="mapTransition" aria-hidden="true"></div>
 
     <div id="missionText">目前任務：守住營地 <span class="mission-secondary">| 破壞異質核心</span></div>
+    <div id="systemNotices" role="status" aria-live="polite" aria-atomic="false"></div>
 
     <div id="overlay">
       <div class="overlay-card">
@@ -44,11 +46,28 @@
     </div>
     <!-- 建築快捷欄與完整清單：浮在遊戲畫面左下角 -->
     <div id="buildToolbar">
-      <button class="tbtn" id="demolishToggle" type="button" title="點擊後，再點選自己建造的建築">🔨 拆除</button>
+      <button class="tbtn" id="demolishToggle" type="button" title="點擊後，再點選自己建造的建築"><span class="build-tool-icon" aria-hidden="true">🔨</span><span>拆除</span></button>
+      <button class="tbtn" id="buildToggle" type="button"><span class="build-tool-icon" aria-hidden="true">🧱</span><span>更多建築</span></button>
       <div id="buildQuickSlots" aria-label="建築快捷欄"></div>
-      <button class="tbtn" id="buildToggle" type="button">🧱 更多建築</button>
     </div>
     <div id="buildbar" class="hidden"></div>
+    <div id="npcArrangeToolbar" class="hidden">
+      <button class="tbtn" id="npcArrangeToggle" type="button" aria-pressed="false">移動 NPC</button>
+      <span id="npcArrangeHint" class="hidden">拖曳角色到空地，放開後正面朝向鏡頭</span>
+    </div>
+    <div id="elevatorMenu" class="hidden" role="dialog" aria-modal="true" aria-labelledby="elevatorTitle">
+      <div class="elevator-card">
+        <button id="elevatorClose" type="button" aria-label="關閉樓層選單">×</button>
+        <h2 id="elevatorTitle">搭電梯</h2>
+        <p id="elevatorMessage">選擇要前往的樓層</p>
+        <div class="elevator-floors">
+          <button type="button" data-floor="1F">1F</button>
+          <button type="button" data-floor="3F">3F</button>
+          <button type="button" data-floor="4F">4F</button>
+          <button type="button" data-floor="B-4F">B-4F</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <div id="hud" aria-label="戰鬥資訊">
@@ -72,19 +91,19 @@
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
-  <script src="js/sfx.js"></script>          <!-- 1b. 音效 -->
+  <script src="js/sfx.js?v=portal-transition-20260925"></script>          <!-- 1b. 音效 -->
 
-  <script src="data/balance.js"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/balance.js?v=muomn-name-20260925"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/objects.js"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
   <script src="data/decorations.js"></script><!-- 3b. 裝飾物件（低HP、可佈置） -->
-  <script src="data/maps.js?v=eoc-zoom"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
+  <script src="data/maps.js?v=dorm-assets-20260925"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=object-depth-2"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
-  <script src="js/lighting.js"></script>     <!-- 7. 黑暗與光源系統 -->
+  <script src="js/maploader.js?v=base-lamp-position-20260925"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/lighting.js?v=camping-light-single-20260925"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/build.js"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=zone-interaction-20260925"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js"></script>
-  <script src="js/game.js"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=muomn-name-20260925"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

@@ -17,7 +17,7 @@ SHEETS = {
     "claire_A": "character_ClaireA.png",
     "luther_A": "character_Luther_A.png",
     "luther_B": "character_Luther_B.png",
-    "mumu_A": "character_mumuA.psd",
+    "muomn_A": "character_MuomnA.psd",
     "noah_A": "character_noahA.png",
     "noah_B": "character_noah_B.png",
     "theonie_A": "character_Theonie_A.png",

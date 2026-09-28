@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 地圖編輯器</title>
-<link rel="stylesheet" href="css/editor.css?v=map-size-2">
+<link rel="stylesheet" href="css/editor.css?v=selection-toolbar-20260925">
 </head>
 <body>
   <h1>🗺️ 地圖編輯器　<a class="backlink" href="塔防原型.html">← 回遊戲</a></h1>
@@ -55,11 +55,11 @@
         <button class="btn" id="cancelColorBlock">取消</button>
       </div>
 
-      <div id="selControls" class="hidden">
+      <div id="selControls">
         <span>已選取：<b id="selName">—</b></span>
         <label>圖層：<select id="selLayer"></select></label>
-        <label id="selDepthControl" class="hidden" title="由圖片頂端往下數；線上方的人會被物件遮住，線下方的人會顯示在物件前面">人物遮擋線 <input id="selDepthInput" type="number" min="0" max="8" step="0.25" style="width:56px"> 格</label>
-        <button class="btn hidden" id="selDepthAuto" title="回到圖片底部作為遮擋線，並自動處理放在其他物件上的圖片">自動深度</button>
+        <label id="selDepthControl" title="由圖片頂端往下數；線上方的人會被物件遮住，線下方的人會顯示在物件前面">人物遮擋線 <input id="selDepthInput" type="number" min="0" max="8" step="0.25" style="width:56px"> 格</label>
+        <button class="btn" id="selDepthAuto" title="回到圖片底部作為遮擋線，並自動處理放在其他物件上的圖片">自動深度</button>
         <button class="btn" id="selUp">↑ 上移一層</button>
         <button class="btn" id="selDown">↓ 下移一層</button>
         <button class="btn" id="selFlipX">⇄ 左右翻</button>
@@ -181,7 +181,7 @@
 
   <!-- 依序載入 -->
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
-  <script src="data/maps.js?v=eoc-zoom"></script>        <!-- 地圖資料 -->
-  <script src="js/editor.js?v=map-size-2"></script>        <!-- 編輯器程式 -->
+  <script src="data/maps.js?v=dorm-assets-20260925"></script>        <!-- 地圖資料 -->
+  <script src="js/editor.js?v=muomn-name-20260925"></script>        <!-- 編輯器程式 -->
 </body>
 </html>

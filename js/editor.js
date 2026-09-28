@@ -9,15 +9,15 @@
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;   // 像素圖不要模糊
-// 2026-09-23：備份舊地圖與素材暫存，從目前 pull 的 data/maps.js 重新載入。
-const PULL_RESTORE_MARKER = 'tudrc_pull_restore_d0f2e51_done';
+// 2026-09-24：備份並清除目前的編輯器暫存，載入今天 pull 的 84ae68e 地圖。
+const PULL_RESTORE_MARKER = 'tudrc_pull_restore_84ae68e_done';
 const PULL_RESTORE_APPLIED = (() => {
   if (localStorage.getItem(PULL_RESTORE_MARKER)) return false;
-  const oldKeys = ['tudrc_maps_v3', 'tudrc_tiles_v2', 'tudrc_maps_v2', 'tudrc_tiles_v1'];
+  const oldKeys = ['tudrc_maps_v4', 'tudrc_tiles_v3', 'tudrc_map_preview_v1', 'tudrc_maps_v3', 'tudrc_tiles_v2', 'tudrc_maps_v2', 'tudrc_tiles_v1'];
   try {
     oldKeys.forEach(key => {
       const value = localStorage.getItem(key);
-      const backupKey = key + '_backup_before_d0f2e51_20260923';
+      const backupKey = key + '_backup_before_84ae68e_20260924';
       if (value && !localStorage.getItem(backupKey)) localStorage.setItem(backupKey, value);
     });
   } catch (error) {
@@ -46,6 +46,7 @@ const STORAGE_EOC_HYDRANTS = 'tudrc_asset_eoc_hydrants_v1';            // 後補
 const STORAGE_COUNSELING_TISSUE_FIX = 'tudrc_fix_counseling_tissue_v1'; // 疏導室面紙盒改名，避免與應變中心的同檔名
 const STORAGE_EOC_NO_ENTRY = 'tudrc_asset_eoc_no_entry_poster_v1';      // 後補的應變中心素材：禁止進入海報
 const STORAGE_EOC_STAIRS_DESK = 'tudrc_asset_eoc_stairs_desk_v1'; // 樓梯、雙開門、書和筆
+const STORAGE_DORM_PACK = 'tudrc_asset_pack_dorm_v1'; // 宿舍家具與房間設備
 const STORAGE_COUNSELING_ROOM_PACK = 'tudrc_asset_pack_counseling_room_v1'; // 疏導室素材包
 const STORAGE_TILE_SIZE_FIX = 'tudrc_fix_tile_sizes_v1';         // 修正登記尺寸與圖片不符的素材
 const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應變中心素材：安全距離海報
@@ -53,10 +54,10 @@ const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應
 const STORAGE_DAMAGE_ASSETS_CLEANUP = 'tudrc_remove_unapproved_damage_assets_v1';
 
 // ---- UI 按鈕回饋 ----
-const buttonSound = new Audio('music/Sound effects/按紐.mp3');
+const buttonSound = new Audio('Sound effects/按鈕.mp3');
 buttonSound.preload = 'auto';
 buttonSound.volume = 0.55;
-const mapClickSound = new Audio('music/Sound effects/對話框下一頁音效.mp3');
+const mapClickSound = new Audio('Sound effects/對話框下一頁音效.mp3');
 mapClickSound.preload = 'auto';
 mapClickSound.volume = 0.55;
 
@@ -215,6 +216,23 @@ function loadTiles() {
     'images/書和筆.png': 'images/應變中心/book-and-pen.png',
     'images/樓梯.png': 'images/應變中心/escape-stairs.png',
     'images/雙開門.png': 'images/應變中心/double-door-open.png',
+    'images/exec-c68e3f9e-1fbc-46da-a9fe-b0d90fe5f862.png': 'images/宿舍/desk.png',
+    'images/exec-e610ecc9-a73b-4d1c-96a0-ed77d8f75795.png': 'images/宿舍/office-chair-back.png',
+    'images/圖層 100.png': 'images/宿舍/chair-blue.png',
+    'images/圖層 102 拷貝 2.png': 'images/宿舍/shoe-bench.png',
+    'images/圖層 105 拷貝.png': 'images/宿舍/desk-lamp.png',
+    'images/圖層 111.png': 'images/宿舍/rug-blue.png',
+    'images/圖層 113 拷貝.png': 'images/宿舍/wardrobe-lab-coat.png',
+    'images/圖層 114 拷貝.png': 'images/宿舍/cabinet-tall.png',
+    'images/圖層 114.png': 'images/宿舍/bedside-drawers.png',
+    'images/圖層 115.png': 'images/宿舍/computer-monitor.png',
+    'images/圖層 116 拷貝.png': 'images/宿舍/bed-horizontal.png',
+    'images/圖層 83.png': 'images/宿舍/standing-fan.png',
+    'images/圖層 86.png': 'images/宿舍/bed-vertical.png',
+    'images/圖層 88.png': 'images/宿舍/air-conditioner.png',
+    'images/圖層 90 拷貝.png': 'images/宿舍/window-blinds-wide.png',
+    'images/圖層 90.png': 'images/宿舍/window-blinds-narrow.png',
+    'images/圖層 98 拷貝 2.png': 'images/宿舍/binder-set.png',
   };
   let organizedPathsChanged = false;
   customTiles.forEach(t => {
@@ -222,7 +240,8 @@ function loadTiles() {
     if (replacement) { t.file = replacement; organizedPathsChanged = true; }
   });
   const stairsDeskAdded = mergeDefaultAssetPack(t => ['tile_eoc_book_and_pen', 'tile_eoc_escape_stairs', 'tile_eoc_double_door_open'].includes(t.id), STORAGE_EOC_STAIRS_DESK);
-  if (organizedPathsChanged || stairsDeskAdded) saveTiles();
+  const dormAdded = mergeDefaultAssetPack('tile_dorm_', STORAGE_DORM_PACK);
+  if (organizedPathsChanged || stairsDeskAdded || dormAdded) saveTiles();
   const decorAdded = mergeDefaultAssetPack('tile_decor_', STORAGE_DECOR_PACK);
   const obstaclesAdded = mergeDefaultAssetPack('tile_obstacle_', STORAGE_OBSTACLE_PACK);
   const newAssetsAdded = mergeDefaultAssetPack('tile_new_', STORAGE_NEW_ASSETS_PACK);
@@ -462,6 +481,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/item-obstacle',
   'images/01-station-hall',
   'images/應變中心',
+  'images/宿舍',
   'images/破損建築',
 ];
 function tileImageSources(file) {
@@ -955,6 +975,7 @@ const PALETTE_CATEGORIES = [
   { id: 'decor', name: '裝飾物' },
   { id: 'obstacle', name: '障礙物' },
   { id: 'eoc', name: '應變中心' },
+  { id: 'dorm', name: '宿舍' },
   { id: 'damaged', name: '破損建築' },
   { id: 'field', name: '野戰基地' },
   { id: 'scene', name: '場景物件' },
@@ -966,6 +987,7 @@ function tileCategory(t) {
   if (t.systemColor) return 'color';
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
   if (file.includes('/應變中心/')) return 'eoc';
+  if (file.includes('/宿舍/')) return 'dorm';
   if (file.includes('/破損建築/')) return 'damaged';
   if (file.includes('/field-camp/')) return 'field';
   if (file.includes('/scene-props/')) return 'scene';
@@ -1165,41 +1187,52 @@ function refreshBaseCollisionPanel() {
   }
 }
 function refreshSelPanel() {
-  const panel = document.getElementById('selControls');   // 只隱藏／顯示內層控制項，選取鈕永遠在
-  const depthControl = document.getElementById('selDepthControl');
+  const layerSelect = document.getElementById('selLayer');
+  const depthInput = document.getElementById('selDepthInput');
   const depthAuto = document.getElementById('selDepthAuto');
-  depthControl.classList.add('hidden'); depthAuto.classList.add('hidden');
   const m = curMap();
   selections = selections.filter(sel => sel.type === 'stamp' ? !!m.stamps[sel.index] : !!(m.layers[sel.layer] && m.layers[sel.layer][sel.key] !== undefined));
   selection = selections.length ? selections[selections.length - 1] : null;
-  if (!selection) { panel.classList.add('hidden'); refreshBaseCollisionPanel(); return; }
+  const hasSelection = !!selection;
+  layerSelect.disabled = !hasSelection;
+  ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selReset', 'selDelete', 'selClear'].forEach(id => {
+    document.getElementById(id).disabled = !hasSelection;
+  });
+  depthInput.disabled = true;
+  depthInput.value = '';
+  depthAuto.disabled = true;
+  if (!selection) {
+    document.getElementById('selName').textContent = '無';
+    layerSelect.innerHTML = '<option value="">選取物件後設定</option>';
+    refreshBaseCollisionPanel();
+    return;
+  }
   if (selections.length > 1) {
     document.getElementById('selName').textContent = selections.length + ' 個物件';
-    const sl = document.getElementById('selLayer'); sl.innerHTML = '<option value="">選擇目標圖層</option>';
-    LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; sl.appendChild(o); });
-    panel.classList.remove('hidden'); refreshBaseCollisionPanel(); return;
+    layerSelect.innerHTML = '<option value="">選擇目標圖層</option>';
+    LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; layerSelect.appendChild(o); });
+    refreshBaseCollisionPanel(); return;
   }
   let name, curLayer;
   if (selection.type === 'stamp') {
-    const s = m.stamps[selection.index]; if (!s) { selection = null; panel.classList.add('hidden'); return; }
+    const s = m.stamps[selection.index]; if (!s) { selections = []; selection = null; refreshSelPanel(); return; }
     const t = tileById(s.id) || {};
     const size = t.systemColor ? (tilePixelW(t) + '×' + tilePixelH(t) + ' px') : (tileW(t) + '×' + tileH(t) + ' 格');
     name = (t.name || '大圖') + '（' + size + '）'; curLayer = s.layer || 'top';
   } else {
     const id = m.layers[selection.layer] ? m.layers[selection.layer][selection.key] : undefined;
-    if (id === undefined) { selection = null; panel.classList.add('hidden'); return; }
+    if (id === undefined) { selections = []; selection = null; refreshSelPanel(); return; }
     const t = tileById(id) || {}; name = (t.name || '圖') + '（小圖）'; curLayer = selection.layer;
   }
   document.getElementById('selName').textContent = name;
-  const sl = document.getElementById('selLayer'); sl.innerHTML = '';
-  LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; if (l.id === curLayer) o.selected = true; sl.appendChild(o); });
-  panel.classList.remove('hidden');
+  layerSelect.innerHTML = '';
+  LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; if (l.id === curLayer) o.selected = true; layerSelect.appendChild(o); });
   const depthStamp = selectedDepthStamp();
   if (depthStamp) {
-    const input = document.getElementById('selDepthInput');
-    input.max = tileH(depthStamp.t);
-    input.value = Number.isFinite(depthStamp.s.sortDepth) ? depthStamp.s.sortDepth : tileH(depthStamp.t);
-    depthControl.classList.remove('hidden'); depthAuto.classList.remove('hidden');
+    depthInput.max = tileH(depthStamp.t);
+    depthInput.value = Number.isFinite(depthStamp.s.sortDepth) ? depthStamp.s.sortDepth : tileH(depthStamp.t);
+    depthInput.disabled = false;
+    depthAuto.disabled = false;
   }
   refreshBaseCollisionPanel();
 }
@@ -1578,7 +1611,7 @@ document.getElementById('f_name').addEventListener('input', e => { curMap().name
 document.getElementById('f_desc').addEventListener('input', e => { curMap().desc = e.target.value; saveMaps(); });
 document.getElementById('f_npcs').addEventListener('change', e => {
   curMap().npcs = e.target.checked; saveMaps();
-  setStatus(e.target.checked ? '這張地圖會出現場景 NPC（克莉思、克萊兒、路德、穆穆、艾德林、諾亞、阿瓦倫）' : '這張地圖不會出現場景 NPC', '#8fd3ff');
+  setStatus(e.target.checked ? '這張地圖會出現場景 NPC（克莉思、克萊兒、路德、穆恩、艾德林、諾亞、阿瓦倫）' : '這張地圖不會出現場景 NPC', '#8fd3ff');
 });
 document.getElementById('f_safe').addEventListener('change', e => {
   curMap().safe = e.target.checked; saveMaps();

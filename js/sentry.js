@@ -64,12 +64,74 @@ function personnelInLight(x, y) {
   return [[0,0],[-12,-12],[12,-12],[-12,12],[12,12]]
     .every(([dx,dy]) => isLit(x + dx, y + dy));
 }
-function personnelStepAllowed(x, y, tx, ty) {
+function personnelStepAllowed(x, y, tx, ty, allowDark = false) {
   const steps = Math.max(1, Math.ceil(Math.hypot(tx-x, ty-y) / 4));
   for (let i = 1; i <= steps; i++) {
     const px = x + (tx-x)*i/steps, py = y + (ty-y)*i/steps;
-    if (sentryBlocked(px, py) || !personnelInLight(px, py)) return false;
+    if (sentryBlocked(px, py) || (!allowDark && !personnelInLight(px, py))) return false;
   }
+  return true;
+}
+function darkEscapeCell(c, r) {
+  if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
+  const [x, y] = center(c, r);
+  return !sentryBlocked(x, y);
+}
+function pathToLight(actor) {
+  const [sc, sr] = cellAt(actor.x, actor.y), startKey = sc + ',' + sr;
+  const queue = [[sc, sr]], cameFrom = new Map([[startKey, null]]);
+  let partialGoal = null, goal = null;
+  for (let head = 0; head < queue.length; head++) {
+    const [c, r] = queue[head], key = c + ',' + r, [x, y] = center(c, r);
+    if (personnelInLight(x, y)) { goal = key; break; }
+    if (!partialGoal && isLit(x, y)) partialGoal = key;
+    for (const [dc, dr] of [[0,-1],[1,0],[0,1],[-1,0]]) {
+      const nc = c + dc, nr = r + dr, nextKey = nc + ',' + nr;
+      if (cameFrom.has(nextKey) || !darkEscapeCell(nc, nr)) continue;
+      cameFrom.set(nextKey, key); queue.push([nc, nr]);
+    }
+  }
+  goal ||= partialGoal;
+  if (!goal) return null;
+  const path = [];
+  for (let key = goal; key && key !== startKey; key = cameFrom.get(key)) {
+    const [c, r] = key.split(',').map(Number); path.push({ c, r });
+  }
+  if (!path.length) path.push({ c: sc, r: sr });
+  return path.reverse();
+}
+function escapeDarkness(actor, dt) {
+  if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
+    if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
+    if (actor.escapePath) {
+      actor.navPath = null;
+      actor.navGoal = null;
+      actor.navTimer = 0;
+    }
+    actor.darkResumeTarget = null;
+    actor.escapePath = null; actor.escapeTimer = 0;
+    return false;
+  }
+  if (actor.mode !== 'goto') actor.darkResumeTarget = null;
+  else if (actor.target) actor.darkResumeTarget = actor.target;
+  actor.target = null; actor.waitT = 0;
+  actor.escapeTimer = (actor.escapeTimer || 0) - dt;
+  const goal = actor.escapePath?.at(-1);
+  if (!actor.escapePath?.length || actor.escapeTimer <= 0 || !goal || !darkEscapeCell(goal.c, goal.r)) {
+    actor.escapePath = pathToLight(actor);
+    actor.escapeTimer = .5;
+  }
+  const next = actor.escapePath?.[0];
+  if (!next) return true;
+  const [tx, ty] = center(next.c, next.r);
+  const dx = tx - actor.x, dy = ty - actor.y, distance = Math.hypot(dx, dy);
+  if (distance <= 2) { actor.escapePath.shift(); return true; }
+  const step = Math.min(distance, Math.max(100, (TYPES[actor.type]?.walkSpeed || 65) * 1.25) * dt);
+  const nx = actor.x + dx / distance * step, ny = actor.y + dy / distance * step;
+  const oldX = actor.x, oldY = actor.y;
+  if (personnelStepAllowed(actor.x, actor.y, nx, actor.y, true)) actor.x = nx;
+  if (personnelStepAllowed(actor.x, actor.y, actor.x, ny, true)) actor.y = ny;
+  if (Math.hypot(actor.x - oldX, actor.y - oldY) < .001) actor.escapeTimer = 0;
   return true;
 }
 function sentryCellWalkable(c, r) {
@@ -193,31 +255,33 @@ function hasAggroTarget(t) {
   }
   return false;
 }
+function redAttacker() {
+  const player = G.player, attacker = player && player.lastAttacker;
+  return player && player.underAttackT > 0 && attacker && attacker.hp > 0 && !attacker.dead && G.enemies.includes(attacker)
+    ? attacker : null;
+}
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; return; }
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
-  if (menuSentry === t) return;                       // 選單開著時先站好
-  // 光沒了（探照燈被拆等）→ 走向最近的光
-  if (LIGHT.enabled && !isLit(t.x, t.y)) {
-    let best = null, bd = Infinity;
-    for (const l of lightsCache) { const d = Math.hypot(l.x - t.x, l.y - t.y) - l.r; if (d < bd) { bd = d; best = l; } }
-    if (best) t.target = { x: best.x, y: best.y };
-  }
-  // 嚮導保持安全距離：敵人靠近時優先往反方向撤退，仍可在遠處攻擊與治療。
+  if (escapeDarkness(t, dt)) return;
   const ownSpec = TYPES[t.type];
-  // 玩家受襲時，雷德會立刻回到溫特身邊護衛；此行為優先於巡邏與一般接敵。
-  if (t.type === 'red' && G.player && (G.player.underAttackT || 0) > 0) {
+  const attacker = t.type === 'red' ? redAttacker() : null;
+  if (attacker) {
     if (t.guardSpeechCd <= 0) {
-      t.say = { text: '部隊長！請躲在我身後！', life: 3.4 };
+      t.say = { text: '部隊長！我來擋住牠！', life: 3.4 };
       t.guardSpeechCd = 6;
     }
     t.target = null; t.waitT = 0;
-    followTarget(t, G.player, { dist: CELL * 1.15, speed: Math.max(118, (ownSpec.walkSpeed || 80) * 1.55) }, dt);
+    if (Math.hypot(attacker.x - t.x, attacker.y - t.y) > ownSpec.range * CELL - 6) {
+      moveSentryWithPath(t, attacker.x, attacker.y, Math.max(170, (ownSpec.walkSpeed || 80) * 2.2), dt);
+    }
     return;
   }
+  if (menuSentry === t) return;                       // 選單開著時先站好
+  // 嚮導保持安全距離：敵人靠近時優先往反方向撤退，仍可在遠處攻擊與治療。
   if (ownSpec.guide && G.enemies.length) {
     let threat = null, threatD = Infinity;
     for (const e of G.enemies) {
@@ -234,11 +298,11 @@ function updateSentry(t, dt) {
       t.target=null; t.waitT=0; return;
     }
   }
-  // 嚮導的預設行為是支援哨兵：精神負荷最高者優先，其次才看傷勢與距離。
-  // 被玩家下達巡邏指令時（hold / goto）會遵守指令，不會擅自離開崗位。
-  if (ownSpec.guide && t.mode === 'free') {
+  // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
+  if (t.type === 'eldrin' && t.mode !== 'goto') {
     const sentinels = G.towers.filter(o =>
-      o !== t && o.hp > 0 && !TYPES[o.type].guide && (o.taint || 0) > 30
+      o !== t && o.hp > 0 && !TYPES[o.type].guide &&
+      (o.berserk || (o.taint || 0) >= 10 || o.maxhp - o.hp >= 10)
     );
     if (sentinels.length) {
       sentinels.sort((a, b) => {
@@ -248,11 +312,16 @@ function updateSentry(t, dt) {
         if (Math.abs(injuryDiff) > 1) return injuryDiff;
         return Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y);
       });
-      const supportTarget = sentinels[0];
-      t.supportTarget = supportTarget.type;
-      followTarget(t, supportTarget, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
-      t.target = null; t.waitT = 0;
-      return; // 支援位置優先；攻擊仍由 game.js 對射程內目標自動執行
+      const supportTarget = sentinels.find(o =>
+        Math.hypot(o.x - t.x, o.y - t.y) <= ownSpec.aura.r * CELL ||
+        buildSentryPath(t, o.x, o.y) !== null
+      );
+      if (supportTarget) {
+        t.supportTarget = supportTarget.type;
+        followTarget(t, supportTarget, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
+        t.target = null; t.waitT = 0;
+        return; // 支援位置優先；攻擊仍由 game.js 對射程內目標自動執行
+      }
     }
   }
   // 玩家明確下達的前往指令優先於追敵與角色跟隨關係，避免目的地被接敵邏輯清除。
@@ -262,6 +331,7 @@ function updateSentry(t, dt) {
       t.target = null; t.navPath = null; t.navGoal = null;
       t.mode = 'hold'; t.anchor = { x: t.x, y: t.y };
       flash('開始巡邏', t.x, t.y - 24, '#7ee0c0');
+      systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏');
     }
     return;
   }
@@ -286,10 +356,10 @@ function updateSentry(t, dt) {
     const spec = TYPES[t.type];
     const atkR = spec.range * CELL;                       // 射程（像素）
     const anchor = (t.mode !== 'free' && t.anchor) ? t.anchor : t;
-    const detectR = (spec.aggroRange || spec.range + 1.5) * CELL; // 每名隊員獨立的主動索敵距離
-    const leashR = t.mode === 'free' ? Math.max(260, detectR) : 110; // 自由行動不限制設定好的索敵距離
+    const detectR = t.guardSummoned ? Math.max(220, (spec.aggroRange || spec.range + 1.5) * CELL) : (spec.aggroRange || spec.range + 1.5) * CELL;
+    const leashR = t.guardSummoned ? 220 : t.mode === 'free' ? Math.max(260, detectR) : 110;
     let foe = null, fd = Infinity;
-    for (const e of [...G.enemies, ...G.cores]) {
+    for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
       if (e.dead) continue;
       if (LIGHT.enabled && !isLit(e.x, e.y)) continue;    // 只追亮處看得見的怪
       if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
@@ -315,7 +385,7 @@ function updateSentry(t, dt) {
   const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 : 1);   // 指派時走快一點
   if (moveSentryWithPath(t, t.target.x, t.target.y, sp, dt)) {
     t.target = null; t.navPath = null;
-    if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0'); }
+    if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0'); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
     else t.waitT = 0.6 + Math.random() * 1.8;         // 到點後停一下再逛
     return;
   }
@@ -356,6 +426,7 @@ function followTarget(mover, target, cfg, dt) {
 function updateWanderer(npc, dt) {
   rescueStuck(npc, sentryBlocked);
   updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）
+  if (escapeDarkness(npc, dt)) return;
   // 阿瓦倫緊跟著艾德林
   if (npc.id === 'avaren' && typeof FOLLOW !== 'undefined') {
     const eldrin = G.npcs.find(n => n.id === 'eldrin');
@@ -390,8 +461,8 @@ function openSentryMenu(t, silent) {
     '<button data-act="free">🚶 自由走動</button>' +
     '<button data-act="hold">📍 在原地巡邏</button>' +
     '<button data-act="goto">🎯 指派位置巡邏</button>' +
-    '<button data-act="talk">💬 對話</button>' +
-    '<button data-act="soothe">💗 疏導（-' + SOOTHE.cost + ' 能量）</button>';
+    (MAP_SAFE ? '<button data-act="talk">💬 對話</button>' :
+      '<button data-act="soothe">💗 疏導（-' + SOOTHE.cost + ' 能量）</button>');
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
   const rect = cv.getBoundingClientRect();
@@ -403,8 +474,8 @@ function openSentryMenu(t, silent) {
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
 function sentryMenuAct(act) {
   const t = menuSentry; if (!t) return;
-  if (act === 'free') { sfx('button'); t.mode = 'free'; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
-  else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
+  if (act === 'free') { sfx('button'); t.mode = 'free'; t.guardSummoned = false; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
+  else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
   else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); flash('點地圖指定巡邏位置（Esc 取消）', t.x, t.y - 24, '#ffd479'); return; }
   else if (act === 'talk') { openDialogue(t); return; }
   else if (act === 'soothe') { soothe(t); openSentryMenu(t, true); return; }   // soothe() 自帶音效；選單靜默重開、更新汙染數字

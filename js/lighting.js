@@ -92,16 +92,17 @@ function getLights() {
   // 光照範圍固定；warm/phase 是給「暖色呼吸光暈」裝飾用的（每盞燈相位錯開）
   if (G) for (const o of G.obstacles) {
     if (o.isBase) {
-      const x0 = OX + o.c * CELL, y0 = OY + o.r * CELL;
+      // 光源跟著圖片的像素微調走；o.c/o.r 是碰撞用的整格座標。
+      const x0 = o.artX ?? OX + o.c * CELL, y0 = o.artY ?? OY + o.r * CELL;
       const w = (o.w || 11) * CELL, h = (o.h || 8) * CELL;
       // 基地中央提供穩定環境光；四角燈各自提供暖色光與光暈。
       L.push({ x: x0 + w / 2, y: y0 + h / 2, r: LIGHT.baseR || 300 });
       const lampR = LIGHT.baseLampR || 190;
       const lamps = [
-        [x0 + 0.55 * CELL, y0 + 1.05 * CELL],
-        [x0 + w - 0.65 * CELL, y0 + 1.05 * CELL],
-        [x0 + 0.55 * CELL, y0 + h - 1.05 * CELL],
-        [x0 + w - 0.65 * CELL, y0 + h - 1.05 * CELL],
+        [x0 + 17, y0 + 46],
+        [x0 + w - 18, y0 + 46],
+        [x0 + 17, y0 + h - 63],
+        [x0 + w - 18, y0 + h - 63],
       ];
       lamps.forEach(([x, y], i) => L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }));
     }
@@ -111,7 +112,8 @@ function getLights() {
       const y = OY + (o.r + (o.h || 1) / 2) * CELL;
       // 燈頭在 1×2 圖片的上方；visualY 只影響光暈位置，不改遊戲照明判定。
       const visualY = OY + (o.r + Math.min(0.38, (o.h || 1) * 0.3)) * CELL + 10;
-      L.push({ x, y, visualX: x, visualY, r: lr, warm: true, phase: o.c * 7 + o.r * 13 });
+      L.push({ x, y, visualX: x, visualY, r: lr, warm: true,
+        single: o.type === 'camping_lights', phase: o.c * 7 + o.r * 13 });
     }
   }
   return L;

@@ -1495,12 +1495,219 @@ const TILES_CUSTOM = [
     "h": 4
   },
   {
+    "id": "tile_dorm_desk",
+    "name": "書桌",
+    "role": "floor",
+    "file": "images/宿舍/desk.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_office_chair_back",
+    "name": "辦公椅（背面）",
+    "role": "floor",
+    "file": "images/宿舍/office-chair-back.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_chair_blue",
+    "name": "藍色椅子",
+    "role": "floor",
+    "file": "images/宿舍/chair-blue.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_shoe_bench",
+    "name": "鞋架長椅",
+    "role": "floor",
+    "file": "images/宿舍/shoe-bench.png",
+    "w": 1,
+    "h": 3
+  },
+  {
+    "id": "tile_dorm_desk_lamp",
+    "name": "桌燈",
+    "role": "floor",
+    "file": "images/宿舍/desk-lamp.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_dorm_rug_blue",
+    "name": "藍色地毯",
+    "role": "floor",
+    "file": "images/宿舍/rug-blue.png",
+    "w": 2,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_dorm_wardrobe_lab_coat",
+    "name": "白袍衣櫃",
+    "role": "floor",
+    "file": "images/宿舍/wardrobe-lab-coat.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_dorm_cabinet_tall",
+    "name": "高櫃",
+    "role": "floor",
+    "file": "images/宿舍/cabinet-tall.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_bedside_drawers",
+    "name": "床邊抽屜櫃",
+    "role": "floor",
+    "file": "images/宿舍/bedside-drawers.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_computer_monitor",
+    "name": "電腦螢幕",
+    "role": "floor",
+    "file": "images/宿舍/computer-monitor.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_dorm_bed_horizontal",
+    "name": "橫向床",
+    "role": "floor",
+    "file": "images/宿舍/bed-horizontal.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_dorm_standing_fan",
+    "name": "立扇",
+    "role": "floor",
+    "file": "images/宿舍/standing-fan.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_bed_vertical",
+    "name": "直向床",
+    "role": "floor",
+    "file": "images/宿舍/bed-vertical.png",
+    "w": 2,
+    "h": 4
+  },
+  {
+    "id": "tile_dorm_air_conditioner",
+    "name": "冷氣",
+    "role": "floor",
+    "file": "images/宿舍/air-conditioner.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_dorm_window_blinds_wide",
+    "name": "百葉窗（寬）",
+    "role": "floor",
+    "file": "images/宿舍/window-blinds-wide.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_window_blinds_narrow",
+    "name": "百葉窗（窄）",
+    "role": "floor",
+    "file": "images/宿舍/window-blinds-narrow.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_dorm_binder_set",
+    "name": "資料夾組",
+    "role": "floor",
+    "file": "images/宿舍/binder-set.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_eoc_no_entry_poster",
     "name": "禁止進入海報",
     "role": "floor",
     "file": "images/應變中心/no-entry-poster.png",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_muftd54p",
+    "name": "warning-line",
+    "role": "floor",
+    "file": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAbgAAAFACAYAAADOC2nHAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFFmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDg4LCAyMDIwLzA3LzEwLTIyOjA2OjUzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTA5LTI1VDAxOjM0OjI5KzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wOS0yNVQwMTozNjoxNSswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wOS0yNVQwMTozNjoxNSswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDoxZDRkOGVmMi05MDBiLWQw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",
+    "w": 11,
+    "h": 8,
+    "flat": true
+  },
+  {
+    "id": "tile_mufv6z24",
+    "name": "shoe-cabinet",
+    "role": "floor",
+    "file": "images/宿舍/shoe-cabinet.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_mufv9ytk",
+    "name": "Backpack",
+    "role": "floor",
+    "file": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAACXBIWXMAAAsTAAALEwEAmpwYAAAFFmlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNi4wLWMwMDIgNzkuMTY0NDg4LCAyMDIwLzA3LzEwLTIyOjA2OjUzICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjIuMCAoV2luZG93cykiIHhtcDpDcmVhdGVEYXRlPSIyMDI2LTA5LTI1VDAyOjI5OjA5KzA4OjAwIiB4bXA6TW9kaWZ5RGF0ZT0iMjAyNi0wOS0yNVQwMjoyOTozNSswODowMCIgeG1wOk1ldGFkYXRhRGF0ZT0iMjAyNi0wOS0yNVQwMjoyOTozNSswODowMCIgZGM6Zm9ybWF0PSJpbWFnZS9wbmciIHBob3Rvc2hvcDpDb2xvck1vZGU9IjMiIHBob3Rvc2hvcDpJQ0NQcm9maWxlPSJzUkdCIElFQzYxOTY2LTIuMSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDozODg5ZTNiMC1hMWM3LWU0NGEtODUyMC0zZTZhMWVjZjFiMTIiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6Mzg4OWUzYjAtYTFjNy1lNDRhLTg1MjAtM2U2YTFlY2YxYjEyIiB4bXBNTTpPcmlnaW5hbERvY3VtZW50SUQ9InhtcC5kaWQ6Mzg4OWUzYjAtYTFjNy1lNDRhLTg1MjAtM2U2YTFlY2YxYjEyIj4gPHhtcE1NOkhpc3Rvcnk+IDxyZGY6U2VxPiA8cmRmOmxpIHN0RXZ0OmFjdGlvbj0iY3JlYXRlZCIgc3RFdnQ6aW5zdGFuY2VJRD0ieG1wLmlpZDozODg5ZTNiMC1hMWM3LWU0NGEtODUyMC0zZTZhMWVjZjFiMTIiIHN0RXZ0OndoZW49IjIwMjYtMDktMjVUMDI6Mjk6MDkrMDg6MDAiIHN0RXZ0OnNvZnR3YXJlQWdlbnQ9IkFkb2JlIFBob3Rvc2hvcCAyMi4wIChXaW5kb3dzKSIvPiA8L3JkZjpTZXE+IDwveG1wTU06SGlzdG9yeT4gPC9yZGY6RGVzY3JpcHRpb24+IDwvcmRmOlJERj4gPC94OnhtcG1ldGE+IDw/eHBhY2tldCBlbmQ9InIiPz7uzA0xAAAFwklEQVRYhe2ZX2xUVR7HP+fcPzPjDNMt1DZSadBaUSgo2ibd7JPGhGTDQrIlWFf8E0x84MXog/HFV998M74YNUZiDP5JEF8gUMO6u2FZWIiioUCzdGEoQintDOPM3HvPOT7cztWh8+cOYOTB39M5Z37n+/vc8zvnd+9phTGG29nkbw3Qyn4HvFn7HfBm7bYHtG+FiBCybq0yRoub1b4hwOuB+u+7k2xakkqGCSmVNfmiXuR3I8BtAwohzauvDDF9yYvG/nVoms1/Xk7CCfsVHz785DzPbFsX+dzV7SKENO1CtgUohDRPbVmDNIu37sVLPs6Cmh8sniuN5Kkta9qGjAUohDTSshka6sNxBbnLZVSlzDcnr+F5Ic3ZCxXEQtjq2/Pf/7mI69qseyBD7jI4rmBoqA/Ldo1WQayUtwQUQpptYwN89Mn/SLkK2xYc/fYH5mZ9Bldn0CLJqVMFTp+eWzS3vz+DNAH/PDzDH5Y6PLq2m5SrANg2NhBrNdtKseMmmDhzjYdWZ/EqAVLA1WL429aNy3GkBsDXkl1fXgCgI2Pxx+EO3ITNxJlrJNxEOyGbA7qJpHlubCVqoT8zW2bk4U7uuXdJ5PP3w5cA+H8uX1dj7ZqeqJ20Chw6fjXqPze2EjeRNF6l3HAVY63gl3unwwBJl66uLJ4ySPmzZsXzGP/HDJYTHh7l66gdmNBPa0NXV5Zkshhpbt7Q1TJ2S8BCPqBYXCgpBioBBMUA3zeUSmFK1w4uazg/lyuTSkkcR6ACBxYOULHoUcjXOe7tAv7ShDQUij5SemilWbFiCb29SQDmZ0tU19QAHUtT0bxz5wpIS6J1qNGONQU0Rtf0lVLMXS0hbIVRcGV+DpRGSoOTtPnm2AwA69Z3MZX7Ea0FWBILg7DABAqlVNMYsQEt2zXbtq7i2vx8NFYue3y6e6KpIMD3p2Yb/rb6waU1/b9tWYVlu0YFXt2D0jLFew9OA5YAzMxMhddefqSu39vvfsvo1r8A8NmuPex4YW1dv/d2Rg8o9h6cNqObOprGbwmoVe2DdTc5eC++9HoE2MyvkXY9awkoLfBKZSzbBeD0ZOM988V7T0ftZn4AXqVMJuO2BGz4weo64dONbgr3SEslIAgEQRDvO8CyXTO6aVVNrLYAPd+InbsmyGYcdmwfjBXUtg22Ha+M7Ng+SDbjsHPXBJ5vGhI2BFRBWJxL5eapAlDCD8WkhZRWzVgzq2pXY9WzVntQvP/R90arACHClZmcKjR0zl0sRe2zZ8tAua6f0T5vvXMcadkATfdEnEuTAPjrpv6awX0HJqO2BkaG+/h8zxSf75liZLgP3cD3Oq2WG7YpYKOl33dgkqkPBqPAVZGR4T5Ghvtqxq73jRujai3LjAo8hJD4gWL9Qx3s3R8GOjIRvugPH72AkGDZDo4T7j/fV6jAp/oWq/ruOzDJhieW4wcqFlwswKr5Co4cm2P7kwMAjL5xks1/6mHN+iyloscPswbXDTPmeYaepYJU2uW7Y3lG3zgZzdu9P8fQI51xw8a/uI9/fZ7Rjb3s3p8DYNmyOygEkE5DOivp7nHo6HTp6HTp7nFIZyXpNBSC0LcKN7qxl/Gvz8cGFHH+PiiENI893s+qlS656TKHjl4JIbMuFSDwFZWKxuhQS0hBIiGxHYsEcCUfpnLk0WX03pVk4qzHV+OTt+bS9EvLZtNkliQZGOjkw4/P8Pyz98ea9+ZbJ3hm7D6kMEhhAa333g0BKq2Yz1ei/snTeVIpidIKYSRioWoYDEZoLGlFX935fFgTO7K38NJ0vf33RJ7+vp8DSCnxfB+lDJ7n43lhil1X4LoSy9JI6SzS+FUAyxVFMmHVjM1e9ZGWQgoIAh2t4I+BxvNAG9CqvlZci31IAB57vPZtcuLEZe5ekcaxwLIlcqEmaA0q0PgKzp8rMjh4Z828r8bDWhrnkMQFrDZv1b8EBLS+j0BMwN/SfgIG1mVk4kpSbgAAAABJRU5ErkJggg==",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "color_mufvoh5q",
+    "name": "色塊",
+    "role": "floor",
+    "color": "#4f8fbf",
+    "w": 1,
+    "h": 1,
+    "systemColor": true,
+    "flat": true
+  },
+  {
+    "id": "tile_mufvqx2u",
+    "name": "station-floor-2",
+    "role": "floor",
+    "file": "images/background/station-floor-2.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "color_mufwrm72",
+    "name": "色塊",
+    "role": "floor",
+    "color": "#000000",
+    "w": 10,
+    "h": 1,
+    "systemColor": true,
+    "flat": true
+  },
+  {
+    "id": "tile_mufxoi3i",
+    "name": "elevator",
+    "role": "floor",
+    "file": "images/應變中心/elevator.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_mufxpxnl",
+    "name": "elevator-light01",
+    "role": "floor",
+    "file": "images/應變中心/elevator-light01.png",
+    "w": 1,
+    "h": 1
   }
 ];
 
@@ -3598,14 +3805,6 @@ const MAPS_DEFAULT = [
             6
           ],
           [
-            2,
-            6
-          ],
-          [
-            2,
-            5
-          ],
-          [
             1,
             5
           ],
@@ -3622,14 +3821,6 @@ const MAPS_DEFAULT = [
             3
           ],
           [
-            6,
-            3
-          ],
-          [
-            7,
-            3
-          ],
-          [
             8,
             3
           ],
@@ -3659,11 +3850,11 @@ const MAPS_DEFAULT = [
           ],
           [
             6,
-            5
+            3
           ],
           [
-            6,
-            4
+            7,
+            3
           ]
         ],
         "ox": 0,
@@ -3882,6 +4073,42 @@ const MAPS_DEFAULT = [
         "c": 25,
         "r": 25,
         "layer": "floor"
+      },
+      {
+        "id": "tile_muftd54p",
+        "c": 13,
+        "r": 19,
+        "layer": "ground",
+        "ox": 0,
+        "oy": -14
+      },
+      {
+        "id": "tile_obstacle_redroadblocks_h",
+        "c": 14,
+        "r": 25,
+        "layer": "object2",
+        "ox": -14,
+        "oy": -20
+      },
+      {
+        "id": "tile_obstacle_redroadblocks_h",
+        "c": 18,
+        "r": 25,
+        "layer": "object2",
+        "ox": -20,
+        "oy": -20
+      },
+      {
+        "id": "tile_obstacle_redroadblocks_v",
+        "c": 10,
+        "r": 19,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_obstacle_redroadblocks_v",
+        "c": 26,
+        "r": 23,
+        "layer": "object2"
       }
     ],
     "solid": [
@@ -7204,7 +7431,7 @@ const MAPS_DEFAULT = [
   },
   {
     "id": "map_mu5ad7t2",
-    "name": "應變中心",
+    "name": "2F-應變中心",
     "desc": "",
     "layers": {
       "floor": {
@@ -7683,7 +7910,9 @@ const MAPS_DEFAULT = [
         "27,5": "tile_new_bg_wall_front_edge",
         "27,6": "tile_new_bg_wall_front_edge",
         "27,7": "tile_new_bg_wall_front_edge",
-        "8,8": "tile_new_decor_exit_sign"
+        "8,8": "tile_new_decor_exit_sign",
+        "3,14": "tile_new_decor_fire_extinguisher",
+        "1,14": "tile_new_decor_box_large"
       },
       "overlay": {},
       "top": {},
@@ -8219,7 +8448,7 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "tile_new_decor_exit_sign",
-        "c": 53,
+        "c": 55,
         "r": 8,
         "layer": "object2",
         "fx": true
@@ -8477,6 +8706,88 @@ const MAPS_DEFAULT = [
         "layer": "object",
         "ox": 0,
         "oy": 0
+      },
+      {
+        "id": "tile_new_decor_poster",
+        "c": 11,
+        "r": 8,
+        "layer": "object"
+      },
+      {
+        "id": "tile_eoc_distance_poster",
+        "c": 15,
+        "r": 8,
+        "layer": "object"
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 1,
+        "r": 9,
+        "layer": "object",
+        "ox": 0,
+        "oy": -28
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 2,
+        "r": 9,
+        "layer": "object",
+        "ox": -6,
+        "oy": -28
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 3,
+        "r": 9,
+        "layer": "object",
+        "ox": -12,
+        "oy": -28
+      },
+      {
+        "id": "tile_mu4yyr9r",
+        "c": 1,
+        "r": 12,
+        "layer": "object",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "tile_new_decor_box_medium",
+        "c": 2,
+        "r": 14,
+        "layer": "object",
+        "ox": -4,
+        "oy": 4
+      },
+      {
+        "id": "tile_new_decor_box_three",
+        "c": 1,
+        "r": 8,
+        "layer": "object2",
+        "ox": -10,
+        "oy": 26
+      },
+      {
+        "id": "tile_new_decor_cabinet_tall_metal",
+        "c": 10,
+        "r": 10,
+        "layer": "object2",
+        "ox": 0,
+        "oy": -16
+      },
+      {
+        "id": "tile_mufxoi3i",
+        "c": 60,
+        "r": 8,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mufxpxnl",
+        "c": 61,
+        "r": 8,
+        "layer": "object",
+        "ox": 0,
+        "oy": -6
       }
     ],
     "solid": [
@@ -8606,8 +8917,8 @@ const MAPS_DEFAULT = [
       "57,6",
       "5,5",
       "5,6",
-      "6,5",
-      "6,6"
+      "6,6",
+      "6,5"
     ],
     "breakable": [],
     "entrances": [],
@@ -8689,9 +9000,36 @@ const MAPS_DEFAULT = [
         "c": 23,
         "r": 10,
         "to": "map_mubk73un"
+      },
+      {
+        "c": 58,
+        "r": 5,
+        "to": "map_mufyx9gj"
+      },
+      {
+        "c": 7,
+        "r": 5,
+        "to": "map_mufyx9gj"
       }
     ],
-    "solidOffsets": {},
+    "solidOffsets": {
+      "6,5": [
+        -9,
+        0
+      ],
+      "6,6": [
+        -9,
+        0
+      ],
+      "57,5": [
+        -11,
+        0
+      ],
+      "57,6": [
+        -11,
+        0
+      ]
+    },
     "coreSpots": [],
     "coreCount": 1
   },
@@ -8854,8 +9192,6 @@ const MAPS_DEFAULT = [
         "13,17": "tile_new_bg_floor",
         "14,2": "tile_new_bg_floor",
         "14,3": "tile_new_bg_floor",
-        "14,4": "tile_new_bg_floor",
-        "14,5": "tile_new_bg_floor",
         "14,6": "tile_new_bg_floor",
         "14,7": "tile_new_bg_floor",
         "14,8": "tile_new_bg_floor",
@@ -8865,17 +9201,9 @@ const MAPS_DEFAULT = [
         "14,15": "tile_new_bg_floor",
         "14,16": "tile_new_bg_floor",
         "14,17": "tile_new_bg_floor",
-        "15,2": "tile_new_bg_floor",
-        "15,3": "tile_new_bg_floor",
-        "15,4": "tile_new_bg_floor",
-        "15,5": "tile_new_bg_floor",
         "15,15": "tile_new_bg_floor",
         "15,16": "tile_new_bg_floor",
         "15,17": "tile_new_bg_floor",
-        "16,2": "tile_new_bg_floor",
-        "16,3": "tile_new_bg_floor",
-        "16,4": "tile_new_bg_floor",
-        "16,5": "tile_new_bg_floor",
         "16,15": "tile_new_bg_floor",
         "16,16": "tile_new_bg_floor",
         "16,17": "tile_new_bg_floor",
@@ -9061,7 +9389,9 @@ const MAPS_DEFAULT = [
         "31,14": "tile_new_bg_floor",
         "31,15": "tile_new_bg_floor",
         "31,16": "tile_new_bg_floor",
-        "31,17": "tile_new_bg_floor"
+        "31,17": "tile_new_bg_floor",
+        "14,4": "tile_mufvqx2u",
+        "14,5": "tile_mufvqx2u"
       },
       "ground": {
         "3,2": "tile_new_bg_wall_front_edge",
@@ -9110,12 +9440,6 @@ const MAPS_DEFAULT = [
         "layer": "object4",
         "ox": 0,
         "oy": 0
-      },
-      {
-        "id": "tile_mu5e3ndv",
-        "c": 16,
-        "r": 0,
-        "layer": "ground2"
       },
       {
         "id": "tile_new_bg_wall",
@@ -9174,12 +9498,6 @@ const MAPS_DEFAULT = [
       {
         "id": "tile_new_bg_wall",
         "c": 13,
-        "r": 0,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_new_bg_wall",
-        "c": 15,
         "r": 0,
         "layer": "ground"
       },
@@ -9295,16 +9613,6 @@ const MAPS_DEFAULT = [
         "layer": "object",
         "ox": 26,
         "oy": -36
-      },
-      {
-        "id": "tile_bg_wall_front_edge02",
-        "c": 15,
-        "r": 5,
-        "layer": "top",
-        "fx": false,
-        "fy": false,
-        "ox": 0,
-        "oy": 12
       },
       {
         "id": "tile_eoc_door",
@@ -9425,14 +9733,6 @@ const MAPS_DEFAULT = [
         "oy": 2
       },
       {
-        "id": "tile_mu5e3ndv",
-        "c": 16,
-        "r": 5,
-        "layer": "top",
-        "ox": 0,
-        "oy": -12
-      },
-      {
         "id": "tile_new_bg_floor",
         "c": 5,
         "r": 6,
@@ -9447,6 +9747,14 @@ const MAPS_DEFAULT = [
         "layer": "top",
         "ox": 0,
         "oy": 12
+      },
+      {
+        "id": "tile_mu8rra80",
+        "c": 14,
+        "r": 6,
+        "layer": "object",
+        "ox": -14,
+        "oy": 0
       }
     ],
     "solid": [
@@ -9480,22 +9788,20 @@ const MAPS_DEFAULT = [
       "9,3",
       "10,3",
       "11,3",
-      "12,3",
-      "9,2",
-      "10,2",
-      "11,2",
-      "12,2",
       "6,6",
       "7,3",
       "8,3",
-      "14,3",
-      "13,3",
       "15,3",
       "10,7",
       "10,8",
       "10,9",
-      "16,3",
-      "16,8"
+      "14,4",
+      "15,5",
+      "15,4",
+      "12,3",
+      "13,3",
+      "14,3",
+      "3,11"
     ],
     "breakable": [],
     "entrances": [
@@ -9534,13 +9840,19 @@ const MAPS_DEFAULT = [
         "c": 6,
         "r": 11,
         "to": "map_mu5ad7t2"
+      },
+      {
+        "c": 14,
+        "r": 4,
+        "to": "map_mufvtoiq"
+      },
+      {
+        "c": 14,
+        "r": 5,
+        "to": "map_mufvtoiq"
       }
     ],
     "solidOffsets": {
-      "14,3": [
-        0,
-        -4
-      ],
       "15,3": [
         0,
         -4
@@ -11252,6 +11564,2102 @@ const MAPS_DEFAULT = [
     ],
     "cols": 16,
     "rows": 12,
+    "coreSpots": [],
+    "coreCount": 1
+  },
+  {
+    "id": "map_mufu03od",
+    "name": "雷德哨兵寢室",
+    "desc": "",
+    "layers": {
+      "floor": {
+        "4,2": "tile_new_bg_floor",
+        "5,3": "tile_new_bg_floor",
+        "6,4": "tile_new_bg_floor",
+        "7,4": "tile_new_bg_floor",
+        "8,4": "tile_new_bg_floor",
+        "8,2": "tile_new_bg_floor",
+        "6,2": "tile_new_bg_floor",
+        "4,3": "tile_new_bg_floor",
+        "3,3": "tile_new_bg_floor",
+        "3,4": "tile_new_bg_floor",
+        "2,5": "tile_new_bg_floor",
+        "3,5": "tile_new_bg_floor",
+        "3,6": "tile_new_bg_floor",
+        "4,6": "tile_new_bg_floor",
+        "6,6": "tile_new_bg_floor",
+        "8,6": "tile_new_bg_floor",
+        "6,5": "tile_new_bg_floor",
+        "7,5": "tile_new_bg_floor",
+        "8,5": "tile_new_bg_floor",
+        "7,3": "tile_new_bg_floor",
+        "8,3": "tile_new_bg_floor",
+        "6,1": "tile_new_bg_floor",
+        "7,1": "tile_new_bg_floor",
+        "8,1": "tile_new_bg_floor",
+        "5,1": "tile_new_bg_floor",
+        "4,1": "tile_new_bg_floor",
+        "7,2": "tile_new_bg_floor",
+        "6,3": "tile_new_bg_floor",
+        "2,2": "tile_new_bg_floor",
+        "2,3": "tile_new_bg_floor",
+        "2,4": "tile_new_bg_floor",
+        "2,6": "tile_new_bg_floor",
+        "2,7": "tile_new_bg_floor",
+        "2,8": "tile_new_bg_floor",
+        "2,9": "tile_new_bg_floor",
+        "3,2": "tile_new_bg_floor",
+        "3,7": "tile_new_bg_floor",
+        "3,8": "tile_new_bg_floor",
+        "3,9": "tile_new_bg_floor",
+        "4,4": "tile_new_bg_floor",
+        "4,5": "tile_new_bg_floor",
+        "4,7": "tile_new_bg_floor",
+        "4,8": "tile_new_bg_floor",
+        "4,9": "tile_new_bg_floor",
+        "5,2": "tile_new_bg_floor",
+        "5,4": "tile_new_bg_floor",
+        "5,5": "tile_new_bg_floor",
+        "5,6": "tile_new_bg_floor",
+        "5,7": "tile_new_bg_floor",
+        "5,8": "tile_new_bg_floor",
+        "5,9": "tile_new_bg_floor",
+        "6,7": "tile_new_bg_floor",
+        "6,8": "tile_new_bg_floor",
+        "6,9": "tile_new_bg_floor",
+        "7,6": "tile_new_bg_floor",
+        "7,7": "tile_new_bg_floor",
+        "7,8": "tile_new_bg_floor",
+        "7,9": "tile_new_bg_floor",
+        "8,7": "tile_new_bg_floor",
+        "8,8": "tile_new_bg_floor",
+        "8,9": "tile_new_bg_floor"
+      },
+      "ground": {},
+      "ground2": {},
+      "ground3": {},
+      "object": {
+        "2,9": "tile_new_bg_wall_front_edge"
+      },
+      "object2": {
+        "2,2": "tile_new_bg_wall_front_edge",
+        "2,3": "tile_new_bg_wall_front_edge",
+        "2,4": "tile_new_bg_wall_front_edge",
+        "2,5": "tile_new_bg_wall_front_edge",
+        "2,7": "tile_new_bg_wall_front_edge",
+        "2,6": "tile_new_bg_wall_front_edge",
+        "2,8": "tile_new_bg_wall_front_edge",
+        "2,1": "tile_new_bg_wall_front_edge",
+        "8,1": "tile_new_bg_wall_front_edge",
+        "8,2": "tile_new_bg_wall_front_edge",
+        "8,3": "tile_new_bg_wall_front_edge",
+        "8,4": "tile_new_bg_wall_front_edge",
+        "8,5": "tile_new_bg_wall_front_edge",
+        "8,6": "tile_new_bg_wall_front_edge",
+        "8,7": "tile_new_bg_wall_front_edge",
+        "8,8": "tile_new_bg_wall_front_edge",
+        "8,9": "tile_new_bg_wall_front_edge"
+      },
+      "object3": {},
+      "object4": {},
+      "overlay": {},
+      "top": {}
+    },
+    "stamps": [
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 2,
+        "r": 0,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 8,
+        "r": 0,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 2,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 3,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 4,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 5,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 6,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 7,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 8,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 1,
+        "r": 4,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 1,
+        "r": 8,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 9,
+        "r": 8,
+        "layer": "ground",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "tile_dorm_bed_vertical",
+        "c": 3,
+        "r": 2,
+        "layer": "object",
+        "ox": -10,
+        "oy": 4
+      },
+      {
+        "id": "tile_dorm_air_conditioner",
+        "c": 3,
+        "r": 1,
+        "layer": "object",
+        "ox": -10,
+        "oy": -2
+      },
+      {
+        "id": "tile_dorm_desk",
+        "c": 5,
+        "r": 2,
+        "layer": "object",
+        "ox": -26,
+        "oy": 16
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 5,
+        "r": 8,
+        "layer": "top"
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 6,
+        "r": 2,
+        "layer": "object",
+        "ox": 6,
+        "oy": -18,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 9,
+        "r": 4,
+        "layer": "object2",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 7,
+        "r": 1,
+        "layer": "object",
+        "ox": 0,
+        "oy": 22,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_mufv6z24",
+        "c": 3,
+        "r": 9,
+        "layer": "object2",
+        "ox": -24,
+        "oy": 0
+      },
+      {
+        "id": "tile_dorm_window_blinds_narrow",
+        "c": 4,
+        "r": 1,
+        "layer": "ground3",
+        "ox": 18,
+        "oy": -14
+      },
+      {
+        "id": "tile_mufv9ytk",
+        "c": 7,
+        "r": 2,
+        "layer": "object3",
+        "ox": 0,
+        "oy": -14
+      },
+      {
+        "id": "tile_dorm_binder_set",
+        "c": 5,
+        "r": 3,
+        "layer": "object3",
+        "ox": 14,
+        "oy": -26
+      },
+      {
+        "id": "tile_dorm_standing_fan",
+        "c": 7,
+        "r": 4,
+        "layer": "object"
+      },
+      {
+        "id": "tile_dorm_chair_blue",
+        "c": 5,
+        "r": 3,
+        "layer": "object2",
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_dorm_desk_lamp",
+        "c": 1,
+        "r": 2,
+        "layer": "object3",
+        "ox": 136,
+        "oy": 12
+      },
+      {
+        "id": "tile_eoc_pen_holder",
+        "c": 1,
+        "r": 3,
+        "layer": "object3",
+        "ox": 156,
+        "oy": -28
+      }
+    ],
+    "solid": [
+      "2,3",
+      "3,3",
+      "5,3",
+      "2,4",
+      "2,5",
+      "2,6",
+      "2,7",
+      "2,2",
+      "6,3",
+      "7,3",
+      "8,3",
+      "4,3",
+      "8,7",
+      "8,6",
+      "8,4",
+      "8,5",
+      "8,8",
+      "8,9",
+      "3,4",
+      "3,5",
+      "7,5",
+      "2,8",
+      "2,9",
+      "3,9"
+    ],
+    "breakable": [],
+    "entrances": [
+      "9,1"
+    ],
+    "camp": [],
+    "rules": {
+      "money": 150,
+      "lives": 12,
+      "guide": 100,
+      "guideRegen": 9,
+      "waves": 5,
+      "count": 8,
+      "countAdd": 3,
+      "hp": 40,
+      "hpAdd": 28,
+      "speed": 44,
+      "speedAdd": 5,
+      "gap": 0.85,
+      "gapSub": 0.05,
+      "reward": 8
+    },
+    "solidOffsets": {},
+    "safe": true,
+    "npcs": false,
+    "portals": [
+      {
+        "c": 5,
+        "r": 9,
+        "to": "map_mufyx9gj"
+      },
+      {
+        "c": 6,
+        "r": 9,
+        "to": "map_mufyx9gj"
+      }
+    ],
+    "cols": 12,
+    "rows": 10,
+    "coreSpots": [],
+    "coreCount": 1
+  },
+  {
+    "id": "map_mufvtoiq",
+    "name": "溫特寢室",
+    "desc": "",
+    "layers": {
+      "floor": {
+        "5,2": "tile_new_bg_floor",
+        "6,3": "tile_new_bg_floor",
+        "7,4": "tile_new_bg_floor",
+        "8,4": "tile_new_bg_floor",
+        "9,4": "tile_new_bg_floor",
+        "9,2": "tile_new_bg_floor",
+        "7,2": "tile_new_bg_floor",
+        "5,3": "tile_new_bg_floor",
+        "4,3": "tile_new_bg_floor",
+        "4,4": "tile_new_bg_floor",
+        "3,5": "tile_new_bg_floor",
+        "4,5": "tile_new_bg_floor",
+        "4,6": "tile_new_bg_floor",
+        "5,6": "tile_new_bg_floor",
+        "7,6": "tile_new_bg_floor",
+        "9,6": "tile_new_bg_floor",
+        "7,5": "tile_new_bg_floor",
+        "8,5": "tile_new_bg_floor",
+        "9,5": "tile_new_bg_floor",
+        "8,3": "tile_new_bg_floor",
+        "9,3": "tile_new_bg_floor",
+        "8,2": "tile_new_bg_floor",
+        "7,3": "tile_new_bg_floor",
+        "3,2": "tile_new_bg_floor",
+        "3,3": "tile_new_bg_floor",
+        "3,4": "tile_new_bg_floor",
+        "3,6": "tile_new_bg_floor",
+        "3,7": "tile_new_bg_floor",
+        "3,8": "tile_new_bg_floor",
+        "3,9": "tile_new_bg_floor",
+        "4,2": "tile_new_bg_floor",
+        "4,7": "tile_new_bg_floor",
+        "4,8": "tile_new_bg_floor",
+        "4,9": "tile_new_bg_floor",
+        "5,4": "tile_new_bg_floor",
+        "5,5": "tile_new_bg_floor",
+        "5,7": "tile_new_bg_floor",
+        "5,8": "tile_new_bg_floor",
+        "5,9": "tile_new_bg_floor",
+        "6,2": "tile_new_bg_floor",
+        "6,4": "tile_new_bg_floor",
+        "6,5": "tile_new_bg_floor",
+        "6,6": "tile_new_bg_floor",
+        "6,7": "tile_new_bg_floor",
+        "6,8": "tile_new_bg_floor",
+        "6,9": "tile_new_bg_floor",
+        "7,7": "tile_new_bg_floor",
+        "7,8": "tile_new_bg_floor",
+        "7,9": "tile_new_bg_floor",
+        "8,6": "tile_new_bg_floor",
+        "8,7": "tile_new_bg_floor",
+        "8,8": "tile_new_bg_floor",
+        "8,9": "tile_new_bg_floor",
+        "9,7": "tile_new_bg_floor",
+        "9,8": "tile_new_bg_floor",
+        "9,9": "tile_new_bg_floor",
+        "10,4": "tile_new_bg_floor",
+        "11,4": "tile_new_bg_floor",
+        "11,5": "tile_new_bg_floor",
+        "10,5": "tile_new_bg_floor",
+        "10,3": "tile_new_bg_floor",
+        "10,6": "tile_new_bg_floor",
+        "10,7": "tile_new_bg_floor",
+        "10,8": "tile_new_bg_floor",
+        "10,9": "tile_new_bg_floor",
+        "11,6": "tile_new_bg_floor",
+        "11,7": "tile_new_bg_floor",
+        "11,8": "tile_new_bg_floor",
+        "11,9": "tile_new_bg_floor",
+        "2,6": "tile_new_bg_floor",
+        "2,7": "tile_new_bg_floor",
+        "2,8": "tile_new_bg_floor",
+        "2,9": "tile_new_bg_floor",
+        "2,10": "tile_new_bg_floor",
+        "2,11": "tile_new_bg_floor",
+        "3,11": "tile_new_bg_floor",
+        "4,11": "tile_new_bg_floor",
+        "4,10": "tile_new_bg_floor",
+        "3,10": "tile_new_bg_floor",
+        "5,10": "tile_new_bg_floor",
+        "6,10": "tile_new_bg_floor",
+        "7,10": "tile_new_bg_floor",
+        "8,10": "tile_new_bg_floor",
+        "8,11": "tile_new_bg_floor",
+        "7,11": "tile_new_bg_floor",
+        "6,11": "tile_new_bg_floor",
+        "5,11": "tile_new_bg_floor",
+        "9,11": "tile_new_bg_floor",
+        "10,11": "tile_new_bg_floor",
+        "10,10": "tile_new_bg_floor",
+        "9,10": "tile_new_bg_floor",
+        "11,10": "tile_new_bg_floor",
+        "11,11": "tile_new_bg_floor"
+      },
+      "ground": {},
+      "ground2": {},
+      "ground3": {},
+      "object": {
+        "2,9": "tile_new_bg_wall_front_edge"
+      },
+      "object2": {
+        "11,2": "tile_new_bg_wall_front_edge",
+        "11,3": "tile_new_bg_wall_front_edge",
+        "11,4": "tile_new_bg_wall_front_edge",
+        "11,5": "tile_new_bg_wall_front_edge",
+        "11,6": "tile_new_bg_wall_front_edge",
+        "11,7": "tile_new_bg_wall_front_edge",
+        "11,8": "tile_new_bg_wall_front_edge",
+        "2,6": "tile_new_bg_wall_front_edge",
+        "2,7": "tile_new_bg_wall_front_edge",
+        "2,8": "tile_new_bg_wall_front_edge",
+        "2,10": "tile_new_bg_wall_front_edge",
+        "11,9": "tile_new_bg_wall_front_edge",
+        "11,10": "tile_new_bg_wall_front_edge",
+        "10,11": "tile_bg_wall_front_edge02",
+        "9,11": "tile_bg_wall_front_edge02",
+        "8,11": "tile_bg_wall_front_edge02",
+        "7,11": "tile_bg_wall_front_edge02",
+        "6,11": "tile_bg_wall_front_edge02",
+        "5,11": "tile_bg_wall_front_edge02",
+        "4,11": "tile_bg_wall_front_edge02",
+        "3,11": "tile_bg_wall_front_edge02"
+      },
+      "object3": {},
+      "object4": {},
+      "overlay": {},
+      "top": {}
+    },
+    "stamps": [
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 2,
+        "r": 0,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 11,
+        "r": 0,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 3,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 4,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 5,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 6,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 7,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 8,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 10,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 1,
+        "r": 4,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 1,
+        "r": 8,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 12,
+        "r": 8,
+        "layer": "ground",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 12,
+        "r": 4,
+        "layer": "object2",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 9,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_bg_wall_front_edge03",
+        "c": 11,
+        "r": 11,
+        "layer": "object2",
+        "fx": true,
+        "fy": true
+      },
+      {
+        "id": "tile_bg_wall_front_edge03",
+        "c": 2,
+        "r": 11,
+        "layer": "object2",
+        "fy": true
+      },
+      {
+        "id": "tile_dorm_wardrobe_lab_coat",
+        "c": 9,
+        "r": 2,
+        "layer": "object",
+        "ox": 4,
+        "oy": -16,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_dorm_window_blinds_wide",
+        "c": 6,
+        "r": 1,
+        "layer": "object",
+        "ox": -10,
+        "oy": -12
+      },
+      {
+        "id": "tile_bg_wall_front_edge03",
+        "c": 2,
+        "r": 5,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_dorm_bed_horizontal",
+        "c": 8,
+        "r": 8,
+        "layer": "object3",
+        "ox": 16,
+        "oy": 10,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_dorm_cabinet_tall",
+        "c": 10,
+        "r": 7,
+        "layer": "object2",
+        "ox": 18,
+        "oy": 24
+      },
+      {
+        "id": "tile_eoc_comms_desk",
+        "c": 9,
+        "r": 4,
+        "layer": "object",
+        "fx": true,
+        "ox": 24,
+        "oy": 20
+      },
+      {
+        "id": "tile_eoc_office_chair_black",
+        "c": 8,
+        "r": 6,
+        "layer": "object",
+        "fx": true,
+        "ox": 30,
+        "oy": -20,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_dorm_shoe_bench",
+        "c": 3,
+        "r": 5,
+        "layer": "object",
+        "ox": -14,
+        "oy": 0
+      },
+      {
+        "id": "tile_dorm_rug_blue",
+        "c": 4,
+        "r": 5,
+        "layer": "ground2",
+        "ox": -28,
+        "oy": 0
+      },
+      {
+        "id": "tile_eoc_wooden_cabinet",
+        "c": 4,
+        "r": 8,
+        "layer": "object",
+        "ox": 6,
+        "oy": 42
+      },
+      {
+        "id": "tile_eoc_sofa_side",
+        "c": 3,
+        "r": 8,
+        "layer": "object",
+        "ox": -10,
+        "oy": 12
+      },
+      {
+        "id": "tile_eoc_binder_cabinet",
+        "c": 3,
+        "r": 1,
+        "layer": "object3",
+        "ox": 18,
+        "oy": 24,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_eoc_plant_small_01",
+        "c": 10,
+        "r": 8,
+        "layer": "object4",
+        "ox": 18,
+        "oy": -20
+      },
+      {
+        "id": "tile_eoc_sideboard",
+        "c": 6,
+        "r": 2,
+        "layer": "object2",
+        "ox": 26,
+        "oy": 24,
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_eoc_sideboard",
+        "c": 5,
+        "r": 2,
+        "layer": "object2",
+        "ox": -14,
+        "oy": 24,
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_dorm_binder_set",
+        "c": 5,
+        "r": 2,
+        "layer": "object3",
+        "ox": -4,
+        "oy": 20
+      },
+      {
+        "id": "tile_mufv9ytk",
+        "c": 8,
+        "r": 3,
+        "layer": "object3",
+        "ox": 8,
+        "oy": -18
+      },
+      {
+        "id": "tile_eoc_first_aid_bag",
+        "c": 7,
+        "r": 3,
+        "layer": "object3",
+        "ox": 6,
+        "oy": -20
+      },
+      {
+        "id": "tile_eoc_book_stack",
+        "c": 6,
+        "r": 2,
+        "layer": "object3",
+        "ox": -20,
+        "oy": 20
+      },
+      {
+        "id": "tile_new_decor_plant01",
+        "c": 2,
+        "r": 3,
+        "layer": "object3",
+        "ox": 32,
+        "oy": -14,
+        "sortDepth": 1.5
+      },
+      {
+        "id": "color_mufwrm72",
+        "c": 2,
+        "r": 11,
+        "layer": "floor",
+        "ox": 0,
+        "oy": 30
+      },
+      {
+        "id": "tile_mufvqx2u",
+        "c": 2,
+        "r": 4,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_mufvqx2u",
+        "c": 2,
+        "r": 5,
+        "layer": "floor",
+        "fx": true
+      }
+    ],
+    "solid": [
+      "3,3",
+      "4,3",
+      "6,3",
+      "3,2",
+      "7,3",
+      "8,3",
+      "9,3",
+      "5,3",
+      "2,6",
+      "2,7",
+      "2,8",
+      "2,9",
+      "2,10",
+      "2,11",
+      "3,11",
+      "6,11",
+      "4,11",
+      "5,11",
+      "7,11",
+      "8,11",
+      "9,11",
+      "10,11",
+      "11,11",
+      "10,10",
+      "9,10",
+      "11,10",
+      "10,3",
+      "11,3",
+      "11,5",
+      "11,4",
+      "11,6",
+      "11,7",
+      "11,9",
+      "11,8",
+      "2,3",
+      "1,3",
+      "1,4",
+      "1,5",
+      "1,6",
+      "5,10",
+      "10,6",
+      "10,7"
+    ],
+    "breakable": [],
+    "entrances": [],
+    "camp": [],
+    "rules": {
+      "money": 150,
+      "lives": 12,
+      "guide": 100,
+      "guideRegen": 9,
+      "waves": 5,
+      "count": 8,
+      "countAdd": 3,
+      "hp": 40,
+      "hpAdd": 28,
+      "speed": 44,
+      "speedAdd": 5,
+      "gap": 0.85,
+      "gapSub": 0.05,
+      "reward": 8
+    },
+    "solidOffsets": {
+      "2,10": [
+        24,
+        0
+      ],
+      "5,10": [
+        -14,
+        -6
+      ],
+      "2,6": [
+        18,
+        0
+      ],
+      "2,7": [
+        19,
+        0
+      ],
+      "1,6": [
+        19,
+        0
+      ],
+      "1,5": [
+        29,
+        0
+      ],
+      "2,3": [
+        0,
+        -9
+      ],
+      "1,4": [
+        9,
+        0
+      ]
+    },
+    "safe": true,
+    "npcs": false,
+    "portals": [
+      {
+        "c": 2,
+        "r": 4,
+        "to": "map_mua3askw"
+      }
+    ],
+    "cols": 14,
+    "rows": 12,
+    "coreSpots": [],
+    "coreCount": 1
+  },
+  {
+    "id": "map_mufyx9gj",
+    "name": "4F哨兵宿舍樓",
+    "desc": "",
+    "layers": {
+      "floor": {
+        "34,10": "tile_new_bg_floor",
+        "34,11": "tile_new_bg_floor",
+        "34,12": "tile_new_bg_floor",
+        "33,12": "tile_new_bg_floor",
+        "33,13": "tile_new_bg_floor",
+        "44,13": "tile_new_bg_floor",
+        "44,12": "tile_new_bg_floor",
+        "44,11": "tile_new_bg_floor",
+        "44,10": "tile_new_bg_floor",
+        "43,13": "tile_new_bg_floor",
+        "17,9": "tile_new_bg_floor",
+        "17,10": "tile_new_bg_floor",
+        "17,11": "tile_new_bg_floor",
+        "17,12": "tile_new_bg_floor",
+        "17,13": "tile_new_bg_floor",
+        "18,13": "tile_new_bg_floor",
+        "18,12": "tile_new_bg_floor",
+        "18,11": "tile_new_bg_floor",
+        "18,10": "tile_new_bg_floor",
+        "18,9": "tile_new_bg_floor",
+        "20,9": "tile_new_bg_floor",
+        "20,10": "tile_new_bg_floor",
+        "20,11": "tile_new_bg_floor",
+        "19,12": "tile_new_bg_floor",
+        "19,13": "tile_new_bg_floor",
+        "19,11": "tile_new_bg_floor",
+        "19,10": "tile_new_bg_floor",
+        "19,9": "tile_new_bg_floor",
+        "21,9": "tile_new_bg_floor",
+        "21,10": "tile_new_bg_floor",
+        "21,11": "tile_new_bg_floor",
+        "21,12": "tile_new_bg_floor",
+        "21,13": "tile_new_bg_floor",
+        "20,13": "tile_new_bg_floor",
+        "20,12": "tile_new_bg_floor",
+        "22,9": "tile_new_bg_floor",
+        "22,10": "tile_new_bg_floor",
+        "22,11": "tile_new_bg_floor",
+        "22,12": "tile_new_bg_floor",
+        "22,13": "tile_new_bg_floor",
+        "23,13": "tile_new_bg_floor",
+        "23,12": "tile_new_bg_floor",
+        "23,11": "tile_new_bg_floor",
+        "23,10": "tile_new_bg_floor",
+        "23,9": "tile_new_bg_floor",
+        "24,9": "tile_new_bg_floor",
+        "24,10": "tile_new_bg_floor",
+        "24,11": "tile_new_bg_floor",
+        "24,12": "tile_new_bg_floor",
+        "24,13": "tile_new_bg_floor",
+        "25,13": "tile_new_bg_floor",
+        "25,12": "tile_new_bg_floor",
+        "26,9": "tile_new_bg_floor",
+        "26,10": "tile_new_bg_floor",
+        "25,10": "tile_new_bg_floor",
+        "25,11": "tile_new_bg_floor",
+        "27,13": "tile_new_bg_floor",
+        "26,13": "tile_new_bg_floor",
+        "26,12": "tile_new_bg_floor",
+        "26,11": "tile_new_bg_floor",
+        "28,13": "tile_new_bg_floor",
+        "28,12": "tile_new_bg_floor",
+        "27,11": "tile_new_bg_floor",
+        "27,10": "tile_new_bg_floor",
+        "27,9": "tile_new_bg_floor",
+        "25,9": "tile_new_bg_floor",
+        "28,11": "tile_new_bg_floor",
+        "28,10": "tile_new_bg_floor",
+        "29,10": "tile_new_bg_floor",
+        "29,11": "tile_new_bg_floor",
+        "29,12": "tile_new_bg_floor",
+        "29,13": "tile_new_bg_floor",
+        "27,12": "tile_new_bg_floor",
+        "33,10": "tile_new_bg_floor",
+        "33,11": "tile_new_bg_floor",
+        "31,13": "tile_new_bg_floor",
+        "31,12": "tile_new_bg_floor",
+        "31,11": "tile_new_bg_floor",
+        "31,10": "tile_new_bg_floor",
+        "32,10": "tile_new_bg_floor",
+        "32,11": "tile_new_bg_floor",
+        "32,12": "tile_new_bg_floor",
+        "32,13": "tile_new_bg_floor",
+        "35,11": "tile_new_bg_floor",
+        "34,13": "tile_new_bg_floor",
+        "35,10": "tile_new_bg_floor",
+        "37,9": "tile_new_bg_floor",
+        "37,10": "tile_new_bg_floor",
+        "36,11": "tile_new_bg_floor",
+        "36,10": "tile_new_bg_floor",
+        "43,11": "tile_new_bg_floor",
+        "43,12": "tile_new_bg_floor",
+        "42,13": "tile_new_bg_floor",
+        "30,13": "tile_new_bg_floor",
+        "30,12": "tile_new_bg_floor",
+        "30,11": "tile_new_bg_floor",
+        "30,10": "tile_new_bg_floor",
+        "38,13": "tile_new_bg_floor",
+        "39,13": "tile_new_bg_floor",
+        "37,13": "tile_new_bg_floor",
+        "36,13": "tile_new_bg_floor",
+        "35,13": "tile_new_bg_floor",
+        "40,13": "tile_new_bg_floor",
+        "41,13": "tile_new_bg_floor",
+        "35,12": "tile_new_bg_floor",
+        "37,11": "tile_new_bg_floor",
+        "38,11": "tile_new_bg_floor",
+        "40,11": "tile_new_bg_floor",
+        "41,12": "tile_new_bg_floor",
+        "42,12": "tile_new_bg_floor",
+        "40,12": "tile_new_bg_floor",
+        "39,12": "tile_new_bg_floor",
+        "38,12": "tile_new_bg_floor",
+        "37,12": "tile_new_bg_floor",
+        "36,12": "tile_new_bg_floor",
+        "41,11": "tile_new_bg_floor",
+        "42,11": "tile_new_bg_floor",
+        "40,10": "tile_new_bg_floor",
+        "38,10": "tile_new_bg_floor",
+        "39,10": "tile_new_bg_floor",
+        "41,10": "tile_new_bg_floor",
+        "43,10": "tile_new_bg_floor",
+        "42,10": "tile_new_bg_floor",
+        "39,11": "tile_new_bg_floor",
+        "45,10": "tile_new_bg_floor",
+        "45,11": "tile_new_bg_floor",
+        "45,12": "tile_new_bg_floor",
+        "45,13": "tile_new_bg_floor",
+        "48,12": "tile_new_bg_floor",
+        "48,13": "tile_new_bg_floor",
+        "47,10": "tile_new_bg_floor",
+        "47,11": "tile_new_bg_floor",
+        "47,12": "tile_new_bg_floor",
+        "47,13": "tile_new_bg_floor",
+        "46,10": "tile_new_bg_floor",
+        "46,12": "tile_new_bg_floor",
+        "46,13": "tile_new_bg_floor",
+        "46,11": "tile_new_bg_floor",
+        "48,10": "tile_new_bg_floor",
+        "48,11": "tile_new_bg_floor",
+        "49,13": "tile_new_bg_floor",
+        "50,13": "tile_new_bg_floor",
+        "51,13": "tile_new_bg_floor",
+        "52,13": "tile_new_bg_floor",
+        "53,13": "tile_new_bg_floor",
+        "54,13": "tile_new_bg_floor",
+        "49,12": "tile_new_bg_floor",
+        "50,12": "tile_new_bg_floor",
+        "51,12": "tile_new_bg_floor",
+        "52,12": "tile_new_bg_floor",
+        "53,12": "tile_new_bg_floor",
+        "54,12": "tile_new_bg_floor",
+        "49,11": "tile_new_bg_floor",
+        "50,11": "tile_new_bg_floor",
+        "51,11": "tile_new_bg_floor",
+        "52,11": "tile_new_bg_floor",
+        "53,11": "tile_new_bg_floor",
+        "54,11": "tile_new_bg_floor",
+        "49,10": "tile_new_bg_floor",
+        "50,10": "tile_new_bg_floor",
+        "51,10": "tile_new_bg_floor",
+        "52,10": "tile_new_bg_floor",
+        "53,10": "tile_new_bg_floor",
+        "54,10": "tile_new_bg_floor",
+        "16,12": "tile_new_bg_floor",
+        "15,13": "tile_new_bg_floor",
+        "15,12": "tile_new_bg_floor",
+        "16,11": "tile_new_bg_floor",
+        "16,10": "tile_new_bg_floor",
+        "15,10": "tile_new_bg_floor",
+        "15,11": "tile_new_bg_floor",
+        "16,13": "tile_new_bg_floor",
+        "15,14": "tile_new_bg_floor",
+        "16,14": "tile_new_bg_floor",
+        "17,14": "tile_new_bg_floor",
+        "18,14": "tile_new_bg_floor",
+        "19,14": "tile_new_bg_floor",
+        "20,14": "tile_new_bg_floor",
+        "22,14": "tile_new_bg_floor",
+        "24,14": "tile_new_bg_floor",
+        "26,14": "tile_new_bg_floor",
+        "27,14": "tile_new_bg_floor",
+        "21,14": "tile_new_bg_floor",
+        "23,14": "tile_new_bg_floor",
+        "28,14": "tile_new_bg_floor",
+        "29,14": "tile_new_bg_floor",
+        "30,14": "tile_new_bg_floor",
+        "31,14": "tile_new_bg_floor",
+        "32,14": "tile_new_bg_floor",
+        "33,14": "tile_new_bg_floor",
+        "34,14": "tile_new_bg_floor",
+        "35,14": "tile_new_bg_floor",
+        "36,14": "tile_new_bg_floor",
+        "37,14": "tile_new_bg_floor",
+        "38,14": "tile_new_bg_floor",
+        "39,14": "tile_new_bg_floor",
+        "40,14": "tile_new_bg_floor",
+        "41,14": "tile_new_bg_floor",
+        "42,14": "tile_new_bg_floor",
+        "43,14": "tile_new_bg_floor",
+        "44,14": "tile_new_bg_floor",
+        "48,14": "tile_new_bg_floor",
+        "49,14": "tile_new_bg_floor",
+        "50,14": "tile_new_bg_floor",
+        "51,14": "tile_new_bg_floor",
+        "52,14": "tile_new_bg_floor",
+        "53,14": "tile_new_bg_floor",
+        "54,14": "tile_new_bg_floor",
+        "46,14": "tile_new_bg_floor",
+        "25,14": "tile_new_bg_floor",
+        "45,14": "tile_new_bg_floor",
+        "47,14": "tile_new_bg_floor",
+        "14,14": "tile_new_bg_floor",
+        "13,14": "tile_new_bg_floor",
+        "12,14": "tile_new_bg_floor",
+        "11,14": "tile_new_bg_floor",
+        "10,14": "tile_new_bg_floor",
+        "8,14": "tile_new_bg_floor",
+        "9,14": "tile_new_bg_floor",
+        "14,13": "tile_new_bg_floor",
+        "13,13": "tile_new_bg_floor",
+        "12,13": "tile_new_bg_floor",
+        "11,13": "tile_new_bg_floor",
+        "10,13": "tile_new_bg_floor",
+        "9,13": "tile_new_bg_floor",
+        "8,13": "tile_new_bg_floor",
+        "8,12": "tile_new_bg_floor",
+        "9,12": "tile_new_bg_floor",
+        "10,12": "tile_new_bg_floor",
+        "11,12": "tile_new_bg_floor",
+        "12,12": "tile_new_bg_floor",
+        "13,12": "tile_new_bg_floor",
+        "14,12": "tile_new_bg_floor",
+        "14,11": "tile_new_bg_floor",
+        "13,11": "tile_new_bg_floor",
+        "12,11": "tile_new_bg_floor",
+        "11,11": "tile_new_bg_floor",
+        "10,11": "tile_new_bg_floor",
+        "9,11": "tile_new_bg_floor",
+        "8,11": "tile_new_bg_floor",
+        "14,10": "tile_new_bg_floor",
+        "13,10": "tile_new_bg_floor",
+        "12,10": "tile_new_bg_floor",
+        "11,10": "tile_new_bg_floor",
+        "10,10": "tile_new_bg_floor",
+        "9,10": "tile_new_bg_floor",
+        "8,10": "tile_new_bg_floor",
+        "7,11": "tile_new_bg_floor",
+        "6,11": "tile_new_bg_floor",
+        "5,11": "tile_new_bg_floor",
+        "4,11": "tile_new_bg_floor",
+        "3,11": "tile_new_bg_floor",
+        "2,11": "tile_new_bg_floor",
+        "1,11": "tile_new_bg_floor",
+        "0,11": "tile_new_bg_floor",
+        "7,12": "tile_new_bg_floor",
+        "6,12": "tile_new_bg_floor",
+        "5,12": "tile_new_bg_floor",
+        "4,12": "tile_new_bg_floor",
+        "3,12": "tile_new_bg_floor",
+        "2,12": "tile_new_bg_floor",
+        "0,12": "tile_new_bg_floor",
+        "7,13": "tile_new_bg_floor",
+        "6,13": "tile_new_bg_floor",
+        "5,13": "tile_new_bg_floor",
+        "4,13": "tile_new_bg_floor",
+        "3,13": "tile_new_bg_floor",
+        "2,13": "tile_new_bg_floor",
+        "1,13": "tile_new_bg_floor",
+        "0,13": "tile_new_bg_floor",
+        "7,14": "tile_new_bg_floor",
+        "6,14": "tile_new_bg_floor",
+        "5,14": "tile_new_bg_floor",
+        "4,14": "tile_new_bg_floor",
+        "3,14": "tile_new_bg_floor",
+        "2,14": "tile_new_bg_floor",
+        "1,14": "tile_new_bg_floor",
+        "0,14": "tile_new_bg_floor",
+        "1,12": "tile_new_bg_floor",
+        "7,10": "tile_new_bg_floor",
+        "6,10": "tile_new_bg_floor",
+        "5,10": "tile_new_bg_floor",
+        "4,10": "tile_new_bg_floor",
+        "3,10": "tile_new_bg_floor",
+        "2,10": "tile_new_bg_floor",
+        "1,10": "tile_new_bg_floor",
+        "0,10": "tile_new_bg_floor",
+        "5,9": "tile_new_bg_floor",
+        "6,9": "tile_new_bg_floor",
+        "7,9": "tile_new_bg_floor",
+        "5,8": "tile_new_bg_floor",
+        "6,8": "tile_new_bg_floor",
+        "7,8": "tile_new_bg_floor",
+        "8,8": "tile_new_bg_floor",
+        "7,7": "tile_new_bg_floor",
+        "6,7": "tile_new_bg_floor",
+        "5,7": "tile_new_bg_floor",
+        "4,7": "tile_new_bg_floor",
+        "8,7": "tile_new_bg_floor",
+        "55,14": "tile_new_bg_floor",
+        "56,14": "tile_new_bg_floor",
+        "57,14": "tile_new_bg_floor",
+        "58,14": "tile_new_bg_floor",
+        "59,14": "tile_new_bg_floor",
+        "60,14": "tile_new_bg_floor",
+        "61,14": "tile_new_bg_floor",
+        "62,14": "tile_new_bg_floor",
+        "63,14": "tile_new_bg_floor",
+        "55,13": "tile_new_bg_floor",
+        "56,13": "tile_new_bg_floor",
+        "57,13": "tile_new_bg_floor",
+        "58,13": "tile_new_bg_floor",
+        "59,13": "tile_new_bg_floor",
+        "60,13": "tile_new_bg_floor",
+        "61,13": "tile_new_bg_floor",
+        "62,13": "tile_new_bg_floor",
+        "63,13": "tile_new_bg_floor",
+        "55,12": "tile_new_bg_floor",
+        "57,12": "tile_new_bg_floor",
+        "58,12": "tile_new_bg_floor",
+        "59,12": "tile_new_bg_floor",
+        "60,12": "tile_new_bg_floor",
+        "61,12": "tile_new_bg_floor",
+        "62,12": "tile_new_bg_floor",
+        "63,12": "tile_new_bg_floor",
+        "56,12": "tile_new_bg_floor",
+        "57,11": "tile_new_bg_floor",
+        "58,11": "tile_new_bg_floor",
+        "59,11": "tile_new_bg_floor",
+        "60,11": "tile_new_bg_floor",
+        "61,11": "tile_new_bg_floor",
+        "62,11": "tile_new_bg_floor",
+        "63,11": "tile_new_bg_floor",
+        "55,11": "tile_new_bg_floor",
+        "56,11": "tile_new_bg_floor",
+        "56,10": "tile_new_bg_floor",
+        "57,10": "tile_new_bg_floor",
+        "57,9": "tile_new_bg_floor",
+        "58,9": "tile_new_bg_floor",
+        "59,9": "tile_new_bg_floor",
+        "59,10": "tile_new_bg_floor",
+        "58,10": "tile_new_bg_floor",
+        "55,10": "tile_new_bg_floor",
+        "60,10": "tile_new_bg_floor",
+        "61,10": "tile_new_bg_floor",
+        "62,10": "tile_new_bg_floor",
+        "63,10": "tile_new_bg_floor",
+        "63,9": "tile_new_bg_floor",
+        "56,9": "tile_new_bg_floor",
+        "56,8": "tile_new_bg_floor",
+        "56,7": "tile_new_bg_floor",
+        "57,7": "tile_new_bg_floor",
+        "58,7": "tile_new_bg_floor",
+        "58,8": "tile_new_bg_floor",
+        "55,9": "tile_new_bg_floor",
+        "55,7": "tile_new_bg_floor",
+        "55,8": "tile_new_bg_floor",
+        "57,8": "tile_new_bg_floor",
+        "59,8": "tile_new_bg_floor",
+        "59,7": "tile_new_bg_floor",
+        "60,8": "tile_new_bg_floor"
+      },
+      "ground": {},
+      "ground2": {},
+      "ground3": {
+        "37,7": "tile_new_bg_wall_front_edge",
+        "37,8": "tile_new_bg_wall_front_edge",
+        "37,9": "tile_new_bg_wall_front_edge",
+        "26,8": "tile_eoc_security_camera",
+        "0,9": "tile_new_bg_wall_front_edge",
+        "0,10": "tile_new_bg_wall_front_edge",
+        "0,11": "tile_new_bg_wall_front_edge",
+        "0,12": "tile_new_bg_wall_front_edge",
+        "0,13": "tile_new_bg_wall_front_edge",
+        "0,14": "tile_new_bg_wall_front_edge",
+        "0,8": "tile_new_bg_wall_front_edge"
+      },
+      "object": {
+        "8,8": "tile_new_decor_exit_sign",
+        "3,14": "tile_new_decor_fire_extinguisher",
+        "1,14": "tile_new_decor_box_large"
+      },
+      "overlay": {},
+      "top": {},
+      "object2": {
+        "63,8": "tile_new_bg_wall_front_edge",
+        "63,9": "tile_new_bg_wall_front_edge",
+        "63,10": "tile_new_bg_wall_front_edge",
+        "63,11": "tile_new_bg_wall_front_edge",
+        "63,12": "tile_new_bg_wall_front_edge",
+        "63,13": "tile_new_bg_wall_front_edge",
+        "63,14": "tile_new_bg_wall_front_edge"
+      },
+      "object3": {},
+      "object4": {}
+    },
+    "stamps": [
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 37,
+        "r": 7,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 26,
+        "r": 7,
+        "layer": "object2",
+        "ox": 40,
+        "oy": 0
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 40,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 41,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 42,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 43,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 44,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 45,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 47,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 46,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 48,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 23,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 21,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 19,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 17,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 18,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 20,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 22,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 24,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 38,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 39,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 25,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 48,
+        "r": 3,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_new_decor_poster",
+        "c": 38,
+        "r": 8,
+        "layer": "object",
+        "ox": 40,
+        "oy": 2
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 49,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 50,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 51,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 52,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 53,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 54,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 46,
+        "r": 7,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 41,
+        "r": 9,
+        "layer": "object4",
+        "ox": -20,
+        "oy": -4
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 50,
+        "r": 9,
+        "layer": "object4",
+        "ox": -18,
+        "oy": -4
+      },
+      {
+        "id": "tile_eoc_hydrant_white",
+        "c": 20,
+        "r": 8,
+        "layer": "ground2",
+        "ox": -20,
+        "oy": 24
+      },
+      {
+        "id": "tile_eoc_distance_poster",
+        "c": 47,
+        "r": 8,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_decor_exit_sign",
+        "c": 55,
+        "r": 8,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_eoc_security_camera",
+        "c": 38,
+        "r": 8,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 16,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 15,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 26,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_eoc_no_entry_poster",
+        "c": 42,
+        "r": 8,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 14,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 8,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 9,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 11,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 12,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 13,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 10,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 9,
+        "r": 7,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 18,
+        "r": 7,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 22,
+        "r": 9,
+        "layer": "ground3",
+        "ox": 0,
+        "oy": -4
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 4,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 3,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 2,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 1,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 0,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 0,
+        "r": 7,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_eoc_double_door_open",
+        "c": 5,
+        "r": 7,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_eoc_escape_stairs",
+        "c": 4,
+        "r": 5,
+        "layer": "floor",
+        "ox": 0,
+        "oy": -24,
+        "sortDepth": 0.5
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 61,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 62,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 63,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 60,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 54,
+        "r": 7,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 63,
+        "r": 7,
+        "layer": "object"
+      },
+      {
+        "id": "tile_eoc_double_door_open",
+        "c": 56,
+        "r": 7,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_eoc_escape_stairs",
+        "c": 55,
+        "r": 4,
+        "layer": "ground",
+        "sortDepth": 0.5
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 55,
+        "r": 7,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 59,
+        "r": 7,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 13,
+        "r": 9,
+        "layer": "object",
+        "ox": 0,
+        "oy": 0
+      },
+      {
+        "id": "tile_new_decor_poster",
+        "c": 11,
+        "r": 8,
+        "layer": "object"
+      },
+      {
+        "id": "tile_eoc_distance_poster",
+        "c": 15,
+        "r": 8,
+        "layer": "object"
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 1,
+        "r": 9,
+        "layer": "object",
+        "ox": 0,
+        "oy": -28
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 2,
+        "r": 9,
+        "layer": "object",
+        "ox": -6,
+        "oy": -28
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 3,
+        "r": 9,
+        "layer": "object",
+        "ox": -12,
+        "oy": -28
+      },
+      {
+        "id": "tile_mu4yyr9r",
+        "c": 1,
+        "r": 12,
+        "layer": "object",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "tile_new_decor_box_medium",
+        "c": 2,
+        "r": 14,
+        "layer": "object",
+        "ox": -4,
+        "oy": 4
+      },
+      {
+        "id": "tile_new_decor_box_three",
+        "c": 1,
+        "r": 8,
+        "layer": "object2",
+        "ox": -10,
+        "oy": 26
+      },
+      {
+        "id": "tile_new_decor_cabinet_tall_metal",
+        "c": 10,
+        "r": 10,
+        "layer": "object2",
+        "ox": 0,
+        "oy": -16
+      },
+      {
+        "id": "tile_mufxoi3i",
+        "c": 60,
+        "r": 8,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mufxpxnl",
+        "c": 61,
+        "r": 8,
+        "layer": "object",
+        "ox": 0,
+        "oy": -6
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 28,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 29,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 30,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 31,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 32,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 33,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 34,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 35,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 36,
+        "r": 7,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 32,
+        "r": 9,
+        "layer": "object"
+      }
+    ],
+    "solid": [
+      "17,10",
+      "18,10",
+      "19,10",
+      "20,10",
+      "21,10",
+      "22,10",
+      "23,10",
+      "24,10",
+      "25,10",
+      "26,10",
+      "38,10",
+      "39,10",
+      "40,10",
+      "41,10",
+      "42,10",
+      "43,10",
+      "44,10",
+      "45,10",
+      "46,10",
+      "47,10",
+      "48,10",
+      "37,10",
+      "49,10",
+      "50,10",
+      "51,10",
+      "52,10",
+      "53,10",
+      "54,10",
+      "16,10",
+      "15,10",
+      "27,10",
+      "14,10",
+      "13,10",
+      "12,10",
+      "11,10",
+      "10,10",
+      "9,10",
+      "8,10",
+      "4,10",
+      "3,10",
+      "1,10",
+      "2,10",
+      "0,10",
+      "0,11",
+      "0,12",
+      "0,13",
+      "0,14",
+      "4,7",
+      "4,8",
+      "4,9",
+      "4,6",
+      "4,5",
+      "4,4",
+      "5,4",
+      "6,4",
+      "7,4",
+      "8,4",
+      "8,5",
+      "8,6",
+      "8,7",
+      "8,8",
+      "8,9",
+      "55,10",
+      "55,9",
+      "55,7",
+      "55,8",
+      "55,4",
+      "55,5",
+      "55,6",
+      "56,4",
+      "56,5",
+      "57,4",
+      "58,4",
+      "59,4",
+      "59,5",
+      "59,6",
+      "59,7",
+      "59,9",
+      "59,8",
+      "59,10",
+      "60,10",
+      "61,10",
+      "62,10",
+      "63,11",
+      "63,12",
+      "63,10",
+      "63,13",
+      "63,14",
+      "56,6",
+      "57,5",
+      "57,6",
+      "5,5",
+      "5,6",
+      "6,6",
+      "6,5",
+      "28,10",
+      "29,10",
+      "30,10",
+      "31,10",
+      "32,10",
+      "33,10",
+      "34,10",
+      "35,10",
+      "36,10"
+    ],
+    "breakable": [],
+    "entrances": [],
+    "camp": [
+      "42,12",
+      "42,13",
+      "43,12",
+      "43,13",
+      "44,12",
+      "44,13",
+      "45,12",
+      "45,13",
+      "46,12",
+      "46,13",
+      "47,12",
+      "47,13",
+      "48,12",
+      "48,13",
+      "49,12",
+      "49,13",
+      "50,12",
+      "50,13",
+      "51,12",
+      "51,13",
+      "52,12",
+      "52,13",
+      "53,12",
+      "53,13",
+      "54,12",
+      "54,13"
+    ],
+    "rules": {
+      "money": 150,
+      "lives": 12,
+      "guide": 100,
+      "guideRegen": 9,
+      "waves": 1,
+      "count": 8,
+      "countAdd": 3,
+      "hp": 40,
+      "hpAdd": 28,
+      "speed": 44,
+      "speedAdd": 5,
+      "gap": 0.85,
+      "gapSub": 0.05,
+      "reward": 8
+    },
+    "cols": 64,
+    "rows": 15,
+    "safe": true,
+    "npcs": true,
+    "portals": [
+      {
+        "c": 50,
+        "r": 10,
+        "to": "map_mufu03od"
+      },
+      {
+        "c": 7,
+        "r": 5,
+        "to": "map_mu5ad7t2"
+      },
+      {
+        "c": 5,
+        "r": 7,
+        "to": "map_mu5ad7t2"
+      },
+      {
+        "c": 56,
+        "r": 7,
+        "to": "map_mu5ad7t2"
+      },
+      {
+        "c": 57,
+        "r": 7,
+        "to": "map_mu5ad7t2"
+      }
+    ],
+    "solidOffsets": {
+      "6,5": [
+        -9,
+        0
+      ],
+      "6,6": [
+        -9,
+        0
+      ],
+      "57,5": [
+        -11,
+        0
+      ],
+      "57,6": [
+        -11,
+        0
+      ]
+    },
     "coreSpots": [],
     "coreCount": 1
   }

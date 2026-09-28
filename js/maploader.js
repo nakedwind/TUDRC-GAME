@@ -175,6 +175,8 @@ function seedMapObstacles() {
     const o = {
       kind: 'obstacle', isBase: true, mapTileId: t.id,
       c: baseC, r: baseR, w, h, solid, hp, maxhp: hp,
+      artX: OX + s.c * CELL + (s.ox || 0),
+      artY: OY + s.r * CELL + (s.oy || 0),
       orient: 'h', spawnT: undefined, hitT: 0,
     };
     solid.forEach(([dc, dr]) => {

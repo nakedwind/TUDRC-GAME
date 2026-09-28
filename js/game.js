@@ -69,12 +69,12 @@ function dialogueKey(actor) { return actor.kind === 'tower' ? actor.type : actor
 function dialogueProfile(actor) {
   return actor.kind === 'tower' ? TYPES[actor.type] : WANDERERS.find(profile => profile.id === actor.id);
 }
-function dialogueNearPlayer() {
+function interactionNearPlayer() {
   const p = G && G.player; if (!p || p.sitting) return null;
   let best = null, bestDistance = NPC_TALK.radius;
   const actors = [...(G.npcs || []), ...(G.towers || [])];
   for (const actor of actors) {
-    if (actor.berserk) continue;
+    if (actor.kind === 'tower' && actor.hp <= 0) continue;
     const distance = Math.hypot(actor.x - p.x, actor.y - p.y);
     if (distance < bestDistance) { best = actor; bestDistance = distance; }
   }
@@ -189,10 +189,40 @@ function animateSentry(t, mx, my, dt) {
   t.anim = (t.anim || 0) + dt;
 }
 const keys = {};                         // 目前按住的按鍵
+const mapTransition = document.getElementById('mapTransition');
+let mapTransitioning = false;
+const elevatorMenu = document.getElementById('elevatorMenu');
+let elevatorMenuOpen = false;
+function closeElevatorMenu() { elevatorMenuOpen = false; elevatorMenu.classList.add('hidden'); }
+function openElevatorMenu() {
+  sfx('menu');
+  elevatorMenuOpen = true;
+  Object.keys(keys).forEach(key => { keys[key] = false; });
+  document.getElementById('elevatorMessage').textContent = '選擇要前往的樓層';
+  elevatorMenu.querySelectorAll('[data-floor]').forEach(button => button.classList.remove('sel'));
+  elevatorMenu.classList.remove('hidden');
+  document.getElementById('elevatorClose').focus();
+}
+document.getElementById('elevatorClose').addEventListener('click', () => { sfx('switch'); closeElevatorMenu(); });
+elevatorMenu.addEventListener('click', e => { if (e.target === elevatorMenu) { sfx('switch'); closeElevatorMenu(); } });
+elevatorMenu.querySelectorAll('[data-floor]').forEach(button => button.addEventListener('click', () => {
+  sfx('button');
+  elevatorMenu.querySelectorAll('[data-floor]').forEach(option => option.classList.toggle('sel', option === button));
+  document.getElementById('elevatorMessage').textContent = button.dataset.floor + ' 的地圖尚未建立';
+}));
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'];
 const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
+  if (mapTransitioning) {
+    if (MOVE_KEYS.includes(k) || isInteractKey(k)) e.preventDefault();
+    return;
+  }
+  if (elevatorMenuOpen) {
+    if (k === 'escape') { e.preventDefault(); closeElevatorMenu(); }
+    else if (isInteractKey(k) || MOVE_KEYS.includes(k)) e.preventDefault();
+    return;
+  }
   if (dialogueState) {
     if (k.startsWith('arrow') || k === ' ' || k === 'enter') e.preventDefault();
     if (!e.repeat && (isInteractKey(k) || k === 'enter')) advanceDialogue();
@@ -201,19 +231,38 @@ window.addEventListener('keydown', e => {
   }
   keys[k] = true;
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
-  if (isInteractKey(k) && G && G.running && !G.over) {          // 互動鍵：空白鍵 或 E
+  if (npcArrangeMode) return;
+  if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：空白鍵 或 E
+    const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
-    if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    if (elevator) openElevatorMenu();
+    else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else {
-      const npc = dialogueNearPlayer();
-      if (npc) openDialogue(npc);
-      else toggleSit();                   // 附近沒有 NPC 才判定座位
+      const actor = interactionNearPlayer();
+      if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
+      else if (actor) openDialogue(actor);
+      else toggleSit();                   // 附近沒有角色才判定座位
     }
   }
 });
 const isInteractKey = k => k === ' ' || k === SIT.key;   // 空白鍵為主，E 也可觸發
 // ---- 出入口（走到門旁按 E 進入另一張地圖）----
 const PORTAL_RADIUS = 52;   // 離門多近才會出現提示（像素）
+const PORTAL_FADE_MS = 500;
+const PORTAL_BLACK_MS = 500;
+function elevatorNearPlayer() {
+  if (!MAP_SAFE || !G.player || !MAP || !MAP.stamps) return null;
+  let best = null, bestDistance = 72;
+  for (const stamp of MAP.stamps) {
+    const tile = mapTileById(stamp.id);
+    if (!tile || !String(tile.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator.png')) continue;
+    const x = OX + (stamp.c + mapTileW(tile) / 2) * CELL + (stamp.ox || 0);
+    const y = OY + (stamp.r + mapTileH(tile) + .5) * CELL + (stamp.oy || 0);
+    const distance = Math.hypot(x - G.player.x, y - G.player.y);
+    if (distance < bestDistance) { bestDistance = distance; best = { x, y, top: OY + (stamp.r + .5) * CELL + (stamp.oy || 0) }; }
+  }
+  return best;
+}
 function portalNearPlayer() {
   const p = G.player; if (!p || typeof mapPortals === 'undefined') return null;
   let best = null, bd = PORTAL_RADIUS;
@@ -224,15 +273,43 @@ function portalNearPlayer() {
   return best;
 }
 function portalTargetName(pt) { const i = mapIndexById(pt.to), list = mapList(); return (i >= 0 && list[i] && list[i].name) || '另一張地圖'; }
+function placePlayerNearPortal(portal) {
+  if (!portal || !G.player) return;
+  // 門格可能是牆或門框；優先站在門前，再從近到遠找能容納角色的空位。
+  const offsets = [[0, 1], [0, 0], [1, 0], [-1, 0], [0, -1]];
+  for (let radius = 2; radius <= 5; radius++) {
+    for (let dr = -radius; dr <= radius; dr++) for (let dc = -radius; dc <= radius; dc++) {
+      if (Math.max(Math.abs(dc), Math.abs(dr)) === radius) offsets.push([dc, dr]);
+    }
+  }
+  for (const [dc, dr] of offsets) {
+    const c = portal.c + dc, r = portal.r + dr;
+    if (!inGrid(c, r)) continue;
+    const [x, y] = center(c, r);
+    if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; return; }
+  }
+}
 function enterPortal(pt) {
+  if (mapTransitioning) return;
   if (mapIndexById(pt.to) < 0) { flash('目標地圖不存在（可能已被刪除）', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
   const fromId = MAP.id;
-  sfx('switch');
-  switchMap(mapIndexById(pt.to));           // 換地圖＋重算尺寸/路徑
-  begin();                                  // 重建並進入遊玩狀態
-  const back = returnPortalCell(fromId);    // 落在新地圖「通回原地圖」的門旁
-  if (back && G.player) { const [x, y] = center(back.c, back.r); G.player.x = x; G.player.y = y; }
-  updateCamera(); draw();
+  mapTransitioning = true;
+  Object.keys(keys).forEach(key => { keys[key] = false; });
+  sfx('door');
+  requestAnimationFrame(() => {
+    mapTransition.classList.add('visible');
+    setTimeout(() => {
+      setTimeout(() => {
+        switchMap(mapIndexById(pt.to));         // 全黑維持半秒後換地圖
+        begin(false);                           // 重建並進入遊玩狀態，不播放開始按鈕聲
+        const back = returnPortalCell(fromId);  // 落在新地圖「通回原地圖」的門旁
+        placePlayerNearPortal(back);
+        updateCamera(); draw();
+        requestAnimationFrame(() => mapTransition.classList.remove('visible'));
+        setTimeout(() => { mapTransitioning = false; }, PORTAL_FADE_MS);
+      }, PORTAL_BLACK_MS);
+    }, PORTAL_FADE_MS);
+  });
 }
 window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
 
@@ -246,7 +323,7 @@ function spawnGroundRipple(clientX, clientY) {
   wrap.appendChild(ripple);
 }
 
-// ---- 地面情境選單：指定格子建築／召喚哨兵 ----
+// ---- 地面情境選單：指定格子召喚哨兵 ----
 const groundMenu = document.getElementById('groundMenu');
 let groundTarget = null;
 function closeGroundMenu() {
@@ -255,7 +332,7 @@ function closeGroundMenu() {
 }
 function positionGroundMenu(clientX, clientY) {
   const wrapRect = document.getElementById('wrap').getBoundingClientRect();
-  const menuW = 178, menuH = 260;
+  const menuW = groundMenu.offsetWidth, menuH = groundMenu.offsetHeight;
   const left = Math.max(8, Math.min(clientX - wrapRect.left + 10, wrapRect.width - menuW - 8));
   const top = Math.max(8, Math.min(clientY - wrapRect.top + 10, wrapRect.height - menuH - 8));
   groundMenu.style.left = Math.round(left) + 'px';
@@ -268,32 +345,48 @@ function addGroundCloseButton() {
   close.addEventListener('click', () => { sfx('switch'); closeGroundMenu(); });
   groundMenu.appendChild(close);
 }
-function assignSentryToGround(t) {
+function assignSentryToGround(t, guard = false) {
   if (!groundTarget) return;
   const { c, r } = groundTarget, [x, y] = center(c, r);
   if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '正在暴走，無法指派', x, y, '#ff8f8f'); return; }
   if (!isLit(x, y)) { sfx('error'); flash('巡邏點必須在亮處', x, y, '#ffd24a'); return; }
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
+  t.guardSummoned = guard;
   sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
+  systemNotice(TYPES[t.type].name + '正前往巡邏點');
   closeGroundMenu();
+}
+function summonNearestSentryToGround() {
+  if (!groundTarget) return;
+  const { c, r } = groundTarget, [x, y] = center(c, r);
+  if (!sentryCellWalkable(c, r)) {
+    sfx('error'); flash('此處無法讓哨兵駐守', x, y, '#ff8f8f'); return;
+  }
+  const choices = G.towers.filter(t => t.hp > 0 && !t.berserk && !TYPES[t.type].guide)
+    .map(t => ({ t, path: buildSentryPath(t, x, y) }))
+    .filter(choice => choice.path !== null)
+    .sort((a, b) => a.path.length - b.path.length ||
+      Math.hypot(a.t.x - x, a.t.y - y) - Math.hypot(b.t.x - x, b.t.y - y));
+  if (!choices.length) {
+    sfx('error'); flash('沒有可到達此處的哨兵', x, y, '#ff8f8f'); return;
+  }
+  assignSentryToGround(choices[0].t, true);
 }
 function renderGroundActions() {
   if (!groundTarget) return;
-  const { c, r } = groundTarget;
   groundMenu.innerHTML = '';
   addGroundCloseButton();
-  const build = document.createElement('button');
-  build.textContent = '🏗️ 建築';
-  build.addEventListener('click', () => {
-    buildTargetCell = [c, r]; G.selType = null;
-    renderBuildBar(); buildBar.classList.remove('hidden'); updateBuildToggle();
-    sfx('menu'); closeGroundMenu();
-  });
   const patrol = document.createElement('button');
   patrol.textContent = '📣 召喚哨兵';
   patrol.addEventListener('click', renderGroundSentryChoices);
-  groundMenu.append(build, patrol);
+  groundMenu.appendChild(patrol);
+  const nearest = document.createElement('button');
+  nearest.className = 'gm-nearest';
+  nearest.textContent = '🎯 召喚最近的哨兵至此';
+  nearest.addEventListener('click', summonNearestSentryToGround);
+  groundMenu.appendChild(nearest);
+  if (!groundMenu.classList.contains('hidden')) positionGroundMenu(groundTarget.clientX, groundTarget.clientY);
 }
 function playerBuildingAt(c, r) {
   return [...G.obstacles].reverse().find(o =>
@@ -327,8 +420,72 @@ function renderBuildingActions(o) {
 function openBuildingMenu(o, c, r, clientX, clientY) {
   closeBuildMenu(); closeSentryMenu();
   groundTarget = { c, r, obstacle: o };
-  renderBuildingActions(o); positionGroundMenu(clientX, clientY);
+  renderBuildingActions(o);
   groundMenu.classList.remove('hidden');
+  positionGroundMenu(clientX, clientY);
+  groundMenu.style.animation = 'none'; void groundMenu.offsetWidth; groundMenu.style.animation = '';
+  sfx('menu');
+}
+function campBaseAt(x, y) {
+  return G.obstacles.find(o => {
+    if (!o.isBase || o.hp <= 0) return false;
+    const left = o.artX ?? OX + o.c * CELL;
+    const top = o.artY ?? OY + o.r * CELL;
+    return x >= left && x < left + o.w * CELL && y >= top && y < top + o.h * CELL;
+  }) || null;
+}
+function recallSentriesToCamp(base) {
+  const centerC = base.c + (base.w - 1) / 2, centerR = base.r + (base.h - 1) / 2;
+  const spots = [];
+  for (let r = Math.max(0, base.r - 2); r < Math.min(ROWS, base.r + base.h + 2); r++) {
+    for (let c = Math.max(0, base.c - 2); c < Math.min(COLS, base.c + base.w + 2); c++) {
+      if (sentryCellWalkable(c, r)) spots.push({ c, r });
+    }
+  }
+  const reserved = [];
+  let recalled = 0;
+  for (const t of G.towers) {
+    if (t.hp <= 0 || t.berserk) continue;
+    const choices = spots.filter(p => !reserved.some(q => q.c === p.c && q.r === p.r));
+    choices.sort((a, b) => {
+      const score = p => Math.hypot(p.c - centerC, p.r - centerR) +
+        reserved.reduce((penalty, q) => penalty + (Math.hypot(p.c - q.c, p.r - q.r) < 2 ? 8 : 0), 0);
+      return score(a) - score(b);
+    });
+    const spot = choices.find(p => {
+      const [x, y] = center(p.c, p.r);
+      return buildSentryPath(t, x, y) !== null;
+    });
+    if (!spot) continue;
+    reserved.push(spot);
+    const [x, y] = center(spot.c, spot.r);
+    t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0;
+    t.guardSummoned = false;
+    t.navPath = null; t.navGoal = null; t.navTimer = 0; t.navFailed = false;
+    recalled++;
+  }
+  return recalled;
+}
+function openCampMenu(base, clientX, clientY) {
+  closeBuildMenu(); closeSentryMenu();
+  groundTarget = null;
+  groundMenu.innerHTML = '<div class="gm-title">營地</div>';
+  addGroundCloseButton();
+  const recall = document.createElement('button');
+  recall.textContent = '📣 召回所有哨兵';
+  recall.disabled = !G.towers.some(t => t.hp > 0 && !t.berserk);
+  recall.addEventListener('click', () => {
+    const count = recallSentriesToCamp(base);
+    closeGroundMenu();
+    const x = (base.artX ?? OX + base.c * CELL) + base.w * CELL / 2;
+    const y = (base.artY ?? OY + base.r * CELL) + base.h * CELL / 2;
+    sfx(count ? 'button' : 'error');
+    flash(count ? `已召回 ${count} 位哨兵守衛營地` : '營地附近沒有可到達的守衛位置',
+      x, y - 24, count ? '#7ee0c0' : '#ff8f8f');
+  });
+  groundMenu.appendChild(recall);
+  groundMenu.classList.remove('hidden');
+  positionGroundMenu(clientX, clientY);
   groundMenu.style.animation = 'none'; void groundMenu.offsetWidth; groundMenu.style.animation = '';
   sfx('menu');
 }
@@ -338,20 +495,29 @@ function renderGroundSentryChoices() {
   addGroundCloseButton();
   for (const t of G.towers) {
     const b = document.createElement('button');
-    b.innerHTML = '🎯 ' + TYPES[t.type].name + '<small>' + (t.berserk ? '暴走中，暫時無法指派' : '汙染 ' + Math.round(t.taint)) + '</small>';
+    b.className = 'gm-sentry';
+    const avatar = document.createElement('span'); avatar.className = 'gm-avatar';
+    const portrait = sentrySprites[t.type]?.front?.[0];
+    if (portrait) { const img = document.createElement('img'); img.src = portrait.src; img.alt = ''; avatar.appendChild(img); }
+    const info = document.createElement('span'); info.className = 'gm-sentry-info';
+    const name = document.createElement('strong'); name.textContent = TYPES[t.type].name;
+    const status = document.createElement('small'); status.textContent = t.berserk ? '暴走中' : '汙染 ' + Math.round(t.taint);
+    info.append(name, status); b.append(avatar, info);
     b.disabled = !!t.berserk;
     b.addEventListener('click', () => assignSentryToGround(t));
     groundMenu.appendChild(b);
   }
   const back = document.createElement('button'); back.textContent = '← 返回';
   back.addEventListener('click', renderGroundActions); groundMenu.appendChild(back);
+  positionGroundMenu(groundTarget.clientX, groundTarget.clientY);
 }
 function openGroundMenu(c, r, clientX, clientY) {
   closeBuildMenu();
-  groundTarget = { c, r };
+  groundTarget = { c, r, clientX, clientY };
   closeSentryMenu();
-  renderGroundActions(); positionGroundMenu(clientX, clientY);
+  renderGroundActions();
   groundMenu.classList.remove('hidden');
+  positionGroundMenu(clientX, clientY);
   // 彈窗已開著時換位置，也強制重新播放展開動畫。
   groundMenu.style.animation = 'none'; void groundMenu.offsetWidth; groundMenu.style.animation = '';
   sfx('menu');
@@ -372,6 +538,9 @@ function updateCamera() {
 // ---- 遊戲狀態 ----
 let G;
 function newGame() {
+  closeElevatorMenu();
+  setNpcArrangeMode(false);
+  document.getElementById('systemNotices').replaceChildren();
   G = {
     phase: 'ready', money: START.money, lives: START.lives,
     guide: START.guide, guideMax: START.guideMax, guideRegen: START.guideRegen,
@@ -506,11 +675,12 @@ function standUp() {
 
 function updatePlayer(dt) {
   const p = G.player; if (!p) return;
+  if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
   if (p.sitting) {                      // 坐著：不判定碰撞（椅子本來就是不可穿透），按移動鍵才起身
     if (!anyMoveKey()) { p.moving = false; p.anim = 0; updateBlink(p, dt); return; }
     standUp();
   }
-  if (rescueStuck(p, playerBlocked)) flash('!', p.x, p.y - 30, '#ffd479');   // 被卡住→自動脫困
+  rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
   p.moving = !!(dx || dy);
@@ -529,8 +699,79 @@ function updatePlayer(dt) {
   if (!playerBlocked(p.x, ny)) p.y = ny;
 }
 
+// 安全區域的人物擺位；只保留在本次場景，不改動地圖資料。
+let npcArrangeMode = false;
+let npcDrag = null;
+const npcArrangeToggle = document.getElementById('npcArrangeToggle');
+function faceNpcFront(actor) {
+  actor.dir = 'front'; actor.moving = false; actor.anim = 0;
+}
+function finishNpcDrag(cancel = false) {
+  if (!npcDrag) return;
+  const drag = npcDrag;
+  npcDrag = null;
+  if (cancel) {
+    drag.actor.x = drag.x; drag.actor.y = drag.y;
+    drag.actor.npcPosed = drag.wasPosed;
+  } else drag.actor.npcPosed = true;
+  faceNpcFront(drag.actor);
+  if (cv.hasPointerCapture(drag.pointerId)) cv.releasePointerCapture(drag.pointerId);
+  cv.classList.remove('npc-dragging');
+}
+function setNpcArrangeMode(enabled) {
+  finishNpcDrag(true);
+  npcArrangeMode = !!enabled;
+  npcArrangeToggle.textContent = enabled ? '完成擺位' : '移動 NPC';
+  npcArrangeToggle.setAttribute('aria-pressed', String(npcArrangeMode));
+  npcArrangeToggle.classList.toggle('sel', npcArrangeMode);
+  document.getElementById('npcArrangeHint').classList.toggle('hidden', !npcArrangeMode);
+  cv.classList.toggle('npc-arranging', npcArrangeMode);
+  if (enabled) {
+    closeDialogue(); closeGroundMenu(); closeSentryMenu(); assigning = null;
+    for (const actor of [...G.npcs, ...G.towers]) faceNpcFront(actor);
+  }
+}
+npcArrangeToggle.addEventListener('click', () => {
+  if (MAP_SAFE && G?.running && !G.over) setNpcArrangeMode(!npcArrangeMode);
+});
+function npcPointerPosition(e) {
+  const rect = cv.getBoundingClientRect();
+  return {
+    x: (e.clientX - rect.left) * cv.width / rect.width / VIEW_SCALE + cam.x,
+    y: (e.clientY - rect.top) * cv.height / rect.height / VIEW_SCALE + cam.y,
+  };
+}
+cv.addEventListener('pointerdown', e => {
+  if (!npcArrangeMode || !MAP_SAFE || !G.running || G.over || e.button !== 0 || npcDrag) return;
+  const p = npcPointerPosition(e);
+  const actor = [...G.npcs, ...G.towers].sort((a, b) => b.y - a.y)
+    .find(a => Math.abs(a.x - p.x) <= 26 && p.y >= a.y - 48 && p.y <= a.y + 18);
+  if (!actor) return;
+  e.preventDefault();
+  npcDrag = { actor, x: actor.x, y: actor.y, wasPosed: actor.npcPosed,
+    dx: actor.x - p.x, dy: actor.y - p.y, pointerId: e.pointerId };
+  cv.setPointerCapture(e.pointerId);
+  cv.classList.add('npc-dragging');
+  faceNpcFront(actor);
+});
+cv.addEventListener('pointermove', e => {
+  if (!npcDrag || npcDrag.pointerId !== e.pointerId) return;
+  const p = npcPointerPosition(e), x = p.x + npcDrag.dx, y = p.y + npcDrag.dy;
+  if (!sentryBlocked(x, y) && isLit(x, y)) {
+    npcDrag.actor.x = x; npcDrag.actor.y = y;
+  }
+});
+cv.addEventListener('pointerup', e => { if (npcDrag?.pointerId === e.pointerId) finishNpcDrag(); });
+cv.addEventListener('pointercancel', () => finishNpcDrag(true));
+cv.addEventListener('lostpointercapture', () => finishNpcDrag(true));
+window.addEventListener('blur', () => finishNpcDrag(true));
+window.addEventListener('keydown', e => {
+  if (e.key === 'Escape' && npcArrangeMode) setNpcArrangeMode(false);
+});
+
 // ---- 輸入：點畫面（放置 / 哨兵選單）----
 cv.addEventListener('click', e => {
+  if (npcArrangeMode) return;
   const rect = cv.getBoundingClientRect();
   const x = (e.clientX - rect.left) * (cv.width / rect.width) / VIEW_SCALE + cam.x;   // 去掉縮放、加上鏡頭＝世界座標
   const y = (e.clientY - rect.top) * (cv.height / rect.height) / VIEW_SCALE + cam.y;
@@ -545,11 +786,24 @@ cv.addEventListener('click', e => {
     const t = assigning;
     if (!isLit(x, y)) { sfx('error'); flash('要指派在亮處', x, y, '#ffd24a'); return; }
     if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
-    t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
+    t.mode = 'goto'; t.guardSummoned = false; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
     sfx('button');
     flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
+    systemNotice(TYPES[t.type].name + '正前往巡邏點');
     return;
   }
+  // 已選建築時由放置判定檢查實際佔用格；圖片上半部可與牆面重疊。
+  if (G.selType && G.selType.startsWith('build:')) {
+    if (MAP_SAFE) return;
+    closeGroundMenu(); closeSentryMenu();
+    spawnGroundRipple(e.clientX, e.clientY);
+    const ob = buildableById(G.selType.slice(6));
+    if (ob) placeObstacle(ob, c, r);
+    updateHUD();
+    return;
+  }
+  const campBase = !MAP_SAFE && campBaseAt(x, y);
+  if (campBase) { openCampMenu(campBase, e.clientX, e.clientY); return; }
   if (G.selType === 'demolish') {
     const target = playerBuildingAt(c, r);
     if (target) { spawnGroundRipple(e.clientX, e.clientY); demolishPlayerBuilding(target); }
@@ -573,14 +827,7 @@ cv.addEventListener('click', e => {
   // 地圖原生障礙物與基地不能由玩家拆除。
   if (buildAt(c, r) || isWall(c, r) || isEntrance(c, r)) { closeGroundMenu(); return; }
   spawnGroundRipple(e.clientX, e.clientY);
-  // 放置（合不合法由 placeObstacle 檢查「擋路格」決定，跟預覽框一致）
-  if (!G.selType) { openGroundMenu(c, r, e.clientX, e.clientY); return; }
-  closeGroundMenu();
-  if (G.selType.startsWith('build:')) {
-    const ob = buildableById(G.selType.slice(6));   // 去掉 'build:' 前綴，跨障礙物/裝飾查找
-    if (ob) placeObstacle(ob, c, r);
-  }
-  updateHUD();
+  openGroundMenu(c, r, e.clientX, e.clientY);
 });
 
 // ---- 滑鼠移動：記住目前指到哪一格（世界座標）----
@@ -645,7 +892,11 @@ function enemyAttackPlayer(e, dt) {
   if ((e.playerTouchCd || 0) > 0) return;
   e.playerTouchCd = 1;
   p.hp = Math.max(0, p.hp - 12);
-  p.hitT = .45; p.underAttackT = 5;
+  p.hitT = .45; p.underAttackT = 5; p.lastAttacker = e;
+  for (const sentry of G.towers) if (sentry.type === 'red' && sentry.hp > 0 && !sentry.berserk) {
+    sentry.cd = Math.min(sentry.cd, .1);
+    sentry.navPath = null; sentry.navGoal = null; sentry.navTimer = 0;
+  }
   G.damageVignetteT = .45; G.cameraShakeT = .2;
   // 沿史萊姆撞擊方向將玩家推開；若後方是牆或建築，就逐步縮短擊退距離。
   const dx = p.x - e.x, dy = p.y - e.y, distance = Math.hypot(dx, dy) || 1;
@@ -925,10 +1176,10 @@ function updateFootsteps() {
 }
 function loop(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
-  if (!G.over && !dialogueState) updatePlayer(dt);   // 對話時暫停玩家與戰場
+  if (!G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning) updatePlayer(dt);   // 對話或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (G.running && !G.over && !dialogueState) update(dt);
+  if (G.running && !G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning) update(dt);
   draw();
   requestAnimationFrame(loop);
 }
@@ -961,12 +1212,14 @@ function update(dt) {
   // 哨兵走動（巡邏）
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
-    updateSentry(t, dt);
+    if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
+    else updateSentry(t, dt);
     animateSentry(t, t.x - ox, t.y - oy, dt);
   }
   for (const npc of G.npcs) {
     const ox = npc.x, oy = npc.y;
-    updateWanderer(npc, dt);
+    if (MAP_SAFE && (npcArrangeMode || npc.npcPosed)) faceNpcFront(npc);
+    else updateWanderer(npc, dt);
     animateSentry(npc, npc.x - ox, npc.y - oy, dt);
   }
   // 哨兵攻擊
@@ -993,10 +1246,18 @@ function update(dt) {
     t.cd -= dt;
     if (t.berserk || t.cd > 0) continue;
     const R = spec.range * CELL;
-    let target = null, bestY = -1;
-    for (const e of [...G.enemies, ...G.cores]) {
-      if (e.dead) continue;
-      if (Math.hypot(e.x - t.x, e.y - t.y) <= R && e.y > bestY) { target = e; bestY = e.y; }
+    let target = null, bestY = -1, bestDistance = Infinity;
+    const attacker = t.type === 'red' ? redAttacker() : null;
+    if (attacker) {
+      if (Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R) target = attacker;
+    } else {
+      for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
+        if (e.dead) continue;
+        const distance = Math.hypot(e.x - t.x, e.y - t.y);
+        if (distance <= R && (t.guardSummoned ? distance < bestDistance : e.y > bestY)) {
+          target = e; bestY = e.y; bestDistance = distance;
+        }
+      }
     }
     if (target) {
       t.cd = 1 / spec.rate;
@@ -1016,12 +1277,12 @@ function update(dt) {
         spawnAttackVisual(t, target, spec, affected);
       } else flash('MISS', t.x, t.y - 26, '#9aa4b2');
       if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
-      if (t.taint >= 100 && !t.berserk) { t.berserk = true; G.lives -= BERSERK.livesPenalty; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d'); }
+      if (t.taint >= 100 && !t.berserk) { t.berserk = true; G.lives -= BERSERK.livesPenalty; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d'); systemNotice(TYPES[t.type].name + '污染失控，已進入暴走狀態', true); }
     }
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(3); sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
-    core.dead=true; earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff');
+    core.dead=true; earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -1051,6 +1312,16 @@ function update(dt) {
 }
 const FLASH_LIFE = 1.5;   // 提示字停留時間（秒）；想更久／更短改這裡
 function flash(text, x, y, color) { G.effects.push({ text, x, y, life: FLASH_LIFE, life0: FLASH_LIFE, color, vy: -22 }); }
+function systemNotice(text, warning = false) {
+  const list = document.getElementById('systemNotices');
+  if (!list) return;
+  const item = document.createElement('div');
+  item.className = 'system-notice' + (warning ? ' warning' : '');
+  item.textContent = text;
+  list.prepend(item);
+  while (list.children.length > 3) list.lastElementChild.remove();
+  setTimeout(() => { item.classList.add('leaving'); setTimeout(() => item.remove(), 300); }, 3800);
+}
 
 // ---- 各種角色/物件的畫法（拆成函式，方便深度排序時逐一呼叫）----
 const HIT_DUR = 0.3;   // 建築被攻擊時「閃紅＋震動」持續秒數
@@ -1198,7 +1469,7 @@ const BUBBLE_COLORS = {
   chris:   { bg: '#eef2f6', bd: '#8a97a8', tx: '#2b3541' },   // 冷白
   claire:  { bg: '#f5ecd6', bd: '#a07a3a', tx: '#4d3712' },   // 金
   luther:  { bg: '#e4f0d6', bd: '#5f8a35', tx: '#2c4014' },   // 草綠
-  mumu:    { bg: '#d6edf2', bd: '#2f8598', tx: '#123842' },   // 藍綠
+  muomn:   { bg: '#d6edf2', bd: '#2f8598', tx: '#123842' },   // 藍綠
   theonie: { bg: '#fbe0ec', bd: '#c04a7a', tx: '#5a1c38' },   // 粉紅
   amber:   { bg: '#e5e2f7', bd: '#5f52a8', tx: '#2a2356' },   // 藍紫
   red:     { bg: '#f7dee1', bd: '#a8303a', tx: '#5a1a20' },   // 紅
@@ -1288,12 +1559,15 @@ function draw() {
   // 上層（樹冠、屋簷等，永遠蓋在最上面）
   drawMapTop(ctx);
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
-  if (G.player && !G.player.sitting && !G.over && !dialogueState) {
+  if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
+    const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
-    if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    if (elevator) drawInteractPrompt(elevator.x, elevator.top, '搭電梯');
+    else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else {
-      const actor = dialogueNearPlayer(), profile = actor && dialogueProfile(actor);
-      if (actor) drawInteractPrompt(actor.x, actor.y - 57, '與 ' + (profile ? profile.name : '角色') + ' 對話');
+      const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
+      if (actor) drawInteractPrompt(actor.x, actor.y - 57,
+        actor.kind === 'tower' && !MAP_SAFE ? '疏導' : '與 ' + (profile ? profile.name : '角色') + ' 對話');
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }
   }
@@ -1380,7 +1654,7 @@ function draw() {
     if (ob) {
       const v = ob[buildOrient], [c, r] = hoverCell;
       const x = OX + c * CELL, y = OY + r * CELL, w = v.w * CELL, h = v.h * CELL;
-      const ok = canPlaceObstacle(v, c, r, placeExtra(ob));   // 探照燈可蓋在光圈邊緣附近
+      const ok = canPlaceObstacle(v, c, r, placeExtra(ob)) && G.money >= ob.cost;
       const img = obstacleImgs[ob.id][buildOrient];
       ctx.globalAlpha = 0.4;
       if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
@@ -1446,6 +1720,7 @@ function roundRect(x, y, w, h, r) {
 
 // ---- HUD / 狀態畫面 ----
 function updateHUD() {
+  document.getElementById('npcArrangeToolbar').classList.toggle('hidden', !MAP_SAFE);
   // 安全區域不顯示戰鬥資訊條，連同「建築」按鈕一起收起來
   const hud = document.getElementById('hud');
   if (hud) hud.classList.toggle('hidden', MAP_SAFE);
@@ -1495,7 +1770,7 @@ function showStart() {
 function winOverlay() { showOverlay('✅ Y 區已控制', '所有異質核心與殘存異質體已清除！異質結晶已儲存，可用於哨兵培養。', '再玩一次'); }
 function loseOverlay() { showOverlay('💀 營地失守', '怪物攻進了營地。<br>試試多築牆卡位、提早疏導快暴走的哨兵。', '再挑戰'); }
 
-function begin() { sfx('button'); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; sfx('win'); winOverlay(); }
 function lose() { G.over = true; G.running = false; G.phase = 'lost'; sfx('lose'); loseOverlay(); }
 ovBtn.addEventListener('click', begin);

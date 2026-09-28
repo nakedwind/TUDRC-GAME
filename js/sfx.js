@@ -1,11 +1,33 @@
-/* ===== 音效（Web Audio 即時合成，不用音檔）=====
-   用振盪器＋噪音＋音量包絡即時「合成」出各種音效，完全不依賴外部檔案。
+/* ===== 音效：優先播放素材音檔，未對應的效果沿用 Web Audio 合成 =====
    呼叫：sfx('button' | 'menu' | 'switch' | 'blip' | 'place' | 'soothe'
             | 'wave' | 'win' | 'lose' | 'error' | 'berserk' | 'kill')
    調整：改 sounds 裡的參數就能改音色；SFX.volume 設總音量；按 M 鍵可靜音。
 */
 const SFX = (() => {
   let ctx = null, master = null, volume = 0.35, enabled = true;
+  const files = {
+    button: '按鈕.mp3',
+    menu: '開選單.mp3',
+    switch: '切換.mp3',
+    blip: '對話框下一頁音效.mp3',
+    place: '放置.mp3',
+    soothe: '疏導.mp3',
+    door: '關門.mp3',
+  };
+  const activeAudio = new Set();
+  const lastPlayed = new Map();
+  function playFile(name) {
+    const now = performance.now();
+    if (now - (lastPlayed.get(name) || -Infinity) < 70) return;
+    lastPlayed.set(name, now);
+    const audio = new Audio('Sound effects/' + files[name]);
+    audio.volume = Math.min(1, volume);
+    activeAudio.add(audio);
+    const cleanup = () => activeAudio.delete(audio);
+    audio.addEventListener('ended', cleanup, { once: true });
+    audio.addEventListener('error', cleanup, { once: true });
+    audio.play().catch(() => { cleanup(); });
+  }
   function ensure() {
     if (!ctx) {
       const AC = window.AudioContext || window.webkitAudioContext;
@@ -56,11 +78,19 @@ const SFX = (() => {
     kill() { tone({ freq: 420, freq2: 120, type: 'sine', dur: 0.09, gain: 0.1 }); },
     hit() { tone({ freq: 160, freq2: 70, type: 'square', dur: 0.07, gain: 0.15 }); noise({ dur: 0.06, gain: 0.08, freq: 700 }); },
   };
-  function play(name) { if (!enabled) return; ensure(); const f = sounds[name]; if (f) f(); }
+  function play(name) {
+    if (!enabled) return;
+    if (files[name]) { playFile(name); return; }
+    const f = sounds[name];
+    if (f) { ensure(); f(); }
+  }
   return {
     play,
-    get enabled() { return enabled; }, set enabled(v) { enabled = v; },
-    set volume(v) { volume = v; if (master) master.gain.value = v; },
+    get enabled() { return enabled; }, set enabled(v) {
+      enabled = v;
+      if (!v) { activeAudio.forEach(audio => audio.pause()); activeAudio.clear(); }
+    },
+    set volume(v) { volume = v; if (master) master.gain.value = v; activeAudio.forEach(audio => { audio.volume = Math.min(1, v); }); },
   };
 })();
 function sfx(name) { SFX.play(name); }
