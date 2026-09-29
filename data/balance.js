@@ -33,12 +33,14 @@ const TYPES = {
   // 嚮導也可編入任務：戰鬥力弱、HP／防禦低，但有「隨身疏導光環」aura（持續降低附近哨兵的負荷）
   eldrin:  { name: '艾德林', rank: 'B', role: '醫療支援', ability: '疏導', cost: 35, range: 4, aggroRange: 6, dmg: 12, rate: 1/3, taint: 0, splash: 0, color: '#2f8a68', accuracy: .9, taintRegen: 0, walkSpeed: 80, hp: 150, defense: .25, sprite: 'eldrin_B', guide: true, aura: { r: 2.8, rate: 6, heal: 6 }, ratings: { guide:3, combat:2, defense:3, hp:3, heal:3 }, evade: 3, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
   chris:   { name: '克莉思', rank: 'A', role: '戰鬥嚮導', ability: '疏導', cost: 35, range: 6, aggroRange: 8, dmg: 18, rate: 2/3, taint: 0, splash: 0, color: '#8a97a8', accuracy: 1, taintRegen: 0, walkSpeed: 85, hp: 150, defense: .35, sprite: 'chris_B', guide: true, aura: { r: 2.5, rate: 3, heal: 4 }, ratings: { guide:1, combat:3, defense:4, hp:3, heal:2 }, evade: 3.5, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
+  // 堤諾：異能力「感知」——帶著他出勤時，玩家能看見他周圍黑暗中的怪物（見「劇情設定.md」第五節）。等級待定。
+  tino:    { name: '堤諾', rank: 'B', role: '感知偵察', ability: '感知', cost: 40, range: 3, aggroRange: 14, dmg: 8, rate: 2, taint: 2, splash: 0, color: '#f0a63c', accuracy: .95, taintRegen: 0, walkSpeed: 105, hp: 110, defense: .1, sprite: 'tino_B', ratings: { combat:3, defense:1, hp:2, load:4 }, sense: 20, trait: '單體攻擊；感官敏銳，讓玩家看見他周圍 20 格內、黑暗中的怪物（其他哨兵仍只攻擊亮處的目標）。' },
 };
 
 // ---- 出勤隊伍 ----
 // 每次任務可帶 TEAM_SIZE 位；ROSTER＝可選名單（對應 TYPES 的 key）；DEFAULT_TEAM＝預設隊伍。
 const TEAM_SIZE = 4;
-const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'eldrin', 'chris'];
+const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'eldrin', 'chris', 'tino'];
 const DEFAULT_TEAM = ['theonie', 'amber', 'red', 'luther'];
 
 // ---- 場景 NPC ----
@@ -47,6 +49,7 @@ const WANDERERS = [
   { id: 'claire', name: '克萊兒', sprite: 'claire_A' },
   { id: 'muomn',  name: '穆恩',   sprite: 'muomn_A' },
   { id: 'noah',   name: '諾亞',   sprite: 'noah_B' },
+  { id: 'ash',    name: '亞許',   sprite: 'ash_B' },
 ];
 
 // ===== 章節 =====
@@ -82,6 +85,9 @@ const WANDER_LINES = {
   theonie:['這種程度也需要我上場？', '我一個人會更方便', '火力沒有失控，是地形太脆弱。', '看清楚了，這才叫效率。'],
   amber:  ['射程確認，開始執行任務。', '非常抱歉！我會重新校正。', '請各位不要進入攻擊範圍。', '克萊兒……她在安全區嗎？'],
   red:    ['嗨！今天也一起加油吧！', '放心的依靠我吧！', '先照顧其他人吧。', '少一個人受傷都是好事！'],
+  // 亞許：安靜隨和的倖存者嚮導，習慣順著別人、視力不好（見「劇情設定.md」第五節）
+  ash:    ['嗯，都可以喔。', '這樣安排就好。', '……抱歉，我沒看清楚。', '堤諾又跑去哪裡了呢。'],
+  tino:   ['……離我遠一點。', '這裡的味道我不喜歡。', '吵死了。', '亞許呢？'],
 };
 // 戰鬥區專用泡泡台詞。安全區仍使用上面的日常內容。
 const BATTLE_WANDER_LINES = {
@@ -92,6 +98,7 @@ const BATTLE_WANDER_LINES = {
   avaren:  ['……目標確認。', '別讓牠們靠近艾德林。', '腐蝕已經擴散。', '下一個。'],
   eldrin:  ['負荷升高的人立刻回報。', '有人受傷嗎？不要硬撐。', '維持隊形，我會負責疏導。', '阿瓦倫，不准追得太遠。'],
   chris:   ['需要疏導就快點說。', '別倒下，我可搬不動你們。', '我會顧著後方，專心打。', '嘖，又有異質體過來了。'],
+  tino:    ['那邊有東西，暗處。', '別過去，我聽得到。', '味道變了……牠們靠近了。', '有三隻，右邊。'],
 };
 const WANDER_TALK = { minGap: 5, maxGap: 13, duration: 3.4 };   // 每隔 5~13 秒說一次、泡泡顯示 3.4 秒
 const BATTLE_WANDER_TALK = { minGap: 11, maxGap: 22, duration: 3.2 };
@@ -111,6 +118,7 @@ const NPC_DIALOGUES = {
   eldrin: ['先站好，讓我看看。你說沒受傷不算，我確認過才算。', '地下街粉塵多，口罩要戴緊；水也要喝。別每次都等到不舒服才說。', '還有，看到阿瓦倫的話請告訴我。他說自己沒事的時候，通常最需要有人陪著。'],
   noah:   ['辛苦了。要不要坐一下？我正好知道幾件能讓你暫時忘記工作的趣事。', '放心，我只聊無傷大雅的部分。至於希奧妮剛才說了什麼……那就得看你想不想聽了。', '不過認真說，如果遇到難溝通的人就來找我吧。先聽懂對方在意什麼，事情通常就好辦多了。'],
   avaren: ['……你不是艾德林。找我做什麼？', '我會待在他看得到的地方。這樣他就不會一直擔心。', '如果我看起來不對勁，別去叫其他人。叫艾德林來……只要他就好。'],
+  ash:    ['啊，部隊長。有什麼需要我做的嗎？都可以喔，我這邊沒什麼要緊的事。', '不好意思，我眼睛不太好，要走近一點才看得清楚。讓您多走幾步了。', '十九年前的事……我其實不太記得了。大家都說我運氣很好，那大概就是這樣吧。', '堤諾嗎？他不是討厭我，只是不喜歡味道而已。我在旁邊坐著就好，他會自己過來。'],
 };
 
 // 三位哨兵的主動對話。哨兵暴走時無法交談，要先使用「疏導」。
@@ -120,6 +128,7 @@ const SENTRY_DIALOGUES = {
   red:     ['你來啦！別擔心，這裡有我守著，大家都很安全。', '我的傷和負荷都會慢慢恢復。疏導名額先留給更需要的人吧，我還撐得住！', '我是小隊長嘛。站在最前面、把大家平安帶回去，本來就是我該做的事。'],
   avaren:  ['……你不是艾德林。找我做什麼？', '我會待在他看得到的地方。這樣他就不會一直擔心。', '如果我看起來不對勁，別去叫其他人。叫艾德林來……只要他就好。'],
   luther:  ['有事的話站在那裡說就好，不、不用再靠近了。', '……克莉思也在前線？那傢伙總是亂來。算了，我會看著她。', '前面有東西要清開就叫我。你們別硬撐，我來比較快。'],
+  tino:    ['……幹嘛。有事就快說。', '暗的地方有什麼我知道。你們看不到，那是你們的問題，不是我在說謊。', '亞許沒有味道，所以我才受得了。這不代表你也可以隨便靠過來。'],
 };
 
 // ---- 跟隨行為 ----

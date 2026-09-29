@@ -36,11 +36,37 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
   }
   return set;
 }
-const playerSprites = loadCharacterSprites(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`);
+// ---- 造型切換：安全區穿 A 版、戰鬥區穿 B 版 ----
+// 兩套都先準備好，換地圖時再把下面三組精靈圖換成對應的造型。
+// 只有一種造型的角色（例如克萊兒、穆恩）就一直用它原本那套。
+const OUTFIT_SETS = {};   // 基底名稱（例如 'red'）→ { A, B, declared }
+function outfitRecord(folder) {
+  const base = String(folder).replace(/_[AB]$/, '');
+  const declared = /_(A|B)$/.test(folder) ? folder.slice(-1) : 'B';
+  let rec = OUTFIT_SETS[base];
+  if (rec) return rec;
+  rec = OUTFIT_SETS[base] = { A: null, B: null, declared };
+  rec[declared] = loadCharacterSprites(base + '_' + declared);
+  const other = declared === 'A' ? 'B' : 'A';
+  const probe = new Image();   // 先確認另一套存在再載入，避免對沒有該造型的角色發出一堆 404
+  probe.onload = () => { rec[other] = loadCharacterSprites(base + '_' + other); };
+  probe.src = `images/character/${base}_${other}/${base}${other}_0000_Front.png`;
+  return rec;
+}
+function outfitSet(folder) {
+  const rec = outfitRecord(folder);
+  const want = MAP_SAFE ? 'A' : 'B';
+  return rec[want] || rec[rec.declared];
+}
+const playerSprites = {};
 const sentrySprites = {};   // 哨兵類型 → 精靈圖（data/balance.js 的 TYPES 有填 sprite 才有）
-for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = loadCharacterSprites(TYPES[type].sprite);
 const wandererSprites = {};
-for (const profile of WANDERERS) wandererSprites[profile.id] = loadCharacterSprites(profile.sprite);
+function applyOutfits() {   // 每次開始遊戲／換地圖時呼叫
+  Object.assign(playerSprites, outfitSet(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`));
+  for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = outfitSet(TYPES[type].sprite);
+  for (const profile of WANDERERS) wandererSprites[profile.id] = outfitSet(profile.sprite);
+}
+applyOutfits();
 const monsterSlimeSprite = new Image();
 monsterSlimeSprite.src = 'images/monster/Monster_Slime.png';
 let lastSlimeLandSound = 0;
@@ -540,6 +566,7 @@ function updateCamera() {
 // ---- 遊戲狀態 ----
 let G;
 function newGame() {
+  applyOutfits();   // 依這張地圖是安全區或戰鬥區，換成 A／B 造型
   closeElevatorMenu();
   setNpcArrangeMode(false);
   document.getElementById('systemNotices').replaceChildren();
@@ -1416,6 +1443,32 @@ function drawTower(t) {
   if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('暴走', t.x, nameY - 14); }
   if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - 13, t.say.text, BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡
 }
+// ---- 堤諾的異能力「感知」----
+// 帶著堤諾出勤時，他周圍一定範圍內、位於黑暗中的怪物會以輪廓標示出來。
+// 這是「只有玩家看得見」的情報：哨兵的索敵仍然只看亮處，所以不影響戰鬥判定。
+function sensedEnemies() {
+  if (!LIGHT.enabled || !G || !G.enemies.length) return [];
+  const eyes = (G.towers || []).filter(t => (TYPES[t.type] || {}).sense && t.hp > 0 && !t.berserk);
+  if (!eyes.length) return [];
+  return G.enemies.filter(e => !e.dead && !isLit(e.x, e.y)
+    && eyes.some(t => Math.hypot(e.x - t.x, e.y - t.y) <= TYPES[t.type].sense * CELL));
+}
+function drawSensedEnemies() {
+  const list = sensedEnemies();
+  if (!list.length) return;
+  const pulse = .55 + .25 * Math.sin(performance.now() / 260);
+  ctx.save();
+  for (const e of list) {
+    ctx.globalAlpha = pulse;
+    ctx.strokeStyle = '#f0a63c'; ctx.lineWidth = 1.5;                   // 堤諾的代表色
+    ctx.beginPath(); ctx.ellipse(e.x, e.y + 2, 14, 12, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.globalAlpha = pulse * .35; ctx.fillStyle = '#f0a63c';
+    ctx.beginPath(); ctx.ellipse(e.x, e.y + 2, 14, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = pulse; ctx.fillStyle = '#ffd9a0';                 // 中心小點，暗處也看得出位置
+    ctx.beginPath(); ctx.arc(e.x, e.y + 2, 2, 0, Math.PI * 2); ctx.fill();
+  }
+  ctx.restore();
+}
 function drawEnemy(e) {
   ctx.save();
   if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
@@ -1477,6 +1530,8 @@ const BUBBLE_COLORS = {
   theonie: { bg: '#fbe0ec', bd: '#c04a7a', tx: '#5a1c38' },   // 粉紅
   amber:   { bg: '#e5e2f7', bd: '#5f52a8', tx: '#2a2356' },   // 藍紫
   red:     { bg: '#f7dee1', bd: '#a8303a', tx: '#5a1a20' },   // 紅
+  tino:    { bg: '#fdeacb', bd: '#d1892a', tx: '#5a3410' },   // 橘黃（對應橘髮與金黃色眼睛）
+  ash:     { bg: '#e6e8ee', bd: '#5b6478', tx: '#242a36' },   // 墨灰
 };
 const BUBBLE_DEFAULT = { bg: '#eef2f7', bd: '#5a6a86', tx: '#232a36' };
 function drawSpeechBubble(cx, bottomY, text, col) {
@@ -1554,7 +1609,7 @@ function draw() {
   for (const o of G.obstacles) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });
   for (const t of G.towers) sortables.push({ y: t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.y + 17, draw: () => drawWanderer(npc) });
-  for (const e of G.enemies) if (isLit(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到
+  for (const e of G.enemies) if (isLit(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (G.player) sortables.push({ y: G.player.sitting ? G.player.sitting.sortY + 0.5 : G.player.y + 16, draw: () => drawPlayer(G.player) });
   sortables.sort((a, b) => a.y - b.y);
@@ -1673,6 +1728,7 @@ function draw() {
   // 情境選單或指定建築的目標格
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
+  drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。
   if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
     const ob = buildableById(G.selType.slice(6));
