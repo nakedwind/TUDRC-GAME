@@ -353,6 +353,7 @@ function assignSentryToGround(t, guard = false) {
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   t.guardSummoned = guard;
+  t.guardBase = null;
   sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
   systemNotice(TYPES[t.type].name + '正前往巡邏點');
   closeGroundMenu();
@@ -460,7 +461,8 @@ function recallSentriesToCamp(base) {
     reserved.push(spot);
     const [x, y] = center(spot.c, spot.r);
     t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0;
-    t.guardSummoned = false;
+    t.guardSummoned = true;
+    t.guardBase = base;
     t.navPath = null; t.navGoal = null; t.navTimer = 0; t.navFailed = false;
     recalled++;
   }
@@ -786,7 +788,7 @@ cv.addEventListener('click', e => {
     const t = assigning;
     if (!isLit(x, y)) { sfx('error'); flash('要指派在亮處', x, y, '#ffd24a'); return; }
     if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
-    t.mode = 'goto'; t.guardSummoned = false; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
+    t.mode = 'goto'; t.guardSummoned = false; t.guardBase = null; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
     sfx('button');
     flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
     systemNotice(TYPES[t.type].name + '正前往巡邏點');
@@ -863,6 +865,7 @@ function commitNext(e) {
   e.hasTarget = true; e.stuck = false; e.exiting = false;
 }
 function enemyAttackObstacle(e, o, dt) {
+  e.attackingObstacle = o;
   e.atkCd = (e.atkCd || 0) - dt;
   if (e.atkCd > 0) return;
   e.atkCd = BARRIER.breakInterval;
@@ -1066,6 +1069,7 @@ function spawnAttackVisual(attacker, target, spec, affected) {
   if (typeof sfx === 'function') sfx('hit');
 }
 function stepEnemy(e, dt) {
+  e.attackingObstacle = null;
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
@@ -1247,10 +1251,10 @@ function update(dt) {
     if (t.berserk || t.cd > 0) continue;
     const R = spec.range * CELL;
     let target = null, bestY = -1, bestDistance = Infinity;
-    const attacker = t.type === 'red' ? redAttacker() : null;
-    if (attacker) {
-      if (Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R) target = attacker;
-    } else {
+    target = t.mode === 'goto' ? null : campAttackerFor(t, R);
+    const attacker = !target && t.type === 'red' ? redAttacker() : null;
+    if (attacker && Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R) target = attacker;
+    if (!target) {
       for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
         if (e.dead) continue;
         const distance = Math.hypot(e.x - t.x, e.y - t.y);

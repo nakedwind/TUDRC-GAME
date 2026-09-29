@@ -260,6 +260,18 @@ function redAttacker() {
   return player && player.underAttackT > 0 && attacker && attacker.hp > 0 && !attacker.dead && G.enemies.includes(attacker)
     ? attacker : null;
 }
+function campAttackerFor(t, maxDistance = Infinity) {
+  const base = t.guardBase;
+  if (!base || base.hp <= 0 || !G.obstacles.includes(base)) return null;
+  let closest = null, bestDistance = maxDistance;
+  for (const e of G.enemies) {
+    if (e.dead || e.hp <= 0 || e.attackingObstacle !== base) continue;
+    if (LIGHT.enabled && !isLit(e.x, e.y)) continue;
+    const distance = Math.hypot(e.x - t.x, e.y - t.y);
+    if (distance <= bestDistance) { closest = e; bestDistance = distance; }
+  }
+  return closest;
+}
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; return; }
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
@@ -268,6 +280,17 @@ function updateSentry(t, dt) {
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
   if (escapeDarkness(t, dt)) return;
   const ownSpec = TYPES[t.type];
+  // 召回營地的哨兵抵達後，優先攔截正在破壞營地的怪物。
+  if (t.mode !== 'goto' && !ownSpec.guide) {
+    const campThreat = campAttackerFor(t);
+    if (campThreat) {
+      t.target = null; t.waitT = 0;
+      if (Math.hypot(campThreat.x - t.x, campThreat.y - t.y) > ownSpec.range * CELL - 6) {
+        moveSentryWithPath(t, campThreat.x, campThreat.y, (ownSpec.walkSpeed || 80) * 1.25, dt);
+      }
+      return;
+    }
+  }
   const attacker = t.type === 'red' ? redAttacker() : null;
   if (attacker) {
     if (t.guardSpeechCd <= 0) {
@@ -357,7 +380,8 @@ function updateSentry(t, dt) {
     const atkR = spec.range * CELL;                       // 射程（像素）
     const anchor = (t.mode !== 'free' && t.anchor) ? t.anchor : t;
     const detectR = t.guardSummoned ? Math.max(220, (spec.aggroRange || spec.range + 1.5) * CELL) : (spec.aggroRange || spec.range + 1.5) * CELL;
-    const leashR = t.guardSummoned ? 220 : t.mode === 'free' ? Math.max(260, detectR) : 110;
+    const holdR = ((typeof PATROL !== 'undefined' && PATROL.holdChaseCells) || 6) * CELL;
+    const leashR = t.guardSummoned ? 220 : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
       if (e.dead) continue;
@@ -474,8 +498,8 @@ function openSentryMenu(t, silent) {
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
 function sentryMenuAct(act) {
   const t = menuSentry; if (!t) return;
-  if (act === 'free') { sfx('button'); t.mode = 'free'; t.guardSummoned = false; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
-  else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
+  if (act === 'free') { sfx('button'); t.mode = 'free'; t.guardSummoned = false; t.guardBase = null; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
+  else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.guardBase = null; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
   else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); flash('點地圖指定巡邏位置（Esc 取消）', t.x, t.y - 24, '#ffd479'); return; }
   else if (act === 'talk') { openDialogue(t); return; }
   else if (act === 'soothe') { soothe(t); openSentryMenu(t, true); return; }   // soothe() 自帶音效；選單靜默重開、更新汙染數字
