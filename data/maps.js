@@ -4046,12 +4046,6 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "tile_obstacle_redroadblocks_h",
-        "c": 38,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_obstacle_redroadblocks_h",
         "c": 1,
         "r": 18,
         "layer": "floor"
@@ -4223,7 +4217,12 @@ const MAPS_DEFAULT = [
       "13,4",
       "3,18",
       "36,25",
-      "5,21"
+      "5,21",
+      "33,19",
+      "34,19",
+      "35,19",
+      "25,19",
+      "26,19"
     ],
     "breakable": [],
     "entrances": [

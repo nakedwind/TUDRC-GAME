@@ -91,7 +91,7 @@ function spawnCoreGroup(core) {
   for (let i=0;i<count;i++) {
     const index = Math.floor(Math.random()*cells.length), [c,r] = cells.splice(index,1)[0];
     const [x,y] = center(c,r);
-    G.enemies.push({x,y,hp:WAVE_CFG.baseHp,maxhp:WAVE_CFG.baseHp,speed:WAVE_CFG.baseSpeed,reward:WAVE_CFG.reward,hasTarget:false,wanderWait:Math.random()*.8,slimeClock:Math.random()*1.83});
+    G.enemies.push(createMonster(chooseMonster(MAP, ACTIVE_MONSTERS), x, y));
     G.recentMonsterSpawns = G.recentMonsterSpawns || [];
     G.recentMonsterSpawns.push(c+','+r);
     if (G.recentMonsterSpawns.length>18) G.recentMonsterSpawns.shift();

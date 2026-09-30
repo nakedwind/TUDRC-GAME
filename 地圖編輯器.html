@@ -7,7 +7,7 @@
 <link rel="stylesheet" href="css/editor.css?v=selection-toolbar-20260925">
 </head>
 <body>
-  <h1>🗺️ 地圖編輯器　<a class="backlink" href="塔防原型.html">← 回遊戲</a></h1>
+  <h1>🗺️ 地圖編輯器　<a class="backlink" href="塔防原型.html">← 回遊戲</a>　<a class="backlink" href="怪物編輯器.html">🐾 怪物編輯器</a></h1>
 
   <div class="layout">
     <!-- 左邊：地圖選擇 + 畫布 + 工具 -->
@@ -149,18 +149,9 @@
         <div class="subhead">異質核心</div>
         <div class="field"><label>本局核心數量</label><input id="f_coreCount" type="number" min="1" max="20" step="1"></div>
         <div class="field"><small>先在地圖上標記候選點；每次進場會隨機抽取指定數量。</small></div>
-
-        <div class="subhead">波次難度</div>
-        <div class="field"><label>幾波怪</label><input id="f_waves" type="number"></div>
-        <div class="field"><label>每波數量(基礎)</label><input id="f_count" type="number"></div>
-        <div class="field"><label>每波數量(遞增)</label><input id="f_countAdd" type="number"></div>
-        <div class="field"><label>血量(基礎)</label><input id="f_hp" type="number"></div>
-        <div class="field"><label>血量(遞增)</label><input id="f_hpAdd" type="number"></div>
-        <div class="field"><label>速度(基礎)</label><input id="f_speed" type="number"></div>
-        <div class="field"><label>速度(遞增)</label><input id="f_speedAdd" type="number"></div>
-        <div class="field"><label>出怪間隔(基礎)</label><input id="f_gap" type="number" step="0.05"></div>
-        <div class="field"><label>間隔遞減</label><input id="f_gapSub" type="number" step="0.05"></div>
-        <div class="field"><label>殺怪回資源</label><input id="f_reward" type="number"></div>
+        <div class="subhead">這張地圖的異質體</div>
+        <div class="field"><small>勾選會出現的種類，權重越高越常出現；怪物能力與圖片到 <a href="怪物編輯器.html">怪物編輯器</a> 調整。</small></div>
+        <div id="monsterMixList" style="display:grid;gap:8px;margin:10px 0"></div>
         </div>
       </details>
 
@@ -181,6 +172,8 @@
 
   <!-- 依序載入 -->
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
+  <script src="data/monsters.js"></script>  <!-- 怪物種類與數值 -->
+  <script src="js/monster-data.js"></script>
   <script src="data/maps.js?v=dorm-assets-20260925"></script>        <!-- 地圖資料 -->
   <script src="js/editor.js?v=muomn-name-20260925"></script>        <!-- 編輯器程式 -->
 </body>

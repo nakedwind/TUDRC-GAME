@@ -117,16 +117,9 @@ function squadMembers() {
   if (typeof G === 'undefined' || !G || !Array.isArray(G.towers)) return [];
   return G.towers.map(live => ({ type: live.type, live }));
 }
-const CAPTAIN_IMPRESSIONS = {
-  theonie: '希奧妮很清楚自己的火力有多強，也有足以支撐那份自信的實力。只要有人替她守住前線，她會是隊上最可靠的遠程火力。需要注意的是，她有時會因為太想迅速解決目標，而忽略自己的精神負荷。',
-  red: '雷德是那種會自然站到所有人前面的人。他耐打、恢復力強，也很擅長把危險集中到自己身上。把前線交給他，我很放心；但也得提醒他，可靠不代表什麼都要一個人扛。',
-  amber: '安柏做事認真，也願意遵守每一項規定。她的雷擊命中還不夠穩定，但控制異質體的能力非常有價值。只要再多一點實戰經驗，她會成為能替全隊創造機會的哨兵。',
-  luther: '路德的力量足以正面阻止異質體，近距離作戰能力很強。話不多，卻會默默確認身邊每個人的位置。他不擅長應付過度的關心，但真正危險時，反而是最不會後退的那一個。',
-  avaren: '阿瓦倫仍對周遭保持高度戒備，不會輕易相信任何人。他的腐蝕能力很危險，運用得當也能讓異質體彼此攻擊。我不會要求他立刻融入所有人；能讓他願意留在隊伍裡，本身就是信任的開始。',
-  eldrin: '艾德林很溫和，卻不是軟弱。他總能及時察覺哨兵的異常，並把快要失控的人拉回來。比起自己的安全，他常常更在意別人的狀況，所以出勤時必須有人留意他的位置。',
-  chris: '克莉思看起來懶散，真正進入任務後卻很少漏掉關鍵變化。她的疏導不算強，但戰鬥判斷與射擊能力足以補足這點。她習慣用輕鬆的態度掩飾關心，尤其是在路德附近。',
-  tino: '堤諾的感官比任何儀器都準，黑暗中有什麼、有幾隻，他都先知道。代價是那份敏銳同樣會反噬他——氣味、聲音、太近的距離，都會讓他炸毛。不要試圖安撫他，也不要越過他的界線；把他的警告當真，並且讓亞許留在他看得到的地方就好。'
-};
+const CAPTAIN_IMPRESSIONS = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.captainImpression)
+  .map(character => [character.id, character.captainImpression]));
 function openCaptainImpression(type) {
   ensureTeamUI();
   const spec = TYPES[type]; if (!spec || !impressionPanel) return;
@@ -289,16 +282,9 @@ function renderFieldSquadHud() {
   fieldSquadHud.classList.remove('hidden');
 }
 
-const TEAM_PROFILES = {
-  theonie: { intro: '自信的火焰天才。擅長遠程火力，需留意負荷累積。' },
-  amber: { intro: '認真守規矩的實習哨兵。雷擊能波及多個目標，但命中較不穩定。' },
-  red: { intro: '熱情可靠的小隊長。近距離迎敵，負荷會自行恢復。' },
-  avaren: { intro: '沉默而戒備的特殊個體。攻擊力強，格外依賴艾德林。' },
-  luther: { intro: '擁有怪力的哨兵。擅長近戰重擊，不善應付過度親近。' },
-  eldrin: { intro: '溫柔又愛操心的嚮導。持續疏導附近隊友，適合隨隊支援。' },
-  chris: { intro: '懶散又親近人的戰鬥嚮導。能隨隊疏導，總會留意路德。' },
-  tino: { intro: '感官敏銳的年輕哨兵。能察覺黑暗中的怪物，但防禦與生命偏低。' },
-};
+const TEAM_PROFILES = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.intro)
+  .map(character => [character.id, { intro: character.intro }]));
 function renderTeamPanel() {
   const roster = (typeof ROSTER !== 'undefined') ? ROSTER : [];
   const cap = (typeof TEAM_SIZE !== 'undefined') ? TEAM_SIZE : 4;

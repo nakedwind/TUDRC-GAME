@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>異質體編輯器｜Y102 應變中心</title>
+<style>
+  :root { color-scheme:dark; font-family:system-ui,'Microsoft JhengHei',sans-serif; background:#10151c; color:#e8edf5 }
+  * { box-sizing:border-box } body { margin:0; padding:28px; max-width:1240px; margin-inline:auto }
+  a { color:#9bd2ff } h1 { font-size:25px; margin:0 0 6px } h2 { font-size:18px; margin:0 0 12px }
+  p { color:#aebccc; line-height:1.6; margin:0 0 22px } small { color:#91a3b8 }
+  .top { display:flex; justify-content:space-between; align-items:start; gap:16px; flex-wrap:wrap }
+  .nav { display:flex; gap:15px; padding-top:7px; white-space:nowrap }
+  .layout { display:grid; grid-template-columns:minmax(230px,280px) 1fr; gap:18px }
+  .panel { background:#1c2530; border:1px solid #3a4b60; border-radius:14px; padding:18px }
+  .toolbar,.actions { display:flex; gap:8px; flex-wrap:wrap; margin-bottom:13px }
+  button { cursor:pointer; color:#eaf3ff; background:#2a3e54; border:1px solid #5b7793; border-radius:8px; padding:9px 12px; font:inherit }
+  button:hover { background:#34516d } button.primary { background:#276f80; border-color:#64b6bd }
+  button.danger { background:#58313a; border-color:#a05b68 }
+  input { background:#121a23; color:#f3f6fb; border:1px solid #52677d; border-radius:7px; padding:8px 10px; font:inherit; min-width:0 }
+  #search { width:100%; margin:0 0 10px }
+  #monsterList { display:grid; gap:7px; max-height:620px; overflow:auto }
+  #monsterList button { display:flex; gap:10px; align-items:center; width:100%; text-align:left; background:#15202b; border-color:#35485c }
+  #monsterList button.selected { background:#213d50; border-color:#77c7d9 }
+  #monsterList img { width:42px; height:42px; object-fit:contain; image-rendering:pixelated; background:#0e1721; border-radius:6px }
+  #monsterList span { display:grid } #monsterList small { font-size:11px }
+  .details { display:grid; grid-template-columns:minmax(180px,220px) 1fr; gap:22px }
+  .preview { min-height:230px; display:grid; place-content:center; text-align:center; gap:10px; background:repeating-conic-gradient(#182331 0 25%,#202d3b 0 50%) 0 0/24px 24px; border:1px solid #455a71; border-radius:10px }
+  #spritePreview { width:128px; height:128px; object-fit:contain; image-rendering:pixelated; margin:auto }
+  #spriteError { color:#ffacaa; font-size:12px; min-height:16px }
+  .fields { display:grid; grid-template-columns:repeat(2,minmax(150px,1fr)); gap:13px }
+  .fields label { display:grid; gap:5px; font-size:13px; color:#b8c9da }
+  .fields .wide { grid-column:1/-1 } .fields input { width:100% }
+  .foot { margin-top:20px; border-top:1px solid #344454; padding-top:16px }
+  #exportOut { width:100%; min-height:150px; background:#0d151e; border:1px solid #4c6479; color:#b6d5e6; border-radius:8px; padding:12px; font:12px/1.5 Consolas,monospace; resize:vertical }
+  #status { min-height:23px; color:#84ddbd; margin:10px 0 }
+  @media(max-width:800px) { .layout,.details { grid-template-columns:1fr } body { padding:16px } }
+</style>
+</head>
+<body>
+  <div class="top"><div><h1>🐾 異質體編輯器</h1><p>怪物的能力與圖片在這裡設定；每張地圖只決定會出現哪些怪物及出現比例。</p></div>
+    <nav class="nav"><a href="塔防原型.html">回遊戲</a><a href="地圖編輯器.html">地圖編輯器</a></nav></div>
+  <div class="layout">
+    <section class="panel"><div class="toolbar"><button class="primary" id="addMonster">＋ 新增異質體</button><button id="duplicateMonster">複製</button></div>
+      <input id="search" type="search" placeholder="搜尋名稱或 ID" aria-label="搜尋異質體">
+      <div id="monsterList"></div></section>
+    <section class="panel"><div class="actions"><h2 style="flex:1" id="editingTitle">怪物資料</h2><button class="danger" id="deleteMonster">刪除此種類</button></div>
+      <div class="details"><div><div class="preview"><img id="spritePreview" alt="怪物圖片預覽"><span id="spriteError"></span></div>
+        <p style="margin-top:12px;font-size:12px">圖片請放在遊戲的 <code>images/monster/</code> 資料夾，再填入相對路徑。新增怪物目前沿用史萊姆的跳躍與索敵行為。</p></div>
+        <div class="fields">
+          <label>名稱<input id="f_name" data-field="name" maxlength="40"></label>
+          <label>種類 ID<input id="f_id" readonly title="ID 建立後固定，避免地圖引用失效"></label>
+          <label class="wide">圖片路徑<input id="f_sprite" data-field="sprite" placeholder="images/monster/Monster_Slime.png"></label>
+          <label>生命 HP<input id="f_hp" data-field="hp" type="number" min="1"></label>
+          <label>移動速度<input id="f_speed" data-field="speed" type="number" min="1"></label>
+          <label>攻擊玩家<input id="f_playerDamage" data-field="playerDamage" type="number" min="0"></label>
+          <label>攻擊哨兵<input id="f_sentryDamage" data-field="sentryDamage" type="number" min="0"></label>
+          <label>攻擊建築<input id="f_buildingDamage" data-field="buildingDamage" type="number" min="0"></label>
+          <label>擊殺經費<input id="f_reward" data-field="reward" type="number" min="0"></label>
+          <label>擊殺結晶<input id="f_crystals" data-field="crystals" type="number" min="0"></label>
+          <label>圖片寬度 px<input id="f_width" data-field="width" type="number" min="8"></label>
+          <label>圖片高度 px<input id="f_height" data-field="height" type="number" min="8"></label>
+        </div></div>
+      <div class="foot"><div class="actions"><button id="previewGame">▶ 用暫存設定預覽遊戲</button><button id="exportMonsters" class="primary">下載 monsters.js</button><button id="resetMonsters">從檔案重新載入</button></div>
+        <small>編輯會自動儲存在這台瀏覽器。正式保留並同步到其他電腦時，下載檔案並放到 <code>data/monsters.js</code>。</small>
+        <div id="status" role="status"></div><textarea id="exportOut" readonly aria-label="怪物設定匯出內容"></textarea></div>
+    </section>
+  </div>
+  <script src="data/monsters.js"></script>
+  <script src="js/monster-data.js"></script>
+  <script src="js/monster-editor.js"></script>
+</body>
+</html>

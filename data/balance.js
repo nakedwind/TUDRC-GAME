@@ -1,6 +1,6 @@
-/* ===== 遊戲數值設定（你最常調整的地方）=====
-   想讓遊戲更難或更簡單、調整哨兵強弱、資源多寡，都在這個檔案改就好。
-   這裡「只是資料」，不含程式邏輯，改起來很安全。
+/* ===== 全域遊戲數值 =====
+   起始資源、編隊人數、疏導與光照等共通規則放在這裡。
+   個別人物的能力、圖片、介紹和台詞請改 data/characters.js。
 */
 
 // ---- 起始資源與嚮導能量 ----
@@ -18,24 +18,15 @@ const SOOTHE = {
   heal: 55,   // 每次疏導降多少汙染值
 };
 
-// ---- 哨兵數值 ----
-// 哨兵是「人」：一個名字只有一位，會在亮處走動巡邏。
+// ---- 角色資料相容入口 ----
+// 哨兵與嚮導的原始數值集中在 data/characters.js；這裡建立遊戲既有的 TYPES 介面。
 // range=射程(格) dmg=傷害 rate=每秒攻擊次數 taint=每次攻擊累積的汙染
 // splash=範圍傷害半徑(格,0=單體) accuracy=命中率(1=必中) taintRegen=汙染每秒自動下降
 // walkSpeed=走路速度(像素/秒) hp=生命值
 // sprite=角色造型資料夾（images/character/ 底下，例如 'red_B'）；沒填就畫成色塊
-const TYPES = {
-  theonie: { name: '希奧妮', rank: 'S', role: '遠程火力', ability: '火焰', cost: 50, range: 5, aggroRange: 10, dmg: 30, rate: 1, taint: 5, splash: 0, color: '#ff7b39', accuracy: 1, taintRegen: 0, walkSpeed: 75, hp: 80, defense: .05, sprite: 'theonie_B', ratings: { combat:5, defense:1, hp:1, load:2 }, burn: { duration:5, damage:5 }, trait: '單體攻擊；使目標燒傷 5 秒，每秒受到一次傷害。' },
-  amber:   { name: '安柏', rank: 'C', role: '範圍雷擊', ability: '雷電', cost: 40, range: 5, aggroRange: 10, dmg: 12, rate: .5, taint: 5, splash: 1.3, color: '#ffd24a', accuracy: .6, taintRegen: 0, walkSpeed: 95, hp: 150, defense: .15, sprite: 'amber_B', ratings: { combat:2, defense:2, hp:3, load:2 }, stun: 2, trait: '範圍攻擊；在小片區域降下雷電，使異質體顫抖並停止 2 秒。' },
-  red:     { name: '雷德', rank: 'A', role: '前衛防禦', ability: '自癒', cost: 45, range: 1, aggroRange: 16, dmg: 12, rate: 1, taint: 2, splash: 1, color: '#ff5b6e', accuracy: .9, taintRegen: 6, walkSpeed: 85, hp: 240, defense: .45, sprite: 'red_B', ratings: { combat:2, defense:5, hp:5, load:1 }, taunt: 3.2, hpRegen: 4, trait: '範圍攻擊；吸引異質體仇恨，並持續恢復生命與精神負荷。' },
-  avaren:  { name: '阿瓦倫', rank: 'S', role: '腐蝕特攻', ability: '腐蝕', cost: 70, range: 2, aggroRange: 10, dmg: 30, rate: .5, taint: 8, splash: 1.1, color: '#5e9bff', accuracy: .9, taintRegen: 0, walkSpeed: 75, hp: 160, defense: .25, sprite: 'avaren_B', ratings: { combat:5, defense:3, hp:3, load:3 }, noAggro: true, confuse: 3, trait: '範圍攻擊；不主動吸引仇恨。腐蝕使異質體混亂 3 秒並攻擊同類。' },
-  luther:  { name: '路德', rank: 'A', role: '近戰重擊', ability: '怪力', cost: 55, range: 1, aggroRange: 14, dmg: 24, rate: .5, taint: 8, splash: 1, color: '#6fae55', accuracy: .9, taintRegen: 0, walkSpeed: 80, hp: 160, defense: .25, sprite: 'luther_B', ratings: { combat:4, defense:3, hp:3, load:3 }, taunt: 2.6, knockback: 1, stun: 1, trait: '範圍攻擊；吸引異質體仇恨，擊退 1 格並使其停止 1 秒。' },
-  // 嚮導也可編入任務：戰鬥力弱、HP／防禦低，但有「隨身疏導光環」aura（持續降低附近哨兵的負荷）
-  eldrin:  { name: '艾德林', rank: 'B', role: '醫療支援', ability: '疏導', cost: 35, range: 4, aggroRange: 6, dmg: 12, rate: 1/3, taint: 0, splash: 0, color: '#2f8a68', accuracy: .9, taintRegen: 0, walkSpeed: 80, hp: 150, defense: .25, sprite: 'eldrin_B', guide: true, aura: { r: 2.8, rate: 6, heal: 6 }, ratings: { guide:3, combat:2, defense:3, hp:3, heal:3 }, evade: 3, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
-  chris:   { name: '克莉思', rank: 'A', role: '戰鬥嚮導', ability: '疏導', cost: 35, range: 6, aggroRange: 8, dmg: 18, rate: 2/3, taint: 0, splash: 0, color: '#8a97a8', accuracy: 1, taintRegen: 0, walkSpeed: 85, hp: 150, defense: .35, sprite: 'chris_B', guide: true, aura: { r: 2.5, rate: 3, heal: 4 }, ratings: { guide:1, combat:3, defense:4, hp:3, heal:2 }, evade: 3.5, trait: '無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。' },
-  // 堤諾：異能力「感知」——帶著他出勤時，玩家能看見他周圍黑暗中的怪物（見「劇情設定.md」第五節）。等級待定。
-  tino:    { name: '堤諾', rank: 'B', role: '感知偵察', ability: '感知', cost: 40, range: 3, aggroRange: 14, dmg: 8, rate: 2, taint: 2, splash: 0, color: '#f0a63c', accuracy: .95, taintRegen: 0, walkSpeed: 105, hp: 110, defense: .1, sprite: 'tino_B', ratings: { combat:3, defense:1, hp:2, load:4 }, sense: 20, trait: '單體攻擊；感官敏銳，讓玩家看見他周圍 20 格內、黑暗中的怪物（其他哨兵仍只攻擊亮處的目標）。' },
-};
+const TYPES = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.combat)
+  .map(character => [character.id, { ...character.combat, name: character.name, sprite: character.sprite }]));
 
 // ---- 出勤隊伍 ----
 // 每次任務可帶 TEAM_SIZE 位；ROSTER＝可選名單（對應 TYPES 的 key）；DEFAULT_TEAM＝預設隊伍。
@@ -45,12 +36,9 @@ const DEFAULT_TEAM = ['theonie', 'amber', 'red', 'luther'];
 
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。
-const WANDERERS = [
-  { id: 'claire', name: '克萊兒', sprite: 'claire_A' },
-  { id: 'muomn',  name: '穆恩',   sprite: 'muomn_A' },
-  { id: 'noah',   name: '諾亞',   sprite: 'noah_B' },
-  { id: 'ash',    name: '亞許',   sprite: 'ash_B' },
-];
+const WANDERERS = Object.values(CHARACTERS)
+  .filter(character => character.kind === 'support')
+  .map(({ id, name, sprite }) => ({ id, name, sprite }));
 
 // ===== 章節 =====
 // 目前進行到第幾章。下面三張對話表（泡泡／NPC 對話／哨兵對話）都可依章節不同。
@@ -74,32 +62,13 @@ function chapterPick(entry) {
 // ---- 場景 NPC 平時會冒出的對話（頭上泡泡框）----
 // 想改台詞就編輯這裡：每個角色一組句子，系統會隨機挑一句、每隔幾秒說一次。
 // 沒列在這裡的角色就不會說話。
-const WANDER_LINES = {
-  chris:  ['好累……要不是為了津貼...', '路德呢？剛才明明還在這裡。', '報告晚點再寫吧。', '好想休息'],
-  claire: ['流程我有好好背熟喔！', '第一次實戰……沒問題的！', '安柏還在值勤嗎？', '大家要平安回來喔！'],
-  luther: ['學姊…請放過我…', '我、我自己檢查裝備就好。', '請保持社交距離...', '需要搬開什麼就叫我。'],
-  muomn:  ['嗚…工作做不完。', '戰鬥辛苦了～', '不想加班...'],
-  eldrin: ['平時要記得測量負荷值哦', '有沒有按時吃飯？', '累了就休息，不准硬撐。', '藥品用完要記得登記。'],
-  noah:   ['要不要聊聊？我很會保密的。', '今天的星座運勢不錯。', '那個年紀的孩子比較敏感一點。', '休息時間也需要一點消息嘛。'],
-  avaren: ['……艾德林呢？', '別靠太近。', '我沒有不穩定。', '不要跟別人說話...'],
-  theonie:['這種程度也需要我上場？', '我一個人會更方便', '火力沒有失控，是地形太脆弱。', '看清楚了，這才叫效率。'],
-  amber:  ['射程確認，開始執行任務。', '非常抱歉！我會重新校正。', '請各位不要進入攻擊範圍。', '克萊兒……她在安全區嗎？'],
-  red:    ['嗨！今天也一起加油吧！', '放心的依靠我吧！', '先照顧其他人吧。', '少一個人受傷都是好事！'],
-  // 亞許：安靜隨和的倖存者嚮導，習慣順著別人、視力不好（見「劇情設定.md」第五節）
-  ash:    ['嗯，都可以喔。', '這樣安排就好。', '……抱歉，我沒看清楚。', '堤諾又跑去哪裡了呢。'],
-  tino:   ['……離我遠一點。', '這裡的味道我不喜歡。', '吵死了。', '亞許呢？'],
-};
+const WANDER_LINES = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.dialogues.idle.length)
+  .map(character => [character.id, character.dialogues.idle]));
 // 戰鬥區專用泡泡台詞。安全區仍使用上面的日常內容。
-const BATTLE_WANDER_LINES = {
-  theonie: ['保持射界，別站到我前面。', '左側交給我處理。', '異質體正在接近，準備迎擊。', '火焰壓制開始。'],
-  red:     ['不要脫離隊形！', '我來擋住牠們！', '後方交給你們了。', '發現異質體，準備接敵！'],
-  amber:   ['偵測到異質體反應。', '雷擊座標正在校正。', '請離開落雷範圍。', '確認射界，開始攻擊。'],
-  luther:  ['退後，這裡我來擋。', '前方障礙由我清除。', '別讓牠們突破防線。', '目標接近，準備擊退。'],
-  avaren:  ['……目標確認。', '別讓牠們靠近艾德林。', '腐蝕已經擴散。', '下一個。'],
-  eldrin:  ['負荷升高的人立刻回報。', '有人受傷嗎？不要硬撐。', '維持隊形，我會負責疏導。', '阿瓦倫，不准追得太遠。'],
-  chris:   ['需要疏導就快點說。', '別倒下，我可搬不動你們。', '我會顧著後方，專心打。', '嘖，又有異質體過來了。'],
-  tino:    ['那邊有東西，暗處。', '別過去，我聽得到。', '味道變了……牠們靠近了。', '有三隻，右邊。'],
-};
+const BATTLE_WANDER_LINES = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.dialogues.battle.length)
+  .map(character => [character.id, character.dialogues.battle]));
 const WANDER_TALK = { minGap: 5, maxGap: 13, duration: 3.4 };   // 每隔 5~13 秒說一次、泡泡顯示 3.4 秒
 const BATTLE_WANDER_TALK = { minGap: 11, maxGap: 22, duration: 3.2 };
 
@@ -110,33 +79,20 @@ const NPC_TALK = {
   radius: 66,
   typeSpeed: 24,   // 打字機每個字出現的毫秒數；數字越小越快
 };
-const NPC_DIALOGUES = {
-  chris:  ['你要下地下街？那我也去。先說好，我可不是突然變勤快了。', '作戰津貼那麼高，總不能讓路德一個人把危險的工作全搶走吧。', '走啦，別離我太遠。萬一負荷上升，我還能順手幫你處理。'],
-  claire: ['前、前輩好！疏導流程和緊急撤離程序，我都有好好背熟！', '雖然是第一次實戰有一點緊張……但只要照程序來，一定沒問題的。', '那個，您有看到安柏嗎？我只是想確認她有沒有又勉強自己，沒有別的意思喔！'],
-  luther: ['有事的話站在那裡說就好，不、不用再靠近了。', '……克莉思也在前線？那傢伙總是亂來。算了，我會看著她。', '前面有東西要清開就叫我。你們別硬撐，我來比較快。'],
-  muomn:  ['你終於來找穆恩了！', '剛才那邊傳來好大的聲音……不是穆恩弄的喔。', '等事情結束以後，我們一起去找東西吃吧！'],
-  eldrin: ['先站好，讓我看看。你說沒受傷不算，我確認過才算。', '地下街粉塵多，口罩要戴緊；水也要喝。別每次都等到不舒服才說。', '還有，看到阿瓦倫的話請告訴我。他說自己沒事的時候，通常最需要有人陪著。'],
-  noah:   ['辛苦了。要不要坐一下？我正好知道幾件能讓你暫時忘記工作的趣事。', '放心，我只聊無傷大雅的部分。至於希奧妮剛才說了什麼……那就得看你想不想聽了。', '不過認真說，如果遇到難溝通的人就來找我吧。先聽懂對方在意什麼，事情通常就好辦多了。'],
-  avaren: ['……你不是艾德林。找我做什麼？', '我會待在他看得到的地方。這樣他就不會一直擔心。', '如果我看起來不對勁，別去叫其他人。叫艾德林來……只要他就好。'],
-  ash:    ['啊，部隊長。有什麼需要我做的嗎？都可以喔，我這邊沒什麼要緊的事。', '不好意思，我眼睛不太好，要走近一點才看得清楚。讓您多走幾步了。', '十九年前的事……我其實不太記得了。大家都說我運氣很好，那大概就是這樣吧。', '堤諾嗎？他不是討厭我，只是不喜歡味道而已。我在旁邊坐著就好，他會自己過來。'],
-};
+const NPC_DIALOGUES = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.dialogues.npc.length)
+  .map(character => [character.id, character.dialogues.npc]));
 
 // 三位哨兵的主動對話。哨兵暴走時無法交談，要先使用「疏導」。
-const SENTRY_DIALOGUES = {
-  theonie: ['你特地過來，就是為了確認我的狀態？真是多此一舉。', '我的火力和距離都算得很清楚。只要其他人別擅自闖進射線，就不會有問題。', '需要疏導時我自然會說。現在，把最棘手的目標交給我——別浪費天才的時間。'],
-  amber:   ['報告，我已完成裝備與射界檢查，隨時可以接受部署。', '命中誤差仍在容許範圍……我會再校正一次。不能讓隊友因為我的疏忽受傷。', '另外，克萊兒是實習嚮導，請不要把她安排得太靠近前線。這只是安全規定上的建議。'],
-  red:     ['你來啦！別擔心，這裡有我守著，大家都很安全。', '我的傷和負荷都會慢慢恢復。疏導名額先留給更需要的人吧，我還撐得住！', '我是小隊長嘛。站在最前面、把大家平安帶回去，本來就是我該做的事。'],
-  avaren:  ['……你不是艾德林。找我做什麼？', '我會待在他看得到的地方。這樣他就不會一直擔心。', '如果我看起來不對勁，別去叫其他人。叫艾德林來……只要他就好。'],
-  luther:  ['有事的話站在那裡說就好，不、不用再靠近了。', '……克莉思也在前線？那傢伙總是亂來。算了，我會看著她。', '前面有東西要清開就叫我。你們別硬撐，我來比較快。'],
-  tino:    ['……幹嘛。有事就快說。', '暗的地方有什麼我知道。你們看不到，那是你們的問題，不是我在說謊。', '亞許沒有味道，所以我才受得了。這不代表你也可以隨便靠過來。'],
-};
+const SENTRY_DIALOGUES = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.dialogues.sentry.length)
+  .map(character => [character.id, character.dialogues.sentry]));
 
 // ---- 跟隨行為 ----
 // radiusCells＝可自由活動的護衛圈半徑（格）；超出後才會追上對方。
-const FOLLOW = {
-  avaren: { radiusCells: 4, speed: 96 },  // 阿瓦倫：艾德林周圍 4 格
-  red:    { radiusCells: 7, speed: 92 },  // 雷德：溫特周圍 7 格
-};
+const FOLLOW = Object.fromEntries(Object.values(CHARACTERS)
+  .filter(character => character.follow)
+  .map(character => [character.id, character.follow]));
 
 // ---- 原地巡邏 ----
 // 哨兵設成「在原地巡邏」時，只追崗位周圍 holdChaseCells 格內的怪物；怪物跑遠就回崗位。

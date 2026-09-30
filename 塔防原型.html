@@ -87,13 +87,17 @@
   <div id="editors">
     <a href="地圖編輯器.html">🗺️ 地圖編輯器</a>
     <a href="物件編輯器.html">🧱 物件編輯器</a>
+    <a href="怪物編輯器.html">🐾 怪物編輯器</a>
   </div>
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
   <script src="js/sfx.js?v=portal-transition-20260925"></script>          <!-- 1b. 音效 -->
 
+  <script src="data/characters.js"></script>  <!-- 集中管理所有角色 -->
   <script src="data/balance.js?v=hold-patrol-20260929"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/monsters.js"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="js/monster-data.js"></script>
   <script src="data/objects.js"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
   <script src="data/decorations.js"></script><!-- 3b. 裝飾物件（低HP、可佈置） -->
   <script src="data/maps.js?v=dorm-assets-20260925"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->

@@ -515,5 +515,6 @@ function soothe(t) {
   G.guide -= SOOTHE.cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
   sfx('soothe');
+  playAttackSprite('guidance', t.x, t.y - 8, .48);
   flash('疏導 -' + SOOTHE.heal, t.x, t.y - 26, '#7ee0c0'); updateHUD();
 }

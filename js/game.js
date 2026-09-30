@@ -13,9 +13,9 @@ const ctx = cv.getContext('2d');
 // 不再自動鋪滿地板貼圖：沒鋪素材的格子就是黑的（地板請在地圖編輯器裡鋪）
 
 // ---- 玩家角色（嚮導本人，可用 WASD／方向鍵操縱）----
-const PLAYER = { speed: 230, r: 14, drawSize: 64 };   // 移動速度、碰撞半徑、角色圖尺寸
-const PLAYER_CHARACTER = 'winter';
-const PLAYER_OUTFIT = 'B';
+const PLAYER = CHARACTERS.winter.player;   // 移動速度、碰撞半徑、角色圖尺寸
+const PLAYER_CHARACTER = CHARACTERS.winter.id;
+const PLAYER_OUTFIT = CHARACTERS.winter.sprite.slice(-1);
 // ---- 角色精靈圖（玩家與哨兵共用）----
 // 資料夾 images/character/<角色>_<服裝>/，檔名 <角色><服裝>_0000_Front.png …
 const CHARACTER_SPRITE_FILES = {
@@ -67,8 +67,42 @@ function applyOutfits() {   // 每次開始遊戲／換地圖時呼叫
   for (const profile of WANDERERS) wandererSprites[profile.id] = outfitSet(profile.sprite);
 }
 applyOutfits();
-const monsterSlimeSprite = new Image();
-monsterSlimeSprite.src = 'images/monster/Monster_Slime.png';
+const ACTIVE_MONSTERS = monsterCatalog(/[?&](preview|previewMonsters)=1(&|$)/.test(location.search));
+const monsterImageCache = new Map();
+function monsterImage(file) {
+  if (!monsterImageCache.has(file)) {
+    const image = new Image(); image.src = file;
+    monsterImageCache.set(file, image);
+  }
+  return monsterImageCache.get(file);
+}
+ACTIVE_MONSTERS.forEach(monster => monsterImage(monster.sprite));
+function createMonster(spec, x, y) {
+  const legacy = !Array.isArray(MAP?.monsterMix) || !MAP.monsterMix.length;
+  const oldRules = legacy && spec.id === 'slime' ? (MAP.rules || {}) : {};
+  const hp = Number(oldRules.hp) || spec.hp;
+  return {
+    type: spec.id, x, y, hp, maxhp: hp,
+    speed: Number(oldRules.speed) || spec.speed,
+    reward: oldRules.reward != null ? Number(oldRules.reward) : spec.reward,
+    crystals: spec.crystals, playerDamage: spec.playerDamage,
+    sentryDamage: spec.sentryDamage, buildingDamage: spec.buildingDamage,
+    sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height,
+    hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
+  };
+}
+const ATTACK_EFFECT_KINDS = ['fire', 'lightning', 'slash', 'guidance', 'corrosion', 'impact'];
+const attackEffectFrames = Object.fromEntries(ATTACK_EFFECT_KINDS.map(kind => [kind,
+  Array.from({ length: 4 }, (_, i) => {
+    const img = new Image();
+    img.src = `images/Attack%20effects/${kind}/frame_${String(i + 1).padStart(2, '0')}.png`;
+    return img;
+  })
+]));
+function playAttackSprite(kind, x, y, duration = .32, angle = 0) {
+  if (!G || !attackEffectFrames[kind]) return;
+  G.effects.push({ spriteEffect: kind, x, y, angle, life: duration, life0: duration });
+}
 let lastSlimeLandSound = 0;
 function playSlimeAudio(kind, slime = null) {
   if (typeof SFX !== 'undefined' && !SFX.enabled) return;
@@ -573,7 +607,7 @@ function newGame() {
   G = {
     phase: 'ready', money: START.money, lives: START.lives,
     guide: START.guide, guideMax: START.guideMax, guideRegen: START.guideRegen,
-    grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [], mapDestroyed: new Set(),
+    grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [], acidPools: [], mapDestroyed: new Set(),
     recentMonsterSpawns: [],
     selType: null, waveIndex: 0, waves: buildWaves(),
     spawnQueue: [], spawnTimer: 0, curGap: 0.9, betweenWaves: 0,
@@ -609,7 +643,7 @@ function startWave() {
   if (G.cores) { G.spawnQueue=[]; return; }
   const w = G.waves[G.waveIndex];
   G.spawnQueue = [];
-  for (let i = 0; i < w.count; i++) G.spawnQueue.push({ hp: w.hp, speed: w.speed, reward: w.reward });
+  for (let i = 0; i < w.count; i++) G.spawnQueue.push({});
   G.spawnTimer = 0; G.curGap = w.gap;
   sfx('wave');   // 新一波開始
 }
@@ -896,7 +930,7 @@ function enemyAttackObstacle(e, o, dt) {
   e.atkCd = (e.atkCd || 0) - dt;
   if (e.atkCd > 0) return;
   e.atkCd = BARRIER.breakInterval;
-  o.hp -= BARRIER.breakDmg;
+  o.hp -= e.buildingDamage ?? BARRIER.breakDmg;
   o.hitT = HIT_DUR;
   sfx('hit');
   if (o.hp > 0) return;
@@ -912,8 +946,9 @@ function enemyAttackSentry(e, target, dt) {
   if (e.atkCd > 0 || !target || target.hp <= 0) return;
   e.atkCd = 1;
   const spec = TYPES[target.type], defense = Math.max(0, Math.min(.75, spec.defense || 0));
-  target.hp = Math.max(0, target.hp - 14 * (1 - defense));
-  flash('-' + Math.round(14 * (1 - defense)), target.x, target.y - 30, '#ff8f8f');
+  const damage = (e.sentryDamage ?? 14) * (1 - defense);
+  target.hp = Math.max(0, target.hp - damage);
+  flash('-' + Math.round(damage), target.x, target.y - 30, '#ff8f8f');
   if (target.hp <= 0) { target.target = null; flash('失去戰鬥能力', target.x, target.y - 42, '#ff5b6e'); }
 }
 function enemyAttackPlayer(e, dt) {
@@ -921,7 +956,8 @@ function enemyAttackPlayer(e, dt) {
   if (!p || p.hp <= 0) return;
   if ((e.playerTouchCd || 0) > 0) return;
   e.playerTouchCd = 1;
-  p.hp = Math.max(0, p.hp - 12);
+  const damage = e.playerDamage ?? 12;
+  p.hp = Math.max(0, p.hp - damage);
   p.hitT = .45; p.underAttackT = 5; p.lastAttacker = e;
   for (const sentry of G.towers) if (sentry.type === 'red' && sentry.hp > 0 && !sentry.berserk) {
     sentry.cd = Math.min(sentry.cd, .1);
@@ -936,7 +972,7 @@ function enemyAttackPlayer(e, dt) {
     if (!playerBlocked(nx, p.y)) { p.x = nx; break; }
     if (!playerBlocked(p.x, ny)) { p.y = ny; break; }
   }
-  flash('-12', p.x, p.y - 46, '#ff6b6b');
+  flashDmg('-' + damage, p.x, p.y - 46, '#ff6b6b'); addShake(4);   // 玩家被打：彈出傷害＋震動
   playSlimeAudio('hit');
   if (p.hp <= 0 && !G.over) {
     flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e');
@@ -1070,19 +1106,128 @@ function updateSlimeJump(e, dt) {
   return phase < SLIME_JUMP.airRatio ? dt / SLIME_JUMP.airRatio : 0;
 }
 
-function spawnAttackVisual(attacker, target, spec, affected) {
+// ---- 打擊感：畫面震動、命中頓格、彈出傷害數字 ----
+let shakeAmt = 0, hitstop = 0;
+function addShake(a) { shakeAmt = Math.min(16, Math.max(shakeAmt, a)); }
+function addHitstop(t) { hitstop = Math.min(0.09, Math.max(hitstop, t)); }
+function flashDmg(text, x, y, color) { G.effects.push({ dmg: true, text, x, y, vy: -34, life: 0.7, life0: 0.7, color: color || '#fff' }); }
+// 火焰命中特效：程式即時繪製（取代 PNG 序列圖）。畫成一叢會扭動竄升的火舌。
+function drawFlameShape(ctx, cx, baseY, h, w, tipSway, color) {   // 尖端向上的水滴狀火舌
+  const tipX = cx + tipSway, tipY = baseY - h;
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.moveTo(cx - w / 2, baseY);
+  ctx.quadraticCurveTo(cx - w * 0.62, baseY - h * 0.5, tipX, tipY);   // 左側鼓出→尖端
+  ctx.quadraticCurveTo(cx + w * 0.62, baseY - h * 0.5, cx + w / 2, baseY);   // 尖端→右側落下
+  ctx.quadraticCurveTo(cx, baseY + h * 0.08, cx - w / 2, baseY);      // 圓底
+  ctx.closePath();
+  ctx.fill();
+}
+// 雷電命中特效：從上方劈下的鋸齒閃電（帶分岔）＋青白爆閃＋電火花。
+function makeBolt(x0, y0, x1, y1, segs, jit) {
+  const pts = [[x0, y0]];
+  for (let i = 1; i < segs; i++) {
+    const t = i / segs, bx = x0 + (x1 - x0) * t, by = y0 + (y1 - y0) * t, j = jit * (1 - t * 0.6);
+    pts.push([bx + (Math.random() * 2 - 1) * j, by + (Math.random() * 2 - 1) * j * 0.4]);
+  }
+  pts.push([x1, y1]);
+  return pts;
+}
+function spawnLightningBolt(x, y) {
+  const top = y - (95 + Math.random() * 30);
+  const main = makeBolt(x + (Math.random() * 2 - 1) * 10, top, x, y, 8, 16);
+  const branches = [];
+  for (let b = 0; b < 2; b++) {
+    const i = 2 + Math.floor(Math.random() * (main.length - 4));
+    const [bx, by] = main[i];
+    branches.push(makeBolt(bx, by, bx + (Math.random() * 2 - 1) * 34, by + 10 + Math.random() * 22, 4, 12));
+  }
+  G.effects.push({ bolt: true, x, y, main, branches, life: .26, life0: .26 });
+  G.effects.push({ ring: true, x, y, r: 5, r2: 30, life: .2, life0: .2, color: '#bfefff' });   // 命中閃光環
+  for (let i = 0; i < 7; i++) {                                                                 // 電火花四濺
+    const a = Math.random() * Math.PI * 2, sp = 40 + Math.random() * 80;
+    G.effects.push({ particle: true, kind: 'lightning', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 10,
+      r: 2 + Math.random() * 3, life: .2 + Math.random() * .18, life0: .38, color: '#cbf2ff' });
+  }
+}
+// 近戰命中特效：揮砍弧光（月牙斬）＋迸擊火花。
+function spawnMeleeSlash(x, y, angle, heavy) {
+  G.effects.push({ slash: true, x, y, angle, heavy, life: heavy ? .26 : .2, life0: heavy ? .26 : .2 });
+}
+function spawnMeleeImpact(x, y, heavy) {
+  G.effects.push({ ring: true, x, y, r: 5, r2: heavy ? 34 : 26, life: .2, life0: .2, color: '#dceaff' });
+  for (let i = 0; i < (heavy ? 12 : 8); i++) {
+    const a = Math.random() * Math.PI * 2, sp = 90 + Math.random() * 110;
+    G.effects.push({ particle: true, kind: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      r: 2 + Math.random() * 2.6, life: .18 + Math.random() * .14, life0: .32, color: '#eaf4ff' });
+  }
+}
+// 一團扭曲、濃稠的紫黑霧：由數個不規則裂片組成，會緩慢churn扭動。
+function pushCorrosionMist(x, y, vx, vy) {
+  const nl = 3 + Math.floor(Math.random() * 3), lobes = [];
+  for (let j = 0; j < nl; j++) lobes.push({ ox: (Math.random() * 2 - 1) * 8, oy: (Math.random() * 2 - 1) * 8, rr: 5 + Math.random() * 7, ph: Math.random() * 6.28 });
+  const L = 1.1 + Math.random() * 0.8;   // 停留久
+  G.effects.push({ cmist: true, x, y, vx, vy, r0: 0.7, rMax: 1.35, lobes, spin: (Math.random() * 2 - 1) * 0.7, life: L, life0: L });
+}
+// 腐蝕命中特效：濃稠扭曲的紫黑霧＋暗紫液滴，並在地上留下 5 秒的腐蝕痕跡（怪物碰到會扣血）。
+function spawnCorrosionSplash(x, y, splash, dmg) {
+  const R = splash > 0 ? Math.min(46, splash * CELL * 0.9) : 22;
+  // 地上腐蝕痕跡（存活 5 秒，範圍內怪物持續扣血）
+  const blobs = [];
+  for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * R * 0.5, dy: (Math.random() * 2 - 1) * R * 0.35, rr: R * (0.55 + Math.random() * 0.5) });
+  (G.acidPools = G.acidPools || []).push({ x, y, r: R, t: 5, t0: 5, dps: Math.max(2, dmg * 0.5), blobs, fizz: 0 });
+  // 命中瞬間噴出的紫黑霧（慢速、黏稠）
+  for (let i = 0; i < 8; i++) {
+    const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.6, sp = 10 + Math.random() * 22;
+    pushCorrosionMist(x + (Math.random() * 2 - 1) * 6, y + (Math.random() * 2 - 1) * 4, Math.cos(a) * sp, Math.sin(a) * sp);
+  }
+  // 幾滴暗紫液滴
+  for (let i = 0; i < 6; i++) {
+    const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.2, sp = 40 + Math.random() * 70, L = .35 + Math.random() * .3;
+    G.effects.push({ cdrop: true, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      r: 1.6 + Math.random() * 2.4, life: L, life0: L, col: Math.random() < .5 ? '#7a1aa0' : '#4d0d68' });
+  }
+}
+function spawnFlameBurst(x, y) {
+  const L = 0.5, n = 4, tongues = [];
+  for (let i = 0; i < n; i++) {
+    const center = Math.pow(1 - Math.abs(i - (n - 1) / 2) / ((n - 1) / 2), 1.4);   // 中間主導
+    tongues.push({
+      dx: (i - (n - 1) / 2) * 8 + (Math.random() * 2 - 1) * 2.5,
+      h: 32 + center * 44 + Math.random() * 8,   // 中間明顯高、兩側矮
+      w: 16 + center * 14 + Math.random() * 4,
+      phase: Math.random() * Math.PI * 2,
+      freq: 11 + Math.random() * 6,
+      lean: (Math.random() * 2 - 1) * 7,
+    });
+  }
+  G.effects.push({ flame: true, x, y, tongues, life: L, life0: L });
+  G.effects.push({ fglow: true, x, y: y - 14, r0: 12, r1: 46, life: .3, life0: .3 });   // 底層爆閃光暈
+  for (let i = 0; i < 8; i++) {                                                          // 飛散火星
+    const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.0, sp = 60 + Math.random() * 85;
+    const sl = .3 + Math.random() * .3;
+    G.effects.push({ ember: true, spark: true, x, y: y - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,
+      r: 1.3 + Math.random() * 1.5, wob: 4 + Math.random() * 6, seed: Math.random() * 99, life: sl, life0: sl });
+  }
+}
+function spawnAttackVisual(attacker, target, spec, affected, impactPoint = target) {
   const kind = spec.ability === '火焰' ? 'flame'
     : spec.ability === '雷電' ? 'lightning'
     : spec.ability === '怪力' || spec.ability === '自癒' ? 'melee'
     : spec.ability === '腐蝕' ? 'corrosion' : 'shot';
-  const duration = kind === 'lightning' ? .34 : (kind === 'melee' ? .24 : .28);
-  G.effects.push({ attack: true, kind, x1: attacker.x, y1: attacker.y - 9, x2: target.x, y2: target.y, life: duration, life0: duration, color: spec.color, seed: Math.random() * 1000 });
+  // 火焰、雷電、近戰改用程式即時繪製；其餘維持原本序列圖／光束
+  const proc = kind === 'flame' || kind === 'lightning' || kind === 'melee' || kind === 'corrosion';
+  if (kind === 'flame') spawnFlameBurst(impactPoint.x, impactPoint.y + 8);
+  else if (kind === 'lightning') spawnLightningBolt(impactPoint.x, impactPoint.y);
+  else if (kind === 'melee') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0);
+  else if (kind === 'corrosion') spawnCorrosionSplash(impactPoint.x, impactPoint.y, spec.splash, spec.dmg);
+  else G.effects.push({ attack: true, kind, x1: attacker.x, y1: attacker.y - 9, x2: target.x, y2: target.y, life: .28, life0: .28, color: spec.color, seed: Math.random() * 1000 });
   const hitTargets = affected && affected.length ? affected : [target];
   for (const enemy of hitTargets) {
     enemy.hitT = Math.max(enemy.hitT || 0, .16);
     enemy.hitColor = spec.color;
   }
-  const particleCount = kind === 'lightning' ? 12 : (kind === 'melee' ? 9 : 7);
+  const particleCount = proc ? 0 : 7;
   for (let i = 0; i < particleCount; i++) {
     const angle = Math.random() * Math.PI * 2;
     const speed = (kind === 'corrosion' ? 20 : 35) + Math.random() * 55;
@@ -1093,6 +1238,17 @@ function spawnAttackVisual(attacker, target, spec, affected) {
       color: kind === 'lightning' ? '#fff3a3' : (kind === 'flame' ? '#ffb347' : spec.color)
     });
   }
+  // 依屬性給不同的打擊感：震動強度、命中頓格、衝擊環顏色
+  const feel = ({
+    flame:     { shake: 3.5, stop: 0,    ring: '#ff8a3a' },   // 希奧妮 火焰：中震、灼燒環
+    lightning: { shake: 8,   stop: 0.05, ring: '#fff3a3' },   // 安柏 雷電：強震＋頓格＋亮環
+    melee:     { shake: 6.5, stop: 0.05, ring: '#ffd0d5' },   // 雷德／路德 近戰：重擊震＋頓格
+    corrosion: { shake: 2.5, stop: 0,    ring: '#b98cff' },   // 阿瓦倫 腐蝕：輕震、紫環
+    shot:      { shake: 2.5, stop: 0,    ring: spec.color },
+  })[kind] || { shake: 2.5, stop: 0, ring: spec.color };
+  if (feel.stop) addHitstop(feel.stop);
+  if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
+  for (const enemy of hitTargets) flashDmg('-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6)), enemy.x, enemy.y - 26, feel.ring);
   if (typeof sfx === 'function') sfx('hit');
 }
 function stepEnemy(e, dt) {
@@ -1207,10 +1363,12 @@ function updateFootsteps() {
 }
 function loop(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
-  if (!G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning) updatePlayer(dt);   // 對話或轉場時暫停玩家與戰場
+  const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
+  if (!G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) updatePlayer(dt);   // 對話或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (G.running && !G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning) update(dt);
+  if (G.running && !G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) update(dt);
+  if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
   requestAnimationFrame(loop);
 }
@@ -1229,10 +1387,10 @@ function update(dt) {
     if (G.spawnTimer <= 0) {
       const cells = spawnCells();   // 地圖的「入口」格（沒設定就用最上排）
       if (cells.length) {
-        const s = G.spawnQueue.shift();
+        G.spawnQueue.shift();
         const [sc, sr] = cells[Math.floor(Math.random() * cells.length)];
         const [sx, sy] = center(sc, sr);
-        G.enemies.push({ x: sx, y: sy, hp: s.hp, maxhp: s.hp, speed: s.speed, reward: s.reward, hasTarget: false });
+        G.enemies.push(createMonster(chooseMonster(MAP, ACTIVE_MONSTERS), sx, sy));
       }
       G.spawnTimer = G.curGap;
     }
@@ -1244,7 +1402,7 @@ function update(dt) {
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
-    else updateSentry(t, dt);
+    else if (!t.meleeSwing || t.hp <= 0 || t.berserk) updateSentry(t, dt);
     animateSentry(t, t.x - ox, t.y - oy, dt);
   }
   for (const npc of G.npcs) {
@@ -1256,7 +1414,7 @@ function update(dt) {
   // 哨兵攻擊
   for (const t of G.towers) {
     const spec = TYPES[t.type];
-    if (t.hp <= 0) continue;
+    if (t.hp <= 0) { t.meleeSwing = null; continue; }
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (spec.taintRegen && !t.berserk) t.taint = Math.max(0, t.taint - spec.taintRegen * dt);
     if (spec.aura && !t.berserk) {
@@ -1268,17 +1426,34 @@ function update(dt) {
         o.hp = Math.min(o.maxhp, beforeHp + (spec.aura.heal || 0) * dt);
         if (o.berserk && o.taint < 60) o.berserk = false;
         if ((o.taint < beforeTaint || o.hp > beforeHp) && t.supportFxCd <= 0) {
-          G.effects.push({ heal: true, x: o.x, y: o.y - 9, life: .72, life0: .72, color: '#72e0bd' });
+          playAttackSprite('guidance', o.x, o.y - 8, .48);
           G.effects.push({ support: true, x1: t.x, y1: t.y - 8, x2: o.x, y2: o.y - 8, life: .32, life0: .32, color: '#72e0bd' });
           t.supportFxCd = .55;
         }
       }
     }   // 嚮導隨身疏導與治療
     t.cd -= dt;
-    if (t.berserk || t.cd > 0) continue;
+    let swingTarget = null;
+    if (t.berserk) { t.meleeSwing = null; continue; }
+    if (t.meleeSwing) {
+      const swing = t.meleeSwing;
+      swing.age += dt;
+      if (!swing.slashFx && swing.age >= swing.wind) {
+        swing.slashFx = true;
+        const slashAng = Math.atan2(Math.sin(swing.angle) + 1.1, Math.cos(swing.angle));   // 偏向下前方（配合往下劈）
+        spawnMeleeSlash(t.x + Math.cos(swing.angle) * 20, t.y - 6 + Math.sin(swing.angle) * 16, slashAng, t.type === 'luther');
+      }
+      if (!swing.hit && swing.age >= swing.impact) {
+        swing.hit = true;
+        const foe = swing.target;
+        if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12) swingTarget = foe;
+      }
+      if (swing.age >= swing.duration) t.meleeSwing = null;
+      if (!swingTarget) continue;
+    } else if (t.cd > 0) continue;
     const R = spec.range * CELL;
-    let target = null, bestY = -1, bestDistance = Infinity;
-    target = t.mode === 'goto' ? null : campAttackerFor(t, R);
+    let target = swingTarget, bestY = -1, bestDistance = Infinity;
+    if (!target) target = t.mode === 'goto' ? null : campAttackerFor(t, R);
     const attacker = !target && t.type === 'red' ? redAttacker() : null;
     if (attacker && Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R) target = attacker;
     if (!target) {
@@ -1291,8 +1466,16 @@ function update(dt) {
       }
     }
     if (target) {
-      t.cd = 1 / spec.rate;
+      if (!swingTarget) t.cd = 1 / spec.rate;
+      if ((t.type === 'red' || t.type === 'luther') && !swingTarget) {
+        const heavy = t.type === 'luther', dx = target.x - t.x, dy = target.y - t.y;
+        t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
+        t.meleeSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: heavy ? .29 : .19, impact: heavy ? .43 : .30, duration: heavy ? .78 : .58, hit: false };
+        t.moving = false;
+        continue;
+      }
       if (Math.random() < spec.accuracy) {
+        const impactPoint = { x: target.x, y: target.y };
         target.hp -= spec.dmg;
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
         if (spec.splash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= spec.splash * CELL) { e.hp -= spec.dmg * .6; affected.push(e); }
@@ -1305,13 +1488,33 @@ function update(dt) {
             e.x+=dx/d*CELL*spec.knockback;e.y+=dy/d*CELL*spec.knockback;e.hasTarget=false;e.baseTarget=null;
           }
         }
-        spawnAttackVisual(t, target, spec, affected);
+        spawnAttackVisual(t, target, spec, affected, impactPoint);
       } else flash('MISS', t.x, t.y - 26, '#9aa4b2');
       if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
       if (t.taint >= 100 && !t.berserk) { t.berserk = true; G.lives -= BERSERK.livesPenalty; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d'); systemNotice(TYPES[t.type].name + '污染失控，已進入暴走狀態', true); }
     }
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(3); sfx('kill'); } }
+  // 地上腐蝕痕跡：計時、範圍內怪物持續扣血、偶爾冒紫黑霧
+  if (G.acidPools && G.acidPools.length) {
+    for (const pool of G.acidPools) {
+      pool.t -= dt;
+      for (const e of G.enemies) {
+        if (e.dead) continue;
+        if (Math.hypot(e.x - pool.x, e.y - pool.y) <= pool.r) {
+          e.hp -= pool.dps * dt;
+          e.hitT = Math.max(e.hitT || 0, .12); e.hitColor = '#b060ff';
+        }
+      }
+      pool.fizz -= dt;
+      if (pool.fizz <= 0 && pool.t > .4) {   // 痕跡上緩緩冒濃霧
+        pool.fizz = .35 + Math.random() * .35;
+        const ang = Math.random() * Math.PI * 2, rr = Math.random() * pool.r * 0.8;
+        pushCorrosionMist(pool.x + Math.cos(ang) * rr, pool.y + Math.sin(ang) * rr, (Math.random() * 2 - 1) * 5, -4 - Math.random() * 6);
+      }
+    }
+    G.acidPools = G.acidPools.filter(p => p.t > 0);
+  }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
@@ -1333,6 +1536,18 @@ function update(dt) {
       f.x += f.vx * dt; f.y += f.vy * dt;
       f.vx *= (1 - 3.4 * dt); f.vy *= (1 - 3.4 * dt);
       if (f.kind === 'flame') f.vy -= 18 * dt;
+    } else if (f.ember) {   // 火焰粒子：往上竄、浮力持續、水平減速
+      f.x += f.vx * dt; f.y += f.vy * dt;
+      f.vy -= (f.spark ? 8 : 26) * dt;
+      f.vx *= (1 - 1.6 * dt);
+    } else if (f.cdrop) {   // 腐蝕液滴：噴出後受重力灑落
+      f.x += f.vx * dt; f.y += f.vy * dt;
+      f.vy += 190 * dt;
+      f.vx *= (1 - 1.2 * dt);
+    } else if (f.cmist) {   // 腐蝕紫黑霧：黏稠——移動很慢、強阻力很快就停住
+      f.x += f.vx * dt; f.y += f.vy * dt;
+      f.vy -= 4 * dt;
+      f.vx *= (1 - 3.6 * dt); f.vy *= (1 - 3.2 * dt);
     }
   }
   G.effects = G.effects.filter(f => f.life > 0);
@@ -1403,6 +1618,62 @@ function drawObstacle(o) {
     ctx.fillStyle = '#c9a26a'; ctx.fillRect(x + 2, y + h - 6, (w - 4) * Math.max(0, o.hp) / o.maxhp, 4);
   }
 }
+function meleeSwingAngle(s) {
+  // 角度＝斧頭方向（已鏡像的座標系）：-π/2 朝上、0 朝前、+π/2 朝下。過頭劈：上後方→前下方。
+  const REST = -0.5, BACK = -2.15, CHOP = 0.8, OVER = 1.0;
+  if (s.age < s.wind) {                                   // 舉斧過頭蓄力（ease-out）
+    const u = s.age / s.wind, e = 1 - (1 - u) * (1 - u);
+    return REST + (BACK - REST) * e;
+  }
+  if (s.age < s.impact) {                                 // 往下劈（ease-in 加速，才有力道）
+    const u = (s.age - s.wind) / (s.impact - s.wind), e = u * u;
+    return BACK + (CHOP - BACK) * e;
+  }
+  if (s.age < s.impact + .06) {                           // 命中過衝一下
+    const u = (s.age - s.impact) / .06;
+    return CHOP + (OVER - CHOP) * Math.sin(u * Math.PI);
+  }
+  const u = Math.min(1, (s.age - s.impact - .06) / (s.duration - s.impact - .06));   // 收招回正
+  return CHOP + (REST - CHOP) * (1 - (1 - u) * (1 - u));
+}
+function drawFireAxe(t) {
+  if (MAP_SAFE || t.hp <= 0 || t.berserk || (t.type !== 'red' && t.type !== 'luther')) return;
+  const s = t.meleeSwing, heavy = t.type === 'luther';
+  const length = heavy ? 30 : 25, k = heavy ? 1.25 : 1.0;   // length：柄長；k：斧頭大小
+  const facing = s ? s.angle : ({ left: Math.PI, right: 0, back: -Math.PI / 2, front: Math.PI / 2 }[t.dir] ?? 0);
+  const sweep = s ? meleeSwingAngle(s) : -0.5;
+  const fx = Math.cos(facing) >= 0 ? 1 : -1;   // 目標在右→1，在左→鏡像
+  ctx.save();
+  ctx.translate(t.x + fx * 6, t.y - 13);       // 支點在肩膀附近
+  ctx.scale(fx, 1); ctx.rotate(sweep);         // 垂直面上的過頭劈（左右自動鏡像）
+  ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  const hx = length;
+  // 木柄（深色描邊＋木色芯）
+  ctx.strokeStyle = '#1e1512'; ctx.lineWidth = heavy ? 7 : 5.5;
+  ctx.beginPath(); ctx.moveTo(-7, 0); ctx.lineTo(hx, 0); ctx.stroke();
+  ctx.strokeStyle = '#b07a3e'; ctx.lineWidth = heavy ? 3.4 : 2.6;
+  ctx.beginPath(); ctx.moveTo(-6, 0); ctx.lineTo(hx - 1, 0); ctx.stroke();
+  // 後方尖鎬
+  ctx.fillStyle = '#a52526'; ctx.strokeStyle = '#3a1114'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.moveTo(hx - 2, -3 * k); ctx.lineTo(hx - 13 * k, -1.5 * k); ctx.lineTo(hx - 2, 2 * k); ctx.closePath(); ctx.fill(); ctx.stroke();
+  // 前方斧刃（紅頭＋弧形刃）
+  ctx.fillStyle = '#c62d2d';
+  ctx.beginPath();
+  ctx.moveTo(hx - 2, -5 * k); ctx.lineTo(hx + 6 * k, -10 * k);
+  ctx.quadraticCurveTo(hx + 15 * k, 0, hx + 6 * k, 11 * k); ctx.lineTo(hx - 2, 6 * k);
+  ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#3a1114'; ctx.lineWidth = 1.6; ctx.stroke();
+  // 銀白刃口
+  ctx.strokeStyle = '#eaf6ff'; ctx.lineWidth = 2.6;
+  ctx.beginPath(); ctx.moveTo(hx + 6 * k, -10 * k); ctx.quadraticCurveTo(hx + 15 * k, 0, hx + 6 * k, 11 * k); ctx.stroke();
+  // 斧頭高光
+  ctx.strokeStyle = 'rgba(255,255,255,.35)'; ctx.lineWidth = 1.4;
+  ctx.beginPath(); ctx.moveTo(hx + 2, -6 * k); ctx.lineTo(hx + 9 * k, -1 * k); ctx.stroke();
+  // 握斧的手
+  ctx.fillStyle = '#e6b594'; ctx.strokeStyle = '#8a5a3a'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.arc(2, 0, 3.4, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+  ctx.restore();
+}
 function drawTower(t) {
   const spec = TYPES[t.type];
   const set = sentrySprites[t.type];
@@ -1417,12 +1688,25 @@ function drawTower(t) {
       ctx.beginPath(); ctx.ellipse(t.x, t.y + 14, 20, 7, 0, 0, Math.PI * 2); ctx.fill();
     }
     ctx.imageSmoothingEnabled = false;
+    ctx.save();
+    if (t.meleeSwing) {
+      const s = t.meleeSwing;
+      let lunge;   // -1 後仰蓄力 → +1 前傾撲擊
+      if (s.age < s.wind) lunge = -Math.sin(s.age / s.wind * Math.PI / 2) * .65;
+      else if (s.age < s.impact) { const u = (s.age - s.wind) / (s.impact - s.wind); lunge = -.65 + 1.65 * u * u; }
+      else { const u = Math.min(1, (s.age - s.impact) / (s.duration - s.impact)); lunge = 1 * (1 - u * u); }
+      const dx = Math.cos(s.angle), dy = Math.sin(s.angle);
+      ctx.translate(t.x + dx * lunge * 6, t.y + dy * lunge * 4);
+      ctx.rotate(dx * lunge * .16); ctx.translate(-t.x, -t.y);
+    }
     ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
+    ctx.restore();
     ctx.imageSmoothingEnabled = true;
   } else {
     ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
   }
 
+  drawFireAxe(t);
   // 頭頂資訊：名字在上，HP 條在下。
   // 安全區域沒有血條，名字往下 5px 貼近頭頂（跟 NPC 一致）；戰鬥區域維持原本的名字＋血條間距。
   const nameY = visualTop - (MAP_SAFE ? 6 : 11);
@@ -1473,15 +1757,16 @@ function drawEnemy(e) {
   ctx.save();
   if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
   const lift = e.slimeLift || 0;
-  const slimeW = 42 * (e.slimeScaleX || 1), slimeH = 33 * (e.slimeScaleY || 1);
+  const slimeW = (e.drawWidth || 42) * (e.slimeScaleX || 1), slimeH = (e.drawHeight || 33) * (e.slimeScaleY || 1);
   const bottomY = e.y + 13 - lift;
   const shadowScale = Math.max(.55, 1 - lift / 22);
   ctx.globalAlpha = .28 * shadowScale; ctx.fillStyle = '#071015';
   ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill();
   ctx.globalAlpha = 1;
-  if (monsterSlimeSprite.complete && monsterSlimeSprite.naturalWidth) {
+  const sprite = monsterImage(e.sprite || 'images/monster/Monster_Slime.png');
+  if (sprite.complete && sprite.naturalWidth) {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(monsterSlimeSprite, Math.round(e.x - slimeW / 2), Math.round(bottomY - slimeH), Math.round(slimeW), Math.round(slimeH));
+    ctx.drawImage(sprite, Math.round(e.x - slimeW / 2), Math.round(bottomY - slimeH), Math.round(slimeW), Math.round(slimeH));
     ctx.imageSmoothingEnabled = true;
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
@@ -1594,7 +1879,8 @@ function draw() {
     ctx.translate((Math.random() * 2 - 1) * power, (Math.random() * 2 - 1) * power);
   }
   ctx.scale(VIEW_SCALE, VIEW_SCALE);
-  ctx.translate(-Math.round(cam.x * VIEW_SCALE) / VIEW_SCALE, -Math.round(cam.y * VIEW_SCALE) / VIEW_SCALE);
+  const shx = shakeAmt ? (Math.random() * 2 - 1) * shakeAmt : 0, shy = shakeAmt ? (Math.random() * 2 - 1) * shakeAmt : 0;   // 打擊震動
+  ctx.translate(-Math.round(cam.x * VIEW_SCALE) / VIEW_SCALE + shx, -Math.round(cam.y * VIEW_SCALE) / VIEW_SCALE + shy);
   ctx.imageSmoothingEnabled = false;   // 放大時保持像素銳利
   // 底色＝純黑：沒有鋪任何素材的格子就是黑的（跟地圖編輯器看到的一致）
   ctx.fillStyle = '#000'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
@@ -1612,6 +1898,19 @@ function draw() {
   for (const e of G.enemies) if (isLit(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (G.player) sortables.push({ y: G.player.sitting ? G.player.sitting.sortY + 0.5 : G.player.y + 16, draw: () => drawPlayer(G.player) });
+  // 地上腐蝕痕跡（畫在單位腳下：紫黑色murky污漬，壓扁貼地）
+  if (G.acidPools) for (const pool of G.acidPools) {
+    const a = Math.min(1, (pool.t0 - pool.t) / 0.3, pool.t / 1.0);   // 淡入 0.3s、最後 1s 淡出
+    for (const b of pool.blobs) {
+      const cxp = pool.x + b.dx, cyp = pool.y + b.dy;
+      const g = ctx.createRadialGradient(cxp, cyp, 0, cxp, cyp, b.rr);
+      g.addColorStop(0, `rgba(48,10,66,${(0.6 * a).toFixed(3)})`);
+      g.addColorStop(0.6, `rgba(60,15,82,${(0.36 * a).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(28,0,44,0)');
+      ctx.save(); ctx.translate(cxp, cyp); ctx.scale(1, 0.6); ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(0, 0, b.rr, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    }
+  }
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
 
@@ -1632,7 +1931,125 @@ function draw() {
   }
   // 特效
   for (const f of G.effects) {
-    if (f.text) {
+    if (f.spriteEffect) {
+      const frames = attackEffectFrames[f.spriteEffect];
+      const age = 1 - Math.max(0, f.life) / f.life0;
+      const frame = frames[Math.min(3, Math.floor(age * 4))];
+      if (frame && frame.complete && frame.naturalWidth) {
+        ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.angle || 0);
+        ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(frame, -32, -32, 64, 64);
+        ctx.restore();
+      }
+    } else if (f.slash) {                                  // 近戰揮砍：月牙斬弧光（殘影拖尾＋外光暈＋白核＋銳利前緣）
+      const p = Math.max(0, f.life / f.life0), prog = 1 - p;
+      const R = (f.heavy ? 54 : 42) * (0.92 + prog * 0.22), band = f.heavy ? 13 : 10, span = f.heavy ? 2.2 : 1.9;
+      const rot = (prog - 0.5) * 0.7, alpha = Math.min(1, p * 1.7);
+      const crescent = (ro, ri, s, e) => { ctx.beginPath(); ctx.arc(0, 0, ro, s, e); ctx.arc(0, 0, ri, e, s, true); ctx.closePath(); ctx.fill(); };
+      ctx.save(); ctx.translate(f.x, f.y); ctx.globalCompositeOperation = 'lighter';
+      ctx.save(); ctx.rotate(f.angle + rot - 0.4); ctx.globalAlpha = alpha * 0.28; ctx.fillStyle = '#3f8bff';   // 殘影拖尾
+      crescent(R * 0.97, R * 0.97 - band, -span / 2, span / 2); ctx.restore();
+      ctx.rotate(f.angle + rot);
+      ctx.globalAlpha = alpha * 0.6; ctx.fillStyle = '#4a9cff'; ctx.shadowColor = '#6ab4ff'; ctx.shadowBlur = 20;   // 外光暈
+      crescent(R, R - band, -span / 2, span / 2);
+      ctx.shadowBlur = 0; ctx.globalAlpha = alpha; ctx.fillStyle = '#eef8ff';                                      // 白核
+      crescent(R - band * 0.08, R - band * 0.5, -span * 0.49, span * 0.49);
+      ctx.globalAlpha = alpha; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;                                     // 銳利前緣亮線
+      ctx.beginPath(); ctx.arc(0, 0, R - 1, -span * 0.5, span * 0.5); ctx.stroke();
+      ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.bolt) {                                   // 雷電本體：鋸齒閃電＋分岔，青藍外光＋白核，快速明滅
+      const p = Math.max(0, f.life / f.life0), age = f.life0 - f.life;
+      const flick = age < .04 ? 1 : (Math.sin(age * 90) > -0.3 ? 1 : 0.25);   // 明滅閃爍
+      const a = Math.min(1, p * 1.6) * flick;
+      ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.globalCompositeOperation = 'lighter';
+      const stroke = (pts, wGlow, wCore) => {
+        const trace = () => { ctx.beginPath(); ctx.moveTo(pts[0][0], pts[0][1]); for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]); ctx.stroke(); };
+        ctx.globalAlpha = a * 0.5; ctx.strokeStyle = '#3ad6ff'; ctx.lineWidth = wGlow; ctx.shadowColor = '#3ad6ff'; ctx.shadowBlur = 14; trace();
+        ctx.shadowBlur = 0; ctx.globalAlpha = a; ctx.strokeStyle = '#eafcff'; ctx.lineWidth = wCore; trace();
+      };
+      stroke(f.main, 5, 1.8);
+      for (const br of f.branches) stroke(br, 3, 1.1);
+      ctx.globalAlpha = a; ctx.fillStyle = '#eafcff';                          // 命中處白熱點
+      ctx.beginPath(); ctx.arc(f.x, f.y, 4 + (1 - p) * 3, 0, Math.PI * 2); ctx.fill();
+      ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.flame) {                                  // 火焰本體：一叢扭動竄升的火舌（三層色＋加色疊加）
+      const t = 1 - Math.max(0, f.life) / f.life0, age = f.life0 - f.life;
+      const rise = t < .25 ? t / .25 : 1;                  // 快速長出
+      const shrink = t < .6 ? 1 : Math.max(.2, 1 - (t - .6) / .4 * .85);   // 後段收縮
+      const gscale = (0.55 + rise * 0.45) * shrink;
+      const alpha = t < .68 ? 1 : Math.max(0, 1 - (t - .68) / .32);
+      const baseY = f.y - t * 12;                           // 整體略往上飄
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alpha;
+      for (const tg of f.tongues) {
+        const cx = f.x + tg.dx;
+        const flick = Math.sin(age * tg.freq + tg.phase);
+        const flick2 = Math.sin(age * tg.freq * 0.6 + tg.phase * 1.7);
+        const h = tg.h * gscale * (0.85 + 0.15 * flick);
+        const w = tg.w * gscale * (0.9 + 0.12 * flick2);
+        const sway = flick * w * 0.35 + tg.lean * gscale;
+        drawFlameShape(ctx, cx, baseY, h,        w,        sway,        '#ff5a10');   // 外層 橙紅
+        drawFlameShape(ctx, cx, baseY, h * 0.66, w * 0.58, sway * 0.8,  '#ffab1e');   // 中層 黃
+        drawFlameShape(ctx, cx, baseY, h * 0.28, w * 0.24, sway * 0.6, '#ffcf66');   // 核心 暖黃（縮小、留在底部）
+      }
+      ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.cmist) {                                  // 腐蝕紫黑霧：多裂片組成的扭曲濃霧，緩慢churn（murky 不發光）
+      const prog = 1 - Math.max(0, f.life) / f.life0, s = f.r0 + (f.rMax - f.r0) * prog;
+      const alpha = (prog < .15 ? prog / .15 : prog > .6 ? Math.max(0, (1 - prog) / .4) : 1) * .62;
+      if (alpha > 0.01) {
+        const age = f.life0 - f.life, rot = f.spin * age;
+        for (const lo of f.lobes) {
+          const wob = Math.sin(age * 3 + lo.ph) * 2.5;
+          const lx = f.x + (lo.ox * Math.cos(rot) - lo.oy * Math.sin(rot)) + wob;
+          const ly = f.y + (lo.ox * Math.sin(rot) + lo.oy * Math.cos(rot));
+          const rr = lo.rr * s;
+          const g = ctx.createRadialGradient(lx, ly, 0, lx, ly, rr);
+          g.addColorStop(0, `rgba(64,14,88,${alpha.toFixed(3)})`);
+          g.addColorStop(0.55, `rgba(40,7,56,${(alpha * 0.72).toFixed(3)})`);
+          g.addColorStop(1, 'rgba(20,0,34,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, ly, rr, 0, Math.PI * 2); ctx.fill();
+        }
+      }
+    } else if (f.cdrop) {                                  // 腐蝕液滴：暗紫小圓
+      const p = Math.max(0, f.life / f.life0);
+      ctx.globalAlpha = Math.min(1, p * 1.5); ctx.fillStyle = f.col;
+      ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.6, f.r * (0.6 + 0.4 * p)), 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 1;
+    } else if (f.fglow) {                                  // 火焰爆閃光暈（加色疊加）
+      const p = Math.max(0, f.life / f.life0), r = f.r0 + (f.r1 - f.r0) * (1 - p);
+      const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
+      g.addColorStop(0, `rgba(255,240,190,${(0.9 * p).toFixed(3)})`);
+      g.addColorStop(0.4, `rgba(255,150,40,${(0.6 * p).toFixed(3)})`);
+      g.addColorStop(1, 'rgba(120,20,0,0)');
+      ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g;
+      ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, Math.PI * 2); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over';
+    } else if (f.ember) {                                  // 火焰粒子：白熱→黃→橙→暗紅，閃爍上竄
+      const t = 1 - Math.max(0, f.life) / f.life0, age = f.life0 - f.life;
+      let cr, cg, cb;
+      if (f.spark) { cr = 255; cg = 240; cb = 180; }
+      else if (t < .35) { const u = t / .35; cr = 255; cg = 250 - u * 40; cb = 200 - u * 150; }
+      else if (t < .7)  { const u = (t - .35) / .35; cr = 255; cg = 210 - u * 100; cb = 50 - u * 40; }
+      else { const u = (t - .7) / .3; cr = 255 - u * 90; cg = 110 - u * 80; cb = 10; }
+      const wob = Math.sin(f.seed + age * 22) * (f.wob || 6) * (1 - t) * 0.5;
+      const alpha = Math.min(1, f.life / (f.life0 * .5)), rad = Math.max(.4, f.r * (1 - t * .7));
+      ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alpha;
+      ctx.fillStyle = `rgb(${cr | 0},${cg | 0},${cb | 0})`;
+      ctx.beginPath(); ctx.arc(f.x + wob, f.y, rad, 0, Math.PI * 2); ctx.fill();
+      ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.ring) {                                   // 命中衝擊環：快速擴張＋淡出
+      const p = Math.max(0, f.life / f.life0), rr = f.r + (f.r2 - f.r) * (1 - p);
+      ctx.globalAlpha = p * 0.9; ctx.strokeStyle = f.color; ctx.lineWidth = 1.5 + p * 2.5;
+      ctx.beginPath(); ctx.arc(f.x, f.y, rr, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
+    } else if (f.dmg) {                             // 彈出傷害數字：先放大一下再定住、上飄淡出
+      const life0 = f.life0 || 0.7, age = life0 - f.life;
+      const pop = age < 0.09 ? 0.7 + (age / 0.09) * 0.5 : 1.2 - Math.min(1, (age - 0.09) / 0.28) * 0.2;
+      const alpha = Math.min(1, f.life / 0.35), ty = f.y + (f.vy || -34) * Math.min(0.5, age);
+      ctx.save(); ctx.translate(f.x, ty); ctx.scale(pop, pop);
+      ctx.font = 'bold 17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.globalAlpha = alpha; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+      ctx.strokeText(f.text, 0, 0); ctx.fillStyle = f.color; ctx.fillText(f.text, 0, 0);
+      ctx.restore(); ctx.globalAlpha = 1;
+    } else if (f.text) {
       const life0 = f.life0 || 0.8;
       const alpha = Math.min(1, f.life / 0.6);                 // 最後 0.6 秒才淡出，其餘維持清晰
       const ty = f.y + (f.vy || 0) * Math.min(0.8, life0 - f.life);   // 只在前段緩緩上飄
@@ -1673,10 +2090,22 @@ function draw() {
         ctx.beginPath(); ctx.arc(f.x2, f.y2, 12 + grow * 18, 0, Math.PI * 2); ctx.stroke();
       } else if (f.kind === 'melee') {
         const angle = Math.atan2(f.y2 - f.y1, f.x2 - f.x1);
-        ctx.strokeStyle = '#fff2cf'; ctx.lineWidth = 5; ctx.lineCap = 'round'; ctx.shadowColor = f.color; ctx.shadowBlur = 8;
-        ctx.beginPath(); ctx.arc(f.x2, f.y2, 19 + grow * 9, angle - 1.25, angle + .85); ctx.stroke();
-        ctx.shadowBlur = 0; ctx.strokeStyle = f.color; ctx.lineWidth = 2;
-        ctx.beginPath(); ctx.arc(f.x2, f.y2 + 5, 8 + grow * 24, 0, Math.PI * 2); ctx.stroke();
+        const heavy = f.meleeType === 'luther';
+        const radius = (heavy ? 34 : 25) * (0.72 + grow * 0.38);
+        const start = -1.25 + grow * .45, end = 1.25 + grow * .45;
+        ctx.translate(f.x2, f.y2 - 7); ctx.rotate(angle);
+        ctx.shadowColor = '#2379ff'; ctx.shadowBlur = heavy ? 17 : 11;
+        ctx.fillStyle = heavy ? '#348cff' : '#66b6ff';
+        ctx.beginPath(); ctx.arc(0, 0, radius, start, end);
+        ctx.quadraticCurveTo(radius * .36, 0, radius * Math.cos(start), radius * Math.sin(start));
+        ctx.closePath(); ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.fillStyle = '#f4ffff';
+        ctx.beginPath(); ctx.arc(0, 0, radius * .82, start + .13, end - .13);
+        ctx.quadraticCurveTo(radius * .48, 0, radius * .82 * Math.cos(start + .13), radius * .82 * Math.sin(start + .13));
+        ctx.closePath(); ctx.fill();
+        ctx.strokeStyle = '#6dbbff'; ctx.lineWidth = heavy ? 2.5 : 1.7;
+        ctx.beginPath(); ctx.arc(0, 0, radius + 2, start - .1, end + .1); ctx.stroke();
       } else {
         const dx = f.x2 - f.x1, dy = f.y2 - f.y1, d = Math.hypot(dx, dy) || 1;
         ctx.strokeStyle = f.kind === 'flame' ? '#ffd080' : (f.kind === 'corrosion' ? '#8db8ff' : f.color);

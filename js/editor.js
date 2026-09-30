@@ -1488,7 +1488,7 @@ function refreshMapSelect() {
   maps.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
 }
 function newId() { return 'map_' + Date.now().toString(36); }
-function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], coreCount: 1, entrances: [], camp: [], rules: {} }); }
+function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], entrances: [], camp: [], rules: {} }); }
 function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
 
 mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
@@ -1514,7 +1514,34 @@ document.getElementById('delMap').addEventListener('click', () => {
 });
 
 // ================= 規則面板 =================
-const RULE_FIELDS = ['money', 'lives', 'guide', 'guideRegen', 'waves', 'count', 'countAdd', 'hp', 'hpAdd', 'speed', 'speedAdd', 'gap', 'gapSub', 'reward'];
+const RULE_FIELDS = ['money', 'lives', 'guide', 'guideRegen'];
+function renderMonsterMix() {
+  const panel = document.getElementById('monsterMixList'), map = curMap();
+  panel.replaceChildren();
+  const catalog = monsterCatalog(true);
+  const current = new Map(monsterChoices(map, catalog).map(item => [item.id, item.weight]));
+  catalog.forEach(monster => {
+    const row = document.createElement('label');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px';
+    const toggle = document.createElement('input'); toggle.type = 'checkbox'; toggle.checked = current.has(monster.id); toggle.dataset.monsterId = monster.id;
+    const name = document.createElement('span'); name.textContent = monster.name; name.style.flex = '1';
+    const weight = document.createElement('input'); weight.type = 'number'; weight.min = '1'; weight.max = '999';
+    weight.value = current.get(monster.id) || 100; weight.style.width = '70px'; weight.dataset.monsterWeight = monster.id;
+    const unit = document.createElement('small'); unit.textContent = '權重';
+    row.append(toggle, name, weight, unit); panel.append(row);
+    toggle.addEventListener('change', saveMonsterMix);
+    weight.addEventListener('change', saveMonsterMix);
+  });
+}
+function saveMonsterMix() {
+  const panel = document.getElementById('monsterMixList');
+  const mix = [...panel.querySelectorAll('input[data-monster-id]')].filter(input => input.checked).map(input => ({
+    id: input.dataset.monsterId,
+    weight: Math.max(1, Math.min(999, Math.floor(Number(panel.querySelector(`input[data-monster-weight="${input.dataset.monsterId}"]`).value) || 1))),
+  }));
+  if (!mix.length) { setStatus('至少選一種異質體', '#ffd24a'); renderMonsterMix(); return; }
+  pushUndo(); curMap().monsterMix = mix; saveMaps(); renderMonsterMix();
+}
 function loadRules() {
   const m = curMap();
   document.getElementById('f_name').value = m.name;
@@ -1525,7 +1552,9 @@ function loadRules() {
   document.getElementById('f_npcs').checked = !!m.npcs;
   document.getElementById('f_coreCount').value = m.coreCount;
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
+  renderMonsterMix();
 }
+window.addEventListener('focus', renderMonsterMix);
 // 寬、高旁的方向選單決定從哪一側增加／裁掉。
 function bindSizeField(id, key) {
   document.getElementById(id).addEventListener('change', e => {
