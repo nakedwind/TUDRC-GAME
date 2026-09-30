@@ -48,6 +48,7 @@ const STORAGE_EOC_NO_ENTRY = 'tudrc_asset_eoc_no_entry_poster_v1';      // 後�
 const STORAGE_EOC_STAIRS_DESK = 'tudrc_asset_eoc_stairs_desk_v1'; // 樓梯、雙開門、書和筆
 const STORAGE_DORM_PACK = 'tudrc_asset_pack_dorm_v1'; // 宿舍家具與房間設備
 const STORAGE_COUNSELING_ROOM_PACK = 'tudrc_asset_pack_counseling_room_v1'; // 疏導室素材包
+const STORAGE_RESTAURANT_PACK = 'tudrc_asset_pack_restaurant_v1'; // 餐廳素材包
 const STORAGE_TILE_SIZE_FIX = 'tudrc_fix_tile_sizes_v1';         // 修正登記尺寸與圖片不符的素材
 const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應變中心素材：安全距離海報
 const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應變中心素材：門（電子鎖）、消防栓箱
@@ -256,13 +257,14 @@ function loadTiles() {
   const counselingTissueFixed = mergeDefaultAssetPack(t => t.id === 'tile_counseling_tissue_box', STORAGE_COUNSELING_TISSUE_FIX);
   const noEntryAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_no_entry_poster', STORAGE_EOC_NO_ENTRY);
   const counselingRoomAdded = mergeDefaultAssetPack('tile_counseling_', STORAGE_COUNSELING_ROOM_PACK);
+  const restaurantAdded = mergeDefaultAssetPack('tile_restaurant_', STORAGE_RESTAURANT_PACK);
   // 破損建築：新素材（tile_dmg_）＋從 item-decorate 搬過來的裂痕／碎石（更新路徑與尺寸，地圖上的擺放不變）
   const damagedAdded = mergeDefaultAssetPack(t => String(t.file || '').includes('/破損建築/'), STORAGE_DAMAGED_PACK);
   // 兩個「柱子」曾因同檔名互相覆蓋：大廳高柱改回 2×8、補回應變中心的柱子
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded) saveTiles();
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -483,6 +485,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/應變中心',
   'images/宿舍',
   'images/破損建築',
+  'images/餐廳',
 ];
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -979,6 +982,7 @@ const PALETTE_CATEGORIES = [
   { id: 'damaged', name: '破損建築' },
   { id: 'field', name: '野戰基地' },
   { id: 'scene', name: '場景物件' },
+  { id: 'restaurant', name: '餐廳' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -991,6 +995,7 @@ function tileCategory(t) {
   if (file.includes('/破損建築/')) return 'damaged';
   if (file.includes('/field-camp/')) return 'field';
   if (file.includes('/scene-props/')) return 'scene';
+  if (String(t.id || '').startsWith('tile_restaurant_') || file.includes('/餐廳/')) return 'restaurant';
   if (file.includes('/item-decorate/')) return 'decor';
   if (file.includes('/item-obstacle/')) return 'obstacle';
   return 'other';

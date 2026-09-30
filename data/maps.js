@@ -1708,6 +1708,158 @@ const TILES_CUSTOM = [
     "file": "images/應變中心/elevator-light01.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_restaurant_waste_sorting_station",
+    "name": "Waste Sorting Station",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-waste-sorting-station.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_trash_bin_small",
+    "name": "Small Trash Bin",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-trash-bin-small.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_restaurant_kitchen_workstation",
+    "name": "Kitchen Workstation",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-kitchen-workstation.png",
+    "w": 7,
+    "h": 3
+  },
+  {
+    "id": "tile_restaurant_tray_stack",
+    "name": "Tray Stack",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-tray-stack.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_chopsticks_holder",
+    "name": "Chopsticks Holder",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-chopsticks-holder.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_restaurant_bowl_stack",
+    "name": "Bowl Stack",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-bowl-stack.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_restaurant_storage_cabinet",
+    "name": "Storage Cabinet",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-storage-cabinet.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_restaurant_serving_counter",
+    "name": "Serving Counter",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-serving-counter.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_counter_stool_red",
+    "name": "Red Counter Stool",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-counter-stool-red.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_restaurant_water_dispenser_01",
+    "name": "Water Dispenser 01",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-water-dispenser-01.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_water_dispenser_02",
+    "name": "Water Dispenser 02",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-water-dispenser-02.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_condiment_bottles",
+    "name": "Condiment Bottles",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-condiment-bottles.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_restaurant_napkin_holder",
+    "name": "Napkin Holder",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-napkin-holder.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_restaurant_partition_tall",
+    "name": "Tall Partition",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-partition-tall.png",
+    "w": 2,
+    "h": 6
+  },
+  {
+    "id": "tile_restaurant_booth_seating_vertical",
+    "name": "Vertical Booth Seating",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-booth-seating-vertical.png",
+    "w": 1,
+    "h": 7
+  },
+  {
+    "id": "tile_restaurant_chair_side",
+    "name": "Side Chair",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-chair-side.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_buffet_counter_01",
+    "name": "Buffet Counter 01",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-buffet-counter-01.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_buffet_counter_02",
+    "name": "Buffet Counter 02",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-buffet-counter-02.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_soup_warmer",
+    "name": "Soup Warmer",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-soup-warmer.png",
+    "w": 1,
+    "h": 2
   }
 ];
 
