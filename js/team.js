@@ -101,8 +101,9 @@ function memberCondition(actor, safe) {
   if (actor.noncombat) return { text: '非戰鬥人員', cls: 'support' };
   if (safe) return { text: getTeam().includes(actor.type) ? '已編入' : '待命', cls: getTeam().includes(actor.type) ? 'ready' : 'standby' };
   if (!actor.live) return { text: '未部署', cls: 'standby' };
-  if (actor.live.berserk) return { text: '暴走', cls: 'danger' };
+  if (actor.live.berserk) return { text: '混亂', cls: 'danger' };
   const taint = actor.live.taint || 0;
+  if (taint > 85) return { text: '瀕臨暴走', cls: 'danger' };
   if (taint >= 70) return { text: '危險', cls: 'danger' };
   if (taint >= 40) return { text: '負荷上升', cls: 'warning' };
   return { text: '正常', cls: 'ready' };
@@ -270,11 +271,12 @@ function renderFieldSquadHud() {
       const hpPercent = Math.max(0, Math.min(100, hp / spec.hp * 100));
       const taint = Math.max(0, Math.min(100, Math.round(member.taint || 0)));
       const loadWidth = spec.guide ? 0 : taint;
-      const sootheAction = hp > 0 && !spec.guide && taint > 50
-        ? '<button class="field-soothe-button" type="button" data-soothe="' + member.type + '">疏導</button>'
-        : '';
+      const sootheAction = '';   // 正式遊戲停用隊友欄的手動疏導按鈕（靠近哨兵仍可疏導）
+      const stateLabel = member.berserk
+        ? '<em style="font-size:10px;font-weight:700;color:#ff5b5b;margin-left:5px">混亂</em>'
+        : (!spec.guide && taint > 85 ? '<em style="font-size:10px;font-weight:700;color:#ffb24d;margin-left:5px">瀕臨暴走</em>' : '');
       return '<article class="field-member' + (hp <= 0 ? ' down' : '') + '">' +
-        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + '</b>' +
+        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
         '<div><i class="field-hp" aria-label="生命值"><u style="width:' + hpPercent + '%"></u></i></div>' +
         '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i></div>' +
         '</div>' + sootheAction + '</article>';
