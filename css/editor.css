@@ -25,24 +25,6 @@ a.backlink { color: #8fd3ff; font-size: 13px; text-decoration: none; }
 .btn.off { color: #697382; background: #181d24; }
 .btn.on { border-color: #b39ddb; background: #3a2f55; color: #fff; }
 
-button, .tile {
-  transform-origin: center;
-  will-change: transform;
-}
-button.ui-pressing, .tile.ui-pressing { transform: scale(.93); }
-button.ui-bounce, .tile.ui-bounce { animation: ui-button-bounce 220ms cubic-bezier(.2, .9, .3, 1.35); }
-
-@keyframes ui-button-bounce {
-  0% { transform: scale(.93); }
-  58% { transform: scale(1.045); }
-  100% { transform: scale(1); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  button.ui-pressing, .tile.ui-pressing { transform: none; }
-  button.ui-bounce, .tile.ui-bounce { animation: none; }
-}
-
 /* 畫布：地圖比畫面大時，外框出現捲軸，可捲動編輯 */
 #wrap { position: relative; width: 100%; max-width: 1280px; overflow: auto; max-height: 82vh; }
 canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }

@@ -63,6 +63,28 @@ let MAP_NPCS = false;
 const LIGHT_BASE_ENABLED = LIGHT.enabled;   // balance.js 的原始設定，離開安全場景要還原
 
 let MAP_INDEX = 0;   // 目前玩第幾張地圖（由開始畫面的地圖選單切換）
+let openElevatorStamp = null;
+const elevatorOpenImage = new Image();
+elevatorOpenImage.src = 'images/應變中心/elevator-open.png';
+const isElevatorTile = tile => String(tile?.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator.png');
+const isElevatorStamp = stamp => isElevatorTile(mapTileById(stamp.id));
+function setElevatorSolids(stamp, phase) {
+  const tile = mapTileById(stamp.id), cfg = elevatorConfig(stamp.id);
+  if (!tile || !cfg) return;
+  const c0 = stamp.c + Math.round((stamp.ox || 0) / CELL);
+  const r0 = stamp.r + Math.round((stamp.oy || 0) / CELL);
+  for (let dr = 0; dr < mapTileH(tile); dr++) for (let dc = 0; dc < mapTileW(tile); dc++) {
+    mapWalls.delete((c0 + dc) + ',' + (r0 + dr));
+  }
+  for (const [dc, dr] of cfg[phase].solid || []) {
+    if (dc >= 0 && dc < mapTileW(tile) && dr >= 0 && dr < mapTileH(tile))
+      mapWalls.add((c0 + dc) + ',' + (r0 + dr));
+  }
+}
+function openElevator(stamp) {
+  openElevatorStamp = stamp;
+  setElevatorSolids(stamp, 'open');
+}
 function mapList() {
   if (PREVIEW) return [PREVIEW.map];                 // 預覽模式：只有編輯中的那一張
   return (typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length) ? MAPS_DEFAULT : [];
@@ -78,6 +100,7 @@ function switchMap(i) {                 // 切換到第 i 張並重新載入地�
 function initMap() {
   buildTileRegistry(); preloadMapTiles();
   MAP = pickMap();
+  openElevatorStamp = null;
   if (!MAP) return;
 
   // 地圖大小（可比畫面大；鏡頭會跟著玩家捲動）
@@ -113,7 +136,24 @@ function initMap() {
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
+  for (const stamp of MAP.stamps || []) if (isElevatorStamp(stamp)) setElevatorSolids(stamp, 'closed');
   mapSolidOffsets = MAP.solidOffsets || {};                              // 不可穿透格的像素微調
+  // 每張椅子的擋路格由椅子編輯器決定；一般格子圖片與大圖擺放都套用。
+  const addChairSolid = (id, c, r, fx = false, fy = false) => {
+    const cfg = chairConfig(id), tile = mapTileById(id);
+    if (!cfg || !tile) return;
+    const w = mapTileW(tile), h = mapTileH(tile);
+    for (const [dx, dy] of cfg.solid) {
+      const cc = c + (fx ? w - 1 - dx : dx), rr = r + (fy ? h - 1 - dy : dy);
+      if (inGrid(cc, rr)) mapWalls.add(cc + ',' + rr);
+    }
+  };
+  for (const layer of Object.values(MAP.layers || {})) for (const [key, id] of Object.entries(layer)) {
+    const [c, r] = key.split(',').map(Number);
+    addChairSolid(id, c, r);
+  }
+  for (const s of MAP.stamps || []) addChairSolid(s.id,
+    s.c + Math.round((s.ox || 0) / CELL), s.r + Math.round((s.oy || 0) / CELL), !!s.fx, !!s.fy);
   mapBases = (MAP.stamps || []).filter(s => {
     const t = mapTileById(s.id);
     return !!(t && t.baseHp);
@@ -269,7 +309,7 @@ function hasImageAt(c, r) {
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
-const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !!t.baseHp || (!t.flat && (mapTileH(t) >= OCC_MIN_H || isOccLayer(s.layer || 'top'))); };
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapTileH(t) >= OCC_MIN_H || isOccLayer(s.layer || 'top'))); };
 
 // 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
 function drawMapGround(ctx) {
@@ -277,16 +317,18 @@ function drawMapGround(ctx) {
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    if (!isOccLayer(lid)) for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key)) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
-    for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === lid && !stampIsOcc(s)) drawMapStampImg(ctx, s);
+    if (!isOccLayer(lid)) for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+    for (const s of (MAP.stamps || [])) if (!isElevatorStamp(s) && (s.layer || 'top') === lid && !stampIsOcc(s)) drawMapStampImg(ctx, s);
   }
 }
 // 上層：'top' 圖層，永遠畫在角色上面
 function drawMapTop(ctx) {
   if (!MAP) return;
   const layer = MAP.layers ? (MAP.layers.top || {}) : {};
-  for (const key in layer) { if (G.mapDestroyed.has('top:' + key)) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+  for (const key in layer) { if (G.mapDestroyed.has('top:' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
   for (const s of (MAP.stamps || [])) {
+    if (isElevatorStamp(s)) continue;
+    if (chairConfig(s.id)) continue;
     if ((s.layer || 'top') !== 'top') continue;
     const t = mapTileById(s.id) || {};
     if (!t.baseHp) drawMapStampImg(ctx, s);
@@ -305,19 +347,26 @@ function mapOccluders() {
   const items = [];
   MAP_LAYER_ORDER.forEach((lid, li) => {
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    if (lid !== 'top' && isOccLayer(lid)) for (const key in layer) {
+    for (const key in layer) {
+      const chair = chairConfig(layer[key]);
+      if (!chair && (lid === 'top' || !isOccLayer(lid))) continue;
       const [c, r] = key.split(',').map(Number), id = layer[key];
-      items.push({ li, x0: c * CELL, y0: r * CELL, x1: (c + 1) * CELL, y1: (r + 1) * CELL, kind: 'cell', id, c, r });
+      const y0 = r * CELL;
+      items.push({ li, x0: c * CELL, y0, x1: (c + 1) * CELL, y1: (r + 1) * CELL,
+        sortY: chair ? y0 + chair.depth : null, fixedDepth: !!chair, kind: 'cell', id, c, r });
     }
     for (const s of (MAP.stamps || [])) {
+      if (isElevatorStamp(s)) continue;
       if ((s.layer || 'top') !== lid || !stampIsOcc(s)) continue;
       const t = mapTileById(s.id) || {};
-      if (lid === 'top' && !t.baseHp) continue;
+      const chair = chairConfig(s.id);
+      if (lid === 'top' && !t.baseHp && !chair) continue;
       const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
-      const depth = t.baseHp
+      const depth = chair ? y0 + (s.fy ? mapTileH(t) * CELL - chair.depth : chair.depth) : t.baseHp
         ? Math.max(0, Math.min(mapTileH(t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapTileH(t) - 2))))
         : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapTileH(t), s.sortDepth)) : null);
-      items.push({ li, x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL, sortY: depth == null ? null : y0 + depth * CELL, fixedDepth: depth != null, kind: 'stamp', stamp: s });
+      items.push({ li, x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL,
+        sortY: depth == null ? null : chair ? depth : y0 + depth * CELL, fixedDepth: depth != null, kind: 'stamp', stamp: s });
     }
   });
   // items 已依圖層由下往上排好，所以下層的 y 一定先算完；
@@ -342,6 +391,15 @@ function collectMapOccluders(ctx, out) {
   for (const it of mapOccluders()) {
     if (it.kind === 'cell') { const { id, c, r, li } = it; const source = MAP_LAYER_ORDER[li] + ':' + c + ',' + r; if (!G.mapDestroyed.has(source)) out.push({ y: it.y, draw: () => drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL) }); }
     else { const s = it.stamp; out.push({ y: it.y, draw: () => drawMapStampImg(ctx, s) }); }
+  }
+}
+function drawElevators(ctx) {
+  for (const stamp of MAP.stamps || []) {
+    if (!isElevatorStamp(stamp)) continue;
+    if (stamp === openElevatorStamp && elevatorOpenImage.complete && elevatorOpenImage.naturalWidth) {
+      const x = OX + stamp.c * CELL + (stamp.ox || 0), y = OY + stamp.r * CELL + (stamp.oy || 0);
+      ctx.drawImage(elevatorOpenImage, x, y, mapTileW(mapTileById(stamp.id)) * CELL, mapTileH(mapTileById(stamp.id)) * CELL);
+    } else drawMapStampImg(ctx, stamp);
   }
 }
 

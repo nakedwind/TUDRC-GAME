@@ -294,8 +294,8 @@ document.getElementById('elevatorClose').addEventListener('click', () => { sfx('
 elevatorMenu.addEventListener('click', e => { if (e.target === elevatorMenu) { sfx('switch'); closeElevatorMenu(); } });
 elevatorMenu.querySelectorAll('[data-floor]').forEach(button => button.addEventListener('click', () => {
   sfx('button');
-  elevatorMenu.querySelectorAll('[data-floor]').forEach(option => option.classList.toggle('sel', option === button));
-  document.getElementById('elevatorMessage').textContent = button.dataset.floor + ' 的地圖尚未建立';
+  closeElevatorMenu();
+  enterPortal({ to: 'map_mu5ad7t2', elevator: true });
 }));
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'];
 const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
@@ -323,7 +323,10 @@ window.addEventListener('keydown', e => {
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：空白鍵 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
-    if (elevator) openElevatorMenu();
+    if (elevator) {
+      if (elevator.mode === 'closed') { openElevator(elevator.stamp); sfx('door'); }
+      else openElevatorMenu();
+    }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else {
       const actor = interactionNearPlayer();
@@ -343,13 +346,25 @@ function elevatorNearPlayer() {
   let best = null, bestDistance = 72;
   for (const stamp of MAP.stamps) {
     const tile = mapTileById(stamp.id);
-    if (!tile || !String(tile.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator.png')) continue;
-    const x = OX + (stamp.c + mapTileW(tile) / 2) * CELL + (stamp.ox || 0);
-    const y = OY + (stamp.r + mapTileH(tile) + .5) * CELL + (stamp.oy || 0);
+    if (!isElevatorTile(tile)) continue;
+    const left = OX + stamp.c * CELL + (stamp.ox || 0), top = OY + stamp.r * CELL + (stamp.oy || 0);
+    const x = left + 60, y = top + 140;
+    if (stamp === openElevatorStamp) {
+      if (playerInsideElevator(stamp)) {
+        return { x, top, stamp, mode: 'inside' };
+      }
+      continue;
+    }
     const distance = Math.hypot(x - G.player.x, y - G.player.y);
-    if (distance < bestDistance) { bestDistance = distance; best = { x, y, top: OY + (stamp.r + .5) * CELL + (stamp.oy || 0) }; }
+    if (distance < bestDistance) { bestDistance = distance; best = { x, top, stamp, mode: 'closed' }; }
   }
   return best;
+}
+function playerInsideElevator(stamp) {
+  if (!stamp || !G.player) return false;
+  const left = OX + stamp.c * CELL + (stamp.ox || 0), top = OY + stamp.r * CELL + (stamp.oy || 0);
+  return G.player.x >= left + 25 && G.player.x <= left + 95 &&
+    G.player.y >= top + 55 && G.player.y <= top + 115;
 }
 function portalNearPlayer() {
   const p = G.player; if (!p || typeof mapPortals === 'undefined') return null;
@@ -391,7 +406,14 @@ function enterPortal(pt) {
         switchMap(mapIndexById(pt.to));         // 全黑維持半秒後換地圖
         begin(false);                           // 重建並進入遊玩狀態，不播放開始按鈕聲
         const back = returnPortalCell(fromId);  // 落在新地圖「通回原地圖」的門旁
-        placePlayerNearPortal(back);
+        if (pt.elevator) {
+          const stamp = (MAP.stamps || []).find(s => String(mapTileById(s.id)?.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator.png'));
+          if (stamp) {
+            const x = OX + (stamp.c + 1.5) * CELL + (stamp.ox || 0);
+            const y = OY + (stamp.r + 3.5) * CELL + (stamp.oy || 0);
+            if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; }
+          }
+        } else placePlayerNearPortal(back);
         updateCamera(); draw();
         requestAnimationFrame(() => mapTransition.classList.remove('visible'));
         setTimeout(() => { mapTransitioning = false; }, PORTAL_FADE_MS);
@@ -793,25 +815,37 @@ function rescueStuck(p, blockedFn) {
 let seatCache = null, seatCacheFor = null;
 function mapSeats() {
   if (seatCache && seatCacheFor === MAP) return seatCache;
-  const occByStamp = new Map();
-  for (const it of mapOccluders()) if (it.kind === 'stamp') occByStamp.set(it.stamp, it);
+  const occByStamp = new Map(), occByCell = new Map();
+  for (const it of mapOccluders()) {
+    if (it.kind === 'stamp') occByStamp.set(it.stamp, it);
+    else if (it.kind === 'cell') occByCell.set(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r, it);
+  }
   const seats = [];
-  for (const s of (MAP && MAP.stamps) || []) {
-    const cfg = SIT.tiles[s.id]; if (!cfg) continue;
+  function addSeat(s, occ) {
+    const cfg = chairConfig(s.id); if (!cfg) return;
     const t = mapTileById(s.id) || {};
     const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
     const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
-    let dir = cfg.dir || 'front';
+    let dir = cfg.seat.dir || 'front';
     if (s.fx && (dir === 'left' || dir === 'right')) dir = dir === 'left' ? 'right' : 'left';   // 椅子翻面→人也跟著翻
-    const dx = (cfg.seatDx || 0) * (s.fx ? -1 : 1);                                             // 翻面時左右微調也鏡射
-    const occ = occByStamp.get(s);
+    if (s.fy && (dir === 'front' || dir === 'back')) dir = dir === 'front' ? 'back' : 'front';
     seats.push({
-      x: x0 + w / 2 + dx,
-      y: y0 + (cfg.seatDy != null ? cfg.seatDy : h * 0.7),
-      top: y0, dir,
-      sortY: occ ? occ.y : y0 + h,
+      x: x0 + (s.fx ? w - cfg.seat.x : cfg.seat.x),
+      y: y0 + (s.fy ? h - cfg.seat.y : cfg.seat.y),
+      top: y0, dir, x0, y0, w, h,
+      rotation: Number(cfg.seat.rotation) || 0,
+      prompt: /bed|床/i.test(s.id) ? '躺' : '坐',
+      sortY: occ ? occ.y : y0 + cfg.depth,
     });
   }
+  for (const [lid, layer] of Object.entries((MAP && MAP.layers) || {})) {
+    for (const [key, id] of Object.entries(layer)) {
+      if (!chairConfig(id)) continue;
+      const [c, r] = key.split(',').map(Number);
+      addSeat({ id, c, r }, occByCell.get(lid + ':' + key));
+    }
+  }
+  for (const s of (MAP && MAP.stamps) || []) addSeat(s, occByStamp.get(s));
   seatCache = seats; seatCacheFor = MAP;
   return seats;
 }
@@ -819,7 +853,10 @@ function seatNearPlayer() {
   const p = G.player; if (!p) return null;
   let best = null, bd = SIT.radius;
   for (const s of mapSeats()) {
-    const d = Math.hypot(s.x - p.x, s.y - p.y);
+    // 大床中央可能被碰撞格包住；互動距離要從家具外緣算，不能只量床中央。
+    const dx = Math.max(s.x0 - p.x, 0, p.x - (s.x0 + s.w));
+    const dy = Math.max(s.y0 - p.y, 0, p.y - (s.y0 + s.h));
+    const d = Math.hypot(dx, dy);
     if (d < bd) { bd = d; best = s; }
   }
   return best;
@@ -1054,6 +1091,12 @@ function enemyAttackSentry(e, target, dt) {
   const spec = TYPES[target.type], defense = Math.max(0, Math.min(.75, spec.defense || 0));
   const damage = (e.sentryDamage ?? 14) * (1 - defense);
   target.hp = Math.max(0, target.hp - damage);
+  target.hitT = Math.max(target.hitT || 0, .2);   // 受擊閃紅
+  // 擊退：被怪物往外推約 0.6 格（撞牆就不推）
+  const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
+  const nx = target.x + dx / d * CELL * 0.6, ny = target.y + dy / d * CELL * 0.6;
+  const [cc, cr] = cellAt(nx, ny);
+  if (typeof sentryCellWalkable === 'function' && sentryCellWalkable(cc, cr)) { target.x = nx; target.y = ny; target.navPath = null; target.navGoal = null; }
   flash('-' + Math.round(damage), target.x, target.y - 30, '#ff8f8f');
   if (target.hp <= 0) { target.target = null; flash('失去戰鬥能力', target.x, target.y - 42, '#ff5b6e'); }
 }
@@ -1361,7 +1404,7 @@ function spawnFlameBurst(x, y, scale = 1) {
   }
 }
 // 玩家（溫特）攻擊：按住左鍵朝游標方向開槍。彈匣 6 發，打完或按 R 裝填；傷害很低、會吸引仇恨。
-const PLAYER_ATK = { range: 6, dmg: 3, rate: 1.5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 1.6 };
+const PLAYER_ATK = { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 3 };
 let aimHeld = false, aimClient = null;
 function clientToWorld(cx, cy) {
   const rect = cv.getBoundingClientRect();
@@ -1380,6 +1423,7 @@ function updatePlayerAttack(dt) {
   if (p.gunT > 0) p.gunT -= dt;
   if (p.recoilT > 0) p.recoilT -= dt;
   p.atkCd = (p.atkCd || 0) - dt;
+  if (aimHeld && p.hp > 0) p.gunT = Math.max(p.gunT, 0.3);   // 按住時持續舉槍，不會射完一發就跳回
   if (p.reloadT > 0) {   // 裝填中
     p.reloadT -= dt;
     if (p.reloadT <= 0) { p.ammo = PLAYER_ATK.mag; }
@@ -1393,7 +1437,7 @@ function updatePlayerAttack(dt) {
   p.atkCd = 1 / PLAYER_ATK.rate;
   p.ammo--;
   p.dir = Math.abs(adx) >= Math.abs(ady) ? (adx < 0 ? 'left' : 'right') : (ady < 0 ? 'back' : 'front');
-  p.gunT = 0.22; p.recoilT = 0.14; p.recoilAng = aimAng;   // 後座力
+  p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   // 朝游標方向、射程內、照亮的最近怪
   let best = null, bestD = PLAYER_ATK.range * CELL;
   for (const e of G.enemies) {
@@ -1406,8 +1450,9 @@ function updatePlayerAttack(dt) {
   const endX = best ? best.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   const endY = best ? best.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
   const mx = p.x + Math.cos(aimAng) * 15, my = p.y - 8 + Math.sin(aimAng) * 10;
-  G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .09, life0: .09 });   // 槍口閃光
-  G.effects.push({ attack: true, kind: 'shot', x1: mx, y1: my, x2: endX, y2: endY, life: .12, life0: .12, color: '#bfe0ff', seed: Math.random() * 1000 });
+  G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });   // 槍口閃光
+  G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
+  if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
   if (best) {
     best.hp -= PLAYER_ATK.dmg;
     best.playerAggroT = PLAYER_ATK.aggro;   // 吸引仇恨
@@ -1672,6 +1717,7 @@ function update(dt) {
     const spec = TYPES[t.type];
     if (t.hp <= 0) { t.meleeSwing = null; t.gunSwing = null; continue; }
     if (t.gunT > 0) t.gunT -= dt;   // 持槍攻擊圖計時
+    if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
@@ -1992,12 +2038,14 @@ function drawFireAxe(t) {
   if (t.type === 'avaren') { drawSwingWeapon(t, avarenKnifeImg, 9, 29, 20); return; }  // 阿瓦倫：military_knife
   if (t.type === 'luther') { drawSwingWeapon(t, lutherAxeImg, 28, 46, 26); return; }   // 路德：fire_axe_02（攻擊時才出現）
 }
-function sentryRedFlash(t) {   // 回傳紅閃強度 0~1：瀕臨暴走慢脈動、暴走快脈動
-  if (MAP_SAFE || t.hp <= 0) return 0;
+function sentryRedFlash(t) {   // 回傳紅閃強度 0~1：受擊閃一下、瀕臨暴走慢脈動、暴走快脈動
+  if (t.hp <= 0) return 0;
+  const hit = t.hitT > 0 ? Math.min(1, t.hitT / .2) * 0.9 : 0;   // 受擊閃紅
+  if (MAP_SAFE) return hit;
   const now = performance.now() / 1000;
-  if (t.berserk) return (Math.sin(now * Math.PI * 2 * 3) + 1) / 2;                                       // 暴走：快閃（約 3Hz）
-  if (!TYPES[t.type].guide && t.taint > 85) return (Math.sin(now * Math.PI * 2 * 0.8) + 1) / 2 * 0.85;   // 瀕臨暴走：慢閃（約 0.8Hz）
-  return 0;
+  if (t.berserk) return Math.max(hit, (Math.sin(now * Math.PI * 2 * 3) + 1) / 2);                                       // 暴走：快閃（約 3Hz）
+  if (!TYPES[t.type].guide && t.taint > 85) return Math.max(hit, (Math.sin(now * Math.PI * 2 * 0.8) + 1) / 2 * 0.85);   // 瀕臨暴走：慢閃
+  return hit;
 }
 function drawTower(t) {
   const spec = TYPES[t.type];
@@ -2103,7 +2151,15 @@ function drawEnemy(e) {
   const sprite = monsterImage(e.sprite || 'images/monster/Monster_Slime.png');
   if (sprite.complete && sprite.naturalWidth) {
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(sprite, Math.round(e.x - slimeW / 2), Math.round(bottomY - slimeH), Math.round(slimeW), Math.round(slimeH));
+    const dx = Math.round(e.x - slimeW / 2), dy = Math.round(bottomY - slimeH), dw = Math.round(slimeW), dh = Math.round(slimeH);
+    ctx.drawImage(sprite, dx, dy, dw, dh);
+    if (e.hitT > 0) {   // 受擊閃紅
+      ctx.save();
+      ctx.globalAlpha = Math.min(1, e.hitT / .16) * 0.65;
+      ctx.filter = 'sepia(1) saturate(8) hue-rotate(-35deg) brightness(1.1)';
+      ctx.drawImage(sprite, dx, dy, dw, dh);
+      ctx.restore();
+    }
     ctx.imageSmoothingEnabled = true;
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
@@ -2183,7 +2239,7 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.fillStyle = '#e6ebf2'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText(label, x + pad + keyW + gap, y + 17);
 }
-function drawSitPrompt(seat) { drawInteractPrompt(seat.x, seat.top, '坐'); }
+function drawSitPrompt(seat) { drawInteractPrompt(seat.x, seat.top, seat.prompt || '坐'); }
 function drawPlayer(p) {
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
@@ -2195,7 +2251,11 @@ function drawPlayer(p) {
     }
     if (p.hitT > 0) ctx.filter = 'sepia(1) saturate(4) hue-rotate(-38deg) brightness(1.32)';
     ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
+    if (p.sitting?.rotation) {
+      ctx.translate(p.x, p.y - size / 2 + 18);
+      ctx.rotate(p.sitting.rotation * Math.PI / 180);
+      ctx.drawImage(img, -size / 2, -size / 2, size, size);
+    } else ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
     ctx.imageSmoothingEnabled = true;
     ctx.restore();
   } else {
@@ -2257,11 +2317,21 @@ function draw() {
 
   // 上層（樹冠、屋簷等，永遠蓋在最上面）
   drawMapTop(ctx);
+  // 電梯是獨立物件：牆之後繪製；開門後站進去的人物顯示在門框前。
+  drawElevators(ctx);
+  if (G.player) for (const stamp of MAP.stamps || []) {
+    if (!isElevatorStamp(stamp)) continue;
+    const left = OX + stamp.c * CELL + (stamp.ox || 0), top = OY + stamp.r * CELL + (stamp.oy || 0);
+    const cfg = elevatorConfig(stamp.id), phase = stamp === openElevatorStamp ? 'open' : 'closed';
+    const depth = cfg?.[phase]?.depth ?? (phase === 'open' ? 35 : 120);
+    if (G.player.x >= left && G.player.x <= left + 3 * CELL &&
+        G.player.y + 16 >= top + depth && G.player.y <= top + 4 * CELL) drawPlayer(G.player);
+  }
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
-    if (elevator) drawInteractPrompt(elevator.x, elevator.top, '搭電梯');
+    if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'closed' ? '電梯' : '選擇樓層');
     else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
@@ -2359,6 +2429,15 @@ function draw() {
       ctx.globalAlpha = Math.min(1, p * 1.5); ctx.fillStyle = f.col;
       ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.6, f.r * (0.6 + 0.4 * p)), 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
+    } else if (f.bullet) {                                 // 子彈曳光：一顆亮點＋短尾，從槍口快速飛向目標
+      const prog = 1 - Math.max(0, f.life) / f.life0;
+      const cx = f.x1 + (f.x2 - f.x1) * prog, cy = f.y1 + (f.y2 - f.y1) * prog;
+      const ang = Math.atan2(f.y2 - f.y1, f.x2 - f.x1), tx = cx - Math.cos(ang) * 8, ty = cy - Math.sin(ang) * 8;
+      ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
+      ctx.strokeStyle = f.color; ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(cx, cy); ctx.stroke();
+      ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cx, cy, 1.8, 0, Math.PI * 2); ctx.fill();
+      ctx.restore(); ctx.globalCompositeOperation = 'source-over';
     } else if (f.muzzle) {                                 // 槍口閃光：短暫的亮星＋前射小扇
       const p = Math.max(0, f.life / f.life0);
       ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.ang || 0); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = p;

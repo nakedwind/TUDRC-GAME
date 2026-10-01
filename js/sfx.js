@@ -95,7 +95,10 @@ const SFX = (() => {
     set volume(v) { volume = v; if (master) master.gain.value = v; activeAudio.forEach(audio => { audio.volume = Math.min(1, v); }); },
   };
 })();
-function sfx(name) { SFX.play(name); }
+function sfx(name) {
+  if (typeof UIFeedback !== 'undefined' && UIFeedback.intercept(name)) return;
+  SFX.play(name);
+}
 
 // M 鍵：靜音開關
 window.addEventListener('keydown', e => {

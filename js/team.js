@@ -310,31 +310,44 @@ function renderTeamPanel() {
   const roster = (typeof ROSTER !== 'undefined') ? ROSTER : [];
   const cap = (typeof TEAM_SIZE !== 'undefined') ? TEAM_SIZE : 4;
   const team = getTeam();
-  const rows = roster.map(id => {
+  const memberCard = (id, selected) => {
     const spec = (typeof TYPES !== 'undefined' && TYPES[id]) || {};
-    const inTeam = team.includes(id);
     const role = spec.guide ? '嚮導・弱戰鬥＋隨身疏導' : '哨兵';
     const profile = TEAM_PROFILES[id] || {};
-    return '<button class="team-pick" data-id="' + id + '" style="display:flex;align-items:center;gap:10px;width:100%;text-align:left;margin:5px 0;padding:9px 11px;border-radius:8px;border:2px solid ' + (inTeam ? '#5ec8ff' : '#34404f') + ';background:' + (inTeam ? '#22384a' : '#1b222c') + ';color:#e6ebf2;cursor:pointer;font-size:14px">' +
+    return '<button class="team-pick' + (selected ? ' team-pick-selected' : '') + '" type="button" data-id="' + id + '" aria-label="' + (selected ? '移出' : '編入') + spec.name + '">' +
       '<span class="team-avatar-frame"><img class="team-avatar" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '正面圖"></span>' +
       '<span class="team-summary"><b>' + (spec.name || id) + '</b>' +
       '<span class="team-role">' + (spec.rank ? spec.rank + ' 級・' : '') + role + '</span>' +
       '<span class="team-intro">' + (profile.intro || spec.role || '') + '</span></span>' +
-      '<span class="team-choice" style="color:' + (inTeam ? '#8fd3ff' : '#9aa4b2') + '">' + (inTeam ? '✔ 已編入' : '＋ 編入') + '</span></button>';
-  }).join('');
+      '<span class="team-choice">' + (selected ? '移出 −' : '編入 ＋') + '</span></button>';
+  };
+  const available = roster.filter(id => !team.includes(id));
   teamPanel.innerHTML =
-    '<div style="background:#141a22;border:1px solid #2a3442;border-radius:12px;padding:18px;width:min(680px,92%);max-height:88%;overflow:auto">' +
-    '<h2 style="margin:0 0 4px;font-size:18px;color:#e6ebf2">🧑‍🤝‍🧑 出勤配置</h2>' +
-    '<div style="color:#9aa4b2;font-size:13px;margin-bottom:10px">每次任務可帶 ' + cap + ' 位。已選 <b style="color:#8fd3ff">' + team.length + ' / ' + cap + '</b> 位。</div>' +
-    '<div>' + rows + '</div>' +
-    '<div style="display:flex;justify-content:flex-end;margin-top:14px"><button id="teamDone" style="padding:8px 18px;border-radius:8px;background:#2b5a45;border:1px solid #4fbf8f;color:#fff;cursor:pointer;font-size:14px">完成</button></div>' +
+    '<div class="team-dialog" role="dialog" aria-modal="true" aria-label="出勤配置">' +
+    '<header class="team-dialog-head"><div><h2>🧑‍🤝‍🧑 出勤配置</h2><p>選擇這次任務的出勤人員</p></div><span class="team-count">已編入 <b>' + team.length + ' / ' + cap + '</b></span></header>' +
+    '<div class="team-columns">' +
+      '<section class="team-column"><h3>可選人員 <small>' + available.length + ' 位</small></h3><div class="team-list" id="teamAvailable">' +
+        (available.length ? available.map(id => memberCard(id, false)).join('') : '<p class="team-empty">所有人員都已編入。</p>') +
+      '</div></section>' +
+      '<section class="team-column team-column-selected"><h3>已編入人員 <small>' + team.length + ' / ' + cap + '</small></h3><div class="team-list" id="teamSelected">' +
+        (team.length ? team.map(id => memberCard(id, true)).join('') : '<p class="team-empty">尚未編入人員，請從左側選擇。</p>') +
+      '</div></section>' +
+    '</div><footer class="team-dialog-footer"><span>點選左側編入，點選右側移出</span><button id="teamDone" type="button">完成</button></footer>' +
     '</div>';
-  teamPanel.querySelectorAll('.team-pick').forEach(b => b.addEventListener('click', () => {
-    const id = b.dataset.id; let t = getTeam();
-    if (t.includes(id)) t = t.filter(x => x !== id);
-    else { if (t.length >= cap) { if (typeof sfx === 'function') sfx('error'); return; } t.push(id); }
-    setTeam(t); renderTeamPanel();
-  }));
+  teamPanel.querySelector('#teamAvailable').addEventListener('click', e => {
+    const button = e.target.closest('.team-pick'); if (!button) return;
+    const current = getTeam();
+    if (current.length >= cap) {
+      if (typeof sfx === 'function') sfx('error');
+      if (typeof systemNotice === 'function') systemNotice('已滿編', true);
+      return;
+    }
+    setTeam([...current, button.dataset.id]); renderTeamPanel();
+  });
+  teamPanel.querySelector('#teamSelected').addEventListener('click', e => {
+    const button = e.target.closest('.team-pick'); if (!button) return;
+    setTeam(getTeam().filter(id => id !== button.dataset.id)); renderTeamPanel();
+  });
   teamPanel.querySelector('#teamDone').addEventListener('click', () => { if (typeof sfx === 'function') sfx('button'); closeTeamPanel(); });
 }
 

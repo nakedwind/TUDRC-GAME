@@ -54,58 +54,15 @@ const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應
 const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應變中心素材：門（電子鎖）、消防栓箱
 const STORAGE_DAMAGE_ASSETS_CLEANUP = 'tudrc_remove_unapproved_damage_assets_v1';
 
-// ---- UI 按鈕回饋 ----
-const buttonSound = new Audio('Sound effects/按鈕.mp3');
-buttonSound.preload = 'auto';
-buttonSound.volume = 0.55;
+// 地圖畫布的點選音效；按鈕與切換的回饋由 ui-feedback.js 共用處理。
 const mapClickSound = new Audio('Sound effects/對話框下一頁音效.mp3');
 mapClickSound.preload = 'auto';
 mapClickSound.volume = 0.55;
-
-function playButtonSound() {
-  buttonSound.currentTime = 0;
-  buttonSound.play().catch(() => {});
-}
 
 function playMapClickSound() {
   mapClickSound.currentTime = 0;
   mapClickSound.play().catch(() => {});
 }
-
-function bounceButton(el) {
-  el.classList.remove('ui-bounce');
-  void el.offsetWidth;
-  el.classList.add('ui-bounce');
-}
-
-let pressedControl = null;
-document.addEventListener('pointerdown', e => {
-  const control = e.target.closest('button, .tile');
-  if (!control || control.disabled) return;
-  pressedControl = control;
-  control.classList.add('ui-pressing');
-  playButtonSound();
-});
-document.addEventListener('pointerup', () => {
-  if (!pressedControl) return;
-  pressedControl.classList.remove('ui-pressing');
-  bounceButton(pressedControl);
-  pressedControl = null;
-});
-document.addEventListener('pointercancel', () => {
-  if (!pressedControl) return;
-  pressedControl.classList.remove('ui-pressing');
-  pressedControl = null;
-});
-document.addEventListener('click', e => {
-  const control = e.target.closest('button, .tile');
-  if (!control || control.disabled || e.detail !== 0) return;
-  playButtonSound();
-  bounceButton(control);
-});
-document.addEventListener('animationend', e => {
-  if (e.animationName === 'ui-button-bounce') e.target.classList.remove('ui-bounce');
-});
 
 // ---- 小工具 ----
 const clone = (o) => JSON.parse(JSON.stringify(o));

@@ -1,0 +1,20 @@
+/* 共用互動回饋：遊戲與各編輯器的按鈕／切換控制一致。 */
+:is(button, input[type="button"], input[type="submit"], select, summary, input[type="checkbox"], input[type="radio"], input[type="color"], [role="button"], [role="tab"], [role="switch"], .tile, .sw, a.backlink, a.back, #editors a) {
+  transform-origin: center;
+  transition: transform 120ms ease, filter 120ms ease, border-color 120ms ease;
+}
+:is(button, input[type="button"], input[type="submit"], select, summary, input[type="checkbox"], input[type="radio"], input[type="color"], [role="button"], [role="tab"], [role="switch"], .tile, .sw, a.backlink, a.back, #editors a):not(:disabled):hover {
+  filter: brightness(1.15) drop-shadow(0 0 5px rgba(127, 208, 239, .35));
+}
+:is(button, input[type="button"], input[type="submit"], summary, [role="button"], [role="tab"], [role="switch"], .tile, .sw, a.backlink, a.back, #editors a):not(:disabled):is(:active, .ui-pressing, .ui-clicked) {
+  transform: scale(.96) !important;
+  filter: brightness(1.28) drop-shadow(0 0 7px rgba(142, 220, 250, .55)) !important;
+}
+:is(select, input[type="checkbox"], input[type="radio"], input[type="color"]):not(:disabled):active {
+  filter: brightness(1.28) drop-shadow(0 0 6px rgba(142, 220, 250, .5));
+}
+@media (prefers-reduced-motion: reduce) {
+  :is(button, input[type="button"], input[type="submit"], summary, [role="button"], [role="tab"], [role="switch"], .tile, .sw, a.backlink, a.back, #editors a):not(:disabled):is(:active, .ui-pressing, .ui-clicked) {
+    transform: none !important;
+  }
+}

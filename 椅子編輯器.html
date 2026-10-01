@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>互動物件編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  :root { color-scheme:dark; font-family:system-ui,'Microsoft JhengHei',sans-serif; background:#10151c; color:#e8edf5 }
+  * { box-sizing:border-box } body { max-width:1280px; margin:0 auto; padding:24px }
+  h1 { font-size:25px; margin:0 0 6px } h2 { font-size:17px; margin:0 } h3 { font-size:14px; margin:0 0 10px }
+  p { color:#aabacc; line-height:1.5; margin:0 } a { color:#9bd2ff }
+  .top { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:18px }
+  .nav { display:flex; gap:14px; padding-top:7px; white-space:nowrap }
+  .layout { display:grid; grid-template-columns:minmax(220px,270px) minmax(360px,1fr) minmax(250px,315px); gap:14px }
+  .panel { background:#1b2530; border:1px solid #3a4d60; border-radius:13px; padding:16px; min-width:0 }
+  button { cursor:pointer; font:inherit; color:#eaf4ff; background:#2a3c50; border:1px solid #57718b; border-radius:8px; padding:8px 11px }
+  button:hover { background:#345169 } button.primary { background:#236b79; border-color:#69b9c1 }
+  input,select { background:#101923; border:1px solid #536b80; border-radius:7px; color:#edf5ff; font:inherit; padding:7px 9px; min-width:0 }
+  input[type=number] { width:100% } input[type=checkbox] { accent-color:#6bdbbd }
+  #search { width:100%; margin:14px 0 9px }
+  #chairList { display:grid; gap:6px; max-height:620px; overflow:auto; scrollbar-width:thin; scrollbar-color:#537d91 #111c27 }
+  #chairList button { display:flex; align-items:center; gap:9px; text-align:left; background:#15202b; border-color:#334a5d; width:100% }
+  #chairList button.selected { background:#224358; border-color:#82cbe2 }
+  #chairList img { width:42px; height:42px; object-fit:contain; image-rendering:pixelated; background:#0e1721; border-radius:5px }
+  #chairList span { display:grid; gap:2px; min-width:0 } #chairList small { color:#9fb1c2; font-size:11px; overflow:hidden; text-overflow:ellipsis }
+  #chairList em { color:#e7b98d; font:11px inherit; margin-left:auto }
+  .canvas-head { display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:12px }
+  .modebar { display:flex; flex-wrap:wrap; gap:6px; margin-bottom:12px }
+  .modebar button.active { border-color:#7fd7da; background:#245668 }
+  .stage { min-height:440px; max-height:540px; overflow:auto; display:grid; place-items:center; padding:18px; border:1px solid #42586e; border-radius:9px; background:repeating-conic-gradient(#182431 0 25%,#202e3b 0 50%) 0 0/24px 24px }
+  #preview { display:block; image-rendering:pixelated; cursor:crosshair; touch-action:none; box-shadow:0 0 0 1px #8ca8ba,0 9px 24px #0008 }
+  .legend { display:flex; flex-wrap:wrap; gap:11px; color:#b8c9d7; font-size:12px; margin-top:12px }
+  .legend i { display:inline-block; width:10px; height:10px; border-radius:3px; margin-right:4px }
+  .hint { margin-top:10px; font-size:12px; color:#9eb2c4 }
+  .form { display:grid; grid-template-columns:1fr 1fr; gap:13px 10px; margin-top:15px }
+  .form label { display:grid; gap:5px; color:#b9cad9; font-size:12px }
+  .form .wide { grid-column:1/-1 } .form select { width:100% }
+  .enabled { display:flex!important; align-items:center; gap:8px!important; font-size:14px!important; color:#e4f5ee!important }
+  .enabled input { width:17px; height:17px }
+  .actions { display:flex; flex-wrap:wrap; gap:7px; margin-top:17px }
+  [hidden] { display:none!important }
+  .editor-tabs { display:flex; gap:8px; margin-bottom:14px }
+  .editor-tabs button.active { background:#245668; border-color:#7fd7da }
+  .elevator-layout { display:grid; grid-template-columns:minmax(350px,1fr) minmax(250px,315px); gap:14px }
+  .state-tabs { display:flex; gap:7px; margin:12px 0 }
+  .state-tabs button.active { background:#245668; border-color:#7fd7da }
+  @media(max-width:680px) { .elevator-layout { grid-template-columns:1fr } }
+  .status { min-height:20px; color:#8be0c2; font-size:12px; margin-top:11px }
+  .export-note { font-size:12px; margin-top:10px }
+  @media(max-width:1050px) { .layout { grid-template-columns:220px 1fr } .settings { grid-column:1/-1 } }
+  @media(max-width:680px) { body { padding:14px } .top { display:block } .nav { margin-top:9px; flex-wrap:wrap } .layout { grid-template-columns:1fr } .settings { grid-column:auto } .stage { min-height:300px } }
+</style>
+</head>
+<body>
+  <div class="top"><div><h1>🪑 互動物件編輯器</h1><p>編輯椅子、床與電梯的角色位置、通行範圍與遮擋深度。</p></div>
+    <nav class="nav"><a href="塔防原型.html">回遊戲</a><a href="地圖編輯器.html">地圖編輯器</a></nav></div>
+  <div class="editor-tabs" role="tablist" aria-label="物件種類"><button type="button" class="active" data-editor-tab="seats" role="tab" aria-selected="true">椅子與床</button><button type="button" data-editor-tab="elevator" role="tab" aria-selected="false">電梯</button></div>
+  <div id="seatsPanel" class="layout">
+    <section class="panel"><h2>座位與床鋪素材</h2><input id="search" type="search" placeholder="搜尋椅子／沙發／床" aria-label="搜尋座椅與床"><div id="chairList"></div></section>
+    <section class="panel"><div class="canvas-head"><h2 id="chairTitle">座椅預覽</h2><small id="chairSize"></small></div>
+      <div class="modebar" role="group" aria-label="編輯模式"><button type="button" data-mode="seat" class="active" data-ui-sound="switch">🎯 坐下位置</button><button type="button" data-mode="solid" data-ui-sound="switch">🟥 不可穿透</button><button type="button" data-mode="depth" data-ui-sound="switch">🔷 遮擋深度</button></div>
+      <div class="stage"><canvas id="preview" aria-label="座椅設定預覽"></canvas></div>
+      <div class="legend"><span><i style="background:#67dcff"></i>坐下位置</span><span><i style="background:#e74b5a"></i>不可穿透格</span><span><i style="background:#ffd36f"></i>遮擋深度線</span></div>
+      <p class="hint">選擇模式後直接點圖片；坐下位置與深度線可拖曳。半透明的溫特預覽坐姿位置，紅格代表角色與異質體無法通過。</p>
+    </section>
+    <section class="panel settings"><h2>設定</h2><div class="form">
+      <label class="wide enabled"><input id="enabled" type="checkbox">啟用坐下互動</label>
+      <label class="wide">遮擋深度（從圖片頂部算，px）<input id="depth" type="number" min="0" step="1"></label>
+      <label>坐下 X（從左算，px）<input id="seatX" type="number" min="0" step="1"></label>
+      <label>坐下 Y（從上算，px）<input id="seatY" type="number" min="0" step="1"></label>
+      <label class="wide">坐下朝向<select id="direction"><option value="front">正面</option><option value="back">背面</option><option value="left">左側</option><option value="right">右側</option></select></label>
+      <label class="wide">人物旋轉<select id="rotation"><option value="0">0° 不旋轉</option><option value="90">90° 順時針</option><option value="180">180°</option><option value="270">270° 逆時針</option></select></label>
+    </div><div class="actions"><button type="button" id="previewGame">▶ 暫存設定預覽</button><button type="button" id="exportChairs" class="primary">下載 chairs.js</button><button type="button" id="resetChairs">從檔案重新載入</button></div>
+      <div id="status" class="status" role="status"></div><p class="export-note">編輯會自動存在這台瀏覽器。要正式套用、同步其他電腦，請下載並取代遊戲中的 <code>data/chairs.js</code>。</p></section>
+  </div>
+  <div id="elevatorPanel" class="elevator-layout" hidden>
+    <section class="panel"><div class="canvas-head"><h2>🛗 電梯</h2><small>3 × 3 格</small></div>
+      <div class="state-tabs" role="group" aria-label="電梯狀態"><button type="button" data-elevator-state="closed" class="active">關門</button><button type="button" data-elevator-state="open">開門</button></div>
+      <div class="modebar" role="group" aria-label="電梯編輯模式"><button type="button" data-elevator-mode="solid" class="active">🟥 不可穿透格</button><button type="button" data-elevator-mode="depth">🔷 遮擋深度線</button></div>
+      <div class="stage"><canvas id="elevatorPreview" aria-label="電梯通行與深度預覽"></canvas></div>
+      <div class="legend"><span><i style="background:#e74b5a"></i>不可穿透</span><span><i style="background:#62d7a8"></i>可穿透</span><span><i style="background:#ffd36f"></i>遮擋深度線</span></div>
+      <p class="hint">切換關門／開門後，點格子可切換是否擋路；切換遮擋深度模式，可在圖片上拖動深度線。兩種狀態分開儲存。</p>
+    </section>
+    <section class="panel settings"><h2>電梯設定</h2><div class="form"><label class="wide">目前狀態的遮擋深度（px）<input id="elevatorDepth" type="number" min="0" max="120" step="1"></label></div>
+      <div class="actions"><button type="button" id="previewElevator">▶ 暫存設定預覽</button><button type="button" id="exportElevators" class="primary">下載 elevators.js</button><button type="button" id="resetElevators">從檔案重新載入</button></div>
+      <div id="elevatorStatus" class="status" role="status"></div><p class="export-note">編輯會自動存在這台瀏覽器。正式套用或同步其他電腦時，請下載並取代 <code>data/elevators.js</code>。</p>
+    </section>
+  </div>
+  <script src="data/maps.js"></script>
+  <script src="data/chairs.js"></script>
+  <script src="data/elevators.js"></script>
+  <script src="js/chair-data.js"></script>
+  <script src="js/elevator-data.js"></script>
+  <script src="js/sfx.js"></script>
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/chair-editor.js"></script>
+  <script src="js/elevator-editor.js"></script>
+</body>
+</html>

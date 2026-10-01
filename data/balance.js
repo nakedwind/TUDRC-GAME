@@ -100,19 +100,11 @@ const PATROL = {
   holdChaseCells: 6,
 };
 
-// ---- 可以坐的東西（椅子）----
-// 玩家靠近時會冒出「坐」的提示，按 key 坐上去；坐著時會畫在椅子上面，按移動鍵起身。
-// tiles：磚塊 id → seatDy＝從圖片頂端往下幾像素當作屁股的位置（愈大愈低）；
-//        seatDx＝左右微調（正的往右）；dir＝坐著時角色的朝向。
-//        椅子若在編輯器左右翻轉過，seatDx 和 dir 都會自動鏡射，坐的相對位置不變。
+// ---- 坐下互動的共通操作 ----
+// 每張椅子的深度、碰撞與坐下位置改在 data/chairs.js 設定。
 const SIT = {
   key: 'e',        // 互動鍵
   radius: 62,      // 離座位多近才會出現提示（像素）
-  tiles: {
-    tile_new_decor_chair_front:  { seatDy: 25, seatDx: -10, dir: 'front' },
-    tile_new_decor_chair_side:   { seatDy: 25, seatDx: -10, dir: 'left' },
-    tile_decor_foldingchair:     { seatDy: 24, dir: 'front' },
-  },
 };
 
 // ---- 障礙物（可被打破的牆）----

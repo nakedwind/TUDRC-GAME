@@ -173,6 +173,44 @@ canvas.cursor-pressed {
   backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
   border-radius: 18px;
 }
+#wrap:has(#teamEditPanel:not(.hidden)) #systemNotices { z-index: 50; }
+.team-dialog {
+  display: flex; flex-direction: column; width: min(1000px, 94%); max-height: 88%; min-height: 0;
+  padding: 20px; border: 1px solid #3b5065; border-radius: 14px;
+  background: #141a22; color: #e6ebf2; box-shadow: 0 18px 55px rgba(0,0,0,.42);
+}
+.team-dialog-head, .team-dialog-footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.team-dialog-head h2 { margin: 0; font-size: 19px; }
+.team-dialog-head p { margin: 4px 0 0; color: #aab7c7; font-size: 13px; }
+.team-count { color: #aab7c7; font-size: 13px; white-space: nowrap; }
+.team-count b { color: #8fd3ff; font-size: 16px; }
+.team-columns { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; min-height: 0; flex: 1; margin-top: 17px; }
+.team-column { display: flex; flex-direction: column; min-height: 0; padding: 12px; border: 1px solid #34465a; border-radius: 10px; background: #19232f; }
+.team-column-selected { background: #172a32; border-color: #3e706f; }
+.team-column h3 { margin: 0 0 10px; font-size: 15px; color: #dceafa; }
+.team-column h3 small { margin-left: 5px; color: #99adbe; font-size: 12px; font-weight: normal; }
+.team-list { min-height: 0; overflow-y: auto; display: grid; align-content: start; gap: 8px; padding-right: 5px; }
+.team-list, .team-columns { scrollbar-width: thin; scrollbar-color: #537d91 #111c27; }
+.team-list::-webkit-scrollbar, .team-columns::-webkit-scrollbar { width: 8px; }
+.team-list::-webkit-scrollbar-track, .team-columns::-webkit-scrollbar-track { background: #111c27; border-radius: 99px; }
+.team-list::-webkit-scrollbar-thumb, .team-columns::-webkit-scrollbar-thumb {
+  background: #537d91; border: 2px solid #111c27; border-radius: 99px;
+}
+.team-list::-webkit-scrollbar-thumb:hover, .team-columns::-webkit-scrollbar-thumb:hover { background: #79b3c7; }
+.team-pick { display: flex; align-items: center; gap: 10px; width: 100%; min-height: 80px; padding: 8px; text-align: left; color: #e6ebf2; background: #1d2835; border: 1px solid #425569; border-radius: 9px; cursor: pointer; font: inherit; }
+.team-pick:hover, .team-pick:focus-visible { border-color: #7bc7ed; background: #263d4f; }
+.team-pick-selected { background: #223c41; border-color: #569a91; }
+.team-pick-selected:hover, .team-pick-selected:focus-visible { border-color: #8edac1; background: #2b514e; }
+.team-pick .team-avatar-frame { width: 62px; height: 62px; }
+.team-pick .team-avatar { top: -10px; }
+.team-pick .team-summary b { font-size: 16px; }
+.team-pick .team-intro { display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; font-size: 12px; line-height: 1.35; }
+.team-pick .team-choice { font-size: 12px; color: #9ed9fb; }
+.team-pick-selected .team-choice { color: #a6e3ce; }
+.team-empty { margin: 18px 4px; color: #9aaab9; font-size: 13px; line-height: 1.5; }
+.team-dialog-footer { margin-top: 15px; color: #99aabb; font-size: 12px; }
+.team-dialog-footer button { padding: 8px 22px; border: 1px solid #4fbf8f; border-radius: 8px; background: #2b5a45; color: #fff; cursor: pointer; font-size: 14px; }
+.team-dialog-footer button:hover { background: #356e55; }
 .team-avatar-frame {
   position: relative; width: 78px; height: 78px; flex: none; overflow: hidden;
   border-radius: 9px; background: rgba(5,10,18,.55);
@@ -191,7 +229,12 @@ canvas.cursor-pressed {
 @media (max-width: 480px) {
   .team-avatar-frame { width: 58px; height: 64px; }
   .team-avatar { width: 96px; height: 96px; }
-  .team-pick { flex-wrap: wrap; }
+}
+@media (max-width: 700px) {
+  .team-dialog { max-height: 92%; padding: 13px; }
+  .team-columns { grid-template-columns: 1fr; overflow-y: auto; }
+  .team-column { min-height: 175px; max-height: 290px; }
+  .team-dialog-footer span { display: none; }
 }
 @keyframes squad-backdrop-in { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) {

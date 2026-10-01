@@ -6,6 +6,7 @@
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
 <link rel="stylesheet" href="css/style.css?v=nearest-sentry-20260925">
+<link rel="stylesheet" href="css/ui-feedback.css">
 </head>
 <body>
   <div id="wrap">
@@ -88,11 +89,13 @@
     <a href="地圖編輯器.html">🗺️ 地圖編輯器</a>
     <a href="物件編輯器.html">🧱 物件編輯器</a>
     <a href="怪物編輯器.html">🐾 怪物編輯器</a>
+    <a href="椅子編輯器.html">🪑 椅子編輯器</a>
   </div>
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
   <script src="js/sfx.js?v=portal-transition-20260925"></script>          <!-- 1b. 音效 -->
+  <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js"></script>  <!-- 集中管理所有角色 -->
   <script src="data/balance.js?v=hold-patrol-20260929"></script>    <!-- 2. 遊戲數值（最常調整） -->
@@ -101,6 +104,10 @@
   <script src="data/objects.js"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
   <script src="data/decorations.js"></script><!-- 3b. 裝飾物件（低HP、可佈置） -->
   <script src="data/maps.js?v=dorm-assets-20260925"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
+  <script src="data/chairs.js"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
+  <script src="js/chair-data.js"></script>
+  <script src="data/elevators.js"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
+  <script src="js/elevator-data.js"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/maploader.js?v=base-lamp-position-20260925"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/lighting.js?v=camping-light-single-20260925"></script>     <!-- 7. 黑暗與光源系統 -->
