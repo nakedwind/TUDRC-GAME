@@ -275,13 +275,32 @@ function renderFieldSquadHud() {
       const stateLabel = member.berserk
         ? '<em style="font-size:10px;font-weight:700;color:#ff5b5b;margin-left:5px">混亂</em>'
         : (!spec.guide && taint > 85 ? '<em style="font-size:10px;font-weight:700;color:#ffb24d;margin-left:5px">瀕臨暴走</em>' : '');
+      const hasUlt = (typeof ULTIMATES !== 'undefined') && ULTIMATES[member.type];   // 有大招才顯示冷卻環
+      const cdRing = hasUlt
+        ? '<svg class="field-cd-ring" data-type="' + member.type + '" viewBox="0 0 40 40" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"><rect x="2.5" y="2.5" width="35" height="35" rx="2" fill="none" stroke="#4db5ff" stroke-width="2" stroke-linecap="round" style="stroke-dasharray:140;stroke-dashoffset:140;filter:drop-shadow(0 0 2px #4db5ff)"></rect></svg>'
+        : '';
       return '<article class="field-member' + (hp <= 0 ? ' down' : '') + '">' +
-        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
+        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
         '<div><i class="field-hp" aria-label="生命值"><u style="width:' + hpPercent + '%"></u></i></div>' +
         '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i></div>' +
         '</div>' + sootheAction + '</article>';
     }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>') + '</div>';
   fieldSquadHud.classList.remove('hidden');
+}
+// 每幀更新隊員頭像的大招冷卻環（內緣藍線，隨充能繞一圈）
+function updateFieldCdRings() {
+  if (!fieldSquadHud || typeof G === 'undefined' || !G || !Array.isArray(G.towers)) return;
+  const ults = (typeof ULTIMATES !== 'undefined') ? ULTIMATES : null; if (!ults) return;
+  for (const svg of fieldSquadHud.querySelectorAll('.field-cd-ring')) {
+    const member = G.towers.find(t => t.type === svg.dataset.type), ult = ults[svg.dataset.type];
+    const rect = svg.querySelector('rect'); if (!rect) continue;
+    const remain = (member && ult) ? Math.max(0, Math.min(1, (member.ultCd || 0) / ult.cd)) : 0;   // 1 剛發招 → 0 可用
+    if (remain <= 0.001) { rect.style.display = 'none'; continue; }   // 可用（或沒大招）時不顯示藍圈
+    rect.style.display = '';
+    const P = rect.getTotalLength ? rect.getTotalLength() : 140;
+    rect.style.strokeDasharray = P;
+    rect.style.strokeDashoffset = P * (1 - remain);   // 滿→空，隨冷卻減少
+  }
 }
 
 const TEAM_PROFILES = Object.fromEntries(Object.values(CHARACTERS)

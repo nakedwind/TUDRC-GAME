@@ -4233,16 +4233,16 @@ const MAPS_DEFAULT = [
         "c": 14,
         "r": 25,
         "layer": "object2",
-        "ox": -14,
-        "oy": -20
+        "ox": -4,
+        "oy": -6
       },
       {
         "id": "tile_obstacle_redroadblocks_h",
         "c": 18,
         "r": 25,
         "layer": "object2",
-        "ox": -20,
-        "oy": -20
+        "ox": -4,
+        "oy": -6
       },
       {
         "id": "tile_obstacle_redroadblocks_v",

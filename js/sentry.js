@@ -406,7 +406,7 @@ function updateSentry(t, dt) {
     if (!tgt) { t.waitT = 0.8; return; }
     t.target = tgt; return;
   }
-  const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 : 1) * ((t.taint > 85 && !t.berserk) ? 0.5 : 1);   // 指派時走快一點；瀕臨暴走時移速減半
+  const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 : 1) * ((t.taint > 85 && !t.berserk) ? 0.5 : 1) * (t.shieldMode ? 1.7 : 1);   // 指派快一點；瀕臨暴走減半；雷德舉盾衝刺加速
   if (moveSentryWithPath(t, t.target.x, t.target.y, sp, dt)) {
     t.target = null; t.navPath = null;
     if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0'); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
@@ -515,6 +515,6 @@ function soothe(t) {
   G.guide -= SOOTHE.cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
   sfx('soothe');
-  playAttackSprite('guidance', t.x, t.y - 8, .48);
+  spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
   flash('疏導 -' + SOOTHE.heal, t.x, t.y - 26, '#7ee0c0'); updateHUD();
 }
