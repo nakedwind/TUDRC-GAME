@@ -953,6 +953,12 @@ cv.addEventListener('mousemove', e => { aimClient = { x: e.clientX, y: e.clientY
 cv.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   aimClient = { x: e.clientX, y: e.clientY };
+  if (e.ctrlKey && !MAP_SAFE && G?.running && !G.over && !dialogueState && !elevatorMenuOpen) {
+    e.preventDefault();
+    closeGroundMenu(); closeSentryMenu();
+    aimHeld = true;
+    return;
+  }
   aimHeld = handleMapClick(e, true);   // 回傳 true（點空地）才開始射擊；開了選單/放建築則不射
 });
 window.addEventListener('mouseup', e => { if (e.button === 0) aimHeld = false; });
@@ -1136,14 +1142,39 @@ function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
   if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
   return true;
 }
+function enemyBlocked(x, y) {
+  const [c, r] = cellAt(x, y);
+  return !inGrid(c, r) || isWall(c, r) || !!barrierAt(c, r);
+}
+function resetEnemyNavigation(e) {
+  e.hasTarget = false; e.baseTarget = null;
+  e.aiPath = null; e.aiGoal = null; e.aiRouteKey = null; e.aiRouteTimer = 0;
+  e.wanderCell = null;
+}
+// 擊退與衝撞要逐小步檢查，避免一次跨進基地、牆壁或建築的阻擋格。
+function displaceEnemy(e, dx, dy, distance, resetRoute = true) {
+  const length = Math.hypot(dx, dy);
+  if (!length || distance <= 0) return false;
+  const steps = Math.max(1, Math.ceil(distance / 4));
+  const sx = dx / length * distance / steps, sy = dy / length * distance / steps;
+  let moved = false;
+  for (let i = 0; i < steps; i++) {
+    const nx = e.x + sx, ny = e.y + sy;
+    if (!enemyBlocked(nx, ny)) { e.x = nx; e.y = ny; moved = true; continue; }
+    if (!enemyBlocked(nx, e.y)) { e.x = nx; moved = true; continue; }
+    if (!enemyBlocked(e.x, ny)) { e.y = ny; moved = true; continue; }
+    break;
+  }
+  if (moved) {
+    if (resetRoute) resetEnemyNavigation(e);
+    else { e.hasTarget = false; e.baseTarget = null; }
+  }
+  return moved;
+}
 function moveEnemyToward(e, target, dt) {
   const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
   const step = e.speed * dt;
-  const nx=e.x+dx/d*Math.min(step,d),ny=e.y+dy/d*Math.min(step,d),[c,r]=cellAt(nx,ny);
-  if (!inGrid(c,r) || isWall(c,r) || barrierAt(c,r)) return false;
-  e.x=nx;e.y=ny;
-  e.hasTarget = false; e.baseTarget = null;
-  return true;
+  return displaceEnemy(e, dx, dy, Math.min(step, d), false);
 }
 
 // ---- 異質體行為：18 格感知、尋路與黑暗遊蕩 ----
@@ -1404,7 +1435,7 @@ function spawnFlameBurst(x, y, scale = 1) {
   }
 }
 // 玩家（溫特）攻擊：按住左鍵朝游標方向開槍。彈匣 6 發，打完或按 R 裝填；傷害很低、會吸引仇恨。
-const PLAYER_ATK = { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 3 };
+const PLAYER_ATK = { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 2 };
 let aimHeld = false, aimClient = null;
 function clientToWorld(cx, cy) {
   const rect = cv.getBoundingClientRect();
@@ -1449,7 +1480,10 @@ function updatePlayerAttack(dt) {
   }
   const endX = best ? best.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   const endY = best ? best.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
-  const mx = p.x + Math.cos(aimAng) * 15, my = p.y - 8 + Math.sin(aimAng) * 10;
+  let mx = p.x + Math.cos(aimAng) * 15, my = p.y - 8 + Math.sin(aimAng) * 10;
+  if (p.dir === 'left') { mx -= 5; my += 5; }
+  else if (p.dir === 'right') { mx += 3; my += 5; }
+  else if (p.dir === 'back') { my -= 25; }
   G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });   // 槍口閃光
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
   if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
@@ -1526,6 +1560,14 @@ function stepEnemy(e, dt) {
   e.attackingObstacle = null;
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
+  if (enemyBlocked(e.x, e.y)) {
+    const safeX = e.lastSafeX, safeY = e.lastSafeY;
+    if (Number.isFinite(safeX) && Number.isFinite(safeY) && !enemyBlocked(safeX, safeY)) {
+      e.x = safeX; e.y = safeY;
+    } else if (!rescueStuck(e, enemyBlocked)) return;
+    resetEnemyNavigation(e);
+  }
+  e.lastSafeX = e.x; e.lastSafeY = e.y;
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
   if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= 30) {
@@ -1697,8 +1739,8 @@ function update(dt) {
     if (foe && !foe.dead && Math.hypot(foe.x - t.x, foe.y - t.y) <= CELL * 1.1) {
       const spec = TYPES.red, ramDmg = Math.max(1, Math.round(spec.dmg * 0.4));
       foe.hp -= ramDmg;
-      const dx = foe.x - t.x, dy = foe.y - t.y, d = Math.hypot(dx, dy) || 1;
-      foe.x += dx / d * CELL * 1.2; foe.y += dy / d * CELL * 1.2; foe.hasTarget = false; foe.baseTarget = null;
+      const dx = foe.x - t.x, dy = foe.y - t.y;
+      displaceEnemy(foe, dx, dy, CELL * 1.2);
       foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = '#dbe7ff';
       flashDmg('-' + ramDmg, foe.x, foe.y - 26, '#dbe7ff');
       G.effects.push({ ring: true, x: foe.x, y: foe.y, r: 5, r2: 24, life: .2, life0: .2, color: '#dbe7ff' });
@@ -1815,7 +1857,7 @@ function update(dt) {
         for (const e of G.enemies) {
           if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r) continue;
           e.hp -= dmg;
-          if (U.knockback) { const dx = e.x - t.x, dy = e.y - t.y, d = Math.hypot(dx, dy) || 1; e.x += dx / d * CELL * U.knockback; e.y += dy / d * CELL * U.knockback; e.hasTarget = false; e.baseTarget = null; }
+          if (U.knockback) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
           if (U.stun) e.stunT = Math.max(e.stunT || 0, U.stun);
           e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = col;
           flashDmg('-' + Math.round(dmg), e.x, e.y - 26, col);
@@ -1835,8 +1877,8 @@ function update(dt) {
           if (spec.stun) e.stunT=Math.max(e.stunT||0,spec.stun);
           if (spec.confuse) e.confuseT=Math.max(e.confuseT||0,spec.confuse);
           if (spec.knockback) {
-            const dx=e.x-t.x,dy=e.y-t.y,d=Math.hypot(dx,dy)||1;
-            e.x+=dx/d*CELL*spec.knockback;e.y+=dy/d*CELL*spec.knockback;e.hasTarget=false;e.baseTarget=null;
+            const dx=e.x-t.x,dy=e.y-t.y;
+            displaceEnemy(e,dx,dy,CELL*spec.knockback);
           }
         }
         spawnAttackVisual(t, target, U ? { ...spec, dmg: atkDmg, splash: atkSplash } : spec, affected, impactPoint, U ? U.scale : 1);
