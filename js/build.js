@@ -88,8 +88,12 @@ const DEFAULT_BUILD_QUICK = ['camping_lights', 'searchlight', 'wirecloth', 'redr
 let buildQuickIds = DEFAULT_BUILD_QUICK.slice();
 try {
   const saved = JSON.parse(localStorage.getItem(BUILD_QUICK_KEY) || 'null');
-  if (Array.isArray(saved) && saved.length === 5 && saved.every(id => buildableById(id))) buildQuickIds = saved;
+  if (Array.isArray(saved) && saved.length === 5) buildQuickIds = saved;
 } catch (_) {}
+// 物件編輯器匯出的資料可能暫時少了某個預設物件；快捷欄仍須能正常初始化。
+const availableQuickIds = [...OBSTACLES, ...DECOS].map(o => o.id);
+buildQuickIds = buildQuickIds.map((id, index) => buildableById(id) ? id :
+  (availableQuickIds.find(candidate => !buildQuickIds.includes(candidate)) || availableQuickIds[index % availableQuickIds.length]));
 function saveBuildQuickSlots() {
   try { localStorage.setItem(BUILD_QUICK_KEY, JSON.stringify(buildQuickIds)); } catch (_) {}
 }
@@ -99,6 +103,7 @@ function renderBuildQuickSlots() {
     const ob = buildableById(id);
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'build-quick-slot';
+    if (!ob) { button.disabled = true; button.textContent = '未設定'; buildQuickSlots.appendChild(button); return; }
     button.title = (index + 1) + '：' + ob.name + '（經費 ' + ob.cost + '）';
     button.setAttribute('aria-label', '快捷鍵 ' + (index + 1) + '：建造' + ob.name);
     button.innerHTML = '<img src="' + ob[buildOrient].file + '" alt=""><span>' + ob.name + '</span>';

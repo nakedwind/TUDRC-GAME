@@ -64,10 +64,20 @@ const LIGHT_BASE_ENABLED = LIGHT.enabled;   // balance.js 的原始設定，離�
 
 let MAP_INDEX = 0;   // 目前玩第幾張地圖（由開始畫面的地圖選單切換）
 let openElevatorStamp = null;
+let elevatorCloseAnim = null;
+let elevatorOpenAnim = null;
 const elevatorOpenImage = new Image();
 elevatorOpenImage.src = 'images/應變中心/elevator-open.png';
+const elevatorLightOpenImage = new Image();
+elevatorLightOpenImage.src = 'images/應變中心/elevator-light02.png';
 const isElevatorTile = tile => String(tile?.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator.png');
 const isElevatorStamp = stamp => isElevatorTile(mapTileById(stamp.id));
+const isElevatorLightTile = tile => String(tile?.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator-light01.png');
+function elevatorLightIsOpen(c, r) {
+  return (MAP?.stamps || []).some(stamp => isElevatorStamp(stamp) &&
+    Math.abs(stamp.c + 1 - c) <= 1 && Math.abs(stamp.r - r) <= 1 &&
+    (stamp === openElevatorStamp || elevatorOpenAnim?.stamp === stamp || elevatorCloseAnim?.stamp === stamp));
+}
 function setElevatorSolids(stamp, phase) {
   const tile = mapTileById(stamp.id), cfg = elevatorConfig(stamp.id);
   if (!tile || !cfg) return;
@@ -85,6 +95,24 @@ function openElevator(stamp) {
   openElevatorStamp = stamp;
   setElevatorSolids(stamp, 'open');
 }
+function startElevatorOpen(stamp) {
+  if (openElevatorStamp === stamp || elevatorOpenAnim) return;
+  elevatorOpenAnim = { stamp, started: performance.now(), duration: 550 };
+}
+function finishElevatorOpen(stamp) {
+  if (!MAP || !(MAP.stamps || []).includes(stamp) || elevatorOpenAnim?.stamp !== stamp) return;
+  elevatorOpenAnim = null;
+  openElevator(stamp);
+}
+function startElevatorClose(stamp) {
+  elevatorCloseAnim = { stamp, started: performance.now(), duration: 550 };
+}
+function finishElevatorClose(stamp) {
+  if (!MAP || !(MAP.stamps || []).includes(stamp)) return;
+  elevatorCloseAnim = null;
+  openElevatorStamp = null;
+  setElevatorSolids(stamp, 'closed');
+}
 function mapList() {
   if (PREVIEW) return [PREVIEW.map];                 // 預覽模式：只有編輯中的那一張
   return (typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length) ? MAPS_DEFAULT : [];
@@ -101,6 +129,8 @@ function initMap() {
   buildTileRegistry(); preloadMapTiles();
   MAP = pickMap();
   openElevatorStamp = null;
+  elevatorCloseAnim = null;
+  elevatorOpenAnim = null;
   if (!MAP) return;
 
   // 地圖大小（可比畫面大；鏡頭會跟著玩家捲動）
@@ -179,7 +209,39 @@ function returnPortalCell(fromId) { return mapPortals.find(p => p.to === fromId)
 // 所以判定時要連周圍 8 格一起看。怪物尋路仍然以「整格」為單位（見 pathfinding.js）。
 let mapSolidOffsets = {};
 const solidOffsetAt = (c, r) => mapSolidOffsets[c + ',' + r];
+function elevatorBlocksPoint(x, y) {
+  for (const stamp of MAP?.stamps || []) {
+    if (!isElevatorStamp(stamp)) continue;
+    const tile = mapTileById(stamp.id), cfg = elevatorConfig(stamp.id);
+    if (!tile || !cfg) continue;
+    const left = OX + stamp.c * CELL + (stamp.ox || 0), top = OY + stamp.r * CELL + (stamp.oy || 0);
+    const lx = x - left, ly = y - top;
+    const setting = cfg[stamp === openElevatorStamp ? 'open' : 'closed'];
+    const fallback = ELEVATORS_DEFAULT[stamp.id]?.[stamp === openElevatorStamp ? 'open' : 'closed'];
+    const passage = setting?.passage ?? fallback?.passage;
+    // 開門後讓通道延伸到門檻外一個角色半徑，避免圖片的像素位移在入口留下擋路縫隙。
+    const doorwayBottom = mapTileH(tile) * CELL + (typeof PLAYER !== 'undefined' ? PLAYER.r : 14);
+    if (stamp === openElevatorStamp && passage && passage.w > 0 && passage.h > 0 &&
+        lx >= passage.x && lx < passage.x + passage.w &&
+        ly >= passage.y && ly < Math.max(passage.y + passage.h, doorwayBottom)) return false;
+    if (lx < 0 || ly < 0 || lx >= mapTileW(tile) * CELL || ly >= mapTileH(tile) * CELL) continue;
+    const c = Math.floor(lx / CELL), r = Math.floor(ly / CELL);
+    if (passage && passage.w > 0 && passage.h > 0 &&
+        lx >= passage.x && lx < passage.x + passage.w &&
+        ly >= passage.y && ly < passage.y + passage.h) return false;
+    const solid = (setting?.solid || []).some(([sc, sr]) => sc === c && sr === r);
+    if (!solid) return false;
+    const inset = key => Math.max(0, Math.min(CELL, Number(setting[key]) || 0));
+    return !(c === 0 && lx < inset('leftInset')) &&
+      !(c === mapTileW(tile) - 1 && lx >= mapTileW(tile) * CELL - inset('rightInset')) &&
+      !(r === 0 && ly < inset('topInset')) &&
+      !(r === mapTileH(tile) - 1 && ly >= mapTileH(tile) * CELL - inset('bottomInset'));
+  }
+  return null;
+}
 function solidBlocksPoint(x, y) {
+  const elevator = elevatorBlocksPoint(x, y);
+  if (elevator !== null) return elevator;
   const [c, r] = cellAt(x, y);
   if (isWall(c, r) && !solidOffsetAt(c, r)) return true;        // 沒微調過：整格都擋
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
@@ -275,7 +337,8 @@ function drawMapStampImg(ctx, s) {
   const t = mapTileById(s.id); if (!t) return;
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
-  const img = tileImage(t);
+  const img = isElevatorLightTile(t) && elevatorLightIsOpen(s.c, s.r) && elevatorLightOpenImage.complete && elevatorLightOpenImage.naturalWidth
+    ? elevatorLightOpenImage : tileImage(t);
   if (img) {
     if (s.fx || s.fy) {
       ctx.save(); ctx.translate(x + (s.fx ? w : 0), y + (s.fy ? h : 0)); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
@@ -396,9 +459,23 @@ function collectMapOccluders(ctx, out) {
 function drawElevators(ctx) {
   for (const stamp of MAP.stamps || []) {
     if (!isElevatorStamp(stamp)) continue;
-    if (stamp === openElevatorStamp && elevatorOpenImage.complete && elevatorOpenImage.naturalWidth) {
+    if ((stamp === openElevatorStamp || elevatorOpenAnim?.stamp === stamp) && elevatorOpenImage.complete && elevatorOpenImage.naturalWidth) {
       const x = OX + stamp.c * CELL + (stamp.ox || 0), y = OY + stamp.r * CELL + (stamp.oy || 0);
       ctx.drawImage(elevatorOpenImage, x, y, mapTileW(mapTileById(stamp.id)) * CELL, mapTileH(mapTileById(stamp.id)) * CELL);
+      const animation = elevatorOpenAnim?.stamp === stamp ? elevatorOpenAnim : elevatorCloseAnim?.stamp === stamp ? elevatorCloseAnim : null;
+      if (animation) {
+        const closed = tileImage(mapTileById(stamp.id));
+        if (closed) {
+          const p = Math.min(1, (performance.now() - animation.started) / animation.duration);
+          const eased = p * p * (3 - 2 * p);
+          const gap = 34 * (animation === elevatorOpenAnim ? eased : 1 - eased);
+          ctx.save();
+          ctx.beginPath(); ctx.rect(x + 20, y + 31, 70, 89); ctx.clip();
+          ctx.drawImage(closed, 21, 31, 34, 89, x + 21 - gap, y + 31, 34, 89);
+          ctx.drawImage(closed, 55, 31, 34, 89, x + 55 + gap, y + 31, 34, 89);
+          ctx.restore();
+        }
+      }
     } else drawMapStampImg(ctx, stamp);
   }
 }

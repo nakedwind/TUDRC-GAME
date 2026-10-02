@@ -8930,14 +8930,16 @@ const MAPS_DEFAULT = [
         "id": "tile_mufxoi3i",
         "c": 60,
         "r": 8,
-        "layer": "object"
+        "layer": "object",
+        "ox": 0,
+        "oy": -4
       },
       {
         "id": "tile_mufxpxnl",
         "c": 61,
         "r": 8,
         "layer": "object",
-        "ox": 0,
+        "ox": -4,
         "oy": -6
       }
     ],
@@ -9055,8 +9057,6 @@ const MAPS_DEFAULT = [
       "59,9",
       "59,8",
       "59,10",
-      "60,10",
-      "62,10",
       "63,11",
       "63,12",
       "63,10",

@@ -73,10 +73,10 @@ const ELEVATORS_DEFAULT = {
       "topInset": 0,
       "bottomInset": 0,
       "passage": {
-        "x": 21,
-        "y": 64,
-        "w": 67,
-        "h": 56
+        "x": 28,
+        "y": 39,
+        "w": 53,
+        "h": 81
       }
     }
   }

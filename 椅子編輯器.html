@@ -77,24 +77,24 @@
   <div id="elevatorPanel" class="elevator-layout" hidden>
     <section class="panel"><div class="canvas-head"><h2>🛗 電梯</h2><small>3 × 3 格</small></div>
       <div class="state-tabs" role="group" aria-label="電梯狀態"><button type="button" data-elevator-state="closed" class="active">關門</button><button type="button" data-elevator-state="open">開門</button></div>
-      <div class="modebar" role="group" aria-label="電梯編輯模式"><button type="button" data-elevator-mode="solid" class="active">🟥 不可穿透格</button><button type="button" data-elevator-mode="depth">🔷 遮擋深度線</button></div>
+      <div class="modebar" role="group" aria-label="電梯編輯模式"><button type="button" data-elevator-mode="solid" class="active">🟥 不可穿透格</button><button type="button" data-elevator-mode="passage">🟩 可通行門洞</button><button type="button" data-elevator-mode="leftEdge">← 左邊</button><button type="button" data-elevator-mode="rightEdge">→ 右邊</button><button type="button" data-elevator-mode="topEdge">↑ 上邊</button><button type="button" data-elevator-mode="bottomEdge">↓ 下邊</button><button type="button" data-elevator-mode="depth">🔷 遮擋深度線</button></div>
       <div class="stage"><canvas id="elevatorPreview" aria-label="電梯通行與深度預覽"></canvas></div>
-      <div class="legend"><span><i style="background:#e74b5a"></i>不可穿透</span><span><i style="background:#62d7a8"></i>可穿透</span><span><i style="background:#ffd36f"></i>遮擋深度線</span></div>
-      <p class="hint">切換關門／開門後，點格子可切換是否擋路；切換遮擋深度模式，可在圖片上拖動深度線。兩種狀態分開儲存。</p>
+      <div class="legend"><span><i style="background:#e74b5a"></i>不可穿透</span><span><i style="background:#5fff83"></i>可通行門洞</span><span><i style="background:#ffd36f"></i>遮擋深度線</span></div>
+      <p class="hint">選「開門」後，用「可通行門洞」在圖片上拖出綠框；綠框會跨越紅格，讓玩家進出。也可在右側輸入位置與大小。關門／開門各自保存。</p>
     </section>
-    <section class="panel settings"><h2>電梯設定</h2><div class="form"><label class="wide">目前狀態的遮擋深度（px）<input id="elevatorDepth" type="number" min="0" max="120" step="1"></label></div>
+    <section class="panel settings"><h2>電梯設定</h2><div class="form"><label class="wide">目前狀態的遮擋深度（px）<input id="elevatorDepth" type="number" min="0" max="120" step="1"></label><label>門洞 X（px）<input id="elevatorPassageX" type="number" min="0" max="120" step="1"></label><label>門洞 Y（px）<input id="elevatorPassageY" type="number" min="0" max="120" step="1"></label><label>門洞寬度（px）<input id="elevatorPassageW" type="number" min="0" max="120" step="1"></label><label>門洞高度（px）<input id="elevatorPassageH" type="number" min="0" max="120" step="1"></label><label>左邊縮減（px）<input id="elevatorLeftInset" type="number" min="0" max="40" step="1"></label><label>右邊縮減（px）<input id="elevatorRightInset" type="number" min="0" max="40" step="1"></label><label>上邊縮減（px）<input id="elevatorTopInset" type="number" min="0" max="40" step="1"></label><label>下邊縮減（px）<input id="elevatorBottomInset" type="number" min="0" max="40" step="1"></label></div>
       <div class="actions"><button type="button" id="previewElevator">▶ 暫存設定預覽</button><button type="button" id="exportElevators" class="primary">下載 elevators.js</button><button type="button" id="resetElevators">從檔案重新載入</button></div>
       <div id="elevatorStatus" class="status" role="status"></div><p class="export-note">編輯會自動存在這台瀏覽器。正式套用或同步其他電腦時，請下載並取代 <code>data/elevators.js</code>。</p>
     </section>
   </div>
   <script src="data/maps.js"></script>
   <script src="data/chairs.js"></script>
-  <script src="data/elevators.js"></script>
+  <script src="data/elevators.js?v=passage-20261002"></script>
   <script src="js/chair-data.js"></script>
   <script src="js/elevator-data.js"></script>
   <script src="js/sfx.js"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/chair-editor.js"></script>
-  <script src="js/elevator-editor.js"></script>
+  <script src="js/elevator-editor.js?v=passage-20261002"></script>
 </body>
 </html>

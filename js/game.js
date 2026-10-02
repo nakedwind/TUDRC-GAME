@@ -128,12 +128,18 @@ function playAttackSprite(kind, x, y, duration = .32, angle = 0) {
 let lastSlimeLandSound = 0;
 function playSlimeAudio(kind, slime = null) {
   if (typeof SFX !== 'undefined' && !SFX.enabled) return;
-  if (kind === 'land' && slime && (!G.player || Math.hypot(slime.x - G.player.x, slime.y - G.player.y) > CELL * 15)) return;
+  let landGain = 1;
+  if (kind === 'land') {
+    if (!slime || !G.player) return;
+    const distance = Math.hypot(slime.x - G.player.x, slime.y - G.player.y) / CELL;
+    if (distance >= 15) return;
+    landGain = Math.pow(Math.min(1, (15 - distance) / 13), 1.4);
+  }
   const now = performance.now();
   if (kind === 'land' && now - lastSlimeLandSound < 90) return;
   if (kind === 'land') lastSlimeLandSound = now;
   const audio = new Audio(kind === 'hit' ? 'Sound effects/slime-hit.mp3' : 'Sound effects/slime-land.mp3');
-  audio.volume = kind === 'hit' ? .72 : .28;
+  audio.volume = kind === 'hit' ? .72 : .36 * landGain;
   audio.play().catch(() => {});
 }
 
@@ -324,8 +330,12 @@ window.addEventListener('keydown', e => {
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
     if (elevator) {
-      if (elevator.mode === 'closed') { openElevator(elevator.stamp); sfx('door'); }
-      else openElevatorMenu();
+      if (elevator.mode === 'closed') {
+        startElevatorOpen(elevator.stamp);
+        sfx('elevator');
+        const stamp = elevator.stamp;
+        setTimeout(() => finishElevatorOpen(stamp), 550);
+      } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else {
@@ -356,7 +366,7 @@ function elevatorNearPlayer() {
       continue;
     }
     const distance = Math.hypot(x - G.player.x, y - G.player.y);
-    if (distance < bestDistance) { bestDistance = distance; best = { x, top, stamp, mode: 'closed' }; }
+    if (distance < bestDistance) { bestDistance = distance; best = { x, top, stamp, mode: elevatorOpenAnim?.stamp === stamp ? 'opening' : 'closed' }; }
   }
   return best;
 }
@@ -398,7 +408,7 @@ function enterPortal(pt) {
   const fromId = MAP.id;
   mapTransitioning = true;
   Object.keys(keys).forEach(key => { keys[key] = false; });
-  sfx('door');
+  if (!pt.elevator) sfx('door');
   requestAnimationFrame(() => {
     mapTransition.classList.add('visible');
     setTimeout(() => {
@@ -406,17 +416,31 @@ function enterPortal(pt) {
         switchMap(mapIndexById(pt.to));         // 全黑維持半秒後換地圖
         begin(false);                           // 重建並進入遊玩狀態，不播放開始按鈕聲
         const back = returnPortalCell(fromId);  // 落在新地圖「通回原地圖」的門旁
+        let arrivalElevator = null;
         if (pt.elevator) {
-          const stamp = (MAP.stamps || []).find(s => String(mapTileById(s.id)?.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator.png'));
-          if (stamp) {
-            const x = OX + (stamp.c + 1.5) * CELL + (stamp.ox || 0);
-            const y = OY + (stamp.r + 3.5) * CELL + (stamp.oy || 0);
+          arrivalElevator = (MAP.stamps || []).find(isElevatorStamp) || null;
+          if (arrivalElevator) {
+            openElevator(arrivalElevator);
+            const x = OX + (arrivalElevator.c + 1.5) * CELL + (arrivalElevator.ox || 0);
+            const y = OY + (arrivalElevator.r + 3.5) * CELL + (arrivalElevator.oy || 0);
             if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; }
           }
         } else placePlayerNearPortal(back);
         updateCamera(); draw();
         requestAnimationFrame(() => mapTransition.classList.remove('visible'));
-        setTimeout(() => { mapTransitioning = false; }, PORTAL_FADE_MS);
+        if (arrivalElevator) {
+          setTimeout(() => {
+            if (!(MAP.stamps || []).includes(arrivalElevator)) { mapTransitioning = false; return; }
+            startElevatorClose(arrivalElevator);
+            setTimeout(() => {
+              if (openElevatorStamp === arrivalElevator) {
+                finishElevatorClose(arrivalElevator);
+                sfx('elevator');
+              }
+              mapTransitioning = false;
+            }, 550);
+          }, PORTAL_FADE_MS + 180);
+        } else setTimeout(() => { mapTransitioning = false; }, PORTAL_FADE_MS);
       }, PORTAL_BLACK_MS);
     }, PORTAL_FADE_MS);
   });
@@ -464,7 +488,7 @@ function assignSentryToGround(t, guard = false) {
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   t.guardSummoned = guard;
   t.guardBase = null;
-  sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff');
+  sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff', 3);
   systemNotice(TYPES[t.type].name + '正前往巡邏點');
   closeGroundMenu();
 }
@@ -602,7 +626,7 @@ function sendSentryRest(t) {
   if (!bestSpot) return;
   t.mode = 'goto'; t.target = { x: bestSpot.x, y: bestSpot.y }; t.anchor = null; t.waitT = 0;
   t.guardSummoned = true; t.guardBase = base; t.navPath = null; t.navGoal = null; t.navTimer = 0; t.navFailed = false;
-  flash('瀕臨暴走，退守營地', t.x, t.y - 30, '#ffb24d');
+  sentryStatus(t, '瀕臨暴走，退守營地', '#ffb24d', true);
 }
 // 混亂（污染 100）：無差別攻擊最近的任意目標——敵人、其他哨兵、玩家、基地、核心
 // 隊友避開腐蝕池：在池內／貼邊時往外推（阿瓦倫本人免疫、不避；混亂中不避）
@@ -649,11 +673,12 @@ function applyChaosDamage(t, best, spec) {
     if (o.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose(); }
   } else if (o.isBase) {
     o.hp -= dmg; o.hitT = HIT_DUR;
+    warnCampAttack();
     if (o.hp <= 0) { removeBarrier(o); G.lives = 0; flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b'); if (!G.over) lose(); }
   } else if (G.towers.includes(o)) {   // 攻擊隊友
     const def = Math.max(0, Math.min(.75, (TYPES[o.type] && TYPES[o.type].defense) || 0));
     o.hp = Math.max(0, o.hp - dmg * (1 - def)); o.hitT = Math.max(o.hitT || 0, .16); o.hitColor = '#ff5b5b';
-    if (o.hp <= 0) { o.target = null; o.meleeSwing = null; flash('失去戰鬥能力', o.x, o.y - 42, '#ff5b6e'); }
+    if (o.hp <= 0) { o.target = null; o.meleeSwing = null; sentryStatus(o, '失去戰鬥能力', '#ff5b6e', true); }
   }
 }
 function openCampMenu(base, clientX, clientY) {
@@ -734,6 +759,7 @@ function newGame() {
   document.getElementById('systemNotices').replaceChildren();
   G = {
     phase: 'ready', money: START.money, lives: START.lives,
+    campWarningAt: -Infinity,
     guide: START.guide, guideMax: START.guideMax, guideRegen: START.guideRegen,
     grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [], acidPools: [], mapDestroyed: new Set(),
     recentMonsterSpawns: [],
@@ -1009,7 +1035,7 @@ function handleMapClick(e, isLeft) {
     if (!isLit(x, y)) { sfx('error'); flash('要指派在亮處', x, y, '#ffd24a'); return false; }
     if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return false; }
     t.mode = 'goto'; t.guardSummoned = false; t.guardBase = null; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
-    sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff'); systemNotice(TYPES[t.type].name + '正前往巡邏點');
+    sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff', 3); systemNotice(TYPES[t.type].name + '正前往巡邏點');
     return false;
   }
   if (isLeft && G.selType && G.selType.startsWith('build:')) {   // 放建築
@@ -1081,7 +1107,8 @@ function enemyAttackObstacle(e, o, dt) {
   e.atkCd = BARRIER.breakInterval;
   o.hp -= e.buildingDamage ?? BARRIER.breakDmg;
   o.hitT = HIT_DUR;
-  sfx('hit');
+  if (o.isBase) warnCampAttack();
+  if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('knock2', e.x, e.y, 0.52, 'slime-building');
   if (o.hp > 0) return;
   removeBarrier(o); e.hasTarget = false; e.baseTarget = null;
   if (o.isBase) {
@@ -1104,7 +1131,7 @@ function enemyAttackSentry(e, target, dt) {
   const [cc, cr] = cellAt(nx, ny);
   if (typeof sentryCellWalkable === 'function' && sentryCellWalkable(cc, cr)) { target.x = nx; target.y = ny; target.navPath = null; target.navGoal = null; }
   flash('-' + Math.round(damage), target.x, target.y - 30, '#ff8f8f');
-  if (target.hp <= 0) { target.target = null; flash('失去戰鬥能力', target.x, target.y - 42, '#ff5b6e'); }
+  if (target.hp <= 0) { target.target = null; sentryStatus(target, '失去戰鬥能力', '#ff5b6e', true); }
 }
 function enemyAttackPlayer(e, dt) {
   const p = G.player;
@@ -1436,7 +1463,38 @@ function spawnFlameBurst(x, y, scale = 1) {
 }
 // 玩家（溫特）攻擊：按住左鍵朝游標方向開槍。彈匣 6 發，打完或按 R 裝填；傷害很低、會吸引仇恨。
 const PLAYER_ATK = { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 2 };
+const GUIDE_GUN_TYPES = new Set(['eldrin', 'chris']);
+const GUIDE_GUN = { mag: 6, reloadTime: 2 };
 let aimHeld = false, aimClient = null;
+function gunMuzzleAt(who, angle) {
+  let x = who.x + Math.cos(angle) * 15, y = who.y - 8 + Math.sin(angle) * 10;
+  if (who.dir === 'left') { x -= 5; y += 5; }
+  else if (who.dir === 'right') { x += 3; y += 5; }
+  else if (who.dir === 'back') y -= 25;
+  return { x, y };
+}
+function spawnGuideGunshot(t, sw) {
+  const foe = sw.target, angle = sw.angle, muzzle = gunMuzzleAt(t, angle);
+  const endX = foe && !foe.dead ? foe.x : t.x + Math.cos(angle) * TYPES[t.type].range * CELL;
+  const endY = foe && !foe.dead ? foe.y : t.y + Math.sin(angle) * TYPES[t.type].range * CELL;
+  G.effects.push({ muzzle: true, x: muzzle.x, y: muzzle.y, ang: angle, life: .07, life0: .07 });
+  G.effects.push({ bullet: true, x1: muzzle.x, y1: muzzle.y, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });
+  t.gunAmmo = Math.max(0, (t.gunAmmo ?? GUIDE_GUN.mag) - 1);
+  if (typeof sfxAt === 'function') sfxAt('gunshot', t.x, t.y, 0.42, t.type);
+  if (t.gunAmmo === 0) {
+    t.gunReloadT = GUIDE_GUN.reloadTime;
+    if (typeof sfxAt === 'function') sfxAt('reload', t.x, t.y, 0.35, t.type);
+  }
+}
+function spawnSentryShotVisual(t, sw, spec) {
+  const muzzle = gunMuzzleAt(t, sw.angle);
+  const foe = sw.target;
+  const endX = foe && !foe.dead ? foe.x : t.x + Math.cos(sw.angle) * spec.range * CELL;
+  const endY = foe && !foe.dead ? foe.y : t.y + Math.sin(sw.angle) * spec.range * CELL;
+  G.effects.push({ muzzle: true, x: muzzle.x, y: muzzle.y, ang: sw.angle, life: .09, life0: .09 });
+  G.effects.push({ bullet: true, x1: muzzle.x, y1: muzzle.y, x2: endX, y2: endY,
+    life: .11, life0: .11, color: spec.color || '#ffe79a' });
+}
 function clientToWorld(cx, cy) {
   const rect = cv.getBoundingClientRect();
   return { x: (cx - rect.left) * cv.width / rect.width / VIEW_SCALE + cam.x, y: (cy - rect.top) * cv.height / rect.height / VIEW_SCALE + cam.y };
@@ -1445,7 +1503,6 @@ function startReload(p) {
   if (!p || p.reloadT > 0 || (p.ammo ?? PLAYER_ATK.mag) >= PLAYER_ATK.mag) return;
   p.reloadT = PLAYER_ATK.reloadTime;
   if (typeof sfx === 'function') sfx('reload');
-  flash('裝填中…', p.x, p.y - 46, '#ffd24a');
 }
 function updatePlayerAttack(dt) {
   const p = G.player;
@@ -1480,10 +1537,7 @@ function updatePlayerAttack(dt) {
   }
   const endX = best ? best.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   const endY = best ? best.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
-  let mx = p.x + Math.cos(aimAng) * 15, my = p.y - 8 + Math.sin(aimAng) * 10;
-  if (p.dir === 'left') { mx -= 5; my += 5; }
-  else if (p.dir === 'right') { mx += 3; my += 5; }
-  else if (p.dir === 'back') { my -= 25; }
+  const { x: mx, y: my } = gunMuzzleAt(p, aimAng);
   G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });   // 槍口閃光
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
   if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
@@ -1492,6 +1546,7 @@ function updatePlayerAttack(dt) {
     best.playerAggroT = PLAYER_ATK.aggro;   // 吸引仇恨
     best.hitT = Math.max(best.hitT || 0, .14); best.hitColor = '#bfe0ff';
     flashDmg('-' + PLAYER_ATK.dmg, best.x, best.y - 26, '#bfe0ff');
+    if (typeof sfxAt === 'function') sfxAt('monsterHit', best.x, best.y, 0.48, 'player');
   }
   if (typeof sfx === 'function') sfx('gunshot');
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
@@ -1526,6 +1581,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   else if (kind === 'lightning') spawnLightningBolt(impactPoint.x, impactPoint.y, scale);
   else if (kind === 'melee') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0);
   else if (kind === 'corrosion') spawnCorrosionSplash(impactPoint.x, impactPoint.y, spec.splash, spec.dmg, scale);
+  else if (attacker && GUIDE_GUN_TYPES.has(attacker.type)) G.effects.push({ ring: true, x: target.x, y: target.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });
   else G.effects.push({ attack: true, kind, x1: attacker.x, y1: attacker.y - 9, x2: target.x, y2: target.y, life: .28, life0: .28, color: spec.color, seed: Math.random() * 1000 });
   const hitTargets = affected && affected.length ? affected : [target];
   for (const enemy of hitTargets) {
@@ -1554,7 +1610,16 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   if (feel.stop) addHitstop(feel.stop);
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
   for (const enemy of hitTargets) flashDmg('-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6)), enemy.x, enemy.y - 26, feel.ring);
-  if (typeof sfx === 'function') sfx('hit');
+  if (G.enemies.includes(target) && typeof sfxAt === 'function') {
+    const impactSound = { flame: 'fireImpact', lightning: 'lightningImpact', corrosion: 'corrosionImpact' }[kind];
+    if (impactSound) sfxAt(impactSound, impactPoint.x, impactPoint.y, kind === 'corrosion' ? 0.62 : 0.5, attacker?.type || 'sentry');
+    sfxAt('monsterHit', target.x, target.y, 0.48, attacker?.type || 'sentry');
+  }
+}
+const SENTRY_ATTACK_SOUNDS = { theonie: 'rangedShot', amber: 'rangedShot', avaren: 'cleaver', luther: 'meleeAttack', red: 'swordSwing' };
+function playSentryAttackSound(t) {
+  const name = SENTRY_ATTACK_SOUNDS[t.type];
+  if (name && typeof sfxAt === 'function') sfxAt(name, t.x, t.y, 0.55, t.type);
 }
 function stepEnemy(e, dt) {
   e.attackingObstacle = null;
@@ -1713,7 +1778,7 @@ function update(dt) {
   }
   // 怪物移動
   for (const e of G.enemies) stepEnemy(e, dt);
-  for (const e of G.enemies) { if (e.reached) { G.lives--; e.dead = true; } }
+  for (const e of G.enemies) { if (e.reached) { G.lives--; e.dead = true; warnCampAttack(); } }
   // 雷德：偵測最近怪物，3 格內進入「舉盾衝撞」模式（供移動衝刺、撞擊、繪製共用）
   for (const t of G.towers) {
     if (t.type !== 'red') continue;
@@ -1742,9 +1807,9 @@ function update(dt) {
       const dx = foe.x - t.x, dy = foe.y - t.y;
       displaceEnemy(foe, dx, dy, CELL * 1.2);
       foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = '#dbe7ff';
+      if (typeof sfxAt === 'function') sfxAt('monsterHit', foe.x, foe.y, 0.48, 'red-ram');
       flashDmg('-' + ramDmg, foe.x, foe.y - 26, '#dbe7ff');
       G.effects.push({ ring: true, x: foe.x, y: foe.y, r: 5, r2: 24, life: .2, life0: .2, color: '#dbe7ff' });
-      if (typeof sfx === 'function') sfx('hit');
       t.ramCd = 1.4;
     }
   }
@@ -1759,6 +1824,10 @@ function update(dt) {
     const spec = TYPES[t.type];
     if (t.hp <= 0) { t.meleeSwing = null; t.gunSwing = null; continue; }
     if (t.gunT > 0) t.gunT -= dt;   // 持槍攻擊圖計時
+    if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0) {
+      t.gunReloadT = Math.max(0, t.gunReloadT - dt);
+      if (t.gunReloadT === 0) t.gunAmmo = GUIDE_GUN.mag;
+    }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
@@ -1782,7 +1851,10 @@ function update(dt) {
           G.effects.push({ support: true, x1: t.x, y1: t.y - 8, x2: o.x, y2: o.y - 8, life: .5, life0: .5, color: `rgb(${sc[0]},${sc[1]},${sc[2]})` });
           did = true;
         }
-        if (did) t.auraCd = AURA_CD;
+        if (did) {
+          t.auraCd = AURA_CD;
+          if (typeof sfxAt === 'function') sfxAt('soothe', t.x, t.y, 0.42, t.type);
+        }
       }
     }
     t.cd -= dt;
@@ -1791,6 +1863,7 @@ function update(dt) {
     if (t.meleeSwing) {
       const swing = t.meleeSwing;
       swing.age += dt;
+      if (!swing.soundPlayed && swing.age >= swing.wind) { swing.soundPlayed = true; playSentryAttackSound(t); }
       if (!swing.slashFx && swing.age >= swing.wind && !(swing.ult && ULTIMATES[t.type] && ULTIMATES[t.type].radius)) {   // 近戰大招用衝擊波，不噴小月牙
         swing.slashFx = true;
         const slashAng = Math.atan2(Math.sin(swing.angle) + 1.1, Math.cos(swing.angle));   // 偏向下前方（配合往下劈）
@@ -1809,12 +1882,15 @@ function update(dt) {
       t.gunT = Math.max(t.gunT || 0, .08);   // 整段都舉槍
       if (!sw.fired && sw.age >= sw.impact) {
         sw.fired = true;
+        if (GUIDE_GUN_TYPES.has(t.type)) spawnGuideGunshot(t, sw);
+        else { playSentryAttackSound(t); spawnSentryShotVisual(t, sw, spec); }
         const foe = sw.target;
         if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12) swingTarget = foe;
       }
       if (sw.age >= sw.duration) t.gunSwing = null;
       if (!swingTarget) continue;
     } else if (t.cd > 0) continue;
+    if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0 && !swingTarget) continue;
     const R = spec.range * CELL;
     let target = swingTarget, bestY = -1, bestDistance = Infinity;
     if (!target) target = t.mode === 'goto' ? null : campAttackerFor(t, R);
@@ -1841,7 +1917,7 @@ function update(dt) {
         t.moving = false;
         continue;
       }
-      if (GUN_FOLDERS.has(spec.sprite) && !swingTarget) {   // 開槍角色：先瞄準再開火（前搖→命中→收招）
+      if (!swingTarget) {   // 遠程角色：即使沒有持槍素材，也先做瞄準／後座動畫再判定命中
         const dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
@@ -1854,6 +1930,7 @@ function update(dt) {
       const U = ((t.gunSwing && t.gunSwing.ult) || (t.meleeSwing && t.meleeSwing.ult)) ? ULTIMATES[t.type] : null;   // 大招（在揮擊啟動時已決定）
       if (U && U.radius) {   // 近戰大招：大範圍（紅＝盾牌衝撞＋回復；路德＝重擊＋暈眩）
         const r = U.radius * CELL, dmg = spec.dmg * U.dmgMul, col = U.kind === 'bash' ? '#bfe0ff' : '#ffd0d5';
+        const hitEnemy = G.enemies.find(e => !e.dead && Math.hypot(e.x - t.x, e.y - t.y) <= r);
         for (const e of G.enemies) {
           if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r) continue;
           e.hp -= dmg;
@@ -1865,8 +1942,8 @@ function update(dt) {
         if (U.healHp) { t.hp = Math.min(t.maxhp, t.hp + U.healHp); flashDmg('+' + U.healHp, t.x, t.y - 40, '#7ee0a0'); }
         if (U.healTaint) t.taint = Math.max(0, t.taint - U.healTaint);
         spawnUltShockwave(t.x, t.y, r, col);
-        if (typeof sfx === 'function') sfx('hit');
-      } else if (Math.random() < spec.accuracy) {
+        if (hitEnemy && typeof sfxAt === 'function') sfxAt('monsterHit', hitEnemy.x, hitEnemy.y, 0.48, t.type + '-ult');
+      } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy) {
         const impactPoint = { x: target.x, y: target.y };
         const atkDmg = spec.dmg * (U ? U.dmgMul : 1), atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
@@ -1882,9 +1959,9 @@ function update(dt) {
           }
         }
         spawnAttackVisual(t, target, U ? { ...spec, dmg: atkDmg, splash: atkSplash } : spec, affected, impactPoint, U ? U.scale : 1);
-      } else flash('MISS', t.x, t.y - 26, '#9aa4b2');
+      } else flashDmg('MISS', target.x, target.y - 26, '#c6d1dd');
       if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
-      if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('混亂!', t.x, t.y - 30, '#ff4d4d'); systemNotice(TYPES[t.type].name + '污染達到極限，陷入混亂，開始無差別攻擊！', true); }
+      if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('混亂!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入混亂，開始無差別攻擊！', true); }
     }
   }
   // 地上腐蝕痕跡：計時、範圍內怪物持續扣血、偶爾冒紫黑霧
@@ -1906,7 +1983,7 @@ function update(dt) {
           const def = Math.max(0, Math.min(.75, (TYPES[t.type] && TYPES[t.type].defense) || 0));
           t.hp = Math.max(0, t.hp - dmgAmt * (1 - def));
           t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#b060ff';
-          if (t.hp <= 0) { t.target = null; flash('失去戰鬥能力', t.x, t.y - 42, '#ff5b6e'); }
+          if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
         }
       }
       // 玩家（溫特）
@@ -1925,7 +2002,7 @@ function update(dt) {
     }
     G.acidPools = G.acidPools.filter(p => p.t > 0);
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
@@ -1974,7 +2051,11 @@ function update(dt) {
   updateHUD();
 }
 const FLASH_LIFE = 1.5;   // 提示字停留時間（秒）；想更久／更短改這裡
-function flash(text, x, y, color) { G.effects.push({ text, x, y, life: FLASH_LIFE, life0: FLASH_LIFE, color, vy: -22 }); }
+function flash(text, x, y, color, life = FLASH_LIFE) { G.effects.push({ text, x, y, life, life0: life, color, vy: -22 }); }
+function sentryStatus(t, text, color = '#8fd3ff', warning = false) {
+  flash(text, t.x, t.y - 30, color, 3);
+  systemNotice((TYPES[t.type]?.name || '哨兵') + '：' + text, warning);
+}
 function systemNotice(text, warning = false) {
   const list = document.getElementById('systemNotices');
   if (!list) return;
@@ -1984,6 +2065,13 @@ function systemNotice(text, warning = false) {
   list.prepend(item);
   while (list.children.length > 3) list.lastElementChild.remove();
   setTimeout(() => { item.classList.add('leaving'); setTimeout(() => item.remove(), 300); }, 3800);
+}
+function warnCampAttack() {
+  const now = performance.now();
+  if (now - G.campWarningAt < 10000) return;
+  G.campWarningAt = now;
+  systemNotice('營地遭受攻擊', true);
+  sfx('campWarning');
 }
 
 // ---- 各種角色/物件的畫法（拆成函式，方便深度排序時逐一呼叫）----
@@ -2282,6 +2370,19 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.fillText(label, x + pad + keyW + gap, y + 17);
 }
 function drawSitPrompt(seat) { drawInteractPrompt(seat.x, seat.top, seat.prompt || '坐'); }
+function drawPlayerReloadCountdown(p, size) {
+  if (!(p.reloadT > 0)) return;
+  const w = 58, h = 20, x = Math.round(p.x - w / 2), y = Math.round(p.y - size - 14);
+  const progress = Math.max(0, Math.min(1, 1 - p.reloadT / PLAYER_ATK.reloadTime));
+  ctx.save();
+  ctx.fillStyle = 'rgba(10,17,27,.94)'; roundRect(x, y, w, h, 6); ctx.fill();
+  ctx.strokeStyle = '#5d88a8'; ctx.lineWidth = 1; ctx.stroke();
+  ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = '#e2f2ff'; ctx.fillText('Reload', p.x, y + 8);
+  ctx.fillStyle = '#243a50'; ctx.fillRect(x + 5, y + h - 6, w - 10, 3);
+  ctx.fillStyle = '#71c8fa'; ctx.fillRect(x + 5, y + h - 6, (w - 10) * progress, 3);
+  ctx.restore();
+}
 function drawPlayer(p) {
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
@@ -2308,6 +2409,7 @@ function drawPlayer(p) {
     ctx.fillStyle = 'rgba(8,12,18,.88)'; roundRect(x - 1, y - 1, w + 2, h + 2, 3); ctx.fill();
     if (ratio > 0) { ctx.fillStyle = ratio > .35 ? '#63d7aa' : '#ff6363'; roundRect(x, y, w * ratio, h, 2); ctx.fill(); }
   }
+  drawPlayerReloadCountdown(p, size);
 }
 
 // ---- 繪製 ----
@@ -2359,21 +2461,24 @@ function draw() {
 
   // 上層（樹冠、屋簷等，永遠蓋在最上面）
   drawMapTop(ctx);
-  // 電梯是獨立物件：牆之後繪製；開門後站進去的人物顯示在門框前。
+  // 電梯是獨立物件：牆之後繪製；深度線前方的所有人物都要顯示在門框前。
   drawElevators(ctx);
-  if (G.player) for (const stamp of MAP.stamps || []) {
+  for (const stamp of MAP.stamps || []) {
     if (!isElevatorStamp(stamp)) continue;
     const left = OX + stamp.c * CELL + (stamp.ox || 0), top = OY + stamp.r * CELL + (stamp.oy || 0);
     const cfg = elevatorConfig(stamp.id), phase = stamp === openElevatorStamp ? 'open' : 'closed';
     const depth = cfg?.[phase]?.depth ?? (phase === 'open' ? 35 : 120);
-    if (G.player.x >= left && G.player.x <= left + 3 * CELL &&
-        G.player.y + 16 >= top + depth && G.player.y <= top + 4 * CELL) drawPlayer(G.player);
+    const inFront = actor => actor.x >= left && actor.x <= left + 3 * CELL &&
+      actor.y + 16 >= top + depth && actor.y <= top + 4 * CELL;
+    for (const tower of G.towers) if (inFront(tower)) drawTower(tower);
+    for (const npc of G.npcs) if (inFront(npc)) drawWanderer(npc);
+    if (G.player && inFront(G.player)) drawPlayer(G.player);
   }
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
-    if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'closed' ? '電梯' : '選擇樓層');
+    if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);

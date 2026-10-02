@@ -1,6 +1,10 @@
 const STORE='td-object-editor-v1';
 const clone=x=>JSON.parse(JSON.stringify(x));
 let objects; try{objects=JSON.parse(localStorage.getItem(STORE))||clone(OBSTACLES)}catch(_){objects=clone(OBSTACLES)}
+// 舊瀏覽器存檔若漏了露營燈，補上目前遊戲的正式資料，保留其他已調整的 HP／碰撞設定。
+for(const id of ['camping_lights']) if(!objects.some(o=>o.id===id)){
+  const current=OBSTACLES.find(o=>o.id===id); if(current) objects.push(clone(current));
+}
 let index=0, orient='h';
 const $=id=>document.getElementById(id), fields=['name','cost','hp','file','w','h'];
 function save(){localStorage.setItem(STORE,JSON.stringify(objects));$('status').textContent='✓ 已自動保存';setTimeout(()=>{$('status').textContent=''},900)}

@@ -353,7 +353,7 @@ function updateSentry(t, dt) {
     if (moveSentryWithPath(t, t.target.x, t.target.y, speed, dt)) {
       t.target = null; t.navPath = null; t.navGoal = null;
       t.mode = 'hold'; t.anchor = { x: t.x, y: t.y };
-      flash('開始巡邏', t.x, t.y - 24, '#7ee0c0');
+      flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3);
       systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏');
     }
     return;
@@ -409,7 +409,7 @@ function updateSentry(t, dt) {
   const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 : 1) * ((t.taint > 85 && !t.berserk) ? 0.5 : 1) * (t.shieldMode ? 1.7 : 1);   // 指派快一點；瀕臨暴走減半；雷德舉盾衝刺加速
   if (moveSentryWithPath(t, t.target.x, t.target.y, sp, dt)) {
     t.target = null; t.navPath = null;
-    if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0'); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
+    if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
     else t.waitT = 0.6 + Math.random() * 1.8;         // 到點後停一下再逛
     return;
   }
@@ -498,9 +498,9 @@ function openSentryMenu(t, silent) {
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
 function sentryMenuAct(act) {
   const t = menuSentry; if (!t) return;
-  if (act === 'free') { sfx('button'); t.mode = 'free'; t.guardSummoned = false; t.guardBase = null; t.anchor = null; t.target = null; flash('自由走動', t.x, t.y - 24, '#8fd3ff'); }
-  else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.guardBase = null; t.anchor = { x: t.x, y: t.y }; t.target = null; flash('在原地巡邏', t.x, t.y - 24, '#8fd3ff'); }
-  else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); flash('點地圖指定巡邏位置（Esc 取消）', t.x, t.y - 24, '#ffd479'); return; }
+  if (act === 'free') { sfx('button'); t.mode = 'free'; t.guardSummoned = false; t.guardBase = null; t.anchor = null; t.target = null; sentryStatus(t, '自由走動'); }
+  else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.guardBase = null; t.anchor = { x: t.x, y: t.y }; t.target = null; sentryStatus(t, '在原地巡邏'); }
+  else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); sentryStatus(t, '點地圖指定巡邏位置（Esc 取消）', '#ffd479'); return; }
   else if (act === 'talk') { openDialogue(t); return; }
   else if (act === 'soothe') { soothe(t); openSentryMenu(t, true); return; }   // soothe() 自帶音效；選單靜默重開、更新汙染數字
   closeSentryMenu();
@@ -510,11 +510,11 @@ window.addEventListener('keydown', e => {
 });
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
 function soothe(t) {
-  if (t.taint <= 0 && !t.berserk) { sfx('error'); flash('無需疏導', t.x, t.y - 26, '#9aa4b2'); return; }
-  if (G.guide < SOOTHE.cost) { sfx('error'); flash('嚮導能量不足', t.x, t.y - 26, '#ff8f8f'); return; }
+  if (t.taint <= 0 && !t.berserk) { sfx('error'); sentryStatus(t, '無需疏導', '#9aa4b2'); return; }
+  if (G.guide < SOOTHE.cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
   G.guide -= SOOTHE.cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
   sfx('soothe');
   spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
-  flash('疏導 -' + SOOTHE.heal, t.x, t.y - 26, '#7ee0c0'); updateHUD();
+  sentryStatus(t, '疏導 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
 }

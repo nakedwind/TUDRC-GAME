@@ -48,15 +48,10 @@ const CHAIRS_DEFAULT = {
   "tile_eoc_office_chair_black": {
     "enabled": true,
     "depth": 58,
-    "solid": [
-      [
-        0,
-        1
-      ]
-    ],
+    "solid": [],
     "seat": {
-      "x": 6,
-      "y": 49,
+      "x": 8,
+      "y": 43,
       "dir": "left"
     }
   },
@@ -165,16 +160,7 @@ const CHAIRS_DEFAULT = {
   "tile_dorm_office_chair_back": {
     "enabled": true,
     "depth": 65,
-    "solid": [
-      [
-        0,
-        1
-      ],
-      [
-        1,
-        1
-      ]
-    ],
+    "solid": [],
     "seat": {
       "x": 39,
       "y": 39,
@@ -377,10 +363,6 @@ const CHAIRS_DEFAULT = {
     "solid": [
       [
         0,
-        0
-      ],
-      [
-        0,
         1
       ],
       [
@@ -389,19 +371,11 @@ const CHAIRS_DEFAULT = {
       ],
       [
         1,
-        0
-      ],
-      [
-        1,
         1
       ],
       [
         1,
         2
-      ],
-      [
-        2,
-        0
       ],
       [
         2,

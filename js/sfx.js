@@ -13,18 +13,30 @@ const SFX = (() => {
     place: '放置.mp3',
     soothe: '疏導.mp3',
     door: '關門.mp3',
+    elevator: '電梯.mp3',
     gunshot: '開槍.mp3',
     reload: 'reload.mp3',
+    monsterHit: 'hit.mp3',
+    fireImpact: '火焰.mp3',
+    lightningImpact: '雷電.mp3',
+    corrosionImpact: '腐蝕命中.wav',
+    campWarning: '警告聲.mp3',
+    monsterDown: '怪物倒下.mp3',
+    rangedShot: '射擊.mp3',
+    knock2: '敲打2.mp3',
+    cleaver: '菜刀.mp3',
+    meleeAttack: '近戰攻擊.mp3',
+    swordSwing: '揮劍.mp3',
   };
-  const activeAudio = new Set();
+  const activeAudio = new Map();
   const lastPlayed = new Map();
-  function playFile(name) {
+  function playFile(name, gain = 1, sourceKey = name) {
     const now = performance.now();
-    if (now - (lastPlayed.get(name) || -Infinity) < 70) return;
-    lastPlayed.set(name, now);
+    if (now - (lastPlayed.get(sourceKey) || -Infinity) < 70) return;
+    lastPlayed.set(sourceKey, now);
     const audio = new Audio('Sound effects/' + files[name]);
-    audio.volume = Math.min(1, volume);
-    activeAudio.add(audio);
+    audio.volume = Math.min(1, volume * gain);
+    activeAudio.set(audio, gain);
     const cleanup = () => activeAudio.delete(audio);
     audio.addEventListener('ended', cleanup, { once: true });
     audio.addEventListener('error', cleanup, { once: true });
@@ -80,9 +92,10 @@ const SFX = (() => {
     kill() { tone({ freq: 420, freq2: 120, type: 'sine', dur: 0.09, gain: 0.1 }); },
     hit() { tone({ freq: 160, freq2: 70, type: 'square', dur: 0.07, gain: 0.15 }); noise({ dur: 0.06, gain: 0.08, freq: 700 }); },
   };
-  function play(name) {
+  function play(name, gain = 1, sourceKey = name) {
     if (!enabled) return;
-    if (files[name]) { playFile(name); return; }
+    if (gain <= 0) return;
+    if (files[name]) { playFile(name, gain, sourceKey); return; }
     const f = sounds[name];
     if (f) { ensure(); f(); }
   }
@@ -90,14 +103,23 @@ const SFX = (() => {
     play,
     get enabled() { return enabled; }, set enabled(v) {
       enabled = v;
-      if (!v) { activeAudio.forEach(audio => audio.pause()); activeAudio.clear(); }
+      if (!v) { activeAudio.forEach((_, audio) => audio.pause()); activeAudio.clear(); }
     },
-    set volume(v) { volume = v; if (master) master.gain.value = v; activeAudio.forEach(audio => { audio.volume = Math.min(1, v); }); },
+    set volume(v) { volume = v; if (master) master.gain.value = v; activeAudio.forEach((gain, audio) => { audio.volume = Math.min(1, v * gain); }); },
   };
 })();
 function sfx(name) {
   if (typeof UIFeedback !== 'undefined' && UIFeedback.intercept(name)) return;
   SFX.play(name);
+}
+// 角色發出的聲音：靠近玩家最清楚，超過 16 格逐漸淡出。
+function sfxAt(name, x, y, baseGain = 0.4, sourceId = '') {
+  const player = typeof G !== 'undefined' && G && G.player;
+  if (!player) return;
+  const cell = typeof CELL !== 'undefined' ? CELL : 40;
+  const distance = Math.hypot(x - player.x, y - player.y) / cell;
+  const distanceGain = distance <= 2 ? 1 : Math.max(0, (16 - distance) / 14);
+  if (distanceGain > 0) SFX.play(name, baseGain * distanceGain, sourceId ? name + ':' + sourceId : name);
 }
 
 // M 鍵：靜音開關
