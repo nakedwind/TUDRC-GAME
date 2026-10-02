@@ -1,19 +1,33 @@
-/* ===== 角色資料 =====
-   每位角色集中於同一筆資料：身分、外觀、戰鬥能力、介紹、印象、台詞與跟隨參數。
-   kind: player=玩家、sentinel=哨兵、guide=出勤嚮導、support=非戰鬥人員。
-   特殊行為的執行程式仍在 js/sentry.js / js/game.js；這裡保存可調整的參數。
-   角色 ID 請保持穩定，編隊與升級存檔會使用它。
-*/
+/* 角色資料頁匯出；保留角色 ID、對話與非戰鬥人員資料。 */
 const CHARACTERS = {
   "winter": {
     "id": "winter",
     "kind": "player",
     "name": "溫特",
     "sprite": "winter_B",
-    "player": { "speed": 230, "r": 14, "drawSize": 64 },
+    "player": {
+      "hp": 100,
+      "speed": 230,
+      "r": 14,
+      "drawSize": 64
+    },
+    "playerAttack": {
+      "range": 8,
+      "dmg": 5,
+      "rate": 5,
+      "aggro": 5,
+      "cone": 0.44,
+      "mag": 6,
+      "reloadTime": 2
+    },
     "intro": "Y102應變編組的嚮導部隊長。",
     "captainImpression": "",
-    "dialogues": { "idle": [], "battle": [], "npc": [], "sentry": [] }
+    "dialogues": {
+      "idle": [],
+      "battle": [],
+      "npc": [],
+      "sentry": []
+    }
   },
   "theonie": {
     "id": "theonie",
@@ -25,11 +39,11 @@ const CHARACTERS = {
       "role": "遠程火力",
       "ability": "火焰",
       "cost": 50,
-      "range": 5,
+      "range": 6,
       "aggroRange": 10,
       "dmg": 30,
       "rate": 1,
-      "taint": 5,
+      "taint": 3,
       "splash": 0,
       "color": "#ff7b39",
       "accuracy": 1,
@@ -82,11 +96,11 @@ const CHARACTERS = {
       "role": "範圍雷擊",
       "ability": "雷電",
       "cost": 40,
-      "range": 5,
+      "range": 6,
       "aggroRange": 10,
       "dmg": 12,
       "rate": 0.5,
-      "taint": 5,
+      "taint": 1,
       "splash": 1.3,
       "color": "#ffd24a",
       "accuracy": 0.6,
@@ -137,14 +151,14 @@ const CHARACTERS = {
       "ability": "自癒",
       "cost": 45,
       "range": 1,
-      "aggroRange": 16,
+      "aggroRange": 14,
       "dmg": 12,
       "rate": 1,
       "taint": 2,
       "splash": 1,
       "color": "#ff5b6e",
       "accuracy": 0.9,
-      "taintRegen": 6,
+      "taintRegen": 0.5,
       "walkSpeed": 85,
       "hp": 240,
       "defense": 0.45,
@@ -198,8 +212,8 @@ const CHARACTERS = {
       "range": 2,
       "aggroRange": 10,
       "dmg": 30,
-      "rate": 0.5,
-      "taint": 8,
+      "rate": 1,
+      "taint": 1,
       "splash": 1.1,
       "color": "#5e9bff",
       "accuracy": 0.9,
@@ -264,7 +278,7 @@ const CHARACTERS = {
       "rate": 0.5,
       "taint": 8,
       "splash": 1,
-      "color": "#6fae55",
+      "color": "#56973b",
       "accuracy": 0.9,
       "taintRegen": 0,
       "walkSpeed": 80,
@@ -318,13 +332,13 @@ const CHARACTERS = {
       "role": "醫療支援",
       "ability": "疏導",
       "cost": 35,
-      "range": 4,
+      "range": 5,
       "aggroRange": 6,
-      "dmg": 12,
-      "rate": 0.3333333333333333,
+      "dmg": 10,
+      "rate": 0.5,
       "taint": 0,
       "splash": 0,
-      "color": "#2f8a68",
+      "color": "#6ab973",
       "accuracy": 0.9,
       "taintRegen": 0,
       "walkSpeed": 80,
@@ -333,7 +347,7 @@ const CHARACTERS = {
       "guide": true,
       "aura": {
         "r": 2.8,
-        "rate": 6,
+        "rate": 5,
         "heal": 6
       },
       "ratings": {
@@ -381,8 +395,8 @@ const CHARACTERS = {
       "cost": 35,
       "range": 6,
       "aggroRange": 8,
-      "dmg": 18,
-      "rate": 0.6666666666666666,
+      "dmg": 15,
+      "rate": 1,
       "taint": 0,
       "splash": 0,
       "color": "#8a97a8",

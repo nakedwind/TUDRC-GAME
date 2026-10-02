@@ -99,11 +99,11 @@ function monsterImage(file) {
   return monsterImageCache.get(file);
 }
 ACTIVE_MONSTERS.forEach(monster => monsterImage(monster.sprite));
-function createMonster(spec, x, y) {
+function createMonster(spec, x, y, variant) {
   const legacy = !Array.isArray(MAP?.monsterMix) || !MAP.monsterMix.length;
   const oldRules = legacy && spec.id === 'slime' ? (MAP.rules || {}) : {};
   const hp = spec.hp;   // 血量一律用怪物編輯器（catalog）的設定，不再被地圖舊規則 rules.hp 覆蓋
-  return {
+  const monster = {
     type: spec.id, x, y, hp, maxhp: hp,
     speed: Number(oldRules.speed) || spec.speed,
     reward: oldRules.reward != null ? Number(oldRules.reward) : spec.reward,
@@ -112,6 +112,8 @@ function createMonster(spec, x, y) {
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height,
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
   };
+  // 史萊姆變體（分裂／自爆／巨型…），設定在 js/combat-feel.js
+  return spec.id === 'slime' ? applySlimeVariant(monster, variant || rollSlimeVariant()) : monster;
 }
 const ATTACK_EFFECT_KINDS = ['fire', 'lightning', 'slash', 'guidance', 'corrosion', 'impact'];
 const attackEffectFrames = Object.fromEntries(ATTACK_EFFECT_KINDS.map(kind => [kind,
@@ -774,7 +776,7 @@ function newGame() {
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
   spawnWanderers();     // 場景 NPC 只會在亮處自由走動
   const [px, py] = playerSpawnPos();
-  G.player = { x: px, y: py, hp: 100, maxhp: 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
+  G.player = { x: px, y: py, hp: PLAYER.hp ?? 100, maxhp: PLAYER.hp ?? 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
   updateCamera();
   updateHUD();
   updateBuildToggle();
@@ -1164,6 +1166,18 @@ function enemyAttackPlayer(e, dt) {
 function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
   if (!G.player || G.player.hp <= 0 || playerDistance > ENEMY_SENSE_RANGE) return false;
   if (playerDistance <= 30) { enemyAttackPlayer(e, dt); return true; }
+  if (e.type === 'slime' && playerDistance <= SLIME_POUNCE.range && playerDistance > 40 &&
+      (e.playerPounceCd || 0) <= 0 && (e.playerPounceT || 0) <= 0 &&
+      e.slimeClock / SLIME_JUMP.total >= SLIME_JUMP.airRatio) {
+    // 鎖定「蓄力開始當下」玩家的位置：地上會出現落點警示，玩家看到就能閃開。
+    const dx = G.player.x - e.x, dy = G.player.y - e.y, d = Math.hypot(dx, dy) || 1;
+    const reach = Math.max(0, Math.min(d, SLIME_POUNCE.maxLeap) - 14);   // 落在玩家面前一點，擊退才有方向
+    e.playerWindupT = SLIME_POUNCE.windup;
+    e.playerPounceCd = SLIME_POUNCE.cooldown;
+    e.playerPounceGoal = { x: e.x + dx / d * reach, y: e.y + dy / d * reach };
+    e.slimeLift = 0; e.slimeScaleX = 1.18; e.slimeScaleY = .76;
+    return true;
+  }
   const [gc, gr] = cellAt(G.player.x, G.player.y);
   const nav = enemyNavigate(e, gc, gr, moveDt, 'player:' + gc + ',' + gr, true);
   if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
@@ -1281,6 +1295,8 @@ function updateEnemyEffects(e, dt) {
   if (e.hitT > 0) e.hitT -= dt;
   if (e.playerAggroT > 0) e.playerAggroT -= dt;   // 玩家射擊造成的仇恨計時
   e.playerTouchCd = Math.max(0, (e.playerTouchCd || 0) - dt);
+  e.playerPounceCd = Math.max(0, (e.playerPounceCd || 0) - dt);
+  e.playerPounceT = Math.max(0, (e.playerPounceT || 0) - dt);
   if (e.burnT > 0) {
     e.burnT -= dt; e.burnTick = (e.burnTick || 0) - dt;
     if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flash('燒傷', e.x, e.y - 25, '#ff8a42'); }
@@ -1291,13 +1307,51 @@ function updateEnemyEffects(e, dt) {
 
 // 與《苦艾與甘露》一致：完整週期約 1.83 秒，前 62% 騰空移動，落地後壓扁並停住。
 const SLIME_JUMP = { total: 1.83, airRatio: .62, height: 14 };
+// 撲擊：蓄力（地上出現落點警示）→ 高高拋物線飛撲 → 重重落地（震動＋衝擊波，落點附近的玩家受傷）
+// windup 蓄力秒數、lunge 飛行秒數、range 觸發距離、maxLeap 最遠撲擊距離、height 飛撲高度、hitRadius 落地傷害半徑
+const SLIME_POUNCE = { windup: .6, lunge: .45, range: CELL * 3, maxLeap: CELL * 3.2, height: 46, hitRadius: 38, cooldown: 3.2 };
+function updateSlimePounce(e, dt) {
+  e.playerPounceT = Math.max(0, e.playerPounceT - dt);
+  const p = 1 - e.playerPounceT / SLIME_POUNCE.lunge;
+  const goal = e.playerPounceGoal, start = e.playerPounceStart;
+  // 沿直線逐小步移動（撞牆或建築就停在牆前），高度用拋物線
+  const tx = start.x + (goal.x - start.x) * p, ty = start.y + (goal.y - start.y) * p;
+  displaceEnemy(e, tx - e.x, ty - e.y, Math.hypot(tx - e.x, ty - e.y), true);
+  e.slimeLift = 4 * SLIME_POUNCE.height * p * (1 - p);
+  e.slimeScaleX = .8; e.slimeScaleY = 1.28;   // 空中拉長
+  if (e.playerPounceT > 0) return;
+  // 落地：大幅壓扁、震動、衝擊波；之後停在原地喘一下（玩家的反擊時機）
+  e.slimeLift = 0; e.slimeScaleX = 1.4; e.slimeScaleY = .6;
+  e.slimeClock = SLIME_JUMP.total * SLIME_JUMP.airRatio;
+  e.playerPounceGoal = null;
+  G.effects.push({ ring: true, x: e.x, y: e.y + 10, r: 8, r2: SLIME_POUNCE.hitRadius + 14, life: .32, life0: .32, color: '#ff8665' });
+  G.effects.push({ ring: true, x: e.x, y: e.y + 10, r: 4, r2: SLIME_POUNCE.hitRadius, life: .22, life0: .22, color: '#ffe0c8' });
+  for (let i = 0; i < 10; i++) {
+    const a = Math.PI * 2 * i / 10 + Math.random() * .4, sp = 60 + Math.random() * 70;
+    G.effects.push({ particle: true, kind: 'spark', x: e.x, y: e.y + 10, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45,
+      r: 2 + Math.random() * 2, life: .35, life0: .35, color: '#9fe7ef' });
+  }
+  playSlimeAudio('land', e);
+  const playerD = G.player ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
+  const hitRadius = SLIME_POUNCE.hitRadius * (e.sizeMul || 1);
+  if (playerD <= hitRadius) addShake(9);          // 被撲中：重震
+  else nearbyImpact(e.x, e.y, 3, 0);              // 沒撲中：附近才輕震
+  if (G.player && G.player.hp > 0 && playerD <= hitRadius) {
+    e.playerTouchCd = 0;
+    enemyAttackPlayer(e, dt);
+    addHitstop(.06);
+  }
+}
 function slimeLerp(a, b, p) { return a + (b - a) * Math.max(0, Math.min(1, p)); }
 function updateSlimeJump(e, dt) {
   if (e.slimeClock == null) e.slimeClock = Math.random() * SLIME_JUMP.total;
   const previous = e.slimeClock / SLIME_JUMP.total;
   e.slimeClock = (e.slimeClock + dt) % SLIME_JUMP.total;
   const phase = e.slimeClock / SLIME_JUMP.total;
-  if (previous < SLIME_JUMP.airRatio && phase >= SLIME_JUMP.airRatio) playSlimeAudio('land', e);
+  if (previous < SLIME_JUMP.airRatio && phase >= SLIME_JUMP.airRatio) {
+    playSlimeAudio('land', e);
+    if (e.variant === 'giant') onGiantLand(e);
+  }
   if (phase < .35) {
     const p = phase / .35;
     e.slimeLift = slimeLerp(0, 14, p); e.slimeScaleX = slimeLerp(1, .96, p); e.slimeScaleY = slimeLerp(1, 1.07, p);
@@ -1420,13 +1474,169 @@ function pushCorrosionMist(x, y, vx, vy) {
   const L = 1.6 + Math.random() * 1.1;   // 停留更久
   G.effects.push({ cmist: true, x, y, vx, vy, r0: 0.8, rMax: 1.7, lobes, spin: (Math.random() * 2 - 1) * 0.3, life: L, life0: L });
 }
-// 腐蝕命中特效：濃稠扭曲的紫黑霧＋暗紫液滴，並在地上留下 5 秒的腐蝕痕跡（怪物碰到會扣血）。
+// 地上焦痕：腐蝕（阿瓦倫）、火焰（希奧妮）、雷電（安柏）三種樣式，只是畫面效果。
+// 腐蝕焦痕在扣血期間透出紫光；火焰／雷電焦痕剛落下時有一小段餘熱發光，之後只剩焦黑，時間到慢慢淡掉。
+// life：留在地上幾秒；fade：最後幾秒淡出；size：外觀大小倍率（不影響扣血範圍）
+// cracks：主裂紋條數；rays：雷擊放射狀焦紋條數；heat：剛落下時餘熱發光的秒數
+// halo／c0～c2／crack／fleck：外圈、主體（中心→邊緣）、裂紋、碎屑顏色；glow：發光顏色
+const SCORCH = {
+  max: 80,   // 地上同時最多幾個焦痕（超過就先移除最舊的）
+  styles: {
+    corrosion: { life: 14, fade: 3, size: .8, cracks: 7, halo: '#2b1236',
+                 c0: [10, 4, 14], c1: [24, 10, 32], c2: [58, 26, 74], crack: '#07020a', fleck: '#1a0b22', glow: [155, 79, 208] },
+    flame:     { life: 5, fade: 1.5, size: 1, cracks: 3, heat: 1.2, halo: '#3a2619',
+                 c0: [8, 6, 5], c1: [24, 15, 10], c2: [62, 38, 22], crack: '#050302', fleck: '#18100b', glow: [255, 122, 42] },
+    lightning: { life: 5, fade: 1.5, size: 1, cracks: 0, rays: 8, heat: .45, halo: '#26262c',
+                 c0: [6, 6, 8], c1: [18, 18, 22], c2: [50, 48, 54], crack: '#030304', fleck: '#121214', glow: [170, 225, 255] },
+  },
+};
+function addScorchMark(x, y, R0, pool, styleId = 'corrosion') {
+  const st = SCORCH.styles[styleId] || SCORCH.styles.corrosion;
+  const R = R0 * st.size;
+  const flecks = [], cracks = [];
+  // 雷擊焦痕中心比較小、放射紋比較長；其他是一整片不規則焦黑
+  const body = st.rays ? .55 : 1;
+  const radii = scorchShape(R * body), haloRadii = radii.map(r => r * (1.08 + Math.random() * .28));
+  // 主體旁邊噴濺出去的小焦斑
+  const splats = [];
+  for (let i = 0, ns = 2 + Math.floor(Math.random() * 3); i < ns; i++) {
+    const a = Math.random() * Math.PI * 2, d = R * body * (1.05 + Math.random() * .45);
+    splats.push({ x: Math.cos(a) * d, y: Math.sin(a) * d, radii: scorchShape(R * body * (.16 + Math.random() * .16), 10) });
+  }
+  for (let i = 0; i < 8; i++) {
+    const a = Math.random() * Math.PI * 2, d = R * (.95 + Math.random() * .5);
+    flecks.push({ x: Math.cos(a) * d, y: Math.sin(a) * d, r: .7 + Math.random() * 1.5 });
+  }
+  // 由中心往外的主裂紋（每條 3～4 折，平均分散在各方向），部分會在中段再岔出細裂紋
+  const a0 = Math.random() * Math.PI * 2;
+  for (let i = 0; i < st.cracks; i++) {
+    const pts = [[0, 0]];
+    let a = a0 + i / st.cracks * Math.PI * 2 + (Math.random() * 2 - 1) * .35, d = 0;
+    const segs = 3 + Math.floor(Math.random() * 2);
+    for (let k = 0; k < segs; k++) { d += R * (.16 + Math.random() * .14); a += (Math.random() * 2 - 1) * .5; pts.push([Math.cos(a) * d, Math.sin(a) * d]); }
+    cracks.push({ pts, w: 1.3 });
+    if (Math.random() < .6) {   // 細岔裂
+      const [bx, by] = pts[1 + Math.floor(Math.random() * (pts.length - 2))];
+      let ba = a + (Math.random() < .5 ? -1 : 1) * (.6 + Math.random() * .5), bd = 0;
+      const branch = [[bx, by]];
+      for (let k = 0; k < 2; k++) { bd += R * (.1 + Math.random() * .1); ba += (Math.random() * 2 - 1) * .4; branch.push([bx + Math.cos(ba) * bd, by + Math.sin(ba) * bd]); }
+      cracks.push({ pts: branch, w: .8 });
+    }
+  }
+  // 雷擊：從中心向外炸開的鋸齒狀放射焦紋，長短不一
+  for (let i = 0; i < (st.rays || 0); i++) {
+    const pts = [[0, 0]];
+    const a = a0 + i / st.rays * Math.PI * 2 + (Math.random() * 2 - 1) * .3;
+    const len = R * (.8 + Math.random() * .6);
+    for (let k = 1; k <= 4; k++) {
+      const d = len * k / 4, zig = (k < 4 ? (Math.random() * 2 - 1) * R * .12 : 0);
+      pts.push([Math.cos(a) * d - Math.sin(a) * zig, Math.sin(a) * d + Math.cos(a) * zig]);
+    }
+    cracks.push({ pts, w: 1.6 - Math.random() * .6 });
+  }
+  G.scorchMarks = G.scorchMarks || [];
+  G.scorchMarks.push({ x, y, R, radii, haloRadii, splats, flecks, cracks, st, t: st.life, pool, ph: Math.random() * 6.28,
+    rot: Math.random() * Math.PI, stretch: 1 + Math.random() * .45 });   // 隨機轉向、拉長，不會每個都一樣圓
+  if (G.scorchMarks.length > SCORCH.max) G.scorchMarks.shift();
+}
+// 不規則外形：大塊凸起＋細碎鋸齒＋隨機噴濺尖角與缺口（n＝外形點數）
+function scorchShape(R, n = 24) {
+  const k1 = 2 + Math.floor(Math.random() * 2), p1 = Math.random() * 6.28;   // 2～3 個大塊凸起
+  const k2 = 5 + Math.floor(Math.random() * 3), p2 = Math.random() * 6.28;   // 5～7 個中等起伏
+  const radii = [];
+  for (let i = 0; i < n; i++) {
+    const t = i / n * Math.PI * 2;
+    radii.push(R * (.8 + .2 * Math.sin(k1 * t + p1) + .1 * Math.sin(k2 * t + p2) + (Math.random() - .5) * .3));
+  }
+  for (let s = 0, ns = 2 + Math.floor(Math.random() * 2); s < ns; s++) radii[Math.floor(Math.random() * n)] *= 1.3 + Math.random() * .35;   // 往外噴的尖角
+  for (let s = 0, ns = 1 + Math.floor(Math.random() * 2); s < ns; s++) radii[Math.floor(Math.random() * n)] *= .55 + Math.random() * .15;   // 往內缺的缺口
+  return radii.map(r => Math.max(R * .35, r));
+}
+function scorchPath(ctx, radii, k = 1) {   // 用各點中點做二次曲線，畫出圓滑但不規則的外形
+  const n = radii.length, pt = i => {
+    const a = (i % n) / n * Math.PI * 2, r = radii[i % n] * k;
+    return [Math.cos(a) * r, Math.sin(a) * r];
+  };
+  ctx.beginPath();
+  let [px, py] = pt(0), [qx, qy] = pt(1);
+  ctx.moveTo((px + qx) / 2, (py + qy) / 2);
+  for (let i = 1; i <= n; i++) {
+    [px, py] = pt(i); [qx, qy] = pt(i + 1);
+    ctx.quadraticCurveTo(px, py, (px + qx) / 2, (py + qy) / 2);
+  }
+  ctx.closePath();
+}
+// 焦痕目前的發光強度（0～1）：腐蝕看扣血區域是否還在；火焰／雷電看剛落下的餘熱
+function scorchGlow(m) {
+  if (m.pool) return m.pool.t > 0 ? Math.min(1, m.pool.t) * (.65 + .35 * Math.sin(performance.now() / 260 + m.ph)) : 0;
+  const age = m.st.life - m.t;
+  return m.st.heat ? Math.max(0, 1 - age / m.st.heat) : 0;
+}
+function drawScorchMarks(ctx) {
+  if (!G.scorchMarks) return;
+  const rgba = (c, al) => `rgba(${c[0]},${c[1]},${c[2]},${al.toFixed(3)})`;
+  for (const m of G.scorchMarks) {
+    const st = m.st;
+    const a = Math.min(1, (st.life - m.t) / .25, m.t / st.fade);   // 0.25 秒浮現、最後幾秒淡出
+    if (a <= 0) continue;
+    ctx.save(); ctx.translate(m.x, m.y); ctx.scale(1, .6);   // 壓扁貼地
+    ctx.rotate(m.rot || 0); ctx.scale(m.stretch || 1, 1 / Math.sqrt(m.stretch || 1));   // 隨機轉向＋拉長
+    // 外圈燒灼暈（有自己的不規則外形）＋旁邊噴濺的小焦斑
+    ctx.globalAlpha = .34 * a; ctx.fillStyle = st.halo;
+    scorchPath(ctx, m.haloRadii || m.radii.map(r => r * 1.18)); ctx.fill();
+    if (m.splats) {
+      ctx.globalAlpha = .7 * a; ctx.fillStyle = rgba(st.c1, 1);
+      for (const s of m.splats) { ctx.save(); ctx.translate(s.x, s.y); scorchPath(ctx, s.radii); ctx.fill(); ctx.restore(); }
+    }
+    // 主體：中心最深 → 邊緣較淡
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, m.R * 1.1);
+    g.addColorStop(0, rgba(st.c0, .9 * a));
+    g.addColorStop(.62, rgba(st.c1, .8 * a));
+    g.addColorStop(1, rgba(st.c2, .55 * a));
+    ctx.globalAlpha = 1; ctx.fillStyle = g;
+    scorchPath(ctx, m.radii); ctx.fill();
+    // 發光：腐蝕中透紫光（提醒別踩）、火焰餘燼橘光、雷擊殘電青白光
+    const glow = scorchGlow(m);
+    if (glow > 0) {
+      const pg = ctx.createRadialGradient(0, 0, 0, 0, 0, m.R * .85);
+      pg.addColorStop(0, rgba(st.glow, (m.pool ? .3 : .55) * glow));
+      pg.addColorStop(1, rgba(st.glow, 0));
+      ctx.fillStyle = pg; scorchPath(ctx, m.radii, .85); ctx.fill();
+    }
+    // 裂紋：發光期間裂縫透出光，之後只剩深色裂痕
+    ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+    for (const pass of glow > 0 ? ['glow', 'line'] : ['line']) {
+      ctx.globalAlpha = (pass === 'glow' ? .55 * glow : .75) * a;
+      ctx.strokeStyle = pass === 'glow' ? rgba(st.glow, 1) : st.crack;
+      for (const c of m.cracks) {
+        ctx.lineWidth = pass === 'glow' ? c.w + 2 : c.w;
+        ctx.beginPath(); ctx.moveTo(c.pts[0][0], c.pts[0][1]);
+        for (let i = 1; i < c.pts.length; i++) ctx.lineTo(c.pts[i][0], c.pts[i][1]);
+        ctx.stroke();
+      }
+    }
+    ctx.globalAlpha = .75 * a; ctx.fillStyle = st.fleck;
+    for (const f of m.flecks) { ctx.beginPath(); ctx.arc(f.x, f.y, f.r, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+}
+// 黑霧：從焦痕緩緩往上飄、邊飄邊左右搖擺並擴散變淡（像燒焦冒出的黑煙）
+function pushBlackSmoke(x, y, big = false) {
+  const L = 1.7 + Math.random() * 1;
+  G.effects.push({ smoke: true, x, y, vx: (Math.random() * 2 - 1) * 6, vy: -(24 + Math.random() * 18),
+    r0: 3 + Math.random() * 3, r1: (13 + Math.random() * 9) * (big ? 1.4 : 1),
+    ph: Math.random() * 6.28, shade: Math.random(), life: L, life0: L });
+}
+// 腐蝕命中特效：濃稠扭曲的紫黑霧＋暗紫液滴，並在地上留下 6 秒的腐蝕焦痕（碰到會扣血），焦痕上持續冒黑霧。
 function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
   const R = (splash > 0 ? Math.min(46 * scale, splash * CELL * 0.9) : 22) * (scale > 1 ? 1.1 : 1);
   // 地上腐蝕痕跡（存活 5 秒，範圍內怪物持續扣血）
   const blobs = [];
   for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * R * 0.5, dy: (Math.random() * 2 - 1) * R * 0.35, rr: R * (0.55 + Math.random() * 0.5) });
-  (G.acidPools = G.acidPools || []).push({ x, y, r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), blobs, fizz: 0 });
+  const pool = { x, y, r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), blobs, fizz: 0 };
+  (G.acidPools = G.acidPools || []).push(pool);
+  addScorchMark(x, y, R, pool);   // 地上焦黑燒痕
+  for (let i = 0; i < Math.round(4 * scale); i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * R * .5, y + (Math.random() * 2 - 1) * R * .25, true);
   // 命中瞬間噴出的紫黑霧（很慢、黏稠、大片）
   for (let i = 0; i < Math.round(9 * scale); i++) {
     const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.6, sp = 6 + Math.random() * 14;
@@ -1462,7 +1672,7 @@ function spawnFlameBurst(x, y, scale = 1) {
   }
 }
 // 玩家（溫特）攻擊：按住左鍵朝游標方向開槍。彈匣 6 發，打完或按 R 裝填；傷害很低、會吸引仇恨。
-const PLAYER_ATK = { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 2 };
+const PLAYER_ATK = CHARACTERS.winter.playerAttack || { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 2 };
 const GUIDE_GUN_TYPES = new Set(['eldrin', 'chris']);
 const GUIDE_GUN = { mag: 6, reloadTime: 2 };
 let aimHeld = false, aimClient = null;
@@ -1545,6 +1755,7 @@ function updatePlayerAttack(dt) {
     best.hp -= PLAYER_ATK.dmg;
     best.playerAggroT = PLAYER_ATK.aggro;   // 吸引仇恨
     best.hitT = Math.max(best.hitT || 0, .14); best.hitColor = '#bfe0ff';
+    enemyHitReact(best, p.x, p.y, false);
     flashDmg('-' + PLAYER_ATK.dmg, best.x, best.y - 26, '#bfe0ff');
     if (typeof sfxAt === 'function') sfxAt('monsterHit', best.x, best.y, 0.48, 'player');
   }
@@ -1577,16 +1788,24 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   }
   // 火焰、雷電、近戰改用程式即時繪製；其餘維持原本序列圖／光束
   const proc = kind === 'flame' || kind === 'lightning' || kind === 'melee' || kind === 'corrosion';
-  if (kind === 'flame') spawnFlameBurst(impactPoint.x, impactPoint.y + 8, scale);
-  else if (kind === 'lightning') spawnLightningBolt(impactPoint.x, impactPoint.y, scale);
+  if (kind === 'flame') {
+    spawnFlameBurst(impactPoint.x, impactPoint.y + 8, scale);
+    addScorchMark(impactPoint.x, impactPoint.y + 10, 15 * scale, null, 'flame');   // 希奧妮：地上留焦痕
+  } else if (kind === 'lightning') {
+    spawnLightningBolt(impactPoint.x, impactPoint.y, scale);
+    addScorchMark(impactPoint.x, impactPoint.y + 10, (spec.splash > 0 ? Math.min(26, spec.splash * CELL * .3) : 16) * scale, null, 'lightning');   // 安柏：雷擊焦紋
+  }
   else if (kind === 'melee') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0);
   else if (kind === 'corrosion') spawnCorrosionSplash(impactPoint.x, impactPoint.y, spec.splash, spec.dmg, scale);
   else if (attacker && GUIDE_GUN_TYPES.has(attacker.type)) G.effects.push({ ring: true, x: target.x, y: target.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });
   else G.effects.push({ attack: true, kind, x1: attacker.x, y1: attacker.y - 9, x2: target.x, y2: target.y, life: .28, life0: .28, color: spec.color, seed: Math.random() * 1000 });
   const hitTargets = affected && affected.length ? affected : [target];
+  const heavyHit = kind === 'melee' || kind === 'lightning' || scale > 1.3;   // 近戰、雷電、大招算重擊
   for (const enemy of hitTargets) {
     enemy.hitT = Math.max(enemy.hitT || 0, .16);
     enemy.hitColor = spec.color;
+    const from = enemy === target && attacker ? attacker : impactPoint;
+    enemyHitReact(enemy, from.x, from.y, heavyHit);
   }
   const particleCount = proc ? 0 : 7;
   for (let i = 0; i < particleCount; i++) {
@@ -1607,7 +1826,8 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     corrosion: { shake: 2.5, stop: 0,    ring: '#b98cff' },   // 阿瓦倫 腐蝕：輕震、紫環
     shot:      { shake: 2.5, stop: 0,    ring: spec.color },
   })[kind] || { shake: 2.5, stop: 0, ring: spec.color };
-  if (feel.stop) addHitstop(feel.stop);
+  // 命中頓格只在玩家附近發生（遠處的戰鬥不凍結畫面，避免怪多時一直卡頓）
+  if (feel.stop && G.player && Math.hypot(G.player.x - impactPoint.x, G.player.y - impactPoint.y) <= SHAKE_FEEL.range * CELL) addHitstop(feel.stop);
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
   for (const enemy of hitTargets) flashDmg('-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6)), enemy.x, enemy.y - 26, feel.ring);
   if (G.enemies.includes(target) && typeof sfxAt === 'function') {
@@ -1625,6 +1845,7 @@ function stepEnemy(e, dt) {
   e.attackingObstacle = null;
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
+  if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信
   if (enemyBlocked(e.x, e.y)) {
     const safeX = e.lastSafeX, safeY = e.lastSafeY;
     if (Number.isFinite(safeX) && Number.isFinite(safeY) && !enemyBlocked(safeX, safeY)) {
@@ -1633,13 +1854,27 @@ function stepEnemy(e, dt) {
     resetEnemyNavigation(e);
   }
   e.lastSafeX = e.x; e.lastSafeY = e.y;
+  // 飛撲途中已經騰空，不受接觸判定或暈眩打斷，落地時才結算傷害。
+  if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
   if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= 30) {
     enemyAttackPlayer(e, dt);
     return;
   }
-  if (e.stunT > 0) { e.slimeLift = 0; e.slimeScaleX = 1.08; e.slimeScaleY = .92; return; }
+  if (e.stunT > 0) { e.playerWindupT = 0; e.playerPounceT = 0; e.slimeLift = 0; e.slimeScaleX = 1.08; e.slimeScaleY = .92; return; }
+  if (e.playerWindupT > 0) {
+    e.playerWindupT = Math.max(0, e.playerWindupT - dt);
+    const charge = 1 - e.playerWindupT / SLIME_POUNCE.windup;
+    e.slimeLift = 0;
+    e.slimeScaleX = 1.1 + .25 * charge;   // 越壓越扁
+    e.slimeScaleY = .86 - .26 * charge;
+    if (e.playerWindupT === 0) {
+      e.playerPounceT = SLIME_POUNCE.lunge;
+      e.playerPounceStart = { x: e.x, y: e.y };
+    }
+    return;
+  }
   const moveDt = updateSlimeJump(e, dt);
   if (e.confuseT > 0) {
     const allies = G.enemies.filter(o => o !== e && !o.dead && o.hp > 0).sort((a,b) => Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y));
@@ -1651,6 +1886,9 @@ function stepEnemy(e, dt) {
     }
     return;
   }
+  const playerDistance = G.player && G.player.hp > 0 ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
+  // 玩家進入撲擊距離（3 格內）時，比探照燈更優先——否則燈附近的史萊姆永遠不會撲向玩家。
+  if (playerDistance <= SLIME_POUNCE.range && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
   // 發光建築是異質體的最高優先目標：先破壞探照燈，讓周圍重新陷入黑暗。
   const lightChoice = G.obstacles
     .filter(o => o.hp > 0 && o.type && LIGHT.buildings && LIGHT.buildings[o.type])
@@ -1676,7 +1914,6 @@ function stepEnemy(e, dt) {
     return taunt && item.d <= taunt * CELL;
   });
   if (taunter) sentryChoice = taunter;
-  const playerDistance = G.player && G.player.hp > 0 ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
   // 玩家貼近怪物時一定會引起攻擊；距離明顯比哨兵近時也會成為目標。
   // 嘲諷中的哨兵仍能把遠處怪物的注意力拉回自己身上。
   const playerIsImmediate = playerDistance <= CELL * 2.25;
@@ -1994,15 +2231,19 @@ function update(dt) {
         if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose(); }
       }
       pool.fizz -= dt;
-      if (pool.fizz <= 0 && pool.t > .4) {   // 痕跡上緩緩冒濃霧
-        pool.fizz = .35 + Math.random() * .35;
-        const ang = Math.random() * Math.PI * 2, rr = Math.random() * pool.r * 0.8;
-        pushCorrosionMist(pool.x + Math.cos(ang) * rr, pool.y + Math.sin(ang) * rr, (Math.random() * 2 - 1) * 5, -4 - Math.random() * 6);
+      if (pool.fizz <= 0 && pool.t > .4) {   // 焦痕上持續冒出往上飄散的黑霧
+        pool.fizz = .14 + Math.random() * .12;
+        const ang = Math.random() * Math.PI * 2, rr = Math.random() * pool.r * 0.75;
+        pushBlackSmoke(pool.x + Math.cos(ang) * rr, pool.y + Math.sin(ang) * rr * .6);
       }
     }
     G.acidPools = G.acidPools.filter(p => p.t > 0);
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  if (G.scorchMarks) {   // 焦痕計時（比傷害區域留得久）
+    for (const m of G.scorchMarks) m.t -= dt;
+    G.scorchMarks = G.scorchMarks.filter(m => m.t > 0);
+  }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
@@ -2036,6 +2277,10 @@ function update(dt) {
       f.x += f.vx * dt; f.y += f.vy * dt;
       f.vy -= 2.5 * dt;
       f.vx *= (1 - 4.2 * dt); f.vy *= (1 - 3.8 * dt);
+    } else if (f.smoke) {   // 黑霧：往上飄、左右搖擺、上升逐漸變慢，微微被風吹向一側
+      const age = f.life0 - f.life;
+      f.x += (f.vx + Math.sin(age * 2.2 + f.ph) * 10) * dt; f.y += f.vy * dt;
+      f.vy *= (1 - .3 * dt); f.vx += 4 * dt;
     } else if (f.mote) {    // 疏導光點：緩緩上飄、減速
       f.x += f.vx * dt; f.y += f.vy * dt;
       f.vy -= 8 * dt;
@@ -2045,6 +2290,7 @@ function update(dt) {
     }
   }
   G.effects = G.effects.filter(f => f.life > 0);
+  updateCombatFeel(dt);   // 屍體、黏液、地上痕跡
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   if (G.lives <= 0) { G.lives = 0; lose(); }
@@ -2271,21 +2517,41 @@ function drawSensedEnemies() {
 function drawEnemy(e) {
   ctx.save();
   if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
-  const lift = e.slimeLift || 0;
-  const slimeW = (e.drawWidth || 42) * (e.slimeScaleX || 1), slimeH = (e.drawHeight || 33) * (e.slimeScaleY || 1);
+  const lift = e.slimeLift || 0, size = e.sizeMul || 1;
+  // 受擊壓扁回彈：被打瞬間變扁變寬，0.16 秒內彈回
+  const squash = (e.hitSquashT || 0) / .16, sqX = 1 + .22 * squash, sqY = 1 - .2 * squash;
+  const slimeW = (e.drawWidth || 42) * (e.slimeScaleX || 1) * sqX, slimeH = (e.drawHeight || 33) * (e.slimeScaleY || 1) * sqY;
   const bottomY = e.y + 13 - lift;
-  const shadowScale = Math.max(.55, 1 - lift / 22);
-  ctx.globalAlpha = .28 * shadowScale; ctx.fillStyle = '#071015';
+  const shadowScale = Math.max(.55, 1 - lift / 22) * size;
+  ctx.globalAlpha = .28 * Math.min(1, shadowScale); ctx.fillStyle = '#071015';
   ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill();
+  // 撲擊落點警示：蓄力時由外往內縮的紅圈＋逐漸填滿，飛撲時保持顯示
+  const pounceGoal = e.playerPounceGoal;
+  if (pounceGoal && (e.playerWindupT > 0 || e.playerPounceT > 0)) {
+    const charge = e.playerWindupT > 0 ? 1 - e.playerWindupT / SLIME_POUNCE.windup : 1;
+    const R = SLIME_POUNCE.hitRadius * (e.sizeMul || 1), gy = pounceGoal.y + 10;
+    ctx.globalAlpha = .18 + .22 * charge; ctx.fillStyle = '#ff4b3a';
+    ctx.beginPath(); ctx.ellipse(pounceGoal.x, gy, R * charge, R * .45 * charge, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = .55 + .4 * charge; ctx.strokeStyle = '#ff8665'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(pounceGoal.x, gy, R, R * .45, 0, 0, Math.PI * 2); ctx.stroke();
+  }
+  if (e.playerWindupT > 0) {   // 蓄力時身體顫抖
+    const charge = 1 - e.playerWindupT / SLIME_POUNCE.windup;
+    ctx.translate((Math.random() * 2 - 1) * 1.6 * charge, 0);
+  }
   ctx.globalAlpha = 1;
-  const sprite = monsterImage(e.sprite || 'images/monster/Monster_Slime.png');
-  if (sprite.complete && sprite.naturalWidth) {
+  const baseSprite = monsterImage(e.sprite || 'images/monster/Monster_Slime.png');
+  if (baseSprite.complete && baseSprite.naturalWidth) {
+    const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
     ctx.imageSmoothingEnabled = false;
     const dx = Math.round(e.x - slimeW / 2), dy = Math.round(bottomY - slimeH), dw = Math.round(slimeW), dh = Math.round(slimeH);
     ctx.drawImage(sprite, dx, dy, dw, dh);
-    if (e.hitT > 0) {   // 受擊閃紅
+    // 受擊閃紅；自爆引信點燃時越閃越快
+    const fuseP = e.fuseT > 0 ? 1 - e.fuseT / SLIME_BOMB.fuse : 0;
+    const fuseFlash = fuseP > 0 ? (Math.sin(fuseP * fuseP * 60) > 0 ? .85 : .15) : 0;
+    if (e.hitT > 0 || fuseFlash) {
       ctx.save();
-      ctx.globalAlpha = Math.min(1, e.hitT / .16) * 0.65;
+      ctx.globalAlpha = Math.max(Math.min(1, (e.hitT || 0) / .16) * 0.65, fuseFlash);
       ctx.filter = 'sepia(1) saturate(8) hue-rotate(-35deg) brightness(1.1)';
       ctx.drawImage(sprite, dx, dy, dw, dh);
       ctx.restore();
@@ -2294,8 +2560,14 @@ function drawEnemy(e) {
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
   }
-  ctx.fillStyle = '#000'; ctx.fillRect(e.x - 16, e.y - 26, 32, 3);
-  ctx.fillStyle = '#7CFC7C'; ctx.fillRect(e.x - 16, e.y - 26, 32 * Math.max(0, e.hp) / e.maxhp, 3);
+  // 血條放在圖的上方（體型大的變體血條也跟著變寬、變高）
+  const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6;
+  ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW / 2, barY, barW, 3);
+  ctx.fillStyle = e.variant === 'giant' ? '#c79bff' : '#7CFC7C'; ctx.fillRect(e.x - barW / 2, barY, barW * Math.max(0, e.hp) / e.maxhp, 3);
+  if (e.variant === 'giant') {
+    ctx.fillStyle = '#e3c8ff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText(SLIME_VARIANTS.giant.name, e.x, barY - 4);
+  }
   if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
   if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('顫抖',e.x,e.y-33); }
   if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
@@ -2443,21 +2715,12 @@ function draw() {
   for (const e of G.enemies) if (isLit(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (G.player) sortables.push({ y: G.player.sitting ? G.player.sitting.sortY + 0.5 : G.player.y + 16, draw: () => drawPlayer(G.player) });
-  // 地上腐蝕痕跡（畫在單位腳下：紫黑色murky污漬，壓扁貼地）
-  if (G.acidPools) for (const pool of G.acidPools) {
-    const a = Math.min(1, (pool.t0 - pool.t) / 0.3, pool.t / 1.0);   // 淡入 0.3s、最後 1s 淡出
-    for (const b of pool.blobs) {
-      const cxp = pool.x + b.dx, cyp = pool.y + b.dy;
-      const g = ctx.createRadialGradient(cxp, cyp, 0, cxp, cyp, b.rr);
-      g.addColorStop(0, `rgba(32,19,37,${(0.6 * a).toFixed(3)})`);
-      g.addColorStop(0.6, `rgba(24,14,29,${(0.38 * a).toFixed(3)})`);
-      g.addColorStop(1, 'rgba(10,4,14,0)');
-      ctx.save(); ctx.translate(cxp, cyp); ctx.scale(1, 0.6); ctx.fillStyle = g;
-      ctx.beginPath(); ctx.arc(0, 0, b.rr, 0, Math.PI * 2); ctx.fill(); ctx.restore();
-    }
-  }
+  // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
+  drawScorchMarks(ctx);
+  drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
+  drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
 
   // 上層（樹冠、屋簷等，永遠蓋在最上面）
   drawMapTop(ctx);
@@ -2552,6 +2815,20 @@ function draw() {
         drawFlameShape(ctx, cx, baseY, h * 0.28, w * 0.24, sway * 0.6, '#ffcf66');   // 核心 暖黃（縮小、留在底部）
       }
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.smoke) {                                  // 黑霧：由小變大、先濃後淡，兩團錯開疊成蓬鬆煙團
+      const prog = 1 - Math.max(0, f.life) / f.life0;
+      const r = f.r0 + (f.r1 - f.r0) * (1 - Math.pow(1 - prog, 2));
+      const alpha = (prog < .15 ? prog / .15 : Math.max(0, (1 - prog) / .85)) * .42;
+      if (alpha > .01) {
+        const c = Math.round(14 + f.shade * 16);
+        for (const [ox, oy, k] of [[0, 0, 1], [r * .45, -r * .25, .72]]) {
+          const g = ctx.createRadialGradient(f.x + ox, f.y + oy, 0, f.x + ox, f.y + oy, r * k);
+          g.addColorStop(0, `rgba(${c},${c - 4},${c + 4},${alpha.toFixed(3)})`);
+          g.addColorStop(.55, `rgba(${c + 8},${c + 4},${c + 12},${(alpha * .55).toFixed(3)})`);
+          g.addColorStop(1, 'rgba(20,16,24,0)');
+          ctx.fillStyle = g; ctx.beginPath(); ctx.arc(f.x + ox, f.y + oy, r * k, 0, Math.PI * 2); ctx.fill();
+        }
+      }
     } else if (f.cmist) {                                  // 腐蝕紫黑霧：多裂片組成的扭曲濃霧，緩慢churn（murky 不發光）
       const prog = 1 - Math.max(0, f.life) / f.life0, s = f.r0 + (f.rMax - f.r0) * prog;
       const alpha = (prog < .15 ? prog / .15 : prog > .6 ? Math.max(0, (1 - prog) / .4) : 1) * .62;
