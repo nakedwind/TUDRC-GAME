@@ -4418,7 +4418,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 300,
-      "lives": 30,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -7557,7 +7556,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -9102,7 +9100,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 1,
@@ -9962,7 +9959,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -10559,7 +10555,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -11204,7 +11199,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -11688,7 +11682,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -12045,7 +12038,6 @@ const MAPS_DEFAULT = [
     "camp": [],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -12561,7 +12553,6 @@ const MAPS_DEFAULT = [
     "camp": [],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -13747,7 +13738,6 @@ const MAPS_DEFAULT = [
     ],
     "rules": {
       "money": 150,
-      "lives": 12,
       "guide": 100,
       "guideRegen": 9,
       "waves": 1,

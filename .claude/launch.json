@@ -3,13 +3,13 @@
   "configurations": [
     {
       "name": "game",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": "C:/Users/b9054/AppData/Local/Programs/Python/Python313/python.exe",
       "runtimeArgs": ["-m", "http.server", "8765"],
       "port": 8765
     },
     {
       "name": "game-alt",
-      "runtimeExecutable": "python",
+      "runtimeExecutable": "C:/Users/b9054/AppData/Local/Programs/Python/Python313/python.exe",
       "runtimeArgs": ["-m", "http.server", "8766"],
       "port": 8766
     }

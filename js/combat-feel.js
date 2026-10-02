@@ -145,7 +145,7 @@ function slimeExplode(e, mul) {
       if (!playerBlocked(nx, ny)) { p.x = nx; p.y = ny; break; }
     }
     flashDmg('-' + dmg, p.x, p.y - 46, '#ff6b6b');
-    if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose(); }
+    if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
   }
   for (const t of G.towers) {
     if (t.hp <= 0 || Math.hypot(t.x - x, t.y - y) > R) continue;

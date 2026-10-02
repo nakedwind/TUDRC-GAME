@@ -74,7 +74,6 @@ body {
   display: block; margin-top: 2px; color: #ffd479;
   font-size: 21px; line-height: 1.1; font-variant-numeric: tabular-nums;
 }
-#hud .hp b { color: #ff8f8f; }
 #hud .crystal b { color: #b7a4ff; }
 #wrap {
   position: relative; width: 100%; max-width: 1280px;
@@ -854,3 +853,12 @@ canvas.cursor-pressed {
 .achv-card.got .achv-body b { color: #fff3cf; }
 .achv-body small { display: block; margin-top: 3px; color: #8fa1b3; font-size: 11px; }
 .achv-card.got .achv-body small { color: #d9b85c; }
+/* 暫停提示（P 鍵） */
+#pauseBadge {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 6;
+  padding: 14px 28px; border-radius: 10px; border: 1px solid #4f8fbf;
+  background: rgba(14, 20, 28, .82); color: #f4f8fc;
+  font-size: 26px; font-weight: 700; letter-spacing: .08em; text-align: center;
+  pointer-events: none;
+}
+#pauseBadge small { display: block; margin-top: 4px; font-size: 13px; font-weight: 400; color: #c3ccd8; letter-spacing: .04em; }

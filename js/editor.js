@@ -298,7 +298,7 @@ function fixMap(m) {
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
   m.rules = Object.assign({
-    money: 150, lives: 12, guide: 100, guideRegen: 9, waves: 5,
+    money: 150, guide: 100, guideRegen: 9, waves: 5,
     count: 8, countAdd: 3, hp: 40, hpAdd: 28, speed: 44, speedAdd: 5,
     gap: 0.85, gapSub: 0.05, reward: 8,
   }, m.rules || {});
@@ -1476,7 +1476,7 @@ document.getElementById('delMap').addEventListener('click', () => {
 });
 
 // ================= 規則面板 =================
-const RULE_FIELDS = ['money', 'lives', 'guide', 'guideRegen'];
+const RULE_FIELDS = ['money', 'guide', 'guideRegen'];
 function renderMonsterMix() {
   const panel = document.getElementById('monsterMixList'), map = curMap();
   panel.replaceChildren();

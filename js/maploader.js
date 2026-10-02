@@ -150,7 +150,6 @@ function initMap() {
   // 規則覆蓋數值（沒填的沿用 balance.js 預設）
   const R = MAP.rules || {};
   if (R.money != null) START.money = R.money;
-  if (R.lives != null) START.lives = R.lives;
   if (R.guide != null) { START.guide = R.guide; START.guideMax = Math.max(START.guideMax, R.guide); }
   if (R.guideRegen != null) START.guideRegen = R.guideRegen;
   if (R.waves != null) WAVE_CFG.total = R.waves;
