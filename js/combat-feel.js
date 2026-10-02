@@ -182,6 +182,7 @@ function slimeExplode(e, mul) {
 
 // ---- 死亡表演 ----
 function onEnemyDeath(e) {
+  trackKillAchievements(e);   // 成就計數（js/achievements.js）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
   const size = e.sizeMul || 1;
   if (e.variant === 'bomber') {   // 自爆型：被打死也會爆（威力較小），不留屍體
@@ -343,4 +344,21 @@ function drawCombatFeelTop(ctx) {
     ctx.beginPath(); ctx.arc(g.x, g.y - g.z, g.r, 0, Math.PI * 2); ctx.fill();
   }
   ctx.globalAlpha = 1;
+}
+
+// ============================================================
+//  爆擊
+// ============================================================
+// 爆擊：chance 機率、mul 傷害倍率（哨兵一般攻擊與玩家開槍才會爆擊；大招不會）
+const CRIT = { sentry: { chance: .12, mul: 1.8 }, player: { chance: .1, mul: 2 } };
+function rollCrit(kind) {
+  const c = CRIT[kind] || CRIT.sentry;
+  return Math.random() < c.chance ? c.mul : 0;
+}
+// 爆擊傷害數字：金色大字＋「爆擊」小標，停留比較久
+function flashCrit(text, x, y) {
+  addStat('crits');   // 成就計數
+  G.effects.push({ dmg: true, crit: true, text, x, y, vy: -40, life: .95, life0: .95, color: '#ffd84a' });
+  G.effects.push({ ring: true, x, y: y + 18, r: 6, r2: 30, life: .25, life0: .25, color: '#ffe27a' });
+  if (G.player && Math.hypot(G.player.x - x, G.player.y - y) <= SHAKE_FEEL.range * CELL) addHitstop(.04);
 }

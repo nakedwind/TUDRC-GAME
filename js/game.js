@@ -630,8 +630,8 @@ function sendSentryRest(t) {
   t.guardSummoned = true; t.guardBase = base; t.navPath = null; t.navGoal = null; t.navTimer = 0; t.navFailed = false;
   sentryStatus(t, '瀕臨暴走，退守營地', '#ffb24d', true);
 }
-// 混亂（污染 100）：無差別攻擊最近的任意目標——敵人、其他哨兵、玩家、基地、核心
-// 隊友避開腐蝕池：在池內／貼邊時往外推（阿瓦倫本人免疫、不避；混亂中不避）
+// 暴走（污染 100）：無差別攻擊最近的任意目標——敵人、其他哨兵、玩家、基地、核心
+// 隊友避開腐蝕池：在池內／貼邊時往外推（阿瓦倫本人免疫、不避；暴走中不避）
 function avoidAcidPools(t, dt) {
   if (MAP_SAFE || t.type === 'avaren' || t.berserk || t.hp <= 0 || !G.acidPools || !G.acidPools.length) return;
   for (const pool of G.acidPools) {
@@ -667,11 +667,13 @@ function updateChaosSentry(t, spec, dt) {
 }
 function applyChaosDamage(t, best, spec) {
   const o = best.o, dmg = spec.dmg;
+  const heavy = spec.ability === '怪力' || spec.ability === '自癒' || spec.ability === '雷電';   // 近戰、雷電＝重擊，震退比較遠
   spawnAttackVisual(t, { x: best.x, y: best.y, hp: 1, maxhp: 1 }, spec, [], { x: best.x, y: best.y });
-  if (G.enemies.includes(o)) { o.hp -= dmg; }
+  if (G.enemies.includes(o)) { o.hp -= dmg; enemyHitReact(o, t.x, t.y, heavy); }
   else if (G.cores.includes(o)) { o.hp -= dmg; }
   else if (o === G.player) {
     o.hp = Math.max(0, o.hp - dmg); o.hitT = .3; G.damageVignetteT = Math.max(G.damageVignetteT, .3);
+    friendlyHitReact(o, t.x, t.y, dmg, heavy, t);   // 閃紅、震退、傷害數字
     if (o.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose(); }
   } else if (o.isBase) {
     o.hp -= dmg; o.hitT = HIT_DUR;
@@ -679,7 +681,8 @@ function applyChaosDamage(t, best, spec) {
     if (o.hp <= 0) { removeBarrier(o); G.lives = 0; flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b'); if (!G.over) lose(); }
   } else if (G.towers.includes(o)) {   // 攻擊隊友
     const def = Math.max(0, Math.min(.75, (TYPES[o.type] && TYPES[o.type].defense) || 0));
-    o.hp = Math.max(0, o.hp - dmg * (1 - def)); o.hitT = Math.max(o.hitT || 0, .16); o.hitColor = '#ff5b5b';
+    o.hp = Math.max(0, o.hp - dmg * (1 - def));
+    friendlyHitReact(o, t.x, t.y, dmg * (1 - def), heavy, t);   // 閃紅、震退、被打斷一下、喊話、傷害數字
     if (o.hp <= 0) { o.target = null; o.meleeSwing = null; sentryStatus(o, '失去戰鬥能力', '#ff5b6e', true); }
   }
 }
@@ -718,7 +721,7 @@ function renderGroundSentryChoices() {
     if (portrait) { const img = document.createElement('img'); img.src = portrait.src; img.alt = ''; avatar.appendChild(img); }
     const info = document.createElement('span'); info.className = 'gm-sentry-info';
     const name = document.createElement('strong'); name.textContent = TYPES[t.type].name;
-    const status = document.createElement('small'); status.textContent = t.berserk ? '混亂中' : (t.taint > 85 ? '瀕臨暴走' : '汙染 ' + Math.round(t.taint));
+    const status = document.createElement('small'); status.textContent = t.berserk ? '暴走中' : (t.taint > 85 ? '瀕臨暴走' : '汙染 ' + Math.round(t.taint));
     info.append(name, status); b.append(avatar, info);
     b.disabled = !!t.berserk;
     b.addEventListener('click', () => assignSentryToGround(t));
@@ -1401,6 +1404,7 @@ function spawnUltShockwave(x, y, r, color) {   // 近戰大招：大範圍衝擊
 }
 function spawnSootheEffect(x, y, color, follow) {
   const col = color || SOOTHE_COLORS.winter;
+  if (follow) { follow.lastSootheColor = col; follow.lastSootheAt = performance.now(); }   // 記下誰疏導的（暴走恢復時用同色吹散黑霧）
   G.effects.push({ sootheGlow: true, x, y, r0: 10, r1: 52, life: 1.5, life0: 1.5, col, follow, foy: y - (follow ? follow.y : y) });   // 大、久、明顯；可跟隨哨兵
   for (let i = 0; i < 14; i++) {
     const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.0, sp = 16 + Math.random() * 30, L = 1.0 + Math.random() * .8;
@@ -1752,11 +1756,13 @@ function updatePlayerAttack(dt) {
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
   if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
   if (best) {
-    best.hp -= PLAYER_ATK.dmg;
+    const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
+    best.hp -= shotDmg;
     best.playerAggroT = PLAYER_ATK.aggro;   // 吸引仇恨
     best.hitT = Math.max(best.hitT || 0, .14); best.hitColor = '#bfe0ff';
-    enemyHitReact(best, p.x, p.y, false);
-    flashDmg('-' + PLAYER_ATK.dmg, best.x, best.y - 26, '#bfe0ff');
+    enemyHitReact(best, p.x, p.y, !!critMul);   // 爆擊算重擊（會擊退、硬直）
+    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 30);
+    else flashDmg('-' + shotDmg, best.x, best.y - 26, '#bfe0ff');
     if (typeof sfxAt === 'function') sfxAt('monsterHit', best.x, best.y, 0.48, 'player');
   }
   if (typeof sfx === 'function') sfx('gunshot');
@@ -1829,7 +1835,11 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   // 命中頓格只在玩家附近發生（遠處的戰鬥不凍結畫面，避免怪多時一直卡頓）
   if (feel.stop && G.player && Math.hypot(G.player.x - impactPoint.x, G.player.y - impactPoint.y) <= SHAKE_FEEL.range * CELL) addHitstop(feel.stop);
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
-  for (const enemy of hitTargets) flashDmg('-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6)), enemy.x, enemy.y - 26, feel.ring);
+  for (const enemy of hitTargets) {
+    const text = '-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6));
+    if (spec.crit && enemy === target) flashCrit(text, enemy.x, enemy.y - 30);   // 爆擊：金色大字
+    else flashDmg(text, enemy.x, enemy.y - 26, feel.ring);
+  }
   if (G.enemies.includes(target) && typeof sfxAt === 'function') {
     const impactSound = { flame: 'fireImpact', lightning: 'lightningImpact', corrosion: 'corrosionImpact' }[kind];
     if (impactSound) sfxAt(impactSound, impactPoint.x, impactPoint.y, kind === 'corrosion' ? 0.62 : 0.5, attacker?.type || 'sentry');
@@ -1980,10 +1990,11 @@ function updateFootsteps() {
 function loop(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
-  if (!G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) updatePlayer(dt);   // 對話或轉場時暫停玩家與戰場
+  const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
+  if (!G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (G.running && !G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) update(dt);
+  if (G.running && !G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) update(sdt);
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
@@ -2096,7 +2107,7 @@ function update(dt) {
     }
     t.cd -= dt;
     let swingTarget = null;
-    if (t.berserk) { t.meleeSwing = null; t.gunSwing = null; updateChaosSentry(t, spec, dt); continue; }   // 混亂：無差別攻擊
+    if (t.berserk) { t.meleeSwing = null; t.gunSwing = null; updateChaosSentry(t, spec, dt); continue; }   // 暴走：無差別攻擊
     if (t.meleeSwing) {
       const swing = t.meleeSwing;
       swing.age += dt;
@@ -2182,7 +2193,8 @@ function update(dt) {
         if (hitEnemy && typeof sfxAt === 'function') sfxAt('monsterHit', hitEnemy.x, hitEnemy.y, 0.48, t.type + '-ult');
       } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy) {
         const impactPoint = { x: target.x, y: target.y };
-        const atkDmg = spec.dmg * (U ? U.dmgMul : 1), atkSplash = U ? U.splash : spec.splash;
+        const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
+        const atkDmg = spec.dmg * (U ? U.dmgMul : 1) * (critMul || 1), atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
         if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL) { e.hp -= atkDmg * .6; affected.push(e); }
@@ -2195,10 +2207,10 @@ function update(dt) {
             displaceEnemy(e,dx,dy,CELL*spec.knockback);
           }
         }
-        spawnAttackVisual(t, target, U ? { ...spec, dmg: atkDmg, splash: atkSplash } : spec, affected, impactPoint, U ? U.scale : 1);
+        spawnAttackVisual(t, target, (U || critMul) ? { ...spec, dmg: atkDmg, splash: atkSplash, crit: !!critMul } : spec, affected, impactPoint, U ? U.scale : 1);
       } else flashDmg('MISS', target.x, target.y - 26, '#c6d1dd');
       if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
-      if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('混亂!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入混亂，開始無差別攻擊！', true); }
+      if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入暴走，開始無差別攻擊！', true); }
     }
   }
   // 地上腐蝕痕跡：計時、範圍內怪物持續扣血、偶爾冒紫黑霧
@@ -2291,6 +2303,7 @@ function update(dt) {
   }
   G.effects = G.effects.filter(f => f.life > 0);
   updateCombatFeel(dt);   // 屍體、黏液、地上痕跡
+  updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   if (G.lives <= 0) { G.lives = 0; lose(); }
@@ -2432,7 +2445,8 @@ function drawTower(t) {
   if (img && img.complete && img.naturalWidth) {
     const size = PLAYER.drawSize;
     visualTop = t.y - size + 18;
-    const shX = t.berserk ? (Math.random() * 2 - 1) * 1.5 : 0;   // 暴走：微微發抖
+    const shX = t.berserk ? (Math.random() * 2 - 1) * 1.5   // 暴走：微微發抖
+      : (t.hitT > .12 ? (Math.random() * 2 - 1) * 2.5 : 0);    // 受擊：短暫抖一下
     if (t.berserk) {   // 暴走：腳下紅光
       ctx.fillStyle = 'rgba(255,60,60,0.45)';
       ctx.beginPath(); ctx.ellipse(t.x, t.y + 14, 20, 7, 0, 0, Math.PI * 2); ctx.fill();
@@ -2472,7 +2486,8 @@ function drawTower(t) {
   const nameY = visualTop - (MAP_SAFE ? 6 : 11);
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, t.x, nameY);
-  ctx.fillStyle = t.berserk ? '#ff7777' : '#fff'; ctx.fillText(spec.name, t.x, nameY);
+  const taintDanger = !MAP_SAFE && !t.berserk && !spec.guide && t.taint > 85 && t.hp > 0;
+  ctx.fillStyle = t.berserk ? '#ff4d4d' : taintDanger ? '#ffb24d' : '#fff'; ctx.fillText(spec.name, t.x, nameY);   // 暴走紅字、瀕臨暴走橘字
 
   if (!MAP_SAFE) {        // 安全區域沒有戰鬥，頭上不顯示血條（名字留著）
     const maxhp = t.maxhp || spec.hp || 100;
@@ -2484,9 +2499,19 @@ function drawTower(t) {
       roundRect(barX, barY, barW * hp / maxhp, barH, 1); ctx.fill();
     }
   }
-  if (t.berserk) { ctx.fillStyle = '#ff4d4d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('混亂', t.x, nameY - 14); }
-  else if (t.taint > 85) { ctx.fillStyle = '#ffb24d'; ctx.font = 'bold 10px sans-serif'; ctx.fillText('瀕臨暴走', t.x, nameY - 14); }
-  if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - 13, t.say.text, BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡
+  // 「暴走」「瀕臨暴走」標籤：黑底＋外框
+  const tagText = t.berserk && t.hp > 0 ? '暴走' : taintDanger ? '瀕臨暴走' : '';
+  if (tagText) drawTaintTag(t.x, nameY - 15, tagText, t.berserk ? '#ff4d4d' : '#ffb24d');
+  if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - (tagText ? 30 : 13), t.say.text, BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡（有標籤時往上移）
+}
+function drawTaintTag(cx, centerY, text, color) {
+  ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const w = Math.ceil(ctx.measureText(text).width) + 10, h = 14;
+  const x = Math.round(cx - w / 2) + .5, y = Math.round(centerY - h / 2) + .5;
+  ctx.fillStyle = 'rgba(0,0,0,.92)'; roundRect(x, y, w, h, 3); ctx.fill();
+  ctx.strokeStyle = color; ctx.lineWidth = 1; roundRect(x, y, w, h, 3); ctx.stroke();
+  ctx.fillStyle = color; ctx.fillText(text, cx, centerY + .5);
+  ctx.textBaseline = 'alphabetic';
 }
 // ---- 堤諾的異能力「感知」----
 // 帶著堤諾出勤時，他周圍一定範圍內、位於黑暗中的怪物會以輪廓標示出來。
@@ -2721,6 +2746,7 @@ function draw() {
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
+  drawBerserkFxWorld(ctx);     // 哨兵身上的黑紫霧、腳下心跳光圈、暴走台詞
 
   // 上層（樹冠、屋簷等，永遠蓋在最上面）
   drawMapTop(ctx);
@@ -2931,12 +2957,19 @@ function draw() {
       ctx.beginPath(); ctx.arc(f.x, f.y, rr, 0, Math.PI * 2); ctx.stroke(); ctx.globalAlpha = 1;
     } else if (f.dmg) {                             // 彈出傷害數字：先放大一下再定住、上飄淡出
       const life0 = f.life0 || 0.7, age = life0 - f.life;
-      const pop = age < 0.09 ? 0.7 + (age / 0.09) * 0.5 : 1.2 - Math.min(1, (age - 0.09) / 0.28) * 0.2;
+      const pop = f.crit   // 爆擊：從 1.9 倍砸下來再定住，前 0.1 秒抖動
+        ? (age < 0.1 ? 1.9 - (age / 0.1) * 0.7 : 1.2 - Math.min(1, (age - 0.1) / 0.3) * 0.1)
+        : (age < 0.09 ? 0.7 + (age / 0.09) * 0.5 : 1.2 - Math.min(1, (age - 0.09) / 0.28) * 0.2);
       const alpha = Math.min(1, f.life / 0.35), ty = f.y + (f.vy || -34) * Math.min(0.5, age);
-      ctx.save(); ctx.translate(f.x, ty); ctx.scale(pop, pop);
-      ctx.font = 'bold 17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.globalAlpha = alpha; ctx.lineWidth = 3.5; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+      const jx = f.crit && age < 0.1 ? (Math.random() * 2 - 1) * 2 : 0;
+      ctx.save(); ctx.translate(f.x + jx, ty); ctx.scale(pop, pop);
+      ctx.font = f.crit ? 'italic 900 22px sans-serif' : 'bold 17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.globalAlpha = alpha; ctx.lineWidth = f.crit ? 5 : 3.5; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineJoin = 'round';
       ctx.strokeText(f.text, 0, 0); ctx.fillStyle = f.color; ctx.fillText(f.text, 0, 0);
+      if (f.crit) {   // 上方「爆擊」小標
+        ctx.font = '900 10px sans-serif'; ctx.lineWidth = 3;
+        ctx.strokeText('爆擊', 0, -16); ctx.fillStyle = '#fff3b0'; ctx.fillText('爆擊', 0, -16);
+      }
       ctx.restore(); ctx.globalAlpha = 1;
     } else if (f.text) {
       const life0 = f.life0 || 0.8;
@@ -3089,6 +3122,7 @@ function draw() {
     vignette.addColorStop(1, `rgba(210,0,0,${.72 * strength})`);
     ctx.fillStyle = vignette; ctx.fillRect(0, 0, cv.width, cv.height);
   }
+  drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y);
@@ -3149,7 +3183,7 @@ function winOverlay() { showOverlay('✅ Y 區已控制', '所有異質核心與
 function loseOverlay() { showOverlay('💀 營地失守', '怪物攻進了營地。<br>試試多築牆卡位、提早疏導快暴走的哨兵。', '再挑戰'); }
 
 function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
-function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; sfx('win'); winOverlay(); }
+function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; sfx('win'); addStat('wins'); winOverlay(); }
 function lose() { G.over = true; G.running = false; G.phase = 'lost'; sfx('lose'); loseOverlay(); }
 ovBtn.addEventListener('click', begin);
 

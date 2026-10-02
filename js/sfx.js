@@ -27,6 +27,8 @@ const SFX = (() => {
     cleaver: '菜刀.mp3',
     meleeAttack: '近戰攻擊.mp3',
     swordSwing: '揮劍.mp3',
+    heartbeat: '心跳.mp3',
+    achievement: '升級.mp3',
   };
   const activeAudio = new Map();
   const lastPlayed = new Map();

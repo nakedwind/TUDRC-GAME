@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=nearest-sentry-20260925">
+<link rel="stylesheet" href="css/style.css?v=achv-page-20261002">
 <link rel="stylesheet" href="css/ui-feedback.css">
 </head>
 <body>
@@ -95,7 +95,7 @@
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
-  <script src="js/sfx.js?v=elevator-sound-20261002"></script>          <!-- 1b. 音效 -->
+  <script src="js/sfx.js?v=achv-20261002"></script>          <!-- 1b. 音效 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js"></script>  <!-- 集中管理所有角色 -->
@@ -113,10 +113,12 @@
   <script src="js/maploader.js?v=elevator-opening-20261002"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/lighting.js?v=camping-light-single-20260925"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/build.js"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
-  <script src="js/team.js"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=hold-patrol-20260929"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/team.js?v=achv-page-20261002"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
+  <script src="js/sentry.js?v=achv-20261002"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js"></script>
-  <script src="js/combat-feel.js?v=giant-quiet-20261002"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
-  <script src="js/game.js?v=burn-irregular-20261002"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/combat-feel.js?v=achv-20261002"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/achievements.js?v=achv-page-20261002"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
+  <script src="js/berserk-fx.js?v=achv-20261002"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
+  <script src="js/game.js?v=achv-20261002"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

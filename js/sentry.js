@@ -515,6 +515,7 @@ function soothe(t) {
   G.guide -= SOOTHE.cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
   sfx('soothe');
+  addStat('soothes');   // 成就：親自疏導次數
   spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
   sentryStatus(t, '疏導 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
 }

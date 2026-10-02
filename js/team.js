@@ -87,7 +87,7 @@ function ensureTeamUI() {
     wrap.appendChild(fieldCommandMenu);
   }
 }
-function openTeamPanel() { ensureTeamUI(); closeSquadPanel(); renderTeamPanel(); teamPanel.classList.remove('hidden'); if (typeof sfx === 'function') sfx('menu'); }
+function openTeamPanel() { ensureTeamUI(); closeSquadPanel(); if (typeof closeAchievementPanel === 'function') closeAchievementPanel(); renderTeamPanel(); teamPanel.classList.remove('hidden'); if (typeof sfx === 'function') sfx('menu'); }
 function closeTeamPanel() { if (teamPanel) teamPanel.classList.add('hidden'); }
 function isTeamPanelOpen() { return teamPanel && !teamPanel.classList.contains('hidden'); }
 
@@ -101,7 +101,7 @@ function memberCondition(actor, safe) {
   if (actor.noncombat) return { text: '非戰鬥人員', cls: 'support' };
   if (safe) return { text: getTeam().includes(actor.type) ? '已編入' : '待命', cls: getTeam().includes(actor.type) ? 'ready' : 'standby' };
   if (!actor.live) return { text: '未部署', cls: 'standby' };
-  if (actor.live.berserk) return { text: '混亂', cls: 'danger' };
+  if (actor.live.berserk) return { text: '暴走', cls: 'danger' };
   const taint = actor.live.taint || 0;
   if (taint > 85) return { text: '瀕臨暴走', cls: 'danger' };
   if (taint >= 70) return { text: '危險', cls: 'danger' };
@@ -197,7 +197,7 @@ function renderSquadPanel() {
   squadPanel.querySelectorAll('.captain-impression-button').forEach(button => button.addEventListener('click', () => openCaptainImpression(button.dataset.impression)));
   const list = squadPanel.querySelector('.squad-list'); if (list) list.scrollTop = scrollTop;
 }
-function openSquadPanel() { ensureTeamUI(); closeTeamPanel(); renderSquadPanel(); squadPanel.classList.remove('hidden'); squadBtn.classList.add('active'); if (typeof sfx === 'function') sfx('menu'); }
+function openSquadPanel() { ensureTeamUI(); closeTeamPanel(); if (typeof closeAchievementPanel === 'function') closeAchievementPanel(); renderSquadPanel(); squadPanel.classList.remove('hidden'); squadBtn.classList.add('active'); if (typeof sfx === 'function') sfx('menu'); }
 function closeSquadPanel() { if (squadPanel) squadPanel.classList.add('hidden'); if (squadBtn) squadBtn.classList.remove('active'); }
 function isSquadPanelOpen() { return squadPanel && !squadPanel.classList.contains('hidden'); }
 
@@ -272,18 +272,25 @@ function renderFieldSquadHud() {
       const taint = Math.max(0, Math.min(100, Math.round(member.taint || 0)));
       const loadWidth = spec.guide ? 0 : taint;
       const sootheAction = '';   // 正式遊戲停用隊友欄的手動疏導按鈕（靠近哨兵仍可疏導）
-      const stateLabel = member.berserk
-        ? '<em style="font-size:10px;font-weight:700;color:#ff5b5b;margin-left:5px">混亂</em>'
-        : (!spec.guide && taint > 85 ? '<em style="font-size:10px;font-weight:700;color:#ffb24d;margin-left:5px">瀕臨暴走</em>' : '');
+      const stateLabel = hp <= 0 ? ''   // 倒下時不顯示汙染標籤，改由下方的「重傷」橫條說明
+        : member.berserk
+        ? '<em class="taint-tag berserk">暴走</em>'
+        : (!spec.guide && taint > 85 ? '<em class="taint-tag danger">瀕臨暴走</em>' : '');
       const hasUlt = (typeof ULTIMATES !== 'undefined') && ULTIMATES[member.type];   // 有大招才顯示冷卻環
       const cdRing = hasUlt
         ? '<svg class="field-cd-ring" data-type="' + member.type + '" viewBox="0 0 40 40" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"><rect x="2.5" y="2.5" width="35" height="35" rx="2" fill="none" stroke="#4db5ff" stroke-width="2" stroke-linecap="round" style="stroke-dasharray:140;stroke-dashoffset:140;filter:drop-shadow(0 0 2px #4db5ff)"></rect></svg>'
         : '';
-      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + '">' +
+      const taintCls = hp <= 0 ? '' : member.berserk ? ' berserk' : (!spec.guide && taint > 85 ? ' danger' : '');   // 整個隊員框閃紅／紅色濾鏡
+      // 這個面板每 0.3 秒重畫一次；用負的 animation-delay 對齊時鐘，閃爍才不會每次重畫就從頭開始
+      const nowS = performance.now() / 1000;
+      const syncStyle = taintCls ? ' style="--blink-sync:-' + (nowS % 1.1).toFixed(2) + 's;--blink-sync-fast:-' + (nowS % .38).toFixed(2) + 's"' : '';
+      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + '"' + syncStyle + '>' +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
         '<div><i class="field-hp" aria-label="生命值"><u style="width:' + hpPercent + '%"></u></i></div>' +
         '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i></div>' +
-        '</div>' + sootheAction + '</article>';
+        '</div>' + sootheAction +
+        (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
+        '</article>';
     }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>') + '</div>';
   fieldSquadHud.classList.remove('hidden');
 }
@@ -357,6 +364,7 @@ function updateTeamButton() {
   const safe = (typeof MAP_SAFE !== 'undefined') && MAP_SAFE;
   if (teamBtn) teamBtn.classList.toggle('hidden', !safe);
   if (!safe) closeTeamPanel();
+  if (typeof updateAchievementButton === 'function') updateAchievementButton(safe);   // 🏆 成就按鈕（js/achievements.js）
   if (squadBtn) {
     squadBtn.classList.toggle('hidden', !safe);
     squadBtn.title = '查看全體隊員資料';
