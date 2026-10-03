@@ -3,15 +3,95 @@
    - 打擊感：畫面震動、命中頓格、彈出傷害數字
    - 疏導光環、大招蓄力與衝擊波
    - 各能力的命中特效：火焰、雷電、近戰揮砍、腐蝕（含地上焦痕與黑霧）、槍擊
+   - 攻擊閃光：槍口火光、火焰、雷擊、腐蝕、核心摧毀會短暫照亮黑暗（LIGHT_FLASH）
    - spawnAttackVisual：依哨兵能力挑選要播哪一種特效＋音效
    只負責「產生特效」；特效每幀的移動在 game.js 的 update()，畫出來在 draw()。
    必須在 game.js 之前載入。
 */
 // ---- 打擊感：畫面震動、命中頓格、彈出傷害數字 ----
 let shakeAmt = 0, hitstop = 0;
+// ---- 攻擊閃光：在黑暗中短暫照亮周圍（只影響畫面，不影響遊戲的「亮處」判定）----
+// r：光圈半徑（像素）；life：持續秒數；power：最亮時的亮度 0～1；color：附帶的色光 [紅,綠,藍]
+const LIGHT_FLASH = {
+  muzzle:    { r: 110, life: .09, power: .75, color: [255, 214, 140] },   // 槍口火光
+  flame:     { r: 170, life: .40, power: .85, color: [255, 140, 60] },    // 希奧妮 火焰
+  lightning: { r: 300, life: .22, power: 1,   color: [190, 225, 255] },   // 安柏 雷擊（最大、最亮）
+  corrosion: { r: 60,  life: .45, power: .23, color: [170, 90, 230] },    // 阿瓦倫 腐蝕（暗紫、微光）
+  core:      { r: 420, life: 1.1, power: 1,   color: [220, 160, 255] },   // 異質核心被摧毀
+  soothe:    { r: 150, life: .70, power: .55, color: [140, 220, 160] },   // 疏導（顏色跟著施術者）
+};
+const LIGHT_FLASH_MAX = 14;   // 同時最多幾個閃光（太多會拖慢畫面；超過就擠掉最快熄的）
+function addLightFlash(kind, x, y, scale = 1, color) {
+  if (!G || typeof LIGHT === 'undefined' || !LIGHT.enabled) return;
+  const spec = LIGHT_FLASH[kind];
+  if (!spec) return;
+  const list = G.lightFlashes || (G.lightFlashes = []);
+  if (list.length >= LIGHT_FLASH_MAX) {
+    let weakest = 0;
+    for (let i = 1; i < list.length; i++) if (list[i].life < list[weakest].life) weakest = i;
+    list.splice(weakest, 1);
+  }
+  list.push({ x, y, r: spec.r * scale, life: spec.life, life0: spec.life, power: spec.power, color: color || spec.color });
+}
+function updateLightFlashes(dt) {
+  if (!G.lightFlashes || !G.lightFlashes.length) return;
+  for (const f of G.lightFlashes) f.life -= dt;
+  G.lightFlashes = G.lightFlashes.filter(f => f.life > 0);
+}
+
 function addShake(a) { shakeAmt = Math.min(16, Math.max(shakeAmt, a)); }
 function addHitstop(t) { hitstop = Math.min(0.09, Math.max(hitstop, t)); }
-function flashDmg(text, x, y, color) { G.effects.push({ dmg: true, text, x, y, vy: -34, life: 0.7, life0: 0.7, color: color || '#fff' }); }
+// 傷害數字：短時間內打在同一處（同一隻怪）、同顏色的數字會合併成總和，畫面才不會滿天飛。
+// time＝多少秒內的命中算同一串；dist＝距離多近算同一處（像素）
+const DMG_MERGE = { time: .35, dist: 26 };
+function flashDmg(text, x, y, color, opts) {
+  color = color || '#fff';
+  const small = !!(opts && opts.small);   // small：燒傷這類持續傷害，用小字、比較淡
+  const m = /^-(\d+)$/.exec(text);
+  if (m) {
+    const n = +m[1];
+    for (const f of G.effects) {
+      if (!f.dmg || f.crit || f.sum == null || f.small !== small || f.color !== color) continue;
+      if (f.life0 - f.life > DMG_MERGE.time) continue;
+      if (Math.abs(f.x - x) > DMG_MERGE.dist || Math.abs(f.y0 - y) > DMG_MERGE.dist) continue;
+      f.sum += n; f.text = '-' + f.sum;   // 累加，並重新彈一下
+      f.x = x; f.y = f.y0 = y; f.life = f.life0;
+      return;
+    }
+    G.effects.push({ dmg: true, text, sum: n, x, y, y0: y, vy: -34, life: .7, life0: .7, color, small });
+    return;
+  }
+  G.effects.push({ dmg: true, text, x, y, vy: -34, life: .7, life0: .7, color, small });
+}
+
+// ---- 開槍手感：彈殼、準星命中標記、怪物被吸引的「！」（開槍不震畫面，避免頭暈）----
+// hitMarkTime＝命中標記顯示秒數
+const GUN_FEEL = { hitMarkTime: .15 };
+const ENEMY_ALERT_TIME = .9;   // 怪物頭上「！」顯示秒數
+function spawnShellCasing(x, y, angle) {   // 往槍身側後方拋出一顆彈殼
+  const side = Math.cos(angle) >= 0 ? -1 : 1;
+  const a = angle + Math.PI + side * (.9 + Math.random() * .5), sp = 35 + Math.random() * 30;
+  G.effects.push({ shell: true, x, y, z: 8, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: 70 + Math.random() * 40,
+    rot: Math.random() * Math.PI, spin: (Math.random() * 2 - 1) * 20, life: 1.3, life0: 1.3 });
+}
+function markHit(crit) { G.hitMarker = { at: performance.now(), crit: !!crit }; }
+function drawHitMarker() {
+  const m = G.hitMarker;
+  if (!m || !aimClient) return;
+  const age = (performance.now() - m.at) / 1000;
+  if (age > GUN_FEEL.hitMarkTime) return;
+  const { x, y } = clientToWorld(aimClient.x, aimClient.y);
+  const p = 1 - age / GUN_FEEL.hitMarkTime, gap = 4 + (1 - p) * 3, len = m.crit ? 8 : 6;
+  ctx.save(); ctx.lineCap = 'round'; ctx.globalAlpha = p;
+  for (const [w, color] of [[m.crit ? 4.5 : 4, 'rgba(0,0,0,.7)'], [m.crit ? 2.5 : 2, m.crit ? '#ffd84a' : '#ffffff']]) {
+    ctx.lineWidth = w; ctx.strokeStyle = color; ctx.beginPath();
+    for (const [sx, sy] of [[1, 1], [1, -1], [-1, 1], [-1, -1]]) {
+      ctx.moveTo(x + sx * gap, y + sy * gap); ctx.lineTo(x + sx * (gap + len), y + sy * (gap + len));
+    }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
 // 疏導特效：柔和光環＋上升的療癒光點，顏色依施術者（溫特藍／艾德林草綠／克莉思白）
 const SOOTHE_COLORS = { winter: [96, 170, 255], eldrin: [128, 222, 112], chris: [238, 246, 255] };
 
@@ -38,6 +118,16 @@ function spawnSootheEffect(x, y, color, follow) {
       vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 2.2 + Math.random() * 2.8, seed: Math.random() * 99, wob: 5 + Math.random() * 7, life: L, life0: L, col });
   }
 }
+// ---- 疏導表演（嚮導施放疏導＝大招等級的演出）----
+// 施術者腳下展開法陣 → 光波擴散到疏導範圍 → 隊友身上的光環與療癒光點（spawnSootheEffect）。
+// radius＝光波擴到多遠（像素，0＝不放光波）
+function spawnSootheCast(caster, col, radius) {
+  if (!caster) return;
+  G.effects.push({ sootheSigil: true, follow: caster, col, life: 1.1, life0: 1.1, spin: Math.random() * Math.PI });
+  if (radius > 0) G.effects.push({ sootheWave: true, x: caster.x, y: caster.y, r: radius, col, life: .7, life0: .7 });
+  addLightFlash('soothe', caster.x, caster.y - 10, 1, col);
+}
+
 // 火焰命中特效：程式即時繪製（取代 PNG 序列圖）。畫成一叢會扭動竄升的火舌。
 function drawFlameShape(ctx, cx, baseY, h, w, tipSway, color) {   // 尖端向上的水滴狀火舌
   const tipX = cx + tipSway, tipY = baseY - h;
@@ -61,6 +151,7 @@ function makeBolt(x0, y0, x1, y1, segs, jit) {
   return pts;
 }
 function spawnLightningBolt(x, y, scale = 1) {
+  addLightFlash('lightning', x, y, scale);
   const top = y - (95 + Math.random() * 30) * scale;
   const main = makeBolt(x + (Math.random() * 2 - 1) * 10 * scale, top, x, y, 8, 16 * scale);
   const branches = [];
@@ -259,6 +350,7 @@ function pushBlackSmoke(x, y, big = false) {
 }
 // 腐蝕命中特效：濃稠扭曲的紫黑霧＋暗紫液滴，並在地上留下 6 秒的腐蝕焦痕（碰到會扣血），焦痕上持續冒黑霧。
 function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
+  addLightFlash('corrosion', x, y, scale);
   const R = (splash > 0 ? Math.min(46 * scale, splash * CELL * 0.9) : 22) * (scale > 1 ? 1.1 : 1);
   // 地上腐蝕痕跡（存活 5 秒，範圍內怪物持續扣血）
   const blobs = [];
@@ -280,6 +372,7 @@ function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
   }
 }
 function spawnFlameBurst(x, y, scale = 1) {
+  addLightFlash('flame', x, y, scale);
   const L = 0.5, n = scale > 1.5 ? 6 : 4, tongues = [];   // 大招火舌更多
   for (let i = 0; i < n; i++) {
     const center = Math.pow(1 - Math.abs(i - (n - 1) / 2) / ((n - 1) / 2), 1.4);   // 中間主導
@@ -304,6 +397,7 @@ function spawnFlameBurst(x, y, scale = 1) {
 
 function spawnSentryShotVisual(t, sw, spec) {
   const muzzle = gunMuzzleAt(t, sw.angle);
+  addLightFlash('muzzle', muzzle.x, muzzle.y);
   const foe = sw.target;
   const endX = foe && !foe.dead ? foe.x : t.x + Math.cos(sw.angle) * spec.range * CELL;
   const endY = foe && !foe.dead ? foe.y : t.y + Math.sin(sw.angle) * spec.range * CELL;
@@ -338,6 +432,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   const hitTargets = affected && affected.length ? affected : [target];
   const heavyHit = kind === 'melee' || kind === 'lightning' || scale > 1.3;   // 近戰、雷電、大招算重擊
   for (const enemy of hitTargets) {
+    if (attacker && G.towers.includes(attacker)) aggroOnSentry(enemy, attacker);   // 被打中的怪物改追這位哨兵
     enemy.hitT = Math.max(enemy.hitT || 0, .16);
     enemy.hitColor = spec.color;
     const from = enemy === target && attacker ? attacker : impactPoint;

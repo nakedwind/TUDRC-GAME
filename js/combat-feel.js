@@ -78,6 +78,39 @@ function tintedSprite(img, hue) {
   return tintedSpriteCache.get(key);
 }
 
+// 受擊閃光用的「純色剪影」：把圖片形狀塗成單一顏色，第一次用到時算一次就快取。
+// （取代每幀用 ctx.filter 即時算色；怪物一多時 filter 很吃效能）
+const flashSpriteCache = new WeakMap();
+function flashSprite(img, color) {
+  const w = img && (img.naturalWidth || img.width), h = img && (img.naturalHeight || img.height);
+  if (!w || !h) return null;
+  let byColor = flashSpriteCache.get(img);
+  if (!byColor) { byColor = new Map(); flashSpriteCache.set(img, byColor); }
+  let cv = byColor.get(color);
+  if (!cv) {
+    cv = document.createElement('canvas'); cv.width = w; cv.height = h;
+    const c = cv.getContext('2d');
+    c.drawImage(img, 0, 0);
+    c.globalCompositeOperation = 'source-in';   // 只保留圖片形狀，塗滿指定顏色
+    c.fillStyle = color; c.fillRect(0, 0, w, h);
+    byColor.set(color, cv);
+  }
+  return cv;
+}
+// 受擊閃光：剛被打中先「閃白」，接著轉成攻擊者的屬性色並淡出。
+// white＝閃白佔整段的比例；whiteAlpha／colorAlpha＝閃白、屬性色最濃時的不透明度
+const HIT_FLASH = { white: .3, whiteAlpha: .9, colorAlpha: .65 };
+function drawHitFlash(img, k, color, dx, dy, dw, dh) {   // k＝剩餘比例（1 剛被打 → 0 結束）
+  if (!(k > 0)) return;
+  const white = k > 1 - HIT_FLASH.white;
+  const sil = flashSprite(img, white ? '#ffffff' : (color || '#ff5b5b'));
+  if (!sil) return;
+  const a = ctx.globalAlpha;
+  ctx.globalAlpha = a * (white ? HIT_FLASH.whiteAlpha : HIT_FLASH.colorAlpha * k / (1 - HIT_FLASH.white));
+  ctx.drawImage(sil, dx, dy, dw, dh);
+  ctx.globalAlpha = a;
+}
+
 // ---- 受擊回饋：往後滑、壓扁回彈、重擊硬直 ----
 function enemyHitReact(e, fromX, fromY, heavy) {
   if (!e || e.dead) return;
@@ -333,8 +366,8 @@ function drawCombatFeelTop(ctx) {
       ctx.globalAlpha = 1 - p * .8;
       if (c.img.width) {
         ctx.drawImage(c.img, -c.w * s / 2, -c.h * s, c.w * s, c.h * s);
-        ctx.globalAlpha = (1 - p) * .9; ctx.filter = 'brightness(4) saturate(0)';
-        ctx.drawImage(c.img, -c.w * s / 2, -c.h * s, c.w * s, c.h * s);
+        const white = flashSprite(c.img, '#ffffff');
+        if (white) { ctx.globalAlpha = (1 - p) * .9; ctx.drawImage(white, -c.w * s / 2, -c.h * s, c.w * s, c.h * s); }
       }
     }
     ctx.restore();

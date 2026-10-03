@@ -232,6 +232,10 @@ function sampleWanderTarget(cx, cy, radius) {
   return null;
 }
 function sentryCompanionRule(t) {
+  if (t.mode === 'escort' && G.player) {   // 跟隨護衛：貼在部隊長身邊，走得比平常快才跟得上
+    const speed = Math.max(110, (TYPES[t.type].walkSpeed || 80) * 1.45);
+    return { anchor: G.player, radius: ESCORT.radiusCells * CELL, speed };
+  }
   if (t.mode !== 'free' || typeof FOLLOW === 'undefined') return null;
   if (t.type === 'avaren') {
     const anchor = (G.towers || []).find(x => x !== t && x.type === 'eldrin' && x.hp > 0);
@@ -322,7 +326,7 @@ function updateSentry(t, dt) {
     }
   }
   // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
-  if (t.type === 'eldrin' && t.mode !== 'goto') {
+  if (t.type === 'eldrin' && t.mode !== 'goto' && t.mode !== 'escort') {
     const sentinels = G.towers.filter(o =>
       o !== t && o.hp > 0 && !TYPES[o.type].guide &&
       (o.berserk || (o.taint || 0) >= 10 || o.maxhp - o.hp >= 10)
@@ -378,10 +382,10 @@ function updateSentry(t, dt) {
   if (litHere && (G.enemies.length || G.cores.some(c=>!c.dead))) {
     const spec = TYPES[t.type];
     const atkR = spec.range * CELL;                       // 射程（像素）
-    const anchor = (t.mode !== 'free' && t.anchor) ? t.anchor : t;
+    const anchor = t.mode === 'escort' && G.player ? G.player : (t.mode !== 'free' && t.anchor) ? t.anchor : t;   // 護衛時以部隊長為中心
     const detectR = t.guardSummoned ? Math.max(220, (spec.aggroRange || spec.range + 1.5) * CELL) : (spec.aggroRange || spec.range + 1.5) * CELL;
     const holdR = ((typeof PATROL !== 'undefined' && PATROL.holdChaseCells) || 6) * CELL;
-    const leashR = t.guardSummoned ? 220 : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
+    const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
       if (e.dead) continue;
@@ -472,7 +476,7 @@ function updateWanderer(npc, dt) {
   if (npc.navFailed) { npc.target = null; npc.navPath = null; npc.waitT = .5; }
 }
 
-// ---- 哨兵選單（點哨兵彈出：自由走動／原地巡邏／指派位置／疏導）----
+// ---- 哨兵選單（點哨兵彈出：自由走動／原地巡邏／指派位置／跟隨護衛）----
 const sentryMenu = document.getElementById('sentryMenu');
 let menuSentry = null;    // 目前開著選單的哨兵
 let assigning = null;     // 「指派位置巡邏」等待點地圖的哨兵
@@ -486,7 +490,7 @@ function openSentryMenu(t, silent) {
     '<button data-act="hold">📍 在原地巡邏</button>' +
     '<button data-act="goto">🎯 指派位置巡邏</button>' +
     (MAP_SAFE ? '<button data-act="talk">💬 對話</button>' :
-      '<button data-act="soothe">💗 疏導（-' + SOOTHE.cost + ' 能量）</button>');
+      '<button data-act="escort">🛡️ 跟隨護衛部隊長' + (t.mode === 'escort' ? '（護衛中）' : '') + '</button>');
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
   const rect = cv.getBoundingClientRect();
@@ -496,13 +500,19 @@ function openSentryMenu(t, silent) {
   sentryMenu.classList.remove('hidden');
 }
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
+// 跟隨護衛：持續跟在部隊長身邊，看到附近的怪會出手（哨兵選單與左上角頭像選單共用）
+function setSentryEscort(t) {
+  t.mode = 'escort'; t.guardSummoned = false; t.guardBase = null;
+  t.target = null; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
+  sentryStatus(t, '跟隨護衛部隊長');
+}
 function sentryMenuAct(act) {
   const t = menuSentry; if (!t) return;
   if (act === 'free') { sfx('button'); t.mode = 'free'; t.guardSummoned = false; t.guardBase = null; t.anchor = null; t.target = null; sentryStatus(t, '自由走動'); }
   else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.guardBase = null; t.anchor = { x: t.x, y: t.y }; t.target = null; sentryStatus(t, '在原地巡邏'); }
   else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); sentryStatus(t, '點地圖指定巡邏位置（Esc 取消）', '#ffd479'); return; }
   else if (act === 'talk') { openDialogue(t); return; }
-  else if (act === 'soothe') { soothe(t); openSentryMenu(t, true); return; }   // soothe() 自帶音效；選單靜默重開、更新汙染數字
+  else if (act === 'escort') { sfx('button'); setSentryEscort(t); }
   closeSentryMenu();
 }
 window.addEventListener('keydown', e => {
@@ -517,5 +527,7 @@ function soothe(t) {
   sfx('soothe');
   addStat('soothes');   // 成就：親自疏導次數
   spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
+  spawnSootheCast(G.player, SOOTHE_COLORS.winter, 0);         // 溫特腳下法陣
+  Object.assign(G.player, { soothingT: SOOTHE_CHANNEL, gunT: 0, dir: 'front', moving: false });   // 溫特也停下來閉眼疏導
   sentryStatus(t, '疏導 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
 }

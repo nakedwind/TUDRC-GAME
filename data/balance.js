@@ -99,6 +99,14 @@ const PATROL = {
   holdChaseCells: 6,
 };
 
+// ---- 跟隨護衛（點左上角隊員頭像 →「跟隨護衛部隊長」）----
+// radiusCells＝離部隊長多遠以內算「在身邊」（格），超過就追上來；
+// chaseCells＝看到怪物時，最多離開部隊長幾格去追打，怪跑遠就回到身邊。
+const ESCORT = {
+  radiusCells: 2.5,
+  chaseCells: 5,
+};
+
 // ---- 坐下互動的共通操作 ----
 // 每張椅子的深度、碰撞與坐下位置改在 data/chairs.js 設定。
 const SIT = {

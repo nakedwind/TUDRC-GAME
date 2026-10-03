@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=nolives-20261002">
+<link rel="stylesheet" href="css/style.css?v=rclick-20261003">
 <link rel="stylesheet" href="css/ui-feedback.css">
 </head>
 <body>
@@ -95,33 +95,33 @@
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
-  <script src="js/sfx.js?v=achv-20261002"></script>          <!-- 1b. 音效 -->
+  <script src="js/sfx.js?v=webaudio-20261003"></script>          <!-- 1b. 音效 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js"></script>  <!-- 集中管理所有角色 -->
-  <script src="data/balance.js?v=nolives-20261002"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/balance.js?v=escort-20261003"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/monsters.js"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js"></script>
   <script src="data/objects.js"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
   <script src="data/decorations.js"></script><!-- 3b. 裝飾物件（低HP、可佈置） -->
-  <script src="data/maps.js?v=nolives-20261002"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
+  <script src="data/maps.js?v=containment-20261004"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
   <script src="data/chairs.js"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
   <script src="js/chair-data.js"></script>
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/maploader.js?v=nolives-20261002"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
-  <script src="js/lighting.js?v=camping-light-single-20260925"></script>     <!-- 7. 黑暗與光源系統 -->
+  <script src="js/lighting.js?v=flash2-20261003"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/build.js"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
-  <script src="js/team.js?v=achv-page-20261002"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=achv-20261002"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/team.js?v=soothe-20261003"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
+  <script src="js/sentry.js?v=wchannel-20261003"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js"></script>
-  <script src="js/combat-feel.js?v=pause-20261002"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/combat-feel.js?v=feel-20261003"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=achv-page-20261002"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=achv-20261002"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=nolives-20261002"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
-  <script src="js/render.js?v=split-20261002"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
-  <script src="js/attack-fx.js?v=fx-split-20261002"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
-  <script src="js/game.js?v=nolives-20261002"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/enemy-ai.js?v=saggro-20261003"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/render.js?v=nolink-20261003"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/attack-fx.js?v=nolink-20261003"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
+  <script src="js/game.js?v=gmenu-20261003"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

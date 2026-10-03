@@ -140,9 +140,9 @@ function playSlimeAudio(kind, slime = null) {
   const now = performance.now();
   if (kind === 'land' && now - lastSlimeLandSound < 90) return;
   if (kind === 'land') lastSlimeLandSound = now;
-  const audio = new Audio(kind === 'hit' ? 'Sound effects/slime-hit.mp3' : 'Sound effects/slime-land.mp3');
-  audio.volume = kind === 'hit' ? .72 : .36 * landGain;
-  audio.play().catch(() => {});
+  // 原本的實際音量：撞擊 0.72、落地 0.36；換算成相對總音量的倍率，改由 SFX 預先載入的音檔播放
+  const name = kind === 'hit' ? 'slimeHit' : 'slimeLand', target = kind === 'hit' ? .72 : .36 * landGain;
+  SFX.play(name, target / Math.max(.01, SFX.volume), name);
 }
 
 // ---- NPC 正式對話（靠近後按 Space／E）----
@@ -262,6 +262,7 @@ function updateBlink(who, dt) {
 }
 // 依朝向／走路／眨眼狀態挑出這一幀要畫的圖
 function pickCharacterFrame(set, who) {
+  if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
   if (who.gunT > 0) {   // 攻擊中：用面向目標的持槍圖（沒有該圖就照常）
     const gunKey = { front: 'gunFront', back: 'gunBack', left: 'gunLeft', right: 'gunRight' }[who.dir || 'front'];
     const g = set[gunKey] && set[gunKey][0];
@@ -510,21 +511,6 @@ function summonNearestSentryToGround() {
   }
   assignSentryToGround(choices[0].t, true);
 }
-function renderGroundActions() {
-  if (!groundTarget) return;
-  groundMenu.innerHTML = '';
-  addGroundCloseButton();
-  const patrol = document.createElement('button');
-  patrol.textContent = '📣 召喚哨兵';
-  patrol.addEventListener('click', renderGroundSentryChoices);
-  groundMenu.appendChild(patrol);
-  const nearest = document.createElement('button');
-  nearest.className = 'gm-nearest';
-  nearest.textContent = '🎯 召喚最近的哨兵至此';
-  nearest.addEventListener('click', summonNearestSentryToGround);
-  groundMenu.appendChild(nearest);
-  if (!groundMenu.classList.contains('hidden')) positionGroundMenu(groundTarget.clientX, groundTarget.clientY);
-}
 function playerBuildingAt(c, r) {
   return [...G.obstacles].reverse().find(o =>
     o.playerBuilt && c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)
@@ -709,10 +695,16 @@ function openCampMenu(base, clientX, clientY) {
   groundMenu.style.animation = 'none'; void groundMenu.offsetWidth; groundMenu.style.animation = '';
   sfx('menu');
 }
-function renderGroundSentryChoices() {
+// 點空地的彈窗：一打開就列出「召喚最近的哨兵」和每位隊員，點誰就召喚誰到這格
+function renderGroundActions() {
   if (!groundTarget) return;
-  groundMenu.innerHTML = '<div class="gm-title">選擇要召喚的哨兵</div>';
+  groundMenu.innerHTML = '<div class="gm-title">召喚至此</div>';
   addGroundCloseButton();
+  const nearest = document.createElement('button');
+  nearest.className = 'gm-nearest';
+  nearest.textContent = '🎯 召喚最近的哨兵';
+  nearest.addEventListener('click', summonNearestSentryToGround);
+  groundMenu.appendChild(nearest);
   for (const t of G.towers) {
     const b = document.createElement('button');
     b.className = 'gm-sentry';
@@ -727,9 +719,7 @@ function renderGroundSentryChoices() {
     b.addEventListener('click', () => assignSentryToGround(t));
     groundMenu.appendChild(b);
   }
-  const back = document.createElement('button'); back.textContent = '← 返回';
-  back.addEventListener('click', renderGroundActions); groundMenu.appendChild(back);
-  positionGroundMenu(groundTarget.clientX, groundTarget.clientY);
+  if (!groundMenu.classList.contains('hidden')) positionGroundMenu(groundTarget.clientX, groundTarget.clientY);
 }
 function openGroundMenu(c, r, clientX, clientY) {
   closeBuildMenu();
@@ -914,6 +904,11 @@ function standUp() {
 function updatePlayer(dt) {
   const p = G.player; if (!p) return;
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
+  if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼，按移動鍵也不會走
+    p.soothingT = Math.max(0, p.soothingT - dt);
+    p.moving = false; p.anim = 0; p.dir = 'front';
+    return;
+  }
   if (p.sitting) {                      // 坐著：不判定碰撞（椅子本來就是不可穿透），按移動鍵才起身
     if (!anyMoveKey()) { p.moving = false; p.anim = 0; updateBlink(p, dt); return; }
     standUp();
@@ -1057,7 +1052,7 @@ function handleMapClick(e, isLeft) {
     return false;
   }
 
-  // ── 營地／哨兵／建築選單：左右鍵都可開 ──
+  // ── 營地／哨兵選單：左右鍵都可開；自己蓋的建築只有右鍵開（左鍵照常開槍）──
   const campBase = !MAP_SAFE && campBaseAt(x, y);
   if (campBase) { openCampMenu(campBase, e.clientX, e.clientY); return false; }
   const hit = G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
@@ -1065,7 +1060,10 @@ function handleMapClick(e, isLeft) {
   closeSentryMenu();
   if (MAP_SAFE) { closeGroundMenu(); return false; }
   const clickedBuilding = playerBuildingAt(c, r);
-  if (clickedBuilding) { spawnGroundRipple(e.clientX, e.clientY); openBuildingMenu(clickedBuilding, c, r, e.clientX, e.clientY); return false; }
+  if (clickedBuilding) {
+    if (isLeft) { closeGroundMenu(); return true; }   // 左鍵點到建築：不開拆除選單，當成開槍
+    spawnGroundRipple(e.clientX, e.clientY); openBuildingMenu(clickedBuilding, c, r, e.clientX, e.clientY); return false;
+  }
   if (buildAt(c, r) || isWall(c, r) || isEntrance(c, r)) { closeGroundMenu(); return false; }
 
   // ── 空地：右鍵開召喚選單；左鍵交給射擊 ──
@@ -1086,8 +1084,31 @@ cv.addEventListener('mousedown', () => cv.classList.add('cursor-pressed'));
 window.addEventListener('mouseup', () => cv.classList.remove('cursor-pressed'));
 cv.addEventListener('mouseleave', () => { hoverCell = null; cv.classList.remove('cursor-pressed'); });
 
+// ---- 哨兵挑目標（射程 R 內）----
+// 優先順序：正在打營地或部隊長的怪物 → 最近的怪物 → 最近的異質核心（被召喚護衛時不打核心）
+function pickSentryTarget(t, R) {
+  const p = G.player;
+  let best = null, bestScore = Infinity;
+  for (const e of G.enemies) {
+    if (e.dead) continue;
+    const distance = Math.hypot(e.x - t.x, e.y - t.y);
+    if (distance > R) continue;
+    const urgent = (e.attackingObstacle && e.attackingObstacle.isBase) || (p && p.underAttackT > 0 && p.lastAttacker === e);
+    const score = urgent ? distance - 100000 : distance;
+    if (score < bestScore) { best = e; bestScore = score; }
+  }
+  if (best || t.guardSummoned) return best;
+  for (const core of G.cores) {
+    if (core.dead) continue;
+    const distance = Math.hypot(core.x - t.x, core.y - t.y);
+    if (distance <= R && distance < bestScore) { best = core; bestScore = distance; }
+  }
+  return best;
+}
+
 // ---- 疏導冷卻與大招數值（特效本身在 js/attack-fx.js）----
 const SOOTHE_AURA_CD = 3;   // 嚮導被動疏導的冷卻秒數
+const SOOTHE_CHANNEL = 1;  // 嚮導疏導時站定、閉眼施法的秒數（期間不走動、不攻擊）
 // 大招：平時普攻，冷卻好時放一次（傷害高、範圍大、特效大）
 const ULTIMATES = {
   theonie: { cd: 8,  dmgMul: 2.6, splash: 2.2, scale: 1.9, line: '集中火力!' },
@@ -1098,6 +1119,12 @@ const ULTIMATES = {
   luther:  { cd: 11, dmgMul: 3.0, radius: 3.0, kind: 'smash', knockback: 0.8, stun: 2.5, line: '不准靠近!' },
 };
 const ULT_SWING = { wind: .6, impact: .8, duration: 1.2 };   // 大招：長前搖→放招→收招
+// 近戰普攻的節奏（秒，從出手開始算）：wind＝舉起蓄力結束、impact＝命中瞬間、duration＝收招完成
+const MELEE_SWING = {
+  normal: { wind: .19, impact: .30, duration: .58 },   // 雷德
+  luther: { wind: .29, impact: .43, duration: .78 },   // 路德：重擊，比較慢
+  avaren: { wind: .11, impact: .18, duration: .36 },   // 阿瓦倫：短刀，快而俐落
+};
 // 玩家（溫特）攻擊：按住左鍵朝游標方向開槍。彈匣 6 發，打完或按 R 裝填；傷害很低、會吸引仇恨。
 const PLAYER_ATK = CHARACTERS.winter.playerAttack || { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 2 };
 const GUIDE_GUN_TYPES = new Set(['eldrin', 'chris']);
@@ -1115,6 +1142,8 @@ function spawnGuideGunshot(t, sw) {
   const endX = foe && !foe.dead ? foe.x : t.x + Math.cos(angle) * TYPES[t.type].range * CELL;
   const endY = foe && !foe.dead ? foe.y : t.y + Math.sin(angle) * TYPES[t.type].range * CELL;
   G.effects.push({ muzzle: true, x: muzzle.x, y: muzzle.y, ang: angle, life: .07, life0: .07 });
+  addLightFlash('muzzle', muzzle.x, muzzle.y);
+  spawnShellCasing(muzzle.x, muzzle.y, angle);
   G.effects.push({ bullet: true, x1: muzzle.x, y1: muzzle.y, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });
   t.gunAmmo = Math.max(0, (t.gunAmmo ?? GUIDE_GUN.mag) - 1);
   if (typeof sfxAt === 'function') sfxAt('gunshot', t.x, t.y, 0.42, t.type);
@@ -1146,7 +1175,7 @@ function updatePlayerAttack(dt) {
     updateAmmoHud(); return;
   }
   updateAmmoHud();
-  if (p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || G.over || dialogueState || elevatorMenuOpen) return;
+  if (p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen) return;   // 疏導中不開槍
   if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const aim = clientToWorld(aimClient.x, aimClient.y);
   const adx = aim.x - p.x, ady = aim.y - p.y, aimAng = Math.atan2(ady, adx);
@@ -1167,12 +1196,16 @@ function updatePlayerAttack(dt) {
   const endY = best ? best.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
   const { x: mx, y: my } = gunMuzzleAt(p, aimAng);
   G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });   // 槍口閃光
+  addLightFlash('muzzle', mx, my);   // 槍口火光照亮周圍的黑暗
+  spawnShellCasing(mx, my, aimAng);  // 彈殼拋出
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
   if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
   if (best) {
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     best.hp -= shotDmg;
+    if (!(best.playerAggroT > 0)) best.alertT = ENEMY_ALERT_TIME;   // 這一槍才把牠吸引過來：頭上冒「！」
     best.playerAggroT = PLAYER_ATK.aggro;   // 吸引仇恨
+    markHit(critMul);                       // 準星旁閃一下命中標記
     best.hitT = Math.max(best.hitT || 0, .14); best.hitColor = '#bfe0ff';
     enemyHitReact(best, p.x, p.y, !!critMul);   // 爆擊算重擊（會擊退、硬直）
     if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 30);
@@ -1277,6 +1310,7 @@ function update(dt) {
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
+    else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) updateSentry(t, dt);
     avoidAcidPools(t, dt);   // 被腐蝕池推開（阿瓦倫本人免疫、不避）
     animateSentry(t, t.x - ox, t.y - oy, dt);
@@ -1288,6 +1322,7 @@ function update(dt) {
     if (foe && !foe.dead && Math.hypot(foe.x - t.x, foe.y - t.y) <= CELL * 1.1) {
       const spec = TYPES.red, ramDmg = Math.max(1, Math.round(spec.dmg * 0.4));
       foe.hp -= ramDmg;
+      aggroOnSentry(foe, t);
       const dx = foe.x - t.x, dy = foe.y - t.y;
       displaceEnemy(foe, dx, dy, CELL * 1.2);
       foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = '#dbe7ff';
@@ -1313,6 +1348,7 @@ function update(dt) {
       if (t.gunReloadT === 0) t.gunAmmo = GUIDE_GUN.mag;
     }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
+    if (t.soothingT > 0) t.soothingT = Math.max(0, t.soothingT - dt);   // 疏導施法計時
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
@@ -1324,23 +1360,28 @@ function update(dt) {
       t.auraCd = Math.max(0, (t.auraCd || 0) - dt);
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
-        let did = false;
+        const soothed = [];
         for (const o of G.towers) {
           if (o === t || o.hp <= 0 || TYPES[o.type].guide || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
           if ((o.taint || 0) <= 0 && o.hp >= o.maxhp && !o.berserk) continue;   // 不需要疏導就跳過
-          o.taint = Math.max(0, (o.taint || 0) - spec.aura.rate * AURA_CD);      // 一次清一批（平均速率不變）
+          const taintBefore = o.taint || 0;
+          o.taint = Math.max(0, taintBefore - spec.aura.rate * AURA_CD);          // 一次清一批（平均速率不變）
           o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * AURA_CD);
           if (o.berserk && o.taint < 60) o.berserk = false;
           spawnSootheEffect(o.x, o.y - 8, sc, o);
-          G.effects.push({ support: true, x1: t.x, y1: t.y - 8, x2: o.x, y2: o.y - 8, life: .5, life0: .5, color: `rgb(${sc[0]},${sc[1]},${sc[2]})` });
-          did = true;
+          const cleared = Math.round(taintBefore - o.taint);
+          if (cleared > 0) flashDmg('汙染 -' + cleared, o.x, o.y - 44, `rgb(${sc[0]},${sc[1]},${sc[2]})`);
+          soothed.push(o);
         }
-        if (did) {
+        if (soothed.length) {
           t.auraCd = AURA_CD;
+          spawnSootheCast(t, sc, spec.aura.r * CELL);   // 疏導表演：法陣、光波
+          t.soothingT = SOOTHE_CHANNEL; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;   // 停下來閉眼疏導
           if (typeof sfxAt === 'function') sfxAt('soothe', t.x, t.y, 0.42, t.type);
         }
       }
     }
+    if (t.soothingT > 0) continue;   // 疏導中專心施法，不開槍
     t.cd -= dt;
     let swingTarget = null;
     if (t.berserk) { t.meleeSwing = null; t.gunSwing = null; updateChaosSentry(t, spec, dt); continue; }   // 暴走：無差別攻擊
@@ -1376,19 +1417,11 @@ function update(dt) {
     } else if (t.cd > 0) continue;
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0 && !swingTarget) continue;
     const R = spec.range * CELL;
-    let target = swingTarget, bestY = -1, bestDistance = Infinity;
+    let target = swingTarget;
     if (!target) target = t.mode === 'goto' ? null : campAttackerFor(t, R);
     const attacker = !target && t.type === 'red' ? redAttacker() : null;
     if (attacker && Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R) target = attacker;
-    if (!target) {
-      for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
-        if (e.dead) continue;
-        const distance = Math.hypot(e.x - t.x, e.y - t.y);
-        if (distance <= R && (t.guardSummoned ? distance < bestDistance : e.y > bestY)) {
-          target = e; bestY = e.y; bestDistance = distance;
-        }
-      }
-    }
+    if (!target) target = pickSentryTarget(t, R);
     if (target) {
       if (!swingTarget) t.cd = 1 / (spec.rate * (t.taint > 85 && !t.berserk ? 0.5 : 1));   // 瀕臨暴走：攻速減半
       if ((t.type === 'red' || t.type === 'luther' || t.type === 'avaren') && !swingTarget) {
@@ -1396,7 +1429,7 @@ function update(dt) {
         t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
         if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; t.say = { text: ULTIMATES[t.type].line, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type]); }
-        const sw = isUlt ? ULT_SWING : { wind: heavy ? .29 : .19, impact: heavy ? .43 : .30, duration: heavy ? .78 : .58 };
+        const sw = isUlt ? ULT_SWING : (MELEE_SWING[t.type] || MELEE_SWING.normal);
         t.meleeSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, hit: false, ult: isUlt };
         t.moving = false;
         continue;
@@ -1418,6 +1451,7 @@ function update(dt) {
         for (const e of G.enemies) {
           if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r) continue;
           e.hp -= dmg;
+          aggroOnSentry(e, t);
           if (U.knockback) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
           if (U.stun) e.stunT = Math.max(e.stunT || 0, U.stun);
           e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = col;
@@ -1493,7 +1527,7 @@ function update(dt) {
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
-    core.dead=true; earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    core.dead=true; addLightFlash('core', core.x, core.y); earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -1506,7 +1540,15 @@ function update(dt) {
   }
   for (const f of G.effects) {
     f.life -= dt;
-    if (f.dust) {   // 塵埃：往外飄、逐漸減速
+    if (f.shell) {   // 彈殼：拋出、受重力落地彈一下，之後躺在地上淡出
+      f.x += f.vx * dt; f.y += f.vy * dt; f.rot += f.spin * dt;
+      f.vz -= 420 * dt; f.z += f.vz * dt;
+      if (f.z <= 0) {
+        f.z = 0;
+        if (f.vz < -40) { f.vz *= -.35; f.vx *= .5; f.vy *= .5; f.spin *= .5; }
+        else { f.vz = 0; f.vx *= (1 - 8 * dt); f.vy *= (1 - 8 * dt); f.spin *= (1 - 8 * dt); }
+      }
+    } else if (f.dust) {   // 塵埃：往外飄、逐漸減速
       f.x += f.vx * dt; f.y += f.vy * dt;
       f.vx *= (1 - 2.5 * dt); f.vy *= (1 - 2.5 * dt);
     } else if (f.particle) {
@@ -1538,6 +1580,7 @@ function update(dt) {
     }
   }
   G.effects = G.effects.filter(f => f.life > 0);
+  updateLightFlashes(dt);   // 攻擊閃光逐漸熄滅
   updateCombatFeel(dt);   // 屍體、黏液、地上痕跡
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   // 波次（安全場景沒有波次，也不會有勝負）

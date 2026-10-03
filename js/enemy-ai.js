@@ -87,25 +87,43 @@ function enemyAttackPlayer(e, dt) {
     lose('player');
   }
 }
+// 史萊姆撲擊：目標（玩家、哨兵或嚮導）在 3 格內就蓄力，朝「蓄力開始當下」目標的位置飛撲。
+// 地上會出現落點警示，看到就能閃開；落地時落點附近的玩家、哨兵、嚮導都會受傷。
+function trySlimePounce(e, target, distance) {
+  if (e.type !== 'slime' || !target || distance > SLIME_POUNCE.range || distance <= 40) return false;
+  if ((e.playerPounceCd || 0) > 0 || (e.playerPounceT || 0) > 0 || e.slimeClock / SLIME_JUMP.total < SLIME_JUMP.airRatio) return false;
+  const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
+  const reach = Math.max(0, Math.min(d, SLIME_POUNCE.maxLeap) - 14);   // 落在目標面前一點，擊退才有方向
+  e.playerWindupT = SLIME_POUNCE.windup;
+  e.playerPounceCd = SLIME_POUNCE.cooldown;
+  e.playerPounceGoal = { x: e.x + dx / d * reach, y: e.y + dy / d * reach };
+  e.slimeLift = 0; e.slimeScaleX = 1.18; e.slimeScaleY = .76;
+  return true;
+}
 function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
   if (!G.player || G.player.hp <= 0 || playerDistance > ENEMY_SENSE_RANGE) return false;
   if (playerDistance <= 30) { enemyAttackPlayer(e, dt); return true; }
-  if (e.type === 'slime' && playerDistance <= SLIME_POUNCE.range && playerDistance > 40 &&
-      (e.playerPounceCd || 0) <= 0 && (e.playerPounceT || 0) <= 0 &&
-      e.slimeClock / SLIME_JUMP.total >= SLIME_JUMP.airRatio) {
-    // 鎖定「蓄力開始當下」玩家的位置：地上會出現落點警示，玩家看到就能閃開。
-    const dx = G.player.x - e.x, dy = G.player.y - e.y, d = Math.hypot(dx, dy) || 1;
-    const reach = Math.max(0, Math.min(d, SLIME_POUNCE.maxLeap) - 14);   // 落在玩家面前一點，擊退才有方向
-    e.playerWindupT = SLIME_POUNCE.windup;
-    e.playerPounceCd = SLIME_POUNCE.cooldown;
-    e.playerPounceGoal = { x: e.x + dx / d * reach, y: e.y + dy / d * reach };
-    e.slimeLift = 0; e.slimeScaleX = 1.18; e.slimeScaleY = .76;
-    return true;
-  }
+  if (trySlimePounce(e, G.player, playerDistance)) return true;
   const [gc, gr] = cellAt(G.player.x, G.player.y);
   const nav = enemyNavigate(e, gc, gr, moveDt, 'player:' + gc + ',' + gr, true);
   if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
   return true;
+}
+// ---- 被哨兵打中會拉仇恨 ----
+// 被哨兵／嚮導攻擊後，SENTRY_AGGRO_TIME 秒內會優先追打那位攻擊者（連探照燈都先不管）。
+// 優先順序：嘲諷中的哨兵 ＞ 溫特開槍的仇恨 ＞ 打自己的哨兵 ＞ 探照燈 ＞ 最近的哨兵…
+const SENTRY_AGGRO_TIME = 5;
+function aggroOnSentry(e, t) {
+  if (!e || !t || e.dead || !G.enemies.includes(e) || !G.towers.includes(t)) return;
+  e.sentryAggro = t; e.sentryAggroT = SENTRY_AGGRO_TIME;
+}
+// 追擊並攻擊指定的哨兵：貼身就打、3 格內撲擊，否則尋路靠近（路上被建築擋住就先拆）
+function enemyChaseSentry(e, target, distance, moveDt, dt) {
+  if (distance <= 22) { enemyAttackSentry(e, target, dt); return; }
+  if (trySlimePounce(e, target, distance)) return;   // 3 格內：蓄力撲向哨兵／嚮導
+  const [gc, gr] = cellAt(target.x, target.y);
+  const nav = enemyNavigate(e, gc, gr, moveDt, 'sentry:' + target.type + ':' + gc + ',' + gr, true);
+  if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
 }
 function enemyBlocked(x, y) {
   const [c, r] = cellAt(x, y);
@@ -218,12 +236,14 @@ function chooseDarkWanderCell(e) {
 function updateEnemyEffects(e, dt) {
   if (e.hitT > 0) e.hitT -= dt;
   if (e.playerAggroT > 0) e.playerAggroT -= dt;   // 玩家射擊造成的仇恨計時
+  if (e.alertT > 0) e.alertT -= dt;                 // 頭上「！」的顯示計時
+  if (e.sentryAggroT > 0) e.sentryAggroT -= dt;     // 被哨兵打中造成的仇恨計時
   e.playerTouchCd = Math.max(0, (e.playerTouchCd || 0) - dt);
   e.playerPounceCd = Math.max(0, (e.playerPounceCd || 0) - dt);
   e.playerPounceT = Math.max(0, (e.playerPounceT || 0) - dt);
   if (e.burnT > 0) {
     e.burnT -= dt; e.burnTick = (e.burnTick || 0) - dt;
-    if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flash('燒傷', e.x, e.y - 25, '#ff8a42'); }
+    if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flashDmg('-' + (e.burnDmg || 5), e.x + 12, e.y - 18, '#ff8a42', { small: true }); }   // 燒傷：小字、不搶眼
   }
   if (e.stunT > 0) e.stunT -= dt;
   if (e.confuseT > 0) e.confuseT -= dt;
@@ -264,6 +284,11 @@ function updateSlimePounce(e, dt) {
     e.playerTouchCd = 0;
     enemyAttackPlayer(e, dt);
     addHitstop(.06);
+  }
+  for (const t of G.towers) {   // 落點附近的哨兵、嚮導也會被撲中
+    if (t.hp <= 0 || Math.hypot(t.x - e.x, t.y - e.y) > hitRadius + 6) continue;
+    e.atkCd = 0;   // 撲擊落地不受普通攻擊冷卻限制（每位被撲中的人各算一次）
+    enemyAttackSentry(e, t, dt);
   }
 }
 function slimeLerp(a, b, p) { return a + (b - a) * Math.max(0, Math.min(1, p)); }
@@ -340,6 +365,25 @@ function stepEnemy(e, dt) {
   const playerDistance = G.player && G.player.hp > 0 ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
   // 玩家進入撲擊距離（3 格內）時，比探照燈更優先——否則燈附近的史萊姆永遠不會撲向玩家。
   if (playerDistance <= SLIME_POUNCE.range && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
+  const living = G.towers.filter(t => t.hp > 0 && !t.berserk);
+  const sensedSentries = living
+    .map(t => ({ t, d: Math.hypot(t.x - e.x, t.y - e.y) }))
+    .filter(item => item.d <= ENEMY_SENSE_RANGE)
+    .sort((a, b) => a.d - b.d);
+  // 具有嘲諷能力的哨兵若在嘲諷範圍內，會把怪物的注意力拉到自己身上。
+  const taunter = sensedSentries.find(item => {
+    const taunt = TYPES[item.t.type].taunt || 0;
+    return taunt && item.d <= taunt * CELL;
+  });
+  // 被溫特開槍打中（仇恨中）：優先追溫特，連探照燈都先不管（嘲諷中的哨兵仍可搶走注意力）。
+  const playerAggro = !taunter && (e.playerAggroT || 0) > 0 && playerDistance <= ENEMY_SENSE_RANGE;
+  if (playerAggro && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
+  // 被哨兵打中（仇恨中）：改追那位攻擊者，探照燈先不管。
+  const attacker = !taunter && e.sentryAggroT > 0 ? e.sentryAggro : null;
+  if (attacker && attacker.hp > 0 && !attacker.berserk && G.towers.includes(attacker)) {
+    const d = Math.hypot(attacker.x - e.x, attacker.y - e.y);
+    if (d <= ENEMY_SENSE_RANGE) { enemyChaseSentry(e, attacker, d, moveDt, dt); return; }
+  }
   // 發光建築是異質體的最高優先目標：先破壞探照燈，讓周圍重新陷入黑暗。
   const lightChoice = G.obstacles
     .filter(o => o.hp > 0 && o.type && LIGHT.buildings && LIGHT.buildings[o.type])
@@ -352,33 +396,17 @@ function stepEnemy(e, dt) {
     if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
     return;
   }
-  const living = G.towers.filter(t => t.hp > 0 && !t.berserk);
-  const sensedSentries = living
-    .map(t => ({ t, d: Math.hypot(t.x - e.x, t.y - e.y) }))
-    .filter(item => item.d <= ENEMY_SENSE_RANGE)
-    .sort((a, b) => a.d - b.d);
-
   // 哨兵是第一優先；具有嘲諷能力者若在嘲諷範圍內，會覆蓋最近目標。
   let sentryChoice = sensedSentries[0] || null;
-  const taunter = sensedSentries.find(item => {
-    const taunt = TYPES[item.t.type].taunt || 0;
-    return taunt && item.d <= taunt * CELL;
-  });
   if (taunter) sentryChoice = taunter;
   // 玩家貼近怪物時一定會引起攻擊；距離明顯比哨兵近時也會成為目標。
   // 嘲諷中的哨兵仍能把遠處怪物的注意力拉回自己身上。
   const playerIsImmediate = playerDistance <= CELL * 2.25;
   const playerIsMuchCloser = !taunter && playerDistance <= ENEMY_SENSE_RANGE &&
     (!sentryChoice || playerDistance + CELL * 1.5 < sentryChoice.d);
-  const playerAggro = !taunter && (e.playerAggroT || 0) > 0 && playerDistance <= ENEMY_SENSE_RANGE;   // 被玩家射擊→優先追玩家
-  if ((playerIsImmediate || playerIsMuchCloser || playerAggro) && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
+  if ((playerIsImmediate || playerIsMuchCloser) && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
   if (sentryChoice) {
-    const target = sentryChoice.t;
-    if (sentryChoice.d <= 22) { enemyAttackSentry(e, target, dt); return; }
-    const [gc, gr] = cellAt(target.x, target.y);
-    const nav = enemyNavigate(e, gc, gr, moveDt, 'sentry:' + target.type + ':' + gc + ',' + gr, true);
-    // 追擊途中碰到任何建築，立刻先拆掉擋路的建築。
-    if (nav.blocker) { enemyAttackObstacle(e, nav.blocker, dt); return; }
+    enemyChaseSentry(e, sentryChoice.t, sentryChoice.d, moveDt, dt);
     return;
   }
 

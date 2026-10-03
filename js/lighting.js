@@ -13,6 +13,7 @@ const LIT_MIN = 0.1;                                   // 亮度低於這個值�
 let lightField = new Float32Array(COLS * ROWS);        // 每格亮度 0～1
 let warmField = new Float32Array(COLS * ROWS);         // 探照燈暖色量（沿用同一份遮牆結果）
 let lightDist = new Float32Array(COLS * ROWS);         // BFS 暫存
+let flashField = new Float32Array(COLS * ROWS);        // 攻擊閃光的亮度（只影響畫面，不算進遊戲的「亮處」判定）
 const fieldCv = document.createElement('canvas');      // 一格一像素的黑幕小圖
 fieldCv.width = COLS; fieldCv.height = ROWS;
 const fieldCtx = fieldCv.getContext('2d');
@@ -30,6 +31,7 @@ function ensureLightBuffers() {
   lightField = new Float32Array(COLS * ROWS);
   warmField = new Float32Array(COLS * ROWS);
   lightDist = new Float32Array(COLS * ROWS);
+  flashField = new Float32Array(COLS * ROWS);
   fieldCv.width = COLS; fieldCv.height = ROWS; fieldImg = fieldCtx.createImageData(COLS, ROWS);
   warmCv.width = COLS; warmCv.height = ROWS; warmImg = warmCtx.createImageData(COLS, ROWS);
 }
@@ -41,10 +43,17 @@ function computeLightField() {
   lightField.fill(0);
   warmField.fill(0);
   if (!LIGHT.enabled) return;
-  for (const l of lightsCache) {
+  for (const l of lightsCache) spreadLight(l, (i, b) => {
+    if (b > lightField[i]) lightField[i] = b;
+    if (l.warm && b > warmField[i]) warmField[i] = b;
+  });
+}
+// 從一個光源沿格子擴散，對每個被照到的格子呼叫 onCell(格子編號, 亮度 0～1)
+function spreadLight(l, onCell) {
+  {
     const steps = l.r / CELL;                          // 這盞燈的光能走幾格
     const [sc, sr] = cellAt(l.x, l.y);
-    if (!inGrid(sc, sr)) continue;
+    if (!inGrid(sc, sr)) return;
     lightDist.fill(Infinity);
     // 平滑補間：用光源「實際座標」到附近格子中心的真實距離當起始距離，
     // 角色在格子內移動時亮度會連續滑動，光就不會一格一格跳。
@@ -71,14 +80,29 @@ function computeLightField() {
         if (nd < lightDist[ni]) { lightDist[ni] = nd; q.push(ni); }
       }
     }
-    for (let i = 0; i < lightField.length; i++) {
-      if (lightDist[i] < Infinity) {
-        const b = 1 - lightDist[i] / steps;
-        if (b > lightField[i]) lightField[i] = b;
-        if (l.warm && b > warmField[i]) warmField[i] = b;
-      }
+    for (let i = 0; i < lightDist.length; i++) {
+      if (lightDist[i] < Infinity) onCell(i, 1 - lightDist[i] / steps);
     }
   }
+}
+
+// ---- 攻擊閃光（槍口火光、火焰、雷擊…）----
+// 種類與數值在 js/attack-fx.js 的 LIGHT_FLASH。閃光同樣會被牆擋住，
+// 但只是「畫面變亮、看得到怪物」，不會讓哨兵索敵、蓋建築等判定把那裡當成亮處。
+function flashStrength(f) { return Math.pow(Math.max(0, f.life / f.life0), 1.6) * f.power; }
+function computeFlashField() {
+  flashField.fill(0);
+  if (!LIGHT.enabled || !G || !G.lightFlashes || !G.lightFlashes.length) return;
+  for (const f of G.lightFlashes) {
+    const k = flashStrength(f);
+    if (k > .02) spreadLight(f, (i, b) => { const v = b * k; if (v > flashField[i]) flashField[i] = v; });
+  }
+}
+// 畫面上看不看得到（亮處，或正被攻擊閃光照到）。只給繪圖用。
+function isVisible(x, y) {
+  if (isLit(x, y)) return true;
+  const [c, r] = cellAt(x, y);
+  return inGrid(c, r) && flashField[r * COLS + c] > LIT_MIN;
 }
 
 function getLights() {
@@ -178,7 +202,7 @@ function drawDarkness() {
   const px = fieldImg.data, maxA = Math.round(LIGHT.darkness * 255);
   for (let i = 0; i < lightField.length; i++) {
     // 只改視覺曲線：中段亮度更柔順，實際的 isLit 判定仍使用原始 lightField。
-    const b = Math.pow(Math.min(1, lightField[i]), 0.78);
+    const b = Math.pow(Math.min(1, Math.max(lightField[i], flashField[i])), 0.78);   // 攻擊閃光也會暫時掀開黑幕
     const o = i * 4;
     px[o] = 0; px[o + 1] = 0; px[o + 2] = 0;
     px[o + 3] = Math.round(maxA * (1 - b));
@@ -228,6 +252,23 @@ function drawDarkness() {
     }
   }
   ctx.restore();
+
+  // 攻擊閃光的色光（火焰偏橘、雷擊偏藍白…），疊在黑幕上面
+  if (G && G.lightFlashes && G.lightFlashes.length) {
+    ctx.save();
+    ctx.globalCompositeOperation = 'screen';
+    for (const f of G.lightFlashes) {
+      const k = flashStrength(f);
+      if (k <= .02) continue;
+      const R = f.r * .75, [cr, cg, cb] = f.color;
+      const glow = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, R);
+      glow.addColorStop(0, 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (.38 * k).toFixed(3) + ')');
+      glow.addColorStop(.45, 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (.14 * k).toFixed(3) + ')');
+      glow.addColorStop(1, 'rgba(' + cr + ',' + cg + ',' + cb + ',0)');
+      ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(f.x, f.y, R, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
+  }
 
   // 地圖範圍以外的畫面也保持黑暗（vx/vy/vw/vh＝目前看得到的世界範圍）
   const vx = cam.x, vy = cam.y, vw = viewW(), vh = viewH();

@@ -2,6 +2,9 @@
    呼叫：sfx('button' | 'menu' | 'switch' | 'blip' | 'place' | 'soothe'
             | 'wave' | 'win' | 'lose' | 'error' | 'berserk' | 'kill')
    調整：改 sounds 裡的參數就能改音色；SFX.volume 設總音量；按 M 鍵可靜音。
+   音檔播放：開遊戲時就先把音檔解碼進記憶體（Web Audio），要播時立刻出聲、不會慢半拍。
+            如果是直接雙擊 HTML 開啟（file://），瀏覽器不准預先載入，會自動退回舊的播放方式。
+   音高變化：VARIED 裡的戰鬥音效每次播放音高、音量都會隨機偏一點，連續命中才不會像同一段錄音重播。
 */
 const SFX = (() => {
   let ctx = null, master = null, volume = 0.35, enabled = true;
@@ -29,30 +32,73 @@ const SFX = (() => {
     swordSwing: '揮劍.mp3',
     heartbeat: '心跳.mp3',
     achievement: '升級.mp3',
+    slimeHit: 'slime-hit.mp3',
+    slimeLand: 'slime-land.mp3',
   };
-  const activeAudio = new Map();
+  // 戰鬥音效的隨機變化：pitch＝音高（播放速度）±比例、gain＝音量 ±比例。
+  // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
+  const VARY = { pitch: 0.08, gain: 0.12 };
+  const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'monsterDown',
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit']);
+  const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
+  const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
+  const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
+  const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
   const lastPlayed = new Map();
   function playFile(name, gain = 1, sourceKey = name) {
     const now = performance.now();
     if (now - (lastPlayed.get(sourceKey) || -Infinity) < 70) return;
     lastPlayed.set(sourceKey, now);
-    const audio = new Audio('Sound effects/' + files[name]);
+    const vary = VARIED.has(name), rate = vary ? jitter(VARY.pitch) : 1;
+    if (vary) gain *= jitter(VARY.gain);
+    if (buffers[name]) {             // 已預先載入：立即播放
+      ensure();
+      const src = ctx.createBufferSource(); src.buffer = buffers[name]; src.playbackRate.value = rate;
+      const g = ctx.createGain(); g.gain.value = gain;
+      src.connect(g); g.connect(master);
+      activeSources.add(src);
+      src.onended = () => activeSources.delete(src);
+      src.start();
+      return;
+    }
+    const audio = new Audio('Sound effects/' + files[name]);   // 還沒載入好（或 file:// 開啟）：退回舊方式
     audio.volume = Math.min(1, volume * gain);
+    audio.preservesPitch = false; audio.playbackRate = rate;
     activeAudio.set(audio, gain);
     const cleanup = () => activeAudio.delete(audio);
     audio.addEventListener('ended', cleanup, { once: true });
     audio.addEventListener('error', cleanup, { once: true });
     audio.play().catch(() => { cleanup(); });
   }
+  function createContext() {
+    if (ctx) return;
+    const AC = window.AudioContext || window.webkitAudioContext;
+    if (!AC) return;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = volume; master.connect(ctx.destination);
+  }
   function ensure() {
-    if (!ctx) {
-      const AC = window.AudioContext || window.webkitAudioContext;
-      ctx = new AC();
-      master = ctx.createGain(); master.gain.value = volume; master.connect(ctx.destination);
-    }
+    createContext();
     if (ctx.state === 'suspended') ctx.resume();
     return ctx;
   }
+  // 開遊戲時先把所有音檔下載並解碼；任何一個失敗，就只有那個音沿用舊播放方式
+  function preload() {
+    if (location.protocol === 'file:') return;   // 雙擊開啟時瀏覽器禁止讀檔，直接用舊方式
+    createContext();
+    if (!ctx) return;
+    for (const [name, file] of Object.entries(files)) {
+      fetch('Sound effects/' + encodeURIComponent(file))
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
+        .then(data => new Promise((ok, fail) => ctx.decodeAudioData(data, ok, fail)))
+        .then(buffer => { buffers[name] = buffer; })
+        .catch(() => {});
+    }
+  }
+  // 瀏覽器規定玩家第一次點擊或按鍵後才能出聲，那時順便喚醒音效引擎
+  const unlock = () => { if (ctx && ctx.state === 'suspended') ctx.resume(); };
+  window.addEventListener('pointerdown', unlock);
+  window.addEventListener('keydown', unlock);
   // 一個帶音量包絡的音（可做滑音：freq → freq2）
   function tone({ freq, freq2, type = 'sine', dur = 0.12, gain = 0.25, attack = 0.004, when = 0 }) {
     const t0 = ctx.currentTime + when;
@@ -91,8 +137,8 @@ const SFX = (() => {
     lose() { [440, 392, 311, 233].forEach((f, i) => tone({ freq: f, type: 'sawtooth', dur: 0.26, gain: 0.17, when: i * 0.14 })); },
     error() { tone({ freq: 200, freq2: 150, type: 'square', dur: 0.16, gain: 0.18 }); },
     berserk() { tone({ freq: 130, freq2: 55, type: 'sawtooth', dur: 0.4, gain: 0.24 }); noise({ dur: 0.34, gain: 0.16, freq: 500, q: 0.5 }); },
-    kill() { tone({ freq: 420, freq2: 120, type: 'sine', dur: 0.09, gain: 0.1 }); },
-    hit() { tone({ freq: 160, freq2: 70, type: 'square', dur: 0.07, gain: 0.15 }); noise({ dur: 0.06, gain: 0.08, freq: 700 }); },
+    kill() { const k = jitter(VARY.pitch); tone({ freq: 420 * k, freq2: 120 * k, type: 'sine', dur: 0.09, gain: 0.1 * jitter(VARY.gain) }); },
+    hit() { const k = jitter(VARY.pitch); tone({ freq: 160 * k, freq2: 70 * k, type: 'square', dur: 0.07, gain: 0.15 * jitter(VARY.gain) }); noise({ dur: 0.06, gain: 0.08, freq: 700 * k }); },
   };
   function play(name, gain = 1, sourceKey = name) {
     if (!enabled) return;
@@ -101,12 +147,17 @@ const SFX = (() => {
     const f = sounds[name];
     if (f) { ensure(); f(); }
   }
+  preload();
   return {
     play,
     get enabled() { return enabled; }, set enabled(v) {
       enabled = v;
-      if (!v) { activeAudio.forEach((_, audio) => audio.pause()); activeAudio.clear(); }
+      if (!v) {
+        activeAudio.forEach((_, audio) => audio.pause()); activeAudio.clear();
+        activeSources.forEach(src => { try { src.stop(); } catch (_) {} }); activeSources.clear();
+      }
     },
+    get volume() { return volume; },
     set volume(v) { volume = v; if (master) master.gain.value = v; activeAudio.forEach((gain, audio) => { audio.volume = Math.min(1, v * gain); }); },
   };
 })();

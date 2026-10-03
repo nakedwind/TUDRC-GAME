@@ -201,7 +201,7 @@ function openSquadPanel() { ensureTeamUI(); closeTeamPanel(); if (typeof closeAc
 function closeSquadPanel() { if (squadPanel) squadPanel.classList.add('hidden'); if (squadBtn) squadBtn.classList.remove('active'); }
 function isSquadPanelOpen() { return squadPanel && !squadPanel.classList.contains('hidden'); }
 
-function closeFieldCommandMenu() { if (fieldCommandMenu) fieldCommandMenu.classList.add('hidden'); }
+function closeFieldCommandMenu() { if (fieldCommandMenu) { fieldCommandMenu.classList.add('hidden'); fieldCommandMenu.dataset.type = ''; } }
 function nearestPatrolPoint(x, y, predicate) {
   let best = null, bestDistance = Infinity;
   for (let radius = 0; radius <= 4; radius++) {
@@ -235,6 +235,11 @@ function commandFieldMember(type, destination) {
     if (typeof sfx === 'function') sfx('error');
     closeFieldCommandMenu(); return;
   }
+  if (destination === 'escort') {   // 跟隨護衛（js/sentry.js 的 setSentryEscort）
+    if (typeof sfx === 'function') sfx('button');
+    setSentryEscort(member);
+    closeFieldCommandMenu(); return;
+  }
   const point = destination === 'player' && G.player
     ? nearestPatrolPoint(G.player.x, G.player.y)
     : basePatrolPoint(member);
@@ -248,10 +253,16 @@ function openFieldCommandMenu(type, avatar) {
   const member = G && G.towers && G.towers.find(t => t.type === type), spec = TYPES[type];
   if (!member || !spec || !fieldCommandMenu) return;
   const unavailable = member.hp <= 0 || member.berserk;
-  fieldCommandMenu.innerHTML = '<strong>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + '</strong>' +
+  if (!fieldCommandMenu.classList.contains('hidden') && fieldCommandMenu.dataset.type === type) { closeFieldCommandMenu(); return; }   // 再點同一個頭像＝關閉
+  const escorting = member.mode === 'escort';
+  fieldCommandMenu.innerHTML = '<div class="field-command-head"><strong>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + '</strong>' +
+    '<button type="button" class="field-command-close" aria-label="關閉選單">×</button></div>' +
     (unavailable ? '<p>' + (member.hp <= 0 ? '目前無法行動' : '暴走中，無法接受指令') + '</p>' :
-    '<button type="button" data-destination="base">返回基地巡邏</button><button type="button" data-destination="player">到玩家身邊巡邏</button>');
-  fieldCommandMenu.querySelectorAll('button').forEach(button => button.addEventListener('click', () => commandFieldMember(type, button.dataset.destination)));
+    '<button type="button" class="field-command-option" data-destination="base">返回基地巡邏</button>' +
+    '<button type="button" class="field-command-option' + (escorting ? ' active' : '') + '" data-destination="escort">跟隨護衛部隊長' + (escorting ? '<small>護衛中</small>' : '') + '</button>');
+  fieldCommandMenu.querySelector('.field-command-close').addEventListener('click', () => { if (typeof sfx === 'function') sfx('switch'); closeFieldCommandMenu(); });
+  fieldCommandMenu.querySelectorAll('.field-command-option').forEach(button => button.addEventListener('click', () => commandFieldMember(type, button.dataset.destination)));
+  fieldCommandMenu.dataset.type = type;
   const wrapRect = document.getElementById('wrap').getBoundingClientRect(), avatarRect = avatar.getBoundingClientRect();
   fieldCommandMenu.style.left = Math.round(avatarRect.right - wrapRect.left + 7) + 'px';
   fieldCommandMenu.style.top = Math.round(avatarRect.top - wrapRect.top) + 'px';
@@ -276,9 +287,12 @@ function renderFieldSquadHud() {
         : member.berserk
         ? '<em class="taint-tag berserk">暴走</em>'
         : (!spec.guide && taint > 85 ? '<em class="taint-tag danger">瀕臨暴走</em>' : '');
-      const hasUlt = (typeof ULTIMATES !== 'undefined') && ULTIMATES[member.type];   // 有大招才顯示冷卻環
+      const hasUlt = ((typeof ULTIMATES !== 'undefined') && ULTIMATES[member.type]) || spec.aura;   // 有大招（嚮導＝疏導）才顯示冷卻條
+      const cdRemain = hasUlt ? ultCooldownRemain(member) : 0;
+      const sc = spec.aura && typeof SOOTHE_COLORS !== 'undefined' && SOOTHE_COLORS[member.type];   // 嚮導的冷卻條用疏導的顏色
+      const barStyle = sc ? 'background:rgb(' + sc.join(',') + ');box-shadow:0 0 4px rgb(' + sc.join(',') + ');' : '';
       const cdRing = hasUlt
-        ? '<svg class="field-cd-ring" data-type="' + member.type + '" viewBox="0 0 40 40" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;overflow:visible"><rect x="2.5" y="2.5" width="35" height="35" rx="2" fill="none" stroke="#4db5ff" stroke-width="2" stroke-linecap="round" style="stroke-dasharray:140;stroke-dashoffset:140;filter:drop-shadow(0 0 2px #4db5ff)"></rect></svg>'
+        ? '<span class="field-cd-bar" data-type="' + member.type + '"' + (cdRemain > .001 ? '' : ' hidden') + '><i style="' + barStyle + 'width:' + (cdRemain * 100).toFixed(1) + '%"></i></span>'
         : '';
       const taintCls = hp <= 0 ? '' : member.berserk ? ' berserk' : (!spec.guide && taint > 85 ? ' danger' : '');   // 整個隊員框閃紅／紅色濾鏡
       // 這個面板每 0.3 秒重畫一次；用負的 animation-delay 對齊時鐘，閃爍才不會每次重畫就從頭開始
@@ -295,18 +309,22 @@ function renderFieldSquadHud() {
   fieldSquadHud.classList.remove('hidden');
 }
 // 每幀更新隊員頭像的大招冷卻環（內緣藍線，隨充能繞一圈）
+// 大招還要冷卻多久（1＝剛放完 → 0＝可以再放）。嚮導的「大招」就是疏導。
+function ultCooldownRemain(member) {
+  if (!member) return 0;
+  const ult = typeof ULTIMATES !== 'undefined' && ULTIMATES[member.type];
+  if (ult) return Math.max(0, Math.min(1, (member.ultCd || 0) / ult.cd));
+  const spec = TYPES[member.type];
+  if (spec && spec.aura && typeof SOOTHE_AURA_CD !== 'undefined') return Math.max(0, Math.min(1, (member.auraCd || 0) / SOOTHE_AURA_CD));
+  return 0;
+}
+// 頭像框內上方的藍色冷卻條：剛放完大招是滿的，隨冷卻縮短，冷卻好就消失（每幀由 game.js 呼叫）
 function updateFieldCdRings() {
   if (!fieldSquadHud || typeof G === 'undefined' || !G || !Array.isArray(G.towers)) return;
-  const ults = (typeof ULTIMATES !== 'undefined') ? ULTIMATES : null; if (!ults) return;
-  for (const svg of fieldSquadHud.querySelectorAll('.field-cd-ring')) {
-    const member = G.towers.find(t => t.type === svg.dataset.type), ult = ults[svg.dataset.type];
-    const rect = svg.querySelector('rect'); if (!rect) continue;
-    const remain = (member && ult) ? Math.max(0, Math.min(1, (member.ultCd || 0) / ult.cd)) : 0;   // 1 剛發招 → 0 可用
-    if (remain <= 0.001) { rect.style.display = 'none'; continue; }   // 可用（或沒大招）時不顯示藍圈
-    rect.style.display = '';
-    const P = rect.getTotalLength ? rect.getTotalLength() : 140;
-    rect.style.strokeDasharray = P;
-    rect.style.strokeDashoffset = P * (1 - remain);   // 滿→空，隨冷卻減少
+  for (const bar of fieldSquadHud.querySelectorAll('.field-cd-bar')) {
+    const remain = ultCooldownRemain(G.towers.find(t => t.type === bar.dataset.type));
+    bar.hidden = remain <= .001;
+    bar.firstChild.style.width = (remain * 100).toFixed(1) + '%';
   }
 }
 
@@ -373,6 +391,21 @@ function updateTeamButton() {
   if (safe) closeFieldCommandMenu();
   renderFieldSquadHud();
 }
+
+// 滑鼠移到隊友欄上：整欄變淡，看得到底下的怪物（隊友欄除了頭像都不擋點擊，見 style.css）
+window.addEventListener('mousemove', e => {
+  if (!fieldSquadHud || fieldSquadHud.classList.contains('hidden')) return;
+  const list = fieldSquadHud.querySelector('.field-squad-list') || fieldSquadHud, r = list.getBoundingClientRect();
+  const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
+  fieldSquadHud.classList.toggle('peek', inside);
+});
+
+// 點選單以外的地方（頭像除外，頭像有自己的開關）就關閉隊員指令選單
+document.addEventListener('pointerdown', e => {
+  if (!fieldCommandMenu || fieldCommandMenu.classList.contains('hidden')) return;
+  if (fieldCommandMenu.contains(e.target) || e.target.closest('.field-member-avatar')) return;
+  closeFieldCommandMenu();
+}, true);
 
 // Esc 關閉面板
 window.addEventListener('keydown', e => {

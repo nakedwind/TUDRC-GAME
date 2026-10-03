@@ -255,8 +255,19 @@ canvas.cursor-pressed {
 #fieldSquadHud {
   position: absolute; z-index: 8; top: 54px; left: 20px; width: 120px;
   overflow: visible; border: 0; background: transparent; box-shadow: none;
-  pointer-events: auto; transition: opacity .15s ease;
+  pointer-events: none; transition: opacity .15s ease;   /* 只有頭像能點，其餘點擊穿透到戰場（才打得到底下的怪） */
 }
+/* 滑鼠移到隊友欄上：名字、血條、底色變淡，露出底下的戰場；頭像維持清楚，方便點擊 */
+#fieldSquadHud .field-member, #fieldSquadHud .field-member-status, #fieldSquadHud .field-down-banner { transition: opacity .15s ease, background-color .15s ease; }
+#fieldSquadHud.peek .field-member { background-color: rgba(8,13,19,.06); }
+#fieldSquadHud.peek .field-member-status, #fieldSquadHud.peek .field-down-banner { opacity: .3; }
+/* 大招冷卻條：頭像框內上緣的一條藍線 */
+.field-cd-bar {
+  position: absolute; z-index: 2; top: 2px; left: 2px; right: 2px; height: 3px;
+  border-radius: 2px; background: rgba(8,15,24,.65); pointer-events: none; overflow: hidden;
+}
+.field-cd-bar[hidden] { display: none; }
+.field-cd-bar i { display: block; height: 100%; background: #4db5ff; box-shadow: 0 0 4px #4db5ff; }
 #fieldSquadHud.hidden { display: none; }
 #wrap.placing-building #fieldSquadHud { opacity: .35; }
 #wrap.placing-building #fieldSquadHud,
@@ -335,12 +346,21 @@ canvas.cursor-pressed {
   backdrop-filter: blur(7px);
 }
 #fieldCommandMenu.hidden { display: none; }
-#fieldCommandMenu strong { display: block; padding: 3px 5px 8px; color: #e6f3fa; font-size: 13px; }
-#fieldCommandMenu button {
-  display: block; width: 100%; padding: 7px 6px; border: 0; border-radius: 6px;
-  background: transparent; color: #c8d7e1; cursor: pointer; text-align: left; font: 600 12px "Microsoft JhengHei", sans-serif;
+#fieldCommandMenu .field-command-head { display: flex; align-items: center; justify-content: space-between; gap: 6px; padding: 0 0 6px 5px; }
+#fieldCommandMenu strong { display: block; color: #e6f3fa; font-size: 13px; }
+#fieldCommandMenu .field-command-close {
+  flex: none; width: 22px; height: 22px; padding: 0; border: 1px solid rgba(143,211,255,.3); border-radius: 6px;
+  background: rgba(255,255,255,.04); color: #c8d7e1; cursor: pointer; font: 700 15px/1 sans-serif;
 }
-#fieldCommandMenu button:hover { background: rgba(83,145,177,.25); color: #fff; }
+#fieldCommandMenu .field-command-close:hover { background: rgba(255,120,120,.18); border-color: rgba(255,150,150,.6); color: #fff; }
+#fieldCommandMenu .field-command-option {
+  display: flex; align-items: center; justify-content: space-between; width: 100%; margin-top: 6px; padding: 7px 9px;
+  border: 1px solid rgba(143,211,255,.35); border-radius: 7px;
+  background: rgba(30,48,64,.55); color: #c8d7e1; cursor: pointer; text-align: left; font: 600 12px "Microsoft JhengHei", sans-serif;
+}
+#fieldCommandMenu .field-command-option:hover { background: rgba(83,145,177,.32); border-color: rgba(143,211,255,.75); color: #fff; }
+#fieldCommandMenu .field-command-option.active { border-color: #7ee0c0; background: rgba(60,130,110,.3); color: #e9fff8; }
+#fieldCommandMenu .field-command-option small { color: #7ee0c0; font-size: 10px; font-weight: 600; }
 #fieldCommandMenu p { margin: 2px 4px 4px; color: #df8c8c; font-size: 9px; line-height: 1.5; }
 #squadStatusPanel {
   position: absolute; z-index: 15; top: 18px; right: 18px; bottom: 18px;
@@ -674,7 +694,7 @@ canvas.cursor-pressed {
 #buildToolbar .tbtn {
   display: flex; flex: 0 0 58px; flex-direction: column; align-items: center; justify-content: center;
   gap: 2px; width: 58px; height: 58px; min-width: 0; padding: 3px;
-  border-radius: 10px; font-size: 10px; font-weight: 700; text-align: center;
+  border-radius: 10px; font-size: 12px; font-weight: 700; text-align: center;
   background: rgba(24, 35, 49, .52);
   box-shadow: inset 0 1px 0 rgba(255,255,255,.08), 0 3px 8px rgba(0,0,0,.15);
 }
@@ -695,7 +715,7 @@ canvas.cursor-pressed {
   gap: 2px; width: 58px; height: 58px; padding: 3px;
   border: 1px solid #405167; border-radius: 10px;
   background: linear-gradient(180deg,#283442,#17222e); color: #e6e9ee;
-  cursor: pointer; font: 700 10px "Microsoft JhengHei", sans-serif;
+  cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; white-space: nowrap;
 }
 .build-quick-slot img { width: 38px; height: 38px; object-fit: contain; image-rendering: pixelated; }
 .build-quick-slot.sel { border-color: #8fd3ff; background: #29465a; box-shadow: 0 0 0 2px rgba(143,211,255,.16); }

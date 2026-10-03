@@ -141,11 +141,11 @@ function drawTower(t) {
     }
     ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
     const redFlash = sentryRedFlash(t);   // 瀕臨暴走慢閃紅、暴走快閃紅
-    if (redFlash > 0.01) {
-      ctx.globalAlpha = redFlash * 0.6;
-      ctx.filter = 'sepia(1) saturate(7) hue-rotate(-30deg) brightness(1.1)';
-      ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
-      ctx.filter = 'none'; ctx.globalAlpha = 1;
+    const redSil = redFlash > 0.01 ? flashSprite(img, '#ff3b3b') : null;
+    if (redSil) {
+      ctx.globalAlpha = redFlash * 0.5;
+      ctx.drawImage(redSil, t.x - size / 2 + shX, t.y - size + 18, size, size);
+      ctx.globalAlpha = 1;
     }
     ctx.restore();
     ctx.imageSmoothingEnabled = true;
@@ -193,7 +193,7 @@ function sensedEnemies() {
   if (!LIGHT.enabled || !G || !G.enemies.length) return [];
   const eyes = (G.towers || []).filter(t => (TYPES[t.type] || {}).sense && t.hp > 0 && !t.berserk);
   if (!eyes.length) return [];
-  return G.enemies.filter(e => !e.dead && !isLit(e.x, e.y)
+  return G.enemies.filter(e => !e.dead && !isVisible(e.x, e.y)
     && eyes.some(t => Math.hypot(e.x - t.x, e.y - t.y) <= TYPES[t.type].sense * CELL));
 }
 function drawSensedEnemies() {
@@ -247,13 +247,9 @@ function drawEnemy(e) {
     // 受擊閃紅；自爆引信點燃時越閃越快
     const fuseP = e.fuseT > 0 ? 1 - e.fuseT / SLIME_BOMB.fuse : 0;
     const fuseFlash = fuseP > 0 ? (Math.sin(fuseP * fuseP * 60) > 0 ? .85 : .15) : 0;
-    if (e.hitT > 0 || fuseFlash) {
-      ctx.save();
-      ctx.globalAlpha = Math.max(Math.min(1, (e.hitT || 0) / .16) * 0.65, fuseFlash);
-      ctx.filter = 'sepia(1) saturate(8) hue-rotate(-35deg) brightness(1.1)';
-      ctx.drawImage(sprite, dx, dy, dw, dh);
-      ctx.restore();
-    }
+    if (e.hitT > 0) drawHitFlash(sprite, Math.min(1, e.hitT / .16), e.hitColor, dx, dy, dw, dh);   // 先閃白，再轉屬性色
+    const fuseSil = fuseFlash ? flashSprite(sprite, '#ff6a3d') : null;
+    if (fuseSil) { ctx.globalAlpha = fuseFlash * .75; ctx.drawImage(fuseSil, dx, dy, dw, dh); ctx.globalAlpha = 1; }
     ctx.imageSmoothingEnabled = true;
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
@@ -269,6 +265,14 @@ function drawEnemy(e) {
   if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
   if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('顫抖',e.x,e.y-33); }
   if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
+  if (e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」
+    const age = ENEMY_ALERT_TIME - e.alertT, pop = age < .12 ? .6 + age / .12 * .7 : 1.3 - Math.min(.3, (age - .12) * 1.5);
+    ctx.save(); ctx.translate(e.x, barY - 9); ctx.scale(pop, pop); ctx.globalAlpha = Math.min(1, e.alertT / .25);
+    ctx.font = '900 17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+    ctx.lineWidth = 3.5; ctx.lineJoin = 'round'; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText('!', 0, 0);
+    ctx.fillStyle = '#ffd24a'; ctx.fillText('!', 0, 0);
+    ctx.restore();
+  }
   if (e.hitT > 0) {
     ctx.globalAlpha = Math.min(1, e.hitT / .16);
     ctx.strokeStyle = e.hitColor || '#fff'; ctx.lineWidth = 2.5;
@@ -362,13 +366,17 @@ function drawPlayer(p) {
       const k = (p.recoilT / 0.14) * 4;
       ctx.translate(-Math.cos(p.recoilAng || 0) * k, -Math.sin(p.recoilAng || 0) * k);
     }
-    if (p.hitT > 0) ctx.filter = 'sepia(1) saturate(4) hue-rotate(-38deg) brightness(1.32)';
     ctx.imageSmoothingEnabled = false;
+    const hitK = p.hitT > 0 ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出
     if (p.sitting?.rotation) {
       ctx.translate(p.x, p.y - size / 2 + 18);
       ctx.rotate(p.sitting.rotation * Math.PI / 180);
       ctx.drawImage(img, -size / 2, -size / 2, size, size);
-    } else ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
+      drawHitFlash(img, hitK, '#ff4d4d', -size / 2, -size / 2, size, size);
+    } else {
+      ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
+      drawHitFlash(img, hitK, '#ff4d4d', p.x - size / 2, p.y - size + 18, size, size);
+    }
     ctx.imageSmoothingEnabled = true;
     ctx.restore();
   } else {
@@ -386,6 +394,7 @@ function drawPlayer(p) {
 function draw() {
   lightsCache = LIGHT.enabled ? getLights() : [];   // 更新這一幀的光源
   computeLightField();                              // 光沿格子擴散、碰牆停（牆後全黑）
+  computeFlashField();                              // 攻擊閃光（只影響畫面）
   ctx.clearRect(0, 0, cv.width, cv.height);
   // 之後畫的都是「世界座標」：先套畫面縮放，再平移鏡頭位置，畫面就會跟著玩家捲動
   ctx.save();
@@ -406,11 +415,11 @@ function draw() {
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
   collectMapOccluders(ctx, sortables);
-  for(const core of G.cores) if(!core.dead && isLit(core.x,core.y)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
+  for(const core of G.cores) if(!core.dead && isVisible(core.x,core.y)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });
   for (const t of G.towers) sortables.push({ y: t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.y + 17, draw: () => drawWanderer(npc) });
-  for (const e of G.enemies) if (isLit(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
+  for (const e of G.enemies) if (isVisible(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (G.player) sortables.push({ y: G.player.sitting ? G.player.sitting.sortY + 0.5 : G.player.y + 16, draw: () => drawPlayer(G.player) });
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
@@ -577,6 +586,36 @@ function draw() {
       ctx.globalAlpha = 0.2 + 0.6 * prog; ctx.fillStyle = f.color;
       ctx.beginPath(); ctx.arc(f.x, f.y, 3 + 15 * prog, 0, Math.PI * 2); ctx.fill();
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.sootheSigil) {                            // 疏導法陣：施術者腳下兩圈光環＋旋轉刻紋，展開後淡出
+      const p = Math.max(0, f.life / f.life0), age = f.life0 - f.life;
+      const open = Math.min(1, age / .25), a = Math.min(1, p * 2.2);
+      const R = 30 * (.55 + .45 * open), [cr, cg, cb] = f.col, rgb = `rgb(${cr},${cg},${cb})`;
+      ctx.save(); ctx.translate(f.follow.x, f.follow.y + 14); ctx.scale(1, .45);
+      ctx.globalCompositeOperation = 'lighter';
+      const g = ctx.createRadialGradient(0, 0, 0, 0, 0, R * 1.25);
+      g.addColorStop(0, `rgba(${cr},${cg},${cb},${(.32 * a).toFixed(3)})`);
+      g.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+      ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, R * 1.25, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = rgb;
+      ctx.globalAlpha = a * .9; ctx.lineWidth = 2.4; ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = a * .55; ctx.lineWidth = 1.4; ctx.beginPath(); ctx.arc(0, 0, R * .66, 0, Math.PI * 2); ctx.stroke();
+      ctx.rotate(f.spin + age * 2.2);                       // 外圈刻紋順時針轉
+      ctx.globalAlpha = a * .85; ctx.lineWidth = 2; ctx.beginPath();
+      for (let i = 0; i < 8; i++) { const an = i / 8 * Math.PI * 2; ctx.moveTo(Math.cos(an) * R * .74, Math.sin(an) * R * .74); ctx.lineTo(Math.cos(an) * R * .93, Math.sin(an) * R * .93); }
+      ctx.stroke();
+      ctx.rotate(-age * 4.4);                               // 內圈三角逆時針轉
+      ctx.globalAlpha = a * .6; ctx.lineWidth = 1.4; ctx.beginPath();
+      for (let i = 0; i <= 3; i++) { const an = i / 3 * Math.PI * 2 - Math.PI / 2; ctx[i ? 'lineTo' : 'moveTo'](Math.cos(an) * R * .6, Math.sin(an) * R * .6); }
+      ctx.stroke();
+      ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.sootheWave) {                             // 疏導光波：從施術者往外擴散到疏導範圍
+      const p = Math.max(0, f.life / f.life0), q = 1 - p, rr = f.r * (1 - Math.pow(1 - q, 3));
+      const [cr, cg, cb] = f.col;
+      ctx.save(); ctx.translate(f.x, f.y + 8); ctx.scale(1, .55);
+      ctx.globalCompositeOperation = 'lighter'; ctx.strokeStyle = `rgb(${cr},${cg},${cb})`;
+      ctx.globalAlpha = p * .28; ctx.lineWidth = 9; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.stroke();
+      ctx.globalAlpha = p * .75; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, 0, rr, 0, Math.PI * 2); ctx.stroke();
+      ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
     } else if (f.sootheGlow) {                             // 疏導柔和光環＋雙層擴張圈（加色疊加）
       const p = Math.max(0, f.life / f.life0), r = f.r0 + (f.r1 - f.r0) * (1 - p), a = Math.sin(p * Math.PI);
       const [cr, cg, cb] = f.col;
@@ -636,8 +675,8 @@ function draw() {
       const alpha = Math.min(1, f.life / 0.35), ty = f.y + (f.vy || -34) * Math.min(0.5, age);
       const jx = f.crit && age < 0.1 ? (Math.random() * 2 - 1) * 2 : 0;
       ctx.save(); ctx.translate(f.x + jx, ty); ctx.scale(pop, pop);
-      ctx.font = f.crit ? 'italic 900 22px sans-serif' : 'bold 17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-      ctx.globalAlpha = alpha; ctx.lineWidth = f.crit ? 5 : 3.5; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineJoin = 'round';
+      ctx.font = f.crit ? 'italic 900 22px sans-serif' : f.small ? 'bold 12px sans-serif' : 'bold 17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.globalAlpha = alpha * (f.small ? .8 : 1); ctx.lineWidth = f.crit ? 5 : f.small ? 3 : 3.5; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineJoin = 'round';
       ctx.strokeText(f.text, 0, 0); ctx.fillStyle = f.color; ctx.fillText(f.text, 0, 0);
       if (f.crit) {   // 上方「爆擊」小標
         ctx.font = '900 10px sans-serif'; ctx.lineWidth = 3;
@@ -720,6 +759,12 @@ function draw() {
         ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.5, f.r * p), 0, Math.PI * 2); ctx.fill();
       }
       ctx.globalAlpha = 1;
+    } else if (f.shell) {   // 彈殼：小小的黃銅色長條，邊轉邊掉，落地後淡出
+      ctx.save(); ctx.globalAlpha = Math.min(1, f.life / .4);
+      ctx.translate(f.x, f.y - f.z); ctx.rotate(f.rot);
+      ctx.fillStyle = '#c9952f'; ctx.fillRect(-3, -1.2, 6, 2.4);
+      ctx.fillStyle = '#ffe9a3'; ctx.fillRect(-3, -1.2, 2.2, 1.2);
+      ctx.restore();
     } else if (f.dust) {   // 塵埃：淡土色小圓點，隨時間變淡、略微放大
       const p = Math.max(0, f.life / f.life0);
       ctx.globalAlpha = 0.45 * p;
@@ -753,6 +798,7 @@ function draw() {
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
+  drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
   // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。
   if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
     const ob = buildableById(G.selType.slice(6));
