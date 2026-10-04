@@ -1,4 +1,4 @@
-const CHAIR_CANDIDATE = /chair|sofa|bench|seating|bed|椅|沙發|長椅|床/i;
+const CHAIR_CANDIDATE = /chair|sofa|bench|seating|bed|stool|椅|沙發|長椅|床|凳/i;
 const savedTiles = (() => { try { return JSON.parse(localStorage.getItem('tudrc_tiles_v3') || 'null'); } catch (_) { return null; } })();
 const tileById = new Map();
 for (const tile of [...TILES_CUSTOM, ...(Array.isArray(savedTiles) ? savedTiles : [])]) {
@@ -6,7 +6,7 @@ for (const tile of [...TILES_CUSTOM, ...(Array.isArray(savedTiles) ? savedTiles 
 }
 const candidates = [...tileById.values()].filter(tile => {
   const label = [tile.id, tile.name, String(tile.file).startsWith('data:') ? '' : tile.file].join(' ');
-  return CHAIR_CANDIDATE.test(label) && !/bedside|床邊|drawers|抽屜/i.test(label);
+  return CHAIR_CANDIDATE.test(label) && !/bedside|床邊|drawers|抽屜|headwall|床頭牆板|plant|盆栽/i.test(label);
 });
 function defaultChair(tile) {
   const w = Math.max(1, Number(tile.w) || 1), h = Math.max(1, Number(tile.h) || 1);
@@ -16,7 +16,7 @@ function defaultChair(tile) {
     seat: { x: Math.round(w*20), y: Math.round(h*40*.56), dir: /side/i.test(tile.id) ? 'left' : /back/i.test(tile.id) ? 'back' : 'front', rotation: 0 } };
 }
 let chairs = JSON.parse(JSON.stringify(chairCatalog(true)));
-for (const tile of candidates) if (!chairs[tile.id]) chairs[tile.id] = defaultChair(tile);
+for (const tile of candidates) if (!chairs[tile.id]) chairs[tile.id] = CHAIRS_DEFAULT[tile.id] ? JSON.parse(JSON.stringify(CHAIRS_DEFAULT[tile.id])) : defaultChair(tile);
 let selectedId = candidates.find(tile => chairs[tile.id])?.id || Object.keys(chairs)[0];
 let mode = 'seat', dragging = false, image = new Image();
 const canvas = document.getElementById('preview'), ctx = canvas.getContext('2d');

@@ -172,8 +172,10 @@ function interactionNearPlayer() {
 }
 function faceEachOther(actor) {
   const p = G.player, dx = actor.x - p.x, dy = actor.y - p.y;
+  const actorDir = actor.dir;
   if (Math.abs(dx) >= Math.abs(dy)) { p.dir = dx < 0 ? 'left' : 'right'; actor.dir = dx < 0 ? 'right' : 'left'; }
   else { p.dir = dy < 0 ? 'back' : 'front'; actor.dir = dy < 0 ? 'front' : 'back'; }
+  if (actor.sitting) actor.dir = actorDir;   // 坐著／躺著的人不轉身
   p.moving = false; p.anim = 0; actor.moving = false; actor.anim = 0;
 }
 function renderDialogueLine() {
@@ -262,6 +264,7 @@ function updateBlink(who, dt) {
 }
 // 依朝向／走路／眨眼狀態挑出這一幀要畫的圖
 function pickCharacterFrame(set, who) {
+  if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
   if (who.gunT > 0) {   // 攻擊中：用面向目標的持槍圖（沒有該圖就照常）
     const gunKey = { front: 'gunFront', back: 'gunBack', left: 'gunLeft', right: 'gunRight' }[who.dir || 'front'];
@@ -857,6 +860,7 @@ function mapSeats() {
       top: y0, dir, x0, y0, w, h,
       rotation: Number(cfg.seat.rotation) || 0,
       prompt: /bed|床/i.test(s.id) ? '躺' : '坐',
+      bed: /bed|床/i.test(s.id),
       sortY: occ ? occ.y : y0 + cfg.depth,
     });
   }
@@ -875,6 +879,7 @@ function seatNearPlayer() {
   const p = G.player; if (!p) return null;
   let best = null, bd = SIT.radius;
   for (const s of mapSeats()) {
+    if (typeof seatTaken === 'function' && seatTaken(s, G.player)) continue;   // NPC 坐著的位子
     // 大床中央可能被碰撞格包住；互動距離要從家具外緣算，不能只量床中央。
     const dx = Math.max(s.x0 - p.x, 0, p.x - (s.x0 + s.w));
     const dy = Math.max(s.y0 - p.y, 0, p.y - (s.y0 + s.h));
@@ -961,7 +966,7 @@ function setNpcArrangeMode(enabled) {
   cv.classList.toggle('npc-arranging', npcArrangeMode);
   if (enabled) {
     closeDialogue(); closeGroundMenu(); closeSentryMenu(); assigning = null;
-    for (const actor of [...G.npcs, ...G.towers]) faceNpcFront(actor);
+    for (const actor of [...G.npcs, ...G.towers]) { npcStandUp(actor); actor.seatGoal = null; faceNpcFront(actor); }
   }
 }
 npcArrangeToggle.addEventListener('click', () => {

@@ -278,6 +278,7 @@ function campAttackerFor(t, maxDistance = Infinity) {
 }
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; return; }
+  if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
@@ -404,6 +405,7 @@ function updateSentry(t, dt) {
   }
   if (t.waitT > 0) { t.waitT -= dt; return; }
   if (!t.target) {
+    if (MAP_SAFE && trySeatActor(t)) return;          // 安全區：路過椅子／床有機率去坐
     const anchor = companion ? companion.anchor : (t.mode === 'hold' && t.anchor ? t.anchor : t);
     const radius = companion ? companion.radius * .92 : (t.mode === 'hold' ? 70 : 200);
     const tgt = sampleWanderTarget(anchor.x, anchor.y, radius);
@@ -451,7 +453,73 @@ function followTarget(mover, target, cfg, dt) {
   moveSentryWithPath(mover, tx, ty, cfg.speed, dt);
   return true;
 }
+// ---- 安全區：NPC 閒逛時，路過椅子或床會有機率坐下／躺下 ----
+// chance＝每次挑新閒逛目標時去坐的機率；radius＝多近的椅子算「路過」（格）
+// sit／lie＝坐、躺的秒數範圍；cooldown＝起身後多久內不會再坐
+// 坐下的位置與方向沿用溫特的設定（data/chairs.js，可用椅子編輯器調整）
+const NPC_SEAT = { chance: .35, radius: 4.5, sit: [8, 18], lie: [15, 30], cooldown: 10 };
+const seatActors = () => [...G.npcs, ...G.towers];
+function seatTaken(seat, except) {
+  if (G.player && G.player.sitting === seat) return true;
+  return seatActors().some(o => o !== except && (o.sitting === seat || (o.seatGoal && o.seatGoal.seat === seat)));
+}
+// 椅子旁邊可以站的格子（走過去的位置，起身後也回到這裡）
+function seatApproachPoint(seat) {
+  let best = null, bestD = Infinity;
+  const c0 = Math.floor(seat.x0 / CELL) - 1, r0 = Math.floor(seat.y0 / CELL) - 1;
+  const c1 = Math.ceil((seat.x0 + seat.w) / CELL), r1 = Math.ceil((seat.y0 + seat.h) / CELL);
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    if (!inGrid(c, r)) continue;
+    const [x, y] = center(c, r);
+    if (sentryBlocked(x, y) || !personnelInLight(x, y)) continue;
+    const d = Math.hypot(x - seat.x, y - seat.y);
+    if (d < bestD) { bestD = d; best = { x, y }; }
+  }
+  return best;
+}
+function trySeatActor(a) {
+  if (!MAP_SAFE || a.seatCd > 0 || Math.random() >= NPC_SEAT.chance || typeof mapSeats !== 'function') return false;
+  let best = null, bestD = NPC_SEAT.radius * CELL;
+  for (const seat of mapSeats()) {
+    const d = Math.hypot(seat.x - a.x, seat.y - a.y);
+    if (d >= bestD || seatTaken(seat, a)) continue;
+    const approach = seatApproachPoint(seat);
+    if (approach) { best = { seat, approach }; bestD = d; }
+  }
+  if (!best) { a.seatCd = 3; return false; }   // 附近沒有空位，過一下再看
+  a.seatGoal = best; a.target = null; a.navPath = null; a.waitT = 0;
+  return true;
+}
+function npcStandUp(a) {
+  if (!a.sitting) return;
+  const back = a.sitFrom || seatApproachPoint(a.sitting) || { x: a.x, y: a.y + CELL };
+  a.x = back.x; a.y = back.y; a.dir = 'front';
+  a.sitting = null; a.sitFrom = null; a.seatCd = NPC_SEAT.cooldown; a.waitT = .6 + Math.random();
+}
+// 每幀先跑這裡：坐著／正走向椅子時回傳 true（這幀不跑一般閒逛）
+function npcSeatStep(a, dt, speed) {
+  if (a.seatCd > 0) a.seatCd -= dt;
+  if (a.sitting) {
+    if (!MAP_SAFE) { npcStandUp(a); return false; }
+    a.x = a.sitting.x; a.y = a.sitting.y; a.dir = a.sitting.dir; a.moving = false;
+    a.sitT -= dt;
+    if (a.sitT <= 0) npcStandUp(a);
+    return true;
+  }
+  const goal = a.seatGoal;
+  if (!goal) return false;
+  if (!MAP_SAFE || seatTaken(goal.seat, a)) { a.seatGoal = null; return false; }   // 被別人先坐走了
+  if (moveSentryWithPath(a, goal.approach.x, goal.approach.y, speed, dt)) {
+    const [lo, hi] = goal.seat.bed ? NPC_SEAT.lie : NPC_SEAT.sit;
+    a.sitFrom = { x: a.x, y: a.y }; a.sitting = goal.seat; a.seatGoal = null;
+    a.x = goal.seat.x; a.y = goal.seat.y; a.dir = goal.seat.dir;
+    a.sitT = lo + Math.random() * (hi - lo); a.navPath = null; a.target = null;
+  } else if (a.navFailed) { a.seatGoal = null; a.navPath = null; a.seatCd = NPC_SEAT.cooldown; }
+  return true;
+}
+
 function updateWanderer(npc, dt) {
+  if (npcSeatStep(npc, dt, 65)) { updateNpcTalk(npc, dt); return; }   // 坐著或正走向椅子
   rescueStuck(npc, sentryBlocked);
   updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）
   if (escapeDarkness(npc, dt)) return;
@@ -462,6 +530,7 @@ function updateWanderer(npc, dt) {
   }
   if (npc.waitT > 0) { npc.waitT -= dt; return; }
   if (!npc.target) {
+    if (trySeatActor(npc)) return;   // 路過椅子／床：有機率去坐
     npc.target = sampleWanderTarget(npc.x, npc.y, 180);
     if (!npc.target) npc.waitT = 0.8;
     return;

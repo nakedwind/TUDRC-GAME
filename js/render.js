@@ -139,6 +139,7 @@ function drawTower(t) {
       const off = gunSwingOffset(t.gunSwing), dx = Math.cos(t.gunSwing.angle), dy = Math.sin(t.gunSwing.angle);
       ctx.translate(dx * off * 4, dy * off * 4);
     }
+    seatRotate(t, size);   // 躺在橫放的床上：跟溫特一樣旋轉
     ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
     const redFlash = sentryRedFlash(t);   // 瀕臨暴走慢閃紅、暴走快閃紅
     const redSil = redFlash > 0.01 ? flashSprite(img, '#ff3b3b') : null;
@@ -281,13 +282,22 @@ function drawEnemy(e) {
   }
   ctx.restore();
 }
+// 椅子設定有旋轉角度（橫放的床）時，以角色圖中心旋轉（呼叫前要先 ctx.save()）
+function seatRotate(actor, size) {
+  const deg = actor.sitting && actor.sitting.rotation;
+  if (!deg) return;
+  const cy = actor.y - size / 2 + 18;
+  ctx.translate(actor.x, cy); ctx.rotate(deg * Math.PI / 180); ctx.translate(-actor.x, -cy);
+}
 function drawWanderer(npc) {
   const set = wandererSprites[npc.id];
   const img = set && pickCharacterFrame(set, npc);
   const size = PLAYER.drawSize;
   if (img && img.complete && img.naturalWidth) {
     ctx.imageSmoothingEnabled = false;
+    ctx.save(); seatRotate(npc, size);
     ctx.drawImage(img, npc.x - size / 2, npc.y - size + 18, size, size);
+    ctx.restore();
     ctx.imageSmoothingEnabled = true;
   }
   // 頭頂名字（跟哨兵同樣式；NPC 沒有血條）
@@ -417,8 +427,9 @@ function draw() {
   collectMapOccluders(ctx, sortables);
   for(const core of G.cores) if(!core.dead && isVisible(core.x,core.y)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });
-  for (const t of G.towers) sortables.push({ y: t.y + 17, draw: () => drawTower(t) });
-  for (const npc of G.npcs) sortables.push({ y: npc.y + 17, draw: () => drawWanderer(npc) });
+  // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
+  for (const t of G.towers) sortables.push({ y: t.sitting ? t.sitting.sortY + 0.5 : t.y + 17, draw: () => drawTower(t) });
+  for (const npc of G.npcs) sortables.push({ y: npc.sitting ? npc.sitting.sortY + 0.5 : npc.y + 17, draw: () => drawWanderer(npc) });
   for (const e of G.enemies) if (isVisible(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (G.player) sortables.push({ y: G.player.sitting ? G.player.sitting.sortY + 0.5 : G.player.y + 16, draw: () => drawPlayer(G.player) });
