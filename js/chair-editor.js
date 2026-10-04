@@ -6,6 +6,7 @@ for (const tile of [...TILES_CUSTOM, ...(Array.isArray(savedTiles) ? savedTiles 
 }
 const candidates = [...tileById.values()].filter(tile => {
   const label = [tile.id, tile.name, String(tile.file).startsWith('data:') ? '' : tile.file].join(' ');
+  if (CHAIRS_DEFAULT[tile.id]) return true;   // 已設定過的座椅（例如名稱沒寫「椅」的素材）
   return CHAIR_CANDIDATE.test(label) && !/bedside|床邊|drawers|抽屜|headwall|床頭牆板|plant|盆栽/i.test(label);
 });
 function defaultChair(tile) {
@@ -55,8 +56,10 @@ function draw() {
   canvas.style.width = Math.round(w*scale)+'px'; canvas.style.height = Math.round(h*scale)+'px';
   ctx.imageSmoothingEnabled = false;
   ctx.fillStyle = '#15202c'; ctx.fillRect(0,0,w,h);
-  if (image.complete && image.naturalWidth) ctx.drawImage(image,0,0,w,h);
-  const chair = currentChair(); if (!chair) return;
+  const chair = currentChair();
+  const behind = chair && chair.seat.dir === 'back' && !/bed|床/i.test(selectedId);   // 背面椅子：人在椅子後面（跟遊戲一致）
+  if (!behind && image.complete && image.naturalWidth) ctx.drawImage(image,0,0,w,h);
+  if (!chair) return;
   const actor = previewActor[chair.seat.dir];
   if (actor?.complete && actor.naturalWidth) {
     ctx.globalAlpha = .34;
@@ -67,6 +70,7 @@ function draw() {
     ctx.restore();
     ctx.globalAlpha = 1;
   }
+  if (behind && image.complete && image.naturalWidth) ctx.drawImage(image,0,0,w,h);
   for (const [c,r] of chair.solid) {
     ctx.fillStyle = 'rgba(231,75,90,.45)'; ctx.fillRect(c*40,r*40,40,40);
     ctx.strokeStyle = '#ff6571'; ctx.lineWidth = 1; ctx.strokeRect(c*40+.5,r*40+.5,39,39);

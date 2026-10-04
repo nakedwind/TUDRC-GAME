@@ -1783,17 +1783,17 @@ const TILES_CUSTOM = [
   },
   {
     "id": "tile_restaurant_water_dispenser_01",
-    "name": "Water Dispenser 01",
+    "name": "折疊椅（背面）",
     "role": "floor",
-    "file": "images/餐廳/restaurant-water-dispenser-01.png",
+    "file": "images/餐廳/restaurant-folding-chair-back.png",
     "w": 1,
     "h": 2
   },
   {
     "id": "tile_restaurant_water_dispenser_02",
-    "name": "Water Dispenser 02",
+    "name": "折疊椅（正面）",
     "role": "floor",
-    "file": "images/餐廳/restaurant-water-dispenser-02.png",
+    "file": "images/餐廳/restaurant-folding-chair-front.png",
     "w": 1,
     "h": 2
   },
@@ -2094,6 +2094,30 @@ const TILES_CUSTOM = [
     "file": "images/收容觀察室/containment-table.png",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_muu4ow6f",
+    "name": "supply-shelf02",
+    "role": "floor",
+    "file": "images/應變中心/supply-shelf02.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_muu4p4el",
+    "name": "supply-shelf03",
+    "role": "floor",
+    "file": "images/應變中心/supply-shelf03.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_muu6050n",
+    "name": "supply-shelf04",
+    "role": "floor",
+    "file": "images/應變中心/supply-shelf04.png",
+    "w": 2,
+    "h": 3
   }
 ];
 
@@ -10629,7 +10653,8 @@ const MAPS_DEFAULT = [
         "r": 4,
         "layer": "object",
         "ox": 0,
-        "oy": 26
+        "oy": 26,
+        "sortDepth": 4.5
       },
       {
         "id": "tile_mu8rra80",
@@ -10698,14 +10723,16 @@ const MAPS_DEFAULT = [
         "c": 11,
         "r": 5,
         "layer": "ground2",
-        "sortDepth": 1.25
+        "sortDepth": 1.25,
+        "ox": 4,
+        "oy": 0
       },
       {
         "id": "tile_eoc_office_chair_grey",
         "c": 11,
         "r": 7,
         "layer": "ground2",
-        "ox": 0,
+        "ox": 4,
         "oy": -16
       },
       {
@@ -10714,7 +10741,9 @@ const MAPS_DEFAULT = [
         "r": 5,
         "layer": "ground2",
         "fx": true,
-        "sortDepth": 1.25
+        "sortDepth": 1.25,
+        "ox": -4,
+        "oy": 0
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -10722,7 +10751,7 @@ const MAPS_DEFAULT = [
         "r": 7,
         "layer": "ground2",
         "fx": true,
-        "ox": 0,
+        "ox": -4,
         "oy": -16
       },
       {
@@ -13306,12 +13335,7 @@ const MAPS_DEFAULT = [
         "63,12": "tile_new_bg_wall_front_edge",
         "63,13": "tile_new_bg_wall_front_edge",
         "63,14": "tile_new_bg_wall_front_edge",
-        "11,10": "tile_new_decor_fire_extinguisher",
-        "17,10": "tile_new_decor_fire_extinguisher",
-        "24,10": "tile_new_decor_fire_extinguisher",
-        "31,10": "tile_new_decor_fire_extinguisher",
-        "38,10": "tile_new_decor_fire_extinguisher",
-        "46,10": "tile_new_decor_fire_extinguisher"
+        "62,14": "tile_new_decor_fire_extinguisher"
       },
       "object3": {},
       "object4": {}
@@ -13506,7 +13530,7 @@ const MAPS_DEFAULT = [
         "c": 18,
         "r": 8,
         "layer": "ground2",
-        "ox": -20,
+        "ox": -8,
         "oy": 24
       },
       {
@@ -13730,26 +13754,26 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "tile_eoc_locker",
-        "c": 1,
+        "c": 15,
         "r": 9,
         "layer": "object",
-        "ox": 0,
+        "ox": 4,
         "oy": -28
       },
       {
         "id": "tile_eoc_locker",
-        "c": 2,
+        "c": 22,
         "r": 9,
         "layer": "object",
-        "ox": -6,
+        "ox": 4,
         "oy": -28
       },
       {
         "id": "tile_eoc_locker",
-        "c": 3,
+        "c": 26,
         "r": 9,
         "layer": "object",
-        "ox": -12,
+        "ox": 124,
         "oy": -28
       },
       {
@@ -13769,20 +13793,12 @@ const MAPS_DEFAULT = [
         "oy": 4
       },
       {
-        "id": "tile_new_decor_box_three",
-        "c": 1,
-        "r": 8,
-        "layer": "object2",
-        "ox": -10,
-        "oy": 26
-      },
-      {
         "id": "tile_new_decor_cabinet_tall_metal",
         "c": 10,
         "r": 10,
         "layer": "object2",
         "ox": 0,
-        "oy": -16
+        "oy": -22
       },
       {
         "id": "tile_mufxoi3i",
@@ -13889,7 +13905,9 @@ const MAPS_DEFAULT = [
         "c": 1,
         "r": 8,
         "layer": "object",
-        "fx": true
+        "fx": true,
+        "ox": 0,
+        "oy": -8
       },
       {
         "id": "tile_eoc_security_camera",
@@ -13925,6 +13943,64 @@ const MAPS_DEFAULT = [
         "r": 9,
         "layer": "object",
         "fx": true
+      },
+      {
+        "id": "tile_muu4ow6f",
+        "c": 3,
+        "r": 9,
+        "layer": "object2",
+        "ox": -20,
+        "oy": -20,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_muu6050n",
+        "c": 1,
+        "r": 9,
+        "layer": "object2",
+        "ox": -6,
+        "oy": -20,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 44,
+        "r": 8,
+        "layer": "object2",
+        "ox": 0,
+        "oy": 12
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 36,
+        "r": 8,
+        "layer": "object2",
+        "ox": 0,
+        "oy": 12
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 53,
+        "r": 8,
+        "layer": "object2",
+        "ox": 0,
+        "oy": 12
+      },
+      {
+        "id": "tile_new_decor_fire_extinguisher",
+        "c": 24,
+        "r": 10,
+        "layer": "object2",
+        "ox": 0,
+        "oy": 8
+      },
+      {
+        "id": "tile_new_decor_plant02",
+        "c": 60,
+        "r": 13,
+        "layer": "object2",
+        "ox": 14,
+        "oy": 8
       }
     ],
     "solid": [
@@ -14028,7 +14104,10 @@ const MAPS_DEFAULT = [
       "33,10",
       "34,10",
       "35,10",
-      "36,10"
+      "36,10",
+      "1,13",
+      "1,14",
+      "2,14"
     ],
     "breakable": [],
     "entrances": [],
@@ -14610,15 +14689,9 @@ const MAPS_DEFAULT = [
       "object2": {
         "17,8": "tile_eoc_security_camera"
       },
-      "object3": {
-        "7,17": "tile_restaurant_napkin_holder"
-      },
+      "object3": {},
       "object4": {
-        "7,17": "tile_restaurant_napkin_holder",
-        "10,17": "tile_restaurant_napkin_holder",
         "2,18": "tile_restaurant_napkin_holder",
-        "13,17": "tile_restaurant_chopsticks_holder",
-        "14,17": "tile_restaurant_condiment_bottles",
         "2,17": "tile_restaurant_condiment_bottles",
         "2,19": "tile_restaurant_chopsticks_holder"
       },
@@ -14850,7 +14923,7 @@ const MAPS_DEFAULT = [
         "id": "tile_musc5wyq",
         "c": 6,
         "r": 17,
-        "layer": "object3",
+        "layer": "object2",
         "sortDepth": 1.25,
         "ox": -16,
         "oy": -2
@@ -14859,7 +14932,7 @@ const MAPS_DEFAULT = [
         "id": "tile_musc5wyq",
         "c": 9,
         "r": 17,
-        "layer": "object3",
+        "layer": "object2",
         "ox": -6,
         "oy": -2,
         "sortDepth": 1.25
@@ -14868,7 +14941,7 @@ const MAPS_DEFAULT = [
         "id": "tile_musc5wyq",
         "c": 14,
         "r": 17,
-        "layer": "object3",
+        "layer": "object2",
         "ox": -76,
         "oy": -2,
         "sortDepth": 1
@@ -15418,6 +15491,40 @@ const MAPS_DEFAULT = [
         "c": 18,
         "r": 8,
         "layer": "object3"
+      },
+      {
+        "id": "tile_restaurant_napkin_holder",
+        "c": 10,
+        "r": 17,
+        "layer": "object3",
+        "ox": 12,
+        "oy": -12
+      },
+      {
+        "id": "tile_restaurant_napkin_holder",
+        "c": 7,
+        "r": 17,
+        "layer": "object3",
+        "ox": 2,
+        "oy": -12
+      },
+      {
+        "id": "tile_restaurant_condiment_bottles",
+        "c": 14,
+        "r": 17,
+        "layer": "object4",
+        "ox": -2,
+        "oy": 0,
+        "sortDepth": 0.5
+      },
+      {
+        "id": "tile_restaurant_chopsticks_holder",
+        "c": 13,
+        "r": 17,
+        "layer": "object4",
+        "ox": 6,
+        "oy": -8,
+        "sortDepth": 0.5
       }
     ],
     "solid": [
@@ -15469,16 +15576,6 @@ const MAPS_DEFAULT = [
       "15,13",
       "16,13",
       "5,13",
-      "6,17",
-      "7,17",
-      "8,17",
-      "9,17",
-      "10,17",
-      "11,17",
-      "12,17",
-      "14,17",
-      "15,17",
-      "13,17",
       "2,16",
       "2,18",
       "2,17",
@@ -15578,7 +15675,17 @@ const MAPS_DEFAULT = [
       "0,8",
       "1,7",
       "1,8",
-      "2,8"
+      "2,8",
+      "6,17",
+      "7,17",
+      "8,17",
+      "9,17",
+      "10,17",
+      "11,17",
+      "12,17",
+      "13,17",
+      "14,17",
+      "15,17"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -15622,6 +15729,46 @@ const MAPS_DEFAULT = [
       "16,1": [
         -9,
         0
+      ],
+      "6,17": [
+        0,
+        8
+      ],
+      "7,17": [
+        0,
+        8
+      ],
+      "8,17": [
+        0,
+        9
+      ],
+      "9,17": [
+        0,
+        9
+      ],
+      "10,17": [
+        0,
+        9
+      ],
+      "11,17": [
+        0,
+        9
+      ],
+      "12,17": [
+        0,
+        8
+      ],
+      "13,17": [
+        0,
+        9
+      ],
+      "14,17": [
+        0,
+        9
+      ],
+      "15,17": [
+        -6,
+        9
       ]
     },
     "safe": true,

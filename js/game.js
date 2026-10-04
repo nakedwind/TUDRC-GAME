@@ -861,6 +861,8 @@ function mapSeats() {
       rotation: Number(cfg.seat.rotation) || 0,
       prompt: /bed|床/i.test(s.id) ? '躺' : '坐',
       bed: /bed|床/i.test(s.id),
+      // 背面的椅子：人背對鏡頭坐著，椅背擋在人前面 → 椅子要畫在人物上面（床不算）
+      chairInFront: dir === 'back' && !/bed|床/i.test(s.id),
       sortY: occ ? occ.y : y0 + cfg.depth,
     });
   }

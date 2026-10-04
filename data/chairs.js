@@ -443,7 +443,7 @@ const CHAIRS_DEFAULT = {
     ],
     "seat": {
       "x": 20,
-      "y": 22,
+      "y": 9,
       "dir": "front"
     }
   },
@@ -535,7 +535,7 @@ const CHAIRS_DEFAULT = {
   },
   "tile_hospital_armchair_back": {
     "enabled": true,
-    "depth": 72,
+    "depth": 47,
     "solid": [
       [
         0,
@@ -550,7 +550,7 @@ const CHAIRS_DEFAULT = {
   },
   "tile_hospital_waiting_bench_side": {
     "enabled": true,
-    "depth": 92,
+    "depth": 70,
     "solid": [
       [
         0,
@@ -565,6 +565,36 @@ const CHAIRS_DEFAULT = {
       "x": 20,
       "y": 66,
       "dir": "right"
+    }
+  },
+  "tile_restaurant_water_dispenser_01": {
+    "enabled": true,
+    "depth": 72,
+    "solid": [
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 40,
+      "dir": "back"
+    }
+  },
+  "tile_restaurant_water_dispenser_02": {
+    "enabled": true,
+    "depth": 46,
+    "solid": [
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 46,
+      "dir": "front"
     }
   }
 };

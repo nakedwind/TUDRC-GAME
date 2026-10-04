@@ -51,6 +51,7 @@ const STORAGE_COUNSELING_ROOM_PACK = 'tudrc_asset_pack_counseling_room_v1'; // �
 const STORAGE_RESTAURANT_PACK = 'tudrc_asset_pack_restaurant_v1'; // 餐廳素材包
 const STORAGE_HOSPITAL_PACK = 'tudrc_asset_pack_hospital_v1';     // 醫院病房素材包
 const STORAGE_CONTAINMENT_PACK = 'tudrc_asset_pack_containment_v1'; // 收容觀察室素材包
+const STORAGE_RESTAURANT_CHAIR_FIX = 'tudrc_fix_restaurant_folding_chairs_v1'; // 餐廳「飲水機」其實是折疊椅：改檔名與名稱
 const STORAGE_TILE_SIZE_FIX = 'tudrc_fix_tile_sizes_v1';         // 修正登記尺寸與圖片不符的素材
 const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應變中心素材：安全距離海報
 const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應變中心素材：門（電子鎖）、消防栓箱
@@ -219,13 +220,21 @@ function loadTiles() {
   const restaurantAdded = mergeDefaultAssetPack('tile_restaurant_', STORAGE_RESTAURANT_PACK);
   const hospitalAdded = mergeDefaultAssetPack('tile_hospital_', STORAGE_HOSPITAL_PACK);
   const containmentAdded = mergeDefaultAssetPack('tile_containment_', STORAGE_CONTAINMENT_PACK);
+  let restaurantChairsFixed = false;
+  if (!localStorage.getItem(STORAGE_RESTAURANT_CHAIR_FIX)) {   // 素材 id 不變，地圖上的擺放不受影響
+    for (const id of ['tile_restaurant_water_dispenser_01', 'tile_restaurant_water_dispenser_02']) {
+      const src = TILES_CUSTOM.find(t => t.id === id), own = customTiles.find(t => t.id === id);
+      if (src && own) { own.file = src.file; own.name = src.name; restaurantChairsFixed = true; }
+    }
+    localStorage.setItem(STORAGE_RESTAURANT_CHAIR_FIX, '1');
+  }
   // 破損建築：新素材（tile_dmg_）＋從 item-decorate 搬過來的裂痕／碎石（更新路徑與尺寸，地圖上的擺放不變）
   const damagedAdded = mergeDefaultAssetPack(t => String(t.file || '').includes('/破損建築/'), STORAGE_DAMAGED_PACK);
   // 兩個「柱子」曾因同檔名互相覆蓋：大廳高柱改回 2×8、補回應變中心的柱子
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded) saveTiles();
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
