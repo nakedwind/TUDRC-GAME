@@ -2118,6 +2118,556 @@ const TILES_CUSTOM = [
     "file": "images/應變中心/supply-shelf04.png",
     "w": 2,
     "h": 3
+  },
+  {
+    "id": "tile_mrt_floor_tile",
+    "name": "車站地板",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-floor-tile.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_floor_tile_strip",
+    "name": "地磚（長條）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-floor-tile-strip.png",
+    "w": 3,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_floor_guide_lines",
+    "name": "地面導引線",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-floor-guide-lines.png",
+    "w": 6,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_tactile_paving_white",
+    "name": "導盲磚（白）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-tactile-paving-white.png",
+    "w": 3,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_tactile_paving_yellow",
+    "name": "導盲磚（黃）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-tactile-paving-yellow.png",
+    "w": 3,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_accessible_waiting_area",
+    "name": "身障停等區",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-accessible-waiting-area.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_platform_edge_line",
+    "name": "月台黃線",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-platform-edge-line.png",
+    "w": 3,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_rail_track",
+    "name": "軌道",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-rail-track.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_rail_track_objects",
+    "name": "軌道零件",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-rail-track-objects.png",
+    "w": 5,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_tunnel_wall",
+    "name": "隧道牆（暗色）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-tunnel-wall.png",
+    "w": 3,
+    "h": 5
+  },
+  {
+    "id": "tile_mrt_wall_sign_platform",
+    "name": "牆面（①月台指標）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-sign-platform.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_blue_band",
+    "name": "牆面（藍色飾帶）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-blue-band.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_sign_tamsui",
+    "name": "牆面（往淡水指標）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-sign-tamsui.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_wall_sign_station_name",
+    "name": "牆面（站名：忠孝敦化）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-wall-sign-station-name.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_low_wall_blue",
+    "name": "矮牆（藍邊）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-low-wall-blue.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_low_wall_beige",
+    "name": "矮牆（米色邊）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-low-wall-beige.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_pillar_large",
+    "name": "大柱子",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-pillar-large.png",
+    "w": 2,
+    "h": 7
+  },
+  {
+    "id": "tile_mrt_pillar_large_route_map",
+    "name": "大柱子（路線圖）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-pillar-large-route-map.png",
+    "w": 2,
+    "h": 7
+  },
+  {
+    "id": "tile_mrt_platform_screen_doors",
+    "name": "月台門",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-platform-screen-doors.png",
+    "w": 6,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_glass_railing",
+    "name": "玻璃圍欄",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-glass-railing.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_ticket_gate",
+    "name": "捷運閘門",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-ticket-gate.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_gate_card_readers",
+    "name": "閘門讀卡機",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-gate-card-readers.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_gate_card_readers_small",
+    "name": "閘門讀卡機（小）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-gate-card-readers-small.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_escalator_side",
+    "name": "手扶梯（側面）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-escalator-side.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_escalator_side_cover",
+    "name": "手扶梯（側面外殼）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-escalator-side-cover.png",
+    "w": 6,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_escalator_front",
+    "name": "手扶梯（正面）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-escalator-front.png",
+    "w": 5,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_stairs_dark",
+    "name": "樓梯（深色）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-stairs-dark.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_stairs_light",
+    "name": "樓梯（淺色）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-stairs-light.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_train_car_head",
+    "name": "車廂（車頭）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-train-car-head.png",
+    "w": 26,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_train_car_middle",
+    "name": "車廂（中段）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-train-car-middle.png",
+    "w": 26,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_train_door",
+    "name": "車門",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-train-door.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_train_door_2",
+    "name": "車門（款式2）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-train-door-2.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_exit_sign",
+    "name": "出口指示牌",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-exit-sign.png",
+    "w": 3,
+    "h": 1
+  },
+  {
+    "id": "tile_mrt_info_board_map",
+    "name": "告示牌（路線圖）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-info-board-map.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_info_board_notice",
+    "name": "告示牌（公告）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-info-board-notice.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_ceiling_light",
+    "name": "燈管",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-ceiling-light.png",
+    "w": 3,
+    "h": 1
+  },
+  {
+    "id": "tile_mrt_waiting_seats",
+    "name": "候車椅（雙座）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-waiting-seats.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_recycling_bins",
+    "name": "垃圾桶（分類）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-recycling-bins.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_planter",
+    "name": "植栽",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-planter.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_cardboard_boxes",
+    "name": "紙箱堆",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-cardboard-boxes.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_poster_moon_lake",
+    "name": "海報（月之湖）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-poster-moon-lake.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_mrt_poster_moonlight",
+    "name": "海報（月光）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-poster-moonlight.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_bg_backroom_floor03",
+    "name": "後室地板（殘破）",
+    "role": "floor",
+    "file": "images/background/Back-room-floor03.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_bg_backroom_floor04",
+    "name": "後室地板（殘破 2）",
+    "role": "floor",
+    "file": "images/background/Back-room-floor04.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_bg_backroom_wall02",
+    "name": "後室牆面（寬）",
+    "role": "floor",
+    "file": "images/background/Back-room-wall02.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_bg_backroom_wall02_dmg_light",
+    "name": "後室牆面（輕微破損）",
+    "role": "floor",
+    "file": "images/background/Back-room-wall02-damage-light.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_bg_backroom_wall02_dmg_medium",
+    "name": "後室牆面（中度破損）",
+    "role": "floor",
+    "file": "images/background/Back-room-wall02-damage-medium.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_bg_backroom_wall02_dmg_heavy",
+    "name": "後室牆面（嚴重破損）",
+    "role": "floor",
+    "file": "images/background/Back-room-wall02-damage-heavy.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_bg_electric_light",
+    "name": "日光燈",
+    "role": "floor",
+    "file": "images/background/electric-light.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_bg_road_signs",
+    "name": "指示看板",
+    "role": "floor",
+    "file": "images/background/Road-signs.png",
+    "w": 5,
+    "h": 2
+  },
+  {
+    "id": "tile_bg_word_y28",
+    "name": "看板文字（Y2-26／Y28 出口）",
+    "role": "floor",
+    "file": "images/background/word-y28.png",
+    "w": 5,
+    "h": 1
+  },
+  {
+    "id": "tile_dmg_backroom_pillar_damaged",
+    "name": "後室柱子（破損）",
+    "role": "floor",
+    "file": "images/破損建築/Back-room-Pillar-damaged.png",
+    "w": 1,
+    "h": 4
+  },
+  {
+    "id": "tile_dmg_pillar_damaged",
+    "name": "大廳柱子（破損）",
+    "role": "floor",
+    "file": "images/破損建築/pillar-damaged.png",
+    "w": 2,
+    "h": 8
+  },
+  {
+    "id": "tile_dmg_floor_crack_cross",
+    "name": "地面裂痕（交叉）",
+    "role": "floor",
+    "file": "images/破損建築/floor-crack-cross.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_floor_crack_fork",
+    "name": "地面裂痕（分岔）",
+    "role": "floor",
+    "file": "images/破損建築/floor-crack-fork.png",
+    "w": 3,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_floor_crack_stained",
+    "name": "地面裂痕（污漬）",
+    "role": "floor",
+    "file": "images/破損建築/floor-crack-stained.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_floor_stain_seep",
+    "name": "地面污漬（滲漏）",
+    "role": "floor",
+    "file": "images/破損建築/floor-stain-seep.png",
+    "w": 3,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_floor_stain_smudge",
+    "name": "地面污漬（擦痕）",
+    "role": "floor",
+    "file": "images/破損建築/floor-stain-smudge.png",
+    "w": 3,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_brick_chunks",
+    "name": "碎磚塊",
+    "role": "floor",
+    "file": "images/破損建築/rubble-brick-chunks.png",
+    "w": 2,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_chips_02",
+    "name": "碎石屑 2",
+    "role": "floor",
+    "file": "images/破損建築/rubble-chips-02.png",
+    "w": 2,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_scatter_02",
+    "name": "碎石散落 2",
+    "role": "floor",
+    "file": "images/破損建築/rubble-scatter-02.png",
+    "w": 3,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_slab_fragments",
+    "name": "水泥板碎片",
+    "role": "floor",
+    "file": "images/破損建築/rubble-slab-fragments.png",
+    "w": 2,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_wall_chunks",
+    "name": "牆壁碎塊",
+    "role": "floor",
+    "file": "images/破損建築/rubble-wall-chunks.png",
+    "w": 2,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_dmg_rubble_rebar_chunk",
+    "name": "鋼筋水泥塊",
+    "role": "floor",
+    "file": "images/破損建築/rubble-rebar-chunk.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_bg_backroom_floor05",
+    "name": "後室地板（左緣）",
+    "role": "floor",
+    "file": "images/background/Back-room-floor05.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_bg_backroom_floor06",
+    "name": "後室地板（右緣）",
+    "role": "floor",
+    "file": "images/background/Back-room-floor06.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
   }
 ];
 
