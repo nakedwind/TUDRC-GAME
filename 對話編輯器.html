@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>對話編輯器｜Y102 應變中心</title>
+  <link rel="stylesheet" href="css/ui-feedback.css">
+  <style>
+    :root { color-scheme:dark; font-family:system-ui,"Microsoft JhengHei",sans-serif; color:#e8f1fa; background:#0d131b }
+    * { box-sizing:border-box }
+    body { margin:0; padding:28px; max-width:1440px; margin-inline:auto; background:radial-gradient(circle at 85% 0%,#1e3545 0,transparent 37%) }
+    h1,h2,h3,p { margin-top:0 } h1 { font-size:27px; margin-bottom:5px } h2 { font-size:17px; margin-bottom:15px }
+    p,small { color:#9eb0c0; line-height:1.5 }
+    a { color:#9bd9ff; text-decoration:none } a:hover { text-decoration:underline }
+    button,input,textarea,select { font:inherit }
+    button { cursor:pointer; color:#eaf5ff; background:#263d50; border:1px solid #52718a; border-radius:9px; padding:8px 12px }
+    button.primary { background:#2b6581; border-color:#6abce3; font-weight:700 } button.danger { color:#ffd0c9; border-color:#925d5b; background:#4b3035 }
+    button.small { padding:4px 9px; font-size:12px; border-radius:7px }
+    button.icon { padding:0; width:30px; height:30px; flex:none; border-radius:7px; background:#1c2b39; border-color:#3a5368; color:#a9c3d6 }
+    button.icon:hover { border-color:#89d3f5; color:#fff } button.icon.del:hover { border-color:#e07a72; color:#ffb0a8 }
+    button:disabled { opacity:.35; cursor:default }
+    .top { display:flex; align-items:flex-start; justify-content:space-between; gap:20px; flex-wrap:wrap; margin-bottom:20px }
+    .top p { margin-bottom:0 } .nav { display:flex; gap:15px; white-space:nowrap; padding-top:7px }
+    .notice { border:1px solid #426781; border-left:4px solid #71c8fa; border-radius:10px; background:#152332; padding:12px 15px; margin-bottom:18px; font-size:13px; line-height:1.6 }
+    .notice strong { color:#d9efff } code { color:#b6ddf5; background:#0e1b29; border-radius:4px; padding:1px 4px }
+    .layout { display:grid; grid-template-columns:minmax(240px,290px) minmax(0,1fr); gap:18px; align-items:start }
+    .panel { background:#18232e; border:1px solid #344d61; border-radius:15px; box-shadow:0 12px 38px #0005 }
+    .sidebar { padding:16px; position:sticky; top:14px; max-height:calc(100vh - 28px); display:flex; flex-direction:column }
+    .sidebar-head { display:flex; align-items:center; justify-content:space-between }
+    .count { color:#84cfec; font-size:12px; background:#213c4f; border-radius:20px; padding:3px 8px; white-space:nowrap }
+    #search { width:100%; background:#0e1822; color:#e8f3fd; border:1px solid #405e74; border-radius:8px; padding:10px 11px; margin-bottom:12px }
+    #search:focus { outline:none; border-color:#89d3f5 }
+    #characterList { overflow:auto; min-height:120px; display:grid; align-content:start; gap:6px; padding-right:4px }
+    .list-group { margin:8px 0 2px; color:#7fa2b8; font-size:11px; letter-spacing:2px }
+    .character-item { display:flex; width:100%; text-align:left; align-items:center; gap:11px; padding:7px 8px; background:#182633; border-color:transparent }
+    .character-item.selected { background:#29455a; border-color:#82cdf1 }
+    .character-item.dim { opacity:.35 }
+    .character-item img, .character-item .ph { width:42px; height:42px; flex:none; object-fit:cover; image-rendering:pixelated; background:#101a25; border-radius:8px; display:grid; place-items:center; font-size:20px }
+    .character-item span { display:grid; gap:1px; min-width:0; flex:1 } .character-item b { font-size:15px } .character-item small { font-size:11px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .character-item .count { flex:none }
+    .content { padding:22px; min-height:700px }
+    .hero { display:flex; gap:18px; align-items:center; border-bottom:1px solid #344e62; padding-bottom:16px; margin-bottom:6px }
+    .hero img, .hero .ph { width:76px; height:76px; object-fit:cover; image-rendering:pixelated; border-radius:13px; background:#101b27; border:1px solid #41627a; display:grid; place-items:center; font-size:34px }
+    .hero h2 { font-size:23px; margin-bottom:3px } .hero p { margin:0; font-size:13px }
+    .tag { display:inline-block; border-radius:20px; background:#27495c; color:#a9e1fd; font-size:12px; padding:3px 9px; margin-bottom:6px }
+    .group-title { margin:22px 0 10px; font-size:13px; letter-spacing:3px; color:#ffd77a }
+    .situation { margin:0 0 12px; padding:14px 16px; background:#111d28; border:1px solid #2b4559; border-radius:12px }
+    .situation.match { border-color:#e0c060 }
+    .sit-head { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; margin-bottom:3px }
+    .sit-head h3 { margin:0; font-size:15px; color:#cfe9fa } .sit-head .count { font-size:11px }
+    .when { font-size:12px; color:#8fa7ba; margin:0 0 10px } .when b { color:#c9a95a; font-weight:600 }
+    .lines { display:grid; grid-template-columns:minmax(0,1fr); gap:6px }
+    .line { display:flex; gap:6px; align-items:center; min-width:0 }
+    .line .num { width:22px; flex:none; text-align:right; color:#6d8ea5; font-size:12px }
+    .line input { flex:1; width:0; min-width:0; color:#edf7ff; background:#0e1822; border:1px solid #3d596e; border-radius:8px; padding:7px 10px; outline:none }
+    .line input:focus { border-color:#89d3f5; box-shadow:0 0 0 2px #5baad03b }
+    .line input.hit { border-color:#e0c060; background:#2a2612 }
+    .empty { font-size:12px; color:#7d93a4; padding:6px 0 2px; font-style:italic }
+    .row-actions { display:flex; gap:8px; margin-top:9px; flex-wrap:wrap; align-items:center }
+    .chapter { margin:8px 0 4px; padding:10px; border:1px dashed #3a5870; border-radius:9px }
+    .chapter-head { display:flex; align-items:center; gap:8px; margin-bottom:7px; font-size:12px; color:#a8d8ef }
+    .chapter-head input { width:60px; color:#edf7ff; background:#0e1822; border:1px solid #3d596e; border-radius:6px; padding:3px 6px }
+    .rage { border-color:#6b3a2a; background:linear-gradient(180deg,#1f1612,#111d28 120px) }
+    .rage-settings { display:flex; gap:16px; flex-wrap:wrap; align-items:flex-end; margin:6px 0 14px }
+    .rage-settings label { display:flex; flex-direction:column; gap:4px; font-size:12px; color:#b9cbd9 }
+    .rage-settings input[type=number] { width:90px; color:#edf7ff; background:#0e1822; border:1px solid #47647a; border-radius:8px; padding:7px 8px }
+    .rage-settings input[type=color] { width:52px; height:34px; padding:2px; background:#0e1822; border:1px solid #47647a; border-radius:8px }
+    .rage-toggle { display:flex; align-items:center; gap:8px; font-size:14px; margin:4px 0 8px }
+    .rage-toggle input { width:18px; height:18px }
+    .bubble { display:inline-block; padding:6px 14px; border:1.5px solid; border-radius:10px; font-weight:700; font-size:14px; position:relative; margin-bottom:6px }
+    .bubble::after { content:''; position:absolute; left:50%; bottom:-7px; margin-left:-5px; border:5px solid transparent; border-top-color:inherit }
+    .rage-body.off { opacity:.4; pointer-events:none }
+    .sub { margin-top:10px; padding:12px 14px; background:#0e1822; border:1px solid #2a4053; border-radius:10px }
+    .sub h4 { margin:0 0 3px; font-size:14px; color:#ffc7a0 }
+    .foot { border-top:1px solid #344e62; padding-top:18px; margin-top:24px }
+    .actions { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:9px }
+    #status { min-height:22px; color:#8ce0be; font-size:13px; margin-top:8px }
+    #exportOut { width:100%; min-height:120px; margin-top:12px; background:#0b151f; color:#a9cbdb; border:1px solid #345065; border-radius:8px; padding:10px; font:11px/1.45 Consolas,monospace; display:none }
+    #exportOut.visible { display:block }
+    .layout > * { min-width:0 }
+    @media(max-width:560px) {   /* 窄畫面：台詞輸入框佔一整行，按鈕排在下面 */
+      .line { flex-wrap:wrap; justify-content:flex-end; padding-bottom:4px; border-bottom:1px solid #20323f }
+      .line .num { display:none }
+      .line input { flex:1 1 100%; width:auto }
+      .situation, .sub { padding:12px 10px } .chapter { padding:8px 6px }
+    }
+    @media(max-width:650px) { body { padding:14px } .layout { grid-template-columns:minmax(0,1fr) } .sidebar { position:static; max-height:none } #characterList { max-height:260px } .content { padding:16px } }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <div><h1>💬 對話編輯器</h1><p>整理所有角色會說的話，以及在什麼情境下說。</p></div>
+    <nav class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="角色資料頁.html">角色資料頁</a></nav>
+  </header>
+  <div class="notice"><strong>編輯方式：</strong>修改會先自動保存在這台瀏覽器。確認後按「下載 dialogues.js」，用下載的檔案取代遊戲資料夾裡的 <code>data/dialogues.js</code>，重新整理遊戲就會生效。同一個情境放幾句都可以，遊戲會隨機挑一句（「依序說完」的情境除外）。</div>
+  <main class="layout">
+    <aside class="panel sidebar">
+      <div class="sidebar-head"><h2>角色</h2><span id="total" class="count"></span></div>
+      <input id="search" type="search" placeholder="搜尋名字或台詞內容" aria-label="搜尋角色或台詞">
+      <div id="characterList" aria-label="角色清單"></div>
+    </aside>
+    <section class="panel content">
+      <div class="hero" id="hero"></div>
+      <div id="editor"></div>
+      <div class="foot">
+        <div class="actions"><button id="download" class="primary">⬇ 下載 dialogues.js</button><button id="showExport">查看匯出內容</button><button id="reset" class="danger">從目前檔案重新載入</button></div>
+        <small>下載後放進遊戲資料夾的 <code>data/</code>（取代原本的 dialogues.js），再重新整理遊戲。想同步到另一台電腦，還需要將檔案提交至 Git。</small>
+        <div id="status" role="status" aria-live="polite"></div>
+        <textarea id="exportOut" readonly aria-label="對話資料匯出內容"></textarea>
+      </div>
+    </section>
+  </main>
+  <script src="data/characters.js"></script>
+  <script src="data/dialogues.js"></script>
+  <script src="js/sfx.js"></script><script src="js/ui-feedback.js"></script>
+  <script src="js/dialogue-editor.js"></script>
+</body>
+</html>

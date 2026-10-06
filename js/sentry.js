@@ -299,7 +299,8 @@ function updateSentry(t, dt) {
   const attacker = t.type === 'red' ? redAttacker() : null;
   if (attacker) {
     if (t.guardSpeechCd <= 0) {
-      t.say = { text: '部隊長！我來擋住牠！', life: 3.4 };
+      const guardLine = pickDialogueLine(t.type, 'guard');   // 對話編輯器：衝去保護部隊長時
+      if (guardLine) t.say = { text: guardLine, life: 3.4 };
       t.guardSpeechCd = 6;
     }
     t.target = null; t.waitT = 0;
@@ -436,6 +437,13 @@ function updateNpcTalk(npc, dt) {
     return;
   }
   npc.sayWait -= dt;
+  const rage = battle && typeof ragePersona === 'function' && npc.type && G.towers.includes(npc) ? ragePersona(npc) : null;   // 狂戰士人格（js/berserk-fx.js）
+  if (rage) npc.sayWait = Math.min(npc.sayWait, talkCfg.maxGap * rage.talkGap);   // 狂戰士比較多話：等待時間縮短
+  if (rage && rage.battle && rage.battle.length && npc.sayWait <= 0) {
+    npc.say = { text: pickLine(rage.battle, 'x', npc), life: talkCfg.duration, col: rage.bubble };
+    npc.sayWait = nextGap() * rage.talkGap;
+    return;
+  }
   if (npc.sayWait <= 0) {
     const key = npc.id || npc.type;   // NPC 用 id、哨兵用 type
     const battleLines = battle ? chapterPick(BATTLE_WANDER_LINES[key]) : null;
@@ -547,6 +555,12 @@ function updateWanderer(npc, dt) {
 
 // ---- 哨兵選單（點哨兵彈出：自由走動／原地巡邏／指派位置／跟隨護衛）----
 const sentryMenu = document.getElementById('sentryMenu');
+// 怪力加成：汙染值越高攻擊力越高。rageDmg＝汙染 100 時「額外」增加的倍率（1 → 2 倍、0.5 → 1.5 倍）
+function sentryDamageMul(t) {
+  const spec = TYPES[t.type];
+  if (!spec || !spec.rageDmg) return 1;
+  return 1 + spec.rageDmg * Math.max(0, Math.min(100, t.taint || 0)) / 100;
+}
 let menuSentry = null;    // 目前開著選單的哨兵
 let assigning = null;     // 「指派位置巡邏」等待點地圖的哨兵
 function openSentryMenu(t, silent) {
@@ -554,7 +568,8 @@ function openSentryMenu(t, silent) {
   menuSentry = t; assigning = null;
   const spec = TYPES[t.type];
   sentryMenu.innerHTML =
-    '<div class="sm-title">' + spec.name + '　汙染 ' + Math.round(t.taint) + '</div>' +
+    '<div class="sm-title">' + spec.name + '　汙染 ' + Math.round(t.taint) +
+      (spec.rageDmg ? '<small style="display:block;color:#ff9a5a;font-size:11px;margin-top:2px">怪力加成：攻擊力 +' + Math.round((sentryDamageMul(t) - 1) * 100) + '%</small>' : '') + '</div>' +
     '<button data-act="free">🚶 自由走動</button>' +
     '<button data-act="hold">📍 在原地巡邏</button>' +
     '<button data-act="goto">🎯 指派位置巡邏</button>' +

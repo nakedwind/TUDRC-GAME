@@ -61,13 +61,15 @@ function chapterPick(entry) {
 // ---- 場景 NPC 平時會冒出的對話（頭上泡泡框）----
 // 想改台詞就編輯這裡：每個角色一組句子，系統會隨機挑一句、每隔幾秒說一次。
 // 沒列在這裡的角色就不會說話。
-const WANDER_LINES = Object.fromEntries(Object.values(CHARACTERS)
-  .filter(character => character.dialogues.idle.length)
-  .map(character => [character.id, character.dialogues.idle]));
+// 台詞都在 data/dialogues.js（用「對話編輯器.html」編輯）；舊的角色檔若還有 dialogues 也能讀
+const dialogueEntry = (character, key) =>
+  (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters?.[character.id]?.[key]) || character.dialogues?.[key] || [];
+const hasDialogue = v => Array.isArray(v) ? v.length > 0 : !!(v && typeof v === 'object');
+const dialogueTable = key => Object.fromEntries(Object.values(CHARACTERS)
+  .map(character => [character.id, dialogueEntry(character, key)]).filter(([, v]) => hasDialogue(v)));
+const WANDER_LINES = dialogueTable('idle');
 // 戰鬥區專用泡泡台詞。安全區仍使用上面的日常內容。
-const BATTLE_WANDER_LINES = Object.fromEntries(Object.values(CHARACTERS)
-  .filter(character => character.dialogues.battle.length)
-  .map(character => [character.id, character.dialogues.battle]));
+const BATTLE_WANDER_LINES = dialogueTable('battle');
 const WANDER_TALK = { minGap: 5, maxGap: 13, duration: 3.4 };   // 每隔 5~13 秒說一次、泡泡顯示 3.4 秒
 const BATTLE_WANDER_TALK = { minGap: 11, maxGap: 22, duration: 3.2 };
 
@@ -78,14 +80,10 @@ const NPC_TALK = {
   radius: 66,
   typeSpeed: 24,   // 打字機每個字出現的毫秒數；數字越小越快
 };
-const NPC_DIALOGUES = Object.fromEntries(Object.values(CHARACTERS)
-  .filter(character => character.dialogues.npc.length)
-  .map(character => [character.id, character.dialogues.npc]));
+const NPC_DIALOGUES = dialogueTable('npc');
 
 // 三位哨兵的主動對話。哨兵暴走時無法交談，要先使用「疏導」。
-const SENTRY_DIALOGUES = Object.fromEntries(Object.values(CHARACTERS)
-  .filter(character => character.dialogues.sentry.length)
-  .map(character => [character.id, character.dialogues.sentry]));
+const SENTRY_DIALOGUES = dialogueTable('sentry');
 
 // ---- 跟隨行為 ----
 // radiusCells＝可自由活動的護衛圈半徑（格）；超出後才會追上對方。

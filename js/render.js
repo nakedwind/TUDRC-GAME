@@ -176,7 +176,7 @@ function drawTower(t) {
   // 「暴走」「瀕臨暴走」標籤：黑底＋外框
   const tagText = t.berserk && t.hp > 0 ? '暴走' : taintDanger ? '瀕臨暴走' : '';
   if (tagText) drawTaintTag(t.x, nameY - 15, tagText, t.berserk ? '#ff4d4d' : '#ffb24d');
-  if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - (tagText ? 30 : 13), t.say.text, BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡（有標籤時往上移）
+  if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - (tagText ? 30 : 13), t.say.text, t.say.col || BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡（有標籤時往上移）
 }
 function drawTaintTag(cx, centerY, text, color) {
   ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';

@@ -463,6 +463,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   for (const enemy of hitTargets) {
     const text = '-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6));
     if (spec.crit && enemy === target) flashCrit(text, enemy.x, enemy.y - 30);   // 爆擊：金色大字
+    else if (spec.rage > 1.25) flashDmg(text, enemy.x, enemy.y - 26, spec.rage >= 1.6 ? '#ff5a3a' : '#ff9a4a');   // 怪力加成：橘紅色數字
     else flashDmg(text, enemy.x, enemy.y - 26, feel.ring);
   }
   if (G.enemies.includes(target) && typeof sfxAt === 'function') {

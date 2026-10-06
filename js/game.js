@@ -655,9 +655,9 @@ function updateChaosSentry(t, spec, dt) {
   }
 }
 function applyChaosDamage(t, best, spec) {
-  const o = best.o, dmg = spec.dmg;
+  const rageMul = sentryDamageMul(t), o = best.o, dmg = spec.dmg * rageMul;   // 暴走時汙染 100：路德的亂打也是最痛的
   const heavy = spec.ability === '怪力' || spec.ability === '自癒' || spec.ability === '雷電';   // 近戰、雷電＝重擊，震退比較遠
-  spawnAttackVisual(t, { x: best.x, y: best.y, hp: 1, maxhp: 1 }, spec, [], { x: best.x, y: best.y });
+  spawnAttackVisual(t, { x: best.x, y: best.y, hp: 1, maxhp: 1 }, rageMul > 1 ? { ...spec, dmg, rage: rageMul } : spec, [], { x: best.x, y: best.y });
   if (G.enemies.includes(o)) { o.hp -= dmg; enemyHitReact(o, t.x, t.y, heavy); }
   else if (G.cores.includes(o)) { o.hp -= dmg; }
   else if (o === G.player) {
@@ -1116,14 +1116,14 @@ function pickSentryTarget(t, R) {
 // ---- 疏導冷卻與大招數值（特效本身在 js/attack-fx.js）----
 const SOOTHE_AURA_CD = 3;   // 嚮導被動疏導的冷卻秒數
 const SOOTHE_CHANNEL = 1;  // 嚮導疏導時站定、閉眼施法的秒數（期間不走動、不攻擊）
-// 大招：平時普攻，冷卻好時放一次（傷害高、範圍大、特效大）
+// 大招：平時普攻，冷卻好時放一次（傷害高、範圍大、特效大）；喊的話在 data/dialogues.js 的 ultimate
 const ULTIMATES = {
-  theonie: { cd: 8,  dmgMul: 2.6, splash: 2.2, scale: 1.9, line: '集中火力!' },
-  amber:   { cd: 9,  dmgMul: 2.6, splash: 2.4, scale: 1.9, line: '請保持距離!' },
-  avaren:  { cd: 10, dmgMul: 2.3, splash: 2.8, scale: 2.0, line: '別礙事' },
+  theonie: { cd: 8,  dmgMul: 2.6, splash: 2.2, scale: 1.9 },
+  amber:   { cd: 9,  dmgMul: 2.6, splash: 2.4, scale: 1.9 },
+  avaren:  { cd: 10, dmgMul: 2.3, splash: 2.8, scale: 2.0 },
   // 近戰大招（大範圍）：red 盾牌衝撞＋回HP回污染、擊退；luther 大範圍重擊＋暈眩、傷害更高
-  red:     { cd: 10, dmgMul: 2.2, radius: 2.8, kind: 'bash',  knockback: 1.6, healHp: 40, healTaint: 40, line: '交給我來扛住!' },
-  luther:  { cd: 11, dmgMul: 3.0, radius: 3.0, kind: 'smash', knockback: 0.8, stun: 2.5, line: '不准靠近!' },
+  red:     { cd: 10, dmgMul: 2.2, radius: 2.8, kind: 'bash',  knockback: 1.6, healHp: 40, healTaint: 40 },
+  luther:  { cd: 11, dmgMul: 3.0, radius: 3.0, kind: 'smash', knockback: 0.8, stun: 2.5 },
 };
 const ULT_SWING = { wind: .6, impact: .8, duration: 1.2 };   // 大招：長前搖→放招→收招
 // 近戰普攻的節奏（秒，從出手開始算）：wind＝舉起蓄力結束、impact＝命中瞬間、duration＝收招完成
@@ -1360,7 +1360,7 @@ function update(dt) {
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
     if (spec.taintRegen && !t.berserk) t.taint = Math.max(0, t.taint - spec.taintRegen * dt);
-    if (!t.berserk && !TYPES[t.type].guide && t.taint > 85) {   // 瀕臨暴走：自動退守營地（觸發一次）
+    if (!t.berserk && !TYPES[t.type].guide && !spec.noRetreat && t.taint > 85) {   // 瀕臨暴走：自動退守營地（觸發一次）；noRetreat 的角色（路德）會留在前線
       if (!t.resting) { t.resting = true; sendSentryRest(t); }
     } else if (t.taint <= 80) t.resting = false;
     if (spec.aura && !t.berserk) {   // 嚮導隨身疏導：改成「冷卻一到就一次清一批」，不再每幀連續疏導
@@ -1435,7 +1435,7 @@ function update(dt) {
         const heavy = t.type === 'luther', dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
-        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; t.say = { text: ULTIMATES[t.type].line, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type]); }
+        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type]); }
         const sw = isUlt ? ULT_SWING : (MELEE_SWING[t.type] || MELEE_SWING.normal);
         t.meleeSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, hit: false, ult: isUlt };
         t.moving = false;
@@ -1445,7 +1445,7 @@ function update(dt) {
         const dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
-        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; t.say = { text: ULTIMATES[t.type].line, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type]); }
+        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type]); }
         const sw = isUlt ? ULT_SWING : { wind: .14, impact: .21, duration: .4 };
         t.gunSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, fired: false, ult: isUlt };
         t.gunT = sw.duration; t.moving = false;
@@ -1453,7 +1453,7 @@ function update(dt) {
       }
       const U = ((t.gunSwing && t.gunSwing.ult) || (t.meleeSwing && t.meleeSwing.ult)) ? ULTIMATES[t.type] : null;   // 大招（在揮擊啟動時已決定）
       if (U && U.radius) {   // 近戰大招：大範圍（紅＝盾牌衝撞＋回復；路德＝重擊＋暈眩）
-        const r = U.radius * CELL, dmg = spec.dmg * U.dmgMul, col = U.kind === 'bash' ? '#bfe0ff' : '#ffd0d5';
+        const r = U.radius * CELL, dmg = spec.dmg * U.dmgMul * sentryDamageMul(t), col = U.kind === 'bash' ? '#bfe0ff' : '#ffd0d5';
         const hitEnemy = G.enemies.find(e => !e.dead && Math.hypot(e.x - t.x, e.y - t.y) <= r);
         for (const e of G.enemies) {
           if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r) continue;
@@ -1471,7 +1471,8 @@ function update(dt) {
       } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy) {
         const impactPoint = { x: target.x, y: target.y };
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
-        const atkDmg = spec.dmg * (U ? U.dmgMul : 1) * (critMul || 1), atkSplash = U ? U.splash : spec.splash;
+        const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
+        const atkDmg = spec.dmg * (U ? U.dmgMul : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
         if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL) { e.hp -= atkDmg * .6; affected.push(e); }
@@ -1484,7 +1485,7 @@ function update(dt) {
             displaceEnemy(e,dx,dy,CELL*spec.knockback);
           }
         }
-        spawnAttackVisual(t, target, (U || critMul) ? { ...spec, dmg: atkDmg, splash: atkSplash, crit: !!critMul } : spec, affected, impactPoint, U ? U.scale : 1);
+        spawnAttackVisual(t, target, (U || critMul || rageMul > 1) ? { ...spec, dmg: atkDmg, splash: atkSplash, crit: !!critMul, rage: rageMul } : spec, affected, impactPoint, U ? U.scale : 1);
       } else flashDmg('MISS', target.x, target.y - 26, '#c6d1dd');
       if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
       if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入暴走，開始無差別攻擊！', true); }

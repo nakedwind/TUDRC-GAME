@@ -9,47 +9,39 @@ const BERSERK_FX = { warnAt: 70, dangerAt: 85, slowMo: .7, slowMoScale: .3, push
                      heartbeatGap: .95, heartbeatRange: 4, heartbeatVolume: .55,   // 心跳：間隔秒數、玩家幾格內才聽得到、最大音量
                      murmurGap: [8, 12] };   // 瀕臨暴走一直沒人疏導時，每隔幾秒（隨機範圍）再說一句
 
-// 瀕臨暴走時（汙染值越過 dangerAt，以及之後每隔一段時間）說的話
-const TAINT_WARN_LINES = {
-  red:     ['還撐得住……先顧其他人。', '沒事，這點程度我自己會退。', '嘖……腦袋有點沉。', '部隊長，別擔心，我很耐操的。', '疏導名額……留給更需要的人吧。'],
-  theonie: ['……我還能打，別多管閒事。', '吵死了，腦子裡全是雜音……', '區區這點負荷……才不會影響我。', '……視線有點晃，只是錯覺。', '別用那種眼神看我，我很好。'],
-  amber:   ['部隊長……我、我好像有點不舒服……', '對不起，我先退回去一下！', '規定說負荷太高要回報……我、我回報！', '手……手在發抖……', '我還可以的……應該吧……'],
-  luther:  ['……頭好吵。', '……我先退開。', '……別過來。現在的我不太對。', '……還行。', '……讓我一個人待著。'],
-  avaren:  ['……好吵。', '……別靠近我。', '……裡面的東西……在動。', '……艾德林在哪？', '……忍得住。'],
-  default: ['……有點撐不住了。', '……頭好痛。'],
-};
-// 瀕臨暴走（還沒暴走）時被疏導下來說的話
-const RELIEF_LINES = {
-  red:     ['哈，舒服多了！謝啦，部隊長。', '又讓你費心了……下次我會注意。', '好，可以繼續上了！'],
-  theonie: ['……還不錯，勉強算你及格。', '哼，我本來就沒事。……不過，謝了。', '腦袋清楚多了，繼續吧。'],
-  amber:   ['謝謝部隊長！我感覺好多了！', '呼……得救了，我會更小心的！', '我、我可以回到崗位了嗎？'],
-  luther:  ['……好多了。', '……謝了。', '……安靜下來了。'],
-  avaren:  ['……嗯。', '……比較安靜了。', '……你的疏導，不討厭。'],
-  default: ['……好多了，謝謝。'],
-};
-// 暴走那一刻說的話（失控邊緣的破碎台詞）
-const BERSERK_LINES = {
-  red:     ['……退後！全部離我遠一點！', '不行……控制不住……！'],
-  theonie: ['吵死了——全部燒掉就好！', '火……停不下來……！'],
-  amber:   ['對不起……身體不聽使喚……！', '請、請保持距離……！'],
-  luther:  ['……走開！', '別靠近我……會傷到你們。'],
-  avaren:  ['……不要看我。', '艾德林……別過來……'],
-  default: ['……控制不住了……！'],
-};
-// 從暴走被疏導回來時說的話
-const SOOTHED_LINES = {
-  red:     ['……部隊長？謝了，又被你救了一次。', '抱歉，讓你擔心了。'],
-  theonie: ['……哼，這次就算我欠你。', '……剛才的事，忘掉。'],
-  amber:   ['對不起，給大家添麻煩了……謝謝部隊長！', '我、我沒事了！'],
-  luther:  ['……抱歉。謝了。', '……沒傷到人吧？'],
-  avaren:  ['……嗯。', '……沒讓他看到吧。'],
-  default: ['……謝謝。'],
-};
 const BERSERK_BUBBLE = { bg: '#2a0d16', bd: '#ff4d6d', tx: '#ffd6dd' };   // 暴走台詞泡泡：暗紅底
+// ---- 狂戰士人格：汙染到 at 以上，說話方式完全變了（性格變化：把平常壓住的那一面放大） ----
+// 台詞、門檻、泡泡顏色都在 data/dialogues.js 每個角色的 rage 裡（對話編輯器的「狂戰士人格」）
+const RAGE_PERSONA = Object.fromEntries(Object.entries((typeof DIALOGUES !== 'undefined' && DIALOGUES.characters) || {})
+  .filter(([, c]) => c.rage && c.rage.enabled).map(([id, c]) => [id, c.rage]));
+// 一般台詞：角色有專屬台詞就用，沒有就用「通用」那組
+function linesFor(key, type) {
+  const own = dialogueLines(type, key);
+  return own && own.length ? own : (dialogueLines(null, key) || []);
+}
+// 狂戰士台詞：沒填就退回一般台詞
+const personaLines = (p, key, fallbackKey, type) => (p && p[key] && p[key].length ? p[key] : linesFor(fallbackKey, type));
+// 最近是誰疏導的（用疏導光的顏色反查：winter／eldrin／chris）
+function sootherId(t) {
+  const col = t.lastSootheColor;
+  return col ? Object.keys(SOOTHE_COLORS).find(k => SOOTHE_COLORS[k] === col) : null;
+}
+// 疏導後的台詞：有「被誰疏導」的專屬台詞就優先用
+function personaAfterLines(p, kind, t) {
+  const by = p[kind + 'By'], id = sootherId(t);
+  return (by && id && by[id] && by[id].length) ? by[id] : personaLines(p, kind, kind, t.type);
+}
+// 目前是否處於狂戰士人格（暴走中另外處理）
+function ragePersona(t) {
+  const p = RAGE_PERSONA[t.type];
+  return p && t.hp > 0 && !t.berserk && (t.taint || 0) >= p.at ? p : null;
+}
+
 
 // 隨機挑一句；有傳入哨兵時，避免連續兩次說同一句
 function pickLine(table, type, t) {
-  const lines = table[type] || table.default;
+  const lines = Array.isArray(table) ? table : (table[type] || table.default);
+  if (!lines || !lines.length) return '……';
   let line = lines[Math.floor(Math.random() * lines.length)];
   if (t && lines.length > 1) {
     while (line === t.lastFxLine) line = lines[Math.floor(Math.random() * lines.length)];
@@ -63,18 +55,7 @@ const recentlySoothed = t => performance.now() - (t.lastSootheAt || -1e9) < 1500
 // knock／heavyKnock：擊退距離（近戰、雷電算重擊）；time：擊退滑行秒數；flash：閃紅秒數；stun：哨兵被打斷的秒數
 // lineCd：同一個隊員被打後，至少隔幾秒才會再喊一次（避免每一下都講話）
 const FRIENDLY_HIT = { knock: CELL * .6, heavyKnock: CELL * 1.1, time: .16, flash: .32, stun: .4, lineCd: 4 };
-// 被暴走隊友打到時喊的話；{name} 會換成攻擊者的名字
-const FRIENDLY_HIT_LINES = {
-  red:     ['{name}，冷靜點！是我啊！', '部隊長！緊急申請疏導！', '我擋著，大家先退開！'],
-  theonie: ['{name}！你在打哪裡！', '……緊急申請疏導，快點！', '別逼我還手！'],
-  amber:   ['{name}，請冷靜下來！', '緊、緊急申請疏導！', '好痛……是我啊！'],
-  luther:  ['……{name}，醒醒。', '……需要疏導。快。', '……別讓他靠近其他人。'],
-  avaren:  ['……{name}，再過來我就不客氣了。', '……吵死了。', '……失控了嗎。'],
-  eldrin:  ['{name}，冷靜點，我在這裡！', '緊急申請疏導支援！', '沒事的，我馬上幫你！'],
-  chris:   ['喂喂，{name}，打錯人了吧？', '這下真的要緊急疏導了……', '冷靜點啦，{name}！'],
-  tino:    ['{name}！別過來！', '好吵……好可怕……', '緊急……申請疏導！'],
-  default: ['{name}，冷靜點！', '緊急申請疏導！'],
-};
+// 被暴走隊友打到時喊的話在 data/dialogues.js 的 friendlyHit（{name} 會換成攻擊者的名字）
 function friendlyHitReact(o, fromX, fromY, dmg, heavy, attacker) {
   const isPlayer = o === G.player;
   const dist = heavy ? FRIENDLY_HIT.heavyKnock : FRIENDLY_HIT.knock;
@@ -89,7 +70,9 @@ function friendlyHitReact(o, fromX, fromY, dmg, heavy, attacker) {
     if (o.hp > 0 && !o.berserk && now - (o.friendlyLineAt || -1e9) > FRIENDLY_HIT.lineCd * 1000) {
       o.friendlyLineAt = now;
       const name = (attacker && TYPES[attacker.type]?.name) || '喂';
-      o.say = { text: pickLine(FRIENDLY_HIT_LINES, o.type, o).replace(/\{name\}/g, name), life: 2.6 };
+      const rp = ragePersona(o);
+      o.say = rp ? { text: pickLine(personaLines(rp, 'hit', 'friendlyHit', o.type), 'x', o).replace(/\{name\}/g, name), life: 2.6, col: rp.bubble }
+                 : { text: pickLine(linesFor('friendlyHit', o.type), 'x', o).replace(/\{name\}/g, name), life: 2.6 };
       o.sayWait = Math.max(o.sayWait || 0, 4);
     }
   }
@@ -131,12 +114,21 @@ function updateBerserkFx(dt) {
     // 狀態轉換：剛暴走／剛恢復／從危險區被疏導下來
     if (alive && t.berserk && !t.fxBerserk) onSentryBerserk(t);
     else if (!t.berserk && t.fxBerserk) onSentryRecovered(t);
-    else if (alive && !t.berserk && t.fxDanger && taint < BERSERK_FX.warnAt && recentlySoothed(t)) { onSentryRelieved(t); t.fxDanger = false; }
+    else if (alive && !t.berserk && t.fxDanger && taint < BERSERK_FX.warnAt && recentlySoothed(t)) { onSentryRelieved(t); t.fxDanger = false; t.rageOn = false; }
+    else if (alive && !t.berserk && t.rageOn && RAGE_PERSONA[t.type] && taint < RAGE_PERSONA[t.type].at && recentlySoothed(t)) { onSentryRelieved(t); t.rageOn = false; }   // 狂戰士還沒到 70 就被疏導下來
     t.fxBerserk = t.berserk;
     if (t.berserk || taint >= BERSERK_FX.warnAt) t.fxDanger = true;
     else if (taint < BERSERK_FX.warnAt - 20) t.fxDanger = false;   // 自然恢復（雷德）降到 50 以下才解除，不說台詞
     if (t.berserkSay) { t.berserkSay.life -= dt; if (t.berserkSay.life <= 0) t.berserkSay = null; }
     if (!alive) continue;
+    const persona = RAGE_PERSONA[t.type];
+    if (persona && !t.berserk) {
+      if (!t.rageOn && taint >= persona.at) {   // 狂戰士人格覺醒：說一句帶笑意的話，周圍閃一圈橘紅光
+        t.rageOn = true;
+        if (persona.onset && persona.onset.length) { t.say = { text: pickLine(persona.onset, 'x', t), life: 2.8, col: persona.bubble }; t.sayWait = 4; }
+        G.effects.push({ ring: true, x: t.x, y: t.y - 10, r: 6, r2: 34, life: .4, life0: .4, color: '#ff6a2a' });
+      } else if (t.rageOn && taint < persona.at - 15 && !recentlySoothed(t)) t.rageOn = false;   // 自然降下來就安靜恢復
+    }
     // 瀕臨暴走：越過 dangerAt 時說一句，之後沒人疏導就每隔 murmurGap 秒再說一句
     if (!t.berserk && taint >= BERSERK_FX.dangerAt) {
       t.murmurT = (t.murmurT ?? 0) - dt;
@@ -144,7 +136,9 @@ function updateBerserkFx(dt) {
         t.warnSaid = true;
         const [g0, g1] = BERSERK_FX.murmurGap;
         t.murmurT = g0 + Math.random() * (g1 - g0);
-        t.say = { text: pickLine(TAINT_WARN_LINES, t.type, t), life: 2.8 }; t.sayWait = Math.max(t.sayWait || 0, 4);
+        const rp = ragePersona(t);
+        t.say = rp ? { text: pickLine(personaLines(rp, 'warn', 'taintWarn', t.type), 'x', t), life: 2.8, col: rp.bubble } : { text: pickLine(linesFor('taintWarn', t.type), 'x', t), life: 2.8 };
+        t.sayWait = Math.max(t.sayWait || 0, 4);
       }
     } else if (taint < BERSERK_FX.warnAt) t.warnSaid = false;
     // 身上冒黑紫霧：汙染越高冒越快，暴走時最濃
@@ -191,7 +185,7 @@ function onSentryBerserk(t) {
   G.slowMoT = BERSERK_FX.slowMo; G.slowMoScale = BERSERK_FX.slowMoScale;   // 短暫慢動作
   G.berserkFlashT = .6;                      // 畫面閃一下暗紅
   nearbyImpact(t.x, t.y, 10, 0);
-  t.berserkSay = { text: pickLine(BERSERK_LINES, t.type, t), life: 3 };
+  t.berserkSay = { text: pickLine(personaLines(RAGE_PERSONA[t.type], 'berserk', 'berserk', t.type), 'x', t), life: 3 };
   // 爆出一圈衝擊波＋向外炸開的黑紫霧，把附近的怪物推開（不造成傷害）
   G.effects.push({ ring: true, x: t.x, y: t.y - 8, r: 10, r2: CELL * BERSERK_FX.pushRadius, life: .45, life0: .45, color: '#ff4d6d' });
   G.effects.push({ ring: true, x: t.x, y: t.y - 8, r: 6, r2: CELL * BERSERK_FX.pushRadius * .65, life: .32, life0: .32, color: '#a55cff' });
@@ -226,12 +220,13 @@ function onSentryRecovered(t) {
     G.effects.push({ particle: true, kind: 'spark', x: t.x, y: t.y - 14, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7,
       r: 1.5 + Math.random() * 2, life: .5, life0: .5, color: `rgb(${col[0]},${col[1]},${col[2]})` });
   }
-  if (t.hp > 0) { t.say = { text: pickLine(SOOTHED_LINES, t.type, t), life: 3.2 }; t.sayWait = 6; }
+  t.rageOn = false;
+  if (t.hp > 0) { t.say = { text: pickLine(RAGE_PERSONA[t.type] ? personaAfterLines(RAGE_PERSONA[t.type], 'soothed', t) : linesFor('soothed', t.type), 'x', t), life: 3.2 }; t.sayWait = 6; }
 }
 // 瀕臨暴走時被疏導下來（呼叫前已確認是真的被疏導，雷德自然恢復不會觸發）
 function onSentryRelieved(t) {
   blowAwayMist(t, t.lastSootheColor || SOOTHE_COLORS.winter);
-  t.say = { text: pickLine(RELIEF_LINES, t.type, t), life: 3 }; t.sayWait = 6;
+  t.say = { text: pickLine(RAGE_PERSONA[t.type] ? personaAfterLines(RAGE_PERSONA[t.type], 'relief', t) : linesFor('relief', t.type), 'x', t), life: 3 }; t.sayWait = 6;
 }
 
 // ---- 繪製 ----

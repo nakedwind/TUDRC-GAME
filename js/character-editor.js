@@ -6,12 +6,12 @@ let charactersDraft = cloneCharacterData(CHARACTERS);
 let selectedCharacterId = fighterIds[0];
 
 const FIELD_LABELS = {
-  name:'名稱', sprite:'角色圖片資料夾', rank:'等級', role:'戰鬥定位', ability:'能力', cost:'出勤經費',
+  name:'名稱', sprite:'角色圖片資料夾', rank:'等級', role:'戰鬥定位', ability:'能力',
   hp:'生命 HP', dmg:'每次傷害', rate:'每秒攻擊次數', range:'攻擊射程・格', aggroRange:'主動索敵・格',
   accuracy:'命中率・0～1', defense:'減傷比例・0～1', walkSpeed:'移動速度・px/秒', speed:'移動速度・px/秒',
   taint:'每次攻擊增加負荷', taintRegen:'每秒減少負荷', splash:'範圍半徑・格', color:'特效顏色',
   trait:'能力說明', intro:'人物簡介', captainImpression:'部隊長印象', guide:'嚮導', noAggro:'不主動吸引仇恨',
-  taunt:'嘲諷範圍・格', hpRegen:'每秒恢復 HP', confuse:'混亂時間・秒', knockback:'擊退距離・格',
+  taunt:'嘲諷範圍・格', rageDmg:'汙染加成・滿汙染額外倍率', noRetreat:'瀕臨暴走不撤退', hpRegen:'每秒恢復 HP', confuse:'混亂時間・秒', knockback:'擊退距離・格',
   stun:'暈眩時間・秒', sense:'感知範圍・格', evade:'閃避距離・格',
   duration:'持續時間・秒', damage:'每秒傷害', r:'半徑・格／碰撞 px', heal:'治療量',
   combat:'戰鬥', load:'精神負荷', ratings:'星級評價', aura:'被動支援', burn:'燒傷',
@@ -19,7 +19,7 @@ const FIELD_LABELS = {
   drawSize:'角色圖尺寸・px'
 };
 const CORE_COMBAT = ['hp','dmg','rate','range','aggroRange','accuracy','defense','walkSpeed','taint','taintRegen','splash','color'];
-const BASIC_COMBAT = ['rank','role','ability','cost'];
+const BASIC_COMBAT = ['rank','role','ability'];
 const PLAYER_FIELDS = ['hp','speed','r','drawSize'];
 const PLAYER_ATTACK_FIELDS = ['range','dmg','rate','mag','reloadTime','aggro','cone'];
 const $character = id => document.getElementById(id);
@@ -192,7 +192,7 @@ function renderCharacter() {
 function exportSource() {
   const merged = cloneCharacterData(CHARACTERS);
   for (const id of fighterIds) mergeCharacterDraft(merged[id], editablePart(charactersDraft[id]));
-  return '/* 角色資料頁匯出；保留角色 ID、對話與非戰鬥人員資料。 */\nconst CHARACTERS = ' + JSON.stringify(merged, null, 2) + ';\n';
+  return '/* 角色資料頁匯出；保留角色 ID 與非戰鬥人員資料。台詞在 data/dialogues.js（對話編輯器）。 */\nconst CHARACTERS = ' + JSON.stringify(merged, null, 2) + ';\n';
 }
 $character('search').addEventListener('input', renderCharacterList);
 $character('showExport').addEventListener('click', () => {
