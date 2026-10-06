@@ -5660,13 +5660,15 @@ const MAPS_DEFAULT = [
         "id": "tile_bg_backroom_pillar3",
         "c": 33,
         "r": 9,
-        "layer": "ground2"
+        "layer": "ground2",
+        "sortDepth": 3.25
       },
       {
         "id": "tile_bg_backroom_pillar3",
         "c": 39,
         "r": 9,
-        "layer": "ground2"
+        "layer": "ground2",
+        "sortDepth": 3.25
       },
       {
         "id": "tile_bg_backroom_wall02_dmg_heavy",
@@ -5983,13 +5985,6 @@ const MAPS_DEFAULT = [
       "23,16",
       "23,17",
       "23,18",
-      "33,12",
-      "34,12",
-      "35,12",
-      "36,12",
-      "37,12",
-      "38,12",
-      "39,12",
       "33,11",
       "33,7",
       "33,8",
