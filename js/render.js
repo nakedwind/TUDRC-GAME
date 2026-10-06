@@ -440,6 +440,7 @@ function draw() {
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
+  drawCoreShards(ctx);         // 異質核心碎片
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
   drawBerserkFxWorld(ctx);     // 哨兵身上的黑紫霧、腳下心跳光圈、暴走台詞
 
@@ -772,6 +773,8 @@ function draw() {
         ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.5, f.r * p), 0, Math.PI * 2); ctx.fill();
       }
       ctx.globalAlpha = 1;
+    } else if (f.coreMote) {   // 異質核心的黑紫粒子
+      drawCoreMote(ctx, f);
     } else if (f.shell) {   // 彈殼：小小的黃銅色長條，邊轉邊掉，落地後淡出
       ctx.save(); ctx.globalAlpha = Math.min(1, f.life / .4);
       ctx.translate(f.x, f.y - f.z); ctx.rotate(f.rot);

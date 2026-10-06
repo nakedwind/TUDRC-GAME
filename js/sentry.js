@@ -250,10 +250,10 @@ function sentryCompanionRule(t) {
 function hasAggroTarget(t) {
   const spec = TYPES[t.type]; if (!spec) return false;
   const cores = (typeof G.cores !== 'undefined') ? G.cores : [];
-  if (!G.enemies.length && !cores.some(c => !c.dead)) return false;
+  if (!G.enemies.length && !cores.some(c => !c.dead && c.awake)) return false;
   const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
   for (const e of [...G.enemies, ...cores]) {
-    if (e.dead) continue;
+    if (e.dead || e.awake === false) continue;   // 沉睡的核心不算目標
     if (LIGHT.enabled && !isLit(e.x, e.y)) continue;
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
   }
@@ -381,7 +381,7 @@ function updateSentry(t, dt) {
   // 主動接敵：看到亮處的怪物就靠近攻擊（開火由 game.js 處理；這裡只負責走過去）
   // 追多遠依模式：自由走動＝追得遠、原地巡邏／指派＝只追崗位附近，怪死或跑遠就回去巡邏。
   const litHere = !LIGHT.enabled || isLit(t.x, t.y);
-  if (litHere && (G.enemies.length || G.cores.some(c=>!c.dead))) {
+  if (litHere && (G.enemies.length || G.cores.some(c=>!c.dead && c.awake))) {
     const spec = TYPES[t.type];
     const atkR = spec.range * CELL;                       // 射程（像素）
     const anchor = t.mode === 'escort' && G.player ? G.player : (t.mode !== 'free' && t.anchor) ? t.anchor : t;   // 護衛時以部隊長為中心
@@ -390,7 +390,7 @@ function updateSentry(t, dt) {
     const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
-      if (e.dead) continue;
+      if (e.dead || e.awake === false) continue;   // 沉睡的核心不去追
       if (LIGHT.enabled && !isLit(e.x, e.y)) continue;    // 只追亮處看得見的怪
       if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
       const d = Math.hypot(e.x - t.x, e.y - t.y);

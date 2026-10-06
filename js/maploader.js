@@ -445,14 +445,52 @@ function mapOccluders() {
       if (overlapX > 0 && (smallDecoration ? overlapY > 0 : overlapY >= CELL / 4)) it.y = other.y;
     }
   }
+  buildLayerOverdraw(items);
   occCache = items; occCacheFor = MAP;
   return items;
+}
+// ---- 讓「編輯器裡在上層的圖」在遊戲裡也蓋在上面 ----
+// 立體物依底部Y排序（角色才能走到前後），但這個順序可能跟編輯器的圖層相反：
+// 例如牆上的監視器（平貼）、床頭牆板、比書桌低一點的椅子，進遊戲會被下層的牆／書桌蓋掉。
+// 做法：畫完一個立體物之後，把「圖層比它高、跟它重疊、卻比它先畫」的圖，
+// 只在重疊的範圍內再補畫一次。這樣只修正圖跟圖之間的上下，角色被遮擋的方式不變。
+function buildLayerOverdraw(items) {
+  const flats = (MAP.stamps || []).filter(s => !isElevatorStamp(s) && (s.layer || 'top') !== 'top' && !stampIsOcc(s)).map(s => {
+    const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
+    return { flat: true, li: MAP_LAYER_ORDER.indexOf(s.layer || 'top'), x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL, kind: 'stamp', stamp: s };
+  });
+  // 立體物在遊戲裡的實際先後（底部Y，同樣的話照原本順序）
+  const rank = new Map([...items].map((it, k) => ({ it, k })).sort((a, b) => a.it.y - b.it.y || a.k - b.k).map((o, n) => [o.it, n]));
+  const order = new Map([...items, ...flats].map((it, k) => [it, k]));
+  for (const x of items) {
+    x.overdraw = [];
+    for (const a of [...items, ...flats]) {
+      if (a === x || a.li <= x.li) continue;                   // 只管比它上層的圖
+      if (!a.flat && rank.get(a) > rank.get(x)) continue;       // 本來就比它晚畫，不用補
+      const cx0 = Math.max(a.x0, x.x0), cy0 = Math.max(a.y0, x.y0), cx1 = Math.min(a.x1, x.x1), cy1 = Math.min(a.y1, x.y1);
+      if (cx1 <= cx0 || cy1 <= cy0) continue;
+      x.overdraw.push({ a, clip: [cx0, cy0, cx1 - cx0, cy1 - cy0] });
+    }
+    x.overdraw.sort((p, q) => p.a.li - q.a.li || order.get(p.a) - order.get(q.a));   // 依編輯器圖層由下往上補畫
+  }
+}
+function drawOccluderItem(ctx, it) {
+  if (it.kind === 'cell') {
+    if (!G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) drawMapTileImg(ctx, it.id, OX + it.c * CELL, OY + it.r * CELL);
+  } else drawMapStampImg(ctx, it.stamp);
 }
 function collectMapOccluders(ctx, out) {
   if (!MAP) return;
   for (const it of mapOccluders()) {
-    if (it.kind === 'cell') { const { id, c, r, li } = it; const source = MAP_LAYER_ORDER[li] + ':' + c + ',' + r; if (!G.mapDestroyed.has(source)) out.push({ y: it.y, draw: () => drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL) }); }
-    else { const s = it.stamp; out.push({ y: it.y, draw: () => drawMapStampImg(ctx, s) }); }
+    if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
+    out.push({ y: it.y, draw: () => {
+      drawOccluderItem(ctx, it);
+      for (const { a, clip } of it.overdraw || []) {   // 上層圖在重疊處補畫回來
+        ctx.save(); ctx.beginPath(); ctx.rect(OX + clip[0], OY + clip[1], clip[2], clip[3]); ctx.clip();
+        drawOccluderItem(ctx, a);
+        ctx.restore();
+      }
+    } });
   }
 }
 function drawElevators(ctx) {

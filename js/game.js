@@ -639,7 +639,7 @@ function updateChaosSentry(t, spec, dt) {
   for (const o of G.towers) if (o !== t && o.hp > 0) consider(o, o.x, o.y);
   if (G.player && G.player.hp > 0) consider(G.player, G.player.x, G.player.y);
   for (const o of G.obstacles) if (o.isBase && o.hp > 0) consider(o, (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2);
-  for (const c of G.cores) if (!c.dead) consider(c, c.x, c.y);
+  for (const c of G.cores) if (!c.dead && c.awake) consider(c, c.x, c.y);
   if (!best) return;
   const range = spec.range * CELL;
   if (bestD > range * 0.9) {                                   // 走向目標（直線步進、撞牆改走單軸）
@@ -1106,7 +1106,7 @@ function pickSentryTarget(t, R) {
   }
   if (best || t.guardSummoned) return best;
   for (const core of G.cores) {
-    if (core.dead) continue;
+    if (core.dead || !core.awake) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
     if (distance <= R && distance < bestScore) { best = core; bestScore = distance; }
   }
@@ -1192,8 +1192,9 @@ function updatePlayerAttack(dt) {
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   // 朝游標方向、射程內、照亮的最近怪
   let best = null, bestD = PLAYER_ATK.range * CELL;
-  for (const e of G.enemies) {
-    if (e.dead || !isLit(e.x, e.y)) continue;
+  for (const e of [...G.enemies, ...G.cores]) {
+    const isCore = G.cores.includes(e);
+    if (e.dead || !(isCore ? isVisible(e.x, e.y) : isLit(e.x, e.y))) continue;
     const d = Math.hypot(e.x - p.x, e.y - p.y);
     if (d > PLAYER_ATK.range * CELL) continue;
     let da = Math.abs(Math.atan2(e.y - p.y, e.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
@@ -1207,6 +1208,13 @@ function updatePlayerAttack(dt) {
   spawnShellCasing(mx, my, aimAng);  // 彈殼拋出
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
   if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
+  if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
+    const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
+    wakeCore(best); best.lastHp = best.hp;
+    best.hp -= shotDmg; markHit(critMul);
+    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');
+    best = null;
+  }
   if (best) {
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     best.hp -= shotDmg;
@@ -1496,7 +1504,7 @@ function update(dt) {
     for (const pool of G.acidPools) {
       pool.t -= dt;
       const dmgAmt = pool.dps * dt;
-      for (const e of G.enemies) {
+      for (const e of (pool.noEnemy ? [] : G.enemies)) {   // 異質核心腳下的腐蝕不傷異質體
         if (e.dead) continue;
         if (Math.hypot(e.x - pool.x, e.y - pool.y) <= pool.r) {
           e.hp -= dmgAmt;
@@ -1535,7 +1543,7 @@ function update(dt) {
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
-    core.dead=true; addLightFlash('core', core.x, core.y); earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    core.dead=true; breakCore(core); earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -1548,7 +1556,8 @@ function update(dt) {
   }
   for (const f of G.effects) {
     f.life -= dt;
-    if (f.shell) {   // 彈殼：拋出、受重力落地彈一下，之後躺在地上淡出
+    if (f.coreMote) updateCoreMote(f, dt);   // 異質核心的黑紫粒子
+    else if (f.shell) {   // 彈殼：拋出、受重力落地彈一下，之後躺在地上淡出
       f.x += f.vx * dt; f.y += f.vy * dt; f.rot += f.spin * dt;
       f.vz -= 420 * dt; f.z += f.vz * dt;
       if (f.z <= 0) {
