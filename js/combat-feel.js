@@ -14,6 +14,7 @@ const SLIME_VARIANTS = {
   // 巨型不靠機率，改由下方 GIANT_EVENT 固定時間登場
   giant:    { name: '巨型史萊姆', maxAlive: 1, hue: 95, hpMul: 4, speedMul: .7,
               dmgMul: 2, rewardMul: 4, scale: 1.65, knockResist: 1, goo: '#b983ff' },
+  spitter:  { name: '吐酸史萊姆', chance: .12, unlockAt: 40, hue: -130, hpMul: .9, speedMul: .85, goo: '#d4e04a' },
   mini:     { name: '小史萊姆', hue: -75, hpMul: .3, speedMul: 1.35, dmgMul: .5, rewardMul: .25, scale: .6, goo: '#a4e35c' },
 };
 // 自爆史萊姆：靠近目標後引爆的距離、引信秒數、爆炸半徑與各對象傷害
@@ -21,6 +22,10 @@ const SLIME_BOMB = { trigger: CELL * 1.25, fuse: 1.1, radius: CELL * 1.6,
                      player: 24, sentry: 30, building: 60, monster: 20, killedMul: .6 };
 // 巨型史萊姆登場事件：開戰 first 秒後第一次出現，之後每 every 秒再來一隻（場上同時最多 1 隻）
 const GIANT_EVENT = { first: 45, every: 75 };
+// 吐酸史萊姆：range 在多遠內會吐（格）、minRange 太近就不吐；windup 蓄力秒數（地上出現落點警示）
+// flySpeed 酸液飛行速度（格／秒）；cooldown 冷卻；pool 地上酸液：半徑（格）、存在秒數、每秒傷害（玩家／哨兵）
+const SLIME_SPIT = { range: 5, minRange: 1.5, windup: .75, flySpeed: 6.5, cooldown: 3.8,
+                     pool: { radius: .75, life: 4.5, playerDps: 9, sentryDps: 10 } };
 // 受擊回饋：擊退距離（一般／重擊）、重擊硬直秒數
 const HIT_FEEL = { knock: 5, heavyKnock: 16, stagger: .3 };
 // 畫面震動只在玩家附近發生：range 格以內才震，越近越強
@@ -124,6 +129,7 @@ function enemyHitReact(e, fromX, fromY, heavy) {
   if (heavy && resist < 1) {
     e.staggerT = HIT_FEEL.stagger;
     e.playerWindupT = 0; e.playerPounceGoal = null;   // 重擊可以打斷撲擊蓄力
+    e.spitWindT = 0; e.spitGoal = null;                // 也能打斷吐酸蓄力
   }
 }
 
@@ -155,6 +161,7 @@ function updateEnemyFeel(e, dt) {
     e.slimeLift = 0; e.slimeScaleX = 1.12; e.slimeScaleY = .88;
     return true;
   }
+  if (e.variant === 'spitter' && updateSpitter(e, dt)) return true;   // 吐酸蓄力／吐完的後座
   return false;
 }
 function bomberShouldArm(e) {
@@ -302,6 +309,7 @@ function updateGiantEvent() {
 function updateCombatFeel(dt) {
   G.battleTime = (G.battleTime || 0) + dt;
   updateGiantEvent();
+  updateAcidSpit(dt);
   if (G.fxCorpses) {
     for (const c of G.fxCorpses) {
       c.t += dt; c.life -= dt;
@@ -329,6 +337,7 @@ function updateCombatFeel(dt) {
 // ---- 繪製 ----
 // 地面層（角色腳下）：黏液痕跡＋自爆範圍警示
 function drawCombatFeelGround(ctx) {
+  drawAcidGround(ctx);   // 吐酸：酸液池、落點警示
   if (G.slimeSplats) for (const s of G.slimeSplats) {
     const a = Math.min(1, s.t / 2) * .55;   // 最後 2 秒淡出
     ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = s.color;
@@ -351,6 +360,7 @@ function drawCombatFeelGround(ctx) {
 }
 // 角色上層：被打飛的屍體與飛濺的黏液
 function drawCombatFeelTop(ctx) {
+  drawAcidTop(ctx);      // 吐酸：飛行中的酸液球
   if (G.fxCorpses) for (const c of G.fxCorpses) {
     if (!isLit(c.x, c.y)) continue;
     ctx.save();
@@ -394,4 +404,155 @@ function flashCrit(text, x, y) {
   G.effects.push({ dmg: true, crit: true, text, x, y, vy: -40, life: .95, life0: .95, color: '#ffd84a' });
   G.effects.push({ ring: true, x, y: y + 18, r: 6, r2: 30, life: .25, life0: .25, color: '#ffe27a' });
   if (G.player && Math.hypot(G.player.x - x, G.player.y - y) <= SHAKE_FEEL.range * CELL) addHitstop(.04);
+}
+
+// ============================================================
+//  吐酸史萊姆：蓄力（地上出現落點警示）→ 吐出拋物線酸液 → 落地留下一灘會傷人的酸液
+// ============================================================
+// 每幀在 updateEnemyFeel 呼叫；回傳 true 代表正在蓄力或剛吐完，這幀不移動
+function updateSpitter(e, dt) {
+  e.spitCd = Math.max(0, (e.spitCd || 0) - dt);
+  if (e.spitWindT > 0 && e.spitGoal) {   // 蓄力：先壓扁鼓起
+    e.spitWindT -= dt;
+    const p = 1 - Math.max(0, e.spitWindT) / SLIME_SPIT.windup;
+    e.slimeLift = 0; e.slimeScaleX = 1 + .16 * p; e.slimeScaleY = 1 - .2 * p;
+    if (e.spitWindT <= 0) launchAcidSpit(e);
+    return true;
+  }
+  if (e.spitRecoverT > 0) {   // 吐完：往上拉長再回彈
+    e.spitRecoverT -= dt;
+    e.slimeLift = 0; e.slimeScaleX = .86; e.slimeScaleY = 1.2;
+    return true;
+  }
+  if (e.spitCd > 0 || e.stunT > 0 || e.confuseT > 0 || !isLit(e.x, e.y)) return false;   // 在黑暗裡不吐（玩家看不到蓄力就太不公平）
+  // 目標：射程內最近的玩家或哨兵
+  let best = null, bestD = SLIME_SPIT.range * CELL;
+  const consider = o => {
+    const d = Math.hypot(o.x - e.x, o.y - e.y);
+    if (d >= SLIME_SPIT.minRange * CELL && d <= bestD) { best = o; bestD = d; }
+  };
+  if (G.player && G.player.hp > 0) consider(G.player);
+  for (const t of G.towers) if (t.hp > 0) consider(t);
+  if (!best) return false;
+  e.spitWindT = SLIME_SPIT.windup;
+  e.spitGoal = { x: best.x, y: best.y + 6 };   // 鎖定蓄力開始當下的位置，看到警示就能閃開
+  e.playerWindupT = 0; e.playerPounceGoal = null;
+  return true;
+}
+function launchAcidSpit(e) {
+  const g = e.spitGoal; e.spitGoal = null;
+  const d = Math.hypot(g.x - e.x, g.y - e.y);
+  (G.acidShots = G.acidShots || []).push({
+    x0: e.x, y0: e.y - 8, x1: g.x, y1: g.y, t: 0,
+    dur: Math.max(.4, Math.min(.9, d / (SLIME_SPIT.flySpeed * CELL))), h: 34 + d * .18, trailT: 0,
+  });
+  e.spitCd = SLIME_SPIT.cooldown; e.spitRecoverT = .22;
+  if (typeof sfxAt === 'function') sfxAt('knock2', e.x, e.y, .35, 'spitter');
+}
+function updateAcidSpit(dt) {
+  if (G.acidShots) {
+    for (const s of G.acidShots) {
+      s.t += dt;
+      s.trailT -= dt;
+      if (s.trailT <= 0 && s.t < s.dur) {   // 飛行中滴落的小酸滴
+        s.trailT = .05;
+        const [x, y, z] = acidShotPos(s);
+        (G.fxGoo = G.fxGoo || []).push({ x, y: y + 8, z: z + 2, vx: (Math.random() * 2 - 1) * 15, vy: 0, vz: -10, r: 1.5 + Math.random(), color: SLIME_VARIANTS.spitter.goo });
+      }
+      if (s.t >= s.dur) { s.done = true; addSpitPool(s.x1, s.y1); }
+    }
+    G.acidShots = G.acidShots.filter(s => !s.done);
+  }
+  if (G.spitPools) {
+    const P = SLIME_SPIT.pool;
+    for (const pool of G.spitPools) {
+      pool.t -= dt;
+      if (pool.t <= 0) continue;
+      const inPool = o => { const dx = o.x - pool.x, dy = (o.y - pool.y) / .6; return dx * dx + dy * dy <= pool.r * pool.r; };
+      const p = G.player;
+      if (p && p.hp > 0 && inPool(p)) {
+        p.hp = Math.max(0, p.hp - P.playerDps * dt);
+        p.hitT = Math.max(p.hitT || 0, .15); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .25);
+        p.acidTick = (p.acidTick || 0) - dt;
+        if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * .5), p.x, p.y - 46, '#d4e04a'); }
+        if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose(); }
+      }
+      for (const t of G.towers) {
+        if (t.hp <= 0 || !inPool(t)) continue;
+        const def = Math.max(0, Math.min(.75, TYPES[t.type]?.defense || 0));
+        t.hp = Math.max(0, t.hp - P.sentryDps * (1 - def) * dt);
+        t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#d4e04a';
+        if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+      }
+      pool.fizzT -= dt;   // 冒泡
+      if (pool.fizzT <= 0) {
+        pool.fizzT = .12 + Math.random() * .15;
+        const a = Math.random() * Math.PI * 2, rr = Math.random() * pool.r * .8;
+        pool.bubbles.push({ x: Math.cos(a) * rr, y: Math.sin(a) * rr * .6, t: 0, life: .5 + Math.random() * .4, r: 1.5 + Math.random() * 2.5 });
+      }
+      for (const b of pool.bubbles) b.t += dt;
+      pool.bubbles = pool.bubbles.filter(b => b.t < b.life);
+    }
+    G.spitPools = G.spitPools.filter(pool => pool.t > 0);
+  }
+}
+function acidShotPos(s) {
+  const p = Math.min(1, s.t / s.dur);
+  return [s.x0 + (s.x1 - s.x0) * p, s.y0 + (s.y1 - s.y0) * p, 4 * s.h * p * (1 - p)];
+}
+function addSpitPool(x, y) {
+  const P = SLIME_SPIT.pool, r = P.radius * CELL;
+  (G.spitPools = G.spitPools || []).push({ x, y, r, t: P.life, t0: P.life, shape: scorchShape(r, 18), bubbles: [], fizzT: 0 });
+  spawnGoo(x, y - 8, SLIME_VARIANTS.spitter.goo, 8, .9);
+  G.effects.push({ ring: true, x, y, r: 4, r2: r * 1.1, life: .25, life0: .25, color: '#e6f06a' });
+  if (typeof sfxAt === 'function') sfxAt('corrosionImpact', x, y, .45, 'spitter-land');
+}
+// 地面層：酸液池＋落點警示（蓄力中、飛行中）
+function drawAcidGround(ctx) {
+  if (G.spitPools) for (const pool of G.spitPools) {
+    const a = Math.min(1, (pool.t0 - pool.t) / .2, pool.t / 1);   // 0.2 秒擴散開、最後 1 秒淡掉
+    const grow = Math.min(1, (pool.t0 - pool.t) / .2);
+    ctx.save(); ctx.translate(pool.x, pool.y); ctx.scale(1, .6);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, pool.r);
+    g.addColorStop(0, `rgba(196,220,60,${(.75 * a).toFixed(3)})`);
+    g.addColorStop(.7, `rgba(140,175,30,${(.6 * a).toFixed(3)})`);
+    g.addColorStop(1, `rgba(90,120,20,${(.45 * a).toFixed(3)})`);
+    ctx.fillStyle = g; scorchPath(ctx, pool.shape, .4 + .6 * grow); ctx.fill();
+    ctx.globalAlpha = .5 * a; ctx.strokeStyle = '#f0ff8a'; ctx.lineWidth = 1.5;   // 亮綠邊緣，提醒會受傷
+    scorchPath(ctx, pool.shape, .4 + .6 * grow); ctx.stroke();
+    for (const b of pool.bubbles) {   // 泡泡：長大後破掉
+      const k = b.t / b.life;
+      ctx.globalAlpha = a * (k < .8 ? .85 : (1 - k) * 4);
+      ctx.strokeStyle = '#f4ffa0'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(b.x, b.y / .6, b.r * (.4 + k), 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  const warn = (x, y, k) => {   // 落點警示：黃綠色虛線圈，越接近落地越滿
+    const R = SLIME_SPIT.pool.radius * CELL;
+    ctx.save();
+    ctx.globalAlpha = .15 + .2 * k; ctx.fillStyle = '#c8e040';
+    ctx.beginPath(); ctx.ellipse(x, y, R * k, R * .6 * k, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.globalAlpha = .7; ctx.strokeStyle = '#e6f06a'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.ellipse(x, y, R, R * .6, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  };
+  for (const e of G.enemies) if (e.spitWindT > 0 && e.spitGoal && isLit(e.x, e.y)) warn(e.spitGoal.x, e.spitGoal.y, .4 * (1 - e.spitWindT / SLIME_SPIT.windup));
+  if (G.acidShots) for (const s of G.acidShots) warn(s.x1, s.y1, .4 + .6 * Math.min(1, s.t / s.dur));
+}
+// 角色上層：飛行中的酸液球（地上有影子）
+function drawAcidTop(ctx) {
+  if (!G.acidShots) return;
+  for (const s of G.acidShots) {
+    const [x, y, z] = acidShotPos(s);
+    ctx.save();
+    ctx.globalAlpha = .3; ctx.fillStyle = '#0a1005';
+    ctx.beginPath(); ctx.ellipse(x, y + 8, 6, 2.5, 0, 0, Math.PI * 2); ctx.fill();
+    const by = y - z;
+    const g = ctx.createRadialGradient(x - 1.5, by - 1.5, 0, x, by, 9);
+    g.addColorStop(0, 'rgba(250,255,190,1)'); g.addColorStop(.45, 'rgba(210,230,70,.95)'); g.addColorStop(1, 'rgba(150,190,30,0)');
+    ctx.globalAlpha = 1; ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(x, by, 9, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
 }

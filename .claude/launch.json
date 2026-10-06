@@ -12,6 +12,12 @@
       "runtimeExecutable": "C:/Users/b9054/AppData/Local/Programs/Python/Python313/python.exe",
       "runtimeArgs": ["-m", "http.server", "8766"],
       "port": 8766
+    },
+    {
+      "name": "game-local",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8767"],
+      "port": 8767
     }
   ]
 }

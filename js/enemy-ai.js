@@ -90,7 +90,7 @@ function enemyAttackPlayer(e, dt) {
 // 史萊姆撲擊：目標（玩家、哨兵或嚮導）在 3 格內就蓄力，朝「蓄力開始當下」目標的位置飛撲。
 // 地上會出現落點警示，看到就能閃開；落地時落點附近的玩家、哨兵、嚮導都會受傷。
 function trySlimePounce(e, target, distance) {
-  if (e.type !== 'slime' || !target || distance > SLIME_POUNCE.range || distance <= 40) return false;
+  if (e.type !== 'slime' || e.variant === 'spitter' || !target || distance > SLIME_POUNCE.range || distance <= 40) return false;   // 吐酸型改用遠程吐酸，不撲擊
   if ((e.playerPounceCd || 0) > 0 || (e.playerPounceT || 0) > 0 || e.slimeClock / SLIME_JUMP.total < SLIME_JUMP.airRatio) return false;
   const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
   const reach = Math.max(0, Math.min(d, SLIME_POUNCE.maxLeap) - 14);   // 落在目標面前一點，擊退才有方向
@@ -253,7 +253,7 @@ function updateEnemyEffects(e, dt) {
 const SLIME_JUMP = { total: 1.83, airRatio: .62, height: 14 };
 // 撲擊：蓄力（地上出現落點警示）→ 高高拋物線飛撲 → 重重落地（震動＋衝擊波，落點附近的玩家受傷）
 // windup 蓄力秒數、lunge 飛行秒數、range 觸發距離、maxLeap 最遠撲擊距離、height 飛撲高度、hitRadius 落地傷害半徑
-const SLIME_POUNCE = { windup: .6, lunge: .45, range: CELL * 3, maxLeap: CELL * 3.2, height: 46, hitRadius: 38, cooldown: 3.2 };
+const SLIME_POUNCE = { windup: .95, lunge: .7, range: CELL * 3, maxLeap: CELL * 3.2, height: 46, hitRadius: 38, cooldown: 3.2 };
 function updateSlimePounce(e, dt) {
   e.playerPounceT = Math.max(0, e.playerPounceT - dt);
   const p = 1 - e.playerPounceT / SLIME_POUNCE.lunge;

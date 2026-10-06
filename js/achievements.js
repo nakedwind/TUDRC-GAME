@@ -13,6 +13,7 @@ const ACHIEVEMENTS = [
   { id: 'giant_5',    group: '特殊異質體', stat: 'giantKills',  goal: 5,   name: '擊倒 5 隻巨型史萊姆' },
   { id: 'bomber_10',  group: '特殊異質體', stat: 'bomberKills', goal: 10,  name: '擊倒 10 隻自爆史萊姆' },
   { id: 'split_20',   group: '特殊異質體', stat: 'splitterKills', goal: 20, name: '擊倒 20 隻分裂史萊姆' },
+  { id: 'spit_20',    group: '特殊異質體', stat: 'spitterKills', goal: 20, name: '擊倒 20 隻吐酸史萊姆' },
   { id: 'crit_10',    group: '戰鬥', stat: 'crits',       goal: 10,  name: '打出 10 次爆擊' },
   { id: 'crit_100',   group: '戰鬥', stat: 'crits',       goal: 100, name: '打出 100 次爆擊' },
   { id: 'soothe_10',  group: '嚮導', stat: 'soothes',     goal: 10,  name: '親自疏導哨兵 10 次' },
@@ -60,6 +61,7 @@ function trackKillAchievements(e) {
   if (e.variant === 'giant') addStat('giantKills');
   else if (e.variant === 'bomber') addStat('bomberKills');
   else if (e.variant === 'splitter') addStat('splitterKills');
+  else if (e.variant === 'spitter') addStat('spitterKills');
 }
 
 // ---- 右下角通知：一則一則排隊彈出 ----
