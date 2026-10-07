@@ -38,6 +38,7 @@ const SFX = (() => {
     smallBoom: '小爆炸.mp3',
     midBoom: '中爆炸.mp3',
     bigBoom: '爆炸.mp3',
+    shopBell: '便利商店門鈴.mp3',
     slimeHit: 'slime-hit.mp3',
     slimeLand: 'slime-land.mp3',
   };

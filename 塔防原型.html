@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=rclick-20261003">
+<link rel="stylesheet" href="css/style.css?v=namebox-20261007">
 <link rel="stylesheet" href="css/ui-feedback.css">
 </head>
 <body>
@@ -70,6 +70,32 @@
         </div>
       </div>
     </div>
+    <button id="supplyShopButton" type="button" aria-haspopup="dialog"><span aria-hidden="true">🏪</span> 商店</button>
+    <div id="supplyShop" class="hidden" role="dialog" aria-modal="true" aria-labelledby="supplyShopTitle">
+      <section class="supply-shop-card">
+        <header class="supply-shop-head">
+          <div class="shop-sign" aria-hidden="true">24H</div>
+          <div class="shop-title"><small>B4 · 地下便利商店</small><h2 id="supplyShopTitle">商店</h2><p>買好的東西放進背包。戰鬥中按 <kbd>Q</kbd> 吃零食、<kbd>F</kbd> 喝飲料，不用打開商店。</p></div>
+          <div class="supply-shop-wallet"><small>經費</small><b>$<span id="shopMoney">0</span></b></div>
+          <button id="supplyShopClose" type="button" aria-label="關閉商店（Esc）">×</button>
+        </header>
+        <div class="shop-body">
+          <div class="shop-main">
+            <nav class="supply-shop-tabs" role="tablist" aria-label="商品分類">
+              <button type="button" role="tab" data-supply-tab="all" class="active" aria-selected="true">全部 <em></em></button>
+              <button type="button" role="tab" data-supply-tab="snack" aria-selected="false">❤ 零食 <em></em></button>
+              <button type="button" role="tab" data-supply-tab="drink" aria-selected="false">✦ 飲料 <em></em></button>
+            </nav>
+            <div id="supplyShopList" class="supply-shop-list"></div>
+          </div>
+          <aside class="supply-inventory" aria-label="背包">
+            <div class="bag-head"><strong>🎒 背包</strong><span><span id="supplyInventoryCount">0</span> 件</span></div>
+            <div id="supplyInventoryList" class="supply-inventory-list"></div>
+            <p class="bag-tip">點一下使用・戰鬥中按 <kbd>Q</kbd>／<kbd>F</kbd></p>
+          </aside>
+        </div>
+      </section>
+    </div>
   </div>
 
   <div id="hud" aria-label="戰鬥資訊">
@@ -77,9 +103,13 @@
       <span class="hud-player-avatar"><img src="images/character/winter_B/winterB_0000_Front.png" alt="溫特"></span>
       <div class="hud-player-status">
         <b>溫特．嚮導部隊長</b>
-        <div class="hud-player-bar hp" role="meter" aria-label="溫特 HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="playerHpBar"></i></div>
-        <div class="hud-player-bar energy" role="meter" aria-label="精神能量" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><i id="playerEnergyBar"></i></div>
+        <div class="hud-player-bar hp" role="meter" aria-label="溫特 HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" data-label="HP"><i id="playerHpBar"></i><i class="gain"></i></div>
+        <div class="hud-player-bar energy" role="meter" aria-label="溫特 SP（精神能量）" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" data-label="SP"><i id="playerEnergyBar"></i><i class="gain"></i></div>
       </div>
+    </div>
+    <div class="hud-supplies" aria-label="快捷補給">
+      <div id="quickSupplies"></div>
+      <button id="hudShopButton" type="button" aria-haspopup="dialog" title="打開商店"><span aria-hidden="true">🏪</span>商店</button>
     </div>
     <span class="stat money"><small>經費</small><b id="money">0</b></span>
     <span class="stat crystal"><small>異質碎片</small><b id="crystals">0</b></span>
@@ -96,10 +126,11 @@
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
-  <script src="js/sfx.js?v=boom-sfx-20261007"></script>          <!-- 1b. 音效 -->
+  <script src="js/sfx.js?v=shop2-20261007"></script>          <!-- 1b. 音效 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js?v=taint-rates-20261007"></script>  <!-- 集中管理所有角色 -->
+  <script src="data/supplies.js?v=supply-shop-20261007"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/dialogues.js?v=dlg-20261006"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=dlg-20261006"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
@@ -116,7 +147,7 @@
   <script src="js/maploader.js?v=merge-20261007"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/lighting.js?v=core-20261006"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/build.js?v=mine-20261007"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
-  <script src="js/team.js?v=soothe-20261003"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
+  <script src="js/team.js?v=hpsp-20261007"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=merge-20261007"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=core-20261006"></script>
   <script src="js/anomalous-core.js?v=corebar-20261006"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
@@ -128,6 +159,6 @@
   <script src="js/attack-fx.js?v=boom-sfx-20261007"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=boom-sfx-20261007"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/landmine.js?v=mine2-20261007"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/game.js?v=merge-20261007"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=namebox-20261007"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

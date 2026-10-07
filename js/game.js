@@ -292,6 +292,11 @@ const mapTransition = document.getElementById('mapTransition');
 let mapTransitioning = false;
 const elevatorMenu = document.getElementById('elevatorMenu');
 let elevatorMenuOpen = false;
+const supplyShop = document.getElementById('supplyShop');
+const supplyShopList = document.getElementById('supplyShopList');
+const supplyInventoryList = document.getElementById('supplyInventoryList');
+const supplyInventory = new Map();
+let supplyShopOpen = false, supplyShopTab = 'all';
 function closeElevatorMenu() { elevatorMenuOpen = false; elevatorMenu.classList.add('hidden'); }
 function openElevatorMenu() {
   sfx('menu');
@@ -309,12 +314,132 @@ elevatorMenu.querySelectorAll('[data-floor]').forEach(button => button.addEventL
   closeElevatorMenu();
   enterPortal({ to: 'map_mu5ad7t2', elevator: true });
 }));
+// ---- 便利商店：買零食（恢復 HP）、飲料（恢復 SP 精神能量），存在背包裡；戰鬥中按 Q／F 或點下方資訊條的快捷格直接使用 ----
+const SUPPLY_KIND = {
+  snack: { name: '零食', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
+  drink: { name: '飲料', stat: 'SP', key: 'F', icon: '✦', color: '#8cc7ff' },
+};
+const supplyById = id => SUPPLIES.find(entry => entry.id === id);
+function supplyEffect(item) { return `${SUPPLY_KIND[item.kind].stat} +${item.restore}`; }
+function supplyNeed(kind) { return !G?.player ? 0 : kind === 'snack' ? G.player.maxhp - G.player.hp : G.guideMax - G.guide; }
+function supplyOwnedCount(kind) { return SUPPLIES.reduce((sum, item) => sum + (item.kind === kind ? supplyInventory.get(item.id) || 0 : 0), 0); }
+// 快捷使用時挑哪一個：剛好能補滿的裡面挑最小的（不浪費）；都補不滿就挑恢復最多的
+function pickSupply(kind) {
+  const need = supplyNeed(kind), owned = SUPPLIES.filter(item => item.kind === kind && supplyInventory.get(item.id) > 0);
+  return owned.filter(item => item.restore >= need).sort((a, b) => a.restore - b.restore)[0] || owned.sort((a, b) => b.restore - a.restore)[0] || null;
+}
+function renderSupplyStatus() {   // 滑到商品上：下方資訊條的 HP／SP 條會亮出這個商品能補多少
+  const bars = [['snack', 'playerHpBar', G?.player?.hp || 0, G?.player?.maxhp || 1], ['drink', 'playerEnergyBar', G?.guide || 0, G?.guideMax || 1]];
+  for (const [kind, id, now, max] of bars) {
+    const gain = document.getElementById(id)?.parentElement.querySelector('.gain'); if (!gain) continue;
+    const add = supplyShopOpen && supplyHover && supplyHover.kind === kind ? Math.min(supplyHover.restore, max - now) : 0;
+    gain.style.left = Math.min(100, now / max * 100) + '%';
+    gain.style.width = Math.max(0, add / max * 100) + '%';
+  }
+}
+let supplyHover = null;
+function renderSupplyShop() {
+  if (!supplyShopList || !supplyInventoryList) return;
+  const money = Math.floor(G?.money || 0);
+  document.getElementById('shopMoney').textContent = money;
+  document.querySelectorAll('[data-supply-tab]').forEach(tab => {
+    const n = SUPPLIES.filter(item => tab.dataset.supplyTab === 'all' || item.kind === tab.dataset.supplyTab).length;
+    tab.querySelector('em').textContent = n;
+  });
+  const visible = SUPPLIES.filter(item => supplyShopTab === 'all' || item.kind === supplyShopTab)
+    .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'snack' ? -1 : 1) || a.price - b.price);   // 零食在前，各自由便宜到貴
+  supplyShopList.innerHTML = visible.map(item => {
+    const kind = SUPPLY_KIND[item.kind], owned = supplyInventory.get(item.id) || 0, short = item.price - money;
+    return `<article class="shop-item ${item.kind}" data-item="${item.id}">
+      ${owned ? `<span class="shop-owned" title="背包裡有 ${owned} 個">×${owned}</span>` : ''}
+      <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
+      <span class="shop-effect">${kind.icon} ${supplyEffect(item)}</span>
+      <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="購買 ${item.name}，$${item.price}"`}>${short > 0 ? `還差 $${short}` : `<span>購買</span><b>$${item.price}</b>`}</button>
+    </article>`;
+  }).join('');
+  const owned = SUPPLIES.filter(item => (supplyInventory.get(item.id) || 0) > 0);
+  document.getElementById('supplyInventoryCount').textContent = [...supplyInventory.values()].reduce((sum, count) => sum + count, 0);
+  supplyInventoryList.innerHTML = owned.length ? owned.map(item => {
+    const full = supplyNeed(item.kind) <= 0;
+    return `<button class="supply-slot ${item.kind}" type="button" data-use-supply="${item.id}" ${full ? 'disabled' : ''} title="${full ? SUPPLY_KIND[item.kind].stat + ' 已滿' : '點一下使用'}｜${item.name}　${supplyEffect(item)}">
+      <img src="${item.image}" alt=""><span class="slot-info"><strong>${item.name}</strong><small>${SUPPLY_KIND[item.kind].icon} ${full ? SUPPLY_KIND[item.kind].stat + ' 已滿' : supplyEffect(item)}</small></span><b>×${supplyInventory.get(item.id)}</b></button>`;
+  }).join('') : '<span class="supply-empty">背包是空的。<br>買好的東西會放在這裡。</span>';
+  renderSupplyStatus();
+}
+// 下方資訊條的快捷格：零食（Q）、飲料（F）
+let quickSupplyKey = '';
+function renderQuickSupplies() {
+  const box = document.getElementById('quickSupplies'); if (!box) return;
+  const state = ['snack', 'drink'].map(kind => { const pick = pickSupply(kind); return [kind, pick?.id || '', supplyOwnedCount(kind), supplyNeed(kind) <= 0]; });
+  const key = JSON.stringify(state); if (key === quickSupplyKey) return; quickSupplyKey = key;
+  box.innerHTML = state.map(([kind, id, count, full]) => {
+    const k = SUPPLY_KIND[kind], item = supplyById(id);
+    const tip = !count ? `沒有${k.name}了，到商店買一點` : full ? `${k.stat} 已滿` : `按 ${k.key}：使用 ${item.name}（${supplyEffect(item)}）`;
+    return `<button class="quick-supply ${kind}" type="button" data-quick-supply="${kind}" ${!count || full ? 'disabled' : ''} title="${tip}" aria-label="${tip}">
+      <span class="qs-icon">${item ? `<img src="${item.image}" alt="">` : k.icon}</span><span class="qs-text"><small>${k.name}</small><b>×${count}</b></span><kbd>${k.key}</kbd></button>`;
+  }).join('');
+}
+function openSupplyShop() {
+  if (!G || G.over || !G.player || supplyShopOpen) return;
+  supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
+  closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
+  renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopBell', .7, 'shop-bell'); document.getElementById('supplyShopClose').focus();
+}
+function closeSupplyShop(silent = false) { if (!supplyShopOpen) return; supplyShopOpen = false; supplyHover = null; renderSupplyStatus(); supplyShop.classList.add('hidden'); if (!silent) sfx('switch'); }
+function buySupply(id) {
+  const item = supplyById(id);
+  if (!item || !G || G.money < item.price) { sfx('error'); return; }
+  G.money -= item.price; supplyInventory.set(id, (supplyInventory.get(id) || 0) + 1);
+  sfx('button'); updateHUD(); renderSupplyShop();
+  const card = supplyShopList.querySelector(`[data-item="${id}"]`);   // 買到的那張卡片跳一下、冒出 +1
+  if (card) { card.classList.add('bought'); const pop = document.createElement('i'); pop.className = 'shop-pop'; pop.textContent = '+1'; card.appendChild(pop); }
+  const bag = document.querySelector('.supply-inventory'); if (bag) { bag.classList.remove('bump'); void bag.offsetWidth; bag.classList.add('bump'); }
+  const btn = card?.querySelector('.shop-buy'); if (btn && !btn.disabled) btn.focus();   // 鍵盤連按 Enter 可以一直買
+}
+function useSupply(id) {
+  const item = supplyById(id), count = supplyInventory.get(id) || 0;
+  if (!item || !G?.player || count <= 0) return false;
+  const restored = Math.min(item.restore, supplyNeed(item.kind));
+  if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.kind].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
+  if (item.kind === 'snack') G.player.hp += restored; else G.guide += restored;
+  if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1);
+  const k = SUPPLY_KIND[item.kind];
+  sfx('soothe'); flash(`${item.name}　+${Math.ceil(restored)} ${k.stat}`, G.player.x, G.player.y - 54, k.color);
+  updateHUD(); if (supplyShopOpen) renderSupplyShop();
+  return true;
+}
+function quickUseSupply(kind) {
+  const k = SUPPLY_KIND[kind], item = pickSupply(kind);
+  if (!item) { sfx('error'); flash(`沒有${k.name}了`, G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  useSupply(item.id);
+}
+document.getElementById('supplyShopButton').addEventListener('click', openSupplyShop);
+document.getElementById('hudShopButton').addEventListener('click', openSupplyShop);
+document.getElementById('quickSupplies').addEventListener('click', e => { const b = e.target.closest('[data-quick-supply]'); if (b && G?.player) quickUseSupply(b.dataset.quickSupply); });
+document.getElementById('supplyShopClose').addEventListener('click', () => closeSupplyShop());
+supplyShop.addEventListener('click', e => { if (e.target === supplyShop) { closeSupplyShop(); return; } const buy = e.target.closest('[data-buy-supply]'); if (buy) buySupply(buy.dataset.buySupply); const use = e.target.closest('[data-use-supply]'); if (use) useSupply(use.dataset.useSupply); });
+supplyShop.addEventListener('animationend', e => { if (e.target.classList.contains('shop-pop')) e.target.remove(); else e.target.classList.remove('bought', 'bump'); });
+supplyShopList.addEventListener('mouseover', e => { const card = e.target.closest('[data-item]'); const item = card ? supplyById(card.dataset.item) : null; if (item !== supplyHover) { supplyHover = item; renderSupplyStatus(); } });
+supplyShopList.addEventListener('mouseleave', () => { supplyHover = null; renderSupplyStatus(); });
+document.querySelectorAll('[data-supply-tab]').forEach(button => button.addEventListener('click', () => { supplyShopTab = button.dataset.supplyTab; document.querySelectorAll('[data-supply-tab]').forEach(tab => { tab.classList.toggle('active', tab === button); tab.setAttribute('aria-selected', tab === button); }); supplyShopList.scrollTop = 0; renderSupplyShop(); sfx('switch'); }));
+window.addEventListener('keydown', e => {   // Q 吃零食、F 喝飲料
+  const k = e.key.toLowerCase();
+  if (e.repeat || (k !== 'q' && k !== 'f') || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  if (!G?.player || G.over || MAP_SAFE || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
+  e.preventDefault(); quickUseSupply(k === 'q' ? 'snack' : 'drink');
+});
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'];
 const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (mapTransitioning) {
     if (MOVE_KEYS.includes(k) || isInteractKey(k)) e.preventDefault();
+    return;
+  }
+  if (supplyShopOpen) {
+    if (k === 'escape') { e.preventDefault(); closeSupplyShop(); }
+    else if (k.startsWith('arrow') || ((k === ' ' || k === 'enter') && !(e.target instanceof HTMLButtonElement))) e.preventDefault();   // 按鈕上按 Enter／空白鍵照常可以按
     return;
   }
   if (elevatorMenuOpen) {
@@ -755,6 +880,7 @@ let G;
 function newGame() {
   applyOutfits();   // 依這張地圖是安全區或戰鬥區，換成 A／B 造型
   closeElevatorMenu();
+  closeSupplyShop(true);
   setNpcArrangeMode(false);
   setPaused(false);
   document.getElementById('systemNotices').replaceChildren();
@@ -989,7 +1115,7 @@ cv.addEventListener('mousemove', e => { aimClient = { x: e.clientX, y: e.clientY
 cv.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   aimClient = { x: e.clientX, y: e.clientY };
-  if (e.ctrlKey && !MAP_SAFE && G?.running && !G.over && !dialogueState && !elevatorMenuOpen) {
+  if (e.ctrlKey && !MAP_SAFE && G?.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen) {
     e.preventDefault();
     closeGroundMenu(); closeSentryMenu();
     aimHeld = true;
@@ -1282,7 +1408,7 @@ function setPaused(on) {
   if (badge) badge.classList.toggle('hidden', !paused);
 }
 window.addEventListener('keydown', e => {
-  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || mapTransitioning) return;
+  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || supplyShopOpen || mapTransitioning) return;
   if (!G || !G.running || G.over || MAP_SAFE) return;   // 只有戰鬥中可以暫停
   sfx('switch'); setPaused(!paused);
 });
@@ -1290,10 +1416,10 @@ function loop(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
-  if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話或轉場時暫停玩家與戰場
+  if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !mapTransitioning && !frozen) update(sdt);
+  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !mapTransitioning && !frozen) update(sdt);
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
@@ -1679,6 +1805,8 @@ function updateHUD() {
   if (typeof updateTeamButton === 'function') updateTeamButton();   // 安全場景才顯示「出勤編隊」按鈕
   if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
+  document.getElementById('supplyShopButton').classList.toggle('hidden', !MAP_SAFE);   // 基地裡資訊條收起來，商店按鈕改放在畫面右下角
+  renderQuickSupplies();
   document.getElementById('crystals').textContent = training.crystals;
   const playerHpBar = document.getElementById('playerHpBar');
   const playerHp = Math.max(0, G.player?.hp ?? 0);
@@ -1690,6 +1818,7 @@ function updateHUD() {
   playerEnergyBar.style.width = Math.max(0, Math.min(100, G.guide / Math.max(1, G.guideMax) * 100)) + '%';
   playerEnergyBar.parentElement.setAttribute('aria-valuenow', Math.floor(G.guide));
   playerEnergyBar.parentElement.setAttribute('aria-valuemax', G.guideMax);
+  playerEnergyBar.parentElement.setAttribute('aria-valuetext', `${Math.floor(G.guide)} / ${G.guideMax} SP`);
   const mission = document.getElementById('missionText');
   if (mission) {
     if (MAP_SAFE) {
@@ -1724,7 +1853,7 @@ const LOSE_TEXT = {
 };
 function loseOverlay(reason) { const [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base; showOverlay(title, text, '再挑戰'); }
 
-function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); winOverlay(); }
 function lose(reason) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason); }
 ovBtn.addEventListener('click', begin);

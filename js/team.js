@@ -156,7 +156,7 @@ function squadCard(actor, safe) {
     '<img class="squad-portrait" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' +
     '<div class="squad-member-main">' +
       '<div class="squad-member-head"><div><strong>' + spec.name + '<mark>Lv.' + level + '</mark></strong><span>' + spec.rank + ' 級 ' + (spec.guide ? '嚮導' : '哨兵') + '・' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
-      '<div class="squad-bars"><div><span>生命 <b>' + hp + ' / ' + spec.hp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / spec.hp * 100)) + '%"></u></i></div>' +
+      '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + spec.hp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / spec.hp * 100)) + '%"></u></i></div>' +
       loadBar + '</div>' +
       '<dl class="squad-stats"><div><dt>攻擊</dt><dd>' + spec.dmg + '</dd></div><div><dt>防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
       '<div class="squad-card-actions"><button class="captain-impression-button" type="button" data-impression="' + actor.type + '">深入了解</button><div class="squad-training">' + trainingAction + '</div></div>' +
@@ -300,7 +300,7 @@ function renderFieldSquadHud() {
       const syncStyle = taintCls ? ' style="--blink-sync:-' + (nowS % 1.1).toFixed(2) + 's;--blink-sync-fast:-' + (nowS % .38).toFixed(2) + 's"' : '';
       return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + '"' + syncStyle + '>' +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
-        '<div><i class="field-hp" aria-label="生命值"><u style="width:' + hpPercent + '%"></u></i></div>' +
+        '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i></div>' +
         '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i></div>' +
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
