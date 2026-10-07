@@ -196,6 +196,14 @@ function slimeExplode(e, mul) {
     if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
   }
   for (const o of [...G.obstacles]) {
+    if (o.trap) {   // 地雷：被炸到會跟著爆（連鎖）
+      if (o.hp > 0 && !(o.fuseT > 0) && Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15;
+      continue;
+    }
+    if (typeof oilItem === 'function' && oilItem(o)) {   // 油桶：被炸到會跟著爆（連鎖）
+      if (o.hp > 0 && enemyObstacleDistance(e, o) <= R) damageOil(o, SLIME_BOMB.building * mul, 'explosion');
+      continue;
+    }
     if (!o.playerBuilt || o.isBase || o.hp <= 0 || enemyObstacleDistance(e, o) > R) continue;
     o.hp -= SLIME_BOMB.building * mul; o.hitT = HIT_DUR;
     if (o.hp <= 0) removeBarrier(o);
@@ -429,10 +437,10 @@ function updateSpitter(e, dt) {
   let best = null, bestD = SLIME_SPIT.range * CELL;
   const consider = o => {
     const d = Math.hypot(o.x - e.x, o.y - e.y);
-    if (d >= SLIME_SPIT.minRange * CELL && d <= bestD) { best = o; bestD = d; }
+    if (d >= SLIME_SPIT.minRange * CELL && d <= bestD && hasLineOfSight(e.x, e.y, o.x, o.y)) { best = o; bestD = d; }   // 隔著牆不吐
   };
   if (G.player && G.player.hp > 0) consider(G.player);
-  for (const t of G.towers) if (t.hp > 0) consider(t);
+  for (const t of G.towers) if (t.hp > 0 && enemyNoticesSentry(e, t)) consider(t);   // 吐酸也不會瞄準沒惹牠的阿瓦倫
   if (!best) return false;
   e.spitWindT = SLIME_SPIT.windup;
   e.spitGoal = { x: best.x, y: best.y + 6 };   // 鎖定蓄力開始當下的位置，看到警示就能閃開

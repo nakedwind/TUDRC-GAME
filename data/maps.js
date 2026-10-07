@@ -325,6 +325,14 @@ const TILES_CUSTOM = [
     "h": 2
   },
   {
+    "id": "tile_new_decor_oil_tank",
+    "name": "油箱",
+    "role": "floor",
+    "file": "images/item-decorate/oil-tank.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_new_decor_plant01",
     "name": "盆栽 1",
     "role": "floor",

@@ -14,6 +14,7 @@ function removeBarrier(o) {
   });
   if (o.mapSource) G.mapDestroyed.add(o.mapSource);
   G.obstacles = G.obstacles.filter(x => x !== o);
+  if (typeof onObstacleRemoved === 'function') onObstacleRemoved(o);   // 油桶／油箱：爆炸或漏油（js/oil-barrels.js）
 }
 
 // 沒有 solid 的舊資料仍以整張圖片範圍擋路。
@@ -60,10 +61,12 @@ function placeObstacle(ob, c, r) {
     return false;
   }
   if (!canPlaceObstacle(v, c, r, extra)) { sfx('error'); flash('這裡放不下', ...center(c, r), '#ff8f8f'); return false; }
+  if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) { sfx('error'); flash('這裡已經有地雷了', ...center(c, r), '#ff8f8f'); return false; }
   if (G.money < ob.cost) { sfx('error'); flash('資源不足', ...center(c, r), '#ff8f8f'); return false; }
   G.money -= ob.cost;
-  const solid = variantSolidCells(v).map(cell => cell.slice());
-  const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0 };
+  // 地雷（trap）埋在地上、不擋路：不登記擋路格
+  const solid = ob.trap ? [] : variantSolidCells(v).map(cell => cell.slice());
+  const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0, trap: !!ob.trap };
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
   sfx('place');   // 放置成功（落地「叩」聲）

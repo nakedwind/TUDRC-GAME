@@ -32,6 +32,7 @@ function enemyAttackObstacle(e, o, dt) {
   e.atkCd = (e.atkCd || 0) - dt;
   if (e.atkCd > 0) return;
   e.atkCd = BARRIER.breakInterval;
+  o.lastHitBy = 'monster';   // 油桶被怪物打壞只會漏油、不會爆炸
   o.hp -= e.buildingDamage ?? BARRIER.breakDmg;
   o.hitT = HIT_DUR;
   if (o.isBase) warnCampAttack();
@@ -92,6 +93,7 @@ function enemyAttackPlayer(e, dt) {
 function trySlimePounce(e, target, distance) {
   if (e.type !== 'slime' || e.variant === 'spitter' || !target || distance > SLIME_POUNCE.range || distance <= 40) return false;   // 吐酸型改用遠程吐酸，不撲擊
   if ((e.playerPounceCd || 0) > 0 || (e.playerPounceT || 0) > 0 || e.slimeClock / SLIME_JUMP.total < SLIME_JUMP.airRatio) return false;
+  if (!hasLineOfSight(e.x, e.y, target.x, target.y)) return false;   // 隔著牆不會撲
   const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
   const reach = Math.max(0, Math.min(d, SLIME_POUNCE.maxLeap) - 14);   // 落在目標面前一點，擊退才有方向
   e.playerWindupT = SLIME_POUNCE.windup;
@@ -113,6 +115,12 @@ function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
 // 被哨兵／嚮導攻擊後，SENTRY_AGGRO_TIME 秒內會優先追打那位攻擊者（連探照燈都先不管）。
 // 優先順序：嘲諷中的哨兵 ＞ 溫特開槍的仇恨 ＞ 打自己的哨兵 ＞ 探照燈 ＞ 最近的哨兵…
 const SENTRY_AGGRO_TIME = 5;
+// 「不主動吸引仇恨」的哨兵（阿瓦倫，資料裡的 noAggro）：怪物平常當作沒看到他，
+// 只有被他打中、正在記仇（sentryAggro）的那一隻才會攻擊他。
+function enemyNoticesSentry(e, t) {
+  if (!TYPES[t.type] || !TYPES[t.type].noAggro) return true;
+  return e.sentryAggro === t && e.sentryAggroT > 0;
+}
 function aggroOnSentry(e, t) {
   if (!e || !t || e.dead || !G.enemies.includes(e) || !G.towers.includes(t)) return;
   e.sentryAggro = t; e.sentryAggroT = SENTRY_AGGRO_TIME;
@@ -286,7 +294,7 @@ function updateSlimePounce(e, dt) {
     addHitstop(.06);
   }
   for (const t of G.towers) {   // 落點附近的哨兵、嚮導也會被撲中
-    if (t.hp <= 0 || Math.hypot(t.x - e.x, t.y - e.y) > hitRadius + 6) continue;
+    if (t.hp <= 0 || Math.hypot(t.x - e.x, t.y - e.y) > hitRadius + 6 || !enemyNoticesSentry(e, t)) continue;   // 撲擊落地也不會順便打到沒惹牠的阿瓦倫
     e.atkCd = 0;   // 撲擊落地不受普通攻擊冷卻限制（每位被撲中的人各算一次）
     enemyAttackSentry(e, t, dt);
   }
@@ -365,7 +373,7 @@ function stepEnemy(e, dt) {
   const playerDistance = G.player && G.player.hp > 0 ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
   // 玩家進入撲擊距離（3 格內）時，比探照燈更優先——否則燈附近的史萊姆永遠不會撲向玩家。
   if (playerDistance <= SLIME_POUNCE.range && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
-  const living = G.towers.filter(t => t.hp > 0 && !t.berserk);
+  const living = G.towers.filter(t => t.hp > 0 && !t.berserk && enemyNoticesSentry(e, t));   // 沒打過牠的阿瓦倫不算目標
   const sensedSentries = living
     .map(t => ({ t, d: Math.hypot(t.x - e.x, t.y - e.y) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
@@ -415,7 +423,7 @@ function stepEnemy(e, dt) {
 
   // 沒有哨兵時，才搜尋 18 格內由玩家建造的設施。
   const buildingChoice = G.obstacles
-    .filter(o => o.playerBuilt && o.hp > 0)
+    .filter(o => o.playerBuilt && o.hp > 0 && !o.trap)   // 地雷埋在地上，怪物不知道
     .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
     .sort((a, b) => a.d - b.d)[0];

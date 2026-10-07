@@ -428,7 +428,7 @@ function draw() {
   const sortables = [];
   collectMapOccluders(ctx, sortables);
   for(const core of G.cores) if(!core.dead && isVisible(core.x,core.y)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
-  for (const o of G.obstacles) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });
+  for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
@@ -437,6 +437,8 @@ function draw() {
   if (G.player) sortables.push({ y: G.player.sitting ? seatDrawY(G.player.sitting) : G.player.y + 16, draw: () => drawPlayer(G.player) });
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
+  drawLandmines(ctx);          // 地雷（js/landmine.js）
+  drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();

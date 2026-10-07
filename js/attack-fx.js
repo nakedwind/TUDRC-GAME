@@ -18,6 +18,7 @@ const LIGHT_FLASH = {
   lightning: { r: 300, life: .22, power: 1,   color: [190, 225, 255] },   // 安柏 雷擊（最大、最亮）
   corrosion: { r: 60,  life: .45, power: .23, color: [170, 90, 230] },    // 阿瓦倫 腐蝕（暗紫、微光）
   core:      { r: 420, life: 1.1, power: 1,   color: [220, 160, 255] },   // 異質核心被摧毀
+  explosion: { r: 380, life: .6,  power: 1,   color: [255, 170, 80] },    // 油桶爆炸
   soothe:    { r: 150, life: .70, power: .55, color: [140, 220, 160] },   // 疏導（顏色跟著施術者）
 };
 const LIGHT_FLASH_MAX = 14;   // 同時最多幾個閃光（太多會拖慢畫面；超過就擠掉最快熄的）
@@ -469,6 +470,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   if (G.enemies.includes(target) && typeof sfxAt === 'function') {
     const impactSound = { flame: 'fireImpact', lightning: 'lightningImpact', corrosion: 'corrosionImpact' }[kind];
     if (impactSound) sfxAt(impactSound, impactPoint.x, impactPoint.y, kind === 'corrosion' ? 0.62 : 0.5, attacker?.type || 'sentry');
+    if (kind === 'flame' && scale > 1.3) sfxAt('smallBoom', impactPoint.x, impactPoint.y, .8, (attacker?.type || 'sentry') + '-ult');   // 希奧妮大招：再疊一聲小爆炸
     sfxAt('monsterHit', target.x, target.y, 0.48, attacker?.type || 'sentry');
   }
 }

@@ -32,11 +32,18 @@ function buildTileRegistry() {
 const mapTileById = id => TILE_REGISTRY[id];
 const mapTileW = t => (t && t.w) || 1;
 const mapTileH = t => (t && t.h) || 1;
-const isMapObstacleTile = t => !!(t && (t.role === 'obstacle' || String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/')));
+const isMapObstacleTile = t => !!(t && (t.role === 'obstacle' || String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/') ||
+  (typeof oilItemByFile === 'function' && oilItemByFile(t.file))));   // 油桶／油箱（js/oil-barrels.js）
 function mapObstacleSpec(t) {
   const file = String(t.file || '').replace(/\\/g, '/');
+  const oil = typeof oilItemByFile === 'function' && oilItemByFile(file);
+  if (oil) {   // 油桶／油箱：HP 沿用裝飾物件的設定，只有最下面那排擋路
+    const deco = (typeof DECORATIONS !== 'undefined' && DECORATIONS.find(d => d.id === oil[0])) || {};
+    const solid = []; for (let c = 0; c < mapTileW(t); c++) solid.push([c, mapTileH(t) - 1]);
+    return { type: oil[0], hp: deco.hp || 30, solid };
+  }
   for (const ob of OBSTACLES) for (const orient of ['h', 'v']) {
-    if (ob[orient] && ob[orient].file === file) return { type: ob.id, hp: ob.hp, solid: ob[orient].solid };
+    if (ob[orient] && ob[orient].file === file) return { type: ob.id, hp: ob.hp, solid: ob[orient].solid, trap: !!ob.trap };
   }
   if (file.includes('07-Camping lights.png')) return { type: 'camping_lights', hp: 120, solid: [[0, mapTileH(t) - 1]] };
   const solid = [];
@@ -238,6 +245,23 @@ function elevatorBlocksPoint(x, y) {
   }
   return null;
 }
+// ---- 視線：兩點之間有沒有被固定牆擋住 ----
+// 只有地圖的固定牆（含微調過的牆面、關著的電梯門）會擋；玩家蓋的路障、鐵絲網等比較矮，可以從上面打過去。
+// 沿線每 6px 檢查一次；線剛好擦過牆角時，左右各偏 5px 再試一次，有一條通就算看得到（避免卡卡的誤判）。
+function hasLineOfSight(x0, y0, x1, y1) {
+  const clear = (ox, oy) => {
+    const ax = x0 + ox, ay = y0 + oy, bx = x1 + ox, by = y1 + oy;
+    const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 6));
+    for (let i = 1; i < n; i++) {
+      const k = i / n;
+      if (solidBlocksPoint(ax + (bx - ax) * k, ay + (by - ay) * k)) return false;
+    }
+    return true;
+  };
+  if (clear(0, 0)) return true;
+  const d = Math.hypot(x1 - x0, y1 - y0) || 1, px = -(y1 - y0) / d * 5, py = (x1 - x0) / d * 5;
+  return clear(px, py) || clear(-px, -py);
+}
 function solidBlocksPoint(x, y) {
   const elevator = elevatorBlocksPoint(x, y);
   if (elevator !== null) return elevator;
@@ -291,6 +315,10 @@ function seedMapObstacles() {
   const addMapObstacle = (t, c, r, source, stamp = null) => {
     if (!isMapObstacleTile(t)) return;
     const spec = mapObstacleSpec(t), w = mapTileW(t), h = mapTileH(t);
+    if (spec.trap) {   // 地雷：埋在地上、不擋路
+      G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w: 1, h: 1, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0, trap: true });
+      return;
+    }
     const solid = (spec.solid || []).map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr])
       .filter(([dc, dr]) => inGrid(c + dc, r + dr) && !G.grid[(c + dc) + ',' + (r + dr)]);
     if (!solid.length) return;

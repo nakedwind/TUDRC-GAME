@@ -290,7 +290,7 @@ function updateSentry(t, dt) {
     const campThreat = campAttackerFor(t);
     if (campThreat) {
       t.target = null; t.waitT = 0;
-      if (Math.hypot(campThreat.x - t.x, campThreat.y - t.y) > ownSpec.range * CELL - 6) {
+      if (Math.hypot(campThreat.x - t.x, campThreat.y - t.y) > ownSpec.range * CELL - 6 || !hasLineOfSight(t.x, t.y, campThreat.x, campThreat.y)) {
         moveSentryWithPath(t, campThreat.x, campThreat.y, (ownSpec.walkSpeed || 80) * 1.25, dt);
       }
       return;
@@ -304,7 +304,7 @@ function updateSentry(t, dt) {
       t.guardSpeechCd = 6;
     }
     t.target = null; t.waitT = 0;
-    if (Math.hypot(attacker.x - t.x, attacker.y - t.y) > ownSpec.range * CELL - 6) {
+    if (Math.hypot(attacker.x - t.x, attacker.y - t.y) > ownSpec.range * CELL - 6 || !hasLineOfSight(t.x, t.y, attacker.x, attacker.y)) {
       moveSentryWithPath(t, attacker.x, attacker.y, Math.max(170, (ownSpec.walkSpeed || 80) * 2.2), dt);
     }
     return;
@@ -398,7 +398,7 @@ function updateSentry(t, dt) {
     }
     if (foe) {
       t.target = null; t.waitT = 0;                       // 取消原本的閒逛
-      if (fd > atkR - 6) {                                // 還沒進射程→靠過去
+      if (fd > atkR - 6 || !hasLineOfSight(t.x, t.y, foe.x, foe.y)) {   // 還沒進射程、或隔著牆看不到→繞路靠過去
         moveSentryWithPath(t, foe.x, foe.y, (spec.walkSpeed || 80) * 1.25, dt); // 追敵時也會繞過障礙
       }
       return;                                             // 接敵中：不進入閒逛邏輯

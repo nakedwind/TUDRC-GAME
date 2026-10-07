@@ -32,6 +32,12 @@ const SFX = (() => {
     swordSwing: '揮劍.mp3',
     heartbeat: '心跳.mp3',
     achievement: '升級.mp3',
+    glassBreak3: '玻璃破掉3.mp3',
+    glassBreak4: '玻璃破掉4.mp3',
+    mineBeep: 'BB聲.mp3',
+    smallBoom: '小爆炸.mp3',
+    midBoom: '中爆炸.mp3',
+    bigBoom: '爆炸.mp3',
     slimeHit: 'slime-hit.mp3',
     slimeLand: 'slime-land.mp3',
   };

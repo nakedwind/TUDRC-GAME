@@ -522,6 +522,7 @@ function playerBuildingAt(c, r) {
 function demolishPlayerBuilding(o) {
   if (!o || !o.playerBuilt || !G.obstacles.includes(o)) return false;
   const [fx, fy] = center(o.c + ((o.w || 1) - 1) / 2, o.r + ((o.h || 1) - 1) / 2);
+  o.lastHitBy = 'demolish';   // 自己拆除的油桶不會爆炸也不會漏油
   removeBarrier(o);
   for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }
   for (const enemy of G.enemies) { enemy.aiPath = null; enemy.aiGoal = null; enemy.aiRouteTimer = 0; }
@@ -642,7 +643,8 @@ function updateChaosSentry(t, spec, dt) {
   for (const c of G.cores) if (!c.dead) consider(c, c.x, c.y);
   if (!best) return;
   const range = spec.range * CELL;
-  if (bestD > range * 0.9) {                                   // 走向目標（直線步進、撞牆改走單軸）
+  const canSee = hasLineOfSight(t.x, t.y, best.x, best.y);
+  if (bestD > range * 0.9 || !canSee) {                        // 走向目標（直線步進、撞牆改走單軸）；隔牆看不到也繼續走
     const sp = (spec.walkSpeed || 80) * dt, dx = best.x - t.x, dy = best.y - t.y, d = bestD || 1;
     const nx = t.x + dx / d * sp, ny = t.y + dy / d * sp;
     const [cc, cr] = cellAt(nx, ny);
@@ -1100,6 +1102,7 @@ function pickSentryTarget(t, R) {
     if (e.dead) continue;
     const distance = Math.hypot(e.x - t.x, e.y - t.y);
     if (distance > R) continue;
+    if (!hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 隔著牆看不到就不能打
     const urgent = (e.attackingObstacle && e.attackingObstacle.isBase) || (p && p.underAttackT > 0 && p.lastAttacker === e);
     const score = urgent ? distance - 100000 : distance;
     if (score < bestScore) { best = e; bestScore = score; }
@@ -1108,7 +1111,7 @@ function pickSentryTarget(t, R) {
   for (const core of G.cores) {
     if (core.dead) continue;
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
-    if (distance <= R && distance < bestScore) { best = core; bestScore = distance; }
+    if (distance <= R && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
   }
   return best;
 }
@@ -1116,6 +1119,7 @@ function pickSentryTarget(t, R) {
 // ---- 疏導冷卻與大招數值（特效本身在 js/attack-fx.js）----
 const SOOTHE_AURA_CD = 3;   // 嚮導被動疏導的冷卻秒數
 const SOOTHE_CHANNEL = 1;  // 嚮導疏導時站定、閉眼施法的秒數（期間不走動、不攻擊）
+const ACID_TICK = 1;   // 阿瓦倫腐蝕池：每隔幾秒扣一次血（每次扣「每秒傷害 × 間隔」）
 // 大招：平時普攻，冷卻好時放一次（傷害高、範圍大、特效大）；喊的話在 data/dialogues.js 的 ultimate
 const ULTIMATES = {
   theonie: { cd: 8,  dmgMul: 2.6, splash: 2.2, scale: 1.9 },
@@ -1194,10 +1198,18 @@ function updatePlayerAttack(dt) {
   let best = null, bestD = PLAYER_ATK.range * CELL;
   for (const e of G.enemies) {
     if (e.dead || !isLit(e.x, e.y)) continue;
+    if (!hasLineOfSight(p.x, p.y, e.x, e.y)) continue;   // 隔牆打不到
     const d = Math.hypot(e.x - p.x, e.y - p.y);
     if (d > PLAYER_ATK.range * CELL) continue;
     let da = Math.abs(Math.atan2(e.y - p.y, e.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
     if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = e; }
+  }
+  for (const o of G.obstacles) {   // 油桶／油箱也能瞄準（開槍打爆）
+    if (!oilItem(o) || o.hp <= 0) continue;
+    const c = oilCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
+    if (d > PLAYER_ATK.range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
+    let da = Math.abs(Math.atan2(c.y - p.y, c.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
+    if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = oilProxy(o); }
   }
   const endX = best ? best.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   const endY = best ? best.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
@@ -1207,6 +1219,8 @@ function updatePlayerAttack(dt) {
   spawnShellCasing(mx, my, aimAng);  // 彈殼拋出
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
   if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
+  igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
+  if (best && best.oilRef) { damageOil(best.oilRef, Math.round(PLAYER_ATK.dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
   if (best) {
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     best.hp -= shotDmg;
@@ -1426,8 +1440,9 @@ function update(dt) {
     const R = spec.range * CELL;
     let target = swingTarget;
     if (!target) target = t.mode === 'goto' ? null : campAttackerFor(t, R);
+    if (target && target !== swingTarget && !hasLineOfSight(t.x, t.y, target.x, target.y)) target = null;   // 隔牆看不到
     const attacker = !target && t.type === 'red' ? redAttacker() : null;
-    if (attacker && Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R) target = attacker;
+    if (attacker && Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R && hasLineOfSight(t.x, t.y, attacker.x, attacker.y)) target = attacker;
     if (!target) target = pickSentryTarget(t, R);
     if (target) {
       if (!swingTarget) t.cd = 1 / (spec.rate * (t.taint > 85 && !t.berserk ? 0.5 : 1));   // 瀕臨暴走：攻速減半
@@ -1454,9 +1469,9 @@ function update(dt) {
       const U = ((t.gunSwing && t.gunSwing.ult) || (t.meleeSwing && t.meleeSwing.ult)) ? ULTIMATES[t.type] : null;   // 大招（在揮擊啟動時已決定）
       if (U && U.radius) {   // 近戰大招：大範圍（紅＝盾牌衝撞＋回復；路德＝重擊＋暈眩）
         const r = U.radius * CELL, dmg = spec.dmg * U.dmgMul * sentryDamageMul(t), col = U.kind === 'bash' ? '#bfe0ff' : '#ffd0d5';
-        const hitEnemy = G.enemies.find(e => !e.dead && Math.hypot(e.x - t.x, e.y - t.y) <= r);
+        const hitEnemy = G.enemies.find(e => !e.dead && Math.hypot(e.x - t.x, e.y - t.y) <= r && hasLineOfSight(t.x, t.y, e.x, e.y));
         for (const e of G.enemies) {
-          if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r) continue;
+          if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r || !hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 牆後的不受影響
           e.hp -= dmg;
           aggroOnSentry(e, t);
           if (U.knockback) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
@@ -1474,8 +1489,9 @@ function update(dt) {
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
         const atkDmg = spec.dmg * (U ? U.dmgMul : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
+        onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);   // 安柏／希奧妮：不小心波及附近的油桶、油汙
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
-        if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL) { e.hp -= atkDmg * .6; affected.push(e); }
+        if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
         for (const e of affected) {
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
           if (spec.stun) e.stunT=Math.max(e.stunT||0,spec.stun);
@@ -1491,35 +1507,54 @@ function update(dt) {
       if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入暴走，開始無差別攻擊！', true); }
     }
   }
-  // 地上腐蝕痕跡：計時、範圍內怪物持續扣血、偶爾冒紫黑霧
+  // 地上腐蝕痕跡：站在裡面的對象每 ACID_TICK 秒扣一次血、偶爾冒紫黑霧。
+  // 計時跟著「被腐蝕的對象」走：同時站在好幾灘裡，也只吃最痛的那一灘（不疊加）。
   if (G.acidPools && G.acidPools.length) {
+    const acidDps = o => {   // 站在哪幾灘裡 → 取最痛的那一灘的每秒傷害；不在任何一灘裡回傳 0
+      let best = 0;
+      for (const pool of G.acidPools) if (pool.t > 0 && Math.hypot(o.x - pool.x, o.y - pool.y) <= pool.r) best = Math.max(best, pool.dps);
+      return best;
+    };
+    // 回傳這一刻要扣多少血（0＝還沒到時間或不在池子裡）；剛踩進去要等 1 秒才第一次扣
+    const acidTick = o => {
+      const dps = acidDps(o);
+      if (!dps) { o.acidT = ACID_TICK; return 0; }
+      o.acidT = (o.acidT ?? ACID_TICK) - dt;
+      if (o.acidT > 0) return 0;
+      o.acidT += ACID_TICK;
+      return dps * ACID_TICK;   // 一次扣掉「每秒傷害 × 間隔」
+    };
+    for (const e of G.enemies) {
+      if (e.dead) continue;
+      const dmgAmt = acidTick(e);
+      if (!dmgAmt) continue;
+      e.hp -= dmgAmt;
+      e.hitT = Math.max(e.hitT || 0, .16); e.hitColor = '#b060ff';
+      flashDmg('-' + Math.round(dmgAmt), e.x, e.y - 26, '#c58aff');
+    }
+    // 隊友也會被腐蝕：哨兵（依防禦減免，歸 0 失去戰鬥能力）。阿瓦倫本人對自己的腐蝕免疫。
+    for (const t of G.towers) {
+      if (t.hp <= 0 || t.berserk || t.type === 'avaren') continue;
+      const dmgAmt = acidTick(t);
+      if (!dmgAmt) continue;
+      const def = Math.max(0, Math.min(.75, (TYPES[t.type] && TYPES[t.type].defense) || 0));
+      const hurt = dmgAmt * (1 - def);
+      t.hp = Math.max(0, t.hp - hurt);
+      t.hitT = Math.max(t.hitT || 0, .2); t.hitColor = '#b060ff';
+      flashDmg('-' + Math.round(hurt), t.x, t.y - 30, '#c58aff');
+      if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+    }
+    // 玩家（溫特）
+    const p = G.player;
+    const playerAcid = p && p.hp > 0 ? acidTick(p) : 0;
+    if (playerAcid) {
+      p.hp = Math.max(0, p.hp - playerAcid);
+      p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT, .35);
+      flashDmg('-' + Math.round(playerAcid), p.x, p.y - 46, '#c58aff');
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
+    }
     for (const pool of G.acidPools) {
       pool.t -= dt;
-      const dmgAmt = pool.dps * dt;
-      for (const e of G.enemies) {
-        if (e.dead) continue;
-        if (Math.hypot(e.x - pool.x, e.y - pool.y) <= pool.r) {
-          e.hp -= dmgAmt;
-          e.hitT = Math.max(e.hitT || 0, .12); e.hitColor = '#b060ff';
-        }
-      }
-      // 隊友也會被腐蝕：哨兵（依防禦減免，歸 0 失去戰鬥能力）。阿瓦倫本人對自己的腐蝕免疫。
-      for (const t of G.towers) {
-        if (t.hp <= 0 || t.berserk || t.type === 'avaren') continue;
-        if (Math.hypot(t.x - pool.x, t.y - pool.y) <= pool.r) {
-          const def = Math.max(0, Math.min(.75, (TYPES[t.type] && TYPES[t.type].defense) || 0));
-          t.hp = Math.max(0, t.hp - dmgAmt * (1 - def));
-          t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#b060ff';
-          if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
-        }
-      }
-      // 玩家（溫特）
-      const p = G.player;
-      if (p && p.hp > 0 && Math.hypot(p.x - pool.x, p.y - pool.y) <= pool.r) {
-        p.hp = Math.max(0, p.hp - dmgAmt);
-        p.hitT = Math.max(p.hitT || 0, .2); G.damageVignetteT = Math.max(G.damageVignetteT, .3);
-        if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
-      }
       pool.fizz -= dt;
       if (pool.fizz <= 0 && pool.t > .4) {   // 焦痕上持續冒出往上飄散的黑霧
         pool.fizz = .14 + Math.random() * .12;
@@ -1535,7 +1570,8 @@ function update(dt) {
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
-    core.dead=true; addLightFlash('core', core.x, core.y); earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    core.dead=true; addLightFlash('core', core.x, core.y);
+    SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起 earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -1591,6 +1627,8 @@ function update(dt) {
   updateLightFlashes(dt);   // 攻擊閃光逐漸熄滅
   updateCombatFeel(dt);   // 屍體、黏液、地上痕跡
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
+  updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
+  updateLandmines(dt);    // 地雷（js/landmine.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   updateHUD();

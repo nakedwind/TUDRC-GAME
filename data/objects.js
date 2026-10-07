@@ -177,8 +177,28 @@ const OBSTACLES = [
     "name": "露營燈",
     "cost": 15,
     "hp": 120,
-    "h": { "file": "images/item-obstacle/07-Camping lights.png", "w": 1, "h": 1, "solid": [[0, 0]] },
-    "v": { "file": "images/item-obstacle/07-Camping lights.png", "w": 1, "h": 1, "solid": [[0, 0]] }
+    "h": {
+      "file": "images/item-obstacle/07-Camping lights.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/07-Camping lights.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    }
   },
   {
     "id": "searchlight",
@@ -204,6 +224,35 @@ const OBSTACLES = [
         [
           0,
           1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "landmine",
+    "name": "地雷",
+    "cost": 25,
+    "hp": 1,
+    "trap": true,
+    "h": {
+      "file": "images/item-obstacle/08-landmine.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/08-landmine.png",
+      "w": 1,
+      "h": 1,
+      "solid": [
+        [
+          0,
+          0
         ]
       ]
     }
