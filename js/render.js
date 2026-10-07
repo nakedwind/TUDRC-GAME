@@ -467,6 +467,7 @@ function draw() {
     const near = G.running ? portalNearPlayer() : null;
     if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, d.open ? '關門' : '開門'); }
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
       if (actor) drawInteractPrompt(actor.x, actor.y - 57,

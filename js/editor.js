@@ -52,8 +52,11 @@ const STORAGE_RESTAURANT_PACK = 'tudrc_asset_pack_restaurant_v1'; // 餐廳素�
 const STORAGE_HOSPITAL_PACK = 'tudrc_asset_pack_hospital_v1';     // 醫院病房素材包
 const STORAGE_CONTAINMENT_PACK = 'tudrc_asset_pack_containment_v1'; // 收容觀察室素材包
 const STORAGE_MRT_PACK = 'tudrc_asset_pack_mrt_station_v1';       // 捷運車站素材包
+const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商店素材包
 const STORAGE_BACKROOM_DAMAGE_EXTRA = 'tudrc_asset_backroom_damage_extra_v1'; // 後補：後室地板／牆面破損、看板、日光燈＋破損建築新素材
 const STORAGE_BACKROOM_FLOOR_EDGE = 'tudrc_asset_backroom_floor_edge_v1';  // 後補：後室地板左緣／右緣
+const STORAGE_BACKROOM_WALL_HALF_HOLE = 'tudrc_asset_backroom_wall_half_hole_v1'; // 後補：後室半牆、後室牆面（門洞）
+const STORAGE_BACKROOM_DOOR_WOOD = 'tudrc_asset_backroom_door_wood_v1'; // 後補：後室木門（黃色，配門洞用）
 const STORAGE_BACKROOM_CORE_PILLARS = 'tudrc_asset_backroom_core_pillars_v1'; // 後補：異質核心與柱子變化
 const BACKROOM_CORE_PILLAR_IDS = new Set(['tile_bg_anomalous_core', 'tile_bg_backroom_pillar3', 'tile_bg_pillar', 'tile_bg_pillar02', 'tile_bg_pillar03', 'tile_bg_pillar04']);
 const BACKROOM_DAMAGE_EXTRA_IDS = new Set(["tile_bg_backroom_floor03", "tile_bg_backroom_floor04", "tile_bg_backroom_wall02", "tile_bg_backroom_wall02_dmg_light", "tile_bg_backroom_wall02_dmg_medium", "tile_bg_backroom_wall02_dmg_heavy", "tile_bg_electric_light", "tile_bg_road_signs", "tile_bg_word_y28", "tile_dmg_backroom_pillar_damaged", "tile_dmg_pillar_damaged", "tile_dmg_floor_crack_cross", "tile_dmg_floor_crack_fork", "tile_dmg_floor_crack_stained", "tile_dmg_floor_stain_seep", "tile_dmg_floor_stain_smudge", "tile_dmg_rubble_brick_chunks", "tile_dmg_rubble_chips_02", "tile_dmg_rubble_scatter_02", "tile_dmg_rubble_slab_fragments", "tile_dmg_rubble_wall_chunks", "tile_dmg_rubble_rebar_chunk"]);
@@ -228,8 +231,11 @@ function loadTiles() {
   const hospitalAdded = mergeDefaultAssetPack('tile_hospital_', STORAGE_HOSPITAL_PACK);
   const containmentAdded = mergeDefaultAssetPack('tile_containment_', STORAGE_CONTAINMENT_PACK);
   const mrtAdded = mergeDefaultAssetPack('tile_mrt_', STORAGE_MRT_PACK);
+  const cvsAdded = mergeDefaultAssetPack('tile_cvs_', STORAGE_CVS_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
   const backroomEdgeAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_floor05' || t.id === 'tile_bg_backroom_floor06', STORAGE_BACKROOM_FLOOR_EDGE);
+  const backroomWallHalfHoleAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_half' || t.id === 'tile_bg_backroom_wall02_hole', STORAGE_BACKROOM_WALL_HALF_HOLE);
+  const backroomDoorWoodAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_door_wood', STORAGE_BACKROOM_DOOR_WOOD);
   const oilTankAdded = mergeDefaultAssetPack(t => t.id === 'tile_new_decor_oil_tank', STORAGE_OIL_TANK);
   const backroomCorePillarsAdded = mergeDefaultAssetPack(t => BACKROOM_CORE_PILLAR_IDS.has(t.id), STORAGE_BACKROOM_CORE_PILLARS, true);
   let restaurantChairsFixed = false;
@@ -246,7 +252,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || backroomDamageAdded || backroomEdgeAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
+  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -471,6 +477,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/醫院病房',
   'images/收容觀察室',
   'images/捷運車站',
+  'images/convenience-store',
 ];
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -971,6 +978,7 @@ const PALETTE_CATEGORIES = [
   { id: 'hospital', name: '醫院病房' },
   { id: 'containment', name: '收容觀察室' },
   { id: 'mrt', name: '捷運車站' },
+  { id: 'cvs', name: '便利商店' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -987,6 +995,7 @@ function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_hospital_') || file.includes('/醫院病房/')) return 'hospital';
   if (String(t.id || '').startsWith('tile_containment_') || file.includes('/收容觀察室/')) return 'containment';
   if (String(t.id || '').startsWith('tile_mrt_') || file.includes('/捷運車站/')) return 'mrt';
+  if (String(t.id || '').startsWith('tile_cvs_') || file.includes('/convenience-store/')) return 'cvs';
   if (file.includes('/item-decorate/')) return 'decor';
   if (file.includes('/item-obstacle/')) return 'obstacle';
   return 'other';
@@ -1182,6 +1191,29 @@ function refreshBaseCollisionPanel() {
     grid.appendChild(b);
   }
 }
+// ---- 門：選到一扇門時，可以設定手動門／自動門 ----
+function selectedDoorStamp() {
+  if (typeof DOOR_TILES === 'undefined' || selections.length !== 1 || selections[0].type !== 'stamp') return null;
+  const s = curMap().stamps[selections[0].index];
+  return s && DOOR_TILES[s.id] ? s : null;
+}
+function refreshDoorControl() {
+  const box = document.getElementById('selDoorControl'), select = document.getElementById('selDoorMode');
+  const s = selectedDoorStamp();
+  box.classList.toggle('hidden', !s);
+  if (!s) return;
+  if (!select.options.length) for (const [value, label] of Object.entries(DOOR_MODES)) {
+    const o = document.createElement('option'); o.value = value; o.textContent = label; select.appendChild(o);
+  }
+  select.value = s.doorMode === 'auto' ? 'auto' : 'manual';
+}
+document.getElementById('selDoorMode').addEventListener('change', e => {
+  const s = selectedDoorStamp(); if (!s) return;
+  pushUndo();
+  if (e.target.value === 'auto') s.doorMode = 'auto'; else delete s.doorMode;   // 手動門是預設，不另外存
+  saveMaps(); draw();
+  setStatus(e.target.value === 'auto' ? '已設為自動門：異質核心醒來時自動打開' : '已設為手動門：玩家按 E 開關', '#7ee0c0');
+});
 function refreshSelPanel() {
   const layerSelect = document.getElementById('selLayer');
   const depthInput = document.getElementById('selDepthInput');
@@ -1198,12 +1230,14 @@ function refreshSelPanel() {
   depthInput.value = '';
   depthAuto.disabled = true;
   if (!selection) {
+    refreshDoorControl();
     document.getElementById('selName').textContent = '無';
     layerSelect.innerHTML = '<option value="">選取物件後設定</option>';
     refreshBaseCollisionPanel();
     return;
   }
   if (selections.length > 1) {
+    refreshDoorControl();
     document.getElementById('selName').textContent = selections.length + ' 個物件';
     layerSelect.innerHTML = '<option value="">選擇目標圖層</option>';
     LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; layerSelect.appendChild(o); });
@@ -1223,6 +1257,7 @@ function refreshSelPanel() {
   document.getElementById('selName').textContent = name;
   layerSelect.innerHTML = '';
   LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; if (l.id === curLayer) o.selected = true; layerSelect.appendChild(o); });
+  refreshDoorControl();
   const depthStamp = selectedDepthStamp();
   if (depthStamp) {
     depthInput.max = tileH(depthStamp.t);

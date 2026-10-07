@@ -344,6 +344,7 @@ window.addEventListener('keydown', e => {
       } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else {
       const actor = interactionNearPlayer();
       if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
@@ -770,6 +771,7 @@ function newGame() {
   };
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
+  setupDoors();         // 門一開始都關著（js/doors.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
