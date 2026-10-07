@@ -640,7 +640,7 @@ function updateChaosSentry(t, spec, dt) {
   for (const o of G.towers) if (o !== t && o.hp > 0) consider(o, o.x, o.y);
   if (G.player && G.player.hp > 0) consider(G.player, G.player.x, G.player.y);
   for (const o of G.obstacles) if (o.isBase && o.hp > 0) consider(o, (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2);
-  for (const c of G.cores) if (!c.dead) consider(c, c.x, c.y);
+  for (const c of G.cores) if (!c.dead && c.awake) consider(c, c.x, c.y);
   if (!best) return;
   const range = spec.range * CELL;
   const canSee = hasLineOfSight(t.x, t.y, best.x, best.y);
@@ -1109,7 +1109,7 @@ function pickSentryTarget(t, R) {
   }
   if (best || t.guardSummoned) return best;
   for (const core of G.cores) {
-    if (core.dead) continue;
+    if (core.dead || !core.awake) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
     if (distance <= R && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
   }
@@ -1196,8 +1196,9 @@ function updatePlayerAttack(dt) {
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   // 朝游標方向、射程內、照亮的最近怪
   let best = null, bestD = PLAYER_ATK.range * CELL;
-  for (const e of G.enemies) {
-    if (e.dead || !isLit(e.x, e.y)) continue;
+  for (const e of [...G.enemies, ...G.cores]) {
+    const isCore = G.cores.includes(e);
+    if (e.dead || !(isCore ? isVisible(e.x, e.y) : isLit(e.x, e.y))) continue;
     if (!hasLineOfSight(p.x, p.y, e.x, e.y)) continue;   // 隔牆打不到
     const d = Math.hypot(e.x - p.x, e.y - p.y);
     if (d > PLAYER_ATK.range * CELL) continue;
@@ -1221,6 +1222,13 @@ function updatePlayerAttack(dt) {
   if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
   if (best && best.oilRef) { damageOil(best.oilRef, Math.round(PLAYER_ATK.dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
+  if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
+    const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
+    wakeCore(best); best.lastHp = best.hp;
+    best.hp -= shotDmg; markHit(critMul);
+    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');
+    best = null;
+  }
   if (best) {
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     best.hp -= shotDmg;
@@ -1510,9 +1518,10 @@ function update(dt) {
   // 地上腐蝕痕跡：站在裡面的對象每 ACID_TICK 秒扣一次血、偶爾冒紫黑霧。
   // 計時跟著「被腐蝕的對象」走：同時站在好幾灘裡，也只吃最痛的那一灘（不疊加）。
   if (G.acidPools && G.acidPools.length) {
-    const acidDps = o => {   // 站在哪幾灘裡 → 取最痛的那一灘的每秒傷害；不在任何一灘裡回傳 0
+    const acidDps = o => {   // 站在哪幾灘裡 → 取最痛的那一灘的每秒傷害；不在任何一灘裡回傳 0（異質核心腳下的腐蝕不傷異質體）
       let best = 0;
-      for (const pool of G.acidPools) if (pool.t > 0 && Math.hypot(o.x - pool.x, o.y - pool.y) <= pool.r) best = Math.max(best, pool.dps);
+      const isEnemy = G.enemies.includes(o);
+      for (const pool of G.acidPools) if (pool.t > 0 && !(isEnemy && pool.noEnemy) && Math.hypot(o.x - pool.x, o.y - pool.y) <= pool.r) best = Math.max(best, pool.dps);
       return best;
     };
     // 回傳這一刻要扣多少血（0＝還沒到時間或不在池子裡）；剛踩進去要等 1 秒才第一次扣
@@ -1570,8 +1579,9 @@ function update(dt) {
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
-    core.dead=true; addLightFlash('core', core.x, core.y);
-    SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起 earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    core.dead=true; breakCore(core);
+    SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
+    earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -1584,7 +1594,8 @@ function update(dt) {
   }
   for (const f of G.effects) {
     f.life -= dt;
-    if (f.shell) {   // 彈殼：拋出、受重力落地彈一下，之後躺在地上淡出
+    if (f.coreMote) updateCoreMote(f, dt);   // 異質核心的黑紫粒子
+    else if (f.shell) {   // 彈殼：拋出、受重力落地彈一下，之後躺在地上淡出
       f.x += f.vx * dt; f.y += f.vy * dt; f.rot += f.spin * dt;
       f.vz -= 420 * dt; f.z += f.vz * dt;
       if (f.z <= 0) {

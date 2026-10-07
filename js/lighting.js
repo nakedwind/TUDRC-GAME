@@ -90,10 +90,16 @@ function spreadLight(l, onCell) {
 // 種類與數值在 js/attack-fx.js 的 LIGHT_FLASH。閃光同樣會被牆擋住，
 // 但只是「畫面變亮、看得到怪物」，不會讓哨兵索敵、蓋建築等判定把那裡當成亮處。
 function flashStrength(f) { return Math.pow(Math.max(0, f.life / f.life0), 1.6) * f.power; }
+// 只影響畫面的光：攻擊閃光＋甦醒的異質核心
+function visualLights() {
+  if (!G) return [];
+  return [...(G.lightFlashes || []), ...(typeof coreGlowLights === 'function' ? coreGlowLights() : [])];
+}
 function computeFlashField() {
   flashField.fill(0);
-  if (!LIGHT.enabled || !G || !G.lightFlashes || !G.lightFlashes.length) return;
-  for (const f of G.lightFlashes) {
+  const list = visualLights();
+  if (!LIGHT.enabled || !list.length) return;
+  for (const f of list) {
     const k = flashStrength(f);
     if (k > .02) spreadLight(f, (i, b) => { const v = b * k; if (v > flashField[i]) flashField[i] = v; });
   }
@@ -254,10 +260,10 @@ function drawDarkness() {
   ctx.restore();
 
   // 攻擊閃光的色光（火焰偏橘、雷擊偏藍白…），疊在黑幕上面
-  if (G && G.lightFlashes && G.lightFlashes.length) {
+  if (visualLights().length) {
     ctx.save();
     ctx.globalCompositeOperation = 'screen';
-    for (const f of G.lightFlashes) {
+    for (const f of visualLights()) {
       const k = flashStrength(f);
       if (k <= .02) continue;
       const R = f.r * .75, [cr, cg, cb] = f.color;
