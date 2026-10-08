@@ -57,7 +57,11 @@ function placeObstacle(ob, c, r) {
   const v = ob[buildOrient], extra = placeExtra(ob);
   if (!footprintNearLight(v, c, r, extra)) {
     sfx('error');
-    flash(emitsLight(ob) ? '離光太遠了，要蓋在光圈邊緣附近' : '太暗了，要先照亮這裡', ...center(c, r), '#ffd24a');
+    const msg = '太暗了，無法放置建築';
+    flash(msg, ...center(c, r), '#ffd24a');
+    // 右上角也提示一次（連續點擊時 1.5 秒內不重複）
+    const now = performance.now();
+    if (now - (placeObstacle.darkNoticeAt || 0) > 1500) { placeObstacle.darkNoticeAt = now; systemNotice(msg, true); }
     return false;
   }
   if (!canPlaceObstacle(v, c, r, extra)) { sfx('error'); flash('這裡放不下', ...center(c, r), '#ff8f8f'); return false; }

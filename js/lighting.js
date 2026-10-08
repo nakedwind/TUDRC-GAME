@@ -147,6 +147,7 @@ function getLights() {
         single: o.type === 'camping_lights', phase: o.c * 7 + o.r * 13 });
     }
   }
+  if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
   return L;
 }
 function isLit(x, y) {

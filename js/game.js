@@ -1806,6 +1806,7 @@ function update(dt) {
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
+  updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   updateHUD();

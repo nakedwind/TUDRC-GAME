@@ -2,6 +2,7 @@
 //  異質碎片礦物：用地圖編輯器擺在地圖上（素材在 images/item-obstacle/09～11-ore-*.png）。
 //  礦物很硬，徒手挖不開。能打開礦物的方法：
 //    ・地雷爆炸（油桶炸不開，但油桶爆炸可以引爆旁邊的地雷）
+//    ・瓦斯爐爆炸（威力比較小，js/oil-barrels.js）
 //    ・路德：打怪時礦物剛好在拳頭的攻擊範圍內，會被震裂，打幾下就碎（暴走時更快）
 //    ・阿瓦倫：打怪時腐蝕剛好噴到礦物，礦物泡在腐蝕池裡久了會溶解
 //    （哨兵不會主動去打礦物，只會在攻擊範圍剛好涵蓋礦物時波及）
@@ -42,11 +43,11 @@ function oreNearPlayer() {
 // 對著礦物按互動鍵：提醒打開礦物的方法
 function oreHint(o) {
   const c = oreCenter(o);
-  flash('太硬了！要用地雷炸開', c.x, c.y - 34, '#d6b8ff', 1.4);
+  flash('太硬了！要用地雷或瓦斯爐炸開', c.x, c.y - 34, '#d6b8ff', 1.4);
   sfx('error');
 }
 
-// ---- 爆炸：地雷（js/landmine.js）、希奧妮大招（js/attack-fx.js）爆炸時呼叫 ----
+// ---- 爆炸：地雷（js/landmine.js）、瓦斯爐（js/oil-barrels.js）、希奧妮大招（js/attack-fx.js）爆炸時呼叫 ----
 function blastOres(x, y, R) {
   if (!G) return;
   for (const o of [...G.obstacles]) {
@@ -207,7 +208,7 @@ function drawOreShards(ctx) {
 // 靠近礦物時的提示（沒有按鍵，只說明要用爆炸）
 function drawOreHint(o) {
   const c = oreCenter(o), spec = ORE_TYPES[o.type];
-  const label = '💣 ' + spec.name + '：用地雷炸開';
+  const label = '💣 ' + spec.name + '：用地雷或瓦斯爐炸開';
   ctx.save();
   ctx.font = 'bold 12px sans-serif'; ctx.textBaseline = 'alphabetic';
   const w = ctx.measureText(label).width + 18, h = 22, x = Math.round(c.x - w / 2), y = Math.round(c.y - 30 - h - 8);

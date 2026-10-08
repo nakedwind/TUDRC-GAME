@@ -1,6 +1,7 @@
 // ============================================================
 //  油桶／油箱：可以破壞，被「會點火的人」打爆會爆炸並燃燒；
 //  被怪物或其他人打壞則只會漏出一灘油汙，油汙之後被點火的人打到也會燒起來。
+//  瓦斯爐（爐具）：被打壞就會爆炸（不管是誰打壞的），威力比油桶小、不會起火；可以炸開異質礦物。
 //  （數值集中在最上面，想調整改這裡就好）
 // ============================================================
 
@@ -9,6 +10,7 @@
 const OIL_IGNITERS = new Set(['player', 'eldrin', 'chris', 'amber', 'theonie', 'explosion', 'fire']);
 
 // blast：爆炸半徑（格）與傷害；fire：爆炸後留下的火海（半徑、秒數、每秒傷害）；slick：沒爆炸時漏出的油汙（半徑、留多久）
+// gas：瓦斯類，被誰打壞都會爆炸；breaksOre：爆炸能炸開異質礦物；boom：爆炸音效
 const OIL_ITEMS = {
   deco_oil_drum: { name: '油桶', file: 'images/item-decorate/oil-drum.png',
     blast: { radius: 2, enemy: 80, sentry: 35, player: 30 },
@@ -18,6 +20,10 @@ const OIL_ITEMS = {
     blast: { radius: 1.4, enemy: 50, sentry: 22, player: 20 },
     fire: { radius: 1.2, life: 5, dps: 10 },
     slick: { radius: .85, life: 40 } },
+  deco_gasstove:  { name: '瓦斯爐', file: 'images/item-decorate/gasstove.png', gas: true, breaksOre: true, boom: 'smallBoom',
+    blast: { radius: 1.2, enemy: 40, sentry: 15, player: 12 } },
+  deco_gasstove2: { name: '瓦斯爐', file: 'images/item-decorate/gasstove02.png', gas: true, breaksOre: true, boom: 'smallBoom',
+    blast: { radius: 1.2, enemy: 40, sentry: 15, player: 12 } },
 };
 // 油汙被點燃後的火海：半徑是油汙的幾倍、燒幾秒、每秒傷害
 const SLICK_FIRE = { radiusMul: 1.15, life: 6, dps: 10 };
@@ -60,7 +66,7 @@ function onObstacleRemoved(o) {
   if (o.proxy) { o.proxy.dead = true; o.proxy.hp = 0; }
   if (o.lastHitBy === 'demolish') return;   // 自己拆除：安全移除，什麼都不會發生
   const p = oilCenter(o);
-  if (OIL_IGNITERS.has(o.lastHitBy)) oilExplode(p.x, p.y, it);
+  if (it.gas || OIL_IGNITERS.has(o.lastHitBy)) oilExplode(p.x, p.y, it);   // 瓦斯爐被誰打壞都會爆
   else addOilSlick(p.x, p.y, it.slick.radius * CELL, it.slick.life);
 }
 
@@ -114,7 +120,8 @@ function oilExplode(x, y, it) {
     if (Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15 + Math.random() * .1;
   }
   igniteSlicksNear(x, y, R);
-  addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
+  if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 瓦斯爐：炸開附近的異質礦物（js/ore.js）
+  if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
   // 畫面：爆閃、雙層衝擊環、火星、碎片、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
   G.effects.push({ fglow: true, x, y: y - 8, r0: 20, r1: R * 1.15, life: .45, life0: .45 });
@@ -129,14 +136,13 @@ function oilExplode(x, y, it) {
   for (let i = 0; i < 4; i++) spawnFlameBurst(x + (Math.random() * 2 - 1) * R * .35, y + (Math.random() * 2 - 1) * R * .2, 1.3);
   addScorchMark(x, y + 6, R * .75, null, 'flame');
   nearbyImpact(x, y, 13, .08);
-  if (typeof sfxAt === 'function') sfxAt(Math.random() < .5 ? 'midBoom' : 'bigBoom', x, y, .9, 'oil-boom');   // 隨機：中爆炸／爆炸
+  if (typeof sfxAt === 'function') sfxAt(it.boom || (Math.random() < .5 ? 'midBoom' : 'bigBoom'), x, y, .9, 'oil-boom');   // 油桶隨機：中爆炸／爆炸；瓦斯爐：小爆炸
 }
 
 // ---- 油汙 ----
 function addOilSlick(x, y, r, life) {
   (G.oilSlicks = G.oilSlicks || []).push({ x, y: y + 6, r, t: life, t0: life, shape: scorchShape(r, 20), ph: Math.random() * 6.28 });
   if (typeof sfxAt === 'function') sfxAt('knock2', x, y, .5, 'oil-leak');
-  flash('漏油了', x, y - 30, '#d9c48a');
 }
 function slickContains(s, x, y) { const dx = x - s.x, dy = (y - s.y) / .6; return dx * dx + dy * dy <= s.r * s.r; }
 // 在 (x, y) 半徑 r 內碰到的油汙全部點燃
@@ -265,15 +271,17 @@ function drawOilGround(ctx) {
     const grow = Math.min(1, (s.t0 - s.t) / .6 + .3);
     ctx.save(); ctx.translate(s.x, s.y); ctx.scale(1, .6);
     const g = ctx.createRadialGradient(-s.r * .2, -s.r * .2, 0, 0, 0, s.r);
-    g.addColorStop(0, `rgba(48,40,30,${(.85 * a).toFixed(3)})`);
-    g.addColorStop(.7, `rgba(30,24,18,${(.8 * a).toFixed(3)})`);
-    g.addColorStop(1, `rgba(18,14,10,${(.6 * a).toFixed(3)})`);
+    // 半透明的藍色油汙（跟焦痕的深色分開，一眼就看得出是油）
+    g.addColorStop(0, `rgba(60,150,255,${(.5 * a).toFixed(3)})`);
+    g.addColorStop(.7, `rgba(35,115,245,${(.46 * a).toFixed(3)})`);
+    g.addColorStop(1, `rgba(25,85,220,${(.36 * a).toFixed(3)})`);
     ctx.fillStyle = g; scorchPath(ctx, s.shape, grow); ctx.fill();
+    ctx.strokeStyle = `rgba(170,215,255,${(.35 * a).toFixed(3)})`; ctx.lineWidth = 1.5; ctx.stroke();   // 淡淡的亮邊
     // 油膜的彩虹反光（緩慢流動），提醒玩家這灘油可以點燃
     const sh = performance.now() / 1400 + s.ph;
     const sg = ctx.createLinearGradient(-s.r, -s.r * .5, s.r, s.r * .5);
     sg.addColorStop(0, 'rgba(120,60,200,0)');
-    sg.addColorStop(.5 + .3 * Math.sin(sh), `rgba(80,200,210,${(.22 * a).toFixed(3)})`);
+    sg.addColorStop(.5 + .3 * Math.sin(sh), `rgba(210,240,255,${(.3 * a).toFixed(3)})`);   // 流動的反光
     sg.addColorStop(1, 'rgba(230,150,60,0)');
     ctx.fillStyle = sg; scorchPath(ctx, s.shape, grow * .75); ctx.fill();
     ctx.restore();
