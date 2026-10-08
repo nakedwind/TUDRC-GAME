@@ -361,6 +361,7 @@ function drawMapTileImg(ctx, id, x, y) {
 }
 function drawMapStampImg(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
+  if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
   const t = mapTileById(s.id); if (!t) return;
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }

@@ -61,6 +61,7 @@
         <label>圖層：<select id="selLayer"></select></label>
         <label id="selDepthControl" title="由圖片頂端往下數；線上方的人會被物件遮住，線下方的人會顯示在物件前面">人物遮擋線 <input id="selDepthInput" type="number" min="0" max="8" step="0.25" style="width:56px"> 格</label>
         <button class="btn" id="selDepthAuto" title="回到圖片底部作為遮擋線，並自動處理放在其他物件上的圖片">自動深度</button>
+        <label id="selDoorControl" class="hidden" title="手動門：玩家走到門前按 E 開關。自動門：玩家打不開，異質核心醒來時自動打開。">🚪 門：<select id="selDoorMode"></select></label>
         <button class="btn" id="selUp">↑ 上移一層</button>
         <button class="btn" id="selDown">↓ 下移一層</button>
         <button class="btn" id="selFlipX">⇄ 左右翻</button>
@@ -174,9 +175,10 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js"></script>
-  <script src="data/maps.js?v=merge-20261007"></script>        <!-- 地圖資料 -->
+  <script src="data/maps.js?v=cvs-20261008"></script>        <!-- 地圖資料 -->
+  <script src="data/doors.js?v=doorsfx-20261008"></script>        <!-- 可開關的門 -->
   <script src="js/sfx.js"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/editor.js?v=merge-20261007"></script>        <!-- 編輯器程式 -->
+  <script src="js/editor.js?v=cvs-20261008"></script>        <!-- 編輯器程式 -->
 </body>
 </html>

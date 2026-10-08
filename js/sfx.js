@@ -16,6 +16,7 @@ const SFX = (() => {
     place: '放置.mp3',
     soothe: '疏導.mp3',
     door: '關門.mp3',
+    backroomDoor: '後室開門.mp3',
     elevator: '電梯.mp3',
     gunshot: '開槍.mp3',
     reload: 'reload.mp3',

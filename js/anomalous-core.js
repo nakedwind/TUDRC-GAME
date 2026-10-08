@@ -112,6 +112,7 @@ function wakeCore(core) {
   if (typeof sfxAt === 'function') sfxAt('corrosionImpact', core.x, core.y, .7, 'core-wake');
   flash('異質核心甦醒了！', core.x, core.y - CORE.h, '#d69bff');
   systemNotice('異質核心甦醒了！異質體開始大量湧出', true);
+  if (typeof openAutoDoors === 'function') openAutoDoors('core-awake');   // 地圖上的自動門跟著打開
 }
 function enterPhase2(core) {
   core.phase = 2;
