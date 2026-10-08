@@ -10,9 +10,9 @@ const FLICKER = {
   radius: 150,                     // 亮著時的照明半徑（像素）
   tube: { dx: 39, dy: 36 },        // 燈管在圖片裡的位置（從圖片左上角算，像素）
   blinkEvery: [3, 9],              // 平常每隔幾秒閃一下（隨機範圍）
-  outEvery: [14, 32],              // 每隔幾秒跳電一次
-  outFor: [1.5, 4],                // 跳電熄掉幾秒
-  sparkEvery: [4, 12],             // 每隔幾秒噴一次火花
+  outEvery: [20, 50],              // 每隔幾秒跳電一次
+  outFor: [10, 40],                // 跳電熄掉幾秒
+  sparkEvery: [15, 60],            // 每隔幾秒噴一次火花
   humRange: 6,                     // 幾格內聽得到嗡嗡聲
   humVolume: .05,                  // 嗡嗡聲最大音量
 };
@@ -45,13 +45,12 @@ function updateFlickerLights(dt) {
         const step = L.flick.steps.shift();
         if (!step) { L.flick = null; L.on = true; break; }
         L.on = step[0]; L.flick.t += step[1];
-        if (!L.on && Math.random() < .35) zapSpark(L, 3);   // 熄掉的瞬間常常會爆一點火花
       }
     } else {
       L.blinkT -= dt; L.outT -= dt;
       if (L.outT <= 0) {   // 跳電：啪一聲熄掉，暗幾秒，再閃幾下才亮回來
         L.outT = flickRand(FLICKER.outEvery); L.blinkT = flickRand(FLICKER.blinkEvery);
-        zapSpark(L, 8);
+        playZap(L);   // 跳電：只有「啪」一聲（火花只照 sparkEvery 的時間噴）
         const steps = [[false, flickRand(FLICKER.outFor)]];
         for (let i = 0; i < 3 + Math.floor(Math.random() * 3); i++) steps.push([true, .05 + Math.random() * .12], [false, .06 + Math.random() * .25]);
         L.flick = { t: 0, steps };
@@ -96,9 +95,13 @@ function drawFlickerLights(ctx) {
   for (const L of list) {
     if (L.level <= 0) continue;
     const k = L.level;
-    let g = ctx.createRadialGradient(L.x, L.y, 0, L.x, L.y, 70);   // 燈管周圍的光暈
-    g.addColorStop(0, `rgba(255,248,210,${.42 * k})`); g.addColorStop(.35, `rgba(220,235,255,${.16 * k})`); g.addColorStop(1, 'rgba(180,210,255,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.ellipse(L.x, L.y + 8, 70, 46, 0, 0, Math.PI * 2); ctx.fill();
+    // 燈管周圍的光暈：壓扁成橢圓，漸層一路淡到 0，邊緣不會有一圈銳利的線
+    ctx.save(); ctx.translate(L.x, L.y + 6); ctx.scale(1.25, .8);
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 80);
+    g.addColorStop(0, `rgba(255,248,210,${.34 * k})`); g.addColorStop(.25, `rgba(240,240,225,${.16 * k})`);
+    g.addColorStop(.6, `rgba(210,225,255,${.05 * k})`); g.addColorStop(1, 'rgba(200,220,255,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
     ctx.fillStyle = `rgba(255,255,235,${.85 * k})`; ctx.fillRect(L.x - 19, L.y - 1.5, 38, 3);   // 燈管本身發亮
   }
   for (const a of G.elecArcs || []) {   // 鋸齒電弧
