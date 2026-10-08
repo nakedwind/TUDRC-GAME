@@ -460,6 +460,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   })[kind] || { shake: 2.5, stop: 0, ring: spec.color };
   // 命中頓格只在玩家附近發生（遠處的戰鬥不凍結畫面，避免怪多時一直卡頓）
   if (feel.stop && G.player && Math.hypot(G.player.x - impactPoint.x, G.player.y - impactPoint.y) <= SHAKE_FEEL.range * CELL) addHitstop(feel.stop);
+  if (kind === 'flame' && scale > 1.3 && typeof blastOres === 'function') blastOres(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 希奧妮大招的小爆炸：炸開礦物（js/ore.js）
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
   for (const enemy of hitTargets) {
     const text = '-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6));

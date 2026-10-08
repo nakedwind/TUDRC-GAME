@@ -42,6 +42,8 @@ function mapObstacleSpec(t) {
     const solid = []; for (let c = 0; c < mapTileW(t); c++) solid.push([c, mapTileH(t) - 1]);
     return { type: oil[0], hp: deco.hp || 30, solid };
   }
+  const ore = typeof oreByFile === 'function' && oreByFile(file);
+  if (ore) return { type: ore[0], hp: 9999, solid: [[0, mapTileH(t) - 1]], ore: true };   // 異質碎片礦物（js/ore.js）
   for (const ob of OBSTACLES) for (const orient of ['h', 'v']) {
     if (ob[orient] && ob[orient].file === file) return { type: ob.id, hp: ob.hp, solid: ob[orient].solid, trap: !!ob.trap };
   }
@@ -323,7 +325,7 @@ function seedMapObstacles() {
       .filter(([dc, dr]) => inGrid(c + dc, r + dr) && !G.grid[(c + dc) + ',' + (r + dr)]);
     if (!solid.length) return;
     const o = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type,
-      c, r, w, h, solid, hp: spec.hp, maxhp: spec.hp, hitT: 0 };
+      c, r, w, h, solid, hp: spec.hp, maxhp: spec.hp, hitT: 0, ore: !!spec.ore };
     for (const [dc, dr] of solid) {
       const key = (c + dc) + ',' + (r + dr);
       mapWalls.delete(key); // 舊地圖若另畫了固定碰撞，改由可破壞物件接管。

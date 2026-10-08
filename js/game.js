@@ -233,6 +233,7 @@ function openDialogue(actor) {
   dialoguePortrait.alt = profile ? profile.name : 'NPC';
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
+  if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);   // 好感度、送禮按鈕（js/gifts.js）
 }
 function advanceDialogue() {
   if (!dialogueState) return;
@@ -246,6 +247,7 @@ function closeDialogue(silent = false) {
   const actor = dialogueState.actor;
   if (actor) actor.waitT = 0.6;
   dialogueState = null; dialogueText.classList.remove('typing'); dialogueBox.classList.add('hidden');
+  if (typeof onDialogueClosed === 'function') onDialogueClosed();
   if (!silent) sfx('switch');
 }
 dialogueNext.addEventListener('click', advanceDialogue);
@@ -294,7 +296,8 @@ const elevatorMenu = document.getElementById('elevatorMenu');
 let elevatorMenuOpen = false;
 const supplyShop = document.getElementById('supplyShop');
 const supplyShopList = document.getElementById('supplyShopList');
-const supplyInventoryList = document.getElementById('supplyInventoryList');
+const shopCartList = document.getElementById('cartList');
+const shopCart = new Map();   // 購物車：商品 id → 數量（結帳後才放進背包）
 const supplyInventory = new Map();
 let supplyShopOpen = false, supplyShopTab = 'all';
 function closeElevatorMenu() { elevatorMenuOpen = false; elevatorMenu.classList.add('hidden'); }
@@ -339,8 +342,8 @@ function renderSupplyStatus() {   // 滑到商品上：下方資訊條的 HP／S
 }
 let supplyHover = null;
 function renderSupplyShop() {
-  if (!supplyShopList || !supplyInventoryList) return;
-  const money = Math.floor(G?.money || 0);
+  if (!supplyShopList || !shopCartList) return;
+  const money = Math.floor(G?.money || 0), left = money - cartTotal();   // left：扣掉購物車後還能花的錢
   document.getElementById('shopMoney').textContent = money;
   document.querySelectorAll('[data-supply-tab]').forEach(tab => {
     const n = SUPPLIES.filter(item => tab.dataset.supplyTab === 'all' || item.kind === tab.dataset.supplyTab).length;
@@ -349,21 +352,28 @@ function renderSupplyShop() {
   const visible = SUPPLIES.filter(item => supplyShopTab === 'all' || item.kind === supplyShopTab)
     .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'snack' ? -1 : 1) || a.price - b.price);   // 零食在前，各自由便宜到貴
   supplyShopList.innerHTML = visible.map(item => {
-    const kind = SUPPLY_KIND[item.kind], owned = supplyInventory.get(item.id) || 0, short = item.price - money;
+    const kind = SUPPLY_KIND[item.kind], inCart = shopCart.get(item.id) || 0, short = item.price - left;
     return `<article class="shop-item ${item.kind}" data-item="${item.id}">
-      ${owned ? `<span class="shop-owned" title="背包裡有 ${owned} 個">×${owned}</span>` : ''}
+      ${inCart ? `<span class="shop-owned" title="購物車裡有 ${inCart} 個">🛒${inCart}</span>` : ''}
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
       <span class="shop-effect">${kind.icon} ${supplyEffect(item)}</span>
-      <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="購買 ${item.name}，$${item.price}"`}>${short > 0 ? `還差 $${short}` : `<span>購買</span><b>$${item.price}</b>`}</button>
+      <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="把 ${item.name} 加入購物車，$${item.price}"`}>${short > 0 ? `還差 $${short}` : `<span>加入</span><b>$${item.price}</b>`}</button>
     </article>`;
   }).join('');
-  const owned = SUPPLIES.filter(item => (supplyInventory.get(item.id) || 0) > 0);
-  document.getElementById('supplyInventoryCount').textContent = [...supplyInventory.values()].reduce((sum, count) => sum + count, 0);
-  supplyInventoryList.innerHTML = owned.length ? owned.map(item => {
-    const full = supplyNeed(item.kind) <= 0;
-    return `<button class="supply-slot ${item.kind}" type="button" data-use-supply="${item.id}" ${full ? 'disabled' : ''} title="${full ? SUPPLY_KIND[item.kind].stat + ' 已滿' : '點一下使用'}｜${item.name}　${supplyEffect(item)}">
-      <img src="${item.image}" alt=""><span class="slot-info"><strong>${item.name}</strong><small>${SUPPLY_KIND[item.kind].icon} ${full ? SUPPLY_KIND[item.kind].stat + ' 已滿' : supplyEffect(item)}</small></span><b>×${supplyInventory.get(item.id)}</b></button>`;
-  }).join('') : '<span class="supply-empty">背包是空的。<br>買好的東西會放在這裡。</span>';
+  const cart = SUPPLIES.filter(item => shopCart.get(item.id) > 0), total = cartTotal();
+  document.getElementById('cartCount').textContent = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
+  document.getElementById('cartTotal').textContent = total;
+  document.getElementById('cartRemain').textContent = money - total;
+  document.getElementById('cartClear').disabled = !cart.length;
+  const checkout = document.getElementById('cartCheckout');
+  checkout.disabled = !cart.length || total > money;
+  checkout.textContent = total > money ? `還差 $${total - money}` : '結帳';
+  shopCartList.innerHTML = cart.length ? cart.map(item => {
+    const n = shopCart.get(item.id);
+    return `<div class="cart-row ${item.kind}" data-cart-item="${item.id}">
+      <img src="${item.image}" alt=""><span class="slot-info"><strong>${item.name}</strong><small>$${item.price * n}</small></span>
+      <span class="cart-qty"><button type="button" data-cart-dec="${item.id}" aria-label="${item.name} 少一個">${n > 1 ? '−' : '🗑'}</button><b>${n}</b><button type="button" data-cart-inc="${item.id}" aria-label="${item.name} 多一個" ${item.price > left ? 'disabled' : ''}>＋</button></span></div>`;
+  }).join('') : '<span class="supply-empty">購物車是空的</span>';
   renderSupplyStatus();
 }
 // 下方資訊條的快捷格：零食（Q）、飲料（F）
@@ -374,7 +384,7 @@ function renderQuickSupplies() {
   const key = JSON.stringify(state); if (key === quickSupplyKey) return; quickSupplyKey = key;
   box.innerHTML = state.map(([kind, id, count, full]) => {
     const k = SUPPLY_KIND[kind], item = supplyById(id);
-    const tip = !count ? `沒有${k.name}了，到商店買一點` : full ? `${k.stat} 已滿` : `按 ${k.key}：使用 ${item.name}（${supplyEffect(item)}）`;
+    const tip = !count ? `沒有${k.name}` : full ? `${k.stat} 已滿` : `${k.key}｜${item.name} ${supplyEffect(item)}`;
     return `<button class="quick-supply ${kind}" type="button" data-quick-supply="${kind}" ${!count || full ? 'disabled' : ''} title="${tip}" aria-label="${tip}">
       <span class="qs-icon">${item ? `<img src="${item.image}" alt="">` : k.icon}</span><span class="qs-text"><small>${k.name}</small><b>×${count}</b></span><kbd>${k.key}</kbd></button>`;
   }).join('');
@@ -382,19 +392,36 @@ function renderQuickSupplies() {
 function openSupplyShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
-  closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
+  closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopBell', .7, 'shop-bell'); document.getElementById('supplyShopClose').focus();
 }
 function closeSupplyShop(silent = false) { if (!supplyShopOpen) return; supplyShopOpen = false; supplyHover = null; renderSupplyStatus(); supplyShop.classList.add('hidden'); if (!silent) sfx('switch'); }
-function buySupply(id) {
+const cartTotal = () => SUPPLIES.reduce((sum, item) => sum + item.price * (shopCart.get(item.id) || 0), 0);
+function addToCart(id, focusCard = true) {
   const item = supplyById(id);
-  if (!item || !G || G.money < item.price) { sfx('error'); return; }
-  G.money -= item.price; supplyInventory.set(id, (supplyInventory.get(id) || 0) + 1);
-  sfx('button'); updateHUD(); renderSupplyShop();
-  const card = supplyShopList.querySelector(`[data-item="${id}"]`);   // 買到的那張卡片跳一下、冒出 +1
+  if (!item || !G || G.money - cartTotal() < item.price) { sfx('error'); return; }
+  shopCart.set(id, (shopCart.get(id) || 0) + 1);
+  sfx('button'); renderSupplyShop();
+  const card = supplyShopList.querySelector(`[data-item="${id}"]`);   // 加入的那張卡片發光、冒出 +1
   if (card) { card.classList.add('bought'); const pop = document.createElement('i'); pop.className = 'shop-pop'; pop.textContent = '+1'; card.appendChild(pop); }
-  const bag = document.querySelector('.supply-inventory'); if (bag) { bag.classList.remove('bump'); void bag.offsetWidth; bag.classList.add('bump'); }
-  const btn = card?.querySelector('.shop-buy'); if (btn && !btn.disabled) btn.focus();   // 鍵盤連按 Enter 可以一直買
+  const cart = document.querySelector('.shop-cart'); if (cart) { cart.classList.remove('bump'); void cart.offsetWidth; cart.classList.add('bump'); }
+  if (focusCard) { const btn = card?.querySelector('.shop-buy'); if (btn && !btn.disabled) btn.focus(); }   // 鍵盤連按 Enter 可以一直加
+}
+function removeFromCart(id) {
+  const n = shopCart.get(id) || 0; if (!n) return;
+  if (n <= 1) shopCart.delete(id); else shopCart.set(id, n - 1);
+  sfx('switch'); renderSupplyShop();
+}
+function checkoutCart() {
+  const total = cartTotal();
+  if (!shopCart.size || !G || total > G.money) { sfx('error'); return; }
+  const count = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
+  G.money -= total;
+  for (const [id, n] of shopCart) supplyInventory.set(id, (supplyInventory.get(id) || 0) + n);
+  shopCart.clear();
+  SFX.play('shopBell', .6, 'shop-checkout'); systemNotice(`結帳 $${total}，${count} 件已放進背包`);
+  updateHUD(); renderSupplyShop();
+  const link = document.getElementById('shopOpenBackpack'); link.classList.remove('flash'); void link.offsetWidth; link.classList.add('flash'); link.focus();
 }
 function useSupply(id) {
   const item = supplyById(id), count = supplyInventory.get(id) || 0;
@@ -405,7 +432,7 @@ function useSupply(id) {
   if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1);
   const k = SUPPLY_KIND[item.kind];
   sfx('soothe'); flash(`${item.name}　+${Math.ceil(restored)} ${k.stat}`, G.player.x, G.player.y - 54, k.color);
-  updateHUD(); if (supplyShopOpen) renderSupplyShop();
+  updateHUD(); if (supplyShopOpen) renderSupplyShop(); if (backpackOpen) renderBackpack();
   return true;
 }
 function quickUseSupply(kind) {
@@ -415,10 +442,15 @@ function quickUseSupply(kind) {
 }
 document.getElementById('supplyShopButton').addEventListener('click', openSupplyShop);
 document.getElementById('hudShopButton').addEventListener('click', openSupplyShop);
+document.getElementById('shopOpenBackpack').addEventListener('click', () => { closeSupplyShop(true); openBackpack(); });
 document.getElementById('quickSupplies').addEventListener('click', e => { const b = e.target.closest('[data-quick-supply]'); if (b && G?.player) quickUseSupply(b.dataset.quickSupply); });
 document.getElementById('supplyShopClose').addEventListener('click', () => closeSupplyShop());
-supplyShop.addEventListener('click', e => { if (e.target === supplyShop) { closeSupplyShop(); return; } const buy = e.target.closest('[data-buy-supply]'); if (buy) buySupply(buy.dataset.buySupply); const use = e.target.closest('[data-use-supply]'); if (use) useSupply(use.dataset.useSupply); });
-supplyShop.addEventListener('animationend', e => { if (e.target.classList.contains('shop-pop')) e.target.remove(); else e.target.classList.remove('bought', 'bump'); });
+supplyShop.addEventListener('click', e => { if (e.target === supplyShop) { closeSupplyShop(); return; } const buy = e.target.closest('[data-buy-supply]'); if (buy) addToCart(buy.dataset.buySupply);
+  const inc = e.target.closest('[data-cart-inc]'); if (inc) { addToCart(inc.dataset.cartInc, false); shopCartList.querySelector(`[data-cart-inc="${inc.dataset.cartInc}"]:not(:disabled)`)?.focus(); }
+  const dec = e.target.closest('[data-cart-dec]'); if (dec) { removeFromCart(dec.dataset.cartDec); (shopCartList.querySelector(`[data-cart-dec="${dec.dataset.cartDec}"]`) || document.getElementById('supplyShopClose')).focus(); }
+  if (e.target.closest('#cartClear')) { shopCart.clear(); sfx('switch'); renderSupplyShop(); }
+  if (e.target.closest('#cartCheckout')) checkoutCart(); });
+supplyShop.addEventListener('animationend', e => { if (e.target.classList.contains('shop-pop')) e.target.remove(); else e.target.classList.remove('bought', 'bump', 'flash'); });
 supplyShopList.addEventListener('mouseover', e => { const card = e.target.closest('[data-item]'); const item = card ? supplyById(card.dataset.item) : null; if (item !== supplyHover) { supplyHover = item; renderSupplyStatus(); } });
 supplyShopList.addEventListener('mouseleave', () => { supplyHover = null; renderSupplyStatus(); });
 document.querySelectorAll('[data-supply-tab]').forEach(button => button.addEventListener('click', () => { supplyShopTab = button.dataset.supplyTab; document.querySelectorAll('[data-supply-tab]').forEach(tab => { tab.classList.toggle('active', tab === button); tab.setAttribute('aria-selected', tab === button); }); supplyShopList.scrollTop = 0; renderSupplyShop(); sfx('switch'); }));
@@ -437,8 +469,8 @@ window.addEventListener('keydown', e => {
     if (MOVE_KEYS.includes(k) || isInteractKey(k)) e.preventDefault();
     return;
   }
-  if (supplyShopOpen) {
-    if (k === 'escape') { e.preventDefault(); closeSupplyShop(); }
+  if (supplyShopOpen || backpackOpen || settingsOpen) {   // 商店、背包、設定打開時：Esc 關閉，其他按鍵不控制角色
+    if (k === 'escape') { e.preventDefault(); if (supplyShopOpen) closeSupplyShop(); else closeBackpack(); }
     else if (k.startsWith('arrow') || ((k === ' ' || k === 'enter') && !(e.target instanceof HTMLButtonElement))) e.preventDefault();   // 按鈕上按 Enter／空白鍵照常可以按
     return;
   }
@@ -470,6 +502,7 @@ window.addEventListener('keydown', e => {
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
+    else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
     else {
       const actor = interactionNearPlayer();
       if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
@@ -786,6 +819,7 @@ function applyChaosDamage(t, best, spec) {
   const rageMul = sentryDamageMul(t), o = best.o, dmg = spec.dmg * rageMul;   // 暴走時汙染 100：路德的亂打也是最痛的
   const heavy = spec.ability === '怪力' || spec.ability === '自癒' || spec.ability === '雷電';   // 近戰、雷電＝重擊，震退比較遠
   spawnAttackVisual(t, { x: best.x, y: best.y, hp: 1, maxhp: 1 }, rageMul > 1 ? { ...spec, dmg, rage: rageMul } : spec, [], { x: best.x, y: best.y });
+  if (typeof sentryHitOre === 'function') sentryHitOre(t, { x: best.x, y: best.y }, (spec.splash || 0) * CELL);   // 暴走亂打也可能波及礦物
   if (G.enemies.includes(o)) { o.hp -= dmg; enemyHitReact(o, t.x, t.y, heavy); }
   else if (G.cores.includes(o)) { o.hp -= dmg; }
   else if (o === G.player) {
@@ -881,7 +915,8 @@ let G;
 function newGame() {
   applyOutfits();   // 依這張地圖是安全區或戰鬥區，換成 A／B 造型
   closeElevatorMenu();
-  closeSupplyShop(true);
+  closeSupplyShop(true); closeBackpack(true); closeSettings(true);
+  if (typeof onGiftNewGame === 'function') onGiftNewGame();   // 出勤後大家又可以收禮
   setNpcArrangeMode(false);
   setPaused(false);
   document.getElementById('systemNotices').replaceChildren();
@@ -1117,7 +1152,7 @@ cv.addEventListener('mousemove', e => { aimClient = { x: e.clientX, y: e.clientY
 cv.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   aimClient = { x: e.clientX, y: e.clientY };
-  if (e.ctrlKey && !MAP_SAFE && G?.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen) {
+  if (e.ctrlKey && !MAP_SAFE && G?.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen) {
     e.preventDefault();
     closeGroundMenu(); closeSentryMenu();
     aimHeld = true;
@@ -1398,6 +1433,7 @@ function updateFootsteps() {
   const a = FOOT.audio;
   const want = MAP_SAFE ? 'Sound effects/footsteps02.mp3' : 'Sound effects/footsteps01.mp3';
   if (FOOT.file !== want) { FOOT.file = want; a.src = want; }
+  a.volume = Math.min(1, 0.5 * SFX.volume / 0.35);   // 跟著設定裡的音效音量
   a.muted = !SFX.enabled;                       // 跟著 M 鍵一起靜音
   if (walking) { if (a.paused) a.play().catch(() => {}); }
   else if (!a.paused) a.pause();
@@ -1410,7 +1446,7 @@ function setPaused(on) {
   if (badge) badge.classList.toggle('hidden', !paused);
 }
 window.addEventListener('keydown', e => {
-  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || supplyShopOpen || mapTransitioning) return;
+  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || mapTransitioning) return;
   if (!G || !G.running || G.over || MAP_SAFE) return;   // 只有戰鬥中可以暫停
   sfx('switch'); setPaused(!paused);
 });
@@ -1418,10 +1454,10 @@ function loop(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
-  if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
+  if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !mapTransitioning && !frozen) update(sdt);
+  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !mapTransitioning && !frozen) update(sdt);
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
@@ -1625,7 +1661,8 @@ function update(dt) {
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
         const atkDmg = spec.dmg * (U ? U.dmgMul : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
-        onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);   // 安柏／希奧妮：不小心波及附近的油桶、油汙
+        onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);
+        if (typeof sentryHitOre === 'function') sentryHitOre(t, impactPoint, (atkSplash || 0) * CELL);   // 路德：拳頭剛好波及礦物（js/ore.js）   // 安柏／希奧妮：不小心波及附近的油桶、油汙
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
         if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
         for (const e of affected) {
@@ -1638,7 +1675,7 @@ function update(dt) {
           }
         }
         spawnAttackVisual(t, target, (U || critMul || rageMul > 1) ? { ...spec, dmg: atkDmg, splash: atkSplash, crit: !!critMul, rage: rageMul } : spec, affected, impactPoint, U ? U.scale : 1);
-      } else flashDmg('MISS', target.x, target.y - 26, '#c6d1dd');
+      } else { flashDmg('MISS', target.x, target.y - 26, '#c6d1dd'); if (typeof strayBoltOre === 'function') strayBoltOre(t, target); }   // 安柏打偏：可能劈中附近的礦物（js/ore.js）
       if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
       if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入暴走，開始無差別攻擊！', true); }
     }
@@ -1768,6 +1805,7 @@ function update(dt) {
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
+  updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   updateHUD();
@@ -1807,7 +1845,7 @@ function updateHUD() {
   if (typeof updateTeamButton === 'function') updateTeamButton();   // 安全場景才顯示「出勤編隊」按鈕
   if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
-  document.getElementById('supplyShopButton').classList.toggle('hidden', !MAP_SAFE);   // 基地裡資訊條收起來，商店按鈕改放在畫面右下角
+  document.getElementById('safeCornerButtons').classList.toggle('hidden', !MAP_SAFE);   // 基地裡資訊條收起來，商店按鈕改放在畫面右下角
   renderQuickSupplies();
   document.getElementById('crystals').textContent = training.crystals;
   const playerHpBar = document.getElementById('playerHpBar');
@@ -1855,7 +1893,7 @@ const LOSE_TEXT = {
 };
 function loseOverlay(reason) { const [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base; showOverlay(title, text, '再挑戰'); }
 
-function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); winOverlay(); }
 function lose(reason) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason); }
 ovBtn.addEventListener('click', begin);

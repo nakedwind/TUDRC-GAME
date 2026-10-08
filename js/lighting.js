@@ -93,7 +93,8 @@ function flashStrength(f) { return Math.pow(Math.max(0, f.life / f.life0), 1.6) 
 // 只影響畫面的光：攻擊閃光＋甦醒的異質核心
 function visualLights() {
   if (!G) return [];
-  return [...(G.lightFlashes || []), ...(typeof coreGlowLights === 'function' ? coreGlowLights() : [])];
+  return [...(G.lightFlashes || []), ...(typeof coreGlowLights === 'function' ? coreGlowLights() : []),
+          ...(typeof oreGlowLights === 'function' ? oreGlowLights() : [])];   // 礦物的紫光（js/ore.js）
 }
 function computeFlashField() {
   flashField.fill(0);

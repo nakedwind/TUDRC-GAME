@@ -109,7 +109,7 @@ function oilExplode(x, y, it) {
     const c = oilCenter(o);
     if (Math.hypot(c.x - x, c.y - y) <= R) damageOil(o, 9999, 'explosion');
   }
-  for (const o of G.obstacles) {   // 地雷也會被引爆
+  for (const o of G.obstacles) {   // 地雷也會被引爆（油桶炸不開礦物，但可以引爆旁邊的地雷去炸）
     if (!o.trap || o.hp <= 0 || o.fuseT > 0) continue;
     if (Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15 + Math.random() * .1;
   }

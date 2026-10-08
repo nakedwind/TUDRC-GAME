@@ -31,7 +31,7 @@ function drawObstacle(o) {
     else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
   }
   if (hit) {   // 閃紅：半透明紅疊在圖上
-    ctx.globalAlpha = 0.55 * hit; ctx.fillStyle = '#ff3030';
+    ctx.globalAlpha = (o.ore ? .35 : .55) * hit; ctx.fillStyle = o.ore ? '#e6c8ff' : '#ff3030';   // 採礦敲擊：淡紫光（不是受傷的紅）
     if (o.isBase) {
       ctx.lineWidth = 6; ctx.strokeStyle = '#ff3030'; ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);
     } else ctx.fillRect(x, y, w, h);
@@ -438,6 +438,7 @@ function draw() {
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
   drawLandmines(ctx);          // 地雷（js/landmine.js）
+  drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   sortables.sort((a, b) => a.y - b.y);
@@ -468,6 +469,7 @@ function draw() {
     if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, d.open ? '關門' : '開門'); }
+    else if (oreNearPlayer()) drawOreHint(oreNearPlayer());   // 礦物：提示要用爆炸炸開（js/ore.js）
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
       if (actor) drawInteractPrompt(actor.x, actor.y - 57,

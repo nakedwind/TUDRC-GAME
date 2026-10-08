@@ -2730,6 +2730,30 @@ const TILES_CUSTOM = [
     "h": 8
   },
   {
+    "id": "tile_ore_small",
+    "name": "小型異質礦",
+    "role": "obstacle",
+    "file": "images/item-obstacle/09-ore-small.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_ore_large",
+    "name": "大型異質礦",
+    "role": "obstacle",
+    "file": "images/item-obstacle/10-ore-large.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_ore_rare",
+    "name": "稀有紫晶礦",
+    "role": "obstacle",
+    "file": "images/item-obstacle/11-ore-rare.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_new_decor_oil_tank",
     "name": "油箱",
     "role": "floor",

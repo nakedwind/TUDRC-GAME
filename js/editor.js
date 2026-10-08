@@ -1028,7 +1028,7 @@ function renderPalette() {
     const sizeTxt = t.systemColor ? (' ' + tilePixelW(t) + '×' + tilePixelH(t) + ' px') : (isBig(t) ? (' ' + tileW(t) + '×' + tileH(t)) : '');
     const isObstacleArt = String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/');
     const typeTxt = isObstacleArt
-      ? (t.id === 'tile_obstacle_camping_lights' ? '可擋路・可破壞・小範圍發光' : '可擋路・可破壞')
+      ? (t.id === 'tile_obstacle_camping_lights' ? '可擋路・可破壞・小範圍發光' : String(t.id).startsWith('tile_ore_') ? '可擋路・用地雷炸開' : '可擋路・可破壞')
       : (t.systemColor ? '系統色塊' : (t.builtin ? roleLabel(t.role) : '圖片'));
     b.innerHTML = thumb + '<span class="tname">' + t.name + '</span><small>' + typeTxt + sizeTxt + '</small>';
     b.addEventListener('click', () => selectTile(t.id));

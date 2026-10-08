@@ -78,6 +78,7 @@ function detonateMine(o) {
     }
   }
   if (typeof igniteSlicksNear === 'function') igniteSlicksNear(x, y, R);
+  if (typeof blastOres === 'function') blastOres(x, y, R);   // 炸開附近的異質礦物（js/ore.js）
   // 畫面：爆閃、衝擊環、火星、碎石、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
   G.effects.push({ fglow: true, x, y: y - 6, r0: 16, r1: R, life: .35, life0: .35 });

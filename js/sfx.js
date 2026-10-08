@@ -40,6 +40,9 @@ const SFX = (() => {
     midBoom: '中爆炸.mp3',
     bigBoom: '爆炸.mp3',
     shopBell: '便利商店門鈴.mp3',
+    favorUp: '升等.mp3',
+    mineGrind: '打磨.mp3',
+    crystalGet: '得到碎片.mp3',
     slimeHit: 'slime-hit.mp3',
     slimeLand: 'slime-land.mp3',
   };
