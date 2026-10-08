@@ -1,8 +1,9 @@
 // ============================================================
 //  背包：左邊格子、右邊物品說明。按 B 或下方資訊條的「背包」打開，打開時遊戲暫停。
 //  物品資料：商店的零食飲料在 data/supplies.js，其他物品在 data/items.js。
-//  背包裡有什麼存在 supplyInventory（js/game.js）：物品 id → 數量。
+//  背包裡有什麼存在 supplyInventory（就在下面）：物品 id → 數量。商店、送禮、存檔都會用到。
 // ============================================================
+const supplyInventory = new Map();   // 背包裡的東西：物品 id → 數量
 const BAG_MIN_SLOTS = 24;   // 至少畫幾格（不夠的用空格補滿，看起來像背包）
 const backpackEl = document.getElementById('backpack');
 const backpackGrid = document.getElementById('backpackGrid');
