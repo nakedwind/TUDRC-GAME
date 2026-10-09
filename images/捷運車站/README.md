@@ -46,3 +46,6 @@
 | mrt-cardboard-boxes.png | 紙箱堆 | 2 × 2 |
 | mrt-poster-moon-lake.png | 海報（月之湖） | 4 × 2 |
 | mrt-poster-moonlight.png | 海報（月光） | 4 × 2 |
+| mrt-exit-2.png | 捷運出口 2 | 5 × 6 |
+| mrt-exit-2-sealed.png | 捷運出口 2（封鎖） | 6 × 6 |
+| mrt-map-kiosk.png | 路網圖看板 | 2 × 3 |

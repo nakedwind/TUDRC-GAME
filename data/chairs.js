@@ -596,5 +596,20 @@ const CHAIRS_DEFAULT = {
       "y": 46,
       "dir": "front"
     }
+  },
+  "tile_street_plastic_stool": {
+    "enabled": true,
+    "depth": 30,
+    "solid": [
+      [
+        0,
+        0
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 20,
+      "dir": "front"
+    }
   }
 };

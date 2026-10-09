@@ -23,7 +23,13 @@ function flickerLights() {
   if (!G || typeof MAP === 'undefined' || !MAP) return [];
   if (G.flickerLights && G.flickerLightsMap === MAP) return G.flickerLights;
   const list = [];
-  const isTube = id => { const t = typeof mapTileById === 'function' && mapTileById(id); return t && String(t.file || '').includes(FLICKER.file); };
+  // 認得日光燈的方式：素材 id、檔名、或素材名稱（在編輯器直接上傳的圖片沒有檔名，只能靠名稱認）
+  const isTube = id => {
+    if (id === 'tile_bg_electric_light') return true;
+    const t = typeof mapTileById === 'function' && mapTileById(id); if (!t) return false;
+    const file = String(t.file || '').startsWith('data:') ? '' : String(t.file || '');
+    return file.includes(FLICKER.file) || /electric-light|日光燈/i.test(String(t.name || ''));
+  };
   const add = (left, top, fx) => list.push({
     x: left + (fx ? 80 - FLICKER.tube.dx : FLICKER.tube.dx), y: top + FLICKER.tube.dy,
     on: true, level: 1, blinkT: flickRand(FLICKER.blinkEvery), outT: flickRand(FLICKER.outEvery), sparkT: flickRand(FLICKER.sparkEvery),
