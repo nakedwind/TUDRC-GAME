@@ -117,8 +117,9 @@ function escapeDarkness(actor, dt) {
   actor.target = null; actor.waitT = 0;
   actor.escapeTimer = (actor.escapeTimer || 0) - dt;
   const goal = actor.escapePath?.at(-1);
-  if (!actor.escapePath?.length || actor.escapeTimer <= 0 || !goal || !darkEscapeCell(goal.c, goal.r)) {
-    actor.escapePath = pathToLight(actor);
+  // 找不到光時也等計時器到再重找，不要每幀都整張地圖搜一次
+  if (actor.escapeTimer <= 0 || (actor.escapePath?.length && (!goal || !darkEscapeCell(goal.c, goal.r)))) {
+    actor.escapePath = pathToLight(actor) || [];
     actor.escapeTimer = .5;
   }
   const next = actor.escapePath?.[0];
@@ -134,10 +135,13 @@ function escapeDarkness(actor, dt) {
   if (Math.hypot(actor.x - oldX, actor.y - oldY) < .001) actor.escapeTimer = 0;
   return true;
 }
-function sentryCellWalkable(c, r) {
+// ignoreFire：被推出火海時用，只看地形，不把火當成擋路
+function sentryCellWalkable(c, r, ignoreFire = false) {
   if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
   const [x, y] = center(c, r);
   if (sentryBlocked(x, y)) return false;
+  if (!ignoreFire && typeof oilFireAt === 'function' && oilFireAt(x, y, 6)   // 燒著的火海：找路時繞開（js/oil-barrels.js）
+      && !(typeof sentryFireTrait === 'function' && sentryFireTrait(sentryFireWalker))) return false;   // 希奧妮、雷德不繞（js/game.js 的 SENTRY_FIRE_TRAITS）
   if (!personnelInLight(x, y)) return false;
   return true;
 }
@@ -280,6 +284,7 @@ function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; return; }
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
+  if (stepActorKnock(t, dt, sentryBlocked)) { t.moving = false; return; }   // 被鳥頭人撞飛：滑行中（js/bird-head.js）
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控

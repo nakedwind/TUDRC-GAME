@@ -472,7 +472,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     const impactSound = { flame: 'fireImpact', lightning: 'lightningImpact', corrosion: 'corrosionImpact' }[kind];
     if (impactSound) sfxAt(impactSound, impactPoint.x, impactPoint.y, kind === 'corrosion' ? 0.62 : 0.5, attacker?.type || 'sentry');
     if (kind === 'flame' && scale > 1.3) sfxAt('smallBoom', impactPoint.x, impactPoint.y, .8, (attacker?.type || 'sentry') + '-ult');   // 希奧妮大招：再疊一聲小爆炸
-    sfxAt('monsterHit', target.x, target.y, 0.48, attacker?.type || 'sentry');
+    sfxMonsterHit(target, 0.48, attacker?.type || 'sentry');   // 鳥頭人等有自己的被打音效（每隻冷卻 0.5 秒，js/game.js）
   }
 }
 const SENTRY_ATTACK_SOUNDS = { theonie: 'rangedShot', amber: 'rangedShot', avaren: 'cleaver', luther: 'meleeAttack', red: 'swordSwing' };

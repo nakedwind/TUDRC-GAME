@@ -7,9 +7,11 @@ function status(text, error = false) {
   const el = document.getElementById('status');
   el.textContent = text; el.style.color = error ? '#ffb4b4' : '#84ddbd';
 }
+let slimeCfg = slimeSettings(true);
 function saveMonsters() {
   try {
     localStorage.setItem(MONSTER_STORAGE_KEY, JSON.stringify(monsters));
+    localStorage.setItem(SLIME_SETTINGS_STORAGE_KEY, JSON.stringify(slimeCfg));
     status('已自動儲存到這台瀏覽器。');
   } catch (_) { status('儲存失敗：瀏覽器暫存空間不足。', true); }
 }
@@ -44,7 +46,42 @@ function render() {
   document.getElementById('f_id').value = monster.id;
   fields.forEach(input => { input.value = monster[input.dataset.field]; });
   document.getElementById('deleteMonster').disabled = monsters.length <= 1;
-  previewSprite(monster); renderList();
+  previewSprite(monster); renderList(); renderBehaviorFields(monster);
+}
+// 衝撞型（鳥頭人）的行為數值：欄位由 js/monster-data.js 的 CHARGER_FIELDS 產生
+// 行為數值：依怪物的行為模式顯示對應欄位（欄位表在 js/monster-data.js）
+const BEHAVIOR_UI = {
+  charger: { key: 'charger', fields: () => CHARGER_FIELDS, valid: c => validChargerCfg(c), title: '🐦 衝撞行為',
+    desc: '平時發呆、偶爾散步；玩家或哨兵進入注意範圍（中間沒有牆）就愣一下，然後直線衝過去，撞到會把人撞飛。玩家一出現就只追玩家，哨兵的嘲諷也引不走。' },
+  shooter: { key: 'shooter', fields: () => SHOOTER_FIELDS, valid: c => validShooterCfg(c), title: '🫧 飄浮噴珍珠',
+    desc: '半浮在空中慢慢移動；看到玩家或哨兵就飄到射程內，手上的珍珠閃一下後噴出珍珠，太近會往後飄。地圖上有異質核心醒著時變成生氣的紅眼圖，噴得比較快。每顆珍珠的傷害用上面的「攻擊玩家／哨兵／建築」。' },
+};
+function renderBehaviorFields(monster) {
+  const box = document.getElementById('chargerBox'), wrap = document.getElementById('chargerFields');
+  const ui = BEHAVIOR_UI[monster.behavior];
+  box.hidden = !ui;
+  wrap.replaceChildren();
+  if (box.hidden) return;
+  document.getElementById('behaviorTitle').textContent = ui.title;
+  document.getElementById('behaviorDesc').textContent = ui.desc;
+  monster[ui.key] = ui.valid(monster[ui.key]);
+  const cfg = () => monster[ui.key];
+  for (const f of ui.fields()) {
+    const label = document.createElement('label'), input = document.createElement('input');
+    label.textContent = f.label;
+    input.type = 'number'; input.step = f.pct ? 5 : f.step;
+    input.min = f.pct ? f.min * 100 : f.min; input.max = f.pct ? f.max * 100 : f.max;
+    const show = () => { input.value = f.pct ? Math.round(cfg()[f.key] * 100) : cfg()[f.key]; };
+    show();
+    input.title = '預設 ' + (f.pct ? Math.round(f.def * 100) + '%' : f.def);
+    input.addEventListener('change', () => {
+      const n = Number(input.value);
+      cfg()[f.key] = f.pct ? n / 100 : n;
+      monster[ui.key] = ui.valid(cfg());   // 夾在合理範圍內（發呆最長不會小於最短）
+      show(); saveMonsters();
+    });
+    label.append(input); wrap.append(label);
+  }
 }
 function newMonsterId() {
   let n = 2;
@@ -54,6 +91,8 @@ function newMonsterId() {
 function addMonster(copy = false) {
   const source = currentMonster();
   const monster = { ...source, id: newMonsterId(), name: copy ? source.name + '（複製）' : '新異質體' };
+  if (source.charger) monster.charger = { ...source.charger };
+  if (source.shooter) monster.shooter = { ...source.shooter };
   monsters.push(monster); selectedId = monster.id;
   saveMonsters(); render();
   document.getElementById('f_name').focus(); document.getElementById('f_name').select();
@@ -78,13 +117,81 @@ fields.forEach(input => input.addEventListener(input.dataset.field === 'name' ? 
     monster[key] = input.value.trim() || (key === 'name' ? monster.id : 'images/monster/Monster_Slime.png');
   }
   saveMonsters();
+  if (monster.id === 'slime') renderSlimeTable();   // 基本史萊姆變了，各種類的實際數值跟著更新
   if (key === 'name') { document.getElementById('editingTitle').textContent = monster.name + '・資料'; renderList(); }
   if (key === 'sprite') { previewSprite(monster); renderList(); }
 }));
 function exportText() {
   return '/* 怪物種類資料：由怪物編輯器匯出。地圖只記錄種類 ID 與權重。 */\n'
-    + 'const MONSTERS_DEFAULT = ' + JSON.stringify(validMonsterCatalog(monsters), null, 2) + ';\n';
+    + 'const MONSTERS_DEFAULT = ' + JSON.stringify(validMonsterCatalog(monsters), null, 2) + ';\n'
+    + '/* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */\n'
+    + 'const SLIME_SETTINGS_DEFAULT = ' + JSON.stringify(validSlimeSettings(slimeCfg), null, 2) + ';\n';
 }
+
+// ================= 史萊姆種類 =================
+// 靠機率出現的種類（巨型靠時間、小史萊姆靠分裂、一般史萊姆是預設）
+const SLIME_ROLLED = new Set(['splitter', 'bomber', 'spitter']);
+const SLIME_COLS = [
+  { key: 'chance', step: 1, min: 0, max: 100, pct: true },
+  { key: 'unlockAt', step: 5, min: 0 },
+  { key: 'hpMul', step: .05, min: .05 }, { key: 'speedMul', step: .05, min: .05 },
+  { key: 'dmgMul', step: .05, min: 0 }, { key: 'rewardMul', step: .05, min: 0 },
+  { key: 'scale', step: .05, min: .2 }, { key: 'hue', step: 5, min: -180, max: 180 },
+];
+const slimeBody = document.querySelector('#slimeTable tbody');
+function slimeBase() { return monsters.find(m => m.id === 'slime') || monsters[0]; }
+function slimeActualText(v) {
+  const b = slimeBase(), r = n => Math.round(n);
+  return `血量 ${r(b.hp * v.hpMul)}・速度 ${r(b.speed * v.speedMul)}<br>攻擊 玩家 ${r(b.playerDamage * v.dmgMul)}／哨兵 ${r(b.sentryDamage * v.dmgMul)}／建築 ${r(b.buildingDamage * v.dmgMul)}<br>獎勵 經費 ${r(b.reward * v.rewardMul)}・結晶 ${r(b.crystals * v.rewardMul)}`;
+}
+function slimeThumb(img, v) {
+  const b = slimeBase(), k = Math.min(1.2, .9 * v.scale);
+  img.src = b.sprite; img.style.width = Math.round((b.width || 42) * k) + 'px'; img.style.height = Math.round((b.height || 33) * k) + 'px';
+  img.style.filter = v.hue ? `hue-rotate(${v.hue}deg) saturate(1.35)` : '';
+}
+function renderSlimeTable() {
+  slimeBody.replaceChildren();
+  for (const v of slimeCfg.variants) {
+    const tr = document.createElement('tr');
+    const thumbTd = document.createElement('td'), thumb = document.createElement('div'), img = new Image();
+    thumb.className = 'slime-thumb'; thumb.append(img); thumbTd.append(thumb); slimeThumb(img, v);
+    const nameTd = document.createElement('td'), name = document.createElement('input');
+    name.className = 'name'; name.value = v.name; name.maxLength = 40;
+    name.addEventListener('input', () => { v.name = name.value.trim() || v.id; saveMonsters(); });
+    nameTd.append(name); tr.append(thumbTd, nameTd);
+    const actual = document.createElement('td'); actual.className = 'actual'; actual.innerHTML = slimeActualText(v);
+    for (const col of SLIME_COLS) {
+      const td = document.createElement('td');
+      if ((col.key === 'chance' || col.key === 'unlockAt') && !SLIME_ROLLED.has(v.id)) {
+        td.className = 'na'; td.textContent = v.id === 'giant' ? '依下方時間' : v.id === 'mini' ? '分裂時出現' : '預設';
+      } else if (v.id === 'normal' && col.key !== 'hue') {
+        td.className = 'na'; td.textContent = '1';   // 一般史萊姆就是基準，倍率固定 1
+      } else {
+        const input = document.createElement('input'); input.type = 'number'; input.step = col.step; input.min = col.min;
+        if (col.max != null) input.max = col.max;
+        const show = () => { input.value = col.pct ? Math.round(v[col.key] * 1000) / 10 : v[col.key]; };
+        show();
+        input.addEventListener('change', () => {
+          let n = Number(input.value); if (!Number.isFinite(n)) n = col.min;
+          v[col.key] = col.pct ? n / 100 : n;
+          slimeCfg = validSlimeSettings(slimeCfg);   // 夾在合理範圍內
+          Object.assign(v, slimeCfg.variants.find(x => x.id === v.id));
+          slimeCfg.variants[slimeCfg.variants.findIndex(x => x.id === v.id)] = v;
+          show(); actual.innerHTML = slimeActualText(v); slimeThumb(img, v); saveMonsters();
+        });
+        td.append(input);
+      }
+      tr.append(td);
+    }
+    tr.append(actual); slimeBody.append(tr);
+  }
+  document.getElementById('g_first').value = slimeCfg.giant.first;
+  document.getElementById('g_every').value = slimeCfg.giant.every;
+}
+for (const key of ['first', 'every']) document.getElementById('g_' + key).addEventListener('change', e => {
+  slimeCfg.giant[key] = Number(e.target.value); slimeCfg = validSlimeSettings(slimeCfg);
+  e.target.value = slimeCfg.giant[key]; saveMonsters(); renderSlimeTable();
+});
 document.getElementById('exportMonsters').addEventListener('click', () => {
   const content = exportText();
   document.getElementById('exportOut').value = content;
@@ -99,8 +206,9 @@ document.getElementById('previewGame').addEventListener('click', () => {
 });
 document.getElementById('resetMonsters').addEventListener('click', () => {
   if (!confirm('丟棄這台瀏覽器裡尚未匯出的怪物設定，重新載入 data/monsters.js？')) return;
-  localStorage.removeItem(MONSTER_STORAGE_KEY);
-  monsters = monsterCatalog(false); selectedId = monsters[0].id;
-  render(); status('已從檔案重新載入。');
+  localStorage.removeItem(MONSTER_STORAGE_KEY); localStorage.removeItem(SLIME_SETTINGS_STORAGE_KEY);
+  monsters = monsterCatalog(false); selectedId = monsters[0].id; slimeCfg = slimeSettings(false);
+  render(); renderSlimeTable(); status('已從檔案重新載入。');
 });
 render();
+renderSlimeTable();

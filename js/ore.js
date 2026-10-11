@@ -9,15 +9,12 @@
 //    ・希奧妮：大招的小爆炸會炸開礦物
 //    ・安柏：雷電打偏時，有機率劈中附近的礦物
 //  炸開後異質碎片會散落在地上，溫特走過去就會撿起來，畫面中間跳出拾取提示。
-//  礦物每次出勤重新出現；在黑暗中會發出淡淡的紫光，方便發現。
+//  礦物每次出勤重新出現。在黑暗中不會發光；被探照燈、營燈或其他燈照亮時，
+//  露出的紫色結晶會亮起鮮豔的紫光（發光圖在 images/item-obstacle/glow/，由原圖的紫色部分做成）。
 //  （數值集中在最上面，想調整改這裡就好）
 // ============================================================
 // crystals：炸開後總共掉幾個異質碎片；shards：分成幾塊掉在地上；glow：黑暗中的紫光亮度
-const ORE_TYPES = {
-  ore_small: { name: '小型異質礦', file: 'images/item-obstacle/09-ore-small.png', crystals: 8,  shards: 3, glow: .22 },
-  ore_large: { name: '大型異質礦', file: 'images/item-obstacle/10-ore-large.png', crystals: 20, shards: 5, glow: .32 },
-  ore_rare:  { name: '稀有紫晶礦', file: 'images/item-obstacle/11-ore-rare.png',  crystals: 50, shards: 8, glow: .55 },
-};
+
 const ORE_BLAST_PAD = .6;   // 爆炸半徑外再多算幾格也會炸到礦物（礦物本身有一格大）
 const SHARD = { magnet: 90, pickup: 24, delay: .45 };   // 多近會被吸過來、多近算撿到（像素）；落地後幾秒才能撿
 // 路德的拳頭剛好波及礦物：hits＝敲幾下會碎（暴走時每下算 2 下）；pad＝攻擊範圍外再多算幾格
@@ -26,8 +23,37 @@ const ORE_DISSOLVE = 3;                       // 礦物泡在腐蝕池裡累積�
 const ORE_STRAY = { chance: .4, range: 3 };   // 安柏打偏時：多少機率劈中目標附近幾格內的礦物
 const ORE_THEONIE_R = 1.2;                    // 希奧妮大招的爆炸半徑（格）
 
+// 結晶發光：strength＝紫光亮度；halo＝外圍光暈亮度；pulse＝閃爍幅度；speed＝閃爍快慢；pad＝光暈圖四周多留的像素
+const ORE_CRYSTAL_GLOW = { strength: .85, halo: .6, pulse: .25, speed: 1.8, pad: 8 };
+// 發光圖依礦物圖檔名對應：images/item-obstacle/09-ore-small.png → glow/09-ore-small-glow.png、-halo.png
+const oreGlowImgs = {};
+function oreGlowFor(type) {
+  if (oreGlowImgs[type] !== undefined) return oreGlowImgs[type];
+  const spec = ORE_TYPES[type], base = spec && String(spec.file || '').split('/').pop().replace(/\.png$/i, '');
+  if (!base) return (oreGlowImgs[type] = null);
+  const glow = new Image(); glow.src = `images/item-obstacle/glow/${base}-glow.png`;
+  const halo = new Image(); halo.src = `images/item-obstacle/glow/${base}-halo.png`;
+  return (oreGlowImgs[type] = { glow, halo });
+}
+Object.keys(ORE_TYPES).forEach(oreGlowFor);   // 先載入
+// 被照亮的礦物：結晶疊上鮮豔紫光（由 render.js 的 drawObstacle 呼叫，跟礦物圖同一個前後順序）
+function drawOreGlow(ctx, o, x, y, w, h) {
+  const c = oreCenter(o);
+  if (o.hp <= 0 || !isLit(c.x, c.y)) return;   // 黑暗中不發光
+  const imgs = oreGlowFor(o.type); if (!imgs) return;
+  const now = performance.now() / 1000, C = ORE_CRYSTAL_GLOW;
+  const k = 1 - C.pulse + C.pulse * (.5 + .5 * Math.sin(now * C.speed + o.c * 1.7 + o.r));
+  ctx.save();
+  ctx.globalCompositeOperation = 'lighter'; ctx.imageSmoothingEnabled = false;
+  if (imgs.halo.complete && imgs.halo.naturalWidth) {   // 光暈圖四周多留 pad 像素（以原圖比例換算）
+    const px = C.pad * w / (imgs.glow.naturalWidth || w), py = C.pad * h / (imgs.glow.naturalHeight || h);
+    ctx.globalAlpha = C.halo * k; ctx.drawImage(imgs.halo, x - px, y - py, w + px * 2, h + py * 2);
+  }
+  if (imgs.glow.complete && imgs.glow.naturalWidth) { ctx.globalAlpha = C.strength * k; ctx.drawImage(imgs.glow, x, y, w, h); }
+  ctx.restore();
+}
 const oreByFile = file => Object.entries(ORE_TYPES).find(([, spec]) => file.endsWith(spec.file.replace('images/', ''))) || null;
-const oreCenter = o => ({ x: OX + (o.c + .5) * CELL, y: OY + (o.r + .5) * CELL });
+const oreCenter = o => ({ x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + (o.h || 1) / 2) * CELL });   // 整張圖的中心（大型、稀有礦不只一格）
 
 // 靠近礦物時的提示（礦物在 1.5 格內）
 function oreNearPlayer() {
@@ -175,7 +201,7 @@ function strayBoltOre(t, target) {
 function oreGlowLights() {
   if (!G || !G.obstacles) return [];
   const now = performance.now() / 1000;
-  const lights = G.obstacles.filter(o => o.ore && o.hp > 0).map(o => {
+  const lights = G.obstacles.filter(o => o.ore && o.hp > 0 && isLit(oreCenter(o).x, oreCenter(o).y)).map(o => {   // 黑暗中不發光
     const c = oreCenter(o), spec = ORE_TYPES[o.type];
     return { x: c.x, y: c.y - 6, r: 70 + spec.glow * 60, life: 1, life0: 1,
       power: spec.glow * (.8 + .2 * Math.sin(now * 2 + o.c * 1.7 + o.r)), color: [190, 110, 255] };

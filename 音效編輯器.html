@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>音效編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  :root { color-scheme:dark; font-family:system-ui,'Microsoft JhengHei',sans-serif; background:#10151c; color:#e8edf5 }
+  * { box-sizing:border-box } body { margin:0; padding:28px; max-width:1100px; margin-inline:auto }
+  a { color:#9bd2ff } h1 { font-size:25px; margin:0 0 6px } h2 { font-size:17px; margin:0 0 10px }
+  p { color:#aebccc; line-height:1.6; margin:0 0 18px } small { color:#91a3b8 }
+  .top { display:flex; justify-content:space-between; align-items:start; gap:16px; flex-wrap:wrap }
+  .nav { display:flex; gap:15px; padding-top:7px; white-space:nowrap }
+  .panel { background:#1c2530; border:1px solid #3a4b60; border-radius:14px; padding:16px 18px; margin-bottom:16px }
+  .toolbar { display:flex; gap:8px; flex-wrap:wrap; align-items:center }
+  button { cursor:pointer; color:#eaf3ff; background:#2a3e54; border:1px solid #5b7793; border-radius:8px; padding:8px 12px; font:inherit }
+  button:hover { background:#34516d } button.primary { background:#276f80; border-color:#64b6bd }
+  input { background:#121a23; color:#f3f6fb; border:1px solid #52677d; border-radius:7px; padding:7px 9px; font:inherit; min-width:0 }
+  #search { flex:1; min-width:180px }
+  .row { display:grid; grid-template-columns:minmax(150px,1.3fr) minmax(140px,2fr) 82px auto auto; gap:10px; align-items:center;
+         padding:7px 8px; border-radius:8px }
+  .row + .row { border-top:1px solid #29384a }
+  .row.changed { background:#22323f }
+  .name b { display:block; font-weight:600 } .name small { font-size:11.5px }
+  .row input[type=range] { width:100%; accent-color:#64b6bd }
+  .pct { display:flex; align-items:center; gap:4px } .pct input { width:64px; text-align:right }
+  .play { min-width:62px } .reset { padding:8px 10px; background:transparent; border-color:#3e5266 }
+  .reset:disabled { opacity:.3; cursor:default }
+  #status { min-height:22px; color:#84ddbd; margin:10px 0 0 }
+  #exportOut { width:100%; min-height:120px; margin-top:10px; background:#0d151e; border:1px solid #4c6479; color:#b6d5e6; border-radius:8px; padding:12px; font:12px/1.5 Consolas,monospace; resize:vertical }
+  @media(max-width:700px) { body { padding:16px } .row { grid-template-columns:1fr 82px auto auto } .row input[type=range] { grid-column:1/-1; order:5 } }
+</style>
+</head>
+<body>
+  <div class="top"><div><h1>🔊 音效編輯器</h1>
+    <p>調整每個音效的大小聲（100%＝原本大小，最大 300%）。按 ▶ 試聽；改動會自動存在這台瀏覽器。<br>
+       正式套用到遊戲：按「下載 sound-volumes.js」，把檔案放到遊戲的 <code>data</code> 資料夾覆蓋。整體音量請用遊戲裡的設定選單。</p></div>
+    <nav class="nav"><a href="塔防原型.html">回遊戲</a><a href="怪物編輯器.html">怪物編輯器</a></nav></div>
+  <section class="panel">
+    <div class="toolbar">
+      <input id="search" type="search" placeholder="搜尋音效名稱或檔名" aria-label="搜尋音效">
+      <button id="previewGame">▶ 用暫存設定預覽遊戲</button>
+      <button id="exportBtn" class="primary">下載 sound-volumes.js</button>
+      <button id="resetAll">全部恢復 100%</button>
+      <button id="reloadFile">從檔案重新載入</button>
+    </div>
+    <div id="status" role="status"></div>
+  </section>
+  <div id="groups"></div>
+  <section class="panel"><h2>匯出內容</h2><small>按「下載」時也會顯示在這裡。</small>
+    <textarea id="exportOut" readonly aria-label="匯出內容"></textarea></section>
+  <script src="data/sound-volumes.js?v=vol-20261011"></script>
+  <script src="js/sfx.js?v=pearl-20261011"></script>
+  <script src="js/ui-feedback.js?v=mute-20261011"></script>
+  <script src="js/sound-editor.js?v=pearl-20261011"></script>
+</body>
+</html>

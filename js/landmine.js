@@ -21,7 +21,7 @@ function updateLandmines(dt) {
       if (o.fuseT <= 0) detonateMine(o);
       continue;
     }
-    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL);
+    const stepped = G.enemies.some(e => !e.dead && e.hp > 0 && !e.flying && Math.hypot(e.x - p.x, e.y - p.y) <= LANDMINE.trigger * CELL);   // 飄在空中的（珍珠小童）踩不到
     if (stepped) {
       o.fuseT = LANDMINE.fuse;
       if (typeof sfxAt === 'function') sfxAt('mineBeep', p.x, p.y, .8, 'mine-beep');   // 先「嗶嗶」，引信 1 秒後才爆

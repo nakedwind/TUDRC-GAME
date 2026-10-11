@@ -12,21 +12,21 @@ const OIL_IGNITERS = new Set(['player', 'eldrin', 'chris', 'amber', 'theonie', '
 // blast：爆炸半徑（格）與傷害；fire：爆炸後留下的火海（半徑、秒數、每秒傷害）；slick：沒爆炸時漏出的油汙（半徑、留多久）
 // gas：瓦斯類，被誰打壞都會爆炸；breaksOre：爆炸能炸開異質礦物；boom：爆炸音效
 const OIL_ITEMS = {
-  deco_oil_drum: { name: '油桶', file: 'images/item-decorate/oil-drum.png',
-    blast: { radius: 2, enemy: 80, sentry: 35, player: 30 },
-    fire: { radius: 1.7, life: 6, dps: 12 },
-    slick: { radius: 1.2, life: 40 } },
+  deco_oil_drum: { name: '油桶', file: 'images/item-decorate/oil-drum.png',   // 範圍比油箱大
+    blast: { radius: 3, enemy: 80, sentry: 35, player: 30 },
+    fire: { radius: 3, life: 12, dps: 12 },   // 打爆後的火海燒 12 秒（原本 6 秒）
+    slick: { radius: 2, life: 200 } },   // 油汙留 200 秒
   deco_oil_tank: { name: '油箱', file: 'images/item-decorate/oil-tank.png',
-    blast: { radius: 1.4, enemy: 50, sentry: 22, player: 20 },
-    fire: { radius: 1.2, life: 5, dps: 10 },
-    slick: { radius: .85, life: 40 } },
+    blast: { radius: 2, enemy: 50, sentry: 22, player: 20 },
+    fire: { radius: 2, life: 8, dps: 10 },   // 打爆後的火海燒 8 秒
+    slick: { radius: 1, life: 180 } },   // 油汙留 3 分鐘
   deco_gasstove:  { name: '瓦斯爐', file: 'images/item-decorate/gasstove.png', gas: true, breaksOre: true, boom: 'smallBoom',
     blast: { radius: 1.2, enemy: 40, sentry: 15, player: 12 } },
   deco_gasstove2: { name: '瓦斯爐', file: 'images/item-decorate/gasstove02.png', gas: true, breaksOre: true, boom: 'smallBoom',
     blast: { radius: 1.2, enemy: 40, sentry: 15, player: 12 } },
 };
 // 油汙被點燃後的火海：半徑是油汙的幾倍、燒幾秒、每秒傷害
-const SLICK_FIRE = { radiusMul: 1.15, life: 6, dps: 10 };
+const SLICK_FIRE = { radiusMul: 1.15, life: 12, dps: 10 };   // 燒 12 秒（原本 6 秒）
 const FIRE_TICK = 1;   // 火海每隔幾秒燙一次（同時站在好幾片火裡也只吃最燙的那片）
 
 const oilItem = o => o && OIL_ITEMS[o.type];
@@ -175,8 +175,15 @@ function igniteSlicksOnLine(x0, y0, x1, y1) {
 }
 
 // ---- 火海 ----
+// 這個點有沒有在燒著的火海裡（pad＝範圍外再多算幾像素）。火海是扁的橢圓：上下只有左右的 0.7 倍
+function oilFireAt(x, y, pad = 0) {
+  if (!G.oilFires) return null;
+  for (const f of G.oilFires) if (f.t > 0 && Math.hypot(x - f.x, (y - f.y) / .7) <= f.r + pad) return f;
+  return null;
+}
 function addOilFire(x, y, r, life, dps) {
   (G.oilFires = G.oilFires || []).push({ x, y, r, t: life, t0: life, dps, flameT: 0, smokeT: 0 });
+  for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }   // 哨兵重新找路，繞開剛燒起來的火
 }
 
 // ---- 哨兵不會主動打油桶或油汙（要不要射爆由玩家決定）----
@@ -222,6 +229,7 @@ function updateOil(dt) {
   }
   for (const t of G.towers) {
     if (t.hp <= 0) continue;
+    if (typeof sentryFireTrait === 'function' && sentryFireTrait(t) === 'immune') continue;   // 希奧妮不怕火
     const d = fireTick(t); if (!d) continue;
     const def = Math.max(0, Math.min(.75, TYPES[t.type]?.defense || 0)), hurt = d * (1 - def);
     t.hp = Math.max(0, t.hp - hurt); t.hitT = Math.max(t.hitT || 0, .2); t.hitColor = '#ff8a3a';

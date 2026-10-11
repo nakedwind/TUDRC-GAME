@@ -32,9 +32,25 @@
   .fields { display:grid; grid-template-columns:repeat(2,minmax(150px,1fr)); gap:13px }
   .fields label { display:grid; gap:5px; font-size:13px; color:#b8c9da }
   .fields .wide { grid-column:1/-1 } .fields input { width:100% }
+  #chargerBox { margin-top:20px; border-top:1px solid #344454; padding-top:16px }
+  #chargerBox h3 { font-size:15px; margin:0 0 6px } #chargerBox p { margin:0 0 12px; font-size:13px }
+  #chargerFields { grid-template-columns:repeat(3,minmax(150px,1fr)) }
+  @media(max-width:800px) { #chargerFields { grid-template-columns:repeat(2,minmax(130px,1fr)) } }
   .foot { margin-top:20px; border-top:1px solid #344454; padding-top:16px }
   #exportOut { width:100%; min-height:150px; background:#0d151e; border:1px solid #4c6479; color:#b6d5e6; border-radius:8px; padding:12px; font:12px/1.5 Consolas,monospace; resize:vertical }
   #status { min-height:23px; color:#84ddbd; margin:10px 0 }
+  .slime-panel { margin-top:18px }
+  .slime-wrap { overflow-x:auto }
+  #slimeTable { border-collapse:collapse; width:100%; min-width:980px; font-size:13px }
+  #slimeTable th { color:#9fb3c8; font-weight:600; text-align:left; padding:6px 6px 8px; border-bottom:1px solid #3a4b60; white-space:nowrap }
+  #slimeTable td { padding:7px 6px; border-bottom:1px solid #2b3a4a; vertical-align:middle }
+  #slimeTable input { width:74px; padding:6px 7px } #slimeTable input.name { width:110px }
+  #slimeTable .na { color:#73869b; font-size:12px }
+  #slimeTable .actual { color:#a8c4dc; font-size:12px; line-height:1.5; white-space:nowrap }
+  .slime-thumb { width:56px; height:44px; display:grid; place-items:end center; background:#0e1721; border-radius:6px }
+  .slime-thumb img { image-rendering:pixelated }
+  .giant-fields { display:flex; gap:16px; flex-wrap:wrap; margin-top:14px }
+  .giant-fields label { display:grid; gap:5px; font-size:13px; color:#b8c9da } .giant-fields input { width:120px }
   @media(max-width:800px) { .layout,.details { grid-template-columns:1fr } body { padding:16px } }
 </style>
 </head>
@@ -62,15 +78,33 @@
           <label>圖片寬度 px<input id="f_width" data-field="width" type="number" min="8"></label>
           <label>圖片高度 px<input id="f_height" data-field="height" type="number" min="8"></label>
         </div></div>
+      <div id="chargerBox" hidden>
+        <h3 id="behaviorTitle">行為</h3>
+        <p id="behaviorDesc"></p>
+        <div class="fields" id="chargerFields"></div>
+      </div>
       <div class="foot"><div class="actions"><button id="previewGame">▶ 用暫存設定預覽遊戲</button><button id="exportMonsters" class="primary">下載 monsters.js</button><button id="resetMonsters">從檔案重新載入</button></div>
         <small>編輯會自動儲存在這台瀏覽器。正式保留並同步到其他電腦時，下載檔案並放到 <code>data/monsters.js</code>。</small>
         <div id="status" role="status"></div><textarea id="exportOut" readonly aria-label="怪物設定匯出內容"></textarea></div>
     </section>
   </div>
-  <script src="data/monsters.js"></script>
-  <script src="js/monster-data.js"></script>
+  <section class="panel slime-panel">
+    <h2>🟢 史萊姆種類</h2>
+    <p style="margin-bottom:14px">每種史萊姆都是用上面「史萊姆」的數值乘上倍率。生成一隻史萊姆時，依序擲出現機率，都沒中就是一般史萊姆。
+      巨型史萊姆依下方時間固定登場，小史萊姆是分裂史萊姆死掉時分出來的。改動會跟上面一起自動儲存，「下載 monsters.js」也會一起存進去。</p>
+    <div class="slime-wrap"><table id="slimeTable">
+      <thead><tr><th>預覽</th><th>名稱</th><th>出現機率 %</th><th>開戰幾秒後出現</th><th>血量 ×</th><th>速度 ×</th><th>攻擊 ×</th><th>獎勵 ×</th><th>體型 ×</th><th>顏色偏移 °</th><th>實際數值</th></tr></thead>
+      <tbody></tbody></table></div>
+    <div class="giant-fields">
+      <label>巨型：開戰幾秒後第一隻<input id="g_first" type="number" min="0" step="5"></label>
+      <label>巨型：之後每隔幾秒一隻<input id="g_every" type="number" min="5" step="5"></label>
+    </div>
+    <small style="display:block;margin-top:10px">場上同時最多一隻巨型；上一隻沒倒，下一隻會等。</small>
+  </section>
+  <script src="data/monsters.js?v=pearl-20261011"></script>
+  <script src="js/monster-data.js?v=pearl-20261011"></script>
   <script src="js/sfx.js"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js"></script>
+  <script src="js/monster-editor.js?v=pearl-20261011"></script>
 </body>
 </html>

@@ -17,11 +17,25 @@ const SLIME_VARIANTS = {
   spitter:  { name: '吐酸史萊姆', chance: .12, unlockAt: 40, hue: -130, hpMul: .9, speedMul: .85, goo: '#d4e04a' },
   mini:     { name: '小史萊姆', hue: -75, hpMul: .3, speedMul: 1.35, dmgMul: .5, rewardMul: .25, scale: .6, goo: '#a4e35c' },
 };
+// 機率、出現時間、各項倍率、顏色與巨型登場時間改由怪物編輯器設定（data/monsters.js 的 SLIME_SETTINGS_DEFAULT），
+// 這裡的數字只在設定檔缺少時當備用；顏色的黏液（goo）、擊退抗性仍寫在上面。
+function applySlimeSettings() {
+  if (typeof slimeSettings !== 'function') return;
+  const s = slimeSettings(/[?&](preview|previewMonsters)=1(&|$)/.test(location.search));   // 預覽模式用編輯器暫存
+  for (const v of s.variants) {
+    const t = SLIME_VARIANTS[v.id]; if (!t) continue;
+    t.name = v.name; t.hpMul = v.hpMul; t.speedMul = v.speedMul; t.dmgMul = v.dmgMul;
+    t.rewardMul = v.rewardMul; t.scale = v.scale; t.hue = v.hue || null;
+    if (v.id !== 'normal' && v.id !== 'giant' && v.id !== 'mini') { t.chance = v.chance; t.unlockAt = v.unlockAt; }
+  }
+  GIANT_EVENT.first = s.giant.first; GIANT_EVENT.every = s.giant.every;
+}
 // 自爆史萊姆：靠近目標後引爆的距離、引信秒數、爆炸半徑與各對象傷害
 const SLIME_BOMB = { trigger: CELL * 1.25, fuse: 1.1, radius: CELL * 1.6,
                      player: 24, sentry: 30, building: 60, monster: 20, killedMul: .6 };
 // 巨型史萊姆登場事件：開戰 first 秒後第一次出現，之後每 every 秒再來一隻（場上同時最多 1 隻）
 const GIANT_EVENT = { first: 45, every: 75 };
+applySlimeSettings();
 // 吐酸史萊姆：range 在多遠內會吐（格）、minRange 太近就不吐；windup 蓄力秒數（地上出現落點警示）
 // flySpeed 酸液飛行速度（格／秒）；cooldown 冷卻；pool 地上酸液：半徑（格）、存在秒數、每秒傷害（玩家／哨兵）
 const SLIME_SPIT = { range: 5, minRange: 1.5, windup: .75, flySpeed: 6.5, cooldown: 3.8,
@@ -231,6 +245,8 @@ function slimeExplode(e, mul) {
 // ---- 死亡表演 ----
 function onEnemyDeath(e) {
   trackKillAchievements(e);   // 成就計數（js/achievements.js）
+  if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
+  if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
   const size = e.sizeMul || 1;
   if (e.variant === 'bomber') {   // 自爆型：被打死也會爆（威力較小），不留屍體
@@ -300,7 +316,7 @@ function onGiantLand(e) {
 function updateGiantEvent() {
   if (MAP_SAFE || G.over) return;
   if (G.cores.length ? !G.cores.some(c => !c.dead) : G.waveIndex >= G.waves.length) return;   // 戰鬥已結束
-  if (G.nextGiantAt == null) G.nextGiantAt = GIANT_EVENT.first;
+  if (G.nextGiantAt == null) G.nextGiantAt = GIANT_EVENT.first / difficultyOf('spawnRate');
   if (G.battleTime < G.nextGiantAt) return;
   if (G.enemies.some(e => e.variant === 'giant' && !e.dead)) return;   // 上一隻還沒倒就先等
   const cells = G.cores.length ? darkMonsterSpawnCells() : spawnCells();
@@ -310,7 +326,7 @@ function updateGiantEvent() {
   const spec = ACTIVE_MONSTERS.find(m => m.id === 'slime');
   if (!spec) return;
   G.enemies.push(createMonster(spec, x, y, 'giant'));
-  G.nextGiantAt = G.battleTime + GIANT_EVENT.every;
+  G.nextGiantAt = G.battleTime + GIANT_EVENT.every / difficultyOf('spawnRate');
 }
 
 // ---- 每幀更新（在 update 裡呼叫）----
@@ -321,6 +337,8 @@ function updateCombatFeel(dt) {
   if (G.fxCorpses) {
     for (const c of G.fxCorpses) {
       c.t += dt; c.life -= dt;
+      if (c.fall) { updateFallCorpse(c); continue; }
+      if (c.drop) { updateDropCorpse(c, dt); continue; }
       if (c.fly) {
         c.x += c.vx * dt; c.z += c.vz * dt; c.vz -= 520 * dt; c.rot += c.spin * dt;
         if (c.life <= 0 || c.z < 0) { c.life = 0; popCorpse(c.x, c.y, c.goo, c.size); }
@@ -346,6 +364,7 @@ function updateCombatFeel(dt) {
 // 地面層（角色腳下）：黏液痕跡＋自爆範圍警示
 function drawCombatFeelGround(ctx) {
   drawAcidGround(ctx);   // 吐酸：酸液池、落點警示
+  // （倒下的鳥頭人、珍珠小童的屍體改由 render.js 依位置排序畫，見 drawCorpseSorted）
   if (G.slimeSplats) for (const s of G.slimeSplats) {
     const a = Math.min(1, s.t / 2) * .55;   // 最後 2 秒淡出
     ctx.save(); ctx.globalAlpha = a; ctx.fillStyle = s.color;
@@ -366,11 +385,18 @@ function drawCombatFeelGround(ctx) {
     ctx.restore();
   }
 }
+// 倒下的鳥頭人／珍珠小童屍體：由 render.js 的排序呼叫（跟牆、角色依位置排前後）
+function drawCorpseSorted(c) {
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  try { if (c.fall) drawFallCorpse(ctx, c); else drawDropCorpse(ctx, c); }
+  catch (err) { c.life = 0; console.warn('屍體動畫出錯，已略過', err); }   // 畫不出來就直接移除這具屍體
+  finally { ctx.restore(); }
+}
 // 角色上層：被打飛的屍體與飛濺的黏液
 function drawCombatFeelTop(ctx) {
   drawAcidTop(ctx);      // 吐酸：飛行中的酸液球
   if (G.fxCorpses) for (const c of G.fxCorpses) {
-    if (!isLit(c.x, c.y)) continue;
+    if (c.fall || c.drop || !isLit(c.x, c.y)) continue;   // 倒下的屍體畫在地面層
     ctx.save();
     ctx.imageSmoothingEnabled = false;
     if (c.fly) {

@@ -30,6 +30,7 @@ function drawObstacle(o) {
     if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
     else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
   }
+  if (o.ore && typeof drawOreGlow === 'function') drawOreGlow(ctx, o, x, y, w, h);   // 被照亮時結晶發出紫光（js/ore.js）
   if (hit) {   // 閃紅：半透明紅疊在圖上
     ctx.globalAlpha = (o.ore ? .35 : .55) * hit; ctx.fillStyle = o.ore ? '#e6c8ff' : '#ff3030';   // 採礦敲擊：淡紫光（不是受傷的紅）
     if (o.isBase) {
@@ -213,13 +214,38 @@ function drawSensedEnemies() {
   }
   ctx.restore();
 }
+// 走路的怪物（有 frames）：依移動方向選正面／側面，走動時換腳，停下來站著
+function monsterWalkFrame(e) {
+  const f = e.frames;
+  const mdx = e.x - (e.animX ?? e.x), mdy = e.y - (e.animY ?? e.y), moved = Math.hypot(mdx, mdy);
+  e.animX = e.x; e.animY = e.y;
+  const now = performance.now() / 1000;
+  if (moved > .15 && moved < 20 && !(e.knockT > 0)) {   // 被擊退滑行不算走路
+    e.walkDist = (e.walkDist || 0) + moved; e.walkUntil = now + .15;
+    if (Math.abs(mdx) > Math.abs(mdy) * .9) { e.animSide = true; e.faceRight = mdx > 0; }
+    else if (Math.abs(mdy) > Math.abs(mdx) * 1.1) e.animSide = false;
+  }
+  const walking = (e.walkUntil || 0) > now && !(e.stunT > 0);
+  const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : 10));   // 衝刺時步伐大一點
+  const lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';   // 沒在追人的時候
+  if (!walking && f.idle && lazy) {   // 站著不動：原地動畫（鳥頭人轉眼睛），朝最後面向的方向
+    if (e.idlePhase == null) e.idlePhase = Math.random() * 10;
+    const i = Math.floor((now + e.idlePhase) * f.idleFps) % f.idle.length;
+    return { file: f.idle[i], flip: !!e.faceRight === (f.idleFacing === 'left') };
+  }
+  if (e.animSide && f.side) return { file: walking ? f.side[step % f.side.length] : f.side[0], flip: e.faceRight === (f.sideFacing === 'left') };
+  return { file: walking ? f.walkFront[step % f.walkFront.length] : f.front, flip: false };
+}
 function drawEnemy(e) {
   ctx.save();
   if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
+  else if (e.shockT > 0) ctx.translate((Math.random() * 2 - 1) * 1.3, (Math.random() * 2 - 1) * .6);   // 麻痺：微微顫抖
   const lift = e.slimeLift || 0, size = e.sizeMul || 1;
   // 受擊壓扁回彈：被打瞬間變扁變寬，0.16 秒內彈回
   const squash = (e.hitSquashT || 0) / .16, sqX = 1 + .22 * squash, sqY = 1 - .2 * squash;
-  const slimeW = (e.drawWidth || 42) * (e.slimeScaleX || 1) * sqX, slimeH = (e.drawHeight || 33) * (e.slimeScaleY || 1) * sqY;
+  // 跳躍／硬直的壓扁拉長只給史萊姆：鳥頭人、珍珠小童沒有跳躍動作會把形狀重設，套用的話被爆擊後會一直扁著
+  const bodyX = e.behavior ? 1 : (e.slimeScaleX || 1), bodyY = e.behavior ? 1 : (e.slimeScaleY || 1);
+  const slimeW = (e.drawWidth || 42) * bodyX * sqX, slimeH = (e.drawHeight || 33) * bodyY * sqY;
   const bottomY = e.y + 13 - lift;
   const shadowScale = Math.max(.55, 1 - lift / 22) * size;
   ctx.globalAlpha = .28 * Math.min(1, shadowScale); ctx.fillStyle = '#071015';
@@ -239,7 +265,10 @@ function drawEnemy(e) {
     ctx.translate((Math.random() * 2 - 1) * 1.6 * charge, 0);
   }
   ctx.globalAlpha = 1;
-  const baseSprite = monsterImage(e.sprite || 'images/monster/Monster_Slime.png');
+  const walkFrame = e.frames ? monsterWalkFrame(e) : null;
+  if (walkFrame) { e.lastFrameFile = walkFrame.file; e.lastFrameFlip = walkFrame.flip; }   // 死亡倒地用目前這張圖
+  const baseSprite = monsterImage(walkFrame ? walkFrame.file : e.art ? shooterFrame(e) : (e.sprite || 'images/monster/Monster_Slime.png'));   // 珍珠小童：眨眼／生氣圖
+  if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
   if (baseSprite.complete && baseSprite.naturalWidth) {
     const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
     ctx.imageSmoothingEnabled = false;
@@ -255,8 +284,9 @@ function drawEnemy(e) {
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
   }
+  if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
   // 血條放在圖的上方（體型大的變體血條也跟著變寬、變高）
-  const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6;
+  const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
   ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW / 2, barY, barW, 3);
   ctx.fillStyle = e.variant === 'giant' ? '#c79bff' : '#7CFC7C'; ctx.fillRect(e.x - barW / 2, barY, barW * Math.max(0, e.hp) / e.maxhp, 3);
   if (e.variant === 'giant') {
@@ -264,7 +294,7 @@ function drawEnemy(e) {
     ctx.fillText(SLIME_VARIANTS.giant.name, e.x, barY - 4);
   }
   if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
-  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('顫抖',e.x,e.y-33); }
+  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
   if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
   if (e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」
     const age = ENEMY_ALERT_TIME - e.alertT, pop = age < .12 ? .6 + age / .12 * .7 : 1.3 - Math.min(.3, (age - .12) * 1.5);
@@ -433,10 +463,13 @@ function draw() {
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
   for (const e of G.enemies) if (isVisible(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
+  // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
+  for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (G.player) sortables.push({ y: G.player.sitting ? seatDrawY(G.player.sitting) : G.player.y + 16, draw: () => drawPlayer(G.player) });
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
+  drawFlares(ctx);             // 地上燃燒的照明彈
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
@@ -444,6 +477,8 @@ function draw() {
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
   drawCoreShards(ctx);         // 異質核心碎片
+  drawFlareShots(ctx);         // 飛行中的照明彈
+  drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
   drawBerserkFxWorld(ctx);     // 哨兵身上的黑紫霧、腳下心跳光圈、暴走台詞
 
@@ -468,6 +503,7 @@ function draw() {
     const near = G.running ? portalNearPlayer() : null;
     if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, d.open ? '關門' : '開門'); }
     else if (oreNearPlayer()) drawOreHint(oreNearPlayer());   // 礦物：提示要用爆炸炸開（js/ore.js）
     else {
@@ -482,11 +518,12 @@ function draw() {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];
       const age = 1 - Math.max(0, f.life) / f.life0;
-      const frame = frames[Math.min(3, Math.floor(age * 4))];
+      const frame = frames[Math.min(frames.length - 1, Math.floor(age * frames.length))];
+      const size = ATTACK_EFFECT_SIZE[f.spriteEffect] || 64;
       if (frame && frame.complete && frame.naturalWidth) {
         ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.angle || 0);
         ctx.imageSmoothingEnabled = false;
-        ctx.drawImage(frame, -32, -32, 64, 64);
+        ctx.drawImage(frame, -size / 2, -size / 2, size, size);
         ctx.restore();
       }
     } else if (f.slash) {                                  // 近戰揮砍：月牙斬弧光（殘影拖尾＋外光暈＋白核＋銳利前緣）
@@ -819,6 +856,8 @@ function draw() {
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
   drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
+  drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
+  drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
   // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。

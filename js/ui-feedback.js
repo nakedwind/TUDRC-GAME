@@ -1,4 +1,5 @@
-/* 共用按鈕回饋。現有程式的 button/menu/switch 音效在同一次點擊中合併成一次。 */
+/* 共用按鈕回饋。現有程式的 button/menu/switch 音效在同一次點擊中合併成一次。
+   按鈕加上 data-ui-sound="none" 就不播點擊聲（例如音效編輯器的「試聽」，才不會跟要聽的音效混在一起）。 */
 const UIFeedback = (() => {
   const controls = 'button, input[type="button"], input[type="submit"], select, summary, input[type="checkbox"], input[type="radio"], input[type="color"], [role="button"], [role="tab"], [role="switch"], .tile, .sw, a.backlink, a.back, #editors a';
   const switches = 'select, summary, input[type="checkbox"], input[type="radio"], input[type="color"], [role="tab"], [role="switch"], [aria-pressed], [aria-selected], .team-pick, .buildcat, .build-quick-slot, .tool, .layer, .tile, .sw, .orient button, [data-o], #monsterList button, #list button, .elevator-floors button, #buildToggle, #demolishToggle, #npcArrangeToggle, #gridToggle, #solidToggle, #flipX, #flipY, #sentryMenu [data-act], #fieldCommandMenu button';
@@ -49,6 +50,7 @@ const UIFeedback = (() => {
     const el = findControl(e.target);
     if (!el || el.matches('select')) return;
     clickFlash(el);
+    if (el.dataset.uiSound === 'none') return;   // 這個按鈕自己會出聲（試聽），不要再疊點擊聲
     activate(el);
   }, true);
   document.addEventListener('change', e => {

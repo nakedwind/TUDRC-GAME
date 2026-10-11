@@ -98,18 +98,22 @@ function monsterImage(file) {
   }
   return monsterImageCache.get(file);
 }
-ACTIVE_MONSTERS.forEach(monster => monsterImage(monster.sprite));
+ACTIVE_MONSTERS.forEach(monster => [monster.sprite, ...monsterFrameFiles(monster), ...Object.values(monster.art || {})].forEach(monsterImage));
 function createMonster(spec, x, y, variant) {
   const legacy = !Array.isArray(MAP?.monsterMix) || !MAP.monsterMix.length;
   const oldRules = legacy && spec.id === 'slime' ? (MAP.rules || {}) : {};
-  const hp = spec.hp;   // 血量一律用怪物編輯器（catalog）的設定，不再被地圖舊規則 rules.hp 覆蓋
+  const hp = Math.max(1, Math.round(spec.hp * difficultyOf('monsterHp')));   // 血量用怪物編輯器的設定 × 整體難度（data/balance.js）
+  const dmg = n => n == null ? n : Math.round(n * difficultyOf('monsterDamage'));
   const monster = {
     type: spec.id, x, y, hp, maxhp: hp,
     speed: Number(oldRules.speed) || spec.speed,
     reward: oldRules.reward != null ? Number(oldRules.reward) : spec.reward,
-    crystals: spec.crystals, playerDamage: spec.playerDamage,
-    sentryDamage: spec.sentryDamage, buildingDamage: spec.buildingDamage,
-    sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height,
+    crystals: spec.crystals, playerDamage: dmg(spec.playerDamage),
+    sentryDamage: dmg(spec.sentryDamage), buildingDamage: dmg(spec.buildingDamage),
+    sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
+    hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
+    shooterCfg: spec.shooter || null, art: spec.art || null,
+    flying: spec.behavior === 'shooter',   // 飄在空中：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
   };
   // 史萊姆變體（分裂／自爆／巨型…），設定在 js/combat-feel.js
@@ -123,6 +127,28 @@ const attackEffectFrames = Object.fromEntries(ATTACK_EFFECT_KINDS.map(kind => [k
     return img;
   })
 ]));
+// 自己畫的特效：格數與顯示大小各自不同（images/Attack effects/<名稱>/frame_01.png…）
+const CUSTOM_ATTACK_EFFECTS = { 'charge-impact': { frames: 6, size: 80, v: 2 } };   // 鳥頭人衝撞的撞擊（v：改圖後加 1，避免瀏覽器用舊圖）
+const ATTACK_EFFECT_SIZE = {};
+for (const [kind, cfg] of Object.entries(CUSTOM_ATTACK_EFFECTS)) {
+  attackEffectFrames[kind] = Array.from({ length: cfg.frames }, (_, i) => {
+    const img = new Image();
+    img.src = `images/Attack%20effects/${kind}/frame_${String(i + 1).padStart(2, '0')}.png?v=${cfg.v || 1}`;
+    return img;
+  });
+  ATTACK_EFFECT_SIZE[kind] = cfg.size;
+}
+// 怪物被打中的音效：有專屬音效的怪物（鳥頭人）每隻各自冷卻，連續被打時不會一直重複響
+const MONSTER_HIT_SOUND_CD = .5;   // 秒
+function sfxMonsterHit(e, gain, sourceId) {
+  if (typeof sfxAt !== 'function' || !e) return;
+  if (e.hitSound) {
+    const now = performance.now();
+    if (now < (e.hitSoundAt || -Infinity) + MONSTER_HIT_SOUND_CD * 1000) return;
+    e.hitSoundAt = now;
+    sfxAt(e.hitSound, e.x, e.y, gain, sourceId);
+  } else sfxAt('monsterHit', e.x, e.y, gain, sourceId);
+}
 function playAttackSprite(kind, x, y, duration = .32, angle = 0) {
   if (!G || !attackEffectFrames[kind]) return;
   G.effects.push({ spriteEffect: kind, x, y, angle, life: duration, life0: duration });
@@ -337,7 +363,9 @@ window.addEventListener('keydown', e => {
   }
   keys[k] = true;
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
-  if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) startReload(G.player);   // 手動裝填
+  if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) {   // 手動裝填（目前拿的那把）
+    if (playerWeapon(G.player).id === 'flare') startFlareReload(G.player); else startReload(G.player);
+  }
   if (npcArrangeMode) return;
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：空白鍵 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
@@ -351,6 +379,7 @@ window.addEventListener('keydown', e => {
       } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
     else {
@@ -642,6 +671,35 @@ function avoidAcidPools(t, dt) {
     else { const [ac] = cellAt(nx, t.y); if (sentryCellWalkable(ac, cellAt(t.x, t.y)[1])) t.x = nx; else { const [, br] = cellAt(t.x, ny); if (sentryCellWalkable(cellAt(t.x, t.y)[0], br)) t.y = ny; } }
   }
 }
+// 各哨兵對火海的反應：
+//   immune（希奧妮）＝火燙不到、不躲；brave（雷德）＝找路不繞開火、直接穿過去；
+//   只有站著不動、停在火中心附近時才慢慢走出來（還是會被燙）
+const SENTRY_FIRE_TRAITS = { theonie: 'immune', red: 'brave' };
+const SENTRY_FIRE_BRAVE = { core: .55, speed: 60 };   // 雷德：火海半徑幾成以內才走出來、走出來的速度（像素／秒）
+const sentryFireTrait = t => (t && SENTRY_FIRE_TRAITS[t.type]) || null;
+let sentryFireWalker = null;   // 目前正在找路的哨兵（js/sentry.js 的 sentryCellWalkable 依他的特性決定火能不能走）
+// 隊友避開火海（油桶、油汙燒起來的火）：在火裡／貼邊時往外推，比腐蝕池推得快（暴走中不避）
+function avoidOilFires(t, dt, moved = false) {
+  if (MAP_SAFE || t.berserk || t.hp <= 0 || !G.oilFires || !G.oilFires.length) return;
+  const trait = sentryFireTrait(t);
+  if (trait === 'immune') return;   // 希奧妮：不怕火
+  if (trait === 'brave' && moved) return;   // 雷德正在走（例如穿過火海）：不推他，讓他一口氣走過去
+  for (const f of G.oilFires) {
+    if (f.t <= 0) continue;
+    let dx = t.x - f.x, dy = (t.y - f.y) / .7;
+    if (Math.hypot(dx, dy) < 1) { const a = t.fireEscapeAng ??= Math.random() * Math.PI * 2; dx = Math.cos(a); dy = Math.sin(a); }   // 正好站在火中心：隨便挑一個方向逃
+    const brave = trait === 'brave';
+    const d = Math.hypot(dx, dy), margin = brave ? f.r * SENTRY_FIRE_BRAVE.core : f.r + 12;   // 雷德：只有在火中心附近才走
+    if (d >= margin) continue;
+    const ux = dx / d, uy = dy / d * .7, ul = Math.hypot(ux, uy) || 1;   // 橢圓往外的方向
+    const step = Math.min(margin - d, (brave ? SENTRY_FIRE_BRAVE.speed : 170) * dt), nx = t.x + ux / ul * step, ny = t.y + uy / ul * step;
+    const [cc, cr] = cellAt(nx, ny), [hc, hr] = cellAt(t.x, t.y);
+    if (sentryCellWalkable(cc, cr, true)) { t.x = nx; t.y = ny; }
+    else if (sentryCellWalkable(cellAt(nx, t.y)[0], hr, true)) t.x = nx;
+    else if (sentryCellWalkable(hc, cellAt(t.x, ny)[1], true)) t.y = ny;
+    t.navPath = null;
+  }
+}
 function updateChaosSentry(t, spec, dt) {
   let best = null, bestD = Infinity;   // t.cd 已在呼叫前扣過
   const consider = (o, x, y) => { const d = Math.hypot(x - t.x, y - t.y); if (d < bestD) { bestD = d; best = { o, x, y }; } };
@@ -811,7 +869,8 @@ function startWave() {
   if (G.cores) { G.spawnQueue=[]; return; }
   const w = G.waves[G.waveIndex];
   G.spawnQueue = [];
-  for (let i = 0; i < w.count; i++) G.spawnQueue.push({});
+  const count = Math.max(1, Math.round(w.count * difficultyOf('spawnRate')));   // 整體難度（data/balance.js）
+  for (let i = 0; i < count; i++) G.spawnQueue.push({});
   G.spawnTimer = 0; G.curGap = w.gap;
   sfx('wave');   // 新一波開始
 }
@@ -936,6 +995,7 @@ function updatePlayer(dt) {
     standUp();
   }
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
+  if (stepActorKnock(p, dt, playerBlocked)) { p.moving = false; p.anim = 0; return; }   // 被鳥頭人撞飛：滑行中不能走（js/bird-head.js）
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
   p.moving = !!(dx || dy);
@@ -1074,11 +1134,11 @@ function handleMapClick(e, isLeft) {
     return false;
   }
 
-  // ── 營地／哨兵選單：左右鍵都可開；自己蓋的建築只有右鍵開（左鍵照常開槍）──
-  const campBase = !MAP_SAFE && campBaseAt(x, y);
-  if (campBase) { openCampMenu(campBase, e.clientX, e.clientY); return false; }
-  const hit = G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
+  // ── 哨兵／營地／自己蓋的建築：只有右鍵開選單（左鍵照常開槍）；哨兵站在營地裡時哨兵優先 ──
+  const hit = !isLeft && G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
   if (hit) { closeGroundMenu(); openSentryMenu(hit); return false; }
+  const campBase = !isLeft && !MAP_SAFE && campBaseAt(x, y);
+  if (campBase) { closeSentryMenu(); openCampMenu(campBase, e.clientX, e.clientY); return false; }
   closeSentryMenu();
   if (MAP_SAFE) { closeGroundMenu(); return false; }
   const clickedBuilding = playerBuildingAt(c, r);
@@ -1193,13 +1253,15 @@ function updatePlayerAttack(dt) {
   if (p.recoilT > 0) p.recoilT -= dt;
   p.atkCd = (p.atkCd || 0) - dt;
   if (aimHeld && p.hp > 0) p.gunT = Math.max(p.gunT, 0.3);   // 按住時持續舉槍，不會射完一發就跳回
-  if (p.reloadT > 0) {   // 裝填中
+  if (p.reloadT > 0) {   // 手槍裝填中（切到照明彈槍時也會繼續裝）
     p.reloadT -= dt;
     if (p.reloadT <= 0) { p.ammo = PLAYER_ATK.mag; }
-    updateAmmoHud(); return;
+    if (playerWeapon(p).id === 'pistol') { updateAmmoHud(); return; }
   }
   updateAmmoHud();
-  if (p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen) return;   // 疏導中不開槍
+  const canFire = !(p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
+  if (playerWeapon(p).id === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈槍（js/flare.js）
+  if (!canFire) return;
   if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const aim = clientToWorld(aimClient.x, aimClient.y);
   const adx = aim.x - p.x, ady = aim.y - p.y, aimAng = Math.atan2(ady, adx);
@@ -1207,32 +1269,41 @@ function updatePlayerAttack(dt) {
   p.ammo--;
   p.dir = Math.abs(adx) >= Math.abs(ady) ? (adx < 0 ? 'left' : 'right') : (ady < 0 ? 'back' : 'front');
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
-  // 朝游標方向、射程內、照亮的最近怪
-  let best = null, bestD = PLAYER_ATK.range * CELL;
+  // 朝游標方向、射程內、照亮的最近怪。
+  // 浮在空中／很高的目標（珍珠小童、異質核心）畫面上的身體比腳底高：游標直接點在身體上就一定打中；
+  // 扇形判定也同時看腳底和身體中心，取比較接近的角度。
+  let best = null, bestD = PLAYER_ATK.range * CELL, bestOnBody = false;
+  const angDiff = (x, y) => { let da = Math.abs(Math.atan2(y - p.y, x - p.x) - aimAng); return da > Math.PI ? 2 * Math.PI - da : da; };
   for (const e of [...G.enemies, ...G.cores]) {
     const isCore = G.cores.includes(e);
     if (e.dead || !(isCore ? isVisible(e.x, e.y) : isLit(e.x, e.y))) continue;
     if (!hasLineOfSight(p.x, p.y, e.x, e.y)) continue;   // 隔牆打不到
     const d = Math.hypot(e.x - p.x, e.y - p.y);
     if (d > PLAYER_ATK.range * CELL) continue;
-    let da = Math.abs(Math.atan2(e.y - p.y, e.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
-    if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = e; }
+    const box = targetBodyBox(e), pad = 4;
+    const onBody = aim.x >= box.x0 - pad && aim.x <= box.x1 + pad && aim.y >= box.y0 - pad && aim.y <= box.y1 + pad;
+    const da = Math.min(angDiff(e.x, e.y), angDiff(box.cx, box.cy));
+    if (!onBody && da > PLAYER_ATK.cone) continue;
+    // 點在身上的目標優先；同樣是點在身上或同樣在扇形內，就打最近的
+    if ((onBody && !bestOnBody) || (onBody === bestOnBody && d < bestD)) { bestD = d; best = e; bestOnBody = onBody; }
   }
   for (const o of G.obstacles) {   // 油桶／油箱也能瞄準（開槍打爆）
+    if (bestOnBody) break;          // 已經直接點在怪物身上
     if (!oilItem(o) || o.hp <= 0) continue;
     const c = oilCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
     if (d > PLAYER_ATK.range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
     let da = Math.abs(Math.atan2(c.y - p.y, c.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
     if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = oilProxy(o); }
   }
-  const endX = best ? best.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
-  const endY = best ? best.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
+  const hitPt = best && !best.oilRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
+  const endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
+  const endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
   const { x: mx, y: my } = gunMuzzleAt(p, aimAng);
   G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });   // 槍口閃光
   addLightFlash('muzzle', mx, my);   // 槍口火光照亮周圍的黑暗
   spawnShellCasing(mx, my, aimAng);  // 彈殼拋出
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
-  if (best) G.effects.push({ ring: true, x: best.x, y: best.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
+  if (best) G.effects.push({ ring: true, x: endX, y: endY, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
   if (best && best.oilRef) { damageOil(best.oilRef, Math.round(PLAYER_ATK.dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
@@ -1252,24 +1323,51 @@ function updatePlayerAttack(dt) {
     enemyHitReact(best, p.x, p.y, !!critMul);   // 爆擊算重擊（會擊退、硬直）
     if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 30);
     else flashDmg('-' + shotDmg, best.x, best.y - 26, '#bfe0ff');
-    if (typeof sfxAt === 'function') sfxAt('monsterHit', best.x, best.y, 0.48, 'player');
+    sfxMonsterHit(best, 0.48, 'player');
   }
   if (typeof sfx === 'function') sfx('gunshot');
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
 }
-// 右下角彈藥數顯示
-let ammoHudEl = null;
+// 右下角武器＋彈藥數：兩把槍一前一後疊著，正在用的在前面、遮住後面那把
+let ammoHudEl = null, ammoGunEls = null, ammoTextEl = null, ammoHudKey = '';
+function buildAmmoHud() {
+  const css = document.createElement('style');
+  css.textContent = `
+    #ammoHud { position:absolute; right:14px; bottom:14px; z-index:9; display:flex; align-items:flex-end; gap:10px; pointer-events:none;
+      padding:0; }
+    #ammoHud .gun-stack { position:relative; width:40px; height:52px; }
+    #ammoHud .gun-stack img { position:absolute; left:0; bottom:0; width:40px; height:30px; image-rendering:pixelated; transform-origin:left bottom;
+      transition:transform .22s cubic-bezier(.3,1.4,.5,1), filter .22s, opacity .22s; }
+    #ammoHud .gun-stack img.front { z-index:2; transform:translate(0,0) scale(1); filter:drop-shadow(0 0 2px rgba(255,236,190,.95)) drop-shadow(0 0 5px rgba(255,214,140,.55)); opacity:1; }
+    #ammoHud .gun-stack img.back  { z-index:1; transform:translate(4px,-22px) scale(.8); filter:brightness(.62) saturate(.35) drop-shadow(0 0 1px rgba(160,190,220,.5)); opacity:.85; }
+    #ammoHud .ammo-text { font:700 16px sans-serif; color:#dbe7ff; letter-spacing:1px; white-space:nowrap; padding-bottom:4px; text-shadow:0 1px 2px #000, 0 0 3px #000; }
+    #ammoHud .ammo-text small { display:block; font-size:12px; color:#ff9f7a; letter-spacing:0; }`;
+  document.head.appendChild(css);
+  ammoHudEl = document.createElement('div');
+  ammoHudEl.id = 'ammoHud';
+  const stack = document.createElement('div'); stack.className = 'gun-stack';
+  ammoGunEls = WEAPONS.map(w => { const img = new Image(); img.src = w.img; img.alt = w.name; stack.appendChild(img); return img; });
+  ammoTextEl = document.createElement('div'); ammoTextEl.className = 'ammo-text';
+  ammoHudEl.append(stack, ammoTextEl);
+  document.getElementById('wrap').appendChild(ammoHudEl);
+}
 function updateAmmoHud() {
   if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { if (ammoHudEl) ammoHudEl.style.display = 'none'; return; }
-  if (!ammoHudEl) {
-    ammoHudEl = document.createElement('div');
-    ammoHudEl.id = 'ammoHud';
-    ammoHudEl.style.cssText = 'position:absolute;right:14px;bottom:14px;z-index:9;font:700 16px sans-serif;color:#dbe7ff;background:rgba(10,14,20,.72);border:1px solid #3a5168;border-radius:8px;padding:6px 14px;pointer-events:none;letter-spacing:1px';
-    document.getElementById('wrap').appendChild(ammoHudEl);
-  }
+  if (!ammoHudEl) buildAmmoHud();
   ammoHudEl.style.display = '';
   const p = G.player, mag = PLAYER_ATK.mag, ammo = p ? (p.ammo ?? mag) : mag;
-  ammoHudEl.innerHTML = (p && p.reloadT > 0) ? '🔄 裝填中…' : '🔫 ' + ammo + ' / ' + mag;
+  const wi = (p && p.weaponIndex) || 0;
+  let text;
+  if (p && playerWeapon(p).id === 'flare') {   // 照明彈：彈匣／備用彈
+    ensureFlareAmmo(p);
+    const empty = p.flareMag + p.flareReserve <= 0;
+    text = p.flareReloadT > 0 ? '🔄 裝填中…' : p.flareMag + ' / ' + p.flareReserve + (empty ? '<small>去彈藥箱補給</small>' : '');
+  } else text = (p && p.reloadT > 0) ? '🔄 裝填中…' : ammo + ' / ∞';
+  const key = wi + '|' + text;
+  if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
+  ammoHudKey = key;
+  ammoGunEls.forEach((img, i) => { img.className = i === wi ? 'front' : 'back'; });
+  ammoTextEl.innerHTML = text;
 }
 
 // ---- 主迴圈（幀率校正）----
@@ -1283,7 +1381,7 @@ function updateFootsteps() {
   const a = FOOT.audio;
   const want = MAP_SAFE ? 'Sound effects/footsteps02.mp3' : 'Sound effects/footsteps01.mp3';
   if (FOOT.file !== want) { FOOT.file = want; a.src = want; }
-  a.volume = Math.min(1, 0.5 * SFX.volume / 0.35);   // 跟著設定裡的音效音量
+  a.volume = Math.min(1, 0.5 * SFX.volume / 0.35 * SFX.gainOf('footsteps'));   // 跟著設定裡的音效音量＋音效編輯器的倍率
   a.muted = !SFX.enabled;                       // 跟著 M 鍵一起靜音
   if (walking) { if (a.paused) a.play().catch(() => {}); }
   else if (!a.paused) a.pause();
@@ -1300,7 +1398,31 @@ window.addEventListener('keydown', e => {
   if (!G || !G.running || G.over || MAP_SAFE) return;   // 只有戰鬥中可以暫停
   sfx('switch'); setPaused(!paused);
 });
+// 目標在畫面上「身體」的範圍（世界座標）：怪物依圖片大小與浮空高度，異質核心依浮起高度（js/anomalous-core.js）
+function targetBodyBox(t) {
+  if (G.cores && G.cores.includes(t)) {
+    const lift = typeof coreLift === 'function' ? coreLift(t) : 0;
+    const x0 = t.x - CORE.w / 2, y1 = t.y + 20 - lift, y0 = y1 - CORE.h;
+    return { x0, y0, x1: x0 + CORE.w, y1, cx: t.x, cy: y0 + CORE.h * .5 };
+  }
+  const w = (t.drawWidth || 42), h = (t.drawHeight || 33), lift = t.slimeLift || 0;
+  const y1 = t.y + 13 - lift, y0 = y1 - h;
+  return { x0: t.x - w / 2, y0, x1: t.x + w / 2, y1, cx: t.x, cy: y0 + h * .5 };
+}
+// 某一幀出錯時：記一次錯誤（同樣的錯只記一次）、把畫布狀態重設，下一幀照常繼續，
+// 不會因為一個錯誤就整個卡住，或畫布位移沒還原讓畫面一直壞掉。
+const frameErrorsSeen = new Set();
+function recoverFrame(err) {
+  const msg = String(err && (err.stack || err.message) || err);
+  if (!frameErrorsSeen.has(msg)) { frameErrorsSeen.add(msg); console.error('[遊戲畫面] 這一幀出錯，已自動恢復：', err); }
+  if (typeof ctx.reset === 'function') ctx.reset();
+  else { const w = cv.width; cv.width = w; }   // 舊瀏覽器：重設畫布大小也會清掉所有狀態
+}
 function loop(ts) {
+  try { frame(ts); } catch (err) { recoverFrame(err); }
+  requestAnimationFrame(loop);
+}
+function frame(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
@@ -1311,7 +1433,6 @@ function loop(ts) {
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
-  requestAnimationFrame(loop);
 }
 function update(dt) {
   updateCores(dt);
@@ -1354,8 +1475,9 @@ function update(dt) {
     const ox = t.x, oy = t.y;
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
-    else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) updateSentry(t, dt);
+    else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
     avoidAcidPools(t, dt);   // 被腐蝕池推開（阿瓦倫本人免疫、不避）
+    avoidOilFires(t, dt, Math.hypot(t.x - ox, t.y - oy) > .3);    // 被火海推開（js/oil-barrels.js 的火）；這幀有沒有在走
     animateSentry(t, t.x - ox, t.y - oy, dt);
   }
   // 雷德衝撞：舉盾模式下撞到怪物 → 擊退＋少量傷害（有冷卻，避免連續觸發）
@@ -1369,7 +1491,7 @@ function update(dt) {
       const dx = foe.x - t.x, dy = foe.y - t.y;
       displaceEnemy(foe, dx, dy, CELL * 1.2);
       foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = '#dbe7ff';
-      if (typeof sfxAt === 'function') sfxAt('monsterHit', foe.x, foe.y, 0.48, 'red-ram');
+      sfxMonsterHit(foe, 0.48, 'red-ram');
       flashDmg('-' + ramDmg, foe.x, foe.y - 26, '#dbe7ff');
       G.effects.push({ ring: true, x: foe.x, y: foe.y, r: 5, r2: 24, life: .2, life0: .2, color: '#dbe7ff' });
       t.ramCd = 1.4;
@@ -1504,7 +1626,7 @@ function update(dt) {
         if (U.healHp) { t.hp = Math.min(t.maxhp, t.hp + U.healHp); flashDmg('+' + U.healHp, t.x, t.y - 40, '#7ee0a0'); }
         if (U.healTaint) t.taint = Math.max(0, t.taint - U.healTaint);
         spawnUltShockwave(t.x, t.y, r, col);
-        if (hitEnemy && typeof sfxAt === 'function') sfxAt('monsterHit', hitEnemy.x, hitEnemy.y, 0.48, t.type + '-ult');
+        if (hitEnemy) sfxMonsterHit(hitEnemy, 0.48, t.type + '-ult');
       } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy) {
         const impactPoint = { x: target.x, y: target.y };
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
@@ -1517,7 +1639,10 @@ function update(dt) {
         if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
         for (const e of affected) {
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
-          if (spec.stun) e.stunT=Math.max(e.stunT||0,spec.stun);
+          if (spec.stun) {
+            e.stunT=Math.max(e.stunT||0,spec.stun);
+            if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
+          }
           if (spec.confuse) e.confuseT=Math.max(e.confuseT||0,spec.confuse);
           if (spec.knockback) {
             const dx=e.x-t.x,dy=e.y-t.y;
@@ -1592,7 +1717,7 @@ function update(dt) {
     for (const m of G.scorchMarks) m.t -= dt;
     G.scorchMarks = G.scorchMarks.filter(m => m.t > 0);
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -1657,6 +1782,8 @@ function update(dt) {
   updateLandmines(dt);    // 地雷（js/landmine.js）
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
+  updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
+  updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   updateHUD();

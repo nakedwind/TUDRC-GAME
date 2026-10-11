@@ -27,7 +27,10 @@ function buildTileRegistry() {
   ];
   const custom = (PREVIEW && PREVIEW.tiles) ? PREVIEW.tiles
     : ((typeof TILES_CUSTOM !== 'undefined' && TILES_CUSTOM) ? TILES_CUSTOM : []);
-  [...builtin, ...custom].forEach(t => { TILE_REGISTRY[t.id] = t; });
+  [...builtin, ...custom].forEach(t => {
+    const entry=typeof ORE_TYPES!=='undefined'&&(ORE_TYPES[String(t.id).replace(/^tile_obstacle_/, '')] || Object.values(ORE_TYPES).find(spec=>spec.file===t.file));
+    TILE_REGISTRY[t.id] = entry ? {...t,name:entry.name,file:entry.file,w:entry.w,h:entry.h} : t;
+  });
 }
 const mapTileById = id => TILE_REGISTRY[id];
 const mapTileW = t => (t && t.w) || 1;
@@ -43,7 +46,10 @@ function mapObstacleSpec(t) {
     return { type: oil[0], hp: deco.hp || 30, solid };
   }
   const ore = typeof oreByFile === 'function' && oreByFile(file);
-  if (ore) return { type: ore[0], hp: 9999, solid: [[0, mapTileH(t) - 1]], ore: true };   // 異質碎片礦物（js/ore.js）
+  if (ore) {   // 異質碎片礦物（js/ore.js）：最下面一整排擋路（大型、稀有礦有 2 格寬）
+    const solid = []; for (let c = 0; c < mapTileW(t); c++) solid.push([c, mapTileH(t) - 1]);
+    return { type: ore[0], hp: ore[1].hp ?? 9999, solid: ore[1].solid ?? solid, ore: true };
+  }
   for (const ob of OBSTACLES) for (const orient of ['h', 'v']) {
     if (ob[orient] && ob[orient].file === file) return { type: ob.id, hp: ob.hp, solid: ob[orient].solid, trap: !!ob.trap };
   }
@@ -217,9 +223,16 @@ function returnPortalCell(fromId) { return mapPortals.find(p => p.to === fromId)
 // 所以判定時要連周圍 8 格一起看。怪物尋路仍然以「整格」為單位（見 pathfinding.js）。
 let mapSolidOffsets = {};
 const solidOffsetAt = (c, r) => mapSolidOffsets[c + ',' + r];
+// 電梯物件清單快取：地圖物件很多，每次碰撞判定都整張掃一遍會很慢
+let elevatorStampCache = { list: null, src: null, len: -1 };
+function elevatorStamps() {
+  const src = MAP?.stamps || [];
+  if (elevatorStampCache.src !== src || elevatorStampCache.len !== src.length)
+    elevatorStampCache = { list: src.filter(isElevatorStamp), src, len: src.length };
+  return elevatorStampCache.list;
+}
 function elevatorBlocksPoint(x, y) {
-  for (const stamp of MAP?.stamps || []) {
-    if (!isElevatorStamp(stamp)) continue;
+  for (const stamp of elevatorStamps()) {
     const tile = mapTileById(stamp.id), cfg = elevatorConfig(stamp.id);
     if (!tile || !cfg) continue;
     const left = OX + stamp.c * CELL + (stamp.ox || 0), top = OY + stamp.r * CELL + (stamp.oy || 0);
@@ -364,8 +377,10 @@ function drawMapTileImg(ctx, id, x, y) {
 function drawMapStampImg(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
-  const t = mapTileById(s.id); if (!t) return;
-  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+  let t = mapTileById(s.id); if (!t) return;
+  let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+  const opened = typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s);   // 剛補給過的彈藥箱：換成打開的圖
+  if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
   const img = isElevatorLightTile(t) && elevatorLightIsOpen(s.c, s.r) && elevatorLightOpenImage.complete && elevatorLightOpenImage.naturalWidth
     ? elevatorLightOpenImage : tileImage(t);

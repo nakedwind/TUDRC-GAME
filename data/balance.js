@@ -138,6 +138,7 @@ const LIGHT = {
     camping_lights: 120,
   },
   placeMargin: 150,  // 發光建築（探照燈）可以蓋在「光圈邊緣往外再多這麼多像素」的範圍內
+  buildMargin: 40,   // 一般建築可以蓋在光圈外多遠（像素；40＝1 格）。0＝每個擋路格都要亮
 };
 
 // ---- 波次設定 ----
@@ -150,3 +151,12 @@ const WAVE_CFG = {
   reward: 8,                     // 殺一隻怪回多少資源
   baseGap: 0.85, subGap: 0.05,   // 出怪間隔（秒）= baseGap - i*subGap
 };
+
+// ===== 整體難度（2026-10-11 依玩家回饋：難度降低一半）=====
+// 1＝原本的難度。調小＝變簡單，調大＝變難。
+const DIFFICULTY = {
+  spawnRate: 0.5,      // 怪物出現的量：0.5＝核心召喚間隔變兩倍、場上怪物上限減半、巨型史萊姆登場間隔變兩倍、波次模式每波數量減半
+  monsterHp: 1,        // 怪物血量倍率（所有怪物，包含史萊姆各種類、鳥頭人）
+  monsterDamage: 1,    // 怪物攻擊力倍率（打玩家、哨兵、建築）
+};
+const difficultyOf = key => (typeof DIFFICULTY !== 'undefined' && Number(DIFFICULTY[key]) > 0) ? Number(DIFFICULTY[key]) : 1;

@@ -254,6 +254,7 @@ function updateEnemyEffects(e, dt) {
     if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flashDmg('-' + (e.burnDmg || 5), e.x + 12, e.y - 18, '#ff8a42', { small: true }); }   // 燒傷：小字、不搶眼
   }
   if (e.stunT > 0) e.stunT -= dt;
+  if (e.shockT > 0) e.shockT = e.stunT > 0 ? e.shockT - dt : 0;   // 麻痺跟著停住一起結束
   if (e.confuseT > 0) e.confuseT -= dt;
 }
 
@@ -340,13 +341,15 @@ function stepEnemy(e, dt) {
   e.lastSafeX = e.x; e.lastSafeY = e.y;
   // 飛撲途中已經騰空，不受接觸判定或暈眩打斷，落地時才結算傷害。
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
+  if (e.behavior === 'charger') { stepChargerEnemy(e, dt); return; }   // 鳥頭人：發呆、散步、看到人就衝撞（js/bird-head.js）
+  if (e.behavior === 'shooter') { stepShooterEnemy(e, dt); return; }   // 珍珠小童：飄浮、保持距離噴珍珠（js/pearl-kid.js）
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
   if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= 30) {
     enemyAttackPlayer(e, dt);
     return;
   }
-  if (e.stunT > 0) { e.playerWindupT = 0; e.playerPounceT = 0; e.slimeLift = 0; e.slimeScaleX = 1.08; e.slimeScaleY = .92; return; }
+  if (e.stunT > 0) { e.playerWindupT = 0; e.playerPounceT = 0; e.slimeLift = 0; if (!e.frames) { e.slimeScaleX = 1.08; e.slimeScaleY = .92; } return; }
   if (e.playerWindupT > 0) {
     e.playerWindupT = Math.max(0, e.playerWindupT - dt);
     const charge = 1 - e.playerWindupT / SLIME_POUNCE.windup;
@@ -359,7 +362,7 @@ function stepEnemy(e, dt) {
     }
     return;
   }
-  const moveDt = updateSlimeJump(e, dt);
+  const moveDt = e.frames ? dt : updateSlimeJump(e, dt);   // 有走路動畫的怪物（鳥頭人）一路走，不像史萊姆一跳一跳
   if (e.confuseT > 0) {
     const allies = G.enemies.filter(o => o !== e && !o.dead && o.hp > 0).sort((a,b) => Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y));
     const foe = allies[0];

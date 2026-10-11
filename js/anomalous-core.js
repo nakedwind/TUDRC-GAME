@@ -71,14 +71,17 @@ function darkMonsterSpawnCells() {
   return candidates.length ? candidates : fallback;
 }
 function coreSpawnRule(core) {
-  return !core.awake ? CORE.spawn.dormant : core.phase === 2 ? CORE.spawn.phase2 : CORE.spawn.phase1;
+  const rule = !core.awake ? CORE.spawn.dormant : core.phase === 2 ? CORE.spawn.phase2 : CORE.spawn.phase1;
+  const rate = difficultyOf('spawnRate');   // 整體難度（data/balance.js 的 DIFFICULTY）：召喚間隔跟著拉長
+  return { ...rule, every: [rule.every[0] / rate, rule.every[1] / rate] };
 }
+const coreMaxEnemies = () => Math.max(4, Math.round(CORE.maxEnemies * difficultyOf('spawnRate')));   // 場上異質體上限
 function spawnCoreGroup(core) {
   const cells = darkMonsterSpawnCells();
   if (!cells.length) return;
   const rule = coreSpawnRule(core);
   const want = Math.round(randRange([rule.group[0], rule.group[1] + .99]) - .49);
-  const count = Math.min(want, CORE.maxEnemies - G.enemies.length, cells.length);
+  const count = Math.min(want, coreMaxEnemies() - G.enemies.length, cells.length);
   for (let i = 0; i < count; i++) {
     const index = Math.floor(Math.random() * cells.length), [c, r] = cells.splice(index, 1)[0];
     const [x, y] = center(c, r);
@@ -158,7 +161,7 @@ function updateCores(dt) {
       }
     }
     core.timer -= dt;
-    if (core.timer <= 0 && G.enemies.length < CORE.maxEnemies) {
+    if (core.timer <= 0 && G.enemies.length < coreMaxEnemies()) {
       spawnCoreGroup(core);
       core.timer = randRange(coreSpawnRule(core).every);
     }

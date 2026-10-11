@@ -19,6 +19,7 @@ const SFX = (() => {
     backroomDoor: '後室開門.mp3',
     elevator: '電梯.mp3',
     gunshot: '開槍.mp3',
+    flare: '射擊.mp3',
     reload: 'reload.mp3',
     monsterHit: 'hit.mp3',
     fireImpact: '火焰.mp3',
@@ -45,12 +46,15 @@ const SFX = (() => {
     crystalGet: '得到碎片.mp3',
     slimeHit: 'slime-hit.mp3',
     slimeLand: 'slime-land.mp3',
+    // 鳥頭人：依試聽結果對調（被打用「死掉」那個檔、死掉用「被打」那個檔）
+    birdHurt: '鳥頭人死掉.mp3',
+    birdDeath: '鳥頭人被打.mp3',
   };
   // 戰鬥音效的隨機變化：pitch＝音高（播放速度）±比例、gain＝音量 ±比例。
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
@@ -149,18 +153,59 @@ const SFX = (() => {
     error() { tone({ freq: 200, freq2: 150, type: 'square', dur: 0.16, gain: 0.18 }); },
     berserk() { tone({ freq: 130, freq2: 55, type: 'sawtooth', dur: 0.4, gain: 0.24 }); noise({ dur: 0.34, gain: 0.16, freq: 500, q: 0.5 }); },
     kill() { const k = jitter(VARY.pitch); tone({ freq: 420 * k, freq2: 120 * k, type: 'sine', dur: 0.09, gain: 0.1 * jitter(VARY.gain) }); },
+    // 鳥頭人跑步：赤腳重重踩在水泥地上——低沉的「咚」＋腳掌拍地的「啪」＋一點沙沙的摩擦
+    birdRun(g = 1) {
+      const k = jitter(.1);
+      tone({ freq: 105 * k, freq2: 48 * k, type: 'sine', dur: .1, gain: .34 * g });
+      noise({ dur: .05, gain: .16 * g, freq: 1900 * k, q: 1.3 });
+      noise({ dur: .08, gain: .1 * g, freq: 420 * k, q: .8, when: .008 });
+      noise({ dur: .07, gain: .045 * g, freq: 3200, q: .6, when: .03 });
+    },
+    // 鳥頭人快步走：輕一點、短一點
+    birdWalk(g = 1) {
+      const k = jitter(.1);
+      tone({ freq: 120 * k, freq2: 70 * k, type: 'sine', dur: .07, gain: .2 * g });
+      noise({ dur: .04, gain: .08 * g, freq: 1600 * k, q: 1.2 });
+    },
+    // 珍珠小童噴珍珠：嘴裡「啵」一聲吐出來
+    pearlShot(g = 1) {
+      const k = jitter(.08);
+      tone({ freq: 520 * k, freq2: 260 * k, type: 'sine', dur: .09, gain: .22 * g });
+      noise({ dur: .05, gain: .07 * g, freq: 2200 * k, q: 1.4 });
+    },
+    // 珍珠打中／碎掉：清脆的「叮」
+    pearlHit(g = 1) {
+      const k = jitter(.06);
+      tone({ freq: 1850 * k, freq2: 1500 * k, type: 'triangle', dur: .12, gain: .14 * g });
+      tone({ freq: 2770 * k, type: 'sine', dur: .08, gain: .06 * g, when: .01 });
+      noise({ dur: .04, gain: .06 * g, freq: 4200, q: 1 });
+    },
     hit() { const k = jitter(VARY.pitch); tone({ freq: 160 * k, freq2: 70 * k, type: 'square', dur: 0.07, gain: 0.15 * jitter(VARY.gain) }); noise({ dur: 0.06, gain: 0.08, freq: 700 * k }); },
   };
+  // 個別音效的音量倍率（1＝原本）：在「音效編輯器」調整，存在 data/sound-volumes.js
+  // 用 ?previewSounds=1 開遊戲時，改用音效編輯器存在瀏覽器裡、還沒匯出的設定。
+  const GAIN_KEY = 'tudrc_sound_gain_v1';
+  let SOUND_GAIN = { ...(typeof SOUND_GAIN_DEFAULT !== 'undefined' ? SOUND_GAIN_DEFAULT : {}) };
+  if (/[?&]previewSounds=1(&|$)/.test(location.search)) {
+    try { const draft = JSON.parse(localStorage.getItem(GAIN_KEY) || 'null'); if (draft && typeof draft === 'object') SOUND_GAIN = draft; } catch (_) {}
+  }
   function play(name, gain = 1, sourceKey = name) {
     if (!enabled) return;
+    gain *= SOUND_GAIN[name] ?? 1;
     if (gain <= 0) return;
     if (files[name]) { playFile(name, gain, sourceKey); return; }
     const f = sounds[name];
-    if (f) { ensure(); f(); }
+    if (f) { ensure(); f(gain); }   // 合成音效也吃音量（sfxAt 會依距離調小）
   }
   preload();
   return {
     play,
+    GAIN_KEY,
+    gainOf: name => SOUND_GAIN[name] ?? 1,                 // 某個音效目前的音量倍率
+    setGains(map) { SOUND_GAIN = { ...(map || {}) }; },    // 音效編輯器即時套用
+    // 所有音效：有音檔的（file）與程式合成的（file: null）
+    list: () => [...Object.keys(files).map(name => ({ name, file: files[name] })),
+                 ...Object.keys(sounds).filter(name => !files[name]).map(name => ({ name, file: null }))],
     get enabled() { return enabled; }, set enabled(v) {
       enabled = v;
       if (!v) {

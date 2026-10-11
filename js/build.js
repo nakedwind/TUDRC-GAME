@@ -30,10 +30,10 @@ function obstacleSolidCells(o) {
 }
 
 // ---- 建築放置：圖片須在地圖內，只有 solid 格會擋路／不可重疊 ----
-// 黑暗規則：一般建築只能放亮處；「會發光的建築」（探照燈等）可蓋在光圈邊緣附近
-// （光圈外再多 LIGHT.placeMargin 像素的容許範圍），用來一步步推光。
+// 黑暗規則：一般建築可以蓋在亮處、或光圈外 LIGHT.buildMargin 像素內（預設 1 格，邊緣有點暗也能蓋）；
+// 「會發光的建築」（探照燈等）可蓋得更遠（光圈外 LIGHT.placeMargin 像素內），用來一步步推光。
 const emitsLight = ob => !!(LIGHT.buildings && LIGHT.buildings[ob.id]);
-const placeExtra = ob => emitsLight(ob) ? LIGHT.placeMargin : 0;   // 0＝必須全亮
+const placeExtra = ob => emitsLight(ob) ? LIGHT.placeMargin : (LIGHT.buildMargin ?? 40);
 function canPlaceObstacle(v, c, r, lightExtra = 0) {
   if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;
   // 只有「擋路格(solid)」才要求空地／不壓牆／不疊其他建築的擋路格／夠亮；
