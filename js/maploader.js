@@ -67,7 +67,22 @@ function tileImage(t) {
   if (!rec) { rec = mapImgCache[t.id] = { img: new Image(), loaded: false }; rec.img.onload = () => { rec.loaded = true; }; rec.img.src = t.file; }
   return rec.loaded ? rec.img : null;
 }
-function preloadMapTiles() { Object.values(TILE_REGISTRY).forEach(t => { if (t.file) tileImage(t); }); }
+// 預先下載素材：先只下載「這張地圖」用到的（載入畫面會等它們），
+// 其他地圖的素材等這批下載完，再安靜地在背景下載（不擋遊戲，見 js/asset-gate.js）
+function mapUsedTileIds(m) {
+  const ids = new Set();
+  if (!m) return ids;
+  for (const s of m.stamps || []) ids.add(s.id);
+  for (const layer of Object.values(m.layers || {})) for (const id of Object.values(layer)) ids.add(id);
+  return ids;
+}
+function preloadMapTiles(m) {
+  const used = mapUsedTileIds(m);
+  Object.values(TILE_REGISTRY).forEach(t => { if (t.file && used.has(t.id)) tileImage(t); });
+  const rest = () => Object.values(TILE_REGISTRY).forEach(t => { if (t.file) tileImage(t); });
+  if (typeof AssetGate === 'undefined') { rest(); return; }
+  AssetGate.whenIdle(() => setTimeout(() => AssetGate.quiet(rest), 500));
+}
 
 // ---- 當前地圖 ----
 let MAP = null, mapEntrances = [], mapBreakable = [], mapPortals = [], mapBases = [];
@@ -141,8 +156,9 @@ function switchMap(i) {                 // 切換到第 i 張並重新載入地�
   if (i >= 0 && i < list.length) { MAP_INDEX = i; initMap(); }
 }
 function initMap() {
-  buildTileRegistry(); preloadMapTiles();
+  buildTileRegistry();
   MAP = pickMap();
+  preloadMapTiles(MAP);
   openElevatorStamp = null;
   elevatorCloseAnim = null;
   elevatorOpenAnim = null;

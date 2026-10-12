@@ -1420,7 +1420,10 @@ function recoverFrame(err) {
   else { const w = cv.width; cv.width = w; }   // 舊瀏覽器：重設畫布大小也會清掉所有狀態
 }
 function loop(ts) {
-  try { frame(ts); } catch (err) { recoverFrame(err); }
+  try {
+    if (typeof AssetGate !== 'undefined' && AssetGate.blocking()) last = ts;   // 圖片還沒下載完：先暫停（載入畫面在 js/asset-gate.js）
+    else frame(ts);
+  } catch (err) { recoverFrame(err); }
   requestAnimationFrame(loop);
 }
 function frame(ts) {

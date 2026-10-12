@@ -201,6 +201,7 @@
   </div>
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
+  <script src="js/asset-gate.js?v=gate-20261012"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=merged-sound-settings-20261012"></script> <!-- 1a. 音量、替換與自訂音效 -->
   <script src="js/sfx.js?v=organized-sfx-20261012"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
@@ -225,7 +226,7 @@
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=ore-editor-20261012-ore-20261012"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=gate-20261012"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/doors.js?v=doorsfx-20261008"></script> <!-- 門：手動門／自動門 -->
   <script src="js/lighting.js?v=flare-20261010"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/build.js?v=notices-20261012"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
@@ -251,6 +252,6 @@
   <script src="js/gifts.js?v=requests3-20261012"></script> <!-- 9l. 送禮與好感度 -->
   <script src="js/save.js?v=requests-20261012"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/flare.js?v=gunhud-20261010"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/game.js?v=organized-sfx-20261012"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=gate-20261012"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>
