@@ -21,7 +21,7 @@ applySettings();
 
 // ---------- 存檔 ----------
 let lastSavedAt = 0, lastSavedSnapshot = '';
-const saveSnapshot = () => JSON.stringify({ inventory: [...supplyInventory], cart: [...shopCart], favor: favorPoints, giftKnown, gifted: [...giftedThisVisit] });
+const saveSnapshot = () => JSON.stringify({ inventory: [...supplyInventory], cart: [...shopCart], favor: favorPoints, giftKnown, gifted: [...giftedThisVisit], requests: giftRequests, requestsStale });
 function saveGame(manual = false) {
   try {
     const snap = saveSnapshot();
@@ -44,6 +44,8 @@ function loadGame() {
   shopCart.clear(); (data.cart || []).filter(valid).forEach(([id, n]) => shopCart.set(id, n));
   Object.assign(favorPoints, data.favor || {}); Object.assign(giftKnown, data.giftKnown || {});   // 好感度（js/gifts.js）
   (data.gifted || []).forEach(id => giftedThisVisit.add(id));
+  for (const [id, item] of Object.entries(data.requests || {})) if (itemById(item)) giftRequests[id] = item;   // 今日想吃
+  if (typeof data.requestsStale === 'boolean') requestsStale = data.requestsStale;
   lastSavedAt = data.savedAt || 0; lastSavedSnapshot = saveSnapshot();
   if (typeof G !== 'undefined' && G) updateHUD();
 }

@@ -1,7 +1,8 @@
 // ============================================================
-//  便利商店：買零食（恢復 HP）、飲料（恢復 SP 精神能量）
+//  便利商店：補給（醫療包、杏仁水）、零食飲料（送禮）
 //  ・左邊商品、右邊購物車；結帳後東西放進背包（背包在 js/backpack.js）
-//  ・戰鬥中按 Q 吃零食、F 喝飲料（下方資訊條的快捷格）
+//  ・補給：醫療包恢復 HP、杏仁水恢復 SP；戰鬥中按 Q／F 快速使用（下方資訊條的快捷格）
+//  ・零食、飲料：送禮用（js/gifts.js）
 //  ・商品資料在 data/supplies.js
 // ============================================================
 const supplyShop = document.getElementById('supplyShop');
@@ -9,24 +10,26 @@ const supplyShopList = document.getElementById('supplyShopList');
 const shopCartList = document.getElementById('cartList');
 const shopCart = new Map();   // 購物車：商品 id → 數量（結帳後才放進背包）
 let supplyShopOpen = false, supplyShopTab = 'all';
+// 補給的效果（商品資料的 use）：hp＝醫療包恢復 HP（Q）、sp＝杏仁水恢復 SP（F）
 const SUPPLY_KIND = {
-  snack: { name: '零食', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
-  drink: { name: '飲料', stat: 'SP', key: 'F', icon: '✦', color: '#8cc7ff' },
+  hp: { name: '醫療包', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
+  sp: { name: '杏仁水', stat: 'SP', key: 'F', icon: '✦', color: '#8cc7ff' },
 };
+const SHOP_KIND_ORDER = ['medical', 'snack', 'drink'];   // 商店排序：補給 → 零食 → 飲料
 const supplyById = id => SUPPLIES.find(entry => entry.id === id);
-function supplyEffect(item) { return `${SUPPLY_KIND[item.kind].stat} +${item.restore}`; }
-function supplyNeed(kind) { return !G?.player ? 0 : kind === 'snack' ? G.player.maxhp - G.player.hp : G.guideMax - G.guide; }
-function supplyOwnedCount(kind) { return SUPPLIES.reduce((sum, item) => sum + (item.kind === kind ? supplyInventory.get(item.id) || 0 : 0), 0); }
+function supplyEffect(item) { return item.use ? `${SUPPLY_KIND[item.use].stat} +${item.restore}` : '送禮用'; }
+function supplyNeed(use) { return !G?.player ? 0 : use === 'hp' ? G.player.maxhp - G.player.hp : G.guideMax - G.guide; }
+function supplyOwnedCount(use) { return SUPPLIES.reduce((sum, item) => sum + (item.use === use ? supplyInventory.get(item.id) || 0 : 0), 0); }
 // 快捷使用時挑哪一個：剛好能補滿的裡面挑最小的（不浪費）；都補不滿就挑恢復最多的
-function pickSupply(kind) {
-  const need = supplyNeed(kind), owned = SUPPLIES.filter(item => item.kind === kind && supplyInventory.get(item.id) > 0);
+function pickSupply(use) {
+  const need = supplyNeed(use), owned = SUPPLIES.filter(item => item.use === use && supplyInventory.get(item.id) > 0);
   return owned.filter(item => item.restore >= need).sort((a, b) => a.restore - b.restore)[0] || owned.sort((a, b) => b.restore - a.restore)[0] || null;
 }
 function renderSupplyStatus() {   // 滑到商品上：下方資訊條的 HP／SP 條會亮出這個商品能補多少
-  const bars = [['snack', 'playerHpBar', G?.player?.hp || 0, G?.player?.maxhp || 1], ['drink', 'playerEnergyBar', G?.guide || 0, G?.guideMax || 1]];
+  const bars = [['hp', 'playerHpBar', G?.player?.hp || 0, G?.player?.maxhp || 1], ['sp', 'playerEnergyBar', G?.guide || 0, G?.guideMax || 1]];
   for (const [kind, id, now, max] of bars) {
     const gain = document.getElementById(id)?.parentElement.querySelector('.gain'); if (!gain) continue;
-    const add = supplyShopOpen && supplyHover && supplyHover.kind === kind ? Math.min(supplyHover.restore, max - now) : 0;
+    const add = supplyShopOpen && supplyHover && supplyHover.use === kind ? Math.min(supplyHover.restore, max - now) : 0;
     gain.style.left = Math.min(100, now / max * 100) + '%';
     gain.style.width = Math.max(0, add / max * 100) + '%';
   }
@@ -41,13 +44,13 @@ function renderSupplyShop() {
     tab.querySelector('em').textContent = n;
   });
   const visible = SUPPLIES.filter(item => supplyShopTab === 'all' || item.kind === supplyShopTab)
-    .sort((a, b) => (a.kind === b.kind ? 0 : a.kind === 'snack' ? -1 : 1) || a.price - b.price);   // 零食在前，各自由便宜到貴
+    .sort((a, b) => (SHOP_KIND_ORDER.indexOf(a.kind) - SHOP_KIND_ORDER.indexOf(b.kind)) || a.price - b.price);   // 補給 → 零食 → 飲料，各自由便宜到貴
   supplyShopList.innerHTML = visible.map(item => {
-    const kind = SUPPLY_KIND[item.kind], inCart = shopCart.get(item.id) || 0, short = item.price - left;
-    return `<article class="shop-item ${item.kind}" data-item="${item.id}">
+    const use = item.use && SUPPLY_KIND[item.use], inCart = shopCart.get(item.id) || 0, short = item.price - left;
+    return `<article class="shop-item ${item.kind} ${item.use || 'gift'}" data-item="${item.id}">
       ${inCart ? `<span class="shop-owned" title="購物車裡有 ${inCart} 個">🛒${inCart}</span>` : ''}
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
-      <span class="shop-effect">${kind.icon} ${supplyEffect(item)}</span>
+      <span class="shop-effect">${use ? use.icon + ' ' + supplyEffect(item) : '🎁 送禮用'}</span>
       <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="把 ${item.name} 加入購物車，$${item.price}"`}>${short > 0 ? `還差 $${short}` : `<span>加入</span><b>$${item.price}</b>`}</button>
     </article>`;
   }).join('');
@@ -67,11 +70,11 @@ function renderSupplyShop() {
   }).join('') : '<span class="supply-empty">購物車是空的</span>';
   renderSupplyStatus();
 }
-// 下方資訊條的快捷格：零食（Q）、飲料（F）
+// 下方資訊條的快捷格：醫療包（Q）、杏仁水（F）
 let quickSupplyKey = '';
 function renderQuickSupplies() {
   const box = document.getElementById('quickSupplies'); if (!box) return;
-  const state = ['snack', 'drink'].map(kind => { const pick = pickSupply(kind); return [kind, pick?.id || '', supplyOwnedCount(kind), supplyNeed(kind) <= 0]; });
+  const state = ['hp', 'sp'].map(kind => { const pick = pickSupply(kind); return [kind, pick?.id || '', supplyOwnedCount(kind), supplyNeed(kind) <= 0]; });
   const key = JSON.stringify(state); if (key === quickSupplyKey) return; quickSupplyKey = key;
   box.innerHTML = state.map(([kind, id, count, full]) => {
     const k = SUPPLY_KIND[kind], item = supplyById(id);
@@ -117,11 +120,12 @@ function checkoutCart() {
 function useSupply(id) {
   const item = supplyById(id), count = supplyInventory.get(id) || 0;
   if (!item || !G?.player || count <= 0) return false;
-  const restored = Math.min(item.restore, supplyNeed(item.kind));
-  if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.kind].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
-  if (item.kind === 'snack') G.player.hp += restored; else G.guide += restored;
+  if (!item.use) return false;   // 零食飲料不能直接吃（送禮用）
+  const restored = Math.min(item.restore, supplyNeed(item.use));
+  if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.use].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
+  if (item.use === 'hp') G.player.hp += restored; else G.guide += restored;
   if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1);
-  const k = SUPPLY_KIND[item.kind];
+  const k = SUPPLY_KIND[item.use];
   sfx('soothe'); flash(`${item.name}　+${Math.ceil(restored)} ${k.stat}`, G.player.x, G.player.y - 54, k.color);
   updateHUD(); if (supplyShopOpen) renderSupplyShop(); if (backpackOpen) renderBackpack();
   return true;
@@ -150,5 +154,5 @@ window.addEventListener('keydown', e => {   // Q 吃零食、F 喝飲料
   if (e.repeat || (k !== 'q' && k !== 'f') || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (!G?.player || G.over || MAP_SAFE || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
-  e.preventDefault(); quickUseSupply(k === 'q' ? 'snack' : 'drink');
+  e.preventDefault(); quickUseSupply(k === 'q' ? 'hp' : 'sp');
 });

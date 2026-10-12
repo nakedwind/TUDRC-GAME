@@ -1,25 +1,31 @@
-/* 溫特的個人補給：零食恢復 HP，飲料恢復 SP（精神能量）。 */
+/* 商店賣的東西（溫特的個人補給）
+   ・補給（kind: 'medical'）：use 'hp' 恢復 HP、use 'sp' 恢復 SP（精神能量）；restore＝恢復多少。戰鬥中按 Q／F 快速使用。
+   ・零食（'snack'）、飲料（'drink'）：不會恢復 HP／SP，用來送禮給角色（data/gifts.js），之後也能帶去出勤當補給。
+   ・圖片放在 images/道具/ */
 const SUPPLIES = [
-  { id:'little-noodles', name:'小學麵', kind:'snack', restore:12, price:18, file:'小學麵.png' },
-  { id:'cadina', name:'卡迪這', kind:'snack', restore:18, price:25, file:'卡迪這.png' },
-  { id:'corn-snack', name:'可喜果', kind:'snack', restore:16, price:22, file:'可喜果.png' },
-  { id:'kuai-kuai', name:'乖乖', kind:'snack', restore:14, price:20, file:'乖乖.png' },
-  { id:'oyster-omelet', name:'阿子煎', kind:'snack', restore:22, price:30, file:'阿子煎.png' },
-  { id:'fish-snack', name:'南海鱈魚香絲', kind:'snack', restore:20, price:28, file:'南海鱈魚香絲.png' },
-  { id:'cream-puff', name:'美美小泡芙', kind:'snack', restore:18, price:25, file:'美美小泡芙.png' },
-  { id:'spicy-snack', name:'真有味', kind:'snack', restore:25, price:34, file:'真有味.png' },
-  { id:'shrimp-snack', name:'蝦未生', kind:'snack', restore:20, price:28, file:'蝦未生.png' },
-  { id:'cola', name:'口客', kind:'drink', restore:18, price:20, file:'口客.png' },
-  { id:'water', name:'少喝水', kind:'drink', restore:14, price:16, file:'少喝水.png' },
-  { id:'papaya-milk', name:'木瓜牛奶', kind:'drink', restore:25, price:30, file:'木瓜牛奶.png' },
-  { id:'tea', name:'玉茶元', kind:'drink', restore:20, price:24, file:'玉茶元.png' },
-  { id:'sarsaparilla', name:'白松沙士', kind:'drink', restore:22, price:26, file:'白松沙士.png' },
-  { id:'tea-collection', name:'吃冰室茶集', kind:'drink', restore:28, price:34, file:'吃冰室茶集.png' },
-  { id:'asparagus-juice', name:'聿聿蘆筍汁', kind:'drink', restore:32, price:40, file:'聿聿蘆筍汁.png' },
-  { id:'vegetable-juice', name:'波蜜果菜汁', kind:'drink', restore:30, price:38, file:'波蜜果菜汁.png' },
-  { id:'pure-tea', name:'純喫茶', kind:'drink', restore:24, price:30, file:'純喫茶.png' },
-  { id:'milk-tea', name:'麥香奶茶', kind:'drink', restore:26, price:32, file:'麥香奶茶.png' },
-  { id:'black-tea', name:'麥香紅茶', kind:'drink', restore:22, price:27, file:'麥香紅茶.png' },
-  { id:'green-tea', name:'麥香綠茶', kind:'drink', restore:24, price:29, file:'麥香綠茶.png' },
-  { id:'tomato-soda', name:'番茄西打', kind:'drink', restore:30, price:36, file:'番茄西打.png' },
+  // ---- 補給 ----
+  { id:'medkit', name:'醫療包', kind:'medical', use:'hp', restore:35, price:30, file:'醫療包.png', desc:'應變中心配發的急救包。' },
+  { id:'almond-water', name:'杏仁水', kind:'medical', use:'sp', restore:30, price:25, file:'杏仁水.png', desc:'溫溫的杏仁水，喝了心情會平靜下來。' },
+  // ---- 零食 ----
+  { id:'little-noodles', name:'小學麵', kind:'snack', price:18, file:'小學麵.png' },
+  { id:'cadina', name:'卡迪這', kind:'snack', price:25, file:'卡迪這.png' },
+  { id:'corn-snack', name:'可喜果', kind:'snack', price:22, file:'可喜果.png' },
+  { id:'kuai-kuai', name:'乖乖', kind:'snack', price:20, file:'乖乖.png' },
+  { id:'oyster-omelet', name:'阿子煎', kind:'snack', price:30, file:'阿子煎.png' },
+  { id:'fish-snack', name:'南海鱈魚香絲', kind:'snack', price:28, file:'南海鱈魚香絲.png' },
+  { id:'cream-puff', name:'美美小泡芙', kind:'snack', price:25, file:'美美小泡芙.png' },
+  { id:'spicy-snack', name:'真有味', kind:'snack', price:34, file:'真有味.png' },
+  { id:'shrimp-snack', name:'蝦未生', kind:'snack', price:28, file:'蝦未生.png' },
+  { id:'cola', name:'口客', kind:'snack', price:20, file:'口客.png' },
+  // ---- 飲料 ----
+  { id:'water', name:'少喝水', kind:'drink', price:16, file:'少喝水.png' },
+  { id:'papaya-milk', name:'木瓜牛奶', kind:'drink', price:30, file:'木瓜牛奶.png' },
+  { id:'tea', name:'玉茶元', kind:'drink', price:24, file:'玉茶元.png' },
+  { id:'sarsaparilla', name:'白松沙士', kind:'drink', price:26, file:'白松沙士.png' },
+  { id:'tea-collection', name:'吃冰室茶集', kind:'drink', price:34, file:'吃冰室茶集.png' },
+  { id:'asparagus-juice', name:'聿聿蘆筍汁', kind:'drink', price:40, file:'聿聿蘆筍汁.png' },
+  { id:'vegetable-juice', name:'波蜜果菜汁', kind:'drink', price:38, file:'波蜜果菜汁.png' },
+  { id:'pure-tea', name:'純喫茶', kind:'drink', price:30, file:'純喫茶.png' },
+  { id:'milk-tea', name:'MY香奶茶', kind:'drink', price:32, file:'麥香奶茶.png' },
+  { id:'tomato-soda', name:'番茄西打', kind:'drink', price:36, file:'番茄西打.png' },
 ].map(item => ({ ...item, image: 'images/道具/' + item.file }));

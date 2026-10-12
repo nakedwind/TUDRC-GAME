@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=oreblast-20261008">
+<link rel="stylesheet" href="css/style.css?v=requests-20261012">
 <link rel="stylesheet" href="css/ui-feedback.css">
 </head>
 <body>
@@ -47,8 +47,8 @@
               <dt><kbd>R</kbd></dt><dd>裝填（建造時：轉向）</dd>
               <dt><kbd>1</kbd>～<kbd>5</kbd></dt><dd>建築快捷</dd>
               <dt><kbd>Space</kbd><kbd>E</kbd></dt><dd>對話、互動</dd>
-              <dt><kbd>Q</kbd></dt><dd>吃零食</dd>
-              <dt><kbd>F</kbd></dt><dd>喝飲料</dd>
+              <dt><kbd>Q</kbd></dt><dd>用醫療包（HP）</dd>
+              <dt><kbd>F</kbd></dt><dd>喝杏仁水（SP）</dd>
               <dt><kbd>B</kbd></dt><dd>背包</dd>
               <dt><kbd>G</kbd></dt><dd>對話中送禮</dd>
               <dt><kbd>P</kbd></dt><dd>暫停</dd>
@@ -151,8 +151,9 @@
           <div class="shop-main">
             <nav class="supply-shop-tabs" role="tablist" aria-label="商品分類">
               <button type="button" role="tab" data-supply-tab="all" class="active" aria-selected="true">全部 <em></em></button>
-              <button type="button" role="tab" data-supply-tab="snack" aria-selected="false">❤ 零食 <em></em></button>
-              <button type="button" role="tab" data-supply-tab="drink" aria-selected="false">✦ 飲料 <em></em></button>
+              <button type="button" role="tab" data-supply-tab="medical" aria-selected="false">🩹 補給 <em></em></button>
+              <button type="button" role="tab" data-supply-tab="snack" aria-selected="false">🍙 零食 <em></em></button>
+              <button type="button" role="tab" data-supply-tab="drink" aria-selected="false">🥤 飲料 <em></em></button>
             </nav>
             <div id="supplyShopList" class="supply-shop-list"></div>
           </div>
@@ -207,9 +208,9 @@
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js?v=taint-rates-20261007"></script>  <!-- 集中管理所有角色 -->
-  <script src="data/gifts.js?v=gift-20261008"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
-  <script src="data/items.js?v=drop-20261008"></script>   <!-- 背包物品分類與其他物品 -->
-  <script src="data/supplies.js?v=supply-shop-20261007"></script>   <!-- 溫特可購買、使用的個人補給 -->
+  <script src="data/gifts.js?v=remap-20261012"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
+  <script src="data/items.js?v=black-20261012"></script>   <!-- 背包物品分類與其他物品 -->
+  <script src="data/supplies.js?v=medical-20261012"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/dialogues.js?v=dlg-20261006"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=easy-20261011"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
@@ -238,17 +239,17 @@
   <script src="js/enemy-ai.js?v=lifeform-sfx-20261012"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=safe-20261012"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
-  <script src="js/render.js?v=facing-20261012"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=requests-20261012"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=lifeform-20261012"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=lifeform-20261012"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=detect-20261009"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/lifeform.js?v=lifeform-sfx-20261012"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
   <script src="js/ore.js?v=oreglow-20261012"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
   <script src="js/landmine.js?v=fly-20261011"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=split-20261008"></script> <!-- 9i2. 便利商店：商品、購物車、Q／F 快捷補給 -->
-  <script src="js/backpack.js?v=split-20261008"></script> <!-- 9j. 背包：物品格與說明 -->
-  <script src="js/gifts.js?v=gift2-20261008"></script> <!-- 9l. 送禮與好感度 -->
-  <script src="js/save.js?v=gift-20261008"></script> <!-- 9k. 存檔、設定選單 -->
+  <script src="js/shop.js?v=medical-20261012"></script> <!-- 9i2. 便利商店：商品、購物車、Q／F 快捷補給 -->
+  <script src="js/backpack.js?v=medical2-20261012"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/gifts.js?v=requests3-20261012"></script> <!-- 9l. 送禮與好感度 -->
+  <script src="js/save.js?v=requests-20261012"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/flare.js?v=gunhud-20261010"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/game.js?v=organized-sfx-20261012"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
