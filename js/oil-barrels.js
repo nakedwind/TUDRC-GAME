@@ -86,6 +86,7 @@ function oilExplode(x, y, it) {
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
     const k = 1 - .4 * d / R;   // 越靠近中心越痛
     e.hp -= B.enemy * k; e.hitT = .2; e.hitColor = '#ff9a3c';
+    if (it.fire) e.fireHitAt = performance.now() / 1000;   // 油桶／油箱的火焰爆炸（瓦斯爐不算）
     flashDmg('-' + Math.round(B.enemy * k), e.x, e.y - 26, '#ff9a3c');
     enemyHitReact(e, x, y, true);
   }
@@ -122,6 +123,7 @@ function oilExplode(x, y, it) {
   igniteSlicksNear(x, y, R);
   if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 瓦斯爐：炸開附近的異質礦物（js/ore.js）
   if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
+  if (it.fire && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 燒掉生命體碎掉的那堆（js/lifeform.js）
   // 畫面：爆閃、雙層衝擊環、火星、碎片、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
   G.effects.push({ fglow: true, x, y: y - 8, r0: 20, r1: R * 1.15, life: .45, life0: .45 });
@@ -224,7 +226,7 @@ function updateOil(dt) {
   for (const e of G.enemies) {
     if (e.dead) continue;
     const d = fireTick(e); if (!d) continue;
-    e.hp -= d; e.hitT = Math.max(e.hitT || 0, .16); e.hitColor = '#ff8a3a';
+    e.hp -= d; e.hitT = Math.max(e.hitT || 0, .16); e.hitColor = '#ff8a3a'; e.fireHitAt = performance.now() / 1000;   // 被火燒到（生命體會被燒死）
     flashDmg('-' + Math.round(d), e.x, e.y - 26, '#ff9a3c');
   }
   for (const t of G.towers) {

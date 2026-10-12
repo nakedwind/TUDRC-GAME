@@ -114,8 +114,8 @@ function isVisible(x, y) {
 
 function getLights() {
   const L = [];
-  // 玩家（嚮導提燈）
-  if (G && G.player) L.push({ x: G.player.x, y: G.player.y, r: LIGHT.playerR });
+  // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
+  if (G && G.player && LIGHT.playerLightOn) L.push({ x: G.player.x, y: G.player.y, r: LIGHT.playerR });
   // 營地常亮（沒自訂營地就用預設最下排）
   if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); const [x, y] = center(c, r); L.push({ x, y, r: LIGHT.campR }); });
   else for (let c = 0; c < COLS; c++) { const [x, y] = center(c, ROWS - 1); L.push({ x, y, r: LIGHT.campR }); }

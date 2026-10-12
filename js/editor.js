@@ -73,7 +73,7 @@ const STORAGE_EOC_WALL_ITEMS = 'tudrc_asset_eoc_wall_items_v1';  // 後補的應
 const STORAGE_DAMAGE_ASSETS_CLEANUP = 'tudrc_remove_unapproved_damage_assets_v1';
 
 // 地圖畫布的點選音效；按鈕與切換的回饋由 ui-feedback.js 共用處理。
-const mapClickSound = new Audio('Sound effects/對話框下一頁音效.mp3');
+const mapClickSound = new Audio('Sound effects/介面/對話框下一頁音效.mp3');
 mapClickSound.preload = 'auto';
 mapClickSound.volume = 0.55;
 

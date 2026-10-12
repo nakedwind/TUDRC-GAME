@@ -156,6 +156,8 @@ function initMap() {
   const fitWidth = VIEW_W / (COLS * CELL), fitHeight = VIEW_H / (ROWS * CELL);
   VIEW_SCALE = Math.max(1, Math.min(fitWidth, fitHeight));
   if (fitWidth < 1 && fitHeight > 1) VIEW_SCALE = fitHeight;
+  // 只有「大於畫面、需要捲動」的大型地圖才再放大；完整塞進畫面的小房間維持原本大小不放大
+  if (fitWidth < 1 || fitHeight < 1) VIEW_SCALE *= VIEW_ZOOM;
 
   // 安全場景：沒有怪物、沒有黑幕（整張地圖都是亮的）
   MAP_SAFE = !!MAP.safe;

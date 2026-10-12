@@ -173,6 +173,7 @@ function spawnLightningBolt(x, y, scale = 1) {
 const SLASH_PALETTES = {
   blue:   { after: '#3f8bff', outer: '#4a9cff', glow: '#6ab4ff', core: '#eef8ff', edge: '#ffffff' },
   purple: { after: '#8a3fff', outer: '#a860ff', glow: '#c77bff', core: '#f1e2ff', edge: '#ffffff' },
+  dark:   { after: '#3a0a14', outer: '#7a1428', glow: '#ff2d4a', core: '#ffd3da', edge: '#ffffff' },   // 生命體：暗紅黑
 };
 function spawnMeleeSlash(x, y, angle, heavy, pal) {
   G.effects.push({ slash: true, x, y, angle, heavy, pal: SLASH_PALETTES[pal] || SLASH_PALETTES.blue, life: heavy ? .26 : .2, life0: heavy ? .26 : .2 });
@@ -460,6 +461,8 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   })[kind] || { shake: 2.5, stop: 0, ring: spec.color };
   // 命中頓格只在玩家附近發生（遠處的戰鬥不凍結畫面，避免怪多時一直卡頓）
   if (feel.stop && G.player && Math.hypot(G.player.x - impactPoint.x, G.player.y - impactPoint.y) <= SHAKE_FEEL.range * CELL) addHitstop(feel.stop);
+  if (kind === 'flame' && typeof burnLifePilesNear === 'function') burnLifePilesNear(impactPoint.x, impactPoint.y, (spec.splash || 0) * CELL + 22);   // 希奧妮的火焰剛好燒到生命體的碎塊
+  if (kind === 'flame' && G.enemies.includes(target)) target.fireHitAt = performance.now() / 1000;
   if (kind === 'flame' && scale > 1.3 && typeof blastOres === 'function') blastOres(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 希奧妮大招的小爆炸：炸開礦物（js/ore.js）
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
   for (const enemy of hitTargets) {

@@ -7129,7 +7129,7 @@ const MAPS_DEFAULT = [
     "monsterMix": [
       {
         "id": "slime",
-        "weight": 50
+        "weight": 30
       },
       {
         "id": "bird_head",
@@ -7137,7 +7137,11 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "pearl_kid",
-        "weight": 20
+        "weight": 10
+      },
+      {
+        "id": "lifeform",
+        "weight": 50
       }
     ]
   },

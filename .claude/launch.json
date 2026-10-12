@@ -3,15 +3,17 @@
   "configurations": [
     {
       "name": "game",
-      "runtimeExecutable": "C:/Users/b9054/AppData/Local/Programs/Python/Python313/python.exe",
-      "runtimeArgs": ["-m", "http.server", "8765"],
-      "port": 8765
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8768"],
+      "port": 8768,
+      "autoPort": false
     },
     {
       "name": "game-alt",
-      "runtimeExecutable": "C:/Users/b9054/AppData/Local/Programs/Python/Python313/python.exe",
-      "runtimeArgs": ["-m", "http.server", "8766"],
-      "port": 8766
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8769"],
+      "port": 8769,
+      "autoPort": false
     },
     {
       "name": "game-local",

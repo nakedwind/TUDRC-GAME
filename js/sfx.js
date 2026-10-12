@@ -8,82 +8,105 @@
 */
 const SFX = (() => {
   let ctx = null, master = null, volume = 0.35, enabled = true;
-  const files = {
-    button: '按鈕.mp3',
-    menu: '開選單.mp3',
-    switch: '切換.mp3',
-    blip: '對話框下一頁音效.mp3',
-    place: '放置.mp3',
-    soothe: '疏導.mp3',
-    door: '關門.mp3',
-    backroomDoor: '後室開門.mp3',
-    elevator: '電梯.mp3',
-    gunshot: '開槍.mp3',
-    flare: '射擊.mp3',
-    reload: 'reload.mp3',
-    monsterHit: 'hit.mp3',
-    fireImpact: '火焰.mp3',
-    lightningImpact: '雷電.mp3',
-    corrosionImpact: '腐蝕命中.wav',
-    campWarning: '警告聲.mp3',
-    monsterDown: '怪物倒下.mp3',
-    rangedShot: '射擊.mp3',
-    knock2: '敲打2.mp3',
-    cleaver: '菜刀.mp3',
-    meleeAttack: '近戰攻擊.mp3',
-    swordSwing: '揮劍.mp3',
-    heartbeat: '心跳.mp3',
-    achievement: '升級.mp3',
-    glassBreak3: '玻璃破掉3.mp3',
-    glassBreak4: '玻璃破掉4.mp3',
-    mineBeep: 'BB聲.mp3',
-    smallBoom: '小爆炸.mp3',
-    midBoom: '中爆炸.mp3',
-    bigBoom: '爆炸.mp3',
-    shopBell: '便利商店門鈴.mp3',
-    favorUp: '升等.mp3',
-    mineGrind: '打磨.mp3',
-    crystalGet: '得到碎片.mp3',
-    slimeHit: 'slime-hit.mp3',
-    slimeLand: 'slime-land.mp3',
+  const baseFiles = {
+    button: '介面/按鈕.mp3',
+    menu: '介面/開選單.mp3',
+    switch: '介面/切換.mp3',
+    blip: '介面/對話框下一頁音效.mp3',
+    place: '設施/放置.mp3',
+    soothe: '玩家/疏導.mp3',
+    door: '環境/門與機關/關門.mp3',
+    backroomDoor: '環境/門與機關/後室開門.mp3',
+    elevator: '環境/門與機關/電梯.mp3',
+    gunshot: '戰鬥/槍械/開槍.mp3',
+    flare: '戰鬥/槍械/射擊.mp3',
+    reload: '戰鬥/槍械/reload.mp3',
+    monsterHit: '戰鬥/命中/hit.mp3',
+    fireImpact: { mode: 'random', files: ['戰鬥/元素/火焰.mp3', '戰鬥/元素/火焰02.mp3'] },
+    lightningImpact: '戰鬥/元素/雷電.mp3',
+    corrosionImpact: '戰鬥/元素/腐蝕命中.wav',
+    campWarning: '設施/警告聲.mp3',
+    monsterDown: '怪物/共用/怪物倒下.mp3',
+    rangedShot: '戰鬥/槍械/射擊.mp3',
+    knock2: '戰鬥/命中/敲打2.mp3',
+    cleaver: '戰鬥/近戰/菜刀.mp3',
+    meleeAttack: '戰鬥/近戰/近戰攻擊.mp3',
+    swordSwing: '戰鬥/近戰/揮劍.mp3',
+    heartbeat: '玩家/心跳.mp3',
+    achievement: '獎勵/升級.mp3',
+    glassBreak3: '環境/破壞/玻璃破掉3.mp3',
+    glassBreak4: '環境/破壞/玻璃破掉4.mp3',
+    mineBeep: '設施/BB聲.mp3',
+    smallBoom: '戰鬥/爆炸/小爆炸.mp3',
+    midBoom: '戰鬥/爆炸/中爆炸.mp3',
+    bigBoom: '戰鬥/爆炸/爆炸.mp3',
+    shopBell: '商店/便利商店門鈴.mp3',
+    favorUp: '獎勵/升等.mp3',
+    mineGrind: '設施/打磨.mp3',
+    crystalGet: '獎勵/得到碎片.mp3',
+    slimeHit: '怪物/史萊姆/slime-hit.mp3',
+    slimeLand: '怪物/史萊姆/slime-land.mp3',
     // 鳥頭人：依試聽結果對調（被打用「死掉」那個檔、死掉用「被打」那個檔）
-    birdHurt: '鳥頭人死掉.mp3',
-    birdDeath: '鳥頭人被打.mp3',
+    birdHurt: '怪物/鳥頭人/鳥頭人死掉.mp3',
+    birdDeath: '怪物/鳥頭人/鳥頭人被打.mp3',
+    pearlHurt: '怪物/珍珠小童/珍珠小童被打.mp3',
+    pearlDeath: ['怪物/珍珠小童/珍珠小童死掉.mp3', '怪物/珍珠小童/珍珠小童死掉02.mp3'],
+    lifeformAttack: '怪物/生命體/生命體.mp3',
+    lifeformWalk: '怪物/生命體/生命體走路.mp3',
+    lifeformDeath: '怪物/生命體/生命體死掉.mp3',
+    lifeformRevive: '怪物/生命體/生命體復活.mp3',
   };
+  const FILE_KEY = 'tudrc_sound_files_v1';
+  const fileConfig = (() => {
+    let cfg = typeof SOUND_SETTINGS !== 'undefined' ? (SOUND_SETTINGS.files || {}) :
+      (typeof SOUND_FILE_CONFIG !== 'undefined' ? SOUND_FILE_CONFIG : {});
+    if (/[?&]previewSounds=1(&|$)/.test(location.search)) {
+      try { const draft = JSON.parse(localStorage.getItem(FILE_KEY) || 'null'); if (draft && typeof draft === 'object') cfg = draft; } catch (_) {}
+    }
+    return cfg || {};
+  })();
+  const files = { ...baseFiles, ...(fileConfig.overrides || {}), ...(fileConfig.extras || {}) };
   // 戰鬥音效的隨機變化：pitch＝音高（播放速度）±比例、gain＝音量 ±比例。
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
   const lastPlayed = new Map();
+  const fileLayers = value => value && value.mode === 'random' && Array.isArray(value.files) ? value.files.filter(Boolean) :
+    (Array.isArray(value) ? value.filter(Boolean) : (value ? [value] : []));
+  const playbackLayers = value => {
+    const all = fileLayers(value);
+    if (value && value.mode === 'random' && all.length) {
+      const index = Math.floor(Math.random() * all.length);
+      return [{ file: all[index], index }];
+    }
+    return all.map((file, index) => ({ file, index }));
+  };
   function playFile(name, gain = 1, sourceKey = name) {
     const now = performance.now();
     if (now - (lastPlayed.get(sourceKey) || -Infinity) < 70) return;
     lastPlayed.set(sourceKey, now);
     const vary = VARIED.has(name), rate = vary ? jitter(VARY.pitch) : 1;
     if (vary) gain *= jitter(VARY.gain);
-    if (buffers[name]) {             // 已預先載入：立即播放
-      ensure();
-      const src = ctx.createBufferSource(); src.buffer = buffers[name]; src.playbackRate.value = rate;
-      const g = ctx.createGain(); g.gain.value = gain;
-      src.connect(g); g.connect(master);
-      activeSources.add(src);
-      src.onended = () => activeSources.delete(src);
-      src.start();
-      return;
-    }
-    const audio = new Audio('Sound effects/' + files[name]);   // 還沒載入好（或 file:// 開啟）：退回舊方式
-    audio.volume = Math.min(1, volume * gain);
-    audio.preservesPitch = false; audio.playbackRate = rate;
-    activeAudio.set(audio, gain);
-    const cleanup = () => activeAudio.delete(audio);
-    audio.addEventListener('ended', cleanup, { once: true });
-    audio.addEventListener('error', cleanup, { once: true });
-    audio.play().catch(() => { cleanup(); });
+    playbackLayers(files[name]).forEach(({ file, index }) => {
+      const key = name + ':' + index;
+      if (buffers[key]) {             // 已預先載入：所有疊加層在同一刻播放
+        ensure();
+        const src = ctx.createBufferSource(); src.buffer = buffers[key]; src.playbackRate.value = rate;
+        const g = ctx.createGain(); g.gain.value = gain;
+        src.connect(g); g.connect(master); activeSources.add(src);
+        src.onended = () => activeSources.delete(src); src.start(); return;
+      }
+      const audio = new Audio('Sound effects/' + file);   // file:// 開啟時的疊加播放
+      audio.volume = Math.min(1, volume * gain); audio.preservesPitch = false; audio.playbackRate = rate;
+      activeAudio.set(audio, gain); const cleanup = () => activeAudio.delete(audio);
+      audio.addEventListener('ended', cleanup, { once: true }); audio.addEventListener('error', cleanup, { once: true });
+      audio.play().catch(cleanup);
+    });
   }
   function createContext() {
     if (ctx) return;
@@ -102,13 +125,13 @@ const SFX = (() => {
     if (location.protocol === 'file:') return;   // 雙擊開啟時瀏覽器禁止讀檔，直接用舊方式
     createContext();
     if (!ctx) return;
-    for (const [name, file] of Object.entries(files)) {
-      fetch('Sound effects/' + encodeURIComponent(file))
+    for (const [name, value] of Object.entries(files)) fileLayers(value).forEach((file, index) => {
+      fetch('Sound effects/' + file.split('/').map(encodeURIComponent).join('/'))
         .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
         .then(data => new Promise((ok, fail) => ctx.decodeAudioData(data, ok, fail)))
-        .then(buffer => { buffers[name] = buffer; })
+        .then(buffer => { buffers[name + ':' + index] = buffer; })
         .catch(() => {});
-    }
+    });
   }
   // 瀏覽器規定玩家第一次點擊或按鍵後才能出聲，那時順便喚醒音效引擎
   const unlock = () => { if (ctx && ctx.state === 'suspended') ctx.resume(); };
@@ -182,10 +205,11 @@ const SFX = (() => {
     },
     hit() { const k = jitter(VARY.pitch); tone({ freq: 160 * k, freq2: 70 * k, type: 'square', dur: 0.07, gain: 0.15 * jitter(VARY.gain) }); noise({ dur: 0.06, gain: 0.08, freq: 700 * k }); },
   };
-  // 個別音效的音量倍率（1＝原本）：在「音效編輯器」調整，存在 data/sound-volumes.js
+  // 個別音效的音量倍率（1＝原本）：在「音效編輯器」調整，存在 data/sound-settings.js
   // 用 ?previewSounds=1 開遊戲時，改用音效編輯器存在瀏覽器裡、還沒匯出的設定。
   const GAIN_KEY = 'tudrc_sound_gain_v1';
-  let SOUND_GAIN = { ...(typeof SOUND_GAIN_DEFAULT !== 'undefined' ? SOUND_GAIN_DEFAULT : {}) };
+  let SOUND_GAIN = { ...(typeof SOUND_SETTINGS !== 'undefined' ? (SOUND_SETTINGS.gains || {}) :
+    (typeof SOUND_GAIN_DEFAULT !== 'undefined' ? SOUND_GAIN_DEFAULT : {})) };
   if (/[?&]previewSounds=1(&|$)/.test(location.search)) {
     try { const draft = JSON.parse(localStorage.getItem(GAIN_KEY) || 'null'); if (draft && typeof draft === 'object') SOUND_GAIN = draft; } catch (_) {}
   }
@@ -201,8 +225,15 @@ const SFX = (() => {
   return {
     play,
     GAIN_KEY,
+    FILE_KEY,
     gainOf: name => SOUND_GAIN[name] ?? 1,                 // 某個音效目前的音量倍率
     setGains(map) { SOUND_GAIN = { ...(map || {}) }; },    // 音效編輯器即時套用
+    setFiles(config) {
+      const next = { ...baseFiles, ...((config || {}).overrides || {}), ...((config || {}).extras || {}) };
+      Object.keys(files).forEach(name => { delete files[name]; delete buffers[name]; });
+      Object.assign(files, next); preload();
+    },
+    defaultFiles: () => ({ ...baseFiles }),
     // 所有音效：有音檔的（file）與程式合成的（file: null）
     list: () => [...Object.keys(files).map(name => ({ name, file: files[name] })),
                  ...Object.keys(sounds).filter(name => !files[name]).map(name => ({ name, file: null }))],

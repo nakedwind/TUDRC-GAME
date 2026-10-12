@@ -95,6 +95,8 @@ const MONSTERS_DEFAULT = [
     "crystals": 4,
     "width": 80,
     "height": 74,
+    "hitSound": "pearlHurt",
+    "deathSound": "pearlDeath",
     "behavior": "shooter",
     "shooter": {
       "noticeRange": 7,
@@ -121,6 +123,53 @@ const MONSTERS_DEFAULT = [
       "angry": "images/monster/pearl-kid/pearl-kid-angry.png",
       "angryHalf": "images/monster/pearl-kid/pearl-kid-angry-half-closed.png",
       "pearl": "images/monster/pearl-kid/pearl.png"
+    }
+  },
+  {
+    "id": "lifeform",
+    "name": "生命體",
+    "sprite": "images/monster/Lifeform/Monster_Lifeform01.png",
+    "hp": 200,
+    "speed": 24,
+    "playerDamage": 18,
+    "sentryDamage": 20,
+    "buildingDamage": 50,
+    "reward": 60,
+    "crystals": 6,
+    "width": 101,
+    "height": 145,
+    "noHitSquash": true,
+    "stagger": 0.1,
+    "undying": true,
+    "frames": {
+      "walkFacing": "left",
+      "front": "images/monster/Lifeform/Monster_Lifeform01.png",
+      "walkFront": [
+        "images/monster/Lifeform/Monster_Lifeform01.png",
+        "images/monster/Lifeform/Monster_Lifeform02.png",
+        "images/monster/Lifeform/Monster_Lifeform03.png",
+        "images/monster/Lifeform/Monster_Lifeform04.png",
+        "images/monster/Lifeform/Monster_Lifeform05.png",
+        "images/monster/Lifeform/Monster_Lifeform06.png",
+        "images/monster/Lifeform/Monster_Lifeform07.png",
+        "images/monster/Lifeform/Monster_Lifeform08.png",
+        "images/monster/Lifeform/Monster_Lifeform09.png"
+      ],
+      "attack": [
+        "images/monster/Lifeform/Monster_Lifeform_attack01.png",
+        "images/monster/Lifeform/Monster_Lifeform_attack02.png",
+        "images/monster/Lifeform/Monster_Lifeform_attack03.png",
+        "images/monster/Lifeform/Monster_Lifeform_attack04.png"
+      ],
+      "attackFacing": "left",
+      "attackRig": {
+        "body": "images/monster/Lifeform/Monster_Lifeform_body.png",
+        "arm": "images/monster/Lifeform/Monster_Lifeform_arm.png",
+        "pivot": [35.5, 25],
+        "rest": 101.6,
+        "angles": [208, 258, 150],
+        "facing": "left"
+      }
     }
   }
 ];

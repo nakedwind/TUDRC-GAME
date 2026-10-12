@@ -53,20 +53,21 @@ function footprintNearLight(v, c, r, extra) {
   for (const [dc, dr] of variantSolidCells(v)) if (!cellNearLight(c + dc, r + dr, extra)) return false;
   return true;
 }
+// 放不了建築：建造位置跳字＋右上角系統提示（同一句 1.5 秒內不重複，連續點擊才不會洗版）
+const buildFailNoticeAt = {};
+function buildFail(msg, c, r, color = '#ff8f8f') {
+  sfx('error');
+  flash(msg, ...center(c, r), color);
+  const now = performance.now();
+  if (now - (buildFailNoticeAt[msg] || 0) > 1500) { buildFailNoticeAt[msg] = now; systemNotice(msg, true); }
+  return false;
+}
 function placeObstacle(ob, c, r) {
   const v = ob[buildOrient], extra = placeExtra(ob);
-  if (!footprintNearLight(v, c, r, extra)) {
-    sfx('error');
-    const msg = '太暗了，無法放置建築';
-    flash(msg, ...center(c, r), '#ffd24a');
-    // 右上角也提示一次（連續點擊時 1.5 秒內不重複）
-    const now = performance.now();
-    if (now - (placeObstacle.darkNoticeAt || 0) > 1500) { placeObstacle.darkNoticeAt = now; systemNotice(msg, true); }
-    return false;
-  }
-  if (!canPlaceObstacle(v, c, r, extra)) { sfx('error'); flash('這裡放不下', ...center(c, r), '#ff8f8f'); return false; }
-  if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) { sfx('error'); flash('這裡已經有地雷了', ...center(c, r), '#ff8f8f'); return false; }
-  if (G.money < ob.cost) { sfx('error'); flash('資源不足', ...center(c, r), '#ff8f8f'); return false; }
+  if (!footprintNearLight(v, c, r, extra)) return buildFail('太暗了，無法放置建築', c, r, '#ffd24a');
+  if (!canPlaceObstacle(v, c, r, extra)) return buildFail('這裡不能放置建築', c, r);
+  if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) return buildFail('這裡已經有地雷了', c, r);
+  if (G.money < ob.cost) return buildFail('經費不足，無法放置建築', c, r);
   G.money -= ob.cost;
   // 地雷（trap）埋在地上、不擋路：不登記擋路格
   const solid = ob.trap ? [] : variantSolidCells(v).map(cell => cell.slice());

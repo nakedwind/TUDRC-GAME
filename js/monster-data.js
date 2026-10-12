@@ -52,6 +52,9 @@ function validMonsterCatalog(list) {
     // 專屬音效（js/sfx.js 裡的名稱）：hitSound 被打中、deathSound 死掉；沒填就用通用的
     ...(typeof monster.hitSound === 'string' && monster.hitSound ? { hitSound: monster.hitSound } : {}),
     ...(typeof monster.deathSound === 'string' && monster.deathSound ? { deathSound: monster.deathSound } : {}),
+    ...(monster.undying ? { undying: true } : {}),
+    ...(monster.noHitSquash ? { noHitSquash: true } : {}),   // 被打中時不要壓扁回彈
+    ...(Number.isFinite(+monster.stagger) ? { stagger: Math.max(0, Math.min(2, +monster.stagger)) } : {}),   // 被重擊時硬直幾秒（沒填用通用值 0.3）   // 不死：HP 歸零只會碎掉，30 秒後復活；要用火燒才會真的死（js/lifeform.js）
   }));
 }
 // 走路動畫（選填）：front 站著、walkFront 走路（沒有 side 時，往任何方向走都用這組）、
@@ -126,20 +129,36 @@ function validMonsterFrames(frames) {
   if (!frames || typeof frames !== 'object') return null;
   const list = v => (Array.isArray(v) ? v : []).filter(x => typeof x === 'string' && x);
   const front = typeof frames.front === 'string' ? frames.front : '';
-  const walkFront = list(frames.walkFront), side = list(frames.side), idle = list(frames.idle);
+  const walkFront = list(frames.walkFront), side = list(frames.side), idle = list(frames.idle), attack = list(frames.attack);
   const points = v => (Array.isArray(v) ? v : []).filter(q => Array.isArray(q) && Number.isFinite(+q[0]) && Number.isFinite(+q[1])).map(q => [+q[0], +q[1]]);
   const eyes = points(frames.eyes), idleEyes = points(frames.idleEyes);
   if (!front && !walkFront.length && !side.length) return null;
   return { front: front || walkFront[0] || side[0], walkFront: walkFront.length ? walkFront : [front || side[0]],
+    // walkFacing：站姿／走路圖本身朝哪邊（例如生命體朝左）；往另一邊走時左右翻。沒填＝正面圖，不翻
+    ...(frames.walkFacing === 'left' || frames.walkFacing === 'right' ? { walkFacing: frames.walkFacing } : {}),
     ...(side.length ? { side, sideFacing: frames.sideFacing === 'right' ? 'right' : 'left' } : {}),
     // idle 站著不動時的動畫（例如鳥頭人轉眼睛）；idleFacing＝原圖朝哪邊；idleFps＝每秒幾張
     ...(idle.length ? { idle, idleFacing: frames.idleFacing === 'right' ? 'right' : 'left', idleFps: Math.max(.5, Math.min(24, Number(frames.idleFps) || 4)) } : {}),
     // eyes／idleEyes：眼睛在原圖上的像素座標（正面圖／發呆圖），鎖定目標時眼睛閃光用
-    ...(eyes.length ? { eyes } : {}), ...(idleEyes.length ? { idleEyes } : {}) };
+    ...(eyes.length ? { eyes } : {}), ...(idleEyes.length ? { idleEyes } : {}),
+    // attack：揮手攻擊動畫（3 張：舉手、揮出、收手；4 張：半舉、高舉蓄力、揮下、收回）
+    // attackFacing＝原圖往哪邊揮，目標在另一邊時左右翻；圖可以比站姿大（以腳底中央對齊）
+    ...(attack.length ? { attack, attackFacing: frames.attackFacing === 'left' ? 'left' : 'right' } : {}),
+    // attackRig：揮手時「即時轉動手臂」，比換圖流暢。body＝沒有那隻手的身體、arm＝只有那隻手（兩張跟站姿圖同尺寸）
+    // pivot＝肩膀在圖上的位置、rest＝手臂平常的角度、angles＝[半舉, 高舉, 揮下] 的角度（0＝往右、90＝往下、180＝往左、270＝往上）
+    ...(validAttackRig(frames.attackRig) ? { attackRig: validAttackRig(frames.attackRig) } : {}) };
+}
+function validAttackRig(r) {
+  if (!r || typeof r.body !== 'string' || typeof r.arm !== 'string') return null;
+  const n = (v, d) => Number.isFinite(+v) ? +v : d;
+  const pivot = Array.isArray(r.pivot) ? [n(r.pivot[0], 0), n(r.pivot[1], 0)] : [0, 0];
+  const angles = Array.isArray(r.angles) && r.angles.length >= 3 ? r.angles.slice(0, 3).map(a => n(a, 0)) : null;
+  if (!angles) return null;
+  return { body: r.body, arm: r.arm, pivot, rest: n(r.rest, 90), angles, facing: r.facing === 'left' ? 'left' : 'right' };
 }
 function monsterFrameFiles(monster) {
   const f = monster.frames; if (!f) return [];
-  return [...new Set([f.front, ...f.walkFront, ...(f.side || []), ...(f.idle || [])])];
+  return [...new Set([f.front, ...f.walkFront, ...(f.side || []), ...(f.idle || []), ...(f.attack || []), ...(f.attackRig ? [f.attackRig.body, f.attackRig.arm] : [])])];
 }
 function monsterCatalog(useBrowserDraft = false) {
   if (useBrowserDraft) {

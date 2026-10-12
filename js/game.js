@@ -112,6 +112,7 @@ function createMonster(spec, x, y, variant) {
     sentryDamage: dmg(spec.sentryDamage), buildingDamage: dmg(spec.buildingDamage),
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
+    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger,   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
     shooterCfg: spec.shooter || null, art: spec.art || null,
     flying: spec.behavior === 'shooter',   // 飄在空中：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
@@ -1379,7 +1380,7 @@ function updateFootsteps() {
   const walking = !!(p && p.moving && !p.sitting && G.running && !G.over && !paused);
   if (!FOOT.audio) { FOOT.audio = new Audio(); FOOT.audio.loop = true; FOOT.audio.volume = 0.5; }
   const a = FOOT.audio;
-  const want = MAP_SAFE ? 'Sound effects/footsteps02.mp3' : 'Sound effects/footsteps01.mp3';
+  const want = MAP_SAFE ? 'Sound effects/環境/腳步/footsteps02.mp3' : 'Sound effects/環境/腳步/footsteps01.mp3';
   if (FOOT.file !== want) { FOOT.file = want; a.src = want; }
   a.volume = Math.min(1, 0.5 * SFX.volume / 0.35 * SFX.gainOf('footsteps'));   // 跟著設定裡的音效音量＋音效編輯器的倍率
   a.muted = !SFX.enabled;                       // 跟著 M 鍵一起靜音
@@ -1717,7 +1718,7 @@ function update(dt) {
     for (const m of G.scorchMarks) m.t -= dt;
     G.scorchMarks = G.scorchMarks.filter(m => m.t > 0);
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -1781,6 +1782,7 @@ function update(dt) {
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
+  updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）

@@ -30,8 +30,11 @@ function commitNext(e) {
 function enemyAttackObstacle(e, o, dt) {
   e.attackingObstacle = o;
   e.atkCd = (e.atkCd || 0) - dt;
+  const ox = OX + (o.c + (o.w || 1) / 2) * CELL, oy = OY + (o.r + (o.h || 1) / 2) * CELL;
+  monsterSwingCue(e, e.atkCd, ox, oy);
   if (e.atkCd > 0) return;
   e.atkCd = BARRIER.breakInterval;
+  monsterSwingHit(e, ox, oy);
   o.lastHitBy = 'monster';   // 油桶被怪物打壞只會漏油、不會爆炸
   o.hp -= e.buildingDamage ?? BARRIER.breakDmg;
   o.hitT = HIT_DUR;
@@ -44,10 +47,31 @@ function enemyAttackObstacle(e, o, dt) {
     if (!G.over) lose('base');
   }
 }
+// ---- 揮手攻擊動畫（有 frames.attack 的怪物，例如生命體）----
+// windup＝前搖：舉手蓄力幾秒（打下去之前就開始舉）、strike＝快速揮下那一下、recover＝收回原本姿勢
+const MONSTER_SWING = { windup: .75, strike: .09, recover: .3 };
+function monsterSwingCue(e, cd, tx, ty) {   // 攻擊冷卻剩不到 windup 秒時，先把手舉起來
+  if (!e.frames || !e.frames.attack || e.swing || !(cd > 0) || cd > MONSTER_SWING.windup) return;
+  e.swing = { at: performance.now() / 1000 - (MONSTER_SWING.windup - cd), right: tx >= e.x };
+}
+function monsterSwingHit(e, tx, ty) {   // 打下去的瞬間：動畫跳到「揮出」，畫一道爪痕
+  if (!e.frames || !e.frames.attack) return;
+  const now = performance.now() / 1000, right = tx >= e.x;
+  if (!e.swing || now - e.swing.at < MONSTER_SWING.windup) e.swing = { at: now - MONSTER_SWING.windup, right };
+  else e.swing.right = right;
+  // 跟雷德、路德的近戰一樣：半月形斬擊（生命體是暗紅色）＋命中衝擊環＋玩家附近時畫面震一下
+  const ang = Math.atan2(ty - e.y, tx - e.x);
+  if (typeof spawnMeleeSlash === 'function') spawnMeleeSlash(tx - Math.cos(ang) * 10, ty - 14, ang, true, e.undying ? 'dark' : 'purple');
+  if (typeof spawnMeleeImpact === 'function') spawnMeleeImpact(tx, ty - 10, true);
+  if (typeof nearbyImpact === 'function') nearbyImpact(tx, ty, 6, .05);
+  if (e.undying && typeof sfxAt === 'function') sfxAt('lifeformAttack', e.x, e.y, .68, 'lifeform-attack');
+}
 function enemyAttackSentry(e, target, dt) {
   e.atkCd = (e.atkCd || 0) - dt;
+  if (target) monsterSwingCue(e, e.atkCd, target.x, target.y);
   if (e.atkCd > 0 || !target || target.hp <= 0) return;
   e.atkCd = 1;
+  monsterSwingHit(e, target.x, target.y);
   const spec = TYPES[target.type], defense = Math.max(0, Math.min(.75, spec.defense || 0));
   const damage = (e.sentryDamage ?? 14) * (1 - defense);
   target.hp = Math.max(0, target.hp - damage);
@@ -63,8 +87,10 @@ function enemyAttackSentry(e, target, dt) {
 function enemyAttackPlayer(e, dt) {
   const p = G.player;
   if (!p || p.hp <= 0) return;
+  monsterSwingCue(e, e.playerTouchCd || 0, p.x, p.y);
   if ((e.playerTouchCd || 0) > 0) return;
   e.playerTouchCd = 1;
+  monsterSwingHit(e, p.x, p.y);
   const damage = e.playerDamage ?? 12;
   p.hp = Math.max(0, p.hp - damage);
   p.hitT = .45; p.underAttackT = 5; p.lastAttacker = e;
@@ -165,7 +191,12 @@ function displaceEnemy(e, dx, dy, distance, resetRoute = true) {
 function moveEnemyToward(e, target, dt) {
   const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
   const step = e.speed * dt;
-  return displaceEnemy(e, dx, dy, Math.min(step, d), false);
+  const moved = displaceEnemy(e, dx, dy, Math.min(step, d), false);
+  if (moved && e.undying && typeof sfxAt === 'function') {
+    e.lifeStepT = (e.lifeStepT || 0) - dt;
+    if (e.lifeStepT <= 0) { e.lifeStepT = .78; sfxAt('lifeformWalk', e.x, e.y, .38, 'lifeform-walk'); }
+  }
+  return moved;
 }
 
 // ---- 異質體行為：18 格感知、尋路與黑暗遊蕩 ----

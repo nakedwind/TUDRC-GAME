@@ -18,7 +18,7 @@
   button:hover { background:#34516d } button.primary { background:#276f80; border-color:#64b6bd }
   input { background:#121a23; color:#f3f6fb; border:1px solid #52677d; border-radius:7px; padding:7px 9px; font:inherit; min-width:0 }
   #search { flex:1; min-width:180px }
-  .row { display:grid; grid-template-columns:minmax(150px,1.3fr) minmax(140px,2fr) 82px auto auto; gap:10px; align-items:center;
+  .row { display:grid; grid-template-columns:minmax(145px,1.2fr) minmax(180px,1.5fr) minmax(130px,1.4fr) 78px auto auto; gap:10px; align-items:center;
          padding:7px 8px; border-radius:8px }
   .row + .row { border-top:1px solid #29384a }
   .row.changed { background:#22323f }
@@ -26,33 +26,51 @@
   .row input[type=range] { width:100%; accent-color:#64b6bd }
   .pct { display:flex; align-items:center; gap:4px } .pct input { width:64px; text-align:right }
   .play { min-width:62px } .reset { padding:8px 10px; background:transparent; border-color:#3e5266 }
+  select { width:100%; min-width:0; padding:7px 8px; border:1px solid #52677d; border-radius:7px; background:#121a23; color:#f3f6fb; font:inherit }
+  .file-pick { display:flex; gap:6px; min-width:0 } .file-pick select { flex:1 } .file-pick button { padding:7px 9px; white-space:nowrap }
+  .new-sound { display:grid; grid-template-columns:1fr 1.2fr 1fr 1.7fr auto; gap:9px; align-items:end }
+  .new-sound label { display:grid; gap:5px; color:#9fb0c3; font-size:12px }
+  .folder-note { margin:9px 0 0; color:#d3bd82; font-size:12px }
+  .custom-tag { display:inline-block; margin-left:5px; padding:1px 5px; border-radius:99px; background:#465c72; color:#dbefff; font-size:9px }
   .reset:disabled { opacity:.3; cursor:default }
   #status { min-height:22px; color:#84ddbd; margin:10px 0 0 }
   #exportOut { width:100%; min-height:120px; margin-top:10px; background:#0d151e; border:1px solid #4c6479; color:#b6d5e6; border-radius:8px; padding:12px; font:12px/1.5 Consolas,monospace; resize:vertical }
-  @media(max-width:700px) { body { padding:16px } .row { grid-template-columns:1fr 82px auto auto } .row input[type=range] { grid-column:1/-1; order:5 } }
+  @media(max-width:850px) { body { padding:16px } .row { grid-template-columns:1fr 1fr 78px auto auto } .file-pick { grid-column:1/-1 } .row input[type=range] { grid-column:1/-1; order:6 } .new-sound { grid-template-columns:1fr 1fr } }
 </style>
 </head>
 <body>
   <div class="top"><div><h1>🔊 音效編輯器</h1>
-    <p>調整每個音效的大小聲（100%＝原本大小，最大 300%）。按 ▶ 試聽；改動會自動存在這台瀏覽器。<br>
-       正式套用到遊戲：按「下載 sound-volumes.js」，把檔案放到遊戲的 <code>data</code> 資料夾覆蓋。整體音量請用遊戲裡的設定選單。</p></div>
+    <p>調整音量、替換既有音效，或用「＋疊加」讓多個音檔同時播放。按 ▶ 可立即試聽，改動會自動存在這台瀏覽器。<br>
+       正式套用時下載 <code>sound-settings.js</code> 放進 <code>data</code>，新音檔可放進 <code>Sound effects</code> 的分類子資料夾。</p></div>
     <nav class="nav"><a href="塔防原型.html">回遊戲</a><a href="怪物編輯器.html">怪物編輯器</a></nav></div>
   <section class="panel">
     <div class="toolbar">
       <input id="search" type="search" placeholder="搜尋音效名稱或檔名" aria-label="搜尋音效">
+      <input id="libraryFolder" type="file" accept="audio/*" webkitdirectory multiple hidden>
+      <button id="loadLibrary">選擇音效素材資料夾</button>
       <button id="previewGame">▶ 用暫存設定預覽遊戲</button>
-      <button id="exportBtn" class="primary">下載 sound-volumes.js</button>
+      <button id="exportSettings" class="primary">下載音效設定</button>
       <button id="resetAll">全部恢復 100%</button>
       <button id="reloadFile">從檔案重新載入</button>
     </div>
+    <div class="folder-note" id="libraryStatus">尚未載入素材資料夾；仍可逐項選擇電腦裡的音效檔。</div>
     <div id="status" role="status"></div>
   </section>
+  <section class="panel"><h2>＋ 加入更多音效</h2>
+    <div class="new-sound">
+      <label>程式名稱<input id="newSoundId" placeholder="例如 radioAlert"></label>
+      <label>顯示名稱<input id="newSoundLabel" placeholder="例如 廣播警告"></label>
+      <label>分類<select id="newSoundGroup"><option>介面</option><option>溫特</option><option>哨兵攻擊</option><option>怪物</option><option>場景與物件</option><option selected>其他</option></select></label>
+      <label>音效檔<input id="newSoundFile" type="file" accept="audio/*"></label>
+      <button id="addSound" class="primary">加入音效</button>
+    </div>
+  </section>
   <div id="groups"></div>
-  <section class="panel"><h2>匯出內容</h2><small>按「下載」時也會顯示在這裡。</small>
+  <section class="panel"><h2>匯出內容</h2><small>按任一「下載」時也會顯示在這裡。</small>
     <textarea id="exportOut" readonly aria-label="匯出內容"></textarea></section>
-  <script src="data/sound-volumes.js?v=vol-20261011"></script>
-  <script src="js/sfx.js?v=pearl-20261011"></script>
+  <script src="data/sound-settings.js?v=merged-sound-settings-20261012"></script>
+  <script src="js/sfx.js?v=organized-sfx-20261012"></script>
   <script src="js/ui-feedback.js?v=mute-20261011"></script>
-  <script src="js/sound-editor.js?v=pearl-20261011"></script>
+  <script src="js/sound-editor.js?v=organized-sfx-20261012"></script>
 </body>
 </html>

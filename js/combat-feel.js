@@ -133,7 +133,7 @@ function drawHitFlash(img, k, color, dx, dy, dw, dh) {   // k＝剩餘比例（1
 // ---- 受擊回饋：往後滑、壓扁回彈、重擊硬直 ----
 function enemyHitReact(e, fromX, fromY, heavy) {
   if (!e || e.dead) return;
-  e.hitSquashT = .16;
+  e.hitSquashT = e.noHitSquash ? 0 : .16;   // 生命體之類：被打中不壓扁回彈
   e.lastHitHeavy = !!heavy;
   if (e.playerPounceT > 0) return;   // 空中不受擊退
   const resist = SLIME_VARIANTS[e.variant]?.knockResist || 0;
@@ -141,7 +141,8 @@ function enemyHitReact(e, fromX, fromY, heavy) {
   const dx = e.x - fromX, dy = e.y - fromY, d = Math.hypot(dx, dy);
   if (dist > .5 && d > 0) { e.knockT = .12; e.knockVX = dx / d * dist / .12; e.knockVY = dy / d * dist / .12; }
   if (heavy && resist < 1) {
-    e.staggerT = HIT_FEEL.stagger;
+    e.staggerT = e.staggerTime ?? HIT_FEEL.stagger;   // 硬直時間：怪物資料的 stagger（生命體比較短）
+    if (e.swing && typeof MONSTER_SWING !== 'undefined' && performance.now() / 1000 - e.swing.at < MONSTER_SWING.windup) e.swing = null;   // 舉手蓄力時被重擊：打斷這次揮手
     e.playerWindupT = 0; e.playerPounceGoal = null;   // 重擊可以打斷撲擊蓄力
     e.spitWindT = 0; e.spitGoal = null;                // 也能打斷吐酸蓄力
   }
@@ -245,6 +246,7 @@ function slimeExplode(e, mul) {
 // ---- 死亡表演 ----
 function onEnemyDeath(e) {
   trackKillAchievements(e);   // 成就計數（js/achievements.js）
+  if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;

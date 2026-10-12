@@ -215,8 +215,41 @@ function drawSensedEnemies() {
   ctx.restore();
 }
 // 走路的怪物（有 frames）：依移動方向選正面／側面，走動時換腳，停下來站著
+// 揮手時手臂的角度（度）：半舉 → 高舉（慢慢往後拉、微微發抖）→ 一口氣劈下 → 稍微甩過頭 → 收回原位
+function rigArmAngle(R, t) {
+  const S = MONSTER_SWING, [a1, a2, a3] = R.angles, rest = R.rest, w = S.windup;
+  const lerp = (a, b, k) => a + (b - a) * k, out = k => 1 - (1 - k) * (1 - k), inOut = k => k * k * (3 - 2 * k);
+  if (t < 0) return rest;
+  if (t < w * .3) return lerp(rest, a1, out(t / (w * .3)));
+  if (t < w * .6) return lerp(a1, a2, out((t - w * .3) / (w * .3)));
+  const pull = a2 + (a2 > a3 ? 7 : -7);   // 劈下前再往後拉一點（蓄力）
+  if (t < w) return lerp(a2, pull, inOut((t - w * .6) / (w * .4))) + Math.sin(t * 70) * 1.2;
+  if (t < w + S.strike) { const k = (t - w) / S.strike; return lerp(pull, a3, k * k); }   // 越劈越快
+  const over = a3 + (a3 - pull > 0 ? 9 : -9), u = (t - w - S.strike) / S.recover;   // 甩過頭一點再收回
+  return u < .25 ? lerp(a3, over, out(u / .25)) : lerp(over, rest, inOut((u - .25) / .75));
+}
 function monsterWalkFrame(e) {
   const f = e.frames;
+  if (e.swing && f.attackRig) {   // 揮手攻擊（即時轉動手臂，比換圖流暢）
+    const t = performance.now() / 1000 - e.swing.at, S = MONSTER_SWING, R = f.attackRig;
+    if (t >= 0 && t < S.windup + S.strike + S.recover) {
+      const flip = e.swing.right === (R.facing === 'left');
+      return { rig: R, angle: rigArmAngle(R, t), ghosts: t >= S.windup && t < S.windup + S.strike + .05 ? [rigArmAngle(R, t - .025), rigArmAngle(R, t - .05)] : null,
+        flip, charging: t > S.windup * .6 && t < S.windup, file: R.body };
+    }
+    e.swing = null;
+  }
+  if (e.swing && f.attack) {   // 揮手攻擊中（js/enemy-ai.js 的 MONSTER_SWING）
+    const t = performance.now() / 1000 - e.swing.at, S = MONSTER_SWING;
+    if (t >= 0 && t < S.windup + S.strike + S.recover) {
+      // 4 張：半舉 → 高舉蓄力（前搖後段，身體微微發抖）→ 快速揮下 → 收回；3 張：舉手 → 揮出 → 收手
+      const four = f.attack.length >= 4;
+      const i = t < S.windup ? (four && t >= S.windup * .3 ? 1 : 0) : t < S.windup + S.strike ? (four ? 2 : 1) : (four ? 3 : 2);
+      const flip = e.swing.right === (f.attackFacing === 'left');   // 原圖往左揮、目標在右邊（或反過來）就左右翻
+      return { file: f.attack[Math.min(i, f.attack.length - 1)], flip, attack: true, charging: four && i === 1 };
+    }
+    e.swing = null;
+  }
   const mdx = e.x - (e.animX ?? e.x), mdy = e.y - (e.animY ?? e.y), moved = Math.hypot(mdx, mdy);
   e.animX = e.x; e.animY = e.y;
   const now = performance.now() / 1000;
@@ -234,7 +267,21 @@ function monsterWalkFrame(e) {
     return { file: f.idle[i], flip: !!e.faceRight === (f.idleFacing === 'left') };
   }
   if (e.animSide && f.side) return { file: walking ? f.side[step % f.side.length] : f.side[0], flip: e.faceRight === (f.sideFacing === 'left') };
-  return { file: walking ? f.walkFront[step % f.walkFront.length] : f.front, flip: false };
+  // 走路圖朝左（或朝右）的怪物：往另一邊走就左右翻；上下走時維持最後面向的方向
+  return { file: walking ? f.walkFront[step % f.walkFront.length] : f.front, flip: f.walkFacing ? !!e.faceRight === (f.walkFacing === 'left') : false };
+}
+function drawRigArm(e, fr, dx, dy, dw, dh) {
+  const R = fr.rig, arm = monsterImage(R.arm), base = monsterImage(e.frames.front);
+  if (!arm.complete || !arm.naturalWidth || !base.naturalWidth) return;
+  const kx = dw / base.naturalWidth, ky = dh / base.naturalHeight;
+  const px = dx + R.pivot[0] * kx, py = dy + R.pivot[1] * ky;
+  const drawAt = (deg, alpha) => {
+    ctx.save(); ctx.globalAlpha = alpha; ctx.translate(px, py); ctx.rotate((deg - R.rest) * Math.PI / 180);
+    ctx.drawImage(tintedSprite(arm, e.tint), -R.pivot[0] * kx, -R.pivot[1] * ky, dw, dh);
+    ctx.restore();
+  };
+  if (fr.ghosts) fr.ghosts.forEach((g, i) => drawAt(g, .35 - i * .15));   // 劈下時的殘影
+  drawAt(fr.angle, 1);
 }
 function drawEnemy(e) {
   ctx.save();
@@ -244,7 +291,7 @@ function drawEnemy(e) {
   // 受擊壓扁回彈：被打瞬間變扁變寬，0.16 秒內彈回
   const squash = (e.hitSquashT || 0) / .16, sqX = 1 + .22 * squash, sqY = 1 - .2 * squash;
   // 跳躍／硬直的壓扁拉長只給史萊姆：鳥頭人、珍珠小童沒有跳躍動作會把形狀重設，套用的話被爆擊後會一直扁著
-  const bodyX = e.behavior ? 1 : (e.slimeScaleX || 1), bodyY = e.behavior ? 1 : (e.slimeScaleY || 1);
+  const bodyX = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleX || 1), bodyY = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleY || 1);
   const slimeW = (e.drawWidth || 42) * bodyX * sqX, slimeH = (e.drawHeight || 33) * bodyY * sqY;
   const bottomY = e.y + 13 - lift;
   const shadowScale = Math.max(.55, 1 - lift / 22) * size;
@@ -266,18 +313,25 @@ function drawEnemy(e) {
   }
   ctx.globalAlpha = 1;
   const walkFrame = e.frames ? monsterWalkFrame(e) : null;
+  if (walkFrame && walkFrame.charging) ctx.translate((Math.random() * 2 - 1) * 1.2, 0);   // 高舉蓄力時微微發抖
   if (walkFrame) { e.lastFrameFile = walkFrame.file; e.lastFrameFlip = walkFrame.flip; }   // 死亡倒地用目前這張圖
   const baseSprite = monsterImage(walkFrame ? walkFrame.file : e.art ? shooterFrame(e) : (e.sprite || 'images/monster/Monster_Slime.png'));   // 珍珠小童：眨眼／生氣圖
   if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
   if (baseSprite.complete && baseSprite.naturalWidth) {
     const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
     ctx.imageSmoothingEnabled = false;
-    const dx = Math.round(e.x - slimeW / 2), dy = Math.round(bottomY - slimeH), dw = Math.round(slimeW), dh = Math.round(slimeH);
+    let fw = slimeW, fh = slimeH;
+    if (walkFrame && walkFrame.attack) {   // 攻擊圖畫布比較大：照站姿圖的比例換算，腳底中央對齊
+      const base = monsterImage(e.frames.front);
+      if (base.naturalWidth) { fw = baseSprite.naturalWidth * slimeW / base.naturalWidth; fh = baseSprite.naturalHeight * slimeH / base.naturalHeight; }
+    }
+    const dx = Math.round(e.x - fw / 2), dy = Math.round(bottomY - fh), dw = Math.round(fw), dh = Math.round(fh);
     ctx.drawImage(sprite, dx, dy, dw, dh);
     // 受擊閃紅；自爆引信點燃時越閃越快
     const fuseP = e.fuseT > 0 ? 1 - e.fuseT / SLIME_BOMB.fuse : 0;
     const fuseFlash = fuseP > 0 ? (Math.sin(fuseP * fuseP * 60) > 0 ? .85 : .15) : 0;
     if (e.hitT > 0) drawHitFlash(sprite, Math.min(1, e.hitT / .16), e.hitColor, dx, dy, dw, dh);   // 先閃白，再轉屬性色
+    if (walkFrame && walkFrame.rig) drawRigArm(e, walkFrame, dx, dy, dw, dh);   // 揮手：即時轉動的手臂
     const fuseSil = fuseFlash ? flashSprite(sprite, '#ff6a3d') : null;
     if (fuseSil) { ctx.globalAlpha = fuseFlash * .75; ctx.drawImage(fuseSil, dx, dy, dw, dh); ctx.globalAlpha = 1; }
     ctx.imageSmoothingEnabled = true;
@@ -462,7 +516,8 @@ function draw() {
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
-  for (const e of G.enemies) if (isVisible(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
+  for (const e of G.enemies) if (isVisible(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });
+  if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
