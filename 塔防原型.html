@@ -5,8 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=requests-20261012">
+<link rel="stylesheet" href="css/style.css?v=money-prefix-20261013">
 <link rel="stylesheet" href="css/ui-feedback.css">
+<link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
 <body>
   <div id="wrap">
@@ -17,8 +18,8 @@
     <div id="missionText">目前任務：守住營地 <span class="mission-secondary">| 破壞異質核心</span></div>
     <div id="pauseBadge" class="hidden" role="status">⏸ 已暫停<small>按 P 繼續</small></div>
     <div id="systemNotices" role="status" aria-live="polite" aria-atomic="false"></div>
+    <div id="itemPickupNotices" role="status" aria-live="polite" aria-atomic="false"></div>
     <div id="pickupToasts" role="status" aria-live="polite"></div>   <!-- 撿到東西的提示（js/ore.js） -->
-    <button id="settingsButton" type="button" aria-haspopup="dialog" aria-label="設定（Esc）" title="設定（Esc）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.5 7.5 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6Z"/><circle cx="12" cy="12" r="3"/></svg></button>
     <div id="settingsMenu" class="hidden" role="dialog" aria-modal="true" aria-labelledby="settingsTitle">
       <section class="settings-card">
         <header class="settings-head"><h2 id="settingsTitle">設定</h2><button id="settingsClose" type="button" aria-label="關閉設定（Esc）">×</button></header>
@@ -99,8 +100,10 @@
     </div>
     <!-- 建築快捷欄與完整清單：浮在遊戲畫面左下角 -->
     <div id="buildToolbar">
+      <div class="build-toolbar-actions">
+      <button class="tbtn" id="buildToggle" type="button"><span class="build-tool-icon" aria-hidden="true">🧱</span><span>建築</span></button>
       <button class="tbtn" id="demolishToggle" type="button" title="點擊後，再點選自己建造的建築"><span class="build-tool-icon" aria-hidden="true">🔨</span><span>拆除</span></button>
-      <button class="tbtn" id="buildToggle" type="button"><span class="build-tool-icon" aria-hidden="true">🧱</span><span>更多建築</span></button>
+      </div>
       <div id="buildQuickSlots" aria-label="建築快捷欄"></div>
     </div>
     <div id="buildbar" class="hidden"></div>
@@ -186,8 +189,9 @@
       <button id="hudBackpackButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開背包（B）"><span aria-hidden="true">🎒</span>背包</button>
       <button id="hudShopButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開商店"><span aria-hidden="true">🏪</span>商店</button>
     </div>
-    <span class="stat money"><small>經費</small><b id="money">0</b></span>
-    <span class="stat crystal"><small>異質碎片</small><b id="crystals">0</b></span>
+    <span class="stat money"><span class="hud-stat-values"><small>經費</small><b id="money">0</b></span></span>
+    <span class="stat crystal"><img class="hud-stat-icon shard-icon" src="images/碎片鑰匙/anomalous-shard.png" alt=""><span class="hud-stat-values"><small>異質碎片</small><b id="crystals">0</b></span></span>
+    <button id="settingsButton" type="button" aria-haspopup="dialog" aria-label="設定（Esc）" title="設定（Esc）"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19.4 13a7.5 7.5 0 0 0 0-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 0 0-1.7-1L15 3.5h-4l-.4 2.5a7.6 7.6 0 0 0-1.7 1l-2.4-1-2 3.4 2 1.6a7.5 7.5 0 0 0 0 2l-2 1.6 2 3.4 2.4-1a7.6 7.6 0 0 0 1.7 1l.4 2.5h4l.4-2.5a7.6 7.6 0 0 0 1.7-1l2.4 1 2-3.4-2-1.6Z"/><circle cx="12" cy="12" r="3"/></svg></button>
   </div>
 
   <div id="editors">
@@ -204,32 +208,33 @@
   <script src="js/asset-gate.js?v=gate-20261012"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=merged-sound-settings-20261012"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=organized-sfx-20261012"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=iron-slide-sound-20261013"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js?v=taint-rates-20261007"></script>  <!-- 集中管理所有角色 -->
   <script src="data/gifts.js?v=remap-20261012"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
-  <script src="data/items.js?v=black-20261012"></script>   <!-- 背包物品分類與其他物品 -->
+  <script src="data/items.js?v=pickup-recognition-20261013"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=medical-20261012"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/dialogues.js?v=dlg-20261006"></script>  <!-- 所有台詞（對話編輯器） -->
-  <script src="data/balance.js?v=easy-20261011"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/balance.js?v=pickup-recognition-20261013"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="data/monsters.js?v=pearl-sfx-20261012"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=facing-20261012"></script>
-  <script src="data/ores.js?v=ore-editor-20261012"></script><script src="data/objects.js?v=mine-20261007"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
+  <script src="data/storage-boxes.js?v=storage-collision-20261013"></script><script src="data/ores.js?v=ore-editor-20261012"></script><script src="data/objects.js?v=iron-gate-20261013"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
   <script src="data/decorations.js?v=buildable-decor-20261011"></script><!-- 3b. 裝飾物件（低HP、可佈置） -->
-  <script src="data/maps.js?v=ore-20261012"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
+  <script src="data/maps.js?v=iron-gate-20261013"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
   <script src="data/doors.js?v=doorsfx-20261008"></script> <!-- 可開關的門（哪些素材是門）-->
   <script src="data/chairs.js?v=stool-20261009"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
   <script src="js/chair-data.js"></script>
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=gate-20261012"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=iron-gate-20261013"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/doors.js?v=doorsfx-20261008"></script> <!-- 門：手動門／自動門 -->
-  <script src="js/lighting.js?v=flare-20261010"></script>     <!-- 7. 黑暗與光源系統 -->
-  <script src="js/build.js?v=notices-20261012"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/lighting.js?v=pickup-recognition-20261013"></script>     <!-- 7. 黑暗與光源系統 -->
+  <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
+  <script src="js/build.js?v=disabled-builds-20261013"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=hpsp-20261007"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=firetraits-20261012"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=core-20261006"></script>
@@ -240,18 +245,20 @@
   <script src="js/enemy-ai.js?v=lifeform-sfx-20261012"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=safe-20261012"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
-  <script src="js/render.js?v=requests-20261012"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=iron-gate-20261013"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=lifeform-20261012"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=lifeform-20261012"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
-  <script src="js/flicker-light.js?v=detect-20261009"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
-  <script src="js/lifeform.js?v=lifeform-sfx-20261012"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
-  <script src="js/ore.js?v=oreglow-20261012"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
+  <script src="js/flicker-light.js?v=pickup-recognition-20261013"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
+  <script src="js/lifeform.js?v=death-in-fire-20261013"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
+  <script src="js/ore.js?v=shard-item-notice-20261013"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
   <script src="js/landmine.js?v=fly-20261011"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=medical-20261012"></script> <!-- 9i2. 便利商店：商品、購物車、Q／F 快捷補給 -->
   <script src="js/backpack.js?v=medical2-20261012"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/gifts.js?v=requests3-20261012"></script> <!-- 9l. 送禮與好感度 -->
-  <script src="js/save.js?v=requests-20261012"></script> <!-- 9k. 存檔、設定選單 -->
+  <script src="js/powered-lights.js?v=pickup-recognition-20261013"></script>
+  <script src="js/storage-lockers.js?v=storage-collision-20261013"></script>
+  <script src="js/save.js?v=storage-collision-20261013"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/flare.js?v=gunhud-20261010"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/game.js?v=gate-20261012"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=storage-collision-20261013"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

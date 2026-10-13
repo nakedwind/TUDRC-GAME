@@ -1,6 +1,86 @@
 /* ===== 磚塊與地圖資料（由地圖編輯器匯出）=====
    整段貼回 data/maps.js 覆蓋即可。 */
 const TILES_CUSTOM = [
+{
+  "id": "tile_obstacle_irongate",
+  "name": "滑動鐵門",
+  "role": "floor",
+  "file": "images/item-obstacle/12-irongate.png",
+  "w": 4,
+  "h": 2
+},
+{
+  "id": "tile_interactive_electric_light_02",
+  "name": "electric-light-02（電源控制燈）",
+  "role": "floor",
+  "file": "images/background/electric-light-02.png",
+  "w": 2,
+  "h": 1
+},
+{
+  "id": "tile_interactive_pickup_battery",
+  "name": "拾取亮點（電池）",
+  "role": "floor",
+  "file": "images/items/battery.png",
+  "w": 1,
+  "h": 1
+},
+{
+  "id": "tile_interactive_pickup_almond_water",
+  "name": "拾取亮點（杏仁水）",
+  "role": "floor",
+  "file": "images/items/almond-water-small.png",
+  "w": 1,
+  "h": 1
+},
+{
+  "id": "tile_interactive_storage_locker",
+  "name": "置物箱（鎖住）",
+  "role": "floor",
+  "file": "images/scene-props/storage-locker-closed.png",
+  "w": 3,
+  "h": 3
+},
+{
+  "id": "tile_interactive_storage_locker_open",
+  "name": "置物箱（開啟）",
+  "role": "floor",
+  "file": "images/scene-props/storage-locker-open.png",
+  "w": 3,
+  "h": 3
+},
+{
+  "id": "tile_interactive_power_switch_on",
+  "name": "電源開關（開）",
+  "role": "floor",
+  "file": "images/scene-props/power-switch-on.png",
+  "w": 1,
+  "h": 1
+},
+{
+  "id": "tile_interactive_power_switch_off",
+  "name": "電源開關（關）",
+  "role": "floor",
+  "file": "images/scene-props/power-switch-off.png",
+  "w": 1,
+  "h": 1
+},
+{
+  "id": "tile_interactive_flare_ammo",
+  "name": "照明彈",
+  "role": "floor",
+  "file": "images/items/flare-ammo.png",
+  "w": 1,
+  "h": 1
+},
+{
+  "id": "tile_interactive_storage_locker_key",
+  "name": "拾取亮點（置物櫃鑰匙）",
+  "role": "floor",
+  "file": "images/items/storage-locker-key.png",
+  "w": 1,
+  "h": 1
+},
   {
     "id": "tile_mr4ct8od",
     "name": "Back-room-floor-01",

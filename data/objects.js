@@ -257,4 +257,57 @@ const OBSTACLES = [
       ]
     }
   }
+,
+{
+  "id": "irongate",
+  "name": "滑動鐵門",
+  "cost": 60,
+  "hp": 2200,
+  "h": {
+    "file": "images/item-obstacle/12-irongate.png",
+    "w": 4,
+    "h": 2,
+    "solid": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        1
+      ]
+    ]
+  },
+  "v": {
+    "file": "images/item-obstacle/12-irongate.png",
+    "w": 4,
+    "h": 2,
+    "solid": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        3,
+        1
+      ]
+    ]
+  }
+}
 ];

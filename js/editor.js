@@ -189,6 +189,20 @@ function loadTiles() {
 
   // 新素材包各自只自動補入一次；保留使用者原有素材與地圖內容。
   const organizedAssetPaths = {
+"images/層級鑰匙.png": "images/items/level-key.png",
+"images/手電筒.png": "images/items/flashlight.png",
+"images/扭蛋.png": "images/items/gashapon-capsule.png",
+"images/杏仁水.png": "images/items/almond-water-large.png",
+"images/杏仁水小.png": "images/items/almond-water-small.png",
+"images/照明彈.png": "images/items/flare-ammo.png",
+"images/置物箱.png": "images/scene-props/storage-locker-closed.png",
+"images/置物箱02.png": "images/scene-props/storage-locker-open.png",
+"images/置物箱鑰匙.png": "images/items/storage-locker-key.png",
+"images/藥罐.png": "images/items/medicine-bottle.png",
+"images/醫療箱.png": "images/items/medical-kit.png",
+"images/電池.png": "images/items/battery.png",
+"images/電源開關-開.png": "images/scene-props/power-switch-on.png",
+"images/電源開關-關.png": "images/scene-props/power-switch-off.png",
     'images/書和筆.png': 'images/應變中心/book-and-pen.png',
     'images/樓梯.png': 'images/應變中心/escape-stairs.png',
     'images/雙開門.png': 'images/應變中心/double-door-open.png',
@@ -240,6 +254,8 @@ function loadTiles() {
   const streetAdded = mergeDefaultAssetPack(t => STREET_PACK_IDS.has(t.id), STORAGE_STREET_PACK);
   const ammoCrateOpenAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_ammo_crate_open', STORAGE_AMMO_CRATE_OPEN);
   const oreTilesAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_obstacle_ore_'), STORAGE_ORE_TILES);
+  const ironGateAdded=mergeDefaultAssetPack('tile_obstacle_irongate','tudrc_irongate_v1');
+  const interactiveAdded = mergeDefaultAssetPack('tile_interactive_', 'tudrc_asset_interactive_20261013_v3');
   const poolcoreAdded = mergeDefaultAssetPack('tile_poolcore_', STORAGE_POOLCORE_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
   const backroomEdgeAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_floor05' || t.id === 'tile_bg_backroom_floor06', STORAGE_BACKROOM_FLOOR_EDGE);
@@ -261,7 +277,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
+  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -993,6 +1009,7 @@ const PALETTE_CATEGORIES = [
   { id: 'damaged', name: '破損建築' },
   { id: 'field', name: '野戰基地' },
   { id: 'scene', name: '場景物件' },
+  { id: 'interactive', name: '互動與道具' },
   { id: 'restaurant', name: '餐廳' },
   { id: 'hospital', name: '醫院病房' },
   { id: 'containment', name: '收容觀察室' },
@@ -1005,6 +1022,7 @@ const PALETTE_CATEGORIES = [
 let activePaletteCategory = 'all';
 function tileCategory(t) {
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
+  if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
   if (t.systemColor) return 'color';
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
   if (String(t.id || '').startsWith('tile_poolcore_') || file.includes('/池核/')) return 'poolcore';

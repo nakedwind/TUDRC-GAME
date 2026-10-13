@@ -247,21 +247,11 @@ function drawOreHint(o) {
 // ---- 拾取提示（畫面中間偏上彈出；短時間內連續撿到會合併成一則）----
 let pickupToast = null;
 function showPickupToast(amount) {
-  const box = document.getElementById('pickupToasts'); if (!box) return;
-  const now = performance.now();
-  if (pickupToast && now - pickupToast.at < 1800 && box.contains(pickupToast.el)) {
-    pickupToast.total += amount; pickupToast.at = now;
-    pickupToast.el.querySelector('b').textContent = '+' + pickupToast.total;
-    pickupToast.el.querySelector('small').textContent = '持有 ' + training.crystals;
-    pickupToast.el.classList.remove('bump'); void pickupToast.el.offsetWidth; pickupToast.el.classList.add('bump');
-    clearTimeout(pickupToast.timer);
-  } else {
-    const el = document.createElement('div');
-    el.className = 'pickup-toast';
-    el.innerHTML = `<i aria-hidden="true"></i><span>異質碎片 <b>+${amount}</b></span><small>持有 ${training.crystals}</small>`;
-    box.appendChild(el);
-    pickupToast = { el, total: amount, at: now };
+  const now=performance.now(),box=document.getElementById('itemPickupNotices');
+  let total=amount;
+  if(pickupToast&&now-pickupToast.at<1800&&box?.contains(pickupToast.el)){
+    total+=pickupToast.total;pickupToast.el.remove();
   }
-  const t = pickupToast;
-  t.timer = setTimeout(() => { t.el.classList.add('leaving'); setTimeout(() => t.el.remove(), 400); if (pickupToast === t) pickupToast = null; }, 2200);
+  const el=showItemPickupNotice({name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png'},total);
+  pickupToast={el,total,at:now};
 }

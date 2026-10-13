@@ -27,7 +27,9 @@ function drawObstacle(o) {
   const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
   // 基地本體是地圖上的平面大圖，這裡只負責碰撞、受擊效果與血條，避免重複繪製。
   if (!o.isBase && !o.mapSource) {
-    if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
+    if (img && img.complete && img.naturalWidth) {
+      if(o.type==='irongate')drawSlidingIronGate(ctx,o,img,x,y,w,h);else ctx.drawImage(img,x,y,w,h);
+    }
     else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
   }
   if (o.ore && typeof drawOreGlow === 'function') drawOreGlow(ctx, o, x, y, w, h);   // 被照亮時結晶發出紫光（js/ore.js）
@@ -559,7 +561,9 @@ function draw() {
     const near = G.running ? portalNearPlayer() : null;
     if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
+    else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, d.open ? '關門' : '開門'); }
     else if (oreNearPlayer()) drawOreHint(oreNearPlayer());   // 礦物：提示要用爆炸炸開（js/ore.js）
     else {
@@ -911,7 +915,9 @@ function draw() {
   // 情境選單或指定建築的目標格
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
+  drawPoweredLights(ctx);
   drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
+  drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）

@@ -78,6 +78,7 @@ function mapUsedTileIds(m) {
 }
 function preloadMapTiles(m) {
   const used = mapUsedTileIds(m);
+  if([...used].some(id=>String(mapTileById(id)?.file||'').endsWith('/storage-locker-closed.png')))used.add('tile_interactive_storage_locker_open');
   Object.values(TILE_REGISTRY).forEach(t => { if (t.file && used.has(t.id)) tileImage(t); });
   const rest = () => Object.values(TILE_REGISTRY).forEach(t => { if (t.file) tileImage(t); });
   if (typeof AssetGate === 'undefined') { rest(); return; }
@@ -158,6 +159,7 @@ function switchMap(i) {                 // 切換到第 i 張並重新載入地�
 function initMap() {
   buildTileRegistry();
   MAP = pickMap();
+  if(typeof resetMapPower==='function')resetMapPower();
   preloadMapTiles(MAP);
   openElevatorStamp = null;
   elevatorCloseAnim = null;
@@ -383,11 +385,18 @@ function seedMapObstacles() {
 }
 
 // ---- 繪製地圖圖片（圖層由下往上，最後大圖）----
-function drawMapTileImg(ctx, id, x, y) {
-  const t = mapTileById(id); if (!t) return;
+function drawMapTileImg(ctx, id, x, y, layer='top') {
+  let t = mapTileById(id); if (!t) return;
+  const [c,r]=cellAt(x,y);
+  const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(id,c,r,layer):null;
+  if(display===false)return;
+  if(display)t=display;
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, CELL, CELL); return; }
   const img = tileImage(t);
-  if (img) { ctx.drawImage(img, x, y, CELL, CELL); return; }
+  if (img) {
+    ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn())ctx.filter='brightness(0.35)';
+    ctx.drawImage(img,x,y,CELL,CELL);ctx.restore();return;
+  }
   if (t.role === 'wall') { ctx.fillStyle = '#3f434b'; ctx.fillRect(x + 2, y + 2, CELL - 4, CELL - 4); }
   else if (t.role === 'obstacle') { ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x + 4, y + 4, CELL - 8, CELL - 8); }
   else { ctx.fillStyle = '#20262f'; ctx.fillRect(x, y, CELL, CELL); }
@@ -396,6 +405,9 @@ function drawMapStampImg(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
   let t = mapTileById(s.id); if (!t) return;
+  const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(s.id,s.c,s.r,s.layer||'top',s):null;
+  if(display===false)return;
+  if(display)t=display;
   let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
   const opened = typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s);   // 剛補給過的彈藥箱：換成打開的圖
   if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }
@@ -403,10 +415,14 @@ function drawMapStampImg(ctx, s) {
   const img = isElevatorLightTile(t) && elevatorLightIsOpen(s.c, s.r) && elevatorLightOpenImage.complete && elevatorLightOpenImage.naturalWidth
     ? elevatorLightOpenImage : tileImage(t);
   if (img) {
+    const gate=G.obstacles.find(o=>o.type==='irongate'&&o.mapSource===s);
+    if(gate&&drawSlidingIronGate(ctx,gate,img,x,y,w,h))return;
+    ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn())ctx.filter='brightness(0.35)';
     if (s.fx || s.fy) {
       ctx.save(); ctx.translate(x + (s.fx ? w : 0), y + (s.fy ? h : 0)); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
       ctx.drawImage(img, 0, 0, w, h); ctx.restore();
     } else ctx.drawImage(img, x, y, w, h);
+    ctx.restore();
     return;
   }
   ctx.fillStyle = t.role === 'wall' ? '#3f434b' : (t.role === 'obstacle' ? '#7a5a3a' : '#2b3446');
@@ -416,7 +432,7 @@ function drawMapImages(ctx) {
   if (!MAP) return;
   for (const lid of MAP_LAYER_ORDER) {
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key)) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+    for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key)) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL, lid); }
     for (const s of (MAP.stamps || [])) if ((s.layer || 'top') === lid) drawMapStampImg(ctx, s);
   }
 }
@@ -443,7 +459,7 @@ function drawMapGround(ctx) {
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    if (!isOccLayer(lid)) for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+    if (!isOccLayer(lid)) for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL, lid); }
     for (const s of (MAP.stamps || [])) if (!isElevatorStamp(s) && (s.layer || 'top') === lid && !stampIsOcc(s)) drawMapStampImg(ctx, s);
   }
 }
@@ -451,7 +467,7 @@ function drawMapGround(ctx) {
 function drawMapTop(ctx) {
   if (!MAP) return;
   const layer = MAP.layers ? (MAP.layers.top || {}) : {};
-  for (const key in layer) { if (G.mapDestroyed.has('top:' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL); }
+  for (const key in layer) { if (G.mapDestroyed.has('top:' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL, 'top'); }
   for (const s of (MAP.stamps || [])) {
     if (isElevatorStamp(s)) continue;
     if (chairConfig(s.id)) continue;
@@ -540,7 +556,7 @@ function buildLayerOverdraw(items) {
 }
 function drawOccluderItem(ctx, it) {
   if (it.kind === 'cell') {
-    if (!G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) drawMapTileImg(ctx, it.id, OX + it.c * CELL, OY + it.r * CELL);
+    if (!G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) drawMapTileImg(ctx, it.id, OX + it.c * CELL, OY + it.r * CELL, MAP_LAYER_ORDER[it.li]);
   } else drawMapStampImg(ctx, it.stamp);
 }
 function collectMapOccluders(ctx, out) {

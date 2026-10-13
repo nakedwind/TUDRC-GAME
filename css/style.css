@@ -98,18 +98,18 @@ canvas {
   box-shadow: inset 0 0 85px rgba(0,0,0,.34), inset 0 0 0 1px rgba(255,255,255,.04);
 }
 #systemNotices {
-  position: absolute; top: 70px; right: 22px; z-index: 12;   /* 讓出右上角給設定齒輪 */
+  position: absolute; top: 20px; right: 22px; z-index: 12;   /* 固定於遊戲畫面右上角 */
   display: flex; flex-direction: column; align-items: flex-end; gap: 6px;
   width: min(300px, calc(100% - 44px)); pointer-events: none;
 }
 .system-notice {
-  max-width: 100%; padding: 8px 11px; border: 1px solid rgba(143,211,255,.38);
-  border-radius: 8px; background: rgba(17,27,37,.76); color: #e8f5ff;
+  max-width: 100%; padding: 8px 11px; border: 0;
+  border-radius: 8px; background: rgba(0,0,0,.55); color: #e8f5ff;
   box-shadow: 0 4px 16px rgba(0,0,0,.24); backdrop-filter: blur(5px);
-  font-size: 12px; line-height: 1.45; text-align: right;
+  font-size: 14px; line-height: 1.45; text-align: right;
   animation: system-notice-in .2s ease-out both;
 }
-.system-notice.warning { border-color: rgba(255,174,119,.55); color: #ffe1ca; }
+.system-notice.warning { color: #ffe1ca; }
 .system-notice.leaving { opacity: 0; transition: opacity .3s ease; }
 @keyframes system-notice-in { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: translateX(0); } }
 #mapTransition {
@@ -1235,3 +1235,42 @@ canvas.cursor-pressed {
 .pickup-toast.key-toast { padding:10px 18px 10px 12px; border-color:#ffd479; box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 24px rgba(255,212,121,.45); }
 .pickup-toast.key-toast img { width:22px; height:44px; image-rendering:pixelated; }
 .pickup-toast.key-toast b { color:#ffd479; }
+
+/* 設定按鈕放在 HUD 的異質碎片右側。 */
+#hud #settingsButton{position:static;flex:none;margin-left:12px;z-index:auto;box-shadow:none;}
+
+/* 四組主要操作介面放大為 1.2 倍。 */
+#buildToolbar{transform:scale(1.2);transform-origin:left bottom;max-width:calc((100% - 48px) / 1.2);}
+#ammoHud{transform:scale(1.2);transform-origin:right bottom;}
+#fieldSquadHud{transform:scale(1.2);transform-origin:left top;}
+#hud{zoom:1.2;width:calc(100% / 1.2);max-width:calc(1280px / 1.2);}
+
+/* 建築列貼近左下邊緣，兩個工具按鈕垂直堆疊。 */
+#buildToolbar{left:10px;right:auto;bottom:10px;max-width:calc((100% - 20px) / 1.2);}
+#buildToolbar .build-toolbar-actions{display:flex;flex:none;flex-direction:column;gap:4px;}
+#buildToolbar .build-toolbar-actions .tbtn{flex:none;flex-direction:row;width:72px;height:27px;padding:2px 3px;gap:3px;border-radius:7px;font-size:11px;}
+#buildToolbar .build-toolbar-actions .build-tool-icon{font-size:14px;line-height:16px;}
+
+/* 建築清單：統一分類，緊湊的兩排資訊與深色捲動條。 */
+#buildbar{left:10px;width:min(220px,calc(100% - 20px));padding:8px;scrollbar-width:thin;scrollbar-color:#53687e rgba(0,0,0,.22);scrollbar-gutter:stable;}
+#buildbar .buildcat{cursor:default;}
+#buildbar .tbtn.build{flex:none;width:100%;gap:8px;padding:6px 8px;text-align:left;}
+#buildbar .build-option-info{display:flex;flex-direction:column;gap:4px;min-width:0;}
+#buildbar .build-option-name{font-size:12px;font-weight:700;line-height:1.25;}
+#buildbar .build-option-stats{font-size:13px;line-height:1.2;color:#aabaca;white-space:nowrap;}
+#buildbar::-webkit-scrollbar{width:8px;}
+#buildbar::-webkit-scrollbar-track{background:rgba(0,0,0,.22);border-radius:8px;}
+#buildbar::-webkit-scrollbar-thumb{background:#53687e;border:2px solid #151e29;border-radius:8px;}
+#buildbar::-webkit-scrollbar-thumb:hover{background:#8fd3ff;}
+#buildbar::-webkit-scrollbar-button{display:none;}
+
+/* 經費與異質碎片：圖示置於數值左側。 */
+#hud .stat{display:flex;align-items:center;gap:9px;}
+#hud .hud-stat-icon{flex:none;width:28px;height:36px;}
+#hud .money-icon{display:grid;place-items:center;color:#ffd479;font:700 28px/1 Consolas,monospace;}
+#hud .shard-icon{object-fit:contain;image-rendering:pixelated;}
+#hud .hud-stat-values{min-width:0;}
+
+#hud .hud-stat-icon{position:relative;top:calc(3px / 1.2);}
+
+#hud .money #money::before{content:"$";}

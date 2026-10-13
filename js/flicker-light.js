@@ -25,6 +25,7 @@ function flickerLights() {
   const list = [];
   // 認得日光燈的方式：素材 id、檔名、或素材名稱（在編輯器直接上傳的圖片沒有檔名，只能靠名稱認）
   const isTube = id => {
+    if (typeof isPoweredLightTile==='function'&&isPoweredLightTile(mapTileById(id)))return false;
     if (id === 'tile_bg_electric_light') return true;
     const t = typeof mapTileById === 'function' && mapTileById(id); if (!t) return false;
     const file = String(t.file || '').startsWith('data:') ? '' : String(t.file || '');

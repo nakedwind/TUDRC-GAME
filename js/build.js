@@ -63,6 +63,7 @@ function buildFail(msg, c, r, color = '#ff8f8f') {
   return false;
 }
 function placeObstacle(ob, c, r) {
+  if(!ob||DISABLED_BUILD_IDS.has(ob.id))return false;
   const v = ob[buildOrient], extra = placeExtra(ob);
   if (!footprintNearLight(v, c, r, extra)) return buildFail('太暗了，無法放置建築', c, r, '#ffd24a');
   if (!canPlaceObstacle(v, c, r, extra)) return buildFail('這裡不能放置建築', c, r);
@@ -84,22 +85,26 @@ const buildToggle = document.getElementById('buildToggle');
 const buildQuickSlots = document.getElementById('buildQuickSlots');
 const demolishToggle = document.getElementById('demolishToggle');
 let buildOrient = 'h';         // 目前方向：h 橫版 / v 直版（按 R 切換）
-let buildCat = 'obstacle';     // 目前選單分類：obstacle 障礙物 / decor 裝飾物件
+let buildCat = 'obstacle';     // 全部可建造物件統一歸為障礙物
 let buildTargetCell = null;    // 從地面情境選單指定的建築格
-const BUILD_CATS = [['obstacle', '🧱 障礙物'], ['decor', '🪑 裝飾']];
+const BUILD_CATS = [['obstacle', '🧱 障礙物']];
 const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
-const buildList = cat => (cat === 'decor' ? DECOS : OBSTACLES);
+const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove']);
+const buildList = () => [...OBSTACLES, ...DECOS].filter(o=>!DISABLED_BUILD_IDS.has(o.id));
 // 依 id 找建築（跨兩類），放置時用
-const buildableById = id => OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id);
+const buildableById = id => DISABLED_BUILD_IDS.has(id) ? null : (OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id));
 const BUILD_QUICK_KEY = 'tudrc-build-quick-slots-v1';
-const DEFAULT_BUILD_QUICK = ['camping_lights', 'searchlight', 'wirecloth', 'redroadblocks', 'wirefence'];
+const DEFAULT_BUILD_QUICK = ['camping_lights', 'searchlight', 'wirecloth', 'roadblocks', 'wirefence', 'landmine'];
 let buildQuickIds = DEFAULT_BUILD_QUICK.slice();
 try {
   const saved = JSON.parse(localStorage.getItem(BUILD_QUICK_KEY) || 'null');
-  if (Array.isArray(saved) && saved.length === 5) buildQuickIds = saved;
+  if (Array.isArray(saved) && saved.length >= 5) buildQuickIds = saved.slice(0,6);
 } catch (_) {}
 // 物件編輯器匯出的資料可能暫時少了某個預設物件；快捷欄仍須能正常初始化。
-const availableQuickIds = [...OBSTACLES, ...DECOS].map(o => o.id);
+const availableQuickIds = buildList().map(o => o.id);
+while(buildQuickIds.length<6){
+  buildQuickIds.push(availableQuickIds.find(id=>!buildQuickIds.includes(id)) || availableQuickIds[0]);
+}
 buildQuickIds = buildQuickIds.map((id, index) => buildableById(id) ? id :
   (availableQuickIds.find(candidate => !buildQuickIds.includes(candidate)) || availableQuickIds[index % availableQuickIds.length]));
 function saveBuildQuickSlots() {
@@ -153,23 +158,13 @@ function renderBuildBar() {
   buildBar.innerHTML = '';
   const quickHint = document.createElement('div');
   quickHint.className = 'build-quick-hint';
-  quickHint.textContent = '拖曳建築到下方快捷欄，可替換 1～5';
+  quickHint.textContent = '拖曳建築到下方快捷欄，可替換 1～6';
   buildBar.appendChild(quickHint);
   if (buildTargetCell) {
     const note = document.createElement('div'); note.className = 'build-target';
     note.textContent = '選擇要建造的物件';
     buildBar.appendChild(note);
   }
-  // 分類頁籤
-  const tabs = document.createElement('div'); tabs.className = 'buildtabs';
-  BUILD_CATS.forEach(([cat, label]) => {
-    const tb = document.createElement('button');
-    tb.className = 'buildcat' + (buildCat === cat ? ' sel' : '');
-    tb.textContent = label;
-    tb.addEventListener('click', () => { buildCat = cat; sfx('switch'); renderBuildBar(); });
-    tabs.appendChild(tb);
-  });
-  buildBar.appendChild(tabs);
   // 目前分類的項目
   buildList(buildCat).forEach(o => {
     const v = o[buildOrient];
@@ -182,7 +177,11 @@ function renderBuildBar() {
       e.dataTransfer.setData('application/x-tudrc-build', o.id);
       e.dataTransfer.setData('text/plain', o.id);
     });
-    b.innerHTML = '<img src="' + v.file + '" alt=""><span>' + o.name + '　$' + o.cost + '　HP ' + o.hp + '</span>';
+    const image=document.createElement('img');image.src=v.file;image.alt='';
+    const info=document.createElement('span');info.className='build-option-info';
+    const name=document.createElement('span');name.className='build-option-name';name.textContent=o.name;
+    const stats=document.createElement('span');stats.className='build-option-stats';stats.textContent='$'+o.cost+'　HP '+o.hp;
+    info.append(name,stats);b.append(image,info);
     b.addEventListener('click', () => {
       if (buildTargetCell) {
         const [targetC, targetR] = buildTargetCell;
@@ -247,7 +246,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape' && (!buildBar.classList.contains('hidden') || (G && G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish')))) {
     closeBuildMenu(); return;
   }
-  if (e.repeat || !/^[1-5]$/.test(e.key) || !G || !G.running || MAP_SAFE || dialogueState) return;
+  if (e.repeat || !/^[1-6]$/.test(e.key) || !G || !G.running || MAP_SAFE || dialogueState) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   selectBuildType(buildQuickIds[Number(e.key) - 1]);
 });

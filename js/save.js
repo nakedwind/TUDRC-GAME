@@ -21,7 +21,7 @@ applySettings();
 
 // ---------- 存檔 ----------
 let lastSavedAt = 0, lastSavedSnapshot = '';
-const saveSnapshot = () => JSON.stringify({ inventory: [...supplyInventory], cart: [...shopCart], favor: favorPoints, giftKnown, gifted: [...giftedThisVisit], requests: giftRequests, requestsStale });
+const saveSnapshot = () => JSON.stringify({ inventory: [...supplyInventory], unlockedStorageLockers: [...unlockedStorageLockers], collectedStorageKeys: [...collectedStorageKeys], cart: [...shopCart], favor: favorPoints, giftKnown, gifted: [...giftedThisVisit], requests: giftRequests, requestsStale });
 function saveGame(manual = false) {
   try {
     const snap = saveSnapshot();
@@ -41,13 +41,16 @@ function loadGame() {
   if (!data) return;
   const valid = ([id, n]) => itemById(id) && Number.isInteger(n) && n > 0;   // 已經刪掉的物品就不讀
   supplyInventory.clear(); (data.inventory || []).filter(valid).forEach(([id, n]) => supplyInventory.set(id, n));
+  unlockedStorageLockers.clear(); collectedStorageKeys.clear();
+  (Array.isArray(data.unlockedStorageLockers)?data.unlockedStorageLockers:[]).filter(x=>typeof x==='string').forEach(x=>unlockedStorageLockers.add(x));
+  (Array.isArray(data.collectedStorageKeys)?data.collectedStorageKeys:[]).filter(x=>typeof x==='string').forEach(x=>collectedStorageKeys.add(x));
   shopCart.clear(); (data.cart || []).filter(valid).forEach(([id, n]) => shopCart.set(id, n));
   Object.assign(favorPoints, data.favor || {}); Object.assign(giftKnown, data.giftKnown || {});   // 好感度（js/gifts.js）
   (data.gifted || []).forEach(id => giftedThisVisit.add(id));
   for (const [id, item] of Object.entries(data.requests || {})) if (itemById(item)) giftRequests[id] = item;   // 今日想吃
   if (typeof data.requestsStale === 'boolean') requestsStale = data.requestsStale;
   lastSavedAt = data.savedAt || 0; lastSavedSnapshot = saveSnapshot();
-  if (typeof G !== 'undefined' && G) updateHUD();
+  if (typeof G !== 'undefined' && G) { setupStorageBoxWalls();computeFlow();updateHUD(); }
 }
 // 遊戲程式（js/game.js）都載入完才讀檔
 window.addEventListener('DOMContentLoaded', loadGame);

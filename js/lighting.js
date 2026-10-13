@@ -44,6 +44,7 @@ function computeLightField() {
   warmField.fill(0);
   if (!LIGHT.enabled) return;
   for (const l of lightsCache) spreadLight(l, (i, b) => {
+    b *= l.intensity ?? 1;
     if (b > lightField[i]) lightField[i] = b;
     if (l.warm && b > warmField[i]) warmField[i] = b;
   });
@@ -148,6 +149,7 @@ function getLights() {
     }
   }
   if (typeof flareLightSources === 'function') L.push(...flareLightSources());   // 燃燒中的照明彈（js/flare.js）
+  if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());
   if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
   return L;
 }

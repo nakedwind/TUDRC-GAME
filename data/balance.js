@@ -131,6 +131,8 @@ const LIGHT = {
   darkness: 0.98,    // 黑暗濃度（0～1，越大越黑；留一點點可隱約看到地形輪廓）
   playerLightOn: false,   // 玩家身上的光暈：先關閉（之後要啟用改成 true）
   playerR: 140,      // 玩家（嚮導）身上的光圈半徑（像素；playerLightOn 為 true 時生效）
+  poweredLampR: 250, // 電源控制日光燈：比探照燈 300 像素小
+  poweredLampIntensity: .85, // 相對亮度
   campR: 120,        // 營地每一格的光圈半徑
   baseR: 300,        // 基地本體的常亮範圍
   baseLampR: 190,    // 基地四角燈的獨立光圈半徑

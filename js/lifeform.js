@@ -28,15 +28,20 @@ function lifeSlices(file, w, h) {
   if (!img.complete || !img.naturalWidth) return [];
   const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
   const g = c.getContext('2d'); g.drawImage(img, 0, 0);
-  const data = g.getImageData(0, 0, c.width, c.height).data;
+  // 直接雙擊 HTML（file://）開啟時，瀏覽器不准讀圖片像素：改成整張照格子切，不判斷哪塊有畫東西
+  //（空白的碎塊本來就是透明的，畫出來看不出差別）。之前沒擋這個錯，生命體碎掉時每一幀都出錯、畫面全黑。
+  let data = null;
+  try { data = g.getImageData(0, 0, c.width, c.height).data; } catch (_) { data = null; }
   const kx = w / c.width, ky = h / c.height, cols = 3, rows = Math.max(4, Math.round(c.height / LIFEFORM.slice));
   const out = [];
   for (let r = 0; r < rows; r++) for (let q = 0; q < cols; q++) {
     const sx = Math.floor(q * c.width / cols), sy = Math.floor(r * c.height / rows);
     const sw = Math.floor((q + 1) * c.width / cols) - sx, sh = Math.floor((r + 1) * c.height / rows) - sy;
-    let ink = 0;
-    for (let y = sy; y < sy + sh; y += 2) for (let x = sx; x < sx + sw; x += 2) if (data[(y * c.width + x) * 4 + 3] > 60) ink++;
-    if (ink < 4) continue;
+    if (data) {
+      let ink = 0;
+      for (let y = sy; y < sy + sh; y += 2) for (let x = sx; x < sx + sw; x += 2) if (data[(y * c.width + x) * 4 + 3] > 60) ink++;
+      if (ink < 4) continue;
+    }
     // home：這塊在站姿裡的位置（以腳底中央為原點，畫面像素）
     out.push({ img, sx, sy, sw, sh, w: sw * kx, h: sh * ky, hx: (sx + sw / 2) * kx - w / 2, hy: (sy + sh / 2) * ky - h });
   }
@@ -45,7 +50,8 @@ function lifeSlices(file, w, h) {
 
 // ---- HP 歸零時（js/game.js 呼叫）：沒在燒 → 碎成一堆，回傳 true（這次不算擊殺）----
 function lifeformOnFire(e) {
-  return e.burnT > 0 || lifeNow() - (e.fireHitAt || -99) < LIFEFORM.burnWindow;
+  const standingInFire = typeof oilFireAt === 'function' && !!oilFireAt(e.x,e.y);
+  return standingInFire || e.burnT > 0 || lifeNow() - (e.fireHitAt ?? -99) < LIFEFORM.burnWindow;
 }
 function lifeformCollapse(e) {
   if (!isUndying(e) || lifeformOnFire(e)) return false;   // 正在燒：照一般流程真的死掉

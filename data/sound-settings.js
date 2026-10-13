@@ -1,6 +1,4 @@
-/* 音效設定（由音效編輯器匯出）。
-   gains：各音效音量倍率；files：替換與新增的音效檔。
-   音檔可放在 Sound effects 的分類子資料夾。 */
+/* 音效設定（由音效編輯器匯出）。音檔可放在 Sound effects 的分類子資料夾。 */
 const SOUND_SETTINGS = {
   "gains": {
     "berserk": 1.2,
@@ -15,11 +13,15 @@ const SOUND_SETTINGS = {
     "glassBreak3": 1.7,
     "glassBreak4": 1.65,
     "hit": 3,
+    "ironGateSlide": 2.6,
+    "itemPickup": 1.2,
     "kill": 1.85,
     "lifeformAttack": 1.55,
     "lifeformWalk": 1.45,
     "midBoom": 1.2,
+    "pearlDeath": 1.15,
     "pearlHit": 1.7,
+    "pearlHurt": 1.85,
     "rangedShot": 1.35,
     "reload": 0.8,
     "shopBell": 0.6,

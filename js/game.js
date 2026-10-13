@@ -380,7 +380,9 @@ window.addEventListener('keydown', e => {
       } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
+    else if (toggleIronGateNearPlayer()) {}
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
     else {
@@ -841,6 +843,7 @@ function newGame() {
   };
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
+  setupStorageBoxWalls();
   setupDoors();         // 門一開始都關著（js/doors.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
@@ -1278,11 +1281,19 @@ function updatePlayerAttack(dt) {
   for (const e of [...G.enemies, ...G.cores]) {
     const isCore = G.cores.includes(e);
     if (e.dead || !(isCore ? isVisible(e.x, e.y) : isLit(e.x, e.y))) continue;
-    if (!hasLineOfSight(p.x, p.y, e.x, e.y)) continue;   // 隔牆打不到
     const d = Math.hypot(e.x - p.x, e.y - p.y);
     if (d > PLAYER_ATK.range * CELL) continue;
     const box = targetBodyBox(e), pad = 4;
     const onBody = aim.x >= box.x0 - pad && aim.x <= box.x1 + pad && aim.y >= box.y0 - pad && aim.y <= box.y1 + pad;
+    if (!hasLineOfSight(p.x, p.y, e.x, e.y)) {   // 隔牆打不到……
+      // ……除非直接點在牠身上，而且擋住的只是牠身邊的那面牆（站在牆後、上半身從牆上方露出來）：
+      // 看得到身體＝牆比牠矮，子彈從牆上面打過去。越高的目標離牆越遠也還看得到（生命體約 2 格、異質核心約 3 格），
+      // 所以「身邊」的範圍依目標露出來的高度算；中間還隔著別的牆就照樣打不到。
+      if (!onBody) continue;
+      const reach = Math.max(CELL * 1.5, (e.y + 13) - box.y0 + 10);   // 目標露出來的高度
+      const back = Math.min(d, reach), nx = e.x + (p.x - e.x) / (d || 1) * back, ny = e.y + (p.y - e.y) / (d || 1) * back;
+      if (!hasLineOfSight(p.x, p.y, nx, ny)) continue;
+    }
     const da = Math.min(angDiff(e.x, e.y), angDiff(box.cx, box.cy));
     if (!onBody && da > PLAYER_ATK.cone) continue;
     // 點在身上的目標優先；同樣是點在身上或同樣在扇形內，就打最近的
@@ -1342,6 +1353,7 @@ function buildAmmoHud() {
     #ammoHud .gun-stack img.front { z-index:2; transform:translate(0,0) scale(1); filter:drop-shadow(0 0 2px rgba(255,236,190,.95)) drop-shadow(0 0 5px rgba(255,214,140,.55)); opacity:1; }
     #ammoHud .gun-stack img.back  { z-index:1; transform:translate(4px,-22px) scale(.8); filter:brightness(.62) saturate(.35) drop-shadow(0 0 1px rgba(160,190,220,.5)); opacity:.85; }
     #ammoHud .ammo-text { font:700 16px sans-serif; color:#dbe7ff; letter-spacing:1px; white-space:nowrap; padding-bottom:4px; text-shadow:0 1px 2px #000, 0 0 3px #000; }
+    #ammoHud .ammo-text .weapon-name { display:block; margin-bottom:5px; color:#eef3fa; font:700 12px 'Microsoft JhengHei',sans-serif; letter-spacing:0; }
     #ammoHud .ammo-text small { display:block; font-size:12px; color:#ff9f7a; letter-spacing:0; }`;
   document.head.appendChild(css);
   ammoHudEl = document.createElement('div');
@@ -1362,13 +1374,14 @@ function updateAmmoHud() {
   if (p && playerWeapon(p).id === 'flare') {   // 照明彈：彈匣／備用彈
     ensureFlareAmmo(p);
     const empty = p.flareMag + p.flareReserve <= 0;
-    text = p.flareReloadT > 0 ? '🔄 裝填中…' : p.flareMag + ' / ' + p.flareReserve + (empty ? '<small>去彈藥箱補給</small>' : '');
-  } else text = (p && p.reloadT > 0) ? '🔄 裝填中…' : ammo + ' / ∞';
+    text = p.flareReloadT > 0 ? 'Reload' : p.flareMag + ' / ' + p.flareReserve + (empty ? '<small>去彈藥箱補給</small>' : '');
+  } else text = (p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞';
   const key = wi + '|' + text;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
   ammoHudKey = key;
   ammoGunEls.forEach((img, i) => { img.className = i === wi ? 'front' : 'back'; });
-  ammoTextEl.innerHTML = text;
+  ammoTextEl.innerHTML = '<span class="weapon-name"></span>' + text;
+  ammoTextEl.querySelector('.weapon-name').textContent = WEAPONS[wi].id === 'flare' ? '照明彈' : WEAPONS[wi].name;
 }
 
 // ---- 主迴圈（幀率校正）----
@@ -1413,9 +1426,12 @@ function targetBodyBox(t) {
 // 某一幀出錯時：記一次錯誤（同樣的錯只記一次）、把畫布狀態重設，下一幀照常繼續，
 // 不會因為一個錯誤就整個卡住，或畫布位移沒還原讓畫面一直壞掉。
 const frameErrorsSeen = new Set();
-function recoverFrame(err) {
+function reportFrameError(err, where = '遊戲畫面') {
   const msg = String(err && (err.stack || err.message) || err);
-  if (!frameErrorsSeen.has(msg)) { frameErrorsSeen.add(msg); console.error('[遊戲畫面] 這一幀出錯，已自動恢復：', err); }
+  if (!frameErrorsSeen.has(msg)) { frameErrorsSeen.add(msg); console.error('[' + where + '] 這一幀出錯，已自動恢復：', err); }
+}
+function recoverFrame(err) {
+  reportFrameError(err);
   if (typeof ctx.reset === 'function') ctx.reset();
   else { const w = cv.width; cv.width = w; }   // 舊瀏覽器：重設畫布大小也會清掉所有狀態
 }
@@ -1433,7 +1449,10 @@ function frame(ts) {
   if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !mapTransitioning && !frozen) update(sdt);
+  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !mapTransitioning && !frozen) {
+    // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
+    try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
+  }
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
@@ -1807,7 +1826,7 @@ function systemNotice(text, warning = false) {
   item.textContent = text;
   list.prepend(item);
   while (list.children.length > 3) list.lastElementChild.remove();
-  setTimeout(() => { item.classList.add('leaving'); setTimeout(() => item.remove(), 300); }, 3800);
+  setTimeout(() => { item.classList.add('leaving'); setTimeout(() => item.remove(), 300); }, 4800);
 }
 function warnCampAttack() {
   const now = performance.now();
