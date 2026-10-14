@@ -576,7 +576,7 @@ function draw() {
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, d.open ? '關門' : '開門'); }
     else if (oreNearPlayer()) drawOreHint(oreNearPlayer());   // 礦物：提示要用爆炸炸開（js/ore.js）
-    else if (typeof missionTableNear === 'function' && missionTableNear()) { const t = missionTableNear(); drawInteractPrompt(t.x, t.top, '作戰桌'); }   // js/missions.js
+    else if (typeof missionTableUsable === 'function' && missionTableUsable()) { const t = missionTableUsable(); drawInteractPrompt(t.x, t.top, t.label || '作戰桌'); }   // 作戰桌／作戰螢幕（js/missions.js）
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
       if (actor) drawInteractPrompt(actor.x, actor.y - 57,

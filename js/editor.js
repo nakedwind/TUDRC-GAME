@@ -57,6 +57,7 @@ const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v1'; // 後補：�
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v2';       // 池核磁磚素材（含救生圈與水線牆）
+const STORAGE_HQ_PACK = 'tudrc_asset_pack_command_hq_v1';           // 指揮部素材包
 const STREET_PACK_IDS = new Set(["tile_street_ubike", "tile_street_scooter_delivery_green", "tile_street_scooter_delivery_pink", "tile_street_capsule_toy_machines", "tile_street_utility_box_painted", "tile_street_utility_box", "tile_street_folding_table", "tile_street_plastic_stool", "tile_street_plastic_stools_stacked", "tile_street_bottle_red", "tile_street_bollard_red", "tile_street_bollard_yellow", "tile_street_sign_no_entry", "tile_street_sign_stop", "tile_street_sign_scooter_lanes", "tile_street_sign_two_stage_turn", "tile_street_sign_turn_right", "tile_street_sign_no_left_turn", "tile_street_sign_speed_limit_50", "tile_street_traffic_light", "tile_street_name_sign_pole", "tile_street_crosswalk", "tile_street_area_map_board", "tile_street_stall_steak", "tile_street_stall_noodles", "tile_street_stall_drinks", "tile_mrt_exit_2", "tile_mrt_exit_2_sealed", "tile_mrt_map_kiosk", "tile_bg_backroom_wall02_dmg_crack", "tile_bg_backroom_wall02_hole2", "tile_street_claw_machine"]);
 const STORAGE_BACKROOM_DAMAGE_EXTRA = 'tudrc_asset_backroom_damage_extra_v1'; // 後補：後室地板／牆面破損、看板、日光燈＋破損建築新素材
 const STORAGE_BACKROOM_FLOOR_EDGE = 'tudrc_asset_backroom_floor_edge_v1';  // 後補：後室地板左緣／右緣
@@ -257,6 +258,7 @@ function loadTiles() {
   const ironGateAdded=mergeDefaultAssetPack('tile_obstacle_irongate','tudrc_irongate_v1');
   const interactiveAdded = mergeDefaultAssetPack('tile_interactive_', 'tudrc_asset_interactive_20261013_v3');
   const poolcoreAdded = mergeDefaultAssetPack('tile_poolcore_', STORAGE_POOLCORE_PACK);
+  const hqAdded = mergeDefaultAssetPack('tile_hq_', STORAGE_HQ_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
   const backroomEdgeAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_floor05' || t.id === 'tile_bg_backroom_floor06', STORAGE_BACKROOM_FLOOR_EDGE);
   const backroomWallHalfHoleAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_half' || t.id === 'tile_bg_backroom_wall02_hole', STORAGE_BACKROOM_WALL_HALF_HOLE);
@@ -277,7 +279,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
+  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -505,6 +507,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/convenience-store',
   'images/street',
   'images/池核',
+  'images/指揮部',
 ];
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -1017,6 +1020,7 @@ const PALETTE_CATEGORIES = [
   { id: 'cvs', name: '便利商店' },
   { id: 'street', name: '街道' },
   { id: 'poolcore', name: '池核' },
+  { id: 'hq', name: '指揮部' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -1026,6 +1030,7 @@ function tileCategory(t) {
   if (t.systemColor) return 'color';
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
   if (String(t.id || '').startsWith('tile_poolcore_') || file.includes('/池核/')) return 'poolcore';
+  if (String(t.id || '').startsWith('tile_hq_') || file.includes('/指揮部/')) return 'hq';
   if (file.includes('/應變中心/')) return 'eoc';
   if (file.includes('/宿舍/')) return 'dorm';
   if (file.includes('/破損建築/')) return 'damaged';

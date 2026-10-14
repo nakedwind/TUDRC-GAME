@@ -17,7 +17,7 @@ const SOUND_SETTINGS = {
     "itemPickup": 1.2,
     "kill": 1.85,
     "lifeformAttack": 1.55,
-    "lifeformWalk": 1.45,
+    "lifeformWalk": 1.5,
     "midBoom": 1.2,
     "pearlDeath": 1.15,
     "pearlHit": 1.7,
@@ -25,7 +25,8 @@ const SOUND_SETTINGS = {
     "rangedShot": 1.35,
     "reload": 0.8,
     "shopBell": 0.6,
-    "smallBoom": 1.15
+    "smallBoom": 1.15,
+    "smilerLaugh": 2
   },
   "files": {
     "overrides": {

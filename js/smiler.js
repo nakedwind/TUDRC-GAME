@@ -34,12 +34,12 @@ const SMILER = {
   shakePlayer: 7,        // 溫特被咬時畫面震動的幅度
   shakeTeammate: 0,      // 隊員被咬時畫面震動的幅度（0＝不震）
   flashTeammate: 0,      // 隊員被咬時，畫面邊框閃紅的強度（溫特被咬＝1；0＝不閃）
-  laughVolume: 0.22,     // 注視時笑聲的音量（離越遠越小聲）
+  laughVolume: 0.9,      // 注視時笑聲的音量（離越遠越小聲）；錄音本身很小聲，原本 0.22 會被背景白噪音蓋掉
   biteVolume: 0.8,       // 咬人音效的音量
 };
 const smilerImg = new Image();
 let smilerBloody = null;          // 牙齒沾血版本（咬過人之後用）
-smilerImg.onload = () => { smilerBloody = makeBloodyTeeth(smilerImg); };
+smilerImg.onload = () => { try { smilerBloody = makeBloodyTeeth(smilerImg); } catch (_) { smilerBloody = null; } };   // 直接雙擊 HTML 開啟時讀不到像素：就不做沾血版
 smilerImg.src = SMILER.image;
 // 用原圖做一張「牙齒沾血」的版本：亮白的牙齒依每一欄不同程度染紅，有幾欄往下滴血
 function makeBloodyTeeth(img) {

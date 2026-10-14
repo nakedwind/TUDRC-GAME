@@ -10,7 +10,7 @@ const FLARE = {
   reserveMax: 30,      // 備用彈最多幾發
   reloadTime: 1.5,     // 裝填秒數
   fireGap: .8,         // 兩發之間至少隔幾秒
-  range: 10,           // 最遠打幾格
+  range: 20,           // 最遠打幾格
   speed: 1400,         // 飛行速度（像素／秒），直線像子彈一樣快
   burn: 12,            // 燃燒秒數（最後 fade 秒會閃爍變暗）
   fade: 3,

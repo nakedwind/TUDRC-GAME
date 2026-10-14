@@ -48,10 +48,15 @@ const CHAIRS_DEFAULT = {
   "tile_eoc_office_chair_black": {
     "enabled": true,
     "depth": 58,
-    "solid": [],
+    "solid": [
+      [
+        0,
+        1
+      ]
+    ],
     "seat": {
-      "x": 8,
-      "y": 43,
+      "x": 9,
+      "y": 42,
       "dir": "left"
     }
   },
@@ -597,6 +602,26 @@ const CHAIRS_DEFAULT = {
       "dir": "front"
     }
   },
+  "tile_mrt_waiting_seats": {
+    "enabled": true,
+    "depth": 72,
+    "solid": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 40,
+      "y": 45,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
   "tile_street_plastic_stool": {
     "enabled": true,
     "depth": 30,
@@ -610,6 +635,52 @@ const CHAIRS_DEFAULT = {
       "x": 20,
       "y": 20,
       "dir": "front"
+    }
+  },
+  "tile_street_plastic_stools_stacked": {
+    "enabled": true,
+    "depth": 72,
+    "solid": [
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 45,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_hq_office_chair_front": {
+    "enabled": true,
+    "depth": 47,
+    "solid": [
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 21,
+      "y": 41,
+      "dir": "front"
+    }
+  },
+  "tile_hq_office_chair_back": {
+    "enabled": true,
+    "depth": 47,
+    "solid": [
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 39,
+      "dir": "back"
     }
   }
 };

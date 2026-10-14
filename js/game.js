@@ -350,8 +350,16 @@ elevatorMenu.querySelectorAll('[data-floor]').forEach(button => button.addEventL
 }));
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'];
 const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
+// 移動鍵用「實體按鍵位置」判斷（e.code），不看按鍵名稱：
+// 開著注音等中文輸入法時，按鍵名稱會變成 "Process"，按下和放開對不上 → 角色一直往某個方向走（卡鍵）。
+const MOVE_CODES = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', ArrowUp: 'arrowup', ArrowLeft: 'arrowleft', ArrowDown: 'arrowdown', ArrowRight: 'arrowright' };
+const keyOf = e => MOVE_CODES[e.code] || String(e.key || '').toLowerCase();
+const releaseMoveKeys = () => MOVE_KEYS.forEach(k => { keys[k] = false; });
+// 切到別的視窗／分頁時，放開的訊號收不到 → 當作全部放開
+window.addEventListener('blur', releaseMoveKeys);
+document.addEventListener('visibilitychange', () => { if (document.hidden) releaseMoveKeys(); });
 window.addEventListener('keydown', e => {
-  const k = e.key.toLowerCase();
+  const k = keyOf(e);
   if (mapTransitioning) {
     if (MOVE_KEYS.includes(k) || isInteractKey(k)) e.preventDefault();
     return;
@@ -396,7 +404,7 @@ window.addEventListener('keydown', e => {
     else if (toggleIronGateNearPlayer()) {}
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
-    else if (typeof missionTableNear === 'function' && missionTableNear()) openMissionBoard();   // 作戰桌（js/missions.js）
+    else if (typeof missionTableUsable === 'function' && missionTableUsable()) openMissionBoard();   // 作戰桌／作戰螢幕（js/missions.js；旁邊的椅子或人更近時讓給它們）
     else {
       const actor = interactionNearPlayer();
       if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
@@ -504,7 +512,10 @@ function enterPortal(pt) {
     }, PORTAL_FADE_MS);
   });
 }
-window.addEventListener('keyup', e => { keys[e.key.toLowerCase()] = false; });
+window.addEventListener('keyup', e => {
+  keys[String(e.key || '').toLowerCase()] = false;
+  const mk = MOVE_CODES[e.code]; if (mk) keys[mk] = false;   // 移動鍵依實體按鍵放開（輸入法切換中也放得開）
+});
 
 // ---- 滑鼠所在格（建築放置預覽用）----
 let hoverCell = null;

@@ -349,5 +349,21 @@ const CHARACTERS = {
     "sprite": "ash_B",
     "intro": "",
     "captainImpression": ""
+  },
+  "eden": {
+    "id": "eden",
+    "kind": "support",
+    "name": "伊德",
+    "sprite": "eden_B",
+    "intro": "",
+    "captainImpression": ""
+  },
+  "salem": {
+    "id": "salem",
+    "kind": "support",
+    "name": "薩冷",
+    "sprite": "salem_B",
+    "intro": "",
+    "captainImpression": ""
   }
 };

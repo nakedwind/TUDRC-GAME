@@ -22,7 +22,7 @@ const Ambience = (() => {
   const baseVolume = () => (SFX.enabled ? SFX.volume : 0) * AMBIENCE.volume * (SFX.gainOf(AMBIENCE.sound) ?? 1);
 
   async function load() {
-    if (buffer || loading) return;
+    if (buffer || loading || fallback) return;   // 已經在用備用方式播了：不要再建一個（之前每按一次鍵就多疊一層白噪音，越來越大聲）
     const file = fileOf(); if (!file) return;
     loading = true;
     try {

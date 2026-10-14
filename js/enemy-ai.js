@@ -218,7 +218,7 @@ function moveEnemyToward(e, target, dt) {
   const moved = displaceEnemy(e, dx, dy, Math.min(step, d), false);
   if (moved && e.undying && typeof sfxAt === 'function') {
     e.lifeStepT = (e.lifeStepT || 0) - dt;
-    if (e.lifeStepT <= 0) { e.lifeStepT = .78; sfxAt('lifeformWalk', e.x, e.y, .38, 'lifeform-walk'); }
+    if (e.lifeStepT <= 0) { e.lifeStepT = .78; sfxAt('lifeformWalk', e.x, e.y, .9, 'lifeform-walk'); }   // 錄音本身很小聲：原本 .38 會被背景白噪音蓋掉
   }
   return moved;
 }

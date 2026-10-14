@@ -565,13 +565,42 @@ function collectMapOccluders(ctx, out) {
     if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
     out.push({ y: it.y, draw: () => {
       drawOccluderItem(ctx, it);
-      for (const { a, clip } of it.overdraw || []) {   // 上層圖在重疊處補畫回來
-        ctx.save(); ctx.beginPath(); ctx.rect(OX + clip[0], OY + clip[1], clip[2], clip[3]); ctx.clip();
-        drawOccluderItem(ctx, a);
-        ctx.restore();
-      }
+      for (const od of it.overdraw || []) drawOverdrawPatch(ctx, it, od);   // 上層圖在重疊處補畫回來
     } });
   }
+}
+// 補畫上層圖時，只補在「下層這張圖有畫東西的像素」上，不是整個重疊的長方形：
+// 否則站在兩張圖之間的角色也會被蓋掉（例如坐在餐桌下排椅子上的人，頭被補畫的桌子整塊遮住）。
+// 做法：在小畫布上畫上層圖，再用下層圖的形狀裁切（destination-in，不需要讀像素，雙擊開啟也能用）。
+// 結果存起來重複使用；門開關、彈藥箱打開這類會變圖的，狀態一改就重做。
+function occluderStateSig(x) {
+  if (x.kind === 'cell') {
+    const layer = MAP_LAYER_ORDER[x.li], shown = typeof storagePropDisplayTile === 'function' ? storagePropDisplayTile(x.id, x.c, x.r, layer) : null;
+    return (G.mapDestroyed.has(layer + ':' + x.c + ',' + x.r) ? 'x' : '') + (shown === false ? 'h' : shown ? (shown.id || 's') : '');   // h＝這格目前不顯示
+  }
+  const s = x.stamp;
+  return (G.mapDestroyed && G.mapDestroyed.has(s) ? 'x' : '') + ((typeof doorStampOpen === 'function' && doorStampOpen(s)) ? 'o' : '')
+    + ((typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s)) ? 'a' : '');
+}
+function occluderImageReady(x) {
+  return !!tileImage(mapTileById(x.kind === 'cell' ? x.id : x.stamp.id));
+}
+function drawOverdrawPatch(ctx, it, od) {
+  const [cx, cy, cw, ch] = od.clip;
+  const sig = occluderStateSig(it) + '|' + occluderStateSig(od.a);
+  if (!od.patch || !od.ready || od.sig !== sig) {
+    const c = od.patch || (od.patch = document.createElement('canvas'));
+    c.width = Math.max(1, Math.ceil(cw)); c.height = Math.max(1, Math.ceil(ch));
+    const g = c.getContext('2d'); g.imageSmoothingEnabled = false;
+    g.save(); g.translate(-(OX + cx), -(OY + cy));
+    drawOccluderItem(g, od.a);                       // 上層圖
+    g.globalCompositeOperation = 'destination-in';
+    drawOccluderItem(g, it);                         // 只留下層圖有畫東西的地方
+    g.restore();
+    od.ready = occluderImageReady(it) && occluderImageReady(od.a);   // 圖還沒載完：下一幀再做一次
+    od.sig = sig;
+  }
+  ctx.drawImage(od.patch, OX + cx, OY + cy);
 }
 function drawElevators(ctx) {
   for (const stamp of MAP.stamps || []) {

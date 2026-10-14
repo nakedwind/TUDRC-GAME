@@ -49,14 +49,60 @@ function missionHudText() {
 }
 
 // ---- 作戰桌：靠近會出現提示，按 Space 打開（game.js、render.js 呼叫）----
+// 地圖上的作戰終端（作戰指揮桌、監控大螢幕…，見 data/missions.js 的 terminals）
+function missionTerminals() {
+  if (!onBaseMap() || !MAP) return [];
+  const defs = MISSION_BASE.terminals || [];
+  const out = [];
+  for (const s of MAP.stamps || []) {
+    const def = defs.find(d => d.id === s.id); if (!def) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+    out.push({ stamp: s, label: def.label, primary: def === defs[0], x0, y0, x1: x0 + w, y1: y0 + h, x: x0 + w / 2, y: y0 + h - CELL / 2, top: y0 });
+  }
+  return out;
+}
 function missionTablePos() {
-  const t = MISSION_BASE.table, [x, y] = center(t.c, t.r);
-  return { x: x + CELL / 2, y, top: y - CELL * 1.6 };
+  const list = missionTerminals(), main = list.find(t => t.primary) || list[0];
+  if (main) return { x: main.x, y: main.y, top: main.top, label: main.label };
+  const t = MISSION_BASE.table, [x, y] = center(t.c, t.r);   // 地圖上沒擺作戰終端：用舊的固定位置
+  return { x: x + CELL / 2, y, top: y - CELL * 1.6, label: '作戰桌' };
 }
 function missionTableNear() {
   if (!onBaseMap() || !G || !G.player) return null;
-  const t = missionTablePos();
-  return Math.hypot(G.player.x - t.x, G.player.y - t.y) <= MISSION_BASE.table.radius * CELL ? t : null;
+  const p = G.player, list = missionTerminals();
+  if (list.length) {   // 離桌子／螢幕的「邊緣」多近：大型素材從哪一邊靠近都按得到
+    let best = null, bestD = Infinity;
+    for (const t of list) {
+      const dx = Math.max(t.x0 - p.x, 0, p.x - t.x1), dy = Math.max(t.y0 - p.y, 0, p.y - t.y1), d = Math.hypot(dx, dy);
+      if (d < bestD) { bestD = d; best = t; }
+    }
+    return bestD <= (MISSION_BASE.reach ?? 1.2) * CELL ? { x: best.x, y: best.y, top: best.top, label: best.label, dist: bestD } : null;
+  }
+  const t = missionTablePos(), d = Math.hypot(p.x - t.x, p.y - t.y);
+  return d <= MISSION_BASE.table.radius * CELL ? { ...t, dist: d } : null;
+}
+// 作戰桌旁邊常有椅子和人：椅子或可以對話的人比作戰桌（的邊緣）更近時，讓給坐下／對話
+//（game.js 的互動鍵、render.js 的提示都用這個，看到的提示就是按下去會做的事）
+function missionTableUsable() {
+  const t = missionTableNear(); if (!t) return null;
+  const p = G.player;
+  const a = typeof interactionNearPlayer === 'function' ? interactionNearPlayer() : null;
+  if (a && Math.hypot(a.x - p.x, a.y - p.y) < t.dist) return null;
+  const s = typeof seatNearPlayer === 'function' ? seatNearPlayer() : null;
+  if (s && Math.hypot(Math.max(s.x0 - p.x, 0, p.x - (s.x0 + s.w)), Math.max(s.y0 - p.y, 0, p.y - (s.y0 + s.h))) < t.dist) return null;
+  return t;
+}
+// 打完回來站的位置：作戰桌正前方（找最近一格能站的）；地圖上沒有作戰終端就用 MISSION_BASE.arrive
+function missionArriveCell() {
+  const main = missionTerminals().find(t => t.primary);
+  if (!main) return [MISSION_BASE.arrive.c, MISSION_BASE.arrive.r];
+  const t = mapTileById(main.stamp.id), c0 = main.stamp.c + Math.floor(mapTileW(t) / 2), r0 = main.stamp.r + mapTileH(t);
+  for (const [dc, dr] of [[0, 0], [-1, 0], [1, 0], [0, 1], [-1, 1], [1, 1], [-2, 0], [2, 0], [0, 2]]) {
+    const [x, y] = center(c0 + dc, r0 + dr);
+    if (!playerBlocked(x, y)) return [c0 + dc, r0 + dr];
+  }
+  return [MISSION_BASE.arrive.c, MISSION_BASE.arrive.r];
 }
 // 亞許頭上的「！」、作戰桌上的地圖記號（render.js 呼叫）
 function drawMissionMarks(ctx) {
@@ -97,12 +143,13 @@ function missionTravel(mapId, after) {
 // 回應變中心：站在作戰桌前；有新任務的話，亞許走過來報告
 function returnToBase() {
   missionTravel(MISSION_BASE.map, () => {
-    const [x, y] = center(MISSION_BASE.arrive.c, MISSION_BASE.arrive.r);
+    const [ac, ar] = missionArriveCell();
+    const [x, y] = center(ac, ar);
     if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; G.player.dir = 'back'; }
     const ash = brieferNpc();
     if (ash && briefPending()) {
       for (const [dc, dr] of [[1, 0], [-1, 0], [2, 0], [-2, 0], [0, 1]]) {
-        const [ax, ay] = center(MISSION_BASE.arrive.c + dc, MISSION_BASE.arrive.r + dr);
+        const [ax, ay] = center(ac + dc, ar + dr);
         if (!playerBlocked(ax, ay)) { ash.x = ax; ash.y = ay; break; }
       }
       ash.target = null; ash.waitT = 99;   // 先站著別走開
