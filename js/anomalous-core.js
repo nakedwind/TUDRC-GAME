@@ -261,7 +261,7 @@ function breakCore(core) {
   }
   addLightFlash('core', core.x, core.y - 30);
   nearbyImpact(core.x, core.y, 12, .09);
-  if (typeof sfxAt === 'function') { sfxAt('corrosionImpact', core.x, core.y, .9, 'core-break'); sfxAt('monsterDown', core.x, core.y, .8, 'core-break2'); }
+  if (typeof sfxAt === 'function') { sfxAt('corrosionImpact', core.x, core.y, .9, 'core-break'); sfxAt('monsterDown', core.x, core.y, .8, 'core-break2'); sfxAt('oreMine', core.x, core.y, .8, 'core-mine'); }   // 核心碎掉：再加挖礦聲
   if (core.pool) core.pool.t = 1.5;   // 腳下腐蝕痕跡慢慢退去
 }
 // 兩個外框點之間如果跨過圖片角落，要把角落也放進碎片的多邊形裡

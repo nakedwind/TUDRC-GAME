@@ -112,8 +112,8 @@ function createMonster(spec, x, y, variant) {
     sentryDamage: dmg(spec.sentryDamage), buildingDamage: dmg(spec.buildingDamage),
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
-    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger,   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
-    shooterCfg: spec.shooter || null, art: spec.art || null,
+    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, sweep: spec.sweep || null,   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
+    shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null,   // boomerang：夯吉寶（js/hangi-bao.js）
     flying: spec.behavior === 'shooter',   // 飄在空中：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
   };
@@ -170,6 +170,15 @@ function playSlimeAudio(kind, slime = null) {
   // 原本的實際音量：撞擊 0.72、落地 0.36；換算成相對總音量的倍率，改由 SFX 預先載入的音檔播放
   const name = kind === 'hit' ? 'slimeHit' : 'slimeLand', target = kind === 'hit' ? .72 : .36 * landGain;
   SFX.play(name, target / Math.max(.01, SFX.volume), name);
+}
+
+// 溫特受傷的聲音（Sound effects/玩家/slime-hit.mp3）
+// gain＝相對音量（1＝一般被打；酸液池、火那種持續燙傷用小一點）
+// byMonster＝true：被怪物打中，slime-hit 再加上 hit 一起播（playerHitMonster）
+function playPlayerHit(gain = 1, byMonster = false) {
+  if (typeof SFX === 'undefined' || !SFX.enabled) return;
+  const name = byMonster ? 'playerHitMonster' : 'playerHit';
+  SFX.play(name, .72 * gain / Math.max(.01, SFX.volume), 'player-hit');
 }
 
 // ---- NPC 正式對話（靠近後按 Space／E）----
@@ -738,6 +747,7 @@ function applyChaosDamage(t, best, spec) {
   else if (G.cores.includes(o)) { o.hp -= dmg; }
   else if (o === G.player) {
     o.hp = Math.max(0, o.hp - dmg); o.hitT = .3; G.damageVignetteT = Math.max(G.damageVignetteT, .3);
+    playPlayerHit();   // 被暴走的隊員打到
     friendlyHitReact(o, t.x, t.y, dmg, heavy, t);   // 閃紅、震退、傷害數字
     if (o.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose('player', '被暴走的' + (TYPES[t.type]?.name || '隊員') + '攻擊'); }
   } else if (o.isBase) {
@@ -831,6 +841,7 @@ function newGame() {
   closeElevatorMenu();
   closeSupplyShop(true); closeBackpack(true); closeSettings(true);
   if (typeof onGiftNewGame === 'function') onGiftNewGame();   // 出勤後大家又可以收禮
+  if (typeof rememberSanitySP === 'function') rememberSanitySP();   // 換地圖前先記住目前的 SP（js/sanity.js）
   if (typeof resetSmilers === 'function') resetSmilers();   // 黑暗中的笑臉（js/smiler.js）
   if (typeof onSortieNewGame === 'function') onSortieNewGame();   // 出勤時吃掉補給、回基地清掉效果（js/sortie-supply.js）
   setNpcArrangeMode(false);
@@ -857,6 +868,7 @@ function newGame() {
   const [px, py] = playerSpawnPos();
   G.player = { x: px, y: py, hp: PLAYER.hp ?? 100, maxhp: PLAYER.hp ?? 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
   updateCamera();
+  if (typeof restoreSanitySP === 'function') restoreSanitySP();   // SP 帶到這張地圖，不補滿（js/sanity.js）
   updateHUD();
   updateBuildToggle();
 }
@@ -1118,7 +1130,9 @@ function handleMapClick(e, isLeft) {
   const x = (e.clientX - rect.left) * (cv.width / rect.width) / VIEW_SCALE + cam.x;   // 去掉縮放、加上鏡頭＝世界座標
   const y = (e.clientY - rect.top) * (cv.height / rect.height) / VIEW_SCALE + cam.y;
   const [c, r] = cellAt(x, y);
-  if (!inGrid(c, r) || !G.running || dialogueState) return false;
+  if (!G.running || dialogueState) return false;
+  // 點在地圖外面（例如高個子怪物、異質核心的頭超出地圖上緣）：左鍵照樣朝游標開槍
+  if (!inGrid(c, r)) return isLeft && !MAP_SAFE && !assigning && !G.selType;
 
   // ── 左鍵確認類動作 ──
   if (isLeft && assigning) {   // 指派巡邏點
@@ -1155,7 +1169,9 @@ function handleMapClick(e, isLeft) {
     if (isLeft) { closeGroundMenu(); return true; }   // 左鍵點到建築：不開拆除選單，當成開槍
     spawnGroundRipple(e.clientX, e.clientY); openBuildingMenu(clickedBuilding, c, r, e.clientX, e.clientY); return false;
   }
-  if (buildAt(c, r) || isWall(c, r) || isEntrance(c, r)) { closeGroundMenu(); return false; }
+  // 點到牆、出入口、地圖上的物件：右鍵不開選單；左鍵照樣開槍
+  // （高個子怪物、異質核心站在牆邊時，頭會畫在牆那一格上面，以前點頭會被當成點到牆而不開槍）
+  if (buildAt(c, r) || isWall(c, r) || isEntrance(c, r)) { closeGroundMenu(); return isLeft; }
 
   // ── 空地：右鍵開召喚選單；左鍵交給射擊 ──
   if (isLeft) return true;
@@ -1254,6 +1270,33 @@ function startReload(p) {
   p.reloadT = PLAYER_ATK.reloadTime;
   if (typeof sfx === 'function') sfx('reload');
 }
+// 溫特開槍時，這個目標能不能打：回傳 { d 距離, onBody 游標是不是直接點在牠身上 }，不能打就回傳 null。
+// 看得到牠身上「任何一個地方」就打得到：腳底、腳邊靠溫特這一側、身體中間、頭、身體左右兩側。
+// （以前只看腳底：站在牆邊的高個子怪物、異質核心，腳底那條線常擦到牆角，就變成打不到。）
+const SHOT_BODY_PAD = 8;   // 游標點在身體框外幾像素內也算點到
+function playerShotCheck(p, e, aim, angDiff) {
+  const isCore = G.cores.includes(e);
+  if (e.dead) return null;
+  const box = targetBodyBox(e);
+  const lit = isCore ? (isVisible(e.x, e.y) || isVisible(box.cx, box.cy)) : (isLit(e.x, e.y) || isLit(box.cx, box.cy));
+  if (!lit) return null;
+  const d = Math.hypot(e.x - p.x, e.y - p.y);
+  if (d > PLAYER_ATK.range * CELL) return null;
+  const pad = SHOT_BODY_PAD;
+  const onBody = aim.x >= box.x0 - pad && aim.x <= box.x1 + pad && aim.y >= box.y0 - pad && aim.y <= box.y1 + pad;
+  const ux = (p.x - e.x) / (d || 1), uy = (p.y - e.y) / (d || 1), h = box.y1 - box.y0;
+  const spots = [
+    [e.x, e.y],                                  // 腳底
+    [e.x + ux * 16, e.y + uy * 16],              // 腳邊靠溫特這一側（貼著牆站時，腳底那一點常擦到牆角）
+    [box.cx, box.cy],                            // 身體中間
+    [box.cx, box.y0 + h * .2],                   // 頭（站在矮牆後面時，上半身從牆上方露出來）
+    [box.x0 + 6, box.cy], [box.x1 - 6, box.cy],  // 身體左右兩側
+  ];
+  if (!spots.some(([x, y]) => hasLineOfSight(p.x, p.y, x, y))) return null;   // 整個身體都被牆擋住
+  const da = Math.min(angDiff(e.x, e.y), angDiff(box.cx, box.cy));
+  if (!onBody && da > PLAYER_ATK.cone) return null;
+  return { d, onBody };
+}
 function updatePlayerAttack(dt) {
   const p = G.player;
   if (!p || MAP_SAFE) { updateAmmoHud(); return; }
@@ -1284,25 +1327,10 @@ function updatePlayerAttack(dt) {
   let best = null, bestD = PLAYER_ATK.range * CELL, bestOnBody = false;
   const angDiff = (x, y) => { let da = Math.abs(Math.atan2(y - p.y, x - p.x) - aimAng); return da > Math.PI ? 2 * Math.PI - da : da; };
   for (const e of [...G.enemies, ...G.cores]) {
-    const isCore = G.cores.includes(e);
-    if (e.dead || !(isCore ? isVisible(e.x, e.y) : isLit(e.x, e.y))) continue;
-    const d = Math.hypot(e.x - p.x, e.y - p.y);
-    if (d > PLAYER_ATK.range * CELL) continue;
-    const box = targetBodyBox(e), pad = 4;
-    const onBody = aim.x >= box.x0 - pad && aim.x <= box.x1 + pad && aim.y >= box.y0 - pad && aim.y <= box.y1 + pad;
-    if (!hasLineOfSight(p.x, p.y, e.x, e.y)) {   // 隔牆打不到……
-      // ……除非直接點在牠身上，而且擋住的只是牠身邊的那面牆（站在牆後、上半身從牆上方露出來）：
-      // 看得到身體＝牆比牠矮，子彈從牆上面打過去。越高的目標離牆越遠也還看得到（生命體約 2 格、異質核心約 3 格），
-      // 所以「身邊」的範圍依目標露出來的高度算；中間還隔著別的牆就照樣打不到。
-      if (!onBody) continue;
-      const reach = Math.max(CELL * 1.5, (e.y + 13) - box.y0 + 10);   // 目標露出來的高度
-      const back = Math.min(d, reach), nx = e.x + (p.x - e.x) / (d || 1) * back, ny = e.y + (p.y - e.y) / (d || 1) * back;
-      if (!hasLineOfSight(p.x, p.y, nx, ny)) continue;
-    }
-    const da = Math.min(angDiff(e.x, e.y), angDiff(box.cx, box.cy));
-    if (!onBody && da > PLAYER_ATK.cone) continue;
+    const shot = playerShotCheck(p, e, aim, angDiff);
+    if (!shot) continue;
     // 點在身上的目標優先；同樣是點在身上或同樣在扇形內，就打最近的
-    if ((onBody && !bestOnBody) || (onBody === bestOnBody && d < bestD)) { bestD = d; best = e; bestOnBody = onBody; }
+    if ((shot.onBody && !bestOnBody) || (shot.onBody === bestOnBody && shot.d < bestD)) { bestD = shot.d; best = e; bestOnBody = shot.onBody; }
   }
   for (const o of G.obstacles) {   // 油桶／油箱也能瞄準（開槍打爆）
     if (bestOnBody) break;          // 已經直接點在怪物身上
@@ -1313,8 +1341,12 @@ function updatePlayerAttack(dt) {
     if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = oilProxy(o); }
   }
   const hitPt = best && !best.oilRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
-  const endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
-  const endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
+  let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
+  let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
+  if (!best && typeof shootHangiCapOnLine === 'function') {   // 沒打到怪物：打到順順宮帽就把它打開（js/hangi-bao.js）
+    const capHit = shootHangiCapOnLine(p.x, p.y, endX, endY);
+    if (capHit) { endX = capHit.x; endY = capHit.y; G.effects.push({ ring: true, x: endX, y: endY, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' }); }
+  }
   const { x: mx, y: my } = gunMuzzleAt(p, aimAng);
   G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });   // 槍口閃光
   addLightFlash('muzzle', mx, my);   // 槍口火光照亮周圍的黑暗
@@ -1460,6 +1492,7 @@ function frame(ts) {
   }
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
+  if (typeof sanityAfterDraw === 'function') sanityAfterDraw();   // SP 低於 20：殘影（js/sanity.js）
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
 }
 function update(dt) {
@@ -1471,7 +1504,7 @@ function update(dt) {
   }
   G.damageVignetteT = Math.max(0, (G.damageVignetteT || 0) - dt);
   G.cameraShakeT = Math.max(0, (G.cameraShakeT || 0) - dt);
-  G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);
+  if (typeof SANITY === 'undefined' || SANITY.autoRegen) G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);   // SP 不會自己恢復，要喝杏仁水（js/sanity.js）
   // 生怪
   if (G.spawnQueue.length > 0) {
     G.spawnTimer -= dt;
@@ -1647,7 +1680,7 @@ function update(dt) {
           e.hp -= dmg;
           aggroOnSentry(e, t);
           if (U.knockback) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
-          if (U.stun) e.stunT = Math.max(e.stunT || 0, U.stun);
+          if (U.stun && !e.noStun) e.stunT = Math.max(e.stunT || 0, U.stun);   // 路德的大招：生命體不會被停住
           e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = col;
           flashDmg('-' + Math.round(dmg), e.x, e.y - 26, col);
         }
@@ -1667,7 +1700,7 @@ function update(dt) {
         if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
         for (const e of affected) {
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
-          if (spec.stun) {
+          if (spec.stun && !e.noStun) {   // noStun 的怪物（生命體）不會被停住
             e.stunT=Math.max(e.stunT||0,spec.stun);
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
           }
@@ -1726,6 +1759,7 @@ function update(dt) {
     const playerAcid = p && p.hp > 0 ? acidTick(p) : 0;
     if (playerAcid) {
       p.hp = Math.max(0, p.hp - playerAcid);
+      playPlayerHit(.55);   // 阿瓦倫的腐蝕：每燙一次小聲響一下
       p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT, .35);
       flashDmg('-' + Math.round(playerAcid), p.x, p.y - 46, '#c58aff');
       if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被阿瓦倫的腐蝕波及'); }
@@ -1814,6 +1848,7 @@ function update(dt) {
   if (typeof updateSmilers === 'function') updateSmilers(dt);   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
+  if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   updateHUD();
@@ -1861,10 +1896,14 @@ function updateHUD() {
   const playerMaxHp = Math.max(1, G.player?.maxhp ?? 100);
   playerHpBar.style.width = Math.min(100, playerHp / playerMaxHp * 100) + '%';
   playerHpBar.parentElement.setAttribute('aria-valuenow', Math.ceil(playerHp));
+  const hpText = Math.ceil(playerHp) + ' / ' + Math.round(playerMaxHp), hpEl = document.getElementById('playerHpText');   // 條中間的數字
+  if (hpEl && hpEl.textContent !== hpText) hpEl.textContent = hpText;
   playerHpBar.parentElement.setAttribute('aria-valuemax', playerMaxHp);
   const playerEnergyBar = document.getElementById('playerEnergyBar');
   playerEnergyBar.style.width = Math.max(0, Math.min(100, G.guide / Math.max(1, G.guideMax) * 100)) + '%';
   playerEnergyBar.parentElement.setAttribute('aria-valuenow', Math.floor(G.guide));
+  const spText = Math.floor(G.guide) + ' / ' + Math.round(G.guideMax), spEl = document.getElementById('playerEnergyText');
+  if (spEl && spEl.textContent !== spText) spEl.textContent = spText;
   playerEnergyBar.parentElement.setAttribute('aria-valuemax', G.guideMax);
   playerEnergyBar.parentElement.setAttribute('aria-valuetext', `${Math.floor(G.guide)} / ${G.guideMax} SP`);
   const mission = document.getElementById('missionText');

@@ -37,6 +37,7 @@ function detonateMine(o) {
   o.lastHitBy = 'demolish';   // 從清單移除時不要觸發其他效果
   removeBarrier(o);
   const R = LANDMINE.radius * CELL;
+  if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {   // 怪物
     if (e.dead || e.hp <= 0) continue;
     const d = Math.hypot(e.x - x, e.y - y);
@@ -62,6 +63,7 @@ function detonateMine(o) {
     if (d <= R && hasLineOfSight(x, y, pl.x, pl.y)) {
       const hurt = LANDMINE.player * (1 - .4 * d / R);
       pl.hp = Math.max(0, pl.hp - hurt); G.damageVignetteT = .5;
+      if (typeof playPlayerHit === 'function') playPlayerHit();   // 溫特被地雷炸到：統一用溫特被打中的音效
       blastPush(pl, x, y, hurt, 46);
       if (pl.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', pl.x, pl.y - 58, '#ff5b6e'); lose('player', '被地雷的爆炸波及'); }
     }

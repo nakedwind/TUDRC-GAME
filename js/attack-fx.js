@@ -464,6 +464,8 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   if (kind === 'flame' && typeof burnLifePilesNear === 'function') burnLifePilesNear(impactPoint.x, impactPoint.y, (spec.splash || 0) * CELL + 22);   // 希奧妮的火焰剛好燒到生命體的碎塊
   if (kind === 'flame' && G.enemies.includes(target)) target.fireHitAt = performance.now() / 1000;
   if (kind === 'flame' && scale > 1.3 && typeof blastOres === 'function') blastOres(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 希奧妮大招的小爆炸：炸開礦物（js/ore.js）
+  if (kind === 'flame' && typeof hitHangiCapsAt === 'function')   // 希奧妮的火焰燒到順順宮帽：打開帽子（大招的爆炸範圍比較大）
+    hitHangiCapsAt(impactPoint.x, impactPoint.y, scale > 1.3 && typeof ORE_THEONIE_R !== 'undefined' ? ORE_THEONIE_R * CELL : (spec.splash || 0) * CELL + 22);
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
   for (const enemy of hitTargets) {
     const text = '-' + Math.round(spec.dmg * (enemy === target ? 1 : 0.6));
@@ -472,7 +474,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     else flashDmg(text, enemy.x, enemy.y - 26, feel.ring);
   }
   if (G.enemies.includes(target) && typeof sfxAt === 'function') {
-    const impactSound = { flame: 'fireImpact', lightning: 'lightningImpact', corrosion: 'corrosionImpact' }[kind];
+    const impactSound = { flame: 'fireImpact', lightning: 'lightningImpact', corrosion: 'avarenCorrosion' }[kind];   // 阿瓦倫：腐蝕＋腐蝕02 一起播
     if (impactSound) sfxAt(impactSound, impactPoint.x, impactPoint.y, kind === 'corrosion' ? 0.62 : 0.5, attacker?.type || 'sentry');
     if (kind === 'flame' && scale > 1.3) sfxAt('smallBoom', impactPoint.x, impactPoint.y, .8, (attacker?.type || 'sentry') + '-ult');   // 希奧妮大招：再疊一聲小爆炸
     sfxMonsterHit(target, 0.48, attacker?.type || 'sentry');   // 鳥頭人等有自己的被打音效（每隻冷卻 0.5 秒，js/game.js）

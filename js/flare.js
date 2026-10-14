@@ -101,6 +101,7 @@ function updateFlares(dt) {
       s.t += dt;
       if (s.t >= s.T) {   // 落地：開始燃燒
         (G.flares = G.flares || []).push({ x: s.x1, y: s.y1, t: FLARE.burn, emberT: 0, seed: Math.random() * 10 });
+        if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(s.x1, s.y1, 6);   // 照明彈落在順順宮帽上：打開帽子
         if (typeof sfxAt === 'function') sfxAt('fireImpact', s.x1, s.y1, .35, 'flare-land');
       } else if (Math.random() < .6) {   // 飛行中拖出火星
         const k = s.t / s.T, x = s.x0 + (s.x1 - s.x0) * k, y = s.y0 + (s.y1 - s.y0) * k;

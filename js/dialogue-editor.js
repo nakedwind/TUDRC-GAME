@@ -19,6 +19,11 @@ const SITUATIONS = [
   { group: '汙染與暴走', key: 'relief', label: '瀕臨暴走時被疏導', fallback: true, when: '汙染 70 以上時被疏導、降到 <b>70 以下</b>。' },
   { group: '汙染與暴走', key: 'soothed', label: '從暴走被疏導回來', fallback: true, when: '暴走中被疏導、<b>恢復清醒</b>時。' },
   { group: '汙染與暴走', key: 'friendlyHit', label: '被暴走的隊友打到', fallback: true, name: true, when: '被暴走的隊友攻擊時（每 <b>4 秒</b>最多一次）。' },
+  // 報告任務（通訊員）：每個任務一格，任務清單在 data/missions.js
+  ...(typeof MISSIONS !== 'undefined' ? MISSIONS : []).map(m => ({
+    group: '報告任務（通訊員）', key: 'brief_' + m.id, label: '報告任務：' + m.name, ordered: true,
+    when: '「' + m.name + '」開放後，回到應變中心時他會走過來，<b>依序</b>一句一句報告這個任務（只報告一次）。',
+  })),
 ];
 // 狂戰士人格的台詞欄位
 const RAGE_FIELDS = [
@@ -41,6 +46,17 @@ try {
   const saved = JSON.parse(localStorage.getItem(DIALOGUE_DRAFT_KEY) || 'null');
   if (saved && saved.characters) { draft = saved; usingDraft = true; }
 } catch (_) { /* 草稿損壞就用正式檔案 */ }
+// 草稿是舊的時候，把正式檔案裡新加的「報告任務」台詞補進草稿（不會蓋掉已經改過的）
+if (usingDraft && typeof DIALOGUES !== 'undefined') {
+  for (const [id, entry] of Object.entries(DIALOGUES.characters || {})) {
+    if (!draft.characters[id]) continue;
+    for (const [key, lines] of Object.entries(entry)) if (key.startsWith('brief_') && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
+  }
+}
+// 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
+if (typeof MISSIONS !== 'undefined' && typeof MISSION_BASE !== 'undefined' && draft.characters[MISSION_BASE.briefer]) {
+  for (const m of MISSIONS) if (!(('brief_' + m.id) in draft.characters[MISSION_BASE.briefer])) draft.characters[MISSION_BASE.briefer]['brief_' + m.id] = [];
+}
 let selected = Object.keys(draft.characters)[0] || DEFAULT_ID;
 
 function charInfo(id) {

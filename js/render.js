@@ -263,6 +263,12 @@ function monsterWalkFrame(e) {
   const walking = (e.walkUntil || 0) > now && !(e.stunT > 0);
   const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : 10));   // 衝刺時步伐大一點
   const lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';   // 沒在追人的時候
+  if (!walking && f.blink && f.blink.length) {   // 站著不動：每隔幾秒眨一次眼（半閉→全閉→半閉）
+    if (e.blinkAt == null) e.blinkAt = now + 1 + Math.random() * 3;
+    let bt = now - e.blinkAt;
+    if (bt > .3) { e.blinkAt = now + 2 + Math.random() * 3.5; bt = -1; }
+    if (bt >= 0) return { file: bt < .07 || bt > .23 ? f.blink[0] : (f.blink[1] || f.blink[0]), flip: false };
+  }
   if (!walking && f.idle && lazy) {   // 站著不動：原地動畫（鳥頭人轉眼睛），朝最後面向的方向
     if (e.idlePhase == null) e.idlePhase = Math.random() * 10;
     const i = Math.floor((now + e.idlePhase) * f.idleFps) % f.idle.length;
@@ -496,6 +502,7 @@ function draw() {
   ctx.clearRect(0, 0, cv.width, cv.height);
   // 之後畫的都是「世界座標」：先套畫面縮放，再平移鏡頭位置，畫面就會跟著玩家捲動
   ctx.save();
+  if (typeof applySanitySway === 'function') applySanitySway(ctx, cv);   // SP 低於 40：畫面慢慢搖晃（js/sanity.js）
   if ((G.cameraShakeT || 0) > 0) {
     const power = 4 * Math.min(1, G.cameraShakeT / .2);
     ctx.translate((Math.random() * 2 - 1) * power, (Math.random() * 2 - 1) * power);
@@ -519,6 +526,7 @@ function draw() {
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
   for (const e of G.enemies) if (isVisible(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });
+  if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
@@ -538,6 +546,7 @@ function draw() {
   drawCoreShards(ctx);         // 異質核心碎片
   drawFlareShots(ctx);         // 飛行中的照明彈
   drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
+  if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
   drawBerserkFxWorld(ctx);     // 哨兵身上的黑紫霧、腳下心跳光圈、暴走台詞
 
@@ -922,6 +931,7 @@ function draw() {
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕

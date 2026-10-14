@@ -144,7 +144,8 @@ function smilerBite(v, s) {
   const dmg = isPlayer ? SMILER.playerDmg : SMILER.sentryDmg * (1 - sentryDefense(v));
   v.hp = Math.max(0, v.hp - dmg);
   v.hitT = Math.max(v.hitT || 0, .3); v.hitColor = '#ff3b4f';
-  sfxAt('smilerBite', v.x, v.y, SMILER.biteVolume, 'smiler');   // 咬人專屬音效（js/sfx.js 的 smilerBite）
+  if (isPlayer) playPlayerHit(1, true);   // 咬到溫特：跟其他怪物一樣用溫特被打中的音效
+  else sfxAt('smilerBite', v.x, v.y, SMILER.biteVolume, 'smiler');   // 咬到隊員：咬人音效（js/sfx.js 的 smilerBite）
   // 噴血（跟著被咬的人）；畫面震一下；溫特被咬時畫面邊框閃紅一次
   const drops = Array.from({ length: 9 }, () => { const a = -Math.PI / 2 + (Math.random() - .5) * 2.4, sp = 70 + Math.random() * 110; return { x: 0, y: 0, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 1.6 + Math.random() * 2 }; });
   smilerWounds.push({ x: v.x, y: v.y - 14, t: 0, drops });   // 血噴在咬的位置，不跟著人走

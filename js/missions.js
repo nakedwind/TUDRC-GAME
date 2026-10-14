@@ -32,7 +32,8 @@ function missionDialogueLines(actor) {
   const m = briefPending();
   if (!m || !actor || actor.id !== MISSION_BASE.briefer) return null;
   missionState.briefed.push(m.id); saveMissions();
-  return m.brief && m.brief.length ? m.brief : ['……部隊長，新任務。作戰桌上有地圖。'];
+  const lines = typeof dialogueLines === 'function' && dialogueLines(MISSION_BASE.briefer, 'brief_' + m.id);   // 對話編輯器裡的「報告任務」
+  return lines && lines.length ? lines : ['部隊長，有新的任務了。詳細的內容，作戰桌上的地圖都有標出來喔。'];
 }
 
 // ---- 左上角「目前任務」（game.js 的 updateHUD 呼叫）----

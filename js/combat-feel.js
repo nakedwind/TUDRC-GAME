@@ -137,10 +137,10 @@ function enemyHitReact(e, fromX, fromY, heavy) {
   e.lastHitHeavy = !!heavy;
   if (e.playerPounceT > 0) return;   // 空中不受擊退
   const resist = SLIME_VARIANTS[e.variant]?.knockResist || 0;
-  const dist = (heavy ? HIT_FEEL.heavyKnock : HIT_FEEL.knock) * (1 - resist);
+  const dist = (heavy ? HIT_FEEL.heavyKnock : HIT_FEEL.knock) * (1 - resist) * (e.knockMul ?? 1);   // knockMul：生命體只微微後退
   const dx = e.x - fromX, dy = e.y - fromY, d = Math.hypot(dx, dy);
   if (dist > .5 && d > 0) { e.knockT = .12; e.knockVX = dx / d * dist / .12; e.knockVY = dy / d * dist / .12; }
-  if (heavy && resist < 1) {
+  if (heavy && resist < 1 && (e.staggerTime ?? HIT_FEEL.stagger) > 0) {   // stagger 設成 0 的怪物（生命體）被重擊也不會硬直、不會被打斷
     e.staggerT = e.staggerTime ?? HIT_FEEL.stagger;   // 硬直時間：怪物資料的 stagger（生命體比較短）
     if (e.swing && typeof MONSTER_SWING !== 'undefined' && performance.now() / 1000 - e.swing.at < MONSTER_SWING.windup) e.swing = null;   // 舉手蓄力時被重擊：打斷這次揮手
     e.playerWindupT = 0; e.playerPounceGoal = null;   // 重擊可以打斷撲擊蓄力
@@ -189,11 +189,13 @@ function bomberShouldArm(e) {
 // ---- 自爆 ----
 function slimeExplode(e, mul) {
   const R = SLIME_BOMB.radius, x = e.x, y = e.y;
+  if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 自爆史萊姆的爆炸波及順順宮帽：打開帽子
   const p = G.player;
   if (p && p.hp > 0 && Math.hypot(p.x - x, p.y - y) <= R) {
     const dmg = Math.round(SLIME_BOMB.player * mul);
     p.hp = Math.max(0, p.hp - dmg);
     p.hitT = .45; p.underAttackT = 5; G.damageVignetteT = .5;
+    playPlayerHit(1, true);   // 溫特被自爆史萊姆炸到
     const dx = p.x - x, dy = p.y - y, d = Math.hypot(dx, dy) || 1;
     for (let push = 30; push >= 2; push -= 4) {
       const nx = p.x + dx / d * push, ny = p.y + dy / d * push;
@@ -249,6 +251,7 @@ function onEnemyDeath(e) {
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
+  if (e.behavior === 'boomerang') { pushFallCorpse(e); return; }   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
   const size = e.sizeMul || 1;
   if (e.variant === 'bomber') {   // 自爆型：被打死也會爆（威力較小），不留屍體
@@ -510,7 +513,7 @@ function updateAcidSpit(dt) {
         p.hp = Math.max(0, p.hp - P.playerDps * dt);
         p.hitT = Math.max(p.hitT || 0, .15); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .25);
         p.acidTick = (p.acidTick || 0) - dt;
-        if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * .5), p.x, p.y - 46, '#d4e04a'); }
+        if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * .5), p.x, p.y - 46, '#d4e04a'); playPlayerHit(.55, true); }   // 踩在吐酸史萊姆的酸液裡：每次燙傷小聲響一下
         if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '踩進吐酸史萊姆的酸液'); }
       }
       for (const t of G.towers) {

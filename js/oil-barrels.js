@@ -80,6 +80,7 @@ function blastPush(o, x, y, hurt, numY) {
 }
 function oilExplode(x, y, it) {
   const B = it.blast, R = B.radius * CELL;
+  if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {
     if (e.dead || e.hp <= 0) continue;
     const d = Math.hypot(e.x - x, e.y - y);
@@ -106,6 +107,7 @@ function oilExplode(x, y, it) {
     if (d <= R && hasLineOfSight(x, y, p.x, p.y)) {
       const hurt = B.player * (1 - .4 * d / R);
       p.hp = Math.max(0, p.hp - hurt); G.damageVignetteT = .5;
+      if (typeof playPlayerHit === 'function') playPlayerHit();   // 溫特被油桶／油箱／瓦斯爐的爆炸炸到：統一用溫特被打中的音效
       blastPush(p, x, y, hurt, 46);
       if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + ((it && it.name) || '油桶') + '的爆炸波及'); }
     }
@@ -243,6 +245,7 @@ function updateOil(dt) {
     const d = fireTick(p);
     if (d) {
       p.hp = Math.max(0, p.hp - d); p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .35);
+      if (typeof playPlayerHit === 'function') playPlayerHit(.55);   // 站在火裡被燙：每燙一次小聲響一下
       flashDmg('-' + Math.round(d), p.x, p.y - 46, '#ff9a3c');
       if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被火燒傷'); }
     }

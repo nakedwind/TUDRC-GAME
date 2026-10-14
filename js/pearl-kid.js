@@ -153,7 +153,7 @@ function updatePearls(dt) {
       const p = G.player;
       if (p && p.hp > 0 && Math.hypot(p.x - pl.x, p.y - pl.y) <= PEARL_HIT_R) {
         pl.done = true; pearlBurst(pl.x, pl.y, pl.z); pearlHitPlayer(pl);
-        if (typeof sfxAt === 'function') sfxAt('pearlHit', pl.x, pl.y, .9, 'pearl-hit');
+        playPlayerHit(1, true);   // 溫特被珍珠打中
         break;
       }
       for (const t of G.towers) {

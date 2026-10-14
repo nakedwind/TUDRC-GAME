@@ -18,6 +18,7 @@ const SFX = (() => {
     powerOn: '環境/門與機關/很大聲的開燈.mp3',
     ironGateSlide: '環境/門與機關/鐵門滑動.mp3',
     soothe: '玩家/疏導.mp3',
+    drink: '喝飲料.mp3',   // 喝杏仁水（js/shop.js 的 useSupply）
     door: '環境/門與機關/關門.mp3',
     backroomDoor: '環境/門與機關/後室開門.mp3',
     elevator: '環境/門與機關/電梯.mp3',
@@ -27,7 +28,8 @@ const SFX = (() => {
     monsterHit: '戰鬥/命中/hit.mp3',
     fireImpact: { mode: 'random', files: ['戰鬥/元素/火焰.mp3', '戰鬥/元素/火焰02.mp3'] },
     lightningImpact: '戰鬥/元素/雷電.mp3',
-    corrosionImpact: '戰鬥/元素/腐蝕命中.wav',
+    corrosionImpact: ['戰鬥/元素/腐蝕.mp3', '戰鬥/元素/腐蝕02.mp3'],   // 異質核心甦醒／碎掉、吐酸史萊姆的酸落地：腐蝕＋腐蝕02 一起播（原本是 腐蝕命中.wav）
+    avarenCorrosion: ['戰鬥/元素/腐蝕.mp3', '戰鬥/元素/腐蝕02.mp3'],   // 阿瓦倫的腐蝕攻擊打中：腐蝕＋腐蝕02 一起播
     campWarning: '設施/警告聲.mp3',
     monsterDown: '怪物/共用/怪物倒下.mp3',
     rangedShot: '戰鬥/槍械/射擊.mp3',
@@ -39,6 +41,7 @@ const SFX = (() => {
     achievement: '獎勵/升級.mp3',
     glassBreak3: '環境/破壞/玻璃破掉3.mp3',
     glassBreak4: '環境/破壞/玻璃破掉4.mp3',
+    oreMine: '環境/破壞/挖礦.mp3',   // 異質礦被破壞時（跟玻璃破掉一起播；js/ore.js）
     mineBeep: '設施/BB聲.mp3',
     smallBoom: '戰鬥/爆炸/小爆炸.mp3',
     midBoom: '戰鬥/爆炸/中爆炸.mp3',
@@ -48,6 +51,8 @@ const SFX = (() => {
     mineGrind: '設施/打磨.mp3',
     crystalGet: '獎勵/得到碎片.mp3',
     slimeHit: '怪物/史萊姆/slime-hit.mp3',
+    playerHit: '玩家/slime-hit.mp3',   // 溫特受傷（地雷、爆炸、火、腐蝕、暴走隊員；js/game.js 的 playPlayerHit）
+    playerHitMonster: ['玩家/slime-hit.mp3', '戰鬥/命中/hit.mp3'],   // 溫特被「怪物」打中：slime-hit＋hit 一起播
     slimeLand: '怪物/史萊姆/slime-land.mp3',
     // 鳥頭人：依試聽結果對調（被打用「死掉」那個檔、死掉用「被打」那個檔）
     birdHurt: '怪物/鳥頭人/鳥頭人死掉.mp3',
@@ -61,6 +66,14 @@ const SFX = (() => {
     // Smiler：咬人＝hit＋史萊姆撞擊（兩個疊在一起播）；笑＝scary-laugh（Smiler 消失時會淡出）
     smilerBite: ['戰鬥/命中/hit.mp3', '怪物/史萊姆/slime-hit.mp3'],   // 先用 hit；自製的咬聲在 怪物/Smiler/smiler-bite.wav（太刺耳，暫時不用）
     smilerLaugh: '怪物/Smiler/scary-laugh.mp3',
+    // 夯吉寶：被打、死掉、從順順宮帽裡衝出來（js/hangi-bao.js）
+    hangiHurt: '怪物/夯吉寶/夯吉被打.mp3',
+    hangiDeath: '怪物/夯吉寶/夯吉死掉.mp3',
+    hangiPopOut: '怪物/夯吉寶/夯吉衝出來.mp3',
+    // 環境背景音：Y 區地圖一直循環播放（js/ambience.js）
+    whiteNoise: '環境/白噪音.mp3',
+    // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
+    weirdNoise: '玩家/怪聲.mp3',
   };
   const FILE_KEY = 'tudrc_sound_files_v1';
   const fileConfig = (() => {
@@ -75,8 +88,8 @@ const SFX = (() => {
   // 戰鬥音效的隨機變化：pitch＝音高（播放速度）±比例、gain＝音量 ±比例。
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
-  const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite']);
+  const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'playerHit', 'playerHitMonster']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）

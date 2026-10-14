@@ -136,10 +136,16 @@ const MONSTERS_DEFAULT = [
     "buildingDamage": 50,
     "reward": 60,
     "crystals": 6,
-    "width": 101,
-    "height": 145,
+    "width": 111,
+    "height": 160,
     "noHitSquash": true,
-    "stagger": 0.1,
+    "stagger": 0,
+    "knockMul": 0.4,
+    "noStun": true,
+    "sweep": {
+      "range": 1.5,
+      "arc": 140
+    },
     "undying": true,
     "frames": {
       "walkFacing": "left",
@@ -171,6 +177,52 @@ const MONSTERS_DEFAULT = [
         "facing": "left"
       }
     }
+  },
+  {
+    "id": "hangi_bao",
+    "name": "夯吉寶",
+    "sprite": "images/monster/Hangi-Bao/hangi-bao.png",
+    "hp": 45,
+    "speed": 48,
+    "playerDamage": 6,
+    "sentryDamage": 8,
+    "buildingDamage": 15,
+    "reward": 20,
+    "crystals": 2,
+    "width": 80,
+    "height": 80,
+    "frames": {
+      "front": "images/monster/Hangi-Bao/hangi-bao.png",
+      "walkFront": [
+        "images/monster/Hangi-Bao/hangi-bao-walk-01.png",
+        "images/monster/Hangi-Bao/hangi-bao-walk-02.png"
+      ],
+      "blink": [
+        "images/monster/Hangi-Bao/hangi-bao-blink-01.png",
+        "images/monster/Hangi-Bao/hangi-bao-blink-02.png"
+      ]
+    },
+    "behavior": "boomerang",
+    "boomerang": {
+      "noticeRange": 7,
+      "loseRange": 12,
+      "throwRange": 4.5,
+      "keepDistance": 2,
+      "retreatSpeedMul": 0.8,
+      "windup": 0.35,
+      "cooldown": 1.6,
+      "capSpeed": 260,
+      "returnSpeedMul": 1.15,
+      "wanderRadius": 2.5,
+      "wanderSpeedMul": 0.6,
+      "idleMin": 1,
+      "idleMax": 3
+    },
+    "art": {
+      "cap": "images/monster/Hangi-Bao/shunshun-cap-small.png"
+    },
+    "hitSound": "hangiHurt",
+    "deathSound": "hangiDeath"
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

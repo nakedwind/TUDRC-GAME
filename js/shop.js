@@ -126,7 +126,8 @@ function useSupply(id) {
   if (item.use === 'hp') G.player.hp += restored; else G.guide += restored;
   if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1);
   const k = SUPPLY_KIND[item.use];
-  sfx('soothe'); flash(`${item.name}　+${Math.ceil(restored)} ${k.stat}`, G.player.x, G.player.y - 54, k.color);
+  sfx(item.use === 'sp' ? 'drink' : 'soothe');   // 杏仁水：喝飲料的聲音；醫療包維持原本的聲音
+  flash(`${item.name}　+${Math.ceil(restored)} ${k.stat}`, G.player.x, G.player.y - 54, k.color);
   updateHUD(); if (supplyShopOpen) renderSupplyShop(); if (backpackOpen) renderBackpack();
   return true;
 }

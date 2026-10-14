@@ -48,13 +48,18 @@ function validMonsterCatalog(list) {
     ...(validMonsterFrames(monster.frames) ? { frames: validMonsterFrames(monster.frames) } : {}),
     ...(monster.behavior === 'charger' ? { behavior: 'charger', charger: validChargerCfg(monster.charger) } : {}),   // 行為模式：charger＝鳥頭人的發呆／衝撞（js/bird-head.js）
     ...(monster.behavior === 'shooter' ? { behavior: 'shooter', shooter: validShooterCfg(monster.shooter) } : {}),   // shooter＝珍珠小童的飄浮／噴珍珠（js/pearl-kid.js）
+    ...(monster.behavior === 'boomerang' ? { behavior: 'boomerang', boomerang: validBoomerangCfg(monster.boomerang) } : {}),   // boomerang＝夯吉寶丟迴力鏢帽子（js/hangi-bao.js）
     ...(validMonsterArt(monster.art) ? { art: validMonsterArt(monster.art) } : {}),   // 狀態圖（一般／眨眼／生氣、子彈），給 shooter 用
     // 專屬音效（js/sfx.js 裡的名稱）：hitSound 被打中、deathSound 死掉；沒填就用通用的
     ...(typeof monster.hitSound === 'string' && monster.hitSound ? { hitSound: monster.hitSound } : {}),
     ...(typeof monster.deathSound === 'string' && monster.deathSound ? { deathSound: monster.deathSound } : {}),
     ...(monster.undying ? { undying: true } : {}),
     ...(monster.noHitSquash ? { noHitSquash: true } : {}),   // 被打中時不要壓扁回彈
-    ...(Number.isFinite(+monster.stagger) ? { stagger: Math.max(0, Math.min(2, +monster.stagger)) } : {}),   // 被重擊時硬直幾秒（沒填用通用值 0.3）   // 不死：HP 歸零只會碎掉，30 秒後復活；要用火燒才會真的死（js/lifeform.js）
+    ...(Number.isFinite(+monster.stagger) ? { stagger: Math.max(0, Math.min(2, +monster.stagger)) } : {}),
+    ...(monster.noStun ? { noStun: true } : {}),
+    // sweep：範圍攻擊（揮一下打到前方扇形內所有人）。range＝攻擊距離（格）、arc＝扇形角度（度）
+    ...(monster.sweep && typeof monster.sweep === 'object' ? { sweep: { range: Math.max(.3, Math.min(5, Number(monster.sweep.range) || 1.5)), arc: Math.max(20, Math.min(360, Number(monster.sweep.arc) || 140)) } } : {}),   // 不會被隊員的攻擊停住（安柏的雷電麻痺、路德的拳頭和大招）
+    ...(Number.isFinite(+monster.knockMul) ? { knockMul: Math.max(0, Math.min(2, +monster.knockMul)) } : {}),   // 被打時擊退距離的倍率（1＝一般；0.4＝只微微後退；0＝不退）   // 被重擊時硬直幾秒（沒填用通用值 0.3）   // 不死：HP 歸零只會碎掉，30 秒後復活；要用火燒才會真的死（js/lifeform.js）
   }));
 }
 // 走路動畫（選填）：front 站著、walkFront 走路（沒有 side 時，往任何方向走都用這組）、
@@ -108,6 +113,31 @@ const SHOOTER_FIELDS = [
   { key: 'idleMin',          label: '發呆最短（秒）',         min: .2,  max: 30,  step: .5,  def: 1.5 },
   { key: 'idleMax',          label: '發呆最長（秒）',         min: .2,  max: 30,  step: .5,  def: 3.5 },
 ];
+// ---- 迴力鏢型（夯吉寶）：丟出小順順宮帽，飛到盡頭再飛回自己身上（js/hangi-bao.js）----
+const BOOMERANG_FIELDS = [
+  { key: 'noticeRange',     label: '注意範圍（格）',         min: 1,   max: 30,  step: .5,  def: 7 },
+  { key: 'loseRange',       label: '放棄追擊距離（格）',     min: 2,   max: 40,  step: .5,  def: 12 },
+  { key: 'throwRange',      label: '丟帽子的距離（格）',     min: 1,   max: 15,  step: .5,  def: 4.5 },
+  { key: 'keepDistance',    label: '太近就後退（格）',       min: 0,   max: 10,  step: .5,  def: 2 },
+  { key: 'retreatSpeedMul', label: '後退速度 ×',             min: 0,   max: 3,   step: .1,  def: .8 },
+  { key: 'windup',          label: '丟之前的準備（秒）',     min: 0,   max: 3,   step: .05, def: .35 },
+  { key: 'cooldown',        label: '帽子回來後再丟的間隔（秒）', min: .2, max: 10, step: .1, def: 1.6 },
+  { key: 'capSpeed',        label: '帽子飛行速度',           min: 40,  max: 800, step: 10,  def: 260 },
+  { key: 'returnSpeedMul',  label: '飛回來的速度 ×',         min: .3,  max: 3,   step: .05, def: 1.15 },
+  { key: 'wanderRadius',    label: '閒晃範圍（格）',         min: .5,  max: 10,  step: .5,  def: 2.5 },
+  { key: 'wanderSpeedMul',  label: '閒晃速度 ×',             min: .1,  max: 2,   step: .1,  def: .6 },
+  { key: 'idleMin',         label: '發呆最短（秒）',         min: .2,  max: 30,  step: .5,  def: 1 },
+  { key: 'idleMax',         label: '發呆最長（秒）',         min: .2,  max: 30,  step: .5,  def: 3 },
+];
+function validBoomerangCfg(raw) {
+  const src = raw && typeof raw === 'object' ? raw : {}, out = {};
+  for (const f of BOOMERANG_FIELDS) {
+    const n = Number(src[f.key]);
+    out[f.key] = Number.isFinite(n) ? Math.max(f.min, Math.min(f.max, n)) : f.def;
+  }
+  if (out.idleMax < out.idleMin) out.idleMax = out.idleMin;
+  return out;
+}
 function validShooterCfg(raw) {
   const src = raw && typeof raw === 'object' ? raw : {}, out = {};
   for (const f of SHOOTER_FIELDS) {
@@ -129,7 +159,7 @@ function validMonsterFrames(frames) {
   if (!frames || typeof frames !== 'object') return null;
   const list = v => (Array.isArray(v) ? v : []).filter(x => typeof x === 'string' && x);
   const front = typeof frames.front === 'string' ? frames.front : '';
-  const walkFront = list(frames.walkFront), side = list(frames.side), idle = list(frames.idle), attack = list(frames.attack);
+  const walkFront = list(frames.walkFront), side = list(frames.side), idle = list(frames.idle), attack = list(frames.attack), blink = list(frames.blink);
   const points = v => (Array.isArray(v) ? v : []).filter(q => Array.isArray(q) && Number.isFinite(+q[0]) && Number.isFinite(+q[1])).map(q => [+q[0], +q[1]]);
   const eyes = points(frames.eyes), idleEyes = points(frames.idleEyes);
   if (!front && !walkFront.length && !side.length) return null;
@@ -141,6 +171,8 @@ function validMonsterFrames(frames) {
     ...(idle.length ? { idle, idleFacing: frames.idleFacing === 'right' ? 'right' : 'left', idleFps: Math.max(.5, Math.min(24, Number(frames.idleFps) || 4)) } : {}),
     // eyes／idleEyes：眼睛在原圖上的像素座標（正面圖／發呆圖），鎖定目標時眼睛閃光用
     ...(eyes.length ? { eyes } : {}), ...(idleEyes.length ? { idleEyes } : {}),
+    // blink：站著不動時每隔幾秒眨一次眼（2 張：半閉、全閉）
+    ...(blink.length ? { blink } : {}),
     // attack：揮手攻擊動畫（3 張：舉手、揮出、收手；4 張：半舉、高舉蓄力、揮下、收回）
     // attackFacing＝原圖往哪邊揮，目標在另一邊時左右翻；圖可以比站姿大（以腳底中央對齊）
     ...(attack.length ? { attack, attackFacing: frames.attackFacing === 'left' ? 'left' : 'right' } : {}),
@@ -158,7 +190,7 @@ function validAttackRig(r) {
 }
 function monsterFrameFiles(monster) {
   const f = monster.frames; if (!f) return [];
-  return [...new Set([f.front, ...f.walkFront, ...(f.side || []), ...(f.idle || []), ...(f.attack || []), ...(f.attackRig ? [f.attackRig.body, f.attackRig.arm] : [])])];
+  return [...new Set([f.front, ...f.walkFront, ...(f.side || []), ...(f.idle || []), ...(f.attack || []), ...(f.blink || []), ...(f.attackRig ? [f.attackRig.body, f.attackRig.arm] : [])])];
 }
 function monsterCatalog(useBrowserDraft = false) {
   if (useBrowserDraft) {
@@ -173,6 +205,7 @@ function monsterCatalog(useBrowserDraft = false) {
             if (monster.behavior) own.behavior = monster.behavior;
             if (monster.art) own.art = monster.art;   // 狀態圖不在編輯器裡改
             if (monster.shooter && !own.shooter) own.shooter = monster.shooter;
+            if (monster.boomerang && !own.boomerang) own.boomerang = monster.boomerang;
             if (monster.hitSound) own.hitSound = monster.hitSound;     // 音效不在編輯器裡改，一律用檔案的設定
             if (monster.deathSound) own.deathSound = monster.deathSound;
             if (monster.charger && !own.charger) own.charger = monster.charger;   // 舊暫存還沒有行為數值

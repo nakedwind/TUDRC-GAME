@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=losecause-20261014">
+<link rel="stylesheet" href="css/style.css?v=barvals-20261014">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -180,8 +180,8 @@
       <span class="hud-player-avatar"><img src="images/character/winter_B/winterB_0000_Front.png" alt="溫特"></span>
       <div class="hud-player-status">
         <b>溫特．嚮導部隊長</b>
-        <div class="hud-player-bar hp" role="meter" aria-label="溫特 HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" data-label="HP"><i id="playerHpBar"></i><i class="gain"></i></div>
-        <div class="hud-player-bar energy" role="meter" aria-label="溫特 SP（精神能量）" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" data-label="SP"><i id="playerEnergyBar"></i><i class="gain"></i></div>
+        <div class="hud-player-bar hp" role="meter" aria-label="溫特 HP" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" data-label="HP"><i id="playerHpBar"></i><i class="gain"></i><b class="bar-value" id="playerHpText">100 / 100</b></div>
+        <div class="hud-player-bar energy" role="meter" aria-label="溫特 SP（精神能量）" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100" data-label="SP"><i id="playerEnergyBar"></i><i class="gain"></i><b class="bar-value" id="playerEnergyText">100 / 100</b></div>
       </div>
     </div>
     <div class="hud-supplies" aria-label="快捷補給">
@@ -208,7 +208,7 @@
   <script src="js/asset-gate.js?v=gate-20261012"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=merged-sound-settings-20261012"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=smiler-sound3-20261014"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=drink-20261014"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
@@ -216,12 +216,12 @@
   <script src="data/gifts.js?v=remap-20261012"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=pickup-recognition-20261013"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=sortie-20261014"></script>   <!-- 溫特可購買、使用的個人補給 -->
-  <script src="data/missions.js?v=missions-20261014"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
-  <script src="data/dialogues.js?v=dlg-20261006"></script>  <!-- 所有台詞（對話編輯器） -->
-  <script src="data/balance.js?v=pickup-recognition-20261013"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/missions.js?v=brief-20261014"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
+  <script src="data/dialogues.js?v=brief-20261014"></script>  <!-- 所有台詞（對話編輯器） -->
+  <script src="data/balance.js?v=sanity-20261014"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
-  <script src="data/monsters.js?v=pearl-sfx-20261012"></script>  <!-- 2b. 怪物種類與數值 -->
-  <script src="js/monster-data.js?v=facing-20261012"></script>
+  <script src="data/monsters.js?v=hangiwalk-20261014"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="js/monster-data.js?v=sweep-20261014"></script>
   <script src="data/storage-boxes.js?v=storage-collision-20261013"></script><script src="data/ores.js?v=ore-editor-20261012"></script><script src="data/objects.js?v=iron-gate-20261013"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
   <script src="data/decorations.js?v=buildable-decor-20261011"></script><!-- 3b. 裝飾物件（低HP、可佈置） -->
   <script src="data/maps.js?v=iron-gate-20261013"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
@@ -239,30 +239,33 @@
   <script src="js/team.js?v=norank-20261014"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=sortie-20261014"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=core-20261006"></script>
-  <script src="js/anomalous-core.js?v=easy-20261011"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
-  <script src="js/combat-feel.js?v=losecause-20261014"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/anomalous-core.js?v=coremine-20261014"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
+  <script src="js/combat-feel.js?v=monsterhit-20261014"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=spitter-20261006"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=dlg-20261006"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=losecause-20261014"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=monsterhit-20261014"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
-  <script src="js/pearl-kid.js?v=losecause-20261014"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
-  <script src="js/render.js?v=smiler6-20261014"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
-  <script src="js/attack-fx.js?v=lifeform-20261012"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
-  <script src="js/oil-barrels.js?v=losecause-20261014"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
-  <script src="js/flicker-light.js?v=pickup-recognition-20261013"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
+  <script src="js/pearl-kid.js?v=monsterhit-20261014"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
+  <script src="js/hangi-bao.js?v=monsterhit-20261014"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
+  <script src="js/render.js?v=sanity-20261014"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/attack-fx.js?v=avarensfx2-20261014"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
+  <script src="js/oil-barrels.js?v=playerhit3-20261014"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
+  <script src="js/flicker-light.js?v=humfix-20261014"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/lifeform.js?v=death-in-fire-20261013"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
-  <script src="js/smiler.js?v=smiler11-20261014"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
-  <script src="js/ore.js?v=shard-item-notice-20261013"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
-  <script src="js/landmine.js?v=losecause-20261014"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=medical-20261012"></script> <!-- 9i2. 便利商店：商品、購物車、Q／F 快捷補給 -->
+  <script src="js/smiler.js?v=monsterhit-20261014"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
+  <script src="js/ore.js?v=oremine-20261014"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
+  <script src="js/landmine.js?v=playerhit2-20261014"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
+  <script src="js/shop.js?v=drink-20261014"></script> <!-- 9i2. 便利商店：商品、購物車、Q／F 快捷補給 -->
   <script src="js/backpack.js?v=sortie-20261014"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/gifts.js?v=requests3-20261012"></script> <!-- 9l. 送禮與好感度 -->
   <script src="js/sortie-supply.js?v=sortie4-20261014"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=pickup-recognition-20261013"></script>
   <script src="js/storage-lockers.js?v=storage-collision-20261013"></script>
-  <script src="js/missions.js?v=missions2-20261014"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
+  <script src="js/missions.js?v=brief-20261014"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/save.js?v=storage-collision-20261013"></script> <!-- 9k. 存檔、設定選單 -->
-  <script src="js/flare.js?v=gunhud-20261010"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/game.js?v=losecause-20261014"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/ambience.js?v=ambience-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
+  <script src="js/sanity.js?v=sanitysfx-20261014"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
+  <script src="js/flare.js?v=caphit-20261014"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/game.js?v=monsterhit-20261014"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

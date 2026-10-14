@@ -66,6 +66,30 @@ function monsterSwingHit(e, tx, ty) {   // 打下去的瞬間：動畫跳到「�
   if (typeof nearbyImpact === 'function') nearbyImpact(tx, ty, 6, .05);
   if (e.undying && typeof sfxAt === 'function') sfxAt('lifeformAttack', e.x, e.y, .68, 'lifeform-attack');
 }
+// ---- 範圍攻擊（怪物資料有 sweep 的怪物，例如生命體）----
+// 目標進到 range 格內就揮手；打下去的瞬間，前方 arc 度扇形、range 格內的溫特和哨兵／嚮導全部受傷（隔牆的不算）。
+const sweepReach = e => e.sweep ? e.sweep.range * CELL : 0;
+function sweepAttack(e, target, dt) {
+  e.sweepCd = (e.sweepCd || 0) - dt;
+  if (target) monsterSwingCue(e, e.sweepCd, target.x, target.y);
+  if (e.sweepCd > 0 || !target || target.hp <= 0) return;
+  e.sweepCd = 1;
+  const R = sweepReach(e) + 8, half = e.sweep.arc / 2 * Math.PI / 180;
+  const aim = Math.atan2(target.y - e.y, target.x - e.x);
+  const inArc = o => {
+    const d = Math.hypot(o.x - e.x, o.y - e.y);
+    if (o !== target && (d > R || !hasLineOfSight(e.x, e.y, o.x, o.y))) return false;
+    let da = Math.abs(Math.atan2(o.y - e.y, o.x - e.x) - aim); if (da > Math.PI) da = 2 * Math.PI - da;
+    return o === target || da <= half || d < 18;   // 貼在身上的也打得到
+  };
+  const p = G.player;
+  if (p && p.hp > 0 && inArc(p)) { e.playerTouchCd = 0; enemyAttackPlayer(e, 0); }
+  for (const t of G.towers) {
+    if (t.hp <= 0 || !inArc(t) || (t !== target && !enemyNoticesSentry(e, t))) continue;   // 沒惹牠的阿瓦倫不會被順便打到
+    e.atkCd = 0; enemyAttackSentry(e, t, 0);
+  }
+  e.atkCd = 1; e.playerTouchCd = 1;   // 一般攻擊的冷卻也重設，不會同一下打兩次
+}
 function enemyAttackSentry(e, target, dt) {
   e.atkCd = (e.atkCd || 0) - dt;
   if (target) monsterSwingCue(e, e.atkCd, target.x, target.y);
@@ -108,7 +132,7 @@ function enemyAttackPlayer(e, dt) {
     if (!playerBlocked(p.x, ny)) { p.y = ny; break; }
   }
   flashDmg('-' + damage, p.x, p.y - 46, '#ff6b6b'); addShake(4);   // 玩家被打：彈出傷害＋震動
-  playSlimeAudio('hit');
+  playPlayerHit(1, true);   // 溫特被怪物打中：slime-hit＋hit
   if (p.hp <= 0 && !G.over) {
     flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e');
     lose('player', '被' + monsterNameOf(e) + '攻擊');
@@ -130,7 +154,7 @@ function trySlimePounce(e, target, distance) {
 }
 function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
   if (!G.player || G.player.hp <= 0 || playerDistance > ENEMY_SENSE_RANGE) return false;
-  if (playerDistance <= 30) { enemyAttackPlayer(e, dt); return true; }
+  if (e.sweep ? playerDistance <= sweepReach(e) : playerDistance <= 30) { e.sweep ? sweepAttack(e, G.player, dt) : enemyAttackPlayer(e, dt); return true; }
   if (trySlimePounce(e, G.player, playerDistance)) return true;
   const [gc, gr] = cellAt(G.player.x, G.player.y);
   const nav = enemyNavigate(e, gc, gr, moveDt, 'player:' + gc + ',' + gr, true);
@@ -153,7 +177,7 @@ function aggroOnSentry(e, t) {
 }
 // 追擊並攻擊指定的哨兵：貼身就打、3 格內撲擊，否則尋路靠近（路上被建築擋住就先拆）
 function enemyChaseSentry(e, target, distance, moveDt, dt) {
-  if (distance <= 22) { enemyAttackSentry(e, target, dt); return; }
+  if (e.sweep ? distance <= sweepReach(e) : distance <= 22) { e.sweep ? sweepAttack(e, target, dt) : enemyAttackSentry(e, target, dt); return; }
   if (trySlimePounce(e, target, distance)) return;   // 3 格內：蓄力撲向哨兵／嚮導
   const [gc, gr] = cellAt(target.x, target.y);
   const nav = enemyNavigate(e, gc, gr, moveDt, 'sentry:' + target.type + ':' + gc + ',' + gr, true);
@@ -161,7 +185,7 @@ function enemyChaseSentry(e, target, distance, moveDt, dt) {
 }
 function enemyBlocked(x, y) {
   const [c, r] = cellAt(x, y);
-  return !inGrid(c, r) || isWall(c, r) || !!barrierAt(c, r);
+  return !inGrid(c, r) || isWall(c, r) || !!barrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r));   // 順順宮帽也擋路（js/hangi-bao.js）
 }
 function resetEnemyNavigation(e) {
   e.hasTarget = false; e.baseTarget = null;
@@ -231,6 +255,7 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
       if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key)) continue;
       if (barrierAt(nc, nr) && !canBreakBuildings) continue;
+      if (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr)) continue;   // 繞過順順宮帽
       cameFrom.set(key, [c, r]); queue.push([nc, nr]);
     }
   }
@@ -374,10 +399,11 @@ function stepEnemy(e, dt) {
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
   if (e.behavior === 'charger') { stepChargerEnemy(e, dt); return; }   // 鳥頭人：發呆、散步、看到人就衝撞（js/bird-head.js）
   if (e.behavior === 'shooter') { stepShooterEnemy(e, dt); return; }   // 珍珠小童：飄浮、保持距離噴珍珠（js/pearl-kid.js）
+  if (e.behavior === 'boomerang') { stepBoomerangEnemy(e, dt); return; }   // 夯吉寶：丟迴力鏢帽子（js/hangi-bao.js）
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
-  if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= 30) {
-    enemyAttackPlayer(e, dt);
+  if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= (e.sweep ? sweepReach(e) : 30)) {
+    if (e.sweep) sweepAttack(e, G.player, dt); else enemyAttackPlayer(e, dt);   // 生命體：範圍攻擊
     return;
   }
   if (e.stunT > 0) { e.playerWindupT = 0; e.playerPounceT = 0; e.slimeLift = 0; if (!e.frames) { e.slimeScaleX = 1.08; e.slimeScaleY = .92; } return; }

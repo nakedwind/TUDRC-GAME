@@ -104,7 +104,7 @@ function breakOre(o, bx, by, msg) {
   }
   if (typeof spawnGoo === 'function') spawnGoo(c.x, c.y - 4, '#6b6372', 8, 1.1);   // 碎石
   flash(msg || spec.name + ' 炸開了！', c.x, c.y - 40, '#d69bff', 1.6);
-  if (typeof sfxAt === 'function') sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break');
+  if (typeof sfxAt === 'function') { sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break'); sfxAt('oreMine', c.x, c.y, .7, 'ore-mine'); }   // 碎掉的玻璃聲＋挖礦聲
 }
 
 // ---- 每幀更新（在 update 裡呼叫）：碎片噴飛、落地、被溫特吸過去撿起來 ----
