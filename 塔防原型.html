@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=money-prefix-20261013">
+<link rel="stylesheet" href="css/style.css?v=losecause-20261014">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -208,14 +208,15 @@
   <script src="js/asset-gate.js?v=gate-20261012"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=merged-sound-settings-20261012"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=iron-slide-sound-20261013"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=smiler-sound3-20261014"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js?v=taint-rates-20261007"></script>  <!-- 集中管理所有角色 -->
   <script src="data/gifts.js?v=remap-20261012"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=pickup-recognition-20261013"></script>   <!-- 背包物品分類與其他物品 -->
-  <script src="data/supplies.js?v=medical-20261012"></script>   <!-- 溫特可購買、使用的個人補給 -->
+  <script src="data/supplies.js?v=sortie-20261014"></script>   <!-- 溫特可購買、使用的個人補給 -->
+  <script src="data/missions.js?v=missions-20261014"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/dialogues.js?v=dlg-20261006"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=pickup-recognition-20261013"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
@@ -235,30 +236,33 @@
   <script src="js/lighting.js?v=pickup-recognition-20261013"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
   <script src="js/build.js?v=disabled-builds-20261013"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
-  <script src="js/team.js?v=hpsp-20261007"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=firetraits-20261012"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/team.js?v=norank-20261014"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
+  <script src="js/sentry.js?v=sortie-20261014"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=core-20261006"></script>
   <script src="js/anomalous-core.js?v=easy-20261011"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
-  <script src="js/combat-feel.js?v=rig-20261012"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/combat-feel.js?v=losecause-20261014"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=spitter-20261006"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=dlg-20261006"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=lifeform-sfx-20261012"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=losecause-20261014"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
-  <script src="js/pearl-kid.js?v=safe-20261012"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
-  <script src="js/render.js?v=iron-gate-20261013"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/pearl-kid.js?v=losecause-20261014"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
+  <script src="js/render.js?v=smiler6-20261014"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=lifeform-20261012"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
-  <script src="js/oil-barrels.js?v=lifeform-20261012"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
+  <script src="js/oil-barrels.js?v=losecause-20261014"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=pickup-recognition-20261013"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/lifeform.js?v=death-in-fire-20261013"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
+  <script src="js/smiler.js?v=smiler11-20261014"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=shard-item-notice-20261013"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
-  <script src="js/landmine.js?v=fly-20261011"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
+  <script src="js/landmine.js?v=losecause-20261014"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=medical-20261012"></script> <!-- 9i2. 便利商店：商品、購物車、Q／F 快捷補給 -->
-  <script src="js/backpack.js?v=medical2-20261012"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/backpack.js?v=sortie-20261014"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/gifts.js?v=requests3-20261012"></script> <!-- 9l. 送禮與好感度 -->
+  <script src="js/sortie-supply.js?v=sortie4-20261014"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=pickup-recognition-20261013"></script>
   <script src="js/storage-lockers.js?v=storage-collision-20261013"></script>
+  <script src="js/missions.js?v=missions2-20261014"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/save.js?v=storage-collision-20261013"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/flare.js?v=gunhud-20261010"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/game.js?v=storage-collision-20261013"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=losecause-20261014"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

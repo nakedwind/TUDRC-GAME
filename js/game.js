@@ -248,7 +248,8 @@ function openDialogue(actor) {
   if (!actor || dialogueState) return;
   if (actor.berserk) { flash('污染失控，現在無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
-  const lines = chapterPick(actor.kind === 'tower' ? SENTRY_DIALOGUES[key] : NPC_DIALOGUES[key]) || chapterPick(WANDER_LINES[key]) || ['……'];
+  const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
+    || chapterPick(actor.kind === 'tower' ? SENTRY_DIALOGUES[key] : NPC_DIALOGUES[key]) || chapterPick(WANDER_LINES[key]) || ['……'];
   dialogueState = { actor, lines, index: 0 };
   actor.target = null; actor.say = null; actor.sayWait = 2;
   MOVE_KEYS.forEach(key => { keys[key] = false; });
@@ -346,6 +347,7 @@ window.addEventListener('keydown', e => {
     if (MOVE_KEYS.includes(k) || isInteractKey(k)) e.preventDefault();
     return;
   }
+  if (typeof missionBoardOpen !== 'undefined' && missionBoardOpen) return;   // 作戰桌打開時，按鍵不控制角色（Esc／Enter 在 js/missions.js）
   if (supplyShopOpen || backpackOpen || settingsOpen) {   // 商店、背包、設定打開時：Esc 關閉，其他按鍵不控制角色
     if (k === 'escape') { e.preventDefault(); if (supplyShopOpen) closeSupplyShop(); else closeBackpack(); }
     else if (k.startsWith('arrow') || ((k === ' ' || k === 'enter') && !(e.target instanceof HTMLButtonElement))) e.preventDefault();   // 按鈕上按 Enter／空白鍵照常可以按
@@ -385,6 +387,7 @@ window.addEventListener('keydown', e => {
     else if (toggleIronGateNearPlayer()) {}
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
+    else if (typeof missionTableNear === 'function' && missionTableNear()) openMissionBoard();   // 作戰桌（js/missions.js）
     else {
       const actor = interactionNearPlayer();
       if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
@@ -722,7 +725,7 @@ function updateChaosSentry(t, spec, dt) {
     else { const [ac] = cellAt(nx, t.y); if (sentryCellWalkable(ac, cellAt(t.x, t.y)[1])) t.x = nx; else { const [, br] = cellAt(t.x, ny); if (sentryCellWalkable(cellAt(t.x, t.y)[0], br)) t.y = ny; } }
     t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
   } else if (t.cd <= 0) {
-    t.cd = 1 / spec.rate;
+    t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')));
     applyChaosDamage(t, best, spec);
   }
 }
@@ -736,13 +739,13 @@ function applyChaosDamage(t, best, spec) {
   else if (o === G.player) {
     o.hp = Math.max(0, o.hp - dmg); o.hitT = .3; G.damageVignetteT = Math.max(G.damageVignetteT, .3);
     friendlyHitReact(o, t.x, t.y, dmg, heavy, t);   // 閃紅、震退、傷害數字
-    if (o.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose('player'); }
+    if (o.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose('player', '被暴走的' + (TYPES[t.type]?.name || '隊員') + '攻擊'); }
   } else if (o.isBase) {
     o.hp -= dmg; o.hitT = HIT_DUR;
     warnCampAttack();
     if (o.hp <= 0) { removeBarrier(o); flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b'); if (!G.over) lose('base'); }
   } else if (G.towers.includes(o)) {   // 攻擊隊友
-    const def = Math.max(0, Math.min(.75, (TYPES[o.type] && TYPES[o.type].defense) || 0));
+    const def = sentryDefense(o);
     o.hp = Math.max(0, o.hp - dmg * (1 - def));
     friendlyHitReact(o, t.x, t.y, dmg * (1 - def), heavy, t);   // 閃紅、震退、被打斷一下、喊話、傷害數字
     if (o.hp <= 0) { o.target = null; o.meleeSwing = null; sentryStatus(o, '失去戰鬥能力', '#ff5b6e', true); }
@@ -828,6 +831,8 @@ function newGame() {
   closeElevatorMenu();
   closeSupplyShop(true); closeBackpack(true); closeSettings(true);
   if (typeof onGiftNewGame === 'function') onGiftNewGame();   // 出勤後大家又可以收禮
+  if (typeof resetSmilers === 'function') resetSmilers();   // 黑暗中的笑臉（js/smiler.js）
+  if (typeof onSortieNewGame === 'function') onSortieNewGame();   // 出勤時吃掉補給、回基地清掉效果（js/sortie-supply.js）
   setNpcArrangeMode(false);
   setPaused(false);
   document.getElementById('systemNotices').replaceChildren();
@@ -1553,7 +1558,7 @@ function update(dt) {
           if (o === t || o.hp <= 0 || TYPES[o.type].guide || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
           if ((o.taint || 0) <= 0 && o.hp >= o.maxhp && !o.berserk) continue;   // 不需要疏導就跳過
           const taintBefore = o.taint || 0;
-          o.taint = Math.max(0, taintBefore - spec.aura.rate * AURA_CD);          // 一次清一批（平均速率不變）
+          o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD);   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
           o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * AURA_CD);
           if (o.berserk && o.taint < 60) o.berserk = false;
           spawnSootheEffect(o.x, o.y - 8, sc, o);
@@ -1612,7 +1617,7 @@ function update(dt) {
     if (attacker && Math.hypot(attacker.x - t.x, attacker.y - t.y) <= R && hasLineOfSight(t.x, t.y, attacker.x, attacker.y)) target = attacker;
     if (!target) target = pickSentryTarget(t, R);
     if (target) {
-      if (!swingTarget) t.cd = 1 / (spec.rate * (t.taint > 85 && !t.berserk ? 0.5 : 1));   // 瀕臨暴走：攻速減半
+      if (!swingTarget) t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')) * (t.taint > 85 && !t.berserk ? 0.5 : 1));   // 瀕臨暴走：攻速減半
       if ((t.type === 'red' || t.type === 'luther' || t.type === 'avaren') && !swingTarget) {
         const heavy = t.type === 'luther', dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
@@ -1674,7 +1679,7 @@ function update(dt) {
         }
         spawnAttackVisual(t, target, (U || critMul || rageMul > 1) ? { ...spec, dmg: atkDmg, splash: atkSplash, crit: !!critMul, rage: rageMul } : spec, affected, impactPoint, U ? U.scale : 1);
       } else { flashDmg('MISS', target.x, target.y - 26, '#c6d1dd'); if (typeof strayBoltOre === 'function') strayBoltOre(t, target); }   // 安柏打偏：可能劈中附近的礦物（js/ore.js）
-      if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint);
+      if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint * Math.max(0, 1 - sortieBuff(t, 'calm')));   // 出勤補給：負荷累積變慢
       if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入暴走，開始無差別攻擊！', true); }
     }
   }
@@ -1709,7 +1714,7 @@ function update(dt) {
       if (t.hp <= 0 || t.berserk || t.type === 'avaren') continue;
       const dmgAmt = acidTick(t);
       if (!dmgAmt) continue;
-      const def = Math.max(0, Math.min(.75, (TYPES[t.type] && TYPES[t.type].defense) || 0));
+      const def = sentryDefense(t);
       const hurt = dmgAmt * (1 - def);
       t.hp = Math.max(0, t.hp - hurt);
       t.hitT = Math.max(t.hitT || 0, .2); t.hitColor = '#b060ff';
@@ -1723,7 +1728,7 @@ function update(dt) {
       p.hp = Math.max(0, p.hp - playerAcid);
       p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT, .35);
       flashDmg('-' + Math.round(playerAcid), p.x, p.y - 46, '#c58aff');
-      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被阿瓦倫的腐蝕波及'); }
     }
     for (const pool of G.acidPools) {
       pool.t -= dt;
@@ -1806,6 +1811,7 @@ function update(dt) {
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
+  if (typeof updateSmilers === 'function') updateSmilers(dt);   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   // 波次（安全場景沒有波次，也不會有勝負）
@@ -1864,7 +1870,8 @@ function updateHUD() {
   const mission = document.getElementById('missionText');
   if (mission) {
     if (MAP_SAFE) {
-      if (mission.dataset.mode !== 'safe') mission.textContent = '目前任務：休息一下（安全區域）';
+      const text = (typeof missionHudText === 'function' && missionHudText()) || '目前任務：休息一下（安全區域）';   // js/missions.js
+      if (mission.dataset.mode !== 'safe' || mission.textContent !== text) mission.textContent = text;
       mission.dataset.mode = 'safe';
     } else {
       if (mission.dataset.mode !== 'combat') mission.innerHTML = '目前任務：守住營地 <span class="mission-secondary">| 破壞異質核心</span>';
@@ -1887,18 +1894,25 @@ function showStart() {
     '後室<b>一片漆黑</b>——只有營地和你身上的燈是亮的。<br><b>哨兵已在基地待命</b>：點擊哨兵可下指令（巡邏／指派位置／疏導）。<br>異質體會成群出現在<b>不同的黑暗角落</b>並四處遊蕩；進入感知範圍後會優先追擊哨兵，若被建築擋住就會先破壞建築。<br>放置<b>探照燈</b>與防禦設施控制戰場，在哨兵<b>暴走</b>前記得<b>疏導</b>。破壞所有異質核心並清除異質體即可控制 Y 區。<br>戰鬥中按 <b>P</b> 可以暫停。',
     '開始防禦');
 }
-function winOverlay() { showOverlay('✅ Y 區已控制', '所有異質核心與殘存異質體已清除！異質結晶已儲存，可用於哨兵培養。', '再玩一次'); }
+function winOverlay() { if (typeof missionWinOverlay === 'function' && missionWinOverlay()) return; showOverlay('✅ Y 區已控制', '所有異質核心與殘存異質體已清除！異質結晶已儲存，可用於哨兵培養。', '再玩一次'); }
 // 失敗原因 → 標題與提示（player＝部隊長倒下、base＝地圖上的營地物件被摧毀）
 const LOSE_TEXT = {
   player: ['💀 部隊長倒下', '溫特失去了戰鬥能力。<br>別離哨兵太遠，被異質體包圍時先退回亮處或營地。'],
   base:   ['💀 營地被摧毀', '異質體打穿了基地。<br>用防禦設施拖住牠們，並讓哨兵守在基地附近。'],
 };
-function loseOverlay(reason) { const [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base; showOverlay(title, text, '再挑戰'); }
+// cause＝倒下原因（例：「被史萊姆攻擊」），會顯示在結算畫面上
+function loseOverlay(reason, cause) {
+  const [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base;
+  const causeLine = cause ? '<span class="lose-cause">倒下原因：<b>' + cause + '</b></span>' : '';
+  showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '再挑戰');
+}
+// 怪物的中文名稱（怪物編輯器裡的名字）
+function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); winOverlay(); }
-function lose(reason) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason); }
-ovBtn.addEventListener('click', begin);
+function lose(reason, cause) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
+ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
 const mapPick = document.getElementById('mapPick');

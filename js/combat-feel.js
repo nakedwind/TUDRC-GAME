@@ -200,11 +200,11 @@ function slimeExplode(e, mul) {
       if (!playerBlocked(nx, ny)) { p.x = nx; p.y = ny; break; }
     }
     flashDmg('-' + dmg, p.x, p.y - 46, '#ff6b6b');
-    if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
+    if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被自爆史萊姆的爆炸波及'); }
   }
   for (const t of G.towers) {
     if (t.hp <= 0 || Math.hypot(t.x - x, t.y - y) > R) continue;
-    const defense = Math.max(0, Math.min(.75, TYPES[t.type].defense || 0));
+    const defense = sentryDefense(t);
     const dmg = SLIME_BOMB.sentry * mul * (1 - defense);
     t.hp = Math.max(0, t.hp - dmg); t.hitT = Math.max(t.hitT || 0, .25);
     flashDmg('-' + Math.round(dmg), t.x, t.y - 30, '#ff8f8f');
@@ -511,11 +511,11 @@ function updateAcidSpit(dt) {
         p.hitT = Math.max(p.hitT || 0, .15); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .25);
         p.acidTick = (p.acidTick || 0) - dt;
         if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * .5), p.x, p.y - 46, '#d4e04a'); }
-        if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose(); }
+        if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '踩進吐酸史萊姆的酸液'); }
       }
       for (const t of G.towers) {
         if (t.hp <= 0 || !inPool(t)) continue;
-        const def = Math.max(0, Math.min(.75, TYPES[t.type]?.defense || 0));
+        const def = sentryDefense(t);
         t.hp = Math.max(0, t.hp - P.sentryDps * (1 - def) * dt);
         t.hitT = Math.max(t.hitT || 0, .12); t.hitColor = '#d4e04a';
         if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }

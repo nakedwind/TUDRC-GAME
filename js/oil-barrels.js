@@ -107,7 +107,7 @@ function oilExplode(x, y, it) {
       const hurt = B.player * (1 - .4 * d / R);
       p.hp = Math.max(0, p.hp - hurt); G.damageVignetteT = .5;
       blastPush(p, x, y, hurt, 46);
-      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + ((it && it.name) || '油桶') + '的爆炸波及'); }
     }
   }
   // 連鎖：範圍內的其他油桶也被炸爆、油汙被點燃
@@ -244,7 +244,7 @@ function updateOil(dt) {
     if (d) {
       p.hp = Math.max(0, p.hp - d); p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .35);
       flashDmg('-' + Math.round(d), p.x, p.y - 46, '#ff9a3c');
-      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
+      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被火燒傷'); }
     }
   }
   for (const f of G.oilFires) {

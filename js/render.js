@@ -534,6 +534,7 @@ function draw() {
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
+  if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
   drawCoreShards(ctx);         // 異質核心碎片
   drawFlareShots(ctx);         // 飛行中的照明彈
   drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
@@ -566,6 +567,7 @@ function draw() {
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, d.open ? '關門' : '開門'); }
     else if (oreNearPlayer()) drawOreHint(oreNearPlayer());   // 礦物：提示要用爆炸炸開（js/ore.js）
+    else if (typeof missionTableNear === 'function' && missionTableNear()) { const t = missionTableNear(); drawInteractPrompt(t.x, t.top, '作戰桌'); }   // js/missions.js
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
       if (actor) drawInteractPrompt(actor.x, actor.y - 57,
@@ -920,6 +922,7 @@ function draw() {
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  if (typeof drawSmilers === 'function') drawSmilers(ctx);   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
   // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。
@@ -965,6 +968,7 @@ function draw() {
     ctx.fillStyle = vignette; ctx.fillRect(0, 0, cv.width, cv.height);
   }
   drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
+  if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y);

@@ -39,7 +39,7 @@ function ensureTeamUI() {
     teamPanel = document.createElement('div');
     teamPanel.id = 'teamEditPanel';
     teamPanel.className = 'hidden';
-    teamPanel.style.cssText = 'position:absolute;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;background:rgba(6,10,16,.72)';
+    teamPanel.style.cssText = 'position:absolute;inset:10px;z-index:40;display:flex;align-items:center;justify-content:center';   // 外觀在 style.css（和商店同一套）
     teamPanel.addEventListener('click', e => { if (e.target === teamPanel) closeTeamPanel(); });   // 點外面關閉
     wrap.appendChild(teamPanel);
   }
@@ -88,7 +88,7 @@ function ensureTeamUI() {
   }
 }
 function openTeamPanel() { ensureTeamUI(); closeSquadPanel(); if (typeof closeAchievementPanel === 'function') closeAchievementPanel(); renderTeamPanel(); teamPanel.classList.remove('hidden'); if (typeof sfx === 'function') sfx('menu'); }
-function closeTeamPanel() { if (teamPanel) teamPanel.classList.add('hidden'); }
+function closeTeamPanel() { if (teamPanel) teamPanel.classList.add('hidden'); if (typeof sortiePicking !== 'undefined') sortiePicking = null; }
 function isTeamPanelOpen() { return teamPanel && !teamPanel.classList.contains('hidden'); }
 
 // ---- 隊員資料：安全區看完整名冊，戰鬥區只看實際出勤成員 ----
@@ -137,7 +137,7 @@ function squadCard(actor, safe) {
   if (actor.noncombat) return supportCard(actor);
   const spec = TYPES[actor.type]; if (!spec) return '';
   const live = actor.live;
-  const hp = live ? Math.max(0, Math.round(live.hp)) : spec.hp;
+  const hp = live ? Math.max(0, Math.round(live.hp)) : spec.hp, maxhp = live ? live.maxhp : spec.hp;
   const taint = live ? Math.max(0, Math.min(100, Math.round(live.taint || 0))) : 0;
   const condition = memberCondition(actor, safe);
   const support = spec.guide ? '疏導 ' + spec.aura.rate + '/秒' : (spec.splash > 0 ? '範圍 ' + spec.splash.toFixed(1) + ' 格' : '單體攻擊');
@@ -155,9 +155,9 @@ function squadCard(actor, safe) {
   return '<article class="squad-card squad-card-combat" style="--member-color:' + spec.color + '">' +
     '<img class="squad-portrait" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' +
     '<div class="squad-member-main">' +
-      '<div class="squad-member-head"><div><strong>' + spec.name + '<mark>Lv.' + level + '</mark></strong><span>' + spec.rank + ' 級 ' + (spec.guide ? '嚮導' : '哨兵') + '・' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
-      '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + spec.hp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / spec.hp * 100)) + '%"></u></i></div>' +
-      loadBar + '</div>' +
+      '<div class="squad-member-head"><div><strong>' + spec.name + '<mark>Lv.' + level + '</mark></strong><span>' + (spec.guide ? '嚮導' : '哨兵') + '・' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
+      '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + maxhp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / maxhp * 100)) + '%"></u></i></div>' +
+      loadBar + '</div>' + (typeof sortieActiveHtml === 'function' ? sortieActiveHtml(actor.type) : '') +
       '<dl class="squad-stats"><div><dt>攻擊</dt><dd>' + spec.dmg + '</dd></div><div><dt>防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
       '<div class="squad-card-actions"><button class="captain-impression-button" type="button" data-impression="' + actor.type + '">深入了解</button><div class="squad-training">' + trainingAction + '</div></div>' +
     '</div></article>';
@@ -279,7 +279,7 @@ function renderFieldSquadHud() {
     (members.length ? members.map(member => {
       const spec = TYPES[member.type]; if (!spec) return '';
       const hp = Math.max(0, Math.round(member.hp || 0));
-      const hpPercent = Math.max(0, Math.min(100, hp / spec.hp * 100));
+      const hpPercent = Math.max(0, Math.min(100, hp / (member.maxhp || spec.hp) * 100));
       const taint = Math.max(0, Math.min(100, Math.round(member.taint || 0)));
       const loadWidth = spec.guide ? 0 : taint;
       const sootheAction = '';   // 正式遊戲停用隊友欄的手動疏導按鈕（靠近哨兵仍可疏導）
@@ -341,23 +341,24 @@ function renderTeamPanel() {
     const profile = TEAM_PROFILES[id] || {};
     return '<button class="team-pick' + (selected ? ' team-pick-selected' : '') + '" type="button" data-id="' + id + '" aria-label="' + (selected ? '移出' : '編入') + spec.name + '">' +
       '<span class="team-avatar-frame"><img class="team-avatar" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '正面圖"></span>' +
-      '<span class="team-summary"><b>' + (spec.name || id) + '</b>' +
-      '<span class="team-role">' + (spec.rank ? spec.rank + ' 級・' : '') + role + '</span>' +
+      '<span class="team-summary"><span class="team-name-line"><b>' + (spec.name || id) + '</b>' +
+      '<span class="team-role">' + role + '</span></span>' +   // 評級（S／A 級）先不顯示
       '<span class="team-intro">' + (profile.intro || spec.role || '') + '</span></span>' +
       '<span class="team-choice">' + (selected ? '移出 −' : '編入 ＋') + '</span></button>';
   };
   const available = roster.filter(id => !team.includes(id));
+  const oldSelected = teamPanel.querySelector('#teamSelected'), selectedScroll = oldSelected ? oldSelected.scrollTop : 0;
   teamPanel.innerHTML =
     '<div class="team-dialog" role="dialog" aria-modal="true" aria-label="出勤配置">' +
-    '<header class="team-dialog-head"><div><h2>🧑‍🤝‍🧑 出勤配置</h2><p>選擇這次任務的出勤人員</p></div><span class="team-count">已編入 <b>' + team.length + ' / ' + cap + '</b></span></header>' +
+    '<header class="team-dialog-head"><div class="team-title"><small>應變編組</small><div class="team-title-line"><h2>出勤配置</h2><p>選擇這次任務的出勤人員</p></div></div><span class="team-count"><small>已編入</small><b>' + team.length + ' / ' + cap + '</b></span></header>' +
     '<div class="team-columns">' +
-      '<section class="team-column"><h3>可選人員 <small>' + available.length + ' 位</small></h3><div class="team-list" id="teamAvailable">' +
+      '<section class="team-column"><h3>可選人員 <small>' + available.length + '</small></h3><div class="team-list" id="teamAvailable">' +
         (available.length ? available.map(id => memberCard(id, false)).join('') : '<p class="team-empty">所有人員都已編入。</p>') +
       '</div></section>' +
       '<section class="team-column team-column-selected"><h3>已編入人員 <small>' + team.length + ' / ' + cap + '</small></h3><div class="team-list" id="teamSelected">' +
-        (team.length ? team.map(id => memberCard(id, true)).join('') : '<p class="team-empty">尚未編入人員，請從左側選擇。</p>') +
+        (team.length ? team.map(id => '<div class="team-member-wrap">' + memberCard(id, true) + (typeof sortieSlotsHtml === 'function' ? sortieSlotsHtml(id) : '') + '</div>').join('') : '<p class="team-empty">尚未編入人員，請從左側選擇。</p>') +
       '</div></section>' +
-    '</div><footer class="team-dialog-footer"><span>點選左側編入，點選右側移出</span><button id="teamDone" type="button">完成</button></footer>' +
+    '</div><footer class="team-dialog-footer"><span>點選左側編入，點選右側移出；補給格放零食飲料，出勤時吃掉</span><button id="teamDone" type="button">完成</button></footer>' +
     '</div>';
   teamPanel.querySelector('#teamAvailable').addEventListener('click', e => {
     const button = e.target.closest('.team-pick'); if (!button) return;
@@ -370,9 +371,12 @@ function renderTeamPanel() {
     setTeam([...current, button.dataset.id]); renderTeamPanel();
   });
   teamPanel.querySelector('#teamSelected').addEventListener('click', e => {
+    if (typeof handleSortieClick === 'function' && handleSortieClick(e)) return;   // 補給格（js/sortie-supply.js）
     const button = e.target.closest('.team-pick'); if (!button) return;
+    if (typeof dropSortieLoadout === 'function') dropSortieLoadout(button.dataset.id);
     setTeam(getTeam().filter(id => id !== button.dataset.id)); renderTeamPanel();
   });
+  teamPanel.querySelector('#teamSelected').scrollTop = selectedScroll;
   teamPanel.querySelector('#teamDone').addEventListener('click', () => { if (typeof sfx === 'function') sfx('button'); closeTeamPanel(); });
 }
 

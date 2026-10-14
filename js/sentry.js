@@ -15,7 +15,9 @@ function spawnSentries() {
     const spec = TYPES[type]; if (!spec) continue;
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
-    G.towers.push({ kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() });
+    const t = { kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() };
+    if (!MAP_SAFE && typeof applySortieBuff === 'function') applySortieBuff(t);   // 出勤補給（js/sortie-supply.js）
+    G.towers.push(t);
   }
 }
 
@@ -562,9 +564,14 @@ function updateWanderer(npc, dt) {
 const sentryMenu = document.getElementById('sentryMenu');
 // 怪力加成：汙染值越高攻擊力越高。rageDmg＝汙染 100 時「額外」增加的倍率（1 → 2 倍、0.5 → 1.5 倍）
 function sentryDamageMul(t) {
+  const spec = TYPES[t.type], food = 1 + ((t.buff && t.buff.atk) || 0);   // 出勤補給的攻擊加成
+  if (!spec || !spec.rageDmg) return food;
+  return food * (1 + spec.rageDmg * Math.max(0, Math.min(100, t.taint || 0)) / 100);
+}
+// 防禦（受到傷害打幾折）：角色本身＋出勤補給，最多 75%
+function sentryDefense(t) {
   const spec = TYPES[t.type];
-  if (!spec || !spec.rageDmg) return 1;
-  return 1 + spec.rageDmg * Math.max(0, Math.min(100, t.taint || 0)) / 100;
+  return Math.max(0, Math.min(.75, ((spec && spec.defense) || 0) + ((t.buff && t.buff.def) || 0)));
 }
 let menuSentry = null;    // 目前開著選單的哨兵
 let assigning = null;     // 「指派位置巡邏」等待點地圖的哨兵

@@ -72,7 +72,7 @@ function enemyAttackSentry(e, target, dt) {
   if (e.atkCd > 0 || !target || target.hp <= 0) return;
   e.atkCd = 1;
   monsterSwingHit(e, target.x, target.y);
-  const spec = TYPES[target.type], defense = Math.max(0, Math.min(.75, spec.defense || 0));
+  const defense = sentryDefense(target);
   const damage = (e.sentryDamage ?? 14) * (1 - defense);
   target.hp = Math.max(0, target.hp - damage);
   target.hitT = Math.max(target.hitT || 0, .2);   // 受擊閃紅
@@ -111,7 +111,7 @@ function enemyAttackPlayer(e, dt) {
   playSlimeAudio('hit');
   if (p.hp <= 0 && !G.over) {
     flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e');
-    lose('player');
+    lose('player', '被' + monsterNameOf(e) + '攻擊');
   }
 }
 // 史萊姆撲擊：目標（玩家、哨兵或嚮導）在 3 格內就蓄力，朝「蓄力開始當下」目標的位置飛撲。

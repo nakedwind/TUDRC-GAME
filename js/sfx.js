@@ -58,6 +58,9 @@ const SFX = (() => {
     lifeformWalk: '怪物/生命體/生命體走路.mp3',
     lifeformDeath: '怪物/生命體/生命體死掉.mp3',
     lifeformRevive: '怪物/生命體/生命體復活.mp3',
+    // Smiler：咬人＝hit＋史萊姆撞擊（兩個疊在一起播）；笑＝scary-laugh（Smiler 消失時會淡出）
+    smilerBite: ['戰鬥/命中/hit.mp3', '怪物/史萊姆/slime-hit.mp3'],   // 先用 hit；自製的咬聲在 怪物/Smiler/smiler-bite.wav（太刺耳，暫時不用）
+    smilerLaugh: '怪物/Smiler/scary-laugh.mp3',
   };
   const FILE_KEY = 'tudrc_sound_files_v1';
   const fileConfig = (() => {
@@ -73,12 +76,15 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
   const lastPlayed = new Map();
+  const playingByKey = new Map();    // 正在播的聲音：sourceKey → [{ src, g } 或 { audio, gain }]（給 fadeOut 用）
+  const remember = (sourceKey, h) => { const list = playingByKey.get(sourceKey) || []; list.push(h); playingByKey.set(sourceKey, list); };
+  const forget = (sourceKey, h) => { const list = playingByKey.get(sourceKey); if (!list) return; const i = list.indexOf(h); if (i >= 0) list.splice(i, 1); if (!list.length) playingByKey.delete(sourceKey); };
   const fileLayers = value => value && value.mode === 'random' && Array.isArray(value.files) ? value.files.filter(Boolean) :
     (Array.isArray(value) ? value.filter(Boolean) : (value ? [value] : []));
   const playbackLayers = value => {
@@ -102,11 +108,13 @@ const SFX = (() => {
         const src = ctx.createBufferSource(); src.buffer = buffers[key]; src.playbackRate.value = rate;
         const g = ctx.createGain(); g.gain.value = gain;
         src.connect(g); g.connect(master); activeSources.add(src);
-        src.onended = () => activeSources.delete(src); src.start(); return;
+        const h = { src, g }; remember(sourceKey, h);
+        src.onended = () => { activeSources.delete(src); forget(sourceKey, h); }; src.start(); return;
       }
       const audio = new Audio('Sound effects/' + file);   // file:// 開啟時的疊加播放
       audio.volume = Math.min(1, volume * gain); audio.preservesPitch = false; audio.playbackRate = rate;
-      activeAudio.set(audio, gain); const cleanup = () => activeAudio.delete(audio);
+      const h = { audio }; remember(sourceKey, h);
+      activeAudio.set(audio, gain); const cleanup = () => { activeAudio.delete(audio); forget(sourceKey, h); };
       audio.addEventListener('ended', cleanup, { once: true }); audio.addEventListener('error', cleanup, { once: true });
       audio.play().catch(cleanup);
     });
@@ -225,8 +233,23 @@ const SFX = (() => {
     if (f) { ensure(); f(gain); }   // 合成音效也吃音量（sfxAt 會依距離調小）
   }
   preload();
+  // 讓某個還在播的聲音在 sec 秒內淡出並停止（例：Smiler 消失時，長笑聲跟著淡掉）
+  function fadeOut(sourceKey, sec = 0.5) {
+    for (const h of [...(playingByKey.get(sourceKey) || [])]) {
+      if (h.src) {
+        const t = ctx.currentTime;
+        h.g.gain.cancelScheduledValues(t); h.g.gain.setValueAtTime(h.g.gain.value, t); h.g.gain.linearRampToValueAtTime(0, t + sec);
+        try { h.src.stop(t + sec + 0.02); } catch (_) {}
+      } else if (h.audio) {
+        const a = h.audio, v0 = a.volume, t0 = performance.now();
+        const step = () => { const p = (performance.now() - t0) / (sec * 1000); if (p >= 1) { a.pause(); a.dispatchEvent(new Event('ended')); return; } a.volume = v0 * (1 - p); requestAnimationFrame(step); };
+        step();
+      }
+    }
+  }
   return {
     play,
+    fadeOut,
     GAIN_KEY,
     FILE_KEY,
     gainOf: name => SOUND_GAIN[name] ?? 1,                 // 某個音效目前的音量倍率

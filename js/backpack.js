@@ -59,7 +59,7 @@ function renderBackpackDetail() {
   backpackDetail.innerHTML = `
     <div class="bag-detail-image"><img src="${item.image}" alt=""></div>
     <h3>${item.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${cat.icon} ${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : ''}</div>
+    <div class="bag-tags"><span class="bag-tag">${cat.icon} ${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div>
     ${itemDesc(item) ? `<p class="bag-desc">${itemDesc(item)}</p>` : ''}
     <div class="bag-owned">持有 <b>×${count}</b></div>
     <div class="bag-actions">${backpackDrop && backpackDrop.id === item.id ? `

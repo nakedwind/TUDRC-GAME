@@ -130,7 +130,7 @@ function pearlHitPlayer(pearl) {
   p.hitT = .35; p.underAttackT = 5; p.lastAttacker = e;
   G.damageVignetteT = .35;
   flashDmg('-' + dmg, p.x, p.y - 46, '#ff6b6b'); addShake(2);
-  if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player'); }
+  if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + monsterNameOf(e) + '的珍珠打中'); }
 }
 function updatePearls(dt) {
   if (!G.pearls || !G.pearls.length) { if (G.pearlBits) updatePearlBits(dt); return; }

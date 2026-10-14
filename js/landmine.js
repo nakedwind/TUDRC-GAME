@@ -63,7 +63,7 @@ function detonateMine(o) {
       const hurt = LANDMINE.player * (1 - .4 * d / R);
       pl.hp = Math.max(0, pl.hp - hurt); G.damageVignetteT = .5;
       blastPush(pl, x, y, hurt, 46);
-      if (pl.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', pl.x, pl.y - 58, '#ff5b6e'); lose('player'); }
+      if (pl.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', pl.x, pl.y - 58, '#ff5b6e'); lose('player', '被地雷的爆炸波及'); }
     }
   }
   // 連鎖：引爆附近的油桶、點燃油汙、引爆附近的其他地雷

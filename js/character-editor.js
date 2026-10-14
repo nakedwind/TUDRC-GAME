@@ -19,7 +19,7 @@ const FIELD_LABELS = {
   drawSize:'角色圖尺寸・px'
 };
 const CORE_COMBAT = ['hp','dmg','rate','range','aggroRange','accuracy','defense','walkSpeed','taint','taintRegen','splash','color'];
-const BASIC_COMBAT = ['rank','role','ability'];
+const BASIC_COMBAT = ['role','ability'];   // 評級（rank）先不顯示，資料保留在 data/characters.js
 const PLAYER_FIELDS = ['hp','speed','r','drawSize'];
 const PLAYER_ATTACK_FIELDS = ['range','dmg','rate','mag','reloadTime','aggro','cone'];
 const $character = id => document.getElementById(id);
@@ -72,7 +72,7 @@ function renderCharacterList() {
   list.replaceChildren();
   for (const id of fighterIds) {
     const character = charactersDraft[id];
-    const sub = character.combat ? [character.combat.rank,character.combat.role,character.combat.ability].filter(Boolean).join('・') : '玩家・開槍／疏導';
+    const sub = character.combat ? [character.combat.role,character.combat.ability].filter(Boolean).join('・') : '玩家・開槍／疏導';
     if (term && !(character.name + id + sub).toLowerCase().includes(term)) continue;
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'character-item' + (id === selectedCharacterId ? ' selected' : '');
@@ -135,7 +135,7 @@ function makeField(path) {
     }
     parent[key] = next;
     saveDraft(); renderSummary(); renderCharacterList();
-    if (['name','sprite','rank','role','ability'].includes(key)) renderHero();
+    if (['name','sprite','role','ability'].includes(key)) renderHero();
   });
   label.append(title, input);
   if (key === 'accuracy' || key === 'defense') { const note = document.createElement('em'); note.textContent = '1 = 100%；0.25 = 25%'; label.appendChild(note); }
@@ -172,7 +172,7 @@ function renderHero() {
   $character('portrait').alt = c.name + '頭像';
   $character('kindTag').textContent = kindLabel(c);
   $character('editingTitle').textContent = c.name + '・角色資料';
-  $character('heroSub').textContent = c.combat ? [c.combat.rank + '級', c.combat.role, c.combat.ability].filter(Boolean).join(' · ') : '溫特・玩家操作角色';
+  $character('heroSub').textContent = c.combat ? [c.combat.role, c.combat.ability].filter(Boolean).join(' · ') : '溫特・玩家操作角色';
 }
 function renderCharacter() {
   const c = charactersDraft[selectedCharacterId];
@@ -180,7 +180,7 @@ function renderCharacter() {
   addSection('基本資料', c.combat ? ['name','sprite',...BASIC_COMBAT.map(key => 'combat.' + key)] : ['name','sprite'], '角色 ID 固定為 ' + c.id + '，避免編隊與存檔失效。');
   if (c.combat) {
     addSection('戰鬥數值', CORE_COMBAT.map(key => 'combat.' + key), '攻速以每秒攻擊次數表示；防禦與命中率以 0～1 表示。');
-    const special = Object.fromEntries(Object.entries(c.combat).filter(([key]) => !BASIC_COMBAT.includes(key) && !CORE_COMBAT.includes(key) && key !== 'ratings' && key !== 'trait'));
+    const special = Object.fromEntries(Object.entries(c.combat).filter(([key]) => !BASIC_COMBAT.includes(key) && !CORE_COMBAT.includes(key) && key !== 'ratings' && key !== 'trait' && key !== 'rank'));
     if (Object.keys(special).length) addObjectGroup('特殊能力', 'combat', special);
     if (c.combat.ratings) addSection('星級評價', Object.keys(c.combat.ratings).map(key => 'combat.ratings.' + key), '星級是人物介紹用的評價，實際戰鬥仍以數值欄位為準。');
   } else {
