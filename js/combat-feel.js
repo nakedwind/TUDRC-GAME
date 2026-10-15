@@ -192,7 +192,7 @@ function slimeExplode(e, mul) {
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 自爆史萊姆的爆炸波及順順宮帽：打開帽子
   const p = G.player;
   if (p && p.hp > 0 && Math.hypot(p.x - x, p.y - y) <= R) {
-    const dmg = Math.round(SLIME_BOMB.player * mul);
+    const dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SLIME_BOMB.player * mul) : SLIME_BOMB.player * mul));
     p.hp = Math.max(0, p.hp - dmg);
     p.hitT = .45; p.underAttackT = 5; G.damageVignetteT = .5;
     playPlayerHit(1, true);   // 溫特被自爆史萊姆炸到
@@ -510,7 +510,7 @@ function updateAcidSpit(dt) {
       const inPool = o => { const dx = o.x - pool.x, dy = (o.y - pool.y) / .6; return dx * dx + dy * dy <= pool.r * pool.r; };
       const p = G.player;
       if (p && p.hp > 0 && inPool(p)) {
-        p.hp = Math.max(0, p.hp - P.playerDps * dt);
+        p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(P.playerDps * dt) : P.playerDps * dt));
         p.hitT = Math.max(p.hitT || 0, .15); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .25);
         p.acidTick = (p.acidTick || 0) - dt;
         if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * .5), p.x, p.y - 46, '#d4e04a'); playPlayerHit(.55, true); }   // 踩在吐酸史萊姆的酸液裡：每次燙傷小聲響一下

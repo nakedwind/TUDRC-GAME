@@ -186,7 +186,7 @@ function onOverlayButton() {
 document.getElementById('ov-text').addEventListener('click', e => { if (e.target.closest('#missionRetreat')) { sfx('button'); returnToBase(); } });
 
 // ---- 作戰桌面板（外觀和商店、出勤配置同一套）----
-let missionBoard = null, missionBoardOpen = false, missionSel = null;
+let missionBoard = null, missionBoardOpen = false, missionSel = null, boardTab = 'main';   // boardTab：main 主線／side 支線（js/quests.js）
 const STATUS_TEXT = { cleared: '已控制', available: '可出擊', locked: '未開放', soon: '情報收集中' };
 function ensureMissionBoard() {
   if (missionBoard) return;
@@ -194,6 +194,9 @@ function ensureMissionBoard() {
   missionBoard.id = 'missionBoard'; missionBoard.className = 'hidden';
   missionBoard.addEventListener('click', e => {
     if (e.target === missionBoard || e.target.closest('.mission-close')) { closeMissionBoard(); return; }
+    const tab = e.target.closest('[data-board-tab]');
+    if (tab) { if (boardTab !== tab.dataset.boardTab) { boardTab = tab.dataset.boardTab; sfx('switch'); renderMissionBoard(); } return; }
+    if (boardTab === 'side' && typeof handleSideBoardClick === 'function' && handleSideBoardClick(e)) return;
     const node = e.target.closest('[data-mission]');
     if (node) { missionSel = node.dataset.mission; sfx('blip'); renderMissionBoard(); return; }
     if (e.target.closest('.mission-team')) { closeMissionBoard(true); openTeamPanel(); return; }
@@ -213,12 +216,17 @@ function renderMissionBoard() {
   const team = getTeam(), cleared = MISSIONS.filter(missionCleared).length;
   const teamFaces = team.map(id => '<img src="' + memberPortraitPath(TYPES[id]) + '" alt="' + TYPES[id].name + '" title="' + TYPES[id].name + '">').join('');
   const canGo = !!sel.map && st !== 'locked';
+  const side = boardTab === 'side' && typeof renderSideBoard === 'function';
+  const ready = typeof readyCount === 'function' ? readyCount() : 0;
+  const tabs = '<nav class="board-tabs" role="tablist">' +
+    '<button type="button" role="tab" data-board-tab="main" aria-selected="' + !side + '" class="' + (side ? '' : 'on') + '">主線</button>' +
+    '<button type="button" role="tab" data-board-tab="side" aria-selected="' + side + '" class="' + (side ? 'on' : '') + '">支線' + (ready ? '<i>' + ready + '</i>' : '') + '</button></nav>';
   missionBoard.innerHTML =
     '<section class="mission-card" role="dialog" aria-modal="true" aria-label="作戰桌">' +
-      '<header class="mission-head"><div class="mission-title"><small>作戰桌</small><div class="mission-title-line"><h2>Y 區作戰地圖</h2><p>選擇要前往的區域</p></div></div>' +
-        '<span class="mission-progress"><small>已控制</small><b>' + cleared + ' / ' + MISSIONS.length + '</b></span>' +
+      '<header class="mission-head"><div class="mission-title"><small>作戰桌</small><div class="mission-title-line"><h2>' + (side ? '委託與回憶' : '攻略 Y 區') + '</h2><p>' + (side ? '承接委託、查看回憶碎片' : '主線任務：依序控制 Y 區的每一區') + '</p></div></div>' + tabs +
+        (side ? '' : '<span class="mission-progress"><small>主線進度</small><b>' + cleared + ' / ' + MISSIONS.length + '</b></span>') +
         '<button type="button" class="mission-close" aria-label="關閉（Esc）">×</button></header>' +
-      '<div class="mission-body">' +
+      (side ? '<div class="mission-body side-body">' + renderSideBoard() + '</div></section>' : ('<div class="mission-body">' +
         '<div class="mission-map"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + lines + '</svg>' + nodes + '</div>' +
         '<aside class="mission-detail">' +
           '<div class="mission-detail-main"><em class="mission-status ' + st + '">' + (sel.boss ? '⚠ BOSS 反應・' : '') + STATUS_TEXT[st] + '</em>' +
@@ -228,16 +236,18 @@ function renderMissionBoard() {
           '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : STATUS_TEXT[st]) + '</button>' +
         '</aside>' +
       '</div>' +
-    '</section>';
+    '</section>'));
 }
 function openMissionBoard() {
-  ensureMissionBoard(); missionSel = null;
+  ensureMissionBoard(); missionSel = null; boardTab = 'main';
   missionBoardOpen = true; Object.keys(keys).forEach(key => { keys[key] = false; });
+  missionBoard.classList.remove('settled');   // 剛打開：播放滑入動畫；之後切分頁、點任務重畫時不要再播
   renderMissionBoard(); missionBoard.classList.remove('hidden'); sfx('menu');
+  clearTimeout(missionBoard._settle); missionBoard._settle = setTimeout(() => missionBoard.classList.add('settled'), 350);
 }
 function closeMissionBoard(silent = false) { if (!missionBoardOpen) return; missionBoardOpen = false; missionBoard.classList.add('hidden'); if (!silent) sfx('switch'); }
 window.addEventListener('keydown', e => {
   if (!missionBoardOpen) return;
   if (e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); closeMissionBoard(); }
-  else if (e.key === 'Enter' && !e.repeat) { e.preventDefault(); sortieTo(missionById(missionSel)); }
+  else if (e.key === 'Enter' && !e.repeat && boardTab === 'main') { e.preventDefault(); sortieTo(missionById(missionSel)); }
 }, true);

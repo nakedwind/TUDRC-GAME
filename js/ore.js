@@ -83,6 +83,7 @@ function blastOres(x, y, R) {
   }
 }
 function breakOre(o, bx, by, msg) {
+  if (typeof questEvent === 'function') questEvent('breakOre');   // 支線進度（js/quests.js）
   const spec = ORE_TYPES[o.type], c = oreCenter(o);
   o.lastHitBy = 'demolish';
   removeBarrier(o);

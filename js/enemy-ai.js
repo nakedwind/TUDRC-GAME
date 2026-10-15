@@ -115,7 +115,7 @@ function enemyAttackPlayer(e, dt) {
   if ((e.playerTouchCd || 0) > 0) return;
   e.playerTouchCd = 1;
   monsterSwingHit(e, p.x, p.y);
-  const damage = e.playerDamage ?? 12;
+  const damage = (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 12) : e.playerDamage ?? 12);   // 防護背心減傷（js/equipment.js）
   p.hp = Math.max(0, p.hp - damage);
   p.hitT = .45; p.underAttackT = 5; p.lastAttacker = e;
   for (const sentry of G.towers) if (sentry.type === 'red' && sentry.hp > 0 && !sentry.berserk) {

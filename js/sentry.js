@@ -617,8 +617,9 @@ window.addEventListener('keydown', e => {
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
 function soothe(t) {
   if (t.taint <= 0 && !t.berserk) { sfx('error'); sentryStatus(t, '無需疏導', '#9aa4b2'); return; }
-  if (G.guide < SOOTHE.cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
-  G.guide -= SOOTHE.cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
+  const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;   // 共感手環：花的 SP 變少（js/equipment.js）
+  if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
+  G.guide -= cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
   sfx('soothe');
   addStat('soothes');   // 成就：親自疏導次數

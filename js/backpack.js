@@ -30,6 +30,7 @@ function renderBackpack() {
   if (!backpackEl) return;
   const total = [...supplyInventory.values()].reduce((sum, n) => sum + n, 0);
   document.getElementById('backpackCount').textContent = total;
+  if (typeof renderEquipPanel === 'function') renderEquipPanel();   // 左邊的部隊長裝備（js/equipment.js）
   // 分類分頁：顯示每一類有幾件
   document.getElementById('backpackTabs').innerHTML = [{ id: 'all', name: '全部', icon: '' }, ...ITEM_CATEGORIES].map(cat => {
     const n = allItems().filter(item => cat.id === 'all' || item.category === cat.id).reduce((sum, item) => sum + (supplyInventory.get(item.id) || 0), 0);

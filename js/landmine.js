@@ -61,7 +61,7 @@ function detonateMine(o) {
   if (pl && pl.hp > 0) {
     const d = Math.hypot(pl.x - x, pl.y - y);
     if (d <= R && hasLineOfSight(x, y, pl.x, pl.y)) {
-      const hurt = LANDMINE.player * (1 - .4 * d / R);
+      const hurt = (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(LANDMINE.player * (1 - .4 * d / R)) : LANDMINE.player * (1 - .4 * d / R));
       pl.hp = Math.max(0, pl.hp - hurt); G.damageVignetteT = .5;
       if (typeof playPlayerHit === 'function') playPlayerHit();   // 溫特被地雷炸到：統一用溫特被打中的音效
       blastPush(pl, x, y, hurt, 46);

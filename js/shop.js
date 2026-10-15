@@ -121,7 +121,8 @@ function useSupply(id) {
   const item = supplyById(id), count = supplyInventory.get(id) || 0;
   if (!item || !G?.player || count <= 0) return false;
   if (!item.use) return false;   // 零食飲料不能直接吃（送禮用）
-  const restored = Math.min(item.restore, supplyNeed(item.use));
+  const amount = item.use === 'sp' && typeof equipAlmondMul === 'function' ? Math.round(item.restore * equipAlmondMul()) : item.restore;   // 杏仁水保溫瓶：恢復更多（js/equipment.js）
+  const restored = Math.min(amount, supplyNeed(item.use));
   if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.use].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
   if (item.use === 'hp') G.player.hp += restored; else G.guide += restored;
   if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1);

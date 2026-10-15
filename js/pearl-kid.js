@@ -125,7 +125,7 @@ function pearlBurst(x, y, z, color = '#f4f1ff') {   // 珍珠碎掉：小白圈�
   }
 }
 function pearlHitPlayer(pearl) {
-  const p = G.player, e = pearl.owner, dmg = e.playerDamage ?? 8;
+  const p = G.player, e = pearl.owner, dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 8) : e.playerDamage ?? 8));
   p.hp = Math.max(0, p.hp - dmg);
   p.hitT = .35; p.underAttackT = 5; p.lastAttacker = e;
   G.damageVignetteT = .35;

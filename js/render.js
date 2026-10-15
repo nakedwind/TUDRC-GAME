@@ -932,7 +932,8 @@ function draw() {
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
-  if (typeof drawSmilers === 'function') drawSmilers(ctx);   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
+  if (typeof drawSmilers === 'function') drawSmilers(ctx);
+  if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
   // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。

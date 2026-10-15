@@ -118,6 +118,8 @@ function hitHangiCapsAt(x, y, R) {
 // 帽子打開：跳出夯吉寶，有機會掉物品
 function openHangiCap(cap) {
   cap.state = 'open'; cap.t = 0;
+  if (typeof questEvent === 'function') questEvent('openCap');   // 支線進度（js/quests.js）
+  if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮御守（js/equipment.js）
   const key = cap.c + ',' + cap.r;
   if (G.grid[key] && G.grid[key].cap === cap) delete G.grid[key];   // 打開後就不擋路了（夯吉寶才跑得出來）
   if (typeof sfxAt === 'function') sfxAt('hangiPopOut', cap.x, cap.y, .9, 'hangi-cap');   // 夯吉寶衝出來的聲音
@@ -231,7 +233,7 @@ function throwCap(e, target) {
   if (typeof sfxAt === 'function') sfxAt('swordSwing', e.x, e.y, .45, 'hangi-throw');
 }
 function capHitPlayer(s) {
-  const p = G.player, e = s.owner, dmg = e.playerDamage ?? 8;
+  const p = G.player, e = s.owner, dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 8) : e.playerDamage ?? 8));
   p.hp = Math.max(0, p.hp - dmg);
   p.hitT = .35; p.underAttackT = 5; p.lastAttacker = e;
   G.damageVignetteT = Math.max(G.damageVignetteT || 0, .35);

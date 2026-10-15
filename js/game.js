@@ -270,7 +270,8 @@ function openDialogue(actor) {
   dialoguePortrait.alt = profile ? profile.name : 'NPC';
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
-  if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);   // 好感度、送禮按鈕（js/gifts.js）
+  if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);
+  if (typeof onDialogueOpenedWorkshop === 'function') onDialogueOpenedWorkshop(actor);   // 諾亞：開發工坊按鈕（js/equipment.js）   // 好感度、送禮按鈕（js/gifts.js）
 }
 function advanceDialogue() {
   if (!dialogueState) return;
@@ -364,7 +365,8 @@ window.addEventListener('keydown', e => {
     if (MOVE_KEYS.includes(k) || isInteractKey(k)) e.preventDefault();
     return;
   }
-  if (typeof missionBoardOpen !== 'undefined' && missionBoardOpen) return;   // 作戰桌打開時，按鍵不控制角色（Esc／Enter 在 js/missions.js）
+  if (typeof missionBoardOpen !== 'undefined' && missionBoardOpen) return;
+  if (typeof workshopOpen !== 'undefined' && workshopOpen) return;   // 開發工坊打開時，按鍵不控制角色   // 作戰桌打開時，按鍵不控制角色（Esc／Enter 在 js/missions.js）
   if (supplyShopOpen || backpackOpen || settingsOpen) {   // 商店、背包、設定打開時：Esc 關閉，其他按鍵不控制角色
     if (k === 'escape') { e.preventDefault(); if (supplyShopOpen) closeSupplyShop(); else closeBackpack(); }
     else if (k.startsWith('arrow') || ((k === ' ' || k === 'enter') && !(e.target instanceof HTMLButtonElement))) e.preventDefault();   // 按鈕上按 Enter／空白鍵照常可以按
@@ -757,7 +759,7 @@ function applyChaosDamage(t, best, spec) {
   if (G.enemies.includes(o)) { o.hp -= dmg; enemyHitReact(o, t.x, t.y, heavy); }
   else if (G.cores.includes(o)) { o.hp -= dmg; }
   else if (o === G.player) {
-    o.hp = Math.max(0, o.hp - dmg); o.hitT = .3; G.damageVignetteT = Math.max(G.damageVignetteT, .3);
+    o.hp = Math.max(0, o.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg)); o.hitT = .3; G.damageVignetteT = Math.max(G.damageVignetteT, .3);
     playPlayerHit();   // 被暴走的隊員打到
     friendlyHitReact(o, t.x, t.y, dmg, heavy, t);   // 閃紅、震退、傷害數字
     if (o.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose('player', '被暴走的' + (TYPES[t.type]?.name || '隊員') + '攻擊'); }
@@ -1040,7 +1042,7 @@ function updatePlayer(dt) {
   if (Math.abs(dx) >= Math.abs(dy) && dx) p.dir = dx < 0 ? 'left' : 'right';
   else if (dy) p.dir = dy < 0 ? 'back' : 'front';
   p.anim += dt;
-  const len = Math.hypot(dx, dy), step = PLAYER.speed * dt;
+  const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dt;   // 輕量跑鞋（js/equipment.js）
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   if (!playerBlocked(nx, p.y)) p.x = nx;
   if (!playerBlocked(p.x, ny)) p.y = ny;
@@ -1247,6 +1249,7 @@ const MELEE_SWING = {
 };
 // 玩家（溫特）攻擊：按住左鍵朝游標方向開槍。彈匣 6 發，打完或按 R 裝填；傷害很低、會吸引仇恨。
 const PLAYER_ATK = CHARACTERS.winter.playerAttack || { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 2 };
+if (typeof applyWeaponLevels === 'function') applyWeaponLevels();   // 武器等級（找諾亞升級；js/equipment.js）
 const GUIDE_GUN_TYPES = new Set(['eldrin', 'chris']);
 const GUIDE_GUN = { mag: 6, reloadTime: 2 };
 let aimHeld = false, aimClient = null;
@@ -1769,7 +1772,7 @@ function update(dt) {
     const p = G.player;
     const playerAcid = p && p.hp > 0 ? acidTick(p) : 0;
     if (playerAcid) {
-      p.hp = Math.max(0, p.hp - playerAcid);
+      p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(playerAcid) : playerAcid));
       playPlayerHit(.55);   // 阿瓦倫的腐蝕：每燙一次小聲響一下
       p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT, .35);
       flashDmg('-' + Math.round(playerAcid), p.x, p.y - 46, '#c58aff');
@@ -1790,7 +1793,7 @@ function update(dt) {
     for (const m of G.scorchMarks) m.t -= dt;
     G.scorchMarks = G.scorchMarks.filter(m => m.t > 0);
   }
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -1856,7 +1859,8 @@ function update(dt) {
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
-  if (typeof updateSmilers === 'function') updateSmilers(dt);   // Smiler：黑暗中注視、咬人（js/smiler.js）
+  if (typeof updateSmilers === 'function') updateSmilers(dt);
+  if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
@@ -1960,7 +1964,7 @@ function loseOverlay(reason, cause) {
 function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
-function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); winOverlay(); }
+function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 function lose(reason, cause) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 

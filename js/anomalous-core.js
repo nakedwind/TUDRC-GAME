@@ -226,6 +226,8 @@ function drawCore(core) {
 
 // ---- 打破：碎成好幾塊往外噴飛，落地彈一下後淡出 ----
 function breakCore(core) {
+  if (typeof questEvent === 'function') questEvent('breakCore');   // 支線進度（js/quests.js）
+  if (typeof tryEquipDrop === 'function') tryEquipDrop('detector', core.x, core.y);   // 有機會拿到異質探測器（js/equipment.js）
   const lift = coreLift(core), bottom = core.y + 20, top = bottom - CORE.h - lift, left = core.x - CORE.w / 2;
   const cx = CORE.w / 2, cy = CORE.h * .55;   // 碎裂中心（圖片座標）
   // 把圖片沿著外框切成一圈楔形碎片（每片＝中心點＋外框上兩個點）

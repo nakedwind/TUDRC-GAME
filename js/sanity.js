@@ -46,6 +46,7 @@ function restoreSanitySP() {
   sanityWarned = G.guide < SANITY.swayBelow;   // 本來就很低：不要一進地圖就再說一次
 }
 // 0（SP 滿）～1（SP 歸零）
+const sanityCalm = () => (typeof equipCalm === 'function' ? 1 - equipCalm() : 1);   // 降噪耳機：影響變輕（js/equipment.js）
 const sanityLoss = () => (G && G.guideMax ? Math.max(0, Math.min(1, 1 - G.guide / G.guideMax)) : 0);
 
 // 頭暈（render.js 在畫世界之前呼叫）：
@@ -56,7 +57,7 @@ const sanityLoss = () => (G && G.guideMax ? Math.max(0, Math.min(1, 1 - G.guide 
 let sanityLurch = { at: -99, side: 1, next: 0 };
 function applySanitySway(ctx, cv) {
   if (!G || G.guide >= SANITY.swayBelow) return;
-  const k = Math.min(1, (SANITY.swayBelow - G.guide) / SANITY.swayBelow), t = performance.now() / 1000;
+  const k = Math.min(1, (SANITY.swayBelow - G.guide) / SANITY.swayBelow) * sanityCalm(), t = performance.now() / 1000;
   // 1. 不規則繞圈
   const orbitR = SANITY.swayPx * k * (.55 + .45 * Math.sin(t * .37));
   const orbitA = t * 1.6 + Math.sin(t * .53) * 1.8;
@@ -85,7 +86,7 @@ function sanityAfterDraw() {
     sanityGhostCv.getContext('2d').drawImage(cv, 0, 0);
     return;
   }
-  const k = Math.min(1, (SANITY.ghostBelow - G.guide) / SANITY.ghostBelow), t = performance.now() / 1000;
+  const k = Math.min(1, (SANITY.ghostBelow - G.guide) / SANITY.ghostBelow) * sanityCalm(), t = performance.now() / 1000;
   const c = cv.getContext('2d'), sx = Math.cos(t * 1.9) * SANITY.ghostShift * (.5 + .5 * k), sy = Math.sin(t * 1.3) * SANITY.ghostShift * .5 * k;
   c.save(); c.setTransform(1, 0, 0, 1, 0, 0);
   c.globalAlpha = SANITY.ghostAlpha * (.4 + .6 * k);
@@ -98,7 +99,7 @@ function sanityAfterDraw() {
 (function sanityLoop() {
   requestAnimationFrame(sanityLoop);
   const cv = document.getElementById('cv'); if (!cv || typeof G === 'undefined' || !G) return;
-  const sp = G.guide, loss = SANITY.grayFrom > 0 ? Math.max(0, Math.min(1, (SANITY.grayFrom - sp) / SANITY.grayFrom)) : 0;
+  const sp = G.guide, loss = (SANITY.grayFrom > 0 ? Math.max(0, Math.min(1, (SANITY.grayFrom - sp) / SANITY.grayFrom)) : 0) * sanityCalm();
   const filter = loss > .005 ? `grayscale(${(loss * SANITY.grayMax).toFixed(3)}) brightness(${(1 - loss * SANITY.dimMax).toFixed(3)})` : '';
   if (cv.style.filter !== filter) cv.style.filter = filter;
   if (sanitySP !== sp) {
@@ -117,7 +118,7 @@ let sanityBeatAt = 0, sanityWeirdAt = 0;
 function sanitySounds(sp) {
   const now = performance.now() / 1000;
   if (!G.player || sp >= SANITY.soundBelow || (typeof mapTransitioning !== 'undefined' && mapTransitioning)) { sanityBeatAt = 0; sanityWeirdAt = 0; return; }
-  const k = Math.min(1, (SANITY.soundBelow - sp) / SANITY.soundBelow), level = .25 + .75 * k;
+  const k = Math.min(1, (SANITY.soundBelow - sp) / SANITY.soundBelow), level = (.25 + .75 * k) * sanityCalm();
   if (now >= sanityBeatAt) {
     sanityBeatAt = now + SANITY.heartbeatEvery;
     SFX.play('heartbeat', SANITY.heartbeatVolume * level, 'sanity-heartbeat');

@@ -113,7 +113,8 @@ function updateSmilers(dt) {
     v.darkT = (v.darkT || 0) + dt;
     if (v.darkT < SMILER.grace || v.smilerCd > 0 || smilers.some(s => s.victim === v)) continue;
     const rate = Math.min(SMILER.biteMax, SMILER.biteRate + (v.darkT - SMILER.grace) * SMILER.biteRamp);
-    if (Math.random() < rate * dt) startSmilerBite(v);
+    const ward = v === G.player && typeof equipSmilerMul === 'function' ? equipSmilerMul() : 1;   // 順順宮御守：溫特比較不容易被咬（js/equipment.js）
+    if (Math.random() < rate * ward * dt) startSmilerBite(v);
   }
   // ---- 動畫 ----
   for (const s of smilers) {
@@ -141,7 +142,7 @@ function smilerBite(v, s) {
   v.smilerCd = SMILER.biteCd;
   if (v.hp <= 0) return;
   const isPlayer = v === G.player;
-  const dmg = isPlayer ? SMILER.playerDmg : SMILER.sentryDmg * (1 - sentryDefense(v));
+  const dmg = isPlayer ? (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SMILER.playerDmg) : SMILER.playerDmg) : SMILER.sentryDmg * (1 - sentryDefense(v));
   v.hp = Math.max(0, v.hp - dmg);
   v.hitT = Math.max(v.hitT || 0, .3); v.hitColor = '#ff3b4f';
   if (isPlayer) playPlayerHit(1, true);   // 咬到溫特：跟其他怪物一樣用溫特被打中的音效

@@ -153,7 +153,7 @@ function squadCard(actor, safe) {
     ? '<div class="no-load"><span>精神負荷 <b>無</b></span><i><u style="width:0"></u></i></div>'
     : '<div><span>負荷 <b>' + taint + ' / 100</b></span><i class="taint-bar"><u style="width:' + taint + '%"></u></i></div>';
   return '<article class="squad-card squad-card-combat" style="--member-color:' + spec.color + '">' +
-    '<img class="squad-portrait" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' +
+    '<span class="squad-portrait"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></span>' +   // 頭像框：放大顯示上半身（半身像）
     '<div class="squad-member-main">' +
       '<div class="squad-member-head"><div><strong>' + spec.name + '<mark>Lv.' + level + '</mark></strong><span>' + (spec.guide ? '嚮導' : '哨兵') + '・' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
       '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + maxhp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / maxhp * 100)) + '%"></u></i></div>' +
@@ -167,7 +167,7 @@ function supportCard(actor) {
   if (!profile) return '';
   const display = { name: profile.name, sprite: profile.sprite };
   return '<article class="squad-card squad-card-support" style="--member-color:#8292a3">' +
-    '<img class="squad-portrait" src="' + memberPortraitPath(display) + '" alt="' + profile.name + '">' +
+    '<span class="squad-portrait"><img src="' + memberPortraitPath(display) + '" alt="' + profile.name + '"></span>' +
     '<div class="squad-member-main">' +
       '<div class="squad-member-head"><div><strong>' + profile.name + '</strong><span>Y102編組・非戰鬥人員</span></div><em class="member-condition support">非戰鬥人員</em></div>' +
       '<div class="support-assignment"><b>支援編制</b><span>不參與戰鬥，無法使用異質結晶升級。</span></div>' +
