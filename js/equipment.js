@@ -8,7 +8,7 @@
 //  ・資料、數值在 data/equipment.js；進度存在瀏覽器（localStorage）。
 // ============================================================
 const EQUIP_STORE = 'tudrc_equipment_v1';
-const equipState = { owned: {}, equipped: { head: null, body: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, gunAmmo: {}, battery: 100 };
+const equipState = { owned: {}, equipped: { head: null, body: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: 'flare' }, gunAmmo: {}, battery: 100 };
 try {
   const s = JSON.parse(localStorage.getItem(EQUIP_STORE) || '{}');
   if (s.owned) for (const [id, lv] of Object.entries(s.owned)) if (EQUIPMENT.some(e => e.id === id)) equipState.owned[id] = Math.max(1, Math.min(3, lv | 0));
@@ -23,7 +23,18 @@ try {
   if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field ? 0 : 1, Math.min(3, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
   if (s.gunAmmo) for (const [k, a] of Object.entries(s.gunAmmo)) if (WEAPON_UPGRADES[k] && a) equipState.gunAmmo[k] = { mag: Math.max(0, a.mag | 0), reserve: Math.max(0, a.reserve | 0) };
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
+  if (s.loadout) for (const k of ['main', 'sub']) if (s.loadout[k] === null || WEAPON_UPGRADES[s.loadout[k]]) equipState.loadout[k] = s.loadout[k];
 } catch (_) {}
+// ---- 主武器／副武器：出勤時只能在這兩把之間切換（滾輪、數字鍵 1／2）----
+const WEAPON_SLOTS = [{ id: 'main', name: '主武器' }, { id: 'sub', name: '副武器' }];
+const weaponHave = id => !!WEAPON_UPGRADES[id] && (equipState.weapons[id] || 0) > 0;
+function fixLoadout() {   // 沒拿到的槍不能裝；兩格不能放同一把；兩格都空＝空手
+  const L = equipState.loadout;
+  if (L.main && !weaponHave(L.main)) L.main = null;
+  if (L.sub && (!weaponHave(L.sub) || L.sub === L.main)) L.sub = null;
+}
+fixLoadout();
+const weaponInLoadout = id => equipState.loadout.main === id || equipState.loadout.sub === id;
 function saveEquipment() { try { localStorage.setItem(EQUIP_STORE, JSON.stringify(equipState)); } catch (_) {} }
 
 const equipDef = id => EQUIPMENT.find(e => e.id === id) || null;
@@ -226,50 +237,100 @@ function tryEquipDrop(id, x, y) {
 }
 
 // ---- 背包左邊的「部隊長裝備」----
-let equipPick = null;   // 正在換哪一格
+// 點有東西的格子：跳出「卸下裝備／取消」小視窗；點空格：背包切到「裝備」分頁，挑一件能放這格的。
+// 要換成別的：在「裝備」分頁點那件，右邊說明下面按「裝備」（會直接換掉，不用先卸下）。
+let equipMenu = null;   // 跳出小視窗的那一格
 function equipIcon(def, cls = '') { return def.image ? '<img class="' + cls + '" src="' + def.image + '" alt="">' : '<i class="' + cls + '">' + def.icon + '</i>'; }
 function renderEquipPanel() {
   const box = document.getElementById('equipPanel'); if (!box) return;
-  // 紙娃娃：左邊溫特立繪，4 個裝備格直排在右邊（頭部、身體、隨身物品 ×2），名稱在格子上面
-  const pos = { head: 'tl', body: 'bl', acc1: 'tr', acc2: 'br' };
-  const slots = EQUIP_SLOTS.map(s => {
+  // 紙娃娃：溫特在上面，下面 2 欄：主武器、副武器／頭部、身體／隨身物品 ×2
+  const weaponSlots = WEAPON_SLOTS.map(s => {
+    const id = equipState.loadout[s.id], w = id && WEAPON_UPGRADES[id];
+    return '<button type="button" class="doll-slot weapon' + (w ? ' filled' : '') + '" data-equip-slot="w:' + s.id + '" title="' + s.name + (w ? '：' + w.name : '：未裝備') + '">' +
+      '<span>' + (w ? equipIcon(w) : '＋') + '</span><small>' + (w ? w.name : s.name) + '</small></button>';   // 裝上後只顯示名稱；空格顯示「主武器／副武器」
+  }).join('');
+  const slots = weaponSlots + EQUIP_SLOTS.map(s => {
     const id = equipState.equipped[s.id], def = id && equipDef(id);
-    return '<button type="button" class="doll-slot doll-' + pos[s.id] + (def ? ' filled' : '') + (equipPick === s.id ? ' picking' : '') + '" data-equip-slot="' + s.id + '" title="' + s.name + (def ? '：' + def.name : '：未裝備') + '">' +
-      '<span>' + (def ? equipIcon(def) : '＋') + '</span><small>' + (def ? def.name : s.name) + '</small>' + (def ? '<em>Lv' + equipState.owned[id] + '</em>' : '') + '</button>';
+    return '<button type="button" class="doll-slot' + (def ? ' filled' : '') + '" data-equip-slot="' + s.id + '" title="' + s.name + (def ? '：' + def.name : '：未裝備') + '">' +
+      '<span>' + (def ? equipIcon(def) : '＋') + '</span><small>' + (def ? def.name : s.name) + '</small></button>';   // 等級看下面的「目前效果」
   }).join('');
   const art = '<img class="doll-art" src="' + EQUIP_PORTRAIT.image + '" alt="溫特" onerror="this.onerror=null;this.src=\'' + EQUIP_PORTRAIT.fallback + '\';this.classList.add(\'sprite\')">';
-  const pickSlot = equipPick && EQUIP_SLOTS.find(s => s.id === equipPick);
-  const worn = EQUIP_SLOTS.map(s => equipState.equipped[s.id]).filter(Boolean).map(id => { const d = equipDef(id); return '<li>' + equipIcon(d) + '<b>' + d.name + ' <em>Lv' + equipState.owned[id] + '</em></b><span>' + d.stat(d.levels[equipState.owned[id] - 1]) + '</span></li>'; }).join('');
-  const weapons = Object.entries(WEAPON_UPGRADES).map(([k, w]) => !equipState.weapons[k]
-    ? '<div class="equip-weapon locked">' + equipIcon(w) + '<b>' + w.name + '</b><span>尚未取得：' + w.where + '</span></div>'
-    : '<div class="equip-weapon">' + equipIcon(w) + '<b>' + w.name + ' <em>Lv' + equipState.weapons[k] + '</em></b><span>' + w.stat(w.levels[equipState.weapons[k] - 1]) + (w.field ? '・彈藥 ' + (gunAmmo(k).mag + gunAmmo(k).reserve) + ' 發' : '') + '</span></div>').join('');
   const lamp = equipLv('headlamp') ? '<div class="equip-battery"><span>🔋 手電筒電量</span><b>' + Math.round(equipState.battery) + '%</b><i><u style="width:' + equipState.battery + '%"></u></i><small>背包裡的電池：' + (supplyInventory.get('battery') || 0) + ' 顆</small></div>' : '';
+  const oldArt = box.querySelector('.doll-art'), scroll = box.scrollTop;
+  box.classList.add('no-anim');   // 重畫的這一瞬間不要播格子的浮起／變色動畫
   box.innerHTML = '<h3>部隊長裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + slots + '</div></div>' +
-    (pickSlot ? '<div class="equip-pick-title">換「' + pickSlot.name + '」</div>' + equipPicker(pickSlot) : '') +
-    (worn ? '<h3>目前效果</h3><ul class="equip-worn">' + worn + '</ul>' : '') + lamp + '<h3>武器</h3>' + weapons + '<p class="equip-tip">升級裝備和武器：回基地找諾亞</p>';
+    lamp;
+  if (oldArt && oldArt.complete) box.querySelector('.doll-art').replaceWith(oldArt);   // 沿用已經載好的立繪，不要重新載入（會閃）
+  box.scrollTop = scroll;
+  requestAnimationFrame(() => requestAnimationFrame(() => box.classList.remove('no-anim')));
+  renderEquipSlotMenu(box);
 }
-function equipPicker(slot) {
-  const def = EQUIPMENT.filter(e => slot.kinds.includes(e.kind) && equipState.owned[e.id]);
-  const cur = equipState.equipped[slot.id];
-  const rows = def.map(e => {
-    const where = Object.entries(equipState.equipped).find(([k, v]) => v === e.id && k !== slot.id);
-    return '<button type="button" class="equip-option' + (e.id === cur ? ' sel' : '') + '" data-equip-item="' + e.id + '">' + equipIcon(e) +
-      '<b>' + e.name + ' <em>Lv' + equipState.owned[e.id] + '</em></b><span>' + e.stat(e.levels[equipState.owned[e.id] - 1]) + (where ? '（從另一格換過來）' : '') + '</span></button>';
-  }).join('');
-  return '<div class="equip-picker">' + (rows || '<p>還沒有這一格能用的裝備。回基地找諾亞開發看看。</p>') +
-    (cur ? '<button type="button" class="equip-unequip">卸下</button>' : '') + '</div>';
+// 格子的小視窗：跟在被點的格子下面
+function renderEquipSlotMenu(box) {
+  const btn = equipMenu && box.querySelector('[data-equip-slot="' + equipMenu + '"]');
+  if (!btn) { equipMenu = null; return; }
+  const name = btn.querySelector('small').textContent;
+  const menu = document.createElement('div');
+  menu.className = 'equip-slot-menu'; menu.setAttribute('role', 'dialog'); menu.setAttribute('aria-label', name);
+  menu.innerHTML = '<b>' + name + '</b>' +
+    '<button type="button" data-slot-act="off">卸下裝備</button>' +
+    '<button type="button" class="cancel" data-slot-act="cancel">取消</button>';
+  box.appendChild(menu);
+  const b = btn.getBoundingClientRect(), p = box.getBoundingClientRect(), mw = menu.offsetWidth;
+  const left = Math.max(4, Math.min(box.clientWidth - mw - 4, b.left - p.left + b.width / 2 - mw / 2));
+  menu.style.left = left + 'px';
+  menu.style.top = (b.bottom - p.top + box.scrollTop + 4) + 'px';
+  menu.querySelector('button').focus();
+}
+function equipSlotFilled(slotId) {
+  return slotId.startsWith('w:') ? !!equipState.loadout[slotId.slice(2)] : !!equipState.equipped[slotId];
+}
+function afterLoadoutChange() {
+  saveEquipment();
+  if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) updateAmmoHud();
+  if (typeof backpackOpen !== 'undefined' && backpackOpen && typeof renderBackpack === 'function') renderBackpack(); else renderEquipPanel();
+}
+function unequipSlot(slotId) {
+  if (slotId.startsWith('w:')) equipState.loadout[slotId.slice(2)] = null; else equipState.equipped[slotId] = null;
+  sfx('switch'); afterLoadoutChange();
+}
+// 直接裝到某一格（原本那格的東西換下來；同一件已經在別格就跟那格交換／移過來）
+function equipToSlot(slotId, id) {
+  if (slotId.startsWith('w:')) {
+    const slot = slotId.slice(2), other = slot === 'main' ? 'sub' : 'main', L = equipState.loadout;
+    if (!weaponHave(id)) return;
+    if (L[other] === id) L[other] = L[slot];   // 另一格已經是這把：兩格交換
+    L[slot] = id;
+  } else {
+    if (!equipState.owned[id]) return;
+    for (const k of Object.keys(equipState.equipped)) if (equipState.equipped[k] === id) equipState.equipped[k] = null;   // 同一件只能穿一格
+    equipState.equipped[slotId] = id;
+  }
+  sfx('button'); afterLoadoutChange();
+}
+// 這件可以放哪幾格（背包「裝備」分頁的按鈕用）
+function slotsForGear(kind, id) {
+  if (kind === 'weapon') return WEAPON_SLOTS.map(s => ({ id: 'w:' + s.id, name: s.name, cur: equipState.loadout[s.id] === id }));
+  const d = equipDef(id); if (!d) return [];
+  return EQUIP_SLOTS.filter(s => s.kinds.includes(d.kind)).map(s => ({ id: s.id, name: s.name, cur: equipState.equipped[s.id] === id }));
 }
 document.addEventListener('click', e => {
   if (!e.target.closest || !e.target.closest('#equipPanel')) return;
-  const slot = e.target.closest('[data-equip-slot]');
-  if (slot) { equipPick = equipPick === slot.dataset.equipSlot ? null : slot.dataset.equipSlot; sfx('menu'); renderEquipPanel(); return; }
-  const opt = e.target.closest('[data-equip-item]');
-  if (opt && equipPick) {
-    const id = opt.dataset.equipItem;
-    for (const k of Object.keys(equipState.equipped)) if (equipState.equipped[k] === id) equipState.equipped[k] = null;   // 同一件只能穿一格
-    equipState.equipped[equipPick] = id; equipPick = null; saveEquipment(); sfx('button'); renderEquipPanel(); return;
+  const act = e.target.closest('[data-slot-act]');
+  if (act && equipMenu) {
+    const id = equipMenu; equipMenu = null;
+    if (act.dataset.slotAct === 'off') unequipSlot(id); else { sfx('switch'); renderEquipPanel(); }
+    document.querySelector('#equipPanel [data-equip-slot="' + id + '"]')?.focus(); return;
   }
-  if (e.target.closest('.equip-unequip') && equipPick) { equipState.equipped[equipPick] = null; equipPick = null; saveEquipment(); sfx('switch'); renderEquipPanel(); }
+  const slot = e.target.closest('[data-equip-slot]');
+  if (slot) {
+    const id = slot.dataset.equipSlot;
+    if (equipSlotFilled(id)) { equipMenu = equipMenu === id ? null : id; sfx('menu'); renderEquipPanel(); return; }   // 有東西：跳小視窗
+    equipMenu = null;   // 空格：背包切到「裝備」分頁，選第一件能放這格的
+    if (typeof showGearForSlot === 'function') showGearForSlot(id); else renderEquipPanel();
+    return;
+  }
+  if (equipMenu && !e.target.closest('.equip-slot-menu')) { equipMenu = null; renderEquipPanel(); }   // 點旁邊：關掉小視窗
 });
 
 // ---- 諾亞的開發工坊 ----
@@ -325,10 +386,27 @@ function renderWorkshop() {
     return row(equipIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < 3 ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
       lv < 3 ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>');
   }).join('');
+  // 右側：目前穿戴的 4 格＋背包裡其他已擁有的裝備（升級後等級即時更新）
+  const wornWeaponSlots = WEAPON_SLOTS.map(s => {
+    const k = equipState.loadout[s.id], w = k && WEAPON_UPGRADES[k], lv = k && equipState.weapons[k];
+    return '<div class="wss-slot weapon' + (w ? ' filled' : '') + '"><span class="wss-icon">' + (w ? equipIcon(w) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (w ? w.name + ' <em>Lv' + lv + '</em>' : '未裝備') + '</b>' +
+      (w ? '<span>' + w.stat(w.levels[lv - 1]) + '</span>' : '') + '</div></div>';
+  }).join('');
+  const wornSlots = wornWeaponSlots + EQUIP_SLOTS.map(s => {
+    const id = equipState.equipped[s.id], d = id && equipDef(id);
+    return '<div class="wss-slot' + (d ? ' filled' : '') + '"><span class="wss-icon">' + (d ? equipIcon(d) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (d ? d.name + ' <em>Lv' + equipState.owned[id] + '</em>' : '未裝備') + '</b>' +
+      (d ? '<span>' + d.stat(d.levels[equipState.owned[id] - 1]) + '</span>' : '') + '</div></div>';
+  }).join('');
+  const wornIds = new Set(Object.values(equipState.equipped).filter(Boolean));
+  const spare = EQUIPMENT.filter(d => equipState.owned[d.id] && !wornIds.has(d.id))
+    .map(d => '<span class="wss-item" title="' + d.name + ' Lv' + equipState.owned[d.id] + '：' + d.stat(d.levels[equipState.owned[d.id] - 1]) + '">' + equipIcon(d) + '<em>Lv' + equipState.owned[d.id] + '</em></span>').join('');
+  const side = '<aside class="workshop-side"><h3>目前裝備</h3>' + wornSlots +
+    '<h3>背包裡的裝備</h3>' + (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">沒有其他裝備</p>') +
+    '<p class="wss-tip">換裝備：打開背包</p></aside>';
   workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
     '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>用異質碎片開發新裝備，或把裝備、武器升級</p></div>' +
     '<span class="workshop-wallet"><small>異質碎片</small><b>◆ ' + training.crystals + '</b></span><button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +
-    '<div class="workshop-body"><h3>裝備</h3>' + gear + '<h3>武器</h3>' + weapons + '</div></section>';
+    '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3>' + gear + '<h3>武器</h3>' + weapons + '</div>' + side + '</div></section>';
 }
 function openWorkshop() {
   ensureWorkshop(); if (typeof closeDialogue === 'function') closeDialogue(true);
@@ -345,3 +423,11 @@ function onDialogueOpenedWorkshop(actor) {
 document.getElementById('dialogueWorkshop')?.addEventListener('click', openWorkshop);
 
 applyWeaponLevels();
+
+// Esc：先關格子的小視窗（不要直接把背包關掉）
+window.addEventListener('keydown', e => {
+  if (e.key !== 'Escape' || !equipMenu) return;
+  e.preventDefault(); e.stopImmediatePropagation();
+  const id = equipMenu; equipMenu = null; sfx('switch'); renderEquipPanel();
+  document.querySelector('#equipPanel [data-equip-slot="' + id + '"]')?.focus();
+}, true);

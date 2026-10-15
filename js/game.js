@@ -387,7 +387,8 @@ window.addEventListener('keydown', e => {
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
   if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) {   // 手動裝填（目前拿的那把）
     const wid = playerWeapon(G.player).id;
-    if (wid === 'flare') startFlareReload(G.player); else if (playerWeapon(G.player).special) startSpecialReload(wid, G.player); else startReload(G.player);
+    if (wid === 'none') { /* 空手：沒東西可以裝填 */ }
+    else if (wid === 'flare') startFlareReload(G.player); else if (playerWeapon(G.player).special) startSpecialReload(wid, G.player); else startReload(G.player);
   }
   if (npcArrangeMode) return;
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：空白鍵 或 E
@@ -408,6 +409,8 @@ window.addEventListener('keydown', e => {
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) openMissionBoard();   // 作戰桌／作戰螢幕（js/missions.js；旁邊的椅子或人更近時讓給它們）
+    else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) openVendingMachine();   // 販賣機：只賣飲料（js/shop.js）
+    else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();
       if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
@@ -1326,6 +1329,7 @@ function updatePlayerAttack(dt) {
     if (playerWeapon(p).id === 'pistol') { updateAmmoHud(); return; }
   }
   updateAmmoHud();
+  if (playerWeapon(p).id === 'none') { p.gunT = 0; return; }   // 空手：不舉槍、不開槍
   const canFire = !(p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
   if (playerWeapon(p).id === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈槍（js/flare.js）
   if (playerWeapon(p).special) { updateSpecialGun(playerWeapon(p).id, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈槍、麻醉槍（js/special-guns.js）
@@ -1423,20 +1427,23 @@ function updateAmmoHud() {
   if (!ammoHudEl) buildAmmoHud();
   ammoHudEl.style.display = '';
   const p = G.player, mag = PLAYER_ATK.mag, ammo = p ? (p.ammo ?? mag) : mag;
+  const unarmed = !!p && playerWeapon(p).id === 'none';
   const wi = (p && p.weaponIndex) || 0;
   let text;
-  if (p && playerWeapon(p).id === 'flare') {   // 照明彈：彈匣／備用彈
+  if (unarmed) text = '';
+  else if (p && playerWeapon(p).id === 'flare') {   // 照明彈：彈匣／備用彈
     ensureFlareAmmo(p);
     const empty = p.flareMag + p.flareReserve <= 0;
     text = p.flareReloadT > 0 ? 'Reload' : p.flareMag + ' / ' + p.flareReserve + (empty ? '<small>去彈藥箱補給</small>' : '');
   } else if (p && playerWeapon(p).special) text = specialGunHud(playerWeapon(p).id, p);   // 燃燒彈槍、麻醉槍
   else text = (p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞';
   const owned = WEAPONS.map((w, i) => weaponUsable(i) ? 1 : 0).join('');
-  const key = wi + '|' + text + '|' + owned;
+  const key = (unarmed ? 'none' : wi) + '|' + text + '|' + owned;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
   ammoHudKey = key;
   // 正在用的在前面；後面只露出下一把（滾輪往下會換到的那把），還沒拿到的不顯示
   let nx = wi; for (let i = 0; i < WEAPONS.length; i++) { nx = (nx + 1) % WEAPONS.length; if (weaponUsable(nx)) break; }
+  if (unarmed) { ammoGunEls.forEach(img => { img.className = 'off'; }); ammoTextEl.innerHTML = '<span class="weapon-name">✋ 空手</span>'; return; }
   ammoGunEls.forEach((img, i) => { img.className = i === wi ? 'front' : i === nx ? 'back' : 'off'; });
   ammoTextEl.innerHTML = '<span class="weapon-name"></span>' + text;
   ammoTextEl.querySelector('.weapon-name').textContent = WEAPONS[wi].id === 'flare' ? '照明彈' : WEAPONS[wi].short || WEAPONS[wi].name;
@@ -1905,15 +1912,15 @@ function warnCampAttack() {
 // ---- HUD / 狀態畫面 ----
 function updateHUD() {
   document.getElementById('npcArrangeToolbar').classList.toggle('hidden', !MAP_SAFE);
-  // 安全區域不顯示戰鬥資訊條，連同「建築」按鈕一起收起來
+  // 下方資訊條（HP／SP、補給、背包、經費、碎片）安全區域也顯示；只有「建築」按鈕在安全區收起來
   const hud = document.getElementById('hud');
-  if (hud) hud.classList.toggle('hidden', MAP_SAFE);
+  if (hud) hud.classList.remove('hidden');
   const buildToolbar = document.getElementById('buildToolbar');
   if (buildToolbar) buildToolbar.classList.toggle('hidden', MAP_SAFE);
   if (typeof updateTeamButton === 'function') updateTeamButton();   // 安全場景才顯示「出勤編隊」按鈕
   if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
-  document.getElementById('safeCornerButtons').classList.toggle('hidden', !MAP_SAFE);   // 基地裡資訊條收起來，商店按鈕改放在畫面右下角
+  document.getElementById('safeCornerButtons').classList.add('hidden');   // 右下角的背包按鈕不用了：資訊條上就有背包
   renderQuickSupplies();
   document.getElementById('crystals').textContent = training.crystals;
   const playerHpBar = document.getElementById('playerHpBar');

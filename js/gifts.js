@@ -85,7 +85,7 @@ function renderGiftPicker() {
     const wanted = item.id === want;
     return `<button type="button" class="gift-cell${r ? ' ' + r : ''}${wanted ? ' wanted' : ''}" data-gift="${item.id}" title="${item.name}${wanted ? '｜想吃這個！' : tag ? '｜' + tag.label : '｜還不知道喜不喜歡'}">
       ${wanted ? '<i class="gift-want">想吃！</i>' : ''}<img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b><em>${tag ? tag.icon : '❔'}</em><span>${item.name}</span></button>`;
-  }).join('') : `<div class="gift-empty">背包裡沒有能送的東西<button type="button" id="giftGoShop">🏪 去商店</button></div>`;
+  }).join('') : `<div class="gift-empty">背包裡沒有能送的東西<small>到 1 樓 HOME Mart 或販賣機買</small></div>`;
   if (want && !items.some(item => item.id === want)) {   // 想吃的東西背包裡沒有：提示去買
     document.getElementById('giftPickerList').insertAdjacentHTML('afterbegin', `<div class="gift-want-missing"><img src="${itemById(want)?.image}" alt=""><span>想吃：${itemById(want)?.name}<small>背包裡沒有，可以去商店買</small></span></div>`);
   }
@@ -206,7 +206,6 @@ document.getElementById('dialogueGift').addEventListener('click', openGiftPicker
 document.getElementById('giftPickerClose').addEventListener('click', () => closeGiftPicker());
 giftPicker.addEventListener('click', e => {
   const cell = e.target.closest('[data-gift]'); if (cell) { giveGift(cell.dataset.gift); return; }
-  if (e.target.closest('#giftGoShop')) { closeGiftPicker(true); closeDialogue(true); openSupplyShop(); }
 });
 document.getElementById('dialogueFavor').addEventListener('animationend', e => e.currentTarget.classList.remove('pulse'));
 // 鍵盤：對話中按 G 送禮；禮物選單打開時，方向鍵選、Enter 送出、Esc 關閉（不會關掉對話框）

@@ -4,12 +4,19 @@
 //  ・補給：醫療包恢復 HP、杏仁水恢復 SP；戰鬥中按 Q／F 快速使用（下方資訊條的快捷格）
 //  ・零食、飲料：送禮用（js/gifts.js）
 //  ・商品資料在 data/supplies.js
+//  ・商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Space／E 打開，進門播全家的進門聲
+//  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Space／E，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
 // ============================================================
 const supplyShop = document.getElementById('supplyShop');
 const supplyShopList = document.getElementById('supplyShopList');
 const shopCartList = document.getElementById('cartList');
-const shopCart = new Map();   // 購物車：商品 id → 數量（結帳後才放進背包）
+const storeCart = new Map(), vendingCart = new Map();   // 購物車：商品 id → 數量（結帳後才放進背包）；商店、販賣機各一台
+let shopCart = storeCart;
 let supplyShopOpen = false, supplyShopTab = 'all';
+let vendingMode = false;   // true＝現在開的是販賣機（只有飲料）
+const VENDING = { kinds: ['drink'], reach: 1, match: id => /vending/.test(id) };   // 賣什麼、離販賣機邊緣幾格內按得到、哪些素材算販賣機
+const SHOP_COUNTER = { reach: 1.2, match: id => id === 'tile_cvs_checkout_counter' };   // 商店的結帳櫃台（地圖編輯器「結帳櫃台」）
+const shopItems = () => vendingMode ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : SUPPLIES;
 // 補給的效果（商品資料的 use）：hp＝醫療包恢復 HP（Q）、sp＝杏仁水恢復 SP（F）
 const SUPPLY_KIND = {
   hp: { name: '醫療包', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
@@ -40,10 +47,10 @@ function renderSupplyShop() {
   const money = Math.floor(G?.money || 0), left = money - cartTotal();   // left：扣掉購物車後還能花的錢
   document.getElementById('shopMoney').textContent = money;
   document.querySelectorAll('[data-supply-tab]').forEach(tab => {
-    const n = SUPPLIES.filter(item => tab.dataset.supplyTab === 'all' || item.kind === tab.dataset.supplyTab).length;
+    const n = shopItems().filter(item => tab.dataset.supplyTab === 'all' || item.kind === tab.dataset.supplyTab).length;
     tab.querySelector('em').textContent = n;
   });
-  const visible = SUPPLIES.filter(item => supplyShopTab === 'all' || item.kind === supplyShopTab)
+  const visible = shopItems().filter(item => vendingMode || supplyShopTab === 'all' || item.kind === supplyShopTab)
     .sort((a, b) => (SHOP_KIND_ORDER.indexOf(a.kind) - SHOP_KIND_ORDER.indexOf(b.kind)) || a.price - b.price);   // 補給 → 零食 → 飲料，各自由便宜到貴
   supplyShopList.innerHTML = visible.map(item => {
     const use = item.use && SUPPLY_KIND[item.use], inCart = shopCart.get(item.id) || 0, short = item.price - left;
@@ -54,7 +61,7 @@ function renderSupplyShop() {
       <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="把 ${item.name} 加入購物車，$${item.price}"`}>${short > 0 ? `還差 $${short}` : `<span>加入</span><b>$${item.price}</b>`}</button>
     </article>`;
   }).join('');
-  const cart = SUPPLIES.filter(item => shopCart.get(item.id) > 0), total = cartTotal();
+  const cart = shopItems().filter(item => shopCart.get(item.id) > 0), total = cartTotal();
   document.getElementById('cartCount').textContent = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
   document.getElementById('cartTotal').textContent = total;
   document.getElementById('cartRemain').textContent = money - total;
@@ -83,14 +90,46 @@ function renderQuickSupplies() {
       <span class="qs-icon">${item ? `<img src="${item.image}" alt="">` : k.icon}</span><span class="qs-text"><small>${k.name}</small><b>×${count}</b></span><kbd>${k.key}</kbd></button>`;
   }).join('');
 }
+// 商店／販賣機共用一個視窗：切換標題、分頁、購物車
+function setShopMode(vending) {
+  vendingMode = vending; shopCart = vending ? vendingCart : storeCart;
+  supplyShop.classList.toggle('vending', vending);
+  supplyShop.querySelector('.shop-title small').textContent = vending ? '自動販賣機' : '便利商店';
+  document.getElementById('supplyShopTitle').textContent = vending ? '販賣機' : '商店';
+  supplyShop.querySelector('.shop-sign').textContent = vending ? '🥤' : '24H';
+  document.getElementById('supplyShopClose').setAttribute('aria-label', vending ? '關閉販賣機（Esc）' : '關閉商店（Esc）');
+}
 function openSupplyShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
+  setShopMode(false);
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
-  renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopBell', .7, 'shop-bell'); document.getElementById('supplyShopClose').focus();
+  renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopEnter', .7, 'shop-enter'); document.getElementById('supplyShopClose').focus();   // 全家便利商店進門聲
+}
+function openVendingMachine() {
+  if (!G || G.over || !G.player || supplyShopOpen) return;
+  setShopMode(true);
+  supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
+  closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
+  supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); sfx('menu'); document.getElementById('supplyShopClose').focus();
+}
+// 玩家旁邊的販賣機／結帳櫃台（離素材邊緣 reach 格內）
+function vendingNearPlayer() { return shopStampNearPlayer(VENDING); }
+function shopCounterNearPlayer() { return shopStampNearPlayer(SHOP_COUNTER); }
+function shopStampNearPlayer(cfg) {
+  if (!G || !G.player || !MAP) return null;
+  const p = G.player; let best = null, bestD = cfg.reach * CELL;
+  for (const s of MAP.stamps || []) {
+    if (!cfg.match(s.id)) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), x1 = x0 + mapTileW(t) * CELL, y1 = y0 + mapTileH(t) * CELL;
+    const d = Math.hypot(Math.max(x0 - p.x, 0, p.x - x1), Math.max(y0 - p.y, 0, p.y - y1));
+    if (d <= bestD) { bestD = d; best = { x: (x0 + x1) / 2, top: y0, dist: d }; }
+  }
+  return best;
 }
 function closeSupplyShop(silent = false) { if (!supplyShopOpen) return; supplyShopOpen = false; supplyHover = null; renderSupplyStatus(); supplyShop.classList.add('hidden'); if (!silent) sfx('switch'); }
-const cartTotal = () => SUPPLIES.reduce((sum, item) => sum + item.price * (shopCart.get(item.id) || 0), 0);
+const cartTotal = () => shopItems().reduce((sum, item) => sum + item.price * (shopCart.get(item.id) || 0), 0);
 function addToCart(id, focusCard = true) {
   const item = supplyById(id);
   if (!item || !G || G.money - cartTotal() < item.price) { sfx('error'); return; }
@@ -113,7 +152,8 @@ function checkoutCart() {
   G.money -= total;
   for (const [id, n] of shopCart) supplyInventory.set(id, (supplyInventory.get(id) || 0) + n);
   shopCart.clear();
-  SFX.play('shopBell', .6, 'shop-checkout'); systemNotice(`結帳 $${total}，${count} 件已放進背包`);
+  if (vendingMode) { sfx('drink'); systemNotice(`販賣機掉出 ${count} 瓶飲料（$${total}），已放進背包`); }
+  else { SFX.play('shopBell', .6, 'shop-checkout'); systemNotice(`結帳 $${total}，${count} 件已放進背包`); }
   updateHUD(); renderSupplyShop();
   const link = document.getElementById('shopOpenBackpack'); link.classList.remove('flash'); void link.offsetWidth; link.classList.add('flash'); link.focus();
 }
@@ -137,8 +177,7 @@ function quickUseSupply(kind) {
   if (!item) { sfx('error'); flash(`沒有${k.name}了`, G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   useSupply(item.id);
 }
-document.getElementById('supplyShopButton').addEventListener('click', openSupplyShop);
-document.getElementById('hudShopButton').addEventListener('click', openSupplyShop);
+// 下方的「商店」按鈕拿掉了：商店要走到 1 樓 HOME Mart 的櫃台才能開
 document.getElementById('shopOpenBackpack').addEventListener('click', () => { closeSupplyShop(true); openBackpack(); });
 document.getElementById('quickSupplies').addEventListener('click', e => { const b = e.target.closest('[data-quick-supply]'); if (b && G?.player) quickUseSupply(b.dataset.quickSupply); });
 document.getElementById('supplyShopClose').addEventListener('click', () => closeSupplyShop());

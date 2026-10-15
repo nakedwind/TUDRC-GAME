@@ -2,6 +2,52 @@
    哨兵是會走動的人：開場佈署、巡邏移動 AI、點擊選單（巡邏/指派/疏導）。
    哨兵數值在 data/balance.js 的 TYPES。
 */
+// ---- 平時活動範圍（data/balance.js 的 NPC_HOME_AREAS，例如諾亞、希奧妮待在研究部）----
+const homeAreaCache = { map: null, areas: {} };
+function homeAreaOf(id) {
+  if (!MAP_SAFE || typeof NPC_HOME_AREAS === 'undefined' || !NPC_HOME_AREAS[id] || !MAP) return null;
+  if (homeAreaCache.map !== MAP) { homeAreaCache.map = MAP; homeAreaCache.areas = {}; }
+  if (id in homeAreaCache.areas) return homeAreaCache.areas[id];
+  const def = NPC_HOME_AREAS[id];
+  let c0 = Infinity, r0 = Infinity, c1 = -Infinity, r1 = -Infinity;
+  const prefixes = [].concat(def.stamps);
+  for (const s of MAP.stamps || []) {
+    if (!prefixes.some(p => String(s.id).startsWith(p))) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    c0 = Math.min(c0, s.c); r0 = Math.min(r0, s.r);
+    c1 = Math.max(c1, s.c + mapTileW(t) - 1); r1 = Math.max(r1, s.r + mapTileH(t) - 1);
+  }
+  let area = null;
+  if (c0 <= c1) {
+    const pad = def.pad ?? 1;
+    c0 = Math.max(0, c0 - pad); r0 = Math.max(0, r0 - pad); c1 = Math.min(COLS - 1, c1 + pad); r1 = Math.min(ROWS - 1, r1 + pad);
+    const cells = [];   // 範圍內站得住的格子
+    for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) {
+      if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;
+      const [x, y] = center(c, r);
+      if (!sentryBlocked(x, y)) cells.push([c, r]);
+    }
+    if (cells.length) area = { c0, r0, c1, r1, cells, x0: OX + c0 * CELL, y0: OY + r0 * CELL, x1: OX + (c1 + 1) * CELL, y1: OY + (r1 + 1) * CELL };
+  }
+  return homeAreaCache.areas[id] = area;
+}
+function inHomeArea(area, x, y) { return x >= area.x0 && x <= area.x1 && y >= area.y0 && y <= area.y1; }
+// 活動範圍裡隨機挑一個點（偏好離自己不太遠，看起來像在房間裡踱步）
+function sampleHomeTarget(area, a) {
+  const near = area.cells.filter(([c, r]) => { const [x, y] = center(c, r); return Math.hypot(x - a.x, y - a.y) < 200; });
+  const pool = near.length > 3 && inHomeArea(area, a.x, a.y) ? near : area.cells;
+  const [c, r] = pool[Math.floor(Math.random() * pool.length)];
+  const [x, y] = center(c, r);
+  return { x: x + (Math.random() - .5) * 14, y: y + (Math.random() - .5) * 14 };
+}
+function placeInHomeArea(a, id) {
+  const area = homeAreaOf(id); if (!area) return;
+  const taken = new Set([...(G.towers || []), ...(G.npcs || [])].filter(o => o !== a).map(o => cellAt(o.x, o.y).join(',')));
+  const free = area.cells.filter(cell => !taken.has(cell.join(',')));
+  const [c, r] = (free.length ? free : area.cells)[Math.floor(Math.random() * (free.length || area.cells.length))];
+  [a.x, a.y] = center(c, r);
+}
+
 // ---- 開場佈署：三位哨兵在基地（營地）區隨機位置出現 ----
 function spawnSentries() {
   const cand = [];
@@ -18,6 +64,7 @@ function spawnSentries() {
     const t = { kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() };
     if (!MAP_SAFE && typeof applySortieBuff === 'function') applySortieBuff(t);   // 出勤補給（js/sortie-supply.js）
     G.towers.push(t);
+    placeInHomeArea(t, type);   // 有平時活動範圍的（希奧妮→研究部）直接在那裡出現
   }
 }
 
@@ -45,6 +92,7 @@ function spawnWanderers() {
       blinkWait: 2 + Math.random() * 3, blinkTime: -1,
       say: null, sayWait: 2 + Math.random() * 8,   // 平時對話：倒數到 0 冒一句
     });
+    placeInHomeArea(G.npcs[G.npcs.length - 1], profile.id);   // 諾亞→研究部
   }
 }
 
@@ -416,7 +464,8 @@ function updateSentry(t, dt) {
     if (MAP_SAFE && trySeatActor(t)) return;          // 安全區：路過椅子／床有機率去坐
     const anchor = companion ? companion.anchor : (t.mode === 'hold' && t.anchor ? t.anchor : t);
     const radius = companion ? companion.radius * .92 : (t.mode === 'hold' ? 70 : 200);
-    const tgt = sampleWanderTarget(anchor.x, anchor.y, radius);
+    const home = !companion && t.mode === 'free' ? homeAreaOf(t.type) : null;   // 平時待在自己的活動範圍（研究部…）
+    const tgt = home ? sampleHomeTarget(home, t) : sampleWanderTarget(anchor.x, anchor.y, radius);
     if (!tgt) { t.waitT = 0.8; return; }
     t.target = tgt; return;
   }
@@ -495,9 +544,11 @@ function seatApproachPoint(seat) {
 function trySeatActor(a) {
   if (!MAP_SAFE || a.seatCd > 0 || Math.random() >= NPC_SEAT.chance || typeof mapSeats !== 'function') return false;
   let best = null, bestD = NPC_SEAT.radius * CELL;
+  const home = (a.kind === 'tower' ? a.mode === 'free' : true) ? homeAreaOf(a.kind === 'tower' ? a.type : a.id) : null;
   for (const seat of mapSeats()) {
     const d = Math.hypot(seat.x - a.x, seat.y - a.y);
     if (d >= bestD || seatTaken(seat, a)) continue;
+    if (home && !inHomeArea(home, seat.x, seat.y)) continue;   // 有活動範圍的人只坐範圍裡的椅子
     const approach = seatApproachPoint(seat);
     if (approach) { best = { seat, approach }; bestD = d; }
   }
@@ -546,7 +597,8 @@ function updateWanderer(npc, dt) {
   if (npc.waitT > 0) { npc.waitT -= dt; return; }
   if (!npc.target) {
     if (trySeatActor(npc)) return;   // 路過椅子／床：有機率去坐
-    npc.target = sampleWanderTarget(npc.x, npc.y, 180);
+    const home = homeAreaOf(npc.id);   // 平時待在自己的活動範圍（研究部…）
+    npc.target = home ? sampleHomeTarget(home, npc) : sampleWanderTarget(npc.x, npc.y, 180);
     if (!npc.target) npc.waitT = 0.8;
     return;
   }

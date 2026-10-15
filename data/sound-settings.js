@@ -24,7 +24,8 @@ const SOUND_SETTINGS = {
     "pearlHurt": 1.85,
     "rangedShot": 1.35,
     "reload": 0.8,
-    "shopBell": 0.6,
+    "shopBell": 0.4,
+    "shopEnter": 0.25,
     "smallBoom": 1.15,
     "smilerLaugh": 2
   },

@@ -24,11 +24,21 @@ const WEAPONS = [
   { id: 'incendiary', name: '燃燒彈槍', short: '燃燒彈', icon: '🧨', img: 'images/weapon/incendiary_launcher.png', special: true },
   { id: 'tranq', name: '麻醉槍', short: '麻醉針', icon: '💤', img: 'images/weapon/tranquilizer_gun.png', special: true },
 ];
-const weaponUsable = i => typeof weaponOwned !== 'function' || weaponOwned(WEAPONS[i].id);
+// 能切到這把：拿到了，而且裝在主武器／副武器格（背包左邊，js/equipment.js）
+const weaponUsable = i => (typeof weaponOwned !== 'function' || weaponOwned(WEAPONS[i].id)) && (typeof weaponInLoadout !== 'function' || weaponInLoadout(WEAPONS[i].id));
+const loadoutIndex = slot => WEAPONS.findIndex(w => typeof equipState !== 'undefined' && w.id === equipState.loadout[slot]);
 const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], openId: 'tile_field_ammo_crate_open', radius: 72, openFor: 1.6 };
 
 // ---- 武器狀態 ----
-function playerWeapon(p) { return WEAPONS[(p && p.weaponIndex) || 0]; }
+const UNARMED = { id: 'none', name: '空手', icon: '✋' };   // 主武器、副武器都卸下：不能開槍
+function playerWeapon(p) {
+  if (p && !weaponUsable(p.weaponIndex || 0)) {   // 手上的槍被換下來了：改拿主武器，沒有就拿副武器
+    const i = loadoutIndex('main') >= 0 ? loadoutIndex('main') : loadoutIndex('sub');
+    if (i < 0) return UNARMED;
+    p.weaponIndex = i; p.sgReload = null;
+  }
+  return WEAPONS[(p && p.weaponIndex) || 0];
+}
 function ensureFlareAmmo(p) {
   if (p.flareMag == null) p.flareMag = FLARE.mag;
   if (p.flareReserve == null) p.flareReserve = FLARE.reserveMax;
@@ -60,7 +70,7 @@ cv.addEventListener('wheel', e => {
 window.addEventListener('keydown', e => {
   if (e.repeat || dialogueState) return;
   const n = Number(e.key);
-  if (n >= 1 && n <= 2) switchWeapon(0, n - 1);   // 燃燒彈槍、麻醉槍只用滾輪切換（3 以後的數字鍵是建築快捷）
+  if (n >= 1 && n <= 2) { const i = loadoutIndex(n === 1 ? 'main' : 'sub'); if (i >= 0) switchWeapon(0, i); }   // 1＝主武器、2＝副武器（3 以後的數字鍵是建築快捷）
 });
 
 // ---- 照明彈：裝填、發射 ----

@@ -46,7 +46,8 @@ const SFX = (() => {
     smallBoom: '戰鬥/爆炸/小爆炸.mp3',
     midBoom: '戰鬥/爆炸/中爆炸.mp3',
     bigBoom: '戰鬥/爆炸/爆炸.mp3',
-    shopBell: '商店/便利商店門鈴.mp3',
+    shopBell: '商店/便利商店門鈴.mp3',   // 結帳
+    shopEnter: '商店/全家便利商店新進門聲.mp3',   // 在櫃台打開商店（js/shop.js）
     favorUp: '獎勵/升等.mp3',
     mineGrind: '設施/打磨.mp3',
     crystalGet: '獎勵/得到碎片.mp3',

@@ -3490,6 +3490,70 @@ const TILES_CUSTOM = [
     "w": 2,
     "h": 1,
     "flat": true
+  },
+  {
+    "id": "tile_research_lab_tools_tray",
+    "name": "研究部｜實驗工具盤",
+    "role": "floor",
+    "file": "images/研究部/research-tools-tray.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_research_lab_sample_storage",
+    "name": "研究部｜樣本收納架",
+    "role": "floor",
+    "file": "images/研究部/research-sample-storage.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_research_lab_crystal_containment_pod",
+    "name": "研究部｜晶體收容艙",
+    "role": "floor",
+    "file": "images/研究部/research-crystal-containment-pod.png",
+    "w": 2,
+    "h": 4
+  },
+  {
+    "id": "tile_research_lab_microscope_workstation",
+    "name": "研究部｜顯微鏡工作台",
+    "role": "floor",
+    "file": "images/研究部/research-microscope-workstation.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_research_lab_analysis_table",
+    "name": "研究部｜實驗分析桌",
+    "role": "floor",
+    "file": "images/研究部/research-analysis-table.png",
+    "w": 5,
+    "h": 3
+  },
+  {
+    "id": "tile_research_lab_specimen_cabinet",
+    "name": "研究部｜樣本櫃",
+    "role": "floor",
+    "file": "images/研究部/research-specimen-cabinet.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_research_lab_control_workstation",
+    "name": "研究部｜研究控制台",
+    "role": "floor",
+    "file": "images/研究部/research-control-workstation.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mv9qoz8k",
+    "name": "Research-Department",
+    "role": "floor",
+    "file": "images/研究部/Research-Department.png",
+    "w": 2,
+    "h": 1
   }
 ];
 
@@ -11143,7 +11207,98 @@ const MAPS_DEFAULT = [
         "39,21": "tile_hq_floor",
         "40,21": "tile_hq_floor",
         "41,21": "tile_hq_floor",
-        "42,21": "tile_hq_floor"
+        "42,21": "tile_hq_floor",
+        "21,21": "tile_hq_floor",
+        "20,21": "tile_hq_floor",
+        "19,21": "tile_hq_floor",
+        "18,21": "tile_hq_floor",
+        "17,21": "tile_hq_floor",
+        "16,21": "tile_hq_floor",
+        "21,20": "tile_hq_floor",
+        "20,20": "tile_hq_floor",
+        "19,20": "tile_hq_floor",
+        "18,20": "tile_hq_floor",
+        "17,20": "tile_hq_floor",
+        "16,20": "tile_hq_floor",
+        "15,20": "tile_hq_floor",
+        "15,21": "tile_hq_floor",
+        "21,19": "tile_hq_floor",
+        "20,19": "tile_hq_floor",
+        "19,19": "tile_hq_floor",
+        "18,19": "tile_hq_floor",
+        "17,19": "tile_hq_floor",
+        "16,19": "tile_hq_floor",
+        "15,19": "tile_hq_floor",
+        "16,18": "tile_hq_floor",
+        "17,18": "tile_hq_floor",
+        "18,18": "tile_hq_floor",
+        "19,18": "tile_hq_floor",
+        "20,18": "tile_hq_floor",
+        "21,18": "tile_hq_floor",
+        "21,17": "tile_hq_floor",
+        "21,16": "tile_hq_floor",
+        "21,15": "tile_hq_floor",
+        "20,15": "tile_hq_floor",
+        "19,15": "tile_hq_floor",
+        "18,15": "tile_hq_floor",
+        "17,15": "tile_hq_floor",
+        "16,15": "tile_hq_floor",
+        "15,15": "tile_hq_floor",
+        "15,17": "tile_hq_floor",
+        "15,18": "tile_hq_floor",
+        "16,17": "tile_hq_floor",
+        "16,16": "tile_hq_floor",
+        "15,16": "tile_hq_floor",
+        "17,16": "tile_hq_floor",
+        "18,16": "tile_hq_floor",
+        "19,16": "tile_hq_floor",
+        "20,16": "tile_hq_floor",
+        "20,17": "tile_hq_floor",
+        "19,17": "tile_hq_floor",
+        "18,17": "tile_hq_floor",
+        "17,17": "tile_hq_floor",
+        "14,16": "tile_hq_floor",
+        "13,16": "tile_hq_floor",
+        "12,16": "tile_hq_floor",
+        "11,16": "tile_hq_floor",
+        "10,16": "tile_hq_floor",
+        "9,16": "tile_hq_floor",
+        "9,17": "tile_hq_floor",
+        "9,18": "tile_hq_floor",
+        "9,19": "tile_hq_floor",
+        "9,20": "tile_hq_floor",
+        "9,21": "tile_hq_floor",
+        "11,17": "tile_hq_floor",
+        "10,18": "tile_hq_floor",
+        "10,19": "tile_hq_floor",
+        "10,20": "tile_hq_floor",
+        "10,21": "tile_hq_floor",
+        "10,17": "tile_hq_floor",
+        "11,21": "tile_hq_floor",
+        "11,20": "tile_hq_floor",
+        "11,19": "tile_hq_floor",
+        "11,18": "tile_hq_floor",
+        "13,17": "tile_hq_floor",
+        "13,18": "tile_hq_floor",
+        "12,19": "tile_hq_floor",
+        "12,20": "tile_hq_floor",
+        "12,21": "tile_hq_floor",
+        "13,21": "tile_hq_floor",
+        "13,20": "tile_hq_floor",
+        "13,19": "tile_hq_floor",
+        "12,17": "tile_hq_floor",
+        "12,15": "tile_hq_floor",
+        "14,15": "tile_hq_floor",
+        "9,15": "tile_hq_floor",
+        "10,15": "tile_hq_floor",
+        "11,15": "tile_hq_floor",
+        "13,15": "tile_hq_floor",
+        "14,17": "tile_hq_floor",
+        "14,18": "tile_hq_floor",
+        "14,19": "tile_hq_floor",
+        "14,20": "tile_hq_floor",
+        "14,21": "tile_hq_floor",
+        "12,18": "tile_hq_floor"
       },
       "ground": {},
       "ground2": {},
@@ -12161,7 +12316,7 @@ const MAPS_DEFAULT = [
         "id": "tile_mu5e3ndv",
         "c": 22,
         "r": 18,
-        "layer": "object",
+        "layer": "top",
         "fx": true
       },
       {
@@ -12485,6 +12640,281 @@ const MAPS_DEFAULT = [
         "layer": "object2",
         "ox": 0,
         "oy": -24
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 8,
+        "r": 18,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 8,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 10,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 11,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 12,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 13,
+        "r": 12,
+        "layer": "object",
+        "ox": 0,
+        "oy": 0
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 14,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 21,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 20,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 19,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_hq_stairs",
+        "c": 16,
+        "r": 15,
+        "layer": "ground",
+        "ox": 0,
+        "oy": -4
+      },
+      {
+        "id": "tile_hq_wall_side",
+        "c": 15,
+        "r": 12,
+        "layer": "object"
+      },
+      {
+        "id": "tile_hq_wall_side",
+        "c": 18,
+        "r": 12,
+        "layer": "object",
+        "fx": true,
+        "ox": 0,
+        "oy": 0
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 8,
+        "r": 16,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 8,
+        "r": 17,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 8,
+        "r": 18,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 8,
+        "r": 19,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 8,
+        "r": 20,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 8,
+        "r": 21,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 9,
+        "r": 12,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 8,
+        "r": 17,
+        "layer": "ground",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 8,
+        "r": 16,
+        "layer": "ground",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 8,
+        "r": 15,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 8,
+        "r": 14,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 8,
+        "r": 13,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 9,
+        "r": 14,
+        "layer": "object2",
+        "fx": true,
+        "ox": -4,
+        "oy": -28,
+        "sortDepth": 2.75
+      },
+      {
+        "id": "tile_research_lab_control_workstation",
+        "c": 10,
+        "r": 15,
+        "layer": "object2",
+        "ox": -6,
+        "oy": -22,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_research_lab_specimen_cabinet",
+        "c": 14,
+        "r": 14,
+        "layer": "object2",
+        "ox": -38,
+        "oy": -20,
+        "sortDepth": 2.75
+      },
+      {
+        "id": "tile_research_lab_sample_storage",
+        "c": 20,
+        "r": 14,
+        "layer": "object2",
+        "ox": 0,
+        "oy": -12,
+        "sortDepth": 2.75
+      },
+      {
+        "id": "tile_research_lab_crystal_containment_pod",
+        "c": 18,
+        "r": 13,
+        "layer": "object2",
+        "ox": 32,
+        "oy": -12,
+        "sortDepth": 3.75
+      },
+      {
+        "id": "tile_new_decor_fire_extinguisher",
+        "c": 18,
+        "r": 15,
+        "layer": "object2",
+        "ox": 0,
+        "oy": 8
+      },
+      {
+        "id": "tile_hq_office_chair_back",
+        "c": 11,
+        "r": 16,
+        "layer": "object3",
+        "ox": -20,
+        "oy": 16,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_research_lab_analysis_table",
+        "c": 9,
+        "r": 18,
+        "layer": "object3",
+        "ox": 0,
+        "oy": 8,
+        "sortDepth": 2.25
+      },
+      {
+        "id": "tile_research_lab_microscope_workstation",
+        "c": 19,
+        "r": 17,
+        "layer": "object3",
+        "ox": 10,
+        "oy": 2
+      },
+      {
+        "id": "tile_eoc_office_chair_grey",
+        "c": 20,
+        "r": 17,
+        "layer": "object2",
+        "fx": true,
+        "sortDepth": 1.75,
+        "ox": -20,
+        "oy": 10
+      },
+      {
+        "id": "tile_eoc_filing_cabinet",
+        "c": 15,
+        "r": 15,
+        "layer": "object3",
+        "ox": -14,
+        "oy": -24
+      },
+      {
+        "id": "tile_mv9qoz8k",
+        "c": 14,
+        "r": 13,
+        "layer": "object3",
+        "ox": 4,
+        "oy": 0
       }
     ],
     "solid": [
@@ -12651,8 +13081,6 @@ const MAPS_DEFAULT = [
       "13,15",
       "14,15",
       "15,15",
-      "16,15",
-      "17,15",
       "18,15",
       "19,15",
       "20,15",
@@ -12717,7 +13145,37 @@ const MAPS_DEFAULT = [
       "1,13",
       "1,14",
       "2,14",
-      "3,14"
+      "3,14",
+      "8,16",
+      "8,17",
+      "8,18",
+      "8,19",
+      "8,20",
+      "8,21",
+      "10,16",
+      "12,16",
+      "11,16",
+      "9,19",
+      "10,19",
+      "11,19",
+      "12,19",
+      "13,19",
+      "21,19",
+      "21,18",
+      "21,20",
+      "20,20",
+      "19,14",
+      "20,14",
+      "21,14",
+      "18,14",
+      "15,14",
+      "13,14",
+      "14,14",
+      "12,14",
+      "11,14",
+      "10,14",
+      "9,14",
+      "8,14"
     ],
     "breakable": [],
     "entrances": [],

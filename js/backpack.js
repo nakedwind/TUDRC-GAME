@@ -22,7 +22,22 @@ function itemDesc(item) {
   if (item.kind === 'snack' || item.kind === 'drink') return '便利商店買來的。可以送給大家，看看誰喜歡。';
   return '';
 }
+// 「裝備」分頁：列出擁有的部隊長裝備（js/equipment.js 的 equipState），只能看，換裝備用左邊的裝備格
+const GEAR_TAB = { id: 'equip', name: '裝備', icon: '🛡️' };
+const GEAR_KIND_NAME = { head: '頭部', body: '身體', acc: '隨身物品' };
+function ownedGear() {
+  if (typeof EQUIPMENT === 'undefined' || typeof equipState === 'undefined') return [];
+  const worn = new Set(Object.values(equipState.equipped || {}).filter(Boolean));
+  // 武器排前面（拿到的槍），再來是裝備；wornAs＝裝在哪一格（主武器／副武器）
+  const L = equipState.loadout || {};
+  const weapons = typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).filter(([k]) => (equipState.weapons[k] || 0) > 0).map(([k, w]) => ({
+    id: 'gear:w:' + k, name: w.name, image: w.image, icon: w.icon, gear: w, weapon: k, lv: equipState.weapons[k],
+    worn: L.main === k || L.sub === k, wornAs: L.main === k ? '主武器' : L.sub === k ? '副武器' : '' }));
+  return weapons.concat(EQUIPMENT.filter(d => equipState.owned[d.id]).map(d => ({ id: 'gear:' + d.id, name: d.name, image: d.image, icon: d.icon, gear: d, lv: equipState.owned[d.id], worn: worn.has(d.id) })));
+}
+const gearById = id => String(id || '').startsWith('gear:') ? ownedGear().find(g => g.id === id) || null : null;
 function ownedItems() {
+  if (backpackTab === GEAR_TAB.id) return ownedGear();
   return allItems().filter(item => (supplyInventory.get(item.id) || 0) > 0 && (backpackTab === 'all' || item.category === backpackTab));
 }
 
@@ -32,21 +47,61 @@ function renderBackpack() {
   document.getElementById('backpackCount').textContent = total;
   if (typeof renderEquipPanel === 'function') renderEquipPanel();   // 左邊的部隊長裝備（js/equipment.js）
   // 分類分頁：顯示每一類有幾件
-  document.getElementById('backpackTabs').innerHTML = [{ id: 'all', name: '全部', icon: '' }, ...ITEM_CATEGORIES].map(cat => {
-    const n = allItems().filter(item => cat.id === 'all' || item.category === cat.id).reduce((sum, item) => sum + (supplyInventory.get(item.id) || 0), 0);
+  document.getElementById('backpackTabs').innerHTML = [{ id: 'all', name: '全部', icon: '' }, ...ITEM_CATEGORIES, GEAR_TAB].map(cat => {
+    const n = cat === GEAR_TAB ? ownedGear().length : allItems().filter(item => cat.id === 'all' || item.category === cat.id).reduce((sum, item) => sum + (supplyInventory.get(item.id) || 0), 0);
     return `<button type="button" role="tab" data-bag-tab="${cat.id}" class="${backpackTab === cat.id ? 'active' : ''}" aria-selected="${backpackTab === cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} <em>${n}</em></button>`;
   }).join('');
   // 格子
   const items = ownedItems();
   if (!items.some(item => item.id === backpackSel)) backpackSel = items[0]?.id || null;
   const slots = Math.max(BAG_MIN_SLOTS, Math.ceil(items.length / 6) * 6);
-  let html = items.map(item => `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${supplyInventory.get(item.id)}" aria-pressed="${item.id === backpackSel}">
+  let html = items.map(item => item.gear ? `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
+      ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}</button>` : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${supplyInventory.get(item.id)}" aria-pressed="${item.id === backpackSel}">
       <img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b></button>`).join('');
   for (let i = items.length; i < slots; i++) html += '<span class="bag-cell empty" aria-hidden="true"></span>';
+  backpackGrid.classList.add('no-anim');   // 重畫時不要重播滑鼠下那格的浮起動畫
   backpackGrid.innerHTML = html;
+  requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
   renderBackpackDetail();
 }
+// 裝備按鈕：只有一格能放就「裝備」；可以放兩格（主／副武器、隨身物品 1／2）就各一顆。已經在那格就變「卸下」
+function gearButtons(g) {
+  const kind = g.weapon ? 'weapon' : 'gear', id = g.weapon || g.gear.id;
+  const slots = typeof slotsForGear === 'function' ? slotsForGear(kind, id) : [];
+  return '<div class="bag-equip-buttons">' + slots.map(s => s.cur
+    ? `<button type="button" class="bag-unequip" data-gear-off="${s.id}">卸下${slots.length > 1 ? '（' + s.name + '）' : ''}</button>`
+    : `<button type="button" class="bag-use" data-gear-equip="${s.id}" data-gear-id="${id}">${slots.length > 1 ? '裝到' + s.name : '裝備'}</button>`).join('') + '</div>';
+}
+// 左邊點空格：切到「裝備」分頁，選第一件能放這格的
+function showGearForSlot(slotId) {
+  backpackTab = GEAR_TAB.id; backpackDrop = null;
+  const fit = ownedGear().find(g => slotsForGear(g.weapon ? 'weapon' : 'gear', g.weapon || g.gear.id).some(s => s.id === slotId && !s.cur));
+  backpackSel = fit ? fit.id : null;
+  sfx('switch'); renderBackpack();
+  if (!fit) systemNotice('沒有可以放這一格的' + (slotId.startsWith('w:') ? '武器' : '裝備'));
+  backpackGrid.querySelector('.bag-cell.sel')?.focus();
+}
+function renderGearDetail(g) {
+  const d = g.gear, next = g.lv < 3 && d.levels[g.lv];
+  backpackDetail.classList.remove('dropping');
+  backpackDetail.innerHTML = `
+    <div class="bag-detail-image">${g.image ? `<img src="${g.image}" alt=""${g.weapon ? ' class="weapon"' : ''}>` : `<i class="bag-gear-emoji">${g.icon}</i>`}</div>
+    <h3>${g.name}</h3>
+    <div class="bag-tags"><span class="bag-tag">${g.weapon ? '🔫 武器' : GEAR_TAB.icon + ' ' + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div>
+    ${d.desc ? `<p class="bag-desc">${d.desc}</p>` : ''}
+    <div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}${g.weapon && d.field && typeof gunAmmo === 'function' ? '・彈藥 ' + (gunAmmo(g.weapon).mag + gunAmmo(g.weapon).reserve) + ' 發' : ''}</b>${next ? `<small>升到 Lv${g.lv + 1}：${d.stat(next)}</small>` : '<small>已達最高等級</small>'}</div>
+    <div class="bag-actions">${gearButtons(g)}<p class="bag-note">升級找諾亞</p></div>`;
+}
+// 只換選取的格子：不重畫整個背包（重畫會讓格子、溫特立繪重新建立而閃一下）
+function selectBackpackItem(id) {
+  backpackSel = id; backpackDrop = null;
+  backpackGrid.querySelectorAll('.bag-cell[data-bag-item]').forEach(c => {
+    const on = c.dataset.bagItem === id; c.classList.toggle('sel', on); c.setAttribute('aria-pressed', on);
+  });
+  renderBackpackDetail(); sfx('blip');
+}
 function renderBackpackDetail() {
+  const g = gearById(backpackSel); if (g) { renderGearDetail(g); return; }
   const item = itemById(backpackSel);
   backpackDetail.classList.toggle('dropping', !!(backpackDrop && item && backpackDrop.id === item.id));   // 確認丟棄時把圖縮小，留空間給確認框
   if (!item) {
@@ -114,7 +169,7 @@ backpackEl.addEventListener('click', e => {
   const tab = e.target.closest('[data-bag-tab]');
   if (tab) { backpackTab = tab.dataset.bagTab; backpackSel = null; backpackDrop = null; renderBackpack(); sfx('switch'); return; }
   const cell = e.target.closest('[data-bag-item]');
-  if (cell) { if (backpackSel !== cell.dataset.bagItem) { backpackSel = cell.dataset.bagItem; backpackDrop = null; renderBackpack(); sfx('blip'); } backpackGrid.querySelector('.bag-cell.sel')?.focus(); return; }
+  if (cell) { if (backpackSel !== cell.dataset.bagItem) selectBackpackItem(cell.dataset.bagItem); backpackGrid.querySelector('.bag-cell.sel')?.focus(); return; }
   if (e.target.closest('[data-bag-drop]')) { startDrop(e.target.closest('[data-bag-drop]').dataset.bagDrop); return; }
   if (e.target.closest('[data-drop-cancel]')) { cancelDrop(); return; }
   if (e.target.closest('[data-drop-ok]')) { confirmDrop(); return; }
@@ -126,6 +181,10 @@ backpackEl.addEventListener('click', e => {
     (backpackDetail.querySelector(`[data-drop-qty="${v}"]:not(:disabled)`) || backpackDetail.querySelector('.bag-drop-ok')).focus();
     return;
   }
+  const ge = e.target.closest('[data-gear-equip]');
+  if (ge) { equipToSlot(ge.dataset.gearEquip, ge.dataset.gearId); backpackDetail.querySelector('[data-gear-off], [data-gear-equip]')?.focus(); return; }
+  const go = e.target.closest('[data-gear-off]');
+  if (go) { unequipSlot(go.dataset.gearOff); backpackDetail.querySelector('[data-gear-equip], [data-gear-off]')?.focus(); return; }
   const use = e.target.closest('[data-bag-use]');
   if (use) { useBackpackItem(use.dataset.bagUse); (backpackDetail.querySelector('.bag-use:not(:disabled)') || backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus(); }
 });
@@ -151,7 +210,7 @@ window.addEventListener('keydown', e => {
   if (step && items.length && (document.activeElement?.closest('#backpackGrid') || document.activeElement === document.body)) {
     e.preventDefault();
     const next = Math.max(0, Math.min(items.length - 1, (i < 0 ? 0 : i) + step));
-    if (items[next].id !== backpackSel) { backpackSel = items[next].id; backpackDrop = null; renderBackpack(); sfx('blip'); }
+    if (items[next].id !== backpackSel) selectBackpackItem(items[next].id);
     backpackGrid.querySelector('.bag-cell.sel')?.focus();
   } else if (k === 'enter' && document.activeElement?.closest('#backpackGrid') && backpackSel) {
     e.preventDefault(); useBackpackItem(backpackSel); backpackGrid.querySelector('.bag-cell.sel')?.focus();
