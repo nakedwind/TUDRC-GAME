@@ -249,7 +249,7 @@ function slimeExplode(e, mul) {
 function onEnemyDeath(e) {
   trackKillAchievements(e);   // 成就計數（js/achievements.js）
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
-  if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
+  if (e.behavior === 'charger') { pushFallCorpse(e); if (typeof tryEquipDrop === 'function') tryEquipDrop('adrenaline', e.x, e.y); return; }   // 鳥頭人：有機會掉出腎上腺素注射器   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'boomerang') { pushFallCorpse(e); return; }   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
@@ -510,7 +510,7 @@ function updateAcidSpit(dt) {
       const inPool = o => { const dx = o.x - pool.x, dy = (o.y - pool.y) / .6; return dx * dx + dy * dy <= pool.r * pool.r; };
       const p = G.player;
       if (p && p.hp > 0 && inPool(p)) {
-        p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(P.playerDps * dt) : P.playerDps * dt));
+        p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(P.playerDps * dt * (typeof equipAcidMul === 'function' ? equipAcidMul() : 1)) : P.playerDps * dt));   // 防毒面具也減少酸液傷害
         p.hitT = Math.max(p.hitT || 0, .15); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .25);
         p.acidTick = (p.acidTick || 0) - dt;
         if (p.acidTick <= 0) { p.acidTick = .5; flashDmg('-' + Math.round(P.playerDps * .5), p.x, p.y - 46, '#d4e04a'); playPlayerHit(.55, true); }   // 踩在吐酸史萊姆的酸液裡：每次燙傷小聲響一下

@@ -420,7 +420,7 @@ function updateSentry(t, dt) {
     if (!tgt) { t.waitT = 0.8; return; }
     t.target = tgt; return;
   }
-  const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 : 1) * ((t.taint > 85 && !t.berserk) ? 0.5 : 1) * (t.shieldMode ? 1.7 : 1);   // 指派快一點；瀕臨暴走減半；雷德舉盾衝刺加速
+  const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 * (typeof equipRushMul === 'function' ? equipRushMul() : 1) : 1) * ((t.taint > 85 && !t.berserk) ? 0.5 : 1) * (t.shieldMode ? 1.7 : 1);   // 指派快一點；瀕臨暴走減半；雷德舉盾衝刺加速
   if (moveSentryWithPath(t, t.target.x, t.target.y, sp, dt)) {
     t.target = null; t.navPath = null;
     if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }

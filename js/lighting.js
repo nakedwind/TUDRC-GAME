@@ -55,6 +55,7 @@ function spreadLight(l, onCell) {
     const steps = l.r / CELL;                          // 這盞燈的光能走幾格
     const [sc, sr] = cellAt(l.x, l.y);
     if (!inGrid(sc, sr)) return;
+    const coneK = l.cone ? coneFactor(l) : null;       // 扇形光（手電筒）：格子在扇形裡多少（0～1）
     lightDist.fill(Infinity);
     // 平滑補間：用光源「實際座標」到附近格子中心的真實距離當起始距離，
     // 角色在格子內移動時亮度會連續滑動，光就不會一格一格跳。
@@ -78,13 +79,28 @@ function spreadLight(l, onCell) {
         if (!inGrid(nc, nr)) continue;
         if (dc && dr && isWall(c + dc, r) && isWall(c, r + dr)) continue;   // 斜向不能穿牆角
         const nd = d + w, ni = nr * COLS + nc;
+        if (coneK && coneK(nc, nr) <= 0) continue;    // 扇形外面：光不往那裡走
         if (nd < lightDist[ni]) { lightDist[ni] = nd; q.push(ni); }
       }
     }
     for (let i = 0; i < lightDist.length; i++) {
-      if (lightDist[i] < Infinity) onCell(i, 1 - lightDist[i] / steps);
+      if (lightDist[i] === Infinity) continue;
+      const k = coneK ? coneK(i % COLS, (i - i % COLS) / COLS) : 1;
+      if (k > 0) onCell(i, (1 - lightDist[i] / steps) * k);
     }
   }
+}
+
+// 扇形光：回傳 (c, r) → 0～1（1＝在扇形中間，邊緣一小段淡出，0＝在外面）；腳邊一格內一定亮
+function coneFactor(l) {
+  const ca = Math.cos(l.cone.ang), sa = Math.sin(l.cone.ang), edge = Math.cos(l.cone.half), soft = Math.cos(Math.max(0, l.cone.half - .14));
+  return (c, r) => {
+    const [cx, cy] = center(c, r), dx = cx - l.x, dy = cy - l.y, d = Math.hypot(dx, dy);
+    if (d < CELL * .9) return 1;
+    const dot = (dx * ca + dy * sa) / d;
+    if (dot <= edge) return 0;
+    return dot >= soft ? 1 : (dot - edge) / (soft - edge);
+  };
 }
 
 // ---- 攻擊閃光（槍口火光、火焰、雷擊…）----
@@ -117,7 +133,7 @@ function getLights() {
   const L = [];
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
   if (G && G.player && LIGHT.playerLightOn) L.push({ x: G.player.x, y: G.player.y, r: LIGHT.playerR });
-  if (typeof equipLight === 'function') { const lamp = equipLight(); if (lamp) L.push(lamp); }   // 頭燈（js/equipment.js）
+  if (typeof equipLight === 'function') L.push(...equipLight());   // 照明頭盔、手電筒（js/equipment.js）
   // 營地常亮（沒自訂營地就用預設最下排）
   if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); const [x, y] = center(c, r); L.push({ x, y, r: LIGHT.campR }); });
   else for (let c = 0; c < COLS; c++) { const [x, y] = center(c, ROWS - 1); L.push({ x, y, r: LIGHT.campR }); }
@@ -223,6 +239,7 @@ function drawDarkness() {
   const mx = OX, my = OY, mw = COLS * CELL, mh = ROWS * CELL;
   ctx.imageSmoothingEnabled = true;
   ctx.drawImage(fieldCv, mx, my, mw, mh);
+  if (typeof drawFlashlightBeam === 'function') drawFlashlightBeam(ctx);   // 手電筒的光束（js/equipment.js）
 
   // 探照燈的環境暖光也使用格子擴散遮罩，因此不會穿過牆壁。
   const wp = warmImg.data;

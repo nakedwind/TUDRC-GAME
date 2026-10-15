@@ -356,7 +356,7 @@ function drawEnemy(e) {
     ctx.fillText(SLIME_VARIANTS.giant.name, e.x, barY - 4);
   }
   if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
-  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
+  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.sleepT > 0 ? '睡著' : e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
   if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
   if (e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」
     const age = ENEMY_ALERT_TIME - e.alertT, pop = age < .12 ? .6 + age / .12 * .7 : 1.3 - Math.min(.3, (age - .12) * 1.5);
@@ -545,6 +545,7 @@ function draw() {
   if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
   drawCoreShards(ctx);         // 異質核心碎片
   drawFlareShots(ctx);         // 飛行中的照明彈
+  if (typeof drawSpecialShots === 'function') drawSpecialShots(ctx);   // 飛行中的燃燒彈、麻醉針（js/special-guns.js）
   drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
   if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
@@ -935,6 +936,8 @@ function draw() {
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
+  if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉槍打睡的頭上飄 Zzz（js/special-guns.js）
+  if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
   // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。
   if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {

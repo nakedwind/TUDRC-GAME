@@ -1,5 +1,6 @@
 /* ===== 溫特的武器切換＋照明彈槍＋彈藥箱 =====
    - 滾輪（滑鼠在遊戲畫面上）或數字鍵 1／2 切換：手槍（6/∞）↔ 照明彈槍（彈匣 3／備用最多 30）。
+     後室撿到的燃燒彈槍、麻醉槍也會加進滾輪切換（js/special-guns.js）。
    - 照明彈：朝滑鼠方向打出去（最遠 FLARE.range 格，碰到牆會停在牆前），落地燃燒一段時間。
      是「真的光」：照亮的地方哨兵看得到怪、可以蓋建築、溫特的槍也能瞄準。怪物不會被它吸引。
    - 彈匣打完按 R（或再開火）從備用彈裝填；備用彈也用完，就要走到地圖上的彈藥箱按 Space／E 補滿。
@@ -19,7 +20,11 @@ const FLARE = {
 const WEAPONS = [
   { id: 'pistol', name: '手槍', icon: '🔫', img: 'images/weapon/winter-handgun-design.png' },
   { id: 'flare', name: '照明彈槍', icon: '🔥', img: 'images/weapon/winter-flare-gun-design.png' },
+  // 下面兩把要在後室撿到才會出現在切換裡（js/special-guns.js）
+  { id: 'incendiary', name: '燃燒彈槍', short: '燃燒彈', icon: '🧨', img: 'images/weapon/incendiary_launcher.png', special: true },
+  { id: 'tranq', name: '麻醉槍', short: '麻醉針', icon: '💤', img: 'images/weapon/tranquilizer_gun.png', special: true },
 ];
+const weaponUsable = i => typeof weaponOwned !== 'function' || weaponOwned(WEAPONS[i].id);
 const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], openId: 'tile_field_ammo_crate_open', radius: 72, openFor: 1.6 };
 
 // ---- 武器狀態 ----
@@ -35,8 +40,13 @@ function switchWeapon(step, toIndex) {
   const now = performance.now();
   if (toIndex == null && now - lastWeaponSwitch < 200) return;   // 滾一下不要連跳好幾把
   lastWeaponSwitch = now;
-  const next = toIndex != null ? toIndex : ((p.weaponIndex || 0) + step + WEAPONS.length) % WEAPONS.length;
+  let next = toIndex;
+  if (next == null) {   // 滾輪：跳過還沒拿到的槍
+    next = p.weaponIndex || 0;
+    for (let i = 0; i < WEAPONS.length; i++) { next = (next + step + WEAPONS.length) % WEAPONS.length; if (weaponUsable(next)) break; }
+  } else if (!weaponUsable(next)) return;
   if (next === (p.weaponIndex || 0)) return;
+  p.sgReload = null;   // 燃燒彈槍、麻醉槍的裝填：換槍就中斷
   p.weaponIndex = next; p.atkCd = Math.max(p.atkCd || 0, .15);
   const w = WEAPONS[next];
   flash(w.icon + ' ' + w.name, p.x, p.y - 70, '#ffe79a', .9);
@@ -50,7 +60,7 @@ cv.addEventListener('wheel', e => {
 window.addEventListener('keydown', e => {
   if (e.repeat || dialogueState) return;
   const n = Number(e.key);
-  if (n >= 1 && n <= WEAPONS.length) switchWeapon(0, n - 1);
+  if (n >= 1 && n <= 2) switchWeapon(0, n - 1);   // 燃燒彈槍、麻醉槍只用滾輪切換（3 以後的數字鍵是建築快捷）
 });
 
 // ---- 照明彈：裝填、發射 ----

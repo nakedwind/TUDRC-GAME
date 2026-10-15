@@ -197,7 +197,7 @@ function dialogueProfile(actor) {
 }
 function interactionNearPlayer() {
   const p = G && G.player; if (!p || p.sitting) return null;
-  let best = null, bestDistance = NPC_TALK.radius;
+  let best = null, bestDistance = NPC_TALK.radius * (typeof equipTalkReach === 'function' ? equipTalkReach() : 1);   // 無線電：戰鬥中疏導距離變遠
   const actors = [...(G.npcs || []), ...(G.towers || [])];
   for (const actor of actors) {
     if (actor.kind === 'tower' && actor.hp <= 0) continue;
@@ -386,7 +386,8 @@ window.addEventListener('keydown', e => {
   keys[k] = true;
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
   if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) {   // 手動裝填（目前拿的那把）
-    if (playerWeapon(G.player).id === 'flare') startFlareReload(G.player); else startReload(G.player);
+    const wid = playerWeapon(G.player).id;
+    if (wid === 'flare') startFlareReload(G.player); else if (playerWeapon(G.player).special) startSpecialReload(wid, G.player); else startReload(G.player);
   }
   if (npcArrangeMode) return;
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：空白鍵 或 E
@@ -1327,6 +1328,7 @@ function updatePlayerAttack(dt) {
   updateAmmoHud();
   const canFire = !(p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
   if (playerWeapon(p).id === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈槍（js/flare.js）
+  if (playerWeapon(p).special) { updateSpecialGun(playerWeapon(p).id, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈槍、麻醉槍（js/special-guns.js）
   if (!canFire) return;
   if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const aim = clientToWorld(aimClient.x, aimClient.y);
@@ -1402,6 +1404,7 @@ function buildAmmoHud() {
     #ammoHud .gun-stack img { position:absolute; left:0; bottom:0; width:40px; height:30px; image-rendering:pixelated; transform-origin:left bottom;
       transition:transform .22s cubic-bezier(.3,1.4,.5,1), filter .22s, opacity .22s; }
     #ammoHud .gun-stack img.front { z-index:2; transform:translate(0,0) scale(1); filter:drop-shadow(0 0 2px rgba(255,236,190,.95)) drop-shadow(0 0 5px rgba(255,214,140,.55)); opacity:1; }
+    #ammoHud .gun-stack img.off { display:none; }
     #ammoHud .gun-stack img.back  { z-index:1; transform:translate(4px,-22px) scale(.8); filter:brightness(.62) saturate(.35) drop-shadow(0 0 1px rgba(160,190,220,.5)); opacity:.85; }
     #ammoHud .ammo-text { font:700 16px sans-serif; color:#dbe7ff; letter-spacing:1px; white-space:nowrap; padding-bottom:4px; text-shadow:0 1px 2px #000, 0 0 3px #000; }
     #ammoHud .ammo-text .weapon-name { display:block; margin-bottom:5px; color:#eef3fa; font:700 12px 'Microsoft JhengHei',sans-serif; letter-spacing:0; }
@@ -1426,13 +1429,17 @@ function updateAmmoHud() {
     ensureFlareAmmo(p);
     const empty = p.flareMag + p.flareReserve <= 0;
     text = p.flareReloadT > 0 ? 'Reload' : p.flareMag + ' / ' + p.flareReserve + (empty ? '<small>去彈藥箱補給</small>' : '');
-  } else text = (p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞';
-  const key = wi + '|' + text;
+  } else if (p && playerWeapon(p).special) text = specialGunHud(playerWeapon(p).id, p);   // 燃燒彈槍、麻醉槍
+  else text = (p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞';
+  const owned = WEAPONS.map((w, i) => weaponUsable(i) ? 1 : 0).join('');
+  const key = wi + '|' + text + '|' + owned;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
   ammoHudKey = key;
-  ammoGunEls.forEach((img, i) => { img.className = i === wi ? 'front' : 'back'; });
+  // 正在用的在前面；後面只露出下一把（滾輪往下會換到的那把），還沒拿到的不顯示
+  let nx = wi; for (let i = 0; i < WEAPONS.length; i++) { nx = (nx + 1) % WEAPONS.length; if (weaponUsable(nx)) break; }
+  ammoGunEls.forEach((img, i) => { img.className = i === wi ? 'front' : i === nx ? 'back' : 'off'; });
   ammoTextEl.innerHTML = '<span class="weapon-name"></span>' + text;
-  ammoTextEl.querySelector('.weapon-name').textContent = WEAPONS[wi].id === 'flare' ? '照明彈' : WEAPONS[wi].name;
+  ammoTextEl.querySelector('.weapon-name').textContent = WEAPONS[wi].id === 'flare' ? '照明彈' : WEAPONS[wi].short || WEAPONS[wi].name;
 }
 
 // ---- 主迴圈（幀率校正）----
@@ -1549,6 +1556,7 @@ function update(dt) {
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
+    else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
     avoidAcidPools(t, dt);   // 被腐蝕池推開（阿瓦倫本人免疫、不避）
@@ -1588,6 +1596,7 @@ function update(dt) {
       if (t.gunReloadT === 0) t.gunAmmo = GUIDE_GUN.mag;
     }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
+    if (t.sleepT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著：不攻擊
     if (t.soothingT > 0) t.soothingT = Math.max(0, t.soothingT - dt);   // 疏導施法計時
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
@@ -1770,7 +1779,7 @@ function update(dt) {
     }
     // 玩家（溫特）
     const p = G.player;
-    const playerAcid = p && p.hp > 0 ? acidTick(p) : 0;
+    const playerAcid = p && p.hp > 0 ? acidTick(p) * (typeof equipAcidMul === 'function' ? equipAcidMul() : 1) : 0;   // 防毒面具（js/equipment.js）
     if (playerAcid) {
       p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(playerAcid) : playerAcid));
       playPlayerHit(.55);   // 阿瓦倫的腐蝕：每燙一次小聲響一下
@@ -1862,6 +1871,7 @@ function update(dt) {
   if (typeof updateSmilers === 'function') updateSmilers(dt);
   if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
+  if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）

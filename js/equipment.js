@@ -1,17 +1,27 @@
 // ============================================================
 //  部隊長（溫特）的裝備
-//  ・背包左邊「部隊長裝備」：換裝（頭部、身體、飾品 ×2），看武器等級、頭燈電量。
+//  ・背包左邊「部隊長裝備」：換裝（頭部、身體、隨身物品 ×2），看武器等級、手電筒電量。
+//  ・照明：照明頭盔（頭部，身邊一小圈光）、高亮度手電筒（隨身物品，朝滑鼠方向的扇形光，要電池）。
+//  ・主動裝備：急救包（H）、腎上腺素注射器（J），下方資訊條也有按鈕。
 //  ・找諾亞對話 →「🔧 開發工坊」：用異質碎片開發新裝備、升級裝備和武器。
-//  ・特殊裝備（順順宮御守、異質探測器）只能在戰鬥區域拿到。
+//  ・特殊裝備（順順宮御守、異質探測器、杏仁水保溫瓶、腎上腺素注射器）只能在戰鬥區域拿到。
 //  ・資料、數值在 data/equipment.js；進度存在瀏覽器（localStorage）。
 // ============================================================
 const EQUIP_STORE = 'tudrc_equipment_v1';
-const equipState = { owned: {}, equipped: { head: null, body: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1 }, battery: 100 };
+const equipState = { owned: {}, equipped: { head: null, body: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, gunAmmo: {}, battery: 100 };
 try {
   const s = JSON.parse(localStorage.getItem(EQUIP_STORE) || '{}');
   if (s.owned) for (const [id, lv] of Object.entries(s.owned)) if (EQUIPMENT.some(e => e.id === id)) equipState.owned[id] = Math.max(1, Math.min(3, lv | 0));
   if (s.equipped) for (const k of Object.keys(equipState.equipped)) if (s.equipped[k] && equipState.owned[s.equipped[k]]) equipState.equipped[k] = s.equipped[k];
-  if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(1, Math.min(3, s.weapons[k] | 0));
+  // 舊存檔：頭燈／手持格的手電筒改放到空著的隨身物品格；穿在不對的格子的裝備卸下
+  const oldLamp = (s.equipped && s.equipped.hand === 'headlamp') || equipState.equipped.head === 'headlamp';
+  if (equipState.equipped.head === 'headlamp') equipState.equipped.head = null;
+  if (oldLamp && equipState.owned.headlamp && !Object.values(equipState.equipped).includes('headlamp')) {
+    const free = ['acc1', 'acc2'].find(k => !equipState.equipped[k]); if (free) equipState.equipped[free] = 'headlamp';
+  }
+  for (const slot of EQUIP_SLOTS) { const id = equipState.equipped[slot.id], d = id && EQUIPMENT.find(e => e.id === id); if (d && !slot.kinds.includes(d.kind)) equipState.equipped[slot.id] = null; }
+  if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field ? 0 : 1, Math.min(3, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
+  if (s.gunAmmo) for (const [k, a] of Object.entries(s.gunAmmo)) if (WEAPON_UPGRADES[k] && a) equipState.gunAmmo[k] = { mag: Math.max(0, a.mag | 0), reserve: Math.max(0, a.reserve | 0) };
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
 } catch (_) {}
 function saveEquipment() { try { localStorage.setItem(EQUIP_STORE, JSON.stringify(equipState)); } catch (_) {} }
@@ -25,17 +35,43 @@ function equipLv(id) {
 }
 
 // ---- 效果（其他程式呼叫）----
-const equipPlayerDamage = d => { const v = equipLv('vest'); return v ? d * (1 - v.guard) : d; };   // 防護背心：溫特受到的傷害
+const equipPlayerDamage = d => { const v = equipLv('vest'), h = equipLv('helmet'); return d * (v ? 1 - v.guard : 1) * (h ? 1 - h.guard : 1) * (adrenalineActive() ? 1 - ADRENALINE.guard : 1); };   // 防護背心、防護頭盔、腎上腺素：溫特受到的傷害
+const equipFireMul = () => { const v = equipLv('fireboots'); return v ? 1 - v.fire : 1; };   // 防火鞋：火海燙傷（js/oil-barrels.js）
+const equipAcidMul = () => { const v = equipLv('mask'); return v ? 1 - v.filter : 1; };   // 防毒面具：腐蝕池、酸液的傷害
 const equipSootheCost = c => { const v = equipLv('bracelet'); return v ? Math.round(c * (1 - v.save)) : c; };   // 共感手環：疏導花的 SP
 const equipAlmondMul = () => { const v = equipLv('thermos'); return v ? 1 + v.bonus : 1; };   // 杏仁水保溫瓶
-const equipSpeedMul = () => { const v = equipLv('sneakers'); return v ? 1 + v.speed : 1; };   // 輕量跑鞋
+const equipSpeedMul = () => { const v = equipLv('sneakers'); return (v ? 1 + v.speed : 1) * adrenalineSpeedMul(); };   // 輕量跑鞋、腎上腺素
 const equipSmilerMul = () => { const v = equipLv('charm'); return v ? 1 - v.ward : 1; };      // 順順宮御守：被 Smiler 咬的機率
-const equipCalm = () => { const v = equipLv('earmuffs'); return v ? v.calm : 0; };            // 降噪耳機：理智下降的影響減少多少
-// 頭燈：戰鬥區域、有電的時候，溫特身上一圈光（js/lighting.js 的 getLights 呼叫）
+// 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
+const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && !MAP_SAFE ? h.fear : 0)); };   // 照明頭盔也算
+const flashlightOn = () => !!(equipLv('headlamp') && !MAP_SAFE && equipState.battery > 0);
+// 無線電：疏導距離（js/game.js）、指派時隊員跑更快（js/sentry.js）
+const equipTalkReach = () => { const v = equipLv('radio'); return v && !MAP_SAFE ? 1 + v.reach : 1; };
+const equipRushMul = () => { const v = equipLv('radio'); return v && v.rush ? 1 + v.rush : 1; };
+// 照明（js/lighting.js 的 getLights 呼叫，只有戰鬥區域）：
+//   照明頭盔＝溫特身邊一小圈光；高亮度手電筒（有電時）＝朝滑鼠方向的扇形光，照得遠
 function equipLight() {
-  const v = equipLv('headlamp');
-  if (!v || MAP_SAFE || !G || !G.player || equipState.battery <= 0) return null;
-  return { x: G.player.x, y: G.player.y - 10, r: v.light };
+  if (MAP_SAFE || !G || !G.player) return [];
+  const p = G.player, L = [], h = equipLv('lamphelmet'), v = equipLv('headlamp');
+  if (h) L.push({ x: p.x, y: p.y - 10, r: h.light });
+  if (v && equipState.battery > 0) L.push({ x: p.x, y: p.y - 10, r: v.light, cone: { ang: flashlightAngle(), half: v.spread * Math.PI / 180 } });
+  return L;
+}
+// 手電筒照的方向：滑鼠在遊戲畫面上就朝滑鼠，不然朝溫特面向的方向
+function flashlightAngle() {
+  const p = G.player;
+  if (aimClient && typeof clientToWorld === 'function') { const a = clientToWorld(aimClient.x, aimClient.y); if (Math.hypot(a.x - p.x, a.y - p.y) > 8) return Math.atan2(a.y - (p.y - 10), a.x - p.x); }
+  return { left: Math.PI, right: 0, back: -Math.PI / 2, front: Math.PI / 2 }[p.dir] ?? Math.PI / 2;
+}
+// 手電筒的光束（淡淡的白光，畫在黑幕上面，讓人看得出是一道光；js/lighting.js 的 drawDarkness 呼叫）
+function drawFlashlightBeam(ctx) {
+  const l = equipLight().find(x => x.cone); if (!l) return;
+  const { ang, half } = l.cone, R = l.r * .95;
+  ctx.save(); ctx.globalCompositeOperation = 'screen';
+  const g = ctx.createRadialGradient(l.x, l.y, 4, l.x, l.y, R);
+  g.addColorStop(0, 'rgba(255,250,225,.22)'); g.addColorStop(.6, 'rgba(255,245,210,.08)'); g.addColorStop(1, 'rgba(255,240,200,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.arc(l.x, l.y, R, ang - half, ang + half); ctx.closePath(); ctx.fill();
+  ctx.restore();
 }
 // 武器等級套到實際數值（手槍：傷害、彈匣、裝填；照明彈槍：燃燒秒數、備用彈上限）
 function applyWeaponLevels() {
@@ -44,9 +80,98 @@ function applyWeaponLevels() {
   if (typeof FLARE !== 'undefined') { FLARE.burn = f.burn; FLARE.reserveMax = f.reserve; }
 }
 
-// ---- 每幀（game.js 的 update 呼叫）：頭燈耗電 ----
+// ---- 腎上腺素注射器（J）----
+const adrenaline = { until: 0, sideUntil: 0, readyAt: 0 };
+const nowSec = () => performance.now() / 1000;
+const adrenalineActive = () => nowSec() < adrenaline.until;
+function adrenalineSpeedMul() {
+  const t = nowSec();
+  if (t < adrenaline.until) return 1 + ADRENALINE.speed;
+  if (t < adrenaline.sideUntil) return 1 - ADRENALINE.slow;   // 藥效退了：副作用變慢
+  return 1;
+}
+function useAdrenaline() {
+  const v = equipLv('adrenaline'); if (!v || MAP_SAFE || !G?.player || G.player.hp <= 0) return;
+  const t = nowSec();
+  if (t < adrenaline.readyAt) { sfx('error'); flash('腎上腺素還要 ' + Math.ceil(adrenaline.readyAt - t) + ' 秒', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  adrenaline.until = t + v.dur; adrenaline.sideUntil = adrenaline.until + v.side; adrenaline.readyAt = t + ADRENALINE.cooldown;
+  flash('💉 腎上腺素！', G.player.x, G.player.y - 54, '#ff8a8a', 1.4); sfx('soothe');
+  G.effects.push({ ring: true, x: G.player.x, y: G.player.y, r: 6, r2: 40, life: .35, life0: .35, color: '#ff8a8a' });
+}
+// ---- 急救包（H）：治療身邊受傷的隊員（倒地的也行），沒有就治療自己 ----
+const firstAid = { uses: 0, forG: null, channel: null };
+function firstAidTarget() {
+  const p = G.player, near = [];
+  for (const t of G.towers || []) if (t.hp < t.maxhp && Math.hypot(t.x - p.x, t.y - p.y) <= 1.8 * CELL) near.push(t);
+  near.sort((a, b) => (a.hp / a.maxhp) - (b.hp / b.maxhp));   // 傷最重的先救（倒地的排最前面）
+  if (near.length) return near[0];
+  return p.hp < p.maxhp ? p : null;
+}
+function useFirstAid() {
+  const v = equipLv('firstaid'); if (!v || MAP_SAFE || !G?.player || G.player.hp <= 0 || firstAid.channel) return;
+  if (firstAid.forG !== G) { firstAid.forG = G; firstAid.uses = v.uses; }
+  if (firstAid.uses <= 0) { sfx('error'); flash('急救包用完了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  const target = firstAidTarget();
+  if (!target) { sfx('error'); flash('大家都沒有受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  firstAid.channel = { t: 0, total: v.time, target, heal: v.heal };
+  Object.assign(G.player, { soothingT: v.time, gunT: 0, moving: false });   // 站著不動處理傷口
+  flash('⛑️ 急救中…', target.x, target.y - 46, '#9ff0c0', v.time);
+}
+function finishFirstAid() {
+  const c = firstAid.channel; firstAid.channel = null; if (!c || !G) return;
+  const t = c.target, isPlayer = t === G.player, wasDown = !isPlayer && t.hp <= 0;
+  firstAid.uses--;
+  t.hp = Math.min(t.maxhp, Math.max(0, t.hp) + c.heal);
+  flash('+' + c.heal + (wasDown ? ' 重新站起來了！' : ''), t.x, t.y - 50, '#79dbad', 1.6);
+  if (!isPlayer && wasDown && typeof sentryStatus === 'function') sentryStatus(t, '被溫特救起來了', '#79dbad');
+  for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: t.x + (Math.random() - .5) * 26, y: t.y - 10, vx: 0, vy: -40 - Math.random() * 30, r: 2, life: .7, life0: .7, color: '#9ff0c0' });
+  sfx('soothe'); if (typeof updateHUD === 'function') updateHUD();
+}
+// ---- 無線電 Lv3：標記溫特附近黑暗中的怪物（render.js 在黑幕上面畫）----
+function drawRadioMarks(ctx) {
+  const v = equipLv('radio'); if (!v || !v.mark || MAP_SAFE || !G || !G.player) return;
+  const p = G.player, R = v.mark * CELL, pulse = .55 + .3 * Math.sin(performance.now() / 220);
+  ctx.save();
+  for (const e of G.enemies) {
+    if (e.dead || e.hp <= 0 || isVisible(e.x, e.y) || Math.hypot(e.x - p.x, e.y - p.y) > R) continue;
+    ctx.globalAlpha = pulse; ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = 1.5;
+    const s = 11; ctx.beginPath();   // 紅色準星框
+    for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { ctx.moveTo(e.x + dx * s, e.y + dy * s - dy * 5); ctx.lineTo(e.x + dx * s, e.y + dy * s); ctx.lineTo(e.x + dx * s - dx * 5, e.y + dy * s); }
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+// ---- 下方資訊條：主動裝備的按鈕（急救包 H、腎上腺素 J）----
+let gearQuickKey = '';
+function renderGearQuick() {
+  let box = document.getElementById('quickGear');
+  if (!box) { const host = document.getElementById('quickSupplies'); if (!host) return; box = document.createElement('div'); box.id = 'quickGear'; host.after(box); }
+  const aid = equipLv('firstaid'), adr = equipLv('adrenaline'), t = nowSec();
+  if (aid && firstAid.forG !== G) { firstAid.forG = G; firstAid.uses = aid.uses; }
+  const cd = Math.max(0, Math.ceil(adrenaline.readyAt - t)), active = adrenalineActive();
+  const key = JSON.stringify([!!aid, aid ? firstAid.uses : 0, !!firstAid.channel, !!adr, cd, active]);
+  if (key === gearQuickKey) return; gearQuickKey = key;
+  const btn = (id, icon, name, sub, k, off, cls = '') => '<button type="button" class="quick-supply gear ' + cls + '" data-gear-use="' + id + '" ' + (off ? 'disabled' : '') + ' title="' + k + '｜' + name + '">' +
+    '<span class="qs-icon">' + icon + '</span><span class="qs-text"><small>' + name + '</small><b>' + sub + '</b></span><kbd>' + k + '</kbd></button>';
+  box.innerHTML = (aid ? btn('firstaid', '⛑️', '急救包', '×' + firstAid.uses, 'H', firstAid.uses <= 0 || firstAid.channel) : '') +
+    (adr ? btn('adrenaline', '💉', '腎上腺素', active ? '生效中' : cd ? cd + ' 秒' : '可使用', 'J', cd > 0 && !active, active ? 'on' : '') : '');
+}
+document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-gear-use]'); if (!b) return; if (b.dataset.gearUse === 'firstaid') useFirstAid(); else useAdrenaline(); });
+window.addEventListener('keydown', e => {
+  const k = e.key.toLowerCase();
+  if (e.repeat || (k !== 'h' && k !== 'j') || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  if (!G?.player || G.over || MAP_SAFE || dialogueState || elevatorMenuOpen || mapTransitioning) return;
+  if (typeof supplyShopOpen !== 'undefined' && supplyShopOpen) return;
+  if (typeof backpackOpen !== 'undefined' && backpackOpen) return;
+  e.preventDefault(); if (k === 'h') useFirstAid(); else useAdrenaline();
+});
+
+// ---- 每幀（game.js 的 update 呼叫）：手電筒耗電、急救進度、資訊條按鈕 ----
 let batteryWarned = false;
 function updateEquipment(dt) {
+  if (firstAid.channel) { firstAid.channel.t += dt; if (firstAid.channel.t >= firstAid.channel.total || G.player.hp <= 0) finishFirstAid(); }
+  renderGearQuick();
   const v = equipLv('headlamp');
   if (!v || MAP_SAFE) return;
   if (equipState.battery > 0) {
@@ -56,10 +181,10 @@ function updateEquipment(dt) {
   if ((supplyInventory.get('battery') || 0) > 0) {   // 沒電：自動換上背包裡的電池
     const n = supplyInventory.get('battery'); if (n <= 1) supplyInventory.delete('battery'); else supplyInventory.set('battery', n - 1);
     equipState.battery = 100; batteryWarned = false; saveEquipment();
-    systemNotice('🔋 頭燈換上新電池（剩 ' + (n - 1) + ' 顆）');
+    systemNotice('🔋 手電筒換上新電池（剩 ' + (n - 1) + ' 顆）');
   } else if (!batteryWarned) {
     batteryWarned = true; saveEquipment();
-    systemNotice('頭燈沒電了，在地圖上找找電池吧', true);
+    systemNotice('手電筒沒電了，在地圖上找找電池吧', true);
   }
 }
 setInterval(() => { if (equipLv('headlamp') && !MAP_SAFE) saveEquipment(); }, 3000);   // 電量每 3 秒存一次
@@ -105,7 +230,7 @@ let equipPick = null;   // 正在換哪一格
 function equipIcon(def, cls = '') { return def.image ? '<img class="' + cls + '" src="' + def.image + '" alt="">' : '<i class="' + cls + '">' + def.icon + '</i>'; }
 function renderEquipPanel() {
   const box = document.getElementById('equipPanel'); if (!box) return;
-  // 紙娃娃：左邊溫特立繪（置中），4 個裝備格直排在右邊（頭部、身體、飾品、飾品）
+  // 紙娃娃：左邊溫特立繪，4 個裝備格直排在右邊（頭部、身體、隨身物品 ×2），名稱在格子上面
   const pos = { head: 'tl', body: 'bl', acc1: 'tr', acc2: 'br' };
   const slots = EQUIP_SLOTS.map(s => {
     const id = equipState.equipped[s.id], def = id && equipDef(id);
@@ -115,8 +240,10 @@ function renderEquipPanel() {
   const art = '<img class="doll-art" src="' + EQUIP_PORTRAIT.image + '" alt="溫特" onerror="this.onerror=null;this.src=\'' + EQUIP_PORTRAIT.fallback + '\';this.classList.add(\'sprite\')">';
   const pickSlot = equipPick && EQUIP_SLOTS.find(s => s.id === equipPick);
   const worn = EQUIP_SLOTS.map(s => equipState.equipped[s.id]).filter(Boolean).map(id => { const d = equipDef(id); return '<li>' + equipIcon(d) + '<b>' + d.name + ' <em>Lv' + equipState.owned[id] + '</em></b><span>' + d.stat(d.levels[equipState.owned[id] - 1]) + '</span></li>'; }).join('');
-  const weapons = Object.entries(WEAPON_UPGRADES).map(([k, w]) => '<div class="equip-weapon">' + equipIcon(w) + '<b>' + w.name + ' <em>Lv' + equipState.weapons[k] + '</em></b><span>' + w.stat(w.levels[equipState.weapons[k] - 1]) + '</span></div>').join('');
-  const lamp = equipLv('headlamp') ? '<div class="equip-battery"><span>🔋 頭燈電量</span><b>' + Math.round(equipState.battery) + '%</b><i><u style="width:' + equipState.battery + '%"></u></i><small>背包裡的電池：' + (supplyInventory.get('battery') || 0) + ' 顆</small></div>' : '';
+  const weapons = Object.entries(WEAPON_UPGRADES).map(([k, w]) => !equipState.weapons[k]
+    ? '<div class="equip-weapon locked">' + equipIcon(w) + '<b>' + w.name + '</b><span>尚未取得：' + w.where + '</span></div>'
+    : '<div class="equip-weapon">' + equipIcon(w) + '<b>' + w.name + ' <em>Lv' + equipState.weapons[k] + '</em></b><span>' + w.stat(w.levels[equipState.weapons[k] - 1]) + (w.field ? '・彈藥 ' + (gunAmmo(k).mag + gunAmmo(k).reserve) + ' 發' : '') + '</span></div>').join('');
+  const lamp = equipLv('headlamp') ? '<div class="equip-battery"><span>🔋 手電筒電量</span><b>' + Math.round(equipState.battery) + '%</b><i><u style="width:' + equipState.battery + '%"></u></i><small>背包裡的電池：' + (supplyInventory.get('battery') || 0) + ' 顆</small></div>' : '';
   box.innerHTML = '<h3>部隊長裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + slots + '</div></div>' +
     (pickSlot ? '<div class="equip-pick-title">換「' + pickSlot.name + '」</div>' + equipPicker(pickSlot) : '') +
     (worn ? '<h3>目前效果</h3><ul class="equip-worn">' + worn + '</ul>' : '') + lamp + '<h3>武器</h3>' + weapons + '<p class="equip-tip">升級裝備和武器：回基地找諾亞</p>';
@@ -173,7 +300,7 @@ function workshopBuy(kind, id) {
     equipState.owned[id] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
     systemNotice('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
   } else if (kind === 'wp') {
-    const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || lv >= 3) return;
+    const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= 3) return;
     if (!spendCrystals(w.cost[lv - 1])) return;
     equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); SFX.play('achievement', .7, 'equip-up');
     systemNotice('🔧 「' + w.name + '」升到 Lv' + (lv + 1));
@@ -194,6 +321,7 @@ function renderWorkshop() {
   }).join('');
   const weapons = Object.entries(WEAPON_UPGRADES).map(([k, w]) => {
     const lv = equipState.weapons[k];
+    if (!lv) return row(equipIcon(w), w.name, '', w.desc, '只能在戰鬥區域取得：' + w.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
     return row(equipIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < 3 ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
       lv < 3 ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>');
   }).join('');

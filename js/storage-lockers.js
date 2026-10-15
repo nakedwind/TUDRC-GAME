@@ -77,6 +77,8 @@ function useStoragePropNearPlayer(){
     sfx('error');flash('需要置物箱鑰匙',prop.x,prop.top-8,'#ffcf89',1.4);
   }else{
     unlockedStorageLockers.add(prop.token);setupStorageBoxWalls();computeFlow();sfx('door');systemNotice('已用鑰匙打開置物箱');saveGame();
+    if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);   // 有機會在裡面找到杏仁水保溫瓶（js/equipment.js）
+    if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);   // 有機會找到燃燒彈槍、麻醉槍或它們的彈藥（js/special-guns.js）
   }
   return true;
 }

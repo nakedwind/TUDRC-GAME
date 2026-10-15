@@ -1517,6 +1517,8 @@ canvas.cursor-pressed {
 .equip-weapon { display: grid; grid-template-columns: 26px minmax(0,1fr); column-gap: 7px; align-items: center; padding: 6px 8px; border-radius: 9px; background: rgba(37,43,51,.45); font-size: 12px; }
 .equip-weapon i { grid-row: 1 / 3; font-style: normal; font-size: 18px; text-align: center; }
 .equip-weapon span { color: #a9b5c1; font-size: 10px; }
+.equip-weapon.locked { opacity: .5; }
+.equip-weapon.locked img, .equip-weapon.locked i { filter: grayscale(1) brightness(.6); }
 .equip-tip { margin: 4px 2px 0; color: #82909d; font-size: 10px; text-align: center; }
 @media (max-width: 860px) { .backpack-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0,1fr) auto; } .equip-panel { max-height: 180px; border-right: 0; border-bottom: 1px solid rgba(255,212,121,.13); } }
 /* 對話框：和諾亞對話時的「開發工坊」按鈕 */
@@ -1598,7 +1600,19 @@ canvas.cursor-pressed {
 .doll-slot small { max-width: 40px; padding: 1px 5px; }
 .doll-art { left: calc((100% - 96px) / 2); max-width: calc(100% - 100px); }
 .doll-art.sprite { width: 116px; max-width: none; }
-.doll-slots .doll-slot small { order: -1; }   /* 名稱在格子左邊 */
+.doll-slots .doll-slot small { order: -1; }
+/* 裝備格 4 格：名稱放在格子上面 */
+.doll-slots .doll-slot { flex-direction: column; justify-content: flex-start; align-items: center; gap: 2px; }
+.doll-slots .doll-slot small { max-width: 84px; }
+.doll-slots .doll-slot span { width: 42px; height: 42px; }
+.doll-slots .doll-slot span img { width: 34px; height: 34px; }
 @media (max-width: 860px) { .backpack-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0,1fr) auto; } .equip-panel { max-height: 180px; } }   /* 視窗窄的時候改成上下排 */
 .equip-weapon { grid-template-columns: 40px minmax(0,1fr); }
 .equip-weapon > img { grid-row: 1 / 3; width: 40px; height: 30px; image-rendering: pixelated; }   /* 武器圖片（40×30 原尺寸） */
+
+/* ===== 主動裝備按鈕（急救包 H、腎上腺素 J）===== */
+#quickGear { display:flex; gap:6px; }
+.quick-supply.gear { border-color:rgba(255,212,121,.32); }
+.quick-supply.gear:hover:not(:disabled) { border-color:#ffd479; }
+.quick-supply.gear .qs-icon { color:#ffd479; }
+.quick-supply.gear.on { border-color:#ff8a8a; box-shadow:0 0 10px rgba(255,138,138,.45); }

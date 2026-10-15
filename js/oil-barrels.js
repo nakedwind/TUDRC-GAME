@@ -244,9 +244,10 @@ function updateOil(dt) {
   if (p && p.hp > 0) {
     const d = fireTick(p);
     if (d) {
-      p.hp = Math.max(0, p.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(d) : d)); p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .35);
+      const hurt = (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(d) : d) * (typeof equipFireMul === 'function' ? equipFireMul() : 1);   // 防火鞋（js/equipment.js）
+      p.hp = Math.max(0, p.hp - hurt); p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT || 0, .35);
       if (typeof playPlayerHit === 'function') playPlayerHit(.55);   // 站在火裡被燙：每燙一次小聲響一下
-      flashDmg('-' + Math.round(d), p.x, p.y - 46, '#ff9a3c');
+      flashDmg('-' + Math.round(hurt), p.x, p.y - 46, '#ff9a3c');
       if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被火燒傷'); }
     }
   }
@@ -254,6 +255,7 @@ function updateOil(dt) {
     f.t -= dt;
     // 火會延燒：碰到的油汙被點燃、碰到的油桶被燒爆
     igniteSlicksNear(f.x, f.y, f.r * .6);
+    if (typeof burnLifePilesNear === 'function') burnLifePilesNear(f.x, f.y, f.r * .8);   // 生命體碎掉的那堆在火裡：燒成灰
     for (const o of [...G.obstacles]) {
       if (!oilItem(o) || o.hp <= 0) continue;
       const c = oilCenter(o);
