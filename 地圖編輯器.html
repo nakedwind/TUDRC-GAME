@@ -35,6 +35,7 @@
         <span class="sep"></span>
         <button class="btn" id="flipX" title="左右翻筆刷（快捷鍵 F）">⇄ 左右翻</button>
         <button class="btn" id="flipY" title="上下翻筆刷（快捷鍵 V）">⇅ 上下翻</button>
+        <button class="btn" id="rotateBrush" title="旋轉筆刷 90 度（快捷鍵 R）">↻ 旋轉</button>
       </div>
       <div id="tools2" class="toolrow">
         <span class="tool-label">⚙️ 地圖</span>
@@ -77,6 +78,7 @@
         <button class="btn" id="selDown">↓ 下移一層</button>
         <button class="btn" id="selFlipX">⇄ 左右翻</button>
         <button class="btn" id="selFlipY">⇅ 上下翻</button>
+        <button class="btn" id="selRotate" title="旋轉選取物件 90 度（快捷鍵 R）">↻ 旋轉</button>
         <button class="btn" id="selReset" title="把微調的位置歸零、貼回格線">↺ 回格線</button>
         <button class="btn danger" id="selDelete">🗑 刪除</button>
         <button class="btn" id="selClear">取消選取</button>
@@ -189,12 +191,12 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=pearlshell-20261016"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=fish-20261016"></script>
-  <script src="data/maps.js?v=fish-20261016"></script>        <!-- 地圖資料 -->
+  <script src="data/maps.js?v=drink-shop-20261017"></script>        <!-- 地圖資料 -->
   <script src="data/doors.js?v=doorsfx-20261008"></script>        <!-- 可開關的門 -->
   <script src="js/sfx.js"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/editor-store.js?v=psave-20261016"></script>   <!-- 地圖暫存放在瀏覽器資料庫 -->
-  <script>EditorStore.boot(["js/editor.js?v=wide-canvas-fix-20261016", "js/editor-save.js?v=psave-20261016"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/editor.js?v=stamp-color-fix-20261017", "js/editor-save.js?v=psave-20261016"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>

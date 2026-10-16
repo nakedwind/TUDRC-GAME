@@ -410,6 +410,7 @@ window.addEventListener('keydown', e => {
     else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) openMissionBoard();   // 作戰桌／作戰螢幕（js/missions.js；旁邊的椅子或人更近時讓給它們）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) openVendingMachine();   // 販賣機：只賣飲料（js/shop.js）
+    else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) openDrinkShop();   // 飲料店：只賣飲料（js/shop.js）
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();

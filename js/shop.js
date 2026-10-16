@@ -1,22 +1,24 @@
 // ============================================================
-//  便利商店：補給（醫療包、杏仁水）、零食飲料（送禮）
+//  商店：便利商店、飲料店、販賣機共用購物介面
 //  ・左邊商品、右邊購物車；結帳後東西放進背包（背包在 js/backpack.js）
 //  ・補給：醫療包恢復 HP、杏仁水恢復 SP；戰鬥中按 Q／F 快速使用（下方資訊條的快捷格）
 //  ・零食、飲料：送禮用（js/gifts.js）
 //  ・商品資料在 data/supplies.js
-//  ・商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Space／E 打開，進門播全家的進門聲
+//  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Space／E 打開
+//  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Space／E 打開，只賣飲料
 //  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Space／E，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
 // ============================================================
 const supplyShop = document.getElementById('supplyShop');
 const supplyShopList = document.getElementById('supplyShopList');
 const shopCartList = document.getElementById('cartList');
-const storeCart = new Map(), vendingCart = new Map();   // 購物車：商品 id → 數量（結帳後才放進背包）；商店、販賣機各一台
+const storeCart = new Map(), vendingCart = new Map();   // 購物車：商品 id → 數量（結帳後才放進背包）；一般商店與飲料店分開
 let shopCart = storeCart;
 let supplyShopOpen = false, supplyShopTab = 'all';
-let vendingMode = false;   // true＝現在開的是販賣機（只有飲料）
+let vendingMode = false, drinkShopMode = false;   // 販賣機或飲料店模式都只賣飲料
 const VENDING = { kinds: ['drink'], reach: 1, match: id => /vending/.test(id) };   // 賣什麼、離販賣機邊緣幾格內按得到、哪些素材算販賣機
 const SHOP_COUNTER = { reach: 1.2, match: id => id === 'tile_cvs_checkout_counter' };   // 商店的結帳櫃台（地圖編輯器「結帳櫃台」）
-const shopItems = () => vendingMode ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : SUPPLIES;
+const DRINK_SHOP = { kinds: ['drink'], reach: 1.2, match: id => String(id).startsWith('tile_street_drink_shop_') };
+const shopItems = () => vendingMode || drinkShopMode ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : SUPPLIES;
 // 補給的效果（商品資料的 use）：hp＝醫療包恢復 HP（Q）、sp＝杏仁水恢復 SP（F）
 const SUPPLY_KIND = {
   hp: { name: '醫療包', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
@@ -90,31 +92,43 @@ function renderQuickSupplies() {
       <span class="qs-icon">${item ? `<img src="${item.image}" alt="">` : k.icon}</span><span class="qs-text"><small>${k.name}</small><b>×${count}</b></span><kbd>${k.key}</kbd></button>`;
   }).join('');
 }
-// 商店／販賣機共用一個視窗：切換標題、分頁、購物車
-function setShopMode(vending) {
-  vendingMode = vending; shopCart = vending ? vendingCart : storeCart;
-  supplyShop.classList.toggle('vending', vending);
-  supplyShop.querySelector('.shop-title small').textContent = vending ? '自動販賣機' : '便利商店';
-  document.getElementById('supplyShopTitle').textContent = vending ? '販賣機' : '商店';
-  supplyShop.querySelector('.shop-sign').textContent = vending ? '🥤' : '24H';
-  document.getElementById('supplyShopClose').setAttribute('aria-label', vending ? '關閉販賣機（Esc）' : '關閉商店（Esc）');
+// 商店／飲料店／販賣機共用一個視窗：切換標題、分頁、購物車
+function setShopMode(mode) {
+  vendingMode = mode === 'vending'; drinkShopMode = mode === 'drinkshop';
+  shopCart = vendingMode || drinkShopMode ? vendingCart : storeCart;
+  supplyShop.classList.toggle('vending', vendingMode);
+  supplyShop.classList.toggle('drinkshop', drinkShopMode);
+  const smallTitle = vendingMode ? '自動販賣機' : drinkShopMode ? '飲料店' : '便利商店';
+  const title = vendingMode ? '販賣機' : drinkShopMode ? '飲料店' : '商店';
+  supplyShop.querySelector('.shop-title small').textContent = smallTitle;
+  document.getElementById('supplyShopTitle').textContent = title;
+  supplyShop.querySelector('.shop-sign').textContent = vendingMode || drinkShopMode ? '🥤' : '24H';
+  document.getElementById('supplyShopClose').setAttribute('aria-label', '關閉' + title + '（Esc）');
 }
 function openSupplyShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
-  setShopMode(false);
+  setShopMode('store');
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopEnter', .7, 'shop-enter'); document.getElementById('supplyShopClose').focus();   // 全家便利商店進門聲
 }
 function openVendingMachine() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
-  setShopMode(true);
+  setShopMode('vending');
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); sfx('menu'); document.getElementById('supplyShopClose').focus();
 }
-// 玩家旁邊的販賣機／結帳櫃台（離素材邊緣 reach 格內）
+function openDrinkShop() {
+  if (!G || G.over || !G.player || supplyShopOpen) return;
+  setShopMode('drinkshop');
+  supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
+  closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
+  supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); sfx('menu'); document.getElementById('supplyShopClose').focus();
+}
+// 玩家旁邊的販賣機、飲料店、便利商店櫃台（離素材邊緣 reach 格內）
 function vendingNearPlayer() { return shopStampNearPlayer(VENDING); }
+function drinkShopNearPlayer() { return shopStampNearPlayer(DRINK_SHOP); }
 function shopCounterNearPlayer() { return shopStampNearPlayer(SHOP_COUNTER); }
 function shopStampNearPlayer(cfg) {
   if (!G || !G.player || !MAP) return null;
@@ -153,6 +167,7 @@ function checkoutCart() {
   for (const [id, n] of shopCart) supplyInventory.set(id, (supplyInventory.get(id) || 0) + n);
   shopCart.clear();
   if (vendingMode) { sfx('drink'); systemNotice(`販賣機掉出 ${count} 瓶飲料（$${total}），已放進背包`); }
+  else if (drinkShopMode) { SFX.play('shopCheckout', .7, 'shop-checkout'); systemNotice(`飲料店結帳 $${total}，${count} 杯已放進背包`); }
   else { SFX.play('shopCheckout', .7, 'shop-checkout'); systemNotice(`結帳 $${total}，${count} 件已放進背包`); }
   updateHUD(); renderSupplyShop();
   const link = document.getElementById('shopOpenBackpack'); link.classList.remove('flash'); void link.offsetWidth; link.classList.add('flash'); link.focus();

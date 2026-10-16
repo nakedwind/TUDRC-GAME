@@ -56,6 +56,7 @@ const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商�
 const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v1'; // 後補：彈藥箱（打開）
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
+const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
 const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v2';       // 池核磁磚素材（含救生圈與水線牆）
 const STORAGE_HQ_PACK = 'tudrc_asset_pack_command_hq_v1';           // 指揮部素材包
 const STORAGE_RESEARCH_LAB_PACK = 'tudrc_asset_pack_research_lab_v1'; // 研究部素材包
@@ -94,6 +95,9 @@ const toggle = (arr, key) => { const i = arr.indexOf(key); if (i >= 0) arr.splic
 const roleLabel = (r) => ({ floor: '地板', wall: '牆', obstacle: '障礙物' })[r] || r;
 const tileW = (t) => (t && t.w) || 1;
 const tileH = (t) => (t && t.h) || 1;
+const stampTurn = s => ((Number(s && s.rot) || 0) % 4 + 4) % 4;
+const stampW = (s, t) => stampTurn(s) % 2 ? tileH(t) : tileW(t);
+const stampH = (s, t) => stampTurn(s) % 2 ? tileW(t) : tileH(t);
 const isBig = (t) => tileW(t) !== 1 || tileH(t) !== 1;
 const tilePixelW = (t) => Math.round(tileW(t) * CELL);
 const tilePixelH = (t) => Math.round(tileH(t) * CELL);
@@ -131,6 +135,7 @@ const effCamp = (m) => new Set(m.camp.length ? m.camp : defCamp());
 let maps, curId, customTiles = [], brush = { mode: 'tile', tile: 'floor' }, activeLayer = 'floor';
 let checkResult = null, hoverCell = null, painting = false, lastPaint = '', selection = null, selections = [];
 let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（大小圖都可用）
+let brushRotation = 0;
 let tempTool = null, savedBrush = null, pickResult = null;   // Alt=臨時吸管 / Ctrl=臨時選取
 let selectionDrag = null;
 const hiddenLayers = new Set();
@@ -257,6 +262,7 @@ function loadTiles() {
   const mrtAdded = mergeDefaultAssetPack('tile_mrt_', STORAGE_MRT_PACK);
   const cvsAdded = mergeDefaultAssetPack('tile_cvs_', STORAGE_CVS_PACK);
   const streetAdded = mergeDefaultAssetPack(t => STREET_PACK_IDS.has(t.id), STORAGE_STREET_PACK);
+  const drinkShopAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_street_drink_shop_'), STORAGE_DRINK_SHOP_PACK);
   const ammoCrateOpenAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_ammo_crate_open', STORAGE_AMMO_CRATE_OPEN);
   const oreTilesAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_obstacle_ore_'), STORAGE_ORE_TILES);
   const ironGateAdded=mergeDefaultAssetPack('tile_obstacle_irongate','tudrc_irongate_v1');
@@ -284,7 +290,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
+  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -449,6 +455,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Delete' && !inField && selections.length) { e.preventDefault(); deleteSelection(); }
   if (!inField && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); flipAction('x'); }
   if (!inField && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); flipAction('y'); }
+  if (!inField && (e.key === 'r' || e.key === 'R')) { e.preventDefault(); rotateAction(); }
   // 方向鍵：微調選取物件的位置（不貼齊格線；按住 Shift 一次移多一點）
   // 1×1 小圖原本存成「格子」，格子只有格座標、沒有像素位移 → 第一次微調時先轉成 1×1 大圖。
   // 碰撞微調：方向鍵移動選中紅格的擋路範圍（Shift 一次多移一點，Delete 歸零）
@@ -603,32 +610,40 @@ function drawTile(id, x, y) {
   } else { ctx.fillStyle = '#20262f'; ctx.fillRect(x, y, CELL, CELL); }
 }
 // 畫圖片（可左右／上下翻轉）
-function drawImageFlipped(img, x, y, w, h, fx, fy) {
-  if (!fx && !fy) { ctx.drawImage(img, x, y, w, h); return; }
+function drawImageFlipped(img, x, y, w, h, fx, fy, rot = 0) {
+  if (!fx && !fy && !rot) { ctx.drawImage(img, x, y, w, h); return; }
   ctx.save();
-  ctx.translate(x + (fx ? w : 0), y + (fy ? h : 0));
+  ctx.translate(x + w / 2, y + h / 2);
+  if (rot) ctx.rotate(rot * Math.PI / 2);
   ctx.scale(fx ? -1 : 1, fy ? -1 : 1);
-  ctx.drawImage(img, 0, 0, w, h);
+  const iw = rot % 2 ? h : w, ih = rot % 2 ? w : h;
+  ctx.drawImage(img, -iw / 2, -ih / 2, iw, ih);
   ctx.restore();
 }
 // 畫多格大圖
 function drawStamp(s) {
   const t = tileById(s.id); if (!t) return;
-  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = tileW(t) * CELL, h = tileH(t) * CELL;
-  if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
-  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { drawImageFlipped(rec.img, x, y, w, h, s.fx, s.fy); return; } }
+  const drawW = stampW(s, t) * CELL, drawH = stampH(s, t) * CELL;
+  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, drawW, drawH); return; }
+  const rot = stampTurn(s);
+  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { drawImageFlipped(rec.img, x, y, drawW, drawH, s.fx, s.fy, rot); return; } }
   ctx.fillStyle = t.role === 'wall' ? '#3f434b' : (t.role === 'obstacle' ? '#7a5a3a' : '#2b3446');
-  ctx.fillRect(x + 2, y + 2, w - 4, h - 4);
-  ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 1; ctx.strokeRect(x + 2, y + 2, w - 4, h - 4);
+  ctx.fillRect(x + 2, y + 2, drawW - 4, drawH - 4);
+  ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 1; ctx.strokeRect(x + 2, y + 2, drawW - 4, drawH - 4);
   ctx.fillStyle = '#c3ccd8'; ctx.font = '11px sans-serif'; ctx.textAlign = 'center';
-  ctx.fillText(t.name, x + w / 2, y + h / 2);
+  ctx.fillText(t.name, x + drawW / 2, y + drawH / 2);
 }
 
 // 基地碰撞以「每次擺放的 stamp」為單位保存；舊地圖沒有資料時沿用素材預設。
 function baseSolidForStamp(s, t) {
   if (Array.isArray(s.baseSolid)) return s.baseSolid;
   const w = tileW(t), h = tileH(t);
-  return clone(t.baseSolid || []).map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
+  const cells = rotateBaseCells(clone(t.baseSolid || []), w, h, stampTurn(s));
+  return cells.map(([dc, dr]) => [s.fx ? stampW(s, t) - 1 - dc : dc, s.fy ? stampH(s, t) - 1 - dr : dr]);
+}
+function rotateBaseCells(cells, w, h, rot) {
+  return cells.map(([c, r]) => rot === 1 ? [h - 1 - r, c] : rot === 2 ? [w - 1 - c, h - 1 - r] : rot === 3 ? [r, w - 1 - c] : [c, r]);
 }
 
 // ================= 畫布繪製 =================
@@ -700,17 +715,18 @@ function draw() {
     const sel = brush.mode === 'tile' ? tileById(brush.tile) : null;
     if (sel) {
       const big = isBig(sel), w = big ? tileW(sel) : 1, h = big ? tileH(sel) : 1;
-      const fits = c < COLS && r < ROWS && c + w > 0 && r + h > 0;   // 允許超出邊緣（純外觀），只要有一格在地圖內
+      const pw = brushRotation % 2 ? h : w, ph = brushRotation % 2 ? w : h;
+      const fits = c < COLS && r < ROWS && c + pw > 0 && r + ph > 0;   // 允許超出邊緣（純外觀），只要有一格在地圖內
       // 半透明預覽圖
       ctx.save();
       ctx.globalAlpha = 0.4;
-      if (big || brushFlip.fx || brushFlip.fy) drawStamp({ c, r, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy });
+      if (big || brushFlip.fx || brushFlip.fy || brushRotation) drawStamp({ c, r, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy, rot: brushRotation });
       else drawTile(brush.tile, OX + c * CELL, OY + r * CELL);
       ctx.restore();
       // 外框（放不下時變紅）
       if (big) {
         ctx.strokeStyle = fits ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
-        ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, w * CELL - 2, h * CELL - 2); ctx.setLineDash([]);
+        ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, pw * CELL - 2, ph * CELL - 2); ctx.setLineDash([]);
       } else {
         ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, CELL - 2, CELL - 2);
       }
@@ -722,7 +738,7 @@ function draw() {
   // 選取高亮（黃色虛線框）
   for (const selected of selections) {
     let rx = null, ry = 0, rw = CELL, rh = CELL;
-    if (selected.type === 'stamp') { const s = m.stamps[selected.index]; if (s) { const t = tileById(s.id) || {}; rx = OX + s.c * CELL + (s.ox || 0); ry = OY + s.r * CELL + (s.oy || 0); rw = tileW(t) * CELL; rh = tileH(t) * CELL; } }
+    if (selected.type === 'stamp') { const s = m.stamps[selected.index]; if (s) { const t = tileById(s.id) || {}; rx = OX + s.c * CELL + (s.ox || 0); ry = OY + s.r * CELL + (s.oy || 0); rw = stampW(s, t) * CELL; rh = stampH(s, t) * CELL; } }
     else { const [c, r] = selected.key.split(',').map(Number); rx = OX + c * CELL; ry = OY + r * CELL; }
     if (rx != null) { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3; ctx.setLineDash([7, 4]); ctx.strokeRect(rx + 1.5, ry + 1.5, rw - 3, rh - 3); ctx.setLineDash([]); }
   }
@@ -735,10 +751,10 @@ function draw() {
         ctx.fillStyle = 'rgba(235,55,55,.34)'; ctx.fillRect(x, y, CELL, CELL);
         ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
       }
-      const depth = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, tileH(t) - 2));
+      const depth = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, stampH(s, t) - 2));
       const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0) + depth * CELL;
       ctx.strokeStyle = '#55d9ff'; ctx.lineWidth = 3; ctx.setLineDash([9, 5]);
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + tileW(t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + stampW(s, t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
       ctx.fillText('深度線 ' + depth, x + 5, y - 4);
     } else if (s && t && !t.flat && (s.layer || 'top') !== 'top' && (tileH(t) >= 2 || /^object\d*$/.test(s.layer || '') || s.layer === 'overlay')) {
@@ -755,25 +771,26 @@ function draw() {
 
 // ================= 可翻轉圖片放置 / 查詢 =================
 function placeStamp(c, r, t) {
-  const m = curMap(), w = tileW(t), h = tileH(t);
-  if (c >= COLS || r >= ROWS || c + w <= 0 || r + h <= 0) { setStatus('放不下：整張圖都在地圖外', '#ff8f8f'); return; }   // 允許超出邊緣（大圖純外觀），只要有一格落在地圖內就能放
+  const m = curMap(), w = tileW(t), h = tileH(t), pw = brushRotation % 2 ? h : w, ph = brushRotation % 2 ? w : h;
+  if (c >= COLS || r >= ROWS || c + pw <= 0 || r + ph <= 0) { setStatus('放不下：整張圖都在地圖外', '#ff8f8f'); return; }   // 允許超出邊緣（大圖純外觀），只要有一格落在地圖內就能放
   // 只移除「同一圖層」上重疊的大圖（不同層可疊放）
   m.stamps = m.stamps.filter(s => {
     if ((s.layer || 'top') !== activeLayer) return true;
-    const st = tileById(s.id) || {}, sw = tileW(st), sh = tileH(st);
-    const overlap = !(c + w <= s.c || s.c + sw <= c || r + h <= s.r || s.r + sh <= r);
+    const st = tileById(s.id) || {}, sw = stampW(s, st), sh = stampH(s, st);
+    const overlap = !(c + pw <= s.c || s.c + sw <= c || r + ph <= s.r || s.r + sh <= r);
     return !overlap;
   });
   // 1×1 小圖翻轉後改用 stamp 儲存，先移除同格同層的普通小圖。
-  if (w === 1 && h === 1) delete m.layers[activeLayer][c + ',' + r];
+    if (w === 1 && h === 1) delete m.layers[activeLayer][c + ',' + r];
   const st = { id: t.id, c, r, layer: activeLayer };
   if (brushFlip.fx) st.fx = true;
   if (brushFlip.fy) st.fy = true;
+  if (brushRotation) st.rot = brushRotation;
   if (t.baseHp) {
     st.baseHp = t.baseHp;
     const defaultDepth = Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2);
-    st.baseDepth = brushFlip.fy ? h - defaultDepth : defaultDepth;
-    st.baseSolid = clone(t.baseSolid || []).map(([dc, dr]) => [brushFlip.fx ? w - 1 - dc : dc, brushFlip.fy ? h - 1 - dr : dr]);
+    st.baseDepth = brushFlip.fy ? ph - defaultDepth : defaultDepth;
+    st.baseSolid = rotateBaseCells(clone(t.baseSolid || []), w, h, brushRotation).map(([dc, dr]) => [brushFlip.fx ? pw - 1 - dc : dc, brushFlip.fy ? ph - 1 - dr : dr]);
   }
   m.stamps.push(st);
   checkResult = null; saveMaps(); draw();
@@ -783,7 +800,7 @@ function stampIndexAt(m, c, r) {
     const s = m.stamps[i];
     if (hiddenLayers.has(s.layer || 'top') || isLockedLayer(s.layer)) continue;   // 隱藏或鎖定的圖層：選不到／擦不到
     const t = tileById(s.id) || {};
-    if (c >= s.c && c < s.c + tileW(t) && r >= s.r && r < s.r + tileH(t)) return i;
+    if (c >= s.c && c < s.c + stampW(s, t) && r >= s.r && r < s.r + stampH(s, t)) return i;
   }
   return -1;
 }
@@ -796,7 +813,7 @@ function pickAt(m, c, r) {
     for (let k = m.stamps.length - 1; k >= 0; k--) {
       const s = m.stamps[k]; if ((s.layer || 'top') !== lid) continue;
       const t = tileById(s.id) || {};
-      if (c >= s.c && c < s.c + tileW(t) && r >= s.r && r < s.r + tileH(t)) return s.id;
+      if (c >= s.c && c < s.c + stampW(s, t) && r >= s.r && r < s.r + stampH(s, t)) return s.id;
     }
     const id = m.layers[lid] && m.layers[lid][c + ',' + r];
     if (id) return id;
@@ -846,7 +863,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (isLockedLayer(activeLayer)) { if (isDown) setStatus('「' + layerName(activeLayer) + '」已鎖定，請先按 🔒 解鎖才能貼圖', '#ffd24a'); return; }
     const t = tileById(brush.tile); if (!t) return;
     if (isBig(t)) { if (isDown) placeStamp(c, r, t); return; }   // 大圖：只在按下時放一張
-    if (brushFlip.fx || brushFlip.fy) { placeStamp(c, r, t); return; }   // 翻轉小圖：以 1×1 stamp 保存方向
+    if (brushFlip.fx || brushFlip.fy || brushRotation) { placeStamp(c, r, t); return; }   // 轉向小圖：以 1×1 stamp 保存方向
     // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
@@ -912,7 +929,7 @@ function beginSelectionDrag(c, r) {
     if (sel.type === 'stamp') {
       const s = m.stamps[sel.index]; if (!s) return;
       const t = tileById(s.id) || {};
-      items.push({ type: 'stamp', index: sel.index, c: s.c, r: s.r, w: tileW(t), h: tileH(t) });
+      items.push({ type: 'stamp', index: sel.index, c: s.c, r: s.r, w: stampW(s, t), h: stampH(s, t) });
     } else {
       const [tc, tr] = sel.key.split(',').map(Number);
       items.push({ type: 'tile', layer: sel.layer, key: sel.key, id: m.layers[sel.layer][sel.key], c: tc, r: tr, w: 1, h: 1 });
@@ -1097,7 +1114,7 @@ function renderPalette() {
     const isObstacleArt = String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/');
     const typeTxt = isObstacleArt
       ? (t.id === 'tile_obstacle_camping_lights' ? '可擋路・可破壞・小範圍發光' : /-ore-/.test(String(t.file || '')) ? '可擋路・用地雷或瓦斯爐炸開' : '可擋路・可破壞')
-      : (t.systemColor ? '系統色塊' : (t.builtin ? roleLabel(t.role) : '圖片'));
+      : (String(t.id || '').startsWith('tile_street_drink_shop_') ? '可互動・靠近按 E／Space 購買飲料' : (t.systemColor ? '系統色塊' : (t.builtin ? roleLabel(t.role) : '圖片')));
     b.innerHTML = thumb + '<span class="tname">' + t.name + '</span><small>' + typeTxt + sizeTxt + '</small>';
     b.addEventListener('click', () => selectTile(t.id));
     if (!t.builtin) {
@@ -1291,7 +1308,7 @@ function refreshSelPanel() {
   selection = selections.length ? selections[selections.length - 1] : null;
   const hasSelection = !!selection;
   layerSelect.disabled = !hasSelection;
-  ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selReset', 'selDelete', 'selClear'].forEach(id => {
+  ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete', 'selClear'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;
   });
   depthInput.disabled = true;
@@ -1397,7 +1414,7 @@ document.getElementById('baseCollisionReset').addEventListener('click', () => {
   s.baseHp = t.baseHp || 2000;
   const defaultDepth = Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2);
   s.baseDepth = s.fy ? h - defaultDepth : defaultDepth;
-  s.baseSolid = clone(t.baseSolid || []).map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
+  s.baseSolid = rotateBaseCells(clone(t.baseSolid || []), w, h, stampTurn(s)).map(([dc, dr]) => [s.fx ? stampW(s, t) - 1 - dc : dc, s.fy ? stampH(s, t) - 1 - dr : dr]);
   saveMaps(); draw(); refreshBaseCollisionPanel(); setStatus('基地碰撞、HP 與深度線已恢復預設', '#7ee0c0');
 });
 
@@ -1407,6 +1424,42 @@ function updateFlipUI() {
   if (bx) bx.classList.toggle('on', brushFlip.fx);
   if (by) by.classList.toggle('on', brushFlip.fy);
 }
+function rotateBrush() {
+  brushRotation = (brushRotation + 1) % 4;
+  draw();
+  setStatus('筆刷已旋轉 ' + brushRotation * 90 + '°（R 可連續旋轉）', '#b39ddb');
+}
+function rotateSelection() {
+  if (!selections.length) { setStatus('請先選取要旋轉的圖片', '#ffd24a'); return; }
+  if (dropLockedSelections('旋轉')) return;
+  pushUndo();
+  const m = curMap();
+  selections = selections.map(sel => {
+    if (sel.type === 'tile') {
+      const id = m.layers[sel.layer] && m.layers[sel.layer][sel.key];
+      if (!id) return sel;
+      const [c, r] = sel.key.split(',').map(Number);
+      delete m.layers[sel.layer][sel.key];
+      m.stamps.push({ id, c, r, layer: sel.layer, rot: 1 });
+      return { type: 'stamp', index: m.stamps.length - 1 };
+    }
+    const s = m.stamps[sel.index];
+    if (!s) return sel;
+    const t = tileById(s.id) || {}, h = tileH(t);
+    const depthBefore = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2));
+    if (t.baseHp) {
+      const cells = rotateBaseCells(baseSolidForStamp(s, t), stampW(s, t), stampH(s, t), 1);
+      s.baseSolid = cells;
+      s.baseDepth = h - depthBefore;
+    }
+    s.rot = (stampTurn(s) + 1) % 4;
+    return sel;
+  });
+  selection = selections[selections.length - 1] || null;
+  saveMaps(); draw(); refreshSelPanel();
+  setStatus('已旋轉 ' + selections.length + ' 個圖片 90°', '#7ee0c0');
+}
+function rotateAction() { if (selections.length) rotateSelection(); else rotateBrush(); }
 function toggleBrushFlip(axis) {
   if (axis === 'x') brushFlip.fx = !brushFlip.fx; else brushFlip.fy = !brushFlip.fy;
   updateFlipUI(); draw();
@@ -1430,13 +1483,13 @@ function flipSelection(axis) {
     if (sel.type === 'stamp') {
       const s = m.stamps[sel.index];
       if (s) {
-        const t = tileById(s.id) || {}, w = tileW(t), h = tileH(t);
+        const t = tileById(s.id) || {}, h = tileH(t);
         if (t.baseHp) {
           const cells = baseSolidForStamp(s, t);
-          s.baseSolid = cells.map(([dc, dr]) => axis === 'x' ? [w - 1 - dc, dr] : [dc, h - 1 - dr]);
+          s.baseSolid = cells.map(([dc, dr]) => axis === 'x' ? [stampW(s, t) - 1 - dc, dr] : [dc, stampH(s, t) - 1 - dr]);
           if (axis === 'y') {
-            const depth = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2));
-            s.baseDepth = h - depth;
+      const depth = Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2));
+            s.baseDepth = stampH(s, t) - depth;
           }
         }
         if (axis === 'x') s.fx = !s.fx; else s.fy = !s.fy;
@@ -1462,6 +1515,8 @@ document.getElementById('flipX').addEventListener('click', () => toggleBrushFlip
 document.getElementById('flipY').addEventListener('click', () => toggleBrushFlip('y'));
 document.getElementById('selFlipX').addEventListener('click', () => flipSelection('x'));
 document.getElementById('selFlipY').addEventListener('click', () => flipSelection('y'));
+document.getElementById('rotateBrush')?.addEventListener('click', rotateBrush);
+document.getElementById('selRotate')?.addEventListener('click', rotateSelection);
 document.getElementById('selReset').addEventListener('click', () => {
   const m = curMap(); let n = 0;
   selections.filter(s => s.type === 'stamp').forEach(sel => { const s = m.stamps[sel.index]; if (s && (s.ox || s.oy)) { delete s.ox; delete s.oy; n++; } });
@@ -1701,7 +1756,7 @@ function dropOutsideContent(m) {
   const before = (m.stamps || []).length;
   m.stamps = (m.stamps || []).filter(s => {
     const t = tileById(s.id) || {};
-    return s.c + tileW(t) > 0 && s.r + tileH(t) > 0 && s.c < m.cols && s.r < m.rows;   // 還有一格在地圖內就留著
+    return s.c + stampW(s, t) > 0 && s.r + stampH(s, t) > 0 && s.c < m.cols && s.r < m.rows;   // 還有一格在地圖內就留著
   });
   removed += before - m.stamps.length;
   ['solid', 'breakable', 'entrances', 'camp', 'coreSpots'].forEach(key => {

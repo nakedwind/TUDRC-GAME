@@ -35,6 +35,12 @@ function buildTileRegistry() {
 const mapTileById = id => TILE_REGISTRY[id];
 const mapTileW = t => (t && t.w) || 1;
 const mapTileH = t => (t && t.h) || 1;
+const mapStampTurn = s => ((Number(s && s.rot) || 0) % 4 + 4) % 4;
+const mapStampW = (s, t) => mapStampTurn(s) % 2 ? mapTileH(t) : mapTileW(t);
+const mapStampH = (s, t) => mapStampTurn(s) % 2 ? mapTileW(t) : mapTileH(t);
+function mapStampCells(cells, w, h, rot) {
+  return (cells || []).map(([c, r]) => rot === 1 ? [h - 1 - r, c] : rot === 2 ? [w - 1 - c, h - 1 - r] : rot === 3 ? [r, w - 1 - c] : [c, r]);
+}
 const isMapObstacleTile = t => !!(t && (t.role === 'obstacle' || String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/') ||
   (typeof oilItemByFile === 'function' && oilItemByFile(t.file))));   // 油桶／油箱（js/oil-barrels.js）
 function mapObstacleSpec(t) {
@@ -203,11 +209,12 @@ function initMap() {
   for (const stamp of MAP.stamps || []) if (isElevatorStamp(stamp)) setElevatorSolids(stamp, 'closed');
   mapSolidOffsets = MAP.solidOffsets || {};                              // 不可穿透格的像素微調
   // 每張椅子的擋路格由椅子編輯器決定；一般格子圖片與大圖擺放都套用。
-  const addChairSolid = (id, c, r, fx = false, fy = false) => {
+  const addChairSolid = (id, c, r, fx = false, fy = false, stamp = null) => {
     const cfg = chairConfig(id), tile = mapTileById(id);
     if (!cfg || !tile) return;
-    const w = mapTileW(tile), h = mapTileH(tile);
-    for (const [dx, dy] of cfg.solid) {
+    const w = stamp ? mapStampW(stamp, tile) : mapTileW(tile), h = stamp ? mapStampH(stamp, tile) : mapTileH(tile);
+    const cells = stamp ? mapStampCells(cfg.solid, mapTileW(tile), mapTileH(tile), mapStampTurn(stamp)) : cfg.solid;
+    for (const [dx, dy] of cells) {
       const cc = c + (fx ? w - 1 - dx : dx), rr = r + (fy ? h - 1 - dy : dy);
       if (inGrid(cc, rr)) mapWalls.add(cc + ',' + rr);
     }
@@ -217,7 +224,7 @@ function initMap() {
     addChairSolid(id, c, r);
   }
   for (const s of MAP.stamps || []) addChairSolid(s.id,
-    s.c + Math.round((s.ox || 0) / CELL), s.r + Math.round((s.oy || 0) / CELL), !!s.fx, !!s.fy);
+    s.c + Math.round((s.ox || 0) / CELL), s.r + Math.round((s.oy || 0) / CELL), !!s.fx, !!s.fy, s);
   mapBases = (MAP.stamps || []).filter(s => {
     const t = mapTileById(s.id);
     return !!(t && t.baseHp);
@@ -226,7 +233,7 @@ function initMap() {
   const baseTargets = mapBases.map(s => {
     const t = mapTileById(s.id);
     const baseC = s.c + Math.round((s.ox || 0) / CELL), baseR = s.r + Math.round((s.oy || 0) / CELL);
-    return (baseC + Math.floor(mapTileW(t) / 2)) + ',' + (baseR + Math.floor(mapTileH(t) / 2));
+    return (baseC + Math.floor(mapStampW(s, t) / 2)) + ',' + (baseR + Math.floor(mapStampH(s, t) / 2));
   });
   campCells = new Set(baseTargets.length ? baseTargets : ((MAP.camp && MAP.camp.length) ? MAP.camp : []));    // 空＝預設最下排
   mapEntrances = (MAP.entrances || []).map(k => k.split(',').map(Number));
@@ -326,11 +333,12 @@ function seedMapObstacles() {
   for (const s of mapBases) {
     const t = mapTileById(s.id);
     if (!t) continue;
-    const w = mapTileW(t), h = mapTileH(t);
+    const w = mapStampW(s, t), h = mapStampH(s, t), baseW = mapTileW(t), baseH = mapTileH(t);
     const baseC = s.c + Math.round((s.ox || 0) / CELL), baseR = s.r + Math.round((s.oy || 0) / CELL);
     const hasCustomSolid = Array.isArray(s.baseSolid);
     const sourceSolid = hasCustomSolid ? s.baseSolid : (Array.isArray(t.baseSolid) ? t.baseSolid : []);
-    const solid = sourceSolid.map(([dc, dr]) => hasCustomSolid ? [dc, dr] : [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
+    const solid = (hasCustomSolid ? sourceSolid : mapStampCells(sourceSolid, baseW, baseH, mapStampTurn(s)))
+      .map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
     const hp = Math.max(1, Number(s.baseHp != null ? s.baseHp : t.baseHp) || 2000);
     const o = {
       kind: 'obstacle', isBase: true, mapTileId: t.id,
@@ -349,12 +357,13 @@ function seedMapObstacles() {
   // 不修改原始地圖；拆毀後只在本局隱藏該圖片。
   const addMapObstacle = (t, c, r, source, stamp = null) => {
     if (!isMapObstacleTile(t)) return;
-    const spec = mapObstacleSpec(t), w = mapTileW(t), h = mapTileH(t);
+    const spec = mapObstacleSpec(t), w = stamp ? mapStampW(stamp, t) : mapTileW(t), h = stamp ? mapStampH(stamp, t) : mapTileH(t);
     if (spec.trap) {   // 地雷：埋在地上、不擋路
       G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w: 1, h: 1, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0, trap: true });
       return;
     }
-    const solid = (spec.solid || []).map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr])
+    const solid = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))
+      .map(([dc, dr]) => [stamp && stamp.fx ? w - 1 - dc : dc, stamp && stamp.fy ? h - 1 - dr : dr])
       .filter(([dc, dr]) => inGrid(c + dc, r + dr) && !G.grid[(c + dc) + ',' + (r + dr)]);
     if (!solid.length) return;
     const o = { kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type,
@@ -408,7 +417,9 @@ function drawMapStampImg(ctx, s) {
   const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(s.id,s.c,s.r,s.layer||'top',s):null;
   if(display===false)return;
   if(display)t=display;
-  let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+  let w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, rot = mapStampTurn(s);
+  const rotatedW = rot % 2 ? h : w, rotatedH = rot % 2 ? w : h;
+  let x = OX + s.c * CELL + (s.ox || 0) - (rotatedW - w) / 2, y = OY + s.r * CELL + (s.oy || 0) - (rotatedH - h) / 2;
   const opened = typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s);   // 剛補給過的彈藥箱：換成打開的圖
   if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
@@ -418,9 +429,10 @@ function drawMapStampImg(ctx, s) {
     const gate=G.obstacles.find(o=>o.type==='irongate'&&o.mapSource===s);
     if(gate&&drawSlidingIronGate(ctx,gate,img,x,y,w,h))return;
     ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn())ctx.filter='brightness(0.35)';
-    if (s.fx || s.fy) {
-      ctx.save(); ctx.translate(x + (s.fx ? w : 0), y + (s.fy ? h : 0)); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
-      ctx.drawImage(img, 0, 0, w, h); ctx.restore();
+    const drawW = rot % 2 ? h : w, drawH = rot % 2 ? w : h;
+    if (s.fx || s.fy || rot) {
+      ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
+      ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore();
     } else ctx.drawImage(img, x, y, w, h);
     ctx.restore();
     return;
@@ -440,7 +452,7 @@ function hasImageAt(c, r) {
   if (!MAP) return false;
   const key = c + ',' + r;
   for (const lid of MAP_LAYER_ORDER) if (MAP.layers && MAP.layers[lid] && MAP.layers[lid][key]) return true;
-  for (const s of (MAP.stamps || [])) { const t = mapTileById(s.id) || {}; if (c >= s.c && c < s.c + mapTileW(t) && r >= s.r && r < s.r + mapTileH(t)) return true; }
+  for (const s of (MAP.stamps || [])) { const t = mapTileById(s.id) || {}; if (c >= s.c && c < s.c + mapStampW(s, t) && r >= s.r && r < s.r + mapStampH(s, t)) return true; }
   return false;
 }
 
@@ -503,11 +515,11 @@ function mapOccluders() {
       const t = mapTileById(s.id) || {};
       const chair = chairConfig(s.id);
       if (lid === 'top' && !t.baseHp && !chair) continue;
-      const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
-      const depth = chair ? y0 + (s.fy ? mapTileH(t) * CELL - chair.depth : chair.depth) : t.baseHp
-        ? Math.max(0, Math.min(mapTileH(t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapTileH(t) - 2))))
-        : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapTileH(t), s.sortDepth)) : null);
-      items.push({ li, x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL,
+      const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0), stampWpx = mapStampW(s, t) * CELL, stampHpx = mapStampH(s, t) * CELL;
+      const depth = chair ? y0 + (s.fy ? mapStampH(s, t) * CELL - chair.depth : chair.depth) : t.baseHp
+        ? Math.max(0, Math.min(mapStampH(s, t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapStampH(s, t) - 2))))
+        : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapStampH(s, t), s.sortDepth)) : null);
+      items.push({ li, x0, y0, x1: x0 + stampWpx, y1: y0 + stampHpx,
         sortY: depth == null ? null : chair ? depth : y0 + depth * CELL, fixedDepth: depth != null, kind: 'stamp', stamp: s });
     }
   });
@@ -537,7 +549,7 @@ function mapOccluders() {
 function buildLayerOverdraw(items) {
   const flats = (MAP.stamps || []).filter(s => !isElevatorStamp(s) && (s.layer || 'top') !== 'top' && !stampIsOcc(s)).map(s => {
     const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
-    return { flat: true, li: MAP_LAYER_ORDER.indexOf(s.layer || 'top'), x0, y0, x1: x0 + mapTileW(t) * CELL, y1: y0 + mapTileH(t) * CELL, kind: 'stamp', stamp: s };
+    return { flat: true, li: MAP_LAYER_ORDER.indexOf(s.layer || 'top'), x0, y0, x1: x0 + mapStampW(s, t) * CELL, y1: y0 + mapStampH(s, t) * CELL, kind: 'stamp', stamp: s };
   });
   // 立體物在遊戲裡的實際先後（底部Y，同樣的話照原本順序）
   const rank = new Map([...items].map((it, k) => ({ it, k })).sort((a, b) => a.it.y - b.it.y || a.k - b.k).map((o, n) => [o.it, n]));

@@ -1710,8 +1710,8 @@ canvas.cursor-pressed {
 .backpack-tabs button.active em { background: rgba(59,35,4,.22); color: #3b2304; }
 
 /* 販賣機：跟商店同一個視窗，只有飲料，不用分頁 */
-#supplyShop.vending .supply-shop-tabs { display: none; }
-#supplyShop.vending .shop-sign { font-size: 20px; letter-spacing: 0; }
+#supplyShop.vending .supply-shop-tabs, #supplyShop.drinkshop .supply-shop-tabs { display: none; }
+#supplyShop.vending .shop-sign, #supplyShop.drinkshop .shop-sign { font-size: 20px; letter-spacing: 0; }
 
 /* 商店按鈕拿掉了（要到 1 樓 HOME Mart 的櫃台開商店） */
 #supplyShopButton[hidden], #hudShopButton[hidden] { display: none !important; }
