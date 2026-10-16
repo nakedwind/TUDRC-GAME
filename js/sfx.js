@@ -71,6 +71,12 @@ const SFX = (() => {
     hangiHurt: '怪物/夯吉寶/夯吉被打.mp3',
     hangiDeath: '怪物/夯吉寶/夯吉死掉.mp3',
     hangiPopOut: '怪物/夯吉寶/夯吉衝出來.mp3',
+    // 魚頭君：腳步聲、噴水、水把火澆熄（js/fish-head.js；滅火先用水滴聲代替）
+    fishStep: '怪物/魚頭君/魚頭腳步聲.mp3',
+    fishSpray: '怪物/魚頭君/噴水攻擊.mp3',
+    fishHurt: '怪物/魚頭君/魚頭被打.mp3',
+    fishDeath: ['怪物/魚頭君/魚頭死掉.mp3', '怪物/魚頭君/魚頭被打.mp3'],   // 死掉時被打的聲音一起播
+    fishDouse: '環境/水滴聲.mp3',
     // 環境背景音：Y 區地圖一直循環播放（js/ambience.js）
     whiteNoise: '環境/白噪音.mp3',
     // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
@@ -90,7 +96,7 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'playerHit', 'playerHitMonster']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'playerHit', 'playerHitMonster']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）

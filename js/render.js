@@ -263,6 +263,7 @@ function monsterWalkFrame(e) {
   const walking = (e.walkUntil || 0) > now && !(e.stunT > 0);
   const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : 10));   // 衝刺時步伐大一點
   const lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';   // 沒在追人的時候
+  if (f.walkBack && e.showBack) return { file: walking ? f.walkBack[step % f.walkBack.length] : f.back, flip: !!e.faceRight === (f.backFacing === 'left') };   // 背面（魚頭君露出魚肉）
   if (!walking && f.blink && f.blink.length) {   // 站著不動：每隔幾秒眨一次眼（半閉→全閉→半閉）
     if (e.blinkAt == null) e.blinkAt = now + 1 + Math.random() * 3;
     let bt = now - e.blinkAt;
@@ -538,6 +539,7 @@ function draw() {
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
+  if (typeof drawFishWater === 'function') drawFishWater(ctx);   // 魚頭君留下的水漬、積水（js/fish-head.js）
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
@@ -548,6 +550,7 @@ function draw() {
   if (typeof drawSpecialShots === 'function') drawSpecialShots(ctx);   // 飛行中的燃燒彈、麻醉針（js/special-guns.js）
   drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
   if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
+  if (typeof drawFishSprays === 'function') drawFishSprays(ctx);   // 魚頭君噴出的水柱（js/fish-head.js）
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
   drawBerserkFxWorld(ctx);     // 哨兵身上的黑紫霧、腳下心跳光圈、暴走台詞
 

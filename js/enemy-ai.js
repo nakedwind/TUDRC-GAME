@@ -307,7 +307,7 @@ function updateEnemyEffects(e, dt) {
   e.playerPounceT = Math.max(0, (e.playerPounceT || 0) - dt);
   if (e.burnT > 0) {
     e.burnT -= dt; e.burnTick = (e.burnTick || 0) - dt;
-    if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; flashDmg('-' + (e.burnDmg || 5), e.x + 12, e.y - 18, '#ff8a42', { small: true }); }   // 燒傷：小字、不搶眼
+    if (e.burnTick <= 0) { e.burnTick += 1; e.hp -= e.burnDmg || 5; e.fireDmg = (e.fireDmg || 0) + (e.burnDmg || 5); flashDmg('-' + (e.burnDmg || 5), e.x + 12, e.y - 18, '#ff8a42', { small: true }); }   // 燒傷：小字、不搶眼
   }
   if (e.stunT > 0) e.stunT -= dt;
   if (e.shockT > 0) e.shockT = e.stunT > 0 ? e.shockT - dt : 0;   // 麻痺跟著停住一起結束
@@ -399,7 +399,8 @@ function stepEnemy(e, dt) {
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
   if (e.behavior === 'charger') { stepChargerEnemy(e, dt); return; }   // 鳥頭人：發呆、散步、看到人就衝撞（js/bird-head.js）
   if (e.behavior === 'shooter') { stepShooterEnemy(e, dt); return; }   // 珍珠小童：飄浮、保持距離噴珍珠（js/pearl-kid.js）
-  if (e.behavior === 'boomerang') { stepBoomerangEnemy(e, dt); return; }   // 夯吉寶：丟迴力鏢帽子（js/hangi-bao.js）
+  if (e.behavior === 'boomerang') { stepBoomerangEnemy(e, dt); return; }
+  if (e.behavior === 'fishhead') { stepFishHeadEnemy(e, dt); return; }   // 魚頭君：噴水、去滅火（js/fish-head.js）   // 夯吉寶：丟迴力鏢帽子（js/hangi-bao.js）
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
   if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= (e.sweep ? sweepReach(e) : 30)) {

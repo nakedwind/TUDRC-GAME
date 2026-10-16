@@ -3,6 +3,7 @@
    手上的珍珠閃一下（蓄力），然後朝目標噴出珍珠；目標太近時會往後飄、保持距離。
    珍珠直線飛行：打到人造成傷害、打到建築會損壞建築、碰到牆就碎掉。
    地圖上有異質核心醒著時是「生氣」狀態（紅眼圖），噴得比較快。平時慢慢飄來飄去、偶爾眨眼。
+   被打到：閉起貝殼、掉到地上，防禦變高；一段時間沒被打就張開、飄回空中（PEARL_SHELL）。
    死掉：掉到地上、珍珠滾出來，變暗後消失（不套用史萊姆的黏液）。
    資料裡 behavior: "shooter" 的怪物都走這套（data/monsters.js），數值在怪物編輯器調整
    （欄位見 js/monster-data.js 的 SHOOTER_FIELDS）。必須在 enemy-ai.js 之後、game.js 之前載入。
@@ -12,6 +13,12 @@ const shooterCfg = e => e.shooterCfg || PEARL_DEFAULT;
 const PEARL_ART_W = 80, PEARL_ART_H = 74;      // 原圖大小（珍珠位置用這個比例換算）
 const PEARL_HAND = { x: 33, y: 54 };           // 小童手上那顆珍珠在原圖上的位置：珍珠從這裡噴出去
 const PEARL_HIT_R = 16;                        // 珍珠打中人的判定半徑（像素）
+// 閉殼：被打到就閉起貝殼掉到地上（不動、不攻擊），閉著的時候受到的傷害變少；多久沒被打就張開
+const PEARL_SHELL = {
+  reopen: 5,         // 幾秒沒被打就張開
+  defense: 0.25,     // 閉殼時受到的傷害 ×0.25（防禦變高）
+  fall: 520,         // 掉下去的重力（越大掉越快）
+};
 
 // 地圖上有醒著的異質核心 → 生氣
 const pearlAngry = () => !!(G.cores && G.cores.some(c => c.awake && !c.dead));
@@ -57,6 +64,22 @@ function stepShooterEnemy(e, dt) {
   const cfg = shooterCfg(e);
   if (!e.pk) e.pk = { cd: .8 + Math.random() * 1.2, wait: Math.random() * 2, bob: Math.random() * 10 };
   const pk = e.pk;
+  // 閉殼：掉到地上、不動也不攻擊，時間到就張開（張開後下面的飄浮會讓它慢慢飄回空中）
+  if (pk.shellT > 0) {
+    pk.shellT -= dt; pk.windup = 0;
+    pk.vz = (pk.vz || 0) - PEARL_SHELL.fall * dt;
+    e.slimeLift = Math.max(0, (e.slimeLift || 0) + pk.vz * dt);
+    if (e.slimeLift <= 0 && !pk.landed) {   // 落地：揚起一圈灰塵
+      pk.landed = true; pk.vz = 0;
+      G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 6, r2: 30, life: .25, life0: .25, color: '#d8d0c0' });
+      if (typeof sfxAt === 'function') sfxAt('pearlHit', e.x, e.y, .5, 'pearl-shell-land');
+    }
+    if (pk.shellT <= 0) {   // 張開
+      pk.landed = false; pk.vz = 0; pk.cd = Math.max(pk.cd, .6);
+      G.effects.push({ ring: true, x: e.x, y: e.y - 10, r: 6, r2: 26, life: .22, life0: .22, color: '#ffffff' });
+    }
+    return;
+  }
   // 飄浮：慢慢升到浮空高度，上下輕晃（被暈住會掉到接近地面）
   pk.bob += dt;
   const want = e.stunT > 0 ? 4 : cfg.hover + Math.sin(pk.bob * 2.1) * 3;
@@ -102,6 +125,27 @@ function stepShooterEnemy(e, dt) {
   }
   pk.wait -= dt;
   if (pk.wait <= 0) { pk.spot = shooterWanderSpot(e); pk.wait = cfg.idleMin + Math.random() * (cfg.idleMax - cfg.idleMin); }
+}
+
+// ---- 閉殼：每幀檢查這幀有沒有被打（game.js 在結算死亡前呼叫）----
+// 被打到：閉起來（第一下照常受傷）；已經閉著：受到的傷害 × PEARL_SHELL.defense；每被打一下就重新計時
+function pearlShellArmor() {
+  for (const e of G.enemies) {
+    if (e.behavior !== 'shooter' || e.dead || !e.art || !e.art.shell) continue;
+    if (e.pkHp == null || e.hp > e.pkHp) { e.pkHp = e.hp; continue; }
+    const lost = e.pkHp - e.hp;
+    if (lost > 0) {
+      if (!e.pk) e.pk = { cd: 1, wait: 0, bob: 0 };
+      if (e.pk.shellT > 0) e.hp = e.pkHp - lost * PEARL_SHELL.defense;   // 閉著：很硬
+      else {   // 剛被打到：閉起來
+        e.pk.vz = 0; e.pk.landed = false;
+        G.effects.push({ ring: true, x: e.x, y: e.y - (e.slimeLift || 0) - 20, r: 4, r2: 22, life: .18, life0: .18, color: '#f4eef8' });
+        if (typeof sfxAt === 'function') sfxAt('knock2', e.x, e.y, .45, 'pearl-shell-close');
+      }
+      e.pk.shellT = PEARL_SHELL.reopen;
+    }
+    e.pkHp = e.hp;
+  }
 }
 
 // ---- 噴珍珠：直線飛，打到人／建築／牆就停 ----
@@ -171,9 +215,10 @@ function updatePearls(dt) {
 }
 
 // ---- 繪圖 ----
-// 選圖：生氣用紅眼圖；每隔幾秒眨一次眼（半閉→閉→半閉）
+// 選圖：閉殼時用閉起來的貝殼；生氣用紅眼圖；每隔幾秒眨一次眼（半閉→閉→半閉）
 function shooterFrame(e) {
   const art = e.art || {}, angry = pearlAngry();
+  if (e.pk && e.pk.shellT > 0 && art.shell) return art.shell;
   const now = performance.now() / 1000;
   if (e.blinkAt == null) e.blinkAt = now + 1 + Math.random() * 3;
   let t = now - e.blinkAt;

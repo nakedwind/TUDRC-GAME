@@ -7472,6 +7472,10 @@ const MAPS_DEFAULT = [
       {
         "id": "lifeform",
         "weight": 50
+      },
+      {
+        "id": "fish_head",
+        "weight": 40
       }
     ]
   },
@@ -12175,14 +12179,16 @@ const MAPS_DEFAULT = [
         "id": "tile_mufxoi3i",
         "c": 60,
         "r": 8,
-        "layer": "object"
+        "layer": "object",
+        "ox": 0,
+        "oy": -4
       },
       {
         "id": "tile_mufxpxnl",
         "c": 61,
         "r": 8,
         "layer": "object",
-        "ox": 0,
+        "ox": -4,
         "oy": -6
       },
       {
@@ -18048,7 +18054,6 @@ const MAPS_DEFAULT = [
         "22,18": "tile_new_bg_floor",
         "21,18": "tile_new_bg_floor",
         "18,19": "tile_new_bg_floor",
-        "17,19": "tile_new_bg_floor",
         "17,18": "tile_new_bg_floor",
         "18,18": "tile_new_bg_floor",
         "19,17": "tile_new_bg_floor",
@@ -18551,12 +18556,7 @@ const MAPS_DEFAULT = [
       "object2": {
         "20,10": "tile_eoc_security_camera"
       },
-      "object3": {
-        "10,19": "tile_restaurant_napkin_holder",
-        "13,19": "tile_restaurant_napkin_holder",
-        "16,19": "tile_restaurant_chopsticks_holder",
-        "17,19": "tile_restaurant_condiment_bottles"
-      },
+      "object3": {},
       "object4": {
         "5,20": "tile_restaurant_napkin_holder",
         "5,19": "tile_restaurant_condiment_bottles",

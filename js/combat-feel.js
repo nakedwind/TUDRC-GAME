@@ -251,7 +251,8 @@ function onEnemyDeath(e) {
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); if (typeof tryEquipDrop === 'function') tryEquipDrop('adrenaline', e.x, e.y); return; }   // 鳥頭人：有機會掉出腎上腺素注射器   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
-  if (e.behavior === 'boomerang') { pushFallCorpse(e); return; }   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
+  if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
+  if (e.behavior === 'boomerang' || e.behavior === 'fishhead') { pushFallCorpse(e); return; }   // 魚頭君也倒下   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
   const size = e.sizeMul || 1;
   if (e.variant === 'bomber') {   // 自爆型：被打死也會爆（威力較小），不留屍體

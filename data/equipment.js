@@ -74,6 +74,9 @@ const EQUIP_DROPS = { charm: .35, detector: .5, thermos: .4, adrenaline: .2 };
 const ADRENALINE = { speed: .45, guard: .25, slow: .3, cooldown: 40 };
 
 // 武器升級（找諾亞）：Lv1 是原本的樣子；cost：[升到 Lv2, 升到 Lv3]
+// 測試用：true＝所有槍都解鎖，每次開遊戲彈藥補滿（測完改成 false）
+const TEST_UNLOCK_ALL_GUNS = true;
+
 const WEAPON_UPGRADES = {
   pistol: { name: '手槍', icon: '🔫', image: 'images/weapon/winter-handgun-design.png', cost: [80, 160],
     stat: lv => '傷害 ' + lv.dmg + '・彈匣 ' + lv.mag + ' 發・裝填 ' + lv.reload + ' 秒',

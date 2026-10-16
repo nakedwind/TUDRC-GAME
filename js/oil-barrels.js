@@ -228,7 +228,7 @@ function updateOil(dt) {
   for (const e of G.enemies) {
     if (e.dead) continue;
     const d = fireTick(e); if (!d) continue;
-    e.hp -= d; e.hitT = Math.max(e.hitT || 0, .16); e.hitColor = '#ff8a3a'; e.fireHitAt = performance.now() / 1000;   // 被火燒到（生命體會被燒死）
+    e.hp -= d; e.fireDmg = (e.fireDmg || 0) + d; e.hitT = Math.max(e.hitT || 0, .16); e.hitColor = '#ff8a3a'; e.fireHitAt = performance.now() / 1000;   // 被火燒到（生命體會被燒死）
     flashDmg('-' + Math.round(d), e.x, e.y - 26, '#ff9a3c');
   }
   for (const t of G.towers) {

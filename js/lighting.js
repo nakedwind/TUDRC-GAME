@@ -10,6 +10,7 @@
 let lightsCache = [];   // 這一幀的所有光源（世界座標），每幀在 draw() 開頭更新
 
 const LIT_MIN = 0.1;                                   // 亮度低於這個值視為「黑暗」
+const LIGHT_FILL_SOLID = 4;                            // 大物件（置物櫃等）裡面最多補亮幾格深，避免中間黑一塊
 let lightField = new Float32Array(COLS * ROWS);        // 每格亮度 0～1
 let warmField = new Float32Array(COLS * ROWS);         // 探照燈暖色量（沿用同一份遮牆結果）
 let lightDist = new Float32Array(COLS * ROWS);         // BFS 暫存
@@ -82,6 +83,24 @@ function spreadLight(l, onCell) {
         if (coneK && coneK(nc, nr) <= 0) continue;    // 扇形外面：光不往那裡走
         if (nd < lightDist[ni]) { lightDist[ni] = nd; q.push(ni); }
       }
+    }
+    // 會擋路的大物件（置物櫃、櫃子…）佔好幾格：光只照得到外圈，中間會黑一塊。
+    // 這裡把「被照到的格子旁邊的擋路格」也補亮（只補擋路格，光不會穿過去照到另一邊的地板）。
+    const span = Math.ceil(steps) + 1, cMin = Math.max(0, sc - span), cMax = Math.min(COLS - 1, sc + span), rMin = Math.max(0, sr - span), rMax = Math.min(ROWS - 1, sr + span);
+    for (let pass = 0; pass < LIGHT_FILL_SOLID; pass++) {
+      const fill = [];
+      for (let r = rMin; r <= rMax; r++) for (let c = cMin; c <= cMax; c++) {
+        const i = r * COLS + c;
+        if (!isWall(c, r)) continue;
+        let best = Infinity;
+        if (c > 0) best = Math.min(best, lightDist[i - 1]);
+        if (c < COLS - 1) best = Math.min(best, lightDist[i + 1]);
+        if (r > 0) best = Math.min(best, lightDist[i - COLS]);
+        if (r < ROWS - 1) best = Math.min(best, lightDist[i + COLS]);
+        if (best + 1 < steps && best + 1 < lightDist[i] - 1e-6) fill.push(i, best + 1);
+      }
+      if (!fill.length) break;
+      for (let k = 0; k < fill.length; k += 2) lightDist[fill[k]] = fill[k + 1];
     }
     for (let i = 0; i < lightDist.length; i++) {
       if (lightDist[i] === Infinity) continue;

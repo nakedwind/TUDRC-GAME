@@ -4,12 +4,12 @@ const MONSTERS_DEFAULT = [
     "id": "slime",
     "name": "史萊姆",
     "sprite": "images/monster/Monster_Slime.png",
-    "hp": 50,
-    "speed": 25,
+    "hp": 98,
+    "speed": 50,
     "playerDamage": 12,
     "sentryDamage": 14,
     "buildingDamage": 60,
-    "reward": 30,
+    "reward": 8,
     "crystals": 3,
     "width": 42,
     "height": 33
@@ -95,8 +95,6 @@ const MONSTERS_DEFAULT = [
     "crystals": 4,
     "width": 80,
     "height": 74,
-    "hitSound": "pearlHurt",
-    "deathSound": "pearlDeath",
     "behavior": "shooter",
     "shooter": {
       "noticeRange": 7,
@@ -119,11 +117,14 @@ const MONSTERS_DEFAULT = [
     "art": {
       "normal": "images/monster/pearl-kid/pearl-kid.png",
       "half": "images/monster/pearl-kid/pearl-kid-half-closed.png",
-      "closed": "images/monster/pearl-kid/pearl-kid-closed.png",
+      "closed": "images/monster/pearl-kid/pearl-kid-eyes-closed.png",
+      "shell": "images/monster/pearl-kid/pearl-kid-closed-green.png",
       "angry": "images/monster/pearl-kid/pearl-kid-angry.png",
       "angryHalf": "images/monster/pearl-kid/pearl-kid-angry-half-closed.png",
       "pearl": "images/monster/pearl-kid/pearl.png"
-    }
+    },
+    "hitSound": "pearlHurt",
+    "deathSound": "pearlDeath"
   },
   {
     "id": "lifeform",
@@ -138,17 +139,7 @@ const MONSTERS_DEFAULT = [
     "crystals": 6,
     "width": 111,
     "height": 160,
-    "noHitSquash": true,
-    "stagger": 0,
-    "knockMul": 0.4,
-    "noStun": true,
-    "sweep": {
-      "range": 1.5,
-      "arc": 140
-    },
-    "undying": true,
     "frames": {
-      "walkFacing": "left",
       "front": "images/monster/Lifeform/Monster_Lifeform01.png",
       "walkFront": [
         "images/monster/Lifeform/Monster_Lifeform01.png",
@@ -161,6 +152,7 @@ const MONSTERS_DEFAULT = [
         "images/monster/Lifeform/Monster_Lifeform08.png",
         "images/monster/Lifeform/Monster_Lifeform09.png"
       ],
+      "walkFacing": "left",
       "attack": [
         "images/monster/Lifeform/Monster_Lifeform_attack01.png",
         "images/monster/Lifeform/Monster_Lifeform_attack02.png",
@@ -171,12 +163,28 @@ const MONSTERS_DEFAULT = [
       "attackRig": {
         "body": "images/monster/Lifeform/Monster_Lifeform_body.png",
         "arm": "images/monster/Lifeform/Monster_Lifeform_arm.png",
-        "pivot": [35.5, 25],
+        "pivot": [
+          35.5,
+          25
+        ],
         "rest": 101.6,
-        "angles": [208, 258, 150],
+        "angles": [
+          208,
+          258,
+          150
+        ],
         "facing": "left"
       }
-    }
+    },
+    "undying": true,
+    "noHitSquash": true,
+    "stagger": 0,
+    "noStun": true,
+    "sweep": {
+      "range": 1.5,
+      "arc": 140
+    },
+    "knockMul": 0.4
   },
   {
     "id": "hangi_bao",
@@ -223,6 +231,37 @@ const MONSTERS_DEFAULT = [
     },
     "hitSound": "hangiHurt",
     "deathSound": "hangiDeath"
+  },
+  {
+    "id": "fish_head",
+    "name": "魚頭君",
+    "sprite": "images/monster/fish-head/fish-head-front.png",
+    "hp": 110,
+    "speed": 70,
+    "playerDamage": 5,
+    "sentryDamage": 6,
+    "buildingDamage": 20,
+    "reward": 45,
+    "crystals": 4,
+    "width": 80,
+    "height": 80,
+    "frames": {
+      "front": "images/monster/fish-head/fish-head-front.png",
+      "walkFront": [
+        "images/monster/fish-head/fish-head-front-walk-01.png",
+        "images/monster/fish-head/fish-head-front-walk-02.png"
+      ],
+      "walkFacing": "left",
+      "back": "images/monster/fish-head/fish-head-back.png",
+      "walkBack": [
+        "images/monster/fish-head/fish-head-back-walk-01.png",
+        "images/monster/fish-head/fish-head-back-walk-02.png"
+      ],
+      "backFacing": "right"
+    },
+    "behavior": "fishhead",
+    "hitSound": "fishHurt",
+    "deathSound": "fishDeath"
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

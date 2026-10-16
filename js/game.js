@@ -1729,6 +1729,10 @@ function update(dt) {
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
         if (atkSplash > 0) for (const e of G.enemies) if (e !== target && !e.dead && Math.hypot(e.x - target.x, e.y - target.y) <= atkSplash * CELL && hasLineOfSight(target.x, target.y, e.x, e.y)) { e.hp -= atkDmg * .6; affected.push(e); }
         for (const e of affected) {
+          if (spec.ability === '火焰' || spec.ability === '雷電') {   // 記下屬性傷害（魚頭君抗火、怕電；js/fish-head.js）
+            const amt = e === target ? atkDmg : atkDmg * .6;
+            if (spec.ability === '火焰') e.fireDmg = (e.fireDmg || 0) + amt; else e.shockDmg = (e.shockDmg || 0) + amt;
+          }
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
           if (spec.stun && !e.noStun) {   // noStun 的怪物（生命體）不會被停住
             e.stunT=Math.max(e.stunT||0,spec.stun);
@@ -1809,6 +1813,8 @@ function update(dt) {
     for (const m of G.scorchMarks) m.t -= dt;
     G.scorchMarks = G.scorchMarks.filter(m => m.t > 0);
   }
+  if (typeof fishHeadArmor === 'function') fishHeadArmor();
+  if (typeof pearlShellArmor === 'function') pearlShellArmor();   // 珍珠小童：被打就閉殼、閉著防禦變高（js/pearl-kid.js）   // 魚頭君：正面減傷、斜後加傷（js/fish-head.js）
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
@@ -1880,6 +1886,7 @@ function update(dt) {
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
+  if (typeof updateFishHead === 'function') updateFishHead(dt);   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();

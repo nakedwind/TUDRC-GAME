@@ -25,6 +25,13 @@ try {
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
   if (s.loadout) for (const k of ['main', 'sub']) if (s.loadout[k] === null || WEAPON_UPGRADES[s.loadout[k]]) equipState.loadout[k] = s.loadout[k];
 } catch (_) {}
+// 測試用：解鎖所有槍、彈藥補滿（data/equipment.js 的 TEST_UNLOCK_ALL_GUNS）
+if (typeof TEST_UNLOCK_ALL_GUNS !== 'undefined' && TEST_UNLOCK_ALL_GUNS) {
+  for (const [id, w] of Object.entries(WEAPON_UPGRADES)) {
+    if (!(equipState.weapons[id] > 0)) equipState.weapons[id] = 1;
+    if (w.field) { const lv = w.levels[equipState.weapons[id] - 1]; equipState.gunAmmo[id] = { mag: id === 'tranq' ? lv.mag : 1, reserve: lv.reserve }; }
+  }
+}
 // ---- 主武器／副武器：出勤時只能在這兩把之間切換（滾輪、數字鍵 1／2）----
 const WEAPON_SLOTS = [{ id: 'main', name: '主武器' }, { id: 'sub', name: '副武器' }];
 const weaponHave = id => !!WEAPON_UPGRADES[id] && (equipState.weapons[id] || 0) > 0;
