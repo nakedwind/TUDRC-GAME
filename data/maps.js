@@ -5099,11 +5099,11 @@ const MAPS_DEFAULT = [
         "30,30": "tile_interactive_pickup_battery",
         "35,33": "tile_interactive_pickup_battery",
         "13,34": "tile_interactive_pickup_battery",
-        "11,30": "tile_interactive_pickup_battery",
         "24,28": "tile_interactive_pickup_almond_water",
         "29,28": "tile_interactive_storage_locker_key",
         "17,35": "tile_interactive_storage_locker_key",
-        "7,34": "tile_interactive_storage_locker_key"
+        "7,34": "tile_interactive_storage_locker_key",
+        "9,32": "tile_interactive_pickup_battery"
       },
       "object3": {},
       "object4": {}
@@ -7213,8 +7213,6 @@ const MAPS_DEFAULT = [
       "5,5",
       "6,5",
       "7,5",
-      "8,5",
-      "9,5",
       "10,5",
       "11,5",
       "12,5",
@@ -7340,8 +7338,6 @@ const MAPS_DEFAULT = [
       "2,24",
       "0,24",
       "0,31",
-      "1,31",
-      "2,31",
       "3,31",
       "3,30",
       "2,30",
@@ -7426,7 +7422,7 @@ const MAPS_DEFAULT = [
       "22,36"
     ],
     "rules": {
-      "money": 300,
+      "money": 3000,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -7474,8 +7470,8 @@ const MAPS_DEFAULT = [
         "weight": 50
       },
       {
-        "id": "fish_head",
-        "weight": 40
+        "id": "hangi_bao",
+        "weight": 50
       }
     ]
   },

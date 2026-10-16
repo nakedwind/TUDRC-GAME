@@ -106,5 +106,7 @@
   <script src="js/sfx.js"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/monster-editor.js?v=pearl-20261011"></script>
+  <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案 -->
+  <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
 </body>
 </html>

@@ -970,7 +970,7 @@ function mapSeats() {
       x: x0 + (s.fx ? w - cfg.seat.x : cfg.seat.x),
       y: y0 + (s.fy ? h - cfg.seat.y : cfg.seat.y),
       top: y0, dir, x0, y0, w, h,
-      rotation: Number(cfg.seat.rotation) || 0,
+      rotation: (Number(cfg.seat.rotation) || 0) * (s.fx ? -1 : 1),   // 床左右翻轉：躺的方向也跟著翻
       prompt: /bed|床/i.test(s.id) ? '躺' : '坐',
       bed: /bed|床/i.test(s.id),
       // 背面的椅子：人背對鏡頭坐著，椅背擋在人前面 → 椅子要畫在人物上面（床不算）

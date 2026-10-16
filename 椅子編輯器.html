@@ -94,7 +94,15 @@
   <script src="js/elevator-data.js"></script>
   <script src="js/sfx.js"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/chair-editor.js?v=backchair-20261005"></script>
-  <script src="js/elevator-editor.js?v=passage-20261002"></script>
+  <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案 -->
+  <script src="js/editor-store.js?v=psave-20261016"></script>   <!-- 地圖編輯器的素材暫存（瀏覽器資料庫） -->
+  <script>EditorStore.boot(["js/chair-editor.js?v=save-20261016", "js/elevator-editor.js?v=passage-20261002"], () => ProjectSave.attach({
+    after: ['exportChairs', 'exportElevators'],
+    files: [
+      { path: 'data/chairs.js', label: '椅子', text: () => '/* 由椅子編輯器匯出：深度 px、擋路格、坐下位置 px。 */\nconst CHAIRS_DEFAULT = ' + JSON.stringify(chairs, null, 2) + ';\n' },
+      { path: 'data/elevators.js', label: '電梯', text: () => '/* 由互動物件編輯器匯出：電梯關門／開門的擋路格與遮擋深度。 */\nconst ELEVATORS_DEFAULT = ' + JSON.stringify(elevatorDraft, null, 2) + ';\n' },
+    ],
+    status: (m, e) => status(m, e),
+  }));</script>
 </body>
 </html>

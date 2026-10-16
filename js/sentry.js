@@ -2,25 +2,53 @@
    哨兵是會走動的人：開場佈署、巡邏移動 AI、點擊選單（巡邏/指派/疏導）。
    哨兵數值在 data/balance.js 的 TYPES。
 */
-// ---- 平時活動範圍（data/balance.js 的 NPC_HOME_AREAS，例如諾亞、希奧妮待在研究部）----
+// ---- 基地裡每個人平時在哪（data/npc-locations.js，由「基地編輯器」匯出）----
+// 從「🏠 基地編輯器」按「▶ 預覽遊戲」開的遊戲（?preview=1）會用編輯器裡還沒匯出的名單
+const NPC_LOC_DRAFT_KEY = 'tudrc_npc_locations_v1';
+const npcLocationData = (() => {
+  if (/[?&]preview=1(&|$)/.test(location.search)) {
+    try { const d = JSON.parse(localStorage.getItem(NPC_LOC_DRAFT_KEY) || 'null'); if (d && d.chapters) return d.chapters; } catch (_) {}
+  }
+  return typeof NPC_LOCATIONS !== 'undefined' ? NPC_LOCATIONS : {};
+})();
+// 目前章節的名單（≤ 目前章節的最大那一章）
+function npcLocationTable() {
+  const ch = typeof CHAPTER !== 'undefined' ? CHAPTER : 1;
+  const all = Object.keys(npcLocationData).map(Number).sort((a, b) => a - b);
+  if (!all.length) return {};
+  const usable = all.filter(k => k <= ch);
+  return npcLocationData[usable.length ? usable[usable.length - 1] : all[0]] || {};
+}
+// 這個人平時在哪裡：{ map, rect?:[c0,r0,c1,r1], area? } 或 null（不在基地）
+function npcLocation(id) { return npcLocationTable()[id] || null; }
+
+// ---- 平時活動範圍：rect＝基地編輯器在地圖上框的方框；area＝舊寫法（NPC_AREAS 用素材圍出來的範圍）----
 const homeAreaCache = { map: null, areas: {} };
 function homeAreaOf(id) {
-  if (!MAP_SAFE || typeof NPC_HOME_AREAS === 'undefined' || !NPC_HOME_AREAS[id] || !MAP) return null;
+  if (!MAP_SAFE || !MAP) return null;
+  const loc = npcLocation(id);
+  if (!loc || loc.map !== MAP.name) return null;
   if (homeAreaCache.map !== MAP) { homeAreaCache.map = MAP; homeAreaCache.areas = {}; }
-  if (id in homeAreaCache.areas) return homeAreaCache.areas[id];
-  const def = NPC_HOME_AREAS[id];
-  let c0 = Infinity, r0 = Infinity, c1 = -Infinity, r1 = -Infinity;
-  const prefixes = [].concat(def.stamps);
-  for (const s of MAP.stamps || []) {
-    if (!prefixes.some(p => String(s.id).startsWith(p))) continue;
-    const t = mapTileById(s.id); if (!t) continue;
-    c0 = Math.min(c0, s.c); r0 = Math.min(r0, s.r);
-    c1 = Math.max(c1, s.c + mapTileW(t) - 1); r1 = Math.max(r1, s.r + mapTileH(t) - 1);
-  }
+  let c0 = Infinity, r0 = Infinity, c1 = -Infinity, r1 = -Infinity, key;
+  if (Array.isArray(loc.rect) && loc.rect.length === 4) {
+    [c0, r0, c1, r1] = loc.rect.map(Number);
+    key = 'rect:' + loc.rect.join(',');
+    if (key in homeAreaCache.areas) return homeAreaCache.areas[key];
+  } else if (loc.area && typeof NPC_AREAS !== 'undefined' && NPC_AREAS[loc.area]) {
+    key = 'area:' + loc.area;
+    if (key in homeAreaCache.areas) return homeAreaCache.areas[key];
+    const def = NPC_AREAS[loc.area], prefixes = [].concat(def.stamps), pad = def.pad ?? 1;
+    for (const s of MAP.stamps || []) {
+      if (!prefixes.some(p => String(s.id).startsWith(p))) continue;
+      const t = mapTileById(s.id); if (!t) continue;
+      c0 = Math.min(c0, s.c); r0 = Math.min(r0, s.r);
+      c1 = Math.max(c1, s.c + mapTileW(t) - 1); r1 = Math.max(r1, s.r + mapTileH(t) - 1);
+    }
+    if (c0 <= c1) { c0 -= pad; r0 -= pad; c1 += pad; r1 += pad; }
+  } else return null;   // 沒框範圍：整張地圖閒逛
   let area = null;
-  if (c0 <= c1) {
-    const pad = def.pad ?? 1;
-    c0 = Math.max(0, c0 - pad); r0 = Math.max(0, r0 - pad); c1 = Math.min(COLS - 1, c1 + pad); r1 = Math.min(ROWS - 1, r1 + pad);
+  if (c0 <= c1 && r0 <= r1) {
+    c0 = Math.max(0, c0); r0 = Math.max(0, r0); c1 = Math.min(COLS - 1, c1); r1 = Math.min(ROWS - 1, r1);
     const cells = [];   // 範圍內站得住的格子
     for (let c = c0; c <= c1; c++) for (let r = r0; r <= r1; r++) {
       if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;
@@ -29,7 +57,7 @@ function homeAreaOf(id) {
     }
     if (cells.length) area = { c0, r0, c1, r1, cells, x0: OX + c0 * CELL, y0: OY + r0 * CELL, x1: OX + (c1 + 1) * CELL, y1: OY + (r1 + 1) * CELL };
   }
-  return homeAreaCache.areas[id] = area;
+  return homeAreaCache.areas[key] = area;
 }
 function inHomeArea(area, x, y) { return x >= area.x0 && x <= area.x1 && y >= area.y0 && y <= area.y1; }
 // 活動範圍裡隨機挑一個點（偏好離自己不太遠，看起來像在房間裡踱步）
@@ -48,6 +76,26 @@ function placeInHomeArea(a, id) {
   [a.x, a.y] = center(c, r);
 }
 
+// ---- 基地裡：這個人平時是不是在這張地圖（data/npc-locations.js）----
+function npcHomeHere(id) {
+  if (!MAP_SAFE || !MAP) return false;
+  const loc = npcLocation(id);
+  return !!loc && loc.map === MAP.name;
+}
+// 在整張地圖隨機挑一個站得住、沒人的格子（平時在這張地圖、又沒有指定活動範圍的人用）
+function placeAnywhere(a) {
+  const taken = new Set([...(G.towers || []), ...(G.npcs || [])].filter(o => o !== a).map(o => cellAt(o.x, o.y).join(',')));
+  const cells = [];
+  for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+    if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r] || taken.has(c + ',' + r)) continue;
+    const [x, y] = center(c, r);
+    if (!sentryBlocked(x, y)) cells.push([c, r]);
+  }
+  if (!cells.length) return;
+  const [c, r] = cells[Math.floor(Math.random() * cells.length)];
+  [a.x, a.y] = center(c, r);
+}
+
 // ---- 開場佈署：三位哨兵在基地（營地）區隨機位置出現 ----
 function spawnSentries() {
   const cand = [];
@@ -55,8 +103,10 @@ function spawnSentries() {
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
   const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r]);
   // 應變中心是全員集合的安全區；戰鬥地圖仍只生成已編入的出勤隊伍。
-  const team = (MAP_SAFE && MAP_NPCS && typeof ROSTER !== 'undefined')
-    ? ROSTER : ((typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES));
+  // 基地（安全區）：出勤隊伍不跟著溫特，只出現「平時在這張地圖」的人（data/npc-locations.js）；戰鬥地圖：出勤隊伍
+  const team = MAP_SAFE
+    ? (typeof ROSTER !== 'undefined' ? ROSTER : Object.keys(TYPES)).filter(npcHomeHere)
+    : ((typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES));
   for (const type of team) {
     const spec = TYPES[type]; if (!spec) continue;
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
@@ -65,12 +115,15 @@ function spawnSentries() {
     if (!MAP_SAFE && typeof applySortieBuff === 'function') applySortieBuff(t);   // 出勤補給（js/sortie-supply.js）
     G.towers.push(t);
     placeInHomeArea(t, type);   // 有平時活動範圍的（希奧妮→研究部）直接在那裡出現
+    if (MAP_SAFE && !homeAreaOf(type)) placeAnywhere(t);   // 基地裡沒有指定活動範圍：整張地圖隨機一個位置
   }
 }
 
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
 function spawnWanderers() {
-  if (!MAP_NPCS) return;            // 只有勾了「場景 NPC」的地圖才會有這些人
+  // 基地（安全區）：只出現平時在這張地圖的人（data/npc-locations.js）；戰鬥地圖：勾了「場景 NPC」才有
+  const list = MAP_SAFE ? WANDERERS.filter(w => npcHomeHere(w.id)) : (MAP_NPCS ? WANDERERS : []);
+  if (!list.length) return;
   const candidates = [], seen = new Set();
   const occupied = new Set(G.towers.map(t => cellAt(t.x, t.y).join(',')));
   const addCell = (c, r) => {
@@ -83,7 +136,7 @@ function spawnWanderers() {
   else for (let c = 0; c < COLS; c++) addCell(c, ROWS - 1);
   for (let r = ROWS - 1; r >= 0; r--) for (let c = 0; c < COLS; c++) addCell(c, r);
 
-  for (const profile of WANDERERS) {
+  for (const profile of list) {
     const cell = candidates.shift() || [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
     G.npcs.push({
@@ -93,6 +146,7 @@ function spawnWanderers() {
       say: null, sayWait: 2 + Math.random() * 8,   // 平時對話：倒數到 0 冒一句
     });
     placeInHomeArea(G.npcs[G.npcs.length - 1], profile.id);   // 諾亞→研究部
+    if (MAP_SAFE && !homeAreaOf(profile.id)) placeAnywhere(G.npcs[G.npcs.length - 1]);   // 基地裡沒有指定活動範圍：整張地圖隨機一個位置
   }
 }
 

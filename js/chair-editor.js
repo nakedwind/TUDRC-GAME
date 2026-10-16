@@ -1,5 +1,5 @@
 const CHAIR_CANDIDATE = /chair|sofa|bench|seating|bed|stool|椅|沙發|長椅|床|凳/i;
-const savedTiles = (() => { try { return JSON.parse(localStorage.getItem('tudrc_tiles_v3') || 'null'); } catch (_) { return null; } })();
+const savedTiles = (() => { try { return JSON.parse((typeof EditorStore !== 'undefined' ? EditorStore : localStorage).getItem('tudrc_tiles_v3') || 'null'); } catch (_) { return null; } })();   // 地圖編輯器的素材暫存（js/editor-store.js）
 const tileById = new Map();
 for (const tile of [...TILES_CUSTOM, ...(Array.isArray(savedTiles) ? savedTiles : [])]) {
   if (tile && tile.id && tile.file) tileById.set(tile.id, tile);

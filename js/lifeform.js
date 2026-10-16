@@ -65,7 +65,6 @@ function lifeformCollapse(e) {
   lifePiles().push({ x: e.x, y: e.y, spec: ACTIVE_MONSTERS.find(m => m.id === e.type), t: LIFEFORM.revive, born: lifeNow(),
     pieces, tint: e.tint || null, state: 'collapse' });
   e.dead = true; e.lifeformPiled = true;
-  flash('碎掉了……', e.x, e.y - 40, '#c9b6ff', 1.2);
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', e.x, e.y, .72, 'lifeform-collapse');
   if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 5, .05);
   return true;
@@ -80,7 +79,6 @@ function burnLifePile(p) {
   p.state = 'burn'; p.burnAt = lifeNow();
   const spec = p.spec || {};
   G.money += spec.reward || 0; earnCrystals(spec.crystals ?? 3);
-  flash('燒成灰燼了！', p.x, p.y - 40, '#ffb070', 1.4);
   if (typeof trackKillAchievements === 'function') trackKillAchievements({ type: spec.id, x: p.x, y: p.y });
   lifeBurnFx(p.x, p.y);
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', p.x, p.y, .68, 'lifeform-burn-death');
@@ -91,7 +89,6 @@ function lifeformBurnAway(e) {
   const file = e.frames ? e.frames.front : e.sprite;
   const pieces = lifeSlices(file, e.drawWidth || 60, e.drawHeight || 80).map(p => ({ ...p, tx: 0, ty: 0, rot: 0, delay: 0 }));
   lifePiles().push({ x: e.x, y: e.y, spec: null, t: 0, born: lifeNow() - LIFEFORM.collapse, pieces, state: 'burn', burnAt: lifeNow(), standing: true });
-  flash('燒成灰燼了！', e.x, e.y - 40, '#ffb070', 1.4);
   lifeBurnFx(e.x, e.y);
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', e.x, e.y, .68, 'lifeform-burn-away');
 }
@@ -124,7 +121,6 @@ function updateLifePiles(dt) {
         const e = createMonster(p.spec, p.x, p.y);
         if (p.tint) e.tint = p.tint;
         G.enemies.push(e);
-        flash('重新組裝了！', p.x, p.y - 60, '#d69bff', 1.4);
       }
     }
   }

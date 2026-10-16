@@ -85,6 +85,9 @@ function playMapClickSound() {
 }
 
 // ---- 小工具 ----
+// ---- 編輯器模式：地圖編輯器＝戰鬥地圖；基地編輯器（基地編輯器.html 會先設定 EDITOR_MODE = 'base'）＝基地（安全區域）地圖 ----
+const EDITOR_BASE = typeof EDITOR_MODE !== 'undefined' && EDITOR_MODE === 'base';
+const inEditorMode = m => !!m && (EDITOR_BASE ? !!m.safe : !m.safe);
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const removeFrom = (arr, key) => { const i = arr.indexOf(key); if (i >= 0) arr.splice(i, 1); };
 const toggle = (arr, key) => { const i = arr.indexOf(key); if (i >= 0) arr.splice(i, 1); else arr.push(key); };
@@ -174,7 +177,7 @@ function mergeDefaultAssetPack(match, storageKey, idOnly = false) {
 }
 
 function loadTiles() {
-  const saved = localStorage.getItem(STORAGE_TILES);
+  const saved = EditorStore.getItem(STORAGE_TILES);
   if (saved) { try { customTiles = JSON.parse(saved); } catch (e) { customTiles = clone(TILES_CUSTOM); } }
   else customTiles = clone(TILES_CUSTOM);
   if (!Array.isArray(customTiles)) customTiles = [];
@@ -291,10 +294,10 @@ function loadTiles() {
   });
   if (migrated) saveTiles();
 }
-function saveTiles() { localStorage.setItem(STORAGE_TILES, JSON.stringify(customTiles)); }
+function saveTiles() { EditorStore.setItem(STORAGE_TILES, JSON.stringify(customTiles)).catch(e => setStatus('⚠️ 素材暫存失敗（' + (e && e.name || e) + '）', '#ff8f8f')); }
 
 function loadMaps() {
-  const saved = localStorage.getItem(STORAGE_MAPS);
+  const saved = EditorStore.getItem(STORAGE_MAPS);
   if (saved) { try { maps = JSON.parse(saved); } catch (e) { maps = clone(MAPS_DEFAULT); } }
   else maps = clone(MAPS_DEFAULT);
   if (!Array.isArray(maps) || maps.length === 0) maps = clone(MAPS_DEFAULT);
@@ -330,7 +333,7 @@ function loadMaps() {
       restoredEocHeight = true;
     }
   }
-  if (restoredDefaults || restoredEocHeight) localStorage.setItem(STORAGE_MAPS, JSON.stringify(maps));
+  if (restoredDefaults || restoredEocHeight) EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps));
   curId = maps[0].id;
 }
 // 補齊欄位；把舊格式一次性遷移（tiles平面→layers.floor；walls→solid）
@@ -387,7 +390,8 @@ let editorZoom = 0;   // 0＝尚未設定；第一次載入會自動「全覽整
 function fitZoom() {
   const wrap = document.getElementById('wrap');
   const availW = Math.max(120, wrap.clientWidth - 4);
-  const availH = Math.max(200, window.innerHeight * 0.82 - 4);
+  const maxHeight = parseFloat(getComputedStyle(wrap).maxHeight);
+  const availH = Math.max(120, (Number.isFinite(maxHeight) ? maxHeight : window.innerHeight * 0.88) - 20);
   return Math.max(0.1, Math.min(1, Math.min(availW / cv.width, availH / cv.height)));
 }
 function applyZoom() {
@@ -403,8 +407,20 @@ document.getElementById('zoomIn').onclick = () => setZoom(editorZoom * 1.25);
 document.getElementById('zoomOut').onclick = () => setZoom(editorZoom / 1.25);
 document.getElementById('zoomFit').onclick = () => { editorZoom = fitZoom(); applyZoom(); };
 document.getElementById('zoom100').onclick = () => setZoom(1);
-function saveMaps() { localStorage.setItem(STORAGE_MAPS, JSON.stringify(maps)); setStatus('已自動存檔 ✓', '#7ee0c0'); }
-const curMap = () => maps.find(m => m.id === curId) || maps[0];
+document.getElementById('expandEditor')?.addEventListener('click', () => {
+  const expanded = document.body.classList.toggle('wide-editor');
+  const button = document.getElementById('expandEditor');
+  button.textContent = expanded ? '↙ 還原編輯區' : '⛶ 放大編輯區';
+  button.setAttribute('aria-pressed', String(expanded));
+  // 保留縮放倍率和目前編輯位置，只增加可見空間。
+});
+// 地圖暫存放在瀏覽器資料庫（js/editor-store.js）；寫入失敗要大聲提醒
+function saveMaps() {
+  EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps)).catch(e => setStatus('⚠️ 自動存檔失敗（' + (e && e.name || e) + '）：請馬上按「💾 存到專案」或「下載」保存！', '#ff8f8f'));
+  setStatus('已自動存檔 ✓', '#7ee0c0');
+  if (typeof refreshStorageInfoSoon === 'function') refreshStorageInfoSoon();
+}
+const curMap = () => maps.find(m => m.id === curId) || maps.find(inEditorMode) || maps[0];
 
 function setStatus(text, color) { const el = document.getElementById('status'); el.textContent = text; el.style.color = color || '#7ee0c0'; }
 
@@ -417,10 +433,10 @@ function undo() {
   const s = JSON.parse(undoStack.pop());
   maps = s.maps; customTiles = s.tiles; curId = s.curId;
   selection = null; selections = [];
-  if (!maps.find(m => m.id === curId)) curId = maps[0].id;
+  if (!inEditorMode(maps.find(m => m.id === curId))) curId = (maps.find(inEditorMode) || maps[0]).id;
   if (!tileById(brush.tile)) brush = { mode: brush.mode, tile: 'floor' };
-  localStorage.setItem(STORAGE_MAPS, JSON.stringify(maps));
-  localStorage.setItem(STORAGE_TILES, JSON.stringify(customTiles));
+  EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps));
+  EditorStore.setItem(STORAGE_TILES, JSON.stringify(customTiles));
   checkResult = null;
   applyMapSize(); refreshMapSelect(); renderPalette(); loadRules(); draw();
   setStatus('已回復上一步（還剩 ' + undoStack.length + ' 步可回復）', '#7ee0c0');
@@ -734,6 +750,7 @@ function draw() {
       ctx.fillText('人物遮擋線 ' + depth, x + 5, y - 4);
     }
   }
+  if (typeof drawEditorOverlay === 'function') drawEditorOverlay(ctx, m);   // 基地編輯器：NPC 活動範圍（js/base-editor.js）
 }
 
 // ================= 可翻轉圖片放置 / 查詢 =================
@@ -1567,7 +1584,7 @@ document.getElementById('clearLayout').addEventListener('click', () => {
 const mapSelect = document.getElementById('mapSelect');
 function refreshMapSelect() {
   mapSelect.innerHTML = '';
-  maps.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
+  maps.filter(inEditorMode).forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], entrances: [], camp: [], rules: {} }); }
@@ -1577,7 +1594,7 @@ mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
 document.getElementById('newMap').addEventListener('click', () => {
   const name = prompt('新地圖的名稱？', '新地圖 ' + (maps.length + 1)); if (name === null) return;
   pushUndo();
-  const m = blankMap(name.trim() || '新地圖'); maps.push(m); switchTo(m.id); saveMaps();
+  const m = blankMap(name.trim() || '新地圖'); if (EDITOR_BASE) m.safe = true; maps.push(m); switchTo(m.id); saveMaps();
 });
 document.getElementById('dupMap').addEventListener('click', () => {
   pushUndo();
@@ -1586,13 +1603,15 @@ document.getElementById('dupMap').addEventListener('click', () => {
 document.getElementById('renameMap').addEventListener('click', () => {
   const m = curMap(), name = prompt('改名為？', m.name); if (name === null) return;
   pushUndo();
+  const oldName = m.name;
   m.name = name.trim() || m.name; refreshMapSelect(); loadRules(); saveMaps();
+  if (typeof onEditorMapRenamed === 'function' && oldName !== m.name) onEditorMapRenamed(oldName, m.name);
 });
 document.getElementById('delMap').addEventListener('click', () => {
-  if (maps.length <= 1) { alert('至少要留一張地圖'); return; }
+  if (maps.filter(inEditorMode).length <= 1) { alert('至少要留一張地圖'); return; }
   const m = curMap(); if (!confirm('確定刪除地圖「' + m.name + '」？')) return;
   pushUndo();
-  maps = maps.filter(x => x !== m); switchTo(maps[0].id); saveMaps();
+  maps = maps.filter(x => x !== m); switchTo((maps.find(inEditorMode) || maps[0]).id); saveMaps();
 });
 
 // ================= 規則面板 =================
@@ -1718,14 +1737,26 @@ function resizeMapSide(dir, amount) {
   const act = amount > 0 ? ('往' + DIR_LABEL[dir] + '加 ' + amount + ' 格') : ('從' + DIR_LABEL[dir] + '刪 ' + (-amount) + ' 格');
   setStatus(act + '：地圖變成 ' + m.cols + '×' + m.rows + (dropped ? '（有 ' + dropped + ' 個超出範圍的內容被刪掉，可用 Ctrl+Z 復原）' : ''), dropped ? '#ffd24a' : '#7ee0c0');
 }
+document.getElementById('f_name').addEventListener('focus', e => { e.target.dataset.oldName = curMap().name; });
 document.getElementById('f_name').addEventListener('input', e => { curMap().name = e.target.value; refreshMapSelect(); saveMaps(); });
+document.getElementById('f_name').addEventListener('change', e => {   // 改完名稱：通知基地編輯器（NPC 名單用地圖名稱對應）
+  const oldName = e.target.dataset.oldName;
+  if (typeof onEditorMapRenamed === 'function' && oldName && oldName !== curMap().name) onEditorMapRenamed(oldName, curMap().name);
+  e.target.dataset.oldName = curMap().name;
+});
 document.getElementById('f_desc').addEventListener('input', e => { curMap().desc = e.target.value; saveMaps(); });
 document.getElementById('f_npcs').addEventListener('change', e => {
   curMap().npcs = e.target.checked; saveMaps();
   setStatus(e.target.checked ? '這張地圖會出現場景 NPC（克莉思、克萊兒、路德、穆恩、艾德林、諾亞、阿瓦倫）' : '這張地圖不會出現場景 NPC', '#8fd3ff');
 });
 document.getElementById('f_safe').addEventListener('change', e => {
-  curMap().safe = e.target.checked; saveMaps();
+  const m = curMap(); m.safe = e.target.checked; saveMaps();
+  if (!inEditorMode(m)) {   // 這張地圖改到另一個編輯器管理了
+    const next = maps.find(inEditorMode);
+    if (next) switchTo(next.id);
+    setStatus('「' + m.name + '」' + (m.safe ? '設為安全場景，已搬到「🏠 基地編輯器」' : '恢復成一般關卡，已搬到「🗺️ 地圖編輯器」'), '#8fd3ff');
+    return;
+  }
   setStatus(e.target.checked ? '這張地圖設為安全場景：遊戲裡不生怪、不套黑幕' : '這張地圖恢復成一般關卡（會生怪、有黑幕）', '#8fd3ff');
 });
 RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).addEventListener('input', e => { const v = parseFloat(e.target.value); curMap().rules[k] = isNaN(v) ? 0 : v; saveMaps(); }); });
@@ -1770,15 +1801,16 @@ document.getElementById('downloadExport').addEventListener('click', () => {
 });
 document.getElementById('resetFile').addEventListener('click', () => {
   if (!confirm('確定丟棄瀏覽器暫存，改用 data/maps.js 檔案的內容？未匯出的變更會不見。')) return;
-  localStorage.removeItem(STORAGE_MAPS); localStorage.removeItem(STORAGE_TILES);
+  EditorStore.removeItem(STORAGE_MAPS); EditorStore.removeItem(STORAGE_TILES);
   selection = null; selections = [];
-  loadTiles(); loadMaps(); applyMapSize(); preloadTiles(); renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
+  loadTiles(); loadMaps(); if (!inEditorMode(maps.find(m => m.id === curId))) curId = (maps.find(inEditorMode) || maps[0]).id; applyMapSize(); preloadTiles(); renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
   setStatus('已重設為檔案內容', '#ffd24a');
 });
 
 // ================= 啟動 =================
 loadTiles();
 loadMaps();
+if (!inEditorMode(maps.find(m => m.id === curId))) curId = (maps.find(inEditorMode) || maps[0]).id;   // 只顯示這個編輯器管的地圖
 applyMapSize();
 preloadTiles();
 renderPalette();
@@ -1788,4 +1820,4 @@ refreshMapSelect();
 loadRules();
 draw();
 if (PULL_RESTORE_APPLIED) setStatus('舊瀏覽器紀錄已備份；目前已載入 Git 地圖版本 ✓', '#7ee0c0');
-setStatus('編輯器已就緒。目前有 ' + maps.length + ' 張地圖、' + palette().length + ' 塊磚塊。', '#7ee0c0');
+setStatus('編輯器已就緒。目前有 ' + maps.filter(inEditorMode).length + ' 張' + (EDITOR_BASE ? '基地' : '戰鬥') + '地圖、' + palette().length + ' 塊磚塊。', '#7ee0c0');

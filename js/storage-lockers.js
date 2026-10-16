@@ -64,7 +64,7 @@ function storagePropPrompt(prop){
 function useStoragePropNearPlayer(){
   const prop=storagePropNearPlayer();if(!prop)return false;
   if(prop.kind==='power'){
-    toggleMapPower();sfx(mapPowerIsOn()?'powerOn':'switch');systemNotice(mapPowerIsOn()?'電源已開啟':'電源已關閉');
+    toggleMapPower();sfx('powerOn');systemNotice(mapPowerIsOn()?'電源已開啟':'電源已關閉');
   }else if(isWorldPickup(prop.kind)){
     const loot=WORLD_PICKUPS[prop.kind];
     supplyInventory.set(loot.item,(supplyInventory.get(loot.item)||0)+1);

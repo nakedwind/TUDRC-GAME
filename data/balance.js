@@ -35,15 +35,7 @@ const DEFAULT_TEAM = ['theonie', 'amber', 'red', 'luther'];
 
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。
-// ---- 平時活動範圍（應變中心這類安全區）----
-// 角色 id → 活動範圍：地圖上所有 id 以 stamps 開頭的素材圍出來的方框，再往外多 pad 格。
-// stamps 可以是一個字串或陣列（多種素材一起圍）。指揮部的地板／樓梯／牆面在別的房間也有用到，所以只挑指揮部專屬的大件家具。
-// 地圖上沒有這些素材時照常自由走動；哨兵被指派巡邏／護衛時也照指令走。
-const NPC_HOME_AREAS = {
-  noah:    { stamps: 'tile_research_lab_', pad: 1, name: '研究部' },
-  theonie: { stamps: 'tile_research_lab_', pad: 1, name: '研究部' },
-  ash:     { stamps: ['tile_hq_monitor_wall', 'tile_hq_command_table', 'tile_hq_computer_desk', 'tile_hq_desk_vertical'], pad: 0, name: '指揮部' },
-};
+// ---- 基地裡每個人平時在哪張地圖、哪一區（可依章節不同）：在 data/npc-locations.js ----
 const WANDERERS = Object.values(CHARACTERS)
   .filter(character => character.kind === 'support')
   .map(({ id, name, sprite }) => ({ id, name, sprite }));

@@ -292,6 +292,7 @@ function drawRigArm(e, fr, dx, dy, dw, dh) {
   if (fr.ghosts) fr.ghosts.forEach((g, i) => drawAt(g, .35 - i * .15));   // 劈下時的殘影
   drawAt(fr.angle, 1);
 }
+const SHOW_ENEMY_ALERT = false;   // 怪物被槍吸引過來時頭上彈出「！」：true＝顯示
 function drawEnemy(e) {
   ctx.save();
   if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
@@ -359,7 +360,7 @@ function drawEnemy(e) {
   if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
   if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.sleepT > 0 ? '睡著' : e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
   if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
-  if (e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」
+  if (SHOW_ENEMY_ALERT && e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」（目前關掉）
     const age = ENEMY_ALERT_TIME - e.alertT, pop = age < .12 ? .6 + age / .12 * .7 : 1.3 - Math.min(.3, (age - .12) * 1.5);
     ctx.save(); ctx.translate(e.x, barY - 9); ctx.scale(pop, pop); ctx.globalAlpha = Math.min(1, e.alertT / .25);
     ctx.font = '900 17px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';

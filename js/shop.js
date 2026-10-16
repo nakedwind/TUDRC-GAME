@@ -153,7 +153,7 @@ function checkoutCart() {
   for (const [id, n] of shopCart) supplyInventory.set(id, (supplyInventory.get(id) || 0) + n);
   shopCart.clear();
   if (vendingMode) { sfx('drink'); systemNotice(`販賣機掉出 ${count} 瓶飲料（$${total}），已放進背包`); }
-  else { SFX.play('shopBell', .6, 'shop-checkout'); systemNotice(`結帳 $${total}，${count} 件已放進背包`); }
+  else { SFX.play('shopCheckout', .7, 'shop-checkout'); systemNotice(`結帳 $${total}，${count} 件已放進背包`); }
   updateHUD(); renderSupplyShop();
   const link = document.getElementById('shopOpenBackpack'); link.classList.remove('flash'); void link.offsetWidth; link.classList.add('flash'); link.focus();
 }

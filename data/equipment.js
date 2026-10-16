@@ -83,7 +83,7 @@ const WEAPON_UPGRADES = {
     levels: [{ dmg: 5, mag: 6, reload: 2 }, { dmg: 6, mag: 8, reload: 1.7 }, { dmg: 8, mag: 10, reload: 1.4 }] },
   flare: { name: '照明彈槍', icon: '🔥', image: 'images/weapon/winter-flare-gun-design.png', cost: [70, 150],
     stat: lv => '燃燒 ' + lv.burn + ' 秒・備用彈最多 ' + lv.reserve + ' 發',
-    levels: [{ burn: 12, reserve: 30 }, { burn: 16, reserve: 40 }, { burn: 20, reserve: 50 }] },
+    levels: [{ burn: 24, reserve: 30 }, { burn: 32, reserve: 40 }, { burn: 40, reserve: 50 }] },   // 燃燒秒數（亮光時間）
   // 下面兩把只能在後室（戰鬥區域）撿到（field），撿到後才能升級；彈藥以後在後室的商店、轉蛋機取得（js/special-guns.js）
   // 燃燒彈槍：r 火海半徑（格）、burn 火海燒幾秒、reload 每發裝填秒數、reserve 備用彈最多幾發、ignite 被燒到的怪物身上著火幾秒（Lv3）
   incendiary: { name: '燃燒彈槍', icon: '🧨', image: 'images/weapon/incendiary_launcher.png', field: true, where: '有機會在上鎖的置物箱裡找到', cost: [100, 180],

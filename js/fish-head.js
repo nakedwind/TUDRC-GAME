@@ -356,13 +356,9 @@ function fishHeadArmor() {
     if (e.fhHp == null || e.hp > e.fhHp) { e.fhHp = e.hp; continue; }
     const lost = e.fhHp - e.hp;
     if (lost > 0) {
-      if (e.fh) { if (!(e.fh.flee > 0) && now - (e.fhScaredAt || 0) > 1.5) { e.fhScaredAt = now; flash('嚇！', e.x, e.y - (e.drawHeight || 80) - 22, '#bfe6ff', .6); } if (!(e.fh.flee > 0)) { e.fh.fleeDir = null; e.fh.hop = 0; } e.fh.flee = C.fleeTime; }   // 剛嚇到：彈一下   // 膽小：被打就逃
+      if (e.fh) { if (!(e.fh.flee > 0) && now - (e.fhScaredAt || 0) > 1.5) { e.fhScaredAt = now; flash('！', e.x, e.y - (e.drawHeight || 80) - 22, '#bfe6ff', .6); } if (!(e.fh.flee > 0)) { e.fh.fleeDir = null; e.fh.hop = 0; } e.fh.flee = C.fleeTime; }   // 剛嚇到：彈一下   // 膽小：被打就逃
       const back = !!e.showBack, f = Math.min(lost, fire), sh = Math.min(lost - f, shock), other = lost - f - sh;
       e.hp = e.fhHp - (f * C.fireMul + sh * C.shockMul + other) * (back ? C.backMul : C.frontMul);
-      const top = e.y - (e.drawHeight || 80) - 8;
-      if (sh > 0 && now - (e.fhShockAt || 0) > .8) { e.fhShockAt = now; flash('怕電！', e.x, top - 12, '#ffe66b', .7); }
-      else if (f > 0 && now - (e.fhFireAt || 0) > 1.2) { e.fhFireAt = now; flash('抗火', e.x, top - 12, '#c9b7a6', .7); }
-      if (back && other + sh > 0 && now - (e.fhWeakAt || 0) > .8) { e.fhWeakAt = now; flash('弱點！', e.x, top, '#ffd479', .7); }
     }
     e.fhHp = e.hp;
   }

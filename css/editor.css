@@ -9,7 +9,7 @@ h1 { font-size: 18px; margin: 0 0 10px; color: #8fd3ff; font-weight: 600; }
 a.backlink { color: #8fd3ff; font-size: 13px; text-decoration: none; }
 
 .layout { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
-.left { flex: 1 1 720px; min-width: 320px; }
+.left { flex: 1 1 720px; min-width: 0; }
 .right { flex: 0 0 300px; min-width: 260px; }
 
 /* 上方：地圖選擇列 */
@@ -26,7 +26,12 @@ a.backlink { color: #8fd3ff; font-size: 13px; text-decoration: none; }
 .btn.on { border-color: #b39ddb; background: #3a2f55; color: #fff; }
 
 /* 畫布：地圖比畫面大時，外框出現捲軸，可捲動編輯 */
-#wrap { position: relative; width: 100%; max-width: 1280px; overflow: auto; max-height: 82vh; }
+#wrap { position: relative; width: 100%; max-width: none; overflow: auto; max-height: 88vh; }
+#zoombar { flex-wrap: wrap; }
+body.wide-editor .right { display: none; }
+body.wide-editor .left { flex-basis: 100%; }
+body.wide-editor #wrap { max-height: 92vh; }
+body.wide-editor #expandEditor { border-color: #8fd3ff; background: #2b526b; }
 canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }
 
 /* 圖層切換（右側・直排）*/
@@ -172,3 +177,17 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 /* 匯出區 */
 #exportOut { width: 100%; height: 150px; background: #0e1116; color: #b7c2d0; border: 1px solid #333c49; border-radius: 6px; padding: 8px; font-family: monospace; font-size: 11px; resize: vertical; }
 .exrow { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+/* ===== 工具列：兩排（工具／地圖），少用的放在「⋯ 更多」 ===== */
+.toolrow { display: flex; gap: 8px; margin: 6px 0; flex-wrap: wrap; align-items: center; }
+.tool-label { flex: none; min-width: 58px; color: #8fd3ff; font-size: 12px; font-weight: 700; }
+.toolrow-gap { flex: 1; }
+.tool-more { position: relative; }
+.tool-more > summary { list-style: none; user-select: none; }
+.tool-more > summary::-webkit-details-marker { display: none; }
+.tool-more[open] > summary { border-color: #8fd3ff; }
+.tool-more-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; display: grid; gap: 6px; min-width: 200px; padding: 8px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.tool-more-menu .btn { text-align: left; }
+#saveProject { font-weight: 700; }
+.save-note { margin: 6px 0 0; color: #8c98a6; font-size: 12px; line-height: 1.5; }
+.save-note a { color: #8fd3ff; }
