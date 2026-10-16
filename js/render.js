@@ -197,7 +197,7 @@ function sensedEnemies() {
   if (!LIGHT.enabled || !G || !G.enemies.length) return [];
   const eyes = (G.towers || []).filter(t => (TYPES[t.type] || {}).sense && t.hp > 0 && !t.berserk);
   if (!eyes.length) return [];
-  return G.enemies.filter(e => !e.dead && !isVisible(e.x, e.y)
+  return G.enemies.filter(e => !e.dead && !enemyVisible(e)
     && eyes.some(t => Math.hypot(e.x - t.x, e.y - t.y) <= TYPES[t.type].sense * CELL));
 }
 function drawSensedEnemies() {
@@ -522,12 +522,12 @@ function draw() {
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
   collectMapOccluders(ctx, sortables);
-  for(const core of G.cores) if(!core.dead && isVisible(core.x,core.y)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
+  for(const core of G.cores) if(!core.dead && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
-  for (const e of G.enemies) if (isVisible(e.x, e.y)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });
+  for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住

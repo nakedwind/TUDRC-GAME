@@ -214,7 +214,7 @@
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/asset-gate.js?v=gate-20261012"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
-  <script src="js/config.js"></script>       <!-- 1. 格線與座標設定 -->
+  <script src="js/config.js?v=view-zoom-125-20261016"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=homemart-20261016"></script> <!-- 1a. 音量、替換與自訂音效 -->
   <script src="js/sfx.js?v=fixlist1-20261016"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
@@ -228,14 +228,14 @@
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=quests-20261015"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/dialogues.js?v=brief-20261014"></script>  <!-- 所有台詞（對話編輯器） -->
-  <script src="data/balance.js?v=npcloc-20261016"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/balance.js?v=full-darkness-20261016"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=baseeditor-20261016"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="data/monsters.js?v=pearlshell-20261016"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=fish-20261016"></script>
   <script src="data/storage-boxes.js?v=storage-collision-20261013"></script><script src="data/ores.js?v=ore-editor-20261012"></script><script src="data/objects.js?v=iron-gate-20261013"></script>    <!-- 3. 障礙物外觀與碰撞範圍 -->
   <script src="data/decorations.js?v=buildable-decor-20261011"></script><!-- 3b. 裝飾物件（低HP、可佈置） -->
-  <script src="data/maps.js?v=fish-20261016"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
+  <script src="data/maps.js?v=player-spawn-20261016"></script>       <!-- 4. 地圖資料（地圖編輯器匯出） -->
   <script src="data/doors.js?v=doorsfx-20261008"></script> <!-- 可開關的門（哪些素材是門）-->
   <script src="data/chairs.js?v=hqchair-20261015"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
   <script src="js/chair-data.js"></script>
@@ -244,11 +244,11 @@
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/maploader.js?v=overdrawmask-20261015"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/doors.js?v=doorsfx-20261008"></script> <!-- 門：手動門／自動門 -->
-  <script src="js/lighting.js?v=solidlight2-20261016"></script>     <!-- 7. 黑暗與光源系統 -->
+  <script src="js/lighting.js?v=seeenemy-20261016"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
   <script src="js/build.js?v=disabled-builds-20261013"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=bust-20261015"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=baseeditor-20261016"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=npcspawn-20261016"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=core-20261006"></script>
   <script src="js/anomalous-core.js?v=equip-20261015"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
   <script src="js/combat-feel.js?v=fishdeath-20261016"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
@@ -259,8 +259,8 @@
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fishnolabel-20261016"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/render.js?v=fixlist1-20261016"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
-  <script src="js/attack-fx.js?v=avarensfx2-20261014"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
+  <script src="js/render.js?v=seeenemy-20261016"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/attack-fx.js?v=damage-rounding-20261016"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=fishelem-20261016"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=humfix-20261014"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/lifeform.js?v=fixlist1-20261016"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
@@ -279,8 +279,8 @@
   <script src="js/ambience.js?v=noisefix-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=equip-20261015"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=fixlist1-20261016"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=allguns-20261016"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=seeenemy-20261016"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=loadout-20261016"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
-  <script src="js/game.js?v=fixlist1-20261016"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=seeenemy-20261016"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
 </body>
 </html>

@@ -15,10 +15,13 @@ let lightField = new Float32Array(COLS * ROWS);        // 每格亮度 0～1
 let warmField = new Float32Array(COLS * ROWS);         // 探照燈暖色量（沿用同一份遮牆結果）
 let lightDist = new Float32Array(COLS * ROWS);         // BFS 暫存
 let flashField = new Float32Array(COLS * ROWS);        // 攻擊閃光的亮度（只影響畫面，不算進遊戲的「亮處」判定）
+let visField = new Float32Array(COLS * ROWS);          // 畫黑幕用的亮度：不含溫特身上的燈（頭燈、手電筒另外用平滑的形狀挖開，見 drawDarkness）
+let beamMask = new Float32Array(COLS * ROWS);          // 溫特身上的燈照得到的格子（只看牆有沒有擋住）
 const fieldCv = document.createElement('canvas');      // 一格一像素的黑幕小圖
 fieldCv.width = COLS; fieldCv.height = ROWS;
 const fieldCtx = fieldCv.getContext('2d');
 let fieldImg = fieldCtx.createImageData(COLS, ROWS);
+const darkCv = document.createElement('canvas'), darkCtx = darkCv.getContext('2d');   // 有手電筒時：黑幕先畫在這裡，挖掉光束再貼上
 const warmCv = document.createElement('canvas');       // 暖色光層，同樣是一格一像素再平滑放大
 warmCv.width = COLS; warmCv.height = ROWS;
 const warmCtx = warmCv.getContext('2d');
@@ -33,6 +36,8 @@ function ensureLightBuffers() {
   warmField = new Float32Array(COLS * ROWS);
   lightDist = new Float32Array(COLS * ROWS);
   flashField = new Float32Array(COLS * ROWS);
+  visField = new Float32Array(COLS * ROWS);
+  beamMask = new Float32Array(COLS * ROWS);
   fieldCv.width = COLS; fieldCv.height = ROWS; fieldImg = fieldCtx.createImageData(COLS, ROWS);
   warmCv.width = COLS; warmCv.height = ROWS; warmImg = warmCtx.createImageData(COLS, ROWS);
 }
@@ -43,11 +48,31 @@ function computeLightField() {
   ensureLightBuffers();   // 地圖尺寸變了就先重建暫存
   lightField.fill(0);
   warmField.fill(0);
+  visField.fill(0);
+  beamMask.fill(0);
   if (!LIGHT.enabled) return;
-  for (const l of lightsCache) spreadLight(l, (i, b) => {
-    b *= l.intensity ?? 1;
-    if (b > lightField[i]) lightField[i] = b;
-    if (l.warm && b > warmField[i]) warmField[i] = b;
+  for (const l of lightsCache) {
+    spreadLight(l, (i, b) => {
+      b *= l.intensity ?? 1;
+      if (b > lightField[i]) lightField[i] = b;          // 遊戲判定（亮處）：手電筒照常用格子扇形
+      if (!l.smooth && b > visField[i]) visField[i] = b;   // 畫面：頭燈、手電筒另外畫
+      if (l.warm && b > warmField[i]) warmField[i] = b;
+    });
+    if (l.smooth) markBeamMask(l);   // 頭燈、手電筒畫面上照得到的格子（牆後面不會亮）
+  }
+}
+// 頭燈、手電筒畫面上照得到的格子：格子擴散（不限扇形，讓柔邊也有地方亮；範圍多一點給柔邊）＋從燈到格子要「直線看得到」。
+// 只靠格子擴散的話，光會從門口繞過牆角、或穿過比一格薄的牆，跑到牆的另一邊。
+function markBeamMask(l) {
+  const cone = l.cone, ca = cone ? Math.cos(cone.ang) : 0, sa = cone ? Math.sin(cone.ang) : 0, wide = cone ? Math.cos(Math.min(Math.PI, cone.half + .45)) : -2;
+  spreadLight({ ...l, cone: null, r: l.r * 1.25 }, (i, b) => {
+    if (b <= 0) return;
+    const c = i % COLS, r = (i - c) / COLS;
+    let [x, y] = center(c, r);
+    const dx = x - l.x, dy = y - l.y, d = Math.hypot(dx, dy);
+    if (d > CELL * 1.2 && (dx * ca + dy * sa) / d < wide) return;   // 離扇形太遠的不用管（省時間）
+    if (isWall(c, r)) { const k = Math.max(0, (d - CELL * .5) / (d || 1)); x = l.x + dx * k; y = l.y + dy * k; }   // 牆本身：看朝向手電筒那一面
+    if (d <= CELL * .75 || hasLineOfSight(l.x, l.y, x, y)) beamMask[i] = 1;
   });
 }
 // 從一個光源沿格子擴散，對每個被照到的格子呼叫 onCell(格子編號, 亮度 0～1)
@@ -148,6 +173,22 @@ function isVisible(x, y) {
   return inGrid(c, r) && flashField[r * COLS + c] > LIT_MIN;
 }
 
+// 畫面上某一點有多亮（0～1）：格子亮度做雙線性插值（跟黑幕放大後的漸層一樣）＋頭燈、手電筒的平滑光
+function visualLightAt(x, y) {
+  if (!LIGHT.enabled) return 1;
+  const fx = (x - OX) / CELL - .5, fy = (y - OY) / CELL - .5, c0 = Math.floor(fx), r0 = Math.floor(fy), tx = fx - c0, ty = fy - r0;
+  const v = (c, r) => inGrid(c, r) ? Math.max(visField[r * COLS + c], flashField[r * COLS + c]) : 0;
+  const b = (v(c0, r0) * (1 - tx) + v(c0 + 1, r0) * tx) * (1 - ty) + (v(c0, r0 + 1) * (1 - tx) + v(c0 + 1, r0 + 1) * tx) * ty;
+  return Math.max(b, typeof equipLightAt === 'function' ? equipLightAt(x, y) : 0);
+}
+// 怪物（或任何目標）看不看得到：身上任何一個地方在畫面上夠亮就看得到（腳底、身體中間、頭、左右兩側）
+const SEE_MIN = .08;   // 畫面亮度超過這個就算看得到（0～1；越小越容易看到）
+function bodyVisible(box, x, y) {
+  if (!LIGHT.enabled) return true;
+  const pts = [[x, y], [box.cx, box.cy], [box.cx, box.y0 + 4], [box.x0 + 4, box.cy], [box.x1 - 4, box.cy]];
+  return pts.some(([px, py]) => isVisible(px, py) || visualLightAt(px, py) > SEE_MIN);
+}
+const enemyVisible = e => bodyVisible(targetBodyBox(e), e.x, e.y);
 function getLights() {
   const L = [];
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
@@ -249,7 +290,7 @@ function drawDarkness() {
   const px = fieldImg.data, maxA = Math.round(LIGHT.darkness * 255);
   for (let i = 0; i < lightField.length; i++) {
     // 只改視覺曲線：中段亮度更柔順，實際的 isLit 判定仍使用原始 lightField。
-    const b = Math.pow(Math.min(1, Math.max(lightField[i], flashField[i])), 0.78);   // 攻擊閃光也會暫時掀開黑幕
+    const b = Math.pow(Math.min(1, Math.max(visField[i], flashField[i])), 0.78);   // 攻擊閃光也會暫時掀開黑幕
     const o = i * 4;
     px[o] = 0; px[o + 1] = 0; px[o + 2] = 0;
     px[o + 3] = Math.round(maxA * (1 - b));
@@ -257,8 +298,20 @@ function drawDarkness() {
   fieldCtx.putImageData(fieldImg, 0, 0);
   const mx = OX, my = OY, mw = COLS * CELL, mh = ROWS * CELL;
   ctx.imageSmoothingEnabled = true;
-  ctx.drawImage(fieldCv, mx, my, mw, mh);
-  if (typeof drawFlashlightBeam === 'function') drawFlashlightBeam(ctx);   // 手電筒的光束（js/equipment.js）
+  // 頭燈、手電筒：平滑的形狀（js/equipment.js）從黑幕挖開；都沒有就直接貼黑幕
+  const beam = typeof flashlightBeamLayer === 'function' ? flashlightBeamLayer(beamMask) : null;
+  if (beam) {
+    if (darkCv.width !== beam.cv.width || darkCv.height !== beam.cv.height) { darkCv.width = beam.cv.width; darkCv.height = beam.cv.height; }
+    darkCtx.setTransform(1, 0, 0, 1, 0, 0); darkCtx.globalCompositeOperation = 'source-over'; darkCtx.globalAlpha = 1;
+    darkCtx.clearRect(0, 0, darkCv.width, darkCv.height);
+    darkCtx.translate(-beam.x, -beam.y); darkCtx.imageSmoothingEnabled = true;
+    darkCtx.drawImage(fieldCv, mx, my, mw, mh);
+    darkCtx.setTransform(1, 0, 0, 1, 0, 0);
+    darkCtx.globalCompositeOperation = 'destination-out'; darkCtx.globalAlpha = FLASH_BEAM.reveal;
+    darkCtx.drawImage(beam.cv, 0, 0);
+    ctx.drawImage(darkCv, beam.x, beam.y);
+    drawFlashlightBeam(ctx, beam);   // 再疊一層淡淡的暖黃光
+  } else ctx.drawImage(fieldCv, mx, my, mw, mh);
 
   // 探照燈的環境暖光也使用格子擴散遮罩，因此不會穿過牆壁。
   const wp = warmImg.data;

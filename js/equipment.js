@@ -71,24 +71,127 @@ const equipRushMul = () => { const v = equipLv('radio'); return v && v.rush ? 1 
 function equipLight() {
   if (MAP_SAFE || !G || !G.player) return [];
   const p = G.player, L = [], h = equipLv('lamphelmet'), v = equipLv('headlamp');
-  if (h) L.push({ x: p.x, y: p.y - 10, r: h.light });
-  if (v && equipState.battery > 0) L.push({ x: p.x, y: p.y - 10, r: v.light, cone: { ang: flashlightAngle(), half: v.spread * Math.PI / 180 } });
+  // smooth：畫面上用平滑的形狀挖開黑幕（js/lighting.js），遊戲判定照樣用格子
+  if (h) L.push({ x: p.x, y: p.y - 10, r: h.light, smooth: true, helmet: true });
+  if (v && equipState.battery > 0) L.push({ x: p.x, y: p.y + FLASH_BEAM.dy, r: v.light, smooth: true, cone: { ang: flashlightAngle(), half: v.spread * Math.PI / 180 } });
   return L;
 }
+// 手電筒光束的外觀：dy＝起點在溫特腳底往上／下幾像素（手的高度）；r0＝起點離手多遠（圓弧，不是尖角）；
+// body＝溫特身體的範圍（橢圓：中心往上 cy、半寬 rx、半高 ry；soft＝柔邊往外延伸幾倍），暖黃色那層在這裡慢慢淡掉，不會壓在溫特身上
+// color＝光的顏色（偏暖黃）、alpha＝暖黃色那層多濃、reveal＝把黑幕掀開多少（1＝全亮）
+// edge＝兩側淡出的寬度（弧度，越大邊緣越柔）、fadeIn＝起點從暗到亮的距離、falloff＝越遠越淡的速度（越大越快暗）
+// halo＝溫特身邊的小光暈半徑（像素；要比照明頭盔的光圈小）、haloTall＝光暈上下拉長幾倍（1＝正圓）
+// 照明頭盔的圓形光（畫面）：size＝畫出來的半徑是照明半徑的幾倍（外圈柔邊會比較暗，所以畫大一點看起來才一樣大）、core＝中間全亮的部分佔多少
+const HELMET_LIGHT = { size: 1.4, core: .2 };
+const FLASH_BEAM = { dy: 2, r0: 16, body: { cy: -16, rx: 17, ry: 30, soft: 3 }, color: [255, 228, 160], alpha: .3, reveal: .95, edge: .22, fadeIn: 30, falloff: 1.1, halo: 34, haloTall: 1.2 };
 // 手電筒照的方向：滑鼠在遊戲畫面上就朝滑鼠，不然朝溫特面向的方向
 function flashlightAngle() {
   const p = G.player;
-  if (aimClient && typeof clientToWorld === 'function') { const a = clientToWorld(aimClient.x, aimClient.y); if (Math.hypot(a.x - p.x, a.y - p.y) > 8) return Math.atan2(a.y - (p.y - 10), a.x - p.x); }
+  if (aimClient && typeof clientToWorld === 'function') { const a = clientToWorld(aimClient.x, aimClient.y); if (Math.hypot(a.x - p.x, a.y - p.y) > 8) return Math.atan2(a.y - (p.y + FLASH_BEAM.dy), a.x - p.x); }
   return { left: Math.PI, right: 0, back: -Math.PI / 2, front: Math.PI / 2 }[p.dir] ?? Math.PI / 2;
 }
-// 手電筒的光束（淡淡的白光，畫在黑幕上面，讓人看得出是一道光；js/lighting.js 的 drawDarkness 呼叫）
-function drawFlashlightBeam(ctx) {
-  const l = equipLight().find(x => x.cone); if (!l) return;
+// 光束圖（朝右，亮度 0～1）：每個像素用平滑曲線算，兩側、起點、遠處都自然淡出；只在大小或角度變了才重算
+let flashBeamTex = null;
+function flashBeamTexture(R, half, r0) {
+  const key = [R, half, r0, FLASH_BEAM.edge, FLASH_BEAM.fadeIn, FLASH_BEAM.falloff, FLASH_BEAM.color].join();
+  if (flashBeamTex && flashBeamTex.key === key) return flashBeamTex.canvas;
+  const outer = half + FLASH_BEAM.edge, W = Math.ceil(R), H = Math.ceil(2 * R * Math.sin(Math.min(outer, Math.PI / 2))) + 2;
+  const cv2 = document.createElement('canvas'); cv2.width = W; cv2.height = H;
+  const c2 = cv2.getContext('2d'), img = c2.createImageData(W, H), d = img.data;
+  const [cr, cg, cb] = FLASH_BEAM.color, smooth = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+    const dx = x + .5, dy = y + .5 - H / 2, dist = Math.hypot(dx, dy); if (dist > R) continue;
+    const a = Math.abs(Math.atan2(dy, dx));
+    const side = smooth((outer - a) / (FLASH_BEAM.edge * 2));                 // 兩側：從邊緣往裡慢慢變亮
+    const start = smooth((dist - r0) / FLASH_BEAM.fadeIn);                     // 起點：圓弧狀，從暗慢慢變亮
+    const fall = Math.pow(1 - dist / R, FLASH_BEAM.falloff);                   // 越遠越淡
+    const k = side * start * fall; if (k <= 0) continue;
+    const i = (y * W + x) * 4; d[i] = cr; d[i + 1] = cg; d[i + 2] = cb; d[i + 3] = Math.round(Math.min(1, k) * 255);
+  }
+  c2.putImageData(img, 0, 0);
+  flashBeamTex = { key, canvas: cv2 };
+  return cv2;
+}
+// 這一幀溫特身上的燈（畫面範圍大小的一張圖）：頭燈的圓形光、手電筒的光束＋身邊小光暈，再用 mask（照得到的格子）把牆後面去掉。
+// js/lighting.js 的 drawDarkness 拿它把黑幕挖開；回傳 null＝頭燈、手電筒都沒有
+const beamLayer = { cv: document.createElement('canvas'), mask: document.createElement('canvas') };
+function flashlightBeamLayer(mask) {
+  const lights = equipLight(), l = lights.find(x => x.cone), helmet = lights.find(x => x.helmet);
+  if (!l && !helmet) return null;
+  const p = G.player;
+  const x0 = Math.floor(cam.x) - 2, y0 = Math.floor(cam.y) - 2, W = Math.ceil(viewW()) + 4, H = Math.ceil(viewH()) + 4;
+  const cv2 = beamLayer.cv; if (cv2.width !== W || cv2.height !== H) { cv2.width = W; cv2.height = H; }
+  const c2 = cv2.getContext('2d');
+  c2.setTransform(1, 0, 0, 1, 0, 0); c2.globalCompositeOperation = 'source-over'; c2.clearRect(0, 0, W, H);
+  c2.translate(-x0, -y0);
+  const [cr, cg, cb] = FLASH_BEAM.color, col = a => 'rgba(' + cr + ',' + cg + ',' + cb + ',' + a + ')';
+  // 頭燈：平滑的圓形光（中間全亮，外圈慢慢淡掉）
+  if (helmet) {
+    const hr = helmet.r * HELMET_LIGHT.size, g = c2.createRadialGradient(helmet.x, helmet.y, 0, helmet.x, helmet.y, hr);
+    g.addColorStop(0, col(1)); g.addColorStop(HELMET_LIGHT.core, col(.92)); g.addColorStop(.75, col(.35)); g.addColorStop(1, col(0));
+    c2.fillStyle = g; c2.beginPath(); c2.arc(helmet.x, helmet.y, hr, 0, Math.PI * 2); c2.fill();
+  }
+  if (l) drawFlashlightShape(c2, l, p, col);
+  // 牆後面不亮：照得到的格子（一格一像素）平滑放大後，只留重疊的部分
+  const m = beamLayer.mask; if (m.width !== COLS || m.height !== ROWS) { m.width = COLS; m.height = ROWS; }
+  const mc = m.getContext('2d'), mi = mc.createImageData(COLS, ROWS);
+  for (let i = 0; i < mask.length; i++) mi.data[i * 4 + 3] = mask[i] > 0 ? 255 : 0;
+  mc.putImageData(mi, 0, 0);
+  c2.globalCompositeOperation = 'destination-in'; c2.imageSmoothingEnabled = true;
+  c2.drawImage(m, OX, OY, COLS * CELL, ROWS * CELL);
+  return { cv: cv2, x: x0, y: y0 };
+}
+// 手電筒：身邊的直橢圓小光暈＋光束
+function drawFlashlightShape(c2, l, p, col) {
   const { ang, half } = l.cone, R = l.r * .95;
-  ctx.save(); ctx.globalCompositeOperation = 'screen';
-  const g = ctx.createRadialGradient(l.x, l.y, 4, l.x, l.y, R);
-  g.addColorStop(0, 'rgba(255,250,225,.22)'); g.addColorStop(.6, 'rgba(255,245,210,.08)'); g.addColorStop(1, 'rgba(255,240,200,0)');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.moveTo(l.x, l.y); ctx.arc(l.x, l.y, R, ang - half, ang + half); ctx.closePath(); ctx.fill();
+  const hx = p.x, hy = p.y + FLASH_BEAM.body.cy, hr = FLASH_BEAM.halo;
+  const g = c2.createRadialGradient(hx, hy, 0, hx, hy, hr);
+  g.addColorStop(0, col(.85)); g.addColorStop(.55, col(.45)); g.addColorStop(1, col(0));
+  c2.save(); c2.translate(hx, hy); c2.scale(1, FLASH_BEAM.haloTall); c2.translate(-hx, -hy);   // 拉長成直的橢圓（包住整個人）
+  c2.fillStyle = g; c2.beginPath(); c2.arc(hx, hy, hr, 0, Math.PI * 2); c2.fill(); c2.restore();
+  // 光束
+  const tex = flashBeamTexture(R, half, FLASH_BEAM.r0);
+  c2.save(); c2.translate(l.x, l.y); c2.rotate(ang); c2.drawImage(tex, 0, -tex.height / 2); c2.restore();
+}
+// 頭燈、手電筒在 (x, y) 的畫面亮度（0～1），跟 flashlightBeamLayer 畫出來的形狀一樣；牆後面（beamMask 沒標到的格子）是 0
+function equipLightAt(x, y) {
+  const lights = equipLight(); if (!lights.length || typeof beamMask === 'undefined') return 0;
+  const [c, r] = cellAt(x, y); if (!inGrid(c, r) || !beamMask[r * COLS + c]) return 0;
+  let k = 0;
+  const smooth = t => t <= 0 ? 0 : t >= 1 ? 1 : t * t * (3 - 2 * t);
+  for (const l of lights) {
+    if (l.helmet) {
+      const t = Math.hypot(x - l.x, y - l.y) / (l.r * HELMET_LIGHT.size);
+      k = Math.max(k, t >= 1 ? 0 : t <= HELMET_LIGHT.core ? 1 : 1 - (t - HELMET_LIGHT.core) / (1 - HELMET_LIGHT.core));
+    } else if (l.cone) {
+      const p = G.player, hx = p.x, hy = p.y + FLASH_BEAM.body.cy;
+      const ht = Math.hypot((x - hx) / FLASH_BEAM.halo, (y - hy) / (FLASH_BEAM.halo * FLASH_BEAM.haloTall));
+      if (ht < 1) k = Math.max(k, .85 * (1 - ht));
+      const R = l.r * .95, dx = x - l.x, dy = y - l.y, dist = Math.hypot(dx, dy); if (dist > R) continue;
+      let a = Math.abs(Math.atan2(dy, dx) - l.cone.ang); if (a > Math.PI) a = 2 * Math.PI - a;
+      const outer = l.cone.half + FLASH_BEAM.edge;
+      k = Math.max(k, smooth((outer - a) / (FLASH_BEAM.edge * 2)) * smooth((dist - FLASH_BEAM.r0) / FLASH_BEAM.fadeIn) * Math.pow(1 - dist / R, FLASH_BEAM.falloff));
+    }
+  }
+  return k * FLASH_BEAM.reveal;
+}
+// 暖黃色那層：疊在黑幕上面。溫特身體那塊用「漸層」慢慢淡掉（不是一刀剪掉），才不會看到一圈硬邊
+const beamTint = document.createElement('canvas');
+function drawFlashlightBeam(ctx, beam) {
+  if (!beam) return;
+  const p = G.player, b = FLASH_BEAM.body, W = beam.cv.width, H = beam.cv.height;
+  if (beamTint.width !== W || beamTint.height !== H) { beamTint.width = W; beamTint.height = H; }
+  const t = beamTint.getContext('2d');
+  t.setTransform(1, 0, 0, 1, 0, 0); t.globalCompositeOperation = 'source-over'; t.clearRect(0, 0, W, H);
+  t.drawImage(beam.cv, 0, 0);
+  // 身體：橢圓形的柔邊遮罩（中間全挖、往外慢慢恢復），用圓形漸層再壓扁成橢圓
+  t.globalCompositeOperation = 'destination-out';
+  t.translate(p.x - beam.x, p.y + b.cy - beam.y); t.scale(1, b.ry / b.rx);
+  const R = b.rx * b.soft, g = t.createRadialGradient(0, 0, 0, 0, 0, R);
+  g.addColorStop(0, 'rgba(0,0,0,1)'); g.addColorStop(.45, 'rgba(0,0,0,.9)'); g.addColorStop(1, 'rgba(0,0,0,0)');
+  t.fillStyle = g; t.beginPath(); t.arc(0, 0, R, 0, Math.PI * 2); t.fill();
+  ctx.save(); ctx.globalCompositeOperation = 'screen'; ctx.globalAlpha = FLASH_BEAM.alpha;
+  ctx.drawImage(beamTint, beam.x, beam.y);
   ctx.restore();
 }
 // 武器等級套到實際數值（手槍：傷害、彈匣、裝填；照明彈槍：燃燒秒數、備用彈上限）
@@ -151,7 +254,7 @@ function drawRadioMarks(ctx) {
   const p = G.player, R = v.mark * CELL, pulse = .55 + .3 * Math.sin(performance.now() / 220);
   ctx.save();
   for (const e of G.enemies) {
-    if (e.dead || e.hp <= 0 || isVisible(e.x, e.y) || Math.hypot(e.x - p.x, e.y - p.y) > R) continue;
+    if (e.dead || e.hp <= 0 || enemyVisible(e) || Math.hypot(e.x - p.x, e.y - p.y) > R) continue;
     ctx.globalAlpha = pulse; ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = 1.5;
     const s = 11; ctx.beginPath();   // 紅色準星框
     for (const [dx, dy] of [[-1, -1], [1, -1], [1, 1], [-1, 1]]) { ctx.moveTo(e.x + dx * s, e.y + dy * s - dy * 5); ctx.lineTo(e.x + dx * s, e.y + dy * s); ctx.lineTo(e.x + dx * s - dx * 5, e.y + dy * s); }

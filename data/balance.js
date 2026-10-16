@@ -129,7 +129,7 @@ const BARRIER = {
 // 想暫時關掉黑暗系統：把 enabled 改成 false。
 const LIGHT = {
   enabled: true,
-  darkness: 0.98,    // 黑暗濃度（0～1，越大越黑；留一點點可隱約看到地形輪廓）
+  darkness: 1,       // 黑暗濃度（1＝全黑；光照區仍會正常顯示）
   playerLightOn: false,   // 玩家身上的光暈：先關閉（之後要啟用改成 true）
   playerR: 140,      // 玩家（嚮導）身上的光圈半徑（像素；playerLightOn 為 true 時生效）
   poweredLampR: 250, // 電源控制日光燈：比探照燈 300 像素小

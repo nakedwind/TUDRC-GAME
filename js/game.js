@@ -913,8 +913,23 @@ function startWave() {
   sfx('wave');   // 新一波開始
 }
 
-// ---- 玩家出生點：優先站營地，找不到就從下往上找空地 ----
+// ---- 玩家出生點：基地地圖可指定格子；其他情況優先站營地，再找空地 ----
 function playerSpawnPos() {
+  if (MAP_SAFE && MAP && Array.isArray(MAP.playerSpawn) && MAP.playerSpawn.length === 2) {
+    const [c0, r0] = MAP.playerSpawn.map(Number);
+    if (Number.isInteger(c0) && Number.isInteger(r0) && inGrid(c0, r0)) {
+      const exact = center(c0, r0), exactKey = c0 + ',' + r0;
+      if (!isWall(c0, r0) && !isEntrance(c0, r0) && !G.grid[exactKey] && !playerBlocked(...exact)) return exact;
+      const nearby = [];
+      for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) nearby.push([c, r]);
+      nearby.sort((a, b) => Math.abs(a[0] - c0) + Math.abs(a[1] - r0) - Math.abs(b[0] - c0) - Math.abs(b[1] - r0));
+      for (const [c, r] of nearby) {
+        if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;
+        const pos = center(c, r);
+        if (!playerBlocked(...pos)) return pos;
+      }
+    }
+  }
   const cand = [];
   campCells.forEach(k => cand.push(k.split(',').map(Number)));
   for (let r = ROWS - 1; r >= 0; r--) for (let c = 0; c < COLS; c++) cand.push([c, r]);
@@ -1296,7 +1311,7 @@ function playerShotCheck(p, e, aim, angDiff) {
   const isCore = G.cores.includes(e);
   if (e.dead) return null;
   const box = targetBodyBox(e);
-  const lit = isCore ? (isVisible(e.x, e.y) || isVisible(box.cx, box.cy)) : (isLit(e.x, e.y) || isLit(box.cx, box.cy));
+  const lit = bodyVisible(box, e.x, e.y) || isLit(e.x, e.y) || isLit(box.cx, box.cy);   // 畫面上看得到就打得到
   if (!lit) return null;
   const d = Math.hypot(e.x - p.x, e.y - p.y);
   if (d > PLAYER_ATK.range * CELL) return null;

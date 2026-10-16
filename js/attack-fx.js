@@ -48,6 +48,7 @@ const DMG_MERGE = { time: .35, dist: 26 };
 function flashDmg(text, x, y, color, opts) {
   color = color || '#fff';
   const small = !!(opts && opts.small);   // small：燒傷這類持續傷害，用小字、比較淡
+  if (/^-?\d+(?:\.\d+)?$/.test(String(text))) text = String(Math.round(Number(text)));
   const m = /^-(\d+)$/.exec(text);
   if (m) {
     const n = +m[1];

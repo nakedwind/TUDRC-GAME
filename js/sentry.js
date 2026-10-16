@@ -75,6 +75,30 @@ function placeInHomeArea(a, id) {
   const [c, r] = (free.length ? free : area.cells)[Math.floor(Math.random() * (free.length || area.cells.length))];
   [a.x, a.y] = center(c, r);
 }
+// 指定出生格優先使用；若格子被牆、物件或其他角色佔住，改找最近的可站格。
+function placeAtConfiguredSpawn(a, id) {
+  if (!MAP_SAFE || !MAP) return false;
+  const loc = npcLocation(id);
+  if (!loc || loc.map !== MAP.name || !Array.isArray(loc.spawn) || loc.spawn.length !== 2) return false;
+  const c0 = Number(loc.spawn[0]), r0 = Number(loc.spawn[1]);
+  if (!Number.isInteger(c0) || !Number.isInteger(r0) || !inGrid(c0, r0)) return false;
+  const area = homeAreaOf(id), taken = new Set([...(G.towers || []), ...(G.npcs || [])]
+    .filter(o => o !== a).map(o => cellAt(o.x, o.y).join(',')));
+  const canStand = ([c, r]) => {
+    if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r] || taken.has(c + ',' + r)) return false;
+    const [x, y] = center(c, r);
+    return !sentryBlocked(x, y);
+  };
+  const exact = [c0, r0];
+  if (canStand(exact)) { [a.x, a.y] = center(c0, r0); return true; }
+  let candidates = area ? area.cells.slice() : [];
+  if (!area) for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) candidates.push([c, r]);
+  candidates.sort((a, b) => Math.abs(a[0] - c0) + Math.abs(a[1] - r0) - Math.abs(b[0] - c0) - Math.abs(b[1] - r0));
+  const nearest = candidates.find(canStand);
+  if (!nearest) return false;
+  [a.x, a.y] = center(nearest[0], nearest[1]);
+  return true;
+}
 
 // ---- 基地裡：這個人平時是不是在這張地圖（data/npc-locations.js）----
 function npcHomeHere(id) {
@@ -114,8 +138,9 @@ function spawnSentries() {
     const t = { kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() };
     if (!MAP_SAFE && typeof applySortieBuff === 'function') applySortieBuff(t);   // 出勤補給（js/sortie-supply.js）
     G.towers.push(t);
-    placeInHomeArea(t, type);   // 有平時活動範圍的（希奧妮→研究部）直接在那裡出現
-    if (MAP_SAFE && !homeAreaOf(type)) placeAnywhere(t);   // 基地裡沒有指定活動範圍：整張地圖隨機一個位置
+    const configuredSpawn = placeAtConfiguredSpawn(t, type);
+    if (!configuredSpawn) placeInHomeArea(t, type);   // 未指定出生格時，沿用活動範圍內的隨機出生
+    if (MAP_SAFE && !configuredSpawn && !homeAreaOf(type)) placeAnywhere(t);   // 沒有指定出生格或活動範圍：整張地圖隨機一個位置
   }
 }
 
@@ -145,8 +170,10 @@ function spawnWanderers() {
       blinkWait: 2 + Math.random() * 3, blinkTime: -1,
       say: null, sayWait: 2 + Math.random() * 8,   // 平時對話：倒數到 0 冒一句
     });
-    placeInHomeArea(G.npcs[G.npcs.length - 1], profile.id);   // 諾亞→研究部
-    if (MAP_SAFE && !homeAreaOf(profile.id)) placeAnywhere(G.npcs[G.npcs.length - 1]);   // 基地裡沒有指定活動範圍：整張地圖隨機一個位置
+    const npc = G.npcs[G.npcs.length - 1];
+    const configuredSpawn = placeAtConfiguredSpawn(npc, profile.id);
+    if (!configuredSpawn) placeInHomeArea(npc, profile.id);   // 未指定出生格時，沿用活動範圍內的隨機出生
+    if (MAP_SAFE && !configuredSpawn && !homeAreaOf(profile.id)) placeAnywhere(npc);   // 沒有指定出生格或活動範圍：整張地圖隨機一個位置
   }
 }
 

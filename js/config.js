@@ -11,7 +11,7 @@ const VIEW_W = 1280, VIEW_H = 720;    // 遊戲畫面（相框）大小
 // 畫面縮放：小房間等比例放大；短而寬的地圖放大到畫面高度，左右可由鏡頭捲動。
 // viewW()/viewH()＝相框換算成「世界座標」的大小，鏡頭與黑幕都用它。
 let VIEW_SCALE = 1;
-const VIEW_ZOOM = 1.2;                // 整體畫面再放大倍率（看到的範圍更小）；想調就改這裡
+const VIEW_ZOOM = 1.5;               // 整體畫面再放大倍率（看到的範圍更小）；想調就改這裡
 const viewW = () => VIEW_W / VIEW_SCALE;
 const viewH = () => VIEW_H / VIEW_SCALE;
 const OX = 0, OY = 0;                 // 地圖世界座標的原點

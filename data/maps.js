@@ -5099,11 +5099,11 @@ const MAPS_DEFAULT = [
         "30,30": "tile_interactive_pickup_battery",
         "35,33": "tile_interactive_pickup_battery",
         "13,34": "tile_interactive_pickup_battery",
+        "11,30": "tile_interactive_pickup_battery",
         "24,28": "tile_interactive_pickup_almond_water",
         "29,28": "tile_interactive_storage_locker_key",
         "17,35": "tile_interactive_storage_locker_key",
-        "7,34": "tile_interactive_storage_locker_key",
-        "9,32": "tile_interactive_pickup_battery"
+        "7,34": "tile_interactive_storage_locker_key"
       },
       "object3": {},
       "object4": {}
@@ -7213,6 +7213,8 @@ const MAPS_DEFAULT = [
       "5,5",
       "6,5",
       "7,5",
+      "8,5",
+      "9,5",
       "10,5",
       "11,5",
       "12,5",
@@ -7338,6 +7340,8 @@ const MAPS_DEFAULT = [
       "2,24",
       "0,24",
       "0,31",
+      "1,31",
+      "2,31",
       "3,31",
       "3,30",
       "2,30",
@@ -7422,7 +7426,7 @@ const MAPS_DEFAULT = [
       "22,36"
     ],
     "rules": {
-      "money": 3000,
+      "money": 300,
       "guide": 100,
       "guideRegen": 9,
       "waves": 5,
@@ -7467,10 +7471,6 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "lifeform",
-        "weight": 50
-      },
-      {
-        "id": "hangi_bao",
         "weight": 50
       }
     ]
@@ -12175,16 +12175,14 @@ const MAPS_DEFAULT = [
         "id": "tile_mufxoi3i",
         "c": 60,
         "r": 8,
-        "layer": "object",
-        "ox": 0,
-        "oy": -4
+        "layer": "object"
       },
       {
         "id": "tile_mufxpxnl",
         "c": 61,
         "r": 8,
         "layer": "object",
-        "ox": -4,
+        "ox": 0,
         "oy": -6
       },
       {
@@ -13300,7 +13298,11 @@ const MAPS_DEFAULT = [
       ]
     },
     "coreSpots": [],
-    "coreCount": 1
+    "coreCount": 1,
+    "playerSpawn": [
+      33,
+      11
+    ]
   },
   {
     "id": "map_mua3askw",
@@ -18050,6 +18052,7 @@ const MAPS_DEFAULT = [
         "22,18": "tile_new_bg_floor",
         "21,18": "tile_new_bg_floor",
         "18,19": "tile_new_bg_floor",
+        "17,19": "tile_new_bg_floor",
         "17,18": "tile_new_bg_floor",
         "18,18": "tile_new_bg_floor",
         "19,17": "tile_new_bg_floor",
@@ -18552,7 +18555,12 @@ const MAPS_DEFAULT = [
       "object2": {
         "20,10": "tile_eoc_security_camera"
       },
-      "object3": {},
+      "object3": {
+        "10,19": "tile_restaurant_napkin_holder",
+        "13,19": "tile_restaurant_napkin_holder",
+        "16,19": "tile_restaurant_chopsticks_holder",
+        "17,19": "tile_restaurant_condiment_bottles"
+      },
       "object4": {
         "5,20": "tile_restaurant_napkin_holder",
         "5,19": "tile_restaurant_condiment_bottles",
