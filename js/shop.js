@@ -26,7 +26,7 @@ const BACKROOM_SHOP = {
   stock: [{ id: 'almond-water' }, { id: 'medkit' }, { id: 'battery', price: 20 }],
   sellRate: .5, sellPrice: { battery: 10 },
 };
-const BACKROOM_ONLY = ['almond-water'];   // 只有後室商店買得到（1 樓便利商店不賣）
+const BACKROOM_ONLY = ['almond-water'];   // 只有在後室（戰鬥地圖）裡的店買得到；基地的便利商店、飲料店、販賣機不賣
 let backroomMode = false, backroomTab = 'buy';   // backroomTab：buy 購買／sell 賣出
 const backroomCart = new Map();
 function backroomStock() {
@@ -35,9 +35,10 @@ function backroomStock() {
     return { ...base, price: s.price ?? base.price, kind: base.kind || base.category || 'material' };
   }).filter(Boolean);
 }
+// 在後室（戰鬥地圖）裡的飲料店、販賣機、便利商店也賣杏仁水；基地裡的不賣
 const shopItems = () => backroomMode ? backroomStock()
-  : vendingMode || drinkShopMode ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind))
-  : SUPPLIES.filter(item => !BACKROOM_ONLY.includes(item.id));
+  : vendingMode || drinkShopMode ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind) || (!MAP_SAFE && BACKROOM_ONLY.includes(item.id)))
+  : SUPPLIES.filter(item => !MAP_SAFE || !BACKROOM_ONLY.includes(item.id));
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
 // 賣掉一個能拿多少錢（0＝不能賣：重要物品、回憶碎片這類 noDrop 的、沒有價錢的）
 function sellPriceOf(item) {
