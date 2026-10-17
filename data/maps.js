@@ -10280,7 +10280,7 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "bird_head",
-        "weight": 30
+        "weight": 40
       },
       {
         "id": "pearl_kid",
@@ -10288,7 +10288,7 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "lifeform",
-        "weight": 50
+        "weight": 30
       },
       {
         "id": "hangi_bao",
