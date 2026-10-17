@@ -602,6 +602,7 @@ function draw() {
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) { const t = missionTableUsable(); drawInteractPrompt(t.x, t.top, t.label || '作戰桌'); }   // 作戰桌／作戰螢幕（js/missions.js）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) { const v = vendingNearPlayer(); drawInteractPrompt(v.x, v.top, '販賣機'); }   // 販賣機（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) { const s = drinkShopNearPlayer(); drawInteractPrompt(s.x, s.top, '飲料店'); }   // 飲料店（js/shop.js）
+    else if (typeof backroomShopNearPlayer === 'function' && backroomShopNearPlayer()) { const s = backroomShopNearPlayer(); drawInteractPrompt(s.x, s.top, '後室商店'); }   // 後室商店（js/shop.js）
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, '商店'); }   // HOME Mart 結帳櫃台
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
@@ -957,6 +958,7 @@ function draw() {
   for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);
   drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
+  drawEquipmentGroundDrops(ctx);
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）

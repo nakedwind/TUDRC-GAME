@@ -113,7 +113,7 @@ function updateSmilers(dt) {
     v.darkT = (v.darkT || 0) + dt;
     if (v.darkT < SMILER.grace || v.smilerCd > 0 || smilers.some(s => s.victim === v)) continue;
     const rate = Math.min(SMILER.biteMax, SMILER.biteRate + (v.darkT - SMILER.grace) * SMILER.biteRamp);
-    const ward = v === G.player && typeof equipSmilerMul === 'function' ? equipSmilerMul() : 1;   // 順順宮御守：溫特比較不容易被咬（js/equipment.js）
+    const ward = v === G.player && typeof equipSmilerMul === 'function' ? equipSmilerMul() : 1;   // 順順宮平安符：溫特比較不容易被咬（js/equipment.js）
     if (Math.random() < rate * ward * dt) startSmilerBite(v);
   }
   // ---- 動畫 ----

@@ -412,6 +412,7 @@ window.addEventListener('keydown', e => {
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) openMissionBoard();   // 作戰桌／作戰螢幕（js/missions.js；旁邊的椅子或人更近時讓給它們）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) openVendingMachine();   // 販賣機：只賣飲料（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) openDrinkShop();   // 飲料店：只賣飲料（js/shop.js）
+    else if (typeof backroomShopNearPlayer === 'function' && backroomShopNearPlayer()) openBackroomShop();   // 後室商店：杏仁水、賣東西（js/shop.js）
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();
@@ -907,8 +908,12 @@ function newGame() {
     grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [], acidPools: [], mapDestroyed: new Set(),
     recentMonsterSpawns: [],
     selType: null,
+    battle: { kills: {}, crystals: 0, cores: 0, got: [], spent: 0, time: 0 },   // 這一局的統計（結算畫面用，js/battle-result.js）
     running: false, over: false, won: false, damageVignetteT: 0, cameraShakeT: 0,
   };
+  // 錢：基地裡用錢包的錢；戰鬥地圖用這張地圖的作戰經費（上面的 START.money，來自地圖規則）
+  if (MAP_SAFE && !window.TEST_MODE && typeof walletGet === 'function') G.money = walletGet();
+  if (G.battle && !MAP_SAFE) G.battle.budget = G.money;
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
   setupStorageBoxWalls();
@@ -1547,12 +1552,14 @@ function frame(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
-  if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
+  const introOpen = typeof itemIntroOpen !== 'undefined' && itemIntroOpen;   // 第一次拿到新東西的說明視窗（js/item-intro.js）
+  if (!paused && !introOpen && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) {
+  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
+    if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
   }
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
@@ -1837,11 +1844,11 @@ function update(dt) {
   }
   if (typeof fishHeadArmor === 'function') fishHeadArmor();
   if (typeof pearlShellArmor === 'function') pearlShellArmor();   // 珍珠小童：被打就閉殼、閉著防禦變高（js/pearl-kid.js）   // 魚頭君：正面減傷、斜後加傷（js/fish-head.js）
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; G.money += e.reward; earnCrystals(e.crystals ?? 3); onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
-    earnCrystals(core.reward); flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    earnCrystals(core.reward); if (G.battle) G.battle.cores++; flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -1950,6 +1957,7 @@ function updateHUD() {
   if (typeof updateTeamButton === 'function') updateTeamButton();   // 安全場景才顯示「出勤編隊」按鈕
   if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
+  if (MAP_SAFE && !window.TEST_MODE && typeof walletSet === 'function' && walletGet() !== Math.floor(G.money)) walletSet(G.money);   // 基地裡花錢：存回錢包
   document.getElementById('safeCornerButtons').classList.add('hidden');   // 右下角的背包按鈕不用了：資訊條上就有背包
   renderQuickSupplies();
   document.getElementById('crystals').textContent = training.crystals;
@@ -1995,7 +2003,7 @@ function showStart() {
     '後室<b>一片漆黑</b>——只有營地和你身上的燈是亮的。<br><b>哨兵已在基地待命</b>：點擊哨兵可下指令（巡邏／指派位置／疏導）。<br>異質體會成群出現在<b>不同的黑暗角落</b>並四處遊蕩；進入感知範圍後會優先追擊哨兵，若被建築擋住就會先破壞建築。<br>放置<b>探照燈</b>與防禦設施控制戰場，在哨兵<b>暴走</b>前記得<b>疏導</b>。破壞所有異質核心並清除異質體即可控制 Y 區。<br>戰鬥中按 <b>P</b> 可以暫停。',
     '開始防禦');
 }
-function winOverlay() { if (typeof missionWinOverlay === 'function' && missionWinOverlay()) return; showOverlay('✅ Y 區已控制', '所有異質核心與殘存異質體已清除！異質結晶已儲存，可用於哨兵培養。', '再玩一次'); }
+function winOverlay() { if (typeof missionWinOverlay === 'function' && missionWinOverlay()) { if (typeof appendBattleResult === 'function') appendBattleResult(); return; } showOverlay('✅ Y 區已控制', '所有異質核心與殘存異質體已清除！異質結晶已儲存，可用於哨兵培養。', '再玩一次'); if (typeof appendBattleResult === 'function') appendBattleResult(); }
 // 失敗原因 → 標題與提示（player＝部隊長倒下、base＝地圖上的營地物件被摧毀）
 const LOSE_TEXT = {
   player: ['💀 部隊長倒下', '溫特失去了戰鬥能力。<br>別離哨兵太遠，被異質體包圍時先退回亮處或營地。'],

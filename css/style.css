@@ -1889,3 +1889,48 @@ canvas.cursor-pressed {
 #buildToolbar .build-quick-slot[data-build-id="wirefence"] img { top:-11px; }
 #buildToolbar .build-quick-slot[data-build-id="deco_oil_drum"] img { width:66px; height:66px; top:-13px; }
 .gm-demolish-icon { width: 12px; height: 14px; vertical-align: -2px; image-rendering: pixelated; }
+
+/* ===== 第一次拿到新東西：說明視窗（js/item-intro.js）===== */
+#itemIntro { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(4,7,11,.55); backdrop-filter: blur(3px); animation: item-intro-fade .18s ease-out; }
+#itemIntro.hidden { display: none; }
+.item-intro-card { width: min(340px, calc(100% - 32px)); padding: 22px 22px 18px; border: 1px solid rgba(255,212,121,.55); border-radius: 16px; text-align: center; color: #e8eef3;
+  background: linear-gradient(170deg, rgba(36,42,50,.97), rgba(14,19,26,.98)); box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(255,212,121,.15);
+  animation: item-intro-pop .32s cubic-bezier(.2,1.4,.4,1); font-family: "Microsoft JhengHei", sans-serif; }
+.item-intro-new { display: block; color: #ffd479; font-size: 12px; letter-spacing: .2em; }
+.item-intro-image { display: grid; place-items: center; width: 120px; height: 120px; margin: 12px auto 8px; border-radius: 16px; background: radial-gradient(circle at 50% 45%, rgba(255,212,121,.18), rgba(7,10,14,.5) 70%); }
+.item-intro-image img { max-width: 96px; max-height: 96px; object-fit: contain; image-rendering: pixelated; }
+.item-intro-image i { font-style: normal; font-size: 56px; }
+.item-intro-card h2 { margin: 4px 0 6px; font-size: 22px; color: #fff8e7; }
+.item-intro-tag { display: inline-block; padding: 2px 10px; border-radius: 99px; background: rgba(143,211,255,.14); color: #9fdcff; font-size: 12px; }
+.item-intro-card p { margin: 10px 0 0; color: #c3ccd8; font-size: 14px; line-height: 1.65; text-align: left; }
+.item-intro-card p.item-intro-stat { color: #a9d8c9; font-size: 13px; }
+.item-intro-ok { margin-top: 16px; padding: 9px 28px; border: 1px solid #e9bd62; border-radius: 10px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 15px "Microsoft JhengHei", sans-serif; }
+.item-intro-ok kbd { margin-left: 6px; padding: 0 5px; border: 1px solid rgba(59,35,4,.35); border-radius: 4px; font: 700 10px Consolas, monospace; }
+@keyframes item-intro-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes item-intro-pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+/* ===== 結算畫面（js/battle-result.js）===== */
+.battle-result { margin: 14px auto 2px; max-width: 460px; text-align: left; display: grid; gap: 10px; }
+.br-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.br-stat { padding: 8px 6px; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; background: rgba(20,28,38,.7); text-align: center; }
+.br-stat small { display: block; color: #8f9aa7; font-size: 11px; }
+.br-stat b { display: block; color: #fff8e7; font-size: 18px; }
+.br-stat.crystal b { color: #c9a2ff; } .br-stat.money b { color: #ffd479; }
+.br-block { padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(20,28,38,.55); }
+.br-block h4 { margin: 0 0 6px; color: #ffe3a1; font-size: 13px; }
+.br-list { display: flex; flex-wrap: wrap; gap: 6px; }
+.br-chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 99px; background: rgba(255,255,255,.06); color: #dbe4ec; font-size: 12px; }
+.br-chip img { width: 18px; height: 18px; object-fit: contain; image-rendering: pixelated; }
+.br-chip em { color: #ffd479; font-style: normal; }
+.br-squad { display: grid; gap: 4px; }
+.br-member { display: grid; grid-template-columns: 70px 1fr 40px; align-items: center; gap: 8px; font-size: 12px; color: #dbe4ec; }
+.br-member i { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.br-member i u { display: block; height: 100%; background: #63d7aa; }
+.br-member.down { color: #ff8f8f; } .br-member.down i u { background: #ff6363; }
+.br-empty { color: #7f8a96; font-size: 12px; }
+/* 結算畫面內容多：卡片可以捲動，下面的按鈕永遠看得到 */
+#overlay .overlay-card { max-height: calc(100% - 110px); overflow-y: auto; scrollbar-color: #4f6070 transparent; flex-shrink: 1; min-height: 0; }
+
+/* 後室商店：購買／賣出分頁，賣出按鈕綠色 */
+#supplyShop.backroom .supply-shop-tabs:not(.backroom-tabs) { display: none; }
+#supplyShop .shop-item.sell .sell-btn { border-color: #6fcf97; background: linear-gradient(180deg, #a8efc4, #5fbf86); color: #0f3a22; }

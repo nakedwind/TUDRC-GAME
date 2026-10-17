@@ -5,7 +5,7 @@
 
 // ---- 起始資源與嚮導能量 ----
 const START = {
-  money: 150,      // 起始資源
+  money: 3000,     // 作戰經費（每張戰鬥地圖可以在地圖編輯器的規則裡改）
   guide: 100,      // 嚮導能量（用來疏導哨兵）
   guideMax: 100,   // 嚮導能量上限
   guideRegen: 9,   // 嚮導能量每秒回復（目前停用：SP 只能靠杏仁水恢復，見 js/sanity.js 的 SANITY.autoRegen）

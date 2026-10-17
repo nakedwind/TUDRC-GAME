@@ -24,6 +24,8 @@ function tryGunFind(x, y) {
   if (missing.length && Math.random() < GUN_FINDS.gun) {
     const id = missing[Math.floor(Math.random() * missing.length)], w = WEAPON_UPGRADES[id], st = GUN_FINDS.start[id];
     equipState.weapons[id] = 1; equipState.gunAmmo[id] = { mag: st.mag, reserve: st.reserve }; saveEquipment();
+    if (typeof itemIntroForWeapon === 'function') itemIntroForWeapon(id);   // 第一次拿到：跳說明（js/item-intro.js）
+    if (typeof battleGot === 'function') battleGot(w.name, w.image, 1);
     if (!equipState.loadout.sub) { equipState.loadout.sub = id; saveEquipment(); }   // 副武器格空著就直接裝上
     systemNotice('🎁 在置物箱裡找到「' + w.name + '」！' + (weaponInLoadout(id) ? '已裝在副武器，按 2 或滾輪切換' : '打開背包（B）可以換成主武器或副武器'));
     flash(w.icon + ' ' + w.name, x, y - 40, '#ffd479', 2.5);

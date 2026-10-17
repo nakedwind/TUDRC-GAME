@@ -44,6 +44,7 @@ function storagePropEntries(){
   for(const [layer,tiles] of Object.entries(MAP.layers||{})) for(const [key,id] of Object.entries(tiles)){
     const [c,r]=key.split(',').map(Number);add(id,c,r,layer);
   }
+  for (const drop of G?.equipmentDrops || []) entries.push({ kind:'equipment-drop', drop, x:drop.x, y:drop.y, top:drop.y-28 });
   return entries;
 }
 function storagePropNearPlayer(){
@@ -56,6 +57,7 @@ function storagePropNearPlayer(){
   return nearest;
 }
 function storagePropPrompt(prop){
+  if(prop.kind==='equipment-drop')return '拾取'+(equipDef(prop.drop.id)?.name||'裝備');
   if(isWorldPickup(prop.kind))return '拾取';
   if(prop.kind==='power')return mapPowerIsOn()?'關閉電源':'開啟電源';
   if(prop.open)return '查看置物箱';
@@ -63,7 +65,11 @@ function storagePropPrompt(prop){
 }
 function useStoragePropNearPlayer(){
   const prop=storagePropNearPlayer();if(!prop)return false;
-  if(prop.kind==='power'){
+  if(prop.kind==='equipment-drop'){
+    if(grantEquipment(prop.drop.id,'拾取了'))sfx('itemPickup');
+    G.equipmentDrops=(G.equipmentDrops||[]).filter(drop=>drop!==prop.drop);
+    updateHUD();saveGame();
+  }else if(prop.kind==='power'){
     toggleMapPower();sfx('powerOn');systemNotice(mapPowerIsOn()?'電源已開啟':'電源已關閉');
   }else if(isWorldPickup(prop.kind)){
     const loot=WORLD_PICKUPS[prop.kind];
@@ -142,6 +148,8 @@ function drawWorldPickupSparkles(ctx){
 // 固定在遊戲畫面中間偏右：拾取後才揭曉圖片與名稱，顯示三秒。
 function showItemPickupNotice(id,amount=1){
   const item=typeof id==='string'?itemById(id):id,box=document.getElementById('itemPickupNotices');
+  if(typeof id==='string'&&typeof itemIntroForItem==='function')itemIntroForItem(id);   // 第一次拿到：跳說明（js/item-intro.js）
+  if(item&&typeof battleGot==='function')battleGot(item.name,item.image,amount);   // 結算畫面的「本次取得」
   if(!item||!box)return;
   const notice=document.createElement('div');notice.className='item-pickup-notice';
   const image=document.createElement('img');image.src=item.image;image.alt='';

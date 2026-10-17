@@ -146,6 +146,13 @@ function updateOre(dt) {
   }
 }
 
+// 怪物死掉時掉一顆碎片（value＝這顆值多少碎片），從屍體的位置彈出來落在地上，溫特靠近就會吸過來
+function dropShard(x, y, value) {
+  if (!G || !value) return;
+  G.oreShards = G.oreShards || [];
+  const a = Math.random() * Math.PI * 2, sp = 20 + Math.random() * 40;
+  G.oreShards.push({ x, y, z: 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7, vz: 140 + Math.random() * 60, value, t: 0, spin: Math.random() * 6 });
+}
 // 溫特開槍打中礦物（js/game.js 呼叫）：累積傷害，夠了就碎掉
 function pistolHitOre(o, dmg) {
   if (!o || !o.ore || o.hp <= 0 || !G.obstacles.includes(o)) return;

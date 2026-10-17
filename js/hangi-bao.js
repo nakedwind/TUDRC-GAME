@@ -119,7 +119,7 @@ function hitHangiCapsAt(x, y, R) {
 function openHangiCap(cap) {
   cap.state = 'open'; cap.t = 0;
   if (typeof questEvent === 'function') questEvent('openCap');   // 支線進度（js/quests.js）
-  if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮御守（js/equipment.js）
+  if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮平安符（js/equipment.js）
   const key = cap.c + ',' + cap.r;
   if (G.grid[key] && G.grid[key].cap === cap) delete G.grid[key];   // 打開後就不擋路了（夯吉寶才跑得出來）
   if (typeof sfxAt === 'function') sfxAt('hangiPopOut', cap.x, cap.y, .9, 'hangi-cap');   // 夯吉寶衝出來的聲音

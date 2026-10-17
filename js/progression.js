@@ -21,6 +21,7 @@ function saveTraining() {
 }
 function earnCrystals(amount) {
   training.crystals += Math.max(0, Math.floor(amount || 0));
+  if (typeof G !== 'undefined' && G && G.battle && !MAP_SAFE) G.battle.crystals += Math.max(0, Math.floor(amount || 0));   // 結算畫面
   saveTraining();
   if (typeof isSquadPanelOpen === 'function' && isSquadPanelOpen()) renderSquadPanel();
 }
@@ -43,3 +44,24 @@ function upgradeSentry(type) {
   return true;
 }
 // 異質核心（生成、甦醒、召喚、繪製、碎裂）在 js/anomalous-core.js
+
+// ===== 錢包：基地裡的錢（存在瀏覽器）=====
+// 出勤時：戰鬥地圖給「作戰經費」（地圖編輯器的規則 money，預設 3000），打怪不會加錢。
+// 回到安全區（基地）時：作戰經費剩下的錢加進錢包。基地裡（商店、販賣機）花的是錢包的錢。
+const WALLET_KEY = 'tudrc_wallet_v1', WALLET_START = 300;   // 第一次玩時錢包有多少
+let wallet = (() => { try { const v = Number(localStorage.getItem(WALLET_KEY)); return localStorage.getItem(WALLET_KEY) == null ? WALLET_START : Math.max(0, Math.floor(v) || 0); } catch (_) { return WALLET_START; } })();
+function walletGet() { return wallet; }
+function walletSet(n) {
+  wallet = Math.max(0, Math.floor(Number(n) || 0));
+  try { localStorage.setItem(WALLET_KEY, String(wallet)); } catch (_) {}
+}
+// 離開戰鬥地圖時（換地圖之前呼叫）：剩下的作戰經費帶回錢包
+function settleSortieMoney() {
+  if (typeof G === 'undefined' || !G || MAP_SAFE || G.moneySettled || window.TEST_MODE) return;
+  if (G.phase === 'ready') return;   // 還沒開始作戰（只是載入地圖）：不算
+  G.moneySettled = true;
+  const left = Math.max(0, Math.floor(G.money || 0));
+  if (!left) return;
+  walletSet(wallet + left);
+  setTimeout(() => { if (typeof systemNotice === 'function') systemNotice('作戰經費剩下 $' + left + '，已帶回基地'); }, 900);
+}

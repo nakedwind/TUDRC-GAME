@@ -166,6 +166,7 @@ function pickMap() {
   return list[MAP_INDEX] || list[0] || null;
 }
 function switchMap(i) {                 // 切換到第 i 張並重新載入地圖
+  if (typeof settleSortieMoney === 'function') settleSortieMoney();   // 離開戰鬥地圖：剩下的作戰經費帶回基地（js/progression.js）
   const list = mapList();
   if (i >= 0 && i < list.length) { MAP_INDEX = i; initMap(); }
 }

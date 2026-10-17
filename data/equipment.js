@@ -61,7 +61,7 @@ const EQUIPMENT = [
   { id: 'adrenaline', name: '腎上腺素注射器', kind: 'acc', icon: '💉', image: 'images/裝備/adrenaline-injector.png', source: 'field', where: '打倒鳥頭人時有機會掉落', cost: [0, 120, 200], active: 'J',
     desc: '按 J 暫時加速並減傷，結束後短暫減速；需冷卻。',
     stat: lv => '持續 ' + lv.dur + ' 秒・副作用 ' + lv.side + ' 秒', levels: [{ dur: 6, side: 4 }, { dur: 8, side: 2.5 }, { dur: 10, side: 1 }] },
-  { id: 'charm', name: '順順宮御守', kind: 'acc', icon: '🧧', image: 'images/裝備/lucky-charm.png', source: 'field', where: '偶爾從順順宮帽裡掉出來', cost: [0, 120, 200],
+  { id: 'charm', name: '順順宮平安符', kind: 'acc', icon: '🧧', image: 'images/裝備/lucky-charm.png', source: 'field', where: '偶爾從順順宮帽裡掉出來', cost: [0, 120, 200],
     desc: '降低暗處被 Smiler 咬中的機率。',
     stat: lv => '在黑暗中被 Smiler 咬的機率 −' + Math.round(lv.ward * 100) + '%', levels: [{ ward: .4 }, { ward: .55 }, { ward: .7 }] },
   { id: 'detector', name: '異質探測器', kind: 'acc', icon: '📡', image: 'images/裝備/handheld-radio.png', source: 'field', where: '打碎異質核心時有機會拿到', cost: [0, 120, 200],

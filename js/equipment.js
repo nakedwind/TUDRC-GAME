@@ -4,7 +4,7 @@
 //  ・照明：照明頭盔（頭部，身邊一小圈光）、高亮度手電筒（隨身物品，朝滑鼠方向的扇形光，要電池）。
 //  ・主動裝備：急救包（H）、腎上腺素注射器（J），下方資訊條也有按鈕。
 //  ・找諾亞對話 →「🔧 開發工坊」：用異質碎片開發新裝備、升級裝備和武器。
-//  ・特殊裝備（順順宮御守、異質探測器、杏仁水保溫瓶、腎上腺素注射器）只能在戰鬥區域拿到。
+//  ・特殊裝備（順順宮平安符、異質探測器、杏仁水保溫瓶、腎上腺素注射器）只能在戰鬥區域拿到。
 //  ・資料、數值在 data/equipment.js；進度存在瀏覽器（localStorage）。
 // ============================================================
 const EQUIP_STORE = 'tudrc_equipment_v1';
@@ -59,7 +59,7 @@ const equipAcidMul = () => { const v = equipLv('mask'); return v ? 1 - v.filter 
 const equipSootheCost = c => { const v = equipLv('bracelet'); return v ? Math.round(c * (1 - v.save)) : c; };   // 共感手環：疏導花的 SP
 const equipAlmondMul = () => { const v = equipLv('thermos'); return v ? 1 + v.bonus : 1; };   // 杏仁水保溫瓶
 const equipSpeedMul = () => { const v = equipLv('sneakers'); return (v ? 1 + v.speed : 1) * adrenalineSpeedMul(); };   // 輕量跑鞋、腎上腺素
-const equipSmilerMul = () => { const v = equipLv('charm'); return v ? 1 - v.ward : 1; };      // 順順宮御守：被 Smiler 咬的機率
+const equipSmilerMul = () => { const v = equipLv('charm'); return v ? 1 - v.ward : 1; };      // 順順宮平安符：被 Smiler 咬的機率
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
 const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && !MAP_SAFE ? h.fear : 0)); };   // 照明頭盔也算
 const flashlightOn = () => !!(equipLv('headlamp') && !MAP_SAFE && equipState.battery > 0);
@@ -336,6 +336,8 @@ function grantEquipment(id, how) {
   if (free) equipState.equipped[free.id] = id;
   saveEquipment();
   systemNotice('🎁 ' + how + '「' + def.name + '」' + (free ? '，已經裝備上了' : '，到背包換裝'));
+  if (typeof itemIntroForEquipment === 'function') itemIntroForEquipment(id);   // 第一次拿到：跳說明（js/item-intro.js）
+  if (typeof battleGot === 'function' && !MAP_SAFE) battleGot(def.name, def.image, 1);
   SFX.play('favorUp', .8, 'equip-get');
   if (typeof backpackOpen !== 'undefined' && backpackOpen) renderBackpack();
   return true;
@@ -343,7 +345,26 @@ function grantEquipment(id, how) {
 // 戰鬥區域掉落（順順宮帽打開、異質核心碎掉時呼叫）
 function tryEquipDrop(id, x, y) {
   if (MAP_SAFE || equipState.owned[id] || Math.random() >= (EQUIP_DROPS[id] || 0)) return;
+  if (id === 'charm') {
+    if (!G.equipmentDrops) G.equipmentDrops = [];
+    if (G.equipmentDrops.some(drop => drop.id === id)) return;
+    G.equipmentDrops.push({ id, x, y });
+    flash('順順宮平安符掉落了', x, y - 40, '#ffd479', 2.5);
+    return;
+  }
   if (grantEquipment(id, '撿到了特殊裝備') && typeof flash === 'function') flash(equipDef(id).icon + ' ' + equipDef(id).name, x, y - 40, '#ffd479', 2.5);
+}
+function drawEquipmentGroundDrops(ctx) {
+  for (const drop of G.equipmentDrops || []) {
+    if (!isLit(drop.x, drop.y)) continue;
+    const def = equipDef(drop.id); if (!def) continue;
+    const img = tileImage({ id: '__ground-equipment-' + drop.id, file: def.image });
+    ctx.save(); ctx.imageSmoothingEnabled = false;
+    ctx.shadowColor = '#ffd479'; ctx.shadowBlur = 8;
+    if (img) ctx.drawImage(img, drop.x - 15, drop.y - 28, 30, 30);
+    else { ctx.fillStyle = '#ffd479'; ctx.font = '22px sans-serif'; ctx.fillText(def.icon, drop.x - 11, drop.y); }
+    ctx.restore();
+  }
 }
 
 // ---- 背包左邊的「部隊長裝備」----

@@ -10,10 +10,11 @@
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
   let resumeScene = null;
+  window.TEST_MODE = false;
   try {
     const request = sessionStorage.getItem(REQUEST);
     const testActive = sessionStorage.getItem('tudrc-test-mode-v1') === '1';
-    if ((testActive && request && request !== 'test') || (!testActive && localStorage.getItem('tudrc-test-active-v1'))) {
+    if ((testActive && request !== 'test') || (!testActive && localStorage.getItem('tudrc-test-active-v1'))) {
       const normal = JSON.parse(localStorage.getItem('tudrc-before-test-v1') || 'null');
       if (!normal?.values) throw new Error('找不到測試前的進度備份');
       progressKeys.forEach(key => {
@@ -32,7 +33,7 @@
       localStorage.setItem('tudrc-test-active-v1', '1');
       sessionStorage.removeItem(REQUEST); startedFresh = true;
     } else if (request === 'test-exit') {
-      sessionStorage.removeItem(REQUEST); startedFresh = true;
+      sessionStorage.removeItem(REQUEST);
     }
     window.TEST_MODE = sessionStorage.getItem('tudrc-test-mode-v1') === '1';
     if (request === 'new' || request === 'restore' || /^slot:[1-6]$/.test(request || '')) {
@@ -68,6 +69,10 @@
     } catch (error) { alert('無法重新開始：' + error.message); }
   }
   window.addEventListener('DOMContentLoaded', () => {
+    if (!startedFresh && !(typeof PREVIEW !== 'undefined' && PREVIEW)) {
+      const continueButton = document.getElementById('ov-btn');
+      if (continueButton) continueButton.textContent = localStorage.getItem('tudrc-save-v1') ? '繼續遊戲' : '開始遊戲';
+    }
     document.querySelectorAll('[data-new-game]').forEach(button => button.addEventListener('click', () => requestRestart('new')));
     document.querySelectorAll('[data-test-mode]').forEach(button => button.addEventListener('click', () => {
       try { sessionStorage.setItem(REQUEST, 'test'); location.reload(); }
@@ -87,7 +92,7 @@
       restore.addEventListener('click', () => requestRestart('restore'));
     }
     // 等所有載入存檔的 DOMContentLoaded 處理完成後才進場。
-    if (startedFresh || window.TEST_MODE) setTimeout(() => {
+    if (startedFresh) setTimeout(() => {
       if (window.TEST_MODE) {
         for (const item of [...SUPPLIES, ...ITEMS]) supplyInventory.set(item.id, Math.max(99, supplyInventory.get(item.id) || 0));
         for (const def of EQUIPMENT) equipState.owned[def.id] = def.levels.length;

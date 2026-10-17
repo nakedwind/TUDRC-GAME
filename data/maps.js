@@ -2796,6 +2796,14 @@ const TILES_CUSTOM = [
     "h": 3
   },
   {
+    "id": "tile_cvs_checkout_counter_backroom",
+    "name": "後室便利商店櫃台（後室商店）",
+    "role": "floor",
+    "file": "images/convenience-store/cvs-checkout-counter.png",
+    "w": 5,
+    "h": 3
+  },
+  {
     "id": "tile_cvs_counter_extension",
     "name": "櫃台（延伸段）",
     "role": "floor",
@@ -5529,9 +5537,7 @@ const MAPS_DEFAULT = [
         "31,56": "tile_decor_gasstove02",
         "31,55": "tile_decor_foldingchair"
       },
-      "object3": {
-        "15,33": "tile_interactive_power_switch_off"
-      },
+      "object3": {},
       "object4": {}
     },
     "stamps": [
@@ -7426,7 +7432,8 @@ const MAPS_DEFAULT = [
         "id": "tile_street_drink_shop_small",
         "c": 22,
         "r": 19,
-        "layer": "top"
+        "layer": "object2",
+        "sortDepth": 2.5
       },
       {
         "id": "tile_mr4cyy36",
@@ -7872,7 +7879,8 @@ const MAPS_DEFAULT = [
         "id": "tile_mrt_exit_2_sealed",
         "c": 6,
         "r": 1,
-        "layer": "object"
+        "layer": "object",
+        "sortDepth": 5.25
       },
       {
         "id": "tile_mr4cyq54",
@@ -7960,7 +7968,8 @@ const MAPS_DEFAULT = [
         "layer": "object3",
         "fx": true,
         "ox": -18,
-        "oy": -28
+        "oy": -28,
+        "sortDepth": 2.5
       },
       {
         "id": "tile_street_utility_box_painted",
@@ -7969,7 +7978,8 @@ const MAPS_DEFAULT = [
         "layer": "object3",
         "fx": true,
         "ox": 8,
-        "oy": -16
+        "oy": -16,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_obstacle_ore_small",
@@ -7984,7 +7994,8 @@ const MAPS_DEFAULT = [
         "r": 16,
         "layer": "object",
         "ox": 0,
-        "oy": -4
+        "oy": -4,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_mr4cyu5g",
@@ -8029,6 +8040,14 @@ const MAPS_DEFAULT = [
         "c": 32,
         "r": 18,
         "layer": "object"
+      },
+      {
+        "id": "tile_interactive_power_switch_off",
+        "c": 15,
+        "r": 33,
+        "layer": "object3",
+        "ox": 0,
+        "oy": 14
       }
     ],
     "solid": [
@@ -8743,7 +8762,6 @@ const MAPS_DEFAULT = [
       "35,39",
       "36,39",
       "37,39",
-      "38,39",
       "39,39",
       "40,39",
       "41,39",
@@ -8780,7 +8798,6 @@ const MAPS_DEFAULT = [
       "35,46",
       "21,46",
       "36,46",
-      "2,46",
       "3,46",
       "5,46",
       "6,46",
