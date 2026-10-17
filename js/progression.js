@@ -1,22 +1,20 @@
-/* 異質結晶與哨兵養成。獨立存檔，不改動地圖與編隊存檔。 */
+/* 異質碎片與哨兵養成（技能樹在 js/skills.js、data/skills.js）。獨立存檔，不改動地圖與編隊存檔。 */
 const TRAINING_KEY = 'sentinel-crystals-v1';
-const training = { crystals: 0, levels: {} };
+const training = { crystals: 0, skills: {} };
 try {
   const saved = JSON.parse(localStorage.getItem(TRAINING_KEY) || '{}');
   training.crystals = Number.isSafeInteger(saved.crystals) && saved.crystals >= 0 ? saved.crystals : 0;
-  for (const key of Object.keys(TYPES)) training.levels[key] = Math.max(1, Math.min(30, Math.floor(Number(saved.levels?.[key]) || 1)));
-} catch (_) {}
-const trainingBase = Object.fromEntries(Object.entries(TYPES).map(([key,s]) => [key,{hp:s.hp,dmg:s.dmg}]));
-function applyTraining() {
-  for (const [key, base] of Object.entries(trainingBase)) {
-    const n = (training.levels[key] || 1)-1;
-    TYPES[key].hp = Math.round(base.hp*(1+n*.10));
-    TYPES[key].dmg = Math.round(base.dmg*(1+n*.08));
+  if (saved.skills && typeof saved.skills === 'object') training.skills = saved.skills;
+  // 舊的升等系統已經拿掉：之前升等花掉的碎片全部退回（Lv.n 花了 30×(1+2+…+(n−1))）
+  if (saved.levels && !saved.levelsRefunded) {
+    let refund = 0;
+    for (const lv of Object.values(saved.levels)) { const n = Math.max(1, Math.min(30, Math.floor(Number(lv) || 1))); refund += 30 * (n - 1) * n / 2; }
+    training.crystals += refund;
+    if (refund) setTimeout(() => { if (typeof systemNotice === 'function') systemNotice('升等系統改成技能樹，之前升等花的 ◆ ' + refund + ' 已退回'); }, 1500);
   }
-}
-applyTraining();
+} catch (_) {}
 function saveTraining() {
-  try { localStorage.setItem(TRAINING_KEY,JSON.stringify(training)); }
+  try { localStorage.setItem(TRAINING_KEY,JSON.stringify({ ...training, levelsRefunded: true })); }
   catch (_) {}
 }
 function earnCrystals(amount) {
@@ -24,24 +22,6 @@ function earnCrystals(amount) {
   if (typeof G !== 'undefined' && G && G.battle && !MAP_SAFE) G.battle.crystals += Math.max(0, Math.floor(amount || 0));   // 結算畫面
   saveTraining();
   if (typeof isSquadPanelOpen === 'function' && isSquadPanelOpen()) renderSquadPanel();
-}
-function sentryLevel(type) { return training.levels[type] || 1; }
-function sentryUpgradeCost(type) { return 30 * sentryLevel(type); }
-function canUpgradeSentry(type) {
-  const spec = TYPES[type];
-  return !!spec && typeof MAP_SAFE !== 'undefined' && MAP_SAFE && sentryLevel(type) < 30 && training.crystals >= sentryUpgradeCost(type);
-}
-function upgradeSentry(type) {
-  if (!canUpgradeSentry(type)) return false;
-  const cost = sentryUpgradeCost(type);
-  training.crystals -= cost;
-  training.levels[type] = sentryLevel(type) + 1;
-  applyTraining(); saveTraining();
-  if (typeof G !== 'undefined' && G) for (const t of G.towers) if (t.type === type) {
-    const ratio = t.maxhp > 0 ? t.hp / t.maxhp : 1;
-    t.maxhp = TYPES[type].hp; t.hp = Math.max(0, ratio * t.maxhp);
-  }
-  return true;
 }
 // 異質核心（生成、甦醒、召喚、繪製、碎裂）在 js/anomalous-core.js
 

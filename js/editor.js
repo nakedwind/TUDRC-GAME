@@ -270,6 +270,7 @@ function loadTiles() {
   const breakableWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_breakable', 'tudrc_breakable_wall_v1');   // 後室牆面（可炸開）：js/breakable-walls.js
   const backroomCounterAdded = mergeDefaultAssetPack(t => t.id === 'tile_cvs_checkout_counter_backroom', 'tudrc_backroom_counter_v1');   // 後室商店櫃台（js/shop.js）
   const secretWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_secret', 'tudrc_secret_wall_v1');   // 後室牆面（可炸開・隱藏區）
+  const backgroundExtrasAdded = mergeDefaultAssetPack('tile_bg_extra_', 'tudrc_asset_background_extras_20261018');
   const researchLabAdded = mergeDefaultAssetPack('tile_research_lab_', STORAGE_RESEARCH_LAB_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
   const backroomEdgeAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_floor05' || t.id === 'tile_bg_backroom_floor06', STORAGE_BACKROOM_FLOOR_EDGE);
@@ -291,7 +292,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
+  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -708,7 +709,7 @@ function draw() {
       ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6); ctx.setLineDash([]);
     }
-    if (spawnZone.has(key)) {   // 怪物出生區
+    if (showSolid && spawnZone.has(key)) {   // 怪物出生區與紅格共用顯示開關
       ctx.fillStyle = 'rgba(80,220,120,.22)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = 'rgba(120,255,160,.75)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
       ctx.strokeRect(x + 2.5, y + 2.5, CELL - 5, CELL - 5); ctx.setLineDash([]);
@@ -725,7 +726,7 @@ function draw() {
   }
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
-  if (brush.mode === 'spawn' || (m.spawnZone || []).length) {
+  if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
@@ -790,11 +791,11 @@ function draw() {
       ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + stampW(s, t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
       ctx.fillText('深度線 ' + depth, x + 5, y - 4);
-    } else if (s && t && !t.flat && (s.layer || 'top') !== 'top' && (tileH(t) >= 2 || /^object\d*$/.test(s.layer || '') || s.layer === 'overlay')) {
-      const depth = Number.isFinite(s.sortDepth) ? s.sortDepth : tileH(t);
+    } else if (s && t && (Number.isFinite(s.sortDepth) || (!t.flat && (s.layer || 'top') !== 'top' && (stampH(s, t) > 1 || /^object\d*$/.test(s.layer || '') || s.layer === 'overlay')))) {
+      const depth = Number.isFinite(s.sortDepth) ? s.sortDepth : stampH(s, t);
       const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0) + depth * CELL;
       ctx.strokeStyle = '#55d9ff'; ctx.lineWidth = 3; ctx.setLineDash([9, 5]);
-      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + tileW(t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
+      ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + stampW(s, t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
       ctx.fillText('人物遮擋線 ' + depth, x + 5, y - 4);
     }
@@ -1280,8 +1281,8 @@ function selectedBaseStamp() {
 function selectedDepthStamp() {
   if (selections.length !== 1 || selections[0].type !== 'stamp') return null;
   const s = curMap().stamps[selections[0].index], t = s && tileById(s.id);
-  if (!s || !t || t.baseHp || t.flat || (s.layer || 'top') === 'top') return null;
-  return tileH(t) >= 2 || /^object\d*$/.test(s.layer || '') || s.layer === 'overlay' ? { s, t } : null;
+  if (!s || !t || t.baseHp) return null;
+  return { s, t };
 }
 function refreshBaseCollisionPanel() {
   const panel = document.getElementById('baseCollisionPanel');
@@ -1434,8 +1435,8 @@ function refreshSelPanel() {
   refreshDoorControl();
   const depthStamp = selectedDepthStamp();
   if (depthStamp) {
-    depthInput.max = tileH(depthStamp.t);
-    depthInput.value = Number.isFinite(depthStamp.s.sortDepth) ? depthStamp.s.sortDepth : tileH(depthStamp.t);
+    depthInput.max = stampH(depthStamp.s, depthStamp.t);
+    depthInput.value = Number.isFinite(depthStamp.s.sortDepth) ? depthStamp.s.sortDepth : stampH(depthStamp.s, depthStamp.t);
     depthInput.disabled = false;
     depthAuto.disabled = false;
   }
@@ -1469,7 +1470,7 @@ document.getElementById('selDepthInput').addEventListener('change', e => {
   const picked = selectedDepthStamp(); if (!picked) return;
   const value = Number(e.target.value);
   if (!Number.isFinite(value)) { refreshSelPanel(); return; }
-  const next = Math.max(0, Math.min(tileH(picked.t), value));
+  const next = Math.max(0, Math.min(stampH(picked.s, picked.t), value));
   pushUndo(); picked.s.sortDepth = next;
   saveMaps(); draw(); refreshSelPanel();
   setStatus('人物遮擋線設在圖片頂端往下 ' + next + ' 格', '#55d9ff');
@@ -1711,10 +1712,10 @@ document.getElementById('gridToggle').addEventListener('click', e => {
 // 不可穿透紅格的顯示開關（純顯示，不會動到地圖的不可穿透設定）
 document.getElementById('solidToggle').addEventListener('click', e => {
   showSolid = !showSolid;
-  e.currentTarget.textContent = showSolid ? '🧱 紅格：開' : '🧱 紅格：關';
+  e.currentTarget.textContent = showSolid ? '🧱 紅綠格：開' : '🧱 紅綠格：關';
   e.currentTarget.classList.toggle('off', !showSolid);
   draw();
-  setStatus(showSolid ? '已顯示不可穿透的紅格' : '已隱藏不可穿透的紅格（設定仍然保留，也還是可以繼續畫）', '#8fd3ff');
+  setStatus(showSolid ? '已顯示紅格與怪物出生區綠格' : '已隱藏紅格與怪物出生區綠格（設定保留）', '#8fd3ff');
 });
 
 document.getElementById('clearLayout').addEventListener('click', () => {

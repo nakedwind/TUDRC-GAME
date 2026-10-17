@@ -192,7 +192,7 @@ function openBackroomShop() {
   setShopMode('backroom');
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
-  supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopEnter', .5, 'shop-enter'); document.getElementById('supplyShopClose').focus();
+  supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('shopBell', .7, 'shop-bell'); document.getElementById('supplyShopClose').focus();   // 後室商店：打開時播便利商店門鈴
 }
 function backroomShopNearPlayer() { return shopStampNearPlayer(BACKROOM_SHOP); }
 function openDrinkShop() {

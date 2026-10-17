@@ -153,21 +153,15 @@ function squadCard(actor, safe) {
   const taint = live ? Math.max(0, Math.min(100, Math.round(live.taint || 0))) : 0;
   const condition = memberCondition(actor, safe);
   const support = spec.guide ? '疏導 ' + spec.aura.rate + '/秒' : (spec.splash > 0 ? '範圍 ' + spec.splash.toFixed(1) + ' 格' : '單體攻擊');
-  const level = typeof sentryLevel === 'function' ? sentryLevel(actor.type) : 1;
-  const cost = typeof sentryUpgradeCost === 'function' ? sentryUpgradeCost(actor.type) : 0;
-  const maxed = level >= 30;
-  const affordable = typeof training !== 'undefined' && training.crystals >= cost;
-  const trainingAction = safe
-      ? '<button class="squad-upgrade" data-type="' + actor.type + '"' + ((!affordable || maxed) ? ' disabled' : '') + '>' +
-          (maxed ? '已達最高等級' : '提升至 Lv.' + (level + 1) + '<small>消耗 ◆ ' + cost + '</small>') + '</button>'
-      : '<span class="squad-training-note locked">返回安全區域後可升級</span>';
+  const learned = typeof training !== 'undefined' && training.skills ? (training.skills[actor.type] || []).length : 0;
+  const trainingAction = '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / 9' + (safe ? '' : '・回基地才能學') + '</small></button>';
   const loadBar = spec.guide
     ? '<div class="no-load"><span>精神負荷 <b>無</b></span><i><u style="width:0"></u></i></div>'
     : '<div><span>負荷 <b>' + taint + ' / 100</b></span><i class="taint-bar"><u style="width:' + taint + '%"></u></i></div>';
   return '<article class="squad-card squad-card-combat" style="--member-color:' + spec.color + '">' +
     '<span class="squad-portrait"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></span>' +   // 頭像框：放大顯示上半身（半身像）
     '<div class="squad-member-main">' +
-      '<div class="squad-member-head"><div><strong>' + spec.name + '<mark>Lv.' + level + '</mark></strong><span>' + (spec.guide ? '嚮導' : '哨兵') + '・' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
+      '<div class="squad-member-head"><div><strong>' + spec.name + '</strong><span>' + (spec.guide ? '嚮導' : '哨兵') + '・' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
       '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + maxhp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / maxhp * 100)) + '%"></u></i></div>' +
       loadBar + '</div>' + (typeof sortieActiveHtml === 'function' ? sortieActiveHtml(actor.type) : '') +
       '<dl class="squad-stats"><div><dt>攻擊</dt><dd>' + spec.dmg + '</dd></div><div><dt>防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
@@ -182,8 +176,7 @@ function supportCard(actor) {
     '<span class="squad-portrait" data-char="' + actor.type + '"><img src="' + memberPortraitPath(display) + '" alt="' + profile.name + '"></span>' +   // data-char：個別角色的頭像裁切（css/style.css，例如球球）
     '<div class="squad-member-main">' +
       '<div class="squad-member-head"><div><strong>' + profile.name + '</strong><span>Y102編組・非戰鬥人員</span></div><em class="member-condition support">非戰鬥人員</em></div>' +
-      '<div class="support-assignment"><b>支援編制</b><span>不參與戰鬥，無法使用異質結晶升級。</span></div>' +
-      '<div class="squad-training"><span class="squad-training-note locked">非戰鬥人員無法升級</span></div>' +
+      '<div class="support-assignment"><b>支援編制</b><span>不參與戰鬥，沒有技能樹。</span></div>' +
     '</div></article>';
 }
 function renderSquadPanel() {
@@ -198,14 +191,7 @@ function renderSquadPanel() {
     '<div class="squad-panel-head"><div><small>' + (safe ? 'Y102 RESPONSE UNIT' : 'ACTIVE FIELD PERSONNEL') + '</small><h2>Y102隊員</h2><p>' + (safe ? '安全區域・管理戰鬥與支援編制人員' : '戰鬥區域・僅顯示本次出勤人員') + '</p></div><div class="squad-head-actions"><span class="crystal-wallet"><i>◆</i><small>異質結晶</small><b>' + crystalCount + '</b></span><button class="squad-close" type="button" aria-label="關閉隊員資料">×</button></div></div>' +
     '<div class="squad-list">' + (members.length ? members.map(actor => squadCard(actor, safe)).join('') : '<div class="squad-empty">本次任務沒有攜帶隊員。</div>') + '</div>';
   squadPanel.querySelector('.squad-close').addEventListener('click', closeSquadPanel);
-  squadPanel.querySelectorAll('.squad-upgrade').forEach(button => button.addEventListener('click', () => {
-    if (typeof upgradeSentry !== 'function' || !upgradeSentry(button.dataset.type)) {
-      if (typeof sfx === 'function') sfx('error');
-      return;
-    }
-    if (typeof sfx === 'function') sfx('button');
-    renderSquadPanel();
-  }));
+  squadPanel.querySelectorAll('[data-skill-tree]').forEach(button => button.addEventListener('click', () => { if (typeof openSkillTree === 'function') openSkillTree(button.dataset.skillTree); }));
   squadPanel.querySelectorAll('.captain-impression-button').forEach(button => button.addEventListener('click', () => openCaptainImpression(button.dataset.impression)));
   const list = squadPanel.querySelector('.squad-list'); if (list) list.scrollTop = scrollTop;
 }

@@ -482,7 +482,7 @@ function hasImageAt(c, r) {
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
-const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapTileH(t) >= OCC_MIN_H || isOccLayer(s.layer || 'top'))); };
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
 // 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
 function drawMapGround(ctx) {
@@ -504,7 +504,7 @@ function drawMapTop(ctx) {
     if (chairConfig(s.id)) continue;
     if ((s.layer || 'top') !== 'top') continue;
     const t = mapTileById(s.id) || {};
-    if (!t.baseHp) drawMapStampImg(ctx, s);
+    if (!t.baseHp && !Number.isFinite(s.sortDepth)) drawMapStampImg(ctx, s);
   }
 }
 // 立體物：會和角色互相遮擋，回傳 {y:底部Y, draw:畫它} 加進 out
@@ -533,7 +533,7 @@ function mapOccluders() {
       if ((s.layer || 'top') !== lid || !stampIsOcc(s)) continue;
       const t = mapTileById(s.id) || {};
       const chair = chairConfig(s.id);
-      if (lid === 'top' && !t.baseHp && !chair) continue;
+      if (lid === 'top' && !t.baseHp && !chair && !Number.isFinite(s.sortDepth)) continue;
       const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0), stampWpx = mapStampW(s, t) * CELL, stampHpx = mapStampH(s, t) * CELL;
       const depth = chair ? y0 + (s.fy ? mapStampH(s, t) * CELL - chair.depth : chair.depth) : t.baseHp
         ? Math.max(0, Math.min(mapStampH(s, t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapStampH(s, t) - 2))))
