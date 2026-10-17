@@ -615,7 +615,7 @@ canvas.cursor-pressed {
 #sentryMenu button:hover { border-color: #8fd3ff; background: #2b3a4a; }
 /* 地面情境選單：點空地後召喚哨兵 */
 #groundMenu {
-  position: absolute; z-index: 11; width: 150px; max-width: calc(100% - 16px);
+  position: absolute; z-index: 11; width: 180px; max-width: calc(100% - 16px);
   max-height: calc(100% - 16px); overflow-y: auto;
   background: rgba(17,24,34,.42); border: 1px solid rgba(126,190,230,.55); border-radius: 12px;
   padding: 6px; display: flex; flex-direction: column; gap: 5px;
@@ -623,37 +623,50 @@ canvas.cursor-pressed {
   transform-origin: 12px 12px;
   animation: ground-menu-open 170ms cubic-bezier(.2,.85,.25,1.2) both;
 }
-#groundMenu .gm-title { color: #8fd3ff; font-size: 12px; font-weight: 700; padding: 3px 23px 5px 5px; }
+#groundMenu .gm-title { color: #8fd3ff; font-size: 14px; font-weight: 700; padding: 3px 23px 5px 5px; }
 #groundMenu button {
   background: rgba(35,45,58,.48); border: 1px solid rgba(98,124,151,.55); color: #eef4fa;
-  padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 13px; text-align: left;
+  padding: 8px 10px; border-radius: 8px; cursor: pointer; font-size: 15px; text-align: left;
   white-space: nowrap;
 }
 #groundMenu button:hover { border-color: #8fd3ff; background: rgba(44,64,82,.72); }
 #groundMenu .gm-nearest { white-space: normal; line-height: 1.35; }
 #groundMenu button:disabled { opacity: .42; cursor: not-allowed; border-color: #37404c; }
-#groundMenu button small { display: block; margin: 3px 0 0 24px; color: #96a5b5; font-size: 10px; }
-#groundMenu .gm-sentry { display: flex; align-items: center; gap: 7px; padding: 5px 6px; }
+#groundMenu button small { display: block; margin: 3px 0 0 24px; color: #96a5b5; font-size: 12px; }
+#groundMenu .gm-sentry { display: flex; align-items: center; gap: 10px; padding: 7px 8px; }
 #groundMenu .gm-avatar {
-  position: relative; display: block; flex: none; width: 30px; height: 30px; overflow: hidden;
+  position: relative; display: block; flex: none; width: 40px; height: 40px; overflow: hidden;
   border: 1px solid rgba(143,211,255,.35); border-radius: 6px; background: rgba(8,15,24,.45);
 }
 #groundMenu .gm-avatar img {
-  position: absolute; top: -7px; left: 50%; width: 48px; height: 48px;
+  position: absolute; top: -9px; left: 50%; width: 64px; height: 64px;
   max-width: none; transform: translateX(-50%); image-rendering: pixelated;
 }
 #groundMenu .gm-sentry-info { display: block; min-width: 0; }
-#groundMenu .gm-sentry-info strong { display: block; font-size: 12px; }
+#groundMenu .gm-sentry-info strong { display: block; font-size: 16px; }
+#groundMenu:has(> .gm-sentry) { width:260px; display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:6px; }
+#groundMenu:has(> .gm-sentry) > .gm-title,
+#groundMenu:has(> .gm-sentry) > .gm-nearest { grid-column:1 / -1; }
+#groundMenu:has(> .gm-sentry) > .gm-sentry { min-width:0; }
+#groundMenu:has(> .gm-sentry) { text-shadow:none; }
+#groundMenu:has(> .gm-sentry) > .gm-title { font-weight:900; text-shadow:none; }
+#groundMenu:has(> .gm-sentry) > button,
+#groundMenu:has(> .gm-sentry) .gm-sentry-info strong {
+  text-shadow:-1px -1px 0 #000, 0 -1px 0 #000, 1px -1px 0 #000, -1px 0 0 #000, 1px 0 0 #000, -1px 1px 0 #000, 0 1px 0 #000, 1px 1px 0 #000;
+}
 #groundMenu .gm-sentry-info small { margin: 2px 0 0; }
 #groundMenu .gm-close {
   position: absolute; top: 2px; right: 2px; z-index: 2;
   width: 25px; height: 25px; min-width: 0; padding: 0;
   display: grid; place-items: center; border-radius: 50%;
   background: rgba(18,25,34,.9); border: 1px solid rgba(143,211,255,.72);
-  color: #dcecff; font-size: 16px; line-height: 1; text-align: center;
+  color: #dcecff; font-size: 18px; line-height: 1; text-align: center;
   box-shadow: 0 4px 12px rgba(0,0,0,.45);
 }
 #groundMenu .gm-close:hover { color: #fff; background: rgba(68,91,111,.96); }
+#groundMenu:has(.gm-camp-title) { width:210px; background:rgba(17,24,34,.8); }
+#groundMenu .gm-camp-title { font-size:16px; }
+#groundMenu:has(.gm-camp-title) button:not(.gm-close) { font-size:17px; padding:10px 12px; }
 @keyframes ground-menu-open {
   from { opacity: 0; transform: translateY(-6px) scale(.84); }
   to { opacity: 1; transform: translateY(0) scale(1); }
@@ -1090,10 +1103,10 @@ canvas.cursor-pressed {
 .backpack-body { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 260px; }
 
 /* 左邊：物品格 */
-.backpack-grid { min-height:0; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); align-content:start; gap:8px; overflow-y:auto; padding:6px 16px 16px 18px; scrollbar-color:#3d5266 transparent; }
+.backpack-grid { min-height:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); align-content:start; gap:8px; overflow-y:auto; padding:6px 16px 16px 18px; scrollbar-color:#3d5266 transparent; }
 .bag-cell { position:relative; aspect-ratio:1; display:grid; place-items:center; min-width:0; padding:6px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(23,32,42,.6); cursor:pointer; transition:transform .12s, border-color .12s, background .12s, box-shadow .12s; }
 .bag-cell.snack { border-color:rgba(121,219,173,.28); } .bag-cell.drink { border-color:rgba(140,199,255,.28); }
-.bag-cell img { width:100%; max-width:80px; height:auto; image-rendering:pixelated; }
+.bag-cell img { position:absolute; inset:6px; margin:auto; width:calc(100% - 12px); height:calc(100% - 12px); max-width:80px; max-height:80px; object-fit:contain; image-rendering:pixelated; }
 .bag-cell b { position:absolute; right:4px; bottom:4px; min-width:20px; padding:1px 6px; border-radius:99px; background:#eaf4fb; color:#15202a; font-size:11px; font-weight:800; text-align:center; box-shadow:0 1px 4px rgba(0,0,0,.4); }
 .bag-cell:hover:not(.empty) { transform:translateY(-2px); background:rgba(40,54,68,.75); }
 .bag-cell.sel { border-color:#ffd479; background:rgba(70,60,36,.55); box-shadow:0 0 0 1px rgba(255,212,121,.6), 0 0 16px rgba(255,212,121,.3); }
@@ -1240,6 +1253,62 @@ canvas.cursor-pressed {
 #settingsMenu button:focus-visible, #settingsMenu input[type=range]:focus-visible { outline:2px solid #ffd479; outline-offset:2px; }
 @media (prefers-reduced-motion: reduce) { #settingsMenu, .settings-card { animation:none; } #settingsButton svg { transition:none; } }
 @media (max-width: 700px) { .settings-body { grid-template-columns:1fr; } }
+
+.settings-card { width:min(820px,100%); height:min(580px,100%); }
+.settings-body.settings-layout { grid-template-columns:148px minmax(0,1fr); gap:0; padding:0; overflow:hidden; flex:1; }
+.settings-nav { display:flex; flex-direction:column; gap:8px; padding:18px 12px; border-right:1px solid rgba(143,211,255,.13); background:rgba(0,0,0,.15); }
+.settings-nav button { padding:12px; border:1px solid transparent; border-radius:9px; background:transparent; color:#aebfce; font:700 14px "Microsoft JhengHei",sans-serif; text-align:left; cursor:pointer; }
+.settings-nav button[aria-selected="true"] { color:#ffe3a1; border-color:rgba(255,212,121,.4); background:rgba(255,212,121,.12); }
+.settings-nav button:hover { background:rgba(143,211,255,.1); }
+.settings-content { min-width:0; min-height:0; overflow-y:auto; padding:18px; }
+.settings-page[hidden] { display:none; }
+.settings-content .set-group { border:0; background:none; padding:0; gap:16px; }
+.settings-content .set-group h3 { font-size:16px; letter-spacing:0; color:#dbe8f2; }
+.save-slots { display:flex; flex-direction:column; gap:9px; }
+.save-slot { display:flex; align-items:center; gap:8px; padding:12px; border:1px solid rgba(143,211,255,.16); border-radius:10px; background:rgba(0,0,0,.18); }
+.save-slot-portrait { flex:0 0 52px; width:52px; height:52px; overflow:hidden; border:1px solid rgba(143,211,255,.22); border-radius:10px; background:rgba(143,211,255,.06); }
+.save-slot-portrait img { display:block; width:68px; max-width:none; height:auto; margin:-4px 0 0 -8px; image-rendering:pixelated; }
+.save-slot > div { flex:1; min-width:0; display:flex; flex-direction:column; gap:5px; }
+.save-slot strong { color:#e6eef4; font-size:14px; }
+.save-slot small { color:#8fabbf; font-size:12px; overflow-wrap:anywhere; }
+@media (max-width:560px) {
+  .settings-body.settings-layout { grid-template-columns:104px minmax(0,1fr); }
+  .settings-nav { padding:12px 6px; }
+  .settings-nav button { padding:10px 6px; font-size:13px; }
+  .settings-content { padding:12px; }
+  .save-slot { flex-wrap:wrap; }
+  .save-slot > div { flex-basis:100%; }
+}
+
+/* 帳篷作戰計畫：獨立暫停彈窗。 */
+#campPlanDialog { position:absolute; inset:0; z-index:45; display:grid; place-items:center; padding:20px; background:rgba(3,8,13,.72); backdrop-filter:blur(6px); }
+#campPlanDialog.hidden { display:none; }
+.camp-plan-card { box-sizing:border-box; width:min(580px,100%); max-height:100%; overflow-y:auto; padding:26px; border:1px solid #668a94; border-top:3px solid #e7c47c; border-radius:16px; background:linear-gradient(145deg,#25353c,#111e25); box-shadow:0 24px 80px rgba(0,0,0,.65); color:#e4edf0; }
+.camp-plan-card header { position:relative; display:flex; align-items:center; justify-content:center; min-height:38px; padding:0 46px; text-align:center; }
+
+.camp-plan-card h2 { margin:0; font-size:27px; }
+.camp-plan-card header button { position:absolute; right:0; top:50%; transform:translateY(-50%); flex:none; width:34px; height:34px; border:1px solid #52707c; border-radius:50%; background:#1a2a32; color:#d5e6ec; font-size:24px; cursor:pointer; }
+.camp-plan-card > p { margin:16px 0; color:#e7c47c; font-size:15px; }
+.camp-plan-options { display:flex; flex-direction:column; gap:12px; margin-top:20px; }
+.camp-plan-options > button { display:flex; align-items:center; gap:15px; width:100%; padding:17px; border:1px solid #47616e; border-radius:11px; background:rgba(7,15,22,.5); color:#e4edf0; text-align:left; cursor:pointer; }
+.camp-plan-options > button:hover { border-color:#e7c47c; background:#30414a; }
+.camp-plan-options i { flex:none; color:#e7c47c; font:700 22px monospace; font-style:normal; }
+.camp-plan-options span { display:flex; flex-direction:column; gap:7px; min-width:0; }
+.camp-plan-options b { font-size:17px; line-height:1.5; }
+.camp-plan-options small { font-size:14px; color:#e7c47c; line-height:1.5; }
+.camp-plan-card footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:22px; color:#90a7b3; font-size:14px; }
+.camp-plan-card footer button { padding:9px 18px; border:1px solid #e7c47c; border-radius:8px; background:#e7c47c; color:#302818; font:700 16px "Microsoft JhengHei",sans-serif; cursor:pointer; }
+.camp-plan-card button:focus-visible { outline:2px solid #8edacb; outline-offset:3px; }
+.camp-plan-card[hidden] { display:none; }
+.camp-plan-confirm { box-sizing:border-box; width:min(460px,100%); padding:28px; border:1px solid #668a94; border-top:3px solid #e7c47c; border-radius:16px; background:linear-gradient(145deg,#25353c,#111e25); box-shadow:0 24px 80px rgba(0,0,0,.65); color:#e4edf0; text-align:center; }
+.camp-plan-confirm h2 { margin:14px 0; font-size:25px; }
+.camp-plan-confirm p { margin:0 0 26px; color:#e7c47c; font-size:16px; line-height:1.8; }
+.camp-plan-confirm > div { display:flex; justify-content:center; gap:12px; }
+.camp-plan-confirm button { padding:10px 25px; border:1px solid #63818d; border-radius:9px; background:#243a44; color:#e4edf0; font:700 16px "Microsoft JhengHei",sans-serif; cursor:pointer; }
+.camp-plan-confirm [data-plan-confirm] { background:#e7c47c; border-color:#e7c47c; color:#302818; }
+.camp-plan-confirm button:hover { filter:brightness(1.12); }
+.camp-plan-confirm button:focus-visible { outline:2px solid #8edacb; outline-offset:3px; }
+@media (max-width:560px) { .camp-plan-card { padding:18px; } .camp-plan-options > button { padding:13px; gap:10px; } }
 
 /* ===== 送禮與好感度 ===== */
 .dialogue-head { justify-content:flex-start; }
@@ -1500,7 +1569,7 @@ canvas.cursor-pressed {
 .backpack-card { width: min(1060px, 100%); }
 .backpack-body { grid-template-columns: 240px minmax(0,1fr) 260px; }
 .equip-panel { position: relative; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 12px; border-right: 1px solid rgba(255,212,121,.13); background: rgba(40,33,18,.18); scrollbar-color: #776642 transparent; }
-.equip-panel h3 { margin: 4px 0 2px; color: #ffe3a1; font-size: 13px; }
+.equip-panel h3 { margin: 4px 0 2px; color: #ffe3a1; font-size: 14px; }
 .equip-slot { display: grid; grid-template-columns: 60px minmax(0,1fr); align-items: center; gap: 9px; padding: 6px 8px 6px 6px; border: 1px dashed rgba(255,212,121,.25); border-radius: 10px; background: rgba(7,12,18,.35); color: #e8eef3; cursor: pointer; text-align: left; font: inherit; transition: border-color .12s, background .12s; }
 .equip-slot.filled { border-style: solid; border-color: rgba(255,255,255,.1); background: rgba(37,43,51,.55); }
 .equip-slot:hover, .equip-slot.picking { border-color: #ffd479; background: rgba(52,60,70,.7); }
@@ -1642,24 +1711,24 @@ canvas.cursor-pressed {
 .doll-slots .doll-slot span img { width: 34px; height: 34px; }
 /* 紙娃娃排版 v4：溫特在上方置中，4 個裝備格在他下面排成 2×2（頭部、身體／隨身物品1、隨身物品2） */
 .equip-doll { height: auto; display: flex; flex-direction: column; align-items: center; padding: 8px 8px 10px; }
-.equip-doll .doll-art { position: static; transform: none; height: 150px; max-width: 100%; }
-.equip-doll .doll-art.sprite { width: 116px; height: auto; }
+.equip-doll .doll-art { position: static; transform: none; height: 180px; max-width: 100%; }
+.equip-doll .doll-art.sprite { width: 139.2px; height: auto; }
 .doll-slots { position: static; width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 6px 8px; margin-top: 4px; }
 .doll-slots .doll-slot { width: auto; }
 .doll-slots .doll-slot small { order: -1; max-width: 96px; }
-.doll-slots .doll-slot span { width: 48px; height: 48px; }
-.doll-slots .doll-slot span img { width: 40px; height: 40px; }
+.doll-slots .doll-slot span { width: 56px; height: 56px; }
+.doll-slots .doll-slot span img { width: 46px; height: 46px; }
 .doll-slots .doll-slot em { right: calc(50% - 32px); top: 14px; }
-@media (max-width: 860px) { .equip-doll .doll-art { height: 110px; } }
+@media (max-width: 860px) { .equip-doll .doll-art { height: 132px; } }
 /* 裝備格文字 v5：名稱放在格子下面（可換行、不加底色），等級改成格子右下角的小徽章，不再跟名稱擠在一起 */
-.doll-slots { gap: 10px 8px; }
+.doll-slots { gap: 12px 8px; }
 .doll-slots .doll-slot { gap: 4px; }
-.doll-slots .doll-slot small { order: 1; max-width: 100%; padding: 0 2px; background: none; border-radius: 0; color: #e8eef3; font-size: 11px; line-height: 1.25; text-align: center; white-space: normal; overflow: visible; word-break: keep-all; overflow-wrap: anywhere; }
+.doll-slots .doll-slot small { order: 1; max-width: 100%; padding: 0 2px; background: none; border-radius: 0; color: #e8eef3; font-size: 13px; line-height: 1.35; text-align: center; white-space: normal; overflow: visible; word-break: keep-all; overflow-wrap: anywhere; }
 .doll-slots .doll-slot:not(.filled) small { color: #8c96a1; }
 /* 主武器／副武器格：最上面一排，格子比較寬（槍圖 40×30），格框帶一點橘色 */
-.doll-slots .doll-slot.weapon span { width: 64px; border-color: rgba(255,170,90,.45); }
+.doll-slots .doll-slot.weapon span { width: 72px; border-color: rgba(255,170,90,.45); }
 .doll-slots .doll-slot.weapon.filled span { border-color: rgba(255,170,90,.55); background: rgba(52,40,30,.85); }
-.doll-slots .doll-slot.weapon span img { width: 48px; height: 36px; }
+.doll-slots .doll-slot.weapon span img { width: 56px; height: 42px; }
 .doll-slots .doll-slot.weapon em { right: -9px; }
 .doll-slot-kind { display: block; color: #ffb36b; font-style: normal; font-size: 10px; }
 .doll-slots .doll-slot.weapon + .doll-slot.weapon + .doll-slot { margin-top: 2px; }
@@ -1709,6 +1778,35 @@ canvas.cursor-pressed {
 .backpack-tabs button.active { border-color: #ffd479; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; box-shadow: 0 0 10px rgba(255,212,121,.35); }
 .backpack-tabs button.active em { background: rgba(59,35,4,.22); color: #3b2304; }
 
+/* 背包：左側裝備跨兩列，物品說明放在格子下方。 */
+.backpack-body { grid-template-columns:216px minmax(0,1fr); grid-template-rows:minmax(0,1fr) minmax(0,150px); grid-template-areas:"equipment items" "equipment detail"; }
+.backpack-body > .equip-panel { grid-area:equipment; }
+.backpack-body > .backpack-main { grid-area:items; min-width:0; }
+.backpack-body > .backpack-detail { grid-area:detail; display:grid; grid-template-columns:100px minmax(0,1fr) 180px; grid-template-rows:auto auto auto auto; align-content:start; align-items:start; gap:6px 14px; padding:12px 16px; border-left:0; border-top:1px solid rgba(143,211,255,.14); text-align:left; }
+.backpack-detail > .bag-detail-image { grid-column:1; grid-row:1 / 5; padding:6px 0; }
+.backpack-detail .bag-detail-image img, .backpack-detail .bag-detail-image img.weapon { width:88px; height:100px; }
+.backpack-detail > h3 { grid-column:2; grid-row:1; margin:0; }
+.backpack-detail > .bag-tags { grid-column:2; grid-row:2; justify-content:flex-start; }
+.backpack-detail > .bag-desc { grid-column:2; grid-row:3; }
+.backpack-detail > .bag-gear-stat, .backpack-detail > .bag-owned { grid-column:2; grid-row:4; }
+.backpack-detail > .bag-actions { grid-column:3; grid-row:1 / 5; margin-top:0; padding-top:0; }
+.backpack-detail > .bag-detail-empty { grid-column:1 / -1; grid-row:1 / 5; text-align:center; }
+.bag-gear-heading { grid-column:2; grid-row:1; display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
+.bag-gear-heading h3 { margin:0; }
+.bag-gear-heading .bag-tags { justify-content:flex-start; }
+.backpack-detail.gear-detail > .bag-desc { grid-row:2; }
+.backpack-detail.gear-detail > .bag-gear-stat { grid-row:2 / 5; }
+@media (max-width:860px) {
+  .backpack-body { grid-template-columns:minmax(0,1fr); grid-template-rows:auto minmax(0,1fr) minmax(0,150px); grid-template-areas:"equipment" "items" "detail"; }
+}
+@media (max-width:560px) {
+  .backpack-body > .backpack-detail { grid-template-columns:64px minmax(0,1fr); gap:6px 10px; }
+  .backpack-detail .bag-detail-image img, .backpack-detail .bag-detail-image img.weapon { width:60px; height:72px; }
+  .backpack-detail > .bag-actions { grid-column:1 / -1; grid-row:5; }
+  .backpack-detail .bag-equip-buttons { flex-direction:row; flex-wrap:wrap; }
+  .backpack-detail .bag-equip-buttons > button { flex:1; }
+}
+
 /* 販賣機：跟商店同一個視窗，只有飲料，不用分頁 */
 #supplyShop.vending .supply-shop-tabs, #supplyShop.drinkshop .supply-shop-tabs { display: none; }
 #supplyShop.vending .shop-sign, #supplyShop.drinkshop .shop-sign { font-size: 20px; letter-spacing: 0; }
@@ -1716,3 +1814,78 @@ canvas.cursor-pressed {
 /* 商店按鈕拿掉了（要到 1 樓 HOME Mart 的櫃台開商店） */
 #supplyShopButton[hidden], #hudShopButton[hidden] { display: none !important; }
 .gift-empty small { display: block; margin-top: 6px; color: #9aa6b2; font-size: 11px; }
+
+/* 對話頭像：球球（狗，頭在圖的左邊、位置比較低）→ 放大 2.5 倍，對準頭 */
+#dialoguePortraitFrame[data-char="ball"] #dialoguePortrait { left: -2px; top: -54px; width: 160px; height: 160px; transform: none; }
+@media (max-width: 620px) { #dialoguePortraitFrame[data-char="ball"] #dialoguePortrait { left: -2px; top: -42px; width: 125px; height: 125px; } }
+
+/* Y102 編組名單的頭像：球球（狗）→ 對準牠的頭（頭在圖的左邊 27%、高度 56% 的地方），不管框多大都適用 */
+.squad-portrait[data-char="ball"] img { left: 50%; top: 50%; width: 220%; height: auto; aspect-ratio: 1; transform: translate(-27%, -56%); }
+
+/* 戰鬥畫面面板的收合按鈕（隊員欄、建築欄） */
+.hud-collapse { pointer-events: auto; flex: none; display: flex; align-items: center; justify-content: center; gap: 4px;
+  min-width: 22px; height: 22px; padding: 0 6px; border: 1px solid rgba(255,255,255,.14); border-radius: 7px;
+  background: rgba(16,24,33,.78); color: #cfdbe6; cursor: pointer; font: 700 11px "Microsoft JhengHei", sans-serif; white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(0,0,0,.25); transition: background .12s, border-color .12s; }
+.hud-collapse:hover { border-color: #8fd3ff; background: rgba(40,62,80,.9); color: #fff; }
+.hud-collapse:focus-visible { outline: 2px solid #9fddff; outline-offset: 2px; }
+#fieldSquadHud > .hud-collapse { margin-bottom: 4px; }
+/* 隊員欄的收合鈕：跟建築欄一樣細長，只是橫的（隊員欄是上下收） */
+#fieldSquadHud > .hud-collapse { width: 100%; height: 14px; min-width: 0; padding: 0; font-size: 10px; line-height: 1; }
+#buildToolbar > .hud-collapse { align-self: stretch; height: auto; min-width: 18px; padding: 0 3px; }
+/* 收起／展開的動畫：隊員欄往上收（高度變 0＋淡出），建築欄往左收（寬度變 0＋淡出） */
+.field-squad-fold { display: grid; grid-template-rows: 1fr; opacity: 1; transform: translateY(0);
+  transition: grid-template-rows .28s cubic-bezier(.3,.7,.3,1), opacity .2s ease, transform .28s cubic-bezier(.3,.7,.3,1); }
+.field-squad-fold > .field-squad-list { min-height: 0; overflow: hidden; }
+#fieldSquadHud.collapsed .field-squad-fold { grid-template-rows: 0fr; opacity: 0; transform: translateY(-6px); }
+#fieldSquadHud.collapsed .field-squad-fold * { pointer-events: none !important; }
+#buildToolbar { overflow: visible; }
+.build-fold { display: flex; align-items: center; gap: 6px; max-width: 1400px; opacity: 1; overflow: hidden;
+  transition: max-width .3s cubic-bezier(.3,.7,.3,1), opacity .2s ease, margin .3s ease; }
+#buildToolbar.collapsed .build-fold { max-width: 0; opacity: 0; margin-left: -6px; pointer-events: none; }
+.build-fold { min-width: 0; overflow-x: auto; scrollbar-width: none; }   /* 畫面窄時快捷欄可以左右捲 */
+.build-fold::-webkit-scrollbar { display: none; }
+#buildToolbar.collapsed .build-fold { overflow: hidden; }
+
+/* 收合鈕的箭頭：按鈕大小不變，箭頭是用 CSS 畫的扁三角形（不發光） */
+#fieldSquadHud > .hud-collapse, #buildToolbar > .hud-collapse { color: #b9e4ff; overflow: hidden; }
+#fieldSquadHud > .hud-collapse:hover, #buildToolbar > .hud-collapse:hover { color: #fff; }
+#fieldSquadHud > .hud-collapse::before, #buildToolbar > .hud-collapse::before { content: ''; display: block; background: currentColor; }
+#fieldSquadHud > .hud-collapse::before { width: 16px; height: 6px; clip-path: polygon(50% 0, 100% 100%, 0 100%); }            /* 往上 */
+#fieldSquadHud.collapsed > .hud-collapse::before { clip-path: polygon(0 0, 100% 0, 50% 100%); }                                /* 往下 */
+#buildToolbar > .hud-collapse::before { width: 6px; height: 16px; clip-path: polygon(0 50%, 100% 0, 100% 100%); }                /* 往左 */
+#buildToolbar.collapsed > .hud-collapse::before { clip-path: polygon(0 0, 100% 50%, 0 100%); }                                  /* 往右 */
+
+/* 拆除模式：滑鼠變成歪 45 度的槌子（images/weapon/icon-hammer.png 轉 45 度放大 2 倍；熱點在槌頭左端的打擊面） */
+#wrap.demolishing canvas, #wrap.demolishing #cv { cursor: url("../images/weapon/icon-hammer-cursor.png") 6 29, crosshair !important; }
+
+/* 建築欄：「建築」選單按鈕拿掉了（下方直接列出全部建築），只剩拆除 */
+#buildToolbar #buildToggle[hidden] { display: none !important; }
+#buildToolbar .build-toolbar-actions { justify-content: center; }
+#buildToolbar .build-toolbar-actions #demolishToggle { height: 58px; flex-direction: column; width: 46px; font-size: 12px; }
+#buildToolbar .build-toolbar-actions #demolishToggle .build-tool-icon { font-size: 20px; line-height: 22px; }
+#buildToolbar { max-width: calc((100% - 180px) / 1.2); }   /* 右下角留給武器欄，建築太多時可以左右捲（滑鼠滾輪） */
+/* 建築格：圖片放大到幾乎填滿格子，名字疊在圖片下緣（加黑邊才看得清楚） */
+#buildToolbar .build-quick-slot { position: relative; padding: 0; overflow: hidden; }
+#buildToolbar .build-quick-slot img { position: absolute; left: 2px; top: 1px; width: 54px; height: 54px; object-fit: contain; image-rendering: pixelated; }
+#buildToolbar .build-quick-slot span { position: absolute; left: 0; right: 0; bottom: 3px; z-index: 1; text-align: center; font-size: 12px; line-height: 1;
+  text-shadow: 0 0 2px #000, 0 0 3px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }
+
+/* 拆除按鈕：用 images/weapon/icon-hammer.png（16×19 像素圖放大 2 倍） */
+#buildToolbar #demolishToggle .demolish-icon { width: 24px; height: 28px; object-fit: contain; image-rendering: pixelated; }
+#buildToolbar #demolishToggle > span { display:none; }
+#buildToolbar #demolishToggle { justify-content:center; }
+#buildToolbar .build-quick-slot[data-build-id] img { left:50%; transform:translateX(-50%); }
+#buildToolbar .build-quick-slot[data-build-id="camping_lights"] img,
+#buildToolbar .build-quick-slot[data-build-id="wirefence"] img,
+#buildToolbar .build-quick-slot[data-build-id="irongate"] img { top:-3px; }
+#buildToolbar .build-quick-slot[data-build-id="searchlight"] img,
+#buildToolbar .build-quick-slot[data-build-id="roadblocks"] img,
+#buildToolbar .build-quick-slot[data-build-id="deco_oil_drum"] img { width:60px; height:60px; top:-5px; }
+#buildToolbar .build-quick-slot[data-build-id="wirecloth"] img,
+#buildToolbar .build-quick-slot[data-build-id="landmine"] img,
+#buildToolbar .build-quick-slot[data-build-id="deco_oil_tank"] img { width:48px; height:48px; top:-2px; }
+#buildToolbar .build-quick-slot[data-build-id="wirecloth"] img { width:42px; height:42px; top:2px; }
+#buildToolbar .build-quick-slot[data-build-id="wirefence"] img { top:-11px; }
+#buildToolbar .build-quick-slot[data-build-id="deco_oil_drum"] img { width:66px; height:66px; top:-13px; }
+.gm-demolish-icon { width: 12px; height: 14px; vertical-align: -2px; image-rendering: pixelated; }

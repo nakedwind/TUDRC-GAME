@@ -15,7 +15,6 @@ const VIEW_ZOOM = 1.5;               // 整體畫面再放大倍率（看到的�
 const viewW = () => VIEW_W / VIEW_SCALE;
 const viewH = () => VIEW_H / VIEW_SCALE;
 const OX = 0, OY = 0;                 // 地圖世界座標的原點
-const SPAWN_ROW = 0;                  // 預設怪物入口＝最上排
 
 // 格子中心的世界座標
 const center = (c, r) => [OX + c * CELL + CELL / 2, OY + r * CELL + CELL / 2];

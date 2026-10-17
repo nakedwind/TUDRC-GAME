@@ -268,6 +268,7 @@ function openDialogue(actor) {
   const portrait = set && set.front && set.front[0];
   dialoguePortrait.src = portrait ? portrait.src : '';
   dialoguePortrait.alt = profile ? profile.name : 'NPC';
+  dialoguePortrait.parentElement.dataset.char = actor.kind === 'tower' ? actor.type : actor.id;   // 個別角色的頭像裁切（css/style.css，例如球球）
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
   if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);
@@ -404,10 +405,10 @@ window.addEventListener('keydown', e => {
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
+    else if (useCampInteractionNearPlayer(e.code === 'Space' || e.key === ' ')) {}
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
     else if (toggleIronGateNearPlayer()) {}
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
-    else if (oreNearPlayer()) oreHint(oreNearPlayer());   // 靠近礦物→提醒要用爆炸炸開（js/ore.js）
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) openMissionBoard();   // 作戰桌／作戰螢幕（js/missions.js；旁邊的椅子或人更近時讓給它們）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) openVendingMachine();   // 販賣機：只賣飲料（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) openDrinkShop();   // 飲料店：只賣飲料（js/shop.js）
@@ -569,6 +570,29 @@ function assignSentryToGround(t, guard = false) {
   systemNotice(TYPES[t.type].name + '正前往巡邏點');
   closeGroundMenu();
 }
+function summonAllSentriesToGround() {
+  if (!groundTarget) return;
+  const { c, r } = groundTarget, spots = [];
+  for (let dr = -3; dr <= 3; dr++) for (let dc = -3; dc <= 3; dc++) {
+    const cc = c + dc, rr = r + dr;
+    if (!inGrid(cc, rr) || !sentryCellWalkable(cc, rr) || isEntrance(cc, rr)) continue;
+    const [x, y] = center(cc, rr); if (isLit(x, y)) spots.push({ x, y, distance: dc * dc + dr * dr });
+  }
+  spots.sort((a, b) => a.distance - b.distance);
+  let count = 0;
+  for (const t of G.towers) {
+    if (t.hp <= 0 || t.berserk || TYPES[t.type].guide) continue;
+    const index = spots.findIndex(p => buildSentryPath(t, p.x, p.y) !== null);
+    if (index < 0) continue;
+    const p = spots.splice(index, 1)[0];
+    t.mode = 'goto'; t.target = { x: p.x, y: p.y }; t.anchor = null; t.waitT = 0;
+    t.navPath = null; t.navGoal = null; t.navFailed = false; t.guardSummoned = true; t.guardBase = null;
+    count++;
+  }
+  sfx(count ? 'button' : 'error');
+  systemNotice(count ? '已召喚 ' + count + ' 位哨兵前往此處' : '沒有可到達此處的哨兵');
+  if (count) closeGroundMenu();
+}
 function summonNearestSentryToGround() {
   if (!groundTarget) return;
   const { c, r } = groundTarget, [x, y] = center(c, r);
@@ -585,20 +609,32 @@ function summonNearestSentryToGround() {
   }
   assignSentryToGround(choices[0].t, true);
 }
+// 可以拆除的：自己蓋的建築，以及地圖編輯器擺的障礙物（拒馬、油桶、地雷、滑動鐵門…）。
+// 不能拆：基地（營地帳篷）、異質礦（要用爆炸炸開）
+const canDemolish = o => !!o && !o.isBase && !o.ore
+  && (o.playerBuilt || o.mapSource || (o.kind === 'obstacle' && !o.type));
 function playerBuildingAt(c, r) {
   return [...G.obstacles].reverse().find(o =>
-    o.playerBuilt && c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)
+    canDemolish(o) && c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)
   ) || null;
 }
+// 拆除退錢：自己蓋的才退，依剩下的血量比例退（全滿退全部、剩一半退一半，無條件捨去）；地圖編輯器擺的不退
+function demolishRefund(o) {
+  const spec = o && o.playerBuilt && typeof buildableById === 'function' ? buildableById(o.type) : null;
+  return spec ? Math.floor((spec.cost || 0) * Math.max(0, Math.min(1, o.hp / (o.maxhp || 1)))) : 0;
+}
 function demolishPlayerBuilding(o) {
-  if (!o || !o.playerBuilt || !G.obstacles.includes(o)) return false;
+  if (!canDemolish(o) || !G.obstacles.includes(o)) return false;
   const [fx, fy] = center(o.c + ((o.w || 1) - 1) / 2, o.r + ((o.h || 1) - 1) / 2);
   o.lastHitBy = 'demolish';   // 自己拆除的油桶不會爆炸也不會漏油
   removeBarrier(o);
   for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }
   for (const enemy of G.enemies) { enemy.aiPath = null; enemy.aiGoal = null; enemy.aiRouteTimer = 0; }
   computeFlow();
-  sfx('hit'); flash('已拆除', fx, fy - 20, '#ffd479');
+  const refund = demolishRefund(o);
+  if (refund) G.money += refund;
+  sfx('demolish'); flash(refund ? '已拆除　+$' + refund : '已拆除', fx, fy - 20, '#ffd479');
+  spawnHammerHit(fx, fy, o);   // 槌子敲下去＋碎片＋煙塵（js/attack-fx.js）
   closeGroundMenu(); updateHUD();
   return true;
 }
@@ -609,7 +645,7 @@ function renderBuildingActions(o) {
   addGroundCloseButton();
   const demolish = document.createElement('button');
   demolish.className = 'gm-demolish';
-  demolish.textContent = '🔨 拆除';
+  demolish.innerHTML = '<img class="gm-demolish-icon" src="images/weapon/icon-hammer.png" alt=""> 拆除';   // 跟建築欄的拆除按鈕同一支槌子
   demolish.addEventListener('click', () => {
     if (!demolishPlayerBuilding(o)) closeGroundMenu();
   });
@@ -782,7 +818,7 @@ function applyChaosDamage(t, best, spec) {
 function openCampMenu(base, clientX, clientY) {
   closeBuildMenu(); closeSentryMenu();
   groundTarget = null;
-  groundMenu.innerHTML = '<div class="gm-title">營地</div>';
+  groundMenu.innerHTML = '<div class="gm-title gm-camp-title">營地</div>';
   addGroundCloseButton();
   const recall = document.createElement('button');
   recall.textContent = '📣 召回所有哨兵';
@@ -809,8 +845,8 @@ function renderGroundActions() {
   addGroundCloseButton();
   const nearest = document.createElement('button');
   nearest.className = 'gm-nearest';
-  nearest.textContent = '🎯 召喚最近的哨兵';
-  nearest.addEventListener('click', summonNearestSentryToGround);
+  nearest.textContent = '🎯 召喚全部哨兵';
+  nearest.addEventListener('click', summonAllSentriesToGround);
   groundMenu.appendChild(nearest);
   for (const t of G.towers) {
     const b = document.createElement('button');
@@ -820,8 +856,7 @@ function renderGroundActions() {
     if (portrait) { const img = document.createElement('img'); img.src = portrait.src; img.alt = ''; avatar.appendChild(img); }
     const info = document.createElement('span'); info.className = 'gm-sentry-info';
     const name = document.createElement('strong'); name.textContent = TYPES[t.type].name;
-    const status = document.createElement('small'); status.textContent = t.berserk ? '暴走中' : (t.taint > 85 ? '瀕臨暴走' : '汙染 ' + Math.round(t.taint));
-    info.append(name, status); b.append(avatar, info);
+    info.append(name); b.append(avatar, info);
     b.disabled = !!t.berserk;
     b.addEventListener('click', () => assignSentryToGround(t));
     groundMenu.appendChild(b);
@@ -866,19 +901,19 @@ function newGame() {
   setPaused(false);
   document.getElementById('systemNotices').replaceChildren();
   G = {
-    phase: 'ready', money: START.money,
+    phase: 'ready', money: window.TEST_MODE ? Math.max(START.money, 99999) : START.money,
     campWarningAt: -Infinity,
     guide: START.guide, guideMax: START.guideMax, guideRegen: START.guideRegen,
     grid: {}, towers: [], npcs: [], obstacles: [], enemies: [], effects: [], acidPools: [], mapDestroyed: new Set(),
     recentMonsterSpawns: [],
-    selType: null, waveIndex: 0, waves: buildWaves(),
-    spawnQueue: [], spawnTimer: 0, curGap: 0.9, betweenWaves: 0,
+    selType: null,
     running: false, over: false, won: false, damageVignetteT: 0, cameraShakeT: 0,
   };
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
   setupStorageBoxWalls();
   setupDoors();         // 門一開始都關著（js/doors.js）
+  if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
@@ -889,29 +924,6 @@ function newGame() {
   if (typeof restoreSanitySP === 'function') restoreSanitySP();   // SP 帶到這張地圖，不補滿（js/sanity.js）
   updateHUD();
   updateBuildToggle();
-}
-function buildWaves() {
-  if (MAP_SAFE) return [];        // 安全場景：完全不生怪
-  const w = [], W = WAVE_CFG;
-  for (let i = 0; i < W.total; i++) {
-    w.push({
-      count: W.baseCount + i * W.addCount,
-      hp: W.baseHp + i * W.addHp,
-      speed: W.baseSpeed + i * W.addSpeed,
-      reward: W.reward,
-      gap: W.baseGap - i * W.subGap,
-    });
-  }
-  return w;
-}
-function startWave() {
-  if (G.cores) { G.spawnQueue=[]; return; }
-  const w = G.waves[G.waveIndex];
-  G.spawnQueue = [];
-  const count = Math.max(1, Math.round(w.count * difficultyOf('spawnRate')));   // 整體難度（data/balance.js）
-  for (let i = 0; i < count; i++) G.spawnQueue.push({});
-  G.spawnTimer = 0; G.curGap = w.gap;
-  sfx('wave');   // 新一波開始
 }
 
 // ---- 玩家出生點：基地地圖可指定格子；其他情況優先站營地，再找空地 ----
@@ -1062,7 +1074,8 @@ function updatePlayer(dt) {
   if (Math.abs(dx) >= Math.abs(dy) && dx) p.dir = dx < 0 ? 'left' : 'right';
   else if (dy) p.dir = dy < 0 ? 'back' : 'front';
   p.anim += dt;
-  const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dt;   // 輕量跑鞋（js/equipment.js）
+  const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dt   // 輕量跑鞋（js/equipment.js）
+    * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally') : 1);   // 走在鐵絲網上變慢
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   if (!playerBlocked(nx, p.y)) p.x = nx;
   if (!playerBlocked(p.x, ny)) p.y = ny;
@@ -1111,7 +1124,12 @@ function npcPointerPosition(e) {
   };
 }
 // 右鍵＝開選單；左鍵＝確認/放建築/拆除，點空地則開槍（按住連射，朝游標方向）
-cv.addEventListener('contextmenu', e => { e.preventDefault(); if (!npcDrag) handleMapClick(e, false); });
+cv.addEventListener('contextmenu', e => {
+  e.preventDefault();
+  // 正在放建築（或拆除模式）：右鍵＝取消，不開選單
+  if (G && G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish')) { closeBuildMenu(); sfx('switch'); return; }
+  if (!npcDrag) handleMapClick(e, false);
+});
 cv.addEventListener('mousemove', e => { aimClient = { x: e.clientX, y: e.clientY }; });
 cv.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
@@ -1186,7 +1204,7 @@ function handleMapClick(e, isLeft) {
   if (isLeft && G.selType === 'demolish') {   // 拆除
     const target = playerBuildingAt(c, r);
     if (target) { spawnGroundRipple(e.clientX, e.clientY); demolishPlayerBuilding(target); }
-    else { sfx('error'); flash('只能拆除自己建造的建築', x, y - 18, '#ff8f8f'); }
+    else { sfx('error'); flash('這裡沒有可以拆除的東西', x, y - 18, '#ff8f8f'); }
     return false;
   }
 
@@ -1368,15 +1386,16 @@ function updatePlayerAttack(dt) {
     // 點在身上的目標優先；同樣是點在身上或同樣在扇形內，就打最近的
     if ((shot.onBody && !bestOnBody) || (shot.onBody === bestOnBody && shot.d < bestD)) { bestD = shot.d; best = e; bestOnBody = shot.onBody; }
   }
-  for (const o of G.obstacles) {   // 油桶／油箱也能瞄準（開槍打爆）
+  for (const o of G.obstacles) {   // 油桶／油箱、異質礦也能瞄準（開槍打爆／慢慢打碎）
     if (bestOnBody) break;          // 已經直接點在怪物身上
-    if (!oilItem(o) || o.hp <= 0) continue;
-    const c = oilCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
+    const isOil = oilItem(o), isOre = o.ore && typeof oreProxy === 'function';
+    if ((!isOil && !isOre) || o.hp <= 0) continue;
+    const c = isOil ? oilCenter(o) : oreCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
     if (d > PLAYER_ATK.range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
     let da = Math.abs(Math.atan2(c.y - p.y, c.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
-    if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = oilProxy(o); }
+    if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = isOil ? oilProxy(o) : oreProxy(o); }
   }
-  const hitPt = best && !best.oilRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
+  const hitPt = best && !best.oilRef && !best.oreRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
   let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
   if (!best && typeof shootHangiCapOnLine === 'function') {   // 沒打到怪物：打到順順宮帽就把它打開（js/hangi-bao.js）
@@ -1391,6 +1410,7 @@ function updatePlayerAttack(dt) {
   if (best) G.effects.push({ ring: true, x: endX, y: endY, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
   if (best && best.oilRef) { damageOil(best.oilRef, Math.round(PLAYER_ATK.dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
+  if (best && best.oreRef) { pistolHitOre(best.oreRef, PLAYER_ATK.dmg); best = null; }   // 打到異質礦：累積傷害，打夠了才碎（js/ore.js）
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
@@ -1489,7 +1509,7 @@ function setPaused(on) {
   if (badge) badge.classList.toggle('hidden', !paused);
 }
 window.addEventListener('keydown', e => {
-  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || mapTransitioning) return;
+  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || mapTransitioning) return;
   if (!G || !G.running || G.over || MAP_SAFE) return;   // 只有戰鬥中可以暫停
   sfx('switch'); setPaused(!paused);
 });
@@ -1527,10 +1547,10 @@ function frame(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
-  if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
+  if (!paused && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !mapTransitioning && !frozen) {
+  if (!paused && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
   }
@@ -1549,20 +1569,6 @@ function update(dt) {
   G.damageVignetteT = Math.max(0, (G.damageVignetteT || 0) - dt);
   G.cameraShakeT = Math.max(0, (G.cameraShakeT || 0) - dt);
   if (typeof SANITY === 'undefined' || SANITY.autoRegen) G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);   // SP 不會自己恢復，要喝杏仁水（js/sanity.js）
-  // 生怪
-  if (G.spawnQueue.length > 0) {
-    G.spawnTimer -= dt;
-    if (G.spawnTimer <= 0) {
-      const cells = spawnCells();   // 地圖的「入口」格（沒設定就用最上排）
-      if (cells.length) {
-        G.spawnQueue.shift();
-        const [sc, sr] = cells[Math.floor(Math.random() * cells.length)];
-        const [sx, sy] = center(sc, sr);
-        G.enemies.push(createMonster(chooseMonster(MAP, ACTIVE_MONSTERS), sx, sy));
-      }
-      G.spawnTimer = G.curGap;
-    }
-  }
   // 怪物移動
   for (const e of G.enemies) stepEnemy(e, dt);
   // 雷德：偵測最近怪物，3 格內進入「舉盾衝撞」模式（供移動衝刺、撞擊、繪製共用）
@@ -1846,6 +1852,7 @@ function update(dt) {
     }
     if (o.hitT > 0) o.hitT -= dt;
   }
+  if (typeof updateSlowBuildingWear === 'function') updateSlowBuildingWear(dt);   // 鐵絲網被踩著的怪物慢慢磨壞（js/build.js）
   for (const f of G.effects) {
     f.life -= dt;
     if (f.coreMote) updateCoreMote(f, dt);   // 異質核心的黑紫粒子
@@ -2003,7 +2010,7 @@ function loseOverlay(reason, cause) {
 // 怪物的中文名稱（怪物編輯器裡的名字）
 function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
-function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 function lose(reason, cause) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）

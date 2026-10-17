@@ -17,10 +17,6 @@ const STORAGE_BOXES = [
         [
           1,
           2
-        ],
-        [
-          2,
-          2
         ]
       ]
     },
@@ -60,10 +56,6 @@ const STORAGE_BOXES = [
         ],
         [
           1,
-          2
-        ],
-        [
-          2,
           2
         ]
       ]

@@ -18,6 +18,15 @@ function setTeam(list) { try { localStorage.setItem(TEAM_STORE, JSON.stringify(l
 
 // ---- 編隊面板（DOM 由程式建立，不用改 HTML/CSS）----
 let teamBtn = null, teamPanel = null, squadBtn = null, squadPanel = null, impressionPanel = null, fieldSquadHud = null, fieldCommandMenu = null;
+// 戰鬥畫面的面板可以收起來（隊員欄、建築欄）；收合狀態記在瀏覽器裡，下次打開遊戲照舊
+const HUD_COLLAPSE_KEY = 'tudrc_hud_collapsed';
+const hudCollapsed = (() => { try { return JSON.parse(localStorage.getItem(HUD_COLLAPSE_KEY) || '{}') || {}; } catch (_) { return {}; } })();
+function setHudCollapsed(name, on) {
+  hudCollapsed[name] = !!on;
+  try { localStorage.setItem(HUD_COLLAPSE_KEY, JSON.stringify(hudCollapsed)); } catch (_) {}
+  if (typeof sfx === 'function') sfx('switch');
+}
+if (typeof applyBuildCollapse === 'function') applyBuildCollapse();   // build.js 比這裡早載入，收合狀態讀到之後再套用一次
 function ensureTeamUI() {
   const wrap = document.getElementById('wrap'); if (!wrap) return;
   if (!squadBtn) {
@@ -63,6 +72,8 @@ function ensureTeamUI() {
     fieldSquadHud.className = 'hidden';
     fieldSquadHud.setAttribute('aria-label', '現有隊員狀態');
     fieldSquadHud.addEventListener('pointerdown', e => {
+      const fold = e.target.closest('.hud-collapse');
+      if (fold) { e.preventDefault(); e.stopPropagation(); setHudCollapsed('squad', !hudCollapsed.squad); closeFieldCommandMenu(); applySquadCollapse(); return; }
       const sootheButton = e.target.closest('.field-soothe-button');
       if (sootheButton) {
         e.preventDefault(); e.stopPropagation();
@@ -75,9 +86,10 @@ function ensureTeamUI() {
       const avatar = e.target.closest('.field-member-avatar');
       if (avatar) {
         e.preventDefault(); e.stopPropagation();
-        openFieldCommandMenu(avatar.dataset.type, avatar);
+        if (e.button === 2) openFieldCommandMenu(avatar.dataset.type, avatar);   // 只有右鍵開命令選單（左鍵不會）
       }
     });
+    fieldSquadHud.addEventListener('contextmenu', e => { if (e.target.closest('.field-member-avatar')) e.preventDefault(); });   // 右鍵不要跳出瀏覽器的選單
     wrap.appendChild(fieldSquadHud);
   }
   if (!fieldCommandMenu) {
@@ -167,7 +179,7 @@ function supportCard(actor) {
   if (!profile) return '';
   const display = { name: profile.name, sprite: profile.sprite };
   return '<article class="squad-card squad-card-support" style="--member-color:#8292a3">' +
-    '<span class="squad-portrait"><img src="' + memberPortraitPath(display) + '" alt="' + profile.name + '"></span>' +
+    '<span class="squad-portrait" data-char="' + actor.type + '"><img src="' + memberPortraitPath(display) + '" alt="' + profile.name + '"></span>' +   // data-char：個別角色的頭像裁切（css/style.css，例如球球）
     '<div class="squad-member-main">' +
       '<div class="squad-member-head"><div><strong>' + profile.name + '</strong><span>Y102編組・非戰鬥人員</span></div><em class="member-condition support">非戰鬥人員</em></div>' +
       '<div class="support-assignment"><b>支援編制</b><span>不參與戰鬥，無法使用異質結晶升級。</span></div>' +
@@ -275,7 +287,14 @@ function renderFieldSquadHud() {
   const safe = (typeof MAP_SAFE !== 'undefined') && MAP_SAFE;
   if (safe) { fieldSquadHud.classList.add('hidden'); return; }
   const members = (typeof G !== 'undefined' && G && Array.isArray(G.towers)) ? G.towers : [];
-  fieldSquadHud.innerHTML = '<div class="field-squad-list">' +
+  // 收合鈕和名單外框只建一次（每 0.3 秒只更新名單內容），收起／展開的動畫才不會被重畫打斷
+  let list = fieldSquadHud.querySelector('.field-squad-list');
+  if (!list) {
+    fieldSquadHud.innerHTML = '<button class="hud-collapse" type="button"></button><div class="field-squad-fold"><div class="field-squad-list"></div></div>';
+    list = fieldSquadHud.querySelector('.field-squad-list');
+    applySquadCollapse();
+  }
+  list.innerHTML = ''.concat(
     (members.length ? members.map(member => {
       const spec = TYPES[member.type]; if (!spec) return '';
       const hp = Math.max(0, Math.round(member.hp || 0));
@@ -305,8 +324,15 @@ function renderFieldSquadHud() {
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
         '</article>';
-    }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>') + '</div>';
+    }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>'));
   fieldSquadHud.classList.remove('hidden');
+}
+// 隊員欄收起／展開：只切 class，CSS 負責滑順的動畫
+function applySquadCollapse() {
+  if (!fieldSquadHud) return;
+  const folded = !!hudCollapsed.squad, btn = fieldSquadHud.querySelector('.hud-collapse');
+  fieldSquadHud.classList.toggle('collapsed', folded);
+  if (btn) { btn.textContent = ''; btn.title = folded ? '展開隊員欄' : '收起隊員欄'; btn.setAttribute('aria-expanded', !folded); }
 }
 // 每幀更新隊員頭像的大招冷卻環（內緣藍線，隨充能繞一圈）
 // 大招還要冷卻多久（1＝剛放完 → 0＝可以再放）。嚮導的「大招」就是疏導。

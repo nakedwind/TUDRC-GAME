@@ -465,6 +465,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   if (kind === 'flame' && typeof burnLifePilesNear === 'function') burnLifePilesNear(impactPoint.x, impactPoint.y, (spec.splash || 0) * CELL + 22);   // 希奧妮的火焰剛好燒到生命體的碎塊
   if (kind === 'flame' && G.enemies.includes(target)) target.fireHitAt = performance.now() / 1000;
   if (kind === 'flame' && scale > 1.3 && typeof blastOres === 'function') blastOres(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 希奧妮大招的小爆炸：炸開礦物（js/ore.js）
+  if (kind === 'flame' && scale > 1.3 && typeof blastWalls === 'function') blastWalls(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 也炸得開可炸開的牆
   if (kind === 'flame' && typeof hitHangiCapsAt === 'function')   // 希奧妮的火焰燒到順順宮帽：打開帽子（大招的爆炸範圍比較大）
     hitHangiCapsAt(impactPoint.x, impactPoint.y, scale > 1.3 && typeof ORE_THEONIE_R !== 'undefined' ? ORE_THEONIE_R * CELL : (spec.splash || 0) * CELL + 22);
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });
@@ -485,4 +486,58 @@ const SENTRY_ATTACK_SOUNDS = { theonie: 'rangedShot', amber: 'rangedShot', avare
 function playSentryAttackSound(t) {
   const name = SENTRY_ATTACK_SOUNDS[t.type];
   if (name && typeof sfxAt === 'function') sfxAt(name, t.x, t.y, 0.55, t.type);
+}
+
+// ---- 拆除建築：槌子揮下來敲一下（揮擊 0.07 秒 → 敲中：白光＋星芒、衝擊圈、碎片四濺、煙塵）----
+const HAMMER_FX_IMG = new Image();
+HAMMER_FX_IMG.src = 'images/weapon/icon-hammer-cursor.png';   // 跟拆除游標同一張（icon-hammer.png 轉 45 度）
+function spawnHammerHit(x, y, o) {
+  const chips = [];
+  for (let i = 0; i < 10; i++) {   // 碎片：往上噴再掉下來
+    const a = -Math.PI / 2 + (Math.random() - .5) * 2.4, sp = 70 + Math.random() * 110;
+    chips.push({ vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, s: 2 + Math.random() * 2.5, rot: Math.random() * 6, spin: (Math.random() - .5) * 18, col: Math.random() < .5 ? '#8a6a48' : '#7c8590' });
+  }
+  G.effects.push({ hammerHit: true, x, y, life: .55, life0: .55, chips });
+  setTimeout(() => { if (G && G.effects && o && typeof spawnDust === 'function') spawnDust(o); }, 70);   // 敲中的瞬間揚起煙塵
+}
+function drawHammerHit(ctx, f) {
+  const t = f.life0 - f.life, SWING = .07, RECOIL = .07;   // 揮下只要 0.07 秒（加速度越來越快），敲中後 0.07 秒彈起淡出
+  if (t < SWING + RECOIL) {   // 槌子：從右上舉起 → 猛力揮下敲中 → 稍微彈起
+    const k = Math.min(1, t / SWING), ease = k * k * k;
+    // 支點（握柄末端）在目標右上方；槌頭從上方揮下，最後剛好敲在 (f.x, f.y)，敲中後稍微彈起
+    const ang = .6 - ease * 1.85 + (t > SWING ? .16 * Math.sin((t - SWING) / RECOIL * Math.PI) : 0);
+    ctx.save(); ctx.globalAlpha = t > SWING ? Math.max(0, 1 - (t - SWING) / RECOIL) : 1;
+    ctx.translate(f.x + 25, f.y - 12); ctx.rotate(ang); ctx.imageSmoothingEnabled = false;
+    ctx.drawImage(HAMMER_FX_IMG, -37, -37, 48, 48);   // 以握柄末端（圖上 37,37）為支點旋轉
+    ctx.restore();
+  }
+  if (t < SWING) return;
+  const h = t - SWING, life = f.life0 - SWING, p = Math.min(1, h / life);
+  ctx.save();
+  const FL = .22, FLASH_K = .8;   // 敲中的白光持續幾秒、強度（1＝最亮）
+  if (h < FL) {   // 敲中的白光：亮白光暈（疊加變亮）＋實心白色光球＋銳利的白色星芒；亮處暗處都看得到
+    const a = 1 - h / FL, ease = a * a * FLASH_K, grow = Math.sqrt(h / FL);
+    ctx.globalCompositeOperation = 'lighter';
+    const R = 40 + 36 * grow, g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, R);
+    g.addColorStop(0, 'rgba(255,255,255,' + ease + ')'); g.addColorStop(.4, 'rgba(255,248,220,' + (.7 * ease) + ')'); g.addColorStop(1, 'rgba(255,236,190,0)');
+    ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(f.x, f.y, R, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    const core = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, 22 + 10 * grow);   // 中間的實心白球（亮的地板上也很明顯）
+    core.addColorStop(0, 'rgba(255,255,255,' + ease + ')'); core.addColorStop(.6, 'rgba(255,255,255,' + (.75 * ease) + ')'); core.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = core; ctx.beginPath(); ctx.arc(f.x, f.y, 22 + 10 * grow, 0, Math.PI * 2); ctx.fill();
+    const S = 20 + 34 * grow;   // 星芒：4 長 4 短的尖刺
+    ctx.globalAlpha = ease; ctx.fillStyle = '#ffffff'; ctx.strokeStyle = 'rgba(255,214,120,' + ease + ')'; ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    for (let i = 0; i < 16; i++) { const ang = i * Math.PI / 8 + .2, r = i % 4 === 0 ? S : i % 2 === 0 ? S * .55 : S * .14; ctx.lineTo(f.x + Math.cos(ang) * r, f.y + Math.sin(ang) * r); }
+    ctx.closePath(); ctx.fill(); ctx.stroke();
+  }
+  ctx.globalAlpha = Math.max(0, 1 - p * 1.6);   // 衝擊圈
+  ctx.strokeStyle = '#ffe2a0'; ctx.lineWidth = 3 * (1 - p) + .5;
+  ctx.beginPath(); ctx.ellipse(f.x, f.y + 6, 8 + 34 * Math.sqrt(p), (8 + 34 * Math.sqrt(p)) * .5, 0, 0, Math.PI * 2); ctx.stroke();
+  for (const c of f.chips) {   // 碎片：拋物線落下、邊轉邊淡出
+    const cx = f.x + c.vx * h, cy = f.y + c.vy * h + 260 * h * h;
+    ctx.globalAlpha = Math.max(0, 1 - p); ctx.fillStyle = c.col;
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(c.rot + c.spin * h); ctx.fillRect(-c.s / 2, -c.s / 2, c.s, c.s); ctx.restore();
+  }
+  ctx.restore();
 }

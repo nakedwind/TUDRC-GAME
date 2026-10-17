@@ -60,6 +60,7 @@ function computeLightField() {
     });
     if (l.smooth) markBeamMask(l);   // 頭燈、手電筒畫面上照得到的格子（牆後面不會亮）
   }
+  if (typeof lightBreakableWallFaces === 'function') lightBreakableWallFaces([lightField, visField, warmField]);   // 可炸開的牆：牆面跟著牆腳一起亮（js/breakable-walls.js）
 }
 // 頭燈、手電筒畫面上照得到的格子：格子擴散（不限扇形，讓柔邊也有地方亮；範圍多一點給柔邊）＋從燈到格子要「直線看得到」。
 // 只靠格子擴散的話，光會從門口繞過牆角、或穿過比一格薄的牆，跑到牆的另一邊。
@@ -188,7 +189,7 @@ function bodyVisible(box, x, y) {
   const pts = [[x, y], [box.cx, box.cy], [box.cx, box.y0 + 4], [box.x0 + 4, box.cy], [box.x1 - 4, box.cy]];
   return pts.some(([px, py]) => isVisible(px, py) || visualLightAt(px, py) > SEE_MIN);
 }
-const enemyVisible = e => bodyVisible(targetBodyBox(e), e.x, e.y);
+const enemyVisible = e => !(typeof inHiddenArea === 'function' && inHiddenArea(e.x, e.y)) && bodyVisible(targetBodyBox(e), e.x, e.y);
 function getLights() {
   const L = [];
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）

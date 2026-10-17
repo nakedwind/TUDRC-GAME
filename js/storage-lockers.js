@@ -76,11 +76,38 @@ function useStoragePropNearPlayer(){
   }else if((supplyInventory.get('storage-locker-key')||0)<=0){
     sfx('error');flash('需要置物箱鑰匙',prop.x,prop.top-8,'#ffcf89',1.4);
   }else{
-    unlockedStorageLockers.add(prop.token);setupStorageBoxWalls();computeFlow();sfx('door');systemNotice('已用鑰匙打開置物箱');saveGame();
-    if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);   // 有機會在裡面找到杏仁水保溫瓶（js/equipment.js）
-    if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);   // 有機會找到燃燒彈槍、麻醉槍或它們的彈藥（js/special-guns.js）
+    const remainingKeys=supplyInventory.get('storage-locker-key')-1;
+    if(remainingKeys>0)supplyInventory.set('storage-locker-key',remainingKeys);
+    else supplyInventory.delete('storage-locker-key');
+    unlockedStorageLockers.add(prop.token);setupStorageBoxWalls();computeFlow();sfx('door');systemNotice('已打開置物箱，消耗 1 支鑰匙');
+    const loot=prop.stamp?.lockerLoot;
+    if(loot)grantLockerLoot(loot);
+    else{
+      if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);
+      if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);
+    }
+    updateHUD();saveGame();
   }
   return true;
+}
+function grantLockerLoot(loot){
+  if(loot.kind==='empty')return;
+  if(loot.kind==='item'){
+    const item=itemById(loot.id);if(!item)return;
+    const qty=Math.max(1,Math.min(999,Math.floor(Number(loot.qty)||1)));
+    supplyInventory.set(item.id,(supplyInventory.get(item.id)||0)+qty);
+    showItemPickupNotice(item.id,qty);systemNotice('在置物櫃找到「'+item.name+'」×'+qty);
+  }else if(loot.kind==='equipment'){
+    if(!grantEquipment(loot.id,'在置物櫃找到'))systemNotice('已擁有這件裝備');
+  }else if(loot.kind==='weapon'){
+    const w=WEAPON_UPGRADES[loot.id];if(!w)return;
+    if(equipState.weapons[loot.id]){systemNotice('已擁有「'+w.name+'」');return;}
+    equipState.weapons[loot.id]=1;
+    const ammo=GUN_FINDS.start[loot.id];
+    if(ammo)equipState.gunAmmo[loot.id]={...ammo};
+    if(!equipState.loadout.sub)equipState.loadout.sub=loot.id;
+    saveEquipment();updateAmmoHud();systemNotice('在置物櫃找到「'+w.name+'」');
+  }
 }
 function storagePropDisplayTile(id,c,r,layer,stamp=null){
   const kind=storagePropKind(id);

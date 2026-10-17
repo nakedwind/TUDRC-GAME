@@ -183,12 +183,13 @@ function bomberShouldArm(e) {
   const r = SLIME_BOMB.trigger;
   if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= r) return true;
   if (G.towers.some(t => t.hp > 0 && Math.hypot(t.x - e.x, t.y - e.y) <= r)) return true;
-  return G.obstacles.some(o => o.playerBuilt && o.hp > 0 && enemyObstacleDistance(e, o) <= r * .8);
+  return G.obstacles.some(o => o.playerBuilt && !o.slow && o.hp > 0 && enemyObstacleDistance(e, o) <= r * .8);
 }
 
 // ---- 自爆 ----
 function slimeExplode(e, mul) {
   const R = SLIME_BOMB.radius, x = e.x, y = e.y;
+  if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 自爆史萊姆也炸得開可炸開的牆（js/breakable-walls.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 自爆史萊姆的爆炸波及順順宮帽：打開帽子
   const p = G.player;
   if (p && p.hp > 0 && Math.hypot(p.x - x, p.y - y) <= R) {
@@ -318,14 +319,14 @@ function onGiantLand(e) {
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 10, r2: 34, life: .3, life0: .3, color: '#c9b6e8' });
 }
 
-// 巨型史萊姆登場：從黑暗處（核心模式）或入口（波次模式）悄悄出現
+// 巨型史萊姆登場：從黑暗處悄悄出現
 function updateGiantEvent() {
   if (MAP_SAFE || G.over) return;
-  if (G.cores.length ? !G.cores.some(c => !c.dead) : G.waveIndex >= G.waves.length) return;   // 戰鬥已結束
+  if (!G.cores.some(c => !c.dead)) return;   // 戰鬥已結束（核心都打掉了）
   if (G.nextGiantAt == null) G.nextGiantAt = GIANT_EVENT.first / difficultyOf('spawnRate');
   if (G.battleTime < G.nextGiantAt) return;
   if (G.enemies.some(e => e.variant === 'giant' && !e.dead)) return;   // 上一隻還沒倒就先等
-  const cells = G.cores.length ? darkMonsterSpawnCells() : spawnCells();
+  const cells = darkMonsterSpawnCells();
   if (!cells.length) return;
   const [c, r] = cells[Math.floor(Math.random() * cells.length)];
   const [x, y] = center(c, r);

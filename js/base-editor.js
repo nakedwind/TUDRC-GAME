@@ -159,7 +159,7 @@ cv.addEventListener('pointerdown', e => {
   if (playerSpawnPick) {
     e.stopImmediatePropagation(); e.preventDefault();
     const [c, r] = cellFromEvent(e), m = curMap(), key = c + ',' + r;
-    if (!m.safe || !inGrid(c, r) || (m.solid || []).includes(key) || (m.breakable || []).includes(key) || (m.entrances || []).includes(key)) {
+    if (!m.safe || !inGrid(c, r) || (m.solid || []).includes(key) || (m.breakable || []).includes(key)) {
       setStatus('這格不能當玩家出生地，請選可通行的空格', '#ff8f8f'); draw(); return;
     }
     pushUndo(); m.playerSpawn = [c, r]; playerSpawnPick = false; saveMaps(); renderNpcPanel(); draw();
@@ -170,7 +170,7 @@ cv.addEventListener('pointerdown', e => {
     e.stopImmediatePropagation(); e.preventDefault();
     const [c, r] = cellFromEvent(e), m = curMap(), id = npcSpawnPick, loc = npcTable()[id];
     const key = c + ',' + r;
-    if (!inGrid(c, r) || (m.solid || []).includes(key) || (m.breakable || []).includes(key) || (m.entrances || []).includes(key)) {
+    if (!inGrid(c, r) || (m.solid || []).includes(key) || (m.breakable || []).includes(key)) {
       setStatus('這格不能當出生地，請選可通行的空格', '#ff8f8f'); draw(); return;
     }
     if (loc) { loc.map = m.name; loc.spawn = [c, r]; }

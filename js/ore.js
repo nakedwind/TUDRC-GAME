@@ -19,6 +19,8 @@ const ORE_BLAST_PAD = .6;   // 爆炸半徑外再多算幾格也會炸到礦物�
 const SHARD = { magnet: 90, pickup: 24, delay: .45 };   // 多近會被吸過來、多近算撿到（像素）；落地後幾秒才能撿
 // 路德的拳頭剛好波及礦物：hits＝敲幾下會碎（暴走時每下算 2 下）；pad＝攻擊範圍外再多算幾格
 const ORE_LUTHER = { hits: 4, pad: .5 };
+// 溫特的手槍：累積多少傷害才打得碎（手槍 Lv1 一發 5 → 小型 16 發、大型 28 發、稀有 40 發）
+const ORE_PISTOL = { ore_small: 80, ore_large: 140, ore_rare: 200, default: 120 };
 const ORE_DISSOLVE = 3;                       // 礦物泡在腐蝕池裡累積幾秒會溶解
 const ORE_STRAY = { chance: .4, range: 3 };   // 安柏打偏時：多少機率劈中目標附近幾格內的礦物
 const ORE_THEONIE_R = 1.2;                    // 希奧妮大招的爆炸半徑（格）
@@ -69,7 +71,7 @@ function oreNearPlayer() {
 // 對著礦物按互動鍵：提醒打開礦物的方法
 function oreHint(o) {
   const c = oreCenter(o);
-  flash('太硬了！要用地雷或瓦斯爐炸開', c.x, c.y - 34, '#d6b8ff', 1.4);
+  flash('太硬了！用地雷、瓦斯爐炸開，或用手槍多打幾發', c.x, c.y - 34, '#d6b8ff', 1.4);
   sfx('error');
 }
 
@@ -104,7 +106,6 @@ function breakOre(o, bx, by, msg) {
       r: 1.5 + Math.random() * 2, life: .5 + Math.random() * .3, life0: .8, color: '#c47dff' });
   }
   if (typeof spawnGoo === 'function') spawnGoo(c.x, c.y - 4, '#6b6372', 8, 1.1);   // 碎石
-  flash(msg || spec.name + ' 炸開了！', c.x, c.y - 40, '#d69bff', 1.6);
   if (typeof sfxAt === 'function') { sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break'); sfxAt('oreMine', c.x, c.y, .7, 'ore-mine'); }   // 碎掉的玻璃聲＋挖礦聲
 }
 
@@ -145,6 +146,19 @@ function updateOre(dt) {
   }
 }
 
+// 溫特開槍打中礦物（js/game.js 呼叫）：累積傷害，夠了就碎掉
+function pistolHitOre(o, dmg) {
+  if (!o || !o.ore || o.hp <= 0 || !G.obstacles.includes(o)) return;
+  const need = ORE_PISTOL[o.type] ?? ORE_PISTOL.default, c = oreCenter(o);
+  o.gunDmg = (o.gunDmg || 0) + dmg; o.hitT = HIT_DUR * .7;
+  if (o.gunDmg >= need) breakOre(o, G.player.x, G.player.y, '');   // 不跳文字提示
+  else if (typeof sfxAt === 'function') sfxAt('knock2', c.x, c.y, .45, 'ore-hit');
+}
+// 給溫特瞄準用的「假目標」（跟油桶一樣）
+function oreProxy(o) {
+  if (!o.proxy) { const c = oreCenter(o); o.proxy = { x: c.x, y: c.y, hp: 1, maxhp: 1, oreRef: o }; }
+  return o.proxy;
+}
 function nearestOreTo(x, y, maxD) {
   let best = null, bestD = maxD;
   for (const o of G.obstacles) {

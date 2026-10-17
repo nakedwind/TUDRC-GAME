@@ -60,6 +60,71 @@ window.addEventListener('beforeunload', () => saveGame());
 // ---------- 設定選單 ----------
 const settingsMenu = document.getElementById('settingsMenu');
 let settingsOpen = false;
+const SAVE_SLOT_COUNT = 6;
+const saveSlotKey = n => 'tudrc-save-slot-v1-' + n;
+function readSaveSlot(n) {
+  try {
+    const slot = JSON.parse(localStorage.getItem(saveSlotKey(n)) || 'null');
+    return slot && slot.values && typeof slot.values === 'object' ? slot : null;
+  } catch (_) { return null; }
+}
+function renderSaveSlots() {
+  const box = document.getElementById('saveSlots'); if (!box) return;
+  box.replaceChildren();
+  for (let n = 1; n <= SAVE_SLOT_COUNT; n++) {
+    const slot = readSaveSlot(n), row = document.createElement('article'); row.className = 'save-slot';
+    if (slot) {
+      const portrait = document.createElement('span'); portrait.className = 'save-slot-portrait'; portrait.setAttribute('aria-hidden', 'true');
+      const avatar = document.createElement('img'); avatar.src = EQUIP_PORTRAIT.fallback; avatar.alt = ''; portrait.append(avatar); row.append(portrait);
+    }
+    const info = document.createElement('div'), title = document.createElement('strong'), detail = document.createElement('small');
+    title.textContent = '存檔 ' + n;
+    detail.textContent = slot ? new Date(slot.at).toLocaleString('zh-TW', { hour12: false }) + (slot.scene?.mapName ? ' · ' + slot.scene.mapName : '') : '空白存檔';
+    info.append(title, detail); row.append(info);
+    for (const [action, label] of [['save', slot ? '覆寫' : '存入'], ['load', '讀取']]) {
+      const button = document.createElement('button'); button.type = 'button'; button.className = 'set-btn' + (action === 'save' ? ' primary' : ''); button.textContent = label;
+      button.dataset.slotAction = action; button.dataset.slot = n; button.disabled = action === 'load' && !slot; row.append(button);
+    }
+    box.append(row);
+  }
+}
+function storeSaveSlot(n) {
+  if (!Number.isInteger(n) || n < 1 || n > SAVE_SLOT_COUNT) return;
+  if (readSaveSlot(n) && !confirm('覆寫存檔 ' + n + '？')) return;
+  try {
+    saveGame();
+    for (const fn of [saveEquipment, saveQuests, saveMissions, saveSortie]) fn();
+    const values = Object.fromEntries(window.GAME_PROGRESS_KEYS.map(key => [key, localStorage.getItem(key)]));
+    const scene = { mapId: MAP?.id, mapName: MAP?.name, x: G.player?.x, y: G.player?.y };
+    localStorage.setItem(saveSlotKey(n), JSON.stringify({ v: 1, at: Date.now(), values, scene }));
+    systemNotice('已存入存檔 ' + n); sfx('button'); renderSaveSlots();
+  } catch (_) { systemNotice('存檔失敗：儲存空間不足或無法使用', true); }
+}
+document.getElementById('saveSlots').addEventListener('click', e => {
+  const button = e.target.closest('[data-slot-action]'); if (!button) return;
+  const n = Number(button.dataset.slot);
+  if (button.dataset.slotAction === 'save') { storeSaveSlot(n); return; }
+  if (!readSaveSlot(n) || !confirm('讀取存檔 ' + n + '？目前未存入的進度將被取代。')) return;
+  try { sessionStorage.setItem('tudrc-new-game-request-v1', 'slot:' + n); location.reload(); }
+  catch (_) { systemNotice('無法讀取存檔', true); }
+});
+const settingsTabs = [...document.querySelectorAll('[data-settings-page]')];
+function selectSettingsPage(id) {
+  settingsTabs.forEach(tab => { const on = tab.dataset.settingsPage === id; tab.setAttribute('aria-selected', String(on)); tab.tabIndex = on ? 0 : -1; });
+  document.querySelectorAll('.settings-page').forEach(page => { page.hidden = page.id !== 'settings-' + id; });
+}
+settingsTabs.forEach((tab, index) => {
+  tab.addEventListener('click', () => { selectSettingsPage(tab.dataset.settingsPage); sfx('switch'); });
+  tab.addEventListener('keydown', e => {
+    let next = index;
+    if (e.key === 'ArrowDown') next = (index + 1) % settingsTabs.length;
+    else if (e.key === 'ArrowUp') next = (index + settingsTabs.length - 1) % settingsTabs.length;
+    else if (e.key === 'Home') next = 0;
+    else if (e.key === 'End') next = settingsTabs.length - 1;
+    else return;
+    e.preventDefault(); selectSettingsPage(settingsTabs[next].dataset.settingsPage); settingsTabs[next].focus();
+  });
+});
 function renderSaveInfo() {
   const el = document.getElementById('saveInfo'); if (!el) return;
   if (!lastSavedAt) { el.textContent = '尚未存檔'; return; }
@@ -74,14 +139,11 @@ function renderSettings() {
   }
   document.getElementById('muteAll').checked = !SFX.enabled;
   document.getElementById('musicOffHint').classList.toggle('hidden', MUSIC.enabled);
-  const pauseBtn = document.getElementById('pauseToggle');
-  const canPause = typeof G !== 'undefined' && G && G.running && !G.over && !MAP_SAFE;
-  pauseBtn.disabled = !canPause;
-  pauseBtn.textContent = !canPause ? '戰鬥中才能暫停' : paused ? '▶ 繼續' : '⏸ 暫停';
   renderSaveInfo();
+  renderSaveSlots();
 }
 function openSettings() {
-  if (settingsOpen || typeof G === 'undefined' || !G) return;
+  if ((typeof campPlanOpen !== 'undefined' && campPlanOpen) || settingsOpen || typeof G === 'undefined' || !G) return;
   if (typeof closeSupplyShop === 'function') closeSupplyShop(true);
   if (typeof closeBackpack === 'function') closeBackpack(true);
   settingsOpen = true; aimHeld = false; Object.keys(keys).forEach(key => { keys[key] = false; });
@@ -100,7 +162,6 @@ for (const key of ['music', 'sfx']) {
   input.addEventListener('change', () => { saveSettings(); if (key === 'sfx') sfx('button'); });   // 放開滑桿時播一聲，聽聽看大小
 }
 document.getElementById('muteAll').addEventListener('change', e => { SFX.enabled = !e.target.checked; MUSIC.refresh(); renderSettings(); });
-document.getElementById('pauseToggle').addEventListener('click', () => { setPaused(!paused); sfx('switch'); closeSettings(true); });
 window.addEventListener('keydown', e => {   // M 鍵（js/sfx.js）切換靜音後，音樂跟著靜音
   if (!e.repeat && e.key.toLowerCase() === 'm' && !(e.target instanceof Element && e.target.closest('input, textarea, select'))) setTimeout(() => { MUSIC.refresh(); if (settingsOpen) renderSettings(); });
 });
@@ -110,7 +171,7 @@ window.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || e.repeat) return;
   if (settingsOpen) { e.preventDefault(); e.stopImmediatePropagation(); closeSettings(); return; }
   const visible = id => { const el = document.getElementById(id); return el && !el.classList.contains('hidden'); };
-  const busy = dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || mapTransitioning
+  const busy = (typeof campPlanOpen !== 'undefined' && campPlanOpen) || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || mapTransitioning
     || visible('sentryMenu') || visible('groundMenu') || visible('buildbar') || visible('teamEditPanel') || visible('squadStatusPanel')
     || (G && G.selType) || assigning;   // 開始畫面（簡報）也可以打開設定
   if (!busy) { e.preventDefault(); openSettings(); }

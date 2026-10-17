@@ -214,7 +214,7 @@ function displaceEnemy(e, dx, dy, distance, resetRoute = true) {
 }
 function moveEnemyToward(e, target, dt) {
   const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
-  const step = e.speed * dt;
+  const step = e.speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(e.x, e.y, 'enemy') : 1);   // 走在鐵絲網上變慢
   const moved = displaceEnemy(e, dx, dy, Math.min(step, d), false);
   if (moved && e.undying && typeof sfxAt === 'function') {
     e.lifeStepT = (e.lifeStepT || 0) - dt;
@@ -484,7 +484,7 @@ function stepEnemy(e, dt) {
 
   // 沒有哨兵時，才搜尋 18 格內由玩家建造的設施。
   const buildingChoice = G.obstacles
-    .filter(o => o.playerBuilt && o.hp > 0 && !o.trap)   // 地雷埋在地上，怪物不知道
+    .filter(o => o.playerBuilt && o.hp > 0 && !o.trap && !o.slow)   // 地雷埋在地上，怪物不知道；鐵絲網直接踩過去，不會去打
     .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
     .sort((a, b) => a.d - b.d)[0];

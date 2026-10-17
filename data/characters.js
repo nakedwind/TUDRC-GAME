@@ -365,5 +365,13 @@ const CHARACTERS = {
     "sprite": "salem_B",
     "intro": "",
     "captainImpression": ""
+  },
+  "ball": {
+    "id": "ball",
+    "kind": "support",
+    "name": "球球",
+    "sprite": "ball_B",
+    "intro": "應變中心裡養的狗，常在指揮部晃來晃去。",
+    "captainImpression": ""
   }
 };

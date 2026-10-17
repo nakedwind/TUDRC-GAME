@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 基地編輯器</title>
-<link rel="stylesheet" href="css/editor.css?v=wide-canvas-fix-20261016">
+<link rel="stylesheet" href="css/editor.css?v=locker-control-inline-20261017">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* 基地編輯器：章節＆NPC 面板 */
@@ -40,14 +40,13 @@
 
       <div id="tools" class="toolrow">
         <span class="tool-label">🖌️ 工具</span>
-        <button class="tool" data-mode="select">👆 選取<small>拖曳／多選物件</small></button>
-        <button class="tool" data-mode="erase">🧽 清除<small>只擦掉圖片</small></button>
-        <button class="tool" data-mode="pick">💧 吸管<small>吸取格子的圖・Alt</small></button>
-        <button class="tool" data-mode="solid">🧱 不可穿透<small>怪穿不過・繞路</small></button>
-        <button class="tool" data-mode="solidnudge">🎯 碰撞微調<small>點紅格・方向鍵移動</small></button>
-        <button class="tool" data-mode="portal">🚪 出入口<small>通往另一張地圖</small></button>
-        <button class="tool" data-mode="breakable" hidden>💥 可破壞<small>怪停下打破</small></button>
-        <button class="tool" data-mode="core" hidden>💠 異質核心候選點<small>點格子標記／取消</small></button>
+        <button class="tool" data-mode="select">👆 選取</button>
+        <button class="tool" data-mode="erase">🧽 清除</button>
+        <button class="tool" data-mode="pick">💧 吸管</button>
+        <button class="tool" data-mode="solid">🧱 不可穿透</button>
+        <button class="tool" data-mode="solidnudge">🎯 碰撞微調</button>
+        <button class="tool" data-mode="portal">🚪 出入口</button>
+        <button class="tool" data-mode="core" hidden>💠 異質核心候選點</button>
         <span class="sep"></span>
         <button class="btn" id="flipX" title="左右翻筆刷（快捷鍵 F）">⇄ 左右翻</button>
         <button class="btn" id="flipY" title="上下翻筆刷（快捷鍵 V）">⇅ 上下翻</button>
@@ -55,7 +54,7 @@
       </div>
       <div id="tools2" class="toolrow">
         <span class="tool-label">⚙️ 地圖</span>
-        <button class="btn" id="undoBtn">↶ 回復 (Ctrl+Z)</button>
+        <button class="btn" id="undoBtn" hidden style="display:none">↶ 回復 (Ctrl+Z)</button>
         <button class="btn" id="previewGame" title="用目前編輯中的地圖開遊戲畫面（不用先匯出）">▶ 預覽遊戲</button>
         <button class="btn" id="gridToggle">🔳 格線：開</button>
         <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透的紅色標記（只影響顯示，不會改掉設定）">🧱 紅格：開</button>
@@ -139,8 +138,8 @@
       <div id="status"></div>
       <div id="hint">
         先選<b>圖層</b>（🟫地板／✨裝飾），再選<b>磚塊</b>貼圖 —— 圖片<b>純外觀</b>。選取工具可<b>拖曳物件</b>移動，按住 <b>Shift</b> 點擊可多選後整組移動，按 <b>Delete</b> 可刪除選取物件。小圖(1×1)可<b>點/拖曳</b>鋪；<b>大圖(多格)</b>移過去看虛線框、<b>點一下</b>放置。小圖和大圖都能用<b>左右翻／上下翻</b>（F／V），已放置的圖片可先選取再翻轉。<br>
-        遊戲效果要另外標：<b>🧱 不可穿透</b>（紅框，怪繞路）、<b>💥 可破壞</b>（橙框，怪打破）。兩者互斥、再點一次可取消。<br>
-        用 <b>💠 異質核心候選點</b>標記可能出現的位置，再設定本局核心數量；每次開始會從候選點隨機抽取。候選點不可與不可穿透或可破壞格重疊。按 <b>Ctrl+Z</b> 或「↶ 回復」可回上一步。所有變更會<b>自動存檔</b>。<br>
+        牆壁與邊界可用 <b>🧱 不可穿透</b> 標記（紅框，怪繞路），再點一次可取消；路障與基地等素材會沿用自己的血量與碰撞設定。<br>
+        用 <b>💠 異質核心候選點</b>標記可能出現的位置，再設定本局核心數量；每次開始會從候選點隨機抽取。候選點不可與不可穿透格重疊。按 <b>Ctrl+Z</b> 或「↶ 回復」可回上一步。所有變更會<b>自動存檔</b>。<br>
         <b>💧 吸管</b>：點格子把筆刷換成那格的圖。按住 <b>Alt</b> 臨時吸管、按住 <b>Ctrl</b> 臨時選取，放開還原原本的工具。
       </div>
     </div>
@@ -227,7 +226,10 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=pearlshell-20261016"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=fish-20261016"></script>
-  <script src="data/maps.js?v=drink-shop-20261017"></script>        <!-- 地圖資料 -->
+  <script src="data/maps.js?v=cleanwaves-20261017"></script>        <!-- 地圖資料 -->
+  <script src="data/supplies.js"></script>
+  <script src="data/items.js?v=locker-loot-20261017"></script>
+  <script src="data/equipment.js?v=locker-loot-20261017"></script>
   <script src="data/doors.js?v=doorsfx-20261008"></script>        <!-- 可開關的門 -->
   <script src="js/sfx.js"></script>
   <script src="js/ui-feedback.js"></script>
@@ -235,6 +237,6 @@
   <script src="data/npc-locations.js?v=baseeditor-20261016"></script>  <!-- NPC 平時位置（依章節） -->
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/editor-store.js?v=psave-20261016"></script>   <!-- 地圖暫存放在瀏覽器資料庫 -->
-  <script>EditorStore.boot(["js/editor.js?v=stamp-color-fix-20261017", "js/editor-save.js?v=psave-20261016", "js/base-editor.js?v=player-spawn-20261016"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/editor.js?v=cleanwaves-20261017", "js/editor-save.js?v=psave-20261016", "js/base-editor.js?v=cleanwaves-20261017"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>

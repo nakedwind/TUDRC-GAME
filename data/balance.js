@@ -36,6 +36,13 @@ const DEFAULT_TEAM = ['theonie', 'amber', 'red', 'luther'];
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。
 // ---- 基地裡每個人平時在哪張地圖、哪一區（可依章節不同）：在 data/npc-locations.js ----
+// ---- 減速建築（不擋路，走在上面會變慢）----
+// 建築 id → 速度倍率：enemy＝怪物、ally＝溫特和隊員（0.1＝剩 10%，也就是 −90%）
+// wear＝怪物踩在上面時，每 every 秒磨掉 dmg HP（每隻怪各算一次；磨到 0 就壞掉）
+// 放這裡不會被物件編輯器匯出洗掉
+const SLOW_BUILDINGS = {
+  wirecloth: { enemy: .1, ally: .5, wear: { every: 2, dmg: 10 } },   // 鐵絲網：怪物 −90%、我軍 −50%；一隻怪每 2 秒磨掉 10，500 HP 約 100 秒壞掉
+};
 const WANDERERS = Object.values(CHARACTERS)
   .filter(character => character.kind === 'support')
   .map(({ id, name, sprite }) => ({ id, name, sprite }));
@@ -145,21 +152,10 @@ const LIGHT = {
   buildMargin: 40,   // 一般建築可以蓋在光圈外多遠（像素；40＝1 格）。0＝每個擋路格都要亮
 };
 
-// ---- 波次設定 ----
-// 共 total 波，難度會隨波數遞增（血量、速度變高，間隔變短）
-const WAVE_CFG = {
-  total: 5,
-  baseCount: 8, addCount: 3,     // 第i波怪物數量 = baseCount + i*addCount
-  baseHp: 40, addHp: 28,         // 第i波血量   = baseHp + i*addHp
-  baseSpeed: 44, addSpeed: 5,    // 第i波速度   = baseSpeed + i*addSpeed
-  reward: 8,                     // 殺一隻怪回多少資源
-  baseGap: 0.85, subGap: 0.05,   // 出怪間隔（秒）= baseGap - i*subGap
-};
-
 // ===== 整體難度（2026-10-11 依玩家回饋：難度降低一半）=====
 // 1＝原本的難度。調小＝變簡單，調大＝變難。
 const DIFFICULTY = {
-  spawnRate: 0.5,      // 怪物出現的量：0.5＝核心召喚間隔變兩倍、場上怪物上限減半、巨型史萊姆登場間隔變兩倍、波次模式每波數量減半
+  spawnRate: 0.5,      // 怪物出現的量：0.5＝核心召喚間隔變兩倍、場上怪物上限減半、巨型史萊姆登場間隔變兩倍
   monsterHp: 1,        // 怪物血量倍率（所有怪物，包含史萊姆各種類、鳥頭人）
   monsterDamage: 1,    // 怪物攻擊力倍率（打玩家、哨兵、建築）
 };

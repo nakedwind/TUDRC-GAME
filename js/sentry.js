@@ -338,7 +338,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
     [moveX, moveY] = center(...goal);
   }
   if (waypoint) [moveX, moveY] = center(waypoint.c, waypoint.r);
-  const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt;
+  const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally') : 1);   // 走在鐵絲網上變慢
   if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY)) {
     t.x = moveX; t.y = moveY;
     if (waypoint) t.navPath.shift();
@@ -622,7 +622,9 @@ function seatApproachPoint(seat) {
   }
   return best;
 }
+const NPC_NO_SEAT = ['ball'];   // 不會去坐椅子、躺床的角色（球球是狗）
 function trySeatActor(a) {
+  if (NPC_NO_SEAT.includes(a.kind === 'tower' ? a.type : a.id)) return false;
   if (!MAP_SAFE || a.seatCd > 0 || Math.random() >= NPC_SEAT.chance || typeof mapSeats !== 'function') return false;
   let best = null, bestD = NPC_SEAT.radius * CELL;
   const home = (a.kind === 'tower' ? a.mode === 'free' : true) ? homeAreaOf(a.kind === 'tower' ? a.type : a.id) : null;

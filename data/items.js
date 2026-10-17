@@ -17,7 +17,7 @@ const ITEM_CATEGORIES = [
 const SHARD_DIR = 'images/碎片鑰匙/';
 const ITEMS = [
   { id: 'battery', name: '電池', category: 'material', image: 'images/items/battery.png', desc: '在地圖上找到的電池。' },
-  { id: 'storage-locker-key', name: '置物櫃鑰匙', category: 'key', image: 'images/items/storage-locker-key.png', desc: '靠近鎖住的置物箱，按空白鍵或 E 即可開啟。鑰匙可重複使用。' },
+  { id: 'storage-locker-key', name: '置物櫃鑰匙', category: 'key', image: 'images/items/storage-locker-key.png', desc: '靠近鎖住的置物箱，按空白鍵或 E 開啟，每次消耗 1 支鑰匙。' },
   // ---- 回憶碎片（素材）：集滿 MEMORY_KEYS 裡的數量就會拼成那段回憶的鑰匙 ----
   { id: 'burning-shard', name: '熾熱的碎片',   category: 'material', image: SHARD_DIR + 'burning-shard.png', noDrop: true, desc: '摸起來微微發燙。好像映著誰的身影。' },
   { id: 'pure-shard',    name: '無雜質的碎片', category: 'material', image: SHARD_DIR + 'pure-shard.png',    noDrop: true, desc: '清澈透亮，一點雜質都沒有，像某個人單純的心。' },

@@ -33,9 +33,9 @@ function seedCores() {
   const map = typeof MAP !== 'undefined' ? MAP : {};
   const difficulty = Math.max(1, Math.min(5, Number(map.difficulty) || 1));
   const count = Math.max(1, Math.min(20, Math.floor(Number(map.coreCount) || difficulty)));
-  // 新地圖從編輯器指定的候選點抽取；舊地圖保留原入口作為相容候選點。
+  // 從地圖編輯器指定的候選點抽取；沒畫候選點就從會生怪的黑暗處隨機挑
   const marked = Array.isArray(map.coreSpots) && map.coreSpots.length
-    ? map.coreSpots.map(key => key.split(',').map(Number)) : spawnCells();
+    ? map.coreSpots.map(key => key.split(',').map(Number)) : darkMonsterSpawnCells();
   const seen = new Set();
   const cells = marked.filter(([c, r]) => {
     const key = c + ',' + r;
@@ -54,12 +54,47 @@ function seedCores() {
       timer: 1.8 + i * .7 + Math.random() * 2.4, reward: CORE.reward * difficulty, moteT: 0, hitT: 0, seed: Math.random() * 10 });
   }
 }
+// 這一格有沒有「地板」：地圖編輯器的任何一層有畫東西，或被素材蓋到。沒鋪東西的黑色空白區不算（換地圖才重算）
+let floorCellsCache = { map: null, set: null };
+function mapFloorCells() {
+  if (floorCellsCache.map === MAP && floorCellsCache.set) return floorCellsCache.set;
+  const set = new Set();
+  for (const layer of Object.values((MAP && MAP.layers) || {})) if (layer) for (const k of Object.keys(layer)) if (layer[k]) set.add(k);
+  for (const st of (MAP && MAP.stamps) || []) {
+    const t = mapTileById(st.id); if (!t) continue;
+    for (let dc = 0; dc < mapStampW(st, t); dc++) for (let dr = 0; dr < mapStampH(st, t); dr++) set.add((st.c + dc) + ',' + (st.r + dr));
+  }
+  floorCellsCache = { map: MAP, set };
+  return set;
+}
+// 生怪用的「走得到營地」：跟流場一樣從營地往外走，但門不管開關都當成走得過去（門後的房間也會生怪，等門打開再衝出來）
+function spawnReachCells() {
+  const doorCells = new Set();
+  if (typeof mapDoors !== 'undefined') for (const d of mapDoors) for (const k of d.own || []) doorCells.add(k);
+  const blocked = (c, r) => isWall(c, r) && !doorCells.has(c + ',' + r);
+  const seen = new Set(), q = [];
+  const seed = (c, r) => { const k = c + ',' + r; if (inGrid(c, r) && !blocked(c, r) && !seen.has(k)) { seen.add(k); q.push([c, r]); } };
+  if (campCells.size) campCells.forEach(k => seed(...k.split(',').map(Number)));
+  else for (let c = 0; c < COLS; c++) seed(c, ROWS - 1);
+  for (let i = 0; i < q.length; i++) {
+    const [c, r] = q[i];
+    for (const [dc, dr] of [[0, 1], [0, -1], [-1, 0], [1, 0]]) seed(c + dc, r + dr);
+  }
+  return seen;
+}
 function darkMonsterSpawnCells() {
+  // 地圖編輯器畫了「👾 怪物出生區」：只從那些格子生（優先挑暗的，全部都被照亮就照樣從那裡生）
+  const zone = MAP && Array.isArray(MAP.spawnZone) && MAP.spawnZone.length ? MAP.spawnZone : null;
+  if (zone) return zoneSpawnCells(zone);
+  const floor = mapFloorCells(), reach = spawnReachCells();
   const recent = new Set((G.recentMonsterSpawns || []).slice(-12));
   const candidates = [], fallback = [];
   for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) {
     const key = c + ',' + r;
     if (isWall(c, r) || G.grid[key]) continue;
+    // 要走得到營地才生怪：被牆圍死的區塊不生；門（開著關著都一樣）、鐵門、可打破的牆、障礙物都算走得過去
+    if (!reach.has(key)) continue;
+    if (!floor.has(key)) continue;   // 沒鋪地板的黑色空白區（地圖邊緣）不生怪
     const [x, y] = center(c, r);
     if (G.player && Math.hypot(x - G.player.x, y - G.player.y) < CELL * 4) continue;
     if (G.towers.some(t => t.hp > 0 && Math.hypot(x - t.x, y - t.y) < CELL * 3)) continue;
@@ -316,4 +351,21 @@ function drawCoreMote(ctx, f) {
   ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.5, f.r * (.4 + .6 * p)), 0, Math.PI * 2); ctx.fill();
   if (!f.dark) { ctx.globalAlpha = a * .6; ctx.fillStyle = '#f1ddff'; ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.3, f.r * .35 * p), 0, Math.PI * 2); ctx.fill(); }
   ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+}
+
+// 怪物出生區（地圖編輯器的 👾 筆刷）：挑可以站的格子；離溫特、隊員太近的不要；暗的優先
+function zoneSpawnCells(zone) {
+  const recent = new Set((G.recentMonsterSpawns || []).slice(-12));
+  const dark = [], lit = [], any = [];
+  for (const key of zone) {
+    const [c, r] = key.split(',').map(Number);
+    if (!inGrid(c, r) || isWall(c, r) || G.grid[key]) continue;
+    const [x, y] = center(c, r);
+    any.push([c, r]);
+    if (G.player && Math.hypot(x - G.player.x, y - G.player.y) < CELL * 4) continue;
+    if (G.towers.some(t => t.hp > 0 && Math.hypot(x - t.x, y - t.y) < CELL * 3)) continue;
+    if (recent.has(key) || G.enemies.some(e => Math.hypot(x - e.x, y - e.y) < CELL * 1.5)) continue;
+    (cellLit(c, r) ? lit : dark).push([c, r]);
+  }
+  return dark.length ? dark : lit.length ? lit : any;
 }

@@ -1,7 +1,7 @@
 /* ===== 地圖編輯器 — 核心程式（圖層 + 可翻轉圖片 + 圖片效果分離）=====
    圖片分兩層：🟫 地板層(floor) 在底、✨ 裝飾層(deco) 疊在上面(透明處透出地板)。
    另有多格大圖(stamps)疊最上面。以上都只是外觀。
-   遊戲效果獨立標記：🧱 不可穿透(solid) / 💥 可破壞(breakable)。
+   遊戲效果獨立標記：🧱 不可穿透(solid)；可破壞素材沿用自己的血量與碰撞。
    還可標怪物入口、營地，設定規則，Ctrl+Z 回復，自動存檔、可匯出。
    格線設定在 js/config.js；資料格式見 data/maps.js。
 */
@@ -126,9 +126,7 @@ const BUILTIN_TILES = [
 ];
 
 // 預設入口＝最上排；預設營地＝最下兩排
-function defEntrances() { const a = []; for (let c = 0; c < COLS; c++) a.push(c + ',' + SPAWN_ROW); return a; }
 function defCamp() { const a = []; for (let c = 0; c < COLS; c++) { a.push(c + ',' + (ROWS - 2)); a.push(c + ',' + (ROWS - 1)); } return a; }
-const effEntrances = (m) => new Set(m.entrances.length ? m.entrances : defEntrances());
 const effCamp = (m) => new Set(m.camp.length ? m.camp : defCamp());
 
 // ================= 資料 =================
@@ -269,6 +267,8 @@ function loadTiles() {
   const interactiveAdded = mergeDefaultAssetPack('tile_interactive_', 'tudrc_asset_interactive_20261013_v3');
   const poolcoreAdded = mergeDefaultAssetPack('tile_poolcore_', STORAGE_POOLCORE_PACK);
   const hqAdded = mergeDefaultAssetPack('tile_hq_', STORAGE_HQ_PACK);
+  const breakableWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_breakable', 'tudrc_breakable_wall_v1');   // 後室牆面（可炸開）：js/breakable-walls.js
+  const secretWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_secret', 'tudrc_secret_wall_v1');   // 後室牆面（可炸開・隱藏區）
   const researchLabAdded = mergeDefaultAssetPack('tile_research_lab_', STORAGE_RESEARCH_LAB_PACK);
   const backroomDamageAdded = mergeDefaultAssetPack(t => BACKROOM_DAMAGE_EXTRA_IDS.has(t.id), STORAGE_BACKROOM_DAMAGE_EXTRA);
   const backroomEdgeAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_floor05' || t.id === 'tile_bg_backroom_floor06', STORAGE_BACKROOM_FLOOR_EDGE);
@@ -290,7 +290,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
+  if (ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -330,7 +330,7 @@ function loadMaps() {
       }
     }
     if ((eoc.stamps || []).some(s => s.r >= 14)) onlyAddedFloor = false;
-    if (['solid', 'breakable', 'entrances', 'camp', 'coreSpots'].some(field =>
+    if (['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].some(field =>
       (eoc[field] || []).some(key => Number(key.split(',')[1]) >= 14))) onlyAddedFloor = false;
     if ((eoc.portals || []).some(p => p.r >= 14)) onlyAddedFloor = false;
     if (onlyAddedFloor) {
@@ -361,16 +361,18 @@ function fixMap(m) {
   }
   m.breakable = m.breakable || [];
   delete m.walls;
-  m.entrances = m.entrances || []; m.camp = m.camp || [];
+  delete m.entrances;   // 舊的波次入口：已經不用了
+  m.camp = m.camp || [];
   m.coreSpots = Array.isArray(m.coreSpots) ? [...new Set(m.coreSpots)] : [];
+  m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
   m.rules = Object.assign({
-    money: 150, guide: 100, guideRegen: 9, waves: 5,
-    count: 8, countAdd: 3, hp: 40, hpAdd: 28, speed: 44, speedAdd: 5,
-    gap: 0.85, gapSub: 0.05, reward: 8,
+    money: 150, guide: 100, guideRegen: 9,
+    speed: 44, reward: 8,   // 舊地圖（沒設定怪物組合）的史萊姆速度與獎勵
   }, m.rules || {});
+  for (const k of ["waves", "count", "countAdd", "hp", "hpAdd", "speedAdd", "gap", "gapSub", "lives"]) delete m.rules[k];   // 舊的波次規則：已經不用了
   m.name = m.name || '未命名地圖'; m.desc = m.desc || '';
   m.solidOffsets = m.solidOffsets || {};   // 不可穿透格的像素微調：'c,r' → [dx, dy]
   Object.keys(m.solidOffsets).forEach(k => { if (m.solid.indexOf(k) < 0) delete m.solidOffsets[k]; });   // 沒有紅格就不留微調
@@ -431,12 +433,31 @@ const curMap = () => maps.find(m => m.id === curId) || maps.find(inEditorMode) |
 function setStatus(text, color) { const el = document.getElementById('status'); el.textContent = text; el.style.color = color || '#7ee0c0'; }
 
 // ================= 回復（Undo / Ctrl+Z）=================
-let undoStack = [];
+let undoStack = [], redoStack = [], redoBaseSnapshot = null;
 function snapshot() { return JSON.stringify({ maps, tiles: customTiles, curId }); }
-function pushUndo() { undoStack.push(snapshot()); if (undoStack.length > 60) undoStack.shift(); }
+function pushUndo() {
+  const current = snapshot();
+  if (redoStack.length && current !== redoBaseSnapshot) redoStack = [];
+  undoStack.push(current); if (undoStack.length > 60) undoStack.shift();
+}
 function undo() {
   if (!undoStack.length) { setStatus('沒有可回復的步驟了', '#9aa4b2'); return; }
-  const s = JSON.parse(undoStack.pop());
+  if (redoStack.length && snapshot() !== redoBaseSnapshot) redoStack = [];
+  redoStack.push(snapshot());
+  restoreEditorSnapshot(undoStack.pop());
+  redoBaseSnapshot = snapshot();
+  setStatus('已回復上一步（還剩 ' + undoStack.length + ' 步可回復）', '#7ee0c0');
+}
+function redo() {
+  if (snapshot() !== redoBaseSnapshot) redoStack = [];
+  if (!redoStack.length) { setStatus('沒有可重做的步驟了', '#9aa4b2'); return; }
+  undoStack.push(snapshot()); if (undoStack.length > 60) undoStack.shift();
+  restoreEditorSnapshot(redoStack.pop());
+  redoBaseSnapshot = snapshot();
+  setStatus('已重做上一步（還剩 ' + redoStack.length + ' 步可重做）', '#7ee0c0');
+}
+function restoreEditorSnapshot(value) {
+  const s = JSON.parse(value);
   maps = s.maps; customTiles = s.tiles; curId = s.curId;
   selection = null; selections = [];
   if (!inEditorMode(maps.find(m => m.id === curId))) curId = (maps.find(inEditorMode) || maps[0]).id;
@@ -445,13 +466,13 @@ function undo() {
   EditorStore.setItem(STORAGE_TILES, JSON.stringify(customTiles));
   checkResult = null;
   applyMapSize(); refreshMapSelect(); renderPalette(); loadRules(); draw();
-  setStatus('已回復上一步（還剩 ' + undoStack.length + ' 步可回復）', '#7ee0c0');
 }
 window.addEventListener('keydown', e => {
   const inField = /^(input|textarea)$/i.test(e.target.tagName || '');
   if (!inField && e.key === 'Alt' && !tempTool) { e.preventDefault(); enterTemp('pick'); return; }
   if (!inField && (e.key === 'Control' || e.key === 'Meta') && !tempTool) { enterTemp('select'); return; }
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) { if (inField) return; e.preventDefault(); undo(); }
+  if ((e.ctrlKey || e.metaKey) && !inField && ((e.key.toLowerCase() === 'y') || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); redo(); return; }
   if (e.key === 'Delete' && !inField && selections.length) { e.preventDefault(); deleteSelection(); }
   if (!inField && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); flipAction('x'); }
   if (!inField && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); flipAction('y'); }
@@ -653,7 +674,7 @@ let solidNudgeCell = null;   // 目前用「碰撞微調」選中的紅格（'c,
 function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
-  const coreSpots = new Set(m.coreSpots);
+  const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
 
   ctx.clearRect(0, 0, cv.width, cv.height);
   // 每格先鋪棋盤底
@@ -686,6 +707,13 @@ function draw() {
       ctx.strokeStyle = '#ffb84d'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
       ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6); ctx.setLineDash([]);
     }
+    if (spawnZone.has(key)) {   // 怪物出生區
+      ctx.fillStyle = 'rgba(80,220,120,.22)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = 'rgba(120,255,160,.75)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+      ctx.strokeRect(x + 2.5, y + 2.5, CELL - 5, CELL - 5); ctx.setLineDash([]);
+      ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText('👾', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
+    }
     if (coreSpots.has(key)) {
       ctx.fillStyle = 'rgba(158,83,241,.38)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = '#dab5ff'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
@@ -696,6 +724,10 @@ function draw() {
   }
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
+  if (brush.mode === 'spawn' || (m.spawnZone || []).length) {
+    ctx.fillStyle = '#8cf5b0';
+    ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
+  }
   // 出入口記號（紫格＋🚪＋通往哪張地圖）
   for (const pt of (m.portals || [])) {
     const x = OX + pt.c * CELL, y = OY + pt.r * CELL;
@@ -822,6 +854,7 @@ function pickAt(m, c, r) {
 }
 
 // ================= 畫格子（依目前畫筆）=================
+let spawnPaintAdd = true;   // 怪物出生區筆刷：這一筆是畫上還是擦掉
 function paintCell(c, r, isDown, additiveSelect = false) {
   if (!inGrid(c, r)) return;
   const m = curMap(), key = c + ',' + r;
@@ -879,9 +912,12 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     setStatus('已選這格碰撞範圍（目前偏移 ' + off[0] + ', ' + off[1] + '）：方向鍵移動、Shift 移多一點、Delete 歸零', '#ffd479');
     draw();
     return;
-  } else if (brush.mode === 'breakable') {
-    if (m.coreSpots.includes(key)) { setStatus('核心候選點不能設可破壞，請先取消候選點', '#ff8f8f'); return; }
-    removeFrom(m.solid, key); toggle(m.breakable, key);
+  } else if (brush.mode === 'spawn') {
+    m.spawnZone = m.spawnZone || [];
+    if (isDown) spawnPaintAdd = !m.spawnZone.includes(key);   // 按下的那格決定這一筆是「畫」還是「擦」
+    if (spawnPaintAdd && (m.solid.includes(key) || m.breakable.includes(key))) return;   // 牆、可破壞格不能生怪
+    if (spawnPaintAdd) { if (!m.spawnZone.includes(key)) m.spawnZone.push(key); }
+    else removeFrom(m.spawnZone, key);
   } else if (brush.mode === 'core') {
     if (!isDown) return;
     if (!m.coreSpots.includes(key) && (m.solid.includes(key) || m.breakable.includes(key))) {
@@ -1299,6 +1335,57 @@ document.getElementById('selDoorMode').addEventListener('change', e => {
   saveMaps(); draw();
   setStatus(e.target.value === 'auto' ? '已設為自動門：異質核心醒來時自動打開' : '已設為手動門：玩家按 E 開關', '#7ee0c0');
 });
+// 置物櫃內容跟著擺放的物件保存，避免同素材的所有櫃子共用獎勵。
+function selectedLocker() {
+  if (selections.length !== 1) return null;
+  const sel = selections[0], m = curMap();
+  const s = sel.type === 'stamp' ? m.stamps[sel.index] : null;
+  const id = s ? s.id : m.layers[sel.layer]?.[sel.key];
+  const t = tileById(id);
+  if (!t || !(id === 'tile_interactive_storage_locker' || /storage-locker-closed\.png$/.test(String(t.file || '')) || /置物[箱櫃].*關|置物[箱櫃]（上鎖）/.test(t.name || ''))) return null;
+  return { sel, s, id };
+}
+function refreshLockerControl() {
+  let box = document.getElementById('lockerLootControl');
+  if (!box) {
+    box = document.createElement('label'); box.id = 'lockerLootControl';
+    box.append('置物櫃內容：');
+    const select = document.createElement('select'); select.id = 'lockerLootItem';
+    const add = (value, name, parent = select) => { const o = document.createElement('option'); o.value = value; o.textContent = name; parent.appendChild(o); };
+    add('random', '隨機掉落（原設定）'); add('empty', '空櫃');
+    const groups = [
+      ['補給、零食飲料', 'item', typeof SUPPLIES === 'undefined' ? [] : SUPPLIES],
+      ['素材與重要物品', 'item', typeof ITEMS === 'undefined' ? [] : ITEMS],
+      ['裝備', 'equipment', typeof EQUIPMENT === 'undefined' ? [] : EQUIPMENT],
+      ['武器', 'weapon', typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).map(([id, w]) => ({ ...w, id }))],
+    ];
+    groups.forEach(([label, kind, entries]) => { const g = document.createElement('optgroup'); g.label = label; entries.forEach(t => add(kind + ':' + t.id, t.name, g)); select.appendChild(g); });
+    const qty = document.createElement('input'); qty.id = 'lockerLootQty'; qty.type = 'number'; qty.min = '1'; qty.max = '999'; qty.step = '1'; qty.style.width = '60px'; qty.setAttribute('aria-label', '置物櫃物品數量');
+    box.append(select, ' 數量 ', qty); document.getElementById('selControls').appendChild(box);
+    const change = () => {
+      const picked = selectedLocker(); if (!picked) return;
+      if (dropLockedSelections('設定置物櫃內容')) return;
+      pushUndo(); let s = picked.s;
+      if (!s) {
+        const [c, r] = picked.sel.key.split(',').map(Number);
+        s = { id: picked.id, c, r, layer: picked.sel.layer };
+        delete curMap().layers[picked.sel.layer][picked.sel.key]; curMap().stamps.push(s);
+        selections = [{ type: 'stamp', index: curMap().stamps.length - 1 }]; selection = selections[0];
+      }
+      const [kind, id] = select.value.split(':');
+      if (kind === 'random') delete s.lockerLoot;
+      else s.lockerLoot = { kind, ...(id ? { id } : {}), qty: kind === 'item' ? Math.max(1, Math.min(999, Math.floor(Number(qty.value) || 1))) : 1 };
+      saveMaps(); refreshSelPanel(); draw(); setStatus('已設定這個置物櫃的內容', '#7ee0c0');
+    };
+    select.addEventListener('change', change); qty.addEventListener('change', change);
+  }
+  const picked = selectedLocker(); box.classList.toggle('hidden', !picked);
+  if (!picked) return;
+  const loot = picked.s?.lockerLoot;
+  const select = document.getElementById('lockerLootItem'), qty = document.getElementById('lockerLootQty');
+  select.value = loot ? loot.kind === 'empty' ? 'empty' : loot.kind + ':' + loot.id : 'random';
+  qty.value = loot?.qty || 1; qty.disabled = !select.value.startsWith('item:');
+}
 function refreshSelPanel() {
   const layerSelect = document.getElementById('selLayer');
   const depthInput = document.getElementById('selDepthInput');
@@ -1307,6 +1394,7 @@ function refreshSelPanel() {
   selections = selections.filter(sel => sel.type === 'stamp' ? !!m.stamps[sel.index] : !!(m.layers[sel.layer] && m.layers[sel.layer][sel.key] !== undefined));
   selection = selections.length ? selections[selections.length - 1] : null;
   const hasSelection = !!selection;
+  refreshLockerControl();
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete', 'selClear'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;
@@ -1631,7 +1719,7 @@ document.getElementById('solidToggle').addEventListener('click', e => {
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.entrances = []; m.camp = []; m.coreSpots = []; checkResult = null; solidNudgeCell = null;
+  const m = curMap(); m.layers = emptyLayers(); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; checkResult = null; solidNudgeCell = null;
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -1642,7 +1730,7 @@ function refreshMapSelect() {
   maps.filter(inEditorMode).forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
 }
 function newId() { return 'map_' + Date.now().toString(36); }
-function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], entrances: [], camp: [], rules: {} }); }
+function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], spawnZone: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], camp: [], rules: {} }); }
 function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
 
 mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
@@ -1736,7 +1824,7 @@ function shiftMapContent(m, dc, dr) {
     m.layers[l.id] = out;
   });
   (m.stamps || []).forEach(s => { s.c += dc; s.r += dr; });
-  ['solid', 'breakable', 'entrances', 'camp', 'coreSpots'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
+  ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -1759,7 +1847,7 @@ function dropOutsideContent(m) {
     return s.c + stampW(s, t) > 0 && s.r + stampH(s, t) > 0 && s.c < m.cols && s.r < m.rows;   // 還有一格在地圖內就留著
   });
   removed += before - m.stamps.length;
-  ['solid', 'breakable', 'entrances', 'camp', 'coreSpots'].forEach(key => {
+  ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
     m[key] = (m[key] || []).filter(insideKey);
     removed += n - m[key].length;

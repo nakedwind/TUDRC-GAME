@@ -54,7 +54,8 @@ function renderBackpack() {
   // 格子
   const items = ownedItems();
   if (!items.some(item => item.id === backpackSel)) backpackSel = items[0]?.id || null;
-  const slots = Math.max(BAG_MIN_SLOTS, Math.ceil(items.length / 6) * 6);
+  const columns = window.innerWidth <= 560 ? 4 : window.innerWidth <= 900 ? 5 : 7;
+  const slots = Math.ceil(Math.max(BAG_MIN_SLOTS, items.length) / columns) * columns;
   let html = items.map(item => item.gear ? `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
       ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}</button>` : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${supplyInventory.get(item.id)}" aria-pressed="${item.id === backpackSel}">
       <img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b></button>`).join('');
@@ -82,14 +83,13 @@ function showGearForSlot(slotId) {
   backpackGrid.querySelector('.bag-cell.sel')?.focus();
 }
 function renderGearDetail(g) {
-  const d = g.gear, next = g.lv < 3 && d.levels[g.lv];
+  const d = g.gear;
   backpackDetail.classList.remove('dropping');
+  backpackDetail.classList.add('gear-detail');
   backpackDetail.innerHTML = `
     <div class="bag-detail-image">${g.image ? `<img src="${g.image}" alt=""${g.weapon ? ' class="weapon"' : ''}>` : `<i class="bag-gear-emoji">${g.icon}</i>`}</div>
-    <h3>${g.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${g.weapon ? '🔫 武器' : GEAR_TAB.icon + ' ' + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div>
-    ${d.desc ? `<p class="bag-desc">${d.desc}</p>` : ''}
-    <div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}${g.weapon && d.field && typeof gunAmmo === 'function' ? '・彈藥 ' + (gunAmmo(g.weapon).mag + gunAmmo(g.weapon).reserve) + ' 發' : ''}</b>${next ? `<small>升到 Lv${g.lv + 1}：${d.stat(next)}</small>` : '<small>已達最高等級</small>'}</div>
+    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? '🔫 武器' : GEAR_TAB.icon + ' ' + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div></div>
+    <div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}${g.weapon && d.field && typeof gunAmmo === 'function' ? '・彈藥 ' + (gunAmmo(g.weapon).mag + gunAmmo(g.weapon).reserve) + ' 發' : ''}</b></div>
     <div class="bag-actions">${gearButtons(g)}<p class="bag-note">升級找諾亞</p></div>`;
 }
 // 只換選取的格子：不重畫整個背包（重畫會讓格子、溫特立繪重新建立而閃一下）
@@ -102,6 +102,7 @@ function selectBackpackItem(id) {
 }
 function renderBackpackDetail() {
   const g = gearById(backpackSel); if (g) { renderGearDetail(g); return; }
+  backpackDetail.classList.remove('gear-detail');
   const item = itemById(backpackSel);
   backpackDetail.classList.toggle('dropping', !!(backpackDrop && item && backpackDrop.id === item.id));   // 確認丟棄時把圖縮小，留空間給確認框
   if (!item) {

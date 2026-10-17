@@ -103,32 +103,24 @@ const OBSTACLES = [
   {
     "id": "roadblocks",
     "name": "路障",
-    "cost": 40,
+    "cost": 30,
     "hp": 1500,
     "h": {
       "file": "images/item-obstacle/04roadblocks.png",
-      "w": 2,
-      "h": 2,
-      "solid": [
-        [
-          0,
-          1
-        ],
-        [
-          1,
-          1
-        ]
-      ]
-    },
-    "v": {
-      "file": "images/item-obstacle/04-roadblocks - vertical.png",
       "w": 1,
       "h": 2,
       "solid": [
         [
           0,
-          0
-        ],
+          1
+        ]
+      ]
+    },
+    "v": {
+      "file": "images/item-obstacle/04roadblocks.png",
+      "w": 1,
+      "h": 2,
+      "solid": [
         [
           0,
           1
@@ -181,23 +173,13 @@ const OBSTACLES = [
       "file": "images/item-obstacle/07-Camping lights.png",
       "w": 1,
       "h": 1,
-      "solid": [
-        [
-          0,
-          0
-        ]
-      ]
+      "solid": []
     },
     "v": {
       "file": "images/item-obstacle/07-Camping lights.png",
       "w": 1,
       "h": 1,
-      "solid": [
-        [
-          0,
-          0
-        ]
-      ]
+      "solid": []
     }
   },
   {
@@ -256,58 +238,57 @@ const OBSTACLES = [
         ]
       ]
     }
-  }
-,
-{
-  "id": "irongate",
-  "name": "滑動鐵門",
-  "cost": 60,
-  "hp": 2200,
-  "h": {
-    "file": "images/item-obstacle/12-irongate.png",
-    "w": 4,
-    "h": 2,
-    "solid": [
-      [
-        0,
-        1
-      ],
-      [
-        1,
-        1
-      ],
-      [
-        2,
-        1
-      ],
-      [
-        3,
-        1
-      ]
-    ]
   },
-  "v": {
-    "file": "images/item-obstacle/12-irongate.png",
-    "w": 4,
-    "h": 2,
-    "solid": [
-      [
-        0,
-        1
-      ],
-      [
-        1,
-        1
-      ],
-      [
-        2,
-        1
-      ],
-      [
-        3,
-        1
+  {
+    "id": "irongate",
+    "name": "滑動鐵門",
+    "cost": 60,
+    "hp": 2200,
+    "h": {
+      "file": "images/item-obstacle/12-irongate.png",
+      "w": 4,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          1
+        ]
       ]
-    ]
+    },
+    "v": {
+      "file": "images/item-obstacle/12-irongate.png",
+      "w": 4,
+      "h": 2,
+      "solid": [
+        [
+          0,
+          1
+        ],
+        [
+          1,
+          1
+        ],
+        [
+          2,
+          1
+        ],
+        [
+          3,
+          1
+        ]
+      ]
+    }
   }
-}
 ];

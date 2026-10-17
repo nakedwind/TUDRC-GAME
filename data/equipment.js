@@ -20,52 +20,52 @@ const EQUIP_SLOTS = [
 const EQUIPMENT = [
   // id 沿用 headlamp（以前叫「頭燈」），舊存檔會直接變成高亮度手電筒
   { id: 'headlamp', name: '高亮度手電筒', kind: 'acc', icon: '🔦', image: 'images/items/flashlight.png', source: 'develop', cost: [60, 120, 200],
-    desc: '高亮度的手電筒，朝滑鼠的方向照出一道扇形的光，可以照得很遠（只有戰鬥區域會用到）。燈亮著時比較不怕黑：理智下降的影響變輕。用電池供電，沒電時會自動換上背包裡的電池。Lv3 換成廣角光束，扇形更寬。',
+    desc: '朝游標方向照明並減輕黑暗恐懼；耗電後自動換電池，Lv3 光束加寬。',
     stat: lv => '照明距離 ' + (lv.light / 40).toFixed(1) + ' 格・扇形 ' + lv.spread * 2 + '°・一顆電池撐 ' + lv.battery + ' 秒・黑暗恐懼 −' + Math.round(lv.fear * 100) + '%',
     levels: [{ light: 220, spread: 26, battery: 90, fear: .15 }, { light: 280, spread: 28, battery: 140, fear: .25 }, { light: 340, spread: 36, battery: 200, fear: .35 }] },
   { id: 'lamphelmet', name: '照明頭盔', kind: 'head', icon: '💡', image: 'images/裝備/lamp-helmet.png', source: 'develop', cost: [50, 100, 180],
-    desc: '頭盔上裝了一顆小燈，溫特身邊會亮一小圈（只有戰鬥區域會用到）。不用電池，一直亮著；在光裡比較不怕黑。',
+    desc: '持續照亮周圍並減輕黑暗恐懼，無須電池。',
     stat: lv => '照明半徑 ' + (lv.light / 40).toFixed(1) + ' 格・黑暗恐懼 −' + Math.round(lv.fear * 100) + '%',
     levels: [{ light: 70, fear: .08 }, { light: 85, fear: .12 }, { light: 100, fear: .16 }] },
   { id: 'mask', name: '防毒面具', kind: 'head', icon: '😷', image: 'images/裝備/gas-mask.png', source: 'develop', cost: [60, 120, 200],
-    desc: '過濾腐蝕的毒氣和異味。踩到腐蝕池、被酸液噴到時，受到的傷害減少。',
+    desc: '減少腐蝕池與酸液傷害。',
     stat: lv => '腐蝕、酸液的傷害 −' + Math.round(lv.filter * 100) + '%', levels: [{ filter: .4 }, { filter: .6 }, { filter: .8 }] },
   { id: 'helmet', name: '防護頭盔', kind: 'head', icon: '🪖', image: 'images/裝備/protective-helmet.png', source: 'develop', cost: [60, 120, 200],
-    desc: '堅固的防護頭盔，受到的傷害會減少。可以和防護背心一起穿，效果會疊加。',
+    desc: '減少受傷，可與防護背心疊加。',
     stat: lv => '受到的傷害 −' + Math.round(lv.guard * 100) + '%', levels: [{ guard: .08 }, { guard: .12 }, { guard: .16 }] },
   { id: 'earmuffs', name: '降噪耳機', kind: 'head', icon: '🎧', image: 'images/裝備/noise-cancelling-earmuffs.png', source: 'develop', cost: [50, 100, 180],
-    desc: '把雜音隔開，理智下降時比較不會受影響：畫面沒那麼灰、搖晃和殘影變輕，心跳和怪聲也變小。',
+    desc: '減輕低理智時的視覺與聲音干擾。',
     stat: lv => '理智下降的影響 −' + Math.round(lv.calm * 100) + '%', levels: [{ calm: .3 }, { calm: .5 }, { calm: .7 }] },
   { id: 'vest', name: '防護背心', kind: 'body', icon: '🦺', image: 'images/裝備/protective-vest.png', source: 'develop', cost: [60, 120, 200],
-    desc: '應變中心配發的防護背心，受到的傷害會減少。',
+    desc: '減少受到的傷害。',
     stat: lv => '受到的傷害 −' + Math.round(lv.guard * 100) + '%', levels: [{ guard: .1 }, { guard: .15 }, { guard: .2 }] },
   { id: 'bracelet', name: '共感手環', kind: 'acc', icon: '💠', image: 'images/裝備/empathy-bracelet.png', source: 'develop', cost: [70, 130, 220],
-    desc: '幫助嚮導穩定共感的手環，疏導哨兵時花的 SP 變少。',
+    desc: '降低疏導消耗的 SP。',
     stat: lv => '疏導花的 SP −' + Math.round(lv.save * 100) + '%', levels: [{ save: .15 }, { save: .25 }, { save: .35 }] },
   { id: 'thermos', name: '杏仁水保溫瓶', kind: 'acc', icon: '🧴', image: 'images/裝備/almond-water-thermos.png', source: 'field', where: '有機會在上鎖的置物箱裡找到', cost: [0, 90, 160],
-    desc: '杏仁水裝在保溫瓶裡，喝起來特別安心，恢復的 SP 變多。',
+    desc: '提高杏仁水的 SP 恢復量。',
     stat: lv => '杏仁水恢復的 SP +' + Math.round(lv.bonus * 100) + '%', levels: [{ bonus: .2 }, { bonus: .35 }, { bonus: .5 }] },
   { id: 'sneakers', name: '輕量跑鞋', kind: 'acc', icon: '👟', image: 'images/裝備/lightweight-sneakers.png', source: 'develop', cost: [40, 90, 160],
-    desc: '鞋底很輕，跑起來比較快。',
+    desc: '提高移動速度。',
     stat: lv => '移動速度 +' + Math.round(lv.speed * 100) + '%', levels: [{ speed: .08 }, { speed: .12 }, { speed: .16 }] },
   { id: 'fireboots', name: '防火鞋', kind: 'acc', icon: '🥾', image: 'images/裝備/fire-resistant-boots.png', source: 'develop', cost: [60, 120, 200],
-    desc: '耐高溫的鞋子。踩在火海裡（油桶、油汙、燃燒彈燒起來的火）被燙到的傷害減少，爆炸的傷害不會減少。',
+    desc: '減少火海燙傷，不抵擋爆炸傷害。',
     stat: lv => '火海燙傷 −' + Math.round(lv.fire * 100) + '%', levels: [{ fire: .4 }, { fire: .6 }, { fire: .8 }] },
   { id: 'firstaid', name: '急救包', kind: 'acc', icon: '⛑️', image: 'images/裝備/first-aid-kit.png', source: 'develop', cost: [70, 130, 220], active: 'H',
-    desc: '按 H 使用：治療身邊受傷的隊員，連失去戰鬥能力的哨兵都能救起來；附近沒人受傷就治療溫特自己。使用時要站著不動，每場戰鬥能用的次數有限。',
+    desc: '按 H 原地治療或救起隊員，附近無傷員則治療自己；每場次數有限。',
     stat: lv => '治療 ' + lv.heal + '・使用 ' + lv.time + ' 秒・每場 ' + lv.uses + ' 次', levels: [{ heal: 40, time: 1.6, uses: 2 }, { heal: 60, time: 1.1, uses: 3 }, { heal: 85, time: .7, uses: 4 }] },
-  { id: 'radio', name: '無線電', kind: 'acc', icon: '📻', image: 'images/裝備/handheld-radio.png', source: 'develop', cost: [60, 120, 200],
-    desc: '跟隊員保持聯絡，疏導的距離變遠。Lv2 呼叫支援：指派位置時隊員跑得更快。Lv3 標記敵人：溫特附近黑暗中的怪物會被標出來。',
+  { id: 'radio', name: '無線電', kind: 'acc', icon: '📻', image: 'images/裝備/anomaly-detector.png', source: 'develop', cost: [60, 120, 200],
+    desc: '延長疏導距離；Lv2 加快隊員赴援，Lv3 標記附近暗處敵人。',
     stat: lv => '疏導距離 +' + Math.round(lv.reach * 100) + '%' + (lv.rush ? '・指派時隊員移動 +' + Math.round(lv.rush * 100) + '%' : '') + (lv.mark ? '・標記 ' + lv.mark + ' 格內黑暗中的怪物' : ''),
     levels: [{ reach: .4 }, { reach: .6, rush: .25 }, { reach: .8, rush: .25, mark: 5 }] },
   { id: 'adrenaline', name: '腎上腺素注射器', kind: 'acc', icon: '💉', image: 'images/裝備/adrenaline-injector.png', source: 'field', where: '打倒鳥頭人時有機會掉落', cost: [0, 120, 200], active: 'J',
-    desc: '按 J 使用：一段時間內跑得很快、受到的傷害減少。藥效退了之後會有一點副作用（暫時變慢）。用完要等一段時間才能再用。',
+    desc: '按 J 暫時加速並減傷，結束後短暫減速；需冷卻。',
     stat: lv => '持續 ' + lv.dur + ' 秒・副作用 ' + lv.side + ' 秒', levels: [{ dur: 6, side: 4 }, { dur: 8, side: 2.5 }, { dur: 10, side: 1 }] },
   { id: 'charm', name: '順順宮御守', kind: 'acc', icon: '🧧', image: 'images/裝備/lucky-charm.png', source: 'field', where: '偶爾從順順宮帽裡掉出來', cost: [0, 120, 200],
-    desc: '順順宮的平安御守。帶在身上，黑暗裡的 Smiler 比較不容易咬到溫特。',
+    desc: '降低暗處被 Smiler 咬中的機率。',
     stat: lv => '在黑暗中被 Smiler 咬的機率 −' + Math.round(lv.ward * 100) + '%', levels: [{ ward: .4 }, { ward: .55 }, { ward: .7 }] },
-  { id: 'detector', name: '異質探測器', kind: 'acc', icon: '📡', image: 'images/裝備/anomaly-detector.png', source: 'field', where: '打碎異質核心時有機會拿到', cost: [0, 120, 200],
-    desc: '偵測異質反應的小儀器。附近黑暗中的異質礦、異質核心會微微發光，讓你知道在哪裡。',
+  { id: 'detector', name: '異質探測器', kind: 'acc', icon: '📡', image: 'images/裝備/handheld-radio.png', source: 'field', where: '打碎異質核心時有機會拿到', cost: [0, 120, 200],
+    desc: '顯示附近暗處的異質礦與核心。',
     stat: lv => '偵測範圍 ' + lv.range + ' 格', levels: [{ range: 6 }, { range: 8 }, { range: 10 }] },
 ];
 // 戰鬥區域掉落的機率（還沒拿到的時候；拿到之後就不會再掉）
@@ -75,7 +75,7 @@ const ADRENALINE = { speed: .45, guard: .25, slow: .3, cooldown: 40 };
 
 // 武器升級（找諾亞）：Lv1 是原本的樣子；cost：[升到 Lv2, 升到 Lv3]
 // 測試用：true＝所有槍都解鎖，每次開遊戲彈藥補滿（測完改成 false）
-const TEST_UNLOCK_ALL_GUNS = true;
+const TEST_UNLOCK_ALL_GUNS = !!window.TEST_MODE;
 
 const WEAPON_UPGRADES = {
   pistol: { name: '手槍', icon: '🔫', image: 'images/weapon/winter-handgun-design.png', cost: [80, 160],
@@ -87,12 +87,12 @@ const WEAPON_UPGRADES = {
   // 下面兩把只能在後室（戰鬥區域）撿到（field），撿到後才能升級；彈藥以後在後室的商店、轉蛋機取得（js/special-guns.js）
   // 燃燒彈槍：r 火海半徑（格）、burn 火海燒幾秒、reload 每發裝填秒數、reserve 備用彈最多幾發、ignite 被燒到的怪物身上著火幾秒（Lv3）
   incendiary: { name: '燃燒彈槍', icon: '🧨', image: 'images/weapon/incendiary_launcher.png', field: true, where: '有機會在上鎖的置物箱裡找到', cost: [100, 180],
-    desc: '單發的榴彈槍。燃燒彈拋過去，落地燒出一片火海：會燙傷怪物、點燃油汙和油桶，也能把生命體燒成灰。火不分敵我，小心別燒到自己人。',
+    desc: '落地形成火海，可點燃油汙、油桶並焚毀生命體；也會傷及友軍。',
     stat: lv => '火海半徑 ' + lv.r + ' 格・燒 ' + lv.burn + ' 秒・裝填 ' + lv.reload + ' 秒' + (lv.ignite ? '・怪物著火 ' + lv.ignite + ' 秒' : '') + '・備用彈最多 ' + lv.reserve + ' 發',
     levels: [{ r: 1.1, burn: 6, reload: 2.2, reserve: 6 }, { r: 1.4, burn: 7, reload: 1.9, reserve: 8 }, { r: 1.6, burn: 9, reload: 1.6, reserve: 10, ignite: 4 }] },
   // 麻醉槍：sleep 睡幾秒、mag 彈匣、reload 裝填秒數、reserve 備用彈最多幾發、mist 麻醉霧半徑（格，Lv3）
   tranq: { name: '麻醉槍', icon: '💤', image: 'images/weapon/tranquilizer_gun.png', field: true, where: '有機會在上鎖的置物箱裡找到', cost: [100, 180],
-    desc: '打出麻醉針，打中的怪物會睡著、完全不動（沒有傷害）。也能打暴走的隊員：讓隊員睡一下，醒來就恢復正常。大型怪物睡比較短，生命體沒有效果。',
+    desc: '使怪物睡眠，或讓暴走隊員恢復正常；大型怪物效果較短，生命體無效。',
     stat: lv => '睡 ' + lv.sleep + ' 秒・彈匣 ' + lv.mag + ' 發・裝填 ' + lv.reload + ' 秒' + (lv.mist ? '・麻醉霧 ' + lv.mist + ' 格' : '') + '・備用彈最多 ' + lv.reserve + ' 發',
     levels: [{ sleep: 3, mag: 2, reload: 2, reserve: 8 }, { sleep: 4, mag: 2, reload: 1.5, reserve: 10 }, { sleep: 5, mag: 3, reload: 1.5, reserve: 12, mist: 1.2 }] },
 };

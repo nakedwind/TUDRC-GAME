@@ -400,11 +400,13 @@ function drawWanderer(npc) {
   const name = (WANDERERS.find(w => w.id === npc.id) || {}).name;
   if (!name) return;
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  const nameY = npc.y - size + 12;   // 比圖片頂端再往下 5px
+  const nameY = npc.y - size + 12 + (NPC_LABEL_DY[npc.id] || 0);   // 比圖片頂端再往下 5px（矮的角色再往下，見 NPC_LABEL_DY）
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, npc.x, nameY);
   ctx.fillStyle = '#fff'; ctx.fillText(name, npc.x, nameY);
   if (npc.say && npc.say.text) drawSpeechBubble(npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]);   // 頭上對話泡泡（角色專屬色）
 }
+// 頭上的名字、對話泡泡、「與 XX 對話」提示要往下移幾像素（角色比人矮的時候用，例如球球是狗）
+const NPC_LABEL_DY = { ball: 22 };
 // 對話泡泡：參考《苦艾與甘露》——深色半透明底＋角色專屬色邊框/文字＋圓角＋向下小尾巴＋淡光暈
 // 淺底色＋深色字，每個角色一種顏色（bg 淺底／bd 邊框＋尾巴／tx 深色文字）
 const BUBBLE_COLORS = {
@@ -434,6 +436,22 @@ function drawSpeechBubble(cx, bottomY, text, col) {
   ctx.fillStyle = c.tx; ctx.fillText(text, cx, y + h - 8);    // 角色色文字
 }
 // 椅子上方的「[E] 坐」提示框
+// 拆除模式：滑鼠指到可以拆的建築時，紅框框起來＋上方顯示「拆除 退回 $X」
+function drawDemolishPreview() {
+  if (!G || G.selType !== 'demolish' || !aimClient || typeof playerBuildingAt !== 'function') return;
+  const w = clientToWorld(aimClient.x, aimClient.y), [c, r] = cellAt(w.x, w.y), o = playerBuildingAt(c, r);
+  if (!o) return;
+  const x = OX + o.c * CELL, y = OY + o.r * CELL, bw = (o.w || 1) * CELL, bh = (o.h || 1) * CELL;
+  ctx.save();
+  ctx.strokeStyle = '#ff8a6a'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.strokeRect(x + 1, y + 1, bw - 2, bh - 2); ctx.setLineDash([]);
+  const refund = demolishRefund(o), label = o.playerBuilt ? (refund ? '退回 $' + refund : '退回 $0') : '不退錢';
+  ctx.font = 'bold 13px sans-serif'; ctx.textBaseline = 'middle'; ctx.textAlign = 'center';
+  const tw = ctx.measureText(label).width + 18, tx = Math.round(x + bw / 2 - tw / 2), ty = Math.round(y - 30);
+  ctx.fillStyle = 'rgba(12,16,22,.92)'; roundRect(tx, ty, tw, 22, 6); ctx.fill();
+  ctx.strokeStyle = refund ? 'rgba(255,212,121,.9)' : 'rgba(170,180,190,.7)'; ctx.lineWidth = 1.5; ctx.stroke();
+  ctx.fillStyle = refund ? '#ffd479' : '#b9c3cd'; ctx.fillText(label, tx + tw / 2, ty + 11.5);
+  ctx.restore();
+}
 function drawInteractPrompt(cx, topY, label) {
   const keyLabel = 'Space';
   ctx.textBaseline = 'alphabetic';
@@ -577,17 +595,17 @@ function draw() {
     if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
+    else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : '補充彈藥'); }
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, d.open ? '關門' : '開門'); }
-    else if (oreNearPlayer()) drawOreHint(oreNearPlayer());   // 礦物：提示要用爆炸炸開（js/ore.js）
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) { const t = missionTableUsable(); drawInteractPrompt(t.x, t.top, t.label || '作戰桌'); }   // 作戰桌／作戰螢幕（js/missions.js）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) { const v = vendingNearPlayer(); drawInteractPrompt(v.x, v.top, '販賣機'); }   // 販賣機（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) { const s = drinkShopNearPlayer(); drawInteractPrompt(s.x, s.top, '飲料店'); }   // 飲料店（js/shop.js）
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, '商店'); }   // HOME Mart 結帳櫃台
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
-      if (actor) drawInteractPrompt(actor.x, actor.y - 57,
+      if (actor) drawInteractPrompt(actor.x, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0),
         actor.kind === 'tower' && !MAP_SAFE ? '疏導' : '與 ' + (profile ? profile.name : '角色') + ' 對話');
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }
@@ -902,6 +920,7 @@ function draw() {
       ctx.fillStyle = '#c9952f'; ctx.fillRect(-3, -1.2, 6, 2.4);
       ctx.fillStyle = '#ffe9a3'; ctx.fillRect(-3, -1.2, 2.2, 1.2);
       ctx.restore();
+    } else if (f.hammerHit) {   // 拆除建築：畫在黑幕上面（見 drawDarkness 後面），這裡跳過
     } else if (f.dust) {   // 塵埃：淡土色小圓點，隨時間變淡、略微放大
       const p = Math.max(0, f.life / f.life0);
       ctx.globalAlpha = 0.45 * p;
@@ -928,17 +947,20 @@ function draw() {
       ctx.strokeStyle = ok ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
       ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.setLineDash([]);
       ctx.fillStyle = ok ? 'rgba(80,210,150,.28)' : 'rgba(255,80,80,.3)';
-      for (const [dc, dr] of variantSolidCells(v)) ctx.fillRect(x + dc * CELL, y + dr * CELL, CELL, CELL);
+      for (const [dc, dr] of placeCheckCells(v)) ctx.fillRect(x + dc * CELL, y + dr * CELL, CELL, CELL);
     }
   }
   // 情境選單或指定建築的目標格
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
+  if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
+  for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);
   drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
   if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）

@@ -115,6 +115,12 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 #selControls b { color: #ffd479; }
 #selControls :disabled { opacity: .45; cursor: not-allowed; }
 #selControls .btn:disabled:hover { border-color: #333c49; }
+#selControls { column-gap: 6px; }
+#selControls .btn { padding-left: 8px; padding-right: 8px; }
+#lockerLootControl { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex: 0 0 auto; white-space: nowrap; font-size: 12px; }
+#lockerLootControl.hidden { display: none; }
+#selControls #lockerLootItem { width: 132px; min-width: 0; font-size: 12px; }
+#selControls #lockerLootQty { width: 44px !important; }
 
 .base-collision-panel {
   margin: 6px 0 10px; padding: 10px; border: 1px solid #826c3f; border-radius: 8px;

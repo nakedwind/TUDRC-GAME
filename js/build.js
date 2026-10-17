@@ -8,6 +8,10 @@ window.addEventListener('keydown', e => { if (!e.repeat && e.key.toLowerCase() =
 const buildAt = (c, r) => G.grid[c + ',' + r];
 const barrierAt = (c, r) => { const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle') ? o : null; };
 function removeBarrier(o) {
+  if (o.isBase && o.hp <= 0 && o.baseStamp) {
+    if (!G.destroyedBases) G.destroyedBases = new Set();
+    G.destroyedBases.add(o.baseStamp);
+  }
   obstacleSolidCells(o).forEach(([dc, dr]) => {
     const key = (o.c + dc) + ',' + (o.r + dr);
     if (G.grid[key] === o) delete G.grid[key];
@@ -34,11 +38,18 @@ function obstacleSolidCells(o) {
 // 「會發光的建築」（探照燈等）可蓋得更遠（光圈外 LIGHT.placeMargin 像素內），用來一步步推光。
 const emitsLight = ob => !!(LIGHT.buildings && LIGHT.buildings[ob.id]);
 const placeExtra = ob => emitsLight(ob) ? LIGHT.placeMargin : (LIGHT.buildMargin ?? 40);
+// 放置時要檢查的格子：有擋路格就看擋路格；完全不擋路的（露營燈）就看整個佔地，不然會被放到牆上
+function placeCheckCells(v) {
+  const solid = variantSolidCells(v);
+  if (solid.length) return solid;
+  const cells = []; for (let dc = 0; dc < (v.w || 1); dc++) for (let dr = 0; dr < (v.h || 1); dr++) cells.push([dc, dr]);
+  return cells;
+}
 function canPlaceObstacle(v, c, r, lightExtra = 0) {
   if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;
   // 只有「擋路格(solid)」才要求空地／不壓牆／不疊其他建築的擋路格／夠亮；
   // 其餘格子只是圖片，可以疊在牆或其他建築的圖片前面。
-  for (const [dc, dr] of variantSolidCells(v)) {
+  for (const [dc, dr] of placeCheckCells(v)) {
     const cc = c + dc, rr = r + dr;
     if (!inGrid(cc, rr)) return false;
     if (isWall(cc, rr) || isEntrance(cc, rr)) return false;
@@ -50,7 +61,7 @@ function canPlaceObstacle(v, c, r, lightExtra = 0) {
 }
 function footprintNearLight(v, c, r, extra) {
   // 亮度只看「擋路格」，跟放置判定／預覽框一致
-  for (const [dc, dr] of variantSolidCells(v)) if (!cellNearLight(c + dc, r + dr, extra)) return false;
+  for (const [dc, dr] of placeCheckCells(v)) if (!cellNearLight(c + dc, r + dr, extra)) return false;
   return true;
 }
 // 放不了建築：建造位置跳字＋右上角系統提示（同一句 1.5 秒內不重複，連續點擊才不會洗版）
@@ -68,14 +79,18 @@ function placeObstacle(ob, c, r) {
   if (!footprintNearLight(v, c, r, extra)) return buildFail('太暗了，無法放置建築', c, r, '#ffd24a');
   if (!canPlaceObstacle(v, c, r, extra)) return buildFail('這裡不能放置建築', c, r);
   if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) return buildFail('這裡已經有地雷了', c, r);
+  // 不擋路的建築（鐵絲網、露營燈…）不會被擋路格擋住，要另外檢查：同一格不能疊同一種
+  const passable = !ob.trap && ((typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[ob.id]) || !variantSolidCells(v).length);
+  if (passable && sameBuildingOverlaps(ob.id, v, c, r)) return buildFail('這裡已經有' + ob.name + '了', c, r);
   if (G.money < ob.cost) return buildFail('經費不足，無法放置建築', c, r);
   G.money -= ob.cost;
-  // 地雷（trap）埋在地上、不擋路：不登記擋路格
-  const solid = ob.trap ? [] : variantSolidCells(v).map(cell => cell.slice());
-  const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0, trap: !!ob.trap };
+  // 地雷（trap）埋在地上、減速建築（鐵絲網）可以走過去：都不登記擋路格
+  const slow = typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[ob.id];
+  const solid = ob.trap || slow ? [] : variantSolidCells(v).map(cell => cell.slice());
+  const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0, trap: !!ob.trap, slow: slow || null };
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
-  sfx('place');   // 放置成功（落地「叩」聲）
+  sfx(LIGHT.buildings && LIGHT.buildings[ob.id] ? 'placeLight' : 'place');   // 放置成功：燈類建築（探照燈、露營燈…，data/balance.js 的 LIGHT.buildings）播放燈聲，其他是落地「叩」聲
   return true;
 }
 
@@ -89,49 +104,26 @@ let buildCat = 'obstacle';     // 全部可建造物件統一歸為障礙物
 let buildTargetCell = null;    // 從地面情境選單指定的建築格
 const BUILD_CATS = [['obstacle', '🧱 障礙物']];
 const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
-const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove']);
+const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence']);   // 暫時不能蓋的建築（鐵圍籬先停用）
 const buildList = () => [...OBSTACLES, ...DECOS].filter(o=>!DISABLED_BUILD_IDS.has(o.id));
 // 依 id 找建築（跨兩類），放置時用
 const buildableById = id => DISABLED_BUILD_IDS.has(id) ? null : (OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id));
-const BUILD_QUICK_KEY = 'tudrc-build-quick-slots-v1';
-const DEFAULT_BUILD_QUICK = ['camping_lights', 'searchlight', 'wirecloth', 'roadblocks', 'wirefence', 'landmine'];
-let buildQuickIds = DEFAULT_BUILD_QUICK.slice();
-try {
-  const saved = JSON.parse(localStorage.getItem(BUILD_QUICK_KEY) || 'null');
-  if (Array.isArray(saved) && saved.length >= 5) buildQuickIds = saved.slice(0,6);
-} catch (_) {}
-// 物件編輯器匯出的資料可能暫時少了某個預設物件；快捷欄仍須能正常初始化。
-const availableQuickIds = buildList().map(o => o.id);
-while(buildQuickIds.length<6){
-  buildQuickIds.push(availableQuickIds.find(id=>!buildQuickIds.includes(id)) || availableQuickIds[0]);
-}
-buildQuickIds = buildQuickIds.map((id, index) => buildableById(id) ? id :
-  (availableQuickIds.find(candidate => !buildQuickIds.includes(candidate)) || availableQuickIds[index % availableQuickIds.length]));
-function saveBuildQuickSlots() {
-  try { localStorage.setItem(BUILD_QUICK_KEY, JSON.stringify(buildQuickIds)); } catch (_) {}
-}
+// 下方建築欄：直接列出全部可以蓋的東西（不再有「建築」選單）。
+// 排列：先照 BUILD_ORDER，其他的接在後面（物件編輯器新增的建築會自動出現在最後）
+const BUILD_ORDER = ['camping_lights', 'searchlight', 'wirecloth', 'roadblocks', 'wirefence', 'landmine'];
+const buildQuickIds = [...BUILD_ORDER.filter(id => buildableById(id)), ...buildList().map(o => o.id).filter(id => !BUILD_ORDER.includes(id))];
 function renderBuildQuickSlots() {
   buildQuickSlots.innerHTML = '';
   buildQuickIds.forEach((id, index) => {
-    const ob = buildableById(id);
+    const ob = buildableById(id); if (!ob) return;
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'build-quick-slot';
-    if (!ob) { button.disabled = true; button.textContent = '未設定'; buildQuickSlots.appendChild(button); return; }
-    button.title = (index + 1) + '：' + ob.name + '（經費 ' + ob.cost + '）';
-    button.setAttribute('aria-label', '快捷鍵 ' + (index + 1) + '：建造' + ob.name);
+    button.dataset.buildId = id;
+    const key = index < 6 ? (index + 1) + '：' : '';   // 數字鍵 1～6 對應前 6 個
+    button.title = key + ob.name + '（經費 $' + ob.cost + '・HP ' + ob.hp + '）';
+    button.setAttribute('aria-label', (key ? '快捷鍵 ' + key : '') + '建造' + ob.name);
     button.innerHTML = '<img src="' + ob[buildOrient].file + '" alt=""><span>' + ob.name + '</span>';
     button.addEventListener('click', () => selectBuildType(id));
-    button.addEventListener('dragover', e => { e.preventDefault(); button.classList.add('drag-over'); e.dataTransfer.dropEffect = 'copy'; });
-    button.addEventListener('dragleave', () => button.classList.remove('drag-over'));
-    button.addEventListener('drop', e => {
-      e.preventDefault(); button.classList.remove('drag-over');
-      const dragged = e.dataTransfer.getData('application/x-tudrc-build') || e.dataTransfer.getData('text/plain');
-      if (!buildableById(dragged)) return;
-      const previous = buildQuickIds[index], other = buildQuickIds.indexOf(dragged);
-      if (other >= 0 && other !== index) buildQuickIds[other] = previous;
-      buildQuickIds[index] = dragged;
-      saveBuildQuickSlots(); renderBuildQuickSlots(); updateBuildToggle(); sfx('switch');
-    });
     buildQuickSlots.appendChild(button);
   });
 }
@@ -212,6 +204,7 @@ function updateBuildToggle() {
   buildQuickSlots.querySelectorAll('.build-quick-slot').forEach((button, index) =>
     button.classList.toggle('sel', !!(G && G.selType === 'build:' + buildQuickIds[index])));
   document.getElementById('wrap').classList.toggle('placing-building', placing);
+  document.getElementById('wrap').classList.toggle('demolishing', !!(G && G.selType === 'demolish'));   // 拆除模式：游標變槌子（css/style.css）
   if (placing && typeof closeFieldCommandMenu === 'function') closeFieldCommandMenu();
 }
 demolishToggle.addEventListener('click', () => {
@@ -287,5 +280,58 @@ function spawnDust(o) {
       vx: side * (20 + Math.random() * 55), vy: -(12 + Math.random() * 28),
       r: 2.5 + Math.random() * 3.5, life, life0: life,
     });
+  }
+}
+
+// ---- 建築欄可以收起來（收合狀態跟隊員欄一起記在瀏覽器，js/team.js 的 hudCollapsed）----
+function applyBuildCollapse() {
+  const bar = document.getElementById('buildToolbar'), btn = document.getElementById('buildCollapse');
+  if (!bar || !btn || typeof hudCollapsed === 'undefined') return;
+  const folded = !!hudCollapsed.build;
+  bar.classList.toggle('collapsed', folded);
+  btn.textContent = '';   // 收起來也一樣是細長的按鈕，只換箭頭方向
+  btn.title = folded ? '展開建築欄' : '收起建築欄';
+  btn.setAttribute('aria-expanded', !folded);
+  if (folded && typeof closeBuildMenu === 'function') closeBuildMenu();   // 收起來時順便關掉建築清單
+}
+document.getElementById('buildCollapse')?.addEventListener('click', e => {
+  e.stopPropagation();
+  setHudCollapsed('build', !hudCollapsed.build); applyBuildCollapse();
+});
+applyBuildCollapse();
+// 建築太多、欄位放不下時：滑鼠滾輪可以左右捲
+document.querySelector('#buildToolbar .build-fold')?.addEventListener('wheel', e => {
+  const f = e.currentTarget; if (f.scrollWidth <= f.clientWidth) return;
+  e.preventDefault(); f.scrollLeft += e.deltaY || e.deltaX;
+}, { passive: false });
+
+// ---- 減速建築（鐵絲網）：站在上面的速度倍率（data/balance.js 的 SLOW_BUILDINGS）----
+// who：'enemy' 怪物、'ally' 溫特和隊員。疊好幾個也只算最慢的那個
+function slowFactorAt(x, y, who) {
+  if (!G || !G.obstacles) return 1;
+  const [c, r] = cellAt(x, y);
+  let k = 1;
+  for (const o of G.obstacles) {
+    if (!o.slow || o.hp <= 0) continue;
+    if (c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)) k = Math.min(k, o.slow[who] ?? 1);
+  }
+  return k;
+}
+// 這個位置是不是已經有同一種建築（不擋路的建築一格只能放一個）
+function sameBuildingOverlaps(id, v, c, r) {
+  const w = v.w || 1, h = v.h || 1;
+  return G.obstacles.some(o => o.type === id && o.hp > 0 && c < o.c + (o.w || 1) && o.c < c + w && r < o.r + (o.h || 1) && o.r < r + h);
+}
+// 怪物踩在減速建築上會慢慢把它磨壞（SLOW_BUILDINGS[id].wear：每 every 秒、每隻怪磨掉 dmg）；game.js 的 update 每幀呼叫
+function updateSlowBuildingWear(dt) {
+  for (const o of [...G.obstacles]) {
+    if (!o.slow || !o.slow.wear || o.hp <= 0) continue;
+    const n = G.enemies.filter(e => !e.dead && e.hp > 0 && !e.flying && (() => { const [c, r] = cellAt(e.x, e.y); return c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1); })()).length;
+    if (!n) { o.wearT = 0; continue; }   // 沒人踩：重新計時
+    o.wearT = (o.wearT || 0) + dt;
+    if (o.wearT < o.slow.wear.every) continue;
+    o.wearT -= o.slow.wear.every;
+    o.hp -= o.slow.wear.dmg * n; o.hitT = .15;   // 每隻踩著的怪各磨一次，閃一下紅
+    if (o.hp <= 0) { o.lastHitBy = 'enemy'; removeBarrier(o); computeFlow(); }
   }
 }

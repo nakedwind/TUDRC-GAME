@@ -1,7 +1,7 @@
 /* ===== 地圖載入器：把「地圖編輯器」做的地圖接進遊戲 =====
    讀 data/maps.js 的第一張地圖，套用它的：
    - solid(不可穿透)→固定牆、breakable(可破壞)→障礙物
-   - entrances(入口)→怪物生成點、camp(營地)→怪物目標
+   - camp(營地)→怪物目標
    - rules→覆蓋 data/balance.js 的數值
    - layers/stamps→畫出地板與裝飾圖片（含翻轉）
    想換玩哪張地圖，改最下面 pickMap() 的索引即可。
@@ -29,7 +29,12 @@ function buildTileRegistry() {
     : ((typeof TILES_CUSTOM !== 'undefined' && TILES_CUSTOM) ? TILES_CUSTOM : []);
   [...builtin, ...custom].forEach(t => {
     const entry=typeof ORE_TYPES!=='undefined'&&(ORE_TYPES[String(t.id).replace(/^tile_obstacle_/, '')] || Object.values(ORE_TYPES).find(spec=>spec.file===t.file));
-    TILE_REGISTRY[t.id] = entry ? {...t,name:entry.name,file:entry.file,w:entry.w,h:entry.h} : t;
+    // 地圖的素材尺寸可能早於物件編輯器；障礙物外觀與碰撞使用同一份尺寸。
+    const file = String(t.file || '').replace(/\\/g, '/');
+    const variant = file && typeof OBSTACLES !== 'undefined'
+      ? OBSTACLES.flatMap(o => [o.h, o.v]).find(v => v && String(v.file || '').replace(/\\/g, '/') === file) : null;
+    TILE_REGISTRY[t.id] = entry ? {...t,name:entry.name,file:entry.file,w:entry.w,h:entry.h}
+      : variant ? {...t,w:variant.w,h:variant.h} : t;
   });
 }
 const mapTileById = id => TILE_REGISTRY[id];
@@ -83,6 +88,8 @@ function mapUsedTileIds(m) {
   return ids;
 }
 function preloadMapTiles(m) {
+  tileImage({ id: '__field-base-fail', file: 'images/field-camp/field-base-fail.png' });
+  tileImage({ id: '__warning-line-fail', file: 'images/field-camp/warning-line-fail.png' });
   const used = mapUsedTileIds(m);
   if([...used].some(id=>String(mapTileById(id)?.file||'').endsWith('/storage-locker-closed.png')))used.add('tile_interactive_storage_locker_open');
   Object.values(TILE_REGISTRY).forEach(t => { if (t.file && used.has(t.id)) tileImage(t); });
@@ -92,7 +99,7 @@ function preloadMapTiles(m) {
 }
 
 // ---- 當前地圖 ----
-let MAP = null, mapEntrances = [], mapBreakable = [], mapPortals = [], mapBases = [];
+let MAP = null, mapBreakable = [], mapPortals = [], mapBases = [];
 // 安全場景（例如回基地）：不生怪、不套黑幕。由地圖的 safe 欄位決定（地圖編輯器可勾選）
 let MAP_SAFE = false;
 // 場景 NPC（克莉思、路德…）只在有勾「場景 NPC」的地圖出現
@@ -193,16 +200,6 @@ function initMap() {
   if (R.money != null) START.money = R.money;
   if (R.guide != null) { START.guide = R.guide; START.guideMax = Math.max(START.guideMax, R.guide); }
   if (R.guideRegen != null) START.guideRegen = R.guideRegen;
-  if (R.waves != null) WAVE_CFG.total = R.waves;
-  if (R.count != null) WAVE_CFG.baseCount = R.count;
-  if (R.countAdd != null) WAVE_CFG.addCount = R.countAdd;
-  if (R.hp != null) WAVE_CFG.baseHp = R.hp;
-  if (R.hpAdd != null) WAVE_CFG.addHp = R.hpAdd;
-  if (R.speed != null) WAVE_CFG.baseSpeed = R.speed;
-  if (R.speedAdd != null) WAVE_CFG.addSpeed = R.speedAdd;
-  if (R.gap != null) WAVE_CFG.baseGap = R.gap;
-  if (R.gapSub != null) WAVE_CFG.subGap = R.gapSub;
-  if (R.reward != null) WAVE_CFG.reward = R.reward;
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
@@ -236,7 +233,6 @@ function initMap() {
     return (baseC + Math.floor(mapStampW(s, t) / 2)) + ',' + (baseR + Math.floor(mapStampH(s, t) / 2));
   });
   campCells = new Set(baseTargets.length ? baseTargets : ((MAP.camp && MAP.camp.length) ? MAP.camp : []));    // 空＝預設最下排
-  mapEntrances = (MAP.entrances || []).map(k => k.split(',').map(Number));
   mapBreakable = (MAP.breakable || []).map(k => k.split(',').map(Number));
   mapPortals = (MAP.portals || []).map(p => ({ c: p.c, r: p.r, to: p.to }));   // 出入口：走到門旁按鍵可換地圖
 }
@@ -320,12 +316,8 @@ function solidBlocksPoint(x, y) {
 }
 
 // ---- 提供給 game.js 用的查詢 ----
-function defaultEntranceCells() { const a = []; for (let c = 0; c < COLS; c++) a.push([c, SPAWN_ROW]); return a; }
-function spawnCells() {
-  const src = mapEntrances.length ? mapEntrances : defaultEntranceCells();
-  return src.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && isFinite(flowAt(c, r)));
-}
-const isEntrance = (c, r) => mapEntrances.length ? mapEntrances.some(([ec, er]) => ec === c && er === r) : (r === SPAWN_ROW);
+// 舊的「波次入口」已經拿掉了：沒有格子是入口（保留這個函式，其他地方的判斷才不用一個個改）
+const isEntrance = () => false;
 
 // 開局時把「可破壞」擺成障礙物（每次 newGame 呼叫）
 function seedMapObstacles() {
@@ -341,7 +333,7 @@ function seedMapObstacles() {
       .map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
     const hp = Math.max(1, Number(s.baseHp != null ? s.baseHp : t.baseHp) || 2000);
     const o = {
-      kind: 'obstacle', isBase: true, mapTileId: t.id,
+      kind: 'obstacle', isBase: true, mapTileId: t.id, baseStamp: s,
       c: baseC, r: baseR, w, h, solid, hp, maxhp: hp,
       artX: OX + s.c * CELL + (s.ox || 0),
       artY: OY + s.r * CELL + (s.oy || 0),
@@ -360,6 +352,11 @@ function seedMapObstacles() {
     const spec = mapObstacleSpec(t), w = stamp ? mapStampW(stamp, t) : mapTileW(t), h = stamp ? mapStampH(stamp, t) : mapTileH(t);
     if (spec.trap) {   // 地雷：埋在地上、不擋路
       G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w: 1, h: 1, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0, trap: true });
+      return;
+    }
+    const slow = typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[spec.type];
+    if (slow) {   // 減速建築（鐵絲網）：不擋路，走在上面變慢
+      G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w, h, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0, slow });
       return;
     }
     const solid = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))
@@ -410,10 +407,31 @@ function drawMapTileImg(ctx, id, x, y, layer='top') {
   else if (t.role === 'obstacle') { ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x + 4, y + 4, CELL - 8, CELL - 8); }
   else { ctx.fillStyle = '#20262f'; ctx.fillRect(x, y, CELL, CELL); }
 }
+function destroyedBaseDisplayTile(s, t) {
+  if (!G.destroyedBases?.size) return t;
+  const file = String(t.file || '').replace(/\\/g, '/');
+  if (G.destroyedBases.has(s) && (t.baseHp || file.endsWith('/field-base.png'))) {
+    return { ...t, id: '__field-base-fail', file: 'images/field-camp/field-base-fail.png' };
+  }
+  if (file.endsWith('/warning-line.png') || t.name === 'warning-line') {
+    const x = s.c * CELL + (s.ox || 0), y = s.r * CELL + (s.oy || 0);
+    for (const base of G.destroyedBases) {
+      const bt = mapTileById(base.id); if (!bt) continue;
+      const bx = base.c * CELL + (base.ox || 0), by = base.r * CELL + (base.oy || 0);
+      if (x < bx + mapStampW(base, bt) * CELL && x + mapStampW(s, t) * CELL > bx &&
+          y < by + mapStampH(base, bt) * CELL && y + mapStampH(s, t) * CELL > by) {
+        return { ...t, id: '__warning-line-fail', file: 'images/field-camp/warning-line-fail.png' };
+      }
+    }
+  }
+  return t;
+}
 function drawMapStampImg(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
   let t = mapTileById(s.id); if (!t) return;
+  t = destroyedBaseDisplayTile(s, t);
+  if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
   const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(s.id,s.c,s.r,s.layer||'top',s):null;
   if(display===false)return;
   if(display)t=display;
@@ -592,7 +610,9 @@ function occluderStateSig(x) {
   }
   const s = x.stamp;
   return (G.mapDestroyed && G.mapDestroyed.has(s) ? 'x' : '') + ((typeof doorStampOpen === 'function' && doorStampOpen(s)) ? 'o' : '')
-    + ((typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s)) ? 'a' : '');
+    + ((typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s)) ? 'a' : '')
+    + (destroyedBaseDisplayTile(s, mapTileById(s.id) || {}).id || '')
+    + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '');
 }
 function occluderImageReady(x) {
   return !!tileImage(mapTileById(x.kind === 'cell' ? x.id : x.stamp.id));

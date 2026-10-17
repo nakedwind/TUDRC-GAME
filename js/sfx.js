@@ -14,6 +14,8 @@ const SFX = (() => {
     switch: '介面/切換.mp3',
     blip: '介面/對話框下一頁音效.mp3',
     place: '設施/放置.mp3',
+    demolish: '設施/拆建築.mp3',
+    placeLight: '設施/放燈.mp3',   // 放置燈類建築（js/build.js）   // 拆除自己蓋的建築（js/game.js 的 demolishPlayerBuilding）
     itemPickup: '獎勵/拾取.mp3',
     powerOn: '環境/門與機關/很大聲的開燈.mp3',
     ironGateSlide: '環境/門與機關/鐵門滑動.mp3',

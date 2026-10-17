@@ -12,18 +12,19 @@ const OIL_IGNITERS = new Set(['player', 'eldrin', 'chris', 'amber', 'theonie', '
 // blast：爆炸半徑（格）與傷害；fire：爆炸後留下的火海（半徑、秒數、每秒傷害）；slick：沒爆炸時漏出的油汙（半徑、留多久）
 // gas：瓦斯類，被誰打壞都會爆炸；breaksOre：爆炸能炸開異質礦物；boom：爆炸音效
 const OIL_ITEMS = {
-  deco_oil_drum: { name: '油桶', file: 'images/item-decorate/oil-drum.png',   // 範圍比油箱大
-    blast: { radius: 3, enemy: 80, sentry: 35, player: 30 },
-    fire: { radius: 3, life: 12, dps: 12 },   // 打爆後的火海燒 12 秒（原本 6 秒）
+  // 三種的強弱：爐具（小爆炸、能炸礦）＜ 油箱 ＜ 油桶（最大最痛）
+  deco_oil_drum: { name: '油桶', file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
+    blast: { radius: 3.5, enemy: 150, sentry: 45, player: 40 },
+    fire: { radius: 3.2, life: 12, dps: 18 },   // 打爆後的火海燒 12 秒
     slick: { radius: 2, life: 200 } },   // 油汙留 200 秒
   deco_oil_tank: { name: '油箱', file: 'images/item-decorate/oil-tank.png',
-    blast: { radius: 2, enemy: 50, sentry: 22, player: 20 },
+    blast: { radius: 2, enemy: 60, sentry: 22, player: 20 },
     fire: { radius: 2, life: 8, dps: 10 },   // 打爆後的火海燒 8 秒
     slick: { radius: 1, life: 180 } },   // 油汙留 3 分鐘
-  deco_gasstove:  { name: '瓦斯爐', file: 'images/item-decorate/gasstove.png', gas: true, breaksOre: true, boom: 'smallBoom',
-    blast: { radius: 1.2, enemy: 40, sentry: 15, player: 12 } },
+  deco_gasstove:  { name: '瓦斯爐', file: 'images/item-decorate/gasstove.png', gas: true, breaksOre: true, boom: 'smallBoom',   // 最弱：小範圍、低傷害，但炸得開礦物
+    blast: { radius: 1, enemy: 20, sentry: 6, player: 5 } },
   deco_gasstove2: { name: '瓦斯爐', file: 'images/item-decorate/gasstove02.png', gas: true, breaksOre: true, boom: 'smallBoom',
-    blast: { radius: 1.2, enemy: 40, sentry: 15, player: 12 } },
+    blast: { radius: 1, enemy: 20, sentry: 6, player: 5 } },
 };
 // 油汙被點燃後的火海：半徑是油汙的幾倍、燒幾秒、每秒傷害
 const SLICK_FIRE = { radiusMul: 1.15, life: 12, dps: 10 };   // 燒 12 秒（原本 6 秒）
@@ -124,6 +125,7 @@ function oilExplode(x, y, it) {
   }
   igniteSlicksNear(x, y, R);
   if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 瓦斯爐：炸開附近的異質礦物（js/ore.js）
+  if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 油桶、油箱、瓦斯爐都炸得開可炸開的牆（js/breakable-walls.js）
   if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
   if (it.fire && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 燒掉生命體碎掉的那堆（js/lifeform.js）
   // 畫面：爆閃、雙層衝擊環、火星、碎片、黑煙、焦痕
