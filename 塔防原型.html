@@ -128,7 +128,7 @@
         <button id="elevatorClose" type="button" aria-label="關閉樓層選單">×</button>
         <h2 id="elevatorTitle">搭電梯</h2>
         <p id="elevatorMessage">選擇要前往的樓層</p>
-        <div class="elevator-floors"></div>   <!-- 樓層按鈕：名稱開頭有標樓層的地圖（js/game.js?v=mrt-gate-animation-20261018 的 openElevatorMenu） -->
+        <div class="elevator-floors"></div>   <!-- 樓層按鈕：名稱開頭有標樓層的地圖（js/game.js 的 openElevatorMenu） -->
       </div>
     </div>
     <div id="safeCornerButtons">
@@ -223,14 +223,14 @@
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
-  <script src="data/characters.js?v=taana-name-20261018"></script>  <!-- 集中管理所有角色 -->
+  <script src="data/characters.js?v=taana-name2-20261018"></script>  <!-- 集中管理所有角色 -->
   <script src="data/gifts.js?v=remap-20261012"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=card-consume-20261018"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=graffiti-20261018"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/equipment.js?v=acidboots-20261018"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=quests-20261015"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
-  <script src="data/dialogues.js?v=taana2-20261018"></script>  <!-- 所有台詞（對話編輯器） -->
+  <script src="data/dialogues.js?v=edensalem-20261018"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=buildrange-20261018"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=taana-20261018"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
@@ -261,12 +261,12 @@
   <script src="js/combat-feel.js?v=nowaves-20261017"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=coreclear-20261018"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=fix38d-20261018"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=frenzy2-20261018"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=baselose-20261019"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fishnolabel-20261016"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/render.js?v=taana-20261018"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=edensalem-20261018"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=bwall-20261017"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=oil-breaks-ore-20261018"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -292,7 +292,7 @@
   <script src="js/camp-interactions.js?v=interaction-key-fix-20261018"></script>
   <script src="js/camp-supply.js?v=camp-stock-art-20261018"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
-  <script src="js/game.js?v=mrt-gate-animation-20261018"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=baselose-20261019"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=key-intro-scale200-20261018"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/item-intro.js?v=key-intro-scale150-20261018"></script>   <!-- 第一次拿到新東西：說明視窗 -->

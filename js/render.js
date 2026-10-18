@@ -411,6 +411,8 @@ const NPC_LABEL_DY = { ball: 22 };
 // 淺底色＋深色字，每個角色一種顏色（bg 淺底／bd 邊框＋尾巴／tx 深色文字）
 const BUBBLE_COLORS = {
   taana:   { bg: '#e0e0fb', bd: '#5a5fc4', tx: '#262a6e' },   // 偏紫的藍
+  eden:    { bg: '#fde0ef', bd: '#d0609a', tx: '#5e1f42' },   // 粉色
+  salem:   { bg: '#ddf0fb', bd: '#4f9cc9', tx: '#173f58' },   // 淺藍
   avaren:  { bg: '#dce8fb', bd: '#3a5fa0', tx: '#1c3766' },   // 淺藍
   eldrin:  { bg: '#d8efe6', bd: '#2f8a68', tx: '#123f2e' },   // 青綠
   noah:    { bg: '#f3ecd9', bd: '#a89355', tx: '#4a3f1c' },   // 米黃

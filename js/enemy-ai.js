@@ -45,7 +45,7 @@ function enemyAttackObstacle(e, o, dt) {
   removeBarrier(o); e.hasTarget = false; e.baseTarget = null;
   if (o.isBase) {
     flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b');
-    if (!G.over) lose('base');
+    if (!G.over) baseLost();   // 等幾秒再跳失敗（js/game.js）
   }
 }
 // ---- 揮手攻擊動畫（有 frames.attack 的怪物，例如生命體）----

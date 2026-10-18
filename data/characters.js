@@ -377,7 +377,7 @@ const CHARACTERS = {
   "taana": {
     "id": "taana",
     "kind": "support",
-    "name": "塔那",
+    "name": "塔納",
     "sprite": "taana_A",
     "intro": "常在餐廳出沒的路人，看起來一直很想下班。",
     "captainImpression": ""

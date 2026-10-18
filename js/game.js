@@ -859,7 +859,7 @@ function applyChaosDamage(t, best, spec) {
   } else if (o.isBase) {
     o.hp -= dmg; o.hitT = HIT_DUR;
     warnCampAttack();
-    if (o.hp <= 0) { removeBarrier(o); flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b'); if (!G.over) lose('base'); }
+    if (o.hp <= 0) { removeBarrier(o); flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b'); if (!G.over) baseLost(); }
   } else if (G.towers.includes(o)) {   // 攻擊隊友
     const def = sentryDefense(o);
     o.hp = Math.max(0, o.hp - dmg * (1 - def));
@@ -2011,6 +2011,7 @@ function update(dt) {
   if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
+  if (G.baseLostT > 0 && !G.over) { G.baseLostT -= dt; if (G.baseLostT <= 0) lose('base'); }   // 基地被打壞：等一下才跳失敗
   if (typeof checkCoreClear === 'function') checkCoreClear(dt);
   else if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   updateHUD();
@@ -2113,6 +2114,9 @@ function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id ===
 
 function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
+// 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
+const BASE_LOSE_DELAY = 5;
+function baseLost() { if (!G.over && !(G.baseLostT > 0)) { G.baseLostT = BASE_LOSE_DELAY; systemNotice('營地被摧毀了……', true); } }
 function lose(reason, cause) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
