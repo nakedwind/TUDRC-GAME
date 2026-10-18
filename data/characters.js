@@ -389,5 +389,13 @@ const CHARACTERS = {
     "sprite": "colyn_B",
     "intro": "常在餐廳出沒的路人，精神很好、很會吃。",
     "captainImpression": ""
+  },
+  "rowan": {
+    "id": "rowan",
+    "kind": "support",
+    "name": "羅恩",
+    "sprite": "rowan_C",
+    "intro": "常在餐廳出沒的路人，走路很安靜。",
+    "captainImpression": ""
   }
 };

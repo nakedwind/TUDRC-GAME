@@ -49,12 +49,13 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
 // 只有一種造型的角色（例如克萊兒、穆恩）就一直用它原本那套。
 const OUTFIT_SETS = {};   // 基底名稱（例如 'red'）→ { A, B, declared }
 function outfitRecord(folder) {
-  const base = String(folder).replace(/_[AB]$/, '');
-  const declared = /_(A|B)$/.test(folder) ? folder.slice(-1) : 'B';
+  const base = String(folder).replace(/_[A-Z]$/, '');   // 造型字母：A＝安全區、B＝戰鬥區；其他字母（例如 C）＝只有一套、到哪都穿它
+  const declared = /_([A-Z])$/.test(folder) ? folder.slice(-1) : 'B';
   let rec = OUTFIT_SETS[base];
   if (rec) return rec;
   rec = OUTFIT_SETS[base] = { A: null, B: null, declared };
   rec[declared] = loadCharacterSprites(base + '_' + declared);
+  if (declared !== 'A' && declared !== 'B') return rec;   // 只有一套的造型（C…）：不用找另一套
   const other = declared === 'A' ? 'B' : 'A';
   const probe = new Image();   // 先確認另一套存在再載入，避免對沒有該造型的角色發出一堆 404
   probe.onload = () => { rec[other] = loadCharacterSprites(base + '_' + other); };

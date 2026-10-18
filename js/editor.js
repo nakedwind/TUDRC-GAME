@@ -137,6 +137,27 @@ let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（大小圖都可用
 let brushRotation = 0;
 let tempTool = null, savedBrush = null, pickResult = null;   // Alt=臨時吸管 / Ctrl=臨時選取
 let selectionDrag = null;
+// 物件擺放用「四分之一格」對齊（10px），不用整格整格跳；地板類小圖還是整格
+const SUB = CELL / 4;
+let pointerPx = null;   // 滑鼠目前在畫布上的像素位置
+const snapSub = v => Math.floor(v / SUB) * SUB;
+// 像素位置 → 擺放位置（格子 c、r＋格內偏移 ox、oy，都是 10px 的倍數）
+function subPosAt(x, y) {
+  const gx = snapSub(x - OX), gy = snapSub(y - OY), c = Math.floor(gx / CELL), r = Math.floor(gy / CELL);
+  return { c, r, ox: gx - c * CELL, oy: gy - r * CELL };
+}
+// 物件圖層（會跟角色排前後的那些）＋最上層：1×1 小圖也用四分之一格擺
+const isObjectLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay' || lid === 'top';
+// 用畫出來的實際位置（含微調）找這個像素點上最上面的物件
+function stampIndexAtPx(m, x, y) {
+  for (let i = m.stamps.length - 1; i >= 0; i--) {
+    const s = m.stamps[i];
+    if (hiddenLayers.has(s.layer || 'top') || isLockedLayer(s.layer)) continue;
+    const t = tileById(s.id) || {}, x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
+    if (x >= x0 && x < x0 + stampW(s, t) * CELL && y >= y0 && y < y0 + stampH(s, t) * CELL) return i;
+  }
+  return -1;
+}
 const hiddenLayers = new Set();
 // 鎖定的圖層：看得到、但不能貼圖／擦除／選取／搬動（跟「隱藏」不一樣）
 const lockedLayers = new Set();
@@ -763,18 +784,22 @@ function draw() {
       const big = isBig(sel), w = big ? tileW(sel) : 1, h = big ? tileH(sel) : 1;
       const pw = brushRotation % 2 ? h : w, ph = brushRotation % 2 ? w : h;
       const fits = c < COLS && r < ROWS && c + pw > 0 && r + ph > 0;   // 允許超出邊緣（純外觀），只要有一格在地圖內
+      // 物件：預覽畫在四分之一格對齊的位置（跟實際放下去的一樣）；地板類小圖照整格
+      const free = big || brushFlip.fx || brushFlip.fy || brushRotation || isObjectLayer(activeLayer);
+      const pos = free && pointerPx ? subPosAt(pointerPx.x, pointerPx.y) : { c, r, ox: 0, oy: 0 };
+      const px = OX + pos.c * CELL + pos.ox, py = OY + pos.r * CELL + pos.oy;
       // 半透明預覽圖
       ctx.save();
       ctx.globalAlpha = 0.4;
-      if (big || brushFlip.fx || brushFlip.fy || brushRotation) drawStamp({ c, r, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy, rot: brushRotation });
-      else drawTile(brush.tile, OX + c * CELL, OY + r * CELL);
+      if (big || brushFlip.fx || brushFlip.fy || brushRotation) drawStamp({ c: pos.c, r: pos.r, ox: pos.ox, oy: pos.oy, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy, rot: brushRotation });
+      else drawTile(brush.tile, px, py);
       ctx.restore();
       // 外框（放不下時變紅）
       if (big) {
         ctx.strokeStyle = fits ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
-        ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, pw * CELL - 2, ph * CELL - 2); ctx.setLineDash([]);
+        ctx.strokeRect(px + 1, py + 1, pw * CELL - 2, ph * CELL - 2); ctx.setLineDash([]);
       } else {
-        ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, CELL - 2, CELL - 2);
+        ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(px + 1, py + 1, CELL - 2, CELL - 2);
       }
     } else {
       // 非貼圖工具（選取／不可穿透／清除等）維持單格外框
@@ -816,19 +841,23 @@ function draw() {
 }
 
 // ================= 可翻轉圖片放置 / 查詢 =================
-function placeStamp(c, r, t) {
+function placeStamp(c, r, t, ox = 0, oy = 0) {
   const m = curMap(), w = tileW(t), h = tileH(t), pw = brushRotation % 2 ? h : w, ph = brushRotation % 2 ? w : h;
   if (c >= COLS || r >= ROWS || c + pw <= 0 || r + ph <= 0) { setStatus('放不下：整張圖都在地圖外', '#ff8f8f'); return; }   // 允許超出邊緣（大圖純外觀），只要有一格落在地圖內就能放
-  // 只移除「同一圖層」上重疊的大圖（不同層可疊放）
+  // 只移除「同一圖層」上跟新圖重疊超過一半的圖（不同層可疊放；靠得很近、只碰到一點邊的保留）
+  const nx = c * CELL + ox, ny = r * CELL + oy, nw = pw * CELL, nh = ph * CELL;
   m.stamps = m.stamps.filter(s => {
     if ((s.layer || 'top') !== activeLayer) return true;
-    const st = tileById(s.id) || {}, sw = stampW(s, st), sh = stampH(s, st);
-    const overlap = !(c + pw <= s.c || s.c + sw <= c || r + ph <= s.r || s.r + sh <= r);
-    return !overlap;
+    const st = tileById(s.id) || {}, sx = s.c * CELL + (s.ox || 0), sy = s.r * CELL + (s.oy || 0), sw = stampW(s, st) * CELL, sh = stampH(s, st) * CELL;
+    const ow = Math.min(nx + nw, sx + sw) - Math.max(nx, sx), oh = Math.min(ny + nh, sy + sh) - Math.max(ny, sy);
+    if (ow <= 0 || oh <= 0) return true;
+    return ow * oh <= Math.min(nw * nh, sw * sh) / 2;
   });
   // 1×1 小圖翻轉後改用 stamp 儲存，先移除同格同層的普通小圖。
     if (w === 1 && h === 1) delete m.layers[activeLayer][c + ',' + r];
   const st = { id: t.id, c, r, layer: activeLayer };
+  if (ox) st.ox = ox;
+  if (oy) st.oy = oy;
   if (brushFlip.fx) st.fx = true;
   if (brushFlip.fy) st.fy = true;
   if (brushRotation) st.rot = brushRotation;
@@ -875,7 +904,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
   if (brush.mode === 'select') {
     if (isDown) {
       let picked = null;
-      const si = stampIndexAt(m, c, r);
+      const si = pointerPx ? stampIndexAtPx(m, pointerPx.x, pointerPx.y) : stampIndexAt(m, c, r);   // 微調過的物件：點它畫出來的位置
       if (si >= 0) picked = { type: 'stamp', index: si };
       else for (let i = LAYERS.length - 1; i >= 0; i--) { const id = LAYERS[i].id; if (!hiddenLayers.has(id) && !isLockedLayer(id) && m.layers[id][key]) { picked = { type: 'tile', layer: id, key }; break; } }
       if (!additiveSelect) {
@@ -909,8 +938,10 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (hiddenLayers.has(activeLayer)) { if (isDown) setStatus('「' + layerName(activeLayer) + '」被隱藏中，請先打開眼睛才能貼圖', '#ffd24a'); return; }
     if (isLockedLayer(activeLayer)) { if (isDown) setStatus('「' + layerName(activeLayer) + '」已鎖定，請先按 🔒 解鎖才能貼圖', '#ffd24a'); return; }
     const t = tileById(brush.tile); if (!t) return;
-    if (isBig(t)) { if (isDown) placeStamp(c, r, t); return; }   // 大圖：只在按下時放一張
-    if (brushFlip.fx || brushFlip.fy || brushRotation) { placeStamp(c, r, t); return; }   // 轉向小圖：以 1×1 stamp 保存方向
+    const pos = pointerPx ? subPosAt(pointerPx.x, pointerPx.y) : { c, r, ox: 0, oy: 0 };   // 四分之一格對齊的位置
+    if (isBig(t)) { if (isDown) placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 大圖：只在按下時放一張
+    if (brushFlip.fx || brushFlip.fy || brushRotation) { placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 轉向小圖：以 1×1 stamp 保存方向
+    if (isObjectLayer(activeLayer) && (pos.ox || pos.oy)) { placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 物件圖層的小圖：沒對齊格線就存成可微調的物件
     // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
@@ -953,7 +984,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     setStatus('已設出入口 → ' + others[n - 1].name, '#7ee0c0');
   } else if (brush.mode === 'erase') {
     // 由上往下擦：大圖 → 最上面有圖的那層
-    const si = stampIndexAt(m, c, r);
+    const si = pointerPx ? stampIndexAtPx(m, pointerPx.x, pointerPx.y) : stampIndexAt(m, c, r);
     if (si >= 0) m.stamps.splice(si, 1);
     else for (let i = LAYERS.length - 1; i >= 0; i--) { const id = LAYERS[i].id; if (!hiddenLayers.has(id) && !isLockedLayer(id) && m.layers[id][key]) { delete m.layers[id][key]; break; } }
   }
@@ -965,6 +996,7 @@ function cellFromEvent(e) {
   const rect = cv.getBoundingClientRect();
   const x = (e.clientX - rect.left) * (cv.width / rect.width);
   const y = (e.clientY - rect.top) * (cv.height / rect.height);
+  pointerPx = { x, y };   // 物件擺放、選取用的像素位置
   return cellAt(x, y);
 }
 function beginSelectionDrag(c, r) {
@@ -979,7 +1011,7 @@ function beginSelectionDrag(c, r) {
     if (sel.type === 'stamp') {
       const s = m.stamps[sel.index]; if (!s) return;
       const t = tileById(s.id) || {};
-      items.push({ type: 'stamp', index: sel.index, c: s.c, r: s.r, w: stampW(s, t), h: stampH(s, t) });
+      items.push({ type: 'stamp', index: sel.index, c: s.c, r: s.r, w: stampW(s, t), h: stampH(s, t), px: s.c * CELL + (s.ox || 0), py: s.r * CELL + (s.oy || 0) });
     } else {
       const [tc, tr] = sel.key.split(',').map(Number);
       items.push({ type: 'tile', layer: sel.layer, key: sel.key, id: m.layers[sel.layer][sel.key], c: tc, r: tr, w: 1, h: 1 });
@@ -988,7 +1020,7 @@ function beginSelectionDrag(c, r) {
   if (!items.length) { selectionDrag = null; return; }
   const minC = Math.min(...items.map(item => item.c)), minR = Math.min(...items.map(item => item.r));
   const maxC = Math.max(...items.map(item => item.c + item.w)), maxR = Math.max(...items.map(item => item.r + item.h));
-  selectionDrag = { startC: c, startR: r, items, layers: clone(m.layers), stamps: clone(m.stamps), minC, minR, maxC, maxR, dc: 0, dr: 0, moved: false };
+  selectionDrag = { startC: c, startR: r, startPx: pointerPx ? { ...pointerPx } : null, items, layers: clone(m.layers), stamps: clone(m.stamps), minC, minR, maxC, maxR, dc: 0, dr: 0, dx: 0, dy: 0, moved: false };
 }
 function dragSelectionTo(c, r) {
   if (!selectionDrag) return;
@@ -996,13 +1028,21 @@ function dragSelectionTo(c, r) {
   // 允許拖出地圖邊緣（純外觀），只要選取範圍還有一格留在地圖內
   const dc = Math.max(1 - d.maxC, Math.min(COLS - 1 - d.minC, c - d.startC));
   const dr = Math.max(1 - d.maxR, Math.min(ROWS - 1 - d.minR, r - d.startR));
-  if (dc === d.dc && dr === d.dr) return;
-  d.dc = dc; d.dr = dr; d.moved = dc !== 0 || dr !== 0;
+  // 物件：滑鼠移動多少就搬多少（四分之一格對齊）；限制在跟整格同樣的範圍內
+  const clampPx = (v, lo, hi) => Math.max(lo * CELL, Math.min(hi * CELL, v));
+  const dx = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.x - d.startPx.x) / SUB) * SUB, 1 - d.maxC, COLS - 1 - d.minC) : dc * CELL;
+  const dy = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.y - d.startPx.y) / SUB) * SUB, 1 - d.maxR, ROWS - 1 - d.minR) : dr * CELL;
+  if (dc === d.dc && dr === d.dr && dx === d.dx && dy === d.dy) return;
+  d.dc = dc; d.dr = dr; d.dx = dx; d.dy = dy; d.moved = dc !== 0 || dr !== 0 || dx !== 0 || dy !== 0;
   m.layers = clone(d.layers); m.stamps = clone(d.stamps);
   d.items.filter(item => item.type === 'tile').forEach(item => delete m.layers[item.layer][item.key]);
   selections = d.items.map(item => {
     if (item.type === 'stamp') {
-      const s = m.stamps[item.index]; s.c = item.c + dc; s.r = item.r + dr;
+      const s = m.stamps[item.index], nx = item.px + dx, ny = item.py + dy;
+      s.c = Math.floor(nx / CELL); s.r = Math.floor(ny / CELL);
+      const ox = nx - s.c * CELL, oy = ny - s.r * CELL;
+      if (ox) s.ox = ox; else delete s.ox;
+      if (oy) s.oy = oy; else delete s.oy;
       return { type: 'stamp', index: item.index };
     }
     const key = (item.c + dc) + ',' + (item.r + dr);
@@ -1023,7 +1063,7 @@ cv.addEventListener('pointermove', e => {
   if (painting) {
     if (selectionDrag) dragSelectionTo(c, r);
     else { const key = c + ',' + r; if (key !== lastPaint) { lastPaint = key; paintCell(c, r, false); } }
-  } else draw();
+  } else draw();   // 懸停預覽跟著四分之一格移動
 });
 cv.addEventListener('pointerup', () => {
   painting = false;

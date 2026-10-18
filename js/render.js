@@ -414,6 +414,7 @@ const BUBBLE_COLORS = {
   eden:    { bg: '#fde0ef', bd: '#d0609a', tx: '#5e1f42' },   // 粉色
   salem:   { bg: '#ddf0fb', bd: '#4f9cc9', tx: '#173f58' },   // 淺藍
   colyn:   { bg: '#fdebd2', bd: '#d98a2b', tx: '#5a3208' },   // 暖橘（配他的橘色眼睛）
+  rowan:   { bg: '#e2f1dc', bd: '#5e9a52', tx: '#21401b' },   // 淡綠（配他的綠頭髮）
   avaren:  { bg: '#dce8fb', bd: '#3a5fa0', tx: '#1c3766' },   // 淺藍
   eldrin:  { bg: '#d8efe6', bd: '#2f8a68', tx: '#123f2e' },   // 青綠
   noah:    { bg: '#f3ecd9', bd: '#a89355', tx: '#4a3f1c' },   // 米黃

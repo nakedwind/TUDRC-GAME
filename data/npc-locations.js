@@ -125,6 +125,10 @@ const NPC_LOCATIONS = {
     "colyn": {
       "map": "1F-餐廳",
       "rect": [4, 6, 25, 23]
+    },
+    "rowan": {
+      "map": "1F-餐廳",
+      "rect": [4, 6, 25, 23]
     }
   }
 };
