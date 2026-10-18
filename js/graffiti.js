@@ -195,7 +195,7 @@ function drawGraffitiPreview(ctx) {
   if (!graffitiPlace || !graffitiMouse || !G.player) return;
   const { x, y } = graffitiMouse, ok = !graffitiCheck(x, y).bad, p = graffitiPlayerPoint();
   ctx.save();
-  ctx.strokeStyle = 'rgba(255,255,255,.25)'; ctx.setLineDash([4, 4]); ctx.lineWidth = 1;   // 畫得到的範圍
+  ctx.strokeStyle = 'rgba(143,211,255,.9)'; ctx.setLineDash([10, 6]); ctx.lineWidth = 1.3;   // 畫得到的範圍（跟放建築的範圍圈同樣式，render.js 的 drawBuildRange）
   ctx.beginPath(); ctx.arc(p.x, p.y, GRAFFITI.reach * CELL, 0, Math.PI * 2); ctx.stroke();
   ctx.restore();
   drawGraffitiMark(ctx, { s: graffitiPlace.sym, c: graffitiPlace.color, x, y }, ok ? .7 : .35);

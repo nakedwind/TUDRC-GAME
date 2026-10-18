@@ -488,7 +488,18 @@ function drawStairArrows() {
     ctx.beginPath(); ctx.moveTo(x, y + direction * 4); ctx.lineTo(x - 7, y - direction * 3); ctx.lineTo(x + 7, y - direction * 3); ctx.closePath(); ctx.stroke(); ctx.fill(); ctx.restore();
   }
 }
+// 放建築時：溫特周圍「能蓋的範圍」（畫在黑幕上面，暗處也看得到）
+function drawBuildRange() {
+  if (!G || !G.player || !G.running || !G.selType || !G.selType.startsWith('build:') || typeof BUILD_RANGE === 'undefined') return;
+  const x = G.player.x, y = G.player.y, R = BUILD_RANGE * CELL;
+  ctx.save();
+  ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2);
+  ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(143,211,255,.9)'; ctx.setLineDash([10, 6]);
+  ctx.stroke();
+  ctx.restore();
+}
 // flash() 跳出來的提示字（黑底標籤），畫在黑幕上面
+const textEffectIconImages = {};
 function drawTextEffects() {
   for (const f of G.effects) {
     if (!f.text || f.dmg || f.spriteEffect) continue;
@@ -498,10 +509,21 @@ function drawTextEffects() {
     ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
     // 黑底標籤：讓提示字在任何背景上都看得清楚
     const tw = ctx.measureText(f.text).width;
+    const iconSpace=f.iconImage?34:0,totalWidth=tw+iconSpace;
+    const textX=f.x+iconSpace/2;
     ctx.globalAlpha = alpha * 0.72; ctx.fillStyle = '#000';
-    roundRect(f.x - tw / 2 - 8, ty - 15, tw + 16, 21, 6); ctx.fill();
+    roundRect(f.x - totalWidth / 2 - 8, ty - (f.iconImage?20:15), totalWidth + 16, f.iconImage?30:21, 6); ctx.fill();
     ctx.globalAlpha = alpha; ctx.fillStyle = f.color;
-    ctx.fillText(f.text, f.x, ty);
+    ctx.fillText(f.text, textX, ty);
+    if(f.iconImage){
+      let img=textEffectIconImages[f.iconImage];
+      if(!img){img=new Image();img.src=f.iconImage;textEffectIconImages[f.iconImage]=img;}
+      if(img.complete&&img.naturalWidth){
+        const scale=Math.min(28/img.naturalWidth,24/img.naturalHeight);
+        const w=img.naturalWidth*scale,h=img.naturalHeight*scale;
+        ctx.imageSmoothingEnabled=false;ctx.drawImage(img,f.x-totalWidth/2+(28-w)/2,ty-5-h/2,w,h);
+      }
+    }
     ctx.globalAlpha = 1;
   }
 }
@@ -1003,10 +1025,6 @@ function draw() {
       const v = ob[buildOrient], [c, r] = hoverCell;
       const x = OX + c * CELL, y = OY + r * CELL, w = v.w * CELL, h = v.h * CELL;
       const ok = canPlaceObstacle(v, c, r, placeExtra(ob)) && G.money >= ob.cost && buildInRange(v, c, r);
-      if (G.player && typeof BUILD_RANGE !== 'undefined') {   // 能蓋的範圍：溫特周圍的虛線圈
-        ctx.save(); ctx.strokeStyle = 'rgba(143,211,255,.35)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
-        ctx.beginPath(); ctx.arc(G.player.x, G.player.y, BUILD_RANGE * CELL, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
-      }
       const img = obstacleImgs[ob.id][buildOrient];
       ctx.globalAlpha = 0.4;
       if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
@@ -1032,6 +1050,7 @@ function draw() {
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
+  drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
   drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
   if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);

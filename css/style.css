@@ -1987,3 +1987,7 @@ canvas.cursor-pressed {
 .graffiti-card footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; border-top: 1px solid rgba(255,212,121,.1); color: #8f9aa7; font-size: 12px; }
 .graffiti-cancel { padding: 6px 14px; border: 1px solid #59616c; border-radius: 8px; background: #202730; color: #dfe7ee; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
 #cv.graffiti-placing { cursor: crosshair; }
+
+/* 像素背包圖示 */
+.backpack-button-image{display:inline-block;width:20px;height:24px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;flex:none;}
+.backpack-icon .backpack-button-image{width:28px;height:34px;}

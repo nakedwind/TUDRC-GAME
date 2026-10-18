@@ -3349,30 +3349,6 @@ const TILES_CUSTOM = [
     "h": 1
   },
   {
-    "id": "tile_interactive_pickup_graffiti_red",
-    "name": "拾取亮點（塗鴉筆・紅）",
-    "role": "floor",
-    "file": "images/塗鴉筆/pen-red.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_interactive_pickup_graffiti_blue",
-    "name": "拾取亮點（塗鴉筆・藍）",
-    "role": "floor",
-    "file": "images/塗鴉筆/pen-blue.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_interactive_pickup_graffiti_black",
-    "name": "拾取亮點（塗鴉筆・黑）",
-    "role": "floor",
-    "file": "images/塗鴉筆/pen-black.png",
-    "w": 1,
-    "h": 1
-  },
-  {
     "id": "tile_interactive_pickup_almond_water",
     "name": "拾取亮點（杏仁水）",
     "role": "floor",
@@ -3718,6 +3694,30 @@ const TILES_CUSTOM = [
     "file": "images/background/Back-room-wall04.png",
     "w": 1,
     "h": 5
+  },
+  {
+    "id": "tile_interactive_pickup_graffiti_red",
+    "name": "拾取亮點（塗鴉筆・紅）",
+    "role": "floor",
+    "file": "images/塗鴉筆/pen-red.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_interactive_pickup_graffiti_blue",
+    "name": "拾取亮點（塗鴉筆・藍）",
+    "role": "floor",
+    "file": "images/塗鴉筆/pen-blue.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_interactive_pickup_graffiti_black",
+    "name": "拾取亮點（塗鴉筆・黑）",
+    "role": "floor",
+    "file": "images/塗鴉筆/pen-black.png",
+    "w": 1,
+    "h": 1
   }
 ];
 
@@ -5895,14 +5895,12 @@ const MAPS_DEFAULT = [
         "42,45": "tile_interactive_pickup_battery",
         "13,57": "tile_interactive_pickup_battery",
         "15,56": "tile_interactive_storage_locker_key",
-        "37,50": "tile_interactive_storage_locker_key",
         "40,42": "tile_interactive_pickup_almond_water",
         "13,18": "tile_interactive_pickup_almond_water",
         "54,42": "tile_obstacle_ore_small",
         "35,54": "tile_decor_gasstove02",
         "35,53": "tile_decor_foldingchair",
         "43,57": "tile_interactive_storage_locker_key",
-        "43,54": "tile_interactive_pickup_battery",
         "15,44": "tile_interactive_pickup_almond_water",
         "41,44": "tile_obstacle_ore_small",
         "11,21": "tile_interactive_storage_locker_key",
@@ -5912,7 +5910,9 @@ const MAPS_DEFAULT = [
         "52,21": "tile_interactive_pickup_almond_water",
         "12,30": "tile_interactive_pickup_almond_water",
         "16,49": "tile_interactive_pickup_almond_water",
-        "54,51": "tile_interactive_pickup_almond_water"
+        "54,51": "tile_interactive_pickup_almond_water",
+        "40,55": "tile_interactive_storage_locker_key",
+        "44,55": "tile_interactive_pickup_battery"
       },
       "object3": {
         "19,49": "tile_obstacle_camping_lights",
@@ -6606,6 +6606,14 @@ const MAPS_DEFAULT = [
           [
             5,
             5
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            8,
+            4
           ]
         ],
         "ox": 0,
@@ -7446,7 +7454,7 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "tile_obstacle_ore_large",
-        "c": 35,
+        "c": 45,
         "r": 49,
         "layer": "object2"
       },
@@ -7700,7 +7708,9 @@ const MAPS_DEFAULT = [
         "c": 30,
         "r": 19,
         "layer": "object2",
-        "sortDepth": 2.5
+        "sortDepth": 2.5,
+        "ox": 0,
+        "oy": -8
       },
       {
         "id": "tile_mr4cyq54",
@@ -8384,16 +8394,6 @@ const MAPS_DEFAULT = [
         "layer": "object3",
         "ox": -2,
         "oy": -18
-      },
-      {
-        "id": "tile_cvs_checkout_counter",
-        "c": 4,
-        "r": 19,
-        "layer": "object4",
-        "ox": -20,
-        "oy": 16,
-        "fx": true,
-        "sortDepth": 2.5
       },
       {
         "id": "tile_cvs_counter_extension",
@@ -9189,6 +9189,20 @@ const MAPS_DEFAULT = [
         "c": 23,
         "r": 11,
         "layer": "object2"
+      },
+      {
+        "id": "tile_cvs_checkout_counter_backroom",
+        "c": 4,
+        "r": 19,
+        "layer": "object4",
+        "ox": 0,
+        "oy": 16
+      },
+      {
+        "id": "tile_cvs_checkout_counter_backroom",
+        "c": 33,
+        "r": 47,
+        "layer": "object3"
       }
     ],
     "solid": [

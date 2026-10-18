@@ -59,7 +59,7 @@ function switchWeapon(step, toIndex) {
   p.sgReload = null;   // 燃燒彈槍、麻醉槍的裝填：換槍就中斷
   p.weaponIndex = next; p.atkCd = Math.max(p.atkCd || 0, .15);
   const w = WEAPONS[next];
-  flash(w.icon + ' ' + w.name, p.x, p.y - 70, '#ffe79a', .9);
+  G.effects.push({text:w.name,iconImage:w.img,x:p.x,y:p.y-70,life:.9,life0:.9,color:'#ffe79a',vy:-22});
   sfx('switch'); updateAmmoHud();
 }
 cv.addEventListener('wheel', e => {

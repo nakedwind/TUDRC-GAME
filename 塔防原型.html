@@ -6,7 +6,7 @@
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/new-game.js?v=start-menu-on-refresh-20261018"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=graffiti4-20261018">
+<link rel="stylesheet" href="css/style.css?v=pixel-ui-icons-20261018">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -137,13 +137,13 @@
       </div>
     </div>
     <div id="safeCornerButtons">
-      <button id="backpackButton" type="button" aria-haspopup="dialog"><span aria-hidden="true">🎒</span> 背包 <kbd>B</kbd></button>
+      <button id="backpackButton" type="button" aria-haspopup="dialog"><img class="backpack-button-image" src="images/weapon/Backpack.png" alt=""> 背包 <kbd>B</kbd></button>
       <button id="supplyShopButton" type="button" aria-haspopup="dialog" hidden><span aria-hidden="true">🏪</span> 商店</button>
     </div>
     <div id="backpack" class="hidden" role="dialog" aria-modal="true" aria-labelledby="backpackTitle">
       <section class="backpack-card">
         <header class="backpack-head">
-          <div class="backpack-icon" aria-hidden="true">🎒</div>
+          <div class="backpack-icon" aria-hidden="true"><img class="backpack-button-image" src="images/weapon/Backpack.png" alt=""></div>
           <div class="backpack-title"><h2 id="backpackTitle">背包</h2><p><b id="backpackCount">0</b> 件</p></div>
           <button id="backpackClose" type="button" aria-label="關閉背包（B／Esc）">×</button>
         </header>
@@ -182,7 +182,7 @@
               <div class="cart-total"><span>合計</span><b>$<span id="cartTotal">0</span></b></div>
               <div class="cart-remain">結帳後剩 $<span id="cartRemain">0</span></div>
               <button id="cartCheckout" class="cart-checkout" type="button">結帳</button>
-              <button id="shopOpenBackpack" class="cart-bag-link" type="button">🎒 打開背包</button>
+              <button id="shopOpenBackpack" class="cart-bag-link" type="button"><img class="backpack-button-image" src="images/weapon/Backpack.png" alt=""> 打開背包</button>
             </footer>
           </aside>
         </div>
@@ -201,7 +201,7 @@
     </div>
     <div class="hud-supplies" aria-label="快捷補給">
       <div id="quickSupplies"></div>
-      <button id="hudBackpackButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開背包（B）"><span aria-hidden="true">🎒</span>背包</button>
+      <button id="hudBackpackButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開背包（B）"><img class="backpack-button-image" src="images/weapon/Backpack.png" alt="">背包</button>
       <button id="hudShopButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開商店" hidden><span aria-hidden="true">🏪</span>商店</button>
     </div>
     <span class="stat money"><span class="hud-stat-values"><small>經費</small><b id="money">0</b></span></span>
@@ -270,7 +270,7 @@
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fishnolabel-20261016"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/render.js?v=buildrange-20261018"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=buildrange7-20261018"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=bwall-20261017"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=life-burn-20261018"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -289,13 +289,13 @@
   <script src="js/save.js?v=camp-plan-dialog-20261017"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=noisefix-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=equip-20261015"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=fixlist1-20261016"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/flare.js?v=pixel-ui-icons-20261018"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=items38-20261018"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=fix38c-20261018"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/combat-progress.js?v=camp-confirm-custom-20261017"></script>
   <script src="js/camp-interactions.js?v=camp-plan-concise-20261017"></script>
   <script src="js/game.js?v=graffiti-20261018"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
-  <script src="js/graffiti.js?v=graffiti4-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
+  <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/item-intro.js?v=fix38c-20261018"></script>   <!-- 第一次拿到新東西：說明視窗 -->
   <script src="js/battle-result.js?v=backroomshop-20261018"></script>   <!-- 打贏後的結算畫面 -->
 </body>
