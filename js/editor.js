@@ -279,6 +279,7 @@ function loadTiles() {
   const backroomDoorWoodAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_door_wood', STORAGE_BACKROOM_DOOR_WOOD);
   const oilTankAdded = mergeDefaultAssetPack(t => t.id === 'tile_new_decor_oil_tank', STORAGE_OIL_TANK);
   const graffitiPensAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_interactive_pickup_graffiti_'), STORAGE_GRAFFITI_PENS);
+  const doorKeyAdded = mergeDefaultAssetPack(t => t.id === 'tile_interactive_pickup_backroom_door_key', 'tudrc_asset_pack_door_key_v1');   // 地上撿的後室門鑰匙（js/doors.js）
   const backroomCorePillarsAdded = mergeDefaultAssetPack(t => BACKROOM_CORE_PILLAR_IDS.has(t.id), STORAGE_BACKROOM_CORE_PILLARS, true);
   let restaurantChairsFixed = false;
   if (!localStorage.getItem(STORAGE_RESTAURANT_CHAIR_FIX)) {   // 素材 id 不變，地圖上的擺放不受影響
@@ -294,7 +295,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded) saveTiles();
+  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -1339,14 +1340,14 @@ function refreshDoorControl() {
   if (!select.options.length) for (const [value, label] of Object.entries(DOOR_MODES)) {
     const o = document.createElement('option'); o.value = value; o.textContent = label; select.appendChild(o);
   }
-  select.value = s.doorMode === 'auto' ? 'auto' : 'manual';
+  select.value = DOOR_MODES[s.doorMode] ? s.doorMode : 'manual';
 }
 document.getElementById('selDoorMode').addEventListener('change', e => {
   const s = selectedDoorStamp(); if (!s) return;
   pushUndo();
-  if (e.target.value === 'auto') s.doorMode = 'auto'; else delete s.doorMode;   // 手動門是預設，不另外存
+  if (e.target.value !== 'manual') s.doorMode = e.target.value; else delete s.doorMode;   // 自由開關是預設，不另外存
   saveMaps(); draw();
-  setStatus(e.target.value === 'auto' ? '已設為自動門：異質核心醒來時自動打開' : '已設為手動門：玩家按 E 開關', '#7ee0c0');
+  setStatus('已設為「' + DOOR_MODES[e.target.value] + '」', '#7ee0c0');
 });
 // 置物櫃內容跟著擺放的物件保存，避免同素材的所有櫃子共用獎勵。
 function selectedLocker() {
@@ -1409,6 +1410,32 @@ function selectedCircuitThing() {
   const id = s ? s.id : m.layers[sel.layer]?.[sel.key];
   return isCircuitTile(tileById(id)) ? { sel, s, id } : null;
 }
+// 應變中心的房門：鎖住時溫特說的話（js/locked-doors.js；門前有出入口的門不會用到）
+function selectedLockedDoor() {
+  if (typeof LOCKED_DOOR_TILES === 'undefined' || selections.length !== 1 || selections[0].type !== 'stamp') return null;
+  const s = curMap().stamps[selections[0].index];
+  return s && LOCKED_DOOR_TILES.includes(s.id) ? s : null;
+}
+function refreshLockTextControl() {
+  let box = document.getElementById('lockTextControl');
+  if (!box) {
+    box = document.createElement('label'); box.id = 'lockTextControl';
+    box.append('鎖住時溫特說：');
+    const input = document.createElement('input'); input.id = 'lockTextInput'; input.type = 'text'; input.style.width = '220px';
+    input.placeholder = (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '') + '（\\n 換下一句）';
+    box.append(input); document.getElementById('selControls').appendChild(box);
+    input.addEventListener('change', () => {
+      const s = selectedLockedDoor(); if (!s) return;
+      if (dropLockedSelections('設定門的台詞')) return;
+      pushUndo();
+      const v = input.value.trim().replace(/\\n/g, '\n');
+      if (v) s.lockText = v; else delete s.lockText;
+      saveMaps(); setStatus(v ? '已設定這扇門的台詞（門前沒有出入口時才會用到）' : '已改回預設台詞', '#7ee0c0');
+    });
+  }
+  const s = selectedLockedDoor(); box.classList.toggle('hidden', !s);
+  if (s) document.getElementById('lockTextInput').value = (s.lockText || '').replace(/\n/g, '\\n');
+}
 function refreshCircuitControl() {
   let box = document.getElementById('circuitControl');
   if (!box) {
@@ -1444,6 +1471,7 @@ function refreshSelPanel() {
   const hasSelection = !!selection;
   refreshLockerControl();
   refreshCircuitControl();
+  refreshLockTextControl();
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete', 'selClear'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;

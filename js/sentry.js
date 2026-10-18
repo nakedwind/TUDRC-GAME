@@ -190,8 +190,10 @@ function sentryBlocked(x, y) {
   return false;
 }
 // 身體邊緣也要留在光內，避免中心仍亮、人物已踏進黑暗。
+const CORE_GLOW_WALK = 4;   // 醒著的異質核心會發光：周圍幾格內隊員也能走進去（才打得到核心）
 function personnelInLight(x, y) {
   if (MAP_SAFE || !LIGHT.enabled) return true;
+  if (G && G.cores && G.cores.some(c => c.awake && !c.dead && Math.hypot(c.x - x, c.y - y) <= CORE_GLOW_WALK * CELL)) return true;
   return [[0,0],[-12,-12],[12,-12],[-12,12],[12,12]]
     .every(([dx,dy]) => isLit(x + dx, y + dy));
 }
@@ -389,7 +391,7 @@ function hasAggroTarget(t) {
   const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
   for (const e of [...G.enemies, ...cores]) {
     if (e.dead || e.awake === false) continue;   // 沉睡的核心不算目標
-    if (LIGHT.enabled && !isLit(e.x, e.y)) continue;
+    if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
   }
   return false;
@@ -519,7 +521,8 @@ function updateSentry(t, dt) {
   // 主動接敵：看到亮處的怪物就靠近攻擊（開火由 game.js 處理；這裡只負責走過去）
   // 追多遠依模式：自由走動＝追得遠、原地巡邏／指派＝只追崗位附近，怪死或跑遠就回去巡邏。
   const litHere = !LIGHT.enabled || isLit(t.x, t.y);
-  if (litHere && (G.enemies.length || G.cores.some(c=>!c.dead && c.awake))) {
+  const awakeCore = G.cores.some(c => !c.dead && c.awake);   // 醒著的核心會發光：在暗處也看得到、會走過去打
+  if ((litHere || awakeCore) && (G.enemies.length || awakeCore)) {
     const spec = TYPES[t.type];
     const atkR = spec.range * CELL;                       // 射程（像素）
     const anchor = t.mode === 'escort' && G.player ? G.player : (t.mode !== 'free' && t.anchor) ? t.anchor : t;   // 護衛時以部隊長為中心
@@ -529,14 +532,16 @@ function updateSentry(t, dt) {
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
       if (e.dead || e.awake === false) continue;   // 沉睡的核心不去追
-      if (LIGHT.enabled && !isLit(e.x, e.y)) continue;    // 只追亮處看得見的怪
+      if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
+      if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心
       if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
       const d = Math.hypot(e.x - t.x, e.y - t.y);
       if (d < fd && d <= detectR) { fd = d; foe = e; }
     }
     if (foe) {
       t.target = null; t.waitT = 0;                       // 取消原本的閒逛
-      if (fd > atkR - 6 || !hasLineOfSight(t.x, t.y, foe.x, foe.y)) {   // 還沒進射程、或隔著牆看不到→繞路靠過去
+      const stopR = G.cores.includes(foe) ? atkR + (typeof CORE_HIT_PAD !== 'undefined' ? CORE_HIT_PAD : 0) - 10 : atkR - 6;   // 打核心：站在腐蝕池外面就好
+      if (fd > stopR || !hasLineOfSight(t.x, t.y, foe.x, foe.y)) {   // 還沒進射程、或隔著牆看不到→繞路靠過去
         moveSentryWithPath(t, foe.x, foe.y, (spec.walkSpeed || 80) * 1.25, dt); // 追敵時也會繞過障礙
       }
       return;                                             // 接敵中：不進入閒逛邏輯

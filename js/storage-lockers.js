@@ -5,6 +5,7 @@ const WORLD_PICKUPS = {
   key: { item: 'storage-locker-key', name: '置物櫃鑰匙' },
   battery: { item: 'battery', name: '電池' },
   almond: { item: 'almond-water', name: '杏仁水' },
+  doorKey: { item: 'backroom-door-key', name: '後室門鑰匙' },
   penRed: { item: 'graffiti-red', name: '塗鴉筆（紅）' },
   penBlue: { item: 'graffiti-blue', name: '塗鴉筆（藍）' },
   penBlack: { item: 'graffiti-black', name: '塗鴉筆（黑）' },
@@ -18,6 +19,7 @@ function storagePropKind(id){
   const name=String(tile?.name||'').trim().toLowerCase();
   // 編輯器上傳會把圖片轉成 data URL，需同時認素材 ID 與名稱。
   if(GRAFFITI_PICKUP_TILES[id])return GRAFFITI_PICKUP_TILES[id];
+  if(id==='tile_interactive_pickup_backroom_door_key')return 'doorKey';
   if(id===STORAGE_LOCKER_KEY_TILE||/storage-locker-key|置物[箱櫃]鑰匙/.test(name))return 'key';
   if(id==='tile_interactive_pickup_battery'||/^(battery(?:\.png)?|電池(?:\.png)?|拾取亮點（電池）)$/.test(name)||file.endsWith('/電池.png'))return 'battery';
   if(id==='tile_interactive_pickup_almond_water'||/almond-water|杏仁水/.test(name)||(file.endsWith('/杏仁水.png')||file.endsWith('/杏仁水小.png')))return 'almond';
@@ -64,7 +66,7 @@ function storagePropNearPlayer(){
 function storagePropPrompt(prop){
   if(prop.kind==='equipment-drop')return '拾取'+(prop.drop.item?(itemById(prop.drop.item)?.name||'道具'):(equipDef(prop.drop.id)?.name||'裝備'));
   if(isWorldPickup(prop.kind))return '拾取';
-  if(prop.kind==='power'){const n=circuitOf(prop.stamp);return (mapPowerIsOn(n)?'關閉電源':'開啟電源')+(n?' '+n:'');}
+  if(prop.kind==='power')return mapPowerIsOn(circuitOf(prop.stamp))?'關閉電源':'開啟電源';
   if(prop.open)return '查看置物箱';
   return (supplyInventory.get('storage-locker-key')||0)>0?'用鑰匙開啟置物箱':'置物箱已上鎖（需要鑰匙）';
 }
@@ -77,7 +79,7 @@ function useStoragePropNearPlayer(){
     G.equipmentDrops=(G.equipmentDrops||[]).filter(drop=>drop!==prop.drop);
     updateHUD();saveGame();
   }else if(prop.kind==='power'){
-    const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice('電源'+(n?' '+n+' ':'')+(mapPowerIsOn(n)?'已開啟':'已關閉'));
+    const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice(mapPowerIsOn(n)?'電源已開啟':'電源已關閉');
   }else if(isWorldPickup(prop.kind)){
     const loot=WORLD_PICKUPS[prop.kind];
     supplyInventory.set(loot.item,(supplyInventory.get(loot.item)||0)+1);
@@ -103,6 +105,7 @@ function useStoragePropNearPlayer(){
         if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);
         if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);
         if(typeof tryGraffitiPenFind==='function')tryGraffitiPenFind(prop.x,prop.top);   // 塗鴉筆（js/graffiti.js）
+        if(typeof tryYouyouCardFind==='function')tryYouyouCardFind();   // 好遊卡（js/mrt-locks.js）
       }
     }finally{if(typeof itemIntroFromLocker!=='undefined')itemIntroFromLocker=false;}
     if(typeof itemIntroCount!=='undefined'&&itemIntroCount===before)flash('置物櫃裡什麼也沒有',prop.x,prop.top-8,'#dce6ed',1.6);

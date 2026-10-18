@@ -117,6 +117,10 @@ const NPC_LOCATIONS = {
     "salem": {
       "map": "1F-餐廳",
       "rect": [4, 7, 25, 23]
+    },
+    "taana": {
+      "map": "1F-餐廳",
+      "rect": [4, 6, 25, 23]
     }
   }
 };

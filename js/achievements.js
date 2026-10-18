@@ -22,11 +22,13 @@ const ACHIEVEMENTS = [
   { id: 'calm_10',    group: '嚮導', stat: 'berserkCalmed', goal: 10, name: '把暴走的隊友拉回來 10 次' },
   { id: 'win_1',      group: '任務', stat: 'wins',        goal: 1,   name: '第一次守住營地' },
   { id: 'win_10',     group: '任務', stat: 'wins',        goal: 10,  name: '守住營地 10 次' },
+  { id: 'control_1',  group: '任務', stat: 'fullControls', goal: 1,  name: '第一次徹底控制一個區域' },
+  { id: 'control_5',  group: '任務', stat: 'fullControls', goal: 5,  name: '徹底控制區域 5 次' },
 ];
 // 成就頁面上方「累計戰績」顯示哪些數字
 const ACHIEVE_STAT_LABELS = [
   ['slimeKills', '討伐史萊姆'], ['giantKills', '擊倒巨型'], ['crits', '爆擊'],
-  ['soothes', '親自疏導'], ['berserkCalmed', '平息暴走'], ['wins', '守住營地'],
+  ['soothes', '親自疏導'], ['berserkCalmed', '平息暴走'], ['wins', '守住營地'], ['fullControls', '徹底控制'],
 ];
 const ACHIEVE_KEY = 'tudrc_achievements_v1';
 const ACHIEVE_TOAST = { show: 4, gap: .35 };   // 通知停留秒數、連續解鎖時每則間隔

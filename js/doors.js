@@ -28,8 +28,10 @@ function setupDoors() {
     }
     // 只管理原本不是牆的格子（編輯器裡畫了不可穿透的格子維持擋路）
     const own = cells.filter(k => !mapWalls.has(k));
-    const door = { stamp: s, mode: s.doorMode === 'auto' ? 'auto' : 'manual', open: false, cells, own, sound: DOOR_TILES[s.id].sound || 'door',
-      x: (left + right) / 2, y: bottom, top: y0 + 2 };
+    const mode = typeof DOOR_MODES !== 'undefined' && DOOR_MODES[s.doorMode] ? s.doorMode : 'manual';
+    const door = { stamp: s, mode, open: false, cells, own, sound: DOOR_TILES[s.id].sound || 'door',
+      x: (left + right) / 2, y: bottom, top: y0 + 2, left, right, y0,
+      randomT: mode === 'random' ? doorRandomWait() : 0 };
     for (const k of own) { mapWalls.add(k); doorAddedWalls.add(k); }
     mapDoors.push(door);
   }
@@ -51,19 +53,43 @@ function setDoorOpen(door, open, silent = false) {
   if (!silent && typeof sfxAt === 'function') sfxAt(door.sound, door.x, door.y, .7, 'door');
   return true;
 }
-// 溫特附近、可以手動開關的門
+// 溫特附近、可以按 E 的門（手動門，還有上鎖的門：按了會開鎖或說要什麼鑰匙）
+const doorLocked = d => d.mode === 'key' || d.mode === 'chain';
+const doorKeyItem = d => (typeof DOOR_LOCKS !== 'undefined' && DOOR_LOCKS[d.mode]) || null;
 function doorNearPlayer() {
   const p = G.player; if (!p || p.sitting) return null;
   let best = null, bd = DOOR.radius;
   for (const d of mapDoors) {
-    if (d.mode !== 'manual') continue;
+    if (d.mode !== 'manual' && !doorLocked(d)) continue;
     const dd = Math.hypot(d.x - p.x, d.y - CELL / 2 - p.y);
     if (dd < bd) { bd = dd; best = d; }
   }
   return best;
 }
+// 提示文字（js/render.js）
+function doorPrompt(d) {
+  if (!doorLocked(d)) return d.open ? '關門' : '開門';
+  const key = itemById(doorKeyItem(d)), have = (supplyInventory.get(doorKeyItem(d)) || 0) > 0;
+  if (d.mode === 'chain') return have ? '用' + key.name + '解開鎖鏈' : '被鎖鏈鎖住了（需要' + key.name + '）';
+  return have ? '用' + key.name + '開鎖' : '門鎖住了（需要' + key.name + '）';
+}
+// 上鎖的門：有鑰匙就用掉一把開鎖（之後變成一般的手動門），沒有就說要什麼
+function unlockDoor(door) {
+  const id = doorKeyItem(door), key = itemById(id), n = supplyInventory.get(id) || 0;
+  if (n <= 0) { sfx('error'); flash(door.mode === 'chain' ? '被鎖鏈鎖住了，需要' + key.name : '門鎖住了，需要' + key.name, door.x, door.top, '#ffcf89', 1.6); return; }
+  if (n <= 1) supplyInventory.delete(id); else supplyInventory.set(id, n - 1);
+  const chain = door.mode === 'chain';
+  door.mode = 'manual';
+  if (chain) dropDoorChains(door);
+  if (typeof sfxAt === 'function') sfxAt(chain ? 'chainUnlock' : 'doorUnlock', door.x, door.y, .6, 'door-unlock');   // 音效編輯器可以換
+  systemNotice((chain ? '解開了鎖鏈' : '打開了門鎖') + '，消耗 1 支' + key.name);
+  setDoorOpen(door, true);
+  if (typeof updateHUD === 'function') updateHUD();
+  if (typeof saveGame === 'function') saveGame();
+}
 function toggleDoorNearPlayer() {
   const door = doorNearPlayer(); if (!door) return false;
+  if (doorLocked(door)) { unlockDoor(door); return true; }
   if (!setDoorOpen(door, !door.open)) { sfx('error'); flash('門口有人，關不起來', door.x, door.top, '#ff8f8f'); }
   return true;
 }
@@ -72,4 +98,57 @@ function openAutoDoors(trigger) {
   let opened = 0;
   for (const d of mapDoors) if (d.mode === 'auto' && !d.open && setDoorOpen(d, true, opened > 0)) opened++;
   if (opened) systemNotice(trigger === 'core-awake' ? '異質核心甦醒，周圍的門自動打開了！' : '門自動打開了', true);
+}
+
+// ---- 隨機開關的門：每隔一段時間自己開或關（有人站在門口就晚一點再關）----
+function doorRandomWait() { const [a, b] = (typeof DOOR_RANDOM !== 'undefined' ? DOOR_RANDOM.every : [10, 30]); return a + Math.random() * (b - a); }
+function updateRandomDoors(dt) {
+  for (const d of mapDoors) {
+    if (d.mode !== 'random') continue;
+    d.randomT -= dt; if (d.randomT > 0) continue;
+    if (setDoorOpen(d, !d.open)) d.randomT = doorRandomWait(); else d.randomT = 1.5;
+  }
+}
+// ---- 鎖鏈神秘門、上鎖的門：畫在門上（關著時）；鎖鏈解開時往下掉 ----
+function drawDoorLock(ctx, d) {   // 一扇門的鎖鏈＋大鎖（跟門一起排前後）
+  if (d.open) return;
+  const h = d.y - d.y0;
+  if (d.mode === 'chain') drawChainX(ctx, d.left + 2, d.y0 + h * .2, d.right - 2, d.y - 6, 0);
+  if (d.mode === 'chain' || d.mode === 'key') drawPadlock(ctx, d.x, d.y0 + h * .55, d.mode === 'chain' ? 1.25 : .8, d.mode === 'chain' ? '#b58cff' : '#e9bd62', 0);
+}
+function drawDoorLocks(ctx) {   // 解開時掉下來的鎖鏈
+  for (const f of G.doorChainFx || []) {   // 掉下來的鎖鏈
+    const k = f.t / f.life;
+    ctx.save(); ctx.globalAlpha = 1 - k; drawChainX(ctx, f.left, f.top + f.drop, f.right, f.bottom + f.drop, f.spin); ctx.restore();
+  }
+}
+function drawChainX(ctx, x0, y0, x1, y1, spin) {
+  const link = (ax, ay, bx, by) => {
+    const n = Math.max(4, Math.round(Math.hypot(bx - ax, by - ay) / 7));
+    for (let i = 0; i <= n; i++) {
+      const x = ax + (bx - ax) * i / n, y = ay + (by - ay) * i / n;
+      ctx.save(); ctx.translate(x, y); ctx.rotate(Math.atan2(by - ay, bx - ax) + (i % 2 ? Math.PI / 2 : 0) + spin);
+      ctx.strokeStyle = '#2a2d33'; ctx.lineWidth = 3.4; ctx.beginPath(); ctx.ellipse(0, 0, 4.2, 2.4, 0, 0, Math.PI * 2); ctx.stroke();
+      ctx.strokeStyle = '#a8aeb8'; ctx.lineWidth = 1.6; ctx.stroke();
+      ctx.restore();
+    }
+  };
+  link(x0, y0, x1, y1); link(x1, y0, x0, y1);
+}
+function drawPadlock(ctx, x, y, s, color, t) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(s, s);
+  ctx.strokeStyle = '#2a2d33'; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(0, -5, 5, Math.PI, 0); ctx.stroke();
+  ctx.strokeStyle = '#c7ccd4'; ctx.lineWidth = 2; ctx.stroke();
+  ctx.fillStyle = color; ctx.strokeStyle = '#2a2d33'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.roundRect ? ctx.roundRect(-7, -5, 14, 12, 2) : ctx.rect(-7, -5, 14, 12); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = '#2a2d33'; ctx.fillRect(-1, -1, 2, 4);
+  ctx.restore();
+}
+function dropDoorChains(d) {
+  (G.doorChainFx = G.doorChainFx || []).push({ left: d.left + 2, right: d.right - 2, top: d.y0 + (d.y - d.y0) * .2, bottom: d.y - 6, drop: 0, vy: 0, spin: 0, t: 0, life: .9 });
+}
+function updateDoorFx(dt) {
+  if (!G.doorChainFx || !G.doorChainFx.length) return;
+  for (const f of G.doorChainFx) { f.t += dt; f.vy += 600 * dt; f.drop += f.vy * dt; f.spin += dt * 1.5; }
+  G.doorChainFx = G.doorChainFx.filter(f => f.t < f.life);
 }

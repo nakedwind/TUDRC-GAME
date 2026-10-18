@@ -10,7 +10,7 @@
 const CORE = {
   image: 'images/background/Anomalous-Core.png',
   w: 80, h: 120,                 // 圖片大小（像素）
-  hp: 200,                       // 每一級難度的血量
+  hp: 600,                       // 每一級難度的血量
   reward: 100,                   // 每一級難度的結晶獎勵
   wakeAvarenCells: 4,            // 阿瓦倫走到幾格內，核心就會醒來
   float: { height: 18, bob: 5, rise: .9 },   // 甦醒後浮起的高度、上下飄動幅度、浮起需要幾秒
@@ -269,6 +269,7 @@ function drawCore(core) {
 
 // ---- 打破：碎成好幾塊往外噴飛，落地彈一下後淡出 ----
 function breakCore(core) {
+  if (typeof coreKeyDrop === 'function') coreKeyDrop(core);   // 掉一把異質鑰匙（js/core-clear.js）
   if (typeof questEvent === 'function') questEvent('breakCore');   // 支線進度（js/quests.js）
   if (typeof tryEquipDrop === 'function') tryEquipDrop('detector', core.x, core.y);   // 有機會拿到異質探測器（js/equipment.js）
   const lift = coreLift(core), bottom = core.y + 20, top = bottom - CORE.h - lift, left = core.x - CORE.w / 2;

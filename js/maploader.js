@@ -88,6 +88,9 @@ function mapUsedTileIds(m) {
   return ids;
 }
 function preloadMapTiles(m) {
+  if(typeof MRT_GATE_ART!=='undefined'&&mapUsedTileIds(m).has('tile_mrt_ticket_gate')){
+    tileImage(MRT_GATE_ART.frame);tileImage(MRT_GATE_ART.wings);
+  }
   tileImage({ id: '__field-base-fail', file: 'images/field-camp/field-base-fail.png' });
   tileImage({ id: '__warning-line-fail', file: 'images/field-camp/warning-line-fail.png' });
   const used = mapUsedTileIds(m);
@@ -433,6 +436,7 @@ function drawMapStampImg(ctx, s) {
   let t = mapTileById(s.id); if (!t) return;
   t = destroyedBaseDisplayTile(s, t);
   if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
+  if (typeof mrtDisplayTile === 'function') t = mrtDisplayTile(s, t);   // 解封的捷運入口換圖（js/mrt-locks.js）
   const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(s.id,s.c,s.r,s.layer||'top',s):null;
   if(display===false)return;
   if(display)t=display;
@@ -452,10 +456,18 @@ function drawMapStampImg(ctx, s) {
     const supply = typeof campSupplyOverlay === 'function' ? campSupplyOverlay(s, t) : null;   // 營地物資箱：疊在營地合圖上（js/camp-supply.js）
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
-      ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(img, -w / 2, -h / 2, w, h);
+      ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
+      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
       if (supply) ctx.drawImage(supply, -w / 2, -h / 2, w, h);
       ctx.restore();
-    } else { ctx.drawImage(img, x, y, w, h); if (supply) ctx.drawImage(supply, x, y, w, h); }
+    } else if(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,x,y,w,h)) {
+      // 閘門的靜態機台與滑動門翼由專用繪製處理。
+    } else {
+      const hole = typeof mrtStampHole === 'function' ? mrtStampHole(s) : null;   // 打開的捷運閘門：門板那塊不畫（js/mrt-locks.js）
+      if (hole) { ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.rect(x + hole[0] * w, y + hole[1] * h, hole[2] * w, hole[3] * h); ctx.clip('evenodd'); }
+      ctx.drawImage(img, x, y, w, h); if (supply) ctx.drawImage(supply, x, y, w, h);
+      if (hole) ctx.restore();
+    }
     ctx.restore();
     return;
   }

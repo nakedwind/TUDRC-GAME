@@ -17,12 +17,18 @@ const SFX = (() => {
     demolish: '設施/拆建築.mp3',
     placeLight: '設施/放燈.mp3',   // 放置燈類建築（js/build.js）   // 拆除自己蓋的建築（js/game.js 的 demolishPlayerBuilding）
     itemPickup: '獎勵/拾取.mp3',
+    itemReveal: '獎勵/開置物櫃.mp3',   // 第一次拿到東西、開置物櫃開出東西：跳出說明視窗時（js/item-intro.js）
     powerOn: '環境/門與機關/很大聲的開燈.mp3',
     ironGateSlide: '環境/門與機關/鐵門滑動.mp3',
     soothe: '玩家/疏導.mp3',
     drink: '喝飲料.mp3',   // 喝杏仁水（js/shop.js 的 useSupply）
     door: '環境/門與機關/關門.mp3',
     backroomDoor: '環境/門與機關/後室開門.mp3',
+    lockedDoor: '環境/門與機關/關門.mp3',     // 鎖住的房門：轉門把（js/locked-doors.js）
+    doorUnlock: '環境/門與機關/關門.mp3',     // 用後室門鑰匙開鎖（js/doors.js）
+    chainUnlock: '設施/打磨.mp3',             // 解開神秘門的鎖鏈（js/doors.js）
+    mrtGate: '設施/BB聲.mp3',                 // 捷運閘門刷好遊卡（js/mrt-locks.js）
+    mrtUnlock: '設施/打磨.mp3',               // 用異質鑰匙解封捷運入口（js/mrt-locks.js）
     elevator: '環境/門與機關/電梯.mp3',
     gunshot: '戰鬥/槍械/開槍.mp3',
     flare: '戰鬥/槍械/射擊.mp3',

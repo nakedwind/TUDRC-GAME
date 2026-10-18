@@ -3718,6 +3718,14 @@ const TILES_CUSTOM = [
     "file": "images/塗鴉筆/pen-black.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_interactive_pickup_backroom_door_key",
+    "name": "拾取亮點（後室門鑰匙）",
+    "role": "floor",
+    "file": "images/碎片鑰匙/後室門鑰匙.png",
+    "w": 1,
+    "h": 1
   }
 ];
 
@@ -7451,7 +7459,7 @@ const MAPS_DEFAULT = [
         "oy": -8,
         "lockerLoot": {
           "kind": "item",
-          "id": "battery",
+          "id": "youyou-card",
           "qty": 1
         }
       },
@@ -9182,7 +9190,12 @@ const MAPS_DEFAULT = [
         "id": "tile_interactive_storage_locker",
         "c": 23,
         "r": 11,
-        "layer": "object2"
+        "layer": "object2",
+        "lockerLoot": {
+          "kind": "item",
+          "id": "youyou-card",
+          "qty": 1
+        }
       },
       {
         "id": "tile_cvs_checkout_counter_backroom",
@@ -9218,6 +9231,12 @@ const MAPS_DEFAULT = [
         "r": 32,
         "layer": "object3",
         "circuit": 2
+      },
+      {
+        "id": "tile_mrt_ticket_gate",
+        "c": 18,
+        "r": 54,
+        "layer": "floor"
       }
     ],
     "solid": [
@@ -11312,9 +11331,10 @@ const MAPS_DEFAULT = [
     "portals": [],
     "solidOffsets": {},
     "coreSpots": [
-      "43,52"
+      "43,52",
+      "40,51"
     ],
-    "coreCount": 1,
+    "coreCount": 2,
     "monsterMix": [
       {
         "id": "slime",

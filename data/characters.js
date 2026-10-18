@@ -373,5 +373,13 @@ const CHARACTERS = {
     "sprite": "ball_B",
     "intro": "應變中心裡養的狗，常在指揮部晃來晃去。",
     "captainImpression": ""
+  },
+  "taana": {
+    "id": "taana",
+    "kind": "support",
+    "name": "塔那",
+    "sprite": "taana_A",
+    "intro": "常在餐廳出沒的路人，看起來一直很想下班。",
+    "captainImpression": ""
   }
 };

@@ -228,7 +228,7 @@ function faceEachOther(actor) {
 }
 function renderDialogueLine() {
   if (!dialogueState) return;
-  const { actor, lines, index } = dialogueState, profile = dialogueProfile(actor) || { name: '？？？' };
+  const { actor, lines, index } = dialogueState, profile = actor ? (dialogueProfile(actor) || { name: '？？？' }) : { name: dialogueState.name || '' };
   const line = lines[index], text = typeof line === 'string' ? line : line.text;
   dialogueName.textContent = typeof line === 'object' && line.speaker ? line.speaker : profile.name;
   dialogueProgress.textContent = (index + 1) + ' / ' + lines.length;
@@ -285,6 +285,19 @@ function openDialogue(actor) {
   renderDialogueLine(); sfx('menu');
   if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);
   if (typeof onDialogueOpenedWorkshop === 'function') onDialogueOpenedWorkshop(actor);   // 諾亞：開發工坊按鈕（js/equipment.js）   // 好感度、送禮按鈕（js/gifts.js）
+}
+// 不是跟角色說話的對話框（海報、告示…）：name＝名稱欄、image＝左邊的圖、lines＝一句一句的文字
+function openTextDialogue({ name, image, lines, kind = 'text' }) {
+  if (dialogueState) return;
+  dialogueState = { actor: null, name, lines: lines && lines.length ? lines : ['……'], index: 0 };
+  MOVE_KEYS.forEach(key => { keys[key] = false; });
+  closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
+  dialoguePortrait.src = image || ''; dialoguePortrait.alt = name || '';
+  dialoguePortrait.parentElement.dataset.char = kind;   // css：整張圖縮進框裡（不是裁半身像）
+  for (const id of ['dialogueGift', 'dialogueWorkshop']) document.getElementById(id)?.classList.add('hidden');
+  document.getElementById('dialogueFavor')?.classList.add('hidden');
+  dialogueBox.classList.remove('hidden');
+  renderDialogueLine(); sfx('menu');
 }
 function advanceDialogue() {
   if (!dialogueState) return;
@@ -442,6 +455,9 @@ window.addEventListener('keydown', e => {
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
     else if (toggleIronGateNearPlayer()) {}
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
+    else if (typeof useMrtLockNearPlayer === 'function' && useMrtLockNearPlayer()) {}   // 捷運閘門刷卡、入口解封（js/mrt-locks.js）
+    else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
+    else if (typeof tryLockedDoorNearPlayer === 'function' && tryLockedDoorNearPlayer()) {}   // 鎖住的房門：溫特說「好像被鎖住了」（js/locked-doors.js）
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) openMissionBoard();   // 作戰桌／作戰螢幕（js/missions.js；旁邊的椅子或人更近時讓給它們）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) openVendingMachine();   // 販賣機：只賣飲料（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) openDrinkShop();   // 飲料店：只賣飲料（js/shop.js）
@@ -490,6 +506,7 @@ function portalNearPlayer() {
   const p = G.player; if (!p || typeof mapPortals === 'undefined') return null;
   let best = null, bd = PORTAL_RADIUS;
   for (const pt of mapPortals) {
+    if (typeof mrtPortalBlocked === 'function' && mrtPortalBlocked(pt)) continue;   // 封鎖中的捷運入口裡面的出入口不作用
     const [x, y] = center(pt.c, pt.r), d = Math.hypot(x - p.x, y - p.y);
     if (d < bd) { bd = d; best = { portal: pt, x, y }; }
   }
@@ -952,6 +969,7 @@ function newGame() {
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
   setupStorageBoxWalls();
   setupDoors();         // 門一開始都關著（js/doors.js）
+  if (typeof setupMrtLocks === 'function') setupMrtLocks();   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
@@ -1302,6 +1320,8 @@ cv.addEventListener('mouseleave', () => { hoverCell = null; cv.classList.remove(
 
 // ---- 哨兵挑目標（射程 R 內）----
 // 優先順序：正在打營地或部隊長的怪物 → 最近的怪物 → 最近的異質核心（被召喚護衛時不打核心）
+// 打異質核心可以多搆遠一點：核心本身很大，腳下又有腐蝕池（隊員會站在池子外面），近戰才打得到
+const CORE_HIT_PAD = 36;
 function pickSentryTarget(t, R) {
   const p = G.player;
   let best = null, bestScore = Infinity;
@@ -1318,7 +1338,7 @@ function pickSentryTarget(t, R) {
   for (const core of G.cores) {
     if (core.dead || !core.awake) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
-    if (distance <= R && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
+    if (distance <= R + CORE_HIT_PAD && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
   }
   return best;
 }
@@ -1626,6 +1646,7 @@ function frame(ts) {
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
 }
 function update(dt) {
+  if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);
   if (typeof updateCoreFrenzy === 'function') updateCoreFrenzy(dt);   // 核心醒著：異質體狂暴化（js/core-frenzy.js）
   if (G.player) {
@@ -1750,7 +1771,7 @@ function update(dt) {
       if (!swing.hit && swing.age >= swing.impact) {
         swing.hit = true;
         const foe = swing.target;
-        if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12) swingTarget = foe;
+        if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) swingTarget = foe;
       }
       if (swing.age >= swing.duration) t.meleeSwing = null;
       if (!swingTarget) continue;
@@ -1763,7 +1784,7 @@ function update(dt) {
         if (GUIDE_GUN_TYPES.has(t.type)) spawnGuideGunshot(t, sw);
         else { playSentryAttackSound(t); spawnSentryShotVisual(t, sw, spec); }
         const foe = sw.target;
-        if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12) swingTarget = foe;
+        if (foe && !foe.dead && foe.hp > 0 && Math.hypot(foe.x - t.x, foe.y - t.y) <= spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) swingTarget = foe;
       }
       if (sw.age >= sw.duration) t.gunSwing = null;
       if (!swingTarget) continue;
@@ -1979,6 +2000,7 @@ function update(dt) {
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
+  if (typeof updateRandomDoors === 'function') { updateRandomDoors(dt); updateDoorFx(dt); }   // 隨機開關的門、解開掉落的鎖鏈（js/doors.js）
   if (typeof updateSmilers === 'function') updateSmilers(dt);
   if (typeof updateGraffiti === 'function') updateGraffiti(dt);   // 塗鴉：擦掉的進度（js/graffiti.js）
   if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
@@ -1988,7 +2010,9 @@ function update(dt) {
   if (typeof updateFishHead === 'function') updateFishHead(dt);   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
-  if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
+  // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
+  if (typeof checkCoreClear === 'function') checkCoreClear(dt);
+  else if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
   updateHUD();
 }
 const FLASH_LIFE = 1.5;   // 提示字停留時間（秒）；想更久／更短改這裡

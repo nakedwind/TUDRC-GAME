@@ -13,6 +13,7 @@ let itemIntroFromLocker = false, itemIntroCount = 0;   // 置物櫃開出來的�
 function itemIntro(info) {
   if (!info || !info.key) return;
   const locker = itemIntroFromLocker;
+  if (info.always) { itemIntroQueue.push(info); itemIntroCount++; if (!itemIntroOpen) showNextItemIntro(); return; }   // 每次都跳（異質鑰匙這類特別的東西）
   if (!locker && itemIntroSeen.has(info.key)) return;
   itemIntroSeen.add(info.key);
   try { localStorage.setItem(ITEM_INTRO_KEY, JSON.stringify([...itemIntroSeen])); } catch (_) {}
@@ -32,6 +33,7 @@ function showNextItemIntro() {
   const info = itemIntroQueue.shift();
   if (!info) { itemIntroOpen = false; return; }
   const el = ensureItemIntroEl();
+  el.style.setProperty('--intro-image-scale',String(info.imageScale||1));
   itemIntroOpen = true; aimHeld = false;
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
   const esc = s => String(s || '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
@@ -44,7 +46,7 @@ function showNextItemIntro() {
     (info.stat ? '<p class="item-intro-stat">' + esc(info.stat) + '</p>' : '') +
     '<button type="button" class="item-intro-ok">知道了 <kbd>Enter</kbd></button></section>';
   el.classList.remove('hidden');
-  if (typeof sfx === 'function') sfx('menu');
+  if (typeof SFX !== 'undefined') SFX.play('itemReveal', .8, 'item-reveal'); else if (typeof sfx === 'function') sfx('menu');   // 開置物櫃音效（js/sfx.js）
   setTimeout(() => el.querySelector('.item-intro-ok')?.focus(), 0);
 }
 function closeItemIntro() {

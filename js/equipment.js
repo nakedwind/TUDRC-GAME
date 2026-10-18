@@ -66,7 +66,7 @@ function equipLv(id) {
 // ---- 效果（其他程式呼叫）----
 const equipPlayerDamage = d => { const v = equipLv('vest'), h = equipLv('helmet'); return d * (v ? 1 - v.guard : 1) * (h ? 1 - h.guard : 1); };   // 防護背心、防護頭盔：溫特受到的傷害
 const equipFireMul = () => { const v = equipLv('fireboots'); return v ? 1 - v.fire : 1; };   // 防火鞋：火海燙傷（js/oil-barrels.js）
-const equipAcidMul = () => { const v = equipLv('mask'); return v ? 1 - v.filter : 1; };   // 防毒面具：腐蝕池、酸液的傷害
+const equipAcidMul = () => { const v = equipLv('mask'), b = equipLv('acidboots'); return (v ? 1 - v.filter : 1) * (b ? 1 - b.corrode : 1); };   // 防腐鞋：一起減（可疊加）   // 防毒面具：腐蝕池、酸液的傷害
 const equipSootheCost = c => { const v = equipLv('bracelet'); return v ? Math.round(c * (1 - v.save)) : c; };   // 共感手環：疏導花的 SP
 const equipSpeedMul = () => { const v = equipLv('sneakers'); return (v ? 1 + v.speed : 1) * adrenalineSpeedMul(); };   // 輕量跑鞋、腎上腺素（道具）
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）

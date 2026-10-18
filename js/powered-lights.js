@@ -25,8 +25,9 @@ function poweredLightFixtures(){
 function poweredLightSources(){
   return poweredLightFixtures().filter(l=>mapPowerIsOn(l.circuit)).map(l=>({...l,r:LIGHT.poweredLampR??250,intensity:LIGHT.poweredLampIntensity??.85}));
 }
+const SHOW_CIRCUIT_NUMBERS = false;   // 遊戲裡要不要在開關、電燈上顯示電路編號（地圖編輯器一律顯示）
 function drawPoweredLights(ctx){
-  drawCircuitNumbers(ctx);
+  if(SHOW_CIRCUIT_NUMBERS)drawCircuitNumbers(ctx);
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const l of poweredLightFixtures()){
     if(!mapPowerIsOn(l.circuit))continue;

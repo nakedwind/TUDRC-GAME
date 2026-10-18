@@ -1873,7 +1873,10 @@ canvas.cursor-pressed {
 
 /* 拆除按鈕：用 images/weapon/icon-hammer.png（16×19 像素圖放大 2 倍） */
 #buildToolbar #demolishToggle .demolish-icon { width: 24px; height: 28px; object-fit: contain; image-rendering: pixelated; }
-#buildToolbar #demolishToggle > span { display:none; }
+#buildToolbar #demolishToggle { position: relative; }
+#buildToolbar #demolishToggle .demolish-icon { margin-bottom: 12px; }   /* 圖示往上一點，下面留給「拆除」 */
+#buildToolbar #demolishToggle > span { display: block; position: absolute; left: 0; right: 0; bottom: 3px; text-align: center; font-size: 12px; line-height: 1;
+  text-shadow: 0 0 2px #000, 0 0 3px #000, 1px 1px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000; }   /* 跟建築格的名字同樣式 */
 #buildToolbar #demolishToggle { justify-content:center; }
 #buildToolbar .build-quick-slot[data-build-id] img { left:50%; transform:translateX(-50%); }
 #buildToolbar .build-quick-slot[data-build-id="camping_lights"] img,
@@ -1891,17 +1894,17 @@ canvas.cursor-pressed {
 .gm-demolish-icon { width: 12px; height: 14px; vertical-align: -2px; image-rendering: pixelated; }
 
 /* ===== 第一次拿到新東西：說明視窗（js/item-intro.js）===== */
-#itemIntro { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(4,7,11,.55); backdrop-filter: blur(3px); animation: item-intro-fade .18s ease-out; }
+#itemIntro { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: transparent; animation: item-intro-fade .18s ease-out; }
 #itemIntro.hidden { display: none; }
 .item-intro-card { width: min(340px, calc(100% - 32px)); padding: 22px 22px 18px; border: 1px solid rgba(255,212,121,.55); border-radius: 16px; text-align: center; color: #e8eef3;
-  background: linear-gradient(170deg, rgba(36,42,50,.97), rgba(14,19,26,.98)); box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(255,212,121,.15);
+  background: rgba(0,0,0,.8); box-shadow: 0 0 0 1px rgba(0,0,0,.4), 0 20px 60px rgba(0,0,0,.6), 0 0 40px rgba(255,212,121,.15);
   animation: item-intro-pop .32s cubic-bezier(.2,1.4,.4,1); font-family: "Microsoft JhengHei", sans-serif; }
-.item-intro-new { display: block; color: #ffd479; font-size: 12px; letter-spacing: .2em; }
-.item-intro-image { display: grid; place-items: center; width: 120px; height: 120px; margin: 12px auto 8px; border-radius: 16px; background: radial-gradient(circle at 50% 45%, rgba(255,212,121,.18), rgba(7,10,14,.5) 70%); }
+.item-intro-new { display: none; color: #ffd479; font-size: 12px; letter-spacing: .2em; }
+.item-intro-image { display: grid; place-items: center; width: 120px; height: 120px; margin: 4px auto 8px; border-radius: 16px; background: radial-gradient(circle at 50% 45%, rgba(255,212,121,.18), rgba(7,10,14,.5) 70%); }
 .item-intro-image img { max-width: 96px; max-height: 96px; object-fit: contain; image-rendering: pixelated; }
 .item-intro-image i { font-style: normal; font-size: 56px; }
 .item-intro-card h2 { margin: 4px 0 6px; font-size: 22px; color: #fff8e7; }
-.item-intro-tag { display: inline-block; padding: 2px 10px; border-radius: 99px; background: rgba(143,211,255,.14); color: #9fdcff; font-size: 12px; }
+.item-intro-tag { display: none; padding: 2px 10px; border-radius: 99px; background: rgba(143,211,255,.14); color: #9fdcff; font-size: 12px; }
 .item-intro-card p { margin: 10px 0 0; color: #c3ccd8; font-size: 14px; line-height: 1.65; text-align: left; }
 .item-intro-card p.item-intro-stat { color: #a9d8c9; font-size: 13px; }
 .item-intro-ok { margin-top: 16px; padding: 9px 28px; border: 1px solid #e9bd62; border-radius: 10px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 15px "Microsoft JhengHei", sans-serif; }
@@ -1911,7 +1914,7 @@ canvas.cursor-pressed {
 
 /* ===== 結算畫面（js/battle-result.js）===== */
 .battle-result { margin: 14px auto 2px; max-width: 460px; text-align: left; display: grid; gap: 10px; }
-.br-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.br-row { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .br-stat { padding: 8px 6px; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; background: rgba(20,28,38,.7); text-align: center; }
 .br-stat small { display: block; color: #8f9aa7; font-size: 11px; }
 .br-stat b { display: block; color: #fff8e7; font-size: 18px; }
@@ -2023,3 +2026,46 @@ canvas.cursor-pressed {
 .elevator-floors button b { font-size: 18px; }
 .elevator-floors button small { font-size: 11px; font-weight: 400; opacity: .8; }
 .elevator-floors button:disabled { cursor: default; opacity: .7; }
+
+/* 核心全破的結算：留下來繼續探索（js/core-clear.js） */
+
+.core-clear-note { margin: 0 0 10px; color: #e7c47c; font-size: 14px; }
+.core-clear-note.full { color: #7ee0a8; }
+.core-stay { margin-top: 10px; padding: 9px 22px; border: 1px solid #63818d; border-radius: 9px; background: #243a44; color: #e4edf0; font: 700 15px "Microsoft JhengHei", sans-serif; cursor: pointer; }
+.core-stay:hover { border-color: #e7c47c; }
+
+/* ===== 結算畫面版面（js/result-screen.js）：彈窗加寬、按鈕在彈窗裡、一頁看完 ===== */
+#overlay.result [data-new-game], #overlay.result [data-test-mode], #overlay.result #mapPickRow { display: none !important; }
+#overlay.result .overlay-card { width: min(820px, 96%); max-height: none; overflow: visible; flex-shrink: 0; margin-bottom: 0; padding: 22px 28px 20px; }
+#overlay.result .panel-kicker { display: none; }
+#overlay.result h2 { margin: 0 0 6px; font-size: 28px; }
+#overlay.result #ov-text { margin: 0; font-size: 14px; line-height: 1.6; }
+#overlay.result .battle-result { max-width: none; margin: 14px 0 0; }
+.br-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.br-cols .br-block { min-height: 64px; }
+.result-actions { display: flex; justify-content: center; flex-wrap: wrap; gap: 12px; margin-top: 18px; }
+#overlay .result-actions button { margin: 0; }
+@media (max-width: 640px) { .br-row { grid-template-columns: repeat(3, 1fr); } .br-cols { grid-template-columns: 1fr; } }
+
+/* 結算畫面外觀：跟背包同一套（深色卡片、上方標題列、格子、金色主按鈕） */
+#overlay.result .overlay-card { padding: 0; overflow: hidden; text-align: left; border: 1px solid rgba(143,211,255,.35); border-radius: 16px; background: linear-gradient(160deg, rgba(24,33,44,.97), rgba(10,15,22,.97)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); }
+#overlay.result h2 { margin: 0; padding: 16px 20px 14px; border-bottom: 1px solid rgba(143,211,255,.13); background: linear-gradient(90deg, rgba(143,211,255,.08), transparent 60%); color: #f2f8ff; font-size: 24px; letter-spacing: .02em; }
+#overlay.result #ov-text { display: block; padding: 14px 20px 0; color: #8c9aa8; font-size: 13px; line-height: 1.6; }
+#overlay.result .core-clear-note { margin: 0 0 4px; color: #ffd479; font-size: 14px; font-weight: 700; }
+#overlay.result .core-clear-note.full { color: #7ee0a8; }
+#overlay.result .br-stat { border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: rgba(23,32,42,.6); padding: 10px 6px; }
+#overlay.result .br-stat small { color: #8c9aa8; font-size: 12px; }
+#overlay.result .br-stat b { color: #f2f8ff; font-size: 20px; }
+#overlay.result .br-stat.crystal b { color: #c9a2ff; } #overlay.result .br-stat.money b { color: #ffd479; }
+#overlay.result .br-block { border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: rgba(23,32,42,.6); padding: 10px 12px; }
+#overlay.result .br-block h4 { color: #ffd479; font-size: 13px; margin-bottom: 8px; }
+#overlay.result .br-chip { padding: 4px 10px; border: 1px solid rgba(255,255,255,.08); background: rgba(255,255,255,.06); color: #dfe8ef; font-weight: 700; }
+#overlay.result .result-actions { justify-content: flex-end; margin-top: 16px; padding: 12px 20px; border-top: 1px solid rgba(143,211,255,.14); background: rgba(7,12,18,.4); }
+#overlay.result .result-actions button { padding: 9px 22px; border-radius: 9px; font: 800 15px "Microsoft JhengHei", sans-serif; box-shadow: none; }
+#overlay.result .result-actions #ov-btn { border: 1px solid #e9bd62; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
+#overlay.result .result-actions #coreStay { order: -1; border: 1px solid rgba(143,211,255,.35); background: rgba(23,32,42,.8); color: #d8ecff; }
+
+/* 查看海報的對話框（js/posters.js）：左邊放整張海報，不裁成半身像 */
+#dialoguePortraitFrame[data-char="poster"] #dialoguePortrait { left: 5px; top: 5px; width: calc(100% - 10px); height: calc(100% - 10px); transform: none; object-fit: contain; }
+
+#itemIntro .item-intro-image img{transform:scale(var(--intro-image-scale,1));}
