@@ -1874,6 +1874,78 @@ document.getElementById('delMap').addEventListener('click', () => {
   maps = maps.filter(x => x !== m); switchTo((maps.find(inEditorMode) || maps[0]).id); saveMaps();
 });
 
+// ================= 單張地圖：匯出 / 匯入（跟朋友交換地圖用）=================
+// 匯出：只下載目前這張地圖＋它用到的素材設定（自己上傳的圖片會一起包進去）。
+// 匯入：選別人給的檔案，加成一張地圖；已經有的地圖和素材不會被動到（同一張地圖會先問要不要覆蓋）。
+const MAP_FILE_FORMAT = 'tudrc-map';
+function mapUsedTileIds(m) {
+  const ids = new Set();
+  for (const layer of Object.values(m.layers || {})) for (const id of Object.values(layer || {})) if (id) ids.add(id);
+  for (const st of m.stamps || []) if (st && st.id) ids.add(st.id);
+  return ids;
+}
+function exportCurrentMap() {
+  const m = curMap(); if (!m) return;
+  const tiles = [...mapUsedTileIds(m)].map(id => tileById(id)).filter(Boolean).map(t => clone(t));
+  const data = { format: MAP_FILE_FORMAT, version: 1, exportedAt: new Date().toISOString(), map: clone(m), tiles };
+  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = (String(m.name || 'map').replace(/[\\/:*?"<>|]/g, '_')) + '.tudrcmap.json';
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+  setStatus('已下載「' + m.name + '」（含 ' + tiles.length + ' 種素材），把這個檔案傳給對方，對方按「📥 匯入地圖」就能加進去', '#7ee0c0');
+}
+function importMapFile(file) {
+  const reader = new FileReader();
+  reader.onload = () => {
+    let data;
+    try { data = JSON.parse(reader.result); } catch (_) { setStatus('讀不懂這個檔案（不是匯出的地圖檔）', '#ff8f8f'); return; }
+    if (!data || data.format !== MAP_FILE_FORMAT || !data.map || !data.map.layers) { setStatus('這不是「📤 匯出這張地圖」產生的檔案', '#ff8f8f'); return; }
+    pushUndo();
+    // 素材：這邊沒有的才加進來（已經有的保留自己的設定）
+    let added = 0;
+    for (const t of data.tiles || []) {
+      if (!t || !t.id || tileById(t.id)) continue;
+      customTiles.push(clone(t)); added++;
+    }
+    // 地圖：同一張（同 id）已經存在時問要不要覆蓋；不覆蓋就加成一張新的
+    const m = clone(data.map), exist = maps.find(x => x.id === m.id);
+    let replaced = false;
+    if (exist) {
+      replaced = confirm('已經有「' + exist.name + '」這張地圖了。\n按「確定」用匯入的檔案覆蓋它；按「取消」加成一張新地圖。');
+      if (replaced) maps = maps.filter(x => x !== exist);
+      else { m.id = newId(); m.name = (m.name || '地圖') + '（匯入）'; }
+    }
+    // 出入口通往這邊沒有的地圖：拿掉（之後自己用出入口工具重新設）
+    const before = (m.portals || []).length;
+    m.portals = (m.portals || []).filter(pt => maps.some(x => x.id === pt.to) || pt.to === m.id);
+    const droppedPortals = before - m.portals.length;
+    maps.push(fixMap(m));
+    if (added) saveTiles();
+    saveMaps();
+    if (typeof renderPalette === 'function') renderPalette();
+    if (inEditorMode(m)) switchTo(m.id); else refreshMapSelect();
+    setStatus('已' + (replaced ? '覆蓋' : '匯入') + '「' + m.name + '」' + (added ? '，新增 ' + added + ' 種素材' : '') +
+      (droppedPortals ? '，有 ' + droppedPortals + ' 個出入口通往這邊沒有的地圖，已拿掉' : '') +
+      (inEditorMode(m) ? '' : '（這張是' + (m.safe ? '基地' : '戰鬥') + '地圖，請到對應的編輯器查看）') + '。確認沒問題再按「💾 存到專案」', '#7ee0c0');
+  };
+  reader.onerror = () => setStatus('檔案讀取失敗', '#ff8f8f');
+  reader.readAsText(file);
+}
+(() => {   // 地圖列多兩個按鈕
+  const bar = document.getElementById('mapbar'); if (!bar) return;
+  const exp = document.createElement('button'); exp.className = 'btn'; exp.id = 'exportOneMap'; exp.textContent = '📤 匯出這張地圖';
+  exp.title = '只下載目前這張地圖（含用到的素材），可以傳給別人匯入';
+  const imp = document.createElement('button'); imp.className = 'btn'; imp.id = 'importOneMap'; imp.textContent = '📥 匯入地圖';
+  imp.title = '選別人給的「.tudrcmap.json」地圖檔，加成一張地圖（不會動到其他地圖）';
+  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json'; input.hidden = true;
+  exp.addEventListener('click', exportCurrentMap);
+  imp.addEventListener('click', () => { input.value = ''; input.click(); });
+  input.addEventListener('change', () => { if (input.files && input.files[0]) importMapFile(input.files[0]); });
+  bar.append(exp, imp, input);
+})();
+
 // ================= 規則面板 =================
 const RULE_FIELDS = ['money', 'guide', 'guideRegen'];
 function renderMonsterMix() {
