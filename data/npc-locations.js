@@ -121,6 +121,10 @@ const NPC_LOCATIONS = {
     "taana": {
       "map": "1F-餐廳",
       "rect": [4, 6, 25, 23]
+    },
+    "colyn": {
+      "map": "1F-餐廳",
+      "rect": [4, 6, 25, 23]
     }
   }
 };

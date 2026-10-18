@@ -381,5 +381,13 @@ const CHARACTERS = {
     "sprite": "taana_A",
     "intro": "常在餐廳出沒的路人，看起來一直很想下班。",
     "captainImpression": ""
+  },
+  "colyn": {
+    "id": "colyn",
+    "kind": "support",
+    "name": "柯林",
+    "sprite": "colyn_B",
+    "intro": "常在餐廳出沒的路人，精神很好、很會吃。",
+    "captainImpression": ""
   }
 };
