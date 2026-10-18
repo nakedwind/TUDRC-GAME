@@ -8,6 +8,15 @@ const SUPPLIES = [
   // ---- 補給 ----
   { id:'medkit', name:'醫療包', kind:'medical', use:'hp', restore:35, price:30, file:'醫療包.png', desc:'應變中心配發的急救包。' },
   { id:'almond-water', name:'杏仁水', kind:'medical', use:'sp', restore:30, price:25, file:'杏仁水.png', desc:'溫溫的杏仁水，喝了心情會平靜下來。' },
+  // ---- 後室道具（special：基地的商店不賣，只在後室的店買得到、或在後室撿到）----
+  //   act：在背包按「使用」或快捷鍵時做什麼（firstaid 急救包 H、adrenaline 腎上腺素 J）；note：背包裡的使用說明
+  { id:'thermos', name:'杏仁水保溫杯', kind:'medical', use:'sp', restore:70, price:55, special:true, image:'images/裝備/almond-water-thermos.png', desc:'一整杯溫熱的杏仁水，能恢復大量 SP。' },
+  { id:'firstaid', name:'急救包', kind:'medical', act:'firstaid', price:60, special:true, image:'images/裝備/first-aid-kit.png', effect:'⛑️ 治療隊友', desc:'按 H 原地治療身邊受傷的隊員（倒地的也能救起來）；附近沒有傷員就治療自己。用掉一個。' },
+  { id:'adrenaline', name:'腎上腺素', kind:'medical', act:'adrenaline', price:80, special:true, image:'images/裝備/adrenaline-injector.png', effect:'💉 加速', desc:'按 J 注射：一段時間內跑得更快，藥效退了會短暫變慢。用掉一個。' },
+  { id:'graffiti-red', name:'塗鴉筆（紅）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-red.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個紅色記號，會一直留在那裡。畫一個用掉一支。' },
+  { id:'graffiti-blue', name:'塗鴉筆（藍）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-blue.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個藍色記號，會一直留在那裡。畫一個用掉一支。' },
+  { id:'graffiti-black', name:'塗鴉筆（黑）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-black.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個黑色記號，會一直留在那裡。畫一個用掉一支。' },
+  { id:'charm', name:'順順宮平安符', kind:'medical', price:100, special:true, image:'images/裝備/lucky-charm.png', effect:'🧧 擋一次咬', note:'帶在身上就有效：被 Smiler 咬的時候自動用掉，擋下那一次。', desc:'順順宮求來的平安符。在黑暗中被 Smiler 咬的時候，會替你擋下一次（擋完就用掉了）。' },
   // ---- 零食 ----
   { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.05 }, file:'小學麵.png' },
   { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.07 }, file:'卡迪這.png' },
@@ -30,7 +39,7 @@ const SUPPLIES = [
   { id:'pure-tea', name:'純喫茶', kind:'drink', price:30, buff:{ calm:.10 }, file:'純喫茶.png' },
   { id:'milk-tea', name:'MY香奶茶', kind:'drink', price:32, buff:{ atk:.08 }, file:'麥香奶茶.png' },
   { id:'tomato-soda', name:'番茄西打', kind:'drink', price:36, buff:{ atk:.09 }, file:'番茄西打.png' },
-].map(item => ({ ...item, image: 'images/道具/' + item.file }));
+].map(item => ({ ...item, image: item.image || 'images/道具/' + item.file }));
 
 // ---- 出勤補給（js/sortie-supply.js）----
 const SORTIE_RULES = { slots: 3, loveMul: 1.5 };   // 每人帶幾格；帶到他「最愛」的東西效果 ×1.5

@@ -14,7 +14,7 @@ let backpackDrop = null;   // 正在確認丟棄：{ id, qty }；沒有在丟就
 const canDrop = item => !!item && !item.noDrop && item.category !== 'key';
 
 // 所有物品：商店補給品歸在「消耗品」，再加上 data/items.js 的其他物品
-const allItems = () => [...SUPPLIES.map(item => ({ ...item, category: item.use ? 'consumable' : 'gift' })), ...ITEMS];   // 補給＝消耗品；零食飲料＝禮物
+const allItems = () => [...SUPPLIES.map(item => ({ ...item, category: item.use || item.kind === 'medical' ? 'consumable' : 'gift' })), ...ITEMS];   // 補給、後室道具＝消耗品；零食飲料＝禮物
 const itemById = id => allItems().find(item => item.id === id) || null;
 const categoryOf = id => ITEM_CATEGORIES.find(c => c.id === id) || { id, name: id, icon: '•' };
 function itemDesc(item) {
@@ -112,11 +112,12 @@ function renderBackpackDetail() {
   const cat = categoryOf(item.category), count = supplyInventory.get(item.id) || 0;
   const kind = item.use && SUPPLY_KIND[item.use];
   const full = kind && supplyNeed(item.use) <= 0;
-  const usable = !!kind || typeof item.use === 'function';
+  const usable = !!kind || !!item.act || typeof item.use === 'function';
+  const actKey = { firstaid: 'H', adrenaline: 'J' }[item.act];
   backpackDetail.innerHTML = `
     <div class="bag-detail-image"><img src="${item.image}" alt=""></div>
     <h3>${item.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${cat.icon} ${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div>
+    <div class="bag-tags"><span class="bag-tag">${cat.icon} ${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div>
     ${itemDesc(item) ? `<p class="bag-desc">${itemDesc(item)}</p>` : ''}
     <div class="bag-owned">持有 <b>×${count}</b></div>
     <div class="bag-actions">${backpackDrop && backpackDrop.id === item.id ? `
@@ -125,7 +126,7 @@ function renderBackpackDetail() {
         ${count > 1 ? `<div class="bag-qty"><button type="button" data-drop-qty="-1" aria-label="少一個" ${backpackDrop.qty <= 1 ? 'disabled' : ''}>−</button><b>${backpackDrop.qty}</b><button type="button" data-drop-qty="1" aria-label="多一個" ${backpackDrop.qty >= count ? 'disabled' : ''}>＋</button><button type="button" class="bag-qty-all" data-drop-qty="all" ${backpackDrop.qty >= count ? 'disabled' : ''}>全部</button></div>` : ''}
         <div class="bag-drop-buttons"><button type="button" class="bag-drop-cancel" data-drop-cancel>取消</button><button type="button" class="bag-drop-ok" data-drop-ok>丟棄 ${backpackDrop.qty} 個</button></div>
       </div>` : `
-      ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}" ${full ? 'disabled' : ''}>${full ? `${kind.stat} 已滿` : '使用'}${kind && !full ? `<kbd>${kind.key}</kbd>` : ''}</button>` : (item.category === 'gift' ? '<p class="bag-note">在基地和大家對話時可以送禮</p>' : '<p class="bag-note">無法使用</p>')}
+      ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}" ${full ? 'disabled' : ''}>${full ? `${kind.stat} 已滿` : '使用'}${kind && !full ? `<kbd>${kind.key}</kbd>` : actKey ? `<kbd>${actKey}</kbd>` : ''}</button>` : (item.category === 'gift' ? '<p class="bag-note">在基地和大家對話時可以送禮</p>' : `<p class="bag-note">${item.note || '無法使用'}</p>`)}
       ${canDrop(item) ? `<button type="button" class="bag-drop" data-bag-drop="${item.id}">🗑 丟棄<kbd>Del</kbd></button>` : '<p class="bag-note">無法丟棄</p>'}`}
     </div>`;
 }
@@ -149,8 +150,11 @@ function confirmDrop() {
 }
 function useBackpackItem(id) {
   const item = itemById(id); if (!item) return;
-  if (item.use) useSupply(id);
+  if (item.act === 'firstaid') { if (typeof useFirstAid === 'function') { closeBackpack(); useFirstAid(); } }   // 急救包、腎上腺素：關掉背包再用（js/equipment.js）
+  else if (item.act === 'adrenaline') { if (typeof useAdrenaline === 'function') { closeBackpack(); useAdrenaline(); } }
+  else if (item.act === 'graffiti') { if (typeof openGraffitiPalette === 'function') { closeBackpack(true); openGraffitiPalette(id); } }   // 塗鴉筆：選圖案再畫（js/graffiti.js）
   else if (typeof item.use === 'function') { item.use(); updateHUD(); }
+  else if (item.use) useSupply(id);
   if (backpackOpen) renderBackpack();
 }
 

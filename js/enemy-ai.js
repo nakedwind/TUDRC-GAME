@@ -28,6 +28,7 @@ function commitNext(e) {
   e.hasTarget = true; e.stuck = false; e.exiting = false;
 }
 function enemyAttackObstacle(e, o, dt) {
+  if (o.type === 'camping_lights') { e.attackingObstacle = null; return; }
   e.attackingObstacle = o;
   e.atkCd = (e.atkCd || 0) - dt;
   const ox = OX + (o.c + (o.w || 1) / 2) * CELL, oy = OY + (o.r + (o.h || 1) / 2) * CELL;
@@ -455,7 +456,7 @@ function stepEnemy(e, dt) {
   }
   // 發光建築是異質體的最高優先目標：先破壞探照燈，讓周圍重新陷入黑暗。
   const lightChoice = G.obstacles
-    .filter(o => o.hp > 0 && o.type && LIGHT.buildings && LIGHT.buildings[o.type])
+    .filter(o => o.hp > 0 && o.type !== 'camping_lights' && o.type && LIGHT.buildings && LIGHT.buildings[o.type])
     .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
     .sort((a, b) => a.d - b.d)[0];
@@ -484,7 +485,7 @@ function stepEnemy(e, dt) {
 
   // 沒有哨兵時，才搜尋 18 格內由玩家建造的設施。
   const buildingChoice = G.obstacles
-    .filter(o => o.playerBuilt && o.hp > 0 && !o.trap && !o.slow)   // 地雷埋在地上，怪物不知道；鐵絲網直接踩過去，不會去打
+    .filter(o => o.playerBuilt && o.hp > 0 && o.type !== 'camping_lights' && !o.trap && !o.slow)   // 露營燈、地雷、鐵絲網不會被主動攻擊
     .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
     .sort((a, b) => a.d - b.d)[0];

@@ -696,9 +696,9 @@ canvas.cursor-pressed {
 }
 .dialogue-content { min-width: 0; flex: 1; }
 .dialogue-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
-#dialogueName { color: #ffd479; font-size: 17px; letter-spacing: .04em; }
-#dialogueProgress { color: #8292a5; font-size: 11px; font-variant-numeric: tabular-nums; }
-#dialogueText { margin: 7px 0 12px; color: #f1f5f9; font-size: 15px; line-height: 1.65; min-height: 25px; }
+#dialogueName { color: #ffd479; font-size: 19px; letter-spacing: .04em; }
+#dialogueProgress { color: #8292a5; font-size: 13px; font-variant-numeric: tabular-nums; }
+#dialogueText { margin: 7px 0 12px; color: #f1f5f9; font-size: 17px; line-height: 1.65; min-height: 25px; }
 #dialogueText.line-in { animation: dialogue-line-in 150ms ease-out both; }
 #dialogueText.typing::after {
   content: '▌'; display: inline-block; margin-left: 2px; color: #8fd3ff;
@@ -707,14 +707,14 @@ canvas.cursor-pressed {
 #dialogueNext {
   display: block; margin-left: auto; padding: 6px 11px; border-radius: 8px;
   border: 1px solid rgba(143,211,255,.38); background: rgba(40,57,74,.72);
-  color: #eaf5ff; font-size: 12px; cursor: pointer;
+  color: #eaf5ff; font-size: 14px; cursor: pointer;
 }
 #dialogueNext:hover { border-color: #8fd3ff; background: rgba(53,77,99,.88); }
-#dialogueNext span { color: #8fd3ff; font-size: 10px; margin-right: 5px; }
+#dialogueNext span { color: #8fd3ff; font-size: 12px; margin-right: 5px; }
 #dialogueClose {
   position: absolute; top: -9px; right: -9px; width: 27px; height: 27px; padding: 0;
   border-radius: 50%; border: 1px solid rgba(143,211,255,.72); background: rgba(18,25,34,.96);
-  color: #dcecff; font-size: 18px; line-height: 24px; cursor: pointer;
+  color: #dcecff; font-size: 20px; line-height: 24px; cursor: pointer;
   box-shadow: 0 4px 12px rgba(0,0,0,.45);
 }
 #dialogueClose:hover { color: #fff; background: rgba(68,91,111,.98); }
@@ -744,7 +744,7 @@ canvas.cursor-pressed {
   #dialogueBox { width: calc(100% - 28px); bottom: 16px; gap: 10px; padding: 12px; }
   #dialoguePortraitFrame { width: 64px; height: 64px; }
   #dialoguePortrait { top: -8px; width: 84px; height: 84px; }
-  #dialogueText { font-size: 14px; }
+  #dialogueText { font-size: 16px; }
 }
 @media (prefers-reduced-motion: reduce) {
   #dialogueBox, #dialogueText.line-in { animation: none; }
@@ -1313,7 +1313,7 @@ canvas.cursor-pressed {
 /* ===== 送禮與好感度 ===== */
 .dialogue-head { justify-content:flex-start; }
 #dialogueProgress { margin-left:auto; }
-#dialogueFavor { display:flex; align-items:center; gap:6px; padding:2px 8px; border:1px solid rgba(255,156,207,.35); border-radius:99px; background:rgba(255,120,190,.08); font-size:11px; cursor:default; }
+#dialogueFavor { display:flex; align-items:center; gap:6px; padding:2px 8px; border:1px solid rgba(255,156,207,.35); border-radius:99px; background:rgba(255,120,190,.08); font-size: 13px; cursor:default; }
 #dialogueFavor b { color:#ff9ccf; font-weight:700; }
 #dialogueFavor i { width:46px; height:5px; overflow:hidden; border-radius:9px; background:rgba(255,255,255,.12); }
 #dialogueFavor u { display:block; height:100%; border-radius:inherit; background:linear-gradient(90deg,#ff7ab8,#ffb3d9); transition:width .5s ease; }
@@ -1321,10 +1321,10 @@ canvas.cursor-pressed {
 @keyframes favor-pulse { 40% { transform:scale(1.12); box-shadow:0 0 14px rgba(255,140,200,.6); } }
 .dialogue-actions { display:flex; justify-content:flex-end; align-items:center; gap:8px; }
 .dialogue-actions #dialogueNext { margin-left:0; }
-#dialogueGift { padding:6px 11px; border:1px solid rgba(255,156,207,.45); border-radius:8px; background:rgba(120,40,80,.35); color:#ffe1f0; cursor:pointer; font-size:12px; }
+#dialogueGift { padding:6px 11px; border:1px solid rgba(255,156,207,.45); border-radius:8px; background:rgba(120,40,80,.35); color:#ffe1f0; cursor:pointer; font-size: 14px; }
 #dialogueGift:hover:not(:disabled) { border-color:#ff9ccf; background:rgba(150,50,100,.5); }
 #dialogueGift:disabled { border-color:rgba(255,255,255,.1); background:transparent; color:#7d8996; cursor:default; }
-#dialogueGift span { margin-left:4px; color:#ff9ccf; font-size:10px; }
+#dialogueGift span { margin-left:4px; color:#ff9ccf; font-size: 12px; }
 #giftPicker { position:absolute; z-index:17; left:50%; bottom:24px; transform:translateX(-50%); width:min(760px,calc(100% - 48px)); min-height:116px; display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(255,156,207,.45); border-radius:14px; background:linear-gradient(180deg,rgba(32,22,36,.9),rgba(14,12,20,.92)); box-shadow:0 16px 40px rgba(0,0,0,.55); backdrop-filter:blur(8px); animation:gift-in .18s cubic-bezier(.2,.9,.3,1.15) both; }
 @keyframes gift-in { from { opacity:0; transform:translate(-50%,8px); } }
 .gift-head { display:flex; align-items:center; gap:10px; padding:10px 12px 8px 16px; border-bottom:1px solid rgba(255,156,207,.15); }
@@ -1603,7 +1603,7 @@ canvas.cursor-pressed {
 .equip-tip { margin: 4px 2px 0; color: #82909d; font-size: 10px; text-align: center; }
 @media (max-width: 860px) { .backpack-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0,1fr) auto; } .equip-panel { max-height: 180px; border-right: 0; border-bottom: 1px solid rgba(255,212,121,.13); } }
 /* 對話框：和諾亞對話時的「開發工坊」按鈕 */
-#dialogueWorkshop { padding: 6px 11px; border: 1px solid rgba(255,212,121,.45); border-radius: 8px; background: rgba(110,80,25,.35); color: #ffe3a1; cursor: pointer; font-size: 12px; }
+#dialogueWorkshop { padding: 6px 11px; border: 1px solid rgba(255,212,121,.45); border-radius: 8px; background: rgba(110,80,25,.35); color: #ffe3a1; cursor: pointer; font-size: 14px; }
 #dialogueWorkshop:hover { border-color: #ffd479; background: rgba(140,100,30,.5); }
 /* ===== 諾亞的開發工坊 ===== */
 #workshop { position: absolute; inset: 10px; z-index: 30; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); font-family: "Microsoft JhengHei", sans-serif; }
@@ -1965,3 +1965,25 @@ canvas.cursor-pressed {
 .skill-card footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; border-top: 1px solid rgba(255,212,121,.1); color: #8f9aa7; font-size: 12px; }
 .skill-reset { padding: 6px 12px; border: 1px solid rgba(255,140,120,.45); border-radius: 8px; background: rgba(60,30,28,.55); color: #ffb3a4; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
 @media (max-width: 700px) { .skill-branches { grid-template-columns: 1fr; } }
+
+/* 便利商店、飲料店也能賣東西：購買／賣出分頁一律顯示；賣出時把分類分頁收起來 */
+#supplyShop .supply-shop-tabs.backroom-tabs { display: flex; padding-bottom: 0; }
+#supplyShop.selling .supply-shop-tabs:not(.backroom-tabs) { display: none; }
+
+/* ===== 塗鴉筆：選圖案（js/graffiti.js）===== */
+#graffitiPalette { position: absolute; inset: 0; z-index: 32; display: grid; place-items: center; padding: 14px; background: rgba(4,7,11,.45); font-family: "Microsoft JhengHei", sans-serif; }
+#graffitiPalette.hidden { display: none; }
+.graffiti-card { width: min(440px, 100%); max-height: 100%; overflow-y: auto; border: 1px solid rgba(255,212,121,.38); border-radius: 14px; color: #e8eef3; background: linear-gradient(160deg, rgba(29,34,41,.97), rgba(12,17,23,.98)); box-shadow: 0 24px 60px rgba(0,0,0,.5); }
+.graffiti-card header { display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-bottom: 1px solid rgba(255,212,121,.13); }
+.graffiti-card header img { width: 24px; height: 42px; object-fit: contain; image-rendering: pixelated; }
+.graffiti-card header small { color: #d8ae5d; font-size: 10px; letter-spacing: .16em; }
+.graffiti-card header h3 { margin: 2px 0; font-size: 18px; color: #fff8e7; }
+.graffiti-card header p { margin: 0; color: #929dab; font-size: 12px; }
+.graffiti-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; padding: 14px 16px; }
+.graffiti-grid button { height: 64px; display: grid; place-items: center; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: #d9d4c4; cursor: pointer; }
+.graffiti-grid button:hover, .graffiti-grid button:focus-visible { border-color: #ffd479; box-shadow: 0 0 0 2px rgba(255,212,121,.45); outline: none; }
+#graffitiPalette .graffiti-grid canvas { display: block; max-width: 90%; background: none; border-radius: 0; box-shadow: none; image-rendering: pixelated; pointer-events: none; }
+.graffiti-grid button { overflow: hidden; }
+.graffiti-card footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; border-top: 1px solid rgba(255,212,121,.1); color: #8f9aa7; font-size: 12px; }
+.graffiti-cancel { padding: 6px 14px; border: 1px solid #59616c; border-radius: 8px; background: #202730; color: #dfe7ee; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
+#cv.graffiti-placing { cursor: crosshair; }

@@ -37,6 +37,9 @@ function tryGunFind(x, y) {
     const id = owned[Math.floor(Math.random() * owned.length)], a = gunAmmo(id), max = gunLevel(id).reserve;
     const n = Math.min(GUN_FINDS.ammoFind[id], max - a.reserve); if (n <= 0) return;
     a.reserve += n; saveEquipment();
+    const w = WEAPON_UPGRADES[id];
+    if (typeof itemIntro === 'function') itemIntro({ key: 'ammo:' + id, kindLabel: '彈藥', name: (id === 'tranq' ? '麻醉針' : '燃燒彈') + ' ×' + n, image: w.image, icon: w.icon,
+      tag: '🔫 ' + w.name + '的彈藥', desc: '補充到' + w.name + '的備用彈（現在 ' + a.reserve + ' / ' + max + '）。' });
     systemNotice('在置物箱裡找到' + (id === 'tranq' ? '麻醉針' : '燃燒彈') + ' +' + n);
     updateAmmoHud();
   }

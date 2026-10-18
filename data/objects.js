@@ -168,7 +168,7 @@ const OBSTACLES = [
     "id": "camping_lights",
     "name": "露營燈",
     "cost": 15,
-    "hp": 120,
+    "hp": 20,
     "h": {
       "file": "images/item-obstacle/07-Camping lights.png",
       "w": 1,

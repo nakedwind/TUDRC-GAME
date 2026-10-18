@@ -59,6 +59,13 @@ function canPlaceObstacle(v, c, r, lightExtra = 0) {
   }
   return true;
 }
+// 建築離溫特夠不夠近（BUILD_RANGE 格內，量到建築佔地最近的地方）
+function buildInRange(v, c, r) {
+  const p = G && G.player; if (!p || typeof BUILD_RANGE === 'undefined') return true;
+  const x0 = OX + c * CELL, y0 = OY + r * CELL, x1 = x0 + (v.w || 1) * CELL, y1 = y0 + (v.h || 1) * CELL;
+  const dx = Math.max(x0 - p.x, 0, p.x - x1), dy = Math.max(y0 - p.y, 0, p.y - y1);
+  return Math.hypot(dx, dy) <= BUILD_RANGE * CELL;
+}
 function footprintNearLight(v, c, r, extra) {
   // 亮度只看「擋路格」，跟放置判定／預覽框一致
   for (const [dc, dr] of placeCheckCells(v)) if (!cellNearLight(c + dc, r + dr, extra)) return false;
@@ -76,6 +83,7 @@ function buildFail(msg, c, r, color = '#ff8f8f') {
 function placeObstacle(ob, c, r) {
   if(!ob||DISABLED_BUILD_IDS.has(ob.id))return false;
   const v = ob[buildOrient], extra = placeExtra(ob);
+  if (!buildInRange(v, c, r)) return buildFail('太遠了，只能蓋在溫特 ' + BUILD_RANGE + ' 格以內', c, r);
   if (!footprintNearLight(v, c, r, extra)) return buildFail('太暗了，無法放置建築', c, r, '#ffd24a');
   if (!canPlaceObstacle(v, c, r, extra)) return buildFail('這裡不能放置建築', c, r);
   if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) return buildFail('這裡已經有地雷了', c, r);

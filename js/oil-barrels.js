@@ -1,7 +1,7 @@
 // ============================================================
 //  油桶／油箱：可以破壞，被「會點火的人」打爆會爆炸並燃燒；
 //  被怪物或其他人打壞則只會漏出一灘油汙，油汙之後被點火的人打到也會燒起來。
-//  瓦斯爐（爐具）：被打壞就會爆炸（不管是誰打壞的），威力比油桶小、不會起火；可以炸開異質礦物。
+//  瓦斯爐（爐具）：被打壞就會爆炸，爆焰可燒死生命體、不留下火海；可以炸開異質礦物。
 //  （數值集中在最上面，想調整改這裡就好）
 // ============================================================
 
@@ -12,6 +12,8 @@ const OIL_IGNITERS = new Set(['player', 'eldrin', 'chris', 'amber', 'theonie', '
 // blast：爆炸半徑（格）與傷害；fire：爆炸後留下的火海（半徑、秒數、每秒傷害）；slick：沒爆炸時漏出的油汙（半徑、留多久）
 // gas：瓦斯類，被誰打壞都會爆炸；breaksOre：爆炸能炸開異質礦物；boom：爆炸音效
 const OIL_ITEMS = {
+  // 露營燈可被射擊打破，只留下小火，不產生爆風或油汙。
+  camping_lights: { name: '露營燈', smallFire: true, fire: { radius: .6, life: 2, dps: 5 } },
   // 三種的強弱：爐具（小爆炸、能炸礦）＜ 油箱 ＜ 油桶（最大最痛）
   deco_oil_drum: { name: '油桶', file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
     blast: { radius: 3.5, enemy: 150, sentry: 45, player: 40 },
@@ -67,6 +69,11 @@ function onObstacleRemoved(o) {
   if (o.proxy) { o.proxy.dead = true; o.proxy.hp = 0; }
   if (o.lastHitBy === 'demolish') return;   // 自己拆除：安全移除，什麼都不會發生
   const p = oilCenter(o);
+  if (it.smallFire) {
+    addOilFire(p.x, p.y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
+    if (typeof burnLifePilesNear === 'function') burnLifePilesNear(p.x, p.y, it.fire.radius * CELL);
+    return;
+  }
   if (it.gas || OIL_IGNITERS.has(o.lastHitBy)) oilExplode(p.x, p.y, it);   // 瓦斯爐被誰打壞都會爆
   else addOilSlick(p.x, p.y, it.slick.radius * CELL, it.slick.life);
 }
@@ -81,6 +88,10 @@ function blastPush(o, x, y, hurt, numY) {
 }
 function oilExplode(x, y, it) {
   const B = it.blast, R = B.radius * CELL;
+  // 先播放，且每次爆炸使用獨立來源，避免連鎖爆炸被 70ms 去重吞音。
+  G.oilExplosionSerial = (G.oilExplosionSerial || 0) + 1;
+  if (typeof sfxAt === 'function') sfxAt(it.boom || (it === OIL_ITEMS.deco_oil_tank ? 'midBoom' : 'bigBoom'), x, y, .9, 'oil-boom-' + G.oilExplosionSerial);
+  damageCoresInBlast(x, y, R, B.enemy);
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {
     if (e.dead || e.hp <= 0) continue;
@@ -88,7 +99,7 @@ function oilExplode(x, y, it) {
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
     const k = 1 - .4 * d / R;   // 越靠近中心越痛
     e.hp -= B.enemy * k; e.hitT = .2; e.hitColor = '#ff9a3c';
-    if (it.fire) e.fireHitAt = performance.now() / 1000;   // 油桶／油箱的火焰爆炸（瓦斯爐不算）
+    if (it.fire || it.gas) e.fireHitAt = performance.now() / 1000;   // 油桶、油箱與爐具的爆焰都能燒死生命體
     flashDmg('-' + Math.round(B.enemy * k), e.x, e.y - 26, '#ff9a3c');
     enemyHitReact(e, x, y, true);
   }
@@ -127,7 +138,7 @@ function oilExplode(x, y, it) {
   if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 瓦斯爐：炸開附近的異質礦物（js/ore.js）
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 油桶、油箱、瓦斯爐都炸得開可炸開的牆（js/breakable-walls.js）
   if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
-  if (it.fire && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 燒掉生命體碎掉的那堆（js/lifeform.js）
+  if ((it.fire || it.gas) && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 爆焰燒掉生命體碎塊
   // 畫面：爆閃、雙層衝擊環、火星、碎片、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
   G.effects.push({ fglow: true, x, y: y - 8, r0: 20, r1: R * 1.15, life: .45, life0: .45 });
@@ -142,7 +153,16 @@ function oilExplode(x, y, it) {
   for (let i = 0; i < 4; i++) spawnFlameBurst(x + (Math.random() * 2 - 1) * R * .35, y + (Math.random() * 2 - 1) * R * .2, 1.3);
   addScorchMark(x, y + 6, R * .75, null, 'flame');
   nearbyImpact(x, y, 13, .08);
-  if (typeof sfxAt === 'function') sfxAt(it.boom || (Math.random() < .5 ? 'midBoom' : 'bigBoom'), x, y, .9, 'oil-boom');   // 油桶隨機：中爆炸／爆炸；瓦斯爐：小爆炸
+}
+function damageCoresInBlast(x, y, radius, damage) {
+  for (const core of G.cores || []) {
+    if (core.dead || core.hp <= 0) continue;
+    const d = Math.hypot(core.x - x, core.y - y);
+    if (d > radius || !hasLineOfSight(x, y, core.x, core.y)) continue;
+    const hurt = damage * (1 - .4 * d / radius);
+    wakeCore(core); core.lastHp = core.hp; core.hp = Math.max(0, core.hp - hurt);
+    core.hitT = .2; flashDmg('-' + Math.round(hurt), core.x, core.y - 56, '#ff9a3c');
+  }
 }
 
 // ---- 油汙 ----
@@ -227,6 +247,12 @@ function updateOil(dt) {
     o.fireT += FIRE_TICK;
     return dps * FIRE_TICK;
   };
+  for (const core of G.cores || []) {
+    if (core.dead || core.hp <= 0) continue;
+    const damage = fireTick(core); if (!damage) continue;
+    wakeCore(core); core.lastHp = core.hp; core.hp = Math.max(0, core.hp - damage); core.hitT = .16;
+    flashDmg('-' + Math.round(damage), core.x, core.y - 56, '#ff9a3c');
+  }
   for (const e of G.enemies) {
     if (e.dead) continue;
     const d = fireTick(e); if (!d) continue;

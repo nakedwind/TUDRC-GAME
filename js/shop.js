@@ -23,22 +23,28 @@ const DRINK_SHOP = { kinds: ['drink'], reach: 1.2, match: id => String(id).start
 // 後室商店：stock＝賣什麼（price 沒寫就用商品本身的價錢）；sellRate＝賣掉的東西拿回原價的幾成；sellPrice＝沒有原價的東西賣多少
 const BACKROOM_SHOP = {
   reach: 1.2, match: id => id === 'tile_cvs_checkout_counter_backroom',
-  stock: [{ id: 'almond-water' }, { id: 'medkit' }, { id: 'battery', price: 20 }],
+  stock: [{ id: 'almond-water' }, { id: 'thermos' }, { id: 'medkit' }, { id: 'firstaid' }, { id: 'adrenaline' }, { id: 'battery', price: 20 }, { id: 'graffiti-red' }, { id: 'graffiti-blue' }, { id: 'graffiti-black' }],
   sellRate: .5, sellPrice: { battery: 10 },
 };
 const BACKROOM_ONLY = ['almond-water'];   // 只有在後室（戰鬥地圖）裡的店買得到；基地的便利商店、飲料店、販賣機不賣
-let backroomMode = false, backroomTab = 'buy';   // backroomTab：buy 購買／sell 賣出
+// 後室（戰鬥地圖）裡的販賣機、飲料店（60BLUE）賣什麼；基地裡的照舊只賣飲料
+const BACKROOM_VENDING = [{ id: 'almond-water' }];
+const BACKROOM_DRINKSHOP = [{ id: 'almond-water' }, { id: 'thermos' }];
+let backroomMode = false, backroomTab = 'buy';   // backroomTab：buy 購買／sell 賣出（便利商店、飲料店、後室商店都能賣；販賣機不收）
+const shopCanSell = () => !vendingMode;
 const backroomCart = new Map();
-function backroomStock() {
-  return BACKROOM_SHOP.stock.map(s => {
+function backroomStock(stock = BACKROOM_SHOP.stock) {
+  return stock.map(s => {
     const base = supplyById(s.id) || (typeof itemById === 'function' ? itemById(s.id) : null); if (!base) return null;
     return { ...base, price: s.price ?? base.price, kind: base.kind || base.category || 'material' };
   }).filter(Boolean);
 }
-// 在後室（戰鬥地圖）裡的飲料店、販賣機、便利商店也賣杏仁水；基地裡的不賣
+// 基地：便利商店賣一般商品、販賣機和飲料店只賣飲料；後室：販賣機、60BLUE 照上面的清單，便利商店多賣杏仁水
+// 後室道具（special）只有後室商店賣
 const shopItems = () => backroomMode ? backroomStock()
-  : vendingMode || drinkShopMode ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind) || (!MAP_SAFE && BACKROOM_ONLY.includes(item.id)))
-  : SUPPLIES.filter(item => !MAP_SAFE || !BACKROOM_ONLY.includes(item.id));
+  : vendingMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_VENDING))
+  : drinkShopMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_DRINKSHOP))
+  : SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id)));
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
 // 賣掉一個能拿多少錢（0＝不能賣：重要物品、回憶碎片這類 noDrop 的、沒有價錢的）
 function sellPriceOf(item) {
@@ -81,7 +87,8 @@ function renderSupplyShop() {
     tab.querySelector('em').textContent = n;
   });
   renderBackroomTabs();
-  if (backroomMode && backroomTab === 'sell') { renderSellList(money); renderCart(money); return; }
+  supplyShop.classList.toggle('selling', shopCanSell() && backroomTab === 'sell');
+  if (shopCanSell() && backroomTab === 'sell') { renderSellList(money); renderCart(money); return; }
   const visible = shopItems().filter(item => vendingMode || backroomMode || supplyShopTab === 'all' || item.kind === supplyShopTab)
     .sort((a, b) => (SHOP_KIND_ORDER.indexOf(a.kind) - SHOP_KIND_ORDER.indexOf(b.kind)) || a.price - b.price);   // 補給 → 零食 → 飲料，各自由便宜到貴
   supplyShopList.innerHTML = visible.map(item => {
@@ -89,7 +96,7 @@ function renderSupplyShop() {
     return `<article class="shop-item ${item.kind} ${item.use || 'gift'}" data-item="${item.id}">
       ${inCart ? `<span class="shop-owned" title="購物車裡有 ${inCart} 個">🛒${inCart}</span>` : ''}
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
-      <span class="shop-effect">${use ? use.icon + ' ' + supplyEffect(item) : item.id === 'battery' ? '🔋 手電筒用' : '🎁 送禮用'}</span>
+      <span class="shop-effect">${use ? use.icon + ' ' + supplyEffect(item) : item.effect ? item.effect : item.id === 'battery' ? '🔋 手電筒用' : '🎁 送禮用'}</span>
       <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="把 ${item.name} 加入購物車，$${item.price}"`}>${short > 0 ? `還差 $${short}` : `<span>加入</span><b>$${item.price}</b>`}</button>
     </article>`;
   }).join('');
@@ -126,13 +133,13 @@ function renderQuickSupplies() {
       <span class="qs-icon">${item ? `<img src="${item.image}" alt="">` : k.icon}</span><span class="qs-text"><small>${k.name}</small><b>×${count}</b></span><kbd>${k.key}</kbd></button>`;
   }).join('');
 }
-// 後室商店的「購買／賣出」分頁（取代一般商店的分類分頁）
+// 「購買／賣出」分頁（後室商店取代分類分頁；便利商店在賣出時把分類分頁收起來）
 function renderBackroomTabs() {
   let nav = supplyShop.querySelector('.backroom-tabs');
-  if (!backroomMode) { if (nav) nav.remove(); return; }
+  if (!shopCanSell()) { if (nav) nav.remove(); return; }
   if (!nav) {
     nav = document.createElement('nav'); nav.className = 'supply-shop-tabs backroom-tabs'; nav.setAttribute('role', 'tablist');
-    supplyShop.querySelector('.supply-shop-tabs').after(nav);
+    supplyShop.querySelector('.supply-shop-tabs').before(nav);
   }
   const sellable = [...supplyInventory.entries()].filter(([id, n]) => n > 0 && sellPriceOf(typeof itemById === 'function' ? itemById(id) : null) > 0).length;
   nav.innerHTML = '<button type="button" role="tab" data-backroom-tab="buy" class="' + (backroomTab === 'buy' ? 'active' : '') + '">🛒 購買</button>' +
@@ -154,7 +161,7 @@ function sellItem(id) {
   if (!item || !price || n <= 0 || !G) { sfx('error'); return; }
   if (n <= 1) supplyInventory.delete(id); else supplyInventory.set(id, n - 1);
   G.money += price;
-  if (G.battle) G.battle.sold = (G.battle.sold || 0) + price;   // 結算畫面
+  if (G.battle && !MAP_SAFE) G.battle.sold = (G.battle.sold || 0) + price;   // 結算畫面
   SFX.play('shopCheckout', .5, 'shop-sell');
   updateHUD(); renderSupplyShop();
   const btn = supplyShopList.querySelector(`[data-sell-item="${id}"]`); if (btn) btn.focus();
@@ -162,7 +169,7 @@ function sellItem(id) {
 // 商店／飲料店／販賣機／後室商店共用一個視窗：切換標題、分頁、購物車
 function setShopMode(mode) {
   vendingMode = mode === 'vending'; drinkShopMode = mode === 'drinkshop'; backroomMode = mode === 'backroom';
-  if (backroomMode) backroomTab = 'buy';
+  backroomTab = 'buy';
   shopCart = backroomMode ? backroomCart : vendingMode || drinkShopMode ? vendingCart : storeCart;
   supplyShop.classList.toggle('vending', vendingMode);
   supplyShop.classList.toggle('drinkshop', drinkShopMode);
@@ -176,6 +183,7 @@ function setShopMode(mode) {
 }
 function openSupplyShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
+  if (!MAP_SAFE) return openBackroomShop();   // 在後室（戰鬥地圖）裡的便利商店櫃台＝後室商店
   setShopMode('store');
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
@@ -254,7 +262,7 @@ function useSupply(id) {
   const item = supplyById(id), count = supplyInventory.get(id) || 0;
   if (!item || !G?.player || count <= 0) return false;
   if (!item.use) return false;   // 零食飲料不能直接吃（送禮用）
-  const amount = item.use === 'sp' && typeof equipAlmondMul === 'function' ? Math.round(item.restore * equipAlmondMul()) : item.restore;   // 杏仁水保溫瓶：恢復更多（js/equipment.js）
+  const amount = item.restore;
   const restored = Math.min(amount, supplyNeed(item.use));
   if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.use].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
   if (item.use === 'hp') G.player.hp += restored; else G.guide += restored;

@@ -1,6 +1,6 @@
 /* 部隊長（溫特）的裝備
    ・背包左邊的「部隊長裝備」可以換裝：頭部、身體各 1 格，隨身物品 2 格。
-   ・active：主動使用的裝備（急救包按 H、腎上腺素注射器按 J），其他都是穿著就有效。
+   ・急救包、腎上腺素、杏仁水保溫杯、順順宮平安符已經改成道具（data/supplies.js），不是裝備了。
    ・回基地找諾亞對話 →「🔧 開發工坊」：用異質碎片開發新裝備、把裝備和武器升級（最高 Lv3）。
    ・source：'develop'＝諾亞可以開發；'field'＝只能在戰鬥區域拿到（拿到後可以找諾亞升級），where 寫在哪裡拿到。
    ・cost：[開發, 升到 Lv2, 升到 Lv3] 要花幾個異質碎片（field 裝備的第一個數字不會用到）。
@@ -42,36 +42,28 @@ const EQUIPMENT = [
   { id: 'bracelet', name: '共感手環', kind: 'acc', icon: '💠', image: 'images/裝備/empathy-bracelet.png', source: 'develop', cost: [70, 130, 220],
     desc: '降低疏導消耗的 SP。',
     stat: lv => '疏導花的 SP −' + Math.round(lv.save * 100) + '%', levels: [{ save: .15 }, { save: .25 }, { save: .35 }] },
-  { id: 'thermos', name: '杏仁水保溫瓶', kind: 'acc', icon: '🧴', image: 'images/裝備/almond-water-thermos.png', source: 'field', where: '有機會在上鎖的置物箱裡找到', cost: [0, 90, 160],
-    desc: '提高杏仁水的 SP 恢復量。',
-    stat: lv => '杏仁水恢復的 SP +' + Math.round(lv.bonus * 100) + '%', levels: [{ bonus: .2 }, { bonus: .35 }, { bonus: .5 }] },
   { id: 'sneakers', name: '輕量跑鞋', kind: 'acc', icon: '👟', image: 'images/裝備/lightweight-sneakers.png', source: 'develop', cost: [40, 90, 160],
     desc: '提高移動速度。',
     stat: lv => '移動速度 +' + Math.round(lv.speed * 100) + '%', levels: [{ speed: .08 }, { speed: .12 }, { speed: .16 }] },
   { id: 'fireboots', name: '防火鞋', kind: 'acc', icon: '🥾', image: 'images/裝備/fire-resistant-boots.png', source: 'develop', cost: [60, 120, 200],
     desc: '減少火海燙傷，不抵擋爆炸傷害。',
     stat: lv => '火海燙傷 −' + Math.round(lv.fire * 100) + '%', levels: [{ fire: .4 }, { fire: .6 }, { fire: .8 }] },
-  { id: 'firstaid', name: '急救包', kind: 'acc', icon: '⛑️', image: 'images/裝備/first-aid-kit.png', source: 'develop', cost: [70, 130, 220], active: 'H',
-    desc: '按 H 原地治療或救起隊員，附近無傷員則治療自己；每場次數有限。',
-    stat: lv => '治療 ' + lv.heal + '・使用 ' + lv.time + ' 秒・每場 ' + lv.uses + ' 次', levels: [{ heal: 40, time: 1.6, uses: 2 }, { heal: 60, time: 1.1, uses: 3 }, { heal: 85, time: .7, uses: 4 }] },
   { id: 'radio', name: '無線電', kind: 'acc', icon: '📻', image: 'images/裝備/anomaly-detector.png', source: 'develop', cost: [60, 120, 200],
     desc: '延長疏導距離；Lv2 加快隊員赴援，Lv3 標記附近暗處敵人。',
     stat: lv => '疏導距離 +' + Math.round(lv.reach * 100) + '%' + (lv.rush ? '・指派時隊員移動 +' + Math.round(lv.rush * 100) + '%' : '') + (lv.mark ? '・標記 ' + lv.mark + ' 格內黑暗中的怪物' : ''),
     levels: [{ reach: .4 }, { reach: .6, rush: .25 }, { reach: .8, rush: .25, mark: 5 }] },
-  { id: 'adrenaline', name: '腎上腺素注射器', kind: 'acc', icon: '💉', image: 'images/裝備/adrenaline-injector.png', source: 'field', where: '打倒鳥頭人時有機會掉落', cost: [0, 120, 200], active: 'J',
-    desc: '按 J 暫時加速並減傷，結束後短暫減速；需冷卻。',
-    stat: lv => '持續 ' + lv.dur + ' 秒・副作用 ' + lv.side + ' 秒', levels: [{ dur: 6, side: 4 }, { dur: 8, side: 2.5 }, { dur: 10, side: 1 }] },
-  { id: 'charm', name: '順順宮平安符', kind: 'acc', icon: '🧧', image: 'images/裝備/lucky-charm.png', source: 'field', where: '偶爾從順順宮帽裡掉出來', cost: [0, 120, 200],
-    desc: '降低暗處被 Smiler 咬中的機率。',
-    stat: lv => '在黑暗中被 Smiler 咬的機率 −' + Math.round(lv.ward * 100) + '%', levels: [{ ward: .4 }, { ward: .55 }, { ward: .7 }] },
   { id: 'detector', name: '異質探測器', kind: 'acc', icon: '📡', image: 'images/裝備/handheld-radio.png', source: 'field', where: '打碎異質核心時有機會拿到', cost: [0, 120, 200],
     desc: '顯示附近暗處的異質礦與核心。',
     stat: lv => '偵測範圍 ' + lv.range + ' 格', levels: [{ range: 6 }, { range: 8 }, { range: 10 }] },
 ];
-// 戰鬥區域掉落的機率（還沒拿到的時候；拿到之後就不會再掉）
-const EQUIP_DROPS = { charm: .35, detector: .5, thermos: .4, adrenaline: .2 };
-// 腎上腺素：speed 跑速加成、guard 減傷、slow 副作用變慢多少、cooldown 冷卻秒數
-const ADRENALINE = { speed: .45, guard: .25, slow: .3, cooldown: 40 };
+// 戰鬥區域掉落的機率（裝備：還沒拿到的時候；拿到之後就不會再掉）
+const EQUIP_DROPS = { detector: .5 };
+// 後室道具掉落的機率（data/supplies.js 的道具，可以重複拿）：平安符＝順順宮帽、保溫杯＝置物櫃、腎上腺素＝鳥頭人
+const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2 };
+// 腎上腺素（道具，按 J）：speed 跑速加成、dur 持續秒數、side 藥效退了變慢幾秒、slow 變慢多少
+const ADRENALINE = { speed: .45, dur: 8, side: 2, slow: .3 };
+// 急救包（道具，按 H）：heal 治療量、time 處理傷口要站著幾秒、reach 幾格內的隊員
+const FIRST_AID = { heal: 60, time: 1.2, reach: 1.8 };
 
 // 武器升級（找諾亞）：Lv1 是原本的樣子；cost：[升到 Lv2, 升到 Lv3]
 // 測試用：true＝所有槍都解鎖，每次開遊戲彈藥補滿（測完改成 false）

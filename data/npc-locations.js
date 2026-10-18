@@ -117,10 +117,6 @@ const NPC_LOCATIONS = {
     "salem": {
       "map": "1F-餐廳",
       "rect": [4, 7, 25, 23]
-    },
-    "ball": {
-      "map": "2F-應變中心",
-      "rect": [22, 12, 42, 21]
     }
   }
 };

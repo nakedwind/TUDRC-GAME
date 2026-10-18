@@ -431,8 +431,8 @@ const CHAIRS_DEFAULT = {
       ]
     ],
     "seat": {
-      "x": 20,
-      "y": 22,
+      "x": 21,
+      "y": 3,
       "dir": "front",
       "rotation": 0
     }
@@ -447,8 +447,8 @@ const CHAIRS_DEFAULT = {
       ]
     ],
     "seat": {
-      "x": 20,
-      "y": 9,
+      "x": 21,
+      "y": 6,
       "dir": "front"
     }
   },
@@ -616,8 +616,8 @@ const CHAIRS_DEFAULT = {
       ]
     ],
     "seat": {
-      "x": 40,
-      "y": 45,
+      "x": 29,
+      "y": 49,
       "dir": "front",
       "rotation": 0
     }

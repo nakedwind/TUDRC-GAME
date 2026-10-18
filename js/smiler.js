@@ -113,8 +113,18 @@ function updateSmilers(dt) {
     v.darkT = (v.darkT || 0) + dt;
     if (v.darkT < SMILER.grace || v.smilerCd > 0 || smilers.some(s => s.victim === v)) continue;
     const rate = Math.min(SMILER.biteMax, SMILER.biteRate + (v.darkT - SMILER.grace) * SMILER.biteRamp);
-    const ward = v === G.player && typeof equipSmilerMul === 'function' ? equipSmilerMul() : 1;   // 順順宮平安符：溫特比較不容易被咬（js/equipment.js）
-    if (Math.random() < rate * ward * dt) startSmilerBite(v);
+    if (Math.random() < rate * dt) {
+      // 順順宮平安符（道具）：溫特要被咬的時候自動用掉，擋下這一次
+      if (v === G.player && (supplyInventory.get('charm') || 0) > 0) {
+        if (typeof consumeItem === 'function') consumeItem('charm');
+        v.smilerCd = Math.max(v.smilerCd || 0, 8); v.darkT = 0;
+        flash('🧧 平安符替你擋下了 Smiler！', v.x, v.y - 60, '#ffd479', 2.2);
+        if (typeof sfx === 'function') sfx('soothe');
+        G.effects.push({ ring: true, x: v.x, y: v.y - 20, r: 8, r2: 46, life: .45, life0: .45, color: '#ffd479' });
+        continue;
+      }
+      startSmilerBite(v);
+    }
   }
   // ---- 動畫 ----
   for (const s of smilers) {

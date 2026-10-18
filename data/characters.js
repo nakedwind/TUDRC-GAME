@@ -35,7 +35,7 @@ const CHARACTERS = {
       "range": 6,
       "aggroRange": 10,
       "dmg": 30,
-      "rate": 1,
+      "rate": 0.5,
       "taint": 3,
       "splash": 0,
       "color": "#ff7b39",

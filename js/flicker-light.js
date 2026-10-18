@@ -44,8 +44,12 @@ function flickerLights() {
 }
 
 // ---- 每幀更新（在 update 裡呼叫）----
+// 這張地圖的異質核心被打破了：日光燈穩定下來，一直亮著
+const flickerStable = () => !!(G && G.cores && G.cores.some(c => c.dead));
 function updateFlickerLights(dt) {
+  const stable = flickerStable();
   for (const L of flickerLights()) {
+    if (stable) { L.flick = null; L.on = true; L.level = 1; continue; }
     if (L.flick) {   // 正在閃：照一串「亮／暗」的節奏走完
       L.flick.t -= dt;
       while (L.flick && L.flick.t <= 0) {

@@ -5,7 +5,11 @@ const WORLD_PICKUPS = {
   key: { item: 'storage-locker-key', name: '置物櫃鑰匙' },
   battery: { item: 'battery', name: '電池' },
   almond: { item: 'almond-water', name: '杏仁水' },
+  penRed: { item: 'graffiti-red', name: '塗鴉筆（紅）' },
+  penBlue: { item: 'graffiti-blue', name: '塗鴉筆（藍）' },
+  penBlack: { item: 'graffiti-black', name: '塗鴉筆（黑）' },
 };
+const GRAFFITI_PICKUP_TILES = { tile_interactive_pickup_graffiti_red: 'penRed', tile_interactive_pickup_graffiti_blue: 'penBlue', tile_interactive_pickup_graffiti_black: 'penBlack' };
 const isWorldPickup = kind => !!WORLD_PICKUPS[kind];
 const unlockedStorageLockers = new Set(), collectedStorageKeys = new Set();
 function storagePropKind(id){
@@ -13,6 +17,7 @@ function storagePropKind(id){
   const file=String(tile?.file||'').replaceAll('\\','/');
   const name=String(tile?.name||'').trim().toLowerCase();
   // 編輯器上傳會把圖片轉成 data URL，需同時認素材 ID 與名稱。
+  if(GRAFFITI_PICKUP_TILES[id])return GRAFFITI_PICKUP_TILES[id];
   if(id===STORAGE_LOCKER_KEY_TILE||/storage-locker-key|置物[箱櫃]鑰匙/.test(name))return 'key';
   if(id==='tile_interactive_pickup_battery'||/^(battery(?:\.png)?|電池(?:\.png)?|拾取亮點（電池）)$/.test(name)||file.endsWith('/電池.png'))return 'battery';
   if(id==='tile_interactive_pickup_almond_water'||/almond-water|杏仁水/.test(name)||(file.endsWith('/杏仁水.png')||file.endsWith('/杏仁水小.png')))return 'almond';
@@ -57,7 +62,7 @@ function storagePropNearPlayer(){
   return nearest;
 }
 function storagePropPrompt(prop){
-  if(prop.kind==='equipment-drop')return '拾取'+(equipDef(prop.drop.id)?.name||'裝備');
+  if(prop.kind==='equipment-drop')return '拾取'+(prop.drop.item?(itemById(prop.drop.item)?.name||'道具'):(equipDef(prop.drop.id)?.name||'裝備'));
   if(isWorldPickup(prop.kind))return '拾取';
   if(prop.kind==='power')return mapPowerIsOn()?'關閉電源':'開啟電源';
   if(prop.open)return '查看置物箱';
@@ -66,7 +71,9 @@ function storagePropPrompt(prop){
 function useStoragePropNearPlayer(){
   const prop=storagePropNearPlayer();if(!prop)return false;
   if(prop.kind==='equipment-drop'){
-    if(grantEquipment(prop.drop.id,'拾取了'))sfx('itemPickup');
+    if(prop.drop.item){   // 後室道具（平安符）
+      supplyInventory.set(prop.drop.item,(supplyInventory.get(prop.drop.item)||0)+1);sfx('itemPickup');showItemPickupNotice(prop.drop.item,1);
+    }else if(grantEquipment(prop.drop.id,'拾取了'))sfx('itemPickup');
     G.equipmentDrops=(G.equipmentDrops||[]).filter(drop=>drop!==prop.drop);
     updateHUD();saveGame();
   }else if(prop.kind==='power'){
@@ -87,11 +94,18 @@ function useStoragePropNearPlayer(){
     else supplyInventory.delete('storage-locker-key');
     unlockedStorageLockers.add(prop.token);setupStorageBoxWalls();computeFlow();sfx('door');systemNotice('已打開置物箱，消耗 1 支鑰匙');
     const loot=prop.stamp?.lockerLoot;
-    if(loot)grantLockerLoot(loot);
-    else{
-      if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);
-      if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);
-    }
+    // 開出來的東西每次都跳視窗（js/item-intro.js）；什麼都沒有就飄字
+    const before=typeof itemIntroCount!=='undefined'?itemIntroCount:0;
+    if(typeof itemIntroFromLocker!=='undefined')itemIntroFromLocker=true;
+    try{
+      if(loot)grantLockerLoot(loot);
+      else{
+        if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);
+        if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);
+        if(typeof tryGraffitiPenFind==='function')tryGraffitiPenFind(prop.x,prop.top);   // 塗鴉筆（js/graffiti.js）
+      }
+    }finally{if(typeof itemIntroFromLocker!=='undefined')itemIntroFromLocker=false;}
+    if(typeof itemIntroCount!=='undefined'&&itemIntroCount===before)flash('置物櫃裡什麼也沒有',prop.x,prop.top-8,'#dce6ed',1.6);
     updateHUD();saveGame();
   }
   return true;
@@ -112,6 +126,8 @@ function grantLockerLoot(loot){
     const ammo=GUN_FINDS.start[loot.id];
     if(ammo)equipState.gunAmmo[loot.id]={...ammo};
     if(!equipState.loadout.sub)equipState.loadout.sub=loot.id;
+    if(typeof itemIntroForWeapon==='function')itemIntroForWeapon(loot.id);
+    if(typeof battleGot==='function')battleGot(w.name,w.image,1);
     saveEquipment();updateAmmoHud();systemNotice('在置物櫃找到「'+w.name+'」');
   }
 }
@@ -148,7 +164,7 @@ function drawWorldPickupSparkles(ctx){
 // 固定在遊戲畫面中間偏右：拾取後才揭曉圖片與名稱，顯示三秒。
 function showItemPickupNotice(id,amount=1){
   const item=typeof id==='string'?itemById(id):id,box=document.getElementById('itemPickupNotices');
-  if(typeof id==='string'&&typeof itemIntroForItem==='function')itemIntroForItem(id);   // 第一次拿到：跳說明（js/item-intro.js）
+  if(typeof id==='string'&&typeof itemIntroForItem==='function')itemIntroForItem(id,amount);   // 第一次拿到：跳說明（js/item-intro.js）
   if(item&&typeof battleGot==='function')battleGot(item.name,item.image,amount);   // 結算畫面的「本次取得」
   if(!item||!box)return;
   const notice=document.createElement('div');notice.className='item-pickup-notice';

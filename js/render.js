@@ -179,7 +179,7 @@ function drawTower(t) {
   // 「暴走」「瀕臨暴走」標籤：黑底＋外框
   const tagText = t.berserk && t.hp > 0 ? '暴走' : taintDanger ? '瀕臨暴走' : '';
   if (tagText) drawTaintTag(t.x, nameY - 15, tagText, t.berserk ? '#ff4d4d' : '#ffb24d');
-  if (t.say && t.say.text && !t.berserk) drawSpeechBubble(t.x, nameY - (tagText ? 30 : 13), t.say.text, t.say.col || BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡（有標籤時往上移）
+  if (t.say && t.say.text && !t.berserk) markBubble(t, drawSpeechBubble(t.x, nameY - (tagText ? 30 : 13), t.say.text, t.say.col || BUBBLE_COLORS[t.type]));   // 哨兵對話泡泡（有標籤時往上移）
 }
 function drawTaintTag(cx, centerY, text, color) {
   ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -403,7 +403,7 @@ function drawWanderer(npc) {
   const nameY = npc.y - size + 12 + (NPC_LABEL_DY[npc.id] || 0);   // 比圖片頂端再往下 5px（矮的角色再往下，見 NPC_LABEL_DY）
   ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, npc.x, nameY);
   ctx.fillStyle = '#fff'; ctx.fillText(name, npc.x, nameY);
-  if (npc.say && npc.say.text) drawSpeechBubble(npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]);   // 頭上對話泡泡（角色專屬色）
+  if (npc.say && npc.say.text) markBubble(npc, drawSpeechBubble(npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]));   // 頭上對話泡泡（角色專屬色）
 }
 // 頭上的名字、對話泡泡、「與 XX 對話」提示要往下移幾像素（角色比人矮的時候用，例如球球是狗）
 const NPC_LABEL_DY = { ball: 22 };
@@ -434,9 +434,77 @@ function drawSpeechBubble(cx, bottomY, text, col) {
   ctx.fillStyle = c.bd;                                       // 向下小三角尾巴（同邊框色）
   ctx.beginPath(); ctx.moveTo(cx - 5, y + h); ctx.lineTo(cx + 5, y + h); ctx.lineTo(cx, y + h + tail); ctx.closePath(); ctx.fill();
   ctx.fillStyle = c.tx; ctx.fillText(text, cx, y + h - 8);    // 角色色文字
+  return y;   // 泡泡頂端：互動提示會排到它上面，不會蓋住
+}
+// 記下這一幀角色頭上泡泡的頂端；互動提示（drawInteractPrompt）用來避開泡泡
+function markBubble(actor, top) { actor.bubbleTop = top; actor.bubbleAt = performance.now(); }
+function promptTopAbove(actor, top) {
+  return actor && actor.bubbleAt && performance.now() - actor.bubbleAt < 120 ? Math.min(top, actor.bubbleTop - 2) : top;
 }
 // 椅子上方的「[E] 坐」提示框
 // 拆除模式：滑鼠指到可以拆的建築時，紅框框起來＋上方顯示「拆除 退回 $X」
+// ---- 逃生樓梯的常駐箭頭：樓梯右邊的出入口＝上樓、左邊＝下樓 ----
+const STAIR_ARROW = { ids: ['tile_eoc_escape_stairs'] };
+let stairArrowCache = null;
+// 從地圖名稱看樓層：「2F-應變中心」→ 2、「B-3」→ −3；看不出來回傳 null
+function mapFloorNumber(name) {
+  const t = String(name || '').trim(), b = /^B-?(\d+)/i.exec(t), f = /^(\d+)F/i.exec(t);
+  return b ? -Number(b[1]) : f ? Number(f[1]) : null;
+}
+function stairArrowSpots() {
+  if (stairArrowCache && stairArrowCache.map === MAP && stairArrowCache.portals === (typeof mapPortals !== 'undefined' ? mapPortals : null)) return stairArrowCache.list;
+  const list = [];
+  for (const s of (MAP && MAP.stamps) || []) {
+    if (!STAIR_ARROW.ids.includes(s.id) || typeof mapPortals === 'undefined') continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const w = mapTileW(t), h = mapTileH(t), mid = s.c + w / 2;
+    const groups = {};   // 同一個目的地的出入口格合成一個箭頭
+    for (const pt of mapPortals) {
+      if (pt.c < s.c || pt.c >= s.c + w || pt.r < s.r || pt.r >= s.r + h) continue;
+      (groups[pt.to] = groups[pt.to] || []).push(pt);
+    }
+    const here = mapFloorNumber(MAP && MAP.name);
+    for (const [to, pts] of Object.entries(groups)) {
+      const x = pts.reduce((sum, pt) => sum + center(pt.c, pt.r)[0], 0) / pts.length;
+      const y = Math.min(...pts.map(pt => center(pt.c, pt.r)[1]));
+      const there = mapFloorNumber(portalTargetName({ to }));
+      // 看得出樓層就比樓層；看不出來就照位置：右邊上樓、左邊下樓
+      const dir = here != null && there != null && here !== there ? (there > here ? 'up' : 'down') : (x >= OX + mid * CELL ? 'up' : 'down');
+      list.push({ dir, x, y, portals: pts });
+    }
+  }
+  stairArrowCache = { map: MAP, portals: typeof mapPortals !== 'undefined' ? mapPortals : null, list };
+  return list;
+}
+function isStairPortal(portal) {
+  return stairArrowSpots().some(a => a.portals.some(p => p.c === portal.c && p.r === portal.r && p.to === portal.to));
+}
+function drawStairArrows() {
+  if (!G?.running) return;
+  const bob = Math.sin(performance.now() / 1000 * Math.PI * 2 / 1.8) * 3;
+  for (const a of stairArrowSpots()) {
+    const x = Math.round(a.x), y = a.y - CELL * 1.1 + bob, direction = a.dir === 'up' ? -1 : 1;
+    ctx.save(); ctx.globalAlpha = .9; ctx.fillStyle = '#a0a5aa'; ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.moveTo(x, y + direction * 4); ctx.lineTo(x - 7, y - direction * 3); ctx.lineTo(x + 7, y - direction * 3); ctx.closePath(); ctx.stroke(); ctx.fill(); ctx.restore();
+  }
+}
+// flash() 跳出來的提示字（黑底標籤），畫在黑幕上面
+function drawTextEffects() {
+  for (const f of G.effects) {
+    if (!f.text || f.dmg || f.spriteEffect) continue;
+    const life0 = f.life0 || 0.8;
+    const alpha = Math.min(1, f.life / 0.6);                 // 最後 0.6 秒才淡出，其餘維持清晰
+    const ty = f.y + (f.vy || 0) * Math.min(0.8, life0 - f.life);   // 只在前段緩緩上飄
+    ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+    // 黑底標籤：讓提示字在任何背景上都看得清楚
+    const tw = ctx.measureText(f.text).width;
+    ctx.globalAlpha = alpha * 0.72; ctx.fillStyle = '#000';
+    roundRect(f.x - tw / 2 - 8, ty - 15, tw + 16, 21, 6); ctx.fill();
+    ctx.globalAlpha = alpha; ctx.fillStyle = f.color;
+    ctx.fillText(f.text, f.x, ty);
+    ctx.globalAlpha = 1;
+  }
+}
 function drawDemolishPreview() {
   if (!G || G.selType !== 'demolish' || !aimClient || typeof playerBuildingAt !== 'function') return;
   const w = clientToWorld(aimClient.x, aimClient.y), [c, r] = cellAt(w.x, w.y), o = playerBuildingAt(c, r);
@@ -458,7 +526,7 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.font = 'bold 10px sans-serif'; const keyW = Math.max(18, ctx.measureText(keyLabel).width + 10);
   ctx.font = 'bold 13px sans-serif'; const gap = 6, pad = 9, textW = ctx.measureText(label).width;
   const boxW = pad * 2 + keyW + gap + textW, boxH = 24;
-  const x = Math.round(cx - boxW / 2), y = Math.round(topY - boxH - 10);
+  const x = Math.round(cx - boxW / 2), y = Math.round(topY - boxH - 3);
   ctx.fillStyle = 'rgba(12,16,22,.9)'; roundRect(x, y, boxW, boxH, 6); ctx.fill();
   ctx.strokeStyle = 'rgba(143,211,255,.85)'; ctx.lineWidth = 1.5; ctx.stroke();
   ctx.fillStyle = '#8fd3ff'; roundRect(x + pad, y + 5, keyW, 14, 3); ctx.fill();
@@ -535,11 +603,13 @@ function draw() {
   ctx.fillStyle = '#000'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
+  if (typeof drawGraffitiGround === 'function') drawGraffitiGround(ctx);   // 地板上的塗鴉（js/graffiti.js）
   // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
   collectMapOccluders(ctx, sortables);
+  if (typeof graffitiSortables === 'function') graffitiSortables(sortables);   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
   for(const core of G.cores) if(!core.dead && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -592,8 +662,10 @@ function draw() {
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
-    if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
-    else if (near) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    const urgent = G.running ? urgentSootheTarget() : null;
+    if (urgent) drawInteractPrompt(urgent.x, promptTopAbove(urgent, urgent.y - 57), '疏導');   // 暴走中的哨兵：疏導最優先
+    else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
+    else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : '補充彈藥'); }
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
@@ -603,11 +675,12 @@ function draw() {
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) { const v = vendingNearPlayer(); drawInteractPrompt(v.x, v.top, '販賣機'); }   // 販賣機（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) { const s = drinkShopNearPlayer(); drawInteractPrompt(s.x, s.top, '飲料店'); }   // 飲料店（js/shop.js）
     else if (typeof backroomShopNearPlayer === 'function' && backroomShopNearPlayer()) { const s = backroomShopNearPlayer(); drawInteractPrompt(s.x, s.top, '後室商店'); }   // 後室商店（js/shop.js）
-    else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, '商店'); }   // HOME Mart 結帳櫃台
+    else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, MAP_SAFE ? '商店' : '後室商店'); }   // HOME Mart 結帳櫃台
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
-      if (actor) drawInteractPrompt(actor.x, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0),
+      if (actor) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),
         actor.kind === 'tower' && !MAP_SAFE ? '疏導' : '與 ' + (profile ? profile.name : '角色') + ' 對話');
+      else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) { const g = graffitiNearPlayer(); drawInteractPrompt(g.x, g.y - 14, graffitiErasing() ? '擦掉中…' : '擦掉塗鴉'); }   // js/graffiti.js
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }
   }
@@ -838,17 +911,7 @@ function draw() {
       }
       ctx.restore(); ctx.globalAlpha = 1;
     } else if (f.text) {
-      const life0 = f.life0 || 0.8;
-      const alpha = Math.min(1, f.life / 0.6);                 // 最後 0.6 秒才淡出，其餘維持清晰
-      const ty = f.y + (f.vy || 0) * Math.min(0.8, life0 - f.life);   // 只在前段緩緩上飄
-      ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
-      // 黑底標籤：讓提示字在任何背景上都看得清楚
-      const tw = ctx.measureText(f.text).width;
-      ctx.globalAlpha = alpha * 0.72; ctx.fillStyle = '#000';
-      roundRect(f.x - tw / 2 - 8, ty - 15, tw + 16, 21, 6); ctx.fill();
-      ctx.globalAlpha = alpha; ctx.fillStyle = f.color;
-      ctx.fillText(f.text, f.x, ty);
-      ctx.globalAlpha = 1;
+      // 提示文字改在黑幕之後才畫（drawTextEffects），才不會被黑暗蓋住
     } else if (f.heal) {
       const p = Math.max(0, f.life / f.life0), grow = 1 - p;
       ctx.globalAlpha = p; ctx.strokeStyle = f.color; ctx.lineWidth = 2;
@@ -939,7 +1002,11 @@ function draw() {
     if (ob) {
       const v = ob[buildOrient], [c, r] = hoverCell;
       const x = OX + c * CELL, y = OY + r * CELL, w = v.w * CELL, h = v.h * CELL;
-      const ok = canPlaceObstacle(v, c, r, placeExtra(ob)) && G.money >= ob.cost;
+      const ok = canPlaceObstacle(v, c, r, placeExtra(ob)) && G.money >= ob.cost && buildInRange(v, c, r);
+      if (G.player && typeof BUILD_RANGE !== 'undefined') {   // 能蓋的範圍：溫特周圍的虛線圈
+        ctx.save(); ctx.strokeStyle = 'rgba(143,211,255,.35)'; ctx.lineWidth = 1.5; ctx.setLineDash([6, 6]);
+        ctx.beginPath(); ctx.arc(G.player.x, G.player.y, BUILD_RANGE * CELL, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+      }
       const img = obstacleImgs[ob.id][buildOrient];
       ctx.globalAlpha = 0.4;
       if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
@@ -963,6 +1030,9 @@ function draw() {
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
+  drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
+  if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
+  drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
   if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）

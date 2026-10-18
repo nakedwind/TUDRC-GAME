@@ -78,7 +78,7 @@ function burnLifePile(p) {
   if (p.state === 'burn') return;
   p.state = 'burn'; p.burnAt = lifeNow();
   const spec = p.spec || {};
-  if (typeof dropShard === 'function') dropShard(e.x, e.y, spec.crystals ?? 3); else earnCrystals(spec.crystals ?? 3);   // 打怪不加錢；掉一顆碎片
+  if (typeof dropShard === 'function') dropShard(p.x, p.y, spec.crystals ?? 3); else earnCrystals(spec.crystals ?? 3);   // 打怪不加錢；掉一顆碎片
   if (typeof trackKillAchievements === 'function') trackKillAchievements({ type: spec.id, x: p.x, y: p.y });
   lifeBurnFx(p.x, p.y);
   if (typeof sfxAt === 'function') sfxAt('lifeformDeath', p.x, p.y, .68, 'lifeform-burn-death');

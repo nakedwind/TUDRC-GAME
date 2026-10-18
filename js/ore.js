@@ -276,4 +276,7 @@ function showPickupToast(amount) {
   }
   const el=showItemPickupNotice({name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png'},total);
   pickupToast={el,total,at:now};
+  // 第一次撿到：跳出說明視窗（js/item-intro.js）
+  if(typeof itemIntro==='function')itemIntro({key:'item:anomalous-shard',kindLabel:'素材',name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png',tag:'◆ 養成素材',
+    desc:'打倒怪物、敲碎異質礦會掉出來的碎片，走過去就會吸過來。帶回應變中心後，可以在隊員名單按「技能樹」花碎片幫哨兵、嚮導學技能。'});
 }

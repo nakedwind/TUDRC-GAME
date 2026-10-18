@@ -8,12 +8,15 @@ const ITEM_INTRO_KEY = 'tudrc_seen_items_v1';
 const itemIntroSeen = new Set((() => { try { return JSON.parse(localStorage.getItem(ITEM_INTRO_KEY) || '[]'); } catch (_) { return []; } })());
 const itemIntroQueue = [];
 let itemIntroOpen = false, itemIntroEl = null;
+let itemIntroFromLocker = false, itemIntroCount = 0;   // 置物櫃開出來的東西：每次都跳（不只第一次），標題改成「在置物櫃找到」
 
 function itemIntro(info) {
-  if (!info || !info.key || itemIntroSeen.has(info.key)) return;
+  if (!info || !info.key) return;
+  const locker = itemIntroFromLocker;
+  if (!locker && itemIntroSeen.has(info.key)) return;
   itemIntroSeen.add(info.key);
   try { localStorage.setItem(ITEM_INTRO_KEY, JSON.stringify([...itemIntroSeen])); } catch (_) {}
-  itemIntroQueue.push(info);
+  itemIntroQueue.push(locker ? { ...info, headline: '在置物櫃找到' } : info); itemIntroCount++;
   if (!itemIntroOpen) showNextItemIntro();
 }
 function ensureItemIntroEl() {
@@ -33,7 +36,7 @@ function showNextItemIntro() {
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
   const esc = s => String(s || '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   el.innerHTML = '<section class="item-intro-card">' +
-    '<small class="item-intro-new">✦ 獲得新' + esc(info.kindLabel || '物品') + '</small>' +
+    '<small class="item-intro-new">✦ ' + (info.headline ? esc(info.headline) : '獲得新' + esc(info.kindLabel || '物品')) + '</small>' +
     '<div class="item-intro-image">' + (info.image ? '<img src="' + esc(info.image) + '" alt="">' : '<i>' + esc(info.icon || '🎁') + '</i>') + '</div>' +
     '<h2>' + esc(info.name) + '</h2>' +
     (info.tag ? '<span class="item-intro-tag">' + esc(info.tag) + '</span>' : '') +
@@ -59,10 +62,10 @@ window.addEventListener('keydown', e => {
 }, true);
 
 // ---- 各種東西的說明怎麼組 ----
-function itemIntroForItem(id) {
+function itemIntroForItem(id, qty = 1) {
   const item = typeof itemById === 'function' ? itemById(id) : null; if (!item) return;
   const cat = typeof categoryOf === 'function' ? categoryOf(item.category) : null;
-  itemIntro({ key: 'item:' + item.id, kindLabel: '物品', name: item.name, image: item.image,
+  itemIntro({ key: 'item:' + item.id, kindLabel: '物品', name: item.name + (itemIntroFromLocker && qty > 1 ? ' ×' + qty : ''), image: item.image,
     tag: cat ? (cat.icon ? cat.icon + ' ' : '') + cat.name : '', desc: typeof itemDesc === 'function' ? itemDesc(item) : item.desc });
 }
 function itemIntroForEquipment(id) {

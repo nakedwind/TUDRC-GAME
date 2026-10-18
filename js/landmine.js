@@ -37,6 +37,7 @@ function detonateMine(o) {
   o.lastHitBy = 'demolish';   // 從清單移除時不要觸發其他效果
   removeBarrier(o);
   const R = LANDMINE.radius * CELL;
+  damageCoresInBlast(x, y, R, LANDMINE.damage);
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {   // 怪物
     if (e.dead || e.hp <= 0) continue;

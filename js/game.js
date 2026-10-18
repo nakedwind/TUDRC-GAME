@@ -206,6 +206,18 @@ function interactionNearPlayer() {
   }
   return best;
 }
+// 附近有暴走（或汙染 70 以上快暴走）的哨兵：疏導優先，不會被營地、門、商店之類的互動搶走
+function urgentSootheTarget() {
+  const p = G && G.player; if (!p || p.sitting || MAP_SAFE) return null;
+  const warnAt = typeof BERSERK_FX !== 'undefined' ? BERSERK_FX.warnAt : 70;
+  let best = null, bestDistance = NPC_TALK.radius * (typeof equipTalkReach === 'function' ? equipTalkReach() : 1);
+  for (const t of G.towers || []) {
+    if (t.hp <= 0 || !(t.berserk || (t.taint || 0) >= warnAt)) continue;
+    const distance = Math.hypot(t.x - p.x, t.y - p.y);
+    if (distance < bestDistance) { best = t; bestDistance = distance; }
+  }
+  return best;
+}
 function faceEachOther(actor) {
   const p = G.player, dx = actor.x - p.x, dy = actor.y - p.y;
   const actorDir = actor.dir;
@@ -395,7 +407,9 @@ window.addEventListener('keydown', e => {
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：空白鍵 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
-    if (elevator) {
+    const urgent = urgentSootheTarget();
+    if (urgent) soothe(urgent);                  // 暴走中的哨兵：疏導最優先
+    else if (elevator) {
       if (elevator.mode === 'closed') {
         startElevatorOpen(elevator.stamp);
         sfx('elevator');
@@ -418,6 +432,7 @@ window.addEventListener('keydown', e => {
       const actor = interactionNearPlayer();
       if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
       else if (actor) openDialogue(actor);
+      else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) startGraffitiErase(graffitiNearPlayer());   // 擦掉塗鴉（js/graffiti.js）
       else toggleSit();                   // 附近沒有角色才判定座位
     }
   }
@@ -996,13 +1011,17 @@ function mapSeats() {
     const t = mapTileById(s.id) || {};
     const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
     const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
-    let dir = cfg.seat.dir || 'front';
+    const extra = (typeof CHAIR_EXTRA_SEATS !== 'undefined' && CHAIR_EXTRA_SEATS[s.id]) || [];
+    const spots = [cfg.seat, ...extra.map(e => ({ ...cfg.seat, ...e }))], multi = spots.length > 1;   // 長椅：一張坐好幾個人
+    for (const spot of spots) {
+    let dir = spot.dir || 'front';
     if (s.fx && (dir === 'left' || dir === 'right')) dir = dir === 'left' ? 'right' : 'left';   // 椅子翻面→人也跟著翻
     if (s.fy && (dir === 'front' || dir === 'back')) dir = dir === 'front' ? 'back' : 'front';
+    const sy = y0 + (s.fy ? h - spot.y : spot.y);
     seats.push({
-      x: x0 + (s.fx ? w - cfg.seat.x : cfg.seat.x),
-      y: y0 + (s.fy ? h - cfg.seat.y : cfg.seat.y),
-      top: y0, dir, x0, y0, w, h,
+      x: x0 + (s.fx ? w - spot.x : spot.x),
+      y: sy,
+      top: multi ? sy - 50 : y0, dir, x0, y0, w, h, multi,
       rotation: (Number(cfg.seat.rotation) || 0) * (s.fx ? -1 : 1),   // 床左右翻轉：躺的方向也跟著翻
       prompt: /bed|床/i.test(s.id) ? '躺' : '坐',
       bed: /bed|床/i.test(s.id),
@@ -1010,6 +1029,7 @@ function mapSeats() {
       chairInFront: dir === 'back' && !/bed|床/i.test(s.id),
       sortY: occ ? occ.y : y0 + cfg.depth,
     });
+    }
   }
   for (const [lid, layer] of Object.entries((MAP && MAP.layers) || {})) {
     for (const [key, id] of Object.entries(layer)) {
@@ -1030,7 +1050,7 @@ function seatNearPlayer() {
     // 大床中央可能被碰撞格包住；互動距離要從家具外緣算，不能只量床中央。
     const dx = Math.max(s.x0 - p.x, 0, p.x - (s.x0 + s.w));
     const dy = Math.max(s.y0 - p.y, 0, p.y - (s.y0 + s.h));
-    const d = Math.hypot(dx, dy);
+    const d = s.multi ? Math.max(0, Math.hypot(s.x - p.x, s.y - p.y) - 24) : Math.hypot(dx, dy);   // 長椅：量到各個位子，靠哪個坐哪個
     if (d < bd) { bd = d; best = s; }
   }
   return best;
@@ -1214,7 +1234,8 @@ function handleMapClick(e, isLeft) {
   }
 
   // ── 哨兵／營地／自己蓋的建築：只有右鍵開選單（左鍵照常開槍）；哨兵站在營地裡時哨兵優先 ──
-  const hit = !isLeft && G.towers.find(t => sentrySprites[t.type] ? Math.hypot(t.x - x, t.y - 14 - y) <= 28 : Math.hypot(t.x - x, t.y - y) <= 22);
+  const hitR = t => (t.berserk || (t.taint || 0) >= 70 ? 12 : 0) + (sentrySprites[t.type] ? 28 : 22);   // 暴走中的哨兵點擊範圍放大，比較好點到
+  const hit = !isLeft && G.towers.find(t => Math.hypot(t.x - x, t.y - (sentrySprites[t.type] ? 14 : 0) - y) <= hitR(t));
   if (hit) { closeGroundMenu(); openSentryMenu(hit); return false; }
   const campBase = !isLeft && !MAP_SAFE && campBaseAt(x, y);
   if (campBase) { closeSentryMenu(); openCampMenu(campBase, e.clientX, e.clientY); return false; }
@@ -1392,11 +1413,17 @@ function updatePlayerAttack(dt) {
     if ((shot.onBody && !bestOnBody) || (shot.onBody === bestOnBody && shot.d < bestD)) { bestD = shot.d; best = e; bestOnBody = shot.onBody; }
   }
   for (const o of G.obstacles) {   // 油桶／油箱、異質礦也能瞄準（開槍打爆／慢慢打碎）
-    if (bestOnBody) break;          // 已經直接點在怪物身上
     const isOil = oilItem(o), isOre = o.ore && typeof oreProxy === 'function';
     if ((!isOil && !isOre) || o.hp <= 0) continue;
     const c = isOil ? oilCenter(o) : oreCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
     if (d > PLAYER_ATK.range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
+    if (isOil) {
+      const left = o.artX ?? OX + o.c * CELL, top = o.artY ?? OY + o.r * CELL;
+      if (aim.x >= left && aim.x <= left + (o.w || 1) * CELL && aim.y >= top && aim.y <= top + (o.h || 1) * CELL) {
+        best = oilProxy(o); bestD = d; bestOnBody = true; continue;
+      }
+    }
+    if (bestOnBody) continue;
     let da = Math.abs(Math.atan2(c.y - p.y, c.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
     if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = isOil ? oilProxy(o) : oreProxy(o); }
   }
@@ -1912,6 +1939,7 @@ function update(dt) {
   updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
   if (typeof updateSmilers === 'function') updateSmilers(dt);
+  if (typeof updateGraffiti === 'function') updateGraffiti(dt);   // 塗鴉：擦掉的進度（js/graffiti.js）
   if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）

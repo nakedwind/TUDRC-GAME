@@ -267,7 +267,7 @@ function drawBerserkFxWorld(ctx) {
     ctx.globalAlpha = Math.min(1, t.berserkSay.life / .3);
     // 放在「暴走」標籤上方（與 drawTower 的名字／標籤位置一致）
     const nameY = t.y - PLAYER.drawSize + 18 - 11;
-    drawSpeechBubble(t.x + jx, nameY - 30, t.berserkSay.text, BERSERK_BUBBLE);
+    const top = drawSpeechBubble(t.x + jx, nameY - 30, t.berserkSay.text, BERSERK_BUBBLE); if (typeof markBubble === 'function') markBubble(t, top);
     ctx.globalAlpha = 1;
   }
 }
