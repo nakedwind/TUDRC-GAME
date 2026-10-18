@@ -15855,7 +15855,7 @@ const MAPS_DEFAULT = [
         "r": 8,
         "layer": "object",
         "ox": 40,
-        "oy": 2
+        "oy": 8
       },
       {
         "id": "tile_new_decor_water_dispenser",
@@ -16039,7 +16039,9 @@ const MAPS_DEFAULT = [
         "id": "tile_eoc_distance_poster",
         "c": 48,
         "r": 8,
-        "layer": "ground2"
+        "layer": "ground2",
+        "ox": 0,
+        "oy": 6
       },
       {
         "id": "tile_new_decor_chair_side",
@@ -16126,7 +16128,9 @@ const MAPS_DEFAULT = [
         "id": "tile_eoc_no_entry_poster",
         "c": 42,
         "r": 8,
-        "layer": "object"
+        "layer": "object",
+        "ox": 0,
+        "oy": 6
       },
       {
         "id": "tile_new_bg_wall",

@@ -96,11 +96,7 @@ const NPC_LOCATIONS = {
     },
     "noah": {
       "map": "2F-應變中心",
-      "spawn": [
-        14,
-        17
-      ],
-      "rect": [8, 12, 22, 21]
+      "rect": [9, 15, 21, 21]
     },
     "ash": {
       "map": "2F-應變中心",
@@ -117,18 +113,6 @@ const NPC_LOCATIONS = {
     "salem": {
       "map": "1F-餐廳",
       "rect": [4, 7, 25, 23]
-    },
-    "taana": {
-      "map": "1F-餐廳",
-      "rect": [4, 6, 25, 23]
-    },
-    "colyn": {
-      "map": "1F-餐廳",
-      "rect": [4, 6, 25, 23]
-    },
-    "rowan": {
-      "map": "1F-餐廳",
-      "rect": [4, 6, 25, 23]
     }
   }
 };
