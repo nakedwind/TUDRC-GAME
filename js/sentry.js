@@ -463,6 +463,8 @@ function updateSentry(t, dt) {
       t.target=null; t.waitT=0; return;
     }
   }
+  // 嚮導身上的醫療包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
+  if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
   // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
   if (t.type === 'eldrin' && t.mode !== 'goto' && t.mode !== 'escort') {
     const sentinels = G.towers.filter(o =>

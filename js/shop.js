@@ -4,10 +4,10 @@
 //  ・補給：醫療包恢復 HP、杏仁水恢復 SP；戰鬥中按 Q／F 快速使用（下方資訊條的快捷格）
 //  ・零食、飲料：送禮用（js/gifts.js）
 //  ・商品資料在 data/supplies.js
-//  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Space／E 打開
-//  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Space／E 打開，只賣飲料
-//  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Space／E，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
-//  ・後室商店：地圖編輯器「後室便利商店櫃台」靠近按 Space／E。賣 BACKROOM_SHOP.stock（杏仁水只有這裡買得到），
+//  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Enter／E 打開
+//  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Enter／E 打開，只賣飲料
+//  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Enter／E，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
+//  ・後室商店：地圖編輯器「後室便利商店櫃台」靠近按 Enter／E。賣 BACKROOM_SHOP.stock（杏仁水只有這裡買得到），
 //    也可以把背包裡的東西賣掉換錢（賣到的錢算進作戰經費，回基地時一起帶回去）
 // ============================================================
 const supplyShop = document.getElementById('supplyShop');
@@ -24,7 +24,7 @@ const DRINK_SHOP = { kinds: ['drink'], reach: 1.2, match: id => String(id).start
 const BACKROOM_SHOP = {
   reach: 1.2, match: id => id === 'tile_cvs_checkout_counter_backroom',
   stock: [{ id: 'almond-water' }, { id: 'thermos' }, { id: 'medkit' }, { id: 'firstaid' }, { id: 'adrenaline' }, { id: 'battery', price: 20 }, { id: 'graffiti-red' }, { id: 'graffiti-blue' }, { id: 'graffiti-black' }],
-  sellRate: .5, sellPrice: { battery: 10 },
+  sellRate: .5, crystalSellPrice: 5, sellPrice: { battery: 10 },
 };
 const BACKROOM_ONLY = ['almond-water'];   // 只有在後室（戰鬥地圖）裡的店買得到；基地的便利商店、飲料店、販賣機不賣
 // 後室（戰鬥地圖）裡的販賣機、飲料店（60BLUE）賣什麼；基地裡的照舊只賣飲料
@@ -47,7 +47,9 @@ const shopItems = () => backroomMode ? backroomStock()
   : SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id)));
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
 // 賣掉一個能拿多少錢（0＝不能賣：重要物品、回憶碎片這類 noDrop 的、沒有價錢的）
+const CRYSTAL_SELL_ITEM = {id:'anomalous-crystals',name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png'};
 function sellPriceOf(item) {
+  if(item?.id===CRYSTAL_SELL_ITEM.id)return backroomMode?BACKROOM_SHOP.crystalSellPrice:0;
   if (!item || item.noDrop || item.category === 'key') return 0;
   if (BACKROOM_SHOP.sellPrice[item.id] != null) return BACKROOM_SHOP.sellPrice[item.id];
   const sup = supplyById(item.id);
@@ -141,7 +143,7 @@ function renderBackroomTabs() {
     nav = document.createElement('nav'); nav.className = 'supply-shop-tabs backroom-tabs'; nav.setAttribute('role', 'tablist');
     supplyShop.querySelector('.supply-shop-tabs').before(nav);
   }
-  const sellable = [...supplyInventory.entries()].filter(([id, n]) => n > 0 && sellPriceOf(typeof itemById === 'function' ? itemById(id) : null) > 0).length;
+  const sellable = [...supplyInventory.entries()].filter(([id, n]) => n > 0 && sellPriceOf(typeof itemById === 'function' ? itemById(id) : null) > 0).length + (backroomMode && training.crystals > 0 ? 1 : 0);
   nav.innerHTML = '<button type="button" role="tab" data-backroom-tab="buy" class="' + (backroomTab === 'buy' ? 'active' : '') + '">🛒 購買</button>' +
     '<button type="button" role="tab" data-backroom-tab="sell" class="' + (backroomTab === 'sell' ? 'active' : '') + '">💰 賣出 <em>' + sellable + '</em></button>';
 }
@@ -149,6 +151,7 @@ function renderBackroomTabs() {
 function renderSellList() {
   const rows = [...supplyInventory.entries()].map(([id, n]) => ({ item: typeof itemById === 'function' ? itemById(id) : null, n }))
     .filter(r => r.item && r.n > 0 && sellPriceOf(r.item) > 0);
+  if(backroomMode && training.crystals>0)rows.unshift({item:CRYSTAL_SELL_ITEM,n:training.crystals});
   supplyShopList.innerHTML = rows.length ? rows.map(({ item, n }) => `<article class="shop-item sell" data-item="${item.id}">
       <span class="shop-owned" title="背包裡有 ${n} 個">×${n}</span>
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
@@ -157,6 +160,15 @@ function renderSellList() {
     </article>`).join('') : '<p class="supply-empty" style="grid-column:1/-1">背包裡沒有可以賣的東西（重要物品、回憶碎片不能賣）</p>';
 }
 function sellItem(id) {
+  if(id===CRYSTAL_SELL_ITEM.id){
+    if(!G||!shopCanSell()||!backroomMode||training.crystals<1){sfx('error');return;}
+    const price=BACKROOM_SHOP.crystalSellPrice;
+    training.crystals-=1;G.money+=price;saveTraining();
+    if(G.battle&&!MAP_SAFE)G.battle.sold=(G.battle.sold||0)+price;
+    SFX.play('shopCheckout',.5,'shop-sell');updateHUD();renderSupplyShop();
+    supplyShopList.querySelector('[data-sell-item="anomalous-crystals"]')?.focus();
+    return;
+  }
   const item = typeof itemById === 'function' ? itemById(id) : null, price = sellPriceOf(item), n = supplyInventory.get(id) || 0;
   if (!item || !price || n <= 0 || !G) { sfx('error'); return; }
   if (n <= 1) supplyInventory.delete(id); else supplyInventory.set(id, n - 1);

@@ -11,7 +11,8 @@ function campInteractionSpots() {
       for (let i = 0; i < rot; i++) [x, y] = [-y, x];
       return [base.artX + mapStampW(s, t) * CELL / 2 + x, base.artY + mapStampH(s, t) * CELL / 2 + y];
     };
-    for (const [kind, rect] of [['retreat', [60, 112, 180, 174]], ['ammo', [184, 108, 266, 172]]]) {
+    const supplyRect = typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.rect : null;   // 物資箱（js/camp-supply.js）
+    for (const [kind, rect] of [['retreat', [60, 112, 180, 174]], ['ammo', [184, 108, 230, 172]], ...(supplyRect ? [['supply', supplyRect]] : [])]) {
       const [x0, y0] = project(rect[0], rect[1]), [x1, y1] = project(rect[2], rect[3]);
       const [x, y] = project((rect[0] + rect[2]) / 2, rect[3]);
       spots.push({ base, kind, x, y, top: Math.min(y0, y1), left: Math.min(x0, x1), right: Math.max(x0, x1), bottom: Math.max(y0, y1) });
@@ -110,6 +111,7 @@ window.addEventListener('keydown', e => {
 function useCampInteractionNearPlayer(allowPlan = true) {
   const spot = campInteractionNearPlayer(); if (!spot) return false;
   if (spot.kind === 'ammo') { refillCampAmmo(); return true; }
+  if (spot.kind === 'supply') { if (typeof openCampSupply === 'function') openCampSupply(); return true; }
   if (allowPlan) openCampPlanDialog();
   return true;
 }

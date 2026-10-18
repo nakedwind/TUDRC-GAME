@@ -447,12 +447,15 @@ function drawMapStampImg(ctx, s) {
   if (img) {
     const gate=G.obstacles.find(o=>o.type==='irongate'&&o.mapSource===s);
     if(gate&&drawSlidingIronGate(ctx,gate,img,x,y,w,h))return;
-    ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn())ctx.filter='brightness(0.35)';
+    ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn(circuitOf(s)))ctx.filter='brightness(0.35)';   // 電路編號（js/powered-lights.js）
     const drawW = rot % 2 ? h : w, drawH = rot % 2 ? w : h;
+    const supply = typeof campSupplyOverlay === 'function' ? campSupplyOverlay(s, t) : null;   // 營地物資箱：疊在營地合圖上（js/camp-supply.js）
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
-      ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(img, -w / 2, -h / 2, w, h); ctx.restore();
-    } else ctx.drawImage(img, x, y, w, h);
+      ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(img, -w / 2, -h / 2, w, h);
+      if (supply) ctx.drawImage(supply, -w / 2, -h / 2, w, h);
+      ctx.restore();
+    } else { ctx.drawImage(img, x, y, w, h); if (supply) ctx.drawImage(supply, x, y, w, h); }
     ctx.restore();
     return;
   }

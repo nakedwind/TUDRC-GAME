@@ -6,6 +6,8 @@
     'tudrc-save-v1', 'tudrc_equipment_v1', 'sentinel-crystals-v1',
     'tudrc_team_v1', 'tudrc_achievements_v1', 'tudrc_quests_v1',
     'tudrc_missions_v1', 'tudrc_sortie_v1', 'tudrc_sp_v1', 'tudrc-combat-progress-v1',
+    'tudrc_graffiti_v1',   // 牆上、地上的塗鴉（js/graffiti.js）
+    'tudrc_camp_supply_v1',   // 各地圖營地物資箱的數量（js/camp-supply.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;

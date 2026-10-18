@@ -5674,7 +5674,8 @@ const MAPS_DEFAULT = [
         "44,41": "tile_mr4czvpx",
         "44,40": "tile_mr4czvpx",
         "44,42": "tile_mr4czvpx",
-        "11,42": "tile_obstacle_ore_small"
+        "11,42": "tile_obstacle_ore_small",
+        "36,54": "tile_obstacle_ore_small"
       },
       "overlay": {},
       "top": {
@@ -5890,16 +5891,12 @@ const MAPS_DEFAULT = [
       },
       "ground3": {},
       "object2": {
-        "20,53": "tile_interactive_pickup_battery",
-        "33,51": "tile_interactive_pickup_almond_water",
         "42,45": "tile_interactive_pickup_battery",
         "13,57": "tile_interactive_pickup_battery",
         "15,56": "tile_interactive_storage_locker_key",
         "40,42": "tile_interactive_pickup_almond_water",
         "13,18": "tile_interactive_pickup_almond_water",
         "54,42": "tile_obstacle_ore_small",
-        "35,54": "tile_decor_gasstove02",
-        "35,53": "tile_decor_foldingchair",
         "43,57": "tile_interactive_storage_locker_key",
         "15,44": "tile_interactive_pickup_almond_water",
         "41,44": "tile_obstacle_ore_small",
@@ -5909,13 +5906,16 @@ const MAPS_DEFAULT = [
         "35,26": "tile_interactive_pickup_almond_water",
         "52,21": "tile_interactive_pickup_almond_water",
         "12,30": "tile_interactive_pickup_almond_water",
-        "16,49": "tile_interactive_pickup_almond_water",
         "54,51": "tile_interactive_pickup_almond_water",
         "40,55": "tile_interactive_storage_locker_key",
-        "44,55": "tile_interactive_pickup_battery"
+        "44,55": "tile_interactive_pickup_battery",
+        "33,57": "tile_interactive_pickup_battery",
+        "20,52": "tile_interactive_pickup_almond_water",
+        "33,52": "tile_interactive_pickup_almond_water",
+        "35,53": "tile_decor_foldingchair",
+        "35,54": "tile_decor_gasstove02"
       },
       "object3": {
-        "19,49": "tile_obstacle_camping_lights",
         "8,30": "tile_obstacle_ore_small"
       },
       "object4": {}
@@ -6610,10 +6610,6 @@ const MAPS_DEFAULT = [
           [
             9,
             4
-          ],
-          [
-            8,
-            4
           ]
         ],
         "ox": 0,
@@ -6736,18 +6732,6 @@ const MAPS_DEFAULT = [
         "fx": true
       },
       {
-        "id": "tile_obstacle_searchlight_h",
-        "c": 20,
-        "r": 55,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_obstacle_searchlight_h",
-        "c": 34,
-        "r": 55,
-        "layer": "floor"
-      },
-      {
         "id": "tile_muftd54p",
         "c": 22,
         "r": 50,
@@ -6773,8 +6757,8 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "tile_obstacle_redroadblocks_v",
-        "c": 40,
-        "r": 57,
+        "c": 48,
+        "r": 49,
         "layer": "object2"
       },
       {
@@ -7503,7 +7487,8 @@ const MAPS_DEFAULT = [
         "r": 47,
         "layer": "object3",
         "ox": 0,
-        "oy": 14
+        "oy": 14,
+        "circuit": 1
       },
       {
         "id": "tile_bg_electric_light",
@@ -7517,13 +7502,15 @@ const MAPS_DEFAULT = [
         "id": "tile_mv5my8dk",
         "c": 13,
         "r": 46,
-        "layer": "object"
+        "layer": "object",
+        "circuit": 1
       },
       {
         "id": "tile_mv5my8dk",
         "c": 33,
         "r": 46,
-        "layer": "object"
+        "layer": "object",
+        "circuit": 1
       },
       {
         "id": "tile_mv5my8dk",
@@ -7537,7 +7524,8 @@ const MAPS_DEFAULT = [
         "r": 39,
         "layer": "object2",
         "ox": 0,
-        "oy": -2
+        "oy": -2,
+        "circuit": 2
       },
       {
         "id": "tile_mr4cyq54",
@@ -8093,27 +8081,31 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "tile_interactive_electric_light_02",
-        "c": 45,
+        "c": 47,
         "r": 18,
-        "layer": "object2"
+        "layer": "object2",
+        "circuit": 3
       },
       {
         "id": "tile_interactive_electric_light_02",
         "c": 50,
         "r": 18,
-        "layer": "object2"
+        "layer": "object2",
+        "circuit": 3
       },
       {
         "id": "tile_interactive_electric_light_02",
         "c": 39,
         "r": 23,
-        "layer": "object2"
+        "layer": "object2",
+        "circuit": 3
       },
       {
         "id": "tile_interactive_electric_light_02",
         "c": 30,
         "r": 18,
-        "layer": "object2"
+        "layer": "object2",
+        "circuit": 3
       },
       {
         "id": "tile_bg_backroom_wall02_hole",
@@ -8269,7 +8261,8 @@ const MAPS_DEFAULT = [
         "r": 24,
         "layer": "object2",
         "ox": 0,
-        "oy": 18
+        "oy": 18,
+        "circuit": 3
       },
       {
         "id": "tile_new_decor_oil_drum",
@@ -8301,7 +8294,8 @@ const MAPS_DEFAULT = [
         "r": 33,
         "layer": "object3",
         "ox": 0,
-        "oy": 14
+        "oy": 14,
+        "circuit": 2
       },
       {
         "id": "tile_mr4cyy36",
@@ -9203,6 +9197,27 @@ const MAPS_DEFAULT = [
         "c": 33,
         "r": 47,
         "layer": "object3"
+      },
+      {
+        "id": "tile_mv5my8dk",
+        "c": 27,
+        "r": 27,
+        "layer": "object3",
+        "circuit": 2
+      },
+      {
+        "id": "tile_mv5my8dk",
+        "c": 27,
+        "r": 22,
+        "layer": "object3",
+        "circuit": 2
+      },
+      {
+        "id": "tile_mv5my8dk",
+        "c": 12,
+        "r": 32,
+        "layer": "object3",
+        "circuit": 2
       }
     ],
     "solid": [

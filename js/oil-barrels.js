@@ -15,11 +15,11 @@ const OIL_ITEMS = {
   // 露營燈可被射擊打破，只留下小火，不產生爆風或油汙。
   camping_lights: { name: '露營燈', smallFire: true, fire: { radius: .6, life: 2, dps: 5 } },
   // 三種的強弱：爐具（小爆炸、能炸礦）＜ 油箱 ＜ 油桶（最大最痛）
-  deco_oil_drum: { name: '油桶', file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
+  deco_oil_drum: { name: '油桶', breaksOre: true, file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
     blast: { radius: 3.5, enemy: 150, sentry: 45, player: 40 },
     fire: { radius: 3.2, life: 12, dps: 18 },   // 打爆後的火海燒 12 秒
     slick: { radius: 2, life: 200 } },   // 油汙留 200 秒
-  deco_oil_tank: { name: '油箱', file: 'images/item-decorate/oil-tank.png',
+  deco_oil_tank: { name: '油箱', breaksOre: true, file: 'images/item-decorate/oil-tank.png',
     blast: { radius: 2, enemy: 60, sentry: 22, player: 20 },
     fire: { radius: 2, life: 8, dps: 10 },   // 打爆後的火海燒 8 秒
     slick: { radius: 1, life: 180 } },   // 油汙留 3 分鐘
@@ -135,7 +135,7 @@ function oilExplode(x, y, it) {
     if (Math.hypot(OX + (o.c + .5) * CELL - x, OY + (o.r + .5) * CELL - y) <= R) o.fuseT = .15 + Math.random() * .1;
   }
   igniteSlicksNear(x, y, R);
-  if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 瓦斯爐：炸開附近的異質礦物（js/ore.js）
+  if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 油桶、油箱、瓦斯爐爆炸皆可炸開附近異質礦物（js/ore.js）
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 油桶、油箱、瓦斯爐都炸得開可炸開的牆（js/breakable-walls.js）
   if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
   if ((it.fire || it.gas) && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 爆焰燒掉生命體碎塊

@@ -181,7 +181,7 @@ function playPlayerHit(gain = 1, byMonster = false) {
   SFX.play(name, .72 * gain / Math.max(.01, SFX.volume), 'player-hit');
 }
 
-// ---- NPC 正式對話（靠近後按 Space／E）----
+// ---- NPC 正式對話（靠近後按 Enter／E）----
 const dialogueBox = document.getElementById('dialogueBox');
 const dialoguePortrait = document.getElementById('dialoguePortrait');
 const dialogueName = document.getElementById('dialogueName');
@@ -367,7 +367,7 @@ const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
 // 移動鍵用「實體按鍵位置」判斷（e.code），不看按鍵名稱：
 // 開著注音等中文輸入法時，按鍵名稱會變成 "Process"，按下和放開對不上 → 角色一直往某個方向走（卡鍵）。
 const MOVE_CODES = { KeyW: 'w', KeyA: 'a', KeyS: 's', KeyD: 'd', ArrowUp: 'arrowup', ArrowLeft: 'arrowleft', ArrowDown: 'arrowdown', ArrowRight: 'arrowright' };
-const keyOf = e => MOVE_CODES[e.code] || String(e.key || '').toLowerCase();
+const keyOf = e => ({KeyE:'e',Enter:'enter',NumpadEnter:'enter',Space:' '}[e.code]) || MOVE_CODES[e.code] || String(e.key || '').toLowerCase();
 const releaseMoveKeys = () => MOVE_KEYS.forEach(k => { keys[k] = false; });
 // 切到別的視窗／分頁時，放開的訊號收不到 → 當作全部放開
 window.addEventListener('blur', releaseMoveKeys);
@@ -397,6 +397,7 @@ window.addEventListener('keydown', e => {
     return;
   }
   keys[k] = true;
+  if(isInteractKey(k) && G && G.running && !G.over)e.preventDefault();
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
   if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) {   // 手動裝填（目前拿的那把）
     const wid = playerWeapon(G.player).id;
@@ -404,7 +405,7 @@ window.addEventListener('keydown', e => {
     else if (wid === 'flare') startFlareReload(G.player); else if (playerWeapon(G.player).special) startSpecialReload(wid, G.player); else startReload(G.player);
   }
   if (npcArrangeMode) return;
-  if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：空白鍵 或 E
+  if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
     const urgent = urgentSootheTarget();
@@ -419,7 +420,7 @@ window.addEventListener('keydown', e => {
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
-    else if (useCampInteractionNearPlayer(e.code === 'Space' || e.key === ' ')) {}
+    else if (useCampInteractionNearPlayer(true)) {}
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
     else if (toggleIronGateNearPlayer()) {}
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
@@ -437,7 +438,7 @@ window.addEventListener('keydown', e => {
     }
   }
 });
-const isInteractKey = k => k === ' ' || k === SIT.key;   // 空白鍵為主，E 也可觸發
+const isInteractKey = k => k === ' ' || k === 'enter' || k === 'e';   // Space／Enter／E 皆可互動
 // ---- 出入口（走到門旁按 E 進入另一張地圖）----
 const PORTAL_RADIUS = 52;   // 離門多近才會出現提示（像素）
 const PORTAL_FADE_MS = 500;
@@ -1102,8 +1103,21 @@ function updatePlayer(dt) {
   const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dt   // 輕量跑鞋（js/equipment.js）
     * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally') : 1);   // 走在鐵絲網上變慢
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
-  if (!playerBlocked(nx, p.y)) p.x = nx;
-  if (!playerBlocked(p.x, ny)) p.y = ny;
+  if (!playerBlocked(nx, p.y)) p.x = nx; else if (!dy) slideIntoGap(p, 'x', nx - p.x, step);
+  if (!playerBlocked(p.x, ny)) p.y = ny; else if (!dx) slideIntoGap(p, 'y', ny - p.y, step);
+}
+// 走進一格寬的開口：正面被擋住，但往旁邊挪一點就過得去 → 自動往開口中間滑（不用對得很準）
+const GAP_ASSIST = 18;   // 最多幫忙對齊幾像素（一格 40）
+function slideIntoGap(p, axis, move, step) {
+  for (let off = 2; off <= GAP_ASSIST; off += 2) for (const sign of [-1, 1]) {
+    const sx = axis === 'y' ? sign * off : 0, sy = axis === 'x' ? sign * off : 0;
+    if (playerBlocked(p.x + sx + (axis === 'x' ? move : 0), p.y + sy + (axis === 'y' ? move : 0))) continue;   // 挪過去之後往前還是過不去
+    if (playerBlocked(p.x + sx, p.y + sy)) continue;                                                          // 旁邊本身就是牆
+    const k = Math.min(step, off);
+    if (axis === 'y') p.x += sign * k; else p.y += sign * k;
+    return true;
+  }
+  return false;
 }
 
 // 安全區域的人物擺位；只保留在本次場景，不改動地圖資料。
@@ -1580,10 +1594,10 @@ function frame(ts) {
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
   const introOpen = typeof itemIntroOpen !== 'undefined' && itemIntroOpen;   // 第一次拿到新東西的說明視窗（js/item-intro.js）
-  if (!paused && !introOpen && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
+  if (!paused && !introOpen && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !campSupplyOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps();               // 走路腳步聲
   updateCamera();
-  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !mapTransitioning && !frozen) {
+  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
@@ -1673,12 +1687,19 @@ function update(dt) {
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
         const soothed = [];
+        let usedAlmond = false, usedMedkit = false;   // 這一次疏導有沒有用掉杏仁水／醫療包（一次各用一個）
         for (const o of G.towers) {
           if (o === t || o.hp <= 0 || TYPES[o.type].guide || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
-          if ((o.taint || 0) <= 0 && o.hp >= o.maxhp && !o.berserk) continue;   // 不需要疏導就跳過
+          // 營地物資箱（js/camp-supply.js）：疏導要用掉一瓶杏仁水、補血要用掉一個醫療包；身上沒有就不做
+          const needSoothe = o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1);
+          const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1);
+          const doSoothe = needSoothe && (typeof guideCanSoothe !== 'function' || guideCanSoothe(t));
+          const doHeal = needHeal && (typeof guideCanHeal !== 'function' || guideCanHeal(t));
+          if (!doSoothe && !doHeal) continue;   // 不需要、或身上沒東西可用就跳過
+          if (doSoothe) usedAlmond = true; if (doHeal) usedMedkit = true;
           const taintBefore = o.taint || 0;
-          o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD);   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
-          o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * AURA_CD);
+          if (doSoothe) o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD * (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.sootheMul : 1));   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
+          if (doHeal) o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * AURA_CD);
           if (o.berserk && o.taint < 60) o.berserk = false;
           spawnSootheEffect(o.x, o.y - 8, sc, o);
           const cleared = Math.round(taintBefore - o.taint);
@@ -1686,6 +1707,7 @@ function update(dt) {
           soothed.push(o);
         }
         if (soothed.length) {
+          if (typeof guideUse === 'function') { if (usedAlmond) guideUse(t, 'almond-water'); if (usedMedkit) guideUse(t, 'medkit'); }
           t.auraCd = AURA_CD;
           spawnSootheCast(t, sc, spec.aura.r * CELL);   // 疏導表演：法陣、光波
           t.soothingT = SOOTHE_CHANNEL; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;   // 停下來閉眼疏導
@@ -2023,7 +2045,7 @@ function hideOverlay() { overlay.classList.add('hidden'); }
 function showStart() {
   if (MAP_SAFE) {   // 安全場景（基地）：沒有怪物、沒有黑幕，純走動看場景
     showOverlay((MAP && MAP.name) || '安全區域',
-      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，靠近 NPC 或哨兵按 <b>Space／E</b> 可以對話。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
+      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，靠近 NPC 或哨兵按 <b>Enter／E</b> 可以對話。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
       '進入');
     return;
   }

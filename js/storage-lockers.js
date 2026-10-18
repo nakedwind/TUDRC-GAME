@@ -64,7 +64,7 @@ function storagePropNearPlayer(){
 function storagePropPrompt(prop){
   if(prop.kind==='equipment-drop')return '拾取'+(prop.drop.item?(itemById(prop.drop.item)?.name||'道具'):(equipDef(prop.drop.id)?.name||'裝備'));
   if(isWorldPickup(prop.kind))return '拾取';
-  if(prop.kind==='power')return mapPowerIsOn()?'關閉電源':'開啟電源';
+  if(prop.kind==='power'){const n=circuitOf(prop.stamp);return (mapPowerIsOn(n)?'關閉電源':'開啟電源')+(n?' '+n:'');}
   if(prop.open)return '查看置物箱';
   return (supplyInventory.get('storage-locker-key')||0)>0?'用鑰匙開啟置物箱':'置物箱已上鎖（需要鑰匙）';
 }
@@ -77,7 +77,7 @@ function useStoragePropNearPlayer(){
     G.equipmentDrops=(G.equipmentDrops||[]).filter(drop=>drop!==prop.drop);
     updateHUD();saveGame();
   }else if(prop.kind==='power'){
-    toggleMapPower();sfx('powerOn');systemNotice(mapPowerIsOn()?'電源已開啟':'電源已關閉');
+    const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice('電源'+(n?' '+n+' ':'')+(mapPowerIsOn(n)?'已開啟':'已關閉'));
   }else if(isWorldPickup(prop.kind)){
     const loot=WORLD_PICKUPS[prop.kind];
     supplyInventory.set(loot.item,(supplyInventory.get(loot.item)||0)+1);
@@ -134,7 +134,7 @@ function grantLockerLoot(loot){
 function storagePropDisplayTile(id,c,r,layer,stamp=null){
   const kind=storagePropKind(id);
   if(!kind)return null;
-  if(kind==='power')return mapTileById(mapPowerIsOn()?'tile_interactive_power_switch_on':'tile_interactive_power_switch_off')||null;
+  if(kind==='power')return mapTileById(mapPowerIsOn(circuitOf(stamp))?'tile_interactive_power_switch_on':'tile_interactive_power_switch_off')||null;
   const token=storagePropToken(id,c,r,layer,stamp?.ox||0,stamp?.oy||0);
   if(isWorldPickup(kind))return false; // 實際物品藏起來，統一由小亮點顯示。
   if(kind==='closed'&&unlockedStorageLockers.has(token))return mapTileById('tile_interactive_storage_locker_open');

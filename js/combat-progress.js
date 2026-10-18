@@ -41,7 +41,7 @@ function suspendCombatProgress() {
   const all = readCombatProgress();
   all[MAP.id] = { signature: combatMapSignature(), graph: combatGraphEncode({
     state: { ...G, effects: [] }, walls: mapWalls, doors: mapDoors, doorWalls: doorAddedWalls,
-    offsets: mapSolidOffsets, activeSupply: sortie.active, power: mapPowerIsOn(), elevator: openElevatorStamp,
+    offsets: mapSolidOffsets, activeSupply: sortie.active, power: [...mapPowerOn], elevator: openElevatorStamp,
   }, MAP.stamps || []) };
   localStorage.setItem(COMBAT_PROGRESS_KEY, JSON.stringify(all));
 }
@@ -54,7 +54,7 @@ function restoreCombatProgress() {
     if (!data.state?.player || !(data.walls instanceof Set)) throw new Error('戰場資料不完整');
     G = data.state; mapWalls = data.walls; mapDoors = data.doors; doorAddedWalls = data.doorWalls; mapSolidOffsets = data.offsets;
     sortie.active = data.activeSupply; sortieLastSafe = false; saveSortie();
-    poweredMap = MAP; mapPowerOn = !!data.power; openElevatorStamp = data.elevator;
+    poweredMap = MAP; mapPowerOn = new Set(Array.isArray(data.power) ? data.power : data.power ? [0] : []);   // 舊存檔：true＝沒編號的電路開著 openElevatorStamp = data.elevator;
     sanitySP = G.guide; applyOutfits(); occCache = null; occCacheFor = null;
     computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
     // 接續後消耗暫存；下次選「保留進度」才會建立新的暫存。

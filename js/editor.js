@@ -732,6 +732,15 @@ function draw() {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
+  // 電路編號（開關、電燈右上角的黃色小圓牌）
+  for (const s of (m.stamps || [])) {
+    if (!s.circuit) continue;
+    const x = OX + s.c * CELL + (s.ox || 0) + CELL - 6, y = OY + s.r * CELL + (s.oy || 0) + 6;
+    ctx.fillStyle = '#ffd66e'; ctx.strokeStyle = '#3a2a08'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    ctx.fillStyle = '#3a2a08'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(s.circuit), x, y + .5); ctx.textBaseline = 'alphabetic';
+  }
   // 出入口記號（紫格＋🚪＋通往哪張地圖）
   for (const pt of (m.portals || [])) {
     const x = OX + pt.c * CELL, y = OY + pt.r * CELL;
@@ -1154,7 +1163,7 @@ function renderPalette() {
     const isObstacleArt = String(t.file || '').replace(/\\/g, '/').includes('/item-obstacle/');
     const typeTxt = isObstacleArt
       ? (t.id === 'tile_obstacle_camping_lights' ? '可擋路・可破壞・小範圍發光' : /-ore-/.test(String(t.file || '')) ? '可擋路・用地雷或瓦斯爐炸開' : '可擋路・可破壞')
-      : (String(t.id || '').startsWith('tile_street_drink_shop_') ? '可互動・靠近按 E／Space 購買飲料' : (t.systemColor ? '系統色塊' : (t.builtin ? roleLabel(t.role) : '圖片')));
+      : (String(t.id || '').startsWith('tile_street_drink_shop_') ? '可互動・靠近按 E／Enter 購買飲料' : (t.systemColor ? '系統色塊' : (t.builtin ? roleLabel(t.role) : '圖片')));
     b.innerHTML = thumb + '<span class="tname">' + t.name + '</span><small>' + typeTxt + sizeTxt + '</small>';
     b.addEventListener('click', () => selectTile(t.id));
     if (!t.builtin) {
@@ -1390,6 +1399,41 @@ function refreshLockerControl() {
   select.value = loot ? loot.kind === 'empty' ? 'empty' : loot.kind + ':' + loot.id : 'random';
   qty.value = loot?.qty || 1; qty.disabled = !select.value.startsWith('item:');
 }
+// 電源開關、電源控制的電燈：設定電路編號（1～5），同編號的開關只控制同編號的燈（js/powered-lights.js）
+const isCircuitTile = t => !!t && (/power-switch-(on|off)\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || /^tile_interactive_power_switch/.test(t.id)
+  || /electric-light-02\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || t.id === 'tile_interactive_electric_light_02');
+function selectedCircuitThing() {
+  if (selections.length !== 1) return null;
+  const sel = selections[0], m = curMap();
+  const s = sel.type === 'stamp' ? m.stamps[sel.index] : null;
+  const id = s ? s.id : m.layers[sel.layer]?.[sel.key];
+  return isCircuitTile(tileById(id)) ? { sel, s, id } : null;
+}
+function refreshCircuitControl() {
+  let box = document.getElementById('circuitControl');
+  if (!box) {
+    box = document.createElement('label'); box.id = 'circuitControl';
+    box.append('電路編號：');
+    const select = document.createElement('select'); select.id = 'circuitNumber';
+    [['0', '不編號（全部連動）'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5']].forEach(([v, n]) => { const o = document.createElement('option'); o.value = v; o.textContent = n; select.appendChild(o); });
+    box.append(select); document.getElementById('selControls').appendChild(box);
+    select.addEventListener('change', () => {
+      const picked = selectedCircuitThing(); if (!picked) return;
+      if (dropLockedSelections('設定電路編號')) return;
+      pushUndo(); let s = picked.s;
+      if (!s) {   // 鋪在圖層上的：轉成可以存設定的擺放物件
+        const [c, r] = picked.sel.key.split(',').map(Number);
+        s = { id: picked.id, c, r, layer: picked.sel.layer };
+        delete curMap().layers[picked.sel.layer][picked.sel.key]; curMap().stamps.push(s);
+        selections = [{ type: 'stamp', index: curMap().stamps.length - 1 }]; selection = selections[0];
+      }
+      const n = Number(select.value); if (n) s.circuit = n; else delete s.circuit;
+      saveMaps(); refreshSelPanel(); draw(); setStatus(n ? '電路編號設為 ' + n + '：只跟同編號的開關／電燈連動' : '已取消電路編號', '#7ee0c0');
+    });
+  }
+  const picked = selectedCircuitThing(); box.classList.toggle('hidden', !picked);
+  if (picked) document.getElementById('circuitNumber').value = String(picked.s?.circuit || 0);
+}
 function refreshSelPanel() {
   const layerSelect = document.getElementById('selLayer');
   const depthInput = document.getElementById('selDepthInput');
@@ -1399,6 +1443,7 @@ function refreshSelPanel() {
   selection = selections.length ? selections[selections.length - 1] : null;
   const hasSelection = !!selection;
   refreshLockerControl();
+  refreshCircuitControl();
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete', 'selClear'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;

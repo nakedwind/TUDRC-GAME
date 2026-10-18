@@ -1,6 +1,6 @@
 /* ===== 第一次拿到新東西：畫面中間跳出說明視窗 =====
    第一次撿到某樣物品、裝備或武器時，跳出它的圖片、名稱、分類與說明，遊戲暫停；
-   按「知道了」（或 Space／Enter／Esc）關掉才繼續。同時拿到好幾樣會一個接一個顯示。
+   按「知道了」（或 Enter／Enter／Esc）關掉才繼續。同時拿到好幾樣會一個接一個顯示。
    看過的東西記在瀏覽器（ITEM_INTRO_KEY），之後再拿到就不會跳。
    呼叫：itemIntro({ key, name, image, icon, tag, desc })
 */
@@ -42,7 +42,7 @@ function showNextItemIntro() {
     (info.tag ? '<span class="item-intro-tag">' + esc(info.tag) + '</span>' : '') +
     (info.desc ? '<p>' + esc(info.desc) + '</p>' : '') +
     (info.stat ? '<p class="item-intro-stat">' + esc(info.stat) + '</p>' : '') +
-    '<button type="button" class="item-intro-ok">知道了 <kbd>Space</kbd></button></section>';
+    '<button type="button" class="item-intro-ok">知道了 <kbd>Enter</kbd></button></section>';
   el.classList.remove('hidden');
   if (typeof sfx === 'function') sfx('menu');
   setTimeout(() => el.querySelector('.item-intro-ok')?.focus(), 0);
@@ -54,11 +54,11 @@ function closeItemIntro() {
   itemIntroOpen = false;
   if (itemIntroQueue.length) setTimeout(showNextItemIntro, 120);   // 還有下一個：稍等一下再跳
 }
-// 視窗開著時：Space／Enter／Esc 關掉，其他按鍵不傳給遊戲
+// 視窗開著時：Enter／Enter／Esc 關掉，其他按鍵不傳給遊戲
 window.addEventListener('keydown', e => {
   if (!itemIntroOpen) return;
   e.preventDefault(); e.stopImmediatePropagation();
-  if (!e.repeat && (e.key === ' ' || e.key === 'Enter' || e.key === 'Escape')) closeItemIntro();
+  if (!e.repeat && (e.key === ' ' || e.key.toLowerCase() === 'e' || e.key === 'Enter' || e.key === 'Escape')) closeItemIntro();
 }, true);
 
 // ---- 各種東西的說明怎麼組 ----
