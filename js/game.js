@@ -351,17 +351,35 @@ function openElevatorMenu() {
   elevatorMenuOpen = true;
   Object.keys(keys).forEach(key => { keys[key] = false; });
   document.getElementById('elevatorMessage').textContent = '選擇要前往的樓層';
-  elevatorMenu.querySelectorAll('[data-floor]').forEach(button => button.classList.remove('sel'));
+  renderElevatorFloors();
   elevatorMenu.classList.remove('hidden');
   document.getElementById('elevatorClose').focus();
 }
 document.getElementById('elevatorClose').addEventListener('click', () => { sfx('switch'); closeElevatorMenu(); });
 elevatorMenu.addEventListener('click', e => { if (e.target === elevatorMenu) { sfx('switch'); closeElevatorMenu(); } });
-elevatorMenu.querySelectorAll('[data-floor]').forEach(button => button.addEventListener('click', () => {
+// 電梯能去的樓層：地圖名稱開頭有標樓層的（「1F-餐廳」「4F哨兵宿舍樓」「B-3」…），高樓層排上面
+const ELEVATOR_FLOOR_RE = /^\s*(B-?\d+F?|\d+F)\s*[-－・]?\s*/i;
+function elevatorFloors() {
+  return mapList().map(m => {
+    const hit = ELEVATOR_FLOOR_RE.exec(String(m.name || '')); if (!hit) return null;
+    const label = hit[1].toUpperCase(), rest = String(m.name).slice(hit[0].length).trim();
+    const n = label.startsWith('B') ? -Number(label.replace(/\D/g, '')) : Number(label.replace(/\D/g, ''));
+    return { id: m.id, label, rest, n };
+  }).filter(Boolean).sort((a, b) => b.n - a.n);
+}
+function renderElevatorFloors() {
+  const box = elevatorMenu.querySelector('.elevator-floors'); if (!box) return;
+  box.innerHTML = elevatorFloors().map(f => {
+    const here = MAP && f.id === MAP.id;
+    return '<button type="button" data-floor="' + f.id + '"' + (here ? ' class="sel" disabled' : '') + '><b>' + f.label + '</b>' + (f.rest || here ? '<small>' + (here ? '目前所在' : f.rest) + '</small>' : '') + '</button>';
+  }).join('') || '<p>沒有可以去的樓層</p>';
+}
+elevatorMenu.querySelector('.elevator-floors').addEventListener('click', e => {
+  const button = e.target.closest('[data-floor]'); if (!button || button.disabled) return;
   sfx('button');
   closeElevatorMenu();
-  enterPortal({ to: 'map_mu5ad7t2', elevator: true });
-}));
+  enterPortal({ to: button.dataset.floor, elevator: true });
+});
 const MOVE_KEYS = ['w', 'a', 's', 'd', 'arrowup', 'arrowleft', 'arrowdown', 'arrowright'];
 const anyMoveKey = () => MOVE_KEYS.some(k => keys[k]);
 // 移動鍵用「實體按鍵位置」判斷（e.code），不看按鍵名稱：
@@ -1609,6 +1627,7 @@ function frame(ts) {
 }
 function update(dt) {
   updateCores(dt);
+  if (typeof updateCoreFrenzy === 'function') updateCoreFrenzy(dt);   // 核心醒著：異質體狂暴化（js/core-frenzy.js）
   if (G.player) {
     G.player.hitT = Math.max(0, (G.player.hitT || 0) - dt);
     G.player.underAttackT = Math.max(0, (G.player.underAttackT || 0) - dt);

@@ -11312,12 +11312,7 @@ const MAPS_DEFAULT = [
     "portals": [],
     "solidOffsets": {},
     "coreSpots": [
-      "20,38",
-      "14,35",
-      "12,25",
-      "45,21",
-      "28,43",
-      "25,16"
+      "43,52"
     ],
     "coreCount": 1,
     "monsterMix": [

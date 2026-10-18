@@ -2017,3 +2017,9 @@ canvas.cursor-pressed {
 .cs-row button:disabled { opacity: .35; cursor: default; }
 .camp-supply-card button:focus-visible { outline: 2px solid #8edacb; outline-offset: 3px; }
 .camp-supply-card footer { margin-top: 16px; color: #90a7b3; font-size: 12px; }
+
+/* 電梯樓層按鈕：樓層＋地圖名稱（js/game.js 的 renderElevatorFloors） */
+.elevator-floors button { display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.elevator-floors button b { font-size: 18px; }
+.elevator-floors button small { font-size: 11px; font-weight: 400; opacity: .8; }
+.elevator-floors button:disabled { cursor: default; opacity: .7; }

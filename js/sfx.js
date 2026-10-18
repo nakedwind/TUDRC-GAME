@@ -51,6 +51,8 @@ const SFX = (() => {
     shopBell: '商店/便利商店門鈴.mp3',
     shopCheckout: '商店/結帳.mp3',   // 商店結帳（js/shop.js）
     shopEnter: '商店/全家便利商店新進門聲.mp3',   // 在櫃台打開商店（js/shop.js）
+    vendingOpen: '開販賣機.mp3',        // 打開販賣機（js/shop.js）
+    vendingCheckout: '販賣機結帳.mp3',  // 販賣機結帳、飲料掉出來（js/shop.js）
     favorUp: '獎勵/升等.mp3',
     mineGrind: '設施/打磨.mp3',
     crystalGet: '獎勵/得到碎片.mp3',

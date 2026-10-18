@@ -150,6 +150,7 @@ function wakeCore(core) {
   if (typeof sfxAt === 'function') sfxAt('corrosionImpact', core.x, core.y, .7, 'core-wake');
   flash('異質核心甦醒了！', core.x, core.y - CORE.h, '#d69bff');
   systemNotice('異質核心甦醒了！異質體開始大量湧出', true);
+  if (typeof coreBanner === 'function') coreBanner('異質核心甦醒了', '異質體狂暴化，正衝回核心身邊！');   // 畫面中間的大橫幅（js/core-frenzy.js）
   if (typeof openAutoDoors === 'function') openAutoDoors('core-awake');   // 地圖上的自動門跟著打開
 }
 function enterPhase2(core) {
@@ -160,6 +161,7 @@ function enterPhase2(core) {
   nearbyImpact(core.x, core.y, 7, .05);
   flash('核心狂暴化！', core.x, core.y - CORE.h, '#ff7ae0');
   systemNotice('異質核心進入第二階段！異質體更多、更快', true);
+  if (typeof coreBanner === 'function') coreBanner('核心進入第二階段', '異質體更多、更快', '#ff7ae0');
 }
 // 腐蝕痕跡的焦痕要一直留著（焦痕本身會倒數消失，這裡持續補時間；被擠出清單就重新加回）
 function keepCoreScorch(core) {
@@ -238,7 +240,11 @@ function drawCore(core) {
     ctx.beginPath(); ctx.arc(core.x, cy, R, 0, Math.PI * 2); ctx.fill();
     ctx.globalCompositeOperation = 'source-over';
   }
+  const rise=core.awake?Math.min(1,(core.awakeT||0)/CORE.float.rise):0;
+  const resting=Math.pow(1-rise,2),tilt=-.38*resting,squash=1-.18*resting;
+  const pivotY=bottom-lift+4*resting;
   if (coreImg.complete && coreImg.naturalWidth) {
+    ctx.save();ctx.translate(core.x,pivotY);ctx.rotate(tilt);ctx.scale(1,squash);ctx.translate(-core.x,-(bottom-lift));
     ctx.imageSmoothingEnabled = false;
     ctx.drawImage(coreImg, dx, dy, CORE.w, CORE.h);
     if (core.awake) {   // 本體發光：疊一層紫色剪影，一明一暗
@@ -250,10 +256,12 @@ function drawCore(core) {
       }
     }
     if (core.hitT > 0) drawHitFlash(coreImg, Math.min(1, core.hitT / .16), '#d69bff', dx, dy, CORE.w, CORE.h);
+    ctx.restore();
     ctx.imageSmoothingEnabled = true;
   }
   // 頭上只有血條（第二階段變粉紅色）
-  const barY = dy - 10;
+  const poseHeight=CORE.h*squash*Math.cos(tilt)+CORE.w*.5*Math.abs(Math.sin(tilt));
+  const barY = pivotY-poseHeight-10;
   ctx.fillStyle = '#25202b'; ctx.fillRect(core.x - 30, barY, 60, 6);
   ctx.fillStyle = core.phase === 2 ? '#ff7ae0' : '#d69bff'; ctx.fillRect(core.x - 30, barY, 60 * Math.max(0, core.hp / core.maxhp), 6);
   ctx.restore();

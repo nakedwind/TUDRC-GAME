@@ -6,7 +6,7 @@
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/new-game.js?v=campsupply-20261018"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=campsupply5-20261018">
+<link rel="stylesheet" href="css/style.css?v=elevator-vending-20261018">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -128,12 +128,7 @@
         <button id="elevatorClose" type="button" aria-label="關閉樓層選單">×</button>
         <h2 id="elevatorTitle">搭電梯</h2>
         <p id="elevatorMessage">選擇要前往的樓層</p>
-        <div class="elevator-floors">
-          <button type="button" data-floor="1F">1F</button>
-          <button type="button" data-floor="3F">3F</button>
-          <button type="button" data-floor="4F">4F</button>
-          <button type="button" data-floor="B-4F">B-4F</button>
-        </div>
+        <div class="elevator-floors"></div>   <!-- 樓層按鈕：名稱開頭有標樓層的地圖（js/game.js 的 openElevatorMenu） -->
       </div>
     </div>
     <div id="safeCornerButtons">
@@ -224,7 +219,7 @@
   <script src="js/asset-gate.js?v=gate-20261012"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=homemart-20261016"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=placelight-20261017"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=elevator-vending-20261018"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
@@ -261,16 +256,17 @@
   <script src="js/progression.js?v=skills-20261018"></script>
   <script src="data/skills.js?v=skills-20261018"></script>   <!-- 技能樹資料 -->
   <script src="js/skills.js?v=skills-20261018"></script>   <!-- 技能樹：花碎片學技能 -->
-  <script src="js/anomalous-core.js?v=nowaves-20261017"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
+  <script src="js/anomalous-core.js?v=core-sleep-lean-20261018"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
+  <script src="js/core-frenzy.js?v=core-bar-up30-20261018"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
   <script src="js/combat-feel.js?v=nowaves-20261017"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=spitter-20261006"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=fix38d-20261018"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=campfire-20261018"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=frenzy2-20261018"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fishnolabel-20261016"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/render.js?v=interaction-key-fix-20261018"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=frenzy-20261018"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=bwall-20261017"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=oil-breaks-ore-20261018"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -278,7 +274,7 @@
   <script src="js/smiler.js?v=items38-20261018"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=fix38b-20261018"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
   <script src="js/landmine.js?v=fix39-44-20261018"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=interact-enter-e-20261018"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
+  <script src="js/shop.js?v=elevator-vending-20261018"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
   <script src="js/backpack.js?v=graffiti-20261018"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/gifts.js?v=homemart-20261016"></script> <!-- 9l. 送禮與好感度 -->
   <script src="js/sortie-supply.js?v=sortie4-20261014"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
@@ -295,7 +291,7 @@
   <script src="js/combat-progress.js?v=circuit-20261018"></script>
   <script src="js/camp-interactions.js?v=interaction-key-fix-20261018"></script>
   <script src="js/camp-supply.js?v=camp-stock-art-20261018"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
-  <script src="js/game.js?v=circuit-20261018"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=elevator-vending-20261018"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/item-intro.js?v=interaction-three-keys-20261018"></script>   <!-- 第一次拿到新東西：說明視窗 -->
   <script src="js/battle-result.js?v=backroomshop-20261018"></script>   <!-- 打贏後的結算畫面 -->

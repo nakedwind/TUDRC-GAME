@@ -206,7 +206,7 @@ function openVendingMachine() {
   setShopMode('vending');
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
-  supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); sfx('menu'); document.getElementById('supplyShopClose').focus();
+  supplyShopList.scrollTop = 0; renderSupplyShop(); supplyShop.classList.remove('hidden'); SFX.play('vendingOpen', .7, 'vending-open'); document.getElementById('supplyShopClose').focus();
 }
 function openBackroomShop() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
@@ -263,7 +263,7 @@ function checkoutCart() {
   G.money -= total;
   for (const [id, n] of shopCart) supplyInventory.set(id, (supplyInventory.get(id) || 0) + n);
   shopCart.clear();
-  if (vendingMode) { sfx('drink'); systemNotice(`販賣機掉出 ${count} 瓶飲料（$${total}），已放進背包`); }
+  if (vendingMode) { SFX.play('vendingCheckout', .7, 'vending-checkout'); systemNotice(`販賣機掉出 ${count} 瓶飲料（$${total}），已放進背包`); }
   else if (drinkShopMode) { SFX.play('shopCheckout', .7, 'shop-checkout'); systemNotice(`飲料店結帳 $${total}，${count} 杯已放進背包`); }
   else if (backroomMode) { SFX.play('shopCheckout', .7, 'shop-checkout'); systemNotice(`後室商店結帳 $${total}，${count} 件已放進背包`); }
   else { SFX.play('shopCheckout', .7, 'shop-checkout'); systemNotice(`結帳 $${total}，${count} 件已放進背包`); }

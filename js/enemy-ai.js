@@ -398,6 +398,15 @@ function stepEnemy(e, dt) {
   e.lastSafeX = e.x; e.lastSafeY = e.y;
   // 飛撲途中已經騰空，不受接觸判定或暈眩打斷，落地時才結算傷害。
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
+  // 核心醒著：狂暴的異質體離核心太遠就衝回去守著（js/core-frenzy.js）；溫特貼在旁邊時照樣先打溫特
+  const guardCore = typeof frenzyCoreGoal === 'function' ? frenzyCoreGoal(e) : null;
+  if (guardCore && !(G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= CELL * 2.25)) {
+    const [gc, gr] = cellAt(guardCore.x, guardCore.y);
+    const nav = enemyNavigate(e, gc, gr, e.frames ? dt : updateSlimeJump(e, dt), 'core:' + gc + ',' + gr, true);
+    if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
+    else if (nav.reached && Math.hypot(guardCore.x - e.x, guardCore.y - e.y) > CELL * 2) { e.coreReturning = false; e.coreGiveUpT = 4; }   // 走不到核心：先放棄，過一下再試
+    return;
+  }
   if (e.behavior === 'charger') { stepChargerEnemy(e, dt); return; }   // 鳥頭人：發呆、散步、看到人就衝撞（js/bird-head.js）
   if (e.behavior === 'shooter') { stepShooterEnemy(e, dt); return; }   // 珍珠小童：飄浮、保持距離噴珍珠（js/pearl-kid.js）
   if (e.behavior === 'boomerang') { stepBoomerangEnemy(e, dt); return; }
