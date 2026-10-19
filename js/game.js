@@ -1640,6 +1640,20 @@ function loop(ts) {
   } catch (err) { recoverFrame(err); }
   requestAnimationFrame(loop);
 }
+// ---- 營地的警戒線（素材「warning-line」）圍起來的範圍：站在裡面算在基地內 ----
+let warningLineRects = null, warningLineRectsFor = null;   // 換地圖才重算
+function warningLineAreas() {
+  if (warningLineRectsFor === MAP && warningLineRects) return warningLineRects;
+  warningLineRectsFor = MAP;
+  warningLineRects = ((MAP && MAP.stamps) || []).map(s => {
+    const t = mapTileById(s.id);
+    if (!t || !(t.name === 'warning-line' || String(t.file || '').endsWith('/warning-line.png'))) return null;
+    const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+    return { x, y, w: mapStampW(s, t) * CELL, h: mapStampH(s, t) * CELL };
+  }).filter(Boolean);
+  return warningLineRects;
+}
+const insideWarningLine = (x, y) => warningLineAreas().some(a => x >= a.x && x < a.x + a.w && y >= a.y && y < a.y + a.h);
 function frame(ts) {
   const dt = Math.min(0.05, (ts - last) / 1000 || 0); last = ts;
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
@@ -1656,6 +1670,11 @@ function frame(ts) {
   }
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
+  // 溫特手上拿著槍（戰鬥區、任何槍種、沒開選單）而且走出營地警戒線外：滑鼠游標換成準心，方便瞄準怪物
+  // 在警戒線裡面（基地內）就算拿著槍也是一般游標。樣式在 css/style.css 的 cursor-crosshair。
+  const armed = !MAP_SAFE && G.running && !menuOpen && !!G.player && G.player.hp > 0 && playerWeapon(G.player).id !== 'none'
+    && !insideWarningLine(G.player.x, G.player.y);
+  if (armed !== cv.classList.contains('cursor-crosshair')) cv.classList.toggle('cursor-crosshair', armed);
   if (typeof sanityAfterDraw === 'function') sanityAfterDraw();   // SP 低於 20：殘影（js/sanity.js）
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
 }
