@@ -13,6 +13,10 @@ body {
     radial-gradient(circle at 88% 18%, rgba(121, 78, 47, .22), transparent 32%),
     linear-gradient(180deg, #10141b 0%, #171b22 52%, #0d1015 100%);
 }
+/* 遊戲畫面裡的字和圖片都不能被選取（反藍）：開槍連點滑鼠時，才不會把彈出的道具提示等字選起來。
+   輸入欄位（例如音量滑桿）不受影響。 */
+body { -webkit-user-select: none; user-select: none; }
+input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-select: text; }
 #gameHeader {
   width: 100%; max-width: 1280px; margin: 0 0 10px;
   display: flex; align-items: flex-end; justify-content: space-between; gap: 16px;
