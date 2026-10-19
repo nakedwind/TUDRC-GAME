@@ -176,6 +176,7 @@
           <button class="btn primary" id="genExport">產生匯出文字</button>
           <button class="btn" id="copyExport">複製</button>
           <button class="btn" id="downloadExport">下載 maps.js</button>
+          <button class="btn" id="downloadTiles" title="兩個編輯器共用的素材庫">下載 tiles.js（素材庫）</button>
         </div>
         <textarea id="exportOut" readonly placeholder="按「產生匯出文字」後，這裡會出現要貼回 data/maps.js 的內容"></textarea>
         <div class="exrow">
@@ -191,7 +192,8 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=loofah2-20261019"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=loofah-20261019"></script>
-  <script src="data/maps.js?v=split-20261020"></script>        <!-- 戰鬥地圖資料（BATTLE_TILES、BATTLE_MAPS） -->
+  <script src="data/tiles.js?v=sharedtiles-20261020"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/maps.js?v=sharedtiles-20261020"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
   <script src="data/supplies.js"></script>
   <script src="data/items.js?v=doors4-20261018"></script>
   <script src="data/equipment.js?v=locker-loot-20261017"></script>
@@ -199,7 +201,7 @@
   <script src="js/sfx.js?v=stairs2-20261019"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/map-editor-store.js?v=split-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/map-editor.js?v=layers-20261020", "js/map-editor-save.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script src="js/map-editor-store.js?v=sharedtiles-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
+  <script>EditorStore.boot(["js/map-editor.js?v=sharedtiles-20261020", "js/map-editor-save.js?v=sharedtiles-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>

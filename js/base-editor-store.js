@@ -4,13 +4,15 @@
    用法：頁面先載入這個檔案，再用 EditorStore.boot([...]) 依序載入編輯器程式（等資料庫讀好才開始）。
    編輯器裡讀寫地圖／素材暫存改用 EditorStore.getItem / setItem / removeItem（用法跟 localStorage 一樣）。
    其他小設定照舊放 localStorage。
-   地圖編輯器有自己的一份（js/map-editor-store.js），用不同的暫存名稱，兩邊互不覆蓋。
+   地圖編輯器有自己的一份（js/map-editor-store.js）。地圖暫存用不同的名稱、兩邊互不覆蓋；只有素材庫暫存兩邊共用。
 */
 const EditorStore = (() => {
   const DB_NAME = 'tudrc_editor', STORE = 'kv';
-  const MAPS_KEY = 'tudrc_base_maps_v1', TILES_KEY = 'tudrc_base_tiles_v1';   // 基地編輯器自己的暫存（js/base-editor.js 的 STORAGE_MAPS、STORAGE_TILES）
+  const MAPS_KEY = 'tudrc_base_maps_v1';       // 基地編輯器自己的地圖暫存（js/base-editor.js 的 STORAGE_MAPS）
+const TILES_KEY = 'tudrc_shared_tiles_v1';   // 素材庫：兩個編輯器共用（js/base-editor.js 的 STORAGE_TILES）
   // 放進資料庫的大資料；後面兩個是分開之前兩個編輯器共用的舊暫存，只讀來搬一次（js/base-editor.js 的 oldSharedDraft）
-  const BIG = new Set([MAPS_KEY, TILES_KEY, 'tudrc_maps_v4', 'tudrc_tiles_v3']);
+  // 素材還沒共用之前兩邊各自的素材暫存（tudrc_battle_tiles_v1、tudrc_base_tiles_v1）也讀進來，只搬一次
+  const BIG = new Set([MAPS_KEY, TILES_KEY, 'tudrc_maps_v4', 'tudrc_tiles_v3', 'tudrc_battle_tiles_v1', 'tudrc_base_tiles_v1']);
   const cache = new Map();
   let db = null, failed = null;
   const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });

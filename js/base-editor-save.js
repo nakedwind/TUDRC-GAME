@@ -1,11 +1,14 @@
 /* ===== 🏠 基地編輯器：一鍵存到專案、存檔空間顯示、工具列「更多」選單 =====
-   ・「💾 存到專案」（Ctrl+S）：用 js/project-save.js 直接寫進 data/base-maps.js（只有基地地圖），
+   ・「💾 存到專案」（Ctrl+S）：用 js/project-save.js 直接寫進 data/base-maps.js（只有基地地圖）和 data/tiles.js（共用素材庫），
      NPC 名單 data/npc-locations.js 由 js/base-editor-npc.js 加進 EDITOR_SAVE_FILES 一起存。
    ・存檔空間：顯示地圖、素材暫存用了多少（js/base-editor-store.js）。
    地圖編輯器有自己的一份（js/map-editor-save.js），兩邊互不影響。
    必須在 js/base-editor.js 之後載入（用到 exportText、setStatus）。
 */
-const EDITOR_SAVE_FILES = [{ path: 'data/base-maps.js', label: '基地地圖', text: () => exportText() }];   // js/base-editor-npc.js 會再加 npc-locations.js
+const EDITOR_SAVE_FILES = [
+  { path: 'data/base-maps.js', label: '基地地圖', text: () => exportText() },
+  { path: 'data/tiles.js', label: '素材庫（兩個編輯器共用）', text: () => tilesExportText() },
+];   // js/base-editor-npc.js 會再加 npc-locations.js
 // 存檔功能本身在 js/project-save.js（所有編輯器共用，遊戲資料夾只要選一次）
 const editorProjectSave = ProjectSave.attach({ after: [], files: EDITOR_SAVE_FILES, status: (m, err) => setStatus(m, err ? '#ff8f8f' : '#7ee0c0') });
 document.getElementById('saveProject').addEventListener('click', e => editorProjectSave.save(e.shiftKey));

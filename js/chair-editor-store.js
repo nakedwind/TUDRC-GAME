@@ -5,8 +5,8 @@
 */
 const EditorStore = (() => {
   const DB_NAME = 'tudrc_editor', STORE = 'kv';
-  // 地圖編輯器、基地編輯器各自的素材暫存；最後一個是分開之前兩邊共用的舊暫存（js/chair-editor.js 會依序讀）
-  const BIG = new Set(['tudrc_battle_tiles_v1', 'tudrc_base_tiles_v1', 'tudrc_tiles_v3']);
+  // 兩個編輯器共用的素材庫暫存；後面是更早以前的舊暫存（js/chair-editor.js 會依序讀）
+  const BIG = new Set(['tudrc_shared_tiles_v1', 'tudrc_battle_tiles_v1', 'tudrc_base_tiles_v1', 'tudrc_tiles_v3']);
   const cache = new Map();
   let db = null, failed = null;
   const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });

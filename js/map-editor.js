@@ -8,7 +8,8 @@
    這個編輯器只管「戰鬥地圖」，跟 🏠 基地編輯器完全分開（程式、瀏覽器暫存、存檔都不共用）：
    ・頁面 地圖編輯器.html、樣式 css/map-editor.css
    ・程式 js/map-editor.js（這個檔）、js/map-editor-save.js、js/map-editor-store.js
-   ・存檔 data/maps.js（BATTLE_TILES 素材、BATTLE_MAPS 地圖）
+   ・存檔 data/maps.js（BATTLE_MAPS 地圖）
+   ・素材庫 data/tiles.js（SHARED_TILES）是兩個編輯器唯一共用的東西：任一邊加的素材，另一邊也馬上有（見下面「共用素材庫」）
    基地地圖在 data/base-maps.js，由 基地編輯器.html（js/base-editor*.js）管理。改這裡不會影響基地編輯器。
 */
 
@@ -36,7 +37,9 @@ const PULL_RESTORE_APPLIED = (() => {
 })();
 // 瀏覽器暫存：地圖編輯器自己的（跟基地編輯器分開，兩邊互不覆蓋）
 const STORAGE_MAPS = 'tudrc_battle_maps_v1';
-const STORAGE_TILES = 'tudrc_battle_tiles_v1';
+// 素材庫：兩個編輯器共用同一份暫存（地圖暫存還是各自一份）
+const STORAGE_TILES = 'tudrc_shared_tiles_v1';
+const OWN_OLD_TILES = 'tudrc_battle_tiles_v1', OTHER_OLD_TILES = 'tudrc_base_tiles_v1';   // 素材還沒共用之前，兩個編輯器各自的素材暫存（第一次打開時合併過來，舊暫存不刪）
 // 分開之前兩個編輯器共用的暫存：第一次打開時，把裡面的戰鬥地圖搬過來（舊暫存保留不刪，當作備份）
 const OLD_SHARED_MAPS = 'tudrc_maps_v4';
 const OLD_SHARED_TILES = 'tudrc_tiles_v3';
@@ -198,9 +201,9 @@ const wallCells = (m) => new Set(m.solid);   // 只有「不可穿透」才擋�
 function mergeDefaultAssetPack(match, storageKey, idOnly = false) {
   if (localStorage.getItem(storageKey)) return false;
   const picks = typeof match === 'function' ? match : (t => String(t.id).startsWith(match));
-  const packTiles = BATTLE_TILES.filter(picks);
+  const packTiles = SHARED_TILES.filter(picks);
   const baseName = f => String(f || '').replace(/\\/g, '/').split('/').pop().toLowerCase();
-  const knownIds = new Set(BATTLE_TILES.map(x => x.id));
+  const knownIds = new Set(SHARED_TILES.map(x => x.id));
   packTiles.forEach(t => {
     const filename = baseName(t.file);
     // 先用 id 找；找不到才用檔名找，而且只認「使用者自己加的素材」——
@@ -227,13 +230,25 @@ function oldSharedDraft(key) {
   if (localStorage.getItem(STORAGE_SPLIT_DONE)) return null;
   try { const v = JSON.parse(EditorStore.getItem(key) || 'null'); return Array.isArray(v) && v.length ? v : null; } catch (_) { return null; }
 }
+// 讀一份素材暫存（沒有或壞掉就回傳空陣列）
+function draftTiles(key) { try { const v = JSON.parse(EditorStore.getItem(key) || 'null'); return Array.isArray(v) ? v : []; } catch (_) { return []; } }
 function loadTiles() {
   let saved = EditorStore.getItem(STORAGE_TILES);
-  const sharedTiles = !saved && oldSharedDraft(OLD_SHARED_TILES);
-  if (sharedTiles) saved = JSON.stringify(sharedTiles);
-  if (saved) { try { customTiles = JSON.parse(saved); } catch (e) { customTiles = clone(BATTLE_TILES); } }
-  else customTiles = clone(BATTLE_TILES);
-  if (sharedTiles) saveTiles();
+  // 第一次用共用素材庫：把以前兩個編輯器各自的素材暫存合在一起（同一個素材以這個編輯器的為準），都沒有就用檔案
+  let migratedTiles = false;
+  if (!saved) {
+    const merged = [];
+    for (const list of [draftTiles(OWN_OLD_TILES), draftTiles(OTHER_OLD_TILES), oldSharedDraft(OLD_SHARED_TILES) || []])
+      for (const tile of list) if (tile && tile.id && !merged.some(x => x.id === tile.id)) merged.push(tile);
+    if (merged.length) { saved = JSON.stringify(merged); migratedTiles = true; }
+  }
+  if (saved) { try { customTiles = JSON.parse(saved); } catch (e) { customTiles = clone(SHARED_TILES); } }
+  else customTiles = clone(SHARED_TILES);
+  if (!Array.isArray(customTiles)) customTiles = [];
+  // 檔案（data/tiles.js）裡有、暫存裡沒有的素材（例如別人新增、你剛 pull 下來的）：補進來
+  let filledFromFile = false;
+  for (const tile of SHARED_TILES) if (!customTiles.some(x => x.id === tile.id)) { customTiles.push(clone(tile)); filledFromFile = true; }
+  if (migratedTiles || filledFromFile) saveTiles();
   if (!Array.isArray(customTiles)) customTiles = [];
   customTiles.forEach(t => { t.w = t.w || 1; t.h = t.h || 1; });
 
@@ -334,7 +349,7 @@ function loadTiles() {
   let restaurantChairsFixed = false;
   if (!localStorage.getItem(STORAGE_RESTAURANT_CHAIR_FIX)) {   // 素材 id 不變，地圖上的擺放不受影響
     for (const id of ['tile_restaurant_water_dispenser_01', 'tile_restaurant_water_dispenser_02']) {
-      const src = BATTLE_TILES.find(t => t.id === id), own = customTiles.find(t => t.id === id);
+      const src = SHARED_TILES.find(t => t.id === id), own = customTiles.find(t => t.id === id);
       if (src && own) { own.file = src.file; own.name = src.name; restaurantChairsFixed = true; }
     }
     localStorage.setItem(STORAGE_RESTAURANT_CHAIR_FIX, '1');
@@ -355,7 +370,25 @@ function loadTiles() {
   });
   if (migrated) saveTiles();
 }
-function saveTiles() { EditorStore.setItem(STORAGE_TILES, JSON.stringify(customTiles)).catch(e => setStatus('⚠️ 素材暫存失敗（' + (e && e.name || e) + '）', '#ff8f8f')); }
+// ================= 共用素材庫 =================
+// 兩個編輯器的素材（磚塊）是同一份：存在共用暫存 STORAGE_TILES、存到專案時寫進 data/tiles.js。
+// 兩個編輯器同時開著時，一邊加／改／刪素材，另一邊馬上收到（BroadcastChannel），不用重新整理。
+const tileChannel = typeof BroadcastChannel === 'function' ? new BroadcastChannel('tudrc_shared_tiles') : null;
+const foreignTiles = new Map();   // 另一個編輯器加進來的素材（Ctrl+Z 回到更早的步驟時不要把它們弄丟）
+function saveTiles() {
+  EditorStore.setItem(STORAGE_TILES, JSON.stringify(customTiles)).catch(e => setStatus('⚠️ 素材暫存失敗（' + (e && e.name || e) + '）', '#ff8f8f'));
+  if (tileChannel) tileChannel.postMessage({ from: '地圖編輯器', tiles: customTiles });
+}
+if (tileChannel) tileChannel.onmessage = e => {
+  const list = e.data && e.data.tiles; if (!Array.isArray(list)) return;
+  const added = list.filter(tile => !customTiles.some(x => x.id === tile.id));
+  added.forEach(tile => foreignTiles.set(tile.id, tile));
+  for (const tile of list) { const old = customTiles.find(x => x.id === tile.id); if (old && old.file !== tile.file) delete tileImgCache[tile.id]; }   // 圖片換了：重新載入
+  customTiles = list;
+  if (!tileById(brush.tile)) brush = { mode: brush.mode, tile: 'floor' };
+  preloadTiles(); renderPalette(); draw(); refreshSelPanel();
+  setStatus((e.data.from || '另一個編輯器') + '更新了素材庫' + (added.length ? '：新增「' + added.map(x => x.name).join('、') + '」' : ''), '#8fd3ff');
+};
 
 function loadMaps() {
   let saved = EditorStore.getItem(STORAGE_MAPS);
@@ -497,11 +530,12 @@ function redo() {
 function restoreEditorSnapshot(value) {
   const s = JSON.parse(value);
   maps = s.maps; customTiles = s.tiles; curId = s.curId;
+  for (const [id, tile] of foreignTiles) if (!customTiles.some(x => x.id === id)) customTiles.push(tile);   // 另一個編輯器加的素材留著
   selection = null; selections = [];
   if (!maps.some(m => m.id === curId)) curId = maps[0].id;
   if (!tileById(brush.tile)) brush = { mode: brush.mode, tile: 'floor' };
   EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps));
-  EditorStore.setItem(STORAGE_TILES, JSON.stringify(customTiles));
+  saveTiles();   // 素材庫共用：回復後的素材也同步給另一個編輯器
   checkResult = null;
   applyMapSize(); refreshMapSelect(); renderPalette(); loadRules(); draw();
 }
@@ -1466,8 +1500,17 @@ function selectTile(id) {
   }
   brush = { mode: 'tile', tile: id }; clearSelection(); updateToolUI(); renderPalette();
 }
-function deleteTile(id) {
+// 素材庫兩邊共用：另一個編輯器的地圖還在用的素材不能刪（不然那邊的地圖會少東西）
+async function otherEditorTileUse(id) {
+  const names = new Set(), uses = m => (m.stamps || []).some(s => s.id === id) || Object.values(m.layers || {}).some(layer => Object.values(layer).includes(id));
+  try { const text = await (await fetch('data/base-maps.js', { cache: 'no-store' })).text(); new Function(text + ';return BASE_MAPS;')().forEach(m => { if (uses(m)) names.add(m.name); }); } catch (_) {}
+  try { const draft = JSON.parse(await EditorStore.getRaw('tudrc_base_maps_v1') || 'null'); if (Array.isArray(draft)) draft.forEach(m => { if (uses(m)) names.add(m.name); }); } catch (_) {}
+  return [...names];
+}
+async function deleteTile(id) {
   const t = tileById(id); if (!t || t.builtin) return;
+  const usedThere = await otherEditorTileUse(id);
+  if (usedThere.length) { alert('「' + t.name + '」是兩個編輯器共用的素材，🏠 基地編輯器的地圖還在用：\n' + usedThere.join('、') + '\n\n請先到🏠 基地編輯器把它從那些地圖拿掉，才能刪除。'); return; }
   if (!confirm('刪除磚塊「' + t.name + '」？（已經貼到地圖上的會一起消失）')) return;
   pushUndo();
   customTiles = customTiles.filter(x => x.id !== id); saveTiles();
@@ -2288,12 +2331,25 @@ document.getElementById('previewGame').addEventListener('click', () => {
 // ================= 匯出 / 重設 =================
 // 開頭這段說明要一字不差（存到專案時，內容沒變就不會重寫檔案）
 function exportText() {
-  return '/* ===== 戰鬥地圖：磚塊與地圖資料（由「🗺️ 地圖編輯器」匯出）=====\n' +
+  return '/* ===== 戰鬥地圖（由「🗺️ 地圖編輯器」匯出）=====\n' +
     '   只放戰鬥地圖；基地（安全區域）的地圖在 data/base-maps.js，由「🏠 基地編輯器」管理。\n' +
+    '   素材（磚塊）在兩個編輯器共用的 data/tiles.js。\n' +
     '   整段貼回 data/maps.js 覆蓋即可。 */\n' +
-    'const BATTLE_TILES = ' + JSON.stringify(customTiles, null, 2) + ';\n\n' +
     'const BATTLE_MAPS = ' + JSON.stringify(maps, null, 2) + ';\n';
 }
+// 共用素材庫 data/tiles.js（兩個編輯器寫出來的內容一模一樣，開頭說明也要一字不差）
+function tilesExportText() {
+  return '/* ===== 素材庫：兩個編輯器共用的磚塊／素材（由「🗺️ 地圖編輯器」或「🏠 基地編輯器」匯出）=====\n' +
+    '   在任一個編輯器「⋯ 更多 → ＋ 加入磚塊」加的素材，兩邊都能用；地圖本身還是分開存\n' +
+    '   （戰鬥地圖 data/maps.js、基地地圖 data/base-maps.js）。\n' +
+    '   整段貼回 data/tiles.js 覆蓋即可。 */\n' +
+    'const SHARED_TILES = ' + JSON.stringify(customTiles, null, 2) + ';\n';
+}
+document.getElementById('downloadTiles').addEventListener('click', () => {
+  const blob = new Blob([tilesExportText()], { type: 'text/javascript' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tiles.js'; a.click(); URL.revokeObjectURL(a.href);
+  setStatus('已下載 tiles.js（素材庫），請把它覆蓋到 data/tiles.js', '#7ee0c0');
+});
 document.getElementById('genExport').addEventListener('click', () => { document.getElementById('exportOut').value = exportText(); setStatus('已產生匯出文字，請「複製」或「下載」後貼回 data/maps.js', '#8fd3ff'); });
 document.getElementById('copyExport').addEventListener('click', () => {
   const ta = document.getElementById('exportOut'); if (!ta.value) ta.value = exportText();
@@ -2306,10 +2362,10 @@ document.getElementById('downloadExport').addEventListener('click', () => {
   setStatus('已下載 maps.js，請把它覆蓋到 data/maps.js', '#7ee0c0');
 });
 document.getElementById('resetFile').addEventListener('click', () => {
-  if (!confirm('確定丟棄瀏覽器暫存，改用 data/maps.js 檔案的內容？未匯出的變更會不見。')) return;
+  if (!confirm('確定丟棄瀏覽器暫存，改用 data/maps.js 和 data/tiles.js 檔案的內容？未匯出的變更會不見。\n（素材庫兩個編輯器共用，另一個編輯器的素材也會一起重設成檔案的內容）')) return;
   EditorStore.removeItem(STORAGE_MAPS); EditorStore.removeItem(STORAGE_TILES);
   selection = null; selections = [];
-  loadTiles(); loadMaps(); applyMapSize(); preloadTiles(); renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
+  loadTiles(); saveTiles(); loadMaps(); applyMapSize(); preloadTiles();   // saveTiles：重設後的素材庫也告訴另一個編輯器 renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
   setStatus('已重設為檔案內容', '#ffd24a');
 });
 

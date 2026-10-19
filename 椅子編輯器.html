@@ -87,9 +87,10 @@
       <div id="elevatorStatus" class="status" role="status"></div><p class="export-note">編輯會自動存在這台瀏覽器。正式套用或同步其他電腦時，請下載並取代 <code>data/elevators.js</code>。</p>
     </section>
   </div>
-  <script src="data/maps.js?v=split-20261020"></script>        <!-- 戰鬥地圖的素材（地圖編輯器） -->
-  <script src="data/base-maps.js?v=split-20261020"></script>   <!-- 基地地圖的素材（基地編輯器） -->
-  <script src="js/map-data.js?v=split-20261020"></script>      <!-- 兩份素材合在一起（TILES_CUSTOM） -->
+  <script src="data/tiles.js?v=sharedtiles-20261020"></script>       <!-- 素材庫（地圖編輯器、基地編輯器共用） -->
+  <script src="data/maps.js?v=sharedtiles-20261020"></script>        <!-- 戰鬥地圖 -->
+  <script src="data/base-maps.js?v=sharedtiles-20261020"></script>   <!-- 基地地圖 -->
+  <script src="js/map-data.js?v=sharedtiles-20261020"></script>      <!-- 素材清單（TILES_CUSTOM） -->
   <script src="data/chairs.js?v=hqchair-20261015"></script>
   <script src="data/elevators.js?v=passage-20261002"></script>
   <script src="js/chair-data.js"></script>
@@ -97,8 +98,8 @@
   <script src="js/sfx.js?v=stairs2-20261019"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案 -->
-  <script src="js/chair-editor-store.js?v=split-20261020"></script>   <!-- 讀地圖編輯器、基地編輯器的素材暫存（瀏覽器資料庫） -->
-  <script>EditorStore.boot(["js/chair-editor.js?v=split-20261020", "js/elevator-editor.js?v=passage-20261002"], () => ProjectSave.attach({
+  <script src="js/chair-editor-store.js?v=sharedtiles-20261020"></script>   <!-- 讀地圖編輯器、基地編輯器的素材暫存（瀏覽器資料庫） -->
+  <script>EditorStore.boot(["js/chair-editor.js?v=sharedtiles-20261020", "js/elevator-editor.js?v=passage-20261002"], () => ProjectSave.attach({
     after: ['exportChairs', 'exportElevators'],
     files: [
       { path: 'data/chairs.js', label: '椅子', text: () => '/* 由椅子編輯器匯出：深度 px、擋路格、坐下位置 px。 */\nconst CHAIRS_DEFAULT = ' + JSON.stringify(chairs, null, 2) + ';\n' },
