@@ -5,6 +5,9 @@
    ・必須是第一個載入的程式（之後的程式建立的圖片才追蹤得到）
    ・背景慢慢下載、不需要等的圖片，用 AssetGate.quiet(() => { ... }) 包起來就不會被追蹤
    ・等太久會出現「先開始遊戲」按鈕；單張圖片超過 TIMEOUT 秒還沒好就不再等它
+   ・只有「開場」和「換地圖」的時候會擋（armed）：這兩個時候載好之後就放手，遊戲進行中才第一次用到的圖片
+     （第一次出現的怪物、特效、撿到的東西…）在背景慢慢下載，不會再跳「載入中」把遊戲停住。
+     換地圖時 js/maploader.js 的 switchMap 會呼叫 AssetGate.arm()。
 */
 const AssetGate = (() => {
   const SHOW_DELAY = 250;   // 毫秒：很快就下載好的（瀏覽器快取）不顯示，避免畫面閃一下
@@ -14,6 +17,8 @@ const AssetGate = (() => {
   let batchTotal = 0, batchDone = 0, batchStart = 0, quietDepth = 0, skipped = false;
   let el = null, barEl = null, textEl = null, skipBtn = null;
   const idleWaiters = [];
+  const ARM_MIN = 500;   // 毫秒：開場／換地圖之後至少等這麼久（讓這段時間裡要下載的東西都先登記到）
+  let armed = true, armedAt = performance.now();   // 開場先擋
 
   function finish(img) {
     if (!pending.has(img)) return;
@@ -24,7 +29,7 @@ const AssetGate = (() => {
     }
   }
   function track(img) {
-    if (quietDepth > 0 || !img || pending.has(img)) return;
+    if (!armed || quietDepth > 0 || !img || pending.has(img)) return;   // 遊戲進行中：不擋，背景下載
     if (!pending.size) batchStart = performance.now();
     pending.set(img, performance.now()); batchTotal++;
     const done = () => finish(img);
@@ -33,6 +38,7 @@ const AssetGate = (() => {
   }
   // 圖片以外要等的東西（例如音效）：傳一個 Promise，成功或失敗都算好了
   function wait(promise) {
+    if (!armed) return;   // 遊戲進行中才要的音效：背景下載，不擋
     const token = {};
     if (!pending.size) batchStart = performance.now();
     pending.set(token, performance.now()); batchTotal++;
@@ -78,6 +84,7 @@ const AssetGate = (() => {
     return pending.size > 0 && now - batchStart > SHOW_DELAY;
   }
   function refresh() {
+    if (armed && !pending.size && performance.now() - armedAt > ARM_MIN) armed = false;   // 開場／換地圖要的都好了：放手
     const show = blocking();
     if (!el) { if (!show || !document.body) return; build(); }
     el.hidden = !show;
@@ -92,6 +99,7 @@ const AssetGate = (() => {
   return {
     blocking,      // true＝還在等圖片：遊戲先暫停
     refresh,
+    arm() { armed = true; armedAt = performance.now(); },   // 換地圖：接下來要下載的圖片先擋住等它們好（js/maploader.js）
     wait,          // 等一個 Promise 完成（音效下載＋解碼，js/sfx.js）
     quiet(fn) { quietDepth++; try { return fn(); } finally { quietDepth--; } },   // 這裡面建立的圖片不追蹤（背景下載）
     whenIdle(fn) { if (!pending.size) fn(); else idleWaiters.push(fn); },        // 目前這批圖片都好了再做

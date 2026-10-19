@@ -178,6 +178,7 @@ function pickMap() {
 function switchMap(i) {                 // 切換到第 i 張並重新載入地圖
   if (typeof settleSortieMoney === 'function') settleSortieMoney();   // 離開戰鬥地圖：剩下的作戰經費帶回基地（js/progression.js）
   const list = mapList();
+  if (typeof AssetGate !== 'undefined' && AssetGate.arm) AssetGate.arm();   // 換地圖：這張地圖要的圖片下載好之前先擋住（js/asset-gate.js）
   if (i >= 0 && i < list.length) { MAP_INDEX = i; initMap(); }
 }
 function initMap() {
@@ -514,14 +515,24 @@ const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return Number.isFin
 // 緩衝讓走動時畫面邊緣先畫好，也讓只露出一角的大圖（高柱、牆）不會被切掉。地圖資料完全不變。
 const MAP_DRAW_MARGIN = 2;   // 畫面四周多畫幾格（2＝總共約 400 格）
 let mapDrawRect = null;      // 這一幀要畫的範圍（世界座標像素）
+// 熱身：瀏覽器要等一張圖「第一次真的被畫出來」才會把它準備好（解碼），所以第一次走到新的地方會頓一下。
+// 換地圖、圖片都下載好之後的第一幀，先把整張地圖畫一次，所有圖片一開始就準備好；之後才只畫看得到的範圍。
+let mapDrawWarmFor = null;   // 已經熱身過的地圖
+let mapDrawFull = false;     // 這一幀要畫整張地圖（熱身中）
 function updateMapDrawRect() {
+  mapDrawFull = false;
+  if (MAP && mapDrawWarmFor !== MAP && (typeof AssetGate === 'undefined' || !AssetGate.pendingCount)) {
+    mapDrawWarmFor = MAP; mapDrawFull = true; mapDrawRect = null;
+    if (typeof AssetGate !== 'undefined' && AssetGate.arm) AssetGate.arm();   // 熱身這一幀才第一次用到的圖（換過的門、打開的櫃子…）也在剛進地圖時就載好
+    return null;
+  }
   if (typeof cam === 'undefined' || typeof viewW !== 'function') { mapDrawRect = null; return null; }
   const m = MAP_DRAW_MARGIN * CELL;
   return (mapDrawRect = { x0: cam.x - m, y0: cam.y - m, x1: cam.x + viewW() + m, y1: cam.y + viewH() + m });
 }
 // 這個範圍內有哪幾格（c0～c1、r0～r1）
 function mapDrawCells() {
-  const v = mapDrawRect || updateMapDrawRect();
+  const v = mapDrawFull ? null : (mapDrawRect || updateMapDrawRect());
   if (!v) return { c0: 0, r0: 0, c1: COLS - 1, r1: ROWS - 1 };
   return { c0: Math.max(0, Math.floor((v.x0 - OX) / CELL)), r0: Math.max(0, Math.floor((v.y0 - OY) / CELL)),
     c1: Math.min(COLS - 1, Math.floor((v.x1 - OX) / CELL)), r1: Math.min(ROWS - 1, Math.floor((v.y1 - OY) / CELL)) };
@@ -650,7 +661,7 @@ function drawOccluderItem(ctx, it) {
 }
 function collectMapOccluders(ctx, out) {
   if (!MAP) return;
-  const v = mapDrawRect || updateMapDrawRect();
+  const v = mapDrawFull ? null : (mapDrawRect || updateMapDrawRect());
   for (const it of mapOccluders()) {
     if (v && (it.kind === 'stamp' ? !stampInDrawRect(it.stamp)   // 在畫面範圍外：這一幀不畫
       : (it.x1 + OX <= v.x0 || it.x0 + OX >= v.x1 || it.y1 + OY <= v.y0 || it.y0 + OY >= v.y1))) continue;
