@@ -1143,6 +1143,67 @@ cv.addEventListener('pointerup', () => {
 });
 cv.addEventListener('pointerleave', () => { hoverCell = null; draw(); });
 
+// ================= 滑鼠右鍵選單・中鍵拖曳畫面 =================
+// 右鍵：不跳出瀏覽器原本的選單（另存圖片、複製圖片…），改成只有「取消選取物件」的小選單。
+//      （打字的欄位裡還是保留瀏覽器原本的選單，才能複製、貼上文字）
+// 中鍵：按住拖曳＝上下左右移動地圖畫面（不會跳出瀏覽器的自動捲動）。
+// 右鍵、中鍵都不會在地圖上畫東西或選物件。
+const editorCtxMenu = document.createElement('div');
+editorCtxMenu.className = 'editor-ctxmenu'; editorCtxMenu.hidden = true;
+const ctxClearBtn = document.createElement('button');
+ctxClearBtn.type = 'button'; ctxClearBtn.textContent = '取消選取物件';
+ctxClearBtn.addEventListener('click', () => {
+  hideEditorCtxMenu();
+  if (!selections.length && !selection) { setStatus('目前沒有選取物件', '#9aa4b2'); return; }
+  clearSelection(); setStatus('已取消選取', '#9aa4b2');
+});
+editorCtxMenu.appendChild(ctxClearBtn);
+document.body.appendChild(editorCtxMenu);
+function hideEditorCtxMenu() { editorCtxMenu.hidden = true; }
+const isTypingField = el => !!(el && el.closest && el.closest('input, textarea, select, [contenteditable="true"]'));
+document.addEventListener('contextmenu', e => {
+  if (isTypingField(e.target)) { hideEditorCtxMenu(); return; }
+  e.preventDefault();
+  editorCtxMenu.hidden = false;
+  // 選單貼著滑鼠出現，但不要超出視窗
+  const w = editorCtxMenu.offsetWidth, h = editorCtxMenu.offsetHeight;
+  editorCtxMenu.style.left = Math.min(e.clientX, window.innerWidth - w - 4) + 'px';
+  editorCtxMenu.style.top = Math.min(e.clientY, window.innerHeight - h - 4) + 'px';
+});
+document.addEventListener('pointerdown', e => { if (!editorCtxMenu.contains(e.target)) hideEditorCtxMenu(); }, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') hideEditorCtxMenu(); });
+window.addEventListener('blur', hideEditorCtxMenu);
+window.addEventListener('scroll', hideEditorCtxMenu, true);
+
+const panWrap = document.getElementById('wrap');
+let middlePan = null;   // 中鍵拖曳中：{ x, y, left, top }＝按下時的滑鼠位置和捲動位置
+// 搶在地圖畫布之前攔下右鍵和中鍵（capture＝先處理），畫布就不會把它們當成畫圖
+panWrap.addEventListener('pointerdown', e => {
+  if (e.button === 0) return;
+  e.stopPropagation();
+  if (e.button !== 1) return;   // 右鍵：只開選單（上面的 contextmenu 會處理）
+  e.preventDefault();
+  middlePan = { x: e.clientX, y: e.clientY, left: panWrap.scrollLeft, top: panWrap.scrollTop };
+  panWrap.setPointerCapture(e.pointerId);
+  panWrap.classList.add('panning');
+}, true);
+panWrap.addEventListener('pointermove', e => {
+  if (!middlePan) return;
+  e.stopPropagation();
+  panWrap.scrollLeft = middlePan.left - (e.clientX - middlePan.x);
+  panWrap.scrollTop = middlePan.top - (e.clientY - middlePan.y);
+}, true);
+function endMiddlePan(e) {
+  if (!middlePan) return;
+  e.stopPropagation();
+  middlePan = null; panWrap.classList.remove('panning');
+}
+panWrap.addEventListener('pointerup', endMiddlePan, true);
+panWrap.addEventListener('pointercancel', endMiddlePan, true);
+// 瀏覽器按中鍵會跳出「自動捲動」的圖示，這裡關掉它
+panWrap.addEventListener('mousedown', e => { if (e.button === 1) e.preventDefault(); });
+panWrap.addEventListener('auxclick', e => { if (e.button === 1) e.preventDefault(); });
+
 // ================= 圖層面板（依 LAYERS 動態產生按鈕）=================
 // ・點圖層＝在這層編輯，並在下面展開這層的物件清單；再點一次收起來。點清單裡的物件＝直接選取它（按住 Shift 可以多選）。
 // ・「＋ 新增圖層」加在目前圖層的上面；「✎ 改名」（或雙擊圖層）改名字；「🗑 刪除圖層」連同上面的物件一起刪（Ctrl+Z 可以復原）。
@@ -2129,80 +2190,6 @@ document.getElementById('delMap').addEventListener('click', () => {
   pushUndo();
   maps = maps.filter(x => x !== m); switchTo(maps[0].id); saveMaps();
 });
-
-// ================= 單張地圖：匯出 / 匯入（跟朋友交換地圖用）=================
-// 匯出：只下載目前這張地圖＋它用到的素材設定（自己上傳的圖片會一起包進去）。
-// 匯入：選別人給的檔案，加成一張地圖；已經有的地圖和素材不會被動到（同一張地圖會先問要不要覆蓋）。
-const MAP_FILE_FORMAT = 'tudrc-map';
-function mapUsedTileIds(m) {
-  const ids = new Set();
-  for (const layer of Object.values(m.layers || {})) for (const id of Object.values(layer || {})) if (id) ids.add(id);
-  for (const st of m.stamps || []) if (st && st.id) ids.add(st.id);
-  return ids;
-}
-function exportCurrentMap() {
-  const m = curMap(); if (!m) return;
-  const tiles = [...mapUsedTileIds(m)].map(id => tileById(id)).filter(Boolean).map(t => clone(t));
-  const data = { format: MAP_FILE_FORMAT, version: 1, exportedAt: new Date().toISOString(), map: clone(m), tiles };
-  const blob = new Blob([JSON.stringify(data)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = (String(m.name || 'map').replace(/[\\/:*?"<>|]/g, '_')) + '.tudrcmap.json';
-  document.body.appendChild(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(a.href), 2000);
-  setStatus('已下載「' + m.name + '」（含 ' + tiles.length + ' 種素材），把這個檔案傳給對方，對方按「📥 匯入地圖」就能加進去', '#7ee0c0');
-}
-function importMapFile(file) {
-  const reader = new FileReader();
-  reader.onload = () => {
-    let data;
-    try { data = JSON.parse(reader.result); } catch (_) { setStatus('讀不懂這個檔案（不是匯出的地圖檔）', '#ff8f8f'); return; }
-    if (!data || data.format !== MAP_FILE_FORMAT || !data.map || !data.map.layers) { setStatus('這不是「📤 匯出這張地圖」產生的檔案', '#ff8f8f'); return; }
-    pushUndo();
-    // 素材：這邊沒有的才加進來（已經有的保留自己的設定）
-    let added = 0;
-    for (const t of data.tiles || []) {
-      if (!t || !t.id || tileById(t.id)) continue;
-      customTiles.push(clone(t)); added++;
-    }
-    // 地圖：同一張（同 id）已經存在時問要不要覆蓋；不覆蓋就加成一張新的
-    const m = clone(data.map), exist = maps.find(x => x.id === m.id);
-    let replaced = false;
-    if (exist) {
-      replaced = confirm('已經有「' + exist.name + '」這張地圖了。\n按「確定」用匯入的檔案覆蓋它；按「取消」加成一張新地圖。');
-      if (replaced) maps = maps.filter(x => x !== exist);
-      else { m.id = newId(); m.name = (m.name || '地圖') + '（匯入）'; }
-    }
-    // 出入口通往這邊沒有的地圖：拿掉（之後自己用出入口工具重新設）
-    const before = (m.portals || []).length;
-    m.portals = (m.portals || []).filter(pt => maps.some(x => x.id === pt.to) || pt.to === m.id);
-    const droppedPortals = before - m.portals.length;
-    const wasOtherKind = !!m.safe !== EDITOR_MAP_SAFE;   // 從地圖編輯器匯出的戰鬥地圖：匯入這裡就變成基地（安全區域）
-    m.safe = EDITOR_MAP_SAFE;
-    maps.push(fixMap(m));
-    if (added) saveTiles();
-    saveMaps();
-    if (typeof renderPalette === 'function') renderPalette();
-    switchTo(m.id);
-    setStatus('已' + (replaced ? '覆蓋' : '匯入') + '「' + m.name + '」' + (added ? '，新增 ' + added + ' 種素材' : '') +
-      (droppedPortals ? '，有 ' + droppedPortals + ' 個出入口通往這邊沒有的地圖，已拿掉' : '') +
-      (wasOtherKind ? '（原本是戰鬥地圖，匯入後改成基地：沒有怪物、沒有黑幕）' : '') + '。確認沒問題再按「💾 存到專案」', '#7ee0c0');
-  };
-  reader.onerror = () => setStatus('檔案讀取失敗', '#ff8f8f');
-  reader.readAsText(file);
-}
-(() => {   // 地圖列多兩個按鈕
-  const bar = document.getElementById('mapbar'); if (!bar) return;
-  const exp = document.createElement('button'); exp.className = 'btn'; exp.id = 'exportOneMap'; exp.textContent = '📤 匯出這張地圖';
-  exp.title = '只下載目前這張地圖（含用到的素材），可以傳給別人匯入';
-  const imp = document.createElement('button'); imp.className = 'btn'; imp.id = 'importOneMap'; imp.textContent = '📥 匯入地圖';
-  imp.title = '選別人給的「.tudrcmap.json」地圖檔，加成一張地圖（不會動到其他地圖）';
-  const input = document.createElement('input'); input.type = 'file'; input.accept = '.json,application/json'; input.hidden = true;
-  exp.addEventListener('click', exportCurrentMap);
-  imp.addEventListener('click', () => { input.value = ''; input.click(); });
-  input.addEventListener('change', () => { if (input.files && input.files[0]) importMapFile(input.files[0]); });
-  bar.append(exp, imp, input);
-})();
 
 // ================= 規則面板 =================
 const RULE_FIELDS = ['money', 'guide', 'guideRegen'];
