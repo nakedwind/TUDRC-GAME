@@ -709,12 +709,56 @@ function roundRect(x, y, w, h, r) {
 function drawCellBase(x, y) {
   ctx.fillStyle = '#000'; ctx.fillRect(x, y, CELL, CELL);
 }
+// 這些小道具的圖不是正方形：在編輯器裡照原本的比例畫在格子正中間，不拉長、不壓扁（佔地格數不變）
+const KEEP_RATIO_TILES = new Set([
+  'tile_interactive_storage_locker_key',         // 置物箱鑰匙
+  'tile_interactive_pickup_backroom_door_key',   // 後室門鑰匙
+  'tile_interactive_pickup_almond_water',        // 杏仁水
+  'tile_interactive_pickup_battery',             // 電池
+]);
+// 在 w×h 的框裡，圖片照原比例能畫多大（置中）
+function fitInBox(img, x, y, w, h) {
+  const iw = img.naturalWidth || img.width || w, ih = img.naturalHeight || img.height || h;
+  const k = Math.min(w / iw, h / ih), dw = iw * k, dh = ih * k;
+  return [x + (w - dw) / 2, y + (h - dh) / 2, dw, dh];
+}
+// 道具的亮藍色發光邊：沿著圖案外形描一圈約 2px 的亮藍色（只在編輯器裡顯示，讓人一眼看出這是可以撿的道具）
+const ITEM_GLOW_COLOR = '#4fd8ff';
+const ITEM_GLOW_PX = 2;
+const itemGlowCache = new WeakMap();   // 圖片 → 塗成亮藍色的剪影（只做一次）
+function itemSilhouette(img) {
+  let sil = itemGlowCache.get(img);
+  if (sil) return sil;
+  sil = document.createElement('canvas');
+  sil.width = img.naturalWidth || img.width; sil.height = img.naturalHeight || img.height;
+  const g = sil.getContext('2d');
+  g.drawImage(img, 0, 0);
+  g.globalCompositeOperation = 'source-in';   // 只留圖案的形狀，整塊塗成亮藍色
+  g.fillStyle = ITEM_GLOW_COLOR; g.fillRect(0, 0, sil.width, sil.height);
+  itemGlowCache.set(img, sil);
+  return sil;
+}
+// 在圖案底下先畫發光邊（之後再把圖案本身蓋在上面）
+function drawItemGlow(img, x, y, w, h) {
+  const sil = itemSilhouette(img), d = ITEM_GLOW_PX;
+  ctx.save();
+  ctx.imageSmoothingEnabled = false;
+  ctx.shadowColor = ITEM_GLOW_COLOR; ctx.shadowBlur = 6;   // 外圍再柔柔地亮一點
+  ctx.drawImage(sil, x, y, w, h);
+  ctx.shadowBlur = 0;
+  for (const [dx, dy] of [[-d, 0], [d, 0], [0, -d], [0, d], [-d, -d], [d, -d], [-d, d], [d, d]]) ctx.drawImage(sil, x + dx, y + dy, w, h);
+  ctx.restore();
+}
 // 畫 1×1 小圖（有圖用圖，沒圖用色塊佔位）
 function drawTile(id, x, y) {
   const t = tileById(id);
   if (!t) return;
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, CELL, CELL); return; }
-  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { ctx.drawImage(rec.img, x, y, CELL, CELL); return; } }
+  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) {
+    if (KEEP_RATIO_TILES.has(t.id)) { const box = fitInBox(rec.img, x, y, CELL, CELL); drawItemGlow(rec.img, ...box); ctx.drawImage(rec.img, ...box); }
+    else ctx.drawImage(rec.img, x, y, CELL, CELL);
+    return;
+  } }
   if (t.role === 'wall') {
     ctx.fillStyle = '#3f434b'; ctx.fillRect(x + 2, y + 2, CELL - 4, CELL - 4);
     ctx.strokeStyle = '#565b64'; ctx.lineWidth = 2; ctx.strokeRect(x + 5, y + 5, CELL - 10, CELL - 10);
@@ -724,14 +768,16 @@ function drawTile(id, x, y) {
   } else { ctx.fillStyle = '#20262f'; ctx.fillRect(x, y, CELL, CELL); }
 }
 // 畫圖片（可左右／上下翻轉）
-function drawImageFlipped(img, x, y, w, h, fx, fy, rot = 0) {
-  if (!fx && !fy && !rot) { ctx.drawImage(img, x, y, w, h); return; }
+// keepRatio＝照圖片原本的比例畫在框的正中間（不變形），並加上道具的亮藍色發光邊
+function drawImageFlipped(img, x, y, w, h, fx, fy, rot = 0, keepRatio = false) {
+  if (!fx && !fy && !rot) { if (keepRatio) { const box = fitInBox(img, x, y, w, h); drawItemGlow(img, ...box); ctx.drawImage(img, ...box); } else ctx.drawImage(img, x, y, w, h); return; }
   ctx.save();
   ctx.translate(x + w / 2, y + h / 2);
   if (rot) ctx.rotate(rot * Math.PI / 2);
   ctx.scale(fx ? -1 : 1, fy ? -1 : 1);
   const iw = rot % 2 ? h : w, ih = rot % 2 ? w : h;
-  ctx.drawImage(img, -iw / 2, -ih / 2, iw, ih);
+  if (keepRatio) { const [, , dw, dh] = fitInBox(img, 0, 0, iw, ih); drawItemGlow(img, -dw / 2, -dh / 2, dw, dh); ctx.drawImage(img, -dw / 2, -dh / 2, dw, dh); }
+  else ctx.drawImage(img, -iw / 2, -ih / 2, iw, ih);
   ctx.restore();
 }
 // 畫多格大圖
@@ -741,7 +787,7 @@ function drawStamp(s) {
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, drawW, drawH); return; }
   const rot = stampTurn(s);
-  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { drawImageFlipped(rec.img, x, y, drawW, drawH, s.fx, s.fy, rot); return; } }
+  if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { drawImageFlipped(rec.img, x, y, drawW, drawH, s.fx, s.fy, rot, KEEP_RATIO_TILES.has(t.id)); return; } }
   ctx.fillStyle = t.role === 'wall' ? '#3f434b' : (t.role === 'obstacle' ? '#7a5a3a' : '#2b3446');
   ctx.fillRect(x + 2, y + 2, drawW - 4, drawH - 4);
   ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 1; ctx.strokeRect(x + 2, y + 2, drawW - 4, drawH - 4);
