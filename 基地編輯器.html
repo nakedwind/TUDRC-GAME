@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 基地編輯器</title>
-<link rel="stylesheet" href="css/base-editor.css?v=selbar-20261020">   <!-- 基地編輯器自己的樣式（地圖編輯器是 css/map-editor.css） -->
+<link rel="stylesheet" href="css/base-editor.css?v=savetip-20261020">   <!-- 基地編輯器自己的樣式（地圖編輯器是 css/map-editor.css） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* 基地編輯器：章節＆NPC 面板 */
@@ -49,7 +49,15 @@
           </div>
         </details>
         <span class="toolrow-gap"></span>
-        <button class="btn primary" id="saveProject" title="直接寫進遊戲資料夾的 data/（Ctrl+S）">💾 存到專案</button>
+        <button class="btn danger" id="resetFile">從檔案重設（丟棄瀏覽器暫存）</button>
+        <!-- 存到專案：滑鼠停在按鈕上會出現說明（可以點裡面的「重新選擇遊戲資料夾」） -->
+        <span class="save-wrap">
+          <button class="btn primary" id="saveProject">💾 存到專案</button>
+          <span class="save-tip">
+            <span class="save-note">「💾 存到專案」（Ctrl+S）會直接寫進遊戲資料夾，不用下載再覆蓋。<a href="#" id="pickProject">重新選擇遊戲資料夾</a></span>
+            <span class="save-note" id="storageInfo"></span>
+          </span>
+        </span>
       </div>
       <div id="tools" class="toolrow">
         <button class="tool" data-mode="select" title="快捷鍵 Q">👆 選取</button>
@@ -186,22 +194,6 @@
       </details>
 
       <div class="panel">
-        <h2>💾 匯出基地地圖（data/base-maps.js）</h2>
-        <!-- 暫時用不到，先隱藏（想恢復就把下面兩處的 style="display:none" 拿掉） -->
-        <div class="exrow" style="display:none">
-          <button class="btn primary" id="genExport">產生匯出文字</button>
-          <button class="btn" id="copyExport">複製</button>
-          <button class="btn" id="downloadExport">下載 base-maps.js</button>
-          <button class="btn" id="downloadTiles" title="兩個編輯器共用的素材庫">下載 tiles.js（素材庫）</button>
-        </div>
-        <textarea id="exportOut" readonly style="display:none" placeholder="按「產生匯出文字」後，這裡會出現要貼回 data/base-maps.js 的內容"></textarea>
-        <div class="exrow">
-          <button class="btn danger" id="resetFile">從檔案重設（丟棄瀏覽器暫存）</button>
-        </div>
-        <p class="save-note">💡 上方「💾 存到專案」（Ctrl+S）會直接寫進遊戲資料夾，不用下載再覆蓋。<a href="#" id="pickProject">重新選擇遊戲資料夾</a></p>
-        <p class="save-note" id="storageInfo"></p>
-      </div>
-      <div class="panel">
         <h2>💾 匯出 NPC 名單（npc-locations.js）</h2>
         <div class="exrow">
           <button class="btn primary" id="npcGenExport">產生匯出文字</button>
@@ -232,6 +224,6 @@
   <script src="data/npc-locations.js?v=restaurant-npcs-20261019"></script>  <!-- NPC 平時位置（依章節） -->
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/base-editor-store.js?v=sharedtiles-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（基地編輯器自己的） -->
-  <script>EditorStore.boot(["js/base-editor.js?v=selbar-20261020", "js/base-editor-save.js?v=sharedtiles-20261020", "js/base-editor-npc.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/base-editor.js?v=savetip-20261020", "js/base-editor-save.js?v=sharedtiles-20261020", "js/base-editor-npc.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>

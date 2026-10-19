@@ -203,7 +203,6 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .map-size-note:last-child { margin-bottom: 0; }
 
 /* 匯出區 */
-#exportOut { width: 100%; height: 150px; background: #0e1116; color: #b7c2d0; border: 1px solid #333c49; border-radius: 6px; padding: 8px; font-family: monospace; font-size: 11px; resize: vertical; }
 .exrow { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
 
 /* ===== 工具列：兩排（工具／地圖），少用的放在「⋯ 更多」 ===== */
@@ -217,7 +216,7 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .tool-more-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; display: grid; gap: 6px; min-width: 200px; padding: 8px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
 .tool-more-menu .btn { text-align: left; }
 #saveProject { font-weight: 700; }
-.save-note { margin: 6px 0 0; color: #8c98a6; font-size: 12px; line-height: 1.5; }
+.save-note { display: block; margin: 6px 0 0; color: #8c98a6; font-size: 12px; line-height: 1.5; }
 .save-note a { color: #8fd3ff; }
 
 /* 中鍵拖曳畫面 */
@@ -225,3 +224,16 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 
 /* 選取物件的操作列放在工具列裡（同一排、固定在最上面） */
 #tools #selControls { margin: 0; padding: 5px 8px; }
+
+/* 素材搜尋框（在分類列最前面） */
+.palette-search { width: 160px; background: #11161c; color: #e6e9ee; border: 1px solid #333c49; border-radius: 999px; padding: 5px 12px; font: inherit; font-size: 12px; outline: none; }
+.palette-search:focus { border-color: #8fd3ff; }
+
+/* 「存到專案」的說明：滑鼠停一下才出現，滑鼠可以移進去點連結 */
+.save-wrap { position: relative; display: inline-flex; }
+.save-tip { position: absolute; top: 100%; right: 0; z-index: 60; width: 300px; padding-top: 6px; visibility: hidden; opacity: 0; transition: opacity .15s, visibility 0s .15s; }
+.save-tip::before { content: ''; position: absolute; inset: 6px 0 0; z-index: -1; background: #1d222b; border: 1px solid #3a4250; border-radius: 8px; box-shadow: 0 8px 20px rgba(0,0,0,.5); }
+.save-tip .save-note { padding: 0 12px; }
+.save-tip .save-note:first-child { padding-top: 10px; }
+.save-tip .save-note:last-child { padding-bottom: 10px; }
+.save-wrap:hover .save-tip { visibility: visible; opacity: 1; transition-delay: .4s, .4s; }

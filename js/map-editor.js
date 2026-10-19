@@ -1450,6 +1450,25 @@ const PALETTE_CATEGORIES = [
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
+// ---- 素材搜尋：在分類列的搜尋框打字，只顯示名稱（或檔名）含有這些字的素材；打越多字範圍越小 ----
+let paletteSearch = '';
+const paletteSearchInput = document.createElement('input');   // 只做一個，每次重畫素材列都放回同一個（打到一半的字不會不見）
+paletteSearchInput.type = 'search'; paletteSearchInput.className = 'palette-search';
+paletteSearchInput.placeholder = '🔍 搜尋素材'; paletteSearchInput.title = '輸入素材名稱或檔名裡的字（大小寫都可以）';
+function applyPaletteSearch() {
+  if (paletteSearchInput.value === paletteSearch) return;
+  paletteSearch = paletteSearchInput.value;
+  const pos = paletteSearchInput.selectionStart;
+  renderPalette();
+  paletteSearchInput.focus(); try { paletteSearchInput.setSelectionRange(pos, pos); } catch (_) {}
+}
+paletteSearchInput.addEventListener('input', e => { if (!e.isComposing) applyPaletteSearch(); });   // 注音／中文輸入選字中先不搜尋
+paletteSearchInput.addEventListener('compositionend', applyPaletteSearch);
+paletteSearchInput.addEventListener('keydown', e => { if (e.key === 'Escape') { paletteSearchInput.value = ''; applyPaletteSearch(); } });   // Esc＝清空搜尋
+function tileMatchesSearch(t) {
+  const q = paletteSearch.trim().toLowerCase(); if (!q) return true;
+  return [t.name, t.id, t.file].some(v => String(v || '').toLowerCase().includes(q));
+}
 function tileCategory(t) {
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
@@ -1477,8 +1496,9 @@ function tileCategory(t) {
 function renderPalette() {
   paletteEl.innerHTML = '';
   // 舊地圖仍可讀取內建佔位格，但不再提供灰牆與棕色障礙作為新素材。
-  const allTiles = palette().filter(t => t.id !== 'wall' && t.id !== 'obstacle');
+  const allTiles = palette().filter(t => t.id !== 'wall' && t.id !== 'obstacle' && tileMatchesSearch(t));   // 有搜尋字時：分類數量也只算搜得到的
   const tabs = document.createElement('div'); tabs.className = 'palette-tabs';
+  tabs.appendChild(paletteSearchInput);
   PALETTE_CATEGORIES.forEach(category => {
     const count = category.id === 'all' ? allTiles.length : allTiles.filter(t => tileCategory(t) === category.id).length;
     const tab = document.createElement('button');
@@ -1513,7 +1533,11 @@ function renderPalette() {
     }
     grid.appendChild(b);
   });
-  if (!visibleTiles.length) grid.innerHTML = '<div class="palette-empty">這個分類目前沒有素材</div>';
+  if (!visibleTiles.length) {
+    const empty = document.createElement('div'); empty.className = 'palette-empty';
+    empty.textContent = paletteSearch.trim() ? '這個分類找不到含有「' + paletteSearch.trim() + '」的素材' : '這個分類目前沒有素材';
+    grid.appendChild(empty);
+  }
   paletteEl.appendChild(grid);
   updateFlatUI();
 }
@@ -2307,7 +2331,7 @@ document.getElementById('previewGame').addEventListener('click', () => {
   setStatus('已用「' + m.name + '」開啟預覽視窗（改完地圖再按一次就會更新）', '#7ee0c0');
 });
 
-// ================= 匯出 / 重設 =================
+// ================= 存檔用的文字 / 重設 =================
 // 開頭這段說明要一字不差（存到專案時，內容沒變就不會重寫檔案）
 function exportText() {
   return '/* ===== 戰鬥地圖（由「🗺️ 地圖編輯器」匯出）=====\n' +
@@ -2324,27 +2348,12 @@ function tilesExportText() {
     '   整段貼回 data/tiles.js 覆蓋即可。 */\n' +
     'const SHARED_TILES = ' + JSON.stringify(customTiles, null, 2) + ';\n';
 }
-document.getElementById('downloadTiles').addEventListener('click', () => {
-  const blob = new Blob([tilesExportText()], { type: 'text/javascript' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'tiles.js'; a.click(); URL.revokeObjectURL(a.href);
-  setStatus('已下載 tiles.js（素材庫），請把它覆蓋到 data/tiles.js', '#7ee0c0');
-});
-document.getElementById('genExport').addEventListener('click', () => { document.getElementById('exportOut').value = exportText(); setStatus('已產生匯出文字，請「複製」或「下載」後貼回 data/maps.js', '#8fd3ff'); });
-document.getElementById('copyExport').addEventListener('click', () => {
-  const ta = document.getElementById('exportOut'); if (!ta.value) ta.value = exportText();
-  ta.select(); ta.setSelectionRange(0, 999999);
-  try { document.execCommand('copy'); setStatus('已複製到剪貼簿 ✓', '#7ee0c0'); } catch (e) { setStatus('複製失敗，請手動選取文字複製', '#ff8f8f'); }
-});
-document.getElementById('downloadExport').addEventListener('click', () => {
-  const blob = new Blob([exportText()], { type: 'text/javascript' });
-  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'maps.js'; a.click(); URL.revokeObjectURL(a.href);
-  setStatus('已下載 maps.js，請把它覆蓋到 data/maps.js', '#7ee0c0');
-});
 document.getElementById('resetFile').addEventListener('click', () => {
-  if (!confirm('確定丟棄瀏覽器暫存，改用 data/maps.js 和 data/tiles.js 檔案的內容？未匯出的變更會不見。\n（素材庫兩個編輯器共用，另一個編輯器的素材也會一起重設成檔案的內容）')) return;
+  if (!confirm('確定丟棄瀏覽器暫存，改用 data/maps.js 和 data/tiles.js 檔案的內容？還沒存到專案的變更會不見。\n（素材庫兩個編輯器共用，另一個編輯器的素材也會一起重設成檔案的內容）')) return;
   EditorStore.removeItem(STORAGE_MAPS); EditorStore.removeItem(STORAGE_TILES);
   selection = null; selections = [];
-  loadTiles(); saveTiles(); loadMaps(); applyMapSize(); preloadTiles();   // saveTiles：重設後的素材庫也告訴另一個編輯器 renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
+  loadTiles(); saveTiles(); loadMaps(); applyMapSize(); preloadTiles();   // saveTiles：重設後的素材庫也告訴另一個編輯器
+  renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
   setStatus('已重設為檔案內容', '#ffd24a');
 });
 
