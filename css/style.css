@@ -2069,3 +2069,19 @@ canvas.cursor-pressed {
 #dialoguePortraitFrame[data-char="poster"] #dialoguePortrait { left: 5px; top: 5px; width: calc(100% - 10px); height: calc(100% - 10px); transform: none; object-fit: contain; }
 
 #itemIntro .item-intro-image img{transform:scale(var(--intro-image-scale,1));}
+
+/* 搭電梯選單：外觀跟背包同一套（半透明深色卡片、上方標題列、圓形關閉鈕），樓層排成一欄 */
+#elevatorMenu { background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); animation: shop-fade .16s ease-out both; }
+.elevator-card { width: min(300px, 100%); max-height: 100%; display: flex; flex-direction: column; padding: 0; overflow: hidden; text-align: left; border: 1px solid rgba(143,211,255,.35); border-radius: 16px; background: linear-gradient(160deg, rgba(24,33,44,.64), rgba(10,15,22,.72)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); animation: shop-in .2s cubic-bezier(.2,.9,.3,1.15) both; }
+.elevator-card h2 { margin: 0; padding: 14px 56px 2px 18px; color: #f2f8ff; font-size: 22px; line-height: 1.1; background: linear-gradient(90deg, rgba(143,211,255,.08), transparent 60%); }
+.elevator-card p { min-height: 0; margin: 0; padding: 3px 56px 12px 18px; color: #8c9aa8; font-size: 12px; border-bottom: 1px solid rgba(143,211,255,.13); background: linear-gradient(90deg, rgba(143,211,255,.08), transparent 60%); }
+#elevatorClose { top: 14px; right: 16px; width: 32px; height: 32px; padding: 0; border: 1px solid #59616c; border-radius: 50%; background: #202730; color: #dfe7ee; font-size: 19px; line-height: 1; }
+#elevatorClose:hover { border-color: #c9d3dc; background: #2b3440; }
+.elevator-floors { grid-template-columns: 1fr; gap: 6px; min-height: 0; overflow-y: auto; padding: 12px 16px 16px; scrollbar-color: #3d5266 transparent; }
+.elevator-floors button { flex-direction: row; align-items: center; gap: 12px; padding: 9px 14px; border: 1px solid rgba(255,255,255,.12); border-radius: 10px; background: rgba(23,32,42,.6); text-align: left; transition: background .12s, border-color .12s; }
+.elevator-floors button b { min-width: 46px; color: #f2f8ff; font-size: 18px; }
+.elevator-floors button small { color: #e6edf4; font-size: 16px; font-weight: 700; opacity: 1; }
+.elevator-floors button:hover, .elevator-floors button:focus-visible { background: rgba(143,211,255,.12); border-color: rgba(143,211,255,.45); }
+.elevator-floors button.sel, .elevator-floors button:disabled { opacity: 1; border-color: #ffd479; background: linear-gradient(180deg, #f7d886, #e6b04a); box-shadow: 0 0 10px rgba(255,212,121,.35); }
+.elevator-floors button.sel b, .elevator-floors button.sel small { color: #3b2304; }
+@media (prefers-reduced-motion: reduce) { #elevatorMenu, .elevator-card { animation: none; } }

@@ -2136,10 +2136,14 @@ function lose(reason, cause) { G.over = true; G.running = false; G.phase = 'lost
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
+const MAP_PICK_NAMES = ['Y 區 · 地下街入口', '2F-應變中心'];   // 開始畫面能選的地圖（照地圖名稱）；清空＝全部地圖都能選
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
 if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {
-  MAPS_DEFAULT.forEach((m, i) => { const o = document.createElement('option'); o.value = i; o.textContent = m.name || ('地圖 ' + (i + 1)); mapPick.appendChild(o); });
+  MAPS_DEFAULT.forEach((m, i) => {
+    if (MAP_PICK_NAMES.length && !MAP_PICK_NAMES.includes(m.name)) return;
+    const o = document.createElement('option'); o.value = i; o.textContent = m.name || ('地圖 ' + (i + 1)); mapPick.appendChild(o);
+  });
   mapPick.value = MAP_INDEX;
   mapPickRow.classList.remove('hidden');
   mapPick.addEventListener('change', () => {
