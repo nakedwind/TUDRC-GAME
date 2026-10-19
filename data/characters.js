@@ -397,5 +397,13 @@ const CHARACTERS = {
     "sprite": "rowan_C",
     "intro": "常在餐廳出沒的路人，走路很安靜。",
     "captainImpression": ""
+  },
+  "cael": {
+    "id": "cael",
+    "kind": "support",
+    "name": "凱爾",
+    "sprite": "cael_C",
+    "intro": "常在餐廳出沒的路人，總是在擔心羅恩。",
+    "captainImpression": ""
   }
 };

@@ -242,7 +242,7 @@ function fishTrack(e, dt, facing) {
       fh.trail = 0;
       addPuddle(e.x + (Math.random() - .5) * 10, e.y + 11 + Math.random() * 3, 5 + Math.random() * 3.5, C.trailLife);   // 走路的水漬
       fh.step = !fh.step;
-      if (fh.step && typeof sfxAt === 'function' && isVisible(e.x, e.y)) sfxAt('fishStep', e.x, e.y, .35, 'fish-step');
+      if (fh.step && typeof sfxAt === 'function') sfxAt('fishStep', e.x, e.y, .35, 'fish-step');   // 黑暗中也聽得到（越遠越小聲）
     }
   } else {
     fh.still += dt;

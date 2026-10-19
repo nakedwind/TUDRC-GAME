@@ -262,6 +262,36 @@ const MONSTERS_DEFAULT = [
     "behavior": "fishhead",
     "hitSound": "fishHurt",
     "deathSound": "fishDeath"
+  },
+  {
+    "id": "loofah_lady",
+    "name": "絲瓜小姐",
+    "sprite": "images/monster/loofah-lady/loofah-lady.png",
+    "hp": 140,
+    "speed": 40,
+    "playerDamage": 6,
+    "sentryDamage": 8,
+    "buildingDamage": 20,
+    "reward": 55,
+    "crystals": 5,
+    "width": 80,
+    "height": 107,
+    "frames": {
+      "front": "images/monster/loofah-lady/loofah-lady.png",
+      "walkFront": [
+        "images/monster/loofah-lady/loofah-lady-walk-01.png",
+        "images/monster/loofah-lady/loofah-lady-walk-02.png",
+        "images/monster/loofah-lady/loofah-lady-walk-03.png",
+        "images/monster/loofah-lady/loofah-lady-walk-02.png"
+      ],
+      "blink": [
+        "images/monster/loofah-lady/loofah-lady-blink-01.png",
+        "images/monster/loofah-lady/loofah-lady-blink-02.png"
+      ]
+    },
+    "behavior": "vine",
+    "hitSound": "loofahHurt",
+    "deathSound": "loofahDeath"
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

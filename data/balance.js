@@ -45,6 +45,9 @@ const BUILD_RANGE = 6;
 const SLOW_BUILDINGS = {
   wirecloth: { enemy: .1, ally: .5, wear: { every: 2, dmg: 10 } },   // 鐵絲網：怪物 −90%、我軍 −50%；一隻怪每 2 秒磨掉 10，500 HP 約 100 秒壞掉
 };
+// 每次見到時隨機穿 A 或 B 造型（各 50%）的非戰鬥人員；其他人照舊：安全區穿 A、戰鬥區穿 B
+const RANDOM_OUTFITS = ['ash'];
+
 const WANDERERS = Object.values(CHARACTERS)
   .filter(character => character.kind === 'support')
   .map(({ id, name, sprite }) => ({ id, name, sprite }));

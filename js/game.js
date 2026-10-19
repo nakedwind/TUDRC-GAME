@@ -73,7 +73,14 @@ const wandererSprites = {};
 function applyOutfits() {   // 每次開始遊戲／換地圖時呼叫
   Object.assign(playerSprites, outfitSet(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`));
   for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = outfitSet(TYPES[type].sprite);
-  for (const profile of WANDERERS) wandererSprites[profile.id] = outfitSet(profile.sprite);
+  for (const profile of WANDERERS) wandererSprites[profile.id] = RANDOM_OUTFITS.includes(profile.id) ? randomOutfitSet(profile.sprite) : outfitSet(profile.sprite);
+}
+// 每次進地圖隨機穿 A 或 B（各 50%），名單在 data/balance.js 的 RANDOM_OUTFITS
+function randomOutfitSet(folder) {
+  const rec = outfitRecord(folder);
+  const base = String(folder).replace(/_[A-Z]$/, '');
+  for (const k of ['A', 'B']) if (!rec[k]) rec[k] = loadCharacterSprites(base + '_' + k);
+  return rec[Math.random() < 0.5 ? 'A' : 'B'];
 }
 applyOutfits();
 // 雷德：盾牌造型圖集（redB_*_Shield.png，近戰舉盾時用）＋新斧頭圖（fire_axe_01）
@@ -536,7 +543,10 @@ function enterPortal(pt) {
   const fromId = MAP.id;
   mapTransitioning = true;
   Object.keys(keys).forEach(key => { keys[key] = false; });
-  if (!pt.elevator) sfx('door');
+  if (!pt.elevator) {   // 上／下樓梯：腳步聲；其他出入口：開門聲
+    const stair = typeof stairPortalDir === 'function' ? stairPortalDir(pt) : null;
+    sfx(stair === 'down' ? 'stairsDown' : stair === 'up' ? 'stairsUp' : 'door');
+  }
   requestAnimationFrame(() => {
     mapTransition.classList.add('visible');
     setTimeout(() => {
@@ -1124,6 +1134,7 @@ function updatePlayer(dt) {
     standUp();
   }
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
+  if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
   if (stepActorKnock(p, dt, playerBlocked)) { p.moving = false; p.anim = 0; return; }   // 被鳥頭人撞飛：滑行中不能走（js/bird-head.js）
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
@@ -2008,7 +2019,8 @@ function update(dt) {
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
-  if (typeof updateFishHead === 'function') updateFishHead(dt);   // 魚頭君的水柱、地上的水（js/fish-head.js）
+  if (typeof updateFishHead === 'function') updateFishHead(dt);
+  if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）

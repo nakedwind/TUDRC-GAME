@@ -49,7 +49,8 @@ function validMonsterCatalog(list) {
     ...(monster.behavior === 'charger' ? { behavior: 'charger', charger: validChargerCfg(monster.charger) } : {}),   // 行為模式：charger＝鳥頭人的發呆／衝撞（js/bird-head.js）
     ...(monster.behavior === 'shooter' ? { behavior: 'shooter', shooter: validShooterCfg(monster.shooter) } : {}),   // shooter＝珍珠小童的飄浮／噴珍珠（js/pearl-kid.js）
     ...(monster.behavior === 'boomerang' ? { behavior: 'boomerang', boomerang: validBoomerangCfg(monster.boomerang) } : {}),
-    ...(monster.behavior === 'fishhead' ? { behavior: 'fishhead' } : {}),   // fishhead＝魚頭君：噴水、去滅火、留水漬（js/fish-head.js，數值在 FISH_HEAD）   // boomerang＝夯吉寶丟迴力鏢帽子（js/hangi-bao.js）
+    ...(monster.behavior === 'fishhead' ? { behavior: 'fishhead' } : {}),
+    ...(monster.behavior === 'vine' ? { behavior: 'vine' } : {}),   // vine＝絲瓜小姐：重踏放藤蔓纏人（js/loofah-lady.js，數值在 LOOFAH）   // fishhead＝魚頭君：噴水、去滅火、留水漬（js/fish-head.js，數值在 FISH_HEAD）   // boomerang＝夯吉寶丟迴力鏢帽子（js/hangi-bao.js）
     ...(validMonsterArt(monster.art) ? { art: validMonsterArt(monster.art) } : {}),   // 狀態圖（一般／眨眼／生氣、子彈），給 shooter 用
     // 專屬音效（js/sfx.js 裡的名稱）：hitSound 被打中、deathSound 死掉；沒填就用通用的
     ...(typeof monster.hitSound === 'string' && monster.hitSound ? { hitSound: monster.hitSound } : {}),

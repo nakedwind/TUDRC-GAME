@@ -30,6 +30,8 @@ const SFX = (() => {
     mrtGate: '設施/BB聲.mp3',                 // 捷運閘門刷好遊卡（js/mrt-locks.js）
     mrtUnlock: '設施/打磨.mp3',               // 用異質鑰匙解封捷運入口（js/mrt-locks.js）
     elevator: '環境/門與機關/電梯.mp3',
+    stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3',   // 走逃生樓梯下樓（js/game.js 的 enterPortal）
+    stairsUp: '環境/腳步/footsteps03 (mp3cut.net).mp3',     // 走逃生樓梯上樓（js/game.js 的 enterPortal）
     gunshot: '戰鬥/槍械/開槍.mp3',
     flare: '戰鬥/槍械/射擊.mp3',
     reload: '戰鬥/槍械/reload.mp3',
@@ -88,6 +90,12 @@ const SFX = (() => {
     fishHurt: '怪物/魚頭君/魚頭被打.mp3',
     fishDeath: ['怪物/魚頭君/魚頭死掉.mp3', '怪物/魚頭君/魚頭被打.mp3'],   // 死掉時被打的聲音一起播
     fishDouse: '環境/水滴聲.mp3',
+    // 絲瓜小姐：踩踏、藤蔓從地底冒出來、走路、被打、死掉（js/loofah-lady.js）
+    loofahStomp: '怪物/絲瓜小姐/絲瓜小姐踩踏.mp3',
+    loofahVine: '怪物/絲瓜小姐/絲瓜藤攻擊.mp3',
+    loofahStep: '怪物/絲瓜小姐/絲瓜小姐走路.mp3',
+    loofahHurt: '怪物/絲瓜小姐/絲瓜小姐被打.mp3',
+    loofahDeath: '怪物/絲瓜小姐/絲瓜小姐死掉.mp3',
     // 環境背景音：Y 區地圖一直循環播放（js/ambience.js）
     whiteNoise: '環境/白噪音.mp3',
     // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
@@ -107,7 +115,7 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'playerHit', 'playerHitMonster']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'playerHit', 'playerHitMonster']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）

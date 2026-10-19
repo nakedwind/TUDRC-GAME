@@ -410,7 +410,8 @@ function stepEnemy(e, dt) {
   if (e.behavior === 'charger') { stepChargerEnemy(e, dt); return; }   // 鳥頭人：發呆、散步、看到人就衝撞（js/bird-head.js）
   if (e.behavior === 'shooter') { stepShooterEnemy(e, dt); return; }   // 珍珠小童：飄浮、保持距離噴珍珠（js/pearl-kid.js）
   if (e.behavior === 'boomerang') { stepBoomerangEnemy(e, dt); return; }
-  if (e.behavior === 'fishhead') { stepFishHeadEnemy(e, dt); return; }   // 魚頭君：噴水、去滅火（js/fish-head.js）   // 夯吉寶：丟迴力鏢帽子（js/hangi-bao.js）
+  if (e.behavior === 'fishhead') { stepFishHeadEnemy(e, dt); return; }
+  if (e.behavior === 'vine') { stepVineEnemy(e, dt); return; }   // 絲瓜小姐：重踏、放藤蔓（js/loofah-lady.js）   // 魚頭君：噴水、去滅火（js/fish-head.js）   // 夯吉寶：丟迴力鏢帽子（js/hangi-bao.js）
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
   if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= (e.sweep ? sweepReach(e) : 30)) {

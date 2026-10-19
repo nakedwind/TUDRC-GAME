@@ -143,6 +143,7 @@ function drawTower(t) {
       ctx.translate(dx * off * 4, dy * off * 4);
     }
     seatRotate(t, size);   // 躺在橫放的床上：跟溫特一樣旋轉
+    if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, t);   // 被絲瓜藤纏住：扭動
     ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
     const redFlash = sentryRedFlash(t);   // 瀕臨暴走慢閃紅、暴走快閃紅
     const redSil = redFlash > 0.01 ? flashSprite(img, '#ff3b3b') : null;
@@ -231,6 +232,7 @@ function rigArmAngle(R, t) {
   return u < .25 ? lerp(a3, over, out(u / .25)) : lerp(over, rest, inOut((u - .25) / .75));
 }
 function monsterWalkFrame(e) {
+  if (e.forceFrame) return { file: e.forceFrame, flip: false };   // 指定的動作圖（例如絲瓜小姐抬腳）
   const f = e.frames;
   if (e.swing && f.attackRig) {   // 揮手攻擊（即時轉動手臂，比換圖流暢）
     const t = performance.now() / 1000 - e.swing.at, S = MONSTER_SWING, R = f.attackRig;
@@ -415,6 +417,7 @@ const BUBBLE_COLORS = {
   salem:   { bg: '#ddf0fb', bd: '#4f9cc9', tx: '#173f58' },   // 淺藍
   colyn:   { bg: '#fdebd2', bd: '#d98a2b', tx: '#5a3208' },   // 暖橘（配他的橘色眼睛）
   rowan:   { bg: '#e2f1dc', bd: '#5e9a52', tx: '#21401b' },   // 淡綠（配他的綠頭髮）
+  cael:    { bg: '#eceedd', bd: '#8f9a62', tx: '#3a4020' },   // 灰綠（配他的淺綠頭髮）
   avaren:  { bg: '#dce8fb', bd: '#3a5fa0', tx: '#1c3766' },   // 淺藍
   eldrin:  { bg: '#d8efe6', bd: '#2f8a68', tx: '#123f2e' },   // 青綠
   noah:    { bg: '#f3ecd9', bd: '#a89355', tx: '#4a3f1c' },   // 米黃
@@ -482,7 +485,12 @@ function stairArrowSpots() {
   return list;
 }
 function isStairPortal(portal) {
-  return stairArrowSpots().some(a => a.portals.some(p => p.c === portal.c && p.r === portal.r && p.to === portal.to));
+  return !!stairPortalDir(portal);
+}
+// 這個出入口是樓梯的話，回傳 'up'（上樓）或 'down'（下樓）；不是樓梯回傳 null
+function stairPortalDir(portal) {
+  const a = stairArrowSpots().find(a => a.portals.some(p => p.c === portal.c && p.r === portal.r && p.to === portal.to));
+  return a ? a.dir : null;
 }
 function drawStairArrows() {
   if (!G?.running) return;
@@ -578,6 +586,7 @@ function drawPlayer(p) {
       const k = (p.recoilT / 0.14) * 4;
       ctx.translate(-Math.cos(p.recoilAng || 0) * k, -Math.sin(p.recoilAng || 0) * k);
     }
+    if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, p);   // 被絲瓜藤纏住：掙扎扭動（js/loofah-lady.js）
     ctx.imageSmoothingEnabled = false;
     const hitK = p.hitT > 0 ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出
     if (p.sitting?.rotation) {
@@ -649,7 +658,8 @@ function draw() {
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
-  if (typeof drawFishWater === 'function') drawFishWater(ctx);   // 魚頭君留下的水漬、積水（js/fish-head.js）
+  if (typeof drawFishWater === 'function') drawFishWater(ctx);
+  if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
@@ -661,7 +671,8 @@ function draw() {
   if (typeof drawSpecialShots === 'function') drawSpecialShots(ctx);   // 飛行中的燃燒彈、麻醉針（js/special-guns.js）
   drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
   if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
-  if (typeof drawFishSprays === 'function') drawFishSprays(ctx);   // 魚頭君噴出的水柱（js/fish-head.js）
+  if (typeof drawFishSprays === 'function') drawFishSprays(ctx);
+  if (typeof drawLoofahVines === 'function') drawLoofahVines(ctx);   // 冒出地面、纏住人的絲瓜藤（js/loofah-lady.js）   // 魚頭君噴出的水柱（js/fish-head.js）
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
   drawBerserkFxWorld(ctx);     // 哨兵身上的黑紫霧、腳下心跳光圈、暴走台詞
 
