@@ -345,6 +345,7 @@ function loadTiles() {
   const backroomDoorWoodAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_door_wood', STORAGE_BACKROOM_DOOR_WOOD);
   const oilTankAdded = mergeDefaultAssetPack(t => t.id === 'tile_new_decor_oil_tank', STORAGE_OIL_TANK);
   const graffitiPensAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_interactive_pickup_graffiti_'), STORAGE_GRAFFITI_PENS);
+  const trainingRoomAdded = mergeDefaultAssetPack('tile_training_', 'tudrc_asset_pack_training_room_v1');   // 地下訓練室素材包
   const doorKeyAdded = mergeDefaultAssetPack(t => t.id === 'tile_interactive_pickup_backroom_door_key', 'tudrc_asset_pack_door_key_v1');   // 地上撿的後室門鑰匙（js/doors.js）
   const backroomCorePillarsAdded = mergeDefaultAssetPack(t => BACKROOM_CORE_PILLAR_IDS.has(t.id), STORAGE_BACKROOM_CORE_PILLARS, true);
   let restaurantChairsFixed = false;
@@ -361,7 +362,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded) saveTiles();
+  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -663,6 +664,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/池核',
   'images/指揮部',
   'images/研究部',
+  'images/地下訓練室',
 ];
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -1462,6 +1464,7 @@ const PALETTE_CATEGORIES = [
   { id: 'poolcore', name: '池核' },
   { id: 'hq', name: '指揮部' },
   { id: 'research', name: '研究部' },
+  { id: 'training', name: '地下訓練室' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -1473,6 +1476,7 @@ function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_poolcore_') || file.includes('/池核/')) return 'poolcore';
   if (String(t.id || '').startsWith('tile_hq_') || file.includes('/指揮部/')) return 'hq';
   if (String(t.id || '').startsWith('tile_research_lab_') || file.includes('/研究部/')) return 'research';
+  if (String(t.id || '').startsWith('tile_training_') || file.includes('/地下訓練室/')) return 'training';
   if (file.includes('/應變中心/')) return 'eoc';
   if (file.includes('/宿舍/')) return 'dorm';
   if (file.includes('/破損建築/')) return 'damaged';
@@ -2125,18 +2129,6 @@ document.getElementById('fillAll').addEventListener('click', () => {
   const m = curMap();
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) m.layers[activeLayer][c + ',' + r] = brush.tile;
   saveMaps(); draw(); setStatus('已用「' + t.name + '」填滿「' + layerName(activeLayer) + '」', '#7ee0c0');
-});
-
-// ================= 檢查核心候選位置 =================
-document.getElementById('checkPath').addEventListener('click', () => {
-  const m = curMap();
-  const valid = m.coreSpots.filter(key => {
-    const [c, r] = key.split(',').map(Number);
-    return inGrid(c, r) && !m.solid.includes(key) && !m.breakable.includes(key);
-  });
-  if (m.safe) setStatus('這是安全區域，不會生成異質核心', '#ffd24a');
-  else if (valid.length < m.coreCount) setStatus('⚠ 目前只有 ' + valid.length + ' 個可用候選點，請至少標記 ' + m.coreCount + ' 個', '#ffd24a');
-  else setStatus('✓ ' + valid.length + ' 個可用候選點，每局隨機抽取 ' + m.coreCount + ' 個', '#7ee0c0');
 });
 
 // 格線開關

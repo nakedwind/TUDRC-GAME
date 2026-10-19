@@ -4,24 +4,35 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 地圖編輯器</title>
-<link rel="stylesheet" href="css/map-editor.css?v=rclick-20261020">   <!-- 地圖編輯器自己的樣式（基地編輯器是 css/base-editor.css） -->
+<link rel="stylesheet" href="css/map-editor.css?v=topbar-20261020">   <!-- 地圖編輯器自己的樣式（基地編輯器是 css/base-editor.css） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 </head>
 <body>
-  <h1>🗺️ 地圖編輯器（戰鬥地圖）　<a class="backlink" href="塔防原型.html">← 回遊戲</a>　<a class="backlink" href="基地編輯器.html">🏠 基地編輯器</a>　<a class="backlink" href="怪物編輯器.html">🐾 怪物編輯器</a>　<a class="backlink" href="椅子編輯器.html">🪑 椅子編輯器</a></h1>
-
-  <div class="layout">
-    <!-- 左邊：地圖選擇 + 畫布 + 工具 -->
-    <div class="left">
+  <!-- 上方工具列：永遠固定在視窗最上面（地圖很大、捲到下面編輯時也點得到） -->
+  <div id="topbar">
+    <h1>🗺️ 地圖編輯器（戰鬥地圖）　<a class="backlink" href="塔防原型.html">← 回遊戲</a>　<a class="backlink" href="基地編輯器.html">🏠 基地編輯器</a>　<a class="backlink" href="怪物編輯器.html">🐾 怪物編輯器</a>　<a class="backlink" href="椅子編輯器.html">🪑 椅子編輯器</a></h1>
       <div id="mapbar">
         <span>目前地圖：</span>
         <select id="mapSelect"></select>
+        <button class="btn" id="previewGame" title="用目前編輯中的地圖開遊戲畫面（不用先匯出）">▶ 預覽遊戲</button>
         <button class="btn" id="newMap">＋ 新增</button>
         <button class="btn" id="dupMap">⧉ 複製</button>
         <button class="btn" id="renameMap">✎ 改名</button>
         <button class="btn danger" id="delMap">🗑 刪除</button>
+        <span class="sep"></span>
+        <button class="btn" id="undoBtn" hidden style="display:none">↶ 回復 (Ctrl+Z)</button>
+        <button class="btn" id="gridToggle">🔳 格線：開</button>
+        <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透紅格與怪物出生區綠格（不影響設定）">🧱 紅綠格：開</button>
+        <details class="tool-more">
+          <summary class="btn">⋯ 更多</summary>
+          <div class="tool-more-menu">
+            <button class="btn" id="addTile">＋ 加入磚塊（圖片）</button>
+            <button class="btn" id="addColorBlock">■ 新增色塊</button>
+            <button class="btn" id="fillAll">🪣 用目前的磚塊填滿整張</button>
+            <button class="btn danger" id="clearLayout">🗑 全部清空</button>
+          </div>
+        </details>
       </div>
-
       <div id="tools" class="toolrow">
         <span class="tool-label">🖌️ 工具</span>
         <button class="tool" data-mode="select">👆 選取</button>
@@ -36,26 +47,14 @@
         <button class="btn" id="flipX" title="左右翻筆刷（快捷鍵 F）">⇄ 左右翻</button>
         <button class="btn" id="flipY" title="上下翻筆刷（快捷鍵 V）">⇅ 上下翻</button>
         <button class="btn" id="rotateBrush" title="旋轉筆刷 90 度（快捷鍵 R）">↻ 旋轉</button>
-      </div>
-      <div id="tools2" class="toolrow">
-        <span class="tool-label">⚙️ 地圖</span>
-        <button class="btn" id="undoBtn" hidden style="display:none">↶ 回復 (Ctrl+Z)</button>
-        <button class="btn" id="previewGame" title="用目前編輯中的地圖開遊戲畫面（不用先匯出）">▶ 預覽遊戲</button>
-        <button class="btn" id="gridToggle">🔳 格線：開</button>
-        <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透紅格與怪物出生區綠格（不影響設定）">🧱 紅綠格：開</button>
-        <button class="btn" id="checkPath">🔍 檢查核心</button>
-        <details class="tool-more">
-          <summary class="btn">⋯ 更多</summary>
-          <div class="tool-more-menu">
-            <button class="btn" id="addTile">＋ 加入磚塊（圖片）</button>
-            <button class="btn" id="addColorBlock">■ 新增色塊</button>
-            <button class="btn" id="fillAll">🪣 用目前的磚塊填滿整張</button>
-            <button class="btn danger" id="clearLayout">🗑 全部清空</button>
-          </div>
-        </details>
         <span class="toolrow-gap"></span>
         <button class="btn primary" id="saveProject" title="直接寫進遊戲資料夾的 data/（Ctrl+S）">💾 存到專案</button>
       </div>
+  </div>
+
+  <div class="layout">
+    <!-- 左邊：畫布 + 選取物件 -->
+    <div class="left">
       <input type="file" id="tileFile" accept="image/*" style="display:none">
 
       <div id="colorBlockPanel" class="color-block-panel hidden">
@@ -193,7 +192,7 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=loofah2-20261019"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=loofah-20261019"></script>
-  <script src="data/tiles.js?v=sharedtiles-20261020"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/tiles.js?v=training-20261020"></script>        <!-- 素材庫（兩個編輯器共用） -->
   <script src="data/maps.js?v=sharedtiles-20261020"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
   <script src="data/supplies.js"></script>
   <script src="data/items.js?v=doors4-20261018"></script>
@@ -203,6 +202,6 @@
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/map-editor-store.js?v=sharedtiles-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/map-editor.js?v=pickcancel-20261020", "js/map-editor-save.js?v=sharedtiles-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/map-editor.js?v=topbar-20261020", "js/map-editor-save.js?v=sharedtiles-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>

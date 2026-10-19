@@ -3776,5 +3776,62 @@ const SHARED_TILES = [
     "file": "images/指揮部/hq-floor_M.png",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_training_terminal",
+    "name": "訓練終端機",
+    "role": "floor",
+    "file": "images/地下訓練室/training-terminal.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_training_gun_table",
+    "name": "槍械展示桌",
+    "role": "floor",
+    "file": "images/地下訓練室/training-gun-table.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_training_table",
+    "name": "訓練桌",
+    "role": "floor",
+    "file": "images/地下訓練室/training-table.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_training_shooting_lane",
+    "name": "射擊靶道",
+    "role": "floor",
+    "file": "images/地下訓練室/training-shooting-lane.png",
+    "w": 3,
+    "h": 8
+  },
+  {
+    "id": "tile_training_hazard_frame",
+    "name": "訓練區警示框線",
+    "role": "floor",
+    "file": "images/地下訓練室/training-hazard-frame.png",
+    "w": 12,
+    "h": 11,
+    "flat": true
+  },
+  {
+    "id": "tile_mvfogen9",
+    "name": "containment-glass-door02",
+    "role": "floor",
+    "file": "images/地下訓練室/containment-glass-door02.png",
+    "w": 12,
+    "h": 3
+  },
+  {
+    "id": "tile_mvfonrdd",
+    "name": "containment-glass-door03",
+    "role": "floor",
+    "file": "images/地下訓練室/containment-glass-door03.png",
+    "w": 2,
+    "h": 3
   }
 ];

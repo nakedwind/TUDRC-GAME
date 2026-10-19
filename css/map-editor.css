@@ -13,6 +13,9 @@ a.backlink { color: #8fd3ff; font-size: 13px; text-decoration: none; }
 .left { flex: 1 1 720px; min-width: 0; }
 .right { flex: 0 0 300px; min-width: 260px; }
 
+/* 上方工具列（標題＋地圖列＋工具列）：永遠固定在視窗最上面 */
+#topbar { position: sticky; top: 0; z-index: 50; margin: -12px -12px 8px; padding: 12px 12px 2px; background: #14171c; box-shadow: 0 6px 12px -8px rgba(0,0,0,.6); }
+#mapbar .sep { width: 1px; align-self: stretch; background: #3a4553; margin: 2px 6px; }
 /* 上方：地圖選擇列 */
 #mapbar {
   display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
