@@ -35,9 +35,9 @@
       </div>
       <div id="tools" class="toolrow">
         <span class="tool-label">🖌️ 工具</span>
-        <button class="tool" data-mode="select">👆 選取</button>
-        <button class="tool" data-mode="erase">🧽 清除</button>
-        <button class="tool" data-mode="pick">💧 吸管</button>
+        <button class="tool" data-mode="select" title="快捷鍵 Q">👆 選取</button>
+        <button class="tool" data-mode="erase" title="快捷鍵 E">🧽 清除</button>
+        <button class="tool" data-mode="pick" title="快捷鍵 I（按住 Alt＝臨時吸管）">💧 吸管</button>
         <button class="tool" data-mode="solid">🧱 不可穿透</button>
         <button class="tool" data-mode="solidnudge">🎯 碰撞微調</button>
         <button class="tool" data-mode="portal">🚪 出入口</button>
@@ -45,7 +45,7 @@
         <button class="tool" data-mode="spawn" title="畫上後，這張地圖的怪物只會從這些格子出生（拖曳可以一次畫一片；再畫一次＝擦掉）">👾 怪物出生區</button>
         <span class="sep"></span>
         <button class="btn" id="flipX" title="左右翻筆刷（快捷鍵 F）">⇄ 左右翻</button>
-        <button class="btn" id="flipY" title="上下翻筆刷（快捷鍵 V）">⇅ 上下翻</button>
+        <button class="btn" id="flipY" title="上下翻筆刷">⇅ 上下翻</button>
         <button class="btn" id="rotateBrush" title="旋轉筆刷 90 度（快捷鍵 R）">↻ 旋轉</button>
         <span class="toolrow-gap"></span>
         <button class="btn primary" id="saveProject" title="直接寫進遊戲資料夾的 data/（Ctrl+S）">💾 存到專案</button>
@@ -202,6 +202,6 @@
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/map-editor-store.js?v=sharedtiles-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/map-editor.js?v=topbar-20261020", "js/map-editor-save.js?v=sharedtiles-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/map-editor.js?v=toolkeys2-20261020", "js/map-editor-save.js?v=sharedtiles-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>

@@ -561,7 +561,13 @@ window.addEventListener('keydown', e => {
   if ((e.ctrlKey || e.metaKey) && !inField && ((e.key.toLowerCase() === 'y') || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); redo(); return; }
   if (e.key === 'Delete' && !inField && selections.length) { e.preventDefault(); deleteSelection(); }
   if (!inField && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); flipAction('x'); }
-  if (!inField && (e.key === 'v' || e.key === 'V')) { e.preventDefault(); flipAction('y'); }
+  // 工具快捷鍵：Q＝選取、E＝清除、I＝吸管（上下翻沒有快捷鍵，請點按鈕）
+  const toolKey = { q: 'select', e: 'erase', i: 'pick' }[String(e.key).toLowerCase()];
+  if (!inField && toolKey && !e.ctrlKey && !e.metaKey && !e.altKey && !tempTool) {
+    e.preventDefault();
+    const btn = document.querySelector('.tool[data-mode="' + toolKey + '"]'); if (btn) btn.click();
+    return;
+  }
   if (!inField && (e.key === 'r' || e.key === 'R')) { e.preventDefault(); rotateAction(); }
   // 方向鍵：微調選取物件的位置（不貼齊格線；按住 Shift 一次移多一點）
   // 1×1 小圖原本存成「格子」，格子只有格座標、沒有像素位移 → 第一次微調時先轉成 1×1 大圖。
@@ -2018,7 +2024,7 @@ function flipSelection(axis) {
   saveMaps(); draw(); refreshSelPanel();
   setStatus('已' + (axis === 'x' ? '左右' : '上下') + '翻轉 ' + selections.length + ' 個圖片', '#7ee0c0');
 }
-// F / V 快捷鍵：有選取物件就翻選取，否則翻筆刷
+// F 快捷鍵（左右翻）：有選取物件就翻選取，否則翻筆刷
 function flipAction(axis) { if (selections.length) flipSelection(axis); else toggleBrushFlip(axis); }
 document.getElementById('flipX').addEventListener('click', () => toggleBrushFlip('x'));
 document.getElementById('flipY').addEventListener('click', () => toggleBrushFlip('y'));
