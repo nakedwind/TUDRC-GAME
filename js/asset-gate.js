@@ -31,6 +31,13 @@ const AssetGate = (() => {
     img.addEventListener('load', done, { once: true });
     img.addEventListener('error', done, { once: true });
   }
+  // 圖片以外要等的東西（例如音效）：傳一個 Promise，成功或失敗都算好了
+  function wait(promise) {
+    const token = {};
+    if (!pending.size) batchStart = performance.now();
+    pending.set(token, performance.now()); batchTotal++;
+    Promise.resolve(promise).then(() => finish(token), () => finish(token));
+  }
   // 攔截所有圖片的 src 設定（new Image() 或 <img> 都算）
   const desc = Object.getOwnPropertyDescriptor(HTMLImageElement.prototype, 'src');
   if (desc && desc.set) {
@@ -44,7 +51,7 @@ const AssetGate = (() => {
     el = document.createElement('div');
     el.id = 'assetGate';
     el.innerHTML = '<div class="ag-box"><div class="ag-title">載入中…</div><div class="ag-bar"><i></i></div>'
-      + '<div class="ag-text"></div><div class="ag-note">第一次開啟要下載遊戲圖片，網路比較慢時需要等一下。</div>'
+      + '<div class="ag-text"></div><div class="ag-note">第一次開啟要下載遊戲圖片和音效，網路比較慢時需要等一下。</div>'
       + '<button type="button" class="ag-skip" hidden>先開始遊戲</button></div>';
     const css = document.createElement('style');
     css.textContent = `
@@ -77,7 +84,7 @@ const AssetGate = (() => {
     if (!show) return;
     const pct = batchTotal ? Math.round(batchDone / batchTotal * 100) : 0;
     barEl.style.width = pct + '%';
-    textEl.textContent = `圖片 ${batchDone} / ${batchTotal}（${pct}%）`;
+    textEl.textContent = `圖片、音效 ${batchDone} / ${batchTotal}（${pct}%）`;
     skipBtn.hidden = performance.now() - batchStart < SKIP_AFTER * 1000;
   }
   setInterval(refresh, 150);   // 遊戲主迴圈還沒開始時也要更新進度
@@ -85,6 +92,7 @@ const AssetGate = (() => {
   return {
     blocking,      // true＝還在等圖片：遊戲先暫停
     refresh,
+    wait,          // 等一個 Promise 完成（音效下載＋解碼，js/sfx.js）
     quiet(fn) { quietDepth++; try { return fn(); } finally { quietDepth--; } },   // 這裡面建立的圖片不追蹤（背景下載）
     whenIdle(fn) { if (!pending.size) fn(); else idleWaiters.push(fn); },        // 目前這批圖片都好了再做
     get pendingCount() { return pending.size; },

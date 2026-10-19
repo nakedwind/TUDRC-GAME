@@ -176,11 +176,12 @@ const SFX = (() => {
     createContext();
     if (!ctx) return;
     for (const [name, value] of Object.entries(files)) fileLayers(value).forEach((file, index) => {
-      fetch('Sound effects/' + file.split('/').map(encodeURIComponent).join('/'))
+      const job = fetch('Sound effects/' + file.split('/').map(encodeURIComponent).join('/'))
         .then(r => { if (!r.ok) throw new Error(r.status); return r.arrayBuffer(); })
         .then(data => new Promise((ok, fail) => ctx.decodeAudioData(data, ok, fail)))
         .then(buffer => { buffers[name + ':' + index] = buffer; })
         .catch(() => {});
+      if (typeof AssetGate !== 'undefined') AssetGate.wait(job);   // 音效全部下載、解碼完才開始玩（載入畫面在 js/asset-gate.js）
     });
   }
   // 瀏覽器規定玩家第一次點擊或按鍵後才能出聲，那時順便喚醒音效引擎

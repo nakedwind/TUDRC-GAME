@@ -157,7 +157,7 @@ function dropShard(x, y, value) {
 function pistolHitOre(o, dmg) {
   if (!o || !o.ore || o.hp <= 0 || !G.obstacles.includes(o)) return;
   const need = ORE_PISTOL[o.type] ?? ORE_PISTOL.default, c = oreCenter(o);
-  o.gunDmg = (o.gunDmg || 0) + dmg; o.hitT = HIT_DUR * .7;
+  o.gunDmg = (o.gunDmg || 0) + dmg; o.hitT = HIT_DUR * .7; o.gunFlashAt = performance.now();   // 閃白（js/render.js 的 drawObstacle）
   if (o.gunDmg >= need) breakOre(o, G.player.x, G.player.y, '');   // 不跳文字提示
   else if (typeof sfxAt === 'function') sfxAt('knock2', c.x, c.y, .45, 'ore-hit');
 }

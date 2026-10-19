@@ -8,6 +8,7 @@
 */
 // ---- 各種角色/物件的畫法（拆成函式，方便深度排序時逐一呼叫）----
 const HIT_DUR = 0.3;   // 建築被攻擊時「閃紅＋震動」持續秒數
+const ORE_GUN_FLASH = { ms: 120, alpha: .65 };   // 手槍打異質礦的閃白：持續毫秒、最亮多少
 function drawObstacle(o) {
   const w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
   // 受擊震動：依剩餘 hitT 隨機抖動，越接近結束越小
@@ -33,7 +34,23 @@ function drawObstacle(o) {
     else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
   }
   if (o.ore && typeof drawOreGlow === 'function') drawOreGlow(ctx, o, x, y, w, h);   // 被照亮時結晶發出紫光（js/ore.js）
-  if (hit) {   // 閃紅：半透明紅疊在圖上
+  // 手槍打中異質礦：礦石的形狀閃一下白（ORE_GUN_FLASH 毫秒內淡掉）
+  const gunFlash = o.ore && o.gunFlashAt ? 1 - (performance.now() - o.gunFlashAt) / ORE_GUN_FLASH.ms : 0;
+  if (gunFlash > 0 && typeof flashSprite === 'function') {
+    // mapSource：格子素材是 "圖層:c,r" 字串，圖章素材是圖章物件
+    const s = o.mapSource && typeof o.mapSource === 'object' ? o.mapSource : null;
+    const t = o.mapTileId ? mapTileById(o.mapTileId) : null, im = t ? tileImage(t) : img;
+    const sil = im && im.complete !== false && (im.naturalWidth || im.width) ? flashSprite(im, '#ffffff') : null;
+    if (sil) {
+      const sx = s ? OX + s.c * CELL + (s.ox || 0) + shX : x, sy = s ? OY + s.r * CELL + (s.oy || 0) + shY : y;
+      const sw = s ? mapStampW(s, t) * CELL : t ? CELL : w, sh = s ? mapStampH(s, t) * CELL : t ? CELL : h;   // 格子素材固定畫一格大
+      ctx.save(); ctx.globalAlpha = ORE_GUN_FLASH.alpha * gunFlash; ctx.imageSmoothingEnabled = false;
+      if (s && (s.fx || s.fy)) { ctx.translate(sx + sw / 2, sy + sh / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(sil, -sw / 2, -sh / 2, sw, sh); }
+      else ctx.drawImage(sil, sx, sy, sw, sh);
+      ctx.restore();
+    }
+  }
+  if (hit && !(gunFlash > 0)) {   // 閃紅：半透明紅疊在圖上
     ctx.globalAlpha = (o.ore ? .35 : .55) * hit; ctx.fillStyle = o.ore ? '#e6c8ff' : '#ff3030';   // 採礦敲擊：淡紫光（不是受傷的紅）
     if (o.isBase) {
       ctx.lineWidth = 6; ctx.strokeStyle = '#ff3030'; ctx.strokeRect(x + 3, y + 3, w - 6, h - 6);

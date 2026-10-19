@@ -6867,7 +6867,7 @@ const MAPS_DEFAULT = [
         "id": "tile_mrt_stairs_light",
         "c": 25,
         "r": 27,
-        "layer": "object",
+        "layer": "ground",
         "ox": 0,
         "oy": 6,
         "sortDepth": 0
@@ -11362,7 +11362,7 @@ const MAPS_DEFAULT = [
       },
       {
         "id": "loofah_lady",
-        "weight": 30
+        "weight": 100
       }
     ],
     "spawnZone": [
@@ -20285,8 +20285,7 @@ const MAPS_DEFAULT = [
         "r": 2,
         "layer": "object3",
         "ox": 136,
-        "oy": 12,
-        "sortDepth": 0.25
+        "oy": 12
       },
       {
         "id": "tile_eoc_pen_holder",
@@ -20294,8 +20293,7 @@ const MAPS_DEFAULT = [
         "r": 3,
         "layer": "object3",
         "ox": 156,
-        "oy": -28,
-        "sortDepth": 0.5
+        "oy": -28
       },
       {
         "id": "tile_restaurant_water_dispenser_01",
@@ -22157,11 +22155,7 @@ const MAPS_DEFAULT = [
     },
     "coreSpots": [],
     "coreCount": 1,
-    "spawnZone": [],
-    "playerSpawn": [
-      6,
-      11
-    ]
+    "spawnZone": []
   },
   {
     "id": "map_musbsgj3",
@@ -22933,8 +22927,7 @@ const MAPS_DEFAULT = [
         "r": 18,
         "layer": "object",
         "ox": -12,
-        "oy": -22,
-        "sortDepth": 0.75
+        "oy": -22
       },
       {
         "id": "tile_restaurant_trash_bin_small",
@@ -23874,11 +23867,7 @@ const MAPS_DEFAULT = [
     ],
     "cols": 27,
     "rows": 24,
-    "spawnZone": [],
-    "playerSpawn": [
-      20,
-      8
-    ]
+    "spawnZone": []
   },
   {
     "id": "map_muspgfxl",
@@ -30443,6 +30432,581 @@ const MAPS_DEFAULT = [
         "r": 7,
         "layer": "top",
         "rot": 1,
+        "ox": 10,
+        "oy": 12,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mu4yzgcg",
+        "c": 7,
+        "r": 4,
+        "layer": "top",
+        "ox": 10,
+        "oy": 0,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_new_decor_box_three",
+        "c": 6,
+        "r": 3,
+        "layer": "overlay",
+        "ox": 14,
+        "oy": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_mu4yyr9r",
+        "c": 6,
+        "r": 5,
+        "layer": "object",
+        "ox": 12,
+        "oy": 8
+      },
+      {
+        "id": "tile_eoc_door",
+        "c": 5,
+        "r": 8,
+        "layer": "top",
+        "ox": -16,
+        "oy": 0
+      },
+      {
+        "id": "tile_eoc_plant_small_02",
+        "c": 6,
+        "r": 6,
+        "layer": "top",
+        "ox": 4,
+        "oy": 2
+      },
+      {
+        "id": "tile_eoc_sofa_side",
+        "c": 7,
+        "r": 7,
+        "layer": "overlay",
+        "fx": true,
+        "ox": 10,
+        "oy": 0,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_interactive_flare_ammo",
+        "c": 7,
+        "r": 4,
+        "layer": "top",
+        "ox": 8,
+        "oy": 26,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_hq_poster",
+        "c": 3,
+        "r": 2,
+        "layer": "top",
+        "ox": 10,
+        "oy": -10
+      }
+    ],
+    "solid": [
+      "2,3",
+      "2,4",
+      "2,5",
+      "2,6",
+      "2,7",
+      "2,2",
+      "8,3",
+      "8,7",
+      "8,6",
+      "8,4",
+      "8,5",
+      "8,8",
+      "8,9",
+      "2,8",
+      "3,3",
+      "4,3",
+      "3,4",
+      "3,5",
+      "4,4",
+      "4,5",
+      "7,3",
+      "7,2",
+      "6,3",
+      "5,3",
+      "7,4",
+      "7,5",
+      "6,4",
+      "7,6",
+      "7,7",
+      "6,7",
+      "6,6",
+      "3,7",
+      "3,8",
+      "7,8",
+      "7,9",
+      "3,9",
+      "2,9"
+    ],
+    "breakable": [],
+    "camp": [],
+    "rules": {
+      "money": 150,
+      "guide": 100,
+      "guideRegen": 9,
+      "speed": 44,
+      "reward": 8
+    },
+    "solidOffsets": {
+      "4,3": [
+        -7,
+        0
+      ],
+      "4,4": [
+        -7,
+        0
+      ],
+      "4,5": [
+        -7,
+        -9
+      ],
+      "3,5": [
+        0,
+        -9
+      ],
+      "7,4": [
+        7,
+        0
+      ],
+      "7,5": [
+        7,
+        0
+      ],
+      "6,4": [
+        5,
+        -16
+      ],
+      "6,6": [
+        12,
+        -5
+      ],
+      "7,8": [
+        7,
+        0
+      ],
+      "7,9": [
+        7,
+        0
+      ]
+    },
+    "safe": true,
+    "npcs": false,
+    "portals": [
+      {
+        "c": 5,
+        "r": 9,
+        "to": "map_mufyx9gj"
+      }
+    ],
+    "cols": 12,
+    "rows": 10,
+    "coreSpots": [],
+    "coreCount": 1,
+    "spawnZone": []
+  },
+  {
+    "id": "map_mve6w8og",
+    "name": "塔住這裡",
+    "desc": "",
+    "layers": {
+      "floor": {
+        "4,2": "tile_new_bg_floor",
+        "5,3": "tile_new_bg_floor",
+        "6,4": "tile_new_bg_floor",
+        "7,4": "tile_new_bg_floor",
+        "8,4": "tile_new_bg_floor",
+        "8,2": "tile_new_bg_floor",
+        "6,2": "tile_new_bg_floor",
+        "4,3": "tile_new_bg_floor",
+        "3,3": "tile_new_bg_floor",
+        "3,4": "tile_new_bg_floor",
+        "2,5": "tile_new_bg_floor",
+        "3,5": "tile_new_bg_floor",
+        "3,6": "tile_new_bg_floor",
+        "4,6": "tile_new_bg_floor",
+        "6,6": "tile_new_bg_floor",
+        "8,6": "tile_new_bg_floor",
+        "6,5": "tile_new_bg_floor",
+        "7,5": "tile_new_bg_floor",
+        "8,5": "tile_new_bg_floor",
+        "7,3": "tile_new_bg_floor",
+        "8,3": "tile_new_bg_floor",
+        "6,1": "tile_new_bg_floor",
+        "7,1": "tile_new_bg_floor",
+        "8,1": "tile_new_bg_floor",
+        "5,1": "tile_new_bg_floor",
+        "4,1": "tile_new_bg_floor",
+        "7,2": "tile_new_bg_floor",
+        "6,3": "tile_new_bg_floor",
+        "2,2": "tile_new_bg_floor",
+        "2,3": "tile_new_bg_floor",
+        "2,4": "tile_new_bg_floor",
+        "2,6": "tile_new_bg_floor",
+        "2,7": "tile_new_bg_floor",
+        "2,8": "tile_new_bg_floor",
+        "2,9": "tile_new_bg_floor",
+        "3,2": "tile_new_bg_floor",
+        "3,7": "tile_new_bg_floor",
+        "3,8": "tile_new_bg_floor",
+        "3,9": "tile_new_bg_floor",
+        "4,4": "tile_new_bg_floor",
+        "4,5": "tile_new_bg_floor",
+        "4,7": "tile_new_bg_floor",
+        "4,8": "tile_new_bg_floor",
+        "4,9": "tile_new_bg_floor",
+        "5,2": "tile_new_bg_floor",
+        "5,4": "tile_new_bg_floor",
+        "5,5": "tile_new_bg_floor",
+        "5,6": "tile_new_bg_floor",
+        "5,7": "tile_new_bg_floor",
+        "5,8": "tile_new_bg_floor",
+        "5,9": "tile_new_bg_floor",
+        "6,7": "tile_new_bg_floor",
+        "6,8": "tile_new_bg_floor",
+        "6,9": "tile_new_bg_floor",
+        "7,6": "tile_new_bg_floor",
+        "7,7": "tile_new_bg_floor",
+        "7,8": "tile_new_bg_floor",
+        "7,9": "tile_new_bg_floor",
+        "8,7": "tile_new_bg_floor",
+        "8,8": "tile_new_bg_floor",
+        "8,9": "tile_new_bg_floor"
+      },
+      "ground": {},
+      "ground2": {},
+      "ground3": {},
+      "object": {},
+      "object2": {
+        "2,2": "tile_new_bg_wall_front_edge",
+        "2,3": "tile_new_bg_wall_front_edge",
+        "2,4": "tile_new_bg_wall_front_edge",
+        "2,5": "tile_new_bg_wall_front_edge",
+        "2,7": "tile_new_bg_wall_front_edge",
+        "2,8": "tile_new_bg_wall_front_edge",
+        "2,1": "tile_new_bg_wall_front_edge",
+        "8,1": "tile_new_bg_wall_front_edge",
+        "8,2": "tile_new_bg_wall_front_edge",
+        "8,3": "tile_new_bg_wall_front_edge",
+        "8,4": "tile_new_bg_wall_front_edge",
+        "8,5": "tile_new_bg_wall_front_edge",
+        "8,6": "tile_new_bg_wall_front_edge",
+        "8,7": "tile_new_bg_wall_front_edge",
+        "8,8": "tile_new_bg_wall_front_edge",
+        "8,9": "tile_new_bg_wall_front_edge",
+        "2,6": "tile_new_bg_wall_front_edge",
+        "2,9": "tile_new_bg_wall_front_edge"
+      },
+      "object3": {},
+      "object4": {
+        "3,7": "tile_eoc_plant_small_01"
+      },
+      "overlay": {},
+      "top": {}
+    },
+    "stamps": [
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 2,
+        "r": 0,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 8,
+        "r": 0,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 2,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 3,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 4,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 5,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 6,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 7,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 8,
+        "r": 0,
+        "layer": "ground2"
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 1,
+        "r": 4,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 1,
+        "r": 8,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 9,
+        "r": 8,
+        "layer": "ground",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "tile_dorm_air_conditioner",
+        "c": 3,
+        "r": 1,
+        "layer": "ground3",
+        "ox": 6,
+        "oy": -12
+      },
+      {
+        "id": "color_mu8nxukw",
+        "c": 9,
+        "r": 4,
+        "layer": "object2",
+        "ox": -10,
+        "oy": 0
+      },
+      {
+        "id": "tile_dorm_window_blinds_narrow",
+        "c": 4,
+        "r": 1,
+        "layer": "ground3",
+        "ox": 22,
+        "oy": -6
+      },
+      {
+        "id": "tile_eoc_book_stack",
+        "c": 5,
+        "r": 2,
+        "layer": "overlay",
+        "ox": 2,
+        "oy": 18,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_new_decor_plant01",
+        "c": 4,
+        "r": 2,
+        "layer": "overlay",
+        "ox": 18,
+        "oy": -26,
+        "fx": false,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_muu4p4el",
+        "c": 6,
+        "r": 1,
+        "layer": "object2",
+        "ox": 8,
+        "oy": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_dorm_bed_vertical",
+        "c": 3,
+        "r": 2,
+        "layer": "ground3",
+        "ox": 2,
+        "oy": 0
+      },
+      {
+        "id": "tile_dorm_desk",
+        "c": 4,
+        "r": 3,
+        "layer": "object2",
+        "ox": 22,
+        "oy": -18,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_dorm_chair_blue",
+        "c": 5,
+        "r": 3,
+        "layer": "object3",
+        "ox": 2,
+        "oy": 2
+      },
+      {
+        "id": "tile_dorm_binder_set",
+        "c": 6,
+        "r": 3,
+        "layer": "overlay",
+        "ox": -16,
+        "oy": -24,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_hospital_privacy_curtain_bottom_half",
+        "c": 3,
+        "r": 1,
+        "layer": "object",
+        "fx": true,
+        "ox": -6,
+        "oy": -12
+      },
+      {
+        "id": "tile_prop_work_table",
+        "c": 3,
+        "r": 7,
+        "layer": "object3",
+        "ox": -20,
+        "oy": -32,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_new_decor_coffee_cup",
+        "c": 5,
+        "r": 3,
+        "layer": "top",
+        "ox": -16,
+        "oy": 0,
+        "fx": true,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_counseling_tissue_box",
+        "c": 3,
+        "r": 6,
+        "layer": "object3",
+        "fx": true,
+        "ox": -18,
+        "oy": 16,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_eoc_tissue_box",
+        "c": 2,
+        "r": 6,
+        "layer": "object3",
+        "fx": false,
+        "fy": false,
+        "rot": 0,
+        "ox": 24,
+        "oy": 20,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_new_decor_chair_side",
+        "c": 4,
+        "r": 7,
+        "layer": "object2",
+        "ox": 6,
+        "oy": 6
+      },
+      {
+        "id": "tile_eoc_pen_holder",
+        "c": 3,
+        "r": 7,
+        "layer": "object4",
+        "ox": -20,
+        "oy": 14
+      },
+      {
+        "id": "tile_eoc_plant_small_01",
+        "c": 3,
+        "r": 7,
+        "layer": "top",
+        "ox": -20,
+        "oy": -6
+      },
+      {
+        "id": "tile_eoc_binder_row",
+        "c": 7,
+        "r": 2,
+        "layer": "overlay",
+        "ox": -6,
+        "oy": -24,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_eoc_binder_cabinet",
+        "c": 6,
+        "r": 5,
+        "layer": "overlay",
+        "ox": 22,
+        "oy": 6
+      },
+      {
+        "id": "tile_eoc_floor_lamp",
+        "c": 3,
+        "r": 8,
+        "layer": "top",
+        "ox": -8,
+        "oy": -4,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_eoc_pen",
+        "c": 5,
+        "r": 3,
+        "layer": "top",
+        "ox": 6,
+        "oy": -14,
+        "fx": true,
+        "sortDepth": 0
+      },
+      {
+        "id": "tile_eoc_drawer_unit",
+        "c": 6,
+        "r": 6,
+        "layer": "overlay",
+        "ox": -2,
+        "oy": 2
+      },
+      {
+        "id": "tile_dorm_desk_lamp",
+        "c": 4,
+        "r": 2,
+        "layer": "top",
+        "ox": -6,
+        "oy": 0
+      },
+      {
+        "id": "tile_eoc_book_and_pen",
+        "c": 3,
+        "r": 7,
+        "layer": "top",
+        "rot": 3,
         "ox": 10,
         "oy": 12,
         "sortDepth": 0

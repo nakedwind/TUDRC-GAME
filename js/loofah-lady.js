@@ -12,11 +12,15 @@ const LOOFAH = {
   keepDistance: 2.5,    // 太近會稍微退開（格）
   windup: 0.55,         // 抬腳多久才踏下去（秒）
   recover: 0.45,        // 踏完腳收回的時間（秒）
-  cooldown: 5.5,        // 兩次踏地之間隔幾秒
+  cooldown: 3,          // 兩次踏地之間隔幾秒
   vineSpeed: 170,       // 藤蔓在地底鑽的速度（像素／秒）
-  vineOvershoot: 0.4,   // 藤蔓會比目標位置多鑽幾格
+  vineOvershoot: 0.4,   // 藤蔓會比目標位置多鑽幾格（目標已經不在了才用得到）
+  vineTurn: 2.4,        // 藤蔓在地底追目標的轉彎速度（弧度／秒；越大越難閃）
+  vineReach: 12,        // 鑽到離目標腳下幾像素就冒出來
+  vineMaxTravel: 9,     // 藤蔓最多鑽幾格（追不到就在那裡冒出來）
   eruptRadius: 34,      // 冒出來時抓人的範圍（像素）
-  rootTime: 5,
+  rootTime: 7,          // 被纏住幾秒
+  linger: 3,            // 藤蔓冒出來後在地上停留幾秒：這段時間內有人碰到也會被抓住
   struggleCut: 0.25,    // 被纏住時每「按一下」方向鍵，少纏幾秒（拚命連按約 2 秒就能掙脫）
   struggleMin: 1,       // 至少被纏幾秒才可能掙脫          // 被纏住幾秒
   testSpawn: true,      // 測試用：開始戰鬥時在離溫特約 20 格的地方直接放一隻（測完改成 false）
@@ -109,7 +113,7 @@ function loofahStomp(e) {
   if (!t || t.hp <= 0) return;
   const dx = t.x - e.x, dy = t.y - e.y, d = Math.hypot(dx, dy) || 1;
   const len = d + C.vineOvershoot * CELL;
-  (G.loofahVines = G.loofahVines || []).push({ owner: e, x: e.x, y: e.y + 10, ux: dx / d, uy: dy / d, left: len, state: 'dig', t: 0, puff: 0, cracks: [], seed: Math.random() * 9 });
+  (G.loofahVines = G.loofahVines || []).push({ owner: e, target: t, x: e.x, y: e.y + 10, ux: dx / d, uy: dy / d, left: len, travel: 0, state: 'dig', t: 0, puff: 0, cracks: [], seed: Math.random() * 9 });
 }
 function llDust(x, y, big) {
   const n = big ? 2 : 1;
@@ -126,9 +130,20 @@ function updateLoofahVines(dt) {
     for (const v of G.loofahVines) {
       v.t += dt;
       if (v.state === 'dig') {
+        // 追目標：朝目標現在的腳下慢慢轉彎（轉彎速度有上限，跑得快還是閃得掉）；鑽到腳下就冒出來
+        const tg = v.target;
+        if (tg && tg.hp > 0 && !(tg.rootT > 0)) {
+          const want = Math.atan2(tg.y - v.y, tg.x - v.x), cur = Math.atan2(v.uy, v.ux);
+          let diff = want - cur; while (diff > Math.PI) diff -= Math.PI * 2; while (diff < -Math.PI) diff += Math.PI * 2;
+          const a = cur + Math.max(-C.vineTurn * dt, Math.min(C.vineTurn * dt, diff));
+          v.ux = Math.cos(a); v.uy = Math.sin(a);
+          const dist = Math.hypot(tg.x - v.x, tg.y - v.y);
+          v.left = dist <= C.eruptRadius * .8 ? 0   // 已經在腳邊（抓得到的範圍）：直接冒出來，不要在旁邊繞圈
+            : Math.min(C.vineMaxTravel * CELL - v.travel, Math.max(0, dist - C.vineReach) + (Math.abs(diff) > .6 ? CELL : 0));
+        }
         let move = C.vineSpeed * dt;
         while (move > 0 && v.state === 'dig') {
-          const s = Math.min(4, move); move -= s; v.left -= s;
+          const s = Math.min(4, move); move -= s; v.left -= s; v.travel = (v.travel || 0) + s;
           const nx = v.x + v.ux * s, ny = v.y + v.uy * s, [c, r] = cellAt(nx, ny);
           if (!inGrid(c, r) || isWall(c, r)) { v.left = 0; }   // 撞到牆：就在牆前冒出來
           else { v.x = nx; v.y = ny; }
@@ -137,9 +152,10 @@ function updateLoofahVines(dt) {
           if (v.left <= 0) loofahErupt(v);
         }
       } else if (v.state === 'grab') {
-        v.hold -= dt;
+        v.lingerT -= dt;
+        if (v.lingerT > 0) llCatchNearby(v);   // 還停在地上：有人碰到就抓
         for (const a of v.caught) if (a.hp <= 0) a.rootT = 0;
-        if (v.hold <= 0 || !v.caught.some(a => a.rootT > 0 && a.hp > 0)) { v.state = 'retract'; v.rt = 0; for (const a of v.caught) a.rootT = 0; }
+        if (v.lingerT <= 0 && !v.caught.some(a => a.rootT > 0 && a.hp > 0)) { v.state = 'retract'; v.rt = 0; for (const a of v.caught) a.rootT = 0; }
       } else if (v.state === 'retract') {
         v.rt += dt; if (v.rt > .35) v.done = true;
       }
@@ -164,11 +180,16 @@ function updateLoofahVines(dt) {
 }
 function loofahErupt(v) {
   const C = LOOFAH, e = v.owner;
-  v.state = 'grab'; v.et = 0; v.eruptAt = performance.now() / 1000; v.hold = C.rootTime; v.caught = [];
+  v.state = 'grab'; v.et = 0; v.eruptAt = performance.now() / 1000; v.lingerT = C.linger; v.caught = [];
   G.effects.push({ ring: true, x: v.x, y: v.y + 4, r: 6, r2: C.eruptRadius + 10, life: .3, life0: .3, color: '#7fbf5a' });
   for (let i = 0; i < 6; i++) llDust(v.x + (Math.random() - .5) * 26, v.y + 4, true);
   if (typeof sfxAt === 'function') sfxAt('loofahVine', v.x, v.y, .8, 'loofah-vine');
-  const p = G.player, inR = a => Math.hypot(a.x - v.x, a.y - v.y) <= C.eruptRadius;
+  llCatchNearby(v);
+}
+// 抓住藤蔓旁邊的人（冒出來那一刻，還有停在地上的這段時間都會呼叫；同一根藤蔓不會重複抓同一個人）
+function llCatchNearby(v) {
+  const C = LOOFAH, e = v.owner;
+  const p = G.player, inR = a => Math.hypot(a.x - v.x, a.y - v.y) <= C.eruptRadius && !v.caught.includes(a) && !(a.rootT > 0);
   if (p && p.hp > 0 && inR(p)) {
     v.caught.push(p); p.rootT = C.rootTime; p.rootT0 = C.rootTime; p.struggleCount = 0; p.knockT = 0; p.moving = false;
     if (C.eruptDamage && e) {
@@ -185,7 +206,6 @@ function loofahErupt(v) {
     v.caught.push(t); t.rootT = C.rootTime; t.knockT = 0; t.navPath = null; t.navGoal = null;
     if (C.eruptDamage && e && !e.dead) { e.atkCd = 0; enemyAttackSentry(e, t, 0); t.knockT = 0; }
   }
-  if (!v.caught.length) v.hold = .7;   // 沒抓到人：冒出來晃一下就縮回去
 }
 // 測試用：開戰 1 秒後，在離溫特約 testSpawnDist 格、離哨兵至少 6 格的空地放一隻（太遠放不下就慢慢往近處找）
 function loofahTestSpawn(dt) {
@@ -224,6 +244,12 @@ function loofahStruggle(p, dir) {
 // 掙脫：藤蔓斷開、碎葉彈出來
 function loofahBreakFree(p) {
   p.rootT = 0;
+  // 纏住他的藤蔓：不再停留抓人；藤蔓上沒有別人被纏著就馬上縮回地底（不會留在身上）
+  for (const v of G.loofahVines || []) {
+    if (v.state !== 'grab' || !v.caught.includes(p)) continue;
+    v.lingerT = 0;
+    if (!v.caught.some(a => a !== p && a.rootT > 0 && a.hp > 0)) { v.state = 'retract'; v.rt = 0; }
+  }
   flash('掙脫！', p.x, p.y - 64, '#c8f59a', .9);
   for (let i = 0; i < 10; i++) {
     const a = Math.random() * Math.PI * 2, sp = 60 + Math.random() * 90;
@@ -275,7 +301,7 @@ function drawLoofahVines(ctx) {
     ctx.globalAlpha = .55; ctx.fillStyle = '#3a2d1c';
     ctx.beginPath(); ctx.ellipse(v.x, v.y + 6, 16 * grow + 4, 6 * grow + 2, 0, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
-    if (v.caught.length) for (const a of v.caught) drawWrap(ctx, a, grow, now, v.seed);
+    if (v.caught.length) for (const a of v.caught) if (a.rootT > 0) drawWrap(ctx, a, grow, now, v.seed);   // 只畫還被纏著的人（掙脫、時間到的人身上不留藤蔓）
     const p = G.player;
     if (p && p.rootT > 0 && v.caught.includes(p)) {   // 溫特頭上的掙扎進度條
       const T0 = p.rootT0 || LOOFAH.rootTime, prog = 1 - p.rootT / T0, bx = p.x - 22, by = p.y - 74;

@@ -586,6 +586,7 @@ function enterPortal(pt) {
 window.addEventListener('keyup', e => {
   keys[String(e.key || '').toLowerCase()] = false;
   const mk = MOVE_CODES[e.code]; if (mk) keys[mk] = false;   // 移動鍵依實體按鍵放開（輸入法切換中也放得開）
+  if (!mk && (e.key === 'Process' || !e.code)) releaseMoveKeys();   // 輸入法吃掉、看不出是哪個鍵放開：保險起見全部放開（還按著的話馬上又會被按下）
 });
 
 // ---- 滑鼠所在格（建築放置預覽用）----
