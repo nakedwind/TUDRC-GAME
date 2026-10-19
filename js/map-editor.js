@@ -1119,37 +1119,18 @@ cv.addEventListener('pointerup', () => {
 });
 cv.addEventListener('pointerleave', () => { hoverCell = null; draw(); });
 
-// ================= 滑鼠右鍵選單・中鍵拖曳畫面 =================
-// 右鍵：不跳出瀏覽器原本的選單（另存圖片、複製圖片…），改成只有「取消選取物件」的小選單。
+// ================= 滑鼠右鍵・中鍵拖曳畫面 =================
+// 右鍵：不跳出瀏覽器原本的選單（另存圖片、複製圖片…），直接「取消選取物件」。
 //      （打字的欄位裡還是保留瀏覽器原本的選單，才能複製、貼上文字）
 // 中鍵：按住拖曳＝上下左右移動地圖畫面（不會跳出瀏覽器的自動捲動）。
 // 右鍵、中鍵都不會在地圖上畫東西或選物件。
-const editorCtxMenu = document.createElement('div');
-editorCtxMenu.className = 'editor-ctxmenu'; editorCtxMenu.hidden = true;
-const ctxClearBtn = document.createElement('button');
-ctxClearBtn.type = 'button'; ctxClearBtn.textContent = '取消選取物件';
-ctxClearBtn.addEventListener('click', () => {
-  hideEditorCtxMenu();
-  if (!selections.length && !selection) { setStatus('目前沒有選取物件', '#9aa4b2'); return; }
-  clearSelection(); setStatus('已取消選取', '#9aa4b2');
-});
-editorCtxMenu.appendChild(ctxClearBtn);
-document.body.appendChild(editorCtxMenu);
-function hideEditorCtxMenu() { editorCtxMenu.hidden = true; }
 const isTypingField = el => !!(el && el.closest && el.closest('input, textarea, select, [contenteditable="true"]'));
 document.addEventListener('contextmenu', e => {
-  if (isTypingField(e.target)) { hideEditorCtxMenu(); return; }
+  if (isTypingField(e.target)) return;
   e.preventDefault();
-  editorCtxMenu.hidden = false;
-  // 選單貼著滑鼠出現，但不要超出視窗
-  const w = editorCtxMenu.offsetWidth, h = editorCtxMenu.offsetHeight;
-  editorCtxMenu.style.left = Math.min(e.clientX, window.innerWidth - w - 4) + 'px';
-  editorCtxMenu.style.top = Math.min(e.clientY, window.innerHeight - h - 4) + 'px';
+  if (!selections.length && !selection) return;
+  clearSelection(); setStatus('已取消選取', '#9aa4b2');
 });
-document.addEventListener('pointerdown', e => { if (!editorCtxMenu.contains(e.target)) hideEditorCtxMenu(); }, true);
-document.addEventListener('keydown', e => { if (e.key === 'Escape') hideEditorCtxMenu(); });
-window.addEventListener('blur', hideEditorCtxMenu);
-window.addEventListener('scroll', hideEditorCtxMenu, true);
 
 const panWrap = document.getElementById('wrap');
 let middlePan = null;   // 中鍵拖曳中：{ x, y, left, top }＝按下時的滑鼠位置和捲動位置
