@@ -50,7 +50,7 @@
               <dt><kbd>右鍵</kbd></dt><dd>點哨兵／空地開選單</dd>
               <dt><kbd>R</kbd></dt><dd>裝填（建造時：轉向）</dd>
               <dt><kbd>滾輪</kbd></dt><dd>切換武器</dd>
-              <dt><kbd>1</kbd>～<kbd>5</kbd></dt><dd>建築快捷</dd>
+              <dt><kbd>1</kbd><kbd>2</kbd></dt><dd>切換第一／第二把槍</dd>
               <dt><kbd>Space</kbd><kbd>E</kbd></dt><dd>對話、互動</dd>
               <dt><kbd>Q</kbd></dt><dd>用醫療包（HP）</dd>
               <dt><kbd>F</kbd></dt><dd>喝杏仁水（SP）</dd>
@@ -253,7 +253,7 @@
   <script src="js/breakable-walls.js?v=wallsolid-20261017"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
-  <script src="js/build.js?v=buildrange-20261018"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/build.js?v=numkeys-20261020"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=skills-20261018"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=loofah-20261019"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
@@ -270,7 +270,7 @@
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fishstepdark-20261019"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=loofah-wrap2-20261019"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人 -->
-  <script src="js/render.js?v=oreflash2-20261019"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=buildhint2-20261020"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=bwall-20261017"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=oil-breaks-ore-20261018"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -289,9 +289,9 @@
   <script src="js/save.js?v=camp-plan-dialog-20261017"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=noisefix-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=equip-20261015"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=interact-enter-e-20261018"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/flare.js?v=numkeys-20261020"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=acidboots-20261018"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
-  <script src="js/special-guns.js?v=fix38c-20261018"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/special-guns.js?v=numkeys-20261020"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/combat-progress.js?v=circuit-20261018"></script>
   <script src="js/camp-interactions.js?v=interaction-key-fix-20261018"></script>
   <script src="js/camp-supply.js?v=camp-stock-art-20261018"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->

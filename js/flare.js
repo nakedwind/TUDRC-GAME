@@ -70,7 +70,7 @@ cv.addEventListener('wheel', e => {
 window.addEventListener('keydown', e => {
   if (e.repeat || dialogueState) return;
   const n = Number(e.key);
-  if (n >= 1 && n <= 2) { const i = loadoutIndex(n === 1 ? 'main' : 'sub'); if (i >= 0) switchWeapon(0, i); }   // 1＝主武器、2＝副武器（3 以後的數字鍵是建築快捷）
+  if (n >= 1 && n <= 2) { const i = loadoutIndex(n === 1 ? 'main' : 'sub'); if (i >= 0) switchWeapon(0, i); }   // 1＝第一把槍（主武器）、2＝第二把槍（副武器）；其他數字鍵沒有功能
 });
 
 // ---- 照明彈：裝填、發射 ----

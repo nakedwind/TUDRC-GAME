@@ -127,9 +127,8 @@ function renderBuildQuickSlots() {
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'build-quick-slot';
     button.dataset.buildId = id;
-    const key = index < 6 ? (index + 1) + '：' : '';   // 數字鍵 1～6 對應前 6 個
-    button.title = key + ob.name + '（經費 $' + ob.cost + '・HP ' + ob.hp + '）';
-    button.setAttribute('aria-label', (key ? '快捷鍵 ' + key : '') + '建造' + ob.name);
+    button.title = ob.name + '（經費 $' + ob.cost + '・HP ' + ob.hp + '）';
+    button.setAttribute('aria-label', '建造' + ob.name);
     button.innerHTML = '<img src="' + ob[buildOrient].file + '" alt=""><span>' + ob.name + '</span>';
     button.addEventListener('click', () => selectBuildType(id));
     buildQuickSlots.appendChild(button);
@@ -158,7 +157,7 @@ function renderBuildBar() {
   buildBar.innerHTML = '';
   const quickHint = document.createElement('div');
   quickHint.className = 'build-quick-hint';
-  quickHint.textContent = '拖曳建築到下方快捷欄，可替換 1～6';
+  quickHint.textContent = '拖曳建築到下方快捷欄，可以替換';
   buildBar.appendChild(quickHint);
   if (buildTargetCell) {
     const note = document.createElement('div'); note.className = 'build-target';
@@ -247,9 +246,7 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape' && (!buildBar.classList.contains('hidden') || (G && G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish')))) {
     closeBuildMenu(); return;
   }
-  if (e.repeat || !/^[1-6]$/.test(e.key) || !G || !G.running || MAP_SAFE || dialogueState) return;
-  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
-  selectBuildType(buildQuickIds[Number(e.key) - 1]);
+  // 數字鍵不再選建築：1／2 留給切換槍枝（js/flare.js）；建築請點下方快捷欄
 });
 renderBuildQuickSlots();
 

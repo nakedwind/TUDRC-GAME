@@ -1092,20 +1092,37 @@ function draw() {
   if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉槍打睡的頭上飄 Zzz（js/special-guns.js）
   if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
-  // 選好建築並移到地圖上時，在預覽圖上方提示旋轉快捷鍵。
+  // 選好建築並移到地圖上時，在預覽圖上方提示快捷鍵：［R］旋轉、［ESC］取消（取消後就切回槍）。
   if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
     const ob = buildableById(G.selType.slice(6));
     if (ob) {
       const v = ob[buildOrient], [c, r] = hoverCell;
-      const labelX = OX + (c + v.w / 2) * CELL;
-      const labelBottom = Math.max(OY + 28, OY + r * CELL - 7);
+      const lines = ['［R］旋轉', '［ESC］取消'];
+      const LINE_GAP = 4, PAD_X = 7, PAD_Y = 5, RADIUS = 8;   // 兩行字的間距、深色框左右／上下留白、四個角的圓角（小一點，整體還是方塊）
       ctx.save();
-      ctx.font = 'bold 12px "Microsoft JhengHei", sans-serif';
-      ctx.textAlign = 'center';
+      ctx.font = 'bold 10px "Microsoft JhengHei", sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      // 用字「實際畫出來」的範圍來置中（全形括號左右有留白，直接用字寬置中會偏一邊）
+      const ms = lines.map(t => ctx.measureText(t));
+      const inkW = m => m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+      const ascent = Math.max(...ms.map(m => m.actualBoundingBoxAscent));    // 每行字頂到基線
+      const descent = Math.max(...ms.map(m => m.actualBoundingBoxDescent));  // 基線到每行字底
+      const lineH = ascent + descent;
+      const textH = lines.length * lineH + (lines.length - 1) * LINE_GAP;
+      const boxW = Math.max(...ms.map(inkW)) + PAD_X * 2;
+      const boxH = textH + PAD_Y * 2;
+      const labelX = OX + (c + v.w / 2) * CELL;
+      const boxTop = Math.max(OY + 4, OY + r * CELL - 6 - boxH);
       ctx.fillStyle = 'rgba(10, 16, 23, .88)';
-      ctx.fillRect(labelX - 43, labelBottom - 23, 86, 23);
+      ctx.beginPath();
+      ctx.roundRect(labelX - boxW / 2, boxTop, boxW, boxH, RADIUS);
+      ctx.fill();
       ctx.fillStyle = '#f1f7fc';
-      ctx.fillText('［R］旋轉', labelX, labelBottom - 6);
+      ms.forEach((m, i) => {
+        const x = labelX - inkW(m) / 2 + m.actualBoundingBoxLeft;              // 左右置中
+        const y = boxTop + PAD_Y + i * (lineH + LINE_GAP) + ascent;            // 上下置中
+        ctx.fillText(lines[i], x, y);
+      });
       ctx.restore();
     }
   }
