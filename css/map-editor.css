@@ -222,3 +222,6 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 
 /* 中鍵拖曳畫面 */
 #wrap.panning, #wrap.panning #cv { cursor: grabbing !important; }
+
+/* 選取物件的操作列放在工具列裡（同一排、固定在最上面） */
+#tools #selControls { margin: 0; padding: 5px 8px; }

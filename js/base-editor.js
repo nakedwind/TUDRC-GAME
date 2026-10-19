@@ -1837,7 +1837,6 @@ function refreshCircuitControl() {
 function refreshSelPanel() {
   const layerSelect = document.getElementById('selLayer');
   const depthInput = document.getElementById('selDepthInput');
-  const depthAuto = document.getElementById('selDepthAuto');
   const m = curMap();
   selections = selections.filter(sel => sel.type === 'stamp' ? !!m.stamps[sel.index] : !!(m.layers[sel.layer] && m.layers[sel.layer][sel.key] !== undefined));
   selection = selections.length ? selections[selections.length - 1] : null;
@@ -1847,12 +1846,11 @@ function refreshSelPanel() {
   refreshCircuitControl();
   refreshLockTextControl();
   layerSelect.disabled = !hasSelection;
-  ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete', 'selClear'].forEach(id => {
+  ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;
   });
   depthInput.disabled = true;
   depthInput.value = '';
-  depthAuto.disabled = true;
   if (!selection) {
     refreshDoorControl();
     document.getElementById('selName').textContent = '無';
@@ -1887,7 +1885,6 @@ function refreshSelPanel() {
     depthInput.max = stampH(depthStamp.s, depthStamp.t);
     depthInput.value = Number.isFinite(depthStamp.s.sortDepth) ? depthStamp.s.sortDepth : stampH(depthStamp.s, depthStamp.t);
     depthInput.disabled = false;
-    depthAuto.disabled = false;
   }
   refreshBaseCollisionPanel();
 }
@@ -1924,16 +1921,9 @@ document.getElementById('selDepthInput').addEventListener('change', e => {
   saveMaps(); draw(); refreshSelPanel();
   setStatus('人物遮擋線設在圖片頂端往下 ' + next + ' 格', '#55d9ff');
 });
-document.getElementById('selDepthAuto').addEventListener('click', () => {
-  const picked = selectedDepthStamp(); if (!picked || !Number.isFinite(picked.s.sortDepth)) return;
-  pushUndo(); delete picked.s.sortDepth;
-  saveMaps(); draw(); refreshSelPanel();
-  setStatus('已恢復自動深度', '#7ee0c0');
-});
 document.getElementById('selUp').addEventListener('click', () => moveSelBy(1));
 document.getElementById('selDown').addEventListener('click', () => moveSelBy(-1));
 document.getElementById('selDelete').addEventListener('click', deleteSelection);
-document.getElementById('selClear').addEventListener('click', clearSelection);
 document.getElementById('baseHpInput').addEventListener('change', e => {
   const picked = selectedBaseStamp(); if (!picked) return;
   pushUndo(); picked.s.baseHp = Math.max(1, parseInt(e.target.value, 10) || picked.t.baseHp || 2000);
@@ -2050,11 +2040,8 @@ function flipSelection(axis) {
 }
 // F 快捷鍵（左右翻）：有選取物件就翻選取，否則翻筆刷
 function flipAction(axis) { if (selections.length) flipSelection(axis); else toggleBrushFlip(axis); }
-document.getElementById('flipX').addEventListener('click', () => toggleBrushFlip('x'));
-document.getElementById('flipY').addEventListener('click', () => toggleBrushFlip('y'));
 document.getElementById('selFlipX').addEventListener('click', () => flipSelection('x'));
 document.getElementById('selFlipY').addEventListener('click', () => flipSelection('y'));
-document.getElementById('rotateBrush')?.addEventListener('click', rotateBrush);
 document.getElementById('selRotate')?.addEventListener('click', rotateSelection);
 document.getElementById('selReset').addEventListener('click', () => {
   const m = curMap(); let n = 0;
