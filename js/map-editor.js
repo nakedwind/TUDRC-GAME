@@ -485,6 +485,18 @@ document.getElementById('zoomIn').onclick = () => setZoom(editorZoom * 1.25);
 document.getElementById('zoomOut').onclick = () => setZoom(editorZoom / 1.25);
 document.getElementById('zoomFit').onclick = () => { editorZoom = fitZoom(); applyZoom(); };
 document.getElementById('zoom100').onclick = () => setZoom(1);
+// Alt＋滑鼠滾輪：在地圖上直接縮放（往上滾＝放大、往下滾＝縮小），以滑鼠所在的位置為中心
+document.getElementById('wrap').addEventListener('wheel', e => {
+  if (!e.altKey || !e.deltaY) return;
+  e.preventDefault();
+  const wrap = e.currentTarget, rect = wrap.getBoundingClientRect();
+  const mx = e.clientX - rect.left, my = e.clientY - rect.top;   // 滑鼠在地圖框裡的位置
+  const old = editorZoom;
+  const wx = (wrap.scrollLeft + mx - cv.offsetLeft) / old, wy = (wrap.scrollTop + my - cv.offsetTop) / old;   // 滑鼠指著地圖的哪一點
+  setZoom(editorZoom * (e.deltaY < 0 ? 1.1 : 1 / 1.1));
+  wrap.scrollLeft = wx * editorZoom + cv.offsetLeft - mx;   // 縮放後讓同一點還在滑鼠底下
+  wrap.scrollTop = wy * editorZoom + cv.offsetTop - my;
+}, { passive: false });
 document.getElementById('expandEditor')?.addEventListener('click', () => {
   const expanded = document.body.classList.toggle('wide-editor');
   const button = document.getElementById('expandEditor');
