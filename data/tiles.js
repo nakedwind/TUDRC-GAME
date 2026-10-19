@@ -3807,7 +3807,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/地下訓練室/training-shooting-lane.png",
     "w": 3,
-    "h": 8
+    "h": 8,
+    "flat": true
   },
   {
     "id": "tile_training_hazard_frame",
@@ -3833,5 +3834,21 @@ const SHARED_TILES = [
     "file": "images/地下訓練室/containment-glass-door03.png",
     "w": 2,
     "h": 3
+  },
+  {
+    "id": "tile_mvfqc6g7",
+    "name": "shoe-cabinet02",
+    "role": "floor",
+    "file": "images/地下訓練室/shoe-cabinet02.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_training_bench",
+    "name": "長椅",
+    "role": "floor",
+    "file": "images/地下訓練室/training-bench.png",
+    "w": 2,
+    "h": 1
   }
 ];

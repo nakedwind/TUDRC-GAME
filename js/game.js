@@ -1586,9 +1586,9 @@ function updateAmmoHud() {
 let last = 0;
 // ---- 腳步聲（走路時循環播放；安全場景=footsteps02、戰鬥場景=footsteps01）----
 const FOOT = { audio: null, file: '' };
-function updateFootsteps() {
+function updateFootsteps(menuOpen = false) {
   const p = G && G.player;
-  const walking = !!(p && p.moving && !p.sitting && G.running && !G.over && !paused);
+  const walking = !!(p && p.moving && !p.sitting && G.running && !G.over && !paused && !menuOpen);   // 選單開著時玩家停住，p.moving 會停在 true
   if (!FOOT.audio) { FOOT.audio = new Audio(); FOOT.audio.loop = true; FOOT.audio.volume = 0.5; }
   const a = FOOT.audio;
   const want = MAP_SAFE ? 'Sound effects/環境/腳步/footsteps02.mp3' : 'Sound effects/環境/腳步/footsteps01.mp3';
@@ -1645,8 +1645,9 @@ function frame(ts) {
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
   const introOpen = typeof itemIntroOpen !== 'undefined' && itemIntroOpen;   // 第一次拿到新東西的說明視窗（js/item-intro.js）
-  if (!paused && !introOpen && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !campSupplyOpen && !mapTransitioning && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
-  updateFootsteps();               // 走路腳步聲
+  const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campSupplyOpen || mapTransitioning;
+  if (!menuOpen && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
+  updateFootsteps(!!menuOpen);     // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）
   updateCamera();
   if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）

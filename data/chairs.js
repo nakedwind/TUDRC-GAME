@@ -682,5 +682,24 @@ const CHAIRS_DEFAULT = {
       "y": 39,
       "dir": "back"
     }
+  },
+  "tile_training_bench": {
+    "enabled": true,
+    "depth": 32,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ]
+    ],
+    "seat": {
+      "x": 21,
+      "y": 8,
+      "dir": "front"
+    }
   }
 };

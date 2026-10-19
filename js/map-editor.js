@@ -345,7 +345,7 @@ function loadTiles() {
   const backroomDoorWoodAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_door_wood', STORAGE_BACKROOM_DOOR_WOOD);
   const oilTankAdded = mergeDefaultAssetPack(t => t.id === 'tile_new_decor_oil_tank', STORAGE_OIL_TANK);
   const graffitiPensAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_interactive_pickup_graffiti_'), STORAGE_GRAFFITI_PENS);
-  const trainingRoomAdded = mergeDefaultAssetPack('tile_training_', 'tudrc_asset_pack_training_room_v1');   // 地下訓練室素材包
+  const trainingRoomAdded = mergeDefaultAssetPack('tile_training_', 'tudrc_asset_pack_training_room_v2');   // 地下訓練室素材包
   const doorKeyAdded = mergeDefaultAssetPack(t => t.id === 'tile_interactive_pickup_backroom_door_key', 'tudrc_asset_pack_door_key_v1');   // 地上撿的後室門鑰匙（js/doors.js）
   const backroomCorePillarsAdded = mergeDefaultAssetPack(t => BACKROOM_CORE_PILLAR_IDS.has(t.id), STORAGE_BACKROOM_CORE_PILLARS, true);
   let restaurantChairsFixed = false;
