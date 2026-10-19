@@ -18,7 +18,11 @@ if (/[?&]preview=1(&|$)/.test(location.search)) {
 }
 
 // ---- 磚塊登錄（內建 + 編輯器匯出的自訂磚塊）----
-const MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'object2', 'object3', 'object4', 'overlay', 'top'];
+const DEFAULT_MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'object2', 'object3', 'object4', 'overlay', 'top'];
+// 目前這張地圖的圖層順序（由底到上）：編輯器裡新增／刪除過圖層的地圖存在 MAP.layerOrder，沒改過的用上面的預設。
+// 圖層的畫法看 id：ground…＝地面（在角色下面）、object…／overlay＝立體物（跟角色排前後）、top＝永遠在角色上面
+let MAP_LAYER_ORDER = DEFAULT_MAP_LAYER_ORDER;
+const mapLayerOrderOf = m => (m && Array.isArray(m.layerOrder) && m.layerOrder.length) ? m.layerOrder.map(l => l.id) : DEFAULT_MAP_LAYER_ORDER;
 const TILE_REGISTRY = {};
 // map＝要載入的地圖：戰鬥地圖用地圖編輯器的素材設定、基地用基地編輯器的（js/map-data.js 的 mapTileCatalog）
 function buildTileRegistry(map) {
@@ -180,6 +184,7 @@ function initMap() {
   const next = pickMap();
   buildTileRegistry(next);
   MAP = next;
+  MAP_LAYER_ORDER = mapLayerOrderOf(MAP);   // 這張地圖自己的圖層
   if(typeof resetMapPower==='function')resetMapPower();
   preloadMapTiles(MAP);
   openElevatorStamp = null;

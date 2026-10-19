@@ -49,6 +49,24 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 .layer-lock:hover { background: #2b3a4a; }
 .layer-lock.on { color: #ffd479; background: #3a3320; }
 .layerhint { color: #9aa4b2; font-size: 11px; line-height: 1.5; }
+/* 圖層：新增／改名／刪除、物件數量、展開的物件清單 */
+.layer-tools { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 2px; }
+.layer-tools .btn { padding: 5px 9px; font-size: 12px; }
+.layer { display: flex; align-items: center; gap: 6px; }
+.layer-arrow { width: 10px; color: #8fd3ff; font-size: 11px; }
+.layer-label { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.layer-count { min-width: 22px; padding: 1px 6px; border-radius: 9px; background: #11161c; color: #9aa4b2; font-size: 11px; text-align: center; }
+.layer.sel .layer-count { background: #2a2140; color: #e6dcff; }
+.layer-objs { display: flex; flex-direction: column; gap: 3px; max-height: 320px; overflow-y: auto; margin: -2px 0 4px 14px; padding: 6px; border-left: 2px solid #b39ddb; background: #171b22; border-radius: 0 0 8px 8px; }
+.layer-filter { width: 100%; margin-bottom: 4px; padding: 4px 7px; background: #11161c; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; font-size: 12px; }
+.layer-obj { display: flex; align-items: center; gap: 7px; width: 100%; padding: 3px 6px; background: #1f252f; border: 1px solid transparent; border-radius: 6px; color: #e6e9ee; font-size: 12px; text-align: left; cursor: pointer; }
+.layer-obj:hover { background: #283141; }
+.layer-obj.sel { border-color: #ffe14d; background: #3a3420; }
+.layer-obj img, .layer-obj-swatch { width: 26px; height: 26px; flex: none; object-fit: contain; image-rendering: pixelated; background: #0d1015; border-radius: 4px; }
+.layer-obj-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.layer-obj small { color: #8c98a6; font-size: 11px; white-space: nowrap; }
+.layer-objs-empty { color: #8c98a6; font-size: 12px; padding: 4px 2px; }
+.layer-objs-more { margin-top: 4px; font-size: 12px; }
 
 /* 磚塊調色盤 */
 #palette { background: #1d222b; padding: 8px; border-radius: 8px; margin-bottom: 8px; }

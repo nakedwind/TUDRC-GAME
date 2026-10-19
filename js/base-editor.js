@@ -113,8 +113,12 @@ const isBig = (t) => tileW(t) !== 1 || tileH(t) !== 1;
 const tilePixelW = (t) => Math.round(tileW(t) * CELL);
 const tilePixelH = (t) => Math.round(tileH(t) * CELL);
 
-// ---- 圖層（由底到上；要加減層改這裡即可）----
-const LAYERS = [
+// ---- 圖層（由底到上）----
+// 每張地圖可以有自己的圖層清單：在右邊「🗂️ 圖層」新增／刪除／改名後，存在那張地圖的 layerOrder（[{ id, name }]）。
+// 沒改過圖層的地圖不存 layerOrder，就用下面這組預設圖層。
+// 圖層 id 決定遊戲裡的畫法（js/maploader.js）：ground…＝地面類（永遠畫在角色下面）、
+// object…／overlay＝物件類（跟角色排前後）、top＝永遠畫在角色上面。新增的圖層會取 ground5、object5 這種 id。
+const DEFAULT_LAYERS = [
   { id: 'floor', name: '🟫 地板' },
   { id: 'ground', name: '🌿 地面裝飾' },
   { id: 'ground2', name: '🍂 地面裝飾 2' },
@@ -126,8 +130,14 @@ const LAYERS = [
   { id: 'overlay', name: '🎯 物件裝飾' },
   { id: 'top', name: '☁️ 上層' },
 ];
+const layersOf = m => (m && Array.isArray(m.layerOrder) && m.layerOrder.length) ? m.layerOrder : DEFAULT_LAYERS;
+let LAYERS = DEFAULT_LAYERS;   // 目前這張地圖的圖層（換地圖、新增／刪除圖層時由 syncLayers 更新）
+function syncLayers() {
+  LAYERS = layersOf(curMap());
+  if (!LAYERS.some(l => l.id === activeLayer)) activeLayer = LAYERS[0].id;
+}
 const layerName = (id) => (LAYERS.find(l => l.id === id) || {}).name || id;
-const emptyLayers = () => { const o = {}; LAYERS.forEach(l => o[l.id] = {}); return o; };
+const emptyLayers = (list = DEFAULT_LAYERS) => { const o = {}; list.forEach(l => o[l.id] = {}); return o; };
 
 // ---- 內建磚塊（純圖片；牆/障礙先用色塊當佔位圖）----
 const BUILTIN_TILES = [
@@ -395,7 +405,7 @@ function loadMaps() {
 function fixMap(m) {
   if (!m.layers) { m.layers = {}; if (m.tiles) m.layers.floor = m.tiles; }
   if (m.layers.deco) { m.layers.object = Object.assign({}, m.layers.object || {}, m.layers.deco); delete m.layers.deco; }  // 舊「裝飾層」併入「物件」
-  LAYERS.forEach(l => { m.layers[l.id] = m.layers[l.id] || {}; });
+  layersOf(m).forEach(l => { m.layers[l.id] = m.layers[l.id] || {}; });
   delete m.tiles;
   m.stamps = m.stamps || [];
   m.stamps.forEach(s => { if (!s.layer) s.layer = 'top'; });   // 舊大圖預設在最上層
@@ -434,6 +444,7 @@ function fixMap(m) {
 // 依目前地圖的大小調整格數與畫布（畫布太大時外框會出現捲軸）
 function applyMapSize() {
   const m = curMap();
+  syncLayers(); renderLayers();   // 每張地圖的圖層可能不一樣
   COLS = m.cols; ROWS = m.rows;
   const w = COLS * CELL, h = ROWS * CELL;
   if (cv.width !== w || cv.height !== h) {
@@ -476,6 +487,7 @@ function saveMaps() {
   EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps)).catch(e => setStatus('⚠️ 自動存檔失敗（' + (e && e.name || e) + '）：請馬上按「💾 存到專案」或「下載」保存！', '#ff8f8f'));
   setStatus('已自動存檔 ✓', '#7ee0c0');
   if (typeof refreshStorageInfoSoon === 'function') refreshStorageInfoSoon();
+  refreshLayerListSoon();   // 圖層的物件清單、物件數量跟著更新
 }
 const curMap = () => maps.find(m => m.id === curId) || maps[0];
 
@@ -860,6 +872,7 @@ function draw() {
       ctx.fillText('人物遮擋線 ' + depth, x + 5, y - 4);
     }
   }
+  drawLocateFlash();   // 從圖層物件清單選取時，物件周圍閃一個圈
   if (typeof drawEditorOverlay === 'function') drawEditorOverlay(ctx, m);   // NPC 出生點與活動範圍（js/base-editor-npc.js）
 }
 
@@ -1096,15 +1109,189 @@ cv.addEventListener('pointerup', () => {
 });
 cv.addEventListener('pointerleave', () => { hoverCell = null; draw(); });
 
-// ================= 圖層切換（依 LAYERS 動態產生按鈕）=================
+// ================= 圖層面板（依 LAYERS 動態產生按鈕）=================
+// ・點圖層＝在這層編輯，並在下面展開這層的物件清單；再點一次收起來。點清單裡的物件＝直接選取它（按住 Shift 可以多選）。
+// ・「＋ 新增圖層」加在目前圖層的上面；「✎ 改名」（或雙擊圖層）改名字；「🗑 刪除圖層」連同上面的物件一起刪（Ctrl+Z 可以復原）。
 const layerBtnsEl = document.getElementById('layerBtns');
+let expandedLayer = null;      // 展開物件清單的圖層
+let layerListLimit = 200;      // 清單一次最多列幾個（物件很多時按「再顯示」）
+let layerListFilter = '';      // 清單的名稱搜尋
+// 改圖層之前：沒改過的地圖先把預設圖層抄一份存進地圖（之後就是這張地圖自己的圖層）
+function customizeLayers(m) {
+  if (!Array.isArray(m.layerOrder) || !m.layerOrder.length) m.layerOrder = clone(DEFAULT_LAYERS);
+  return m.layerOrder;
+}
+// 某一層上有哪些物件：上面的大圖（最上面的排前面）＋鋪在格子上的小圖（由上往下、由左往右）
+function layerContents(m, lid) {
+  const items = [];
+  for (let i = m.stamps.length - 1; i >= 0; i--) {
+    const s = m.stamps[i];
+    if ((s.layer || 'top') === lid) items.push({ type: 'stamp', index: i, id: s.id, c: s.c, r: s.r });
+  }
+  const cells = Object.entries(m.layers[lid] || {}).map(([key, id]) => { const [c, r] = key.split(',').map(Number); return { type: 'tile', layer: lid, key, id, c, r }; });
+  cells.sort((a, b) => a.r - b.r || a.c - b.c);
+  return items.concat(cells);
+}
+function addLayer() {
+  const m = curMap();
+  const name = prompt('新圖層的名稱？', '新圖層'); if (name === null) return;
+  const isObject = confirm('這個圖層要放「立體物件」嗎？\n\n【確定】＝物件類：會跟角色排前後（角色走到物件後面會被擋住）。\n【取消】＝地面類：永遠畫在角色下面（地毯、裂痕、地上的痕跡…）。');
+  pushUndo();
+  const list = customizeLayers(m), prefix = isObject ? 'object' : 'ground';
+  let n = isObject ? 5 : 4;
+  while (m.layers[prefix + n] || list.some(l => l.id === prefix + n)) n++;
+  const id = prefix + n, at = list.findIndex(l => l.id === activeLayer);
+  list.splice(at + 1, 0, { id, name: name.trim() || '新圖層' });   // 加在目前圖層的上面
+  m.layers[id] = {};
+  activeLayer = id; expandedLayer = id;
+  syncLayers(); renderLayers(); refreshSelPanel(); saveMaps(); draw();
+  setStatus('已新增圖層「' + (name.trim() || '新圖層') + '」（' + (isObject ? '物件類：會跟角色排前後' : '地面類：在角色下面') + '）', '#7ee0c0');
+}
+function renameLayer(id = activeLayer) {
+  const m = curMap(), cur = layersOf(m).find(l => l.id === id); if (!cur) return;
+  const name = prompt('圖層的新名稱？', cur.name);
+  if (name === null || !name.trim() || name.trim() === cur.name) return;
+  pushUndo();
+  customizeLayers(m).find(l => l.id === id).name = name.trim();
+  syncLayers(); renderLayers(); refreshSelPanel(); saveMaps();
+  setStatus('圖層改名為「' + name.trim() + '」', '#7ee0c0');
+}
+function deleteLayer(id = activeLayer) {
+  const m = curMap(), list = layersOf(m), cur = list.find(l => l.id === id); if (!cur) return;
+  if (list.length <= 1) { alert('至少要留一個圖層'); return; }
+  const count = layerContents(m, id).length;
+  if (!confirm('刪除圖層「' + cur.name + '」？' + (count ? '\n\n這個圖層上有 ' + count + ' 個物件，會一起刪除（可以按 Ctrl+Z 復原）。\n想保留物件的話，先選取物件、用上方的「圖層」選單搬到別層再刪。' : ''))) return;
+  pushUndo();
+  const order = customizeLayers(m), i = order.findIndex(l => l.id === id);
+  order.splice(i, 1);
+  delete m.layers[id];
+  m.stamps = m.stamps.filter(s => (s.layer || 'top') !== id);
+  hiddenLayers.delete(id); lockedLayers.delete(id);
+  if (expandedLayer === id) expandedLayer = null;
+  activeLayer = order[Math.max(0, i - 1)].id;
+  selection = null; selections = [];
+  syncLayers(); renderLayers(); refreshSelPanel(); saveMaps(); draw();
+  setStatus('已刪除圖層「' + cur.name + '」' + (count ? '（連同 ' + count + ' 個物件）' : ''), '#ffd24a');
+}
+// 從物件清單選取：跟在畫面上用「👆 選取」點到一樣（之後可以拖曳、翻轉、刪除、換圖層）
+function selectFromLayerList(item, additive) {
+  if (hiddenLayers.has(item.layer || layerOfItem(item))) { setStatus('這個圖層被隱藏中，請先打開眼睛 👁 才能選取', '#ffd24a'); return; }
+  if (isLockedLayer(item.layer || layerOfItem(item))) { setStatus('這個圖層已鎖定，請先按 🔒 解鎖才能選取', '#ffd24a'); return; }
+  const picked = item.type === 'stamp' ? { type: 'stamp', index: item.index } : { type: 'tile', layer: item.layer, key: item.key };
+  if (brush.mode !== 'select') { brush = { mode: 'select', tile: brush.tile }; updateToolUI(); renderPalette(); }
+  if (additive) {
+    const at = selections.findIndex(s => selectionId(s) === selectionId(picked));
+    if (at >= 0) selections.splice(at, 1); else selections.push(picked);
+  } else selections = [picked];
+  selection = selections.length ? selections[selections.length - 1] : null;
+  refreshSelPanel(); scrollToItem(item); flashLocate(item); draw();
+  setStatus('已選取「' + ((tileById(item.id) || {}).name || item.id) + '」（' + item.c + ', ' + item.r + '）' + (selections.length > 1 ? '，共 ' + selections.length + ' 個' : ''), '#ffd479');
+}
+const layerOfItem = item => item.type === 'stamp' ? ((curMap().stamps[item.index] || {}).layer || 'top') : item.layer;
+// 物件在畫布上的範圍（像素）
+function itemRect(item) {
+  const m = curMap();
+  if (item.type === 'stamp') {
+    const s = m.stamps[item.index], t = (s && tileById(s.id)) || {};
+    if (!s) return null;
+    return { x: OX + s.c * CELL + (s.ox || 0), y: OY + s.r * CELL + (s.oy || 0), w: stampW(s, t) * CELL, h: stampH(s, t) * CELL };
+  }
+  return { x: OX + item.c * CELL, y: OY + item.r * CELL, w: CELL, h: CELL };
+}
+// 把畫面捲到選到的物件
+function scrollToItem(item) {
+  const rect = itemRect(item), wrap = document.getElementById('wrap'); if (!rect || !wrap) return;
+  wrap.scrollTo({ left: (rect.x + rect.w / 2) * editorZoom - wrap.clientWidth / 2, top: (rect.y + rect.h / 2) * editorZoom - wrap.clientHeight / 2, behavior: 'smooth' });
+}
+// 選到之後在物件周圍閃一個圈，很小的物件也看得到在哪
+let locateFlash = null;
+function flashLocate(item) {
+  const rect = itemRect(item); if (!rect) return;
+  locateFlash = { ...rect, until: performance.now() + 1400 };
+  const tick = () => { draw(); if (locateFlash && performance.now() < locateFlash.until) requestAnimationFrame(tick); else { locateFlash = null; draw(); } };
+  requestAnimationFrame(tick);
+}
+function drawLocateFlash() {
+  if (!locateFlash) return;
+  const left = (locateFlash.until - performance.now()) / 1400; if (left <= 0) return;
+  const cx = locateFlash.x + locateFlash.w / 2, cy = locateFlash.y + locateFlash.h / 2;
+  const r = Math.max(locateFlash.w, locateFlash.h) / 2 + 14 + (1 - left) * 40;
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, left * 1.5); ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
+}
+// 物件清單裡這一筆是不是目前選取的
+const isItemSelected = item => selections.some(s => item.type === 'stamp' ? (s.type === 'stamp' && s.index === item.index) : (s.type === 'tile' && s.layer === item.layer && s.key === item.key));
+function renderLayerItems(lid) {
+  const m = curMap(), box = document.createElement('div'); box.className = 'layer-objs';
+  const all = layerContents(m, lid);
+  const filter = document.createElement('input');
+  filter.type = 'search'; filter.className = 'layer-filter'; filter.placeholder = '搜尋物件名稱…'; filter.value = layerListFilter;
+  filter.addEventListener('input', () => { layerListFilter = filter.value; layerListLimit = 200; renderLayers(); const f = layerBtnsEl.querySelector('.layer-filter'); if (f) { f.focus(); f.setSelectionRange(f.value.length, f.value.length); } });
+  box.appendChild(filter);
+  const word = layerListFilter.trim().toLowerCase();
+  const list = word ? all.filter(it => String((tileById(it.id) || {}).name || it.id).toLowerCase().includes(word)) : all;
+  if (!list.length) {
+    const empty = document.createElement('div'); empty.className = 'layer-objs-empty';
+    empty.textContent = all.length ? '沒有符合的物件' : '這個圖層還沒有物件';
+    box.appendChild(empty); return box;
+  }
+  list.slice(0, layerListLimit).forEach(item => {
+    const t = tileById(item.id) || {};
+    const row = document.createElement('button'); row.type = 'button'; row.className = 'layer-obj' + (isItemSelected(item) ? ' sel' : '');
+    row.title = '點一下選取（Shift＋點＝多選）';
+    const rec = t.file ? ensureTileImg(t) : null;
+    const thumb = rec && rec.loaded ? '<img src="' + t.file + '" alt="">' : '<span class="layer-obj-swatch"' + (t.color ? ' style="background:' + t.color + '"' : '') + '></span>';
+    row.innerHTML = thumb + '<span class="layer-obj-name"></span><small>' + (item.type === 'stamp' ? '物件' : '格子') + '・' + item.c + ',' + item.r + '</small>';
+    row.querySelector('.layer-obj-name').textContent = t.name || item.id;
+    row.addEventListener('click', e => selectFromLayerList(item, e.shiftKey));
+    box.appendChild(row);
+  });
+  if (list.length > layerListLimit) {
+    const more = document.createElement('button'); more.type = 'button'; more.className = 'btn layer-objs-more';
+    more.textContent = '再顯示 200 個（還有 ' + (list.length - layerListLimit) + ' 個）';
+    more.addEventListener('click', () => { layerListLimit += 200; renderLayers(); });
+    box.appendChild(more);
+  }
+  return box;
+}
+// 畫面上的東西變了（貼圖、刪除、選取…）：物件清單晚一點再重畫（避免拖曳時一直重畫）
+let layerListTimer = null;
+function refreshLayerListSoon() {
+  clearTimeout(layerListTimer);
+  layerListTimer = setTimeout(() => { if (!document.activeElement || !document.activeElement.classList.contains('layer-filter')) renderLayers(); }, 250);
+}
 function renderLayers() {
+  if (!layerBtnsEl) return;
+  const m = curMap();
+  if (expandedLayer && !LAYERS.some(l => l.id === expandedLayer)) expandedLayer = null;
+  const oldList = layerBtnsEl.querySelector('.layer-objs'), keepScroll = oldList ? oldList.scrollTop : 0;   // 重畫後清單停在原本捲到的地方
   layerBtnsEl.innerHTML = '';
+  // 新增／改名／刪除
+  const tools = document.createElement('div'); tools.className = 'layer-tools';
+  const mk = (text, title, fn, cls = '') => { const b = document.createElement('button'); b.type = 'button'; b.className = 'btn ' + cls; b.textContent = text; b.title = title; b.addEventListener('click', fn); return b; };
+  tools.append(
+    mk('＋ 新增圖層', '在目前圖層的上面加一個新圖層', addLayer),
+    mk('✎ 改名', '改目前圖層的名字（也可以雙擊圖層）', () => renameLayer()),
+    mk('🗑 刪除圖層', '刪除目前圖層（上面的物件會一起刪掉）', () => deleteLayer(), 'danger'));
+  layerBtnsEl.appendChild(tools);
   // 顯示順序反轉：上層在最上、地板在最下（不改 LAYERS 本身的疊圖 z 順序）
   [...LAYERS].reverse().forEach(l => {
     const group = document.createElement('span'); group.className = 'layer-group';
-    const b = document.createElement('button'); b.className = 'layer' + (l.id === activeLayer ? ' sel' : ''); b.textContent = l.name; b.dataset.layer = l.id;
-    b.addEventListener('click', () => { activeLayer = l.id; updateLayerUI(); setStatus('目前在「' + l.name + '」上編輯', '#b39ddb'); });
+    const count = (m.stamps || []).filter(s => (s.layer || 'top') === l.id).length + Object.keys(m.layers[l.id] || {}).length;
+    const b = document.createElement('button'); b.className = 'layer' + (l.id === activeLayer ? ' sel' : ''); b.dataset.layer = l.id;
+    b.innerHTML = '<span class="layer-arrow">' + (expandedLayer === l.id ? '▾' : '▸') + '</span><span class="layer-label"></span><span class="layer-count">' + count + '</span>';
+    b.querySelector('.layer-label').textContent = l.name;
+    b.title = '點一下：在這層編輯並展開物件清單；雙擊：改名';
+    b.addEventListener('click', () => {
+      const wasActive = activeLayer === l.id;
+      activeLayer = l.id;
+      expandedLayer = wasActive && expandedLayer === l.id ? null : l.id;   // 再點一次同一層＝收起來
+      layerListLimit = 200; layerListFilter = '';
+      renderLayers(); setStatus('目前在「' + l.name + '」上編輯', '#b39ddb');
+    });
+    b.addEventListener('dblclick', e => { e.preventDefault(); renameLayer(l.id); });
     const lock = document.createElement('button'); lock.className = 'layer-lock'; lock.dataset.layer = l.id;
     lock.addEventListener('click', () => {
       if (lockedLayers.has(l.id)) lockedLayers.delete(l.id);
@@ -1123,7 +1310,9 @@ function renderLayers() {
       setStatus((hiddenLayers.has(l.id) ? '已隱藏「' : '已顯示「') + l.name + '」', '#8fd3ff');
     });
     group.append(b, lock, eye); layerBtnsEl.appendChild(group);
+    if (expandedLayer === l.id) layerBtnsEl.appendChild(renderLayerItems(l.id));   // 展開：這層的物件清單
   });
+  const newList = layerBtnsEl.querySelector('.layer-objs'); if (newList) newList.scrollTop = keepScroll;
   updateLayerUI();
 }
 function updateLayerUI() {
@@ -1307,7 +1496,7 @@ function deleteTile(id) {
   pushUndo();
   customTiles = customTiles.filter(x => x.id !== id); saveTiles();
   maps.forEach(m => {
-    LAYERS.forEach(l => { for (const k in m.layers[l.id]) if (m.layers[l.id][k] === id) delete m.layers[l.id][k]; });
+    Object.values(m.layers).forEach(layer => { for (const k in layer) if (layer[k] === id) delete layer[k]; });
     m.stamps = m.stamps.filter(s => s.id !== id);
   });
   saveMaps();
@@ -1531,6 +1720,7 @@ function refreshSelPanel() {
   const m = curMap();
   selections = selections.filter(sel => sel.type === 'stamp' ? !!m.stamps[sel.index] : !!(m.layers[sel.layer] && m.layers[sel.layer][sel.key] !== undefined));
   selection = selections.length ? selections[selections.length - 1] : null;
+  refreshLayerListSoon();   // 圖層物件清單：標出目前選取的物件
   const hasSelection = !!selection;
   refreshLockerControl();
   refreshCircuitControl();
@@ -1859,7 +2049,7 @@ document.getElementById('solidToggle').addEventListener('click', e => {
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; checkResult = null; solidNudgeCell = null;
+  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; checkResult = null; solidNudgeCell = null;
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -2031,7 +2221,7 @@ bindSizeField('f_rows', 'rows');
 // 否則內容會相對跑掉。往上／往左減少時同理，並且要丟掉被切掉那幾排的內容。
 function shiftMapContent(m, dc, dr) {
   const shiftKey = k => { const [c, r] = k.split(',').map(Number); return (c + dc) + ',' + (r + dr); };
-  LAYERS.forEach(l => {
+  layersOf(m).forEach(l => {
     const src = m.layers[l.id] || {}, out = {};
     for (const k in src) out[shiftKey(k)] = src[k];
     m.layers[l.id] = out;
@@ -2049,7 +2239,7 @@ function dropOutsideContent(m) {
   const inside = (c, r) => c >= 0 && r >= 0 && c < m.cols && r < m.rows;
   const insideKey = k => { const [c, r] = k.split(',').map(Number); return inside(c, r); };
   let removed = 0;
-  LAYERS.forEach(l => {
+  layersOf(m).forEach(l => {
     const src = m.layers[l.id] || {}, out = {};
     for (const k in src) { if (insideKey(k)) out[k] = src[k]; else removed++; }
     m.layers[l.id] = out;

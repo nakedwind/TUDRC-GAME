@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 基地編輯器</title>
-<link rel="stylesheet" href="css/base-editor.css?v=split-20261020">   <!-- 基地編輯器自己的樣式（地圖編輯器是 css/map-editor.css） -->
+<link rel="stylesheet" href="css/base-editor.css?v=layers-20261020">   <!-- 基地編輯器自己的樣式（地圖編輯器是 css/map-editor.css） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* 基地編輯器：章節＆NPC 面板 */
@@ -154,7 +154,7 @@
       <div id="layerbar">
         <div class="layerbar-title">🗂️ 圖層</div>
         <span id="layerBtns"></span>
-        <span class="layerhint">貼圖會畫到選中的圖層；上層疊在下層之上、透明處透出下層。</span>
+        <span class="layerhint">貼圖會畫到選中的圖層；上層疊在下層之上、透明處透出下層。點圖層可以展開這層的物件清單，點清單裡的物件就會選取它（Shift＋點＝多選）。雙擊圖層可以改名。</span>
       </div>
 
       <details class="panel collapsible" id="rulesPanel">
@@ -235,6 +235,6 @@
   <script src="data/npc-locations.js?v=restaurant-npcs-20261019"></script>  <!-- NPC 平時位置（依章節） -->
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/base-editor-store.js?v=split-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（基地編輯器自己的） -->
-  <script>EditorStore.boot(["js/base-editor.js?v=split-20261020", "js/base-editor-save.js?v=split-20261020", "js/base-editor-npc.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/base-editor.js?v=layers-20261020", "js/base-editor-save.js?v=split-20261020", "js/base-editor-npc.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>
