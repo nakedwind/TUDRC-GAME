@@ -508,23 +508,57 @@ const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
 const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
+// ---- 只畫畫面看得到的地方 ----
+// 大地圖（例如 Y 區 56×60 格）如果每一幀都把整張地圖的每一格、每張圖重畫一次，會很卡。
+// 所以只畫「鏡頭照得到的範圍＋四周多 MAP_DRAW_MARGIN 格」：畫面約 260～300 格，四周各多 2 格後約 400 格。
+// 緩衝讓走動時畫面邊緣先畫好，也讓只露出一角的大圖（高柱、牆）不會被切掉。地圖資料完全不變。
+const MAP_DRAW_MARGIN = 2;   // 畫面四周多畫幾格（2＝總共約 400 格）
+let mapDrawRect = null;      // 這一幀要畫的範圍（世界座標像素）
+function updateMapDrawRect() {
+  if (typeof cam === 'undefined' || typeof viewW !== 'function') { mapDrawRect = null; return null; }
+  const m = MAP_DRAW_MARGIN * CELL;
+  return (mapDrawRect = { x0: cam.x - m, y0: cam.y - m, x1: cam.x + viewW() + m, y1: cam.y + viewH() + m });
+}
+// 這個範圍內有哪幾格（c0～c1、r0～r1）
+function mapDrawCells() {
+  const v = mapDrawRect || updateMapDrawRect();
+  if (!v) return { c0: 0, r0: 0, c1: COLS - 1, r1: ROWS - 1 };
+  return { c0: Math.max(0, Math.floor((v.x0 - OX) / CELL)), r0: Math.max(0, Math.floor((v.y0 - OY) / CELL)),
+    c1: Math.min(COLS - 1, Math.floor((v.x1 - OX) / CELL)), r1: Math.min(ROWS - 1, Math.floor((v.y1 - OY) / CELL)) };
+}
+// 一張大圖有沒有任何一部分在範圍內（旋轉過的圖用比較寬的範圍判斷，寧可多畫不要切掉）
+function stampInDrawRect(s) {
+  const v = mapDrawRect; if (!v) return true;
+  const t = mapTileById(s.id) || {}, w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, half = Math.max(w, h) / 2;
+  const cx = OX + s.c * CELL + (s.ox || 0) + w / 2, cy = OY + s.r * CELL + (s.oy || 0) + h / 2;
+  return cx + half > v.x0 && cx - half < v.x1 && cy + half > v.y0 && cy - half < v.y1;
+}
+// 畫某一層範圍內的小圖（格子）
+function drawLayerCellsInView(ctx, lid) {
+  const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
+  const { c0, r0, c1, r1 } = mapDrawCells();
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    const key = c + ',' + r, id = layer[key];
+    if (!id || G.mapDestroyed.has(lid + ':' + key) || chairConfig(id)) continue;
+    drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL, lid);
+  }
+}
 // 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
 function drawMapGround(ctx) {
   if (!MAP) return;
+  updateMapDrawRect();   // 每一幀先算一次這一幀要畫的範圍（render.js 的 draw 最先畫地面）
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
-    const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
-    if (!isOccLayer(lid)) for (const key in layer) { if (G.mapDestroyed.has(lid + ':' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL, lid); }
-    for (const s of (MAP.stamps || [])) if (!isElevatorStamp(s) && (s.layer || 'top') === lid && !stampIsOcc(s)) drawMapStampImg(ctx, s);
+    if (!isOccLayer(lid)) drawLayerCellsInView(ctx, lid);
+    for (const s of (MAP.stamps || [])) if (!isElevatorStamp(s) && (s.layer || 'top') === lid && !stampIsOcc(s) && stampInDrawRect(s)) drawMapStampImg(ctx, s);
   }
 }
 // 上層：'top' 圖層，永遠畫在角色上面
 function drawMapTop(ctx) {
   if (!MAP) return;
-  const layer = MAP.layers ? (MAP.layers.top || {}) : {};
-  for (const key in layer) { if (G.mapDestroyed.has('top:' + key) || chairConfig(layer[key])) continue; const [c, r] = key.split(',').map(Number); drawMapTileImg(ctx, layer[key], OX + c * CELL, OY + r * CELL, 'top'); }
+  drawLayerCellsInView(ctx, 'top');
   for (const s of (MAP.stamps || [])) {
-    if (isElevatorStamp(s)) continue;
+    if (isElevatorStamp(s) || !stampInDrawRect(s)) continue;
     if (chairConfig(s.id)) continue;
     if ((s.layer || 'top') !== 'top') continue;
     const t = mapTileById(s.id) || {};
@@ -616,7 +650,10 @@ function drawOccluderItem(ctx, it) {
 }
 function collectMapOccluders(ctx, out) {
   if (!MAP) return;
+  const v = mapDrawRect || updateMapDrawRect();
   for (const it of mapOccluders()) {
+    if (v && (it.kind === 'stamp' ? !stampInDrawRect(it.stamp)   // 在畫面範圍外：這一幀不畫
+      : (it.x1 + OX <= v.x0 || it.x0 + OX >= v.x1 || it.y1 + OY <= v.y0 || it.y0 + OY >= v.y1))) continue;
     if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
     out.push({ y: it.y, draw: () => {
       drawOccluderItem(ctx, it);
