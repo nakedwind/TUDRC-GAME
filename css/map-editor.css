@@ -237,3 +237,8 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .save-tip .save-note:first-child { padding-top: 10px; }
 .save-tip .save-note:last-child { padding-bottom: 10px; }
 .save-wrap:hover .save-tip { visibility: visible; opacity: 1; transition-delay: .4s, .4s; }
+
+/* 選取列別太長：物件名稱太長就截成「…」（滑鼠停上去看全名），讓選取列盡量跟工具排在同一排 */
+#selName { display: inline-block; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
+#selDepthInput { padding-left: 2px; padding-right: 2px; }
+#selName.full { max-width: none; }   /* 選取列反正會換到下一排時：顯示全名 */

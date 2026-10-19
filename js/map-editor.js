@@ -1834,7 +1834,21 @@ function refreshCircuitControl() {
   const picked = selectedCircuitThing(); box.classList.toggle('hidden', !picked);
   if (picked) document.getElementById('circuitNumber').value = String(picked.s?.circuit || 0);
 }
+// 物件名稱太長會截成「…」，好讓選取列擠得進工具那一排；
+// 但如果怎麼擠都會換到下一排（例如門、置物箱、電源開關有額外設定），就不截、直接顯示全名。
+function fitSelName() {
+  const nameEl = document.getElementById('selName'), bar = document.getElementById('selControls');
+  const firstTool = document.querySelector('#tools .tool');
+  if (!nameEl || !bar || !firstTool) return;
+  nameEl.classList.remove('full');   // 先用截短的名字量看看
+  const wrapped = bar.getBoundingClientRect().top - firstTool.getBoundingClientRect().top > 10;
+  nameEl.classList.toggle('full', wrapped);
+}
+let fitSelNameFrame = 0;
+function fitSelNameSoon() { cancelAnimationFrame(fitSelNameFrame); fitSelNameFrame = requestAnimationFrame(fitSelName); }   // 等選取列的按鈕都更新完再量
+window.addEventListener('resize', fitSelNameSoon);
 function refreshSelPanel() {
+  fitSelNameSoon();
   const layerSelect = document.getElementById('selLayer');
   const depthInput = document.getElementById('selDepthInput');
   const m = curMap();
@@ -1853,14 +1867,14 @@ function refreshSelPanel() {
   depthInput.value = '';
   if (!selection) {
     refreshDoorControl();
-    document.getElementById('selName').textContent = '無';
+    document.getElementById('selName').textContent = '無'; document.getElementById('selName').title = '';
     layerSelect.innerHTML = '<option value="">選取物件後設定</option>';
     refreshBaseCollisionPanel();
     return;
   }
   if (selections.length > 1) {
     refreshDoorControl();
-    document.getElementById('selName').textContent = selections.length + ' 個物件';
+    document.getElementById('selName').textContent = selections.length + ' 個物件'; document.getElementById('selName').title = '';
     layerSelect.innerHTML = '<option value="">選擇目標圖層</option>';
     LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; layerSelect.appendChild(o); });
     refreshBaseCollisionPanel(); return;
@@ -1877,6 +1891,7 @@ function refreshSelPanel() {
     const t = tileById(id) || {}; name = (t.name || '圖') + '（小圖）'; curLayer = selection.layer;
   }
   document.getElementById('selName').textContent = name;
+  document.getElementById('selName').title = name;   // 名字太長會被截成「…」，滑鼠停上去看全名
   layerSelect.innerHTML = '';
   LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; if (l.id === curLayer) o.selected = true; layerSelect.appendChild(o); });
   refreshDoorControl();
