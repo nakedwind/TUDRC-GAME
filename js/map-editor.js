@@ -159,6 +159,7 @@ let checkResult = null, hoverCell = null, painting = false, lastPaint = '', sele
 let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（大小圖都可用）
 let brushRotation = 0;
 let tempTool = null, savedBrush = null, pickResult = null;   // Alt=臨時吸管 / Ctrl=臨時選取
+let pickedBrushPending = false;   // 吸管吸到的圖還沒放進地圖：這時按右鍵＝取消這次複製，回到「選取」
 let selectionDrag = null;
 // 物件擺放用「四分之一格」對齊（10px），不用整格整格跳；地板類小圖還是整格
 const SUB = CELL / 4;
@@ -986,7 +987,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       if (id) {
         pickResult = id; const t = tileById(id) || {};
         if (tempTool === 'pick') { brush = { mode: 'pick', tile: id }; renderPalette(); setStatus('已吸取「' + (t.name || id) + '」（放開 Alt 開始畫）', '#7ee0c0'); }
-        else { selectTile(id); setStatus('已吸取「' + (t.name || id) + '」，筆刷已切換', '#7ee0c0'); }
+        else { selectTile(id); pickedBrushPending = true; setStatus('已吸取「' + (t.name || id) + '」，筆刷已切換（按右鍵取消）', '#7ee0c0'); }
       } else setStatus('這格沒有圖片可吸取', '#ffd24a');
     }
     return;
@@ -1112,6 +1113,7 @@ function dragSelectionTo(c, r) {
   draw();
 }
 cv.addEventListener('pointerdown', e => {
+  if (brush.mode === 'tile') pickedBrushPending = false;   // 吸管吸到的圖已經放下去了，右鍵就不再取消它
   playMapClickSound(); painting = true; cv.setPointerCapture(e.pointerId); pushUndo();
   const [c, r] = cellFromEvent(e); lastPaint = c + ',' + r; paintCell(c, r, true, e.shiftKey);
   if (!e.shiftKey) beginSelectionDrag(c, r);
@@ -1140,6 +1142,17 @@ const isTypingField = el => !!(el && el.closest && el.closest('input, textarea, 
 document.addEventListener('contextmenu', e => {
   if (isTypingField(e.target)) return;
   e.preventDefault();
+  // 吸管吸到的圖還沒放進地圖：取消這次複製，回到「選取」
+  if (pickedBrushPending && brush.mode === 'tile') {
+    pickedBrushPending = false;
+    brush = { mode: 'select', tile: brush.tile }; updateToolUI(); renderPalette(); draw();
+    setStatus('已取消吸管複製，回到「選取」', '#9aa4b2'); return;
+  }
+  // 還按著 Alt、已經吸到圖：放開 Alt 後回到「選取」，不會變成畫這張圖
+  if (tempTool === 'pick' && pickResult) {
+    pickResult = null; savedBrush = { mode: 'select', tile: (savedBrush || brush).tile };
+    setStatus('已取消吸管複製（放開 Alt 回到「選取」）', '#9aa4b2'); return;
+  }
   if (!selections.length && !selection) return;
   clearSelection(); setStatus('已取消選取', '#9aa4b2');
 });
@@ -1548,6 +1561,7 @@ if (tileColorInput) tileColorInput.addEventListener('input', () => {
   t.color = tileColorInput.value; saveTiles(); renderPalette(); draw();
 });
 function selectTile(id) {
+  pickedBrushPending = false;
   const selectedTile = tileById(id);
   if (activePaletteCategory !== 'all' && selectedTile && tileCategory(selectedTile) !== activePaletteCategory) {
     activePaletteCategory = tileCategory(selectedTile);
@@ -1580,7 +1594,7 @@ async function deleteTile(id) {
 // 工具按鈕
 function updateToolUI() { document.querySelectorAll('.tool').forEach(b => b.classList.toggle('sel', brush.mode === b.dataset.mode)); }
 document.querySelectorAll('.tool').forEach(btn => {
-  btn.addEventListener('click', () => { brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); });
+  btn.addEventListener('click', () => { pickedBrushPending = false; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); });
 });
 
 // Alt=臨時吸管、Ctrl=臨時選取；放開還原（吸到圖則保留新筆刷）
@@ -1595,7 +1609,7 @@ function exitTemp() {
   if (!tempTool) return;
   const keepPick = tempTool === 'pick' && pickResult, picked = pickResult;   // 吸到圖：放開後用該圖進入繪製
   tempTool = null;
-  if (keepPick) brush = { mode: 'tile', tile: picked };
+  if (keepPick) { brush = { mode: 'tile', tile: picked }; pickedBrushPending = true; }
   else brush = savedBrush || brush;
   savedBrush = null; pickResult = null;
   updateToolUI(); renderPalette();

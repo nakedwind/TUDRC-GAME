@@ -113,7 +113,7 @@
       <div id="zoombar" style="display:flex;gap:8px;align-items:center;margin:8px 0;color:#b9c3d0;font-size:13px">
         <span>🔍 縮放</span>
         <button class="btn" id="zoomOut">－</button>
-        <span id="zoomLabel">100%</span>
+        <span id="zoomLabel" title="在地圖上按住 Alt＋滑鼠滾輪也可以縮放">100%</span>
         <button class="btn" id="zoomIn">＋</button>
         <button class="btn" id="zoomFit">🔲 全覽整張</button>
         <button class="btn" id="zoom100">1:1</button>
@@ -238,6 +238,6 @@
   <script src="data/npc-locations.js?v=restaurant-npcs-20261019"></script>  <!-- NPC 平時位置（依章節） -->
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/base-editor-store.js?v=sharedtiles-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（基地編輯器自己的） -->
-  <script>EditorStore.boot(["js/base-editor.js?v=rclick-20261020", "js/base-editor-save.js?v=sharedtiles-20261020", "js/base-editor-npc.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/base-editor.js?v=pickcancel-20261020", "js/base-editor-save.js?v=sharedtiles-20261020", "js/base-editor-npc.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>
