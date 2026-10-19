@@ -13947,6 +13947,30 @@ const BASE_MAPS = [
         "layer": "overlay",
         "ox": 30,
         "oy": 10
+      },
+      {
+        "id": "tile_training_bench",
+        "c": 2,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_training_bench",
+        "c": 4,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_training_bench",
+        "c": 7,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_training_bench",
+        "c": 9,
+        "r": 20,
+        "layer": "floor"
       }
     ],
     "solid": [
@@ -14078,132 +14102,86 @@ const BASE_MAPS = [
         "4,11": "tile_containment_floor_tile",
         "4,12": "tile_containment_floor_tile",
         "4,13": "tile_containment_floor_tile",
-        "4,14": "tile_containment_floor_tile",
-        "4,15": "tile_containment_floor_tile",
         "5,10": "tile_containment_floor_tile",
         "5,11": "tile_containment_floor_tile",
         "5,12": "tile_containment_floor_tile",
         "5,13": "tile_containment_floor_tile",
-        "5,14": "tile_containment_floor_tile",
-        "5,15": "tile_containment_floor_tile",
         "6,10": "tile_containment_floor_tile",
         "6,11": "tile_containment_floor_tile",
         "6,12": "tile_containment_floor_tile",
         "6,13": "tile_containment_floor_tile",
-        "6,14": "tile_containment_floor_tile",
-        "6,15": "tile_containment_floor_tile",
         "7,10": "tile_containment_floor_tile",
         "7,11": "tile_containment_floor_tile",
         "7,12": "tile_containment_floor_tile",
         "7,13": "tile_containment_floor_tile",
-        "7,14": "tile_containment_floor_tile",
-        "7,15": "tile_containment_floor_tile",
         "8,10": "tile_containment_floor_tile",
         "8,11": "tile_containment_floor_tile",
         "8,12": "tile_containment_floor_tile",
         "8,13": "tile_containment_floor_tile",
-        "8,14": "tile_containment_floor_tile",
-        "8,15": "tile_containment_floor_tile",
         "9,10": "tile_containment_floor_tile",
         "9,11": "tile_containment_floor_tile",
         "9,12": "tile_containment_floor_tile",
         "9,13": "tile_containment_floor_tile",
-        "9,14": "tile_containment_floor_tile",
-        "9,15": "tile_containment_floor_tile",
         "10,10": "tile_containment_floor_tile",
         "10,11": "tile_containment_floor_tile",
         "10,12": "tile_containment_floor_tile",
         "10,13": "tile_containment_floor_tile",
-        "10,14": "tile_containment_floor_tile",
-        "10,15": "tile_containment_floor_tile",
         "11,10": "tile_containment_floor_tile",
         "11,11": "tile_containment_floor_tile",
         "11,12": "tile_containment_floor_tile",
         "11,13": "tile_containment_floor_tile",
-        "11,14": "tile_containment_floor_tile",
-        "11,15": "tile_containment_floor_tile",
         "12,10": "tile_containment_floor_tile",
         "12,11": "tile_containment_floor_tile",
         "12,12": "tile_containment_floor_tile",
         "12,13": "tile_containment_floor_tile",
-        "12,14": "tile_containment_floor_tile",
-        "12,15": "tile_containment_floor_tile",
         "13,10": "tile_containment_floor_tile",
         "13,11": "tile_containment_floor_tile",
         "13,12": "tile_containment_floor_tile",
         "13,13": "tile_containment_floor_tile",
-        "13,14": "tile_containment_floor_tile",
-        "13,15": "tile_containment_floor_tile",
         "14,10": "tile_containment_floor_tile",
         "14,11": "tile_containment_floor_tile",
         "14,12": "tile_containment_floor_tile",
         "14,13": "tile_containment_floor_tile",
-        "14,14": "tile_containment_floor_tile",
-        "14,15": "tile_containment_floor_tile",
         "15,10": "tile_containment_floor_tile",
         "15,11": "tile_containment_floor_tile",
         "15,13": "tile_containment_floor_tile",
-        "15,14": "tile_containment_floor_tile",
-        "15,15": "tile_containment_floor_tile",
         "16,10": "tile_containment_floor_tile",
         "16,11": "tile_containment_floor_tile",
         "16,12": "tile_containment_floor_tile",
         "16,13": "tile_containment_floor_tile",
-        "16,14": "tile_containment_floor_tile",
-        "16,15": "tile_containment_floor_tile",
         "17,10": "tile_containment_floor_tile",
         "17,11": "tile_containment_floor_tile",
         "17,12": "tile_containment_floor_tile",
         "17,13": "tile_containment_floor_tile",
-        "17,14": "tile_containment_floor_tile",
-        "17,15": "tile_containment_floor_tile",
         "18,10": "tile_containment_floor_tile",
         "18,11": "tile_containment_floor_tile",
         "18,12": "tile_containment_floor_tile",
         "18,13": "tile_containment_floor_tile",
-        "18,14": "tile_containment_floor_tile",
-        "18,15": "tile_containment_floor_tile",
         "19,10": "tile_containment_floor_tile",
         "19,11": "tile_containment_floor_tile",
         "19,12": "tile_containment_floor_tile",
         "19,13": "tile_containment_floor_tile",
-        "19,14": "tile_containment_floor_tile",
-        "19,15": "tile_containment_floor_tile",
         "20,10": "tile_containment_floor_tile",
         "20,11": "tile_containment_floor_tile",
         "20,12": "tile_containment_floor_tile",
         "20,13": "tile_containment_floor_tile",
-        "20,14": "tile_containment_floor_tile",
-        "20,15": "tile_containment_floor_tile",
         "21,10": "tile_containment_floor_tile",
         "21,11": "tile_containment_floor_tile",
         "21,12": "tile_containment_floor_tile",
         "21,13": "tile_containment_floor_tile",
-        "21,14": "tile_containment_floor_tile",
-        "21,15": "tile_containment_floor_tile",
         "22,10": "tile_containment_floor_tile",
         "22,11": "tile_containment_floor_tile",
         "22,12": "tile_containment_floor_tile",
         "22,13": "tile_containment_floor_tile",
-        "22,14": "tile_containment_floor_tile",
-        "22,15": "tile_containment_floor_tile",
         "23,10": "tile_containment_floor_tile",
         "23,11": "tile_containment_floor_tile",
         "23,12": "tile_containment_floor_tile",
         "23,13": "tile_containment_floor_tile",
-        "23,14": "tile_containment_floor_tile",
-        "23,15": "tile_containment_floor_tile",
         "15,12": "tile_containment_floor_tile",
         "3,12": "tile_containment_floor_tile",
         "3,13": "tile_containment_floor_tile",
-        "3,14": "tile_containment_floor_tile",
-        "3,15": "tile_containment_floor_tile",
         "1,12": "tile_containment_floor_tile",
         "1,13": "tile_containment_floor_tile",
-        "1,14": "tile_containment_floor_tile",
-        "2,14": "tile_containment_floor_tile",
-        "2,15": "tile_containment_floor_tile",
-        "1,15": "tile_containment_floor_tile",
         "2,12": "tile_containment_floor_tile",
         "2,13": "tile_containment_floor_tile",
         "4,2": "tile_containment_floor_tile",
@@ -14302,29 +14280,17 @@ const BASE_MAPS = [
         "10,6": "tile_containment_floor_tile",
         "11,6": "tile_containment_floor_tile",
         "8,4": "tile_containment_floor_tile",
-        "4,0": "tile_containment_floor_tile",
         "4,1": "tile_containment_floor_tile",
-        "5,0": "tile_containment_floor_tile",
         "5,1": "tile_containment_floor_tile",
-        "6,0": "tile_containment_floor_tile",
         "6,1": "tile_containment_floor_tile",
-        "7,0": "tile_containment_floor_tile",
         "7,1": "tile_containment_floor_tile",
-        "8,0": "tile_containment_floor_tile",
         "8,1": "tile_containment_floor_tile",
-        "9,0": "tile_containment_floor_tile",
         "9,1": "tile_containment_floor_tile",
-        "10,0": "tile_containment_floor_tile",
         "10,1": "tile_containment_floor_tile",
         "11,1": "tile_containment_floor_tile",
-        "11,0": "tile_containment_floor_tile",
-        "12,0": "tile_containment_floor_tile",
         "12,1": "tile_containment_floor_tile",
-        "13,0": "tile_containment_floor_tile",
         "13,1": "tile_containment_floor_tile",
         "14,1": "tile_containment_floor_tile",
-        "14,0": "tile_containment_floor_tile",
-        "15,0": "tile_containment_floor_tile",
         "15,1": "tile_containment_floor_tile"
       },
       "ground": {},
@@ -14357,9 +14323,7 @@ const BASE_MAPS = [
         "3,3": "tile_containment_wall_top_straight",
         "3,2": "tile_containment_wall_top_straight",
         "16,1": "tile_containment_wall_top_straight",
-        "16,0": "tile_containment_wall_top_straight",
-        "3,1": "tile_containment_wall_top_straight",
-        "3,0": "tile_containment_wall_top_straight"
+        "3,1": "tile_containment_wall_top_straight"
       }
     },
     "stamps": [
@@ -14384,22 +14348,8 @@ const BASE_MAPS = [
       {
         "id": "tile_mu5e3ndv",
         "c": 0,
-        "r": 12,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_containment_floor_tile",
-        "c": 23,
-        "r": 15,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_containment_floor_tile",
-        "c": 23,
-        "r": 14,
-        "layer": "floor",
-        "fx": true
+        "r": 11,
+        "layer": "top"
       },
       {
         "id": "tile_containment_floor_tile",
@@ -14483,7 +14433,7 @@ const BASE_MAPS = [
       {
         "id": "tile_mu5e3ndv",
         "c": 23,
-        "r": 12,
+        "r": 11,
         "layer": "top",
         "fx": true
       },
@@ -14569,98 +14519,92 @@ const BASE_MAPS = [
       {
         "id": "tile_mu5e3ndv",
         "c": 3,
-        "r": -1,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mu5e3ndv",
-        "c": 16,
-        "r": -1,
+        "r": 0,
         "layer": "ground3"
       },
       {
         "id": "tile_containment_wall",
         "c": 4,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 5,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 6,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 7,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 8,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 9,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 10,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 11,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 12,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 13,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 14,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_containment_wall",
         "c": 15,
-        "r": -1,
+        "r": 0,
         "layer": "ground",
-        "oy": 20
+        "oy": 30
       },
       {
         "id": "tile_eoc_drawer_unit",
@@ -14740,25 +14684,31 @@ const BASE_MAPS = [
       {
         "id": "tile_training_bench",
         "c": 5,
-        "r": 13,
+        "r": 12,
         "layer": "floor"
       },
       {
         "id": "tile_training_bench",
         "c": 7,
-        "r": 13,
+        "r": 12,
         "layer": "floor"
       },
       {
         "id": "tile_training_bench",
         "c": 10,
-        "r": 13,
+        "r": 12,
         "layer": "floor"
       },
       {
         "id": "tile_training_bench",
         "c": 12,
-        "r": 13,
+        "r": 12,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 16,
+        "r": 0,
         "layer": "floor"
       }
     ],
@@ -14771,8 +14721,6 @@ const BASE_MAPS = [
       "22,11",
       "23,12",
       "23,13",
-      "23,15",
-      "23,14",
       "16,10",
       "16,9",
       "16,7",
@@ -14782,11 +14730,8 @@ const BASE_MAPS = [
       "16,3",
       "16,2",
       "16,1",
-      "16,0",
       "3,1",
-      "3,0",
       "3,2",
-      "3,3",
       "3,4",
       "3,5",
       "2,8",
@@ -14804,26 +14749,13 @@ const BASE_MAPS = [
       "0,11",
       "0,12",
       "0,13",
-      "0,15",
-      "0,14",
       "0,10",
       "0,9",
       "1,9",
       "1,8",
       "0,8",
       "4,1",
-      "5,0",
-      "6,0",
-      "7,0",
-      "8,0",
-      "9,0",
-      "10,0",
-      "11,0",
       "15,1",
-      "15,0",
-      "14,0",
-      "13,0",
-      "4,0",
       "5,1",
       "6,1",
       "7,1",
@@ -14832,7 +14764,6 @@ const BASE_MAPS = [
       "10,1",
       "11,1",
       "12,1",
-      "12,0",
       "14,1",
       "13,1",
       "4,8",
@@ -14844,24 +14775,14 @@ const BASE_MAPS = [
       "4,7",
       "4,6",
       "4,5",
-      "4,4",
-      "4,3",
-      "15,3",
-      "15,4",
       "15,5",
       "15,6",
       "12,6",
       "9,6",
       "7,5",
-      "7,4",
-      "7,3",
       "7,6",
       "9,5",
       "12,5",
-      "12,3",
-      "9,3",
-      "9,4",
-      "12,4",
       "5,9",
       "8,9",
       "11,9",
@@ -14877,7 +14798,33 @@ const BASE_MAPS = [
       "13,2",
       "14,2",
       "15,2",
-      "4,2"
+      "4,2",
+      "17,0",
+      "5,3",
+      "6,3",
+      "5,4",
+      "8,4",
+      "6,4",
+      "7,4",
+      "7,3",
+      "4,4",
+      "4,3",
+      "3,3",
+      "8,3",
+      "9,3",
+      "9,4",
+      "10,4",
+      "10,3",
+      "11,3",
+      "11,4",
+      "12,3",
+      "12,4",
+      "13,4",
+      "13,3",
+      "14,3",
+      "14,4",
+      "15,3",
+      "15,4"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14913,22 +14860,6 @@ const BASE_MAPS = [
         -21,
         0
       ],
-      "4,4": [
-        -22,
-        0
-      ],
-      "4,3": [
-        -21,
-        0
-      ],
-      "7,3": [
-        -18,
-        0
-      ],
-      "7,4": [
-        -17,
-        0
-      ],
       "7,5": [
         -17,
         0
@@ -14953,14 +14884,6 @@ const BASE_MAPS = [
         18,
         0
       ],
-      "9,4": [
-        18,
-        0
-      ],
-      "9,3": [
-        20,
-        0
-      ],
       "12,7": [
         20,
         0
@@ -14971,22 +14894,6 @@ const BASE_MAPS = [
       ],
       "12,5": [
         21,
-        0
-      ],
-      "12,4": [
-        20,
-        0
-      ],
-      "12,3": [
-        18,
-        0
-      ],
-      "15,3": [
-        23,
-        0
-      ],
-      "15,4": [
-        23,
         0
       ],
       "15,5": [
@@ -15026,7 +14933,7 @@ const BASE_MAPS = [
     "npcs": false,
     "portals": [],
     "cols": 24,
-    "rows": 16,
+    "rows": 14,
     "spawnZone": []
   }
 ];
