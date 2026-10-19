@@ -1671,9 +1671,11 @@ function frame(ts) {
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
   draw();
   // 溫特手上拿著槍（戰鬥區、任何槍種、沒開選單）而且走出營地警戒線外：滑鼠游標換成準心，方便瞄準怪物
-  // 在警戒線裡面（基地內）就算拿著槍也是一般游標。樣式在 css/style.css 的 cursor-crosshair。
+  // 在警戒線裡面（基地內）、或正在放置建築／道具、拆除、放塗鴉時，就算拿著槍也是一般游標。樣式在 css/style.css 的 cursor-crosshair。
+  const placingThing = !!(G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish'))
+    || (typeof graffitiPlace !== 'undefined' && !!graffitiPlace);
   const armed = !MAP_SAFE && G.running && !menuOpen && !!G.player && G.player.hp > 0 && playerWeapon(G.player).id !== 'none'
-    && !insideWarningLine(G.player.x, G.player.y);
+    && !insideWarningLine(G.player.x, G.player.y) && !placingThing;
   if (armed !== cv.classList.contains('cursor-crosshair')) cv.classList.toggle('cursor-crosshair', armed);
   if (typeof sanityAfterDraw === 'function') sanityAfterDraw();   // SP 低於 20：殘影（js/sanity.js）
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
