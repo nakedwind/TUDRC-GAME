@@ -1,5 +1,6 @@
-/* ===== 地圖載入器：把「地圖編輯器」做的地圖接進遊戲 =====
-   讀 data/maps.js 的第一張地圖，套用它的：
+/* ===== 地圖載入器：把「地圖編輯器」「基地編輯器」做的地圖接進遊戲 =====
+   地圖清單是 MAPS_DEFAULT（js/map-data.js 把 data/maps.js 戰鬥地圖、data/base-maps.js 基地地圖合在一起），
+   載入其中一張，套用它的：
    - solid(不可穿透)→固定牆、breakable(可破壞)→障礙物
    - camp(營地)→怪物目標
    - rules→覆蓋 data/balance.js 的數值
@@ -19,13 +20,15 @@ if (/[?&]preview=1(&|$)/.test(location.search)) {
 // ---- 磚塊登錄（內建 + 編輯器匯出的自訂磚塊）----
 const MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'object2', 'object3', 'object4', 'overlay', 'top'];
 const TILE_REGISTRY = {};
-function buildTileRegistry() {
+// map＝要載入的地圖：戰鬥地圖用地圖編輯器的素材設定、基地用基地編輯器的（js/map-data.js 的 mapTileCatalog）
+function buildTileRegistry(map) {
   const builtin = [
     { id: 'floor', role: 'floor', file: 'images/background/Back-room-floor.png', w: 1, h: 1 },
     { id: 'wall', role: 'wall', file: null, w: 1, h: 1 },
     { id: 'obstacle', role: 'obstacle', file: null, w: 1, h: 1 },
   ];
   const custom = (PREVIEW && PREVIEW.tiles) ? PREVIEW.tiles
+    : (typeof mapTileCatalog === 'function') ? mapTileCatalog(map)
     : ((typeof TILES_CUSTOM !== 'undefined' && TILES_CUSTOM) ? TILES_CUSTOM : []);
   [...builtin, ...custom].forEach(t => {
     const entry=typeof ORE_TYPES!=='undefined'&&(ORE_TYPES[String(t.id).replace(/^tile_obstacle_/, '')] || Object.values(ORE_TYPES).find(spec=>spec.file===t.file));
@@ -174,8 +177,9 @@ function switchMap(i) {                 // 切換到第 i 張並重新載入地�
   if (i >= 0 && i < list.length) { MAP_INDEX = i; initMap(); }
 }
 function initMap() {
-  buildTileRegistry();
-  MAP = pickMap();
+  const next = pickMap();
+  buildTileRegistry(next);
+  MAP = next;
   if(typeof resetMapPower==='function')resetMapPower();
   preloadMapTiles(MAP);
   openElevatorStamp = null;

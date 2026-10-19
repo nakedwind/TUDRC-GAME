@@ -1,7 +1,9 @@
 const CHAIR_CANDIDATE = /chair|sofa|bench|seating|bed|stool|椅|沙發|長椅|床|凳/i;
-const savedTiles = (() => { try { return JSON.parse((typeof EditorStore !== 'undefined' ? EditorStore : localStorage).getItem('tudrc_tiles_v3') || 'null'); } catch (_) { return null; } })();   // 地圖編輯器的素材暫存（js/editor-store.js）
+// 兩個地圖編輯器的素材暫存（還沒存到專案的新素材也列得出來）：舊的共用暫存 → 地圖編輯器 → 基地編輯器（js/chair-editor-store.js）
+const savedTilesOf = key => { try { const v = JSON.parse((typeof EditorStore !== 'undefined' ? EditorStore : localStorage).getItem(key) || 'null'); return Array.isArray(v) ? v : []; } catch (_) { return []; } };
+const savedTiles = ['tudrc_tiles_v3', 'tudrc_battle_tiles_v1', 'tudrc_base_tiles_v1'].flatMap(savedTilesOf);
 const tileById = new Map();
-for (const tile of [...TILES_CUSTOM, ...(Array.isArray(savedTiles) ? savedTiles : [])]) {
+for (const tile of [...TILES_CUSTOM, ...savedTiles]) {   // TILES_CUSTOM：兩個地圖檔合起來的素材（js/map-data.js）
   if (tile && tile.id && tile.file) tileById.set(tile.id, tile);
 }
 const candidates = [...tileById.values()].filter(tile => {

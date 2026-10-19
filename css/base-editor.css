@@ -1,4 +1,5 @@
-/* ===== 地圖編輯器 — 樣式 ===== */
+/* ===== 🏠 基地編輯器 — 樣式 =====
+   只給 基地編輯器.html 用；地圖編輯器有自己的一份 css/map-editor.css，改這裡不會影響它。 */
 * { box-sizing: border-box; }
 body {
   margin: 0; background: #14171c; color: #e6e9ee;

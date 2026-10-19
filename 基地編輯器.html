@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 基地編輯器</title>
-<link rel="stylesheet" href="css/editor.css?v=locker-control-inline-20261017">
+<link rel="stylesheet" href="css/base-editor.css?v=split-20261020">   <!-- 基地編輯器自己的樣式（地圖編輯器是 css/map-editor.css） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* 基地編輯器：章節＆NPC 面板 */
@@ -163,8 +163,7 @@
         <div class="field col"><label>地圖名稱</label><input id="f_name" class="wide" type="text"></div>
         <div class="field col"><label>說明</label><input id="f_desc" class="wide" type="text"></div>
 
-        <div class="field col"><label><input id="f_safe" type="checkbox"> 安全場景（沒有怪物、沒有黑幕）</label></div>
-        <div class="field col"><small>取消「安全場景」＝這張地圖改成戰鬥地圖，會搬到地圖編輯器。</small></div>
+        <div class="field col"><small>這裡的地圖都是<b>基地（安全區域）</b>：沒有怪物、沒有黑幕。戰鬥地圖請到 <a href="地圖編輯器.html">🗺️ 地圖編輯器</a>。想把地圖搬過去：「📤 匯出這張地圖」→ 到地圖編輯器「📥 匯入地圖」。</small></div>
         <div hidden><label><input id="f_npcs" type="checkbox"> 場景 NPC</label></div>
 
         <div class="subhead">地圖大小</div>
@@ -193,13 +192,13 @@
       </details>
 
       <div class="panel">
-        <h2>💾 匯出地圖（maps.js，跟地圖編輯器是同一份）</h2>
+        <h2>💾 匯出基地地圖（data/base-maps.js）</h2>
         <div class="exrow">
           <button class="btn primary" id="genExport">產生匯出文字</button>
           <button class="btn" id="copyExport">複製</button>
-          <button class="btn" id="downloadExport">下載 maps.js</button>
+          <button class="btn" id="downloadExport">下載 base-maps.js</button>
         </div>
-        <textarea id="exportOut" readonly placeholder="按「產生匯出文字」後，這裡會出現要貼回 data/maps.js 的內容"></textarea>
+        <textarea id="exportOut" readonly placeholder="按「產生匯出文字」後，這裡會出現要貼回 data/base-maps.js 的內容"></textarea>
         <div class="exrow">
           <button class="btn danger" id="resetFile">從檔案重設（丟棄瀏覽器暫存）</button>
         </div>
@@ -221,12 +220,11 @@
     </div>
   </div>
 
-  <!-- 依序載入（EDITOR_MODE＝base：編輯器只顯示基地／安全區域地圖） -->
-  <script>const EDITOR_MODE = 'base';</script>
+  <!-- 依序載入（基地編輯器只管基地／安全區域地圖；程式、暫存、存檔都跟地圖編輯器分開） -->
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=loofah2-20261019"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=loofah-20261019"></script>
-  <script src="data/maps.js?v=loofah-20261019"></script>        <!-- 地圖資料 -->
+  <script src="data/base-maps.js?v=split-20261020"></script>   <!-- 基地地圖資料（BASE_TILES、BASE_MAPS） -->
   <script src="data/supplies.js"></script>
   <script src="data/items.js?v=locker-loot-20261017"></script>
   <script src="data/equipment.js?v=locker-loot-20261017"></script>
@@ -236,7 +234,7 @@
   <script src="data/characters.js?v=cael-20261019"></script>       <!-- 角色名單 -->
   <script src="data/npc-locations.js?v=restaurant-npcs-20261019"></script>  <!-- NPC 平時位置（依章節） -->
   <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/editor-store.js?v=psave-20261016"></script>   <!-- 地圖暫存放在瀏覽器資料庫 -->
-  <script>EditorStore.boot(["js/editor.js?v=mapio-20261019", "js/editor-save.js?v=psave-20261016", "js/base-editor.js?v=cleanwaves-20261017"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script src="js/base-editor-store.js?v=split-20261020"></script>   <!-- 地圖暫存放在瀏覽器資料庫（基地編輯器自己的） -->
+  <script>EditorStore.boot(["js/base-editor.js?v=split-20261020", "js/base-editor-save.js?v=split-20261020", "js/base-editor-npc.js?v=split-20261020"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
 </body>
 </html>

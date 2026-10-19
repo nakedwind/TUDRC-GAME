@@ -1,0 +1,200 @@
+/* ===== 🗺️ 地圖編輯器（戰鬥地圖）— 樣式 =====
+   只給 地圖編輯器.html 用；基地編輯器有自己的一份 css/base-editor.css，改這裡不會影響它。 */
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: #14171c; color: #e6e9ee;
+  font-family: "Microsoft JhengHei", "PingFang TC", sans-serif;
+  padding: 12px; min-height: 100vh;
+}
+h1 { font-size: 18px; margin: 0 0 10px; color: #8fd3ff; font-weight: 600; }
+a.backlink { color: #8fd3ff; font-size: 13px; text-decoration: none; }
+
+.layout { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
+.left { flex: 1 1 720px; min-width: 0; }
+.right { flex: 0 0 300px; min-width: 260px; }
+
+/* 上方：地圖選擇列 */
+#mapbar {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+  background: #1d222b; padding: 8px 10px; border-radius: 8px; margin-bottom: 8px;
+}
+#mapbar select { background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 6px; padding: 5px 8px; font-size: 14px; }
+.btn { background: #232a35; border: 1px solid #333c49; color: #e6e9ee; padding: 6px 10px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+.btn:hover { border-color: #8fd3ff; }
+.btn.danger { border-color: #7a3540; }
+.btn.primary { background: #2b6cb0; border-color: #2b6cb0; color: #fff; }
+.btn.off { color: #697382; background: #181d24; }
+.btn.on { border-color: #b39ddb; background: #3a2f55; color: #fff; }
+
+/* 畫布：地圖比畫面大時，外框出現捲軸，可捲動編輯 */
+#wrap { position: relative; width: 100%; max-width: none; overflow: auto; max-height: 88vh; }
+#zoombar { flex-wrap: wrap; }
+body.wide-editor .right { display: none; }
+body.wide-editor .left { flex-basis: 100%; }
+body.wide-editor #wrap { max-height: 92vh; }
+body.wide-editor #expandEditor { border-color: #8fd3ff; background: #2b526b; }
+canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; height: auto; cursor: crosshair; touch-action: none; }
+
+/* 圖層切換（右側・直排）*/
+#layerbar { display: flex; flex-direction: column; gap: 8px; align-items: stretch; background: #1d222b; padding: 10px 12px; border-radius: 8px; margin-bottom: 10px; font-size: 13px; }
+.layerbar-title { font-size: 14px; color: #8fd3ff; font-weight: 600; }
+#layerBtns { display: flex; flex-direction: column; gap: 6px; }
+.layer-group { display: flex; align-items: stretch; width: 100%; }
+.layer { flex: 1; background: #232a35; border: 2px solid #333c49; color: #e6e9ee; padding: 7px 12px; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 13px; text-align: left; }
+.layer.sel { border-color: #b39ddb; background: #3a2f55; color: #fff; }
+.layer-eye { width: 40px; border: 2px solid #333c49; border-left: 0; border-radius: 0 8px 8px 0; background: #232a35; color: #8fd3ff; cursor: pointer; font-size: 14px; }
+.layer-eye:hover { background: #2b3a4a; }
+.layer-eye.off { color: #697382; background: #181d24; }
+.layer-lock { width: 36px; border: 2px solid #333c49; border-left: 0; border-right: 0; background: #232a35; color: #697382; cursor: pointer; font-size: 13px; }
+.layer-lock:hover { background: #2b3a4a; }
+.layer-lock.on { color: #ffd479; background: #3a3320; }
+.layerhint { color: #9aa4b2; font-size: 11px; line-height: 1.5; }
+
+/* 磚塊調色盤 */
+#palette { background: #1d222b; padding: 8px; border-radius: 8px; margin-bottom: 8px; }
+.palette-tabs { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+.palette-tab {
+  border: 1px solid #3a4656; border-radius: 999px; background: #232a35; color: #b9c3cf;
+  padding: 6px 11px; cursor: pointer; font-size: 12px;
+}
+.palette-tab:hover { border-color: #8fd3ff; color: #fff; }
+.palette-tab.sel { border-color: #8fd3ff; background: #2b526b; color: #fff; }
+.palette-tab .count { color: #8fd3ff; margin-left: 3px; font-variant-numeric: tabular-nums; }
+.palette-grid { display: flex; gap: 6px; flex-wrap: wrap; align-items: stretch; }
+.palette-empty { width: 100%; padding: 14px; color: #7f8b99; font-size: 12px; text-align: center; }
+.tile { position: relative; width: 66px; background: #232a35; border: 2px solid #333c49; border-radius: 8px; padding: 4px; cursor: pointer; text-align: center; }
+.tile.has-image { width: 96px; }
+.tile.sel { border-color: #8fd3ff; background: #2b3a4a; }
+.tile .thumb {
+  display: block; width: 100%; height: 40px; object-fit: contain; border-radius: 4px;
+  image-rendering: pixelated;
+  background-color: #0e1116;
+  background-image:
+    linear-gradient(45deg, #1b222c 25%, transparent 25%),
+    linear-gradient(-45deg, #1b222c 25%, transparent 25%),
+    linear-gradient(45deg, transparent 75%, #1b222c 75%),
+    linear-gradient(-45deg, transparent 75%, #1b222c 75%);
+  background-size: 12px 12px;
+  background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+}
+.tile.has-image .thumb { height: 68px; }
+.tile .thumb.swatch.floor { background: #20262f; }
+.tile .thumb.swatch.wall { background: #3f434b; border: 1px solid #565b64; }
+.tile .thumb.swatch.obstacle { background: #7a5a3a; }
+.tile .tname { display: block; font-size: 11px; margin-top: 3px; }
+.tile small { display: block; font-size: 10px; color: #9aa4b2; }
+.tile .del { position: absolute; top: -6px; right: -6px; width: 18px; height: 18px; line-height: 16px; background: #7a3540; color: #fff; border: none; border-radius: 50%; font-size: 12px; cursor: pointer; display: none; }
+.tile:hover .del { display: block; }
+
+/* 工具列 */
+#tools { display: flex; gap: 8px; margin: 8px 0; flex-wrap: wrap; }
+.tool { background: #232a35; border: 2px solid #333c49; color: #e6e9ee; padding: 7px 12px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+.tool small { display: block; color: #9aa4b2; font-size: 11px; margin-top: 2px; }
+.tool.sel { border-color: #8fd3ff; background: #2b3a4a; }
+#tools .sep { width: 1px; align-self: stretch; background: #3a4553; margin: 2px 4px; }
+.color-block-panel {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  margin: 8px 0; padding: 9px 10px; border: 1px solid #3a4656; border-radius: 8px;
+  background: #1d222b; color: #c3ccd8; font-size: 13px;
+}
+.color-block-panel strong { color: #8fd3ff; }
+.color-block-panel label { display: flex; align-items: center; gap: 5px; }
+.color-block-panel input[type="text"], .color-block-panel input[type="number"] {
+  width: 82px; padding: 5px 7px; border: 1px solid #3a4656; border-radius: 5px;
+  background: #141920; color: #e6e9ee;
+}
+.color-block-panel input[type="color"], #tileColor {
+  width: 36px; height: 30px; padding: 2px; border: 1px solid #3a4656; border-radius: 5px;
+  background: #141920; cursor: pointer;
+}
+
+.hidden { display: none !important; }
+/* 選取控制列：選到物件才出現（class hidden 收起，不占位置）*/
+#selControls { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; background: #2b3a4a; border: 1px solid #3d5468; padding: 8px 10px; border-radius: 8px; margin: 6px 0; font-size: 13px; }
+#selControls .btn { padding: 5px 10px; }
+#selControls select { background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; padding: 4px 6px; font-size: 13px; }
+#selControls b { color: #ffd479; }
+#selControls :disabled { opacity: .45; cursor: not-allowed; }
+#selControls .btn:disabled:hover { border-color: #333c49; }
+#selControls { column-gap: 6px; }
+#selControls .btn { padding-left: 8px; padding-right: 8px; }
+#lockerLootControl { display: inline-flex; align-items: center; gap: 4px; margin-left: auto; flex: 0 0 auto; white-space: nowrap; font-size: 12px; }
+#lockerLootControl.hidden { display: none; }
+#selControls #lockerLootItem { width: 132px; min-width: 0; font-size: 12px; }
+#selControls #lockerLootQty { width: 44px !important; }
+
+.base-collision-panel {
+  margin: 6px 0 10px; padding: 10px; border: 1px solid #826c3f; border-radius: 8px;
+  background: #29261d; color: #d8d0bd; font-size: 12px;
+}
+.base-collision-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.base-collision-head strong { color: #ffd479; }
+.base-collision-head label { display: flex; align-items: center; gap: 5px; }
+.base-collision-head input {
+  width: 82px; padding: 4px 6px; border: 1px solid #554c39; border-radius: 5px;
+  background: #171a1f; color: #fff; text-align: right;
+}
+.base-collision-panel p { margin: 7px 0; color: #b9b09d; }
+.base-collision-panel p b { color: #ff7777; }
+.base-collision-panel p b.depth-help { color: #55d9ff; }
+.base-collision-grid { display: grid; gap: 2px; width: max-content; padding: 5px; background: #11151a; border-radius: 6px; }
+.base-collision-cell {
+  width: 23px; height: 23px; padding: 0; border: 1px solid #43505e; border-radius: 2px;
+  background: #26313a; cursor: pointer;
+}
+.base-collision-cell:hover { border-color: #8fd3ff; }
+.base-collision-cell.blocked { background: rgba(220,65,65,.78); border-color: #ff7777; }
+
+#status { font-size: 12px; color: #7ee0c0; min-height: 16px; margin: 2px 0; }
+#hint { font-size: 12px; color: #9aa4b2; line-height: 1.7; }
+
+/* 右側：規則面板 */
+.panel { background: #1d222b; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+.panel h2 { font-size: 14px; margin: 0 0 8px; color: #8fd3ff; }
+
+/* 可收合面板 */
+details.collapsible > summary.panel-head {
+  font-size: 14px; color: #8fd3ff; font-weight: 600; cursor: pointer;
+  list-style: none; display: flex; align-items: center; gap: 6px; user-select: none;
+}
+details.collapsible > summary.panel-head::-webkit-details-marker { display: none; }
+details.collapsible > summary.panel-head::before {
+  content: '▾'; font-size: 12px; color: #8fd3ff; transition: transform .15s;
+}
+details.collapsible:not([open]) > summary.panel-head::before { transform: rotate(-90deg); }
+details.collapsible[open] > .panel-body { margin-top: 8px; }
+.field { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin: 6px 0; font-size: 13px; }
+.field label { color: #c3ccd8; }
+.field input { width: 90px; background: #232a35; color: #e6e9ee; border: 1px solid #333c49; border-radius: 5px; padding: 4px 6px; font-size: 13px; text-align: right; }
+.field input.wide { width: 100%; text-align: left; }
+.field.col { flex-direction: column; align-items: stretch; }
+.field.col label { margin-bottom: 3px; }
+.subhead { font-size: 12px; color: #ffd479; margin: 10px 0 2px; }
+/* 地圖尺寸：目前寬高與四側調整放在同一區塊。 */
+.map-size-panel { margin-top: 6px; padding: 10px; border: 1px solid #374452; border-radius: 9px; background: #1a2029; }
+.map-size-current { display: grid; grid-template-columns: minmax(0,1fr) auto minmax(0,1fr); align-items: center; gap: 4px; font-size: 12px; color: #d7e4ef; }
+.map-size-current label { display: flex; align-items: center; gap: 2px; white-space: nowrap; }
+.map-size-current input, .map-size-current select { border: 1px solid #52647a; border-radius: 5px; background: #232d3a; color: #fff; font: inherit; text-align: center; height: 29px; }
+.map-size-current input { width: 42px; min-width: 0; padding: 3px 1px; }
+.map-size-current select { width: 44px; padding: 2px 0; cursor: pointer; }
+.map-size-current > span { color: #8ea6b8; }
+.map-size-note { margin: 7px 0 9px; color: #9eafbd; font-size: 11px; line-height: 1.5; }
+.map-size-note:last-child { margin-bottom: 0; }
+
+/* 匯出區 */
+#exportOut { width: 100%; height: 150px; background: #0e1116; color: #b7c2d0; border: 1px solid #333c49; border-radius: 6px; padding: 8px; font-family: monospace; font-size: 11px; resize: vertical; }
+.exrow { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+
+/* ===== 工具列：兩排（工具／地圖），少用的放在「⋯ 更多」 ===== */
+.toolrow { display: flex; gap: 8px; margin: 6px 0; flex-wrap: wrap; align-items: center; }
+.tool-label { flex: none; min-width: 58px; color: #8fd3ff; font-size: 12px; font-weight: 700; }
+.toolrow-gap { flex: 1; }
+.tool-more { position: relative; }
+.tool-more > summary { list-style: none; user-select: none; }
+.tool-more > summary::-webkit-details-marker { display: none; }
+.tool-more[open] > summary { border-color: #8fd3ff; }
+.tool-more-menu { position: absolute; z-index: 20; top: calc(100% + 4px); left: 0; display: grid; gap: 6px; min-width: 200px; padding: 8px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.tool-more-menu .btn { text-align: left; }
+#saveProject { font-weight: 700; }
+.save-note { margin: 6px 0 0; color: #8c98a6; font-size: 12px; line-height: 1.5; }
+.save-note a { color: #8fd3ff; }

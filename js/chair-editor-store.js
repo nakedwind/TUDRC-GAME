@@ -1,13 +1,12 @@
-/* ===== 編輯器存檔空間 =====
-   地圖、素材的暫存原本放在瀏覽器的 localStorage（大約只有 5MB，地圖越畫越多會突然存不進去）。
-   現在改放到瀏覽器的資料庫（IndexedDB，空間大很多），第一次打開時會自動把舊的暫存搬過去。
+/* ===== 🪑 椅子編輯器：讀地圖編輯器、基地編輯器的素材暫存 =====
+   椅子編輯器要列出「還沒存到專案、只在編輯器暫存裡」的新素材，所以要讀兩個地圖編輯器放在瀏覽器資料庫（IndexedDB）的素材暫存。
+   這裡只拿來讀，不會改動兩個編輯器暫存的內容。
    用法：頁面先載入這個檔案，再用 EditorStore.boot([...]) 依序載入編輯器程式（等資料庫讀好才開始）。
-   編輯器裡讀寫地圖／素材暫存改用 EditorStore.getItem / setItem / removeItem（用法跟 localStorage 一樣）。
-   其他小設定照舊放 localStorage。
 */
 const EditorStore = (() => {
   const DB_NAME = 'tudrc_editor', STORE = 'kv';
-  const BIG = new Set(['tudrc_maps_v4', 'tudrc_tiles_v3']);   // 放進資料庫的大資料
+  // 地圖編輯器、基地編輯器各自的素材暫存；最後一個是分開之前兩邊共用的舊暫存（js/chair-editor.js 會依序讀）
+  const BIG = new Set(['tudrc_battle_tiles_v1', 'tudrc_base_tiles_v1', 'tudrc_tiles_v3']);
   const cache = new Map();
   let db = null, failed = null;
   const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -58,13 +57,6 @@ const EditorStore = (() => {
     async getRaw(k) { if (!db) return null; try { return await req(db.transaction(STORE).objectStore(STORE).get(k)); } catch (_) { return null; } },
     async setRaw(k, v) { if (!db) return; const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).put(v, k); },
     usingDatabase: () => !!db,
-    // 用了多少：地圖、素材各多大；瀏覽器還能用多少
-    async usage() {
-      const size = k => (cache.get(k) || '').length * 2;
-      let quota = null, used = null;
-      try { if (navigator.storage && navigator.storage.estimate) { const e = await navigator.storage.estimate(); quota = e.quota; used = e.usage; } } catch (_) {}
-      return { maps: size('tudrc_maps_v4'), tiles: size('tudrc_tiles_v3'), quota, used, db: !!db };
-    },
     // 等資料庫讀好，再依序載入編輯器的程式檔
     boot(srcs, onDone) {   // onDone：全部載入完成後執行
       load().finally(() => {
