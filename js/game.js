@@ -1544,7 +1544,7 @@ function updatePlayerAttack(dt) {
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
     best.hp -= shotDmg; markHit(critMul);
-    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');
+    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60, true); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');
     best = null;
   }
   if (best) {
@@ -1555,7 +1555,7 @@ function updatePlayerAttack(dt) {
     markHit(critMul);                       // 準星旁閃一下命中標記
     best.hitT = Math.max(best.hitT || 0, .14); best.hitColor = '#bfe0ff';
     enemyHitReact(best, p.x, p.y, !!critMul);   // 爆擊算重擊（會擊退、硬直）
-    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 30);
+    if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 30, true);   // 溫特開槍：算成就
     else flashDmg('-' + shotDmg, best.x, best.y - 26, '#bfe0ff');
     sfxMonsterHit(best, 0.48, 'player');
   }

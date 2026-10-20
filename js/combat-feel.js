@@ -444,8 +444,9 @@ function rollCrit(kind) {
   return Math.random() < c.chance ? c.mul : 0;
 }
 // 爆擊傷害數字：金色大字＋「爆擊」小標，停留比較久
-function flashCrit(text, x, y) {
-  addStat('crits');   // 成就計數
+// byPlayer＝溫特自己開槍打出的爆擊：只有這種才算進成就（隊員的爆擊太常發生，算進去成就太好拿）
+function flashCrit(text, x, y, byPlayer = false) {
+  if (byPlayer) addStat('crits');   // 成就計數（js/achievements.js 的「打出 N 次爆擊」）
   G.effects.push({ dmg: true, crit: true, text, x, y, vy: -40, life: .95, life0: .95, color: '#ffd84a' });
   G.effects.push({ ring: true, x, y: y + 18, r: 6, r2: 30, life: .25, life0: .25, color: '#ffe27a' });
   if (G.player && Math.hypot(G.player.x - x, G.player.y - y) <= SHAKE_FEEL.range * CELL) addHitstop(.04);
