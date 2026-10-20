@@ -11,7 +11,8 @@ const SFX = (() => {
   const baseFiles = {
     button: '介面/按鈕.mp3',
     menu: '介面/開選單.mp3',
-    aidHover: '介面/help_choose_SE.mp3',   // 用急救包選隊員：滑鼠移到某位隊員的頭像上（js/team.js）
+    aidHover: '介面/help_choose_SE.mp3',   // 用急救包選隊員：滑鼠移到某位隊員的頭像上（js/team.js、js/equipment.js）
+    aidCannot: '介面/help_choose_can_not.mp3',   // 點急救包但沒有人受傷（js/equipment.js）
     switch: '介面/切換.mp3',
     blip: '介面/對話框下一頁音效.mp3',
     place: '設施/放置.mp3',

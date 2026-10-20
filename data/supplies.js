@@ -11,7 +11,7 @@ const SUPPLIES = [
   // ---- 後室道具（special：基地的商店不賣，只在後室的店買得到、或在後室撿到）----
   //   act：在背包按「使用」或快捷鍵時做什麼（firstaid 急救包 H、adrenaline 腎上腺素 J）；note：背包裡的使用說明
   { id:'thermos', name:'杏仁水保溫杯', kind:'medical', use:'sp', restore:70, price:55, special:true, image:'images/裝備/almond-water-thermos.png', desc:'一整杯溫熱的杏仁水，能恢復大量 SP。' },
-  { id:'firstaid', name:'急救包', kind:'medical', act:'firstaid', price:60, special:true, image:'images/裝備/first-aid-kit.png', effect:'⛑️ 治療隊友', desc:'按 H（或點下方的急救包），再點左上角要治療的隊員頭像；要站在隊員旁邊，倒地的也能救起來。不能用在自己身上（溫特補血請用醫療包）。用掉一個。' },
+  { id:'firstaid', name:'急救包', kind:'medical', act:'firstaid', price:60, special:true, image:'images/裝備/first-aid-kit.png', effect:'⛑️ 治療隊友', desc:'按 H（或點下方的急救包），再點要治療的隊員頭像（左上角或急救包上方都可以）；要站在隊員旁邊，倒地的也能救起來。不能用在自己身上（溫特補血請用醫療包）。用掉一個。' },
   { id:'adrenaline', name:'腎上腺素', kind:'medical', act:'adrenaline', price:80, special:true, image:'images/裝備/adrenaline-injector.png', effect:'💉 加速', desc:'按 J 注射：一段時間內跑得更快，藥效退了會短暫變慢。用掉一個。' },
   { id:'graffiti-red', name:'塗鴉筆（紅）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-red.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個紅色記號，會一直留在那裡。畫一個用掉一支。' },
   { id:'graffiti-blue', name:'塗鴉筆（藍）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-blue.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個藍色記號，會一直留在那裡。畫一個用掉一支。' },

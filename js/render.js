@@ -580,6 +580,42 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.strokeStyle='rgba(143,211,255,.85)';ctx.lineWidth=1.5;ctx.stroke();
   ctx.fillStyle='#e6ebf2';ctx.textAlign='center';ctx.fillText(label,cx,y+17);
 }
+// ---- 靠近隊員時頭上的選項：上面「急救」、下面「疏導」，用滑鼠點（疏導也可以照舊按 E）----
+// 滑鼠停在哪個選項上，那個就亮起來：急救＝粉紅色（跟急救包按鈕按下去一樣）、疏導＝亮藍色（跟背包按鈕一樣）。
+// 畫出來的位置記在 towerPrompts，js/game.js 用它判斷滑鼠有沒有點到。
+let towerPrompts = [], towerPromptHover = null;
+const TOWER_PROMPT_STYLE = {
+  firstaid: { line: 'rgba(255,138,138,.55)', hot: '#ff8a8a', glow: 'rgba(255,138,138,.6)' },
+  soothe:   { line: 'rgba(143,211,255,.55)', hot: '#8fd3ff', glow: 'rgba(143,211,255,.6)' },
+};
+function drawTowerPrompts(actor, topY) {
+  const items = [{ kind: 'firstaid', label: '急救' }, { kind: 'soothe', label: '疏導' }];   // 由上往下
+  const boxH = 24, gap = 4, mouse = aimClient && typeof mouseOnCanvas !== 'undefined' && mouseOnCanvas ? clientToWorld(aimClient.x, aimClient.y) : null;
+  ctx.save();
+  ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
+  const boxW = Math.max(...items.map(it => ctx.measureText(it.label).width)) + 18;
+  const x = Math.round(actor.x - boxW / 2);
+  let y = Math.round(topY - 3 - items.length * boxH - (items.length - 1) * gap);
+  towerPromptHover = null;
+  for (const it of items) {
+    const rect = { x, y, w: boxW, h: boxH };
+    const hot = !!mouse && mouse.x >= x && mouse.x <= x + boxW && mouse.y >= y && mouse.y <= y + boxH;
+    const st = TOWER_PROMPT_STYLE[it.kind];
+    towerPrompts.push({ ...rect, kind: it.kind, actor });
+    if (hot) towerPromptHover = it.kind;
+    ctx.save();
+    if (hot) { ctx.shadowColor = st.glow; ctx.shadowBlur = 10; }   // 滑鼠停著：外框發亮
+    ctx.fillStyle = hot ? 'rgba(30,38,50,.95)' : 'rgba(12,16,22,.9)';
+    roundRect(x, y, boxW, boxH, 6); ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = hot ? st.hot : st.line; ctx.lineWidth = 1.5;
+    roundRect(x, y, boxW, boxH, 6); ctx.stroke();
+    ctx.fillStyle = hot ? '#ffffff' : '#e6ebf2';
+    ctx.fillText(it.label, actor.x, y + 17);
+    y += boxH + gap;
+  }
+  ctx.restore();
+}
 function drawSitPrompt(seat) { drawInteractPrompt(seat.x, seat.top, seat.prompt || '坐'); }
 function drawPlayerReloadCountdown(p, size) {
   if (!(p.reloadT > 0)) return;
@@ -709,11 +745,12 @@ function draw() {
     if (G.player && inFront(G.player)) drawPlayer(G.player);
   }
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
+  towerPrompts = []; towerPromptHover = null;   // 這一幀重新記錄隊員頭上的選項
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
     const urgent = G.running ? urgentSootheTarget() : null;
-    if (urgent) drawInteractPrompt(urgent.x, promptTopAbove(urgent, urgent.y - 57), '疏導');   // 暴走中的哨兵：疏導最優先
+    if (urgent) drawTowerPrompts(urgent, promptTopAbove(urgent, urgent.y - 57));   // 暴走中的哨兵：最優先（急救／疏導）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
@@ -731,8 +768,9 @@ function draw() {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, MAP_SAFE ? '商店' : '後室商店'); }   // HOME Mart 結帳櫃台
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
-      if (actor) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),
-        actor.kind === 'tower' && !MAP_SAFE ? '疏導' : '與 ' + (profile ? profile.name : '角色') + ' 對話');
+      if (actor && actor.kind === 'tower' && !MAP_SAFE) drawTowerPrompts(actor, promptTopAbove(actor, actor.y - 57));   // 隊員：急救／疏導
+      else if (actor) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),
+        '與 ' + (profile ? profile.name : '角色') + ' 對話');
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) { const g = graffitiNearPlayer(); drawInteractPrompt(g.x, g.y - 14, graffitiErasing() ? '擦掉中…' : '擦掉塗鴉'); }   // js/graffiti.js
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }

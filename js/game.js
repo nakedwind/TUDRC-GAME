@@ -1219,6 +1219,20 @@ cv.addEventListener('contextmenu', e => {
   if (!npcDrag) handleMapClick(e, false);
 });
 cv.addEventListener('mousemove', e => { aimClient = { x: e.clientX, y: e.clientY }; });
+// 點隊員頭上的「急救」「疏導」（js/render.js 的 drawTowerPrompts）：先攔下來，才不會同時開槍
+cv.addEventListener('mousedown', e => {
+  if (e.button !== 0 || !towerPrompts.length || !G?.running || G.over) return;
+  const { x, y } = clientToWorld(e.clientX, e.clientY);
+  const hit = towerPrompts.find(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h);
+  if (!hit) return;
+  e.preventDefault(); e.stopImmediatePropagation(); aimHeld = false;
+  if (hit.kind === 'firstaid') firstAidOn(hit.actor);   // js/equipment.js
+  else soothe(hit.actor);                               // js/sentry.js
+}, true);
+let mouseOnCanvas = false;   // 滑鼠在遊戲畫面上嗎（離開畫面時，隊員頭上的選項就不亮）
+cv.addEventListener('mouseenter', () => { mouseOnCanvas = true; });
+cv.addEventListener('mousemove', () => { mouseOnCanvas = true; });
+cv.addEventListener('mouseleave', () => { mouseOnCanvas = false; });
 cv.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   aimClient = { x: e.clientX, y: e.clientY };
@@ -1675,7 +1689,7 @@ function frame(ts) {
   const placingThing = !!(G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish'))
     || (typeof graffitiPlace !== 'undefined' && !!graffitiPlace);
   const armed = !MAP_SAFE && G.running && !menuOpen && !!G.player && G.player.hp > 0 && playerWeapon(G.player).id !== 'none'
-    && !insideWarningLine(G.player.x, G.player.y) && !placingThing;
+    && !insideWarningLine(G.player.x, G.player.y) && !placingThing && !towerPromptHover;   // 滑鼠停在隊員頭上的選項：一般游標
   if (armed !== cv.classList.contains('cursor-crosshair')) cv.classList.toggle('cursor-crosshair', armed);
   if (typeof sanityAfterDraw === 'function') sanityAfterDraw();   // SP 低於 20：殘影（js/sanity.js）
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環

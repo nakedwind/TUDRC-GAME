@@ -397,13 +397,6 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .field-member.aid-hover .aid-glow, .field-member.aid-hover .aid-arrow { opacity: 1; }
 @keyframes aidGlowIn { from { opacity: 0; } to { opacity: 1; } }    /* 大範圍發光：淡入 */
 @keyframes aidGlowOut { from { opacity: 1; } to { opacity: 0; } }   /* 小範圍發光：同時淡出 → 看起來是光慢慢變大再變小 */
-/* 頭像下方的提示（例如「沒有受傷」） */
-.field-member .aid-tip {
-  position: absolute; z-index: 3; left: 25px; top: 41px; transform: translateX(-50%); padding: 2px 5px; border-radius: 4px;
-  background: rgba(0,0,0,.82); color: #fff; font-size: 9px; font-weight: 700; line-height: 1.2; white-space: nowrap; pointer-events: none;
-  animation: aidTipIn .15s ease-out both;
-}
-@keyframes aidTipIn { from { opacity: 0; transform: translate(-50%, -3px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .field-load u { background: linear-gradient(90deg,#d8a743,#de5b63); }
 /* HP／負荷條正中間的數字：純白字＋一圈 1px、透明度 50% 的純黑外框，蓋在顏色條上面 */
 .field-member-status > div { position: relative; }
@@ -1781,6 +1774,17 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .quick-supply.gear:hover:not(:disabled) { border-color:#ffd479; }
 .quick-supply.gear .qs-icon { color:#ffd479; }
 .quick-supply.gear.on { border-color:#ff8a8a; box-shadow:0 0 10px rgba(255,138,138,.45); }
+/* 急救包選隊員時：按鈕上方的一排隊員小頭像（js/equipment.js 的 renderGearQuick） */
+.aid-gear-wrap { position:relative; display:flex; }
+.aid-pick-row { position:absolute; left:0; bottom:calc(100% + 6px); z-index:50; display:flex; gap:4px; }
+.aid-face-slot { position:relative; display:block; }
+.aid-pick-face { position:relative; display:block; width:32px; height:32px; padding:0; overflow:hidden; cursor:pointer;
+  border:1px solid rgba(255,255,255,.14); border-radius:5px; background:rgba(8,15,24,.88); transition:border-color .12s ease, box-shadow .12s ease; }
+.aid-pick-face img { position:absolute; top:-2px; left:50%; width:43px; height:43px; max-width:none; object-fit:contain; transform:translateX(-50%); image-rendering:pixelated; }
+.aid-pick-face:hover { border-color:#ff8a8a; box-shadow:0 0 10px rgba(255,138,138,.45); }   /* 跟急救包按鈕按下去時一樣的粉色外框＋淡淡的光 */
+.aid-pick-face.down img { opacity:.42; filter:grayscale(.8); }   /* 倒下：跟左上角一樣變灰變淡 */
+.aid-face-down { position:absolute; left:0; right:0; top:50%; transform:translateY(-50%) rotate(-2deg); padding:2px 0; text-align:center; pointer-events:none;
+  font-size:9px; font-weight:800; line-height:1; color:#ffb3b3; background:rgba(20,6,8,.9); border-top:1px solid #b8323c; border-bottom:1px solid #b8323c; text-shadow:0 1px 2px #000; }
 
 /* 裝備格的小視窗：更換／卸下裝備／取消 */
 .equip-slot-menu { position: absolute; z-index: 5; width: 128px; display: flex; flex-direction: column; gap: 5px; padding: 8px; border: 1px solid rgba(255,212,121,.45); border-radius: 10px; background: rgba(18,23,30,.97); box-shadow: 0 10px 26px rgba(0,0,0,.55); }

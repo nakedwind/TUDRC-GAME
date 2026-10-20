@@ -322,8 +322,7 @@ function renderFieldSquadHud() {
       const aidPick = !!(aid && aid.picking);
       const aidCls = aidPick && aid.hover === member.type ? ' aid-hover' : '';
       const aidFx = aidPick ? '<span class="aid-glow" style="--aid-sync:-' + (nowS % 3.2).toFixed(2) + 's"><i class="s"></i><i class="m"></i></span><span class="aid-arrow"></span>' : '';
-      const aidTip = aid && aid.tip && aid.tip.type === member.type && performance.now() < aid.tip.until ? '<span class="aid-tip">' + aid.tip.text + '</span>' : '';
-      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx + aidTip +
+      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
         // 條的正中間寫數字：左邊＝現在、右邊＝上限（嚮導沒有精神負荷，寫「無」）
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +

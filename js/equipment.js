@@ -237,15 +237,18 @@ function useAdrenaline() {
 // ---- 急救包（道具，H）：先點左上角的隊員頭像，選要治療誰（倒地的也行） ----
 // ・不能用在溫特自己身上：溫特補血請用醫療包。
 // ・按 H 或點下方的「急救包」按鈕 → 進入「選隊員」：滑鼠停在哪位隊員的頭像上，那位就會發光＋出現箭頭（樣式在 css/style.css）。
-// ・點頭像＝治療那位隊員（要站在他旁邊 FIRST_AID.reach 格內）；滿血的隊員會在頭像下方提示「沒有受傷」。
+//   急救包按鈕上方也會出現一排隊員小頭像，點那裡也可以選。
+// ・大家都沒有受傷：提示「沒有人受傷」，不能用。
+// ・點頭像＝治療那位隊員（要站在他旁邊 FIRST_AID.reach 格內）；滿血、太遠時，溫特頭上會浮出「沒有受傷」「距離太遠了」。
 // ・再按一次 H／急救包按鈕、按 Esc、按右鍵或點地圖＝取消。
-const firstAid = { channel: null, picking: false, hover: null, tip: null };   // tip：頭像下方的提示 { type, text, until }
+const firstAid = { channel: null, picking: false, hover: null };
 function useFirstAid() {
   if (!G?.player || G.player.hp <= 0 || firstAid.channel) return;
   if (firstAid.picking) { cancelFirstAidPick(); return; }   // 再按一次＝取消
   if (itemCount('firstaid') <= 0) { sfx('error'); flash('沒有急救包了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (!(G.towers || []).length) { sfx('error'); flash('沒有可以治療的隊員', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (!G.towers.some(t => t.hp < t.maxhp)) { sfx('aidCannot'); flash('沒有人受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   firstAid.picking = true; firstAid.hover = null;
   sfx('menu');
   flash('⛑️ 選擇要治療的隊員', G.player.x, G.player.y - 54, '#9ff0c0', 1.8);
@@ -261,19 +264,23 @@ function refreshFirstAidPick() {   // 下方按鈕、左上角隊員欄跟著更
   if (typeof applySquadCollapse === 'function') applySquadCollapse();   // 隊員欄收起來時：選隊員的期間先展開
   if (typeof renderFieldSquadHud === 'function') renderFieldSquadHud();
 }
-function showFirstAidTip(type, text) {   // 頭像下方的小提示
-  firstAid.tip = { type, text, until: performance.now() + 1400 };
+function showFirstAidTip(text) {   // 溫特頭上浮出的提示（往上飄、慢慢淡掉；跟「選擇要治療的隊員」同樣的樣子）
   sfx('error');
-  if (typeof renderFieldSquadHud === 'function') renderFieldSquadHud();
-  setTimeout(() => { if (firstAid.tip && performance.now() >= firstAid.tip.until && typeof renderFieldSquadHud === 'function') { firstAid.tip = null; renderFieldSquadHud(); } }, 1450);
+  flash('⛑️ ' + text, G.player.x, G.player.y - 54, '#9ff0c0', 1.4);
 }
 // 在「選隊員」時點了某位隊員的頭像
 function firstAidPickMember(type) {
-  const p = G && G.player, t = (G.towers || []).find(m => m.type === type);
-  if (!p || !t) return;
-  if (t.hp >= t.maxhp) { showFirstAidTip(type, '沒有受傷'); return; }   // 滿血不能用
-  if (Math.hypot(t.x - p.x, t.y - p.y) > FIRST_AID.reach * CELL) { showFirstAidTip(type, '距離太遠'); return; }   // 要走到隊員旁邊
-  if (itemCount('firstaid') <= 0) { cancelFirstAidPick(); return; }
+  const t = (G.towers || []).find(m => m.type === type);
+  if (t) firstAidOn(t);
+}
+// 對這位隊員用急救包（選隊員、或點隊員頭上的「急救」都會走這裡）
+function firstAidOn(t) {
+  const p = G && G.player;
+  if (!p || !t || p.hp <= 0 || firstAid.channel) return;
+  if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', p.x, p.y - 54, '#c9d3dc'); return; }
+  if (itemCount('firstaid') <= 0) { cancelFirstAidPick(); sfx('error'); flash('沒有急救包了', p.x, p.y - 54, '#c9d3dc'); return; }
+  if (t.hp >= t.maxhp) { showFirstAidTip('沒有受傷'); return; }   // 滿血不能用
+  if (Math.hypot(t.x - p.x, t.y - p.y) > FIRST_AID.reach * CELL) { showFirstAidTip('距離太遠了'); return; }   // 要走到隊員旁邊
   cancelFirstAidPick();
   const v = FIRST_AID;
   firstAid.channel = { t: 0, total: v.time, target: t, heal: v.heal };
@@ -318,14 +325,28 @@ function renderGearQuick() {
   if (!box) { const host = document.getElementById('quickSupplies'); if (!host) return; box = document.createElement('div'); box.id = 'quickGear'; host.after(box); }
   const aid = itemCount('firstaid'), adr = itemCount('adrenaline'), active = adrenalineActive();
   const show = !MAP_SAFE;   // 只在戰鬥區域顯示
-  const key = JSON.stringify([show, aid, !!firstAid.channel, firstAid.picking, adr, active]);
+  const faces = firstAid.picking ? (G.towers || []).map(t => [t.type, t.hp <= 0]) : [];   // 選隊員時：急救包按鈕上方的隊員小頭像（倒下＝黑白＋重傷）
+  const key = JSON.stringify([show, aid, !!firstAid.channel, firstAid.picking, adr, active, faces]);
   if (key === gearQuickKey) return; gearQuickKey = key;
   const btn = (id, icon, name, sub, k, off, cls = '') => '<button type="button" class="quick-supply gear ' + cls + '" data-gear-use="' + id + '" ' + (off ? 'disabled' : '') + ' title="' + k + '｜' + name + '">' +
     '<span class="qs-icon">' + icon + '</span><span class="qs-text"><small>' + name + '</small><b>' + sub + '</b></span><kbd>' + k + '</kbd></button>';
-  box.innerHTML = !show ? '' : (aid ? btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid, 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') : '') +
+  const faceRow = !faces.length ? '' : '<div class="aid-pick-row">' + faces.map(([type, down]) => {
+    const spec = TYPES[type]; if (!spec) return '';
+    return '<span class="aid-face-slot"><button type="button" class="aid-pick-face' + (down ? ' down' : '') + '" data-aid-face="' + type + '" title="' + spec.name + '">' +
+      '<img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + (down ? '<span class="aid-face-down">重傷</span>' : '') + '</button></span>';
+  }).join('') + '</div>';
+  box.innerHTML = !show ? '' : (aid ? '<span class="aid-gear-wrap">' + btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid, 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') + faceRow + '</span>' : '') +
     (adr ? btn('adrenaline', '💉', '腎上腺素', active ? '生效中' : '×' + adr, 'J', active, active ? 'on' : '') : '');
 }
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-gear-use]'); if (!b) return; if (b.dataset.gearUse === 'firstaid') useFirstAid(); else useAdrenaline(); });
+// 急救包按鈕上方的隊員小頭像：點＝治療那位；滑鼠每換到一位隊員就響一次
+let aidFaceHover = null;
+document.addEventListener('click', e => { const f = e.target.closest && e.target.closest('[data-aid-face]'); if (f && firstAid.picking) firstAidPickMember(f.dataset.aidFace); });
+document.addEventListener('pointerover', e => {
+  const f = e.target.closest && e.target.closest('[data-aid-face]'), type = f && firstAid.picking ? f.dataset.aidFace : null;
+  if (type && type !== aidFaceHover) sfx('aidHover');
+  aidFaceHover = type;
+});
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (e.repeat || (k !== 'h' && k !== 'j') || e.ctrlKey || e.altKey || e.metaKey) return;
