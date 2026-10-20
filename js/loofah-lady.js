@@ -316,9 +316,15 @@ function drawLoofahVines(ctx) {
       }
       ctx.globalAlpha = 1;
     }
-    else for (let k = 0; k < 4; k++) {   // 沒抓到人：幾根藤蔓從洞裡竄出來扭動
-      const bx = v.x + (k - 1.5) * 8, h = (26 + k * 6) * grow, sw = Math.sin(now * 6 + k + v.seed) * 6;
-      vineStroke(ctx, [[bx, v.y + 6], [bx + sw * .5, v.y + 6 - h * .5], [bx + sw, v.y + 6 - h]], 3, v.seed + k);
+    else for (const k of [0, 1, 2]) {   // 沒抓到人：三根高矮不一的捲鬚從洞裡竄出來，中段繞成彈簧圈、頂端有葉子和勾起的捲尖
+      const r = n => (Math.sin(v.seed * (3 + n) + k * (5 + n)) + 1) / 2;   // 每根藤固定的隨機值（0～1）
+      const bx = v.x + [-12, 3, 14][k] + (r(1) - .5) * 5;
+      drawTendril(ctx, bx, v.y + 7, {
+        h: [46, 34, 25][k] * (.88 + r(2) * .24), grow,
+        lean: [-7, 4, 9][k] + Math.sin(now * 2.6 + k * 1.7 + v.seed) * 2.5,
+        turns: 1.7 + r(3) * .5, r: [8.5, 7, 5][k] + r(4) * 1.5, w: [3.4, 3, 2.4][k] * .8,
+        phase: v.seed + k * 2.1, side: k === 1 ? -1 : 1, leaf: k !== 2 || r(5) > .5,
+      });
     }
     ctx.restore();
   }
@@ -356,20 +362,100 @@ function vineStroke(ctx, pts, w, seed = 0) {
   for (let i = 0; i <= 16; i++) { const t = i / 16, r = 5 * (1 - t * .7), a = a0 + side * t * Math.PI * 2.2, x = k.x + Math.cos(a0) * 3 * t + Math.cos(a) * r - Math.cos(a0) * 5, y = k.y + Math.sin(a0) * 3 * t + Math.sin(a) * r - Math.sin(a0) * 5; i ? ctx.lineTo(x, y) : ctx.moveTo(x, y); }
   ctx.stroke();
 }
-// 纏在人身上：從腳邊長出幾圈藤蔓繞住腿和身體，再加幾片葉子；越接近放開越淡
+// ---- 絲瓜捲鬚（參考使用者給的圖：粗粗的黃綠色藤，中段繞成彈簧圈，頂端一片葉子、尖端往外勾）----
+const TENDRIL_COL = { line: '#1f3a12', fill: '#8dc63f', light: '#c4ec78', back: '#5e8f2a', leaf: '#78b83c', vein: '#3f7a22' };
+// 沿著一條路徑畫藤：先畫「背面」那幾段（顏色暗、在後面），再畫「正面」，彈簧圈才有前後交錯的立體感
+function strokeVinePath(ctx, pts, alpha = 1) {
+  const C = TENDRIL_COL;
+  for (const front of [false, true]) {
+    const segs = [];
+    for (let i = 1; i < pts.length; i++) if (pts[i].front === front) segs.push(i);
+    if (!segs.length) continue;
+    ctx.globalAlpha = alpha * (front ? 1 : .9);
+    for (const pass of ['line', 'fill']) {
+      ctx.strokeStyle = pass === 'line' ? C.line : (front ? C.fill : C.back);
+      for (const i of segs) {
+        const a = pts[i - 1], b = pts[i];
+        ctx.lineWidth = b.w + (pass === 'line' ? Math.max(.9, Math.min(2, b.w * .7)) : 0);   // 細的地方外框也細，尖端才尖
+        ctx.beginPath(); ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y); ctx.stroke();
+      }
+    }
+    if (front) {   // 正面的亮邊
+      ctx.strokeStyle = C.light; ctx.lineWidth = .9;
+      for (const i of segs) { const a = pts[i - 1], b = pts[i]; if (b.w < 1.6) continue; ctx.beginPath(); ctx.moveTo(a.x - b.w * .25, a.y - b.w * .25); ctx.lineTo(b.x - b.w * .25, b.y - b.w * .25); ctx.stroke(); }
+    }
+  }
+  ctx.globalAlpha = alpha;
+}
+// 一片尖葉：(x,y) 葉柄、ang 方向、size 長度
+function drawVineLeaf(ctx, x, y, ang, size) {
+  const C = TENDRIL_COL;
+  ctx.save(); ctx.translate(x, y); ctx.rotate(ang);
+  ctx.fillStyle = C.leaf; ctx.strokeStyle = C.line; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(0, 0); ctx.quadraticCurveTo(size * .45, -size * .48, size, 0); ctx.quadraticCurveTo(size * .5, size * .4, 0, 0); ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = C.vein; ctx.lineWidth = .8; ctx.beginPath(); ctx.moveTo(1, 0); ctx.lineTo(size * .8, -size * .05); ctx.stroke();
+  ctx.restore();
+}
+// 從地上 (x,y) 往上長的一根捲鬚。o：h 高度、grow 長出來的比例、lean 往左右歪、turns 繞幾圈、r 圈的大小、w 粗細、phase、side 葉子／捲尖朝哪邊、leaf 有沒有葉子
+function drawTendril(ctx, x, y, o) {
+  const N = 60, c0 = .24, c1 = .64, pts = [], show = Math.max(0, Math.min(1, o.grow));
+  if (show <= 0) return;
+  for (let i = 0; i <= N; i++) {
+    const t = i / N; if (t > show) break;
+    const bend = Math.sin(t * Math.PI * .5) * o.lean;   // 整根往一邊歪
+    let px = x + bend, py = y - o.h * t, front = true;
+    if (t > c0 && t < c1) {   // 中段：彈簧圈（側看的螺旋：左右擺＋上下前後）
+      const u = (t - c0) / (c1 - c0), env = Math.sin(u * Math.PI), th = u * o.turns * Math.PI * 2 + o.phase;
+      px += Math.sin(th) * o.r * env;
+      py += Math.cos(th) * o.r * .95 * env;
+      front = Math.cos(th) > -.15;
+    }
+    if (t >= .86) {   // 尖端：往外勾一小圈
+      const u = (t - .86) / .14, a = u * Math.PI * 1.25;
+      px += o.side * (Math.sin(a) * 4.5 + u * 2); py += (1 - Math.cos(a)) * 3.2 - u * 1.5;
+    }
+    pts.push({ x: px, y: py, w: Math.max(.5, o.w * Math.pow(1 - t, .9) + .35), front });   // 越往上越細，尖端很細
+  }
+  strokeVinePath(ctx, pts);
+  if (o.leaf && show > .8) {   // 圈的上方長一片葉子
+    const q = pts[Math.round(N * .78)] || pts[pts.length - 1];
+    drawVineLeaf(ctx, q.x, q.y, -Math.PI / 2 - o.side * 1.05, 9 * Math.min(1, (show - .8) / .15));
+  }
+}
+// 纏在人身上（參考使用者畫的圖）：粗藤從下巴到腰一圈一圈緊緊捆住身體，圈有點歪、粗細不一；
+// 繞到身體後面的那段比較暗；最下面拖出一條細細的捲鬚往旁邊捲。越接近放開越淡
 function drawWrap(ctx, a, grow, now, seed) {
   const fade = a.rootT > 0 ? Math.min(1, a.rootT / .4 + .3) : grow;
-  ctx.globalAlpha = fade;
   const shake = (a.struggleT || 0) > 0 ? (Math.random() - .5) * 2.4 : 0;   // 掙扎時藤蔓被扯得抖一下
-  const x = a.x + shake, foot = a.y + 14, H = 30 * grow;
-  for (let k = 0; k < 3; k++) {   // 往上繞的藤蔓
-    const side = k % 2 ? 1 : -1, wob = Math.sin(now * 3 + k + seed) * 1.5;
-    vineStroke(ctx, [[x + side * 12, foot + 2], [x - side * 14 + wob, foot - H * .45], [x + side * 6, foot - H * (.7 + k * .12)]], 2.6, seed + k);
+  const rs = n => (Math.sin(seed * (2.3 + n) + 1.7 * n) + 1) / 2;          // 這根藤固定的隨機值
+  const dir = rs(1) > .5 ? 1 : -1, x = a.x + shake;
+  const bottom = a.y + 12, top = a.y - 3, H = (bottom - top) * grow;     // 身體那一段（Q版：頭以下到腰）
+  const turns = 4 + rs(3) * .8, N = 110, pts = [];
+  for (let i = 0; i <= N; i++) {
+    const t = i / N, th = t * turns * Math.PI * 2 * dir + seed;
+    const loop = Math.floor(t * turns);                                    // 第幾圈：每圈的大小、傾斜都不太一樣
+    const rx = 13.5 + Math.sin(loop * 2.7 + seed) * 1.6 - t * 1.5;
+    const tilt = Math.sin(loop * 1.9 + seed * 3) * 1.8;
+    const px = x + Math.sin(th) * rx;
+    const py = bottom - t * H + Math.cos(th) * 2.6 + Math.sin(th) * tilt;   // 前面那半圈比較低（從上往下看的圈）
+    pts.push({ x: px, y: py, w: (3.6 + Math.sin(t * 17 + seed) * .5) * .7, front: Math.cos(th) > -.05 });
   }
-  ctx.strokeStyle = '#4f8a35'; ctx.lineWidth = 1.6;   // 繞腿的圈（細藤）
-  for (let k = 0; k < 3; k++) {
-    const yy = foot - 4 - k * 8 * grow;
-    ctx.beginPath(); ctx.ellipse(x, yy, 11 - k, 3.5, 0, 0, Math.PI * 2); ctx.stroke();
+  ctx.save(); ctx.globalAlpha = fade;
+  strokeVinePath(ctx, pts, fade);
+  // 最下面拖出去的細捲鬚：往旁邊伸出去，尾巴捲一圈半
+  const sx = x - dir * 9, sy = bottom + 2, len = 16 + rs(5) * 5, curl = [];
+  const M = 40, wob = Math.sin(now * 2.5 + seed) * 1.2;
+  for (let i = 0; i <= M; i++) {
+    const t = i / M;
+    let px, py;
+    if (t < .55) { const u = t / .55; px = sx - dir * len * u; py = sy + Math.sin(u * Math.PI) * 2.5 + u * 3 + wob * u; }
+    else {
+      const u = (t - .55) / .45, r = 4.2 * (1 - u * .6), ang = Math.PI / 2 + dir * u * Math.PI * 2.6;
+      const cx = sx - dir * len, cy = sy + 3 + wob - 4.2;
+      px = cx + Math.cos(ang) * r * -dir; py = cy + Math.sin(ang) * r;
+    }
+    curl.push({ x: px, y: py, w: Math.max(.5, 1.7 * .7 * (1 - t * .6)), front: true });
   }
-  ctx.globalAlpha = 1;
+  strokeVinePath(ctx, curl, fade);
+  ctx.restore();
 }
