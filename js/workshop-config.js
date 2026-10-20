@@ -45,11 +45,34 @@ function workshopItemDefs() {   // key → 那件裝備／武器的資料
   if (typeof WEAPON_UPGRADES !== 'undefined') for (const [k, w] of Object.entries(WEAPON_UPGRADES)) out['w:' + k] = w;
   return out;
 }
+// ---- 用編輯器「新增」的裝備（added）、「刪除」的裝備（removed）----
+// 新增的裝備：可以開發／撿到、穿上、升級，效果說明是編輯器裡自己寫的文字；
+// 但遊戲裡實際的效果（例如照明、減傷）要另外寫程式（js/equipment.js 用 equipLv('裝備id') 讀等級），所以一開始只是「有名字、有圖」的裝備。
+const WORKSHOP_KINDS = { head: '頭部', body: '身體', acc: '隨身物品' };
+function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊戲用的裝備資料（跟 data/equipment.js 的格式一樣）
+  const texts = Array.isArray(a.levels) ? a.levels : [];
+  const cost = Array.isArray(a.cost) ? a.cost.map(n => Math.max(0, Math.round(Number(n) || 0))) : [];
+  return {
+    id: a.id, name: a.name || '新裝備', kind: WORKSHOP_KINDS[a.kind] ? a.kind : 'acc', icon: a.icon || '🧰', image: a.image || '',
+    source: a.source === 'field' ? 'field' : 'develop', where: a.where || '', desc: a.desc || '',
+    cost: [cost[0] ?? 50, cost[1] ?? 100, cost[2] ?? 160],
+    stat: lv => lv.text, levels: [0, 1, 2].map(i => ({ text: String(texts[i] ?? '') })),
+    custom: true,
+  };
+}
+const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備（id → 資料；編輯器可以「復原」）
 (function applyWorkshopItems() {
-  const defs = workshopItemDefs(), items = (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.items) || {};
-  for (const [key, def] of Object.entries(defs)) {
+  const cfg = typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {};
+  const defs = workshopItemDefs(), items = cfg.items || {};
+  for (const [key, def] of Object.entries(defs)) {   // 原本的裝備／武器：改名稱、圖片、說明
     WORKSHOP_BASE[key] = Object.fromEntries(WORKSHOP_TEXT_FIELDS.map(f => [f, def[f]]));
     const o = items[key]; if (!o) continue;
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '') def[f] = o[f];
   }
+  if (typeof EQUIPMENT === 'undefined') return;
+  for (const a of Array.isArray(cfg.added) ? cfg.added : []) {   // 新增的裝備：接在最後面
+    if (a && a.id && !EQUIPMENT.some(d => d.id === a.id)) EQUIPMENT.push(workshopCustomDef(a));
+  }
+  const removed = new Set(Array.isArray(cfg.removed) ? cfg.removed : []);   // 刪除的原本裝備：從清單拿掉
+  for (let i = EQUIPMENT.length - 1; i >= 0; i--) if (removed.has(EQUIPMENT[i].id)) WORKSHOP_REMOVED[EQUIPMENT[i].id] = EQUIPMENT.splice(i, 1)[0];
 })();

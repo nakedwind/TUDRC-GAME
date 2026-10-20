@@ -1,8 +1,11 @@
 /* ===== 🔧 開發工坊編輯器 =====
-   左邊：選一件裝備／武器，改名稱、圖片、說明、取得地點；下面改整個工坊的外觀（字的顏色、大小、欄位大小）。
+   左邊：選一件裝備／武器，改名稱、圖片、說明、取得地點；可以「＋ 新增裝備」「🗑 刪除裝備」。
+         下面改整個工坊的外觀（字的顏色、大小、欄位大小）。
    右邊：預覽＝遊戲裡的開發工坊（用同一份 css/style.css，所以長得一模一樣）。
    存檔：「💾 存到專案」寫進 data/workshop.js（遊戲由 js/workshop-config.js 套用）。
    還沒存的修改會先放在瀏覽器暫存（重新整理不會不見）；按「從檔案重設」才會丟掉。
+   ・新增的裝備：可以開發／撿到、穿上、升級，效果說明是自己寫的文字；遊戲裡實際的效果要另外寫程式。
+   ・刪除只能刪「裝備」；武器（手槍、照明彈槍…）有開槍的程式，不能刪。
 */
 const WS_DRAFT_KEY = 'tudrc_workshop_editor_draft_v1';
 const clone = v => JSON.parse(JSON.stringify(v));
@@ -10,74 +13,152 @@ const esc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').re
 const statusEl = document.getElementById('status');
 function setStatus(msg, err = false) { statusEl.textContent = msg; statusEl.classList.toggle('err', !!err); }
 
-// ---- 目前編輯中的設定：{ items: { key: { name, image, desc, where } }, style: {...} } ----
-const fromFile = () => ({ items: clone(WORKSHOP_CONFIG.items || {}), style: clone(WORKSHOP_CONFIG.style || {}) });
+// ---- 目前編輯中的設定：{ items: { key: {name,image,desc,where} }, added: [新裝備], removed: [刪掉的 id], style: {...} } ----
+const fromFile = () => ({ items: clone(WORKSHOP_CONFIG.items || {}), added: clone(WORKSHOP_CONFIG.added || []), removed: clone(WORKSHOP_CONFIG.removed || []), style: clone(WORKSHOP_CONFIG.style || {}) });
 let cfg = (() => {
-  try { const d = JSON.parse(localStorage.getItem(WS_DRAFT_KEY) || 'null'); if (d && d.items && d.style) return d; } catch (_) {}
+  try {
+    const d = JSON.parse(localStorage.getItem(WS_DRAFT_KEY) || 'null');
+    if (d && d.items && d.style) return { items: d.items, added: d.added || [], removed: d.removed || [], style: d.style };
+  } catch (_) {}
   return fromFile();
 })();
 function saveDraft() { try { localStorage.setItem(WS_DRAFT_KEY, JSON.stringify(cfg)); } catch (_) {} }
 
-// ---- 每件裝備／武器 ----
-const DEFS = workshopItemDefs();   // key → 原始資料（數值、費用、stat 說明…）
-const ITEM_KEYS = Object.keys(DEFS);
+// ---- 原本就有的裝備／武器（data/equipment.js）----
 const isWeapon = key => key.startsWith('w:');
+const BUILTIN = {};   // key → 原本的資料（被刪掉的也在，才能「復原」）
+for (const key of Object.keys(WORKSHOP_BASE)) {
+  BUILTIN[key] = isWeapon(key) ? WEAPON_UPGRADES[key.slice(2)] : (EQUIPMENT.find(d => d.id === key) || WORKSHOP_REMOVED[key]);
+}
+const BUILTIN_GEAR = Object.keys(BUILTIN).filter(k => !isWeapon(k));
+const WEAPON_KEYS = Object.keys(BUILTIN).filter(isWeapon);
+// ---- 每一件：原本的、新增的 ----
+const customEntry = key => cfg.added.find(a => a.id === key) || null;
+const isCustom = key => !!customEntry(key);
+const isRemoved = key => cfg.removed.includes(key);
+const getDef = key => isCustom(key) ? workshopCustomDef(customEntry(key)) : BUILTIN[key];
+const gearKeys = () => BUILTIN_GEAR.concat(cfg.added.map(a => a.id));   // 清單：原本的裝備＋新增的裝備
 const isField = (key, def) => isWeapon(key) ? !!def.field : def.source !== 'develop';   // 只能在戰鬥區域拿到
-// 這件現在要顯示的文字／圖片：原本的資料＋編輯中改過的
+// 這件現在要顯示的文字／圖片
 function itemView(key) {
+  if (isCustom(key)) { const d = getDef(key); return { name: d.name, image: d.image, desc: d.desc, where: d.where }; }
   const base = WORKSHOP_BASE[key] || {}, o = cfg.items[key] || {}, out = {};
   for (const f of WORKSHOP_TEXT_FIELDS) out[f] = typeof o[f] === 'string' && o[f] !== '' ? o[f] : (base[f] ?? '');
   return out;
 }
 const itemChanged = key => { const o = cfg.items[key]; return !!o && WORKSHOP_TEXT_FIELDS.some(f => typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]); };
-const iconHtml = (key, view) => view.image ? '<img src="' + esc(view.image) + '" alt="">' : '<i>' + esc(DEFS[key].icon || '？') + '</i>';
-let selKey = ITEM_KEYS[0];
+const iconHtml = (key, view) => view.image ? '<img src="' + esc(view.image) + '" alt="">' : '<i>' + esc(getDef(key).icon || '？') + '</i>';
+let selKey = BUILTIN_GEAR[0];
 
+// ---- 左邊清單 ----
 function renderList() {
   const box = document.getElementById('itemList');
-  box.innerHTML = ITEM_KEYS.map(key => {
+  const btn = key => {
     const v = itemView(key);
-    return '<button type="button" data-key="' + key + '" class="' + (key === selKey ? 'sel ' : '') + (itemChanged(key) ? 'changed' : '') + '">' +
-      iconHtml(key, v) + '<span>' + esc(v.name) + '<small>' + (isWeapon(key) ? '武器' : '裝備') + '</small></span></button>';
-  }).join('');
+    const tag = isRemoved(key) ? 'removed' : isCustom(key) ? 'added' : itemChanged(key) ? 'changed' : '';
+    return '<button type="button" data-key="' + esc(key) + '" class="' + (key === selKey ? 'sel ' : '') + tag + '">' +
+      iconHtml(key, v) + '<span>' + esc(v.name) + '<small>' + (isWeapon(key) ? '武器' : WORKSHOP_KINDS[getDef(key).kind] || '裝備') + '</small></span></button>';
+  };
+  box.innerHTML = '<div class="list-head">裝備</div>' + gearKeys().map(btn).join('') + '<div class="list-head">武器</div>' + WEAPON_KEYS.map(btn).join('');
 }
 document.getElementById('itemList').addEventListener('click', e => {
   const b = e.target.closest('[data-key]'); if (!b) return;
-  selKey = b.dataset.key; renderList(); renderItemForm();
+  selKey = b.dataset.key; renderList(); renderItemForm(); renderPreview();
+});
+document.getElementById('addItem').addEventListener('click', () => {
+  const id = 'custom_' + Date.now().toString(36);
+  cfg.added.push({ id, name: '新裝備', kind: 'acc', icon: '🧰', image: '', source: 'develop', where: '', desc: '在這裡寫裝備的說明。', cost: [50, 100, 160], levels: ['Lv1 的效果', 'Lv2 的效果', 'Lv3 的效果'] });
+  selKey = id; saveDraft(); renderList(); renderItemForm(); renderPreview();
+  document.querySelector('#itemList .sel')?.scrollIntoView({ block: 'nearest' });
+  setStatus('已新增一件裝備（右邊預覽的最後面）；改好名稱和說明後記得存到專案');
 });
 
+// ---- 選到的這件：表單 ----
+const imageField = (key, v, attr) => '<div class="field">圖片<div class="img-row"><span class="thumb">' + iconHtml(key, v) + '</span>' +
+  '<div><input type="text" ' + attr + '="image" value="' + esc(v.image) + '" placeholder="例如 images/裝備/xxx.png（空白＝用表情符號 ' + esc(getDef(key).icon || '') + '）">' +
+  '<div class="img-btns"><button type="button" class="ed-btn" id="pickImage">從遊戲資料夾選圖片…</button></div></div></div>' +
+  '<span class="hint">圖片要先放進遊戲資料夾（例如 images/裝備/），再用上面的按鈕選。</span></div>';
 function renderItemForm() {
-  const key = selKey, def = DEFS[key], v = itemView(key), base = WORKSHOP_BASE[key] || {};
-  const field = isField(key, def);
-  document.getElementById('itemForm').innerHTML =
+  const key = selKey, def = getDef(key), v = itemView(key), form = document.getElementById('itemForm');
+  if (isRemoved(key)) {
+    form.innerHTML = '<p class="removed-note">「' + esc(v.name) + '」已經刪除：遊戲裡不會出現（開發工坊、背包、裝備欄都沒有）。</p>' +
+      '<button type="button" class="ed-btn primary" id="itemRestore">↩ 復原這件裝備</button>';
+    return;
+  }
+  if (isCustom(key)) {   // 新增的裝備：每一項都可以改
+    const a = customEntry(key);
+    form.innerHTML = '<p class="hint" style="margin:0 0 8px">✨ 這是新增的裝備。效果說明是自己寫的文字；遊戲裡實際的效果（例如照明、減傷）要另外寫程式。</p>' +
+      '<div class="field">名稱<input type="text" data-c="name" value="' + esc(a.name) + '"></div>' +
+      imageField(key, v, 'data-c') +
+      '<div class="row2"><div class="field">穿在哪裡<select data-c="kind">' + Object.entries(WORKSHOP_KINDS).map(([k, n]) => '<option value="' + k + '"' + (a.kind === k ? ' selected' : '') + '>' + n + '</option>').join('') + '</select></div>' +
+      '<div class="field">怎麼拿到<select data-c="source"><option value="develop"' + (a.source !== 'field' ? ' selected' : '') + '>找諾亞開發</option><option value="field"' + (a.source === 'field' ? ' selected' : '') + '>只能在戰鬥區域拿到</option></select></div></div>' +
+      (a.source === 'field' ? '<div class="field">在哪裡拿到<textarea data-c="where">' + esc(a.where) + '</textarea><span class="hint">要真的放進置物箱等地方，還需要另外設定。</span></div>' : '') +
+      '<div class="field">說明（還沒拿到時顯示）<textarea data-c="desc">' + esc(a.desc) + '</textarea></div>' +
+      '<div class="field">要花幾個異質碎片</div><div class="row2" style="grid-template-columns:1fr 1fr 1fr">' +
+        ['開發', '升到 Lv2', '升到 Lv3'].map((n, i) => '<div class="field">' + n + '<input type="text" inputmode="numeric" data-c="cost' + i + '" value="' + esc(a.cost[i]) + '"></div>').join('') + '</div>' +
+      [0, 1, 2].map(i => '<div class="field">Lv' + (i + 1) + ' 的效果說明<input type="text" data-c="lv' + i + '" value="' + esc(a.levels[i]) + '"></div>').join('') +
+      '<button type="button" class="ed-btn danger" id="itemDelete">🗑 刪除這件裝備</button>';
+    return;
+  }
+  const base = WORKSHOP_BASE[key] || {}, field = isField(key, def);
+  form.innerHTML =
     '<div class="field">名稱<input type="text" data-f="name" value="' + esc(v.name) + '"></div>' +
-    '<div class="field">圖片<div class="img-row"><span class="thumb">' + iconHtml(key, v) + '</span>' +
-      '<div><input type="text" data-f="image" value="' + esc(v.image) + '" placeholder="例如 images/裝備/xxx.png（空白＝用表情符號 ' + esc(def.icon || '') + '）">' +
-      '<div class="img-btns"><button type="button" class="ed-btn" id="pickImage">從遊戲資料夾選圖片…</button></div></div></div>' +
-      '<span class="hint">圖片要先放進遊戲資料夾（例如 images/裝備/），再用上面的按鈕選。</span></div>' +
+    imageField(key, v, 'data-f') +
     '<div class="field">說明' + (isWeapon(key) && !def.desc ? '（這把武器原本沒有說明；還沒拿到時才會顯示）' : '（還沒拿到時顯示）') +
       '<textarea data-f="desc">' + esc(v.desc) + '</textarea></div>' +
     (field ? '<div class="field">在哪裡拿到（顯示成「只能在戰鬥區域取得：…」）<textarea data-f="where">' + esc(v.where) + '</textarea></div>' : '') +
     '<div class="field"><span class="hint">效果說明（例如「偵測範圍 6 格」）會跟著數值自動產生，要改數值請改 data/equipment.js。</span></div>' +
-    '<button type="button" class="ed-btn" id="itemReset"' + (itemChanged(key) ? '' : ' disabled') + '>這件恢復原本的設定</button>' +
-    (base.name !== v.name ? '<span class="hint" style="margin-left:8px">原本叫「' + esc(base.name) + '」</span>' : '');
+    '<div class="img-btns"><button type="button" class="ed-btn" id="itemReset"' + (itemChanged(key) ? '' : ' disabled') + '>這件恢復原本的設定</button>' +
+    (isWeapon(key) ? '' : '<button type="button" class="ed-btn danger" id="itemDelete">🗑 刪除這件裝備</button>') + '</div>' +
+    (base.name !== v.name ? '<span class="hint">原本叫「' + esc(base.name) + '」</span>' : '');
 }
 document.getElementById('itemForm').addEventListener('input', e => {
-  const f = e.target.dataset.f; if (!f) return;
-  const o = cfg.items[selKey] || (cfg.items[selKey] = {});
-  const val = e.target.value, base = (WORKSHOP_BASE[selKey] || {})[f] ?? '';
-  if (val === base) delete o[f]; else o[f] = val;
-  if (!Object.keys(o).length) delete cfg.items[selKey];
-  if (f === 'image') { const t = document.querySelector('#itemForm .thumb'); if (t) t.innerHTML = iconHtml(selKey, itemView(selKey)); }
-  document.getElementById('itemReset').disabled = !itemChanged(selKey);
+  const f = e.target.dataset.f, cf = e.target.dataset.c;
+  if (f) {   // 原本的裝備／武器：只記改過的
+    const o = cfg.items[selKey] || (cfg.items[selKey] = {});
+    const val = e.target.value, base = (WORKSHOP_BASE[selKey] || {})[f] ?? '';
+    if (val === base) delete o[f]; else o[f] = val;
+    if (!Object.keys(o).length) delete cfg.items[selKey];
+    document.getElementById('itemReset').disabled = !itemChanged(selKey);
+  } else if (cf) {   // 新增的裝備
+    const a = customEntry(selKey); if (!a) return;
+    const val = e.target.value;
+    if (cf.startsWith('cost')) a.cost[+cf.slice(4)] = Math.max(0, Math.round(Number(val) || 0));
+    else if (cf.startsWith('lv')) a.levels[+cf.slice(2)] = val;
+    else a[cf] = val;
+    if (cf === 'source') { saveDraft(); renderList(); renderItemForm(); renderPreview(); return; }   // 換取得方式：表單要多／少「在哪裡拿到」
+  } else return;
+  if ((f || cf) === 'image') { const t = document.querySelector('#itemForm .thumb'); if (t) t.innerHTML = iconHtml(selKey, itemView(selKey)); }
   saveDraft(); renderList(); renderPreview();
 });
+document.getElementById('itemForm').addEventListener('change', e => {   // 下拉選單（部位）
+  if (e.target.dataset.c === 'kind') { const a = customEntry(selKey); if (a) { a.kind = e.target.value; saveDraft(); renderList(); renderPreview(); } }
+});
 document.getElementById('itemForm').addEventListener('click', async e => {
-  if (e.target.id === 'itemReset') {
+  const id = e.target.id;
+  if (id === 'itemReset') {
     delete cfg.items[selKey]; saveDraft(); renderList(); renderItemForm(); renderPreview();
     setStatus('「' + itemView(selKey).name + '」已恢復原本的設定'); return;
   }
-  if (e.target.id === 'pickImage') pickImage();
+  if (id === 'itemDelete') {
+    const name = itemView(selKey).name;
+    if (isCustom(selKey)) {
+      if (!confirm('確定刪除新增的裝備「' + name + '」？')) return;
+      cfg.added = cfg.added.filter(a => a.id !== selKey);
+      selKey = BUILTIN_GEAR[0];
+    } else {
+      if (!confirm('確定刪除「' + name + '」？\n\n刪除後遊戲裡就不會出現這件裝備（開發工坊、背包、裝備欄都沒有），玩家存檔裡已經拿到的這件也會不見。\n之後可以在清單裡點它，按「復原」。')) return;
+      if (!cfg.removed.includes(selKey)) cfg.removed.push(selKey);
+    }
+    saveDraft(); renderList(); renderItemForm(); renderPreview();
+    setStatus('已刪除「' + name + '」（還沒存到專案）'); return;
+  }
+  if (id === 'itemRestore') {
+    cfg.removed = cfg.removed.filter(k => k !== selKey);
+    saveDraft(); renderList(); renderItemForm(); renderPreview();
+    setStatus('已復原「' + itemView(selKey).name + '」'); return;
+  }
+  if (id === 'pickImage') pickImage();
 });
 // 從遊戲資料夾挑一張圖片：記下它在遊戲資料夾裡的路徑（例如 images/裝備/xxx.png）
 async function pickImage() {
@@ -89,7 +170,7 @@ async function pickImage() {
     const parts = await root.resolve(fh);
     if (!parts) { setStatus('這張圖片不在遊戲資料夾裡：請先把圖片放進遊戲資料夾（例如 images/裝備/），再選一次', true); return; }
     const path = parts.join('/');
-    const input = document.querySelector('#itemForm [data-f="image"]');
+    const input = document.querySelector('#itemForm [data-f="image"], #itemForm [data-c="image"]');
     input.value = path; input.dispatchEvent(new Event('input', { bubbles: true }));
     setStatus('圖片改成 ' + path);
   } catch (err) {
@@ -141,9 +222,9 @@ const wsColor = text => String(text)
   .replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>')
   .replace(/戰鬥區域/g, '<i class="ws-where">戰鬥區域</i>');
 function previewRow(key) {
-  const def = DEFS[key], v = itemView(key), mode = document.getElementById('previewMode').value;
+  const def = getDef(key), v = itemView(key), mode = document.getElementById('previewMode').value;
   const icon = v.image ? '<img src="' + esc(v.image) + '" alt="">' : '<i>' + esc(def.icon || '') + '</i>';
-  const row = (lvText, stat, next, btn) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + esc(v.name) + lvText + '</b><span>' + wsColor(esc(stat)) + '</span>' + (next ? '<small>' + wsColor(esc(next)) + '</small>' : '') + '</div>' + btn + '</div>';
+  const row = (lvText, stat, next, btn) => '<div class="ws-row' + (key === selKey ? ' ed-sel' : '') + '" data-key="' + esc(key) + '"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + esc(v.name) + lvText + '</b><span>' + wsColor(esc(stat)) + '</span>' + (next ? '<small>' + wsColor(esc(next)) + '</small>' : '') + '</div>' + btn + '</div>';
   const cost = n => '<b>◆ ' + n + '</b>', w = isWeapon(key);
   const upCost = lv => w ? def.cost[lv - 1] : def.cost[lv];
   if (mode === 'none' && (isField(key, def) || !w)) {
@@ -172,9 +253,10 @@ function arrangeRows(root) {
 }
 function renderPreview() {
   const st = styleNow(), stage = document.getElementById('previewStage');
+  const keepScroll = stage.querySelector('.workshop-body')?.scrollTop || 0;
   stage.style.width = (st.panelW + 32) + 'px'; stage.style.height = (st.panelH + 32) + 'px';   // 跟遊戲一樣：視窗外面留 16px
-  const gear = ITEM_KEYS.filter(k => !isWeapon(k)).map(previewRow).join('');
-  const weapons = ITEM_KEYS.filter(isWeapon).map(previewRow).join('');
+  const gear = gearKeys().filter(k => !isRemoved(k)).map(previewRow).join('');   // 刪掉的不顯示；新增的接在最後面
+  const weapons = WEAPON_KEYS.map(previewRow).join('');
   const side = '<aside class="workshop-side"><h3>目前裝備</h3>' +
     ['主武器', '副武器', '頭部', '身體', '隨身物品1', '隨身物品2'].map(n => '<div class="wss-slot"><span class="wss-icon"><i>＋</i></span><div><small>' + n + '</small><b>（預覽）</b></div></div>').join('') + '</aside>';
   stage.innerHTML = '<div id="workshop"><section class="workshop-card" role="dialog" aria-label="開發工坊預覽">' +
@@ -185,27 +267,44 @@ function renderPreview() {
   ws.style.padding = '16px';
   applyWorkshopStyle(ws, cfg);
   arrangeRows(ws);
+  const body = stage.querySelector('.workshop-body'); if (body) body.scrollTop = keepScroll;
 }
 document.getElementById('previewMode').addEventListener('change', renderPreview);
+// 點預覽裡的欄位＝在左邊選它
+document.getElementById('previewStage').addEventListener('click', e => {
+  const r = e.target.closest('.ws-row[data-key]'); if (!r) return;
+  selKey = r.dataset.key; renderList(); renderItemForm(); renderPreview();
+  document.querySelector('#itemList .sel')?.scrollIntoView({ block: 'nearest' });
+});
+function scrollPreviewTo(key) {   // 新增後：預覽捲到新的那一格
+  const el = document.querySelector('#previewStage .ws-row[data-key="' + key + '"]');
+  if (el) el.scrollIntoView({ block: 'nearest' });
+}
+document.getElementById('addItem').addEventListener('click', () => scrollPreviewTo(selKey));
 
 // ---- 存檔 ----
 // 開頭說明要跟 data/workshop.js 一字不差（存到專案時，內容沒變就不會重寫檔案）
 function exportText() {
   const items = {};
-  for (const key of ITEM_KEYS) {
+  for (const key of Object.keys(BUILTIN)) {
     const o = cfg.items[key]; if (!o) continue;
     const keep = {};
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]) keep[f] = o[f];
     if (Object.keys(keep).length) items[key] = keep;
   }
+  const added = cfg.added.map(a => ({ id: a.id, name: a.name, kind: a.kind, icon: a.icon || '🧰', image: a.image || '', source: a.source === 'field' ? 'field' : 'develop',
+    where: a.source === 'field' ? (a.where || '') : '', desc: a.desc || '', cost: [0, 1, 2].map(i => Math.max(0, Math.round(Number(a.cost[i]) || 0))), levels: [0, 1, 2].map(i => String(a.levels[i] ?? '')) }));
+  const removed = cfg.removed.filter(k => BUILTIN_GEAR.includes(k));
   const style = {};
   for (const k of Object.keys(WORKSHOP_STYLE_DEFAULT)) if (k in cfg.style && cfg.style[k] !== WORKSHOP_STYLE_DEFAULT[k]) style[k] = cfg.style[k];
   return '/* ===== 諾亞的開發工坊：裝備文字、圖片與外觀（由「🔧 開發工坊編輯器」匯出，整段覆蓋即可）=====\n' +
     '   items：要改哪件裝備／武器（沒寫的就用 data/equipment.js 原本的設定）\n' +
     '     key：裝備用 id（例如 headlamp）；武器前面加 w:（例如 w:pistol）\n' +
     '     name 名稱、image 圖片路徑、desc 說明、where 在哪裡拿到（只能在戰鬥區域取得的才會用到）\n' +
+    '   added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）\n' +
+    '   removed：刪除的原本裝備 id\n' +
     '   style：開發工坊的外觀（沒寫的就用預設值，見 js/workshop-config.js 的 WORKSHOP_STYLE_DEFAULT） */\n' +
-    'const WORKSHOP_CONFIG = ' + JSON.stringify({ items, style }, null, 2) + ';\n';
+    'const WORKSHOP_CONFIG = ' + JSON.stringify({ items, added, removed, style }, null, 2) + ';\n';
 }
 document.getElementById('downloadFile').addEventListener('click', () => {
   const blob = new Blob([exportText()], { type: 'text/javascript' });
@@ -215,7 +314,9 @@ document.getElementById('downloadFile').addEventListener('click', () => {
 document.getElementById('resetFile').addEventListener('click', () => {
   if (!confirm('確定丟掉還沒存到專案的修改，改回 data/workshop.js 檔案裡的內容？')) return;
   try { localStorage.removeItem(WS_DRAFT_KEY); } catch (_) {}
-  cfg = fromFile(); renderAll(); setStatus('已改回檔案裡的內容');
+  cfg = fromFile();
+  if (!gearKeys().includes(selKey) && !WEAPON_KEYS.includes(selKey)) selKey = BUILTIN_GEAR[0];
+  renderAll(); setStatus('已改回檔案裡的內容');
 });
 ProjectSave.attach({
   after: ['downloadFile'],
@@ -224,6 +325,7 @@ ProjectSave.attach({
 });
 
 function renderAll() { renderList(); renderItemForm(); renderStyleForm(); renderPreview(); }
+if (!gearKeys().includes(selKey)) selKey = gearKeys()[0];
 renderAll();
 // 暫存跟檔案不一樣＝上次有改了還沒存（存過的就不提醒）
 const fileText = (() => { const keep = cfg; cfg = fromFile(); const t = exportText(); cfg = keep; return t; })();

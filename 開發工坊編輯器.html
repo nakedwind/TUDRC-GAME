@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>開發工坊編輯器｜Y102 應變中心</title>
-<link rel="stylesheet" href="css/style.css?v=wsedit-20261020">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/style.css?v=wsedit2-20261020">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
@@ -36,11 +36,18 @@
   .color input[type=text] { flex: 1; }
   .style-group { border-top: 1px solid #2c3c4c; padding-top: 10px; margin-top: 4px; }
   .style-group > b { display: block; color: #ffe3a1; font-size: 12px; margin-bottom: 6px; }
-  #itemList { display: grid; gap: 5px; max-height: 260px; overflow: auto; margin-bottom: 12px; scrollbar-width: thin; }
+  #itemList { display: grid; gap: 5px; max-height: 300px; overflow: auto; margin-bottom: 12px; scrollbar-width: thin; }
   #itemList button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; cursor: pointer; font: inherit; font-size: 13px;
     color: #e8edf5; background: #15202b; border: 1px solid #334a5d; border-radius: 8px; padding: 5px 8px; }
   #itemList button.sel { background: #224358; border-color: #82cbe2; }
   #itemList button.changed::after { content: '已修改'; margin-left: auto; color: #e7b98d; font-size: 11px; }
+  #itemList button.added::after { content: '新增'; margin-left: auto; color: #8fe0b0; font-size: 11px; }
+  #itemList button.removed { opacity: .5; } #itemList button.removed span { text-decoration: line-through; }
+  #itemList button.removed::after { content: '已刪除'; margin-left: auto; color: #ff9c9c; font-size: 11px; }
+  #itemList .list-head { color: #ffe3a1; font-size: 12px; margin: 4px 0 0; }
+  .removed-note { color: #ffb3b3; font-size: 13px; line-height: 1.5; margin: 0 0 10px; }
+  .preview-stage .ws-row { cursor: pointer; }
+  .preview-stage .ws-row.ed-sel { outline: 2px solid #82cbe2; outline-offset: 1px; }   /* 左邊選到的那一格 */
   #itemList img, #itemList i { width: 30px; height: 30px; object-fit: contain; image-rendering: pixelated; font-style: normal; display: grid; place-items: center; }
   #itemList small { color: #8fa3b5; font-size: 11px; margin-left: 4px; }
   .img-row { display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 8px; align-items: center; }
@@ -71,7 +78,8 @@
   <div class="layout">
     <div>
       <section class="panel">
-        <h2>裝備與武器</h2>
+        <div class="bar" style="justify-content:space-between;margin-bottom:8px"><h2 style="margin:0">裝備與武器</h2>
+          <button type="button" class="ed-btn primary" id="addItem" title="新增一件裝備（右邊預覽的最後面會多一格）">＋ 新增裝備</button></div>
         <div id="itemList"></div>
         <div id="itemForm"></div>
       </section>
@@ -97,10 +105,10 @@
   </div>
 
   <script src="data/equipment.js?v=acidboots-20261018"></script>   <!-- 裝備、武器的原始資料 -->
-  <script src="data/workshop.js?v=wsedit-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
-  <script src="js/workshop-config.js?v=wsedit-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="data/workshop.js?v=wsedit2-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
+  <script src="js/workshop-config.js?v=wsedit2-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
-  <script src="js/project-save.js?v=wsedit-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-editor.js?v=wsedit-20261020"></script>
+  <script src="js/project-save.js?v=wsedit2-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
+  <script src="js/workshop-editor.js?v=wsedit2-20261020"></script>
 </body>
 </html>
