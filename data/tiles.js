@@ -1642,6 +1642,70 @@ const SHARED_TILES = [
     "h": 2
   },
   {
+    "id": "tile_eoc_floor_sign_1f",
+    "name": "樓層標示 1F",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-1F.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_eoc_floor_sign_2f",
+    "name": "樓層標示 2F",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-2F.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_eoc_floor_sign_3f",
+    "name": "樓層標示 3F",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-3F.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_eoc_floor_sign_4f",
+    "name": "樓層標示 4F",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-4F.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_eoc_floor_sign_b1",
+    "name": "樓層標示 B1",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-B1.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_eoc_floor_sign_b2",
+    "name": "樓層標示 B2",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-B2.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_eoc_floor_sign_b3",
+    "name": "樓層標示 B3",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-B3.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_eoc_floor_sign_b4",
+    "name": "樓層標示 B4",
+    "role": "floor",
+    "file": "images/應變中心/floor-sign-B4.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_muftd54p",
     "name": "warning-line",
     "role": "floor",
