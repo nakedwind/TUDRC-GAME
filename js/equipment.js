@@ -615,7 +615,7 @@ function workshopBuy(kind, id) {
 }
 // 說明文字上色：數字＝橘色、「戰鬥區域」和戰鬥區域裡的東西＝紫色、道具名稱＝道具顏色（js/workshop-config.js 的 workshopColorize，編輯器的預覽也用它）
 const wsColor = text => workshopColorize(text);
-function renderWorkshop() {
+function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發後重畫時，捲軸停在原本的位置（剛打開工坊時才從最上面開始）
   // about＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面（開發工坊編輯器可以寫）
   const row = (icon, name, lvText, stat, next, btn, about) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b>' + (about ? '<span class="ws-about">' + wsColor(about) + '</span>' : '') + '<span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
   const cost = n => '<b>' + WS_SHARD_IMG + n + '</b>';   // 按鈕上的價錢：結晶碎片圖＋數字
@@ -651,11 +651,14 @@ function renderWorkshop() {
   const side = '<aside class="workshop-side"><h3>目前裝備</h3>' + wornSlots +
     '<h3>背包裡的裝備</h3>' + (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">沒有其他裝備</p>') +
     '<p class="wss-tip">換裝備：打開背包</p></aside>';
+  const SCROLLERS = ['.workshop-body', '.workshop-side', '.workshop-main'];   // 會捲動的區塊（窄畫面時是 .workshop-main）
+  const scroll = keepScroll ? SCROLLERS.map(q => workshopEl.querySelector(q)?.scrollTop || 0) : null;
   workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
-    '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>用異質碎片開發新裝備，或把裝備、武器升級</p></div>' +
+    '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>使用異質碎片來開發裝備、武器升級</p></div>' +
     '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
     '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3><div class="ws-grid">' + gear + '</div><h3>武器</h3><div class="ws-grid">' + weapons + '</div></div>' + side + '</div></section>';
   arrangeWorkshopRows();
+  if (scroll) SCROLLERS.forEach((q, i) => { const el = workshopEl.querySelector(q); if (el) el.scrollTop = scroll[i]; });
   attachWorkshopToast();
 }
 // 左右兩欄：同一排的兩個欄位要一樣高（說明兩行的配兩行、三行的配三行），不會一高一矮擺在一起。
@@ -681,7 +684,7 @@ function arrangeWorkshopRows() {
 function openWorkshop() {
   ensureWorkshop(); if (typeof closeDialogue === 'function') closeDialogue(true);
   workshopOpen = true; Object.keys(keys).forEach(k => { keys[k] = false; });
-  workshopEl.classList.remove('hidden'); renderWorkshop(); sfx('menu');   // 先顯示再畫，才量得到欄位高度
+  workshopEl.classList.remove('hidden'); renderWorkshop(false); sfx('menu');   // 先顯示再畫，才量得到欄位高度
 }
 function closeWorkshop(silent = false) { if (!workshopOpen) return; workshopOpen = false; workshopEl.classList.add('hidden'); if (!silent) sfx('switch'); }
 window.addEventListener('keydown', e => { if (workshopOpen && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); closeWorkshop(); } }, true);
