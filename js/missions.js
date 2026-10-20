@@ -224,10 +224,10 @@ function renderMissionBoard() {
   missionBoard.innerHTML =
     '<section class="mission-card" role="dialog" aria-modal="true" aria-label="作戰桌">' +
       '<header class="mission-head"><div class="mission-title"><small>作戰桌</small><div class="mission-title-line"><h2>' + (side ? '委託與回憶' : '攻略 Y 區') + '</h2><p>' + (side ? '承接委託、查看回憶碎片' : '主線任務：依序控制 Y 區的每一區') + '</p></div></div>' + tabs +
-        (side ? '' : '<span class="mission-progress"><small>主線進度</small><b>' + cleared + ' / ' + MISSIONS.length + '</b></span>') +
-        '<button type="button" class="mission-close" aria-label="關閉（Esc）">×</button></header>' +
+        '<button type="button" class="mission-close" aria-label="關閉（Esc）">×</button></header>' +   // 主線／支線按鈕固定在關閉鈕左邊：切換分頁時不會移動
       (side ? '<div class="mission-body side-body">' + renderSideBoard() + '</div></section>' : ('<div class="mission-body">' +
-        '<div class="mission-map"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + lines + '</svg>' + nodes + '</div>' +
+        '<div class="mission-map"><svg viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true">' + lines + '</svg>' + nodes +
+          '<span class="mission-progress"><small>主線進度</small><b>' + cleared + ' / ' + MISSIONS.length + '</b></span></div>' +   // 主線進度：放在地圖左上角
         '<aside class="mission-detail">' +
           '<div class="mission-detail-main"><em class="mission-status ' + st + '">' + (sel.boss ? '⚠ BOSS 反應・' : '') + STATUS_TEXT[st] + '</em>' +
             '<h3>' + sel.name + '</h3><p>' + (st === 'locked' ? '先控制前面的區域，才能前往這裡。' : sel.desc) + '</p></div>' +

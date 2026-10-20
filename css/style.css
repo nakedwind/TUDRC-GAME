@@ -1441,7 +1441,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .mission-title-line { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; }
 .mission-title h2 { margin: 2px 0 3px; color: #fff8e7; font-size: 22px; line-height: 1.1; }
 .mission-title p { margin: 0; color: #929dab; font-size: 12px; }
-.mission-progress { flex: none; min-width: 104px; padding: 7px 12px; border: 1px solid rgba(255,212,121,.25); border-radius: 9px; background: rgba(83,65,31,.22); text-align: right; }
+.mission-progress { position: absolute; left: 12px; top: 12px; z-index: 2; min-width: 104px; padding: 7px 12px; border: 1px solid rgba(255,212,121,.25); border-radius: 9px; background: rgba(40,33,20,.78); text-align: center; pointer-events: none; }   /* 主線進度：地圖左上角，字置中 */
 .mission-progress small { display: block; color: #9d927d; font-size: 10px; letter-spacing: .08em; }
 .mission-progress b { display: block; margin-top: 1px; color: #ffd479; font-size: 20px; font-variant-numeric: tabular-nums; }
 .mission-close { width: 32px; height: 32px; flex: none; padding: 0; border: 1px solid #59616c; border-radius: 50%; background: #202730; color: #dfe7ee; cursor: pointer; font-size: 19px; line-height: 1; }
@@ -1453,7 +1453,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .mission-map svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .mission-map line { stroke: rgba(255,255,255,.18); stroke-width: 2; stroke-dasharray: 6 5; vector-effect: non-scaling-stroke; }
 .mission-map line.done { stroke: rgba(121,219,173,.6); stroke-dasharray: none; }
-.mission-node { position: absolute; transform: translate(-50%, -50%); display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: #c9d2db; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
+.mission-node { position: absolute; translate: -50% -50%;   /* 用 translate（不是 transform）置中：按下時的縮小效果才不會讓地點跳開、點不到 */ display: flex; flex-direction: column; align-items: center; gap: 5px; padding: 0; border: 0; background: none; color: #c9d2db; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
 .mission-node i { display: grid; place-items: center; width: 34px; height: 34px; border: 2px solid rgba(255,255,255,.25); border-radius: 50%; background: #1d2530; color: #fff; font-size: 15px; font-style: normal; box-shadow: 0 4px 12px rgba(0,0,0,.4); transition: transform .12s; }
 .mission-node span { padding: 2px 8px; border-radius: 99px; background: rgba(0,0,0,.45); white-space: nowrap; }
 .mission-node:hover i { transform: scale(1.1); }
