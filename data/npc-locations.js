@@ -132,10 +132,18 @@ const NPC_LOCATIONS = {
       ]
     },
     "rowan": {
+      "map": "B-1射擊訓練室",
+      "rect": [2, 10, 15, 13]
+    },
+    "cael": {
+      "map": "B-1射擊訓練室",
+      "rect": [2, 10, 15, 13]
+    },
+    "saku": {
       "map": "1F-餐廳",
       "rect": [4, 6, 25, 23]
     },
-    "cael": {
+    "kakuma": {
       "map": "1F-餐廳",
       "rect": [4, 6, 25, 23]
     }

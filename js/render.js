@@ -435,6 +435,8 @@ const BUBBLE_COLORS = {
   colyn:   { bg: '#fdebd2', bd: '#d98a2b', tx: '#5a3208' },   // 暖橘（配他的橘色眼睛）
   rowan:   { bg: '#e2f1dc', bd: '#5e9a52', tx: '#21401b' },   // 淡綠（配他的綠頭髮）
   cael:    { bg: '#eceedd', bd: '#8f9a62', tx: '#3a4020' },   // 灰綠（配他的淺綠頭髮）
+  saku:    { bg: '#e2e5f4', bd: '#4c5a92', tx: '#1d2550' },   // 靛藍（配碩的黑髮藍眼）
+  kakuma:  { bg: '#f5e2e3', bd: '#b0474f', tx: '#4f1a1f' },   // 灰紅（配赫真的灰髮紅眼）
   avaren:  { bg: '#dce8fb', bd: '#3a5fa0', tx: '#1c3766' },   // 淺藍
   eldrin:  { bg: '#d8efe6', bd: '#2f8a68', tx: '#123f2e' },   // 青綠
   noah:    { bg: '#f3ecd9', bd: '#a89355', tx: '#4a3f1c' },   // 米黃

@@ -3021,31 +3021,9 @@ const BATTLE_MAPS = [
         "oy": -14
       },
       {
-        "id": "tile_obstacle_redroadblocks_h",
-        "c": 23,
-        "r": 56,
-        "layer": "object2",
-        "ox": -14,
-        "oy": -20
-      },
-      {
-        "id": "tile_obstacle_redroadblocks_h",
-        "c": 27,
-        "r": 56,
-        "layer": "object2",
-        "ox": -20,
-        "oy": -20
-      },
-      {
         "id": "tile_obstacle_redroadblocks_v",
         "c": 48,
         "r": 49,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_obstacle_redroadblocks_v",
-        "c": 38,
-        "r": 55,
         "layer": "object2"
       },
       {
@@ -5504,12 +5482,6 @@ const BATTLE_MAPS = [
         "r": 32,
         "layer": "object3",
         "circuit": 2
-      },
-      {
-        "id": "tile_mrt_ticket_gate",
-        "c": 18,
-        "r": 54,
-        "layer": "floor"
       }
     ],
     "solid": [
@@ -7104,8 +7076,6 @@ const BATTLE_MAPS = [
       "7,1",
       "8,1",
       "9,1",
-      "10,1",
-      "11,1",
       "12,1",
       "13,1",
       "14,1",
@@ -7130,9 +7100,6 @@ const BATTLE_MAPS = [
       "15,0",
       "14,0",
       "13,0",
-      "12,0",
-      "11,0",
-      "10,0",
       "6,0",
       "5,0",
       "4,0",
@@ -7553,7 +7520,12 @@ const BATTLE_MAPS = [
       "53,1",
       "54,1",
       "55,1",
-      "22,46"
+      "22,46",
+      "12,0",
+      "10,0",
+      "10,1",
+      "11,1",
+      "11,0"
     ],
     "breakable": [],
     "camp": [
@@ -7604,8 +7576,8 @@ const BATTLE_MAPS = [
     "portals": [],
     "solidOffsets": {},
     "coreSpots": [
-      "43,52",
-      "40,51"
+      "43,36",
+      "39,43"
     ],
     "coreCount": 2,
     "monsterMix": [

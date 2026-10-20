@@ -405,5 +405,21 @@ const CHARACTERS = {
     "sprite": "cael_C",
     "intro": "常在餐廳出沒的路人，總是在擔心羅恩。",
     "captainImpression": ""
+  },
+  "saku": {
+    "id": "saku",
+    "kind": "support",
+    "name": "碩",
+    "sprite": "saku_B",
+    "intro": "常在餐廳出沒的路人。",
+    "captainImpression": ""
+  },
+  "kakuma": {
+    "id": "kakuma",
+    "kind": "support",
+    "name": "赫真",
+    "sprite": "kakuma_C",
+    "intro": "常在餐廳出沒的路人。",
+    "captainImpression": ""
   }
 };
