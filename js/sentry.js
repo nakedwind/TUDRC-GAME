@@ -30,6 +30,21 @@ function homeAreaOf(id) {
   if (!loc || loc.map !== MAP.name) return null;
   if (homeAreaCache.map !== MAP) { homeAreaCache.map = MAP; homeAreaCache.areas = {}; }
   let c0 = Infinity, r0 = Infinity, c1 = -Infinity, r1 = -Infinity, key;
+  const boxes = (Array.isArray(loc.rects) ? loc.rects : []).filter(rc => Array.isArray(rc) && rc.length === 4).map(rc => rc.map(Number));
+  if (boxes.length) {   // 好幾個方框（基地編輯器框的）：合起來就是活動範圍
+    key = 'rects:' + JSON.stringify(boxes);
+    if (key in homeAreaCache.areas) return homeAreaCache.areas[key];
+    const cells = [], seen = new Set();
+    for (const [a0, b0, a1, b1] of boxes) for (let c = Math.max(0, a0); c <= Math.min(COLS - 1, a1); c++) for (let r = Math.max(0, b0); r <= Math.min(ROWS - 1, b1); r++) {
+      const k = c + ',' + r; if (seen.has(k)) continue; seen.add(k);
+      if (isWall(c, r) || isEntrance(c, r) || G.grid[k]) continue;
+      const [x, y] = center(c, r);
+      if (!sentryBlocked(x, y)) cells.push([c, r]);
+    }
+    const px = boxes.map(([a0, b0, a1, b1]) => ({ x0: OX + a0 * CELL, y0: OY + b0 * CELL, x1: OX + (a1 + 1) * CELL, y1: OY + (b1 + 1) * CELL }));
+    const area = cells.length ? { cells, boxes: px, x0: Math.min(...px.map(b => b.x0)), y0: Math.min(...px.map(b => b.y0)), x1: Math.max(...px.map(b => b.x1)), y1: Math.max(...px.map(b => b.y1)) } : null;
+    return homeAreaCache.areas[key] = area;
+  }
   if (Array.isArray(loc.rect) && loc.rect.length === 4) {
     [c0, r0, c1, r1] = loc.rect.map(Number);
     key = 'rect:' + loc.rect.join(',');
@@ -59,7 +74,10 @@ function homeAreaOf(id) {
   }
   return homeAreaCache.areas[key] = area;
 }
-function inHomeArea(area, x, y) { return x >= area.x0 && x <= area.x1 && y >= area.y0 && y <= area.y1; }
+function inHomeArea(area, x, y) {   // 好幾個方框：在任何一個裡面就算
+  if (area.boxes) return area.boxes.some(b => x >= b.x0 && x <= b.x1 && y >= b.y0 && y <= b.y1);
+  return x >= area.x0 && x <= area.x1 && y >= area.y0 && y <= area.y1;
+}
 // 活動範圍裡隨機挑一個點（偏好離自己不太遠，看起來像在房間裡踱步）
 function sampleHomeTarget(area, a) {
   const near = area.cells.filter(([c, r]) => { const [x, y] = center(c, r); return Math.hypot(x - a.x, y - a.y) < 200; });

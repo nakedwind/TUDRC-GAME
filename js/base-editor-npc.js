@@ -1,6 +1,8 @@
 /* ===== 基地編輯器：玩家與 NPC 出生位置、NPC 活動範圍 =====
    基地編輯器.html 的右邊面板。每一章一份完整名單：NPC 平時在哪張基地地圖、從哪格出生、在哪個方框裡走動。
-   ・選章節 → 每個人選地圖（「不在基地」＝這章不出現）→ 可設出生格、拖出活動方框。沒框＝整張地圖閒逛。
+   ・選章節 → 每個人選地圖（「不在基地」＝這章不出現）→ 可設出生格、框出活動方框。沒框＝整張地圖閒逛。
+   ・活動方框＝NPC 平時走動的範圍（不是禁止進入的地方）。一個人可以框好幾個，合起來就是他走動的範圍：
+     按「▭ 框範圍」後一直停在框範圍模式（再按一次或 Esc 結束）；拖曳＝框一塊、點一格＝框 1 格、點已經框好的方框＝刪掉它。
    ・新增章節會複製最後一章的整份名單，再改有變動的人。
    ・編輯會自動存在瀏覽器（tudrc_npc_locations_v1），「▶ 預覽遊戲」會直接用；
      要正式保留：按「下載 npc-locations.js」，覆蓋到 data/npc-locations.js。
@@ -22,6 +24,9 @@ let npcPick = null;        // 正在框範圍的人（id）
 let npcSpawnPick = null;   // 正在設定出生格的人（id）
 let playerSpawnPick = false; // 正在設定玩家出生格
 let npcBoxDrag = null;     // 拖曳中的方框 { c0, r0, c, r }
+// 這個人的活動方框（可以好幾個）：rects＝[[c0,r0,c1,r1], …]；舊資料只有一個 rect 的，讀進來時換成 rects
+const npcRects = loc => (loc && Array.isArray(loc.rects) ? loc.rects : []);
+const rectHas = (rc, c, r) => c >= rc[0] && c <= rc[2] && r >= rc[1] && r <= rc[3];
 let npcShowAll = true;     // 地圖上顯示 NPC 範圍
 let npcFocus = null;       // 滑過列表時強調的人
 
@@ -47,8 +52,11 @@ function loadNpcData() {
   if (!d || !d.chapters) d = { chapters: clone(typeof NPC_LOCATIONS !== 'undefined' ? NPC_LOCATIONS : { 1: {} }) };
   for (const table of Object.values(d.chapters)) for (const [id, loc] of Object.entries(table)) {
     if (!loc || !loc.map) { delete table[id]; continue; }
-    if (loc.area && !loc.rect) { const rect = npcAreaToRect(loc.map, loc.area); if (rect) loc.rect = rect; }
+    if (loc.area && !loc.rect && !loc.rects) { const rect = npcAreaToRect(loc.map, loc.area); if (rect) loc.rect = rect; }
     delete loc.area;
+    if (Array.isArray(loc.rect) && !Array.isArray(loc.rects)) loc.rects = [loc.rect];   // 舊的單一方框 → 方框清單
+    delete loc.rect;
+    if (Array.isArray(loc.rects) && !loc.rects.length) delete loc.rects;
   }
   if (!Object.keys(d.chapters).length) d.chapters = { 1: {} };
   npcData = d;
@@ -71,7 +79,8 @@ function renderNpcPanel() {
     const loc = table[p.id], head = p.kind !== lastKind ? '<div class="npc-kind">' + (KIND_LABEL[p.kind] || p.kind) + '</div>' : '';
     lastKind = p.kind;
     const here = loc && loc.map === cur.name;
-    const range = !loc ? '' : loc.rect ? '方框 ' + (loc.rect[2] - loc.rect[0] + 1) + '×' + (loc.rect[3] - loc.rect[1] + 1) + ' 格' : '整張地圖閒逛';
+    const rs = npcRects(loc), one = rs[0];
+    const range = !loc ? '' : rs.length === 1 ? '方框 ' + (one[2] - one[0] + 1) + '×' + (one[3] - one[1] + 1) + ' 格' : rs.length ? rs.length + ' 個方框' : '整張地圖閒逛';
     const spawn = loc && Array.isArray(loc.spawn) ? '出生格 ' + loc.spawn[0] + ',' + loc.spawn[1] : '隨機出生';
     const picking = npcPick === p.id || npcSpawnPick === p.id;
     return head + '<div class="npc-row' + (picking ? ' picking' : '') + (here ? ' here' : '') + '" data-npc-row="' + p.id + '">' +
@@ -80,8 +89,8 @@ function renderNpcPanel() {
       (loc ? '<span class="npc-range">' + spawn + '・' + range + '</span>' +
         '<button type="button" class="btn small" data-npc-spawn="' + p.id + '" title="切到這張地圖，再點一格指定出生地">' + (npcSpawnPick === p.id ? '點選出生格…' : '⌖ 出生點') + '</button>' +
         (loc.spawn ? '<button type="button" class="btn small" data-npc-spawn-random="' + p.id + '" title="清除指定格，改回隨機出生">隨機</button>' : '') +
-        '<button type="button" class="btn small" data-npc-box="' + p.id + '" title="切到這張地圖，在地圖上拖一個方框">' + (npcPick === p.id ? '拖曳中…' : '▭ 框範圍') + '</button>' +
-        (loc.rect ? '<button type="button" class="btn small" data-npc-clear="' + p.id + '" title="不限範圍，整張地圖閒逛">整張</button>' : '') +
+        '<button type="button" class="btn small' + (npcPick === p.id ? ' primary' : '') + '" data-npc-box="' + p.id + '" title="切到這張地圖框活動範圍：拖曳＝框一塊、點一格＝框 1 格、點已經框好的方框＝刪掉；再按一次或 Esc 結束">' + (npcPick === p.id ? '框範圍中（再按結束）' : '▭ 框範圍') + '</button>' +
+        (npcRects(loc).length ? '<button type="button" class="btn small" data-npc-clear="' + p.id + '" title="不限範圍，整張地圖閒逛">整張</button>' : '') +
         (!here ? '<button type="button" class="btn small" data-npc-go="' + p.id + '" title="切到他所在的地圖">↪</button>' : '') : '') +
       '</div>';
   }).join('');
@@ -123,14 +132,15 @@ npcPanelEl.addEventListener('click', e => {
   if (!id) return;
   const loc = npcTable()[id]; if (!loc) return;
   const m = maps.find(x => x.name === loc.map);
-  if (t.dataset.npcClear) { delete loc.rect; saveNpcData(); renderNpcPanel(); draw(); setStatus(npcPerson(id).name + '：整張地圖閒逛', '#7ee0c0'); return; }
+  if (t.dataset.npcClear) { delete loc.rects; saveNpcData(); renderNpcPanel(); draw(); setStatus(npcPerson(id).name + '：整張地圖閒逛', '#7ee0c0'); return; }
   if (t.dataset.npcSpawnRandom) { delete loc.spawn; npcSpawnPick = null; saveNpcData(); renderNpcPanel(); draw(); setStatus(npcPerson(id).name + '：出生位置改為隨機', '#7ee0c0'); return; }
   if (m && m.id !== curId) switchTo(m.id);
   if (t.dataset.npcBox) {
     playerSpawnPick = false;
     npcSpawnPick = null;
     npcPick = npcPick === id ? null : id;
-    if (npcPick) setStatus('在地圖上拖一個方框：' + npcPerson(id).name + ' 平時會在這個範圍裡走動（按 Esc 取消）', '#8fd3ff');
+    if (npcPick) setStatus('框' + npcPerson(id).name + '的活動範圍：拖曳＝框一塊、點一格＝框 1 格、點已經框好的方框＝刪掉（可以框好幾個；再按「框範圍中」或 Esc 結束）', '#8fd3ff');
+    else setStatus('已結束框範圍', '#9aa4b2');
   }
   if (t.dataset.npcSpawn) {
     playerSpawnPick = false;
@@ -195,12 +205,22 @@ cv.addEventListener('pointermove', e => {
 cv.addEventListener('pointerup', e => {
   if (!npcPick || !npcBoxDrag) return;
   e.stopImmediatePropagation();
-  const m = curMap(), d = npcBoxDrag, loc = npcTable()[npcPick];
-  const c0 = Math.max(0, Math.min(d.c0, d.c)), r0 = Math.max(0, Math.min(d.r0, d.r)), c1 = Math.min(m.cols - 1, Math.max(d.c0, d.c)), r1 = Math.min(m.rows - 1, Math.max(d.r0, d.r));
-  if (loc) { loc.map = m.name; loc.rect = [c0, r0, c1, r1]; }
-  setStatus(npcPerson(npcPick).name + '：平時在「' + m.name + '」這個 ' + (c1 - c0 + 1) + '×' + (r1 - r0 + 1) + ' 格的範圍裡走動', '#7ee0c0');
-  npcBoxDrag = null; npcPick = null;
-  saveNpcData(); renderNpcPanel(); draw();
+  const m = curMap(), d = npcBoxDrag, loc = npcTable()[npcPick], name = npcPerson(npcPick).name;
+  npcBoxDrag = null;
+  if (!loc) { draw(); return; }
+  const clicked = d.c === d.c0 && d.r === d.r0;   // 沒拖動＝點一格
+  const rs = loc.map === m.name ? npcRects(loc) : [];
+  const hit = clicked ? rs.map((rc, i) => [rc, i]).reverse().find(([rc]) => rectHas(rc, d.c0, d.r0)) : null;   // 點到的方框（重疊時刪最後框的那個）
+  if (hit) {
+    rs.splice(hit[1], 1); if (!rs.length) delete loc.rects;
+    setStatus(name + '：刪掉一個方框' + (rs.length ? '（還有 ' + rs.length + ' 個）' : '，現在是整張地圖閒逛'), '#ffd24a');
+  } else {
+    const c0 = Math.max(0, Math.min(d.c0, d.c)), r0 = Math.max(0, Math.min(d.r0, d.r)), c1 = Math.min(m.cols - 1, Math.max(d.c0, d.c)), r1 = Math.min(m.rows - 1, Math.max(d.r0, d.r));
+    if (loc.map !== m.name) delete loc.rects;   // 換到別張地圖框：舊地圖的方框清掉
+    loc.map = m.name; (loc.rects || (loc.rects = [])).push([c0, r0, c1, r1]);
+    setStatus(name + '：多框了 ' + (c1 - c0 + 1) + '×' + (r1 - r0 + 1) + ' 格（共 ' + loc.rects.length + ' 個方框）。可以繼續框；點方框＝刪掉；再按「框範圍中」或 Esc 結束', '#7ee0c0');
+  }
+  saveNpcData(); renderNpcPanel(); draw();   // npcPick 不清掉：一直停在框範圍模式
 }, true);
 
 // ---- 地圖上畫出 NPC 範圍（editor.js 的 draw 最後呼叫）----
@@ -219,16 +239,18 @@ function drawEditorOverlay(ctx, m) {
     const labels = new Map();   // 同一個方框的名字往下排
     for (const p of here) {
       const loc = table[p.id];
-      const rect = loc.rect;
       const strong = npcFocus === p.id || npcPick === p.id;
-      if (rect && (npcShowAll || strong)) {
+      const rs = npcRects(loc);
+      const hoverHit = npcPick === p.id && !npcBoxDrag && hoverCell ? rs.map((rc, i) => [rc, i]).reverse().find(([rc]) => rectHas(rc, hoverCell[0], hoverCell[1])) : null;
+      if (npcShowAll || strong) rs.forEach((rect, i) => {
         const x = OX + rect[0] * CELL, y = OY + rect[1] * CELL, w = (rect[2] - rect[0] + 1) * CELL, h = (rect[3] - rect[1] + 1) * CELL;
-        ctx.globalAlpha = strong ? .22 : .1; ctx.fillStyle = p.color; ctx.fillRect(x, y, w, h);
-        ctx.globalAlpha = 1; ctx.strokeStyle = p.color; ctx.lineWidth = strong ? 4 : 2; ctx.setLineDash(strong ? [] : [8, 5]);
+        const del = hoverHit && hoverHit[1] === i;   // 框範圍模式：滑過的方框＝點一下會刪掉
+        ctx.globalAlpha = del ? .3 : strong ? .22 : .1; ctx.fillStyle = del ? '#ff4d4d' : p.color; ctx.fillRect(x, y, w, h);
+        ctx.globalAlpha = 1; ctx.strokeStyle = del ? '#ff4d4d' : p.color; ctx.lineWidth = strong ? 4 : 2; ctx.setLineDash(strong && !del ? [] : [8, 5]);
         ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.setLineDash([]);
         const k = rect.join(','), n = labels.get(k) || 0; labels.set(k, n + 1);
-        npcTag(ctx, p, x + 4, y + 4 + n * 22);
-      }
+        npcTag(ctx, p, x + 4, y + 4 + n * 22, del ? '點一下刪除' : '');
+      });
       const spawn = loc.spawn;
       if (Array.isArray(spawn) && (npcShowAll || npcFocus === p.id || npcPick === p.id || npcSpawnPick === p.id)) {
         const x = OX + (spawn[0] + .5) * CELL, y = OY + (spawn[1] + .5) * CELL;
@@ -239,7 +261,7 @@ function drawEditorOverlay(ctx, m) {
       }
     }
     // 沒框範圍的人：左上角列出「整張地圖閒逛」
-    const free = here.filter(p => !table[p.id].rect);
+    const free = here.filter(p => !npcRects(table[p.id]).length);
     free.forEach((p, i) => npcTag(ctx, p, OX + 6, OY + 6 + i * 22, '整張閒逛'));
   }
   if (npcPick && npcBoxDrag) {   // 正在拖的方框
@@ -283,18 +305,19 @@ function npcExportText() {
       const loc = npcData.chapters[k][p.id]; if (!loc) continue;
       const entry = { map: loc.map };
       if (Array.isArray(loc.spawn)) entry.spawn = loc.spawn;
-      if (Array.isArray(loc.rect)) entry.rect = loc.rect;
+      const rs = npcRects(loc);
+      if (rs.length === 1) entry.rect = rs[0]; else if (rs.length > 1) entry.rects = rs;   // 一個方框＝rect；好幾個＝rects
       chapters[k][p.id] = entry;
     }
   }
-  const body = JSON.stringify(chapters, null, 2).replace(/\[\n\s+(\d+),\n\s+(\d+),\n\s+(\d+),\n\s+(\d+)\n\s+\]/g, '[$1, $2, $3, $4]');
+  const body = JSON.stringify(chapters, null, 2).replace(/\[\n\s+(\d+),\n\s+(\d+),\n\s+(\d+),\n\s+(\d+)\n\s+\]/g, '[$1, $2, $3, $4]');   // 方框寫成一行（rects 裡的每個方框也是）
   return `/* ===== 基地（安全區）裡每個人平時在哪裡（由「🏠 基地編輯器」匯出，整段覆蓋即可）=====
    基地的每個房間是不同張地圖。這裡決定「誰平時待在哪張地圖、哪一區」，可以依劇情章節不同。
    建議用基地編輯器調整：選章節 → 幫每個人選地圖 → 可指定出生格（spawn＝[格 c, 格 r]），並在地圖上拖活動方框（rect＝[左上格 c, 左上格 r, 右下格 c, 右下格 r]）。
    ・只有寫在這裡的人會出現在基地裡；沒寫的人就不在基地（例如出任務去了）。
    ・出勤隊伍在基地裡不會跟著溫特，大家都待在自己的位置。（戰鬥地圖照舊只出現出勤隊伍。）
-   ・每個人：map＝地圖名稱；spawn＝指定出生格；rect＝活動範圍方框；area＝舊寫法（下面 NPC_AREAS 的名稱，用素材圍出範圍）。
-     沒有 spawn＝隨機出生；rect、area 都沒寫＝整張地圖閒逛。
+   ・每個人：map＝地圖名稱；spawn＝指定出生格；rect＝活動範圍方框（平時在這裡面走動）；rects＝好幾個方框（合起來是走動範圍）；
+     area＝舊寫法（下面 NPC_AREAS 的名稱，用素材圍出範圍）。沒有 spawn＝隨機出生；rect、rects、area 都沒寫＝整張地圖閒逛。
    ・章節：NPC_LOCATIONS 用章節數字當 key。目前章節（data/balance.js 的 CHAPTER）會用「≤ 目前章節」的最大那一章；
      基地編輯器新增章節時會自動複製上一章的整份名單，再改有變動的人。
    讀取名單的程式在 js/sentry.js（npcLocation）。

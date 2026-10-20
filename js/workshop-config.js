@@ -6,6 +6,11 @@
 */
 // 外觀的預設值（＝沒用編輯器改過時的樣子）。編輯器的「恢復預設」就是回到這些數字。
 const WORKSHOP_STYLE_DEFAULT = {
+  // 最上面的標題列：小標、大標題、說明的文字／大小／顏色，整塊的位移（px；正數＝往右／往下）
+  headSmall: '諾亞的開發工坊', headSmallSize: 10, headSmallColor: '#d8ae5d',
+  headTitle: '裝備開發・升級', headTitleSize: 22, headTitleColor: '#fff8e7',
+  headSub: '使用異質碎片來開發裝備、武器升級', headSubSize: 12, headSubColor: '#929dab',
+  headX: 0, headY: 0,
   panelW: 1010,          // 工坊視窗最大寬度（px）
   panelH: 620,           // 工坊視窗最大高度（px）
   cardH: 0,              // 每個裝備欄位的最小高度（px；0＝依內容自動）
@@ -25,6 +30,10 @@ const WORKSHOP_STYLE_DEFAULT = {
 };
 // 數字型的設定在 CSS 裡要加 px
 const WORKSHOP_STYLE_VARS = {
+  headSmallSize: ['--ws-head-small-size', 'px'], headSmallColor: ['--ws-head-small-color', ''],
+  headTitleSize: ['--ws-head-title-size', 'px'], headTitleColor: ['--ws-head-title-color', ''],
+  headSubSize: ['--ws-head-sub-size', 'px'], headSubColor: ['--ws-head-sub-color', ''],
+  headX: ['--ws-head-x', 'px'], headY: ['--ws-head-y', 'px'],
   panelW: ['--ws-panel-w', 'px'], panelH: ['--ws-panel-h', 'px'], cardH: ['--ws-card-h', 'px'], gap: ['--ws-gap', 'px'],
   iconSize: ['--ws-icon', 'px'], btnW: ['--ws-btn-w', 'px'],
   btnFont: ['--ws-btn-font', 'px'], btnPadY: ['--ws-btn-pad-y', 'px'], btnPadX: ['--ws-btn-pad-x', 'px'], btnX: ['--ws-btn-x', 'px'], btnY: ['--ws-btn-y', 'px'],
@@ -35,6 +44,11 @@ const WORKSHOP_STYLE_VARS = {
 };
 function workshopStyle(cfg) {   // 預設值＋設定檔裡改過的
   return { ...WORKSHOP_STYLE_DEFAULT, ...((cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {})).style || {}) };
+}
+// 標題列的三行字（遊戲的開發工坊、編輯器的預覽共用）：空白＝不顯示那一行
+function workshopHeadHtml(cfg) {
+  const st = workshopStyle(cfg), e = t => String(t ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return '<div class="workshop-title">' + (st.headSmall ? '<small>' + e(st.headSmall) + '</small>' : '') + (st.headTitle ? '<h2>' + e(st.headTitle) + '</h2>' : '') + (st.headSub ? '<p>' + e(st.headSub) + '</p>' : '') + '</div>';
 }
 function applyWorkshopStyle(el, cfg) {   // 把外觀設定寫成 CSS 變數（el＝#workshop）
   if (!el) return;

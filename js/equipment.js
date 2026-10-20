@@ -706,7 +706,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   const SCROLLERS = ['.workshop-body', '.workshop-side', '.workshop-main'];   // 會捲動的區塊（窄畫面時是 .workshop-main）
   const scroll = keepScroll ? SCROLLERS.map(q => workshopEl.querySelector(q)?.scrollTop || 0) : null;
   workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
-    '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>使用異質碎片來開發裝備、武器升級</p></div>' +
+    '<header class="workshop-head">' + workshopHeadHtml() +   // 標題列的文字（開發工坊編輯器可以改：js/workshop-config.js）
     '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
     '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3><div class="ws-grid">' + gear + '</div><h3>武器</h3><div class="ws-grid">' + weapons + '</div></div>' + side + '</div></section>';
   arrangeWorkshopRows();

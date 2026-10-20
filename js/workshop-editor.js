@@ -355,6 +355,12 @@ async function pickImage() {
 
 // ---- 外觀 ----
 const STYLE_FIELDS = [
+  ['標題列（工坊最上面，文字都靠左）', [
+    ['headSmall', '小標的文字（空白＝不顯示）', 'text'], ['headSmallSize', '小標的文字大小', 'num', 8, 24, 1], ['headSmallColor', '小標的顏色', 'color'],
+    ['headTitle', '大標題的文字（空白＝不顯示）', 'text'], ['headTitleSize', '大標題的文字大小', 'num', 12, 40, 1], ['headTitleColor', '大標題的顏色', 'color'],
+    ['headSub', '說明的文字（空白＝不顯示）', 'text'], ['headSubSize', '說明的文字大小', 'num', 8, 24, 1], ['headSubColor', '說明的顏色', 'color'],
+    ['headX', '整塊的左右位移（正數＝往右）', 'num', -100, 400, 1], ['headY', '整塊的上下位移（正數＝往下）', 'num', -30, 30, 1],
+  ]],
   ['欄位大小', [
     ['panelW', '工坊視窗最大寬度', 'num', 700, 1400, 10],
     ['panelH', '工坊視窗最大高度', 'num', 400, 900, 10],
@@ -447,7 +453,7 @@ function renderPreview() {
   const weapons = weaponKeys().filter(k => !isRemoved(k)).map(previewRow).join('');   // 刪掉的武器不顯示
   const side = pvSideHtml();   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
   stage.innerHTML = '<div id="workshop"><section class="workshop-card" role="dialog" aria-label="開發工坊預覽">' +
-    '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>使用異質碎片來開發裝備、武器升級</p></div>' +
+    '<header class="workshop-head">' + workshopHeadHtml(cfg) +
     '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
     '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3><div class="ws-grid">' + gear + '</div><h3>武器</h3><div class="ws-grid">' + weapons + '</div></div>' + side + '</div></section></div>';
   const ws = stage.querySelector('#workshop');

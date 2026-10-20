@@ -1650,10 +1650,12 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #workshop.hidden { display: none; }
 .workshop-card { width: min(var(--ws-panel-w, 1010px), 100%); height: 100%; max-height: var(--ws-panel-h, 620px); display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255,212,121,.38); border-radius: 16px; color: #e8eef3; background: linear-gradient(160deg, rgba(29,34,41,.95), rgba(12,17,23,.97)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); }
 .workshop-head { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 18px 12px; border-bottom: 1px solid rgba(255,212,121,.13); background: linear-gradient(90deg, rgba(255,212,121,.07), transparent 60%); }
-.workshop-title { flex: 1; min-width: 0; }
-.workshop-title small { color: #d8ae5d; font-size: 10px; letter-spacing: .16em; }
-.workshop-title h2 { margin: 2px 0 3px; color: #fff8e7; font-size: 22px; }
-.workshop-title p { margin: 0; color: #929dab; font-size: 12px; }
+/* 標題列：文字一律靠左；文字、大小、顏色、位移可以在開發工坊編輯器改（--ws-head-*） */
+.workshop-title { flex: 1; min-width: 0; text-align: left; translate: var(--ws-head-x, 0px) var(--ws-head-y, 0px); }
+.workshop-title small, .workshop-title h2, .workshop-title p { display: block; text-align: left; white-space: pre-line; }
+.workshop-title small { color: var(--ws-head-small-color, #d8ae5d); font-size: var(--ws-head-small-size, 10px); letter-spacing: .16em; }
+.workshop-title h2 { margin: 2px 0 3px; color: var(--ws-head-title-color, #fff8e7); font-size: var(--ws-head-title-size, 22px); }
+.workshop-title p { margin: 0; color: var(--ws-head-sub-color, #929dab); font-size: var(--ws-head-sub-size, 12px); }
 .workshop-close { width: 32px; height: 32px; flex: none; padding: 0; border: 1px solid #59616c; border-radius: 50%; background: #202730; color: #dfe7ee; cursor: pointer; font-size: 19px; }
 .workshop-close:hover { border-color: #c9d3dc; background: #2b3440; }
 .workshop-body { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 16px 16px; display: flex; flex-direction: column; gap: 7px; scrollbar-color: #776642 transparent; }
