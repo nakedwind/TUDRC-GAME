@@ -615,12 +615,14 @@ function workshopBuy(kind, id) {
 }
 // 說明文字上色：數字＝橘色、「戰鬥區域」和戰鬥區域裡的東西＝紫色、道具名稱＝道具顏色（js/workshop-config.js 的 workshopColorize，編輯器的預覽也用它）
 const wsColor = text => workshopColorize(text);
+// 工坊欄位左邊的圖：照開發工坊編輯器設的「圖片大小」縮放（js/workshop-config.js 的 workshopIconStyle）
+const wsIcon = d => { const st = workshopIconStyle(d), h = equipIcon(d); return st ? h.replace(/^<(img|i) /, '<$1' + st + ' ') : h; };
 function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發後重畫時，捲軸停在原本的位置（剛打開工坊時才從最上面開始）
   // about＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面（開發工坊編輯器可以寫）
   const row = (icon, name, lvText, stat, next, btn, about) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b>' + (about ? '<span class="ws-about">' + wsColor(about) + '</span>' : '') + '<span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
   const cost = n => '<b>' + WS_SHARD_IMG + n + '</b>';   // 按鈕上的價錢：結晶碎片圖＋數字
   const gear = EQUIPMENT.map(def => {
-    const lv = equipState.owned[def.id], icon = equipIcon(def);
+    const lv = equipState.owned[def.id], icon = wsIcon(def);
     if (!lv) {
       if (def.source !== 'develop') return row(icon, def.name, '', def.desc, def.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
       return row(icon, def.name, '', def.desc, 'Lv1：' + def.stat(def.levels[0]), '<button type="button" class="ws-btn" data-ws="dev:' + def.id + '">開發 ' + cost(def.cost[0]) + '</button>');
@@ -630,8 +632,8 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   }).join('');
   const weapons = Object.entries(WEAPON_UPGRADES).filter(([, w]) => !w.removed).map(([k, w]) => {   // 刪掉的武器不顯示
     const lv = equipState.weapons[k];
-    if (!lv) return row(equipIcon(w), w.name, '', w.desc, w.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
-    return row(equipIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < w.levels.length ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
+    if (!lv) return row(wsIcon(w), w.name, '', w.desc, w.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
+    return row(wsIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < w.levels.length ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
       lv < w.levels.length ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>', w.ownedDesc);
   }).join('');
   // 右側：目前穿戴的 4 格＋背包裡其他已擁有的裝備（升級後等級即時更新）
@@ -665,8 +667,11 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
 // 先量每個欄位的高度，再把一樣高的兩兩配成一排；配不到的單獨一排（放左邊）。
 function arrangeWorkshopRows() {
   if (!workshopEl || workshopEl.classList.contains('hidden')) return;   // 看不到的時候量不到高度，打開時會再排一次
-  workshopEl.querySelectorAll('.ws-grid').forEach(grid => {
+  const wsOrder = (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.order) || {};
+  workshopEl.querySelectorAll('.ws-grid').forEach((grid, gi) => {
     const cards = [...grid.children];
+    // 開發工坊編輯器調整過順序（data/workshop.js 的 order）：照順序左、右、左、右排，同一排一樣高（不自動配對）
+    if (Array.isArray(wsOrder[gi === 0 ? 'gear' : 'weapons'])) { cards.forEach(el => { el.style.alignSelf = ''; el.style.gridColumnStart = ''; }); return; }
     cards.forEach(el => { el.style.alignSelf = 'start'; el.style.gridColumnStart = ''; });   // 先用自然高度量
     const h = new Map(cards.map(el => [el, el.offsetHeight]));
     const left = cards.slice(), pairs = [], alone = [];

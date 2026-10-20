@@ -72,6 +72,11 @@ function workshopColorize(text, st) {   // st：外觀設定（編輯器傳編�
     .replace(/\u2063([^\u2063]*)\u2063/g, '<i class="ws-num">$1</i>');   // 數值欄填的文字（例如 ∞）：跟數字一樣橘色
 }
 
+// ---- 開發工坊裡的圖片大小（iconScale，%）：圖示框不變，只放大縮小裡面的圖（css/style.css 的 --ws-img-scale）----
+// 圖片位移（iconX／iconY，px）：正數＝往右／往下（--ws-img-x／--ws-img-y）
+const workshopIconVars = (scale, x, y) => [scale && scale !== 100 ? '--ws-img-scale:' + scale / 100 : '', x ? '--ws-img-x:' + x + 'px' : '', y ? '--ws-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
+const workshopIconStyle = d => { const v = d ? workshopIconVars(d.iconScale, d.iconX, d.iconY) : ''; return v ? ' style="' + v + '"' : ''; };
+
 // ---- 裝備／武器的文字和圖片 ----
 const WORKSHOP_TEXT_FIELDS = ['name', 'image', 'desc', 'ownedDesc', 'where'];   // ownedDesc＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面
 // 每一級數值的中文名稱（編輯器用）：label 名稱、unit 單位、scale 顯示時乘多少（例如 0.15 → 15 %；照明 220 像素 → 5.5 格）
@@ -105,6 +110,8 @@ function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊�
   return {
     id: a.id, name: a.name || '新裝備', kind: WORKSHOP_KINDS[a.kind] ? a.kind : 'acc', icon: a.icon || '🧰', image: a.image || '',
     source: a.source === 'field' ? 'field' : 'develop', where: a.where || '', desc: a.desc || '', ownedDesc: a.ownedDesc || '',
+    iconScale: typeof a.iconScale === 'number' && a.iconScale > 0 ? a.iconScale : 100,
+    iconX: Number.isFinite(a.iconX) ? a.iconX : 0, iconY: Number.isFinite(a.iconY) ? a.iconY : 0,
     cost: WORKSHOP_LV_INDEX.map(i => cost[i] ?? [50, 100, 160, 240, 340][i] ?? 340),   // [開發, 升到 Lv2, …, 升到最高級]
     stat: lv => lv.text, levels: WORKSHOP_LV_INDEX.map(i => ({ text: String(texts[i] ?? '') })),
     custom: true,
@@ -180,9 +187,14 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
     WORKSHOP_BASE[key].levels = (def.levels || []).map(lv => ({ ...lv }));   // 原本每一級的數值（編輯器比對、恢復用）
     WORKSHOP_BASE[key].statFn = def.stat;   // 原本的效果說明產生方式（還沒被設定檔改過）
     WORKSHOP_BASE[key].def = def;
+    WORKSHOP_BASE[key].cost = Array.isArray(def.cost) ? def.cost.slice() : [];   // 原本的費用（編輯器比對、恢復用）
     const o = items[key]; if (!o) continue;
+    if (typeof o.iconScale === 'number' && o.iconScale > 0) def.iconScale = o.iconScale;   // 開發工坊裡圖片的大小（%）
+    for (const k of ['iconX', 'iconY']) if (Number.isFinite(o[k])) def[k] = o[k];   // 圖片位移（px）
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '') def[f] = o[f];
     // 每一級的實際數值（傷害、彈匣、裝填秒數…）：直接改進原本的等級資料，遊戲各處讀到的就是新數值，效果說明也會跟著算
+    // 開發／升級要花幾個異質碎片：有寫數字的那一格換掉（null＝原本的）
+    if (Array.isArray(o.cost) && Array.isArray(def.cost)) o.cost.forEach((n, i) => { if (typeof n === 'number' && Number.isFinite(n) && n >= 0 && i < def.cost.length) def.cost[i] = Math.round(n); });
     if (Array.isArray(o.values) && def.levels) o.values.forEach((v, i) => {
       if (!v || !def.levels[i]) return;
       for (const [k, n] of Object.entries(v)) {
@@ -210,5 +222,17 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
   if (typeof WEAPON_UPGRADES !== 'undefined') for (const key of removed) {
     const w = key.startsWith('w:') && WEAPON_UPGRADES[key.slice(2)];
     if (w) { w.removed = true; WORKSHOP_REMOVED[key] = w; }
+  }
+  // 排列順序（開發工坊編輯器在預覽裡拖曳調整的）：開發工坊、背包都照這個順序；沒列到的照原本的順序接在後面
+  const order = cfg.order || {};
+  const rankOf = list => { const m = new Map((Array.isArray(list) ? list : []).map((k, i) => [k, i])); return k => m.has(k) ? m.get(k) : 1e6; };
+  if (Array.isArray(order.gear)) {
+    const rank = rankOf(order.gear), sorted = EQUIPMENT.map((d, i) => [d, i]).sort((a, b) => rank(a[0].id) - rank(b[0].id) || a[1] - b[1]).map(x => x[0]);
+    EQUIPMENT.splice(0, EQUIPMENT.length, ...sorted);
+  }
+  if (Array.isArray(order.weapons) && typeof WEAPON_UPGRADES !== 'undefined') {   // 物件的 key 順序：全部拿出來、照順序放回去
+    const rank = rankOf(order.weapons), entries = Object.entries(WEAPON_UPGRADES).map((e, i) => [e, i]).sort((a, b) => rank('w:' + a[0][0]) - rank('w:' + b[0][0]) || a[1] - b[1]).map(x => x[0]);
+    for (const [k] of entries) delete WEAPON_UPGRADES[k];
+    for (const [k, w] of entries) WEAPON_UPGRADES[k] = w;
   }
 })();

@@ -1609,6 +1609,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .equip-slot-icon { display: grid; place-items: center; width: 60px; height: 60px; border-radius: 12px; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.09), rgba(7,10,14,.5) 70%); color: rgba(255,212,121,.6); font-size: 18px; }
 .equip-slot-icon img { width: 51px; height: 51px; object-fit: contain; image-rendering: pixelated; }
 .equip-slot-icon i, .equip-option > i, .ws-icon i { font-style: normal; font-size: 22px; }
+.ws-icon i { font-size: calc(22px * var(--ws-img-scale, 1)); }   /* 開發工坊編輯器的「圖片大小」 */
+.ws-icon img, .ws-icon i { translate: var(--ws-img-x, 0px) var(--ws-img-y, 0px); }   /* 開發工坊編輯器的「圖片位移」 */
 .equip-slot-text { min-width: 0; display: flex; flex-direction: column; gap: 1px; }
 .equip-slot-text small { color: #9d927d; font-size: 10px; }
 .equip-slot-text b { font-size: 13px; }
@@ -1678,7 +1680,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ws-gap, 7px); }   /* 裝備、武器各分左右兩欄 */
 .ws-row { min-height: var(--ws-card-h, 0px); display: grid; grid-template-columns: var(--ws-icon, 66px) minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; background: rgba(37,43,51,.45); }
 .ws-icon { display: grid; place-items: center; width: var(--ws-icon, 66px); height: var(--ws-icon, 66px); border-radius: 13px; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.09), rgba(7,10,14,.5) 70%); }
-.ws-icon img { width: calc(var(--ws-icon, 66px) * .82); height: calc(var(--ws-icon, 66px) * .82); object-fit: contain; image-rendering: pixelated; }
+.ws-icon img { width: calc(var(--ws-icon, 66px) * .82 * var(--ws-img-scale, 1)); height: calc(var(--ws-icon, 66px) * .82 * var(--ws-img-scale, 1)); object-fit: contain; image-rendering: pixelated; }
 .ws-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 .ws-text b { font-size: var(--ws-name-size, 14px); color: var(--ws-name-color, #fff8e7); }
 .ws-text span { color: var(--ws-desc-color, #aab5c1); font-size: var(--ws-desc-size, 12px); line-height: 1.5; }
