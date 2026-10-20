@@ -253,6 +253,10 @@ function onEnemyDeath(e) {
   if (e.behavior === 'charger') { pushFallCorpse(e); if (typeof tryEquipDrop === 'function') tryEquipDrop('adrenaline', e.x, e.y); return; }   // 鳥頭人：有機會掉出腎上腺素注射器   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
+  if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall') {   // 虱目魚小子：倒下變黑（跟鳥頭人一樣）
+    if (e.forceAttack && e.frames) { e.lastFrameFile = e.frames.front; e.lastFrameFlip = false; }   // 死在撲咬的瞬間：攻擊圖尺寸不同，改用站姿圖倒下才不會變形
+    pushFallCorpse(e); return;
+  }
   if (e.behavior === 'boomerang' || e.behavior === 'fishhead' || e.behavior === 'vine') { pushFallCorpse(e); return; }   // 魚頭君也倒下   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
   const size = e.sizeMul || 1;

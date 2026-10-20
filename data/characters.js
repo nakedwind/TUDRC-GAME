@@ -409,7 +409,7 @@ const CHARACTERS = {
   "saku": {
     "id": "saku",
     "kind": "support",
-    "name": "碩",
+    "name": "朔",
     "sprite": "saku_B",
     "intro": "常在餐廳出沒的路人。",
     "captainImpression": ""

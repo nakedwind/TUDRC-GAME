@@ -208,7 +208,7 @@ function interactionNearPlayer() {
   let best = null, bestDistance = NPC_TALK.radius * (typeof equipTalkReach === 'function' ? equipTalkReach() : 1);   // 無線電：戰鬥中疏導距離變遠
   const actors = [...(G.npcs || []), ...(G.towers || [])];
   for (const actor of actors) {
-    if (actor.kind === 'tower' && actor.hp <= 0) continue;
+    if (actor.kind === 'tower' && (actor.hp <= 0 || actor.eatenBy)) continue;   // 被虱目魚小子吃掉的不能互動
     const distance = Math.hypot(actor.x - p.x, actor.y - p.y);
     if (distance < bestDistance) { best = actor; bestDistance = distance; }
   }
@@ -1694,7 +1694,7 @@ function frame(ts) {
   const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campSupplyOpen || mapTransitioning
     || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen);   // 射擊練習（js/target-practice.js）
   if (!menuOpen && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
-  updateFootsteps(!!menuOpen);     // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）
+  updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen && !campPlanOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
@@ -1731,7 +1731,7 @@ function update(dt) {
   for (const t of G.towers) {
     if (t.type !== 'red') continue;
     let nd = Infinity, near = null;
-    if (!MAP_SAFE && !t.berserk && t.hp > 0) for (const e of G.enemies) { if (e.dead) continue; const d = Math.hypot(e.x - t.x, e.y - t.y); if (d < nd) { nd = d; near = e; } }
+    if (!MAP_SAFE && !t.berserk && t.hp > 0 && !t.eatenBy && !(t.sleepT > 0)) for (const e of G.enemies) { if (e.dead) continue; const d = Math.hypot(e.x - t.x, e.y - t.y); if (d < nd) { nd = d; near = e; } }   // 被虱目魚小子吃掉、睡著時不舉盾（不然會一直撞吃掉他的虱目魚小子）
     t.shieldMode = nd <= 3 * CELL;
     t.ramTarget = t.shieldMode ? near : null;
     t.nearestEnemyDist = nd;
@@ -1750,7 +1750,7 @@ function update(dt) {
   }
   // 雷德衝撞：舉盾模式下撞到怪物 → 擊退＋少量傷害（有冷卻，避免連續觸發）
   for (const t of G.towers) {
-    if (t.type !== 'red' || !t.shieldMode || t.ramCd > 0 || t.hp <= 0 || t.berserk) continue;
+    if (t.type !== 'red' || !t.shieldMode || t.ramCd > 0 || t.hp <= 0 || t.berserk || t.eatenBy || t.sleepT > 0) continue;
     const foe = t.ramTarget;
     if (foe && !foe.dead && Math.hypot(foe.x - t.x, foe.y - t.y) <= CELL * 1.1) {
       const spec = TYPES.red, ramDmg = Math.max(1, Math.round(spec.dmg * 0.4));
@@ -1781,6 +1781,7 @@ function update(dt) {
       if (t.gunReloadT === 0) t.gunAmmo = GUIDE_GUN.mag;
     }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
+    if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
     if (t.sleepT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著：不攻擊
     if (t.soothingT > 0) t.soothingT = Math.max(0, t.soothingT - dt);   // 疏導施法計時
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
@@ -2077,6 +2078,7 @@ function update(dt) {
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
+  if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）

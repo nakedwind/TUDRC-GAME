@@ -130,6 +130,7 @@ function sentryRedFlash(t) {   // 回傳紅閃強度 0~1：受擊閃一下、瀕
   return hit;
 }
 function drawTower(t) {
+  if (t.eatenBy) return;   // 被虱目魚小子吃掉：只畫魚嘴裡露出的腳（js/milkfish-kid.js）
   const spec = TYPES[t.type];
   let set = sentrySprites[t.type];
   if (t.type === 'red' && t.shieldMode && !MAP_SAFE && !t.berserk && redShieldSprites.front) set = redShieldSprites;   // 舉盾造型
@@ -249,7 +250,7 @@ function rigArmAngle(R, t) {
   return u < .25 ? lerp(a3, over, out(u / .25)) : lerp(over, rest, inOut((u - .25) / .75));
 }
 function monsterWalkFrame(e) {
-  if (e.forceFrame) return { file: e.forceFrame, flip: false };   // 指定的動作圖（例如絲瓜小姐抬腳）
+  if (e.forceFrame) return { file: e.forceFrame, flip: !!e.forceFlip, attack: !!e.forceAttack };   // 指定的動作圖（例如絲瓜小姐抬腳）；forceAttack＝尺寸跟站姿圖不同的攻擊圖，照原本的像素比例畫（虱目魚小子，js/milkfish-kid.js）
   const f = e.frames;
   if (e.swing && f.attackRig) {   // 揮手攻擊（即時轉動手臂，比換圖流暢）
     const t = performance.now() / 1000 - e.swing.at, S = MONSTER_SWING, R = f.attackRig;
@@ -360,6 +361,7 @@ function drawEnemy(e) {
     const fuseP = e.fuseT > 0 ? 1 - e.fuseT / SLIME_BOMB.fuse : 0;
     const fuseFlash = fuseP > 0 ? (Math.sin(fuseP * fuseP * 60) > 0 ? .85 : .15) : 0;
     if (e.hitT > 0) drawHitFlash(sprite, Math.min(1, e.hitT / .16), e.hitColor, dx, dy, dw, dh);   // 先閃白，再轉屬性色
+    if (e.mf && e.mf.prey && typeof drawMilkfishPrey === 'function') drawMilkfishPrey(ctx, e, dx, dy, dw, dh, baseSprite);   // 虱目魚小子嘴裡的隊友：用這一幀實際畫的位置，被打壓扁、晃動時才會黏在嘴上（js/milkfish-kid.js）
     if (walkFrame && walkFrame.rig) drawRigArm(e, walkFrame, dx, dy, dw, dh);   // 揮手：即時轉動的手臂
     const fuseSil = fuseFlash ? flashSprite(sprite, '#ff6a3d') : null;
     if (fuseSil) { ctx.globalAlpha = fuseFlash * .75; ctx.drawImage(fuseSil, dx, dy, dw, dh); ctx.globalAlpha = 1; }
@@ -435,7 +437,7 @@ const BUBBLE_COLORS = {
   colyn:   { bg: '#fdebd2', bd: '#d98a2b', tx: '#5a3208' },   // 暖橘（配他的橘色眼睛）
   rowan:   { bg: '#e2f1dc', bd: '#5e9a52', tx: '#21401b' },   // 淡綠（配他的綠頭髮）
   cael:    { bg: '#eceedd', bd: '#8f9a62', tx: '#3a4020' },   // 灰綠（配他的淺綠頭髮）
-  saku:    { bg: '#e2e5f4', bd: '#4c5a92', tx: '#1d2550' },   // 靛藍（配碩的黑髮藍眼）
+  saku:    { bg: '#e2e5f4', bd: '#4c5a92', tx: '#1d2550' },   // 靛藍（配朔的黑髮藍眼）
   kakuma:  { bg: '#f5e2e3', bd: '#b0474f', tx: '#4f1a1f' },   // 灰紅（配赫真的灰髮紅眼）
   avaren:  { bg: '#dce8fb', bd: '#3a5fa0', tx: '#1c3766' },   // 淺藍
   eldrin:  { bg: '#d8efe6', bd: '#2f8a68', tx: '#123f2e' },   // 青綠

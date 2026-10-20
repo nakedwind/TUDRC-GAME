@@ -169,6 +169,7 @@ const SENTRY_AGGRO_TIME = 5;
 // 「不主動吸引仇恨」的哨兵（阿瓦倫，資料裡的 noAggro）：怪物平常當作沒看到他，
 // 只有被他打中、正在記仇（sentryAggro）的那一隻才會攻擊他。
 function enemyNoticesSentry(e, t) {
+  if (t && t.eatenBy) return false;   // 被虱目魚小子吃掉、卡在魚嘴裡（js/milkfish-kid.js）
   if (!TYPES[t.type] || !TYPES[t.type].noAggro) return true;
   return e.sentryAggro === t && e.sentryAggroT > 0;
 }
@@ -412,6 +413,7 @@ function stepEnemy(e, dt) {
   if (e.behavior === 'shooter') { stepShooterEnemy(e, dt); return; }   // 珍珠小童：飄浮、保持距離噴珍珠（js/pearl-kid.js）
   if (e.behavior === 'boomerang') { stepBoomerangEnemy(e, dt); return; }
   if (e.behavior === 'fishhead') { stepFishHeadEnemy(e, dt); return; }
+  if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall') { stepMilkfishEnemy(e, dt); return; }   // 虱目魚小子：吃隊友、吃一格的物品（js/milkfish-kid.js）
   if (e.behavior === 'vine') { stepVineEnemy(e, dt); return; }   // 絲瓜小姐：重踏、放藤蔓（js/loofah-lady.js）   // 魚頭君：噴水、去滅火（js/fish-head.js）   // 夯吉寶：丟迴力鏢帽子（js/hangi-bao.js）
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。

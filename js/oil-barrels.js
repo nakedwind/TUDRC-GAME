@@ -67,7 +67,7 @@ function onObstacleRemoved(o) {
   const it = oilItem(o);
   if (!it) return;
   if (o.proxy) { o.proxy.dead = true; o.proxy.hp = 0; }
-  if (o.lastHitBy === 'demolish') return;   // 自己拆除：安全移除，什麼都不會發生
+  if (o.lastHitBy === 'demolish' || o.lastHitBy === 'eaten') return;   // 自己拆除、被虱目魚小子吃掉：安全移除，什麼都不會發生
   const p = oilCenter(o);
   if (it.smallFire) {
     addOilFire(p.x, p.y, it.fire.radius * CELL, it.fire.life, it.fire.dps);

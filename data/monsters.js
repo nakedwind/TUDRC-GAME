@@ -292,6 +292,60 @@ const MONSTERS_DEFAULT = [
     "behavior": "vine",
     "hitSound": "loofahHurt",
     "deathSound": "loofahDeath"
+  },
+  {
+    "id": "milkfish_kid",
+    "name": "虱目魚小子",
+    "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
+    "hp": 160,
+    "speed": 45,
+    "playerDamage": 8,
+    "sentryDamage": 10,
+    "buildingDamage": 20,
+    "reward": 60,
+    "crystals": 5,
+    "width": 110,
+    "height": 132,
+    "frames": {
+      "front": "images/monster/milkfish-kid/milkfish-kid-front.png",
+      "walkFront": [
+        "images/monster/milkfish-kid/milkfish-kid-walk-01.png",
+        "images/monster/milkfish-kid/milkfish-kid-walk-02.png",
+        "images/monster/milkfish-kid/milkfish-kid-walk-03.png",
+        "images/monster/milkfish-kid/milkfish-kid-walk-02.png"
+      ]
+    },
+    "behavior": "milkfish",
+    "hitSound": "milkfishHurt",
+    "deathSound": "milkfishDeath",
+    "knockMul": 0.4,
+    "stagger": 0.15
+  },
+  {
+    "id": "milkfish_kid_small",
+    "name": "小虱目魚小子",
+    "sprite": "images/monster/milkfish-kid-small/milkfish-kid-small-front.png",
+    "hp": 60,
+    "speed": 55,
+    "playerDamage": 0,
+    "sentryDamage": 0,
+    "buildingDamage": 15,
+    "reward": 25,
+    "crystals": 2,
+    "width": 70,
+    "height": 80,
+    "frames": {
+      "front": "images/monster/milkfish-kid-small/milkfish-kid-small-front.png",
+      "walkFront": [
+        "images/monster/milkfish-kid-small/milkfish-kid-small-walk-01.png",
+        "images/monster/milkfish-kid-small/milkfish-kid-small-walk-02.png",
+        "images/monster/milkfish-kid-small/milkfish-kid-small-walk-03.png",
+        "images/monster/milkfish-kid-small/milkfish-kid-small-walk-02.png"
+      ]
+    },
+    "behavior": "milkfishSmall",
+    "hitSound": "milkfishHurt",
+    "deathSound": "milkfishDeath"
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */
