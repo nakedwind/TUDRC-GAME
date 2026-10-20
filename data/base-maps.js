@@ -10381,7 +10381,9 @@ const BASE_MAPS = [
       },
       "object3": {},
       "object4": {},
-      "overlay": {},
+      "overlay": {
+        "21,3": "tile_eoc_floor_sign_b4"
+      },
       "top": {
         "14,2": "tile_containment_wall_top_straight",
         "14,3": "tile_containment_wall_top_straight",
