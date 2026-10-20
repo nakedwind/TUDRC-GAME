@@ -712,7 +712,7 @@ function draw() {
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
   for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
-  for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => { if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); } });   // 狂暴的異質體腳下冒紅光
+  for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); } });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
@@ -774,6 +774,7 @@ function draw() {
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）
     else if (typeof lockedDoorNearPlayer === 'function' && !doorNearPlayer() && lockedDoorNearPlayer()) { const d = lockedDoorNearPlayer(); drawInteractPrompt(d.x, d.top - 4, '開門'); }   // 鎖住的房門（js/locked-doors.js）
     else if (typeof mrtLockNearPlayer === 'function' && mrtLockNearPlayer()) { const l = mrtLockNearPlayer(); drawInteractPrompt(l.x, l.top - 4, mrtLockPrompt(l)); }   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
+    else if (typeof practiceDoorNear === 'function' && practiceDoorNear()) { const d = practiceDoorNear(); drawInteractPrompt(d.x, d.top - 6, practiceDoorPrompt()); }   // 訓練室的門（js/practice.js）
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, typeof doorPrompt === 'function' ? doorPrompt(d) : d.open ? '關門' : '開門'); }
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) { const t = missionTableUsable(); drawInteractPrompt(t.x, t.top, t.label || '作戰桌'); }   // 作戰桌／作戰螢幕（js/missions.js）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) { const v = vendingNearPlayer(); drawInteractPrompt(v.x, v.top, '販賣機'); }   // 販賣機（js/shop.js）

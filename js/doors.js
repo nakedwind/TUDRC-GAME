@@ -28,7 +28,7 @@ function setupDoors() {
     }
     // 只管理原本不是牆的格子（編輯器裡畫了不可穿透的格子維持擋路）
     const own = cells.filter(k => !mapWalls.has(k));
-    const mode = typeof DOOR_MODES !== 'undefined' && DOOR_MODES[s.doorMode] ? s.doorMode : 'manual';
+    const mode = typeof DOOR_MODES !== 'undefined' && DOOR_MODES[s.doorMode] ? s.doorMode : (DOOR_TILES[s.id].mode || 'manual');   // 素材可以指定預設的門種類
     const door = { stamp: s, mode, open: false, cells, own, sound: DOOR_TILES[s.id].sound || 'door',
       x: (left + right) / 2, y: bottom, top: y0 + 2, left, right, y0,
       randomT: mode === 'random' ? doorRandomWait() : 0 };

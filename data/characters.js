@@ -379,7 +379,7 @@ const CHARACTERS = {
     "kind": "support",
     "name": "塔納",
     "sprite": "taana_A",
-    "intro": "常在餐廳出沒的路人，看起來一直很想下班。",
+    "intro": "B-2 訓練室的負責人，管理練習模式和訓練場的設備。看起來一直很想下班。",
     "captainImpression": ""
   },
   "colyn": {

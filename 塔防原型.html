@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
-<script src="js/new-game.js?v=lv5-20261020"></script>
+<script src="js/new-game.js?v=mrt-20261018"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=lv5-20261020">
+<link rel="stylesheet" href="css/style.css?v=wsshard5-practice-20261020">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -98,6 +98,7 @@
         <div class="dialogue-actions">
           <button id="dialogueGift" class="hidden" type="button">🎁 送禮 <span>G</span></button>
           <button id="dialogueWorkshop" class="hidden" type="button">🔧 開發工坊</button>
+          <button id="dialoguePractice" class="hidden" type="button">🎯 開始訓練</button>
           <button id="dialogueNext" type="button"><span>Space／E</span> 下一句</button>
         </div>
       </div>
@@ -224,16 +225,16 @@
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
-  <script src="data/characters.js?v=cael-20261019"></script>  <!-- 集中管理所有角色 -->
+  <script src="data/characters.js?v=taana-20261020"></script>  <!-- 集中管理所有角色 -->
   <script src="data/gifts.js?v=remap-20261012"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=card-consume-20261018"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=aidfaces-20261020"></script>   <!-- 溫特可購買、使用的個人補給 -->
-  <script src="data/equipment.js?v=lv5-20261020"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
-  <script src="data/workshop.js?v=lv5-20261020"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
-  <script src="js/workshop-config.js?v=lv5-20261020"></script>   <!-- 把上面的設定套用到裝備資料 -->
+  <script src="data/equipment.js?v=flareshine-20261020"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/workshop.js?v=wsedit5-20261020"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
+  <script src="js/workshop-config.js?v=flareshine-20261020"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=quests-20261015"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
-  <script src="data/dialogues.js?v=cael-20261019"></script>  <!-- 所有台詞（對話編輯器） -->
+  <script src="data/dialogues.js?v=taana-20261020"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=ash-outfit-20261019"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=restaurant-npcs-20261019"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
@@ -245,35 +246,35 @@
   <script src="data/maps.js?v=sharedtiles-20261020"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=sharedtiles-20261020"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="js/map-data.js?v=sharedtiles-20261020"></script>     <!-- 4b. 兩份地圖合在一起給遊戲用（MAPS_DEFAULT） -->
-  <script src="data/doors.js?v=lockeddoor-20261018"></script> <!-- 可開關的門（哪些素材是門）-->
+  <script src="data/doors.js?v=practice-20261020"></script> <!-- 可開關的門（哪些素材是門）-->
   <script src="data/chairs.js?v=bench-20261020"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
   <script src="js/chair-data.js?v=bench-20261020"></script>
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=minzoom-20261020"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
-  <script src="js/doors.js?v=sfxkeys-20261018"></script> <!-- 門：手動門／自動門 -->
+  <script src="js/maploader.js?v=practice-20261020"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/doors.js?v=practice-20261020"></script> <!-- 門：手動門／自動門 -->
   <script src="js/breakable-walls.js?v=wallsolid-20261017"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
   <script src="js/build.js?v=numkeys-20261020"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=aidtip2-20261020"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=loofah-20261019"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=practice2-20261020"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
   <script src="data/skills.js?v=skills-20261018"></script>   <!-- 技能樹資料 -->
   <script src="js/skills.js?v=skills-20261018"></script>   <!-- 技能樹：花碎片學技能 -->
-  <script src="js/anomalous-core.js?v=corehit-20261018"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
+  <script src="js/anomalous-core.js?v=practice-20261020"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
   <script src="js/core-frenzy.js?v=core-bar-up30-20261018"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
   <script src="js/combat-feel.js?v=loofah-20261019"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=coreclear-20261018"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=bubbletop-20261020"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=loofah-20261019"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=practice-20261020"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fishstepdark-20261019"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=vine-art8-20261020"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人 -->
-  <script src="js/render.js?v=bubbletop-20261020"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=practice-20261020"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=bwall-20261017"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=oil-breaks-ore-20261018"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -293,13 +294,13 @@
   <script src="js/ambience.js?v=noisefix-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=equip-20261015"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=numkeys-20261020"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=lv5-20261020"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=wsshard-20261020"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=wsedit5-20261020"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/combat-progress.js?v=circuit-20261018"></script>
   <script src="js/camp-interactions.js?v=interaction-key-fix-20261018"></script>
   <script src="js/camp-supply.js?v=camp-stock-art-20261018"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
-  <script src="js/game.js?v=elevatorlabel-20261020"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=taana-20261020"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=key-intro-scale200-20261018"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/item-intro.js?v=key-intro-scale150-20261018"></script>   <!-- 第一次拿到新東西：說明視窗 -->
@@ -308,5 +309,6 @@
   <script src="js/locked-doors.js?v=sfxkeys-20261018"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
+  <script src="js/practice.js?v=practice3-20261020"></script>   <!-- B-2 訓練室：練習模式（塔納、沙包） -->
 </body>
 </html>

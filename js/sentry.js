@@ -102,7 +102,7 @@ function placeAtConfiguredSpawn(a, id) {
 
 // ---- 基地裡：這個人平時是不是在這張地圖（data/npc-locations.js）----
 function npcHomeHere(id) {
-  if (!MAP_SAFE || !MAP) return false;
+  if ((!MAP_SAFE && !(typeof practiceOn === 'function' && practiceOn())) || !MAP) return false;   // 訓練室練習中：塔納他們照樣在
   const loc = npcLocation(id);
   return !!loc && loc.map === MAP.name;
 }
@@ -130,6 +130,7 @@ function spawnSentries() {
   // 基地（安全區）：出勤隊伍不跟著溫特，只出現「平時在這張地圖」的人（data/npc-locations.js）；戰鬥地圖：出勤隊伍
   const team = MAP_SAFE
     ? (typeof ROSTER !== 'undefined' ? ROSTER : Object.keys(TYPES)).filter(npcHomeHere)
+    : (typeof practiceOn === 'function' && practiceOn()) ? practice.team.slice()   // 訓練室：在塔納那裡選的隊員（js/practice.js）
     : ((typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES));
   for (const type of team) {
     const spec = TYPES[type]; if (!spec) continue;
@@ -147,7 +148,7 @@ function spawnSentries() {
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
 function spawnWanderers() {
   // 基地（安全區）：只出現平時在這張地圖的人（data/npc-locations.js）；戰鬥地圖：勾了「場景 NPC」才有
-  const list = MAP_SAFE ? WANDERERS.filter(w => npcHomeHere(w.id)) : (MAP_NPCS ? WANDERERS : []);
+  const list = MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id)) : (MAP_NPCS ? WANDERERS : []);
   if (!list.length) return;
   const candidates = [], seen = new Set();
   const occupied = new Set(G.towers.map(t => cellAt(t.x, t.y).join(',')));

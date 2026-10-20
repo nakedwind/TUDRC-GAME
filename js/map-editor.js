@@ -1955,7 +1955,20 @@ function followSelectionLayer() {
   if (!lid || !LAYERS.some(l => l.id === lid)) return;
   if (lid !== activeLayer) { activeLayer = lid; renderLayers(); }
   const b = layerBtnsEl && layerBtnsEl.querySelector('.layer[data-layer="' + lid + '"]');
-  if (b) b.scrollIntoView({ block: 'nearest', behavior: 'smooth' });   // 圖層很多時：捲到看得到它
+  if (b) scrollIntoOwnList(b);   // 圖層很多時：只捲圖層清單本身，讓它看得到（不捲整個頁面）
+}
+// 只捲「最近的那個有捲軸的框」，不會把整個頁面拉走（scrollIntoView 會連整頁一起捲，選物件時畫面會被拉到下面的素材區）
+function scrollIntoOwnList(el) {
+  let box = el.parentElement;
+  while (box && box !== document.body && box !== document.documentElement) {
+    const oy = getComputedStyle(box).overflowY;
+    if ((oy === 'auto' || oy === 'scroll') && box.scrollHeight > box.clientHeight) break;
+    box = box.parentElement;
+  }
+  if (!box || box === document.body || box === document.documentElement) return;   // 清單沒有自己的捲軸：不動
+  const r = el.getBoundingClientRect(), br = box.getBoundingClientRect();
+  if (r.top < br.top) box.scrollTop -= br.top - r.top + 4;
+  else if (r.bottom > br.bottom) box.scrollTop += r.bottom - br.bottom + 4;
 }
 function refreshSelPanel() {
   fitSelNameSoon();

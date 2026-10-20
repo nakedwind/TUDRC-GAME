@@ -385,6 +385,7 @@ function updateSlimeJump(e, dt) {
 
 function stepEnemy(e, dt) {
   e.attackingObstacle = null;
+  if (e.dummy) { updateEnemyEffects(e, dt); return; }   // 訓練室的沙包：不會動、不會打人（js/practice.js）
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信

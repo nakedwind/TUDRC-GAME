@@ -10,6 +10,9 @@ const clone = v => JSON.parse(JSON.stringify(v));
 const SITUATIONS = [
   { group: '日常（基地裡）', key: 'idle', label: '閒晃時的頭上泡泡', when: '在基地等安全場景閒晃時，每隔 <b>5～13 秒</b>隨機冒出一句。' },
   { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Enter／E</b>，會<b>依序</b>一句一句說完。沒填就改說閒晃台詞。' },
+  { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Enter／E</b>，會<b>依序</b>一句一句說完（只說一次）。' },
+  { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>。' },
+  { group: '找他說話（特殊）', key: 'chat', label: '偶爾閒聊（隨機一句）', when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。' },
   { group: '戰鬥中', key: 'battle', label: '出勤時的頭上泡泡', when: '戰鬥地圖中，每隔 <b>11～22 秒</b>隨機冒出一句。' },
   { group: '戰鬥中', key: 'sentry', label: '找他說話（出勤中）', ordered: true, when: '戰鬥中點他、選「對話」時，<b>依序</b>一句一句說完。' },
   { group: '戰鬥中', key: 'ultimate', label: '放大招時喊的話', when: '大招冷卻好、<b>放大招的瞬間</b>。' },

@@ -207,7 +207,7 @@ function initMap() {
   else VIEW_SCALE = Math.max(VIEW_SCALE, VIEW_ZOOM);
 
   // 安全場景：沒有怪物、沒有黑幕（整張地圖都是亮的）
-  MAP_SAFE = !!MAP.safe;
+  MAP_SAFE = !!MAP.safe && !(typeof practiceOn === 'function' && practiceOn());   // 訓練室練習中：暫時當成戰鬥區域（js/practice.js）
   MAP_NPCS = !!MAP.npcs;
   LIGHT.enabled = LIGHT_BASE_ENABLED && !MAP_SAFE;
 

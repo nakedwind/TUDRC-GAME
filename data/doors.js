@@ -2,7 +2,8 @@
    門關著時，門板正下方那一格（圖片最底下一排）會擋路；打開時門的圖片消失、可以通過。
    每扇門在地圖編輯器選取後可設定：manual＝手動門（玩家按 E 開關）／auto＝自動門（觸發條件達成時自動打開）。 */
 const DOOR_TILES = {
-  tile_bg_backroom_door_wood: { panel: [19, 61], sound: 'backroomDoor' },   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
+  tile_bg_backroom_door_wood: { panel: [19, 61], sound: 'backroomDoor' },
+  tile_mvfonrdd: { panel: [0, 80], mode: 'practice' },   // B-2 訓練室的玻璃門（2×3 格，整片都是門板）：平常關著，訓練時從選單結束（js/practice.js）   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
 };
 const DOOR_MODES = {
   manual: '自由開關（玩家按 E 開關）',
@@ -10,6 +11,7 @@ const DOOR_MODES = {
   key: '要後室門鑰匙（用掉一把，開鎖後變成自由開關）',
   chain: '鎖鏈神秘門（要異質鑰匙）',
   auto: '自動門（異質核心醒來時打開）',
+  practice: '訓練室的門（關著；跟塔納對話開始訓練，在門邊結束訓練）',
 };
 // 上鎖的門要什麼鑰匙（物品 id，data/items.js）；random：隨機開關的門每隔幾秒（最短～最長）動一次
 const DOOR_LOCKS = { key: 'backroom-door-key', chain: 'anomaly-key' };

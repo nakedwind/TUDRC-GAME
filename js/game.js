@@ -273,11 +273,25 @@ function startDialogueTyping(text) {
   };
   typeNext();
 }
+// 有填「第一次見面」「平常說話」「偶爾閒聊」的角色（data/dialogues.js）：第一次依序說完自我介紹，之後每次隨機說一句
+const TALK_SEEN_KEY = 'tudrc_talk_seen_v1', TALK_CHAT_CHANCE = .25;
+function specialTalkLines(actor) {
+  const d = typeof DIALOGUES !== 'undefined' && DIALOGUES.characters?.[dialogueKey(actor)];
+  if (!d) return null;
+  const first = d.firstTalk || [], talk = d.talk || [], chat = d.chat || [];
+  if (!first.length && !talk.length && !chat.length) return null;
+  let seen = {}; try { seen = JSON.parse(localStorage.getItem(TALK_SEEN_KEY) || '{}') || {}; } catch (_) {}
+  const id = dialogueKey(actor);
+  if (first.length && !seen[id]) { seen[id] = 1; try { localStorage.setItem(TALK_SEEN_KEY, JSON.stringify(seen)); } catch (_) {} return first.slice(); }
+  const pool = chat.length && (Math.random() < TALK_CHAT_CHANCE || !talk.length) ? chat : talk;
+  return pool.length ? [pool[Math.floor(Math.random() * pool.length)]] : null;
+}
 function openDialogue(actor) {
   if (!actor || dialogueState) return;
   if (actor.berserk) { flash('污染失控，現在無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
   const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
+    || specialTalkLines(actor)   // 第一次見面／平常隨機一句／偶爾閒聊（例如塔納）
     || chapterPick(actor.kind === 'tower' ? SENTRY_DIALOGUES[key] : NPC_DIALOGUES[key]) || chapterPick(WANDER_LINES[key]) || ['……'];
   dialogueState = { actor, lines, index: 0 };
   actor.target = null; actor.say = null; actor.sayWait = 2;
@@ -292,6 +306,7 @@ function openDialogue(actor) {
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
   if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);
+  if (typeof onDialogueOpenedPractice === 'function') onDialogueOpenedPractice(actor);   // 塔納：開始訓練按鈕（js/practice.js）
   if (typeof onDialogueOpenedWorkshop === 'function') onDialogueOpenedWorkshop(actor);   // 諾亞：開發工坊按鈕（js/equipment.js）   // 好感度、送禮按鈕（js/gifts.js）
 }
 // 不是跟角色說話的對話框（海報、告示…）：name＝名稱欄、image＝左邊的圖、lines＝一句一句的文字
@@ -302,7 +317,7 @@ function openTextDialogue({ name, image, lines, kind = 'text' }) {
   closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   dialoguePortrait.src = image || ''; dialoguePortrait.alt = name || '';
   dialoguePortrait.parentElement.dataset.char = kind;   // css：整張圖縮進框裡（不是裁半身像）
-  for (const id of ['dialogueGift', 'dialogueWorkshop']) document.getElementById(id)?.classList.add('hidden');
+  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice']) document.getElementById(id)?.classList.add('hidden');
   document.getElementById('dialogueFavor')?.classList.add('hidden');
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
@@ -463,6 +478,7 @@ window.addEventListener('keydown', e => {
     else if (useCampInteractionNearPlayer(true)) {}
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
     else if (toggleIronGateNearPlayer()) {}
+    else if (typeof usePracticeDoorNearPlayer === 'function' && usePracticeDoorNearPlayer()) {}   // 訓練室的門：訓練選單（js/practice.js）
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (typeof useMrtLockNearPlayer === 'function' && useMrtLockNearPlayer()) {}   // 捷運閘門刷卡、入口解封（js/mrt-locks.js）
     else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
@@ -958,10 +974,10 @@ function newGame() {
   applyOutfits();   // 依這張地圖是安全區或戰鬥區，換成 A／B 造型
   closeElevatorMenu();
   closeSupplyShop(true); closeBackpack(true); closeSettings(true);
-  if (typeof onGiftNewGame === 'function') onGiftNewGame();   // 出勤後大家又可以收禮
+  if (typeof onGiftNewGame === 'function' && !(typeof practiceOn === 'function' && practiceOn())) onGiftNewGame();   // 出勤後大家又可以收禮
   if (typeof rememberSanitySP === 'function') rememberSanitySP();   // 換地圖前先記住目前的 SP（js/sanity.js）
   if (typeof resetSmilers === 'function') resetSmilers();   // 黑暗中的笑臉（js/smiler.js）
-  if (typeof onSortieNewGame === 'function') onSortieNewGame();   // 出勤時吃掉補給、回基地清掉效果（js/sortie-supply.js）
+  if (typeof onSortieNewGame === 'function' && !(typeof practiceOn === 'function' && practiceOn())) onSortieNewGame();   // 出勤時吃掉補給、回基地清掉效果（js/sortie-supply.js）
   setNpcArrangeMode(false);
   setPaused(false);
   document.getElementById('systemNotices').replaceChildren();
@@ -1983,7 +1999,7 @@ function update(dt) {
   }
   if (typeof fishHeadArmor === 'function') fishHeadArmor();
   if (typeof pearlShellArmor === 'function') pearlShellArmor();   // 珍珠小童：被打就閉殼、閉著防禦變高（js/pearl-kid.js）   // 魚頭君：正面減傷、斜後加傷（js/fish-head.js）
-  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -2056,6 +2072,7 @@ function update(dt) {
   if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
+  if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
@@ -2168,7 +2185,7 @@ function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;
 function baseLost() { if (!G.over && !(G.baseLostT > 0)) { G.baseLostT = BASE_LOSE_DELAY; systemNotice('營地被摧毀了……', true); } }
-function lose(reason, cause) { G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
+function lose(reason, cause) { if ((typeof practiceOn === 'function' && practiceOn())) return; G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
