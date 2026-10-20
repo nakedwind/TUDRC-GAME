@@ -6,7 +6,7 @@
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/new-game.js?v=mrt-20261018"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=wscrystal-20261021">
+<link rel="stylesheet" href="css/style.css?v=wsoff-missionfaces-20261021">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -231,7 +231,7 @@
   <script src="data/supplies.js?v=aidfaces-20261020"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/equipment.js?v=wsorder-20261020"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script src="data/workshop.js?v=wsoff-20261021"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
-  <script src="js/workshop-config.js?v=wsbtn-20261021"></script>   <!-- 把上面的設定套用到裝備資料 -->
+  <script src="js/workshop-config.js?v=wsoff-20261021"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=quests-20261015"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/dialogues.js?v=saku-lines-20261021"></script>  <!-- 所有台詞（對話編輯器） -->
@@ -253,7 +253,7 @@
   <script src="js/elevator-data.js"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/maploader.js?v=practice-20261020"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
-  <script src="js/doors.js?v=practice-20261020"></script> <!-- 門：手動門／自動門 -->
+  <script src="js/doors.js?v=doorrow-20261021"></script> <!-- 門：手動門／自動門 -->
   <script src="js/breakable-walls.js?v=wallsolid-20261017"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
@@ -281,21 +281,21 @@
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/lifeform.js?v=life-burn-20261018"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
   <script src="js/smiler.js?v=items38-20261018"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
-  <script src="js/ore.js?v=oreflash-20261019"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
+  <script src="js/ore.js?v=shard-revert-20261021"></script> <!-- 9m. 異質碎片礦物：按住採集 -->
   <script src="js/landmine.js?v=fix39-44-20261018"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=elevator-vending-20261018"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
+  <script src="js/shop.js?v=shard-revert-20261021"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
   <script src="js/backpack.js?v=wsedit5-20261020"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/gifts.js?v=homemart-20261016"></script> <!-- 9l. 送禮與好感度 -->
   <script src="js/sortie-supply.js?v=sortie4-20261014"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=nocircuitnum-20261018"></script>
   <script src="js/storage-lockers.js?v=wsedit5-20261020"></script>
-  <script src="js/missions.js?v=missionboard-20261020"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
+  <script src="js/missions.js?v=missionfaces-20261021"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=quests-20261015"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
   <script src="js/save.js?v=camp-plan-dialog-20261017"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=noisefix-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=equip-20261015"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=numkeys-20261020"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=wspvside-20261021"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=wsswap2-20261021"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=wsedit5-20261020"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/combat-progress.js?v=circuit-20261018"></script>
   <script src="js/camp-interactions.js?v=interaction-key-fix-20261018"></script>

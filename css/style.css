@@ -1380,7 +1380,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* ===== 拾取提示：撿到異質碎片時，畫面中間偏上彈出 ===== */
 #pickupToasts { position:absolute; z-index:13; left:50%; top:26%; transform:translateX(-50%); display:flex; flex-direction:column; align-items:center; gap:6px; pointer-events:none; }
 .pickup-toast { display:flex; align-items:center; gap:10px; padding:8px 16px 8px 10px; border:1px solid rgba(214,155,255,.6); border-radius:99px; background:linear-gradient(180deg,rgba(48,22,70,.92),rgba(24,10,36,.92)); box-shadow:0 8px 22px rgba(0,0,0,.45),0 0 18px rgba(180,100,255,.35); color:#f1e4ff; font:700 14px "Microsoft JhengHei",sans-serif; white-space:nowrap; animation:pickup-in .28s cubic-bezier(.2,.9,.3,1.3) both; }
-.pickup-toast i { width:22px; height:22px; background:url("../images/碎片鑰匙/anomalous-shard.png") center/contain no-repeat; image-rendering:pixelated; filter:drop-shadow(0 0 4px rgba(200,130,255,.8)); }
+.pickup-toast i { width:22px; height:22px; background:url("../images/碎片鑰匙/anomalous-shard.png") center/contain no-repeat; image-rendering:pixelated; filter:drop-shadow(0 0 3px rgba(200,130,255,.95)) drop-shadow(0 0 7px rgba(160,80,255,.7)); }
 .pickup-toast b { color:#e0b6ff; font-size:17px; font-variant-numeric:tabular-nums; }
 .pickup-toast small { color:#a48fb8; font-size:11px; font-weight:400; }
 .pickup-toast.bump b { display:inline-block; animation:pickup-bump .3s ease-out; }
@@ -1431,7 +1431,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #hud .stat{display:flex;align-items:center;gap:9px;}
 #hud .hud-stat-icon{flex:none;width:28px;height:36px;}
 #hud .money-icon{display:grid;place-items:center;color:#ffd479;font:700 28px/1 Consolas,monospace;}
-#hud .shard-icon{object-fit:contain;image-rendering:pixelated;}
+#hud .shard-icon{object-fit:contain;image-rendering:pixelated;width:36px;height:46px;margin:-5px -4px;filter:drop-shadow(0 0 7px rgba(190,120,255,.5)) drop-shadow(0 0 16px rgba(160,80,255,.3));}   /* 圖放大（負的邊距：不把旁邊的字擠開）；背後一大圈淡淡的紫光 */
 #hud .hud-stat-values{min-width:0;}
 
 #hud .hud-stat-icon{position:relative;top:calc(3px / 1.2);}
@@ -1481,11 +1481,14 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .mission-status.available { background: rgba(255,212,121,.15); color: #ffd479; }
 .mission-status.cleared { background: rgba(121,219,173,.12); color: #79dbad; }
 .mission-team-row { display: grid; gap: 7px; padding: 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 10px; background: rgba(37,43,51,.45); }
-.mission-team-row > span { color: #d8ae5d; font-size: 11px; font-weight: 700; letter-spacing: .08em; }
-.mission-faces { display: flex; gap: 5px; min-height: 40px; align-items: center; }
-.mission-faces img { width: 40px; height: 40px; border-radius: 8px; object-fit: cover; object-position: 50% 15%; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.09), rgba(7,10,14,.5) 70%); image-rendering: pixelated; }
-.mission-faces small { color: #ff9d8f; font-size: 12px; }
-.mission-team { padding: 6px 10px; border: 1px solid #59616c; border-radius: 8px; background: #202730; color: #dfe7ee; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
+.mission-team-row > span { color: #d8ae5d; font-size: 13px; font-weight: 700; letter-spacing: .08em; }
+/* 出勤人員：4 格胸像平均分配整排寬度（左右兩端跟下面的「出勤配置」按鈕對齊）；裁切比例跟 Y102隊員面板的 .squad-portrait 一樣 */
+.mission-faces { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; min-height: 40px; align-items: center; }
+.mission-face { position: relative; display: block; aspect-ratio: 68 / 78; overflow: hidden; border-radius: 8px; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.09), rgba(7,10,14,.5) 70%); }
+.mission-face img { position: absolute; left: 50%; top: -12.8%; width: 153%; height: auto; aspect-ratio: 1; max-width: none; transform: translateX(-50%); image-rendering: pixelated; }
+.mission-face[data-char="ball"] img { top: 50%; width: 220%; transform: translate(-27%, -56%); }   /* 球球是狗：跟 Y102隊員面板一樣另外裁 */
+.mission-faces small { grid-column: 1 / -1; color: #ff9d8f; font-size: 14px; }
+.mission-team { padding: 6px 10px; border: 1px solid #59616c; border-radius: 8px; background: #202730; color: #dfe7ee; cursor: pointer; font: 700 14px "Microsoft JhengHei", sans-serif; }
 .mission-team:hover { border-color: #c9d3dc; background: #2b3440; }
 .mission-go { padding: 10px; border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 16px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20, 0 3px 6px rgba(0,0,0,.3); transition: transform .07s, box-shadow .07s, filter .12s; }
 .mission-go:hover:not(:disabled) { filter: brightness(1.07); }
@@ -2081,6 +2084,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* 像素背包圖示 */
 .backpack-button-image{display:inline-block;width:20px;height:24px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;flex:none;}
 .backpack-icon .backpack-button-image{width:28px;height:34px;}
+#hudBackpackButton .backpack-button-image{width:30px;height:31px;margin:0 0 -4px;}   /* 底部 HUD 的背包按鈕：圖示放大 1.5 倍（框剛好貼合圖片比例；按鈕大小不變） */
 
 /* ===== 營地物資箱（js/camp-supply.js）===== */
 #campSupply { position: absolute; inset: 0; z-index: 32; display: grid; place-items: center; padding: 14px; background: rgba(4,7,11,.5); font-family: "Microsoft JhengHei", sans-serif; }
@@ -2245,3 +2249,6 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #targetPractice .tp-paper.swap { animation: tp-swap .36s ease-in-out; }
 @keyframes tp-swap { 0% { transform: none; opacity: 1; } 42% { transform: translateY(-40px); opacity: 0; } 58% { transform: translateY(-24px); opacity: 0; } 100% { transform: none; opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { #targetPractice, #targetPractice .tp-paper.kick { animation: none; } }
+
+/* 異質碎片：放在黑底的介面上，背後發紫光（撿到的提示、說明視窗、商店…；HUD 在 #hud .shard-icon） */
+img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,255,.95)) drop-shadow(0 0 8px rgba(160,80,255,.65)); }
