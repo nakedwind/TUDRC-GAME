@@ -12734,7 +12734,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mvfmo6c2",
-    "name": "B-1訓練室",
+    "name": "B-2訓練室",
     "desc": "",
     "layers": {
       "floor": {
@@ -13087,7 +13087,9 @@ const BASE_MAPS = [
         "c": 19,
         "r": 14,
         "layer": "ground",
-        "fx": true
+        "fx": true,
+        "ox": 0,
+        "oy": 0
       },
       {
         "id": "tile_containment_wall",
@@ -13166,7 +13168,8 @@ const BASE_MAPS = [
         "c": 17,
         "r": 16,
         "layer": "object",
-        "ox": 12
+        "ox": 10,
+        "oy": 0
       },
       {
         "id": "tile_new_decor_exit_sign",
@@ -13434,11 +13437,11 @@ const BASE_MAPS = [
         "layer": "floor"
       },
       {
-        "id": "tile_eoc_floor_sign_b1",
+        "id": "tile_eoc_floor_sign_b2",
         "c": 19,
         "r": 16,
         "layer": "overlay",
-        "ox": 0,
+        "ox": -2,
         "oy": 0
       }
     ],
@@ -13563,7 +13566,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mvfpx57b",
-    "name": "B-2射擊訓練室",
+    "name": "B-1射擊訓練室",
     "desc": "",
     "layers": {
       "floor": {
@@ -13772,7 +13775,7 @@ const BASE_MAPS = [
       "object3": {},
       "object4": {},
       "overlay": {
-        "19,10": "tile_eoc_floor_sign_b2"
+        "19,10": "tile_eoc_floor_sign_b1"
       },
       "top": {
         "23,9": "tile_containment_wall_top_straight",

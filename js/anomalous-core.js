@@ -29,7 +29,7 @@ const randRange = ([lo, hi]) => lo + Math.random() * (hi - lo);
 
 function seedCores() {
   G.cores = []; G.coreShards = [];
-  if (MAP_SAFE) return;
+  if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;   // 訓練室沒有異質核心
   const map = typeof MAP !== 'undefined' ? MAP : {};
   const difficulty = Math.max(1, Math.min(5, Number(map.difficulty) || 1));
   const count = Math.max(1, Math.min(20, Math.floor(Number(map.coreCount) || difficulty)));
