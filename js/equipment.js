@@ -234,26 +234,58 @@ function useAdrenaline() {
   flash('💉 腎上腺素！', G.player.x, G.player.y - 54, '#ff8a8a', 1.4); sfx('soothe');
   G.effects.push({ ring: true, x: G.player.x, y: G.player.y, r: 6, r2: 40, life: .35, life0: .35, color: '#ff8a8a' });
 }
-// ---- 急救包（道具，H）：治療身邊受傷的隊員（倒地的也行），沒有就治療自己 ----
-const firstAid = { channel: null };
-function firstAidTarget() {
-  const p = G.player, near = [];
-  for (const t of G.towers || []) if (t.hp < t.maxhp && Math.hypot(t.x - p.x, t.y - p.y) <= FIRST_AID.reach * CELL) near.push(t);
-  near.sort((a, b) => (a.hp / a.maxhp) - (b.hp / b.maxhp));   // 傷最重的先救（倒地的排最前面）
-  if (near.length) return near[0];
-  return p.hp < p.maxhp ? p : null;
-}
+// ---- 急救包（道具，H）：先點左上角的隊員頭像，選要治療誰（倒地的也行） ----
+// ・不能用在溫特自己身上：溫特補血請用醫療包。
+// ・按 H 或點下方的「急救包」按鈕 → 進入「選隊員」：滑鼠停在哪位隊員的頭像上，那位就會發光＋出現箭頭（樣式在 css/style.css）。
+// ・點頭像＝治療那位隊員（要站在他旁邊 FIRST_AID.reach 格內）；滿血的隊員會在頭像下方提示「沒有受傷」。
+// ・再按一次 H／急救包按鈕、按 Esc、按右鍵或點地圖＝取消。
+const firstAid = { channel: null, picking: false, hover: null, tip: null };   // tip：頭像下方的提示 { type, text, until }
 function useFirstAid() {
   if (!G?.player || G.player.hp <= 0 || firstAid.channel) return;
-  const v = FIRST_AID;
+  if (firstAid.picking) { cancelFirstAidPick(); return; }   // 再按一次＝取消
   if (itemCount('firstaid') <= 0) { sfx('error'); flash('沒有急救包了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
-  const target = firstAidTarget();
-  if (!target) { sfx('error'); flash('大家都沒有受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
-  firstAid.channel = { t: 0, total: v.time, target, heal: v.heal };
-  Object.assign(G.player, { soothingT: v.time, gunT: 0, moving: false });   // 站著不動處理傷口
-  flash('⛑️ 急救中…', target.x, target.y - 46, '#9ff0c0', v.time);
+  if (!(G.towers || []).length) { sfx('error'); flash('沒有可以治療的隊員', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  firstAid.picking = true; firstAid.hover = null;
+  sfx('menu');
+  flash('⛑️ 選擇要治療的隊員', G.player.x, G.player.y - 54, '#9ff0c0', 1.8);
+  refreshFirstAidPick();
 }
+function cancelFirstAidPick() {
+  if (!firstAid.picking) return;
+  firstAid.picking = false; firstAid.hover = null;
+  refreshFirstAidPick();
+}
+function refreshFirstAidPick() {   // 下方按鈕、左上角隊員欄跟著更新
+  gearQuickKey = ''; renderGearQuick();
+  if (typeof applySquadCollapse === 'function') applySquadCollapse();   // 隊員欄收起來時：選隊員的期間先展開
+  if (typeof renderFieldSquadHud === 'function') renderFieldSquadHud();
+}
+function showFirstAidTip(type, text) {   // 頭像下方的小提示
+  firstAid.tip = { type, text, until: performance.now() + 1400 };
+  sfx('error');
+  if (typeof renderFieldSquadHud === 'function') renderFieldSquadHud();
+  setTimeout(() => { if (firstAid.tip && performance.now() >= firstAid.tip.until && typeof renderFieldSquadHud === 'function') { firstAid.tip = null; renderFieldSquadHud(); } }, 1450);
+}
+// 在「選隊員」時點了某位隊員的頭像
+function firstAidPickMember(type) {
+  const p = G && G.player, t = (G.towers || []).find(m => m.type === type);
+  if (!p || !t) return;
+  if (t.hp >= t.maxhp) { showFirstAidTip(type, '沒有受傷'); return; }   // 滿血不能用
+  if (Math.hypot(t.x - p.x, t.y - p.y) > FIRST_AID.reach * CELL) { showFirstAidTip(type, '距離太遠'); return; }   // 要走到隊員旁邊
+  if (itemCount('firstaid') <= 0) { cancelFirstAidPick(); return; }
+  cancelFirstAidPick();
+  const v = FIRST_AID;
+  firstAid.channel = { t: 0, total: v.time, target: t, heal: v.heal };
+  Object.assign(p, { soothingT: v.time, gunT: 0, moving: false });   // 站著不動處理傷口
+  flash('⛑️ 急救中…', t.x, t.y - 46, '#9ff0c0', v.time);
+}
+// 選隊員時：按 Esc 取消（先攔下來，才不會同時打開別的選單）
+window.addEventListener('keydown', e => {
+  if (firstAid.picking && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); cancelFirstAidPick(); }
+}, true);
+// 選隊員時：點地圖（或在地圖上按右鍵）＝取消
+cv.addEventListener('pointerdown', () => { if (firstAid.picking) cancelFirstAidPick(); });
 function finishFirstAid() {
   const c = firstAid.channel; firstAid.channel = null; if (!c || !G) return;
   const t = c.target, isPlayer = t === G.player, wasDown = !isPlayer && t.hp <= 0;
@@ -286,11 +318,11 @@ function renderGearQuick() {
   if (!box) { const host = document.getElementById('quickSupplies'); if (!host) return; box = document.createElement('div'); box.id = 'quickGear'; host.after(box); }
   const aid = itemCount('firstaid'), adr = itemCount('adrenaline'), active = adrenalineActive();
   const show = !MAP_SAFE;   // 只在戰鬥區域顯示
-  const key = JSON.stringify([show, aid, !!firstAid.channel, adr, active]);
+  const key = JSON.stringify([show, aid, !!firstAid.channel, firstAid.picking, adr, active]);
   if (key === gearQuickKey) return; gearQuickKey = key;
   const btn = (id, icon, name, sub, k, off, cls = '') => '<button type="button" class="quick-supply gear ' + cls + '" data-gear-use="' + id + '" ' + (off ? 'disabled' : '') + ' title="' + k + '｜' + name + '">' +
     '<span class="qs-icon">' + icon + '</span><span class="qs-text"><small>' + name + '</small><b>' + sub + '</b></span><kbd>' + k + '</kbd></button>';
-  box.innerHTML = !show ? '' : (aid ? btn('firstaid', '⛑️', '急救包', '×' + aid, 'H', !!firstAid.channel) : '') +
+  box.innerHTML = !show ? '' : (aid ? btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid, 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') : '') +
     (adr ? btn('adrenaline', '💉', '腎上腺素', active ? '生效中' : '×' + adr, 'J', active, active ? 'on' : '') : '');
 }
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-gear-use]'); if (!b) return; if (b.dataset.gearUse === 'firstaid') useFirstAid(); else useAdrenaline(); });
@@ -308,6 +340,7 @@ window.addEventListener('keydown', e => {
 let batteryWarned = false;
 function updateEquipment(dt) {
   if (firstAid.channel) { firstAid.channel.t += dt; if (firstAid.channel.t >= firstAid.channel.total || G.player.hp <= 0) finishFirstAid(); }
+  if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || itemCount('firstaid') <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
   renderGearQuick();
   const v = equipLv('headlamp');
   if (!v || MAP_SAFE) return;

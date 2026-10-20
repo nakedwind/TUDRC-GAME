@@ -86,9 +86,22 @@ function ensureTeamUI() {
       const avatar = e.target.closest('.field-member-avatar');
       if (avatar) {
         e.preventDefault(); e.stopPropagation();
+        if (typeof firstAid !== 'undefined' && firstAid.picking) {   // 正在用急救包選隊員（js/equipment.js）：左鍵＝治療這位，右鍵＝取消
+          if (e.button === 0) firstAidPickMember(avatar.dataset.type); else cancelFirstAidPick();
+          return;
+        }
         if (e.button === 2) openFieldCommandMenu(avatar.dataset.type, avatar);   // 只有右鍵開命令選單（左鍵不會）
       }
     });
+    // 急救包選隊員時：滑鼠停在哪位隊員的頭像上，那位就發光＋出現箭頭
+    const setAidHover = type => {
+      if (typeof firstAid === 'undefined' || !firstAid.picking) type = null;
+      if (type && firstAid.hover !== type) sfx('aidHover');   // 每換到一位隊員就響一次
+      if (typeof firstAid !== 'undefined') firstAid.hover = type;
+      fieldSquadHud.querySelectorAll('.field-member').forEach(a => a.classList.toggle('aid-hover', !!type && a.dataset.type === type));
+    };
+    fieldSquadHud.addEventListener('pointermove', e => { const av = e.target.closest('.field-member-avatar'); setAidHover(av ? av.dataset.type : null); });
+    fieldSquadHud.addEventListener('pointerleave', () => setAidHover(null));
     fieldSquadHud.addEventListener('contextmenu', e => { if (e.target.closest('.field-member-avatar')) e.preventDefault(); });   // 右鍵不要跳出瀏覽器的選單
     wrap.appendChild(fieldSquadHud);
   }
@@ -304,7 +317,13 @@ function renderFieldSquadHud() {
       // 這個面板每 0.3 秒重畫一次；用負的 animation-delay 對齊時鐘，閃爍才不會每次重畫就從頭開始
       const nowS = performance.now() / 1000;
       const syncStyle = taintCls ? ' style="--blink-sync:-' + (nowS % 1.1).toFixed(2) + 's;--blink-sync-fast:-' + (nowS % .38).toFixed(2) + 's"' : '';
-      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + '"' + syncStyle + '>' +
+      // 急救包選隊員（js/equipment.js）：發光（大小兩張圖交替淡入淡出）＋箭頭；滑鼠停在頭像上才看得到
+      const aid = typeof firstAid !== 'undefined' ? firstAid : null;
+      const aidPick = !!(aid && aid.picking);
+      const aidCls = aidPick && aid.hover === member.type ? ' aid-hover' : '';
+      const aidFx = aidPick ? '<span class="aid-glow" style="--aid-sync:-' + (nowS % 3.2).toFixed(2) + 's"><i class="s"></i><i class="m"></i></span><span class="aid-arrow"></span>' : '';
+      const aidTip = aid && aid.tip && aid.tip.type === member.type && performance.now() < aid.tip.until ? '<span class="aid-tip">' + aid.tip.text + '</span>' : '';
+      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx + aidTip +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
         // 條的正中間寫數字：左邊＝現在、右邊＝上限（嚮導沒有精神負荷，寫「無」）
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +
@@ -318,8 +337,10 @@ function renderFieldSquadHud() {
 // 隊員欄收起／展開：只切 class，CSS 負責滑順的動畫
 function applySquadCollapse() {
   if (!fieldSquadHud) return;
-  const folded = !!hudCollapsed.squad, btn = fieldSquadHud.querySelector('.hud-collapse');
+  const picking = typeof firstAid !== 'undefined' && firstAid.picking;   // 用急救包選隊員時：先展開（選完恢復原狀）
+  const folded = !!hudCollapsed.squad && !picking, btn = fieldSquadHud.querySelector('.hud-collapse');
   fieldSquadHud.classList.toggle('collapsed', folded);
+  fieldSquadHud.classList.toggle('aid-picking', picking);
   if (btn) { btn.textContent = ''; btn.title = folded ? '展開隊員欄' : '收起隊員欄'; btn.setAttribute('aria-expanded', !folded); }
 }
 // 每幀更新隊員頭像的大招冷卻環（內緣藍線，隨充能繞一圈）
@@ -409,14 +430,6 @@ function updateTeamButton() {
   if (safe) closeFieldCommandMenu();
   renderFieldSquadHud();
 }
-
-// 滑鼠移到隊友欄上：整欄變淡，看得到底下的怪物（隊友欄除了頭像都不擋點擊，見 style.css）
-window.addEventListener('mousemove', e => {
-  if (!fieldSquadHud || fieldSquadHud.classList.contains('hidden')) return;
-  const list = fieldSquadHud.querySelector('.field-squad-list') || fieldSquadHud, r = list.getBoundingClientRect();
-  const inside = e.clientX >= r.left && e.clientX <= r.right && e.clientY >= r.top && e.clientY <= r.bottom;
-  fieldSquadHud.classList.toggle('peek', inside);
-});
 
 // 點選單以外的地方（頭像除外，頭像有自己的開關）就關閉隊員指令選單
 document.addEventListener('pointerdown', e => {

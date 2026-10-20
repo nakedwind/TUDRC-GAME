@@ -315,8 +315,6 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 }
 /* 滑鼠移到隊友欄上：名字、血條、底色變淡，露出底下的戰場；頭像維持清楚，方便點擊 */
 #fieldSquadHud .field-member, #fieldSquadHud .field-member-status, #fieldSquadHud .field-down-banner { transition: opacity .15s ease, background-color .15s ease; }
-#fieldSquadHud.peek .field-member { background-color: rgba(8,13,19,.06); }
-#fieldSquadHud.peek .field-member-status, #fieldSquadHud.peek .field-down-banner { opacity: .3; }
 /* 大招冷卻條：頭像框內上緣的一條藍線 */
 .field-cd-bar {
   position: absolute; z-index: 2; top: 2px; left: 2px; right: 2px; height: 3px;
@@ -385,6 +383,27 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .field-member-status i { display: block; width: 100%; height: 3px; margin-top: 2px; overflow: hidden; border-radius: 9px; background: rgba(3,7,11,.78); }
 .field-member-status u { display: block; height: 100%; border-radius: inherit; text-decoration: none; }
 .field-hp u { background: linear-gradient(90deg,#45b98a,#79dbad); }
+/* ===== 急救包選隊員（js/equipment.js）：滑鼠停在頭像上 → 頭像後面淡淡發光（小↔大來回）＋右邊出現箭頭 ===== */
+#fieldSquadHud.aid-picking .field-squad-fold > .field-squad-list { overflow: visible; }   /* 發光和箭頭超出隊員欄也要看得到 */
+.field-member > .field-member-avatar, .field-member > .field-member-status { position: relative; z-index: 1; }   /* 頭像、文字蓋在發光上面 */
+.field-member .aid-glow, .field-member .aid-arrow { position: absolute; z-index: 0; pointer-events: none; opacity: 0; transition: opacity .18s ease; }
+.field-member .aid-glow { left: 5px; top: 5px; width: 40px; height: 40px; }   /* 跟頭像（40×40）一樣大、同一個位置 */
+/* 發光圖縮小到「最亮的邊緣剛好貼著頭像外框」，往外淡出約 5～6px（照示意圖量的）。
+   S＝最小範圍、M＝最大範圍；想讓光再大／再小，改下面的 inset（負越多＝光越大）。 */
+.field-member .aid-glow i { position: absolute; background: center / 100% 100% no-repeat; }
+.field-member .aid-glow .s { inset: -11px; background-image: url("../images/ui/help_choose_light_S.png"); animation: aidGlowOut 1.6s ease-in-out infinite alternate; animation-delay: var(--aid-sync, 0s); }
+.field-member .aid-glow .m { inset: -13.5px; background-image: url("../images/ui/help_choose_light_M.png"); animation: aidGlowIn 1.6s ease-in-out infinite alternate; animation-delay: var(--aid-sync, 0s); }
+.field-member .aid-arrow { width: 80px; height: 80px; top: -15px; right: -52px; background: url("../images/ui/help_choose_light_arrow.png") center / 80px 80px no-repeat; }   /* 箭頭在隊員欄右邊、對齊頭像中間 */
+.field-member.aid-hover .aid-glow, .field-member.aid-hover .aid-arrow { opacity: 1; }
+@keyframes aidGlowIn { from { opacity: 0; } to { opacity: 1; } }    /* 大範圍發光：淡入 */
+@keyframes aidGlowOut { from { opacity: 1; } to { opacity: 0; } }   /* 小範圍發光：同時淡出 → 看起來是光慢慢變大再變小 */
+/* 頭像下方的提示（例如「沒有受傷」） */
+.field-member .aid-tip {
+  position: absolute; z-index: 3; left: 25px; top: 41px; transform: translateX(-50%); padding: 2px 5px; border-radius: 4px;
+  background: rgba(0,0,0,.82); color: #fff; font-size: 9px; font-weight: 700; line-height: 1.2; white-space: nowrap; pointer-events: none;
+  animation: aidTipIn .15s ease-out both;
+}
+@keyframes aidTipIn { from { opacity: 0; transform: translate(-50%, -3px); } to { opacity: 1; transform: translate(-50%, 0); } }
 .field-load u { background: linear-gradient(90deg,#d8a743,#de5b63); }
 /* HP／負荷條正中間的數字：純白字＋一圈 1px、透明度 50% 的純黑外框，蓋在顏色條上面 */
 .field-member-status > div { position: relative; }
