@@ -197,7 +197,7 @@ function drawTower(t) {
   // 「暴走」「瀕臨暴走」標籤：黑底＋外框
   const tagText = t.berserk && t.hp > 0 ? '暴走' : taintDanger ? '瀕臨暴走' : '';
   if (tagText) drawTaintTag(t.x, nameY - 15, tagText, t.berserk ? '#ff4d4d' : '#ffb24d');
-  if (t.say && t.say.text && !t.berserk) markBubble(t, drawSpeechBubble(t.x, nameY - (tagText ? 30 : 13), t.say.text, t.say.col || BUBBLE_COLORS[t.type]));   // 哨兵對話泡泡（有標籤時往上移）
+  if (t.say && t.say.text && !t.berserk) queueTowerBubble(t, t.x, nameY - (tagText ? 30 : 13), t.say.text, t.say.col || BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡（有標籤時往上移；等頭上的選項畫完才畫）
 }
 function drawTaintTag(cx, centerY, text, color) {
   ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -461,6 +461,20 @@ function drawSpeechBubble(cx, bottomY, text, col) {
   ctx.fillStyle = c.tx; ctx.fillText(text, cx, y + h - 8);    // 角色色文字
   return y;   // 泡泡頂端：互動提示會排到它上面，不會蓋住
 }
+// 隊員（哨兵）頭上的對話泡泡：先記下來，等「急救／疏導」選項畫完再畫（flushTowerBubbles）。
+// 這位隊員頭上有選項時，泡泡排到選項的上面——選項固定在頭上不會被泡泡推走，滑鼠才點得準。
+let pendingTowerBubbles = new Map();   // 隊員 → 這一幀要畫的泡泡（同一位隊員一幀可能畫兩次身體，只留最後一次）
+function queueTowerBubble(t, cx, bottomY, text, col) { pendingTowerBubbles.set(t, { cx, bottomY, text, col, alpha: ctx.globalAlpha }); }
+function flushTowerBubbles() {
+  for (const [t, b] of pendingTowerBubbles) {
+    const mine = towerPrompts.filter(p => p.actor === t);
+    const bottom = mine.length ? Math.min(b.bottomY, Math.min(...mine.map(p => p.y)) - 2) : b.bottomY;
+    ctx.save(); ctx.globalAlpha = b.alpha;
+    markBubble(t, drawSpeechBubble(b.cx, bottom, b.text, b.col));
+    ctx.restore();
+  }
+  pendingTowerBubbles.clear();
+}
 // 記下這一幀角色頭上泡泡的頂端；互動提示（drawInteractPrompt）用來避開泡泡
 function markBubble(actor, top) { actor.bubbleTop = top; actor.bubbleAt = performance.now(); }
 function promptTopAbove(actor, top) {
@@ -580,7 +594,7 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.strokeStyle='rgba(143,211,255,.85)';ctx.lineWidth=1.5;ctx.stroke();
   ctx.fillStyle='#e6ebf2';ctx.textAlign='center';ctx.fillText(label,cx,y+17);
 }
-// ---- 靠近隊員時頭上的選項：上面「急救」、下面「疏導」，用滑鼠點（疏導也可以照舊按 E）----
+// ---- 靠近隊員時頭上的選項：上面「急救」、下面「疏導」，用滑鼠點（沒有快捷鍵）----
 // 滑鼠停在哪個選項上，那個就亮起來：急救＝粉紅色（跟急救包按鈕按下去一樣）、疏導＝亮藍色（跟背包按鈕一樣）。
 // 畫出來的位置記在 towerPrompts，js/game.js 用它判斷滑鼠有沒有點到。
 let towerPrompts = [], towerPromptHover = null;
@@ -590,12 +604,12 @@ const TOWER_PROMPT_STYLE = {
 };
 function drawTowerPrompts(actor, topY) {
   const items = [{ kind: 'firstaid', label: '急救' }, { kind: 'soothe', label: '疏導' }];   // 由上往下
-  const boxH = 24, gap = 4, mouse = aimClient && typeof mouseOnCanvas !== 'undefined' && mouseOnCanvas ? clientToWorld(aimClient.x, aimClient.y) : null;
+  const boxH = 20, gap = 1, mouse = aimClient && typeof mouseOnCanvas !== 'undefined' && mouseOnCanvas ? clientToWorld(aimClient.x, aimClient.y) : null;
   ctx.save();
   ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
-  const boxW = Math.max(...items.map(it => ctx.measureText(it.label).width)) + 18;
+  const boxW = Math.max(...items.map(it => ctx.measureText(it.label).width)) + 14;   // 寬：字寬＋左右各 7px（比一般提示框窄 4px）
   const x = Math.round(actor.x - boxW / 2);
-  let y = Math.round(topY - 3 - items.length * boxH - (items.length - 1) * gap);
+  let y = Math.round(topY - 5 - items.length * boxH - (items.length - 1) * gap);   // 縮小後底邊往上 2px，讓按鈕中心留在原本的位置
   towerPromptHover = null;
   for (const it of items) {
     const rect = { x, y, w: boxW, h: boxH };
@@ -611,7 +625,7 @@ function drawTowerPrompts(actor, topY) {
     ctx.strokeStyle = hot ? st.hot : st.line; ctx.lineWidth = 1.5;
     roundRect(x, y, boxW, boxH, 6); ctx.stroke();
     ctx.fillStyle = hot ? '#ffffff' : '#e6ebf2';
-    ctx.fillText(it.label, actor.x, y + 17);
+    ctx.fillText(it.label, actor.x, y + 15);
     y += boxH + gap;
   }
   ctx.restore();
@@ -750,7 +764,7 @@ function draw() {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
     const urgent = G.running ? urgentSootheTarget() : null;
-    if (urgent) drawTowerPrompts(urgent, promptTopAbove(urgent, urgent.y - 57));   // 暴走中的哨兵：最優先（急救／疏導）
+    if (urgent) drawTowerPrompts(urgent, urgent.y - 57);   // 暴走中的哨兵：最優先（急救／疏導；位置固定，泡泡會排到上面）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
@@ -768,13 +782,14 @@ function draw() {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, MAP_SAFE ? '商店' : '後室商店'); }   // HOME Mart 結帳櫃台
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
-      if (actor && actor.kind === 'tower' && !MAP_SAFE) drawTowerPrompts(actor, promptTopAbove(actor, actor.y - 57));   // 隊員：急救／疏導
+      if (actor && actor.kind === 'tower' && !MAP_SAFE) drawTowerPrompts(actor, actor.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
       else if (actor) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),
         '與 ' + (profile ? profile.name : '角色') + ' 對話');
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) { const g = graffitiNearPlayer(); drawInteractPrompt(g.x, g.y - 14, graffitiErasing() ? '擦掉中…' : '擦掉塗鴉'); }   // js/graffiti.js
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }
   }
+  flushTowerBubbles();   // 隊員的對話泡泡（有選項時排到選項上面）
   // 特效
   for (const f of G.effects) {
     if (f.spriteEffect) {

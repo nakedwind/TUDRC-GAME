@@ -448,7 +448,7 @@ window.addEventListener('keydown', e => {
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
     const urgent = urgentSootheTarget();
-    if (urgent) soothe(urgent);                  // 暴走中的哨兵：疏導最優先
+    if (urgent) {}                               // 暴走中的哨兵：疏導改用滑鼠點頭上的「疏導」（js/render.js），按鍵不疏導
     else if (elevator) {
       if (elevator.mode === 'closed') {
         startElevatorOpen(elevator.stamp);
@@ -473,7 +473,7 @@ window.addEventListener('keydown', e => {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();
-      if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);
+      if (actor?.kind === 'tower' && !MAP_SAFE) {}   // 戰鬥區的隊員：急救／疏導改用滑鼠點頭上的選項，按鍵沒有功能
       else if (actor) openDialogue(actor);
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) startGraffitiErase(graffitiNearPlayer());   // 擦掉塗鴉（js/graffiti.js）
       else toggleSit();                   // 附近沒有角色才判定座位
