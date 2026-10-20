@@ -1677,8 +1677,11 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-text small { color: var(--ws-next-color, #a9d8c9); font-size: var(--ws-next-size, 11px); }
 .ws-btn { align-self: start; min-width: var(--ws-btn-w, 0px); white-space: nowrap; padding: 6px 10px; border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 13px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
 .ws-btn b { margin-left: 4px; }
-/* 價錢前面的結晶碎片圖：圖本身有一圈光暈，用負的邊距讓水晶本體（約 9×14）落在文字和數字的正中間 */
-.ws-btn .ws-shard { width: 28px; height: 28px; margin: -8px -5.2px -8px -12.3px; vertical-align: middle; position: relative; top: -1.5px; pointer-events: none; }   /* top：跟文字的中線對齊 */
+/* 價錢前面的結晶碎片圖（水晶本體約 9×14，落在文字和數字的正中間）。
+   用背景圖畫在按鈕同一層：不要用 <img>＋position，那樣捲動時圖會自己一層、比文字慢一拍。
+   整張圖（含光暈）28×28 都畫出來、不裁切；格子比圖高 4px、圖往上放，水晶就跟文字的中線對齊；負的邊距讓旁邊的字靠過來 */
+.ws-btn .ws-shard { display: inline-block; width: 28px; height: 32px; margin: -10px -5.2px -10px -12.3px; vertical-align: middle;
+  background: url("../images/碎片鑰匙/anomalous-shard-ground-glow.png") 0 0.56px / 28px 28px no-repeat; pointer-events: none; }
 .ws-btn:disabled .ws-shard { filter: grayscale(1) opacity(.6); }
 /* 每個欄位：左邊圖示；第一行＝名字＋右邊的按鈕；說明文字在下面、可以一路寫到按鈕下方（比較不會換行） */
 .ws-grid .ws-row { grid-template-rows: auto auto auto auto; align-items: start; align-content: center; column-gap: 10px; row-gap: 2px; }
@@ -1692,6 +1695,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* 說明文字的顏色：數字＝橘色、「戰鬥區域」＝紫色（開發工坊編輯器可以改：data/workshop.js） */
 .ws-text i.ws-num { font-style: normal; color: var(--ws-num-color, #CF9447); }
 .ws-text i.ws-where { font-style: normal; color: var(--ws-where-color, #A958E2); }
+.ws-text i.ws-item { font-style: normal; color: var(--ws-item-color, #A958E2); }   /* 道具名稱（電池、杏仁水…） */
 /* 工坊打開時的提示（碎片不夠、升級完成…）：標題列正中間、最上層 */
 .workshop-toast { position: absolute; left: 50%; top: 50%; z-index: 5; transform: translate(-50%, -50%); padding: 9px 16px; border-radius: 9px;
   border: 1px solid rgba(255,212,121,.45); background: #2c2519; color: #f1e6cf; font-size: 15px; font-weight: 700; white-space: nowrap; pointer-events: none;

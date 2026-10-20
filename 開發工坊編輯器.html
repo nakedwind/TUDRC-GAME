@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>開發工坊編輯器｜Y102 應變中心</title>
-<link rel="stylesheet" href="css/style.css?v=wsshard5-20261020">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/style.css?v=lv5-20261020">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
@@ -58,6 +58,40 @@
   .val-table input { width: 100%; min-width: 0; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; text-align: right; }
   .val-table input:disabled { opacity: .35; }
   .preview-stage .ws-row.ed-sel { outline: 2px solid #82cbe2; outline-offset: 1px; }   /* 左邊選到的那一格 */
+  /* 預覽的裝備狀態：一排可以點的按鈕（跟素材列的分頁一樣） */
+  .pv-bar { flex-wrap: nowrap; }   /* 「預覽」「裝備狀態」跟按鈕排在同一行；按鈕太多時只在右邊那一塊裡換行 */
+  .pv-bar { align-items: flex-start; }   /* 按鈕換成兩行時，標題對齊第一行 */
+  .pv-bar > h2, .pv-label { flex: none; padding-top: 4px; }
+  .pv-label { margin-left: 15px; color: #ffe3a1; font-size: 15px; font-weight: 700; white-space: nowrap; }
+  .pv-modes { display: flex; flex-wrap: wrap; gap: 6px; flex: 1 1 0; min-width: 0; }
+  .pv-mode { border: 1px solid #3a4656; border-radius: 999px; background: #232a35; color: #b9c3cf; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 12px; white-space: nowrap; }
+  .pv-mode:hover { border-color: #8fd3ff; color: #fff; }
+  .pv-mode.sel { border-color: #8fd3ff; background: #2b526b; color: #fff; }
+  .val-table input.is-text { border-color: #c79a5a; color: #ffd9a3; text-align: left; }   /* 填了文字（只顯示在效果說明） */
+  /* ---- 素材圖（預覽下面）：跟地圖編輯器下方的素材列一樣 ---- */
+  .asset-tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+  .asset-tabs input[type=search] { width: 160px; background: #101923; border: 1px solid #3a4656; border-radius: 999px; color: #edf5ff; font: inherit; font-size: 12px; padding: 6px 12px; }
+  .asset-tab { border: 1px solid #3a4656; border-radius: 999px; background: #232a35; color: #b9c3cf; padding: 6px 11px; cursor: pointer; font: inherit; font-size: 12px; }
+  .asset-tab:hover { border-color: #8fd3ff; color: #fff; }
+  .asset-tab.sel { border-color: #8fd3ff; background: #2b526b; color: #fff; }
+  .asset-tab .count { color: #8fd3ff; margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .asset-grid { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; }
+  .asset { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 96px; padding: 4px 4px 5px; background: #232a35; border: 2px solid #333c49; border-radius: 8px; cursor: pointer; font: inherit; color: #e8edf5; text-align: center; }
+  .asset:hover { border-color: #5d7a96; }
+  .asset.sel { border-color: #8fd3ff; background: #2b3a4a; }
+  .asset.removed { opacity: .45; }
+  .asset-thumb { display: grid; place-items: center; width: 100%; height: 64px; border-radius: 4px; overflow: hidden;
+    background-color: #0e1116; background-size: 12px 12px; background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+    background-image: linear-gradient(45deg, #1b222c 25%, transparent 25%), linear-gradient(-45deg, #1b222c 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1b222c 75%), linear-gradient(-45deg, transparent 75%, #1b222c 75%); }
+  .asset-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; image-rendering: pixelated; }
+  .asset-thumb i { font-style: normal; font-size: 28px; }
+  .asset b { font-size: 12px; font-weight: 600; line-height: 1.3; word-break: break-all; }
+  .asset small { color: #8c98a6; font-size: 11px; }
+  .asset-empty { width: 100%; padding: 14px; color: #7f8b99; font-size: 12px; text-align: center; margin: 0; }
+  .asset-ctxmenu { position: fixed; z-index: 9999; min-width: 150px; padding: 4px; background: #1d222b; border: 1px solid #3a4250; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
+  .asset-ctxmenu[hidden] { display: none; }
+  .asset-ctxmenu button { display: block; width: 100%; padding: 7px 12px; background: none; border: 0; border-radius: 6px; color: #e6e9ef; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+  .asset-ctxmenu button:hover { background: #2c3443; }
   #itemList img, #itemList i { width: 30px; height: 30px; object-fit: contain; image-rendering: pixelated; font-style: normal; display: grid; place-items: center; }
   #itemList small { color: #8fa3b5; font-size: 11px; margin-left: 4px; }
   .img-row { display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 8px; align-items: center; }
@@ -96,19 +130,17 @@
     </div>
     <div class="right-col">
     <section class="panel">
-      <div class="bar">
+      <div class="bar pv-bar">
         <h2 style="margin:0">預覽</h2>
-        <label class="field" style="margin:0;display:flex;align-items:center;gap:6px">裝備狀態
-          <select id="previewMode">
-            <option value="start" selected>跟遊戲一開始一樣（還沒開發、還沒撿到）</option>
-            <option value="none">全部還沒拿到</option>
-            <option value="lv1">全部 Lv1（可以升級）</option>
-            <option value="max">Lv3（已達最高等級）</option>
-          </select>
-        </label>
+        <span class="pv-label">裝備狀態</span>
+        <div class="pv-modes" id="previewModes"></div>   <!-- 按鈕：js/workshop-editor.js 的 renderPreviewModes -->
       </div>
       <div class="preview-wrap"><div class="preview-stage" id="previewStage"></div></div>
     </section>
+      <section class="panel asset-panel">   <!-- 所有裝備、武器的素材圖（點一下＝選它；右鍵＝以檔案總管開啟） -->
+        <div class="asset-tabs" id="assetTabs"></div>
+        <div class="asset-grid" id="assetGrid"></div>
+      </section>
       <section class="panel style-panel">
         <h2>外觀（所有裝備欄位一起改）</h2>
         <div id="styleForm"></div>
@@ -117,11 +149,13 @@
     </div>
   </div>
 
-  <script src="data/equipment.js?v=flareshine-20261020"></script>   <!-- 裝備、武器的原始資料 -->
-  <script src="data/workshop.js?v=wsedit6-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
-  <script src="js/workshop-config.js?v=flareshine-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="data/equipment.js?v=lv5-20261020"></script>   <!-- 裝備、武器的原始資料 -->
+  <script src="data/supplies.js"></script>   <!-- 道具名稱（說明裡的道具上色用） -->
+  <script src="data/items.js"></script>
+  <script src="data/workshop.js?v=lv5-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
+  <script src="js/workshop-config.js?v=lv5-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=wsedit6-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-editor.js?v=wsshard-20261020"></script>
+  <script src="js/workshop-editor.js?v=lv5-20261020"></script>
 </body>
 </html>

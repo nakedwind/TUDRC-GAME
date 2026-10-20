@@ -17,6 +17,7 @@ const WORKSHOP_STYLE_DEFAULT = {
   nextSize: 11, nextColor: '#a9d8c9',   // 下一級效果、取得地點
   numColor: '#CF9447',   // 說明裡的數字（Lv2、8 格、1.4 秒…）
   whereColor: '#A958E2', // 說明裡的「戰鬥區域」
+  itemColor: '#A958E2',  // 說明裡的道具名稱（電池、杏仁水、急救包…）
 };
 // 數字型的設定在 CSS 裡要加 px
 const WORKSHOP_STYLE_VARS = {
@@ -25,7 +26,7 @@ const WORKSHOP_STYLE_VARS = {
   nameSize: ['--ws-name-size', 'px'], nameColor: ['--ws-name-color', ''],
   descSize: ['--ws-desc-size', 'px'], descColor: ['--ws-desc-color', ''],
   nextSize: ['--ws-next-size', 'px'], nextColor: ['--ws-next-color', ''],
-  numColor: ['--ws-num-color', ''], whereColor: ['--ws-where-color', ''],
+  numColor: ['--ws-num-color', ''], whereColor: ['--ws-where-color', ''], itemColor: ['--ws-item-color', ''],
 };
 function workshopStyle(cfg) {   // 預設值＋設定檔裡改過的
   return { ...WORKSHOP_STYLE_DEFAULT, ...((cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {})).style || {}) };
@@ -34,6 +35,26 @@ function applyWorkshopStyle(el, cfg) {   // 把外觀設定寫成 CSS 變數（e
   if (!el) return;
   const st = workshopStyle(cfg);
   for (const [k, [name, unit]] of Object.entries(WORKSHOP_STYLE_VARS)) el.style.setProperty(name, st[k] + unit);
+}
+
+// 最高幾級（data/equipment.js 的 EQUIP_MAX_LV）；LV_INDEX＝[0, 1, …, 最高-1]
+const WORKSHOP_MAX_LV = typeof EQUIP_MAX_LV !== 'undefined' ? EQUIP_MAX_LV : 5;
+const WORKSHOP_LV_INDEX = Array.from({ length: WORKSHOP_MAX_LV }, (_, i) => i);
+// ---- 說明文字上色（遊戲的開發工坊、編輯器的預覽共用）----
+// 數字（Lv2、8 格、1.4 秒、−10%…）＝橘色、「戰鬥區域」＝紫色、道具名稱（電池、杏仁水…）＝道具顏色（css/style.css 的 .ws-num／.ws-where／.ws-item）
+let workshopItemRe = null;
+function workshopItemNames() {   // 道具名稱：背包的補給、零食飲料（data/supplies.js）＋其他物品（data/items.js）＋異質碎片
+  const names = new Set(['異質碎片']);
+  if (typeof SUPPLIES !== 'undefined') for (const it of SUPPLIES) if (it.name) names.add(it.name);
+  if (typeof ITEMS !== 'undefined') for (const it of ITEMS) if (it.name) names.add(it.name);
+  return [...names].filter(n => n.length >= 2).sort((a, b) => b.length - a.length);   // 長的先比（「杏仁水保溫杯」比「杏仁水」先）
+}
+function workshopColorize(text) {
+  if (!workshopItemRe) { const n = workshopItemNames(); workshopItemRe = n.length ? new RegExp(n.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g') : /(?!)/g; }
+  return String(text)
+    .replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>')
+    .replace(/戰鬥區域/g, '<i class="ws-where">戰鬥區域</i>')
+    .replace(workshopItemRe, m => '<i class="ws-item">' + m + '</i>');
 }
 
 // ---- 裝備／武器的文字和圖片 ----
@@ -69,8 +90,8 @@ function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊�
   return {
     id: a.id, name: a.name || '新裝備', kind: WORKSHOP_KINDS[a.kind] ? a.kind : 'acc', icon: a.icon || '🧰', image: a.image || '',
     source: a.source === 'field' ? 'field' : 'develop', where: a.where || '', desc: a.desc || '', ownedDesc: a.ownedDesc || '',
-    cost: [cost[0] ?? 50, cost[1] ?? 100, cost[2] ?? 160],
-    stat: lv => lv.text, levels: [0, 1, 2].map(i => ({ text: String(texts[i] ?? '') })),
+    cost: WORKSHOP_LV_INDEX.map(i => cost[i] ?? [50, 100, 160, 240, 340][i] ?? 340),   // [開發, 升到 Lv2, …, 升到最高級]
+    stat: lv => lv.text, levels: WORKSHOP_LV_INDEX.map(i => ({ text: String(texts[i] ?? '') })),
     custom: true,
   };
 }
@@ -81,20 +102,38 @@ function workshopWeaponValueKeys() {   // 所有武器用到的數值，照武�
   return keys;
 }
 // 武器多填的數值（這把原本沒有的）→「・燃燒 5 秒」這樣的說明；只是顯示，這把槍的程式沒有用到這個數值
-function workshopExtraText(key, lv) {
+function workshopExtraText(key, lv, texts) {   // texts：這一級填了文字的數值（{ 數值名: '文字' }）
   if (!key.startsWith('w:') || !lv) return '';
   const own = new Set(); for (const b of (WORKSHOP_BASE[key] || {}).levels || []) for (const k of Object.keys(b)) own.add(k);
-  return workshopWeaponValueKeys().filter(k => !own.has(k) && typeof lv[k] === 'number' && lv[k] !== 0).map(k => {   // 0＝不顯示
-    const info = WORKSHOP_VALUE_INFO[k] || { label: k, unit: '' }, n = Math.round(lv[k] * (info.scale || 1) * 100) / 100;
+  const txt = k => texts && typeof texts[k] === 'string' && texts[k] !== '' ? texts[k] : null;
+  return workshopWeaponValueKeys().filter(k => !own.has(k) && (txt(k) !== null || (typeof lv[k] === 'number' && lv[k] !== 0))).map(k => {   // 0＝不顯示
+    const info = WORKSHOP_VALUE_INFO[k] || { label: k, unit: '' }, n = txt(k) ?? Math.round(lv[k] * (info.scale || 1) * 100) / 100;
     return '・' + info.label + ' ' + n + (info.unit === '%' ? '%' : info.unit ? ' ' + info.unit : '');
   }).join('');
 }
+// 數值欄填了數字以外的文字（例如「5～6」「？？」）：遊戲的實際數值維持原本的，只有效果說明顯示這段文字。
+// 作法：把這個數值換成兩個不同的數字各算一次說明，前後一樣的部分不動，中間變動的那一段（＝這個數值）換成文字。
+const WORKSHOP_TEXTVALS = {};   // key → [Lv1, Lv2, …] 各自 { 數值名: '文字' }
+function workshopTextify(fn, lv, texts) {
+  const keys = Object.keys(texts || {}).filter(k => typeof texts[k] === 'string' && texts[k] !== '');
+  if (!keys.length) return fn(lv);
+  const A = { ...lv }; for (const k of keys) A[k] = 1234567.89;
+  const a = fn(A), spans = [];
+  for (const k of keys) {
+    const b = fn({ ...A, [k]: 7654321.23 }); if (b === a) continue;   // 說明裡沒有這個數值
+    let p = 0; while (p < a.length && p < b.length && a[p] === b[p]) p++;
+    let q = 0; while (q < a.length - p && q < b.length - p && a[a.length - 1 - q] === b[b.length - 1 - q]) q++;
+    spans.push([p, a.length - q, texts[k]]);
+  }
+  let out = a; for (const [p, e, t] of spans.sort((x, y) => y[0] - x[0])) out = out.slice(0, p) + t + out.slice(e);   // 從後面換回來，位置才不會跑掉
+  return out;
+}
 // 數值填 0 的那一項，從效果說明裡拿掉（例如燃燒填 0 → 不顯示「燃燒 0 秒」）。
 // 作法：把這個數值換成兩個不同的數字各算一次說明，有變的那一段（用「・」分開）就是它，拿掉。
-function workshopHideZeros(fn, lv) {
+function workshopHideZeros(fn, lv, skip) {   // skip：填了文字的數值（不算 0）
   const text = fn(lv), segs = text.split('・'), drop = new Set();
   for (const k of Object.keys(lv)) {
-    if (lv[k] !== 0) continue;
+    if (lv[k] !== 0 || (skip && skip.has(k))) continue;
     const a = fn({ ...lv, [k]: 1234567 }).split('・'), b = fn({ ...lv, [k]: 7654321 }).split('・');
     if (a.length !== segs.length || b.length !== segs.length) continue;   // 這一項是 0 時本來就不會出現
     a.forEach((sg, i) => { if (sg !== b[i]) drop.add(i); });
@@ -102,22 +141,32 @@ function workshopHideZeros(fn, lv) {
   return drop.size ? segs.filter((_, i) => !drop.has(i)).join('・') : text;
 }
 // 跟著數值自動產生的效果說明（原本的寫法＋武器多填的數值；填 0 的不顯示）
-function workshopAutoStat(key, lv) { const fn = (WORKSHOP_BASE[key] || {}).statFn; return lv && fn ? workshopHideZeros(fn, lv) + workshopExtraText(key, lv) : ''; }
+// texts：這一級填了文字的數值；沒給的話（遊戲裡）照 lv 是第幾級去查設定檔
+function workshopAutoStat(key, lv, texts) {
+  const b = WORKSHOP_BASE[key] || {}, fn = b.statFn; if (!lv || !fn) return '';
+  if (texts === undefined && b.def && b.def.levels) { const i = b.def.levels.indexOf(lv); texts = i >= 0 ? (WORKSHOP_TEXTVALS[key] || [])[i] : null; }
+  const skip = new Set(Object.keys(texts || {}).filter(k => typeof texts[k] === 'string' && texts[k] !== ''));
+  return workshopHideZeros(l => workshopTextify(fn, l, texts), lv, skip) + workshopExtraText(key, lv, texts);
+}
 const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → 資料；編輯器可以「復原」）
 (function applyWorkshopItems() {
   const cfg = typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {};
   const defs = workshopItemDefs(), items = cfg.items || {};
   for (const [key, def] of Object.entries(defs)) {   // 原本的裝備／武器：改名稱、圖片、說明
     WORKSHOP_BASE[key] = Object.fromEntries(WORKSHOP_TEXT_FIELDS.map(f => [f, def[f]]));
-    WORKSHOP_BASE[key].stats = [0, 1, 2].map(i => def.levels && def.levels[i] && def.stat ? def.stat(def.levels[i]) : '');   // 原本每一級的效果說明（跟著數值自動產生的）
+    WORKSHOP_BASE[key].stats = WORKSHOP_LV_INDEX.map(i => def.levels && def.levels[i] && def.stat ? def.stat(def.levels[i]) : '');   // 原本每一級的效果說明（跟著數值自動產生的）
     WORKSHOP_BASE[key].levels = (def.levels || []).map(lv => ({ ...lv }));   // 原本每一級的數值（編輯器比對、恢復用）
     WORKSHOP_BASE[key].statFn = def.stat;   // 原本的效果說明產生方式（還沒被設定檔改過）
+    WORKSHOP_BASE[key].def = def;
     const o = items[key]; if (!o) continue;
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '') def[f] = o[f];
     // 每一級的實際數值（傷害、彈匣、裝填秒數…）：直接改進原本的等級資料，遊戲各處讀到的就是新數值，效果說明也會跟著算
     if (Array.isArray(o.values) && def.levels) o.values.forEach((v, i) => {
       if (!v || !def.levels[i]) return;
-      for (const [k, n] of Object.entries(v)) if (typeof n === 'number' && Number.isFinite(n)) def.levels[i][k] = n;
+      for (const [k, n] of Object.entries(v)) {
+        if (typeof n === 'number' && Number.isFinite(n)) def.levels[i][k] = n;
+        else if (typeof n === 'string' && n !== '') ((WORKSHOP_TEXTVALS[key] || (WORKSHOP_TEXTVALS[key] = []))[i] || (WORKSHOP_TEXTVALS[key][i] = {}))[k] = n;   // 文字：只顯示在效果說明
+      }
     });
     // 改過數值的、還有武器：效果說明照新數值重新產生——填 0 的那一項不顯示；武器多填的數值（這把原本沒有的）接在後面
     if ((Array.isArray(o.values) || key.startsWith('w:')) && def.stat) def.stat = lv => workshopAutoStat(key, lv);

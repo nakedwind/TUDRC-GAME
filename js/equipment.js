@@ -11,10 +11,17 @@ const EQUIP_STORE = 'tudrc_equipment_v1';
 const equipState = { owned: {}, equipped: { head: null, body: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: 'flare' }, gunAmmo: {}, battery: 100 };
 const EQUIP_TO_ITEM = ['thermos', 'firstaid', 'adrenaline', 'charm'];   // 以前是裝備、現在改成道具：舊存檔有的話換成 1 個道具
 let equipLegacyItems = [];
+// 開發工坊編輯器刪掉的裝備／武器：對玩家來說就是永久從遊戲消失——存檔裡拿到的也清掉（之後就算在編輯器復原，也要重新取得）。
+// 資料本身（data/equipment.js）沒有刪，只是遊戲裡不出現。
+let equipPurged = false;
 try {
   const s = JSON.parse(localStorage.getItem(EQUIP_STORE) || '{}');
   if (s.owned) equipLegacyItems = EQUIP_TO_ITEM.filter(id => s.owned[id]);
-  if (s.owned) for (const [id, lv] of Object.entries(s.owned)) if (EQUIPMENT.some(e => e.id === id)) equipState.owned[id] = Math.max(1, Math.min(3, lv | 0));
+  if (s.owned) for (const [id, lv] of Object.entries(s.owned)) {
+    const d = EQUIPMENT.find(e => e.id === id);
+    if (d) equipState.owned[id] = Math.max(1, Math.min(d.levels.length, lv | 0));   // 最高＝這件有幾級（EQUIP_MAX_LV）
+    else equipPurged = true;   // 清單裡沒有了（被刪掉的）：不留
+  }
   if (s.equipped) for (const k of Object.keys(equipState.equipped)) if (s.equipped[k] && equipState.owned[s.equipped[k]]) equipState.equipped[k] = s.equipped[k];
   // 舊存檔：頭燈／手持格的手電筒改放到空著的隨身物品格；穿在不對的格子的裝備卸下
   const oldLamp = (s.equipped && s.equipped.hand === 'headlamp') || equipState.equipped.head === 'headlamp';
@@ -23,15 +30,18 @@ try {
     const free = ['acc1', 'acc2'].find(k => !equipState.equipped[k]); if (free) equipState.equipped[free] = 'headlamp';
   }
   for (const slot of EQUIP_SLOTS) { const id = equipState.equipped[slot.id], d = id && EQUIPMENT.find(e => e.id === id); if (d && !slot.kinds.includes(d.kind)) equipState.equipped[slot.id] = null; }
-  if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field ? 0 : 1, Math.min(3, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
+  if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field ? 0 : 1, Math.min(WEAPON_UPGRADES[k].levels.length, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
   if (s.gunAmmo) for (const [k, a] of Object.entries(s.gunAmmo)) if (WEAPON_UPGRADES[k] && a) equipState.gunAmmo[k] = { mag: Math.max(0, a.mag | 0), reserve: Math.max(0, a.reserve | 0) };
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
   if (s.loadout) for (const k of ['main', 'sub']) if (s.loadout[k] === null || WEAPON_UPGRADES[s.loadout[k]]) equipState.loadout[k] = s.loadout[k];
 } catch (_) {}
+for (const [k, w] of Object.entries(WEAPON_UPGRADES)) if (w.removed && (equipState.weapons[k] > 0 || equipState.gunAmmo[k])) {   // 刪掉的武器：等級、彈藥都清掉
+  equipState.weapons[k] = 0; delete equipState.gunAmmo[k]; equipPurged = true;
+}
 // 測試用：解鎖所有槍、彈藥補滿（data/equipment.js 的 TEST_UNLOCK_ALL_GUNS）
 if (typeof TEST_UNLOCK_ALL_GUNS !== 'undefined' && TEST_UNLOCK_ALL_GUNS) {
   for (const [id, w] of Object.entries(WEAPON_UPGRADES)) {
-    if (w.field && !(equipState.weapons[id] > 0)) continue;   // 燃燒彈槍、麻醉槍：只能在置物櫃拿到，測試模式也不直接給
+    if (w.removed || (w.field && !(equipState.weapons[id] > 0))) continue;   // 燃燒彈槍、麻醉槍：只能在置物櫃拿到，測試模式也不直接給；刪掉的武器不給
     if (!(equipState.weapons[id] > 0)) equipState.weapons[id] = 1;
     if (w.field) { const lv = w.levels[equipState.weapons[id] - 1]; equipState.gunAmmo[id] = { mag: id === 'tranq' ? lv.mag : 1, reserve: lv.reserve }; }
   }
@@ -45,6 +55,7 @@ function fixLoadout() {   // 沒拿到的槍不能裝；兩格不能放同一把
   if (L.sub && (!weaponHave(L.sub) || L.sub === L.main)) L.sub = null;
 }
 fixLoadout();
+if (equipPurged) saveEquipment();   // 刪掉的東西馬上從存檔清掉
 const weaponInLoadout = id => equipState.loadout.main === id || equipState.loadout.sub === id;
 function saveEquipment() { try { localStorage.setItem(EQUIP_STORE, JSON.stringify(equipState)); } catch (_) {} }
 // 舊存檔的裝備換成道具：等背包讀完檔（js/save.js 的 loadGame）再放進去，只做一次
@@ -205,7 +216,9 @@ function drawFlashlightBeam(ctx, beam) {
 }
 // 武器等級套到實際數值（手槍：傷害、彈匣、裝填；照明彈槍：照明秒數、持有上限）
 function applyWeaponLevels() {
-  const p = WEAPON_UPGRADES.pistol.levels[equipState.weapons.pistol - 1], f = WEAPON_UPGRADES.flare.levels[equipState.weapons.flare - 1];
+  // 開發工坊編輯器刪掉的槍是 0 級（沒有）：數值先用 Lv1 的，反正拿不到、用不到
+  const lvOf = id => WEAPON_UPGRADES[id].levels[Math.max(1, equipState.weapons[id] || 0) - 1];
+  const p = lvOf('pistol'), f = lvOf('flare');
   if (typeof PLAYER_ATK !== 'undefined') { PLAYER_ATK.dmg = p.dmg; PLAYER_ATK.mag = p.mag; PLAYER_ATK.reloadTime = p.reload; }
   if (typeof FLARE !== 'undefined') { FLARE.burn = f.shine; FLARE.reserveMax = f.reserve; }   // 照明彈亮幾秒（data/equipment.js 的 shine）
 }
@@ -558,7 +571,7 @@ function ensureWorkshop() {
 }
 // 工坊打開時的提示（碎片不夠、升級完成…）：顯示在工坊標題列的正中間、最上層，約 2.2 秒後淡出
 let workshopToastEl = null, workshopToastUntil = 0, workshopToastTimer = null;
-const WS_SHARD_IMG = '<img class="ws-shard" src="images/碎片鑰匙/anomalous-shard-ground-glow.png" alt="異質碎片">';
+const WS_SHARD_IMG = '<i class="ws-shard" role="img" aria-label="異質碎片"></i>';   // 結晶碎片圖（css/style.css 的 .ws-shard：用背景圖畫，捲動時跟文字一起動）
 function showWorkshopToast(text, html = false) {   // html＝true：text 是自己組的 HTML（例如數字加粗）
   if (!workshopToastEl) { workshopToastEl = document.createElement('div'); workshopToastEl.className = 'workshop-toast'; }
   if (html) workshopToastEl.innerHTML = text; else workshopToastEl.textContent = text;
@@ -588,22 +601,20 @@ function workshopBuy(kind, id) {
     grantEquipment(id, '諾亞開發好了');
     showWorkshopToast('🎁 諾亞開發好了「' + def.name + '」');
   } else if (kind === 'up') {
-    const def = equipDef(id), lv = equipState.owned[id]; if (!def || !lv || lv >= 3) return;
+    const def = equipDef(id), lv = equipState.owned[id]; if (!def || !lv || lv >= def.levels.length) return;
     if (!spendCrystals(def.cost[lv])) return;
     equipState.owned[id] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
     showWorkshopToast('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
   } else if (kind === 'wp') {
-    const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= 3) return;
+    const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= w.levels.length) return;
     if (!spendCrystals(w.cost[lv - 1])) return;
     equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); SFX.play('achievement', .7, 'equip-up');
     showWorkshopToast('🔧 「' + w.name + '」升到 Lv' + (lv + 1));
   }
   renderWorkshop();
 }
-// 說明文字上色：數字（Lv2、8 格、1.4 秒、−10%…）＝橘色、「戰鬥區域」＝紫色（顏色在 css/style.css 的 .ws-num／.ws-where）
-const wsColor = text => String(text)
-  .replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>')
-  .replace(/戰鬥區域/g, '<i class="ws-where">戰鬥區域</i>');
+// 說明文字上色：數字＝橘色、「戰鬥區域」＝紫色、道具名稱＝道具顏色（js/workshop-config.js 的 workshopColorize，編輯器的預覽也用它）
+const wsColor = text => workshopColorize(text);
 function renderWorkshop() {
   // about＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面（開發工坊編輯器可以寫）
   const row = (icon, name, lvText, stat, next, btn, about) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b>' + (about ? '<span class="ws-about">' + wsColor(about) + '</span>' : '') + '<span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
@@ -611,17 +622,17 @@ function renderWorkshop() {
   const gear = EQUIPMENT.map(def => {
     const lv = equipState.owned[def.id], icon = equipIcon(def);
     if (!lv) {
-      if (def.source !== 'develop') return row(icon, def.name, '', def.desc, '只能在戰鬥區域取得：' + def.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
+      if (def.source !== 'develop') return row(icon, def.name, '', def.desc, def.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
       return row(icon, def.name, '', def.desc, 'Lv1：' + def.stat(def.levels[0]), '<button type="button" class="ws-btn" data-ws="dev:' + def.id + '">開發 ' + cost(def.cost[0]) + '</button>');
     }
-    if (lv >= 3) return row(icon, def.name, ' <em>Lv3</em>', def.stat(def.levels[2]), '', '<button type="button" class="ws-btn" disabled>已達最高等級</button>', def.ownedDesc);
+    if (lv >= def.levels.length) return row(icon, def.name, ' <em>Lv' + lv + '</em>', def.stat(def.levels[lv - 1]), '', '<button type="button" class="ws-btn" disabled>已達最高等級</button>', def.ownedDesc);
     return row(icon, def.name, ' <em>Lv' + lv + '</em>', def.stat(def.levels[lv - 1]), '升到 Lv' + (lv + 1) + '：' + def.stat(def.levels[lv]), '<button type="button" class="ws-btn" data-ws="up:' + def.id + '">升級 ' + cost(def.cost[lv]) + '</button>', def.ownedDesc);
   }).join('');
   const weapons = Object.entries(WEAPON_UPGRADES).filter(([, w]) => !w.removed).map(([k, w]) => {   // 刪掉的武器不顯示
     const lv = equipState.weapons[k];
-    if (!lv) return row(equipIcon(w), w.name, '', w.desc, '只能在戰鬥區域取得：' + w.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
-    return row(equipIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < 3 ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
-      lv < 3 ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>', w.ownedDesc);
+    if (!lv) return row(equipIcon(w), w.name, '', w.desc, w.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
+    return row(equipIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < w.levels.length ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
+      lv < w.levels.length ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>', w.ownedDesc);
   }).join('');
   // 右側：目前穿戴的 4 格＋背包裡其他已擁有的裝備（升級後等級即時更新）
   const wornWeaponSlots = WEAPON_SLOTS.map(s => {

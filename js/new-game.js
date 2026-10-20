@@ -100,6 +100,7 @@
         for (const item of [...SUPPLIES, ...ITEMS]) supplyInventory.set(item.id, Math.max(99, supplyInventory.get(item.id) || 0));
         for (const def of EQUIPMENT) equipState.owned[def.id] = def.levels.length;
         for (const [id, def] of Object.entries(WEAPON_UPGRADES)) {
+          if (def.removed) continue;   // 開發工坊編輯器刪掉的武器不給
           equipState.weapons[id] = def.levels.length;
           if (def.field) { const lv = def.levels[def.levels.length - 1]; equipState.gunAmmo[id] = { mag: id === 'tranq' ? lv.mag : 1, reserve: lv.reserve }; }
         }
@@ -114,7 +115,7 @@
       if (window.TEST_MODE) {
         G.money = Math.max(G.money, 99999); updateHUD();
         const note = document.querySelector('.header-note'); if (note) note.textContent = '🧪 測試模式 · 全物品解鎖';
-        systemNotice('測試模式：全部物品 ×99、Lv3 裝備與武器已解鎖');
+        systemNotice('測試模式：全部物品 ×99、最高等級的裝備與武器已解鎖');
       }
       if (resumeScene && G?.player && Number.isFinite(resumeScene.x) && Number.isFinite(resumeScene.y) && !playerBlocked(resumeScene.x, resumeScene.y)) {
         G.player.x = resumeScene.x; G.player.y = resumeScene.y;
