@@ -2316,6 +2316,14 @@ const BASE_MAPS = [
         "layer": "object3",
         "ox": 4,
         "oy": 0
+      },
+      {
+        "id": "tile_eoc_floor_sign_2f",
+        "c": 59,
+        "r": 9,
+        "layer": "overlay",
+        "ox": 0,
+        "oy": 2
       }
     ],
     "solid": [

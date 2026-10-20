@@ -49,8 +49,9 @@
   #itemList .list-head { color: #ffe3a1; font-size: 12px; margin: 4px 0 0; }
   .removed-note { color: #ffb3b3; font-size: 13px; line-height: 1.5; margin: 0 0 10px; }
   .preview-stage .ws-row { cursor: pointer; }
-  .val-table { width: 100%; border-collapse: collapse; margin: -4px 0 12px; font-size: 12px; }
-  .val-table th { color: #b9cad9; font-weight: 600; text-align: left; padding: 3px 4px; white-space: nowrap; }
+  .val-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: -4px 0 12px; font-size: 12px; }   /* 欄寬固定：每一把武器的表格都對齊 */
+  .val-table col.vt-name { width: 118px; }
+  .val-table th { color: #b9cad9; font-weight: 600; text-align: left; padding: 3px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .val-table thead th { color: #ffe3a1; text-align: center; }
   .val-table th small { color: #7f93a6; font-weight: 400; }
   .val-table td { padding: 2px 3px; }
@@ -116,11 +117,11 @@
     </div>
   </div>
 
-  <script src="data/equipment.js?v=acidboots-20261018"></script>   <!-- 裝備、武器的原始資料 -->
-  <script src="data/workshop.js?v=wsedit5-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
-  <script src="js/workshop-config.js?v=wsedit5-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="data/equipment.js?v=flareshine-20261020"></script>   <!-- 裝備、武器的原始資料 -->
+  <script src="data/workshop.js?v=wsedit6-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
+  <script src="js/workshop-config.js?v=flareshine-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
-  <script src="js/project-save.js?v=wsedit5-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-editor.js?v=wsedit5-20261020"></script>
+  <script src="js/project-save.js?v=wsedit6-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
+  <script src="js/workshop-editor.js?v=wsedit6-20261020"></script>
 </body>
 </html>

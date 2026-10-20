@@ -40,7 +40,8 @@ function applyWorkshopStyle(el, cfg) {   // 把外觀設定寫成 CSS 變數（e
 const WORKSHOP_TEXT_FIELDS = ['name', 'image', 'desc', 'ownedDesc', 'where'];   // ownedDesc＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面
 // 每一級數值的中文名稱（編輯器用）：label 名稱、unit 單位、scale 顯示時乘多少（例如 0.15 → 15 %；照明 220 像素 → 5.5 格）
 const WORKSHOP_VALUE_INFO = {
-  dmg: { label: '傷害', unit: '' }, mag: { label: '彈匣', unit: '發' }, reload: { label: '裝填', unit: '秒' }, reserve: { label: '備用彈最多', unit: '發' },
+  dmg: { label: '傷害', unit: '' }, mag: { label: '彈匣', unit: '發' }, reload: { label: '裝填', unit: '秒' }, reserve: { label: '持有上限', unit: '發' },
+  shine: { label: '照明', unit: '秒' },   // 照明彈槍：照明彈亮幾秒
   burn: { label: '燃燒', unit: '秒' }, r: { label: '火海半徑', unit: '格' }, ignite: { label: '怪物著火', unit: '秒' },
   sleep: { label: '睡眠', unit: '秒' }, mist: { label: '麻醉霧半徑', unit: '格' },
   light: { label: '照明距離', unit: '格', scale: 1 / 40 }, spread: { label: '光束角度（一半）', unit: '°' }, battery: { label: '一顆電池撐', unit: '秒' },
@@ -73,6 +74,35 @@ function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊�
     custom: true,
   };
 }
+// ---- 武器的數值：每一把都用同一張表（所有武器用到的數值合起來）----
+function workshopWeaponValueKeys() {   // 所有武器用到的數值，照武器的順序（手槍→照明彈槍→…）排
+  const keys = [];
+  for (const [key, b] of Object.entries(WORKSHOP_BASE)) if (key.startsWith('w:')) for (const lv of b.levels || []) for (const k of Object.keys(lv)) if (typeof lv[k] === 'number' && !keys.includes(k)) keys.push(k);
+  return keys;
+}
+// 武器多填的數值（這把原本沒有的）→「・燃燒 5 秒」這樣的說明；只是顯示，這把槍的程式沒有用到這個數值
+function workshopExtraText(key, lv) {
+  if (!key.startsWith('w:') || !lv) return '';
+  const own = new Set(); for (const b of (WORKSHOP_BASE[key] || {}).levels || []) for (const k of Object.keys(b)) own.add(k);
+  return workshopWeaponValueKeys().filter(k => !own.has(k) && typeof lv[k] === 'number' && lv[k] !== 0).map(k => {   // 0＝不顯示
+    const info = WORKSHOP_VALUE_INFO[k] || { label: k, unit: '' }, n = Math.round(lv[k] * (info.scale || 1) * 100) / 100;
+    return '・' + info.label + ' ' + n + (info.unit === '%' ? '%' : info.unit ? ' ' + info.unit : '');
+  }).join('');
+}
+// 數值填 0 的那一項，從效果說明裡拿掉（例如燃燒填 0 → 不顯示「燃燒 0 秒」）。
+// 作法：把這個數值換成兩個不同的數字各算一次說明，有變的那一段（用「・」分開）就是它，拿掉。
+function workshopHideZeros(fn, lv) {
+  const text = fn(lv), segs = text.split('・'), drop = new Set();
+  for (const k of Object.keys(lv)) {
+    if (lv[k] !== 0) continue;
+    const a = fn({ ...lv, [k]: 1234567 }).split('・'), b = fn({ ...lv, [k]: 7654321 }).split('・');
+    if (a.length !== segs.length || b.length !== segs.length) continue;   // 這一項是 0 時本來就不會出現
+    a.forEach((sg, i) => { if (sg !== b[i]) drop.add(i); });
+  }
+  return drop.size ? segs.filter((_, i) => !drop.has(i)).join('・') : text;
+}
+// 跟著數值自動產生的效果說明（原本的寫法＋武器多填的數值；填 0 的不顯示）
+function workshopAutoStat(key, lv) { const fn = (WORKSHOP_BASE[key] || {}).statFn; return lv && fn ? workshopHideZeros(fn, lv) + workshopExtraText(key, lv) : ''; }
 const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → 資料；編輯器可以「復原」）
 (function applyWorkshopItems() {
   const cfg = typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {};
@@ -81,6 +111,7 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
     WORKSHOP_BASE[key] = Object.fromEntries(WORKSHOP_TEXT_FIELDS.map(f => [f, def[f]]));
     WORKSHOP_BASE[key].stats = [0, 1, 2].map(i => def.levels && def.levels[i] && def.stat ? def.stat(def.levels[i]) : '');   // 原本每一級的效果說明（跟著數值自動產生的）
     WORKSHOP_BASE[key].levels = (def.levels || []).map(lv => ({ ...lv }));   // 原本每一級的數值（編輯器比對、恢復用）
+    WORKSHOP_BASE[key].statFn = def.stat;   // 原本的效果說明產生方式（還沒被設定檔改過）
     const o = items[key]; if (!o) continue;
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '') def[f] = o[f];
     // 每一級的實際數值（傷害、彈匣、裝填秒數…）：直接改進原本的等級資料，遊戲各處讀到的就是新數值，效果說明也會跟著算
@@ -88,6 +119,8 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
       if (!v || !def.levels[i]) return;
       for (const [k, n] of Object.entries(v)) if (typeof n === 'number' && Number.isFinite(n)) def.levels[i][k] = n;
     });
+    // 改過數值的、還有武器：效果說明照新數值重新產生——填 0 的那一項不顯示；武器多填的數值（這把原本沒有的）接在後面
+    if ((Array.isArray(o.values) || key.startsWith('w:')) && def.stat) def.stat = lv => workshopAutoStat(key, lv);
     // 每一級的效果說明（例如「傷害 5・彈匣 6 發・裝填 2 秒」）：有寫就換成寫的文字；空白＝照原本的自動產生。
     // 只換「顯示的文字」，實際的數值（傷害、彈匣…）還是 data/equipment.js 的 levels。
     if (Array.isArray(o.levels) && o.levels.some(t => typeof t === 'string' && t !== '') && def.stat && def.levels) {

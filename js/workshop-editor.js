@@ -54,7 +54,7 @@ const baseLevel = (key, i) => ((WORKSHOP_BASE[key] || {}).levels || [])[i] || nu
 const effLevel = (key, i) => { const b = baseLevel(key, i); return b ? { ...b, ...(valueEdits(key)[i] || {}) } : null; };
 const valuesChanged = key => valueEdits(key).some((v, i) => v && Object.keys(v).some(k => v[k] !== (baseLevel(key, i) || {})[k]));
 // 跟著數值自動產生的效果說明（用改過的數值算）
-function autoText(key, i) { const d = BUILTIN[key], lv = effLevel(key, i); return d && d.stat && lv ? d.stat(lv) : ''; }
+function autoText(key, i) { return workshopAutoStat(key, effLevel(key, i)); }   // js/workshop-config.js（跟遊戲同一套）
 function statText(key, i) {
   if (isCustom(key)) { const d = getDef(key); return d.stat(d.levels[i]); }
   const t = levelEdits(key)[i];
@@ -96,15 +96,19 @@ const imageField = (key, v, attr) => '<div class="field">圖片<div class="img-r
 // 每一級的實際數值表格：橫的是 Lv1～Lv3，直的是每一種數值（顯示成好懂的單位，例如 15 %、5.5 格）
 const valueInfo = k => (typeof WORKSHOP_VALUE_INFO !== 'undefined' && WORKSHOP_VALUE_INFO[k]) || { label: k, unit: '' };
 const shownNum = (raw, scale) => raw == null ? '' : String(Math.round(raw * (scale || 1) * 10000) / 10000);
-function valueKeys(key) {   // 這件裝備有哪些數值（三個等級合起來）
+function valueKeys(key) {   // 這件有哪些數值：武器＝所有武器的數值（每一把同一張表、對齊）；裝備＝自己的（三個等級合起來）
+  if (isWeapon(key)) return workshopWeaponValueKeys();
   const keys = [];
   for (const lv of (WORKSHOP_BASE[key] || {}).levels || []) for (const k of Object.keys(lv)) if (typeof lv[k] === 'number' && !keys.includes(k)) keys.push(k);
   return keys;
 }
 function valueTable(key) {
   const keys = valueKeys(key); if (!keys.length) return '';
-  return '<div class="field">每一級的實際數值（改了遊戲裡就照這個數值）<span class="hint">空白＝這一級沒有這個效果；改回原本的數字＝不算修改。</span></div>' +
-    '<table class="val-table"><thead><tr><th></th><th>Lv1</th><th>Lv2</th><th>Lv3</th></tr></thead><tbody>' +
+  const hint = isWeapon(key)
+    ? '所有武器用同一張表。空白＝這把沒有這個數值（效果說明不會顯示）；這把原本沒有的數值填了，只會顯示在效果說明後面，槍本身的程式沒有用到。'
+    : '空白＝這一級沒有這個效果；改回原本的數字＝不算修改。';
+  return '<div class="field">每一級的實際數值（改了遊戲裡就照這個數值）<span class="hint">' + hint + '</span></div>' +
+    '<table class="val-table"><colgroup><col class="vt-name"><col><col><col></colgroup><thead><tr><th></th><th>Lv1</th><th>Lv2</th><th>Lv3</th></tr></thead><tbody>' +
     keys.map(k => { const info = valueInfo(k);
       return '<tr><th title="' + esc(k) + '">' + esc(info.label) + (info.unit ? '<small>（' + esc(info.unit) + '）</small>' : '') + '</th>' +
         [0, 1, 2].map(i => { const lv = effLevel(key, i); return '<td><input type="text" inputmode="decimal" data-vk="' + esc(k) + '" data-vi="' + i + '" value="' + esc(shownNum(lv && lv[k], info.scale)) + '"' + (lv ? '' : ' disabled') + '></td>'; }).join('') + '</tr>'; }).join('') +

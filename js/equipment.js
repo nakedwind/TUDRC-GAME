@@ -203,11 +203,11 @@ function drawFlashlightBeam(ctx, beam) {
   ctx.drawImage(beamTint, beam.x, beam.y);
   ctx.restore();
 }
-// 武器等級套到實際數值（手槍：傷害、彈匣、裝填；照明彈槍：燃燒秒數、備用彈上限）
+// 武器等級套到實際數值（手槍：傷害、彈匣、裝填；照明彈槍：照明秒數、持有上限）
 function applyWeaponLevels() {
   const p = WEAPON_UPGRADES.pistol.levels[equipState.weapons.pistol - 1], f = WEAPON_UPGRADES.flare.levels[equipState.weapons.flare - 1];
   if (typeof PLAYER_ATK !== 'undefined') { PLAYER_ATK.dmg = p.dmg; PLAYER_ATK.mag = p.mag; PLAYER_ATK.reloadTime = p.reload; }
-  if (typeof FLARE !== 'undefined') { FLARE.burn = f.burn; FLARE.reserveMax = f.reserve; }
+  if (typeof FLARE !== 'undefined') { FLARE.burn = f.shine; FLARE.reserveMax = f.reserve; }   // 照明彈亮幾秒（data/equipment.js 的 shine）
 }
 
 // ---- 道具：背包裡有幾個、用掉一個 ----

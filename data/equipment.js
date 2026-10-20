@@ -77,18 +77,18 @@ const WEAPON_UPGRADES = {
     stat: lv => '傷害 ' + lv.dmg + '・彈匣 ' + lv.mag + ' 發・裝填 ' + lv.reload + ' 秒',
     levels: [{ dmg: 5, mag: 6, reload: 2 }, { dmg: 6, mag: 8, reload: 1.7 }, { dmg: 8, mag: 10, reload: 1.4 }] },
   flare: { name: '照明彈槍', icon: '🔥', image: 'images/weapon/winter-flare-gun-design.png', cost: [70, 150],
-    stat: lv => '燃燒 ' + lv.burn + ' 秒・備用彈最多 ' + lv.reserve + ' 發',
-    levels: [{ burn: 24, reserve: 30 }, { burn: 32, reserve: 40 }, { burn: 40, reserve: 50 }] },   // 燃燒秒數（亮光時間）
+    stat: lv => '照明 ' + lv.shine + ' 秒・持有上限 ' + lv.reserve + ' 發',
+    levels: [{ shine: 24, reserve: 30 }, { shine: 32, reserve: 40 }, { shine: 40, reserve: 50 }] },   // shine：照明彈落地後亮幾秒（只照明，不會燒傷）；reserve：持有上限
   // 下面兩把只能在後室（戰鬥區域）撿到（field），撿到後才能升級；彈藥以後在後室的商店、轉蛋機取得（js/special-guns.js）
-  // 燃燒彈槍：r 火海半徑（格）、burn 火海燒幾秒、reload 每發裝填秒數、reserve 備用彈最多幾發、ignite 被燒到的怪物身上著火幾秒（Lv3）
+  // 燃燒彈槍：r 火海半徑（格）、burn 火海燒幾秒、reload 每發裝填秒數、reserve 持有上限（備用彈最多帶幾發）、ignite 被燒到的怪物身上著火幾秒（Lv3）
   incendiary: { name: '燃燒彈槍', icon: '🧨', image: 'images/weapon/incendiary_launcher.png', field: true, where: '有機會在上鎖的置物箱裡找到', cost: [100, 180],
     desc: '落地形成火海，可點燃油汙、油桶並焚毀生命體；也會傷及友軍。',
-    stat: lv => '火海半徑 ' + lv.r + ' 格・燒 ' + lv.burn + ' 秒・裝填 ' + lv.reload + ' 秒' + (lv.ignite ? '・怪物著火 ' + lv.ignite + ' 秒' : '') + '・備用彈最多 ' + lv.reserve + ' 發',
+    stat: lv => '火海半徑 ' + lv.r + ' 格・燒 ' + lv.burn + ' 秒・裝填 ' + lv.reload + ' 秒' + (lv.ignite ? '・怪物著火 ' + lv.ignite + ' 秒' : '') + '・持有上限 ' + lv.reserve + ' 發',
     levels: [{ r: 1.1, burn: 6, reload: 2.2, reserve: 6 }, { r: 1.4, burn: 7, reload: 1.9, reserve: 8 }, { r: 1.6, burn: 9, reload: 1.6, reserve: 10, ignite: 4 }] },
-  // 麻醉槍：sleep 睡幾秒、mag 彈匣、reload 裝填秒數、reserve 備用彈最多幾發、mist 麻醉霧半徑（格，Lv3）
+  // 麻醉槍：sleep 睡幾秒、mag 彈匣、reload 裝填秒數、reserve 持有上限（備用彈最多帶幾發）、mist 麻醉霧半徑（格，Lv3）
   tranq: { name: '麻醉槍', icon: '💤', image: 'images/weapon/tranquilizer_gun.png', field: true, where: '有機會在上鎖的置物箱裡找到', cost: [100, 180],
     desc: '使怪物睡眠，或讓暴走隊員恢復正常；大型怪物效果較短，生命體無效。',
-    stat: lv => '睡 ' + lv.sleep + ' 秒・彈匣 ' + lv.mag + ' 發・裝填 ' + lv.reload + ' 秒' + (lv.mist ? '・麻醉霧 ' + lv.mist + ' 格' : '') + '・備用彈最多 ' + lv.reserve + ' 發',
+    stat: lv => '睡 ' + lv.sleep + ' 秒・彈匣 ' + lv.mag + ' 發・裝填 ' + lv.reload + ' 秒' + (lv.mist ? '・麻醉霧 ' + lv.mist + ' 格' : '') + '・持有上限 ' + lv.reserve + ' 發',
     levels: [{ sleep: 3, mag: 2, reload: 2, reserve: 8 }, { sleep: 4, mag: 2, reload: 1.5, reserve: 10 }, { sleep: 5, mag: 3, reload: 1.5, reserve: 12, mist: 1.2 }] },
 };
 // 在置物箱裡找到槍、彈藥：gun 還沒有的槍出現的機率；ammo 已經有槍時找到彈藥的機率（商店、轉蛋機做好之前的暫時來源）

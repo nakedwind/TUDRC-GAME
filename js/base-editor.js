@@ -1968,6 +1968,19 @@ function fitSelName() {
 let fitSelNameFrame = 0;
 function fitSelNameSoon() { cancelAnimationFrame(fitSelNameFrame); fitSelNameFrame = requestAnimationFrame(fitSelName); }   // 等選取列的按鈕都更新完再量
 window.addEventListener('resize', fitSelNameSoon);
+// 選到物件：右邊的圖層面板直接跳到它所在的圖層（亮紫色＝目前圖層），方便找它在哪一層
+let lastFollowedSel = null;
+function followSelectionLayer() {
+  const id = selection ? selectionId(selection) : null;
+  if (id === lastFollowedSel) return;   // 選取沒有變（只是重畫）：不要一直把圖層拉回去，自己點別的圖層也不會被搶走
+  lastFollowedSel = id;
+  if (!selection) return;
+  const lid = selectionLayer(selection);
+  if (!lid || !LAYERS.some(l => l.id === lid)) return;
+  if (lid !== activeLayer) { activeLayer = lid; renderLayers(); }
+  const b = layerBtnsEl && layerBtnsEl.querySelector('.layer[data-layer="' + lid + '"]');
+  if (b) b.scrollIntoView({ block: 'nearest', behavior: 'smooth' });   // 圖層很多時：捲到看得到它
+}
 function refreshSelPanel() {
   fitSelNameSoon();
   const layerSelect = document.getElementById('selLayer');
@@ -1975,6 +1988,7 @@ function refreshSelPanel() {
   const m = curMap();
   selections = selections.filter(sel => sel.type === 'stamp' ? !!m.stamps[sel.index] : !!(m.layers[sel.layer] && m.layers[sel.layer][sel.key] !== undefined));
   selection = selections.length ? selections[selections.length - 1] : null;
+  followSelectionLayer();   // 圖層面板跳到選到的物件所在的圖層
   refreshLayerListSoon();   // 圖層物件清單：標出目前選取的物件
   const hasSelection = !!selection;
   refreshLockerControl();
