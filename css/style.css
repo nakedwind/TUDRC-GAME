@@ -1687,9 +1687,9 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-btn b { margin-left: 4px; }
 /* 價錢前面的結晶碎片圖（水晶本體約 9×14，落在文字和數字的正中間）。
    用背景圖畫在按鈕同一層：不要用 <img>＋position，那樣捲動時圖會自己一層、比文字慢一拍。
-   整張圖（含光暈）28×28 都畫出來、不裁切；格子比圖高 4px、圖往上放，水晶就跟文字的中線對齊；負的邊距讓旁邊的字靠過來 */
+   整張圖（含光暈）28×28 都畫出來、不裁切；格子比圖高 4px、圖往上放，水晶比文字的中線低 1px（看起來比較置中）；負的邊距讓旁邊的字靠過來 */
 .ws-btn .ws-shard { display: inline-block; width: 28px; height: 32px; margin: -10px -5.2px -10px -12.3px; vertical-align: middle;
-  background: url("../images/碎片鑰匙/anomalous-shard-ground-glow.png") 0 0.56px / 28px 28px no-repeat; pointer-events: none; }
+  background: url("../images/碎片鑰匙/anomalous-shard-ground-glow.png") 0 1.56px / 28px 28px no-repeat; pointer-events: none; }
 .ws-btn:disabled .ws-shard { filter: grayscale(1) opacity(.6); }
 /* 每個欄位：左邊圖示；第一行＝名字＋右邊的按鈕；說明文字在下面、可以一路寫到按鈕下方（比較不會換行） */
 .ws-grid .ws-row { grid-template-rows: auto auto auto auto; align-items: start; align-content: center; column-gap: 10px; row-gap: 2px; }
