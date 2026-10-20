@@ -770,6 +770,7 @@ function draw() {
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
+    else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）
     else if (typeof lockedDoorNearPlayer === 'function' && !doorNearPlayer() && lockedDoorNearPlayer()) { const d = lockedDoorNearPlayer(); drawInteractPrompt(d.x, d.top - 4, '開門'); }   // 鎖住的房門（js/locked-doors.js）
     else if (typeof mrtLockNearPlayer === 'function' && mrtLockNearPlayer()) { const l = mrtLockNearPlayer(); drawInteractPrompt(l.x, l.top - 4, mrtLockPrompt(l)); }   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
