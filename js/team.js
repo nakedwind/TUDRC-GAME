@@ -284,7 +284,8 @@ function renderFieldSquadHud() {
     (members.length ? members.map(member => {
       const spec = TYPES[member.type]; if (!spec) return '';
       const hp = Math.max(0, Math.round(member.hp || 0));
-      const hpPercent = Math.max(0, Math.min(100, hp / (member.maxhp || spec.hp) * 100));
+      const maxhp = Math.round(member.maxhp || spec.hp);
+      const hpPercent = Math.max(0, Math.min(100, hp / maxhp * 100));
       const taint = Math.max(0, Math.min(100, Math.round(member.taint || 0)));
       const loadWidth = spec.guide ? 0 : taint;
       const sootheAction = '';   // 正式遊戲停用隊友欄的手動疏導按鈕（靠近哨兵仍可疏導）
@@ -305,8 +306,9 @@ function renderFieldSquadHud() {
       const syncStyle = taintCls ? ' style="--blink-sync:-' + (nowS % 1.1).toFixed(2) + 's;--blink-sync-fast:-' + (nowS % .38).toFixed(2) + 's"' : '';
       return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + '"' + syncStyle + '>' +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
-        '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i></div>' +
-        '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i></div>' +
+        // 條的正中間寫數字：左邊＝現在、右邊＝上限（嚮導沒有精神負荷，寫「無」）
+        '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +
+        '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? '無' : taint + '/100') + '</span></div>' +
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
         '</article>';

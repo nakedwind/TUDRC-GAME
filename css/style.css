@@ -386,6 +386,14 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .field-member-status u { display: block; height: 100%; border-radius: inherit; text-decoration: none; }
 .field-hp u { background: linear-gradient(90deg,#45b98a,#79dbad); }
 .field-load u { background: linear-gradient(90deg,#d8a743,#de5b63); }
+/* HP／負荷條正中間的數字：純白字＋一圈 1px、透明度 50% 的純黑外框，蓋在顏色條上面 */
+.field-member-status > div { position: relative; }
+.field-member-status .field-bar-num {
+  position: absolute; left: 0; right: 0; top: 50%; display: block; transform: translateY(-50%);
+  color: #fff; font: 700 7px/1 Consolas, monospace; text-align: center; white-space: nowrap; pointer-events: none;
+  text-shadow: -1px -1px 0 rgba(0,0,0,.5), 0 -1px 0 rgba(0,0,0,.5), 1px -1px 0 rgba(0,0,0,.5), -1px 0 0 rgba(0,0,0,.5),
+               1px 0 0 rgba(0,0,0,.5), -1px 1px 0 rgba(0,0,0,.5), 0 1px 0 rgba(0,0,0,.5), 1px 1px 0 rgba(0,0,0,.5);
+}
 .field-soothe-button {
   position: absolute; left: calc(100% + 5px); top: 50%; transform: translateY(-50%);
   min-width: 36px; padding: 5px 5px; border: 1px solid rgba(114,224,189,.58); border-radius: 7px;
