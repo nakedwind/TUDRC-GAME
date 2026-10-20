@@ -30,7 +30,7 @@ function ownedGear() {
   const worn = new Set(Object.values(equipState.equipped || {}).filter(Boolean));
   // 武器排前面（拿到的槍），再來是裝備；wornAs＝裝在哪一格（主武器／副武器）
   const L = equipState.loadout || {};
-  const weapons = typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).filter(([k]) => (equipState.weapons[k] || 0) > 0).map(([k, w]) => ({
+  const weapons = typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).filter(([k, w]) => !w.removed && (equipState.weapons[k] || 0) > 0).map(([k, w]) => ({
     id: 'gear:w:' + k, name: w.name, image: w.image, icon: w.icon, gear: w, weapon: k, lv: equipState.weapons[k],
     worn: L.main === k || L.sub === k, wornAs: L.main === k ? '主武器' : L.sub === k ? '副武器' : '' }));
   return weapons.concat(EQUIPMENT.filter(d => equipState.owned[d.id]).map(d => ({ id: 'gear:' + d.id, name: d.name, image: d.image, icon: d.icon, gear: d, lv: equipState.owned[d.id], worn: worn.has(d.id) })));

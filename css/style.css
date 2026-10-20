@@ -1681,13 +1681,14 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-btn { align-self: start; min-width: var(--ws-btn-w, 0px); white-space: nowrap; padding: 6px 10px; border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 13px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
 .ws-btn b { margin-left: 4px; }
 /* 每個欄位：左邊圖示；第一行＝名字＋右邊的按鈕；說明文字在下面、可以一路寫到按鈕下方（比較不會換行） */
-.ws-grid .ws-row { grid-template-rows: auto auto auto; align-items: start; align-content: center; column-gap: 10px; row-gap: 2px; }
+.ws-grid .ws-row { grid-template-rows: auto auto auto auto; align-items: start; align-content: center; column-gap: 10px; row-gap: 2px; }
 .ws-grid .ws-icon { grid-column: 1; grid-row: 1 / -1; align-self: center; }
 .ws-grid .ws-text { display: contents; }
 .ws-grid .ws-text b { grid-column: 2; grid-row: 1; align-self: center; }
 .ws-grid .ws-btn { grid-column: 3; grid-row: 1; }
-.ws-grid .ws-text span { grid-column: 2 / 4; grid-row: 2; }
-.ws-grid .ws-text small { grid-column: 2 / 4; grid-row: 3; }
+.ws-grid .ws-text span, .ws-grid .ws-text small { grid-column: 2 / 4; }   /* 說明（已擁有）、目前效果、下一級：照順序往下排 */
+.ws-text span.ws-about { color: var(--ws-desc-color, #aab5c1); }
+.ws-text span, .ws-text small { white-space: pre-line; }   /* 說明裡的換行（開發工坊編輯器按 Enter）照樣換行；行數變多，欄位就跟著變高 */
 /* 說明文字的顏色：數字＝橘色、「戰鬥區域」＝紫色（開發工坊編輯器可以改：data/workshop.js） */
 .ws-text i.ws-num { font-style: normal; color: var(--ws-num-color, #CF9447); }
 .ws-text i.ws-where { font-style: normal; color: var(--ws-where-color, #A958E2); }

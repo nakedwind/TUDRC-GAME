@@ -38,7 +38,7 @@ if (typeof TEST_UNLOCK_ALL_GUNS !== 'undefined' && TEST_UNLOCK_ALL_GUNS) {
 }
 // ---- 主武器／副武器：出勤時只能在這兩把之間切換（滾輪、數字鍵 1／2）----
 const WEAPON_SLOTS = [{ id: 'main', name: '主武器' }, { id: 'sub', name: '副武器' }];
-const weaponHave = id => !!WEAPON_UPGRADES[id] && (equipState.weapons[id] || 0) > 0;
+const weaponHave = id => !!WEAPON_UPGRADES[id] && !WEAPON_UPGRADES[id].removed && (equipState.weapons[id] || 0) > 0;   // removed＝開發工坊編輯器刪掉的武器
 function fixLoadout() {   // 沒拿到的槍不能裝；兩格不能放同一把；兩格都空＝空手
   const L = equipState.loadout;
   if (L.main && !weaponHave(L.main)) L.main = null;
@@ -604,7 +604,8 @@ const wsColor = text => String(text)
   .replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>')
   .replace(/戰鬥區域/g, '<i class="ws-where">戰鬥區域</i>');
 function renderWorkshop() {
-  const row = (icon, name, lvText, stat, next, btn) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b><span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
+  // about＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面（開發工坊編輯器可以寫）
+  const row = (icon, name, lvText, stat, next, btn, about) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b>' + (about ? '<span class="ws-about">' + wsColor(about) + '</span>' : '') + '<span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
   const cost = n => '<b>◆ ' + n + '</b>';
   const gear = EQUIPMENT.map(def => {
     const lv = equipState.owned[def.id], icon = equipIcon(def);
@@ -612,14 +613,14 @@ function renderWorkshop() {
       if (def.source !== 'develop') return row(icon, def.name, '', def.desc, '只能在戰鬥區域取得：' + def.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
       return row(icon, def.name, '', def.desc, 'Lv1：' + def.stat(def.levels[0]), '<button type="button" class="ws-btn" data-ws="dev:' + def.id + '">開發 ' + cost(def.cost[0]) + '</button>');
     }
-    if (lv >= 3) return row(icon, def.name, ' <em>Lv3</em>', def.stat(def.levels[2]), '', '<button type="button" class="ws-btn" disabled>已達最高等級</button>');
-    return row(icon, def.name, ' <em>Lv' + lv + '</em>', def.stat(def.levels[lv - 1]), '升到 Lv' + (lv + 1) + '：' + def.stat(def.levels[lv]), '<button type="button" class="ws-btn" data-ws="up:' + def.id + '">升級 ' + cost(def.cost[lv]) + '</button>');
+    if (lv >= 3) return row(icon, def.name, ' <em>Lv3</em>', def.stat(def.levels[2]), '', '<button type="button" class="ws-btn" disabled>已達最高等級</button>', def.ownedDesc);
+    return row(icon, def.name, ' <em>Lv' + lv + '</em>', def.stat(def.levels[lv - 1]), '升到 Lv' + (lv + 1) + '：' + def.stat(def.levels[lv]), '<button type="button" class="ws-btn" data-ws="up:' + def.id + '">升級 ' + cost(def.cost[lv]) + '</button>', def.ownedDesc);
   }).join('');
-  const weapons = Object.entries(WEAPON_UPGRADES).map(([k, w]) => {
+  const weapons = Object.entries(WEAPON_UPGRADES).filter(([, w]) => !w.removed).map(([k, w]) => {   // 刪掉的武器不顯示
     const lv = equipState.weapons[k];
     if (!lv) return row(equipIcon(w), w.name, '', w.desc, '只能在戰鬥區域取得：' + w.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
     return row(equipIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < 3 ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
-      lv < 3 ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>');
+      lv < 3 ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>', w.ownedDesc);
   }).join('');
   // 右側：目前穿戴的 4 格＋背包裡其他已擁有的裝備（升級後等級即時更新）
   const wornWeaponSlots = WEAPON_SLOTS.map(s => {

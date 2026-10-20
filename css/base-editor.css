@@ -242,3 +242,9 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 #selName { display: inline-block; max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; vertical-align: bottom; }
 #selDepthInput { padding-left: 2px; padding-right: 2px; }
 #selName.full { max-width: none; }   /* 選取列反正會換到下一排時：顯示全名 */
+
+/* 素材圖右鍵選單（以檔案總管開啟） */
+.tile-ctxmenu { position: fixed; z-index: 9999; width: max-content; min-width: 150px; padding: 4px; background: #1d222b; border: 1px solid #3a4250; border-radius: 8px; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
+.tile-ctxmenu[hidden] { display: none; }
+.tile-ctxmenu button { display: block; width: 100%; padding: 7px 12px; background: none; border: 0; border-radius: 6px; color: #e6e9ef; font: inherit; font-size: 13px; text-align: left; cursor: pointer; }
+.tile-ctxmenu button:hover { background: #2c3443; }

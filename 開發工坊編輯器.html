@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>開發工坊編輯器｜Y102 應變中心</title>
-<link rel="stylesheet" href="css/style.css?v=wsedit2-20261020">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/style.css?v=wsnewline-20261020">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
@@ -35,6 +35,8 @@
   .color input[type=color] { width: 38px; height: 28px; padding: 0; border: 1px solid #536b80; border-radius: 6px; background: #101923; }
   .color input[type=text] { flex: 1; }
   .style-group { border-top: 1px solid #2c3c4c; padding-top: 10px; margin-top: 4px; }
+  .right-col { min-width: 0; }
+  #styleForm { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 0 18px; }   /* 外觀：在預覽下面排成好幾欄 */
   .style-group > b { display: block; color: #ffe3a1; font-size: 12px; margin-bottom: 6px; }
   #itemList { display: grid; gap: 5px; max-height: 300px; overflow: auto; margin-bottom: 12px; scrollbar-width: thin; }
   #itemList button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; cursor: pointer; font: inherit; font-size: 13px;
@@ -47,6 +49,13 @@
   #itemList .list-head { color: #ffe3a1; font-size: 12px; margin: 4px 0 0; }
   .removed-note { color: #ffb3b3; font-size: 13px; line-height: 1.5; margin: 0 0 10px; }
   .preview-stage .ws-row { cursor: pointer; }
+  .val-table { width: 100%; border-collapse: collapse; margin: -4px 0 12px; font-size: 12px; }
+  .val-table th { color: #b9cad9; font-weight: 600; text-align: left; padding: 3px 4px; white-space: nowrap; }
+  .val-table thead th { color: #ffe3a1; text-align: center; }
+  .val-table th small { color: #7f93a6; font-weight: 400; }
+  .val-table td { padding: 2px 3px; }
+  .val-table input { width: 100%; min-width: 0; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; text-align: right; }
+  .val-table input:disabled { opacity: .35; }
   .preview-stage .ws-row.ed-sel { outline: 2px solid #82cbe2; outline-offset: 1px; }   /* 左邊選到的那一格 */
   #itemList img, #itemList i { width: 30px; height: 30px; object-fit: contain; image-rendering: pixelated; font-style: normal; display: grid; place-items: center; }
   #itemList small { color: #8fa3b5; font-size: 11px; margin-left: 4px; }
@@ -83,32 +92,35 @@
         <div id="itemList"></div>
         <div id="itemForm"></div>
       </section>
-      <section class="panel">
-        <h2>外觀（所有裝備欄位一起改）</h2>
-        <div id="styleForm"></div>
-        <button type="button" class="ed-btn" id="styleReset">外觀恢復預設</button>
-      </section>
     </div>
+    <div class="right-col">
     <section class="panel">
       <div class="bar">
         <h2 style="margin:0">預覽</h2>
         <label class="field" style="margin:0;display:flex;align-items:center;gap:6px">裝備狀態
           <select id="previewMode">
-            <option value="none">還沒拿到（開發／尚未取得）</option>
-            <option value="lv1" selected>Lv1（可以升級）</option>
+            <option value="start" selected>跟遊戲一開始一樣（還沒開發、還沒撿到）</option>
+            <option value="none">全部還沒拿到</option>
+            <option value="lv1">全部 Lv1（可以升級）</option>
             <option value="max">Lv3（已達最高等級）</option>
           </select>
         </label>
       </div>
       <div class="preview-wrap"><div class="preview-stage" id="previewStage"></div></div>
     </section>
+      <section class="panel style-panel">
+        <h2>外觀（所有裝備欄位一起改）</h2>
+        <div id="styleForm"></div>
+        <button type="button" class="ed-btn" id="styleReset">外觀恢復預設</button>
+      </section>
+    </div>
   </div>
 
   <script src="data/equipment.js?v=acidboots-20261018"></script>   <!-- 裝備、武器的原始資料 -->
-  <script src="data/workshop.js?v=wsedit2-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
-  <script src="js/workshop-config.js?v=wsedit2-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="data/workshop.js?v=wsedit5-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
+  <script src="js/workshop-config.js?v=wsedit5-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
-  <script src="js/project-save.js?v=wsedit2-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-editor.js?v=wsedit2-20261020"></script>
+  <script src="js/project-save.js?v=wsedit5-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
+  <script src="js/workshop-editor.js?v=wsedit5-20261020"></script>
 </body>
 </html>

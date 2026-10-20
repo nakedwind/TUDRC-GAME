@@ -15,12 +15,13 @@ const gunLevel = id => { const lv = (typeof equipState !== 'undefined' && equipS
 const gunMag = (id, lv) => (id === 'tranq' ? lv.mag : 1);
 function gunAmmo(id) { return equipState.gunAmmo[id] || (equipState.gunAmmo[id] = { mag: 0, reserve: 0 }); }
 // 武器有沒有拿到（手槍、照明彈槍一開始就有）
-function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; return !w || !w.field || (typeof equipState !== 'undefined' && (equipState.weapons[id] || 0) > 0); }
+function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; if (w && w.removed) return false;   // 開發工坊編輯器刪掉的武器＝沒有
+  return !w || !w.field || (typeof equipState !== 'undefined' && (equipState.weapons[id] || 0) > 0); }
 
 // ---- 取得：上鎖的置物箱打開時（js/storage-lockers.js 呼叫）----
 function tryGunFind(x, y) {
   if (MAP_SAFE) return;
-  const missing = ['incendiary', 'tranq'].filter(id => !weaponOwned(id));
+  const missing = ['incendiary', 'tranq'].filter(id => WEAPON_UPGRADES[id] && !WEAPON_UPGRADES[id].removed && !weaponOwned(id));   // 刪掉的槍撿不到
   if (missing.length && Math.random() < GUN_FINDS.gun) {
     const id = missing[Math.floor(Math.random() * missing.length)], w = WEAPON_UPGRADES[id], st = GUN_FINDS.start[id];
     equipState.weapons[id] = 1; equipState.gunAmmo[id] = { mag: st.mag, reserve: st.reserve }; saveEquipment();

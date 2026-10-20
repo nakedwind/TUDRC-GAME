@@ -37,7 +37,20 @@ function applyWorkshopStyle(el, cfg) {   // 把外觀設定寫成 CSS 變數（e
 }
 
 // ---- 裝備／武器的文字和圖片 ----
-const WORKSHOP_TEXT_FIELDS = ['name', 'image', 'desc', 'where'];
+const WORKSHOP_TEXT_FIELDS = ['name', 'image', 'desc', 'ownedDesc', 'where'];   // ownedDesc＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面
+// 每一級數值的中文名稱（編輯器用）：label 名稱、unit 單位、scale 顯示時乘多少（例如 0.15 → 15 %；照明 220 像素 → 5.5 格）
+const WORKSHOP_VALUE_INFO = {
+  dmg: { label: '傷害', unit: '' }, mag: { label: '彈匣', unit: '發' }, reload: { label: '裝填', unit: '秒' }, reserve: { label: '備用彈最多', unit: '發' },
+  burn: { label: '燃燒', unit: '秒' }, r: { label: '火海半徑', unit: '格' }, ignite: { label: '怪物著火', unit: '秒' },
+  sleep: { label: '睡眠', unit: '秒' }, mist: { label: '麻醉霧半徑', unit: '格' },
+  light: { label: '照明距離', unit: '格', scale: 1 / 40 }, spread: { label: '光束角度（一半）', unit: '°' }, battery: { label: '一顆電池撐', unit: '秒' },
+  fear: { label: '黑暗恐懼減少', unit: '%', scale: 100 }, filter: { label: '腐蝕、酸液減傷', unit: '%', scale: 100 },
+  guard: { label: '受到的傷害減少', unit: '%', scale: 100 }, calm: { label: '理智影響減少', unit: '%', scale: 100 },
+  save: { label: '疏導省 SP', unit: '%', scale: 100 }, speed: { label: '移動速度加成', unit: '%', scale: 100 },
+  fire: { label: '火海燙傷減少', unit: '%', scale: 100 }, corrode: { label: '腐蝕池、酸液減傷', unit: '%', scale: 100 },
+  reach: { label: '疏導距離加成', unit: '%', scale: 100 }, rush: { label: '指派時隊員移動加成', unit: '%', scale: 100 },
+  mark: { label: '標記黑暗中怪物的範圍', unit: '格' }, range: { label: '偵測範圍', unit: '格' },
+};
 const WORKSHOP_BASE = {};   // 還沒套用設定檔前的原始資料（編輯器的「恢復原本」用）
 function workshopItemDefs() {   // key → 那件裝備／武器的資料
   const out = {};
@@ -54,20 +67,33 @@ function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊�
   const cost = Array.isArray(a.cost) ? a.cost.map(n => Math.max(0, Math.round(Number(n) || 0))) : [];
   return {
     id: a.id, name: a.name || '新裝備', kind: WORKSHOP_KINDS[a.kind] ? a.kind : 'acc', icon: a.icon || '🧰', image: a.image || '',
-    source: a.source === 'field' ? 'field' : 'develop', where: a.where || '', desc: a.desc || '',
+    source: a.source === 'field' ? 'field' : 'develop', where: a.where || '', desc: a.desc || '', ownedDesc: a.ownedDesc || '',
     cost: [cost[0] ?? 50, cost[1] ?? 100, cost[2] ?? 160],
     stat: lv => lv.text, levels: [0, 1, 2].map(i => ({ text: String(texts[i] ?? '') })),
     custom: true,
   };
 }
-const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備（id → 資料；編輯器可以「復原」）
+const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → 資料；編輯器可以「復原」）
 (function applyWorkshopItems() {
   const cfg = typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {};
   const defs = workshopItemDefs(), items = cfg.items || {};
   for (const [key, def] of Object.entries(defs)) {   // 原本的裝備／武器：改名稱、圖片、說明
     WORKSHOP_BASE[key] = Object.fromEntries(WORKSHOP_TEXT_FIELDS.map(f => [f, def[f]]));
+    WORKSHOP_BASE[key].stats = [0, 1, 2].map(i => def.levels && def.levels[i] && def.stat ? def.stat(def.levels[i]) : '');   // 原本每一級的效果說明（跟著數值自動產生的）
+    WORKSHOP_BASE[key].levels = (def.levels || []).map(lv => ({ ...lv }));   // 原本每一級的數值（編輯器比對、恢復用）
     const o = items[key]; if (!o) continue;
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '') def[f] = o[f];
+    // 每一級的實際數值（傷害、彈匣、裝填秒數…）：直接改進原本的等級資料，遊戲各處讀到的就是新數值，效果說明也會跟著算
+    if (Array.isArray(o.values) && def.levels) o.values.forEach((v, i) => {
+      if (!v || !def.levels[i]) return;
+      for (const [k, n] of Object.entries(v)) if (typeof n === 'number' && Number.isFinite(n)) def.levels[i][k] = n;
+    });
+    // 每一級的效果說明（例如「傷害 5・彈匣 6 發・裝填 2 秒」）：有寫就換成寫的文字；空白＝照原本的自動產生。
+    // 只換「顯示的文字」，實際的數值（傷害、彈匣…）還是 data/equipment.js 的 levels。
+    if (Array.isArray(o.levels) && o.levels.some(t => typeof t === 'string' && t !== '') && def.stat && def.levels) {
+      const autoStat = def.stat, texts = o.levels;
+      def.stat = lv => { const i = def.levels.indexOf(lv); return i >= 0 && typeof texts[i] === 'string' && texts[i] !== '' ? texts[i] : autoStat(lv); };
+    }
   }
   if (typeof EQUIPMENT === 'undefined') return;
   for (const a of Array.isArray(cfg.added) ? cfg.added : []) {   // 新增的裝備：接在最後面
@@ -75,4 +101,10 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備（id → 資料；編
   }
   const removed = new Set(Array.isArray(cfg.removed) ? cfg.removed : []);   // 刪除的原本裝備：從清單拿掉
   for (let i = EQUIPMENT.length - 1; i >= 0; i--) if (removed.has(EQUIPMENT[i].id)) WORKSHOP_REMOVED[EQUIPMENT[i].id] = EQUIPMENT.splice(i, 1)[0];
+  // 刪除的武器（key 是 w:武器id）：資料留著（有些程式直接讀手槍、照明彈槍的數值），只標記 removed，
+  // 遊戲裡就當作沒有這把槍：工坊、背包、裝備欄都看不到，置物箱也撿不到（js/equipment.js 的 weaponHave、js/special-guns.js 的 weaponOwned）
+  if (typeof WEAPON_UPGRADES !== 'undefined') for (const key of removed) {
+    const w = key.startsWith('w:') && WEAPON_UPGRADES[key.slice(2)];
+    if (w) { w.removed = true; WORKSHOP_REMOVED[key] = w; }
+  }
 })();

@@ -1559,6 +1559,7 @@ function renderPalette() {
   const visibleTiles = activePaletteCategory === 'all' ? allTiles : allTiles.filter(t => tileCategory(t) === activePaletteCategory);
   visibleTiles.forEach(t => {
     const b = document.createElement('div'); b.className = 'tile' + (brush.mode === 'tile' && brush.tile === t.id ? ' sel' : '');
+    b.dataset.tileId = t.id;   // 右鍵選單（以檔案總管開啟）用
     let thumb;
     const rec = t.file ? ensureTileImg(t) : null;
     if (t.file) b.classList.add('has-image');
@@ -1586,6 +1587,55 @@ function renderPalette() {
   }
   paletteEl.appendChild(grid);
   updateFlatUI();
+}
+
+// ================= 素材圖右鍵：以檔案總管開啟 =================
+// 對下方素材列的圖片按右鍵 → 「以檔案總管開啟」：打開這張圖所在的資料夾（並選好這張圖）。
+// ・用「開啟編輯器.bat」打開編輯器時：真的跳出檔案總管（由 tools/editor-server.py 幫忙開）。
+// ・直接雙擊 HTML 打開時：網頁不能自己開檔案總管（瀏覽器的安全限制），改成複製資料夾路徑，貼到檔案總管的網址列就好。
+const tileMenu = document.createElement('div');
+tileMenu.className = 'tile-ctxmenu'; tileMenu.hidden = true;
+tileMenu.innerHTML = '<button type="button" data-tile-act="folder">📂 以檔案總管開啟</button>';
+document.body.appendChild(tileMenu);
+let tileMenuTarget = null;
+const hideTileMenu = () => { tileMenu.hidden = true; tileMenuTarget = null; };
+paletteEl.addEventListener('contextmenu', e => {
+  const el = e.target.closest('.tile[data-tile-id]'); if (!el) return;
+  e.preventDefault(); e.stopPropagation();   // 不跳出瀏覽器的選單，也不觸發「右鍵＝取消選取」
+  tileMenuTarget = tileById(el.dataset.tileId);
+  tileMenu.hidden = false;
+  const w = tileMenu.offsetWidth, h = tileMenu.offsetHeight;
+  tileMenu.style.left = Math.min(e.clientX, innerWidth - w - 4) + 'px';
+  tileMenu.style.top = Math.min(e.clientY, innerHeight - h - 4) + 'px';
+});
+document.addEventListener('pointerdown', e => { if (!tileMenu.contains(e.target)) hideTileMenu(); }, true);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') hideTileMenu(); });
+window.addEventListener('blur', hideTileMenu);
+tileMenu.addEventListener('click', e => {
+  if (!e.target.closest('[data-tile-act="folder"]')) return;
+  const t = tileMenuTarget; hideTileMenu();
+  if (t) openTileFolder(t);
+});
+function copyText(text) {   // 複製到剪貼簿（雙擊打開的網頁也能用）
+  const ta = document.createElement('textarea'); ta.value = text; ta.style.cssText = 'position:fixed;left:-9999px;top:0';
+  document.body.appendChild(ta); ta.select();
+  let ok = false; try { ok = document.execCommand('copy'); } catch (_) {}
+  ta.remove(); return ok;
+}
+async function openTileFolder(t) {
+  const file = String(t.file || '').split('?')[0];
+  if (!file) { setStatus('「' + t.name + '」是系統色塊，沒有圖片檔', '#ffd24a'); return; }
+  if (file.startsWith('data:')) { setStatus('「' + t.name + '」是直接上傳到編輯器的圖片（存在資料裡），沒有對應的圖片檔', '#ffd24a'); return; }
+  try {   // 用「開啟編輯器.bat」打開時：請本機的小幫手打開檔案總管
+    const r = await fetch('/__open-folder?path=' + encodeURIComponent(file), { cache: 'no-store' });
+    if (r.ok) { setStatus('📂 已用檔案總管打開：' + file, '#7ee0c0'); return; }
+  } catch (_) {}
+  // 沒有小幫手：複製資料夾路徑
+  const local = location.protocol === 'file:' ? decodeURIComponent(location.pathname).replace(/^\/(?=[A-Za-z]:)/, '').replace(/[^/]*$/, '') : '';
+  const folder = (local + file).replace(/\/[^/]*$/, '').replace(/\//g, '\\');
+  const copied = copyText(folder);
+  setStatus((copied ? '已複製資料夾路徑：' : '資料夾路徑：') + folder + (local ? '' : '（在遊戲資料夾裡）') +
+    '　網頁不能自己打開檔案總管；把路徑貼到檔案總管上方的網址列就好。想一鍵打開，請用遊戲資料夾裡的「開啟編輯器.bat」打開編輯器。', '#ffd24a');
 }
 // ---- 素材屬性列：選到自訂磚塊時出現，可改「寬×高格數」與「平貼地面」----
 const tilePropsRow = document.getElementById('tilePropsRow');

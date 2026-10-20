@@ -123,7 +123,7 @@ function grantLockerLoot(loot){
   }else if(loot.kind==='equipment'){
     if(!grantEquipment(loot.id,'在置物櫃找到'))systemNotice('已擁有這件裝備');
   }else if(loot.kind==='weapon'){
-    const w=WEAPON_UPGRADES[loot.id];if(!w)return;
+    const w=WEAPON_UPGRADES[loot.id];if(!w||w.removed)return;   // 刪掉的武器（開發工坊編輯器）撿不到
     if(equipState.weapons[loot.id]){systemNotice('已擁有「'+w.name+'」');return;}
     equipState.weapons[loot.id]=1;
     const ammo=GUN_FINDS.start[loot.id];
