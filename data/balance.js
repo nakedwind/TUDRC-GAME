@@ -87,7 +87,7 @@ const WANDER_TALK = { minGap: 5, maxGap: 13, duration: 3.4 };   // 每隔 5~13 �
 const BATTLE_WANDER_TALK = { minGap: 11, maxGap: 22, duration: 3.2 };
 
 // ---- 玩家主動與 NPC 對話 ----
-// 玩家走近角色後按 Space／E 開始對話；陣列中的每一項就是一句台詞。
+// 玩家走近角色後按 Space 開始對話；陣列中的每一項就是一句台詞。
 // 之後要改劇情，只需修改這裡，不必動遊戲主程式。
 const NPC_TALK = {
   radius: 66,

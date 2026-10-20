@@ -6,7 +6,7 @@
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/new-game.js?v=mrt-20261018"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=wsshard5-practice-20261020">
+<link rel="stylesheet" href="css/style.css?v=dnicon4-20261020">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -84,7 +84,7 @@
     <div id="sentryMenu" class="hidden"></div>
     <!-- 地面情境選單（點空地時彈出） -->
     <div id="groundMenu" class="hidden"></div>
-    <!-- NPC 正式對話框（靠近角色按 Space／E） -->
+    <!-- NPC 正式對話框（靠近角色按 Space） -->
     <div id="dialogueBox" class="hidden" role="dialog" aria-live="polite">
       <button id="dialogueClose" type="button" aria-label="關閉對話">×</button>
       <span id="dialoguePortraitFrame"><img id="dialoguePortrait" alt="角色頭像"></span>   <!-- 頭像框：放大顯示上半身（半身像） -->
@@ -99,7 +99,7 @@
           <button id="dialogueGift" class="hidden" type="button">🎁 送禮 <span>G</span></button>
           <button id="dialogueWorkshop" class="hidden" type="button">🔧 開發工坊</button>
           <button id="dialoguePractice" class="hidden" type="button">🎯 開始訓練</button>
-          <button id="dialogueNext" type="button"><span>Space／E</span> 下一句</button>
+          <button id="dialogueNext" type="button"><span class="dn-keys" aria-label="Space 或滑鼠點一下"><i class="dn-space"></i><em> / </em><i class="dn-mouse"></i></span> 下一句</button>
         </div>
       </div>
     </div>
@@ -298,17 +298,17 @@
   <script src="js/special-guns.js?v=wsedit5-20261020"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/combat-progress.js?v=circuit-20261018"></script>
   <script src="js/camp-interactions.js?v=interaction-key-fix-20261018"></script>
-  <script src="js/camp-supply.js?v=camp-stock-art-20261018"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
+  <script src="js/camp-supply.js?v=nokeye-20261020"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
-  <script src="js/game.js?v=taana-20261020"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=nokeye-20261020"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=key-intro-scale200-20261018"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
-  <script src="js/item-intro.js?v=key-intro-scale150-20261018"></script>   <!-- 第一次拿到新東西：說明視窗 -->
+  <script src="js/item-intro.js?v=nokeye-20261020"></script>   <!-- 第一次拿到新東西：說明視窗 -->
   <script src="data/posters.js?v=posters-20261018"></script>   <!-- 可以查看的海報：說明文字 -->
   <script src="js/posters.js?v=posters-20261018"></script>   <!-- 查看海報 -->
   <script src="js/locked-doors.js?v=sfxkeys-20261018"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
-  <script src="js/practice.js?v=practice3-20261020"></script>   <!-- B-2 訓練室：練習模式（塔納、沙包） -->
+  <script src="js/practice.js?v=nokeye-20261020"></script>   <!-- B-2 訓練室：練習模式（塔納、沙包） -->
 </body>
 </html>

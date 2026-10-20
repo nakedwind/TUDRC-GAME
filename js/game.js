@@ -189,7 +189,7 @@ function playPlayerHit(gain = 1, byMonster = false) {
   SFX.play(name, .72 * gain / Math.max(.01, SFX.volume), 'player-hit');
 }
 
-// ---- NPC 正式對話（靠近後按 Enter／E）----
+// ---- NPC 正式對話（靠近後按 Space／Enter）----
 const dialogueBox = document.getElementById('dialogueBox');
 const dialoguePortrait = document.getElementById('dialoguePortrait');
 const dialogueName = document.getElementById('dialogueName');
@@ -497,8 +497,8 @@ window.addEventListener('keydown', e => {
     }
   }
 });
-const isInteractKey = k => k === ' ' || k === 'enter' || k === 'e';   // Space／Enter／E 皆可互動
-// ---- 出入口（走到門旁按 E 進入另一張地圖）----
+const isInteractKey = k => k === ' ' || k === 'enter';   // Space／Enter 互動（E 鍵已拿掉：對話也可以用滑鼠點對話框）
+// ---- 出入口（走到門旁按 Space 進入另一張地圖）----
 const PORTAL_RADIUS = 52;   // 離門多近才會出現提示（像素）
 const PORTAL_FADE_MS = 500;
 const PORTAL_BLACK_MS = 500;
@@ -2157,7 +2157,7 @@ function hideOverlay() { overlay.classList.add('hidden'); }
 function showStart() {
   if (MAP_SAFE) {   // 安全場景（基地）：沒有怪物、沒有黑幕，純走動看場景
     showOverlay((MAP && MAP.name) || '安全區域',
-      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，靠近 NPC 或哨兵按 <b>Enter／E</b> 可以對話。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
+      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，靠近 NPC 或哨兵按 <b>Space</b> 可以對話。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
       '進入');
     return;
   }

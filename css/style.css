@@ -731,13 +731,19 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   content: '▌'; display: inline-block; margin-left: 2px; color: #8fd3ff;
   animation: dialogue-caret .65s steps(1, end) infinite;
 }
-#dialogueNext {
-  display: block; margin-left: auto; padding: 6px 11px; border-radius: 8px;
+#dialogueNext {   /* 尺寸、間距照示意圖量的（129×34）：Space 19×4、斜線 7×20、滑鼠 14×21，彼此間隔約 7px */
+  display: flex; align-items: center; justify-content: flex-start; box-sizing: border-box; height: 34px;
+  margin-left: auto; padding: 0 11.5px 0 15px; border-radius: 8px;
   border: 1px solid rgba(143,211,255,.38); background: rgba(40,57,74,.72);
-  color: #eaf5ff; font-size: 14px; cursor: pointer;
+  color: #eaf5ff; font-size: 14px; line-height: 1; cursor: pointer;
 }
 #dialogueNext:hover { border-color: #8fd3ff; background: rgba(53,77,99,.88); }
-#dialogueNext span { color: #8fd3ff; font-size: 12px; margin-right: 5px; }
+#dialogueNext .dn-keys { display: inline-flex; align-items: center; flex: none; margin-right: 6.85px; color: #88c8f3; }
+/* 「 / 」：半形斜線，前後各一個半形空白（pre＝空白不被吃掉）。字放大到 27px 才有示意圖的高度，再橫向壓窄成示意圖那樣細長 */
+#dialogueNext .dn-keys em { font: 27px/1 Arial, sans-serif; font-style: normal; white-space: pre; margin: 0 -1.15px 0 -2px; transform: translateY(.6px) scaleX(.78); }
+/* 兩張圖本身留白很多：格子只框住圖案本體，背景圖縮放後往左上移（images/ui/space-icon.png 40×40、mouse-click.png 80×80） */
+#dialogueNext .dn-space { display: block; width: 19px; height: 5px; background: url("../images/ui/space-icon.png?v=3") -1.68px -9.5px / 22.4px 22.4px no-repeat; }
+#dialogueNext .dn-mouse { display: block; width: 13.3px; height: 21.5px; background: url("../images/ui/mouse-click.png?v=3") -8.14px -4.07px / 29.6px 29.6px no-repeat; transform: translateY(.5px); }
 #dialogueClose {
   position: absolute; top: -9px; right: -9px; width: 27px; height: 27px; padding: 0;
   border-radius: 50%; border: 1px solid rgba(143,211,255,.72); background: rgba(18,25,34,.96);

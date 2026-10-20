@@ -6,7 +6,7 @@
      ・污染照常累積（可以練疏導、麻醉槍解除暴走）；也能關掉。
      ・沒有任何獎勵：異質碎片、成就、支線任務進度都不算。
      ・房間中間放一個沙包：打不壞、不會動，頭上顯示每秒傷害（DPS），比較武器和隊員的輸出用。
-   - 結束：走到門邊按 Space／E → 選單（結束訓練、開關燈光、開關污染）。
+   - 結束：走到門邊按 Space → 選單（結束訓練、開關燈光、開關污染）。
 */
 const PRACTICE = {
   map: 'B-2訓練室',                     // 哪一張地圖是訓練室（地圖名稱）
@@ -100,7 +100,7 @@ function renderPracticePanel() {
       '<h3>一次幾隻</h3><div class="pr-chips">' + PRACTICE.counts.map(n => toggle('count:' + n, n ? n + ' 隻' : '不放（只打沙包）', practice.count === n)).join('') + '</div>' +
       '<div class="pr-chips">' + toggle('refill', '打倒就馬上補上（關掉＝整波打完再來下一波）', practice.refill) + toggle('sandbag', '放沙包（顯示 DPS）', practice.sandbag) + '</div>' +
       '<h3>規則</h3>' + rules +
-      '<p class="pr-tip">訓練中不花錢、不消耗物資和彈藥，大家都不會扣 HP；也沒有任何獎勵。要結束就走到門邊按 Space／E。</p>' +
+      '<p class="pr-tip">訓練中不花錢、不消耗物資和彈藥，大家都不會扣 HP；也沒有任何獎勵。要結束就走到門邊按 Space。</p>' +
       '<div class="pr-actions"><button type="button" class="ws-btn pr-ghost" data-pr-cancel>取消</button><button type="button" class="ws-btn" data-pr="start">🎯 開始訓練</button></div>';
   }
   practiceEl.innerHTML = '<section class="workshop-card practice-card" role="dialog" aria-modal="true" aria-label="訓練室">' +
@@ -122,7 +122,7 @@ window.addEventListener('keydown', e => {
   if (!(e.target instanceof HTMLButtonElement)) e.stopImmediatePropagation();   // 面板打開時，按鍵不控制角色
 }, true);
 
-// ---- 門：訓練中在門邊按 Space／E 打開選單；平常按了提醒要找塔納（game.js 的互動鍵、render.js 的提示呼叫）----
+// ---- 門：訓練中在門邊按 Space 打開選單；平常按了提醒要找塔納（game.js 的互動鍵、render.js 的提示呼叫）----
 function practiceDoorNear() {
   if (!isPracticeMap() || !G || !G.player || G.player.sitting) return null;
   const p = G.player;   // 門的正上方（訓練場裡、玻璃牆前）或正下方（門外）都算
@@ -176,7 +176,7 @@ function startPractice() {
     G.towers.forEach((t, i) => { const cell = cells[i]; if (!cell) return; [t.x, t.y] = center(...cell); t.navPath = null; t.anchor = null; t.mode = 'free'; });
     if (practice.sandbag) spawnSandbag();
     practiceApplyRules(); updateHUD();
-    systemNotice('🎯 訓練開始！要結束就走到門邊按 Space／E');
+    systemNotice('🎯 訓練開始！要結束就走到門邊按 Space');
   });
 }
 function endPractice() {

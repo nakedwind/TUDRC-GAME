@@ -1,10 +1,10 @@
 /* ===== 門（data/doors.js 決定哪些素材是門）=====
    - 關著：門板正下方的地板格會擋路（玩家、隊友、怪物都過不去，光也透不過）。
    - 打開：門的圖片直接消失，可以通過。
-   - 手動門：溫特走到門前按 Enter／E 開關（有人站在門口時不能關）。
+   - 手動門：溫特走到門前按 Spacenter 開關（有人站在門口時不能關）。
    - 自動門：平常關著、玩家打不開；觸發條件達成時自動打開（目前：異質核心醒來）。
 */
-const DOOR = { radius: 58, minOverlap: 10 };   // radius＝離門多近可以按 E；minOverlap＝門板蓋到一格多少像素才算擋那格
+const DOOR = { radius: 58, minOverlap: 10 };   // radius＝離門多近可以按 Space；minOverlap＝門板蓋到一格多少像素才算擋那格
 let mapDoors = [];
 let doorAddedWalls = new Set();   // 門加進固定牆的格子（換地圖／重開時先還原）
 const isDoorStamp = s => !!(s && typeof DOOR_TILES !== 'undefined' && DOOR_TILES[s.id]);
@@ -53,7 +53,7 @@ function setDoorOpen(door, open, silent = false) {
   if (!silent && typeof sfxAt === 'function') sfxAt(door.sound, door.x, door.y, .7, 'door');
   return true;
 }
-// 溫特附近、可以按 E 的門（手動門，還有上鎖的門：按了會開鎖或說要什麼鑰匙）
+// 溫特附近、可以按 Space 的門（手動門，還有上鎖的門：按了會開鎖或說要什麼鑰匙）
 const doorLocked = d => d.mode === 'key' || d.mode === 'chain';
 const doorKeyItem = d => (typeof DOOR_LOCKS !== 'undefined' && DOOR_LOCKS[d.mode]) || null;
 function doorNearPlayer() {

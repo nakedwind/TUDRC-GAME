@@ -189,5 +189,5 @@ function renderCampSupply() {
 }
 window.addEventListener('keydown', e => {
   if (!campSupplyOpen) return;
-  if (e.key === 'Escape' || (!e.repeat && (e.key === ' ' || e.key === 'Enter' || e.key.toLowerCase() === 'e'))) { e.preventDefault(); e.stopImmediatePropagation(); closeCampSupply(); }
+  if (e.key === 'Escape' || (!e.repeat && (e.key === ' ' || e.key === 'Enter'))) { e.preventDefault(); e.stopImmediatePropagation(); closeCampSupply(); }
 }, true);

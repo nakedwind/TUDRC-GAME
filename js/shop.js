@@ -4,10 +4,10 @@
 //  ・補給：醫療包恢復 HP、杏仁水恢復 SP；戰鬥中按 Q／F 快速使用（下方資訊條的快捷格）
 //  ・零食、飲料：送禮用（js/gifts.js）
 //  ・商品資料在 data/supplies.js
-//  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Enter／E 打開
-//  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Enter／E 打開，只賣飲料
-//  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Enter／E，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
-//  ・後室商店：地圖編輯器「後室便利商店櫃台」靠近按 Enter／E。賣 BACKROOM_SHOP.stock（杏仁水只有這裡買得到），
+//  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Spacenter 打開
+//  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Spacenter 打開，只賣飲料
+//  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Spacenter，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
+//  ・後室商店：地圖編輯器「後室便利商店櫃台」靠近按 Spacenter。賣 BACKROOM_SHOP.stock（杏仁水只有這裡買得到），
 //    也可以把背包裡的東西賣掉換錢（賣到的錢算進作戰經費，回基地時一起帶回去）
 // ============================================================
 const supplyShop = document.getElementById('supplyShop');
