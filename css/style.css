@@ -702,8 +702,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   #groundMenu { animation: none; }
 }
 /* NPC 正式對話框：只占畫面底部，不遮住整張地圖。 */
-#dialogueBox {
-  position: absolute; z-index: 16; left: 50%; bottom: 24px;
+#dialogueBox {   /* 正式對話框：蓋在遊戲畫面、工具列、成就通知（30）之上；送禮選單（#giftPicker）再高一層 */
+  position: absolute; z-index: 31; left: 50%; bottom: 24px;
   transform: translateX(-50%); width: min(760px, calc(100% - 48px)); min-height: 116px;
   display: flex; align-items: center; gap: 16px; padding: 14px 18px;
   border: 1px solid rgba(143,211,255,.58); border-radius: 15px;
@@ -1358,7 +1358,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #dialogueGift:hover:not(:disabled) { border-color:#ff9ccf; background:rgba(150,50,100,.5); }
 #dialogueGift:disabled { border-color:rgba(255,255,255,.1); background:transparent; color:#7d8996; cursor:default; }
 #dialogueGift span { margin-left:4px; color:#ff9ccf; font-size: 12px; }
-#giftPicker { position:absolute; z-index:17; left:50%; bottom:24px; transform:translateX(-50%); width:min(760px,calc(100% - 48px)); min-height:116px; display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(255,156,207,.45); border-radius:14px; background:linear-gradient(180deg,rgba(32,22,36,.9),rgba(14,12,20,.92)); box-shadow:0 16px 40px rgba(0,0,0,.55); backdrop-filter:blur(8px); animation:gift-in .18s cubic-bezier(.2,.9,.3,1.15) both; }
+#giftPicker { position:absolute; z-index:32; left:50%; bottom:24px; transform:translateX(-50%); width:min(760px,calc(100% - 48px)); min-height:116px; display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(255,156,207,.45); border-radius:14px; background:linear-gradient(180deg,rgba(32,22,36,.9),rgba(14,12,20,.92)); box-shadow:0 16px 40px rgba(0,0,0,.55); backdrop-filter:blur(8px); animation:gift-in .18s cubic-bezier(.2,.9,.3,1.15) both; }
 @keyframes gift-in { from { opacity:0; transform:translate(-50%,8px); } }
 .gift-head { display:flex; align-items:center; gap:10px; padding:10px 12px 8px 16px; border-bottom:1px solid rgba(255,156,207,.15); }
 .gift-head strong { color:#ffe1f0; font-size:15px; }

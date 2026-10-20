@@ -422,7 +422,7 @@ function drawWanderer(npc) {
   const nameY = npc.y - size + 12 + (NPC_LABEL_DY[npc.id] || 0);   // 比圖片頂端再往下 5px（矮的角色再往下，見 NPC_LABEL_DY）
   ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, npc.x, nameY);
   ctx.fillStyle = '#fff'; ctx.fillText(name, npc.x, nameY);
-  if (npc.say && npc.say.text) markBubble(npc, drawSpeechBubble(npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]));   // 頭上對話泡泡（角色專屬色）
+  if (npc.say && npc.say.text) queueTowerBubble(npc, npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]);   // 頭上對話泡泡（角色專屬色）：先記下來，最後畫在最上層（flushTowerBubbles）
 }
 // 頭上的名字、對話泡泡、「與 XX 對話」提示要往下移幾像素（角色比人矮的時候用，例如球球是狗）
 const NPC_LABEL_DY = { ball: 22 };
@@ -461,7 +461,8 @@ function drawSpeechBubble(cx, bottomY, text, col) {
   ctx.fillStyle = c.tx; ctx.fillText(text, cx, y + h - 8);    // 角色色文字
   return y;   // 泡泡頂端：互動提示會排到它上面，不會蓋住
 }
-// 隊員（哨兵）頭上的對話泡泡：先記下來，等「急救／疏導」選項畫完再畫（flushTowerBubbles）。
+// 所有角色（隊員、NPC）頭上的對話泡泡：先記下來，等建築、屋簷、黑幕、「急救／疏導」選項都畫完，最後才畫（flushTowerBubbles）
+// → 泡泡永遠在最上層，不會被角色前面的牆、建築擋住。
 // 這位隊員頭上有選項時，泡泡排到選項的上面——選項固定在頭上不會被泡泡推走，滑鼠才點得準。
 let pendingTowerBubbles = new Map();   // 隊員 → 這一幀要畫的泡泡（同一位隊員一幀可能畫兩次身體，只留最後一次）
 function queueTowerBubble(t, cx, bottomY, text, col) { pendingTowerBubbles.set(t, { cx, bottomY, text, col, alpha: ctx.globalAlpha }); }
@@ -731,8 +732,6 @@ function draw() {
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
   if (typeof drawDoorLocks === 'function') drawDoorLocks(ctx);   // 解開時掉下來的鎖鏈（js/doors.js）
-  if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
-  if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
   drawCoreShards(ctx);         // 異質核心碎片
   drawFlareShots(ctx);         // 飛行中的照明彈
   if (typeof drawSpecialShots === 'function') drawSpecialShots(ctx);   // 飛行中的燃燒彈、麻醉針（js/special-guns.js）
@@ -790,7 +789,6 @@ function draw() {
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }
   }
-  flushTowerBubbles();   // 隊員的對話泡泡（有選項時排到選項上面）
   // 特效
   for (const f of G.effects) {
     if (f.spriteEffect) {
@@ -1138,6 +1136,10 @@ function draw() {
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
   if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺醫療包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
+  // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
+  if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
+  if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
+  flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
   drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
   if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
