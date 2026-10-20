@@ -54,7 +54,8 @@ function workshopColorize(text) {
   return String(text)
     .replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>')
     .replace(/戰鬥區域/g, '<i class="ws-where">戰鬥區域</i>')
-    .replace(workshopItemRe, m => '<i class="ws-item">' + m + '</i>');
+    .replace(workshopItemRe, m => '<i class="ws-item">' + m + '</i>')
+    .replace(/\u2063([^\u2063]*)\u2063/g, '<i class="ws-num">$1</i>');   // 數值欄填的文字（例如 ∞）：跟數字一樣橘色
 }
 
 // ---- 裝備／武器的文字和圖片 ----
@@ -96,10 +97,12 @@ function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊�
   };
 }
 // ---- 武器的數值：每一把都用同一張表（所有武器用到的數值合起來）----
-function workshopWeaponValueKeys() {   // 所有武器用到的數值，照武器的順序（手槍→照明彈槍→…）排
+function workshopWeaponValueKeys() {   // 所有武器用到的數值，照效果說明的順序排（data/equipment.js 的 WEAPON_STAT_TERMS；持有上限在最後）
   const keys = [];
   for (const [key, b] of Object.entries(WORKSHOP_BASE)) if (key.startsWith('w:')) for (const lv of b.levels || []) for (const k of Object.keys(lv)) if (typeof lv[k] === 'number' && !keys.includes(k)) keys.push(k);
-  return keys;
+  const order = typeof WEAPON_STAT_TERMS !== 'undefined' ? WEAPON_STAT_TERMS.map(t => t[0]) : [];
+  const rank = k => { const i = order.indexOf(k); return i < 0 ? order.length - 1.5 : i; };   // 不在順序表裡的：放在持有上限前面
+  return keys.sort((a, b) => rank(a) - rank(b));
 }
 // 武器多填的數值（這把原本沒有的）→「・燃燒 5 秒」這樣的說明；只是顯示，這把槍的程式沒有用到這個數值
 function workshopExtraText(key, lv, texts) {   // texts：這一級填了文字的數值（{ 數值名: '文字' }）
@@ -107,12 +110,14 @@ function workshopExtraText(key, lv, texts) {   // texts：這一級填了文字�
   const own = new Set(); for (const b of (WORKSHOP_BASE[key] || {}).levels || []) for (const k of Object.keys(b)) own.add(k);
   const txt = k => texts && typeof texts[k] === 'string' && texts[k] !== '' ? texts[k] : null;
   return workshopWeaponValueKeys().filter(k => !own.has(k) && (txt(k) !== null || (typeof lv[k] === 'number' && lv[k] !== 0))).map(k => {   // 0＝不顯示
-    const info = WORKSHOP_VALUE_INFO[k] || { label: k, unit: '' }, n = txt(k) ?? Math.round(lv[k] * (info.scale || 1) * 100) / 100;
+    const info = WORKSHOP_VALUE_INFO[k] || { label: k, unit: '' }, n = txt(k) !== null ? WS_TEXT_MARK + txt(k) + WS_TEXT_MARK : Math.round(lv[k] * (info.scale || 1) * 100) / 100;
     return '・' + info.label + ' ' + n + (info.unit === '%' ? '%' : info.unit ? ' ' + info.unit : '');
   }).join('');
 }
 // 數值欄填了數字以外的文字（例如「5～6」「？？」）：遊戲的實際數值維持原本的，只有效果說明顯示這段文字。
 // 作法：把這個數值換成兩個不同的數字各算一次說明，前後一樣的部分不動，中間變動的那一段（＝這個數值）換成文字。
+const WS_TEXT_MARK = '\u2063';   // 數值欄填的文字，前後各一個（看不見）
+const workshopPlain = t => String(t).split(WS_TEXT_MARK).join('');   // 拿掉記號（放進輸入框、比對文字時用）
 const WORKSHOP_TEXTVALS = {};   // key → [Lv1, Lv2, …] 各自 { 數值名: '文字' }
 function workshopTextify(fn, lv, texts) {
   const keys = Object.keys(texts || {}).filter(k => typeof texts[k] === 'string' && texts[k] !== '');
@@ -125,7 +130,8 @@ function workshopTextify(fn, lv, texts) {
     let q = 0; while (q < a.length - p && q < b.length - p && a[a.length - 1 - q] === b[b.length - 1 - q]) q++;
     spans.push([p, a.length - q, texts[k]]);
   }
-  let out = a; for (const [p, e, t] of spans.sort((x, y) => y[0] - x[0])) out = out.slice(0, p) + t + out.slice(e);   // 從後面換回來，位置才不會跑掉
+  // 文字前後加看不見的記號（U+2063）：上色時（workshopColorize）跟數字一樣是橘色；其他地方顯示時看不到
+  let out = a; for (const [p, e, t] of spans.sort((x, y) => y[0] - x[0])) out = out.slice(0, p) + WS_TEXT_MARK + t + WS_TEXT_MARK + out.slice(e);   // 從後面換回來，位置才不會跑掉
   return out;
 }
 // 數值填 0 的那一項，從效果說明裡拿掉（例如燃燒填 0 → 不顯示「燃燒 0 秒」）。
@@ -146,7 +152,9 @@ function workshopAutoStat(key, lv, texts) {
   const b = WORKSHOP_BASE[key] || {}, fn = b.statFn; if (!lv || !fn) return '';
   if (texts === undefined && b.def && b.def.levels) { const i = b.def.levels.indexOf(lv); texts = i >= 0 ? (WORKSHOP_TEXTVALS[key] || [])[i] : null; }
   const skip = new Set(Object.keys(texts || {}).filter(k => typeof texts[k] === 'string' && texts[k] !== ''));
-  return workshopHideZeros(l => workshopTextify(fn, l, texts), lv, skip) + workshopExtraText(key, lv, texts);
+  // 武器的說明（weaponStat）本來就會照順序列出所有數值，不用另外接；其他寫法的才把多填的數值接在後面
+  const extra = typeof weaponStat !== 'undefined' && fn === weaponStat ? '' : workshopExtraText(key, lv, texts);
+  return workshopHideZeros(l => workshopTextify(fn, l, texts), lv, skip) + extra;
 }
 const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → 資料；編輯器可以「復原」）
 (function applyWorkshopItems() {

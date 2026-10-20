@@ -157,7 +157,7 @@ function renderItemForm() {
     (field ? '<div class="field">取得方式的說明<textarea data-f="where">' + esc(v.where) + '</textarea><span class="hint">還沒拿到時顯示在說明下面，整段照寫的顯示（前面不會再自動加字）；寫到「戰鬥區域」會是紫色。</span></div>' : '') +
     valueTable(key) +
     '<div class="field">每一級的效果說明（開發工坊、背包、裝備欄都會顯示）<span class="hint">會跟著上面的數值自動更新；也可以自己改成別的文字，清空＝回到自動產生。</span></div>' +
-    WORKSHOP_LV_INDEX.map(i => '<div class="field">Lv' + (i + 1) + '<input type="text" data-lv="' + i + '" value="' + esc(statText(key, i)) + '" placeholder="' + esc(autoText(key, i)) + '"></div>').join('') +
+    WORKSHOP_LV_INDEX.map(i => '<div class="field">Lv' + (i + 1) + '<input type="text" data-lv="' + i + '" value="' + esc(workshopPlain(statText(key, i))) + '" placeholder="' + esc(workshopPlain(autoText(key, i))) + '"></div>').join('') +
     '<div class="img-btns"><button type="button" class="ed-btn" id="itemReset"' + (itemChanged(key) ? '' : ' disabled') + '>恢復為初始設定</button>' +
     '<button type="button" class="ed-btn danger" id="itemDelete">🗑 刪除這' + (isWeapon(key) ? '把武器' : '件裝備') + '</button></div>' +
     (base.name !== v.name ? '<span class="hint">原本叫「' + esc(base.name) + '」</span>' : '');
@@ -182,13 +182,13 @@ document.getElementById('itemForm').addEventListener('input', e => {
     // 沒自己改過文字的那幾級：效果說明跟著新數值更新
     document.querySelectorAll('#itemForm [data-lv]').forEach(inp => {
       const j = +inp.dataset.lv, t = levelEdits(selKey)[j];
-      inp.placeholder = autoText(selKey, j);
-      if (!(typeof t === 'string' && t !== '')) inp.value = autoText(selKey, j);
+      inp.placeholder = workshopPlain(autoText(selKey, j));
+      if (!(typeof t === 'string' && t !== '')) inp.value = workshopPlain(autoText(selKey, j));
     });
     document.getElementById('itemReset').disabled = !itemChanged(selKey);
   } else if (lvi !== undefined) {   // 原本的裝備／武器：某一級的效果說明
     const o = cfg.items[selKey] || (cfg.items[selKey] = {});
-    const i = +lvi, base = autoText(selKey, i), val = e.target.value;
+    const i = +lvi, base = workshopPlain(autoText(selKey, i)), val = e.target.value;
     const arr = Array.isArray(o.levels) ? o.levels : WORKSHOP_LV_INDEX.map(() => '');
     arr[i] = val === base ? '' : val;   // 跟原本一樣＝不用記
     if (arr.some(t => t)) o.levels = arr; else delete o.levels;

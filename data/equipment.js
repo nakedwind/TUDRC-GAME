@@ -74,23 +74,36 @@ const FIRST_AID = { heal: 60, time: 1.2, reach: 1.8 };
 // 測試用：true＝所有槍都解鎖，每次開遊戲彈藥補滿（測完改成 false）
 const TEST_UNLOCK_ALL_GUNS = !!window.TEST_MODE;
 
+// 武器的效果說明：每一把都照同一個順序排（有這個數值、而且不是 0 才顯示），持有上限永遠在最後：
+//   傷害＝照明＝燃燒 ＞ 彈匣 ＞ 睡眠＝火海半徑＝怪物著火＝麻醉霧半徑 ＞ 裝填 ＞ 持有上限
+// 開發工坊編輯器的數值表也照這個順序排。[數值名, 說明裡的名稱, 單位]
+const WEAPON_STAT_TERMS = [
+  ['dmg', '傷害', ''], ['shine', '照明', '秒'], ['burn', '燃燒', '秒'],
+  ['mag', '彈匣', '發'],
+  ['sleep', '睡眠', '秒'], ['r', '火海半徑', '格'], ['ignite', '怪物著火', '秒'], ['mist', '麻醉霧半徑', '格'],
+  ['reload', '裝填', '秒'],
+  ['reserve', '持有上限', '發'],
+];
+const weaponStat = lv => WEAPON_STAT_TERMS.filter(([k]) => typeof lv[k] === 'number' && lv[k] !== 0)
+  .map(([k, name, unit]) => name + ' ' + lv[k] + (unit ? ' ' + unit : '')).join('・');
+
 const WEAPON_UPGRADES = {
   pistol: { name: '手槍', icon: '🔫', image: 'images/weapon/winter-handgun-design.png', cost: [80, 160, 250, 350],
-    stat: lv => '傷害 ' + lv.dmg + '・彈匣 ' + lv.mag + ' 發・裝填 ' + lv.reload + ' 秒',
+    stat: weaponStat,
     levels: [{ dmg: 5, mag: 6, reload: 2 }, { dmg: 6, mag: 8, reload: 1.7 }, { dmg: 8, mag: 10, reload: 1.4 }, { dmg: 10, mag: 12, reload: 1.2 }, { dmg: 12, mag: 14, reload: 1 }] },
   flare: { name: '照明彈槍', icon: '🔥', image: 'images/weapon/winter-flare-gun-design.png', cost: [70, 150, 240, 340],
-    stat: lv => '照明 ' + lv.shine + ' 秒・持有上限 ' + lv.reserve + ' 發',
+    stat: weaponStat,
     levels: [{ shine: 24, reserve: 30 }, { shine: 32, reserve: 40 }, { shine: 40, reserve: 50 }, { shine: 48, reserve: 60 }, { shine: 56, reserve: 70 }] },   // shine：照明彈落地後亮幾秒（只照明，不會燒傷）；reserve：持有上限
   // 下面兩把只能在後室（戰鬥區域）撿到（field），撿到後才能升級；彈藥以後在後室的商店、轉蛋機取得（js/special-guns.js）
   // 燃燒彈槍：r 火海半徑（格）、burn 火海燒幾秒、reload 每發裝填秒數、reserve 持有上限（備用彈最多帶幾發）、ignite 被燒到的怪物身上著火幾秒（Lv3 起）
   incendiary: { name: '燃燒彈槍', icon: '🧨', image: 'images/weapon/incendiary_launcher.png', field: true, where: '只能在戰鬥區域取得：有機會在上鎖的置物箱裡找到', cost: [100, 180, 270, 370],
     desc: '落地形成火海，可點燃油汙、油桶並焚毀生命體；也會傷及友軍。',
-    stat: lv => '火海半徑 ' + lv.r + ' 格・燒 ' + lv.burn + ' 秒・裝填 ' + lv.reload + ' 秒' + (lv.ignite ? '・怪物著火 ' + lv.ignite + ' 秒' : '') + '・持有上限 ' + lv.reserve + ' 發',
+    stat: weaponStat,
     levels: [{ r: 1.1, burn: 6, reload: 2.2, reserve: 6 }, { r: 1.4, burn: 7, reload: 1.9, reserve: 8 }, { r: 1.6, burn: 9, reload: 1.6, reserve: 10, ignite: 4 }, { r: 1.8, burn: 10, reload: 1.4, reserve: 12, ignite: 5 }, { r: 2, burn: 12, reload: 1.2, reserve: 14, ignite: 6 }] },
   // 麻醉槍：sleep 睡幾秒、mag 彈匣、reload 裝填秒數、reserve 持有上限（備用彈最多帶幾發）、mist 麻醉霧半徑（格，Lv3 起）
   tranq: { name: '麻醉槍', icon: '💤', image: 'images/weapon/tranquilizer_gun.png', field: true, where: '只能在戰鬥區域取得：有機會在上鎖的置物箱裡找到', cost: [100, 180, 270, 370],
     desc: '使怪物睡眠，或讓暴走隊員恢復正常；大型怪物效果較短，生命體無效。',
-    stat: lv => '睡 ' + lv.sleep + ' 秒・彈匣 ' + lv.mag + ' 發・裝填 ' + lv.reload + ' 秒' + (lv.mist ? '・麻醉霧 ' + lv.mist + ' 格' : '') + '・持有上限 ' + lv.reserve + ' 發',
+    stat: weaponStat,
     levels: [{ sleep: 3, mag: 2, reload: 2, reserve: 8 }, { sleep: 4, mag: 2, reload: 1.5, reserve: 10 }, { sleep: 5, mag: 3, reload: 1.5, reserve: 12, mist: 1.2 }, { sleep: 6, mag: 3, reload: 1.3, reserve: 14, mist: 1.4 }, { sleep: 7, mag: 4, reload: 1.1, reserve: 16, mist: 1.6 }] },
 };
 // 在置物箱裡找到槍、彈藥：gun 還沒有的槍出現的機率；ammo 已經有槍時找到彈藥的機率（商店、轉蛋機做好之前的暫時來源）
