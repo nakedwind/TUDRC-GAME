@@ -9,8 +9,8 @@ const clone = v => JSON.parse(JSON.stringify(v));
 // fallback：沒填時會改用「通用台詞」；ordered：找他說話時依序一句一句說完；name：可用 {name}
 const SITUATIONS = [
   { group: '日常（基地裡）', key: 'idle', label: '閒晃時的頭上泡泡', when: '在基地等安全場景閒晃時，每隔 <b>5～13 秒</b>隨機冒出一句。' },
-  { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Enter／E</b>，會<b>依序</b>一句一句說完。沒填就改說閒晃台詞。' },
-  { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Enter／E</b>，會<b>依序</b>一句一句說完（只說一次）。' },
+  { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完。沒填就改說閒晃台詞。' },
+  { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
   { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>。' },
   { group: '找他說話（特殊）', key: 'chat', label: '偶爾閒聊（隨機一句）', when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。' },
   { group: '戰鬥中', key: 'battle', label: '出勤時的頭上泡泡', when: '戰鬥地圖中，每隔 <b>11～22 秒</b>隨機冒出一句。' },
@@ -59,6 +59,21 @@ if (usingDraft && typeof DIALOGUES !== 'undefined') {
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
 if (typeof MISSIONS !== 'undefined' && typeof MISSION_BASE !== 'undefined' && draft.characters[MISSION_BASE.briefer]) {
   for (const m of MISSIONS) if (!(('brief_' + m.id) in draft.characters[MISSION_BASE.briefer])) draft.characters[MISSION_BASE.briefer]['brief_' + m.id] = [];
+}
+// 還沒有台詞的角色也要列出來（data/characters.js 裡的每個人；玩家溫特除外）：
+// 1. 草稿是舊的時候，正式檔案裡新加的角色整組補進草稿；2. 檔案裡也沒有的，照身分給空白的情境格子。
+// 空白的角色匯出時會略過（cleaned），檔案不會多一堆空資料。
+const EMPTY_SITUATIONS = {
+  sentinel: ['idle', 'npc', 'battle', 'sentry', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
+  guide: ['idle', 'npc', 'battle', 'sentry', 'friendlyHit'],
+  support: ['idle', 'npc'],
+};
+if (typeof CHARACTERS !== 'undefined') {   // 原本有的照原本的順序（存檔內容才不會因為順序變了而不同），補上的接在後面
+  for (const [id, c] of Object.entries(CHARACTERS)) {
+    if (c.kind === 'player' || draft.characters[id]) continue;
+    draft.characters[id] = DIALOGUES.characters && DIALOGUES.characters[id] ? clone(DIALOGUES.characters[id])
+      : Object.fromEntries((EMPTY_SITUATIONS[c.kind] || EMPTY_SITUATIONS.support).map(k => [k, []]));
+  }
 }
 let selected = Object.keys(draft.characters)[0] || DEFAULT_ID;
 
@@ -348,6 +363,7 @@ function cleaned() {
       for (const byKey of ['reliefBy', 'soothedBy']) if (v[byKey]) v[byKey] = clean(v[byKey]);
     }
   }
+  for (const [id, entry] of Object.entries(out.characters)) if (!countLines(entry) && !entry.rage) delete out.characters[id];   // 一句台詞都沒有的角色不寫進檔案
   return out;
 }
 function exportSource() {
