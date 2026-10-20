@@ -2316,6 +2316,21 @@ const BASE_MAPS = [
         "layer": "object3",
         "ox": 4,
         "oy": 0
+      },
+      {
+        "id": "tile_eoc_floor_sign_2f",
+        "c": 59,
+        "r": 9,
+        "layer": "overlay",
+        "oy": 2
+      },
+      {
+        "id": "tile_eoc_floor_sign_2f",
+        "c": 4,
+        "r": 9,
+        "layer": "overlay",
+        "ox": 0,
+        "oy": 2
       }
     ],
     "solid": [
@@ -6463,7 +6478,10 @@ const BASE_MAPS = [
         "8,8": "tile_new_decor_exit_sign",
         "1,14": "tile_new_decor_box_large"
       },
-      "overlay": {},
+      "overlay": {
+        "4,9": "tile_eoc_floor_sign_4f",
+        "59,9": "tile_eoc_floor_sign_4f"
+      },
       "top": {},
       "object2": {
         "63,8": "tile_new_bg_wall_front_edge",
@@ -7086,7 +7104,7 @@ const BASE_MAPS = [
         "id": "tile_muu4ow6f",
         "c": 3,
         "r": 9,
-        "layer": "object2",
+        "layer": "overlay",
         "ox": -20,
         "oy": -20,
         "sortDepth": 2.5
@@ -7095,7 +7113,7 @@ const BASE_MAPS = [
         "id": "tile_muu6050n",
         "c": 1,
         "r": 9,
-        "layer": "object2",
+        "layer": "overlay",
         "ox": -6,
         "oy": -20,
         "sortDepth": 2.5
@@ -7892,7 +7910,8 @@ const BASE_MAPS = [
         "21,17": "tile_new_bg_wall_front_edge",
         "21,18": "tile_new_bg_wall_front_edge",
         "21,19": "tile_new_bg_wall_front_edge",
-        "21,20": "tile_new_bg_wall_front_edge"
+        "21,20": "tile_new_bg_wall_front_edge",
+        "22,6": "tile_eoc_floor_sign_1f"
       },
       "top": {
         "3,10": "tile_new_bg_wall_front_edge",
@@ -8345,7 +8364,9 @@ const BASE_MAPS = [
         "id": "tile_new_decor_poster",
         "c": 7,
         "r": 10,
-        "layer": "object2"
+        "layer": "object2",
+        "ox": 0,
+        "oy": 6
       },
       {
         "id": "tile_new_decor_plant03",
@@ -10347,7 +10368,9 @@ const BASE_MAPS = [
       },
       "object3": {},
       "object4": {},
-      "overlay": {},
+      "overlay": {
+        "21,3": "tile_eoc_floor_sign_b4"
+      },
       "top": {
         "14,2": "tile_containment_wall_top_straight",
         "14,3": "tile_containment_wall_top_straight",
@@ -11381,7 +11404,9 @@ const BASE_MAPS = [
       "object2": {},
       "object3": {},
       "object4": {},
-      "overlay": {},
+      "overlay": {
+        "15,2": "tile_eoc_floor_sign_b3"
+      },
       "top": {
         "19,1": "tile_containment_wall_top_straight",
         "0,1": "tile_containment_wall_top_straight",
@@ -11598,11 +11623,10 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_eoc_hydrant_red",
-        "c": 14,
+        "c": 13,
         "r": 2,
         "layer": "object",
-        "ox": -18,
-        "oy": 0
+        "ox": 2
       },
       {
         "id": "tile_new_decor_exit_sign",
@@ -13562,7 +13586,8 @@ const BASE_MAPS = [
       },
       "object4": {},
       "overlay": {
-        "12,17": "tile_field_ammo_crate"
+        "12,17": "tile_field_ammo_crate",
+        "23,16": "tile_eoc_floor_sign_b1"
       },
       "top": {
         "0,17": "tile_containment_wall_top_straight",
@@ -14361,7 +14386,9 @@ const BASE_MAPS = [
       "object2": {},
       "object3": {},
       "object4": {},
-      "overlay": {},
+      "overlay": {
+        "24,10": "tile_eoc_floor_sign_b2"
+      },
       "top": {
         "0,11": "tile_containment_wall_top_straight",
         "0,10": "tile_containment_wall_top_straight",

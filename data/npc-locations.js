@@ -113,6 +113,48 @@ const NPC_LOCATIONS = {
     "salem": {
       "map": "1F-餐廳",
       "rect": [4, 7, 25, 23]
+    },
+    "taana": {
+      "map": "B-1訓練室",
+      "spawn": [
+        15,
+        21
+      ]
+    },
+    "colyn": {
+      "map": "B-1訓練室",
+      "spawn": [
+        9,
+        19
+      ]
+    },
+    "rowan": {
+      "map": "B-2射擊訓練室",
+      "spawn": [
+        15,
+        11
+      ]
+    },
+    "cael": {
+      "map": "B-2射擊訓練室",
+      "spawn": [
+        12,
+        11
+      ]
+    },
+    "saku": {
+      "map": "1F-餐廳",
+      "spawn": [
+        22,
+        21
+      ]
+    },
+    "kakuma": {
+      "map": "1F-餐廳",
+      "spawn": [
+        24,
+        18
+      ]
     }
   }
 };

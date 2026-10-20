@@ -3730,6 +3730,24 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_mvfjt47h",
+    "name": "Back-room-floor_M",
+    "role": "floor",
+    "file": "images/background/Back-room-floor_M.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_mvfjtda0",
+    "name": "Back-room-floor_L",
+    "role": "floor",
+    "file": "images/background/Back-room-floor_L.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
+  },
+  {
     "id": "tile_bg_backroom_floor_l",
     "name": "後室地板（大）",
     "role": "floor",
