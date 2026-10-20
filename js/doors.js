@@ -21,7 +21,9 @@ function setupDoors() {
     let [p0, p1] = DOOR_TILES[s.id].panel;
     if (s.fx) [p0, p1] = [w - p1, w - p0];
     const left = x0 + p0, right = x0 + p1, bottom = y0 + h - 1;
-    const [, row] = cellAt(left, bottom), cells = [];
+    // 擋哪一排：門的下緣只跨進下一排不到 minOverlap 像素（例如編輯器裡往下微調了幾像素），就算上一排（真正的門洞），不然門前會多一排擋路
+    const [, lastRow] = cellAt(left, bottom), cells = [];
+    const row = bottom - (OY + lastRow * CELL) + 1 < DOOR.minOverlap ? lastRow - 1 : lastRow;
     for (let c = cellAt(left, bottom)[0]; c <= cellAt(right - 1, bottom)[0]; c++) {
       const overlap = Math.min(right, OX + (c + 1) * CELL) - Math.max(left, OX + c * CELL);
       if (overlap >= DOOR.minOverlap && inGrid(c, row)) cells.push(c + ',' + row);
