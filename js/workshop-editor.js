@@ -137,7 +137,7 @@ function renderItemForm() {
       imageField(key, v, 'data-c') +
       '<div class="row2"><div class="field">穿在哪裡<select data-c="kind">' + Object.entries(WORKSHOP_KINDS).map(([k, n]) => '<option value="' + k + '"' + (a.kind === k ? ' selected' : '') + '>' + n + '</option>').join('') + '</select></div>' +
       '<div class="field">怎麼拿到<select data-c="source"><option value="develop"' + (a.source !== 'field' ? ' selected' : '') + '>找諾亞開發</option><option value="field"' + (a.source === 'field' ? ' selected' : '') + '>只能在戰鬥區域拿到</option></select></div></div>' +
-      (a.source === 'field' ? '<div class="field">取得方式的說明<textarea data-c="where">' + esc(a.where) + '</textarea><span class="hint">還沒拿到時顯示在說明下面，整段照寫的顯示；寫到「戰鬥區域」會是紫色。要真的放進置物箱等地方，還需要另外設定。</span></div>' : '') +
+      (a.source === 'field' ? '<div class="field">取得方式的說明<textarea data-c="where">' + esc(a.where) + '</textarea><span class="hint">還沒拿到時顯示在說明下面，整段照寫的顯示；寫到「戰鬥區域」或外觀設定裡列的字（例如上鎖的置物櫃）會是紫色。要真的放進置物箱等地方，還需要另外設定。</span></div>' : '') +
       '<div class="field">說明（還沒拿到時顯示）<textarea data-c="desc">' + esc(a.desc) + '</textarea></div>' +
       '<div class="field">說明（已擁有）<textarea data-c="ownedDesc" placeholder="空白＝不顯示">' + esc(a.ownedDesc || '') + '</textarea><span class="hint">拿到之後顯示在名稱下面、詳細數值的上面。</span></div>' +
       '<div class="field">要花幾個異質碎片</div><div class="row2" style="grid-template-columns:repeat(' + WORKSHOP_MAX_LV + ', 1fr)">' +
@@ -154,7 +154,7 @@ function renderItemForm() {
       '<span class="hint">還沒拿到時顯示；下面會接著' + (field ? '「取得方式的說明」' : '「Lv1：…」的彩色說明') + '。' + (isWeapon(key) && !field ? '這把武器一開始就有，遊戲裡不會出現「還沒拿到」的樣子。' : '') + '</span></div>' +
     '<div class="field">說明（已擁有）<textarea data-f="ownedDesc" placeholder="空白＝不顯示">' + esc(v.ownedDesc || '') + '</textarea>' +
       '<span class="hint">拿到之後顯示在名稱下面；下面接著這件的詳細數值（目前效果、下一級）。</span></div>' +
-    (field ? '<div class="field">取得方式的說明<textarea data-f="where">' + esc(v.where) + '</textarea><span class="hint">還沒拿到時顯示在說明下面，整段照寫的顯示（前面不會再自動加字）；寫到「戰鬥區域」會是紫色。</span></div>' : '') +
+    (field ? '<div class="field">取得方式的說明<textarea data-f="where">' + esc(v.where) + '</textarea><span class="hint">還沒拿到時顯示在說明下面，整段照寫的顯示（前面不會再自動加字）；寫到「戰鬥區域」或外觀設定裡列的字（例如上鎖的置物櫃）會是紫色。</span></div>' : '') +
     valueTable(key) +
     '<div class="field">每一級的效果說明（開發工坊、背包、裝備欄都會顯示）<span class="hint">會跟著上面的數值自動更新；也可以自己改成別的文字，清空＝回到自動產生。</span></div>' +
     WORKSHOP_LV_INDEX.map(i => '<div class="field">Lv' + (i + 1) + '<input type="text" data-lv="' + i + '" value="' + esc(workshopPlain(statText(key, i))) + '" placeholder="' + esc(workshopPlain(autoText(key, i))) + '"></div>').join('') +
@@ -276,7 +276,7 @@ const STYLE_FIELDS = [
   ['裝備名稱', [['nameSize', '文字大小', 'num', 9, 30, 1], ['nameColor', '文字顏色：每一格最上面的裝備、武器名稱（例如「手槍」）', 'color']]],
   ['說明／目前效果', [['descSize', '文字大小', 'num', 8, 24, 1], ['descColor', '文字顏色：名稱下面的說明、目前的效果（例如「傷害 5・彈匣 6 發」）', 'color']]],
   ['下一級效果／取得方式', [['nextSize', '文字大小', 'num', 8, 24, 1], ['nextColor', '文字顏色：最下面一行的「升到 Lv2：…」「Lv1：…」、取得方式的說明', 'color']]],
-  ['特別標色', [['numColor', '數字的顏色（Lv2、8 格、1.4 秒…）', 'color'], ['whereColor', '「戰鬥區域」的顏色', 'color'], ['itemColor', '道具名稱的顏色（電池、杏仁水、急救包…）', 'color']]],
+  ['特別標色', [['numColor', '數字的顏色（Lv2、8 格、1.4 秒…）', 'color'], ['whereColor', '「戰鬥區域」和戰鬥區域裡的東西的顏色', 'color'], ['whereWords', '用這個顏色的字（用「、」分開，例如：戰鬥區域、上鎖的置物櫃）', 'text'], ['itemColor', '道具名稱的顏色（電池、杏仁水、急救包…）', 'color']]],
 ];
 const styleNow = () => workshopStyle(cfg);
 function renderStyleForm() {
@@ -284,6 +284,7 @@ function renderStyleForm() {
   document.getElementById('styleForm').innerHTML = STYLE_FIELDS.map(([group, list]) => '<div class="style-group"><b>' + group + '</b>' + list.map(([k, label, type, min, max, step]) =>
     type === 'num'
       ? '<div class="field">' + label + '（px）<div class="num"><input type="range" data-s="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + st[k] + '"><input type="number" data-s="' + k + '" min="' + min + '" max="' + max + '" step="' + step + '" value="' + st[k] + '"></div></div>'
+      : type === 'text' ? '<div class="field">' + label + '<textarea data-s="' + k + '" rows="2">' + esc(st[k]) + '</textarea></div>'
       : '<div class="field">' + label + '<div class="color"><input type="color" data-s="' + k + '" value="' + esc(String(st[k]).toLowerCase()) + '"><input type="text" data-s="' + k + '" value="' + esc(st[k]) + '"></div></div>'
   ).join('') + '</div>').join('');
 }
@@ -291,9 +292,10 @@ document.getElementById('styleForm').addEventListener('input', e => {
   const k = e.target.dataset.s; if (!k) return;
   const isNum = typeof WORKSHOP_STYLE_DEFAULT[k] === 'number';
   let val = e.target.value;
+  const isText = e.target.tagName === 'TEXTAREA';   // 文字（例如「用這個顏色的字」）：照打的存
   if (isNum) { val = Number(val); if (!Number.isFinite(val)) return; }
-  else if (!/^#[0-9a-f]{6}$/i.test(val)) return;   // 顏色打到一半：先不套用
-  if (val === WORKSHOP_STYLE_DEFAULT[k] || (!isNum && String(val).toLowerCase() === String(WORKSHOP_STYLE_DEFAULT[k]).toLowerCase())) delete cfg.style[k]; else cfg.style[k] = val;
+  else if (!isText && !/^#[0-9a-f]{6}$/i.test(val)) return;   // 顏色打到一半：先不套用
+  if (val === WORKSHOP_STYLE_DEFAULT[k] || (!isNum && !isText && String(val).toLowerCase() === String(WORKSHOP_STYLE_DEFAULT[k]).toLowerCase())) delete cfg.style[k]; else cfg.style[k] = val;
   document.querySelectorAll('#styleForm [data-s="' + k + '"]').forEach(el => { if (el !== e.target) el.value = isNum ? val : String(val).toLowerCase(); });   // 滑桿和數字框、色盤和色碼同步
   saveDraft(); renderPreview();
 });
@@ -302,7 +304,7 @@ document.getElementById('styleReset').addEventListener('click', () => {
 });
 
 // ---- 預覽：照遊戲的 renderWorkshop（js/equipment.js）排出一樣的畫面 ----
-const wsColor = text => workshopColorize(text);   // js/workshop-config.js（跟遊戲同一套：數字、戰鬥區域、道具名稱）
+const wsColor = text => workshopColorize(text, styleNow());   // js/workshop-config.js（跟遊戲同一套：數字、戰鬥區域、道具名稱）
 function previewRow(key) {
   const def = getDef(key), v = itemView(key), mode = previewMode, maxLv = def.levels.length;
   const icon = v.image ? '<img src="' + esc(v.image) + '" alt="">' : '<i>' + esc(def.icon || '') + '</i>';
@@ -478,7 +480,7 @@ function exportText() {
   return '/* ===== 諾亞的開發工坊：裝備文字、圖片與外觀（由「🔧 開發工坊編輯器」匯出，整段覆蓋即可）=====\n' +
     '   items：要改哪件裝備／武器（沒寫的就用 data/equipment.js 原本的設定）\n' +
     '     key：裝備用 id（例如 headlamp）；武器前面加 w:（例如 w:pistol）\n' +
-    '     name 名稱、image 圖片路徑、desc 說明（還沒拿到時）、ownedDesc 說明（已擁有）、where 取得方式的說明（整段照寫的顯示，「戰鬥區域」會是紫色；只能在戰鬥區域取得的才會用到）\n' +
+    '     name 名稱、image 圖片路徑、desc 說明（還沒拿到時）、ownedDesc 說明（已擁有）、where 取得方式的說明（整段照寫的顯示，「戰鬥區域」等字會是紫色；只能在戰鬥區域取得的才會用到）\n' +
     '     levels：Lv1～Lv5 的效果說明文字（空白＝照數值自動產生）\n' +
     '     values：Lv1～Lv5 改過的實際數值（例如 {"dmg": 7}；沒寫的＝data/equipment.js 原本的；填文字的話只顯示在效果說明）\n' +
     '   added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）\n' +

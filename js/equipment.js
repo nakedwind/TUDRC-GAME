@@ -613,7 +613,7 @@ function workshopBuy(kind, id) {
   }
   renderWorkshop();
 }
-// 說明文字上色：數字＝橘色、「戰鬥區域」＝紫色、道具名稱＝道具顏色（js/workshop-config.js 的 workshopColorize，編輯器的預覽也用它）
+// 說明文字上色：數字＝橘色、「戰鬥區域」和戰鬥區域裡的東西＝紫色、道具名稱＝道具顏色（js/workshop-config.js 的 workshopColorize，編輯器的預覽也用它）
 const wsColor = text => workshopColorize(text);
 function renderWorkshop() {
   // about＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面（開發工坊編輯器可以寫）

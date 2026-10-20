@@ -16,7 +16,8 @@ const WORKSHOP_STYLE_DEFAULT = {
   descSize: 12, descColor: '#aab5c1',   // 說明／目前效果
   nextSize: 11, nextColor: '#a9d8c9',   // 下一級效果、取得地點
   numColor: '#CF9447',   // 說明裡的數字（Lv2、8 格、1.4 秒…）
-  whereColor: '#A958E2', // 說明裡的「戰鬥區域」
+  whereColor: '#A958E2', // 說明裡的「戰鬥區域」和戰鬥區域裡的東西（下面 whereWords 列的字）
+  whereWords: '戰鬥區域、上鎖的置物櫃、上鎖的置物箱、置物櫃、置物箱、異質核心',   // 用「戰鬥區域」顏色的字（用「、」分開）
   itemColor: '#A958E2',  // 說明裡的道具名稱（電池、杏仁水、急救包…）
 };
 // 數字型的設定在 CSS 裡要加 px
@@ -41,20 +42,33 @@ function applyWorkshopStyle(el, cfg) {   // 把外觀設定寫成 CSS 變數（e
 const WORKSHOP_MAX_LV = typeof EQUIP_MAX_LV !== 'undefined' ? EQUIP_MAX_LV : 5;
 const WORKSHOP_LV_INDEX = Array.from({ length: WORKSHOP_MAX_LV }, (_, i) => i);
 // ---- 說明文字上色（遊戲的開發工坊、編輯器的預覽共用）----
-// 數字（Lv2、8 格、1.4 秒、−10%…）＝橘色、「戰鬥區域」＝紫色、道具名稱（電池、杏仁水…）＝道具顏色（css/style.css 的 .ws-num／.ws-where／.ws-item）
-let workshopItemRe = null;
+// 數字（Lv2、8 格、1.4 秒、−10%…）＝橘色；「戰鬥區域」和戰鬥區域裡的東西（外觀設定 whereWords，例如「上鎖的置物櫃」）＝紫色；
+// 道具名稱（電池、杏仁水…）＝道具顏色（css/style.css 的 .ws-num／.ws-where／.ws-item）
 function workshopItemNames() {   // 道具名稱：背包的補給、零食飲料（data/supplies.js）＋其他物品（data/items.js）＋異質碎片
   const names = new Set(['異質碎片']);
   if (typeof SUPPLIES !== 'undefined') for (const it of SUPPLIES) if (it.name) names.add(it.name);
   if (typeof ITEMS !== 'undefined') for (const it of ITEMS) if (it.name) names.add(it.name);
   return [...names].filter(n => n.length >= 2).sort((a, b) => b.length - a.length);   // 長的先比（「杏仁水保溫杯」比「杏仁水」先）
 }
-function workshopColorize(text) {
-  if (!workshopItemRe) { const n = workshopItemNames(); workshopItemRe = n.length ? new RegExp(n.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g') : /(?!)/g; }
-  return String(text)
-    .replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>')
-    .replace(/戰鬥區域/g, '<i class="ws-where">戰鬥區域</i>')
-    .replace(workshopItemRe, m => '<i class="ws-item">' + m + '</i>')
+// 戰鬥區域的字＋道具名稱合成一個比對：長的先比（「置物櫃鑰匙」是道具、「置物櫃」是戰鬥區域的東西，不會互相切斷）
+let workshopWordCache = { key: null, re: null, cls: null };
+const workshopWhereWords = st => String((st || workshopStyle()).whereWords || '').split(/[、,，;；\s]+/).map(w => w.trim()).filter(Boolean);
+function workshopWords(st) {
+  const where = workshopWhereWords(st), key = where.join('|');
+  if (workshopWordCache.key !== key) {
+    const cls = new Map();
+    for (const n of workshopItemNames()) cls.set(n, 'ws-item');
+    for (const w of where) cls.set(w, 'ws-where');   // 同一個字兩邊都有：當成戰鬥區域的字
+    const words = [...cls.keys()].sort((a, b) => b.length - a.length);
+    workshopWordCache = { key, cls, re: words.length ? new RegExp(words.map(x => x.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')).join('|'), 'g') : null };
+  }
+  return workshopWordCache;
+}
+function workshopColorize(text, st) {   // st：外觀設定（編輯器傳編輯中的；遊戲裡用 data/workshop.js 的）
+  const w = workshopWords(st);
+  let out = String(text).replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>');
+  if (w.re) out = out.replace(w.re, m => '<i class="' + w.cls.get(m) + '">' + m + '</i>');
+  return out
     .replace(/\u2063([^\u2063]*)\u2063/g, '<i class="ws-num">$1</i>');   // 數值欄填的文字（例如 ∞）：跟數字一樣橘色
 }
 
