@@ -383,7 +383,7 @@ const ELEVATOR_FLOOR_RE = /^\s*(B-?\d+F?|\d+F)\s*[-－・]?\s*/i;
 function elevatorFloors() {
   return mapList().map(m => {
     const hit = ELEVATOR_FLOOR_RE.exec(String(m.name || '')); if (!hit) return null;
-    const label = hit[1].toUpperCase(), rest = String(m.name).slice(hit[0].length).trim();
+    const label = hit[1].toUpperCase().replace('-', ''), rest = String(m.name).slice(hit[0].length).trim();   // 「B-3」顯示成「B3」（正式寫法不加 -）
     const n = label.startsWith('B') ? -Number(label.replace(/\D/g, '')) : Number(label.replace(/\D/g, ''));
     return { id: m.id, label, rest, n };
   }).filter(Boolean).sort((a, b) => b.n - a.n);
@@ -392,7 +392,8 @@ function renderElevatorFloors() {
   const box = elevatorMenu.querySelector('.elevator-floors'); if (!box) return;
   box.innerHTML = elevatorFloors().map(f => {
     const here = MAP && f.id === MAP.id;
-    return '<button type="button" data-floor="' + f.id + '"' + (here ? ' class="sel" disabled' : '') + '><b>' + f.label + '</b>' + (f.rest || here ? '<small>' + (here ? '目前所在' : f.rest) + '</small>' : '') + '</button>';
+    // 目前所在的樓層：名稱照樣顯示，後面加一個小一點的「．目前所在」
+    return '<button type="button" data-floor="' + f.id + '"' + (here ? ' class="sel" disabled' : '') + '><b>' + f.label + '</b>' + (f.rest || here ? '<small>' + f.rest + (here ? '<em class="floor-here">．目前所在</em>' : '') + '</small>' : '') + '</button>';
   }).join('') || '<p>沒有可以去的樓層</p>';
 }
 elevatorMenu.querySelector('.elevator-floors').addEventListener('click', e => {

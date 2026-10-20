@@ -2141,4 +2141,5 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .elevator-floors button:hover, .elevator-floors button:focus-visible { background: rgba(143,211,255,.12); border-color: rgba(143,211,255,.45); }
 .elevator-floors button.sel, .elevator-floors button:disabled { opacity: 1; border-color: #ffd479; background: linear-gradient(180deg, #f7d886, #e6b04a); box-shadow: 0 0 10px rgba(255,212,121,.35); }
 .elevator-floors button.sel b, .elevator-floors button.sel small { color: #3b2304; }
+.elevator-floors .floor-here { margin-left: 2px; font-size: 12px; font-style: normal; font-weight: 700; opacity: .75; }   /* 樓層名稱後面的「．目前所在」 */
 @media (prefers-reduced-motion: reduce) { #elevatorMenu, .elevator-card { animation: none; } }
