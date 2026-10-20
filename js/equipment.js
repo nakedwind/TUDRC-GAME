@@ -8,7 +8,8 @@
 //  ・資料、數值在 data/equipment.js；進度存在瀏覽器（localStorage）。
 // ============================================================
 const EQUIP_STORE = 'tudrc_equipment_v1';
-const equipState = { owned: {}, equipped: { head: null, body: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: 'flare' }, gunAmmo: {}, battery: 100 };
+const WS_KEEP_WEAPON = 'pistol';   // 溫特一開始就持有的手槍：不能分解，也不能用任何方式丟掉
+const equipState = { owned: {}, equipped: { head: null, body: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: 'flare' }, gunAmmo: {}, battery: 100, scrapped: {} };   // scrapped：開發工坊分解掉的武器（一開始就有的也不會再補回來）
 const EQUIP_TO_ITEM = ['thermos', 'firstaid', 'adrenaline', 'charm'];   // 以前是裝備、現在改成道具：舊存檔有的話換成 1 個道具
 let equipLegacyItems = [];
 // 開發工坊編輯器刪掉的裝備／武器：對玩家來說就是永久從遊戲消失——存檔裡拿到的也清掉（之後就算在編輯器復原，也要重新取得）。
@@ -30,7 +31,8 @@ try {
     const free = ['acc1', 'acc2'].find(k => !equipState.equipped[k]); if (free) equipState.equipped[free] = 'headlamp';
   }
   for (const slot of EQUIP_SLOTS) { const id = equipState.equipped[slot.id], d = id && EQUIPMENT.find(e => e.id === id); if (d && !slot.kinds.includes(d.kind)) equipState.equipped[slot.id] = null; }
-  if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field ? 0 : 1, Math.min(WEAPON_UPGRADES[k].levels.length, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
+  if (s.scrapped && typeof s.scrapped === 'object') for (const k of Object.keys(s.scrapped)) if (WEAPON_UPGRADES[k] && k !== WS_KEEP_WEAPON) equipState.scrapped[k] = true;
+  if (s.weapons) for (const k of Object.keys(equipState.weapons)) if (Number.isFinite(s.weapons[k])) equipState.weapons[k] = Math.max(WEAPON_UPGRADES[k].field || equipState.scrapped[k] ? 0 : 1, Math.min(WEAPON_UPGRADES[k].levels.length, s.weapons[k] | 0));   // 後室撿的槍：0＝還沒拿到
   if (s.gunAmmo) for (const [k, a] of Object.entries(s.gunAmmo)) if (WEAPON_UPGRADES[k] && a) equipState.gunAmmo[k] = { mag: Math.max(0, a.mag | 0), reserve: Math.max(0, a.reserve | 0) };
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
   if (s.loadout) for (const k of ['main', 'sub']) if (s.loadout[k] === null || WEAPON_UPGRADES[s.loadout[k]]) equipState.loadout[k] = s.loadout[k];
@@ -563,11 +565,59 @@ function ensureWorkshop() {
   if (typeof applyWorkshopStyle === 'function') applyWorkshopStyle(workshopEl);   // 開發工坊編輯器改過的外觀（data/workshop.js、js/workshop-config.js）
   workshopEl.addEventListener('click', e => {
     if (e.target === workshopEl || e.target.closest('.workshop-close')) { closeWorkshop(); return; }
+    if (e.target.closest('[data-scrap-go]')) { wsScrapGo(); return; }   // 分解裝備
+    const sc = e.target.closest('[data-scrap]'); if (sc) { wsScrapSelect(sc.dataset.scrap); return; }   // 右側：選要分解的
     const b = e.target.closest('[data-ws]'); if (!b) return;
     const [kind, id] = b.dataset.ws.split(':');
     workshopBuy(kind, id);
   });
   document.getElementById('wrap').appendChild(workshopEl);
+}
+// ---- 分解：右側「目前裝備」「背包裡的裝備」點一下選它，最下面按「分解裝備」 ----
+// 返還一半的異質碎片：Lv1＝開發時花的一半；Lv2 以上＝升到目前這一級花的一半（只能在戰鬥區域撿到、沒花過碎片的 Lv1＝0）。
+// 手槍（溫特一開始就持有）不能分解。分解掉的裝備、武器就沒有了（之後可以再開發／撿到）。
+let wsScrapSel = null, wsScrapArmed = false, wsScrapArmTimer = null;   // 選到的 key（裝備 id／武器 w:id）；armed＝按過一次，再按一次才真的分解
+function wsScrapInfo(key) {
+  if (!key) return null;
+  if (key.startsWith('w:')) {
+    const k = key.slice(2), w = WEAPON_UPGRADES[k], lv = equipState.weapons[k] || 0; if (!w || !lv) return null;
+    return { name: w.name, lv, keep: k === WS_KEEP_WEAPON, refund: lv >= 2 ? Math.floor((w.cost[lv - 2] || 0) / 2) : 0 };
+  }
+  const d = equipDef(key), lv = equipState.owned[key] || 0; if (!d || !lv) return null;
+  const paid = lv >= 2 ? d.cost[lv - 1] : (d.source === 'develop' ? d.cost[0] : 0);
+  return { name: d.name, lv, keep: false, refund: Math.floor((paid || 0) / 2) };
+}
+function wsScrapBox() {
+  const info = wsScrapInfo(wsScrapSel);
+  if (!info) return '<p class="wss-tip">換裝備：打開背包</p>';
+  if (info.keep) return '<div class="wss-scrap"><button type="button" class="wss-scrap-btn" disabled>無法分解</button><small>「' + info.name + '」是溫特一開始就持有的武器，不能分解或丟棄</small></div>';
+  return '<div class="wss-scrap"><button type="button" class="wss-scrap-btn' + (wsScrapArmed ? ' armed' : '') + '" data-scrap-go>' + (wsScrapArmed ? '確定分解「' + info.name + '」？' : '分解裝備') + '</button>' +
+    '<small>返還一半的異質碎片（' + WS_SHARD_IMG + info.refund + '）</small></div>';
+}
+function wsScrapSelect(key) {
+  wsScrapSel = wsScrapSel === key ? null : key; wsScrapArmed = false; clearTimeout(wsScrapArmTimer);
+  sfx('menu'); renderWorkshop();
+}
+function wsScrapGo() {
+  const key = wsScrapSel, info = wsScrapInfo(key); if (!info || info.keep) return;
+  if (!wsScrapArmed) {   // 第一次按：變成「確定分解？」，3 秒內再按一次才分解（不小心按到不會直接沒了）
+    wsScrapArmed = true; sfx('menu'); renderWorkshop();
+    clearTimeout(wsScrapArmTimer); wsScrapArmTimer = setTimeout(() => { if (wsScrapArmed) { wsScrapArmed = false; if (workshopOpen) renderWorkshop(); } }, 3000);
+    return;
+  }
+  clearTimeout(wsScrapArmTimer); wsScrapArmed = false; wsScrapSel = null;
+  if (key.startsWith('w:')) {
+    const k = key.slice(2);
+    equipState.weapons[k] = 0; delete equipState.gunAmmo[k]; equipState.scrapped[k] = true;
+    fixLoadout(); applyWeaponLevels();
+  } else {
+    delete equipState.owned[key];
+    for (const slot of Object.keys(equipState.equipped)) if (equipState.equipped[slot] === key) equipState.equipped[slot] = null;
+  }
+  training.crystals += info.refund; saveTraining(); if (typeof updateHUD === 'function') updateHUD();
+  afterLoadoutChange(); SFX.play('achievement', .5, 'equip-up');
+  showWorkshopToast('分解了「' + info.name + '」，返還 <b>' + info.refund + '</b> 個異質碎片', true);
+  renderWorkshop();
 }
 // 工坊打開時的提示（碎片不夠、升級完成…）：顯示在工坊標題列的正中間、最上層，約 2.2 秒後淡出
 let workshopToastEl = null, workshopToastUntil = 0, workshopToastTimer = null;
@@ -632,27 +682,27 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   }).join('');
   const weapons = Object.entries(WEAPON_UPGRADES).filter(([, w]) => !w.removed).map(([k, w]) => {   // 刪掉的武器不顯示
     const lv = equipState.weapons[k];
-    if (!lv) return row(wsIcon(w), w.name, '', w.desc, w.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
+    if (!lv) return row(wsIcon(w), w.name, '', w.desc || '', w.where || '', '<button type="button" class="ws-btn" disabled>尚未取得</button>');
     return row(wsIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < w.levels.length ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
       lv < w.levels.length ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>', w.ownedDesc);
   }).join('');
   // 右側：目前穿戴的 4 格＋背包裡其他已擁有的裝備（升級後等級即時更新）
   const wornWeaponSlots = WEAPON_SLOTS.map(s => {
     const k = equipState.loadout[s.id], w = k && WEAPON_UPGRADES[k], lv = k && equipState.weapons[k];
-    return '<div class="wss-slot weapon' + (w ? ' filled' : '') + '"><span class="wss-icon">' + (w ? equipIcon(w) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (w ? w.name + ' <em>Lv' + lv + '</em>' : '未裝備') + '</b>' +
+    return '<div class="wss-slot weapon' + (w ? ' filled' : '') + (w && wsScrapSel === 'w:' + k ? ' sel' : '') + '"' + (w ? ' data-scrap="w:' + k + '"' : '') + '><span class="wss-icon">' + (w ? equipIcon(w) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (w ? w.name + ' <em>Lv' + lv + '</em>' : '未裝備') + '</b>' +
       (w ? '<span>' + w.stat(w.levels[lv - 1]) + '</span>' : '') + '</div></div>';
   }).join('');
   const wornSlots = wornWeaponSlots + EQUIP_SLOTS.map(s => {
     const id = equipState.equipped[s.id], d = id && equipDef(id);
-    return '<div class="wss-slot' + (d ? ' filled' : '') + '"><span class="wss-icon">' + (d ? equipIcon(d) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (d ? d.name + ' <em>Lv' + equipState.owned[id] + '</em>' : '未裝備') + '</b>' +
+    return '<div class="wss-slot' + (d ? ' filled' : '') + (d && wsScrapSel === id ? ' sel' : '') + '"' + (d ? ' data-scrap="' + id + '"' : '') + '><span class="wss-icon">' + (d ? equipIcon(d) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (d ? d.name + ' <em>Lv' + equipState.owned[id] + '</em>' : '未裝備') + '</b>' +
       (d ? '<span>' + d.stat(d.levels[equipState.owned[id] - 1]) + '</span>' : '') + '</div></div>';
   }).join('');
   const wornIds = new Set(Object.values(equipState.equipped).filter(Boolean));
   const spare = EQUIPMENT.filter(d => equipState.owned[d.id] && !wornIds.has(d.id))
-    .map(d => '<span class="wss-item" title="' + d.name + ' Lv' + equipState.owned[d.id] + '：' + d.stat(d.levels[equipState.owned[d.id] - 1]) + '">' + equipIcon(d) + '<em>Lv' + equipState.owned[d.id] + '</em></span>').join('');
+    .map(d => '<span class="wss-item' + (wsScrapSel === d.id ? ' sel' : '') + '" data-scrap="' + d.id + '" title="' + d.name + ' Lv' + equipState.owned[d.id] + '：' + d.stat(d.levels[equipState.owned[d.id] - 1]) + '">' + equipIcon(d) + '<em>Lv' + equipState.owned[d.id] + '</em></span>').join('');
   const side = '<aside class="workshop-side"><h3>目前裝備</h3>' + wornSlots +
-    '<h3>背包裡的裝備</h3>' + (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">沒有其他裝備</p>') +
-    '<p class="wss-tip">換裝備：打開背包</p></aside>';
+    '<h3>背包裡的裝備</h3>' + (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">無</p>') +
+    wsScrapBox() + '</aside>';   // 最下面：選到東西＝「分解裝備」，沒選＝換裝備的提示
   const SCROLLERS = ['.workshop-body', '.workshop-side', '.workshop-main'];   // 會捲動的區塊（窄畫面時是 .workshop-main）
   const scroll = keepScroll ? SCROLLERS.map(q => workshopEl.querySelector(q)?.scrollTop || 0) : null;
   workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
@@ -686,9 +736,10 @@ function arrangeWorkshopRows() {
     cards.forEach(el => { el.style.alignSelf = ''; });
   });
 }
+function openWorkshopResetScrap() { wsScrapSel = null; wsScrapArmed = false; }
 function openWorkshop() {
   ensureWorkshop(); if (typeof closeDialogue === 'function') closeDialogue(true);
-  workshopOpen = true; Object.keys(keys).forEach(k => { keys[k] = false; });
+  workshopOpen = true; openWorkshopResetScrap(); Object.keys(keys).forEach(k => { keys[k] = false; });
   workshopEl.classList.remove('hidden'); renderWorkshop(false); sfx('menu');   // 先顯示再畫，才量得到欄位高度
 }
 function closeWorkshop(silent = false) { if (!workshopOpen) return; workshopOpen = false; workshopEl.classList.add('hidden'); if (!silent) sfx('switch'); }

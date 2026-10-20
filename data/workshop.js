@@ -19,10 +19,15 @@ const WORKSHOP_CONFIG = {
         "照明距離 8.5 格・扇形 72°・一顆電池撐 200 秒",
         "照明距離 10.0 格・扇形 80°・一顆電池撐 260 秒",
         "照明距離 11.5 格・扇形 88°・一顆電池撐 320 秒"
-      ]
+      ],
+      "iconScale": 85
     },
     "lamphelmet": {
+      "iconScale": 94,
       "iconY": -6
+    },
+    "mask": {
+      "iconY": -3
     },
     "helmet": {
       "desc": "減少受到的傷害。",
@@ -41,7 +46,14 @@ const WORKSHOP_CONFIG = {
         {
           "guard": 0.25
         }
-      ]
+      ],
+      "iconScale": 108,
+      "iconX": 2,
+      "iconY": -2
+    },
+    "earmuffs": {
+      "iconScale": 95,
+      "iconY": -5
     },
     "vest": {
       "values": [
@@ -58,7 +70,8 @@ const WORKSHOP_CONFIG = {
         {
           "guard": 0.25
         }
-      ]
+      ],
+      "iconScale": 93
     },
     "bracelet": {
       "values": [
@@ -96,7 +109,8 @@ const WORKSHOP_CONFIG = {
         {
           "speed": 0.2
         }
-      ]
+      ],
+      "iconY": -3
     },
     "acidboots": {
       "desc": "減少踩到腐蝕池、酸液的傷害；\n可以跟防毒面具疊加。"
@@ -117,7 +131,8 @@ const WORKSHOP_CONFIG = {
         },
         {},
         {}
-      ]
+      ],
+      "iconScale": 96
     },
     "w:flare": {
       "values": [
@@ -144,18 +159,28 @@ const WORKSHOP_CONFIG = {
           "reserve": 43,
           "shine": 30
         }
-      ]
+      ],
+      "iconScale": 96
     },
     "w:incendiary": {
-      "where": "於戰鬥區域：上鎖的置物箱有機率獲得"
+      "desc": "落地形成火海，可點燃油桶、油汙並焚毀怪物「生命體」；也會傷及友軍。",
+      "where": "於戰鬥區域：有機率在上鎖的置物箱取得"
     },
     "w:tranq": {
-      "desc": "使怪物睡眠或使暴走隊員冷靜下來；\n大型怪物效果較短，生命體無效。"
+      "desc": "使怪物睡眠或使暴走隊員冷靜下來；\n大型怪物效果較短，對怪物「生命體」無效。",
+      "where": "於戰鬥區域：有機率在上鎖的置物箱取得"
     }
   },
   "added": [],
   "removed": [],
-  "style": {},
+  "style": {
+    "btnFont": 12,
+    "btnPadY": 5,
+    "btnPadX": 8,
+    "btnX": 5,
+    "btnY": -3,
+    "nameSize": 15
+  },
   "order": {
     "gear": [
       "lamphelmet",

@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>開發工坊編輯器｜Y102 應變中心</title>
-<link rel="stylesheet" href="css/style.css?v=wsoff-20261021">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/style.css?v=wscrystal-20261021">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
@@ -70,6 +70,15 @@
   .pv-mode { border: 1px solid #3a4656; border-radius: 999px; background: #232a35; color: #b9c3cf; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 12px; white-space: nowrap; }
   .pv-mode:hover { border-color: #8fd3ff; color: #fff; }
   .pv-mode.sel { border-color: #8fd3ff; background: #2b526b; color: #fff; }
+  /* 預覽右側：點格子跳出能穿的東西 */
+  .preview-stage .wss-slot { cursor: pointer; }
+  .pv-slot-menu { display: flex; flex-direction: column; gap: 3px; margin: -2px 0 2px; padding: 5px; border: 1px solid rgba(255,212,121,.3); border-radius: 9px; background: rgba(16,22,30,.95); }
+  .pv-slot-menu button { text-align: left; padding: 5px 8px; border: 1px solid transparent; border-radius: 7px; background: rgba(37,43,51,.7); color: #eef2f6; cursor: pointer; font: inherit; font-size: 12px; }
+  .pv-slot-menu button:hover { border-color: #8fd3ff; }
+  .pv-slot-menu button.on { border-color: #ffd479; }
+  .pv-slot-menu button.off { color: #ffb3a8; }
+  .pv-slot-menu button em { color: #ffd479; font-style: normal; font-size: 11px; }
+  .pv-slot-menu p { margin: 2px 4px; color: #7f8a96; font-size: 11px; }
   .img-off { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }   /* 圖片位移：左右、上下＋微調按鈕 */
   .img-off label { display: flex; align-items: center; gap: 4px; font-size: 12px; }
   .img-off input { width: 58px; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; text-align: right; }
@@ -167,9 +176,9 @@
   <script src="data/supplies.js"></script>   <!-- 道具名稱（說明裡的道具上色用） -->
   <script src="data/items.js"></script>
   <script src="data/workshop.js?v=wsoff-20261021"></script>       <!-- 目前存在檔案裡的工坊設定 -->
-  <script src="js/workshop-config.js?v=wsoff-20261021"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="js/workshop-config.js?v=wsbtn-20261021"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=wsedit6-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-editor.js?v=wsoff-20261021"></script>
+  <script src="js/workshop-editor.js?v=wspvside-20261021"></script>
 </body>
 </html>

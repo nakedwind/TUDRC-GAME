@@ -81,8 +81,21 @@ const itemChanged = key => { const o = cfg.items[key]; return !!o && (WORKSHOP_T
 // 開發工坊裡圖片的大小（%）：新增的裝備存在 added 裡；原本的存在 items[key].iconScale（沒改＝原本的）
 const iconScaleOf = key => { if (isCustom(key)) return customEntry(key).iconScale || 100; const o = cfg.items[key]; return o && typeof o.iconScale === 'number' ? o.iconScale : ((WORKSHOP_BASE[key] || {}).iconScale || 100); };
 const iconScaleField = key => { const n = iconScaleOf(key);
-  return '<div class="field">圖片大小（開發工坊裡，%）<div class="num"><input type="range" data-is min="30" max="200" step="1" value="' + n + '"><input type="number" data-is min="30" max="200" step="1" value="' + n + '"></div>' +
-    '<span class="hint">100＝原本的大小；圖示框的大小不變（全部一起改請用下面「外觀」的圖示框大小）。</span></div>'; };
+  return '<div class="field">圖片大小（開發工坊裡，%）<div class="img-off"><input type="number" data-is min="30" max="200" step="1" value="' + n + '">' +
+    '<span class="nudge"><button type="button" class="ed-btn" data-scale="1" title="放大 1%">↑</button><button type="button" class="ed-btn" data-scale="-1" title="縮小 1%">↓</button>' +
+    '<button type="button" class="ed-btn" data-scale="0" title="回到原本的大小">100%</button></span></div>' +
+    '<span class="hint">30～200；100＝原本的大小。圖示框的大小不變（全部一起改請用下面「外觀」的圖示框大小）。</span></div>'; };
+function setIconScale(n) {   // 記下這件的圖片大小（%），更新輸入框
+  n = Math.max(30, Math.min(200, Math.round(n)));
+  if (isCustom(selKey)) customEntry(selKey).iconScale = n;
+  else {
+    const o = cfg.items[selKey] || (cfg.items[selKey] = {}), base = (WORKSHOP_BASE[selKey] || {}).iconScale || 100;
+    if (n === base) delete o.iconScale; else o.iconScale = n;
+    if (!Object.keys(o).length) delete cfg.items[selKey];
+    document.getElementById('itemReset').disabled = !itemChanged(selKey);
+  }
+  const inp = document.querySelector('#itemForm [data-is]'); if (inp && Number(inp.value) !== n) inp.value = n;
+}
 // 圖片位移（px）：axis＝'x' 左右、'y' 上下；新增的裝備存在 added 裡，原本的存在 items[key].iconX／iconY
 const iconOffKey = axis => axis === 'x' ? 'iconX' : 'iconY';
 const iconOffOf = (key, axis) => { const k = iconOffKey(axis); if (isCustom(key)) return customEntry(key)[k] || 0; const o = cfg.items[key]; return o && typeof o[k] === 'number' ? o[k] : 0; };
@@ -216,16 +229,9 @@ document.getElementById('itemForm').addEventListener('input', e => {
   if (e.target.dataset.io) {   // 圖片位移（px）
     const n = Math.round(Number(e.target.value)); if (e.target.value.trim() === '' || !Number.isFinite(n)) return;
     setIconOff(e.target.dataset.io, n);
-  } else if (e.target.hasAttribute('data-is')) {   // 圖片大小（%）：滑桿和數字框同步
+  } else if (e.target.hasAttribute('data-is')) {   // 圖片大小（%）：直接打數字（打到一半、超出範圍先不套用）
     const n = Math.round(Number(e.target.value)); if (!Number.isFinite(n) || n < 30 || n > 200) return;
-    document.querySelectorAll('#itemForm [data-is]').forEach(el => { if (el !== e.target) el.value = n; });
-    if (isCustom(selKey)) customEntry(selKey).iconScale = n;
-    else {
-      const o = cfg.items[selKey] || (cfg.items[selKey] = {}), base = (WORKSHOP_BASE[selKey] || {}).iconScale || 100;
-      if (n === base) delete o.iconScale; else o.iconScale = n;
-      if (!Object.keys(o).length) delete cfg.items[selKey];
-      document.getElementById('itemReset').disabled = !itemChanged(selKey);
-    }
+    setIconScale(n);
   } else if (ci !== undefined) {   // 原本的裝備／武器：開發／升級的費用
     const i = +ci, txt = e.target.value.trim(), base = baseCost(selKey)[i];
     if (txt !== '' && !/^\d+$/.test(txt)) return;   // 只收整數（打到一半先不套用）
@@ -290,6 +296,11 @@ document.getElementById('itemForm').addEventListener('change', e => {   // 下�
 });
 document.getElementById('itemForm').addEventListener('click', async e => {
   const id = e.target.id;
+  const sb = e.target.closest('[data-scale]');
+  if (sb) {   // 圖片大小：↑↓ 一次 1%、回到 100%
+    const d = Number(sb.dataset.scale); setIconScale(d ? iconScaleOf(selKey) + d : 100);
+    saveDraft(); renderList(); renderPreview(); return;
+  }
   const nb = e.target.closest('[data-nudge]');
   if (nb) {   // 圖片位移：↑↓←→ 一次 1px、歸零
     if (nb.dataset.nudge === '0') { setIconOff('x', 0); setIconOff('y', 0); }
@@ -350,7 +361,14 @@ const STYLE_FIELDS = [
     ['cardH', '裝備欄位最小高度（0＝自動）', 'num', 0, 200, 1],
     ['gap', '欄位之間的間距', 'num', 0, 30, 1],
     ['iconSize', '圖示框大小', 'num', 36, 120, 1],
-    ['btnW', '按鈕最小寬度（0＝自動）', 'num', 0, 200, 1],
+  ]],
+  ['開發／升級按鈕', [
+    ['btnW', '最小寬度（0＝依文字自動）', 'num', 0, 200, 1],
+    ['btnFont', '文字大小', 'num', 9, 24, 1],
+    ['btnPadY', '上下內距（越大按鈕越高）', 'num', 0, 20, 1],
+    ['btnPadX', '左右內距（越大按鈕越寬）', 'num', 0, 30, 1],
+    ['btnX', '左右位移（正數＝往右）', 'num', -40, 40, 1],
+    ['btnY', '上下位移（正數＝往下）', 'num', -40, 40, 1],
   ]],
   ['裝備名稱', [['nameSize', '文字大小', 'num', 9, 30, 1], ['nameColor', '文字顏色：每一格最上面的裝備、武器名稱（例如「手槍」）', 'color']]],
   ['說明／目前效果', [['descSize', '文字大小', 'num', 8, 24, 1], ['descColor', '文字顏色：名稱下面的說明、目前的效果（例如「傷害 5・彈匣 6 發」）', 'color']]],
@@ -423,12 +441,11 @@ function arrangeRows(root) {
 }
 function renderPreview() {
   const st = styleNow(), stage = document.getElementById('previewStage');
-  const keepScroll = stage.querySelector('.workshop-body')?.scrollTop || 0;
+  const keepScroll = stage.querySelector('.workshop-body')?.scrollTop || 0, keepSide = stage.querySelector('.workshop-side')?.scrollTop || 0;
   stage.style.width = (st.panelW + 32) + 'px'; stage.style.height = (st.panelH + 32) + 'px';   // 跟遊戲一樣：視窗外面留 16px
   const gear = gearKeys().filter(k => !isRemoved(k)).map(previewRow).join('');   // 刪掉的不顯示；新增的接在最後面
   const weapons = weaponKeys().filter(k => !isRemoved(k)).map(previewRow).join('');   // 刪掉的武器不顯示
-  const side = '<aside class="workshop-side"><h3>目前裝備</h3>' +
-    ['主武器', '副武器', '頭部', '身體', '隨身物品1', '隨身物品2'].map(n => '<div class="wss-slot"><span class="wss-icon"><i>＋</i></span><div><small>' + n + '</small><b>（預覽）</b></div></div>').join('') + '</aside>';
+  const side = pvSideHtml();   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
   stage.innerHTML = '<div id="workshop"><section class="workshop-card" role="dialog" aria-label="開發工坊預覽">' +
     '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>使用異質碎片來開發裝備、武器升級</p></div>' +
     '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
@@ -438,18 +455,98 @@ function renderPreview() {
   applyWorkshopStyle(ws, cfg);
   arrangeRows(ws);
   const body = stage.querySelector('.workshop-body'); if (body) body.scrollTop = keepScroll;
+  const sideEl = stage.querySelector('.workshop-side'); if (sideEl) sideEl.scrollTop = keepSide;
   if (document.getElementById('assetGrid')) renderAssets();
   document.getElementById('autoArrange').hidden = !orderCustom('gear') && !orderCustom('weapons');   // 拖曳過才出現
 }
 // 預覽的裝備狀態（按鈕）：start＝全體未開發、未撿到；lv1～lv5＝全部那一級（最高級＝已達最高等級）
 let previewMode = 'start';
+// ---- 預覽右側：可以穿上／卸下、選了可以分解（只是預覽、測試用，不會動到遊戲的存檔）----
+// 擁有的東西照「裝備狀態」：全體未開發＝只有一開始就有的武器（Lv1）；全部 LvN＝每一件都是 LvN。
+const PV_SLOTS = [
+  { id: 'main', name: '主武器', weapon: true }, { id: 'sub', name: '副武器', weapon: true },
+  ...EQUIP_SLOTS.map(sl => ({ id: sl.id, name: sl.name, kinds: sl.kinds })),
+];
+const pv = { equipped: {}, scrapped: new Set(), sel: null, armed: false, menu: null };
+let pvArmTimer = null;
+function pvOwned(key) {
+  if (isRemoved(key) || pv.scrapped.has(key) || !getDef(key)) return false;
+  return previewMode === 'start' ? isWeapon(key) && !isField(key, getDef(key)) : true;
+}
+const pvLv = key => previewMode === 'start' ? 1 : Math.min(getDef(key).levels.length, +previewMode.slice(2) || 1);
+function pvReset() {   // 換裝備狀態：回到遊戲一開始的穿法（主武器手槍、副武器照明彈槍）
+  pv.equipped = { main: pvOwned('w:pistol') ? 'w:pistol' : null, sub: pvOwned('w:flare') ? 'w:flare' : null };
+  pv.scrapped = new Set(); pv.sel = null; pv.armed = false; pv.menu = null;
+}
+pvReset();
+const pvFits = (slot, key) => slot.weapon ? isWeapon(key) : !isWeapon(key) && slot.kinds.includes(getDef(key).kind);
+function pvRefund(key) {   // 跟遊戲一樣：Lv1＝開發費用的一半；Lv2 以上＝升到目前這級的費用的一半；戰鬥區域撿到的 Lv1＝0
+  const lv = pvLv(key), w = isWeapon(key), def = getDef(key);
+  const paid = lv >= 2 ? effCost(key, w ? lv - 2 : lv - 1) : (!w && !isField(key, def) ? effCost(key, 0) : 0);
+  return Math.floor((paid || 0) / 2);
+}
+function pvSideHtml() {
+  for (const k of Object.keys(pv.equipped)) if (pv.equipped[k] && !pvOwned(pv.equipped[k])) pv.equipped[k] = null;   // 刪掉的、分解掉的：卸下
+  const icon = key => { const v = itemView(key), d = getDef(key); return v.image ? '<img src="' + esc(v.image) + '" alt="">' : '<i>' + esc(d.icon || '') + '</i>'; };
+  const slots = PV_SLOTS.map(sl => {
+    const key = pv.equipped[sl.id], lv = key && pvLv(key);
+    const menu = pv.menu === sl.id ? '<div class="pv-slot-menu">' +
+      allKeys().filter(k => pvOwned(k) && pvFits(sl, k)).map(k => '<button type="button" data-pv-equip="' + sl.id + ':' + esc(k) + '"' + (k === key ? ' class="on"' : '') + '>' + esc(itemView(k).name) + ' <em>Lv' + pvLv(k) + '</em></button>').join('') +
+      (key ? '<button type="button" data-pv-equip="' + sl.id + ':" class="off">卸下</button>' : '') +
+      (allKeys().some(k => pvOwned(k) && pvFits(sl, k)) || key ? '' : '<p>沒有能穿在這格的（換上面的「裝備狀態」）</p>') + '</div>' : '';
+    return '<div class="wss-slot' + (sl.weapon ? ' weapon' : '') + (key ? ' filled' : '') + (key && pv.sel === key ? ' sel' : '') + '" data-pv-slot="' + sl.id + '"><span class="wss-icon">' + (key ? icon(key) : '<i>＋</i>') + '</span><div><small>' + sl.name + '</small><b>' +
+      (key ? esc(itemView(key).name) + ' <em>Lv' + lv + '</em>' : '未裝備') + '</b>' + (key ? '<span>' + esc(workshopPlain(statText(key, lv - 1))) + '</span>' : '') + '</div></div>' + menu;
+  }).join('');
+  const worn = new Set(Object.values(pv.equipped).filter(Boolean));
+  const spare = gearKeys().filter(k => pvOwned(k) && !worn.has(k)).map(k => { const v = itemView(k);
+    return '<span class="wss-item' + (pv.sel === k ? ' sel' : '') + '" data-pv-item="' + esc(k) + '" title="' + esc(v.name) + ' Lv' + pvLv(k) + '">' + icon(k) + '<em>Lv' + pvLv(k) + '</em></span>'; }).join('');
+  let bottom = '<p class="wss-tip">點格子＝穿上／卸下（預覽用）</p>';
+  if (pv.sel && pvOwned(pv.sel)) {
+    const name = itemView(pv.sel).name;
+    bottom = pv.sel === 'w:pistol'
+      ? '<div class="wss-scrap"><button type="button" class="wss-scrap-btn" disabled>無法分解</button><small>「' + esc(name) + '」是溫特一開始就持有的武器，不能分解或丟棄</small></div>'
+      : '<div class="wss-scrap"><button type="button" class="wss-scrap-btn' + (pv.armed ? ' armed' : '') + '" data-pv-scrap>' + (pv.armed ? '確定分解「' + esc(name) + '」？' : '分解裝備') + '</button>' +
+        '<small>返還一半的異質碎片（<i class="ws-shard" role="img" aria-label="異質碎片"></i>' + pvRefund(pv.sel) + '）</small></div>';
+  }
+  return '<aside class="workshop-side"><h3>目前裝備</h3>' + slots + '<h3>背包裡的裝備</h3>' +
+    (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">無</p>') + bottom + '</aside>';
+}
+const allKeys = () => gearKeys().concat(weaponKeys());
+function pvEquip(slotId, key) {
+  if (key) for (const [k, v] of Object.entries(pv.equipped)) if (v === key && k !== slotId) pv.equipped[k] = pv.equipped[slotId] || null;   // 已經穿在別格：兩格交換
+  pv.equipped[slotId] = key || null; pv.menu = null;
+}
+// 右側的點擊（在 previewStage 的點擊裡最先處理）：回傳 true＝處理掉了
+function pvSideClick(e) {
+  if (!e.target.closest('.workshop-side')) return false;
+  const eq = e.target.closest('[data-pv-equip]');
+  if (eq) { const [slot, key] = eq.dataset.pvEquip.split(/:(.*)/s); pvEquip(slot, key); renderPreview(); return true; }
+  if (e.target.closest('[data-pv-scrap]')) {   // 分解：按兩次才算（跟遊戲一樣）；預覽裡只是拿掉，不會影響遊戲
+    const key = pv.sel; if (!key) return true;
+    if (!pv.armed) { pv.armed = true; clearTimeout(pvArmTimer); pvArmTimer = setTimeout(() => { if (pv.armed) { pv.armed = false; renderPreview(); } }, 3000); renderPreview(); return true; }
+    clearTimeout(pvArmTimer); pv.armed = false; pv.scrapped.add(key); pv.sel = null;
+    setStatus('（預覽）分解了「' + itemView(key).name + '」，返還 ' + pvRefund(key) + ' 個異質碎片——只是預覽，換「裝備狀態」就會回來，不會影響遊戲');
+    renderPreview(); return true;
+  }
+  const slot = e.target.closest('[data-pv-slot]');
+  if (slot) {
+    const id = slot.dataset.pvSlot, key = pv.equipped[id];
+    pv.menu = pv.menu === id ? null : id;   // 打開／關掉這格的選單
+    if (key) { pv.sel = pv.sel === key && !pv.menu ? null : key; pv.armed = false; }
+    renderPreview(); return true;
+  }
+  const item = e.target.closest('[data-pv-item]');
+  if (item) { const k = item.dataset.pvItem; pv.sel = pv.sel === k ? null : k; pv.armed = false; pv.menu = null; renderPreview(); return true; }
+  if (pv.menu) { pv.menu = null; renderPreview(); }
+  return true;
+}
 function renderPreviewModes() {
   const modes = [['start', '全體未開發、未撿到']].concat(WORKSHOP_LV_INDEX.map(i => ['lv' + (i + 1), '全部 Lv' + (i + 1) + (i + 1 < WORKSHOP_MAX_LV ? '（可升級）' : '（已達最高等級）')]));
   document.getElementById('previewModes').innerHTML = modes.map(([id, n]) => '<button type="button" class="pv-mode' + (previewMode === id ? ' sel' : '') + '" data-mode="' + id + '">' + n + '</button>').join('');
 }
 document.getElementById('previewModes').addEventListener('click', e => {
   const b = e.target.closest('[data-mode]'); if (!b) return;
-  previewMode = b.dataset.mode; renderPreviewModes(); renderPreview();
+  previewMode = b.dataset.mode; pvReset(); renderPreviewModes(); renderPreview();
 });
 renderPreviewModes();
 
@@ -533,6 +630,7 @@ async function openAssetFolder(key) {
 }
 // 點預覽裡的欄位＝在左邊選它
 document.getElementById('previewStage').addEventListener('click', e => {
+  if (pvSideClick(e)) return;   // 右側：穿上／卸下、分解
   const r = e.target.closest('.ws-row[data-key]'); if (!r) return;
   selKey = r.dataset.key; renderList(); renderItemForm(); renderPreview();
   document.querySelector('#itemList .sel')?.scrollIntoView({ block: 'nearest' });

@@ -1672,10 +1672,24 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .wss-slot span { color: #a9d8c9; font-size: 10px; line-height: 1.35; }
 .wss-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .wss-item { position: relative; display: grid; place-items: center; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.08); border-radius: 9px; background: rgba(37,43,51,.55); }
-.wss-item img { width: 80%; height: 80%; object-fit: contain; image-rendering: pixelated; }
+.wss-item img { width: 80%; height: auto; aspect-ratio: 1; object-fit: contain; image-rendering: pixelated; }   /* 高度跟寬度算（格子是 aspect-ratio 撐出來的，height:% 會失效、大圖會撐爆格子） */
 .wss-item em { position: absolute; right: 3px; bottom: 1px; font-size: 9px; text-shadow: 0 1px 2px #000; }
 .wss-empty, .wss-tip { margin: 0; color: #7f8a96; font-size: 11px; }
 .wss-tip { margin-top: auto; padding-top: 8px; }
+/* 分解：右側點一下選它（亮框），最下面出現「分解裝備」（背包裡的裝備變多也一直在最下面） */
+.wss-slot.filled, .wss-item { cursor: pointer; }
+.wss-slot.filled:hover, .wss-item:hover { border-color: rgba(255,212,121,.45); }
+.wss-slot.sel, .wss-item.sel { border-color: #ffd479; box-shadow: 0 0 0 1px #ffd479 inset, 0 0 10px rgba(255,212,121,.25); }
+.wss-scrap { margin-top: auto; padding-top: 10px; display: flex; flex-direction: column; align-items: stretch; gap: 4px; }
+.wss-scrap-btn { padding: 7px 10px; border: 1px solid #c96a5a; border-radius: 9px; background: linear-gradient(180deg, #b8574a, #8e3a31); color: #fff3ee; cursor: pointer;
+  font: 800 13px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.25), 0 2px 0 #5e2520; }
+.wss-scrap-btn:hover:not(:disabled) { filter: brightness(1.08); }
+.wss-scrap-btn.armed { background: linear-gradient(180deg, #e0574a, #b23128); border-color: #ff9a8a; }
+.wss-scrap-btn:disabled { border-color: rgba(255,255,255,.08); background: rgba(0,0,0,.28); color: #9aa6b2; cursor: default; box-shadow: none; }
+.wss-scrap small { color: #9d927d; font-size: 11px; text-align: center; line-height: 1.4; }
+.wss-scrap small .ws-shard { display: inline-block;   /* 小字裡的結晶：用沒有光暈的那張（格子小，光暈會被切掉） */
+  width: 12px; height: 16px; margin: -4px 1px -4px 0; vertical-align: middle;
+  background: url("../images/碎片鑰匙/anomalous-shard-ground-crystal.png") -7.94px -5.44px / 28px 28px no-repeat; }
 @media (max-width: 760px) { .workshop-main { flex-direction: column; overflow-y: auto; } .workshop-main > .workshop-body { overflow: visible; } .workshop-side { width: auto; border-left: 0; border-top: 1px solid rgba(255,212,121,.13); overflow: visible; } }
 .ws-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ws-gap, 7px); }   /* 裝備、武器各分左右兩欄 */
 .ws-row { min-height: var(--ws-card-h, 0px); display: grid; grid-template-columns: var(--ws-icon, 66px) minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; background: rgba(37,43,51,.45); }
@@ -1685,7 +1699,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-text b { font-size: var(--ws-name-size, 14px); color: var(--ws-name-color, #fff8e7); }
 .ws-text span { color: var(--ws-desc-color, #aab5c1); font-size: var(--ws-desc-size, 12px); line-height: 1.5; }
 .ws-text small { color: var(--ws-next-color, #a9d8c9); font-size: var(--ws-next-size, 11px); }
-.ws-btn { align-self: start; min-width: var(--ws-btn-w, 0px); white-space: nowrap; padding: 6px 10px; border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 13px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
+.ws-btn { align-self: start; min-width: var(--ws-btn-w, 0px); white-space: nowrap; padding: var(--ws-btn-pad-y, 6px) var(--ws-btn-pad-x, 10px); border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 var(--ws-btn-font, 13px) "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20;
+  translate: var(--ws-btn-x, 0px) var(--ws-btn-y, 0px); }   /* 按鈕的大小、位置：開發工坊編輯器的「開發／升級按鈕」（--ws-btn-*） */
 .ws-btn b { margin-left: 4px; }
 /* 價錢前面的結晶碎片圖（水晶本體約 9×14，落在文字和數字的正中間）。
    用背景圖畫在按鈕同一層：不要用 <img>＋position，那樣捲動時圖會自己一層、比文字慢一拍。
@@ -1694,7 +1709,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   background: url("../images/碎片鑰匙/anomalous-shard-ground-glow.png") 0 1.56px / 28px 28px no-repeat; pointer-events: none; }
 .ws-btn:disabled .ws-shard { filter: grayscale(1) opacity(.6); }
 /* 每個欄位：左邊圖示；第一行＝名字＋右邊的按鈕；說明文字在下面、可以一路寫到按鈕下方（比較不會換行） */
-.ws-grid .ws-row { grid-template-rows: auto auto auto auto; align-items: start; align-content: center; column-gap: 10px; row-gap: 2px; }
+.ws-grid .ws-row { grid-template-rows: auto auto auto auto; align-items: start; align-content: start; column-gap: 10px; row-gap: 2px; }
 .ws-grid .ws-icon { grid-column: 1; grid-row: 1 / -1; align-self: center; }
 .ws-grid .ws-text { display: contents; }
 .ws-grid .ws-text b { grid-column: 2; grid-row: 1; align-self: center; }

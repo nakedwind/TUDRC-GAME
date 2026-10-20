@@ -12,6 +12,9 @@ const WORKSHOP_STYLE_DEFAULT = {
   gap: 7,                // 裝備欄位之間的間距（px）
   iconSize: 66,          // 左邊圖示框的大小（px）
   btnW: 0,               // 「開發／升級」按鈕的最小寬度（px；0＝依文字自動）
+  btnFont: 13,           // 按鈕的文字大小（px）
+  btnPadY: 6, btnPadX: 10,   // 按鈕的上下、左右內距（px）：按鈕的高度、寬度跟著變
+  btnX: 0, btnY: 0,      // 按鈕的位移（px；正數＝往右／往下）
   nameSize: 14, nameColor: '#fff8e7',   // 裝備名稱
   descSize: 12, descColor: '#aab5c1',   // 說明／目前效果
   nextSize: 11, nextColor: '#a9d8c9',   // 下一級效果、取得地點
@@ -24,6 +27,7 @@ const WORKSHOP_STYLE_DEFAULT = {
 const WORKSHOP_STYLE_VARS = {
   panelW: ['--ws-panel-w', 'px'], panelH: ['--ws-panel-h', 'px'], cardH: ['--ws-card-h', 'px'], gap: ['--ws-gap', 'px'],
   iconSize: ['--ws-icon', 'px'], btnW: ['--ws-btn-w', 'px'],
+  btnFont: ['--ws-btn-font', 'px'], btnPadY: ['--ws-btn-pad-y', 'px'], btnPadX: ['--ws-btn-pad-x', 'px'], btnX: ['--ws-btn-x', 'px'], btnY: ['--ws-btn-y', 'px'],
   nameSize: ['--ws-name-size', 'px'], nameColor: ['--ws-name-color', ''],
   descSize: ['--ws-desc-size', 'px'], descColor: ['--ws-desc-color', ''],
   nextSize: ['--ws-next-size', 'px'], nextColor: ['--ws-next-color', ''],
