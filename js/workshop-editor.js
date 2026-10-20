@@ -297,7 +297,7 @@ function previewRow(key) {
   const def = getDef(key), v = itemView(key), mode = document.getElementById('previewMode').value;
   const icon = v.image ? '<img src="' + esc(v.image) + '" alt="">' : '<i>' + esc(def.icon || '') + '</i>';
   const row = (lvText, stat, next, btn, about) => '<div class="ws-row' + (key === selKey ? ' ed-sel' : '') + '" data-key="' + esc(key) + '"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + esc(v.name) + lvText + '</b>' + (about ? '<span class="ws-about">' + wsColor(esc(about)) + '</span>' : '') + '<span>' + wsColor(esc(stat)) + '</span>' + (next ? '<small>' + wsColor(esc(next)) + '</small>' : '') + '</div>' + btn + '</div>';
-  const cost = n => '<b>◆ ' + n + '</b>', w = isWeapon(key);
+  const cost = n => '<b><img class=\"ws-shard\" src=\"images/碎片鑰匙/anomalous-shard-ground-glow.png\" alt=\"異質碎片\">' + n + '</b>', w = isWeapon(key);
   const upCost = lv => w ? def.cost[lv - 1] : def.cost[lv];
   const owned = mode === 'start' ? !isField(key, def) && w : mode !== 'none' || (w && !isField(key, def));   // 這個預覽狀態下有沒有拿到（遊戲一開始：只有手槍這類一開始就有的武器）
   if (!owned) {
@@ -334,7 +334,7 @@ function renderPreview() {
     ['主武器', '副武器', '頭部', '身體', '隨身物品1', '隨身物品2'].map(n => '<div class="wss-slot"><span class="wss-icon"><i>＋</i></span><div><small>' + n + '</small><b>（預覽）</b></div></div>').join('') + '</aside>';
   stage.innerHTML = '<div id="workshop"><section class="workshop-card" role="dialog" aria-label="開發工坊預覽">' +
     '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>用異質碎片開發新裝備，或把裝備、武器升級</p></div>' +
-    '<span class="workshop-wallet"><small>異質碎片</small><b>◆ 87</b></span><button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
+    '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
     '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3><div class="ws-grid">' + gear + '</div><h3>武器</h3><div class="ws-grid">' + weapons + '</div></div>' + side + '</div></section></div>';
   const ws = stage.querySelector('#workshop');
   ws.style.padding = '16px';

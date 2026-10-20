@@ -1641,9 +1641,6 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .workshop-title small { color: #d8ae5d; font-size: 10px; letter-spacing: .16em; }
 .workshop-title h2 { margin: 2px 0 3px; color: #fff8e7; font-size: 22px; }
 .workshop-title p { margin: 0; color: #929dab; font-size: 12px; }
-.workshop-wallet { flex: none; min-width: 104px; padding: 7px 12px; border: 1px solid rgba(255,212,121,.25); border-radius: 9px; background: rgba(83,65,31,.22); text-align: right; }
-.workshop-wallet small { display: block; color: #9d927d; font-size: 10px; }
-.workshop-wallet b { display: block; color: #ffd479; font-size: 20px; }
 .workshop-close { width: 32px; height: 32px; flex: none; padding: 0; border: 1px solid #59616c; border-radius: 50%; background: #202730; color: #dfe7ee; cursor: pointer; font-size: 19px; }
 .workshop-close:hover { border-color: #c9d3dc; background: #2b3440; }
 .workshop-body { flex: 1; min-height: 0; overflow-y: auto; padding: 10px 16px 16px; display: flex; flex-direction: column; gap: 7px; scrollbar-color: #776642 transparent; }
@@ -1680,6 +1677,9 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-text small { color: var(--ws-next-color, #a9d8c9); font-size: var(--ws-next-size, 11px); }
 .ws-btn { align-self: start; min-width: var(--ws-btn-w, 0px); white-space: nowrap; padding: 6px 10px; border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 13px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
 .ws-btn b { margin-left: 4px; }
+/* 價錢前面的結晶碎片圖：圖本身有一圈光暈，用負的邊距讓水晶本體（約 9×14）落在文字和數字的正中間 */
+.ws-btn .ws-shard { width: 28px; height: 28px; margin: -8px -5.2px -8px -12.3px; vertical-align: middle; position: relative; top: -1.5px; pointer-events: none; }   /* top：跟文字的中線對齊 */
+.ws-btn:disabled .ws-shard { filter: grayscale(1) opacity(.6); }
 /* 每個欄位：左邊圖示；第一行＝名字＋右邊的按鈕；說明文字在下面、可以一路寫到按鈕下方（比較不會換行） */
 .ws-grid .ws-row { grid-template-rows: auto auto auto auto; align-items: start; align-content: center; column-gap: 10px; row-gap: 2px; }
 .ws-grid .ws-icon { grid-column: 1; grid-row: 1 / -1; align-self: center; }
@@ -1694,9 +1694,10 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-text i.ws-where { font-style: normal; color: var(--ws-where-color, #A958E2); }
 /* 工坊打開時的提示（碎片不夠、升級完成…）：標題列正中間、最上層 */
 .workshop-toast { position: absolute; left: 50%; top: 50%; z-index: 5; transform: translate(-50%, -50%); padding: 9px 16px; border-radius: 9px;
-  background: rgba(36,40,46,.94); color: #eef2f6; font-size: 15px; font-weight: 700; white-space: nowrap; pointer-events: none;
-  box-shadow: 0 6px 18px rgba(0,0,0,.45); animation: workshopToastIn .16s ease-out both; transition: opacity .3s ease; }
+  border: 1px solid rgba(255,212,121,.45); background: #2c2519; color: #f1e6cf; font-size: 15px; font-weight: 700; white-space: nowrap; pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,.55), inset 0 0 0 1px rgba(255,212,121,.06); animation: workshopToastIn .16s ease-out both; transition: opacity .3s ease; }
 .workshop-toast.leaving { opacity: 0; }
+.workshop-toast b { color: #ffd479; font-weight: 900; font-size: 17px; }   /* 還差幾個：金色粗體 */
 @keyframes workshopToastIn { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
 .ws-btn:hover:not(:disabled) { filter: brightness(1.07); }
 .ws-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 2px rgba(120,70,10,.3); }

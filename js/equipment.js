@@ -558,9 +558,10 @@ function ensureWorkshop() {
 }
 // 工坊打開時的提示（碎片不夠、升級完成…）：顯示在工坊標題列的正中間、最上層，約 2.2 秒後淡出
 let workshopToastEl = null, workshopToastUntil = 0, workshopToastTimer = null;
-function showWorkshopToast(text) {
+const WS_SHARD_IMG = '<img class="ws-shard" src="images/碎片鑰匙/anomalous-shard-ground-glow.png" alt="異質碎片">';
+function showWorkshopToast(text, html = false) {   // html＝true：text 是自己組的 HTML（例如數字加粗）
   if (!workshopToastEl) { workshopToastEl = document.createElement('div'); workshopToastEl.className = 'workshop-toast'; }
-  workshopToastEl.textContent = text;
+  if (html) workshopToastEl.innerHTML = text; else workshopToastEl.textContent = text;
   workshopToastEl.classList.remove('leaving'); void workshopToastEl.offsetWidth;   // 重新播放出現的動畫
   workshopToastUntil = performance.now() + 2200;
   attachWorkshopToast();
@@ -574,8 +575,8 @@ function attachWorkshopToast() {   // 工坊每次重畫都會換掉標題列，
 function spendCrystals(n) {
   if (training.crystals < n) {
     sfx('error');
-    const msg = '異質碎片不夠（還差 ' + (n - training.crystals) + ' 個）';
-    if (workshopOpen) showWorkshopToast(msg); else systemNotice(msg, true);
+    const short = n - training.crystals, msg = '異質碎片不夠（還差 ' + short + ' 個）';
+    if (workshopOpen) showWorkshopToast('異質碎片不夠（還差 <b>' + short + '</b> 個）', true); else systemNotice(msg, true);
     return false;
   }
   training.crystals -= n; saveTraining(); if (typeof updateHUD === 'function') updateHUD(); return true;
@@ -606,7 +607,7 @@ const wsColor = text => String(text)
 function renderWorkshop() {
   // about＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面（開發工坊編輯器可以寫）
   const row = (icon, name, lvText, stat, next, btn, about) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b>' + (about ? '<span class="ws-about">' + wsColor(about) + '</span>' : '') + '<span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
-  const cost = n => '<b>◆ ' + n + '</b>';
+  const cost = n => '<b>' + WS_SHARD_IMG + n + '</b>';   // 按鈕上的價錢：結晶碎片圖＋數字
   const gear = EQUIPMENT.map(def => {
     const lv = equipState.owned[def.id], icon = equipIcon(def);
     if (!lv) {
@@ -641,7 +642,7 @@ function renderWorkshop() {
     '<p class="wss-tip">換裝備：打開背包</p></aside>';
   workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
     '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>用異質碎片開發新裝備，或把裝備、武器升級</p></div>' +
-    '<span class="workshop-wallet"><small>異質碎片</small><b>◆ ' + training.crystals + '</b></span><button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +
+    '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
     '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3><div class="ws-grid">' + gear + '</div><h3>武器</h3><div class="ws-grid">' + weapons + '</div></div>' + side + '</div></section>';
   arrangeWorkshopRows();
   attachWorkshopToast();
