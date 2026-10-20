@@ -547,6 +547,7 @@ let workshopEl = null, workshopOpen = false;
 function ensureWorkshop() {
   if (workshopEl) return;
   workshopEl = document.createElement('div'); workshopEl.id = 'workshop'; workshopEl.className = 'hidden';
+  if (typeof applyWorkshopStyle === 'function') applyWorkshopStyle(workshopEl);   // 開發工坊編輯器改過的外觀（data/workshop.js、js/workshop-config.js）
   workshopEl.addEventListener('click', e => {
     if (e.target === workshopEl || e.target.closest('.workshop-close')) { closeWorkshop(); return; }
     const b = e.target.closest('[data-ws]'); if (!b) return;
@@ -555,8 +556,28 @@ function ensureWorkshop() {
   });
   document.getElementById('wrap').appendChild(workshopEl);
 }
+// 工坊打開時的提示（碎片不夠、升級完成…）：顯示在工坊標題列的正中間、最上層，約 2.2 秒後淡出
+let workshopToastEl = null, workshopToastUntil = 0, workshopToastTimer = null;
+function showWorkshopToast(text) {
+  if (!workshopToastEl) { workshopToastEl = document.createElement('div'); workshopToastEl.className = 'workshop-toast'; }
+  workshopToastEl.textContent = text;
+  workshopToastEl.classList.remove('leaving'); void workshopToastEl.offsetWidth;   // 重新播放出現的動畫
+  workshopToastUntil = performance.now() + 2200;
+  attachWorkshopToast();
+  clearTimeout(workshopToastTimer);
+  workshopToastTimer = setTimeout(() => { workshopToastEl.classList.add('leaving'); setTimeout(() => { if (performance.now() >= workshopToastUntil) workshopToastEl.remove(); }, 300); }, 2200);
+}
+function attachWorkshopToast() {   // 工坊每次重畫都會換掉標題列，提示要再放回去
+  const head = workshopEl && workshopEl.querySelector('.workshop-head');
+  if (head && workshopToastEl && performance.now() < workshopToastUntil + 300) head.appendChild(workshopToastEl);
+}
 function spendCrystals(n) {
-  if (training.crystals < n) { sfx('error'); systemNotice('異質碎片不夠（還差 ' + (n - training.crystals) + ' 個）', true); return false; }
+  if (training.crystals < n) {
+    sfx('error');
+    const msg = '異質碎片不夠（還差 ' + (n - training.crystals) + ' 個）';
+    if (workshopOpen) showWorkshopToast(msg); else systemNotice(msg, true);
+    return false;
+  }
   training.crystals -= n; saveTraining(); if (typeof updateHUD === 'function') updateHUD(); return true;
 }
 function workshopBuy(kind, id) {
@@ -564,21 +585,26 @@ function workshopBuy(kind, id) {
     const def = equipDef(id); if (!def || equipState.owned[id] || def.source !== 'develop') return;
     if (!spendCrystals(def.cost[0])) return;
     grantEquipment(id, '諾亞開發好了');
+    showWorkshopToast('🎁 諾亞開發好了「' + def.name + '」');
   } else if (kind === 'up') {
     const def = equipDef(id), lv = equipState.owned[id]; if (!def || !lv || lv >= 3) return;
     if (!spendCrystals(def.cost[lv])) return;
     equipState.owned[id] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
-    systemNotice('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
+    showWorkshopToast('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
   } else if (kind === 'wp') {
     const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= 3) return;
     if (!spendCrystals(w.cost[lv - 1])) return;
     equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); SFX.play('achievement', .7, 'equip-up');
-    systemNotice('🔧 「' + w.name + '」升到 Lv' + (lv + 1));
+    showWorkshopToast('🔧 「' + w.name + '」升到 Lv' + (lv + 1));
   }
   renderWorkshop();
 }
+// 說明文字上色：數字（Lv2、8 格、1.4 秒、−10%…）＝橘色、「戰鬥區域」＝紫色（顏色在 css/style.css 的 .ws-num／.ws-where）
+const wsColor = text => String(text)
+  .replace(/(?:Lv)?[+\-−]?\d+(?:\.\d+)?[%°]?/g, m => '<i class="ws-num">' + m + '</i>')
+  .replace(/戰鬥區域/g, '<i class="ws-where">戰鬥區域</i>');
 function renderWorkshop() {
-  const row = (icon, name, lvText, stat, next, btn) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b><span>' + stat + '</span>' + (next ? '<small>' + next + '</small>' : '') + '</div>' + btn + '</div>';
+  const row = (icon, name, lvText, stat, next, btn) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b><span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
   const cost = n => '<b>◆ ' + n + '</b>';
   const gear = EQUIPMENT.map(def => {
     const lv = equipState.owned[def.id], icon = equipIcon(def);
@@ -615,12 +641,34 @@ function renderWorkshop() {
   workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
     '<header class="workshop-head"><div class="workshop-title"><small>諾亞的開發工坊</small><h2>裝備開發・升級</h2><p>用異質碎片開發新裝備，或把裝備、武器升級</p></div>' +
     '<span class="workshop-wallet"><small>異質碎片</small><b>◆ ' + training.crystals + '</b></span><button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +
-    '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3>' + gear + '<h3>武器</h3>' + weapons + '</div>' + side + '</div></section>';
+    '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3><div class="ws-grid">' + gear + '</div><h3>武器</h3><div class="ws-grid">' + weapons + '</div></div>' + side + '</div></section>';
+  arrangeWorkshopRows();
+  attachWorkshopToast();
+}
+// 左右兩欄：同一排的兩個欄位要一樣高（說明兩行的配兩行、三行的配三行），不會一高一矮擺在一起。
+// 先量每個欄位的高度，再把一樣高的兩兩配成一排；配不到的單獨一排（放左邊）。
+function arrangeWorkshopRows() {
+  if (!workshopEl || workshopEl.classList.contains('hidden')) return;   // 看不到的時候量不到高度，打開時會再排一次
+  workshopEl.querySelectorAll('.ws-grid').forEach(grid => {
+    const cards = [...grid.children];
+    cards.forEach(el => { el.style.alignSelf = 'start'; el.style.gridColumnStart = ''; });   // 先用自然高度量
+    const h = new Map(cards.map(el => [el, el.offsetHeight]));
+    const left = cards.slice(), pairs = [], alone = [];
+    while (left.length) {
+      const a = left.shift(), i = left.findIndex(b => Math.abs(h.get(b) - h.get(a)) <= 10);   // 差不到半行字＝一樣高
+      if (i >= 0) pairs.push([a, left.splice(i, 1)[0]]); else alone.push(a);
+    }
+    const order = pairs.flat().concat(alone);
+    order.forEach(el => grid.appendChild(el));
+    pairs.forEach(([a]) => { a.style.gridColumnStart = '1'; });   // 每一排從左欄開始
+    alone.forEach(el => { el.style.gridColumnStart = '1'; });      // 配不到的：自己一排、放左邊
+    cards.forEach(el => { el.style.alignSelf = ''; });
+  });
 }
 function openWorkshop() {
   ensureWorkshop(); if (typeof closeDialogue === 'function') closeDialogue(true);
   workshopOpen = true; Object.keys(keys).forEach(k => { keys[k] = false; });
-  renderWorkshop(); workshopEl.classList.remove('hidden'); sfx('menu');
+  workshopEl.classList.remove('hidden'); renderWorkshop(); sfx('menu');   // 先顯示再畫，才量得到欄位高度
 }
 function closeWorkshop(silent = false) { if (!workshopOpen) return; workshopOpen = false; workshopEl.classList.add('hidden'); if (!silent) sfx('switch'); }
 window.addEventListener('keydown', e => { if (workshopOpen && e.key === 'Escape') { e.preventDefault(); e.stopImmediatePropagation(); closeWorkshop(); } }, true);

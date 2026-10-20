@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>開發工坊編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/style.css?v=wsedit-20261020">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
+  :root { color-scheme: dark; }
+  body { display: block; max-width: none; min-height: 0; margin: 0; padding: 18px 22px; background: #10151c; color: #e8edf5;
+    font-family: system-ui, 'Microsoft JhengHei', sans-serif; -webkit-user-select: text; user-select: text; }
+  h1 { font-size: 23px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 0 0 10px; color: #ffe3a1; }
+  p.lead { color: #aabacc; margin: 0; font-size: 13px; line-height: 1.5; } a { color: #9bd2ff; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+  .nav { display: flex; gap: 14px; padding-top: 6px; white-space: nowrap; font-size: 13px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  #status { font-size: 13px; color: #9fd8c4; }
+  #status.err { color: #ff9c9c; }
+  .layout { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 14px; align-items: start; }
+  .panel { background: #1b2530; border: 1px solid #3a4d60; border-radius: 12px; padding: 14px; min-width: 0; }
+  .panel + .panel { margin-top: 12px; }
+  .ed-btn { cursor: pointer; font: inherit; font-size: 13px; color: #eaf4ff; background: #2a3c50; border: 1px solid #57718b; border-radius: 8px; padding: 7px 11px; }
+  .ed-btn:hover { background: #345169; } .ed-btn.primary { background: #236b79; border-color: #69b9c1; } .ed-btn.danger { border-color: #9a5050; }
+  .field { display: grid; gap: 4px; margin-bottom: 10px; font-size: 12px; color: #b9cad9; }
+  .field input[type=text], .field textarea, .field select { width: 100%; background: #101923; border: 1px solid #536b80; border-radius: 7px; color: #edf5ff; font: inherit; font-size: 13px; padding: 6px 8px; }
+  .field textarea { min-height: 54px; resize: vertical; line-height: 1.45; }
+  .field .hint { color: #7f93a6; font-size: 11px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
+  .num { display: grid; grid-template-columns: minmax(0,1fr) 64px; gap: 6px; align-items: center; }
+  .num input[type=range] { width: 100%; accent-color: #6bdbbd; }
+  .num input[type=number] { width: 64px; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; }
+  .color { display: flex; gap: 6px; align-items: center; }
+  .color input[type=color] { width: 38px; height: 28px; padding: 0; border: 1px solid #536b80; border-radius: 6px; background: #101923; }
+  .color input[type=text] { flex: 1; }
+  .style-group { border-top: 1px solid #2c3c4c; padding-top: 10px; margin-top: 4px; }
+  .style-group > b { display: block; color: #ffe3a1; font-size: 12px; margin-bottom: 6px; }
+  #itemList { display: grid; gap: 5px; max-height: 260px; overflow: auto; margin-bottom: 12px; scrollbar-width: thin; }
+  #itemList button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; cursor: pointer; font: inherit; font-size: 13px;
+    color: #e8edf5; background: #15202b; border: 1px solid #334a5d; border-radius: 8px; padding: 5px 8px; }
+  #itemList button.sel { background: #224358; border-color: #82cbe2; }
+  #itemList button.changed::after { content: '已修改'; margin-left: auto; color: #e7b98d; font-size: 11px; }
+  #itemList img, #itemList i { width: 30px; height: 30px; object-fit: contain; image-rendering: pixelated; font-style: normal; display: grid; place-items: center; }
+  #itemList small { color: #8fa3b5; font-size: 11px; margin-left: 4px; }
+  .img-row { display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 8px; align-items: center; }
+  .img-row .thumb { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 9px; background: #0e1721; border: 1px solid #334a5d; }
+  .img-row .thumb img { max-width: 48px; max-height: 48px; image-rendering: pixelated; }
+  .img-btns { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  /* ---- 預覽區：裡面放的就是遊戲的開發工坊（同一套樣式） ---- */
+  .preview-wrap { overflow: auto; border: 1px solid #42586e; border-radius: 10px; background: repeating-conic-gradient(#182431 0 25%, #131d28 0 50%) 0 0 / 24px 24px; }
+  .preview-stage { position: relative; margin: 0 auto; }
+  .preview-stage #workshop { inset: 0; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>🔧 開發工坊編輯器</h1>
+      <p class="lead">修改諾亞開發工坊裡的裝備圖片、名稱、說明，以及文字顏色、大小和欄位大小。右邊的預覽就是遊戲裡的樣子。<br>
+        改好按「💾 存到專案」（Ctrl+S）會寫進 <code>data/workshop.js</code>；遊戲按 Ctrl+F5 重新整理就會套用。名稱和圖片在背包、裝備欄也會跟著變。</p>
+    </div>
+    <div class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="地圖編輯器.html">🗺️ 地圖編輯器</a><a href="基地編輯器.html">🏠 基地編輯器</a></div>
+  </div>
+  <div class="bar">
+    <button type="button" class="ed-btn" id="downloadFile" title="不能直接存檔的瀏覽器用：下載後覆蓋 data/workshop.js">下載 workshop.js</button>
+    <button type="button" class="ed-btn danger" id="resetFile" title="丟掉還沒存的修改，改回 data/workshop.js 檔案裡的內容">從檔案重設</button>
+    <span id="status"></span>
+  </div>
+
+  <div class="layout">
+    <div>
+      <section class="panel">
+        <h2>裝備與武器</h2>
+        <div id="itemList"></div>
+        <div id="itemForm"></div>
+      </section>
+      <section class="panel">
+        <h2>外觀（所有裝備欄位一起改）</h2>
+        <div id="styleForm"></div>
+        <button type="button" class="ed-btn" id="styleReset">外觀恢復預設</button>
+      </section>
+    </div>
+    <section class="panel">
+      <div class="bar">
+        <h2 style="margin:0">預覽</h2>
+        <label class="field" style="margin:0;display:flex;align-items:center;gap:6px">裝備狀態
+          <select id="previewMode">
+            <option value="none">還沒拿到（開發／尚未取得）</option>
+            <option value="lv1" selected>Lv1（可以升級）</option>
+            <option value="max">Lv3（已達最高等級）</option>
+          </select>
+        </label>
+      </div>
+      <div class="preview-wrap"><div class="preview-stage" id="previewStage"></div></div>
+    </section>
+  </div>
+
+  <script src="data/equipment.js?v=acidboots-20261018"></script>   <!-- 裝備、武器的原始資料 -->
+  <script src="data/workshop.js?v=wsedit-20261020"></script>       <!-- 目前存在檔案裡的工坊設定 -->
+  <script src="js/workshop-config.js?v=wsedit-20261020"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=wsedit-20261020"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
+  <script src="js/workshop-editor.js?v=wsedit-20261020"></script>
+</body>
+</html>

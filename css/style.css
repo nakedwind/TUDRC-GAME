@@ -1635,8 +1635,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* ===== 諾亞的開發工坊 ===== */
 #workshop { position: absolute; inset: 10px; z-index: 30; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); font-family: "Microsoft JhengHei", sans-serif; }
 #workshop.hidden { display: none; }
-.workshop-card { width: min(1010px, 100%); height: 100%; max-height: 620px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255,212,121,.38); border-radius: 16px; color: #e8eef3; background: linear-gradient(160deg, rgba(29,34,41,.95), rgba(12,17,23,.97)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); }
-.workshop-head { display: flex; align-items: center; gap: 14px; padding: 14px 18px 12px; border-bottom: 1px solid rgba(255,212,121,.13); background: linear-gradient(90deg, rgba(255,212,121,.07), transparent 60%); }
+.workshop-card { width: min(var(--ws-panel-w, 1010px), 100%); height: 100%; max-height: var(--ws-panel-h, 620px); display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(255,212,121,.38); border-radius: 16px; color: #e8eef3; background: linear-gradient(160deg, rgba(29,34,41,.95), rgba(12,17,23,.97)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); }
+.workshop-head { position: relative; display: flex; align-items: center; gap: 14px; padding: 14px 18px 12px; border-bottom: 1px solid rgba(255,212,121,.13); background: linear-gradient(90deg, rgba(255,212,121,.07), transparent 60%); }
 .workshop-title { flex: 1; min-width: 0; }
 .workshop-title small { color: #d8ae5d; font-size: 10px; letter-spacing: .16em; }
 .workshop-title h2 { margin: 2px 0 3px; color: #fff8e7; font-size: 22px; }
@@ -1670,15 +1670,33 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .wss-empty, .wss-tip { margin: 0; color: #7f8a96; font-size: 11px; }
 .wss-tip { margin-top: auto; padding-top: 8px; }
 @media (max-width: 760px) { .workshop-main { flex-direction: column; overflow-y: auto; } .workshop-main > .workshop-body { overflow: visible; } .workshop-side { width: auto; border-left: 0; border-top: 1px solid rgba(255,212,121,.13); overflow: visible; } }
-.ws-row { display: grid; grid-template-columns: 66px minmax(0,1fr) auto; align-items: center; gap: 12px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; background: rgba(37,43,51,.45); }
-.ws-icon { display: grid; place-items: center; width: 66px; height: 66px; border-radius: 13px; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.09), rgba(7,10,14,.5) 70%); }
-.ws-icon img { width: 54px; height: 54px; object-fit: contain; image-rendering: pixelated; }
+.ws-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--ws-gap, 7px); }   /* 裝備、武器各分左右兩欄 */
+.ws-row { min-height: var(--ws-card-h, 0px); display: grid; grid-template-columns: var(--ws-icon, 66px) minmax(0,1fr) auto; align-items: center; gap: 10px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.08); border-radius: 11px; background: rgba(37,43,51,.45); }
+.ws-icon { display: grid; place-items: center; width: var(--ws-icon, 66px); height: var(--ws-icon, 66px); border-radius: 13px; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.09), rgba(7,10,14,.5) 70%); }
+.ws-icon img { width: calc(var(--ws-icon, 66px) * .82); height: calc(var(--ws-icon, 66px) * .82); object-fit: contain; image-rendering: pixelated; }
 .ws-text { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.ws-text b { font-size: 14px; color: #fff8e7; }
-.ws-text span { color: #aab5c1; font-size: 12px; line-height: 1.5; }
-.ws-text small { color: #a9d8c9; font-size: 11px; }
-.ws-btn { min-width: 118px; padding: 7px 12px; border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 13px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
+.ws-text b { font-size: var(--ws-name-size, 14px); color: var(--ws-name-color, #fff8e7); }
+.ws-text span { color: var(--ws-desc-color, #aab5c1); font-size: var(--ws-desc-size, 12px); line-height: 1.5; }
+.ws-text small { color: var(--ws-next-color, #a9d8c9); font-size: var(--ws-next-size, 11px); }
+.ws-btn { align-self: start; min-width: var(--ws-btn-w, 0px); white-space: nowrap; padding: 6px 10px; border: 1px solid #e9bd62; border-radius: 9px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 13px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
 .ws-btn b { margin-left: 4px; }
+/* 每個欄位：左邊圖示；第一行＝名字＋右邊的按鈕；說明文字在下面、可以一路寫到按鈕下方（比較不會換行） */
+.ws-grid .ws-row { grid-template-rows: auto auto auto; align-items: start; align-content: center; column-gap: 10px; row-gap: 2px; }
+.ws-grid .ws-icon { grid-column: 1; grid-row: 1 / -1; align-self: center; }
+.ws-grid .ws-text { display: contents; }
+.ws-grid .ws-text b { grid-column: 2; grid-row: 1; align-self: center; }
+.ws-grid .ws-btn { grid-column: 3; grid-row: 1; }
+.ws-grid .ws-text span { grid-column: 2 / 4; grid-row: 2; }
+.ws-grid .ws-text small { grid-column: 2 / 4; grid-row: 3; }
+/* 說明文字的顏色：數字＝橘色、「戰鬥區域」＝紫色（開發工坊編輯器可以改：data/workshop.js） */
+.ws-text i.ws-num { font-style: normal; color: var(--ws-num-color, #CF9447); }
+.ws-text i.ws-where { font-style: normal; color: var(--ws-where-color, #A958E2); }
+/* 工坊打開時的提示（碎片不夠、升級完成…）：標題列正中間、最上層 */
+.workshop-toast { position: absolute; left: 50%; top: 50%; z-index: 5; transform: translate(-50%, -50%); padding: 9px 16px; border-radius: 9px;
+  background: rgba(36,40,46,.94); color: #eef2f6; font-size: 15px; font-weight: 700; white-space: nowrap; pointer-events: none;
+  box-shadow: 0 6px 18px rgba(0,0,0,.45); animation: workshopToastIn .16s ease-out both; transition: opacity .3s ease; }
+.workshop-toast.leaving { opacity: 0; }
+@keyframes workshopToastIn { from { opacity: 0; transform: translate(-50%, -40%); } to { opacity: 1; transform: translate(-50%, -50%); } }
 .ws-btn:hover:not(:disabled) { filter: brightness(1.07); }
 .ws-btn:active:not(:disabled) { transform: translateY(2px); box-shadow: inset 0 1px 2px rgba(120,70,10,.3); }
 .ws-btn:disabled { border-color: rgba(255,255,255,.08); background: rgba(0,0,0,.28); color: #9aa6b2; cursor: default; box-shadow: inset 0 1px 3px rgba(0,0,0,.4); }

@@ -94,5 +94,5 @@ const ProjectSave = (() => {
     });
     return { save: pickAgain => save(files, say, pickAgain, buttons) };
   }
-  return { attach, writeFile, subDir };
+  return { attach, writeFile, subDir, projectDir };   // projectDir：開發工坊編輯器挑圖片時用（取得遊戲資料夾）
 })();
