@@ -29,11 +29,18 @@ const COSTUME_SKINS = [
 ];
 // 配件
 const COSTUME_ACCESSORIES = [
-  // 圖放在 images/服裝系統/
-  { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_red.png' } },
-  { id: 'bow-blue', name: '藍色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_blue.png' } },
-  { id: 'bow-white', name: '白色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_white.png' } },
-  { id: 'bird-green', name: '綠繡眼', slot: 'head', rarity: 'R', art: { front: 'images/服裝系統/鳥/01.png', side: 'images/服裝系統/鳥/02.png', back: 'images/服裝系統/鳥/03.png' } },   // 停在頭頂的小鳥
+  // 圖放在 images/costumes/，檔名依配件、顏色與方向命名。
+  { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/bows/bow-red.png' } },
+  { id: 'bow-blue', name: '藍色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/bows/bow-blue.png' } },
+  { id: 'bow-white', name: '白色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/bows/bow-white.png' } },
+  { id: 'bird-green', name: '綠繡眼', slot: 'head', rarity: 'R', art: { front: 'images/costumes/birds/white-eye-front.png', side: 'images/costumes/birds/white-eye-side.png', back: 'images/costumes/birds/white-eye-back.png' } },   // 停在頭頂的小鳥
+  { id: 'bear-hood', name: '熊熊頭套', slot: 'head', rarity: 'SR', art: { front: 'images/costumes/bear-hood/bear-hood-front.png', side: 'images/costumes/bear-hood/bear-hood-side.png', back: 'images/costumes/bear-hood/bear-hood-back.png' } },   // 整個套住頭，正面中間露出臉
+  { id: 'large-bow-red', name: '紅色大蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/large-bows/large-bow-red.png', side: 'images/costumes/large-bows/large-bow-red-side.png' } },
+  { id: 'large-bow-blue', name: '藍色大蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/large-bows/large-bow-blue.png', side: 'images/costumes/large-bows/large-bow-blue-side.png' } },
+  { id: 'large-bow-white', name: '白色大蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/large-bows/large-bow-white.png', side: 'images/costumes/large-bows/large-bow-white-side.png' } },
+  { id: 'flower-hair-clip', name: '小花髮夾', slot: 'head', rarity: 'N', art: { front: 'images/costumes/flower-clips/flower-hair-clip.png' } },
+  { id: 'round-glasses', name: '圓眼鏡', slot: 'face', rarity: 'N', art: { front: 'images/costumes/round-glasses/round-glasses-front.png', side: 'images/costumes/round-glasses/round-glasses-side.png' } },
+  { id: 'sunglasses', name: '墨鏡', slot: 'face', rarity: 'N', art: { front: 'images/costumes/sunglasses/sunglasses-front.png', side: 'images/costumes/sunglasses/sunglasses-side.png' } },
 ];
 // 一開始就擁有的服裝（新存檔送的；空的＝全部要從扭蛋轉）
 const COSTUME_STARTER = [];

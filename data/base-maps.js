@@ -2339,6 +2339,14 @@ const BASE_MAPS = [
         "layer": "object",
         "ox": -10,
         "oy": 12
+      },
+      {
+        "id": "tile_dorm_wardrobe_lab_coat",
+        "c": 26,
+        "r": 8,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 10
       }
     ],
     "solid": [
