@@ -1,5 +1,5 @@
 /* ===== 服裝系統：換 skin、戴配件、衣櫃的服裝介面（資料在 data/costumes.js）=====
-   ・存檔 tudrc_costumes_v1：{ owned: { 服裝id: 數量 }, equip: { 角色id: { base, battle, head, face, back, hand } } }
+   ・存檔 tudrc_costumes_v1：{ owned: { 服裝id: 數量 }, equip: { 角色id: { base, battle, head, face, back, hand } }, gifted: { 角色id: [送給他的服裝id] } }
        base／battle＝基地、戰鬥各穿哪一套 skin（'A'、'B'＝角色原本那兩套，其他＝COSTUME_SKINS 的 id；沒設＝照原本：基地 A、戰鬥 B）
    ・遊戲裡挑精靈圖時先問 costumeOutfit（js/game.js 的 applyOutfits）；配件由 drawCostumeAccessories 畫（js/render.js 畫角色的地方）
      配件的位置、怎麼畫在 js/costume-draw.js（和服裝編輯器共用）
@@ -7,8 +7,8 @@
    必須在 js/game.js 之前載入。
 */
 const COSTUME_STORE = 'tudrc_costumes_v1';
-let costumeState = { owned: {}, equip: {} };
-try { const saved = JSON.parse(localStorage.getItem(COSTUME_STORE) || 'null'); if (saved && typeof saved === 'object') costumeState = { owned: saved.owned || {}, equip: saved.equip || {}, started: !!saved.started }; } catch (_) {}
+let costumeState = { owned: {}, equip: {}, gifted: {} };
+try { const saved = JSON.parse(localStorage.getItem(COSTUME_STORE) || 'null'); if (saved && typeof saved === 'object') costumeState = { owned: saved.owned || {}, equip: saved.equip || {}, gifted: saved.gifted || {}, started: !!saved.started }; } catch (_) {}
 const saveCostumes = () => { try { localStorage.setItem(COSTUME_STORE, JSON.stringify(costumeState)); } catch (_) {} };
 if (!costumeState.started) {   // 第一次：先送測試用的服裝（扭蛋做好之前）
   for (const id of COSTUME_STARTER) costumeState.owned[id] = Math.max(1, costumeState.owned[id] || 0);
@@ -17,6 +17,9 @@ if (!costumeState.started) {   // 第一次：先送測試用的服裝（扭蛋�
 const SKIN_BY_ID = Object.fromEntries(COSTUME_SKINS.map(s => [s.id, s]));
 const costumeEquip = id => costumeState.equip[id] || (costumeState.equip[id] = {});
 const costumeOwned = id => (costumeState.owned[id] || 0) > 0;
+const costumeGifted = (who, id) => ((costumeState.gifted || {})[who] || []).includes(id);   // 這件是送給 who 的禮物
+const costumeCanWear = (who, id) => costumeOwned(id) || costumeGifted(who, id);
+const costumeCollected = id => costumeOwned(id) || Object.values(costumeState.gifted || {}).some(list => list.includes(id));   // 拿到過（扭蛋收藏用）
 const costumeBase = folder => String(folder).replace(/_[A-Z]$/, '');
 const costumeFolderOf = id => (CHARACTERS[id] && CHARACTERS[id].sprite) || '';
 
@@ -35,7 +38,7 @@ function costumeProbe(folder) {
 function costumeSkinsFor(id) {
   const base = costumeBase(costumeFolderOf(id)), list = [];
   for (const k of ['A', 'B']) if (costumeProbe(base + '_' + k) !== false) list.push({ id: k, name: COSTUME_DEFAULT_SKINS[k], folder: base + '_' + k, builtin: true });
-  for (const s of COSTUME_SKINS) if (s.char === id && costumeOwned(s.id)) list.push(s);
+  for (const s of COSTUME_SKINS) if (s.char === id && costumeCanWear(id, s.id)) list.push(s);
   return list;
 }
 
@@ -80,6 +83,33 @@ function costumeGrant(id) {
   return first;
 }
 const costumeItem = id => ACC_BY_ID[id] || SKIN_BY_ID[id] || null;
+
+// ---- 送禮（js/gifts.js 的禮物選單）----
+// 可以送給 who 的服裝：擁有的、沒寫 giftable: false、skin 只送給那個角色、還沒送過他的
+function costumeGiftable(who) {
+  return [...COSTUME_ACCESSORIES, ...COSTUME_SKINS.filter(s => s.char === who)]
+    .filter(item => item.giftable !== false && costumeOwned(item.id) && !costumeGifted(who, item.id));
+}
+// 送出：用掉一件、記成他的、馬上穿上
+function costumeGive(who, id) {
+  const item = costumeItem(id); if (!item || !costumeOwned(id)) return false;
+  costumeState.owned[id] -= 1; if (costumeState.owned[id] <= 0) delete costumeState.owned[id];
+  const gifted = costumeState.gifted || (costumeState.gifted = {});
+  (gifted[who] = gifted[who] || []).push(id);
+  const eq = costumeEquip(who);
+  if (item.slot) eq[item.slot] = id; else { eq.base = id; eq.battle = id; }
+  if (!costumeOwned(id)) {   // 你手上沒有了：別人身上穿的那件脫下來（送給他們的除外）
+    for (const [other, e] of Object.entries(costumeState.equip)) {
+      if (other === who || costumeGifted(other, id)) continue;
+      for (const k of Object.keys(e)) if (e[k] === id) e[k] = (k === 'base' || k === 'battle') ? undefined : null;
+    }
+  }
+  saveCostumes();
+  if (typeof applyOutfits === 'function') applyOutfits();
+  return true;
+}
+// 禮物選單、扭蛋收藏裡的小圖
+const costumeIconSrc = item => item.slot ? item.art.front : `images/character/${item.folder}/${item.folder.replace('_', '')}_0000_Front.png`;
 
 // ---- 地圖上某種素材（衣櫃、扭蛋機）的位置；test(素材id, 素材) 決定要哪些；safeOnly＝只在基地（安全區）找 ----
 function costumeSpots(test, safeOnly = true) {
@@ -170,10 +200,10 @@ function renderWardrobe() {
   } else {
     const cur = eq[wd.slot] || '';
     cards = '<button type="button" class="wd-item wd-none' + (!cur ? ' on' : '') + '" data-wear=""><span class="wd-icon">✕</span><b>不戴</b></button>'
-      + COSTUME_ACCESSORIES.filter(a => a.slot === wd.slot && costumeOwned(a.id)).map(a => '<button type="button" class="wd-item' + (a.id === cur ? ' on' : '') + '" data-wear="' + a.id + '">'
+      + COSTUME_ACCESSORIES.filter(a => a.slot === wd.slot && costumeCanWear(id, a.id)).map(a => '<button type="button" class="wd-item' + (a.id === cur ? ' on' : '') + '" data-wear="' + a.id + '"' + (costumeGifted(id, a.id) ? ' title="你送的禮物"' : '') + '>'
         + '<span class="wd-icon"><img src="' + a.art.front + '" alt=""></span><b>' + a.name + '</b>'
-        + (a.rarity ? '<em class="r-' + a.rarity + '">' + a.rarity + '</em>' : '') + (costumeState.owned[a.id] > 1 ? '<i>×' + costumeState.owned[a.id] + '</i>' : '') + '</button>').join('');
-    if (!COSTUME_ACCESSORIES.some(a => a.slot === wd.slot && costumeOwned(a.id))) cards += '<p class="wd-empty">還沒有這個欄位的配件</p>';
+        + (a.rarity ? '<em class="r-' + a.rarity + '">' + a.rarity + '</em>' : '') + (costumeGifted(id, a.id) ? '<i>🎁</i>' : costumeState.owned[a.id] > 1 ? '<i>×' + costumeState.owned[a.id] + '</i>' : '') + '</button>').join('');
+    if (!COSTUME_ACCESSORIES.some(a => a.slot === wd.slot && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">還沒有這個欄位的配件</p>';
   }
   el.querySelector('.wd-grid').innerHTML = cards;
   const skin = wdSkinOf(id, wd.mode), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || COSTUME_DEFAULT_SKINS[skin] || skin;

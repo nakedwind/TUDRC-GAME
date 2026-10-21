@@ -59,7 +59,7 @@ function drawAccessory(ctx, acc, id, dir, frame, dx, dy, size, layer, pl) {
   ctx.save(); ctx.imageSmoothingEnabled = false;
   ctx.translate(cx, cy);
   if (pl.rot) ctx.rotate(pl.rot * Math.PI / 180);
-  if (art.flip) ctx.scale(-1, 1);
+  if (art.flip !== !!pl.flip) ctx.scale(-1, 1);   // pl.flip：服裝編輯器勾的「圖片左右翻轉」
   ctx.drawImage(img, -w / 2, -h / 2, w, h);
   ctx.restore();
   return { cx, cy, w, h };

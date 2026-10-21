@@ -110,7 +110,7 @@ function renderGacha() {
   one.disabled = ten.disabled = gc.busy;
   one.classList.toggle('poor', training.crystals < GACHA.cost); ten.classList.toggle('poor', training.crystals < GACHA.tenCost);
   const pool = gachaPool(), tiers = Object.keys(GACHA.rates).filter(r => pool.some(i => rarityOf(i) === r)), total = tiers.reduce((s, r) => s + GACHA.rates[r], 0);
-  el.querySelector('.gc-rates').innerHTML = tiers.map(r => rarityTag(r) + ' ' + Math.round(GACHA.rates[r] / total * 1000) / 10 + '%').join('　') + '<br>共 ' + pool.length + ' 種・已收集 ' + pool.filter(i => costumeOwned(i.id)).length + ' 種';
+  el.querySelector('.gc-rates').innerHTML = tiers.map(r => rarityTag(r) + ' ' + Math.round(GACHA.rates[r] / total * 1000) / 10 + '%').join('　') + '<br>共 ' + pool.length + ' 種・已收集 ' + pool.filter(i => costumeCollected(i.id)).length + ' 種';
   el.querySelectorAll('.gc-tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === gc.tab));
   el.querySelector('.gc-msg').textContent = gc.msg;
   const list = el.querySelector('.gc-list');
@@ -126,6 +126,7 @@ function renderGacha() {
     list.innerHTML = (dupes ? '<div class="gc-book-bar">重複的服裝 ' + dupes + ' 個<button type="button" data-dismantle-all>全部分解</button></div>' : '')
       + pool.map(item => {
         const have = costumeState.owned[item.id] || 0, r = rarityOf(item);
+        if (!have && costumeCollected(item.id)) return '<div class="gc-item r-' + r + '">' + gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '・已送出</small>' + rarityTag(r) + '</div>';
         if (!have) return '<div class="gc-item gc-locked r-' + r + '">' + gachaArt(item) + '<b>？？？</b><small>' + gachaKind(item) + '</small>' + rarityTag(r) + '</div>';
         return '<div class="gc-item r-' + r + '">' + gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(r)
           + (have > 1 ? '<i class="gc-count">×' + have + '</i><button type="button" class="gc-dismantle" data-dismantle="' + item.id + '" title="分解 1 個（按住 Shift 分解全部重複的）">分解 +' + (GACHA.dismantle[r] || 0) + '</button>' : '') + '</div>';

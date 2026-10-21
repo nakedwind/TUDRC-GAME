@@ -4,7 +4,7 @@
        新的 skin：把圖放在 images/character/<folder>/（檔名跟其他角色一樣：<folder 去掉底線>_0000_Front.png …），再加一筆到 COSTUME_SKINS。
    ・配件：疊在角色身上的小圖，所有角色共用同一張圖；一個欄位戴一個（頭飾、臉部、背部、手持）。
        art.front＝正面圖；art.side＝側面圖（畫朝左，往右時自動左右翻；沒畫就用正面圖）；art.back＝背面圖（沒畫就用正面圖）。
-   ・rarity：稀有度 N／R／SR（扭蛋機的機率看這個）；gacha: false＝不放進扭蛋池；giftable：可以當禮物送給那位隊員（之後送禮用）。
+   ・rarity：稀有度 N／R／SR（扭蛋機的機率看這個）；gacha: false＝不放進扭蛋池；giftable: false＝不能當禮物送（沒寫＝可以送；skin 只能送給那個角色）。
 */
 const COSTUME_SLOTS = [
   { id: 'skin', name: '服裝' },
@@ -29,11 +29,14 @@ const COSTUME_SKINS = [
 ];
 // 配件
 const COSTUME_ACCESSORIES = [
-  { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costume/bow-red.png' } },   // 測試用
-  { id: 'glasses-round', name: '圓框眼鏡', slot: 'face', rarity: 'N', art: { front: 'images/costume/glasses-round.png', side: 'images/costume/glasses-round-side.png' } },   // 測試用
+  // 圖放在 images/服裝系統/
+  { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_red.png' } },
+  { id: 'bow-blue', name: '藍色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_blue.png' } },
+  { id: 'bow-white', name: '白色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_white.png' } },
+  { id: 'bird-green', name: '綠繡眼', slot: 'head', rarity: 'R', art: { front: 'images/服裝系統/鳥/01.png', side: 'images/服裝系統/鳥/02.png', back: 'images/服裝系統/鳥/03.png' } },   // 停在頭頂的小鳥
 ];
-// 一開始就擁有的服裝（測試用；正式上線前清空）
-const COSTUME_STARTER = ['bow-red', 'glasses-round'];
+// 一開始就擁有的服裝（新存檔送的；空的＝全部要從扭蛋轉）
+const COSTUME_STARTER = [];
 // 可以打開服裝介面的地圖素材（衣櫃）
 const WARDROBE_TILES = ['tile_dorm_wardrobe_lab_coat'];
 
@@ -43,6 +46,10 @@ const COSTUME_RARITIES = {
   R: { name: '稀有', color: '#6fc3ff' },
   SR: { name: '超稀有', color: '#ffc95c' },
 };
+// 送禮（js/gifts.js 的禮物選單）：服裝也能送給隊員。送出後用掉你的一件，對方馬上穿上，從此那件是他的（衣櫃裡只有他能穿）。
+// 對方喜不喜歡照 data/gifts.js 的 GIFT_PREFS（可以把服裝 id 寫進 love／like／dislike）；沒寫的算 reaction；稀有度越高多加越多好感。
+// 台詞：GIFT_PREFS 裡的 lines.costume（沒寫就用一般收禮的台詞）
+const COSTUME_GIFT = { reaction: 'like', rarityBonus: { N: 0, R: 4, SR: 10 } };
 // 扭蛋機（js/gacha.js）：所有 skin、配件都會進扭蛋池，除非寫 gacha: false
 const GACHA = {
   cost: 30,                        // 轉 1 次花幾個異質碎片

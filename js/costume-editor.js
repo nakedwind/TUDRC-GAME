@@ -52,7 +52,7 @@ function costumePlacementText() {
   return '/* 由服裝編輯器匯出：配件戴在每個角色身上的位置（配件、角色清單在 data/costumes.js）。\n'
     + '   anchors[角色][欄位][方向]＝這個角色每個欄位的預設位置（新配件沒調過就用這個）\n'
     + '   items[配件][角色][方向]＝某個配件專屬的位置（優先）\n'
-    + '     x、y＝配件中心在角色圖（64×64）的位置；scale＝縮放；rot＝旋轉（度）；behind＝畫在角色後面；hidden＝這個方向不畫\n'
+    + '     x、y＝配件中心在角色圖（64×64）的位置；scale＝縮放；rot＝旋轉（度）；behind＝畫在角色後面；hidden＝這個方向不畫；flip＝圖片左右翻轉\n'
     + '   bob[角色][方向]＝[走路第 1 張, 走路第 2 張] 頭部相對站立圖的位移 [dx, dy]（配件跟著晃） */\n'
     + 'const COSTUME_PLACEMENT_DEFAULT = {\n'
     + ['anchors', 'items', 'bob'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n') + '\n};\n';
@@ -101,7 +101,7 @@ function cleanPl(p) {
   for (const k of ['x', 'y']) p[k] = Math.round((Number(p[k]) || 0) * 2) / 2;
   if (p.scale != null) { p.scale = Math.round(Math.max(0.1, Number(p.scale) || 1) * 100) / 100; if (p.scale === 1) delete p.scale; }
   if (p.rot != null) { p.rot = Math.round((((Number(p.rot) || 0) + 540) % 360 - 180) * 10) / 10; if (!p.rot) delete p.rot; }
-  if (!p.behind) delete p.behind; if (!p.hidden) delete p.hidden;
+  if (!p.behind) delete p.behind; if (!p.hidden) delete p.hidden; if (!p.flip) delete p.flip;
   return p;
 }
 function edit(fn, dir = ED.dir) {
@@ -215,11 +215,20 @@ function renderPanel() {
   const pl = effective();
   const set = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
   set('fx', pl.x ?? ''); set('fy', pl.y ?? ''); set('fscale', pl.scale || 1); set('frot', pl.rot || 0);
-  $('fbehind').checked = !!pl.behind; $('fhidden').checked = !!pl.hidden;
-  $('mirror').disabled = !(ED.dir === 'left' || ED.dir === 'right');
-  $('mirror').textContent = ED.dir === 'right' ? '⇋ 鏡射到左側' : '⇋ 鏡射到右側';
+  $('fbehind').checked = !!pl.behind; $('fhidden').checked = !!pl.hidden; $('fflip').checked = !!pl.flip;
+  const side = ED.dir === 'left' || ED.dir === 'right';
+  $('mirror').textContent = side ? (ED.dir === 'right' ? '⇋ 鏡射到左側' : '⇋ 鏡射到右側') : '⇋ 左右對調';
+  $('mirror').title = side ? '把這一側的位置對稱複製到另一側（X 左右對稱、旋轉相反）' : '把配件移到臉的另一邊：X 左右對稱、旋轉相反、圖片翻面';
   const m = scopeMap(false);
   $('clearDir').disabled = !(m && m[ED.dir]); $('clearChar').disabled = !m; $('copyChars').disabled = !m;
+  // 複製給其他配件：只在「配件專屬」時顯示；同系列（同欄位、id 開頭一樣，例如 bow-red／bow-blue）的預設勾起來
+  $('copyAccBox').hidden = ED.scope !== 'item';
+  $('copyAccFrom').textContent = '「' + acc.name + '」';
+  if (ED.copyFor !== acc.id) {
+    ED.copyFor = acc.id;
+    $('copyAccList').innerHTML = COSTUME_ACCESSORIES.filter(a => a.id !== acc.id).map(a => '<label><input type="checkbox" value="' + a.id + '"' + (a.slot === acc.slot && a.id.split('-')[0] === acc.id.split('-')[0] ? ' checked' : '') + '>' + a.name + '</label>').join('') || '<span>沒有其他配件</span>';
+  }
+  $('copyAcc').disabled = !COSTUME_PLACEMENT.items[acc.id];
 }
 function renderAll() { renderLists(); renderBars(); renderPanel(); }
 function setDir(d) { ED.dir = d; renderBars(); renderPanel(); }
@@ -241,15 +250,32 @@ const numEdit = (id, key) => $(id).addEventListener('input', () => { const v = $
 numEdit('fx', 'x'); numEdit('fy', 'y'); numEdit('fscale', 'scale'); numEdit('frot', 'rot');
 $('fbehind').addEventListener('change', e => edit(p => { p.behind = e.target.checked; }));
 $('fhidden').addEventListener('change', e => edit(p => { p.hidden = e.target.checked; }));
+$('fflip').addEventListener('change', e => edit(p => { p.flip = e.target.checked; }));
 $('mirror').addEventListener('click', () => {
-  const other = ED.dir === 'left' ? 'right' : 'left', src = effective();
-  edit(p => { Object.assign(p, src, { x: 64 - src.x, rot: src.rot ? -src.rot : 0 }); }, other);
-  status('已把' + CE_DIR_NAMES[ED.dir] + '鏡射到' + CE_DIR_NAMES[other] + '。');
+  const src = effective();
+  if (ED.dir === 'left' || ED.dir === 'right') {   // 側面：對稱複製到另一側（右側的圖本來就會自動翻面）
+    const other = ED.dir === 'left' ? 'right' : 'left';
+    edit(p => { Object.assign(p, src, { x: 64 - src.x, rot: src.rot ? -src.rot : 0 }); }, other);
+    status('已把' + CE_DIR_NAMES[ED.dir] + '鏡射到' + CE_DIR_NAMES[other] + '。');
+  } else {   // 正面、背面：在同一個方向換到另一邊，圖片也翻面
+    edit(p => { p.x = 64 - p.x; p.rot = p.rot ? -p.rot : 0; p.flip = !p.flip; });
+    status('已把' + CE_DIR_NAMES[ED.dir] + '的配件左右對調。');
+  }
 });
 $('copyAllDirs').addEventListener('click', () => {
   const src = effective();
   for (const d of CE_DIRS) if (d !== ED.dir) edit(p => { p.scale = src.scale || 1; p.rot = src.rot || 0; }, d);
   status('已把縮放、旋轉複製到其他三個方向。');
+});
+$('copyAcc').addEventListener('click', () => {
+  const acc = curAcc(), src = COSTUME_PLACEMENT.items[acc.id];
+  const targets = [...document.querySelectorAll('#copyAccList input:checked')].map(i => ACC_BY_ID[i.value]).filter(Boolean);
+  if (!src) { status('「' + acc.name + '」還沒有專屬位置可以複製。', true); return; }
+  if (!targets.length) { status('先勾選要複製給哪些配件。', true); return; }
+  if (!confirm('把「' + acc.name + '」在所有角色的專屬位置，複製給「' + targets.map(a => a.name).join('」「') + '」？它們原本調好的會被蓋掉。')) return;
+  for (const a of targets) COSTUME_PLACEMENT.items[a.id] = JSON.parse(JSON.stringify(src));
+  saveDraft(); renderAll();
+  status('已複製給' + targets.map(a => a.name).join('、') + '。記得存到專案。');
 });
 $('copyChars').addEventListener('click', () => {
   const m = scopeMap(false), acc = curAcc(); if (!m) return;
