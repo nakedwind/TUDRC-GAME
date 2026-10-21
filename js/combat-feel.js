@@ -249,6 +249,7 @@ function slimeExplode(e, mul) {
 // ---- 死亡表演 ----
 function onEnemyDeath(e) {
   trackKillAchievements(e);   // 成就計數（js/achievements.js）
+  if (typeof bestiaryRecordKill === 'function') bestiaryRecordKill(e);   // 怪物圖鑑的消滅次數（js/bestiary.js）
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）

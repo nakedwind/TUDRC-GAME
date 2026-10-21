@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>怪物圖鑑編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/style.css?v=bestiary1-20261022">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定；跟開發工坊編輯器一樣） ---- */
+  :root { color-scheme: dark; }
+  body { display: block; max-width: none; min-height: 0; margin: 0; padding: 18px 22px; background: #10151c; color: #e8edf5;
+    font-family: system-ui, 'Microsoft JhengHei', sans-serif; -webkit-user-select: text; user-select: text; }
+  h1 { font-size: 23px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 0 0 10px; color: #ffe3a1; }
+  p.lead { color: #aabacc; margin: 0; font-size: 13px; line-height: 1.5; } a { color: #9bd2ff; }
+  .top { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+  .nav { display: flex; gap: 14px; padding-top: 6px; white-space: nowrap; font-size: 13px; }
+  .bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 12px; }
+  #status { font-size: 13px; color: #9fd8c4; }
+  #status.err { color: #ff9c9c; }
+  .layout { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 14px; align-items: start; }
+  .panel { background: #1b2530; border: 1px solid #3a4d60; border-radius: 12px; padding: 14px; min-width: 0; }
+  .panel + .panel { margin-top: 12px; }
+  .ed-btn { cursor: pointer; font: inherit; font-size: 13px; color: #eaf4ff; background: #2a3c50; border: 1px solid #57718b; border-radius: 8px; padding: 7px 11px; }
+  .ed-btn:hover { background: #345169; } .ed-btn.primary { background: #236b79; border-color: #69b9c1; } .ed-btn.danger { border-color: #9a5050; }
+  .ed-btn:disabled { opacity: .4; cursor: default; }
+  .field { display: grid; gap: 4px; margin-bottom: 10px; font-size: 12px; color: #b9cad9; }
+  .field input[type=text], .field textarea, .field select { width: 100%; box-sizing: border-box; background: #101923; border: 1px solid #536b80; border-radius: 7px; color: #edf5ff; font: inherit; font-size: 13px; padding: 6px 8px; }
+  .field textarea { min-height: 54px; resize: vertical; line-height: 1.45; }
+  .field .hint { color: #7f93a6; font-size: 11px; line-height: 1.45; }
+  .field label.check { display: flex; align-items: center; gap: 6px; color: #dbe6f1; font-size: 13px; }
+  .num { display: grid; grid-template-columns: minmax(0,1fr) 64px; gap: 6px; align-items: center; }
+  .num input[type=range] { width: 100%; accent-color: #6bdbbd; }
+  .num input[type=number], .xywh input { width: 64px; box-sizing: border-box; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; }
+  .img-off { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; }
+  .img-off label { display: flex; align-items: center; gap: 4px; font-size: 12px; }
+  .img-off input { width: 58px; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; text-align: right; }
+  .nudge { display: flex; gap: 4px; flex-wrap: wrap; }
+  .nudge .ed-btn { padding: 3px 8px; font-size: 12px; }
+  .xywh { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 6px; }
+  .xywh label { display: grid; gap: 2px; font-size: 11px; color: #9fb2c4; }
+  .xywh input { width: 100%; text-align: right; }
+  .stars-pick { display: flex; gap: 4px; flex-wrap: wrap; }
+  .stars-pick button { width: 30px; height: 30px; padding: 0; border: 1px solid #3a4656; border-radius: 8px; background: #232a35; color: #5c6774; cursor: pointer; font-size: 17px; line-height: 1; }
+  .stars-pick button.on { border-color: #ffd479; color: #ffd479; background: #3a3220; }
+  .stars-pick button.zero { width: auto; padding: 0 8px; font-size: 12px; color: #b9c3cf; }
+  .ab-row { display: grid; grid-template-columns: 64px minmax(0,1fr); gap: 6px; align-items: center; margin-bottom: 5px; }
+  .ab-row span { color: #ffe3a1; font-size: 12px; }
+  .ab-row input { width: 100%; box-sizing: border-box; background: #101923; border: 1px solid #536b80; border-radius: 7px; color: #edf5ff; font: inherit; font-size: 13px; padding: 5px 8px; }
+  .img-row { display: grid; grid-template-columns: 56px minmax(0,1fr); gap: 8px; align-items: center; }
+  .img-row .thumb { width: 56px; height: 56px; display: grid; place-items: center; border-radius: 9px; background: #0e1721; border: 1px solid #334a5d; }
+  .img-row .thumb img { max-width: 48px; max-height: 48px; image-rendering: pixelated; }
+  .img-btns { display: flex; gap: 6px; margin-top: 6px; flex-wrap: wrap; }
+  .sub { border-top: 1px solid #2c3c4c; padding-top: 10px; margin-top: 4px; }
+  .sub > b { display: block; color: #ffe3a1; font-size: 12px; margin-bottom: 6px; }
+  /* 怪物清單 */
+  #monList { display: grid; gap: 5px; max-height: 330px; overflow: auto; margin-bottom: 12px; scrollbar-width: thin; }
+  #monList button { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; cursor: pointer; font: inherit; font-size: 13px;
+    color: #e8edf5; background: #15202b; border: 1px solid #334a5d; border-radius: 8px; padding: 4px 8px; }
+  #monList button.sel { background: #224358; border-color: #82cbe2; }
+  #monList button.hid { opacity: .5; }
+  #monList .ml-img { width: 30px; height: 30px; flex: none; object-fit: contain; image-rendering: pixelated; }
+  #monList .ml-stars { color: #ffd479; font-size: 11px; letter-spacing: -1px; }
+  #monList .ml-flag { margin-left: auto; color: #e7b98d; font-size: 11px; white-space: nowrap; }
+  #monList .ml-flag.hid { color: #ff9c9c; }
+  /* 預覽 */
+  .pv-bar { flex-wrap: wrap; }
+  .pv-modes { display: flex; flex-wrap: wrap; gap: 6px; }
+  .pv-mode { border: 1px solid #3a4656; border-radius: 999px; background: #232a35; color: #b9c3cf; padding: 6px 12px; cursor: pointer; font: inherit; font-size: 12px; white-space: nowrap; }
+  .pv-mode:hover { border-color: #8fd3ff; color: #fff; }
+  .pv-mode.sel { border-color: #8fd3ff; background: #2b526b; color: #fff; }
+  .preview-wrap { overflow: hidden; padding: 12px; border: 1px solid #42586e; border-radius: 10px; background: repeating-conic-gradient(#182431 0 25%, #131d28 0 50%) 0 0 / 24px 24px; }
+  .preview-stage { position: relative; margin: 0 auto; touch-action: none; user-select: none; -webkit-user-select: none; }
+  .preview-stage #bestiary { position: relative; inset: auto; display: block; padding: 0; border-radius: 0; background: none; backdrop-filter: none; -webkit-backdrop-filter: none; animation: none; }
+  .preview-stage .bst-block { cursor: move; }
+  .preview-stage .bst-cell[data-key] { cursor: pointer; }
+  .preview-stage.show-blocks .bst-block { outline: 1px dashed rgba(143,211,255,.28); outline-offset: -1px; }
+  .ed-box { position: absolute; z-index: 50; box-sizing: border-box; border: 2px solid #8fd3ff; border-radius: 4px; pointer-events: none; box-shadow: 0 0 0 1px rgba(0,0,0,.5); }
+  .ed-box b { position: absolute; left: -2px; bottom: 100%; margin-bottom: 2px; padding: 1px 6px; border-radius: 4px; background: #8fd3ff; color: #0b1b28; font-size: 11px; white-space: nowrap; }
+  .ed-area { position: absolute; z-index: 49; box-sizing: border-box; border: 2px dashed rgba(255,179,107,.8); border-radius: 6px; pointer-events: none; }   /* 置中按鈕用的區域 */
+  .ed-area b { position: absolute; right: 6px; top: 4px; padding: 1px 6px; border-radius: 4px; background: rgba(255,179,107,.9); color: #2b1600; font-size: 11px; }
+  .ed-handle { position: absolute; right: -7px; bottom: -7px; width: 12px; height: 12px; border: 2px solid #0b1b28; border-radius: 3px; background: #8fd3ff; cursor: nwse-resize; pointer-events: auto; }
+  /* 素材圖：跟地圖編輯器下方的素材列一樣 */
+  .asset-tabs { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; margin-bottom: 10px; }
+  .asset-tabs input[type=search] { width: 160px; background: #101923; border: 1px solid #3a4656; border-radius: 999px; color: #edf5ff; font: inherit; font-size: 12px; padding: 6px 12px; }
+  .asset-tab { border: 1px solid #3a4656; border-radius: 999px; background: #232a35; color: #b9c3cf; padding: 6px 11px; cursor: pointer; font: inherit; font-size: 12px; }
+  .asset-tab:hover { border-color: #8fd3ff; color: #fff; }
+  .asset-tab.sel { border-color: #8fd3ff; background: #2b526b; color: #fff; }
+  .asset-tab .count { color: #8fd3ff; margin-left: 4px; font-variant-numeric: tabular-nums; }
+  .asset-grid { display: flex; flex-wrap: wrap; gap: 6px; align-items: stretch; max-height: 330px; overflow: auto; scrollbar-width: thin; }
+  .asset { display: flex; flex-direction: column; align-items: center; gap: 2px; width: 96px; padding: 4px 4px 5px; background: #232a35; border: 2px solid #333c49; border-radius: 8px; cursor: pointer; font: inherit; color: #e8edf5; text-align: center; }
+  .asset:hover { border-color: #5d7a96; }
+  .asset.sel { border-color: #8fd3ff; background: #2b3a4a; }
+  .asset-thumb { display: grid; place-items: center; width: 100%; height: 64px; border-radius: 4px; overflow: hidden;
+    background-color: #0e1116; background-size: 12px 12px; background-position: 0 0, 0 6px, 6px -6px, -6px 0;
+    background-image: linear-gradient(45deg, #1b222c 25%, transparent 25%), linear-gradient(-45deg, #1b222c 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #1b222c 75%), linear-gradient(-45deg, transparent 75%, #1b222c 75%); }
+  .asset-thumb img { max-width: 100%; max-height: 100%; object-fit: contain; image-rendering: pixelated; }
+  .asset b { font-size: 11px; font-weight: 600; line-height: 1.3; word-break: break-all; }
+  .asset-empty { width: 100%; padding: 14px; color: #7f8b99; font-size: 12px; text-align: center; margin: 0; }
+  .two-col { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 12px; align-items: start; }
+  .two-col > .panel + .panel { margin-top: 0; }
+  #textForm .field { margin-bottom: 8px; }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>📕 怪物圖鑑編輯器</h1>
+      <p class="lead">調整怪物圖鑑的版面（每一塊的位置、大小）、文字，以及每隻怪物的名稱、星級、能力、背景介紹、圖片和縮圖。右邊的預覽就是遊戲裡的樣子。<br>
+        預覽裡：拖曳＝移動那一塊、<b>按住 Shift 拖曳＝以中心等比例縮放</b>（往外拉＝放大）、拖右下角的小方塊＝自由改寬高、點縮圖＝選那隻怪物；<b>怪物圖片框是每隻怪物分開的</b>（調的是目前選的那隻）；方向鍵＝移動選到的那一塊 1px（按住 Shift 一次 10px）。<br>
+        改好按「💾 存到專案」（Ctrl+S）會寫進 <code>data/bestiary.js</code>；遊戲按 Ctrl+F5 重新整理就會套用。遊戲裡在 2F應變中心的電腦前按 Space 打開。</p>
+    </div>
+    <div class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="怪物編輯器.html">🐾 怪物編輯器</a><a href="開發工坊編輯器.html">🔧 開發工坊編輯器</a></div>
+  </div>
+  <div class="bar">
+    <button type="button" class="ed-btn" id="downloadFile" title="不能直接存檔的瀏覽器用：下載後覆蓋 data/bestiary.js">下載 bestiary.js</button>
+    <button type="button" class="ed-btn danger" id="resetFile" title="丟掉還沒存的修改，改回 data/bestiary.js 檔案裡的內容">從檔案重設</button>
+    <span id="status"></span>
+  </div>
+
+  <div class="layout">
+    <div>
+      <section class="panel">
+        <div class="bar" style="justify-content:space-between;margin-bottom:8px"><h2 style="margin:0">怪物</h2>
+          <button type="button" class="ed-btn" id="orderReset" hidden title="丟掉調整過的順序，回到原本的順序">恢復原本順序</button></div>
+        <div id="monList"></div>
+        <div id="monForm"></div>
+      </section>
+    </div>
+    <div class="right-col">
+      <section class="panel">
+        <div class="bar pv-bar">
+          <h2 style="margin:0">預覽</h2>
+          <div class="pv-modes" id="pvModes"></div>
+          <label class="field" style="margin:0 0 0 auto;display:flex;align-items:center;gap:6px;color:#dbe6f1;font-size:12px"><input type="checkbox" id="showBlocks" checked> 顯示每一塊的範圍</label>
+        </div>
+        <div class="preview-wrap"><div class="preview-stage" id="previewStage"></div></div>
+      </section>
+      <div class="two-col" style="margin-top:12px">
+        <section class="panel">
+          <h2>版面（選到的那一塊）</h2>
+          <div id="blockForm"></div>
+        </section>
+        <section class="panel">
+          <h2>文字與設定</h2>
+          <div id="textForm"></div>
+          <button type="button" class="ed-btn" id="layoutReset">版面、文字全部恢復預設</button>
+        </section>
+      </div>
+      <section class="panel asset-panel">   <!-- 所有怪物的圖（點一下＝換成選到的怪物的圖片） -->
+        <div class="bar" style="justify-content:space-between;margin-bottom:8px"><h2 style="margin:0">怪物圖素（點一下＝換成目前這隻怪物的圖片）</h2>
+          <button type="button" class="ed-btn" id="scanFolder" title="從遊戲資料夾的 images/monster 讀出所有圖（第一次要選遊戲資料夾）">📂 讀取資料夾裡的怪物圖</button></div>
+        <div class="asset-tabs" id="assetTabs"></div>
+        <div class="asset-grid" id="assetGrid"></div>
+      </section>
+    </div>
+  </div>
+
+  <script src="data/monsters.js?v=milkfish-v4-20261021"></script>   <!-- 怪物種類（名稱、圖片） -->
+  <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
+  <script src="js/monster-data.js?v=sync-20261021"></script>
+  <script src="data/bestiary.js?v=imgbox-20261022"></script>   <!-- 目前存在檔案裡的圖鑑設定 -->
+  <script src="js/bestiary-config.js?v=imgbox-20261022"></script>   <!-- 圖鑑的畫面（跟遊戲共用） -->
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=sync-20261021"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
+  <script src="js/bestiary-editor.js?v=pct-20261022"></script>
+</body>
+</html>

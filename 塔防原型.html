@@ -4,9 +4,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
-<script src="js/new-game.js?v=guide-sp-20261021"></script>
+<script src="js/new-game.js?v=bestiary1-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=merge-20261022">
+<link rel="stylesheet" href="css/style.css?v=bestiary1-20261022">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -218,6 +218,7 @@
     <a href="服裝編輯器.html">👗 服裝編輯器</a>
     <a href="音效編輯器.html">🔊 音效編輯器</a>
     <a href="開發工坊編輯器.html">🔧 開發工坊編輯器</a>
+    <a href="怪物圖鑑編輯器.html">📕 怪物圖鑑編輯器</a>
   </div>
 
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
@@ -269,7 +270,7 @@
   <script src="js/skills.js?v=skills-20261018"></script>   <!-- 技能樹：花碎片學技能 -->
   <script src="js/anomalous-core.js?v=practice-20261020"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
   <script src="js/core-frenzy.js?v=core-bar-up30-20261018"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
-  <script src="js/combat-feel.js?v=adren-20261021"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/combat-feel.js?v=bestiary1-20261022"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=coreclear-20261018"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=bubbletop-20261020"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/enemy-ai.js?v=milkfish-20261020"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
@@ -279,7 +280,7 @@
   <script src="js/fish-head.js?v=fishstepdark-20261019"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=vine-art8-20261020"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人 -->
   <script src="js/milkfish-kid.js?v=milkfish-v5-20261021"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=gacha1-20261021"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=bestiary1-20261022"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=ring-20261021"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=milkfish-20261020"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -312,12 +313,15 @@
   <script src="js/camp-supply.js?v=guide-sp-20261021"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guide-sp-20261021"></script>
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
-  <script src="js/game.js?v=gacha1-20261021"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=bestiary1-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=key-intro-scale200-20261018"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/item-intro.js?v=legs-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->
   <script src="data/posters.js?v=posters-20261018"></script>   <!-- 可以查看的海報：說明文字 -->
   <script src="js/posters.js?v=posters-20261018"></script>   <!-- 查看海報 -->
+  <script src="data/bestiary.js?v=imgbox-20261022"></script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器） -->
+  <script src="js/bestiary-config.js?v=imgbox-20261022"></script>   <!-- 怪物圖鑑的畫面（跟怪物圖鑑編輯器共用） -->
+  <script src="js/bestiary.js?v=bestiary1-20261022"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->
   <script src="js/target-practice.js?v=tp11-20261020"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
   <script src="js/locked-doors.js?v=sfxkeys-20261018"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->

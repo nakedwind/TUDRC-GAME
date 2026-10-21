@@ -905,6 +905,7 @@ function draw() {
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (typeof wardrobeNearPlayer === 'function' && !doorNearPlayer() && wardrobeNearPlayer()) { const w = wardrobeNearPlayer(); drawInteractPrompt(w.x, w.top - 4, '換裝'); }   // 衣櫃（js/costumes.js）
     else if (typeof gachaNearPlayer === 'function' && !doorNearPlayer() && gachaNearPlayer()) { const g = gachaNearPlayer(); drawInteractPrompt(g.x, g.top - 4, '扭蛋'); }   // 扭蛋機（js/gacha.js）
+    else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '怪物圖鑑'); }   // 2F應變中心的電腦（js/bestiary.js）
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）
     else if (typeof lockedDoorNearPlayer === 'function' && !doorNearPlayer() && lockedDoorNearPlayer()) { const d = lockedDoorNearPlayer(); drawInteractPrompt(d.x, d.top - 4, '開門'); }   // 鎖住的房門（js/locked-doors.js）
