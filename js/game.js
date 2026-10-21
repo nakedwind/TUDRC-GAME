@@ -652,6 +652,7 @@ function assignSentryToGround(t, guard = false) {
   if (!isLit(x, y)) { sfx('error'); flash('巡邏點必須在亮處', x, y, '#ffd24a'); return; }
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
+  t.summonDark = true;   // 召喚：途中遇到黑暗也照走（js/sentry.js 的 escapeDarkness）
   t.guardSummoned = guard;
   t.guardBase = null;
   sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff', 3);
@@ -670,11 +671,11 @@ function summonAllSentriesToGround() {
   let count = 0;
   for (const t of G.towers) {
     if (t.hp <= 0 || t.berserk || TYPES[t.type].guide) continue;
-    const index = spots.findIndex(p => buildSentryPath(t, p.x, p.y) !== null);
+    const index = spots.findIndex(p => buildSentryPath(t, p.x, p.y, true) !== null);   // 召喚：可以穿過黑暗
     if (index < 0) continue;
     const p = spots.splice(index, 1)[0];
     t.mode = 'goto'; t.target = { x: p.x, y: p.y }; t.anchor = null; t.waitT = 0;
-    t.navPath = null; t.navGoal = null; t.navFailed = false; t.guardSummoned = true; t.guardBase = null;
+    t.navPath = null; t.navGoal = null; t.navFailed = false; t.guardSummoned = true; t.guardBase = null; t.summonDark = true;
     count++;
   }
   sfx(count ? 'button' : 'error');
@@ -688,7 +689,7 @@ function summonNearestSentryToGround() {
     sfx('error'); flash('此處無法讓哨兵駐守', x, y, '#ff8f8f'); return;
   }
   const choices = G.towers.filter(t => t.hp > 0 && !t.berserk && !TYPES[t.type].guide)
-    .map(t => ({ t, path: buildSentryPath(t, x, y) }))
+    .map(t => ({ t, path: buildSentryPath(t, x, y, true) }))   // 召喚：可以穿過黑暗
     .filter(choice => choice.path !== null)
     .sort((a, b) => a.path.length - b.path.length ||
       Math.hypot(a.t.x - x, a.t.y - y) - Math.hypot(b.t.x - x, b.t.y - y));

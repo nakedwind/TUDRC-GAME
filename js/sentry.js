@@ -253,6 +253,9 @@ function pathToLight(actor) {
   return path.reverse();
 }
 function escapeDarkness(actor, dt) {
+  // 被召喚（summonDark）：召喚的優先順序比「怕黑」高，途中穿過黑暗也照走；到了、或改成別的命令就恢復怕黑
+  if (actor.summonDark && actor.mode !== 'goto') actor.summonDark = false;
+  if (actor.summonDark) return false;
   if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
     if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
     if (actor.escapePath) {
@@ -287,14 +290,14 @@ function escapeDarkness(actor, dt) {
   if (Math.hypot(actor.x - oldX, actor.y - oldY) < .001) actor.escapeTimer = 0;
   return true;
 }
-// ignoreFire：被推出火海時用，只看地形，不把火當成擋路
-function sentryCellWalkable(c, r, ignoreFire = false) {
+// ignoreFire：被推出火海時用，只看地形，不把火當成擋路；allowDark：被召喚時，黑暗的格子也能走
+function sentryCellWalkable(c, r, ignoreFire = false, allowDark = false) {
   if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
   const [x, y] = center(c, r);
   if (sentryBlocked(x, y)) return false;
   if (!ignoreFire && typeof oilFireAt === 'function' && oilFireAt(x, y, 6)   // 燒著的火海：找路時繞開（js/oil-barrels.js）
       && !(typeof sentryFireTrait === 'function' && sentryFireTrait(sentryFireWalker))) return false;   // 希奧妮、雷德不繞（js/game.js 的 SENTRY_FIRE_TRAITS）
-  if (!personnelInLight(x, y)) return false;
+  if (!allowDark && !personnelInLight(x, y)) return false;
   return true;
 }
 function nearestSentryGoal(c, r) {
@@ -312,7 +315,7 @@ function nearestSentryGoal(c, r) {
   return null;
 }
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
-function buildSentryPath(t, targetX, targetY) {
+function buildSentryPath(t, targetX, targetY, allowDark = !!t.summonDark) {   // allowDark：找一條可以穿過黑暗的路（召喚時）
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
   const goal = nearestSentryGoal(rawGc, rawGr); if (!goal) return null;
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
@@ -324,7 +327,7 @@ function buildSentryPath(t, targetX, targetY) {
     if (c === gc && r === gr) break;
     for (const [dc, dr] of [[0,-1],[1,0],[0,1],[-1,0]]) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (cameFrom.has(key) || !sentryCellWalkable(nc, nr)) continue;
+      if (cameFrom.has(key) || !sentryCellWalkable(nc, nr, false, allowDark)) continue;
       cameFrom.set(key, c + ',' + r); queue.push([nc, nr]);
     }
   }
@@ -339,7 +342,8 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
-  if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r))) {
+  const dark = !!t.summonDark;   // 被召喚：可以穿過黑暗
+  if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r, false, dark))) {
     t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
     t.navStall = 0;
   }
@@ -360,7 +364,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   }
   if (waypoint) [moveX, moveY] = center(waypoint.c, waypoint.r);
   const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally') : 1);   // 走在鐵絲網上變慢
-  if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY)) {
+  if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY, dark)) {
     t.x = moveX; t.y = moveY;
     if (waypoint) t.navPath.shift();
     return !waypoint;
@@ -368,8 +372,8 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   if (distance <= 0) return true;
   const nx = t.x + dx / distance * step, ny = t.y + dy / distance * step;
   const oldX = t.x, oldY = t.y;
-  if (personnelStepAllowed(t.x, t.y, nx, t.y)) t.x = nx;
-  if (personnelStepAllowed(t.x, t.y, t.x, ny)) t.y = ny;
+  if (personnelStepAllowed(t.x, t.y, nx, t.y, dark)) t.x = nx;
+  if (personnelStepAllowed(t.x, t.y, t.x, ny, dark)) t.y = ny;
   const moved = Math.hypot(t.x - oldX, t.y - oldY) > .001;
   t.navStall = Math.hypot(dx, dy) > 2 && !moved ? (t.navStall || 0) + dt : 0;
   if (t.navStall > .8) { t.navTimer = 0; t.navFailed = true; }
@@ -581,7 +585,7 @@ function updateSentry(t, dt) {
   const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 * (typeof equipRushMul === 'function' ? equipRushMul() : 1) : 1) * ((t.taint > 85 && !t.berserk) ? 0.5 : 1) * (t.shieldMode ? 1.7 : 1);   // 指派快一點；瀕臨暴走減半；雷德舉盾衝刺加速
   if (moveSentryWithPath(t, t.target.x, t.target.y, sp, dt)) {
     t.target = null; t.navPath = null;
-    if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
+    if (t.mode === 'goto') { t.mode = 'hold'; t.summonDark = false; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
     else t.waitT = 0.6 + Math.random() * 1.8;         // 到點後停一下再逛
     return;
   }
