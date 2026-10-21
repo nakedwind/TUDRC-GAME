@@ -21,7 +21,7 @@ function validSlimeSettings(raw) {
 }
 function slimeSettings(useBrowserDraft = false) {
   if (useBrowserDraft) {
-    try { const saved = JSON.parse(localStorage.getItem(SLIME_SETTINGS_STORAGE_KEY) || 'null'); if (saved) return validSlimeSettings(saved); } catch (_) {}
+    try { const saved = (typeof DraftSync !== 'undefined' ? DraftSync.load(SLIME_SETTINGS_STORAGE_KEY, (typeof SLIME_SETTINGS_DEFAULT !== 'undefined' ? SLIME_SETTINGS_DEFAULT : undefined), { label: '史萊姆設定' }) : JSON.parse(localStorage.getItem(SLIME_SETTINGS_STORAGE_KEY) || 'null')); if (saved) return validSlimeSettings(saved); } catch (_) {}
   }
   return validSlimeSettings(null);
 }
@@ -200,7 +200,7 @@ function monsterFrameFiles(monster) {
 function monsterCatalog(useBrowserDraft = false) {
   if (useBrowserDraft) {
     try {
-      const saved = validMonsterCatalog(JSON.parse(localStorage.getItem(MONSTER_STORAGE_KEY) || 'null'));
+      const saved = validMonsterCatalog((typeof DraftSync !== 'undefined' ? DraftSync.load(MONSTER_STORAGE_KEY, MONSTERS_DEFAULT, { label: '怪物' }) : JSON.parse(localStorage.getItem(MONSTER_STORAGE_KEY) || 'null')));   // 編輯器裡：暫存和專案檔三方合併（js/draft-sync.js）
       if (saved.length) {
         for (const monster of validMonsterCatalog(MONSTERS_DEFAULT)) {
           const own = saved.find(m => m.id === monster.id);

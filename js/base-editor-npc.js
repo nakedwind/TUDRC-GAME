@@ -48,7 +48,10 @@ function npcAreaToRect(mapName, areaName) {
 }
 function loadNpcData() {
   let d = null;
-  try { d = JSON.parse(localStorage.getItem(NPC_LOC_STORE) || 'null'); } catch (_) {}
+  try {   // 暫存和專案檔三方合併：朋友新增的 NPC 不會被舊暫存蓋掉（js/draft-sync.js）
+    d = typeof DraftSync !== 'undefined' ? DraftSync.load(NPC_LOC_STORE, { chapters: typeof NPC_LOCATIONS !== 'undefined' ? NPC_LOCATIONS : { 1: {} } }, { label: 'NPC 名單' })
+      : JSON.parse(localStorage.getItem(NPC_LOC_STORE) || 'null');
+  } catch (_) {}
   if (!d || !d.chapters) d = { chapters: clone(typeof NPC_LOCATIONS !== 'undefined' ? NPC_LOCATIONS : { 1: {} }) };
   for (const table of Object.values(d.chapters)) for (const [id, loc] of Object.entries(table)) {
     if (!loc || !loc.map) { delete table[id]; continue; }

@@ -36,7 +36,7 @@ function mergeCharacterDraft(target, saved) {
   }
 }
 try {
-  const saved = JSON.parse(localStorage.getItem(CHARACTER_DRAFT_KEY) || 'null');
+  const saved = (typeof DraftSync !== 'undefined' ? DraftSync.load(CHARACTER_DRAFT_KEY, Object.fromEntries(fighterIds.map(id => [id, editablePart(CHARACTERS[id])])), { label: '角色' }) : JSON.parse(localStorage.getItem(CHARACTER_DRAFT_KEY) || 'null'));   // 暫存和專案檔三方合併（js/draft-sync.js）
   for (const id of fighterIds) if (saved?.[id]) mergeCharacterDraft(charactersDraft[id], saved[id]);
 } catch (_) { /* 草稿損壞時使用正式角色檔，不影響遊戲。 */ }
 

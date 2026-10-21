@@ -2,7 +2,7 @@ const CHAIR_STORAGE_KEY = 'tudrc_chairs_v1';
 function chairCatalog(useBrowserDraft = false) {
   if (useBrowserDraft) {
     try {
-      const saved = JSON.parse(localStorage.getItem(CHAIR_STORAGE_KEY) || 'null');
+      const saved = (typeof DraftSync !== 'undefined' ? DraftSync.load(CHAIR_STORAGE_KEY, CHAIRS_DEFAULT, { label: '椅子' }) : JSON.parse(localStorage.getItem(CHAIR_STORAGE_KEY) || 'null'));   // 編輯器裡：暫存和專案檔三方合併（js/draft-sync.js）
       if (saved && typeof saved === 'object' && !Array.isArray(saved)) return saved;
     } catch (_) {}
   }
