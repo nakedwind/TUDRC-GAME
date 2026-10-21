@@ -7,6 +7,7 @@
 //  ・SP 低於 swayBelow（40）時開始頭暈：視線不規則地繞圈飄。越低越嚴重。
 //  ・SP 低於 ghostBelow（40）時，畫面出現殘影（上一刻的畫面淡淡地留著、稍微錯開）。越低越濃。
 //  ・每個效果都是「剛低於門檻時很輕，SP 歸零時最重」。
+//  ・溫特站在全黑的地方（黑暗蓋住溫特身體 darkCover＝90% 以上）時，SP 每秒少 darkDrain（1）。手電筒、照明頭盔、燈光照到就不會。
 //  ・數值都在下面的 SANITY。
 // ============================================================
 const SANITY = {
@@ -29,6 +30,9 @@ const SANITY = {
   weirdVolume: 0.5,       // SP 歸零時怪聲的音量
   weirdEvery: [20, 50],    // 怪聲每隔幾秒出現一次（剛低於 weirdBelow 時）；SP 越低越頻繁，歸零時約是一半
   warnText: '……頭好暈。得喝點杏仁水才行。',   // 剛低於 swayBelow 時，溫特說的話
+  darkDrain: 1,        // 站在全黑的地方：SP 每秒少多少
+  darkCover: 0.9,      // 黑暗蓋住溫特身體多少以上才算「全黑」（0～1）
+  darkText: '……太黑了，待在這裡真不舒服。',   // 第一次走進全黑的地方時，溫特說的話（每張地圖一次）
 };
 const SP_STORE = 'tudrc_sp_v1';
 let sanitySP = null;   // 記住的 SP（換地圖時帶過去）
@@ -116,6 +120,28 @@ function sanityAfterDraw() {
     if (typeof flash === 'function') flash(SANITY.warnText, G.player.x, G.player.y - 60, '#c9b8ff', 3);
   } else if (sp >= SANITY.swayBelow + 5) sanityWarned = false;
 })();
+// ---- 站在全黑的地方：SP 慢慢下降（game.js 的 update 每幀呼叫）----
+// 在溫特身體範圍（立繪那一塊）均勻取 5×5 個點，看有幾個點落在黑暗裡（沒被任何光照到）。
+function playerDarkCover() {
+  const p = G && G.player; if (!p || typeof LIGHT === 'undefined' || !LIGHT.enabled || typeof isLit !== 'function') return 0;
+  const size = (typeof PLAYER !== 'undefined' && PLAYER.drawSize) || 48, w = size * .5, top = p.y - size + 18 + size * .15, bottom = p.y + 14;
+  let dark = 0, n = 0;
+  for (let i = 0; i < 5; i++) for (let j = 0; j < 5; j++) {
+    const x = p.x - w / 2 + w * i / 4, y = top + (bottom - top) * j / 4;
+    n++; if (!isLit(x, y)) dark++;
+  }
+  return dark / n;
+}
+let darkDrainNoticeFor = null;
+function updateDarkDrain(dt) {
+  const p = G && G.player;
+  if (!p || MAP_SAFE || G.over || !G.running || p.hp <= 0 || G.guide <= 0) return;
+  if (typeof practiceOn === 'function' && practiceOn()) return;   // 訓練室不算
+  if (playerDarkCover() < SANITY.darkCover) return;
+  G.guide = Math.max(0, G.guide - SANITY.darkDrain * dt);
+  if (darkDrainNoticeFor !== G) { darkDrainNoticeFor = G; if (typeof flash === 'function') flash(SANITY.darkText, p.x, p.y - 60, '#c9b8ff', 3); }
+  if (typeof updateHUD === 'function' && Math.floor(G.guide + SANITY.darkDrain * dt) !== Math.floor(G.guide)) updateHUD();   // 每少 1 點更新一次畫面
+}
 // 心跳聲、怪聲（每一幀檢查）：SP 越低越大聲，怪聲也越常出現
 // HP 低於 LOW_HP_FX.hp（js/render.js，畫面閃紅光的時候）也會聽到心跳；兩種情況共用同一個心跳，不會疊兩層
 let sanityBeatAt = 0, sanityWeirdAt = 0;
