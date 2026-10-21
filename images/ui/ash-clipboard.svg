@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- 亞許：任務板（板夾＋任務清單），白色剪影 -->
+  <path fill="#fff" fill-rule="evenodd" d="M6 4.5H18A2 2 0 0 1 20 6.5V20A2 2 0 0 1 18 22H6A2 2 0 0 1 4 20V6.5A2 2 0 0 1 6 4.5Z M7.5 10V11.8H16.5V10Z M7.5 13.8V15.6H16.5V13.8Z M7.5 17.6V19.4H13V17.6Z"/>
+  <path fill="#fff" d="M9 2.2H15A1.2 1.2 0 0 1 16.2 3.4V7.4H7.8V3.4A1.2 1.2 0 0 1 9 2.2Z"/>
+  <path fill="#000" fill-opacity=".55" d="M10.8 3.6H13.2V5H10.8Z"/>
+</svg>

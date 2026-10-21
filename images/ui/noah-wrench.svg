@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- 諾亞：扳手（粗圓可愛版），白色剪影 -->
+  <defs>
+    <mask id="wrenchCut">
+      <g transform="rotate(-45 12 12)">
+        <rect x="2.4" y="9.1" width="13" height="5.8" rx="2.9" fill="#fff"/>
+        <circle cx="17.4" cy="12" r="5.9" fill="#fff"/>
+        <rect x="17.2" y="10.15" width="7" height="3.7" rx="1.85" fill="#000"/>
+        <circle cx="5.4" cy="12" r="1.25" fill="#000"/>
+      </g>
+    </mask>
+  </defs>
+  <rect width="24" height="24" fill="#fff" mask="url(#wrenchCut)"/>
+</svg>

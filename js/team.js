@@ -174,7 +174,7 @@ function squadCard(actor, safe) {
   return '<article class="squad-card squad-card-combat" style="--member-color:' + spec.color + '">' +
     '<span class="squad-portrait"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></span>' +   // 頭像框：放大顯示上半身（半身像）
     '<div class="squad-member-main">' +
-      '<div class="squad-member-head"><div><strong>' + spec.name + '</strong><span>' + (spec.guide ? '嚮導' : '哨兵') + '・' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
+      '<div class="squad-member-head"><div><strong>' + spec.name + roleIconHtml(spec) + '</strong><span>' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
       '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + maxhp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / maxhp * 100)) + '%"></u></i></div>' +
       loadBar + '</div>' + (typeof sortieActiveHtml === 'function' ? sortieActiveHtml(actor.type) : '') +
       '<dl class="squad-stats"><div><dt>攻擊</dt><dd>' + spec.dmg + '</dd></div><div><dt>防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
@@ -266,7 +266,7 @@ function openFieldCommandMenu(type, avatar) {
   const unavailable = member.hp <= 0 || member.berserk;
   if (!fieldCommandMenu.classList.contains('hidden') && fieldCommandMenu.dataset.type === type) { closeFieldCommandMenu(); return; }   // 再點同一個頭像＝關閉
   const escorting = member.mode === 'escort';
-  fieldCommandMenu.innerHTML = '<div class="field-command-head"><strong>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + '</strong>' +
+  fieldCommandMenu.innerHTML = '<div class="field-command-head"><strong>' + spec.name + roleIconHtml(spec) + '</strong>' +
     '<button type="button" class="field-command-close" aria-label="關閉選單">×</button></div>' +
     (unavailable ? '<p>' + (member.hp <= 0 ? '目前無法行動' : '暴走中，無法接受指令') + '</p>' :
     '<button type="button" class="field-command-option" data-destination="base">返回基地巡邏</button>' +
@@ -323,7 +323,7 @@ function renderFieldSquadHud() {
       const aidCls = aidPick && aid.hover === member.type ? ' aid-hover' : '';
       const aidFx = aidPick ? '<span class="aid-glow" style="--aid-sync:-' + (nowS % 3.2).toFixed(2) + 's"><i class="s"></i><i class="m"></i></span><span class="aid-arrow"></span>' : '';
       return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
-        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + '．' + (spec.guide ? '嚮導' : '哨兵') + stateLabel + '</b>' +
+        '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + stateLabel + '</b>' +
         // 條的正中間寫數字：左邊＝現在、右邊＝上限（嚮導沒有精神負荷，寫「無」）
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +
         '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? '無' : taint + '/100') + '</span></div>' +
@@ -365,6 +365,12 @@ function updateFieldCdRings() {
 const TEAM_PROFILES = Object.fromEntries(Object.values(CHARACTERS)
   .filter(character => character.intro)
   .map(character => [character.id, { intro: character.intro }]));
+// 職業圖示：哨兵＝交叉雙劍、嚮導＝盾牌＋十字（白色剪影，CSS 加黑邊）；滑鼠停在上面會顯示「哨兵／嚮導」
+const ROLE_ICON = { sentinel: 'images/ui/sentinel-swords.svg', guide: 'images/ui/guide-shield-plus.svg' };
+function roleIconHtml(spec) {
+  const label = spec.guide ? '嚮導' : '哨兵';
+  return '<img class="role-icon" src="' + (spec.guide ? ROLE_ICON.guide : ROLE_ICON.sentinel) + '" alt="' + label + '" title="' + label + '">';
+}
 function renderTeamPanel() {
   const roster = (typeof ROSTER !== 'undefined') ? ROSTER : [];
   const cap = (typeof TEAM_SIZE !== 'undefined') ? TEAM_SIZE : 4;

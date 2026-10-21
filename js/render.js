@@ -181,9 +181,20 @@ function drawTower(t) {
   // 安全區域沒有血條，名字往下 5px 貼近頭頂（跟 NPC 一致）；戰鬥區域維持原本的名字＋血條間距。
   const nameY = visualTop - (MAP_SAFE ? 6 : 11);
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, t.x, nameY);
+  // 戰鬥區域：名字前面加職業圖示（哨兵＝交叉雙劍、嚮導＝盾牌＋十字），名字跟圖示一起置中
+  const roleKey = spec.guide ? 'guide' : 'sentinel', roleImg = !MAP_SAFE && roleNameIcons[roleKey];
+  const hasRole = roleImg && roleImg.complete && roleImg.naturalWidth, roleSize = 12, roleGap = 3;
+  const nameX = t.x + (hasRole ? (roleSize + roleGap) / 2 : 0);
+  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, nameX, nameY);
   const taintDanger = !MAP_SAFE && !t.berserk && !spec.guide && t.taint > 85 && t.hp > 0;
-  ctx.fillStyle = t.berserk ? '#ff4d4d' : taintDanger ? '#ffb24d' : '#fff'; ctx.fillText(spec.name, t.x, nameY);   // 暴走紅字、瀕臨暴走橘字
+  ctx.fillStyle = t.berserk ? '#ff4d4d' : taintDanger ? '#ffb24d' : '#fff'; ctx.fillText(spec.name, nameX, nameY);   // 暴走紅字、瀕臨暴走橘字
+  if (hasRole) {
+    const ix = nameX - ctx.measureText(spec.name).width / 2 - roleGap - roleSize, iy = nameY - 10, edge = npcIconOutline('role-' + roleKey, roleImg);
+    ctx.save(); ctx.imageSmoothingEnabled = true;
+    for (let a = 0; a < 16; a++) ctx.drawImage(edge, ix + Math.cos(a / 8 * Math.PI) * 1.5, iy + Math.sin(a / 8 * Math.PI) * 1.5, roleSize, roleSize);   // 黑邊
+    ctx.drawImage(roleImg, ix, iy, roleSize, roleSize);
+    ctx.restore();
+  }
 
   if (!MAP_SAFE) {        // 安全區域沒有戰鬥，頭上不顯示血條（名字留著）
     const maxhp = t.maxhp || spec.hp || 100;
@@ -406,6 +417,26 @@ function seatRotate(actor, size) {
   const cy = actor.y - size / 2 + 18;
   ctx.translate(actor.x, cy); ctx.rotate(deg * Math.PI / 180); ctx.translate(-actor.x, -cy);
 }
+// 特殊 NPC 名字前的白色小圖示（角色 id → 圖檔）；要幫別的 NPC 加圖示，在這裡多加一行
+const NPC_NAME_ICON_SRC = {
+  noah: 'images/ui/noah-wrench.svg?v=20261021cute',   // 諾亞：開發工坊（扳手，粗圓版）
+  ash: 'images/ui/ash-clipboard.svg?v=20261021',   // 亞許：通訊員、報告任務（任務板）
+  taana: 'images/ui/taana-whistle.svg?v=20261021', // 塔納：訓練室負責人（哨子）
+};
+const npcNameIcons = {};
+for (const id in NPC_NAME_ICON_SRC) { npcNameIcons[id] = new Image(); npcNameIcons[id].src = NPC_NAME_ICON_SRC[id]; }
+// 戰鬥區域隊員名字前的職業圖示
+const roleNameIcons = { sentinel: new Image(), guide: new Image() };
+roleNameIcons.sentinel.src = 'images/ui/sentinel-swords.svg'; roleNameIcons.guide.src = 'images/ui/guide-shield-plus.svg';
+// 圖示的黑色剪影（畫黑邊用）：第一次用到時做一張，之後重複使用
+const npcIconEdges = {};
+function npcIconOutline(id, img) {
+  if (npcIconEdges[id]) return npcIconEdges[id];
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0, 64, 64);
+  g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgba(0,0,0,.9)'; g.fillRect(0, 0, 64, 64);
+  return (npcIconEdges[id] = c);
+}
 function drawWanderer(npc) {
   const set = wandererSprites[npc.id];
   const img = set && pickCharacterFrame(set, npc);
@@ -422,8 +453,22 @@ function drawWanderer(npc) {
   if (!name) return;
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   const nameY = npc.y - size + 12 + (NPC_LABEL_DY[npc.id] || 0);   // 比圖片頂端再往下 5px（矮的角色再往下，見 NPC_LABEL_DY）
-  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, npc.x, nameY);
-  ctx.fillStyle = '#fff'; ctx.fillText(name, npc.x, nameY);
+  const nameIcon = npcNameIcons[npc.id];
+  const hasIcon = nameIcon && nameIcon.complete && nameIcon.naturalWidth;
+  const iconSize = 12, iconGap = 3;
+  const textX = npc.x + (hasIcon ? (iconSize + iconGap) / 2 : 0);
+  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, textX, nameY);
+  ctx.fillStyle = '#fff'; ctx.fillText(name, textX, nameY);
+  if (hasIcon) {
+    const iconX = textX - ctx.measureText(name).width / 2 - iconGap - iconSize;
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    // 黑邊：跟名字的描邊一樣粗（名字 lineWidth 3 ＝ 往外 1.5 像素），把黑色剪影往四周各蓋一圈，再畫白色圖示
+    const edge = npcIconOutline(npc.id, nameIcon);
+    if (edge) for (let a = 0; a < 16; a++) ctx.drawImage(edge, iconX + Math.cos(a / 8 * Math.PI) * 1.5, nameY - 10 + Math.sin(a / 8 * Math.PI) * 1.5, iconSize, iconSize);
+    ctx.drawImage(nameIcon, iconX, nameY - 10, iconSize, iconSize);
+    ctx.restore();
+  }
   if (npc.say && npc.say.text) queueTowerBubble(npc, npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]);   // 頭上對話泡泡（角色專屬色）：先記下來，最後畫在最上層（flushTowerBubbles）
 }
 // 頭上的名字、對話泡泡、「與 XX 對話」提示要往下移幾像素（角色比人矮的時候用，例如球球是狗）
