@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>開發工坊編輯器｜Y102 應變中心</title>
-<link rel="stylesheet" href="css/style.css?v=ws-text-fit-20261021">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/style.css?v=ws-name14-20261021">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
@@ -48,9 +48,9 @@
   #itemList button.removed::after { content: '已刪除'; margin-left: auto; color: #ff9c9c; font-size: 11px; }
   #itemList .list-head { color: #ffe3a1; font-size: 12px; margin: 4px 0 0; }
   .removed-note { color: #ffb3b3; font-size: 13px; line-height: 1.5; margin: 0 0 10px; }
-  .preview-stage .ws-row { cursor: grab; }   /* 點一下＝選它；按住拖曳＝調整順序 */
-  .preview-stage .ws-row.dragging { opacity: .45; }
-  .preview-stage .ws-row.drop-swap { outline: 2px dashed #8fd3ff; outline-offset: 2px; }   /* 放開會跟這格互換 */
+  .preview-stage .ws-tile { cursor: grab; }   /* 點一下＝選它；按住拖曳＝調整順序 */
+  .preview-stage .ws-tile.dragging { opacity: .45; }
+  .preview-stage .ws-tile.drop-swap { outline: 2px dashed #8fd3ff; outline-offset: 2px; }   /* 放開會跟這格互換 */
   .val-table { width: 100%; table-layout: fixed; border-collapse: collapse; margin: -4px 0 12px; font-size: 12px; }   /* 欄寬固定：每一把武器的表格都對齊 */
   .val-table col.vt-name { width: 118px; }
   .val-table th { color: #b9cad9; font-weight: 600; text-align: left; padding: 3px 4px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -59,7 +59,15 @@
   .val-table td { padding: 2px 3px; }
   .val-table input { width: 100%; min-width: 0; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; text-align: right; }
   .val-table input:disabled { opacity: .35; }
-  .preview-stage .ws-row.ed-sel { outline: 2px solid #82cbe2; outline-offset: 1px; }   /* 左邊選到的那一格 */
+  .preview-stage .ws-tile.ed-sel { outline: 2px solid #82cbe2; outline-offset: 1px; }
+  /* 右側紙娃娃：點格子打開的「穿上／卸下」選單 */
+  .pv-slot-menu { display: flex; flex-direction: column; gap: 4px; padding: 8px; border: 1px solid rgba(255,212,121,.35); border-radius: 10px; background: rgba(7,12,18,.92); }
+  .pv-slot-menu b { color: #ffe3a1; font-size: 12px; }
+  .pv-slot-menu button { padding: 5px 8px; border: 1px solid rgba(255,255,255,.12); border-radius: 7px; background: rgba(37,43,51,.8); color: #e8eef3; cursor: pointer; font: inherit; font-size: 12px; text-align: left; }
+  .pv-slot-menu button.on { border-color: #ffd479; }
+  .pv-slot-menu button.off { color: #ffb3b3; }
+  .pv-slot-menu p { margin: 0; color: #8c96a1; font-size: 11px; }
+  .preview-stage .doll-slot { cursor: pointer; }   /* 左邊選到的那一格 */
   /* 預覽的裝備狀態：一排可以點的按鈕（跟素材列的分頁一樣） */
   .pv-bar { flex-wrap: nowrap; }   /* 「預覽」「裝備狀態」跟按鈕排在同一行；按鈕太多時只在右邊那一塊裡換行 */
   .pv-bar { align-items: flex-start; }   /* 按鈕換成兩行時，標題對齊第一行 */
@@ -147,7 +155,7 @@
         <h2 style="margin:0">預覽</h2>
         <span class="pv-label">裝備狀態</span>
         <div class="pv-modes" id="previewModes"></div>   <!-- 按鈕：js/workshop-editor.js 的 renderPreviewModes -->
-        <button type="button" class="ed-btn" id="autoArrange" hidden title="丟掉拖曳調整的順序，回到一樣高的兩格自動配成一排">恢復自動排列</button>
+        <button type="button" class="ed-btn" id="autoArrange" hidden title="丟掉拖曳調整的順序，回到原本的順序">恢復原本順序</button>
       </div>
       <div class="preview-wrap"><div class="preview-stage" id="previewStage"></div></div>
     </section>
@@ -168,9 +176,9 @@
   <script src="data/items.js"></script>
   <script src="data/workshop.js?v=wsoff-20261021"></script>       <!-- 目前存在檔案裡的工坊設定 -->
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/workshop-config.js?v=wshead-20261021"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="js/workshop-config.js?v=ws-tabs-20261021"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-editor.js?v=sync-20261021"></script>
+  <script src="js/workshop-editor.js?v=ws-devonly-20261021"></script>
 </body>
 </html>
