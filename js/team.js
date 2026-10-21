@@ -181,9 +181,11 @@ function squadCard(actor, safe) {
   const hp = live ? Math.max(0, Math.round(live.hp)) : spec.hp, maxhp = live ? live.maxhp : spec.hp;
   const taint = live ? Math.max(0, Math.min(100, Math.round(live.taint || 0))) : 0;
   const condition = memberCondition(actor, safe);
-  const support = spec.guide ? '疏導 ' + spec.aura.rate + '/秒' : (spec.splash > 0 ? '範圍 ' + spec.splash.toFixed(1) + ' 格' : '單體攻擊');
+  const support = spec.guide ? '疏導 ' + Math.round(spec.aura.rate * 10) / 10 + '/秒' : (spec.splash > 0 ? '範圍 ' + spec.splash.toFixed(1) + ' 格' : '單體攻擊');
   const learned = typeof training !== 'undefined' && training.skills ? (training.skills[actor.type] || []).length : 0;
-  const trainingAction = '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / 9' + (safe ? '' : '・回基地才能學') + '</small></button>';
+  const trainingAction = typeof SKILL_TREES !== 'undefined' && !SKILL_TREES[actor.type]
+    ? '<button class="squad-upgrade squad-skill-btn" disabled>技能樹<small>還沒有技能樹（data/skills.js）</small></button>'   // 新加入的隊員還沒設計技能樹
+    : '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / 9' + (safe ? '' : '・回基地才能學') + '</small></button>';
   const loadBar = spec.guide
     ? '<div><span>SP <b>' + Math.floor(guideSPFor(actor.type)) + ' / ' + guideSPMax() + '</b></span><i class="sp-bar"><u style="width:' + (guideSPFor(actor.type) / guideSPMax() * 100) + '%"></u></i></div>'
     : '<div><span>負荷 <b>' + taint + ' / 100</b></span><i class="taint-bar"><u style="width:' + taint + '%"></u></i></div>';
@@ -193,7 +195,7 @@ function squadCard(actor, safe) {
       '<div class="squad-member-head"><div><strong>' + spec.name + roleIconHtml(spec) + '</strong><span>' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
       '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + maxhp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / maxhp * 100)) + '%"></u></i></div>' +
       loadBar + '</div>' + (typeof sortieActiveHtml === 'function' ? sortieActiveHtml(actor.type) : '') +
-      '<dl class="squad-stats"><div><dt>攻擊</dt><dd>' + spec.dmg + '</dd></div><div><dt>防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
+      '<dl class="squad-stats"><div><dt>攻擊</dt><dd>' + (spec.noAttack ? '—' : spec.dmg) + '</dd></div><div><dt>防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
       '<div class="squad-card-actions"><button class="captain-impression-button" type="button" data-impression="' + actor.type + '">深入了解</button><div class="squad-training">' + trainingAction + '</div></div>' +
     '</div></article>';
 }

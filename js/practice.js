@@ -49,7 +49,7 @@ if (typeof practiceOrigHUD === 'function') window.updateHUD = function (...args)
 // ---- 跟塔納對話：多一個「🎯 開始訓練」按鈕（game.js 的 openDialogue 呼叫）----
 function onDialogueOpenedPractice(actor) {
   const btn = document.getElementById('dialoguePractice'); if (!btn) return;
-  btn.classList.toggle('hidden', !(actor && actor.id === PRACTICE.npc && isPracticeMap() && !practice.active));
+  btn.classList.toggle('hidden', !(actor && (actor.kind === 'tower' ? actor.type : actor.id) === PRACTICE.npc && isPracticeMap() && !practice.active));   // 塔納是出勤隊員（tower）：看 type
 }
 document.getElementById('dialoguePractice')?.addEventListener('click', () => { if (typeof closeDialogue === 'function') closeDialogue(true); openPracticePanel(); });
 

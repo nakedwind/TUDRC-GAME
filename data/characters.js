@@ -376,18 +376,82 @@ const CHARACTERS = {
   },
   "taana": {
     "id": "taana",
-    "kind": "support",
+    "kind": "guide",
     "name": "塔納",
     "sprite": "taana_A",
+    "combat": {
+      "rank": "A",
+      "role": "疏導支援",
+      "ability": "疏導光環",
+      "range": 3,
+      "aggroRange": 6,
+      "dmg": 0,
+      "rate": 0.5,
+      "taint": 0,
+      "splash": 0,
+      "color": "#5266ff",
+      "accuracy": 1,
+      "taintRegen": 0,
+      "walkSpeed": 75,
+      "hp": 150,
+      "defense": 0.15,
+      "guide": true,
+      "noAttack": true,
+      "careFollow": true,
+      "aura": {
+        "r": 3,
+        "rate": 4.3333,
+        "heal": 4.3333
+      },
+      "ratings": {
+        "guide": 4,
+        "combat": 1,
+        "defense": 2,
+        "hp": 3,
+        "heal": 3
+      },
+      "evade": 3.5,
+      "trait": "不攻擊、無精神負荷；疏導光環：每 3 秒為 3 格內的隊員降低 26 汙染、恢復 13 HP（汙染跟其他嚮導一樣算兩倍，介於艾德林和克莉思之間）。遇敵時保持 3.5 格距離，平時跟在需要照顧的哨兵身邊。"
+    },
     "intro": "B-2 訓練室的負責人，管理練習模式和訓練場的設備。看起來一直很想下班。",
     "captainImpression": ""
   },
   "colyn": {
     "id": "colyn",
-    "kind": "support",
+    "kind": "sentinel",
     "name": "柯林",
     "sprite": "colyn_B",
-    "intro": "常在餐廳出沒的路人，精神很好、很會吃。",
+    "combat": {
+      "rank": "B",
+      "role": "前衛劍士",
+      "ability": "劍術",
+      "range": 1.5,
+      "aggroRange": 14,
+      "dmg": 6,
+      "rate": 1.6,
+      "taint": 1,
+      "splash": 0,
+      "color": "#fff5b3",
+      "accuracy": 0.9,
+      "taintRegen": 0,
+      "walkSpeed": 110,
+      "hp": 150,
+      "defense": 0.3,
+      "taunt": 2.2,
+      "parry": {
+        "self": 0.25,
+        "guard": 0.15,
+        "guardRange": 5
+      },
+      "ratings": {
+        "combat": 3,
+        "defense": 4,
+        "hp": 3,
+        "load": 2
+      },
+      "trait": "單體攻擊；長劍快攻，吸引附近異質體的仇恨。被動「劍舞架勢」：怪物打柯林有 25% 會打空，溫特在他 5 格內時，怪物打溫特有 15% 會打空。大招「突擊連刺」：每 8 秒蓄力後 0.5 秒內連刺 3 下（每下 20，整招 1 秒），從第一刺起讓目標破甲 3 秒（受到所有人的傷害 +10%）。"
+    },
+    "intro": "精神很好、很會吃，常在餐廳和訓練室出沒。",
     "captainImpression": ""
   },
   "rowan": {

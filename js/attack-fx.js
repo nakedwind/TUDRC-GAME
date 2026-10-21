@@ -98,6 +98,13 @@ function drawHitMarker() {
 const SOOTHE_COLORS = { winter: [96, 170, 255], eldrin: [128, 222, 112], chris: [238, 246, 255] };
 // 疏導期間身邊飄的小光點（比上面的疏導色更鮮豔）：溫特＝亮藍、艾德林＝亮綠、克莉思＝亮白
 const SOOTHE_MOTE_COLORS = { winter: [0, 115, 255], eldrin: [10, 255, 55], chris: [255, 255, 255] };
+// 上面沒寫的嚮導（例如塔納）：疏導顏色用角色資料頁的「特效顏色」（data/characters.js 的 combat.color）；光點用更鮮豔的同色
+const hexRgb = h => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || '')); const n = m ? parseInt(m[1], 16) : 0xffffff; return [n >> 16 & 255, n >> 8 & 255, n & 255]; };
+for (const [id, spec] of Object.entries(typeof TYPES !== 'undefined' ? TYPES : {})) {
+  if (!spec.guide || SOOTHE_COLORS[id]) continue;
+  const col = hexRgb(spec.color), mid = (col[0] + col[1] + col[2]) / 3;
+  SOOTHE_COLORS[id] = col; SOOTHE_MOTE_COLORS[id] = col.map(v => Math.max(0, Math.min(255, Math.round(mid + (v - mid) * 1.6))));
+}
 const SOOTHE_MOTES = { perSec: 14, rise: [14, 30], life: [1, 1.6], size: [1.44, 2.72] };   // 每秒幾顆、往上飄的速度、飄幾秒、大小
 // 在這些人身邊冒出光點（每幀呼叫）；holder 用來記累積的數量（溫特用一個物件，嚮導用自己）
 function spawnSootheMotes(who, col, dt, holder) {
@@ -111,7 +118,7 @@ function spawnSootheMotes(who, col, dt, holder) {
   }
 }
 
-const ULT_CHARGE_COLOR = { theonie: '#ff8a3a', amber: '#aee9ff', avaren: '#b060ff', red: '#bfe0ff', luther: '#ffd0d5' };
+const ULT_CHARGE_COLOR = { theonie: '#ff8a3a', amber: '#aee9ff', avaren: '#b060ff', red: '#bfe0ff', luther: '#ffd0d5' };   // 沒寫的（柯林）：用角色的特效顏色
 function spawnChargeFx(x, y, color) {   // 大招蓄力telegraph：收束的光圈＋漸亮的核心
   G.effects.push({ charge: true, x, y, color, life: ULT_SWING.impact, life0: ULT_SWING.impact });
 }
@@ -432,6 +439,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   const kind = spec.ability === '火焰' ? 'flame'
     : spec.ability === '雷電' ? 'lightning'
     : spec.ability === '怪力' || spec.ability === '自癒' ? 'melee'
+    : spec.ability === '劍術' ? 'sword'   // 柯林：長劍快攻（近戰、輕打）
     : spec.ability === '腐蝕' ? 'corrosion' : 'shot';
   if (attacker) {   // 攻擊時面向目標，並短暫切換成持槍圖（有持槍圖的角色才會顯示）
     const dx = target.x - attacker.x, dy = target.y - attacker.y;
@@ -439,7 +447,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     attacker.gunT = 0.3;
   }
   // 火焰、雷電、近戰改用程式即時繪製；其餘維持原本序列圖／光束
-  const proc = kind === 'flame' || kind === 'lightning' || kind === 'melee' || kind === 'corrosion';
+  const proc = kind === 'flame' || kind === 'lightning' || kind === 'melee' || kind === 'sword' || kind === 'corrosion';
   if (kind === 'flame') {
     spawnFlameBurst(impactPoint.x, impactPoint.y + 8, scale);
     addScorchMark(impactPoint.x, impactPoint.y + 10, 15 * scale, null, 'flame');   // 希奧妮：地上留焦痕
@@ -447,7 +455,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     spawnLightningBolt(impactPoint.x, impactPoint.y, scale);
     addScorchMark(impactPoint.x, impactPoint.y + 10, (spec.splash > 0 ? Math.min(26, spec.splash * CELL * .3) : 16) * scale, null, 'lightning');   // 安柏：雷擊焦紋
   }
-  else if (kind === 'melee') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0);
+  else if (kind === 'melee' || kind === 'sword') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0);
   else if (kind === 'corrosion') spawnCorrosionSplash(impactPoint.x, impactPoint.y, spec.splash, spec.dmg, scale);
   else if (attacker && GUIDE_GUN_TYPES.has(attacker.type)) G.effects.push({ ring: true, x: target.x, y: target.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });
   else G.effects.push({ attack: true, kind, x1: attacker.x, y1: attacker.y - 9, x2: target.x, y2: target.y, life: .28, life0: .28, color: spec.color, seed: Math.random() * 1000 });
@@ -476,6 +484,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     flame:     { shake: 3.5, stop: 0,    ring: '#ff8a3a' },   // 希奧妮 火焰：中震、灼燒環
     lightning: { shake: 8,   stop: 0.05, ring: '#fff3a3' },   // 安柏 雷電：強震＋頓格＋亮環
     melee:     { shake: 6.5, stop: 0.05, ring: '#ffd0d5' },   // 雷德／路德 近戰：重擊震＋頓格
+    sword:     { shake: 2,   stop: 0,    ring: spec.color },   // 柯林 長劍：打得快，輕震、不頓格（顏色＝角色資料頁的特效顏色）
     corrosion: { shake: 2.5, stop: 0,    ring: '#b98cff' },   // 阿瓦倫 腐蝕：輕震、紫環
     shot:      { shake: 2.5, stop: 0,    ring: spec.color },
   })[kind] || { shake: 2.5, stop: 0, ring: spec.color };
@@ -501,7 +510,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     sfxMonsterHit(target, 0.48, attacker?.type || 'sentry');   // 鳥頭人等有自己的被打音效（每隻冷卻 0.5 秒，js/game.js）
   }
 }
-const SENTRY_ATTACK_SOUNDS = { theonie: 'rangedShot', amber: 'rangedShot', avaren: 'cleaver', luther: 'meleeAttack', red: 'swordSwing' };
+const SENTRY_ATTACK_SOUNDS = { theonie: 'rangedShot', amber: 'rangedShot', avaren: 'cleaver', luther: 'meleeAttack', red: 'swordSwing', colyn: 'swordSwing' };
 function playSentryAttackSound(t) {
   const name = SENTRY_ATTACK_SOUNDS[t.type];
   if (name && typeof sfxAt === 'function') sfxAt(name, t.x, t.y, 0.55, t.type);

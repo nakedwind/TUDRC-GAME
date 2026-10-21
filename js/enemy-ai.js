@@ -91,12 +91,23 @@ function sweepAttack(e, target, dt) {
   }
   e.atkCd = 1; e.playerTouchCd = 1;   // 一般攻擊的冷卻也重設，不會同一下打兩次
 }
+// 柯林的被動「劍舞架勢」（data/characters.js 的 combat.parry）：怪物打柯林有 self 的機率打空；
+// 溫特在他 guardRange 格內時，怪物打溫特有 guard 的機率打空（柯林暴走時不保護溫特）
+function parryMiss(target, isPlayer) {
+  for (const t of G.towers) {
+    const p = TYPES[t.type] && TYPES[t.type].parry; if (!p || t.hp <= 0) continue;
+    const chance = isPlayer ? (!t.berserk && Math.hypot(t.x - target.x, t.y - target.y) <= p.guardRange * CELL ? p.guard : 0) : (t === target ? p.self : 0);
+    if (chance > 0 && Math.random() < chance) { flashDmg('MISS', target.x, target.y - 30, '#c6d1dd'); return true; }
+  }
+  return false;
+}
 function enemyAttackSentry(e, target, dt) {
   e.atkCd = (e.atkCd || 0) - dt;
   if (target) monsterSwingCue(e, e.atkCd, target.x, target.y);
   if (e.atkCd > 0 || !target || target.hp <= 0) return;
   e.atkCd = 1;
   monsterSwingHit(e, target.x, target.y);
+  if (parryMiss(target, false)) return;   // 柯林的劍舞架勢：打空
   const defense = sentryDefense(target);
   const damage = (e.sentryDamage ?? 14) * (1 - defense);
   target.hp = Math.max(0, target.hp - damage);
@@ -116,6 +127,7 @@ function enemyAttackPlayer(e, dt) {
   if ((e.playerTouchCd || 0) > 0) return;
   e.playerTouchCd = 1;
   monsterSwingHit(e, p.x, p.y);
+  if (parryMiss(p, true)) return;   // 溫特在柯林身邊：有機會打空
   const damage = (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 12) : e.playerDamage ?? 12);   // 防護背心減傷（js/equipment.js）
   p.hp = Math.max(0, p.hp - damage);
   p.hitT = .45; p.underAttackT = 5; p.lastAttacker = e;

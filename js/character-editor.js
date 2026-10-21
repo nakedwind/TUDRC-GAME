@@ -13,6 +13,7 @@ const FIELD_LABELS = {
   trait:'能力說明', intro:'人物簡介', captainImpression:'部隊長印象', guide:'嚮導', noAggro:'不主動吸引仇恨',
   taunt:'嘲諷範圍・格', rageDmg:'汙染加成・滿汙染額外倍率', noRetreat:'瀕臨暴走不撤退', hpRegen:'每秒恢復 HP', confuse:'混亂時間・秒', knockback:'擊退距離・格',
   stun:'暈眩時間・秒', sense:'感知範圍・格', evade:'閃避距離・格',
+  noAttack:'不攻擊（只疏導）', careFollow:'跟著需要照顧的哨兵', parry:'劍舞架勢（怪物打空）', self:'怪物打自己打空的機率・0～1', guard:'怪物打溫特打空的機率・0～1', guardRange:'保護溫特的範圍・格',
   duration:'持續時間・秒', damage:'每秒傷害', r:'半徑・格／碰撞 px', heal:'治療量',
   combat:'戰鬥', load:'精神負荷', ratings:'星級評價', aura:'被動支援', burn:'燒傷',
   mag:'彈匣容量', reloadTime:'裝填時間・秒', aggro:'玩家仇恨時間・秒', cone:'瞄準容許角度・弧度',

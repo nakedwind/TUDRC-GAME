@@ -496,7 +496,7 @@ function updateSentry(t, dt) {
   // 嚮導身上的醫療包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
   if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
   // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
-  if (t.type === 'eldrin' && t.mode !== 'goto' && t.mode !== 'escort') {
+  if ((t.type === 'eldrin' || ownSpec.careFollow) && t.mode !== 'goto' && t.mode !== 'escort') {   // careFollow：塔納也一樣
     const sentinels = G.towers.filter(o =>
       o !== t && o.hp > 0 && !TYPES[o.type].guide &&
       (o.berserk || (o.taint || 0) >= 10 || o.maxhp - o.hp >= 10)
@@ -550,7 +550,7 @@ function updateSentry(t, dt) {
   // 追多遠依模式：自由走動＝追得遠、原地巡邏／指派＝只追崗位附近，怪死或跑遠就回去巡邏。
   const litHere = !LIGHT.enabled || isLit(t.x, t.y);
   const awakeCore = G.cores.some(c => !c.dead && c.awake);   // 醒著的核心會發光：在暗處也看得到、會走過去打
-  if ((litHere || awakeCore) && (G.enemies.length || awakeCore)) {
+  if (!TYPES[t.type].noAttack && (litHere || awakeCore) && (G.enemies.length || awakeCore)) {   // 不攻擊的嚮導（塔納）：不去追怪
     const spec = TYPES[t.type];
     const atkR = spec.range * CELL;                       // 射程（像素）
     const anchor = t.mode === 'escort' && G.player ? G.player : (t.mode !== 'free' && t.anchor) ? t.anchor : t;   // 護衛時以部隊長為中心

@@ -119,6 +119,33 @@ function drawFireAxe(t) {
   if (t.type === 'red') { if (!(t.meleeSwing && t.meleeSwing.ult)) drawSwingWeapon(t, redAxeImg, 21, 32, 22); return; }   // 雷德：fire_axe_01（大招用盾衝撞，不拿斧）
   if (t.type === 'avaren') { drawSwingWeapon(t, avarenKnifeImg, 9, 29, 20); return; }  // 阿瓦倫：military_knife
   if (t.type === 'luther') { drawSwingWeapon(t, lutherAxeImg, 28, 46, 26); return; }   // 路德：fire_axe_02（攻擊時才出現）
+  if (t.type === 'colyn') { drawColynSword(t); return; }   // 柯林：長劍
+}
+// 柯林的突擊連刺：身體前後衝的量（-＝往後、+＝往前）。先往後蓄力；每刺一下 0.05 秒衝到最前，
+// 再被反作用力彈回比原位更後面（後座力），等下一刺；最後一刺後慢慢回正。amp＝[前後 px, 上下 px, 傾斜]
+const STAB_LUNGE = { amp: [7, 5, .12], back: -.8, front: 1.8, dash: .05, recoil: .08, settle: .3 };
+function stabLunge(s) {
+  const L = STAB_LUNGE, first = s.stabs[0];
+  if (s.age < first) return L.back * Math.sin(s.age / first * Math.PI / 2);   // 蓄力：往後縮
+  let last = first; for (const ts of s.stabs) if (s.age >= ts) last = ts;
+  const u = s.age - last;   // 這一刺過了幾秒
+  if (u < L.dash) return L.back + (L.front - L.back) * (u / L.dash);                         // 猛往前衝
+  if (u < L.dash + L.recoil) return L.front + (L.back - L.front) * ((u - L.dash) / L.recoil);   // 反作用力彈回
+  if (last !== s.stabs[s.stabs.length - 1]) return L.back;                                  // 等下一刺
+  return L.back * Math.max(0, 1 - (u - L.dash - L.recoil) / L.settle);                      // 收招：回正
+}
+function drawColynSword(t) {   // 柯林：一般攻擊沿弧線揮；大招突刺時劍尖朝目標，跟著身體前後衝
+  const s = t.meleeSwing;
+  if (!s || !colynSwordImg.complete || !colynSwordImg.naturalWidth) return;
+  if (!s.stabs) { drawSwingWeapon(t, colynSwordImg, 9, 46, 18); return; }
+  const lunge = stabLunge(s), [ax, ay] = STAB_LUNGE.amp, cos = Math.cos(s.angle), sin = Math.sin(s.angle);
+  const reach = 6 + Math.max(0, lunge) * 8;   // 往前衝的時候劍再多伸出去一點
+  ctx.save();
+  ctx.translate(t.x + cos * (6 + lunge * ax), t.y - 12 + sin * (4 + lunge * ay));
+  ctx.rotate(s.angle + Math.PI / 2);   // 圖裡朝上的劍尖對準目標
+  ctx.translate(0, -reach); ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(colynSwordImg, -4.5, -40, 9, 46);
+  ctx.restore();
 }
 function sentryRedFlash(t) {   // 回傳紅閃強度 0~1：受擊閃一下、瀕臨暴走慢脈動、暴走快脈動
   if (t.hp <= 0) return 0;
@@ -151,12 +178,13 @@ function drawTower(t) {
     if (t.meleeSwing) {
       const s = t.meleeSwing;
       let lunge;   // -1 後仰蓄力 → +1 前傾撲擊
-      if (s.age < s.wind) lunge = -Math.sin(s.age / s.wind * Math.PI / 2) * .65;
+      if (s.stabs) lunge = stabLunge(s);   // 柯林的突擊連刺：一刺一刺前後衝
+      else if (s.age < s.wind) lunge = -Math.sin(s.age / s.wind * Math.PI / 2) * .65;
       else if (s.age < s.impact) { const u = (s.age - s.wind) / (s.impact - s.wind); lunge = -.65 + 1.65 * u * u; }
       else { const u = Math.min(1, (s.age - s.impact) / (s.duration - s.impact)); lunge = 1 * (1 - u * u); }
-      const dx = Math.cos(s.angle), dy = Math.sin(s.angle);
-      ctx.translate(t.x + dx * lunge * 6, t.y + dy * lunge * 4);
-      ctx.rotate(dx * lunge * .16); ctx.translate(-t.x, -t.y);
+      const dx = Math.cos(s.angle), dy = Math.sin(s.angle), [ax, ay, ar] = s.stabs ? STAB_LUNGE.amp : [6, 4, .16];
+      ctx.translate(t.x + dx * lunge * ax, t.y + dy * lunge * ay);
+      ctx.rotate(dx * lunge * ar); ctx.translate(-t.x, -t.y);
     } else if (t.gunSwing) {   // 開槍後座：沿瞄準方向前傾→後踢→回正
       const off = gunSwingOffset(t.gunSwing), dx = Math.cos(t.gunSwing.angle), dy = Math.sin(t.gunSwing.angle);
       ctx.translate(dx * off * 4, dy * off * 4);
@@ -191,14 +219,14 @@ function drawTower(t) {
   const nameY = visualTop - (MAP_SAFE ? 6 : 11);
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   // 戰鬥區域：名字前面加職業圖示（哨兵＝交叉雙劍、嚮導＝盾牌＋十字），名字跟圖示一起置中
-  const roleKey = spec.guide ? 'guide' : 'sentinel', roleImg = !MAP_SAFE && roleNameIcons[roleKey];
+  const roleKey = spec.guide ? 'guide' : 'sentinel', roleImg = !MAP_SAFE ? roleNameIcons[roleKey] : npcNameIcons[t.type];   // 基地裡：特殊 NPC 的小圖示（例如塔納的哨子）
   const hasRole = roleImg && roleImg.complete && roleImg.naturalWidth, roleSize = 12, roleGap = 3;
   const nameX = t.x + (hasRole ? (roleSize + roleGap) / 2 : 0);
   ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, nameX, nameY);
   const taintDanger = !MAP_SAFE && !t.berserk && !spec.guide && t.taint > 85 && t.hp > 0;
   ctx.fillStyle = t.berserk ? '#ff4d4d' : taintDanger ? '#ffb24d' : '#fff'; ctx.fillText(spec.name, nameX, nameY);   // 暴走紅字、瀕臨暴走橘字
   if (hasRole) {
-    const ix = nameX - ctx.measureText(spec.name).width / 2 - roleGap - roleSize, iy = nameY - 10, edge = npcIconOutline('role-' + roleKey, roleImg);
+    const ix = nameX - ctx.measureText(spec.name).width / 2 - roleGap - roleSize, iy = nameY - 10, edge = npcIconOutline(MAP_SAFE ? t.type : 'role-' + roleKey, roleImg);
     ctx.save(); ctx.imageSmoothingEnabled = true;
     for (let a = 0; a < 16; a++) ctx.drawImage(edge, ix + Math.cos(a / 8 * Math.PI) * 1.5, iy + Math.sin(a / 8 * Math.PI) * 1.5, roleSize, roleSize);   // 黑邊
     ctx.drawImage(roleImg, ix, iy, roleSize, roleSize);

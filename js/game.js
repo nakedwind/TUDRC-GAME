@@ -94,6 +94,7 @@ applyOutfits();
 const redAxeImg = new Image(); redAxeImg.src = 'images/weapon/fire_axe_01.png';
 const avarenKnifeImg = new Image(); avarenKnifeImg.src = 'images/weapon/military_knife.png';
 const lutherAxeImg = new Image(); lutherAxeImg.src = 'images/weapon/fire_axe_02.png';
+const colynSwordImg = new Image(); colynSwordImg.src = 'images/weapon/long_sword.png';   // 柯林：長劍
 function loadRedShieldSprites() {
   const set = {};
   for (const k of ['front', 'back', 'left', 'right', 'blink']) {
@@ -1420,13 +1421,41 @@ const ULTIMATES = {
   // 近戰大招（大範圍）：red 盾牌衝撞＋回HP回污染、擊退；luther 大範圍重擊＋暈眩、傷害更高
   red:     { cd: 10, dmgMul: 2.2, radius: 2.8, kind: 'bash',  knockback: 1.6, healHp: 40, healTaint: 40 },
   luther:  { cd: 11, dmgMul: 3.0, radius: 3.0, kind: 'smash', knockback: 0.8, stun: 2.5 },
+  // 柯林：突擊連刺（stabs＝第幾秒刺：先往後蓄力 0.25 秒，接著 0.5 秒內連刺 3 下，再收招，整招 duration 秒；每下 stabDmg；
+  //       第一刺起目標破甲 breakT 秒＝受到所有人的傷害 ×breakMul；整招只加 taint 汙染）
+  colyn:   { cd: 8, stabs: [.25, .42, .59], stabDmg: 20, duration: 1, breakMul: 1.1, breakT: 3, taint: 3 },
 };
 const ULT_SWING = { wind: .6, impact: .8, duration: 1.2 };   // 大招：長前搖→放招→收招
+// 哨兵的精神負荷增加（出勤補給可以減少）；到 100 暴走。嚮導沒有負荷
+function addSentryTaint(t, amount) {
+  if (!TYPES[t.type].guide) t.taint = Math.min(100, t.taint + amount * Math.max(0, 1 - sortieBuff(t, 'calm')));   // 出勤補給：負荷累積變慢
+  if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入暴走，開始無差別攻擊！', true); }
+}
+// 柯林的突擊連刺：每到一個刺擊時間點就刺一下；目標死了或跑出射程，剩下的就不刺
+function colynStabStep(t, spec, swing) {
+  const U = ULTIMATES[t.type];
+  while (swing.stabIdx < swing.stabs.length && swing.age >= swing.stabs[swing.stabIdx]) {
+    swing.stabIdx++;
+    const foe = swing.target;
+    if (!foe || foe.dead || foe.hp <= 0 || Math.hypot(foe.x - t.x, foe.y - t.y) > spec.range * CELL + 12 + (G.cores.includes(foe) ? CORE_HIT_PAD : 0)) { swing.stabIdx = swing.stabs.length; return; }
+    const isEnemy = G.enemies.includes(foe), dmg = U.stabDmg * sentryDamageMul(t), col = spec.color || '#e9f2ff';   // 劍光顏色＝角色資料頁的特效顏色
+    if (isEnemy && swing.stabIdx === 1) { foe.breakT = U.breakT; flashDmg('破甲', foe.x, foe.y - 46, '#ffcf6a'); }   // 第一刺：破甲（受到的傷害加成在死亡判定前統一算，所有人打牠都有）
+    foe.hp -= dmg;
+    swing.lungeAt = swing.age;   // 劍往前刺的動畫（js/render.js 的 drawColynSword）
+    const a = Math.atan2(foe.y - t.y, foe.x - t.x);
+    G.effects.push({ bullet: true, x1: t.x + Math.cos(a) * 10, y1: t.y - 8 + Math.sin(a) * 8, x2: foe.x + Math.cos(a) * 8, y2: foe.y - 6, life: .12, life0: .12, color: col });   // 刺擊的劍光
+    G.effects.push({ ring: true, x: foe.x, y: foe.y, r: 3, r2: 14, life: .16, life0: .16, color: col });
+    if (isEnemy) { aggroOnSentry(foe, t); foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = col; enemyHitReact(foe, t.x, t.y, swing.stabIdx === swing.stabs.length); sfxMonsterHit(foe, 0.48, 'colyn-ult'); }
+    flashDmg('-' + Math.round(dmg * (isEnemy && foe.breakT > 0 ? U.breakMul : 1)), foe.x, foe.y - 26, col);
+    playSentryAttackSound(t);
+  }
+}
 // 近戰普攻的節奏（秒，從出手開始算）：wind＝舉起蓄力結束、impact＝命中瞬間、duration＝收招完成
 const MELEE_SWING = {
   normal: { wind: .19, impact: .30, duration: .58 },   // 雷德
   luther: { wind: .29, impact: .43, duration: .78 },   // 路德：重擊，比較慢
   avaren: { wind: .11, impact: .18, duration: .36 },   // 阿瓦倫：短刀，快而俐落
+  colyn:  { wind: .1, impact: .16, duration: .34 },    // 柯林：長劍快攻（每秒 1.6 下，收招要比攻擊間隔短）
 };
 // 玩家（溫特）攻擊：按住左鍵朝游標方向開槍。彈匣 6 發，打完或按 R 裝填；傷害很低、會吸引仇恨。
 const PLAYER_ATK = CHARACTERS.winter.playerAttack || { range: 6, dmg: 3, rate: 5, aggro: 3.5, cone: 0.44, mag: 6, reloadTime: 2 };
@@ -1856,12 +1885,18 @@ function update(dt) {
       }
     }
     if (t.soothingT > 0) continue;   // 疏導中專心施法，不開槍
+    if (spec.noAttack) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 不攻擊的嚮導（塔納）：只疏導
     t.cd -= dt;
     let swingTarget = null;
     if (t.berserk) { t.meleeSwing = null; t.gunSwing = null; updateChaosSentry(t, spec, dt); continue; }   // 暴走：無差別攻擊
     if (t.meleeSwing) {
       const swing = t.meleeSwing;
       swing.age += dt;
+      if (swing.ult && swing.stabs) {   // 柯林的突擊連刺：照時間一刺一刺打（不走下面一般攻擊的流程）
+        colynStabStep(t, spec, swing);
+        if (swing.age >= swing.duration) t.meleeSwing = null;
+        continue;
+      }
       if (!swing.soundPlayed && swing.age >= swing.wind) { swing.soundPlayed = true; playSentryAttackSound(t); }
       if (!swing.slashFx && swing.age >= swing.wind && !(swing.ult && ULTIMATES[t.type] && ULTIMATES[t.type].radius)) {   // 近戰大招用衝擊波，不噴小月牙
         swing.slashFx = true;
@@ -1899,13 +1934,16 @@ function update(dt) {
     if (!target) target = pickSentryTarget(t, R);
     if (target) {
       if (!swingTarget) t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')) * (t.taint > 85 && !t.berserk ? 0.5 : 1));   // 瀕臨暴走：攻速減半
-      if ((t.type === 'red' || t.type === 'luther' || t.type === 'avaren') && !swingTarget) {
+      if ((t.type === 'red' || t.type === 'luther' || t.type === 'avaren' || t.type === 'colyn') && !swingTarget) {
         const heavy = t.type === 'luther', dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
-        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type]); }
-        const sw = isUlt ? ULT_SWING : (MELEE_SWING[t.type] || MELEE_SWING.normal);
-        t.meleeSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, hit: false, ult: isUlt };
+        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
+        const U0 = isUlt ? ULTIMATES[t.type] : null, stab = !!(U0 && U0.stabs);   // 柯林的大招：連刺（自己的節奏）
+        const sw = stab ? { wind: 0, impact: 0, duration: U0.duration } : isUlt ? ULT_SWING : (MELEE_SWING[t.type] || MELEE_SWING.normal);
+        t.meleeSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, hit: false, ult: isUlt, ...(stab ? { stabs: U0.stabs, stabIdx: 0, slashFx: true } : {}) };
+        if (stab) addSentryTaint(t, U0.taint);   // 突擊連刺：整招只加一次汙染
+        if (stab) { const fx = G.effects.filter(o => o.charge).pop(); if (fx) fx.life = fx.life0 = U0.stabs[0]; }   // 蓄力光圈只到第一刺（不要跟連刺疊在一起）
         t.moving = false;
         continue;
       }
@@ -1913,7 +1951,7 @@ function update(dt) {
         const dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
-        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type]); }
+        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
         const sw = isUlt ? ULT_SWING : { wind: .14, impact: .21, duration: .4 };
         t.gunSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, fired: false, ult: isUlt };
         t.gunT = sw.duration; t.moving = false;
@@ -1964,8 +2002,7 @@ function update(dt) {
         }
         spawnAttackVisual(t, target, (U || critMul || rageMul > 1) ? { ...spec, dmg: atkDmg, splash: atkSplash, crit: !!critMul, rage: rageMul } : spec, affected, impactPoint, U ? U.scale : 1);
       } else { flashDmg('MISS', target.x, target.y - 26, '#c6d1dd'); if (typeof strayBoltOre === 'function') strayBoltOre(t, target); }   // 安柏打偏：可能劈中附近的礦物（js/ore.js）
-      if (!spec.guide) t.taint = Math.min(100, t.taint + spec.taint * Math.max(0, 1 - sortieBuff(t, 'calm')));   // 出勤補給：負荷累積變慢
-      if (t.taint >= 100 && !t.berserk) { t.berserk = true; sfx('berserk'); flash('暴走!', t.x, t.y - 30, '#ff4d4d', 3); systemNotice(TYPES[t.type].name + '污染達到極限，陷入暴走，開始無差別攻擊！', true); }
+      addSentryTaint(t, spec.taint);   // 每次攻擊增加精神負荷（到 100 暴走）
     }
   }
   // 地上腐蝕痕跡：站在裡面的對象每 ACID_TICK 秒扣一次血、偶爾冒紫黑霧。
@@ -2033,6 +2070,11 @@ function update(dt) {
   }
   if (typeof fishHeadArmor === 'function') fishHeadArmor();
   if (typeof pearlShellArmor === 'function') pearlShellArmor();   // 珍珠小童：被打就閉殼、閉著防禦變高（js/pearl-kid.js）   // 魚頭君：正面減傷、斜後加傷（js/fish-head.js）
+  // 柯林大招的破甲：破甲期間受到的傷害（所有人、所有來源）×ULTIMATES.colyn.breakMul；在死亡判定前統一算
+  for (const e of G.enemies) {
+    if (e.breakT > 0) { e.breakT -= dt; if (e.prevHp != null && e.hp < e.prevHp) e.hp = e.prevHp - (e.prevHp - e.hp) * ULTIMATES.colyn.breakMul; }
+    e.prevHp = e.hp;
+  }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
