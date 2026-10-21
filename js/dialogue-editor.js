@@ -46,7 +46,7 @@ const DEFAULT_ID = '__default';
 let draft = clone(typeof DIALOGUES !== 'undefined' ? DIALOGUES : { characters: {}, default: {} });
 let usingDraft = false;
 try {
-  const saved = JSON.parse(localStorage.getItem(DIALOGUE_DRAFT_KEY) || 'null');
+  const saved = (typeof DraftSync !== 'undefined' ? DraftSync.load(DIALOGUE_DRAFT_KEY, (typeof DIALOGUES !== 'undefined' ? DIALOGUES : undefined), { label: '對話' }) : JSON.parse(localStorage.getItem(DIALOGUE_DRAFT_KEY) || 'null'));   // 暫存和專案檔三方合併（js/draft-sync.js）
   if (saved && saved.characters) { draft = saved; usingDraft = true; }
 } catch (_) { /* 草稿損壞就用正式檔案 */ }
 // 草稿是舊的時候，把正式檔案裡新加的「報告任務」台詞補進草稿（不會蓋掉已經改過的）

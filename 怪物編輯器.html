@@ -102,11 +102,12 @@
     <small style="display:block;margin-top:10px">場上同時最多一隻巨型；上一隻沒倒，下一隻會等。</small>
   </section>
   <script src="data/monsters.js?v=milkfish-v4-20261021"></script>
-  <script src="js/monster-data.js?v=milkfish-20261020"></script>
+  <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
+  <script src="js/monster-data.js?v=sync-20261021"></script>
   <script src="js/sfx.js?v=milkfish-20261020"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=pearl-20261011"></script>
-  <script src="js/project-save.js?v=psave-20261016"></script>   <!-- 一鍵存到專案 -->
+  <script src="js/monster-editor.js?v=sync-20261021"></script>
+  <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
 </body>
 </html>

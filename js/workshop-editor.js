@@ -20,7 +20,7 @@ function setStatus(msg, err = false) { statusEl.textContent = msg; statusEl.clas
 const fromFile = () => ({ items: clone(WORKSHOP_CONFIG.items || {}), added: clone(WORKSHOP_CONFIG.added || []), removed: clone(WORKSHOP_CONFIG.removed || []), style: clone(WORKSHOP_CONFIG.style || {}), order: clone(WORKSHOP_CONFIG.order || {}) });
 let cfg = (() => {
   try {
-    const d = JSON.parse(localStorage.getItem(WS_DRAFT_KEY) || 'null');
+    const d = (typeof DraftSync !== 'undefined' ? DraftSync.load(WS_DRAFT_KEY, fromFile(), { label: '開發工坊' }) : JSON.parse(localStorage.getItem(WS_DRAFT_KEY) || 'null'));   // 暫存和專案檔三方合併（js/draft-sync.js）
     if (d && d.items && d.style) return { items: d.items, added: d.added || [], removed: d.removed || [], style: d.style, order: d.order || {} };
   } catch (_) {}
   return fromFile();

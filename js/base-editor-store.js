@@ -13,6 +13,9 @@ const TILES_KEY = 'tudrc_shared_tiles_v1';   // 素材庫：兩個編輯器共�
   // 放進資料庫的大資料；後面兩個是分開之前兩個編輯器共用的舊暫存，只讀來搬一次（js/base-editor.js 的 oldSharedDraft）
   // 素材還沒共用之前兩邊各自的素材暫存（tudrc_battle_tiles_v1、tudrc_base_tiles_v1）也讀進來，只搬一次
   const BIG = new Set([MAPS_KEY, TILES_KEY, 'tudrc_maps_v4', 'tudrc_tiles_v3', 'tudrc_battle_tiles_v1', 'tudrc_base_tiles_v1']);
+  // 自動合併用的「基準」和合併前的備份（js/draft-sync.js）：跟著地圖、素材一起放資料庫，不佔 localStorage
+  const SIDE = ['tudrc_base__', 'tudrc_backup__'];
+  const isBig = k => BIG.has(k) || SIDE.some(p => k.startsWith(p) && BIG.has(k.slice(p.length)));
   const cache = new Map();
   let db = null, failed = null;
   const req = r => new Promise((res, rej) => { r.onsuccess = () => res(r.result); r.onerror = () => rej(r.error); });
@@ -35,7 +38,7 @@ const TILES_KEY = 'tudrc_shared_tiles_v1';   // 素材庫：兩個編輯器共�
     try {
       db = await open();
       const st = db.transaction(STORE).objectStore(STORE);
-      for (const k of BIG) { const v = await req(st.get(k)); if (v != null) cache.set(k, v); }
+      for (const k of [...BIG, ...[...BIG].map(k => SIDE[0] + k)]) { const v = await req(st.get(k)); if (v != null) cache.set(k, v); }
     } catch (e) { db = null; console.warn('瀏覽器資料庫打不開，改用 localStorage', e); }
     // 舊暫存搬家：localStorage → 資料庫（確定寫進去了才刪掉舊的，騰出空間）
     for (const k of BIG) {
@@ -46,15 +49,15 @@ const TILES_KEY = 'tudrc_shared_tiles_v1';   // 素材庫：兩個編輯器共�
     }
   }
   return {
-    getItem(k) { return BIG.has(k) ? (cache.has(k) ? cache.get(k) : null) : localStorage.getItem(k); },
+    getItem(k) { return isBig(k) ? (cache.has(k) ? cache.get(k) : null) : localStorage.getItem(k); },
     // 寫入：回傳 Promise；失敗時 EditorStore.lastError 會記下原因（編輯器狀態列會顯示）
     setItem(k, v) {
-      if (!BIG.has(k)) { localStorage.setItem(k, v); return Promise.resolve(); }
+      if (!isBig(k)) { localStorage.setItem(k, v); return Promise.resolve(); }
       cache.set(k, String(v));
       return write(k, String(v)).then(() => { failed = null; }, e => { failed = e; throw e; });
     },
     removeItem(k) {
-      if (!BIG.has(k)) { localStorage.removeItem(k); return; }
+      if (!isBig(k)) { localStorage.removeItem(k); return; }
       cache.delete(k); localStorage.removeItem(k);
       if (db) { const tx = db.transaction(STORE, 'readwrite'); tx.objectStore(STORE).delete(k); }
     },

@@ -8,7 +8,7 @@ const oreObjects=Object.entries(ORE_TYPES).map(([id,spec])=>{
 const storageBoxIds=new Set(STORAGE_BOXES.map(o=>o.id));
 const defaults=[...OBSTACLES,...DECORATIONS,...oreObjects,...STORAGE_BOXES];
 const decorationIds=new Set(DECORATIONS.map(o=>o.id));
-let objects; try{const saved=JSON.parse(localStorage.getItem(STORE));objects=Array.isArray(saved)?saved:clone(defaults)}catch(_){objects=clone(defaults)}
+let objects; try{const saved=(typeof DraftSync !== 'undefined' ? DraftSync.load(STORE, defaults, { label: '物件' }) : JSON.parse(localStorage.getItem(STORE) || 'null'));objects=Array.isArray(saved)?saved:clone(defaults)}catch(_){objects=clone(defaults)}
 // 補齊正式資料中的缺項，同時保留瀏覽器裡已編輯的物件。
 for(const current of defaults) if(!objects.some(o=>o.id===current.id)) objects.push(clone(current));
 let index=0, orient='h';

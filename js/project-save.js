@@ -58,13 +58,50 @@ const ProjectSave = (() => {
   }
   const timeStamp = () => { const d = new Date(), z = n => String(n).padStart(2, '0'); return d.getFullYear() + z(d.getMonth() + 1) + z(d.getDate()) + '-' + z(d.getHours()) + z(d.getMinutes()) + z(d.getSeconds()); };
 
+  // ---- 存檔保護（多人協作）：打開編輯器時記下每個檔案當時的內容（基準），存檔前再看一次 ----
+  // ・檔案在你打開編輯器之後被改過（例如剛拉取朋友的版本）→ 先不存，請你重新整理（js/draft-sync.js 會自動合併）
+  // ・編輯器讀到的是瀏覽器快取的舊檔案（跟硬碟上的不一樣）→ 先不存，請你按 Ctrl+F5
+  const baselines = new Map();   // 檔案路徑 → Promise<{ fresh: 硬碟上的內容, stale: 頁面用的是不是快取舊檔 } | null>
+  function baselineOf(path) {
+    if (!baselines.has(path)) baselines.set(path, (async () => {
+      if (location.protocol === 'file:') return null;   // 直接雙擊開啟：讀不到檔案，不檢查
+      try {
+        const res = await fetch(path + '?_fresh=' + Date.now(), { cache: 'no-store' });
+        if (!res.ok) return null;
+        const fresh = await res.text();
+        let stale = false;
+        const tag = [...document.scripts].find(sc => (sc.getAttribute('src') || '').split('?')[0] === path);
+        if (tag) { try { stale = (await (await fetch(tag.getAttribute('src'))).text()) !== fresh; } catch (_) {} }
+        return { fresh, stale };
+      } catch (_) { return null; }
+    })());
+    return baselines.get(path);
+  }
+  async function readDisk(root, path) {
+    try { const parts = path.split('/'), name = parts.pop(); return await (await (await (await subDir(root, parts, false)).getFileHandle(name)).getFile()).text(); }
+    catch (_) { return null; }
+  }
+  async function checkBeforeSave(root, files) {
+    for (const f of files) {
+      const bl = await baselineOf(f.path); if (!bl) continue;
+      const text = f.text();
+      if (bl.stale) throw new Error('「' + f.label + '」：這個編輯器讀到的是瀏覽器快取的舊檔案，直接存會蓋掉新內容。請按 Ctrl+F5 重新整理這個頁面（你的修改會自動合併進來），再存一次。');
+      const disk = await readDisk(root, f.path);
+      if (disk != null && disk !== bl.fresh && disk !== text)
+        throw new Error('「' + f.label + '」在你打開編輯器之後被更新了（例如剛拉取了朋友的版本）。為了不蓋掉新內容，這次先不存。請重新整理這個編輯器頁面（你的修改會自動和新版本合併），再存一次。');
+    }
+  }
+
   // 存這一頁的所有檔案
   async function save(files, say, pickAgain, buttons) {
     buttons.forEach(b => { b.disabled = true; });
     try {
       const root = await projectDir(pickAgain, m => say(m, false)), stamp = timeStamp(), done = [];
+      await checkBeforeSave(root, files);   // 先全部檢查過，有一個不行就整批不存
       for (const f of files) {
-        const r = await writeFile(root, f.path, f.text(), stamp);
+        const text = f.text();
+        const r = await writeFile(root, f.path, text, stamp);
+        baselines.set(f.path, Promise.resolve({ fresh: text, stale: false }));   // 存好了：之後以這次存的內容為基準
         done.push(f.label + (r === 'same' ? '（沒有變動）' : ' ✓'));
       }
       say('已存到專案：' + done.join('、') + '　遊戲頁按 Ctrl+F5 重新整理就會套用；舊檔備份在 backups/編輯器存檔/', false);
@@ -78,6 +115,10 @@ const ProjectSave = (() => {
 
   function attach({ after = [], files, status, title }) {
     const say = (m, err) => { try { status(m, err); } catch (_) { console.log(m); } };
+    // 頁面打開時就記下基準（有些檔案是其他程式之後才加進 files 的，所以等頁面載入完再補一次）
+    const initBaselines = () => files.forEach(f => baselineOf(f.path));
+    for (const ms of [0, 800, 2500]) setTimeout(initBaselines, ms);   // 編輯器程式是一個一個載入的（EditorStore.boot），晚加進來的檔案也要記到
+    if (document.readyState !== 'complete') window.addEventListener('load', initBaselines, { once: true });
     const buttons = [];
     for (const id of [].concat(after)) {
       const ref = document.getElementById(id); if (!ref) continue;

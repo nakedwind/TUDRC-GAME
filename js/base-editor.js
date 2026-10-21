@@ -261,6 +261,7 @@ function loadTiles() {
       for (const tile of list) if (tile && tile.id && !merged.some(x => x.id === tile.id)) merged.push(tile);
     if (merged.length) { saved = JSON.stringify(merged); migratedTiles = true; }
   }
+  if (!migratedTiles && typeof DraftSync !== 'undefined') { const merged = DraftSync.load(STORAGE_TILES, SHARED_TILES, { store: EditorStore, label: '素材庫' }); if (merged) saved = JSON.stringify(merged); }   // 三方合併（js/draft-sync.js）
   if (saved) { try { customTiles = JSON.parse(saved); } catch (e) { customTiles = clone(SHARED_TILES); } }
   else customTiles = clone(SHARED_TILES);
   if (!Array.isArray(customTiles)) customTiles = [];
@@ -417,6 +418,8 @@ function loadMaps() {
   const sharedMaps = shared ? shared.filter(m => m && m.safe) : null;   // 舊共用暫存：只搬基地地圖（戰鬥地圖由地圖編輯器自己搬）
   if (sharedMaps && sharedMaps.length) saved = JSON.stringify(sharedMaps);
   localStorage.setItem(STORAGE_SPLIT_DONE, '1');
+  // 暫存和專案檔三方合併：朋友推送、你剛拉下來的修改不會被舊暫存蓋掉（js/draft-sync.js）
+  if (!(sharedMaps && sharedMaps.length) && typeof DraftSync !== 'undefined') { const merged = DraftSync.load(STORAGE_MAPS, BASE_MAPS, { store: EditorStore, label: '基地地圖' }); if (merged) saved = JSON.stringify(merged); }
   if (saved) { try { maps = JSON.parse(saved); } catch (e) { maps = clone(BASE_MAPS); } }
   else maps = clone(BASE_MAPS);
   if (!Array.isArray(maps) || maps.length === 0) maps = clone(BASE_MAPS);

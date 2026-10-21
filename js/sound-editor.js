@@ -17,7 +17,7 @@ function cleanGains(map){const out={};for(const[k,v]of Object.entries(map||{})){
 function soundFiles(value){if(value&&value.mode==='random'&&Array.isArray(value.files))return value.files.filter(v=>typeof v==='string'&&v);return(Array.isArray(value)?value:[value]).filter(v=>typeof v==='string'&&v);}
 function cleanSoundValue(value){const list=[...new Set(soundFiles(value).map(migratePath))];if(value&&value.mode==='random')return list.length?{mode:'random',files:list}:null;return list.length>1?list:(list[0]||null);}
 function cleanFiles(value){const out={overrides:{},extras:{},meta:{}},src=value||{};for(const[k,v]of Object.entries(src.overrides||{})){const clean=cleanSoundValue(v);if(k&&clean)out.overrides[k]=clean;}for(const[k,v]of Object.entries(src.extras||{})){const clean=cleanSoundValue(v);if(/^[A-Za-z][A-Za-z0-9_-]*$/.test(k)&&clean)out.extras[k]=clean;}for(const[k,v]of Object.entries(src.meta||{}))if(out.extras[k])out.meta[k]={label:String(v.label||k),group:GROUP_ORDER.includes(v.group)?v.group:'其他'};return out;}
-function loadJson(key,fallback){try{const v=JSON.parse(localStorage.getItem(key)||'null');if(v&&typeof v==='object')return v;}catch(_){}return fallback;}
+function loadJson(key,fallback){try{const v=typeof DraftSync!=='undefined'?DraftSync.load(key,fallback,{label:'音效設定'}):JSON.parse(localStorage.getItem(key)||'null');if(v&&typeof v==='object')return v;}catch(_){}return fallback;}
 const FILE_GAINS=typeof SOUND_SETTINGS!=='undefined'?(SOUND_SETTINGS.gains||{}):(typeof SOUND_GAIN_DEFAULT!=='undefined'?SOUND_GAIN_DEFAULT:{});
 const FILE_SOUNDS=typeof SOUND_SETTINGS!=='undefined'?(SOUND_SETTINGS.files||{}):(typeof SOUND_FILE_CONFIG!=='undefined'?SOUND_FILE_CONFIG:{});
 let gains=cleanGains(loadJson(SFX.GAIN_KEY,FILE_GAINS));
