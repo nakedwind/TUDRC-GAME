@@ -138,8 +138,9 @@ function drawTower(t) {
   let visualTop = t.y - 17;
   if (img && img.complete && img.naturalWidth) {
     const size = PLAYER.drawSize;
-    visualTop = t.y - size + 18;
-    const shX = t.berserk ? (Math.random() * 2 - 1) * 1.5   // 暴走：微微發抖
+    visualTop = t.y - size + 18 + (set && img === set.fail ? 14 : 0);   // 倒地圖：人躺著比較矮，名字和血條往下貼近身體
+    const shX = t.hp <= 0 ? 0   // 失去戰鬥能力：躺著不動（倒地圖，js/game.js 的 pickCharacterFrame）
+      : t.berserk ? (Math.random() * 2 - 1) * 1.5   // 暴走：微微發抖
       : (t.hitT > .12 ? (Math.random() * 2 - 1) * 2.5 : 0);    // 受擊：短暫抖一下
     if (t.berserk) {   // 暴走：腳下紅光
       ctx.fillStyle = 'rgba(255,60,60,0.45)';
@@ -162,7 +163,11 @@ function drawTower(t) {
     }
     seatRotate(t, size);   // 躺在橫放的床上：跟溫特一樣旋轉
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, t);   // 被絲瓜藤纏住：扭動
-    ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
+    if (t.hp > 0) t.downAt = null;
+    else if (t.downAt == null) t.downAt = performance.now();   // 剛失去戰鬥能力：播倒下動畫
+    const downAge = t.downAt != null ? (performance.now() - t.downAt) / 1000 : Infinity;
+    if (downAge < FALL_DOWN_TIME() && drawFallDown(t, set, downAge)) { /* 倒下動畫中 */ }
+    else ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
     const redFlash = sentryRedFlash(t);   // 瀕臨暴走慢閃紅、暴走快閃紅
     const redSil = redFlash > 0.01 ? flashSprite(img, '#ff3b3b') : null;
     if (redSil) {
@@ -437,14 +442,17 @@ function npcIconOutline(id, img) {
   g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgba(0,0,0,.9)'; g.fillRect(0, 0, 64, 64);
   return (npcIconEdges[id] = c);
 }
+// 走路時一蹦一蹦的 NPC：height＝最高蹦幾像素、perSec＝每秒蹦幾下（只有圖會跳，頭上的名字和泡泡不跳）
+const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 function drawWanderer(npc) {
   const set = wandererSprites[npc.id];
   const img = set && pickCharacterFrame(set, npc);
   const size = PLAYER.drawSize;
   if (img && img.complete && img.naturalWidth) {
+    const hop = NPC_HOP[npc.id], hopY = hop && npc.moving && !npc.sitting ? -Math.abs(Math.sin((npc.anim || 0) * Math.PI * hop.perSec)) * hop.height : 0;
     ctx.imageSmoothingEnabled = false;
     ctx.save(); seatRotate(npc, size);
-    ctx.drawImage(img, npc.x - size / 2, npc.y - size + 18, size, size);
+    ctx.drawImage(img, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, size);
     ctx.restore();
     ctx.imageSmoothingEnabled = true;
   }
@@ -716,7 +724,41 @@ function lowHpPulse() {   // 0～1，不在低血量時回傳 0
   const t = performance.now() / 1000 / LOW_HP_FX.period;
   return Math.pow(.5 - .5 * Math.cos(t * Math.PI * 2), 1.5);   // 慢慢亮起、慢慢暗下（像心跳）
 }
+// 溫特陣亡動畫（js/game.js 的 lose 開始；戰場定格，只有這段在動）
+function drawPlayerDeath(p) {
+  drawFallDown(p, playerSprites, (performance.now() - G.playerDeath.at) / 1000, false);   // 溫特：不左右晃，只閃白
+}
+// 倒下動畫（溫特陣亡、隊員失去戰鬥能力共用）：踉蹌（站姿閃白、左右晃）→ 倒地圖從上面落下、著地壓扁回彈、揚起灰塵
+// age＝倒下後過了幾秒；時間長度沿用 js/game.js 的 PLAYER_DEATH.stagger／fall。回傳 false＝這個角色沒有倒地圖
+const FALL_DOWN_TIME = () => PLAYER_DEATH.stagger + PLAYER_DEATH.fall + .5;   // 整段動畫（含灰塵）多久
+function drawFallDown(p, set, age, wobble = true) {
+  const D = PLAYER_DEATH, size = PLAYER.drawSize;
+  const fail = set && set.fail, stand = set && pickCharacterFrame(set, { ...p, hp: 1, moving: false, gunT: 0, sitting: null });
+  if (!(fail && fail.complete && fail.naturalWidth)) return false;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  if (age < D.stagger) {   // 踉蹌：站著閃白、左右晃
+    const k = Math.max(0, 1 - age / D.stagger), shake = wobble ? Math.sin(age * 70) * 3 * k : 0;
+    if (stand && stand.complete && stand.naturalWidth) {
+      ctx.drawImage(stand, p.x - size / 2 + shake, p.y - size + 18, size, size);
+      drawHitFlash(stand, Math.min(1, k * 1.4), '#ff4d4d', p.x - size / 2 + shake, p.y - size + 18, size, size);
+    }
+  } else {   // 倒地：從上面落下，著地時壓扁回彈，揚起灰塵
+    const u = Math.min(1, (age - D.stagger) / D.fall), landed = age - D.stagger - D.fall;
+    const drop = (1 - u * u) * 14;
+    const squash = landed > 0 ? Math.max(0, .18 * Math.cos(landed * 18) * Math.exp(-landed * 7)) : 0;
+    const w = size * (1 + squash), h = size * (1 - squash);
+    ctx.drawImage(fail, p.x - w / 2, p.y + 18 - h - drop, w, h);
+    if (landed > 0 && landed < .5) {   // 灰塵圈
+      const q = landed / .5;
+      ctx.globalAlpha = (1 - q) * .55; ctx.strokeStyle = '#b9b2a2'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 14, 10 + q * 26, 4 + q * 8, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+  return true;
+}
 function drawPlayer(p) {
+  if (G.playerDeath) { drawPlayerDeath(p); return; }   // 倒下：陣亡動畫
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
   if (img && img.complete && img.naturalWidth) {

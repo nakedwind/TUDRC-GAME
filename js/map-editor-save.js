@@ -1,12 +1,12 @@
-/* ===== 🗺️ 地圖編輯器（戰鬥地圖）：一鍵存到專案、存檔空間顯示、工具列「更多」選單 =====
-   ・「💾 存到專案」（Ctrl+S）：用 js/project-save.js 直接寫進 data/maps.js（只有戰鬥地圖）和 data/tiles.js（共用素材庫）。
+/* ===== 🗺️ 戰鬥／劇情地圖編輯器共用：一鍵存到專案、存檔空間顯示、工具列「更多」選單 =====
+   ・「💾 存到專案」（Ctrl+S）：依 MAP_EDITOR_CONFIG 寫入所屬地圖檔，並更新 data/tiles.js（共用素材庫）。
    ・存檔空間：顯示地圖、素材暫存用了多少（js/map-editor-store.js）。
    基地編輯器有自己的一份（js/base-editor-save.js），兩邊互不影響。
    必須在 js/map-editor.js 之後載入（用到 exportText、setStatus）。
 */
 const EDITOR_SAVE_FILES = [
-  { path: 'data/maps.js', label: '戰鬥地圖', text: () => exportText() },
-  { path: 'data/tiles.js', label: '素材庫（兩個編輯器共用）', text: () => tilesExportText() },
+  { path: EDITOR_SETTINGS.outputPath, label: EDITOR_SETTINGS.mapLabel, text: () => exportText() },
+  { path: 'data/tiles.js', label: '素材庫（三個編輯器共用）', text: () => tilesExportText() },
 ];
 // 存檔功能本身在 js/project-save.js（所有編輯器共用，遊戲資料夾只要選一次）
 const editorProjectSave = ProjectSave.attach({ after: [], files: EDITOR_SAVE_FILES, status: (m, err) => setStatus(m, err ? '#ff8f8f' : '#7ee0c0') });

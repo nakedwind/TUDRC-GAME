@@ -29,14 +29,18 @@ const CHARACTER_SPRITE_FILES = {
 // 持槍攻擊圖（四個方向各一張靜態圖）；只有這些角色有，避免對其他角色發出 404。
 const GUN_FILES = { gunFront: '0000_Front_withgun.png', gunBack: '0009_back_withgun.png', gunLeft: '0003_Leftside_withgun.png', gunRight: '0006_right-side_withgun.png' };
 const GUN_FOLDERS = new Set(['theonie_B', 'amber_B', 'eldrin_B', 'chris_B', 'winter_B']);
+// 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
+const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png' };
 function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
   const prefix = folder.replace('_', '') + '_';
+  const revision = folder === 'chris_A' ? '?v=chris-a-20261021-2' : '';
   const set = {};
   for (const k of Object.keys(CHARACTER_SPRITE_FILES)) {
     set[k] = CHARACTER_SPRITE_FILES[k].map(file => {
-      const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}`; return img;
+      const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}${revision}`; return img;
     });
   }
+  if (FAIL_FILES[folder]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}${FAIL_FILES[folder]}`; set.fail = img; }   // 倒地圖
   if (GUN_FOLDERS.has(folder)) {   // 攻擊時用的持槍圖
     for (const k of Object.keys(GUN_FILES)) {
       const img = new Image(); img.src = `images/character/${folder}/${prefix}${GUN_FILES[k]}`; set[k] = [img];
@@ -59,7 +63,7 @@ function outfitRecord(folder) {
   const other = declared === 'A' ? 'B' : 'A';
   const probe = new Image();   // 先確認另一套存在再載入，避免對沒有該造型的角色發出一堆 404
   probe.onload = () => { rec[other] = loadCharacterSprites(base + '_' + other); };
-  probe.src = `images/character/${base}_${other}/${base}${other}_0000_Front.png`;
+  probe.src = `images/character/${base}_${other}/${base}${other}_0000_Front.png` + (base === 'chris' && other === 'A' ? '?v=chris-a-20261021-2' : '');
   return rec;
 }
 function outfitSet(folder) {
@@ -353,6 +357,7 @@ function updateBlink(who, dt) {
 }
 // 依朝向／走路／眨眼狀態挑出這一幀要畫的圖
 function pickCharacterFrame(set, who) {
+  if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
   if (who.gunT > 0) {   // 攻擊中：用面向目標的持槍圖（沒有該圖就照常）
@@ -979,6 +984,7 @@ function updateCamera() {
 // ---- 遊戲狀態 ----
 let G;
 function newGame() {
+  document.getElementById('screenShade').classList.remove('player-dying');   // 溫特陣亡動畫的變暗效果
   applyOutfits();   // 依這張地圖是安全區或戰鬥區，換成 A／B 造型
   closeElevatorMenu();
   closeSupplyShop(true); closeBackpack(true); closeSettings(true);
@@ -2204,7 +2210,25 @@ function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;
 function baseLost() { if (!G.over && !(G.baseLostT > 0)) { G.baseLostT = BASE_LOSE_DELAY; systemNotice('營地被摧毀了……', true); } }
-function lose(reason, cause) { if ((typeof practiceOn === 'function' && practiceOn())) return; G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
+// 溫特倒下的陣亡動畫：踉蹌 → 倒地（倒地圖）→ 畫面慢慢變灰變暗，戰場定格；PLAYER_DEATH.total 秒後才跳結算畫面（動畫在 js/render.js 的 drawPlayerDeath）
+const PLAYER_DEATH = { stagger: .3, fall: .25, dark: .4, total: 2.4 };
+function lose(reason, cause) {
+  if ((typeof practiceOn === 'function' && practiceOn())) return;
+  if (reason === 'player' && G.player && !G.over) {
+    G.over = true; G.running = false; G.phase = 'lost'; setPaused(false);
+    const run = G, death = G.playerDeath = { at: performance.now() };
+    if (typeof updateHUD === 'function') updateHUD();   // 戰場定格前先刷新一次：HUD 的 HP 顯示 0
+    G.cameraShakeT = 0; shakeAmt = 0;   // 不要震動（戰場定格後鏡頭震動的倒數也停了，不歸零會一直抖）
+    document.getElementById('screenShade').classList.add('player-dying');   // 畫面慢慢變灰變暗（css/style.css 的 #screenShade；不動畫布的濾鏡，理智值變灰還在用）
+    setTimeout(() => {
+      if (G !== run || G.playerDeath !== death) return;   // 已經重新開始了
+      document.getElementById('screenShade').classList.remove('player-dying');
+      sfx('lose'); loseOverlay(reason, cause);
+    }, PLAYER_DEATH.total * 1000);
+    return;
+  }
+  G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause);
+}
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----

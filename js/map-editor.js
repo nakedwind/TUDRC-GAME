@@ -1,21 +1,36 @@
-/* ===== 🗺️ 地圖編輯器（戰鬥地圖）— 核心程式（圖層 + 可翻轉圖片 + 圖片效果分離）=====
+/* ===== 🗺️ 戰鬥／劇情地圖編輯器共用核心（圖層 + 可翻轉圖片 + 圖片效果分離）=====
    圖片分兩層：🟫 地板層(floor) 在底、✨ 裝飾層(deco) 疊在上面(透明處透出地板)。
    另有多格大圖(stamps)疊最上面。以上都只是外觀。
    遊戲效果獨立標記：🧱 不可穿透(solid)；可破壞素材沿用自己的血量與碰撞。
    還可標怪物入口、營地，設定規則，Ctrl+Z 回復，自動存檔、可匯出。
    格線設定在 js/config.js。
 
-   這個編輯器只管「戰鬥地圖」，跟 🏠 基地編輯器完全分開（程式、瀏覽器暫存、存檔都不共用）：
-   ・頁面 地圖編輯器.html、樣式 css/map-editor.css
-   ・程式 js/map-editor.js（這個檔）、js/map-editor-save.js、js/map-editor-store.js
-   ・存檔 data/maps.js（BATTLE_MAPS 地圖）
-   ・素材庫 data/tiles.js（SHARED_TILES）是兩個編輯器唯一共用的東西：任一邊加的素材，另一邊也馬上有（見下面「共用素材庫」）
-   基地地圖在 data/base-maps.js，由 基地編輯器.html（js/base-editor*.js）管理。改這裡不會影響基地編輯器。
+   地圖編輯器.html 與 劇情地圖編輯器.html 共用這份程式和 css/map-editor.css，
+   但透過 MAP_EDITOR_CONFIG 分別儲存到 data/maps.js 與 data/story-maps.js。
+   基地地圖則由 基地編輯器.html（js/base-editor*.js）管理。
+   三種地圖的清單與瀏覽器暫存互相獨立，素材庫 data/tiles.js（SHARED_TILES）共同使用。
 */
 
 const cv = document.getElementById('cv');
 const ctx = cv.getContext('2d');
 ctx.imageSmoothingEnabled = false;   // 像素圖不要模糊
+const EDITOR_SETTINGS = Object.assign({
+  editorName: '地圖編輯器',
+  mapLabel: '戰鬥地圖',
+  sourceMaps: typeof BATTLE_MAPS !== 'undefined' ? BATTLE_MAPS : [],
+  sourceDeletedMaps: typeof BATTLE_MAPS_DELETED !== 'undefined' ? BATTLE_MAPS_DELETED : [],
+  storageMaps: 'tudrc_battle_maps_v1',
+  storageDeletedMaps: 'tudrc_battle_deleted_maps_v1',
+  storageSplitDone: 'tudrc_battle_editor_split_v1',
+  defaultSafe: false,
+  migrateOldShared: true,
+  outputPath: 'data/maps.js',
+  outputConst: 'BATTLE_MAPS',
+  deletedConst: 'BATTLE_MAPS_DELETED',
+  exportHeading: '戰鬥地圖（由「🗺️ 地圖編輯器」匯出）',
+  exportDescription: '只放戰鬥地圖；基地（安全區域）的地圖在 data/base-maps.js，由「🏠 基地編輯器」管理。',
+}, window.MAP_EDITOR_CONFIG || {});
+const EDITOR_SOURCE_MAPS = Array.isArray(EDITOR_SETTINGS.sourceMaps) ? EDITOR_SETTINGS.sourceMaps : [];
 // 2026-09-24：備份並清除目前的編輯器暫存，載入今天 pull 的 84ae68e 地圖。
 const PULL_RESTORE_MARKER = 'tudrc_pull_restore_84ae68e_done';
 const PULL_RESTORE_APPLIED = (() => {
@@ -35,29 +50,29 @@ const PULL_RESTORE_APPLIED = (() => {
   localStorage.setItem(PULL_RESTORE_MARKER, '1');
   return true;
 })();
-// 瀏覽器暫存：地圖編輯器自己的（跟基地編輯器分開，兩邊互不覆蓋）
-const STORAGE_MAPS = 'tudrc_battle_maps_v1';
+// 瀏覽器暫存：每種地圖分類各用自己的 key，彼此不會覆蓋
+const STORAGE_MAPS = EDITOR_SETTINGS.storageMaps;
 // ---- 刪掉的地圖：記下來，才不會被「檔案裡有、暫存沒有就補回來」又加回去 ----
 // ・自己刪的先記在瀏覽器（STORAGE_DELETED_MAPS）；按「存到專案」時寫進 data/maps.js 的 BATTLE_MAPS_DELETED，
 //   其他人拉下來打開編輯器，他瀏覽器暫存裡的這張也會跟著刪掉（不然他一存檔又會寫回去）。
 // ・刪掉後按「復原」把地圖找回來：記號會自動拿掉。（基地編輯器有自己的一份：js/base-editor.js）
-const STORAGE_DELETED_MAPS = 'tudrc_battle_deleted_maps_v1';
-const FILE_DELETED_MAPS = typeof BATTLE_MAPS_DELETED !== 'undefined' && Array.isArray(BATTLE_MAPS_DELETED) ? BATTLE_MAPS_DELETED : [];
+const STORAGE_DELETED_MAPS = EDITOR_SETTINGS.storageDeletedMaps;
+const FILE_DELETED_MAPS = Array.isArray(EDITOR_SETTINGS.sourceDeletedMaps) ? EDITOR_SETTINGS.sourceDeletedMaps : [];
 let deletedMapIds = new Set(FILE_DELETED_MAPS);
 try { for (const id of JSON.parse(localStorage.getItem(STORAGE_DELETED_MAPS) || '[]')) deletedMapIds.add(id); } catch (_) {}
 function saveDeletedMaps() {
   // 打開編輯器時，檔案裡的地圖都已經補進來了；之後檔案裡有、清單裡卻沒有的＝自己刪掉的（刪除、復原、重做都照這個算）
-  for (const m of BATTLE_MAPS) if (!maps.some(x => x.id === m.id)) deletedMapIds.add(m.id);
+  for (const m of EDITOR_SOURCE_MAPS) if (!maps.some(x => x.id === m.id)) deletedMapIds.add(m.id);
   for (const id of [...deletedMapIds]) if (maps.some(m => m.id === id)) deletedMapIds.delete(id);   // 還在清單裡的（復原回來的）就不算刪掉
   try { localStorage.setItem(STORAGE_DELETED_MAPS, JSON.stringify([...deletedMapIds])); } catch (_) {}
 }
-// 素材庫：兩個編輯器共用同一份暫存（地圖暫存還是各自一份）
+// 素材庫：三個編輯器共用同一份暫存（地圖暫存仍各自一份）
 const STORAGE_TILES = 'tudrc_shared_tiles_v1';
 const OWN_OLD_TILES = 'tudrc_battle_tiles_v1', OTHER_OLD_TILES = 'tudrc_base_tiles_v1';   // 素材還沒共用之前，兩個編輯器各自的素材暫存（第一次打開時合併過來，舊暫存不刪）
 // 分開之前兩個編輯器共用的暫存：第一次打開時，把裡面的戰鬥地圖搬過來（舊暫存保留不刪，當作備份）
 const OLD_SHARED_MAPS = 'tudrc_maps_v4';
 const OLD_SHARED_TILES = 'tudrc_tiles_v3';
-const STORAGE_SPLIT_DONE = 'tudrc_battle_editor_split_v1';   // 搬過一次就不再搬（之後按「從檔案重設」才不會又搬回舊的）
+const STORAGE_SPLIT_DONE = EDITOR_SETTINGS.storageSplitDone;   // 搬過一次就不再搬（之後按「從檔案重設」才不會又搬回舊的）
 const STORAGE_PREVIEW = 'tudrc_map_preview_v1';   // 「預覽遊戲」用：把編輯中的地圖交給遊戲畫面
 const STORAGE_DECOR_PACK = 'tudrc_asset_pack_item_decorate_v1';
 const STORAGE_OBSTACLE_PACK = 'tudrc_asset_pack_item_obstacle_v1';
@@ -115,8 +130,8 @@ function playMapClickSound() {
 }
 
 // ---- 小工具 ----
-// 這個編輯器的地圖都是戰鬥地圖（safe＝false：有怪物、有黑幕）；新增或匯入的地圖都會設成這樣
-const EDITOR_MAP_SAFE = false;
+// 戰鬥編輯器預設 safe=false；劇情編輯器預設 safe=true，並可在地圖規則中切換
+const EDITOR_MAP_SAFE = !!EDITOR_SETTINGS.defaultSafe;
 const clone = (o) => JSON.parse(JSON.stringify(o));
 const removeFrom = (arr, key) => { const i = arr.indexOf(key); if (i >= 0) arr.splice(i, 1); };
 const toggle = (arr, key) => { const i = arr.indexOf(key); if (i >= 0) arr.splice(i, 1); else arr.push(key); };
@@ -395,7 +410,7 @@ const tileChannel = typeof BroadcastChannel === 'function' ? new BroadcastChanne
 const foreignTiles = new Map();   // 另一個編輯器加進來的素材（Ctrl+Z 回到更早的步驟時不要把它們弄丟）
 function saveTiles() {
   EditorStore.setItem(STORAGE_TILES, JSON.stringify(customTiles)).catch(e => setStatus('⚠️ 素材暫存失敗（' + (e && e.name || e) + '）', '#ff8f8f'));
-  if (tileChannel) tileChannel.postMessage({ from: '地圖編輯器', tiles: customTiles });
+  if (tileChannel) tileChannel.postMessage({ from: EDITOR_SETTINGS.editorName, tiles: customTiles });
 }
 if (tileChannel) tileChannel.onmessage = e => {
   const list = e.data && e.data.tiles; if (!Array.isArray(list)) return;
@@ -410,21 +425,21 @@ if (tileChannel) tileChannel.onmessage = e => {
 
 function loadMaps() {
   let saved = EditorStore.getItem(STORAGE_MAPS);
-  const shared = !saved && oldSharedDraft(OLD_SHARED_MAPS);
+  const shared = !saved && EDITOR_SETTINGS.migrateOldShared ? oldSharedDraft(OLD_SHARED_MAPS) : null;
   const sharedMaps = shared ? shared.filter(m => m && !m.safe) : null;   // 舊共用暫存：只搬戰鬥地圖（基地地圖由基地編輯器自己搬）
   if (sharedMaps && sharedMaps.length) saved = JSON.stringify(sharedMaps);
   localStorage.setItem(STORAGE_SPLIT_DONE, '1');
   // 暫存和專案檔三方合併：朋友推送、你剛拉下來的修改不會被舊暫存蓋掉（js/draft-sync.js）
-  if (!(sharedMaps && sharedMaps.length) && typeof DraftSync !== 'undefined') { const merged = DraftSync.load(STORAGE_MAPS, BATTLE_MAPS, { store: EditorStore, label: '戰鬥地圖' }); if (merged) saved = JSON.stringify(merged); }
-  if (saved) { try { maps = JSON.parse(saved); } catch (e) { maps = clone(BATTLE_MAPS); } }
-  else maps = clone(BATTLE_MAPS);
-  if (!Array.isArray(maps) || maps.length === 0) maps = clone(BATTLE_MAPS);
+  if (!(sharedMaps && sharedMaps.length) && typeof DraftSync !== 'undefined') { const merged = DraftSync.load(STORAGE_MAPS, EDITOR_SOURCE_MAPS, { store: EditorStore, label: EDITOR_SETTINGS.mapLabel }); if (merged) saved = JSON.stringify(merged); }
+  if (saved) { try { maps = JSON.parse(saved); } catch (e) { maps = clone(EDITOR_SOURCE_MAPS); } }
+  else maps = clone(EDITOR_SOURCE_MAPS);
+  if (!Array.isArray(maps) || maps.length === 0) maps = clone(EDITOR_SOURCE_MAPS);
   // 專案檔記著已經刪掉的地圖（別人刪的）：瀏覽器暫存裡還有的話也拿掉（至少留一張）
   let restoredDefaults = false;
   const keep = maps.filter(m => !FILE_DELETED_MAPS.includes(m.id));
   if (keep.length && keep.length !== maps.length) { maps = keep; restoredDefaults = true; }
   // 專案資料中若有瀏覽器暫存缺少的地圖，只補上缺少的項目，保留使用者目前的編輯內容。刪掉的地圖不補回來。
-  BATTLE_MAPS.forEach(defaultMap => {
+  EDITOR_SOURCE_MAPS.forEach(defaultMap => {
     if (deletedMapIds.has(defaultMap.id)) return;
     if (!maps.some(map => map.id === defaultMap.id)) {
       maps.push(clone(defaultMap));
@@ -1723,17 +1738,30 @@ function selectTile(id) {
   }
   brush = { mode: 'tile', tile: id }; clearSelection(); updateToolUI(); renderPalette();
 }
-// 素材庫兩邊共用：另一個編輯器的地圖還在用的素材不能刪（不然那邊的地圖會少東西）
+// 素材庫三邊共用：其他分類的地圖還在用的素材不能刪（不然那邊的地圖會少東西）
 async function otherEditorTileUse(id) {
   const names = new Set(), uses = m => (m.stamps || []).some(s => s.id === id) || Object.values(m.layers || {}).some(layer => Object.values(layer).includes(id));
-  try { const text = await (await fetch('data/base-maps.js', { cache: 'no-store' })).text(); new Function(text + ';return BASE_MAPS;')().forEach(m => { if (uses(m)) names.add(m.name); }); } catch (_) {}
-  try { const draft = JSON.parse(await EditorStore.getRaw('tudrc_base_maps_v1') || 'null'); if (Array.isArray(draft)) draft.forEach(m => { if (uses(m)) names.add(m.name); }); } catch (_) {}
+  const catalogs = [
+    { path: 'data/maps.js', constName: 'BATTLE_MAPS', storage: 'tudrc_battle_maps_v1', label: '戰鬥' },
+    { path: 'data/base-maps.js', constName: 'BASE_MAPS', storage: 'tudrc_base_maps_v1', label: '基地' },
+    { path: 'data/story-maps.js', constName: 'STORY_MAPS', storage: 'tudrc_story_maps_v1', label: '劇情' },
+  ].filter(c => c.storage !== STORAGE_MAPS);
+  for (const catalog of catalogs) {
+    try {
+      const source = await (await fetch(catalog.path, { cache: 'no-store' })).text();
+      new Function(source + ';return ' + catalog.constName + ';')().forEach(m => { if (uses(m)) names.add(catalog.label + '：' + m.name); });
+    } catch (_) {}
+    try {
+      const draft = JSON.parse(await EditorStore.getRaw(catalog.storage) || 'null');
+      if (Array.isArray(draft)) draft.forEach(m => { if (uses(m)) names.add(catalog.label + '：' + m.name); });
+    } catch (_) {}
+  }
   return [...names];
 }
 async function deleteTile(id) {
   const t = tileById(id); if (!t || t.builtin) return;
   const usedThere = await otherEditorTileUse(id);
-  if (usedThere.length) { alert('「' + t.name + '」是兩個編輯器共用的素材，🏠 基地編輯器的地圖還在用：\n' + usedThere.join('、') + '\n\n請先到🏠 基地編輯器把它從那些地圖拿掉，才能刪除。'); return; }
+  if (usedThere.length) { alert('「' + t.name + '」是三個編輯器共用的素材，其他分類的地圖還在用：\n' + usedThere.join('、') + '\n\n請先到對應的編輯器把它從那些地圖拿掉，才能刪除。'); return; }
   if (!confirm('刪除磚塊「' + t.name + '」？（已經貼到地圖上的會一起消失）')) return;
   pushUndo();
   customTiles = customTiles.filter(x => x.id !== id); saveTiles();
@@ -2329,8 +2357,7 @@ document.getElementById('newMap').addEventListener('click', () => {
   const m = blankMap(name.trim() || '新地圖'); m.safe = EDITOR_MAP_SAFE; maps.push(m); switchTo(m.id); saveMaps();
 });
 document.getElementById('dupMap').addEventListener('click', () => {
-  pushUndo();
-  const src = curMap(), m = clone(src); m.id = newId(); m.name = src.name + '（複製）'; maps.push(m); switchTo(m.id); saveMaps();
+  MapCopy.open();
 });
 document.getElementById('renameMap').addEventListener('click', () => {
   const m = curMap(), name = prompt('改名為？', m.name); if (name === null) return;
@@ -2382,6 +2409,8 @@ function loadRules() {
   document.getElementById('f_cols').value = m.cols;
   document.getElementById('f_rows').value = m.rows;
   document.getElementById('f_npcs').checked = !!m.npcs;
+  const safeField = document.getElementById('f_safe');
+  if (safeField) safeField.checked = !!m.safe;
   document.getElementById('f_coreCount').value = m.coreCount;
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
   renderMonsterMix();
@@ -2474,6 +2503,11 @@ document.getElementById('f_npcs').addEventListener('change', e => {
   curMap().npcs = e.target.checked; saveMaps();
   setStatus(e.target.checked ? '這張地圖會出現場景 NPC（克莉思、克萊兒、路德、穆恩、艾德林、諾亞、阿瓦倫）' : '這張地圖不會出現場景 NPC', '#8fd3ff');
 });
+const safeField = document.getElementById('f_safe');
+if (safeField) safeField.addEventListener('change', e => {
+  pushUndo(); curMap().safe = e.target.checked; saveMaps();
+  setStatus(e.target.checked ? '這張劇情地圖是安全場景：不生怪、不套黑幕' : '這張劇情地圖是戰鬥場景：啟用怪物與黑幕', '#8fd3ff');
+});
 RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).addEventListener('input', e => { const v = parseFloat(e.target.value); curMap().rules[k] = isNaN(v) ? 0 : v; saveMaps(); }); });
 document.getElementById('f_coreCount').addEventListener('change', e => {
   const count = Math.max(1, Math.min(20, Math.floor(Number(e.target.value) || 1)));
@@ -2499,28 +2533,28 @@ document.getElementById('previewGame').addEventListener('click', () => {
 // ================= 存檔用的文字 / 重設 =================
 // 開頭這段說明要一字不差（存到專案時，內容沒變就不會重寫檔案）
 function exportText() {
-  return '/* ===== 戰鬥地圖（由「🗺️ 地圖編輯器」匯出）=====\n' +
-    '   只放戰鬥地圖；基地（安全區域）的地圖在 data/base-maps.js，由「🏠 基地編輯器」管理。\n' +
-    '   素材（磚塊）在兩個編輯器共用的 data/tiles.js。\n' +
-    '   整段貼回 data/maps.js 覆蓋即可。 */\n' +
-    'const BATTLE_MAPS = ' + JSON.stringify(maps, null, 2) + ';\n' +
+  return '/* ===== ' + EDITOR_SETTINGS.exportHeading + '=====\n' +
+    '   ' + EDITOR_SETTINGS.exportDescription + '\n' +
+    '   素材（磚塊）在三個編輯器共用的 data/tiles.js。\n' +
+    '   整段貼回 ' + EDITOR_SETTINGS.outputPath + ' 覆蓋即可。 */\n' +
+    'const ' + EDITOR_SETTINGS.outputConst + ' = ' + JSON.stringify(maps, null, 2) + ';\n' +
     deletedMapsExport();
 }
 // 刪掉的地圖 id（沒有刪過就不寫，檔案跟以前一樣）
 function deletedMapsExport() {
   const ids = [...deletedMapIds].filter(id => !maps.some(m => m.id === id)).sort();
-  return ids.length ? '// 刪掉的地圖：別人的地圖編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來\nconst BATTLE_MAPS_DELETED = ' + JSON.stringify(ids) + ';\n' : '';
+  return ids.length ? '// 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來\nconst ' + EDITOR_SETTINGS.deletedConst + ' = ' + JSON.stringify(ids) + ';\n' : '';
 }
-// 共用素材庫 data/tiles.js（兩個編輯器寫出來的內容一模一樣，開頭說明也要一字不差）
+// 共用素材庫 data/tiles.js（三個編輯器寫出來的內容一模一樣，開頭說明也要一字不差）
 function tilesExportText() {
-  return '/* ===== 素材庫：兩個編輯器共用的磚塊／素材（由「🗺️ 地圖編輯器」或「🏠 基地編輯器」匯出）=====\n' +
-    '   在任一個編輯器「⋯ 更多 → ＋ 加入磚塊」加的素材，兩邊都能用；地圖本身還是分開存\n' +
-    '   （戰鬥地圖 data/maps.js、基地地圖 data/base-maps.js）。\n' +
+  return '/* ===== 素材庫：三個地圖編輯器共用的磚塊／素材 =====\n' +
+    '   在任一個編輯器「⋯ 更多 → ＋ 加入磚塊」加的素材，三邊都能用；地圖本身依分類分開存\n' +
+    '   （戰鬥地圖 data/maps.js、基地地圖 data/base-maps.js、劇情地圖 data/story-maps.js）。\n' +
     '   整段貼回 data/tiles.js 覆蓋即可。 */\n' +
     'const SHARED_TILES = ' + JSON.stringify(customTiles, null, 2) + ';\n';
 }
 document.getElementById('resetFile').addEventListener('click', () => {
-  if (!confirm('確定丟棄瀏覽器暫存，改用 data/maps.js 和 data/tiles.js 檔案的內容？還沒存到專案的變更會不見。\n（素材庫兩個編輯器共用，另一個編輯器的素材也會一起重設成檔案的內容）')) return;
+  if (!confirm('確定丟棄瀏覽器暫存，改用 ' + EDITOR_SETTINGS.outputPath + ' 和 data/tiles.js 檔案的內容？還沒存到專案的變更會不見。\n（素材庫三個編輯器共用，其他編輯器的素材也會一起重設成檔案的內容）')) return;
   EditorStore.removeItem(STORAGE_MAPS); EditorStore.removeItem(STORAGE_TILES);
   localStorage.removeItem(STORAGE_DELETED_MAPS); deletedMapIds = new Set(FILE_DELETED_MAPS);   // 自己刪、還沒存到專案的也一起丟掉
   selection = null; selections = [];
@@ -2541,4 +2575,4 @@ refreshMapSelect();
 loadRules();
 draw();
 if (PULL_RESTORE_APPLIED) setStatus('舊瀏覽器紀錄已備份；目前已載入 Git 地圖版本 ✓', '#7ee0c0');
-setStatus('編輯器已就緒。目前有 ' + maps.length + ' 張戰鬥地圖、' + palette().length + ' 塊磚塊。', '#7ee0c0');
+setStatus('編輯器已就緒。目前有 ' + maps.length + ' 張' + EDITOR_SETTINGS.mapLabel + '、' + palette().length + ' 塊磚塊。', '#7ee0c0');

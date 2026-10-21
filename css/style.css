@@ -221,6 +221,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .team-pick:hover, .team-pick:focus-visible { transform: translateY(-2px); border-color: rgba(255,212,121,.45); background: rgba(52,60,70,.7); }
 .team-pick-selected { border-color: rgba(121,219,173,.3); }
 .team-pick-selected:hover, .team-pick-selected:focus-visible { border-color: rgba(255,140,130,.45); }
+.team-pick:disabled { opacity: .65; cursor: not-allowed; transform: none; }
+.team-pick:disabled .team-choice { background: #343c44; color: #c7d3dd; border-color: #586371; box-shadow: none; }
 .team-pick .team-avatar-frame { width: 62px; height: 62px; }
 .team-pick .team-avatar { top: -10px; transition: transform .15s; }
 .team-pick:hover .team-avatar { transform: translateX(-50%) scale(1.06); }
@@ -1918,6 +1920,11 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 
 /* Y102 編組名單的頭像：球球（狗）→ 對準牠的頭（頭在圖的左邊 27%、高度 56% 的地方），不管框多大都適用 */
 .squad-portrait[data-char="ball"] img { left: 50%; top: 50%; width: 220%; height: auto; aspect-ratio: 1; transform: translate(-27%, -56%); }
+.team-avatar-frame[data-char="ball"] .team-avatar,
+.team-avatar-frame[data-char="ball"]:hover .team-avatar,
+.field-member-avatar[data-char="ball"] img { left: 50%; top: 50%; width: 220%; height: auto; aspect-ratio: 1; transform: translate(-27%, -56%); }
+.field-member-support .field-member-avatar { cursor: default; }
+.field-member-support .field-member-status > span { font-size: 9px; line-height: 1.4; }
 
 /* 戰鬥畫面面板的收合按鈕（隊員欄、建築欄） */
 .hud-collapse { pointer-events: auto; flex: none; display: flex; align-items: center; justify-content: center; gap: 4px;
@@ -2355,3 +2362,7 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
   filter: drop-shadow(1px 0 0 #000) drop-shadow(-1px 0 0 #000) drop-shadow(0 1px 0 #000) drop-shadow(0 -1px 0 #000); }
 .field-member-status > b .role-icon { width: 13px; height: 13px; margin-left: 3px; vertical-align: -3px;
   filter: drop-shadow(.6px 0 0 #000) drop-shadow(-.6px 0 0 #000) drop-shadow(0 .6px 0 #000) drop-shadow(0 -.6px 0 #000); }
+
+/* 溫特陣亡：畫面慢慢變灰變暗（js/game.js 的 lose；倒地動畫播完 0.4 秒後開始，約 1.6 秒變暗）。疊在畫面上的那層遮罩變暗，不動畫布本身的濾鏡 */
+#screenShade { transition: background-color .2s, backdrop-filter .2s; }
+#screenShade.player-dying { background-color: rgba(0,0,0,.5); backdrop-filter: grayscale(.85); -webkit-backdrop-filter: grayscale(.85); transition: background-color 1.6s ease-in .4s, backdrop-filter 1.6s ease-in .4s; }

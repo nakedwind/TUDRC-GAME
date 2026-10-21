@@ -166,7 +166,9 @@ function spawnSentries() {
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
 function spawnWanderers() {
   // 基地（安全區）：只出現平時在這張地圖的人（data/npc-locations.js）；戰鬥地圖：勾了「場景 NPC」才有
-  const list = MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id)) : (MAP_NPCS ? WANDERERS : []);
+  const deployed = typeof getTeam === 'function' ? getTeam() : [];
+  const list = MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id))
+    : WANDERERS.filter(w => w.id === 'ball' ? deployed.includes('ball') && hasDogHandler(deployed) : MAP_NPCS);
   if (!list.length) return;
   const candidates = [], seen = new Set();
   const occupied = new Set(G.towers.map(t => cellAt(t.x, t.y).join(',')));
@@ -437,7 +439,7 @@ function campAttackerFor(t, maxDistance = Infinity) {
   return closest;
 }
 function updateSentry(t, dt) {
-  if (t.hp <= 0) { t.target = null; t.moving = false; return; }
+  if (t.hp <= 0) { t.target = null; t.moving = false; t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
@@ -704,6 +706,12 @@ function updateWanderer(npc, dt) {
   rescueStuck(npc, sentryBlocked);
   updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）
   if (escapeDarkness(npc, dt)) return;
+  if (npc.id === 'ball' && !MAP_SAFE && getTeam().includes('ball')) {
+    const handler = G.towers.find(t => RESCUE_DOG_HANDLERS.includes(t.type) && t.hp > 0 && !t.berserk);
+    followTarget(npc, handler || G.player, { dist: CELL * 1.25, speed: 110 }, dt);
+    npc.target = null; npc.waitT = 0;
+    return;
+  }
   // 阿瓦倫緊跟著艾德林
   if (npc.id === 'avaren' && typeof FOLLOW !== 'undefined') {
     const eldrin = G.npcs.find(n => n.id === 'eldrin');

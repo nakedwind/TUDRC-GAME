@@ -371,7 +371,7 @@ const CHARACTERS = {
     "kind": "support",
     "name": "球球",
     "sprite": "ball_B",
-    "intro": "應變中心裡養的狗，常在指揮部晃來晃去。",
+    "intro": "應變中心的搜救犬，由領犬員艾德林或阿瓦倫帶領出勤。",
     "captainImpression": ""
   },
   "taana": {

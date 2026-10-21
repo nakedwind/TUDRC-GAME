@@ -29,10 +29,11 @@ const TYPES = Object.fromEntries(Object.values(CHARACTERS)
   .map(character => [character.id, { ...character.combat, name: character.name, sprite: character.sprite }]));
 
 // ---- 出勤隊伍 ----
-// 每次任務可帶 TEAM_SIZE 位；ROSTER＝可選名單（對應 TYPES 的 key）；DEFAULT_TEAM＝預設隊伍。
+// 每次任務可帶 TEAM_SIZE 位；ROSTER＝可選角色 id（含非戰鬥搜救犬）；DEFAULT_TEAM＝預設隊伍。
 const TEAM_SIZE = 4;
-const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'eldrin', 'chris', 'tino'];
+const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'eldrin', 'chris', 'tino', 'ball'];
 const DEFAULT_TEAM = ['theonie', 'amber', 'red', 'luther'];
+const RESCUE_DOG_HANDLERS = ['eldrin', 'avaren'];
 
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。

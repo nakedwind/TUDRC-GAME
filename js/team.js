@@ -1,20 +1,34 @@
 /* ===== 出勤隊伍 =====
-   在基地選最多 TEAM_SIZE 位隊員，任務時只登場這些人（spawnSentries 讀 getTeam()）。
+   在基地選最多 TEAM_SIZE 位隊員，戰鬥隊員與搜救犬分別由 spawnSentries／spawnWanderers 依 getTeam() 生成。
    名單／人數在 data/balance.js：ROSTER / TEAM_SIZE / DEFAULT_TEAM。
    隊伍存在瀏覽器 localStorage，跨場景與重開都保留。
 */
 const TEAM_STORE = 'tudrc_team_v1';
+const RESCUE_DOG_REQUIREMENT = '球球需要艾德林或阿瓦倫其中一位領犬員同行';
+const teamProfile = id => TYPES[id] || CHARACTERS[id];
+const hasDogHandler = team => RESCUE_DOG_HANDLERS.some(id => team.includes(id));
+
+function normalizeTeam(list) {
+  const roster = (typeof ROSTER !== 'undefined') ? ROSTER : [];
+  const cap = (typeof TEAM_SIZE !== 'undefined') ? TEAM_SIZE : 4;
+  const team = [...new Set(list)].filter(id => roster.includes(id) && teamProfile(id)).slice(0, cap);
+  return hasDogHandler(team) ? team : team.filter(id => id !== 'ball');
+}
 
 function getTeam() {
   let t = null;
   try { t = JSON.parse(localStorage.getItem(TEAM_STORE)); } catch (e) {}
   if (!Array.isArray(t)) t = (typeof DEFAULT_TEAM !== 'undefined') ? DEFAULT_TEAM.slice() : [];
-  const roster = (typeof ROSTER !== 'undefined') ? ROSTER : [];
-  t = t.filter(id => roster.includes(id) && (typeof TYPES !== 'undefined') && TYPES[id]);   // 過濾不存在的
-  const cap = (typeof TEAM_SIZE !== 'undefined') ? TEAM_SIZE : 4;
-  return t.slice(0, cap);
+  return normalizeTeam(t);
 }
-function setTeam(list) { try { localStorage.setItem(TEAM_STORE, JSON.stringify(list)); } catch (e) {} }
+function setTeam(list) {
+  if (list.includes('ball') && !hasDogHandler(list)) {
+    if (typeof sfx === 'function') sfx('error');
+    if (typeof systemNotice === 'function') systemNotice(RESCUE_DOG_REQUIREMENT + '，請先移出球球或保留另一位領犬員', true);
+    return false;
+  }
+  try { localStorage.setItem(TEAM_STORE, JSON.stringify(normalizeTeam(list))); return true; } catch (e) { return false; }
+}
 
 // ---- 編隊面板（DOM 由程式建立，不用改 HTML/CSS）----
 let teamBtn = null, teamPanel = null, squadBtn = null, squadPanel = null, impressionPanel = null, fieldSquadHud = null, fieldCommandMenu = null;
@@ -136,12 +150,13 @@ function memberCondition(actor, safe) {
 function squadMembers() {
   const safe = (typeof MAP_SAFE !== 'undefined') && MAP_SAFE;
   if (safe) {
-    const combat = ((typeof ROSTER !== 'undefined') ? ROSTER : Object.keys(TYPES)).map(type => ({ type, live: null }));
+    const combat = ((typeof ROSTER !== 'undefined') ? ROSTER : Object.keys(TYPES)).filter(type => TYPES[type]).map(type => ({ type, live: null }));
     const support = (typeof WANDERERS !== 'undefined' ? WANDERERS : []).map(profile => ({ type: profile.id, profile, live: null, noncombat: true }));
     return [...combat, ...support];
   }
   if (typeof G === 'undefined' || !G || !Array.isArray(G.towers)) return [];
-  return G.towers.map(live => ({ type: live.type, live }));
+  return [...G.towers.map(live => ({ type: live.type, live })),
+    ...(G.npcs || []).filter(npc => npc.id === 'ball' && getTeam().includes('ball')).map(live => ({ type: live.id, live, noncombat: true }))];
 }
 const CAPTAIN_IMPRESSIONS = Object.fromEntries(Object.values(CHARACTERS)
   .filter(character => character.captainImpression)
@@ -188,8 +203,8 @@ function supportCard(actor) {
   return '<article class="squad-card squad-card-support" style="--member-color:#8292a3">' +
     '<span class="squad-portrait" data-char="' + actor.type + '"><img src="' + memberPortraitPath(display) + '" alt="' + profile.name + '"></span>' +   // data-char：個別角色的頭像裁切（css/style.css，例如球球）
     '<div class="squad-member-main">' +
-      '<div class="squad-member-head"><div><strong>' + profile.name + '</strong><span>Y102編組・非戰鬥人員</span></div><em class="member-condition support">非戰鬥人員</em></div>' +
-      '<div class="support-assignment"><b>支援編制</b><span>不參與戰鬥，沒有技能樹。</span></div>' +
+      '<div class="squad-member-head"><div><strong>' + profile.name + '</strong><span>Y102編組・' + (actor.type === 'ball' ? '搜救犬' : '非戰鬥人員') + '</span></div><em class="member-condition support">' + (actor.type === 'ball' ? (getTeam().includes('ball') ? '已編入' : '待命') : '非戰鬥人員') + '</em></div>' +
+      '<div class="support-assignment"><b>支援編制</b><span>' + (actor.type === 'ball' ? RESCUE_DOG_REQUIREMENT : '不參與戰鬥，沒有技能樹。') + '</span></div>' +
     '</div></article>';
 }
 function renderSquadPanel() {
@@ -330,7 +345,9 @@ function renderFieldSquadHud() {
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
         '</article>';
-    }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>'));
+    }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>') +
+    ((G.npcs || []).some(npc => npc.id === 'ball') && getTeam().includes('ball')
+      ? '<article class="field-member field-member-support" data-type="ball"><span class="field-member-avatar" data-char="ball"><img src="' + memberPortraitPath(CHARACTERS.ball) + '" alt="球球"></span><div class="field-member-status"><b>球球</b><span>搜救犬・隨領犬員出勤</span></div></article>' : ''));
   fieldSquadHud.classList.remove('hidden');
 }
 // 隊員欄收起／展開：只切 class，CSS 負責滑順的動畫
@@ -376,15 +393,16 @@ function renderTeamPanel() {
   const cap = (typeof TEAM_SIZE !== 'undefined') ? TEAM_SIZE : 4;
   const team = getTeam();
   const memberCard = (id, selected) => {
-    const spec = (typeof TYPES !== 'undefined' && TYPES[id]) || {};
-    const role = spec.guide ? '嚮導・弱戰鬥＋隨身疏導' : '哨兵';
+    const spec = teamProfile(id) || {};
+    const locked = id === 'ball' && !selected && !hasDogHandler(team);
+    const role = id === 'ball' ? '搜救犬' : (spec.guide ? '嚮導・弱戰鬥＋隨身疏導' : '哨兵') + (RESCUE_DOG_HANDLERS.includes(id) ? '・領犬員' : '');
     const profile = TEAM_PROFILES[id] || {};
-    return '<button class="team-pick' + (selected ? ' team-pick-selected' : '') + '" type="button" data-id="' + id + '" aria-label="' + (selected ? '移出' : '編入') + spec.name + '">' +
-      '<span class="team-avatar-frame"><img class="team-avatar" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '正面圖"></span>' +
+    return '<button class="team-pick' + (selected ? ' team-pick-selected' : '') + '" type="button" data-id="' + id + '"' + (locked ? ' disabled title="' + RESCUE_DOG_REQUIREMENT + '"' : '') + ' aria-label="' + (selected ? '移出' : '編入') + spec.name + '">' +
+      '<span class="team-avatar-frame" data-char="' + id + '"><img class="team-avatar" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '正面圖"></span>' +
       '<span class="team-summary"><span class="team-name-line"><b>' + (spec.name || id) + '</b>' +
       '<span class="team-role">' + role + '</span></span>' +   // 評級（S／A 級）先不顯示
-      '<span class="team-intro">' + (profile.intro || spec.role || '') + '</span></span>' +
-      '<span class="team-choice">' + (selected ? '移出 −' : '編入 ＋') + '</span></button>';
+      '<span class="team-intro">' + (locked ? RESCUE_DOG_REQUIREMENT : profile.intro || spec.role || '') + '</span></span>' +
+      '<span class="team-choice">' + (selected ? '移出 −' : locked ? '需領犬員' : '編入 ＋') + '</span></button>';
   };
   const available = roster.filter(id => !team.includes(id));
   const oldSelected = teamPanel.querySelector('#teamSelected'), selectedScroll = oldSelected ? oldSelected.scrollTop : 0;
@@ -396,13 +414,14 @@ function renderTeamPanel() {
         (available.length ? available.map(id => memberCard(id, false)).join('') : '<p class="team-empty">所有人員都已編入。</p>') +
       '</div></section>' +
       '<section class="team-column team-column-selected"><h3>已編入人員 <small>' + team.length + ' / ' + cap + '</small></h3><div class="team-list" id="teamSelected">' +
-        (team.length ? team.map(id => '<div class="team-member-wrap">' + memberCard(id, true) + (typeof sortieSlotsHtml === 'function' ? sortieSlotsHtml(id) : '') + '</div>').join('') : '<p class="team-empty">尚未編入人員，請從左側選擇。</p>') +
+        (team.length ? team.map(id => '<div class="team-member-wrap">' + memberCard(id, true) + (TYPES[id] && typeof sortieSlotsHtml === 'function' ? sortieSlotsHtml(id) : '') + '</div>').join('') : '<p class="team-empty">尚未編入人員，請從左側選擇。</p>') +
       '</div></section>' +
     '</div><footer class="team-dialog-footer"><span>點選左側編入，點選右側移出；補給格放零食飲料，出勤時吃掉</span><button id="teamDone" type="button">完成</button></footer>' +
     '</div>';
   teamPanel.querySelector('#teamAvailable').addEventListener('click', e => {
     const button = e.target.closest('.team-pick'); if (!button) return;
     const current = getTeam();
+    if (button.dataset.id === 'ball' && !hasDogHandler(current)) return;
     if (current.length >= cap) {
       if (typeof sfx === 'function') sfx('error');
       if (typeof systemNotice === 'function') systemNotice('已滿編', true);
@@ -413,8 +432,9 @@ function renderTeamPanel() {
   teamPanel.querySelector('#teamSelected').addEventListener('click', e => {
     if (typeof handleSortieClick === 'function' && handleSortieClick(e)) return;   // 補給格（js/sortie-supply.js）
     const button = e.target.closest('.team-pick'); if (!button) return;
+    if (!setTeam(getTeam().filter(id => id !== button.dataset.id))) return;
     if (typeof dropSortieLoadout === 'function') dropSortieLoadout(button.dataset.id);
-    setTeam(getTeam().filter(id => id !== button.dataset.id)); renderTeamPanel();
+    renderTeamPanel();
   });
   teamPanel.querySelector('#teamSelected').scrollTop = selectedScroll;
   teamPanel.querySelector('#teamDone').addEventListener('click', () => { if (typeof sfx === 'function') sfx('button'); closeTeamPanel(); });

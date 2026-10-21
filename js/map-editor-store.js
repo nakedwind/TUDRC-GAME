@@ -1,4 +1,4 @@
-/* ===== 🗺️ 地圖編輯器（戰鬥地圖）的存檔空間 =====
+/* ===== 🗺️ 戰鬥／劇情地圖編輯器共用的存檔空間 =====
    地圖、素材的暫存原本放在瀏覽器的 localStorage（大約只有 5MB，地圖越畫越多會突然存不進去）。
    現在改放到瀏覽器的資料庫（IndexedDB，空間大很多），第一次打開時會自動把舊的暫存搬過去。
    用法：頁面先載入這個檔案，再用 EditorStore.boot([...]) 依序載入編輯器程式（等資料庫讀好才開始）。
@@ -8,8 +8,8 @@
 */
 const EditorStore = (() => {
   const DB_NAME = 'tudrc_editor', STORE = 'kv';
-  const MAPS_KEY = 'tudrc_battle_maps_v1';     // 地圖編輯器自己的地圖暫存（js/map-editor.js 的 STORAGE_MAPS）
-const TILES_KEY = 'tudrc_shared_tiles_v1';   // 素材庫：兩個編輯器共用（js/map-editor.js 的 STORAGE_TILES）
+  const MAPS_KEY = (window.MAP_EDITOR_CONFIG && window.MAP_EDITOR_CONFIG.storageMaps) || 'tudrc_battle_maps_v1';
+const TILES_KEY = 'tudrc_shared_tiles_v1';   // 素材庫：三個編輯器共用（js/map-editor.js 的 STORAGE_TILES）
   // 放進資料庫的大資料；後面兩個是分開之前兩個編輯器共用的舊暫存，只讀來搬一次（js/map-editor.js 的 oldSharedDraft）
   // 素材還沒共用之前兩邊各自的素材暫存（tudrc_battle_tiles_v1、tudrc_base_tiles_v1）也讀進來，只搬一次
   const BIG = new Set([MAPS_KEY, TILES_KEY, 'tudrc_maps_v4', 'tudrc_tiles_v3', 'tudrc_battle_tiles_v1', 'tudrc_base_tiles_v1']);
