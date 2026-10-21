@@ -214,7 +214,7 @@ function renderMissionBoard() {
       '<i>' + (m.boss ? '⚠' : s === 'cleared' ? '✓' : s === 'available' ? '!' : '') + '</i><span>' + m.name + '</span></button>';
   }).join('');
   const team = getTeam(), cleared = MISSIONS.filter(missionCleared).length;
-  const teamFaces = team.map(id => '<span class="mission-face" data-char="' + id + '" title="' + TYPES[id].name + '"><img src="' + memberPortraitPath(TYPES[id]) + '" alt="' + TYPES[id].name + '"></span>').join('');   // 胸像（裁切跟 Y102隊員面板的 .squad-portrait 一樣）
+  const teamFaces = team.map(id => { const profile = teamProfile(id); return '<span class="mission-face" data-char="' + id + '" title="' + profile.name + '"><img src="' + memberPortraitPath(profile) + '" alt="' + profile.name + '"></span>'; }).join('');   // 胸像（裁切跟 Y102隊員面板的 .squad-portrait 一樣）
   const canGo = !!sel.map && st !== 'locked';
   const side = boardTab === 'side' && typeof renderSideBoard === 'function';
   const ready = typeof readyCount === 'function' ? readyCount() : 0;

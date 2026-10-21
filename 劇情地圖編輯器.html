@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>台北地下災害應變中心 — 劇情地圖編輯器</title>
+<link rel="stylesheet" href="css/map-editor.css?v=story-20261021">   <!-- 與戰鬥地圖編輯器共用完整功能與樣式 -->
+<link rel="stylesheet" href="css/ui-feedback.css">
+<link rel="stylesheet" href="css/map-editor-copy.css?v=copy-20261021">
+</head>
+<body>
+  <!-- 上方工具列：永遠固定在視窗最上面（地圖很大、捲到下面編輯時也點得到） -->
+  <div id="topbar">
+    <h1>📖 劇情地圖編輯器　<a class="backlink" href="塔防原型.html">← 回遊戲</a>　<a class="backlink" href="地圖編輯器.html">🗺️ 戰鬥地圖</a>　<a class="backlink" href="基地編輯器.html">🏠 基地地圖</a>　<a class="backlink" href="怪物編輯器.html">🐾 怪物編輯器</a>　<a class="backlink" href="椅子編輯器.html">🪑 椅子編輯器</a></h1>
+      <div id="mapbar">
+        <span>目前地圖：</span>
+        <select id="mapSelect"></select>
+        <button class="btn" id="previewGame" title="用目前編輯中的地圖開遊戲畫面（不用先匯出）">▶ 預覽遊戲</button>
+        <button class="btn" id="newMap">＋ 新增</button>
+        <button class="btn" id="dupMap">⧉ 複製</button>
+        <button class="btn" id="renameMap">✎ 改名</button>
+        <button class="btn danger" id="delMap">🗑 刪除</button>
+        <span class="sep"></span>
+        <button class="btn" id="undoBtn" hidden style="display:none">↶ 回復 (Ctrl+Z)</button>
+        <button class="btn" id="gridToggle">🔳 格線：開</button>
+        <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透紅格與怪物出生區綠格（不影響設定）">🧱 紅綠格：開</button>
+        <details class="tool-more">
+          <summary class="btn">⋯ 更多</summary>
+          <div class="tool-more-menu">
+            <button class="btn" id="addTile">＋ 加入磚塊（圖片）</button>
+            <button class="btn" id="addColorBlock">■ 新增色塊</button>
+            <button class="btn" id="fillAll">🪣 用目前的磚塊填滿整張</button>
+            <button class="btn danger" id="clearLayout">🗑 全部清空</button>
+          </div>
+        </details>
+        <span class="toolrow-gap"></span>
+        <button class="btn danger" id="resetFile">從檔案重設（丟棄瀏覽器暫存）</button>
+        <!-- 存到專案：滑鼠停在按鈕上會出現說明（可以點裡面的「重新選擇遊戲資料夾」） -->
+        <span class="save-wrap">
+          <button class="btn primary" id="saveProject">💾 存到專案</button>
+          <span class="save-tip">
+            <span class="save-note">「💾 存到專案」（Ctrl+S）會直接寫進遊戲資料夾，不用下載再覆蓋。<a href="#" id="pickProject">重新選擇遊戲資料夾</a></span>
+            <span class="save-note" id="storageInfo"></span>
+          </span>
+        </span>
+      </div>
+      <div id="tools" class="toolrow">
+        <button class="tool" data-mode="select" title="快捷鍵 Q">👆 選取</button>
+        <button class="tool" data-mode="erase" title="快捷鍵 E">🧽 清除</button>
+        <button class="tool" data-mode="pick" title="快捷鍵 I（按住 Alt＝臨時吸管）">💧 吸管</button>
+        <button class="tool" data-mode="solid">🧱 不可穿透</button>
+        <button class="tool" data-mode="solidnudge">🎯 碰撞微調</button>
+        <button class="tool" data-mode="portal">🚪 出入口</button>
+        <button class="tool" data-mode="core">💠 異質核心候選點</button>
+        <button class="tool" data-mode="spawn" title="畫上後，這張地圖的怪物只會從這些格子出生（拖曳可以一次畫一片；再畫一次＝擦掉）">👾 怪物出生區</button>
+        <span class="sep"></span>
+        <!-- 選取物件後的操作（沒選東西時是灰的） -->
+        <div id="selControls">
+          <span>已選取：<b id="selName">—</b></span>
+          <label title="圖層"><select id="selLayer"></select></label>
+          <label id="selDepthControl" title="由圖片頂端往下數；線上方的人會被物件遮住，線下方的人會顯示在物件前面">人物遮擋線 <input id="selDepthInput" type="number" min="0" max="8" step="0.25" style="width:38px"> 格</label>
+          <label id="selDoorControl" class="hidden" title="手動門：玩家走到門前按 E 開關。自動門：玩家打不開，異質核心醒來時自動打開。">🚪 門：<select id="selDoorMode"></select></label>
+          <button class="btn" id="selUp">↑ 上移一層</button>
+          <button class="btn" id="selDown">↓ 下移一層</button>
+          <button class="btn" id="selFlipX">⇄ 左右翻</button>
+          <button class="btn" id="selFlipY">⇅ 上下翻</button>
+          <button class="btn" id="selRotate" title="旋轉選取物件 90 度（快捷鍵 R）">↻ 旋轉</button>
+          <button class="btn" id="selReset" title="把微調的位置歸零、貼回格線">↺ 回格線</button>
+          <button class="btn danger" id="selDelete">🗑 刪除</button>
+        </div>
+      </div>
+  </div>
+
+  <div class="layout">
+    <!-- 左邊：畫布 + 選取物件 -->
+    <div class="left">
+      <input type="file" id="tileFile" accept="image/*" style="display:none">
+
+      <div id="colorBlockPanel" class="color-block-panel hidden">
+        <strong>新增系統色塊</strong>
+        <label>名稱 <input type="text" id="colorBlockName" value="色塊"></label>
+        <label>顏色 <input type="color" id="colorBlockColor" value="#4f8fbf"></label>
+        <label>寬 <input type="number" id="colorBlockW" min="20" max="2000" step="1" value="40"> px</label>
+        <label>高 <input type="number" id="colorBlockH" min="20" max="2000" step="1" value="40"> px</label>
+        <button class="btn primary" id="createColorBlock">建立</button>
+        <button class="btn" id="cancelColorBlock">取消</button>
+      </div>
+
+
+      <div id="baseCollisionPanel" class="base-collision-panel hidden">
+        <div class="base-collision-head">
+          <strong>🏠 基地可走動區域</strong>
+          <label>HP <input id="baseHpInput" type="number" min="1" step="100"></label>
+          <label>深度線 <input id="baseDepthInput" type="number" min="0" max="8" step="1"></label>
+          <button class="btn" id="baseCollisionReset">恢復預設</button>
+        </div>
+        <p>點格子切換：<b>紅格</b>會阻擋並承受攻擊，空格可讓玩家通行。<b class="depth-help">藍線</b>上方的玩家會被基地遮住，下方會顯示在基地前面。</p>
+        <div id="baseCollisionGrid" class="base-collision-grid"></div>
+      </div>
+
+      <div id="zoombar" style="display:flex;gap:8px;align-items:center;margin:8px 0;color:#b9c3d0;font-size:13px">
+        <span>🔍 縮放</span>
+        <button class="btn" id="zoomOut">－</button>
+        <span id="zoomLabel" title="在地圖上按住 Alt＋滑鼠滾輪也可以縮放">100%</span>
+        <button class="btn" id="zoomIn">＋</button>
+        <button class="btn" id="zoomFit">🔲 全覽整張</button>
+        <button class="btn" id="zoom100">1:1</button>
+        <button class="btn" id="expandEditor" aria-pressed="false" title="收起右側設定面板，讓地圖使用整個頁面寬度">⛶ 放大編輯區</button>
+      </div>
+
+      <div id="wrap">
+        <canvas id="cv" width="1280" height="720"></canvas>
+      </div>
+
+      <div id="tilePropsRow" class="hidden" style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:6px 0;font-size:13px;color:#b9c3d0">
+        <span style="color:#8fd3ff">選中素材：</span>
+        <label>寬 <input type="number" id="tileW" min="1" max="20" style="width:64px"> <span id="tileWUnit">格</span></label>
+        <label>高 <input type="number" id="tileH" min="1" max="20" style="width:64px"> <span id="tileHUnit">格</span></label>
+        <label id="tileColorLabel" class="hidden">顏色 <input type="color" id="tileColor"></label>
+        <label style="cursor:pointer"><input type="checkbox" id="tileFlat"> 平貼地面（不遮角色）</label>
+      </div>
+
+      <!-- 磚塊調色盤（由程式產生：內建地板/牆/障礙物 + 你加入的磚塊）-->
+      <div id="palette"></div>
+
+      <div id="status"></div>
+      <div id="hint">
+        先選<b>圖層</b>（🟫地板／✨裝飾），再選<b>磚塊</b>貼圖 —— 圖片<b>純外觀</b>。選取工具可<b>拖曳物件</b>移動，按住 <b>Shift</b> 點擊可多選後整組移動，按 <b>Delete</b> 可刪除選取物件。小圖(1×1)可<b>點/拖曳</b>鋪；<b>大圖(多格)</b>移過去看虛線框、<b>點一下</b>放置。小圖和大圖都能用<b>左右翻／上下翻</b>（F／V），已放置的圖片可先選取再翻轉。<br>
+        牆壁與邊界可用 <b>🧱 不可穿透</b> 標記（紅框，怪繞路），再點一次可取消；路障與基地等素材會沿用自己的血量與碰撞設定。<br>
+        用 <b>💠 異質核心候選點</b>標記可能出現的位置，再設定本局核心數量；每次開始會從候選點隨機抽取。候選點不可與不可穿透格重疊。按 <b>Ctrl+Z</b> 或「↶ 回復」可回上一步。所有變更會<b>自動存檔</b>。<br>
+        <b>💧 吸管</b>：點格子把筆刷換成那格的圖。按住 <b>Alt</b> 臨時吸管、按住 <b>Ctrl</b> 臨時選取，放開還原原本的工具。
+      </div>
+    </div>
+
+    <!-- 右邊：圖層 + 這張地圖的規則 + 匯出 -->
+    <div class="right">
+      <!-- 圖層切換（直排）-->
+      <div id="layerbar">
+        <div class="layerbar-title">🗂️ 圖層</div>
+        <span id="layerBtns"></span>
+        <span class="layerhint">貼圖會畫到選中的圖層；上層疊在下層之上、透明處透出下層。點圖層可以展開這層的物件清單，點清單裡的物件就會選取它（Shift＋點＝多選）。雙擊圖層可以改名。</span>
+      </div>
+
+      <details class="panel collapsible" id="rulesPanel">
+        <summary class="panel-head">📋 地圖規則</summary>
+        <div class="panel-body">
+        <div class="field col"><label>地圖名稱</label><input id="f_name" class="wide" type="text"></div>
+        <div class="field col"><label>說明</label><input id="f_desc" class="wide" type="text"></div>
+
+        <div class="field col"><small>這裡只用來整理<b>劇情地圖</b>；素材與編輯功能和其他地圖編輯器共用，地圖資料獨立存放，方便分類。</small></div>
+        <div class="field col"><label><input id="f_safe" type="checkbox"> 安全場景（不生怪、不套黑幕）</label><small>取消勾選時，這張劇情地圖會沿用完整戰鬥規則。</small></div>
+        <div class="field col"><label><input id="f_npcs" type="checkbox"> 場景 NPC（克莉思、路德等人會走動並可對話）</label></div>
+
+        <div class="subhead">地圖大小</div>
+        <div class="map-size-panel">
+          <div class="map-size-current">
+            <label>寬 <select id="f_colsSide" aria-label="調整寬度的方向"><option value="left">⬅ 左</option><option value="right" selected>右 ➡</option></select><input id="f_cols" type="number" min="8" max="200" aria-label="地圖寬度">格</label>
+            <span>×</span>
+            <label>高 <select id="f_rowsSide" aria-label="調整高度的方向"><option value="up">⬆ 上</option><option value="down" selected>下 ⬇</option></select><input id="f_rows" type="number" min="8" max="200" aria-label="地圖高度">格</label>
+          </div>
+          <p class="map-size-note">先選擇調整哪一側，再修改格數。數字變大＝增加；變小＝裁掉。裁掉內容可按 Ctrl+Z 復原。</p>
+        </div>
+
+        <div class="subhead">作戰經費</div>
+        <div class="field"><label>作戰經費（出勤時給的錢，剩下的會帶回基地）</label><input id="f_money" type="number"></div>
+        <div class="field"><label>起始嚮導能量</label><input id="f_guide" type="number"></div>
+        <div class="field"><label>嚮導能量/秒</label><input id="f_guideRegen" type="number"></div>
+        <div class="subhead">異質核心</div>
+        <div class="field"><label>本局核心數量</label><input id="f_coreCount" type="number" min="1" max="20" step="1"></div>
+        <div class="field"><small>先在地圖上標記候選點；每次進場會隨機抽取指定數量。</small></div>
+        <div class="subhead">這張地圖的異質體</div>
+        <div class="field"><small>勾選會出現的種類，權重越高越常出現；怪物能力與圖片到 <a href="怪物編輯器.html">怪物編輯器</a> 調整。</small></div>
+        <div id="monsterMixList" style="display:grid;gap:8px;margin:10px 0"></div>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+  <!-- 劇情地圖有獨立清單與暫存，但直接共用戰鬥地圖編輯器的完整功能 -->
+  <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
+  <script src="js/config.js"></script>       <!-- 格線與座標 -->
+  <script src="data/monsters.js?v=milkfish-v4-20261021"></script>  <!-- 怪物種類與數值 -->
+  <script src="js/monster-data.js?v=sync-20261021"></script>
+  <script src="data/tiles.js?v=adren-20261021"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/story-maps.js?v=story-20261021"></script>        <!-- 劇情地圖資料（STORY_MAPS） -->
+  <script src="data/supplies.js"></script>
+  <script src="data/items.js?v=doors4-20261018"></script>
+  <script src="data/equipment.js?v=adren-20261021"></script>
+  <script src="data/doors.js?v=lockeddoor-20261018"></script>        <!-- 可開關的門 -->
+  <script src="js/sfx.js?v=milkfish-20261020"></script>
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
+  <script>
+    window.MAP_EDITOR_CONFIG = {
+      editorName: '劇情地圖編輯器', mapLabel: '劇情地圖',
+      sourceMaps: STORY_MAPS,
+      sourceDeletedMaps: typeof STORY_MAPS_DELETED !== 'undefined' ? STORY_MAPS_DELETED : [],
+      storageMaps: 'tudrc_story_maps_v1',
+      storageDeletedMaps: 'tudrc_story_deleted_maps_v1',
+      storageSplitDone: 'tudrc_story_editor_split_v1',
+      defaultSafe: true, migrateOldShared: false,
+      outputPath: 'data/story-maps.js', outputConst: 'STORY_MAPS', deletedConst: 'STORY_MAPS_DELETED',
+      exportHeading: '劇情地圖（由「📖 劇情地圖編輯器」匯出）',
+      exportDescription: '只放劇情地圖；每張圖可自行設定為安全場景或戰鬥場景。'
+    };
+  </script>
+  <script src="js/map-editor-store.js?v=story-20261021"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
+  <script>EditorStore.boot(["js/map-editor.js?v=copy-20261021", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021"]);</script>
+</body>
+</html>

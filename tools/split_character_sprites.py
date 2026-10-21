@@ -54,6 +54,8 @@ FRAME_POSITIONS = (
 def split_sheet(folder_name: str, source_name: str) -> None:
     source_path = CHARACTER_ROOT / source_name
     target_dir = CHARACTER_ROOT / folder_name
+    if not source_path.is_file():
+        source_path = target_dir / source_name
     target_dir.mkdir(exist_ok=True)
 
     with Image.open(source_path) as sheet:
@@ -74,7 +76,8 @@ def split_sheet(folder_name: str, source_name: str) -> None:
             frame.save(target_dir / f"{prefix}{frame_name}.png")
 
     # Keep the top-level source as a backup and place a copy with its frames.
-    copy2(source_path, target_dir / source_name)
+    if source_path.resolve() != (target_dir / source_name).resolve():
+        copy2(source_path, target_dir / source_name)
 
     with Image.open(source_path) as sheet:
         for frame_name, (column, row) in zip(FRAME_NAMES, FRAME_POSITIONS):

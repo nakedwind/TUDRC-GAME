@@ -1,5 +1,5 @@
 /* ===== 地圖載入器：把「地圖編輯器」「基地編輯器」做的地圖接進遊戲 =====
-   地圖清單是 MAPS_DEFAULT（js/map-data.js 把 data/maps.js 戰鬥地圖、data/base-maps.js 基地地圖合在一起），
+   地圖清單是 MAPS_DEFAULT（js/map-data.js 把戰鬥、基地、劇情三種地圖合在一起），
    載入其中一張，套用它的：
    - solid(不可穿透)→固定牆、breakable(可破壞)→障礙物
    - camp(營地)→怪物目標

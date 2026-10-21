@@ -7,7 +7,7 @@
 */
 const EDITOR_SAVE_FILES = [
   { path: 'data/base-maps.js', label: '基地地圖', text: () => exportText() },
-  { path: 'data/tiles.js', label: '素材庫（兩個編輯器共用）', text: () => tilesExportText() },
+  { path: 'data/tiles.js', label: '素材庫（三個編輯器共用）', text: () => tilesExportText() },
 ];   // js/base-editor-npc.js 會再加 npc-locations.js
 // 存檔功能本身在 js/project-save.js（所有編輯器共用，遊戲資料夾只要選一次）
 const editorProjectSave = ProjectSave.attach({ after: [], files: EDITOR_SAVE_FILES, status: (m, err) => setStatus(m, err ? '#ff8f8f' : '#7ee0c0') });

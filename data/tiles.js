@@ -1,6 +1,6 @@
-/* ===== 素材庫：兩個編輯器共用的磚塊／素材（由「🗺️ 地圖編輯器」或「🏠 基地編輯器」匯出）=====
-   在任一個編輯器「⋯ 更多 → ＋ 加入磚塊」加的素材，兩邊都能用；地圖本身還是分開存
-   （戰鬥地圖 data/maps.js、基地地圖 data/base-maps.js）。
+/* ===== 素材庫：三個地圖編輯器共用的磚塊／素材 =====
+   在任一個編輯器「⋯ 更多 → ＋ 加入磚塊」加的素材，三邊都能用；地圖本身依分類分開存
+   （戰鬥地圖 data/maps.js、基地地圖 data/base-maps.js、劇情地圖 data/story-maps.js）。
    整段貼回 data/tiles.js 覆蓋即可。 */
 const SHARED_TILES = [
   {
@@ -3730,6 +3730,14 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_interactive_pickup_adrenaline",
+    "name": "拾取亮點（腎上腺素）",
+    "role": "floor",
+    "file": "images/裝備/adrenaline-injector.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_mvfjt47h",
     "name": "Back-room-floor_M",
     "role": "floor",
@@ -3940,5 +3948,14 @@ const SHARED_TILES = [
     "file": "images/收容觀察室/double-door-open02.png",
     "w": 3,
     "h": 4
+  },
+  {
+    "id": "tile_mvi1thjl",
+    "name": "escape-stairs02",
+    "role": "floor",
+    "file": "images/應變中心/escape-stairs02.png",
+    "w": 5,
+    "h": 4,
+    "flat": true
   }
 ];

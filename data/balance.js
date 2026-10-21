@@ -15,6 +15,7 @@ const START = {
 const SOOTHE = {
   cost: 30,   // 每次疏導花多少嚮導能量
   heal: 55,   // 每次疏導降多少汙染值
+  time: 3,    // 溫特疏導隊員要幾秒（進度條跑完才算成功；期間溫特和隊員都不能動，js/channel-actions.js）
 };
 
 // ---- 角色資料相容入口 ----
@@ -28,10 +29,11 @@ const TYPES = Object.fromEntries(Object.values(CHARACTERS)
   .map(character => [character.id, { ...character.combat, name: character.name, sprite: character.sprite }]));
 
 // ---- 出勤隊伍 ----
-// 每次任務可帶 TEAM_SIZE 位；ROSTER＝可選名單（對應 TYPES 的 key）；DEFAULT_TEAM＝預設隊伍。
+// 每次任務可帶 TEAM_SIZE 位；ROSTER＝可選角色 id（含非戰鬥搜救犬）；DEFAULT_TEAM＝預設隊伍。
 const TEAM_SIZE = 4;
-const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'eldrin', 'chris', 'tino'];
+const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'eldrin', 'chris', 'tino', 'ball'];
 const DEFAULT_TEAM = ['theonie', 'amber', 'red', 'luther'];
+const RESCUE_DOG_HANDLERS = ['eldrin', 'avaren'];
 
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。

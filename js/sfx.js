@@ -13,6 +13,7 @@ const SFX = (() => {
     menu: '介面/開選單.mp3',
     aidHover: '介面/help_choose_SE.mp3',   // 用急救包選隊員：滑鼠移到某位隊員的頭像上（js/team.js、js/equipment.js）
     aidCannot: '介面/help_choose_can_not.mp3',   // 點急救包但沒有人受傷（js/equipment.js）
+    aidStart: '玩家/補血.mp3',   // 開始急救（進度條開始跑，js/equipment.js）；急救完成播 soothe（疏導）
     switch: '介面/切換.mp3',
     blip: '介面/對話框下一頁音效.mp3',
     place: '設施/放置.mp3',
@@ -23,6 +24,7 @@ const SFX = (() => {
     powerOn: '環境/門與機關/很大聲的開燈.mp3',
     ironGateSlide: '環境/門與機關/鐵門滑動.mp3',
     soothe: '玩家/疏導.mp3',
+    sootheEnd: '玩家/疏導2.mp3',   // 溫特疏導的進度條跑完、疏導成功時（js/sentry.js 的 finishSoothe）；開始時播上面的 soothe
     drink: '喝飲料.mp3',   // 喝杏仁水（js/shop.js 的 useSupply）
     door: '環境/門與機關/關門.mp3',
     backroomDoor: '環境/門與機關/後室開門.mp3',

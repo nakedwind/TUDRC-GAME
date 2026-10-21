@@ -166,7 +166,9 @@ function spawnSentries() {
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
 function spawnWanderers() {
   // 基地（安全區）：只出現平時在這張地圖的人（data/npc-locations.js）；戰鬥地圖：勾了「場景 NPC」才有
-  const list = MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id)) : (MAP_NPCS ? WANDERERS : []);
+  const deployed = typeof getTeam === 'function' ? getTeam() : [];
+  const list = MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id))
+    : WANDERERS.filter(w => w.id === 'ball' ? deployed.includes('ball') && hasDogHandler(deployed) : MAP_NPCS);
   if (!list.length) return;
   const candidates = [], seen = new Set();
   const occupied = new Set(G.towers.map(t => cellAt(t.x, t.y).join(',')));
@@ -253,6 +255,9 @@ function pathToLight(actor) {
   return path.reverse();
 }
 function escapeDarkness(actor, dt) {
+  // 被召喚（summonDark）：召喚的優先順序比「怕黑」高，途中穿過黑暗也照走；到了、或改成別的命令就恢復怕黑
+  if (actor.summonDark && actor.mode !== 'goto') actor.summonDark = false;
+  if (actor.summonDark) return false;
   if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
     if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
     if (actor.escapePath) {
@@ -287,14 +292,14 @@ function escapeDarkness(actor, dt) {
   if (Math.hypot(actor.x - oldX, actor.y - oldY) < .001) actor.escapeTimer = 0;
   return true;
 }
-// ignoreFire：被推出火海時用，只看地形，不把火當成擋路
-function sentryCellWalkable(c, r, ignoreFire = false) {
+// ignoreFire：被推出火海時用，只看地形，不把火當成擋路；allowDark：被召喚時，黑暗的格子也能走
+function sentryCellWalkable(c, r, ignoreFire = false, allowDark = false) {
   if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) return false;
   const [x, y] = center(c, r);
   if (sentryBlocked(x, y)) return false;
   if (!ignoreFire && typeof oilFireAt === 'function' && oilFireAt(x, y, 6)   // 燒著的火海：找路時繞開（js/oil-barrels.js）
       && !(typeof sentryFireTrait === 'function' && sentryFireTrait(sentryFireWalker))) return false;   // 希奧妮、雷德不繞（js/game.js 的 SENTRY_FIRE_TRAITS）
-  if (!personnelInLight(x, y)) return false;
+  if (!allowDark && !personnelInLight(x, y)) return false;
   return true;
 }
 function nearestSentryGoal(c, r) {
@@ -312,7 +317,7 @@ function nearestSentryGoal(c, r) {
   return null;
 }
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
-function buildSentryPath(t, targetX, targetY) {
+function buildSentryPath(t, targetX, targetY, allowDark = !!t.summonDark) {   // allowDark：找一條可以穿過黑暗的路（召喚時）
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
   const goal = nearestSentryGoal(rawGc, rawGr); if (!goal) return null;
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
@@ -324,7 +329,7 @@ function buildSentryPath(t, targetX, targetY) {
     if (c === gc && r === gr) break;
     for (const [dc, dr] of [[0,-1],[1,0],[0,1],[-1,0]]) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (cameFrom.has(key) || !sentryCellWalkable(nc, nr)) continue;
+      if (cameFrom.has(key) || !sentryCellWalkable(nc, nr, false, allowDark)) continue;
       cameFrom.set(key, c + ',' + r); queue.push([nc, nr]);
     }
   }
@@ -339,7 +344,8 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
-  if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r))) {
+  const dark = !!t.summonDark;   // 被召喚：可以穿過黑暗
+  if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r, false, dark))) {
     t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
     t.navStall = 0;
   }
@@ -360,7 +366,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   }
   if (waypoint) [moveX, moveY] = center(waypoint.c, waypoint.r);
   const dx = moveX - t.x, dy = moveY - t.y, distance = Math.hypot(dx, dy), step = speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(t.x, t.y, 'ally') : 1);   // 走在鐵絲網上變慢
-  if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY)) {
+  if (distance <= step && personnelStepAllowed(t.x, t.y, moveX, moveY, dark)) {
     t.x = moveX; t.y = moveY;
     if (waypoint) t.navPath.shift();
     return !waypoint;
@@ -368,8 +374,8 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   if (distance <= 0) return true;
   const nx = t.x + dx / distance * step, ny = t.y + dy / distance * step;
   const oldX = t.x, oldY = t.y;
-  if (personnelStepAllowed(t.x, t.y, nx, t.y)) t.x = nx;
-  if (personnelStepAllowed(t.x, t.y, t.x, ny)) t.y = ny;
+  if (personnelStepAllowed(t.x, t.y, nx, t.y, dark)) t.x = nx;
+  if (personnelStepAllowed(t.x, t.y, t.x, ny, dark)) t.y = ny;
   const moved = Math.hypot(t.x - oldX, t.y - oldY) > .001;
   t.navStall = Math.hypot(dx, dy) > 2 && !moved ? (t.navStall || 0) + dt : 0;
   if (t.navStall > .8) { t.navTimer = 0; t.navFailed = true; }
@@ -433,7 +439,7 @@ function campAttackerFor(t, maxDistance = Infinity) {
   return closest;
 }
 function updateSentry(t, dt) {
-  if (t.hp <= 0) { t.target = null; t.moving = false; return; }
+  if (t.hp <= 0) { t.target = null; t.moving = false; t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
@@ -581,7 +587,7 @@ function updateSentry(t, dt) {
   const sp = (TYPES[t.type].walkSpeed || 80) * (t.mode === 'goto' ? 1.5 * (typeof equipRushMul === 'function' ? equipRushMul() : 1) : 1) * ((t.taint > 85 && !t.berserk) ? 0.5 : 1) * (t.shieldMode ? 1.7 : 1);   // 指派快一點；瀕臨暴走減半；雷德舉盾衝刺加速
   if (moveSentryWithPath(t, t.target.x, t.target.y, sp, dt)) {
     t.target = null; t.navPath = null;
-    if (t.mode === 'goto') { t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
+    if (t.mode === 'goto') { t.mode = 'hold'; t.summonDark = false; t.anchor = { x: t.x, y: t.y }; flash('開始巡邏', t.x, t.y - 24, '#7ee0c0', 3); systemNotice(TYPES[t.type].name + '已抵達巡邏點，開始巡邏'); }
     else t.waitT = 0.6 + Math.random() * 1.8;         // 到點後停一下再逛
     return;
   }
@@ -700,6 +706,12 @@ function updateWanderer(npc, dt) {
   rescueStuck(npc, sentryBlocked);
   updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）
   if (escapeDarkness(npc, dt)) return;
+  if (npc.id === 'ball' && !MAP_SAFE && getTeam().includes('ball')) {
+    const handler = G.towers.find(t => RESCUE_DOG_HANDLERS.includes(t.type) && t.hp > 0 && !t.berserk);
+    followTarget(npc, handler || G.player, { dist: CELL * 1.25, speed: 110 }, dt);
+    npc.target = null; npc.waitT = 0;
+    return;
+  }
   // 阿瓦倫緊跟著艾德林
   if (npc.id === 'avaren' && typeof FOLLOW !== 'undefined') {
     const eldrin = G.npcs.find(n => n.id === 'eldrin');
@@ -778,16 +790,29 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape') { assigning = null; closeSentryMenu(); closeGroundMenu(); closeBuildMenu(); }
 });
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
+// 溫特疏導：先站定跑進度條（SOOTHE.time 秒，期間溫特和這位隊員都不能動），跑完才扣 SP、降污染（js/channel-actions.js）
 function soothe(t) {
+  if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在做別的事（疏導、急救、包紮）
   if (t.taint <= 0 && !t.berserk) { sfx('error'); sentryStatus(t, '無需疏導', '#9aa4b2'); return; }
   const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;   // 共感手環：花的 SP 變少（js/equipment.js）
   if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
+  if (typeof startChannel !== 'function') { finishSoothe(t); return; }
+  spawnSootheCast(G.player, SOOTHE_COLORS.winter, 0);   // 溫特腳下法陣（跟以前一樣約 1 秒）
+  SFX.play('soothe', 1, 'winter-soothe');                 // 開始疏導：「疏導」音效
+  startChannel({ kind: 'soothe', total: SOOTHE.time || 3, target: t, label: '疏導中', color: '#8fd3ff', needAlive: true, onDone: () => finishSoothe(t),
+    onTick: dt => sootheMotes(t, dt),   // 疏導期間：溫特和隊員身邊一直飄出藍色小光點
+    onCancel: () => { if (SFX.fadeOut) SFX.fadeOut('winter-soothe', .3); } });   // 中斷：開始的音效淡掉
+}
+// 疏導期間的鮮豔藍色小光點：從溫特和隊員身邊冒出來，慢慢往上飄、淡掉（數值在 js/attack-fx.js 的 SOOTHE_MOTES）
+const winterMoteHolder = {};
+function sootheMotes(t, dt) { spawnSootheMotes([G.player, t], SOOTHE_MOTE_COLORS.winter, dt, winterMoteHolder); }
+function finishSoothe(t) {
+  const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;
+  if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
   G.guide -= cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
-  sfx('soothe');
+  sfx('sootheEnd');   // 疏導成功：「疏導2」音效
   addStat('soothes');   // 成就：親自疏導次數
   spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
-  spawnSootheCast(G.player, SOOTHE_COLORS.winter, 0);         // 溫特腳下法陣
-  Object.assign(G.player, { soothingT: SOOTHE_CHANNEL, gunT: 0, dir: 'front', moving: false });   // 溫特也停下來閉眼疏導
   sentryStatus(t, '疏導 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
 }

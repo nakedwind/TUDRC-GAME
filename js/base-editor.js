@@ -766,6 +766,7 @@ const KEEP_RATIO_TILES = new Set([
   'tile_interactive_storage_locker_key',         // 置物箱鑰匙
   'tile_interactive_pickup_backroom_door_key',   // 後室門鑰匙
   'tile_interactive_pickup_almond_water',        // 杏仁水
+  'tile_interactive_pickup_adrenaline',          // 腎上腺素
   'tile_interactive_pickup_battery',             // 電池
 ]);
 // 在 w×h 的框裡，圖片照原比例能畫多大（置中）
@@ -1751,17 +1752,29 @@ function selectTile(id) {
   }
   brush = { mode: 'tile', tile: id }; clearSelection(); updateToolUI(); renderPalette();
 }
-// 素材庫兩邊共用：另一個編輯器的地圖還在用的素材不能刪（不然那邊的地圖會少東西）
+// 素材庫三邊共用：其他分類的地圖還在用的素材不能刪（不然那邊的地圖會少東西）
 async function otherEditorTileUse(id) {
   const names = new Set(), uses = m => (m.stamps || []).some(s => s.id === id) || Object.values(m.layers || {}).some(layer => Object.values(layer).includes(id));
-  try { const text = await (await fetch('data/maps.js', { cache: 'no-store' })).text(); new Function(text + ';return BATTLE_MAPS;')().forEach(m => { if (uses(m)) names.add(m.name); }); } catch (_) {}
-  try { const draft = JSON.parse(await EditorStore.getRaw('tudrc_battle_maps_v1') || 'null'); if (Array.isArray(draft)) draft.forEach(m => { if (uses(m)) names.add(m.name); }); } catch (_) {}
+  const catalogs = [
+    { path: 'data/maps.js', constName: 'BATTLE_MAPS', storage: 'tudrc_battle_maps_v1', label: '戰鬥' },
+    { path: 'data/story-maps.js', constName: 'STORY_MAPS', storage: 'tudrc_story_maps_v1', label: '劇情' },
+  ];
+  for (const catalog of catalogs) {
+    try {
+      const source = await (await fetch(catalog.path, { cache: 'no-store' })).text();
+      new Function(source + ';return ' + catalog.constName + ';')().forEach(m => { if (uses(m)) names.add(catalog.label + '：' + m.name); });
+    } catch (_) {}
+    try {
+      const draft = JSON.parse(await EditorStore.getRaw(catalog.storage) || 'null');
+      if (Array.isArray(draft)) draft.forEach(m => { if (uses(m)) names.add(catalog.label + '：' + m.name); });
+    } catch (_) {}
+  }
   return [...names];
 }
 async function deleteTile(id) {
   const t = tileById(id); if (!t || t.builtin) return;
   const usedThere = await otherEditorTileUse(id);
-  if (usedThere.length) { alert('「' + t.name + '」是兩個編輯器共用的素材，🗺️ 地圖編輯器的地圖還在用：\n' + usedThere.join('、') + '\n\n請先到🗺️ 地圖編輯器把它從那些地圖拿掉，才能刪除。'); return; }
+  if (usedThere.length) { alert('「' + t.name + '」是三個編輯器共用的素材，其他分類的地圖還在用：\n' + usedThere.join('、') + '\n\n請先到對應的編輯器把它從那些地圖拿掉，才能刪除。'); return; }
   if (!confirm('刪除磚塊「' + t.name + '」？（已經貼到地圖上的會一起消失）')) return;
   pushUndo();
   customTiles = customTiles.filter(x => x.id !== id); saveTiles();
@@ -2357,8 +2370,7 @@ document.getElementById('newMap').addEventListener('click', () => {
   const m = blankMap(name.trim() || '新地圖'); m.safe = EDITOR_MAP_SAFE; maps.push(m); switchTo(m.id); saveMaps();
 });
 document.getElementById('dupMap').addEventListener('click', () => {
-  pushUndo();
-  const src = curMap(), m = clone(src); m.id = newId(); m.name = src.name + '（複製）'; maps.push(m); switchTo(m.id); saveMaps();
+  MapCopy.open();
 });
 document.getElementById('renameMap').addEventListener('click', () => {
   const m = curMap(), name = prompt('改名為？', m.name); if (name === null) return;
@@ -2549,9 +2561,9 @@ function deletedMapsExport() {
 }
 // 共用素材庫 data/tiles.js（兩個編輯器寫出來的內容一模一樣，開頭說明也要一字不差）
 function tilesExportText() {
-  return '/* ===== 素材庫：兩個編輯器共用的磚塊／素材（由「🗺️ 地圖編輯器」或「🏠 基地編輯器」匯出）=====\n' +
-    '   在任一個編輯器「⋯ 更多 → ＋ 加入磚塊」加的素材，兩邊都能用；地圖本身還是分開存\n' +
-    '   （戰鬥地圖 data/maps.js、基地地圖 data/base-maps.js）。\n' +
+  return '/* ===== 素材庫：三個地圖編輯器共用的磚塊／素材 =====\n' +
+    '   在任一個編輯器「⋯ 更多 → ＋ 加入磚塊」加的素材，三邊都能用；地圖本身依分類分開存\n' +
+    '   （戰鬥地圖 data/maps.js、基地地圖 data/base-maps.js、劇情地圖 data/story-maps.js）。\n' +
     '   整段貼回 data/tiles.js 覆蓋即可。 */\n' +
     'const SHARED_TILES = ' + JSON.stringify(customTiles, null, 2) + ';\n';
 }

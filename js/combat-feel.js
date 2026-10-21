@@ -250,7 +250,7 @@ function slimeExplode(e, mul) {
 function onEnemyDeath(e) {
   trackKillAchievements(e);   // 成就計數（js/achievements.js）
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
-  if (e.behavior === 'charger') { pushFallCorpse(e); if (typeof tryEquipDrop === 'function') tryEquipDrop('adrenaline', e.x, e.y); return; }   // 鳥頭人：有機會掉出腎上腺素注射器   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液
+  if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
   if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall') {   // 虱目魚小子：倒下變黑（跟鳥頭人一樣）

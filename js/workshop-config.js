@@ -9,20 +9,10 @@ const WORKSHOP_STYLE_DEFAULT = {
   // 最上面的標題列：小標、大標題、說明的文字／大小／顏色，整塊的位移（px；正數＝往右／往下）
   headSmall: '諾亞的開發工坊', headSmallSize: 10, headSmallColor: '#d8ae5d',
   headTitle: '裝備開發・升級', headTitleSize: 22, headTitleColor: '#fff8e7',
-  headSub: '使用異質碎片來開發裝備、武器升級', headSubSize: 12, headSubColor: '#929dab',
+  headSub: '', headSubSize: 12, headSubColor: '#929dab',
   headX: 0, headY: 0,
   panelW: 1010,          // 工坊視窗最大寬度（px）
   panelH: 620,           // 工坊視窗最大高度（px）
-  cardH: 0,              // 每個裝備欄位的最小高度（px；0＝依內容自動）
-  gap: 7,                // 裝備欄位之間的間距（px）
-  iconSize: 66,          // 左邊圖示框的大小（px）
-  btnW: 0,               // 「開發／升級」按鈕的最小寬度（px；0＝依文字自動）
-  btnFont: 13,           // 按鈕的文字大小（px）
-  btnPadY: 6, btnPadX: 10,   // 按鈕的上下、左右內距（px）：按鈕的高度、寬度跟著變
-  btnX: 0, btnY: 0,      // 按鈕的位移（px；正數＝往右／往下）
-  nameSize: 14, nameColor: '#fff8e7',   // 裝備名稱
-  descSize: 12, descColor: '#aab5c1',   // 說明／目前效果
-  nextSize: 11, nextColor: '#a9d8c9',   // 下一級效果、取得地點
   numColor: '#CF9447',   // 說明裡的數字（Lv2、8 格、1.4 秒…）
   whereColor: '#A958E2', // 說明裡的「戰鬥區域」和戰鬥區域裡的東西（下面 whereWords 列的字）
   whereWords: '戰鬥區域、上鎖的置物櫃、上鎖的置物箱、置物櫃、置物箱、異質核心',   // 用「戰鬥區域」顏色的字（用「、」分開）
@@ -34,12 +24,7 @@ const WORKSHOP_STYLE_VARS = {
   headTitleSize: ['--ws-head-title-size', 'px'], headTitleColor: ['--ws-head-title-color', ''],
   headSubSize: ['--ws-head-sub-size', 'px'], headSubColor: ['--ws-head-sub-color', ''],
   headX: ['--ws-head-x', 'px'], headY: ['--ws-head-y', 'px'],
-  panelW: ['--ws-panel-w', 'px'], panelH: ['--ws-panel-h', 'px'], cardH: ['--ws-card-h', 'px'], gap: ['--ws-gap', 'px'],
-  iconSize: ['--ws-icon', 'px'], btnW: ['--ws-btn-w', 'px'],
-  btnFont: ['--ws-btn-font', 'px'], btnPadY: ['--ws-btn-pad-y', 'px'], btnPadX: ['--ws-btn-pad-x', 'px'], btnX: ['--ws-btn-x', 'px'], btnY: ['--ws-btn-y', 'px'],
-  nameSize: ['--ws-name-size', 'px'], nameColor: ['--ws-name-color', ''],
-  descSize: ['--ws-desc-size', 'px'], descColor: ['--ws-desc-color', ''],
-  nextSize: ['--ws-next-size', 'px'], nextColor: ['--ws-next-color', ''],
+  panelW: ['--ws-panel-w', 'px'], panelH: ['--ws-panel-h', 'px'], 
   numColor: ['--ws-num-color', ''], whereColor: ['--ws-where-color', ''], itemColor: ['--ws-item-color', ''],
 };
 function workshopStyle(cfg) {   // 預設值＋設定檔裡改過的

@@ -138,8 +138,9 @@ function drawTower(t) {
   let visualTop = t.y - 17;
   if (img && img.complete && img.naturalWidth) {
     const size = PLAYER.drawSize;
-    visualTop = t.y - size + 18;
-    const shX = t.berserk ? (Math.random() * 2 - 1) * 1.5   // 暴走：微微發抖
+    visualTop = t.y - size + 18 + (set && img === set.fail ? 14 : 0);   // 倒地圖：人躺著比較矮，名字和血條往下貼近身體
+    const shX = t.hp <= 0 ? 0   // 失去戰鬥能力：躺著不動（倒地圖，js/game.js 的 pickCharacterFrame）
+      : t.berserk ? (Math.random() * 2 - 1) * 1.5   // 暴走：微微發抖
       : (t.hitT > .12 ? (Math.random() * 2 - 1) * 2.5 : 0);    // 受擊：短暫抖一下
     if (t.berserk) {   // 暴走：腳下紅光
       ctx.fillStyle = 'rgba(255,60,60,0.45)';
@@ -162,7 +163,11 @@ function drawTower(t) {
     }
     seatRotate(t, size);   // 躺在橫放的床上：跟溫特一樣旋轉
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, t);   // 被絲瓜藤纏住：扭動
-    ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
+    if (t.hp > 0) t.downAt = null;
+    else if (t.downAt == null) t.downAt = performance.now();   // 剛失去戰鬥能力：播倒下動畫
+    const downAge = t.downAt != null ? (performance.now() - t.downAt) / 1000 : Infinity;
+    if (downAge < FALL_DOWN_TIME() && drawFallDown(t, set, downAge)) { /* 倒下動畫中 */ }
+    else ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
     const redFlash = sentryRedFlash(t);   // 瀕臨暴走慢閃紅、暴走快閃紅
     const redSil = redFlash > 0.01 ? flashSprite(img, '#ff3b3b') : null;
     if (redSil) {
@@ -181,9 +186,20 @@ function drawTower(t) {
   // 安全區域沒有血條，名字往下 5px 貼近頭頂（跟 NPC 一致）；戰鬥區域維持原本的名字＋血條間距。
   const nameY = visualTop - (MAP_SAFE ? 6 : 11);
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, t.x, nameY);
+  // 戰鬥區域：名字前面加職業圖示（哨兵＝交叉雙劍、嚮導＝盾牌＋十字），名字跟圖示一起置中
+  const roleKey = spec.guide ? 'guide' : 'sentinel', roleImg = !MAP_SAFE && roleNameIcons[roleKey];
+  const hasRole = roleImg && roleImg.complete && roleImg.naturalWidth, roleSize = 12, roleGap = 3;
+  const nameX = t.x + (hasRole ? (roleSize + roleGap) / 2 : 0);
+  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, nameX, nameY);
   const taintDanger = !MAP_SAFE && !t.berserk && !spec.guide && t.taint > 85 && t.hp > 0;
-  ctx.fillStyle = t.berserk ? '#ff4d4d' : taintDanger ? '#ffb24d' : '#fff'; ctx.fillText(spec.name, t.x, nameY);   // 暴走紅字、瀕臨暴走橘字
+  ctx.fillStyle = t.berserk ? '#ff4d4d' : taintDanger ? '#ffb24d' : '#fff'; ctx.fillText(spec.name, nameX, nameY);   // 暴走紅字、瀕臨暴走橘字
+  if (hasRole) {
+    const ix = nameX - ctx.measureText(spec.name).width / 2 - roleGap - roleSize, iy = nameY - 10, edge = npcIconOutline('role-' + roleKey, roleImg);
+    ctx.save(); ctx.imageSmoothingEnabled = true;
+    for (let a = 0; a < 16; a++) ctx.drawImage(edge, ix + Math.cos(a / 8 * Math.PI) * 1.5, iy + Math.sin(a / 8 * Math.PI) * 1.5, roleSize, roleSize);   // 黑邊
+    ctx.drawImage(roleImg, ix, iy, roleSize, roleSize);
+    ctx.restore();
+  }
 
   if (!MAP_SAFE) {        // 安全區域沒有戰鬥，頭上不顯示血條（名字留著）
     const maxhp = t.maxhp || spec.hp || 100;
@@ -406,14 +422,37 @@ function seatRotate(actor, size) {
   const cy = actor.y - size / 2 + 18;
   ctx.translate(actor.x, cy); ctx.rotate(deg * Math.PI / 180); ctx.translate(-actor.x, -cy);
 }
+// 特殊 NPC 名字前的白色小圖示（角色 id → 圖檔）；要幫別的 NPC 加圖示，在這裡多加一行
+const NPC_NAME_ICON_SRC = {
+  noah: 'images/ui/noah-wrench.svg?v=20261021cute',   // 諾亞：開發工坊（扳手，粗圓版）
+  ash: 'images/ui/ash-clipboard.svg?v=20261021',   // 亞許：通訊員、報告任務（任務板）
+  taana: 'images/ui/taana-whistle.svg?v=20261021', // 塔納：訓練室負責人（哨子）
+};
+const npcNameIcons = {};
+for (const id in NPC_NAME_ICON_SRC) { npcNameIcons[id] = new Image(); npcNameIcons[id].src = NPC_NAME_ICON_SRC[id]; }
+// 戰鬥區域隊員名字前的職業圖示
+const roleNameIcons = { sentinel: new Image(), guide: new Image() };
+roleNameIcons.sentinel.src = 'images/ui/sentinel-swords.svg'; roleNameIcons.guide.src = 'images/ui/guide-shield-plus.svg';
+// 圖示的黑色剪影（畫黑邊用）：第一次用到時做一張，之後重複使用
+const npcIconEdges = {};
+function npcIconOutline(id, img) {
+  if (npcIconEdges[id]) return npcIconEdges[id];
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d'); g.drawImage(img, 0, 0, 64, 64);
+  g.globalCompositeOperation = 'source-in'; g.fillStyle = 'rgba(0,0,0,.9)'; g.fillRect(0, 0, 64, 64);
+  return (npcIconEdges[id] = c);
+}
+// 走路時一蹦一蹦的 NPC：height＝最高蹦幾像素、perSec＝每秒蹦幾下（只有圖會跳，頭上的名字和泡泡不跳）
+const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 function drawWanderer(npc) {
   const set = wandererSprites[npc.id];
   const img = set && pickCharacterFrame(set, npc);
   const size = PLAYER.drawSize;
   if (img && img.complete && img.naturalWidth) {
+    const hop = NPC_HOP[npc.id], hopY = hop && npc.moving && !npc.sitting ? -Math.abs(Math.sin((npc.anim || 0) * Math.PI * hop.perSec)) * hop.height : 0;
     ctx.imageSmoothingEnabled = false;
     ctx.save(); seatRotate(npc, size);
-    ctx.drawImage(img, npc.x - size / 2, npc.y - size + 18, size, size);
+    ctx.drawImage(img, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, size);
     ctx.restore();
     ctx.imageSmoothingEnabled = true;
   }
@@ -422,8 +461,22 @@ function drawWanderer(npc) {
   if (!name) return;
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   const nameY = npc.y - size + 12 + (NPC_LABEL_DY[npc.id] || 0);   // 比圖片頂端再往下 5px（矮的角色再往下，見 NPC_LABEL_DY）
-  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, npc.x, nameY);
-  ctx.fillStyle = '#fff'; ctx.fillText(name, npc.x, nameY);
+  const nameIcon = npcNameIcons[npc.id];
+  const hasIcon = nameIcon && nameIcon.complete && nameIcon.naturalWidth;
+  const iconSize = 12, iconGap = 3;
+  const textX = npc.x + (hasIcon ? (iconSize + iconGap) / 2 : 0);
+  ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(name, textX, nameY);
+  ctx.fillStyle = '#fff'; ctx.fillText(name, textX, nameY);
+  if (hasIcon) {
+    const iconX = textX - ctx.measureText(name).width / 2 - iconGap - iconSize;
+    ctx.save();
+    ctx.imageSmoothingEnabled = true;
+    // 黑邊：跟名字的描邊一樣粗（名字 lineWidth 3 ＝ 往外 1.5 像素），把黑色剪影往四周各蓋一圈，再畫白色圖示
+    const edge = npcIconOutline(npc.id, nameIcon);
+    if (edge) for (let a = 0; a < 16; a++) ctx.drawImage(edge, iconX + Math.cos(a / 8 * Math.PI) * 1.5, nameY - 10 + Math.sin(a / 8 * Math.PI) * 1.5, iconSize, iconSize);
+    ctx.drawImage(nameIcon, iconX, nameY - 10, iconSize, iconSize);
+    ctx.restore();
+  }
   if (npc.say && npc.say.text) queueTowerBubble(npc, npc.x, nameY - 13, npc.say.text, BUBBLE_COLORS[npc.id]);   // 頭上對話泡泡（角色專屬色）：先記下來，最後畫在最上層（flushTowerBubbles）
 }
 // 頭上的名字、對話泡泡、「與 XX 對話」提示要往下移幾像素（角色比人矮的時候用，例如球球是狗）
@@ -599,7 +652,8 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.strokeStyle='rgba(143,211,255,.85)';ctx.lineWidth=1.5;ctx.stroke();
   ctx.fillStyle='#e6ebf2';ctx.textAlign='center';ctx.fillText(label,cx,y+17);
 }
-// ---- 靠近隊員時頭上的選項：上面「急救」、下面「疏導」，用滑鼠點（沒有快捷鍵）----
+// ---- 靠近隊員時頭上的選項：上面「急救」（F）、下面「疏導」（空白鍵），按鍵或用滑鼠點都可以 ----
+// 倒下的隊員只顯示「急救」（身上有異質急救包才會出現）。現在用不到的選項（滿血或沒有急救包＝不顯示「急救」；沒有污染＝不顯示「疏導」）直接不出現。
 // 滑鼠停在哪個選項上，那個就亮起來：急救＝粉紅色（跟急救包按鈕按下去一樣）、疏導＝亮藍色（跟背包按鈕一樣）。
 // 畫出來的位置記在 towerPrompts，js/game.js 用它判斷滑鼠有沒有點到。
 let towerPrompts = [], towerPromptHover = null;
@@ -608,11 +662,16 @@ const TOWER_PROMPT_STYLE = {
   soothe:   { line: 'rgba(143,211,255,.55)', hot: '#8fd3ff', glow: 'rgba(143,211,255,.6)' },
 };
 function drawTowerPrompts(actor, topY) {
-  const items = [{ kind: 'firstaid', label: '急救' }, { kind: 'soothe', label: '疏導' }];   // 由上往下
+  if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在疏導／急救／包紮：頭上換成進度條，不顯示選項
+  const canAid = typeof aidUsableOn === 'function' ? aidUsableOn(actor) : true;
+  const items = actor.hp <= 0 ? [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }]   // 由上往下
+    : [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }, { kind: 'soothe', label: '疏導', key: '空白鍵', off: !(actor.taint > 0 || actor.berserk) }].filter(it => !it.off);   // 現在用不到的選項（不需要補血、不需要疏導）不顯示
+  if (!items.length) return;   // 兩個都用不到：頭上什麼都不出現
   const boxH = 20, gap = 1, mouse = aimClient && typeof mouseOnCanvas !== 'undefined' && mouseOnCanvas ? clientToWorld(aimClient.x, aimClient.y) : null;
   ctx.save();
   ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
-  const boxW = Math.max(...items.map(it => ctx.measureText(it.label).width)) + 14;   // 寬：字寬＋左右各 7px（比一般提示框窄 4px）
+  const keyFont = 'bold 10px sans-serif', keyW = it => { if (!it.key) return 0; ctx.font = keyFont; const w = ctx.measureText(it.key).width + 8; ctx.font = 'bold 13px sans-serif'; return w + 4; };
+  const boxW = Math.max(...items.map(it => ctx.measureText(it.label).width + keyW(it))) + 14;   // 寬：按鍵小框＋字寬＋左右各 7px
   const x = Math.round(actor.x - boxW / 2);
   let y = Math.round(topY - 5 - items.length * boxH - (items.length - 1) * gap);   // 縮小後底邊往上 2px，讓按鈕中心留在原本的位置
   towerPromptHover = null;
@@ -629,8 +688,16 @@ function drawTowerPrompts(actor, topY) {
     ctx.restore();
     ctx.strokeStyle = hot ? st.hot : st.line; ctx.lineWidth = 1.5;
     roundRect(x, y, boxW, boxH, 6); ctx.stroke();
-    ctx.fillStyle = hot ? '#ffffff' : '#e6ebf2';
-    ctx.fillText(it.label, actor.x, y + 15);
+    const kw = keyW(it), lw = ctx.measureText(it.label).width, left = actor.x - (kw + lw) / 2;
+    if (kw) {   // 按鍵小框（例如 F、空白鍵）
+      ctx.save(); ctx.font = keyFont;
+      ctx.fillStyle = 'rgba(255,255,255,.14)'; roundRect(left, y + 4, kw - 4, boxH - 8, 3); ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1; roundRect(left, y + 4, kw - 4, boxH - 8, 3); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(it.key, left + (kw - 4) / 2, y + 14);
+      ctx.restore();
+    }
+    ctx.fillStyle = it.off ? '#7d8996' : hot ? '#ffffff' : '#e6ebf2';
+    ctx.textAlign = 'left'; ctx.fillText(it.label, left + kw, y + 15); ctx.textAlign = 'center';
     y += boxH + gap;
   }
   ctx.restore();
@@ -649,7 +716,49 @@ function drawPlayerReloadCountdown(p, size) {
   ctx.fillStyle = '#71c8fa'; ctx.fillRect(x + 5, y + h - 6, (w - 10) * progress, 3);
   ctx.restore();
 }
+// 低血量警示：溫特 HP 低於 hp 時，畫面四周和溫特身上一起閃紅光（period＝閃一次幾秒）
+const LOW_HP_FX = { hp: 30, period: 1.1, edge: .5, body: .38, topBottom: 1.3, heartbeat: 2.6 };   // heartbeat：心跳聲音量倍率（js/sanity.js 播；音檔本身很小聲，最大只有 34%，所以放大到 2.6 倍≈滿格）   // topBottom：上下邊紅光的強弱（1＝跟左右一樣，越大越淡）
+function lowHpPulse() {   // 0～1，不在低血量時回傳 0
+  const p = G && G.player;
+  if (!p || MAP_SAFE || G.over || p.hp <= 0 || p.hp >= LOW_HP_FX.hp) return 0;
+  const t = performance.now() / 1000 / LOW_HP_FX.period;
+  return Math.pow(.5 - .5 * Math.cos(t * Math.PI * 2), 1.5);   // 慢慢亮起、慢慢暗下（像心跳）
+}
+// 溫特陣亡動畫（js/game.js 的 lose 開始；戰場定格，只有這段在動）
+function drawPlayerDeath(p) {
+  drawFallDown(p, playerSprites, (performance.now() - G.playerDeath.at) / 1000, false);   // 溫特：不左右晃，只閃白
+}
+// 倒下動畫（溫特陣亡、隊員失去戰鬥能力共用）：踉蹌（站姿閃白、左右晃）→ 倒地圖從上面落下、著地壓扁回彈、揚起灰塵
+// age＝倒下後過了幾秒；時間長度沿用 js/game.js 的 PLAYER_DEATH.stagger／fall。回傳 false＝這個角色沒有倒地圖
+const FALL_DOWN_TIME = () => PLAYER_DEATH.stagger + PLAYER_DEATH.fall + .5;   // 整段動畫（含灰塵）多久
+function drawFallDown(p, set, age, wobble = true) {
+  const D = PLAYER_DEATH, size = PLAYER.drawSize;
+  const fail = set && set.fail, stand = set && pickCharacterFrame(set, { ...p, hp: 1, moving: false, gunT: 0, sitting: null });
+  if (!(fail && fail.complete && fail.naturalWidth)) return false;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  if (age < D.stagger) {   // 踉蹌：站著閃白、左右晃
+    const k = Math.max(0, 1 - age / D.stagger), shake = wobble ? Math.sin(age * 70) * 3 * k : 0;
+    if (stand && stand.complete && stand.naturalWidth) {
+      ctx.drawImage(stand, p.x - size / 2 + shake, p.y - size + 18, size, size);
+      drawHitFlash(stand, Math.min(1, k * 1.4), '#ff4d4d', p.x - size / 2 + shake, p.y - size + 18, size, size);
+    }
+  } else {   // 倒地：從上面落下，著地時壓扁回彈，揚起灰塵
+    const u = Math.min(1, (age - D.stagger) / D.fall), landed = age - D.stagger - D.fall;
+    const drop = (1 - u * u) * 14;
+    const squash = landed > 0 ? Math.max(0, .18 * Math.cos(landed * 18) * Math.exp(-landed * 7)) : 0;
+    const w = size * (1 + squash), h = size * (1 - squash);
+    ctx.drawImage(fail, p.x - w / 2, p.y + 18 - h - drop, w, h);
+    if (landed > 0 && landed < .5) {   // 灰塵圈
+      const q = landed / .5;
+      ctx.globalAlpha = (1 - q) * .55; ctx.strokeStyle = '#b9b2a2'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.ellipse(p.x, p.y + 14, 10 + q * 26, 4 + q * 8, 0, 0, Math.PI * 2); ctx.stroke();
+    }
+  }
+  ctx.restore();
+  return true;
+}
 function drawPlayer(p) {
+  if (G.playerDeath) { drawPlayerDeath(p); return; }   // 倒下：陣亡動畫
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
   if (img && img.complete && img.naturalWidth) {
@@ -669,6 +778,8 @@ function drawPlayer(p) {
     } else {
       ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
       drawHitFlash(img, hitK, '#ff4d4d', p.x - size / 2, p.y - size + 18, size, size);
+      const low = lowHpPulse() * LOW_HP_FX.body;   // 低血量：身上微微閃紅
+      if (low > .01 && hitK <= 0) drawHitFlash(img, low, '#ff2a2a', p.x - size / 2, p.y - size + 18, size, size);
     }
     ctx.imageSmoothingEnabled = true;
     ctx.restore();
@@ -766,10 +877,16 @@ function draw() {
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
-    const urgent = G.running ? urgentSootheTarget() : null;
-    if (urgent) drawTowerPrompts(urgent, urgent.y - 57);   // 暴走中的哨兵：最優先（急救／疏導；位置固定，泡泡會排到上面）
+    // 優先順序：① 隊員需要治療／疏導 → ② 拾取（異質碎片、地上的道具）→ ③ 地圖物件（跟 js/game.js 的空白鍵一致）
+    const mate = G.running && typeof teammateActionTarget === 'function' ? teammateActionTarget() : null;
+    const pickShard = typeof shardNearPlayer === 'function' ? shardNearPlayer() : null;
+    const pickProp = !pickShard && typeof pickupPropNearPlayer === 'function' ? pickupPropNearPlayer() : null;
+    if (mate) drawTowerPrompts(mate, mate.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
+    else if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
+    else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
@@ -787,7 +904,9 @@ function draw() {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, MAP_SAFE ? '商店' : '後室商店'); }   // HOME Mart 結帳櫃台
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
-      if (actor && actor.kind === 'tower' && !MAP_SAFE) drawTowerPrompts(actor, actor.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
+      const downed = typeof downedTeammateNear === 'function' ? downedTeammateNear() : null;   // 旁邊有倒下的隊員：頭上出現「F 急救」
+      if (downed) drawTowerPrompts(downed, downed.y - 57);
+      else if (actor && actor.kind === 'tower' && !MAP_SAFE) drawTowerPrompts(actor, actor.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
       else if (actor) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),
         '與 ' + (profile ? profile.name : '角色') + ' 對話');
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) { const g = graffitiNearPlayer(); drawInteractPrompt(g.x, g.y - 14, graffitiErasing() ? '擦掉中…' : '擦掉塗鴉'); }   // js/graffiti.js
@@ -925,7 +1044,7 @@ function draw() {
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
     } else if (f.sootheSigil) {                            // 疏導法陣：施術者腳下兩圈光環＋旋轉刻紋，展開後淡出
       const p = Math.max(0, f.life / f.life0), age = f.life0 - f.life;
-      const open = Math.min(1, age / .25), a = Math.min(1, p * 2.2);
+      const open = Math.min(1, age / .25), a = Math.min(1, f.life / Math.min(.5, f.life0 * .45));   // 最後 0.5 秒淡出（法陣留比較久時，前面都維持全亮）
       const R = 30 * (.55 + .45 * open), [cr, cg, cb] = f.col, rgb = `rgb(${cr},${cg},${cb})`;
       ctx.save(); ctx.translate(f.follow.x, f.follow.y + 14); ctx.scale(1, .45);
       ctx.globalCompositeOperation = 'lighter';
@@ -963,9 +1082,9 @@ function draw() {
       g.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
       ctx.fillStyle = g; ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, Math.PI * 2); ctx.fill();
       ctx.strokeStyle = `rgb(${cr},${cg},${cb})`;
-      ctx.globalAlpha = a * 0.85; ctx.lineWidth = 2.6;                         // 主圈
+      ctx.globalAlpha = Math.min(1, a * (f.vivid ? 1.15 : 0.85)); ctx.lineWidth = f.vivid ? 3 : 2.6;   // 主圈（鮮豔版：更亮、更粗）
       ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, Math.PI * 2); ctx.stroke();
-      ctx.globalAlpha = a * 0.4; ctx.lineWidth = 1.6;                          // 外層漣漪
+      ctx.globalAlpha = a * (f.vivid ? 0.65 : 0.4); ctx.lineWidth = f.vivid ? 2 : 1.6;   // 外層漣漪
       ctx.beginPath(); ctx.arc(f.x, f.y, r * 1.35, 0, Math.PI * 2); ctx.stroke();
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
     } else if (f.mote) {                                   // 疏導療癒光點：柔光＋白核，上飄淡出
@@ -973,10 +1092,15 @@ function draw() {
       const wob = Math.sin(age * 6 + f.seed) * (f.wob || 4) * 0.5, alpha = Math.sin(p * Math.PI);
       const [cr, cg, cb] = f.col;
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alpha;
+      if (f.vivid) {   // 鮮豔版（疏導期間飄的光點）：外圈同色光暈
+        const R = Math.max(1, f.r * p * 2.6), hg = ctx.createRadialGradient(f.x + wob, f.y, 0, f.x + wob, f.y, R);
+        hg.addColorStop(0, `rgba(${cr},${cg},${cb},1)`); hg.addColorStop(.45, `rgba(${cr},${cg},${cb},.55)`); hg.addColorStop(1, `rgba(${cr},${cg},${cb},0)`);
+        ctx.fillStyle = hg; ctx.beginPath(); ctx.arc(f.x + wob, f.y, R, 0, Math.PI * 2); ctx.fill();
+      }
       ctx.fillStyle = `rgb(${cr},${cg},${cb})`;
       ctx.beginPath(); ctx.arc(f.x + wob, f.y, Math.max(.6, f.r * p), 0, Math.PI * 2); ctx.fill();
-      ctx.globalAlpha = alpha * 0.7; ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.arc(f.x + wob, f.y, Math.max(.3, f.r * p * 0.42), 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = alpha * (f.vivid ? .3 : 0.7); ctx.fillStyle = '#ffffff';   // 鮮豔版：白色亮芯淡一點、小一點，顏色才不會被沖白
+      ctx.beginPath(); ctx.arc(f.x + wob, f.y, Math.max(.3, f.r * p * (f.vivid ? .25 : 0.42)), 0, Math.PI * 2); ctx.fill();
       ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
     } else if (f.fglow) {                                  // 火焰爆閃光暈（加色疊加）
       const p = Math.max(0, f.life / f.life0), r = f.r0 + (f.r1 - f.r0) * (1 - p);
@@ -1150,6 +1274,7 @@ function draw() {
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
+  if (typeof drawChannelBar === 'function') drawChannelBar(ctx);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
   if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉槍打睡的頭上飄 Zzz（js/special-guns.js）
   if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
@@ -1211,6 +1336,16 @@ function draw() {
     vignette.addColorStop(.62, `rgba(190,0,0,${.08 * strength})`);
     vignette.addColorStop(1, `rgba(210,0,0,${.72 * strength})`);
     ctx.fillStyle = vignette; ctx.fillRect(0, 0, cv.width, cv.height);
+  }
+  const lowEdge = lowHpPulse();   // 低血量：畫面四周跟著心跳閃紅光
+  if (lowEdge > .01) {
+    // 橢圓形的紅暈：畫面比較寬，用圓形的話上下邊幾乎沒有紅光 → 把圓壓扁成橢圓，上下也看得到（topBottom 越小，上下越紅）
+    const radius = cv.width * .59, a = LOW_HP_FX.edge * lowEdge, squash = cv.height / cv.width * LOW_HP_FX.topBottom;
+    ctx.save(); ctx.translate(cv.width / 2, cv.height / 2); ctx.scale(1, squash);
+    const v = ctx.createRadialGradient(0, 0, radius * .5, 0, 0, radius);
+    v.addColorStop(0, 'rgba(170,0,0,0)'); v.addColorStop(.45, `rgba(195,0,0,${(.35 * a).toFixed(3)})`); v.addColorStop(1, `rgba(215,0,0,${a.toFixed(3)})`);
+    ctx.fillStyle = v; ctx.fillRect(-cv.width / 2, -cv.height / 2 / squash, cv.width, cv.height / squash);
+    ctx.restore();
   }
   drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
   if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）

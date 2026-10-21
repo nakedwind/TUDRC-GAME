@@ -5,6 +5,7 @@ const WORLD_PICKUPS = {
   key: { item: 'storage-locker-key', name: '置物櫃鑰匙' },
   battery: { item: 'battery', name: '電池' },
   almond: { item: 'almond-water', name: '杏仁水' },
+  adrenaline: { item: 'adrenaline', name: '腎上腺素' },
   doorKey: { item: 'backroom-door-key', name: '後室門鑰匙' },
   penRed: { item: 'graffiti-red', name: '塗鴉筆（紅）' },
   penBlue: { item: 'graffiti-blue', name: '塗鴉筆（藍）' },
@@ -20,6 +21,7 @@ function storagePropKind(id){
   // 編輯器上傳會把圖片轉成 data URL，需同時認素材 ID 與名稱。
   if(GRAFFITI_PICKUP_TILES[id])return GRAFFITI_PICKUP_TILES[id];
   if(id==='tile_interactive_pickup_backroom_door_key')return 'doorKey';
+  if(id==='tile_interactive_pickup_adrenaline')return 'adrenaline';
   if(id===STORAGE_LOCKER_KEY_TILE||/storage-locker-key|置物[箱櫃]鑰匙/.test(name))return 'key';
   if(id==='tile_interactive_pickup_battery'||/^(battery(?:\.png)?|電池(?:\.png)?|拾取亮點（電池）)$/.test(name)||file.endsWith('/電池.png'))return 'battery';
   if(id==='tile_interactive_pickup_almond_water'||/almond-water|杏仁水/.test(name)||(file.endsWith('/杏仁水.png')||file.endsWith('/杏仁水小.png')))return 'almond';
@@ -54,10 +56,12 @@ function storagePropEntries(){
   for (const drop of G?.equipmentDrops || []) entries.push({ kind:'equipment-drop', drop, x:drop.x, y:drop.y, top:drop.y-28 });
   return entries;
 }
-function storagePropNearPlayer(){
+// filter：只找某一類（例如 isPickupProp＝只找可以拾取的東西）
+function storagePropNearPlayer(filter){
   const p=G?.player;if(!p||p.sitting||p.hp<=0)return null;
   let nearest=null,distance=72;
   for(const prop of storagePropEntries()){
+    if(filter&&!filter(prop))continue;
     const d=Math.hypot(prop.x-p.x,prop.y-p.y);
     if(d<distance){nearest=prop;distance=d;}
   }
@@ -70,8 +74,11 @@ function storagePropPrompt(prop){
   if(prop.open)return '查看置物箱';
   return (supplyInventory.get('storage-locker-key')||0)>0?'用鑰匙開啟置物箱':'置物箱已上鎖（需要鑰匙）';
 }
-function useStoragePropNearPlayer(){
-  const prop=storagePropNearPlayer();if(!prop)return false;
+// 可以拾取的東西（地上的拾取亮點、怪物掉的道具／裝備）：互動優先順序比置物櫃、電源這類地圖物件高
+const isPickupProp=prop=>prop.kind==='equipment-drop'||isWorldPickup(prop.kind);
+const pickupPropNearPlayer=()=>storagePropNearPlayer(isPickupProp);
+function useStoragePropNearPlayer(filter){
+  const prop=storagePropNearPlayer(filter);if(!prop)return false;
   if(prop.kind==='equipment-drop'){
     if(prop.drop.item){   // 後室道具（平安符）
       supplyInventory.set(prop.drop.item,(supplyInventory.get(prop.drop.item)||0)+1);sfx('itemPickup');showItemPickupNotice(prop.drop.item,1);
@@ -103,6 +110,8 @@ function useStoragePropNearPlayer(){
       if(loot)grantLockerLoot(loot);
       else{
         if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);
+        if(typeof tryEquipDrop==='function')tryEquipDrop('adrenaline',prop.x,prop.top);   // 腎上腺素（機率在 data/equipment.js 的 ITEM_DROPS）
+        if(typeof tryEquipDrop==='function')tryEquipDrop('anomaly-firstaid',prop.x,prop.top);   // 異質急救包：只有置物櫃找得到
         if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);
         if(typeof tryGraffitiPenFind==='function')tryGraffitiPenFind(prop.x,prop.top);   // 塗鴉筆（js/graffiti.js）
         if(typeof tryYouyouCardFind==='function')tryYouyouCardFind();   // 好遊卡（js/mrt-locks.js）

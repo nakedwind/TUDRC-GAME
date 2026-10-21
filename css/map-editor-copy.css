@@ -1,0 +1,30 @@
+.map-copy-dialog {
+  width: min(420px, calc(100vw - 32px));
+  box-sizing: border-box;
+  padding: 22px;
+  border: 1px solid #586371;
+  border-radius: 8px;
+  background: #20262f;
+  color: #e6ebf2;
+  font: 14px/1.6 "Microsoft JhengHei", sans-serif;
+}
+.map-copy-dialog::backdrop { background: #0009; }
+.map-copy-form { display: grid; gap: 16px; min-width: 0; }
+.map-copy-form h2 { margin: 0; font-size: 20px; }
+.map-copy-form label { display: grid; gap: 6px; min-width: 0; }
+.map-copy-form input, .map-copy-form select {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid #586371;
+  border-radius: 4px;
+  background: #151a21;
+  color: inherit;
+  font: inherit;
+}
+.map-copy-result { margin: 0; overflow-wrap: anywhere; }
+.map-copy-result:empty { display: none; }
+.map-copy-actions { display: flex; justify-content: flex-end; gap: 8px; }
+.map-copy-open { text-align: center; }
+.map-copy-dialog [hidden] { display: none !important; }

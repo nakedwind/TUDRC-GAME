@@ -29,14 +29,18 @@ const CHARACTER_SPRITE_FILES = {
 // 持槍攻擊圖（四個方向各一張靜態圖）；只有這些角色有，避免對其他角色發出 404。
 const GUN_FILES = { gunFront: '0000_Front_withgun.png', gunBack: '0009_back_withgun.png', gunLeft: '0003_Leftside_withgun.png', gunRight: '0006_right-side_withgun.png' };
 const GUN_FOLDERS = new Set(['theonie_B', 'amber_B', 'eldrin_B', 'chris_B', 'winter_B']);
+// 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
+const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png' };
 function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
   const prefix = folder.replace('_', '') + '_';
+  const revision = folder === 'chris_A' ? '?v=chris-a-20261021-2' : '';
   const set = {};
   for (const k of Object.keys(CHARACTER_SPRITE_FILES)) {
     set[k] = CHARACTER_SPRITE_FILES[k].map(file => {
-      const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}`; return img;
+      const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}${revision}`; return img;
     });
   }
+  if (FAIL_FILES[folder]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}${FAIL_FILES[folder]}`; set.fail = img; }   // 倒地圖
   if (GUN_FOLDERS.has(folder)) {   // 攻擊時用的持槍圖
     for (const k of Object.keys(GUN_FILES)) {
       const img = new Image(); img.src = `images/character/${folder}/${prefix}${GUN_FILES[k]}`; set[k] = [img];
@@ -59,7 +63,7 @@ function outfitRecord(folder) {
   const other = declared === 'A' ? 'B' : 'A';
   const probe = new Image();   // 先確認另一套存在再載入，避免對沒有該造型的角色發出一堆 404
   probe.onload = () => { rec[other] = loadCharacterSprites(base + '_' + other); };
-  probe.src = `images/character/${base}_${other}/${base}${other}_0000_Front.png`;
+  probe.src = `images/character/${base}_${other}/${base}${other}_0000_Front.png` + (base === 'chris' && other === 'A' ? '?v=chris-a-20261021-2' : '');
   return rec;
 }
 function outfitSet(folder) {
@@ -353,6 +357,7 @@ function updateBlink(who, dt) {
 }
 // 依朝向／走路／眨眼狀態挑出這一幀要畫的圖
 function pickCharacterFrame(set, who) {
+  if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
   if (who.gunT > 0) {   // 攻擊中：用面向目標的持槍圖（沒有該圖就照常）
@@ -465,8 +470,11 @@ window.addEventListener('keydown', e => {
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
-    const urgent = urgentSootheTarget();
-    if (urgent) {}                               // 暴走中的哨兵：疏導改用滑鼠點頭上的「疏導」（js/render.js），按鍵不疏導
+    // 互動優先順序：① 隊員（疏導；治療是 F）→ ② 拾取（異質碎片、地上的道具）→ ③ 地圖物件（電梯、門、置物櫃…）
+    const mate = typeof teammateActionTarget === 'function' ? teammateActionTarget() : null;
+    if (mate && mate.hp > 0 && (mate.taint > 0 || mate.berserk)) soothe(mate);   // 隊員需要疏導：空白鍵＝疏導
+    else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
+    else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer() && useStoragePropNearPlayer(isPickupProp)) {}   // 拾取地上的道具（js/storage-lockers.js）
     else if (elevator) {
       if (elevator.mode === 'closed') {
         startElevatorOpen(elevator.stamp);
@@ -476,6 +484,7 @@ window.addEventListener('keydown', e => {
       } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
     else if (useCampInteractionNearPlayer(true)) {}
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
@@ -493,7 +502,7 @@ window.addEventListener('keydown', e => {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();
-      if (actor?.kind === 'tower' && !MAP_SAFE) {}   // 戰鬥區的隊員：急救／疏導改用滑鼠點頭上的選項，按鍵沒有功能
+      if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);   // 戰鬥區的隊員：空白鍵＝疏導、F＝急救（js/shop.js）；也可以點頭上的選項
       else if (actor) openDialogue(actor);
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) startGraffitiErase(graffitiNearPlayer());   // 擦掉塗鴉（js/graffiti.js）
       else toggleSit();                   // 附近沒有角色才判定座位
@@ -648,6 +657,7 @@ function assignSentryToGround(t, guard = false) {
   if (!isLit(x, y)) { sfx('error'); flash('巡邏點必須在亮處', x, y, '#ffd24a'); return; }
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
+  t.summonDark = true;   // 召喚：途中遇到黑暗也照走（js/sentry.js 的 escapeDarkness）
   t.guardSummoned = guard;
   t.guardBase = null;
   sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff', 3);
@@ -666,11 +676,11 @@ function summonAllSentriesToGround() {
   let count = 0;
   for (const t of G.towers) {
     if (t.hp <= 0 || t.berserk || TYPES[t.type].guide) continue;
-    const index = spots.findIndex(p => buildSentryPath(t, p.x, p.y) !== null);
+    const index = spots.findIndex(p => buildSentryPath(t, p.x, p.y, true) !== null);   // 召喚：可以穿過黑暗
     if (index < 0) continue;
     const p = spots.splice(index, 1)[0];
     t.mode = 'goto'; t.target = { x: p.x, y: p.y }; t.anchor = null; t.waitT = 0;
-    t.navPath = null; t.navGoal = null; t.navFailed = false; t.guardSummoned = true; t.guardBase = null;
+    t.navPath = null; t.navGoal = null; t.navFailed = false; t.guardSummoned = true; t.guardBase = null; t.summonDark = true;
     count++;
   }
   sfx(count ? 'button' : 'error');
@@ -684,7 +694,7 @@ function summonNearestSentryToGround() {
     sfx('error'); flash('此處無法讓哨兵駐守', x, y, '#ff8f8f'); return;
   }
   const choices = G.towers.filter(t => t.hp > 0 && !t.berserk && !TYPES[t.type].guide)
-    .map(t => ({ t, path: buildSentryPath(t, x, y) }))
+    .map(t => ({ t, path: buildSentryPath(t, x, y, true) }))   // 召喚：可以穿過黑暗
     .filter(choice => choice.path !== null)
     .sort((a, b) => a.path.length - b.path.length ||
       Math.hypot(a.t.x - x, a.t.y - y) - Math.hypot(b.t.x - x, b.t.y - y));
@@ -974,6 +984,7 @@ function updateCamera() {
 // ---- 遊戲狀態 ----
 let G;
 function newGame() {
+  document.getElementById('screenShade').classList.remove('player-dying');   // 溫特陣亡動畫的變暗效果
   applyOutfits();   // 依這張地圖是安全區或戰鬥區，換成 A／B 造型
   closeElevatorMenu();
   closeSupplyShop(true); closeBackpack(true); closeSettings(true);
@@ -1743,6 +1754,7 @@ function update(dt) {
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
+    else if (t.frozenT > 0) { t.frozenT -= dt; t.moving = false; t.navPath = null; if (t.hp > 0) t.dir = 'front'; }   // 溫特正在疏導／急救這位隊員：站著不動（js/channel-actions.js）
     else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
@@ -1785,7 +1797,11 @@ function update(dt) {
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
     if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
     if (t.sleepT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著：不攻擊
-    if (t.soothingT > 0) t.soothingT = Math.max(0, t.soothingT - dt);   // 疏導施法計時
+    if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
+    if (t.soothingT > 0) {   // 疏導施法計時；期間嚮導和被疏導的隊員身邊飄出嚮導顏色的小光點（js/attack-fx.js）
+      t.soothingT = Math.max(0, t.soothingT - dt);
+      if (typeof spawnSootheMotes === 'function' && SOOTHE_MOTE_COLORS[t.type]) spawnSootheMotes([t, ...(t.sootheTargets || []).filter(o => o.hp > 0)], SOOTHE_MOTE_COLORS[t.type], dt, t);
+    }
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
@@ -1822,6 +1838,7 @@ function update(dt) {
           t.auraCd = AURA_CD;
           spawnSootheCast(t, sc, spec.aura.r * CELL);   // 疏導表演：法陣、光波
           t.soothingT = SOOTHE_CHANNEL; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;   // 停下來閉眼疏導
+          t.sootheTargets = soothed;   // 施法期間這些人身邊飄光點（下面）
           if (typeof sfxAt === 'function') sfxAt('soothe', t.x, t.y, 0.42, t.type);
         }
       }
@@ -2077,6 +2094,8 @@ function update(dt) {
   if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
+  if (typeof updateDarkDrain === 'function') updateDarkDrain(dt);   // 站在全黑的地方：SP 慢慢下降（js/sanity.js）
+  if (typeof updateChannel === 'function') updateChannel(dt);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
@@ -2191,7 +2210,25 @@ function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;
 function baseLost() { if (!G.over && !(G.baseLostT > 0)) { G.baseLostT = BASE_LOSE_DELAY; systemNotice('營地被摧毀了……', true); } }
-function lose(reason, cause) { if ((typeof practiceOn === 'function' && practiceOn())) return; G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause); }
+// 溫特倒下的陣亡動畫：踉蹌 → 倒地（倒地圖）→ 畫面慢慢變灰變暗，戰場定格；PLAYER_DEATH.total 秒後才跳結算畫面（動畫在 js/render.js 的 drawPlayerDeath）
+const PLAYER_DEATH = { stagger: .3, fall: .25, dark: .4, total: 2.4 };
+function lose(reason, cause) {
+  if ((typeof practiceOn === 'function' && practiceOn())) return;
+  if (reason === 'player' && G.player && !G.over) {
+    G.over = true; G.running = false; G.phase = 'lost'; setPaused(false);
+    const run = G, death = G.playerDeath = { at: performance.now() };
+    if (typeof updateHUD === 'function') updateHUD();   // 戰場定格前先刷新一次：HUD 的 HP 顯示 0
+    G.cameraShakeT = 0; shakeAmt = 0;   // 不要震動（戰場定格後鏡頭震動的倒數也停了，不歸零會一直抖）
+    document.getElementById('screenShade').classList.add('player-dying');   // 畫面慢慢變灰變暗（css/style.css 的 #screenShade；不動畫布的濾鏡，理智值變灰還在用）
+    setTimeout(() => {
+      if (G !== run || G.playerDeath !== death) return;   // 已經重新開始了
+      document.getElementById('screenShade').classList.remove('player-dying');
+      sfx('lose'); loseOverlay(reason, cause);
+    }, PLAYER_DEATH.total * 1000);
+    return;
+  }
+  G.over = true; G.running = false; G.phase = 'lost'; setPaused(false); sfx('lose'); loseOverlay(reason, cause);
+}
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----

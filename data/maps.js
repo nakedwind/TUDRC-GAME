@@ -1,6 +1,6 @@
 /* ===== 戰鬥地圖（由「🗺️ 地圖編輯器」匯出）=====
    只放戰鬥地圖；基地（安全區域）的地圖在 data/base-maps.js，由「🏠 基地編輯器」管理。
-   素材（磚塊）在兩個編輯器共用的 data/tiles.js。
+   素材（磚塊）在三個編輯器共用的 data/tiles.js。
    整段貼回 data/maps.js 覆蓋即可。 */
 const BATTLE_MAPS = [
   {

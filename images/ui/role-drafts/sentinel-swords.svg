@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- 哨兵：交叉雙劍 -->
+  <g fill="#fff">
+    <g transform="rotate(45 12 12)"><rect x="10.6" y="1.2" width="2.8" height="15" rx="1.4"/><rect x="7.2" y="15.4" width="9.6" height="2.4" rx="1.2"/><rect x="10.8" y="17.4" width="2.4" height="4.4" rx="1.2"/></g>
+    <g transform="rotate(-45 12 12)"><rect x="10.6" y="1.2" width="2.8" height="15" rx="1.4"/><rect x="7.2" y="15.4" width="9.6" height="2.4" rx="1.2"/><rect x="10.8" y="17.4" width="2.4" height="4.4" rx="1.2"/></g>
+  </g>
+</svg>

@@ -257,13 +257,20 @@ function useAdrenaline() {
 // ・點頭像＝治療那位隊員（要站在他旁邊 FIRST_AID.reach 格內）；滿血、太遠時，溫特頭上會浮出「沒有受傷」「距離太遠了」。
 // ・再按一次 H／急救包按鈕、按 Esc、按右鍵或點地圖＝取消。
 const firstAid = { channel: null, picking: false, hover: null };
+// 急救包（firstaid）只能幫還站著的隊員補血；異質急救包（anomaly-firstaid）才能救回倒下的隊員（HP 變 FIRST_AID.reviveHp）
+const aidKits = () => itemCount('firstaid') + itemCount('anomaly-firstaid');
+const aidKitFor = t => (t.hp <= 0 ? 'anomaly-firstaid' : 'firstaid');   // 這位隊員要用哪一種急救包
+const aidUsableOn = t => !!t && (t.hp <= 0 ? itemCount('anomaly-firstaid') > 0 : t.hp < t.maxhp && itemCount('firstaid') > 0);
 function useFirstAid() {
   if (!G?.player || G.player.hp <= 0 || firstAid.channel) return;
   if (firstAid.picking) { cancelFirstAidPick(); return; }   // 再按一次＝取消
-  if (itemCount('firstaid') <= 0) { sfx('error'); flash('沒有急救包了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (aidKits() <= 0) { sfx('error'); flash('沒有急救包了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (!(G.towers || []).length) { sfx('error'); flash('沒有可以治療的隊員', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
-  if (!G.towers.some(t => t.hp < t.maxhp)) { sfx('aidCannot'); flash('沒有人受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (!G.towers.some(aidUsableOn)) {
+    const downedOnly = G.towers.some(t => t.hp <= 0) && !G.towers.some(t => t.hp > 0 && t.hp < t.maxhp);
+    sfx('aidCannot'); flash(downedOnly ? '要用異質急救包才能救回倒下的隊員' : itemCount('firstaid') <= 0 && G.towers.some(t => t.hp > 0 && t.hp < t.maxhp) ? '沒有急救包了' : '沒有人受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return;
+  }
   firstAid.picking = true; firstAid.hover = null;
   sfx('menu');
   flash('⛑️ 選擇要治療的隊員', G.player.x, G.player.y - 54, '#9ff0c0', 1.8);
@@ -293,14 +300,17 @@ function firstAidOn(t) {
   const p = G && G.player;
   if (!p || !t || p.hp <= 0 || firstAid.channel) return;
   if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', p.x, p.y - 54, '#c9d3dc'); return; }
-  if (itemCount('firstaid') <= 0) { cancelFirstAidPick(); sfx('error'); flash('沒有急救包了', p.x, p.y - 54, '#c9d3dc'); return; }
-  if (t.hp >= t.maxhp) { showFirstAidTip('沒有受傷'); return; }   // 滿血不能用
+  if (t.hp <= 0 && itemCount('anomaly-firstaid') <= 0) { showFirstAidTip('要用異質急救包才能救回來'); return; }   // 倒下的隊員：一般急救包救不回來
+  if (t.hp > 0 && t.hp >= t.maxhp) { showFirstAidTip('沒有受傷'); return; }   // 滿血不能用
+  if (t.hp > 0 && itemCount('firstaid') <= 0) { cancelFirstAidPick(); sfx('error'); flash('沒有急救包了', p.x, p.y - 54, '#c9d3dc'); return; }
   if (Math.hypot(t.x - p.x, t.y - p.y) > FIRST_AID.reach * CELL) { showFirstAidTip('距離太遠了'); return; }   // 要走到隊員旁邊
   cancelFirstAidPick();
   const v = FIRST_AID;
-  firstAid.channel = { t: 0, total: v.time, target: t, heal: v.heal };
-  Object.assign(p, { soothingT: v.time, gunT: 0, moving: false });   // 站著不動處理傷口
-  flash('⛑️ 急救中…', t.x, t.y - 46, '#9ff0c0', v.time);
+  if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在做別的事
+  // 站著不動處理傷口：進度條跑完才治好（js/channel-actions.js；溫特和隊員都不能動）
+  firstAid.channel = startChannel({ kind: 'firstaid', total: v.time, target: t, heal: v.heal, kit: aidKitFor(t), label: t.hp <= 0 ? '救援中' : '急救中', color: '#79dbad',
+    onDone: finishFirstAid, onCancel: () => { firstAid.channel = null; if (SFX.fadeOut) SFX.fadeOut('first-aid-start', .3); } });
+  if (firstAid.channel) SFX.play('aidStart', 1, 'first-aid-start');   // 開始急救：「補血」音效；急救完成時播「疏導」
 }
 // 選隊員時：按 Esc 取消（先攔下來，才不會同時打開別的選單）
 window.addEventListener('keydown', e => {
@@ -310,11 +320,12 @@ window.addEventListener('keydown', e => {
 cv.addEventListener('pointerdown', () => { if (firstAid.picking) cancelFirstAidPick(); });
 function finishFirstAid() {
   const c = firstAid.channel; firstAid.channel = null; if (!c || !G) return;
-  const t = c.target, isPlayer = t === G.player, wasDown = !isPlayer && t.hp <= 0;
-  if (itemCount('firstaid') <= 0) return;
-  consumeItem('firstaid');
-  t.hp = Math.min(t.maxhp, Math.max(0, t.hp) + c.heal);
-  flash('+' + c.heal + (wasDown ? ' 重新站起來了！' : ''), t.x, t.y - 50, '#79dbad', 1.6);
+  const t = c.target, isPlayer = t === G.player, wasDown = !isPlayer && t.hp <= 0, kit = wasDown ? 'anomaly-firstaid' : 'firstaid';
+  if (c.kit && c.kit !== kit) { showFirstAidTip('隊員倒下了，急救包救不回來'); return; }   // 急救到一半隊員倒下：一般急救包不能用
+  if (itemCount(kit) <= 0) return;
+  consumeItem(kit);
+  if (wasDown) { t.hp = Math.max(1, Math.round(t.maxhp * FIRST_AID.reviveHp)); flash('✚ 救回來了！HP ' + t.hp, t.x, t.y - 50, '#79dbad', 1.8); }   // 異質急救包：HP 變 30%
+  else { t.hp = Math.min(t.maxhp, t.hp + c.heal); flash('+' + c.heal, t.x, t.y - 50, '#79dbad', 1.6); }
   if (!isPlayer && wasDown && typeof sentryStatus === 'function') sentryStatus(t, '被溫特救起來了', '#79dbad');
   for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: t.x + (Math.random() - .5) * 26, y: t.y - 10, vx: 0, vy: -40 - Math.random() * 30, r: 2, life: .7, life0: .7, color: '#9ff0c0' });
   sfx('soothe'); if (typeof updateHUD === 'function') updateHUD();
@@ -338,10 +349,10 @@ let gearQuickKey = '';
 function renderGearQuick() {
   let box = document.getElementById('quickGear');
   if (!box) { const host = document.getElementById('quickSupplies'); if (!host) return; box = document.createElement('div'); box.id = 'quickGear'; host.after(box); }
-  const aid = itemCount('firstaid'), adr = itemCount('adrenaline'), active = adrenalineActive();
+  const aid = itemCount('firstaid'), rev = itemCount('anomaly-firstaid'), adr = itemCount('adrenaline'), active = adrenalineActive();
   const show = !MAP_SAFE;   // 只在戰鬥區域顯示
   const faces = firstAid.picking ? (G.towers || []).map(t => [t.type, t.hp <= 0]) : [];   // 選隊員時：急救包按鈕上方的隊員小頭像（倒下＝黑白＋重傷）
-  const key = JSON.stringify([show, aid, !!firstAid.channel, firstAid.picking, adr, active, faces]);
+  const key = JSON.stringify([show, aid, rev, !!firstAid.channel, firstAid.picking, adr, active, faces]);
   if (key === gearQuickKey) return; gearQuickKey = key;
   const btn = (id, icon, name, sub, k, off, cls = '') => '<button type="button" class="quick-supply gear ' + cls + '" data-gear-use="' + id + '" ' + (off ? 'disabled' : '') + ' title="' + k + '｜' + name + '">' +
     '<span class="qs-icon">' + icon + '</span><span class="qs-text"><small>' + name + '</small><b>' + sub + '</b></span><kbd>' + k + '</kbd></button>';
@@ -350,7 +361,7 @@ function renderGearQuick() {
     return '<span class="aid-face-slot"><button type="button" class="aid-pick-face' + (down ? ' down' : '') + '" data-aid-face="' + type + '" title="' + spec.name + '">' +
       '<img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + (down ? '<span class="aid-face-down">重傷</span>' : '') + '</button></span>';
   }).join('') + '</div>';
-  box.innerHTML = !show ? '' : (aid ? '<span class="aid-gear-wrap">' + btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid, 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') + faceRow + '</span>' : '') +
+  box.innerHTML = !show ? '' : (aid || rev ? '<span class="aid-gear-wrap">' + btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid + (rev ? '・異質×' + rev : ''), 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') + faceRow + '</span>' : '') +
     (adr ? btn('adrenaline', '💉', '腎上腺素', active ? '生效中' : '×' + adr, 'J', active, active ? 'on' : '') : '');
 }
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-gear-use]'); if (!b) return; if (b.dataset.gearUse === 'firstaid') useFirstAid(); else useAdrenaline(); });
@@ -375,8 +386,7 @@ window.addEventListener('keydown', e => {
 // ---- 每幀（game.js 的 update 呼叫）：手電筒耗電、急救進度、資訊條按鈕 ----
 let batteryWarned = false;
 function updateEquipment(dt) {
-  if (firstAid.channel) { firstAid.channel.t += dt; if (firstAid.channel.t >= firstAid.channel.total || G.player.hp <= 0) finishFirstAid(); }
-  if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || itemCount('firstaid') <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
+  if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || aidKits() <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
   renderGearQuick();
   const v = equipLv('headlamp');
   if (!v || MAP_SAFE) return;
@@ -567,6 +577,10 @@ function ensureWorkshop() {
     if (e.target === workshopEl || e.target.closest('.workshop-close')) { closeWorkshop(); return; }
     if (e.target.closest('[data-scrap-go]')) { wsScrapGo(); return; }   // 分解裝備
     const sc = e.target.closest('[data-scrap]'); if (sc) { wsScrapSelect(sc.dataset.scrap); return; }   // 右側：選要分解的
+    const pk = e.target.closest('[data-ws-pick]');   // 左邊：點格子＝在下面的說明欄顯示它
+    if (pk) { if (wsPick !== pk.dataset.wsPick) { wsPick = pk.dataset.wsPick; sfx('menu'); renderWorkshop(); } return; }
+    const tb = e.target.closest('[data-ws-tab]');   // 上面的分頁：開發／升級
+    if (tb) { if (wsTab !== tb.dataset.wsTab) { wsTab = tb.dataset.wsTab; wsPick = null; sfx('switch'); renderWorkshop(false); } return; }
     const b = e.target.closest('[data-ws]'); if (!b) return;
     const [kind, id] = b.dataset.ws.split(':');
     workshopBuy(kind, id);
@@ -667,76 +681,97 @@ function workshopBuy(kind, id) {
 const wsColor = text => workshopColorize(text);
 // 工坊欄位左邊的圖：照開發工坊編輯器設的「圖片大小」縮放（js/workshop-config.js 的 workshopIconStyle）
 const wsIcon = d => { const st = workshopIconStyle(d), h = equipIcon(d); return st ? h.replace(/^<(img|i) /, '<$1' + st + ' ') : h; };
-function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發後重畫時，捲軸停在原本的位置（剛打開工坊時才從最上面開始）
-  // about＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面（開發工坊編輯器可以寫）
-  const row = (icon, name, lvText, stat, next, btn, about) => '<div class="ws-row"><span class="ws-icon">' + icon + '</span><div class="ws-text"><b>' + name + lvText + '</b>' + (about ? '<span class="ws-about">' + wsColor(about) + '</span>' : '') + '<span>' + wsColor(stat) + '</span>' + (next ? '<small>' + wsColor(next) + '</small>' : '') + '</div>' + btn + '</div>';
-  const cost = n => '<b>' + WS_SHARD_IMG + n + '</b>';   // 按鈕上的價錢：結晶碎片圖＋數字
+// ---- 開發工坊 v3：跟背包一樣的排法 ----
+// ・上面兩個分頁：「開發」（還沒有的裝備、武器）／「升級」（已經有的）
+// ・格子一排 6 格（正方形，圖示＋名稱），格子底色照等級發光：Lv1 原本的、Lv2 綠、Lv3 藍、Lv4 紫、Lv5 金（.tier-N）
+// ・最下面固定一條說明欄（跟背包一樣）：左邊大圖、中間名稱／說明／數值、右邊開發／升級按鈕；打開時自動選第一格
+// ・右邊：跟背包一樣的紙娃娃（溫特＋身上的裝備），點格子＝選它來分解
+let wsPick = null;      // 目前選的格子：'g:裝備id' 或 'w:武器key'
+let wsTab = 'dev';      // 'dev' 開發／'up' 升級
+const wsPerRow = () => window.innerWidth <= 760 ? 3 : 6;   // 一排幾格（要跟 css 的 .ws-tiles 一樣）
+function workshopEntries() {   // 所有裝備、武器整理成同一種格式
   const gear = EQUIPMENT.map(def => {
-    const lv = equipState.owned[def.id], icon = wsIcon(def);
-    if (!lv) {
-      if (def.source !== 'develop') return row(icon, def.name, '', def.desc, def.where, '<button type="button" class="ws-btn" disabled>尚未取得</button>');
-      return row(icon, def.name, '', def.desc, 'Lv1：' + def.stat(def.levels[0]), '<button type="button" class="ws-btn" data-ws="dev:' + def.id + '">開發 ' + cost(def.cost[0]) + '</button>');
-    }
-    if (lv >= def.levels.length) return row(icon, def.name, ' <em>Lv' + lv + '</em>', def.stat(def.levels[lv - 1]), '', '<button type="button" class="ws-btn" disabled>已達最高等級</button>', def.ownedDesc);
-    return row(icon, def.name, ' <em>Lv' + lv + '</em>', def.stat(def.levels[lv - 1]), '升到 Lv' + (lv + 1) + '：' + def.stat(def.levels[lv]), '<button type="button" class="ws-btn" data-ws="up:' + def.id + '">升級 ' + cost(def.cost[lv]) + '</button>', def.ownedDesc);
-  }).join('');
+    const lv = equipState.owned[def.id] || 0;
+    return { key: 'g:' + def.id, kind: 'gear', def, name: def.name, lv, max: def.levels.length, icon: wsIcon(def), image: def.image, emoji: def.icon,
+      tag: (typeof GEAR_KIND_NAME !== 'undefined' && GEAR_KIND_NAME[def.kind]) || '裝備', worn: Object.values(equipState.equipped).includes(def.id),
+      about: lv ? (def.ownedDesc || def.desc) : def.desc, stat: n => def.stat(def.levels[n - 1]),
+      canDev: !lv && def.source === 'develop', where: def.where, devCost: def.cost[0], upCost: lv ? def.cost[lv] : 0, buy: lv ? 'up:' + def.id : 'dev:' + def.id };
+  });
   const weapons = Object.entries(WEAPON_UPGRADES).filter(([, w]) => !w.removed).map(([k, w]) => {   // 刪掉的武器不顯示
-    const lv = equipState.weapons[k];
-    if (!lv) return row(wsIcon(w), w.name, '', w.desc || '', w.where || '', '<button type="button" class="ws-btn" disabled>尚未取得</button>');
-    return row(wsIcon(w), w.name, ' <em>Lv' + lv + '</em>', w.stat(w.levels[lv - 1]), lv < w.levels.length ? '升到 Lv' + (lv + 1) + '：' + w.stat(w.levels[lv]) : '',
-      lv < w.levels.length ? '<button type="button" class="ws-btn" data-ws="wp:' + k + '">升級 ' + cost(w.cost[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>', w.ownedDesc);
-  }).join('');
-  // 右側：目前穿戴的 4 格＋背包裡其他已擁有的裝備（升級後等級即時更新）
-  const wornWeaponSlots = WEAPON_SLOTS.map(s => {
-    const k = equipState.loadout[s.id], w = k && WEAPON_UPGRADES[k], lv = k && equipState.weapons[k];
-    return '<div class="wss-slot weapon' + (w ? ' filled' : '') + (w && wsScrapSel === 'w:' + k ? ' sel' : '') + '"' + (w ? ' data-scrap="w:' + k + '"' : '') + '><span class="wss-icon">' + (w ? equipIcon(w) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (w ? w.name + ' <em>Lv' + lv + '</em>' : '未裝備') + '</b>' +
-      (w ? '<span>' + w.stat(w.levels[lv - 1]) + '</span>' : '') + '</div></div>';
-  }).join('');
-  const wornSlots = wornWeaponSlots + EQUIP_SLOTS.map(s => {
+    const lv = equipState.weapons[k] || 0;
+    return { key: 'w:' + k, kind: 'weapon', def: w, name: w.name, lv, max: w.levels.length, icon: wsIcon(w), image: w.image, emoji: w.icon,
+      tag: '武器', worn: Object.values(equipState.loadout).includes(k),
+      about: lv ? (w.ownedDesc || w.desc || '') : (w.desc || ''), stat: n => w.stat(w.levels[n - 1]),
+      canDev: false, where: w.where || '', upCost: lv ? w.cost[lv - 1] : 0, buy: 'wp:' + k };
+  });
+  return { gear, weapons };
+}
+function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發後重畫時，捲軸停在原本的位置（剛打開工坊時才從最上面開始）
+  const cost = n => '<b>' + WS_SHARD_IMG + n + '</b>';   // 按鈕上的價錢：結晶碎片圖＋數字
+  const tier = lv => ' tier-' + Math.max(1, Math.min(5, lv || 1));
+  const all = workshopEntries();
+  // 開發分頁只放諾亞做得出來的：只能在後室撿到的（燃燒彈槍、麻醉槍、異質探測器…）不放，撿到之後出現在升級分頁
+  const tabOf = (x, tab) => tab === 'up' ? x.lv > 0 : !x.lv && x.canDev, inTab = x => tabOf(x, wsTab);
+  const gearList = all.gear.filter(inTab), weaponList = all.weapons.filter(inTab), list = [...weaponList, ...gearList];   // 武器排在裝備上面
+  if (!list.some(e => e.key === wsPick)) wsPick = list[0] ? list[0].key : null;   // 跟背包一樣：自動選第一格
+  const tile = e => '<button type="button" class="ws-tile' + (e.lv ? tier(e.lv) + ' owned' : e.canDev ? ' unowned' : ' locked') + (wsPick === e.key ? ' sel' : '') + '" data-ws-pick="' + e.key + '" aria-pressed="' + (wsPick === e.key) + '">' +
+    '<span class="ws-tile-icon">' + e.icon + '</span><b>' + e.name + '</b>' + (e.lv ? '<em>Lv' + e.lv + '</em>' : '') + '</button>';
+  const section = (title, items) => items.length ? '<h3>' + title + '</h3><div class="ws-tiles">' + items.map(tile).join('') + '</div>' : '';
+  const empty = wsTab === 'up' ? '還沒有可以升級的裝備。先到「開發」分頁開發吧！' : '所有裝備都已經拿到了！';
+  // 下方說明欄（跟背包的說明欄一樣：大圖｜名稱、說明、數值｜按鈕）
+  const e = list.find(x => x.key === wsPick);
+  let info;
+  if (!e) info = '<div class="bag-detail-empty"><span>🔧</span><p>' + empty + '</p></div>';
+  else {
+    const img = e.image ? '<img src="' + e.image + '" alt=""' + (e.kind === 'weapon' ? ' class="weapon"' : '') + '>' : '<i class="bag-gear-emoji">' + e.emoji + '</i>';
+    const tags = '<span class="bag-tag">' + (e.kind === 'weapon' ? '🔫 ' : '') + e.tag + '</span>' + (e.lv ? '<span class="bag-tag effect">Lv' + e.lv + '</span>' : e.canDev ? '<span class="bag-tag">未開發</span>' : '<span class="bag-tag">戰鬥區域取得</span>') + (e.worn ? '<span class="bag-tag worn">穿戴中</span>' : '');
+    let stats, btn;
+    if (e.lv) {
+      stats = '<div class="bag-gear-stat"><small>目前效果（Lv' + e.lv + '）</small><b>' + wsColor(e.stat(e.lv)) + '</b></div>' +
+        (e.lv < e.max ? '<div class="bag-gear-stat next"><small>升級後（Lv' + (e.lv + 1) + '）</small><b>' + wsColor(e.stat(e.lv + 1)) + '</b></div>' : '');
+      btn = e.lv < e.max ? '<button type="button" class="ws-btn" data-ws="' + e.buy + '">升級 ' + cost(e.upCost) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
+    } else if (e.canDev) {
+      stats = '<div class="bag-gear-stat next"><small>開發後（Lv1）</small><b>' + wsColor(e.stat(1)) + '</b></div>';
+      btn = '<button type="button" class="ws-btn" data-ws="' + e.buy + '">開發 ' + cost(e.devCost) + '</button>';
+    } else {
+      stats = '<div class="bag-gear-stat where"><small>取得方式</small><b>' + wsColor(e.where || '只能在戰鬥區域取得') + '</b></div>';
+      btn = '<button type="button" class="ws-btn" disabled>尚未取得</button>';
+    }
+    info = '<div class="bag-detail-image">' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3>' + e.name + '</h3><div class="bag-tags">' + tags + '</div></div>' +
+      (e.about ? '<p class="bag-desc">' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats">' + stats + '</div></div><div class="bag-actions">' + btn + '</div>';
+  }
+  const count = tab => [...all.gear, ...all.weapons].filter(x => tabOf(x, tab)).length;
+  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '🔧 開發'], ['up', '⬆️ 升級']].map(([id, label]) =>
+    '<button type="button" role="tab" data-ws-tab="' + id + '" class="' + (wsTab === id ? 'active' : '') + '" aria-selected="' + (wsTab === id) + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
+  // 右側：跟背包一樣的紙娃娃（溫特＋主／副武器、頭部、身體、隨身物品 ×2），點格子＝選它來分解
+  const dollSlot = (key, slotName, icon, name, lv, weapon) => '<div class="doll-slot' + (weapon ? ' weapon' : '') + (key ? ' filled' + tier(lv) : '') + (key && wsScrapSel === key ? ' sel' : '') + '"' + (key ? ' data-scrap="' + key + '"' : '') + ' title="' + slotName + '：' + (key ? name + ' Lv' + lv : '未裝備') + '">' +
+    '<span>' + (key ? icon : '＋') + (key ? '<em>Lv' + lv + '</em>' : '') + '</span><small>' + (key ? name : slotName) + '</small></div>';
+  const dollSlots = WEAPON_SLOTS.map(s => {
+    const k = equipState.loadout[s.id], w = k && WEAPON_UPGRADES[k];
+    return dollSlot(w ? 'w:' + k : null, s.name, w && equipIcon(w), w && w.name, w && equipState.weapons[k], true);
+  }).join('') + EQUIP_SLOTS.map(s => {
     const id = equipState.equipped[s.id], d = id && equipDef(id);
-    return '<div class="wss-slot' + (d ? ' filled' : '') + (d && wsScrapSel === id ? ' sel' : '') + '"' + (d ? ' data-scrap="' + id + '"' : '') + '><span class="wss-icon">' + (d ? equipIcon(d) : '<i>＋</i>') + '</span><div><small>' + s.name + '</small><b>' + (d ? d.name + ' <em>Lv' + equipState.owned[id] + '</em>' : '未裝備') + '</b>' +
-      (d ? '<span>' + d.stat(d.levels[equipState.owned[id] - 1]) + '</span>' : '') + '</div></div>';
+    return dollSlot(d ? id : null, s.name, d && equipIcon(d), d && d.name, d && equipState.owned[id], false);
   }).join('');
+  const art = '<img class="doll-art" src="' + EQUIP_PORTRAIT.image + '" alt="溫特" onerror="this.onerror=null;this.src=\'' + EQUIP_PORTRAIT.fallback + '\';this.classList.add(\'sprite\')">';
   const wornIds = new Set(Object.values(equipState.equipped).filter(Boolean));
   const spare = EQUIPMENT.filter(d => equipState.owned[d.id] && !wornIds.has(d.id))
-    .map(d => '<span class="wss-item' + (wsScrapSel === d.id ? ' sel' : '') + '" data-scrap="' + d.id + '" title="' + d.name + ' Lv' + equipState.owned[d.id] + '：' + d.stat(d.levels[equipState.owned[d.id] - 1]) + '">' + equipIcon(d) + '<em>Lv' + equipState.owned[d.id] + '</em></span>').join('');
-  const side = '<aside class="workshop-side"><h3>目前裝備</h3>' + wornSlots +
+    .map(d => '<span class="wss-item' + tier(equipState.owned[d.id]) + (wsScrapSel === d.id ? ' sel' : '') + '" data-scrap="' + d.id + '" title="' + d.name + ' Lv' + equipState.owned[d.id] + '">' + equipIcon(d) + '<em>Lv' + equipState.owned[d.id] + '</em></span>').join('');
+  const side = '<aside class="workshop-side"><h3>目前裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + dollSlots + '</div></div>' +
     '<h3>背包裡的裝備</h3>' + (spare ? '<div class="wss-grid">' + spare + '</div>' : '<p class="wss-empty">無</p>') +
     wsScrapBox() + '</aside>';   // 最下面：選到東西＝「分解裝備」，沒選＝換裝備的提示
-  const SCROLLERS = ['.workshop-body', '.workshop-side', '.workshop-main'];   // 會捲動的區塊（窄畫面時是 .workshop-main）
+  const SCROLLERS = ['.ws-scroll', '.workshop-side', '.workshop-main'];   // 會捲動的區塊（窄畫面時是 .workshop-main）
   const scroll = keepScroll ? SCROLLERS.map(q => workshopEl.querySelector(q)?.scrollTop || 0) : null;
   workshopEl.innerHTML = '<section class="workshop-card" role="dialog" aria-modal="true" aria-label="諾亞的開發工坊">' +
     '<header class="workshop-head">' + workshopHeadHtml() +   // 標題列的文字（開發工坊編輯器可以改：js/workshop-config.js）
     '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
-    '<div class="workshop-main"><div class="workshop-body"><h3>裝備</h3><div class="ws-grid">' + gear + '</div><h3>武器</h3><div class="ws-grid">' + weapons + '</div></div>' + side + '</div></section>';
-  arrangeWorkshopRows();
+    '<div class="workshop-main"><div class="workshop-body">' + tabs +
+    '<div class="ws-scroll">' + (list.length ? section('武器', weaponList) + section('裝備', gearList) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
+    '<div class="ws-info' + (e ? '' : ' empty') + '">' + info + '</div></div>' + side + '</div></section>';
   if (scroll) SCROLLERS.forEach((q, i) => { const el = workshopEl.querySelector(q); if (el) el.scrollTop = scroll[i]; });
   attachWorkshopToast();
 }
-// 左右兩欄：同一排的兩個欄位要一樣高（說明兩行的配兩行、三行的配三行），不會一高一矮擺在一起。
-// 先量每個欄位的高度，再把一樣高的兩兩配成一排；配不到的單獨一排（放左邊）。
-function arrangeWorkshopRows() {
-  if (!workshopEl || workshopEl.classList.contains('hidden')) return;   // 看不到的時候量不到高度，打開時會再排一次
-  const wsOrder = (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.order) || {};
-  workshopEl.querySelectorAll('.ws-grid').forEach((grid, gi) => {
-    const cards = [...grid.children];
-    // 開發工坊編輯器調整過順序（data/workshop.js 的 order）：照順序左、右、左、右排，同一排一樣高（不自動配對）
-    if (Array.isArray(wsOrder[gi === 0 ? 'gear' : 'weapons'])) { cards.forEach(el => { el.style.alignSelf = ''; el.style.gridColumnStart = ''; }); return; }
-    cards.forEach(el => { el.style.alignSelf = 'start'; el.style.gridColumnStart = ''; });   // 先用自然高度量
-    const h = new Map(cards.map(el => [el, el.offsetHeight]));
-    const left = cards.slice(), pairs = [], alone = [];
-    while (left.length) {
-      const a = left.shift(), i = left.findIndex(b => Math.abs(h.get(b) - h.get(a)) <= 10);   // 差不到半行字＝一樣高
-      if (i >= 0) pairs.push([a, left.splice(i, 1)[0]]); else alone.push(a);
-    }
-    const order = pairs.flat().concat(alone);
-    order.forEach(el => grid.appendChild(el));
-    pairs.forEach(([a]) => { a.style.gridColumnStart = '1'; });   // 每一排從左欄開始
-    alone.forEach(el => { el.style.gridColumnStart = '1'; });      // 配不到的：自己一排、放左邊
-    cards.forEach(el => { el.style.alignSelf = ''; });
-  });
-}
-function openWorkshopResetScrap() { wsScrapSel = null; wsScrapArmed = false; }
+function openWorkshopResetScrap() { wsScrapSel = null; wsScrapArmed = false; wsPick = null; }
 function openWorkshop() {
   ensureWorkshop(); if (typeof closeDialogue === 'function') closeDialogue(true);
   workshopOpen = true; openWorkshopResetScrap(); Object.keys(keys).forEach(k => { keys[k] = false; });
@@ -760,3 +795,27 @@ window.addEventListener('keydown', e => {
   const id = equipMenu; equipMenu = null; sfx('switch'); renderEquipPanel();
   document.querySelector('#equipPanel [data-equip-slot="' + id + '"]')?.focus();
 }, true);
+
+// ---- 靠近隊員時的快捷鍵（js/render.js 畫頭上的「F 急救」「空白鍵 疏導」）----
+// 附近倒下的隊員（站在 FIRST_AID.reach 格內）：頭上只出現「急救」；身上沒有異質急救包就不出現（救不回來）
+function downedTeammateNear() {
+  const p = G && G.player; if (!p || MAP_SAFE || p.hp <= 0 || itemCount('anomaly-firstaid') <= 0) return null;
+  let best = null, bd = FIRST_AID.reach * CELL;
+  for (const t of G.towers || []) { if (t.hp > 0) continue; const d = Math.hypot(t.x - p.x, t.y - p.y); if (d < bd) { bd = d; best = t; } }
+  return best;
+}
+// 現在頭上有選項的那位隊員（暴走的優先，再來倒下的，最後是旁邊的隊員）
+function promptTeammate() {
+  if (!G || !G.player || MAP_SAFE || G.player.sitting) return null;
+  const urgent = typeof urgentSootheTarget === 'function' && urgentSootheTarget(); if (urgent) return urgent;
+  const down = downedTeammateNear(); if (down) return down;
+  const a = typeof interactionNearPlayer === 'function' && interactionNearPlayer();
+  return a && a.kind === 'tower' && a.hp > 0 ? a : null;
+}
+// 按 F：旁邊的隊員能急救（受傷＋有急救包，或倒下＋有異質急救包）就急救，不然沒有作用（js/shop.js；杏仁水改成 E）
+// 互動的第一優先：旁邊的隊員現在需要治療（有對應的急救包）或疏導（有污染、暴走）（js/game.js、js/render.js）
+function teammateActionTarget() {
+  const t = promptTeammate(); if (!t) return null;
+  return aidUsableOn(t) || (t.hp > 0 && (t.taint > 0 || t.berserk)) ? t : null;
+}
+function aidKeyTarget() { const t = promptTeammate(); return t && aidUsableOn(t) && !firstAid.channel ? t : null; }
