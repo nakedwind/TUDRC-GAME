@@ -5,7 +5,7 @@
 const BASE_MAPS = [
   {
     "id": "map_mu5ad7t2",
-    "name": "2F-應變中心",
+    "name": "2F應變中心",
     "desc": "",
     "layers": {
       "floor": {
@@ -2713,7 +2713,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mua3askw",
-    "name": "溫特辦公室",
+    "name": "2F溫特辦公室",
     "desc": "",
     "layers": {
       "floor": {
@@ -3550,7 +3550,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mubj5gxm",
-    "name": "嚮導辦公室",
+    "name": "2F嚮導辦公室",
     "desc": "",
     "layers": {
       "floor": {
@@ -4108,7 +4108,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mubk73un",
-    "name": "哨兵休息室",
+    "name": "2F哨兵休息室",
     "desc": "",
     "layers": {
       "floor": {
@@ -4739,7 +4739,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mue26feq",
-    "name": "疏導室",
+    "name": "2F疏導室",
     "desc": "",
     "layers": {
       "floor": {
@@ -5207,7 +5207,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mufu03od",
-    "name": "雷德哨兵寢室",
+    "name": "4F雷德哨兵寢室",
     "desc": "",
     "layers": {
       "floor": {
@@ -5441,11 +5441,10 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_mufv6z24",
-        "c": 3,
+        "c": 2,
         "r": 9,
         "layer": "object2",
-        "ox": -24,
-        "oy": 0
+        "ox": 26
       },
       {
         "id": "tile_dorm_window_blinds_narrow",
@@ -5562,7 +5561,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mufvtoiq",
-    "name": "溫特寢室",
+    "name": "2F溫特寢室",
     "desc": "",
     "layers": {
       "floor": {
@@ -7361,7 +7360,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_musbsgj3",
-    "name": "1F-餐廳",
+    "name": "1F餐廳",
     "desc": "",
     "layers": {
       "floor": {
@@ -9076,7 +9075,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_muspgfxl",
-    "name": "醫院",
+    "name": "1F醫院",
     "desc": "",
     "layers": {
       "floor": {
@@ -9998,7 +9997,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mussl5gx",
-    "name": "B-4收容觀察室",
+    "name": "B4收容觀察室",
     "desc": "",
     "layers": {
       "floor": {
@@ -11230,7 +11229,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_musu0dlp",
-    "name": "B-3",
+    "name": "B3",
     "desc": "",
     "layers": {
       "floor": {
@@ -11784,7 +11783,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mususr3y",
-    "name": "阿瓦倫房間",
+    "name": "B3阿瓦倫房間",
     "desc": "",
     "layers": {
       "floor": {
@@ -12146,7 +12145,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mve6y3s2",
-    "name": "塔住這裡（匯入）",
+    "name": "4F塔住這裡",
     "desc": "",
     "layers": {
       "floor": {
@@ -12721,7 +12720,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mvfmo6c2",
-    "name": "B-1訓練室",
+    "name": "B1訓練室",
     "desc": "",
     "layers": {
       "floor": {
@@ -13583,7 +13582,7 @@ const BASE_MAPS = [
   },
   {
     "id": "map_mvfpx57b",
-    "name": "B-2射擊訓練室",
+    "name": "B2射擊訓練室",
     "desc": "",
     "layers": {
       "floor": {

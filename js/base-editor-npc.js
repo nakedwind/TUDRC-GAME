@@ -52,6 +52,7 @@ function loadNpcData() {
   if (!d || !d.chapters) d = { chapters: clone(typeof NPC_LOCATIONS !== 'undefined' ? NPC_LOCATIONS : { 1: {} }) };
   for (const table of Object.values(d.chapters)) for (const [id, loc] of Object.entries(table)) {
     if (!loc || !loc.map) { delete table[id]; continue; }
+    if (typeof MAP_NAME_RENAMES !== 'undefined' && MAP_NAME_RENAMES[loc.map]) loc.map = MAP_NAME_RENAMES[loc.map];   // 地圖改名（加上樓層）：舊暫存跟著換
     if (loc.area && !loc.rect && !loc.rects) { const rect = npcAreaToRect(loc.map, loc.area); if (rect) loc.rect = rect; }
     delete loc.area;
     if (Array.isArray(loc.rect) && !Array.isArray(loc.rects)) loc.rects = [loc.rect];   // 舊的單一方框 → 方框清單
@@ -65,7 +66,7 @@ function loadNpcData() {
 function saveNpcData() { try { localStorage.setItem(NPC_LOC_STORE, JSON.stringify(npcData)); } catch (_) {} }
 const npcChapterKeys = () => Object.keys(npcData.chapters).map(Number).sort((a, b) => a - b).map(String);
 const npcTable = () => npcData.chapters[npcChapter] || (npcData.chapters[npcChapter] = {});
-const baseMapNames = () => maps.filter(m => m.safe).map(m => m.name);
+const baseMapNames = () => (typeof sortedMaps === 'function' ? sortedMaps() : maps).filter(m => m.safe).map(m => m.name);   // 照樓層排（js/base-editor.js）
 
 // ---- 面板 ----
 const npcPanelEl = document.getElementById('npcPanel');

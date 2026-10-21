@@ -30,7 +30,7 @@ const NPC_AREAS = {
 const NPC_LOCATIONS = {
   "1": {
     "theonie": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         18,
         17
@@ -38,18 +38,18 @@ const NPC_LOCATIONS = {
       "rect": [8, 12, 22, 21]
     },
     "amber": {
-      "map": "哨兵休息室",
+      "map": "2F哨兵休息室",
       "rect": [4, 4, 14, 10]
     },
     "red": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         30,
         8
       ]
     },
     "avaren": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         39,
         16
@@ -57,14 +57,14 @@ const NPC_LOCATIONS = {
       "rect": [22, 12, 42, 21]
     },
     "luther": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         30,
         6
       ]
     },
     "tino": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         26,
         12
@@ -72,7 +72,7 @@ const NPC_LOCATIONS = {
       "rect": [22, 12, 42, 21]
     },
     "eldrin": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         35,
         20
@@ -80,26 +80,26 @@ const NPC_LOCATIONS = {
       "rect": [22, 12, 42, 21]
     },
     "chris": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         35,
         4
       ]
     },
     "claire": {
-      "map": "嚮導辦公室",
+      "map": "2F嚮導辦公室",
       "rect": [4, 4, 14, 10]
     },
     "muomn": {
-      "map": "嚮導辦公室",
+      "map": "2F嚮導辦公室",
       "rect": [4, 4, 14, 10]
     },
     "noah": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "rect": [9, 15, 21, 21]
     },
     "ash": {
-      "map": "2F-應變中心",
+      "map": "2F應變中心",
       "spawn": [
         29,
         17
@@ -107,50 +107,50 @@ const NPC_LOCATIONS = {
       "rect": [22, 12, 42, 21]
     },
     "eden": {
-      "map": "1F-餐廳",
+      "map": "1F餐廳",
       "rect": [4, 6, 25, 23]
     },
     "salem": {
-      "map": "1F-餐廳",
+      "map": "1F餐廳",
       "rect": [4, 7, 25, 23]
     },
     "taana": {
-      "map": "B-1訓練室",
+      "map": "B1訓練室",
       "spawn": [
         15,
         21
       ]
     },
     "colyn": {
-      "map": "B-1訓練室",
+      "map": "B1訓練室",
       "spawn": [
         9,
         19
       ]
     },
     "rowan": {
-      "map": "B-2射擊訓練室",
+      "map": "B2射擊訓練室",
       "spawn": [
         15,
         11
       ]
     },
     "cael": {
-      "map": "B-2射擊訓練室",
+      "map": "B2射擊訓練室",
       "spawn": [
         12,
         11
       ]
     },
     "saku": {
-      "map": "1F-餐廳",
+      "map": "1F餐廳",
       "spawn": [
         22,
         21
       ]
     },
     "kakuma": {
-      "map": "1F-餐廳",
+      "map": "1F餐廳",
       "spawn": [
         24,
         18

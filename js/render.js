@@ -490,7 +490,7 @@ function promptTopAbove(actor, top) {
 // ---- 逃生樓梯的常駐箭頭：樓梯右邊的出入口＝上樓、左邊＝下樓 ----
 const STAIR_ARROW = { ids: ['tile_eoc_escape_stairs'] };
 let stairArrowCache = null;
-// 從地圖名稱看樓層：「2F-應變中心」→ 2、「B-3」→ −3；看不出來回傳 null
+// 從地圖名稱看樓層：「2F應變中心」→ 2、「B3」→ −3（舊寫法「B-3」也認得）；看不出來回傳 null
 function mapFloorNumber(name) {
   const t = String(name || '').trim(), b = /^B-?(\d+)/i.exec(t), f = /^(\d+)F/i.exec(t);
   return b ? -Number(b[1]) : f ? Number(f[1]) : null;

@@ -393,10 +393,12 @@ function openElevatorMenu() {
 }
 document.getElementById('elevatorClose').addEventListener('click', () => { sfx('switch'); closeElevatorMenu(); });
 elevatorMenu.addEventListener('click', e => { if (e.target === elevatorMenu) { sfx('switch'); closeElevatorMenu(); } });
-// 電梯能去的樓層：地圖名稱開頭有標樓層的（「1F-餐廳」「4F哨兵宿舍樓」「B-3」…），高樓層排上面
+// 電梯能去的樓層：放了電梯的地圖（名稱開頭要有樓層：「1F餐廳」「4F哨兵宿舍樓」「B3」…；舊寫法「B-3」也認得），高樓層排上面。
+// 房間（溫特辦公室…）名稱前面也有樓層，但沒有電梯，所以不會出現在電梯選單。
 const ELEVATOR_FLOOR_RE = /^\s*(B-?\d+F?|\d+F)\s*[-－・]?\s*/i;
 function elevatorFloors() {
   return mapList().map(m => {
+    if (!(m.stamps || []).some(isElevatorStamp)) return null;   // 沒有電梯的房間：電梯不停
     const hit = ELEVATOR_FLOOR_RE.exec(String(m.name || '')); if (!hit) return null;
     const label = hit[1].toUpperCase().replace('-', ''), rest = String(m.name).slice(hit[0].length).trim();   // 「B-3」顯示成「B3」（正式寫法不加 -）
     const n = label.startsWith('B') ? -Number(label.replace(/\D/g, '')) : Number(label.replace(/\D/g, ''));
@@ -2193,7 +2195,7 @@ function lose(reason, cause) { if ((typeof practiceOn === 'function' && practice
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
-const MAP_PICK_NAMES = ['Y 區 · 地下街入口', '2F-應變中心'];   // 開始畫面能選的地圖（照地圖名稱）；清空＝全部地圖都能選
+const MAP_PICK_NAMES = ['Y 區 · 地下街入口', '2F應變中心'];   // 開始畫面能選的地圖（照地圖名稱）；清空＝全部地圖都能選
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
 if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {

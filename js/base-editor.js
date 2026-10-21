@@ -42,6 +42,10 @@ const STORAGE_MAPS = 'tudrc_base_maps_v1';
 //   其他人拉下來打開編輯器，他瀏覽器暫存裡的這張也會跟著刪掉（不然他一存檔又會寫回去）。
 // ・刪掉後按「復原」把地圖找回來：記號會自動拿掉。
 const STORAGE_DELETED_MAPS = 'tudrc_base_deleted_maps_v1';
+// 10/21 地圖名稱統一加上樓層（B-1 → B1、溫特辦公室 → 2F溫特辦公室…）：id → [舊名稱, 新名稱]。
+// 瀏覽器暫存裡還是舊名稱的，打開時自動換掉（只換「還是舊名稱」的，自己又改過名的不動）；NPC 名單也一起換（js/base-editor-npc.js）
+const MAP_RENAMES = {"map_mu5ad7t2": ["2F-應變中心", "2F應變中心"], "map_mua3askw": ["溫特辦公室", "2F溫特辦公室"], "map_mubj5gxm": ["嚮導辦公室", "2F嚮導辦公室"], "map_mubk73un": ["哨兵休息室", "2F哨兵休息室"], "map_mue26feq": ["疏導室", "2F疏導室"], "map_mufu03od": ["雷德哨兵寢室", "4F雷德哨兵寢室"], "map_mufvtoiq": ["溫特寢室", "2F溫特寢室"], "map_musbsgj3": ["1F-餐廳", "1F餐廳"], "map_muspgfxl": ["醫院", "1F醫院"], "map_mussl5gx": ["B-4收容觀察室", "B4收容觀察室"], "map_musu0dlp": ["B-3", "B3"], "map_mususr3y": ["阿瓦倫房間", "B3阿瓦倫房間"], "map_mve6y3s2": ["塔住這裡（匯入）", "4F塔住這裡（匯入）"], "map_mvfmo6c2": ["B-1訓練室", "B1訓練室"], "map_mvfpx57b": ["B-2射擊訓練室", "B2射擊訓練室"]};
+const MAP_NAME_RENAMES = Object.fromEntries(Object.values(MAP_RENAMES));   // 舊名稱 → 新名稱
 const FILE_DELETED_MAPS = typeof BASE_MAPS_DELETED !== 'undefined' && Array.isArray(BASE_MAPS_DELETED) ? BASE_MAPS_DELETED : [];
 let deletedMapIds = new Set(FILE_DELETED_MAPS);
 try { for (const id of JSON.parse(localStorage.getItem(STORAGE_DELETED_MAPS) || '[]')) deletedMapIds.add(id); } catch (_) {}
@@ -418,6 +422,7 @@ function loadMaps() {
   if (!Array.isArray(maps) || maps.length === 0) maps = clone(BASE_MAPS);
   // 專案檔記著已經刪掉的地圖（別人刪的）：瀏覽器暫存裡還有的話也拿掉（至少留一張）
   let restoredDefaults = false;
+  for (const m of maps) { const rn = MAP_RENAMES[m.id]; if (rn && m.name === rn[0]) { m.name = rn[1]; restoredDefaults = true; } }   // 舊名稱 → 加上樓層的新名稱
   const keep = maps.filter(m => !FILE_DELETED_MAPS.includes(m.id));
   if (keep.length && keep.length !== maps.length) { maps = keep; restoredDefaults = true; }
   // 專案資料中若有瀏覽器暫存缺少的地圖，只補上缺少的項目，保留使用者目前的編輯內容。刪掉的地圖不補回來。
@@ -2321,9 +2326,22 @@ document.getElementById('clearLayout').addEventListener('click', () => {
 
 // ================= 地圖管理 =================
 const mapSelect = document.getElementById('mapSelect');
+// ---- 地圖清單照樓層排：4F → 2F → 1F → B1 → B4，看不出樓層的放最後；同一層裡，有電梯、或有樓梯通到別層的（大廳）排第一個 ----
+function mapFloorOf(m) {
+  const t = String(m && m.name || '').trim(), b = /^B-?(\d+)/i.exec(t), f = /^(\d+)F/i.exec(t);
+  return b ? -Number(b[1]) : f ? Number(f[1]) : null;
+}
+function sortedMaps() {
+  const floorById = new Map(maps.map(m => [m.id, mapFloorOf(m)]));
+  const hasElevator = m => (m.stamps || []).some(s => String((tileById(s.id) || {}).file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator.png'));
+  const hub = m => hasElevator(m) || (m.portals || []).some(p => floorById.has(p.to) && floorById.get(p.to) !== floorById.get(m.id));
+  return maps.map((m, i) => ({ m, i, f: floorById.get(m.id), h: hub(m) ? 0 : 1 }))
+    .sort((a, b) => (a.f === null) - (b.f === null) || (b.f ?? 0) - (a.f ?? 0) || a.h - b.h || a.i - b.i)
+    .map(x => x.m);
+}
 function refreshMapSelect() {
   mapSelect.innerHTML = '';
-  maps.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
+  sortedMaps().forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], spawnZone: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], camp: [], rules: {} }); }
