@@ -778,16 +778,29 @@ window.addEventListener('keydown', e => {
   if (e.key === 'Escape') { assigning = null; closeSentryMenu(); closeGroundMenu(); closeBuildMenu(); }
 });
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
+// 溫特疏導：先站定跑進度條（SOOTHE.time 秒，期間溫特和這位隊員都不能動），跑完才扣 SP、降污染（js/channel-actions.js）
 function soothe(t) {
+  if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在做別的事（疏導、急救、包紮）
   if (t.taint <= 0 && !t.berserk) { sfx('error'); sentryStatus(t, '無需疏導', '#9aa4b2'); return; }
   const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;   // 共感手環：花的 SP 變少（js/equipment.js）
   if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
+  if (typeof startChannel !== 'function') { finishSoothe(t); return; }
+  spawnSootheCast(G.player, SOOTHE_COLORS.winter, 0);   // 溫特腳下法陣（跟以前一樣約 1 秒）
+  SFX.play('soothe', 1, 'winter-soothe');                 // 開始疏導：「疏導」音效
+  startChannel({ kind: 'soothe', total: SOOTHE.time || 3, target: t, label: '疏導中', color: '#8fd3ff', needAlive: true, onDone: () => finishSoothe(t),
+    onTick: dt => sootheMotes(t, dt),   // 疏導期間：溫特和隊員身邊一直飄出藍色小光點
+    onCancel: () => { if (SFX.fadeOut) SFX.fadeOut('winter-soothe', .3); } });   // 中斷：開始的音效淡掉
+}
+// 疏導期間的鮮豔藍色小光點：從溫特和隊員身邊冒出來，慢慢往上飄、淡掉（數值在 js/attack-fx.js 的 SOOTHE_MOTES）
+const winterMoteHolder = {};
+function sootheMotes(t, dt) { spawnSootheMotes([G.player, t], SOOTHE_MOTE_COLORS.winter, dt, winterMoteHolder); }
+function finishSoothe(t) {
+  const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;
+  if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
   G.guide -= cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
   if (t.berserk && t.taint < 60) t.berserk = false;
-  sfx('soothe');
+  sfx('sootheEnd');   // 疏導成功：「疏導2」音效
   addStat('soothes');   // 成就：親自疏導次數
   spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
-  spawnSootheCast(G.player, SOOTHE_COLORS.winter, 0);         // 溫特腳下法陣
-  Object.assign(G.player, { soothingT: SOOTHE_CHANNEL, gunT: 0, dir: 'front', moving: false });   // 溫特也停下來閉眼疏導
   sentryStatus(t, '疏導 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
 }

@@ -63,12 +63,12 @@ const EQUIPMENT = [
 ];
 // 戰鬥區域掉落的機率（裝備：還沒拿到的時候；拿到之後就不會再掉）
 const EQUIP_DROPS = { detector: .5 };
-// 後室道具掉落的機率（data/supplies.js 的道具，可以重複拿）：平安符＝順順宮帽、保溫杯＝置物櫃、腎上腺素＝鳥頭人
-const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2 };
+// 後室道具掉落的機率（data/supplies.js 的道具，可以重複拿）：平安符＝順順宮帽、保溫杯＝置物櫃、腎上腺素＝置物櫃（打怪不會掉）、異質急救包＝置物櫃
+const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid': .15 };
 // 腎上腺素（道具，按 J）：speed 跑速加成、dur 持續秒數、side 藥效退了變慢幾秒、slow 變慢多少
 const ADRENALINE = { speed: .45, dur: 8, side: 2, slow: .3 };
 // 急救包（道具，按 H）：heal 治療量、time 處理傷口要站著幾秒、reach 幾格內的隊員
-const FIRST_AID = { heal: 60, time: 1.2, reach: 1.8 };
+const FIRST_AID = { heal: 60, time: 2.5, reach: 1.8, reviveHp: .3 };   // time：急救要幾秒（進度條跑完才算成功）   // reviveHp：異質急救包救回倒下的隊員時，HP 變成幾成
 
 // 武器升級（找諾亞）：Lv1 是原本的樣子；cost：[升到 Lv2, 升到 Lv3, 升到 Lv4, 升到 Lv5]
 // 測試用：true＝所有槍都解鎖，每次開遊戲彈藥補滿（測完改成 false）

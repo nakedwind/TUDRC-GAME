@@ -465,8 +465,11 @@ window.addEventListener('keydown', e => {
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
-    const urgent = urgentSootheTarget();
-    if (urgent) {}                               // 暴走中的哨兵：疏導改用滑鼠點頭上的「疏導」（js/render.js），按鍵不疏導
+    // 互動優先順序：① 隊員（疏導；治療是 F）→ ② 拾取（異質碎片、地上的道具）→ ③ 地圖物件（電梯、門、置物櫃…）
+    const mate = typeof teammateActionTarget === 'function' ? teammateActionTarget() : null;
+    if (mate && mate.hp > 0 && (mate.taint > 0 || mate.berserk)) soothe(mate);   // 隊員需要疏導：空白鍵＝疏導
+    else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
+    else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer() && useStoragePropNearPlayer(isPickupProp)) {}   // 拾取地上的道具（js/storage-lockers.js）
     else if (elevator) {
       if (elevator.mode === 'closed') {
         startElevatorOpen(elevator.stamp);
@@ -476,6 +479,7 @@ window.addEventListener('keydown', e => {
       } else if (elevator.mode === 'inside') openElevatorMenu();
     }
     else if (near) enterPortal(near.portal);   // 靠近出入口→進入另一張地圖
+    else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
     else if (useCampInteractionNearPlayer(true)) {}
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→補滿照明彈
@@ -493,7 +497,7 @@ window.addEventListener('keydown', e => {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();
-      if (actor?.kind === 'tower' && !MAP_SAFE) {}   // 戰鬥區的隊員：急救／疏導改用滑鼠點頭上的選項，按鍵沒有功能
+      if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);   // 戰鬥區的隊員：空白鍵＝疏導、F＝急救（js/shop.js）；也可以點頭上的選項
       else if (actor) openDialogue(actor);
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) startGraffitiErase(graffitiNearPlayer());   // 擦掉塗鴉（js/graffiti.js）
       else toggleSit();                   // 附近沒有角色才判定座位
@@ -1743,6 +1747,7 @@ function update(dt) {
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
+    else if (t.frozenT > 0) { t.frozenT -= dt; t.moving = false; t.navPath = null; if (t.hp > 0) t.dir = 'front'; }   // 溫特正在疏導／急救這位隊員：站著不動（js/channel-actions.js）
     else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
@@ -1785,7 +1790,11 @@ function update(dt) {
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
     if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
     if (t.sleepT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著：不攻擊
-    if (t.soothingT > 0) t.soothingT = Math.max(0, t.soothingT - dt);   // 疏導施法計時
+    if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
+    if (t.soothingT > 0) {   // 疏導施法計時；期間嚮導和被疏導的隊員身邊飄出嚮導顏色的小光點（js/attack-fx.js）
+      t.soothingT = Math.max(0, t.soothingT - dt);
+      if (typeof spawnSootheMotes === 'function' && SOOTHE_MOTE_COLORS[t.type]) spawnSootheMotes([t, ...(t.sootheTargets || []).filter(o => o.hp > 0)], SOOTHE_MOTE_COLORS[t.type], dt, t);
+    }
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
     if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
     if (sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
@@ -1822,6 +1831,7 @@ function update(dt) {
           t.auraCd = AURA_CD;
           spawnSootheCast(t, sc, spec.aura.r * CELL);   // 疏導表演：法陣、光波
           t.soothingT = SOOTHE_CHANNEL; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;   // 停下來閉眼疏導
+          t.sootheTargets = soothed;   // 施法期間這些人身邊飄光點（下面）
           if (typeof sfxAt === 'function') sfxAt('soothe', t.x, t.y, 0.42, t.type);
         }
       }
@@ -2077,6 +2087,7 @@ function update(dt) {
   if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
+  if (typeof updateChannel === 'function') updateChannel(dt);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);

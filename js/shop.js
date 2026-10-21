@@ -55,10 +55,10 @@ function sellPriceOf(item) {
   const sup = supplyById(item.id);
   return sup && sup.price ? Math.max(1, Math.floor(sup.price * BACKROOM_SHOP.sellRate)) : 0;
 }
-// 補給的效果（商品資料的 use）：hp＝醫療包恢復 HP（Q）、sp＝杏仁水恢復 SP（F）
+// 補給的效果（商品資料的 use）：hp＝醫療包恢復 HP（Q）、sp＝杏仁水恢復 SP（E）
 const SUPPLY_KIND = {
   hp: { name: '醫療包', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
-  sp: { name: '杏仁水', stat: 'SP', key: 'F', icon: '✦', color: '#8cc7ff' },
+  sp: { name: '杏仁水', stat: 'SP', key: 'E', icon: '✦', color: '#8cc7ff' },
 };
 const SHOP_KIND_ORDER = ['medical', 'snack', 'drink'];   // 商店排序：補給 → 零食 → 飲料
 const supplyById = id => SUPPLIES.find(entry => entry.id === id);
@@ -122,7 +122,7 @@ function renderCart(money) {
   }).join('') : '<span class="supply-empty">購物車是空的</span>';
   renderSupplyStatus();
 }
-// 下方資訊條的快捷格：醫療包（Q）、杏仁水（F）
+// 下方資訊條的快捷格：醫療包（Q）、杏仁水（E）
 let quickSupplyKey = '';
 function renderQuickSupplies() {
   const box = document.getElementById('quickSupplies'); if (!box) return;
@@ -274,6 +274,18 @@ function useSupply(id) {
   const item = supplyById(id), count = supplyInventory.get(id) || 0;
   if (!item || !G?.player || count <= 0) return false;
   if (!item.use) return false;   // 零食飲料不能直接吃（送禮用）
+  // 醫療包（補 HP）：站著包紮，進度條跑完才補血（js/channel-actions.js）；杏仁水照常馬上喝
+  if (item.use === 'hp' && typeof startChannel === 'function') {
+    if (playerChannel) return false;
+    if (supplyNeed('hp') <= 0) { sfx('error'); flash('HP 已滿', G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
+    startChannel({ kind: 'medkit', total: CHANNEL_TIME.medkit, target: G.player, label: '包紮中', color: '#79dbad', onDone: () => applySupplyNow(id) });
+    return true;
+  }
+  return applySupplyNow(id);
+}
+function applySupplyNow(id) {
+  const item = supplyById(id), count = supplyInventory.get(id) || 0;
+  if (!item || !G?.player || count <= 0) return false;
   const amount = item.restore;
   const restored = Math.min(amount, supplyNeed(item.use));
   if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.use].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
@@ -307,10 +319,16 @@ supplyShop.addEventListener('animationend', e => { if (e.target.classList.contai
 supplyShopList.addEventListener('mouseover', e => { const card = e.target.closest('[data-item]'); const item = card ? supplyById(card.dataset.item) : null; if (item !== supplyHover) { supplyHover = item; renderSupplyStatus(); } });
 supplyShopList.addEventListener('mouseleave', () => { supplyHover = null; renderSupplyStatus(); });
 document.querySelectorAll('[data-supply-tab]').forEach(button => button.addEventListener('click', () => { supplyShopTab = button.dataset.supplyTab; document.querySelectorAll('[data-supply-tab]').forEach(tab => { tab.classList.toggle('active', tab === button); tab.setAttribute('aria-selected', tab === button); }); supplyShopList.scrollTop = 0; renderSupplyShop(); sfx('switch'); }));
-window.addEventListener('keydown', e => {   // Q 吃零食、F 喝飲料
+window.addEventListener('keydown', e => {   // Q 醫療包、E 杏仁水、F 急救（旁邊的隊員需要急救時）
   const k = e.key.toLowerCase();
-  if (e.repeat || (k !== 'q' && k !== 'f') || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.repeat || (k !== 'q' && k !== 'e' && k !== 'f') || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (!G?.player || G.over || MAP_SAFE || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
-  e.preventDefault(); quickUseSupply(k === 'q' ? 'hp' : 'sp');
+  e.preventDefault();
+  if (k === 'f') {   // F＝急救：旁邊的隊員需要急救、也有對應的急救包時才有作用（js/equipment.js）
+    const aidT = typeof aidKeyTarget === 'function' ? aidKeyTarget() : null;
+    if (aidT) firstAidOn(aidT);
+    return;
+  }
+  quickUseSupply(k === 'q' ? 'hp' : 'sp');
 });

@@ -3359,6 +3359,14 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_interactive_pickup_adrenaline",
+    "name": "拾取亮點（腎上腺素）",
+    "role": "floor",
+    "file": "images/裝備/adrenaline-injector.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_mv5my8dk",
     "name": "electric-light-02",
     "role": "floor",

@@ -96,6 +96,20 @@ function drawHitMarker() {
 }
 // 疏導特效：柔和光環＋上升的療癒光點，顏色依施術者（溫特藍／艾德林草綠／克莉思白）
 const SOOTHE_COLORS = { winter: [96, 170, 255], eldrin: [128, 222, 112], chris: [238, 246, 255] };
+// 疏導期間身邊飄的小光點（比上面的疏導色更鮮豔）：溫特＝亮藍、艾德林＝亮綠、克莉思＝亮白
+const SOOTHE_MOTE_COLORS = { winter: [0, 115, 255], eldrin: [10, 255, 55], chris: [255, 255, 255] };
+const SOOTHE_MOTES = { perSec: 14, rise: [14, 30], life: [1, 1.6], size: [1.44, 2.72] };   // 每秒幾顆、往上飄的速度、飄幾秒、大小
+// 在這些人身邊冒出光點（每幀呼叫）；holder 用來記累積的數量（溫特用一個物件，嚮導用自己）
+function spawnSootheMotes(who, col, dt, holder) {
+  holder.moteAcc = (holder.moteAcc || 0) + dt * SOOTHE_MOTES.perSec;
+  const rnd = ([a, b]) => a + Math.random() * (b - a), list = who.filter(Boolean);
+  while (holder.moteAcc >= 1 && list.length) {
+    holder.moteAcc -= 1;
+    const o = list[Math.floor(Math.random() * list.length)], L = rnd(SOOTHE_MOTES.life);
+    G.effects.push({ mote: true, vivid: true, x: o.x + (Math.random() * 2 - 1) * 16, y: o.y - 4 - Math.random() * 30, vx: (Math.random() * 2 - 1) * 5, vy: -rnd(SOOTHE_MOTES.rise),
+      r: rnd(SOOTHE_MOTES.size), seed: Math.random() * 99, wob: 4 + Math.random() * 6, life: L, life0: L, col });
+  }
+}
 
 const ULT_CHARGE_COLOR = { theonie: '#ff8a3a', amber: '#aee9ff', avaren: '#b060ff', red: '#bfe0ff', luther: '#ffd0d5' };
 function spawnChargeFx(x, y, color) {   // 大招蓄力telegraph：收束的光圈＋漸亮的核心
@@ -113,7 +127,9 @@ function spawnUltShockwave(x, y, r, color) {   // 近戰大招：大範圍衝擊
 function spawnSootheEffect(x, y, color, follow) {
   const col = color || SOOTHE_COLORS.winter;
   if (follow) { follow.lastSootheColor = col; follow.lastSootheAt = performance.now(); }   // 記下誰疏導的（暴走恢復時用同色吹散黑霧）
-  G.effects.push({ sootheGlow: true, x, y, r0: 10, r1: 52, life: 1.5, life0: 1.5, col, follow, foy: y - (follow ? follow.y : y) });   // 大、久、明顯；可跟隨哨兵
+  // 疏導成功的光圈波紋：用更鮮豔的顏色（跟疏導期間的光點同一套，SOOTHE_MOTE_COLORS）
+  const key = Object.keys(SOOTHE_COLORS).find(k => SOOTHE_COLORS[k] === col), vivid = key && SOOTHE_MOTE_COLORS[key];
+  G.effects.push({ sootheGlow: true, vivid: !!vivid, x, y, r0: 10, r1: 52, life: 1.5, life0: 1.5, col: vivid || col, follow, foy: y - (follow ? follow.y : y) });   // 大、久、明顯；可跟隨哨兵
   for (let i = 0; i < 14; i++) {
     const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.0, sp = 16 + Math.random() * 30, L = 1.0 + Math.random() * .8;
     G.effects.push({ mote: true, x: x + (Math.random() * 2 - 1) * 18, y: y + (Math.random() * 2 - 1) * 11,
@@ -123,11 +139,14 @@ function spawnSootheEffect(x, y, color, follow) {
 // ---- 疏導表演（嚮導施放疏導＝大招等級的演出）----
 // 施術者腳下展開法陣 → 光波擴散到疏導範圍 → 隊友身上的光環與療癒光點（spawnSootheEffect）。
 // radius＝光波擴到多遠（像素，0＝不放光波）
-function spawnSootheCast(caster, col, radius) {
-  if (!caster) return;
-  G.effects.push({ sootheSigil: true, follow: caster, col, life: 1.1, life0: 1.1, spin: Math.random() * Math.PI });
+// dur：腳下法陣留多久（秒；沒給＝1.1 秒）。溫特疏導時會給整段進度條的時間，法陣一直轉到疏導結束
+function spawnSootheCast(caster, col, radius, dur = 1.1) {
+  if (!caster) return null;
+  const sigil = { sootheSigil: true, follow: caster, col, life: dur, life0: dur, spin: Math.random() * Math.PI };
+  G.effects.push(sigil);
   if (radius > 0) G.effects.push({ sootheWave: true, x: caster.x, y: caster.y, r: radius, col, life: .7, life0: .7 });
   addLightFlash('soothe', caster.x, caster.y - 10, 1, col);
+  return sigil;
 }
 
 // 火焰命中特效：程式即時繪製（取代 PNG 序列圖）。畫成一叢會扭動竄升的火舌。

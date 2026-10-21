@@ -8,7 +8,7 @@
 //    （哨兵不會主動去打礦物，只會在攻擊範圍剛好涵蓋礦物時波及）
 //    ・希奧妮：大招的小爆炸會炸開礦物
 //    ・安柏：雷電打偏時，有機率劈中附近的礦物
-//  炸開後異質碎片會散落在地上，溫特走過去就會撿起來，畫面中間跳出拾取提示。
+//  炸開後異質碎片會散落在地上，溫特走到旁邊按空白鍵撿起來（附近的一起撿），畫面中間跳出拾取提示。
 //  礦物每次出勤重新出現。在黑暗中不會發光；被探照燈、營燈或其他燈照亮時，
 //  露出的紫色結晶會亮起鮮豔的紫光（發光圖在 images/item-obstacle/glow/，由原圖的紫色部分做成）。
 //  （數值集中在最上面，想調整改這裡就好）
@@ -16,7 +16,7 @@
 // crystals：炸開後總共掉幾個異質碎片；shards：分成幾塊掉在地上；glow：黑暗中的紫光亮度
 
 const ORE_BLAST_PAD = .6;   // 爆炸半徑外再多算幾格也會炸到礦物（礦物本身有一格大）
-const SHARD = { magnet: 90, pickup: 24, delay: .45 };   // 多近會被吸過來、多近算撿到（像素）；落地後幾秒才能撿
+const SHARD = { reach: 56, gather: 80, delay: .45 };   // reach：離碎片多近會出現「撿起」提示；gather：按空白鍵時，這個距離內的碎片一起撿（像素）；落地後幾秒才能撿
 // 路德的拳頭剛好波及礦物：hits＝敲幾下會碎（暴走時每下算 2 下）；pad＝攻擊範圍外再多算幾格
 const ORE_LUTHER = { hits: 4, pad: .5 };
 // 溫特的手槍：累積多少傷害才打得碎（手槍 Lv1 一發 5 → 小型 16 發、大型 28 發、稀有 40 發）
@@ -126,14 +126,23 @@ function updateOre(dt) {
     if (blocked(nx, ny) && !blocked(s.x, s.y)) { s.vx = 0; s.vy = 0; }
     else { s.x = nx; s.y = ny; }
     if (s.z === 0) { s.vx *= Math.pow(.02, dt); s.vy *= Math.pow(.02, dt); }   // 在地上滑一下就停
-    if (!p || p.hp <= 0 || s.t < SHARD.delay) continue;
-    const d = Math.hypot(p.x - s.x, p.y - s.y);
-    if (d < SHARD.magnet) {   // 靠近就被吸過去
-      const k = Math.min(1, (420 + (SHARD.magnet - d) * 8) * dt / Math.max(d, 1));
-      s.x += (p.x - s.x) * k; s.y += (p.y - s.y) * k;
-    }
-    if (d < SHARD.pickup) s.picked = true;
   }
+}
+// 溫特旁邊可以撿的碎片（已經落地、離溫特 SHARD.reach 以內，最近的那顆）：render.js 畫「撿起異質碎片」提示、game.js 按空白鍵撿
+function shardNearPlayer() {
+  const p = G && G.player; if (!p || p.hp <= 0 || p.sitting) return null;
+  let best = null, bd = SHARD.reach;
+  for (const s of G.oreShards || []) {
+    if (s.picked || s.z > 0 || s.t < SHARD.delay) continue;
+    const d = Math.hypot(p.x - s.x, p.y - s.y); if (d < bd) { bd = d; best = s; }
+  }
+  return best;
+}
+// 按空白鍵：撿起旁邊的碎片（SHARD.gather 以內的一起撿）；有撿到回傳 true
+function pickShardsNearPlayer() {
+  const p = G && G.player, list = G && G.oreShards;
+  if (!shardNearPlayer() || !list) return false;
+  for (const s of list) if (!s.picked && s.z <= 0 && s.t >= SHARD.delay && Math.hypot(p.x - s.x, p.y - s.y) < SHARD.gather) s.picked = true;
   const picked = list.filter(s => s.picked);
   if (picked.length) {
     const total = picked.reduce((sum, s) => sum + s.value, 0);
@@ -144,6 +153,7 @@ function updateOre(dt) {
     SFX.play('crystalGet', .7, 'shard-pickup');
     updateHUD();
   }
+  return picked.length > 0;
 }
 
 // 怪物死掉時掉一顆碎片（value＝這顆值多少碎片），從屍體的位置彈出來落在地上，溫特靠近就會吸過來

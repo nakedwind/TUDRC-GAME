@@ -257,13 +257,20 @@ function useAdrenaline() {
 // ・點頭像＝治療那位隊員（要站在他旁邊 FIRST_AID.reach 格內）；滿血、太遠時，溫特頭上會浮出「沒有受傷」「距離太遠了」。
 // ・再按一次 H／急救包按鈕、按 Esc、按右鍵或點地圖＝取消。
 const firstAid = { channel: null, picking: false, hover: null };
+// 急救包（firstaid）只能幫還站著的隊員補血；異質急救包（anomaly-firstaid）才能救回倒下的隊員（HP 變 FIRST_AID.reviveHp）
+const aidKits = () => itemCount('firstaid') + itemCount('anomaly-firstaid');
+const aidKitFor = t => (t.hp <= 0 ? 'anomaly-firstaid' : 'firstaid');   // 這位隊員要用哪一種急救包
+const aidUsableOn = t => !!t && (t.hp <= 0 ? itemCount('anomaly-firstaid') > 0 : t.hp < t.maxhp && itemCount('firstaid') > 0);
 function useFirstAid() {
   if (!G?.player || G.player.hp <= 0 || firstAid.channel) return;
   if (firstAid.picking) { cancelFirstAidPick(); return; }   // 再按一次＝取消
-  if (itemCount('firstaid') <= 0) { sfx('error'); flash('沒有急救包了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (aidKits() <= 0) { sfx('error'); flash('沒有急救包了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (!(G.towers || []).length) { sfx('error'); flash('沒有可以治療的隊員', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
-  if (!G.towers.some(t => t.hp < t.maxhp)) { sfx('aidCannot'); flash('沒有人受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (!G.towers.some(aidUsableOn)) {
+    const downedOnly = G.towers.some(t => t.hp <= 0) && !G.towers.some(t => t.hp > 0 && t.hp < t.maxhp);
+    sfx('aidCannot'); flash(downedOnly ? '要用異質急救包才能救回倒下的隊員' : itemCount('firstaid') <= 0 && G.towers.some(t => t.hp > 0 && t.hp < t.maxhp) ? '沒有急救包了' : '沒有人受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return;
+  }
   firstAid.picking = true; firstAid.hover = null;
   sfx('menu');
   flash('⛑️ 選擇要治療的隊員', G.player.x, G.player.y - 54, '#9ff0c0', 1.8);
@@ -293,14 +300,17 @@ function firstAidOn(t) {
   const p = G && G.player;
   if (!p || !t || p.hp <= 0 || firstAid.channel) return;
   if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', p.x, p.y - 54, '#c9d3dc'); return; }
-  if (itemCount('firstaid') <= 0) { cancelFirstAidPick(); sfx('error'); flash('沒有急救包了', p.x, p.y - 54, '#c9d3dc'); return; }
-  if (t.hp >= t.maxhp) { showFirstAidTip('沒有受傷'); return; }   // 滿血不能用
+  if (t.hp <= 0 && itemCount('anomaly-firstaid') <= 0) { showFirstAidTip('要用異質急救包才能救回來'); return; }   // 倒下的隊員：一般急救包救不回來
+  if (t.hp > 0 && t.hp >= t.maxhp) { showFirstAidTip('沒有受傷'); return; }   // 滿血不能用
+  if (t.hp > 0 && itemCount('firstaid') <= 0) { cancelFirstAidPick(); sfx('error'); flash('沒有急救包了', p.x, p.y - 54, '#c9d3dc'); return; }
   if (Math.hypot(t.x - p.x, t.y - p.y) > FIRST_AID.reach * CELL) { showFirstAidTip('距離太遠了'); return; }   // 要走到隊員旁邊
   cancelFirstAidPick();
   const v = FIRST_AID;
-  firstAid.channel = { t: 0, total: v.time, target: t, heal: v.heal };
-  Object.assign(p, { soothingT: v.time, gunT: 0, moving: false });   // 站著不動處理傷口
-  flash('⛑️ 急救中…', t.x, t.y - 46, '#9ff0c0', v.time);
+  if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在做別的事
+  // 站著不動處理傷口：進度條跑完才治好（js/channel-actions.js；溫特和隊員都不能動）
+  firstAid.channel = startChannel({ kind: 'firstaid', total: v.time, target: t, heal: v.heal, kit: aidKitFor(t), label: t.hp <= 0 ? '救援中' : '急救中', color: '#79dbad',
+    onDone: finishFirstAid, onCancel: () => { firstAid.channel = null; if (SFX.fadeOut) SFX.fadeOut('first-aid-start', .3); } });
+  if (firstAid.channel) SFX.play('aidStart', 1, 'first-aid-start');   // 開始急救：「補血」音效；急救完成時播「疏導」
 }
 // 選隊員時：按 Esc 取消（先攔下來，才不會同時打開別的選單）
 window.addEventListener('keydown', e => {
@@ -310,11 +320,12 @@ window.addEventListener('keydown', e => {
 cv.addEventListener('pointerdown', () => { if (firstAid.picking) cancelFirstAidPick(); });
 function finishFirstAid() {
   const c = firstAid.channel; firstAid.channel = null; if (!c || !G) return;
-  const t = c.target, isPlayer = t === G.player, wasDown = !isPlayer && t.hp <= 0;
-  if (itemCount('firstaid') <= 0) return;
-  consumeItem('firstaid');
-  t.hp = Math.min(t.maxhp, Math.max(0, t.hp) + c.heal);
-  flash('+' + c.heal + (wasDown ? ' 重新站起來了！' : ''), t.x, t.y - 50, '#79dbad', 1.6);
+  const t = c.target, isPlayer = t === G.player, wasDown = !isPlayer && t.hp <= 0, kit = wasDown ? 'anomaly-firstaid' : 'firstaid';
+  if (c.kit && c.kit !== kit) { showFirstAidTip('隊員倒下了，急救包救不回來'); return; }   // 急救到一半隊員倒下：一般急救包不能用
+  if (itemCount(kit) <= 0) return;
+  consumeItem(kit);
+  if (wasDown) { t.hp = Math.max(1, Math.round(t.maxhp * FIRST_AID.reviveHp)); flash('✚ 救回來了！HP ' + t.hp, t.x, t.y - 50, '#79dbad', 1.8); }   // 異質急救包：HP 變 30%
+  else { t.hp = Math.min(t.maxhp, t.hp + c.heal); flash('+' + c.heal, t.x, t.y - 50, '#79dbad', 1.6); }
   if (!isPlayer && wasDown && typeof sentryStatus === 'function') sentryStatus(t, '被溫特救起來了', '#79dbad');
   for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: t.x + (Math.random() - .5) * 26, y: t.y - 10, vx: 0, vy: -40 - Math.random() * 30, r: 2, life: .7, life0: .7, color: '#9ff0c0' });
   sfx('soothe'); if (typeof updateHUD === 'function') updateHUD();
@@ -338,10 +349,10 @@ let gearQuickKey = '';
 function renderGearQuick() {
   let box = document.getElementById('quickGear');
   if (!box) { const host = document.getElementById('quickSupplies'); if (!host) return; box = document.createElement('div'); box.id = 'quickGear'; host.after(box); }
-  const aid = itemCount('firstaid'), adr = itemCount('adrenaline'), active = adrenalineActive();
+  const aid = itemCount('firstaid'), rev = itemCount('anomaly-firstaid'), adr = itemCount('adrenaline'), active = adrenalineActive();
   const show = !MAP_SAFE;   // 只在戰鬥區域顯示
   const faces = firstAid.picking ? (G.towers || []).map(t => [t.type, t.hp <= 0]) : [];   // 選隊員時：急救包按鈕上方的隊員小頭像（倒下＝黑白＋重傷）
-  const key = JSON.stringify([show, aid, !!firstAid.channel, firstAid.picking, adr, active, faces]);
+  const key = JSON.stringify([show, aid, rev, !!firstAid.channel, firstAid.picking, adr, active, faces]);
   if (key === gearQuickKey) return; gearQuickKey = key;
   const btn = (id, icon, name, sub, k, off, cls = '') => '<button type="button" class="quick-supply gear ' + cls + '" data-gear-use="' + id + '" ' + (off ? 'disabled' : '') + ' title="' + k + '｜' + name + '">' +
     '<span class="qs-icon">' + icon + '</span><span class="qs-text"><small>' + name + '</small><b>' + sub + '</b></span><kbd>' + k + '</kbd></button>';
@@ -350,7 +361,7 @@ function renderGearQuick() {
     return '<span class="aid-face-slot"><button type="button" class="aid-pick-face' + (down ? ' down' : '') + '" data-aid-face="' + type + '" title="' + spec.name + '">' +
       '<img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + (down ? '<span class="aid-face-down">重傷</span>' : '') + '</button></span>';
   }).join('') + '</div>';
-  box.innerHTML = !show ? '' : (aid ? '<span class="aid-gear-wrap">' + btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid, 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') + faceRow + '</span>' : '') +
+  box.innerHTML = !show ? '' : (aid || rev ? '<span class="aid-gear-wrap">' + btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid + (rev ? '・異質×' + rev : ''), 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') + faceRow + '</span>' : '') +
     (adr ? btn('adrenaline', '💉', '腎上腺素', active ? '生效中' : '×' + adr, 'J', active, active ? 'on' : '') : '');
 }
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-gear-use]'); if (!b) return; if (b.dataset.gearUse === 'firstaid') useFirstAid(); else useAdrenaline(); });
@@ -375,8 +386,7 @@ window.addEventListener('keydown', e => {
 // ---- 每幀（game.js 的 update 呼叫）：手電筒耗電、急救進度、資訊條按鈕 ----
 let batteryWarned = false;
 function updateEquipment(dt) {
-  if (firstAid.channel) { firstAid.channel.t += dt; if (firstAid.channel.t >= firstAid.channel.total || G.player.hp <= 0) finishFirstAid(); }
-  if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || itemCount('firstaid') <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
+  if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || aidKits() <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
   renderGearQuick();
   const v = equipLv('headlamp');
   if (!v || MAP_SAFE) return;
@@ -785,3 +795,27 @@ window.addEventListener('keydown', e => {
   const id = equipMenu; equipMenu = null; sfx('switch'); renderEquipPanel();
   document.querySelector('#equipPanel [data-equip-slot="' + id + '"]')?.focus();
 }, true);
+
+// ---- 靠近隊員時的快捷鍵（js/render.js 畫頭上的「F 急救」「空白鍵 疏導」）----
+// 附近倒下的隊員（站在 FIRST_AID.reach 格內）：頭上只出現「急救」；身上沒有異質急救包就不出現（救不回來）
+function downedTeammateNear() {
+  const p = G && G.player; if (!p || MAP_SAFE || p.hp <= 0 || itemCount('anomaly-firstaid') <= 0) return null;
+  let best = null, bd = FIRST_AID.reach * CELL;
+  for (const t of G.towers || []) { if (t.hp > 0) continue; const d = Math.hypot(t.x - p.x, t.y - p.y); if (d < bd) { bd = d; best = t; } }
+  return best;
+}
+// 現在頭上有選項的那位隊員（暴走的優先，再來倒下的，最後是旁邊的隊員）
+function promptTeammate() {
+  if (!G || !G.player || MAP_SAFE || G.player.sitting) return null;
+  const urgent = typeof urgentSootheTarget === 'function' && urgentSootheTarget(); if (urgent) return urgent;
+  const down = downedTeammateNear(); if (down) return down;
+  const a = typeof interactionNearPlayer === 'function' && interactionNearPlayer();
+  return a && a.kind === 'tower' && a.hp > 0 ? a : null;
+}
+// 按 F：旁邊的隊員能急救（受傷＋有急救包，或倒下＋有異質急救包）就急救，不然沒有作用（js/shop.js；杏仁水改成 E）
+// 互動的第一優先：旁邊的隊員現在需要治療（有對應的急救包）或疏導（有污染、暴走）（js/game.js、js/render.js）
+function teammateActionTarget() {
+  const t = promptTeammate(); if (!t) return null;
+  return aidUsableOn(t) || (t.hp > 0 && (t.taint > 0 || t.berserk)) ? t : null;
+}
+function aidKeyTarget() { const t = promptTeammate(); return t && aidUsableOn(t) && !firstAid.channel ? t : null; }

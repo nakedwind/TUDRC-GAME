@@ -1,30 +1,33 @@
 // ============================================================
 //  溫特的 SP＝理智
-//  ・SP 不會自己恢復，只有喝杏仁水（背包／F 鍵）才會恢復。換地圖、重新整理也不會補滿（會記住剩多少）。
-//  ・SP 低於 grayFrom（60）開始，SP 越低遊戲畫面越灰（只有地圖畫面，介面不會變灰）。
-//  ・SP 低於 swayBelow（40）時開始頭暈：視線不規則地繞圈飄、一陣一陣往一邊歪再慢慢回正、忽遠忽近對不到焦。越低越嚴重。
-//  ・SP 低於 ghostBelow（20）時，畫面出現殘影（上一刻的畫面淡淡地留著、稍微錯開）。
-//  ・SP 低於 soundBelow（50）時，聽得到自己的心跳聲，偶爾還有怪聲；SP 越低越大聲、怪聲越頻繁。
+//  ・SP 不會自己恢復，只有喝杏仁水（背包／E 鍵）才會恢復。換地圖、重新整理也不會補滿（會記住剩多少）。
+//  ・SP 低於 grayFrom（80）開始，SP 越低遊戲畫面越灰、越暗（只有地圖畫面，介面不會變灰）。
+//  ・SP 低於 heartbeatBelow（60）時，聽得到自己的心跳聲；SP 越低越大聲。
+//  ・SP 低於 weirdBelow（50）時，偶爾有怪聲；SP 越低越大聲、越頻繁。
+//  ・SP 低於 swayBelow（40）時開始頭暈：視線不規則地繞圈飄。越低越嚴重。
+//  ・SP 低於 ghostBelow（40）時，畫面出現殘影（上一刻的畫面淡淡地留著、稍微錯開）。越低越濃。
+//  ・每個效果都是「剛低於門檻時很輕，SP 歸零時最重」。
 //  ・數值都在下面的 SANITY。
 // ============================================================
 const SANITY = {
   autoRegen: false,    // SP 會不會自己慢慢恢復（false＝只有杏仁水能恢復）
-  grayFrom: 60,        // SP 低於這個值就開始變灰
+  grayFrom: 80,        // SP 低於這個值就開始變灰、變暗
   grayMax: 0.5,      // SP 歸零時灰到什麼程度（0＝不灰、1＝完全黑白）
   dimMax: 0.15,        // SP 歸零時畫面暗多少
-  swayBelow: 20,       // SP 低於這個值才開始頭暈搖晃
+  swayBelow: 40,       // SP 低於這個值才開始頭暈搖晃
   swayPx: 5,           // SP 歸零時，視線最多飄幾像素
   swayDeg: 0,          // SP 歸零時，畫面最多歪幾度（0＝不歪；之前試過 0.6）
   lurchEvery: null,    // 每隔幾秒來「一陣暈」（SP 越低越頻繁）；null＝關掉（之前試過 [2.2, 4.5]）
   focusPulse: 0,       // 忽遠忽近的幅度（畫面縮放）；0＝關掉（之前試過 0.015）
-  ghostBelow: 20,      // SP 低於這個值出現殘影
+  ghostBelow: 40,      // SP 低於這個值出現殘影
   ghostAlpha: 0.25,    // SP 歸零時殘影有多濃（0～1）
   ghostShift: 5,       // 殘影錯開幾像素
-  soundBelow: 50,      // SP 低於這個值開始聽到心跳聲和怪聲
-  heartbeatVolume: 0.95,   // SP 歸零時心跳聲的音量（剛低於 50 時大約是這個的 1/4）
+  heartbeatBelow: 60,  // SP 低於這個值開始聽到心跳聲
+  weirdBelow: 50,      // SP 低於這個值開始偶爾聽到怪聲
+  heartbeatVolume: 2.6,    // SP 歸零時心跳聲的音量倍率（剛低於 60 時大約是這個的 1/4）；音檔本身很小聲（最大只有 34%），2.6 倍≈滿格
   heartbeatEvery: 5.6,    // 心跳音檔多久重播一次（音檔約 5.7 秒，接著播就不會斷）
   weirdVolume: 0.5,       // SP 歸零時怪聲的音量
-  weirdEvery: [20, 50],    // 怪聲每隔幾秒出現一次（剛低於 50 時）；SP 越低越頻繁，歸零時約是一半
+  weirdEvery: [20, 50],    // 怪聲每隔幾秒出現一次（剛低於 weirdBelow 時）；SP 越低越頻繁，歸零時約是一半
   warnText: '……頭好暈。得喝點杏仁水才行。',   // 剛低於 swayBelow 時，溫特說的話
 };
 const SP_STORE = 'tudrc_sp_v1';
@@ -114,19 +117,24 @@ function sanityAfterDraw() {
   } else if (sp >= SANITY.swayBelow + 5) sanityWarned = false;
 })();
 // 心跳聲、怪聲（每一幀檢查）：SP 越低越大聲，怪聲也越常出現
+// HP 低於 LOW_HP_FX.hp（js/render.js，畫面閃紅光的時候）也會聽到心跳；兩種情況共用同一個心跳，不會疊兩層
 let sanityBeatAt = 0, sanityWeirdAt = 0;
+const lowHpHeartbeat = () => typeof LOW_HP_FX !== 'undefined' && !MAP_SAFE && G.player && !G.over && G.player.hp > 0 && G.player.hp < LOW_HP_FX.hp;
 function sanitySounds(sp) {
-  const now = performance.now() / 1000;
-  if (!G.player || sp >= SANITY.soundBelow || (typeof mapTransitioning !== 'undefined' && mapTransitioning)) { sanityBeatAt = 0; sanityWeirdAt = 0; return; }
-  const k = Math.min(1, (SANITY.soundBelow - sp) / SANITY.soundBelow), level = (.25 + .75 * k) * sanityCalm();
+  const now = performance.now() / 1000, lowHp = lowHpHeartbeat(), lowSp = sp < SANITY.heartbeatBelow;
+  if (!G.player || (!lowSp && !lowHp) || (typeof mapTransitioning !== 'undefined' && mapTransitioning)) { sanityBeatAt = 0; sanityWeirdAt = 0; return; }
+  const k = Math.min(1, Math.max(0, (SANITY.heartbeatBelow - sp) / SANITY.heartbeatBelow)), level = (.25 + .75 * k) * sanityCalm();
   if (now >= sanityBeatAt) {
     sanityBeatAt = now + SANITY.heartbeatEvery;
-    SFX.play('heartbeat', SANITY.heartbeatVolume * level, 'sanity-heartbeat');
+    const vol = Math.max(lowSp ? SANITY.heartbeatVolume * level : 0, lowHp ? LOW_HP_FX.heartbeat : 0);   // 低血量的心跳不受降噪耳機影響
+    SFX.play('heartbeat', vol, 'sanity-heartbeat');
   }
-  if (!sanityWeirdAt) sanityWeirdAt = now + 2 + Math.random() * 3;   // 剛低於 50：幾秒後第一聲
+  if (sp >= SANITY.weirdBelow) { sanityWeirdAt = 0; return; }   // 怪聲只在 SP 低於 weirdBelow 時出現
+  const kw = Math.min(1, (SANITY.weirdBelow - sp) / SANITY.weirdBelow), levelW = (.25 + .75 * kw) * sanityCalm();
+  if (!sanityWeirdAt) sanityWeirdAt = now + 2 + Math.random() * 3;   // 剛低於門檻：幾秒後第一聲
   else if (now >= sanityWeirdAt) {
-    SFX.play('weirdNoise', SANITY.weirdVolume * level, 'sanity-weird');
-    const [a, b] = SANITY.weirdEvery, shrink = 1 - .5 * k;
+    SFX.play('weirdNoise', SANITY.weirdVolume * levelW, 'sanity-weird');
+    const [a, b] = SANITY.weirdEvery, shrink = 1 - .5 * kw;
     sanityWeirdAt = now + (a + Math.random() * (b - a)) * shrink;
   }
 }

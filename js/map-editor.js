@@ -738,6 +738,7 @@ const KEEP_RATIO_TILES = new Set([
   'tile_interactive_storage_locker_key',         // 置物箱鑰匙
   'tile_interactive_pickup_backroom_door_key',   // 後室門鑰匙
   'tile_interactive_pickup_almond_water',        // 杏仁水
+  'tile_interactive_pickup_adrenaline',          // 腎上腺素
   'tile_interactive_pickup_battery',             // 電池
 ]);
 // 在 w×h 的框裡，圖片照原比例能畫多大（置中）
