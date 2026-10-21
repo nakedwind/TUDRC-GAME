@@ -2,7 +2,7 @@
 //  營地物資箱：放醫療包、杏仁水給嚮導用（溫特也可以拿、可以補）
 //  ・每張戰鬥地圖一個箱子（營地合圖裡彈藥箱右邊）。第一次在這張地圖出任務時補滿 start 的數量，
 //    之後就一直維持（用掉就少了，中止任務再回來也不會補），要溫特自己放東西進去。
-//  ・嚮導身上最多帶 carry 個醫療包、carry 瓶杏仁水：疏導一次用掉一瓶杏仁水、幫人補血一次用掉一個醫療包。
+//  ・嚮導身上最多帶 carry 個醫療包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血花醫療包。
 //    其中一樣用完就自己走回物資箱拿；箱子裡也沒有的話，頭上冒思考泡泡顯示缺什麼。
 //  ・存檔：localStorage（CAMP_SUPPLY_KEY），依地圖分開存；開始新遊戲會清掉（js/new-game.js）。
 // ============================================================
@@ -11,9 +11,9 @@ const CAMP_SUPPLY = {
   items: ['medkit', 'almond-water'],           // 能放什麼
   start: { medkit: 10, 'almond-water': 10 },   // 第一次出任務時箱子裡有多少
   carry: 2,                                    // 嚮導每樣最多帶幾個
-  minTaint: 15,                                // 隊員汙染到多少，嚮導才會花一瓶杏仁水疏導（太少不浪費）
+  minTaint: 15,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
   minHeal: 15,                                 // 隊員少多少血，嚮導才會花一個醫療包補血
-  sootheMul: 2,                                // 用杏仁水疏導時，疏導量是原本的幾倍（原本：艾德林一次清 15）
+  sootheMul: 2,                                // 疏導量倍率（原本：艾德林一次清 15）
   art: { full: 'images/field-camp/field-base-02.png', empty: 'images/field-camp/field-base-03.png' },   // 疊在營地合圖上的箱子（同樣 440×320）
   rect: [232, 100, 282, 170],                  // 箱子在營地合圖裡的位置（圖片像素：左、上、右、下）
 };
@@ -65,8 +65,8 @@ function refillGuideKit(t, silent) {
   if (campSupplyOpen) renderCampSupply();
   return got.length > 0;
 }
-// 疏導（game.js 嚮導的被動疏導呼叫）：有杏仁水才能疏導、有醫療包才能補血，各用掉一個
-const guideCanSoothe = t => !MAP_SAFE ? (guideKit(t)['almond-water'] || 0) > 0 : true;
+// 杏仁水用來恢復 SP；沒有水時，只要 SP 足夠仍能疏導。
+const guideCanSoothe = t => guideSP(t) >= guideSPCost();
 const guideCanHeal = t => !MAP_SAFE ? (guideKit(t).medkit || 0) > 0 : true;
 function guideUse(t, k) { if (MAP_SAFE) return; const kit = guideKit(t); kit[k] = Math.max(0, (kit[k] || 0) - 1); }
 // 缺什麼（身上用完的）

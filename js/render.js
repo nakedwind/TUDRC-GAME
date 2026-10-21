@@ -167,7 +167,11 @@ function drawTower(t) {
     else if (t.downAt == null) t.downAt = performance.now();   // 剛失去戰鬥能力：播倒下動畫
     const downAge = t.downAt != null ? (performance.now() - t.downAt) / 1000 : Infinity;
     if (downAge < FALL_DOWN_TIME() && drawFallDown(t, set, downAge)) { /* 倒下動畫中 */ }
-    else ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
+    else {
+      if (t.hp > 0) costumeLayer(t.type, t, t.x - size / 2 + shX, t.y - size + 18, size, 'behind');   // 倒下時不畫配件（人躺著）
+      ctx.drawImage(img, t.x - size / 2 + shX, t.y - size + 18, size, size);
+      if (t.hp > 0) costumeLayer(t.type, t, t.x - size / 2 + shX, t.y - size + 18, size, 'front');
+    }
     const redFlash = sentryRedFlash(t);   // 瀕臨暴走慢閃紅、暴走快閃紅
     const redSil = redFlash > 0.01 ? flashSprite(img, '#ff3b3b') : null;
     if (redSil) {
@@ -444,6 +448,8 @@ function npcIconOutline(id, img) {
 }
 // 走路時一蹦一蹦的 NPC：height＝最高蹦幾像素、perSec＝每秒蹦幾下（只有圖會跳，頭上的名字和泡泡不跳）
 const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
+// 衣櫃裡戴上的配件（js/costumes.js）：behind＝畫在角色後面、front＝前面
+const costumeLayer = (id, who, x, y, size, layer) => { if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer); };
 function drawWanderer(npc) {
   const set = wandererSprites[npc.id];
   const img = set && pickCharacterFrame(set, npc);
@@ -452,7 +458,9 @@ function drawWanderer(npc) {
     const hop = NPC_HOP[npc.id], hopY = hop && npc.moving && !npc.sitting ? -Math.abs(Math.sin((npc.anim || 0) * Math.PI * hop.perSec)) * hop.height : 0;
     ctx.imageSmoothingEnabled = false;
     ctx.save(); seatRotate(npc, size);
+    costumeLayer(npc.id, npc, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, 'behind');
     ctx.drawImage(img, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, size);
+    costumeLayer(npc.id, npc, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, 'front');
     ctx.restore();
     ctx.imageSmoothingEnabled = true;
   }
@@ -773,10 +781,14 @@ function drawPlayer(p) {
     if (p.sitting?.rotation) {
       ctx.translate(p.x, p.y - size / 2 + 18);
       ctx.rotate(p.sitting.rotation * Math.PI / 180);
+      costumeLayer(PLAYER_CHARACTER, p, -size / 2, -size / 2, size, 'behind');
       ctx.drawImage(img, -size / 2, -size / 2, size, size);
+      costumeLayer(PLAYER_CHARACTER, p, -size / 2, -size / 2, size, 'front');
       drawHitFlash(img, hitK, '#ff4d4d', -size / 2, -size / 2, size, size);
     } else {
+      costumeLayer(PLAYER_CHARACTER, p, p.x - size / 2, p.y - size + 18, size, 'behind');
       ctx.drawImage(img, p.x - size / 2, p.y - size + 18, size, size);
+      costumeLayer(PLAYER_CHARACTER, p, p.x - size / 2, p.y - size + 18, size, 'front');
       drawHitFlash(img, hitK, '#ff4d4d', p.x - size / 2, p.y - size + 18, size, size);
       const low = lowHpPulse() * LOW_HP_FX.body;   // 低血量：身上微微閃紅
       if (low > .01 && hitK <= 0) drawHitFlash(img, low, '#ff2a2a', p.x - size / 2, p.y - size + 18, size, size);
@@ -891,6 +903,7 @@ function draw() {
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
+    else if (typeof wardrobeNearPlayer === 'function' && !doorNearPlayer() && wardrobeNearPlayer()) { const w = wardrobeNearPlayer(); drawInteractPrompt(w.x, w.top - 4, '換裝'); }   // 衣櫃（js/costumes.js）
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）
     else if (typeof lockedDoorNearPlayer === 'function' && !doorNearPlayer() && lockedDoorNearPlayer()) { const d = lockedDoorNearPlayer(); drawInteractPrompt(d.x, d.top - 4, '開門'); }   // 鎖住的房門（js/locked-doors.js）

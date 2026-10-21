@@ -8,7 +8,7 @@
 //    （哨兵不會主動去打礦物，只會在攻擊範圍剛好涵蓋礦物時波及）
 //    ・希奧妮：大招的小爆炸會炸開礦物
 //    ・安柏：雷電打偏時，有機率劈中附近的礦物
-//  炸開後異質碎片會散落在地上，溫特走到旁邊按空白鍵撿起來（附近的一起撿），畫面中間跳出拾取提示。
+//  炸開後異質碎片會散落在地上，溫特走到旁邊按互動鍵逐顆撿起來，畫面中間跳出拾取提示。
 //  礦物每次出勤重新出現。在黑暗中不會發光；被探照燈、營燈或其他燈照亮時，
 //  露出的紫色結晶會亮起鮮豔的紫光（發光圖在 images/item-obstacle/glow/，由原圖的紫色部分做成）。
 //  （數值集中在最上面，想調整改這裡就好）
@@ -16,7 +16,7 @@
 // crystals：炸開後總共掉幾個異質碎片；shards：分成幾塊掉在地上；glow：黑暗中的紫光亮度
 
 const ORE_BLAST_PAD = .6;   // 爆炸半徑外再多算幾格也會炸到礦物（礦物本身有一格大）
-const SHARD = { reach: 56, gather: 80, delay: .45 };   // reach：離碎片多近會出現「撿起」提示；gather：按空白鍵時，這個距離內的碎片一起撿（像素）；落地後幾秒才能撿
+const SHARD = { reach: 56, delay: .45 };   // reach：可拾取的距離（像素）；delay：落地後幾秒才能撿
 // 路德的拳頭剛好波及礦物：hits＝敲幾下會碎（暴走時每下算 2 下）；pad＝攻擊範圍外再多算幾格
 const ORE_LUTHER = { hits: 4, pad: .5 };
 // 溫特的手槍：累積多少傷害才打得碎（手槍 Lv1 一發 5 → 小型 16 發、大型 28 發、稀有 40 發）
@@ -109,7 +109,7 @@ function breakOre(o, bx, by, msg) {
   if (typeof sfxAt === 'function') { sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break'); sfxAt('oreMine', c.x, c.y, .7, 'ore-mine'); }   // 碎掉的玻璃聲＋挖礦聲
 }
 
-// ---- 每幀更新（在 update 裡呼叫）：碎片噴飛、落地、被溫特吸過去撿起來 ----
+// ---- 每幀更新（在 update 裡呼叫）：碎片噴飛、落地 ----
 function updateOre(dt) {
   updateOreDissolve(dt);
   const list = G.oreShards; if (!list || !list.length) return;
@@ -138,25 +138,25 @@ function shardNearPlayer() {
   }
   return best;
 }
-// 按空白鍵：撿起旁邊的碎片（SHARD.gather 以內的一起撿）；有撿到回傳 true
+// 玩家與搜救犬共用，每次只結算指定的那一顆。
+function pickShard(shard, collector, reach = SHARD.reach) {
+  if (!shard || !collector || !G?.oreShards?.includes(shard) || shard.picked || shard.z > 0 || shard.t < SHARD.delay
+      || Math.hypot(collector.x - shard.x, collector.y - shard.y) >= reach) return false;
+  shard.picked = true;
+  G.oreShards = G.oreShards.filter(s => s !== shard);
+  earnCrystals(shard.value);
+  showPickupToast(shard.value);
+  flash('+' + shard.value, collector.x, collector.y - 50, '#d69bff', .9);
+  SFX.play('crystalGet', .7, 'shard-pickup');
+  updateHUD();
+  return true;
+}
+// 按一次互動鍵只撿最近的一顆；每顆原本的價值保持不變。
 function pickShardsNearPlayer() {
-  const p = G && G.player, list = G && G.oreShards;
-  if (!shardNearPlayer() || !list) return false;
-  for (const s of list) if (!s.picked && s.z <= 0 && s.t >= SHARD.delay && Math.hypot(p.x - s.x, p.y - s.y) < SHARD.gather) s.picked = true;
-  const picked = list.filter(s => s.picked);
-  if (picked.length) {
-    const total = picked.reduce((sum, s) => sum + s.value, 0);
-    earnCrystals(total);
-    G.oreShards = list.filter(s => !s.picked);
-    showPickupToast(total);
-    flash('+' + total, p.x, p.y - 50, '#d69bff', .9);
-    SFX.play('crystalGet', .7, 'shard-pickup');
-    updateHUD();
-  }
-  return picked.length > 0;
+  return pickShard(shardNearPlayer(), G && G.player);
 }
 
-// 怪物死掉時掉一顆碎片（value＝這顆值多少碎片），從屍體的位置彈出來落在地上，溫特靠近就會吸過來
+// 怪物死掉時掉一顆碎片（value＝這顆值多少碎片），從屍體的位置彈出來落在地上，靠近後可逐顆拾取
 function dropShard(x, y, value) {
   if (!G || !value) return;
   G.oreShards = G.oreShards || [];

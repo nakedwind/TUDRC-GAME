@@ -77,22 +77,32 @@ function storagePropPrompt(prop){
 // 可以拾取的東西（地上的拾取亮點、怪物掉的道具／裝備）：互動優先順序比置物櫃、電源這類地圖物件高
 const isPickupProp=prop=>prop.kind==='equipment-drop'||isWorldPickup(prop.kind);
 const pickupPropNearPlayer=()=>storagePropNearPlayer(isPickupProp);
-function useStoragePropNearPlayer(filter){
-  const prop=storagePropNearPlayer(filter);if(!prop)return false;
+// Shared by player interaction and the rescue dog; stale targets cannot grant loot twice.
+function pickupStorageProp(prop){
+  if(!prop||!isPickupProp(prop))return false;
+  if(prop.kind==='equipment-drop'){
+    if(!(G.equipmentDrops||[]).includes(prop.drop))return false;
+  }else if(collectedStorageKeys.has(prop.token)||!storagePropEntries().some(p=>p.token===prop.token))return false;
   if(prop.kind==='equipment-drop'){
     if(prop.drop.item){   // 後室道具（平安符）
       supplyInventory.set(prop.drop.item,(supplyInventory.get(prop.drop.item)||0)+1);sfx('itemPickup');showItemPickupNotice(prop.drop.item,1);
     }else if(grantEquipment(prop.drop.id,'拾取了'))sfx('itemPickup');
     G.equipmentDrops=(G.equipmentDrops||[]).filter(drop=>drop!==prop.drop);
     updateHUD();saveGame();
-  }else if(prop.kind==='power'){
-    const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice(mapPowerIsOn(n)?'電源已開啟':'電源已關閉');
-  }else if(isWorldPickup(prop.kind)){
+  }else{
     const loot=WORLD_PICKUPS[prop.kind];
     supplyInventory.set(loot.item,(supplyInventory.get(loot.item)||0)+1);
     collectedStorageKeys.add(prop.token);sfx('itemPickup');
     showItemPickupNotice(loot.item,1);
     updateHUD();saveGame();
+  }
+  return true;
+}
+function useStoragePropNearPlayer(filter){
+  const prop=storagePropNearPlayer(filter);if(!prop)return false;
+  if(isPickupProp(prop))return pickupStorageProp(prop);
+  if(prop.kind==='power'){
+    const n=circuitOf(prop.stamp);toggleMapPower(n);sfx('powerOn');systemNotice(mapPowerIsOn(n)?'電源已開啟':'電源已關閉');
   }else if(prop.open){
     flash('置物箱已打開',prop.x,prop.top-8,'#dce6ed',1.2);
   }else if((supplyInventory.get('storage-locker-key')||0)<=0){
