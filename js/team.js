@@ -140,6 +140,7 @@ function memberCondition(actor, safe) {
   if (actor.noncombat) return { text: '非戰鬥人員', cls: 'support' };
   if (safe) return { text: getTeam().includes(actor.type) ? '已編入' : '待命', cls: getTeam().includes(actor.type) ? 'ready' : 'standby' };
   if (!actor.live) return { text: '未部署', cls: 'standby' };
+  if (TYPES[actor.type]?.guide && guideSP(actor.live) < SANITY.swayBelow) return { text: 'SP 偏低', cls: 'warning' };
   if (actor.live.berserk) return { text: '暴走', cls: 'danger' };
   const taint = actor.live.taint || 0;
   if (taint > 85) return { text: '瀕臨暴走', cls: 'danger' };
@@ -184,7 +185,7 @@ function squadCard(actor, safe) {
   const learned = typeof training !== 'undefined' && training.skills ? (training.skills[actor.type] || []).length : 0;
   const trainingAction = '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / 9' + (safe ? '' : '・回基地才能學') + '</small></button>';
   const loadBar = spec.guide
-    ? '<div class="no-load"><span>精神負荷 <b>無</b></span><i><u style="width:0"></u></i></div>'
+    ? '<div><span>SP <b>' + Math.floor(guideSPFor(actor.type)) + ' / ' + guideSPMax() + '</b></span><i class="sp-bar"><u style="width:' + (guideSPFor(actor.type) / guideSPMax() * 100) + '%"></u></i></div>'
     : '<div><span>負荷 <b>' + taint + ' / 100</b></span><i class="taint-bar"><u style="width:' + taint + '%"></u></i></div>';
   return '<article class="squad-card squad-card-combat" style="--member-color:' + spec.color + '">' +
     '<span class="squad-portrait"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></span>' +   // 頭像框：放大顯示上半身（半身像）
@@ -285,9 +286,11 @@ function openFieldCommandMenu(type, avatar) {
     '<button type="button" class="field-command-close" aria-label="關閉選單">×</button></div>' +
     (unavailable ? '<p>' + (member.hp <= 0 ? '目前無法行動' : '暴走中，無法接受指令') + '</p>' :
     '<button type="button" class="field-command-option" data-destination="base">返回基地巡邏</button>' +
-    '<button type="button" class="field-command-option' + (escorting ? ' active' : '') + '" data-destination="escort">跟隨護衛部隊長' + (escorting ? '<small>護衛中</small>' : '') + '</button>');
+    '<button type="button" class="field-command-option' + (escorting ? ' active' : '') + '" data-destination="escort">跟隨護衛部隊長' + (escorting ? '<small>護衛中</small>' : '') + '</button>' +
+    (spec.guide && !guideSPPractice() ? '<button type="button" class="field-command-option" data-guide-drink' + ((supplyInventory.get('almond-water') || 0) <= 0 || guideSP(member) >= guideSPMax() || member.soothingT > 0 || member.sleepT > 0 || member.frozenT > 0 || member.eatenBy ? ' disabled' : '') + '>喝杏仁水<small>背包 ' + (supplyInventory.get('almond-water') || 0) + ' 瓶・恢復 ' + supplyById('almond-water').restore + ' SP</small></button>' : ''));
   fieldCommandMenu.querySelector('.field-command-close').addEventListener('click', () => { if (typeof sfx === 'function') sfx('switch'); closeFieldCommandMenu(); });
-  fieldCommandMenu.querySelectorAll('.field-command-option').forEach(button => button.addEventListener('click', () => commandFieldMember(type, button.dataset.destination)));
+  fieldCommandMenu.querySelectorAll('[data-destination]').forEach(button => button.addEventListener('click', () => commandFieldMember(type, button.dataset.destination)));
+  fieldCommandMenu.querySelector('[data-guide-drink]')?.addEventListener('click', () => { drinkGuideAlmond(member, true); closeFieldCommandMenu(); });
   fieldCommandMenu.dataset.type = type;
   const wrapRect = document.getElementById('wrap').getBoundingClientRect(), avatarRect = avatar.getBoundingClientRect();
   fieldCommandMenu.style.left = Math.round(avatarRect.right - wrapRect.left + 7) + 'px';
@@ -315,12 +318,14 @@ function renderFieldSquadHud() {
       const maxhp = Math.round(member.maxhp || spec.hp);
       const hpPercent = Math.max(0, Math.min(100, hp / maxhp * 100));
       const taint = Math.max(0, Math.min(100, Math.round(member.taint || 0)));
-      const loadWidth = spec.guide ? 0 : taint;
+      const sp = spec.guide ? Math.floor(guideSP(member)) : 0;
+      const lowSP = spec.guide && sp < SANITY.swayBelow;
+      const loadWidth = spec.guide ? sp / guideSPMax() * 100 : taint;
       const sootheAction = '';   // 正式遊戲停用隊友欄的手動疏導按鈕（靠近哨兵仍可疏導）
       const stateLabel = hp <= 0 ? ''   // 倒下時不顯示汙染標籤，改由下方的「重傷」橫條說明
         : member.berserk
         ? '<em class="taint-tag berserk">暴走</em>'
-        : (!spec.guide && taint > 85 ? '<em class="taint-tag danger">瀕臨暴走</em>' : '');
+        : (lowSP ? '<em class="taint-tag">頭暈</em>' : !spec.guide && taint > 85 ? '<em class="taint-tag danger">瀕臨暴走</em>' : '');
       const hasUlt = ((typeof ULTIMATES !== 'undefined') && ULTIMATES[member.type]) || spec.aura;   // 有大招（嚮導＝疏導）才顯示冷卻條
       const cdRemain = hasUlt ? ultCooldownRemain(member) : 0;
       const sc = spec.aura && typeof SOOTHE_COLORS !== 'undefined' && SOOTHE_COLORS[member.type];   // 嚮導的冷卻條用疏導的顏色
@@ -337,11 +342,11 @@ function renderFieldSquadHud() {
       const aidPick = !!(aid && aid.picking);
       const aidCls = aidPick && aid.hover === member.type ? ' aid-hover' : '';
       const aidFx = aidPick ? '<span class="aid-glow" style="--aid-sync:-' + (nowS % 3.2).toFixed(2) + 's"><i class="s"></i><i class="m"></i></span><span class="aid-arrow"></span>' : '';
-      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + taintCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
+      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + (lowSP ? ' sp-low' : '') + taintCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + stateLabel + '</b>' +
-        // 條的正中間寫數字：左邊＝現在、右邊＝上限（嚮導沒有精神負荷，寫「無」）
+        // 嚮導顯示 SP；哨兵顯示精神負荷。
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +
-        '<div><i class="field-load" aria-label="精神負荷"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? '無' : taint + '/100') + '</span></div>' +
+        '<div><i class="' + (spec.guide ? 'field-sp' : 'field-load') + '" aria-label="' + (spec.guide ? 'SP' : '精神負荷') + '"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? 'SP ' + sp + '/' + guideSPMax() : taint + '/100') + '</span></div>' +
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
         '</article>';
@@ -405,39 +410,50 @@ function renderTeamPanel() {
       '<span class="team-choice">' + (selected ? '移出 −' : locked ? '需領犬員' : '編入 ＋') + '</span></button>';
   };
   const available = roster.filter(id => !team.includes(id));
+  const oldAvailable = teamPanel.querySelector('#teamAvailable'), availableScroll = oldAvailable ? oldAvailable.scrollTop : 0;
   const oldSelected = teamPanel.querySelector('#teamSelected'), selectedScroll = oldSelected ? oldSelected.scrollTop : 0;
-  teamPanel.innerHTML =
+  // Keep the animated dialog and backdrop mounted while the roster changes.
+  if (!teamPanel.querySelector('.team-dialog')) {
+    teamPanel.innerHTML =
     '<div class="team-dialog" role="dialog" aria-modal="true" aria-label="出勤配置">' +
-    '<header class="team-dialog-head"><div class="team-title"><small>應變編組</small><div class="team-title-line"><h2>出勤配置</h2><p>選擇這次任務的出勤人員</p></div></div><span class="team-count"><small>已編入</small><b>' + team.length + ' / ' + cap + '</b></span></header>' +
+    '<header class="team-dialog-head"><div class="team-title"><small>應變編組</small><div class="team-title-line"><h2>出勤配置</h2><p>選擇這次任務的出勤人員</p></div></div><span class="team-count"><small>已編入</small><b id="teamTotalCount"></b></span></header>' +
     '<div class="team-columns">' +
-      '<section class="team-column"><h3>可選人員 <small>' + available.length + '</small></h3><div class="team-list" id="teamAvailable">' +
-        (available.length ? available.map(id => memberCard(id, false)).join('') : '<p class="team-empty">所有人員都已編入。</p>') +
+      '<section class="team-column"><h3>可選人員 <small id="teamAvailableCount"></small></h3><div class="team-list" id="teamAvailable">' +
       '</div></section>' +
-      '<section class="team-column team-column-selected"><h3>已編入人員 <small>' + team.length + ' / ' + cap + '</small></h3><div class="team-list" id="teamSelected">' +
-        (team.length ? team.map(id => '<div class="team-member-wrap">' + memberCard(id, true) + (TYPES[id] && typeof sortieSlotsHtml === 'function' ? sortieSlotsHtml(id) : '') + '</div>').join('') : '<p class="team-empty">尚未編入人員，請從左側選擇。</p>') +
+      '<section class="team-column team-column-selected"><h3>已編入人員 <small id="teamSelectedCount"></small></h3><div class="team-list" id="teamSelected">' +
       '</div></section>' +
     '</div><footer class="team-dialog-footer"><span>點選左側編入，點選右側移出；補給格放零食飲料，出勤時吃掉</span><button id="teamDone" type="button">完成</button></footer>' +
     '</div>';
-  teamPanel.querySelector('#teamAvailable').addEventListener('click', e => {
-    const button = e.target.closest('.team-pick'); if (!button) return;
-    const current = getTeam();
-    if (button.dataset.id === 'ball' && !hasDogHandler(current)) return;
-    if (current.length >= cap) {
-      if (typeof sfx === 'function') sfx('error');
-      if (typeof systemNotice === 'function') systemNotice('已滿編', true);
-      return;
-    }
-    setTeam([...current, button.dataset.id]); renderTeamPanel();
-  });
-  teamPanel.querySelector('#teamSelected').addEventListener('click', e => {
-    if (typeof handleSortieClick === 'function' && handleSortieClick(e)) return;   // 補給格（js/sortie-supply.js）
-    const button = e.target.closest('.team-pick'); if (!button) return;
-    if (!setTeam(getTeam().filter(id => id !== button.dataset.id))) return;
-    if (typeof dropSortieLoadout === 'function') dropSortieLoadout(button.dataset.id);
-    renderTeamPanel();
-  });
+    teamPanel.querySelector('#teamAvailable').addEventListener('click', e => {
+      const button = e.target.closest('.team-pick'); if (!button) return;
+      const current = getTeam();
+      if (button.dataset.id === 'ball' && !hasDogHandler(current)) return;
+      if (current.length >= cap) {
+        if (typeof sfx === 'function') sfx('error');
+        if (typeof systemNotice === 'function') systemNotice('已滿編', true);
+        return;
+      }
+      setTeam([...current, button.dataset.id]); renderTeamPanel();
+    });
+    teamPanel.querySelector('#teamSelected').addEventListener('click', e => {
+      if (typeof handleSortieClick === 'function' && handleSortieClick(e)) return;   // 補給格（js/sortie-supply.js）
+      const button = e.target.closest('.team-pick'); if (!button) return;
+      if (!setTeam(getTeam().filter(id => id !== button.dataset.id))) return;
+      if (typeof dropSortieLoadout === 'function') dropSortieLoadout(button.dataset.id);
+      renderTeamPanel();
+    });
+    teamPanel.querySelector('#teamDone').addEventListener('click', () => { if (typeof sfx === 'function') sfx('button'); closeTeamPanel(); });
+  }
+  teamPanel.querySelector('#teamTotalCount').textContent = team.length + ' / ' + cap;
+  teamPanel.querySelector('#teamAvailableCount').textContent = available.length;
+  teamPanel.querySelector('#teamSelectedCount').textContent = team.length + ' / ' + cap;
+  teamPanel.querySelector('#teamAvailable').innerHTML = available.length
+    ? available.map(id => memberCard(id, false)).join('') : '<p class="team-empty">所有人員都已編入。</p>';
+  teamPanel.querySelector('#teamSelected').innerHTML = team.length
+    ? team.map(id => '<div class="team-member-wrap">' + memberCard(id, true) + (TYPES[id] && typeof sortieSlotsHtml === 'function' ? sortieSlotsHtml(id) : '') + '</div>').join('')
+    : '<p class="team-empty">尚未編入人員，請從左側選擇。</p>';
+  teamPanel.querySelector('#teamAvailable').scrollTop = availableScroll;
   teamPanel.querySelector('#teamSelected').scrollTop = selectedScroll;
-  teamPanel.querySelector('#teamDone').addEventListener('click', () => { if (typeof sfx === 'function') sfx('button'); closeTeamPanel(); });
 }
 
 // 只有在安全場景（基地）才顯示編隊按鈕

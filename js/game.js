@@ -74,10 +74,13 @@ function outfitSet(folder) {
 const playerSprites = {};
 const sentrySprites = {};   // 哨兵類型 → 精靈圖（data/balance.js 的 TYPES 有填 sprite 才有）
 const wandererSprites = {};
-function applyOutfits() {   // 每次開始遊戲／換地圖時呼叫
-  Object.assign(playerSprites, outfitSet(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`));
-  for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = outfitSet(TYPES[type].sprite);
-  for (const profile of WANDERERS) wandererSprites[profile.id] = RANDOM_OUTFITS.includes(profile.id) ? randomOutfitSet(profile.sprite) : outfitSet(profile.sprite);
+function applyOutfits() {   // 每次開始遊戲／換地圖時呼叫；在衣櫃換了服裝也會呼叫（js/costumes.js）
+  const costume = (id, folder) => typeof costumeOutfit === 'function' ? costumeOutfit(id, folder) : null;   // 衣櫃指定的服裝（沒指定＝照原本）
+  const player = costume(PLAYER_CHARACTER, `${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`) || outfitSet(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`);
+  for (const k of Object.keys(playerSprites)) delete playerSprites[k];   // 換穿的那套沒有持槍圖時，不要留著上一套的
+  Object.assign(playerSprites, player);
+  for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = costume(type, TYPES[type].sprite) || outfitSet(TYPES[type].sprite);
+  for (const profile of WANDERERS) wandererSprites[profile.id] = costume(profile.id, profile.sprite) || (RANDOM_OUTFITS.includes(profile.id) ? randomOutfitSet(profile.sprite) : outfitSet(profile.sprite));
 }
 // 每次進地圖隨機穿 A 或 B（各 50%），名單在 data/balance.js 的 RANDOM_OUTFITS
 function randomOutfitSet(folder) {
@@ -492,6 +495,8 @@ window.addEventListener('keydown', e => {
     else if (typeof usePracticeDoorNearPlayer === 'function' && usePracticeDoorNearPlayer()) {}   // 訓練室的門：訓練選單（js/practice.js）
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (typeof useMrtLockNearPlayer === 'function' && useMrtLockNearPlayer()) {}   // 捷運閘門刷卡、入口解封（js/mrt-locks.js）
+    else if (typeof useWardrobeNearPlayer === 'function' && useWardrobeNearPlayer()) {}   // 衣櫃：服裝介面（js/costumes.js）
+    else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
     else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
     else if (typeof tryLockedDoorNearPlayer === 'function' && tryLockedDoorNearPlayer()) {}   // 鎖住的房門：溫特說「好像被鎖住了」（js/locked-doors.js）
@@ -990,6 +995,7 @@ function newGame() {
   closeSupplyShop(true); closeBackpack(true); closeSettings(true);
   if (typeof onGiftNewGame === 'function' && !(typeof practiceOn === 'function' && practiceOn())) onGiftNewGame();   // 出勤後大家又可以收禮
   if (typeof rememberSanitySP === 'function') rememberSanitySP();   // 換地圖前先記住目前的 SP（js/sanity.js）
+  if (typeof rememberGuideSP === 'function') rememberGuideSP();
   if (typeof resetSmilers === 'function') resetSmilers();   // 黑暗中的笑臉（js/smiler.js）
   if (typeof onSortieNewGame === 'function' && !(typeof practiceOn === 'function' && practiceOn())) onSortieNewGame();   // 出勤時吃掉補給、回基地清掉效果（js/sortie-supply.js）
   setNpcArrangeMode(false);
@@ -1705,7 +1711,9 @@ function frame(ts) {
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
   const introOpen = typeof itemIntroOpen !== 'undefined' && itemIntroOpen;   // 第一次拿到新東西的說明視窗（js/item-intro.js）
   const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campSupplyOpen || mapTransitioning
-    || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen);   // 射擊練習（js/target-practice.js）
+    || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen)   // 射擊練習（js/target-practice.js）
+    || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
+    || (typeof gachaOpen !== 'undefined' && gachaOpen);   // 扭蛋機（js/gacha.js）
   if (!menuOpen && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
@@ -1798,6 +1806,7 @@ function update(dt) {
     if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
     if (t.sleepT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著：不攻擊
     if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
+    if (spec.guide) updateGuideSP(t, dt);
     if (t.soothingT > 0) {   // 疏導施法計時；期間嚮導和被疏導的隊員身邊飄出嚮導顏色的小光點（js/attack-fx.js）
       t.soothingT = Math.max(0, t.soothingT - dt);
       if (typeof spawnSootheMotes === 'function' && SOOTHE_MOTE_COLORS[t.type]) spawnSootheMotes([t, ...(t.sootheTargets || []).filter(o => o.hp > 0)], SOOTHE_MOTE_COLORS[t.type], dt, t);
@@ -1814,16 +1823,16 @@ function update(dt) {
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
         const soothed = [];
-        let usedAlmond = false, usedMedkit = false;   // 這一次疏導有沒有用掉杏仁水／醫療包（一次各用一個）
+        let usedSP = false, usedMedkit = false;   // 同一次範圍疏導只扣一次 SP；治療仍消耗一個醫療包
         for (const o of G.towers) {
-          if (o === t || o.hp <= 0 || TYPES[o.type].guide || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
-          // 營地物資箱（js/camp-supply.js）：疏導要用掉一瓶杏仁水、補血要用掉一個醫療包；身上沒有就不做
-          const needSoothe = o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1);
+          if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
+          // 疏導消耗 SP；補血消耗醫療包，兩項資源各自檢查。
+          const needSoothe = !TYPES[o.type].guide && (o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1));
           const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1);
           const doSoothe = needSoothe && (typeof guideCanSoothe !== 'function' || guideCanSoothe(t));
           const doHeal = needHeal && (typeof guideCanHeal !== 'function' || guideCanHeal(t));
           if (!doSoothe && !doHeal) continue;   // 不需要、或身上沒東西可用就跳過
-          if (doSoothe) usedAlmond = true; if (doHeal) usedMedkit = true;
+          if (doSoothe) usedSP = true; if (doHeal) usedMedkit = true;
           const taintBefore = o.taint || 0;
           if (doSoothe) o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD * (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.sootheMul : 1));   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
           if (doHeal) o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * AURA_CD);
@@ -1834,11 +1843,12 @@ function update(dt) {
           soothed.push(o);
         }
         if (soothed.length) {
-          if (typeof guideUse === 'function') { if (usedAlmond) guideUse(t, 'almond-water'); if (usedMedkit) guideUse(t, 'medkit'); }
+          if (usedSP) spendGuideSP(t);
+          if (usedMedkit && typeof guideUse === 'function') guideUse(t, 'medkit');
           t.auraCd = AURA_CD;
           spawnSootheCast(t, sc, spec.aura.r * CELL);   // 疏導表演：法陣、光波
           t.soothingT = SOOTHE_CHANNEL; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;   // 停下來閉眼疏導
-          t.sootheTargets = soothed;   // 施法期間這些人身邊飄光點（下面）
+          t.sootheTargets = soothed.filter(o => o !== t);   // 施法者的光點已另外加入，避免自我治療時重複
           if (typeof sfxAt === 'function') sfxAt('soothe', t.x, t.y, 0.42, t.type);
         }
       }

@@ -14,6 +14,7 @@ const SITUATIONS = [
   { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>。' },
   { group: '找他說話（特殊）', key: 'chat', label: '偶爾閒聊（隨機一句）', when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。' },
   { group: '戰鬥中', key: 'battle', label: '出勤時的頭上泡泡', when: '戰鬥地圖中，每隔 <b>11～22 秒</b>隨機冒出一句。' },
+  { group: '戰鬥中', key: 'lowSp', label: '嚮導 SP 偏低・頭暈', when: '嚮導 SP 低於 <b>40</b> 時說一句；恢復到 45 以上後可再次觸發。' },
   { group: '戰鬥中', key: 'sentry', label: '找他說話（出勤中）', ordered: true, when: '戰鬥中點他、選「對話」時，<b>依序</b>一句一句說完。' },
   { group: '戰鬥中', key: 'ultimate', label: '放大招時喊的話', when: '大招冷卻好、<b>放大招的瞬間</b>。' },
   { group: '戰鬥中', key: 'guard', label: '衝去保護部隊長', when: '部隊長被怪物攻擊、他衝過去保護時（每 <b>6 秒</b>最多一次）。' },
@@ -53,7 +54,7 @@ try {
 if (usingDraft && typeof DIALOGUES !== 'undefined') {
   for (const [id, entry] of Object.entries(DIALOGUES.characters || {})) {
     if (!draft.characters[id]) continue;
-    for (const [key, lines] of Object.entries(entry)) if (key.startsWith('brief_') && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
+    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key === 'lowSp') && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
   }
 }
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
@@ -65,7 +66,7 @@ if (typeof MISSIONS !== 'undefined' && typeof MISSION_BASE !== 'undefined' && dr
 // 空白的角色匯出時會略過（cleaned），檔案不會多一堆空資料。
 const EMPTY_SITUATIONS = {
   sentinel: ['idle', 'npc', 'battle', 'sentry', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
-  guide: ['idle', 'npc', 'battle', 'sentry', 'friendlyHit'],
+  guide: ['idle', 'npc', 'battle', 'sentry', 'friendlyHit', 'lowSp'],
   support: ['idle', 'npc'],
 };
 if (typeof CHARACTERS !== 'undefined') {   // 原本有的照原本的順序（存檔內容才不會因為順序變了而不同），補上的接在後面

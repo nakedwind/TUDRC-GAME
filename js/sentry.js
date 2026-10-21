@@ -155,6 +155,7 @@ function spawnSentries() {
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
     const t = { kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() };
+    if (spec.guide && typeof initGuideSP === 'function') initGuideSP(t);
     if (!MAP_SAFE && typeof applySortieBuff === 'function') applySortieBuff(t);   // 出勤補給（js/sortie-supply.js）
     G.towers.push(t);
     const configuredSpawn = placeAtConfiguredSpawn(t, type);
@@ -708,7 +709,9 @@ function updateWanderer(npc, dt) {
   if (escapeDarkness(npc, dt)) return;
   if (npc.id === 'ball' && !MAP_SAFE && getTeam().includes('ball')) {
     const handler = G.towers.find(t => RESCUE_DOG_HANDLERS.includes(t.type) && t.hp > 0 && !t.berserk);
-    followTarget(npc, handler || G.player, { dist: CELL * 1.25, speed: 110 }, dt);
+    const anchor = handler || G.player;
+    if (updateRescueDogPickup(npc, anchor, dt)) return;
+    followTarget(npc, anchor, { dist: CELL * 1.25, speed: 110 }, dt);
     npc.target = null; npc.waitT = 0;
     return;
   }

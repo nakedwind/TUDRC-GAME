@@ -24,6 +24,7 @@ let lastSavedAt = 0, lastSavedSnapshot = '';
 const saveSnapshot = () => JSON.stringify({ inventory: [...supplyInventory], unlockedStorageLockers: [...unlockedStorageLockers], collectedStorageKeys: [...collectedStorageKeys], cart: [...shopCart], favor: favorPoints, giftKnown, gifted: [...giftedThisVisit], requests: giftRequests, requestsStale });
 function saveGame(manual = false) {
   try {
+    if (typeof rememberGuideSP === 'function') rememberGuideSP();
     const snap = saveSnapshot();
     localStorage.setItem(SAVE_KEY, JSON.stringify({ v: 1, savedAt: Date.now(), ...JSON.parse(snap) }));
     lastSavedSnapshot = snap; lastSavedAt = Date.now();
