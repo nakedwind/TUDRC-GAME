@@ -63,11 +63,13 @@ function questEvent(type, data = {}) {
 }
 
 // ---- 承接、放棄、領獎 ----
+// 作戰桌開著時：提示直接出現在作戰桌的標題列上（最上層、不會被作戰桌擋住或糊掉，js/missions.js 的 showBoardToast）；沒開就照常出現在右上角
+const questNotice = (msg, err = false) => (typeof missionBoardOpen !== 'undefined' && missionBoardOpen && typeof showBoardToast === 'function') ? showBoardToast(msg, err) : systemNotice(msg, err);
 function acceptQuest(q) {
   if (questStatus(q) !== 'available') return false;
-  if (activeCount() >= SIDE_QUEST_RULES.maxActive) { sfx('error'); systemNotice('進行中的委託已經有 ' + SIDE_QUEST_RULES.maxActive + ' 個了', true); return false; }
+  if (activeCount() >= SIDE_QUEST_RULES.maxActive) { sfx('error'); questNotice('進行中的委託已經有 ' + SIDE_QUEST_RULES.maxActive + ' 個了', true); return false; }
   questState.active[q.id] = 0; saveQuests(); sfx('button');
-  systemNotice('承接委託：「' + q.name + '」');
+  questNotice('承接委託：「' + q.name + '」');
   return true;
 }
 function abandonQuest(q) { if (!(q.id in questState.active)) return; delete questState.active[q.id]; saveQuests(); sfx('switch'); }
@@ -85,10 +87,10 @@ function claimQuest(q) {
     const before = favorInfo(q.giver);
     favorPoints[q.giver] = Math.max(0, (favorPoints[q.giver] || 0) + r.favor); got.push(charName(q.giver) + '好感度 +' + r.favor);
     const after = favorInfo(q.giver);
-    if (after.lv > before.lv) { SFX.play('favorUp', .8, 'favor-up'); systemNotice('💗 ' + charName(q.giver) + '：好感度「' + after.name + '」'); }
+    if (after.lv > before.lv) { SFX.play('favorUp', .8, 'favor-up'); questNotice('💗 ' + charName(q.giver) + '：好感度「' + after.name + '」'); }
   }
   SFX.play('crystalGet', .7, 'quest-claim');
-  systemNotice('領取獎勵：' + got.join('、'));
+  questNotice('領取獎勵：' + got.join('、'));
   if (typeof updateHUD === 'function') updateHUD();
   return true;
 }
@@ -134,10 +136,12 @@ function sideDetail(mems) {
     ...Object.entries(r.items || {}).map(([id, n]) => { const it = itemById(id); return it ? '<img src="' + it.image + '" alt="">' + it.name + ' ×' + n : ''; }),
     r.favor ? '💗 ' + charName(q.giver) + '好感度 +' + r.favor : '',
   ].filter(Boolean);
-  const btn = s === 'available' ? '<button type="button" class="mission-go side-accept">承接委託</button>'
-    : s === 'ready' ? '<button type="button" class="mission-go side-claim">領取獎勵</button>'
-    : s === 'active' ? '<button type="button" class="mission-team side-abandon">放棄委託</button>'
-    : '<button type="button" class="mission-go" disabled>已完成</button>';
+  // side-btn：承接、領獎、放棄、已完成都一樣大（css/style.css 的 .side-btn）
+  // 完成之後：大按鈕是「已完成」，上面多一顆小的「全部拿取」領獎勵（領完變成「已收下」）
+  const btn = s === 'available' ? '<button type="button" class="mission-go side-btn side-accept">承接委託</button>'
+    : s === 'ready' ? '<div class="side-btns"><button type="button" class="mission-go side-claim side-claim-small">全部拿取</button><button type="button" class="mission-go side-btn" disabled>已完成</button></div>'
+    : s === 'active' ? '<button type="button" class="mission-team side-btn side-abandon">放棄委託</button>'
+    : '<div class="side-btns"><button type="button" class="mission-go side-claim-small" disabled>已收下</button><button type="button" class="mission-go side-btn" disabled>已完成</button></div>';
   return '<div class="mission-detail-main">' +
     '<div class="side-giver">' + (charFace(q.giver) ? '<img src="' + charFace(q.giver) + '" alt="">' : '') + '<div><em class="mission-status ' + (s === 'ready' || s === 'available' ? 'available' : s === 'done' ? 'cleared' : '') + '">' + charName(q.giver) + '的委託・' + STATUS_LABEL[s] + '</em><h3>' + q.name + '</h3></div></div>' +
     '<blockquote class="side-ask">「' + (s === 'done' || s === 'ready' ? q.thanks || q.ask : q.ask) + '」</blockquote>' +

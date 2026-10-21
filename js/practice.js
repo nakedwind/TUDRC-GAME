@@ -9,7 +9,8 @@
    - 結束：走到門邊按 Space → 選單（結束訓練、開關燈光、開關污染）。
 */
 const PRACTICE = {
-  map: 'B-2訓練室',                     // 哪一張地圖是訓練室（地圖名稱）
+  mapId: 'map_mvfmo6c2',               // 哪一張地圖是訓練室（地圖的 id：在基地編輯器改地圖名稱也不會壞）
+  map: 'B-1訓練室',                     // 找不到 id 時，改用地圖名稱找（以前叫 B-2訓練室，10/21 改名成 B-1訓練室）
   npc: 'taana',                         // 誰可以開始訓練
   area: { c0: 4, c1: 15, r0: 6, r1: 13 },   // 黃線區域（格子範圍；14、15 排在玻璃牆後面，畫面上被擋住，不放人）
   enter: [9, 13], exit: [9, 18],        // 進場時溫特站的格子、結束後站的格子（門的裡面／外面）
@@ -29,7 +30,7 @@ function savePracticePrefs() {
   try { localStorage.setItem(PRACTICE_PREFS, JSON.stringify({ team, kinds, count, refill, taint, dark, sandbag })); } catch (_) {}
 }
 const practiceOn = () => practice.active;
-const isPracticeMap = () => !!(MAP && MAP.name === PRACTICE.map);
+const isPracticeMap = () => !!(MAP && (MAP.id === PRACTICE.mapId || MAP.name === PRACTICE.map));
 const inPracticeArea = (c, r) => c >= PRACTICE.area.c0 && c <= PRACTICE.area.c1 && r >= PRACTICE.area.r0 && r <= PRACTICE.area.r1;
 
 // ---- 訓練中不給獎勵、不出 Smiler（包住原本的函式）----

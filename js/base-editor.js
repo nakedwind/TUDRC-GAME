@@ -37,6 +37,20 @@ const PULL_RESTORE_APPLIED = (() => {
 })();
 // 瀏覽器暫存：基地編輯器自己的（跟地圖編輯器分開，兩邊互不覆蓋）
 const STORAGE_MAPS = 'tudrc_base_maps_v1';
+// ---- 刪掉的地圖：記下來，才不會被「檔案裡有、暫存沒有就補回來」又加回去 ----
+// ・自己刪的先記在瀏覽器（STORAGE_DELETED_MAPS）；按「存到專案」時寫進 data/base-maps.js 的 BASE_MAPS_DELETED，
+//   其他人拉下來打開編輯器，他瀏覽器暫存裡的這張也會跟著刪掉（不然他一存檔又會寫回去）。
+// ・刪掉後按「復原」把地圖找回來：記號會自動拿掉。
+const STORAGE_DELETED_MAPS = 'tudrc_base_deleted_maps_v1';
+const FILE_DELETED_MAPS = typeof BASE_MAPS_DELETED !== 'undefined' && Array.isArray(BASE_MAPS_DELETED) ? BASE_MAPS_DELETED : [];
+let deletedMapIds = new Set(FILE_DELETED_MAPS);
+try { for (const id of JSON.parse(localStorage.getItem(STORAGE_DELETED_MAPS) || '[]')) deletedMapIds.add(id); } catch (_) {}
+function saveDeletedMaps() {
+  // 打開編輯器時，檔案裡的地圖都已經補進來了；之後檔案裡有、清單裡卻沒有的＝自己刪掉的（刪除、復原、重做都照這個算）
+  for (const m of BASE_MAPS) if (!maps.some(x => x.id === m.id)) deletedMapIds.add(m.id);
+  for (const id of [...deletedMapIds]) if (maps.some(m => m.id === id)) deletedMapIds.delete(id);   // 還在清單裡的（復原回來的）就不算刪掉
+  try { localStorage.setItem(STORAGE_DELETED_MAPS, JSON.stringify([...deletedMapIds])); } catch (_) {}
+}
 // 素材庫：兩個編輯器共用同一份暫存（地圖暫存還是各自一份）
 const STORAGE_TILES = 'tudrc_shared_tiles_v1';
 const OWN_OLD_TILES = 'tudrc_base_tiles_v1', OTHER_OLD_TILES = 'tudrc_battle_tiles_v1';   // 素材還沒共用之前，兩個編輯器各自的素材暫存（第一次打開時合併過來，舊暫存不刪）
@@ -402,9 +416,13 @@ function loadMaps() {
   if (saved) { try { maps = JSON.parse(saved); } catch (e) { maps = clone(BASE_MAPS); } }
   else maps = clone(BASE_MAPS);
   if (!Array.isArray(maps) || maps.length === 0) maps = clone(BASE_MAPS);
-  // 專案資料中若有瀏覽器暫存缺少的地圖，只補上缺少的項目，保留使用者目前的編輯內容。
+  // 專案檔記著已經刪掉的地圖（別人刪的）：瀏覽器暫存裡還有的話也拿掉（至少留一張）
   let restoredDefaults = false;
+  const keep = maps.filter(m => !FILE_DELETED_MAPS.includes(m.id));
+  if (keep.length && keep.length !== maps.length) { maps = keep; restoredDefaults = true; }
+  // 專案資料中若有瀏覽器暫存缺少的地圖，只補上缺少的項目，保留使用者目前的編輯內容。刪掉的地圖不補回來。
   BASE_MAPS.forEach(defaultMap => {
+    if (deletedMapIds.has(defaultMap.id)) return;
     if (!maps.some(map => map.id === defaultMap.id)) {
       maps.push(clone(defaultMap));
       restoredDefaults = true;
@@ -532,6 +550,7 @@ document.getElementById('expandEditor')?.addEventListener('click', () => {
 });
 // 地圖暫存放在瀏覽器資料庫（js/base-editor-store.js）；寫入失敗要大聲提醒
 function saveMaps() {
+  saveDeletedMaps();   // 復原回來的地圖：拿掉「已刪除」的記號
   EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps)).catch(e => setStatus('⚠️ 自動存檔失敗（' + (e && e.name || e) + '）：請馬上按「💾 存到專案」或「下載」保存！', '#ff8f8f'));
   setStatus('已自動存檔 ✓', '#7ee0c0');
   if (typeof refreshStorageInfoSoon === 'function') refreshStorageInfoSoon();
@@ -572,6 +591,7 @@ function restoreEditorSnapshot(value) {
   selection = null; selections = [];
   if (!maps.some(m => m.id === curId)) curId = maps[0].id;
   if (!tileById(brush.tile)) brush = { mode: brush.mode, tile: 'floor' };
+  saveDeletedMaps();   // 復原／重做刪除地圖：「已刪除」記號跟著更新
   EditorStore.setItem(STORAGE_MAPS, JSON.stringify(maps));
   saveTiles();   // 素材庫共用：回復後的素材也同步給另一個編輯器
   checkResult = null;
@@ -2330,7 +2350,9 @@ document.getElementById('delMap').addEventListener('click', () => {
   if (maps.length <= 1) { alert('至少要留一張地圖'); return; }
   const m = curMap(); if (!confirm('確定刪除地圖「' + m.name + '」？')) return;
   pushUndo();
+  deletedMapIds.add(m.id);   // 記下來：之後打開編輯器不會又從 data/base-maps.js 補回來
   maps = maps.filter(x => x !== m); switchTo(maps[0].id); saveMaps();
+  setStatus('已刪除地圖「' + m.name + '」；按「💾 存到專案」後，其他人的編輯器也會跟著刪掉', '#ffd24a');
 });
 
 // ================= 規則面板 =================
@@ -2496,7 +2518,13 @@ function exportText() {
     '   只放基地（安全區域）的地圖；戰鬥地圖在 data/maps.js，由「🗺️ 地圖編輯器」管理。\n' +
     '   素材（磚塊）在兩個編輯器共用的 data/tiles.js。\n' +
     '   整段貼回 data/base-maps.js 覆蓋即可。 */\n' +
-    'const BASE_MAPS = ' + JSON.stringify(maps, null, 2) + ';\n';
+    'const BASE_MAPS = ' + JSON.stringify(maps, null, 2) + ';\n' +
+    deletedMapsExport();
+}
+// 刪掉的地圖 id（沒有刪過就不寫，檔案跟以前一樣）
+function deletedMapsExport() {
+  const ids = [...deletedMapIds].filter(id => !maps.some(m => m.id === id)).sort();
+  return ids.length ? '// 刪掉的地圖：別人的基地編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來\nconst BASE_MAPS_DELETED = ' + JSON.stringify(ids) + ';\n' : '';
 }
 // 共用素材庫 data/tiles.js（兩個編輯器寫出來的內容一模一樣，開頭說明也要一字不差）
 function tilesExportText() {
@@ -2509,6 +2537,7 @@ function tilesExportText() {
 document.getElementById('resetFile').addEventListener('click', () => {
   if (!confirm('確定丟棄瀏覽器暫存，改用 data/base-maps.js 和 data/tiles.js 檔案的內容？還沒存到專案的變更會不見。\n（素材庫兩個編輯器共用，另一個編輯器的素材也會一起重設成檔案的內容）')) return;
   EditorStore.removeItem(STORAGE_MAPS); EditorStore.removeItem(STORAGE_TILES);
+  localStorage.removeItem(STORAGE_DELETED_MAPS); deletedMapIds = new Set(FILE_DELETED_MAPS);   // 自己刪、還沒存到專案的也一起丟掉
   selection = null; selections = [];
   loadTiles(); saveTiles(); loadMaps(); applyMapSize(); preloadTiles();   // saveTiles：重設後的素材庫也告訴另一個編輯器
   renderPalette(); refreshMapSelect(); refreshSelPanel(); loadRules(); draw();
