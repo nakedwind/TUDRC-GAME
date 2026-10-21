@@ -19,11 +19,9 @@ const WORKSHOP_CONFIG = {
         "照明距離 8.5 格・扇形 72°・一顆電池撐 200 秒",
         "照明距離 10.0 格・扇形 80°・一顆電池撐 260 秒",
         "照明距離 11.5 格・扇形 88°・一顆電池撐 320 秒"
-      ],
-      "iconScale": 85
+      ]
     },
     "lamphelmet": {
-      "iconScale": 94,
       "iconY": -6
     },
     "mask": {
@@ -47,12 +45,10 @@ const WORKSHOP_CONFIG = {
           "guard": 0.25
         }
       ],
-      "iconScale": 108,
       "iconX": 2,
       "iconY": -2
     },
     "earmuffs": {
-      "iconScale": 95,
       "iconY": -5
     },
     "vest": {
@@ -131,8 +127,7 @@ const WORKSHOP_CONFIG = {
         },
         {},
         {}
-      ],
-      "iconScale": 96
+      ]
     },
     "w:flare": {
       "values": [
@@ -159,8 +154,7 @@ const WORKSHOP_CONFIG = {
           "reserve": 43,
           "shine": 30
         }
-      ],
-      "iconScale": 96
+      ]
     },
     "w:incendiary": {
       "desc": "落地形成火海，可點燃油桶、油汙並焚毀怪物「生命體」；也會傷及友軍。",
@@ -174,12 +168,17 @@ const WORKSHOP_CONFIG = {
   "added": [],
   "removed": [],
   "style": {
-    "btnFont": 12,
-    "btnPadY": 5,
+    "headSmallSize": 11,
+    "panelW": 1100,
+    "panelH": 610,
+    "gap": 8,
+    "iconSize": 80,
+    "btnFont": 14,
     "btnPadX": 8,
     "btnX": 5,
-    "btnY": -3,
-    "nameSize": 15
+    "btnY": 30,
+    "nameSize": 16,
+    "descSize": 13
   },
   "order": {
     "gear": [

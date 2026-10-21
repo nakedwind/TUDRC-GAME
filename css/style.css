@@ -1722,8 +1722,9 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .ws-grid .ws-icon { grid-column: 1; grid-row: 1 / -1; align-self: center; }
 .ws-grid .ws-text { display: contents; }
 .ws-grid .ws-text b { grid-column: 2; grid-row: 1; align-self: center; }
-.ws-grid .ws-btn { grid-column: 3; grid-row: 1; }
-.ws-grid .ws-text span, .ws-grid .ws-text small { grid-column: 2 / 4; }   /* 說明（已擁有）、目前效果、下一級：照順序往下排 */
+.ws-grid .ws-btn { grid-column: 3; grid-row: 1 / -1; align-self: center; translate: none; }
+.ws-grid .ws-text > span, .ws-grid .ws-text > small { grid-column: 2; min-width: 0; overflow-wrap: anywhere; }   /* 說明獨立成欄，避免被開發按鈕遮住。 */
+.ws-grid .ws-text > b { overflow-wrap: anywhere; }
 .ws-text span.ws-about { color: var(--ws-desc-color, #aab5c1); }
 .ws-text span, .ws-text small { white-space: pre-line; }   /* 說明裡的換行（開發工坊編輯器按 Enter）照樣換行；行數變多，欄位就跟著變高 */
 /* 說明文字的顏色：數字＝橘色、「戰鬥區域」＝紫色（開發工坊編輯器可以改：data/workshop.js） */
