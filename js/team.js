@@ -287,7 +287,7 @@ function openFieldCommandMenu(type, avatar) {
     (unavailable ? '<p>' + (member.hp <= 0 ? '目前無法行動' : '暴走中，無法接受指令') + '</p>' :
     '<button type="button" class="field-command-option" data-destination="base">返回基地巡邏</button>' +
     '<button type="button" class="field-command-option' + (escorting ? ' active' : '') + '" data-destination="escort">跟隨護衛部隊長' + (escorting ? '<small>護衛中</small>' : '') + '</button>' +
-    (spec.guide ? '<button type="button" class="field-command-option" data-guide-drink' + ((supplyInventory.get('almond-water') || 0) <= 0 || guideSP(member) >= guideSPMax() || member.soothingT > 0 || member.sleepT > 0 || member.frozenT > 0 || member.eatenBy ? ' disabled' : '') + '>喝杏仁水<small>背包 ' + (supplyInventory.get('almond-water') || 0) + ' 瓶・恢復 ' + supplyById('almond-water').restore + ' SP</small></button>' : ''));
+    (spec.guide && !guideSPPractice() ? '<button type="button" class="field-command-option" data-guide-drink' + ((supplyInventory.get('almond-water') || 0) <= 0 || guideSP(member) >= guideSPMax() || member.soothingT > 0 || member.sleepT > 0 || member.frozenT > 0 || member.eatenBy ? ' disabled' : '') + '>喝杏仁水<small>背包 ' + (supplyInventory.get('almond-water') || 0) + ' 瓶・恢復 ' + supplyById('almond-water').restore + ' SP</small></button>' : ''));
   fieldCommandMenu.querySelector('.field-command-close').addEventListener('click', () => { if (typeof sfx === 'function') sfx('switch'); closeFieldCommandMenu(); });
   fieldCommandMenu.querySelectorAll('[data-destination]').forEach(button => button.addEventListener('click', () => commandFieldMember(type, button.dataset.destination)));
   fieldCommandMenu.querySelector('[data-guide-drink]')?.addEventListener('click', () => { drinkGuideAlmond(member, true); closeFieldCommandMenu(); });

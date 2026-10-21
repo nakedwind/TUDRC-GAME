@@ -7,6 +7,7 @@ try {
 } catch (_) {}
 const guideSPMax = () => START.guideMax;
 const guideSPCost = () => SOOTHE.cost;
+const guideSPPractice = () => typeof practiceOn === 'function' && practiceOn();
 function initGuideSP(t) {
   if (!TYPES[t.type]?.guide) return;
   t.maxsp = guideSPMax();
@@ -39,12 +40,13 @@ function warnGuideSP(t) {
   t.sayWait = 8;
 }
 function spendGuideSP(t) {
+  if (guideSPPractice()) return true;
   if (guideSP(t) < guideSPCost()) return false;
   t.sp -= guideSPCost(); saveGuideSP(t); warnGuideSP(t);
   return true;
 }
 function drinkGuideAlmond(t, fromInventory = false) {
-  if (!TYPES[t?.type]?.guide || t.hp <= 0 || t.berserk || t.eatenBy || t.sleepT > 0 || t.frozenT > 0 || t.soothingT > 0) return false;
+  if (guideSPPractice() || !TYPES[t?.type]?.guide || t.hp <= 0 || t.berserk || t.eatenBy || t.sleepT > 0 || t.frozenT > 0 || t.soothingT > 0) return false;
   const before = guideSP(t), item = supplyById('almond-water');
   if (before >= t.maxsp || !item || !(item.restore > 0)) return false;
   const source = fromInventory ? supplyInventory : guideKit(t);
@@ -65,6 +67,7 @@ function drinkGuideAlmond(t, fromInventory = false) {
 }
 function updateGuideSP(t, dt) {
   if (!TYPES[t.type]?.guide || t.hp <= 0 || t.berserk) return;
+  if (guideSPPractice()) return;
   initGuideSP(t); warnGuideSP(t);
   t.spDrinkCd = Math.max(0, (t.spDrinkCd || 0) - dt);
   const restore = supplyById('almond-water')?.restore || 30;

@@ -496,6 +496,7 @@ window.addEventListener('keydown', e => {
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (typeof useMrtLockNearPlayer === 'function' && useMrtLockNearPlayer()) {}   // 捷運閘門刷卡、入口解封（js/mrt-locks.js）
     else if (typeof useWardrobeNearPlayer === 'function' && useWardrobeNearPlayer()) {}   // 衣櫃：服裝介面（js/costumes.js）
+    else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
     else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
     else if (typeof tryLockedDoorNearPlayer === 'function' && tryLockedDoorNearPlayer()) {}   // 鎖住的房門：溫特說「好像被鎖住了」（js/locked-doors.js）
@@ -1711,7 +1712,8 @@ function frame(ts) {
   const introOpen = typeof itemIntroOpen !== 'undefined' && itemIntroOpen;   // 第一次拿到新東西的說明視窗（js/item-intro.js）
   const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campSupplyOpen || mapTransitioning
     || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen)   // 射擊練習（js/target-practice.js）
-    || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen);   // 衣櫃的服裝介面（js/costumes.js）
+    || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
+    || (typeof gachaOpen !== 'undefined' && gachaOpen);   // 扭蛋機（js/gacha.js）
   if (!menuOpen && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();

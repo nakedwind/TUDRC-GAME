@@ -66,7 +66,7 @@ function refillGuideKit(t, silent) {
   return got.length > 0;
 }
 // 杏仁水用來恢復 SP；沒有水時，只要 SP 足夠仍能疏導。
-const guideCanSoothe = t => guideSP(t) >= guideSPCost();
+const guideCanSoothe = t => guideSPPractice() || guideSP(t) >= guideSPCost();
 const guideCanHeal = t => !MAP_SAFE ? (guideKit(t).medkit || 0) > 0 : true;
 function guideUse(t, k) { if (MAP_SAFE) return; const kit = guideKit(t); kit[k] = Math.max(0, (kit[k] || 0) - 1); }
 // 缺什麼（身上用完的）

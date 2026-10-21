@@ -4,7 +4,7 @@
        新的 skin：把圖放在 images/character/<folder>/（檔名跟其他角色一樣：<folder 去掉底線>_0000_Front.png …），再加一筆到 COSTUME_SKINS。
    ・配件：疊在角色身上的小圖，所有角色共用同一張圖；一個欄位戴一個（頭飾、臉部、背部、手持）。
        art.front＝正面圖；art.side＝側面圖（畫朝左，往右時自動左右翻；沒畫就用正面圖）；art.back＝背面圖（沒畫就用正面圖）。
-   ・rarity：稀有度（之後扭蛋用）；giftable：可以當禮物送給那位隊員（之後送禮用）。
+   ・rarity：稀有度 N／R／SR（扭蛋機的機率看這個）；gacha: false＝不放進扭蛋池；giftable：可以當禮物送給那位隊員（之後送禮用）。
 */
 const COSTUME_SLOTS = [
   { id: 'skin', name: '服裝' },
@@ -32,7 +32,22 @@ const COSTUME_ACCESSORIES = [
   { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costume/bow-red.png' } },   // 測試用
   { id: 'glasses-round', name: '圓框眼鏡', slot: 'face', rarity: 'N', art: { front: 'images/costume/glasses-round.png', side: 'images/costume/glasses-round-side.png' } },   // 測試用
 ];
-// 一開始就擁有的服裝（扭蛋做好之前先用這個測試）
+// 一開始就擁有的服裝（測試用；正式上線前清空）
 const COSTUME_STARTER = ['bow-red', 'glasses-round'];
 // 可以打開服裝介面的地圖素材（衣櫃）
 const WARDROBE_TILES = ['tile_dorm_wardrobe_lab_coat'];
+
+// 稀有度：名稱、顏色（衣櫃、扭蛋共用）
+const COSTUME_RARITIES = {
+  N: { name: '普通', color: '#b9c6d3' },
+  R: { name: '稀有', color: '#6fc3ff' },
+  SR: { name: '超稀有', color: '#ffc95c' },
+};
+// 扭蛋機（js/gacha.js）：所有 skin、配件都會進扭蛋池，除非寫 gacha: false
+const GACHA = {
+  cost: 30,                        // 轉 1 次花幾個異質碎片
+  tenCost: 270,                    // 轉 10 次（打九折）
+  rates: { N: 70, R: 25, SR: 5 },  // 各稀有度的機率（%）；某個稀有度還沒有東西時，機率平均分給其他的
+  dismantle: { N: 5, R: 15, SR: 40 },   // 分解 1 個重複的換回幾個異質碎片（每樣至少留 1 個）
+  machineTiles: ['tile_street_capsule_toy_machines'],   // 可以轉的地圖素材（名稱有「扭蛋機」的也算）
+};

@@ -72,28 +72,40 @@ function drawCostumeAccessories(ctx, id, who, dx, dy, size, layer, equipOverride
   }
 }
 
-// ---- 衣櫃：靠近、打開 ----
-let wardrobeOpen = false;
-function wardrobeSpots() {
-  if (!MAP || !MAP_SAFE) return [];
+// 拿到一件服裝（扭蛋機 js/gacha.js、之後的送禮）：回傳是不是第一次拿到
+function costumeGrant(id) {
+  const first = !costumeOwned(id);
+  costumeState.owned[id] = (costumeState.owned[id] || 0) + 1;
+  saveCostumes();
+  return first;
+}
+const costumeItem = id => ACC_BY_ID[id] || SKIN_BY_ID[id] || null;
+
+// ---- 地圖上某種素材（衣櫃、扭蛋機）的位置；test(素材id, 素材) 決定要哪些；safeOnly＝只在基地（安全區）找 ----
+function costumeSpots(test, safeOnly = true) {
+  if (!MAP || (safeOnly && !MAP_SAFE)) return [];
   const spots = [];
   for (const s of MAP.stamps || []) {
-    const t = mapTileById(s.id); if (!t) continue;
-    if (!WARDROBE_TILES.includes(s.id) && !/衣櫃/.test(t.name || '')) continue;
+    const t = mapTileById(s.id); if (!t || !test(s.id, t)) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     spots.push({ x0, y0, x1: x0 + w, y1: y0 + h, x: x0 + w / 2, top: y0 });
   }
   return spots;
 }
-function wardrobeNearPlayer() {
+function costumeSpotNearPlayer(spots) {   // 溫特旁邊 30px 內最近的一個
   const p = G && G.player; if (!p || p.sitting || !G.running) return null;
   let best = null, bd = 30;
-  for (const s of wardrobeSpots()) {
+  for (const s of spots) {
     const d = Math.hypot(Math.max(s.x0 - p.x, 0, p.x - s.x1), Math.max(s.y0 - p.y, 0, p.y - s.y1));
     if (d <= bd) { bd = d; best = s; }
   }
   return best;
 }
+
+// ---- 衣櫃：靠近、打開 ----
+let wardrobeOpen = false;
+const wardrobeSpots = () => costumeSpots((id, t) => WARDROBE_TILES.includes(id) || /衣櫃/.test(t.name || ''));
+const wardrobeNearPlayer = () => costumeSpotNearPlayer(wardrobeSpots());
 function useWardrobeNearPlayer() { if (!wardrobeNearPlayer()) return false; openWardrobe(); return true; }
 
 // ---- 服裝介面 ----
@@ -154,13 +166,13 @@ function renderWardrobe() {
     const cur = wdSkinOf(id, wd.mode);
     cards = costumeSkinsFor(id).map(s => '<button type="button" class="wd-item' + (s.id === cur ? ' on' : '') + '" data-wear="' + s.id + '">'
       + '<span class="wd-face"><img src="images/character/' + s.folder + '/' + s.folder.replace('_', '') + '_0000_Front.png" alt=""></span><b>' + s.name + '</b>'
-      + (s.rarity ? '<em class="wd-r-' + s.rarity + '">' + s.rarity + '</em>' : '') + '</button>').join('');
+      + (s.rarity ? '<em class="r-' + s.rarity + '">' + s.rarity + '</em>' : '') + '</button>').join('');
   } else {
     const cur = eq[wd.slot] || '';
     cards = '<button type="button" class="wd-item wd-none' + (!cur ? ' on' : '') + '" data-wear=""><span class="wd-icon">✕</span><b>不戴</b></button>'
       + COSTUME_ACCESSORIES.filter(a => a.slot === wd.slot && costumeOwned(a.id)).map(a => '<button type="button" class="wd-item' + (a.id === cur ? ' on' : '') + '" data-wear="' + a.id + '">'
         + '<span class="wd-icon"><img src="' + a.art.front + '" alt=""></span><b>' + a.name + '</b>'
-        + (a.rarity ? '<em class="wd-r-' + a.rarity + '">' + a.rarity + '</em>' : '') + (costumeState.owned[a.id] > 1 ? '<i>×' + costumeState.owned[a.id] + '</i>' : '') + '</button>').join('');
+        + (a.rarity ? '<em class="r-' + a.rarity + '">' + a.rarity + '</em>' : '') + (costumeState.owned[a.id] > 1 ? '<i>×' + costumeState.owned[a.id] + '</i>' : '') + '</button>').join('');
     if (!COSTUME_ACCESSORIES.some(a => a.slot === wd.slot && costumeOwned(a.id))) cards += '<p class="wd-empty">還沒有這個欄位的配件</p>';
   }
   el.querySelector('.wd-grid').innerHTML = cards;
