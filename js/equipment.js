@@ -348,8 +348,10 @@ function drawRadioMarks(ctx) {
   ctx.restore();
 }
 // ---- 下方資訊條：主動裝備的按鈕（急救包 H、腎上腺素 J）----
+const GEAR_QUICK_ENABLED = false;   // 暫時停用這兩顆快捷按鈕與 H／J，背包使用仍保留
 let gearQuickKey = '';
 function renderGearQuick() {
+  if (!GEAR_QUICK_ENABLED) { document.getElementById('quickGear')?.remove(); return; }
   let box = document.getElementById('quickGear');
   if (!box) { const host = document.getElementById('quickSupplies'); if (!host) return; box = document.createElement('div'); box.id = 'quickGear'; host.after(box); }
   const aid = itemCount('firstaid'), rev = itemCount('anomaly-firstaid'), adr = itemCount('adrenaline'), active = adrenalineActive();
@@ -377,6 +379,7 @@ document.addEventListener('pointerover', e => {
   aidFaceHover = type;
 });
 window.addEventListener('keydown', e => {
+  if (!GEAR_QUICK_ENABLED) return;
   const k = e.key.toLowerCase();
   if (e.repeat || (k !== 'h' && k !== 'j') || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
