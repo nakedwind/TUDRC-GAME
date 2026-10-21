@@ -29,11 +29,14 @@ const COSTUME_SKINS = [
 ];
 // 配件
 const COSTUME_ACCESSORIES = [
-  { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costume/bow-red.png' } },   // 測試用
-  { id: 'glasses-round', name: '圓框眼鏡', slot: 'face', rarity: 'N', art: { front: 'images/costume/glasses-round.png', side: 'images/costume/glasses-round-side.png' } },   // 測試用
+  // 圖放在 images/服裝系統/
+  { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_red.png' } },
+  { id: 'bow-blue', name: '藍色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_blue.png' } },
+  { id: 'bow-white', name: '白色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/服裝系統/蝴蝶結/Bow_white.png' } },
+  { id: 'bird-green', name: '綠繡眼', slot: 'head', rarity: 'R', art: { front: 'images/服裝系統/鳥/01.png', side: 'images/服裝系統/鳥/02.png', back: 'images/服裝系統/鳥/03.png' } },   // 停在頭頂的小鳥
 ];
-// 一開始就擁有的服裝（測試用；正式上線前清空）
-const COSTUME_STARTER = ['bow-red', 'glasses-round'];
+// 一開始就擁有的服裝（新存檔送的；空的＝全部要從扭蛋轉）
+const COSTUME_STARTER = [];
 // 可以打開服裝介面的地圖素材（衣櫃）
 const WARDROBE_TILES = ['tile_dorm_wardrobe_lab_coat'];
 
