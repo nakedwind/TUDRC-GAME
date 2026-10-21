@@ -1,8 +1,9 @@
 /* ===== 基地編輯器：玩家與 NPC 出生位置、NPC 活動範圍 =====
    基地編輯器.html 的右邊面板。每一章一份完整名單：NPC 平時在哪張基地地圖、從哪格出生、在哪個方框裡走動。
    ・選章節 → 每個人選地圖（「不在基地」＝這章不出現）→ 可設出生格、框出活動方框。沒框＝整張地圖閒逛。
-   ・活動方框＝NPC 平時走動的範圍（不是禁止進入的地方）。一個人可以框好幾個，合起來就是他走動的範圍：
-     按「▭ 框範圍」後一直停在框範圍模式（再按一次或 Esc 結束）；拖曳＝框一塊、點一格＝框 1 格、點已經框好的方框＝刪掉它。
+   ・走動範圍＝NPC 平時走動的地方（不是禁止進入的地方）。可以框好幾次，框好的格子會自動併成一塊（存成最少的方框）：
+     按「▭ 走動範圍」後一直停在設定模式（再按一次或 Esc 結束）；拖曳＝框一塊、點一格＝加 1 格；
+     從範圍裡面開始點／拖＝刪掉那些格子。地圖上每一塊（連在一起的格子）只畫外框，名字只標一次。
    ・新增章節會複製最後一章的整份名單，再改有變動的人。
    ・編輯會自動存在瀏覽器（tudrc_npc_locations_v1），「▶ 預覽遊戲」會直接用；
      要正式保留：按「下載 npc-locations.js」，覆蓋到 data/npc-locations.js。
@@ -28,7 +29,36 @@ let playerSpawnPick = false; // 正在設定玩家出生格
 let npcBoxDrag = null;     // 拖曳中的方框 { c0, r0, c, r }
 // 這個人的活動方框（可以好幾個）：rects＝[[c0,r0,c1,r1], …]；舊資料只有一個 rect 的，讀進來時換成 rects
 const npcRects = loc => (loc && Array.isArray(loc.rects) ? loc.rects : []);
-const rectHas = (rc, c, r) => c >= rc[0] && c <= rc[2] && r >= rc[1] && r <= rc[3];
+// 走動範圍的格子（"c,r"）：方框合起來
+const npcCellSet = rs => { const s = new Set(); for (const [a0, b0, a1, b1] of rs) for (let c = a0; c <= a1; c++) for (let r = b0; r <= b1; r++) s.add(c + ',' + r); return s; };
+const npcCellList = cells => [...cells].map(k => k.split(',').map(Number)).sort((a, b) => a[1] - b[1] || a[0] - b[0]);   // 由上往下、由左往右
+function npcRectsFromCells(cells) {   // 格子 → 最少的方框（不重疊）：每次從最上面最左邊那格往右拉到底、再往下拉到整排都有
+  const used = new Set(), out = [], free = (c, r) => cells.has(c + ',' + r) && !used.has(c + ',' + r);
+  for (const [c, r] of npcCellList(cells)) {
+    if (!free(c, r)) continue;
+    let c1 = c, r1 = r;
+    while (free(c1 + 1, r)) c1++;
+    const rowFree = y => { for (let x = c; x <= c1; x++) if (!free(x, y)) return false; return true; };
+    while (rowFree(r1 + 1)) r1++;
+    for (let x = c; x <= c1; x++) for (let y = r; y <= r1; y++) used.add(x + ',' + y);
+    out.push([c, r, c1, r1]);
+  }
+  return out;
+}
+const npcMergeRects = rs => npcRectsFromCells(npcCellSet(rs));   // 點一格一格框的也併成一塊
+function npcRegions(cells) {   // 連在一起（上下左右相鄰）的格子分成一塊一塊：回傳每塊最上面最左邊那格（名字標在這）
+  const seen = new Set(), out = [];
+  for (const [c, r] of npcCellList(cells)) {
+    if (seen.has(c + ',' + r)) continue;
+    out.push([c, r]); seen.add(c + ',' + r);
+    const stack = [[c, r]];
+    while (stack.length) {
+      const [x, y] = stack.pop();
+      for (const [nx, ny] of [[x + 1, y], [x - 1, y], [x, y + 1], [x, y - 1]]) { const k = nx + ',' + ny; if (cells.has(k) && !seen.has(k)) { seen.add(k); stack.push([nx, ny]); } }
+    }
+  }
+  return out;
+}
 let npcShowAll = true;     // 地圖上顯示 NPC 範圍
 let npcFocus = null;       // 滑過列表時強調的人
 
@@ -62,6 +92,7 @@ function loadNpcData() {
     delete loc.area;
     if (Array.isArray(loc.rect) && !Array.isArray(loc.rects)) loc.rects = [loc.rect];   // 舊的單一方框 → 方框清單
     delete loc.rect;
+    if (Array.isArray(loc.rects)) loc.rects = npcMergeRects(loc.rects.filter(rc => Array.isArray(rc) && rc.length === 4).map(rc => rc.map(Number)));   // 一格一格框的：併成一塊
     if (Array.isArray(loc.rects) && !loc.rects.length) delete loc.rects;
   }
   if (!Object.keys(d.chapters).length) d.chapters = { 1: {} };
@@ -85,8 +116,8 @@ function renderNpcPanel() {
     const loc = table[p.id], head = p.kind !== lastKind ? '<div class="npc-kind">' + (KIND_LABEL[p.kind] || p.kind) + '</div>' : '';
     lastKind = p.kind;
     const here = loc && loc.map === cur.name;
-    const rs = npcRects(loc), one = rs[0];
-    const range = !loc ? '' : rs.length === 1 ? '方框 ' + (one[2] - one[0] + 1) + '×' + (one[3] - one[1] + 1) + ' 格' : rs.length ? rs.length + ' 個方框' : '整張地圖閒逛';
+    const rs = npcRects(loc);
+    const range = !loc ? '' : rs.length ? '走動範圍 ' + npcCellSet(rs).size + ' 格' : '整張地圖閒逛';
     const spawn = loc && Array.isArray(loc.spawn) ? '出生格 ' + loc.spawn[0] + ',' + loc.spawn[1] : '隨機出生';
     const picking = npcPick === p.id || npcSpawnPick === p.id;
     return head + '<div class="npc-row' + (picking ? ' picking' : '') + (here ? ' here' : '') + '" data-npc-row="' + p.id + '">' +
@@ -97,7 +128,7 @@ function renderNpcPanel() {
       (loc ? '<span class="npc-range">' + spawn + '・' + range + '</span>' +
         '<button type="button" class="btn small" data-npc-spawn="' + p.id + '" title="切到這張地圖，再點一格指定出生地">' + (npcSpawnPick === p.id ? '點選出生格…' : '⌖ 出生點') + '</button>' +
         (loc.spawn ? '<button type="button" class="btn small" data-npc-spawn-random="' + p.id + '" title="清除指定格，改回隨機出生">隨機</button>' : '') +
-        '<button type="button" class="btn small' + (npcPick === p.id ? ' primary' : '') + '" data-npc-box="' + p.id + '" title="切到這張地圖框活動範圍：拖曳＝框一塊、點一格＝框 1 格、點已經框好的方框＝刪掉；再按一次或 Esc 結束">' + (npcPick === p.id ? '框範圍中（再按結束）' : '▭ 框範圍') + '</button>' +
+        '<button type="button" class="btn small' + (npcPick === p.id ? ' primary' : '') + '" data-npc-box="' + p.id + '" title="切到這張地圖設定走動範圍：拖曳＝框一塊、點一格＝加 1 格；從範圍裡面開始點／拖＝刪掉那些格子；框好的會自動併成一塊；再按一次或 Esc 結束">' + (npcPick === p.id ? '走動範圍設定中（再按結束）' : '▭ 走動範圍') + '</button>' +
         (npcRects(loc).length ? '<button type="button" class="btn small" data-npc-clear="' + p.id + '" title="不限範圍，整張地圖閒逛">整張</button>' : '') +
         (!here ? '<button type="button" class="btn small" data-npc-go="' + p.id + '" title="切到他所在的地圖">↪</button>' : '') : '') +
       '</div>';
@@ -147,8 +178,8 @@ npcPanelEl.addEventListener('click', e => {
     playerSpawnPick = false;
     npcSpawnPick = null;
     npcPick = npcPick === id ? null : id;
-    if (npcPick) setStatus('框' + npcPerson(id).name + '的活動範圍：拖曳＝框一塊、點一格＝框 1 格、點已經框好的方框＝刪掉（可以框好幾個；再按「框範圍中」或 Esc 結束）', '#8fd3ff');
-    else setStatus('已結束框範圍', '#9aa4b2');
+    if (npcPick) setStatus('設定' + npcPerson(id).name + '的走動範圍：拖曳＝框一塊、點一格＝加 1 格、從範圍裡面點／拖＝刪掉那些格子（框好的會併成一塊；再按「走動範圍設定中」或 Esc 結束）', '#8fd3ff');
+    else setStatus('已結束走動範圍設定', '#9aa4b2');
   }
   if (t.dataset.npcSpawn) {
     playerSpawnPick = false;
@@ -199,8 +230,9 @@ cv.addEventListener('pointerdown', e => {
   }
   if (!npcPick) return;
   e.stopImmediatePropagation(); e.preventDefault();
-  const [c, r] = cellFromEvent(e);
-  npcBoxDrag = { c0: c, r0: r, c, r }; cv.setPointerCapture(e.pointerId); draw();
+  const [c, r] = cellFromEvent(e), loc = npcTable()[npcPick];
+  const erase = !!loc && loc.map === curMap().name && npcCellSet(npcRects(loc)).has(c + ',' + r);   // 從範圍裡面開始＝刪格子
+  npcBoxDrag = { c0: c, r0: r, c, r, erase }; cv.setPointerCapture(e.pointerId); draw();
 }, true);
 cv.addEventListener('pointermove', e => {
   if (!npcPick && !npcSpawnPick && !playerSpawnPick) return;
@@ -216,19 +248,20 @@ cv.addEventListener('pointerup', e => {
   const m = curMap(), d = npcBoxDrag, loc = npcTable()[npcPick], name = npcPerson(npcPick).name;
   npcBoxDrag = null;
   if (!loc) { draw(); return; }
-  const clicked = d.c === d.c0 && d.r === d.r0;   // 沒拖動＝點一格
-  const rs = loc.map === m.name ? npcRects(loc) : [];
-  const hit = clicked ? rs.map((rc, i) => [rc, i]).reverse().find(([rc]) => rectHas(rc, d.c0, d.r0)) : null;   // 點到的方框（重疊時刪最後框的那個）
-  if (hit) {
-    rs.splice(hit[1], 1); if (!rs.length) delete loc.rects;
-    setStatus(name + '：刪掉一個方框' + (rs.length ? '（還有 ' + rs.length + ' 個）' : '，現在是整張地圖閒逛'), '#ffd24a');
+  const c0 = Math.max(0, Math.min(d.c0, d.c)), r0 = Math.max(0, Math.min(d.r0, d.r)), c1 = Math.min(m.cols - 1, Math.max(d.c0, d.c)), r1 = Math.min(m.rows - 1, Math.max(d.r0, d.r));
+  if (d.erase) {   // 從範圍裡面開始點／拖：刪掉那些格子，剩下的重新併成最少的方框
+    const cells = npcCellSet(npcRects(loc)); let gone = 0;
+    for (let x = c0; x <= c1; x++) for (let y = r0; y <= r1; y++) if (cells.delete(x + ',' + y)) gone++;
+    loc.rects = npcRectsFromCells(cells); if (!loc.rects.length) delete loc.rects;
+    setStatus(name + '：走動範圍少了 ' + gone + ' 格' + (cells.size ? '（還有 ' + cells.size + ' 格）' : '，現在是整張地圖閒逛'), '#ffd24a');
   } else {
-    const c0 = Math.max(0, Math.min(d.c0, d.c)), r0 = Math.max(0, Math.min(d.r0, d.r)), c1 = Math.min(m.cols - 1, Math.max(d.c0, d.c)), r1 = Math.min(m.rows - 1, Math.max(d.r0, d.r));
-    if (loc.map !== m.name) delete loc.rects;   // 換到別張地圖框：舊地圖的方框清掉
-    loc.map = m.name; (loc.rects || (loc.rects = [])).push([c0, r0, c1, r1]);
-    setStatus(name + '：多框了 ' + (c1 - c0 + 1) + '×' + (r1 - r0 + 1) + ' 格（共 ' + loc.rects.length + ' 個方框）。可以繼續框；點方框＝刪掉；再按「框範圍中」或 Esc 結束', '#7ee0c0');
+    if (loc.map !== m.name) delete loc.rects;   // 換到別張地圖框：舊地圖的範圍清掉
+    const before = npcCellSet(loc.map === m.name ? npcRects(loc) : []).size;
+    loc.map = m.name; loc.rects = npcMergeRects([...npcRects(loc), [c0, r0, c1, r1]]);   // 跟原本的併成一塊
+    const total = npcCellSet(loc.rects).size;
+    setStatus(name + '：走動範圍多了 ' + (total - before) + ' 格（共 ' + total + ' 格，已經併在一起）。可以繼續框；從範圍裡面點／拖＝刪掉；再按「走動範圍設定中」或 Esc 結束', '#7ee0c0');
   }
-  saveNpcData(); renderNpcPanel(); draw();   // npcPick 不清掉：一直停在框範圍模式
+  saveNpcData(); renderNpcPanel(); draw();   // npcPick 不清掉：一直停在走動範圍設定模式
 }, true);
 
 // ---- 地圖上畫出 NPC 範圍（editor.js 的 draw 最後呼叫）----
@@ -244,21 +277,26 @@ function drawEditorOverlay(ctx, m) {
     npcTag(ctx, { name: '玩家', color: '#ffffff' }, x + 13, y - 22, '出生');
   }
   if (npcShowAll || npcFocus || npcPick || npcSpawnPick) {
-    const labels = new Map();   // 同一個方框的名字往下排
+    const labels = new Map();   // 同一格開頭的名字往下排（兩個人的範圍從同一格開始時）
     for (const p of here) {
       const loc = table[p.id];
       const strong = npcFocus === p.id || npcPick === p.id;
-      const rs = npcRects(loc);
-      const hoverHit = npcPick === p.id && !npcBoxDrag && hoverCell ? rs.map((rc, i) => [rc, i]).reverse().find(([rc]) => rectHas(rc, hoverCell[0], hoverCell[1])) : null;
-      if (npcShowAll || strong) rs.forEach((rect, i) => {
-        const x = OX + rect[0] * CELL, y = OY + rect[1] * CELL, w = (rect[2] - rect[0] + 1) * CELL, h = (rect[3] - rect[1] + 1) * CELL;
-        const del = hoverHit && hoverHit[1] === i;   // 框範圍模式：滑過的方框＝點一下會刪掉
-        ctx.globalAlpha = del ? .3 : strong ? .22 : .1; ctx.fillStyle = del ? '#ff4d4d' : p.color; ctx.fillRect(x, y, w, h);
-        ctx.globalAlpha = 1; ctx.strokeStyle = del ? '#ff4d4d' : p.color; ctx.lineWidth = strong ? 4 : 2; ctx.setLineDash(strong && !del ? [] : [8, 5]);
-        ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.setLineDash([]);
-        const k = rect.join(','), n = labels.get(k) || 0; labels.set(k, n + 1);
-        npcTag(ctx, p, x + 4, y + 4 + n * 22, del ? '點一下刪除' : '');
-      });
+      const rs = npcRects(loc), cells = npcCellSet(rs);
+      if ((npcShowAll || strong) && cells.size) {
+        ctx.globalAlpha = strong ? .22 : .1; ctx.fillStyle = p.color;
+        for (const [a0, b0, a1, b1] of rs) ctx.fillRect(OX + a0 * CELL, OY + b0 * CELL, (a1 - a0 + 1) * CELL, (b1 - b0 + 1) * CELL);   // 方框不重疊（npcRectsFromCells）
+        ctx.globalAlpha = 1; npcOutline(ctx, rs, cells, p.color, strong ? 4 : 2, strong ? [] : [8, 5]);
+        for (const [c, r] of npcRegions(cells)) {   // 每一塊只標一次名字（最上面最左邊那格）
+          const k = c + ',' + r, n = labels.get(k) || 0; labels.set(k, n + 1);
+          npcTag(ctx, p, OX + c * CELL + 4, OY + r * CELL + 4 + n * 22, '');
+        }
+        if (npcPick === p.id && !npcBoxDrag && hoverCell && cells.has(hoverCell[0] + ',' + hoverCell[1])) {   // 滑到範圍裡的格子：點一下會刪掉這格
+          const x = OX + hoverCell[0] * CELL, y = OY + hoverCell[1] * CELL;
+          ctx.globalAlpha = .35; ctx.fillStyle = '#ff4d4d'; ctx.fillRect(x, y, CELL, CELL);
+          ctx.globalAlpha = 1; ctx.strokeStyle = '#ff4d4d'; ctx.lineWidth = 2; ctx.strokeRect(x + 1, y + 1, CELL - 2, CELL - 2);
+          npcTag(ctx, { name: '點一下刪除這格', color: '#ff4d4d' }, x + CELL + 4, y + 4, '');
+        }
+      }
       const spawn = loc.spawn;
       if (Array.isArray(spawn) && (npcShowAll || npcFocus === p.id || npcPick === p.id || npcSpawnPick === p.id)) {
         const x = OX + (spawn[0] + .5) * CELL, y = OY + (spawn[1] + .5) * CELL;
@@ -272,16 +310,36 @@ function drawEditorOverlay(ctx, m) {
     const free = here.filter(p => !npcRects(table[p.id]).length);
     free.forEach((p, i) => npcTag(ctx, p, OX + 6, OY + 6 + i * 22, '整張閒逛'));
   }
-  if (npcPick && npcBoxDrag) {   // 正在拖的方框
+  if (npcPick && npcBoxDrag) {   // 正在拖的方框（紅色＝刪格子）
     const d = npcBoxDrag, c0 = Math.min(d.c0, d.c), r0 = Math.min(d.r0, d.r), c1 = Math.max(d.c0, d.c), r1 = Math.max(d.r0, d.r);
     const p = npcPerson(npcPick);
-    ctx.globalAlpha = .25; ctx.fillStyle = p.color; ctx.fillRect(OX + c0 * CELL, OY + r0 * CELL, (c1 - c0 + 1) * CELL, (r1 - r0 + 1) * CELL);
-    ctx.globalAlpha = 1; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([6, 4]);
+    ctx.globalAlpha = d.erase ? .35 : .25; ctx.fillStyle = d.erase ? '#ff4d4d' : p.color; ctx.fillRect(OX + c0 * CELL, OY + r0 * CELL, (c1 - c0 + 1) * CELL, (r1 - r0 + 1) * CELL);
+    ctx.globalAlpha = 1; ctx.strokeStyle = d.erase ? '#ff4d4d' : '#ffffff'; ctx.lineWidth = 3; ctx.setLineDash([6, 4]);
     ctx.strokeRect(OX + c0 * CELL, OY + r0 * CELL, (c1 - c0 + 1) * CELL, (r1 - r0 + 1) * CELL); ctx.setLineDash([]);
+    if (d.erase) npcTag(ctx, { name: '刪掉這些格子', color: '#ff4d4d' }, OX + c0 * CELL + 4, OY + r0 * CELL + 4, '');
   } else if ((npcPick || npcSpawnPick || playerSpawnPick) && hoverCell) {
     ctx.globalAlpha = .6; ctx.strokeStyle = playerSpawnPick ? '#ffffff' : npcPerson(npcPick || npcSpawnPick).color; ctx.lineWidth = 2;
     ctx.strokeRect(OX + hoverCell[0] * CELL, OY + hoverCell[1] * CELL, CELL, CELL);
   }
+  ctx.restore();
+}
+// 整塊範圍的外框：只畫外圍的邊（相鄰格子之間不畫線），同一條直線上的邊連成一段；線畫在範圍裡面（用範圍當遮罩）
+function npcOutline(ctx, rs, cells, color, width, dash) {
+  const has = (c, r) => cells.has(c + ',' + r), h = new Map(), v = new Map();
+  const add = (map, line, at) => { if (!map.has(line)) map.set(line, []); map.get(line).push(at); };
+  for (const k of cells) {
+    const [c, r] = k.split(',').map(Number);
+    if (!has(c, r - 1)) add(h, r, c); if (!has(c, r + 1)) add(h, r + 1, c);   // 上、下邊：y＝格線 r／r+1，從 c 到 c+1
+    if (!has(c - 1, r)) add(v, c, r); if (!has(c + 1, r)) add(v, c + 1, r);   // 左、右邊：x＝格線 c／c+1，從 r 到 r+1
+  }
+  ctx.save();
+  ctx.beginPath(); for (const [a0, b0, a1, b1] of rs) ctx.rect(OX + a0 * CELL, OY + b0 * CELL, (a1 - a0 + 1) * CELL, (b1 - b0 + 1) * CELL); ctx.clip();
+  ctx.beginPath();
+  const runs = (map, seg) => { for (const [line, list] of map) { list.sort((a, b) => a - b); let s = list[0], e = s + 1;
+    for (let i = 1; i <= list.length; i++) { if (i < list.length && list[i] === e) { e++; continue; } seg(line, s, e); if (i < list.length) { s = list[i]; e = s + 1; } } } };
+  runs(h, (y, a, b) => { ctx.moveTo(OX + a * CELL, OY + y * CELL); ctx.lineTo(OX + b * CELL, OY + y * CELL); });
+  runs(v, (x, a, b) => { ctx.moveTo(OX + x * CELL, OY + a * CELL); ctx.lineTo(OX + x * CELL, OY + b * CELL); });
+  ctx.strokeStyle = color; ctx.lineWidth = width * 2; ctx.setLineDash(dash); ctx.stroke();   // 一半被遮罩切掉，看起來就是 width 粗、畫在範圍裡面
   ctx.restore();
 }
 function npcTag(ctx, p, x, y, extra) {
