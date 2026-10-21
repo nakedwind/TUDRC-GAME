@@ -2484,3 +2484,8 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #gacha .gc-book-bar { grid-column: 1 / -1; display: flex; align-items: center; gap: 10px; color: #b6a7aa; font-size: 12px; }
 #gacha .gc-book-bar button { padding: 3px 12px; border: 1px solid rgba(214,155,255,.45); border-radius: 999px; background: rgba(60,30,80,.5); color: #e2c8ff; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
 @media (prefers-reduced-motion: reduce) { #gacha, #gacha .gc-card, #gacha .gc-item, #gacha .gc-machine-art img { animation: none !important; } }
+
+/* 禮物選單裡的服裝（js/gifts.js 的 giveCostumeGift） */
+.gift-cell.costume { background:linear-gradient(180deg, rgba(70,50,90,.55), rgba(30,26,38,.7)); }
+.gift-cell.costume img { object-fit:contain; padding:6px; }
+.gift-cell.costume.r-R { box-shadow:inset 0 0 0 1px rgba(111,195,255,.35); } .gift-cell.costume.r-SR { box-shadow:inset 0 0 0 1px rgba(255,201,92,.5), 0 0 10px rgba(255,201,92,.25); }

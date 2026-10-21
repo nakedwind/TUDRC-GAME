@@ -5,6 +5,7 @@
 //  ・今日想吃委託：回到基地時有幾個人想吃某樣東西（頭上冒圖示），照著送好感度加倍，還會給回憶碎片或異質碎片。
 //  ・回憶碎片集滿 3 個會自動拼成鑰匙（data/items.js 的 MEMORY_KEYS）。
 //  ・喜好、台詞、點數、等級都在 data/gifts.js。好感度會存檔（js/save.js）。
+//  ・服裝（扭蛋轉到的配件、skin）也能送：送出後對方馬上穿上（js/costumes.js 的 costumeGive；規則在 data/costumes.js 的 COSTUME_GIFT）。
 // ============================================================
 const favorPoints = {};        // 角色 id → 好感點數
 const giftKnown = {};          // 角色 id → { 物品 id: 反應 }（送過才知道對方喜不喜歡）
@@ -86,6 +87,16 @@ function renderGiftPicker() {
     return `<button type="button" class="gift-cell${r ? ' ' + r : ''}${wanted ? ' wanted' : ''}" data-gift="${item.id}" title="${item.name}${wanted ? '｜想吃這個！' : tag ? '｜' + tag.label : '｜還不知道喜不喜歡'}">
       ${wanted ? '<i class="gift-want">想吃！</i>' : ''}<img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b><em>${tag ? tag.icon : '❔'}</em><span>${item.name}</span></button>`;
   }).join('') : `<div class="gift-empty">背包裡沒有能送的東西<small>到 1 樓 HOME Mart 或販賣機買</small></div>`;
+  const costumes = typeof costumeGiftable === 'function' ? costumeGiftable(id) : [];   // 服裝排在零食飲料後面
+  if (costumes.length) {
+    const list = document.getElementById('giftPickerList');
+    list.querySelector('.gift-empty')?.remove();
+    list.insertAdjacentHTML('beforeend', costumes.map(item => {
+      const r = known[item.id], tag = r ? GIFT_REACTION[r] : null;
+      return `<button type="button" class="gift-cell costume r-${item.rarity || 'N'}${r ? ' ' + r : ''}" data-costume="${item.id}" title="${item.name}（服裝，送出後${profile.name}會馬上穿上）${tag ? '｜' + tag.label : ''}">
+        <img src="${costumeIconSrc(item)}" alt=""><b>${costumeState.owned[item.id]}</b><em>${tag ? tag.icon : '👗'}</em><span>${item.name}</span></button>`;
+    }).join(''));
+  }
   if (want && !items.some(item => item.id === want)) {   // 想吃的東西背包裡沒有：提示去買
     document.getElementById('giftPickerList').insertAdjacentHTML('afterbegin', `<div class="gift-want-missing"><img src="${itemById(want)?.image}" alt=""><span>想吃：${itemById(want)?.name}<small>背包裡沒有，可以去商店買</small></span></div>`);
   }
@@ -119,6 +130,29 @@ function giveGift(itemId) {
   if (after.lv > before.lv) { SFX.play('favorUp', .8, 'favor-up'); systemNotice(`💗 ${profile.name}：好感度「${after.name}」`); }
   const box = document.getElementById('dialogueFavor'); box.classList.remove('pulse'); void box.offsetWidth; box.classList.add('pulse');
   updateHUD(); if (typeof backpackOpen !== 'undefined' && backpackOpen) renderBackpack();
+  document.getElementById('dialogueNext').focus();
+}
+// 送服裝：對方馬上穿上，好感照喜好＋稀有度
+function giveCostumeGift(costumeId) {
+  const actor = giftTarget, id = giftableId(actor), item = typeof costumeItem === 'function' && costumeItem(costumeId);
+  if (!actor || !item || giftedThisVisit.has(id) || !costumeGive(id, costumeId)) { sfx('error'); return; }
+  let reaction = giftReaction(id, costumeId);
+  if (reaction === 'normal') reaction = COSTUME_GIFT.reaction;   // 沒特別寫的服裝：預設「喜歡」
+  const before = favorInfo(id), gain = GIFT_POINTS[reaction] + (reaction === 'dislike' ? 0 : COSTUME_GIFT.rarityBonus[item.rarity || 'N'] || 0);
+  favorPoints[id] = Math.max(0, (favorPoints[id] || 0) + gain);
+  (giftKnown[id] = giftKnown[id] || {})[costumeId] = reaction;
+  giftedThisVisit.add(id);
+  const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
+  closeGiftPicker(true);
+  const L = GIFT_PREFS[id].lines || {}, pool = (reaction !== 'dislike' && L.costume) || L[reaction] || ['謝謝。'];
+  const lines = [pool[Math.floor(Math.random() * pool.length)].replaceAll('{item}', item.name), { speaker: '系統', text: `${profile.name}換上了「${item.name}」！` }];
+  if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
+  dialogueState.lines = lines; dialogueState.index = 0; dialogueState.giftReply = true;
+  renderDialogueLine(); renderDialogueFavor();
+  flash(`${GIFT_REACTION[reaction].icon} ${gain >= 0 ? '+' : ''}${gain}`, actor.x, actor.y - 46, reaction === 'dislike' ? '#c9d3dc' : '#ff9ccf', 1.6);
+  sfx(reaction === 'dislike' ? 'error' : 'soothe');
+  if (after.lv > before.lv) { SFX.play('favorUp', .8, 'favor-up'); systemNotice(`💗 ${profile.name}：好感度「${after.name}」`); }
+  const box = document.getElementById('dialogueFavor'); box.classList.remove('pulse'); void box.offsetWidth; box.classList.add('pulse');
   document.getElementById('dialogueNext').focus();
 }
 // ---- 今日想吃委託 ----
@@ -206,6 +240,7 @@ document.getElementById('dialogueGift').addEventListener('click', openGiftPicker
 document.getElementById('giftPickerClose').addEventListener('click', () => closeGiftPicker());
 giftPicker.addEventListener('click', e => {
   const cell = e.target.closest('[data-gift]'); if (cell) { giveGift(cell.dataset.gift); return; }
+  const outfit = e.target.closest('[data-costume]'); if (outfit) { giveCostumeGift(outfit.dataset.costume); return; }
 });
 document.getElementById('dialogueFavor').addEventListener('animationend', e => e.currentTarget.classList.remove('pulse'));
 // 鍵盤：對話中按 G 送禮；禮物選單打開時，方向鍵選、Enter 送出、Esc 關閉（不會關掉對話框）
