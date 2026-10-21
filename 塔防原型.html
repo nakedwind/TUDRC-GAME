@@ -6,7 +6,7 @@
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/new-game.js?v=bestiary1-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=bestiary1-20261022">
+<link rel="stylesheet" href="css/style.css?v=bestiary-gacha-20261022">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -223,7 +223,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=homemart-20261016"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=aidsfx-20261021"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=gachalook-20261022"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js"></script> <!-- 共用按鈕與切換回饋 -->
 
@@ -255,7 +255,7 @@
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js?v=sync-20261021"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=practice-20261020"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=stairs-arrival-20261022"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/doors.js?v=doorrow-20261021"></script> <!-- 門：手動門／自動門 -->
   <script src="js/breakable-walls.js?v=wallsolid-20261017"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
@@ -278,7 +278,7 @@
   <script src="js/fish-head.js?v=fishstepdark-20261019"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=vine-art8-20261020"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人 -->
   <script src="js/milkfish-kid.js?v=milkfish-v5-20261021"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=colynult-20261022"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=merge2-20261022"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=colors-20261022"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=milkfish-20261020"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -293,7 +293,7 @@
   <script src="data/costume-placement.js?v=bear-20261022"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=mirror-20261021"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
   <script src="js/costumes.js?v=costumegift-20261021"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
-  <script src="js/gacha.js?v=costumegift-20261021"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
+  <script src="js/gacha.js?v=gachaball-20261022"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
   <script src="js/sortie-supply.js?v=sortie4-20261014"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=nocircuitnum-20261018"></script>
   <script src="js/storage-lockers.js?v=dog-pickup-20261021"></script>
@@ -309,9 +309,9 @@
   <script src="js/combat-progress.js?v=guide-sp-20261021"></script>
   <script src="js/camp-interactions.js?v=interaction-key-fix-20261018"></script>
   <script src="js/camp-supply.js?v=guide-sp-20261021"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
-  <script src="js/guide-sp.js?v=guide-sp-20261021"></script>
+  <script src="js/guide-sp.js?v=spbubble2-20261022"></script>
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
-  <script src="js/game.js?v=colors-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=merge2-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=key-intro-scale200-20261018"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/item-intro.js?v=legs-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->

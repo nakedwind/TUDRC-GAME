@@ -5,7 +5,9 @@
    必須在 js/costumes.js 之後載入。
 */
 let gachaOpen = false;
-const gc = { el: null, tab: 'result', results: null, busy: false, msg: '' };
+const gc = { el: null, tab: 'result', results: null, busy: false, msg: '', timers: [] };
+// 轉扭蛋的動畫（右邊區塊）：壓黑 → 大扭蛋掉下來 → 搖一搖 → 打開（啵）→ 出現轉到的東西；時間（毫秒）
+const GACHA_ANIM = { dark: 250, drop: 550, wobble: 750, open: 450 };
 const gachaSpots = () => costumeSpots((id, t) => GACHA.machineTiles.includes(id) || /扭蛋機/.test(t.name || ''), false);   // 戰鬥地圖上擺的也能轉（例如地下街入口）
 const gachaNearPlayer = () => costumeSpotNearPlayer(gachaSpots());
 function useGachaNearPlayer() { if (!gachaNearPlayer()) return false; openGacha(); return true; }
@@ -32,18 +34,29 @@ function gachaPull(times) {
   costumeState.pulls = (costumeState.pulls || 0) + times; saveCostumes();
   gc.results = results; gc.tab = 'result'; gc.msg = ''; gc.busy = true;
   renderGacha();
-  // 動畫：機器搖一搖 → 扭蛋掉下來 → 打開
-  const card = gc.el.querySelector('.gc-card');
+  // 動畫：左邊機器搖一搖；右邊壓黑 → 大扭蛋掉下來 → 搖一搖 → 打開 → 出現轉到的東西（點一下可以跳過）
+  const card = gc.el.querySelector('.gc-card'), stage = gc.el.querySelector('.gc-stage');
+  const best = results.reduce((b, r) => Math.max(b, Object.keys(GACHA.rates).indexOf(rarityOf(r.item))), 0);
   card.classList.remove('gc-turning'); void card.offsetWidth; card.classList.add('gc-turning');
-  sfx('button');
-  setTimeout(() => { if (gachaOpen) sfx('place'); }, 520);
-  setTimeout(() => {
-    gc.busy = false; if (!gachaOpen) return;
-    card.classList.remove('gc-turning'); card.classList.add('gc-reveal');
-    const best = results.reduce((b, r) => Math.max(b, Object.keys(GACHA.rates).indexOf(rarityOf(r.item))), 0);
-    sfx(best >= 2 ? 'achievement' : 'itemPickup');
-    renderGacha();
-  }, 1050);
+  stage.className = 'gc-stage show' + (best >= 2 ? ' gold' : best >= 1 ? ' blue' : '');
+  SFX.play('gachaDrop', .8, 'gacha-drop');   // 轉扭蛋：扭蛋掉出來
+  const A = GACHA_ANIM, at = (ms, fn) => gc.timers.push(setTimeout(fn, ms));
+  at(A.dark, () => stage.classList.add('drop'));
+  at(A.dark + A.drop, () => stage.classList.add('wobble'));
+  at(A.dark + A.drop + A.wobble, () => {
+    stage.classList.add('open');
+    sfx(best >= 2 ? 'achievement' : 'itemPickup');   // 扭蛋打開：啵（SR 用升級的音效）
+  });
+  at(A.dark + A.drop + A.wobble + A.open, gachaRevealDone);
+}
+function gachaRevealDone() {   // 動畫結束（或點一下跳過）：收掉黑幕，翻出轉到的東西
+  gc.timers.forEach(clearTimeout); gc.timers = [];
+  if (!gc.busy) return;
+  gc.busy = false;
+  if (!gachaOpen) return;
+  gc.el.querySelector('.gc-card').classList.remove('gc-turning');
+  gc.el.querySelector('.gc-stage').classList.add('done');
+  renderGacha();
 }
 function gachaDismantle(id, all) {
   const item = costumeItem(id), have = costumeState.owned[id] || 0; if (!item || have <= 1) return;
@@ -83,15 +96,19 @@ function buildGacha() {
   const el = gc.el = document.createElement('div');
   el.id = 'gacha'; el.className = 'hidden';
   el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '扭蛋機');
-  el.innerHTML = '<section class="gc-card"><header class="gc-head"><div class="gc-title"><h2>扭蛋機</h2><p>投入異質碎片，轉出服裝和配件</p></div>'
+  el.innerHTML = '<section class="gc-card"><header class="gc-head"><div class="gc-icon-box" aria-hidden="true"><img src="images/items/gashapon-capsule.png" alt=""></div><div class="gc-title"><h2>扭蛋機</h2><p>投入異質碎片，轉出服裝和配件</p></div>'
     + '<span class="gc-shards"><img src="images/碎片鑰匙/anomalous-shard.png" alt=""><b></b></span>'
     + '<button type="button" class="gc-close" aria-label="關閉（Esc）">×</button></header>'
-    + '<div class="gc-body"><div class="gc-machine"><div class="gc-machine-art"><img src="images/street/street-capsule-toy-machines.png" alt=""><i class="gc-capsule"></i></div>'
+    + '<div class="gc-body"><div class="gc-machine"><div class="gc-machine-art"><img src="images/street/street-capsule-toy-machines.png" alt=""></div>'
     + '<div class="gc-buttons"><button type="button" data-pull="1"></button><button type="button" data-pull="10"></button></div><p class="gc-rates"></p></div>'
     + '<div class="gc-side"><nav class="gc-tabs"><button type="button" data-tab="result">轉到的</button><button type="button" data-tab="book">收藏</button></nav>'
-    + '<p class="gc-msg" role="status"></p><div class="gc-list"></div></div></div></section>';
+    + '<p class="gc-msg" role="status"></p><div class="gc-list"></div>'
+    + '<div class="gc-stage" title="點一下跳過"><div class="gc-ball"><img class="gc-ball-whole" src="images/items/gashapon-capsule.png" alt="">'
+    + '<img class="gc-ball-top" src="images/items/gashapon-capsule01.png" alt=""><img class="gc-ball-bottom" src="images/items/gashapon-capsule02.png" alt=""><i class="gc-burst"></i></div></div>'
+    + '</div></div></section>';
   document.getElementById('wrap').appendChild(el);
   el.querySelector('.gc-close').addEventListener('click', closeGacha);
+  el.querySelector('.gc-stage').addEventListener('click', () => { if (gc.busy) { if (!el.querySelector('.gc-stage.open')) sfx('itemPickup'); gachaRevealDone(); } });
   el.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.pull) gachaPull(Number(b.dataset.pull));
@@ -138,13 +155,14 @@ function openGacha() {
   if (!gc.el) buildGacha();
   gachaOpen = true; gc.msg = '';
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
-  gc.el.classList.remove('hidden'); gc.el.querySelector('.gc-card').classList.remove('gc-turning', 'gc-reveal');
+  gc.el.classList.remove('hidden'); gc.el.querySelector('.gc-card').classList.remove('gc-turning');
+  gc.el.querySelector('.gc-stage').className = 'gc-stage';
   renderGacha();
-  sfx('menu');
+  SFX.play('vendingOpen', .8, 'gacha-open');   // 打開扭蛋機：跟販賣機同一個聲音
 }
 function closeGacha() {
   if (!gachaOpen) return;
-  gachaOpen = false; gc.busy = false; gc.el.classList.add('hidden');
+  gachaOpen = false; gc.busy = false; gc.timers.forEach(clearTimeout); gc.timers = []; gc.el.classList.add('hidden');
   sfx('switch');
 }
 // 開著的時候：Esc 關掉，其他按鍵都不要傳給遊戲

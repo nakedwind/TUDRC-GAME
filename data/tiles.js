@@ -1486,7 +1486,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/應變中心/escape-stairs.png",
     "w": 5,
-    "h": 4
+    "h": 4,
+    "flat": true
   },
   {
     "id": "tile_eoc_double_door_open",

@@ -543,7 +543,7 @@ const BUBBLE_COLORS = {
 };
 const BUBBLE_DEFAULT = { bg: '#eef2f7', bd: '#5a6a86', tx: '#232a36' };
 function drawSpeechBubble(cx, bottomY, text, col) {
-  const c = col || BUBBLE_DEFAULT, tail = 6, rad = 9;
+  const c = !col ? BUBBLE_DEFAULT : typeof col === 'string' ? { ...BUBBLE_DEFAULT, bd: col } : col, tail = 6, rad = 9;   // 只給一個色碼：當作框的顏色
   ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   const tw = ctx.measureText(text).width, w = tw + 24, h = 26;
   const x = Math.round(cx - w / 2), y = Math.round(bottomY - tail - h);
@@ -577,7 +577,10 @@ function promptTopAbove(actor, top) {
 // 椅子上方的「[E] 坐」提示框
 // 拆除模式：滑鼠指到可以拆的建築時，紅框框起來＋上方顯示「拆除 退回 $X」
 // ---- 逃生樓梯的常駐箭頭：樓梯右邊的出入口＝上樓、左邊＝下樓 ----
-const STAIR_ARROW = { ids: ['tile_eoc_escape_stairs'] };
+const STAIR_ARROW = { ids: [
+  'tile_eoc_escape_stairs', 'tile_mvi1thjl', 'tile_hq_stairs',
+  'tile_mrt_stairs_dark', 'tile_mrt_stairs_light', 'tile_mvcrmipy'
+] };
 let stairArrowCache = null;
 // 從地圖名稱看樓層：「2F應變中心」→ 2、「B3」→ −3（舊寫法「B-3」也認得）；看不出來回傳 null
 function mapFloorNumber(name) {
@@ -590,10 +593,11 @@ function stairArrowSpots() {
   for (const s of (MAP && MAP.stamps) || []) {
     if (!STAIR_ARROW.ids.includes(s.id) || typeof mapPortals === 'undefined') continue;
     const t = mapTileById(s.id); if (!t) continue;
-    const w = mapTileW(t), h = mapTileH(t), mid = s.c + w / 2;
+    const w = mapStampW(s, t), h = mapStampH(s, t);
+    const left = s.c + (s.ox || 0) / CELL, top = s.r + (s.oy || 0) / CELL, mid = left + w / 2;
     const groups = {};   // 同一個目的地的出入口格合成一個箭頭
     for (const pt of mapPortals) {
-      if (pt.c < s.c || pt.c >= s.c + w || pt.r < s.r || pt.r >= s.r + h) continue;
+      if (pt.c + .5 < left || pt.c + .5 >= left + w || pt.r + .5 < top || pt.r + .5 >= top + h) continue;
       (groups[pt.to] = groups[pt.to] || []).push(pt);
     }
     const here = mapFloorNumber(MAP && MAP.name);
