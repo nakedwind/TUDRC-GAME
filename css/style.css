@@ -2358,6 +2358,8 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-tile-icon img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; scale: var(--ws-img-scale, 1); }
 .ws-tabs button { font-size: 14px; }       /* 開發／升級分頁：比背包的分頁大 2px */
 .ws-tabs button em { font-size: 12px; }
+.ws-tabs button:not(.active) { border-color: #6e6142; background: #2b2e2d; color: #c9c2b0; }   /* 沒選到的分頁：暗金框＋灰底（不要太深，看得出是一顆可以按的按鈕） */
+.ws-tabs button:not(.active):hover { border-color: #9a8659; color: #f1e6cf; }
 .ws-tile b { font-size: 14px; }   /* 格子裡的裝備名稱：14px */
 .ws-info i.ws-item { color: var(--ws-item-color, #A958E2); }   /* 道具名稱用自己的顏色 */
 

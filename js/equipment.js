@@ -717,7 +717,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   const tile = e => '<button type="button" class="ws-tile' + (e.lv ? tier(e.lv) + ' owned' : e.canDev ? ' unowned' : ' locked') + (wsPick === e.key ? ' sel' : '') + '" data-ws-pick="' + e.key + '" aria-pressed="' + (wsPick === e.key) + '">' +
     '<span class="ws-tile-icon">' + e.icon + '</span><b>' + e.name + '</b>' + (e.lv ? '<em>Lv' + e.lv + '</em>' : '') + '</button>';
   const section = (title, items) => items.length ? '<h3>' + title + '</h3><div class="ws-tiles">' + items.map(tile).join('') + '</div>' : '';
-  const empty = wsTab === 'up' ? '還沒有可以升級的裝備。先到「開發」分頁開發吧！' : '所有裝備都已經拿到了！';
+  const empty = wsTab === 'up' ? '還沒有可以升級的裝備。先到「可開發」分頁開發吧！' : '所有裝備都已經拿到了！';
   // 下方說明欄（跟背包的說明欄一樣：大圖｜名稱、說明、數值｜按鈕）
   const e = list.find(x => x.key === wsPick);
   let info;
@@ -741,7 +741,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
       (e.about ? '<p class="bag-desc">' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats">' + stats + '</div></div><div class="bag-actions">' + btn + '</div>';
   }
   const count = tab => [...all.gear, ...all.weapons].filter(x => tabOf(x, tab)).length;
-  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '🔧 開發'], ['up', '⬆️ 升級']].map(([id, label]) =>
+  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '🔧 可開發'], ['up', '⬆️ 可升級']].map(([id, label]) =>
     '<button type="button" role="tab" data-ws-tab="' + id + '" class="' + (wsTab === id ? 'active' : '') + '" aria-selected="' + (wsTab === id) + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
   // 右側：跟背包一樣的紙娃娃（溫特＋主／副武器、頭部、身體、隨身物品 ×2），點格子＝選它來分解
   const dollSlot = (key, slotName, icon, name, lv, weapon) => '<div class="doll-slot' + (weapon ? ' weapon' : '') + (key ? ' filled' + tier(lv) : '') + (key && wsScrapSel === key ? ' sel' : '') + '"' + (key ? ' data-scrap="' + key + '"' : '') + ' title="' + slotName + '：' + (key ? name + ' Lv' + lv : '未裝備') + '">' +
