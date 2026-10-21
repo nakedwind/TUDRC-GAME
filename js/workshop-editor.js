@@ -446,7 +446,7 @@ function renderPreview() {
   const pick = list.includes(selKey) ? selKey : list[0];
   const section = (title, keys) => keys.length ? '<h3>' + title + '</h3><div class="ws-tiles" data-kind="' + (title === '武器' ? 'weapons' : 'gear') + '">' + keys.map(previewTile).join('') + '</div>' : '';
   const count = tab => allKeys().filter(k => !isRemoved(k) && pvTabOf(k) === tab).length;
-  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '🔧 開發'], ['up', '⬆️ 升級']].map(([id, label]) =>
+  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '🔧 可開發'], ['up', '⬆️ 可升級']].map(([id, label]) =>
     '<button type="button" role="tab" data-pv-tab="' + id + '" class="' + (pvTab === id ? 'active' : '') + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
   const empty = pvTab === 'up' ? '還沒有可以升級的裝備（換上面的「裝備狀態」看看）' : '所有裝備都已經拿到了';
   const side = pvSideHtml();   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
