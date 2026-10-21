@@ -576,10 +576,12 @@ function enterPortal(pt) {
   if (mapTransitioning) return;
   if (mapIndexById(pt.to) < 0) { flash('目標地圖不存在（可能已被刪除）', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
   const fromId = MAP.id;
+  const source = { map: MAP, c: pt.c, r: pt.r, cols: MAP.cols, rows: MAP.rows,
+    stair: !pt.elevator && typeof stairPortalDir === 'function' ? stairPortalDir(pt) : null };
   mapTransitioning = true;
   Object.keys(keys).forEach(key => { keys[key] = false; });
   if (!pt.elevator) {   // 上／下樓梯：腳步聲；其他出入口：開門聲
-    const stair = typeof stairPortalDir === 'function' ? stairPortalDir(pt) : null;
+    const stair = source.stair;
     sfx(stair === 'down' ? 'stairsDown' : stair === 'up' ? 'stairsUp' : 'door');
   }
   requestAnimationFrame(() => {
@@ -588,7 +590,7 @@ function enterPortal(pt) {
       setTimeout(() => {
         switchMap(mapIndexById(pt.to));         // 全黑維持半秒後換地圖
         begin(false);                           // 重建並進入遊玩狀態，不播放開始按鈕聲
-        const back = returnPortalCell(fromId);  // 落在新地圖「通回原地圖」的門旁
+        const back = pt.elevator ? null : returnPortalCell(fromId, source);
         let arrivalElevator = null;
         if (pt.elevator) {
           arrivalElevator = (MAP.stamps || []).find(isElevatorStamp) || null;

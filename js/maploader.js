@@ -219,6 +219,12 @@ function initMap() {
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
+  // 牆格整組重建了：上一張地圖的門、捷運閘門、可炸牆、置物箱「加進去的格子」不能再拿來刪
+  // （不然上一張地圖剛好在同一格有門，就會把這張地圖本來畫好的牆刪掉，人可以穿牆）
+  if (typeof doorAddedWalls !== 'undefined') doorAddedWalls = new Set();
+  if (typeof mrtAddedWalls !== 'undefined') mrtAddedWalls = new Set();
+  if (typeof breakableWallCells !== 'undefined') { breakableWallCells = new Set(); breakableWallSolid = new Set(); }
+  if (typeof storageAddedWalls !== 'undefined') storageAddedWalls = new Set();
   for (const stamp of MAP.stamps || []) if (isElevatorStamp(stamp)) setElevatorSolids(stamp, 'closed');
   mapSolidOffsets = MAP.solidOffsets || {};                              // 不可穿透格的像素微調
   // 每張椅子的擋路格由椅子編輯器決定；一般格子圖片與大圖擺放都套用。
@@ -254,7 +260,37 @@ function initMap() {
 }
 // 出入口查詢
 function mapIndexById(id) { const list = mapList(); return list.findIndex(m => m && m.id === id); }
-function returnPortalCell(fromId) { return mapPortals.find(p => p.to === fromId) || null; }
+let lastPortalTrip = null;
+function returnPortalCell(fromId, source = null) {
+  const reciprocal = mapPortals.filter(p => p.to === fromId);
+  if (!source) return reciprocal[0] || null;
+  const stairDir = p => typeof stairPortalDir === 'function' ? stairPortalDir(p) : null;
+  let candidates = reciprocal;
+  if (source.stair) {
+    const stairs = reciprocal.filter(p => stairDir(p));
+    // 缺少回程連結時仍落在樓梯，不退回地圖的預設出生點。
+    candidates = stairs.length ? stairs : reciprocal.length ? reciprocal : mapPortals.filter(p => stairDir(p));
+  }
+  const previous = lastPortalTrip;
+  const returning = previous && previous.from === MAP.id && previous.to === fromId &&
+    source.map === previous.arrivalMap && previous.arrival &&
+    Math.hypot(source.c - previous.arrival.c, source.r - previous.arrival.r) <= 1.5;
+  let back = returning ? candidates.find(p => p.c === previous.departure.c && p.r === previous.departure.r) : null;
+  if (!back) {
+    const opposite = source.stair === 'up' ? 'down' : 'up';
+    const score = p => {
+      const dir = stairDir(p);
+      const kindPenalty = source.stair ? (dir ? 0 : 4) : (dir ? 4 : 0);
+      const directionPenalty = source.stair && dir && dir !== opposite ? 2 : 0;
+      const distance = Math.hypot((p.c + .5) / MAP.cols - (source.c + .5) / source.cols,
+        (p.r + .5) / MAP.rows - (source.r + .5) / source.rows);
+      return kindPenalty + directionPenalty + distance;
+    };
+    back = candidates.slice().sort((a, b) => score(a) - score(b))[0] || null;
+  }
+  lastPortalTrip = { from: fromId, to: MAP.id, departure: source, arrival: back, arrivalMap: MAP };
+  return back;
+}
 
 // ---- 不可穿透格的像素微調 ----
 // 一般的不可穿透格＝整格 40×40 都擋。地圖編輯器可以幫某些格子加上像素位移，

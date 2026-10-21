@@ -319,7 +319,7 @@ const COSTUME_PLACEMENT_DEFAULT = {
     },
     "bow-red": {
       "winter": {
-        "front": {"x":18.5,"y":10,"scale":1.05},
+        "front": {"x":18.5,"y":10},
         "left": {"x":20.5,"y":9.5,"behind":true},
         "right": {"x":28.5,"y":11},
         "back": {"x":47.5,"y":9.5,"rot":-1,"flip":true,"behind":true}
@@ -460,10 +460,10 @@ const COSTUME_PLACEMENT_DEFAULT = {
     },
     "bird-green": {
       "winter": {
-        "front": {"x":32,"y":-1.5},
-        "back": {"x":32,"y":1.5},
-        "left": {"x":35,"y":0},
-        "right": {"x":31.5,"y":0.5}
+        "front": {"x":32,"y":-1.5,"scale":1.2},
+        "back": {"x":32,"y":1.5,"scale":1.2},
+        "left": {"x":35,"y":0,"scale":1.2},
+        "right": {"x":31.5,"y":0.5,"scale":1.2}
       },
       "theonie": {
         "front": {"x":32,"y":8},
@@ -478,16 +478,16 @@ const COSTUME_PLACEMENT_DEFAULT = {
         "right": {"x":34,"y":3.5}
       },
       "red": {
-        "front": {"x":36.5,"y":4},
-        "back": {"x":32,"y":6.5},
-        "left": {"x":33,"y":3.5},
-        "right": {"x":29,"y":6}
+        "front": {"x":37,"y":4,"scale":1.2},
+        "back": {"x":32,"y":6.5,"scale":1.2},
+        "left": {"x":33,"y":3.5,"scale":1.2},
+        "right": {"x":29,"y":6,"scale":1.2}
       },
       "avaren": {
-        "front": {"x":35,"y":1},
-        "back": {"x":32.5,"y":3},
-        "left": {"x":34.5,"y":2},
-        "right": {"x":31,"y":2.5}
+        "front": {"x":35,"y":1,"scale":1.2},
+        "back": {"x":32.5,"y":3,"scale":1.2},
+        "left": {"x":34.5,"y":2,"scale":1.2},
+        "right": {"x":31,"y":2.5,"scale":1.4}
       },
       "luther": {
         "front": {"x":31,"y":0},
@@ -496,10 +496,10 @@ const COSTUME_PLACEMENT_DEFAULT = {
         "right": {"x":32.5,"y":2.5}
       },
       "eldrin": {
-        "front": {"x":31.5,"y":1.5},
-        "back": {"x":30.5,"y":5},
-        "left": {"x":32,"y":2},
-        "right": {"x":30,"y":2.5}
+        "front": {"x":31.5,"y":1.5,"scale":1.2},
+        "back": {"x":30.5,"y":5,"scale":1.2},
+        "left": {"x":32,"y":2,"scale":1.2},
+        "right": {"x":30,"y":2.5,"scale":1.2}
       },
       "chris": {
         "front": {"x":34.5,"y":4.5},
@@ -1140,7 +1140,7 @@ const COSTUME_PLACEMENT_DEFAULT = {
       "eldrin": {
         "right": {"x":40,"y":36},
         "left": {"x":24,"y":36.5},
-        "front": {"x":32,"y":37}
+        "front": {"x":31,"y":37}
       },
       "chris": {
         "right": {"x":42,"y":36},
@@ -1174,7 +1174,7 @@ const COSTUME_PLACEMENT_DEFAULT = {
       },
       "eden": {
         "right": {"x":39,"y":36},
-        "left": {"x":27,"y":36.5},
+        "left": {"x":25.5,"y":36},
         "front": {"x":32,"y":36}
       },
       "salem": {

@@ -36,7 +36,7 @@ function warnGuideSP(t) {
   const entry = typeof DIALOGUES !== 'undefined' ? DIALOGUES.characters?.[t.type]?.lowSp : null;
   const lines = typeof chapterPick === 'function' ? chapterPick(entry) : entry;
   const text = Array.isArray(lines) && lines.length ? lines[Math.floor(Math.random() * lines.length)] : SANITY.warnText;
-  t.say = { text, life: 4, col: '#c9b8ff' };
+  t.say = { text, life: 4 };   // 泡泡用這位嚮導自己的顏色（js/render.js 的 BUBBLE_COLORS）
   t.sayWait = 8;
 }
 function spendGuideSP(t) {
