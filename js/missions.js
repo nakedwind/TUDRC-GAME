@@ -240,11 +240,11 @@ function renderMissionBoard() {
   attachBoardToast();   // 提示（承接委託…）放回新的標題列
 }
 // 作戰桌開著時的提示（承接委託、領獎…）：跟開發工坊一樣顯示在標題列正中間、最上層，約 2.2 秒後淡出。
-// 短時間內連續好幾則（例如領獎＋好感度升級）：疊成好幾行一起顯示。
+// stack＝true：短時間內連續好幾則（例如好感度升級＋領獎）疊成好幾行一起顯示；平常新的一則直接換掉舊的（承接後馬上放棄＝只顯示「放棄委託」）。
 let boardToastEl = null, boardToastUntil = 0, boardToastTimer = null, boardToastLines = [];
-function showBoardToast(text, err = false) {
+function showBoardToast(text, err = false, stack = false) {
   if (!boardToastEl) { boardToastEl = document.createElement('div'); boardToastEl.className = 'workshop-toast board-toast'; }
-  if (performance.now() > boardToastUntil) boardToastLines = [];
+  if (!stack || performance.now() > boardToastUntil) boardToastLines = [];
   boardToastLines.push(text); boardToastLines = boardToastLines.slice(-3);
   boardToastEl.textContent = boardToastLines.join('\n'); boardToastEl.classList.toggle('err', !!err);
   boardToastEl.classList.remove('leaving'); void boardToastEl.offsetWidth;   // 重新播放出現的動畫

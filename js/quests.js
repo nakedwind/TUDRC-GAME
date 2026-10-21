@@ -64,7 +64,7 @@ function questEvent(type, data = {}) {
 
 // ---- 承接、放棄、領獎 ----
 // 作戰桌開著時：提示直接出現在作戰桌的標題列上（最上層、不會被作戰桌擋住或糊掉，js/missions.js 的 showBoardToast）；沒開就照常出現在右上角
-const questNotice = (msg, err = false) => (typeof missionBoardOpen !== 'undefined' && missionBoardOpen && typeof showBoardToast === 'function') ? showBoardToast(msg, err) : systemNotice(msg, err);
+const questNotice = (msg, err = false, stack = false) => (typeof missionBoardOpen !== 'undefined' && missionBoardOpen && typeof showBoardToast === 'function') ? showBoardToast(msg, err, stack) : systemNotice(msg, err);
 function acceptQuest(q) {
   if (questStatus(q) !== 'available') return false;
   if (activeCount() >= SIDE_QUEST_RULES.maxActive) { sfx('error'); questNotice('進行中的委託已經有 ' + SIDE_QUEST_RULES.maxActive + ' 個了', true); return false; }
@@ -72,7 +72,7 @@ function acceptQuest(q) {
   questNotice('承接委託：「' + q.name + '」');
   return true;
 }
-function abandonQuest(q) { if (!(q.id in questState.active)) return; delete questState.active[q.id]; saveQuests(); sfx('switch'); }
+function abandonQuest(q) { if (!(q.id in questState.active)) return; delete questState.active[q.id]; saveQuests(); sfx('switch'); questNotice('放棄委託：「' + q.name + '」'); }
 function claimQuest(q) {
   if (questStatus(q) !== 'ready') return false;
   delete questState.active[q.id]; questState.done.push(q.id); saveQuests();
@@ -90,7 +90,7 @@ function claimQuest(q) {
     if (after.lv > before.lv) { SFX.play('favorUp', .8, 'favor-up'); questNotice('💗 ' + charName(q.giver) + '：好感度「' + after.name + '」'); }
   }
   SFX.play('crystalGet', .7, 'quest-claim');
-  questNotice('領取獎勵：' + got.join('、'));
+  questNotice('領取獎勵：' + got.join('、'), false, true);   // 跟前面的好感度升級疊在一起顯示
   if (typeof updateHUD === 'function') updateHUD();
   return true;
 }
