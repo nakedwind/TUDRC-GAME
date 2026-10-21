@@ -24,7 +24,7 @@ function itemDesc(item) {
 }
 // 「裝備」分頁：列出擁有的部隊長裝備（js/equipment.js 的 equipState），只能看，換裝備用左邊的裝備格
 const GEAR_TAB = { id: 'equip', name: '裝備', icon: '🛡️' };
-const GEAR_KIND_NAME = { head: '頭部', body: '身體', acc: '隨身物品' };
+const GEAR_KIND_NAME = { head: '頭部', body: '上身', legs: '下身', acc: '隨身物品' };
 function ownedGear() {
   if (typeof EQUIPMENT === 'undefined' || typeof equipState === 'undefined') return [];
   const worn = new Set(Object.values(equipState.equipped || {}).filter(Boolean));

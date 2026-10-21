@@ -72,12 +72,12 @@ function itemIntroForItem(id, qty = 1) {
 }
 function itemIntroForEquipment(id) {
   const d = typeof equipDef === 'function' ? equipDef(id) : null; if (!d) return;
-  const part = { head: '頭部', body: '身體', acc: '隨身物品' }[d.kind] || '裝備';
-  itemIntro({ key: 'equip:' + id, kindLabel: '裝備', name: d.name, image: d.image, icon: d.icon, tag: '🛡️ ' + part, desc: d.desc,
+  const part = { head: '頭部', body: '上身', legs: '下身', acc: '隨身物品' }[d.kind] || '裝備';
+  itemIntro({ key: 'equip:' + id, kindLabel: '裝備', name: d.name, image: d.image, icon: d.icon, tag: '🛡️ ' + part, desc: d.ownedDesc || d.desc,
     stat: d.stat && d.levels ? 'Lv1：' + d.stat(d.levels[0]) : '' });
 }
 function itemIntroForWeapon(id) {
   const w = typeof WEAPON_UPGRADES !== 'undefined' ? WEAPON_UPGRADES[id] : null; if (!w) return;
-  itemIntro({ key: 'weapon:' + id, kindLabel: '武器', name: w.name, image: w.image, icon: w.icon, tag: '🔫 武器', desc: w.desc,
+  itemIntro({ key: 'weapon:' + id, kindLabel: '武器', name: w.name, image: w.image, icon: w.icon, tag: '🔫 武器', desc: w.ownedDesc || w.desc,
     stat: w.stat && w.levels ? 'Lv1：' + w.stat(w.levels[0]) : '' });
 }

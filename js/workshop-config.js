@@ -13,6 +13,11 @@ const WORKSHOP_STYLE_DEFAULT = {
   headX: 0, headY: 0,
   panelW: 1010,          // 工坊視窗最大寬度（px）
   panelH: 620,           // 工坊視窗最大高度（px）
+  // 說明欄右邊的金色按鈕（升級／開發）：寬、高（0＝原本的大小：照欄寬、照文字）、文字大小、位移（正數＝往右／往下）
+  actBtnW: 0, actBtnH: 0, actBtnFont: 14, actBtnX: 0, actBtnY: 0,
+  infoY: 0,              // 下方說明欄整塊（圖片、說明、按鈕一起）的上下位移：負數＝往上（上面的格子區變矮），正數＝往下（超出視窗底的部分會被切掉）
+  // 說明欄裡的文字（名稱、說明、數值）單獨移動（正數＝往右／往下）；左邊的圖片是每件自己調（data/workshop.js 的 items[…].infoImgX／infoImgY）
+  infoTextX: 0, infoTextY: 0,
   numColor: '#CF9447',   // 說明裡的數字（Lv2、8 格、1.4 秒…）
   whereColor: '#A958E2', // 說明裡的「戰鬥區域」和戰鬥區域裡的東西（下面 whereWords 列的字）
   whereWords: '戰鬥區域、上鎖的置物櫃、上鎖的置物箱、置物櫃、置物箱、異質核心',   // 用「戰鬥區域」顏色的字（用「、」分開）
@@ -25,6 +30,10 @@ const WORKSHOP_STYLE_VARS = {
   headSubSize: ['--ws-head-sub-size', 'px'], headSubColor: ['--ws-head-sub-color', ''],
   headX: ['--ws-head-x', 'px'], headY: ['--ws-head-y', 'px'],
   panelW: ['--ws-panel-w', 'px'], panelH: ['--ws-panel-h', 'px'], 
+  // 第三格：填 0 時改用這個值（0＝原本的大小）
+  actBtnW: ['--ws-act-w', 'px', '100%'], actBtnH: ['--ws-act-h', 'px', 'auto'], actBtnFont: ['--ws-act-font', 'px'], actBtnX: ['--ws-act-x', 'px'], actBtnY: ['--ws-act-y', 'px'],
+  infoY: ['--ws-info-y', 'px'],
+  infoTextX: ['--ws-info-text-x', 'px'], infoTextY: ['--ws-info-text-y', 'px'],
   numColor: ['--ws-num-color', ''], whereColor: ['--ws-where-color', ''], itemColor: ['--ws-item-color', ''],
 };
 function workshopStyle(cfg) {   // 預設值＋設定檔裡改過的
@@ -38,7 +47,7 @@ function workshopHeadHtml(cfg) {
 function applyWorkshopStyle(el, cfg) {   // 把外觀設定寫成 CSS 變數（el＝#workshop）
   if (!el) return;
   const st = workshopStyle(cfg);
-  for (const [k, [name, unit]] of Object.entries(WORKSHOP_STYLE_VARS)) el.style.setProperty(name, st[k] + unit);
+  for (const [k, [name, unit, zero]] of Object.entries(WORKSHOP_STYLE_VARS)) el.style.setProperty(name, zero !== undefined && Number(st[k]) === 0 ? zero : st[k] + unit);
 }
 
 // 最高幾級（data/equipment.js 的 EQUIP_MAX_LV）；LV_INDEX＝[0, 1, …, 最高-1]
@@ -79,6 +88,14 @@ function workshopColorize(text, st) {   // st：外觀設定（編輯器傳編�
 // 圖片位移（iconX／iconY，px）：正數＝往右／往下（--ws-img-x／--ws-img-y）
 const workshopIconVars = (scale, x, y) => [scale && scale !== 100 ? '--ws-img-scale:' + scale / 100 : '', x ? '--ws-img-x:' + x + 'px' : '', y ? '--ws-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
 const workshopIconStyle = d => { const v = d ? workshopIconVars(d.iconScale, d.iconX, d.iconY) : ''; return v ? ' style="' + v + '"' : ''; };
+// 下方說明欄裡的圖片位移（infoImgX／infoImgY，px，每件分開）：正數＝往右／往下（--ws-info-img-x／--ws-info-img-y）
+const workshopInfoImgVars = (x, y) => [x ? '--ws-info-img-x:' + x + 'px' : '', y ? '--ws-info-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
+const workshopInfoImgStyle = d => { const v = d ? workshopInfoImgVars(d.infoImgX, d.infoImgY) : ''; return v ? ' style="' + v + '"' : ''; };
+
+// 「可升級」分頁前面的圖示：兩個疊在一起的綠色箭頭（照參考圖描的，取代原本的 ⬆️ emoji；遊戲的開發工坊、編輯器的預覽共用）
+const WS_UP_ICON = '<svg class="ws-up-icon" viewBox="0 0 286 337" aria-hidden="true">' +
+  '<polygon points="0,96 143,0 286,96 286,205 143,111 0,205" fill="#7be495"/>' +
+  '<polygon points="7,232 143,146 278,232 278,334 143,245 7,334" fill="#3fbf6a"/></svg>';
 
 // ---- 裝備／武器的文字和圖片 ----
 const WORKSHOP_TEXT_FIELDS = ['name', 'image', 'desc', 'ownedDesc', 'where'];   // ownedDesc＝說明（已擁有）：拿到之後顯示在名稱下面、詳細數值上面
@@ -106,15 +123,19 @@ function workshopItemDefs() {   // key → 那件裝備／武器的資料
 // ---- 用編輯器「新增」的裝備（added）、「刪除」的裝備（removed）----
 // 新增的裝備：可以開發／撿到、穿上、升級，效果說明是編輯器裡自己寫的文字；
 // 但遊戲裡實際的效果（例如照明、減傷）要另外寫程式（js/equipment.js 用 equipLv('裝備id') 讀等級），所以一開始只是「有名字、有圖」的裝備。
-const WORKSHOP_KINDS = { head: '頭部', body: '身體', acc: '隨身物品' };
+const WORKSHOP_KINDS = { head: '頭部', body: '上身', legs: '下身', acc: '隨身物品' };
+// 開發工坊裡裝備的分組（照這個順序排）：頭部裝備（頭盔、帽子類）、上身裝備（背心、衣服類）、下身裝備（鞋子類）、隨身物品
+const WORKSHOP_GEAR_GROUPS = [['head', '頭部裝備'], ['body', '上身裝備'], ['legs', '下身裝備'], ['acc', '隨身物品']];
+const workshopGearGroup = kind => WORKSHOP_GEAR_GROUPS.some(g => g[0] === kind) ? kind : 'acc';   // 不認得的部位：放隨身物品
 function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊戲用的裝備資料（跟 data/equipment.js 的格式一樣）
   const texts = Array.isArray(a.levels) ? a.levels : [];
   const cost = Array.isArray(a.cost) ? a.cost.map(n => Math.max(0, Math.round(Number(n) || 0))) : [];
   return {
     id: a.id, name: a.name || '新裝備', kind: WORKSHOP_KINDS[a.kind] ? a.kind : 'acc', icon: a.icon || '🧰', image: a.image || '',
-    source: a.source === 'field' ? 'field' : 'develop', where: a.where || '', desc: a.desc || '', ownedDesc: a.ownedDesc || '',
+    source: a.source === 'field' ? 'field' : 'develop', where: a.where || '', desc: '', ownedDesc: a.ownedDesc || a.desc || '',   // 說明只有一段
     iconScale: typeof a.iconScale === 'number' && a.iconScale > 0 ? a.iconScale : 100,
     iconX: Number.isFinite(a.iconX) ? a.iconX : 0, iconY: Number.isFinite(a.iconY) ? a.iconY : 0,
+    infoImgX: Number.isFinite(a.infoImgX) ? a.infoImgX : 0, infoImgY: Number.isFinite(a.infoImgY) ? a.infoImgY : 0,   // 下方說明欄裡的圖片位移
     cost: WORKSHOP_LV_INDEX.map(i => cost[i] ?? [50, 100, 160, 240, 340][i] ?? 340),   // [開發, 升到 Lv2, …, 升到最高級]
     stat: lv => lv.text, levels: WORKSHOP_LV_INDEX.map(i => ({ text: String(texts[i] ?? '') })),
     custom: true,
@@ -193,7 +214,9 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
     WORKSHOP_BASE[key].cost = Array.isArray(def.cost) ? def.cost.slice() : [];   // 原本的費用（編輯器比對、恢復用）
     const o = items[key]; if (!o) continue;
     if (typeof o.iconScale === 'number' && o.iconScale > 0) def.iconScale = o.iconScale;   // 開發工坊裡圖片的大小（%）
-    for (const k of ['iconX', 'iconY']) if (Number.isFinite(o[k])) def[k] = o[k];   // 圖片位移（px）
+    for (const k of ['iconX', 'iconY', 'infoImgX', 'infoImgY']) if (Number.isFinite(o[k])) def[k] = o[k];   // 圖片位移（px）：開發工坊格子裡、下方說明欄裡
+    // 舊的設定檔只有「還沒拿到時」的說明（desc）：現在說明只有一段，就當成這件的說明（ownedDesc）
+    if (typeof o.desc === 'string' && o.desc !== '' && !(typeof o.ownedDesc === 'string' && o.ownedDesc !== '')) def.ownedDesc = o.desc;
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '') def[f] = o[f];
     // 每一級的實際數值（傷害、彈匣、裝填秒數…）：直接改進原本的等級資料，遊戲各處讀到的就是新數值，效果說明也會跟著算
     // 開發／升級要花幾個異質碎片：有寫數字的那一格換掉（null＝原本的）
