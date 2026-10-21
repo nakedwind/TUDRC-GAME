@@ -1813,7 +1813,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .doll-slots .doll-slot em { right: calc(50% - 32px); top: 14px; }
 @media (max-width: 860px) { .equip-doll .doll-art { height: 132px; } }
 /* 裝備格文字 v5：名稱放在格子下面（可換行、不加底色），等級改成格子右下角的小徽章，不再跟名稱擠在一起 */
-.doll-slots { gap: 12px 8px; }
+.doll-slots { gap: 10px 8px; }   /* 10/22 多兩格下身（變 4 排）：上下間距 12→10，背包裡剛好放得下不用捲 */
 .doll-slots .doll-slot { gap: 4px; }
 .doll-slots .doll-slot small { order: 1; max-width: 100%; padding: 0 2px; background: none; border-radius: 0; color: #e8eef3; font-size: 13px; line-height: 1.35; text-align: center; white-space: normal; overflow: visible; word-break: keep-all; overflow-wrap: anywhere; }
 .doll-slots .doll-slot:not(.filled) small { color: #8c96a1; }
@@ -2322,6 +2322,8 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .workshop-main > .workshop-body { overflow: hidden; padding: 0; gap: 0; }
 .ws-tabs { flex: none; padding: 10px 16px 6px; }
 .ws-scroll { flex: 1; min-height: 0; overflow-y: auto; padding: 0 16px 14px; display: flex; flex-direction: column; gap: 7px; scrollbar-color: #776642 transparent; }
+/* 捲軸的位置一直留著：東西少、沒有捲軸的分頁（例如「可升級」），格子才不會比有捲軸的分頁大一點 */
+.ws-scroll { scrollbar-gutter: stable; }
 .ws-scroll h3 { margin: 8px 0 0; color: #ffe3a1; font-size: 14px; }
 .ws-tiles { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; }
 .ws-tile { gap: 4px; padding: 6px 4px; }
@@ -2329,10 +2331,15 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-empty { margin: 30px 0; color: #7d8996; font-size: 13px; text-align: center; }
 .ws-info { flex: none; height: 158px; display: grid; grid-template-columns: 104px minmax(0,1fr) 150px; align-items: center; gap: 14px; padding: 12px 16px; border-top: 1px solid rgba(255,212,121,.16); background: rgba(5,8,12,.55); }
 .ws-info.empty { display: flex; justify-content: center; }
-.ws-info .bag-detail-image { height: 100%; padding: 4px 0; }
+/* 說明欄整塊上下移（開發工坊編輯器「外觀 → 下方說明欄」，--ws-info-y：負數＝往上）：用下方的 margin 推，上面的格子區跟著變高／變矮，不會蓋到格子 */
+.ws-info { margin-bottom: calc(var(--ws-info-y, 0px) * -1); }
+.ws-info .bag-detail-image { height: 100%; padding: 4px 0; background: none; }   /* 說明欄的圖片：不要背包那種半透明黑底 */
 .ws-info .bag-detail-image img { width: 88px; height: 88px; object-fit: contain; image-rendering: pixelated; }
 .ws-info .bag-detail-image img.weapon { width: 100px; height: 75px; }
 .ws-info-text { min-width: 0; height: 100%; display: flex; flex-direction: column; gap: 5px; overflow-y: auto; scrollbar-width: thin; }
+/* 說明欄裡的圖片、文字各自移動：圖片每件分開（編輯器每件的「下方說明欄的圖片位移」，--ws-info-img-*），文字全部一起（「外觀 → 下方說明欄」，--ws-info-text-*）；按鈕是 --ws-act-* */
+.ws-info .bag-detail-image { translate: var(--ws-info-img-x, 0px) var(--ws-info-img-y, 0px); }
+.ws-info-text { translate: var(--ws-info-text-x, 0px) var(--ws-info-text-y, 0px); }
 .ws-info h3 { margin: 0; color: #f3f6f9; font-size: 17px; }
 .ws-info .bag-gear-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
 .ws-info .bag-tags { justify-content: flex-start; }
@@ -2344,10 +2351,12 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-info .bag-gear-stat.next small, .ws-info .bag-gear-stat.next b { color: #8fe6ad; }
 .ws-info .bag-gear-stat.where b { color: #c9b8e6; }
 .ws-info .bag-actions { width: auto; margin: 0; padding: 0; align-self: center; }
-.ws-info .ws-btn { width: 100%; padding: 9px 10px; font-size: 14px; translate: none; }
+/* 說明欄右邊的金色按鈕（升級／開發）：大小、位置可以在開發工坊編輯器的「外觀 → 升級／開發按鈕」改（--ws-act-*） */
+.ws-info .ws-btn { align-self: center; width: var(--ws-act-w, 100%); height: var(--ws-act-h, auto); padding: 9px 10px; font-size: var(--ws-act-font, 14px);
+  translate: var(--ws-act-x, 0px) var(--ws-act-y, 0px); }
 .ws-info i.ws-num { font-style: normal; color: var(--ws-num-color, #CF9447); }
 .ws-info i.ws-where, .ws-info i.ws-item { font-style: normal; color: var(--ws-where-color, #A958E2); }
-.ws-info .bag-gear-stat.next i.ws-num { color: #b6f5c9; }
+.ws-info .bag-gear-stat.next i.ws-num { color: var(--ws-num-color, #CF9447); }   /* 升級後（綠框）裡的數字也是橘色，跟目前效果一樣 */
 @media (max-width: 760px) { .ws-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } .ws-info { grid-template-columns: 72px minmax(0,1fr); height: auto; } .ws-info .bag-actions { grid-column: 1 / -1; } }
 .ws-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }   /* 一排 6 格 */
 .ws-tile b { font-size: 11px; }
@@ -2359,6 +2368,7 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-tabs button { font-size: 14px; }       /* 開發／升級分頁：比背包的分頁大 2px */
 .ws-tabs button em { font-size: 12px; }
 .ws-tabs button:not(.active) { border-color: #6e6142; background: #2b2e2d; color: #c9c2b0; }   /* 沒選到的分頁：暗金框＋灰底（不要太深，看得出是一顆可以按的按鈕） */
+.ws-tabs .ws-up-icon { width: 11px; height: 13px; flex: none; filter: drop-shadow(0 0 2px rgba(80,220,130,.35)); }   /* 「可升級」的綠色箭頭（跟 emoji 差不多大） */
 .ws-tabs button:not(.active):hover { border-color: #9a8659; color: #f1e6cf; }
 .ws-tile b { font-size: 14px; }   /* 格子裡的裝備名稱：14px */
 .ws-info i.ws-item { color: var(--ws-item-color, #A958E2); }   /* 道具名稱用自己的顏色 */
