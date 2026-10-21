@@ -3359,14 +3359,6 @@ const SHARED_TILES = [
     "h": 1
   },
   {
-    "id": "tile_interactive_pickup_adrenaline",
-    "name": "拾取亮點（腎上腺素）",
-    "role": "floor",
-    "file": "images/裝備/adrenaline-injector.png",
-    "w": 1,
-    "h": 1
-  },
-  {
     "id": "tile_mv5my8dk",
     "name": "electric-light-02",
     "role": "floor",
@@ -3738,6 +3730,14 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_interactive_pickup_adrenaline",
+    "name": "拾取亮點（腎上腺素）",
+    "role": "floor",
+    "file": "images/裝備/adrenaline-injector.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_mvfjt47h",
     "name": "Back-room-floor_M",
     "role": "floor",
@@ -3948,5 +3948,14 @@ const SHARED_TILES = [
     "file": "images/收容觀察室/double-door-open02.png",
     "w": 3,
     "h": 4
+  },
+  {
+    "id": "tile_mvi1thjl",
+    "name": "escape-stairs02",
+    "role": "floor",
+    "file": "images/應變中心/escape-stairs02.png",
+    "w": 5,
+    "h": 4,
+    "flat": true
   }
 ];

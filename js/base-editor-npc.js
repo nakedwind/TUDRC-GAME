@@ -15,8 +15,10 @@ const KIND_ORDER = { sentinel: 0, guide: 1, support: 2 };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '後勤' };
 const npcPeople = Object.values(CHARACTERS).filter(c => c.kind !== 'player')
   .sort((a, b) => (KIND_ORDER[a.kind] ?? 9) - (KIND_ORDER[b.kind] ?? 9))
-  .map((c, i) => ({ id: c.id, name: c.name, kind: c.kind, color: NPC_COLORS[i % NPC_COLORS.length] }));
+  .map((c, i) => ({ id: c.id, name: c.name, kind: c.kind, color: NPC_COLORS[i % NPC_COLORS.length], sprite: c.sprite }));
 const npcPerson = id => npcPeople.find(p => p.id === id);
+// 頭像：角色的正面圖（images/character/<造型資料夾>/<資料夾去掉底線>_0000_Front.png，跟遊戲裡的隊員頭像一樣）
+const npcFacePath = p => p.sprite ? 'images/character/' + p.sprite + '/' + p.sprite.replace('_', '') + '_0000_Front.png' : '';
 
 let npcData = null;        // { chapters: { 1: { id: { map, spawn?, rect? } } } }
 let npcChapter = '1';      // 目前編輯的章節
@@ -88,7 +90,9 @@ function renderNpcPanel() {
     const spawn = loc && Array.isArray(loc.spawn) ? '出生格 ' + loc.spawn[0] + ',' + loc.spawn[1] : '隨機出生';
     const picking = npcPick === p.id || npcSpawnPick === p.id;
     return head + '<div class="npc-row' + (picking ? ' picking' : '') + (here ? ' here' : '') + '" data-npc-row="' + p.id + '">' +
-      '<i style="background:' + p.color + '"></i><b>' + p.name + '</b>' +
+      '<i style="background:' + p.color + '"></i>' +
+      (p.sprite ? '<span class="npc-face" data-char="' + p.id + '"><img src="' + npcFacePath(p) + '" alt=""></span>' : '') +   // 名字前面的胸像
+      '<b>' + p.name + '</b>' +
       '<select data-npc-map="' + p.id + '">' + opts(loc && loc.map) + '</select>' +
       (loc ? '<span class="npc-range">' + spawn + '・' + range + '</span>' +
         '<button type="button" class="btn small" data-npc-spawn="' + p.id + '" title="切到這張地圖，再點一格指定出生地">' + (npcSpawnPick === p.id ? '點選出生格…' : '⌖ 出生點') + '</button>' +

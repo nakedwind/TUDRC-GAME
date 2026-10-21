@@ -114,6 +114,13 @@ const NPC_LOCATIONS = {
       "map": "1F餐廳",
       "rect": [4, 7, 25, 23]
     },
+    "ball": {
+      "map": "2F應變中心",
+      "spawn": [
+        29,
+        11
+      ]
+    },
     "taana": {
       "map": "B1訓練室",
       "spawn": [
