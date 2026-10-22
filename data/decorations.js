@@ -24,7 +24,7 @@ const DECORATIONS = [
   },
   {
     "id": "deco_gasstove2",
-    "name": "爐具2",
+    "name": "爐具",
     "cost": 10,
     "hp": 15,
     "h": {

@@ -320,9 +320,47 @@ function drawSentryEdgeAlerts(ctx, cv) {
     ctx.restore();
   }
 }
+// 倒下的隊友：標出倒下的位置（畫在最上層，牆壁、黑暗都擋不住）
+// 在畫面外：畫面邊緣的箭頭＋「名字・倒下」，指向他；在畫面裡：他身上方一個上下跳動的箭頭＋名字
+const DOWNED_ALERT = { color: '#ff8fb0', text: '#ffd0de', bob: 6, size: 1.5 };   // size：箭頭放大倍數
+function drawDownedAlerts(ctx, cv) {
+  const W = cv.width, H = cv.height, now = performance.now() / 1000, C = DOWNED_ALERT;
+  for (const t of G.towers) {
+    if (t.hp > 0) continue;
+    const spec = TYPES[t.type]; if (!spec) continue;
+    const sx = (t.x - cam.x) * VIEW_SCALE, sy = (t.y - cam.y) * VIEW_SCALE;
+    const m = EDGE_ALERT.margin, onScreen = sx > m && sx < W - m && sy > m && sy < H - m;
+    const pulse = .75 + .25 * Math.sin(now * Math.PI * 2 / 1.2);
+    const label = spec.name + '・倒下';
+    ctx.save();
+    ctx.font = 'bold 15px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)';
+    const z = C.size;
+    if (onScreen) {   // 身上方：往下指的箭頭（上下跳動）＋名字
+      const top = sy - 74 * VIEW_SCALE - Math.abs(Math.sin(now * 3)) * C.bob;   // 在頭上名字的再上面，不要蓋住名字
+      ctx.globalAlpha = pulse;
+      ctx.fillStyle = C.color; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(sx, top + 12 * z); ctx.lineTo(sx - 9 * z, top - 4 * z); ctx.lineTo(sx, top + z); ctx.lineTo(sx + 9 * z, top - 4 * z); ctx.closePath();
+      ctx.stroke(); ctx.fill();
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.globalAlpha = 1;
+      ctx.strokeText(label, sx, top - 8 * z - 8); ctx.fillStyle = C.text; ctx.fillText(label, sx, top - 8 * z - 8);
+    } else {          // 畫面邊緣：朝他的方向的箭頭＋名字（跟暴走的箭頭一樣的做法）
+      const dx = sx - W / 2, dy = sy - H / 2, ang = Math.atan2(dy, dx);
+      const k = Math.min(Math.abs(dx) > 1e-6 ? (W / 2) / Math.abs(dx) : Infinity, Math.abs(dy) > 1e-6 ? (H / 2) / Math.abs(dy) : Infinity);
+      const ax = Math.max(EDGE_ALERT.inset, Math.min(W - EDGE_ALERT.inset, W / 2 + dx * k)), ay = Math.max(EDGE_ALERT.inset, Math.min(H - EDGE_ALERT.inset, H / 2 + dy * k));
+      ctx.save(); ctx.translate(ax, ay); ctx.rotate(ang); ctx.globalAlpha = pulse;
+      ctx.fillStyle = C.color; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(12 * z, 0); ctx.lineTo(-6 * z, -9 * z); ctx.lineTo(-2 * z, 0); ctx.lineTo(-6 * z, 9 * z); ctx.closePath();
+      ctx.stroke(); ctx.fill(); ctx.restore();
+      const lx = ax - Math.cos(ang) * 46, ly = ay - Math.sin(ang) * 28;
+      ctx.strokeText(label, lx, ly); ctx.fillStyle = C.text; ctx.fillText(label, lx, ly);
+    }
+    ctx.restore();
+  }
+}
 function drawBerserkFxScreen(ctx, cv) {
   if (MAP_SAFE) return;
   drawSentryEdgeAlerts(ctx, cv);
+  drawDownedAlerts(ctx, cv);
   const v = G.taintVignette || 0, flashT = G.berserkFlashT || 0;
   if (v < .02 && flashT <= 0) return;
   const now = performance.now() / 1000, ph = (now * 1.4) % 1;

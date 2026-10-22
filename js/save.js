@@ -174,6 +174,6 @@ window.addEventListener('keydown', e => {
   const visible = id => { const el = document.getElementById(id); return el && !el.classList.contains('hidden'); };
   const busy = (typeof campPlanOpen !== 'undefined' && campPlanOpen) || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || mapTransitioning
     || visible('sentryMenu') || visible('groundMenu') || visible('buildbar') || visible('teamEditPanel') || visible('squadStatusPanel')
-    || (G && G.selType) || assigning;   // 開始畫面（簡報）也可以打開設定
+    || (typeof tpadOpen !== 'undefined' && tpadOpen) || (G && G.selType) || assigning;   // T-Pad 開著＝Esc 只關 T-Pad。開始畫面（簡報）也可以打開設定
   if (!busy) { e.preventDefault(); openSettings(); }
 }, true);

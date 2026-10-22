@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
+<script>   /* UI 編輯器裡的預覽遊戲（?uiedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
+  if (/[?&]uiedit=1(&|$)/.test(location.search)) { const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage; } catch (_) { return false; } };
+    P.setItem = function (k, v) { if (!isLocal(this)) return set.call(this, k, v); }; P.removeItem = function (k) { if (!isLocal(this)) return rem.call(this, k); }; P.clear = function () { if (!isLocal(this)) return clr.call(this); }; }
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/new-game.js?v=qs-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=baggun-20261022">
+<link rel="stylesheet" href="css/style.css?v=hudw-20261022">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -56,6 +60,7 @@
               <dt><kbd>Q</kbd> <kbd>E</kbd> <kbd>Z</kbd> <kbd>X</kbd></dt><dd>快捷欄（預設 Q 醫療包、E 杏仁水；打開背包把道具拖到下方就能換）</dd>
               <dt><kbd>F</kbd></dt><dd>靠近受傷／倒下的隊員時：急救</dd>
               <dt><kbd>B</kbd></dt><dd>背包</dd>
+              <dt><kbd>T</kbd></dt><dd>T-Pad（隊員、出勤配置、任務、成就、怪物圖鑑…）</dd>
               <dt><kbd>G</kbd></dt><dd>對話中送禮</dd>
               <dt><kbd>P</kbd></dt><dd>暫停</dd>
               <dt><kbd>M</kbd></dt><dd>靜音</dd>
@@ -197,6 +202,7 @@
     <div class="hud-supplies" aria-label="快捷補給">
       <div id="quickSupplies"></div>
       <button id="hudBackpackButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開背包（B）"><img class="backpack-button-image" src="images/weapon/Backpack.png" alt="">背包<kbd>B</kbd></button>
+      <button id="hudTpadButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開 T-Pad（T）"><svg class="tpad-button-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="5.4" width="10" height="11.6" rx=".8" fill="currentColor" opacity=".55"/><circle cx="12" cy="19.4" r="1.1" fill="currentColor"/></svg>T-Pad<kbd>T</kbd></button>
       <button id="hudShopButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開商店" hidden><span aria-hidden="true">🏪</span>商店</button>
     </div>
     <span class="stat money"><span class="hud-stat-values"><small>經費</small><b id="money">0</b></span></span>
@@ -217,6 +223,7 @@
     <a href="精靈圖切割器.html">✂️ 精靈圖切割器</a>
     <a href="音效編輯器.html">🔊 音效編輯器</a>
     <a href="開發工坊編輯器.html">🔧 開發工坊編輯器</a>
+    <a href="UI編輯器.html">🖥️ UI編輯器</a>
     <a href="怪物圖鑑編輯器.html">📕 怪物圖鑑編輯器</a>
   </div>
 
@@ -271,7 +278,7 @@
   <script src="js/core-frenzy.js?v=core-bar-up30-20261018"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
   <script src="js/combat-feel.js?v=bestiary1-20261022"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=coreclear-20261018"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
-  <script src="js/berserk-fx.js?v=bubbletop-20261020"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
+  <script src="js/berserk-fx.js?v=downed3-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/enemy-ai.js?v=squad2-20261022"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
@@ -301,7 +308,7 @@
   <script src="js/rescue-dog.js?v=dog-pickup-20261021"></script>
   <script src="js/missions.js?v=rescue-dog-20261021"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=claimall2-20261021"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
-  <script src="js/save.js?v=guide-sp-20261021"></script> <!-- 9k. 存檔、設定選單 -->
+  <script src="js/save.js?v=tpad1-20261022"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=noisefix-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=numkeys-20261020"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
@@ -312,7 +319,9 @@
   <script src="js/camp-supply.js?v=guide-sp-20261021"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=spbubble2-20261022"></script>
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
-  <script src="js/game.js?v=soothe-c-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
+  <script src="js/ui-layout.js?v=tpad1-20261022"></script>   <!-- 套用上面的 UI 版面 -->
+  <script src="js/game.js?v=tpad1-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=key-intro-scale200-20261018"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=qs-20261022"></script>   <!-- 下方快捷欄 Q／E／Z／X：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
@@ -329,5 +338,6 @@
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
   <script src="js/practice.js?v=squad2-20261022"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
   <script src="js/channel-actions.js?v=motes-20261021"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
+  <script src="js/tpad.js?v=tpad1-20261022"></script>   <!-- 📱 T-Pad：隊員、出勤配置、任務、成就、怪物圖鑑…都收在這裡（按 T） -->
 </body>
 </html>

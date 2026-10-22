@@ -1410,7 +1410,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #buildToolbar{transform:scale(1.2);transform-origin:left bottom;max-width:calc((100% - 48px) / 1.2);}
 #ammoHud{transform:scale(1.2);transform-origin:right bottom;}
 #fieldSquadHud{transform:scale(1.2);transform-origin:left top;}
-#hud{zoom:1.2;width:calc(100% / 1.2);max-width:calc(1280px / 1.2);}
+#hud{zoom:1.2;width:100%;max-width:calc(1280px / 1.2);}   /* 放大 1.2 倍；寬度 100%＝跟遊戲畫面一樣寬（瀏覽器會自己換算 zoom，不要再除 1.2） */
 
 /* 建築列貼近左下邊緣，兩個工具按鈕垂直堆疊。 */
 #buildToolbar{left:10px;right:auto;bottom:10px;max-width:calc((100% - 20px) / 1.2);}
@@ -2637,3 +2637,56 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .backpack-tabs button { font-size: 14px; }
 .backpack-tabs button .bag-ico { width: 20px; height: 20px; }   /* 17px × 1.2 */
 .bag-tag .bag-ico { width: 1.45em; height: 1.45em; vertical-align: -0.38em; }   /* 說明欄標籤裡的圖示放大 */
+/* 建造列：「建築」（打開更多建築）按鈕先藏起來；探照燈圖示再放大 1.2 倍；物件名稱 12 → 13px */
+#buildToggle { display: none !important; }
+#buildToolbar .build-quick-slot[data-build-id="searchlight"] img { width: 72px; height: 72px; top: -11px; }   /* 探照燈再大 1.2 倍（60 → 72）：直接改尺寸，置中才不會跑掉 */
+#buildToolbar .build-quick-slot span { font-size: 13px; }
+
+/* 左上隊員資訊：名字、條上的數字各大 1px（10 → 11、7 → 8） */
+.field-member-status > b { font-size: 11px; }
+.field-member-status .field-bar-num { font-size: 8px; }
+/* 建造列的按鈕框縮成 0.9 倍（58 → 52px；拆除 46×58 → 41×52），裡面的圖片、文字大小不變 */
+#buildToolbar .build-quick-slot { width: 52px; height: 52px; }
+#buildToolbar .build-quick-slot img { margin-top: -3px; }   /* 框矮了 6px：圖片往上 3px，維持在框的正中間 */
+#buildToolbar .build-toolbar-actions #demolishToggle { width: 41px; height: 52px; }
+/* 探照燈、鐵絲網、爐具、油箱的圖片往下 3px */
+#buildToolbar .build-quick-slot:is([data-build-id="searchlight"], [data-build-id="wirecloth"], [data-build-id="deco_gasstove2"], [data-build-id="deco_oil_tank"]) img { margin-top: 0; }
+
+/* ===== 📱 T-Pad（js/tpad.js）：左上的「Y102隊員／出勤配置／成就」收進 T-Pad ===== */
+#squadStatusButton, #teamEditButton, #achievementButton { display: none !important; }
+#hudTpadButton { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; width: 46px; height: 46px; padding: 0; border: 1px solid rgba(143,211,255,.42); border-radius: 9px; background: linear-gradient(180deg,rgba(38,56,74,.94),rgba(20,30,42,.96)); color: #d8ecff; cursor: pointer; font: 700 10px "Microsoft JhengHei",sans-serif; transition: transform .12s, border-color .12s; }
+#hudTpadButton:hover, #hudTpadButton.active { border-color: #8fd3ff; color: #fff; transform: translateY(-1px); }
+#hudTpadButton .tpad-button-icon { width: 22px; height: 22px; margin-top: 3px; }
+#hudTpadButton kbd { position: absolute; top: 2px; right: 2px; min-width: 15px; padding: 1px 3px; border: 1px solid rgba(255,255,255,.22); border-bottom-width: 2px; border-radius: 4px; background: #10161d; color: #aab6c2; font: 700 9px/1.2 Consolas, monospace; text-align: center; }
+
+#tpad { position: absolute; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; background: rgba(4,8,12,.62); backdrop-filter: blur(3px); animation: tpad-fade .18s ease-out; }
+#tpad.hidden { display: none; }
+@keyframes tpad-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes tpad-rise { from { transform: translateY(26px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
+.tpad-device { position: relative; width: min(760px, 86%); aspect-ratio: 4 / 3; max-height: 86%; padding: 22px; border-radius: 34px; background: linear-gradient(145deg, #3a4048, #16191d 60%, #2a2f35); box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.08), inset 0 0 0 9px #0b0d10; animation: tpad-rise .22s cubic-bezier(.2,.9,.3,1.1); }
+.tpad-cam { position: absolute; top: 9px; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%; background: #20262d; box-shadow: inset 0 0 0 1.5px #3a4651; }
+.tpad-screen { position: relative; height: 100%; overflow: hidden; border-radius: 16px; color: #eef6ff; font-family: "Microsoft JhengHei", sans-serif;
+  background: radial-gradient(120% 90% at 15% 0%, rgba(255,150,80,.38), transparent 55%), radial-gradient(90% 80% at 100% 100%, rgba(70,140,220,.42), transparent 60%), linear-gradient(160deg, #1d2a3a, #101722); }
+.tpad-status { display: flex; align-items: center; gap: 12px; padding: 7px 16px; font-size: 12px; color: #d6e4f2; background: rgba(0,0,0,.18); }
+.tpad-status b { font-weight: 700; letter-spacing: .5px; }
+.tpad-time { margin: 0 auto; font-weight: 700; font-variant-numeric: tabular-nums; }
+.tpad-batt { display: flex; align-items: center; gap: 6px; }
+.tpad-batt i { width: 20px; height: 10px; border: 1.5px solid currentColor; border-radius: 3px; background: linear-gradient(90deg, #7ee08a 78%, transparent 78%); background-clip: content-box; padding: 1px; }
+.tpad-home { display: flex; flex-direction: column; gap: 18px; padding: 18px 28px 50px; height: calc(100% - 30px); box-sizing: border-box; }
+.tpad-widget { display: grid; gap: 3px; padding: 12px 16px; border-radius: 16px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(8px); }
+.tpad-widget small { font-size: 12px; color: #ffcf9e; font-weight: 700; }
+.tpad-widget b { font-size: 16px; }
+.tpad-widget span { font-size: 12px; color: #b8c8d8; }
+.tpad-apps { display: grid; grid-template-columns: repeat(4, 1fr); gap: 18px 10px; align-content: start; }
+.tpad-app { position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 4px 0; border: 0; background: none; color: #f2f8ff; cursor: pointer; font: 700 13px "Microsoft JhengHei", sans-serif; text-shadow: 0 1px 3px rgba(0,0,0,.6); }
+.tpad-ico { display: grid; place-items: center; width: 66px; height: 66px; border-radius: 17px; color: #fff; background: linear-gradient(160deg, color-mix(in srgb, var(--app) 82%, #fff), var(--app) 55%, color-mix(in srgb, var(--app) 70%, #000)); box-shadow: 0 6px 14px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.35); transition: transform .12s; }
+.tpad-ico svg { width: 36px; height: 36px; filter: drop-shadow(0 1.5px 0 rgba(0,0,0,.35)); }
+.tpad-app:hover .tpad-ico { transform: translateY(-3px) scale(1.05); }
+.tpad-app:active .tpad-ico { transform: scale(.94); }
+.tpad-app.off .tpad-ico { filter: grayscale(.85) brightness(.7); }
+.tpad-app.off b { color: #9aa8b6; }
+.tpad-app em { position: absolute; top: -4px; right: calc(50% - 44px); padding: 1px 6px; border-radius: 8px; background: #2b3542; color: #ffd27a; font: 700 10px "Microsoft JhengHei", sans-serif; font-style: normal; box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+.tpad-toast { position: absolute; left: 50%; bottom: 46px; transform: translateX(-50%); padding: 8px 16px; border-radius: 18px; background: rgba(10,14,20,.88); color: #fff; font-size: 13px; white-space: nowrap; }
+.tpad-home-btn { position: absolute; left: 50%; bottom: 10px; width: 120px; height: 5px; margin-left: -60px; padding: 0; border: 0; border-radius: 3px; background: rgba(255,255,255,.7); cursor: pointer; }
+.tpad-home-btn::before { content: ""; position: absolute; inset: -10px -10px; }
+.tpad-home-btn:hover { background: #fff; }

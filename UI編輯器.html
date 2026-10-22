@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>UI編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  :root { color-scheme:dark; font-family:system-ui,'Microsoft JhengHei',sans-serif; background:#10151c; color:#e8edf5 }
+  * { box-sizing:border-box } body { margin:0 auto; padding:18px 20px; max-width:1800px }
+  h1 { font-size:24px; margin:0 0 4px } h2 { font-size:15px; margin:0 0 10px } h3 { font-size:12px; margin:14px 0 6px; color:#9fb1c2 }
+  p { color:#aabacc; line-height:1.5; margin:0 } a { color:#9bd2ff } code { color:#ffd9a8 }
+  .top { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:12px }
+  .nav { display:flex; gap:14px; padding-top:7px; white-space:nowrap }
+  .layout { display:grid; grid-template-columns:230px minmax(0,1fr) 270px; gap:12px; align-items:start }
+  .panel { background:#1b2530; border:1px solid #3a4d60; border-radius:13px; padding:14px; min-width:0 }
+  button { cursor:pointer; font:inherit; color:#eaf4ff; background:#2a3c50; border:1px solid #57718b; border-radius:8px; padding:6px 10px }
+  button:hover { background:#345169 } button.primary { background:#236b79; border-color:#69b9c1; font-weight:700 } button.on { background:#245668; border-color:#7fd7da }
+  button.danger { background:#4a2a30; border-color:#a0606a }
+  input[type=number] { width:100%; background:#101923; border:1px solid #536b80; border-radius:7px; color:#edf5ff; font:inherit; padding:5px 7px }
+  input[type=range] { width:100% } input[type=checkbox] { accent-color:#6bdbbd }
+  .list { display:grid; gap:4px }
+  .list button { display:flex; align-items:center; gap:6px; text-align:left; background:#15202b; border-color:#334a5d; width:100%; padding:6px 8px; font-size:13px }
+  .list button.on { background:#224358; border-color:#82cbe2 }
+  .list button em { margin-left:auto; font-style:normal; font-size:11px; color:#8be0c2 }
+  .list button.hid { opacity:.5 }
+  .stage-wrap { position:relative; overflow:hidden; border:1px solid #42586e; border-radius:10px; background:#05080b }
+  #game { display:block; border:0; transform-origin:0 0; background:#000 }
+  .modes { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; align-items:center }
+  .modes span { color:#9fb1c2; font-size:12px; margin-left:6px }
+  .field { display:grid; gap:4px; margin-top:10px; font-size:12px; color:#b9cad9 }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:8px }
+  .rangebox { display:grid; grid-template-columns:1fr 54px; gap:6px; align-items:center }
+  .sel-name { font-size:16px; font-weight:700; color:#ffe3a1 }
+  .actions { display:grid; gap:8px; margin-top:16px }
+  #status { min-height:20px; margin-top:10px; font-size:12px; line-height:1.6; color:#8be0c2; white-space:pre-line }
+  #status.err { color:#ff9c9c }
+  .hint { margin-top:10px; font-size:12px; color:#9eb2c4; line-height:1.7 }
+  .empty { color:#7d8996; font-size:13px }
+  kbd { padding:0 4px; border:1px solid #57718b; border-radius:4px; font-size:11px }
+  .part { margin-top:8px; padding:8px; border:1px solid #2f4152; border-radius:9px; background:#15202b }
+  .part b { display:block; font-size:12px; color:#dfe8ef; margin-bottom:6px }
+  .part-props { display:grid; grid-template-columns:repeat(2,1fr); gap:6px }
+  .part-props label { display:grid; gap:2px; font-size:11px; color:#9fb1c2 }
+  .part-props input::placeholder { color:#5f7386 }
+  #props { max-height:calc(100vh - 330px); overflow:auto; padding-right:4px; scrollbar-width:thin }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>🖥️ UI編輯器</h1>
+      <p>調整遊戲畫面上 UI 的位置、大小、透明度。直接在中間的遊戲畫面<b>點一下 UI 選取、按住拖曳移動</b>，右邊可以微調數字。</p>
+      <p>改好按「💾 存到專案」（寫進 <code>data/ui-layout.js</code>），遊戲按 Ctrl+F5 就會套用。</p>
+    </div>
+    <div class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="地圖編輯器.html">🗺️ 地圖編輯器</a></div>
+  </div>
+  <div class="layout">
+    <section class="panel">
+      <h2>UI 元素</h2>
+      <div class="list" id="list"></div>
+      <div class="hint">灰色＝已隱藏、綠字＝調整過。<br>「整條資訊條」要從這裡選（在畫面上點會選到裡面的小區塊）。</div>
+    </section>
+    <section class="panel">
+      <div class="modes">
+        <button type="button" data-mode="combat" class="on">⚔️ 戰鬥區畫面</button>
+        <button type="button" data-mode="base">🏠 基地畫面</button>
+        <span>戰鬥區才看得到左上隊員資訊、建造列、彈藥</span>
+      </div>
+      <div class="stage-wrap" id="stageWrap"><iframe id="game" src="塔防原型.html?uiedit=1" title="遊戲畫面預覽"></iframe></div>
+    </section>
+    <section class="panel">
+      <h2>調整</h2>
+      <div id="props"><p class="empty">先在左邊清單或遊戲畫面上選一個 UI</p></div>
+      <div class="actions">
+        <button type="button" class="primary" id="saveBtn">💾 存到專案</button>
+        <button type="button" id="downloadBtn">⬇ 下載 ui-layout.js</button>
+        <button type="button" class="danger" id="resetAll">全部恢復原本的樣子</button>
+      </div>
+      <div id="status"></div>
+      <div class="hint">選取後可以用方向鍵微調位置（按住 <kbd>Shift</kbd>＝一次 10px）。<br>修改會自動暫存在這台瀏覽器，存到專案後才會套用到遊戲。</div>
+    </section>
+  </div>
+  <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 每次都讀最新的版面設定 -->
+  <script src="js/draft-sync.js"></script>
+  <script src="js/ui-layout.js?v=5"></script>
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js"></script>
+  <script src="js/ui-editor.js?v=5"></script>
+</body>
+</html>
