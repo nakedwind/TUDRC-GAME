@@ -40,7 +40,7 @@ const UI_ELEMENTS = [
       P('name', '名字（溫特・嚮導部隊長）', '#hud .hud-player-status > b', ['font']),
       P('bar', 'HP／SP 條', '#hud .hud-player-bar', ['h']),
       P('num', '條上的數字', '#hud .hud-player-bar .bar-value', ['font']) ] },
-  { key: 'quickSlots',    group: '下方資訊條', label: '快捷欄 Q／E／Z／X', sel: '#quickSupplies',         origin: 'center', parts: [
+  { key: 'quickSlots',    group: '下方資訊條', label: '快捷欄 1～0', sel: '#quickSupplies',         origin: 'center', parts: [
       P('slot', '格子', '#quickSupplies .quick-supply', ['w', 'h', 'radius']),
       P('icon', '道具圖示（高）', '#quickSupplies .quick-supply .qs-icon img', ['h']),
       P('count', '數量', '#quickSupplies .quick-supply .qs-text b', ['font']),

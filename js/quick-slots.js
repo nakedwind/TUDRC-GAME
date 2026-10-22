@@ -1,22 +1,52 @@
-/* ===== 下方資訊條的快捷欄：Q、E、Z、X 四格，玩家自己決定放什麼 =====
-   ・預設 Q＝醫療包、E＝杏仁水，Z、X 空著。
-   ・設定方式：打開背包，把道具拖到下方的快捷格；或在背包的說明欄按「Q／E／Z／X」。
+/* ===== 下方資訊條的快捷欄：10 格，按 1～9、0 使用 =====
+   ・新拿到的道具（之前沒有、現在有）會依拿到的順序自動放進第一個空格；預設 1＝醫療包、2＝杏仁水。
+     自己拿掉的不會馬上又放回去：要等用完、之後再拿到才會自動放。
+   ・設定方式：打開背包，把道具拖到下方的快捷格；或在背包的說明欄按「1～0」。
      快捷格之間也可以拖來拖去（兩格互換）；對快捷格按右鍵、或把它拖回背包＝拿掉。
    ・同一種道具只會在一格（放到別格＝搬過去）。用完（×0）格子變暗但保留，補貨後可以直接用。
-   ・可以放的：補 HP／SP 的道具（醫療包、杏仁水、保溫杯）、腎上腺素、塗鴉筆。零食飲料是送禮用的；急救包要對隊員用（F）。
+   ・可以放的：補 HP／SP 的道具（醫療包、杏仁水、保溫杯）、急救包、異質急救包（按了選要治療的隊員）、腎上腺素、塗鴉筆。零食飲料是送禮用的。
    ・設定存在 tudrc_quickslots_v1（js/new-game.js 的進度清單：開新遊戲會重設、存檔欄位會一起存）。
+     內容：{ slots：每一格放什麼, seen：已經自動放過的道具 }；以前的 Q／E／Z／X 讀進來時搬到 1～4。
    必須在 js/shop.js、js/backpack.js、js/equipment.js、js/graffiti.js 之後載入（這裡的 renderQuickSupplies 取代 shop.js 的同名函式）。
 */
-const QUICK_KEYS = ['q', 'e', 'z', 'x'];
+const QUICK_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
 const QUICK_STORE = 'tudrc_quickslots_v1';
-const QUICK_DEFAULT = { q: 'medkit', e: 'almond-water', z: null, x: null };
+const QUICK_DEFAULT = Object.fromEntries(QUICK_KEYS.map(k => [k, null]));
+QUICK_DEFAULT['1'] = 'medkit'; QUICK_DEFAULT['2'] = 'almond-water';
+const quickSeen = new Set();   // 已經自動放過的道具（自己拿掉的不會再自動放回去；用完了才清掉）
 let quickSlots = (() => {
-  try { const s = JSON.parse(localStorage.getItem(QUICK_STORE) || 'null'); if (s && typeof s === 'object') return { ...QUICK_DEFAULT, ...s }; } catch (_) {}
+  try {
+    const s = JSON.parse(localStorage.getItem(QUICK_STORE) || 'null');
+    if (s && typeof s === 'object') {
+      if ('q' in s || 'e' in s || 'z' in s || 'x' in s) {   // 舊的 Q／E／Z／X 四格：照順序搬到 1～4
+        const out = Object.fromEntries(QUICK_KEYS.map(k => [k, null]));
+        ['q', 'e', 'z', 'x'].forEach((k, i) => { out[QUICK_KEYS[i]] = s[k] || null; });
+        return out;
+      }
+      if (s.slots && typeof s.slots === 'object') {
+        (Array.isArray(s.seen) ? s.seen : []).forEach(id => quickSeen.add(id));
+        return Object.fromEntries(QUICK_KEYS.map(k => [k, s.slots[k] || null]));
+      }
+    }
+  } catch (_) {}
   return { ...QUICK_DEFAULT };
 })();
-function saveQuickSlots() { try { localStorage.setItem(QUICK_STORE, JSON.stringify(quickSlots)); } catch (_) {} }
+function saveQuickSlots() { try { localStorage.setItem(QUICK_STORE, JSON.stringify({ slots: quickSlots, seen: [...quickSeen] })); } catch (_) {} }
 const quickItem = id => (id && typeof itemById === 'function' ? itemById(id) : null) || (typeof supplyById === 'function' ? supplyById(id) : null);
-function quickAllowed(item) { return !!item && (item.use === 'hp' || item.use === 'sp' || item.act === 'adrenaline' || item.act === 'graffiti'); }
+function quickAllowed(item) { return !!item && (item.use === 'hp' || item.use === 'sp' || item.act === 'adrenaline' || item.act === 'graffiti' || item.act === 'firstaid'); }
+// 新拿到的道具：依拿到的順序（背包的先後）放進第一個空格。用完的從 seen 拿掉，下次拿到會再自動放
+function quickAutoFill() {
+  let changed = false;
+  for (const [id, n] of supplyInventory) {
+    if (!(n > 0) || quickSeen.has(id) || !quickAllowed(quickItem(id))) continue;
+    quickSeen.add(id); changed = true;
+    if (quickSlotOf(id)) continue;
+    const empty = QUICK_KEYS.find(k => !quickSlots[k]);
+    if (empty) quickSlots[empty] = id;
+  }
+  for (const id of [...quickSeen]) if (!(supplyInventory.get(id) > 0)) { quickSeen.delete(id); changed = true; }
+  if (changed) saveQuickSlots();
+}
 const quickSlotOf = id => QUICK_KEYS.find(k => quickSlots[k] === id) || null;
 // 放進某一格：原本在別格就搬過去；from＝從另一格拖過來（兩格互換）
 function setQuickSlot(slot, id, from = null) {
@@ -32,6 +62,7 @@ function clearQuickSlot(slot) { if (!quickSlots[slot]) return; quickSlots[slot] 
 // ---- 畫快捷欄（取代 js/shop.js 的 renderQuickSupplies）----
 function renderQuickSupplies() {
   const box = document.getElementById('quickSupplies'); if (!box) return;
+  quickAutoFill();
   const state = QUICK_KEYS.map(k => { const it = quickItem(quickSlots[k]); return [k, it ? it.id : '', it ? (supplyInventory.get(it.id) || 0) : 0, it && (it.use === 'hp' || it.use === 'sp') ? supplyNeed(it.use) <= 0 : false]; });
   const key = JSON.stringify(state); if (key === quickSupplyKey) return; quickSupplyKey = key;
   box.innerHTML = state.map(([k, id, count, full]) => {
@@ -52,10 +83,11 @@ function useQuickSlot(slot) {
   if (it.act === 'graffiti') { if (typeof openGraffitiPalette === 'function') openGraffitiPalette(it.id); return; }   // 塗鴉筆：選圖案再畫（js/graffiti.js；基地也可以畫）
   if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', p.x, p.y - 54, '#c9d3dc'); return; }
   if (it.act === 'adrenaline') { if (typeof useAdrenaline === 'function') useAdrenaline(); return; }   // js/equipment.js
+  if (it.act === 'firstaid') { if (typeof useFirstAid === 'function') useFirstAid(); return; }   // 急救包、異質急救包：選要治療的隊員（js/equipment.js；再按一次＝取消）
   useSupply(it.id);   // 醫療包、杏仁水…（js/shop.js）
 }
 window.addEventListener('keydown', e => {
-  const k = e.key.toLowerCase();
+  const k = e.key;   // 1～9、0（數字鍵盤的也算）
   if (e.repeat || !QUICK_KEYS.includes(k) || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (!G?.player || G.over || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
@@ -94,7 +126,7 @@ quickBox.addEventListener('drop', e => {
 document.addEventListener('dragover', e => { if (quickDrag && quickDrag.from && e.target.closest && e.target.closest('#backpack')) e.preventDefault(); });
 document.addEventListener('drop', e => { if (quickDrag && quickDrag.from && e.target.closest && e.target.closest('#backpack')) { e.preventDefault(); clearQuickSlot(quickDrag.from); } });
 
-// ---- 背包：可以放進快捷欄的道具格可以拖；說明欄多一排「放到快捷欄 Q E Z X」 ----
+// ---- 背包：可以放進快捷欄的道具格可以拖；說明欄多一排「放到快捷欄 1～0」 ----
 const quickOrigRenderBackpack = renderBackpack;
 renderBackpack = function () {
   quickOrigRenderBackpack();

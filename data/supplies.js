@@ -1,5 +1,5 @@
 /* 商店賣的東西（溫特的個人補給）
-   ・補給（kind: 'medical'）：use 'hp' 恢復 HP、use 'sp' 恢復 SP（精神能量）；restore＝恢復多少。戰鬥中按 Q／F 快速使用。
+   ・補給（kind: 'medical'）：use 'hp' 恢復 HP、use 'sp' 恢復 SP（精神能量）；restore＝恢復多少。戰鬥中按 1～0 快速使用（下方快捷欄）。
    ・零食（'snack'）、飲料（'drink'）：不會恢復 HP／SP，用來送禮給角色（data/gifts.js），之後也能帶去出勤當補給。
    ・buff＝出勤補給效果（在「出勤配置」幫隊員帶上，出勤時吃掉，效果維持到回基地；js/sortie-supply.js）
      atk 攻擊、spd 攻速、def 防禦、hp 生命上限、calm 負荷累積減少（嚮導：疏導量增加）；.05 = 5%

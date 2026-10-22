@@ -1,7 +1,7 @@
 // ============================================================
 //  商店：便利商店、飲料店、販賣機共用購物介面
 //  ・左邊商品、右邊購物車；結帳後東西放進背包（背包在 js/backpack.js）
-//  ・補給：醫療包恢復 HP、杏仁水恢復 SP；戰鬥中按 Q／F 快速使用（下方資訊條的快捷格）
+//  ・補給：醫療包恢復 HP、杏仁水恢復 SP；戰鬥中按 1～0 快速使用（下方資訊條的快捷格）
 //  ・零食、飲料：送禮用（js/gifts.js）
 //  ・商品資料在 data/supplies.js
 //  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Spacenter 打開
@@ -319,7 +319,7 @@ supplyShop.addEventListener('animationend', e => { if (e.target.classList.contai
 supplyShopList.addEventListener('mouseover', e => { const card = e.target.closest('[data-item]'); const item = card ? supplyById(card.dataset.item) : null; if (item !== supplyHover) { supplyHover = item; renderSupplyStatus(); } });
 supplyShopList.addEventListener('mouseleave', () => { supplyHover = null; renderSupplyStatus(); });
 document.querySelectorAll('[data-supply-tab]').forEach(button => button.addEventListener('click', () => { supplyShopTab = button.dataset.supplyTab; document.querySelectorAll('[data-supply-tab]').forEach(tab => { tab.classList.toggle('active', tab === button); tab.setAttribute('aria-selected', tab === button); }); supplyShopList.scrollTop = 0; renderSupplyShop(); sfx('switch'); }));
-window.addEventListener('keydown', e => {   // F 急救（旁邊的隊員需要急救時）；Q／E／Z／X 是快捷欄（js/quick-slots.js）
+window.addEventListener('keydown', e => {   // F 急救（旁邊的隊員需要急救時）；1～0 是快捷欄（js/quick-slots.js）
   const k = e.key.toLowerCase();
   if (e.repeat || k !== 'f' || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
