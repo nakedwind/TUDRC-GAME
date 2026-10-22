@@ -11,7 +11,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=quick10-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=sync-backpack-tab-20261022">
+<link rel="stylesheet" href="css/style.css?v=hovertip-20261023">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -118,7 +118,7 @@
       <div class="build-fold">
       <div class="build-toolbar-actions">
       <button class="tbtn" id="buildToggle" type="button" title="打開更多建築（完整清單）"><span class="build-tool-icon" aria-hidden="true">🧱</span><span>建築</span></button>
-      <button class="tbtn" id="demolishToggle" type="button" title="點擊後，再點選要拆除的建築或障礙物"><img class="build-tool-icon demolish-icon" src="images/weapon/icon-hammer.png" alt=""><span>拆除</span></button>
+      <button class="tbtn" id="demolishToggle" type="button" data-tip="點選建築或障礙物拆除" aria-label="拆除：點擊後，再點選要拆除的建築或障礙物"><img class="build-tool-icon demolish-icon" src="images/weapon/icon-hammer.png" alt=""><span>拆除</span></button>
       </div>
       <div id="buildQuickSlots" aria-label="建築快捷欄"></div>
       </div>
@@ -267,7 +267,7 @@
   <script src="js/breakable-walls.js?v=wallsolid-20261017"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
-  <script src="js/build.js?v=esclayer-20261023"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/build.js?v=hovertip-20261023"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=esclayer-20261023"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=esclayer-20261023"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
@@ -324,7 +324,8 @@
   <script src="js/game.js?v=esclayer-20261023"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=flash2x2-20261022"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
-  <script src="js/quick-slots.js?v=quick10-20261022"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
+  <script src="js/quick-slots.js?v=hovertip-20261023"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
+  <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->
   <script src="js/item-intro.js?v=bulletimg-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->
   <script src="data/posters.js?v=posters-20261018"></script>   <!-- 可以查看的海報：說明文字 -->
   <script src="js/posters.js?v=posters-20261018"></script>   <!-- 查看海報 -->

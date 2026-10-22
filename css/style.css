@@ -3044,3 +3044,11 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #backpackGrid .bag-cell.mag-cell.drop-on { border: 1px solid #ffd479; box-shadow: 0 0 0 2px rgba(255,212,121,.35), 0 0 16px rgba(255,212,121,.3); transform: translateY(-2px); }
 #backpackGrid .bag-cell.mag-cell.drop-on::before { border: 1px solid #ffd479; background: rgba(255,212,121,.1); }
 #backpackGrid.dragging .bag-cell.mag-cell:not(.locked)::before { border-color: rgba(255,212,121,.55); }
+
+/* ===== 懸停提示（js/hover-tip.js）：快捷欄、建造欄的小道具 =====
+   圖示上方的 UI 框（效果）＋圖示下方的名稱；以圖示中心左右延展、文字置中 */
+.hover-tip-box, .hover-tip-name { position: fixed; z-index: 9000; pointer-events: none; white-space: nowrap; text-align: center; font-family: "Microsoft JhengHei", sans-serif; font-weight: 700; animation: hoverTipIn .1s ease-out; }
+.hover-tip-box { transform: translate(-50%, -100%); padding: 3px 9px 4px; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; background: rgba(22,28,36,.96); color: #f1f6fb; font-size: 12px; line-height: 1.2; box-shadow: 0 2px 8px rgba(0,0,0,.45); }
+.hover-tip-name { transform: translateX(-50%); color: #fff; font-size: 11px; line-height: 1.15; text-shadow: 0 1px 2px #000, 0 0 3px #000, 0 0 1px #000; }
+.hover-tip-box[hidden], .hover-tip-name[hidden] { display: none; }
+@keyframes hoverTipIn { from { opacity: 0; } to { opacity: 1; } }

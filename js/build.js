@@ -127,12 +127,13 @@ function renderBuildQuickSlots() {
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'build-quick-slot';
     button.dataset.buildId = id;
-    button.title = ob.name + '（經費 $' + ob.cost + '・HP ' + ob.hp + '）';
+    button.dataset.tip = '經費 $' + ob.cost + '・HP ' + ob.hp; button.dataset.tipKey = 'build-' + id;   // 懸停提示（js/hover-tip.js）；名稱本來就寫在圖示下面
     button.setAttribute('aria-label', '建造' + ob.name);
     button.innerHTML = '<img src="' + ob[buildOrient].file + '" alt=""><span>' + ob.name + '</span>';
     button.addEventListener('click', () => selectBuildType(id));
     buildQuickSlots.appendChild(button);
   });
+  if (typeof refreshHoverTip === 'function') refreshHoverTip();
 }
 function selectBuildType(id) {
   if (!G || !G.running || MAP_SAFE || !buildableById(id)) return;
