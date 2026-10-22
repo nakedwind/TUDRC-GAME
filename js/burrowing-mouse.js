@@ -34,8 +34,7 @@ function updateBurrowMouseTestSpawn(dt, entering = false) {
     || (x >= cam.x + CELL * 2 && x <= cam.x + viewW() - CELL * 2 && y >= cam.y + CELL * 3 && y <= cam.y + viewH() - CELL));
   if (G.enemies.some(e => e.type === spec.id && !e.dead && e.hp > 0 && visible(e.x, e.y))) {
     G.burrowMouseTestSpawnDone = true;
-    if (typeof setPaused === 'function') setPaused(true);
-    if (typeof systemNotice === 'function') systemNotice('版權老鼠已在附近，已暫停；按 P 開始測試。');
+    if (typeof systemNotice === 'function') systemNotice('版權老鼠已在附近，可直接開始測試。');
     return;
   }
   const floor = mapFloorCells(), [pc, pr] = cellAt(p.x, p.y), spots = [];
@@ -59,9 +58,7 @@ function updateBurrowMouseTestSpawn(dt, entering = false) {
   }
   G.enemies.push(createMonster(spec, spots[0].x, spots[0].y));
   G.burrowMouseTestSpawnDone = true;
-  // 先讓玩家看清楚本體，避免還在營地內時就被隊員擊倒。
-  if (typeof setPaused === 'function') setPaused(true);
-  if (typeof systemNotice === 'function') systemNotice('版權老鼠已在你附近出現，已暫停；按 P 開始測試。');
+  if (typeof systemNotice === 'function') systemNotice('版權老鼠已在你附近出現，可直接開始測試。');
 }
 function burrowingMouseDefinition(id = 'burrowing_mouse') {
   return { id, name: '花蓮版權老鼠', sprite: BURROW_MOUSE_ART.normal,
