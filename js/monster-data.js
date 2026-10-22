@@ -94,7 +94,6 @@ const CHARGER_FIELDS = [
 // 鑽地型：本體從洞口探出；手鎖定地面位置，出手前保留可閃避的預警。
 const BURROW_FIELDS = [
   { key: 'noticeRange', label: '注意範圍（格）', min: 1, max: 30, step: .5, def: 14 },
-  { key: 'attackRange', label: '地底手攻擊距離（格）', min: 1, max: 12, step: .5, def: 5 },
   { key: 'hitRadius', label: '地底手命中半徑（格）', min: .3, max: 2, step: .1, def: .8 },
   { key: 'windup', label: '地洞預警（秒）', min: .2, max: 4, step: .05, def: .8 },
   { key: 'handRise', label: '手鑽出到命中（秒）', min: .1, max: 1, step: .05, def: .2 },
@@ -107,7 +106,6 @@ function validBurrowCfg(raw) {
   for (const f of BURROW_FIELDS) {
     const n = Number(src[f.key]); out[f.key] = Number.isFinite(n) ? Math.max(f.min, Math.min(f.max, n)) : f.def;
   }
-  out.noticeRange = Math.max(out.noticeRange, out.attackRange);
   return out;
 }
 function validChargerCfg(raw) {

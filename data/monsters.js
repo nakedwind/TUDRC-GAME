@@ -369,7 +369,6 @@ const MONSTERS_DEFAULT = [
     "behavior": "burrow",
     "burrow": {
       "noticeRange": 14,
-      "attackRange": 5,
       "hitRadius": 0.8,
       "windup": 0.8,
       "handRise": 0.2,

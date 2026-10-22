@@ -1,4 +1,4 @@
-/* 花蓮版權老鼠：本體出土、地底追蹤、腳下預警後伸手。素材沿用 110×90 原稿，無重繪。
+/* 花蓮版權老鼠：鑽地瞬移、3×3 格伸手、離開後原地洞保留五秒。素材沿用 110×90 原稿。
    怪物編輯器也載入本檔，使用同一份素材與動作選圖預覽。所有計時用遊戲 dt，可暫停／保留戰場。 */
 const BURROW_MOUSE_ART = {
   normal: 'images/monster/burrowing-mouse/mouse-hole-open.png',
@@ -28,7 +28,7 @@ function burrowMouseBodyFrame(art, phase, age, duration) {
   if (phase === 'emerge' || phase === 'sink') {
     let k = Math.max(0, Math.min(1, age / Math.max(.01, duration)));
     if (phase === 'sink') k = 1 - k;
-    return k < .25 ? art.hole : k < .68 ? art.emerge : art.normal;
+    return k < .25 ? (phase === 'emerge' ? art.crack : art.hole) : k < .68 ? art.emerge : art.normal;
   }
   const blink = age % 3.7;
   return blink < .1 || (blink >= .22 && blink < .32) ? art.half : blink < .22 ? art.closed : art.normal;
@@ -48,11 +48,41 @@ function burrowMouseTargets(e, range) {
       return taunt(b) - taunt(a) || Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y);
     });
 }
+// 九宮格以本體所在格為中心，含四個斜角；不是半徑三格。
+function burrowMouseInReach(e, p) {
+  const [ec, er] = cellAt(e.x, e.y), [pc, pr] = cellAt(p.x, p.y);
+  return Math.abs(pc - ec) <= 1 && Math.abs(pr - er) <= 1;
+}
+function burrowMouseLeaveHole(e, delay = 0) {
+  (G.burrowHoles || (G.burrowHoles = [])).push({
+    x: e.x, y: e.y, w: e.drawWidth || 110, h: e.drawHeight || 90,
+    image: burrowMouseArt(e).hole, age: 0, lifetime: 5 + delay,
+  });
+}
+function burrowMouseTeleport(e, target) {
+  if (!target) return false;
+  const [tc, tr] = cellAt(target.x, target.y), [ec, er] = cellAt(e.x, e.y);
+  const floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null, spots = [];
+  for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+    const c = tc + dc, r = tr + dr, x = OX + (c + .5) * CELL, y = OY + (r + .5) * CELL;
+    if ((!dc && !dr) || (c === ec && r === er) || (floor && !floor.has(c + ',' + r))) continue;
+    if (enemyBlocked(x, y) || !hasLineOfSight(x, y, target.x, target.y)) continue;
+    if (G.towers.some(t => t.hp > 0 && cellAt(t.x, t.y)[0] === c && cellAt(t.x, t.y)[1] === r)
+      || G.enemies.some(o => o !== e && !o.dead && o.hp > 0 && cellAt(o.x, o.y)[0] === c && cellAt(o.x, o.y)[1] === r)) continue;
+    spots.push({ x, y });
+  }
+  spots.sort((a, b) => Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y));
+  if (!spots.length) return false;
+  e.x = spots[0].x; e.y = spots[0].y;
+  e.lastSafeX = e.x; e.lastSafeY = e.y;
+  resetEnemyNavigation(e);
+  return true;
+}
 function stepBurrowingMouse(e, dt) {
   const c = validBurrowCfg(e.burrowCfg), art = burrowMouseArt(e);
-  const b = e.bm || (e.bm = { phase: 'emerge', age: 0, cd: c.cooldown, side: 'left', hands: [] });
+  const b = e.bm || (e.bm = { phase: 'emerge', age: 0, cd: c.cooldown, attacked: false, hands: [] });
   b.hands = b.hands || [];
-  // Grounded body: it stays vulnerable, including while travelling. No global damage rules change.
+  // 不做地下逐格移動；入土完成時一次換位置，出土與入土期間仍可受傷。
   e.slimeLift = 0; e.slimeScaleX = 1; e.slimeScaleY = 1;
   if (e.stunT > 0 || e.sleepT > 0) { b.hands = []; return; }
   b.age += dt; b.cd = Math.max(0, b.cd - dt);
@@ -63,34 +93,23 @@ function stepBurrowingMouse(e, dt) {
   b.hands = b.hands.filter(h => h.age < c.windup + c.handRise + c.handHold + .22);
   const guard = typeof frenzyCoreGoal === 'function' ? frenzyCoreGoal(e) : null;
   const target = burrowMouseTargets(e, c.noticeRange)[0] || guard;
-  const distance = target ? Math.hypot(target.x - e.x, target.y - e.y) : 0;
   if (b.phase === 'emerge' && b.age >= c.emergeTime) { b.phase = 'idle'; b.age = 0; }
-  else if (b.phase === 'sink' && b.age >= c.emergeTime) { b.phase = 'travel'; b.age = 0; }
-  else if (b.phase === 'travel') {
-    if (!target || distance <= (target === guard ? 2 : c.attackRange) * CELL) { b.phase = 'emerge'; b.age = 0; }
-    else {
-      const [gc, gr] = cellAt(target.x, target.y);
-      const before = { x: e.x, y: e.y };
-      const nav = enemyNavigate(e, gc, gr, dt, 'burrow:' + gc + ',' + gr, true);
-      const [nc, nr] = cellAt(e.x, e.y);
-      if (typeof mapFloorCells === 'function' && !mapFloorCells().has(nc + ',' + nr)) {
-        e.x = before.x; e.y = before.y; resetEnemyNavigation(e); b.phase = 'emerge'; b.age = 0;
-      }
-      if (nav?.blocker) { b.phase = 'emerge'; b.age = 0; b.blocker = nav.blocker; }
-    }
+  else if ((b.phase === 'sink' && b.age >= c.emergeTime) || b.phase === 'travel') {
+    // travel 僅供舊戰場存檔相容。洞記錄舊座標，絕不跟著本體移動。
+    burrowMouseLeaveHole(e);
+    burrowMouseTeleport(e, target);
+    b.phase = 'emerge'; b.age = 0; b.attacked = false;
   } else if (b.phase === 'idle') {
-    if (b.blocker && (b.blocker.hp <= 0 || !G.obstacles.includes(b.blocker))) b.blocker = null;
-    if (target && distance > (target === guard ? 2 : c.attackRange) * CELL && !b.hands.length && !b.blocker) { b.phase = 'sink'; b.age = 0; }
+    if (!b.hands.length && (b.attacked || (target && !burrowMouseInReach(e, target)))) { b.phase = 'sink'; b.age = 0; }
     else if (b.cd <= 0 && !b.hands.length) {
-      const obstacle = b.blocker && b.blocker.hp > 0 && G.obstacles.includes(b.blocker) ? b.blocker : null;
-      const aim = target && target !== guard && distance <= c.attackRange * CELL ? target : obstacle;
+      const aim = target && target !== guard && burrowMouseInReach(e, target) ? target : null;
       if (aim) {
-        const p = obstacle && aim === obstacle ? { x: OX + (aim.c + (aim.w || 1) / 2) * CELL, y: OY + (aim.r + (aim.h || 1) / 2) * CELL } : aim;
+        const p = aim;
         const [cc, rr] = cellAt(p.x, p.y);
         const floor = typeof mapFloorCells !== 'function' || mapFloorCells().has(cc + ',' + rr);
-        if ((obstacle && aim === obstacle) || (floor && !isWall(cc, rr) && hasLineOfSight(e.x, e.y, p.x, p.y))) {
-          b.hands.push({ x: p.x, y: p.y, side: b.side, age: 0, hit: false, confused: e.confuseT > 0, obstacle: obstacle && aim === obstacle ? obstacle : null });
-          b.side = b.side === 'left' ? 'right' : 'left'; b.cd = c.cooldown;
+        if (floor && !isWall(cc, rr) && hasLineOfSight(e.x, e.y, p.x, p.y)) {
+          b.hands.push({ x: p.x, y: p.y, side: p.x < e.x ? 'left' : 'right', age: 0, hit: false, confused: e.confuseT > 0 });
+          b.attacked = true; b.cd = c.cooldown;
         }
       }
     }
@@ -98,8 +117,8 @@ function stepBurrowingMouse(e, dt) {
   e.forceFrame = burrowMouseBodyFrame(art, b.phase, b.age, c.emergeTime); e.forceFlip = false;
 }
 function burrowMouseStrike(e, hand, c) {
-  if (e.dead || e.hp <= 0 || (!hand.obstacle && !hasLineOfSight(e.x, e.y, hand.x, hand.y))) return;
-  const within = t => t && t.hp > 0 && Math.hypot(t.x - hand.x, t.y - hand.y) <= c.hitRadius * CELL
+  if (e.dead || e.hp <= 0 || !burrowMouseInReach(e, hand) || (!hand.obstacle && !hasLineOfSight(e.x, e.y, hand.x, hand.y))) return;
+  const within = t => t && t.hp > 0 && burrowMouseInReach(e, t) && Math.hypot(t.x - hand.x, t.y - hand.y) <= c.hitRadius * CELL
     && hasLineOfSight(hand.x, hand.y, t.x, t.y);
   if (hand.confused) {
     for (const other of G.enemies) if (other !== e && !other.dead && within(other)) {
@@ -125,6 +144,7 @@ function drawBurrowWarning(context, h, c) {
   context.globalAlpha = .8; context.beginPath(); context.ellipse(h.x, h.y + 3, r * (1.5 - k * .5), r * .48 * (1.5 - k * .5), 0, 0, Math.PI * 2); context.stroke(); context.restore();
 }
 function drawBurrowingMouseGround(context) {
+  for (const h of G.burrowHoles || []) if (isLit(h.x, h.y)) drawBurrowFrame(context, monsterImage(h.image), h.x, h.y, h.w, h.h);
   for (const e of G.enemies) if (e.behavior === 'burrow' && !e.dead) {
     const c = validBurrowCfg(e.burrowCfg);
     for (const h of e.bm?.hands || []) if (isLit(h.x, h.y)) drawBurrowWarning(context, h, c);
@@ -143,8 +163,11 @@ function burrowingMouseSortables(list) {
 }
 function burrowingMouseDeath(e) {
   if (e.bm) e.bm.hands = [];
+  // 死亡收回動畫結束後，洞口仍完整保留五秒。
+  burrowMouseLeaveHole(e, 1.1);
   (G.burrowDeaths || (G.burrowDeaths = [])).push({ x: e.x, y: e.y, w: e.drawWidth || 110, h: e.drawHeight || 90, art: burrowMouseArt(e), age: 0 });
 }
 function updateBurrowingMouseFx(dt) {
+  if (G.burrowHoles) G.burrowHoles = G.burrowHoles.filter(h => (h.age += dt) < h.lifetime);
   if (G.burrowDeaths) G.burrowDeaths = G.burrowDeaths.filter(d => (d.age += dt) < 1.1);
 }

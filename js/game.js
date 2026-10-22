@@ -2329,7 +2329,7 @@ function prepareMonsterPreview() {
   const spec = ACTIVE_MONSTERS.find(m => m.id === MONSTER_PREVIEW_ID);
   G.cores = []; G.enemies = []; G.towers = []; G.npcs = []; LIGHT.enabled = false;
   // Existing per-monster debug spawners must not add unrelated species to this test scene.
-  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true;
+  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true; G.clownfishTestDone = true;
   G.player.x = CELL * 10; G.player.y = CELL * 7; G.player.hp = PLAYER.hp; G.guide = G.guideMax;
   if (spec) G.enemies.push(createMonster(spec, CELL * 14, CELL * 7));
   const note = document.querySelector('.header-note');

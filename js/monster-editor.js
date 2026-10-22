@@ -53,7 +53,7 @@ function render() {
 // 行為數值：依怪物的行為模式顯示對應欄位（欄位表在 js/monster-data.js）
 const BEHAVIOR_UI = {
   burrow: { key: 'burrow', fields: () => BURROW_FIELDS, valid: c => validBurrowCfg(c), title: '🐭 鑽地出土／地底伸手',
-    desc: '先鑽出地面；遠處目標會沿可行走地面鑽地接近。進入射程後在目標當下的位置留下橘圈預兆，再交替伸出左右手攻擊。手不會追著目標瞬移，躲開即可閃避；隔牆、沒有地板的空洞不會出手。' },
+    desc: '鑽地後瞬移到目標附近，使用「地洞剛出現」出土。本體周圍 3×3 格內可以伸手：目標在左邊用左手，右邊用右手。出手前鎖定地面並預警，可移動閃避；本體躲回去或死亡後，原地洞保留 5 秒。手的洞隨攻擊結束消失。' },
   charger: { key: 'charger', fields: () => CHARGER_FIELDS, valid: c => validChargerCfg(c), title: '🐦 衝撞行為',
     desc: '平時發呆、偶爾散步；玩家或哨兵進入注意範圍（中間沒有牆）就愣一下，然後直線衝過去，撞到會把人撞飛。玩家一出現就只追玩家，哨兵的嘲諷也引不走。' },
   shooter: { key: 'shooter', fields: () => SHOOTER_FIELDS, valid: c => validShooterCfg(c), title: '🫧 飄浮噴珍珠',
@@ -103,12 +103,6 @@ function addMonster(copy = false) {
   document.getElementById('f_name').focus(); document.getElementById('f_name').select();
 }
 document.getElementById('addMonster').addEventListener('click', () => addMonster(false));
-document.getElementById('addBurrowingMouse').addEventListener('click', () => {
-  const existing = monsters.find(m => m.id === 'burrowing_mouse');
-  if (!existing) monsters.push(burrowingMouseDefinition());
-  selectedId = 'burrowing_mouse'; saveMonsters(); render();
-  status(existing ? '已選取花蓮版權老鼠，保留原有設定。' : '已新增花蓮版權老鼠；可調整數值及動作預覽，確認後存到專案。');
-});
 document.getElementById('f_behavior').addEventListener('change', e => {
   const m = currentMonster();
   if (e.target.value) m.behavior = e.target.value; else delete m.behavior;
@@ -253,28 +247,30 @@ function drawBurrowEditorPreview(now) {
     const t = (now - burrowPreviewStarted) / 1000, handDuration = c.windup + c.handRise + c.handHold + .22;
     let phase = 'idle', age = t, hand = null;
     if (mode === 'emerge' || mode === 'sink') { phase = mode; age = t % (c.emergeTime + .7); }
-    else if (mode === 'left' || mode === 'right') hand = { x: 390, y: 202, age: t % (handDuration + .7), side: mode };
-    else if (mode.startsWith('strike-')) { age = 1; hand = { x: 390, y: 202, age: c.windup + c.handRise + Math.min(.1, c.handHold / 2), side: mode.slice(7) }; }
+    else if (mode === 'left' || mode === 'right') hand = { x: mode === 'left' ? 260 : 340, y: 180, age: t % (handDuration + .7), side: mode };
+    else if (mode.startsWith('strike-')) { age = 1; hand = { x: mode === 'strike-left' ? 260 : 340, y: 180, age: c.windup + c.handRise + Math.min(.1, c.handHold / 2), side: mode.slice(7) }; }
     else if (mode === 'cycle') {
       const u = t % (c.emergeTime * 2 + 2.4 + handDuration * 2);
       if (u < c.emergeTime) { phase = 'emerge'; age = u; }
       else if (u < c.emergeTime + 2.4) age = u - c.emergeTime;
       else if (u < c.emergeTime + 2.4 + handDuration * 2) {
         const h = u - c.emergeTime - 2.4, left = h < handDuration;
-        hand = { x: left ? 345 : 440, y: 202, side: left ? 'left' : 'right', age: h % handDuration };
+        hand = { x: left ? 260 : 340, y: 180, side: left ? 'left' : 'right', age: h % handDuration };
       } else { phase = 'sink'; age = u - c.emergeTime - 2.4 - handDuration * 2; }
     }
     pc.clearRect(0, 0, canvas.width, canvas.height); pc.fillStyle = '#222e38'; pc.fillRect(0, 0, canvas.width, canvas.height);
     pc.strokeStyle = '#35434c'; pc.lineWidth = 1;
     for (let x = 0; x < canvas.width; x += 40) { pc.beginPath(); pc.moveTo(x, 0); pc.lineTo(x, canvas.height); pc.stroke(); }
     for (let y = 0; y < canvas.height; y += 40) { pc.beginPath(); pc.moveTo(0, y); pc.lineTo(canvas.width, y); pc.stroke(); }
+    pc.strokeStyle = '#64c4a0'; pc.strokeRect(240, 120, 120, 120);
     if (hand && hand.age <= handDuration) {
       drawBurrowWarning(pc, hand, c);
       drawBurrowFrame(pc, previewBurrowImage(burrowMouseHandFrame(art, hand.side, hand.age, c)), hand.x, hand.y);
     }
-    drawBurrowFrame(pc, previewBurrowImage(burrowMouseBodyFrame(art, phase, age, c.emergeTime)), 132, 202, m.width || 110, m.height || 90);
+    drawBurrowFrame(pc, previewBurrowImage(burrowMouseBodyFrame(art, phase, age, c.emergeTime)), 300, 180, m.width || 110, m.height || 90);
     pc.fillStyle = '#e4edf3'; pc.font = '15px "Microsoft JhengHei", sans-serif';
-    pc.fillText('本體：出土／眨眼／入土', 36, 35); pc.fillText('遠端洞口：預警 → 伸手 → 縮回', 280, 35);
+    pc.fillText('目標在左用左手，右邊用右手', 36, 35);
+    pc.fillText('綠框：本體周圍 3×3 格；離開後原地洞保留 5 秒', 36, 62);
   }
   requestAnimationFrame(drawBurrowEditorPreview);
 }
