@@ -22,10 +22,10 @@ const NPC_CHAT_RULES = {
   lineMax: 5,   // 每句最多顯示幾秒
   lineGap: 0.35,   // 兩句之間停多久（泡泡消失）
   startPause: 0.6,   // 溫特按「聽閒聊」後先停多久才開口
-  waitTime: 60,      // 到定位後等溫特來聽幾秒（沒人來就散開）
-  listenRange: 3,    // 離大家中間幾格內可以按 Space「聽閒聊」
-  leaveRange: 20,    // 聽到一半，溫特走離幾格就當作不聽了（大家散開）
-  murmurEvery: 1.8,  // 等人來聽時，頭上「…」大約隔幾秒冒一次
+  waitTime: 60,   // 到定位後等溫特來聽幾秒（沒人來就散開）
+  listenRange: 3,   // 離大家中間幾格內可以按 Space「聽閒聊」
+  leaveRange: 20,   // 聽到一半，溫特走離幾格就當作不聽了（大家散開）
+  murmurEvery: 1.8,   // 等人來聽時，頭上「…」大約隔幾秒冒一次
 };
 const NPC_CHATS = [
   {
@@ -58,7 +58,8 @@ const NPC_CHATS = [
         ["theonie", "那不是我。"],
         ["noah", "我又沒說是妳。"],
         ["theonie", "……。"]
-      ]
+      ],
+      []
     ]
   },
   {
@@ -91,6 +92,23 @@ const NPC_CHATS = [
         ["avaren", "可能吧...你能幫我檢查一下嗎？"],
         ["eldrin", "知道了，等我把這個資料交出去，就帶你去疏導室！"],
         ["avaren", "...那你快一點...。"]
+      ]
+    ]
+  },
+  {
+    "id": "閒聊1",
+    "map": "B1訓練室",
+    "who": ["taana", "colyn"],
+    "stand": {
+      "taana": [13, 19],
+      "colyn": [11, 19]
+    },
+    "talks": [
+      [
+        ["taana", "你要在這裡待多久？"],
+        ["colyn", "到我膩了為止！"],
+        ["taana", "你什麼時候會膩？"],
+        ["colyn", "我不會膩！"]
       ]
     ]
   }
