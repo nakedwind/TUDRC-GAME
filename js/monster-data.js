@@ -52,7 +52,8 @@ function validMonsterCatalog(list) {
     ...(monster.behavior === 'fishhead' ? { behavior: 'fishhead' } : {}),
     ...(monster.behavior === 'burrow' ? { behavior: 'burrow', burrow: validBurrowCfg(monster.burrow) } : {}),
     ...(monster.behavior === 'milkfish' || monster.behavior === 'milkfishSmall' ? { behavior: monster.behavior } : {}),   // milkfish＝虱目魚小子：吃隊友、吃一格的物品；milkfishSmall＝小虱目魚小子：只吃物品（js/milkfish-kid.js，數值在 MILKFISH）
-    ...(monster.behavior === 'vine' ? { behavior: 'vine' } : {}),   // vine＝絲瓜小姐：重踏放藤蔓纏人（js/loofah-lady.js，數值在 LOOFAH）   // fishhead＝魚頭君：噴水、去滅火、留水漬（js/fish-head.js，數值在 FISH_HEAD）   // boomerang＝夯吉寶丟迴力鏢帽子（js/hangi-bao.js）
+    ...(monster.behavior === 'vine' ? { behavior: 'vine' } : {}),
+    ...(monster.behavior === 'clownfish' ? { behavior: 'clownfish' } : {}),   // vine＝絲瓜小姐：重踏放藤蔓纏人（js/loofah-lady.js，數值在 LOOFAH）   // fishhead＝魚頭君：噴水、去滅火、留水漬（js/fish-head.js，數值在 FISH_HEAD）   // boomerang＝夯吉寶丟迴力鏢帽子（js/hangi-bao.js）
     ...(validMonsterArt(monster.art) ? { art: validMonsterArt(monster.art) } : {}),   // 狀態圖（一般／眨眼／生氣、子彈），給 shooter 用
     // 專屬音效（js/sfx.js 裡的名稱）：hitSound 被打中、deathSound 死掉；沒填就用通用的
     ...(typeof monster.hitSound === 'string' && monster.hitSound ? { hitSound: monster.hitSound } : {}),
@@ -61,6 +62,7 @@ function validMonsterCatalog(list) {
     ...(monster.noHitSquash ? { noHitSquash: true } : {}),   // 被打中時不要壓扁回彈
     ...(Number.isFinite(+monster.stagger) ? { stagger: Math.max(0, Math.min(2, +monster.stagger)) } : {}),
     ...(monster.noStun ? { noStun: true } : {}),
+    ...(Number.isFinite(+monster.shockResist) ? { shockResist: Math.max(0, Math.min(2, +monster.shockResist)) } : {}),   // 不怕電：雷電傷害的倍率（0.6＝只吃 6 成），而且不會被電到麻痺（安柏的雷擊、雷電彈）
     // sweep：範圍攻擊（揮一下打到前方扇形內所有人）。range＝攻擊距離（格）、arc＝扇形角度（度）
     ...(monster.sweep && typeof monster.sweep === 'object' ? { sweep: { range: Math.max(.3, Math.min(5, Number(monster.sweep.range) || 1.5)), arc: Math.max(20, Math.min(360, Number(monster.sweep.arc) || 140)) } } : {}),   // 不會被隊員的攻擊停住（安柏的雷電麻痺、路德的拳頭和大招）
     ...(Number.isFinite(+monster.knockMul) ? { knockMul: Math.max(0, Math.min(2, +monster.knockMul)) } : {}),   // 被打時擊退距離的倍率（1＝一般；0.4＝只微微後退；0＝不退）   // 被重擊時硬直幾秒（沒填用通用值 0.3）   // 不死：HP 歸零只會碎掉，30 秒後復活；要用火燒才會真的死（js/lifeform.js）

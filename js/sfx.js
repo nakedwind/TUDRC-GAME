@@ -101,6 +101,13 @@ const SFX = (() => {
     loofahStep: '怪物/絲瓜小姐/絲瓜小姐走路.mp3',
     loofahHurt: '怪物/絲瓜小姐/絲瓜小姐被打.mp3',
     loofahDeath: '怪物/絲瓜小姐/絲瓜小姐死掉.mp3',
+    // 比基尼小丑魚：落地（兩種跳躍聲輪流）、被打、死掉；生蛋和孵化用 pop（js/clownfish.js）
+    clownfishHop1: '怪物/小丑魚/小丑魚跳躍01.mp3',
+    clownfishHop2: '怪物/小丑魚/小丑魚跳躍02.mp3',
+    clownfishHurt: '怪物/小丑魚/小丑魚被打.mp3',
+    clownfishDeath: '怪物/小丑魚/小丑魚死掉.mp3',
+    clownfishSmallDeath: '怪物/小丑魚/小丑魚死掉.mp3',   // 小丑魚幼體死掉：同一個檔，播快一點（音調高、尖，像小孩；見 SOUND_PITCH）
+    pop: 'pop.mp3',
     milkfishGulp: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吞下隊友（js/milkfish-kid.js）
     milkfishChew: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吃掉一格的物品
     milkfishSpit: '怪物/史萊姆/slime-land.mp3',           // 吐出隊友（被打死獲救、被消化到倒下）
@@ -125,8 +132,10 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'playerHit', 'playerHitMonster']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'pop', 'playerHit', 'playerHitMonster']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
+  // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
+  const SOUND_PITCH = { clownfishSmallDeath: 1.6 };
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
@@ -148,7 +157,7 @@ const SFX = (() => {
     const now = performance.now();
     if (now - (lastPlayed.get(sourceKey) || -Infinity) < 70) return;
     lastPlayed.set(sourceKey, now);
-    const vary = VARIED.has(name), rate = vary ? jitter(VARY.pitch) : 1;
+    const vary = VARIED.has(name), rate = (vary ? jitter(VARY.pitch) : 1) * (SOUND_PITCH[name] || 1);
     if (vary) gain *= jitter(VARY.gain);
     playbackLayers(files[name]).forEach(({ file, index }) => {
       const key = name + ':' + index;
@@ -254,6 +263,14 @@ const SFX = (() => {
       noise({ dur: .04, gain: .08 * g, freq: 1600 * k, q: 1.2 });
     },
     // 珍珠小童噴珍珠：嘴裡「啵」一聲吐出來
+    // 踩到小丑魚的魚卵：軟軟濕濕的「噗啾」——低沉的壓扁聲＋被撐開的吱一聲＋冒一顆泡泡（js/clownfish.js）
+    eggSquish(g = 1) {
+      const k = jitter(.07);
+      tone({ freq: 240 * k, freq2: 105 * k, type: 'sine', dur: .17, gain: .3 * g, attack: .006 });                  // 噗：被踩扁
+      tone({ freq: 880 * k, freq2: 1450 * k, type: 'triangle', dur: .06, gain: .06 * g, when: .025 });             // 啾：膜被撐開
+      tone({ freq: 640 * k, freq2: 330 * k, type: 'sine', dur: .1, gain: .13 * g, attack: .003, when: .08 });      // 冒泡
+      noise({ dur: .11, gain: .07 * g, freq: 650 * k, q: 1.3 });                                                     // 濕濕的
+    },
     pearlShot(g = 1) {
       const k = jitter(.08);
       tone({ freq: 520 * k, freq2: 260 * k, type: 'sine', dur: .09, gain: .22 * g });

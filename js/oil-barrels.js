@@ -18,11 +18,11 @@ const OIL_ITEMS = {
   deco_oil_drum: { name: '油桶', breaksOre: true, file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
     blast: { radius: 3.5, enemy: 150, sentry: 45, player: 40 },
     fire: { radius: 3.2, life: 12, dps: 18 },   // 打爆後的火海燒 12 秒
-    slick: { radius: 2, life: 200 } },   // 油汙留 200 秒
+    slick: { radius: 2, life: 300 } },   // 油汙留 5 分鐘
   deco_oil_tank: { name: '油箱', breaksOre: true, file: 'images/item-decorate/oil-tank.png',
     blast: { radius: 2, enemy: 60, sentry: 22, player: 20 },
     fire: { radius: 2, life: 8, dps: 10 },   // 打爆後的火海燒 8 秒
-    slick: { radius: 1, life: 180 } },   // 油汙留 3 分鐘
+    slick: { radius: 1, life: 300 } },   // 油汙留 5 分鐘
   deco_gasstove:  { name: '瓦斯爐', file: 'images/item-decorate/gasstove.png', gas: true, breaksOre: true, boom: 'smallBoom',   // 最弱：小範圍、低傷害，但炸得開礦物
     blast: { radius: 1, enemy: 20, sentry: 6, player: 5 } },
   deco_gasstove2: { name: '瓦斯爐', file: 'images/item-decorate/gasstove02.png', gas: true, breaksOre: true, boom: 'smallBoom',

@@ -25,7 +25,7 @@ const LOOFAH = {
   linger: 3,            // 藤蔓冒出來後在地上停留幾秒：這段時間內有人碰到也會被抓住
   struggleCut: 0.25,    // 被纏住時每「按一下」方向鍵，少纏幾秒（拚命連按約 2 秒就能掙脫）
   struggleMin: 1,       // 至少被纏幾秒才可能掙脫          // 被纏住幾秒
-  testSpawn: true,      // 測試用：開始戰鬥時在離溫特約 20 格的地方直接放一隻（測完改成 false）
+  testSpawn: false,     // 測試用：開始戰鬥時在離溫特約 20 格的地方直接放一隻（測完改成 false）
   testSpawnDist: 20,    // 測試用：離溫特幾格
   eruptDamage: true,    // 冒出來時造成一次傷害（怪物編輯器的「玩家傷害／哨兵傷害」）
   wanderRadius: 2.5, wanderSpeedMul: 0.55, idleMin: 1.5, idleMax: 3.5,

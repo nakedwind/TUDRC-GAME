@@ -393,6 +393,65 @@ const MONSTERS_DEFAULT = [
     },
     "noHitSquash": true,
     "knockMul": 0
+  },
+  {
+    "id": "clownfish",
+    "name": "比基尼小丑魚",
+    "sprite": "images/monster/clownfish/clownfish-front.png",
+    "hp": 120,
+    "speed": 75,
+    "playerDamage": 12,
+    "sentryDamage": 14,
+    "buildingDamage": 30,
+    "reward": 26,
+    "crystals": 3,
+    "width": 108,
+    "height": 132,
+    "frames": {
+      "front": "images/monster/clownfish/clownfish-front.png",
+      "idle": [
+        "images/monster/clownfish/clownfish-front.png",
+        "images/monster/clownfish/clownfish-front-02.png"
+      ],
+      "idleFps": 1.6,
+      "blink": [
+        "images/monster/clownfish/clownfish-blink.png"
+      ],
+      "walkFront": [
+        "images/monster/clownfish/clownfish-hop-crouch.png",
+        "images/monster/clownfish/clownfish-hop-air.png"
+      ]
+    },
+    "behavior": "clownfish",
+    "hitSound": "clownfishHurt",
+    "deathSound": "clownfishDeath",
+    "knockMul": 0.6,
+    "shockResist": 0.6
+  },
+  {
+    "id": "clownfish_small",
+    "name": "小丑魚幼體",
+    "sprite": "images/monster/clownfish/clownfish-small-front.png",
+    "hp": 35,
+    "speed": 120,
+    "playerDamage": 5,
+    "sentryDamage": 6,
+    "buildingDamage": 10,
+    "reward": 8,
+    "crystals": 1,
+    "width": 50,
+    "height": 64,
+    "frames": {
+      "front": "images/monster/clownfish/clownfish-small-front.png",
+      "walkFront": [
+        "images/monster/clownfish/clownfish-small-front.png",
+        "images/monster/clownfish/clownfish-small-hop.png"
+      ]
+    },
+    "behavior": "clownfish",
+    "hitSound": "clownfishHurt",
+    "deathSound": "clownfishSmallDeath",
+    "knockMul": 1.2
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

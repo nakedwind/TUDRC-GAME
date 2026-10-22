@@ -7616,6 +7616,10 @@ const BATTLE_MAPS = [
       {
         "id": "milkfish_kid_small",
         "weight": 100
+      },
+      {
+        "id": "clownfish",
+        "weight": 100
       }
     ],
     "spawnZone": [
