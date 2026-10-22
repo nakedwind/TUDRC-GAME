@@ -955,7 +955,7 @@ function draw() {
       const downed = typeof downedTeammateNear === 'function' ? downedTeammateNear() : null;   // 旁邊有倒下的隊員：頭上出現「F 急救」
       if (downed) { if (!mate) drawTowerPrompts(downed, downed.y - 57); }   // 上面已經畫過隊員的選項就不重複畫
       else if (actor && actor.kind === 'tower' && !MAP_SAFE) { if (!mate) drawTowerPrompts(actor, actor.y - 57); }   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
-      else if (actor) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),
+      else if (actor && canTalk(actor)) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),   // 沒有台詞的人不顯示
         '與 ' + (profile ? profile.name : '角色') + ' 對話');
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) { const g = graffitiNearPlayer(); drawInteractPrompt(g.x, g.y - 14, graffitiErasing() ? '擦掉中…' : '擦掉塗鴉'); }   // js/graffiti.js
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }

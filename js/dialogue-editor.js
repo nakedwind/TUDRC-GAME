@@ -6,24 +6,23 @@ const $d = id => document.getElementById(id);
 const clone = v => JSON.parse(JSON.stringify(v));
 
 // ---- 情境說明：遊戲在什麼時候用這組台詞 ----
-// fallback：沒填時會改用「通用台詞」；ordered：找他說話時依序一句一句說完；name：可用 {name}
+// ordered：找他說話時依序一句一句說完；name：可用 {name}。每一格都只用自己的台詞：沒填就不說話（不會借用別格或「通用台詞」）
 const SITUATIONS = [
   { group: '日常（基地裡）', key: 'idle', label: '閒晃時的頭上泡泡', when: '在基地等安全場景閒晃時，每隔 <b>5～13 秒</b>隨機冒出一句。' },
-  { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完。沒填就改說閒晃台詞。' },
+  { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完。沒填就不說話。' },
   { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
-  { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>。' },
+  { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>（大約四次有一次改說「偶爾閒聊」）。抽到的那一格沒填就不說話。' },
   { group: '找他說話（特殊）', key: 'chat', label: '偶爾閒聊（隨機一句）', when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。' },
   { group: '保留（遊戲不會用）', key: 'reserve', label: '保留台詞', when: '先收起來的台詞，<b>遊戲不會說</b>。之後要用時，複製到上面的情境就好（例如角色搬到別的地方時）。' },
   { group: '戰鬥中', key: 'battle', label: '出勤時的頭上泡泡', when: '戰鬥地圖中，每隔 <b>11～22 秒</b>隨機冒出一句。' },
   { group: '戰鬥中', key: 'lowSp', label: '嚮導 SP 偏低・頭暈', when: '嚮導 SP 低於 <b>40</b> 時說一句；恢復到 45 以上後可再次觸發。' },
-  { group: '戰鬥中', key: 'sentry', label: '找他說話（出勤中）', ordered: true, when: '戰鬥中點他、選「對話」時，<b>依序</b>一句一句說完。' },
   { group: '戰鬥中', key: 'ultimate', label: '放大招時喊的話', when: '大招冷卻好、<b>放大招的瞬間</b>。' },
   { group: '戰鬥中', key: 'guard', label: '衝去保護部隊長', when: '部隊長被怪物攻擊、他衝過去保護時（每 <b>6 秒</b>最多一次）。' },
-  { group: '汙染與暴走', key: 'taintWarn', label: '瀕臨暴走', fallback: true, when: '汙染超過 <b>85</b> 時說一句，之後沒人疏導，每 <b>8～12 秒</b>再說一句。' },
-  { group: '汙染與暴走', key: 'berserk', label: '暴走瞬間', fallback: true, when: '汙染到 <b>100</b>、暴走的那一刻（暗紅色泡泡）。' },
-  { group: '汙染與暴走', key: 'relief', label: '瀕臨暴走時被疏導', fallback: true, when: '汙染 70 以上時被疏導、降到 <b>70 以下</b>。' },
-  { group: '汙染與暴走', key: 'soothed', label: '從暴走被疏導回來', fallback: true, when: '暴走中被疏導、<b>恢復清醒</b>時。' },
-  { group: '汙染與暴走', key: 'friendlyHit', label: '被暴走的隊友打到', fallback: true, name: true, when: '被暴走的隊友攻擊時（每 <b>4 秒</b>最多一次）。' },
+  { group: '汙染與暴走', key: 'taintWarn', label: '瀕臨暴走', when: '汙染超過 <b>85</b> 時說一句，之後沒人疏導，每 <b>8～12 秒</b>再說一句。' },
+  { group: '汙染與暴走', key: 'berserk', label: '暴走瞬間', when: '汙染到 <b>100</b>、暴走的那一刻（暗紅色泡泡）。' },
+  { group: '汙染與暴走', key: 'relief', label: '瀕臨暴走時被疏導', when: '汙染 70 以上時被疏導、降到 <b>70 以下</b>。' },
+  { group: '汙染與暴走', key: 'soothed', label: '從暴走被疏導回來', when: '暴走中被疏導、<b>恢復清醒</b>時。' },
+  { group: '汙染與暴走', key: 'friendlyHit', label: '被暴走的隊友打到', name: true, when: '被暴走的隊友攻擊時（每 <b>4 秒</b>最多一次）。' },
   // 報告任務（通訊員）：每個任務一格，任務清單在 data/missions.js
   ...(typeof MISSIONS !== 'undefined' ? MISSIONS : []).map(m => ({
     group: '報告任務（通訊員）', key: 'brief_' + m.id, label: '報告任務：' + m.name, ordered: true,
@@ -33,12 +32,12 @@ const SITUATIONS = [
 // 狂戰士人格的台詞欄位
 const RAGE_FIELDS = [
   { key: 'onset', label: '性格切換的那一刻', when: '汙染<b>剛到門檻</b>時說一句，周圍閃一圈光。沒填就不說。' },
-  { key: 'battle', label: '變身後的戰鬥閒聊', when: '變身狀態下的頭上泡泡（比平常多話）。沒填就照常說「出勤時的頭上泡泡」。' },
-  { key: 'warn', label: '瀕臨暴走', when: '取代一般的「瀕臨暴走」台詞。沒填就用一般的。' },
-  { key: 'berserk', label: '暴走瞬間', when: '取代一般的「暴走瞬間」台詞。沒填就用一般的。' },
-  { key: 'hit', label: '被暴走的隊友打到', name: true, when: '變身狀態下被隊友打到。沒填就用一般的。' },
-  { key: 'relief', label: '瀕臨暴走時被疏導', when: '變身狀態下被疏導、恢復原本個性時。沒填就用一般的。' },
-  { key: 'soothed', label: '從暴走被疏導回來', when: '從暴走恢復時。沒填就用一般的。' },
+  { key: 'battle', label: '變身後的戰鬥閒聊', when: '變身狀態下的頭上泡泡（比平常多話）。沒填就不說。' },
+  { key: 'warn', label: '瀕臨暴走', when: '取代一般的「瀕臨暴走」台詞。沒填就不說。' },
+  { key: 'berserk', label: '暴走瞬間', when: '取代一般的「暴走瞬間」台詞。沒填就不說。' },
+  { key: 'hit', label: '被暴走的隊友打到', name: true, when: '變身狀態下被隊友打到。沒填就不說。' },
+  { key: 'relief', label: '瀕臨暴走時被疏導', when: '變身狀態下被疏導、恢復原本個性時。沒填就不說。' },
+  { key: 'soothed', label: '從暴走被疏導回來', when: '從暴走恢復時。沒填就不說。' },
 ];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };
@@ -66,8 +65,8 @@ if (typeof MISSIONS !== 'undefined' && typeof MISSION_BASE !== 'undefined' && dr
 // 1. 草稿是舊的時候，正式檔案裡新加的角色整組補進草稿；2. 檔案裡也沒有的，照身分給空白的情境格子。
 // 空白的角色匯出時會略過（cleaned），檔案不會多一堆空資料。
 const EMPTY_SITUATIONS = {
-  sentinel: ['idle', 'npc', 'battle', 'sentry', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
-  guide: ['idle', 'npc', 'battle', 'sentry', 'friendlyHit', 'lowSp'],
+  sentinel: ['idle', 'npc', 'battle', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
+  guide: ['idle', 'npc', 'battle', 'friendlyHit', 'lowSp'],
   support: ['idle', 'npc'],
 };
 if (typeof CHARACTERS !== 'undefined') {   // 原本有的照原本的順序（存檔內容才不會因為順序變了而不同），補上的接在後面
@@ -76,6 +75,47 @@ if (typeof CHARACTERS !== 'undefined') {   // 原本有的照原本的順序（�
     draft.characters[id] = DIALOGUES.characters && DIALOGUES.characters[id] ? clone(DIALOGUES.characters[id])
       : Object.fromEntries((EMPTY_SITUATIONS[c.kind] || EMPTY_SITUATIONS.support).map(k => [k, []]));
   }
+}
+// 可以編入戰鬥的角色（哨兵、嚮導）一定要有「戰鬥中」「汙染與暴走」的情境格子（例如後來才加入出勤的塔納、柯林，原本只有基地的台詞）。
+// 補上的格子沒寫台詞的話，匯出時會拿掉（autoAdded），檔案不會多一堆空資料。
+const COMBAT_SITUATIONS = {
+  sentinel: ['battle', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
+  guide: ['battle', 'friendlyHit', 'lowSp'],
+};
+const NO_ULTIMATE = ['tino'];   // 沒有大招的哨兵（大招在 js/game.js 的 ULTIMATES），不補「放大招時喊的話」
+const autoAdded = new Set();
+// 哨兵的「狂戰士人格」：還沒有的補一組關著的（勾「啟用」、寫台詞才會在遊戲裡出現；沒動過的匯出時拿掉）
+const emptyRage = () => ({ enabled: false, at: 60, talkGap: .5, bubble: { bg: '#3a1012', bd: '#ff4d4d', tx: '#ffd0d0' },
+  ...Object.fromEntries(RAGE_FIELDS.map(f => [f.key, []])), reliefBy: {}, soothedBy: {} });
+if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHARACTERS)) {
+  const keys = COMBAT_SITUATIONS[c.kind], entry = draft.characters[id];
+  if (!keys || !entry) continue;
+  const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
+  for (const k of keys) {
+    if (k === 'ultimate' && NO_ULTIMATE.includes(id)) continue;
+    if (!(k in entry)) entry[k] = [];
+    if (!(k in inFile) && Array.isArray(entry[k]) && !entry[k].length) autoAdded.add(id + '.' + k);   // 檔案裡沒有、又是空的＝自動補上的（暫存裡留下來的也算）
+  }
+  if (c.kind === 'sentinel') {
+    if (!entry.rage) entry.rage = emptyRage();
+    if (!inFile.rage && JSON.stringify(entry.rage) === JSON.stringify(emptyRage())) autoAdded.add(id + '.rage');
+  }
+}
+// 自動補上、沒動過的格子拿掉（匯出、存暫存都用）：空的情境格子、完全沒動過的狂戰士人格
+function stripAuto(d) {
+  for (const key of autoAdded) {
+    const [id, k] = key.split('.'), e = d.characters[id]; if (!e) continue;
+    if (k === 'rage' ? JSON.stringify(e.rage) === JSON.stringify(emptyRage()) : Array.isArray(e[k]) && !e[k].length) delete e[k];
+  }
+  return d;
+}
+// 10/22 拿掉「找他說話（出勤中）」（sentry）：遊戲沒有出勤中的對話了。暫存裡還有的話，跟「找他說話（基地）」不一樣的句子收進「保留台詞」
+for (const e of Object.values(draft.characters)) {
+  if (!e || !('sentry' in e)) continue;
+  const flat = v => Array.isArray(v) ? v : (v && typeof v === 'object' ? Object.values(v).flat() : []);
+  const npc = flat(e.npc), keep = flat(e.sentry).filter(l => String(l).trim() && !npc.includes(l));
+  if (keep.length) e.reserve = [...flat(e.reserve), ...keep.filter(l => !flat(e.reserve).includes(l))];
+  delete e.sentry;
 }
 let selected = Object.keys(draft.characters)[0] || DEFAULT_ID;
 
@@ -132,7 +172,7 @@ function renderList() {
       const b = document.createElement('button');
       b.className = 'character-item' + (id === selected ? ' selected' : '') + (entryMatches(id) ? '' : ' dim');
       b.innerHTML = portraitHtml(info, '') + '<span><b>' + esc(info.name) + '</b><small>' +
-        (id === DEFAULT_ID ? '沒填專屬台詞時使用' : (KIND_LABEL[info.kind] || '')) + '</small></span><em class="count">' + n + ' 句</em>';
+        (id === DEFAULT_ID ? '已停用（遊戲不會用）' : (KIND_LABEL[info.kind] || '')) + '</small></span><em class="count">' + n + ' 句</em>';
       b.addEventListener('click', () => { selected = id; renderAll(); });
       list.appendChild(b);
     }
@@ -248,7 +288,7 @@ function renderEditor() {
   const info = charInfo(selected), entry = entryOf(selected) || {};
   $d('hero').innerHTML = portraitHtml(info, '') +
     '<div><span class="tag">' + (selected === DEFAULT_ID ? '備用' : (KIND_LABEL[info.kind] || '')) + '</span><h2>' + esc(info.name) + '</h2><p>' +
-    (selected === DEFAULT_ID ? '角色的「汙染與暴走」情境沒有填寫專屬台詞時，會改用這裡的台詞。'
+    (selected === DEFAULT_ID ? '已停用：遊戲不會再用這裡的台詞（角色沒填的欄位就不說話）。要用的話，請複製到角色自己的欄位。'
                               : '共 ' + countLines(entry) + ' 句台詞。') + '</p></div>';
   const ed = $d('editor'); ed.innerHTML = '';
   const q = query();
@@ -277,7 +317,7 @@ function renderEditor() {
 function renderRage(ed, rage) {
   const g = document.createElement('div'); g.className = 'group-title'; g.textContent = '狂戰士人格（高汙染時性格大變）'; ed.appendChild(g);
   const box = document.createElement('div'); box.className = 'situation rage'; ed.appendChild(box);
-  box.innerHTML = '<p class="when">汙染到<b>門檻</b>以上時，說話方式完全改變；被疏導後恢復原本的個性。下面每個欄位<b>沒填就沿用一般台詞</b>。</p>';
+  box.innerHTML = '<p class="when">汙染到<b>門檻</b>以上時，說話方式完全改變；被疏導後恢復原本的個性。啟用後只說這裡的台詞，<b>沒填的欄位就不說話</b>。</p>';
   const toggle = document.createElement('label'); toggle.className = 'rage-toggle';
   toggle.innerHTML = '<input type="checkbox"' + (rage.enabled ? ' checked' : '') + '> 啟用狂戰士人格';
   toggle.querySelector('input').addEventListener('change', e => { rage.enabled = e.target.checked; changed(); renderEditor(); });
@@ -347,7 +387,7 @@ function changed(rerenderList = true) {
 }
 function saveDraft() {
   try {
-    localStorage.setItem(DIALOGUE_DRAFT_KEY, JSON.stringify(draft));
+    localStorage.setItem(DIALOGUE_DRAFT_KEY, JSON.stringify(stripAuto(clone(draft))));   // 自動補上、沒動過的格子不存
     setStatus('已自動儲存在這台瀏覽器。下載 dialogues.js 並取代檔案後，遊戲才會套用。');
   } catch (_) { setStatus('瀏覽器草稿儲存失敗；請先下載檔案。', true); }
   if ($d('exportOut').classList.contains('visible')) $d('exportOut').value = exportSource();
@@ -365,6 +405,7 @@ function cleaned() {
       for (const byKey of ['reliefBy', 'soothedBy']) if (v[byKey]) v[byKey] = clean(v[byKey]);
     }
   }
+  stripAuto(out);   // 自動補上、沒寫台詞（狂戰士人格：完全沒動過）的格子不寫進檔案
   for (const [id, entry] of Object.entries(out.characters)) if (!countLines(entry) && !entry.rage) delete out.characters[id];   // 一句台詞都沒有的角色不寫進檔案
   return out;
 }

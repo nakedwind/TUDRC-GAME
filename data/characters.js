@@ -382,7 +382,7 @@ const CHARACTERS = {
     "combat": {
       "rank": "A",
       "role": "疏導支援",
-      "ability": "疏導光環",
+      "ability": "疏導",
       "range": 3,
       "aggroRange": 6,
       "dmg": 0,

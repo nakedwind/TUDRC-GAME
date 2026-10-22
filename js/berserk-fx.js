@@ -14,13 +14,10 @@ const BERSERK_BUBBLE = { bg: '#2a0d16', bd: '#ff4d6d', tx: '#ffd6dd' };   // 暴
 // 台詞、門檻、泡泡顏色都在 data/dialogues.js 每個角色的 rage 裡（對話編輯器的「狂戰士人格」）
 const RAGE_PERSONA = Object.fromEntries(Object.entries((typeof DIALOGUES !== 'undefined' && DIALOGUES.characters) || {})
   .filter(([, c]) => c.rage && c.rage.enabled).map(([id, c]) => [id, c.rage]));
-// 一般台詞：角色有專屬台詞就用，沒有就用「通用」那組
-function linesFor(key, type) {
-  const own = dialogueLines(type, key);
-  return own && own.length ? own : (dialogueLines(null, key) || []);
-}
-// 狂戰士台詞：沒填就退回一般台詞
-const personaLines = (p, key, fallbackKey, type) => (p && p[key] && p[key].length ? p[key] : linesFor(fallbackKey, type));
+// 一般台詞：只用這個角色自己這一格（沒填＝不說話，不借用「通用台詞」或別格的）
+function linesFor(key, type) { return dialogueLines(type, key) || []; }
+// 狂戰士人格開著時只用狂戰士那一格（沒填＝不說話）；沒開才用一般台詞
+const personaLines = (p, key, normalKey, type) => (p ? (Array.isArray(p[key]) ? p[key] : []) : linesFor(normalKey, type));
 // 最近是誰疏導的（用疏導光的顏色反查：winter／eldrin／chris）
 function sootherId(t) {
   const col = t.lastSootheColor;
@@ -41,7 +38,7 @@ function ragePersona(t) {
 // 隨機挑一句；有傳入哨兵時，避免連續兩次說同一句
 function pickLine(table, type, t) {
   const lines = Array.isArray(table) ? table : (table[type] || table.default);
-  if (!lines || !lines.length) return '……';
+  if (!lines || !lines.length) return null;   // 沒有台詞：不說話（呼叫的地方看到 null 就不冒泡泡）
   let line = lines[Math.floor(Math.random() * lines.length)];
   if (t && lines.length > 1) {
     while (line === t.lastFxLine) line = lines[Math.floor(Math.random() * lines.length)];
@@ -71,9 +68,8 @@ function friendlyHitReact(o, fromX, fromY, dmg, heavy, attacker) {
       o.friendlyLineAt = now;
       const name = (attacker && TYPES[attacker.type]?.name) || '喂';
       const rp = ragePersona(o);
-      o.say = rp ? { text: pickLine(personaLines(rp, 'hit', 'friendlyHit', o.type), 'x', o).replace(/\{name\}/g, name), life: 2.6, col: rp.bubble }
-                 : { text: pickLine(linesFor('friendlyHit', o.type), 'x', o).replace(/\{name\}/g, name), life: 2.6 };
-      o.sayWait = Math.max(o.sayWait || 0, 4);
+      const text = pickLine(personaLines(rp, 'hit', 'friendlyHit', o.type), 'x', o);
+      if (text) { o.say = { text: text.replace(/\{name\}/g, name), life: 2.6, ...(rp ? { col: rp.bubble } : {}) }; o.sayWait = Math.max(o.sayWait || 0, 4); }
     }
   }
   flashDmg('-' + Math.round(dmg), o.x, o.y - (isPlayer ? 46 : 30), '#ff8f8f');
@@ -137,8 +133,8 @@ function updateBerserkFx(dt) {
         const [g0, g1] = BERSERK_FX.murmurGap;
         t.murmurT = g0 + Math.random() * (g1 - g0);
         const rp = ragePersona(t);
-        t.say = rp ? { text: pickLine(personaLines(rp, 'warn', 'taintWarn', t.type), 'x', t), life: 2.8, col: rp.bubble } : { text: pickLine(linesFor('taintWarn', t.type), 'x', t), life: 2.8 };
-        t.sayWait = Math.max(t.sayWait || 0, 4);
+        const text = pickLine(personaLines(rp, 'warn', 'taintWarn', t.type), 'x', t);
+        if (text) { t.say = { text, life: 2.8, ...(rp ? { col: rp.bubble } : {}) }; t.sayWait = Math.max(t.sayWait || 0, 4); }
       }
     } else if (taint < BERSERK_FX.warnAt) t.warnSaid = false;
     // 身上冒黑紫霧：汙染越高冒越快，暴走時最濃
@@ -185,7 +181,8 @@ function onSentryBerserk(t) {
   G.slowMoT = BERSERK_FX.slowMo; G.slowMoScale = BERSERK_FX.slowMoScale;   // 短暫慢動作
   G.berserkFlashT = .6;                      // 畫面閃一下暗紅
   nearbyImpact(t.x, t.y, 10, 0);
-  t.berserkSay = { text: pickLine(personaLines(RAGE_PERSONA[t.type], 'berserk', 'berserk', t.type), 'x', t), life: 3 };
+  const berserkLine = pickLine(personaLines(RAGE_PERSONA[t.type], 'berserk', 'berserk', t.type), 'x', t);
+  t.berserkSay = berserkLine ? { text: berserkLine, life: 3 } : null;   // 沒填：不說話
   // 爆出一圈衝擊波＋向外炸開的黑紫霧，把附近的怪物推開（不造成傷害）
   G.effects.push({ ring: true, x: t.x, y: t.y - 8, r: 10, r2: CELL * BERSERK_FX.pushRadius, life: .45, life0: .45, color: '#ff4d6d' });
   G.effects.push({ ring: true, x: t.x, y: t.y - 8, r: 6, r2: CELL * BERSERK_FX.pushRadius * .65, life: .32, life0: .32, color: '#a55cff' });
@@ -221,12 +218,14 @@ function onSentryRecovered(t) {
       r: 1.5 + Math.random() * 2, life: .5, life0: .5, color: `rgb(${col[0]},${col[1]},${col[2]})` });
   }
   t.rageOn = false;
-  if (t.hp > 0) { t.say = { text: pickLine(RAGE_PERSONA[t.type] ? personaAfterLines(RAGE_PERSONA[t.type], 'soothed', t) : linesFor('soothed', t.type), 'x', t), life: 3.2 }; t.sayWait = 6; }
+  const text = t.hp > 0 ? pickLine(RAGE_PERSONA[t.type] ? personaAfterLines(RAGE_PERSONA[t.type], 'soothed', t) : linesFor('soothed', t.type), 'x', t) : null;
+  if (text) { t.say = { text, life: 3.2 }; t.sayWait = 6; }
 }
 // 瀕臨暴走時被疏導下來（呼叫前已確認是真的被疏導，雷德自然恢復不會觸發）
 function onSentryRelieved(t) {
   blowAwayMist(t, t.lastSootheColor || SOOTHE_COLORS.winter);
-  t.say = { text: pickLine(RAGE_PERSONA[t.type] ? personaAfterLines(RAGE_PERSONA[t.type], 'relief', t) : linesFor('relief', t.type), 'x', t), life: 3 }; t.sayWait = 6;
+  const text = pickLine(RAGE_PERSONA[t.type] ? personaAfterLines(RAGE_PERSONA[t.type], 'relief', t) : linesFor('relief', t.type), 'x', t);
+  if (text) { t.say = { text, life: 3 }; t.sayWait = 6; }
 }
 
 // ---- 繪製 ----

@@ -291,16 +291,26 @@ function specialTalkLines(actor) {
   let seen = {}; try { seen = JSON.parse(localStorage.getItem(TALK_SEEN_KEY) || '{}') || {}; } catch (_) {}
   const id = dialogueKey(actor);
   if (first.length && !seen[id]) { seen[id] = 1; try { localStorage.setItem(TALK_SEEN_KEY, JSON.stringify(seen)); } catch (_) {} return first.slice(); }
-  const pool = chat.length && (Math.random() < TALK_CHAT_CHANCE || !talk.length) ? chat : talk;
+  const pool = Math.random() < TALK_CHAT_CHANCE ? chat : talk;   // 四次有一次說「偶爾閒聊」；抽到的那一格沒填就不說話（不借用另一格）
   return pool.length ? [pool[Math.floor(Math.random() * pool.length)]] : null;
+}
+// 找他說話用哪一格（各用各的，沒填就不說話，不借用別格）：
+// 通訊員有新任務要報告 →「報告任務」；有填「第一次見面／平常說話／偶爾閒聊」的角色 → 只用這幾格；其他：「找他說話（基地）」。
+// 戰鬥中的隊員不能對話（10/22 拿掉「找他說話（出勤中）」）
+const talkKeyOf = () => 'npc';
+const hasSpecialTalk = actor => ['firstTalk', 'talk', 'chat'].some(k => (dialogueLines(dialogueKey(actor), k) || []).length);
+function canTalk(actor) {   // 有沒有可以說的台詞（沒有就不顯示「與○○對話」、選單也沒有「對話」）
+  if (!actor || (!MAP_SAFE && actor.kind === 'tower')) return false;   // 戰鬥中的隊員：不對話（空白鍵、C、F 是疏導、急救）
+  if (typeof missionBriefReady === 'function' && missionBriefReady(actor)) return true;
+  return hasSpecialTalk(actor) || (dialogueLines(dialogueKey(actor), talkKeyOf(actor)) || []).length > 0;
 }
 function openDialogue(actor) {
   if (!actor || dialogueState) return;
   if (actor.berserk) { flash('污染失控，現在無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
   const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
-    || specialTalkLines(actor)   // 第一次見面／平常隨機一句／偶爾閒聊（例如塔納）
-    || chapterPick(actor.kind === 'tower' ? SENTRY_DIALOGUES[key] : NPC_DIALOGUES[key]) || chapterPick(WANDER_LINES[key]) || ['……'];
+    || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」
+  if (!lines || !lines.length) return;   // 這一格沒填：不說話
   dialogueState = { actor, lines, index: 0 };
   actor.target = null; actor.say = null; actor.sayWait = 2;
   MOVE_KEYS.forEach(key => { keys[key] = false; });
@@ -505,7 +515,7 @@ window.addEventListener('keydown', e => {
     else {
       const actor = interactionNearPlayer();
       if (actor?.kind === 'tower' && !MAP_SAFE) {}   // 戰鬥區的隊員：C＝疏導、F＝急救（js/equipment.js、js/shop.js）；也可以點頭上的選項
-      else if (actor) openDialogue(actor);
+      else if (actor && canTalk(actor)) openDialogue(actor);   // 沒有台詞的人：空白鍵照樣可以坐下、擦塗鴉
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) startGraffitiErase(graffitiNearPlayer());   // 擦掉塗鴉（js/graffiti.js）
       else toggleSit();                   // 附近沒有角色才判定座位
     }

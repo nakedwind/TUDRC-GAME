@@ -66,8 +66,8 @@ input, textarea, [contenteditable="true"] { -webkit-user-select: text; user-sele
 /* 條的正中間：目前值 / 最大值 */
 #hud .hud-player-bar .bar-value { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; color: #fff; font: 700 9px/1 Consolas, monospace; letter-spacing: .02em; text-shadow: 0 0 2px rgba(0,0,0,.9), 0 1px 1px rgba(0,0,0,.8); pointer-events: none; }
 #hud .hud-player-status { padding-left: 2px; }
-#hud .hud-player-bar { margin-left: 16px; width: calc(100% - 16px); }   /* 左邊留空間給 HP／SP 小標，不要壓到頭像（10/22 往左延伸 4px） */
-#hud .hud-player-bar::before { content: attr(data-label); position: absolute; right: calc(100% + 1px); top: 50%; transform: translateY(-50%); color: #8a98a6; font: 700 9px/1 Consolas, monospace; white-space: nowrap; }
+#hud .hud-player-bar { margin-left: 15px; width: calc(100% - 15px); }   /* 左邊留空間給 HP／SP 小標（10/22：小標和條一起往左 5px，小標對齊上面名字的開頭；條的右端不動） */
+#hud .hud-player-bar::before { content: attr(data-label); position: absolute; right: calc(100% + 5px); top: 50%; transform: translateY(-50%); color: #8a98a6; font: 700 9px/1 Consolas, monospace; white-space: nowrap; }
 #hud .hud-player-bar.hp::before { color: #79dbad; } #hud .hud-player-bar.energy::before { color: #8cc7ff; }
 #hud .hud-player-bar i.gain.gain { position: absolute; top: 0; left: 0; width: 0; background: rgba(255,255,255,.6); animation: hud-gain .8s ease-in-out infinite alternate; transition: width .15s ease, left .2s ease; }
 @keyframes hud-gain { from { opacity: .35; } to { opacity: .85; } }

@@ -625,8 +625,7 @@ function updateNpcTalk(npc, dt) {
   }
   if (npc.sayWait <= 0) {
     const key = npc.id || npc.type;   // NPC 用 id、哨兵用 type
-    const battleLines = battle ? chapterPick(BATTLE_WANDER_LINES[key]) : null;
-    const lines = battleLines || ((typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null);
+    const lines = battle ? chapterPick(BATTLE_WANDER_LINES[key]) : ((typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null);   // 各說各的：出勤泡泡沒填就不說（不借用閒晃台詞）
     if (lines && lines.length) npc.say = { text: lines[Math.floor(Math.random() * lines.length)], life: talkCfg.duration };
     else npc.sayWait = 4;   // 沒台詞：晚點再檢查
   }
@@ -771,8 +770,8 @@ function openSentryMenu(t, silent) {
     '<button data-act="free">🚶 自由走動</button>' +
     '<button data-act="hold">📍 在原地巡邏</button>' +
     '<button data-act="goto">🎯 指派位置巡邏</button>' +
-    (MAP_SAFE ? '<button data-act="talk">💬 對話</button>' :
-      '<button data-act="escort">🛡️ 跟隨護衛部隊長' + (t.mode === 'escort' ? '（護衛中）' : '') + '</button>');
+    (MAP_SAFE ? '' : '<button data-act="escort">🛡️ 跟隨護衛部隊長' + (t.mode === 'escort' ? '（護衛中）' : '') + '</button>') +
+    (MAP_SAFE && typeof canTalk === 'function' && canTalk(t) ? '<button data-act="talk">💬 對話</button>' : '');   // 基地裡、有「找他說話（基地）」的台詞才有
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
   const rect = cv.getBoundingClientRect();

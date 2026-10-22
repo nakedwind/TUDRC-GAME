@@ -35,8 +35,8 @@ function warnGuideSP(t) {
   t.spWarned = true;
   const entry = typeof DIALOGUES !== 'undefined' ? DIALOGUES.characters?.[t.type]?.lowSp : null;
   const lines = typeof chapterPick === 'function' ? chapterPick(entry) : entry;
-  const text = Array.isArray(lines) && lines.length ? lines[Math.floor(Math.random() * lines.length)] : SANITY.warnText;
-  t.say = { text, life: 4 };   // 泡泡用這位嚮導自己的顏色（js/render.js 的 BUBBLE_COLORS）
+  if (!Array.isArray(lines) || !lines.length) return;   // 對話編輯器「嚮導 SP 偏低・頭暈」沒填：不說話
+  t.say = { text: lines[Math.floor(Math.random() * lines.length)], life: 4 };   // 泡泡用這位嚮導自己的顏色（js/render.js 的 BUBBLE_COLORS）
   t.sayWait = 8;
 }
 function spendGuideSP(t) {

@@ -23,7 +23,9 @@ function missionStatus(m) {
 // 下一個要打的任務（還沒控制、已開放的第一個）
 const nextMission = () => MISSIONS.find(m => !missionCleared(m) && missionOpen(m)) || null;
 // 亞許有沒有新任務要報告
-const briefPending = () => { const m = nextMission(); return m && !missionState.briefed.includes(m.id) ? m : null; };
+const briefLines = m => (typeof dialogueLines === 'function' && dialogueLines(MISSION_BASE.briefer, 'brief_' + m.id)) || [];   // 對話編輯器裡的「報告任務」
+const briefPending = () => { const m = nextMission(); return m && !missionState.briefed.includes(m.id) && briefLines(m).length ? m : null; };   // 沒填報告台詞的任務：不用報告
+const missionBriefReady = actor => !!(actor && actor.id === MISSION_BASE.briefer && briefPending());
 const brieferNpc = () => (G && G.npcs || []).find(n => n.id === MISSION_BASE.briefer) || null;
 const onBaseMap = () => MAP_SAFE && MAP && sameMapId(MAP.id, MISSION_BASE.map);
 
@@ -32,8 +34,7 @@ function missionDialogueLines(actor) {
   const m = briefPending();
   if (!m || !actor || actor.id !== MISSION_BASE.briefer) return null;
   missionState.briefed.push(m.id); saveMissions();
-  const lines = typeof dialogueLines === 'function' && dialogueLines(MISSION_BASE.briefer, 'brief_' + m.id);   // 對話編輯器裡的「報告任務」
-  return lines && lines.length ? lines : ['部隊長，有新的任務了。詳細的內容，作戰桌上的地圖都有標出來喔。'];
+  return briefLines(m);   // briefPending 已經確認有台詞
 }
 
 // ---- 左上角「目前任務」（game.js 的 updateHUD 呼叫）----

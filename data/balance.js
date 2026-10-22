@@ -97,8 +97,6 @@ const NPC_TALK = {
 };
 const NPC_DIALOGUES = dialogueTable('npc');
 
-// 三位哨兵的主動對話。哨兵暴走時無法交談，要先使用「疏導」。
-const SENTRY_DIALOGUES = dialogueTable('sentry');
 
 // ---- 跟隨行為 ----
 // radiusCells＝可自由活動的護衛圈半徑（格）；超出後才會追上對方。
