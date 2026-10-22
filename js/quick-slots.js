@@ -129,7 +129,7 @@ quickBox.addEventListener('drop', e => {
 document.addEventListener('dragover', e => { if (quickDrag && quickDrag.from && e.target.closest && e.target.closest('#backpack')) e.preventDefault(); });
 document.addEventListener('drop', e => { if (quickDrag && quickDrag.from && e.target.closest && e.target.closest('#backpack')) { e.preventDefault(); clearQuickSlot(quickDrag.from); } });
 
-// ---- 背包：可以放進快捷欄的道具格可以拖；說明欄多一排「放到快捷欄 1～0」 ----
+// ---- 背包：可以放進快捷欄的道具格可以拖；說明欄顯示拖曳提示 ----
 const quickOrigRenderBackpack = renderBackpack;
 renderBackpack = function () {
   quickOrigRenderBackpack();
@@ -142,7 +142,7 @@ renderBackpackDetail = function () {
   const acts = backpackDetail.querySelector('.bag-actions'); if (!acts) return;
   const cur = quickSlotOf(it.id);
   const row = document.createElement('div'); row.className = 'bag-quick';
-  row.innerHTML = '<small>放到快捷欄（也可以直接拖到下方）</small><div>' + QUICK_KEYS.map(k => `<button type="button" data-quick-set="${k}" class="${cur === k ? 'on' : ''}" title="${cur === k ? '再按一次＝從快捷欄拿掉' : '放到 ' + k.toUpperCase()}">${k.toUpperCase()}</button>`).join('') + '</div>';
+  row.innerHTML = '<small>可直接拖曳到下方快捷鍵</small>';
   acts.prepend(row);
   const use = acts.querySelector('.bag-use kbd'); if (use) { if (cur) use.textContent = cur.toUpperCase(); else use.remove(); }   // 「使用」按鈕上的按鍵＝它在快捷欄的那一格
 };

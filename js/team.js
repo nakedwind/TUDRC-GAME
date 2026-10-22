@@ -31,7 +31,7 @@ function setTeam(list) {
 }
 
 // ---- 編隊面板（DOM 由程式建立，不用改 HTML/CSS）----
-let teamBtn = null, teamPanel = null, squadBtn = null, squadPanel = null, impressionPanel = null, fieldSquadHud = null, fieldCommandMenu = null;
+let teamPanel = null, squadBtn = null, squadPanel = null, impressionPanel = null, fieldSquadHud = null, fieldCommandMenu = null;
 // 戰鬥畫面的面板可以收起來（隊員欄、建築欄）；收合狀態記在瀏覽器裡，下次打開遊戲照舊
 const HUD_COLLAPSE_KEY = 'tudrc_hud_collapsed';
 const hudCollapsed = (() => { try { return JSON.parse(localStorage.getItem(HUD_COLLAPSE_KEY) || '{}') || {}; } catch (_) { return {}; } })();
@@ -49,14 +49,6 @@ function ensureTeamUI() {
     squadBtn.textContent = '👥 Y102隊員';
     squadBtn.addEventListener('click', () => isSquadPanelOpen() ? closeSquadPanel() : openSquadPanel());
     wrap.appendChild(squadBtn);
-  }
-  if (!teamBtn) {
-    teamBtn = document.createElement('button');
-    teamBtn.textContent = '🧑‍🤝‍🧑 出勤配置';
-    teamBtn.id = 'teamEditButton';
-    teamBtn.className = 'hidden';
-    teamBtn.addEventListener('click', openTeamPanel);
-    wrap.appendChild(teamBtn);
   }
   if (!teamPanel) {
     teamPanel = document.createElement('div');
@@ -474,7 +466,6 @@ function renderTeamPanel() {
 function updateTeamButton() {
   ensureTeamUI();
   const safe = (typeof MAP_SAFE !== 'undefined') && MAP_SAFE;
-  if (teamBtn) teamBtn.classList.toggle('hidden', !safe);
   if (!safe) closeTeamPanel();
   if (typeof updateAchievementButton === 'function') updateAchievementButton(safe);   // 🏆 成就按鈕（js/achievements.js）
   if (squadBtn) {

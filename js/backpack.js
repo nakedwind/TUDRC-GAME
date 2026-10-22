@@ -140,7 +140,6 @@ function renderBulletDetail(b) {
     <h3>${b.name}</h3>
     <div class="bag-tags"><span class="bag-tag">${BAG_ICON.weapon}子彈</span>${tag ? `<span class="bag-tag">${tag}</span>` : ''}${b.free ? '<span class="bag-tag worn">不佔格子</span>' : slot >= 0 ? `<span class="bag-tag worn">彈夾第 ${slot + 1} 格</span>` : ''}</div>
     ${b.def.desc ? `<p class="bag-desc">${b.def.desc}</p>` : ''}
-    <div class="bag-owned">持有 <b>${b.count}</b> / ${b.max}</div>
     <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note">也可以直接拖曳到武器分頁的彈夾格</p>'}</div>`;
 }
 // 裝備按鈕：只有一格能放就「裝備」；可以放兩格（主／副武器、隨身物品 1／2）就各一顆。已經在那格就變「卸下」
@@ -195,10 +194,9 @@ function renderBackpackDetail() {
   const actKey = { firstaid: 'H' }[item.act];   // 腎上腺素沒有固定按鍵了：放進快捷欄就用那一格的鍵（js/quick-slots.js）
   backpackDetail.innerHTML = `
     <div class="bag-detail-image"><img src="${item.image}" alt=""></div>
-    <h3>${item.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${BAG_ICON[cat.id] || cat.icon + ' '}${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div>
+    <div class="bag-item-heading"><h3>${item.name}</h3>
+    <div class="bag-tags"><span class="bag-tag">${BAG_ICON[cat.id] || cat.icon + ' '}${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div></div>
     ${itemDesc(item) ? `<p class="bag-desc">${itemDesc(item)}</p>` : ''}
-    <div class="bag-owned">持有 <b>×${count}</b></div>
     <div class="bag-actions">${backpackDrop && backpackDrop.id === item.id ? `
       <div class="bag-drop-confirm" role="group" aria-label="確認丟棄">
         <p>丟棄幾個？<small>無法復原</small></p>

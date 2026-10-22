@@ -1164,6 +1164,14 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 
 /* 右邊：物品說明 */
 .backpack-detail { min-height:0; display:flex; flex-direction:column; align-items:center; gap:8px; overflow-y:auto; padding:16px 16px 18px; border-left:1px solid rgba(143,211,255,.14); background:rgba(7,12,18,.4); text-align:center; }
+.backpack-detail { scrollbar-width:thin; scrollbar-color:#536b7c #101923; }
+.backpack-detail::-webkit-scrollbar { width:8px; height:8px; }
+.backpack-detail::-webkit-scrollbar-track { background:#101923; border-radius:8px; }
+.backpack-detail::-webkit-scrollbar-thumb { background:#536b7c; border:2px solid #101923; border-radius:8px; }
+.backpack-detail::-webkit-scrollbar-thumb:hover { background:#8fb6cf; }
+.backpack-detail::-webkit-scrollbar-thumb:active { background:#8fd3ff; }
+.backpack-detail::-webkit-scrollbar-button { display:none; width:0; height:0; }
+.backpack-detail::-webkit-scrollbar-corner { background:#101923; }
 .bag-detail-image { display:grid; place-items:center; width:100%; padding:10px 0; border-radius:12px; background:radial-gradient(circle at 50% 50%,rgba(255,255,255,.1),rgba(7,10,14,.45) 70%); }
 .bag-detail-image img { width:160px; height:160px; image-rendering:pixelated; }   /* 80×80 素材放大兩倍，像素保持清楚 */
 .backpack-detail h3 { margin:4px 0 0; color:#f3f6f9; font-size:18px; }
@@ -1903,6 +1911,9 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .bag-gear-heading { grid-column:2; grid-row:1; display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
 .bag-gear-heading h3 { margin:0; }
 .bag-gear-heading .bag-tags { justify-content:flex-start; }
+.bag-item-heading { grid-column:2; grid-row:1; display:flex; align-items:center; flex-wrap:wrap; gap:6px 10px; min-width:0; }
+.bag-item-heading h3 { margin:0; }
+.bag-item-heading .bag-tags { justify-content:flex-start; }
 .backpack-detail.gear-detail > .bag-desc { grid-row:2; }
 .backpack-detail.gear-detail > .bag-gear-stat { grid-row:2 / 5; }
 .backpack-detail > .bag-gear-stats { grid-column:2; grid-row:2 / 5; display:flex; flex-direction:column; gap:4px; min-width:0; }   /* 手槍：目前效果、帶著的子彈 上下排，不疊在一起 */
@@ -2595,7 +2606,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #quickSupplies .quick-supply.drop-over { outline: 2px solid #ffd479; outline-offset: 2px; transform: translateY(-2px); }
 /* 背包說明欄：放到快捷欄 */
 .bag-quick { display: grid; gap: 4px; }
-.bag-quick small { color: #9aa6b2; font-size: 11px; }
+.bag-quick small { color: #9aa6b2; font-size: 13px; }
 .bag-quick div { display: flex; gap: 4px; }
 .bag-quick button { flex: 1; padding: 4px 0; border: 1px solid rgba(255,255,255,.14); border-radius: 7px; background: rgba(26,32,40,.9); color: #dfe8ef; cursor: pointer; font: 700 12px Consolas, "Microsoft JhengHei", monospace; }
 .bag-quick button:hover { border-color: #ffd479; }
@@ -2999,7 +3010,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 
 /* 物品名稱與數量：名稱固定下緣、數量固定右上。 */
 .bag-cell[data-bag-item]:not(.mag-cell) { min-height:104px; padding-bottom:28px; }
-.bag-cell-name { position:absolute; left:3px; right:3px; bottom:5px; color:#dce6ed; font-size:12px; font-weight:600; line-height:15px; text-align:center; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 2px #000; pointer-events:none; }
+.bag-cell-name { position:absolute; left:3px; right:3px; bottom:5px; color:#dce6ed; font-size:14px; font-weight:600; line-height:17px; text-align:center; overflow-wrap:anywhere; display:-webkit-box; -webkit-line-clamp:2; -webkit-box-orient:vertical; overflow:hidden; text-shadow:0 1px 2px #000; pointer-events:none; }
 .bag-cell[data-bag-item]:not(.mag-cell) img { inset:12px 6px 30px; width:calc(100% - 18px); height:calc(100% - 46px); }
 .bag-cell.bullet[data-bag-item] img { inset:16px 6px 30px !important; width:76% !important; height:48% !important; }
 .bag-cell[data-bag-item] b { top:4px; bottom:auto; font-size:13px; z-index:2; }
@@ -3031,7 +3042,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #backpackGrid .bag-cell.mag-cell i { position: absolute; left: 0; right: 0; top: 26%; height: 40%; display: grid; place-items: center; color: rgba(143,211,255,.45); font-size: 18px; font-style: normal; }
 #backpackGrid .bag-cell.mag-cell img { position: absolute; inset: auto !important; left: 16% !important; top: 26% !important; width: 68% !important; height: 40% !important; max-width: none; max-height: none; margin: 0; object-fit: contain; object-position: center; image-rendering: pixelated; filter: drop-shadow(0 0 4px color-mix(in srgb, var(--bc) 70%, transparent)); }
 #backpackGrid .bag-cell.mag-cell b { top: 5px; right: 6px; bottom: auto; font-size: 11px; }
-#backpackGrid .bag-cell.mag-cell .bag-cell-name { bottom: 6px; font-size: 11px; line-height: 13px; }
+#backpackGrid .bag-cell.mag-cell .bag-cell-name { bottom: 6px; font-size: 13px; line-height: 15px; }
 #backpackGrid .bag-cell.mag-cell .bag-cell-name.hint { color: #5f7486; font-weight: 400; }
 #backpackGrid .bag-cell.mag-cell.filled { border-color: color-mix(in srgb, var(--bc) 45%, rgba(143,211,255,.2)); background: linear-gradient(180deg, color-mix(in srgb, var(--bc) 12%, transparent), rgba(16,28,40,.62) 70%); cursor: grab; }
 #backpackGrid .bag-cell.mag-cell.filled::before { border-style: solid; border-color: color-mix(in srgb, var(--bc) 35%, transparent); box-shadow: inset 0 2px 5px rgba(0,0,0,.55), 0 0 10px color-mix(in srgb, var(--bc) 22%, transparent); }

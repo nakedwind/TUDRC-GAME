@@ -11,7 +11,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=quick10-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=hovertip-20261023">
+<link rel="stylesheet" href="css/style.css?v=sync-inventory-20261023">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -60,7 +60,7 @@
               <dt><kbd>1</kbd>～<kbd>9</kbd> <kbd>0</kbd></dt><dd>快捷欄（預設 1 醫療包、2 杏仁水；新拿到的補品會自動放進空格；打開背包把道具拖到下方就能換）</dd>
               <dt><kbd>F</kbd></dt><dd>靠近受傷／倒下的隊員時：急救</dd>
               <dt><kbd>B</kbd></dt><dd>背包</dd>
-              <dt><kbd>Tab</kbd></dt><dd>T-Pad（隊員、出勤配置、任務、成就、怪物圖鑑…）</dd>
+              <dt><kbd>Tab</kbd></dt><dd>T-Pad（隊員、任務、成就、怪物圖鑑…）</dd>
               <dt><kbd>G</kbd></dt><dd>對話中送禮</dd>
               <dt><kbd>P</kbd></dt><dd>暫停</dd>
               <dt><kbd>M</kbd></dt><dd>靜音</dd>
@@ -268,7 +268,7 @@
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
   <script src="js/build.js?v=hovertip-20261023"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
-  <script src="js/team.js?v=esclayer-20261023"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
+  <script src="js/team.js?v=desk-esclayer-20261023"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=esclayer-20261023"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
   <script src="data/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹資料 -->
@@ -285,7 +285,7 @@
   <script src="js/fish-head.js?v=fishstepdark-20261019"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=vine-art8-20261020"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人 -->
   <script src="js/milkfish-kid.js?v=milkfish-v5-20261021"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=dashbar-20261022"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=character-shadows-20261023"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=colors-20261022"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=milkfish-20261020"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -293,8 +293,8 @@
   <script src="js/smiler.js?v=giftlines-20261023"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=dog-pickup-20261021"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=fix39-44-20261018"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=quick10-20261022"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=pistolcell2-20261022"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/shop.js?v=all-ammo-20261023"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
+  <script src="js/backpack.js?v=no-owned-line-20261023"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/gifts.js?v=giftlines-20261023"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=giftlines-20261023"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=bear-20261022"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
@@ -324,7 +324,7 @@
   <script src="js/game.js?v=esclayer-20261023"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=flash2x2-20261022"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
-  <script src="js/quick-slots.js?v=hovertip-20261023"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
+  <script src="js/quick-slots.js?v=hint-hover-20261023"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->
   <script src="js/item-intro.js?v=bulletimg-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->
   <script src="data/posters.js?v=posters-20261018"></script>   <!-- 可以查看的海報：說明文字 -->
@@ -341,6 +341,6 @@
   <script src="js/channel-actions.js?v=motes-20261021"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=squash-20261022"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=tpadm2-20261022"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
-  <script src="js/tpad.js?v=tabkey-20261022"></script>   <!-- 📱 T-Pad：隊員、出勤配置、任務、成就、怪物圖鑑…都收在這裡（按 Tab） -->
+  <script src="js/tpad.js?v=desk-only-20261023"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
 </body>
 </html>
