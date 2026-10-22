@@ -501,6 +501,7 @@ window.addEventListener('keydown', e => {
     else if (typeof usePracticeDoorNearPlayer === 'function' && usePracticeDoorNearPlayer()) {}   // 訓練室的門：訓練選單（js/practice.js）
     else if (toggleDoorNearPlayer()) {}         // 靠近手動門→開門／關門
     else if (typeof useMrtLockNearPlayer === 'function' && useMrtLockNearPlayer()) {}   // 捷運閘門刷卡、入口解封（js/mrt-locks.js）
+    else if (typeof useNpcChatNearPlayer === 'function' && useNpcChatNearPlayer()) {}   // 有人在閒聊：聽閒聊（js/npc-chats.js）
     else if (typeof useWardrobeNearPlayer === 'function' && useWardrobeNearPlayer()) {}   // 衣櫃：服裝介面（js/costumes.js）
     else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
     else if (typeof useBestiaryNearPlayer === 'function' && useBestiaryNearPlayer()) {}   // 2F應變中心的電腦：怪物圖鑑（js/bestiary.js）
@@ -2202,6 +2203,7 @@ function update(dt) {
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
+  if (typeof updateNpcChats === 'function') updateNpcChats(dt);   // 基地裡的 NPC 閒聊小表演（js/npc-chats.js）
   if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
