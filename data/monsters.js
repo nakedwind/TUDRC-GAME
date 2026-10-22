@@ -318,8 +318,8 @@ const MONSTERS_DEFAULT = [
     "behavior": "milkfish",
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
-    "knockMul": 0.4,
-    "stagger": 0.15
+    "stagger": 0.15,
+    "knockMul": 0.4
   },
   {
     "id": "milkfish_kid_small",
@@ -346,6 +346,53 @@ const MONSTERS_DEFAULT = [
     "behavior": "milkfishSmall",
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath"
+  },
+  {
+    "id": "burrowing_mouse",
+    "name": "花蓮版權老鼠",
+    "sprite": "images/monster/burrowing-mouse/mouse-hole-open.png",
+    "hp": 180,
+    "speed": 65,
+    "playerDamage": 14,
+    "sentryDamage": 18,
+    "buildingDamage": 35,
+    "reward": 45,
+    "crystals": 5,
+    "width": 110,
+    "height": 90,
+    "frames": {
+      "front": "images/monster/burrowing-mouse/mouse-hole-open.png",
+      "walkFront": [
+        "images/monster/burrowing-mouse/mouse-hole-open.png"
+      ]
+    },
+    "behavior": "burrow",
+    "burrow": {
+      "noticeRange": 14,
+      "attackRange": 5,
+      "hitRadius": 0.8,
+      "windup": 0.8,
+      "handRise": 0.2,
+      "handHold": 0.4,
+      "cooldown": 2.6,
+      "emergeTime": 0.75
+    },
+    "art": {
+      "normal": "images/monster/burrowing-mouse/mouse-hole-open.png",
+      "half": "images/monster/burrowing-mouse/mouse-hole-half.png",
+      "closed": "images/monster/burrowing-mouse/mouse-hole-closed.png",
+      "emerge": "images/monster/burrowing-mouse/mouse-emerge.png",
+      "hole": "images/monster/burrowing-mouse/hole.png",
+      "crack": "images/monster/burrowing-mouse/hole-appear.png",
+      "leftHole": "images/monster/burrowing-mouse/left-hole.png",
+      "rightHole": "images/monster/burrowing-mouse/right-hole.png",
+      "leftRise": "images/monster/burrowing-mouse/left-hand-rise.png",
+      "rightRise": "images/monster/burrowing-mouse/right-hand-rise.png",
+      "leftHand": "images/monster/burrowing-mouse/left-hand-hole.png",
+      "rightHand": "images/monster/burrowing-mouse/right-hand-hole.png"
+    },
+    "noHitSquash": true,
+    "knockMul": 0
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

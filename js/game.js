@@ -129,7 +129,7 @@ function createMonster(spec, x, y, variant) {
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
     undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, sweep: spec.sweep || null,   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
-    shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null,   // boomerang：夯吉寶（js/hangi-bao.js）
+    shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null, burrowCfg: spec.burrow || null,   // burrow：地底出土、伸手（js/burrowing-mouse.js）
     flying: spec.behavior === 'shooter',   // 飄在空中：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
   };
@@ -1819,6 +1819,7 @@ function frame(ts) {
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
 }
 function update(dt) {
+  if (typeof updateBurrowingMouseFx === 'function') updateBurrowingMouseFx(dt);
   if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);
   if (typeof updateCoreFrenzy === 'function') updateCoreFrenzy(dt);   // 核心醒著：異質體狂暴化（js/core-frenzy.js）
@@ -2317,7 +2318,19 @@ function loseOverlay(reason, cause) {
 // 怪物的中文名稱（怪物編輯器裡的名字）
 function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
-function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function prepareMonsterPreview() {
+  if (!MONSTER_PREVIEW_ID) return;
+  const spec = ACTIVE_MONSTERS.find(m => m.id === MONSTER_PREVIEW_ID);
+  G.cores = []; G.enemies = []; G.towers = []; G.npcs = []; LIGHT.enabled = false;
+  // Existing per-monster debug spawners must not add unrelated species to this test scene.
+  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true;
+  G.player.x = CELL * 10; G.player.y = CELL * 7; G.player.hp = PLAYER.hp; G.guide = G.guideMax;
+  if (spec) G.enemies.push(createMonster(spec, CELL * 14, CELL * 7));
+  const note = document.querySelector('.header-note');
+  if (note) note.textContent = '🔍 ' + (spec?.name || '怪物') + '測試場 · WASD 移動，滑鼠射擊；不會寫入正式存檔';
+  updateCamera(); updateHUD();
+}
+function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;

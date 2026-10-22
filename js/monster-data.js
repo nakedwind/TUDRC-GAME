@@ -50,6 +50,7 @@ function validMonsterCatalog(list) {
     ...(monster.behavior === 'shooter' ? { behavior: 'shooter', shooter: validShooterCfg(monster.shooter) } : {}),   // shooter＝珍珠小童的飄浮／噴珍珠（js/pearl-kid.js）
     ...(monster.behavior === 'boomerang' ? { behavior: 'boomerang', boomerang: validBoomerangCfg(monster.boomerang) } : {}),
     ...(monster.behavior === 'fishhead' ? { behavior: 'fishhead' } : {}),
+    ...(monster.behavior === 'burrow' ? { behavior: 'burrow', burrow: validBurrowCfg(monster.burrow) } : {}),
     ...(monster.behavior === 'milkfish' || monster.behavior === 'milkfishSmall' ? { behavior: monster.behavior } : {}),   // milkfish＝虱目魚小子：吃隊友、吃一格的物品；milkfishSmall＝小虱目魚小子：只吃物品（js/milkfish-kid.js，數值在 MILKFISH）
     ...(monster.behavior === 'vine' ? { behavior: 'vine' } : {}),   // vine＝絲瓜小姐：重踏放藤蔓纏人（js/loofah-lady.js，數值在 LOOFAH）   // fishhead＝魚頭君：噴水、去滅火、留水漬（js/fish-head.js，數值在 FISH_HEAD）   // boomerang＝夯吉寶丟迴力鏢帽子（js/hangi-bao.js）
     ...(validMonsterArt(monster.art) ? { art: validMonsterArt(monster.art) } : {}),   // 狀態圖（一般／眨眼／生氣、子彈），給 shooter 用
@@ -88,6 +89,25 @@ const CHARGER_FIELDS = [
   { key: 'recoverWall',     label: '撞牆暈眩（秒）',         min: 0,   max: 10,   step: .1,  def: 1.2 },
   { key: 'knockback',       label: '撞飛距離（像素）',       min: 0,   max: 300,  step: 5,   def: 80 },
 ];
+// 鑽地型：本體從洞口探出；手鎖定地面位置，出手前保留可閃避的預警。
+const BURROW_FIELDS = [
+  { key: 'noticeRange', label: '注意範圍（格）', min: 1, max: 30, step: .5, def: 14 },
+  { key: 'attackRange', label: '地底手攻擊距離（格）', min: 1, max: 12, step: .5, def: 5 },
+  { key: 'hitRadius', label: '地底手命中半徑（格）', min: .3, max: 2, step: .1, def: .8 },
+  { key: 'windup', label: '地洞預警（秒）', min: .2, max: 4, step: .05, def: .8 },
+  { key: 'handRise', label: '手鑽出到命中（秒）', min: .1, max: 1, step: .05, def: .2 },
+  { key: 'handHold', label: '手停留（秒）', min: .1, max: 2, step: .05, def: .4 },
+  { key: 'cooldown', label: '攻擊間隔（秒）', min: .5, max: 15, step: .1, def: 2.6 },
+  { key: 'emergeTime', label: '本體出土／入土（秒）', min: .3, max: 3, step: .05, def: .75 },
+];
+function validBurrowCfg(raw) {
+  const src = raw && typeof raw === 'object' ? raw : {}, out = {};
+  for (const f of BURROW_FIELDS) {
+    const n = Number(src[f.key]); out[f.key] = Number.isFinite(n) ? Math.max(f.min, Math.min(f.max, n)) : f.def;
+  }
+  out.noticeRange = Math.max(out.noticeRange, out.attackRange);
+  return out;
+}
 function validChargerCfg(raw) {
   const src = raw && typeof raw === 'object' ? raw : {}, out = {};
   for (const f of CHARGER_FIELDS) {
@@ -214,6 +234,7 @@ function monsterCatalog(useBrowserDraft = false) {
             if (monster.hitSound) own.hitSound = monster.hitSound;     // 音效不在編輯器裡改，一律用檔案的設定
             if (monster.deathSound) own.deathSound = monster.deathSound;
             if (monster.charger && !own.charger) own.charger = monster.charger;   // 舊暫存還沒有行為數值
+            if (monster.burrow && !own.burrow) own.burrow = monster.burrow;
             if (String(own.sprite).startsWith('images/monster/鳥頭人/')) own.sprite = monster.sprite;   // 2026-10-11 圖片改成英文檔名
           }
         }

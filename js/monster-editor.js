@@ -45,12 +45,15 @@ function render() {
   document.getElementById('editingTitle').textContent = monster.name + '・資料';
   document.getElementById('f_id').value = monster.id;
   fields.forEach(input => { input.value = monster[input.dataset.field]; });
+  document.getElementById('f_behavior').value = monster.behavior || '';
   document.getElementById('deleteMonster').disabled = monsters.length <= 1;
   previewSprite(monster); renderList(); renderBehaviorFields(monster);
 }
 // 衝撞型（鳥頭人）的行為數值：欄位由 js/monster-data.js 的 CHARGER_FIELDS 產生
 // 行為數值：依怪物的行為模式顯示對應欄位（欄位表在 js/monster-data.js）
 const BEHAVIOR_UI = {
+  burrow: { key: 'burrow', fields: () => BURROW_FIELDS, valid: c => validBurrowCfg(c), title: '🐭 鑽地出土／地底伸手',
+    desc: '先鑽出地面；遠處目標會沿可行走地面鑽地接近。進入射程後在目標當下的位置留下橘圈預兆，再交替伸出左右手攻擊。手不會追著目標瞬移，躲開即可閃避；隔牆、沒有地板的空洞不會出手。' },
   charger: { key: 'charger', fields: () => CHARGER_FIELDS, valid: c => validChargerCfg(c), title: '🐦 衝撞行為',
     desc: '平時發呆、偶爾散步；玩家或哨兵進入注意範圍（中間沒有牆）就愣一下，然後直線衝過去，撞到會把人撞飛。玩家一出現就只追玩家，哨兵的嘲諷也引不走。' },
   shooter: { key: 'shooter', fields: () => SHOOTER_FIELDS, valid: c => validShooterCfg(c), title: '🫧 飄浮噴珍珠',
@@ -59,6 +62,7 @@ const BEHAVIOR_UI = {
 function renderBehaviorFields(monster) {
   const box = document.getElementById('chargerBox'), wrap = document.getElementById('chargerFields');
   const ui = BEHAVIOR_UI[monster.behavior];
+  document.getElementById('burrowPreviewBox').hidden = monster.behavior !== 'burrow';
   box.hidden = !ui;
   wrap.replaceChildren();
   if (box.hidden) return;
@@ -93,11 +97,28 @@ function addMonster(copy = false) {
   const monster = { ...source, id: newMonsterId(), name: copy ? source.name + '（複製）' : '新異質體' };
   if (source.charger) monster.charger = { ...source.charger };
   if (source.shooter) monster.shooter = { ...source.shooter };
+  if (source.burrow) monster.burrow = { ...source.burrow };
   monsters.push(monster); selectedId = monster.id;
   saveMonsters(); render();
   document.getElementById('f_name').focus(); document.getElementById('f_name').select();
 }
 document.getElementById('addMonster').addEventListener('click', () => addMonster(false));
+document.getElementById('addBurrowingMouse').addEventListener('click', () => {
+  const existing = monsters.find(m => m.id === 'burrowing_mouse');
+  if (!existing) monsters.push(burrowingMouseDefinition());
+  selectedId = 'burrowing_mouse'; saveMonsters(); render();
+  status(existing ? '已選取花蓮版權老鼠，保留原有設定。' : '已新增花蓮版權老鼠；可調整數值及動作預覽，確認後存到專案。');
+});
+document.getElementById('f_behavior').addEventListener('change', e => {
+  const m = currentMonster();
+  if (e.target.value) m.behavior = e.target.value; else delete m.behavior;
+  if (m.behavior === 'burrow') {
+    m.burrow = validBurrowCfg(m.burrow);
+    m.art = { ...BURROW_MOUSE_ART, ...(m.art || {}) };
+    m.noHitSquash = true;
+  }
+  saveMonsters(); renderBehaviorFields(m);
+});
 document.getElementById('duplicateMonster').addEventListener('click', () => addMonster(true));
 document.getElementById('deleteMonster').addEventListener('click', () => {
   if (monsters.length <= 1) return;
@@ -200,6 +221,12 @@ document.getElementById('exportMonsters').addEventListener('click', () => {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
   status('已下載 monsters.js。將它放到遊戲的 data 資料夾，正式遊戲就會使用新設定。');
 });
+document.getElementById('previewMonster').addEventListener('click', () => {
+  saveMonsters();
+  const query = new URLSearchParams({ previewMonsters: '1', monsterPreview: '1', monsterId: currentMonster().id });
+  window.open('塔防原型.html?' + query, 'single_monster_preview');
+  status('已開啟單隻測試場：可移動閃避、射擊；不會寫入正式存檔，也不改地圖配置。');
+});
 document.getElementById('previewGame').addEventListener('click', () => {
   saveMonsters(); window.open('塔防原型.html?previewMonsters=1', 'monster_preview');
   status('已開啟使用瀏覽器暫存怪物設定的遊戲預覽。');
@@ -210,5 +237,47 @@ document.getElementById('resetMonsters').addEventListener('click', () => {
   monsters = monsterCatalog(false); selectedId = monsters[0].id; slimeCfg = slimeSettings(false);
   render(); renderSlimeTable(); status('已從檔案重新載入。');
 });
+// 與遊戲共用素材、出土選圖、手部前搖；只繪圖，不寫入遊戲存檔。
+const burrowPreviewImages = new Map();
+let burrowPreviewStarted = performance.now();
+document.getElementById('burrowPreviewMode').addEventListener('change', () => { burrowPreviewStarted = performance.now(); });
+function previewBurrowImage(file) {
+  if (!burrowPreviewImages.has(file)) { const img = new Image(); img.src = file; burrowPreviewImages.set(file, img); }
+  return burrowPreviewImages.get(file);
+}
+function drawBurrowEditorPreview(now) {
+  const m = currentMonster();
+  if (m.behavior === 'burrow') {
+    const canvas = document.getElementById('burrowAnimation'), pc = canvas.getContext('2d');
+    const c = validBurrowCfg(m.burrow), art = burrowMouseArt(m), mode = document.getElementById('burrowPreviewMode').value;
+    const t = (now - burrowPreviewStarted) / 1000, handDuration = c.windup + c.handRise + c.handHold + .22;
+    let phase = 'idle', age = t, hand = null;
+    if (mode === 'emerge' || mode === 'sink') { phase = mode; age = t % (c.emergeTime + .7); }
+    else if (mode === 'left' || mode === 'right') hand = { x: 390, y: 202, age: t % (handDuration + .7), side: mode };
+    else if (mode.startsWith('strike-')) { age = 1; hand = { x: 390, y: 202, age: c.windup + c.handRise + Math.min(.1, c.handHold / 2), side: mode.slice(7) }; }
+    else if (mode === 'cycle') {
+      const u = t % (c.emergeTime * 2 + 2.4 + handDuration * 2);
+      if (u < c.emergeTime) { phase = 'emerge'; age = u; }
+      else if (u < c.emergeTime + 2.4) age = u - c.emergeTime;
+      else if (u < c.emergeTime + 2.4 + handDuration * 2) {
+        const h = u - c.emergeTime - 2.4, left = h < handDuration;
+        hand = { x: left ? 345 : 440, y: 202, side: left ? 'left' : 'right', age: h % handDuration };
+      } else { phase = 'sink'; age = u - c.emergeTime - 2.4 - handDuration * 2; }
+    }
+    pc.clearRect(0, 0, canvas.width, canvas.height); pc.fillStyle = '#222e38'; pc.fillRect(0, 0, canvas.width, canvas.height);
+    pc.strokeStyle = '#35434c'; pc.lineWidth = 1;
+    for (let x = 0; x < canvas.width; x += 40) { pc.beginPath(); pc.moveTo(x, 0); pc.lineTo(x, canvas.height); pc.stroke(); }
+    for (let y = 0; y < canvas.height; y += 40) { pc.beginPath(); pc.moveTo(0, y); pc.lineTo(canvas.width, y); pc.stroke(); }
+    if (hand && hand.age <= handDuration) {
+      drawBurrowWarning(pc, hand, c);
+      drawBurrowFrame(pc, previewBurrowImage(burrowMouseHandFrame(art, hand.side, hand.age, c)), hand.x, hand.y);
+    }
+    drawBurrowFrame(pc, previewBurrowImage(burrowMouseBodyFrame(art, phase, age, c.emergeTime)), 132, 202, m.width || 110, m.height || 90);
+    pc.fillStyle = '#e4edf3'; pc.font = '15px "Microsoft JhengHei", sans-serif';
+    pc.fillText('本體：出土／眨眼／入土', 36, 35); pc.fillText('遠端洞口：預警 → 伸手 → 縮回', 280, 35);
+  }
+  requestAnimationFrame(drawBurrowEditorPreview);
+}
+requestAnimationFrame(drawBurrowEditorPreview);
 render();
 renderSlimeTable();
