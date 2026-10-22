@@ -43,8 +43,6 @@ const MILKFISH = {
   fleeMaxTime: 8,         // 最多逃幾秒（被卡住就不跑了）
   legsFps: 6,             // 嘴裡的腳踢動畫速度（張／秒）
   mouthRow: 21,           // 魚嘴開口在圖片的第幾排（腳的圖片下緣對齊這裡；圖片高 120）
-  testSpawn: true,        // 測試用：開戰 1 秒後在離溫特約 testSpawnDist 格的地方放一隻虱目魚小子＋一隻小的（測完改成 false）
-  testSpawnDist: 10,
   wanderRadius: 2.5, wanderSpeedMul: 0.55, idleMin: 1.5, idleMax: 3.5,
 };
 const MILKFISH_ART = 'images/monster/milkfish-kid/milkfish-kid-';
@@ -278,7 +276,6 @@ function mfRelease(t, rescued) {
 }
 // 每幀（game.js 的 update 呼叫）：被吃的人跟著魚嘴走、消化扣血；虱目魚小子死了就把人放出來
 function updateMilkfish(dt) {
-  if (MILKFISH.testSpawn) mfTestSpawn(dt);
   for (const t of G.towers) {
     const e = t.eatenBy; if (!e) continue;
     if (e.dead || e.hp <= 0 || !G.enemies.includes(e)) { mfRelease(t, true); continue; }   // 打死了：救出來
@@ -348,24 +345,3 @@ function drawMilkfishPrey(ctx, e, dx, dy, dw, dh, frameImg) {
   ctx.restore();
 }
 
-// 測試用：開戰 1 秒後，在離溫特約 testSpawnDist 格、離隊友至少 4 格的空地放一隻虱目魚小子和一隻小的
-function mfTestSpawn(dt) {
-  if (G.milkfishTestDone || MAP_SAFE || !G.running || G.over || !G.player) return;
-  G.milkfishTestT = (G.milkfishTestT || 0) + dt;
-  if (G.milkfishTestT < 1) return;
-  G.milkfishTestDone = true;
-  const p = G.player, D = MILKFISH.testSpawnDist;
-  for (const id of ['milkfish_kid', 'milkfish_kid_small']) {
-    const spec = ACTIVE_MONSTERS.find(m => m.id === id); if (!spec) continue;
-    let placed = false;
-    for (let k = 0; k <= D && !placed; k++) for (const d of k ? [D + k, D - k] : [D]) {
-      if (placed || d < 3) continue;
-      for (let i = 0; i < 32; i++) {
-        const a = i / 32 * Math.PI * 2 + (id === 'milkfish_kid' ? 0 : .3), x = p.x + Math.cos(a) * d * CELL, y = p.y + Math.sin(a) * d * CELL, [c, r] = cellAt(x, y);
-        if (!inGrid(c, r) || enemyBlocked(x, y)) continue;
-        if (G.towers.some(t => t.hp > 0 && Math.hypot(t.x - x, t.y - y) < 4 * CELL)) continue;
-        G.enemies.push(createMonster(spec, x, y)); placed = true; break;
-      }
-    }
-  }
-}

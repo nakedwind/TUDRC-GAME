@@ -128,7 +128,7 @@ function createMonster(spec, x, y, variant) {
     sentryDamage: dmg(spec.sentryDamage), buildingDamage: dmg(spec.buildingDamage),
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
-    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, sweep: spec.sweep || null,   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
+    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, shockResist: spec.shockResist ?? null, sweep: spec.sweep || null,   /* shockResist：不怕電（雷電傷害倍率、不會麻痺） */   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
     shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null,   // boomerang：夯吉寶（js/hangi-bao.js）
     flying: spec.behavior === 'shooter',   // 飄在空中：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
@@ -1618,7 +1618,12 @@ function updatePlayerAttack(dt) {
     SFX.play('gunshot', .55, 'paint-shot');
     return;
   }
-  if (!best && typeof shootHangiCapOnLine === 'function') {   // 沒打到怪物：打到順順宮帽就把它打開（js/hangi-bao.js）
+  let eggShot = null;
+  if (!best && typeof shootFishEggOnLine === 'function') {   // 沒打到怪物：打中魚卵就引爆（js/clownfish.js）
+    eggShot = shootFishEggOnLine(p.x, p.y, endX, endY);
+    if (eggShot) { endX = eggShot.x; endY = eggShot.y; }
+  }
+  if (!best && !eggShot && typeof shootHangiCapOnLine === 'function') {   // 沒打到怪物：打到順順宮帽就把它打開（js/hangi-bao.js）
     const capHit = shootHangiCapOnLine(p.x, p.y, endX, endY);
     if (capHit) { endX = capHit.x; endY = capHit.y; G.effects.push({ ring: true, x: endX, y: endY, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' }); }
   }
@@ -2046,7 +2051,7 @@ function update(dt) {
             if (spec.ability === '火焰') e.fireDmg = (e.fireDmg || 0) + amt; else e.shockDmg = (e.shockDmg || 0) + amt;
           }
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
-          if (spec.stun && !e.noStun) {   // noStun 的怪物（生命體）不會被停住
+          if (spec.stun && !e.noStun && !(spec.ability === '雷電' && e.shockResist != null)) {   // noStun 的怪物（生命體）不會被停住；不怕電的（小丑魚）不會被雷擊麻痺
             e.stunT=Math.max(e.stunT||0,spec.stun);
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
           }
@@ -2195,6 +2200,7 @@ function update(dt) {
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
+  if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）

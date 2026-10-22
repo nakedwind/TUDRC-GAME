@@ -162,7 +162,8 @@ function drawCharacterShadow(actor) {
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,.3)';
   ctx.beginPath();
-  ctx.ellipse(actor.x, actor.y + 15, 15, 5, 0, 0, Math.PI * 2);
+  const down = actor.hp <= 0;
+  ctx.ellipse(actor.x + (down ? 10 : 0), actor.y + (down ? 5 : 15), 15, 5, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.restore();
 }
@@ -917,6 +918,7 @@ function draw() {
   drawScorchMarks(ctx);
   drawFlares(ctx);             // 地上燃燒的照明彈
   drawLandmines(ctx);          // 地雷（js/landmine.js）
+  if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   if (typeof drawFishWater === 'function') drawFishWater(ctx);

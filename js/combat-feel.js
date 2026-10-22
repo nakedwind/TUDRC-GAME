@@ -258,7 +258,7 @@ function onEnemyDeath(e) {
     if (e.forceAttack && e.frames) { e.lastFrameFile = e.frames.front; e.lastFrameFlip = false; }   // 死在撲咬的瞬間：攻擊圖尺寸不同，改用站姿圖倒下才不會變形
     pushFallCorpse(e); return;
   }
-  if (e.behavior === 'boomerang' || e.behavior === 'fishhead' || e.behavior === 'vine') { pushFallCorpse(e); return; }   // 魚頭君也倒下   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
+  if (e.behavior === 'boomerang' || e.behavior === 'fishhead' || e.behavior === 'vine' || e.behavior === 'clownfish') { pushFallCorpse(e); return; }   // 比基尼小丑魚也跟絲瓜小姐一樣倒下（js/clownfish.js）   // 魚頭君也倒下   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
   const size = e.sizeMul || 1;
   if (e.variant === 'bomber') {   // 自爆型：被打死也會爆（威力較小），不留屍體
