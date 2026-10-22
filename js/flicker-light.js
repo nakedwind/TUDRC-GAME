@@ -141,10 +141,12 @@ function humContext() {
   window.addEventListener('pointerdown', resume); window.addEventListener('keydown', resume);
   return humAudio;
 }
+let humUpdatedAt = 0;   // 上一次照遊戲畫面更新嗡嗡聲的時間（遊戲邏輯停住時，下面的計時器會把聲音關掉）
 function updateFlickerHum() {
   const list = flickerLights(), p = G.player;
+  humUpdatedAt = performance.now();
   let best = 0;
-  if (p && list.length) for (const L of list) {
+  if (p && list.length && !MAP_SAFE) for (const L of list) {   // 應變中心（安全區）：不會有嗡嗡聲
     if (!L.on) continue;
     const d = Math.hypot(L.x - p.x, L.y - p.y) / CELL;
     best = Math.max(best, Math.max(0, 1 - d / FLICKER.humRange));
@@ -155,8 +157,14 @@ function updateFlickerHum() {
   const vol = enabled ? best * best * FLICKER.humVolume * ((typeof SFX !== 'undefined' ? SFX.volume : .35) / .35) : 0;
   h.out.gain.setTargetAtTime(vol, h.ctx.currentTime, .05);
 }
+// 保險：遊戲邏輯沒在跑（換地圖、結算畫面、選單開著…）或回到安全區時，嗡嗡聲不會停在上一次的音量
+setInterval(() => {
+  if (!humAudio) return;
+  const idle = performance.now() - humUpdatedAt > 300;
+  if (idle || (typeof MAP_SAFE !== 'undefined' && MAP_SAFE)) humAudio.out.gain.setTargetAtTime(0, humAudio.ctx.currentTime, .05);
+}, 200);
 function playZap(L) {
-  const p = G.player; if (!p) return;
+  const p = G.player; if (!p || MAP_SAFE) return;
   const d = Math.hypot(L.x - p.x, L.y - p.y) / CELL; if (d > FLICKER.humRange + 4) return;
   if (typeof SFX !== 'undefined' && !SFX.enabled) return;
   const h = humContext(); if (!h || h.ctx.state !== 'running') return;

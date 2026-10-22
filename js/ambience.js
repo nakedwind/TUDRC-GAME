@@ -18,7 +18,7 @@ const Ambience = (() => {
   let driftUntil = 0, active = false, fallback = null;
 
   const fileOf = () => { const it = SFX.list().find(x => x.name === AMBIENCE.sound); return it && typeof it.file === 'string' ? it.file : null; };
-  const inYZone = () => typeof MAP_SAFE !== 'undefined' && typeof MAP !== 'undefined' && MAP && !MAP_SAFE;   // Y 區＝戰鬥地圖
+  const inYZone = () => typeof MAP_SAFE !== 'undefined' && typeof MAP !== 'undefined' && MAP && !MAP_SAFE && !MAP.safe;   // Y 區＝戰鬥地圖（B1 訓練室練習時暫時算戰鬥區，但還是在應變中心裡：不播）
   const baseVolume = () => (SFX.enabled ? SFX.volume : 0) * AMBIENCE.volume * (SFX.gainOf(AMBIENCE.sound) ?? 1);
 
   async function load() {
@@ -56,6 +56,7 @@ const Ambience = (() => {
     const want = inYZone() ? baseVolume() : 0, now = ctx.currentTime;
     if (fallback) {   // 備用播放方式
       if (want > 0 && fallback.paused) fallback.play().catch(() => {});
+      else if (want <= 0 && !fallback.paused) fallback.pause();   // 回到應變中心：整個停掉（不只是音量 0）
       const wobble = AMBIENCE.low + (AMBIENCE.high - AMBIENCE.low) * (.5 + .5 * Math.sin(performance.now() / 2300));
       fallback.volume = Math.max(0, Math.min(1, want * wobble));
       return;
