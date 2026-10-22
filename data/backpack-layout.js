@@ -14,7 +14,8 @@ const BACKPACK_LAYOUT = {
       "align": "center"
     },
     "text.desc": {
-      "y": -30
+      "y": -30,
+      "align": "left"
     },
     "item:storage-locker-key": {
       "size": 60
@@ -155,6 +156,9 @@ const BACKPACK_LAYOUT = {
     },
     "detailImg:thermos": {
       "x": 2
+    },
+    "img.bagIcon": {
+      "size": 30
     }
   },
   "texts": {}

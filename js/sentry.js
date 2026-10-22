@@ -443,6 +443,7 @@ function campAttackerFor(t, maxDistance = Infinity) {
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
+  if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(t, dt)) return;   // 基地：正在跟別人閒聊（js/npc-chats.js）
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
   if (t.rootT > 0) { t.moving = false; t.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
@@ -710,6 +711,7 @@ function npcSeatStep(a, dt, speed) {
 }
 
 function updateWanderer(npc, dt) {
+  if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(npc, dt)) return;   // 正在跟別人閒聊（js/npc-chats.js）
   if (npcSeatStep(npc, dt, 65)) { updateNpcTalk(npc, dt); return; }   // 坐著或正走向椅子
   rescueStuck(npc, sentryBlocked);
   updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）

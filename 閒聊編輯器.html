@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NPC 閒聊編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  :root { color-scheme: dark; font-family: system-ui, 'Microsoft JhengHei', sans-serif; background: #10151c; color: #e8edf5; }
+  * { box-sizing: border-box; } body { margin: 0 auto; padding: 16px 20px 24px; max-width: 1600px; }
+  h1 { font-size: 22px; margin: 0 0 4px; } h2 { font-size: 15px; margin: 0 0 8px; } p { margin: 0; color: #aabacc; line-height: 1.5; }
+  .top { margin-bottom: 12px; }
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr) 360px; gap: 12px; align-items: start; }
+  .panel { background: #1b2530; border: 1px solid #3a4d60; border-radius: 12px; padding: 12px; min-width: 0; }
+  button { cursor: pointer; font: inherit; color: #eaf4ff; background: #2a3c50; border: 1px solid #57718b; border-radius: 7px; padding: 5px 10px; }
+  button:hover { background: #345169; } button.primary { background: #236b79; border-color: #69b9c1; } button.on { background: #245668; border-color: #ffd479; color: #fff; }
+  button.danger { background: transparent; border-color: rgba(255,120,110,.45); color: #ff9d8f; } button.danger:hover { background: rgba(255,100,90,.12); }
+  button.small { padding: 2px 7px; font-size: 12px; } button:disabled { opacity: .4; cursor: default; }
+  select, input { background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; padding: 4px 6px; min-width: 0; }
+  label.f { display: grid; gap: 4px; font-size: 12px; color: #b9cad9; margin: 6px 0; }
+  .note { font-size: 12px; color: #8c98a6; line-height: 1.5; margin: 6px 0; } .warn { color: #ffd479; }
+  .sub { margin: 12px 0 6px; font-size: 13px; color: #cfe0ee; font-weight: 700; }
+  .list { display: grid; gap: 5px; }
+  .item { display: grid; gap: 2px; padding: 6px 8px; border: 1px solid #2f3e4d; border-radius: 8px; background: #15202b; cursor: pointer; text-align: left; }
+  .item:hover { border-color: #57718b; } .item.on { border-color: #ffd479; background: #24301f; }
+  .item b { font-size: 13px; } .item small { color: #8c98a6; font-size: 11px; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .stage-head { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+  .stage-head .grow { flex: 1; }
+  .stage { overflow: auto; max-height: calc(100vh - 200px); border: 1px solid #2f3e4d; border-radius: 8px; background: #0b1016; }
+  #map { display: block; image-rendering: pixelated; cursor: crosshair; }
+  .who { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; padding: 5px 7px; border: 1px solid #2a323e; border-radius: 8px; background: #181d24; font-size: 13px; }
+  .who.picking { border-color: #fff; box-shadow: 0 0 0 2px rgba(143,211,255,.35); }
+  .who i { width: 11px; height: 11px; border-radius: 50%; flex: none; }
+  .who b { min-width: 46px; } .who .pos { color: #8c98a6; font-size: 12px; flex: 1; }
+  .face { position: relative; flex: none; width: 28px; height: 32px; overflow: hidden; border-radius: 6px; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.1), rgba(7,10,14,.55) 70%); }
+  .face img { position: absolute; left: 50%; top: -12.8%; width: 153%; height: auto; aspect-ratio: 1; max-width: none; transform: translateX(-50%); image-rendering: pixelated; }
+  .face[data-char="ball"] img { top: 50%; width: 220%; transform: translate(-27%, -56%); }
+  .tabs { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 6px; }
+  .lines { display: grid; gap: 4px; }
+  .line { display: flex; gap: 4px; align-items: center; }
+  .line select { flex: none; width: 80px; } .line input { flex: 1; }
+  .status { min-height: 18px; margin-top: 8px; font-size: 12px; color: #8be0c2; } .status.error { color: #ff9b9b; }
+  [hidden] { display: none !important; }
+  @media (max-width: 1150px) { .layout { grid-template-columns: 220px minmax(0, 1fr); } .layout > .edit { grid-column: 1 / -1; } }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+  <div class="top"><h1>🗨️ NPC 閒聊編輯器</h1><p>設定基地裡誰會跟誰閒聊、站在哪裡、聊什麼。兩個以上的人剛好在同一張基地地圖時，偶爾會走到站位面對面聊天，聊完回去做原本的事。</p></div>
+  <div class="layout">
+    <section class="panel">
+      <h2>地圖</h2>
+      <select id="mapSel" style="width:100%"></select>
+      <div class="sub">這張地圖的閒聊</div>
+      <div id="chatList" class="list"></div>
+      <div class="row" style="margin-top:8px"><button type="button" class="primary" id="chatNew">＋ 新增閒聊</button></div>
+      <div class="sub">誰平時在這張地圖</div>
+      <div id="peopleHere" class="note"></div>
+    </section>
+    <section class="panel">
+      <div class="stage-head"><b id="mapTitle"></b><span class="grow"></span>
+        <label class="row" style="font-size:12px"><input type="checkbox" id="showSolid" checked>顯示不可穿透格</label>
+        <button type="button" class="small" id="zoomOut">－</button><span id="zoomText" style="font-size:12px;min-width:40px;text-align:center"></span><button type="button" class="small" id="zoomIn">＋</button>
+      </div>
+      <div class="stage" id="stage"><canvas id="map"></canvas></div>
+      <p class="note">按右邊某人的「⌖ 站位」，再點地圖上的一格。圓點＝站位、箭頭＝說話時面向哪邊；虛線連起一起聊天的人。</p>
+    </section>
+    <section class="panel edit">
+      <h2 id="editTitle">編輯</h2>
+      <div id="editBox"><p class="note">左邊選一段閒聊，或按「＋ 新增閒聊」。</p></div>
+      <div class="sub">存檔</div>
+      <div class="row"><button type="button" id="previewGame">▶ 預覽遊戲</button><button type="button" class="primary" id="exportFile">下載 npc-chats.js</button><button type="button" class="danger" id="resetFile">從檔案重新載入</button></div>
+      <div id="status" class="status" role="status"></div>
+      <p class="note">編輯會自動存在這台瀏覽器；「▶ 預覽遊戲」會直接用。要正式套用、同步其他電腦，請按「💾 存到專案」（寫進 <code>data/npc-chats.js</code>）。</p>
+    </section>
+  </div>
+  <script src="js/draft-sync.js?v=sync-20261021"></script>
+  <script src="data/tiles.js?v=exitfade-20261022"></script>
+  <script src="data/base-maps.js?v=floornames-20261021"></script>
+  <script src="data/characters.js?v=colynparry-20261023"></script>
+  <script src="data/npc-locations.js?v=floornames-20261021"></script>
+  <script src="data/npc-chats.js?v=chatlisten-20261023"></script>
+  <script src="js/sfx.js?v=smalldeath2-20261023"></script>
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=sync-20261021"></script>
+  <script src="js/chat-editor.js?v=chatlisten-20261023"></script>
+  <script>ProjectSave.attach({
+    after: ['exportFile'],
+    files: [{ path: 'data/npc-chats.js', label: 'NPC 閒聊', text: () => chatExportText() }],
+    status: (m, e) => status(m, e),
+  });</script>
+  <script src="js/editor-nav.js?v=nav4-20261023"></script>
+</body>
+</html>

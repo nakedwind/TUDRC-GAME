@@ -558,14 +558,45 @@ const BUBBLE_DEFAULT = { bg: '#eef2f7', bd: '#5a6a86', tx: '#232a36' };
 function drawSpeechBubble(cx, bottomY, text, col) {
   const c = !col ? BUBBLE_DEFAULT : typeof col === 'string' ? { ...BUBBLE_DEFAULT, bd: col } : col, tail = 6, rad = 9;   // 只給一個色碼：當作框的顏色
   ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  const tw = ctx.measureText(text).width, w = tw + 24, h = 26;
+  const lines = wrapBubbleText(text), lineH = 18;
+  const tw = Math.max(...lines.map(l => ctx.measureText(l).width)), w = tw + 24, h = 8 + lines.length * lineH;
   const x = Math.round(cx - w / 2), y = Math.round(bottomY - tail - h);
   ctx.fillStyle = c.bg; roundRect(x, y, w, h, rad); ctx.fill();
   ctx.strokeStyle = c.bd; ctx.lineWidth = 1.2; roundRect(x, y, w, h, rad); ctx.stroke();
   ctx.fillStyle = c.bd;                                       // 向下小三角尾巴（同邊框色）
   ctx.beginPath(); ctx.moveTo(cx - 5, y + h); ctx.lineTo(cx + 5, y + h); ctx.lineTo(cx, y + h + tail); ctx.closePath(); ctx.fill();
-  ctx.fillStyle = c.tx; ctx.fillText(text, cx, y + h - 8);    // 角色色文字
+  ctx.fillStyle = c.tx; lines.forEach((l, i) => ctx.fillText(l, cx, y + 18 + i * lineH));    // 角色色文字
   return y;   // 泡泡頂端：互動提示會排到它上面，不會蓋住
+}
+// 泡泡太長就換行：每行最寬 BUBBLE_MAX_W 像素；幾行之間盡量一樣長，而且優先在標點符號後面斷（台詞裡打 \n 也會換行）
+const BUBBLE_MAX_W = 224;   // 大約 16 個字
+const bubbleWrapCache = new Map();
+function wrapBubbleText(text) {
+  const key = String(text); if (bubbleWrapCache.has(key)) return bubbleWrapCache.get(key);
+  const out = [];
+  for (const para of key.split('\n')) {
+    const full = ctx.measureText(para).width;
+    if (full <= BUBBLE_MAX_W) { out.push(para); continue; }
+    // 先決定要幾行，再一行一行找最好的斷點：每行盡量接近平均寬度、在標點後面斷加分、標點不放在行首
+    let rest = [...para], n = Math.ceil(full / BUBBLE_MAX_W);
+    while (n > 1 && rest.length) {
+      const w = i => ctx.measureText(rest.slice(0, i).join('')).width, restW = ctx.measureText(rest.join('')).width, target = restW / n;
+      let best = -1, bestScore = Infinity;
+      for (let i = 1; i < rest.length; i++) {
+        const wl = w(i); if (wl > BUBBLE_MAX_W) break;
+        if (/[，。！？…、；」』）]/.test(rest[i])) continue;   // 下一行不能用標點開頭
+        if (ctx.measureText(rest.slice(i).join('')).width > BUBBLE_MAX_W * (n - 1)) continue;   // 剩下的要塞得進剩下的行數
+        const score = Math.abs(wl - target) - (/[，。！？…、；」』）\s]/.test(rest[i - 1]) ? 64 : 0);   // 在標點後面斷：大約可以多讓 4 個字的長短差
+        if (score < bestScore) { bestScore = score; best = i; }
+      }
+      if (best < 0) best = Math.max(1, rest.length - 1);
+      out.push(rest.slice(0, best).join('')); rest = rest.slice(best); n--;
+    }
+    if (rest.length) out.push(rest.join(''));
+  }
+  if (bubbleWrapCache.size > 300) bubbleWrapCache.clear();
+  bubbleWrapCache.set(key, out);
+  return out;
 }
 // 所有角色（隊員、NPC）頭上的對話泡泡：先記下來，等建築、屋簷、黑幕、「急救／疏導」選項都畫完，最後才畫（flushTowerBubbles）
 // → 泡泡永遠在最上層，不會被角色前面的牆、建築擋住。
@@ -974,6 +1005,7 @@ function draw() {
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
+    else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）
     else if (typeof wardrobeNearPlayer === 'function' && !doorNearPlayer() && wardrobeNearPlayer()) { const w = wardrobeNearPlayer(); drawInteractPrompt(w.x, w.top - 4, '換裝'); }   // 衣櫃（js/costumes.js）
     else if (typeof gachaNearPlayer === 'function' && !doorNearPlayer() && gachaNearPlayer()) { const g = gachaNearPlayer(); drawInteractPrompt(g.x, g.top - 4, '扭蛋'); }   // 扭蛋機（js/gacha.js）
     else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '怪物圖鑑'); }   // 2F應變中心的電腦（js/bestiary.js）
@@ -1355,6 +1387,7 @@ function draw() {
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
   if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
   flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
+  if (typeof drawNpcChatMarks === 'function') drawNpcChatMarks(ctx);   // 有人在閒聊、等溫特來聽：中間的「● ● ●」（js/npc-chats.js）
   drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
   if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
@@ -1435,6 +1468,7 @@ function draw() {
     ctx.fillStyle = v; ctx.fillRect(-cv.width / 2, -cv.height / 2 / squash, cv.width, cv.height / squash);
     ctx.restore();
   }
+  if (typeof drawNpcChatOffscreen === 'function') drawNpcChatOffscreen(ctx, cv);   // 閒聊的人在畫面外：邊緣的方向箭頭（js/npc-chats.js）
   drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
   if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
   if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
