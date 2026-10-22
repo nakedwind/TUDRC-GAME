@@ -170,7 +170,7 @@ function smilerBite(v, s) {
     if (v.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', v.x, v.y - 58, '#ff5b6e'); lose('player', '在黑暗中被 Smiler 咬傷'); }
   } else {
     if (v.hp <= 0) { v.target = null; sentryStatus(v, '失去戰鬥能力', '#ff5b6e', true); }
-    else v.say = { text: '……！什麼東西咬我！', life: 2.2 };
+    else { const line = typeof pickDialogueLine === 'function' ? pickDialogueLine(v.type, 'bitten') : null; if (line) v.say = { text: line, life: 2.2 }; }   // 對話編輯器「在黑暗中被咬」；沒寫就不說
   }
 }
 

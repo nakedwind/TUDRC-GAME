@@ -10490,10 +10490,7 @@ const BASE_MAPS = [
       },
       "object3": {},
       "object4": {},
-      "overlay": {
-        "21,3": "tile_eoc_floor_sign_b4",
-        "21,6": "tile_eoc_floor_sign_b4"
-      },
+      "overlay": {},
       "top": {
         "14,2": "tile_containment_wall_top_straight",
         "14,3": "tile_containment_wall_top_straight",
@@ -11202,6 +11199,12 @@ const BASE_MAPS = [
         "layer": "floor",
         "ox": 0,
         "oy": 2
+      },
+      {
+        "id": "tile_eoc_floor_sign_b4",
+        "c": 25,
+        "r": 6,
+        "layer": "overlay"
       }
     ],
     "solid": [

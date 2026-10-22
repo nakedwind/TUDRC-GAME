@@ -6,17 +6,26 @@ const $d = id => document.getElementById(id);
 const clone = v => JSON.parse(JSON.stringify(v));
 
 // ---- 情境說明：遊戲在什麼時候用這組台詞 ----
-// ordered：找他說話時依序一句一句說完；name：可用 {name}。每一格都只用自己的台詞：沒填就不說話（不會借用別格或「通用台詞」）
+// ordered：找他說話時依序一句一句說完；name：可用 {name}；item：可用 {item}。每一格都只用自己的台詞：沒填就不說話（不會借用別格或「通用台詞」）
+// 遊戲裡角色說的每一句話都從這裡來（程式裡不寫台詞）
 const SITUATIONS = [
   { group: '日常（基地裡）', key: 'idle', label: '閒晃時的頭上泡泡', when: '在基地等安全場景閒晃時，每隔 <b>5～13 秒</b>隨機冒出一句。' },
   { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完。沒填就不說話。' },
   { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
   { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>（大約四次有一次改說「偶爾閒聊」）。抽到的那一格沒填就不說話。' },
   { group: '找他說話（特殊）', key: 'chat', label: '偶爾閒聊（隨機一句）', when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。' },
+  { group: '送禮與委託', key: 'giftLove', label: '收到最愛的禮物', item: true, when: '在基地送他<b>最愛</b>的零食飲料時，隨機說一句。沒填就不說（對話框只顯示「收下了」的系統訊息）。' },
+  { group: '送禮與委託', key: 'giftLike', label: '收到喜歡的禮物', item: true, when: '送他<b>喜歡</b>的東西時，隨機說一句。' },
+  { group: '送禮與委託', key: 'giftNormal', label: '收到普通的禮物', item: true, when: '送他<b>普通</b>（沒特別喜歡、也不討厭）的東西時，隨機說一句。' },
+  { group: '送禮與委託', key: 'giftDislike', label: '收到不喜歡的禮物', item: true, when: '送他<b>不喜歡</b>的東西時（包括不喜歡的服裝），隨機說一句。' },
+  { group: '送禮與委託', key: 'giftCostume', label: '收到服裝', item: true, when: '送他扭蛋轉到的<b>服裝</b>、他馬上換上時，隨機說一句（不喜歡的服裝改說「收到不喜歡的禮物」）。' },
+  { group: '送禮與委託', key: 'requestAsk', label: '委託：想吃東西', item: true, when: '回到基地時他想吃某樣東西（頭上冒圖示），找他說話時<b>先說這一句</b>。沒填就不說（禮物選單裡還是會標「想吃！」）。' },
+  { group: '送禮與委託', key: 'requestReward', label: '委託：完成時交給你東西', when: '照他想吃的送了之後，把回憶碎片（或異質碎片）交給溫特時說的話（隨機一句）。' },
   { group: '保留（遊戲不會用）', key: 'reserve', label: '保留台詞', when: '先收起來的台詞，<b>遊戲不會說</b>。之後要用時，複製到上面的情境就好（例如角色搬到別的地方時）。' },
   { group: '戰鬥中', key: 'battle', label: '出勤時的頭上泡泡', when: '戰鬥地圖中，每隔 <b>11～22 秒</b>隨機冒出一句。' },
   { group: '戰鬥中', key: 'lowSp', label: '嚮導 SP 偏低・頭暈', when: '嚮導 SP 低於 <b>40</b> 時說一句；恢復到 45 以上後可再次觸發。' },
   { group: '戰鬥中', key: 'ultimate', label: '放大招時喊的話', when: '大招冷卻好、<b>放大招的瞬間</b>。' },
+  { group: '戰鬥中', key: 'bitten', label: '在黑暗中被咬', when: '待在暗處被 Smiler 咬到、還站得住時。' },
   { group: '戰鬥中', key: 'guard', label: '衝去保護部隊長', when: '部隊長被怪物攻擊、他衝過去保護時（每 <b>6 秒</b>最多一次）。' },
   { group: '汙染與暴走', key: 'taintWarn', label: '瀕臨暴走', when: '汙染超過 <b>85</b> 時說一句，之後沒人疏導，每 <b>8～12 秒</b>再說一句。' },
   { group: '汙染與暴走', key: 'berserk', label: '暴走瞬間', when: '汙染到 <b>100</b>、暴走的那一刻（暗紅色泡泡）。' },
@@ -39,6 +48,8 @@ const RAGE_FIELDS = [
   { key: 'relief', label: '瀕臨暴走時被疏導', when: '變身狀態下被疏導、恢復原本個性時。沒填就不說。' },
   { key: 'soothed', label: '從暴走被疏導回來', when: '從暴走恢復時。沒填就不說。' },
 ];
+// 可以收禮的角色（data/gifts.js 的 GIFT_PREFS）都有「送禮與委託」這幾格
+const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'requestAsk', 'requestReward'];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };
 const DEFAULT_ID = '__default';
@@ -50,11 +61,11 @@ try {
   const saved = (typeof DraftSync !== 'undefined' ? DraftSync.load(DIALOGUE_DRAFT_KEY, (typeof DIALOGUES !== 'undefined' ? DIALOGUES : undefined), { label: '對話' }) : JSON.parse(localStorage.getItem(DIALOGUE_DRAFT_KEY) || 'null'));   // 暫存和專案檔三方合併（js/draft-sync.js）
   if (saved && saved.characters) { draft = saved; usingDraft = true; }
 } catch (_) { /* 草稿損壞就用正式檔案 */ }
-// 草稿是舊的時候，把正式檔案裡新加的「報告任務」台詞補進草稿（不會蓋掉已經改過的）
+// 草稿是舊的時候，把正式檔案裡新加的「報告任務」「送禮與委託」台詞補進草稿（不會蓋掉已經改過的）
 if (usingDraft && typeof DIALOGUES !== 'undefined') {
   for (const [id, entry] of Object.entries(DIALOGUES.characters || {})) {
     if (!draft.characters[id]) continue;
-    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key === 'lowSp') && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
+    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
   }
 }
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
@@ -79,8 +90,8 @@ if (typeof CHARACTERS !== 'undefined') {   // 原本有的照原本的順序（�
 // 可以編入戰鬥的角色（哨兵、嚮導）一定要有「戰鬥中」「汙染與暴走」的情境格子（例如後來才加入出勤的塔納、柯林，原本只有基地的台詞）。
 // 補上的格子沒寫台詞的話，匯出時會拿掉（autoAdded），檔案不會多一堆空資料。
 const COMBAT_SITUATIONS = {
-  sentinel: ['battle', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
-  guide: ['battle', 'friendlyHit', 'lowSp'],
+  sentinel: ['battle', 'ultimate', 'bitten', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
+  guide: ['battle', 'bitten', 'friendlyHit', 'lowSp'],
 };
 const NO_ULTIMATE = ['tino'];   // 沒有大招的哨兵（大招在 js/game.js 的 ULTIMATES），不補「放大招時喊的話」
 const autoAdded = new Set();
@@ -99,6 +110,15 @@ if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHAR
   if (c.kind === 'sentinel') {
     if (!entry.rage) entry.rage = emptyRage();
     if (!inFile.rage && JSON.stringify(entry.rage) === JSON.stringify(emptyRage())) autoAdded.add(id + '.rage');
+  }
+}
+// 可以收禮的角色：補上「送禮與委託」的格子（沒寫台詞的話匯出時拿掉）
+if (typeof GIFT_PREFS !== 'undefined') for (const id of Object.keys(GIFT_PREFS)) {
+  const entry = draft.characters[id]; if (!entry) continue;
+  const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
+  for (const k of GIFT_SITUATIONS) {
+    if (!(k in entry)) entry[k] = [];
+    if (!(k in inFile) && Array.isArray(entry[k]) && !entry[k].length) autoAdded.add(id + '.' + k);
   }
 }
 // 自動補上、沒動過的格子拿掉（匯出、存暫存都用）：空的情境格子、完全沒動過的狂戰士人格
@@ -303,6 +323,7 @@ function renderEditor() {
     const hit = q && lines.some(l => l.toLowerCase().includes(q));
     let when = s.when;
     if (s.name) when += ' 可以用 <code>{name}</code> 代表攻擊他的人的名字。';
+    if (s.item) when += ' 可以用 <code>{item}</code> 代表東西的名稱。';
     if (s.ordered) when += ' 可以用 ↑↓ 調整順序。';
     const box = situationBox(ed, s.label, when, lines.length, hit ? 'match' : '');
     fieldEditor(box, entry, s.key, {

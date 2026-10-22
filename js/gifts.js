@@ -4,7 +4,7 @@
 //  ・每個人每次回到基地只能收一次禮物（出勤一次之後才能再送）。
 //  ・今日想吃委託：回到基地時有幾個人想吃某樣東西（頭上冒圖示），照著送好感度加倍，還會給回憶碎片或異質碎片。
 //  ・回憶碎片集滿 3 個會自動拼成鑰匙（data/items.js 的 MEMORY_KEYS）。
-//  ・喜好、台詞、點數、等級都在 data/gifts.js。好感度會存檔（js/save.js）。
+//  ・喜好、點數、等級在 data/gifts.js；收禮、委託時說的話在「對話編輯器」的「送禮與委託」（data/dialogues.js），沒寫就不說。好感度會存檔（js/save.js）。
 //  ・服裝（扭蛋轉到的配件、skin）也能送：送出後對方馬上穿上（js/costumes.js 的 costumeGive；規則在 data/costumes.js 的 COSTUME_GIFT）。
 // ============================================================
 const favorPoints = {};        // 角色 id → 好感點數
@@ -16,6 +16,9 @@ const giftRequests = {};       // 今日想吃：角色 id → 想吃的物品 i
 let requestsStale = true;      // 出勤過後回到基地要重新抽委託
 
 const giftableId = actor => actor && (actor.kind === 'tower' ? actor.type : actor.id);
+// 收禮、委託的台詞（對話編輯器「送禮與委託」）：隨機一句，{item} 換成東西的名稱；沒寫就回傳 null（不說話）
+const GIFT_LINE_KEY = { love: 'giftLove', like: 'giftLike', normal: 'giftNormal', dislike: 'giftDislike' };
+function giftLine(id, key, itemName) { const line = pickDialogueLine(id, key); return line ? line.replaceAll('{item}', itemName || '') : null; }
 const canReceiveGifts = id => !!GIFT_PREFS[id];
 function favorLevel(points) {
   let lv = 0;
@@ -52,9 +55,9 @@ function renderDialogueFavor() {
 }
 function onDialogueOpened(actor) {
   const id = giftableId(actor), want = MAP_SAFE && giftRequests[id] && !giftedThisVisit.has(id) ? itemById(giftRequests[id]) : null;
-  if (want && dialogueState) {   // 有委託：先說想吃什麼
-    const ask = (REQUEST_LINES[id] || {}).ask || ['好想吃{item}……'];
-    dialogueState.lines = [ask[Math.floor(Math.random() * ask.length)].replaceAll('{item}', want.name), ...dialogueState.lines];
+  const ask = want && dialogueState ? giftLine(id, 'requestAsk', want.name) : null;   // 有委託：先說想吃什麼（沒寫就不說，想吃的東西在禮物選單裡會標「想吃！」）
+  if (ask) {
+    dialogueState.lines = [ask, ...dialogueState.lines];
     dialogueState.index = 0; renderDialogueLine();
   }
   renderDialogueFavor();
@@ -116,10 +119,10 @@ function giveGift(itemId) {
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
   // 對話框換成收到禮物的反應
-  const pool = (GIFT_PREFS[id].lines || {})[reaction] || ['謝謝。'];
-  const lines = [pool[Math.floor(Math.random() * pool.length)].replaceAll('{item}', item.name)];
+  const said = giftLine(id, GIFT_LINE_KEY[reaction], item.name);   // 沒寫台詞：只顯示系統訊息
+  const lines = [said || { speaker: '系統', text: `${profile.name}收下了「${item.name}」。` }];
   const reward = wanted ? fulfillRequest(id) : null;   // 委託完成：回憶碎片或異質碎片
-  if (reward) lines.push(reward.line, { speaker: '系統', text: reward.text });
+  if (reward) { if (reward.line) lines.push(reward.line); lines.push({ speaker: '系統', text: reward.text }); }
   if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
   dialogueState.lines = lines; dialogueState.index = 0; dialogueState.giftReply = true;
   renderDialogueLine(); renderDialogueFavor();
@@ -144,8 +147,8 @@ function giveCostumeGift(costumeId) {
   giftedThisVisit.add(id);
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
-  const L = GIFT_PREFS[id].lines || {}, pool = (reaction !== 'dislike' && L.costume) || L[reaction] || ['謝謝。'];
-  const lines = [pool[Math.floor(Math.random() * pool.length)].replaceAll('{item}', item.name), { speaker: '系統', text: `${profile.name}換上了「${item.name}」！` }];
+  const said = giftLine(id, reaction === 'dislike' ? 'giftDislike' : 'giftCostume', item.name);   // 「收到服裝」；不喜歡的服裝說「收到不喜歡的禮物」
+  const lines = [...(said ? [said] : []), { speaker: '系統', text: `${profile.name}換上了「${item.name}」！` }];
   if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
   dialogueState.lines = lines; dialogueState.index = 0; dialogueState.giftReply = true;
   renderDialogueLine(); renderDialogueFavor();
@@ -171,7 +174,7 @@ function generateRequests() {
 }
 function fulfillRequest(id) {
   delete giftRequests[id];
-  const lineFor = (REQUEST_LINES[id] || {}).reward || '這個給你。';
+  const lineFor = pickDialogueLine(id, 'requestReward');   // 對話編輯器「委託：完成時交給你東西」；沒寫就不說
   const shard = REQUEST_SHARDS[id], mk = shard && MEMORY_KEYS.find(m => m.shard === shard);
   if (mk && !(supplyInventory.get(mk.key) > 0)) {   // 給回憶碎片（鑰匙還沒拼好的話）
     supplyInventory.set(shard, (supplyInventory.get(shard) || 0) + 1);

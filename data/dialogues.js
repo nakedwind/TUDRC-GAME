@@ -132,7 +132,26 @@ const DIALOGUES = {
         ],
         "reliefBy": {},
         "soothedBy": {}
-      }
+      },
+      "giftLove": [
+        "……哼，{item}。算你有眼光。",
+        "你倒是挺懂我的品味。"
+      ],
+      "giftLike": [
+        "還不錯，我收下了。"
+      ],
+      "giftNormal": [
+        "嗯，放著吧。"
+      ],
+      "giftDislike": [
+        "{item}？這是給小孩吃的吧。"
+      ],
+      "requestAsk": [
+        "……我現在想吃{item}。不是要你去買的意思。"
+      ],
+      "requestReward": [
+        "……這是在地下街撿到的碎片。我也不知道能幹嘛，給你吧。"
+      ]
     },
     "amber": {
       "idle": [
@@ -222,7 +241,26 @@ const DIALOGUES = {
         ],
         "reliefBy": {},
         "soothedBy": {}
-      }
+      },
+      "giftLove": [
+        "謝謝部隊長！{item}是我最喜歡的！我會好好喝的！",
+        "真、真的可以收下嗎？謝謝您！"
+      ],
+      "giftLike": [
+        "謝謝您，我很喜歡！"
+      ],
+      "giftNormal": [
+        "謝謝部隊長的關心！"
+      ],
+      "giftDislike": [
+        "謝、謝謝……不過我平常盡量不吃這種的……"
+      ],
+      "requestAsk": [
+        "那、那個……如果方便的話，我想吃{item}……"
+      ],
+      "requestReward": [
+        "這是我巡邏時撿到的，請部隊長收下！"
+      ]
     },
     "red": {
       "idle": [
@@ -316,7 +354,27 @@ const DIALOGUES = {
         ],
         "reliefBy": {},
         "soothedBy": {}
-      }
+      },
+      "giftLove": [
+        "哇！是{item}！部隊長你怎麼知道我最喜歡這個！我會好好珍惜的……好啦我現在就要吃！",
+        "{item}！！今天是什麼好日子！"
+      ],
+      "giftLike": [
+        "謝啦！{item}我很喜歡喔！"
+      ],
+      "giftNormal": [
+        "給我的嗎？謝謝部隊長！"
+      ],
+      "giftDislike": [
+        "呃……{item}……沒、沒關係！心意最重要！（吞口水）"
+      ],
+      "requestAsk": [
+        "部隊長～我好想吃{item}喔……",
+        "欸欸，今天好想吃{item}！"
+      ],
+      "requestReward": [
+        "啊對了！這個給你！在地下街撿到的，亮晶晶的，我也不知道能幹嘛。"
+      ]
     },
     "avaren": {
       "idle": [
@@ -419,6 +477,25 @@ const DIALOGUES = {
       },
       "reserve": [
         "……找我做什麼？"
+      ],
+      "giftLove": [
+        "……{item}。……可以分艾德林一半嗎。",
+        "……喜歡。"
+      ],
+      "giftLike": [
+        "……嗯。"
+      ],
+      "giftNormal": [
+        "……"
+      ],
+      "giftDislike": [
+        "……（推回來）"
+      ],
+      "requestAsk": [
+        "……{item}。……想吃。"
+      ],
+      "requestReward": [
+        "……撿到的。……給你。"
       ]
     },
     "luther": {
@@ -524,7 +601,26 @@ const DIALOGUES = {
             "學姊...抱歉又帶給你麻煩了...！"
           ]
         }
-      }
+      },
+      "giftLove": [
+        "喔！{item}！這個好，夠勁！",
+        "……謝了。這個我真的很喜歡。"
+      ],
+      "giftLike": [
+        "不錯，謝啦。"
+      ],
+      "giftNormal": [
+        "喔，謝了。"
+      ],
+      "giftDislike": [
+        "{item}……太可愛了吧，這個我不太行……拿給克莉思吧。"
+      ],
+      "requestAsk": [
+        "今天……有點想吃{item}。"
+      ],
+      "requestReward": [
+        "這個……在地下街撿到的。我不知道能幹嘛，你拿去吧。"
+      ]
     },
     "eldrin": {
       "lowSp": [
@@ -552,6 +648,25 @@ const DIALOGUES = {
         "{name}，冷靜點，我在這裡！",
         "緊急申請疏導支援！",
         "沒事的，我馬上幫你！"
+      ],
+      "giftLove": [
+        "{item}！好健康的選擇！部隊長也要記得多喝喔。",
+        "謝謝您，這個我很喜歡。"
+      ],
+      "giftLike": [
+        "謝謝部隊長，您也要好好吃飯喔。"
+      ],
+      "giftNormal": [
+        "謝謝您的心意。"
+      ],
+      "giftDislike": [
+        "{item}……這個糖分太高了啦！部隊長自己也少吃一點！"
+      ],
+      "requestAsk": [
+        "最近有點想吃{item}呢。"
+      ],
+      "requestReward": [
+        "這個給您，在地下街撿到的，說不定用得上。"
       ]
     },
     "chris": {
@@ -580,6 +695,25 @@ const DIALOGUES = {
         "{name}，好痛！",
         "需要申請麻醉槍……",
         "冷靜點啦，{name}！"
+      ],
+      "giftLove": [
+        "欸——{item}！部隊長好懂我～今天可以不出任務嗎？",
+        "耶～我最愛這個了！"
+      ],
+      "giftLike": [
+        "謝啦～"
+      ],
+      "giftNormal": [
+        "喔，謝謝～"
+      ],
+      "giftDislike": [
+        "{item}……沒味道的東西不行啦……"
+      ],
+      "requestAsk": [
+        "好想吃{item}喔～部隊長幫我買嘛～"
+      ],
+      "requestReward": [
+        "欸，這個給你～在地下街撿到的，我懶得研究它是什麼了。"
       ]
     },
     "tino": {
@@ -651,7 +785,26 @@ const DIALOGUES = {
         ],
         "reliefBy": {},
         "soothedBy": {}
-      }
+      },
+      "giftLove": [
+        "……{item}。……不要盯著我看。（偷偷收進口袋）",
+        "……哼。這個，還可以。"
+      ],
+      "giftLike": [
+        "……嗯，收下了。"
+      ],
+      "giftNormal": [
+        "……幹嘛突然給我東西。"
+      ],
+      "giftDislike": [
+        "{item}……味道好重，拿開。"
+      ],
+      "requestAsk": [
+        "……{item}。……沒什麼，我只是說說。"
+      ],
+      "requestReward": [
+        "……撿到的。拿去。"
+      ]
     },
     "claire": {
       "idle": [
@@ -664,6 +817,25 @@ const DIALOGUES = {
         "前、前輩好！疏導流程和緊急撤離程序，我都有好好背熟！",
         "雖然是第一次實戰有一點緊張……但只要照程序來，一定沒問題的。",
         "那個，您有看到安柏嗎？我只是想確認她有沒有又勉強自己，沒有別的意思喔！"
+      ],
+      "giftLove": [
+        "哇啊！{item}！部隊長最好了！",
+        "是{item}耶！我可以拍照嗎！"
+      ],
+      "giftLike": [
+        "謝謝部隊長～！"
+      ],
+      "giftNormal": [
+        "謝謝您！"
+      ],
+      "giftDislike": [
+        "唔……{item}有點……不過謝謝部隊長！"
+      ],
+      "requestAsk": [
+        "部隊長！我好想吃{item}！"
+      ],
+      "requestReward": [
+        "這個送你！是我在地下街撿到的喔！"
       ]
     },
     "muomn": {
@@ -676,6 +848,24 @@ const DIALOGUES = {
         "你終於來找穆恩了！",
         "剛才那邊傳來好大的聲音……不是我弄的喔。",
         "等事情結束以後，我們一起去找東西吃吧！"
+      ],
+      "giftLove": [
+        "謝謝，我很喜歡。"
+      ],
+      "giftLike": [
+        "謝謝。"
+      ],
+      "giftNormal": [
+        "謝謝您。"
+      ],
+      "giftDislike": [
+        "……謝謝。"
+      ],
+      "requestAsk": [
+        "有點想吃{item}。"
+      ],
+      "requestReward": [
+        "這個給您。"
       ]
     },
     "noah": {
@@ -689,6 +879,25 @@ const DIALOGUES = {
         "辛苦了。要不要坐一下？我正好知道幾件能讓你暫時忘記工作的趣事。",
         "放心，我只聊無傷大雅的部分。至於希奧妮剛才說了什麼……那就得看你想不想聽了。",
         "不過認真說，如果遇到難溝通的人就來找我吧。先聽懂對方在意什麼，事情通常就好辦多了。"
+      ],
+      "giftLove": [
+        "{item}！謝謝部隊長，正好想泡杯茶跟大家聊聊天呢。",
+        "這個我很喜歡，謝謝您。"
+      ],
+      "giftLike": [
+        "謝謝部隊長，您真貼心。"
+      ],
+      "giftNormal": [
+        "謝謝您的禮物。"
+      ],
+      "giftDislike": [
+        "啊，{item}……我不太能吃辣，不過謝謝您。"
+      ],
+      "requestAsk": [
+        "說到這個，好久沒吃{item}了呢。"
+      ],
+      "requestReward": [
+        "這是我在地下街撿到的，送給部隊長吧。"
       ]
     },
     "ash": {
@@ -723,7 +932,26 @@ const DIALOGUES = {
         "部隊長，最深處的反應……越來越強了。",
         "中心還在分析，暫時還不能過去。這段時間，請您先好好休息吧。"
       ],
-      "brief_zone4": []
+      "brief_zone4": [],
+      "giftLove": [
+        "……謝謝。……（多看了{item}好幾眼）",
+        "……都可以的。……不過，這個好像……還不錯。"
+      ],
+      "giftLike": [
+        "謝謝，都可以。"
+      ],
+      "giftNormal": [
+        "謝謝。都可以的。"
+      ],
+      "giftDislike": [
+        "謝謝。都可以。"
+      ],
+      "requestAsk": [
+        "……{item}……好像，還不錯。"
+      ],
+      "requestReward": [
+        "……撿到的。都可以，給你。"
+      ]
     },
     "eden": {
       "idle": [

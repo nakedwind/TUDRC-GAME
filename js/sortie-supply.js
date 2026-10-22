@@ -83,8 +83,8 @@ function applySortieBuff(t) {
   if (t.buff.hp) { t.maxhp = Math.round(t.maxhp * (1 + t.buff.hp)); t.hp = t.maxhp; }
   if (sortieJustFed) {
     const love = a.items.find(id => isLove(t.type, id));
-    if (love && typeof giftKnown !== 'undefined') (giftKnown[t.type] = giftKnown[t.type] || {})[love] = 'love';   // 他說出來了，之後送禮選單也會顯示 💖
-    setTimeout(() => sentryStatus(t, love ? '有帶' + itemById(love).name + '！💖' : '補給收到了！', love ? '#ff9fc8' : '#8fd3ff'), 600 + Math.random() * 900);
+    if (love && typeof giftKnown !== 'undefined') (giftKnown[t.type] = giftKnown[t.type] || {})[love] = 'love';   // 頭上顯示出來了，之後送禮選單也會顯示 💖
+    setTimeout(() => sentryStatus(t, love ? '💖 帶了最愛的' + itemById(love).name : '收到補給', love ? '#ff9fc8' : '#8fd3ff'), 600 + Math.random() * 900);   // 狀態提示（不是角色說的話：角色台詞都在對話編輯器）
   }
 }
 

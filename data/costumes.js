@@ -55,7 +55,7 @@ const COSTUME_RARITIES = {
 };
 // 送禮（js/gifts.js 的禮物選單）：服裝也能送給隊員。送出後用掉你的一件，對方馬上穿上，從此那件是他的（衣櫃裡只有他能穿）。
 // 對方喜不喜歡照 data/gifts.js 的 GIFT_PREFS（可以把服裝 id 寫進 love／like／dislike）；沒寫的算 reaction；稀有度越高多加越多好感。
-// 台詞：GIFT_PREFS 裡的 lines.costume（沒寫就用一般收禮的台詞）
+// 台詞：對話編輯器「送禮與委託」的「收到服裝」（沒寫就不說；不喜歡的服裝說「收到不喜歡的禮物」）
 const COSTUME_GIFT = { reaction: 'like', rarityBonus: { N: 0, R: 4, SR: 10 } };
 // 扭蛋機（js/gacha.js）：所有 skin、配件都會進扭蛋池，除非寫 gacha: false
 const GACHA = {
