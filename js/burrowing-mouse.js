@@ -14,6 +14,55 @@ const BURROW_MOUSE_ART = {
   leftHand: 'images/monster/burrowing-mouse/left-hand-hole.png',
   rightHand: 'images/monster/burrowing-mouse/right-hand-hole.png',
 };
+// 暫時的地圖實測開關，與小丑魚測試生怪同樣獨立於核心隨機生成。
+// 測完改 enabled:false；只對 monsterMix 包含老鼠的戰鬥地圖生效。
+const BURROW_MOUSE_TEST = { enabled: true, delay: 1, minDistance: 3, maxDistance: 12 };
+function updateBurrowMouseTestSpawn(dt, entering = false) {
+  if (dt <= 0 || !BURROW_MOUSE_TEST.enabled || !G || !G.running || G.over || MAP_SAFE || !G.player || G.player.hp <= 0
+    || (typeof MONSTER_PREVIEW_ID !== 'undefined' && MONSTER_PREVIEW_ID)) return;
+  if (!MAP?.monsterMix?.some(m => m.id === 'burrowing_mouse' && Number(m.weight) > 0)) return;
+  const spec = ACTIVE_MONSTERS.find(m => m.id === 'burrowing_mouse');
+  if (!spec) return;
+  if (entering && !G.enemies.some(e => e.type === spec.id && !e.dead && e.hp > 0)) {
+    G.burrowMouseTestSpawnDone = false; G.burrowMouseTestSpawnT = 0;
+  }
+  if (G.burrowMouseTestSpawnDone) return;
+  G.burrowMouseTestSpawnT = (G.burrowMouseTestSpawnT || 0) + dt;
+  if (G.burrowMouseTestSpawnT < BURROW_MOUSE_TEST.delay) return;
+  G.burrowMouseTestSpawnT = BURROW_MOUSE_TEST.delay - .5; // 沒找到空地時繼續重試，不先標記完成。
+  const p = G.player, visible = (x, y) => isLit(x, y) && (typeof cam === 'undefined' || typeof viewW !== 'function'
+    || (x >= cam.x + CELL * 2 && x <= cam.x + viewW() - CELL * 2 && y >= cam.y + CELL * 3 && y <= cam.y + viewH() - CELL));
+  if (G.enemies.some(e => e.type === spec.id && !e.dead && e.hp > 0 && visible(e.x, e.y))) {
+    G.burrowMouseTestSpawnDone = true;
+    if (typeof setPaused === 'function') setPaused(true);
+    if (typeof systemNotice === 'function') systemNotice('版權老鼠已在附近，已暫停；按 P 開始測試。');
+    return;
+  }
+  const floor = mapFloorCells(), [pc, pr] = cellAt(p.x, p.y), spots = [];
+  for (let dc = -BURROW_MOUSE_TEST.maxDistance; dc <= BURROW_MOUSE_TEST.maxDistance; dc++) {
+    for (let dr = -BURROW_MOUSE_TEST.maxDistance; dr <= BURROW_MOUSE_TEST.maxDistance; dr++) {
+      const c = pc + dc, r = pr + dr, [x, y] = center(c, r), distance = Math.hypot(x - p.x, y - p.y) / CELL;
+      if (distance < BURROW_MOUSE_TEST.minDistance || distance > BURROW_MOUSE_TEST.maxDistance || !floor.has(c + ',' + r)) continue;
+      if (enemyBlocked(x, y) || !visible(x, y) || (typeof insideWarningLine === 'function' && insideWarningLine(x, y))) continue;
+      if (G.towers.some(t => t.hp > 0 && Math.hypot(t.x - x, t.y - y) < CELL * 1.5)
+        || G.enemies.some(e => !e.dead && e.hp > 0 && Math.hypot(e.x - x, e.y - y) < CELL * 1.5)) continue;
+      // 優先營地前方的空地，避免生在營地後方被營地圖／基地血條遮住。
+      spots.push({ x, y, distance, score: distance + (y < p.y + CELL ? BURROW_MOUSE_TEST.maxDistance * 2 : 0) });
+    }
+  }
+  spots.sort((a, b) => a.score - b.score);
+  if (!spots.length) {
+    if (!G.burrowMouseTestSpawnHint && typeof systemNotice === 'function') {
+      systemNotice('老鼠測試：請走出營地到附近亮處，老鼠會在空地出現。'); G.burrowMouseTestSpawnHint = true;
+    }
+    return;
+  }
+  G.enemies.push(createMonster(spec, spots[0].x, spots[0].y));
+  G.burrowMouseTestSpawnDone = true;
+  // 先讓玩家看清楚本體，避免還在營地內時就被隊員擊倒。
+  if (typeof setPaused === 'function') setPaused(true);
+  if (typeof systemNotice === 'function') systemNotice('版權老鼠已在你附近出現，已暫停；按 P 開始測試。');
+}
 function burrowingMouseDefinition(id = 'burrowing_mouse') {
   return { id, name: '花蓮版權老鼠', sprite: BURROW_MOUSE_ART.normal,
     hp: 180, speed: 65, playerDamage: 14, sentryDamage: 18, buildingDamage: 35,
@@ -185,6 +234,7 @@ function burrowingMouseDeath(e) {
   (G.burrowDeaths || (G.burrowDeaths = [])).push({ x: e.x, y: e.y, w: e.drawWidth || 110, h: e.drawHeight || 90, art: burrowMouseArt(e), age: 0 });
 }
 function updateBurrowingMouseFx(dt) {
+  updateBurrowMouseTestSpawn(dt);
   if (G.burrowHoles) G.burrowHoles = G.burrowHoles.filter(h => (h.age += dt) < h.lifetime);
   if (G.burrowDeaths) G.burrowDeaths = G.burrowDeaths.filter(d => (d.age += dt) < 1.1);
 }
