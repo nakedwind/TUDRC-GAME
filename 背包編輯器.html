@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>背包編輯器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  :root { color-scheme:dark; font-family:system-ui,'Microsoft JhengHei',sans-serif; background:#10151c; color:#e8edf5 }
+  * { box-sizing:border-box } body { margin:0 auto; padding:18px 20px; max-width:1800px }
+  h1 { font-size:24px; margin:0 0 4px } h2 { font-size:15px; margin:0 0 10px } h3 { font-size:12px; margin:14px 0 6px; color:#9fb1c2 }
+  p { color:#aabacc; line-height:1.5; margin:0 } a { color:#9bd2ff } code { color:#ffd9a8 }
+  .top { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:12px }
+  .nav { display:flex; gap:14px; padding-top:7px; white-space:nowrap }
+  .layout { display:grid; grid-template-columns:230px minmax(0,1fr) 290px; gap:12px; align-items:start }
+  .panel { background:#1b2530; border:1px solid #3a4d60; border-radius:13px; padding:14px; min-width:0 }
+  button { cursor:pointer; font:inherit; color:#eaf4ff; background:#2a3c50; border:1px solid #57718b; border-radius:8px; padding:6px 10px }
+  button:hover { background:#345169 } button.primary { background:#236b79; border-color:#69b9c1; font-weight:700 } button.on { background:#245668; border-color:#7fd7da }
+  button.danger { background:#4a2a30; border-color:#a0606a }
+  button:disabled { opacity:.45; cursor:default }
+  button.small { padding:3px 7px; font-size:12px; border-radius:6px }
+  input[type=number], input[type=text], textarea { width:100%; background:#101923; border:1px solid #536b80; border-radius:7px; color:#edf5ff; font:inherit; padding:5px 7px }
+  textarea { resize:vertical; min-height:90px; line-height:1.5 }
+  input::placeholder, textarea::placeholder { color:#5f7386 }
+  #list { max-height:calc(100vh - 230px); overflow:auto; padding-right:4px; scrollbar-width:thin }
+  .list { display:grid; gap:4px }
+  .list button { display:flex; align-items:center; gap:6px; text-align:left; background:#15202b; border-color:#334a5d; width:100%; padding:6px 8px; font-size:13px }
+  .list button.on { background:#224358; border-color:#82cbe2 }
+  .list button em { margin-left:auto; font-style:normal; font-size:11px; color:#8be0c2; white-space:nowrap }
+  details > summary { cursor:pointer; font-size:12px; margin:14px 0 6px; color:#9fb1c2; font-weight:700 }
+  .stage-wrap { position:relative; overflow:hidden; border:1px solid #42586e; border-radius:10px; background:#05080b }
+  #game { display:block; border:0; transform-origin:0 0; background:#000 }
+  .modes { display:flex; gap:6px; margin-bottom:8px; flex-wrap:wrap; align-items:center }
+  .modes span { color:#9fb1c2; font-size:12px; margin-left:6px }
+  .sel-name { font-size:16px; font-weight:700; color:#ffe3a1 }
+  .sel-sub { font-size:12px; color:#9fb1c2; margin-top:2px }
+  .sec { margin-top:10px; padding:9px; border:1px solid #2f4152; border-radius:9px; background:#15202b }
+  .sec-head { display:flex; align-items:center; gap:6px; margin-bottom:6px; font-size:12px; color:#dfe8ef; font-weight:700 }
+  .sec-head .sp { flex:1 }
+  .two { display:grid; grid-template-columns:1fr 1fr; gap:6px }
+  .two label, .one label { display:grid; gap:2px; font-size:11px; color:#9fb1c2 }
+  .btns { display:flex; gap:5px; flex-wrap:wrap; margin-top:6px }
+  .note { font-size:12px; color:#9eb2c4; line-height:1.6 }
+  .orig { font-size:11px; color:#7d93a8; margin-top:4px; line-height:1.5; white-space:pre-wrap; word-break:break-all }
+  .actions { display:grid; gap:8px; margin-top:16px }
+  #props { max-height:calc(100vh - 340px); overflow:auto; padding-right:4px; scrollbar-width:thin }
+  #status { min-height:20px; margin-top:10px; font-size:12px; line-height:1.6; color:#8be0c2; white-space:pre-line }
+  #status.err { color:#ff9c9c }
+  .hint { margin-top:10px; font-size:12px; color:#9eb2c4; line-height:1.7 }
+  .empty { color:#7d8996; font-size:13px }
+  kbd { padding:0 4px; border:1px solid #57718b; border-radius:4px; font-size:11px }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>🎒 背包編輯器</h1>
+      <p>調整背包裡每個區域、圖片、文字、按鈕的位置、大小、字級，也可以改字。在中間的背包畫面<b>點一下選取、按住拖曳移動、拖右下角的小方塊改大小</b>，右邊可以微調數字。</p>
+      <p>改好按「💾 存到專案」（寫進 <code>data/backpack-layout.js</code>、<code>data/item-texts.js</code>），遊戲重新整理就會套用。</p>
+    </div>
+    <div class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="UI編輯器.html">🖥️ UI編輯器</a></div>
+  </div>
+  <div class="layout">
+    <section class="panel">
+      <h2>可以調整的東西</h2>
+      <div id="list"></div>
+      <div class="hint">綠字＝調整過。<br>「整個面板」也可以在畫面上點它的空白處選到。</div>
+    </section>
+    <section class="panel">
+      <div class="modes">
+        <button type="button" data-mode="edit" class="on">🖱️ 編輯模式</button>
+        <button type="button" data-mode="play">🎮 試玩模式</button>
+        <button type="button" id="undoBtn" title="Ctrl+Z">↶ 上一步</button>
+        <button type="button" id="redoBtn" title="Ctrl+Y">↷ 下一步</button>
+        <span id="modeHint">點一下選取、拖曳移動；點道具格會順便換下面的說明</span>
+      </div>
+      <div class="stage-wrap" id="stageWrap"><iframe id="game" src="塔防原型.html?bagedit=1" title="背包畫面預覽"></iframe></div>
+    </section>
+    <section class="panel">
+      <h2>調整</h2>
+      <div id="props"><p class="empty">先在左邊清單或背包畫面上選一個東西</p></div>
+      <div class="actions">
+        <button type="button" class="primary" id="saveBtn">💾 存到專案</button>
+        <button type="button" id="downloadBtn">⬇ 下載兩個設定檔</button>
+        <button type="button" class="danger" id="resetAll">全部恢復預設</button>
+      </div>
+      <div id="status"></div>
+      <div class="hint">選取後可以用方向鍵微調位置（按住 <kbd>Shift</kbd>＝一次 10px）。<br><kbd>Ctrl</kbd>+<kbd>Z</kbd>＝上一步、<kbd>Ctrl</kbd>+<kbd>Y</kbd>＝下一步。<br>修改會自動暫存在這台瀏覽器，存到專案後才會套用到遊戲。</div>
+    </section>
+  </div>
+  <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 每次都讀最新的設定 -->
+  <script src="js/draft-sync.js"></script>
+  <script src="js/backpack-layout.js?v=bagedit2-20261023"></script>   <!-- 可以調整的東西清單（BACKPACK_PARTS），跟遊戲共用 -->
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js"></script>
+  <script src="js/backpack-editor.js?v=2"></script>
+  <script src="js/editor-nav.js?v=nav3-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+</body>
+</html>
