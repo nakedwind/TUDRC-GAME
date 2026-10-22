@@ -19,20 +19,144 @@ const TPAD_ICON = (() => {
 })();
 const tpadNeed = name => typeof window[name] === 'function' || (() => { try { return typeof eval(name) === 'function'; } catch (_) { return false; } })();
 const TPAD_APPS = [
-  { id: 'squad',    name: 'Y102隊員', color: '#3f7fd8', icon: TPAD_ICON.squad,    open: () => openSquadPanel(),       isOpen: () => typeof isSquadPanelOpen === 'function' && isSquadPanelOpen() },
+  { id: 'squad',    name: 'Y102隊員', color: '#3f7fd8', icon: TPAD_ICON.squad,    view: el => renderTPadSquadApp(el) },
   { id: 'team',     name: '出勤配置', color: '#2f9e8f', icon: TPAD_ICON.team,     open: () => openTeamPanel(),        isOpen: () => typeof isTeamPanelOpen === 'function' && isTeamPanelOpen(), baseOnly: true },
   { id: 'mission',  name: '任務',     color: '#d9893b', icon: TPAD_ICON.mission,  view: el => renderMissionApp(el) },   // js/tpad-missions.js（出擊、承接委託還是在作戰桌）
   { id: 'achieve',  name: '成就',     color: '#c9a227', icon: TPAD_ICON.achieve,  view: el => renderAchievementApp(el) },   // view＝直接在 T-Pad 螢幕裡打開
-  { id: 'bestiary', name: '怪物圖鑑', color: '#8a4fd1', icon: TPAD_ICON.bestiary, open: () => openBestiary(),         isOpen: () => typeof bestiaryOpen !== 'undefined' && bestiaryOpen },
-  { id: 'settings', name: '設定',     color: '#6b7a8c', icon: TPAD_ICON.settings, open: () => openSettings(),         isOpen: () => typeof settingsOpen !== 'undefined' && settingsOpen },
+  { id: 'bestiary', name: '怪物圖鑑', color: '#8a4fd1', icon: TPAD_ICON.bestiary, view: el => renderBestiaryApp(el) },
+  { id: 'settings', name: '設定',     color: '#6b7a8c', icon: TPAD_ICON.settings, view: el => renderTPadSettingsApp(el) },
   { id: 'map',      name: '地圖',     color: '#3e8c4f', icon: TPAD_ICON.map,      soon: true },
 ];
+let tpadEscDirect = false;   // 按 Esc 直接打開設定：在設定裡再按 Esc＝整個關掉
 let tpadOpen = false, tpadEl = null, tpadLaunched = null, tpadClock = null, tpadView = null;   // tpadView：螢幕裡正在開的 App
+// 共用原本的設定控制項，讓音量、存檔與頁籤的事件在 T-Pad 中照常運作。
+function renderTPadSettingsApp(el) {
+  const body = settingsMenu.querySelector('.settings-body');
+  renderSettings();
+  el.classList.add('tpad-settings-app');
+  el.appendChild(body);
+}
+function restoreTPadSettingsApp() {
+  const body = tpadEl?.querySelector('.tpad-settings-app > .settings-body');
+  if (body) settingsMenu.querySelector('.settings-card').appendChild(body);
+  tpadEl?.querySelector('.tpad-appbody')?.classList.remove('tpad-settings-app');
+}
+let tpadSquadSelected = null;
+function tpadSquadSkills(type) {
+  const spec = TYPES[type], safe = typeof MAP_SAFE !== 'undefined' && MAP_SAFE;
+  if (!spec || !SKILL_TREES[type]) return '<p class="tpad-roster-empty">這名隊員的技能樹尚未開放。</p>';
+  const owned = (training.skills[type] || []).length;
+  const fragmentIcon = '<img class="tpad-fragment-icon" src="images/碎片鑰匙/anomalous-shard-ground-glow.png" alt="異質碎片">';
+  const board = skillTreeHtml(type, { coin: fragmentIcon });   // 技能圖＋說明＋培養按鈕（js/skills.js）
+  return '<section class="tpad-roster-skills"><div class="tpad-roster-skills-head"><span class="tpad-roster-skills-progress">已學 ' + owned + ' / ' + SKILL_TOTAL + '</span><h3>技能樹</h3>' +
+    '<div class="tpad-roster-skills-actions">' +
+    (owned ? '<button type="button" class="skill-reset" data-squad-reset>重置技能</button>' : '') + '</div></div>' +
+    '<div class="tpad-skill-tree">' + board + '</div></section>';
+}
+function renderTPadSquadView(el, keepScroll = false) {
+  const leftScroll = keepScroll ? el.querySelector('.tpad-roster-list')?.scrollTop || 0 : 0;
+  const rightScroll = keepScroll ? el.querySelector('.tpad-roster-detail')?.scrollTop || 0 : 0;
+  const safe = typeof MAP_SAFE !== 'undefined' && MAP_SAFE;
+  const rosterPriority = ['red', 'avaren', 'theonie', 'amber'];
+  const members = squadMembers().sort((a, b) => {
+    const aRank = rosterPriority.indexOf(a.type), bRank = rosterPriority.indexOf(b.type);
+    return (aRank < 0 ? rosterPriority.length : aRank) - (bRank < 0 ? rosterPriority.length : bRank);
+  });
+  if (!members.some(actor => actor.type === tpadSquadSelected)) tpadSquadSelected = members[0]?.type || null;
+  const selected = members.find(actor => actor.type === tpadSquadSelected);
+  el.classList.toggle('squad-safe', safe);
+  const list = members.map(actor => {
+    const spec = TYPES[actor.type] || actor.profile, name = spec?.name || actor.type;
+    const status = memberCondition(actor, safe);
+    const role = actor.noncombat ? (actor.type === 'ball' ? '搜救犬' : '支援') : (spec.guide ? '嚮導' : '哨兵');
+    const roleIcon = actor.noncombat ? '' : roleIconHtml(spec);
+    return '<button type="button" class="tpad-roster-member' + (actor.type === tpadSquadSelected ? ' selected' : '') + '" data-squad-member="' + actor.type + '" aria-pressed="' + (actor.type === tpadSquadSelected) + '">' +
+      '<span class="tpad-roster-avatar" data-char="' + actor.type + '"><img src="' + memberPortraitPath(spec) + '" alt=""></span>' +
+      '<span class="tpad-roster-info"><span class="tpad-roster-name-line"><b>' + name + '</b>' + roleIcon + '<span class="tpad-roster-role-label">' + role + '</span></span>' +
+      '<small>' + status.text + '</small></span></button>';
+  }).join('');
+  const detail = selected ? (selected.noncombat ? supportCard(selected) + '<p class="tpad-roster-empty">支援人員沒有戰鬥數值或技能樹。</p>' : squadCard(selected, safe) + tpadSquadSkills(selected.type)) : '<p class="tpad-roster-empty">本次任務沒有攜帶隊員。</p>';
+  el.innerHTML = '<div class="tpad-roster"><aside class="tpad-roster-side"><div class="tpad-roster-side-head"><small>Y102 RESPONSE UNIT</small><b>隊員名單</b><span>' + members.length + ' 人</span></div>' +
+    '<div class="tpad-roster-list">' + list + '</div></aside><main class="tpad-roster-detail">' + detail + '</main></div>';
+  // 能力留在姓名旁，特性則作為數值列最右側的欄位。
+  const card = el.querySelector('.tpad-roster-detail .squad-card-combat');
+  if (card) {
+    const head = card.querySelector('.squad-member-head');
+    const status = head?.querySelector('.member-condition');
+    const impression = card.querySelector('.captain-impression-button');
+    if (head && status && impression) {
+      const summary = head.firstElementChild;
+      const ability = summary?.querySelector('span');
+      const traitRow = card.querySelector('.squad-stats .wide');
+      if (summary && ability && traitRow) {
+        summary.classList.add('tpad-member-summary');
+        ability.classList.add('tpad-member-ability');
+        const meta = document.createElement('span');
+        meta.className = 'tpad-member-meta';
+        meta.appendChild(ability);
+        summary.appendChild(meta);
+        const bars = card.querySelector('.squad-bars');
+        if (bars) {
+          const barsWrap = document.createElement('div');
+          barsWrap.className = 'tpad-member-bars';
+          barsWrap.appendChild(bars);
+          summary.appendChild(barsWrap);
+        }
+        traitRow.classList.add('tpad-member-trait-stat');
+      }
+      const actions = document.createElement('div');
+      actions.className = 'tpad-member-head-actions';
+      actions.append(status, impression);
+      head.appendChild(actions);
+      card.querySelector('.squad-card-actions')?.remove();
+    }
+  }
+  el.querySelector('.tpad-roster-list').scrollTop = leftScroll;
+  el.querySelector('.tpad-roster-detail').scrollTop = rightScroll;
+}
+function renderTPadSquadApp(el) {
+  ensureTeamUI();
+  el.classList.add('tpad-squad-app');
+  if (!el._squadBound) {
+    el._squadBound = true;
+    el.addEventListener('click', e => {
+      if (tpadView !== 'squad') return;
+      const member = e.target.closest('[data-squad-member]');
+      if (member) {
+        const listScroll = el.querySelector('.tpad-roster-list')?.scrollTop || 0;
+        tpadSquadSelected = member.dataset.squadMember;
+        renderTPadSquadView(el);
+        el.querySelector('.tpad-roster-list').scrollTop = listScroll;
+        if (typeof sfx === 'function') sfx('switch');
+        return;
+      }
+      const skillHit = typeof handleSkillTreeClick === 'function' ? handleSkillTreeClick(tpadSquadSelected, e.target) : null;   // 點技能圖示＝看說明、按培養＝學（js/skills.js）
+      if (skillHit) { if (skillHit !== 'fail') renderTPadSquadView(el, true); return; }
+      if (e.target.closest('[data-squad-reset]')) {
+        if (!confirm('重置 ' + TYPES[tpadSquadSelected].name + ' 的技能？學技能花掉的碎片會全部退回。')) return;
+        const refund = resetSkills(tpadSquadSelected);
+        if (typeof systemNotice === 'function') systemNotice('已重置技能，退回 ◆ ' + refund);
+        if (typeof sfx === 'function') sfx('switch');
+        renderTPadSquadView(el, true);
+        return;
+      }
+      const impression = e.target.closest('[data-impression]');
+      if (impression) openCaptainImpression(impression.dataset.impression);
+    });
+  }
+  renderTPadSquadView(el);
+}
+function restoreTPadSquadApp() {
+  if (typeof closeSkillTree === 'function') closeSkillTree();
+  if (typeof closeCaptainImpression === 'function') closeCaptainImpression();
+  const body = tpadEl?.querySelector('.tpad-appbody');
+  body?.classList.remove('tpad-squad-app', 'squad-safe');
+}
 function ensureTPad() {
   if (tpadEl) return;
   tpadEl = document.createElement('div'); tpadEl.id = 'tpad'; tpadEl.className = 'hidden';
   tpadEl.innerHTML = '<div class="tpad-device" role="dialog" aria-modal="true" aria-label="T-Pad"><div class="tpad-cam"></div><div class="tpad-screen">' +
-    '<div class="tpad-status"><b>Y102 T-Pad</b><span class="tpad-time"></span><span class="tpad-batt"><i></i>應變中心網路</span></div>' +
+    '<div class="tpad-status"><b>Y102 T-Pad</b><span class="tpad-time"></span><span class="tpad-batt"><i></i><svg class="tpad-signal" viewBox="0 0 22 16" role="img" aria-label="網路訊號"><path d="M2 14h2v-3H2zM7 14h2V8H7zM12 14h2V5h-2zM17 14h2V2h-2z" fill="currentColor"/><line x1="1" y1="2" x2="21" y2="15"/></svg><span class="tpad-network-label">應變中心網路</span></span></div>' +
     '<div class="tpad-home"><div class="tpad-widget"></div><div class="tpad-apps"></div></div>' +
     '<div class="tpad-appview" hidden><header class="tpad-apphead"><button type="button" class="tpad-back">‹ 主畫面</button><b class="tpad-apptitle"></b><span></span></header><div class="tpad-appbody"></div></div>' +
     '<div class="tpad-toast" hidden></div><button type="button" class="tpad-home-btn" aria-label="關閉 T-Pad（Esc）"></button></div></div>';
@@ -60,6 +184,11 @@ function updateTPadClock() {
   if (!tpadEl) return;
   const d = new Date(), z = n => String(n).padStart(2, '0');
   tpadEl.querySelector('.tpad-time').textContent = z(d.getHours()) + ':' + z(d.getMinutes());
+  const safe = typeof MAP_SAFE !== 'undefined' && MAP_SAFE;
+  const connection = tpadEl.querySelector('.tpad-batt');
+  connection.classList.toggle('offline', !safe);
+  connection.querySelector('.tpad-network-label').textContent = safe ? '應變中心網路' : '無訊號';
+  connection.querySelector('.tpad-signal').setAttribute('aria-label', safe ? '網路訊號' : '無網路訊號');
 }
 function openTPad() {
   if (typeof G === 'undefined' || !G || !G.player || G.over) return;
@@ -71,30 +200,63 @@ function openTPad() {
   if (typeof sfx === 'function') sfx('menu');
   document.getElementById('hudTpadButton')?.classList.add('active');
 }
+// Esc：打開 T-Pad 並直接進設定；打不開（開始畫面）回傳 false
+function openTPadSettings() {
+  if (!tpadOpen) openTPad(); if (!tpadOpen) return false;
+  if (tpadView !== 'settings') launchTPadApp('settings');
+  tpadEscDirect = true; return true;
+}
 function closeTPad(silent = false) {
   if (!tpadOpen) return;
+  flushTPadClosing();
+  if (tpadView === 'settings') restoreTPadSettingsApp();
+  if (tpadView === 'squad') restoreTPadSquadApp();
+  tpadEl.querySelector('.tpad-appbody').replaceChildren();
+  tpadView = null;
   tpadOpen = false; tpadEl.classList.add('hidden'); clearInterval(tpadClock);
   if (!silent && typeof sfx === 'function') sfx('switch');
   document.getElementById('hudTpadButton')?.classList.remove('active');
 }
 // 螢幕裡的 App：打開（從圖示放大出來）／回主畫面
 function showTPadApp(a) {
-  tpadView = a.id;
+  flushTPadClosing();
   const view = tpadEl.querySelector('.tpad-appview'), home = tpadEl.querySelector('.tpad-home');
+  if (tpadView === 'settings') restoreTPadSettingsApp();
+  if (tpadView === 'squad') restoreTPadSquadApp();
+  const body = view.querySelector('.tpad-appbody');
+  body.replaceChildren();
+  tpadView = a.id;
   view.querySelector('.tpad-apptitle').textContent = a.name;
   view.style.setProperty('--app', a.color);
   const ico = tpadEl.querySelector('[data-app="' + a.id + '"] .tpad-ico'), scr = tpadEl.querySelector('.tpad-screen');
   if (ico) { const r = ico.getBoundingClientRect(), b = scr.getBoundingClientRect(); view.style.transformOrigin = (r.left + r.width / 2 - b.left) + 'px ' + (r.top + r.height / 2 - b.top) + 'px'; }
-  a.view(view.querySelector('.tpad-appbody'));
-  home.hidden = true; view.hidden = false; view.classList.remove('opening'); void view.offsetWidth; view.classList.add('opening');
+  a.view(body);
+  home.hidden = true; view.hidden = false; view.classList.remove('opening'); view.classList.add('pre-open'); void view.offsetWidth;   // 先排版（第一次打開比較花時間）
+  requestAnimationFrame(() => { view.classList.remove('pre-open'); view.classList.add('opening'); });   // 下一格才開始動畫，動畫才不會一開始就卡一下
   if (typeof sfx === 'function') sfx('blip');
 }
+// 回主畫面：App 縮回它的圖示、主畫面從後面浮出來（像 iPad）；silent＝不播音效也不播動畫（關掉／重開 T-Pad 時）
 function showTPadHome(silent = false) {
   if (!tpadEl) return;
-  const was = tpadView; tpadView = null;
-  tpadEl.querySelector('.tpad-appview').hidden = true; tpadEl.querySelector('.tpad-home').hidden = false;
-  if (was && !silent && typeof sfx === 'function') sfx('blip');
+  flushTPadClosing();
+  const was = tpadView; tpadView = null; tpadEscDirect = false;
+  const view = tpadEl.querySelector('.tpad-appview'), home = tpadEl.querySelector('.tpad-home');
+  const finish = () => {
+    view._finish = null; clearTimeout(view._t);
+    if (was === 'settings') restoreTPadSettingsApp();
+    if (was === 'squad') restoreTPadSquadApp();
+    view.querySelector('.tpad-appbody').replaceChildren();
+    view.hidden = true; view.classList.remove('opening', 'closing');
+  };
+  home.hidden = false;
+  if (!was || silent) { finish(); return; }
+  view.classList.remove('opening'); void view.offsetWidth; view.classList.add('closing');
+  home.classList.remove('returning'); void home.offsetWidth; home.classList.add('returning');
+  view._finish = finish; view._t = setTimeout(finish, 260);
+  if (typeof sfx === 'function') sfx('blip');
 }
+// 縮回去的動畫還沒播完就又打開別的 App／關掉 T-Pad：直接收尾
+function flushTPadClosing() { const view = tpadEl && tpadEl.querySelector('.tpad-appview'); if (view && view._finish) view._finish(); }
 function tpadToast(msg) {
   const t = tpadEl.querySelector('.tpad-toast'); t.textContent = msg; t.hidden = false;
   clearTimeout(t._h); t._h = setTimeout(() => { t.hidden = true; }, 1600);
@@ -120,7 +282,15 @@ window.addEventListener('keydown', e => {
   const k = (e.key || '').toLowerCase();
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (tpadOpen) {
-    if (k === 'escape' && tpadView) showTPadHome();   // App 裡按 Esc＝回主畫面
+    if (k === 'escape' && tpadView === 'squad') {
+      const impression = document.getElementById('captainImpressionPanel');
+      const skills = document.getElementById('skillTreePanel');
+      if (impression && !impression.classList.contains('hidden')) { closeCaptainImpression(); e.preventDefault(); e.stopImmediatePropagation(); return; }
+      if (skills && !skills.classList.contains('hidden')) { closeSkillTree(); e.preventDefault(); e.stopImmediatePropagation(); return; }
+    }
+    if (tpadView === 'bestiary' && (k === 'arrowleft' || k === 'arrowright')) bestiaryAppStep(tpadEl.querySelector('.tpad-appbody'), k === 'arrowright' ? 1 : -1);   // 怪物圖鑑：←→ 換一隻
+    else if (k === 'escape' && tpadView === 'settings' && tpadEscDirect) closeTPad();   // Esc 打開的設定：再按 Esc 直接關掉
+    else if (k === 'escape' && tpadView) showTPadHome();   // App 裡按 Esc＝回主畫面
     else if (k === 'escape' || (k === 't' && !e.repeat)) closeTPad();
     e.preventDefault(); e.stopImmediatePropagation(); return;
   }
@@ -131,3 +301,36 @@ window.addEventListener('keydown', e => {
   e.preventDefault(); e.stopImmediatePropagation(); tpadLaunched = null; openTPad();
 }, true);
 document.getElementById('hudTpadButton')?.addEventListener('click', () => tpadOpen ? closeTPad() : openTPad());
+
+// ---- 先把隊員畫面要用的圖片載好（第一次打開隊員畫面就不會卡一下）----
+// 遊戲開好後趁瀏覽器有空時慢慢載：所有角色的正面頭像、異質碎片圖示、哨兵／嚮導圖示；decode()＝順便先解碼，顯示時不用再算
+const tpadPreloaded = [];   // 留著參考，圖片才不會被瀏覽器丟掉
+function preloadTPadImages() {
+  const srcs = new Set(['images/碎片鑰匙/anomalous-shard-ground-glow.png', 'images/ui/sentinel-swords.svg', 'images/ui/guide-shield-plus.svg']);
+  for (const c of Object.values(typeof CHARACTERS !== 'undefined' ? CHARACTERS : {})) if (c && c.sprite && typeof memberPortraitPath === 'function') srcs.add(memberPortraitPath(c));
+  const list = [...srcs];
+  const next = () => {
+    const src = list.shift(); if (!src) { idle(prewarmTPadSquad); return; }   // 圖片都載完：再把隊員畫面先預排一次
+    const img = new Image(); img.src = src; tpadPreloaded.push(img);
+    (img.decode ? img.decode() : Promise.resolve()).catch(() => {}).finally(() => idle(next));
+  };
+  const idle = fn => (window.requestIdleCallback ? requestIdleCallback(fn, { timeout: 1500 }) : setTimeout(fn, 30));
+  idle(next);
+}
+if (document.readyState === 'complete') setTimeout(preloadTPadImages, 1500); else window.addEventListener('load', () => setTimeout(preloadTPadImages, 1500));
+
+// 預排隊員畫面：瀏覽器第一次替這個畫面排版、套樣式比較慢（約 20～40 毫秒），趁空閒在看不見的地方先做一次，之後真的打開就順了
+let tpadPrewarmed = false;
+function prewarmTPadSquad() {
+  if (tpadPrewarmed || tpadOpen || typeof G === 'undefined' || !G || !G.player) { if (!tpadPrewarmed) setTimeout(prewarmTPadSquad, 3000); return; }
+  const a = TPAD_APPS.find(x => x.id === 'squad'); if (!a || !a.view) return;
+  tpadPrewarmed = true;
+  try {
+    ensureTPad();
+    const view = tpadEl.querySelector('.tpad-appview'), home = tpadEl.querySelector('.tpad-home'), body = view.querySelector('.tpad-appbody');
+    tpadEl.style.visibility = 'hidden'; tpadEl.classList.remove('hidden'); home.hidden = true; view.hidden = false;
+    a.view(body); void body.offsetHeight;   // 排版一次（看不見）
+    body.replaceChildren(); restoreTPadSquadApp();
+    view.hidden = true; home.hidden = false; tpadEl.classList.add('hidden'); tpadEl.style.visibility = '';
+  } catch (e) { if (tpadEl) { tpadEl.classList.add('hidden'); tpadEl.style.visibility = ''; } }
+}

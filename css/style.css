@@ -1271,7 +1271,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .set-btn:hover:not(:disabled) { border-color:#8fd3ff; background:rgba(143,211,255,.16); }
 .set-btn:disabled { opacity:.45; cursor:default; }
 .set-btn.primary { border-color:#e9bd62; background:linear-gradient(180deg,#f7d886,#e6b04a); color:#3b2304; box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
-.set-btn.primary:hover { filter:brightness(1.07); } .set-btn.primary:active { transform:translateY(2px); box-shadow:none; }
+.set-btn.primary:hover:not(:disabled) { border-color:#ffd98a; background:linear-gradient(180deg,#f7d886,#e6b04a); filter:brightness(1.08); }   /* 金色按鈕移上去：維持金色（不要被上面一般按鈕的藍色底蓋掉） */ .set-btn.primary:active { transform:translateY(2px); box-shadow:none; }
 .set-slider { display:grid; grid-template-columns:64px minmax(0,1fr) 30px; align-items:center; gap:10px; color:#dfe8ef; font-size:13px; }
 .set-slider output { color:#ffd479; font-weight:700; font-variant-numeric:tabular-nums; text-align:right; }
 .set-slider input { --fill:50%; width:100%; height:6px; margin:0; border-radius:9px; background:linear-gradient(90deg,#8fd3ff var(--fill),rgba(255,255,255,.12) var(--fill)); cursor:pointer; -webkit-appearance:none; appearance:none; }
@@ -1301,6 +1301,12 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .settings-page[hidden] { display:none; }
 .settings-content .set-group { border:0; background:none; padding:0; gap:16px; }
 .settings-content .set-group h3 { font-size:16px; letter-spacing:0; color:#dbe8f2; }
+.save-overview { display:flex; align-items:center; justify-content:space-between; gap:12px; min-height:46px; padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,.1); }
+.save-heading { display:flex; align-items:center; gap:12px; min-width:0; }
+#settings-save .save-heading h3 { flex:none; margin:0; padding:0; border:0; }
+.save-heading .set-hint { margin:0; color:#9caab8; white-space:nowrap; }
+#saveInfo { color:#dfe8ef; font-size:13px; text-align:right; white-space:nowrap; }
+.save-actions { display:flex; flex-wrap:wrap; align-items:center; justify-content:flex-end; gap:8px; }
 .save-slots { display:flex; flex-direction:column; gap:9px; }
 .save-slot { display:flex; align-items:center; gap:8px; padding:12px; border:1px solid rgba(143,211,255,.16); border-radius:10px; background:rgba(0,0,0,.18); }
 .save-slot-portrait { flex:0 0 52px; width:52px; height:52px; overflow:hidden; border:1px solid rgba(143,211,255,.22); border-radius:10px; background:rgba(143,211,255,.06); }
@@ -2659,11 +2665,11 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #hudTpadButton .tpad-button-icon { width: 22px; height: 22px; margin-top: 3px; }
 #hudTpadButton kbd { position: absolute; top: 2px; right: 2px; min-width: 15px; padding: 1px 3px; border: 1px solid rgba(255,255,255,.22); border-bottom-width: 2px; border-radius: 4px; background: #10161d; color: #aab6c2; font: 700 9px/1.2 Consolas, monospace; text-align: center; }
 
-#tpad { position: absolute; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; background: rgba(4,8,12,.62); backdrop-filter: blur(3px); animation: tpad-fade .18s ease-out; }
+#tpad { position: absolute; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; container-type:size; background: rgba(4,8,12,.62); backdrop-filter: blur(3px); animation: tpad-fade .18s ease-out; }
 #tpad.hidden { display: none; }
 @keyframes tpad-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes tpad-rise { from { transform: translateY(26px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
-.tpad-device { position: relative; box-sizing: content-box; width: min(740px, 82%); aspect-ratio: 2420 / 1668;   /* iPad Pro 11 吋的螢幕比例（不要加 max-height，會把比例壓扁） */ padding: 22px; border-radius: 34px; background: linear-gradient(145deg, #3a4048, #16191d 60%, #2a2f35); box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.08), inset 0 0 0 9px #0b0d10; animation: tpad-rise .22s cubic-bezier(.2,.9,.3,1.1); }
+.tpad-device { position: relative; box-sizing: content-box; width: min(888px, calc(100cqw - 56px), calc(145cqh - 82px)); aspect-ratio: 2420 / 1668;   /* 原本的 1.2 倍；畫面較小時依可用寬高縮小，不壓扁比例 */ padding: 26px; border-radius: 40px; background: linear-gradient(145deg, #3a4048, #16191d 60%, #2a2f35); box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.08), inset 0 0 0 9px #0b0d10; animation: tpad-rise .22s cubic-bezier(.2,.9,.3,1.1); }
 .tpad-cam { position: absolute; top: 9px; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%; background: #20262d; box-shadow: inset 0 0 0 1.5px #3a4651; }
 .tpad-screen { position: relative; height: 100%; overflow: hidden; border-radius: 16px; color: #eef6ff; font-family: "Microsoft JhengHei", sans-serif;
   background: radial-gradient(120% 90% at 15% 0%, rgba(255,150,80,.38), transparent 55%), radial-gradient(90% 80% at 100% 100%, rgba(70,140,220,.42), transparent 60%), linear-gradient(160deg, #1d2a3a, #101722); }
@@ -2672,6 +2678,11 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .tpad-time { margin: 0 auto; font-weight: 700; font-variant-numeric: tabular-nums; }
 .tpad-batt { display: flex; align-items: center; gap: 6px; }
 .tpad-batt i { width: 20px; height: 10px; border: 1.5px solid currentColor; border-radius: 3px; background: linear-gradient(90deg, #7ee08a 78%, transparent 78%); background-clip: content-box; padding: 1px; }
+.tpad-signal { width:20px; height:16px; flex:none; color:#92d9ff; }
+.tpad-signal line { display:none; stroke:#ff9292; stroke-width:2.5; stroke-linecap:round; }
+.tpad-batt.offline .tpad-signal { color:#788591; }
+.tpad-batt.offline .tpad-signal line { display:block; }
+.tpad-batt.offline .tpad-network-label { color:#ffabab; }
 .tpad-home { display: flex; flex-direction: column; gap: 18px; padding: 18px 28px 50px; height: calc(100% - 30px); box-sizing: border-box; }
 .tpad-widget { display: grid; gap: 3px; padding: 12px 16px; border-radius: 16px; background: rgba(255,255,255,.1); border: 1px solid rgba(255,255,255,.12); backdrop-filter: blur(8px); }
 .tpad-widget small { font-size: 12px; color: #ffcf9e; font-weight: 700; }
@@ -2696,11 +2707,100 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .tpad-appview[hidden] { display: none; }
 .tpad-appview.opening { animation: tpad-app-open .26s cubic-bezier(.2,.85,.25,1); }
 @keyframes tpad-app-open { from { transform: scale(.12); opacity: 0; border-radius: 40px; } to { transform: none; opacity: 1; } }
+/* 回主畫面：App 縮回圖示（transform-origin＝圖示的位置，js/tpad.js 打開時設定），主畫面從稍大、稍暗慢慢回到原位 */
+.tpad-appview.closing { pointer-events: none; animation: tpad-app-close .26s cubic-bezier(.4,0,.6,1) forwards; }
+@keyframes tpad-app-close { 0% { transform: none; opacity: 1; border-radius: 0; } 70% { opacity: .9; } 100% { transform: scale(.1); opacity: 0; border-radius: 40px; } }
+.tpad-home.returning { animation: tpad-home-return .3s cubic-bezier(.2,.85,.25,1); }
+@keyframes tpad-home-return { from { transform: scale(1.06); opacity: .35; filter: blur(2px); } to { transform: none; opacity: 1; filter: none; } }
+@media (prefers-reduced-motion: reduce) { .tpad-appview.closing, .tpad-appview.opening, .tpad-home.returning { animation-duration: .01s; } }
 .tpad-apphead { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 6px 14px; border-bottom: 1px solid rgba(255,255,255,.07); background: rgba(28,30,36,.95); }
 .tpad-apphead b { font-size: 15px; color: #f2f5f8; }
 .tpad-back { justify-self: start; padding: 4px 6px; border: 0; background: none; color: var(--app, #8fd3ff); cursor: pointer; font: 600 14px "Microsoft JhengHei", sans-serif; }
 .tpad-back:hover { filter: brightness(1.25); }
 .tpad-appbody { flex: 1; min-height: 0; padding-bottom: 24px; }
+
+/* Y102 隊員 App：左側選人、右側顯示數值與可操作的技能樹。 */
+.tpad-appbody.tpad-squad-app { padding-bottom:24px; background:#121418; }
+.tpad-roster { display:grid; grid-template-columns:200px minmax(0,1fr); width:100%; height:100%; }
+.tpad-roster-side { display:flex; flex-direction:column; min-height:0; border-right:1px solid rgba(255,255,255,.08); background:#1a1d22; }
+.tpad-roster-side-head { display:grid; gap:4px; padding:18px 14px 12px; border-bottom:1px solid rgba(255,255,255,.07); }
+.tpad-roster-side-head small { color:#86bdef; font-size:10px; font-weight:700; letter-spacing:.1em; }
+.tpad-roster-side-head b { color:#f1f7ff; font-size:17px; }
+.tpad-roster-side-head span { color:#8c9baa; font-size:11px; }
+.tpad-roster-list { flex:1; min-height:0; display:flex; flex-direction:column; gap:5px; overflow-y:auto; padding:10px 8px 16px; scrollbar-width:thin; }
+.tpad-roster-member { display:flex; align-items:center; gap:9px; width:100%; min-height:68px; padding:6px; border:1px solid transparent; border-radius:10px; background:transparent; color:#dce8f4; text-align:left; cursor:pointer; font:inherit; }
+.tpad-roster-member:hover { background:rgba(143,211,255,.09); }
+.tpad-roster-member.selected { border-color:rgba(143,211,255,.34); background:#30465b; box-shadow:inset 3px 0 #8fd3ff; }
+.tpad-roster-avatar { position:relative; display:block; width:50px; height:54px; flex:none; overflow:hidden; border-radius:7px; background:radial-gradient(circle at 50% 45%,rgba(255,255,255,.09),#111820 72%); }
+.tpad-roster-avatar img { position:absolute; left:50%; top:-6px; width:72px; height:72px; max-width:none; transform:translateX(-50%); image-rendering:pixelated; }
+.tpad-roster-avatar[data-char="ball"] img { top:50%; width:115px; height:115px; transform:translate(-27%,-56%); }
+.tpad-roster-info { display:grid; align-content:center; gap:4px; min-width:0; }
+.tpad-roster-name-line { display:flex; align-items:center; gap:4px; min-width:0; white-space:nowrap; }
+.tpad-roster-name-line b { overflow:hidden; text-overflow:ellipsis; font-size:16px; line-height:1.2; }
+.tpad-roster-name-line .role-icon { flex:none; width:14px; height:14px; margin:0; vertical-align:middle; }
+.tpad-roster-role-label { flex:none; color:#b9d4eb; font-size:13px; line-height:1.2; }
+.tpad-roster-info small { color:#a9bacb; font-size:12px; line-height:1.2; }
+.tpad-roster-detail { min-width:0; min-height:0; overflow-y:auto; padding:18px 20px 30px; scrollbar-width:thin; }
+.tpad-roster-detail .squad-card { margin:0 0 12px; padding:10px 12px; gap:5px 11px; background:#1e242d; }
+.tpad-roster-detail .squad-card-combat .squad-portrait { grid-row:1; }
+.tpad-roster-detail .squad-card-combat .squad-stats { grid-column:1 / -1; grid-row:2; }
+.tpad-roster-detail .tpad-member-summary { flex:1; min-width:0; display:grid; grid-template-columns:max-content minmax(0,1fr); align-content:start; align-items:baseline; column-gap:9px; row-gap:4px; }
+.tpad-roster-detail .tpad-member-summary strong { grid-column:1; grid-row:1; }
+.tpad-roster-detail .tpad-member-meta { grid-column:2; grid-row:1; min-width:0; display:block; line-height:1.45; }
+.tpad-roster-detail .tpad-member-meta > span { display:inline; margin-top:0; }
+.tpad-roster-detail .tpad-member-bars { grid-column:1 / -1; grid-row:2; width:min(350px,100%); min-width:0; }
+.tpad-roster-detail .tpad-member-bars .squad-bars { grid-column:auto; grid-row:auto; grid-template-columns:repeat(2,minmax(0,1fr)); gap:12px; margin-top:0; }
+.tpad-member-head-actions { flex:none; display:flex; flex-direction:column; align-items:flex-end; gap:5px; }
+.tpad-roster-detail .tpad-member-head-actions .captain-impression-button { min-height:29px; padding:4px 10px; }
+.tpad-roster-detail .squad-stats { grid-template-columns:repeat(5,minmax(0,12%)) minmax(0,1fr); margin-top:3px; gap:4px; }
+.tpad-roster-detail .squad-stats div { padding:4px 6px; }
+.tpad-roster-detail .squad-stats dt .stat-ico { width:1.45em; height:1.45em; }
+.tpad-roster-detail .squad-stats div.tpad-member-trait-stat { grid-column:6; display:block; padding:4px 7px; }
+.tpad-roster-detail .squad-stats div.tpad-member-trait-stat dd { white-space:normal; }
+.tpad-roster-detail .squad-skill-btn { display:none; }
+.tpad-roster-skills { overflow:hidden; border:1px solid rgba(255,255,255,.09); border-radius:12px; background:#1e242d; }
+.tpad-roster-skills-head { display:grid; grid-template-columns:minmax(0,1fr) auto minmax(0,1fr); align-items:center; gap:10px; height:40px; padding:3px 12px; border-bottom:1px solid rgba(255,255,255,.08); }
+.tpad-roster-skills-head h3 { margin:0; color:#f0dfbd; font-size:18px; line-height:1.2; white-space:nowrap; text-align:center; }
+.tpad-roster-skills-progress { color:#a9b8c6; font-size:12px; white-space:nowrap; }
+.tpad-roster-skills-actions { display:flex; align-items:center; justify-self:end; gap:10px; }
+.tpad-fragment-count { display:inline-flex; align-items:center; gap:2px; color:#d7b5ff; font-size:14px; font-weight:700; white-space:nowrap; }
+.tpad-fragment-icon { width:30px; height:30px; flex:none; object-fit:contain; vertical-align:-9px; }
+.tpad-roster-skills .skill-node em .tpad-fragment-icon { width:20px; height:20px; vertical-align:-5px; }
+.tpad-roster-skills .skill-branches { overflow:visible; padding:16px; }
+.tpad-roster-empty { padding:24px 18px; border:1px dashed rgba(143,211,255,.3); border-radius:10px; color:#aab8c5; text-align:center; font-size:13px; }
+.tpad-roster-member:focus-visible, .tpad-roster-skills button:focus-visible { outline:2px solid #ffd479; outline-offset:2px; }
+#wrap:has(#tpad:not(.hidden)) #skillTreePanel:not(.hidden) { z-index:58; }
+@media (max-width:750px) {
+  .tpad-roster { grid-template-columns:145px minmax(0,1fr); }
+  .tpad-roster-member { gap:6px; padding:5px; }
+  .tpad-roster-avatar { width:36px; height:44px; }
+  .tpad-roster-avatar img { width:68px; height:68px; }
+  .tpad-roster-avatar[data-char="ball"] img { width:92px; height:92px; }
+  .tpad-roster-detail { padding:12px; }
+  .tpad-roster-detail .squad-stats { grid-template-columns:repeat(5,minmax(0,1fr)); }
+  .tpad-roster-detail .squad-stats div.tpad-member-trait-stat { grid-column:1 / -1; }
+  .tpad-roster-skills .skill-branches { grid-template-columns:1fr; }
+}
+
+/* 設定 App：沿用原本的設定功能，排版融入 T-Pad 的 App 畫面。 */
+.tpad-appbody.tpad-settings-app { padding-bottom:24px; background:#121418; }
+.tpad-settings-app > .settings-body { width:100%; height:100%; box-sizing:border-box; grid-template-columns:176px minmax(0,1fr); background:#121418; }
+.tpad-settings-app .settings-nav { gap:4px; padding:22px 12px; border-right:1px solid rgba(255,255,255,.08); background:#1a1d22; }
+.tpad-settings-app .settings-nav::before { content:"設定項目"; padding:0 12px 12px; color:#8d9aa7; font-size:11px; font-weight:700; letter-spacing:.1em; }
+.tpad-settings-app .settings-nav button { padding:12px 14px; border:0; border-radius:10px; color:#c3ced9; }
+.tpad-settings-app .settings-nav button[aria-selected="true"] { color:#fff; background:#354455; box-shadow:inset 3px 0 #9bd7ff; }
+.tpad-settings-app .settings-content { padding:22px clamp(18px,4vw,40px) 32px; scrollbar-width:thin; }
+.tpad-settings-app .set-group h3 { padding-bottom:14px; border-bottom:1px solid rgba(255,255,255,.1); font-size:22px; }
+.tpad-settings-app .set-row, .tpad-settings-app .set-slider, .tpad-settings-app .set-toggle { font-size:14px; }
+.tpad-settings-app .save-slot { background:#1e242d; border-color:rgba(255,255,255,.09); }
+.tpad-settings-app kbd { display:inline-block; min-width:18px; padding:1px 5px; border:1px solid rgba(255,255,255,.25); border-bottom-width:2px; border-radius:5px; background:#10161d; color:#e8eef3; font:700 11px/1.3 Consolas,"Microsoft JhengHei",monospace; text-align:center; }
+.tpad-settings-app button:focus-visible, .tpad-settings-app input[type=range]:focus-visible { outline:2px solid #ffd479; outline-offset:2px; }
+@media (max-width:620px) {
+  .tpad-settings-app > .settings-body { grid-template-columns:116px minmax(0,1fr); }
+  .tpad-settings-app .settings-nav { padding:16px 6px; }
+  .tpad-settings-app .settings-nav button { padding:11px 8px; font-size:12px; }
+  .tpad-settings-app .settings-content { padding:16px 12px 28px; }
+}
 
 /* ===== T-Pad：成就 App（js/achievements.js 的 renderAchievementApp）=====
    iPad 的「左邊分類、右邊內容」版面 */
@@ -2803,3 +2903,53 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .ma-note { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: rgba(217,137,59,.1); color: #ffcf9e; font-size: 12px; text-align: center; }
 .ma-note:empty { display: none; }
 .ma .aa-list > .ma-note { margin: 0; background: none; }
+
+/* ===== 技能樹（新版排版，js/skills.js 的 skillTreeHtml）：上面技能圖、下面說明＋培養按鈕 ===== */
+.skill-board { position: relative; flex: none; height: 300px; margin: 12px 16px 0; border: 1px solid rgba(255,255,255,.07); border-radius: 12px; background: rgba(8,12,17,.55); }
+.skill-lines { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.skill-lines path { fill: none; stroke: rgba(255,255,255,.13); stroke-width: 5px; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; }
+.skill-lines path.next { stroke: rgba(143,211,255,.45); }
+.skill-lines path.on { stroke: #ffd479; }
+.skill-orb { position: absolute; z-index: 1; width: 56px; height: 56px; margin: -28px 0 0 -28px; padding: 0; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.16); border-radius: 50%; background: #1d242d; color: #9aa6b2; cursor: pointer; font: 22px/1 sans-serif; transition: transform .12s, box-shadow .12s; }
+.skill-orb i { font-style: normal; }
+.skill-orb:hover { transform: scale(1.08); }
+.skill-orb.owned { border-color: #ffd479; background: radial-gradient(circle at 50% 40%, #6e5522, #34280f); box-shadow: 0 0 14px rgba(255,212,121,.35); }
+.skill-orb.open { border-color: #8fd3ff; box-shadow: 0 0 0 3px rgba(143,211,255,.18), 0 0 14px rgba(143,211,255,.3); }
+.skill-orb.locked i { filter: grayscale(1); opacity: .6; }
+.skill-orb.ult { width: 64px; height: 64px; margin: -32px 0 0 -32px; font-size: 26px; }
+.skill-orb.sel { outline: 3px solid #fff8e7; outline-offset: 3px; }
+.skill-orb-name { position: absolute; top: 100%; left: 50%; margin-top: 6px; transform: translateX(-50%); color: #c9d3dc; font: 700 11px "Microsoft JhengHei", sans-serif; white-space: nowrap; text-shadow: 0 1px 2px #000; pointer-events: none; }
+.skill-orb.locked .skill-orb-name { color: #7d8996; }
+.skill-orb.sel .skill-orb-name { color: #fff8e7; }
+.skill-row-label { position: absolute; transform: translate(-30%, -50%); color: #d8ae5d; font: 700 12px "Microsoft JhengHei", sans-serif; white-space: nowrap; pointer-events: none; }
+.skill-detail { flex: none; display: flex; align-items: flex-end; gap: 16px; margin: 12px 16px 14px; padding: 12px 16px; border: 1px solid rgba(255,255,255,.08); border-radius: 12px; background: rgba(0,0,0,.45); }
+.skill-detail-main { flex: 1; min-width: 0; }
+.skill-detail-main small { color: #d8ae5d; font-size: 11px; }
+.skill-detail-main b { display: block; margin: 2px 0 4px; color: #fff8e7; font-size: 17px; }
+.skill-detail-main p { margin: 0; color: #c9d3dc; font-size: 13px; line-height: 1.6; }
+.skill-detail-side { flex: none; text-align: right; }
+.skill-detail-cost { margin-bottom: 6px; color: #a9b8c6; font-size: 12px; white-space: nowrap; }
+.skill-detail-cost .tpad-fragment-icon { width: 20px; height: 20px; vertical-align: -5px; }
+.skill-learn { min-width: 120px; padding: 9px 18px; border: 1px solid #e9bd62; border-radius: 10px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 15px "Microsoft JhengHei", sans-serif; box-shadow: inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20; }
+.skill-learn:hover:not(:disabled) { filter: brightness(1.07); }
+.skill-learn:disabled { border-color: rgba(255,255,255,.15); background: #2a313b; color: #8f9aa7; box-shadow: none; cursor: default; }
+.tpad-skill-tree .skill-board { margin: 12px 12px 0; }
+.tpad-skill-tree .skill-detail { margin: 12px 12px 12px; }
+@media (max-width: 700px) { .skill-orb { width: 44px; height: 44px; margin: -22px 0 0 -22px; font-size: 18px; } .skill-orb.ult { width: 50px; height: 50px; margin: -25px 0 0 -25px; } .skill-orb-name { font-size: 10px; } }
+.skill-card:has(.skill-board) { overflow-y: auto; }   /* 視窗不夠高：整張卡片捲動，不要把技能圖擠扁 */
+/* T-Pad 技能樹標題：沒有分隔線，標題列變矮，下面的技能圖往上靠（上下留白跟左右一樣） */
+.tpad-roster-skills-head { height: auto; padding: 10px 12px 0; border-bottom: 0; }
+.tpad-skill-tree .skill-board { margin-top: 8px; }
+/* 技能說明右邊的「需要 ◆ 40」：整體放大 1.2 倍（字 12→14.4px、碎片圖示 20→24px） */
+.skill-detail-cost { font-size: 14.4px; }
+.skill-detail-cost .tpad-fragment-icon { width: 24px; height: 24px; vertical-align: -6px; }
+/* T-Pad 一帶不用背景模糊（backdrop-filter 每一格都要重算，比較弱的電腦會卡）：改成稍微深一點的半透明底，看起來差不多 */
+#tpad { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(4,8,12,.72); }
+.tpad-widget { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(20,26,34,.72); }
+#skillTreePanel { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(4,7,11,.72); }
+#captainImpressionPanel { backdrop-filter: none; -webkit-backdrop-filter: none; background: rgba(4,7,11,.62); }
+
+/* ===== T-Pad 怪物圖鑑 App：原本的排版（.bst-card）整張縮小放在螢幕正中間 ===== */
+.bst-app { display: grid; place-items: center; height: 100%; }
+/* T-Pad 按鈕：放在資訊條最右邊（原本設定按鈕的位置；設定改成在 T-Pad 裡開） */
+#hud > #hudTpadButton { flex: none; margin-left: 12px; }

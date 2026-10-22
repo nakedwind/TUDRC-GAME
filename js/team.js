@@ -197,7 +197,7 @@ function squadCard(actor, safe) {
   const learned = typeof training !== 'undefined' && training.skills ? (training.skills[actor.type] || []).length : 0;
   const trainingAction = typeof SKILL_TREES !== 'undefined' && !SKILL_TREES[actor.type]
     ? '<button class="squad-upgrade squad-skill-btn" disabled>技能樹<small>還沒有技能樹（data/skills.js）</small></button>'   // 新加入的隊員還沒設計技能樹
-    : '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / 9' + (safe ? '' : '・回基地才能學') + '</small></button>';
+    : '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / ' + (typeof SKILL_TOTAL !== 'undefined' ? SKILL_TOTAL : 10) + (safe ? '' : '・回基地才能學') + '</small></button>';
   const loadBar = spec.guide
     ? '<div><span>SP <b>' + Math.floor(guideSPFor(actor.type)) + ' / ' + guideSPMax() + '</b></span><i class="sp-bar"><u style="width:' + (guideSPFor(actor.type) / guideSPMax() * 100) + '%"></u></i></div>'
     : '<div><span>負荷 <b>' + taint + ' / 100</b></span><i class="taint-bar"><u style="width:' + taint + '%"></u></i></div>';

@@ -1,5 +1,5 @@
 /* ===== 怪物圖鑑（遊戲）=====
-   ・2F應變中心的電腦（電腦辦公桌）前按 Space 打開；左邊是選到的怪物（圖片、名稱、能力），右邊是星級、縮圖、基礎訊息
+   ・在 T-Pad 的「怪物圖鑑」App 看；2F應變中心的電腦前按 Space 打開原本的獨立視窗（兩邊同一份排版、同一份紀錄）；左邊是選到的怪物（圖片、名稱、能力），右邊是星級、縮圖、基礎訊息
    ・消滅次數：怪物死掉時記一次（js/combat-feel.js 的 onEnemyDeath 呼叫 bestiaryRecordKill）。
      自爆史萊姆自己炸掉的不算；B1 訓練室（練習模式）打死的預設不算（data/bestiary.js 的 style.countPractice）。
    ・消滅過的怪物才有縮圖、才能點來看；還沒消滅過的是黑底問號
@@ -61,6 +61,36 @@ function fitBestiary() {   // 視窗比 1060×620 小：整個等比例縮小
   wrap.style.width = BESTIARY_W * k + 'px'; wrap.style.height = BESTIARY_H * k + 'px';
   card.style.transform = 'scale(' + k + ')';
 }
+// ---- T-Pad 裡的怪物圖鑑 App（js/tpad.js 的 TPAD_APPS 用 view 打開）----
+// 用原本的排版（js/bestiary-config.js 的 bestiaryHtml，跟怪物圖鑑編輯器同一份），整張等比例縮小放進 T-Pad 螢幕
+function renderBestiaryApp(el, keepPage = false) {
+  const entries = bestiaryEntries(), known = e => (bst.kills[e.key] || 0) > 0;
+  if (!entries.some(e => e.key === bst.sel && known(e))) bst.sel = (entries.find(known) || {}).key || null;   // 沒選、選的不在了：選第一隻消滅過的
+  if (!keepPage) { const per = Math.max(1, bestiaryLayout().grid.cols * bestiaryLayout().grid.rows), i = entries.findIndex(e => e.key === bst.sel); if (i >= 0) bst.page = Math.floor(i / per); }   // 剛打開：翻到選著的那一隻
+  bst.page = Math.max(0, Math.min(bestiaryPageCount(null, entries.length) - 1, bst.page));
+  el.innerHTML = '<div class="bst-app"><div class="bst-scale">' + bestiaryHtml(null, { entries, kills: bst.kills, sel: bst.sel, page: bst.page }) + '</div></div>';
+  fitBestiaryApp(el);
+  if (el._bstBound) return;
+  el._bstBound = true;   // appbody 一直是同一個：點擊、尺寸變化只綁一次
+  el.addEventListener('click', ev => {
+    if (typeof tpadView === 'undefined' || tpadView !== 'bestiary') return;
+    const b = ev.target.closest('.bst-cell.known, .bst-prev, .bst-next, .bst-close'); if (!b) return;
+    if (b.classList.contains('bst-close')) { showTPadHome(); return; }   // 關閉＝回 T-Pad 主畫面
+    if (b.classList.contains('bst-prev') || b.classList.contains('bst-next')) { if (!b.disabled) { bst.page += b.classList.contains('bst-next') ? 1 : -1; sfx('switch'); renderBestiaryApp(el, true); } return; }
+    if (b.dataset.key !== bst.sel) { bst.sel = b.dataset.key; sfx('switch'); renderBestiaryApp(el, true); }
+  });
+  if (window.ResizeObserver) new ResizeObserver(() => { if (tpadView === 'bestiary') fitBestiaryApp(el); }).observe(el);   // 螢幕打開、視窗變大小：重新縮放
+}
+function fitBestiaryApp(el) {   // clientWidth／Height 不受打開動畫的縮放影響
+  const wrap = el.querySelector('.bst-scale'), card = el.querySelector('.bst-card'), box = el.querySelector('.bst-app');
+  if (!wrap || !card || !box || !box.clientWidth) return;
+  const k = Math.max(.1, Math.min((box.clientWidth - 16) / BESTIARY_W, (box.clientHeight - 16) / BESTIARY_H));
+  wrap.style.width = BESTIARY_W * k + 'px'; wrap.style.height = BESTIARY_H * k + 'px';
+  card.style.transform = 'scale(' + k + ')';
+}
+// ←→：翻頁（js/tpad.js 的按鍵呼叫）
+function bestiaryAppStep(el, d) { const b = el.querySelector(d > 0 ? '.bst-next' : '.bst-prev'); if (b && !b.disabled) b.click(); }
+
 function openBestiary() {
   if (bestiaryOpen) return;
   if (!bst.el) buildBestiary();

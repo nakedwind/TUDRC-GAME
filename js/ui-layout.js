@@ -57,7 +57,6 @@ const UI_ELEMENTS = [
       P('label', '標題「異質碎片」', '#hud .stat.crystal small', ['font']), P('num', '數字', '#hud .stat.crystal b', ['font']) ] },
   { key: 'tpadBtn',       group: '下方資訊條', label: 'T-Pad 按鈕',     sel: '#hudTpadButton',           origin: 'center', parts: [
       P('self', '按鈕框', '#hudTpadButton', ['w', 'h', 'font', 'radius']), P('key', '快捷鍵 T', '#hudTpadButton kbd', ['font']) ] },
-  { key: 'settingsBtn',   group: '下方資訊條', label: '設定按鈕',       sel: '#settingsButton',          origin: 'center', parts: [P('self', '按鈕', '#settingsButton', ['w', 'h', 'radius'])] },
 ];
 const UI_PROP_NAMES = { w: '寬', h: '高', font: '文字大小', gap: '間距', radius: '圓角' };
 // 每種細節數值要寫成哪些 CSS

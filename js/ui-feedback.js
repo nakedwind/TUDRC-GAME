@@ -51,6 +51,7 @@ const UIFeedback = (() => {
     if (!el || el.matches('select')) return;
     clickFlash(el);
     if (el.dataset.uiSound === 'none') return;   // 這個按鈕自己會出聲（試聽），不要再疊點擊聲
+    if (el.closest('#tpad')) return;   // T-Pad 裡面：只播 T-Pad 自己的音效（對話框下一頁），不要「按鈕」聲（js/tpad.js）
     activate(el);
   }, true);
   document.addEventListener('change', e => {

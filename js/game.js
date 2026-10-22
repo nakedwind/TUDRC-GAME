@@ -1715,6 +1715,7 @@ function recoverFrame(err) {
   if (typeof ctx.reset === 'function') ctx.reset();
   else { const w = cv.width; cv.width = w; }   // 舊瀏覽器：重設畫布大小也會清掉所有狀態
 }
+let loopTpadDrawn = false;   // T-Pad 打開後已經畫過一次後面的遊戲畫面
 function loop(ts) {
   try {
     if (typeof AssetGate !== 'undefined' && AssetGate.blocking()) last = ts;   // 圖片還沒下載完：先暫停（載入畫面在 js/asset-gate.js）
@@ -1756,7 +1757,10 @@ function frame(ts) {
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
   }
   if (shakeAmt > 0) shakeAmt = Math.max(0, shakeAmt - dt * 40);   // 畫面震動線性衰減
-  draw();
+  // T-Pad 開著：遊戲本來就暫停，後面的畫面不用一直重畫（不然 T-Pad 背後的模糊每一格都要重算，開關動畫會卡）
+  const tpadStill = typeof tpadOpen !== 'undefined' && tpadOpen && loopTpadDrawn;
+  loopTpadDrawn = typeof tpadOpen !== 'undefined' && tpadOpen;
+  if (!tpadStill) draw();
   // 溫特手上拿著槍（戰鬥區、任何槍種、沒開選單）而且走出營地警戒線外：滑鼠游標換成準心，方便瞄準怪物
   // 在警戒線裡面（基地內）、或正在放置建築／道具、拆除、放塗鴉時，就算拿著槍也是一般游標。樣式在 css/style.css 的 cursor-crosshair。
   const placingThing = !!(G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish'))
@@ -1940,7 +1944,7 @@ function update(dt) {
         const heavy = t.type === 'luther', dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
-        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
+        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd * (1 - (spec.ultCdCut || 0)); const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
         const U0 = isUlt ? ULTIMATES[t.type] : null, stab = !!(U0 && U0.stabs);   // 柯林的大招：連刺（自己的節奏）
         const sw = stab ? { wind: 0, impact: 0, duration: U0.duration } : isUlt ? ULT_SWING : (MELEE_SWING[t.type] || MELEE_SWING.normal);
         t.meleeSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, hit: false, ult: isUlt, ...(stab ? { stabs: U0.stabs, stabIdx: 0, slashFx: true } : {}) };
@@ -1953,7 +1957,7 @@ function update(dt) {
         const dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
         const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
-        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd; const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
+        if (isUlt) { t.ultCd = ULTIMATES[t.type].cd * (1 - (spec.ultCdCut || 0)); const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
         const sw = isUlt ? ULT_SWING : { wind: .14, impact: .21, duration: .4 };
         t.gunSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, fired: false, ult: isUlt };
         t.gunT = sw.duration; t.moving = false;
@@ -1961,7 +1965,7 @@ function update(dt) {
       }
       const U = ((t.gunSwing && t.gunSwing.ult) || (t.meleeSwing && t.meleeSwing.ult)) ? ULTIMATES[t.type] : null;   // 大招（在揮擊啟動時已決定）
       if (U && U.radius) {   // 近戰大招：大範圍（紅＝盾牌衝撞＋回復；路德＝重擊＋暈眩）
-        const r = U.radius * CELL, dmg = spec.dmg * U.dmgMul * sentryDamageMul(t), col = U.kind === 'bash' ? '#bfe0ff' : '#ffd0d5';
+        const r = U.radius * CELL, dmg = spec.dmg * U.dmgMul * (1 + (spec.ultDmgBonus || 0)) * sentryDamageMul(t), col = U.kind === 'bash' ? '#bfe0ff' : '#ffd0d5';
         const hitEnemy = G.enemies.find(e => !e.dead && Math.hypot(e.x - t.x, e.y - t.y) <= r && hasLineOfSight(t.x, t.y, e.x, e.y));
         for (const e of G.enemies) {
           if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r || !hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 牆後的不受影響
@@ -1980,7 +1984,7 @@ function update(dt) {
         const impactPoint = { x: target.x, y: target.y };
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
-        const atkDmg = spec.dmg * (U ? U.dmgMul : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
+        const atkDmg = spec.dmg * (U ? U.dmgMul * (1 + (spec.ultDmgBonus || 0)) : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
         onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);
         if (typeof sentryHitOre === 'function') sentryHitOre(t, impactPoint, (atkSplash || 0) * CELL);   // 路德：拳頭剛好波及礦物（js/ore.js）   // 安柏／希奧妮：不小心波及附近的油桶、油汙

@@ -153,7 +153,7 @@ function openSettings() {
 }
 function closeSettings(silent = false) { if (!settingsOpen) return; settingsOpen = false; settingsMenu.classList.add('hidden'); if (!silent) sfx('switch'); }
 
-document.getElementById('settingsButton').addEventListener('click', () => settingsOpen ? closeSettings() : openSettings());
+document.getElementById('settingsButton')?.addEventListener('click', () => settingsOpen ? closeSettings() : openSettings());   // 設定按鈕已拿掉（改在 T-Pad 裡開）
 document.getElementById('settingsClose').addEventListener('click', () => closeSettings());
 settingsMenu.addEventListener('click', e => { if (e.target === settingsMenu) closeSettings(); });
 document.getElementById('saveNow').addEventListener('click', () => saveGame(true));
@@ -166,7 +166,7 @@ document.getElementById('muteAll').addEventListener('change', e => { SFX.enabled
 window.addEventListener('keydown', e => {   // M 鍵（js/sfx.js）切換靜音後，音樂跟著靜音
   if (!e.repeat && e.key.toLowerCase() === 'm' && !(e.target instanceof Element && e.target.closest('input, textarea, select'))) setTimeout(() => { MUSIC.refresh(); if (settingsOpen) renderSettings(); });
 });
-// Esc：設定打開時關閉；其他視窗都沒開時打開設定
+// Esc：設定打開時關閉；其他視窗都沒開時打開 T-Pad 裡的設定（開始畫面還不能開 T-Pad：打開原本的設定視窗）
 // （用 capture 先檢查：別的視窗會在同一次按鍵裡被關掉，那次就不打開設定）
 window.addEventListener('keydown', e => {
   if (e.key !== 'Escape' || e.repeat) return;
@@ -174,6 +174,6 @@ window.addEventListener('keydown', e => {
   const visible = id => { const el = document.getElementById(id); return el && !el.classList.contains('hidden'); };
   const busy = (typeof campPlanOpen !== 'undefined' && campPlanOpen) || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || mapTransitioning
     || visible('sentryMenu') || visible('groundMenu') || visible('buildbar') || visible('teamEditPanel') || visible('squadStatusPanel')
-    || (typeof tpadOpen !== 'undefined' && tpadOpen) || (G && G.selType) || assigning;   // T-Pad 開著＝Esc 只關 T-Pad。開始畫面（簡報）也可以打開設定
-  if (!busy) { e.preventDefault(); openSettings(); }
+    || (typeof tpadOpen !== 'undefined' && tpadOpen) || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen) || (G && G.selType) || assigning;   // 怪物圖鑑（電腦開的視窗）開著＝Esc 只關圖鑑   // T-Pad 開著＝Esc 只關 T-Pad。開始畫面（簡報）也可以打開設定
+  if (!busy) { e.preventDefault(); e.stopImmediatePropagation(); if (!(typeof openTPadSettings === 'function' && openTPadSettings())) openSettings(); }
 }, true);
