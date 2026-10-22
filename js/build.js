@@ -129,7 +129,7 @@ function renderBuildQuickSlots() {
     button.dataset.buildId = id;
     button.dataset.tip = '經費 $' + ob.cost + '・HP ' + ob.hp; button.dataset.tipKey = 'build-' + id;   // 懸停提示（js/hover-tip.js）；名稱本來就寫在圖示下面
     button.setAttribute('aria-label', '建造' + ob.name);
-    button.innerHTML = '<img src="' + ob[buildOrient].file + '" alt=""><span>' + ob.name + '</span>';
+    button.innerHTML = '<i class="bq-art" aria-hidden="true"><img src="' + ob[buildOrient].file + '" alt=""></i><span>' + ob.name + '</span>';   // bq-art：只把圖片裁在框裡，名稱不會被切掉（css/style.css）
     button.addEventListener('click', () => selectBuildType(id));
     buildQuickSlots.appendChild(button);
   });

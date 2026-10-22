@@ -2658,6 +2658,10 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #buildToolbar .build-toolbar-actions #demolishToggle { width: 41px; height: 52px; }
 /* 探照燈、鐵絲網、爐具、油箱的圖片往下 3px */
 #buildToolbar .build-quick-slot:is([data-build-id="searchlight"], [data-build-id="wirecloth"], [data-build-id="deco_gasstove2"], [data-build-id="deco_oil_tank"]) img { margin-top: 0; }
+/* 建造列的名稱在最上層：只有圖片裁在框裡（.bq-art），名稱比框寬時以框的中心往左右延展、蓋在邊框上面，不會被切掉 */
+#buildToolbar .build-quick-slot { overflow: visible; }
+#buildToolbar .build-quick-slot .bq-art { position: absolute; inset: 0; overflow: hidden; border-radius: 9px; pointer-events: none; }
+#buildToolbar .build-quick-slot span { left: 50%; right: auto; transform: translateX(-50%); z-index: 2; white-space: nowrap; pointer-events: none; }
 
 /* ===== 📱 T-Pad（js/tpad.js）：左上的「Y102隊員／出勤配置／成就」收進 T-Pad ===== */
 #squadStatusButton, #teamEditButton, #achievementButton { display: none !important; }
