@@ -1,0 +1,392 @@
+/* ===== 🧑‍🚀 Y102隊員裝備／技能編輯器（隊員裝備技能編輯器.html）=====
+   中間嵌一個真的遊戲畫面（iframe：塔防原型.html?squadedit=1，T-Pad 一直開在「Y102隊員」），
+   在上面點東西選取、拖曳移動、拖右下角改大小；右邊調位置、大小、字級、對齊、介面文字，每一項都有「置中」「恢復預設」。
+   左邊三個分頁：版面（所有可以調的東西）、技能內容（每位隊員每一格技能）、裝備清單（隊員裝備：新增、修改、刪除）。
+   存檔：data/squad-layout.js（版面）、data/squad-skills.js（技能內容）、data/squad-gear.js（隊員裝備）。遊戲那邊的程式在 js/squad-page.js 最下面。
+   Ctrl+Z／Ctrl+Y：上一步／下一步（記在這個頁面裡，重新整理就清掉）。
+*/
+const SQ_DRAFT_KEY = 'tudrc_squad_editor_draft_v1';
+const $q = id => document.getElementById(id);
+const clone = v => JSON.parse(JSON.stringify(v));
+const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+let state = (() => {   // { layout: { elements, texts }, skills: { members }, gear: [...] }
+  const file = {
+    layout: typeof SQUAD_LAYOUT !== 'undefined' ? SQUAD_LAYOUT : {},
+    skills: typeof SQUAD_SKILLS !== 'undefined' ? SQUAD_SKILLS : {},
+    gear: typeof SQUAD_GEAR !== 'undefined' ? SQUAD_GEAR : [],
+  };
+  const d = typeof DraftSync !== 'undefined' ? DraftSync.load(SQ_DRAFT_KEY, file, { label: 'Y102隊員頁' }) : null;
+  const out = clone(d && d.layout ? d : file);
+  out.layout = out.layout || {}; out.layout.elements = out.layout.elements || {}; out.layout.texts = out.layout.texts || {};
+  out.skills = out.skills || {}; out.skills.members = out.skills.members || {}; out.gear = Array.isArray(out.gear) ? out.gear : [];
+  return out;
+})();
+let selKey = null, play = false, page = 'skills', leftTab = 'parts', parts = [], members = [], nodes = [], skillMember = null, skillNode = null, gearSel = null;
+const info = {};   // 遊戲畫面量到的：info[key] = { visible, count, values, text, skill }
+const ALIGN_NAMES = { left: '靠左', center: '置中', right: '靠右' };
+function setStatus(msg, err = false) { $q('status').textContent = msg; $q('status').classList.toggle('err', !!err); }
+function saveDraft() { try { localStorage.setItem(SQ_DRAFT_KEY, JSON.stringify(state)); } catch (_) {} }
+const partOf = key => parts.find(p => p.key === key) || { key, label: key, group: '', kind: /^img\.|Img:|Icon:/.test(key) ? 'img' : '' };
+const labelOf = key => partOf(key).label;
+const elOf = key => state.layout.elements[key] || {};
+const isImg = key => partOf(key).kind === 'img';
+const isText = key => !isImg(key) && /^(text|btn|stat(Label|Value)|gearSlotName|lookSlotName)/.test(key);
+const isChanged = key => !!state.layout.elements[key] || !!state.layout.texts[key];
+
+// ---- 上一步／下一步（Ctrl+Z／Ctrl+Y）：每次修改之前記下整份設定；連續的同一種修改只記一次 ----
+const undoStack = [], redoStack = [];
+let lastTag = '', lastTagAt = 0;
+function remember(tag = '') {
+  const now = Date.now();
+  if (tag && tag === lastTag && now - lastTagAt < 1500) { lastTagAt = now; return; }
+  lastTag = tag; lastTagAt = now;
+  const snap = JSON.stringify(state);
+  if (undoStack[undoStack.length - 1] !== snap) { undoStack.push(snap); if (undoStack.length > 300) undoStack.shift(); }
+  redoStack.length = 0; renderUndo();
+}
+function stepHistory(from, to, msg) {
+  if (!from.length) { setStatus(msg === 'undo' ? '沒有上一步了' : '沒有下一步了'); return; }
+  to.push(JSON.stringify(state)); state = JSON.parse(from.pop()); lastTag = '';
+  saveDraft(); sendState(); renderLeft(); renderProps(); renderUndo();
+  setStatus(msg === 'undo' ? '↶ 回到上一步（還沒存到專案）' : '↷ 重做下一步（還沒存到專案）');
+}
+const undo = () => stepHistory(undoStack, redoStack, 'undo'), redo = () => stepHistory(redoStack, undoStack, 'redo');
+function renderUndo() { $q('undoBtn').disabled = !undoStack.length; $q('redoBtn').disabled = !redoStack.length; }
+$q('undoBtn').addEventListener('click', undo); $q('redoBtn').addEventListener('click', redo);
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey)) return;
+  const k = e.key.toLowerCase();
+  if (k === 'z' && !e.shiftKey) { e.preventDefault(); undo(); }
+  else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); redo(); }
+}, true);
+
+// ---- 版面：改位置／大小（空白、0 的欄位拿掉，檔案比較乾淨）----
+function setEl(key, patch, send = true) {
+  const o = { ...elOf(key), ...patch }, clean = {};
+  for (const k of ['x', 'y']) if (Math.round(+o[k] || 0)) clean[k] = Math.round(+o[k]);
+  for (const k of ['w', 'h', 'size', 'font']) if (+o[k] > 0) clean[k] = Math.round(+o[k]);
+  if (o.align) clean.align = o.align;
+  if (Object.keys(clean).length) state.layout.elements[key] = clean; else delete state.layout.elements[key];
+  saveDraft(); if (send) sendState(); if (leftTab === 'parts') renderLeft(); renderProps(false);
+}
+function setText(t, value) {
+  const v = value === t.original ? '' : value;
+  if (v) state.layout.texts[t.k] = v; else delete state.layout.texts[t.k];
+  t.value = v; saveDraft(); sendState(); if (leftTab === 'parts') renderLeft();
+}
+
+// ---- 左邊：版面清單／技能內容／裝備清單 ----
+const openGroups = new Set(['面板區域']);
+document.querySelector('.tabs').addEventListener('click', e => {
+  const b = e.target.closest('[data-tab]'); if (!b) return;
+  leftTab = b.dataset.tab; document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x === b)); renderLeft();
+});
+function renderLeft() {
+  const box = $q('leftBody'), scroll = box.scrollTop;
+  if (leftTab === 'parts') box.innerHTML = partsHtml();
+  else if (leftTab === 'skills') box.innerHTML = skillsHtml();
+  else box.innerHTML = gearHtml();
+  box.scrollTop = scroll;
+  if (leftTab === 'skills' || leftTab === 'gear') fillContentFields();
+}
+function partsHtml() {
+  if (!parts.length) return '<p class="empty">等遊戲畫面載入…</p>';
+  const groups = new Map();
+  for (const p of parts) { if (!groups.has(p.group)) groups.set(p.group, []); groups.get(p.group).push(p.key); }
+  let html = '';
+  for (const [group, keys] of groups) {
+    const changed = keys.filter(isChanged).length;
+    html += '<details data-group="' + esc(group) + '"' + (openGroups.has(group) || keys.includes(selKey) ? ' open' : '') + '><summary>' + esc(group) + (changed ? '（調整過 ' + changed + '）' : '') + '</summary><div class="list">' +
+      keys.map(key => '<button type="button" data-key="' + esc(key) + '" class="' + (key === selKey ? 'on' : '') + '">' + esc(labelOf(key)) + (isChanged(key) ? '<em>已調整</em>' : '') + '</button>').join('') + '</div></details>';
+  }
+  return html;
+}
+$q('leftBody').addEventListener('toggle', e => { const d = e.target; if (d.dataset && d.dataset.group) { if (d.open) openGroups.add(d.dataset.group); else openGroups.delete(d.dataset.group); } }, true);
+
+// 技能內容：選隊員、選格子，下面改名稱、說明、效果、圖示、價格、數值
+const MOD_PATHS = () => Object.entries(typeof STAT_MOD_NAMES !== 'undefined' ? STAT_MOD_NAMES : {});
+function modsHtml(mods, prefix) {
+  return '<div class="mods">' + (mods || []).map((m, i) => {
+    const known = MOD_PATHS().some(([p]) => p === m.path);
+    return '<div class="mod" data-mod="' + i + '"><select data-' + prefix + '-mod="path">' + MOD_PATHS().map(([p, v]) => '<option value="' + p + '"' + (p === m.path ? ' selected' : '') + '>' + esc(v.name) + '</option>').join('') +
+      (known ? '' : '<option value="' + esc(m.path) + '" selected>' + esc(m.path) + '</option>') + '</select>' +
+      '<select data-' + prefix + '-mod="op"><option value="mul"' + (m.mul != null ? ' selected' : '') + '>乘</option><option value="add"' + (m.mul == null ? ' selected' : '') + '>加</option></select>' +
+      '<input type="number" step="0.01" data-' + prefix + '-mod="val" value="' + (m.mul != null ? m.mul : m.add != null ? m.add : 0) + '"><button type="button" class="danger" data-' + prefix + '-mod-del title="拿掉">×</button></div>';
+  }).join('') + '<button type="button" class="small" data-' + prefix + '-mod-add>＋ 加一個數值效果</button></div>' +
+  '<div class="orig">「乘」1.1＝+10%、0.8＝−20%；「加」直接加上去（防禦、命中、大招這幾個用小數：0.05＝+5%）</div>';
+}
+function readMods(container, prefix) {
+  return [...container.querySelectorAll('.mod')].map(row => {
+    const path = row.querySelector('[data-' + prefix + '-mod="path"]').value, op = row.querySelector('[data-' + prefix + '-mod="op"]').value, val = Number(row.querySelector('[data-' + prefix + '-mod="val"]').value) || 0;
+    return op === 'mul' ? { path, mul: val } : { path, add: val };
+  });
+}
+const savedNode = (m, id) => (state.skills.members[m] || {})[id] || null;
+function currentNode() {   // 編輯中的那一格：存過的優先，沒有就用遊戲那邊算出來的（舊版換算）
+  if (!skillMember || !skillNode) return null;
+  const s = savedNode(skillMember, skillNode); if (s) return s;
+  const inf = Object.values(info).find(i => i.skill && i.skill.member === skillMember && i.skill.id === skillNode);
+  return inf ? inf.skill.node : null;
+}
+function skillsHtml() {
+  if (!members.length) return '<p class="empty">等遊戲畫面載入…</p>';
+  if (!skillMember) skillMember = members[0].id;
+  let h = '<label class="field">隊員<select id="skMember">' + members.map(m => '<option value="' + m.id + '"' + (m.id === skillMember ? ' selected' : '') + '>' + esc(m.name) + (state.skills.members[m.id] ? '（改過）' : '') + '</option>').join('') + '</select></label>' +
+    '<div class="nodes">' + nodes.map(n => '<button type="button" data-node="' + n.id + '" class="' + (n.id === skillNode ? 'on ' : '') + (savedNode(skillMember, n.id) ? 'saved' : '') + '">' + esc(n.tag) + '<br><small>' + n.id + '</small></button>').join('') + '</div>';
+  const node = currentNode();
+  if (!skillNode) return h + '<p class="note" style="margin-top:10px">選一格技能來改內容（中間的畫面會跟著顯示）。綠字＝改過。</p>';
+  if (!node) return h + '<p class="note" style="margin-top:10px">讀取中…</p>';
+  h += '<div class="sec"><div class="sec-head">' + esc((nodes.find(n => n.id === skillNode) || {}).tag || skillNode) + '<span class="sp"></span>' + (savedNode(skillMember, skillNode) ? '<button type="button" class="small" id="skReset">↺ 恢復預設</button>' : '') + '</div>' +
+    '<label class="field">名稱<input type="text" data-sk="name"></label>' +
+    '<label class="field">技能描述（文字說明）<textarea data-sk="desc" rows="3"></textarea></label>' +
+    '<label class="field">技能效果（顯示的數值文字；空白＝依下面的數值自動產生）<input type="text" data-sk="effect"></label>' +
+    '<div class="two"><label class="field">圖示（emoji 或圖片路徑）<input type="text" data-sk="icon" placeholder="空白＝預設圖示"></label>' +
+    '<label class="field">價格（異質碎片）<input type="number" min="0" step="1" data-sk="cost"' + (skillNode === 'trait-1' ? ' disabled title="Lv1 一開始就會"' : '') + '></label></div>' +
+    '<div class="field">實際改的數值' + modsHtml(node.mods, 'sk') + '</div></div>';
+  return h;
+}
+function gearHtml() {
+  let h = '<div class="btns" style="margin-top:0"><button type="button" class="primary" id="gearAdd">＋ 新增裝備</button></div><div class="list" style="margin-top:8px">' +
+    state.gear.map(g => '<button type="button" data-gear="' + esc(g.id) + '" class="' + (g.id === gearSel ? 'on' : '') + '"><img src="' + esc(squadGearImage(g)) + '" alt="">' + esc(g.name || g.id) + '<em>$' + (g.price || 0) + '</em></button>').join('') + '</div>';
+  const g = state.gear.find(x => x.id === gearSel);
+  if (!g) return h + '<p class="note" style="margin-top:10px">選一件裝備來改。溫特在便利商店「隊員裝備」分頁用經費買；價格 0＝商店不賣。</p>';
+  h += '<div class="sec"><div class="sec-head">' + esc(g.name || g.id) + '<span class="sp"></span><button type="button" class="small danger" id="gearDel">刪除這件</button></div>' +
+    '<label class="field">名稱<input type="text" data-gf="name"></label>' +
+    '<div class="two"><label class="field">圖示 emoji（沒有圖片時用）<input type="text" data-gf="icon"></label><label class="field">價格（經費 $）<input type="number" min="0" step="1" data-gf="price"></label></div>' +
+    '<label class="field">圖片路徑（可不填，例：images/items/xxx.png）<input type="text" data-gf="image"></label>' +
+    '<label class="field">裝備說明<textarea data-gf="desc" rows="3"></textarea></label>' +
+    '<label class="field">裝備數值（顯示的文字；空白＝依下面的數值自動產生）<input type="text" data-gf="effect"></label>' +
+    '<div class="field">實際改的數值' + modsHtml(g.mods, 'gf') + '</div>' +
+    '<div class="orig">代號：' + esc(g.id) + '（存檔、背包用，建立後不要改）</div></div>';
+  return h;
+}
+function fillContentFields() {
+  const box = $q('leftBody');
+  if (leftTab === 'skills') {
+    const node = currentNode(); if (!node) return;
+    for (const f of ['name', 'desc', 'effect', 'icon', 'cost']) { const el = box.querySelector('[data-sk="' + f + '"]'); if (el && document.activeElement !== el) el.value = node[f] != null ? node[f] : ''; }
+    const eff = box.querySelector('[data-sk="effect"]'); if (eff) eff.placeholder = modsText(node.mods) || '（沒有數值效果）';
+  } else if (leftTab === 'gear') {
+    const g = state.gear.find(x => x.id === gearSel); if (!g) return;
+    for (const f of ['name', 'icon', 'price', 'image', 'desc', 'effect']) { const el = box.querySelector('[data-gf="' + f + '"]'); if (el && document.activeElement !== el) el.value = g[f] != null ? g[f] : ''; }
+    const eff = box.querySelector('[data-gf="effect"]'); if (eff) eff.placeholder = modsText(g.mods) || '（沒有數值效果）';
+  }
+}
+// 技能內容改了：整格存成一份（第一次改時，從遊戲算出來的內容複製一份）
+function updateSkill(mutate, tag) {
+  const base = currentNode(); if (!base) return;
+  remember(tag);
+  const m = state.skills.members[skillMember] || (state.skills.members[skillMember] = {});
+  const node = clone(m[skillNode] || base); mutate(node);
+  if (skillNode === 'trait-1') node.cost = 0;
+  m[skillNode] = node;
+  saveDraft(); sendState();
+}
+function updateGear(mutate, tag) {
+  const g = state.gear.find(x => x.id === gearSel); if (!g) return;
+  remember(tag); mutate(g); saveDraft(); sendState();
+}
+$q('leftBody').addEventListener('click', e => {
+  const t = e.target;
+  const k = t.closest('[data-key]'); if (k) { select(k.dataset.key); return; }
+  const n = t.closest('[data-node]');
+  if (n) { skillNode = n.dataset.node; toGame({ type: 'member', member: skillMember, node: skillNode }); select('node:' + skillNode); renderLeft(); return; }
+  if (t.id === 'skReset') { remember(); const m = state.skills.members[skillMember]; if (m) { delete m[skillNode]; if (!Object.keys(m).length) delete state.skills.members[skillMember]; } saveDraft(); sendState(); renderLeft(); setStatus('這格技能恢復預設（還沒存到專案）'); return; }
+  if (t.matches('[data-sk-mod-add]')) { updateSkill(nd => { nd.mods = (nd.mods || []).concat([{ path: 'dmg', mul: 1.1 }]); }); renderLeft(); return; }
+  if (t.matches('[data-sk-mod-del]')) { const i = Number(t.closest('.mod').dataset.mod); updateSkill(nd => { nd.mods.splice(i, 1); }); renderLeft(); return; }
+  const g = t.closest('[data-gear]'); if (g) { gearSel = g.dataset.gear; renderLeft(); return; }
+  if (t.id === 'gearAdd') {
+    remember(); let i = 1; while (state.gear.some(x => x.id === 'sg-new' + i)) i++;
+    const ng = { id: 'sg-new' + i, name: '新裝備 ' + i, icon: '🎽', image: '', price: 100, desc: '', effect: '', mods: [{ path: 'dmg', mul: 1.05 }] };
+    state.gear.push(ng); gearSel = ng.id; saveDraft(); sendState(); renderLeft(); setStatus('新增了一件裝備（還沒存到專案）'); return;
+  }
+  if (t.id === 'gearDel') {
+    const g2 = state.gear.find(x => x.id === gearSel); if (!g2 || !confirm('刪除「' + (g2.name || g2.id) + '」？已經買了、穿著的玩家會失去這件裝備。（可以按 Ctrl+Z 回來）')) return;
+    remember(); state.gear = state.gear.filter(x => x.id !== gearSel); gearSel = null; saveDraft(); sendState(); renderLeft(); return;
+  }
+  if (t.matches('[data-gf-mod-add]')) { updateGear(g2 => { g2.mods = (g2.mods || []).concat([{ path: 'dmg', mul: 1.05 }]); }); renderLeft(); return; }
+  if (t.matches('[data-gf-mod-del]')) { const i = Number(t.closest('.mod').dataset.mod); updateGear(g2 => { g2.mods.splice(i, 1); }); renderLeft(); return; }
+});
+$q('leftBody').addEventListener('input', e => {
+  const t = e.target;
+  if (t.dataset.sk) { const f = t.dataset.sk; updateSkill(nd => { nd[f] = f === 'cost' ? Math.max(0, Math.round(+t.value || 0)) : t.value; }, 'sk:' + skillMember + skillNode + f); if (f === 'name') { /* 名稱改了，清單不用重畫 */ } return; }
+  if (t.matches('[data-sk-mod]')) { const box = t.closest('.mods'); updateSkill(nd => { nd.mods = readMods(box, 'sk'); }, 'skmod:' + skillMember + skillNode); fillContentFields(); return; }
+  if (t.dataset.gf) { const f = t.dataset.gf; updateGear(g => { g[f] = f === 'price' ? Math.max(0, Math.round(+t.value || 0)) : t.value; }, 'gf:' + gearSel + f); return; }
+  if (t.matches('[data-gf-mod]')) { const box = t.closest('.mods'); updateGear(g => { g.mods = readMods(box, 'gf'); }, 'gfmod:' + gearSel); fillContentFields(); return; }
+});
+$q('leftBody').addEventListener('change', e => {
+  if (e.target.id === 'skMember') { skillMember = e.target.value; toGame({ type: 'member', member: skillMember, node: skillNode || undefined }); renderLeft(); return; }
+  if (e.target.matches('[data-sk-mod], [data-gf-mod]')) { /* 下拉選單用 input 事件已經處理 */ }
+  if (leftTab === 'gear' && e.target.dataset.gf) renderLeft();   // 名稱、圖示、價格改完：更新清單
+});
+
+// ---- 右邊：版面調整 ----
+const num = (f, label) => '<label>' + label + '<input type="number" step="1" data-f="' + f + '"></label>';
+function renderProps(rebuild = true) {
+  const box = $q('props');
+  if (!selKey) { box.innerHTML = '<p class="empty">先在左邊清單或中間的畫面上選一個東西</p>'; return; }
+  const inf = info[selKey] || {}, t = inf.text;
+  const sig = selKey + '|' + (t ? t.k : '-');
+  if (rebuild || box.dataset.sig !== sig) {
+    box.dataset.sig = sig;
+    let html = '<div class="sel-name">' + esc(labelOf(selKey)) + '</div><div class="sel-sub" id="selSub"></div>' +
+      '<div class="sec"><div class="sec-head">位置（往右／往下為正，px）<span class="sp"></span><button type="button" class="small" data-reset="pos">↺ 恢復預設</button></div>' +
+      '<div class="two">' + num('x', 'X') + num('y', 'Y') + '</div>' +
+      '<div class="btns"><button type="button" class="small" data-center="both">⊕ 置中</button><button type="button" class="small" data-center="x">↔ 水平置中</button><button type="button" class="small" data-center="y">↕ 垂直置中</button></div>' +
+      '<div class="orig">置中＝放到外面那一層框的正中間</div></div>' +
+      (isImg(selKey)
+        ? '<div class="sec"><div class="sec-head">大小（px，長寬等比例）<span class="sp"></span><button type="button" class="small" data-reset="size">↺ 恢復預設</button></div>' +
+          '<div class="one">' + num('size', '寬（高度照圖片比例，1px 一格）') + '</div></div>'
+        : '<div class="sec"><div class="sec-head">大小（px，空白＝原本）<span class="sp"></span><button type="button" class="small" data-reset="size">↺ 恢復預設</button></div>' +
+          '<div class="two">' + num('w', '寬') + num('h', '高') + '</div></div>');
+    if (isText(selKey)) html +=
+      '<div class="sec"><div class="sec-head">文字大小與對齊<span class="sp"></span><button type="button" class="small" data-reset="font">↺ 恢復預設</button></div>' +
+      '<div class="two">' + num('font', '字級（px，空白＝原本）') + '<label>對齊<span class="btns" style="margin:0">' +
+      ['left', 'center', 'right'].map(a => '<button type="button" class="small" data-align="' + a + '">' + ALIGN_NAMES[a] + '</button>').join('') + '</span></label></div></div>';
+    if (t) html += '<div class="sec"><div class="sec-head">文字內容<span class="sp"></span><button type="button" class="small" data-reset="text">↺ 恢復預設</button></div>' +
+      '<input type="text" data-text><div class="orig">' + esc(t.scope || '') + '</div><div class="orig" id="textOrig"></div></div>';
+    else if (/^text\.(name|intro|role|ability|status)$|^text\.skill|^text\.(desc|stat)$/.test(selKey)) html += '<div class="sec"><div class="note">這段文字每個隊員／每格技能都不一樣：' +
+      (/skill/.test(selKey) ? '到左邊「技能內容」改。' : /^text\.(desc|stat)$/.test(selKey) ? '到左邊「裝備清單」改。' : '名字、簡介在「角色資料頁」改。') + '</div></div>';
+    if (inf.skill) html += '<div class="sec"><div class="note">這是「' + esc(inf.skill.memberName) + '」的「' + esc(inf.skill.node.name) + '」。<br><button type="button" class="small" id="goSkill">到「技能內容」改這格技能</button></div></div>';
+    html += '<div class="actions" style="margin-top:12px"><button type="button" class="danger" id="resetOne">這一個全部恢復預設</button></div>';
+    box.innerHTML = html;
+  }
+  const o = elOf(selKey), v = inf.values || {};
+  const set = (f, val, ph) => { const el = box.querySelector('[data-f="' + f + '"]'); if (!el) return; if (document.activeElement !== el) el.value = val; if (ph != null) el.placeholder = ph; };
+  set('x', o.x || 0); set('y', o.y || 0);
+  set('w', o.w || '', v.w != null ? '原本 ' + v.w : '原本'); set('h', o.h || '', v.h != null ? '原本 ' + v.h : '原本');
+  set('size', o.size || '', v.size != null ? '原本 ' + v.size : '原本');
+  set('font', o.font || '', v.font != null ? '原本 ' + v.font : '原本');
+  box.querySelectorAll('[data-align]').forEach(b => b.classList.toggle('on', (o.align || '') === b.dataset.align));
+  const sub = $q('selSub');
+  if (sub) sub.textContent = [inf.visible === false ? '（現在畫面上看不到）' : '', inf.count > 1 ? '同名的有 ' + inf.count + ' 個，一起調整' : ''].filter(Boolean).join('　');
+  const ta = box.querySelector('[data-text]');
+  if (ta && t) { if (document.activeElement !== ta) ta.value = t.value || ''; ta.placeholder = t.original || ''; $q('textOrig').textContent = '預設：' + (t.original || '（空白）'); }
+}
+$q('props').addEventListener('input', e => {
+  if (!selKey) return;
+  if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t) { remember('text:' + selKey); setText(t, e.target.value); } return; }
+  const f = e.target.dataset.f; if (!f) return;
+  remember('field:' + selKey + ':' + f);
+  const val = e.target.value === '' ? 0 : +e.target.value;
+  setEl(selKey, { [f]: f === 'x' || f === 'y' ? val : Math.max(0, val) });
+});
+$q('props').addEventListener('click', e => {
+  if (!selKey) return;
+  const b = e.target.closest('button'); if (!b) return;
+  if (b.id === 'goSkill') { const s = info[selKey].skill; skillMember = s.member; skillNode = s.id; leftTab = 'skills'; document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === 'skills')); renderLeft(); return; }
+  if (b.dataset.center || b.dataset.align || b.dataset.reset || b.id === 'resetOne') remember();
+  if (b.dataset.center) { toGame({ type: 'center', key: selKey, axis: b.dataset.center }); return; }
+  if (b.dataset.align) { const o = elOf(selKey); setEl(selKey, { align: o.align === b.dataset.align ? '' : b.dataset.align }); return; }
+  const r = b.dataset.reset;
+  if (r === 'pos') setEl(selKey, { x: 0, y: 0 });
+  else if (r === 'size') setEl(selKey, { w: 0, h: 0, size: 0 });
+  else if (r === 'font') setEl(selKey, { font: 0, align: '' });
+  else if (r === 'text') { const t = (info[selKey] || {}).text; if (t) { setText(t, ''); renderProps(false); } }
+  else if (b.id === 'resetOne') {
+    delete state.layout.elements[selKey];
+    const t = (info[selKey] || {}).text; if (t) setText(t, '');
+    saveDraft(); sendState(); renderLeft(); renderProps();
+    setStatus('「' + labelOf(selKey) + '」恢復預設（還沒存到專案）');
+  }
+});
+$q('resetAll').addEventListener('click', () => {
+  if (!confirm('確定把版面（位置、大小、介面文字）全部恢復預設？技能內容、裝備清單不會動。（可以按 Ctrl+Z 回來）')) return;
+  remember(); state.layout = { elements: {}, texts: {} };
+  saveDraft(); sendState(); renderLeft(); renderProps(); setStatus('版面全部恢復預設（還沒存到專案）');
+});
+function select(key) { selKey = key; if (leftTab === 'parts') renderLeft(); renderProps(); toGame({ type: 'select', key }); }
+
+// ---- 中間：遊戲畫面（iframe）----
+const frame = $q('game'), stageWrap = $q('stageWrap');
+const GAME_W = 960, GAME_H = 700;   // iframe 用固定大小（T-Pad 剛好是最大的 888 寬），再縮放到放得下
+function fitFrame() {
+  const s = Math.min(1, stageWrap.clientWidth / GAME_W);
+  frame.style.width = GAME_W + 'px'; frame.style.height = GAME_H + 'px'; frame.style.transform = 'scale(' + s + ')';
+  stageWrap.style.height = Math.round(GAME_H * s) + 'px';
+}
+window.addEventListener('resize', fitFrame); fitFrame();
+// 跟遊戲畫面溝通一律用訊息（postMessage）：直接雙擊 HTML 打開時，瀏覽器不准這邊直接碰 iframe 裡面
+const toGame = m => { try { frame.contentWindow.postMessage(Object.assign({ src: 'squadedit-editor' }, m), '*'); } catch (_) {} };
+function sendState() { toGame({ type: 'state', layout: state.layout, skills: state.skills, gear: state.gear }); }
+let gameReady = false;
+setInterval(() => { if (!gameReady) toGame({ type: 'ping' }); }, 700);
+frame.addEventListener('load', () => { gameReady = false; toGame({ type: 'ping' }); });
+window.addEventListener('message', e => {
+  const m = e.data; if (!m || m.src !== 'squadedit-game' || e.source !== frame.contentWindow) return;
+  if (m.type === 'ready') { if (!gameReady) { gameReady = true; toGame({ type: 'setup' }); } }
+  else if (m.type === 'opened') { sendState(); toGame({ type: 'page', page }); toGame({ type: 'mode', play }); if (selKey) toGame({ type: 'select', key: selKey }); }
+  else if (m.type === 'parts') { parts = m.list || []; members = m.members || members; nodes = m.nodes || nodes; renderLeft(); }
+  else if (m.type === 'pick') { if (m.key !== selKey) { selKey = m.key; if (leftTab === 'parts') renderLeft(); renderProps(); } }
+  else if (m.type === 'info') {
+    info[m.key] = m;
+    if (m.page && m.page !== page) { page = m.page; document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('on', x.dataset.page === page)); }
+    if (m.skill && leftTab === 'skills' && m.skill.member === skillMember && m.skill.id === skillNode && !savedNode(skillMember, skillNode)) renderLeft();
+    if (m.key === selKey) renderProps(false);
+  }
+  else if (m.type === 'move') setEl(m.key, { x: m.x, y: m.y }, false);   // 拖曳中（遊戲那邊已經先動了）
+  else if (m.type === 'resize') setEl(m.key, m.size ? { size: m.size } : { w: m.w, h: m.h }, false);
+  else if (m.type === 'dragstart') remember();
+  else if (m.type === 'moved') setStatus('調整了「' + labelOf(m.key) + '」（還沒存到專案）');
+  else if (m.type === 'arrow') nudge(m.key, m.shift);
+  else if (m.type === 'undo') undo();
+  else if (m.type === 'redo') redo();
+  else if (m.type === 'save') sqSave.save(false);
+});
+document.querySelector('.modes').addEventListener('click', e => {
+  const p = e.target.closest('[data-page]');
+  if (p) { page = p.dataset.page; document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('on', x === p)); toGame({ type: 'page', page }); return; }
+  const b = e.target.closest('[data-mode]'); if (!b) return;
+  play = b.dataset.mode === 'play';
+  document.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x === b));
+  $q('modeHint').textContent = play ? '照遊戲裡的方式點：學技能、換裝備都可以試（不會存檔）；要調整請切回編輯模式' : '點一下選取、拖曳移動；點隊員、技能、裝備格會順便換畫面';
+  toGame({ type: 'mode', play });
+});
+function nudge(key, shift) {   // 方向鍵微調（Shift＝10px）
+  if (!selKey) return;
+  const n = shift ? 10 : 1, o = elOf(selKey);
+  remember('nudge:' + selKey);
+  setEl(selKey, { x: (o.x || 0) + (key === 'ArrowLeft' ? -n : key === 'ArrowRight' ? n : 0), y: (o.y || 0) + (key === 'ArrowUp' ? -n : key === 'ArrowDown' ? n : 0) });
+}
+document.addEventListener('keydown', e => {
+  if (!selKey || play || !e.key.startsWith('Arrow') || (e.target && e.target.closest && e.target.closest('input, textarea, select'))) return;
+  e.preventDefault(); nudge(e.key, e.shiftKey);
+});
+
+// ---- 存檔 ----
+function layoutText() {
+  return '/* ===== T-Pad「Y102隊員」頁的版面（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
+    '   elements：每個可以調整的區域／圖片／文字 → { x, y：位移（像素）, w, h：寬高（像素）, size：圖片大小（寬，高度照比例）, font：字級, align：文字對齊 }\n' +
+    '   texts：改過的介面文字（標題、按鈕…）\n' +
+    '   沒寫在這裡的就照原本的樣子。套用的程式在 js/squad-page.js。 */\n' +
+    'const SQUAD_LAYOUT = ' + JSON.stringify({ elements: state.layout.elements, texts: state.layout.texts }, null, 2) + ';\n';
+}
+function skillsText() {
+  return '/* ===== Y102隊員技能樹的內容（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
+    '   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值 }\n' +
+    '   技能格 id：trait-1（普通技能 Lv1＝原本的特性）、trait-2（Lv2）、a-1／a-2（A 系列－生存）、core-1～3（核心技能）、ult（終極核心大招）、b-1／b-2（B 系列－攻擊）、aux-1／aux-2（輔助技能）\n' +
+    '   mods：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }（數值名稱見 js/skills.js 開頭）\n' +
+    '   這裡沒寫的隊員／格子，會從 data/skills.js（舊版技能資料）自動換算。 */\n' +
+    'const SQUAD_SKILLS = ' + JSON.stringify({ members: state.skills.members }, null, 2) + ';\n';
+}
+function gearText() {
+  return '/* ===== Y102隊員裝備（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
+    '   溫特在便利商店（「隊員裝備」分頁）用經費買，買了放進背包；在 T-Pad「Y102隊員」→ 裝備頁給隊員穿（每人 3 格、不分種類，一件只能給一個人穿）。\n' +
+    '   每件：{ id, name：名稱, icon：沒有圖片時用的 emoji, image：圖片路徑（可不填）, price：價錢, desc：裝備說明, effect：裝備數值（顯示用；空白＝依 mods 自動產生）, mods：實際改的數值 }\n' +
+    '   mods 的寫法跟技能一樣：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }。 */\n' +
+    'const SQUAD_GEAR = ' + JSON.stringify(state.gear, null, 2) + ';\n';
+}
+const sqSave = ProjectSave.attach({ after: [], files: [
+  { path: 'data/squad-layout.js', label: 'Y102隊員頁版面', text: layoutText },
+  { path: 'data/squad-skills.js', label: '技能內容', text: skillsText },
+  { path: 'data/squad-gear.js', label: '隊員裝備', text: gearText },
+], status: (m, err) => setStatus(m, err) });
+$q('saveBtn').addEventListener('click', e => sqSave.save(e.shiftKey));
+$q('downloadBtn').addEventListener('click', () => {
+  for (const [name, text] of [['squad-layout.js', layoutText()], ['squad-skills.js', skillsText()], ['squad-gear.js', gearText()]]) {
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], { type: 'text/javascript' })); a.download = name; a.click();
+  }
+  setStatus('已下載三個檔案，請覆蓋到 data/ 資料夾');
+});
+
+renderLeft(); renderProps(); renderUndo();

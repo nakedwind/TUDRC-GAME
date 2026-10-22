@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
-  if (/[?&](uiedit|bagedit)=1(&|$)/.test(location.search)) { const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage; } catch (_) { return false; } };
+  if (/[?&](uiedit|bagedit|squadedit)=1(&|$)/.test(location.search)) { const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage; } catch (_) { return false; } };
     P.setItem = function (k, v) { if (!isLocal(this)) return set.call(this, k, v); }; P.removeItem = function (k) { if (!isLocal(this)) return rem.call(this, k); }; P.clear = function () { if (!isLocal(this)) return clr.call(this); }; }
 </script>
 <meta charset="UTF-8">
@@ -13,6 +13,7 @@
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
 <link rel="stylesheet" href="css/style.css?v=merge-bq-inventory-20261023">
 <link rel="stylesheet" href="css/ui-feedback.css">
+<link rel="stylesheet" href="css/squad-page.css?v=squad1-20261023">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
 <body>
@@ -172,6 +173,7 @@
               <button type="button" role="tab" data-supply-tab="medical" aria-selected="false">🩹 補給 <em></em></button>
               <button type="button" role="tab" data-supply-tab="snack" aria-selected="false">🍙 零食 <em></em></button>
               <button type="button" role="tab" data-supply-tab="drink" aria-selected="false">🥤 飲料 <em></em></button>
+              <button type="button" role="tab" data-supply-tab="squadgear" aria-selected="false">🎽 隊員裝備 <em></em></button>
             </nav>
             <div id="supplyShopList" class="supply-shop-list"></div>
           </div>
@@ -224,6 +226,7 @@
     <a href="開發工坊編輯器.html">🔧 開發工坊編輯器</a>
     <a href="UI編輯器.html">🖥️ UI編輯器</a>
     <a href="背包編輯器.html">🎒 背包編輯器</a>
+    <a href="隊員裝備技能編輯器.html">🧑‍🚀 Y102隊員裝備／技能編輯器</a>
     <a href="怪物圖鑑編輯器.html">📕 怪物圖鑑編輯器</a>
   </div>
 
@@ -241,7 +244,7 @@
   <script src="data/supplies.js?v=noclickprompt-20261023"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/equipment.js?v=bag-labels-20261022"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
-  <script src="js/backpack-layout.js?v=bagedit2-20261023"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
+  <script src="js/backpack-layout.js?v=imgbox-20261023"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
   <script src="data/workshop.js?v=pistolcell2-20261022"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
   <script src="js/workshop-config.js?v=infoimg-20261022"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
@@ -275,7 +278,8 @@
   <script src="js/sentry.js?v=esclayer-20261023"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
   <script src="data/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹資料 -->
-  <script src="js/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹：花碎片學技能 -->
+  <script>document.write('<script src="data/squad-skills.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 技能樹內容（Y102隊員裝備／技能編輯器匯出）；每次都讀最新的 -->
+  <script src="js/skills.js?v=squad12-20261023"></script>   <!-- 技能樹：12 格、花碎片學技能 -->
   <script src="js/anomalous-core.js?v=practice-20261020"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
   <script src="js/core-frenzy.js?v=core-bar-up30-20261018"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
   <script src="js/combat-feel.js?v=bestiary1-20261022"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
@@ -296,8 +300,10 @@
   <script src="js/smiler.js?v=giftlines-20261023"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=dog-pickup-20261021"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=fix39-44-20261018"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=all-ammo-20261023"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
+  <script src="js/shop.js?v=squadgear-20261023"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
   <script src="js/backpack.js?v=no-owned-line-20261023"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
+  <script src="js/squad-gear.js?v=squad1-20261023"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=giftlines-20261023"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=giftlines-20261023"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=bear-20261022"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
@@ -344,6 +350,8 @@
   <script src="js/channel-actions.js?v=motes-20261021"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=squash-20261022"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=tpadm2-20261022"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
-  <script src="js/tpad.js?v=desk-only-20261023"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
+  <script src="js/tpad.js?v=squadpage-20261023"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
+  <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->
+  <script src="js/squad-page.js?v=squad1-20261023"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
 </body>
 </html>

@@ -53,7 +53,7 @@ function backroomStock(stock = BACKROOM_SHOP.stock) {
 const shopItems = () => backroomMode ? [...backroomStock(), ...backroomBulletStock()]
   : vendingMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_VENDING))
   : drinkShopMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_DRINKSHOP))
-  : SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id)));
+  : [...SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id))), ...(MAP_SAFE && typeof squadGearShopItems === 'function' ? squadGearShopItems() : [])];   // 基地的便利商店也賣隊員裝備（js/squad-gear.js）
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
 // 賣掉一個能拿多少錢（0＝不能賣：重要物品、回憶碎片這類 noDrop 的、沒有價錢的）
 const CRYSTAL_SELL_ITEM = {id:'anomalous-crystals',name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png'};
@@ -69,7 +69,7 @@ const SUPPLY_KIND = {
   hp: { name: '醫療包', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
   sp: { name: '杏仁水', stat: 'SP', key: 'E', icon: '✦', color: '#8cc7ff' },
 };
-const SHOP_KIND_ORDER = ['medical', 'snack', 'drink'];   // 商店排序：補給 → 零食 → 飲料
+const SHOP_KIND_ORDER = ['medical', 'snack', 'drink', 'squadgear'];   // 商店排序：補給 → 零食 → 飲料 → 隊員裝備
 const supplyById = id => SUPPLIES.find(entry => entry.id === id);
 function supplyEffect(item) { return item.use ? `${SUPPLY_KIND[item.use].stat} +${item.restore}` : '送禮用'; }
 function supplyNeed(use) { return !G?.player ? 0 : use === 'hp' ? G.player.maxhp - G.player.hp : G.guideMax - G.guide; }

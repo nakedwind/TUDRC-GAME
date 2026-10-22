@@ -131,9 +131,10 @@ function renderProps(rebuild = true) {
   const o = elOf(selKey), v = inf.values || {};
   const set = (f, val, ph) => { const el = box.querySelector('[data-f="' + f + '"]'); if (!el) return; if (document.activeElement !== el) el.value = val; if (ph != null) el.placeholder = ph; };
   set('x', o.x || 0); set('y', o.y || 0);
-  set('w', o.w || '', v.w != null ? '原本 ' + v.w : '原本'); set('h', o.h || '', v.h != null ? '原本 ' + v.h : '原本');
-  set('size', o.size || '', v.size != null ? '原本 ' + v.size : '原本');
-  set('font', o.font || '', v.font != null ? '原本 ' + v.font : '原本');
+  // 沒調整過的欄位直接填目前的大小（例如鑰匙原本 80），按上下箭頭才會從 80 開始加減，不會從 0 開始
+  set('w', o.w || v.w || '', v.w != null ? '原本 ' + v.w : '原本'); set('h', o.h || v.h || '', v.h != null ? '原本 ' + v.h : '原本');
+  set('size', o.size || v.size || '', v.size != null ? '原本 ' + v.size : '原本');
+  set('font', o.font || v.font || '', v.font != null ? '原本 ' + v.font : '原本');
   box.querySelectorAll('[data-align]').forEach(b => b.classList.toggle('on', (o.align || '') === b.dataset.align));
   const sub = $b('selSub');
   if (sub) sub.textContent = [inf.visible === false ? '（現在畫面上看不到，換個分頁或物品）' : '', inf.count > 1 ? '同一組有 ' + inf.count + ' 個，一起調整' : '', inf.item && t && !t.note && t.store === 'items' ? '目前物品：' + inf.item : ''].filter(Boolean).join('　');

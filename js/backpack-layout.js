@@ -72,7 +72,16 @@ applyItemTexts();
 // ---- 位置、大小、字級：產生一份 CSS 蓋在原本的樣式上 ----
 const BACKPACK_BASE_CSS =
   // 物品說明：從框的左上角開始往下寫（不置中）
-  '#backpackDetail .bag-desc{text-align:left;align-self:start;justify-self:stretch;margin:0;overflow-wrap:anywhere;}';
+  '#backpackDetail .bag-desc{text-align:left;align-self:start;justify-self:stretch;margin:0;overflow-wrap:anywhere;}' +
+  // 說明欄每個物品的說明文字都從同一個高度開始：
+  //   原本左邊的圖比較高，多出來的高度會平均分給每一列，說明只有一行的物品會被往下擠、兩行的不會，同樣填 Y −30 卻高高低低。
+  //   改成多出來的高度全部給最下面那一列；說明往下留 25px，跟原本一行說明的位置一樣（背包編輯器裡填的 Y 才不用重調）。
+  '@media (min-width:861px){#backpack .backpack-body > #backpackDetail:not(.gear-detail){grid-template-rows:auto auto auto 1fr;}' +
+  '#backpack .backpack-body > #backpackDetail:not(.gear-detail) > .bag-desc{margin-top:25px;}' +
+  // 說明欄左邊的圖片框：永遠 100×112，不管裡面的圖調多大都不會跟著變（框的大小要改請在背包編輯器調「說明欄的圖片框」）
+  //   圖放大超過框的時候，從框的正中間往四周長出去，不會把框撐大
+  '#backpack .backpack-body > #backpackDetail > .bag-detail-image{box-sizing:border-box;height:112px;grid-template:minmax(0,1fr) / minmax(0,1fr);place-items:center;overflow:visible;}' +
+  '#backpack .backpack-body > #backpackDetail > .bag-detail-image > img{min-width:0;min-height:0;}}';
 function backpackLayoutCss() {
   let css = BACKPACK_BASE_CSS;
   const els = (typeof BACKPACK_LAYOUT !== 'undefined' && BACKPACK_LAYOUT.elements) || {};
