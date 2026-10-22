@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>精靈圖切割器｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  :root { color-scheme:dark; font-family:system-ui,'Microsoft JhengHei',sans-serif; background:#10151c; color:#e8edf5 }
+  * { box-sizing:border-box } body { max-width:1360px; margin:0 auto; padding:24px }
+  h1 { font-size:25px; margin:0 0 6px } h2 { font-size:17px; margin:0 0 10px } h3 { font-size:14px; margin:16px 0 8px; color:#cfe0ee }
+  p { color:#aabacc; line-height:1.5; margin:0 } a { color:#9bd2ff } code { color:#ffd9a8 }
+  .top { display:flex; justify-content:space-between; gap:14px; align-items:flex-start; margin-bottom:18px }
+  .nav { display:flex; gap:14px; padding-top:7px; white-space:nowrap }
+  .layout { display:grid; grid-template-columns:minmax(230px,270px) minmax(380px,1fr) minmax(260px,300px); gap:14px; align-items:start }
+  .panel { background:#1b2530; border:1px solid #3a4d60; border-radius:13px; padding:16px; min-width:0 }
+  button { cursor:pointer; font:inherit; color:#eaf4ff; background:#2a3c50; border:1px solid #57718b; border-radius:8px; padding:7px 10px }
+  button:hover { background:#345169 } button.primary { background:#236b79; border-color:#69b9c1; font-weight:700 } button.on { background:#245668; border-color:#7fd7da }
+  button:disabled { opacity:.45; cursor:default }
+  input { background:#101923; border:1px solid #536b80; border-radius:7px; color:#edf5ff; font:inherit; padding:6px 8px; min-width:0; width:100% }
+  .list { display:grid; gap:5px; max-height:430px; overflow:auto; scrollbar-width:thin; scrollbar-color:#537d91 #111c27 }
+  .list button { display:flex; align-items:center; gap:9px; text-align:left; background:#15202b; border-color:#334a5d; width:100%; padding:5px 8px }
+  .list button.on { background:#224358; border-color:#82cbe2 }
+  .list .face { width:34px; height:34px; flex:none; overflow:hidden; border-radius:6px; background:#0e1721; position:relative }
+  .list .face img { position:absolute; width:68px; height:68px; left:-17px; top:-4px; image-rendering:pixelated }
+  .list span { display:grid; gap:1px; min-width:0 } .list small { color:#9fb1c2; font-size:11px }
+  .field { display:grid; gap:4px; margin-top:10px; color:#b9cad9; font-size:12px }
+  .letters { display:flex; gap:6px; flex-wrap:wrap }
+  .letters button { min-width:44px }
+  .path { margin-top:10px; padding:8px 10px; border-radius:8px; background:#101923; color:#ffd9a8; font:12px/1.5 Consolas,monospace; word-break:break-all }
+  .note { margin-top:8px; font-size:12px; line-height:1.6; color:#9eb2c4 }
+  .note.warn { color:#ffc27a } .note.ok { color:#8be0c2 }
+  .drop { display:grid; place-items:center; gap:8px; min-height:200px; padding:16px; border:2px dashed #4f6a82; border-radius:12px; background:#0d141b; text-align:center; color:#9eb2c4; cursor:pointer }
+  .drop.over { border-color:#7fd7da; background:#12212b }
+  .drop b { color:#e8edf5; font-size:15px }
+  #sheetWrap { position:relative; display:none; margin-top:12px; overflow:auto }
+  #sheetCanvas { display:block; image-rendering:pixelated; background:repeating-conic-gradient(#1a2430 0 25%, #121a23 0 50%) 0 0/24px 24px; border-radius:8px }
+  .size { margin-top:8px; font-size:13px }
+  .size.bad { color:#ff9c9c } .size.good { color:#8be0c2 }
+  .anim { display:grid; grid-template-columns:repeat(2,1fr); gap:10px }
+  .anim figure { margin:0; display:grid; place-items:center; gap:4px; padding:8px 4px; border:1px solid #33475a; border-radius:10px; background:repeating-conic-gradient(#1a2430 0 25%, #121a23 0 50%) 0 0/16px 16px }
+  .anim canvas { width:128px; height:128px; image-rendering:pixelated }
+  .anim figcaption { font-size:12px; color:#b9cad9 }
+  .compare { display:flex; gap:10px; justify-content:center; margin-top:6px }
+  .compare figure { margin:0; text-align:center; font-size:12px; color:#9fb1c2 }
+  .compare canvas, .compare img { width:96px; height:96px; image-rendering:pixelated; background:#0d141b; border:1px solid #33475a; border-radius:8px }
+  .actions { display:grid; gap:8px; margin-top:14px }
+  #status { min-height:20px; margin-top:10px; font-size:13px; line-height:1.6; color:#8be0c2; white-space:pre-line }
+  #status.err { color:#ff9c9c }
+  @media (max-width:1050px) { .layout { grid-template-columns:1fr } }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div>
+      <h1>✂️ 精靈圖切割器</h1>
+      <p>把角色的精靈圖（320×192，一格 64×64，5 欄 × 3 列）切成遊戲用的 15 張圖，直接存進 <code>images/character/角色_造型字母/</code>。</p>
+      <p>步驟：① 左邊選角色和造型 → ② 中間放進精靈圖 → ③ 右邊確認動畫 → ④ 按「✂️ 切割並存到專案」。遊戲按 Ctrl+F5 就會換成新圖。</p>
+    </div>
+    <div class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="角色資料頁.html">🪪 角色資料頁</a><a href="服裝編輯器.html">👗 服裝編輯器</a></div>
+  </div>
+
+  <div class="layout">
+    <section class="panel">
+      <h2>① 角色與造型</h2>
+      <div class="list" id="charList"></div>
+      <label class="field">角色代號（英文小寫，新角色自己填）<input id="charId" placeholder="例如 cael" autocomplete="off"></label>
+      <div class="field">造型
+        <div class="letters" id="letters"></div>
+      </div>
+      <div class="note" id="letterNote"></div>
+      <div class="path" id="folderPath"></div>
+      <div class="note" id="useNote"></div>
+    </section>
+
+    <section class="panel">
+      <h2>② 精靈圖</h2>
+      <label class="drop" id="drop">
+        <b>把精靈圖拖進來，或點這裡選檔案</b>
+        <span>PNG，320×192（5 欄 × 3 列，每格 64×64）</span>
+        <input type="file" id="file" accept="image/png,image/*" hidden>
+      </label>
+      <div class="size" id="sizeNote"></div>
+      <div id="sheetWrap"><canvas id="sheetCanvas"></canvas></div>
+      <div class="note">每一欄＝一個方向：正面、左側、右側、背面、眨眼。每一欄由上往下是第 1、2、3 張（眨眼那一欄由下往上＝慢慢閉眼）。</div>
+    </section>
+
+    <section class="panel">
+      <h2>③ 預覽</h2>
+      <div class="anim" id="anim"></div>
+      <h3>跟資料夾裡現在的圖比較（正面）</h3>
+      <div class="compare">
+        <figure><img id="oldFront" alt=""><figcaption>現在的</figcaption></figure>
+        <figure><canvas id="newFront" width="64" height="64"></canvas><figcaption>新的</figcaption></figure>
+      </div>
+      <div class="actions">
+        <button type="button" class="primary" id="save" disabled>✂️ 切割並存到專案</button>
+        <button type="button" id="pickDir" title="重新選擇遊戲資料夾">📁 重新選遊戲資料夾</button>
+      </div>
+      <div id="status"></div>
+      <div class="note">存檔前，資料夾裡原本的圖會先備份到 <code>backups/精靈圖切割器/</code>。需要 Chrome 或 Edge。</div>
+    </section>
+  </div>
+
+  <script src="data/characters.js"></script>
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js"></script>
+  <script src="js/sprite-cutter.js"></script>
+</body>
+</html>

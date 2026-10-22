@@ -13,6 +13,7 @@ const SITUATIONS = [
   { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
   { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>。' },
   { group: '找他說話（特殊）', key: 'chat', label: '偶爾閒聊（隨機一句）', when: '見過面之後找他說話，大約<b>四次有一次</b>改說這裡的一句。' },
+  { group: '保留（遊戲不會用）', key: 'reserve', label: '保留台詞', when: '先收起來的台詞，<b>遊戲不會說</b>。之後要用時，複製到上面的情境就好（例如角色搬到別的地方時）。' },
   { group: '戰鬥中', key: 'battle', label: '出勤時的頭上泡泡', when: '戰鬥地圖中，每隔 <b>11～22 秒</b>隨機冒出一句。' },
   { group: '戰鬥中', key: 'lowSp', label: '嚮導 SP 偏低・頭暈', when: '嚮導 SP 低於 <b>40</b> 時說一句；恢復到 45 以上後可再次觸發。' },
   { group: '戰鬥中', key: 'sentry', label: '找他說話（出勤中）', ordered: true, when: '戰鬥中點他、選「對話」時，<b>依序</b>一句一句說完。' },
