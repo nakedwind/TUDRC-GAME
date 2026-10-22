@@ -569,7 +569,8 @@ function drawSpeechBubble(cx, bottomY, text, col) {
   return y;   // 泡泡頂端：互動提示會排到它上面，不會蓋住
 }
 // 泡泡太長就換行：每行最寬 BUBBLE_MAX_W 像素；幾行之間盡量一樣長，而且優先在標點符號後面斷（台詞裡打 \n 也會換行）
-const BUBBLE_MAX_W = 224;   // 大約 16 個字
+const BUBBLE_MAX_W = 200;   // 大約 14 個字（建議寬度：在標點斷行時最多可以再超出 BUBBLE_STRETCH 像素）
+const BUBBLE_STRETCH = 28;   // 大約 2 個字
 const bubbleWrapCache = new Map();
 function wrapBubbleText(text) {
   const key = String(text); if (bubbleWrapCache.has(key)) return bubbleWrapCache.get(key);
@@ -583,9 +584,11 @@ function wrapBubbleText(text) {
       const w = i => ctx.measureText(rest.slice(0, i).join('')).width, restW = ctx.measureText(rest.join('')).width, target = restW / n;
       let best = -1, bestScore = Infinity;
       for (let i = 1; i < rest.length; i++) {
-        const wl = w(i); if (wl > BUBBLE_MAX_W) break;
+        const wl = w(i); if (wl > BUBBLE_MAX_W + BUBBLE_STRETCH) break;
+        const punct = /[，。！？…、；」』）\s]/.test(rest[i - 1]);
+        if (wl > BUBBLE_MAX_W && !punct) continue;   // 超過建議寬度：只有在標點後面斷才可以
         if (/[，。！？…、；」』）]/.test(rest[i])) continue;   // 下一行不能用標點開頭
-        if (ctx.measureText(rest.slice(i).join('')).width > BUBBLE_MAX_W * (n - 1)) continue;   // 剩下的要塞得進剩下的行數
+        if (ctx.measureText(rest.slice(i).join('')).width > (BUBBLE_MAX_W + BUBBLE_STRETCH) * (n - 1)) continue;   // 剩下的要塞得進剩下的行數
         const score = Math.abs(wl - target) - (/[，。！？…、；」』）\s]/.test(rest[i - 1]) ? 64 : 0);   // 在標點後面斷：大約可以多讓 4 個字的長短差
         if (score < bestScore) { bestScore = score; best = i; }
       }
