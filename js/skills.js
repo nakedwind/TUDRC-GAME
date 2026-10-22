@@ -3,17 +3,19 @@
      ① 普通技能 Lv1（trait-1）＝原本的特性，一開始就會
      ② 普通技能 Lv2（trait-2）＝特性更強
      ③ 從 Lv2 往右分三條：A 系列－生存（上排 2 格）、核心技能（中排 3 格）→ 終極核心大招、B 系列－攻擊（下排 2 格）
+        核心技能第 1 格：A1、B1 要先學其中一個（技能樹上的兩條斜線）
      ④ 輔助技能 2 個（永久被動，學會 Lv2 之後就能學，各自獨立）
    技能內容：data/squad-skills.js（「Y102隊員裝備／技能編輯器」存的）；那邊沒寫的，從 data/skills.js（舊版技能資料）自動換算。
    學會的技能存在 training.skills（js/progression.js）：{ 隊員: [技能 id…] }。學會後把 mods 套到 TYPES 上；隊員裝備（js/squad-gear.js）的數值也在這裡一起套。
    效果 mods：path＝數值名稱（dmg 攻擊、rate 攻速、hp 血量、range 射程、defense 防禦、accuracy 命中、walkSpeed 移動速度…），mul＝乘、add＝加
 */
-// req：要先學哪一格；group：trait／a／b／core／ult／aux（畫面分區用）
+// req：要先學哪一格；reqAny：這幾格要先學其中一個；group：trait／a／b／core／ult／aux（畫面分區用）
 const SKILL_LAYOUT = [
   { id: 'trait-1', group: 'trait', req: null, tag: '普通技能 Lv1' },
   { id: 'trait-2', group: 'trait', req: 'trait-1', tag: '普通技能 Lv2' },
   { id: 'a-1', group: 'a', req: 'trait-2', tag: 'A 系列－生存' }, { id: 'a-2', group: 'a', req: 'a-1', tag: 'A 系列－生存' },
-  { id: 'core-1', group: 'core', req: 'trait-2', tag: '核心技能' }, { id: 'core-2', group: 'core', req: 'core-1', tag: '核心技能' }, { id: 'core-3', group: 'core', req: 'core-2', tag: '核心技能' },
+  // core-1 的 reqAny：A1、B1 要先學其中一個（技能樹上的兩條斜線）
+  { id: 'core-1', group: 'core', req: 'trait-2', reqAny: ['a-1', 'b-1'], tag: '核心技能' }, { id: 'core-2', group: 'core', req: 'core-1', tag: '核心技能' }, { id: 'core-3', group: 'core', req: 'core-2', tag: '核心技能' },
   { id: 'ult', group: 'ult', req: 'core-3', tag: '終極核心大招' },
   { id: 'b-1', group: 'b', req: 'trait-2', tag: 'B 系列－攻擊' }, { id: 'b-2', group: 'b', req: 'b-1', tag: 'B 系列－攻擊' },
   { id: 'aux-1', group: 'aux', req: 'trait-2', tag: '輔助技能（永久被動）' }, { id: 'aux-2', group: 'aux', req: 'trait-2', tag: '輔助技能（永久被動）' },
@@ -64,6 +66,7 @@ function skillStateOf(type, id) {
   if (hasSkill(type, id)) return 'owned';
   const lay = skillLayoutOf(id); if (!lay) return 'locked';
   if (lay.req && !hasSkill(type, lay.req)) return 'locked';   // 前面那一格還沒學
+  if (lay.reqAny && !lay.reqAny.some(id => hasSkill(type, id))) return 'locked';   // 斜線的那幾格一個都還沒學
   return 'open';
 }
 const skillLearnedCount = type => SKILL_LAYOUT.filter(n => hasSkill(type, n.id)).length;

@@ -26,11 +26,12 @@ const info = {};   // 遊戲畫面量到的：info[key] = { visible, count, valu
 const ALIGN_NAMES = { left: '靠左', center: '置中', right: '靠右' };
 function setStatus(msg, err = false) { $q('status').textContent = msg; $q('status').classList.toggle('err', !!err); }
 function saveDraft() { try { localStorage.setItem(SQ_DRAFT_KEY, JSON.stringify(state)); } catch (_) {} }
-const partOf = key => parts.find(p => p.key === key) || { key, label: key, group: '', kind: /^img\.|Img:|Icon:/.test(key) ? 'img' : '' };
+const partOf = key => parts.find(p => p.key === key) || { key, label: key, group: '', kind: /^img\.|Img:|Icon:/.test(key) ? 'img' : /^(roster|node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '' };
 const labelOf = key => partOf(key).label;
 const elOf = key => state.layout.elements[key] || {};
 const isImg = key => partOf(key).kind === 'img';
-const isText = key => !isImg(key) && /^(text|btn|stat(Label|Value)|gearSlotName|lookSlotName)/.test(key);
+const isBox = key => partOf(key).kind === 'box';   // 方形的框：大小＝寬＝高
+const isText = key => !isImg(key) && !isBox(key) && /^(text|btn|stat(Label|Value)|gearSlotName|lookSlotName)/.test(key);
 const isChanged = key => !!state.layout.elements[key] || !!state.layout.texts[key];
 
 // ---- 上一步／下一步（Ctrl+Z／Ctrl+Y）：每次修改之前記下整份設定；連續的同一種修改只記一次 ----
@@ -234,9 +235,9 @@ function renderProps(rebuild = true) {
       '<div class="two">' + num('x', 'X') + num('y', 'Y') + '</div>' +
       '<div class="btns"><button type="button" class="small" data-center="both">⊕ 置中</button><button type="button" class="small" data-center="x">↔ 水平置中</button><button type="button" class="small" data-center="y">↕ 垂直置中</button></div>' +
       '<div class="orig">置中＝放到外面那一層框的正中間</div></div>' +
-      (isImg(selKey)
+      (isImg(selKey) || isBox(selKey)
         ? '<div class="sec"><div class="sec-head">大小（px，長寬等比例）<span class="sp"></span><button type="button" class="small" data-reset="size">↺ 恢復預設</button></div>' +
-          '<div class="one">' + num('size', '寬（高度照圖片比例，1px 一格）') + '</div></div>'
+          '<div class="one">' + num('size', isBox(selKey) ? '寬＝高（長寬一起，1px 一格）' : '寬（高度照圖片比例，1px 一格）') + '</div></div>'
         : '<div class="sec"><div class="sec-head">大小（px，空白＝原本）<span class="sp"></span><button type="button" class="small" data-reset="size">↺ 恢復預設</button></div>' +
           '<div class="two">' + num('w', '寬') + num('h', '高') + '</div></div>');
     if (isText(selKey)) html +=
@@ -263,6 +264,14 @@ function renderProps(rebuild = true) {
   const ta = box.querySelector('[data-text]');
   if (ta && t) { if (document.activeElement !== ta) ta.value = t.value || ''; ta.placeholder = t.original || ''; $q('textOrig').textContent = '預設：' + (t.original || '（空白）'); }
 }
+// 數字欄是空白（＝原本的大小）時按上下小箭頭：先填入原本的數字，再從它開始加減（不是從 0 開始）
+function prefillDefault(e) {
+  const el = e.target;
+  if (!el.matches || !el.matches('input[type=number][data-f]') || el.value !== '') return;
+  const m = /(-?\d+(?:\.\d+)?)/.exec(el.placeholder || ''); if (m) el.value = m[1];
+}
+$q('props').addEventListener('pointerdown', prefillDefault, true);
+$q('props').addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') prefillDefault(e); }, true);
 $q('props').addEventListener('input', e => {
   if (!selKey) return;
   if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t) { remember('text:' + selKey); setText(t, e.target.value); } return; }

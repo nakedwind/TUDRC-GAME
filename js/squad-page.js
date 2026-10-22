@@ -51,7 +51,8 @@ const SQ_PARTS = {
 const SQ_LOOK_SLOTS = () => typeof COSTUME_SLOTS !== 'undefined' ? COSTUME_SLOTS : [{ id: 'skin', name: '服裝' }];
 function squadPart(key) {
   key = String(key || '');
-  const kind = /^img\.|Img:|Icon:|^img:/.test(key) ? 'img' : '';
+  // img＝圖片（大小＝寬，高度照比例）；box＝方形的框（大小＝寬＝高，長寬一起縮放）；其他＝面板、文字（寬、高分開）
+  const kind = /^img\.|Img:|Icon:|^img:/.test(key) ? 'img' : /^(roster|node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '';
   if (SQ_PARTS[key]) return { key, group: SQ_PARTS[key][0], label: SQ_PARTS[key][1], kind, text: key in SQ_TEXT_DEFAULT };
   const [p, ...rest] = key.split(':'), id = rest.join(':'), nm = t => (TYPES[t] || (typeof CHARACTERS !== 'undefined' && CHARACTERS[t]) || {}).name || t;
   const lay = typeof skillLayoutOf === 'function' ? skillLayoutOf(id) : null, st = SQ_STATS.find(s => s.id === id), look = SQ_LOOK_SLOTS().find(s => s.id === id);
@@ -136,7 +137,7 @@ function squadSkillHtml(actor, safe) {
   st.skill[type] = sel;
   const nodes = SKILL_LAYOUT.map(n => {
     const node = skillNodeOf(type, n.id), state = skillStateOf(type, n.id), icon = node.icon || SKILL_GROUP_ICON[n.group];
-    return '<button type="button" class="sq-node g-' + n.group + ' ' + state + (n.id === sel ? ' sel' : '') + '" data-skill-pick="' + n.id + '" data-sq="node:' + n.id + '" data-tip="' + sqEsc(node.name) + '" data-tip-desc="' + sqEsc(node.desc || node.effect) + '">' +
+    return '<button type="button" class="sq-node g-' + n.group + ' ' + state + (n.id === sel ? ' sel' : '') + '" data-skill-pick="' + n.id + '" data-sq="node:' + n.id + '" data-sq-tip="' + sqEsc(node.name) + '" data-sq-tip-desc="' + sqEsc(node.desc || node.effect) + '">' +
       sqIcon(icon, 'nodeIcon:' + n.id) + (state === 'locked' ? '<i class="sq-node-lock">🔒</i>' : '') + '</button>';
   }).join('');
   const learned = skillLearnedCount(type);
@@ -151,10 +152,10 @@ function squadSkillHtml(actor, safe) {
   const lay = skillLayoutOf(sel), node = skillNodeOf(type, sel), state = skillStateOf(type, sel), cost = node.cost, afford = training.crystals >= cost;
   const icon = node.icon || SKILL_GROUP_ICON[lay.group], effect = node.effect || (typeof modsText === 'function' ? modsText(node.mods) : '');
   if (state === 'locked') {
-    const req = skillNodeOf(type, lay.req);
+    const req = skillNodeOf(type, lay.req), need = lay.req && !hasSkill(type, lay.req) ? null : (lay.reqAny || []).filter(id => !hasSkill(type, id)).map(id => '「' + sqEsc(skillNodeOf(type, id).name) + '」');
     h += '<section class="sq-info locked" data-sq="panel.skillInfo"><div class="sq-locked" data-sq="box.locked">' +
       '<span class="sq-lock-icon" data-sq="box.lockIcon"><img data-sq="img.lockIcon" src="images/ui/skill-lock.svg" alt="未解鎖"></span>' +
-      '<p class="sq-lock-hint" data-sq="text.lockHint">「' + sqEsc(node.name) + '」需先解鎖「' + sqEsc(req ? req.name : lay.req) + '」技能。</p>' +
+      '<p class="sq-lock-hint" data-sq="text.lockHint">「' + sqEsc(node.name) + '」' + (need && need.length ? '需先解鎖' + need.join('或') + '其中一項。' : '需先解鎖「' + sqEsc(req ? req.name : lay.req) + '」技能。') + '</p>' +
       '<p class="sq-lock-desc" data-sq="text.lockDesc">' + sqEsc(node.desc) + (effect ? '<br>' + sqEsc(effect) : '') + '</p></div></section>';
   } else {
     const label = state === 'owned' ? '已學會' : !safe ? '回基地才能培養' : afford ? sqT('btn.learn', '培養') : '碎片不足';
@@ -163,7 +164,7 @@ function squadSkillHtml(actor, safe) {
       '<b class="sq-info-name" data-sq="text.skillName">' + sqEsc(node.name) + '</b><small class="sq-info-tag" data-sq="text.skillTag">' + sqEsc(lay.tag) + '</small>' +
       '<p class="sq-info-desc" data-sq="text.skillDesc">' + sqEsc(node.desc) + '</p>' +
       '<p class="sq-info-effect" data-sq="text.skillEffect">' + sqEsc(effect) + '</p>' +
-      '<div class="sq-learn" data-sq="box.learn">' + (state === 'owned' ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
+      '<div class="sq-learn' + (state === 'owned' ? ' owned' : '') + '" data-sq="box.learn">' + (state === 'owned' ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
       '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' + label + '</button></div></section>';
   }
   return h;
@@ -235,7 +236,9 @@ function fitSquadCanvas(body) {
 }
 function afterSquadRender(body) {
   placeSquadArrow(body); drawSquadLines(body); drawSquadPreview(body);
-  if (!body._sqResize && typeof ResizeObserver !== 'undefined') { body._sqResize = new ResizeObserver(() => { fitSquadCanvas(body); }); body._sqResize.observe(body); }
+  // 第一次打開時 App 畫面還沒顯示出來（量不到位置）：顯示後（大小改變）再排一次
+  if (!body._sqResize && typeof ResizeObserver !== 'undefined') { body._sqResize = new ResizeObserver(() => { fitSquadCanvas(body); placeSquadArrow(body); drawSquadLines(body); }); body._sqResize.observe(body); }
+  setTimeout(() => { if (body.isConnected) { fitSquadCanvas(body); placeSquadArrow(body); drawSquadLines(body); } }, 0);
 }
 const sqScale = el => { const r = el.getBoundingClientRect(); return el.offsetWidth ? r.width / el.offsetWidth || 1 : 1; };
 function placeSquadArrow(body) {
@@ -247,16 +250,29 @@ function placeSquadArrow(body) {
   arrow.style.visibility = visible ? '' : 'hidden';
   arrow.style.top = ((br.top + br.height / 2 - cr.top) / s - arrow.offsetHeight / 2) + 'px';
 }
+// 技能之間的連線：用排版位置（offset）＋編輯器的位移來算，不受 T-Pad 打開動畫、縮放影響
+// 直線／折線＝前一格（req）；斜線＝「其中一項」條件（reqAny：A1 或 B1 學了其中一個，才能學核心技能）
 function drawSquadLines(body) {
-  const svg = body.querySelector('.sq-lines'), panel = svg && svg.parentElement; if (!svg) return;
-  const type = squadPageState.member, s = sqScale(panel), pr = panel.getBoundingClientRect();
+  const svg = body.querySelector('.sq-lines'), panel = svg && svg.parentElement; if (!svg || !panel.offsetWidth) return;
+  const type = squadPageState.member, els = (typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.elements) || {};
   svg.setAttribute('viewBox', '0 0 ' + panel.offsetWidth + ' ' + panel.offsetHeight);
-  const box = id => { const el = panel.querySelector('[data-skill-pick="' + id + '"]'); if (!el) return null; const r = el.getBoundingClientRect(); return { l: (r.left - pr.left) / s, r: (r.right - pr.left) / s, cy: (r.top + r.height / 2 - pr.top) / s }; };
-  svg.innerHTML = SKILL_LAYOUT.filter(n => n.req && n.group !== 'aux').map(n => {
+  const box = id => {
+    const el = panel.querySelector('[data-skill-pick="' + id + '"]'); if (!el) return null;
+    const o = els['node:' + id] || {}, l = el.offsetLeft + (o.x || 0), t = el.offsetTop + (o.y || 0), w = el.offsetWidth, h = el.offsetHeight;
+    return { l, r: l + w, t, b: t + h, cx: l + w / 2, cy: t + h / 2, w };
+  };
+  const cls = (from, to) => hasSkill(type, to) && hasSkill(type, from) ? 'on' : hasSkill(type, from) && skillStateOf(type, to) === 'open' ? 'next' : '';
+  let paths = SKILL_LAYOUT.filter(n => n.req && n.group !== 'aux').map(n => {
     const a = box(n.req), b = box(n.id); if (!a || !b) return '';
     const mx = (a.r + b.l) / 2, d = Math.abs(a.cy - b.cy) < 3 ? 'M' + a.r + ' ' + a.cy + ' H' + b.l : 'M' + a.r + ' ' + a.cy + ' H' + mx + ' V' + b.cy + ' H' + b.l;
-    return '<path d="' + d + '" class="' + (hasSkill(type, n.id) ? 'on' : skillStateOf(type, n.id) === 'open' ? 'next' : '') + '"/>';
+    return '<path d="' + d + '" class="' + cls(n.req, n.id) + '"/>';
   }).join('');
+  for (const n of SKILL_LAYOUT) for (const from of n.reqAny || []) {
+    const a = box(from), b = box(n.id); if (!a || !b) continue;
+    const down = a.cy < b.cy, ax = a.cx + a.w / 4, bx = b.cx - b.w / 4;
+    paths += '<path d="M' + ax + ' ' + (down ? a.b : a.t) + ' L' + bx + ' ' + (down ? b.t : b.b) + '" class="diag ' + cls(from, n.id) + '"/>';
+  }
+  svg.innerHTML = paths;
 }
 function drawSquadPreview(body) {
   const cvs = body.querySelector('.sq-preview canvas'); if (!cvs || typeof costumeSkinSet !== 'function') return;
@@ -324,11 +340,11 @@ function squadUnequip(body) {
 }
 // 滑鼠停在技能格上：小視窗顯示名稱和說明（第一格＝原本的特性）
 function handleSquadHover(body, e) {
-  const tip = body.querySelector('.sq-tip'), node = e.target.closest && e.target.closest('[data-tip]'), canvas = body.querySelector('.sq-canvas');
+  const tip = body.querySelector('.sq-tip'), node = e.target.closest && e.target.closest('[data-sq-tip]'), canvas = body.querySelector('.sq-canvas');
   if (!tip || !canvas) return;
   if (!node) { tip.hidden = true; return; }
   const s = sqScale(canvas), cr = canvas.getBoundingClientRect(), r = node.getBoundingClientRect();
-  tip.innerHTML = '<b>' + node.dataset.tip + '</b><p>' + node.dataset.tipDesc + '</p>'; tip.hidden = false;
+  tip.innerHTML = '<b>' + node.dataset.sqTip + '</b><p>' + node.dataset.sqTipDesc + '</p>'; tip.hidden = false;
   const x = Math.min(SQ_W - tip.offsetWidth - 6, Math.max(6, (r.left + r.width / 2 - cr.left) / s - tip.offsetWidth / 2));
   tip.style.left = x + 'px'; tip.style.top = Math.max(4, (r.top - cr.top) / s - tip.offsetHeight - 8) + 'px';
 }
@@ -339,11 +355,12 @@ function squadLayoutCss() {
   const els = (typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.elements) || {};
   for (const [key, o] of Object.entries(els)) {
     const part = squadPart(key); if (!part || !o) continue;
-    const r = [], img = part.kind === 'img';
+    const r = [], img = part.kind === 'img', sq = part.kind === 'box';
     if (o.x || o.y) r.push('translate:' + (o.x || 0) + 'px ' + (o.y || 0) + 'px !important');
     if (img && o.size > 0) r.push('width:' + o.size + 'px !important', 'height:auto !important', 'max-width:none !important', 'max-height:none !important', 'min-width:0 !important', 'min-height:0 !important', 'font-size:' + Math.round(o.size * .62) + 'px !important');
-    if (!img && o.w > 0) r.push('width:' + o.w + 'px !important', 'max-width:none !important', 'min-width:0 !important', 'flex:none !important');
-    if (!img && o.h > 0) r.push('height:' + o.h + 'px !important', 'max-height:none !important', 'min-height:0 !important');
+    if (sq && o.size > 0) r.push('width:' + o.size + 'px !important', 'height:' + o.size + 'px !important', 'max-width:none !important', 'max-height:none !important', 'min-width:0 !important', 'min-height:0 !important', 'flex:none !important');
+    if (!img && !sq && o.w > 0) r.push('width:' + o.w + 'px !important', 'max-width:none !important', 'min-width:0 !important', 'flex:none !important');
+    if (!img && !sq && o.h > 0) r.push('height:' + o.h + 'px !important', 'max-height:none !important', 'min-height:0 !important');
     if (o.font > 0) r.push('font-size:' + o.font + 'px !important');
     if (o.align) r.push('text-align:' + o.align + ' !important', 'justify-content:' + ({ left: 'flex-start', center: 'center', right: 'flex-end' }[o.align] || 'center') + ' !important');
     if (r.length) css += '#tpad [data-sq="' + key.replace(/["\\]/g, '\\$&') + '"]{' + r.join(';') + '}';
@@ -414,6 +431,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     if (el) {
       const cs = getComputedStyle(el), r = el.getBoundingClientRect();
       values.w = Math.round(el.offsetWidth || r.width / scaleOf(el)); values.h = Math.round(el.offsetHeight || r.height / scaleOf(el));
+      if (part.kind === 'box') values.size = Math.round(el.offsetWidth || r.width);
       if (part.kind === 'img') {
         const nw = el.naturalWidth, nh = el.naturalHeight;
         values.size = Math.round(nw && nh && cs.objectFit === 'contain' ? Math.min(el.offsetWidth, el.offsetHeight * nw / nh) : (el.offsetWidth || r.width));
@@ -495,7 +513,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     if (handle && ev.target === handle && selKey) {   // 改大小
       ev.preventDefault(); ev.stopImmediatePropagation();
       const el = els(selKey)[0]; if (!el) return;
-      const o = over(selKey), img = (squadPart(selKey) || {}).kind === 'img';
+      const o = over(selKey), img = /^(img|box)$/.test((squadPart(selKey) || {}).kind);   // 圖片、方框：長寬一起縮放
       drag = { key: selKey, resize: true, img, sx: ev.clientX, sy: ev.clientY, size: o.size || el.offsetWidth || el.getBoundingClientRect().width / scaleOf(el), w: o.w || el.offsetWidth, h: o.h || el.offsetHeight, s: scaleOf(el.parentElement || el), moved: false };
       return;
     }

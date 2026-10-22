@@ -146,6 +146,14 @@ function renderProps(rebuild = true) {
     $b('textOrig').textContent = '預設：' + (t.original || '（空白）');
   }
 }
+// 數字欄是空白（＝原本的大小）時按上下小箭頭：先填入原本的數字，再從它開始加減（不是從 0 開始）
+function prefillDefault(e) {
+  const el = e.target;
+  if (!el.matches || !el.matches('input[type=number][data-f]') || el.value !== '') return;
+  const m = /(-?\d+(?:\.\d+)?)/.exec(el.placeholder || ''); if (m) el.value = m[1];
+}
+$b('props').addEventListener('pointerdown', prefillDefault, true);
+$b('props').addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') prefillDefault(e); }, true);
 $b('props').addEventListener('input', e => {
   if (!selKey) return;
   if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t && !t.note) { remember('text:' + selKey); setText(t, e.target.value); } return; }
