@@ -2663,7 +2663,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #tpad.hidden { display: none; }
 @keyframes tpad-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes tpad-rise { from { transform: translateY(26px) scale(.96); opacity: 0; } to { transform: none; opacity: 1; } }
-.tpad-device { position: relative; width: min(760px, 86%); aspect-ratio: 4 / 3; max-height: 86%; padding: 22px; border-radius: 34px; background: linear-gradient(145deg, #3a4048, #16191d 60%, #2a2f35); box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.08), inset 0 0 0 9px #0b0d10; animation: tpad-rise .22s cubic-bezier(.2,.9,.3,1.1); }
+.tpad-device { position: relative; box-sizing: content-box; width: min(740px, 82%); aspect-ratio: 2420 / 1668;   /* iPad Pro 11 吋的螢幕比例（不要加 max-height，會把比例壓扁） */ padding: 22px; border-radius: 34px; background: linear-gradient(145deg, #3a4048, #16191d 60%, #2a2f35); box-shadow: 0 30px 80px rgba(0,0,0,.6), inset 0 0 0 2px rgba(255,255,255,.08), inset 0 0 0 9px #0b0d10; animation: tpad-rise .22s cubic-bezier(.2,.9,.3,1.1); }
 .tpad-cam { position: absolute; top: 9px; left: 50%; width: 7px; height: 7px; margin-left: -3.5px; border-radius: 50%; background: #20262d; box-shadow: inset 0 0 0 1.5px #3a4651; }
 .tpad-screen { position: relative; height: 100%; overflow: hidden; border-radius: 16px; color: #eef6ff; font-family: "Microsoft JhengHei", sans-serif;
   background: radial-gradient(120% 90% at 15% 0%, rgba(255,150,80,.38), transparent 55%), radial-gradient(90% 80% at 100% 100%, rgba(70,140,220,.42), transparent 60%), linear-gradient(160deg, #1d2a3a, #101722); }
@@ -2690,3 +2690,116 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .tpad-home-btn { position: absolute; left: 50%; bottom: 10px; width: 120px; height: 5px; margin-left: -60px; padding: 0; border: 0; border-radius: 3px; background: rgba(255,255,255,.7); cursor: pointer; }
 .tpad-home-btn::before { content: ""; position: absolute; inset: -10px -10px; }
 .tpad-home-btn:hover { background: #fff; }
+
+/* ===== T-Pad：螢幕裡打開的 App（js/tpad.js 的 view）===== */
+.tpad-appview { position: absolute; inset: 30px 0 0; display: flex; flex-direction: column; background: #121418; }
+.tpad-appview[hidden] { display: none; }
+.tpad-appview.opening { animation: tpad-app-open .26s cubic-bezier(.2,.85,.25,1); }
+@keyframes tpad-app-open { from { transform: scale(.12); opacity: 0; border-radius: 40px; } to { transform: none; opacity: 1; } }
+.tpad-apphead { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; padding: 6px 14px; border-bottom: 1px solid rgba(255,255,255,.07); background: rgba(28,30,36,.95); }
+.tpad-apphead b { font-size: 15px; color: #f2f5f8; }
+.tpad-back { justify-self: start; padding: 4px 6px; border: 0; background: none; color: var(--app, #8fd3ff); cursor: pointer; font: 600 14px "Microsoft JhengHei", sans-serif; }
+.tpad-back:hover { filter: brightness(1.25); }
+.tpad-appbody { flex: 1; min-height: 0; padding-bottom: 24px; }
+
+/* ===== T-Pad：成就 App（js/achievements.js 的 renderAchievementApp）=====
+   iPad 的「左邊分類、右邊內容」版面 */
+.aa { display: grid; grid-template-columns: 178px 1fr; height: 100%; }
+.aa-side { display: flex; flex-direction: column; gap: 3px; padding: 16px 10px; overflow-y: auto; background: #1a1d22; border-right: 1px solid rgba(255,255,255,.06); scrollbar-width: thin; }
+.aa-ring { position: relative; width: 92px; height: 92px; margin: 2px auto 0; border-radius: 50%; background: conic-gradient(#ffd45a calc(var(--p) * 360deg), rgba(255,255,255,.1) 0); display: grid; place-items: center; }
+.aa-ring::before { content: ""; position: absolute; inset: 9px; border-radius: 50%; background: #1a1d22; }
+.aa-ring div { position: relative; display: flex; align-items: baseline; gap: 2px; }
+.aa-ring b { font-size: 26px; color: #ffe08a; }
+.aa-ring small { font-size: 12px; color: #9aa6b2; }
+.aa-ring-cap { margin: 6px 0 10px; text-align: center; font-size: 12px; color: #9aa6b2; }
+.aa-tab { display: flex; align-items: center; justify-content: space-between; padding: 8px 10px; border: 0; border-radius: 9px; background: none; color: #dfe6ee; cursor: pointer; font: 600 13px "Microsoft JhengHei", sans-serif; text-align: left; }
+.aa-tab em { font-style: normal; font-size: 11px; color: #8592a0; }
+.aa-tab:hover { background: rgba(255,255,255,.06); }
+.aa-tab.on { background: #c9a227; color: #1b1607; }
+.aa-tab.on em { color: #3d3210; }
+.aa-main { padding: 16px 22px; overflow-y: auto; scrollbar-width: thin; }
+.aa-title { margin: 0; font-size: 24px; color: #f4f7fa; }
+.aa-sub { margin: 2px 0 12px; font-size: 12px; color: #8f9caa; }
+.aa-sec { margin: 16px 0 6px; font-size: 12px; font-weight: 700; color: #8f9caa; letter-spacing: .05em; }
+.aa-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.aa-stats span { display: grid; gap: 1px; padding: 9px 11px; border-radius: 12px; background: #1f2329; }
+.aa-stats b { font-size: 20px; color: #ffe08a; font-variant-numeric: tabular-nums; }
+.aa-stats small { font-size: 11px; color: #9aa6b2; }
+.aa-list { border-radius: 12px; background: #1f2329; overflow: hidden; }
+.aa-row { display: flex; align-items: center; gap: 12px; padding: 9px 14px; }
+.aa-row + .aa-row { border-top: 1px solid rgba(255,255,255,.06); }
+.aa-ico { flex: none; display: grid; place-items: center; width: 36px; height: 36px; border-radius: 10px; background: #2c3138; color: #6f7b88; }
+.aa-ico svg { width: 21px; height: 21px; }
+.aa-row.got .aa-ico { background: linear-gradient(160deg, #ffe08a, #c9a227 60%, #8a6c12); color: #fff; box-shadow: 0 3px 8px rgba(201,162,39,.35); }
+.aa-row.got .aa-ico svg { filter: drop-shadow(0 1px 0 rgba(0,0,0,.3)); }
+.aa-txt { flex: 1; min-width: 0; display: grid; gap: 5px; }
+.aa-txt b { font-size: 14px; color: #e9eef3; font-weight: 600; }
+.aa-row:not(.got) .aa-txt b { color: #b9c3cd; }
+.aa-txt small { font-size: 11px; color: #c9a227; }
+.aa-bar { display: block; height: 5px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+.aa-bar u { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #8a6c12, #ffd45a); }
+.aa-val { flex: none; min-width: 52px; text-align: right; font: 600 12px Consolas, monospace; color: #8f9caa; }
+.aa-row.got .aa-val { color: #ffd45a; font-size: 15px; }
+.aa-empty { margin: 0; padding: 14px; font-size: 13px; color: #8f9caa; text-align: center; }
+/* T-Pad 裡的捲軸：細細的半透明圓角條（像 iPad），不要瀏覽器預設的白色捲軸 */
+.tpad-screen * { scrollbar-width: thin; scrollbar-color: rgba(255,255,255,.28) transparent; }
+.tpad-screen ::-webkit-scrollbar { width: 6px; height: 6px; }
+.tpad-screen ::-webkit-scrollbar-track { background: transparent; }
+.tpad-screen ::-webkit-scrollbar-thumb { border-radius: 3px; background: rgba(255,255,255,.22); }
+.tpad-screen ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,.4); }
+.tpad-screen ::-webkit-scrollbar-button { display: none; height: 0; }
+
+/* ===== T-Pad：任務 App（js/tpad-missions.js）——沿用成就 App 的 .aa 版面 ===== */
+.ma-side { gap: 3px; }
+.ma-now { display: grid; gap: 3px; margin-bottom: 10px; padding: 10px 11px; border-radius: 12px; background: linear-gradient(160deg, rgba(217,137,59,.28), rgba(217,137,59,.08)); border: 1px solid rgba(217,137,59,.35); }
+.ma-now small { font-size: 11px; font-weight: 700; color: #ffc48a; }
+.ma-now b { font-size: 13px; line-height: 1.4; color: #f6efe6; }
+.ma .aa-tab.on { background: #d9893b; color: #1f1206; }
+.ma .aa-tab.on em { color: #4a2a0c; }
+.ma-badge { min-width: 18px; padding: 1px 6px; border-radius: 9px; background: #ff5a4f; color: #fff; font: 700 11px/16px "Microsoft JhengHei", sans-serif; font-style: normal; text-align: center; }
+.ma-progress { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; margin-bottom: 12px; padding: 11px 14px; border-radius: 12px; background: #1f2329; }
+.ma-progress span { font-size: 12px; color: #9aa6b2; }
+.ma-progress b { font-size: 15px; color: #ffc48a; }
+.ma-progress .aa-bar { grid-column: 1 / -1; }
+.ma .aa-bar u { background: linear-gradient(90deg, #9a5a1c, #ffb067); }
+.ma-row { display: flex; align-items: center; gap: 12px; width: 100%; padding: 9px 12px 9px 14px; border: 0; background: none; color: inherit; cursor: pointer; text-align: left; font-family: "Microsoft JhengHei", sans-serif; }
+.ma-row + .ma-row { border-top: 1px solid rgba(255,255,255,.06); }
+.ma-row:not(.static):hover { background: rgba(255,255,255,.04); }
+.ma-row:not(.static):active { background: rgba(255,255,255,.08); }
+.ma-row .aa-txt small { color: #8f9caa; }
+.ma-right { flex: none; }
+.ma-chev { flex: none; font-style: normal; font-size: 20px; line-height: 1; color: #5d6874; }
+.ma-ico { flex: none; display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; color: #fff; }
+.ma-ico svg { width: 19px; height: 19px; }
+.ma-ico.big { width: 52px; height: 52px; border-radius: 14px; }
+.ma-ico.big svg { width: 28px; height: 28px; }
+.ma-ico.green { background: #34a853; } .ma-ico.orange { background: #d9893b; } .ma-ico.blue { background: #3f7fd8; }
+.ma-ico.red { background: #d9483b; } .ma-ico.gray { background: #3a4049; color: #8d98a4; }
+.ma-face { position: relative; flex: none; width: 34px; height: 34px; overflow: hidden; border-radius: 50%; background: #2c3138; }
+.ma-face img { position: absolute; left: 50%; top: -12%; width: 160%; transform: translateX(-50%); image-rendering: pixelated; }
+.ma-face.big { width: 52px; height: 52px; }
+.ma-pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font: 700 11px/1.4 "Microsoft JhengHei", sans-serif; font-style: normal; vertical-align: 2px; }
+.ma-pill.green { background: rgba(52,168,83,.2); color: #7fdc9a; } .ma-pill.orange { background: rgba(217,137,59,.22); color: #ffbf80; }
+.ma-pill.blue { background: rgba(63,127,216,.24); color: #9cc4ff; } .ma-pill.red { background: rgba(217,72,59,.24); color: #ff9d92; }
+.ma-pill.gray { background: rgba(255,255,255,.08); color: #9aa6b2; }
+.ma-push { animation: ma-push .22s cubic-bezier(.2,.85,.25,1); }
+@keyframes ma-push { from { transform: translateX(28px); opacity: 0; } to { transform: none; opacity: 1; } }
+.ma-back { margin: -4px 0 8px -6px; padding: 4px 6px; border: 0; background: none; color: #ffb067; cursor: pointer; font: 600 14px "Microsoft JhengHei", sans-serif; }
+.ma-back:hover { filter: brightness(1.2); }
+.ma-hero { display: flex; align-items: center; gap: 14px; margin-bottom: 12px; }
+.ma-hero .aa-title { margin-top: 4px; }
+.ma-card { padding: 12px 14px; border-radius: 12px; background: #1f2329; font-size: 13px; line-height: 1.65; color: #d7dee6; }
+.ma-card p { margin: 0; }
+.ma-card small { color: #8f9caa; }
+.ma-quote { font-size: 14px; color: #efe6da; }
+.ma-goal { display: grid; grid-template-columns: 1fr auto; gap: 6px 10px; align-items: center; }
+.ma-goal b { color: #ffc48a; }
+.ma-goal .aa-bar { grid-column: 1 / -1; }
+.ma-rewards { display: flex; flex-wrap: wrap; gap: 6px; }
+.ma-rewards em { display: inline-flex; align-items: center; gap: 4px; padding: 3px 9px; border-radius: 9px; background: rgba(255,255,255,.06); font-style: normal; font-size: 12px; }
+.ma-rewards img { width: 18px; height: 18px; object-fit: contain; image-rendering: pixelated; }
+.ma-faces { display: flex; gap: 8px; }
+.ma-faces .mission-face { width: 46px; }
+.ma-note { margin: 14px 0 0; padding: 10px 12px; border-radius: 10px; background: rgba(217,137,59,.1); color: #ffcf9e; font-size: 12px; text-align: center; }
+.ma-note:empty { display: none; }
+.ma .aa-list > .ma-note { margin: 0; background: none; }

@@ -2,7 +2,7 @@
    ・下方資訊條（背包旁邊）的「T-Pad」按鈕或按 T 打開；Esc／T／點外面／點下方橫條 關掉。
    ・主畫面：狀態列（時間、電量）、App 圖示、「目前任務」小卡片。
    ・點 App＝打開原本的介面（隊員、出勤配置、任務、成就、怪物圖鑑、設定…）；那個介面關掉後自動回到 T-Pad 主畫面。
-   ・要加新的 App：在下面的 TPAD_APPS 多加一項（open＝打開的函式、isOpen＝現在是不是開著；baseOnly＝只有基地能用；soon＝即將推出）。
+   ・要加新的 App：在下面的 TPAD_APPS 多加一項（open＝打開原本的介面、isOpen＝那個介面是不是開著；或 view＝直接畫在 T-Pad 螢幕裡；baseOnly＝只有基地能用；soon＝即將推出）。
    必須在 team.js、achievements.js、missions.js、bestiary.js、save.js 之後載入。
 */
 const TPAD_ICON = (() => {
@@ -21,22 +21,24 @@ const tpadNeed = name => typeof window[name] === 'function' || (() => { try { re
 const TPAD_APPS = [
   { id: 'squad',    name: 'Y102隊員', color: '#3f7fd8', icon: TPAD_ICON.squad,    open: () => openSquadPanel(),       isOpen: () => typeof isSquadPanelOpen === 'function' && isSquadPanelOpen() },
   { id: 'team',     name: '出勤配置', color: '#2f9e8f', icon: TPAD_ICON.team,     open: () => openTeamPanel(),        isOpen: () => typeof isTeamPanelOpen === 'function' && isTeamPanelOpen(), baseOnly: true },
-  { id: 'mission',  name: '任務',     color: '#d9893b', icon: TPAD_ICON.mission,  open: () => openMissionBoard(),     isOpen: () => typeof missionBoardOpen !== 'undefined' && missionBoardOpen },
-  { id: 'achieve',  name: '成就',     color: '#c9a227', icon: TPAD_ICON.achieve,  open: () => openAchievementPanel(), isOpen: () => typeof isAchievementPanelOpen === 'function' && isAchievementPanelOpen() },
+  { id: 'mission',  name: '任務',     color: '#d9893b', icon: TPAD_ICON.mission,  view: el => renderMissionApp(el) },   // js/tpad-missions.js（出擊、承接委託還是在作戰桌）
+  { id: 'achieve',  name: '成就',     color: '#c9a227', icon: TPAD_ICON.achieve,  view: el => renderAchievementApp(el) },   // view＝直接在 T-Pad 螢幕裡打開
   { id: 'bestiary', name: '怪物圖鑑', color: '#8a4fd1', icon: TPAD_ICON.bestiary, open: () => openBestiary(),         isOpen: () => typeof bestiaryOpen !== 'undefined' && bestiaryOpen },
   { id: 'settings', name: '設定',     color: '#6b7a8c', icon: TPAD_ICON.settings, open: () => openSettings(),         isOpen: () => typeof settingsOpen !== 'undefined' && settingsOpen },
   { id: 'map',      name: '地圖',     color: '#3e8c4f', icon: TPAD_ICON.map,      soon: true },
 ];
-let tpadOpen = false, tpadEl = null, tpadLaunched = null, tpadClock = null;
+let tpadOpen = false, tpadEl = null, tpadLaunched = null, tpadClock = null, tpadView = null;   // tpadView：螢幕裡正在開的 App
 function ensureTPad() {
   if (tpadEl) return;
   tpadEl = document.createElement('div'); tpadEl.id = 'tpad'; tpadEl.className = 'hidden';
   tpadEl.innerHTML = '<div class="tpad-device" role="dialog" aria-modal="true" aria-label="T-Pad"><div class="tpad-cam"></div><div class="tpad-screen">' +
     '<div class="tpad-status"><b>Y102 T-Pad</b><span class="tpad-time"></span><span class="tpad-batt"><i></i>應變中心網路</span></div>' +
     '<div class="tpad-home"><div class="tpad-widget"></div><div class="tpad-apps"></div></div>' +
+    '<div class="tpad-appview" hidden><header class="tpad-apphead"><button type="button" class="tpad-back">‹ 主畫面</button><b class="tpad-apptitle"></b><span></span></header><div class="tpad-appbody"></div></div>' +
     '<div class="tpad-toast" hidden></div><button type="button" class="tpad-home-btn" aria-label="關閉 T-Pad（Esc）"></button></div></div>';
   tpadEl.addEventListener('click', e => {
-    if (e.target === tpadEl || e.target.closest('.tpad-home-btn')) { closeTPad(); return; }
+    if (e.target === tpadEl) { closeTPad(); return; }
+    if (e.target.closest('.tpad-home-btn, .tpad-back')) { tpadView ? showTPadHome() : closeTPad(); return; }   // 在 App 裡＝回主畫面
     const b = e.target.closest('[data-app]'); if (b) launchTPadApp(b.dataset.app);
   });
   document.getElementById('wrap').appendChild(tpadEl);
@@ -61,9 +63,10 @@ function updateTPadClock() {
 }
 function openTPad() {
   if (typeof G === 'undefined' || !G || !G.player || G.over) return;
+  const ov = document.getElementById('overlay'); if (ov && getComputedStyle(ov).display !== 'none' && !ov.classList.contains('hidden')) return;   // 開始畫面：還不能用
   ensureTPad(); tpadOpen = true; tpadLaunched = null;
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
-  renderTPad(); tpadEl.classList.remove('hidden'); tpadEl.classList.remove('leaving');
+  showTPadHome(true); renderTPad(); tpadEl.classList.remove('hidden'); tpadEl.classList.remove('leaving');
   clearInterval(tpadClock); tpadClock = setInterval(updateTPadClock, 10000);
   if (typeof sfx === 'function') sfx('menu');
   document.getElementById('hudTpadButton')?.classList.add('active');
@@ -74,6 +77,24 @@ function closeTPad(silent = false) {
   if (!silent && typeof sfx === 'function') sfx('switch');
   document.getElementById('hudTpadButton')?.classList.remove('active');
 }
+// 螢幕裡的 App：打開（從圖示放大出來）／回主畫面
+function showTPadApp(a) {
+  tpadView = a.id;
+  const view = tpadEl.querySelector('.tpad-appview'), home = tpadEl.querySelector('.tpad-home');
+  view.querySelector('.tpad-apptitle').textContent = a.name;
+  view.style.setProperty('--app', a.color);
+  const ico = tpadEl.querySelector('[data-app="' + a.id + '"] .tpad-ico'), scr = tpadEl.querySelector('.tpad-screen');
+  if (ico) { const r = ico.getBoundingClientRect(), b = scr.getBoundingClientRect(); view.style.transformOrigin = (r.left + r.width / 2 - b.left) + 'px ' + (r.top + r.height / 2 - b.top) + 'px'; }
+  a.view(view.querySelector('.tpad-appbody'));
+  home.hidden = true; view.hidden = false; view.classList.remove('opening'); void view.offsetWidth; view.classList.add('opening');
+  if (typeof sfx === 'function') sfx('blip');
+}
+function showTPadHome(silent = false) {
+  if (!tpadEl) return;
+  const was = tpadView; tpadView = null;
+  tpadEl.querySelector('.tpad-appview').hidden = true; tpadEl.querySelector('.tpad-home').hidden = false;
+  if (was && !silent && typeof sfx === 'function') sfx('blip');
+}
 function tpadToast(msg) {
   const t = tpadEl.querySelector('.tpad-toast'); t.textContent = msg; t.hidden = false;
   clearTimeout(t._h); t._h = setTimeout(() => { t.hidden = true; }, 1600);
@@ -83,6 +104,7 @@ function launchTPadApp(id) {
   const a = TPAD_APPS.find(x => x.id === id); if (!a) return;
   if (a.soon) { tpadToast('「' + a.name + '」即將推出'); return; }
   if (a.baseOnly && !(typeof MAP_SAFE !== 'undefined' && MAP_SAFE)) { tpadToast('「' + a.name + '」回到基地才能使用'); return; }
+  if (a.view) { showTPadApp(a); return; }
   closeTPad(true);
   try { a.open(); } catch (e) { console.warn('T-Pad：打不開', id, e); openTPad(); return; }
   tpadLaunched = a;   // 這個 App 關掉之後回到 T-Pad 主畫面
@@ -98,13 +120,14 @@ window.addEventListener('keydown', e => {
   const k = (e.key || '').toLowerCase();
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (tpadOpen) {
-    if (k === 'escape' || (k === 't' && !e.repeat)) closeTPad();
+    if (k === 'escape' && tpadView) showTPadHome();   // App 裡按 Esc＝回主畫面
+    else if (k === 'escape' || (k === 't' && !e.repeat)) closeTPad();
     e.preventDefault(); e.stopImmediatePropagation(); return;
   }
   if (k !== 't' || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
   if (typeof dialogueState !== 'undefined' && dialogueState) return;
   if (typeof backpackOpen !== 'undefined' && backpackOpen) return;
-  if (TPAD_APPS.some(a => { try { return a.isOpen && a.isOpen(); } catch (_) { return false; } })) return;   // 其他介面開著：不要蓋上去
+  if (TPAD_APPS.some(a => { if (!a.isOpen) return false; try { return a.isOpen && a.isOpen(); } catch (_) { return false; } })) return;   // 其他介面開著：不要蓋上去
   e.preventDefault(); e.stopImmediatePropagation(); tpadLaunched = null; openTPad();
 }, true);
 document.getElementById('hudTpadButton')?.addEventListener('click', () => tpadOpen ? closeTPad() : openTPad());

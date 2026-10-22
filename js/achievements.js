@@ -160,3 +160,49 @@ function renderAchievementPanel() {
     '</div>';
 }
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && isAchievementPanelOpen()) closeAchievementPanel(); });
+
+// ---- T-Pad 裡的「成就」App（js/tpad.js 會把它畫在平板螢幕裡）----
+// 左邊：達成進度圈＋分類；右邊：總覽（戰績、最近達成、快完成了）或該分類的成就列表
+let achvAppTab = 'all';
+const ACHV_SVG = {
+  trophy: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M6.6 2.8H17.4V9.4A5.4 5.4 0 0 1 6.6 9.4Z"/><path d="M6.6 4.4H3.4V6.8A4 4 0 0 0 7.2 10.8L7.4 9A2.2 2.2 0 0 1 5.4 6.8V6.4H6.6ZM17.4 4.4H20.6V6.8A4 4 0 0 1 16.8 10.8L16.6 9A2.2 2.2 0 0 0 18.6 6.8V6.4H17.4Z"/><rect x="10.6" y="14.2" width="2.8" height="4"/><rect x="7" y="18" width="10" height="3.4" rx="1"/></svg>',
+  lock: '<svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path fill-rule="evenodd" d="M7.5 10V7.6A4.5 4.5 0 0 1 16.5 7.6V10H18A1.6 1.6 0 0 1 19.6 11.6V20.2A1.6 1.6 0 0 1 18 21.8H6A1.6 1.6 0 0 1 4.4 20.2V11.6A1.6 1.6 0 0 1 6 10ZM9.6 10H14.4V7.6A2.4 2.4 0 0 0 9.6 7.6ZM12 13.6A1.7 1.7 0 0 0 11.1 16.7V18.6H12.9V16.7A1.7 1.7 0 0 0 12 13.6Z"/></svg>',
+};
+function renderAchievementApp(el) {
+  const st = achieveData.stats, un = achieveData.unlocked;
+  const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
+  const fmtDate = ts => { const d = new Date(ts); return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate(); };
+  const groups = [...new Set(ACHIEVEMENTS.map(a => a.group || '其他'))];
+  const inGroup = g => ACHIEVEMENTS.filter(a => (a.group || '其他') === g);
+  const gotN = list => list.filter(a => un[a.id]).length;
+  const done = gotN(ACHIEVEMENTS), total = ACHIEVEMENTS.length;
+  if (achvAppTab !== 'all' && !groups.includes(achvAppTab)) achvAppTab = 'all';
+  const row = a => {
+    const value = st[a.stat] || 0, got = !!un[a.id], k = Math.min(1, value / a.goal);
+    return '<div class="aa-row' + (got ? ' got' : '') + '"><span class="aa-ico">' + (got ? ACHV_SVG.trophy : ACHV_SVG.lock) + '</span>' +
+      '<div class="aa-txt"><b>' + esc(a.name) + '</b>' +
+      (got ? '<small>' + fmtDate(un[a.id]) + ' 達成</small>' : '<i class="aa-bar"><u style="width:' + (k * 100).toFixed(1) + '%"></u></i>') + '</div>' +
+      '<span class="aa-val">' + (got ? '✓' : Math.min(value, a.goal) + ' / ' + a.goal) + '</span></div>';
+  };
+  const side = '<nav class="aa-side"><div class="aa-ring" style="--p:' + (done / total).toFixed(3) + '"><div><b>' + done + '</b><small>/ ' + total + '</small></div></div><p class="aa-ring-cap">已達成</p>' +
+    [['all', '總覽', ACHIEVEMENTS], ...groups.map(g => [g, g, inGroup(g)])].map(([key, label, list]) =>
+      '<button type="button" class="aa-tab' + (key === achvAppTab ? ' on' : '') + '" data-achv-tab="' + esc(key) + '"><span>' + esc(label) + '</span><em>' + gotN(list) + '/' + list.length + '</em></button>').join('') + '</nav>';
+  let main;
+  if (achvAppTab === 'all') {
+    const recent = ACHIEVEMENTS.filter(a => un[a.id]).sort((a, b) => un[b.id] - un[a.id]).slice(0, 3);
+    const near = ACHIEVEMENTS.filter(a => !un[a.id]).sort((a, b) => (st[b.stat] || 0) / b.goal - (st[a.stat] || 0) / a.goal).slice(0, 3);
+    main = '<h2 class="aa-title">總覽</h2><p class="aa-sub">Y102 應變編組的戰績紀錄</p>' +
+      '<div class="aa-stats">' + ACHIEVE_STAT_LABELS.map(([k, label]) => '<span><b>' + (st[k] || 0) + '</b><small>' + label + '</small></span>').join('') + '</div>' +
+      '<h3 class="aa-sec">最近達成</h3><div class="aa-list">' + (recent.length ? recent.map(row).join('') : '<p class="aa-empty">還沒有達成的成就，出去打一場吧！</p>') + '</div>' +
+      (near.length ? '<h3 class="aa-sec">快完成了</h3><div class="aa-list">' + near.map(row).join('') + '</div>' : '');
+  } else {
+    const list = inGroup(achvAppTab);
+    main = '<h2 class="aa-title">' + esc(achvAppTab) + '</h2><p class="aa-sub">已達成 ' + gotN(list) + ' / ' + list.length + '</p><div class="aa-list">' + list.map(row).join('') + '</div>';
+  }
+  el.innerHTML = '<div class="aa">' + side + '<main class="aa-main">' + main + '</main></div>';
+  el.querySelector('.aa-side').addEventListener('click', e => {
+    const b = e.target.closest('[data-achv-tab]'); if (!b || b.dataset.achvTab === achvAppTab) return;
+    achvAppTab = b.dataset.achvTab; renderAchievementApp(el);
+    if (typeof sfx === 'function') sfx('blip');
+  });
+}
