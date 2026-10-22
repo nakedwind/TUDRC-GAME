@@ -156,8 +156,19 @@ function sentryRedFlash(t) {   // 回傳紅閃強度 0~1：受擊閃一下、瀕
   if (!TYPES[t.type].guide && t.taint > 85) return Math.max(hit, (Math.sin(now * Math.PI * 2 * 0.8) + 1) / 2 * 0.85);   // 瀕臨暴走：慢閃
   return hit;
 }
+// 腳下接地陰影：站立、走路共用；抓起／掉落時由 grabDrawWrap 畫離地陰影。
+function drawCharacterShadow(actor) {
+  if (!actor || actor.eatenBy || actor.sitting || actor.grabFall || (typeof grab !== 'undefined' && grab && grab.actor === actor)) return;
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.3)';
+  ctx.beginPath();
+  ctx.ellipse(actor.x, actor.y + 15, 15, 5, 0, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+}
 function drawTower(t) {
   if (t.eatenBy) return;   // 被虱目魚小子吃掉：只畫魚嘴裡露出的腳（js/milkfish-kid.js）
+  drawCharacterShadow(t);
   const spec = TYPES[t.type];
   let set = sentrySprites[t.type];
   if (t.type === 'red' && t.shieldMode && !MAP_SAFE && !t.berserk && redShieldSprites.front) set = redShieldSprites;   // 舉盾造型
@@ -479,6 +490,7 @@ const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 // 衣櫃裡戴上的配件（js/costumes.js）：behind＝畫在角色後面、front＝前面
 const costumeLayer = (id, who, x, y, size, layer) => { if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer); };
 function drawWanderer(npc) {
+  drawCharacterShadow(npc);
   const set = wandererSprites[npc.id];
   const img = set && pickCharacterFrame(set, npc);
   const size = PLAYER.drawSize;
@@ -824,6 +836,7 @@ function drawDashCooldown(p, hpY) {
   ctx.restore();
 }
 function drawPlayer(p) {
+  drawCharacterShadow(p);
   if (G.playerDeath) { drawPlayerDeath(p); return; }   // 倒下：陣亡動畫
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;

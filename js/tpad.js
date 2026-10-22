@@ -2,7 +2,7 @@
    ・下方資訊條（背包旁邊）的「T-Pad」按鈕或按 Tab 打開；Esc／Tab／點外面／點下方橫條 關掉。
      Tab 只用來開關 T-Pad，沒有其他功能（瀏覽器的「切換焦點」在 js/tab-key.js 擋掉）。
    ・主畫面：狀態列（時間、電量）、App 圖示、「目前任務」小卡片。
-   ・點 App＝打開原本的介面（隊員、出勤配置、任務、成就、怪物圖鑑、設定…）；那個介面關掉後自動回到 T-Pad 主畫面。
+   ・點 App＝打開原本的介面（隊員、任務、成就、怪物圖鑑、設定…）；出勤配置只能在作戰桌開啟。
    ・要加新的 App：在下面的 TPAD_APPS 多加一項（open＝打開原本的介面、isOpen＝那個介面是不是開著；或 view＝直接畫在 T-Pad 螢幕裡；baseOnly＝只有基地能用；soon＝即將推出）。
    必須在 team.js、achievements.js、missions.js、bestiary.js、save.js 之後載入。
 */
@@ -21,7 +21,6 @@ const TPAD_ICON = (() => {
 const tpadNeed = name => typeof window[name] === 'function' || (() => { try { return typeof eval(name) === 'function'; } catch (_) { return false; } })();
 const TPAD_APPS = [
   { id: 'squad',    name: 'Y102隊員', color: '#3f7fd8', icon: TPAD_ICON.squad,    view: el => renderTPadSquadApp(el) },
-  { id: 'team',     name: '出勤配置', color: '#2f9e8f', icon: TPAD_ICON.team,     open: () => openTeamPanel(),        isOpen: () => typeof isTeamPanelOpen === 'function' && isTeamPanelOpen(), baseOnly: true },
   { id: 'mission',  name: '任務',     color: '#d9893b', icon: TPAD_ICON.mission,  view: el => renderMissionApp(el) },   // js/tpad-missions.js（出擊、承接委託還是在作戰桌）
   { id: 'achieve',  name: '成就',     color: '#c9a227', icon: TPAD_ICON.achieve,  view: el => renderAchievementApp(el) },   // view＝直接在 T-Pad 螢幕裡打開
   { id: 'bestiary', name: '怪物圖鑑', color: '#8a4fd1', icon: TPAD_ICON.bestiary, view: el => renderBestiaryApp(el) },
