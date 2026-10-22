@@ -26,6 +26,8 @@ const PLAYER_ATTACK_FIELDS = ['range','dmg','rate','mag','reloadTime','aggro','c
 const $character = id => document.getElementById(id);
 const valueAt = (object, path) => path.reduce((current, key) => current?.[key], object);
 const labelFor = key => FIELD_LABELS[key] || key;
+// 星級評價（combat.ratings）：1～5 顆星，跟同名的戰鬥數值（例如 defense 減傷比例 0～1）分開標示、分開限制範圍
+const RATING_LABELS = { combat:'戰鬥', defense:'防禦', hp:'生命', load:'精神負荷' };
 
 function mergeCharacterDraft(target, saved) {
   if (!saved || typeof saved !== 'object' || Array.isArray(saved)) return;
@@ -111,20 +113,23 @@ function renderSummary() {
 }
 function makeField(path) {
   const keys = path.split('.');
-  const key = keys.at(-1), character = charactersDraft[selectedCharacterId];
+  const key = keys.at(-1), character = charactersDraft[selectedCharacterId], isRating = path.startsWith('combat.ratings.');
   const value = valueAt(character, keys);
   if (value === undefined || value === null || typeof value === 'object') return null;
   const label = document.createElement('label');
   label.className = 'field' + (['trait','intro','captainImpression'].includes(key) ? ' wide' : '');
-  const title = document.createElement('span'); title.textContent = labelFor(key);
+  const title = document.createElement('span'); title.textContent = isRating ? (RATING_LABELS[key] || labelFor(key)) + '・1～5 星' : labelFor(key);
   let input;
   if (typeof value === 'boolean') { input = document.createElement('input'); input.type = 'checkbox'; input.checked = value; }
   else if (['trait','intro','captainImpression'].includes(key)) { input = document.createElement('textarea'); input.value = value; }
   else { input = document.createElement('input'); input.type = typeof value === 'number' ? 'number' : key === 'color' ? 'color' : 'text'; input.value = value; }
   if (input.type === 'number') {
     input.step = Number.isInteger(value) ? '1' : 'any';
-    if (['hp','dmg','rate','range','speed','walkSpeed','reloadTime','mag','drawSize'].includes(key)) input.min = '0.01';
-    if (['accuracy','defense'].includes(key)) { input.min = '0'; input.max = '1'; }
+    if (isRating) { input.min = '1'; input.max = '5'; input.step = '1'; }
+    else {
+      if (['hp','dmg','rate','range','speed','walkSpeed','reloadTime','mag','drawSize'].includes(key)) input.min = '0.01';
+      if (['accuracy','defense'].includes(key)) { input.min = '0'; input.max = '1'; }
+    }
   }
   input.dataset.path = path;
   input.addEventListener(input.type === 'number' ? 'change' : 'input', () => {
@@ -139,7 +144,7 @@ function makeField(path) {
     if (['name','sprite','role','ability'].includes(key)) renderHero();
   });
   label.append(title, input);
-  if (key === 'accuracy' || key === 'defense') { const note = document.createElement('em'); note.textContent = '1 = 100%；0.25 = 25%'; label.appendChild(note); }
+  if (!isRating && (key === 'accuracy' || key === 'defense')) { const note = document.createElement('em'); note.textContent = '1 = 100%；0.25 = 25%'; label.appendChild(note); }
   return label;
 }
 function addSection(title, paths, note = '') {
