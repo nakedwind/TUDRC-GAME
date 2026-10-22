@@ -1,4 +1,4 @@
-/* 花蓮版權老鼠：鑽地瞬移、3×3 格伸手、離開後原地洞保留五秒。素材沿用 110×90 原稿。
+/* 花蓮版權老鼠：鑽地瞬移、5×5 格伸手、離開後原地洞保留五秒。素材沿用 110×90 原稿。
    怪物編輯器也載入本檔，使用同一份素材與動作選圖預覽。所有計時用遊戲 dt，可暫停／保留戰場。 */
 const BURROW_MOUSE_ART = {
   normal: 'images/monster/burrowing-mouse/mouse-hole-open.png',
@@ -48,10 +48,10 @@ function burrowMouseTargets(e, range) {
       return taunt(b) - taunt(a) || Math.hypot(a.x - e.x, a.y - e.y) - Math.hypot(b.x - e.x, b.y - e.y);
     });
 }
-// 九宮格以本體所在格為中心，含四個斜角；不是半徑三格。
+// 5×5 格以本體所在格為中心，向四方各延伸兩格，含斜角。
 function burrowMouseInReach(e, p) {
   const [ec, er] = cellAt(e.x, e.y), [pc, pr] = cellAt(p.x, p.y);
-  return Math.abs(pc - ec) <= 1 && Math.abs(pr - er) <= 1;
+  return Math.abs(pc - ec) <= 2 && Math.abs(pr - er) <= 2;
 }
 function burrowMouseLeaveHole(e, delay = 0) {
   (G.burrowHoles || (G.burrowHoles = [])).push({

@@ -86,8 +86,8 @@
         <div class="fields" id="chargerFields"></div>
         <div id="burrowPreviewBox" hidden>
           <label>動作預覽 <select id="burrowPreviewMode"><option value="cycle">完整循環</option><option value="emerge">本體鑽出地面</option><option value="idle">待機與眨眼</option><option value="left">左手出土攻擊</option><option value="right">右手出土攻擊</option><option value="strike-left">左手命中定格</option><option value="strike-right">右手命中定格</option><option value="sink">本體退回地洞</option></select></label>
-          <canvas id="burrowAnimation" width="560" height="250" aria-label="鑽地老鼠動作預覽"></canvas>
-          <small>本體鑽地瞬移，出土與入土時仍可受傷。橘圈鎖定九宮格內的落點，可移動閃避；本體離開後原地洞保留 5 秒。正式出現位置由地圖編輯器的怪物種類／權重決定。</small>
+          <canvas id="burrowAnimation" width="560" height="290" aria-label="鑽地老鼠動作預覽"></canvas>
+          <small>本體鑽地瞬移，出土與入土時仍可受傷。橘圈鎖定5×5 格內的落點，可移動閃避；本體離開後原地洞保留 5 秒。正式出現位置由地圖編輯器的怪物種類／權重決定。</small>
         </div>
       </div>
       <div class="foot"><div class="actions"><button id="previewMonster">▶ 單隻測試場</button><button id="previewGame">▶ 用暫存設定預覽遊戲</button><button id="exportMonsters" class="primary">下載 monsters.js</button><button id="resetMonsters">從檔案重新載入</button></div>
@@ -112,9 +112,9 @@
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
   <script src="js/monster-data.js?v=burrow-teleport-20261023"></script>
   <script src="js/sfx.js?v=smalldeath2-20261023"></script>
-  <script src="js/burrowing-mouse.js?v=burrow-teleport-20261023"></script>
+  <script src="js/burrowing-mouse.js?v=burrow-range5-20261023"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=burrow-teleport-20261023"></script>
+  <script src="js/monster-editor.js?v=burrow-range5-20261023"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=nav3-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
