@@ -887,6 +887,14 @@ const SHARED_TILES = [
     "h": 2
   },
   {
+    "id": "tile_eoc_door_exit_fade",
+    "name": "出口淡出（門口暗影）",
+    "role": "floor",
+    "file": "images/應變中心/door-exit-fade.png",
+    "w": 2,
+    "h": 2
+  },
+  {
     "id": "tile_eoc_binder_cabinet",
     "name": "資料櫃",
     "role": "floor",
