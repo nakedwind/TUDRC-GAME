@@ -120,7 +120,10 @@ function spawnCoreGroup(core) {
   for (let i = 0; i < count; i++) {
     const index = Math.floor(Math.random() * cells.length), [c, r] = cells.splice(index, 1)[0];
     const [x, y] = center(c, r);
-    const m = createMonster(chooseMonster(MAP, ACTIVE_MONSTERS), x, y);
+    const spec = chooseMonster(MAP, ACTIVE_MONSTERS);
+    const spot = spec.behavior === 'burrow' ? burrowMouseSpawnPosition(x, y) : { x, y };
+    if (!spot) continue;
+    const m = createMonster(spec, spot.x, spot.y);
     m.speed *= rule.speed;   // 第二階段：召喚出的異質體跑得更快
     G.enemies.push(m);
     G.recentMonsterSpawns = G.recentMonsterSpawns || [];

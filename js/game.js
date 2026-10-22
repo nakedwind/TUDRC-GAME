@@ -116,6 +116,7 @@ function monsterImage(file) {
 }
 ACTIVE_MONSTERS.forEach(monster => [monster.sprite, ...monsterFrameFiles(monster), ...Object.values(monster.art || {})].forEach(monsterImage));
 function createMonster(spec, x, y, variant) {
+  if (spec.behavior === 'burrow') Object.values(burrowMouseArt(spec)).forEach(monsterImage);
   const legacy = !Array.isArray(MAP?.monsterMix) || !MAP.monsterMix.length;
   const oldRules = legacy && spec.id === 'slime' ? (MAP.rules || {}) : {};
   const hp = Math.max(1, Math.round(spec.hp * difficultyOf('monsterHp')));   // 血量用怪物編輯器的設定 × 整體難度（data/balance.js）
@@ -1071,12 +1072,12 @@ function playerSpawnPos() {
 }
 // ---- 玩家移動與碰撞（牆、哨兵、障礙物都擋路；水平垂直分開判斷可貼牆滑行）----
 function playerBlocked(x, y) {
+  if (typeof burrowMouseBlocksActor === 'function' && burrowMouseBlocksActor(x, y, PLAYER.r)) return true;
   const r = PLAYER.r;
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
-    if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, rr)) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
   return false;
@@ -2345,7 +2346,7 @@ function prepareMonsterPreview() {
   if (note) note.textContent = '🔍 ' + (spec?.name || '怪物') + '測試場 · WASD 移動，滑鼠射擊；不會寫入正式存檔';
   updateCamera(); updateHUD();
 }
-function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); achieveOnBattleEnd('win'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;

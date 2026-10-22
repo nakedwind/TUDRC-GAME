@@ -53,7 +53,7 @@ function render() {
 // 行為數值：依怪物的行為模式顯示對應欄位（欄位表在 js/monster-data.js）
 const BEHAVIOR_UI = {
   burrow: { key: 'burrow', fields: () => BURROW_FIELDS, valid: c => validBurrowCfg(c), title: '🐭 鑽地出土／地底伸手',
-    desc: '鑽地後瞬移到目標附近，使用「地洞剛出現」出土。本體周圍 5×5 格內可以伸手：目標在左邊用左手，右邊用右手。出手前鎖定地面並預警，可移動閃避；本體躲回去或死亡後，原地洞保留 5 秒。手的洞隨攻擊結束消失。洞口所在格暫時不能行走或放置建築，洞消失後恢復。' },
+    desc: '本體、手與地洞分層，使用程式遮罩平滑出土／縮回。生成與瞬移使用自由座標，不吸附格線；以「地洞剛出現」開始出土。本體周圍 5×5 格內可以伸手：目標在左邊用左手，右邊用右手。出手前鎖定地面並預警，可移動閃避；本體躲回去或死亡後，原地洞保留 5 秒。手的洞隨攻擊結束消失。洞口實際範圍暫時不能行走或放置建築，洞消失後恢復。' },
   charger: { key: 'charger', fields: () => CHARGER_FIELDS, valid: c => validChargerCfg(c), title: '🐦 衝撞行為',
     desc: '平時發呆、偶爾散步；玩家或哨兵進入注意範圍（中間沒有牆）就愣一下，然後直線衝過去，撞到會把人撞飛。玩家一出現就只追玩家，哨兵的嘲諷也引不走。' },
   shooter: { key: 'shooter', fields: () => SHOOTER_FIELDS, valid: c => validShooterCfg(c), title: '🫧 飄浮噴珍珠',
@@ -246,7 +246,8 @@ function drawBurrowEditorPreview(now) {
     const c = validBurrowCfg(m.burrow), art = burrowMouseArt(m), mode = document.getElementById('burrowPreviewMode').value;
     const t = (now - burrowPreviewStarted) / 1000, handDuration = c.windup + c.handRise + c.handHold + .22;
     let phase = 'idle', age = t, hand = null;
-    if (mode === 'emerge' || mode === 'sink') { phase = mode; age = t % (c.emergeTime + .7); }
+    if (mode === 'emerge-half' || mode === 'sink-half') { phase = mode.split('-')[0]; age = c.emergeTime * .5; }
+    else if (mode === 'emerge' || mode === 'sink') { phase = mode; age = t % (c.emergeTime + .7); }
     else if (mode === 'left' || mode === 'right') hand = { x: mode === 'left' ? 220 : 380, y: 180, age: t % (handDuration + .7), side: mode };
     else if (mode.startsWith('strike-')) { age = 1; hand = { x: mode === 'strike-left' ? 220 : 380, y: 180, age: c.windup + c.handRise + Math.min(.1, c.handHold / 2), side: mode.slice(7) }; }
     else if (mode === 'cycle') {
@@ -265,9 +266,9 @@ function drawBurrowEditorPreview(now) {
     pc.strokeStyle = '#64c4a0'; pc.strokeRect(200, 80, 200, 200);
     if (hand && hand.age <= handDuration) {
       drawBurrowWarning(pc, hand, c);
-      drawBurrowFrame(pc, previewBurrowImage(burrowMouseHandFrame(art, hand.side, hand.age, c)), hand.x, hand.y);
+      drawBurrowingMouseHand(pc, hand, art, c, previewBurrowImage);
     }
-    drawBurrowFrame(pc, previewBurrowImage(burrowMouseBodyFrame(art, phase, age, c.emergeTime)), 300, 180, m.width || 110, m.height || 90);
+    drawBurrowingMouseBody(pc, { ...m, x: 300, y: 180, bm: { phase, age } }, previewBurrowImage);
     pc.fillStyle = '#e4edf3'; pc.font = '15px "Microsoft JhengHei", sans-serif';
     pc.fillText('目標在左用左手，右邊用右手', 36, 35);
     pc.fillText('綠框：本體周圍 5×5 格；離開後原地洞保留 5 秒', 36, 62);
