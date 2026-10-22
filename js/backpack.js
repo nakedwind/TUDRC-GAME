@@ -113,7 +113,7 @@ function renderBackpackDetail() {
   const kind = item.use && SUPPLY_KIND[item.use];
   const full = kind && supplyNeed(item.use) <= 0;
   const usable = !!kind || !!item.act || typeof item.use === 'function';
-  const actKey = { firstaid: 'H', adrenaline: 'J' }[item.act];
+  const actKey = { firstaid: 'H' }[item.act];   // 腎上腺素沒有固定按鍵了：放進快捷欄就用那一格的鍵（js/quick-slots.js）
   backpackDetail.innerHTML = `
     <div class="bag-detail-image"><img src="${item.image}" alt=""></div>
     <h3>${item.name}</h3>

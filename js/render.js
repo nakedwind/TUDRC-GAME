@@ -692,7 +692,7 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.strokeStyle='rgba(143,211,255,.85)';ctx.lineWidth=1.5;ctx.stroke();
   ctx.fillStyle='#e6ebf2';ctx.textAlign='center';ctx.fillText(label,cx,y+17);
 }
-// ---- 靠近隊員時頭上的選項：上面「急救」（F）、下面「疏導」（空白鍵），按鍵或用滑鼠點都可以 ----
+// ---- 靠近隊員時頭上的選項：上面「急救」（F）、下面「疏導」（C），按鍵或用滑鼠點都可以 ----
 // 倒下的隊員只顯示「急救」（身上有異質急救包才會出現）。現在用不到的選項（滿血或沒有急救包＝不顯示「急救」；沒有污染＝不顯示「疏導」）直接不出現。
 // 滑鼠停在哪個選項上，那個就亮起來：急救＝粉紅色（跟急救包按鈕按下去一樣）、疏導＝亮藍色（跟背包按鈕一樣）。
 // 畫出來的位置記在 towerPrompts，js/game.js 用它判斷滑鼠有沒有點到。
@@ -705,7 +705,7 @@ function drawTowerPrompts(actor, topY) {
   if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在疏導／急救／包紮：頭上換成進度條，不顯示選項
   const canAid = typeof aidUsableOn === 'function' ? aidUsableOn(actor) : true;
   const items = actor.hp <= 0 ? [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }]   // 由上往下
-    : [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }, { kind: 'soothe', label: '疏導', key: '空白鍵', off: !(actor.taint > 0 || actor.berserk) }].filter(it => !it.off);   // 現在用不到的選項（不需要補血、不需要疏導）不顯示
+    : [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }, { kind: 'soothe', label: '疏導', key: 'C', off: !(actor.taint > 0 || actor.berserk) }].filter(it => !it.off);   // 現在用不到的選項（不需要補血、不需要疏導）不顯示
   if (!items.length) return;   // 兩個都用不到：頭上什麼都不出現
   const boxH = 20, gap = 1, mouse = aimClient && typeof mouseOnCanvas !== 'undefined' && mouseOnCanvas ? clientToWorld(aimClient.x, aimClient.y) : null;
   ctx.save();
@@ -921,12 +921,13 @@ function draw() {
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
-    // 優先順序：① 隊員需要治療／疏導 → ② 拾取（異質碎片、地上的道具）→ ③ 地圖物件（跟 js/game.js 的空白鍵一致）
+    // 隊員需要治療／疏導：頭上出現「F 急救」「C 疏導」（跟空白鍵分開，所以下面空白鍵的提示照樣畫）
+    // 空白鍵的優先順序：① 拾取（異質碎片、地上的道具）→ ② 地圖物件（跟 js/game.js 的空白鍵一致）
     const mate = G.running && typeof teammateActionTarget === 'function' ? teammateActionTarget() : null;
     const pickShard = typeof shardNearPlayer === 'function' ? shardNearPlayer() : null;
     const pickProp = !pickShard && typeof pickupPropNearPlayer === 'function' ? pickupPropNearPlayer() : null;
     if (mate) drawTowerPrompts(mate, mate.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
-    else if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
+    if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
     else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
@@ -952,8 +953,8 @@ function draw() {
     else {
       const actor = interactionNearPlayer(), profile = actor && dialogueProfile(actor);
       const downed = typeof downedTeammateNear === 'function' ? downedTeammateNear() : null;   // 旁邊有倒下的隊員：頭上出現「F 急救」
-      if (downed) drawTowerPrompts(downed, downed.y - 57);
-      else if (actor && actor.kind === 'tower' && !MAP_SAFE) drawTowerPrompts(actor, actor.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
+      if (downed) { if (!mate) drawTowerPrompts(downed, downed.y - 57); }   // 上面已經畫過隊員的選項就不重複畫
+      else if (actor && actor.kind === 'tower' && !MAP_SAFE) { if (!mate) drawTowerPrompts(actor, actor.y - 57); }   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
       else if (actor) drawInteractPrompt(actor.x, promptTopAbove(actor, actor.y - 57 + (actor.kind === 'tower' ? 0 : NPC_LABEL_DY[actor.id] || 0)),
         '與 ' + (profile ? profile.name : '角色') + ' 對話');
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) { const g = graffitiNearPlayer(); drawInteractPrompt(g.x, g.y - 14, graffitiErasing() ? '擦掉中…' : '擦掉塗鴉'); }   // js/graffiti.js

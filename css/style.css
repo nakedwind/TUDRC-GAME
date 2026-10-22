@@ -2575,3 +2575,46 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .bst-close:hover { border-color: #c9d3dc; background: #2b3440; }
 /* 背景介紹 */
 .bst-about { overflow-y: auto; padding-right: 6px; color: #c9d3dc; line-height: 1.75; white-space: pre-line; scrollbar-width: thin; scrollbar-color: #3d5266 transparent; }
+
+/* ===== 快捷欄 Q／E／Z／X（js/quick-slots.js）===== */
+.quick-supply.item { border-color: rgba(255,212,121,.3); }
+.quick-supply.item:hover:not(.off) { border-color: #ffd479; }
+.quick-supply.off { cursor: default; opacity: .42; }          /* 用完了、已滿：變暗但保留（拖曳、右鍵照樣可以） */
+.quick-supply.off:hover { transform: none; }
+.quick-supply.quick-empty { border-style: dashed; border-color: rgba(255,255,255,.18); background: rgba(14,18,24,.7); }
+.quick-supply.quick-empty .qs-icon { color: #6f7d8a; font-size: 16px; }
+.quick-supply.quick-empty small { color: #6f7d8a; }
+#quickSupplies.dropping .quick-supply { outline: 1px dashed rgba(255,212,121,.45); outline-offset: 2px; }   /* 拖道具時：哪裡可以放 */
+#quickSupplies .quick-supply.drop-over { outline: 2px solid #ffd479; outline-offset: 2px; transform: translateY(-2px); }
+/* 背包說明欄：放到快捷欄 */
+.bag-quick { display: grid; gap: 4px; }
+.bag-quick small { color: #9aa6b2; font-size: 11px; }
+.bag-quick div { display: flex; gap: 4px; }
+.bag-quick button { flex: 1; padding: 4px 0; border: 1px solid rgba(255,255,255,.14); border-radius: 7px; background: rgba(26,32,40,.9); color: #dfe8ef; cursor: pointer; font: 700 12px Consolas, "Microsoft JhengHei", monospace; }
+.bag-quick button:hover { border-color: #ffd479; }
+.bag-quick button.on { border-color: #ffd479; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; }
+.bag-cell[draggable="true"] { cursor: grab; }
+/* 四格放不下名字：只留圖示＋數量（名字在滑鼠提示裡），資訊條才不會被擠爆 */
+#quickSupplies { gap: 4px; }
+#quickSupplies .quick-supply { padding-right: 18px; }
+#quickSupplies .quick-supply .qs-text small { display: none; }
+#quickSupplies .quick-supply .qs-text b { margin-top: 0; white-space: nowrap; }
+#quickSupplies .quick-supply.quick-empty .qs-text { display: none; }
+/* 快捷欄變成四格：其他區塊縮一點，資訊條才放得下（不然左邊溫特的頭像會被擠出去） */
+#hud { padding: 9px 16px; }
+#hud .hud-player { width: 196px; }
+#hud .stat { min-width: 96px; padding: 2px 12px; }
+#hud .hud-supplies { flex: 0 0 auto; margin-right: 0; }
+/* 快捷欄 v2：正方形小格，只留圖示＋快捷鍵（右上）＋持有數量（右下），名稱只在滑鼠提示裡 */
+#quickSupplies .quick-supply { width: 46px; height: 46px; padding: 0; justify-content: center; }
+#quickSupplies .quick-supply .qs-icon { width: 100%; height: 100%; background: none; }
+#quickSupplies .quick-supply .qs-icon img { max-width: 32px; max-height: 32px; }
+#quickSupplies .quick-supply .qs-text { position: absolute; right: 3px; bottom: 2px; }
+#quickSupplies .quick-supply .qs-text b { margin: 0; font-size: 11px; line-height: 1; text-shadow: 0 1px 2px #000, 0 0 2px #000; }
+#quickSupplies .quick-supply kbd { top: 2px; right: 2px; }
+/* 經費、異質碎片的數字縮小 */
+#hud .stat b { font-size: 17px; }
+#quickSupplies .quick-supply .qs-icon img { width: auto; height: 38px; max-width: 38px; max-height: none; object-fit: contain; }   /* 快捷欄的道具圖示放大 1.2 倍（32 → 38px；小張的圖也放大到同樣高度） */
+/* 背包按鈕右上角的快捷鍵提示（跟快捷欄的 Q／E／Z／X 一樣） */
+#hudBackpackButton { position: relative; width: 46px; height: 46px; }
+#hudBackpackButton kbd { position: absolute; top: 2px; right: 2px; min-width: 15px; padding: 1px 3px; border: 1px solid rgba(255,255,255,.22); border-bottom-width: 2px; border-radius: 4px; background: #10161d; color: #aab6c2; font: 700 9px/1.2 Consolas, monospace; text-align: center; }

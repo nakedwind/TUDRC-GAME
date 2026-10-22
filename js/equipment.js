@@ -381,12 +381,12 @@ document.addEventListener('pointerover', e => {
 window.addEventListener('keydown', e => {
   if (!GEAR_QUICK_ENABLED) return;
   const k = e.key.toLowerCase();
-  if (e.repeat || (k !== 'h' && k !== 'j') || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.repeat || k !== 'h' || e.ctrlKey || e.altKey || e.metaKey) return;   // J（腎上腺素）拿掉了：改放進快捷欄（js/quick-slots.js）
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (!G?.player || G.over || MAP_SAFE || dialogueState || elevatorMenuOpen || mapTransitioning) return;
   if (typeof supplyShopOpen !== 'undefined' && supplyShopOpen) return;
   if (typeof backpackOpen !== 'undefined' && backpackOpen) return;
-  e.preventDefault(); if (k === 'h') useFirstAid(); else useAdrenaline();
+  e.preventDefault(); useFirstAid();
 });
 
 // ---- 每幀（game.js 的 update 呼叫）：手電筒耗電、急救進度、資訊條按鈕 ----
@@ -804,7 +804,7 @@ window.addEventListener('keydown', e => {
   document.querySelector('#equipPanel [data-equip-slot="' + id + '"]')?.focus();
 }, true);
 
-// ---- 靠近隊員時的快捷鍵（js/render.js 畫頭上的「F 急救」「空白鍵 疏導」）----
+// ---- 靠近隊員時的快捷鍵（js/render.js 畫頭上的「F 急救」「C 疏導」）----
 // 附近倒下的隊員（站在 FIRST_AID.reach 格內）：頭上只出現「急救」；身上沒有異質急救包就不出現（救不回來）
 function downedTeammateNear() {
   const p = G && G.player; if (!p || MAP_SAFE || p.hp <= 0 || itemCount('anomaly-firstaid') <= 0) return null;
@@ -827,3 +827,13 @@ function teammateActionTarget() {
   return aidUsableOn(t) || (t.hp > 0 && (t.taint > 0 || t.berserk)) ? t : null;
 }
 function aidKeyTarget() { const t = promptTeammate(); return t && aidUsableOn(t) && !firstAid.channel ? t : null; }
+// 按 C：疏導頭上有「C 疏導」的那位隊員（暴走、負荷很高的優先，見 promptTeammate）；疏導中再按一次 C＝取消
+function sootheKeyTarget() { const t = promptTeammate(); return t && t.hp > 0 && (t.taint > 0 || t.berserk) ? t : null; }
+window.addEventListener('keydown', e => {
+  if (e.key.toLowerCase() !== 'c' || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  if (!G?.player || G.over || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
+  if (typeof playerChannel !== 'undefined' && playerChannel && playerChannel.kind === 'soothe') { e.preventDefault(); cancelChannel(); sfx('switch'); return; }
+  const t = sootheKeyTarget(); if (!t) return;
+  e.preventDefault(); soothe(t);
+});

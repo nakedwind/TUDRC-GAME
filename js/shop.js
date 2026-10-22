@@ -319,9 +319,9 @@ supplyShop.addEventListener('animationend', e => { if (e.target.classList.contai
 supplyShopList.addEventListener('mouseover', e => { const card = e.target.closest('[data-item]'); const item = card ? supplyById(card.dataset.item) : null; if (item !== supplyHover) { supplyHover = item; renderSupplyStatus(); } });
 supplyShopList.addEventListener('mouseleave', () => { supplyHover = null; renderSupplyStatus(); });
 document.querySelectorAll('[data-supply-tab]').forEach(button => button.addEventListener('click', () => { supplyShopTab = button.dataset.supplyTab; document.querySelectorAll('[data-supply-tab]').forEach(tab => { tab.classList.toggle('active', tab === button); tab.setAttribute('aria-selected', tab === button); }); supplyShopList.scrollTop = 0; renderSupplyShop(); sfx('switch'); }));
-window.addEventListener('keydown', e => {   // Q 醫療包、E 杏仁水、F 急救（旁邊的隊員需要急救時）
+window.addEventListener('keydown', e => {   // F 急救（旁邊的隊員需要急救時）；Q／E／Z／X 是快捷欄（js/quick-slots.js）
   const k = e.key.toLowerCase();
-  if (e.repeat || (k !== 'q' && k !== 'e' && k !== 'f') || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.repeat || k !== 'f' || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (!G?.player || G.over || MAP_SAFE || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
   e.preventDefault();
@@ -330,5 +330,4 @@ window.addEventListener('keydown', e => {   // Q 醫療包、E 杏仁水、F 急
     if (aidT) firstAidOn(aidT);
     return;
   }
-  quickUseSupply(k === 'q' ? 'hp' : 'sp');
 });

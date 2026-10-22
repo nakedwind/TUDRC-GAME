@@ -474,10 +474,9 @@ window.addEventListener('keydown', e => {
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
-    // 互動優先順序：① 隊員（疏導；治療是 F）→ ② 拾取（異質碎片、地上的道具）→ ③ 地圖物件（電梯、門、置物櫃…）
-    const mate = typeof teammateActionTarget === 'function' ? teammateActionTarget() : null;
-    if (mate && mate.hp > 0 && (mate.taint > 0 || mate.berserk)) soothe(mate);   // 隊員需要疏導：空白鍵＝疏導
-    else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
+    // 互動優先順序：① 拾取（異質碎片、地上的道具）→ ② 地圖物件（電梯、門、置物櫃…）
+    // 隊員的疏導改成 C、急救是 F（js/equipment.js、js/shop.js），空白鍵不會再撿東西撿到一半變成疏導
+    if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer() && useStoragePropNearPlayer(isPickupProp)) {}   // 拾取地上的道具（js/storage-lockers.js）
     else if (elevator) {
       if (elevator.mode === 'closed') {
@@ -509,7 +508,7 @@ window.addEventListener('keydown', e => {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();
-      if (actor?.kind === 'tower' && !MAP_SAFE) soothe(actor);   // 戰鬥區的隊員：空白鍵＝疏導、F＝急救（js/shop.js）；也可以點頭上的選項
+      if (actor?.kind === 'tower' && !MAP_SAFE) {}   // 戰鬥區的隊員：C＝疏導、F＝急救（js/equipment.js、js/shop.js）；也可以點頭上的選項
       else if (actor) openDialogue(actor);
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) startGraffitiErase(graffitiNearPlayer());   // 擦掉塗鴉（js/graffiti.js）
       else toggleSit();                   // 附近沒有角色才判定座位
