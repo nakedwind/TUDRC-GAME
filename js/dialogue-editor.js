@@ -121,6 +121,13 @@ if (typeof GIFT_PREFS !== 'undefined') for (const id of Object.keys(GIFT_PREFS))
     if (!(k in inFile) && Array.isArray(entry[k]) && !entry[k].length) autoAdded.add(id + '.' + k);
   }
 }
+// 每個角色都有「平常說話（隨機一句）」這一格（沒寫台詞的話匯出時拿掉，遊戲照舊用「找他說話（基地）」）
+for (const [id, entry] of Object.entries(draft.characters)) {
+  if (!entry || 'talk' in entry) continue;
+  const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
+  entry.talk = [];
+  if (!('talk' in inFile)) autoAdded.add(id + '.talk');
+}
 // 自動補上、沒動過的格子拿掉（匯出、存暫存都用）：空的情境格子、完全沒動過的狂戰士人格
 function stripAuto(d) {
   for (const key of autoAdded) {

@@ -61,10 +61,12 @@ function achieveRemember(set, key, stat) {
 }
 const achieveHas = (set, keys) => { const got = new Set(achieveData.sets[set] || []); return keys.length > 0 && keys.every(k => got.has(k)); };
 const achieveBaseMaps = () => (typeof BASE_MAPS !== 'undefined' ? BASE_MAPS : []);
+// 「說到坐到」要坐過哪幾張地圖的椅子（地圖名稱）
+const ACHIEVE_CHAIR_MAPS = ['2F應變中心', '1F餐廳', 'B1訓練室', 'B2射擊訓練室'];
 // 座位編號：地圖 id:素材 id@格子（跟 js/game.js 的 mapSeats 一樣；床不算椅子）
 function achieveAllChairKeys() {
   const out = new Set();
-  for (const m of achieveBaseMaps()) {
+  for (const m of achieveBaseMaps().filter(m => ACHIEVE_CHAIR_MAPS.includes(String(m.name || '').trim()))) {
     const add = (id, c, r) => { if (typeof chairConfig === 'function' && chairConfig(id) && !/bed|床/i.test(id)) out.add(m.id + ':' + id + '@' + c + ',' + r); };
     for (const st of m.stamps || []) add(st.id, st.c, st.r);
     for (const layer of Object.values(m.layers || {})) for (const [k, id] of Object.entries(layer)) { const [c, r] = k.split(',').map(Number); add(id, c, r); }

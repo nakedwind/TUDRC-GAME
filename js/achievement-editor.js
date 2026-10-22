@@ -60,8 +60,10 @@ function renderGroups() {
     b.addEventListener('click', () => { selected = key; renderAll(); });
     box.appendChild(b);
   };
-  item(ALL, '全部成就', data.list.length, ' all');
-  for (const g of data.groups) item(g, g, data.list.filter(a => a.group === g).length);
+  const q = query();   // 搜尋中：數字＝找到幾個，沒找到的分類變暗
+  const count = list => q ? list.filter(matches).length : list.length;
+  item(ALL, '全部成就', count(data.list), ' all');
+  for (const g of data.groups) { const n = count(data.list.filter(a => a.group === g)); item(g, g, n, q && !n ? ' dim' : ''); }
   $a('total').textContent = '共 ' + data.list.length + ' 個';
 }
 $a('addGroup').addEventListener('click', () => {
@@ -70,8 +72,31 @@ $a('addGroup').addEventListener('click', () => {
   setTimeout(() => { const i = $a('groupName'); if (i) { i.focus(); i.select(); } });
 });
 
+// ---- 搜尋：名稱、分類、條件、自訂條件的文字、編號都找得到 ----
+const query = () => $a('achvSearch').value.trim().toLowerCase();
+const matches = a => { const q = query(); return !q || [a.name, a.group, a.id, a.custom || '', achieveStatName(a.stat)].some(t => String(t).toLowerCase().includes(q)); };
+$a('achvSearch').addEventListener('input', () => { renderGroups(); renderMain(); });
+$a('achvSearch').addEventListener('keydown', e => { if (e.key === 'Escape' && e.target.value) { e.preventDefault(); e.target.value = ''; renderGroups(); renderMain(); } });
+function renderSearch() {
+  const head = $a('groupHead'), box = $a('achvList'), q = $a('achvSearch').value.trim();
+  const hits = data.list.filter(matches), groups = data.groups.filter(g => hits.some(a => a.group === g));
+  head.innerHTML = '<h2>搜尋「' + aEsc(q) + '」：找到 ' + hits.length + ' 個</h2>' +
+    '<p>' + (hits.length ? '分在 ' + groups.map(g => '「' + aEsc(g) + '」').join('、') + '。點分類名稱可以跳到那個分類。' : '沒有符合的成就。可以搜名稱、分類、條件、自訂條件的文字或編號。') + '</p>' +
+    '<div class="head-actions"><button type="button" class="small" id="clearSearch">清除搜尋</button></div>';
+  $a('clearSearch').addEventListener('click', () => { $a('achvSearch').value = ''; renderAll(); });
+  box.innerHTML = '';
+  for (const g of groups) {
+    const all = data.list.filter(a => a.group === g);
+    const t = document.createElement('button'); t.type = 'button'; t.className = 'group-title jump'; t.textContent = g + '（找到 ' + all.filter(matches).length + ' / ' + all.length + '）→';
+    t.title = '跳到「' + g + '」這個分類'; t.addEventListener('click', () => { selected = g; $a('achvSearch').value = ''; renderAll(); });
+    box.appendChild(t);
+    all.forEach((a, i) => { if (matches(a)) box.appendChild(achvCard(a, all[i - 1], all[i + 1])); });
+  }
+}
+
 // ---- 右邊：選到的分類的成就 ----
 function renderMain() {
+  if (query()) { renderSearch(); return; }
   const head = $a('groupHead'); head.innerHTML = '';
   if (selected === ALL) {
     head.innerHTML = '<h2>全部成就</h2><p>照分類排列；要改分類名稱、順序，請在左邊點那個分類。</p>';
