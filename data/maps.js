@@ -7619,7 +7619,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "clownfish",
-        "weight": 100
+        "weight": 50
+      },
+      {
+        "id": "burrowing_mouse",
+        "weight": 50
       }
     ],
     "spawnZone": [
