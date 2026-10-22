@@ -16,6 +16,16 @@ if (/[?&]preview=1(&|$)/.test(location.search)) {
   try { PREVIEW = JSON.parse(localStorage.getItem(PREVIEW_KEY) || 'null'); } catch (e) { PREVIEW = null; }
   if (PREVIEW && !PREVIEW.map) PREVIEW = null;
 }
+// 怪物編輯器的單隻測試場：只存在此頁記憶體，不改既有地圖或正式遊戲存檔。
+const MONSTER_PREVIEW_ID = /[?&]monsterPreview=1(&|$)/.test(location.search)
+  ? new URLSearchParams(location.search).get('monsterId') || 'burrowing_mouse' : null;
+if (MONSTER_PREVIEW_ID) {
+  const floor = {};
+  for (let c = 0; c < 24; c++) for (let r = 0; r < 14; r++) floor[c + ',' + r] = 'floor';
+  PREVIEW = { map: { id: 'monster_preview', name: '怪物測試場', cols: 24, rows: 14, safe: false, npcs: false,
+    layers: { floor }, stamps: [], solid: [], camp: ['3,10'], coreSpots: ['20,3'], coreCount: 1,
+    spawnZone: [], portals: [], monsterMix: [{ id: MONSTER_PREVIEW_ID, weight: 100 }], rules: { money: 3000, guide: 100 } }, tiles: [] };
+}
 
 // ---- 磚塊登錄（內建 + 編輯器匯出的自訂磚塊）----
 const DEFAULT_MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'object2', 'object3', 'object4', 'overlay', 'top'];

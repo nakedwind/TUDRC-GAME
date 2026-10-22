@@ -352,6 +352,7 @@ function fishHeadArmor() {
   for (const e of G.enemies) {
     const fire = e.fireDmg || 0, shock = e.shockDmg || 0;
     e.fireDmg = 0; e.shockDmg = 0;
+    if (shock > 0 && e.shockResist != null && !e.dead) e.hp += shock * (1 - e.shockResist);   // 不怕電的怪物（小丑魚）：雷電傷害只吃 shockResist 倍
     if (e.behavior !== 'fishhead' || e.dead) continue;
     if (e.fhHp == null || e.hp > e.fhHp) { e.fhHp = e.hp; continue; }
     const lost = e.fhHp - e.hp;

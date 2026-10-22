@@ -89,6 +89,7 @@ function grabBlocked(x, y) {
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy, [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr] || solidBlocksPoint(px, py)) return true;
+    if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, rr)) return true;
   }
   return false;
 }

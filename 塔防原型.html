@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
-  if (/[?&](uiedit|bagedit|squadedit)=1(&|$)/.test(location.search)) { const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage; } catch (_) { return false; } };
+  if (/[?&](uiedit|bagedit|squadedit|monsterPreview)=1(&|$)/.test(location.search)) { const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage; } catch (_) { return false; } };
     P.setItem = function (k, v) { if (!isLocal(this)) return set.call(this, k, v); }; P.removeItem = function (k) { if (!isLocal(this)) return rem.call(this, k); }; P.clear = function () { if (!isLocal(this)) return clr.call(this); }; }
 </script>
 <meta charset="UTF-8">
@@ -234,7 +234,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=homemart-20261016"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=bullets-20261022"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=smalldeath2-20261023"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/music.js?v=off-20261008"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
 
@@ -253,8 +253,8 @@
   <script src="data/balance.js?v=nosentry-20261022"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
-  <script src="data/monsters.js?v=milkfish-v4-20261021"></script>  <!-- 2b. 怪物種類與數值 -->
-  <script src="js/monster-data.js?v=sync-20261021"></script>
+  <script src="data/monsters.js?v=burrow-teleport-20261023"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="js/monster-data.js?v=burrow-teleport-20261023"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script src="data/tiles.js?v=exitfade-20261022"></script>      <!-- 4. 素材庫（兩個編輯器共用） -->
@@ -268,33 +268,35 @@
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js?v=sync-20261021"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=stairs-arrival-20261022"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=burrow-teleport-20261023"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/doors.js?v=doorrow-20261021"></script> <!-- 門：手動門／自動門 -->
   <script src="js/breakable-walls.js?v=wallsolid-20261017"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
-  <script src="js/build.js?v=bqlabel-20261023"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/build.js?v=burrow-solid-20261023"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=desk-esclayer-20261023"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=esclayer-20261023"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=burrow-solid-20261023"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
   <script src="data/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹資料 -->
   <script>document.write('<script src="data/squad-skills.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 技能樹內容（Y102隊員裝備／技能編輯器匯出）；每次都讀最新的 -->
   <script src="js/skills.js?v=squad12-20261023"></script>   <!-- 技能樹：12 格、花碎片學技能 -->
   <script src="js/anomalous-core.js?v=practice-20261020"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
   <script src="js/core-frenzy.js?v=core-bar-up30-20261018"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
-  <script src="js/combat-feel.js?v=bestiary1-20261022"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/combat-feel.js?v=burrow-teleport-20261023"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=esclayer-20261023"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=nofallback-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=grab-20261022"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/burrowing-mouse.js?v=burrow-solid-20261023"></script> <!-- 花蓮版權老鼠：出土與地底手 -->
+  <script src="js/enemy-ai.js?v=burrow-solid-20261023"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
-  <script src="js/fish-head.js?v=fishstepdark-20261019"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/loofah-lady.js?v=vineshot2-20261023"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
-  <script src="js/milkfish-kid.js?v=milkfish-v5-20261021"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=helphint2-20261023"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/fish-head.js?v=shockresist-20261023"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
+  <script src="js/loofah-lady.js?v=clownfish4-20261023"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
+  <script src="js/clownfish.js?v=smalldeath-20261023"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
+  <script src="js/milkfish-kid.js?v=clownfish4-20261023"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
+  <script src="js/render.js?v=burrow-teleport-20261023"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=colors-20261022"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
-  <script src="js/oil-barrels.js?v=milkfish-20261020"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
+  <script src="js/oil-barrels.js?v=clownfish2-20261023"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=basequiet-20261023"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/lifeform.js?v=life-burn-20261018"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
   <script src="js/smiler.js?v=giftlines-20261023"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
@@ -321,7 +323,7 @@
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=ammohud-20261022"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=noclickprompt-20261023"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
-  <script src="js/special-guns.js?v=mag2-20261022"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/special-guns.js?v=shockresist-20261023"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=bag-labels-20261022"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=guide-sp-20261021"></script>
   <script src="js/camp-interactions.js?v=tab-mag-20261022"></script>
@@ -330,7 +332,7 @@
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=clickqueue-taana-20261023"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=burrow-solid-20261023"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=flash2x2-20261022"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=hint-hover-20261023"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
@@ -348,7 +350,7 @@
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
   <script src="js/practice.js?v=bullets-20261022"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
   <script src="js/channel-actions.js?v=motes-20261021"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
-  <script src="js/grab.js?v=squash-20261022"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
+  <script src="js/grab.js?v=burrow-solid-20261023"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=tpadm2-20261022"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
   <script src="js/tpad.js?v=squadpage-20261023"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
   <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->

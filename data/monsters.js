@@ -318,8 +318,8 @@ const MONSTERS_DEFAULT = [
     "behavior": "milkfish",
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath",
-    "knockMul": 0.4,
-    "stagger": 0.15
+    "stagger": 0.15,
+    "knockMul": 0.4
   },
   {
     "id": "milkfish_kid_small",
@@ -346,6 +346,111 @@ const MONSTERS_DEFAULT = [
     "behavior": "milkfishSmall",
     "hitSound": "milkfishHurt",
     "deathSound": "milkfishDeath"
+  },
+  {
+    "id": "burrowing_mouse",
+    "name": "花蓮版權老鼠",
+    "sprite": "images/monster/burrowing-mouse/mouse-hole-open.png",
+    "hp": 180,
+    "speed": 65,
+    "playerDamage": 14,
+    "sentryDamage": 18,
+    "buildingDamage": 35,
+    "reward": 45,
+    "crystals": 5,
+    "width": 110,
+    "height": 90,
+    "frames": {
+      "front": "images/monster/burrowing-mouse/mouse-hole-open.png",
+      "walkFront": [
+        "images/monster/burrowing-mouse/mouse-hole-open.png"
+      ]
+    },
+    "behavior": "burrow",
+    "burrow": {
+      "noticeRange": 14,
+      "hitRadius": 0.8,
+      "windup": 0.8,
+      "handRise": 0.2,
+      "handHold": 0.4,
+      "cooldown": 2.6,
+      "emergeTime": 0.75
+    },
+    "art": {
+      "normal": "images/monster/burrowing-mouse/mouse-hole-open.png",
+      "half": "images/monster/burrowing-mouse/mouse-hole-half.png",
+      "closed": "images/monster/burrowing-mouse/mouse-hole-closed.png",
+      "emerge": "images/monster/burrowing-mouse/mouse-emerge.png",
+      "hole": "images/monster/burrowing-mouse/hole.png",
+      "crack": "images/monster/burrowing-mouse/hole-appear.png",
+      "leftHole": "images/monster/burrowing-mouse/left-hole.png",
+      "rightHole": "images/monster/burrowing-mouse/right-hole.png",
+      "leftRise": "images/monster/burrowing-mouse/left-hand-rise.png",
+      "rightRise": "images/monster/burrowing-mouse/right-hand-rise.png",
+      "leftHand": "images/monster/burrowing-mouse/left-hand-hole.png",
+      "rightHand": "images/monster/burrowing-mouse/right-hand-hole.png"
+    },
+    "noHitSquash": true,
+    "knockMul": 0
+  },
+  {
+    "id": "clownfish",
+    "name": "比基尼小丑魚",
+    "sprite": "images/monster/clownfish/clownfish-front.png",
+    "hp": 120,
+    "speed": 75,
+    "playerDamage": 12,
+    "sentryDamage": 14,
+    "buildingDamage": 30,
+    "reward": 26,
+    "crystals": 3,
+    "width": 108,
+    "height": 132,
+    "frames": {
+      "front": "images/monster/clownfish/clownfish-front.png",
+      "idle": [
+        "images/monster/clownfish/clownfish-front.png",
+        "images/monster/clownfish/clownfish-front-02.png"
+      ],
+      "idleFps": 1.6,
+      "blink": [
+        "images/monster/clownfish/clownfish-blink.png"
+      ],
+      "walkFront": [
+        "images/monster/clownfish/clownfish-hop-crouch.png",
+        "images/monster/clownfish/clownfish-hop-air.png"
+      ]
+    },
+    "behavior": "clownfish",
+    "hitSound": "clownfishHurt",
+    "deathSound": "clownfishDeath",
+    "knockMul": 0.6,
+    "shockResist": 0.6
+  },
+  {
+    "id": "clownfish_small",
+    "name": "小丑魚幼體",
+    "sprite": "images/monster/clownfish/clownfish-small-front.png",
+    "hp": 35,
+    "speed": 120,
+    "playerDamage": 5,
+    "sentryDamage": 6,
+    "buildingDamage": 10,
+    "reward": 8,
+    "crystals": 1,
+    "width": 50,
+    "height": 64,
+    "frames": {
+      "front": "images/monster/clownfish/clownfish-small-front.png",
+      "walkFront": [
+        "images/monster/clownfish/clownfish-small-front.png",
+        "images/monster/clownfish/clownfish-small-hop.png"
+      ]
+    },
+    "behavior": "clownfish",
+    "hitSound": "clownfishHurt",
+    "deathSound": "clownfishSmallDeath",
+    "knockMul": 1.2
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

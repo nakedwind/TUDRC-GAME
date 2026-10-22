@@ -246,9 +246,9 @@ function fireShock(p, aim, b) {
       hits.push(next);
     }
     hits.forEach((e, i) => {
-      const dmg = Math.round(b.dmg * (i ? .7 : 1));   // 跳出去的弱一點
+      const dmg = Math.round(b.dmg * (i ? .7 : 1) * (e.shockResist ?? 1));   // 跳出去的弱一點；不怕電的（小丑魚）只吃 shockResist 倍
       bulletHurtEnemy(e, dmg, b.color, p);
-      if (!e.noStun) { e.stunT = Math.max(e.stunT || 0, b.stun); e.shockT = Math.max(e.shockT || 0, b.stun); }
+      if (!e.noStun && e.shockResist == null) { e.stunT = Math.max(e.stunT || 0, b.stun); e.shockT = Math.max(e.shockT || 0, b.stun); }   // 不怕電的不會麻痺
       const bp = bodyPoint(e); spawnLightningBolt(bp.x, bp.y + 10, .6); struck.push(e);
     });
   } else struck.push({ x: end.x, y: end.y });

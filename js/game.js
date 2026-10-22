@@ -128,8 +128,8 @@ function createMonster(spec, x, y, variant) {
     sentryDamage: dmg(spec.sentryDamage), buildingDamage: dmg(spec.buildingDamage),
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
-    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, sweep: spec.sweep || null,   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
-    shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null,   // boomerang：夯吉寶（js/hangi-bao.js）
+    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, shockResist: spec.shockResist ?? null, sweep: spec.sweep || null,   /* shockResist：不怕電（雷電傷害倍率、不會麻痺） */   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
+    shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null, burrowCfg: spec.burrow || null,   // boomerang：夯吉寶（js/hangi-bao.js）
     flying: spec.behavior === 'shooter',   // 飄在空中：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
   };
@@ -1073,6 +1073,7 @@ function playerBlocked(x, y) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
+    if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, rr)) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
   return false;
@@ -1618,7 +1619,12 @@ function updatePlayerAttack(dt) {
     SFX.play('gunshot', .55, 'paint-shot');
     return;
   }
-  if (!best && typeof shootHangiCapOnLine === 'function') {   // 沒打到怪物：打到順順宮帽就把它打開（js/hangi-bao.js）
+  let eggShot = null;
+  if (!best && typeof shootFishEggOnLine === 'function') {   // 沒打到怪物：打中魚卵就引爆（js/clownfish.js）
+    eggShot = shootFishEggOnLine(p.x, p.y, endX, endY);
+    if (eggShot) { endX = eggShot.x; endY = eggShot.y; }
+  }
+  if (!best && !eggShot && typeof shootHangiCapOnLine === 'function') {   // 沒打到怪物：打到順順宮帽就把它打開（js/hangi-bao.js）
     const capHit = shootHangiCapOnLine(p.x, p.y, endX, endY);
     if (capHit) { endX = capHit.x; endY = capHit.y; G.effects.push({ ring: true, x: endX, y: endY, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' }); }
   }
@@ -1819,6 +1825,7 @@ function frame(ts) {
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環
 }
 function update(dt) {
+  if (typeof updateBurrowingMouseFx === 'function') updateBurrowingMouseFx(dt);
   if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);
   if (typeof updateCoreFrenzy === 'function') updateCoreFrenzy(dt);   // 核心醒著：異質體狂暴化（js/core-frenzy.js）
@@ -2046,7 +2053,7 @@ function update(dt) {
             if (spec.ability === '火焰') e.fireDmg = (e.fireDmg || 0) + amt; else e.shockDmg = (e.shockDmg || 0) + amt;
           }
           if (spec.burn) { e.burnT=spec.burn.duration; e.burnDmg=spec.burn.damage; e.burnTick=1; }
-          if (spec.stun && !e.noStun) {   // noStun 的怪物（生命體）不會被停住
+          if (spec.stun && !e.noStun && !(spec.ability === '雷電' && e.shockResist != null)) {   // noStun 的怪物（生命體）不會被停住；不怕電的（小丑魚）不會被雷擊麻痺
             e.stunT=Math.max(e.stunT||0,spec.stun);
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
           }
@@ -2195,6 +2202,7 @@ function update(dt) {
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
+  if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）
   updateOre(dt);          // 礦物碎片：噴飛、撿起（js/ore.js）
   updateLifePiles(dt);    // 生命體碎掉的那堆：復活、被火燒（js/lifeform.js）
   updateFlickerLights(dt);   // 不穩定的日光燈（js/flicker-light.js）
@@ -2317,7 +2325,19 @@ function loseOverlay(reason, cause) {
 // 怪物的中文名稱（怪物編輯器裡的名字）
 function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
-function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
+function prepareMonsterPreview() {
+  if (!MONSTER_PREVIEW_ID) return;
+  const spec = ACTIVE_MONSTERS.find(m => m.id === MONSTER_PREVIEW_ID);
+  G.cores = []; G.enemies = []; G.towers = []; G.npcs = []; LIGHT.enabled = false;
+  // Existing per-monster debug spawners must not add unrelated species to this test scene.
+  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true; G.clownfishTestDone = true;
+  G.player.x = CELL * 10; G.player.y = CELL * 7; G.player.hp = PLAYER.hp; G.guide = G.guideMax;
+  if (spec) G.enemies.push(createMonster(spec, CELL * 14, CELL * 7));
+  const note = document.querySelector('.header-note');
+  if (note) note.textContent = '🔍 ' + (spec?.name || '怪物') + '測試場 · WASD 移動，滑鼠射擊；不會寫入正式存檔';
+  updateCamera(); updateHUD();
+}
+function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;
