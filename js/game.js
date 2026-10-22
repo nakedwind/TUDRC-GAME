@@ -469,7 +469,7 @@ window.addEventListener('keydown', e => {
   if (dialogueState) {
     if (k.startsWith('arrow') || k === ' ' || k === 'enter') e.preventDefault();
     if (!e.repeat && (isInteractKey(k) || k === 'enter')) advanceDialogue();
-    else if (!e.repeat && k === 'escape') closeDialogue();
+    else if (!e.repeat && k === 'escape') { e.preventDefault(); closeDialogue(); }   // preventDefault：這次 Esc 用掉了（js/save.js 的 Esc 層級）
     return;
   }
   keys[k] = true;
@@ -1342,7 +1342,7 @@ cv.addEventListener('pointercancel', () => finishNpcDrag(true));
 cv.addEventListener('lostpointercapture', () => finishNpcDrag(true));
 window.addEventListener('blur', () => finishNpcDrag(true));
 window.addEventListener('keydown', e => {
-  if (e.key === 'Escape' && npcArrangeMode) setNpcArrangeMode(false);
+  if (e.key === 'Escape' && npcArrangeMode) { e.preventDefault(); setNpcArrangeMode(false); }
 });
 
 // ---- 輸入：點畫面（放置 / 哨兵選單）----

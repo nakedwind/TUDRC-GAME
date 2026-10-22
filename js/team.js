@@ -495,11 +495,11 @@ document.addEventListener('pointerdown', e => {
 
 // Esc 關閉面板
 window.addEventListener('keydown', e => {
-  if (e.key !== 'Escape') return;
-  if (isTeamPanelOpen()) closeTeamPanel();
-  if (fieldCommandMenu && !fieldCommandMenu.classList.contains('hidden')) { closeFieldCommandMenu(); return; }
-  if (impressionPanel && !impressionPanel.classList.contains('hidden')) { closeCaptainImpression(); return; }
-  if (isSquadPanelOpen()) closeSquadPanel();
+  if (e.key !== 'Escape') return;   // 關掉面板時 preventDefault：這次 Esc 用掉了（js/save.js 的 Esc 層級）
+  if (isTeamPanelOpen()) { e.preventDefault(); closeTeamPanel(); }
+  if (fieldCommandMenu && !fieldCommandMenu.classList.contains('hidden')) { e.preventDefault(); closeFieldCommandMenu(); return; }
+  if (impressionPanel && !impressionPanel.classList.contains('hidden')) { e.preventDefault(); closeCaptainImpression(); return; }
+  if (isSquadPanelOpen()) { e.preventDefault(); closeSquadPanel(); }
 });
 
 // 戰鬥中持續更新目前生命、負荷與狀態，不會因此暫停遊戲。

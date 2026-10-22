@@ -159,7 +159,7 @@ function renderAchievementPanel() {
       '</div>' +
     '</div>';
 }
-window.addEventListener('keydown', e => { if (e.key === 'Escape' && isAchievementPanelOpen()) closeAchievementPanel(); });
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && isAchievementPanelOpen()) { e.preventDefault(); closeAchievementPanel(); } });   // preventDefault：這次 Esc 用掉了，不會再打開設定（js/save.js）
 
 // ---- T-Pad 裡的「成就」App（js/tpad.js 會把它畫在平板螢幕裡）----
 // 左邊：達成進度圈＋分類；右邊：總覽（戰績、最近達成、快完成了）或該分類的成就列表

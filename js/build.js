@@ -247,7 +247,7 @@ function closeBuildMenu() {
 }
 window.addEventListener('keydown', e => {
   if (e.key === 'Escape' && (!buildBar.classList.contains('hidden') || (G && G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish')))) {
-    closeBuildMenu(); return;
+    e.preventDefault(); closeBuildMenu(); return;   // preventDefault：這次 Esc 用掉了（js/save.js 的 Esc 層級）
   }
   // 數字鍵不再選建築：1／2 留給切換槍枝（js/flare.js）；建築請點下方快捷欄
 });

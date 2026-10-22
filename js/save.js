@@ -166,14 +166,24 @@ document.getElementById('muteAll').addEventListener('change', e => { SFX.enabled
 window.addEventListener('keydown', e => {   // M 鍵（js/sfx.js）切換靜音後，音樂跟著靜音
   if (!e.repeat && e.key.toLowerCase() === 'm' && !(e.target instanceof Element && e.target.closest('input, textarea, select'))) setTimeout(() => { MUSIC.refresh(); if (settingsOpen) renderSettings(); });
 });
-// Esc：設定打開時關閉；其他視窗都沒開時打開 T-Pad 裡的設定（開始畫面還不能開 T-Pad：打開原本的設定視窗）
-// （用 capture 先檢查：別的視窗會在同一次按鍵裡被關掉，那次就不打開設定）
+// Esc 的層級：最上面開著的那個視窗先處理（只關掉它），都沒有視窗處理時，才打開 T-Pad 裡的設定（開始畫面還不能開 T-Pad：打開原本的設定視窗）
+// ・設定本身開著：這裡先關（capture，最先處理）
+// ・其他視窗：各自的 Esc 處理關掉自己，並呼叫 e.preventDefault()（或 stopImmediatePropagation）＝「這次 Esc 用掉了」
+// ・打開設定：等所有程式載入完才註冊、而且在 bubble 階段＝所有視窗都處理過、沒人用掉這次 Esc 才打開
+//   → 新的視窗要支援 Esc：在自己的 keydown 裡關掉視窗、呼叫 e.preventDefault() 就好，不用改這裡
 window.addEventListener('keydown', e => {
-  if (e.key !== 'Escape' || e.repeat) return;
-  if (settingsOpen) { e.preventDefault(); e.stopImmediatePropagation(); closeSettings(); return; }
-  const visible = id => { const el = document.getElementById(id); return el && !el.classList.contains('hidden'); };
-  const busy = (typeof campPlanOpen !== 'undefined' && campPlanOpen) || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || mapTransitioning
-    || visible('sentryMenu') || visible('groundMenu') || visible('buildbar') || visible('teamEditPanel') || visible('squadStatusPanel')
-    || (typeof tpadOpen !== 'undefined' && tpadOpen) || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen) || (G && G.selType) || assigning;   // 怪物圖鑑（電腦開的視窗）開著＝Esc 只關圖鑑   // T-Pad 開著＝Esc 只關 T-Pad。開始畫面（簡報）也可以打開設定
-  if (!busy) { e.preventDefault(); e.stopImmediatePropagation(); if (!(typeof openTPadSettings === 'function' && openTPadSettings())) openSettings(); }
+  if (e.key !== 'Escape' || e.repeat || !settingsOpen) return;
+  e.preventDefault(); e.stopImmediatePropagation(); closeSettings();
 }, true);
+function openSettingsOnEsc(e) {
+  if (e.key !== 'Escape' || e.repeat || e.defaultPrevented || settingsOpen) return;   // 別的視窗已經用掉這次 Esc
+  const visible = id => { const el = document.getElementById(id); return el && !el.classList.contains('hidden'); };
+  // 保險：這些狀態下也不打開設定（地圖切換中、放置建築、指派哨兵…）
+  const busy = (typeof campPlanOpen !== 'undefined' && campPlanOpen) || (typeof campSupplyOpen !== 'undefined' && campSupplyOpen) || (typeof npcArrangeMode !== 'undefined' && npcArrangeMode) || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || mapTransitioning
+    || visible('sentryMenu') || visible('groundMenu') || visible('buildbar') || visible('teamEditPanel') || visible('squadStatusPanel')
+    || (typeof tpadOpen !== 'undefined' && tpadOpen) || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen) || (G && G.selType) || assigning;   // 怪物圖鑑
+  if (busy) return;
+  e.preventDefault(); if (!(typeof openTPadSettings === 'function' && openTPadSettings())) openSettings();
+}
+if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', () => window.addEventListener('keydown', openSettingsOnEsc));
+else window.addEventListener('keydown', openSettingsOnEsc);

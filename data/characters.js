@@ -426,7 +426,7 @@ const CHARACTERS = {
       "role": "前衛劍士",
       "ability": "劍術",
       "range": 1.5,
-      "aggroRange": 14,
+      "aggroRange": 18,
       "dmg": 6,
       "rate": 1.6,
       "taint": 1,
@@ -437,7 +437,7 @@ const CHARACTERS = {
       "walkSpeed": 110,
       "hp": 150,
       "defense": 0.3,
-      "taunt": 2.2,
+      "taunt": 3,
       "parry": {
         "self": 0.25,
         "guard": 0.15,

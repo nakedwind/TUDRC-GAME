@@ -797,7 +797,10 @@ function sentryMenuAct(act) {
   closeSentryMenu();
 }
 window.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { assigning = null; closeSentryMenu(); closeGroundMenu(); closeBuildMenu(); }
+  if (e.key !== 'Escape') return;
+  const open = assigning || ['sentryMenu', 'groundMenu'].some(id => { const el = document.getElementById(id); return el && !el.classList.contains('hidden'); });
+  assigning = null; closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
+  if (open) e.preventDefault();   // 有選單被關掉：這次 Esc 用掉了（js/save.js 的 Esc 層級）
 });
 // ---- 疏導哨兵（花嚮導能量降汙染、解暴走）----
 // 溫特疏導：先站定跑進度條（SOOTHE.time 秒，期間溫特和這位隊員都不能動），跑完才扣 SP、降污染（js/channel-actions.js）
