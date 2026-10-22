@@ -407,7 +407,9 @@ function drawEnemy(e) {
   if (walkFrame) { e.lastFrameFile = walkFrame.file; e.lastFrameFlip = walkFrame.flip; }   // 死亡倒地用目前這張圖
   const baseSprite = monsterImage(walkFrame ? walkFrame.file : e.art ? shooterFrame(e) : (e.sprite || 'images/monster/Monster_Slime.png'));   // 珍珠小童：眨眼／生氣圖
   if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
-  if (baseSprite.complete && baseSprite.naturalWidth) {
+  if (e.behavior === 'burrow' && typeof drawBurrowingMouseBody === 'function') {
+    drawBurrowingMouseBody(ctx, e);
+  } else if (baseSprite.complete && baseSprite.naturalWidth) {
     const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
     ctx.imageSmoothingEnabled = false;
     let fw = slimeW, fh = slimeH;

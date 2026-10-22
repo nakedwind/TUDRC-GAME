@@ -200,7 +200,7 @@ function enemyChaseSentry(e, target, distance, moveDt, dt) {
 }
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
-  if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, r, actor)) return true;
+  if (typeof burrowMouseBlocksPoint === 'function' && burrowMouseBlocksPoint(x, y, actor)) return true;
   return !inGrid(c, r) || isWall(c, r) || !!barrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r));   // 順順宮帽也擋路（js/hangi-bao.js）
 }
 function resetEnemyNavigation(e) {
