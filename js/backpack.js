@@ -22,7 +22,7 @@ function itemDesc(item) {
   if (item.kind === 'snack' || item.kind === 'drink') return '便利商店買來的。可以送給大家，看看誰喜歡。';
   return '';
 }
-// 「武器」分頁：第一排＝手槍＋彈夾格，下面＝擁有的子彈（拖曳到彈夾格就換子彈，js/magazine.js）
+// 「武器」分頁：第一排＝手槍＋彈匣格，下面＝擁有的子彈（拖曳到彈匣格就換子彈，js/magazine.js）
 // 「防具」分頁：列出擁有的部隊長裝備（js/equipment.js 的 equipState），換裝備用左邊的裝備格
 const WEAPON_TAB = { id: 'weapon', name: '武器', icon: '🔫' };
 const GEAR_TAB = { id: 'equip', name: '防具', icon: '🛡️' };
@@ -93,30 +93,30 @@ function renderBackpack() {
   requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
   renderBackpackDetail();
 }
-// ---- 武器分頁：第一排手槍＋彈夾格（可以拖曳子彈上去），下面是子彈 ----
+// ---- 武器分頁：第一排手槍＋彈匣格（可以拖曳子彈上去），下面是子彈 ----
 function bulletCellHtml(b) {
   return `<button type="button" class="bag-cell bullet${b.loaded && !b.free ? ' loaded' : ''}${b.count <= 0 ? ' out' : ''}${b.id === backpackSel ? ' sel' : ''}" data-bag-item="${b.id}" draggable="true" data-drag-bullet="${b.bullet}" style="--bc:${b.def.color}" aria-label="${b.name} ${b.count}/${b.max}" aria-pressed="${b.id === backpackSel}">
-      ${b.image ? `<img src="${b.image}" alt="">` : `<i>${b.icon}</i>`}<b>${b.count}</b>${b.free ? '<u class="free">不佔格</u>' : b.loaded ? '<u>彈夾中</u>' : ''}<span class="bag-cell-name">${b.name}</span></button>`;
+      ${b.image ? `<img src="${b.image}" alt="">` : `<i>${b.icon}</i>`}<b>${b.count}</b>${b.free ? '<u class="free">不佔格</u>' : b.loaded ? '<u>彈匣中</u>' : ''}<span class="bag-cell-name">${b.name}</span></button>`;
 }
 function renderWeaponGrid(items, columns) {
   const pistol = items.find(x => x.weapon === 'pistol'), bullets = items.filter(x => x.bullet);
   const m = typeof magState === 'function' ? magState() : { load: [] }, n = typeof magSlotCount === 'function' ? magSlotCount() : 0, maxSlots = typeof MAGAZINE !== 'undefined' ? MAGAZINE.slots[MAGAZINE.slots.length - 1] : 0;
   let row = pistol ? `<button type="button" class="bag-cell gear weapon tier-${Math.max(1, Math.min(5, pistol.lv))}${pistol.id === backpackSel ? ' sel' : ''}" data-bag-item="${pistol.id}" aria-pressed="${pistol.id === backpackSel}"><img src="${pistol.image}" alt=""><b>Lv${pistol.lv}</b><span class="bag-cell-name">${pistol.name}</span></button>` : '';
-  // 彈夾架：手槍右邊一整塊，裡面每一格中間有凹槽（可以把子彈拖進去）
+  // 彈匣架：手槍右邊一整塊，裡面每一格中間有凹槽（可以把子彈拖進去）
   let slots = '';
   for (let i = 0; i < maxSlots; i++) {
-    if (i >= n) { slots += `<span class="bag-cell mag-cell locked" title="到開發工坊升級彈夾"><u>彈夾 ${i + 1}</u><i>🔒</i><span class="bag-cell-name hint">升級解鎖</span></span>`; continue; }
+    if (i >= n) { slots += `<span class="bag-cell mag-cell locked" title="到開發工坊升級彈匣"><u>彈匣 ${i + 1}</u><i>🔒</i><span class="bag-cell-name hint">升級解鎖</span></span>`; continue; }
     const id = m.load[i], b = id && typeof BULLETS !== 'undefined' && BULLETS[id];
-    slots += b ? `<button type="button" class="bag-cell mag-cell filled${BULLET_PREFIX + id === backpackSel ? ' sel' : ''}" data-mag-slot="${i}" data-bag-item="${BULLET_PREFIX + id}" draggable="true" data-drag-slot="${i}" style="--bc:${b.color}" aria-label="彈夾第 ${i + 1} 格：${b.name}"><u>彈夾 ${i + 1}</u>${b.image ? `<img src="${b.image}" alt="">` : `<i>${b.icon}</i>`}<b>${bulletCount(id)}</b><span class="bag-cell-name">${b.name}</span></button>`
-      : `<span class="bag-cell mag-cell" data-mag-slot="${i}" title="把下面的子彈拖到這裡"><u>彈夾 ${i + 1}</u><i>＋</i><span class="bag-cell-name hint">拖子彈到這裡</span></span>`;
+    slots += b ? `<button type="button" class="bag-cell mag-cell filled${BULLET_PREFIX + id === backpackSel ? ' sel' : ''}" data-mag-slot="${i}" data-bag-item="${BULLET_PREFIX + id}" draggable="true" data-drag-slot="${i}" style="--bc:${b.color}" aria-label="彈匣第 ${i + 1} 格：${b.name}"><u>彈匣 ${i + 1}</u>${b.image ? `<img src="${b.image}" alt="">` : `<i>${b.icon}</i>`}<b>${bulletCount(id)}</b><span class="bag-cell-name">${b.name}</span></button>`
+      : `<span class="bag-cell mag-cell" data-mag-slot="${i}" title="把下面的子彈拖到這裡"><u>彈匣 ${i + 1}</u><i>＋</i><span class="bag-cell-name hint">拖子彈到這裡</span></span>`;
   }
   const filled = m.load.slice(0, n).filter(Boolean).length;
-  row += `<div class="bag-mag-rack" style="--rack-span:${Math.max(1, columns - (pistol ? 1 : 0))};--mag-max:${Math.min(maxSlots, columns > 4 ? maxSlots : 3)}"><div class="bag-mag-head">彈夾 <b>${filled} / ${n}</b><small>${n < maxSlots ? '開發工坊可以擴充到 ' + maxSlots + ' 格' : '已擴充到最多格'}</small></div><div class="bag-mag-slots">${slots}</div></div>`;
+  row += `<div class="bag-mag-rack" style="--rack-span:${Math.max(1, columns - (pistol ? 1 : 0))};--mag-max:${Math.min(maxSlots, columns > 4 ? maxSlots : 3)}"><div class="bag-mag-head">彈匣 <b>${filled} / ${n}</b><small>${n < maxSlots ? '開發工坊可以擴充到 ' + maxSlots + ' 格' : '已擴充到最多格'}</small></div><div class="bag-mag-slots">${slots}</div></div>`;
   let rest = bullets.map(bulletCellHtml).join('');
   const total = Math.ceil(Math.max(BAG_MIN_SLOTS - columns, bullets.length) / columns) * columns;
   for (let i = bullets.length; i < total; i++) rest += '<span class="bag-cell empty" aria-hidden="true"></span>';
   backpackGrid.classList.add('no-anim');
-  backpackGrid.innerHTML = row + `<p class="bag-weapon-hint">子彈 <small>拖曳到上面的彈夾格就能換子彈；只有一般子彈不佔格子；照明彈也需要一格</small></p>` + rest;
+  backpackGrid.innerHTML = row + `<p class="bag-weapon-hint">子彈 <small>拖曳到上面的彈匣格就能換子彈；只有一般子彈不佔格子；照明彈也需要一格</small></p>` + rest;
   requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
 }
 function afterMagazineChange() { renderBackpack(); if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) { ammoHudKey = ''; updateAmmoHud(); } }
@@ -124,7 +124,7 @@ function loadBulletToMagazine(id, slot) {
   if (typeof setMagSlot !== 'function' || !BULLETS[id] || magIsFree(id)) return;
   const m = magState(), n = magSlotCount();
   if (slot == null) { slot = m.load.slice(0, n).indexOf(id); if (slot < 0) slot = Array.from({ length: n }, (_, i) => i).find(i => !m.load[i]); }
-  if (slot == null || slot < 0) { sfx('error'); systemNotice('彈夾滿了：把子彈拖到想換掉的那一格上', true); return; }
+  if (slot == null || slot < 0) { sfx('error'); systemNotice('彈匣滿了：把子彈拖到想換掉的那一格上', true); return; }
   setMagSlot(slot, id); sfx('reload'); afterMagazineChange();
 }
 function unloadMagazineSlot(slot) { if (typeof setMagSlot !== 'function') return; setMagSlot(slot, null); sfx('switch'); afterMagazineChange(); }
@@ -132,15 +132,15 @@ function renderBulletDetail(b) {
   backpackDetail.classList.remove('dropping', 'gear-detail');
   const tag = typeof bulletSourceTag === 'function' ? bulletSourceTag(b.def) : '';
   const slot = magState().load.slice(0, magSlotCount()).indexOf(b.bullet);
-  const btn = b.free ? '<p class="bag-note">一般子彈不佔彈夾格子，一定帶著</p>'
-    : slot >= 0 ? `<button type="button" class="bag-unequip" data-mag-unload="${slot}">從彈夾拿下</button>`
-    : `<button type="button" class="bag-use" data-mag-load="${b.bullet}">裝進彈夾</button>`;
+  const btn = b.free ? '<p class="bag-note">一般子彈不佔彈匣格子，一定帶著</p>'
+    : slot >= 0 ? `<button type="button" class="bag-unequip" data-mag-unload="${slot}">從彈匣拿下</button>`
+    : `<button type="button" class="bag-use" data-mag-load="${b.bullet}">裝進彈匣</button>`;
   backpackDetail.innerHTML = `
     <div class="bag-detail-image bullet">${b.image ? `<img src="${b.image}" alt="">` : `<i class="bag-gear-emoji">${b.icon}</i>`}</div>
     <h3>${b.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${BAG_ICON.weapon}子彈</span>${tag ? `<span class="bag-tag">${tag}</span>` : ''}${b.free ? '<span class="bag-tag worn">不佔格子</span>' : slot >= 0 ? `<span class="bag-tag worn">彈夾第 ${slot + 1} 格</span>` : ''}</div>
+    <div class="bag-tags"><span class="bag-tag">${BAG_ICON.weapon}子彈</span>${tag ? `<span class="bag-tag">${tag}</span>` : ''}${b.free ? '<span class="bag-tag worn">不佔格子</span>' : slot >= 0 ? `<span class="bag-tag worn">彈匣第 ${slot + 1} 格</span>` : ''}</div>
     ${b.def.desc ? `<p class="bag-desc">${b.def.desc}</p>` : ''}
-    <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note">也可以直接拖曳到武器分頁的彈夾格</p>'}</div>`;
+    <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note">也可以直接拖曳到武器分頁的彈匣格</p>'}</div>`;
 }
 // 裝備按鈕：只有一格能放就「裝備」；可以放兩格（主／副武器、隨身物品 1／2）就各一顆。已經在那格就變「卸下」
 function gearButtons(g) {
@@ -226,7 +226,7 @@ function confirmDrop() {
   (backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus();
 }
 function useBackpackItem(id) {
-  const bl = bulletEntryById(id);   // 子彈：連點兩下＝裝進彈夾／從彈夾拿下
+  const bl = bulletEntryById(id);   // 子彈：連點兩下＝裝進彈匣／從彈匣拿下
   if (bl) { if (bl.free) return; const slot = magState().load.slice(0, magSlotCount()).indexOf(bl.bullet); if (slot >= 0) unloadMagazineSlot(slot); else loadBulletToMagazine(bl.bullet); return; }
   const item = itemById(id); if (!item) return;
   if (item.act === 'firstaid') { if (typeof useFirstAid === 'function') { closeBackpack(); useFirstAid(); } }   // 急救包、腎上腺素：關掉背包再用（js/equipment.js）
@@ -276,7 +276,7 @@ backpackEl.addEventListener('click', e => {
   const use = e.target.closest('[data-bag-use]');
   if (use) { useBackpackItem(use.dataset.bagUse); (backpackDetail.querySelector('.bag-use:not(:disabled)') || backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus(); }
 });
-// 拖曳：子彈 → 彈夾格（裝進去／換掉那格）；彈夾格 → 另一格（互換）、拖回下面（拿下）
+// 拖曳：子彈 → 彈匣格（裝進去／換掉那格）；彈匣格 → 另一格（互換）、拖回下面（拿下）
 let bagDrag = null;   // { bullet } 或 { slot }
 backpackGrid.addEventListener('dragstart', e => {
   const c = e.target.closest('[data-drag-bullet], [data-drag-slot]'); if (!c) return;
@@ -300,7 +300,7 @@ backpackGrid.addEventListener('drop', e => {
     const to = Number(slotEl.dataset.magSlot);
     if (d.bullet) loadBulletToMagazine(d.bullet, to);
     else if (d.slot !== to) { const m = magState(), id = m.load[d.slot]; if (id) { setMagSlot(to, id); sfx('reload'); afterMagazineChange(); } }   // setMagSlot 會把兩格對調
-  } else if (d.slot != null) unloadMagazineSlot(d.slot);   // 從彈夾拖到其他地方＝拿下
+  } else if (d.slot != null) unloadMagazineSlot(d.slot);   // 從彈匣拖到其他地方＝拿下
 });
 backpackGrid.addEventListener('dblclick', e => { const cell = e.target.closest('[data-bag-item]'); if (cell) useBackpackItem(cell.dataset.bagItem); });   // 連點兩下直接使用
 ['backpackButton', 'hudBackpackButton'].forEach(id => document.getElementById(id)?.addEventListener('click', openBackpack));

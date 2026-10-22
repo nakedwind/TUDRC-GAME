@@ -3,6 +3,8 @@
    ・絲瓜藤鑽進地底，朝目標「踏下去那一刻的位置」往前鑽：地上一路冒出煙塵、留下裂痕，提示藤蔓往哪裡去。
    ・鑽到底就從地面冒出來：範圍內的玩家和隊友都會被纏住，LOOFAH.rootTime 秒不能移動（還是可以開槍、攻擊），之後放開。
    ・看到煙塵就快點閃開！被纏住時連按方向鍵可以掙扎，縮短被纏的時間（隊友會自己扭動，但時間照舊）。
+   ・幫隊友掙脫：隊友被纏住時，溫特在手槍射程內（data/characters.js 溫特的 playerAttack.range 格）、看得到隊友，就能用手槍朝他身上的藤蔓開槍，
+     把藤蔓射斷：每打中一發縮短的時間跟自己被纏住時按一下方向鍵一樣（LOOFAH.struggleCut）。開槍照常扣子彈、要裝填，不會打傷隊友。
    必須在 enemy-ai.js 之後、game.js 之前載入。數值在下面的 LOOFAH。
 */
 const LOOFAH = {
@@ -168,6 +170,7 @@ function updateLoofahVines(dt) {
   const tick = a => {
     if (!a) return;
     if (a.struggleT > 0) a.struggleT = Math.max(0, a.struggleT - dt);
+    if (a.helpHintT > 0) a.helpHintT = Math.max(0, a.helpHintT - dt);   // 「幫隊友掙脫」小提示
     if (!(a.rootT > 0)) return;
     a.rootT = Math.max(0, a.rootT - dt);
     if (a.rootT <= 0 && a === G.player && (a.struggleCount || 0) >= 2) loofahBreakFree(a);   // 掙脫
@@ -203,7 +206,7 @@ function llCatchNearby(v) {
   }
   for (const t of G.towers) {
     if (t.hp <= 0 || t.berserk || !inR(t)) continue;
-    v.caught.push(t); t.rootT = C.rootTime; t.knockT = 0; t.navPath = null; t.navGoal = null;
+    v.caught.push(t); t.rootT = C.rootTime; t.rootT0 = C.rootTime; t.helpCount = 0; t.knockT = 0; t.navPath = null; t.navGoal = null;
     if (C.eruptDamage && e && !e.dead) { e.atkCd = 0; enemyAttackSentry(e, t, 0); t.knockT = 0; }
   }
 }
@@ -240,6 +243,60 @@ function loofahStruggle(p, dir) {
   p.rootT = Math.max(p.rootT - C.struggleCut, C.struggleMin - held, 0);   // 至少要被纏 struggleMin 秒
   if (Math.random() < .5) G.effects.push({ particle: true, kind: 'spark', x: p.x + (Math.random() - .5) * 16, y: p.y + 4, vx: (Math.random() - .5) * 60, vy: -(20 + Math.random() * 30), r: 1.5 + Math.random(), life: .3, life0: .3, color: '#8fcf5e' });
   if (p.rootT <= 0) loofahBreakFree(p);
+}
+// ---- 幫隊友掙脫：隊友被纏住時，用手槍（一般子彈）朝他身上的藤蔓開槍，把藤蔓射斷 ----
+// 每打中一發少纏 struggleCut 秒（跟自己按一下方向鍵一樣），一樣至少要被纏 struggleMin 秒；溫特要在手槍射程內、看得到隊友（中間沒有牆、隊友不在黑暗裡）
+// 開槍照常：舉槍、槍口火光、彈殼、扣彈匣、要裝填，射速也跟平常一樣（js/game.js 的 updatePlayerAttack 呼叫 vineShotTarget、shootVine）
+// 換成特殊子彈時照特殊子彈的效果打，不會射斷藤蔓
+function rootedTeammateAt(x, y) {   // 滑鼠點到哪位被纏住的隊員（身體範圍：腳底往上約一個人高）
+  return G.towers.find(t => t.rootT > 0 && t.hp > 0 && !t.eatenBy && !t.grabbed && Math.abs(x - t.x) <= 20 && y >= t.y - 44 && y <= t.y + 18) || null;
+}
+const helpInRange = t => Math.hypot(t.x - G.player.x, t.y - G.player.y) <= PLAYER_ATK.range * CELL;   // 手槍射程（PLAYER_ATK 在 js/game.js）
+// 看得到隊員：跟溫特開槍打怪物同一套——身上任何一個地方在畫面上夠亮、而且視線沒有被牆整個擋住（腳底、腰、胸口、左右兩側）
+const mateBodyBox = t => ({ x0: t.x - 14, y0: t.y - 40, x1: t.x + 14, y1: t.y + 14, cx: t.x, cy: t.y - 13 });
+function helpSeen(t) {
+  const p = G.player, b = mateBodyBox(t);
+  if (!(bodyVisible(b, t.x, t.y) || isLit(t.x, t.y))) return false;
+  return [[t.x, t.y], [t.x, t.y - 8], [b.cx, b.cy], [b.x0 + 4, b.cy], [b.x1 - 4, b.cy]].some(([x, y]) => hasLineOfSight(p.x, p.y, x, y));
+}
+const canHelpFree = t => !!(G.player && G.player.hp > 0 && helpInRange(t) && helpSeen(t));
+document.getElementById('cv').addEventListener('mousedown', e => {   // 這個檔比 game.js 早載入，還不能用 cv
+  if (e.button !== 0 || typeof G === 'undefined' || !G || !G.running || G.over || MAP_SAFE || !G.player || G.player.hp <= 0) return;
+  if ((typeof paused !== 'undefined' && paused) || dialogueState || G.selType) return;   // 暫停、對話中、正在放建築／拆除：照原本的處理
+  if (playerWeapon(G.player).id !== 'pistol') return;   // 特殊子彈：照原本的效果
+  const { x, y } = clientToWorld(e.clientX, e.clientY), t = rootedTeammateAt(x, y);
+  if (!t || canHelpFree(t)) return;   // 打得到藤蔓：交給平常的開槍（js/game.js 的 updatePlayerAttack → shootVine）
+  const now = performance.now();   // 太遠或看不到：照樣開槍（只是射不到藤蔓），旁邊提示一下（連點時不要一直疊字）
+  if (now - (t.helpFarAt || 0) > 900) { t.helpFarAt = now; flash(helpInRange(t) ? '看不到他，射不到藤蔓' : '太遠了，要在手槍射程內才射得到藤蔓', t.x, t.y - 58, '#ffd479', .6); sfx('error'); }
+}, true);
+// 游標點在哪位被纏住、打得到的隊員身上（js/game.js 的 updatePlayerAttack 呼叫；沒有就回傳 null，照平常打怪）
+function vineShotTarget(aim) {
+  const t = rootedTeammateAt(aim.x, aim.y);
+  return t && canHelpFree(t) ? t : null;
+}
+// 開一槍打在隊友身上的藤蔓：子彈曳光飛到藤蔓上、碎葉噴出，藤蔓鬆一點（彈匣已經在 game.js 扣過了）
+function shootVine(p, t, aim, aimAng) {
+  const hx = Math.max(t.x - 13, Math.min(t.x + 13, aim.x)), hy = Math.max(t.y - 4, Math.min(t.y + 12, aim.y));   // 子彈打在纏住身體的那一圈藤上
+  const { x: mx, y: my } = gunMuzzleAt(p, aimAng);
+  G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });   // 槍口閃光
+  addLightFlash('muzzle', mx, my);
+  spawnShellCasing(mx, my, aimAng);
+  G.effects.push({ bullet: true, x1: mx, y1: my, x2: hx, y2: hy, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光
+  G.effects.push({ ring: true, x: hx, y: hy, r: 2, r2: 9, life: .14, life0: .14, color: '#a7dd7a' });   // 打中藤蔓：綠色小火花
+  sfx('gunshot');
+  t.helpHintT = HELP_HINT.show;   // 旁邊冒出「幫隊友掙脫」
+  loofahHelpFree(t, hx, hy);
+  if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
+  else if (PLAYER_ATK.double && Math.random() < PLAYER_ATK.double) p.atkCd = .07;   // 快速射擊（手槍 Lv3 起）
+}
+function loofahHelpFree(t, x, y) {
+  const C = LOOFAH, p = G.player, held = (t.rootT0 || C.rootTime) - t.rootT;
+  t.helpCount = (t.helpCount || 0) + 1;
+  t.struggleT = .18; t.struggleDir = [x < t.x ? 1 : -1, 0];   // 藤蔓被扯：隊友往另一邊歪一下
+  t.rootT = Math.max(t.rootT - C.struggleCut, C.struggleMin - held, 0);   // 至少要被纏 struggleMin 秒
+  for (let i = 0; i < 3; i++) G.effects.push({ particle: true, kind: 'spark', x, y, vx: (Math.random() - .5) * 80, vy: -(20 + Math.random() * 40), r: 1.5 + Math.random(), life: .3, life0: .3, color: i % 2 ? '#6fae4a' : '#a7dd7a' });   // 射斷的碎葉
+  if (typeof sfxAt === 'function') sfxAt('knock2', t.x, t.y, .3, 'loofah-help');
+  if (t.rootT <= 0) loofahBreakFree(t);
 }
 // 掙脫：藤蔓斷開、碎葉彈出來
 function loofahBreakFree(p) {
@@ -316,7 +373,21 @@ function drawLoofahVines(ctx) {
       }
       ctx.globalAlpha = 1;
     }
-    else for (const k of [0, 1, 2]) {   // 沒抓到人：三根高矮不一的捲鬚從洞裡竄出來，中段繞成彈簧圈、頂端有葉子和勾起的捲尖
+    for (const t of v.caught) {   // 被纏住的隊友頭上：掙脫進度條；溫特在旁邊時提示可以幫忙
+      if (!G.towers.includes(t) || !(t.rootT > 0) || t.hp <= 0) continue;
+      const T0 = t.rootT0 || LOOFAH.rootTime, prog = 1 - t.rootT / T0, bx = t.x - 22, by = t.y - 64;
+      ctx.globalAlpha = .9; ctx.fillStyle = '#0d1218'; ctx.fillRect(bx - 1, by - 1, 46, 7);
+      ctx.fillStyle = '#5f9c3e'; ctx.fillRect(bx, by, 44 * prog, 5);
+      ctx.strokeStyle = '#c8f59a'; ctx.lineWidth = 1; ctx.strokeRect(bx - .5, by - .5, 45, 6);
+      if (!(t.helpHintT > 0) && ((t.helpCount || 0) < 4 && canHelpFree(t) && playerWeapon(G.player).id === 'pistol')) {   // 正在射藤蔓時換成旁邊的「幫隊友掙脫」（drawLoofahHelpHints）
+        ctx.font = 'bold 11px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+        ctx.globalAlpha = .65 + .35 * Math.sin(now * 8);
+        ctx.fillStyle = '#0d1218'; ctx.fillText('開槍射斷藤蔓幫他掙脫！', t.x + 1, by - 2);
+        ctx.fillStyle = '#e8ffd2'; ctx.fillText('開槍射斷藤蔓幫他掙脫！', t.x, by - 3);
+      }
+      ctx.globalAlpha = 1;
+    }
+    if (!(p && p.rootT > 0 && v.caught.includes(p))) for (const k of [0, 1, 2]) {   // 沒抓到人：三根高矮不一的捲鬚從洞裡竄出來，中段繞成彈簧圈、頂端有葉子和勾起的捲尖
       const r = n => (Math.sin(v.seed * (3 + n) + k * (5 + n)) + 1) / 2;   // 每根藤固定的隨機值（0～1）
       const bx = v.x + [-12, 3, 14][k] + (r(1) - .5) * 5;
       drawTendril(ctx, bx, v.y + 7, {
@@ -328,6 +399,28 @@ function drawLoofahVines(ctx) {
     }
     ctx.restore();
   }
+}
+// ---- 射藤蔓時隊友旁邊的小提示：滑鼠左鍵圖示＋「幫隊友掙脫」，沒有底框，圖示和字同一個顏色 ----
+// 圖示用 images/ui/mouse-click.png（對話框「下一句」也用這張；原圖 80×80，滑鼠本體在 x 22～57、y 11～68）
+const HELP_HINT = { text: '幫隊友掙脫', color: '#88c8f3', show: .8, fade: .25, iconH: 14, dx: 20, dy: -22 };   // 顏色＝圖示的藍色；show：最後一發後留幾秒；dx／dy：在隊員腳底右上方多遠
+const helpHintIcon = new Image(); helpHintIcon.src = 'images/ui/mouse-click.png?v=3';
+// render.js 在黑幕之後呼叫：提示畫在黑幕上面，顏色才不會被暗處壓暗
+function drawLoofahHelpHints(ctx) {
+  for (const t of G.towers) if (t.helpHintT > 0 && t.rootT > 0 && t.hp > 0 && !t.eatenBy) drawHelpHint(ctx, t);
+}
+function drawHelpHint(ctx, t) {
+  const H = HELP_HINT, a = Math.min(1, t.helpHintT / H.fade), x = t.x + H.dx, y = t.y + H.dy;
+  ctx.save(); ctx.globalAlpha = a;
+  ctx.shadowColor = 'rgba(0,0,0,.85)'; ctx.shadowBlur = 3;   // 沒有底框：只加一點陰影，亮的地板上也看得清楚
+  let tx = x;
+  if (helpHintIcon.complete && helpHintIcon.naturalWidth) {
+    const iw = H.iconH * 36 / 58;
+    ctx.drawImage(helpHintIcon, 22, 11, 36, 58, x, y - H.iconH / 2, iw, H.iconH);
+    tx = x + iw + 4;
+  }
+  ctx.font = 'bold 12px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+  ctx.fillStyle = H.color; ctx.fillText(H.text, tx, y + 1);
+  ctx.restore();
 }
 // 一根絲瓜藤：根部較粗、越往上越細，尖端是尖的（不是圓頭）；中段旁邊長一片尖葉和一條捲鬚
 function vineStroke(ctx, pts, w, seed = 0) {

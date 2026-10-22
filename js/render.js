@@ -568,7 +568,7 @@ function drawSpeechBubble(cx, bottomY, text, col) {
 }
 // 所有角色（隊員、NPC）頭上的對話泡泡：先記下來，等建築、屋簷、黑幕、「急救／疏導」選項都畫完，最後才畫（flushTowerBubbles）
 // → 泡泡永遠在最上層，不會被角色前面的牆、建築擋住。
-// 這位隊員頭上有選項時，泡泡排到選項的上面——選項固定在頭上不會被泡泡推走，滑鼠才點得準。
+// 這位隊員頭上有選項時，泡泡排到選項的上面——選項固定在頭上不會被泡泡推走。
 let pendingTowerBubbles = new Map();   // 隊員 → 這一幀要畫的泡泡（同一位隊員一幀可能畫兩次身體，只留最後一次）
 function queueTowerBubble(t, cx, bottomY, text, col) { pendingTowerBubbles.set(t, { cx, bottomY, text, col, alpha: ctx.globalAlpha }); }
 function flushTowerBubbles() {
@@ -704,14 +704,13 @@ function drawInteractPrompt(cx, topY, label) {
   ctx.strokeStyle='rgba(143,211,255,.85)';ctx.lineWidth=1.5;ctx.stroke();
   ctx.fillStyle='#e6ebf2';ctx.textAlign='center';ctx.fillText(label,cx,y+17);
 }
-// ---- 靠近隊員時頭上的選項：上面「急救」（F）、下面「疏導」（C），按鍵或用滑鼠點都可以 ----
+// ---- 靠近隊員時頭上的按鍵提示：上面「急救」（F）、下面「疏導」（C）；只能按鍵，滑鼠點不到 ----
 // 倒下的隊員只顯示「急救」（身上有異質急救包才會出現）。現在用不到的選項（滿血或沒有急救包＝不顯示「急救」；沒有污染＝不顯示「疏導」）直接不出現。
-// 滑鼠停在哪個選項上，那個就亮起來：急救＝粉紅色（跟急救包按鈕按下去一樣）、疏導＝亮藍色（跟背包按鈕一樣）。
-// 畫出來的位置記在 towerPrompts，js/game.js 用它判斷滑鼠有沒有點到。
-let towerPrompts = [], towerPromptHover = null;
+// 框線顏色：急救＝粉紅色、疏導＝藍色。畫出來的位置記在 towerPrompts，頭上的對話泡泡會排到它上面（flushTowerBubbles）。
+let towerPrompts = [];
 const TOWER_PROMPT_STYLE = {
-  firstaid: { line: 'rgba(255,138,138,.55)', hot: '#ff8a8a', glow: 'rgba(255,138,138,.6)' },
-  soothe:   { line: 'rgba(143,211,255,.55)', hot: '#8fd3ff', glow: 'rgba(143,211,255,.6)' },
+  firstaid: { line: 'rgba(255,138,138,.55)' },
+  soothe:   { line: 'rgba(143,211,255,.55)' },
 };
 function drawTowerPrompts(actor, topY) {
   if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在疏導／急救／包紮：頭上換成進度條，不顯示選項
@@ -719,26 +718,19 @@ function drawTowerPrompts(actor, topY) {
   const items = actor.hp <= 0 ? [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }]   // 由上往下
     : [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }, { kind: 'soothe', label: '疏導', key: 'C', off: !(actor.taint > 0 || actor.berserk) }].filter(it => !it.off);   // 現在用不到的選項（不需要補血、不需要疏導）不顯示
   if (!items.length) return;   // 兩個都用不到：頭上什麼都不出現
-  const boxH = 20, gap = 1, mouse = aimClient && typeof mouseOnCanvas !== 'undefined' && mouseOnCanvas ? clientToWorld(aimClient.x, aimClient.y) : null;
+  const boxH = 20, gap = 1;
   ctx.save();
   ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 13px sans-serif'; ctx.textAlign = 'center';
   const keyFont = 'bold 10px sans-serif', keyW = it => { if (!it.key) return 0; ctx.font = keyFont; const w = ctx.measureText(it.key).width + 8; ctx.font = 'bold 13px sans-serif'; return w + 4; };
   const boxW = Math.max(...items.map(it => ctx.measureText(it.label).width + keyW(it))) + 14;   // 寬：按鍵小框＋字寬＋左右各 7px
   const x = Math.round(actor.x - boxW / 2);
   let y = Math.round(topY - 5 - items.length * boxH - (items.length - 1) * gap);   // 縮小後底邊往上 2px，讓按鈕中心留在原本的位置
-  towerPromptHover = null;
   for (const it of items) {
-    const rect = { x, y, w: boxW, h: boxH };
-    const hot = !!mouse && mouse.x >= x && mouse.x <= x + boxW && mouse.y >= y && mouse.y <= y + boxH;
     const st = TOWER_PROMPT_STYLE[it.kind];
-    towerPrompts.push({ ...rect, kind: it.kind, actor });
-    if (hot) towerPromptHover = it.kind;
-    ctx.save();
-    if (hot) { ctx.shadowColor = st.glow; ctx.shadowBlur = 10; }   // 滑鼠停著：外框發亮
-    ctx.fillStyle = hot ? 'rgba(30,38,50,.95)' : 'rgba(12,16,22,.9)';
+    towerPrompts.push({ x, y, w: boxW, h: boxH, kind: it.kind, actor });
+    ctx.fillStyle = 'rgba(12,16,22,.9)';
     roundRect(x, y, boxW, boxH, 6); ctx.fill();
-    ctx.restore();
-    ctx.strokeStyle = hot ? st.hot : st.line; ctx.lineWidth = 1.5;
+    ctx.strokeStyle = st.line; ctx.lineWidth = 1.5;
     roundRect(x, y, boxW, boxH, 6); ctx.stroke();
     const kw = keyW(it), lw = ctx.measureText(it.label).width, left = actor.x - (kw + lw) / 2;
     if (kw) {   // 按鍵小框（例如 F、空白鍵）
@@ -748,7 +740,7 @@ function drawTowerPrompts(actor, topY) {
       ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(it.key, left + (kw - 4) / 2, y + 14);
       ctx.restore();
     }
-    ctx.fillStyle = it.off ? '#7d8996' : hot ? '#ffffff' : '#e6ebf2';
+    ctx.fillStyle = it.off ? '#7d8996' : '#e6ebf2';
     ctx.textAlign = 'left'; ctx.fillText(it.label, left + kw, y + 15); ctx.textAlign = 'center';
     y += boxH + gap;
   }
@@ -959,7 +951,7 @@ function draw() {
     if (G.player && inFront(G.player)) drawPlayer(G.player);
   }
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
-  towerPrompts = []; towerPromptHover = null;   // 這一幀重新記錄隊員頭上的選項
+  towerPrompts = [];   // 這一幀重新記錄隊員頭上的選項
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
     const near = G.running ? portalNearPlayer() : null;
@@ -1365,6 +1357,7 @@ function draw() {
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   if (typeof drawChannelBar === 'function') drawChannelBar(ctx);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
+  if (typeof drawLoofahHelpHints === 'function') drawLoofahHelpHints(ctx);   // 射隊友身上的絲瓜藤時旁邊的「幫隊友掙脫」（js/loofah-lady.js）
   if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉彈打睡的頭上飄 Zzz（js/special-guns.js）
   if (typeof drawPaintMarks === 'function') drawPaintMarks(ctx);   // 漆彈標記的怪物：螢光漆、準心（黑暗中也看得到）
   if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）

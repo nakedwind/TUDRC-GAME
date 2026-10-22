@@ -114,7 +114,7 @@ const WEAPON_UPGRADES = {
 // ===== 手槍的子彈：溫特從頭到尾只有一把手槍，差別只在子彈（滾輪換子彈，js/flare.js）=====
 // 一般子彈無限（彈匣、裝填、傷害看手槍等級）；特殊子彈有數量，打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的子彈。
 // 特殊子彈的效果固定、不會升級（只有手槍能找諾亞升級）。上面照明彈槍、燃燒彈槍、麻醉槍的等級表已經不用了。
-// 要先裝進彈夾（背包「武器」分頁）才換得到（js/magazine.js；只有一般子彈不佔彈夾）。
+// 要先裝進彈匣（背包「武器」分頁）才換得到（js/magazine.js；只有一般子彈不佔彈匣）。
 // image：子彈的圖（images/weapon/bullet/，統一 48×16）；max：最多帶幾發；gap：兩發至少隔幾秒；color：右下角、切換時的顏色
 // source：怎麼拿到——develop＝諾亞的開發工坊開發（cost 碎片，每次出勤自動補滿）；field＝只能在後室（戰鬥區域）的置物櫃找到（打完就沒了）；supply＝補給箱、彈藥箱補
 const BULLETS = {
@@ -140,6 +140,6 @@ const BULLETS = {
 const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal'],
   ammoFind: { incendiary: 2, flash: 2, shock: 2, heal: 1, tranq: 3, paint: 4 },
   start: { incendiary: 3, flash: 3, shock: 4, heal: 2, tranq: 5, paint: 6 } };
-// ===== 彈夾（js/magazine.js）：在背包「武器」分頁把子彈拖進彈夾格，戰鬥中滾輪只換得到彈夾裡的 =====
-// free：不佔彈夾、一定帶著；slots[等級-1]＝彈夾裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
-const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5], cost: [150, 250, 380], name: '彈夾', icon: '🧰' };
+// ===== 彈匣（js/magazine.js）：在背包「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪只換得到彈匣裡的 =====
+// free：不佔彈匣、一定帶著；slots[等級-1]＝彈匣裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
+const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5], cost: [150, 250, 380], name: '彈匣', icon: '🧰' };

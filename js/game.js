@@ -514,7 +514,7 @@ window.addEventListener('keydown', e => {
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) openSupplyShop();   // HOME Mart 結帳櫃台：商店
     else {
       const actor = interactionNearPlayer();
-      if (actor?.kind === 'tower' && !MAP_SAFE) {}   // 戰鬥區的隊員：C＝疏導、F＝急救（js/equipment.js、js/shop.js）；也可以點頭上的選項
+      if (actor?.kind === 'tower' && !MAP_SAFE) {}   // 戰鬥區的隊員：C＝疏導、F＝急救（js/equipment.js、js/shop.js）
       else if (actor && canTalk(actor)) openDialogue(actor);   // 沒有台詞的人：空白鍵照樣可以坐下、擦塗鴉
       else if (typeof graffitiNearPlayer === 'function' && graffitiNearPlayer()) startGraffitiErase(graffitiNearPlayer());   // 擦掉塗鴉（js/graffiti.js）
       else toggleSit();                   // 附近沒有角色才判定座位
@@ -1022,6 +1022,8 @@ function newGame() {
   };
   // 錢：基地裡用錢包的錢；戰鬥地圖用這張地圖的作戰經費（上面的 START.money，來自地圖規則）
   if (MAP_SAFE && !window.TEST_MODE && typeof walletGet === 'function') G.money = walletGet();
+  // 出勤：應變中心錢包裡的錢全部帶出來，加在這張地圖的作戰經費上（回基地時剩多少就帶回多少，js/progression.js）
+  if (!MAP_SAFE && !window.TEST_MODE && typeof walletGet === 'function') G.money += walletGet();
   if (G.battle && !MAP_SAFE) G.battle.budget = G.money;
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
@@ -1290,30 +1292,18 @@ cv.addEventListener('contextmenu', e => {
   if (!npcDrag) handleMapClick(e, false);
 });
 cv.addEventListener('mousemove', e => { aimClient = { x: e.clientX, y: e.clientY }; });
-// 點隊員頭上的「急救」「疏導」（js/render.js 的 drawTowerPrompts）：先攔下來，才不會同時開槍
-cv.addEventListener('mousedown', e => {
-  if (e.button !== 0 || !towerPrompts.length || !G?.running || G.over) return;
-  const { x, y } = clientToWorld(e.clientX, e.clientY);
-  const hit = towerPrompts.find(b => x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h);
-  if (!hit) return;
-  e.preventDefault(); e.stopImmediatePropagation(); aimHeld = false;
-  if (hit.kind === 'firstaid') firstAidOn(hit.actor);   // js/equipment.js
-  else soothe(hit.actor);                               // js/sentry.js
-}, true);
-let mouseOnCanvas = false;   // 滑鼠在遊戲畫面上嗎（離開畫面時，隊員頭上的選項就不亮）
-cv.addEventListener('mouseenter', () => { mouseOnCanvas = true; });
-cv.addEventListener('mousemove', () => { mouseOnCanvas = true; });
-cv.addEventListener('mouseleave', () => { mouseOnCanvas = false; });
+// 隊員頭上的「急救」「疏導」只是按鍵提示（F 急救、C 疏導），滑鼠點不到（js/render.js 的 drawTowerPrompts）
 cv.addEventListener('mousedown', e => {
   if (e.button !== 0) return;
   aimClient = { x: e.clientX, y: e.clientY };
   if (e.ctrlKey && !MAP_SAFE && G?.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !settingsOpen) {
     e.preventDefault();
     closeGroundMenu(); closeSentryMenu();
-    aimHeld = true;
+    aimHeld = true; shotQueuedAt = performance.now();
     return;
   }
   aimHeld = handleMapClick(e, true);   // 回傳 true（點空地）才開始射擊；開了選單/放建築則不射
+  if (aimHeld) shotQueuedAt = performance.now();   // 連點：每按一下至少開一槍（js/game.js 的 updatePlayerAttack）
 });
 window.addEventListener('mouseup', e => { if (e.button === 0) aimHeld = false; });
 window.addEventListener('blur', () => { aimHeld = false; });
@@ -1497,6 +1487,9 @@ if (typeof applyWeaponLevels === 'function') applyWeaponLevels();   // 武器等
 const GUIDE_GUN_TYPES = new Set(['eldrin', 'chris']);
 const GUIDE_GUN = { mag: 6, reloadTime: 2 };
 let aimHeld = false, aimClient = null;
+// 快速連點：按下到放開比一幀還短（或剛好在射速冷卻中）時，這一下也要開得到槍 → 先記下來，SHOT_QUEUE 秒內冷卻好了就補開
+let shotQueuedAt = -Infinity;
+const SHOT_QUEUE = .3;
 function gunMuzzleAt(who, angle) {
   let x = who.x + Math.cos(angle) * 15, y = who.y - 8 + Math.sin(angle) * 10;
   if (who.dir === 'left') { x -= 5; y += 5; }
@@ -1563,6 +1556,7 @@ function updatePlayerAttack(dt) {
   if (p.recoilT > 0) p.recoilT -= dt;
   p.atkCd = (p.atkCd || 0) - dt;
   if (aimHeld && p.hp > 0) p.gunT = Math.max(p.gunT, 0.3);   // 按住時持續舉槍，不會射完一發就跳回
+  if (G.over || dialogueState || elevatorMenuOpen) shotQueuedAt = -Infinity;   // 選單、對話開著：剛才那一下不要留到之後才開
   const wid = playerWeapon(p).id, paint = wid === 'paint';   // 裝的子彈（滾輪換，js/flare.js）
   if (p.reloadT > 0) {   // 手槍彈匣裝填中（換成特殊子彈時也會繼續裝）
     p.reloadT -= dt;
@@ -1570,7 +1564,9 @@ function updatePlayerAttack(dt) {
     if (wid === 'pistol') { updateAmmoHud(); return; }
   }
   updateAmmoHud();
-  const canFire = !(p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
+  const queued = performance.now() - shotQueuedAt < SHOT_QUEUE * 1000;   // 剛點了一下（已經放開也算）
+  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
+  if (canFire) shotQueuedAt = -Infinity;   // 這一下開了：用掉
   if (wid === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈（js/flare.js）
   if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
   if (!canFire) return;
@@ -1582,6 +1578,8 @@ function updatePlayerAttack(dt) {
   else { p.atkCd = 1 / PLAYER_ATK.rate; p.ammo--; }
   p.dir = Math.abs(adx) >= Math.abs(ady) ? (adx < 0 ? 'left' : 'right') : (ady < 0 ? 'back' : 'front');
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
+  const vineMate = !paint && typeof vineShotTarget === 'function' ? vineShotTarget(aim) : null;   // 游標點在被絲瓜藤纏住的隊友身上：子彈射斷藤蔓（js/loofah-lady.js）
+  if (vineMate) { shootVine(p, vineMate, aim, aimAng); return; }
   // 朝游標方向、射程內、照亮的最近怪。
   // 浮在空中／很高的目標（珍珠小童、異質核心）畫面上的身體比腳底高：游標直接點在身體上就一定打中；
   // 扇形判定也同時看腳底和身體中心，取比較接近的角度。
@@ -1815,7 +1813,7 @@ function frame(ts) {
   const placingThing = !!(G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish'))
     || (typeof graffitiPlace !== 'undefined' && !!graffitiPlace);
   const armed = !MAP_SAFE && G.running && !menuOpen && !!G.player && G.player.hp > 0 && playerWeapon(G.player).id !== 'none'
-    && !insideWarningLine(G.player.x, G.player.y) && !placingThing && !towerPromptHover;   // 滑鼠停在隊員頭上的選項：一般游標
+    && !insideWarningLine(G.player.x, G.player.y) && !placingThing;
   if (armed !== cv.classList.contains('cursor-crosshair')) cv.classList.toggle('cursor-crosshair', armed);
   if (typeof sanityAfterDraw === 'function') sanityAfterDraw();   // SP 低於 20：殘影（js/sanity.js）
   if (!MAP_SAFE && typeof updateFieldCdRings === 'function') updateFieldCdRings();   // 隊員頭像大招冷卻環

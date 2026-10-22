@@ -26,8 +26,8 @@ function earnCrystals(amount) {
 // 異質核心（生成、甦醒、召喚、繪製、碎裂）在 js/anomalous-core.js
 
 // ===== 錢包：基地裡的錢（存在瀏覽器）=====
-// 出勤時：戰鬥地圖給「作戰經費」（地圖編輯器的規則 money，預設 3000），打怪不會加錢。
-// 回到安全區（基地）時：作戰經費剩下的錢加進錢包。基地裡（商店、販賣機）花的是錢包的錢。
+// 出勤時：錢包裡的錢全部帶出去，加上戰鬥地圖給的「作戰經費」（地圖編輯器的規則 money，預設 3000），打怪不會加錢。
+// 回到安全區（基地）時：剩下的錢全部變成錢包的錢（因為出勤時已經把錢包整個帶出去了）。基地裡（商店、販賣機）花的是錢包的錢。
 const WALLET_KEY = 'tudrc_wallet_v1', WALLET_START = 300;   // 第一次玩時錢包有多少
 let wallet = (() => { try { const v = Number(localStorage.getItem(WALLET_KEY)); return localStorage.getItem(WALLET_KEY) == null ? WALLET_START : Math.max(0, Math.floor(v) || 0); } catch (_) { return WALLET_START; } })();
 function walletGet() { return wallet; }
@@ -41,7 +41,7 @@ function settleSortieMoney() {
   if (G.phase === 'ready') return;   // 還沒開始作戰（只是載入地圖）：不算
   G.moneySettled = true;
   const left = Math.max(0, Math.floor(G.money || 0));
+  walletSet(left);   // 錢包的錢出勤時已經全部帶出去了，所以剩下多少，錢包就是多少（不是再加上去）
   if (!left) return;
-  walletSet(wallet + left);
   setTimeout(() => { if (typeof systemNotice === 'function') systemNotice('作戰經費剩下 $' + left + '，已帶回基地'); }, 900);
 }
