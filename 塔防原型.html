@@ -8,9 +8,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
+<script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=quick10-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=hpbar2-20261022">
+<link rel="stylesheet" href="css/style.css?v=tabkey-20261022">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -59,7 +60,7 @@
               <dt><kbd>1</kbd>～<kbd>9</kbd> <kbd>0</kbd></dt><dd>快捷欄（預設 1 醫療包、2 杏仁水；新拿到的補品會自動放進空格；打開背包把道具拖到下方就能換）</dd>
               <dt><kbd>F</kbd></dt><dd>靠近受傷／倒下的隊員時：急救</dd>
               <dt><kbd>B</kbd></dt><dd>背包</dd>
-              <dt><kbd>T</kbd></dt><dd>T-Pad（隊員、出勤配置、任務、成就、怪物圖鑑…）</dd>
+              <dt><kbd>Tab</kbd></dt><dd>T-Pad（隊員、出勤配置、任務、成就、怪物圖鑑…）</dd>
               <dt><kbd>G</kbd></dt><dd>對話中送禮</dd>
               <dt><kbd>P</kbd></dt><dd>暫停</dd>
               <dt><kbd>M</kbd></dt><dd>靜音</dd>
@@ -205,7 +206,7 @@
     </div>
     <span class="stat money"><span class="hud-stat-values"><small>經費</small><b id="money">0</b></span></span>
     <span class="stat crystal"><img class="hud-stat-icon shard-icon" src="images/碎片鑰匙/anomalous-shard.png" alt=""><span class="hud-stat-values"><small>異質碎片</small><b id="crystals">0</b></span></span>
-    <button id="hudTpadButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開 T-Pad（T）；Esc＝直接打開設定"><svg class="tpad-button-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="5.4" width="10" height="11.6" rx=".8" fill="currentColor" opacity=".55"/><circle cx="12" cy="19.4" r="1.1" fill="currentColor"/></svg>T-Pad<kbd>T</kbd></button>
+    <button id="hudTpadButton" class="hud-menu-button" type="button" aria-haspopup="dialog" title="打開 T-Pad（Tab）；Esc＝直接打開設定"><svg class="tpad-button-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="2" width="16" height="20" rx="2.6" fill="none" stroke="currentColor" stroke-width="2"/><rect x="7" y="5.4" width="10" height="11.6" rx=".8" fill="currentColor" opacity=".55"/><circle cx="12" cy="19.4" r="1.1" fill="currentColor"/></svg>T-Pad<kbd>Tab</kbd></button>
   </div>
 
   <div id="editors">
@@ -313,7 +314,7 @@
   <script src="js/equipment.js?v=bullets-20261022"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=bullets-20261022"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/combat-progress.js?v=guide-sp-20261021"></script>
-  <script src="js/camp-interactions.js?v=bullets-20261022"></script>
+  <script src="js/camp-interactions.js?v=tabkey-20261022"></script>
   <script src="js/camp-supply.js?v=guide-sp-20261021"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=nofallback-20261022"></script>
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
@@ -338,6 +339,6 @@
   <script src="js/channel-actions.js?v=motes-20261021"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=squash-20261022"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=tpadm2-20261022"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
-  <script src="js/tpad.js?v=tpadesc-20261022"></script>   <!-- 📱 T-Pad：隊員、出勤配置、任務、成就、怪物圖鑑…都收在這裡（按 T） -->
+  <script src="js/tpad.js?v=tabkey-20261022"></script>   <!-- 📱 T-Pad：隊員、出勤配置、任務、成就、怪物圖鑑…都收在這裡（按 Tab） -->
 </body>
 </html>

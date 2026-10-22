@@ -95,11 +95,7 @@ function openCampPlanDialog() {
 window.addEventListener('keydown', e => {
   if (!campPlanOpen) return;
   if (e.key === 'Escape') { e.preventDefault(); if (campPlanPending) cancelCampPlanConfirmation(); else closeCampPlanDialog(); }
-  else if (e.key === 'Tab') {
-    const panel = campPlanPending ? campPlanDialog.querySelector('.camp-plan-confirm') : campPlanDialog.querySelector('.camp-plan-card');
-    const buttons = [...panel.querySelectorAll('button')], index = buttons.indexOf(document.activeElement);
-    e.preventDefault(); buttons[(index + (e.shiftKey ? -1 : 1) + buttons.length) % buttons.length].focus();
-  } else if (e.key !== 'Enter' && e.code !== 'Space') e.preventDefault();
+  else if (e.key !== 'Enter' && e.code !== 'Space') e.preventDefault();   // Tab 也是：Tab 只用來開關 T-Pad（js/tab-key.js），這裡不切換按鈕
   e.stopImmediatePropagation();
 }, true);
 function useCampInteractionNearPlayer(allowPlan = true) {

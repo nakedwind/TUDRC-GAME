@@ -2663,7 +2663,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #hudTpadButton { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; width: 46px; height: 46px; padding: 0; border: 1px solid rgba(143,211,255,.42); border-radius: 9px; background: linear-gradient(180deg,rgba(38,56,74,.94),rgba(20,30,42,.96)); color: #d8ecff; cursor: pointer; font: 700 10px "Microsoft JhengHei",sans-serif; transition: transform .12s, border-color .12s; }
 #hudTpadButton:hover, #hudTpadButton.active { border-color: #8fd3ff; color: #fff; transform: translateY(-1px); }
 #hudTpadButton .tpad-button-icon { width: 22px; height: 22px; margin-top: 3px; }
-#hudTpadButton kbd { position: absolute; top: 2px; right: 2px; min-width: 15px; padding: 1px 3px; border: 1px solid rgba(255,255,255,.22); border-bottom-width: 2px; border-radius: 4px; background: #10161d; color: #aab6c2; font: 700 9px/1.2 Consolas, monospace; text-align: center; }
+#hudTpadButton kbd { position: absolute; top: 1px; right: 1px; min-width: 15px; padding: 0 2px; border: 1px solid rgba(255,255,255,.22); border-bottom-width: 2px; border-radius: 4px; background: #10161d; color: #aab6c2; font: 700 7.5px/1.2 Consolas, monospace; letter-spacing: -.2px; text-align: center; }   /* 「Tab」三個字：字小一點、貼角落，才不會蓋到平板圖示 */
 
 #tpad { position: absolute; inset: 0; z-index: 45; display: flex; align-items: center; justify-content: center; container-type:size; background: rgba(4,8,12,.62); backdrop-filter: blur(3px); animation: tpad-fade .18s ease-out; }
 #tpad.hidden { display: none; }

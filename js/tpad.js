@@ -1,5 +1,6 @@
 /* ===== 📱 T-Pad：像平板一樣的整合介面 =====
-   ・下方資訊條（背包旁邊）的「T-Pad」按鈕或按 T 打開；Esc／T／點外面／點下方橫條 關掉。
+   ・下方資訊條（背包旁邊）的「T-Pad」按鈕或按 Tab 打開；Esc／Tab／點外面／點下方橫條 關掉。
+     Tab 只用來開關 T-Pad，沒有其他功能（瀏覽器的「切換焦點」在 js/tab-key.js 擋掉）。
    ・主畫面：狀態列（時間、電量）、App 圖示、「目前任務」小卡片。
    ・點 App＝打開原本的介面（隊員、出勤配置、任務、成就、怪物圖鑑、設定…）；那個介面關掉後自動回到 T-Pad 主畫面。
    ・要加新的 App：在下面的 TPAD_APPS 多加一項（open＝打開原本的介面、isOpen＝那個介面是不是開著；或 view＝直接畫在 T-Pad 螢幕裡；baseOnly＝只有基地能用；soon＝即將推出）。
@@ -277,9 +278,21 @@ setInterval(() => {
   let open = true; try { open = tpadLaunched.isOpen(); } catch (_) { open = false; }
   if (!open) { tpadLaunched = null; openTPad(); }
 }, 150);
-// 按鍵：T 開關；開著的時候 Esc 關掉，其他按鍵不要傳給遊戲（不然溫特會走動、開槍）
+// 按鍵：Tab 開關；開著的時候 Esc 關掉，其他按鍵不要傳給遊戲（不然溫特會走動、開槍）
+// 在打字的地方（文字輸入框）按 Tab：什麼都不做；拉桿、勾選框不算打字，Tab 照樣開關
+const TPAD_TYPING = 'textarea, [contenteditable], input:not([type="range"]):not([type="checkbox"]):not([type="radio"]):not([type="button"]):not([type="color"])';
 window.addEventListener('keydown', e => {
   const k = (e.key || '').toLowerCase();
+  if (k === 'tab') {   // Tab：只用來開關 T-Pad，不再傳給其他按鍵處理
+    e.preventDefault(); e.stopImmediatePropagation();
+    if (e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+    if (e.target instanceof Element && e.target.closest(TPAD_TYPING)) return;
+    if (tpadOpen) { closeTPad(); return; }
+    if (typeof dialogueState !== 'undefined' && dialogueState) return;
+    if (typeof backpackOpen !== 'undefined' && backpackOpen) return;
+    if (TPAD_APPS.some(a => { if (!a.isOpen) return false; try { return a.isOpen && a.isOpen(); } catch (_) { return false; } })) return;   // 其他介面開著：不要蓋上去
+    tpadLaunched = null; openTPad(); return;
+  }
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (tpadOpen) {
     if (k === 'escape' && tpadView === 'squad') {
@@ -291,14 +304,9 @@ window.addEventListener('keydown', e => {
     if (tpadView === 'bestiary' && (k === 'arrowleft' || k === 'arrowright')) bestiaryAppStep(tpadEl.querySelector('.tpad-appbody'), k === 'arrowright' ? 1 : -1);   // 怪物圖鑑：←→ 換一隻
     else if (k === 'escape' && tpadView === 'settings' && tpadEscDirect) closeTPad();   // Esc 打開的設定：再按 Esc 直接關掉
     else if (k === 'escape' && tpadView) showTPadHome();   // App 裡按 Esc＝回主畫面
-    else if (k === 'escape' || (k === 't' && !e.repeat)) closeTPad();
-    e.preventDefault(); e.stopImmediatePropagation(); return;
+    else if (k === 'escape') closeTPad();
+    e.preventDefault(); e.stopImmediatePropagation();
   }
-  if (k !== 't' || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
-  if (typeof dialogueState !== 'undefined' && dialogueState) return;
-  if (typeof backpackOpen !== 'undefined' && backpackOpen) return;
-  if (TPAD_APPS.some(a => { if (!a.isOpen) return false; try { return a.isOpen && a.isOpen(); } catch (_) { return false; } })) return;   // 其他介面開著：不要蓋上去
-  e.preventDefault(); e.stopImmediatePropagation(); tpadLaunched = null; openTPad();
 }, true);
 document.getElementById('hudTpadButton')?.addEventListener('click', () => tpadOpen ? closeTPad() : openTPad());
 
