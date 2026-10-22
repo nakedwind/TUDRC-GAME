@@ -378,7 +378,7 @@ const CHARACTERS = {
     "id": "taana",
     "kind": "guide",
     "name": "塔納",
-    "sprite": "taana_A",
+    "sprite": "taana_B",
     "combat": {
       "rank": "A",
       "role": "疏導支援",
