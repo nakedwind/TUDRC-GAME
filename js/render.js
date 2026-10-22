@@ -894,6 +894,7 @@ function draw() {
   ctx.fillStyle = '#000'; ctx.fillRect(OX, OY, COLS * CELL, ROWS * CELL);
   // 地面層（地板、地面裝飾）：永遠畫在角色下方
   drawMapGround(ctx);
+  if (typeof drawBurrowingMouseGround === 'function') drawBurrowingMouseGround(ctx);
   if (typeof drawGraffitiGround === 'function') drawGraffitiGround(ctx);   // 地板上的塗鴉（js/graffiti.js）
   // 不可穿透格只負責碰撞；沒放美術素材時保持地圖原貌，與編輯器一致。
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
@@ -909,6 +910,7 @@ function draw() {
   for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
   for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); } });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
+  if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });

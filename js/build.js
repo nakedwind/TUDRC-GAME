@@ -47,6 +47,7 @@ function placeCheckCells(v) {
 }
 function canPlaceObstacle(v, c, r, lightExtra = 0) {
   if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;
+  if (typeof burrowMouseBlocksBuild === 'function' && burrowMouseBlocksBuild(v, c, r)) return false;
   // 只有「擋路格(solid)」才要求空地／不壓牆／不疊其他建築的擋路格／夠亮；
   // 其餘格子只是圖片，可以疊在牆或其他建築的圖片前面。
   for (const [dc, dr] of placeCheckCells(v)) {
@@ -84,6 +85,7 @@ function placeObstacle(ob, c, r) {
   if(!ob||DISABLED_BUILD_IDS.has(ob.id))return false;
   const v = ob[buildOrient], extra = placeExtra(ob);
   if (!buildInRange(v, c, r)) return buildFail('太遠了，只能蓋在溫特 ' + BUILD_RANGE + ' 格以內', c, r);
+  if (typeof burrowMouseBlocksBuild === 'function' && burrowMouseBlocksBuild(v, c, r)) return buildFail('地洞尚未消失，這裡暫時無法放置', c, r);
   if (!footprintNearLight(v, c, r, extra)) return buildFail('太暗了，無法放置建築', c, r, '#ffd24a');
   if (!canPlaceObstacle(v, c, r, extra)) return buildFail('這裡不能放置建築', c, r);
   if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) return buildFail('這裡已經有地雷了', c, r);

@@ -18,7 +18,8 @@
   button { cursor:pointer; color:#eaf3ff; background:#2a3e54; border:1px solid #5b7793; border-radius:8px; padding:9px 12px; font:inherit }
   button:hover { background:#34516d } button.primary { background:#276f80; border-color:#64b6bd }
   button.danger { background:#58313a; border-color:#a05b68 }
-  input { background:#121a23; color:#f3f6fb; border:1px solid #52677d; border-radius:7px; padding:8px 10px; font:inherit; min-width:0 }
+  input, select { background:#121a23; color:#f3f6fb; border:1px solid #52677d; border-radius:7px; padding:8px 10px; font:inherit; min-width:0 }
+  #burrowAnimation { display:block; width:100%; max-width:640px; height:auto; image-rendering:pixelated; border:1px solid #455a71; border-radius:10px; background:#202b36; margin:12px 0 }
   #search { width:100%; margin:0 0 10px }
   #monsterList { display:grid; gap:7px; max-height:620px; overflow:auto }
   #monsterList button { display:flex; gap:10px; align-items:center; width:100%; text-align:left; background:#15202b; border-color:#35485c }
@@ -63,10 +64,11 @@
       <div id="monsterList"></div></section>
     <section class="panel"><div class="actions"><h2 style="flex:1" id="editingTitle">怪物資料</h2><button class="danger" id="deleteMonster">刪除此種類</button></div>
       <div class="details"><div><div class="preview"><img id="spritePreview" alt="怪物圖片預覽"><span id="spriteError"></span></div>
-        <p style="margin-top:12px;font-size:12px">圖片請放在遊戲的 <code>images/monster/</code> 資料夾，再填入相對路徑。新增怪物目前沿用史萊姆的跳躍與索敵行為。</p></div>
+        <p style="margin-top:12px;font-size:12px">圖片請放在 <code>images/monster/</code>，再填入相對路徑。</p></div>
         <div class="fields">
           <label>名稱<input id="f_name" data-field="name" maxlength="40"></label>
           <label>種類 ID<input id="f_id" readonly title="ID 建立後固定，避免地圖引用失效"></label>
+          <label class="wide">攻擊模式<select id="f_behavior"><option value="">一般索敵</option><option value="charger">衝撞</option><option value="shooter">飄浮射擊</option><option value="boomerang">迴力鏢</option><option value="fishhead">魚頭君噴水</option><option value="vine">絲瓜藤蔓</option><option value="milkfish">虱目魚小子吞食</option><option value="milkfishSmall">小虱目魚小子</option><option value="clownfish">比基尼小丑魚</option><option value="burrow">鑽地出土／地底伸手</option></select></label>
           <label class="wide">圖片路徑<input id="f_sprite" data-field="sprite" placeholder="images/monster/Monster_Slime.png"></label>
           <label>生命 HP<input id="f_hp" data-field="hp" type="number" min="1"></label>
           <label>移動速度<input id="f_speed" data-field="speed" type="number" min="1"></label>
@@ -82,8 +84,13 @@
         <h3 id="behaviorTitle">行為</h3>
         <p id="behaviorDesc"></p>
         <div class="fields" id="chargerFields"></div>
+        <div id="burrowPreviewBox" hidden>
+          <label>動作預覽 <select id="burrowPreviewMode"><option value="cycle">完整循環</option><option value="emerge">本體鑽出地面</option><option value="idle">待機與眨眼</option><option value="left">左手出土攻擊</option><option value="right">右手出土攻擊</option><option value="strike-left">左手命中定格</option><option value="strike-right">右手命中定格</option><option value="sink">本體退回地洞</option></select></label>
+          <canvas id="burrowAnimation" width="560" height="290" aria-label="鑽地老鼠動作預覽"></canvas>
+          <small>本體鑽地瞬移，出土與入土時仍可受傷。橘圈鎖定5×5 格內的落點，可移動閃避；本體離開後原地洞保留 5 秒。正式出現位置由地圖編輯器的怪物種類／權重決定。</small>
+        </div>
       </div>
-      <div class="foot"><div class="actions"><button id="previewGame">▶ 用暫存設定預覽遊戲</button><button id="exportMonsters" class="primary">下載 monsters.js</button><button id="resetMonsters">從檔案重新載入</button></div>
+      <div class="foot"><div class="actions"><button id="previewMonster">▶ 單隻測試場</button><button id="previewGame">▶ 用暫存設定預覽遊戲</button><button id="exportMonsters" class="primary">下載 monsters.js</button><button id="resetMonsters">從檔案重新載入</button></div>
         <small>編輯會自動儲存在這台瀏覽器。正式保留並同步到其他電腦時，下載檔案並放到 <code>data/monsters.js</code>。</small>
         <div id="status" role="status"></div><textarea id="exportOut" readonly aria-label="怪物設定匯出內容"></textarea></div>
     </section>
@@ -101,12 +108,13 @@
     </div>
     <small style="display:block;margin-top:10px">場上同時最多一隻巨型；上一隻沒倒，下一隻會等。</small>
   </section>
-  <script src="data/monsters.js?v=smalldeath-20261023"></script>
+  <script src="data/monsters.js?v=burrow-teleport-20261023"></script>
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/monster-data.js?v=shockresist-20261023"></script>
+  <script src="js/monster-data.js?v=burrow-teleport-20261023"></script>
   <script src="js/sfx.js?v=smalldeath2-20261023"></script>
+  <script src="js/burrowing-mouse.js?v=burrow-solid-20261023"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=sync-20261021"></script>
+  <script src="js/monster-editor.js?v=burrow-solid-20261023"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=nav3-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
