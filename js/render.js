@@ -797,10 +797,37 @@ function drawFallDown(p, set, age, wobble = true) {
   ctx.restore();
   return true;
 }
+// 衝刺（js/game.js 的 DASH）：身後淡藍色的殘影；頭上血條上方一條細細的藍色冷卻條（冷卻好了就不畫）
+function drawDashTrail(p, img, size) {
+  const tr = p.dashTrail; if (!tr || !tr.length || typeof DASH === 'undefined') return;
+  const now = performance.now() / 1000;
+  while (tr.length && now - tr[0].t > DASH.trailLife) tr.shift();
+  const sil = typeof flashSprite === 'function' ? flashSprite(img, '#8fd3ff') : null; if (!sil) return;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  for (const g of tr) {
+    const k = 1 - (now - g.t) / DASH.trailLife; if (k <= 0) continue;
+    ctx.globalAlpha = .45 * k; ctx.drawImage(sil, g.x - size / 2, g.y - size + 18, size, size);
+  }
+  ctx.restore();
+}
+// 冷卻條：跟左上角隊員頭像的大招冷卻條（css/style.css 的 .field-cd-bar）同一個樣子——剛衝完是滿的，往左慢慢縮短
+// hpY＝血條的 y（戰鬥地圖：畫在血條上方 DASH_BAR.gap；基地沒有血條：畫在血條的位置）
+const DASH_BAR = { w: 46, h: 2, gap: 2, color: '#4db5ff' };
+function drawDashCooldown(p, hpY) {
+  if (typeof DASH === 'undefined' || !(p.dashCd > 0)) return;
+  const remain = Math.min(1, p.dashCd / DASH.cd), { w, h, gap } = DASH_BAR;
+  const x = p.x - w / 2, y = MAP_SAFE ? hpY + 1 : hpY - 1 - gap - 1 - h;
+  ctx.save();
+  ctx.fillStyle = 'rgba(8,15,24,.75)'; roundRect(x - 1, y - 1, w + 2, h + 2, 2); ctx.fill();
+  ctx.shadowColor = DASH_BAR.color; ctx.shadowBlur = 4;   // 淡淡的藍色光暈
+  ctx.fillStyle = DASH_BAR.color; ctx.fillRect(x, y, w * remain, h);
+  ctx.restore();
+}
 function drawPlayer(p) {
   if (G.playerDeath) { drawPlayerDeath(p); return; }   // 倒下：陣亡動畫
   const img = pickCharacterFrame(playerSprites, p);
   const size = PLAYER.drawSize;
+  if (img && img.complete && img.naturalWidth && !p.sitting) drawDashTrail(p, img, size);   // 衝刺：殘影（畫在溫特後面）
   if (img && img.complete && img.naturalWidth) {
     ctx.save();
     if (p.recoilT > 0) {   // 開槍後座力：往反方向頂一下再回正
@@ -830,11 +857,13 @@ function drawPlayer(p) {
   } else {
     ctx.fillStyle = '#5ec8ff'; roundRect(p.x - 14, p.y - 16, 28, 32, 8); ctx.fill();
   }
+  const hpY = p.y - size + 13;
   if (!MAP_SAFE) {
-    const w = 46, h = 5, ratio = Math.max(0, p.hp / p.maxhp), x = p.x - w / 2, y = p.y - size + 13;
+    const w = 46, h = 5, ratio = Math.max(0, p.hp / p.maxhp), x = p.x - w / 2, y = hpY;
     ctx.fillStyle = 'rgba(8,12,18,.88)'; roundRect(x - 1, y - 1, w + 2, h + 2, 3); ctx.fill();
     if (ratio > 0) { ctx.fillStyle = ratio > .35 ? '#63d7aa' : '#ff6363'; roundRect(x, y, w * ratio, h, 2); ctx.fill(); }
   }
+  drawDashCooldown(p, hpY);   // 衝刺冷卻條（血條上方）
   drawPlayerReloadCountdown(p, size);
 }
 

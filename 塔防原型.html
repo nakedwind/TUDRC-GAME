@@ -48,6 +48,7 @@
 <section id="settings-keys" class="set-group keys settings-page" role="tabpanel" aria-labelledby="settings-tab-keys" hidden><h3>快捷鍵</h3>
             <dl class="keys-list">
               <dt><kbd>W</kbd><kbd>A</kbd><kbd>S</kbd><kbd>D</kbd></dt><dd>移動</dd>
+              <dt><kbd>Shift</kbd></dt><dd>衝刺：0.5 秒內走路速度 ×2（腎上腺素中也會再 ×2），冷卻 3 秒</dd>
               <dt><kbd>左鍵</kbd></dt><dd>點空地開槍（按住連射）</dd>
               <dt><kbd>Ctrl</kbd>＋<kbd>左鍵</kbd></dt><dd>強制開槍</dd>
               <dt><kbd>右鍵</kbd></dt><dd>點哨兵／空地開選單</dd>
@@ -55,7 +56,7 @@
               <dt><kbd>滾輪</kbd></dt><dd>換子彈（一般子彈、照明彈、燃燒彈、麻醉彈、漆彈）</dd>
               <dt><kbd>Space</kbd></dt><dd>對話、互動、撿東西</dd>
               <dt><kbd>C</kbd></dt><dd>靠近需要疏導的隊員時：疏導（疏導中再按一次＝取消）</dd>
-              <dt><kbd>Q</kbd> <kbd>E</kbd> <kbd>Z</kbd> <kbd>X</kbd></dt><dd>快捷欄（預設 Q 醫療包、E 杏仁水；打開背包把道具拖到下方就能換）</dd>
+              <dt><kbd>1</kbd>～<kbd>9</kbd> <kbd>0</kbd></dt><dd>快捷欄（預設 1 醫療包、2 杏仁水；新拿到的補品會自動放進空格；打開背包把道具拖到下方就能換）</dd>
               <dt><kbd>F</kbd></dt><dd>靠近受傷／倒下的隊員時：急救</dd>
               <dt><kbd>B</kbd></dt><dd>背包</dd>
               <dt><kbd>T</kbd></dt><dd>T-Pad（隊員、出勤配置、任務、成就、怪物圖鑑…）</dd>
@@ -283,7 +284,7 @@
   <script src="js/fish-head.js?v=fishstepdark-20261019"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=vine-art8-20261020"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人 -->
   <script src="js/milkfish-kid.js?v=milkfish-v5-20261021"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=nofallback-20261022"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=dashbar-20261022"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/attack-fx.js?v=colors-20261022"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=milkfish-20261020"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=fix38g-20261018"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
@@ -318,7 +319,7 @@
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=nosentry-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=dash3-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=flash2x2-20261022"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=quick10-20261022"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->

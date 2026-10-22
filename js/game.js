@@ -1168,8 +1168,28 @@ function standUp() {
   sfx('switch');
 }
 
+// ---- 衝刺：按 Shift，DASH.time 秒內走路速度 ×DASH.mul（跟跑鞋、腎上腺素等加成相乘：腎上腺素中就是腎上腺素的速度再 ×2），冷卻 DASH.cd 秒 ----
+// trail：衝刺時身後的殘影（每隔幾秒留一個、留多久）；基地、戰鬥地圖都可以衝
+const DASH = { mul: 2, time: .5, cd: 3, trailGap: .035, trailLife: .25 };
+let dashPressedAt = -1;
+window.addEventListener('keydown', e => {
+  if (e.key !== 'Shift' || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
+  dashPressedAt = performance.now();   // 真正開始衝刺在 updatePlayer（選單開著、坐著、被纏住時不會衝）
+});
+// dashPart：這一格（dt）有幾成時間在衝刺（最後一格只衝一部分），所以不管畫面幾 fps，衝刺都剛好 DASH.time 秒
+const dashMul = p => 1 + (DASH.mul - 1) * ((p && p.dashPart) || 0);
+function startDashIfPressed(p, dt) {
+  if (dashPressedAt < 0) return;
+  const fresh = performance.now() - dashPressedAt < 150; dashPressedAt = -1;
+  if (!fresh || p.dashCd > 0 || p.hp <= 0) return;   // 冷卻中：沒反應
+  p.dashPart = Math.min(1, DASH.time / dt); p.dashT = Math.max(0, DASH.time - dt); p.dashCd = DASH.cd - dt; p.dashTrail = [];   // 這一格就開始衝
+  if (typeof sfxAt === 'function') sfxAt('swordSwing', p.x, p.y, .32, 'dash');   // 咻一聲
+}
 function updatePlayer(dt) {
   const p = G.player; if (!p) return;
+  p.dashPart = dt > 0 ? Math.min(dt, p.dashT || 0) / dt : 0;   // 衝刺剩下的時間、冷卻
+  p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
   if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼，按移動鍵也不會走
     p.soothingT = Math.max(0, p.soothingT - dt);
@@ -1183,6 +1203,7 @@ function updatePlayer(dt) {
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
   if (stepActorKnock(p, dt, playerBlocked)) { p.moving = false; p.anim = 0; return; }   // 被鳥頭人撞飛：滑行中不能走（js/bird-head.js）
+  startDashIfPressed(p, dt);   // Shift：衝刺（能走路的時候才算）
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
   p.moving = !!(dx || dy);
@@ -1195,11 +1216,15 @@ function updatePlayer(dt) {
   if (Math.abs(dx) >= Math.abs(dy) && dx) p.dir = dx < 0 ? 'left' : 'right';
   else if (dy) p.dir = dy < 0 ? 'back' : 'front';
   p.anim += dt;
-  const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dt   // 輕量跑鞋（js/equipment.js）
+  const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dashMul(p) * dt   // 輕量跑鞋、腎上腺素（js/equipment.js）× 衝刺
     * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally') : 1);   // 走在鐵絲網上變慢
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   if (!playerBlocked(nx, p.y)) p.x = nx; else if (!dy) slideIntoGap(p, 'x', nx - p.x, step);
   if (!playerBlocked(p.x, ny)) p.y = ny; else if (!dx) slideIntoGap(p, 'y', ny - p.y, step);
+  if (p.dashPart > 0) {   // 衝刺中：身後留殘影（js/render.js 的 drawDashTrail）
+    const now = performance.now() / 1000, tr = p.dashTrail || (p.dashTrail = []);
+    if (!tr.length || now - tr[tr.length - 1].t >= DASH.trailGap) tr.push({ x: p.x, y: p.y, t: now });
+  }
 }
 // 走進一格寬的開口：正面被擋住，但往旁邊挪一點就過得去 → 自動往開口中間滑（不用對得很準）
 const GAP_ASSIST = 18;   // 最多幫忙對齊幾像素（一格 40）
@@ -2252,7 +2277,7 @@ function hideOverlay() { overlay.classList.add('hidden'); }
 function showStart() {
   if (MAP_SAFE) {   // 安全場景（基地）：沒有怪物、沒有黑幕，純走動看場景
     showOverlay((MAP && MAP.name) || '安全區域',
-      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動，靠近 NPC 或哨兵按 <b>Space</b> 可以對話。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
+      '這裡是<b>安全區域</b>：<b>沒有怪物</b>，燈也全開著（<b>沒有黑幕</b>）。<br>用 <b>WASD／方向鍵</b>走動（<b>Shift</b> 衝刺），靠近 NPC 或哨兵按 <b>Space</b> 可以對話。<br>想回去防守，按上方的<b>地圖選單</b>換一張地圖。',
       '進入');
     return;
   }
