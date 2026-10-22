@@ -2953,3 +2953,5 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .bst-app { display: grid; place-items: center; height: 100%; }
 /* T-Pad 按鈕：放在資訊條最右邊（原本設定按鈕的位置；設定改成在 T-Pad 裡開） */
 #hud > #hudTpadButton { flex: none; margin-left: 12px; }
+/* 右鍵按住抓隊友／NPC（js/grab.js）：抓取手勢的游標 */
+#cv.grab-holding { cursor: grabbing; }

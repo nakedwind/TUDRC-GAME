@@ -10,7 +10,7 @@
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/new-game.js?v=qs-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=tpadesc-20261022">
+<link rel="stylesheet" href="css/style.css?v=grab-20261022">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -268,7 +268,7 @@
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
   <script src="js/build.js?v=numkeys-20261020"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=skilltree-20261022"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=squad2-20261022"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=grab-20261022"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
   <script src="data/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹資料 -->
   <script src="js/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹：花碎片學技能 -->
@@ -277,7 +277,7 @@
   <script src="js/combat-feel.js?v=bestiary1-20261022"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="js/achievements.js?v=blip-20261022"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=downed3-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
-  <script src="js/enemy-ai.js?v=squad2-20261022"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=grab-20261022"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
@@ -319,8 +319,8 @@
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=tpadesc-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=skilltree-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
-  <script src="js/core-clear.js?v=key-intro-scale200-20261018"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
+  <script src="js/game.js?v=flash2x2-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/core-clear.js?v=flash2x2-20261022"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=qs-20261022"></script>   <!-- 下方快捷欄 Q／E／Z／X：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/item-intro.js?v=legs-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->
@@ -336,6 +336,7 @@
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
   <script src="js/practice.js?v=squad2-20261022"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
   <script src="js/channel-actions.js?v=motes-20261021"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
+  <script src="js/grab.js?v=squash-20261022"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=tpadm2-20261022"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
   <script src="js/tpad.js?v=tpadesc-20261022"></script>   <!-- 📱 T-Pad：隊員、出勤配置、任務、成就、怪物圖鑑…都收在這裡（按 T） -->
 </body>

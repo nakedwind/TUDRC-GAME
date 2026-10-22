@@ -748,6 +748,7 @@ function sentryDamageMul(t) {
 }
 // 防禦（受到傷害打幾折）：角色本身＋出勤補給，最多 75%
 function sentryDefense(t) {
+  if (t.grabbed || t.grabFall) return 1;   // 被抓起來（js/grab.js）：打不到
   const spec = TYPES[t.type];
   return Math.max(0, Math.min(.75, ((spec && spec.defense) || 0) + ((t.buff && t.buff.def) || 0)));
 }

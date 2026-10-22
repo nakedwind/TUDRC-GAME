@@ -182,6 +182,7 @@ const SENTRY_AGGRO_TIME = 5;
 // 只有被他打中、正在記仇（sentryAggro）的那一隻才會攻擊他。
 function enemyNoticesSentry(e, t) {
   if (t && t.eatenBy) return false;   // 被虱目魚小子吃掉、卡在魚嘴裡（js/milkfish-kid.js）
+  if (t && (t.grabbed || t.grabFall)) return false;   // 被溫特抓起來（js/grab.js）：怪物不理他
   if (!TYPES[t.type] || !TYPES[t.type].noAggro) return true;
   return e.sentryAggro === t && e.sentryAggroT > 0;
 }

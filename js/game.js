@@ -1748,6 +1748,7 @@ function frame(ts) {
     || (typeof gachaOpen !== 'undefined' && gachaOpen)   // 扭蛋機（js/gacha.js）
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
+  if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
   if (!menuOpen && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
@@ -1798,6 +1799,7 @@ function update(dt) {
   // 哨兵走動（巡邏）
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
+    if (t.grabbed || t.grabFall) { faceNpcFront(t); continue; }   // 被抓著／正在掉下來（js/grab.js）
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
     else if (t.frozenT > 0) { t.frozenT -= dt; t.moving = false; t.navPath = null; if (t.hp > 0) t.dir = 'front'; }   // 溫特正在疏導／急救這位隊員：站著不動（js/channel-actions.js）
     else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
@@ -1826,6 +1828,7 @@ function update(dt) {
   }
   for (const npc of G.npcs) {
     const ox = npc.x, oy = npc.y;
+    if (npc.grabbed || npc.grabFall) { faceNpcFront(npc); continue; }   // 被抓著／正在掉下來（js/grab.js）
     if (MAP_SAFE && (npcArrangeMode || npc.npcPosed)) faceNpcFront(npc);
     else updateWanderer(npc, dt);
     animateSentry(npc, npc.x - ox, npc.y - oy, dt);
@@ -1833,7 +1836,7 @@ function update(dt) {
   // 哨兵攻擊
   for (const t of G.towers) {
     const spec = TYPES[t.type];
-    if (t.hp <= 0) { t.meleeSwing = null; t.gunSwing = null; continue; }
+    if (t.hp <= 0 || t.grabbed || t.grabFall) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 倒下、被抓著（js/grab.js）：不攻擊
     if (t.gunT > 0) t.gunT -= dt;   // 持槍攻擊圖計時
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0) {
       t.gunReloadT = Math.max(0, t.gunReloadT - dt);
@@ -2170,9 +2173,11 @@ function update(dt) {
   updateHUD();
 }
 const FLASH_LIFE = 1.5;   // 提示字停留時間（秒）；想更久／更短改這裡
-function flash(text, x, y, color, life = FLASH_LIFE) { G.effects.push({ text, x, y, life, life0: life, color, vy: -22 }); }
+const FLASH_MUL = 2;      // 提示字停留時間再乘上幾倍（隊員狀態 sentryStatus 不乘，固定 3 秒）
+function flash(text, x, y, color, life = FLASH_LIFE, exact = false) { if (!exact) life *= FLASH_MUL;   // exact：照給的秒數，不乘 FLASH_MUL
+  G.effects.push({ text, x, y, life, life0: life, color, vy: -22 }); }
 function sentryStatus(t, text, color = '#8fd3ff', warning = false) {
-  flash(text, t.x, t.y - 30, color, 3);
+  flash(text, t.x, t.y - 30, color, 3, true);   // 隊員狀態：固定 3 秒
   systemNotice((TYPES[t.type]?.name || '哨兵') + '：' + text, warning);
 }
 function systemNotice(text, warning = false) {

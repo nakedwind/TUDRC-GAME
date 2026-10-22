@@ -14,7 +14,7 @@ function coreKeyDrop(core) {
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   const item = itemById(id);   // 異質鑰匙比較特別：每次拿到都跳說明視窗
   if (typeof itemIntro === 'function') itemIntro({ key: 'item:' + id, always: true, name: item.name, image: item.image, imageScale: 2, desc: item.desc });
-  G.effects.push({ text: itemById(id).name, iconImage: 'images/碎片鑰匙/異質鑰匙小.png', x: core.x, y: core.y - 70, life: 2.5, life0: 2.5, color: '#d69bff', vy: -22 });   // 飄字前面放異質鑰匙小圖
+  G.effects.push({ text: itemById(id).name, iconImage: 'images/碎片鑰匙/異質鑰匙小.png', x: core.x, y: core.y - 70, life: 3, life0: 3, color: '#d69bff', vy: -22 });   // 飄字前面放異質鑰匙小圖
   if (typeof updateHUD === 'function') updateHUD();
 }
 const coreClearMapName = () => (MAP && MAP.name) || '這一區';
