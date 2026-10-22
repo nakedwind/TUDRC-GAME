@@ -43,9 +43,9 @@ function ownedGear() {
   const worn = new Set(Object.values(equipState.equipped || {}).filter(Boolean));
   // 武器排前面（拿到的槍），再來是裝備；wornAs＝裝在哪一格（主武器／副武器）
   const L = equipState.loadout || {};
-  const weapons = typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).filter(([k, w]) => !w.removed && (equipState.weapons[k] || 0) > 0).map(([k, w]) => ({
+  const weapons = typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).filter(([k, w]) => k === 'pistol' && (equipState.weapons[k] || 0) > 0).map(([k, w]) => ({   // 只有手槍（其他槍改成子彈）
     id: 'gear:w:' + k, name: w.name, image: w.image, icon: w.icon, gear: w, weapon: k, lv: equipState.weapons[k],
-    worn: L.main === k || L.sub === k, wornAs: L.main === k ? '主武器' : L.sub === k ? '副武器' : '' }));
+    worn: true, wornAs: '使用中' }));
   return weapons.concat(EQUIPMENT.filter(d => equipState.owned[d.id]).map(d => ({ id: 'gear:' + d.id, name: d.name, image: d.image, icon: d.icon, gear: d, lv: equipState.owned[d.id], worn: worn.has(d.id) })));
 }
 const gearById = id => String(id || '').startsWith('gear:') ? ownedGear().find(g => g.id === id) || null : null;
@@ -102,7 +102,7 @@ function renderGearDetail(g) {
   backpackDetail.innerHTML = `
     <div class="bag-detail-image">${g.image ? `<img src="${g.image}" alt=""${g.weapon ? ' class="weapon"' : ''}>` : `<i class="bag-gear-emoji">${g.icon}</i>`}</div>
     <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? BAG_ICON.weapon + '武器' : BAG_ICON.equip + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div></div>
-    <div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}${g.weapon && d.field && typeof gunAmmo === 'function' ? '・彈藥 ' + (gunAmmo(g.weapon).mag + gunAmmo(g.weapon).reserve) + ' 發' : ''}</b></div>
+    <div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}</b></div>${g.weapon === 'pistol' && typeof WEAPONS !== 'undefined' ? '<div class="bag-gear-stat"><small>子彈（滾輪換）</small><b>' + WEAPONS.filter(w => bulletOwned(w.id)).map(w => w.icon + ' ' + w.name + ' ' + (w.id === 'pistol' ? '∞' : bulletCount(w.id) + '/' + w.max)).join('・') + '</b></div>' : ''}
     <div class="bag-actions">${gearButtons(g)}<p class="bag-note">升級找諾亞</p></div>`;
 }
 // 只換選取的格子：不重畫整個背包（重畫會讓格子、溫特立繪重新建立而閃一下）

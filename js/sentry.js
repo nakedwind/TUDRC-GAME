@@ -476,6 +476,13 @@ function updateSentry(t, dt) {
     return;
   }
   if (menuSentry === t) return;                       // 選單開著時先站好
+  // 漆彈標記的怪物（js/special-guns.js）：自由走動、跟隨護衛的哨兵會追過去；原地巡邏、指派位置的不追；不追進黑暗；嚮導不追（有空時在射程內才打）
+  const marked = !ownSpec.guide && (t.mode === 'free' || t.mode === 'escort') && typeof paintTarget === 'function' ? paintTarget() : null;
+  if (marked && personnelInLight(marked.x, marked.y) && (Math.hypot(marked.x - t.x, marked.y - t.y) > ownSpec.range * CELL - 6 || !hasLineOfSight(t.x, t.y, marked.x, marked.y))) {
+    t.target = null; t.waitT = 0;
+    moveSentryWithPath(t, marked.x, marked.y, (ownSpec.walkSpeed || 80) * 1.2, dt);
+    return;
+  }
   // 嚮導保持安全距離：敵人靠近時優先往反方向撤退，仍可在遠處攻擊與治療。
   if (ownSpec.guide && G.enemies.length) {
     let threat = null, threatD = Infinity;

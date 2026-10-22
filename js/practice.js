@@ -165,8 +165,7 @@ function startPractice() {
   practiceTravel(() => {
     const p = G.player, eqp = typeof equipState !== 'undefined' ? equipState : null;
     practice.snap = { guide: G.guide, supplies: new Map(supplyInventory),
-      gunAmmo: eqp ? JSON.parse(JSON.stringify(eqp.gunAmmo || {})) : null, battery: eqp ? eqp.battery : 100,
-      flare: [p.flareMag, p.flareReserve] };
+      bullets: eqp ? JSON.parse(JSON.stringify(eqp.bullets || {})) : null, battery: eqp ? eqp.battery : 100 };
     practice.active = true; practice.hits = []; practice.total = 0; practice.spawnT = .8; practice.waveT = 0;
     switchMap(MAP_INDEX); begin(false);   // 同一張地圖重新佈置成「戰鬥區域」（MAP_SAFE 關掉，js/maploader.js）
     G.money = PRACTICE.money; G.guide = practice.snap.guide;
@@ -190,8 +189,7 @@ function endPractice() {
     switchMap(MAP_INDEX); begin(false);    // 變回安全區
     if (s) {
       supplyInventory.clear(); for (const [k, v] of s.supplies) supplyInventory.set(k, v);
-      if (typeof equipState !== 'undefined') { if (s.gunAmmo) equipState.gunAmmo = s.gunAmmo; equipState.battery = s.battery; saveEquipment(); }
-      [G.player.flareMag, G.player.flareReserve] = s.flare;
+      if (typeof equipState !== 'undefined') { if (s.bullets && s.bullets.n) equipState.bullets = s.bullets; equipState.battery = s.battery; saveEquipment(); }
     }
     practice.snap = null;
     const [xc, xr] = PRACTICE.exit, [x, y] = center(xc, xr);
@@ -232,10 +230,9 @@ function updatePractice(dt) {
   // 不消耗物資、彈藥
   const s = practice.snap;
   if (s) for (const [k, v] of s.supplies) if ((supplyInventory.get(k) || 0) < v) supplyInventory.set(k, v);
-  if (p && typeof FLARE !== 'undefined') p.flareReserve = FLARE.reserveMax;
   if (typeof equipState !== 'undefined') {
     equipState.battery = 100;
-    for (const id of ['incendiary', 'tranq']) { const lv = typeof gunLevel === 'function' && gunLevel(id); if (lv) gunAmmo(id).reserve = lv.reserve; }
+    if (s && s.bullets && s.bullets.n) for (const [id, n] of Object.entries(s.bullets.n)) if (bulletCount(id) < n) equipState.bullets.n[id] = n;   // 子彈：補回訓練前的數量
     const aid = typeof equipLv === 'function' && equipLv('firstaid');
     if (aid && typeof firstAid !== 'undefined' && !firstAid.channel) { firstAid.forG = G; firstAid.uses = aid.uses; }
   }

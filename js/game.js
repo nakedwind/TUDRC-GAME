@@ -465,11 +465,7 @@ window.addEventListener('keydown', e => {
   keys[k] = true;
   if(isInteractKey(k) && G && G.running && !G.over)e.preventDefault();
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
-  if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) {   // 手動裝填（目前拿的那把）
-    const wid = playerWeapon(G.player).id;
-    if (wid === 'none') { /* 空手：沒東西可以裝填 */ }
-    else if (wid === 'flare') startFlareReload(G.player); else if (playerWeapon(G.player).special) startSpecialReload(wid, G.player); else startReload(G.player);
-  }
+  if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) startReload(G.player);   // 手動裝填手槍的彈匣（特殊子彈不用裝填）
   if (npcArrangeMode) return;
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或 E
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
@@ -1391,6 +1387,8 @@ cv.addEventListener('mouseleave', () => { hoverCell = null; cv.classList.remove(
 const CORE_HIT_PAD = 36;
 function pickSentryTarget(t, R) {
   const p = G.player;
+  const marked = typeof paintTarget === 'function' && paintTarget();   // 被漆彈標記的怪物：射程內看得到就先打牠（js/special-guns.js）
+  if (marked && Math.hypot(marked.x - t.x, marked.y - t.y) <= R && hasLineOfSight(t.x, t.y, marked.x, marked.y)) return marked;
   let best = null, bestScore = Infinity;
   for (const e of G.enemies) {
     if (e.dead) continue;
@@ -1530,22 +1528,23 @@ function updatePlayerAttack(dt) {
   if (p.recoilT > 0) p.recoilT -= dt;
   p.atkCd = (p.atkCd || 0) - dt;
   if (aimHeld && p.hp > 0) p.gunT = Math.max(p.gunT, 0.3);   // 按住時持續舉槍，不會射完一發就跳回
-  if (p.reloadT > 0) {   // 手槍裝填中（切到照明彈槍時也會繼續裝）
+  const wid = playerWeapon(p).id, paint = wid === 'paint';   // 裝的子彈（滾輪換，js/flare.js）
+  if (p.reloadT > 0) {   // 手槍彈匣裝填中（換成特殊子彈時也會繼續裝）
     p.reloadT -= dt;
     if (p.reloadT <= 0) { p.ammo = PLAYER_ATK.mag; }
-    if (playerWeapon(p).id === 'pistol') { updateAmmoHud(); return; }
+    if (wid === 'pistol') { updateAmmoHud(); return; }
   }
   updateAmmoHud();
-  if (playerWeapon(p).id === 'none') { p.gunT = 0; return; }   // 空手：不舉槍、不開槍
   const canFire = !(p.hp <= 0 || !aimHeld || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
-  if (playerWeapon(p).id === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈槍（js/flare.js）
-  if (playerWeapon(p).special) { updateSpecialGun(playerWeapon(p).id, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈槍、麻醉槍（js/special-guns.js）
+  if (wid === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈（js/flare.js）
+  if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
   if (!canFire) return;
-  if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const aim = clientToWorld(aimClient.x, aimClient.y);
+  if (paint) { if (bulletCount('paint') <= 0) { dryFire(p, aim, 'paint'); return; } }   // 漆彈打完：只會「喀」一聲
+  else if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const adx = aim.x - p.x, ady = aim.y - p.y, aimAng = Math.atan2(ady, adx);
-  p.atkCd = 1 / PLAYER_ATK.rate;
-  p.ammo--;
+  if (paint) { p.atkCd = BULLETS.paint.gap; useBullet('paint'); }   // 漆彈：跟一般子彈一樣瞄準，打中的怪物被標記（不扣血）
+  else { p.atkCd = 1 / PLAYER_ATK.rate; p.ammo--; }
   p.dir = Math.abs(adx) >= Math.abs(ady) ? (adx < 0 ? 'left' : 'right') : (ady < 0 ? 'back' : 'front');
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   // 朝游標方向、射程內、照亮的最近怪。
@@ -1553,13 +1552,13 @@ function updatePlayerAttack(dt) {
   // 扇形判定也同時看腳底和身體中心，取比較接近的角度。
   let best = null, bestD = PLAYER_ATK.range * CELL, bestOnBody = false;
   const angDiff = (x, y) => { let da = Math.abs(Math.atan2(y - p.y, x - p.x) - aimAng); return da > Math.PI ? 2 * Math.PI - da : da; };
-  for (const e of [...G.enemies, ...G.cores]) {
+  for (const e of paint ? G.enemies : [...G.enemies, ...G.cores]) {   // 漆彈只標記怪物
     const shot = playerShotCheck(p, e, aim, angDiff);
     if (!shot) continue;
     // 點在身上的目標優先；同樣是點在身上或同樣在扇形內，就打最近的
     if ((shot.onBody && !bestOnBody) || (shot.onBody === bestOnBody && shot.d < bestD)) { bestD = shot.d; best = e; bestOnBody = shot.onBody; }
   }
-  for (const o of G.obstacles) {   // 油桶／油箱、異質礦也能瞄準（開槍打爆／慢慢打碎）
+  for (const o of paint ? [] : G.obstacles) {   // 油桶／油箱、異質礦也能瞄準（開槍打爆／慢慢打碎）；漆彈不打
     const isOil = oilItem(o), isOre = o.ore && typeof oreProxy === 'function';
     if ((!isOil && !isOre) || o.hp <= 0) continue;
     const c = isOil ? oilCenter(o) : oreCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
@@ -1577,6 +1576,15 @@ function updatePlayerAttack(dt) {
   const hitPt = best && !best.oilRef && !best.oreRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
   let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
+  if (paint) {   // 漆彈：粉紅色的彈道，打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
+    const { x: mx, y: my } = gunMuzzleAt(p, aimAng), col = BULLETS.paint.color;
+    G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .06, life0: .06 });
+    G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .09, life0: .09, color: col });
+    G.effects.push({ ring: true, x: endX, y: endY, r: 3, r2: best ? 14 : 8, life: .2, life0: .2, color: col });
+    if (best) paintMark(best);
+    SFX.play('gunshot', .55, 'paint-shot');
+    return;
+  }
   if (!best && typeof shootHangiCapOnLine === 'function') {   // 沒打到怪物：打到順順宮帽就把它打開（js/hangi-bao.js）
     const capHit = shootHangiCapOnLine(p.x, p.y, endX, endY);
     if (capHit) { endX = capHit.x; endY = capHit.y; G.effects.push({ ring: true, x: endX, y: endY, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' }); }
@@ -1612,7 +1620,7 @@ function updatePlayerAttack(dt) {
   if (typeof sfx === 'function') sfx('gunshot');
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
 }
-// 右下角武器＋彈藥數：兩把槍一前一後疊著，正在用的在前面、遮住後面那把
+// 右下角：手槍＋目前裝的子彈（名稱、剩幾發）
 let ammoHudEl = null, ammoGunEls = null, ammoTextEl = null, ammoHudKey = '';
 function buildAmmoHud() {
   const css = document.createElement('style');
@@ -1620,19 +1628,18 @@ function buildAmmoHud() {
     #ammoHud { position:absolute; right:14px; bottom:14px; z-index:9; display:flex; align-items:flex-end; gap:10px; pointer-events:none;
       padding:0; }
     #ammoHud .gun-stack { position:relative; width:40px; height:52px; }
-    #ammoHud .gun-stack img { position:absolute; left:0; bottom:0; width:40px; height:30px; image-rendering:pixelated; transform-origin:left bottom;
-      transition:transform .22s cubic-bezier(.3,1.4,.5,1), filter .22s, opacity .22s; }
-    #ammoHud .gun-stack img.front { z-index:2; transform:translate(0,0) scale(1); filter:drop-shadow(0 0 2px rgba(255,236,190,.95)) drop-shadow(0 0 5px rgba(255,214,140,.55)); opacity:1; }
-    #ammoHud .gun-stack img.off { display:none; }
-    #ammoHud .gun-stack img.back  { z-index:1; transform:translate(4px,-22px) scale(.8); filter:brightness(.62) saturate(.35) drop-shadow(0 0 1px rgba(160,190,220,.5)); opacity:.85; }
+    #ammoHud .gun-stack img { position:absolute; left:0; bottom:0; width:40px; height:30px; image-rendering:pixelated; filter:drop-shadow(0 0 2px rgba(255,236,190,.95)) drop-shadow(0 0 5px rgba(255,214,140,.55)); }
     #ammoHud .ammo-text { font:700 16px sans-serif; color:#dbe7ff; letter-spacing:1px; white-space:nowrap; padding-bottom:4px; text-shadow:0 1px 2px #000, 0 0 3px #000; }
-    #ammoHud .ammo-text .weapon-name { display:block; margin-bottom:5px; color:#eef3fa; font:700 12px 'Microsoft JhengHei',sans-serif; letter-spacing:0; }
-    #ammoHud .ammo-text small { display:block; font-size:12px; color:#ff9f7a; letter-spacing:0; }`;
+    #ammoHud .ammo-text .weapon-name { display:flex; align-items:center; gap:5px; margin-bottom:5px; color:#eef3fa; font:700 12px 'Microsoft JhengHei',sans-serif; letter-spacing:0; }
+    #ammoHud .ammo-text .weapon-name i { width:6px; height:12px; border-radius:3px 3px 1px 1px; background:var(--bc); box-shadow:0 0 6px var(--bc); }
+    #ammoHud .ammo-text small { display:block; font-size:12px; color:#ff9f7a; letter-spacing:0; }
+    #ammoHud .ammo-text.empty b { color:#ff9f7a; }`;
   document.head.appendChild(css);
   ammoHudEl = document.createElement('div');
   ammoHudEl.id = 'ammoHud';
   const stack = document.createElement('div'); stack.className = 'gun-stack';
-  ammoGunEls = WEAPONS.map(w => { const img = new Image(); img.src = w.img; img.alt = w.name; stack.appendChild(img); return img; });
+  const img = new Image(); img.src = WEAPON_UPGRADES.pistol.image; img.alt = '手槍'; stack.appendChild(img);
+  ammoGunEls = [img];
   ammoTextEl = document.createElement('div'); ammoTextEl.className = 'ammo-text';
   ammoHudEl.append(stack, ammoTextEl);
   document.getElementById('wrap').appendChild(ammoHudEl);
@@ -1642,26 +1649,14 @@ function updateAmmoHud() {
   if (!ammoHudEl) buildAmmoHud();
   ammoHudEl.style.display = '';
   const p = G.player, mag = PLAYER_ATK.mag, ammo = p ? (p.ammo ?? mag) : mag;
-  const unarmed = !!p && playerWeapon(p).id === 'none';
-  const wi = (p && p.weaponIndex) || 0;
-  let text;
-  if (unarmed) text = '';
-  else if (p && playerWeapon(p).id === 'flare') {   // 照明彈：彈匣／備用彈
-    ensureFlareAmmo(p);
-    const empty = p.flareMag + p.flareReserve <= 0;
-    text = p.flareReloadT > 0 ? 'Reload' : p.flareMag + ' / ' + p.flareReserve + (empty ? '<small>去彈藥箱補給</small>' : '');
-  } else if (p && playerWeapon(p).special) text = specialGunHud(playerWeapon(p).id, p);   // 燃燒彈槍、麻醉槍
-  else text = (p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞';
-  const owned = WEAPONS.map((w, i) => weaponUsable(i) ? 1 : 0).join('');
-  const key = (unarmed ? 'none' : wi) + '|' + text + '|' + owned;
+  const w = playerWeapon(p), n = bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;
+  const text = w.id === 'pistol' ? ((p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞')
+    : '<b>' + n + '</b> / ' + BULLETS[w.id].max + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
+  const key = w.id + '|' + text;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
   ammoHudKey = key;
-  // 正在用的在前面；後面只露出下一把（滾輪往下會換到的那把），還沒拿到的不顯示
-  let nx = wi; for (let i = 0; i < WEAPONS.length; i++) { nx = (nx + 1) % WEAPONS.length; if (weaponUsable(nx)) break; }
-  if (unarmed) { ammoGunEls.forEach(img => { img.className = 'off'; }); ammoTextEl.innerHTML = '<span class="weapon-name">✋ 空手</span>'; return; }
-  ammoGunEls.forEach((img, i) => { img.className = i === wi ? 'front' : i === nx ? 'back' : 'off'; });
-  ammoTextEl.innerHTML = '<span class="weapon-name"></span>' + text;
-  ammoTextEl.querySelector('.weapon-name').textContent = WEAPONS[wi].id === 'flare' ? '照明彈' : WEAPONS[wi].short || WEAPONS[wi].name;
+  ammoTextEl.classList.toggle('empty', empty);
+  ammoTextEl.innerHTML = '<span class="weapon-name" style="--bc:' + w.color + '"><i></i>' + w.name + '</span>' + text;
 }
 
 // ---- 主迴圈（幀率校正）----

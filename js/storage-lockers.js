@@ -142,15 +142,10 @@ function grantLockerLoot(loot){
   }else if(loot.kind==='equipment'){
     if(!grantEquipment(loot.id,'在置物櫃找到'))systemNotice('已擁有這件裝備');
   }else if(loot.kind==='weapon'){
-    const w=WEAPON_UPGRADES[loot.id];if(!w||w.removed)return;   // 刪掉的武器（開發工坊編輯器）撿不到
-    if(equipState.weapons[loot.id]){systemNotice('已擁有「'+w.name+'」');return;}
-    equipState.weapons[loot.id]=1;
-    const ammo=GUN_FINDS.start[loot.id];
-    if(ammo)equipState.gunAmmo[loot.id]={...ammo};
-    if(!equipState.loadout.sub)equipState.loadout.sub=loot.id;
-    if(typeof itemIntroForWeapon==='function')itemIntroForWeapon(loot.id);
-    if(typeof battleGot==='function')battleGot(w.name,w.image,1);
-    saveEquipment();updateAmmoHud();systemNotice('在置物櫃找到「'+w.name+'」');
+    // 以前的槍（照明彈槍、燃燒彈槍、麻醉槍）現在是手槍的子彈：給那種子彈（js/special-guns.js 的 grantBullets）
+    const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
+    if(bulletCount(loot.id)>=b.max){systemNotice(b.name+'已經是滿的');return;}
+    grantBullets(loot.id,GUN_FINDS.start[loot.id]||b.max,'在置物櫃找到');
   }
 }
 function storagePropDisplayTile(id,c,r,layer,stamp=null){

@@ -235,6 +235,8 @@ const SFX = (() => {
     win() { [523, 659, 784, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: 0.2, gain: 0.2, when: i * 0.11 })); },
     lose() { [440, 392, 311, 233].forEach((f, i) => tone({ freq: f, type: 'sawtooth', dur: 0.26, gain: 0.17, when: i * 0.14 })); },
     error() { tone({ freq: 200, freq2: 150, type: 'square', dur: 0.16, gain: 0.18 }); },
+    // 空槍：子彈打完扣扳機，擊錘「喀、嗒」兩聲金屬聲（js/flare.js 的 dryFire）
+    dryFire() { noise({ dur: 0.025, gain: 0.32, freq: 3400, q: 6 }); tone({ freq: 2100, freq2: 1300, type: 'square', dur: 0.02, gain: 0.05 }); noise({ dur: 0.02, gain: 0.18, freq: 2600, q: 5, when: 0.07 }); },
     berserk() { tone({ freq: 130, freq2: 55, type: 'sawtooth', dur: 0.4, gain: 0.24 }); noise({ dur: 0.34, gain: 0.16, freq: 500, q: 0.5 }); },
     kill() { const k = jitter(VARY.pitch); tone({ freq: 420 * k, freq2: 120 * k, type: 'sine', dur: 0.09, gain: 0.1 * jitter(VARY.gain) }); },
     // 鳥頭人跑步：赤腳重重踩在水泥地上——低沉的「咚」＋腳掌拍地的「啪」＋一點沙沙的摩擦

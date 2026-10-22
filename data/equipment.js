@@ -110,8 +110,22 @@ const WEAPON_UPGRADES = {
     stat: weaponStat,
     levels: [{ sleep: 3, mag: 2, reload: 2, reserve: 8 }, { sleep: 4, mag: 2, reload: 1.5, reserve: 10 }, { sleep: 5, mag: 3, reload: 1.5, reserve: 12, mist: 1.2 }, { sleep: 6, mag: 3, reload: 1.3, reserve: 14, mist: 1.4 }, { sleep: 7, mag: 4, reload: 1.1, reserve: 16, mist: 1.6 }] },
 };
-// 在置物箱裡找到槍、彈藥：gun 還沒有的槍出現的機率；ammo 已經有槍時找到彈藥的機率（商店、轉蛋機做好之前的暫時來源）
-// start：撿到槍時附的彈藥（mag 裝在槍裡、reserve 備用）；ammoFind：找到彈藥時給幾發
-const GUN_FINDS = { gun: .35, ammo: .5,
-  start: { incendiary: { mag: 1, reserve: 3 }, tranq: { mag: 2, reserve: 4 } },
-  ammoFind: { incendiary: 2, tranq: 3 } };
+// ===== 手槍的子彈：溫特從頭到尾只有一把手槍，差別只在子彈（滾輪換子彈，js/flare.js）=====
+// 一般子彈無限（彈匣、裝填、傷害看手槍等級）；特殊子彈有數量，打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的子彈。
+// 特殊子彈的效果固定、不會升級（只有手槍能找諾亞升級）。上面照明彈槍、燃燒彈槍、麻醉槍的等級表已經不用了。
+// max：最多帶幾發；gap：兩發至少隔幾秒；color：右下角、切換時的顏色
+const BULLETS = {
+  pistol:     { name: '一般子彈', icon: '•', color: '#ffe79a' },
+  flare:      { name: '照明彈', icon: '🔥', color: '#ff8a5c', max: 30, gap: .8, shine: 24,   // shine：落地後亮幾秒
+    desc: '打出去落地後燃燒、照亮周圍一大片；照亮的地方隊員看得到怪物、也能蓋建築。打完可以到地圖上的彈藥箱補滿。' },
+  incendiary: { name: '燃燒彈', icon: '🧨', color: '#ff9a3c', max: 8, gap: .6, r: 1.1, burn: 6, ignite: 0,   // r：火海半徑（格）、burn：火海燒幾秒、ignite：被炸到的怪物身上著火幾秒（0＝不著火）
+    desc: '拋物線飛過怪物頭上，落地燒出一片火海；會點燃油桶、油汙，燒掉怪物「生命體」碎掉的那堆。火海敵我都會燙。' },
+  tranq:      { name: '麻醉彈', icon: '💤', color: '#b9a7ff', max: 10, gap: .35, sleep: 3, mist: 0,   // sleep：睡幾秒（大型怪物一半）、mist：麻醉霧半徑（格，0＝沒有）
+    desc: '打中的怪物睡著（不動、不攻擊）；打中暴走的隊員會睡一下，醒來恢復正常。對怪物「生命體」沒有效果。' },
+  paint:      { name: '漆彈', icon: '🎨', color: '#ff5fd6', max: 12, gap: .3,
+    desc: '打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。同時只能標一隻，打新的舊的就消失；怪物死掉漆就跟著消失。' },
+};
+// 在置物箱裡找到特殊子彈（商店、轉蛋機做好之前的暫時來源）：ammo 找到子彈的機率；kinds 會找到哪幾種；ammoFind 一次給幾發；start 第一次拿到（設定好的置物櫃）給幾發
+const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'tranq', 'paint'],
+  ammoFind: { incendiary: 2, tranq: 3, paint: 4 },
+  start: { incendiary: 3, tranq: 5, paint: 6 } };

@@ -1,65 +1,66 @@
-/* ===== 溫特的武器切換＋照明彈槍＋彈藥箱 =====
-   - 滾輪（滑鼠在遊戲畫面上）或數字鍵 1／2 切換：手槍（6/∞）↔ 照明彈槍（彈匣 3／備用最多 30）。
-     後室撿到的燃燒彈槍、麻醉槍也會加進滾輪切換（js/special-guns.js）。
+/* ===== 溫特的手槍＋子彈切換＋照明彈＋彈藥箱 =====
+   - 溫特從頭到尾只有一把手槍，差別只在子彈：一般子彈（無限）、照明彈、燃燒彈、麻醉彈、漆彈（data/equipment.js 的 BULLETS）。
+   - 滾輪（滑鼠在遊戲畫面上）換子彈，只會換到拿到過的子彈；特殊子彈打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的。
    - 照明彈：朝滑鼠方向打出去（最遠 FLARE.range 格，碰到牆會停在牆前），落地燃燒一段時間。
      是「真的光」：照亮的地方哨兵看得到怪、可以蓋建築、溫特的槍也能瞄準。怪物不會被它吸引。
-   - 彈匣打完按 R（或再開火）從備用彈裝填；備用彈也用完，就要走到地圖上的彈藥箱按 Spacenter 補滿。
+   - 照明彈打完：走到地圖上的彈藥箱按 Space 補滿。
+   - 子彈數量存在 equipState.bullets（js/equipment.js，跟裝備一起存）；燃燒彈、麻醉彈的效果在 js/special-guns.js，漆彈在 js/game.js 的 updatePlayerAttack。
    數值都在下面的表格。
 */
 const FLARE = {
-  mag: 3,              // 彈匣幾發
-  reserveMax: 30,      // 備用彈最多幾發
-  reloadTime: 1.5,     // 裝填秒數
-  fireGap: .8,         // 兩發之間至少隔幾秒
   range: 20,           // 最遠打幾格
   speed: 1400,         // 飛行速度（像素／秒），直線像子彈一樣快
-  burn: 24,            // 燃燒秒數（最後 fade 秒會閃爍變暗）
+  burn: 24,            // 燃燒秒數（最後 fade 秒會閃爍變暗）；實際用 BULLETS.flare.shine
   fade: 3,
   radius: 200,         // 照明半徑（像素）
+  reserveMax: 30,      // 最多帶幾發；實際用 BULLETS.flare.max
 };
-const WEAPONS = [
-  { id: 'pistol', name: '手槍', icon: '🔫', img: 'images/weapon/winter-handgun-design.png' },
-  { id: 'flare', name: '照明彈槍', icon: '🔥', img: 'images/weapon/winter-flare-gun-design.png' },
-  // 下面兩把要在後室撿到才會出現在切換裡（js/special-guns.js）
-  { id: 'incendiary', name: '燃燒彈槍', short: '燃燒彈', icon: '🧨', img: 'images/weapon/incendiary_launcher.png', special: true },
-  { id: 'tranq', name: '麻醉槍', short: '麻醉針', icon: '💤', img: 'images/weapon/tranquilizer_gun.png', special: true },
-];
-// 能切到這把：拿到了，而且裝在主武器／副武器格（背包左邊，js/equipment.js）
-const weaponUsable = i => (typeof weaponOwned !== 'function' || weaponOwned(WEAPONS[i].id)) && (typeof weaponInLoadout !== 'function' || weaponInLoadout(WEAPONS[i].id));
-const loadoutIndex = slot => WEAPONS.findIndex(w => typeof equipState !== 'undefined' && w.id === equipState.loadout[slot]);
+// 滾輪切換的順序
+const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint'].map(id => ({ id, ...BULLETS[id], special: id === 'incendiary' || id === 'tranq' }));
 const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], openId: 'tile_field_ammo_crate_open', radius: 72, openFor: 1.6 };
 
-// ---- 武器狀態 ----
-const UNARMED = { id: 'none', name: '空手', icon: '✋' };   // 主武器、副武器都卸下：不能開槍
+// ---- 子彈數量（存在 equipState.bullets：owned 拿到過哪幾種、n 剩幾發）----
+function bulletState() {
+  const e = typeof equipState !== 'undefined' ? equipState : {};
+  return e.bullets || (e.bullets = { owned: { flare: true }, n: { flare: BULLETS.flare.max } });
+}
+function bulletOwned(id) { if (id === 'pistol') return true; const b = BULLETS[id]; return !!b && !b.removed && !!bulletState().owned[id]; }
+function bulletCount(id) { return id === 'pistol' ? Infinity : (bulletState().n[id] || 0); }
+function bulletSave() { if (typeof saveEquipment === 'function') saveEquipment(); if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) updateAmmoHud(); }
+// 加子彈（第一次拿到也算拿到這種）：回傳實際加了幾發（滿了就加不進去）
+function addBullets(id, n) {
+  const s = bulletState(), b = BULLETS[id]; if (!b || id === 'pistol') return 0;
+  s.owned[id] = true;
+  const before = s.n[id] || 0; s.n[id] = Math.min(b.max, before + Math.max(0, n | 0));
+  bulletSave(); return s.n[id] - before;
+}
+function fillBullets(id) { const s = bulletState(), b = BULLETS[id]; if (!b || id === 'pistol' || !s.owned[id]) return 0; const got = b.max - (s.n[id] || 0); s.n[id] = b.max; bulletSave(); return got; }
+function useBullet(id) { const s = bulletState(); s.n[id] = Math.max(0, (s.n[id] || 0) - 1); bulletSave(); }
+
+// ---- 目前裝的子彈 ----
+const UNARMED = { id: 'none', name: '空手', icon: '✋' };   // 舊的：現在一定拿著手槍
+const weaponUsable = i => !!WEAPONS[i] && bulletOwned(WEAPONS[i].id);
 function playerWeapon(p) {
-  if (p && !weaponUsable(p.weaponIndex || 0)) {   // 手上的槍被換下來了：改拿主武器，沒有就拿副武器
-    const i = loadoutIndex('main') >= 0 ? loadoutIndex('main') : loadoutIndex('sub');
-    if (i < 0) return UNARMED;
-    p.weaponIndex = i; p.sgReload = null;
-  }
+  if (p && !weaponUsable(p.weaponIndex || 0)) p.weaponIndex = 0;   // 這種子彈沒了（例如被編輯器拿掉）：換回一般子彈
   return WEAPONS[(p && p.weaponIndex) || 0];
 }
-function ensureFlareAmmo(p) {
-  if (p.flareMag == null) p.flareMag = FLARE.mag;
-  if (p.flareReserve == null) p.flareReserve = FLARE.reserveMax;
-}
+function ensureFlareAmmo() {}   // 舊的：照明彈數量現在跟其他子彈一起存（bulletState）
 let lastWeaponSwitch = 0;
 function switchWeapon(step, toIndex) {
   const p = G && G.player;
   if (!p || MAP_SAFE || !G.running || G.over || p.hp <= 0) return;
   const now = performance.now();
-  if (toIndex == null && now - lastWeaponSwitch < 200) return;   // 滾一下不要連跳好幾把
+  if (toIndex == null && now - lastWeaponSwitch < 200) return;   // 滾一下不要連跳好幾種
   lastWeaponSwitch = now;
   let next = toIndex;
-  if (next == null) {   // 滾輪：跳過還沒拿到的槍
+  if (next == null) {   // 滾輪：跳過還沒拿到的子彈（拿到過但打完的照樣換得到）
     next = p.weaponIndex || 0;
     for (let i = 0; i < WEAPONS.length; i++) { next = (next + step + WEAPONS.length) % WEAPONS.length; if (weaponUsable(next)) break; }
   } else if (!weaponUsable(next)) return;
   if (next === (p.weaponIndex || 0)) return;
-  p.sgReload = null;   // 燃燒彈槍、麻醉槍的裝填：換槍就中斷
   p.weaponIndex = next; p.atkCd = Math.max(p.atkCd || 0, .15);
   const w = WEAPONS[next];
-  G.effects.push({text:w.name,iconImage:w.img,x:p.x,y:p.y-70,life:.9,life0:.9,color:'#ffe79a',vy:-22});
+  G.effects.push({ text: w.icon + ' ' + w.name, x: p.x, y: p.y - 70, life: .9, life0: .9, color: w.color, vy: -22 });
   sfx('switch'); updateAmmoHud();
 }
 cv.addEventListener('wheel', e => {
@@ -67,32 +68,22 @@ cv.addEventListener('wheel', e => {
   e.preventDefault();
   if (e.deltaY) switchWeapon(e.deltaY > 0 ? 1 : -1);
 }, { passive: false });
-window.addEventListener('keydown', e => {
-  if (e.repeat || dialogueState) return;
-  const n = Number(e.key);
-  if (n >= 1 && n <= 2) { const i = loadoutIndex(n === 1 ? 'main' : 'sub'); if (i >= 0) switchWeapon(0, i); }   // 1＝第一把槍（主武器）、2＝第二把槍（副武器）；其他數字鍵沒有功能
-});
-
-// ---- 照明彈：裝填、發射 ----
-function startFlareReload(p) {
-  ensureFlareAmmo(p);
-  if (p.flareReloadT > 0 || p.flareMag >= FLARE.mag) return;
-  if (p.flareReserve <= 0) { flash('照明彈用完了，去彈藥箱補給', p.x, p.y - 70, '#ff9f7a', 1.4); sfx('error'); return; }
-  p.flareReloadT = FLARE.reloadTime; sfx('reload');
+// 特殊子彈打完：扣扳機只會「喀」一聲（舉槍、不出子彈）
+function dryFire(p, aim, id) {
+  if (aim) { const ang = Math.atan2(aim.y - p.y, aim.x - p.x); p.dir = Math.abs(Math.cos(ang)) >= Math.abs(Math.sin(ang)) ? (Math.cos(ang) < 0 ? 'left' : 'right') : (Math.sin(ang) < 0 ? 'back' : 'front'); }
+  p.gunT = .45; p.atkCd = .35;
+  sfx('dryFire');
+  const now = performance.now();
+  if (!(now - (p.dryHintAt || 0) < 1500)) { p.dryHintAt = now; flash('沒有' + BULLETS[id].name + '了', p.x, p.y - 70, '#ff9f7a', .7); }
 }
-// 每幀由 updatePlayerAttack 呼叫；回傳 true＝這幀已處理（裝填中或打出照明彈）
+
+// ---- 照明彈：發射 ----
+// 每幀由 updatePlayerAttack 呼叫；回傳 true＝這幀已處理
 function updateFlareGun(p, dt, aim, canFire) {
-  ensureFlareAmmo(p);
-  if (p.flareReloadT > 0) {
-    p.flareReloadT -= dt;
-    if (p.flareReloadT <= 0) { const n = Math.min(FLARE.mag - p.flareMag, p.flareReserve); p.flareMag += n; p.flareReserve -= n; }
-    return true;
-  }
   if (!canFire) return true;
-  if (p.flareMag <= 0) { startFlareReload(p); p.atkCd = .4; return true; }
-  p.flareMag--; p.atkCd = FLARE.fireGap;
+  if (bulletCount('flare') <= 0) { dryFire(p, aim, 'flare'); return true; }
+  useBullet('flare'); p.atkCd = BULLETS.flare.gap;
   fireFlare(p, aim);
-  if (p.flareMag <= 0 && p.flareReserve > 0) startFlareReload(p);
   return true;
 }
 function fireFlare(p, aim) {
@@ -194,7 +185,7 @@ function drawFlareGlow(ctx) {   // 紅橘色光暈與火焰（畫在黑幕上面
   }
 }
 
-// ---- 彈藥箱：靠近按 Spacenter 補滿照明彈 ----
+// ---- 彈藥箱：靠近按 Space 補滿照明彈 ----
 function ammoCrates() {
   const list = [];
   for (const s of (MAP && MAP.stamps) || []) {
@@ -213,10 +204,9 @@ function ammoCrateNearPlayer() {
 }
 function useAmmoCrateNearPlayer() {
   const crate = ammoCrateNearPlayer(); if (!crate) return false;
-  const p = G.player; ensureFlareAmmo(p);
-  if (p.flareMag >= FLARE.mag && p.flareReserve >= FLARE.reserveMax) { flash('照明彈已經是滿的', p.x, p.y - 70, '#9aa4b2', 1.2); sfx('error'); return true; }
-  const got = (FLARE.mag - p.flareMag) + (FLARE.reserveMax - p.flareReserve);
-  p.flareMag = FLARE.mag; p.flareReserve = FLARE.reserveMax; p.flareReloadT = 0;
+  const p = G.player;
+  if (bulletCount('flare') >= BULLETS.flare.max) { flash('照明彈已經是滿的', p.x, p.y - 70, '#9aa4b2', 1.2); sfx('error'); return true; }
+  const got = bulletOwned('flare') ? fillBullets('flare') : addBullets('flare', BULLETS.flare.max);
   crate.stamp.openUntil = performance.now() + AMMO_CRATE.openFor * 1000;   // 箱子打開一下
   flash('🔥 照明彈補滿 +' + got, p.x, p.y - 70, '#ffb38a', 1.4);
   sfx('reload'); updateAmmoHud();

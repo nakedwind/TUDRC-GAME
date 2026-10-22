@@ -1,80 +1,47 @@
-/* ===== 溫特的特殊槍：燃燒彈槍、麻醉槍 =====
-   - 兩把都只能在後室撿到（上鎖的置物箱），撿到並裝在主武器／副武器格之後，才能切換使用（滾輪／數字鍵 1、2），找諾亞可以升級。
-   - 燃燒彈槍：燃燒彈拋過去（會飛過怪物頭上），落地燒出一片火海（js/oil-barrels.js 的火海，敵我都會燙）。
+/* ===== 手槍的特殊子彈：燃燒彈、麻醉彈（以前是燃燒彈槍、麻醉槍）=====
+   - 在後室的置物箱找得到（第一次找到＝拿到這種子彈），之後用滾輪換到它（js/flare.js）。效果固定，不會升級。
+   - 燃燒彈：拋過去（會飛過怪物頭上），落地燒出一片火海（js/oil-barrels.js 的火海，敵我都會燙）。
      火海會點燃油汙、油桶，也會把生命體碎掉的那堆燒成灰。
-   - 麻醉槍：麻醉針直線飛出去，打中的怪物睡著（不動、沒有傷害）；打中暴走的隊員：睡一下，醒來恢復正常。
-     沒暴走的隊員不會被打到（麻醉針直接穿過去）。生命體沒有效果，大型怪物睡一半的時間。
-   - 彈藥存在 equipState.gunAmmo（跟裝備一起存）；以後由後室的商店、轉蛋機補充，現在置物箱裡偶爾找得到。
-   每一級的數值在 data/equipment.js 的 WEAPON_UPGRADES；下面是不分等級的數值。
+   - 麻醉彈：直線飛出去，打中的怪物睡著（不動、沒有傷害）；打中暴走的隊員：睡一下，醒來恢復正常。
+     沒暴走的隊員不會被打到（直接穿過去）。生命體沒有效果，大型怪物睡一半的時間。
+   - 數量存在 equipState.bullets（js/flare.js 的 bulletCount／addBullets）；每種的數值在 data/equipment.js 的 BULLETS。
 */
 const SPECIAL_GUN = {
   incendiary: { range: 8, flight: [.32, .7], arc: [24, 70], fireDps: 10, burnDmg: 4 },   // 最遠幾格、飛行秒數（近～遠）、拋物線高度、火海每秒傷害、著火每秒傷害
-  tranq: { range: 9, speed: 1100, gap: .35, hitR: 16, bigHp: 150 },   // 最遠幾格、飛行速度、兩發間隔、命中判定半徑、血量多少以上算大型怪物
+  tranq: { range: 9, speed: 1100, hitR: 16, bigHp: 150 },   // 最遠幾格、飛行速度、命中判定半徑、血量多少以上算大型怪物
 };
-const gunLevel = id => { const lv = (typeof equipState !== 'undefined' && equipState.weapons[id]) || 0; return lv ? WEAPON_UPGRADES[id].levels[lv - 1] : null; };
-const gunMag = (id, lv) => (id === 'tranq' ? lv.mag : 1);
-function gunAmmo(id) { return equipState.gunAmmo[id] || (equipState.gunAmmo[id] = { mag: 0, reserve: 0 }); }
-// 武器有沒有拿到（手槍、照明彈槍一開始就有）
-function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; if (w && w.removed) return false;   // 開發工坊編輯器刪掉的武器＝沒有
+// 舊的：武器有沒有拿到（開發工坊、背包現在只有手槍）
+function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; if (w && w.removed) return false;
   return !w || !w.field || (typeof equipState !== 'undefined' && (equipState.weapons[id] || 0) > 0); }
 
 // ---- 取得：上鎖的置物箱打開時（js/storage-lockers.js 呼叫）----
 function tryGunFind(x, y) {
-  if (MAP_SAFE) return;
-  const missing = ['incendiary', 'tranq'].filter(id => WEAPON_UPGRADES[id] && !WEAPON_UPGRADES[id].removed && !weaponOwned(id));   // 刪掉的槍撿不到
-  if (missing.length && Math.random() < GUN_FINDS.gun) {
-    const id = missing[Math.floor(Math.random() * missing.length)], w = WEAPON_UPGRADES[id], st = GUN_FINDS.start[id];
-    equipState.weapons[id] = 1; equipState.gunAmmo[id] = { mag: st.mag, reserve: st.reserve }; saveEquipment();
-    if (typeof itemIntroForWeapon === 'function') itemIntroForWeapon(id);   // 第一次拿到：跳說明（js/item-intro.js）
-    if (typeof battleGot === 'function') battleGot(w.name, w.image, 1);
-    if (!equipState.loadout.sub) { equipState.loadout.sub = id; saveEquipment(); }   // 副武器格空著就直接裝上
-    systemNotice('🎁 在置物箱裡找到「' + w.name + '」！' + (weaponInLoadout(id) ? '已裝在副武器，按 2 或滾輪切換' : '打開背包（B）可以換成主武器或副武器'));
-    flash(w.icon + ' ' + w.name, x, y - 40, '#ffd479', 2.5);
-    SFX.play('favorUp', .8, 'gun-get'); updateAmmoHud();
-    return;
-  }
-  const owned = ['incendiary', 'tranq'].filter(weaponOwned);
-  if (owned.length && Math.random() < GUN_FINDS.ammo) {
-    const id = owned[Math.floor(Math.random() * owned.length)], a = gunAmmo(id), max = gunLevel(id).reserve;
-    const n = Math.min(GUN_FINDS.ammoFind[id], max - a.reserve); if (n <= 0) return;
-    a.reserve += n; saveEquipment();
-    const w = WEAPON_UPGRADES[id];
-    if (typeof itemIntro === 'function') itemIntro({ key: 'ammo:' + id, kindLabel: '彈藥', name: (id === 'tranq' ? '麻醉針' : '燃燒彈') + ' ×' + n, image: w.image, icon: w.icon,
-      tag: '🔫 ' + w.name + '的彈藥', desc: '補充到' + w.name + '的備用彈（現在 ' + a.reserve + ' / ' + max + '）。' });
-    systemNotice('在置物箱裡找到' + (id === 'tranq' ? '麻醉針' : '燃燒彈') + ' +' + n);
-    updateAmmoHud();
-  }
+  if (MAP_SAFE || Math.random() >= GUN_FINDS.ammo) return;
+  const kinds = GUN_FINDS.kinds.filter(id => BULLETS[id] && !BULLETS[id].removed && bulletCount(id) < BULLETS[id].max);   // 滿了的不會再找到
+  if (!kinds.length) return;
+  const id = kinds[Math.floor(Math.random() * kinds.length)];
+  grantBullets(id, GUN_FINDS.ammoFind[id] || 1, '在置物箱裡找到', x, y);
+}
+// 拿到子彈：第一次拿到跳說明；回傳加了幾發
+function grantBullets(id, n, how, x, y) {
+  const b = BULLETS[id]; if (!b) return 0;
+  const first = !bulletOwned(id), got = addBullets(id, n);
+  if (first && typeof itemIntroForBullet === 'function') itemIntroForBullet(id, got);
+  if (typeof battleGot === 'function') battleGot(b.icon + ' ' + b.name, null, got);
+  systemNotice((how || '找到') + b.icon + ' ' + b.name + ' +' + got + (first ? '！滾輪可以換成這種子彈' : '（現在 ' + bulletCount(id) + ' / ' + b.max + '）'));
+  if (x != null) flash(b.icon + ' ' + b.name + ' +' + got, x, y - 40, b.color, 1.2);
+  if (first) SFX.play('favorUp', .8, 'gun-get');
+  return got;
 }
 
-// ---- 裝填、開火（game.js 的 updatePlayerAttack 呼叫）----
-function startSpecialReload(id, p) {
-  const lv = gunLevel(id); if (!lv) return;
-  const a = gunAmmo(id);
-  if (p.sgReload || a.mag >= gunMag(id, lv)) return;
-  if (a.reserve <= 0) { flash((id === 'tranq' ? '麻醉針' : '燃燒彈') + '用完了', p.x, p.y - 70, '#ff9f7a', 1.4); sfx('error'); return; }
-  p.sgReload = { id, t: lv.reload }; sfx('reload');
-}
+// ---- 開火（game.js 的 updatePlayerAttack 呼叫）----
 function updateSpecialGun(id, p, dt, aim, canFire) {
-  const lv = gunLevel(id); if (!lv) return;
-  const a = gunAmmo(id);
-  if (p.sgReload && p.sgReload.id !== id) p.sgReload = null;   // 換槍：另一把的裝填作廢
-  if (p.sgReload) {
-    p.sgReload.t -= dt;
-    if (p.sgReload.t <= 0) { const n = Math.min(gunMag(id, lv) - a.mag, a.reserve); a.mag += n; a.reserve -= n; p.sgReload = null; saveEquipment(); }
-    return;
-  }
   if (!canFire) return;
-  if (a.mag <= 0) { startSpecialReload(id, p); p.atkCd = .4; return; }
-  a.mag--;
-  if (id === 'incendiary') fireIncendiary(p, aim, lv); else fireTranq(p, aim, lv);
-  saveEquipment();
-  if (a.mag <= 0 && a.reserve > 0) startSpecialReload(id, p);
-}
-// 右下角彈藥數（game.js 的 updateAmmoHud 呼叫）
-function specialGunHud(id, p) {
-  const a = gunAmmo(id);
-  if (p.sgReload && p.sgReload.id === id) return 'Reload';
-  return a.mag + ' / ' + a.reserve + (a.mag + a.reserve <= 0 ? '<small>沒有彈藥了</small>' : '');
+  if (bulletCount(id) <= 0) { dryFire(p, aim, id); return; }
+  useBullet(id);
+  const b = BULLETS[id];
+  if (id === 'incendiary') fireIncendiary(p, aim, b); else fireTranq(p, aim, b);
+  p.atkCd = b.gap;
 }
 function aimPose(p, ang) {
   p.dir = Math.abs(Math.cos(ang)) >= Math.abs(Math.sin(ang)) ? (Math.cos(ang) < 0 ? 'left' : 'right') : (Math.sin(ang) < 0 ? 'back' : 'front');
@@ -95,7 +62,7 @@ function clearDistance(p, ang, want) {
 function fireIncendiary(p, aim, lv) {
   const S = SPECIAL_GUN.incendiary, ang = Math.atan2(aim.y - p.y, aim.x - p.x);
   const dist = clearDistance(p, ang, Math.min(Math.hypot(aim.x - p.x, aim.y - p.y), S.range * CELL)), k = dist / (S.range * CELL);
-  aimPose(p, ang); p.atkCd = .5;
+  aimPose(p, ang);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
   (G.incShots = G.incShots || []).push({ x0: mx, y0: my, x1: p.x + Math.cos(ang) * dist, y1: p.y + Math.sin(ang) * dist, t: 0,
     T: S.flight[0] + (S.flight[1] - S.flight[0]) * k, h: S.arc[0] + (S.arc[1] - S.arc[0]) * k, lv });
@@ -109,7 +76,7 @@ function incendiaryLand(s) {
   igniteSlicksNear(x, y, R);
   if (typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 生命體碎掉的那堆：燒成灰（js/lifeform.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, 6);
-  if (s.lv.ignite) for (const e of G.enemies) {   // Lv3：被炸到的怪物身上著火
+  if (s.lv.ignite) for (const e of G.enemies) {   // ignite：被炸到的怪物身上著火
     if (e.dead || Math.hypot(e.x - x, (e.y - y) / .7) > R) continue;
     e.burnT = Math.max(e.burnT || 0, s.lv.ignite); e.burnDmg = S.burnDmg; e.burnTick = 1;
   }
@@ -123,7 +90,7 @@ function incendiaryLand(s) {
 // ---- 麻醉針 ----
 function fireTranq(p, aim, lv) {
   const S = SPECIAL_GUN.tranq, ang = Math.atan2(aim.y - p.y, aim.x - p.x), want = S.range * CELL;
-  aimPose(p, ang); p.atkCd = S.gap;
+  aimPose(p, ang);
   const dist = clearDistance(p, ang, want);
   // 沿路線找第一個打到的：怪物、或暴走的隊員（沒暴走的隊員直接穿過去）
   const cands = [];
@@ -166,7 +133,7 @@ function tranqLand(s) {
   if (s.target && tranqHit(s.target, s.lv)) hits.add(s.target);
   G.effects.push({ ring: true, x: s.x1, y: s.y1, r: 2, r2: 8, life: .14, life0: .14, color: '#c9b8ff' });
   if (!s.lv.mist || !s.target) return;
-  const R = s.lv.mist * CELL;   // Lv3：麻醉霧，附近的也一起睡
+  const R = s.lv.mist * CELL;   // mist：麻醉霧，附近的也一起睡
   for (const o of [...G.enemies, ...G.towers]) if (!hits.has(o) && Math.hypot(o.x - s.x1, o.y - s.y1) <= R) tranqHit(o, s.lv);
   G.effects.push({ ring: true, x: s.x1, y: s.y1, r: 8, r2: R, life: .5, life0: .5, color: '#b9a7ff' });
   for (let i = 0; i < 10; i++) { const a = Math.random() * Math.PI * 2, rr = Math.random() * R * .8;
@@ -196,7 +163,7 @@ function incShotPos(s) {
 }
 
 // ---- 繪製 ----
-function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉針（render.js 畫在角色上面）
+function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉彈（render.js 畫在角色上面）
   for (const s of (G.incShots || [])) {
     const { x, y, gx, gy } = incShotPos(s);
     ctx.save();
@@ -215,6 +182,35 @@ function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉針（render
     ctx.fillStyle = '#c9b8ff'; ctx.beginPath(); ctx.arc(-8, 0, 2.6, 0, Math.PI * 2); ctx.fill();   // 尾端的毛球
     ctx.restore();
   }
+}
+// ---- 漆彈：打中的怪物沾上螢光漆，隊員優先集火（js/game.js 的 pickSentryTarget、js/sentry.js 的追擊）----
+function paintTarget() {   // 現在被標記的怪物（死掉、不見了＝沒有）
+  const e = G.paintTarget;
+  if (e && (e.dead || e.hp <= 0 || !G.enemies.includes(e))) G.paintTarget = null;
+  return G.paintTarget || null;
+}
+function paintMark(e) {
+  const old = paintTarget();
+  G.paintTarget = e; e.paintAt = performance.now();
+  if (old !== e) { flash('🎯 集火！', e.x, e.y - 56, BULLETS.paint.color, .9); systemNotice('隊員優先攻擊被漆彈標記的怪物'); }
+  for (let i = 0; i < 8; i++) { const a = Math.random() * Math.PI * 2, b = targetBodyBox(e);
+    G.effects.push({ ember: true, spark: true, x: b.cx, y: b.cy, vx: Math.cos(a) * 70, vy: Math.sin(a) * 70, r: 1.6, life: .3, life0: .3, color: BULLETS.paint.color }); }
+}
+// 螢光漆：畫在黑幕上面（躲進黑暗也看得到），身上幾塊漆＋腳下轉動的準心
+function drawPaintMarks(ctx) {
+  const e = paintTarget(); if (!e) return;
+  const now = performance.now() / 1000, b = targetBodyBox(e), col = BULLETS.paint.color, pop = Math.min(1, (performance.now() - (e.paintAt || 0)) / 180);
+  ctx.save(); ctx.globalCompositeOperation = 'lighter';
+  const g = ctx.createRadialGradient(b.cx, b.cy, 0, b.cx, b.cy, 30);
+  g.addColorStop(0, 'rgba(255,95,214,.35)'); g.addColorStop(1, 'rgba(255,95,214,0)');
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.cx, b.cy, 30, 0, Math.PI * 2); ctx.fill();
+  ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = col;
+  for (const [dx, dy, r] of [[-5, -3, 5], [4, 2, 4], [-1, 6, 3], [6, -6, 2.5]]) { ctx.beginPath(); ctx.arc(b.cx + dx, b.cy + dy, r * pop, 0, Math.PI * 2); ctx.fill(); }
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.globalAlpha = .85;
+  ctx.translate(e.x, e.y + 4); ctx.scale(1, .45); ctx.rotate(now * 1.6);
+  const R = 22 + 2 * Math.sin(now * 5);
+  for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(0, 0, R, i * Math.PI / 2 + .25, i * Math.PI / 2 + Math.PI / 2 - .25); ctx.stroke(); }
+  ctx.restore();
 }
 function drawSleepMarks(ctx) {   // 睡著的怪物、隊員頭上飄 Zzz（render.js 在黑幕上面畫）
   const now = performance.now() / 1000;

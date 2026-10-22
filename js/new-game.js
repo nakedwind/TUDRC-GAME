@@ -106,8 +106,8 @@
         for (const [id, def] of Object.entries(WEAPON_UPGRADES)) {
           if (def.removed) continue;   // 開發工坊編輯器刪掉的武器不給
           equipState.weapons[id] = def.levels.length;
-          if (def.field) { const lv = def.levels[def.levels.length - 1]; equipState.gunAmmo[id] = { mag: id === 'tranq' ? lv.mag : 1, reserve: lv.reserve }; }
         }
+        for (const id of Object.keys(BULLETS)) if (id !== 'pistol' && !BULLETS[id].removed) { equipState.bullets.owned[id] = true; equipState.bullets.n[id] = BULLETS[id].max; }   // 所有子彈補滿
         equipState.battery = 100; training.crystals = Math.max(training.crystals, 99999);
         saveEquipment(); saveTraining();
       }

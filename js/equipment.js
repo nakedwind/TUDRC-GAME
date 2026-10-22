@@ -9,7 +9,7 @@
 // ============================================================
 const EQUIP_STORE = 'tudrc_equipment_v1';
 const WS_KEEP_WEAPON = 'pistol';   // 溫特一開始就持有的手槍：不能分解，也不能用任何方式丟掉
-const equipState = { owned: {}, equipped: { head: null, body: null, legs1: null, legs2: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: 'flare' }, gunAmmo: {}, battery: 100, scrapped: {} };   // scrapped：開發工坊分解掉的武器（一開始就有的也不會再補回來）
+const equipState = { owned: {}, equipped: { head: null, body: null, legs1: null, legs2: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: null }, gunAmmo: {}, bullets: null, battery: 100, scrapped: {} };   // scrapped：開發工坊分解掉的武器（一開始就有的也不會再補回來）
 const EQUIP_TO_ITEM = ['thermos', 'firstaid', 'adrenaline', 'charm'];   // 以前是裝備、現在改成道具：舊存檔有的話換成 1 個道具
 let equipLegacyItems = [];
 // 開發工坊編輯器刪掉的裝備／武器：對玩家來說就是永久從遊戲消失——存檔裡拿到的也清掉（之後就算在編輯器復原，也要重新取得）。
@@ -39,7 +39,22 @@ try {
   if (s.gunAmmo) for (const [k, a] of Object.entries(s.gunAmmo)) if (WEAPON_UPGRADES[k] && a) equipState.gunAmmo[k] = { mag: Math.max(0, a.mag | 0), reserve: Math.max(0, a.reserve | 0) };
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
   if (s.loadout) for (const k of ['main', 'sub']) if (s.loadout[k] === null || WEAPON_UPGRADES[s.loadout[k]]) equipState.loadout[k] = s.loadout[k];
+  // 手槍的子彈（js/flare.js 的 bulletState）：owned 拿到過哪幾種、n 剩幾發
+  if (s.bullets && s.bullets.owned && s.bullets.n) {
+    equipState.bullets = { owned: { flare: true }, n: {} };
+    for (const id of Object.keys(BULLETS)) if (id !== 'pistol') {
+      if (s.bullets.owned[id]) equipState.bullets.owned[id] = true;
+      if (Number.isFinite(s.bullets.n[id])) equipState.bullets.n[id] = Math.max(0, Math.min(BULLETS[id].max, s.bullets.n[id] | 0));
+    }
+  } else {   // 舊存檔：以前撿到的燃燒彈槍、麻醉槍＝拿到這種子彈，槍裡和備用的彈藥加起來；照明彈補滿
+    equipState.bullets = { owned: { flare: true }, n: { flare: BULLETS.flare.max } };
+    for (const id of ['incendiary', 'tranq']) if ((s.weapons && s.weapons[id] > 0) || (s.gunAmmo && s.gunAmmo[id])) {
+      const a = (s.gunAmmo && s.gunAmmo[id]) || {};
+      equipState.bullets.owned[id] = true; equipState.bullets.n[id] = Math.min(BULLETS[id].max, (a.mag | 0) + (a.reserve | 0));
+    }
+  }
 } catch (_) {}
+if (!equipState.bullets) equipState.bullets = { owned: { flare: true }, n: { flare: BULLETS.flare.max } };
 for (const [k, w] of Object.entries(WEAPON_UPGRADES)) if (w.removed && (equipState.weapons[k] > 0 || equipState.gunAmmo[k])) {   // 刪掉的武器：等級、彈藥都清掉
   equipState.weapons[k] = 0; delete equipState.gunAmmo[k]; equipPurged = true;
 }
@@ -50,14 +65,13 @@ if (typeof TEST_UNLOCK_ALL_GUNS !== 'undefined' && TEST_UNLOCK_ALL_GUNS) {
     if (!(equipState.weapons[id] > 0)) equipState.weapons[id] = 1;
     if (w.field) { const lv = w.levels[equipState.weapons[id] - 1]; equipState.gunAmmo[id] = { mag: id === 'tranq' ? lv.mag : 1, reserve: lv.reserve }; }
   }
+  for (const id of Object.keys(BULLETS)) if (id !== 'pistol' && !BULLETS[id].removed) { equipState.bullets.owned[id] = true; equipState.bullets.n[id] = BULLETS[id].max; }
 }
-// ---- 主武器／副武器：出勤時只能在這兩把之間切換（滾輪、數字鍵 1／2）----
-const WEAPON_SLOTS = [{ id: 'main', name: '主武器' }, { id: 'sub', name: '副武器' }];
+// ---- 武器：溫特只有一把手槍（換的是子彈，js/flare.js），背包、工坊的紙娃娃不放武器格 ----
+const WEAPON_SLOTS = [];
 const weaponHave = id => !!WEAPON_UPGRADES[id] && !WEAPON_UPGRADES[id].removed && (equipState.weapons[id] || 0) > 0;   // removed＝開發工坊編輯器刪掉的武器
-function fixLoadout() {   // 沒拿到的槍不能裝；兩格不能放同一把；兩格都空＝空手
-  const L = equipState.loadout;
-  if (L.main && !weaponHave(L.main)) L.main = null;
-  if (L.sub && (!weaponHave(L.sub) || L.sub === L.main)) L.sub = null;
+function fixLoadout() {   // 一定拿著手槍
+  equipState.loadout.main = 'pistol'; equipState.loadout.sub = null;
 }
 fixLoadout();
 if (equipPurged) saveEquipment();   // 刪掉的東西馬上從存檔清掉
@@ -223,9 +237,9 @@ function drawFlashlightBeam(ctx, beam) {
 function applyWeaponLevels() {
   // 開發工坊編輯器刪掉的槍是 0 級（沒有）：數值先用 Lv1 的，反正拿不到、用不到
   const lvOf = id => WEAPON_UPGRADES[id].levels[Math.max(1, equipState.weapons[id] || 0) - 1];
-  const p = lvOf('pistol'), f = lvOf('flare');
+  const p = lvOf('pistol');
   if (typeof PLAYER_ATK !== 'undefined') { PLAYER_ATK.dmg = p.dmg; PLAYER_ATK.mag = p.mag; PLAYER_ATK.reloadTime = p.reload; }
-  if (typeof FLARE !== 'undefined') { FLARE.burn = f.shine; FLARE.reserveMax = f.reserve; }   // 照明彈亮幾秒（data/equipment.js 的 shine）
+  if (typeof FLARE !== 'undefined') { FLARE.burn = BULLETS.flare.shine; FLARE.reserveMax = BULLETS.flare.max; }   // 照明彈：固定，不會升級（data/equipment.js 的 BULLETS）
 }
 
 // ---- 道具：背包裡有幾個、用掉一個 ----
@@ -550,7 +564,7 @@ function equipToSlot(slotId, id) {
 }
 // 這件可以放哪幾格（背包「裝備」分頁的按鈕用）
 function slotsForGear(kind, id) {
-  if (kind === 'weapon') return WEAPON_SLOTS.map(s => ({ id: 'w:' + s.id, name: s.name, cur: equipState.loadout[s.id] === id }));
+  if (kind === 'weapon') return [];   // 手槍一直拿在手上，沒有要裝哪一格
   const d = equipDef(id); if (!d) return [];
   return EQUIP_SLOTS.filter(s => s.kinds.includes(d.kind)).map(s => ({ id: s.id, name: s.name, cur: equipState.equipped[s.id] === id }));
 }
@@ -703,7 +717,7 @@ function workshopEntries() {   // 所有裝備、武器整理成同一種格式
       about: def.ownedDesc || def.desc || '', stat: n => def.stat(def.levels[n - 1]),
       canDev: !lv && def.source === 'develop', where: def.where, devCost: def.cost[0], upCost: lv ? def.cost[lv] : 0, buy: lv ? 'up:' + def.id : 'dev:' + def.id };
   });
-  const weapons = Object.entries(WEAPON_UPGRADES).filter(([, w]) => !w.removed).map(([k, w]) => {   // 刪掉的武器不顯示
+  const weapons = Object.entries(WEAPON_UPGRADES).filter(([k, w]) => !w.removed && k === 'pistol').map(([k, w]) => {   // 只有手槍能升級（其他槍改成子彈了）
     const lv = equipState.weapons[k] || 0;
     return { key: 'w:' + k, kind: 'weapon', def: w, name: w.name, lv, max: w.levels.length, icon: wsIcon(w), image: w.image, emoji: w.icon,
       tag: '武器', worn: Object.values(equipState.loadout).includes(k),

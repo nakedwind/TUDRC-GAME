@@ -1323,7 +1323,8 @@ function draw() {
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   if (typeof drawChannelBar === 'function') drawChannelBar(ctx);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
-  if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉槍打睡的頭上飄 Zzz（js/special-guns.js）
+  if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉彈打睡的頭上飄 Zzz（js/special-guns.js）
+  if (typeof drawPaintMarks === 'function') drawPaintMarks(ctx);   // 漆彈標記的怪物：螢光漆、準心（黑暗中也看得到）
   if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
   // 選好建築並移到地圖上時，在預覽圖上方提示快捷鍵：［R］旋轉、［ESC］取消（取消後就切回槍）。

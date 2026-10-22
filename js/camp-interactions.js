@@ -32,15 +32,9 @@ function campInteractionNearPlayer() {
 function refillCampAmmo() {
   const p = G.player; if (!p) return;
   p.ammo = PLAYER_ATK.mag; p.reloadT = 0;
-  ensureFlareAmmo(p); p.flareMag = FLARE.mag; p.flareReserve = FLARE.reserveMax; p.flareReloadT = 0;
-  p.sgReload = null;
-  for (const [id, def] of Object.entries(WEAPON_UPGRADES)) {
-    if (!def.field || !(equipState.weapons[id] > 0)) continue;
-    const lv = def.levels[equipState.weapons[id] - 1];
-    equipState.gunAmmo[id] = { mag: id === 'tranq' ? lv.mag : 1, reserve: lv.reserve };
-  }
+  for (const id of Object.keys(BULLETS)) fillBullets(id);   // 拿到過的特殊子彈都補滿（js/flare.js）
   saveEquipment(); saveGame(); updateAmmoHud(); sfx('reload');
-  systemNotice('已補滿所有持有武器的彈藥');
+  systemNotice('已補滿所有子彈');
 }
 let campPlanOpen = false, campPlanDialog = null, campPlanFocus = null;
 let campPlanPending = null, campPlanConfirmFocus = null;

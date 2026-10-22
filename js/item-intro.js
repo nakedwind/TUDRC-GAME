@@ -76,6 +76,11 @@ function itemIntroForEquipment(id) {
   itemIntro({ key: 'equip:' + id, kindLabel: '裝備', name: d.name, image: d.image, icon: d.icon, tag: '🛡️ ' + part, desc: d.ownedDesc || d.desc,
     stat: d.stat && d.levels ? 'Lv1：' + d.stat(d.levels[0]) : '' });
 }
+function itemIntroForBullet(id, n) {
+  const b = typeof BULLETS !== 'undefined' ? BULLETS[id] : null; if (!b) return;
+  itemIntro({ key: 'bullet:' + id, kindLabel: '子彈', name: b.name + (n ? ' ×' + n : ''), icon: b.icon, tag: '🔫 手槍的子彈', desc: b.desc,
+    stat: '最多帶 ' + b.max + ' 發・戰鬥中用滑鼠滾輪換成這種子彈' });
+}
 function itemIntroForWeapon(id) {
   const w = typeof WEAPON_UPGRADES !== 'undefined' ? WEAPON_UPGRADES[id] : null; if (!w) return;
   itemIntro({ key: 'weapon:' + id, kindLabel: '武器', name: w.name, image: w.image, icon: w.icon, tag: '🔫 武器', desc: w.ownedDesc || w.desc,
