@@ -85,11 +85,11 @@ function grabLandFx(a, big, v = 0) {
 
 // 拖動時的撞牆判定：跟走路（sentryBlocked）一樣，但身體算小一點（GRAB.bodyR），靠牆站的人才抓得起來
 function grabBlocked(x, y) {
+  if (typeof burrowMouseBlocksActor === 'function' && burrowMouseBlocksActor(x, y, GRAB.bodyR)) return true;
   const r = GRAB.bodyR;
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy, [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr] || solidBlocksPoint(px, py)) return true;
-    if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, rr)) return true;
   }
   return false;
 }

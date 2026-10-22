@@ -202,12 +202,12 @@ function spawnWanderers() {
 // ---- 哨兵移動 AI（哨兵是「人」：在亮處走動巡邏）----
 // 模式：free=自由走動（亮處隨便逛）/ hold=在錨點附近小範圍巡邏 / goto=走去指派位置後轉 hold
 function sentryBlocked(x, y) {
+  if (typeof burrowMouseBlocksActor === 'function' && burrowMouseBlocksActor(x, y, 12)) return true;
   const r = 12;
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
-    if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, rr)) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
   return false;

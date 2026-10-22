@@ -85,7 +85,7 @@
         <p id="behaviorDesc"></p>
         <div class="fields" id="chargerFields"></div>
         <div id="burrowPreviewBox" hidden>
-          <label>動作預覽 <select id="burrowPreviewMode"><option value="cycle">完整循環</option><option value="emerge">本體鑽出地面</option><option value="idle">待機與眨眼</option><option value="left">左手出土攻擊</option><option value="right">右手出土攻擊</option><option value="strike-left">左手命中定格</option><option value="strike-right">右手命中定格</option><option value="sink">本體退回地洞</option></select></label>
+          <label>動作預覽 <select id="burrowPreviewMode"><option value="cycle">完整循環</option><option value="emerge">本體鑽出地面</option><option value="emerge-half">出土中段（遮罩）</option><option value="sink-half">入土中段（遮罩）</option><option value="idle">待機與眨眼</option><option value="left">左手出土攻擊</option><option value="right">右手出土攻擊</option><option value="strike-left">左手命中定格</option><option value="strike-right">右手命中定格</option><option value="sink">本體退回地洞</option></select></label>
           <canvas id="burrowAnimation" width="560" height="290" aria-label="鑽地老鼠動作預覽"></canvas>
           <small>本體鑽地瞬移，出土與入土時仍可受傷。橘圈鎖定5×5 格內的落點，可移動閃避；本體離開後原地洞保留 5 秒。正式出現位置由地圖編輯器的怪物種類／權重決定。</small>
         </div>
@@ -112,9 +112,9 @@
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
   <script src="js/monster-data.js?v=burrow-teleport-20261023"></script>
   <script src="js/sfx.js?v=smalldeath2-20261023"></script>
-  <script src="js/burrowing-mouse.js?v=burrow-no-pause-20261023"></script>
+  <script src="js/burrowing-mouse.js?v=burrow-mask-free-20261023"></script>
   <script src="js/ui-feedback.js"></script>
-  <script src="js/monster-editor.js?v=burrow-solid-20261023"></script>
+  <script src="js/monster-editor.js?v=burrow-mask-free-20261023"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportMonsters'], files: [{ path: 'data/monsters.js', label: '怪物', text: () => exportText() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=nav4-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
