@@ -198,8 +198,9 @@ function enemyChaseSentry(e, target, distance, moveDt, dt) {
   const nav = enemyNavigate(e, gc, gr, moveDt, 'sentry:' + target.type + ':' + gc + ',' + gr, true);
   if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
 }
-function enemyBlocked(x, y) {
+function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
+  if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, r, actor)) return true;
   return !inGrid(c, r) || isWall(c, r) || !!barrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r));   // 順順宮帽也擋路（js/hangi-bao.js）
 }
 function resetEnemyNavigation(e) {
@@ -271,6 +272,7 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
       if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key)) continue;
       if (barrierAt(nc, nr) && !canBreakBuildings) continue;
       if (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr)) continue;   // 繞過順順宮帽
+      if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(nc, nr, e)) continue;
       cameFrom.set(key, [c, r]); queue.push([nc, nr]);
     }
   }
@@ -291,6 +293,7 @@ function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   }
   if (!e.aiPath || !e.aiPath.length) return { reached: true };
   const [nc, nr] = e.aiPath[0], blocker = barrierAt(nc, nr);
+  if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(nc, nr, e)) { e.aiPath = null; e.aiRouteTimer = 0; return {}; }
   if (blocker) return { blocker };
   const [tx, ty] = center(nc, nr), d = Math.hypot(tx - e.x, ty - e.y);
   if (d <= Math.max(2, e.speed * moveDt)) {
@@ -403,11 +406,12 @@ function stepEnemy(e, dt) {
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信
-  if (enemyBlocked(e.x, e.y)) {
+  const blocked = (x, y) => enemyBlocked(x, y, e);
+  if (blocked(e.x, e.y)) {
     const safeX = e.lastSafeX, safeY = e.lastSafeY;
-    if (Number.isFinite(safeX) && Number.isFinite(safeY) && !enemyBlocked(safeX, safeY)) {
+    if (Number.isFinite(safeX) && Number.isFinite(safeY) && !blocked(safeX, safeY)) {
       e.x = safeX; e.y = safeY;
-    } else if (!rescueStuck(e, enemyBlocked)) return;
+    } else if (!rescueStuck(e, blocked)) return;
     resetEnemyNavigation(e);
   }
   e.lastSafeX = e.x; e.lastSafeY = e.y;

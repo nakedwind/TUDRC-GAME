@@ -1073,6 +1073,7 @@ function playerBlocked(x, y) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
+    if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(c, rr)) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
   return false;

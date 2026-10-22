@@ -53,6 +53,23 @@ function burrowMouseInReach(e, p) {
   const [ec, er] = cellAt(e.x, e.y), [pc, pr] = cellAt(p.x, p.y);
   return Math.abs(pc - ec) <= 2 && Math.abs(pr - er) <= 2;
 }
+// 洞只佔所在的一格，貼圖透明邊緣與 5×5 攻擊範圍不算障礙。
+// 即時查詢，不寫入 G.grid 或地圖；洞消失、重開戰場後便自然解除。
+function burrowMouseHoleAt(c, r, actor = null) {
+  if (typeof G === 'undefined' || !G) return false;
+  const at = p => { const [pc, pr] = cellAt(p.x, p.y); return pc === c && pr === r; };
+  // 本體可以待在自己的出土格，避免每幀被卡住救援搬走；仍不能落在其他洞上。
+  if (actor?.behavior === 'burrow' && at(actor)) return false;
+  if ((G.burrowHoles || []).some(h => (h.age || 0) < (h.lifetime ?? 5) && at(h))) return true;
+  return (G.enemies || []).some(e => e.behavior === 'burrow' && !e.dead && e.hp > 0
+    && (at(e) || (e.bm?.hands || []).some(h => at(h))));
+}
+function burrowMouseBlocksBuild(v, c, r) {
+  for (let dc = 0; dc < (v.w || 1); dc++) for (let dr = 0; dr < (v.h || 1); dr++) {
+    if (burrowMouseHoleAt(c + dc, r + dr)) return true;
+  }
+  return false;
+}
 function burrowMouseLeaveHole(e, delay = 0) {
   (G.burrowHoles || (G.burrowHoles = [])).push({
     x: e.x, y: e.y, w: e.drawWidth || 110, h: e.drawHeight || 90,

@@ -53,7 +53,7 @@ function render() {
 // 行為數值：依怪物的行為模式顯示對應欄位（欄位表在 js/monster-data.js）
 const BEHAVIOR_UI = {
   burrow: { key: 'burrow', fields: () => BURROW_FIELDS, valid: c => validBurrowCfg(c), title: '🐭 鑽地出土／地底伸手',
-    desc: '鑽地後瞬移到目標附近，使用「地洞剛出現」出土。本體周圍 5×5 格內可以伸手：目標在左邊用左手，右邊用右手。出手前鎖定地面並預警，可移動閃避；本體躲回去或死亡後，原地洞保留 5 秒。手的洞隨攻擊結束消失。' },
+    desc: '鑽地後瞬移到目標附近，使用「地洞剛出現」出土。本體周圍 5×5 格內可以伸手：目標在左邊用左手，右邊用右手。出手前鎖定地面並預警，可移動閃避；本體躲回去或死亡後，原地洞保留 5 秒。手的洞隨攻擊結束消失。洞口所在格暫時不能行走或放置建築，洞消失後恢復。' },
   charger: { key: 'charger', fields: () => CHARGER_FIELDS, valid: c => validChargerCfg(c), title: '🐦 衝撞行為',
     desc: '平時發呆、偶爾散步；玩家或哨兵進入注意範圍（中間沒有牆）就愣一下，然後直線衝過去，撞到會把人撞飛。玩家一出現就只追玩家，哨兵的嘲諷也引不走。' },
   shooter: { key: 'shooter', fields: () => SHOOTER_FIELDS, valid: c => validShooterCfg(c), title: '🫧 飄浮噴珍珠',
