@@ -295,6 +295,7 @@ function endTimedRun(abort) {
   tpBig.hidden = true;
   if (abort) { tp.run = null; return; }
   run.phase = 'done';
+  if (typeof achieveMax === 'function') { achieveMax('tpBestScore', run.score); achieveMax('tpMostShots', run.shots); }   // 成就：限時挑戰的分數、發數
   if (run.score > (tpBest.timed || 0)) { run.newBest = (tpBest.timed || 0) > 0; tpBest.timed = run.score; saveTpBest(); }
   tpShowBig(run.newBest ? '新紀錄！' : '時間到', run.newBest ? 'record' : '');
   if (typeof sfx === 'function') sfx(run.newBest ? 'itemReveal' : 'switch');

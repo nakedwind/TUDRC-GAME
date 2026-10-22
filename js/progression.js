@@ -18,6 +18,7 @@ function saveTraining() {
   catch (_) {}
 }
 function earnCrystals(amount) {
+  if (typeof addStat === 'function' && amount > 0) addStat('crystalsEarned', Math.floor(amount));   // 成就：獲得的異質碎片
   training.crystals += Math.max(0, Math.floor(amount || 0));
   if (typeof G !== 'undefined' && G && G.battle && !MAP_SAFE) G.battle.crystals += Math.max(0, Math.floor(amount || 0));   // 結算畫面
   saveTraining();

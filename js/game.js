@@ -311,6 +311,7 @@ function openDialogue(actor) {
   const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
     || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」
   if (!lines || !lines.length) return;   // 這一格沒填：不說話
+  if (typeof achieveRemember === 'function') achieveRemember('talked', key, 'talkedAll');   // 成就：跟每一位角色說過話
   dialogueState = { actor, lines, index: 0 };
   actor.target = null; actor.say = null; actor.sayWait = 2;
   MOVE_KEYS.forEach(key => { keys[key] = false; });
@@ -586,6 +587,7 @@ function enterPortal(pt) {
   const source = { map: MAP, c: pt.c, r: pt.r, cols: MAP.cols, rows: MAP.rows,
     stair: !pt.elevator && typeof stairPortalDir === 'function' ? stairPortalDir(pt) : null };
   mapTransitioning = true;
+  if (typeof achieveOnTravel === 'function') achieveOnTravel(pt.elevator ? 'elevator' : source.stair ? 'stair' : 'door');   // 成就：爬樓梯、只搭電梯
   Object.keys(keys).forEach(key => { keys[key] = false; });
   if (!pt.elevator) {   // 上／下樓梯：腳步聲；其他出入口：開門聲
     const stair = source.stair;
@@ -912,7 +914,7 @@ function applyChaosDamage(t, best, spec) {
     o.hp = Math.max(0, o.hp - (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg)); o.hitT = .3; G.damageVignetteT = Math.max(G.damageVignetteT, .3);
     playPlayerHit();   // 被暴走的隊員打到
     friendlyHitReact(o, t.x, t.y, dmg, heavy, t);   // 閃紅、震退、傷害數字
-    if (o.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose('player', '被暴走的' + (TYPES[t.type]?.name || '隊員') + '攻擊'); }
+    if (o.hp <= 0 && !G.over) { if (typeof addStat === 'function' && achieveNotPractice()) addStat('downedBy:' + t.type); flash('部隊長失去戰鬥能力', o.x, o.y - 58, '#ff5b6e'); lose('player', '被暴走的' + (TYPES[t.type]?.name || '隊員') + '攻擊'); }
   } else if (o.isBase) {
     o.hp -= dmg; o.hitT = HIT_DUR;
     warnCampAttack();
@@ -1127,6 +1129,7 @@ function mapSeats() {
       // 背面的椅子：人背對鏡頭坐著，椅背擋在人前面 → 椅子要畫在人物上面（床不算）
       chairInFront: dir === 'back' && !/bed|床/i.test(s.id),
       sortY: occ ? occ.y : y0 + cfg.depth,
+      key: s.id + '@' + s.c + ',' + s.r,   // 這張椅子的編號（成就「坐過每張椅子」，js/achievements.js）
     });
     }
   }
@@ -1163,6 +1166,7 @@ function toggleSit() {
   p.x = seat.x; p.y = seat.y; p.dir = seat.dir;
   p.moving = false; p.anim = 0; p.blinkTime = -1;
   sfx('button');
+  if (typeof achieveOnSit === 'function') achieveOnSit(seat);   // 成就：坐過的椅子、躺過的床
 }
 function standUp() {
   const p = G.player; if (!p || !p.sitting) return;
@@ -1642,12 +1646,14 @@ function updatePlayerAttack(dt) {
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
     best.hp -= shotDmg; markHit(critMul);
+    if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
     if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 60, true); else flashDmg('-' + shotDmg, best.x, best.y - 56, '#d69bff');
     best = null;
   }
   if (best) {
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     best.hp -= shotDmg;
+    if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
     if (!(best.playerAggroT > 0)) best.alertT = ENEMY_ALERT_TIME;   // 這一槍才把牠吸引過來：頭上冒「！」
     best.playerAggroT = PLAYER_ATK.aggro;   // 吸引仇恨
     markHit(critMul);                       // 準星旁閃一下命中標記
@@ -2115,7 +2121,7 @@ function update(dt) {
       playPlayerHit(.55);   // 阿瓦倫的腐蝕：每燙一次小聲響一下
       p.hitT = Math.max(p.hitT || 0, .3); G.damageVignetteT = Math.max(G.damageVignetteT, .35);
       flashDmg('-' + Math.round(playerAcid), p.x, p.y - 46, '#c58aff');
-      if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被阿瓦倫的腐蝕波及'); }
+      if (p.hp <= 0 && !G.over) { if (typeof addStat === 'function' && achieveNotPractice()) addStat('acidDeaths'); flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被阿瓦倫的腐蝕波及'); }
     }
     for (const pool of G.acidPools) {
       pool.t -= dt;
@@ -2340,7 +2346,7 @@ function prepareMonsterPreview() {
   updateCamera(); updateHUD();
 }
 function begin(playSound = true) { if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; }
-function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
+function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); achieveOnBattleEnd('win'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;
 function baseLost() { if (!G.over && !(G.baseLostT > 0)) { G.baseLostT = BASE_LOSE_DELAY; systemNotice('營地被摧毀了……', true); } }

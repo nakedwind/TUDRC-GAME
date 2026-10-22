@@ -345,6 +345,7 @@ function finishFirstAid() {
   if (wasDown) { t.hp = Math.max(1, Math.round(t.maxhp * FIRST_AID.reviveHp)); flash('✚ 救回來了！HP ' + t.hp, t.x, t.y - 50, '#79dbad', 1.8); }   // 異質急救包：HP 變 30%
   else { t.hp = Math.min(t.maxhp, t.hp + c.heal); flash('+' + c.heal, t.x, t.y - 50, '#79dbad', 1.6); }
   if (!isPlayer && wasDown && typeof sentryStatus === 'function') sentryStatus(t, '被溫特救起來了', '#79dbad');
+  if (!isPlayer && wasDown && typeof addStat === 'function') addStat('revives');   // 成就：把倒下的隊員救回來
   for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: t.x + (Math.random() - .5) * 26, y: t.y - 10, vx: 0, vy: -40 - Math.random() * 30, r: 2, life: .7, life0: .7, color: '#9ff0c0' });
   sfx('soothe'); if (typeof updateHUD === 'function') updateHUD();
 }
@@ -677,7 +678,9 @@ function spendCrystals(n) {
     if (workshopOpen) showWorkshopToast('異質碎片不夠（還差 <b>' + short + '</b> 個）', true); else systemNotice(msg, true);
     return false;
   }
-  training.crystals -= n; saveTraining(); if (typeof updateHUD === 'function') updateHUD(); return true;
+  training.crystals -= n; saveTraining(); if (typeof updateHUD === 'function') updateHUD();
+  if (typeof addStat === 'function') addStat('crystalsSpent', n);   // 成就：花掉的異質碎片
+  return true;
 }
 function workshopBuy(kind, id) {
   if (typeof magazineWorkshopBuy === 'function' && magazineWorkshopBuy(kind, id)) { renderWorkshop(); return; }   // 子彈開發、彈匣升級（js/magazine.js）

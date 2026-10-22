@@ -24,6 +24,7 @@
     ['背包編輯器.html', '🎒 背包編輯器'],
     ['隊員裝備技能編輯器.html', '🧑‍🚀 Y102隊員裝備／技能編輯器'],
     ['怪物圖鑑編輯器.html', '📕 怪物圖鑑編輯器'],
+    ['成就編輯器.html', '🏆 成就編輯器'],
   ];
   const pages = new Set(EDITORS.map(e => e[0]));
   const fileOf = href => { try { return decodeURIComponent(new URL(href, location.href).pathname.split('/').pop()); } catch (_) { return ''; } };

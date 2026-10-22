@@ -32,6 +32,7 @@ function gachaPull(times) {
   const results = [];
   for (let i = 0; i < times; i++) { const item = gachaRoll(); if (item) results.push({ item, isNew: costumeGrant(item.id) }); }
   costumeState.pulls = (costumeState.pulls || 0) + times; saveCostumes();
+  if (typeof addStat === 'function') addStat('gachaPulls', times);   // 成就：扭蛋次數
   gc.results = results; gc.tab = 'result'; gc.msg = ''; gc.busy = true;
   renderGacha();
   // 動畫：左邊機器搖一搖；右邊壓黑 → 大扭蛋掉下來 → 搖一搖 → 打開 → 出現轉到的東西（點一下可以跳過）

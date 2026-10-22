@@ -93,7 +93,7 @@ function placeObstacle(ob, c, r) {
   const passable = !ob.trap && ((typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[ob.id]) || !variantSolidCells(v).length);
   if (passable && sameBuildingOverlaps(ob.id, v, c, r)) return buildFail('這裡已經有' + ob.name + '了', c, r);
   if (G.money < ob.cost) return buildFail('經費不足，無法放置建築', c, r);
-  G.money -= ob.cost; if (G.battle) G.battle.spent += ob.cost;   // 結算畫面：本次花掉的經費
+  G.money -= ob.cost; if (G.battle) G.battle.spent += ob.cost; if (typeof achieveOnSpend === 'function') achieveOnSpend('build', ob.cost);   // 結算畫面：本次花掉的經費
   // 地雷（trap）埋在地上、減速建築（鐵絲網）可以走過去：都不登記擋路格
   const slow = typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[ob.id];
   const solid = ob.trap || slow ? [] : variantSolidCells(v).map(cell => cell.slice());

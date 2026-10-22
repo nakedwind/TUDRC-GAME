@@ -106,6 +106,7 @@ function costumeGive(who, id) {
   }
   saveCostumes();
   if (typeof applyOutfits === 'function') applyOutfits();
+  if (typeof checkAchievements === 'function') checkAchievements('allWear:');   // 成就：全員戴上某件配件
   return true;
 }
 // 禮物選單、扭蛋收藏裡的小圖
@@ -179,6 +180,7 @@ function wearCostume(itemId) {
   else eq[wd.slot] = itemId || null;
   saveCostumes();
   if (typeof applyOutfits === 'function') applyOutfits();   // 遊戲裡的角色馬上跟著換
+  if (typeof checkAchievements === 'function') checkAchievements('allWear:');   // 成就：全員戴上某件配件
   if (typeof sfx === 'function') sfx('switch');
   renderWardrobe();
 }

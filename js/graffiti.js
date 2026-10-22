@@ -170,6 +170,7 @@ function placeGraffiti(x, y) {
   saveGraffiti();
   const n = supplyInventory.get(pl.pen); if (n <= 1) supplyInventory.delete(pl.pen); else supplyInventory.set(pl.pen, n - 1);
   sfx('place'); cancelGraffitiPlace(true);
+  if (typeof addStat === 'function') addStat('graffitis');   // 成就：畫塗鴉
   if (typeof updateHUD === 'function') updateHUD();
   if (typeof saveGame === 'function') saveGame();
 }

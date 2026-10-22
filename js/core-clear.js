@@ -34,7 +34,7 @@ function checkCoreClear(dt = 0) {
 }
 function markFullControl(quiet) {
   G.fullControl = true;
-  if (typeof addStat === 'function') addStat('fullControls');
+  if (typeof addStat === 'function') { addStat('fullControls'); achieveOnBattleEnd('control'); }   // 成就：沒用醫療包、10 分鐘內
   if (quiet) return;                  // 跟結算一起發生：寫在結算畫面上就好
   if (typeof coreBanner === 'function') coreBanner(coreClearMapName() + ' 已徹底控制', '這一區的異質體全部清除了，可以從營地帳篷返回應變中心', CORE_CLEAR.fullColor);
   systemNotice('✓ ' + coreClearMapName() + ' 已徹底控制');

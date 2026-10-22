@@ -119,6 +119,7 @@ function learnSkill(type, id) {
   const cost = skillCost(type, id);
   if (training.crystals < cost) return false;
   training.crystals -= cost;
+  if (typeof addStat === 'function') addStat('crystalsSpent', cost);   // 成就：花掉的異質碎片
   (training.skills[type] = training.skills[type] || []).push(id);
   applySkills(); saveTraining(); refreshLiveSentries(type);
   return true;

@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>成就編輯器｜Y102 應變中心</title>
+  <link rel="stylesheet" href="css/ui-feedback.css">
+  <style>
+    :root { color-scheme:dark; font-family:system-ui,"Microsoft JhengHei",sans-serif; color:#e8f1fa; background:#0d131b }
+    * { box-sizing:border-box }
+    body { margin:0; padding:28px; max-width:1440px; margin-inline:auto; background:radial-gradient(circle at 85% 0%,#3a3214 0,transparent 37%) }
+    h1,h2,h3,p { margin-top:0 } h1 { font-size:27px; margin-bottom:5px } h2 { font-size:17px; margin-bottom:6px }
+    p,small { color:#9eb0c0; line-height:1.5 }
+    button,input,textarea,select { font:inherit }
+    button { cursor:pointer; color:#eaf5ff; background:#263d50; border:1px solid #52718a; border-radius:9px; padding:8px 12px }
+    button.primary { background:#2b6581; border-color:#6abce3; font-weight:700 } button.danger { color:#ffd0c9; border-color:#925d5b; background:#4b3035 }
+    button.small { padding:5px 10px; font-size:12px; border-radius:7px }
+    button.icon { padding:0; width:30px; height:30px; flex:none; border-radius:7px; background:#1c2b39; border-color:#3a5368; color:#a9c3d6 }
+    button.icon:hover { border-color:#89d3f5; color:#fff } button.icon.del:hover { border-color:#e07a72; color:#ffb0a8 }
+    button:disabled { opacity:.35; cursor:default }
+    .top { margin-bottom:16px } .top p { margin-bottom:0 }
+    .notice { border:1px solid #6b5a2a; border-left:4px solid #e7c25a; border-radius:10px; background:#211d12; padding:12px 15px; margin-bottom:18px; font-size:13px; line-height:1.6 }
+    .notice strong { color:#ffe7a6 } code { color:#b6ddf5; background:#0e1b29; border-radius:4px; padding:1px 4px }
+    .layout { display:grid; grid-template-columns:minmax(200px,250px) minmax(0,1fr); gap:18px; align-items:start }
+    .layout > * { min-width:0 }
+    .panel { background:#18232e; border:1px solid #344d61; border-radius:15px; box-shadow:0 12px 38px #0005 }
+    .sidebar { padding:16px; position:sticky; top:14px; display:flex; flex-direction:column; gap:8px }
+    .sidebar-head { display:flex; align-items:center; justify-content:space-between }
+    .sidebar-head h2 { margin:0 }
+    .count { color:#f3d37a; font-size:12px; background:#3b3218; border-radius:20px; padding:3px 8px; white-space:nowrap; font-style:normal }
+    #groupList { display:grid; gap:5px }
+    .group-item { display:flex; align-items:center; justify-content:space-between; gap:8px; width:100%; text-align:left; padding:9px 11px; background:#182633; border-color:transparent }
+    .group-item.all { margin-bottom:4px; border-color:#2f4658 }
+    .group-item.selected { background:#3a3420; border-color:#e7c25a }
+    .group-item span { overflow:hidden; text-overflow:ellipsis; white-space:nowrap }
+    .content { padding:20px 22px }
+    .section { margin-bottom:26px } .section > h2 { color:#ffd77a; letter-spacing:1px }
+    .section > p.hint { font-size:12px; margin:0 0 10px }
+    #groupHead { display:flex; gap:12px; align-items:flex-end; flex-wrap:wrap; border-bottom:1px solid #344e62; padding-bottom:14px; margin-bottom:12px }
+    #groupHead h2 { margin:0 } #groupHead p { margin:0; font-size:13px; flex-basis:100% }
+    .head-actions { display:flex; gap:6px }
+    .field { display:flex; flex-direction:column; gap:4px; font-size:12px; color:#a9bccb; min-width:0 }
+    .field.grow { flex:1 1 220px } .field.goal { flex:0 0 110px } .field.group { flex:0 1 160px }
+    .field input, .field select, .achv .name-input { width:100%; min-width:0; color:#edf7ff; background:#0e1822; border:1px solid #3d596e; border-radius:8px; padding:7px 10px; outline:none }
+    .field input:focus, .field select:focus, .achv .name-input:focus { border-color:#e7c25a; box-shadow:0 0 0 2px #e7c25a33 }
+    .group-title { margin:18px 0 8px; font-size:13px; letter-spacing:2px; color:#ffd77a }
+    .achv { margin:0 0 9px; padding:11px 13px; background:#111d28; border:1px solid #2b4559; border-radius:12px }
+    .achv.secret { border-style:dashed; border-color:#6a5a8a }
+    .achv.custom { border-color:#8a6a2a; background:linear-gradient(180deg,#221b0f,#111d28 80px) }
+    .custom-box { margin:8px 0 0 34px } .custom-box .field span { color:#e7c25a; line-height:1.5 }
+    .custom-box textarea { width:100%; resize:vertical; color:#edf7ff; background:#0e1822; border:1px solid #6b5a2a; border-radius:8px; padding:7px 10px; outline:none; font:inherit }
+    .custom-box textarea:focus { border-color:#e7c25a } .custom-box textarea.warn { border-color:#c9874a; background:#241a10 }
+    .achv-row { display:flex; gap:6px; align-items:center }
+    .achv-row.sub { gap:10px; align-items:flex-end; flex-wrap:wrap; margin-top:8px; padding-left:34px }
+    .achv .trophy { width:28px; flex:none; text-align:center; font-size:18px }
+    .achv .name-input { flex:1; font-weight:700; font-size:15px }
+    .achv .name-input.warn { border-color:#c9874a; background:#241a10 }
+    .achv .id { display:block; margin:6px 0 0 34px; font-size:11px; color:#5f7a8e }
+    .check { display:flex; align-items:center; gap:6px; font-size:13px; color:#c9d6e0; padding-bottom:7px; white-space:nowrap }
+    .check input { width:17px; height:17px }
+    .add { margin:2px 0 6px }
+    .empty { font-size:12px; color:#7d93a4; font-style:italic; margin:4px 0 8px }
+    .board-row { display:flex; gap:8px; align-items:flex-end; margin-bottom:8px }
+    .board-row .num { width:22px; flex:none; text-align:right; color:#6d8ea5; font-size:12px; padding-bottom:9px }
+    .board-row .icon { margin-bottom:2px }
+    #textList { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:10px 14px }
+    #checks { color:#f0b46a; font-size:13px; min-height:0; margin-bottom:8px }
+    .foot { border-top:1px solid #344e62; padding-top:18px }
+    .actions { display:flex; gap:9px; flex-wrap:wrap; margin-bottom:9px }
+    #status { min-height:22px; color:#8ce0be; font-size:13px; margin-top:8px }
+    #exportOut { width:100%; min-height:140px; margin-top:12px; background:#0b151f; color:#a9cbdb; border:1px solid #345065; border-radius:8px; padding:10px; font:11px/1.45 Consolas,monospace; display:none }
+    #exportOut.visible { display:block }
+    @media(max-width:700px) {
+      .custom-box { margin-left:0 }
+      body { padding:14px } .layout { grid-template-columns:minmax(0,1fr) } .sidebar { position:static } .content { padding:16px }
+      .achv-row.sub { padding-left:0 } .achv .id { margin-left:0 } .field.goal, .field.group { flex:1 1 120px }
+    }
+  </style>
+</head>
+<body>
+  <header class="top">
+    <h1>🏆 成就編輯器</h1>
+    <p>新增、編輯成就：分類、名稱、達成條件、隱藏成就，以及成就畫面上的數字和文字。</p>
+  </header>
+  <div class="notice"><strong>編輯方式：</strong>修改會先自動保存在這台瀏覽器。按「💾 存到專案」（或下載 <code>achievements.js</code> 取代 <code>data/achievements.js</code>）後，重新整理遊戲就會生效。
+    成就的<strong>條件</strong>是遊戲會累計的數字（討伐史萊姆、爆擊、疏導…），或<strong>擊倒某一種怪物</strong>的次數（跟怪物圖鑑的消滅次數一樣，以前打過的也算）。新加的成就如果條件已經達到，下次開遊戲就會直接解鎖。<br>清單裡沒有的條件：選「<strong>✏️ 自訂條件</strong>」用文字寫要算什麼，存到專案後跟 Claude 說「幫我實作成就的自訂條件」（實作前遊戲裡不顯示）。</div>
+  <main class="layout">
+    <aside class="panel sidebar">
+      <div class="sidebar-head"><h2>分類</h2><span id="total" class="count"></span></div>
+      <div id="groupList" aria-label="成就分類"></div>
+      <button type="button" class="small" id="addGroup">＋ 新增分類</button>
+    </aside>
+    <section class="panel content">
+      <div class="section">
+        <div id="groupHead"></div>
+        <div id="achvList"></div>
+      </div>
+      <div class="section">
+        <h2>總覽：累計戰績</h2>
+        <p class="hint">成就畫面「總覽」上方顯示的數字（照順序排）。</p>
+        <div id="boardList"></div>
+        <button type="button" class="small" id="addBoard">＋ 新增一個數字</button>
+      </div>
+      <div class="section">
+        <h2>畫面文字</h2>
+        <p class="hint">T-Pad 的成就 App、右下角的達成通知上的文字。沒填的用灰色的預設文字。</p>
+        <div id="textList"></div>
+      </div>
+      <div class="foot">
+        <div id="checks" role="status"></div>
+        <div class="actions"><button id="download" class="primary">⬇ 下載 achievements.js</button><button id="showExport">查看匯出內容</button><button id="reset" class="danger">從目前檔案重新載入</button></div>
+        <small>下載後放進遊戲資料夾的 <code>data/</code>（取代原本的 achievements.js），再重新整理遊戲。想同步到另一台電腦，還需要將檔案提交至 Git。</small>
+        <div id="status" role="status" aria-live="polite"></div>
+        <textarea id="exportOut" readonly aria-label="成就資料匯出內容"></textarea>
+      </div>
+    </section>
+  </main>
+
+  <script src="data/monsters.js?v=achv-20261023"></script>   <!-- 怪物種類：「擊倒某一種怪物」的清單 -->
+  <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
+  <script src="js/monster-data.js?v=achv-20261023"></script>
+  <script src="data/bestiary.js?v=achv-20261023"></script>   <!-- 怪物圖鑑裡改過的怪物名稱 -->
+  <script src="js/bestiary-config.js?v=achv-20261023"></script>
+  <script src="data/characters.js?v=achvimpl-20261023"></script>   <!-- 隊員：「溫特被暴走的○○打倒」的清單 -->
+  <script src="data/costumes.js?v=achvimpl-20261023"></script>   <!-- 配件：「全員戴上○○」的清單 -->
+  <script src="data/achievements.js?v=achvimpl-20261023"></script>   <!-- 目前存在檔案裡的成就 -->
+  <script src="js/achievement-config.js?v=achvimpl-20261023"></script>   <!-- 成就的設定（跟遊戲共用） -->
+  <script src="js/sfx.js?v=achv-20261023"></script><script src="js/ui-feedback.js"></script>
+  <script src="js/achievement-editor.js?v=achvimpl-20261023"></script>
+  <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案 -->
+  <script>ProjectSave.attach({ after: ['download'], files: [{ path: 'data/achievements.js', label: '成就', text: () => exportSource() }], status: (m, e) => setStatus(m, e) });</script>
+  <script src="js/editor-nav.js?v=achv-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
+</body>
+</html>

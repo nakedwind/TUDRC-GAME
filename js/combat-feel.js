@@ -248,8 +248,8 @@ function slimeExplode(e, mul) {
 
 // ---- 死亡表演 ----
 function onEnemyDeath(e) {
-  trackKillAchievements(e);   // 成就計數（js/achievements.js）
   if (typeof bestiaryRecordKill === 'function') bestiaryRecordKill(e);   // 怪物圖鑑的消滅次數（js/bestiary.js）
+  trackKillAchievements(e);   // 成就計數（js/achievements.js；「擊倒某一種怪物」用上面圖鑑的消滅次數，所以放在後面）
   if (e.behavior === 'burrow') { burrowingMouseDeath(e); return; }   // 沉回洞口，取消尚未命中的地底手
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）

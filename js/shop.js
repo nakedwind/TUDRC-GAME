@@ -276,6 +276,7 @@ function checkoutCart() {
   }
   const count = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
   G.money -= total;
+  if (typeof achieveOnSpend === 'function') achieveOnSpend(vendingMode ? 'vending' : 'shop', total, count, [...shopCart.keys()]);   // 成就：販賣機／商店的購買
   for (const [id, n] of shopCart) {
     const item = shopItemById(id);
     if (item.bullet) addBullets(item.bullet, n);
@@ -309,6 +310,7 @@ function applySupplyNow(id) {
   const restored = Math.min(amount, supplyNeed(item.use));
   if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.use].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
   if (item.use === 'hp') G.player.hp += restored; else G.guide += restored;
+  if (typeof achieveOnSupply === 'function') achieveOnSupply(item);   // 成就：一場戰鬥用了幾個醫療包、杏仁水
   if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1);
   const k = SUPPLY_KIND[item.use];
   sfx(item.use === 'sp' ? 'drink' : 'soothe');   // 杏仁水：喝飲料的聲音；醫療包維持原本的聲音
