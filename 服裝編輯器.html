@@ -75,6 +75,8 @@
         <label><input type="radio" name="scope" value="item" checked><span>只調<b id="scopeItemName">這個配件</b>（配件專屬位置）</span></label>
         <label><input type="radio" name="scope" value="anchor"><span>調<b id="scopeAnchorName">這個角色所有頭飾</b>的預設位置（新配件沒調過就戴這裡）</span></label>
       </div>
+      <div class="checks"><label><input id="fblock" type="checkbox"><span><b id="blockWho"></b>不能擁有<b id="blockAcc"></b></span></label></div>
+      <div class="from" id="blockNote" hidden>⛔ 這個角色不能擁有這個配件：遊戲裡的衣櫃不會列出、不能送給他，身上有也不會顯示（下面的位置可以不用調）。</div>
       <div class="from" id="fromNote"></div>
       <div class="form">
         <label>X（中心，px）<input id="fx" type="number" step="0.5"></label>
@@ -95,6 +97,10 @@
         <div id="copyAccList"></div>
         <button type="button" id="copyAcc">複製位置給這些配件</button>
       </div>
+      <h3>角色身高偏移（<span id="offWho"></span>）</h3>
+      <p class="from">比較矮的角色 Y 填正數（往下）、比較高的填負數。按「複製給所有角色」時會自動加上兩個角色偏移的差；還沒替這個角色調過的配件也會套用。</p>
+      <div class="form"><label>X 偏移（px）<input id="offx" type="number" step="0.5"></label><label>Y 偏移（px）<input id="offy" type="number" step="0.5"></label></div>
+      <div class="actions"><button type="button" id="offAuto">自動偵測這個角色</button><button type="button" id="offAutoAll">自動偵測全部角色</button></div>
       <h3>走路時頭的位移（<span id="bobWho"></span>・<span id="bobDir"></span>）</h3>
       <p class="hint" style="margin:0">走路那兩張圖的頭如果有上下晃，配件會跟著位移。每個角色、每個方向各一組，所有配件共用。</p>
       <div class="bob">
@@ -113,11 +119,11 @@
   <script src="data/costumes.js?v=large-bow-side-20261022"></script>
   <script src="data/costume-placement.js?v=bear-20261022"></script>
   <script src="js/draft-sync.js?v=sync-20261021"></script>
-  <script src="js/costume-draw.js?v=mirror-20261021"></script>
+  <script src="js/costume-draw.js?v=block-20261022"></script>
   <script src="js/sfx.js?v=milkfish-20261020"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>
-  <script src="js/costume-editor.js?v=copyacc2-20261021"></script>
+  <script src="js/costume-editor.js?v=block-20261022"></script>
   <script>ProjectSave.attach({
     after: ['exportFile'],
     files: [{ path: 'data/costume-placement.js', label: '配件位置', text: () => costumePlacementText() }],

@@ -131,6 +131,18 @@ function closeTeamPanel() { if (teamPanel) teamPanel.classList.add('hidden'); if
 function isTeamPanelOpen() { return teamPanel && !teamPanel.classList.contains('hidden'); }
 
 // ---- 隊員資料：安全區看完整名冊，戰鬥區只看實際出勤成員 ----
+// 隊員數值的小圖示：跟 NPC 頭上的圖示（images/ui/ash-clipboard.svg 等）同一種風格——白色實心剪影＋深色描邊（css 的 .stat-ico）
+// 攻擊＝劍、防禦＝盾、射程＝兩端箭頭、攻速＝>>>、命中＝靶心
+const STAT_ICON = (() => {
+  const svg = (cls, body) => '<svg class="stat-ico ' + cls + '" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' + body + '</svg>';
+  return {
+    atk: svg('atk', '<g transform="rotate(45 12 12) translate(12 12) scale(1.18) translate(-12 -12)"><path d="M12 1.2 14.6 4V15H9.4V4Z"/><rect x="7.4" y="14.6" width="9.2" height="2.8" rx="1.4"/><rect x="10.7" y="17" width="2.6" height="3.4" rx="1.1"/><circle cx="12" cy="21.1" r="1.6"/></g>'),
+    def: svg('def', '<path fill-rule="evenodd" d="M12 1.8 20.5 5V11.2C20.5 16.6 16.9 20.3 12 22.3 7.1 20.3 3.5 16.6 3.5 11.2V5ZM12 5.6 7.2 7.5V11.4C7.2 14.4 9 16.8 12 18.3Z"/>'),
+    range: svg('range', '<path d="M1.6 12 7.6 6.4V9.8H16.4V6.4L22.4 12 16.4 17.6V14.2H7.6V17.6Z"/>'),
+    rate: svg('rate', '<path d="M1.5 6.2 3.9 4.4 10.3 12 3.9 19.6 1.5 17.8 6.4 12Z"/><path d="M8.1 6.2 10.5 4.4 16.9 12 10.5 19.6 8.1 17.8 13 12Z"/><path d="M14.7 6.2 17.1 4.4 23.5 12 17.1 19.6 14.7 17.8 19.6 12Z"/>'),
+    acc: svg('acc', '<path fill-rule="evenodd" d="M12 2A10 10 0 1 1 12 22 10 10 0 1 1 12 2ZM12 5.4A6.6 6.6 0 1 0 12 18.6 6.6 6.6 0 1 0 12 5.4Z"/><circle cx="12" cy="12" r="3.4"/>'),
+  };
+})();
 function memberPortraitPath(spec) {
   if (!spec || !spec.sprite) return '';
   const prefix = spec.sprite.replace('_', '') + '_';
@@ -195,7 +207,7 @@ function squadCard(actor, safe) {
       '<div class="squad-member-head"><div><strong>' + spec.name + roleIconHtml(spec) + '</strong><span>' + spec.role + '・' + (spec.guide ? '疏導能力' : '異能力') + '：' + spec.ability + '</span></div><em class="member-condition ' + condition.cls + '">' + condition.text + '</em></div>' +
       '<div class="squad-bars"><div><span>HP <b>' + hp + ' / ' + maxhp + '</b></span><i class="hp-bar"><u style="width:' + Math.max(0, Math.min(100, hp / maxhp * 100)) + '%"></u></i></div>' +
       loadBar + '</div>' + (typeof sortieActiveHtml === 'function' ? sortieActiveHtml(actor.type) : '') +
-      '<dl class="squad-stats"><div><dt>攻擊</dt><dd>' + (spec.noAttack ? '—' : spec.dmg) + '</dd></div><div><dt>防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
+      '<dl class="squad-stats"><div><dt>' + STAT_ICON.atk + '攻擊</dt><dd>' + (spec.noAttack ? '—' : spec.dmg) + '</dd></div><div><dt>' + STAT_ICON.def + '防禦</dt><dd>' + Math.round((spec.defense || 0) * 100) + '%</dd></div><div><dt>' + STAT_ICON.range + '射程</dt><dd>' + spec.range.toFixed(1) + ' 格</dd></div><div><dt>' + STAT_ICON.rate + '攻速</dt><dd>' + spec.rate.toFixed(1) + '/秒</dd></div><div><dt>' + STAT_ICON.acc + '命中</dt><dd>' + Math.round(spec.accuracy * 100) + '%</dd></div><div class="wide"><dt>特性</dt><dd>' + (spec.trait || support) + '</dd></div></dl>' +
       '<div class="squad-card-actions"><button class="captain-impression-button" type="button" data-impression="' + actor.type + '">深入了解</button><div class="squad-training">' + trainingAction + '</div></div>' +
     '</div></article>';
 }

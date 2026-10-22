@@ -18,7 +18,7 @@ const SKIN_BY_ID = Object.fromEntries(COSTUME_SKINS.map(s => [s.id, s]));
 const costumeEquip = id => costumeState.equip[id] || (costumeState.equip[id] = {});
 const costumeOwned = id => (costumeState.owned[id] || 0) > 0;
 const costumeGifted = (who, id) => ((costumeState.gifted || {})[who] || []).includes(id);   // 這件是送給 who 的禮物
-const costumeCanWear = (who, id) => costumeOwned(id) || costumeGifted(who, id);
+const costumeCanWear = (who, id) => (costumeOwned(id) || costumeGifted(who, id)) && (typeof costumeAllowed !== 'function' || costumeAllowed(who, id));   // 服裝編輯器設定「不能擁有」的不算
 const costumeCollected = id => costumeOwned(id) || Object.values(costumeState.gifted || {}).some(list => list.includes(id));   // 拿到過（扭蛋收藏用）
 const costumeBase = folder => String(folder).replace(/_[A-Z]$/, '');
 const costumeFolderOf = id => (CHARACTERS[id] && CHARACTERS[id].sprite) || '';
@@ -88,7 +88,7 @@ const costumeItem = id => ACC_BY_ID[id] || SKIN_BY_ID[id] || null;
 // 可以送給 who 的服裝：擁有的、沒寫 giftable: false、skin 只送給那個角色、還沒送過他的
 function costumeGiftable(who) {
   return [...COSTUME_ACCESSORIES, ...COSTUME_SKINS.filter(s => s.char === who)]
-    .filter(item => item.giftable !== false && costumeOwned(item.id) && !costumeGifted(who, item.id));
+    .filter(item => item.giftable !== false && costumeOwned(item.id) && !costumeGifted(who, item.id) && (typeof costumeAllowed !== 'function' || costumeAllowed(who, item.id)));
 }
 // 送出：用掉一件、記成他的、馬上穿上
 function costumeGive(who, id) {
@@ -210,13 +210,13 @@ function renderWardrobe() {
   const accs = ACC_SLOTS.map(s => eq[s] && ACC_BY_ID[eq[s]] && ACC_BY_ID[eq[s]].name).filter(Boolean);
   el.querySelector('.wd-wearing').textContent = CHARACTERS[id].name + '：' + skinName + (accs.length ? '・' + accs.join('、') : '');
 }
-// 預覽：原地走路，配件跟著畫
+// 預覽：站著的圖（不播走路動畫），配件跟著畫
 function wardrobePreviewLoop(now) {
   if (!wardrobeOpen || !wd.el) return;
   const cvs = wd.el.querySelector('.wd-preview'), c = cvs.getContext('2d'), id = wd.who, dir = WD_DIRS[wd.dir];
   c.clearRect(0, 0, cvs.width, cvs.height);
   const set = costumeSkinSet(id, costumeFolderOf(id), wdSkinOf(id, wd.mode));
-  const frames = set && set[dir], step = [1, 0, 2, 0][Math.floor((now - wd.t0) / 125) % 4], img = frames && frames[step];
+  const frames = set && set[dir], step = 0, img = frames && frames[step];   // 0＝站著的那張
   const size = 168, dx = (cvs.width - size) / 2, dy = cvs.height - size - 6;
   c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(cvs.width / 2, cvs.height - 14, 40, 9, 0, 0, Math.PI * 2); c.fill();
   c.imageSmoothingEnabled = false;

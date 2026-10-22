@@ -25,7 +25,7 @@ function loadDraft(useFile) {
   let data = COSTUME_PLACEMENT_DEFAULT;
   if (!useFile) { const merged = DraftSync.load(COSTUME_PLACEMENT_KEY, COSTUME_PLACEMENT_DEFAULT, { label: '配件位置' }); if (merged) data = merged; }
   data = JSON.parse(JSON.stringify(data));
-  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {};
+  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {}; COSTUME_PLACEMENT.offsets = data.offsets || {}; COSTUME_PLACEMENT.blocked = data.blocked || {};
 }
 loadDraft(false);
 function status(message, error = false) { const el = document.getElementById('status'); el.textContent = message; el.classList.toggle('error', !!error); }
@@ -35,6 +35,8 @@ function prune(o) {   // 拿掉空的物件
 }
 function saveDraft() {
   prune(COSTUME_PLACEMENT.anchors); prune(COSTUME_PLACEMENT.items); prune(COSTUME_PLACEMENT.bob);
+  for (const [id, o] of Object.entries(COSTUME_PLACEMENT.offsets || {})) if (!o || (!o.x && !o.y)) delete COSTUME_PLACEMENT.offsets[id];   // 0,0＝沒偏移，不用存
+  for (const [id, list] of Object.entries(COSTUME_PLACEMENT.blocked || {})) if (!list || !list.length) delete COSTUME_PLACEMENT.blocked[id];
   try { localStorage.setItem(COSTUME_PLACEMENT_KEY, JSON.stringify(COSTUME_PLACEMENT)); status('已自動儲存到這台瀏覽器。'); }
   catch (e) { status('暫存失敗：' + e.message, true); }
 }
@@ -48,14 +50,16 @@ function fmt(v, ind) {
 }
 function costumePlacementText() {
   saveDraft();
-  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob };
+  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob, offsets: COSTUME_PLACEMENT.offsets || {}, blocked: COSTUME_PLACEMENT.blocked || {} };
   return '/* 由服裝編輯器匯出：配件戴在每個角色身上的位置（配件、角色清單在 data/costumes.js）。\n'
     + '   anchors[角色][欄位][方向]＝這個角色每個欄位的預設位置（新配件沒調過就用這個）\n'
     + '   items[配件][角色][方向]＝某個配件專屬的位置（優先）\n'
     + '     x、y＝配件中心在角色圖（64×64）的位置；scale＝縮放；rot＝旋轉（度）；behind＝畫在角色後面；hidden＝這個方向不畫；flip＝圖片左右翻轉\n'
-    + '   bob[角色][方向]＝[走路第 1 張, 走路第 2 張] 頭部相對站立圖的位移 [dx, dy]（配件跟著晃） */\n'
+    + '   bob[角色][方向]＝[走路第 1 張, 走路第 2 張] 頭部相對站立圖的位移 [dx, dy]（配件跟著晃）\n'
+    + '   offsets[角色]＝角色身高偏移 { x, y }（矮的角色 y 填正數）：還沒調過的配件會加上；「複製給所有角色」時自動加上兩個角色偏移的差\n'
+    + '   blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件 */\n'
     + 'const COSTUME_PLACEMENT_DEFAULT = {\n'
-    + ['anchors', 'items', 'bob'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n') + '\n};\n';
+    + ['anchors', 'items', 'bob', 'offsets', 'blocked'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n') + '\n};\n';
 }
 
 // ---- 角色圖 ----
@@ -197,8 +201,12 @@ function renderBars() {
 function renderPanel() {
   const acc = curAcc(), ch = CHARACTERS[ED.char];
   const off = !acc;
-  document.querySelectorAll('.settings input, .settings button').forEach(el => { if (!['previewGame', 'exportFile', 'resetFile', 'bobAuto', 'bobAutoAll'].includes(el.id) && !/^b[12][xy]$/.test(el.id) && !el.classList.contains('project-save-btn')) el.disabled = off; });
+  document.querySelectorAll('.settings input, .settings button').forEach(el => { if (!['previewGame', 'exportFile', 'resetFile', 'bobAuto', 'bobAutoAll', 'offAuto', 'offAutoAll', 'offx', 'offy'].includes(el.id) && !/^b[12][xy]$/.test(el.id) && !el.classList.contains('project-save-btn')) el.disabled = off; });
   $('bobWho').textContent = ch.name; $('bobDir').textContent = CE_DIR_NAMES[ED.dir];
+  if (!off) { const blocked = !costumeAllowed(ED.char, acc.id); $('fblock').checked = blocked; $('blockWho').textContent = ch.name; $('blockAcc').textContent = '「' + acc.name + '」'; $('blockNote').hidden = !blocked; }
+  const charOff = costumeCharOffset(ED.char); $('offWho').textContent = ch.name;
+  if (document.activeElement !== $('offx')) $('offx').value = charOff.x;
+  if (document.activeElement !== $('offy')) $('offy').value = charOff.y;
   const bob = (COSTUME_PLACEMENT.bob[ED.char] || {})[ED.dir] || [[0, 0], [0, 0]];
   $('b1x').value = bob[0][0]; $('b1y').value = bob[0][1]; $('b2x').value = bob[1][0]; $('b2y').value = bob[1][1];
   if (off) { $('fromNote').textContent = '先在 data/costumes.js 加配件'; return; }
@@ -280,14 +288,17 @@ $('copyAcc').addEventListener('click', () => {
 $('copyChars').addEventListener('click', () => {
   const m = scopeMap(false), acc = curAcc(); if (!m) return;
   const what = ED.scope === 'item' ? '「' + acc.name + '」的專屬位置' : SLOT_NAME[acc.slot] + '預設位置';
-  if (!confirm('把' + CHARACTERS[ED.char].name + '的' + what + '（四個方向）複製給所有角色？其他角色原本調好的會被蓋掉。')) return;
+  if (!confirm('把' + CHARACTERS[ED.char].name + '的' + what + '（四個方向）複製給所有角色？其他角色原本調好的會被蓋掉。\n（會自動加上每個角色的身高偏移）')) return;
+  const srcOff = costumeCharOffset(ED.char);
   for (const ch of ceChars) {
     if (ch.id === ED.char) continue;
     const copy = JSON.parse(JSON.stringify(m));
+    const off = costumeCharOffset(ch.id), dx = off.x - srcOff.x, dy = off.y - srcOff.y;   // 身高偏移的差：矮的角色自動往下
+    for (const d of Object.keys(copy)) { const p = copy[d]; if (!p) continue; if (typeof p.x === 'number') p.x += dx; if (typeof p.y === 'number') p.y += dy; }
     if (ED.scope === 'item') (COSTUME_PLACEMENT.items[acc.id] = COSTUME_PLACEMENT.items[acc.id] || {})[ch.id] = copy;
     else (COSTUME_PLACEMENT.anchors[ch.id] = COSTUME_PLACEMENT.anchors[ch.id] || {})[acc.slot] = copy;
   }
-  saveDraft(); renderAll(); status('已複製給所有角色，記得逐一檢查身高不同的角色。');
+  saveDraft(); renderAll(); status('已複製給所有角色（已加上各角色的身高偏移），記得檢查一下。');
 });
 $('clearDir').addEventListener('click', () => { const m = scopeMap(false); if (m) delete m[ED.dir]; saveDraft(); renderAll(); });
 $('clearChar').addEventListener('click', () => {
@@ -366,6 +377,36 @@ async function runDetect(ids) {
   try { for (const id of ids) await detectBob(id); saveDraft(); renderAll(); status('已偵測 ' + ids.length + ' 個角色走路時頭的位移，請在下面四個小圖確認。'); }
   catch (e) { status(e && e.name === 'SecurityError' ? '直接雙擊打開的編輯器（file://）不能讀圖片像素，請用本機伺服器打開，或手動填位移。' : '偵測失敗：' + (e && e.message || e), true); }
 }
+// ---- 身高偏移自動偵測：比較每個角色正面站立圖「頭頂」的高度，跟基準角色（溫特）差幾 px 就是 Y 偏移 ----
+// 頭頂＝從上往下第一排有 OFF_DETECT.minPx 個以上不透明像素的地方（避開一兩根翹起來的呆毛）。X 偏移不動（手動調的照樣保留）。
+const OFF_DETECT = { base: 'winter', minPx: 4 };
+function headTopRow(a) {
+  for (let y = 0; y < 64; y++) { let n = 0; for (let x = 0; x < 64; x++) n += a[y * 64 + x]; if (n >= OFF_DETECT.minPx) return y; }
+  return null;
+}
+async function frontHeadTop(id) {
+  const img = ceSet(CHARACTERS[id].sprite).front[0];
+  if (!img.complete) await new Promise(r => { img.onload = img.onerror = r; });
+  return ceReady(img) ? headTopRow(ceAlpha(img)) : null;
+}
+async function runOffsetDetect(ids) {
+  try {
+    const baseId = CHARACTERS[OFF_DETECT.base] ? OFF_DETECT.base : ceChars[0].id, baseTop = await frontHeadTop(baseId);
+    if (baseTop == null) { status('讀不到' + CHARACTERS[baseId].name + '的圖片，沒辦法偵測。', true); return; }
+    const done = [];
+    COSTUME_PLACEMENT.offsets = COSTUME_PLACEMENT.offsets || {};
+    for (const id of ids) {
+      const top = await frontHeadTop(id); if (top == null) continue;
+      const old = costumeCharOffset(id), y = id === baseId ? 0 : top - baseTop;
+      COSTUME_PLACEMENT.offsets[id] = { x: old.x, y };
+      done.push(CHARACTERS[id].name + (y ? (y > 0 ? ' +' : ' ') + y : ' 0'));
+    }
+    saveDraft(); renderAll();
+    status('已偵測身高偏移（以' + CHARACTERS[baseId].name + '為基準）：' + done.join('、') + '。');
+  } catch (e) { status(e && e.name === 'SecurityError' ? '直接雙擊打開的編輯器（file://）不能讀圖片像素，請用本機伺服器打開，或手動填偏移。' : '偵測失敗：' + (e && e.message || e), true); }
+}
+$('offAuto').addEventListener('click', () => runOffsetDetect([ED.char]));
+$('offAutoAll').addEventListener('click', () => runOffsetDetect(ceChars.map(c => c.id)));
 $('bobAuto').addEventListener('click', () => runDetect([ED.char]));
 $('bobAutoAll').addEventListener('click', () => runDetect(ceChars.map(c => c.id)));
 
@@ -385,3 +426,22 @@ $('resetFile').addEventListener('click', () => {
 
 renderAll();
 requestAnimationFrame(loop);
+
+// ---- 角色身高偏移：比較矮／高的角色，配件整體要往下／往上幾 px ----
+for (const id of ['offx', 'offy']) $(id).addEventListener('input', () => {
+  const x = Number($('offx').value) || 0, y = Number($('offy').value) || 0;
+  COSTUME_PLACEMENT.offsets = COSTUME_PLACEMENT.offsets || {};
+  COSTUME_PLACEMENT.offsets[ED.char] = { x, y };
+  saveDraft(); renderAll();
+});
+
+// ---- 這個角色不能擁有這個配件（例如球球是狗，不能戴眼鏡）----
+$('fblock').addEventListener('change', e => {
+  const acc = curAcc(); if (!acc) return;
+  const all = COSTUME_PLACEMENT.blocked = COSTUME_PLACEMENT.blocked || {};
+  const list = (all[acc.id] || []).filter(id => id !== ED.char);
+  if (e.target.checked) list.push(ED.char);
+  all[acc.id] = list;
+  saveDraft(); renderAll();
+  status(e.target.checked ? CHARACTERS[ED.char].name + '不能擁有「' + acc.name + '」了：遊戲裡的衣櫃不會列出、不能送給他，身上有也不會顯示。' : CHARACTERS[ED.char].name + '又可以擁有「' + acc.name + '」了。');
+});

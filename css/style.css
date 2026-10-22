@@ -2618,3 +2618,22 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 /* 背包按鈕右上角的快捷鍵提示（跟快捷欄的 Q／E／Z／X 一樣） */
 #hudBackpackButton { position: relative; width: 46px; height: 46px; }
 #hudBackpackButton kbd { position: absolute; top: 2px; right: 2px; min-width: 15px; padding: 1px 3px; border: 1px solid rgba(255,255,255,.22); border-bottom-width: 2px; border-radius: 4px; background: #10161d; color: #aab6c2; font: 700 9px/1.2 Consolas, monospace; text-align: center; }
+/* 隊員數值的小圖示（js/team.js 的 STAT_ICON） */
+.squad-stats dt { display: flex; align-items: center; gap: 3px; }
+.stat-ico { flex: none; width: 1.15em; height: 1.15em; }
+.stat-ico.atk { color: #ff8f7a; }
+.stat-ico.def { color: #8fd3ff; }
+.stat-ico.range { color: #c4a6ff; }
+.stat-ico.rate { color: #ffd479; }
+.stat-ico.acc { color: #7ee0c0; }
+/* 數值圖示 v2：白色實心剪影＋深色描邊（跟 NPC 頭上的圖示同風格） */
+.stat-ico, .stat-ico.atk, .stat-ico.def, .stat-ico.range, .stat-ico.rate, .stat-ico.acc { color: #f2f5f8; filter: drop-shadow(0 0 1px rgba(0,0,0,.95)) drop-shadow(0 0 .5px rgba(0,0,0,.95)); }
+.squad-stats dt { gap: 4px; }
+/* 背包分頁、標籤的小圖示（js/backpack.js 的 BAG_ICON） */
+.bag-ico { flex: none; width: 1.25em; height: 1.25em; vertical-align: -0.25em; }
+.backpack-tabs button .bag-ico { margin-right: 1px; }
+.bag-tag .bag-ico { width: 1.1em; height: 1.1em; margin-right: 3px; vertical-align: -0.18em; }
+/* 背包分頁：文字、圖示各放大 2px（12 → 14px、15 → 17px），不顯示數量 */
+.backpack-tabs button { font-size: 14px; }
+.backpack-tabs button .bag-ico { width: 20px; height: 20px; }   /* 17px × 1.2 */
+.bag-tag .bag-ico { width: 1.45em; height: 1.45em; vertical-align: -0.38em; }   /* 說明欄標籤裡的圖示放大 */

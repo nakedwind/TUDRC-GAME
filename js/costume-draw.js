@@ -2,6 +2,9 @@
    位置資料在 data/costume-placement.js（服裝編輯器匯出），找的順序：
      配件專屬 items[配件][角色][方向] → 角色的欄位預設 anchors[角色][欄位][方向] → data/costumes.js 的 COSTUME_SLOT_ANCHORS
    走路時再加上 bob[角色][方向]（走路那兩張圖頭部的位移），配件才會跟著頭晃。
+   offsets[角色]＝這個角色的身高偏移 { x, y }（比較矮的角色 y 填正數＝往下）：
+     還沒替這個角色調過（用到欄位通用位置）時會加上；服裝編輯器「複製給所有角色」時也會自動加上兩個角色偏移的差。
+   blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件（衣櫃不列出、不能送給他、身上有也不會畫）。
    從服裝編輯器按「▶ 暫存設定預覽」開的遊戲（?previewCostumes=1）用編輯器裡還沒存到專案的位置。
 */
 const COSTUME_PLACEMENT_KEY = 'tudrc_costume_placement_v1';   // 服裝編輯器的暫存
@@ -10,7 +13,7 @@ const COSTUME_PLACEMENT = (() => {
   if (/[?&]previewCostumes=1(&|$)/.test(location.search)) {
     try { const d = JSON.parse(localStorage.getItem(COSTUME_PLACEMENT_KEY) || 'null'); if (d && typeof d === 'object') p = d; } catch (_) {}
   }
-  return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {} };
+  return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {}, offsets: p.offsets || {}, blocked: p.blocked || {} };
 })();
 const ACC_BY_ID = Object.fromEntries(COSTUME_ACCESSORIES.map(a => [a.id, a]));
 const ACC_SLOTS = ['back', 'hand', 'head', 'face'];   // 畫的順序（後面的蓋前面的）
@@ -26,9 +29,14 @@ function accPlacementInfo(acc, id, dir) {
   if (own) return { pl: own, from: 'item' };
   const anchor = pick3(COSTUME_PLACEMENT.anchors, id, acc.slot, dir);
   if (anchor) return { pl: anchor, from: 'anchor' };
-  return { pl: (COSTUME_SLOT_ANCHORS[acc.slot] || {})[dir] || { x: 32, y: 16 }, from: 'slot' };
+  const base = (COSTUME_SLOT_ANCHORS[acc.slot] || {})[dir] || { x: 32, y: 16 }, off = costumeCharOffset(id);   // 還沒調過：通用位置＋角色身高偏移
+  return { pl: off.x || off.y ? { ...base, x: base.x + off.x, y: base.y + off.y } : base, from: 'slot' };
 }
 const accPlacement = (acc, id, dir) => accPlacementInfo(acc, id, dir).pl;
+// 這個角色可不可以擁有／戴這個配件（服裝編輯器勾「這個角色不能擁有這個配件」＝不行）
+const costumeAllowed = (id, accId) => !((COSTUME_PLACEMENT.blocked || {})[accId] || []).includes(id);
+// 角色的身高偏移（px，以角色圖 64×64 為準）；沒設定＝{ x: 0, y: 0 }
+function costumeCharOffset(id) { const o = (COSTUME_PLACEMENT.offsets || {})[id] || {}; return { x: Number(o.x) || 0, y: Number(o.y) || 0 }; }
 // 這個方向用哪張圖、要不要左右翻（側面圖畫朝左，往右走時翻過來）
 function accArt(acc, dir) {
   const a = acc.art || {};
@@ -50,6 +58,7 @@ function costumeBob(id, dir, frame) {
 }
 // 畫一個配件；pl 不給就照資料找。dx、dy、size＝角色圖畫在哪裡、多大；layer＝'behind'／'front'（不給＝不管前後都畫）
 function drawAccessory(ctx, acc, id, dir, frame, dx, dy, size, layer, pl) {
+  if (!costumeAllowed(id, acc.id)) return null;   // 這個角色不能戴這個配件
   pl = pl || accPlacement(acc, id, dir);
   if (pl.hidden || (layer && (pl.behind ? 'behind' : 'front') !== layer)) return null;
   const art = accArt(acc, dir), img = accImage(art.src);

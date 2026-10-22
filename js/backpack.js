@@ -24,6 +24,19 @@ function itemDesc(item) {
 }
 // 「裝備」分頁：列出擁有的部隊長裝備（js/equipment.js 的 equipState），只能看，換裝備用左邊的裝備格
 const GEAR_TAB = { id: 'equip', name: '裝備', icon: '🛡️' };
+// 背包分頁、說明欄標籤的小圖示：實心剪影（跟隊員數值、NPC 頭上的圖示同一種風格），顏色跟著文字（currentColor）
+const BAG_ICON = (() => {
+  const svg = body => '<svg class="bag-ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor">' + body + '</svg>';
+  return {
+    all: svg('<rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/>'),
+    consumable: svg('<path fill-rule="evenodd" d="M8.5 3.5H15.5A1.5 1.5 0 0 1 17 5V6.5H19.5A2 2 0 0 1 21.5 8.5V18.5A2 2 0 0 1 19.5 20.5H4.5A2 2 0 0 1 2.5 18.5V8.5A2 2 0 0 1 4.5 6.5H7V5A1.5 1.5 0 0 1 8.5 3.5ZM9.3 5.5V6.5H14.7V5.5ZM10.6 9.6V12.2H8V14.8H10.6V17.4H13.4V14.8H16V12.2H13.4V9.6Z"/>'),
+    gift: svg('<path d="M3 8.5A1.5 1.5 0 0 1 4.5 7H10.6V11.6H3Z"/><path d="M13.4 7H19.5A1.5 1.5 0 0 1 21 8.5V11.6H13.4Z"/><path d="M4.3 13.4H10.6V21H5.8A1.5 1.5 0 0 1 4.3 19.5Z"/><path d="M13.4 13.4H19.7V19.5A1.5 1.5 0 0 1 18.2 21H13.4Z"/><path d="M12 6.4C10.4 3.2 6.6 2.6 6.4 4.8 6.3 6.3 9 6.8 12 6.8 15 6.8 17.7 6.3 17.6 4.8 17.4 2.6 13.6 3.2 12 6.4Z"/>'),
+    material: svg('<path fill-rule="evenodd" d="M12 1.8 20.8 6.9V17.1L12 22.2 3.2 17.1V6.9ZM12 8.4A3.6 3.6 0 1 0 12 15.6 3.6 3.6 0 1 0 12 8.4Z"/>'),
+    key: svg('<g transform="rotate(-45 12 12)"><path fill-rule="evenodd" d="M12 0.6A5.6 5.6 0 1 1 12 11.8 5.6 5.6 0 1 1 12 0.6ZM12 3.8A2.4 2.4 0 1 0 12 8.6 2.4 2.4 0 1 0 12 3.8Z"/><rect x="10.6" y="10.8" width="2.8" height="12.4" rx="1"/><rect x="12.6" y="16.2" width="4.4" height="2.4" rx=".6"/><rect x="12.6" y="20" width="3.4" height="2.4" rx=".6"/></g>'),   // 鑰匙：圓環＋鑰匙桿＋兩個齒，斜放
+    equip: svg('<path fill-rule="evenodd" d="M12 1.8 20.5 5V11.2C20.5 16.6 16.9 20.3 12 22.3 7.1 20.3 3.5 16.6 3.5 11.2V5ZM12 5.6 7.2 7.5V11.4C7.2 14.4 9 16.8 12 18.3Z"/>'),
+    weapon: svg('<rect x="18.8" y="3" width="2" height="2.2" rx=".5"/><rect x="2.4" y="3.2" width="2.6" height="2" rx=".5"/><path d="M2.4 4.6H21A1.4 1.4 0 0 1 22.4 6V10.4H2.4A1.2 1.2 0 0 1 1.2 9.2V5.8A1.2 1.2 0 0 1 2.4 4.6Z"/><path d="M4.2 10H11.4L10.6 13.4 7.6 21.4A1.2 1.2 0 0 1 6.5 22.2H2.1A.9.9 0 0 1 1.3 21Z"/><path fill-rule="evenodd" d="M10.8 10H16.8V11.8C16.8 14.6 14.8 16.6 12 16.6H9.4L10.4 13.6ZM12.7 11.8 12.2 14.6C13.9 14.6 14.9 13.6 14.9 12.2V11.8Z"/>'),   // 手槍側面：滑套＋前後準星、往後斜的握把、扳機護弓
+  };
+})();
 const GEAR_KIND_NAME = { head: '頭部', body: '上身', legs: '下身', acc: '隨身物品' };
 function ownedGear() {
   if (typeof EQUIPMENT === 'undefined' || typeof equipState === 'undefined') return [];
@@ -49,7 +62,7 @@ function renderBackpack() {
   // 分類分頁：顯示每一類有幾件
   document.getElementById('backpackTabs').innerHTML = [{ id: 'all', name: '全部', icon: '' }, ...ITEM_CATEGORIES, GEAR_TAB].map(cat => {
     const n = cat === GEAR_TAB ? ownedGear().length : allItems().filter(item => cat.id === 'all' || item.category === cat.id).reduce((sum, item) => sum + (supplyInventory.get(item.id) || 0), 0);
-    return `<button type="button" role="tab" data-bag-tab="${cat.id}" class="${backpackTab === cat.id ? 'active' : ''}" aria-selected="${backpackTab === cat.id}">${cat.icon ? cat.icon + ' ' : ''}${cat.name} <em>${n}</em></button>`;
+    return `<button type="button" role="tab" data-bag-tab="${cat.id}" class="${backpackTab === cat.id ? 'active' : ''}" aria-selected="${backpackTab === cat.id}">${BAG_ICON[cat.id] || (cat.icon ? cat.icon + ' ' : '')}${cat.name}</button>`;   // 分頁後面不顯示數量
   }).join('');
   // 格子
   const items = ownedItems();
@@ -88,7 +101,7 @@ function renderGearDetail(g) {
   backpackDetail.classList.add('gear-detail');
   backpackDetail.innerHTML = `
     <div class="bag-detail-image">${g.image ? `<img src="${g.image}" alt=""${g.weapon ? ' class="weapon"' : ''}>` : `<i class="bag-gear-emoji">${g.icon}</i>`}</div>
-    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? '🔫 武器' : GEAR_TAB.icon + ' ' + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div></div>
+    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? BAG_ICON.weapon + '武器' : BAG_ICON.equip + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div></div>
     <div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}${g.weapon && d.field && typeof gunAmmo === 'function' ? '・彈藥 ' + (gunAmmo(g.weapon).mag + gunAmmo(g.weapon).reserve) + ' 發' : ''}</b></div>
     <div class="bag-actions">${gearButtons(g)}<p class="bag-note">升級找諾亞</p></div>`;
 }
@@ -117,7 +130,7 @@ function renderBackpackDetail() {
   backpackDetail.innerHTML = `
     <div class="bag-detail-image"><img src="${item.image}" alt=""></div>
     <h3>${item.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${cat.icon} ${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div>
+    <div class="bag-tags"><span class="bag-tag">${BAG_ICON[cat.id] || cat.icon + ' '}${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div>
     ${itemDesc(item) ? `<p class="bag-desc">${itemDesc(item)}</p>` : ''}
     <div class="bag-owned">持有 <b>×${count}</b></div>
     <div class="bag-actions">${backpackDrop && backpackDrop.id === item.id ? `
