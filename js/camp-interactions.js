@@ -32,7 +32,7 @@ function campInteractionNearPlayer() {
 function refillCampAmmo() {
   const p = G.player; if (!p) return;
   p.ammo = PLAYER_ATK.mag; p.reloadT = 0;
-  for (const id of Object.keys(BULLETS)) fillBullets(id);   // 拿到過的特殊子彈都補滿（js/flare.js）
+  for (const id of Object.keys(BULLETS)) if (BULLETS[id].source !== 'field') fillBullets(id);   // 拿到過的子彈補滿（js/flare.js）；後室撿的特殊子彈（field）不補
   saveEquipment(); saveGame(); updateAmmoHud(); sfx('reload');
   systemNotice('已補滿所有子彈');
 }

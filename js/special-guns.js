@@ -1,9 +1,13 @@
-/* ===== 手槍的特殊子彈：燃燒彈、麻醉彈（以前是燃燒彈槍、麻醉槍）=====
+/* ===== 手槍的特殊子彈：燃燒彈、麻醉彈、分裂彈、閃光彈、雷電彈、治療彈（data/equipment.js 的 BULLETS）=====
    - 在後室的置物箱找得到（第一次找到＝拿到這種子彈），之後用滾輪換到它（js/flare.js）。效果固定，不會升級。
    - 燃燒彈：拋過去（會飛過怪物頭上），落地燒出一片火海（js/oil-barrels.js 的火海，敵我都會燙）。
      火海會點燃油汙、油桶，也會把生命體碎掉的那堆燒成灰。
    - 麻醉彈：直線飛出去，打中的怪物睡著（不動、沒有傷害）；打中暴走的隊員：睡一下，醒來恢復正常。
      沒暴走的隊員不會被打到（直接穿過去）。生命體沒有效果，大型怪物睡一半的時間。
+   - 分裂彈：一次扇形噴出好幾顆小子彈（每顆各自算打到誰）。
+   - 閃光彈：拋過去落地爆出強光，範圍內的怪物暈眩；隊員也會被閃到（站著不動、不攻擊）。生命體沒有效果。
+   - 雷電彈：直線打中的怪物觸電受傷、麻痺，電流再跳到附近幾隻；打到的地方旁邊有隊員也會被電到。
+   - 治療彈：直線打中誰就補誰的 HP（隊員、怪物都會補；暴走的隊員也補）。
    - 數量存在 equipState.bullets（js/flare.js 的 bulletCount／addBullets）；每種的數值在 data/equipment.js 的 BULLETS。
 */
 const SPECIAL_GUN = {
@@ -40,7 +44,8 @@ function updateSpecialGun(id, p, dt, aim, canFire) {
   if (bulletCount(id) <= 0) { dryFire(p, aim, id); return; }
   useBullet(id);
   const b = BULLETS[id];
-  if (id === 'incendiary') fireIncendiary(p, aim, b); else fireTranq(p, aim, b);
+  const fire = { incendiary: fireIncendiary, tranq: fireTranq, split: fireSplit, flash: fireFlashBang, shock: fireShock, heal: fireHeal }[id];
+  if (fire) fire(p, aim, b);
   p.atkCd = b.gap;
 }
 function aimPose(p, ang) {
@@ -96,16 +101,7 @@ function fireTranq(p, aim, lv) {
   const cands = [];
   for (const e of G.enemies) if (!e.dead && e.hp > 0) cands.push(e);
   for (const t of G.towers) if (t.berserk && t.hp > 0) cands.push(t);
-  let target = null, hitD = dist;
-  for (const o of cands) {
-    const b = typeof targetBodyBox === 'function' && o.maxhp != null && G.enemies.includes(o) ? targetBodyBox(o) : { cx: o.x, cy: o.y - 20 };
-    for (const [px, py] of [[o.x, o.y], [b.cx, b.cy]]) {
-      const along = (px - p.x) * Math.cos(ang) + (py - p.y) * Math.sin(ang);
-      if (along < 0 || along > hitD) continue;
-      const off = Math.abs(-(px - p.x) * Math.sin(ang) + (py - p.y) * Math.cos(ang));
-      if (off <= S.hitR) { target = o; hitD = along; break; }
-    }
-  }
+  const { target, d: hitD } = lineHit(p, ang, dist, cands, S.hitR);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
   const x1 = p.x + Math.cos(ang) * hitD, y1 = p.y + Math.sin(ang) * hitD;
   (G.tranqDarts = G.tranqDarts || []).push({ x0: mx, y0: my, x1, y1, ang, t: 0, T: Math.max(.04, hitD / S.speed), target, lv });
@@ -140,8 +136,161 @@ function tranqLand(s) {
     G.effects.push({ ember: true, x: s.x1 + Math.cos(a) * rr, y: s.y1 + Math.sin(a) * rr * .6, vx: (Math.random() - .5) * 20, vy: -10 - Math.random() * 15, r: 4 + Math.random() * 4, life: .9, life0: .9, color: 'rgba(190,170,255,.55)' }); }
 }
 
+// ---- 共用：沿瞄準線找第一個打到的（腳底或身體中心離線夠近就算）----
+function lineHit(p, ang, maxD, cands, hitR) {
+  let target = null, d = maxD;
+  for (const o of cands) {
+    const b = typeof targetBodyBox === 'function' && G.enemies.includes(o) ? targetBodyBox(o) : { cx: o.x, cy: o.y - 20 };
+    for (const [px, py] of [[o.x, o.y], [b.cx, b.cy]]) {
+      const along = (px - p.x) * Math.cos(ang) + (py - p.y) * Math.sin(ang);
+      if (along < 0 || along > d) continue;
+      const off = Math.abs(-(px - p.x) * Math.sin(ang) + (py - p.y) * Math.cos(ang));
+      if (off <= hitR) { target = o; d = along; break; }
+    }
+  }
+  return { target, d };
+}
+const liveEnemies = () => G.enemies.filter(e => !e.dead && e.hp > 0);
+const bodyPoint = o => G.enemies.includes(o) && typeof targetBodyBox === 'function' ? (b => ({ x: b.cx, y: b.cy }))(targetBodyBox(o)) : { x: o.x, y: o.y - 20 };
+// 子彈打中怪物：扣血、吸仇恨、閃色、跳數字（跟一般子彈一樣）
+function bulletHurtEnemy(e, dmg, col, p) {
+  e.hp -= dmg;
+  if (!(e.playerAggroT > 0)) e.alertT = ENEMY_ALERT_TIME;
+  e.playerAggroT = PLAYER_ATK.aggro;
+  e.hitT = Math.max(e.hitT || 0, .14); e.hitColor = col;
+  enemyHitReact(e, p.x, p.y, false);
+  flashDmg('-' + Math.round(dmg), e.x, e.y - 26, col);
+  if (typeof sfxMonsterHit === 'function') sfxMonsterHit(e, .4, 'player');
+}
+// 子彈波及隊員（雷電彈）：照防禦打折
+function bulletHurtTower(t, dmg, col) {
+  if (t.hp <= 0) return;
+  const def = Math.max(0, Math.min(.75, TYPES[t.type]?.defense || 0)), hurt = dmg * (1 - def);
+  t.hp = Math.max(0, t.hp - hurt); t.hitT = Math.max(t.hitT || 0, .2); t.hitColor = col;
+  flashDmg('-' + Math.round(hurt), t.x, t.y - 30, col);
+  if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
+}
+
+// ---- 分裂彈：扇形噴出好幾顆小子彈 ----
+function fireSplit(p, aim, b) {
+  const ang = Math.atan2(aim.y - p.y, aim.x - p.x), range = b.range * CELL, hits = new Map();
+  aimPose(p, ang);
+  const { x: mx, y: my } = gunMuzzleAt(p, ang), cands = liveEnemies();
+  for (let i = 0; i < b.pellets; i++) {
+    const a = ang + (b.pellets > 1 ? (i / (b.pellets - 1) - .5) * b.spread : 0) + (Math.random() - .5) * .05;
+    const dist = clearDistance(p, a, range), r = lineHit(p, a, dist, cands, 14);
+    const ex = p.x + Math.cos(a) * r.d, ey = p.y + Math.sin(a) * r.d;
+    G.effects.push({ bullet: true, x1: mx, y1: my, x2: ex, y2: ey, life: .08, life0: .08, color: b.color });
+    if (r.target) { hits.set(r.target, (hits.get(r.target) || 0) + b.dmg); G.effects.push({ ring: true, x: ex, y: ey, r: 2, r2: 7, life: .12, life0: .12, color: b.color }); }
+  }
+  for (const [e, dmg] of hits) bulletHurtEnemy(e, dmg, b.color, p);
+  G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .09, life0: .09 });
+  addLightFlash('muzzle', mx, my, 1.2);
+  if (typeof spawnShellCasing === 'function') spawnShellCasing(mx, my, ang);
+  sfx('gunshot');
+}
+
+// ---- 閃光彈：拋過去，落地爆出強光（敵我都暈）----
+function fireFlashBang(p, aim, b) {
+  const S = SPECIAL_GUN.incendiary, ang = Math.atan2(aim.y - p.y, aim.x - p.x), range = b.range * CELL;
+  const dist = clearDistance(p, ang, Math.min(Math.hypot(aim.x - p.x, aim.y - p.y), range)), k = dist / range;
+  aimPose(p, ang);
+  const { x: mx, y: my } = gunMuzzleAt(p, ang);
+  (G.flashShots = G.flashShots || []).push({ x0: mx, y0: my, x1: p.x + Math.cos(ang) * dist, y1: p.y + Math.sin(ang) * dist, t: 0,
+    T: S.flight[0] + (S.flight[1] - S.flight[0]) * k, h: S.arc[0] + (S.arc[1] - S.arc[0]) * k, lv: b });
+  G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .1, life0: .1 });
+  sfx('switch');
+}
+function flashBangLand(s) {
+  const x = s.x1, y = s.y1, R = s.lv.r * CELL, stun = s.lv.stun;
+  for (const e of liveEnemies()) {
+    if (Math.hypot(e.x - x, (e.y - y) / .8) > R) continue;
+    if (e.noStun) { flash('沒有效果', e.x, e.y - 40, '#9aa4b2'); continue; }   // 生命體
+    const dur = stun * ((e.maxhp || 0) >= SPECIAL_GUN.tranq.bigHp ? .5 : 1);
+    e.stunT = Math.max(e.stunT || 0, dur); e.dazeT = Math.max(e.dazeT || 0, dur);
+    e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = '#ffffff';
+  }
+  for (const t of G.towers) {   // 隊員也被閃到
+    if (t.hp <= 0 || Math.hypot(t.x - x, (t.y - y) / .8) > R) continue;
+    t.dazeT = Math.max(t.dazeT || 0, stun); t.target = null; t.moving = false;
+    sentryStatus(t, '被閃到了！', '#fff6a8');
+  }
+  G.effects.push({ ring: true, x, y, r: 10, r2: R, life: .35, life0: .35, color: '#fffbe0' });
+  G.effects.push({ ring: true, x, y, r: 4, r2: R * .6, life: .22, life0: .22, color: '#ffffff' });
+  for (let i = 0; i < 14; i++) { const a = Math.random() * Math.PI * 2, sp = 90 + Math.random() * 120;
+    G.effects.push({ ember: true, spark: true, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .7, r: 1.6, life: .3, life0: .3, color: '#fff6c8' }); }
+  addLightFlash('lightning', x, y, 3);
+  G.flashBangs = G.flashBangs || []; G.flashBangs.push({ x, y, t: .45, T: .45, R });   // 畫面上的白光（drawFlashBangs）
+  if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 3, .06);
+  if (typeof sfxAt === 'function') { sfxAt('smallBoom', x, y, .6, 'flashbang'); sfxAt('glassBreak3', x, y, .25, 'flashbang-ring'); }
+}
+
+// ---- 雷電彈：直線打中，電流跳到附近的怪物；旁邊的隊員也會被電到 ----
+function fireShock(p, aim, b) {
+  const ang = Math.atan2(aim.y - p.y, aim.x - p.x);
+  aimPose(p, ang);
+  const dist = clearDistance(p, ang, 9 * CELL), r = lineHit(p, ang, dist, liveEnemies(), 16);
+  const { x: mx, y: my } = gunMuzzleAt(p, ang);
+  const end = r.target ? bodyPoint(r.target) : { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
+  G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .12, life0: .12, color: b.color });
+  G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
+  const struck = [];   // 被電到的地方（隊員在旁邊就會被波及）
+  if (r.target) {
+    const hits = [r.target];
+    for (let k = 0; k < b.chain; k++) {   // 跳到離上一隻最近、還沒被電到的怪物
+      const cur = hits[hits.length - 1]; let next = null, nd = b.chainR * CELL;
+      for (const e of liveEnemies()) { if (hits.includes(e)) continue; const d = Math.hypot(e.x - cur.x, e.y - cur.y); if (d < nd) { nd = d; next = e; } }
+      if (!next) break;
+      const a = bodyPoint(cur), c = bodyPoint(next);
+      G.effects.push({ bullet: true, x1: a.x, y1: a.y, x2: c.x, y2: c.y, life: .18, life0: .18, color: '#d8f4ff' });
+      hits.push(next);
+    }
+    hits.forEach((e, i) => {
+      const dmg = Math.round(b.dmg * (i ? .7 : 1));   // 跳出去的弱一點
+      bulletHurtEnemy(e, dmg, b.color, p);
+      if (!e.noStun) { e.stunT = Math.max(e.stunT || 0, b.stun); e.shockT = Math.max(e.shockT || 0, b.stun); }
+      const bp = bodyPoint(e); spawnLightningBolt(bp.x, bp.y + 10, .6); struck.push(e);
+    });
+  } else struck.push({ x: end.x, y: end.y });
+  for (const t of G.towers) {   // 波及隊員：離被電到的地方一格內
+    if (t.hp <= 0 || !struck.some(o => Math.hypot(t.x - o.x, t.y - o.y) <= CELL * 1.1)) continue;
+    bulletHurtTower(t, b.dmg * .6, b.color); t.dazeT = Math.max(t.dazeT || 0, .6);
+    sentryStatus(t, '被電到了！', b.color);
+  }
+  addLightFlash('lightning', end.x, end.y, 1);
+  if (typeof sfxAt === 'function') sfxAt('lightningImpact', end.x, end.y, .55, 'shock-bullet');
+}
+
+// ---- 治療彈：打中誰就補誰 ----
+function fireHeal(p, aim, b) {
+  const ang = Math.atan2(aim.y - p.y, aim.x - p.x);
+  aimPose(p, ang);
+  const cands = [...liveEnemies(), ...G.towers.filter(t => t.hp > 0)];
+  const dist = clearDistance(p, ang, 10 * CELL), r = lineHit(p, ang, dist, cands, 18);
+  const { x: mx, y: my } = gunMuzzleAt(p, ang);
+  const end = r.target ? bodyPoint(r.target) : { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
+  G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .14, life0: .14, color: b.color });
+  G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .06, life0: .06 });
+  G.effects.push({ ring: true, x: end.x, y: end.y, r: 3, r2: r.target ? 22 : 10, life: .3, life0: .3, color: b.color });
+  if (r.target) {
+    const o = r.target, before = o.hp;
+    o.hp = Math.min(o.maxhp || o.hp + b.heal, o.hp + b.heal);
+    const got = Math.round(o.hp - before), enemy = G.enemies.includes(o);
+    flash('+' + got, o.x, o.y - (enemy ? 30 : 40), enemy ? '#ff9a9a' : b.color, 1);
+    if (enemy) flash('幫怪物補血了…', o.x, o.y - 56, '#ff9a9a', 1.2);
+    for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: end.x + (Math.random() - .5) * 18, y: end.y + (Math.random() - .5) * 10, vx: (Math.random() - .5) * 12, vy: -20 - Math.random() * 25, r: 2 + Math.random() * 2, life: .7, life0: .7, color: b.color });
+    sfx('soothe');
+  } else sfx('switch');
+}
+
 // ---- 每幀（game.js 的 update 呼叫）----
 function updateSpecialGuns(dt) {
+  if (G.flashShots && G.flashShots.length) {
+    for (const s of G.flashShots) { s.t += dt; if (s.t >= s.T) flashBangLand(s); }
+    G.flashShots = G.flashShots.filter(s => s.t < s.T);
+  }
+  if (G.flashBangs && G.flashBangs.length) { for (const f of G.flashBangs) f.t -= dt; G.flashBangs = G.flashBangs.filter(f => f.t > 0); }
+  for (const e of G.enemies) if (e.dazeT > 0) { e.dazeT -= dt; if (!(e.stunT > 0)) e.dazeT = 0; }
   if (G.incShots && G.incShots.length) {
     for (const s of G.incShots) {
       s.t += dt;
@@ -163,7 +312,23 @@ function incShotPos(s) {
 }
 
 // ---- 繪製 ----
-function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉彈（render.js 畫在角色上面）
+function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉彈、閃光彈（render.js 畫在角色上面）
+  for (const s of (G.flashShots || [])) {
+    const { x, y, gx, gy } = incShotPos(s);
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(gx, gy + 6, 5, 2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.translate(x, y); ctx.rotate(s.t * 12);
+    ctx.fillStyle = '#4d5560'; ctx.fillRect(-3, -5, 6, 10); ctx.fillStyle = '#c9d3dc'; ctx.fillRect(-3, -5, 6, 2); ctx.fillStyle = '#ffe36a'; ctx.fillRect(-3, 1, 6, 1.5);
+    ctx.restore();
+  }
+  for (const f of (G.flashBangs || [])) {   // 閃光：一大片白光（畫在角色上面）
+    const k = f.t / f.T;
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    const g = ctx.createRadialGradient(f.x, f.y - 10, 0, f.x, f.y - 10, f.R * 1.3);
+    g.addColorStop(0, `rgba(255,255,240,${(.95 * k).toFixed(3)})`); g.addColorStop(.4, `rgba(255,250,210,${(.45 * k).toFixed(3)})`); g.addColorStop(1, 'rgba(255,250,210,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(f.x, f.y - 10, f.R * 1.3, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
   for (const s of (G.incShots || [])) {
     const { x, y, gx, gy } = incShotPos(s);
     ctx.save();
@@ -212,9 +377,20 @@ function drawPaintMarks(ctx) {
   for (let i = 0; i < 4; i++) { ctx.beginPath(); ctx.arc(0, 0, R, i * Math.PI / 2 + .25, i * Math.PI / 2 + Math.PI / 2 - .25); ctx.stroke(); }
   ctx.restore();
 }
-function drawSleepMarks(ctx) {   // 睡著的怪物、隊員頭上飄 Zzz（render.js 在黑幕上面畫）
+function drawSleepMarks(ctx) {   // 睡著的怪物、隊員頭上飄 Zzz；暈眩的頭上轉星星（render.js 在黑幕上面畫）
   const now = performance.now() / 1000;
   ctx.save(); ctx.textAlign = 'center'; ctx.font = 'bold 12px sans-serif';
+  for (const o of [...(G.enemies || []), ...(G.towers || [])]) {
+    if (!(o.dazeT > 0) || o.dead || o.hp <= 0) continue;
+    if (G.enemies.includes(o) && !isVisible(o.x, o.y)) continue;
+    const top = o.y - (o.drawHeight || 50) - 4;
+    for (let i = 0; i < 3; i++) {
+      const a = now * 5 + i * Math.PI * 2 / 3;
+      ctx.globalAlpha = .9; ctx.fillStyle = '#fff2a0'; ctx.font = 'bold 11px sans-serif';
+      ctx.fillText('✦', o.x + Math.cos(a) * 12, top + Math.sin(a) * 4);
+    }
+  }
+  ctx.globalAlpha = 1;
   for (const o of [...(G.enemies || []), ...(G.towers || [])]) {
     if (!(o.sleepT > 0) || o.dead || (o.hp <= 0 && G.towers.includes(o))) continue;
     if (G.enemies.includes(o) && !isVisible(o.x, o.y)) continue;

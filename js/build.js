@@ -235,10 +235,13 @@ buildToggle.addEventListener('click', () => {
 });
 // 關閉建築選單並取消選取（Esc 或程式呼叫）
 function closeBuildMenu() {
+  // 載入編隊的收合設定時，game.js 還沒建立 G；先收起選單即可。
+  const gameReady = typeof G !== 'undefined' && !!G;
   const hadTarget = !!buildTargetCell;
   buildTargetCell = null;
-  if (hadTarget) renderBuildBar();
+  if (hadTarget && gameReady) renderBuildBar();
   buildBar.classList.add('hidden');
+  if (!gameReady) return;
   if (G.selType && (G.selType.startsWith('build:') || G.selType === 'demolish')) { G.selType = null; renderBuildBar(); }
   updateBuildToggle();
 }

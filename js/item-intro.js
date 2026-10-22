@@ -78,7 +78,7 @@ function itemIntroForEquipment(id) {
 }
 function itemIntroForBullet(id, n) {
   const b = typeof BULLETS !== 'undefined' ? BULLETS[id] : null; if (!b) return;
-  itemIntro({ key: 'bullet:' + id, kindLabel: '子彈', name: b.name + (n ? ' ×' + n : ''), icon: b.icon, tag: '🔫 手槍的子彈', desc: b.desc,
+  itemIntro({ key: 'bullet:' + id, kindLabel: '子彈', name: b.name + (n ? ' ×' + n : ''), image: b.image, icon: b.icon, tag: '🔫 手槍的子彈', desc: b.desc,
     stat: '最多帶 ' + b.max + ' 發・戰鬥中用滑鼠滾輪換成這種子彈' });
 }
 function itemIntroForWeapon(id) {

@@ -86,6 +86,7 @@ const WEAPON_STAT_TERMS = [
   ['mag', '彈匣', '發'],
   ['sleep', '睡眠', '秒'], ['r', '火海半徑', '格'], ['ignite', '怪物著火', '秒'], ['mist', '麻醉霧半徑', '格'],
   ['reload', '裝填', '秒'],
+  ['double', '連發機率', '%'],   // 手槍：開一槍時有機率馬上再開一發（快速射擊）
   ['reserve', '持有上限', '發'],
 ];
 const weaponStat = lv => WEAPON_STAT_TERMS.filter(([k]) => typeof lv[k] === 'number' && lv[k] !== 0)
@@ -94,7 +95,7 @@ const weaponStat = lv => WEAPON_STAT_TERMS.filter(([k]) => typeof lv[k] === 'num
 const WEAPON_UPGRADES = {
   pistol: { name: '手槍', icon: '🔫', image: 'images/weapon/winter-handgun-design.png', cost: [80, 160, 250, 350],
     stat: weaponStat,
-    levels: [{ dmg: 5, mag: 6, reload: 2 }, { dmg: 6, mag: 8, reload: 1.7 }, { dmg: 8, mag: 10, reload: 1.4 }, { dmg: 10, mag: 12, reload: 1.2 }, { dmg: 12, mag: 14, reload: 1 }] },
+    levels: [{ dmg: 5, mag: 6, reload: 2 }, { dmg: 6, mag: 8, reload: 1.7 }, { dmg: 8, mag: 10, reload: 1.4, double: 20 }, { dmg: 10, mag: 12, reload: 1.2, double: 35 }, { dmg: 12, mag: 14, reload: 1, double: 50 }] },   // double：連發機率（%，Lv3 起；快速射擊）
   flare: { name: '照明彈槍', icon: '🔥', image: 'images/weapon/winter-flare-gun-design.png', cost: [70, 150, 240, 340],
     stat: weaponStat,
     levels: [{ shine: 24, reserve: 30 }, { shine: 32, reserve: 40 }, { shine: 40, reserve: 50 }, { shine: 48, reserve: 60 }, { shine: 56, reserve: 70 }] },   // shine：照明彈落地後亮幾秒（只照明，不會燒傷）；reserve：持有上限
@@ -113,19 +114,32 @@ const WEAPON_UPGRADES = {
 // ===== 手槍的子彈：溫特從頭到尾只有一把手槍，差別只在子彈（滾輪換子彈，js/flare.js）=====
 // 一般子彈無限（彈匣、裝填、傷害看手槍等級）；特殊子彈有數量，打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的子彈。
 // 特殊子彈的效果固定、不會升級（只有手槍能找諾亞升級）。上面照明彈槍、燃燒彈槍、麻醉槍的等級表已經不用了。
-// max：最多帶幾發；gap：兩發至少隔幾秒；color：右下角、切換時的顏色
+// 要先裝進彈夾（背包「武器」分頁）才換得到（js/magazine.js；只有一般子彈不佔彈夾）。
+// image：子彈的圖（images/weapon/bullet/，統一 48×16）；max：最多帶幾發；gap：兩發至少隔幾秒；color：右下角、切換時的顏色
+// source：怎麼拿到——develop＝諾亞的開發工坊開發（cost 碎片，每次出勤自動補滿）；field＝只能在後室（戰鬥區域）的置物櫃找到（打完就沒了）；supply＝補給箱、彈藥箱補
 const BULLETS = {
-  pistol:     { name: '一般子彈', icon: '•', color: '#ffe79a' },
-  flare:      { name: '照明彈', icon: '🔥', color: '#ff8a5c', max: 30, gap: .8, shine: 24,   // shine：落地後亮幾秒
+  pistol:     { name: '一般子彈', icon: '•', image: 'images/weapon/bullet/Ordinarybullets.png', color: '#ffe79a' },
+  flare:      { name: '照明彈', icon: '🔥', image: 'images/weapon/bullet/Flare.png', color: '#ff8a5c', max: 30, gap: .8, shine: 24, source: 'supply',   // shine：落地後亮幾秒
     desc: '打出去落地後燃燒、照亮周圍一大片；照亮的地方隊員看得到怪物、也能蓋建築。打完可以到地圖上的彈藥箱補滿。' },
-  incendiary: { name: '燃燒彈', icon: '🧨', color: '#ff9a3c', max: 8, gap: .6, r: 1.1, burn: 6, ignite: 0,   // r：火海半徑（格）、burn：火海燒幾秒、ignite：被炸到的怪物身上著火幾秒（0＝不著火）
+  incendiary: { name: '燃燒彈', icon: '🧨', image: 'images/weapon/bullet/Incendiary bomb.png', color: '#ff9a3c', max: 8, gap: .6, r: 1.1, burn: 6, ignite: 0, source: 'field',   // r：火海半徑（格）、burn：火海燒幾秒、ignite：被炸到的怪物身上著火幾秒（0＝不著火）
     desc: '拋物線飛過怪物頭上，落地燒出一片火海；會點燃油桶、油汙，燒掉怪物「生命體」碎掉的那堆。火海敵我都會燙。' },
-  tranq:      { name: '麻醉彈', icon: '💤', color: '#b9a7ff', max: 10, gap: .35, sleep: 3, mist: 0,   // sleep：睡幾秒（大型怪物一半）、mist：麻醉霧半徑（格，0＝沒有）
+  tranq:      { name: '麻醉彈', icon: '💤', image: 'images/weapon/bullet/tranquilizerdarts.png', color: '#b9a7ff', max: 10, gap: .35, sleep: 3, mist: 0, source: 'develop', cost: 120,   // sleep：睡幾秒（大型怪物一半）、mist：麻醉霧半徑（格，0＝沒有）
     desc: '打中的怪物睡著（不動、不攻擊）；打中暴走的隊員會睡一下，醒來恢復正常。對怪物「生命體」沒有效果。' },
-  paint:      { name: '漆彈', icon: '🎨', color: '#ff5fd6', max: 12, gap: .3,
+  paint:      { name: '螢光漆彈', icon: '🎨', image: 'images/weapon/bullet/Paintball.png', color: '#ff5fd6', max: 12, gap: .3, source: 'develop', cost: 100,
     desc: '打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。同時只能標一隻，打新的舊的就消失；怪物死掉漆就跟著消失。' },
+  split:      { name: '分裂彈', icon: '✳️', image: 'images/weapon/bullet/SplitBullet.png', color: '#9fe3ff', max: 20, gap: .5, pellets: 5, spread: .55, dmg: 4, range: 5, source: 'develop', cost: 150,   // pellets：一次幾顆、spread：扇形角度（弧度）、dmg：每顆傷害、range：射程（格）
+    desc: '一次扇形噴出好幾顆小子彈，近距離打一整群小怪。距離越遠越散。' },
+  flash:      { name: '閃光彈', icon: '💥', image: 'images/weapon/bullet/Flashbang.png', color: '#fff6a8', max: 6, gap: .7, r: 2.4, stun: 2.5, range: 8, source: 'field',   // r：閃光半徑（格）、stun：暈幾秒、range：最遠丟幾格
+    desc: '丟出去爆出強光，範圍內的怪物暈眩幾秒。範圍內的隊員也會被閃到、暈一下。對怪物「生命體」沒有效果。' },
+  shock:      { name: '雷電彈', icon: '⚡', image: 'images/weapon/bullet/ElectronBomb.png', color: '#8fd8ff', max: 8, gap: .5, dmg: 10, chain: 3, chainR: 3, stun: 1.2, source: 'field',   // dmg：傷害、chain：最多再跳幾隻、chainR：跳躍距離（格）、stun：麻痺幾秒
+    desc: '打中的怪物觸電受傷、短暫麻痺，電流再跳到附近幾隻怪物。旁邊有隊員也會被電到。' },
+  heal:       { name: '治療彈', icon: '💚', image: 'images/weapon/bullet/TreatmentBullet.png', color: '#7ee0a0', max: 5, gap: .8, heal: 40, source: 'field',   // heal：補多少 HP
+    desc: '打中誰就補誰的 HP：瞄準隊員可以幫他補血；打歪打到怪物，也會幫怪物補血。' },
 };
-// 在置物箱裡找到特殊子彈（商店、轉蛋機做好之前的暫時來源）：ammo 找到子彈的機率；kinds 會找到哪幾種；ammoFind 一次給幾發；start 第一次拿到（設定好的置物櫃）給幾發
-const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'tranq', 'paint'],
-  ammoFind: { incendiary: 2, tranq: 3, paint: 4 },
-  start: { incendiary: 3, tranq: 5, paint: 6 } };
+// 在置物箱裡找到特殊子彈（只有後室才找得到的 field 子彈）：ammo 找到子彈的機率；kinds 會找到哪幾種；ammoFind 一次給幾發；start 第一次拿到（設定好的置物櫃）給幾發
+const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal'],
+  ammoFind: { incendiary: 2, flash: 2, shock: 2, heal: 1, tranq: 3, paint: 4 },
+  start: { incendiary: 3, flash: 3, shock: 4, heal: 2, tranq: 5, paint: 6 } };
+// ===== 彈夾（js/magazine.js）：在背包「武器」分頁把子彈拖進彈夾格，戰鬥中滾輪只換得到彈夾裡的 =====
+// free：不佔彈夾、一定帶著；slots[等級-1]＝彈夾裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
+const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5], cost: [150, 250, 380], name: '彈夾', icon: '🧰' };

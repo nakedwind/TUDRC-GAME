@@ -11,7 +11,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=quick10-20261022"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=tabkey-20261022">
+<link rel="stylesheet" href="css/style.css?v=sync-backpack-tab-20261022">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
@@ -238,8 +238,8 @@
   <script src="data/gifts.js?v=remap-20261012"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=card-consume-20261018"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=quick10-20261022"></script>   <!-- 溫特可購買、使用的個人補給 -->
-  <script src="data/equipment.js?v=bullets-20261022"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
-  <script src="data/workshop.js?v=infoimg-20261022"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
+  <script src="data/equipment.js?v=bag-labels-20261022"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/workshop.js?v=pistolcell2-20261022"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
   <script src="js/workshop-config.js?v=infoimg-20261022"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=quests-20261015"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
@@ -267,8 +267,8 @@
   <script src="js/breakable-walls.js?v=wallsolid-20261017"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=hiddenvoid-20261017"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=iron-slide-sound-20261013"></script>
-  <script src="js/build.js?v=numkeys-20261020"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
-  <script src="js/team.js?v=skilltree-20261022"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
+  <script src="js/build.js?v=startup-collapse-20261022"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/team.js?v=bag-labels-20261022"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=nosentry-20261022"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="js/progression.js?v=skills-20261018"></script>
   <script src="data/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹資料 -->
@@ -294,14 +294,14 @@
   <script src="js/ore.js?v=dog-pickup-20261021"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=fix39-44-20261018"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=quick10-20261022"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=bullets-20261022"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/backpack.js?v=pistolcell2-20261022"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/gifts.js?v=costumegift-20261021"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=large-bow-side-20261022"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=bear-20261022"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=block-20261022"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
   <script src="js/costumes.js?v=wdstand-20261022"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
   <script src="js/gacha.js?v=gachaball-20261022"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
-  <script src="js/sortie-supply.js?v=sortie4-20261014"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
+  <script src="js/sortie-supply.js?v=mag1-20261022"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=nocircuitnum-20261018"></script>
   <script src="js/storage-lockers.js?v=bullets-20261022"></script>
   <script src="js/rescue-dog.js?v=dog-pickup-20261021"></script>
@@ -310,21 +310,22 @@
   <script src="js/save.js?v=deskwin-20261022"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=noisefix-20261014"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=bullets-20261022"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=bullets-20261022"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
-  <script src="js/special-guns.js?v=bullets-20261022"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/flare.js?v=ammohud-20261022"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/equipment.js?v=bag-labels-20261022"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/special-guns.js?v=mag2-20261022"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/magazine.js?v=bag-labels-20261022"></script> <!-- 彈夾：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=guide-sp-20261021"></script>
-  <script src="js/camp-interactions.js?v=tabkey-20261022"></script>
+  <script src="js/camp-interactions.js?v=tab-mag-20261022"></script>
   <script src="js/camp-supply.js?v=guide-sp-20261021"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=nofallback-20261022"></script>
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=dash3-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=dash3-ammo-fit-20261022"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=flash2x2-20261022"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=graffiti5-20261018"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=quick10-20261022"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
-  <script src="js/item-intro.js?v=bullets-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->
+  <script src="js/item-intro.js?v=bulletimg-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->
   <script src="data/posters.js?v=posters-20261018"></script>   <!-- 可以查看的海報：說明文字 -->
   <script src="js/posters.js?v=posters-20261018"></script>   <!-- 查看海報 -->
   <script src="data/bestiary.js?v=imgbox-20261022"></script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器） -->

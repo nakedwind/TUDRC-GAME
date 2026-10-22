@@ -1,6 +1,6 @@
 /* ===== 溫特的手槍＋子彈切換＋照明彈＋彈藥箱 =====
    - 溫特從頭到尾只有一把手槍，差別只在子彈：一般子彈（無限）、照明彈、燃燒彈、麻醉彈、漆彈（data/equipment.js 的 BULLETS）。
-   - 滾輪（滑鼠在遊戲畫面上）換子彈，只會換到拿到過的子彈；特殊子彈打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的。
+   - 滾輪（滑鼠在遊戲畫面上）換子彈，只會換到拿到過、而且出勤前裝進彈夾的子彈（js/magazine.js）；特殊子彈打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的。
    - 照明彈：朝滑鼠方向打出去（最遠 FLARE.range 格，碰到牆會停在牆前），落地燃燒一段時間。
      是「真的光」：照亮的地方哨兵看得到怪、可以蓋建築、溫特的槍也能瞄準。怪物不會被它吸引。
    - 照明彈打完：走到地圖上的彈藥箱按 Space 補滿。
@@ -16,9 +16,12 @@ const FLARE = {
   reserveMax: 30,      // 最多帶幾發；實際用 BULLETS.flare.max
 };
 // 滾輪切換的順序
-const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint'].map(id => ({ id, ...BULLETS[id], special: id === 'incendiary' || id === 'tranq' }));
+// special＝效果寫在 js/special-guns.js 的子彈（一般子彈、照明彈、螢光漆彈另外處理）
+const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
 const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], openId: 'tile_field_ammo_crate_open', radius: 72, openFor: 1.6 };
 
+// 子彈的小圖（data/equipment.js 的 image；沒有圖就用 emoji）
+const bulletIcon = (b, cls = 'bullet-img') => b && b.image ? '<img class="' + cls + '" src="' + b.image + '" alt="">' : '<i>' + ((b && b.icon) || '') + '</i>';
 // ---- 子彈數量（存在 equipState.bullets：owned 拿到過哪幾種、n 剩幾發）----
 function bulletState() {
   const e = typeof equipState !== 'undefined' ? equipState : {};
@@ -39,7 +42,7 @@ function useBullet(id) { const s = bulletState(); s.n[id] = Math.max(0, (s.n[id]
 
 // ---- 目前裝的子彈 ----
 const UNARMED = { id: 'none', name: '空手', icon: '✋' };   // 舊的：現在一定拿著手槍
-const weaponUsable = i => !!WEAPONS[i] && bulletOwned(WEAPONS[i].id);
+const weaponUsable = i => !!WEAPONS[i] && bulletOwned(WEAPONS[i].id) && (typeof magazineCarries !== 'function' || magazineCarries(WEAPONS[i].id));   // 拿到過、而且這次有裝進彈夾（js/magazine.js）
 function playerWeapon(p) {
   if (p && !weaponUsable(p.weaponIndex || 0)) p.weaponIndex = 0;   // 這種子彈沒了（例如被編輯器拿掉）：換回一般子彈
   return WEAPONS[(p && p.weaponIndex) || 0];
@@ -60,7 +63,8 @@ function switchWeapon(step, toIndex) {
   if (next === (p.weaponIndex || 0)) return;
   p.weaponIndex = next; p.atkCd = Math.max(p.atkCd || 0, .15);
   const w = WEAPONS[next];
-  G.effects.push({ text: w.icon + ' ' + w.name, x: p.x, y: p.y - 70, life: .9, life0: .9, color: w.color, vy: -22 });
+  G.effects.push(w.image ? { text: w.name, iconImage: w.image, x: p.x, y: p.y - 70, life: .9, life0: .9, color: w.color, vy: -22 }   // 頭上飄子彈圖＋名稱（跟以前換槍一樣）
+    : { text: w.icon + ' ' + w.name, x: p.x, y: p.y - 70, life: .9, life0: .9, color: w.color, vy: -22 });
   sfx('switch'); updateAmmoHud();
 }
 cv.addEventListener('wheel', e => {

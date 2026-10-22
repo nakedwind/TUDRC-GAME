@@ -1654,29 +1654,38 @@ function updatePlayerAttack(dt) {
   }
   if (typeof sfx === 'function') sfx('gunshot');
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
+  else if (PLAYER_ATK.double && Math.random() < PLAYER_ATK.double) p.atkCd = .07;   // 快速射擊（手槍 Lv3 起）：馬上再開一發
 }
-// 右下角：手槍＋目前裝的子彈（名稱、剩幾發）
-let ammoHudEl = null, ammoGunEls = null, ammoTextEl = null, ammoHudKey = '';
+// 右下角：目前裝的子彈（上面名稱；下面子彈圖＋剩幾發）
+// 子彈圖跟以前換槍一樣疊兩張：正在用的在前面、後面露出滾輪往下會換到的那顆，換的時候彈一下
+let ammoHudEl = null, ammoGunEls = null, ammoTextEl = null, ammoNameEl = null, ammoHudKey = '';
 function buildAmmoHud() {
   const css = document.createElement('style');
   css.textContent = `
-    #ammoHud { position:absolute; right:14px; bottom:14px; z-index:9; display:flex; align-items:flex-end; gap:10px; pointer-events:none;
-      padding:0; }
-    #ammoHud .gun-stack { position:relative; width:40px; height:52px; }
-    #ammoHud .gun-stack img { position:absolute; left:0; bottom:0; width:40px; height:30px; image-rendering:pixelated; filter:drop-shadow(0 0 2px rgba(255,236,190,.95)) drop-shadow(0 0 5px rgba(255,214,140,.55)); }
-    #ammoHud .ammo-text { font:700 16px sans-serif; color:#dbe7ff; letter-spacing:1px; white-space:nowrap; padding-bottom:4px; text-shadow:0 1px 2px #000, 0 0 3px #000; }
-    #ammoHud .ammo-text .weapon-name { display:flex; align-items:center; gap:5px; margin-bottom:5px; color:#eef3fa; font:700 12px 'Microsoft JhengHei',sans-serif; letter-spacing:0; }
-    #ammoHud .ammo-text .weapon-name i { width:6px; height:12px; border-radius:3px 3px 1px 1px; background:var(--bc); box-shadow:0 0 6px var(--bc); }
-    #ammoHud .ammo-text small { display:block; font-size:12px; color:#ff9f7a; letter-spacing:0; }
+    #ammoHud { position:absolute; right:14px; bottom:14px; z-index:9; display:flex; flex-direction:column; align-items:flex-end; gap:2px; pointer-events:none; }   /* 名稱、子彈圖、數字都靠右對齊，換子彈時右邊緣不動 */
+    #ammoHud .ammo-name { height:18px; line-height:18px; white-space:nowrap; color:#eef3fa; font:700 13px 'Microsoft JhengHei',sans-serif; text-shadow:0 1px 2px #000, 0 0 3px #000; }
+    #ammoHud .ammo-row { display:flex; flex-direction:column; align-items:flex-end; gap:2px; }   /* 由上往下：名稱、子彈圖、數字 */
+    #ammoHud .bullet-stack { position:relative; width:62px; height:var(--stack-height,24px); }   /* 依實際顯示的一至三顆子彈收合高度 */
+    #ammoHud .bullet-stack img { position:absolute; right:0; top:var(--stack-top,2px); width:57.6px; height:19.2px; image-rendering:pixelated; transform-origin:right center;
+      transition:transform .22s cubic-bezier(.3,1.4,.5,1), filter .22s, opacity .22s; }
+    #ammoHud .bullet-stack img.front { z-index:2; transform:translate(0,0) scale(1); filter:drop-shadow(0 0 2px rgba(255,236,190,.95)) drop-shadow(0 0 5px rgba(255,214,140,.55)); opacity:1; }
+    #ammoHud .bullet-stack img.prev, #ammoHud .bullet-stack img.next { z-index:1; filter:brightness(.62) saturate(.35) drop-shadow(0 0 1px rgba(160,190,220,.5)); opacity:.85; }
+    #ammoHud .bullet-stack img.prev { transform:translate(0,-22px) scale(.75); }
+    #ammoHud .bullet-stack img.next { transform:translate(0,22px) scale(.75); }
+    #ammoHud .bullet-stack img.off { transform:scale(.5); opacity:0; }
+    #ammoHud .ammo-text { height:20px; line-height:20px; font:700 16px sans-serif; color:#dbe7ff; letter-spacing:1px; white-space:nowrap; text-align:right; text-shadow:0 1px 2px #000, 0 0 3px #000; }
+    #ammoHud .ammo-text small { position:absolute; right:0; bottom:100%; margin-bottom:4px; font-size:12px; color:#ff9f7a; letter-spacing:0; white-space:nowrap; }   /* 打完的提示浮在最上面，不把整塊往上推 */
     #ammoHud .ammo-text.empty b { color:#ff9f7a; }`;
   document.head.appendChild(css);
   ammoHudEl = document.createElement('div');
   ammoHudEl.id = 'ammoHud';
-  const stack = document.createElement('div'); stack.className = 'gun-stack';
-  const img = new Image(); img.src = WEAPON_UPGRADES.pistol.image; img.alt = '手槍'; stack.appendChild(img);
-  ammoGunEls = [img];
+  ammoNameEl = document.createElement('div'); ammoNameEl.className = 'ammo-name';
+  const row = document.createElement('div'); row.className = 'ammo-row';
+  const stack = document.createElement('div'); stack.className = 'bullet-stack';
+  ammoGunEls = WEAPONS.map(w => { const img = new Image(); img.src = w.image || ''; img.alt = w.name; img.className = 'off'; stack.appendChild(img); return img; });
   ammoTextEl = document.createElement('div'); ammoTextEl.className = 'ammo-text';
-  ammoHudEl.append(stack, ammoTextEl);
+  row.append(stack, ammoTextEl);
+  ammoHudEl.append(ammoNameEl, row);
   document.getElementById('wrap').appendChild(ammoHudEl);
 }
 function updateAmmoHud() {
@@ -1684,14 +1693,23 @@ function updateAmmoHud() {
   if (!ammoHudEl) buildAmmoHud();
   ammoHudEl.style.display = '';
   const p = G.player, mag = PLAYER_ATK.mag, ammo = p ? (p.ammo ?? mag) : mag;
-  const w = playerWeapon(p), n = bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;
+  const w = playerWeapon(p), wi = WEAPONS.indexOf(w), n = bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;
   const text = w.id === 'pistol' ? ((p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞')
     : '<b>' + n + '</b> / ' + BULLETS[w.id].max + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
-  const key = w.id + '|' + text;
+  const usable = WEAPONS.map((x, i) => weaponUsable(i) ? 1 : 0).join('');
+  const key = w.id + '|' + text + '|' + usable;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
   ammoHudKey = key;
+  const step = d => { let k = wi; for (let i = 0; i < WEAPONS.length; i++) { k = (k + d + WEAPONS.length) % WEAPONS.length; if (weaponUsable(k)) break; } return k; };
+  const nx = step(1), pv = step(-1);   // 滾輪往下、往上會換到的那顆（只有兩種時上面不重複顯示）
+  const hasNext = nx !== wi, hasPrev = pv !== wi && pv !== nx;
+  ammoHudEl.style.setProperty('--stack-height', (24 + (hasNext ? 22 : 0) + (hasPrev ? 22 : 0)) + 'px');
+  ammoHudEl.style.setProperty('--stack-top', (hasPrev ? 24 : 2) + 'px');
+  ammoGunEls.forEach((img, i) => { img.className = i === wi ? 'front' : i === nx && nx !== wi ? 'next' : i === pv && pv !== wi && pv !== nx ? 'prev' : 'off'; });
+  ammoHudEl.style.setProperty('--bc', w.color || '#ffe79a');
+  ammoNameEl.textContent = w.name;
   ammoTextEl.classList.toggle('empty', empty);
-  ammoTextEl.innerHTML = '<span class="weapon-name" style="--bc:' + w.color + '"><i></i>' + w.name + '</span>' + text;
+  ammoTextEl.innerHTML = text;
 }
 
 // ---- 主迴圈（幀率校正）----
@@ -1833,6 +1851,7 @@ function update(dt) {
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
     else if (t.frozenT > 0) { t.frozenT -= dt; t.moving = false; t.navPath = null; if (t.hp > 0) t.dir = 'front'; }   // 溫特正在疏導／急救這位隊員：站著不動（js/channel-actions.js）
     else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
+    else if (t.dazeT > 0 && t.hp > 0) { t.dazeT -= dt; t.moving = false; t.navPath = null; }   // 被閃光彈閃到、被雷電彈電到：暈一下（js/special-guns.js）
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
     avoidAcidPools(t, dt);   // 被腐蝕池推開（阿瓦倫本人免疫、不避）
@@ -1874,7 +1893,7 @@ function update(dt) {
     }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
     if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
-    if (t.sleepT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著：不攻擊
+    if (t.sleepT > 0 || t.dazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著、暈眩：不攻擊
     if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
     if (spec.guide) updateGuideSP(t, dt);
     if (t.soothingT > 0) {   // 疏導施法計時；期間嚮導和被疏導的隊員身邊飄出嚮導顏色的小光點（js/attack-fx.js）

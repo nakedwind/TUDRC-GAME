@@ -236,16 +236,13 @@ const WORKSHOP_CONFIG = {
     "w:pistol": {
       "values": [
         {
-          "reload": 1.3,
-          "reserve": "∞"
+          "reload": 1.3
         },
         {
-          "reload": 1.1,
-          "reserve": "∞"
+          "reload": 1.1
         },
         {
-          "reload": 0.8,
-          "reserve": "∞"
+          "reload": 0.8
         },
         {
           "reload": 0.6
