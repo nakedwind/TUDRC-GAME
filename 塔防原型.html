@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<script>   /* UI 編輯器裡的預覽遊戲（?uiedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
-  if (/[?&]uiedit=1(&|$)/.test(location.search)) { const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage; } catch (_) { return false; } };
+<script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
+  if (/[?&](uiedit|bagedit)=1(&|$)/.test(location.search)) { const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage; } catch (_) { return false; } };
     P.setItem = function (k, v) { if (!isLocal(this)) return set.call(this, k, v); }; P.removeItem = function (k) { if (!isLocal(this)) return rem.call(this, k); }; P.clear = function () { if (!isLocal(this)) return clr.call(this); }; }
 </script>
 <meta charset="UTF-8">
@@ -223,6 +223,7 @@
     <a href="音效編輯器.html">🔊 音效編輯器</a>
     <a href="開發工坊編輯器.html">🔧 開發工坊編輯器</a>
     <a href="UI編輯器.html">🖥️ UI編輯器</a>
+    <a href="背包編輯器.html">🎒 背包編輯器</a>
     <a href="怪物圖鑑編輯器.html">📕 怪物圖鑑編輯器</a>
   </div>
 
@@ -239,6 +240,8 @@
   <script src="data/items.js?v=card-consume-20261018"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=noclickprompt-20261023"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/equipment.js?v=bag-labels-20261022"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
+  <script src="js/backpack-layout.js?v=bagedit2-20261023"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
   <script src="data/workshop.js?v=pistolcell2-20261022"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
   <script src="js/workshop-config.js?v=infoimg-20261022"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
