@@ -1922,7 +1922,7 @@ const BASE_MAPS = [
         "layer": "ground3",
         "fx": true,
         "ox": -4,
-        "oy": 8,
+        "oy": -8,
         "sortDepth": 2.5
       },
       {
@@ -1995,14 +1995,6 @@ const BASE_MAPS = [
         "layer": "object3",
         "ox": 12,
         "oy": -20
-      },
-      {
-        "id": "tile_hq_office_chair_back",
-        "c": 40,
-        "r": 19,
-        "layer": "object3",
-        "ox": 18,
-        "oy": -4
       },
       {
         "id": "tile_hq_sign",
@@ -2347,6 +2339,22 @@ const BASE_MAPS = [
         "layer": "object3",
         "ox": 20,
         "oy": 10
+      },
+      {
+        "id": "tile_eoc_ball_bed",
+        "c": 39,
+        "r": 21,
+        "layer": "object2",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_hq_office_chair_back",
+        "c": 40,
+        "r": 18,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 8
       }
     ],
     "solid": [
@@ -2717,6 +2725,22 @@ const BASE_MAPS = [
       "57,6": [
         -11,
         0
+      ],
+      "39,18": [
+        0,
+        -17
+      ],
+      "40,18": [
+        0,
+        -18
+      ],
+      "41,18": [
+        0,
+        -17
+      ],
+      "39,19": [
+        0,
+        -16
       ]
     },
     "coreSpots": [],
@@ -14678,7 +14702,6 @@ const BASE_MAPS = [
       "21,5",
       "22,5",
       "23,5",
-      "25,5",
       "24,6",
       "24,7",
       "24,8",

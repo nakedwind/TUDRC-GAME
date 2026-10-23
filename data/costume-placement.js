@@ -3387,9 +3387,9 @@ const COSTUME_PLACEMENT_DEFAULT = {
     "star-wand": {
       "winter": {
         "front": {"x":13.5,"y":41},
-        "left": {"x":21,"y":44,"behind":true},
+        "left": {"x":20,"y":45.5,"behind":true,"flip":true,"rot":-90,"scale":1.05},
         "back": {"x":50,"y":40,"behind":true,"flip":true},
-        "right": {"x":27.5,"y":42.5}
+        "right": {"x":45.5,"y":50,"flip":true,"rot":45}
       },
       "theonie": {
         "front": {"x":13.5,"y":45},
