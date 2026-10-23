@@ -1053,6 +1053,7 @@ function newGame() {
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
+  if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof arriveVitals === 'function') arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
   if (typeof achieveOnSortie === 'function') achieveOnSortie();   // 成就：同時帶著○○出勤
@@ -1899,7 +1900,7 @@ function update(dt) {
       foe.hp -= ramDmg;
       aggroOnSentry(foe, t);
       const dx = foe.x - t.x, dy = foe.y - t.y;
-      displaceEnemy(foe, dx, dy, CELL * 1.2);
+      if (!foe.unpushable) displaceEnemy(foe, dx, dy, CELL * 1.2);   // unpushable：菁英鳥頭人推不動
       foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = '#dbe7ff';
       sfxMonsterHit(foe, 0.48, 'red-ram');
       flashDmg('-' + ramDmg, foe.x, foe.y - 26, '#dbe7ff');
@@ -2056,7 +2057,7 @@ function update(dt) {
           if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r || !hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 牆後的不受影響
           e.hp -= dmg;
           aggroOnSentry(e, t);
-          if (U.knockback) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
+          if (U.knockback && !e.unpushable) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
           if (U.stun && !e.noStun) e.stunT = Math.max(e.stunT || 0, U.stun);   // 路德的大招：生命體不會被停住
           e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = col;
           flashDmg('-' + Math.round(dmg), e.x, e.y - 26, col);
@@ -2086,7 +2087,7 @@ function update(dt) {
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
           }
           if (spec.confuse) e.confuseT=Math.max(e.confuseT||0,spec.confuse);
-          if (spec.knockback) {
+          if (spec.knockback && !e.unpushable) {
             const dx=e.x-t.x,dy=e.y-t.y;
             displaceEnemy(e,dx,dy,CELL*spec.knockback);
           }
@@ -2167,6 +2168,7 @@ function update(dt) {
     e.prevHp = e.hp;
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -2254,6 +2256,7 @@ function update(dt) {
   // 波次（安全場景沒有波次，也不會有勝負）
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
   if (G.baseLostT > 0 && !G.over) { G.baseLostT -= dt; if (G.baseLostT <= 0) lose('base'); }   // 基地被打壞：等一下才跳失敗
+  if (typeof updateCoreKeyDrops === 'function') updateCoreKeyDrops(dt);   // 核心掉出的異質鑰匙：落地、幾秒後自動收進背包（js/core-clear.js）
   if (typeof checkCoreClear === 'function') checkCoreClear(dt);
   else if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) win();   // 地底的老鼠也要清掉
   updateHUD();

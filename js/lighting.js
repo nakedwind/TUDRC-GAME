@@ -156,7 +156,8 @@ function flashStrength(f) { return Math.pow(Math.max(0, f.life / f.life0), 1.6) 
 function visualLights() {
   if (!G) return [];
   return [...(G.lightFlashes || []), ...(typeof coreGlowLights === 'function' ? coreGlowLights() : []),
-          ...(typeof oreGlowLights === 'function' ? oreGlowLights() : [])];   // 礦物的紫光（js/ore.js）
+          ...(typeof oreGlowLights === 'function' ? oreGlowLights() : []),   // 礦物的紫光（js/ore.js）
+          ...(typeof coreKeyLights === 'function' ? coreKeyLights() : [])];   // 地上異質鑰匙的紫光（js/core-clear.js）
 }
 function computeFlashField() {
   flashField.fill(0);

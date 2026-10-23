@@ -343,6 +343,13 @@ function monsterWalkFrame(e) {
   const walking = (e.walkUntil || 0) > now && !(e.stunT > 0);
   const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : 10));   // 衝刺時步伐大一點
   const lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';   // 沒在追人的時候
+  if (f.walkBack && e.behavior === 'charger') {   // 鳥頭人：往畫面上方走露出背面；守衛（faceBack）背對玩家看著核心
+    if (e.faceBack) e.showBack = true;
+    else if (!walking) e.showBack = false;   // 停下來就轉回正面（發呆轉眼睛、蓄力瞪人）
+    else if (moved > .15 && moved < 20 && !(e.knockT > 0)) e.showBack = mdy < -Math.abs(mdx) * .3 ? true : mdy > Math.abs(mdx) * .3 ? false : e.showBack;
+    // 背面站姿圖比正面窄：照原圖比例畫（natural），不要被撐寬
+    if (e.showBack) return { file: walking && !e.faceBack ? f.walkBack[step % f.walkBack.length] : f.back, flip: !!e.faceRight === (f.backFacing === 'left'), natural: true };
+  }
   if (f.walkBack && e.showBack) return { file: walking ? f.walkBack[step % f.walkBack.length] : f.back, flip: !!e.faceRight === (f.backFacing === 'left') };   // 背面（魚頭君露出魚肉）
   if (!walking && f.blink && f.blink.length) {   // 站著不動：每隔幾秒眨一次眼（半閉→全閉→半閉）
     if (e.blinkAt == null) e.blinkAt = now + 1 + Math.random() * 3;
@@ -404,6 +411,7 @@ function drawEnemy(e) {
   ctx.globalAlpha = 1;
   const walkFrame = e.frames ? monsterWalkFrame(e) : null;
   if (walkFrame && walkFrame.charging) ctx.translate((Math.random() * 2 - 1) * 1.2, 0);   // 高舉蓄力時微微發抖
+  if (e.tremble) ctx.translate((Math.random() * 2 - 1) * 1.8, (Math.random() * 2 - 1) * .6);   // 菁英鳥頭人衝撞前蓄力：全身發抖（js/elite-bird-head.js）
   if (walkFrame) { e.lastFrameFile = walkFrame.file; e.lastFrameFlip = walkFrame.flip; }   // 死亡倒地用目前這張圖
   const baseSprite = monsterImage(walkFrame ? walkFrame.file : e.art ? shooterFrame(e) : (e.sprite || 'images/monster/Monster_Slime.png'));   // 珍珠小童：眨眼／生氣圖
   if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
@@ -413,7 +421,7 @@ function drawEnemy(e) {
     const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
     ctx.imageSmoothingEnabled = false;
     let fw = slimeW, fh = slimeH;
-    if (walkFrame && walkFrame.attack) {   // 攻擊圖畫布比較大：照站姿圖的比例換算，腳底中央對齊
+    if (walkFrame && (walkFrame.attack || walkFrame.natural)) {   // 攻擊圖畫布比較大（鳥頭人背面圖比較窄）：照站姿圖的比例換算，腳底中央對齊
       const base = monsterImage(e.frames.front);
       if (base.naturalWidth) { fw = baseSprite.naturalWidth * slimeW / base.naturalWidth; fh = baseSprite.naturalHeight * slimeH / base.naturalHeight; }
     }
@@ -1420,6 +1428,8 @@ function draw() {
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
+  if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
   if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
   if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢

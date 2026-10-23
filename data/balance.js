@@ -32,7 +32,7 @@ const TYPES = Object.fromEntries(Object.values(CHARACTERS)
 // 每次任務可帶 TEAM_SIZE 位；ROSTER＝可選角色 id（含非戰鬥搜救犬）；DEFAULT_TEAM＝預設隊伍。
 const TEAM_SIZE = 4;
 const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'colyn', 'eldrin', 'chris', 'taana', 'tino', 'ball'];
-const DEFAULT_TEAM = ['theonie', 'amber', 'red', 'luther'];
+const DEFAULT_TEAM = ['eldrin', 'avaren', 'theonie', 'red'];   // 艾德林、阿瓦倫、希奧妮、雷德
 const RESCUE_DOG_HANDLERS = ['eldrin', 'avaren'];
 
 // ---- 場景 NPC ----

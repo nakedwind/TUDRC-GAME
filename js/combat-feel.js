@@ -140,7 +140,7 @@ function enemyHitReact(e, fromX, fromY, heavy) {
   const dist = (heavy ? HIT_FEEL.heavyKnock : HIT_FEEL.knock) * (1 - resist) * (e.knockMul ?? 1);   // knockMul：生命體只微微後退
   const dx = e.x - fromX, dy = e.y - fromY, d = Math.hypot(dx, dy);
   if (dist > .5 && d > 0) { e.knockT = .12; e.knockVX = dx / d * dist / .12; e.knockVY = dy / d * dist / .12; }
-  if (heavy && resist < 1 && (e.staggerTime ?? HIT_FEEL.stagger) > 0) {   // stagger 設成 0 的怪物（生命體）被重擊也不會硬直、不會被打斷
+  if (heavy && resist < 1 && !e.superArmor && (e.staggerTime ?? HIT_FEEL.stagger) > 0) {   // stagger 設成 0 的怪物（生命體）被重擊也不會硬直、不會被打斷；superArmor＝霸體中（菁英鳥頭人蓄力、衝撞時）
     e.staggerT = e.staggerTime ?? HIT_FEEL.stagger;   // 硬直時間：怪物資料的 stagger（生命體比較短）
     if (e.swing && typeof MONSTER_SWING !== 'undefined' && performance.now() / 1000 - e.swing.at < MONSTER_SWING.windup) e.swing = null;   // 舉手蓄力時被重擊：打斷這次揮手
     e.playerWindupT = 0; e.playerPounceGoal = null;   // 重擊可以打斷撲擊蓄力
@@ -252,6 +252,7 @@ function onEnemyDeath(e) {
   trackKillAchievements(e);   // 成就計數（js/achievements.js；「擊倒某一種怪物」用上面圖鑑的消滅次數，所以放在後面）
   if (e.behavior === 'burrow') { burrowingMouseDeath(e); return; }   // 沉回洞口，取消尚未命中的地底手
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
+  if (e.elite && typeof eliteBirdDown === 'function') eliteBirdDown(e);   // 菁英鳥頭人：橫幅提示核心護盾消失（js/elite-bird-head.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
