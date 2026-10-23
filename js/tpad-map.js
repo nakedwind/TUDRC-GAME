@@ -109,6 +109,14 @@ function tmapFace(p) {
     (src ? '<img src="' + src + '" alt="" onerror="this.remove()">' : '') + '</span>';
 }
 
+// 房間名稱：寢室名稱「希奧妮哨兵寢室」在小房間放不下 → 「希奧妮寢室」（哨兵／嚮導看樓層就知道）
+const tmapRoomLabel = name => name.replace(/(哨兵|嚮導)寢室$/, '寢室');
+// 名稱還是比房間寬：字縮小到剛好放得下（.tm-room-name 平常是 2.4 × --u）
+function tmapRoomNameFit(r, u) {
+  const len = [...tmapRoomLabel(r.name)].length, size = 2.4 * u, fit = (r.w - 1.4 * u) / len;
+  return fit < size ? ' style="font-size:' + fit.toFixed(2) + 'px"' : '';
+}
+
 // 房間形狀：地板格＝淺色、固定牆＝深色（每種一條 path，格子很多也不會慢）
 function tmapRoomShape(room) {
   const m = room.map, floor = (m.layers && m.layers.floor) || {}, solid = new Set(m.solid || []);
@@ -172,7 +180,7 @@ function renderMapApp(el) {
     const cls = 'tm-room' + (r.map.id === here.id ? ' here' : '') + (r.map.name === tmapRoomSel ? ' sel' : '') +
       (tmapSel && people.find(p => p.id === tmapSel)?.mapName === r.map.name ? ' sel' : '');
     return '<g class="' + cls + '" data-tmap-room="' + tmapEsc(r.map.name) + '"><rect class="tm-room-box" x="' + r.x + '" y="' + r.y + '" width="' + r.w + '" height="' + r.h + '" rx=".8"/>' +
-      tmapRoomShape(r) + '<text class="tm-room-name" x="' + (r.x + .8 * u) + '" y="' + (r.y + 2.5 * u) + '">' + tmapEsc(r.name) + '</text></g>';
+      tmapRoomShape(r) + '<text class="tm-room-name" x="' + (r.x + .8 * u) + '" y="' + (r.y + 2.5 * u) + '"' + tmapRoomNameFit(r, u) + '>' + tmapEsc(tmapRoomLabel(r.name)) + '</text></g>';
   }).join('');
   const marks = [];
   for (const p of portals) {
