@@ -4,6 +4,29 @@
 //  背包裡有什麼存在 supplyInventory（就在下面）：物品 id → 數量。商店、送禮、存檔都會用到。
 // ============================================================
 const supplyInventory = new Map();   // 背包裡的東西：物品 id → 數量
+// ---- 溫特的持有上限：每一種東西最多帶幾個（沒寫＝無上限）----
+// kinds＋max＝這幾類（零食、飲料）每一種最多幾個；items＝個別物品的上限（物品 id → 最多幾個，優先）
+// 背包的數量一律照這個截掉：商店、撿到、置物櫃、任務獎勵…所有取得方式都一樣，之後新增的取得方式也自動套用。
+// 會「撿起來」的地方請用 supplyGain(id, n)：拿不下時跳提示，回傳實際拿到幾個（0＝滿了，東西可以留在原地）。
+const CARRY_LIMIT = { kinds: ['snack', 'drink'], max: 2,
+  items: { 'medkit': 20, 'almond-water': 20, 'firstaid': 20, 'anomaly-firstaid': 20, 'adrenaline': 5, 'battery': 10 } };
+function carryMax(x) {   // x＝物品 id 或物品；Infinity＝無上限
+  const id = typeof x === 'string' ? x : x && x.id; if (!id) return Infinity;
+  if (id in CARRY_LIMIT.items) return CARRY_LIMIT.items[id];
+  const kind = typeof x === 'object' && x.kind || (typeof SUPPLIES !== 'undefined' && (SUPPLIES.find(s => s.id === id) || {}).kind);
+  return CARRY_LIMIT.kinds.includes(kind) ? CARRY_LIMIT.max : Infinity;
+}
+const carryRoom = x => Math.max(0, carryMax(x) - (supplyInventory.get(typeof x === 'string' ? x : x.id) || 0));   // 還能再拿幾個
+supplyInventory.set = function (id, n) { return Map.prototype.set.call(this, id, Math.min(n, carryMax(id))); };   // 超過上限的部分不會放進背包
+function supplyGain(id, n = 1, quiet = false) {
+  const got = Math.min(n, carryRoom(id));
+  if (got > 0) supplyInventory.set(id, (supplyInventory.get(id) || 0) + got);
+  if (got < n && !quiet && typeof systemNotice === 'function') {
+    const it = typeof itemById === 'function' && itemById(id);
+    systemNotice('「' + (it ? it.name : id) + '」已達持有上限（最多 ' + carryMax(id) + ' 個）' + (got ? '，只拿了 ' + got + ' 個' : '，拿不下了'), true);
+  }
+  return got;
+}
 const BAG_MIN_SLOTS = 24;   // 至少畫幾格（不夠的用空格補滿，看起來像背包）
 const backpackEl = document.getElementById('backpack');
 const backpackGrid = document.getElementById('backpackGrid');
@@ -84,7 +107,7 @@ function renderBackpack() {
   const columns = window.innerWidth <= 560 ? 4 : window.innerWidth <= 900 ? 5 : 7;
   const slots = Math.ceil(Math.max(BAG_MIN_SLOTS, items.length) / columns) * columns;
   if (backpackTab === WEAPON_TAB.id) { renderWeaponGrid(items, columns); renderBackpackDetail(); return; }
-  let html = items.map(item => item.bullet ? bulletCellHtml(item) : item.gear ? `<button type="button" class="bag-cell gear${item.weapon ? ' weapon tier-' + Math.max(1, Math.min(5, item.lv)) : ''}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
+  let html = items.map(item => item.bullet ? bulletCellHtml(item) : item.gear ? `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${equipTier(item.lv)}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
       ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn && !item.weapon ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}<span class="bag-cell-name">${item.name}</span></button>` : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${supplyInventory.get(item.id)}" aria-pressed="${item.id === backpackSel}">
       <img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b><span class="bag-cell-name">${item.name}</span></button>`).join('');
   for (let i = items.length; i < slots; i++) html += '<span class="bag-cell empty" aria-hidden="true"></span>';
@@ -101,7 +124,7 @@ function bulletCellHtml(b) {
 function renderWeaponGrid(items, columns) {
   const pistol = items.find(x => x.weapon === 'pistol'), bullets = items.filter(x => x.bullet);
   const m = typeof magState === 'function' ? magState() : { load: [] }, n = typeof magSlotCount === 'function' ? magSlotCount() : 0, maxSlots = typeof MAGAZINE !== 'undefined' ? MAGAZINE.slots[MAGAZINE.slots.length - 1] : 0;
-  let row = pistol ? `<button type="button" class="bag-cell gear weapon tier-${Math.max(1, Math.min(5, pistol.lv))}${pistol.id === backpackSel ? ' sel' : ''}" data-bag-item="${pistol.id}" aria-pressed="${pistol.id === backpackSel}"><img src="${pistol.image}" alt=""><b>Lv${pistol.lv}</b><span class="bag-cell-name">${pistol.name}</span></button>` : '';
+  let row = pistol ? `<button type="button" class="bag-cell gear weapon${equipTier(pistol.lv)}${pistol.id === backpackSel ? ' sel' : ''}" data-bag-item="${pistol.id}" aria-pressed="${pistol.id === backpackSel}"><img src="${pistol.image}" alt=""><b>Lv${pistol.lv}</b><span class="bag-cell-name">${pistol.name}</span></button>` : '';
   // 彈匣架：手槍右邊一整塊，裡面每一格中間有凹槽（可以把子彈拖進去）
   let slots = '';
   for (let i = 0; i < maxSlots; i++) {

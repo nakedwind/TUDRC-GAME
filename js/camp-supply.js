@@ -163,7 +163,8 @@ function campSupplyMove(k, dir) {
     box[k] = (box[k] || 0) + 1;
   } else {
     if ((box[k] || 0) <= 0) { sfx('error'); return; }
-    box[k]--; supplyInventory.set(k, bag + 1);
+    if (!supplyGain(k, 1)) { sfx('error'); return; }   // 溫特拿不下了（持有上限）：留在箱子裡
+    box[k]--;
   }
   saveCampSupply(); sfx('button'); updateHUD(); if (typeof saveGame === 'function') saveGame();
   renderCampSupply();

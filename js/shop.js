@@ -8,7 +8,7 @@
 //  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Spacenter 打開，只賣飲料
 //  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Spacenter，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
 //    2F應變中心的兩台（EOC_VENDING）：紅＝零食、綠＝飲料，各隨機 6 種、每種最多 3 個，每 10 分鐘（現實時間）重新抽、補滿
-//  ・零食、飲料：溫特每一種最多帶 CARRY_LIMIT.max 個（所有商店、販賣機都照這個上限）
+//  ・溫特的持有上限（CARRY_LIMIT，在 js/backpack.js）：買到上限就不能再加進購物車
 //  ・後室商店也賣全部的零食、飲料
 //  ・後室商店：地圖編輯器「後室便利商店櫃台」靠近按 Spacenter。賣 BACKROOM_SHOP.stock（杏仁水只有這裡買得到），
 //    也可以把背包裡的東西賣掉換錢（賣到的錢算進作戰經費，回基地時一起帶回去）
@@ -46,8 +46,7 @@ function backroomBulletStock() {
 }
 const shopBulletRoom = item => item.bullet ? Math.max(0, BULLETS[item.bullet].max - bulletCount(item.bullet)) : Infinity;
 // ---- 零食、飲料：溫特身上每一種最多帶幾個 ----
-const CARRY_LIMIT = { kinds: ['snack', 'drink'], max: 2 };
-const carryRoom = item => CARRY_LIMIT.kinds.includes(item.kind) ? Math.max(0, CARRY_LIMIT.max - (supplyInventory.get(item.id) || 0)) : Infinity;
+// 溫特的持有上限：CARRY_LIMIT、carryMax、carryRoom 在 js/backpack.js
 // ---- 2F應變中心的兩台販賣機：紅＝零食、綠＝飲料 ----
 // slots＝每台賣幾種（每次補貨時從全部的零食／飲料裡隨機抽）；max＝每種補滿時有幾個；refillMin＝幾分鐘（現實時間）補一次貨
 // 庫存存在瀏覽器（store），關掉遊戲時間也照算；開新遊戲會重設（js/new-game.js）
@@ -140,7 +139,7 @@ function renderSupplyShop() {
     const use = item.use && SUPPLY_KIND[item.use], inCart = shopCart.get(item.id) || 0, short = item.price - left;
     const full = inCart >= shopRoom(item);
     const left2 = isEocVending() ? (eocVendingState()[vendingColor] || {})[item.id] || 0 : null, owned = supplyInventory.get(item.id) || 0;
-    const limitTxt = [left2 != null ? (left2 ? '剩 ' + left2 + ' 個' : '售完') : '', CARRY_LIMIT.kinds.includes(item.kind) && owned ? '持有 ' + owned + ' 個' : ''].filter(Boolean).join('・');   // 持有 0 個：不寫；放在效果下面第二行
+    const limitTxt = [left2 != null ? (left2 ? '剩 ' + left2 + ' 個' : '售完') : '', carryMax(item) < Infinity && owned ? '持有 ' + owned + ' 個' : ''].filter(Boolean).join('・');   // 持有 0 個：不寫；放在效果下面第二行
     const fullTag = left2 === 0 ? '售完' : '已達上限';
     const effectLines = String(item.effect || '').split('・'), line2 = [...effectLines.slice(1), limitTxt].filter(Boolean).join('・');   // 效果文字有「・」（子彈：每份 1 發・持有 0 / 6）：點刪掉、後半段換到第二行   // 買滿：圖片右上角的小標籤
     return `<article class="shop-item ${item.kind} ${item.use || 'gift'}${full ? ' maxed' : ''}" data-item="${item.id}">
@@ -314,7 +313,7 @@ function checkoutCart() {
   if (!shopCart.size || !G || total > G.money) { sfx('error'); return; }
   for (const [id, n] of shopCart) {
     const item = shopItemById(id);
-    if (!item || n > shopRoom(item)) { sfx('error'); systemNotice(item && item.bullet ? '子彈已達持有上限，請調整購物車數量' : '超過持有上限（每種最多 ' + CARRY_LIMIT.max + ' 個）或販賣機庫存不夠，請調整購物車數量', true); return; }
+    if (!item || n > shopRoom(item)) { sfx('error'); systemNotice(!item ? '找不到這個商品，請調整購物車' : item.bullet ? '子彈已達持有上限，請調整購物車數量' : '超過持有上限（' + item.name + '最多 ' + carryMax(item) + ' 個）或販賣機庫存不夠，請調整購物車數量', true); return; }
   }
   const count = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
   G.money -= total;

@@ -474,7 +474,7 @@ function tryItemDrop(id, x, y) {
     flash(item.name + '掉落了', x, y - 40, '#ffd479', 2.5);
     return;
   }
-  supplyInventory.set(id, (supplyInventory.get(id) || 0) + 1);
+  if (!supplyGain(id, 1)) return;   // 持有上限
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   flash('🎁 ' + item.name, x, y - 40, '#ffd479', 2.5);
   SFX.play('favorUp', .8, 'item-get'); if (typeof updateHUD === 'function') updateHUD();
@@ -496,19 +496,23 @@ function drawEquipmentGroundDrops(ctx) {
 // 點有東西的格子：跳出「卸下裝備／取消」小視窗；點空格：背包切到「裝備」分頁，挑一件能放這格的。
 // 要換成別的：在「裝備」分頁點那件，右邊說明下面按「裝備」（會直接換掉，不用先卸下）。
 let equipMenu = null;   // 跳出小視窗的那一格
+// ---- 裝備等級的顏色（全遊戲共用）：Lv1 原本的、Lv2 綠、Lv3 藍、Lv4 紫、Lv5 金 ----
+// 任何顯示「有等級的裝備／武器」的格子：class 加上 equipTier(等級)，顏色就照 css/style.css 的「裝備等級的顏色」那段
+// （開發工坊、背包的部隊長裝備、背包的裝備格都用這個；之後新的地方也用它，不要自己另外寫顏色）
+const equipTier = lv => ' tier-' + Math.max(1, Math.min(5, lv || 1));
 function equipIcon(def, cls = '') { return def.image ? '<img class="' + cls + '" src="' + def.image + '" alt="">' : '<i class="' + cls + '">' + def.icon + '</i>'; }
 function renderEquipPanel() {
   const box = document.getElementById('equipPanel'); if (!box) return;
   // 紙娃娃：溫特在上面，下面 2 欄：主武器、副武器／頭部、上身／下身1、下身2／隨身物品1、隨身物品2
   const weaponSlots = WEAPON_SLOTS.map(s => {
     const id = equipState.loadout[s.id], w = id && WEAPON_UPGRADES[id];
-    return '<button type="button" class="doll-slot weapon' + (w ? ' filled' : '') + '" data-equip-slot="w:' + s.id + '" title="' + s.name + (w ? '：' + w.name : '：未裝備') + '">' +
-      '<span>' + (w ? equipIcon(w) : '＋') + '</span><small>' + (w ? w.name : s.name) + '</small></button>';   // 裝上後只顯示名稱；空格顯示「主武器／副武器」
+    return '<button type="button" class="doll-slot weapon' + (w ? ' filled' + equipTier(equipState.weapons[id]) : '') + '" data-equip-slot="w:' + s.id + '" title="' + s.name + (w ? '：' + w.name : '：未裝備') + '">' +
+      '<span>' + (w ? equipIcon(w) + '<em>Lv' + equipState.weapons[id] + '</em>' : '＋') + '</span><small>' + (w ? w.name : s.name) + '</small></button>';   // 裝上後顯示名稱＋右上角等級；空格顯示「主武器／副武器」
   }).join('');
   const slots = weaponSlots + EQUIP_SLOTS.map(s => {
     const id = equipState.equipped[s.id], def = id && equipDef(id);
-    return '<button type="button" class="doll-slot' + (def ? ' filled' : '') + '" data-equip-slot="' + s.id + '" title="' + s.name + (def ? '：' + def.name : '：未裝備') + '">' +
-      '<span>' + (def ? equipIcon(def) : '＋') + '</span><small>' + (def ? def.name : s.name) + '</small></button>';   // 等級看下面的「目前效果」
+    return '<button type="button" class="doll-slot' + (def ? ' filled' + equipTier(equipState.owned[id]) : '') + '" data-equip-slot="' + s.id + '" title="' + s.name + (def ? '：' + def.name : '：未裝備') + '">' +
+      '<span>' + (def ? equipIcon(def) + '<em>Lv' + equipState.owned[id] + '</em>' : '＋') + '</span><small>' + (def ? def.name : s.name) + '</small></button>';   // 右上角是等級（跟開發工坊一樣）
   }).join('');
   const art = '<img class="doll-art" src="' + EQUIP_PORTRAIT.image + '" alt="溫特" onerror="this.onerror=null;this.src=\'' + EQUIP_PORTRAIT.fallback + '\';this.classList.add(\'sprite\')">';
   const lamp = equipLv('headlamp') ? '<div class="equip-battery"><span>🔋 手電筒電量</span><b>' + Math.round(equipState.battery) + '%</b><i><u style="width:' + equipState.battery + '%"></u></i><small>背包裡的電池：' + (supplyInventory.get('battery') || 0) + ' 顆</small></div>' : '';
@@ -734,7 +738,7 @@ function workshopEntries() {   // 所有裝備、武器整理成同一種格式
 }
 function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發後重畫時，捲軸停在原本的位置（剛打開工坊時才從最上面開始）
   const cost = n => '<b>' + WS_SHARD_IMG + n + '</b>';   // 按鈕上的價錢：結晶碎片圖＋數字
-  const tier = lv => ' tier-' + Math.max(1, Math.min(5, lv || 1));
+  const tier = equipTier;   // 等級顏色（全遊戲共用）
   const all = workshopEntries();
   // 開發分頁只放諾亞做得出來的：只能在後室撿到的（燃燒彈槍、麻醉槍、異質探測器…）不放，撿到之後出現在升級分頁
   const tabOf = (x, tab) => tab === 'up' ? x.lv > 0 : !x.lv && x.canDev, inTab = x => tabOf(x, wsTab);

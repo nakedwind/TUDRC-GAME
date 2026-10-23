@@ -142,8 +142,8 @@ function openHangiCap(cap) {
     let roll = Math.random() * loot.reduce((sum, it) => sum + (it.weight || 1), 0), pick = loot[0];
     for (const it of loot) { roll -= it.weight || 1; if (roll <= 0) { pick = it; break; } }
     const n = Math.max(1, pick.n || 1);
-    supplyInventory.set(pick.id, (supplyInventory.get(pick.id) || 0) + n);
-    if (typeof showItemPickupNotice === 'function') showItemPickupNotice(pick.id, n);
+    const got = supplyGain(pick.id, n);   // 持有上限
+    if (got && typeof showItemPickupNotice === 'function') showItemPickupNotice(pick.id, got);
     if (typeof sfx === 'function') sfx('itemPickup');
     if (typeof updateHUD === 'function') updateHUD();
   }

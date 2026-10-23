@@ -83,6 +83,7 @@ function updateRescueDogPickup(dog, anchor, dt) {
   const pos = dogPickupPosition(target);
   if (Math.hypot(dog.x - pos.x, dog.y - pos.y) < DOG_PICKUP.reach && personnelStepAllowed(dog.x, dog.y, pos.x, pos.y)) {
     const picked = target.kind === 'shard' ? pickShard(target.shard, dog, DOG_PICKUP.reach) : pickupStorageProp(target.prop);
+    if (!picked) ignoreDogPickup(dog, target);   // 撿不起來（例如溫特已達持有上限）：先不要再去撿這個
     clearDogPickup(dog);
     if (picked) dog.pickupCooldown = DOG_PICKUP.interval;
     return true;

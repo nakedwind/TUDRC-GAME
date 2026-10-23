@@ -80,7 +80,7 @@ function claimQuest(q) {
   if (r.crystals) { earnCrystals(r.crystals); if (typeof showPickupToast === 'function') showPickupToast(r.crystals); got.push('異質碎片 ×' + r.crystals); }
   for (const [id, n] of Object.entries(r.items || {})) {
     const it = itemById(id); if (!it) continue;
-    supplyInventory.set(id, (supplyInventory.get(id) || 0) + n); got.push(it.name + ' ×' + n);
+    const g = supplyGain(id, n); if (g) got.push(it.name + ' ×' + g);   // 持有上限：拿不下的會跳提示
   }
   if (r.items && typeof checkMemoryKeys === 'function') setTimeout(checkMemoryKeys, 600);   // 獎勵裡有回憶碎片時，集滿就拼成鑰匙
   if (r.favor && q.giver) {

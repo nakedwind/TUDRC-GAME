@@ -247,7 +247,7 @@ const graffitiErasing = () => !!graffitiErase;
 function tryGraffitiPenFind(x, y) {
   if (Math.random() >= GRAFFITI.lockerChance) return;
   const ids = Object.keys(GRAFFITI_PENS), id = ids[Math.floor(Math.random() * ids.length)];
-  supplyInventory.set(id, (supplyInventory.get(id) || 0) + 1);
+  if (!supplyGain(id, 1)) return;   // 持有上限
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   if (typeof updateHUD === 'function') updateHUD();
 }

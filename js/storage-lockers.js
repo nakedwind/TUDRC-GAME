@@ -85,13 +85,14 @@ function pickupStorageProp(prop){
   }else if(collectedStorageKeys.has(prop.token)||!storagePropEntries().some(p=>p.token===prop.token))return false;
   if(prop.kind==='equipment-drop'){
     if(prop.drop.item){   // 後室道具（平安符）
-      supplyInventory.set(prop.drop.item,(supplyInventory.get(prop.drop.item)||0)+1);sfx('itemPickup');showItemPickupNotice(prop.drop.item,1);
+      if(!supplyGain(prop.drop.item,1))return false;   // 拿不下：留在地上
+      sfx('itemPickup');showItemPickupNotice(prop.drop.item,1);
     }else if(grantEquipment(prop.drop.id,'拾取了'))sfx('itemPickup');
     G.equipmentDrops=(G.equipmentDrops||[]).filter(drop=>drop!==prop.drop);
     updateHUD();saveGame();
   }else{
     const loot=WORLD_PICKUPS[prop.kind];
-    supplyInventory.set(loot.item,(supplyInventory.get(loot.item)||0)+1);
+    if(!supplyGain(loot.item,1))return false;   // 拿不下（持有上限）：留在地上
     collectedStorageKeys.add(prop.token);sfx('itemPickup');
     showItemPickupNotice(loot.item,1);
     updateHUD();saveGame();
@@ -137,8 +138,8 @@ function grantLockerLoot(loot){
   if(loot.kind==='item'){
     const item=itemById(loot.id);if(!item)return;
     const qty=Math.max(1,Math.min(999,Math.floor(Number(loot.qty)||1)));
-    supplyInventory.set(item.id,(supplyInventory.get(item.id)||0)+qty);
-    showItemPickupNotice(item.id,qty);systemNotice('在置物櫃找到「'+item.name+'」×'+qty);
+    const got=supplyGain(item.id,qty);   // 持有上限：拿不下的會跳提示
+    if(got){showItemPickupNotice(item.id,got);systemNotice('在置物櫃找到「'+item.name+'」×'+got);}
   }else if(loot.kind==='equipment'){
     if(!grantEquipment(loot.id,'在置物櫃找到'))systemNotice('已擁有這件裝備');
   }else if(loot.kind==='weapon'){

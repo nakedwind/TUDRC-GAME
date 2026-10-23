@@ -9,7 +9,7 @@ const CORE_CLEAR = { keyItem: 'anomaly-key', fullColor: '#7ee0a8', resultDelay: 
 // js/anomalous-core.js 的 breakCore 呼叫
 function coreKeyDrop(core) {
   const id = CORE_CLEAR.keyItem; if (typeof itemById !== 'function' || !itemById(id)) return;
-  supplyInventory.set(id, (supplyInventory.get(id) || 0) + 1);
+  supplyGain(id, 1);
   if (typeof itemIntroSeen !== 'undefined') itemIntroSeen.add('item:' + id);   // 下面自己跳視窗，拾取提示就不要再跳「第一次拿到」
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   const item = itemById(id);   // 異質鑰匙比較特別：每次拿到都跳說明視窗

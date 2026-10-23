@@ -11,7 +11,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=vending6-20261023"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=maxed-20261023">
+<link rel="stylesheet" href="css/style.css?v=tierlv-20261023">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=lower-20261023">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
@@ -295,7 +295,7 @@
   <script src="js/enemy-ai.js?v=burrow-mask-free-20261023"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=birdcorpse-20261012"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/pearl-kid.js?v=pearlshell-20261016"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
-  <script src="js/hangi-bao.js?v=equip-20261015"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
+  <script src="js/hangi-bao.js?v=carry-20261023"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=shockresist-20261023"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=clownfish4-20261023"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
   <script src="js/clownfish.js?v=smalldeath-20261023"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
@@ -308,8 +308,8 @@
   <script src="js/smiler.js?v=giftlines-20261023"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=dog-pickup-20261021"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=fix39-44-20261018"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=bulletline-20261023"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=detailclick-20261023"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/shop.js?v=carry-20261023"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
+  <script src="js/backpack.js?v=carry-20261023"></script> <!-- 9j. 背包：物品格與說明 -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
   <script src="js/squad-gear.js?v=squad1-20261023"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=achv7-20261023"></script> <!-- 9l. 送禮與好感度 -->
@@ -320,27 +320,27 @@
   <script src="js/gacha.js?v=wardrobe-note2-20261023"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
   <script src="js/sortie-supply.js?v=giftlines-20261023"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=nocircuitnum-20261018"></script>
-  <script src="js/storage-lockers.js?v=bullets-20261022"></script>
-  <script src="js/rescue-dog.js?v=dog-pickup-20261021"></script>
+  <script src="js/storage-lockers.js?v=carry-20261023"></script>
+  <script src="js/rescue-dog.js?v=carry-20261023"></script>
   <script src="js/missions.js?v=nofallback-20261022"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
-  <script src="js/quests.js?v=claimall2-20261021"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
+  <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
   <script src="js/save.js?v=esclayer-20261023"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=basequiet-20261023"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=ammohud-20261022"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=effnum-20261023"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=carry-20261023"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=shockresist-20261023"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=bag-labels-20261022"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=guide-sp-20261021"></script>
   <script src="js/camp-interactions.js?v=tab-mag-20261022"></script>
-  <script src="js/camp-supply.js?v=guide-sp-20261021"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
+  <script src="js/camp-supply.js?v=carry-20261023"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=nofallback-20261022"></script>
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/game.js?v=achv7-20261023"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
-  <script src="js/core-clear.js?v=achvimpl-20261023"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
-  <script src="js/graffiti.js?v=achvimpl-20261023"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
+  <script src="js/core-clear.js?v=carry-20261023"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
+  <script src="js/graffiti.js?v=carry-20261023"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=hint-hover-20261023"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->
   <script src="js/item-intro.js?v=bulletimg-20261022"></script>   <!-- 第一次拿到新東西：說明視窗 -->
