@@ -191,14 +191,25 @@ function subPosAt(x, y) {
 // 物件圖層（會跟角色排前後的那些）＋最上層：1×1 小圖也用四分之一格擺
 const isObjectLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay' || lid === 'top';
 // 用畫出來的實際位置（含微調）找這個像素點上最上面的物件
-function stampIndexAtPx(m, x, y) {
+// 點選物件：照圖層順序挑，上層的優先（跟右邊圖層面板、畫面上誰蓋誰一樣）；同一層裡比較晚放的優先
+// hit(s, t)＝這個物件有沒有被點到。隱藏或鎖定的圖層：選不到／擦不到
+function topStampIndex(m, hit) {
+  let best = -1, bestRank = -1;
   for (let i = m.stamps.length - 1; i >= 0; i--) {
-    const s = m.stamps[i];
-    if (hiddenLayers.has(s.layer || 'top') || isLockedLayer(s.layer)) continue;
-    const t = tileById(s.id) || {}, x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
-    if (x >= x0 && x < x0 + stampW(s, t) * CELL && y >= y0 && y < y0 + stampH(s, t) * CELL) return i;
+    const s = m.stamps[i], lid = s.layer || 'top';
+    if (hiddenLayers.has(lid) || isLockedLayer(lid)) continue;
+    const rank = LAYERS.findIndex(l => l.id === lid);
+    if (rank <= bestRank) continue;   // 已經找到更上層的（或同一層、比較晚放的）
+    const t = tileById(s.id) || {};
+    if (hit(s, t)) { best = i; bestRank = rank; }
   }
-  return -1;
+  return best;
+}
+function stampIndexAtPx(m, x, y) {
+  return topStampIndex(m, (s, t) => {
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
+    return x >= x0 && x < x0 + stampW(s, t) * CELL && y >= y0 && y < y0 + stampH(s, t) * CELL;
+  });
 }
 const hiddenLayers = new Set();
 // 鎖定的圖層：看得到、但不能貼圖／擦除／選取／搬動（跟「隱藏」不一樣）
@@ -666,7 +677,9 @@ window.addEventListener('keydown', e => {
     });
     selections.filter(s => s.type === 'stamp').forEach(sel => {
       const s = m.stamps[sel.index]; if (!s) return;
+      const cells = collisionFootprint(m, [sel]), c0 = Math.round(s.c + (s.ox || 0) / CELL), r0 = Math.round(s.r + (s.oy || 0) / CELL);
       s.ox = (s.ox || 0) + dx; s.oy = (s.oy || 0) + dy;
+      shiftCollision(m, collisionSnapshot(m), cells, Math.round(s.c + s.ox / CELL) - c0, Math.round(s.r + s.oy / CELL) - r0);   // 微調超過半格：底下的碰撞格跟著移一格
     });
     selection = selections.length ? selections[selections.length - 1] : null;
     refreshSelPanel(); saveMaps(); draw();
@@ -979,9 +992,11 @@ function draw() {
     else { const [c, r] = selected.key.split(',').map(Number); rx = OX + c * CELL; ry = OY + r * CELL; }
     if (rx != null) { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3; ctx.setLineDash([7, 4]); ctx.strokeRect(rx + 1.5, ry + 1.5, rw - 3, rh - 3); ctx.setLineDash([]); }
   }
-  // 選到基地時，把目前的碰撞格直接疊在基地圖上，所見即所得。
-  if (selections.length === 1 && selections[0].type === 'stamp') {
-    const s = m.stamps[selections[0].index], t = s && tileById(s.id);
+  // 選到基地時、或拿著「不可穿透」筆刷時，把基地目前的碰撞格直接疊在基地圖上，所見即所得。
+  const baseOverlay = brush.mode === 'solid' ? m.stamps.map((s, i) => i).filter(i => (tileById(m.stamps[i].id) || {}).baseHp)
+    : selections.length === 1 && selections[0].type === 'stamp' ? [selections[0].index] : [];
+  for (const bi of baseOverlay) {
+    const s = m.stamps[bi], t = s && tileById(s.id);
     if (s && t && t.baseHp) {
       for (const [dc, dr] of baseSolidForStamp(s, t)) {
         const x = OX + (s.c + dc) * CELL + (s.ox || 0), y = OY + (s.r + dr) * CELL + (s.oy || 0);
@@ -1037,14 +1052,8 @@ function placeStamp(c, r, t, ox = 0, oy = 0) {
   m.stamps.push(st);
   checkResult = null; saveMaps(); draw();
 }
-function stampIndexAt(m, c, r) {
-  for (let i = m.stamps.length - 1; i >= 0; i--) {
-    const s = m.stamps[i];
-    if (hiddenLayers.has(s.layer || 'top') || isLockedLayer(s.layer)) continue;   // 隱藏或鎖定的圖層：選不到／擦不到
-    const t = tileById(s.id) || {};
-    if (c >= s.c && c < s.c + stampW(s, t) && r >= s.r && r < s.r + stampH(s, t)) return i;
-  }
-  return -1;
+function stampIndexAt(m, c, r) {   // 上層優先（topStampIndex）
+  return topStampIndex(m, (s, t) => c >= s.c && c < s.c + stampW(s, t) && r >= s.r && r < s.r + stampH(s, t));
 }
 
 // 吸管：偵測某格「最上層可見」的圖片 id（隱藏的圖層跳過）
@@ -1065,6 +1074,24 @@ function pickAt(m, c, r) {
 
 // ================= 畫格子（依目前畫筆）=================
 let spawnPaintAdd = true;   // 怪物出生區筆刷：這一筆是畫上還是擦掉
+// 這一格在哪個基地（臨時基地）上：回傳 { s, t, dc, dr }（dc、dr＝在基地圖裡的第幾格）；沒有＝null
+function baseAtCell(m, c, r) {
+  for (let i = m.stamps.length - 1; i >= 0; i--) {
+    const s = m.stamps[i], t = tileById(s.id);
+    if (!t || !t.baseHp || hiddenLayers.has(s.layer || 'top') || isLockedLayer(s.layer)) continue;
+    const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+    const dc = c - c0, dr = r - r0;
+    if (dc >= 0 && dr >= 0 && dc < stampW(s, t) && dr < stampH(s, t)) return { s, t, dc, dr };
+  }
+  return null;
+}
+function pushBaseSolidToggle(s, t, dc, dr) {   // 基地的這一格：阻擋 ⇄ 可走
+  const cells = baseSolidForStamp(s, t).map(cell => cell.slice());
+  const index = cells.findIndex(([x, y]) => x === dc && y === dr);
+  if (index >= 0) cells.splice(index, 1); else cells.push([dc, dr]);
+  s.baseSolid = cells;
+  setStatus(index >= 0 ? '基地這格改成可走動' : '基地這格改成阻擋（可受攻擊）', index >= 0 ? '#7ee0c0' : '#ff8f8f');
+}
 function paintCell(c, r, isDown, additiveSelect = false) {
   if (!inGrid(c, r)) return;
   const m = curMap(), key = c + ',' + r;
@@ -1112,6 +1139,11 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
+  } else if (brush.mode === 'solid' && baseAtCell(m, c, r)) {
+    // 點在基地上：改的是基地自己的碰撞格（跟著基地走、可受攻擊），不是地圖的紅格
+    const { s, t, dc, dr } = baseAtCell(m, c, r);
+    pushBaseSolidToggle(s, t, dc, dr);
+    if (selectedBaseStamp()) refreshBaseCollisionPanel();
   } else if (brush.mode === 'solid') {
     if (m.coreSpots.includes(key)) { setStatus('核心候選點不能設不可穿透，請先取消候選點', '#ff8f8f'); return; }
     removeFrom(m.breakable, key); toggle(m.solid, key);
@@ -1166,6 +1198,40 @@ function cellFromEvent(e) {
   pointerPx = { x, y };   // 物件擺放、選取用的像素位置
   return cellAt(x, y);
 }
+// ---- 搬物件時，它底下的碰撞格一起搬 ----
+// 物件蓋住的格子（照它畫出來的位置，四捨五入到整格）裡的不可穿透紅格、可破壞格、碰撞微調，跟著物件移動一樣的格數
+function collisionFootprint(m, sels) {
+  const cells = new Set();
+  sels.forEach(sel => {
+    if (sel.type !== 'stamp') { if (sel.key) cells.add(sel.key); return; }
+    const s = m.stamps[sel.index]; if (!s) return;
+    const t = tileById(s.id) || {}, c0 = Math.round(s.c + (s.ox || 0) / CELL), r0 = Math.round(s.r + (s.oy || 0) / CELL);
+    for (let r = 0; r < stampH(s, t); r++) for (let c = 0; c < stampW(s, t); c++) cells.add((c0 + c) + ',' + (r0 + r));
+  });
+  return cells;
+}
+const collisionSnapshot = m => ({ solid: (m.solid || []).slice(), breakable: (m.breakable || []).slice(), offsets: clone(m.solidOffsets || {}) });
+// 從 snap（搬之前的樣子）重來：cells 裡的碰撞格移動 (dc, dr) 格；回傳搬了幾格
+function shiftCollision(m, snap, cells, dc, dr) {
+  m.solid = snap.solid.slice(); m.breakable = snap.breakable.slice(); m.solidOffsets = clone(snap.offsets);
+  if (!dc && !dr) return 0;
+  let n = 0;
+  const to = k => { const [c, r] = k.split(',').map(Number); return inGrid(c + dc, r + dr) ? (c + dc) + ',' + (r + dr) : null; };
+  const move = list => {
+    const out = new Set(list.filter(k => !cells.has(k)));
+    list.filter(k => cells.has(k)).forEach(k => { n++; const k2 = to(k); if (k2) out.add(k2); });
+    return [...out];
+  };
+  m.solid = move(snap.solid);
+  const solidSet = new Set(m.solid);
+  m.breakable = move(snap.breakable).filter(k => !solidSet.has(k));   // 同一格不會同時是紅格和可破壞格
+  const offs = {};
+  for (const [k, v] of Object.entries(snap.offsets)) if (!cells.has(k)) offs[k] = v;
+  for (const [k, v] of Object.entries(snap.offsets)) if (cells.has(k)) { const k2 = to(k); if (k2) offs[k2] = v; }
+  for (const k of Object.keys(offs)) if (!solidSet.has(k)) delete offs[k];
+  m.solidOffsets = offs;
+  return n;
+}
 function beginSelectionDrag(c, r) {
   if (brush.mode !== 'select' || !selections.length) { selectionDrag = null; return; }
   if (selections.some(sel => isLockedLayer(selectionLayer(sel)))) {   // 鎖定圖層上的物件不能拖
@@ -1187,7 +1253,8 @@ function beginSelectionDrag(c, r) {
   if (!items.length) { selectionDrag = null; return; }
   const minC = Math.min(...items.map(item => item.c)), minR = Math.min(...items.map(item => item.r));
   const maxC = Math.max(...items.map(item => item.c + item.w)), maxR = Math.max(...items.map(item => item.r + item.h));
-  selectionDrag = { startC: c, startR: r, startPx: pointerPx ? { ...pointerPx } : null, items, layers: clone(m.layers), stamps: clone(m.stamps), minC, minR, maxC, maxR, dc: 0, dr: 0, dx: 0, dy: 0, moved: false };
+  selectionDrag = { startC: c, startR: r, startPx: pointerPx ? { ...pointerPx } : null, items, layers: clone(m.layers), stamps: clone(m.stamps), minC, minR, maxC, maxR, dc: 0, dr: 0, dx: 0, dy: 0, moved: false,
+    collision: collisionSnapshot(m), collisionCells: collisionFootprint(m, selections), collisionMoved: 0 };   // 物件底下的碰撞格跟著搬
 }
 function dragSelectionTo(c, r) {
   if (!selectionDrag) return;
@@ -1202,6 +1269,7 @@ function dragSelectionTo(c, r) {
   if (dc === d.dc && dr === d.dr && dx === d.dx && dy === d.dy) return;
   d.dc = dc; d.dr = dr; d.dx = dx; d.dy = dy; d.moved = dc !== 0 || dr !== 0 || dx !== 0 || dy !== 0;
   m.layers = clone(d.layers); m.stamps = clone(d.stamps);
+  d.collisionMoved = shiftCollision(m, d.collision, d.collisionCells, Math.round(dx / CELL), Math.round(dy / CELL));   // 碰撞格移動整格（物件移超過半格才跟著移）
   d.items.filter(item => item.type === 'tile').forEach(item => delete m.layers[item.layer][item.key]);
   selections = d.items.map(item => {
     if (item.type === 'stamp') {
@@ -1217,7 +1285,7 @@ function dragSelectionTo(c, r) {
     return { type: 'tile', layer: item.layer, key };
   });
   selection = selections[selections.length - 1];
-  setStatus('正在移動 ' + selections.length + ' 個物件（' + dc + ', ' + dr + '）', '#8fd3ff');
+  setStatus('正在移動 ' + selections.length + ' 個物件（' + dc + ', ' + dr + '）' + (d.collisionMoved ? '，連同 ' + d.collisionMoved + ' 格碰撞區' : ''), '#8fd3ff');
   draw();
 }
 cv.addEventListener('pointerdown', e => {
@@ -1235,14 +1303,14 @@ cv.addEventListener('pointermove', e => {
 });
 cv.addEventListener('pointerup', () => {
   painting = false;
-  if (selectionDrag && selectionDrag.moved) { saveMaps(); refreshSelPanel(); setStatus('已移動 ' + selections.length + ' 個物件', '#7ee0c0'); }
+  if (selectionDrag && selectionDrag.moved) { saveMaps(); refreshSelPanel(); setStatus('已移動 ' + selections.length + ' 個物件' + (selectionDrag.collisionMoved ? '（連同 ' + selectionDrag.collisionMoved + ' 格碰撞區）' : ''), '#7ee0c0'); }
   selectionDrag = null;
   if (undoStack.length && undoStack[undoStack.length - 1] === snapshot()) undoStack.pop();
 });
 cv.addEventListener('pointerleave', () => { hoverCell = null; draw(); });
 
 // ================= 滑鼠右鍵・中鍵拖曳畫面 =================
-// 右鍵：不跳出瀏覽器原本的選單（另存圖片、複製圖片…），直接「取消選取物件」。
+// 右鍵：不跳出瀏覽器原本的選單（另存圖片、複製圖片…），直接「取消選取物件」；正要蓋物品時＝取消那個物品、回到「選取」。
 //      （打字的欄位裡還是保留瀏覽器原本的選單，才能複製、貼上文字）
 // 中鍵：按住拖曳＝上下左右移動地圖畫面（不會跳出瀏覽器的自動捲動）。
 // 右鍵、中鍵都不會在地圖上畫東西或選物件。
@@ -1260,6 +1328,11 @@ document.addEventListener('contextmenu', e => {
   if (tempTool === 'pick' && pickResult) {
     pickResult = null; savedBrush = { mode: 'select', tile: (savedBrush || brush).tile };
     setStatus('已取消吸管複製（放開 Alt 回到「選取」）', '#9aa4b2'); return;
+  }
+  // 選了圖、正要蓋（滑鼠上是半透明預覽）：右鍵＝不蓋了，回到「選取」
+  if (brush.mode === 'tile' && brush.tile) {
+    brush = { mode: 'select', tile: brush.tile }; updateToolUI(); renderPalette(); draw();
+    setStatus('已取消選取的物品，回到「選取」', '#9aa4b2'); return;
   }
   if (!selections.length && !selection) return;
   clearSelection(); setStatus('已取消選取', '#9aa4b2');
@@ -2052,7 +2125,7 @@ function refreshSelPanel() {
     refreshDoorControl();
     document.getElementById('selName').textContent = selections.length + ' 個物件'; document.getElementById('selName').title = '';
     layerSelect.innerHTML = '<option value="">選擇目標圖層</option>';
-    LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; layerSelect.appendChild(o); });
+    [...LAYERS].reverse().forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; layerSelect.appendChild(o); });   // 跟右邊圖層面板一樣：上層在最上面
     refreshBaseCollisionPanel(); return;
   }
   let name, curLayer;
@@ -2069,7 +2142,7 @@ function refreshSelPanel() {
   document.getElementById('selName').textContent = name;
   document.getElementById('selName').title = name;   // 名字太長會被截成「…」，滑鼠停上去看全名
   layerSelect.innerHTML = '';
-  LAYERS.forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; if (l.id === curLayer) o.selected = true; layerSelect.appendChild(o); });
+  [...LAYERS].reverse().forEach(l => { const o = document.createElement('option'); o.value = l.id; o.textContent = l.name; if (l.id === curLayer) o.selected = true; layerSelect.appendChild(o); });   // 跟右邊圖層面板一樣：上層在最上面
   refreshDoorControl();
   const depthStamp = selectedDepthStamp();
   if (depthStamp) {

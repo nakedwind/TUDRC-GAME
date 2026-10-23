@@ -391,8 +391,9 @@ function seedMapObstacles() {
     const baseC = s.c + Math.round((s.ox || 0) / CELL), baseR = s.r + Math.round((s.oy || 0) / CELL);
     const hasCustomSolid = Array.isArray(s.baseSolid);
     const sourceSolid = hasCustomSolid ? s.baseSolid : (Array.isArray(t.baseSolid) ? t.baseSolid : []);
-    const solid = (hasCustomSolid ? sourceSolid : mapStampCells(sourceSolid, baseW, baseH, mapStampTurn(s)))
-      .map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
+    // 編輯器存的 s.baseSolid 已經是翻轉、旋轉後畫面上的格子（js/map-editor.js 的 baseSolidForStamp），不要再翻一次
+    const solid = hasCustomSolid ? sourceSolid.map(cell => cell.slice())
+      : mapStampCells(sourceSolid, baseW, baseH, mapStampTurn(s)).map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
     const hp = Math.max(1, Number(s.baseHp != null ? s.baseHp : t.baseHp) || 2000);
     const o = {
       kind: 'obstacle', isBase: true, mapTileId: t.id, baseStamp: s,

@@ -10970,6 +10970,245 @@ const BATTLE_MAPS = [
         "c": 0,
         "r": 14,
         "layer": "ground2"
+      },
+      {
+        "id": "tile_cvs_sign_home_mart",
+        "c": 23,
+        "r": 12,
+        "layer": "top"
+      },
+      {
+        "id": "tile_cvs_checkout_counter_backroom",
+        "c": 22,
+        "r": 15,
+        "layer": "top",
+        "oy": 10,
+        "ox": 30,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_cvs_back_counter",
+        "c": 22,
+        "r": 12,
+        "layer": "top",
+        "ox": 30,
+        "oy": 30,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_cvs_ibon_kiosk",
+        "c": 21,
+        "r": 12,
+        "layer": "top",
+        "oy": 30,
+        "ox": 30
+      },
+      {
+        "id": "tile_cvs_ice_cream_freezer",
+        "c": 28,
+        "r": 13,
+        "layer": "top",
+        "ox": 14,
+        "sortDepth": 2.75
+      },
+      {
+        "id": "tile_cvs_counter_extension",
+        "c": 27,
+        "r": 16,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 10,
+        "sortDepth": 0.75
+      },
+      {
+        "id": "tile_field_base",
+        "c": 12,
+        "r": 23,
+        "layer": "overlay",
+        "baseHp": 2000,
+        "baseDepth": 4,
+        "baseSolid": [
+          [
+            0,
+            1
+          ],
+          [
+            10,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            10,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            10,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            10,
+            4
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            10,
+            5
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            7,
+            3
+          ],
+          [
+            8,
+            3
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            7,
+            5
+          ],
+          [
+            8,
+            5
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            9,
+            4
+          ]
+        ]
       }
     ],
     "solid": [
@@ -11042,7 +11281,39 @@ const BATTLE_MAPS = [
       "29,10",
       "30,10",
       "31,10",
-      "32,10"
+      "32,10",
+      "23,12",
+      "24,12",
+      "25,12",
+      "26,12",
+      "27,12",
+      "28,12",
+      "30,12",
+      "29,12",
+      "22,13",
+      "23,13",
+      "24,13",
+      "25,13",
+      "26,13",
+      "27,13",
+      "28,13",
+      "29,13",
+      "30,13",
+      "22,14",
+      "23,14",
+      "24,14",
+      "25,14",
+      "26,14",
+      "27,14",
+      "28,14",
+      "29,14",
+      "30,14",
+      "23,17",
+      "24,17",
+      "25,17",
+      "26,17",
+      "27,17",
+      "28,17"
     ],
     "breakable": [],
     "camp": [
@@ -12422,18 +12693,18 @@ const BATTLE_MAPS = [
         "23,10": "tile_poolcore_floor_pale",
         "23,12": "tile_poolcore_floor_pale",
         "23,11": "tile_poolcore_floor_pale",
-        "11,22": "tile_poolcore_floor_pale",
-        "11,23": "tile_poolcore_floor_pale",
-        "11,24": "tile_poolcore_floor_pale",
-        "11,25": "tile_poolcore_floor_pale",
-        "11,26": "tile_poolcore_floor_pale",
-        "11,27": "tile_poolcore_floor_pale",
         "23,20": "tile_poolcore_floor_pale",
         "23,19": "tile_poolcore_floor_pale",
         "23,18": "tile_poolcore_floor_pale",
         "23,17": "tile_poolcore_floor_pale",
         "23,16": "tile_poolcore_floor_pale",
-        "11,28": "tile_mv1cfh6l"
+        "13,28": "tile_mv1cfh6l",
+        "13,27": "tile_poolcore_floor_pale",
+        "13,26": "tile_poolcore_floor_pale",
+        "13,25": "tile_poolcore_floor_pale",
+        "13,24": "tile_poolcore_floor_pale",
+        "13,23": "tile_poolcore_floor_pale",
+        "13,22": "tile_poolcore_floor_pale"
       },
       "ground2": {},
       "ground3": {},
@@ -12969,13 +13240,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_wide",
-        "c": 12,
-        "r": 20,
-        "layer": "ground",
-        "sortDepth": 0.5
-      },
-      {
-        "id": "tile_poolcore_wall_wide",
         "c": 14,
         "r": 20,
         "layer": "ground",
@@ -13011,18 +13275,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_edge",
-        "c": 12,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 12,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
         "c": 14,
         "r": 23,
         "layer": "ground"
@@ -13151,24 +13403,6 @@ const BATTLE_MAPS = [
         "id": "tile_poolcore_wall_edge",
         "c": 34,
         "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 12,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 12,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 12,
-        "r": 27,
         "layer": "ground"
       },
       {
@@ -13678,12 +13912,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mv1cftaj",
-        "c": 12,
-        "r": 28,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_mv1cftaj",
         "c": 14,
         "r": 28,
         "layer": "ground"
@@ -13766,19 +13994,16 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_corner",
-        "c": 11,
+        "c": 13,
         "r": 20,
         "layer": "ground",
-        "ox": 0,
         "oy": 12
       },
       {
         "id": "tile_poolcore_floor_pale",
-        "c": 11,
+        "c": 13,
         "r": 21,
-        "layer": "ground",
-        "ox": 0,
-        "oy": 0
+        "layer": "ground"
       },
       {
         "id": "tile_poolcore_wall_corner",
@@ -13869,13 +14094,13 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mr4cyq54",
-        "c": 10,
+        "c": 12,
         "r": 17,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyq54",
-        "c": 10,
+        "c": 12,
         "r": 26,
         "layer": "object"
       },
@@ -13887,11 +14112,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_bg_electric_light",
-        "c": 10,
+        "c": 11,
         "r": 18,
         "layer": "object2",
-        "ox": -18,
-        "oy": 0
+        "ox": 22
       },
       {
         "id": "tile_bg_electric_light",
@@ -13900,6 +14124,236 @@ const BATTLE_MAPS = [
         "layer": "object2",
         "ox": -18,
         "oy": 0
+      },
+      {
+        "id": "tile_cvs_sign_twelve",
+        "c": 3,
+        "r": 18,
+        "layer": "overlay",
+        "ox": 4,
+        "oy": 10
+      },
+      {
+        "id": "tile_cvs_back_counter",
+        "c": 5,
+        "r": 19,
+        "layer": "overlay",
+        "fx": true,
+        "sortDepth": 2.5,
+        "ox": 10
+      },
+      {
+        "id": "tile_cvs_drink_cooler",
+        "c": 3,
+        "r": 19,
+        "layer": "overlay",
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_cvs_checkout_counter_backroom",
+        "c": 6,
+        "r": 20,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_cvs_counter_extension",
+        "c": 4,
+        "r": 21,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30,
+        "sortDepth": 0.75
+      },
+      {
+        "id": "tile_field_base",
+        "c": 0,
+        "r": 23,
+        "layer": "top",
+        "ox": 10,
+        "baseHp": 2000,
+        "baseDepth": 4,
+        "baseSolid": [
+          [
+            0,
+            1
+          ],
+          [
+            10,
+            1
+          ],
+          [
+            0,
+            2
+          ],
+          [
+            10,
+            2
+          ],
+          [
+            0,
+            3
+          ],
+          [
+            10,
+            3
+          ],
+          [
+            0,
+            4
+          ],
+          [
+            10,
+            4
+          ],
+          [
+            0,
+            5
+          ],
+          [
+            10,
+            5
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            7,
+            3
+          ],
+          [
+            8,
+            3
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            6,
+            5
+          ],
+          [
+            7,
+            5
+          ],
+          [
+            8,
+            5
+          ],
+          [
+            9,
+            5
+          ]
+        ],
+        "oy": 30
       }
     ],
     "solid": [
@@ -14088,7 +14542,6 @@ const BATTLE_MAPS = [
       "36,14",
       "36,13",
       "36,12",
-      "12,21",
       "13,21",
       "14,21",
       "15,21",
@@ -14105,12 +14558,6 @@ const BATTLE_MAPS = [
       "24,19",
       "24,20",
       "24,21",
-      "12,22",
-      "12,23",
-      "12,24",
-      "12,25",
-      "12,26",
-      "12,27",
       "13,27",
       "14,27",
       "15,27",
@@ -14153,7 +14600,87 @@ const BATTLE_MAPS = [
       "35,23",
       "35,24",
       "35,25",
-      "35,26"
+      "35,26",
+      "17,16",
+      "17,15",
+      "17,14",
+      "17,13",
+      "4,13",
+      "4,14",
+      "4,15",
+      "4,16",
+      "4,6",
+      "4,5",
+      "4,4",
+      "4,3",
+      "17,3",
+      "17,4",
+      "17,5",
+      "17,6",
+      "22,3",
+      "22,2",
+      "22,1",
+      "22,0",
+      "37,14",
+      "37,13",
+      "37,12",
+      "37,11",
+      "37,10",
+      "37,9",
+      "37,8",
+      "37,7",
+      "37,2",
+      "37,3",
+      "37,4",
+      "37,5",
+      "37,6",
+      "37,26",
+      "37,27",
+      "37,28",
+      "37,29",
+      "13,22",
+      "13,23",
+      "13,24",
+      "13,26",
+      "13,25",
+      "12,20",
+      "12,19",
+      "12,18",
+      "12,17",
+      "12,26",
+      "12,27",
+      "12,28",
+      "12,29",
+      "3,18",
+      "4,18",
+      "5,18",
+      "7,18",
+      "6,18",
+      "8,18",
+      "9,18",
+      "10,18",
+      "3,19",
+      "4,19",
+      "3,20",
+      "4,20",
+      "5,19",
+      "6,19",
+      "7,19",
+      "8,19",
+      "9,19",
+      "10,19",
+      "5,20",
+      "6,20",
+      "7,20",
+      "8,20",
+      "9,20",
+      "10,20",
+      "5,22",
+      "6,22",
+      "7,22",
+      "8,22",
+      "9,22",
+      "10,22"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14172,7 +14699,32 @@ const BATTLE_MAPS = [
       "speed": 44,
       "reward": 8
     },
-    "solidOffsets": {},
+    "solidOffsets": {
+      "5,22": [
+        0,
+        5
+      ],
+      "6,22": [
+        0,
+        5
+      ],
+      "7,22": [
+        0,
+        5
+      ],
+      "8,22": [
+        0,
+        5
+      ],
+      "9,22": [
+        0,
+        5
+      ],
+      "10,22": [
+        0,
+        5
+      ]
+    },
     "safe": false,
     "npcs": false,
     "portals": [],

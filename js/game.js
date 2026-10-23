@@ -581,6 +581,17 @@ function placePlayerNearPortal(portal) {
     if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; return; }
   }
 }
+// ---- 逃生樓梯：溫特走到樓梯盡頭（出入口那一格）就自動上／下樓（黑幕淡入淡出），不用再按空白鍵 ----
+// 只有樓梯（render.js 的 stairPortalDir 認得的）會自動；門、電梯照舊按空白鍵
+let stairArmed = true;   // 剛到新樓層時如果站在樓梯出入口上：要先走出那一格，再走回來才會觸發
+function autoStairTravel() {
+  const p = G.player;
+  if (!p || p.sitting || mapTransitioning || !G.running || G.over || dialogueState || elevatorMenuOpen || typeof mapPortals === 'undefined' || typeof stairPortalDir !== 'function') return;
+  const c = Math.floor((p.x - OX) / CELL), r = Math.floor((p.y - OY) / CELL);
+  const pt = mapPortals.find(q => q.c === c && q.r === r && !q.elevator && !(typeof mrtPortalBlocked === 'function' && mrtPortalBlocked(q)) && stairPortalDir(q));
+  if (!pt) { stairArmed = true; return; }
+  if (stairArmed && anyMoveKey()) { stairArmed = false; enterPortal(pt); }   // 要是自己走進去的（按著移動鍵）才會觸發
+}
 function enterPortal(pt) {
   if (mapTransitioning) return;
   if (mapIndexById(pt.to) < 0) { flash('目標地圖不存在（可能已被刪除）', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
@@ -611,6 +622,7 @@ function enterPortal(pt) {
             if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; }
           }
         } else placePlayerNearPortal(back);
+        stairArmed = false;   // 剛到的位置如果剛好在樓梯出入口上，不要馬上又被送回去
         updateCamera(); draw();
         requestAnimationFrame(() => mapTransition.classList.remove('visible'));
         if (arrivalElevator) {
@@ -1810,7 +1822,7 @@ function frame(ts) {
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
-  if (!menuOpen && !frozen) updatePlayer(sdt);   // 對話、商店或轉場時暫停玩家與戰場
+  if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !settingsOpen && !campPlanOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
