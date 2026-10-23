@@ -45,7 +45,12 @@ function accPlacementInfo(acc, id, dir) {
 }
 const accPlacement = (acc, id, dir) => accPlacementInfo(acc, id, dir).pl;
 // 這個角色可不可以擁有／戴這個配件（服裝編輯器勾「這個角色不能擁有這個配件」＝不行）
-const costumeAllowed = (id, accId) => !((COSTUME_PLACEMENT.blocked || {})[accId] || []).includes(id);
+// 不能戴：服裝編輯器勾的「不能擁有」，或配件寫了 char（角色專屬，例如溫特的狼耳、狼尾巴）而不是這個角色
+const costumeAllowed = (id, accId) => {
+  const acc = typeof COSTUME_ACCESSORIES !== 'undefined' && COSTUME_ACCESSORIES.find(a => a.id === accId);
+  if (acc && acc.char && acc.char !== id) return false;
+  return !((COSTUME_PLACEMENT.blocked || {})[accId] || []).includes(id);
+};
 // 角色的身高偏移（px，以角色圖 64×64 為準）；沒設定＝{ x: 0, y: 0 }
 function costumeCharOffset(id) { const o = (COSTUME_PLACEMENT.offsets || {})[id] || {}; return { x: Number(o.x) || 0, y: Number(o.y) || 0 }; }
 // 這個方向用哪張圖、要不要左右翻（側面圖畫朝左，往右走時翻過來）

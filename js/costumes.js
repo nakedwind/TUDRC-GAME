@@ -34,6 +34,9 @@ function costumeProbe(folder) {
   img.src = `images/character/${folder}/${base}${letter}_0000_Front.png`;
   return undefined;
 }
+// skin 能不能在這裡穿：wear 'base'＝只能在應變中心、'battle'＝只能出勤；沒寫（含內建 A、B）＝都可以
+const costumeSkinFitsMode = (skin, mode) => !skin || !skin.wear || skin.wear === mode;
+const COSTUME_WEAR_NAMES = { base: '應變中心限定', battle: '出勤限定' };
 // 這個角色可以穿的 skin：內建 A、B（有圖的）＋擁有的專屬 skin
 function costumeSkinsFor(id) {
   const base = costumeBase(costumeFolderOf(id)), list = [];
@@ -61,6 +64,7 @@ function costumeSkinSet(id, folder, skinId) {
 function costumeOutfit(id, folder) {
   const eq = costumeState.equip[id]; if (!eq) return null;
   const want = MAP_SAFE ? eq.base : eq.battle;
+  if (want && !costumeSkinFitsMode(SKIN_BY_ID[want], MAP_SAFE ? 'base' : 'battle')) return null;   // 這裡不能穿：照原本
   return want ? costumeSkinSet(id, folder, want) : null;
 }
 
@@ -95,7 +99,8 @@ function costumeGive(who, id) {
   const gifted = costumeState.gifted || (costumeState.gifted = {});
   (gifted[who] = gifted[who] || []).push(id);
   const eq = costumeEquip(who);
-  if (item.slot) eq[item.slot] = id; else { eq.base = id; eq.battle = id; }
+  if (item.slot) eq[item.slot] = id;
+  else for (const mode of ['base', 'battle']) if (costumeSkinFitsMode(item, mode)) eq[mode] = id;   // 限定場合的 skin 只換那一邊
   if (!costumeOwned(id)) {   // 你手上沒有了：別人身上穿的那件脫下來（送給他們的除外）
     for (const [other, e] of Object.entries(costumeState.equip)) {
       if (other === who || costumeGifted(other, id)) continue;
@@ -168,13 +173,16 @@ function buildWardrobe() {
 // 目前穿的 skin（沒設＝照原本：基地 A、戰鬥 B）
 function wdSkinOf(id, mode) {
   const eq = costumeState.equip[id] || {}, set = mode === 'base' ? eq.base : eq.battle;
-  if (set) return set;
+  if (set && costumeSkinFitsMode(SKIN_BY_ID[set], mode)) return set;
   const list = costumeSkinsFor(id), want = mode === 'base' ? 'A' : 'B';
   return list.some(s => s.id === want) ? want : (list[0] && list[0].id) || want;
 }
 function wearCostume(itemId) {
   const eq = costumeEquip(wd.who);
-  if (wd.slot === 'skin') eq[wd.mode === 'base' ? 'base' : 'battle'] = itemId;
+  if (wd.slot === 'skin') {
+    if (!costumeSkinFitsMode(SKIN_BY_ID[itemId], wd.mode)) return;   // 限定場合：這一邊不能穿
+    eq[wd.mode === 'base' ? 'base' : 'battle'] = itemId;
+  }
   else eq[wd.slot] = itemId || null;
   saveCostumes();
   if (typeof applyOutfits === 'function') applyOutfits();   // 遊戲裡的角色馬上跟著換
@@ -194,9 +202,12 @@ function renderWardrobe() {
   let cards = '';
   if (wd.slot === 'skin') {
     const cur = wdSkinOf(id, wd.mode);
-    cards = costumeSkinsFor(id).map(s => '<button type="button" class="wd-item' + (s.id === cur ? ' on' : '') + '" data-wear="' + s.id + '">'
+    // 限定場合、這一邊不能穿的 skin：照樣列出來但變灰、不能點，標出能在哪裡穿
+    cards = costumeSkinsFor(id).map(s => { const ok = costumeSkinFitsMode(s, wd.mode);
+      return '<button type="button" class="wd-item' + (s.id === cur ? ' on' : '') + (ok ? '' : ' wd-off') + '" data-wear="' + s.id + '"' + (ok ? '' : ' disabled title="' + COSTUME_WEAR_NAMES[s.wear] + '"') + '>'
       + '<span class="wd-face"><img src="images/character/' + s.folder + '/' + s.folder.replace('_', '') + '_0000_Front.png" alt=""></span><b>' + s.name + '</b>'
-      + (s.rarity ? '<em class="r-' + s.rarity + '">' + s.rarity + '</em>' : '') + '</button>').join('');
+      + (s.rarity ? '<em class="r-' + s.rarity + '">' + s.rarity + '</em>' : '')
+      + (s.wear ? '<small class="wd-wear">' + COSTUME_WEAR_NAMES[s.wear] + '</small>' : '') + '</button>'; }).join('');
   } else {
     const cur = eq[wd.slot] || '';
     cards = '<button type="button" class="wd-item wd-none' + (!cur ? ' on' : '') + '" data-wear=""><span class="wd-icon">✕</span><b>不戴</b></button>'
