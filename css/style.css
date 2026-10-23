@@ -2443,7 +2443,8 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 #wardrobe .wd-icon img { max-width: 40px; max-height: 40px; min-width: 24px; image-rendering: pixelated; }
 #wardrobe .wd-item em { position: absolute; top: 4px; right: 5px; padding: 0 4px; border-radius: 4px; background: rgba(255,255,255,.1); color: #c9d3dc; font: 800 10px sans-serif; font-style: normal; }
 #wardrobe .wd-item i { position: absolute; bottom: 4px; right: 6px; color: #8fd3ff; font: 700 11px sans-serif; font-style: normal; }
-#wardrobe .wd-empty { grid-column: 1 / -1; margin: 6px 0; color: #7f91a5; font-size: 13px; }
+#wardrobe .wd-empty { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; color: #7f91a5; font-size: 13px; text-align: center; white-space: nowrap; pointer-events: none; }   /* 「還沒有這個欄位的配件」：在配件區正中間 */
+#wardrobe .wd-grid { position: relative; }
 @media (prefers-reduced-motion: reduce) { #wardrobe, #wardrobe .wd-card { animation: none; } }
 
 /* ===== 稀有度顏色（衣櫃、扭蛋機共用；data/costumes.js 的 COSTUME_RARITIES）===== */
@@ -2459,6 +2460,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #gacha .gc-title { flex:1; min-width:0; }
 #gacha .gc-title h2 { margin:0 0 3px; color:#f2f8ff; font-size:22px; line-height:1.1; }
 #gacha .gc-title p { margin:0; color:#8c9aa8; font-size:12px; }
+#gacha .gc-title p .gc-hl { color:#ffa94d; font-style:normal; font-weight:700; }   /* 說明裡的「衣櫃」：橘色字 */
 #gacha .gc-shards { display:flex; align-items:center; gap:6px; padding:3px 12px 3px 6px; border:1px solid rgba(214,155,255,.35); border-radius:999px; background:rgba(40,22,60,.45); color:#ecd6ff; font:800 15px sans-serif; }
 #gacha .gc-shards img { width:18px; height:23px; }
 #gacha .gc-close { width:32px; height:32px; flex:none; padding:0; border:1px solid #59616c; border-radius:50%; background:#202730; color:#dfe7ee; cursor:pointer; font-size:19px; line-height:1; }

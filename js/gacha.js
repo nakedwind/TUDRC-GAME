@@ -97,7 +97,7 @@ function buildGacha() {
   const el = gc.el = document.createElement('div');
   el.id = 'gacha'; el.className = 'hidden';
   el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '扭蛋機');
-  el.innerHTML = '<section class="gc-card"><header class="gc-head"><div class="gc-icon-box" aria-hidden="true"><img src="images/items/gashapon-capsule.png" alt=""></div><div class="gc-title"><h2>扭蛋機</h2><p>投入異質碎片，轉出服裝和配件</p></div>'
+  el.innerHTML = '<section class="gc-card"><header class="gc-head"><div class="gc-icon-box" aria-hidden="true"><img src="images/items/gashapon-capsule.png" alt=""></div><div class="gc-title"><h2>扭蛋機</h2><p>投入異質碎片，轉出服裝和配件。獲得的物品會自動收進旁邊的<em class="gc-hl">衣櫃</em>。</p></div>'
     + '<span class="gc-shards"><img src="images/碎片鑰匙/anomalous-shard.png" alt=""><b></b></span>'
     + '<button type="button" class="gc-close" aria-label="關閉（Esc）">×</button></header>'
     + '<div class="gc-body"><div class="gc-machine"><div class="gc-machine-art"><img src="images/street/street-capsule-toy-machines.png" alt=""></div>'

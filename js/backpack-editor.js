@@ -140,7 +140,7 @@ function renderProps(rebuild = true) {
   if (sub) sub.textContent = [inf.visible === false ? '（現在畫面上看不到，換個分頁或物品）' : '', inf.count > 1 ? '同一組有 ' + inf.count + ' 個，一起調整' : '', inf.item && t && !t.note && t.store === 'items' ? '目前物品：' + inf.item : ''].filter(Boolean).join('　');
   const ta = box.querySelector('[data-text]');
   if (ta && t && !t.note) {
-    if (document.activeElement !== ta) ta.value = t.value || '';
+    if (document.activeElement !== ta) ta.value = t.value || t.original || '';   // 沒改過的：直接填目前的預設文字，改幾個字就好，不用整句重打
     ta.placeholder = t.original || '';
     $b('textScope').textContent = t.scope || '';
     $b('textOrig').textContent = '預設：' + (t.original || '（空白）');
@@ -156,7 +156,7 @@ $b('props').addEventListener('pointerdown', prefillDefault, true);
 $b('props').addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') prefillDefault(e); }, true);
 $b('props').addEventListener('input', e => {
   if (!selKey) return;
-  if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t && !t.note) { remember('text:' + selKey); setText(t, e.target.value); } return; }
+  if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t && !t.note) { remember('text:' + selKey); setText(t, e.target.value === (t.original || '') ? '' : e.target.value); } return; }   // 改回跟預設一樣＝不另外存
   const f = e.target.dataset.f; if (!f) return;
   remember('field:' + selKey + ':' + f);
   const val = e.target.value === '' ? 0 : +e.target.value;
