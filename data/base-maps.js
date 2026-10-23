@@ -9058,11 +9058,6 @@ const BASE_MAPS = [
         "c": 18,
         "r": 4,
         "to": "map_mvfmo6c2"
-      },
-      {
-        "c": 19,
-        "r": 4,
-        "to": "map_mvfmo6c2"
       }
     ],
     "cols": 27,

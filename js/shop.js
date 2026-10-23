@@ -7,13 +7,16 @@
 //  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Spacenter 打開
 //  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Spacenter 打開，只賣飲料
 //  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Spacenter，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
+//    2F應變中心的兩台（EOC_VENDING）：紅＝零食、綠＝飲料，各隨機 6 種、每種最多 3 個，每 10 分鐘（現實時間）重新抽、補滿
+//  ・零食、飲料：溫特每一種最多帶 CARRY_LIMIT.max 個（所有商店、販賣機都照這個上限）
+//  ・後室商店也賣全部的零食、飲料
 //  ・後室商店：地圖編輯器「後室便利商店櫃台」靠近按 Spacenter。賣 BACKROOM_SHOP.stock（杏仁水只有這裡買得到），
 //    也可以把背包裡的東西賣掉換錢（賣到的錢算進作戰經費，回基地時一起帶回去）
 // ============================================================
 const supplyShop = document.getElementById('supplyShop');
 const supplyShopList = document.getElementById('supplyShopList');
 const shopCartList = document.getElementById('cartList');
-const storeCart = new Map(), vendingCart = new Map();   // 購物車：商品 id → 數量（結帳後才放進背包）；一般商店與飲料店分開
+const storeCart = new Map(), vendingCart = new Map(), vendingCarts = { red: new Map(), green: new Map() };   // 購物車：商品 id → 數量（結帳後才放進背包）；一般商店與飲料店分開
 let shopCart = storeCart;
 let supplyShopOpen = false, supplyShopTab = 'all';
 let vendingMode = false, drinkShopMode = false;   // 販賣機或飲料店模式都只賣飲料
@@ -42,6 +45,36 @@ function backroomBulletStock() {
   }));
 }
 const shopBulletRoom = item => item.bullet ? Math.max(0, BULLETS[item.bullet].max - bulletCount(item.bullet)) : Infinity;
+// ---- 零食、飲料：溫特身上每一種最多帶幾個 ----
+const CARRY_LIMIT = { kinds: ['snack', 'drink'], max: 2 };
+const carryRoom = item => CARRY_LIMIT.kinds.includes(item.kind) ? Math.max(0, CARRY_LIMIT.max - (supplyInventory.get(item.id) || 0)) : Infinity;
+// ---- 2F應變中心的兩台販賣機：紅＝零食、綠＝飲料 ----
+// slots＝每台賣幾種（每次補貨時從全部的零食／飲料裡隨機抽）；max＝每種補滿時有幾個；refillMin＝幾分鐘（現實時間）補一次貨
+// 庫存存在瀏覽器（store），關掉遊戲時間也照算；開新遊戲會重設（js/new-game.js）
+const EOC_VENDING = { map: '2F應變中心', kinds: { red: 'snack', green: 'drink' }, slots: 6, max: 3, refillMin: 10, store: 'tudrc_vending_stock_v1' };
+let vendingColor = null;   // 目前打開的是哪一台（red／green；其他地圖的販賣機＝null，照舊只賣飲料）
+const vendingColorOf = id => (/vending_red/.test(id) ? 'red' : /vending_green/.test(id) ? 'green' : null);
+const isEocVending = () => !!vendingColor && typeof MAP_SAFE !== 'undefined' && MAP_SAFE && MAP && String(MAP.name || '').trim() === EOC_VENDING.map;
+function eocVendingState() {
+  const period = EOC_VENDING.refillMin * 60000, now = Date.now();
+  let st = null; try { st = JSON.parse(localStorage.getItem(EOC_VENDING.store) || 'null'); } catch (_) {}
+  if (!st || !(st.at > 0) || now - st.at >= period || now < st.at) {
+    st = { at: st && st.at > 0 && now >= st.at ? st.at + Math.floor((now - st.at) / period) * period : now };   // 照 10 分鐘一格往前推，補貨時間不會越拖越晚
+    for (const [color, kind] of Object.entries(EOC_VENDING.kinds)) {
+      const pool = SUPPLIES.filter(item => item.kind === kind && !item.special).map(item => item.id).sort(() => Math.random() - .5);
+      st[color] = Object.fromEntries(pool.slice(0, EOC_VENDING.slots).map(id => [id, EOC_VENDING.max]));   // 商品 id → 剩幾個
+    }
+    try { localStorage.setItem(EOC_VENDING.store, JSON.stringify(st)); } catch (_) {}
+  }
+  return st;
+}
+const eocVendingMinutesLeft = () => Math.max(1, Math.ceil((eocVendingState().at + EOC_VENDING.refillMin * 60000 - Date.now()) / 60000));
+// 這一格還能放幾個進購物車：子彈上限、零食飲料的持有上限、販賣機的庫存
+function shopRoom(item) {
+  let room = Math.min(shopBulletRoom(item), carryRoom(item));
+  if (vendingMode && isEocVending()) room = Math.min(room, (eocVendingState()[vendingColor] || {})[item.id] || 0);
+  return room;
+}
 function backroomStock(stock = BACKROOM_SHOP.stock) {
   return stock.map(s => {
     const base = supplyById(s.id) || (typeof itemById === 'function' ? itemById(s.id) : null); if (!base) return null;
@@ -50,7 +83,8 @@ function backroomStock(stock = BACKROOM_SHOP.stock) {
 }
 // 基地：便利商店賣一般商品、販賣機和飲料店只賣飲料；後室：販賣機、60BLUE 照上面的清單，便利商店多賣杏仁水
 // 後室道具（special）只有後室商店賣
-const shopItems = () => backroomMode ? [...backroomStock(), ...backroomBulletStock()]
+const shopItems = () => backroomMode ? [...backroomStock(), ...SUPPLIES.filter(item => (item.kind === 'snack' || item.kind === 'drink') && !item.special), ...backroomBulletStock()]   // 後室商店：全部的零食、飲料都賣
+  : vendingMode && isEocVending() ? Object.keys(eocVendingState()[vendingColor] || {}).map(supplyById).filter(Boolean)   // 2F應變中心的販賣機：這次抽到的 6 種
   : vendingMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_VENDING))
   : drinkShopMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_DRINKSHOP))
   : [...SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id))), ...(MAP_SAFE && typeof squadGearShopItems === 'function' ? squadGearShopItems() : [])];   // 基地的便利商店也賣隊員裝備（js/squad-gear.js）
@@ -104,11 +138,13 @@ function renderSupplyShop() {
     .sort((a, b) => (SHOP_KIND_ORDER.indexOf(a.kind) - SHOP_KIND_ORDER.indexOf(b.kind)) || a.price - b.price);   // 補給 → 零食 → 飲料，各自由便宜到貴
   supplyShopList.innerHTML = visible.map(item => {
     const use = item.use && SUPPLY_KIND[item.use], inCart = shopCart.get(item.id) || 0, short = item.price - left;
-    const full = inCart >= shopBulletRoom(item);
+    const full = inCart >= shopRoom(item);
+    const left2 = isEocVending() ? (eocVendingState()[vendingColor] || {})[item.id] || 0 : null, owned = supplyInventory.get(item.id) || 0;
+    const limitTxt = (left2 != null ? (left2 ? '・剩 ' + left2 + ' 個' : '・售完') : '') + (CARRY_LIMIT.kinds.includes(item.kind) ? '・持有 ' + owned + '/' + CARRY_LIMIT.max : '');
     return `<article class="shop-item ${item.kind} ${item.use || 'gift'}" data-item="${item.id}">
       ${inCart ? `<span class="shop-owned" title="購物車裡有 ${inCart} 個">🛒${inCart}</span>` : ''}
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
-      <span class="shop-effect">${use ? use.icon + ' ' + supplyEffect(item) : item.effect ? item.effect : item.id === 'battery' ? '🔋 手電筒用' : '🎁 送禮用'}</span>
+      <span class="shop-effect">${use ? use.icon + ' ' + supplyEffect(item) : item.effect ? item.effect : item.id === 'battery' ? '🔋 手電筒用' : '🎁 送禮用'}${limitTxt}</span>
       <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${full ? `disabled aria-label="${item.name}，已達持有上限"` : short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="把 ${item.name} 加入購物車，$${item.price}"`}>${full ? '已達上限' : short > 0 ? `還差 $${short}` : `<span>加入</span><b>$${item.price}</b>`}</button>
     </article>`;
   }).join('');
@@ -192,15 +228,17 @@ function sellItem(id) {
 function setShopMode(mode) {
   vendingMode = mode === 'vending'; drinkShopMode = mode === 'drinkshop'; backroomMode = mode === 'backroom';
   backroomTab = 'buy';
-  shopCart = backroomMode ? backroomCart : vendingMode || drinkShopMode ? vendingCart : storeCart;
+  if (!vendingMode) vendingColor = null;
+  shopCart = backroomMode ? backroomCart : vendingMode && isEocVending() ? vendingCarts[vendingColor] : vendingMode || drinkShopMode ? vendingCart : storeCart;
   supplyShop.classList.toggle('vending', vendingMode);
   supplyShop.classList.toggle('drinkshop', drinkShopMode);
   supplyShop.classList.toggle('backroom', backroomMode);
-  const smallTitle = backroomMode ? '後室・便利商店' : vendingMode ? '自動販賣機' : drinkShopMode ? '飲料店' : '便利商店';
-  const title = backroomMode ? '後室商店' : vendingMode ? '販賣機' : drinkShopMode ? '飲料店' : '商店';
+  const eoc = vendingMode && isEocVending();
+  const smallTitle = backroomMode ? '後室・便利商店' : eoc ? '自動販賣機・' + eocVendingMinutesLeft() + ' 分鐘後補貨' : vendingMode ? '自動販賣機' : drinkShopMode ? '飲料店' : '便利商店';
+  const title = backroomMode ? '後室商店' : eoc ? (vendingColor === 'red' ? '零食販賣機' : '飲料販賣機') : vendingMode ? '販賣機' : drinkShopMode ? '飲料店' : '商店';
   supplyShop.querySelector('.shop-title small').textContent = smallTitle;
   document.getElementById('supplyShopTitle').textContent = title;
-  supplyShop.querySelector('.shop-sign').textContent = vendingMode || drinkShopMode ? '🥤' : '24H';
+  supplyShop.querySelector('.shop-sign').textContent = eoc && vendingColor === 'red' ? '🍘' : vendingMode || drinkShopMode ? '🥤' : '24H';
   document.getElementById('supplyShopClose').setAttribute('aria-label', '關閉' + title + '（Esc）');
 }
 function openSupplyShop() {
@@ -213,6 +251,7 @@ function openSupplyShop() {
 }
 function openVendingMachine() {
   if (!G || G.over || !G.player || supplyShopOpen) return;
+  const near = vendingNearPlayer(); vendingColor = near ? vendingColorOf(near.id) : null;   // 哪一台（2F應變中心：紅＝零食、綠＝飲料）
   setShopMode('vending');
   supplyShopOpen = true; aimHeld = false; supplyHover = null; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeBackpack(true); closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
@@ -245,7 +284,7 @@ function shopStampNearPlayer(cfg) {
     const t = mapTileById(s.id); if (!t) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), x1 = x0 + mapTileW(t) * CELL, y1 = y0 + mapTileH(t) * CELL;
     const d = Math.hypot(Math.max(x0 - p.x, 0, p.x - x1), Math.max(y0 - p.y, 0, p.y - y1));
-    if (d <= bestD) { bestD = d; best = { x: (x0 + x1) / 2, top: y0, dist: d }; }
+    if (d <= bestD) { bestD = d; best = { x: (x0 + x1) / 2, top: y0, dist: d, id: s.id }; }
   }
   return best;
 }
@@ -254,7 +293,7 @@ const cartTotal = () => shopItems().reduce((sum, item) => sum + item.price * (sh
 function addToCart(id, focusCard = true) {
   const item = shopItemById(id);
   if (!item || !G || G.money - cartTotal() < item.price) { sfx('error'); return; }
-  if ((shopCart.get(id) || 0) >= shopBulletRoom(item)) { sfx('error'); return; }
+  if ((shopCart.get(id) || 0) >= shopRoom(item)) { sfx('error'); return; }
   shopCart.set(id, (shopCart.get(id) || 0) + 1);
   sfx('button'); renderSupplyShop();
   const card = supplyShopList.querySelector(`[data-item="${id}"]`);   // 加入的那張卡片發光、冒出 +1
@@ -272,11 +311,16 @@ function checkoutCart() {
   if (!shopCart.size || !G || total > G.money) { sfx('error'); return; }
   for (const [id, n] of shopCart) {
     const item = shopItemById(id);
-    if (!item || n > shopBulletRoom(item)) { sfx('error'); systemNotice('子彈已達持有上限，請調整購物車數量', true); return; }
+    if (!item || n > shopRoom(item)) { sfx('error'); systemNotice(item && item.bullet ? '子彈已達持有上限，請調整購物車數量' : '超過持有上限（每種最多 ' + CARRY_LIMIT.max + ' 個）或販賣機庫存不夠，請調整購物車數量', true); return; }
   }
   const count = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
   G.money -= total;
   if (typeof achieveOnSpend === 'function') achieveOnSpend(vendingMode ? 'vending' : 'shop', total, count, [...shopCart.keys()]);   // 成就：販賣機／商店的購買
+  if (vendingMode && isEocVending()) {   // 2F應變中心的販賣機：扣庫存
+    const st = eocVendingState(), box = st[vendingColor] || {};
+    for (const [id, n] of shopCart) if (id in box) box[id] = Math.max(0, box[id] - n);
+    try { localStorage.setItem(EOC_VENDING.store, JSON.stringify(st)); } catch (_) {}
+  }
   for (const [id, n] of shopCart) {
     const item = shopItemById(id);
     if (item.bullet) addBullets(item.bullet, n);

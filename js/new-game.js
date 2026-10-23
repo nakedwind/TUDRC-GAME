@@ -8,7 +8,8 @@
     'tudrc_missions_v1', 'tudrc_sortie_v1', 'tudrc_sp_v1', 'tudrc-combat-progress-v1',
     'tudrc_guide_sp_v1',
     'tudrc_graffiti_v1',   // 牆上、地上的塗鴉（js/graffiti.js）
-    'tudrc_camp_supply_v1',   // 各地圖營地物資箱的數量（js/camp-supply.js）
+    'tudrc_camp_supply_v1',
+    'tudrc_vending_stock_v1',   // 2F應變中心販賣機的庫存（js/shop.js 的 EOC_VENDING）   // 各地圖營地物資箱的數量（js/camp-supply.js）
     'tudrc_mrt_unlocked_v1',   // 已經解封的捷運入口（js/mrt-locks.js）
     'tudrc_costumes_v1',   // 擁有的服裝、每個人穿什麼（js/costumes.js）
     'tudrc_bestiary_v1',   // 怪物圖鑑：每種怪物消滅過幾次（js/bestiary.js）
