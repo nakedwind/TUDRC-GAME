@@ -1038,6 +1038,7 @@ function newGame() {
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
+  if (typeof achieveOnSortie === 'function') achieveOnSortie();   // 成就：同時帶著○○出勤
   spawnWanderers();     // 場景 NPC 只會在亮處自由走動
   const [px, py] = playerSpawnPos();
   G.player = { x: px, y: py, hp: PLAYER.hp ?? 100, maxhp: PLAYER.hp ?? 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };

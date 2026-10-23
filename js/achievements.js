@@ -127,6 +127,13 @@ function achieveOnSupply(item) {
   if (item.use === 'hp') b.medkits++;
   else if (item.use === 'sp') { b.almond++; achieveMax('almondInBattle', b.almond); }
 }
+// 進入戰鬥地圖、出勤隊伍出場（js/game.js 的 newGame）：「同時帶著○○出勤」
+function achieveOnSortie() {
+  if (typeof MAP_SAFE === 'undefined' || MAP_SAFE || !achieveNotPractice() || !G || !G.towers) return;
+  const here = new Set(G.towers.map(t => t.type));
+  for (const stat of new Set(achieveSet().list.map(a => a.stat).filter(x => x.startsWith('sortieWith:'))))
+    if (stat.slice(11).split('+').every(id => here.has(id))) addStat(stat);
+}
 // 打贏（js/game.js 的 win）、徹底控制（js/core-clear.js 的 markFullControl）
 function achieveOnBattleEnd(kind) {
   if (!G || !G.battle) return;

@@ -52,6 +52,7 @@ const ACHIEVE_STATS = [
   { id: 'shopSpent', name: '在商店花的錢' },
   { id: 'moneySpent', name: '總共花掉的錢（商店、販賣機、蓋建築）' },
   { id: 'gachaPulls', name: '扭蛋（次數）' },
+  { id: 'gachaItems', name: '從扭蛋機拿到的東西（個數，重複的也算）' },
   { id: 'crystalsSpent', name: '花掉的異質碎片（扭蛋、開發工坊、技能）' },
   { id: 'crystalsEarned', name: '獲得的異質碎片' },
 ];
@@ -94,10 +95,16 @@ function achieveStatList() {
   const names = typeof bestiaryEntries === 'function' ? Object.fromEntries(bestiaryEntries(undefined, true).map(e => [e.key, e.name])) : {};   // 怪物圖鑑裡改過的名稱
   const fighters = typeof CHARACTERS !== 'undefined' ? Object.values(CHARACTERS).filter(c => c.combat && c.kind !== 'player') : [];
   const accs = typeof COSTUME_ACCESSORIES !== 'undefined' ? COSTUME_ACCESSORIES : [];
+  const giftable = typeof CHARACTERS !== 'undefined' ? Object.values(CHARACTERS).filter(ch => ch.kind !== 'player' && (typeof GIFT_PREFS === 'undefined' || GIFT_PREFS[ch.id])) : [];
+  const nameOf = id => (typeof CHARACTERS !== 'undefined' && CHARACTERS[id] && CHARACTERS[id].name) || id;
+  // 「同時帶著○○出勤」：成就資料裡已經用到的組合都列出來（要新的組合：選自訂條件，請 Claude 加）
+  const combos = [...new Set((typeof ACHIEVEMENT_DATA !== 'undefined' ? ACHIEVEMENT_DATA.list : []).map(a => String(a.stat)).filter(x => x.startsWith('sortieWith:')))];
   return [
     ...ACHIEVE_STATS.map(s => ({ ...s, group: '戰績' })),
     ...fighters.map(ch => ({ id: 'downedBy:' + ch.id, name: '溫特被暴走的「' + ch.name + '」打倒', group: '溫特被某位暴走的隊員打倒' })),
     ...accs.map(a => ({ id: 'allWear:' + a.id, name: '全員戴上「' + a.name + '」（全部戴上＝1）', group: '全員穿戴某件配件' })),
+    ...giftable.map(ch => ({ id: 'giftsTo:' + ch.id, name: '送「' + ch.name + '」禮物（次數，零食飲料和服裝都算）', group: '送某位角色禮物' })),
+    ...combos.map(id => ({ id, name: '帶著 ' + id.slice(11).split('+').map(nameOf).join('、') + ' 一起出勤（進入戰鬥地圖時算 1 次）', group: '同時帶著某幾位隊員出勤' })),
     ...monsters.map(m => ({ id: 'kill:' + m.key, name: '擊倒「' + (names[m.key] || m.name) + '」', group: '擊倒某一種怪物（跟怪物圖鑑的消滅次數一樣）' })),
   ];
 }

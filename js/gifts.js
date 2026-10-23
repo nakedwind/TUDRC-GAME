@@ -116,7 +116,7 @@ function giveGift(itemId) {
   favorPoints[id] = Math.max(0, (favorPoints[id] || 0) + gain);
   (giftKnown[id] = giftKnown[id] || {})[itemId] = reaction;
   giftedThisVisit.add(id);
-  if (typeof addStat === 'function') addStat('gifts');   // 成就：送禮次數
+  if (typeof addStat === 'function') { addStat('gifts'); addStat('giftsTo:' + id); }   // 成就：送禮次數（全部、送給這個人）
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
   // 對話框換成收到禮物的反應
@@ -146,7 +146,7 @@ function giveCostumeGift(costumeId) {
   favorPoints[id] = Math.max(0, (favorPoints[id] || 0) + gain);
   (giftKnown[id] = giftKnown[id] || {})[costumeId] = reaction;
   giftedThisVisit.add(id);
-  if (typeof addStat === 'function') addStat('gifts');   // 成就：送禮次數
+  if (typeof addStat === 'function') { addStat('gifts'); addStat('giftsTo:' + id); }   // 成就：送禮次數（全部、送給這個人）
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
   const said = giftLine(id, reaction === 'dislike' ? 'giftDislike' : 'giftCostume', item.name);   // 「收到服裝」；不喜歡的服裝說「收到不喜歡的禮物」

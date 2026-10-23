@@ -60,6 +60,17 @@ const ACHIEVEMENT_DATA = {
     { "id": "pistol_50000", "group": "隱藏成就", "name": "聽我說，這比魔法好用！", "stat": "pistolDamage", "goal": 50000, "secret": true, "desc": "溫特用手槍造成的傷害累計達到 50,000 點" },
     { "id": "talk_all", "group": "互動．角色", "name": "社交達人", "stat": "talkedAll", "goal": 1, "desc": "與應變中心每一位角色對話 1 次" },
     { "id": "gift_20", "group": "互動．角色", "name": "禮輕情意重", "stat": "gifts", "goal": 20, "desc": "累計送禮 20 次" },
+    { "id": "custom_10_12", "group": "互動．角色", "name": "累計送 雷德 禮物 10 次", "stat": "giftsTo:red", "goal": 10, "desc": "累計送 雷德 禮物 10 次", "note": "累計送 雷德 禮物 10 次" },
+    { "id": "custom_10_11", "group": "互動．角色", "name": "累計送 艾德林 禮物 10 次", "stat": "giftsTo:eldrin", "goal": 10, "desc": "累計送 艾德林 禮物 10 次", "note": "累計送 艾德林 禮物 10 次" },
+    { "id": "custom_10_10", "group": "互動．角色", "name": "累計送 希奧妮 禮物 10 次", "stat": "giftsTo:theonie", "goal": 10, "desc": "累計送 希奧妮 禮物 10 次", "note": "累計送 希奧妮 禮物 10 次" },
+    { "id": "custom_10_9", "group": "互動．角色", "name": "累計送 諾亞 禮物 10 次", "stat": "giftsTo:noah", "goal": 10, "desc": "累計送 諾亞 禮物 10 次", "note": "累計送 諾亞 禮物 10 次" },
+    { "id": "custom_10_8", "group": "互動．角色", "name": "累計送 亞許 禮物 10 次", "stat": "giftsTo:ash", "goal": 10, "desc": "累計送 亞許 禮物 10 次", "note": "累計送 亞許 禮物 10 次" },
+    { "id": "custom_10_7", "group": "互動．角色", "name": "累計送 提諾 禮物 10 次", "stat": "giftsTo:tino", "goal": 10, "desc": "累計送 提諾 禮物 10 次", "note": "累計送 提諾 禮物 10 次" },
+    { "id": "custom_10_6", "group": "互動．角色", "name": "累計送 路德 禮物 10 次", "stat": "giftsTo:luther", "goal": 10, "desc": "累計送 路德 禮物 10 次", "note": "累計送 路德 禮物 10 次" },
+    { "id": "custom_10_5", "group": "互動．角色", "name": "累計送 克莉思 禮物 10 次", "stat": "giftsTo:chris", "goal": 10, "desc": "累計送 克莉思 禮物 10 次", "note": "累計送 克莉思 禮物 10 次" },
+    { "id": "custom_10_4", "group": "互動．角色", "name": "累計送 安柏 禮物 10 次", "stat": "giftsTo:amber", "goal": 10, "desc": "累計送 安柏 禮物 10 次", "note": "累計送 安柏 禮物 10 次" },
+    { "id": "custom_10_3", "group": "互動．角色", "name": "累計送 克萊兒 禮物 10 次", "stat": "giftsTo:claire", "goal": 10, "desc": "累計送 克萊兒 禮物 10 次", "note": "累計送 克萊兒 禮物 10 次" },
+    { "id": "custom_10", "group": "互動．角色", "name": "累計送 穆恩 禮物 10 次", "stat": "giftsTo:muomn", "goal": 10, "desc": "累計送 穆恩 禮物 10 次", "note": "累計送 穆恩 禮物 10 次" },
     { "id": "tp_score_1000", "group": "小遊戲", "name": "神射手", "stat": "tpBestScore", "goal": 1000, "desc": "在射擊練習室的限時挑戰得到 1,000 分" },
     { "id": "tp_shots_130", "group": "小遊戲", "name": "子彈不用錢", "stat": "tpMostShots", "goal": 130, "desc": "在射擊練習室的限時挑戰發射 130 發子彈" },
     { "id": "vend_items_100", "group": "互動．物品", "name": "在販賣機購買 100 件商品", "stat": "vendItems", "goal": 100, "desc": "在販賣機購買 100 件商品" },
@@ -73,7 +84,9 @@ const ACHIEVEMENT_DATA = {
     { "id": "crystal_spent_100000", "group": "互動．物品", "name": "一直異質花", "stat": "crystalsSpent", "goal": 100000, "desc": "消耗 100,000 個異質碎片", "note": "扭蛋、開發工坊、學技能都算。" },
     { "id": "crystal_earned_10000", "group": "互動．物品", "name": "異質礦工", "stat": "crystalsEarned", "goal": 10000, "desc": "獲得 10,000 個異質碎片" },
     { "id": "custom_10_2", "group": "隱藏成就", "name": "大藝術家", "stat": "graffitis", "goal": 50, "secret": true, "desc": "塗鴉累計達到 50 次" },
-    { "id": "custom_10_22", "group": "隱藏成就", "name": "部隊長的用心我看得見", "stat": "allPosters", "goal": 1, "desc": "查看每張宣導海報" }
+    { "id": "custom_10_22", "group": "隱藏成就", "name": "部隊長的用心我看得見", "stat": "allPosters", "goal": 1, "desc": "查看每張宣導海報" },
+    { "id": "custom_10_13", "group": "隱藏成就", "name": "抱歉了錢錢，我需要這個酷東西", "stat": "gachaItems", "goal": 50, "secret": true, "desc": "累計從扭蛋機獲得 50 個商品", "note": "累計從扭蛋機獲得 50 個商品，含重複商品" },
+    { "id": "custom_10_14", "group": "隱藏成就", "name": "這就是愛吧", "stat": "sortieWith:red+eldrin+avaren", "goal": 1, "secret": true, "desc": "同時帶著雷德、溫特、艾德林、阿瓦倫出勤", "note": "剛編入隊伍時不算，進入戰鬥區域後才算。" }
   ],
   "board": [
     { "stat": "slimeKills", "label": "討伐史萊姆" },
