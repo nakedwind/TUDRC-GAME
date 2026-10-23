@@ -133,7 +133,7 @@ function practiceDoorPrompt() { return practice.active ? '結束訓練／訓練�
 function usePracticeDoorNearPlayer() {
   const d = practiceDoorNear(); if (!d) return false;
   if (practice.active) openPracticePanel(true);
-  else { sfx('error'); flash('門鎖著。跟塔納說話就能開始訓練', d.x, d.top, '#ffcf89', 1.8); }
+  else { sfx('error'); flash('門鎖著，找塔納', d.x, d.top, '#ffcf89', 1.8); }
   return true;
 }
 

@@ -118,7 +118,7 @@ function updateSmilers(dt) {
       if (v === G.player && (supplyInventory.get('charm') || 0) > 0) {
         if (typeof consumeItem === 'function') consumeItem('charm');
         v.smilerCd = Math.max(v.smilerCd || 0, 8); v.darkT = 0;
-        flash('🧧 平安符替你擋下了 Smiler！', v.x, v.y - 60, '#ffd479', 2.2);
+        flash('🧧 平安符擋下了！', v.x, v.y - 60, '#ffd479', 2.2);
         if (typeof sfx === 'function') sfx('soothe');
         G.effects.push({ ring: true, x: v.x, y: v.y - 20, r: 8, r2: 46, life: .45, life0: .45, color: '#ffd479' });
         continue;

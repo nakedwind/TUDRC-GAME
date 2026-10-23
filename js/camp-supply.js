@@ -61,7 +61,7 @@ function refillGuideKit(t, silent) {
     const n = Math.min(CAMP_SUPPLY.carry - (t.kit[k] || 0), box[k] || 0);
     if (n > 0) { t.kit[k] += n; box[k] -= n; got.push(itemById(k).name + '×' + n); }
   }
-  if (got.length) { saveCampSupply(); if (!silent && typeof sentryStatus === 'function') sentryStatus(t, '從物資箱拿了 ' + got.join('、'), '#9ff0c0'); }
+  if (got.length) { saveCampSupply(); if (!silent && typeof sentryStatus === 'function') sentryStatus(t, '拿了 ' + got.join('、'), '#9ff0c0'); }
   if (campSupplyOpen) renderCampSupply();
   return got.length > 0;
 }

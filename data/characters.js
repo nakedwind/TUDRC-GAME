@@ -289,7 +289,7 @@ const CHARACTERS = {
     "id": "tino",
     "kind": "sentinel",
     "name": "堤諾",
-    "sprite": "tino_B",
+    "sprite": "tino_C",
     "combat": {
       "rank": "B",
       "role": "感知偵察",

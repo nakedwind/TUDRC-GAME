@@ -107,6 +107,12 @@ const SFX = (() => {
     clownfishHurt: '怪物/小丑魚/小丑魚被打.mp3',
     clownfishDeath: '怪物/小丑魚/小丑魚死掉.mp3',
     clownfishSmallDeath: '怪物/小丑魚/小丑魚死掉.mp3',   // 小丑魚幼體死掉：同一個檔，播快一點（音調高、尖，像小孩；見 SOUND_PITCH）
+    // 花蓮版權老鼠：鑽土（入土、地底移動）、鑽出、手攻擊、被打；死掉先用被打播低一點（js/burrowing-mouse.js）
+    mouseDig: '怪物/老鼠/老鼠鑽土.mp3',
+    mouseOut: '怪物/老鼠/老鼠鑽出.mp3',
+    mouseAttack: '怪物/老鼠/老鼠攻擊.mp3',
+    mouseHurt: '怪物/老鼠/老鼠被打.mp3',
+    mouseDeath: '怪物/老鼠/老鼠被打.mp3',
     pop: 'pop.mp3',
     milkfishGulp: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吞下隊友（js/milkfish-kid.js）
     milkfishChew: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吃掉一格的物品
@@ -132,10 +138,12 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'pop', 'playerHit', 'playerHitMonster']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'pop', 'playerHit', 'playerHitMonster']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
-  const SOUND_PITCH = { clownfishSmallDeath: 1.6 };
+  const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };
+  // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
+  const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 } };
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
@@ -166,6 +174,13 @@ const SFX = (() => {
         const src = ctx.createBufferSource(); src.buffer = buffers[key]; src.playbackRate.value = rate;
         const g = ctx.createGain(); g.gain.value = gain;
         src.connect(g); g.connect(master); activeSources.add(src);
+        const echo = SOUND_ECHO[name];
+        if (echo) {   // 回音：延遲線接回自己，逐次變小；播完再等回音收尾才拆掉
+          const d = ctx.createDelay(1), fb = ctx.createGain(), wet = ctx.createGain();
+          d.delayTime.value = echo.delay; fb.gain.value = echo.feedback; wet.gain.value = echo.wet;
+          g.connect(d); d.connect(fb); fb.connect(d); d.connect(wet); wet.connect(master);
+          src.addEventListener('ended', () => setTimeout(() => { d.disconnect(); fb.disconnect(); wet.disconnect(); }, 2500));
+        }
         const h = { src, g }; remember(sourceKey, h);
         src.onended = () => { activeSources.delete(src); forget(sourceKey, h); }; src.start(); return;
       }

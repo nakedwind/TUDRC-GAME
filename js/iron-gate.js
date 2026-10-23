@@ -34,7 +34,7 @@ function setIronGateSide(o,side){
 function toggleIronGateNearPlayer(){
   const near=ironGateNearPlayer();if(!near)return false;
   const side=near.o.gateSide===near.side?null:near.side;
-  if(!setIronGateSide(near.o,side)){sfx('error');flash('門口有人或物件，無法滑動',near.x,near.top-8,'#ff8f8f');}
+  if(!setIronGateSide(near.o,side)){sfx('error');flash('門口被擋住',near.x,near.top-8,'#ff8f8f');}
   else sfx('ironGateSlide');
   return true;
 }

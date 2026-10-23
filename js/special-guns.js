@@ -113,7 +113,7 @@ function tranqHit(o, lv) {
     if (!o.berserk || o.hp <= 0) return false;
     o.berserk = false; o.taint = Math.min(o.taint, 55); o.sleepT = lv.sleep;
     o.meleeSwing = null; o.gunSwing = null; o.target = null; o.moving = false;
-    sentryStatus(o, '睡著了…醒來就會恢復正常', '#b9a7ff');
+    sentryStatus(o, '睡著了…', '#b9a7ff');
     return true;
   }
   if (o.dead || o.hp <= 0) return false;

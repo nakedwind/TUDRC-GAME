@@ -25,12 +25,12 @@ function checkCoreClear(dt = 0) {
     G.coreClearWait = (G.coreClearWait || 0) + dt;
     if (G.coreClearWait < CORE_CLEAR.resultDelay) return;
     G.coreClearShown = true;
-    if (G.enemies.length === 0) markFullControl(true);
+    if (G.enemies.length === 0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) markFullControl(true);
     win();                            // 記勝利、任務完成、結算畫面（js/game.js、js/missions.js）
     addCoreClearChoices();
     return;
   }
-  if (!G.fullControl && !G.over && G.enemies.length === 0) markFullControl(false);   // 留下來把異質體清光了
+  if (!G.fullControl && !G.over && G.enemies.length === 0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) markFullControl(false);   // 留下來把異質體清光了
 }
 function markFullControl(quiet) {
   G.fullControl = true;
@@ -43,7 +43,7 @@ function markFullControl(quiet) {
 // 結算畫面：統計最上面寫剩幾隻異質體；「返回應變中心」旁邊多一個「留下來繼續探索」
 function addCoreClearChoices() {
   const box = document.getElementById('ov-text'), ok = document.getElementById('ov-btn'); if (!box || !ok) return;
-  const left = G.enemies.filter(e => !e.dead && e.hp > 0).length;
+  const left = G.enemies.filter(e => !e.dead && e.hp > 0).length + (typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0);
   const note = document.createElement('p'); note.className = 'core-clear-note' + (G.fullControl ? ' full' : '');
   note.innerHTML = G.fullControl ? '✓ 異質體也全部清除了：<b>' + coreClearMapName() + ' 已徹底控制</b>'
     : '還有 <b>' + left + '</b> 隻異質體在這一區。留下來清光，就能<b>徹底控制</b>這一區。';

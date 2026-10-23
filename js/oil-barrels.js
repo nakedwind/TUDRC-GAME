@@ -103,6 +103,7 @@ function oilExplode(x, y, it) {
     flashDmg('-' + Math.round(B.enemy * k), e.x, e.y - 26, '#ff9a3c');
     enemyHitReact(e, x, y, true);
   }
+  if (typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, B.enemy);   // 地底的版權老鼠被炸出地面（js/burrowing-mouse.js）
   for (const t of G.towers) {
     if (t.hp <= 0) continue;
     const d = Math.hypot(t.x - x, t.y - y);

@@ -108,7 +108,7 @@ document.getElementById('f_behavior').addEventListener('change', e => {
   if (e.target.value) m.behavior = e.target.value; else delete m.behavior;
   if (m.behavior === 'burrow') {
     m.burrow = validBurrowCfg(m.burrow);
-    m.art = { ...BURROW_MOUSE_ART, ...(m.art || {}) };
+    m.art = burrowMouseArt(m);
     m.noHitSquash = true;
   }
   saveMonsters(); renderBehaviorFields(m);

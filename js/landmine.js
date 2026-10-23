@@ -48,6 +48,7 @@ function detonateMine(o) {
     flashDmg('-' + Math.round(dmg), e.x, e.y - 26, '#ff9a3c');
     enemyHitReact(e, x, y, true);
   }
+  if (typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, LANDMINE.damage);   // 地底的版權老鼠被炸出地面（js/burrowing-mouse.js）
   for (const t of G.towers) {   // 隊友也會被炸傷（依防禦減免）
     if (t.hp <= 0) continue;
     const d = Math.hypot(t.x - x, t.y - y);

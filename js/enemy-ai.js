@@ -200,7 +200,6 @@ function enemyChaseSentry(e, target, distance, moveDt, dt) {
 }
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
-  if (typeof burrowMouseBlocksPoint === 'function' && burrowMouseBlocksPoint(x, y, actor)) return true;
   return !inGrid(c, r) || isWall(c, r) || !!barrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r));   // 順順宮帽也擋路（js/hangi-bao.js）
 }
 function resetEnemyNavigation(e) {
@@ -272,7 +271,6 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
       if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key)) continue;
       if (barrierAt(nc, nr) && !canBreakBuildings) continue;
       if (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr)) continue;   // 繞過順順宮帽
-      if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(nc, nr, e)) continue;
       cameFrom.set(key, [c, r]); queue.push([nc, nr]);
     }
   }
@@ -293,7 +291,6 @@ function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   }
   if (!e.aiPath || !e.aiPath.length) return { reached: true };
   const [nc, nr] = e.aiPath[0], blocker = barrierAt(nc, nr);
-  if (typeof burrowMouseHoleAt === 'function' && burrowMouseHoleAt(nc, nr, e)) { e.aiPath = null; e.aiRouteTimer = 0; return {}; }
   if (blocker) return { blocker };
   const [tx, ty] = center(nc, nr), d = Math.hypot(tx - e.x, ty - e.y);
   if (d <= Math.max(2, e.speed * moveDt)) {

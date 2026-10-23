@@ -97,6 +97,7 @@ function ensureTeamUI() {
           return;
         }
         if (e.button === 2) openFieldCommandMenu(avatar.dataset.type, avatar);   // 只有右鍵開命令選單（左鍵不會）
+        else if (e.button === 0) locateFieldMember(avatar.dataset.type || avatar.dataset.char);
       }
     });
     // 急救包選隊員時：滑鼠停在哪位隊員的頭像上，那位就發光＋出現箭頭
@@ -117,6 +118,14 @@ function ensureTeamUI() {
     fieldCommandMenu.className = 'hidden';
     wrap.appendChild(fieldCommandMenu);
   }
+}
+function locateFieldMember(type) {
+  if (MAP_SAFE || typeof G === 'undefined' || !G) return;
+  const actor = (G.towers || []).find(t => t.type === type) || (G.npcs || []).find(n => n.id === type);
+  if (!actor) return;
+  G.fieldLocate = { actor, until: performance.now() + 4000 };
+  closeFieldCommandMenu();
+  if (typeof sfx === 'function') sfx('blip');
 }
 function openTeamPanel() { ensureTeamUI(); closeSquadPanel(); if (typeof closeAchievementPanel === 'function') closeAchievementPanel(); renderTeamPanel(); teamPanel.classList.remove('hidden'); if (typeof sfx === 'function') sfx('menu'); }
 function closeTeamPanel() { if (teamPanel) teamPanel.classList.add('hidden'); if (typeof sortiePicking !== 'undefined') sortiePicking = null; }
