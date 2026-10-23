@@ -2174,7 +2174,45 @@ const BATTLE_MAPS = [
         "60,11": "floor",
         "60,12": "floor",
         "60,13": "floor",
-        "60,14": "floor"
+        "60,14": "floor",
+        "56,3": "floor",
+        "56,4": "floor",
+        "56,5": "floor",
+        "56,6": "floor",
+        "56,7": "floor",
+        "56,8": "floor",
+        "56,9": "floor",
+        "57,2": "floor",
+        "57,3": "floor",
+        "57,4": "floor",
+        "57,5": "floor",
+        "57,9": "floor",
+        "58,4": "floor",
+        "58,5": "floor",
+        "58,6": "floor",
+        "58,7": "floor",
+        "58,8": "floor",
+        "58,9": "floor",
+        "58,3": "floor",
+        "59,3": "floor",
+        "59,4": "floor",
+        "59,5": "floor",
+        "59,6": "floor",
+        "59,7": "floor",
+        "59,8": "floor",
+        "59,9": "floor",
+        "60,3": "floor",
+        "60,4": "floor",
+        "60,5": "floor",
+        "60,6": "floor",
+        "60,7": "floor",
+        "60,8": "floor",
+        "60,9": "floor",
+        "61,11": "floor",
+        "61,12": "floor",
+        "57,7": "floor",
+        "57,6": "floor",
+        "57,8": "floor"
       },
       "ground": {
         "44,40": "tile_mr4czvpx",
@@ -2463,7 +2501,21 @@ const BATTLE_MAPS = [
         "55,16": "tile_mr4czvpx",
         "55,17": "tile_mr4czvpx",
         "55,18": "tile_mr4czvpx",
-        "55,19": "tile_mr4czvpx"
+        "55,19": "tile_mr4czvpx",
+        "55,6": "tile_mr4czvpx",
+        "55,5": "tile_mr4czvpx",
+        "55,1": "tile_mr4czvpx",
+        "55,2": "tile_mr4czvpx",
+        "55,3": "tile_mr4czvpx",
+        "55,4": "tile_mr4czvpx",
+        "55,7": "tile_mr4czvpx",
+        "61,7": "tile_mr4czvpx",
+        "61,6": "tile_mr4czvpx",
+        "61,5": "tile_mr4czvpx",
+        "61,4": "tile_mr4czvpx",
+        "61,3": "tile_mr4czvpx",
+        "61,2": "tile_mr4czvpx",
+        "61,1": "tile_mr4czvpx"
       },
       "ground2": {
         "21,56": "tile_dmg_debris_dust",
@@ -5844,31 +5896,31 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mr4cyy36",
         "c": 56,
-        "r": 7,
+        "r": 0,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 57,
-        "r": 7,
+        "r": 0,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 58,
-        "r": 7,
+        "r": 0,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 59,
-        "r": 7,
+        "r": 0,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 60,
-        "r": 7,
+        "r": 0,
         "layer": "object"
       },
       {
@@ -5898,43 +5950,41 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mr4cyq54",
         "c": 55,
-        "r": 7,
+        "r": 0,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyq54",
         "c": 61,
-        "r": 7,
+        "r": 0,
         "layer": "object"
       },
       {
         "id": "tile_interactive_power_switch_off",
         "c": 56,
-        "r": 6,
+        "r": 1,
         "layer": "object4",
+        "circuit": 4,
         "ox": 0,
-        "oy": 96,
-        "circuit": 4
+        "oy": 24
       },
       {
         "id": "tile_interactive_electric_light_02",
         "c": 59,
-        "r": 7,
+        "r": 0,
         "layer": "object4",
         "circuit": 4
       },
       {
         "id": "tile_bg_electric_light",
         "c": 57,
-        "r": 7,
-        "layer": "object4",
-        "ox": 0,
-        "oy": 0
+        "r": 0,
+        "layer": "object4"
       },
       {
         "id": "tile_obstacle_ore_rare",
         "c": 59,
-        "r": 8,
+        "r": 1,
         "layer": "object4"
       },
       {
@@ -5980,7 +6030,9 @@ const BATTLE_MAPS = [
         "c": 57,
         "r": 13,
         "layer": "object4",
-        "rot": 1
+        "rot": 1,
+        "ox": -12,
+        "oy": 0
       }
     ],
     "solid": [
@@ -7833,7 +7885,6 @@ const BATTLE_MAPS = [
       "52,9",
       "53,10",
       "54,10",
-      "55,10",
       "45,9",
       "45,10",
       "45,11",
@@ -7943,7 +7994,6 @@ const BATTLE_MAPS = [
       "52,7",
       "53,7",
       "54,7",
-      "55,7",
       "46,7",
       "47,8",
       "48,8",
@@ -7953,7 +8003,6 @@ const BATTLE_MAPS = [
       "53,8",
       "54,8",
       "54,9",
-      "55,8",
       "53,9",
       "50,8",
       "47,6",
@@ -8024,29 +8073,9 @@ const BATTLE_MAPS = [
       "23,50",
       "24,50",
       "25,50",
-      "56,9",
-      "57,9",
-      "58,9",
-      "59,9",
-      "60,9",
-      "55,9",
-      "56,8",
-      "57,8",
-      "58,8",
-      "59,8",
-      "60,8",
-      "61,8",
-      "61,9",
-      "61,10",
       "61,11",
       "61,12",
       "61,15",
-      "56,7",
-      "57,7",
-      "58,7",
-      "59,7",
-      "60,7",
-      "61,7",
       "62,7",
       "63,7",
       "64,7",
@@ -8056,23 +8085,12 @@ const BATTLE_MAPS = [
       "63,6",
       "62,6",
       "61,6",
-      "60,6",
-      "59,6",
-      "58,6",
-      "57,6",
-      "56,6",
-      "56,5",
-      "57,5",
-      "58,5",
-      "59,5",
-      "60,5",
       "61,5",
       "62,5",
       "63,5",
       "64,5",
       "65,5",
       "64,4",
-      "57,4",
       "61,16",
       "61,17",
       "61,18",
@@ -8353,7 +8371,6 @@ const BATTLE_MAPS = [
       "62,17",
       "62,16",
       "63,16",
-      "56,4",
       "56,0",
       "57,0",
       "58,0",
@@ -8371,28 +8388,10 @@ const BATTLE_MAPS = [
       "64,1",
       "63,1",
       "62,1",
-      "60,1",
-      "59,1",
-      "58,2",
-      "57,2",
-      "56,2",
-      "56,1",
-      "57,1",
       "61,1",
       "61,2",
       "61,3",
       "61,4",
-      "60,4",
-      "59,4",
-      "58,4",
-      "58,3",
-      "60,2",
-      "60,3",
-      "59,3",
-      "59,2",
-      "58,1",
-      "56,3",
-      "57,3",
       "62,2",
       "63,2",
       "64,2",
@@ -8971,9 +8970,18 @@ const BATTLE_MAPS = [
         ]
       ],
       "ambush": [
-        [57, 33],
-        [58, 33],
-        [59, 33]
+        [
+          57,
+          33
+        ],
+        [
+          58,
+          33
+        ],
+        [
+          59,
+          33
+        ]
       ]
     }
   },

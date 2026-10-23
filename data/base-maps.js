@@ -669,7 +669,8 @@ const BASE_MAPS = [
         "14,19": "tile_hq_floor",
         "14,20": "tile_hq_floor",
         "14,21": "tile_hq_floor",
-        "12,18": "tile_hq_floor"
+        "12,18": "tile_hq_floor",
+        "37,19": "tile_hq_floor"
       },
       "ground": {},
       "ground2": {},
@@ -1874,13 +1875,6 @@ const BASE_MAPS = [
         "layer": "ground3",
         "ox": 14,
         "oy": 0
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 37,
-        "r": 19,
-        "layer": "floor",
-        "fx": true
       },
       {
         "id": "tile_eoc_office_chair_grey",
