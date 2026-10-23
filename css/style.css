@@ -1178,7 +1178,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .bag-tags { display:flex; flex-wrap:wrap; justify-content:center; gap:6px; }
 .bag-tag { padding:2px 9px; border-radius:99px; background:rgba(255,255,255,.08); color:#b7c3cf; font-size:12px; font-weight:700; }
 .bag-tag.effect.hp { background:rgba(121,219,173,.13); color:#79dbad; } .bag-tag.effect.sp { background:rgba(140,199,255,.13); color:#8cc7ff; }
-.bag-desc { margin:2px 0 0; color:#a3afbb; font-size:13px; line-height:1.6; }
+.bag-desc { margin:2px 0 0; color:#a3afbb; font-size:13px; line-height:1.6; white-space:pre-line; }   /* 背包編輯器的文字內容換行＝這裡也換行 */
 .bag-owned { color:#8c9aa8; font-size:13px; } .bag-owned b { color:#eef4f8; font-size:15px; }
 .bag-actions { display:flex; flex-direction:column; gap:8px; width:100%; margin-top:auto; padding-top:6px; }
 .bag-use { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:9px 10px; border:1px solid #e9bd62; border-radius:9px; background:linear-gradient(180deg,#f7d886,#e6b04a); color:#3b2304; cursor:pointer; font:800 15px "Microsoft JhengHei",sans-serif; box-shadow:inset 0 1px 0 rgba(255,255,255,.45), 0 2px 0 #9a6a20, 0 3px 6px rgba(0,0,0,.3); transition:transform .07s, box-shadow .07s, filter .12s; }

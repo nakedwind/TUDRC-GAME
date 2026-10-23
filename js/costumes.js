@@ -69,10 +69,8 @@ function costumeOutfit(id, folder) {
 function drawCostumeAccessories(ctx, id, who, dx, dy, size, layer, equipOverride) {
   const eq = equipOverride || costumeState.equip[id]; if (!eq) return;
   const dir = (who && who.dir) || 'front', frame = costumeFrameOf(who);
-  for (const slot of ACC_SLOTS) {
-    const acc = eq[slot] && ACC_BY_ID[eq[slot]];
-    if (acc) drawAccessory(ctx, acc, id, dir, frame, dx, dy, size, layer);
-  }
+  const accs = sortAccsByLayer(ACC_SLOTS.map(slot => eq[slot] && ACC_BY_ID[eq[slot]]).filter(Boolean));   // 照圖層（服裝編輯器設定）由下往上畫
+  for (const acc of accs) drawAccessory(ctx, acc, id, dir, frame, dx, dy, size, layer);
 }
 
 // 拿到一件服裝（扭蛋機 js/gacha.js、之後的送禮）：回傳是不是第一次拿到

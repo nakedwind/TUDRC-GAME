@@ -24,6 +24,7 @@ const partOf = key => backpackPart(key) || {};
 const labelOf = key => { const d = dynParts.find(p => p.key === key); return d ? d.label : partOf(key).label || key; };
 const elOf = key => state.layout.elements[key] || {};
 const isImg = key => partOf(key).kind === 'img';
+const isFrame = key => /^(box\.|slot:)/.test(key);   // 圖片的框（背包圖示的框、說明欄的圖片框、裝備格的框）：跟圖片一樣鎖長寬比例
 const isText = key => { const p = partOf(key); return !isImg(key) && (!!p.text || /^(text|btn|tab|slotText)/.test(key)); };
 const isChanged = key => !!state.layout.elements[key] || !!state.layout.texts[key];
 
@@ -112,7 +113,7 @@ function renderProps(rebuild = true) {
       '<div class="two">' + num('x', 'X') + num('y', 'Y') + '</div>' +
       '<div class="btns"><button type="button" class="small" data-center="both">⊕ 置中</button><button type="button" class="small" data-center="x">↔ 水平置中</button><button type="button" class="small" data-center="y">↕ 垂直置中</button></div>' +
       '<div class="orig">置中＝放到外面那一層框的正中間</div></div>' +
-      (isImg(selKey)
+      (isImg(selKey) || isFrame(selKey)
         ? '<div class="sec"><div class="sec-head">大小（px，長寬等比例）<span class="sp"></span><button type="button" class="small" data-reset="size">↺ 恢復預設</button></div>' +
           '<div class="one">' + num('size', '寬（高度照圖片比例，1px 一格）') + '</div></div>'
         : '<div class="sec"><div class="sec-head">大小（px，空白＝原本）<span class="sp"></span><button type="button" class="small" data-reset="size">↺ 恢復預設</button></div>' +
@@ -133,7 +134,8 @@ function renderProps(rebuild = true) {
   set('x', o.x || 0); set('y', o.y || 0);
   // 沒調整過的欄位直接填目前的大小（例如鑰匙原本 80），按上下箭頭才會從 80 開始加減，不會從 0 開始
   set('w', o.w || v.w || '', v.w != null ? '原本 ' + v.w : '原本'); set('h', o.h || v.h || '', v.h != null ? '原本 ' + v.h : '原本');
-  set('size', o.size || v.size || '', v.size != null ? '原本 ' + v.size : '原本');
+  if (isFrame(selKey)) set('size', o.w || v.w || '', v.w != null ? '原本 ' + v.w : '原本');   // 框：寬，高照比例
+  else set('size', o.size || v.size || '', v.size != null ? '原本 ' + v.size : '原本');
   set('font', o.font || v.font || '', v.font != null ? '原本 ' + v.font : '原本');
   box.querySelectorAll('[data-align]').forEach(b => b.classList.toggle('on', (o.align || '') === b.dataset.align));
   const sub = $b('selSub');
@@ -160,6 +162,11 @@ $b('props').addEventListener('input', e => {
   const f = e.target.dataset.f; if (!f) return;
   remember('field:' + selKey + ':' + f);
   const val = e.target.value === '' ? 0 : +e.target.value;
+  if (f === 'size' && isFrame(selKey)) {   // 框：改寬，高照目前的長寬比例
+    const v = (info[selKey] || {}).values || {}, o = elOf(selKey), w0 = o.w || v.w, h0 = o.h || v.h;
+    setEl(selKey, val > 0 && w0 && h0 ? { w: Math.max(0, val), h: Math.max(1, Math.round(val * h0 / w0)) } : { w: 0, h: 0 });
+    return;
+  }
   setEl(selKey, { [f]: f === 'x' || f === 'y' ? val : Math.max(0, val) });
 });
 $b('props').addEventListener('click', e => {

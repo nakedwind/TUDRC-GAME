@@ -25,7 +25,7 @@ function loadDraft(useFile) {
   let data = COSTUME_PLACEMENT_DEFAULT;
   if (!useFile) { const merged = DraftSync.load(COSTUME_PLACEMENT_KEY, COSTUME_PLACEMENT_DEFAULT, { label: '配件位置' }); if (merged) data = merged; }
   data = JSON.parse(JSON.stringify(data));
-  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {}; COSTUME_PLACEMENT.offsets = data.offsets || {}; COSTUME_PLACEMENT.blocked = data.blocked || {};
+  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {}; COSTUME_PLACEMENT.offsets = data.offsets || {}; COSTUME_PLACEMENT.blocked = data.blocked || {}; COSTUME_PLACEMENT.layers = data.layers || {};
 }
 loadDraft(false);
 function status(message, error = false) { const el = document.getElementById('status'); el.textContent = message; el.classList.toggle('error', !!error); }
@@ -50,16 +50,17 @@ function fmt(v, ind) {
 }
 function costumePlacementText() {
   saveDraft();
-  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob, offsets: COSTUME_PLACEMENT.offsets || {}, blocked: COSTUME_PLACEMENT.blocked || {} };
+  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob, offsets: COSTUME_PLACEMENT.offsets || {}, blocked: COSTUME_PLACEMENT.blocked || {}, layers: COSTUME_PLACEMENT.layers || {} };
   return '/* 由服裝編輯器匯出：配件戴在每個角色身上的位置（配件、角色清單在 data/costumes.js）。\n'
     + '   anchors[角色][欄位][方向]＝這個角色每個欄位的預設位置（新配件沒調過就用這個）\n'
     + '   items[配件][角色][方向]＝某個配件專屬的位置（優先）\n'
     + '     x、y＝配件中心在角色圖（64×64）的位置；scale＝縮放；rot＝旋轉（度）；behind＝畫在角色後面；hidden＝這個方向不畫；flip＝圖片左右翻轉\n'
     + '   bob[角色][方向]＝[走路第 1 張, 走路第 2 張] 頭部相對站立圖的位移 [dx, dy]（配件跟著晃）\n'
     + '   offsets[角色]＝角色身高偏移 { x, y }（矮的角色 y 填正數）：還沒調過的配件會加上；「複製給所有角色」時自動加上兩個角色偏移的差\n'
-    + '   blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件 */\n'
+    + '   blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件\n'
+    + '   layers[配件]＝圖層：同時戴好幾個配件時數字大的蓋在上面（沒寫＝下身 1、背部 2、手持 3、頭飾 4、臉部 5） */\n'
     + 'const COSTUME_PLACEMENT_DEFAULT = {\n'
-    + ['anchors', 'items', 'bob', 'offsets', 'blocked'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n') + '\n};\n';
+    + ['anchors', 'items', 'bob', 'offsets', 'blocked', 'layers'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n') + '\n};\n';
 }
 
 // ---- 角色圖 ----
@@ -125,7 +126,7 @@ function wornAccs() {   // 要畫的配件：選中的那個＋（勾選時）�
     const a = acc && slot === acc.slot ? acc : (ED.others && ED.wear[slot] && ACC_BY_ID[ED.wear[slot]]);
     if (a) list.push(a);
   }
-  return list;
+  return sortAccsByLayer(list);   // 照圖層由下往上畫
 }
 function drawFigure(c, dir, frame, dx, dy, size, highlight) {
   const set = ceSet(ceFolder()), img = set[dir] && set[dir][frame], acc = curAcc();
@@ -188,8 +189,25 @@ function renderLists() {
     const done = acc && ((COSTUME_PLACEMENT.items[acc.id] || {})[ch.id] ? '專屬' : pick3(COSTUME_PLACEMENT.anchors, ch.id, acc.slot, 'front') || (COSTUME_PLACEMENT.anchors[ch.id] || {})[acc.slot] ? '預設' : '');
     return '<button type="button" data-char="' + ch.id + '" class="' + (ch.id === ED.char ? 'on' : '') + '"><span class="face"><img src="' + ceFace(ch.sprite) + '" alt=""></span><span>' + ch.name + '<small>' + ch.id + '</small></span>' + (done ? '<em>' + done + '</em>' : '') + '</button>';
   }).join('');
-  $('accList').innerHTML = COSTUME_ACCESSORIES.map(a => '<button type="button" data-acc="' + a.id + '" class="' + (a.id === ED.acc ? 'on' : '') + '"><span class="icon"><img src="' + a.art.front + '" alt=""></span><span>' + a.name + '<small>' + (SLOT_NAME[a.slot] || a.slot) + (a.rarity ? '・' + a.rarity : '') + '</small></span>'
-    + ((COSTUME_PLACEMENT.items[a.id] || {})[ED.char] ? '<em>已調</em>' : '') + '</button>').join('') || '<p>data/costumes.js 裡還沒有配件</p>';
+  const accBtn = a => '<button type="button" data-acc="' + a.id + '" class="' + (a.id === ED.acc ? 'on' : '') + '"><span class="icon"><img src="' + a.art.front + '" alt=""></span><span>' + a.name + '<small>' + (SLOT_NAME[a.slot] || a.slot) + (a.rarity ? '・' + a.rarity : '') + '</small></span>'
+    + ((COSTUME_PLACEMENT.items[a.id] || {})[ED.char] ? '<em>已調</em>' : '') + '</button>';
+  // 服裝（skin）沒有位置可以調：列出這個角色能穿的，點了換預覽用的身體
+  const skinBtn = s => '<button type="button" data-skin="' + s.folder + '" class="' + (s.folder === ceFolder() ? 'on' : '') + '"><span class="face"><img src="' + ceFace(s.folder) + '" alt=""></span><span>' + s.name + '<small>預覽用</small></span></button>';
+  $('accList').innerHTML = ACC_LIST_ORDER.map(slot => {
+    const items = slot === 'skin' ? ceSkins(ED.char).map(skinBtn) : COSTUME_ACCESSORIES.filter(a => a.slot === slot).map(accBtn);
+    const shut = accGroupClosed.has(slot);   // 收合的分類只顯示標題
+    return '<button type="button" class="slot-head" data-group="' + slot + '"><i class="arrow">' + (shut ? '▸' : '▾') + '</i>' + (SLOT_NAME[slot] || slot) + '<i class="count">' + items.length + '</i></button>'
+      + (shut ? '' : items.join('') || '<p class="slot-empty">還沒有</p>');
+  }).join('');
+}
+const ACC_LIST_ORDER = ['head', 'face', 'skin', 'back', 'hand', 'lower'];   // 左邊配件清單的分組順序
+// 收合了哪些分類（記在這台瀏覽器，下次打開一樣）
+const ACC_GROUP_KEY = 'tudrc_costume_editor_closed_groups';
+const accGroupClosed = new Set((() => { try { return JSON.parse(localStorage.getItem(ACC_GROUP_KEY) || '[]'); } catch (_) { return []; } })());
+function toggleAccGroup(slot) {
+  if (accGroupClosed.has(slot)) accGroupClosed.delete(slot); else accGroupClosed.add(slot);
+  try { localStorage.setItem(ACC_GROUP_KEY, JSON.stringify([...accGroupClosed])); } catch (_) {}
+  renderLists();
 }
 function renderBars() {
   $('dirBar').innerHTML = CE_DIRS.map((d, i) => '<button type="button" data-dir="' + d + '" class="' + (d === ED.dir ? 'on' : '') + '" title="快捷鍵 ' + (i + 1) + '">' + CE_DIR_NAMES[d] + '</button>').join('')
@@ -223,6 +241,7 @@ function renderPanel() {
   const pl = effective();
   const set = (id, v) => { if (document.activeElement !== $(id)) $(id).value = v; };
   set('fx', pl.x ?? ''); set('fy', pl.y ?? ''); set('fscale', pl.scale || 1); set('frot', pl.rot || 0);
+  renderLayer(acc);
   $('fbehind').checked = !!pl.behind; $('fhidden').checked = !!pl.hidden; $('fflip').checked = !!pl.flip;
   const side = ED.dir === 'left' || ED.dir === 'right';
   $('mirror').textContent = side ? (ED.dir === 'right' ? '⇋ 鏡射到左側' : '⇋ 鏡射到右側') : '⇋ 左右對調';
@@ -243,15 +262,16 @@ function setDir(d) { ED.dir = d; renderBars(); renderPanel(); }
 
 document.addEventListener('click', e => {
   const b = e.target.closest('button'); if (!b) return;
-  if (b.dataset.char) { ED.char = b.dataset.char; ED.skin = null; renderAll(); }
+  if (b.dataset.group) toggleAccGroup(b.dataset.group);
+  else if (b.dataset.char) { ED.char = b.dataset.char; ED.skin = null; renderAll(); }
   else if (b.dataset.acc) { ED.acc = b.dataset.acc; ED.wear[curAcc().slot] = ED.acc; renderAll(); }
   else if (b.dataset.dir) setDir(b.dataset.dir);
-  else if (b.dataset.skin) { ED.skin = b.dataset.skin; renderBars(); }
+  else if (b.dataset.skin) { ED.skin = b.dataset.skin; renderBars(); renderLists(); }
   else if (b.dataset.frame) { ED.frame = Number(b.dataset.frame); ED.play = false; renderBars(); }
   else if ('play' in b.dataset) { ED.play = !ED.play; ED.t0 = performance.now(); renderBars(); }
 });
 document.addEventListener('change', e => {
-  if (e.target.id === 'others') { ED.others = e.target.checked; }
+  if (e.target.id === 'others') { ED.others = e.target.checked; renderPanel(); }
   else if (e.target.name === 'scope') { ED.scope = e.target.value; renderPanel(); }
 });
 const numEdit = (id, key) => $(id).addEventListener('input', () => { const v = $(id).value; if (v === '' || isNaN(Number(v))) return; edit(p => { p[key] = Number(v); }); });
@@ -434,6 +454,27 @@ for (const id of ['offx', 'offy']) $(id).addEventListener('input', () => {
   COSTUME_PLACEMENT.offsets[ED.char] = { x, y };
   saveDraft(); renderAll();
 });
+
+// ---- 圖層：同時戴好幾個配件時誰蓋誰（所有角色、所有方向共用）----
+function renderLayer(acc) {
+  const v = (COSTUME_PLACEMENT.layers || {})[acc.id];
+  if (document.activeElement !== $('flayer')) $('flayer').value = accLayer(acc);
+  $('layerReset').disabled = v == null;
+  $('layerNote').textContent = v == null ? '預設（' + (SLOT_NAME[acc.slot] || acc.slot) + ' ＝ ' + accLayerDefault(acc) + '）' : '已自訂（預設是 ' + accLayerDefault(acc) + '）';
+  // 現在預覽身上戴的配件，由上（蓋在最上面）往下列
+  const worn = wornAccs().slice().reverse();
+  $('layerOrder').innerHTML = worn.length > 1 ? '目前由上到下：' + worn.map(a => '<b' + (a === acc ? ' class="me"' : '') + '>' + a.name + '（' + accLayer(a) + '）</b>').join(' ＞ ') : '勾選上方「一起戴上其他欄位的配件」並在左邊點其他欄位的配件，可以看誰蓋誰。';
+}
+function setLayer(n) {
+  const acc = curAcc(); if (!acc) return;
+  const all = COSTUME_PLACEMENT.layers = COSTUME_PLACEMENT.layers || {};
+  if (n == null || n === accLayerDefault(acc)) delete all[acc.id]; else all[acc.id] = n;
+  saveDraft(); renderPanel();
+}
+$('flayer').addEventListener('input', () => { const v = $('flayer').value; if (v === '' || isNaN(Number(v))) return; setLayer(Number(v)); });
+$('layerUp').addEventListener('click', () => { const acc = curAcc(); if (acc) setLayer(accLayer(acc) + 1); });
+$('layerDown').addEventListener('click', () => { const acc = curAcc(); if (acc) setLayer(accLayer(acc) - 1); });
+$('layerReset').addEventListener('click', () => setLayer(null));
 
 // ---- 這個角色不能擁有這個配件（例如球球是狗，不能戴眼鏡）----
 $('fblock').addEventListener('change', e => {

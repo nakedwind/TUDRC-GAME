@@ -128,9 +128,9 @@
 .sq-preview { position: absolute; left: 196px; top: 40px; width: 152px; height: 216px; display: flex; align-items: flex-end; justify-content: center; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: radial-gradient(80% 60% at 50% 80%, rgba(120,170,230,.2), transparent 70%), #151b23; }
 .sq-preview canvas { width: 128px; image-rendering: pixelated; margin-bottom: 12px; }
 .sq-slot.look { width: 42px; height: 42px; } .sq-slot.look img { width: 32px; }
-.sq-slot.look.l0 { left: 396px; top: 80px; } .sq-slot.look.l1 { left: 466px; top: 80px; } .sq-slot.look.l2 { left: 396px; top: 150px; } .sq-slot.look.l3 { left: 466px; top: 150px; } .sq-slot.look.l4 { left: 396px; top: 220px; }
+.sq-slot.look.l0 { left: 396px; top: 80px; } .sq-slot.look.l1 { left: 466px; top: 80px; } .sq-slot.look.l2 { left: 396px; top: 150px; } .sq-slot.look.l3 { left: 466px; top: 150px; } .sq-slot.look.l4 { left: 396px; top: 220px; } .sq-slot.look.l5 { left: 466px; top: 220px; }   /* l5＝下身（尾巴） */
 .sq-slot-name.look { width: 70px; font-size: 10px; }
-.sq-slot-name.look.l0 { left: 382px; top: 124px; } .sq-slot-name.look.l1 { left: 452px; top: 124px; } .sq-slot-name.look.l2 { left: 382px; top: 194px; } .sq-slot-name.look.l3 { left: 452px; top: 194px; } .sq-slot-name.look.l4 { left: 382px; top: 264px; }
+.sq-slot-name.look.l0 { left: 382px; top: 124px; } .sq-slot-name.look.l1 { left: 452px; top: 124px; } .sq-slot-name.look.l2 { left: 382px; top: 194px; } .sq-slot-name.look.l3 { left: 452px; top: 194px; } .sq-slot-name.look.l4 { left: 382px; top: 264px; } .sq-slot-name.look.l5 { left: 452px; top: 264px; }
 .sq-title.desc { left: 16px; top: 10px; } .sq-hint { position: absolute; left: 92px; top: 15px; font-size: 10px; color: #8d9aa8; }
 .sq-title.stat { left: 16px; top: 108px; } .sq-title.avail { left: 352px; top: 10px; }
 .sq-box { position: absolute; left: 16px; width: 320px; height: 66px; padding: 8px 10px; overflow: auto; border: 1px solid rgba(255,255,255,.1); border-radius: 8px; background: rgba(0,0,0,.28); }

@@ -15,6 +15,7 @@ const BACKPACK_LAYOUT = {
     },
     "text.desc": {
       "y": -30,
+      "font": 15,
       "align": "left"
     },
     "item:storage-locker-key": {
@@ -159,6 +160,9 @@ const BACKPACK_LAYOUT = {
     },
     "img.bagIcon": {
       "size": 30
+    },
+    "text.name": {
+      "font": 20
     }
   },
   "texts": {}

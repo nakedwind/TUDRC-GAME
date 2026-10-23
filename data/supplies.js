@@ -9,11 +9,11 @@ const SUPPLIES = [
   { id:'medkit', name:'醫療包', kind:'medical', use:'hp', restore:35, price:30, file:'醫療包.png', desc:'應變中心配發的急救包。' },
   { id:'almond-water', name:'杏仁水', kind:'medical', use:'sp', restore:30, price:25, file:'杏仁水.png', desc:'溫溫的杏仁水，喝了心情會平靜下來。' },
   // ---- 後室道具（special：基地的商店不賣，只在後室的店買得到、或在後室撿到）----
-  //   act：在背包按「使用」或快捷鍵時做什麼（firstaid 急救包 H、adrenaline 腎上腺素 J）；note：背包裡的使用說明
+  //   act：在背包按「使用」或快捷鍵時做什麼（firstaid 急救包 H、adrenaline 腎上腺素）；note：背包裡的使用說明
   { id:'thermos', name:'杏仁水保溫杯', kind:'medical', use:'sp', restore:70, price:55, special:true, image:'images/裝備/almond-water-thermos.png', desc:'一整杯溫熱的杏仁水，能恢復大量 SP。' },
   { id:'firstaid', name:'急救包', kind:'medical', act:'firstaid', price:60, special:true, image:'images/裝備/first-aid-kit.png', effect:'⛑️ 治療隊友', desc:'幫受傷的隊員補血。走到隊員旁邊按 F；也可以按 H 再點隊員頭像。救不回已經倒下的隊員（要用異質急救包）。不能用在自己身上（溫特補血請用醫療包）。用掉一個。' },
   { id:'anomaly-firstaid', name:'異質急救包', kind:'medical', act:'firstaid', price:150, special:true, image:'images/裝備/first-aid-kit02.png', effect:'✚ 救回倒下的隊友', desc:'能把已經失去戰鬥能力的隊員救回來，救回來時 HP 是 30%。走到倒下的隊員旁邊按 F。只能在置物櫃裡找到。用掉一個。' },
-  { id:'adrenaline', name:'腎上腺素', kind:'medical', act:'adrenaline', price:80, special:true, image:'images/裝備/adrenaline-injector.png', effect:'💉 加速', desc:'按 J 注射：一段時間內跑得更快，藥效退了會短暫變慢。用掉一個。' },
+  { id:'adrenaline', name:'腎上腺素', kind:'medical', act:'adrenaline', price:80, special:true, image:'images/裝備/adrenaline-injector.png', effect:'💉 加速', desc:'注射後一段時間內跑得更快，藥效退了會短暫變慢。用掉一個。' },
   { id:'graffiti-red', name:'塗鴉筆（紅）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-red.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個紅色記號，會一直留在那裡。畫一個用掉一支。' },
   { id:'graffiti-blue', name:'塗鴉筆（藍）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-blue.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個藍色記號，會一直留在那裡。畫一個用掉一支。' },
   { id:'graffiti-black', name:'塗鴉筆（黑）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-black.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個黑色記號，會一直留在那裡。畫一個用掉一支。' },

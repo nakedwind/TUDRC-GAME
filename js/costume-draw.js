@@ -5,6 +5,8 @@
    offsets[角色]＝這個角色的身高偏移 { x, y }（比較矮的角色 y 填正數＝往下）：
      還沒替這個角色調過（用到欄位通用位置）時會加上；服裝編輯器「複製給所有角色」時也會自動加上兩個角色偏移的差。
    blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件（衣櫃不列出、不能送給他、身上有也不會畫）。
+   layers[配件]＝圖層數字：同時戴好幾個配件時，數字大的蓋在上面（沒寫＝照欄位：下身 1、背部 2、手持 3、頭飾 4、臉部 5）。
+     例如尾巴要蓋在翅膀上面：尾巴填 3（比背部的 2 大）。
    從服裝編輯器按「▶ 暫存設定預覽」開的遊戲（?previewCostumes=1）用編輯器裡還沒存到專案的位置。
 */
 const COSTUME_PLACEMENT_KEY = 'tudrc_costume_placement_v1';   // 服裝編輯器的暫存
@@ -13,10 +15,15 @@ const COSTUME_PLACEMENT = (() => {
   if (/[?&]previewCostumes=1(&|$)/.test(location.search)) {
     try { const d = JSON.parse(localStorage.getItem(COSTUME_PLACEMENT_KEY) || 'null'); if (d && typeof d === 'object') p = d; } catch (_) {}
   }
-  return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {}, offsets: p.offsets || {}, blocked: p.blocked || {} };
+  return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {}, offsets: p.offsets || {}, blocked: p.blocked || {}, layers: p.layers || {} };
 })();
 const ACC_BY_ID = Object.fromEntries(COSTUME_ACCESSORIES.map(a => [a.id, a]));
-const ACC_SLOTS = ['back', 'hand', 'head', 'face'];   // 畫的順序（後面的蓋前面的）
+const ACC_SLOTS = ['lower', 'back', 'hand', 'head', 'face'];   // 畫的順序（後面的蓋前面的）
+// 圖層：數字大的畫在上面；沒設定＝欄位在 ACC_SLOTS 的順序（下身 1、背部 2…臉部 5）
+const accLayerDefault = acc => ACC_SLOTS.indexOf(acc.slot) + 1;
+function accLayer(acc) { const v = (COSTUME_PLACEMENT.layers || {})[acc.id]; return v != null && v !== '' && isFinite(v) ? Number(v) : accLayerDefault(acc); }
+// 把身上的配件照圖層排好（一樣大就照欄位順序）
+const sortAccsByLayer = list => list.map((a, i) => [a, i]).sort((p, q) => accLayer(p[0]) - accLayer(q[0]) || p[1] - q[1]).map(p => p[0]);
 
 const accImgCache = {};
 function accImage(src) { if (!src) return null; let img = accImgCache[src]; if (!img) { img = accImgCache[src] = new Image(); img.src = src; } return img; }

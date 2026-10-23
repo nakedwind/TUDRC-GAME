@@ -65,6 +65,38 @@ function applyItemTexts() {
     const orig = itemTextOriginal.get(item.id), o = ITEM_TEXTS[item.id] || {};
     item.name = o.name != null && o.name !== '' ? o.name : orig.name;
     if (o.desc != null && o.desc !== '') item.desc = o.desc; else if (orig.desc === undefined) delete item.desc; else item.desc = orig.desc;
+    applyEffectNumbers(item, o.effect);
+  }
+  // 子彈（data/equipment.js 的 BULLETS）：ITEM_TEXTS['bullet:子彈 id'] 的名稱、說明蓋上去
+  if (typeof BULLETS !== 'undefined') for (const [bid, def] of Object.entries(BULLETS)) {
+    const key = 'bullet:' + bid;
+    if (!itemTextOriginal.has(key)) itemTextOriginal.set(key, { name: def.name, desc: def.desc });
+    const orig = itemTextOriginal.get(key), o = ITEM_TEXTS[key] || {};
+    def.name = o.name ? o.name : orig.name;
+    if (o.desc) def.desc = o.desc; else if (orig.desc === undefined) delete def.desc; else def.desc = orig.desc;
+  }
+}
+// ---- 效果標籤裡的數字＝實際效果：在背包編輯器改「出勤 ❤️ 生命上限 +10%」的 10、「✦ SP +30」的 30，遊戲就照新的數字算 ----
+// ・出勤補給（buff）：找「攻擊／攻速／防禦／生命上限／負荷累積／疏導量」後面的 N%（疏導量＝負荷累積那一項）。
+//   效果完全照文字：寫了哪幾種就有哪幾種（可以換種類、多加、拿掉）；文字裡一種都找不到＝照原本的效果
+// ・補給（restore）：找「HP／SP」後面的 +N
+// ・標籤恢復預設＝用原本的效果
+const itemEffectOriginal = new Map();   // 物品 id → 原本的 { buff, restore }
+const EFFECT_BUFF_NAMES = { '攻擊': 'atk', '攻速': 'spd', '防禦': 'def', '生命上限': 'hp', '負荷累積': 'calm', '疏導量': 'calm' };
+function applyEffectNumbers(item, text) {
+  if (!itemEffectOriginal.has(item.id)) itemEffectOriginal.set(item.id, { buff: item.buff ? { ...item.buff } : null, restore: item.restore });
+  const orig = itemEffectOriginal.get(item.id);
+  if (orig.buff) item.buff = { ...orig.buff };
+  if (orig.restore != null) item.restore = orig.restore;
+  if (!text) return;
+  if (orig.buff) {
+    const re = /(攻擊|攻速|防禦|生命上限|負荷累積|疏導量)\s*[+＋−\-]?\s*(\d+(?:\.\d+)?)\s*[%％]/g, found = {}; let m;
+    while ((m = re.exec(text))) found[EFFECT_BUFF_NAMES[m[1]]] = Number(m[2]) / 100;
+    if (Object.keys(found).length) item.buff = found;   // 照文字：寫什麼效果就有什麼效果
+  }
+  if (orig.restore != null && item.use) {
+    const m = /(HP|SP)\s*[+＋]\s*(\d+)/i.exec(text);
+    if (m && m[1].toLowerCase() === item.use) item.restore = Number(m[2]);
   }
 }
 applyItemTexts();
@@ -119,7 +151,12 @@ function bagSetOwnText(el, text) {
 }
 // 目前背包說明欄顯示的物品
 function backpackCurrentItem() {
-  return typeof backpackSel !== 'undefined' && typeof itemById === 'function' ? itemById(backpackSel) : null;
+  if (typeof backpackSel === 'undefined') return null;
+  if (String(backpackSel).startsWith('bullet:') && typeof BULLETS !== 'undefined') {   // 子彈：當成一個物品（名稱、說明可以改）
+    const def = BULLETS[String(backpackSel).slice(7)];
+    return def ? { id: backpackSel, name: def.name, desc: def.desc, bullet: true } : null;
+  }
+  return typeof itemById === 'function' ? itemById(backpackSel) : null;
 }
 // 某個東西目前「改過的文字」存在哪裡：回傳 { get(), set(v) }；不能改字的回傳 null
 function backpackTextSlot(key) {
@@ -229,6 +266,7 @@ if (/[?&]bagedit=1(&|$)/.test(location.search)) (() => {
       return { store: 'texts', k: key, value: (L.texts || {})[key] || '', original: orig(key), scope: '所有物品共用這個字' };
     }
     if (!it) return { note: '先在道具一覽點一個物品，再改它的文字。' };
+    if (part.text === 'category' && it.bullet) return { note: '子彈的分類標籤（子彈、後室…）不能改。' };
     if (part.text === 'category') {
       const k = 'catTag:' + it.category;
       return { store: 'texts', k, value: (L.texts || {})[k] || '', original: orig(k), scope: '分類「' + categoryOf(it.category).name + '」的標籤都會改' };
@@ -314,8 +352,8 @@ if (/[?&]bagedit=1(&|$)/.test(location.search)) (() => {
       ev.preventDefault(); ev.stopImmediatePropagation();
       const el = els(selKey)[0]; if (!el) return;
       const o = over(selKey);
-      const img = backpackPart(selKey).kind === 'img';
-      drag = { key: selKey, resize: true, img, sx: ev.clientX, sy: ev.clientY, size: o.size || el.offsetWidth, w: o.w || el.offsetWidth, h: o.h || el.offsetHeight, s: scaleOf(el), moved: false };
+      const img = backpackPart(selKey).kind === 'img', frame = /^(box\.|slot:)/.test(selKey);   // 圖片的框：也鎖長寬比例
+      drag = { key: selKey, resize: true, img, frame, sx: ev.clientX, sy: ev.clientY, size: o.size || el.offsetWidth, w: o.w || el.offsetWidth, h: o.h || el.offsetHeight, s: scaleOf(el), moved: false };
       return;
     }
     if (play) return;
@@ -337,6 +375,7 @@ if (/[?&]bagedit=1(&|$)/.test(location.search)) (() => {
     drag.moved = true;
     const dx = (ev.clientX - drag.sx) / drag.s, dy = (ev.clientY - drag.sy) / drag.s, o = over(drag.key);
     if (drag.resize && drag.img) { o.size = Math.max(4, Math.round(drag.size + dx)); post({ type: 'resize', key: drag.key, size: o.size }); }   // 圖片：長寬一起、1px 一格
+    else if (drag.resize && drag.frame) { o.w = Math.max(4, Math.round(drag.w + dx)); o.h = Math.max(4, Math.round(o.w * drag.h / drag.w)); post({ type: 'resize', key: drag.key, w: o.w, h: o.h }); }   // 圖片的框：寬變多少、高照比例
     else if (drag.resize) { o.w = Math.max(4, Math.round(drag.w + dx)); o.h = Math.max(4, Math.round(drag.h + dy)); post({ type: 'resize', key: drag.key, w: o.w, h: o.h }); }
     else { o.x = Math.round(drag.x + dx); o.y = Math.round(drag.y + dy); post({ type: 'move', key: drag.key, x: o.x, y: o.y }); }
     applyBackpackLayout();   // 先在這邊動，拖起來比較順

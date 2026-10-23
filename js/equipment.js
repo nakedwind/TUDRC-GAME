@@ -2,7 +2,7 @@
 //  部隊長（溫特）的裝備
 //  ・背包左邊「部隊長裝備」：換裝（頭部、上身、下身 ×2、隨身物品 ×2），看武器等級、手電筒電量。
 //  ・照明：照明頭盔（頭部，身邊一小圈光）、高亮度手電筒（隨身物品，朝滑鼠方向的扇形光，要電池）。
-//  ・道具：急救包（H）、腎上腺素（J）是背包裡的消耗品（data/supplies.js），下方資訊條也有按鈕。
+//  ・道具：急救包（H）、腎上腺素是背包裡的消耗品（data/supplies.js），下方資訊條也有按鈕（腎上腺素沒有快捷鍵，用快捷欄 1～0 或背包）。
 //  ・找諾亞對話 →「🔧 開發工坊」：用異質碎片開發新裝備、升級裝備和武器。
 //  ・特殊裝備（異質探測器）只能在戰鬥區域拿到。
 //  ・資料、數值在 data/equipment.js；進度存在瀏覽器（localStorage）。
@@ -375,15 +375,15 @@ function renderGearQuick() {
   const faces = firstAid.picking ? (G.towers || []).map(t => [t.type, t.hp <= 0]) : [];   // 選隊員時：急救包按鈕上方的隊員小頭像（倒下＝黑白＋重傷）
   const key = JSON.stringify([show, aid, rev, !!firstAid.channel, firstAid.picking, adr, active, faces]);
   if (key === gearQuickKey) return; gearQuickKey = key;
-  const btn = (id, icon, name, sub, k, off, cls = '') => '<button type="button" class="quick-supply gear ' + cls + '" data-gear-use="' + id + '" ' + (off ? 'disabled' : '') + ' title="' + k + '｜' + name + '">' +
-    '<span class="qs-icon">' + icon + '</span><span class="qs-text"><small>' + name + '</small><b>' + sub + '</b></span><kbd>' + k + '</kbd></button>';
+  const btn = (id, icon, name, sub, k, off, cls = '') => '<button type="button" class="quick-supply gear ' + cls + '" data-gear-use="' + id + '" ' + (off ? 'disabled' : '') + ' title="' + (k ? k + '｜' : '') + name + '">' +
+    '<span class="qs-icon">' + icon + '</span><span class="qs-text"><small>' + name + '</small><b>' + sub + '</b></span>' + (k ? '<kbd>' + k + '</kbd>' : '') + '</button>';
   const faceRow = !faces.length ? '' : '<div class="aid-pick-row">' + faces.map(([type, down]) => {
     const spec = TYPES[type]; if (!spec) return '';
     return '<span class="aid-face-slot"><button type="button" class="aid-pick-face' + (down ? ' down' : '') + '" data-aid-face="' + type + '" title="' + spec.name + '">' +
       '<img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + (down ? '<span class="aid-face-down">重傷</span>' : '') + '</button></span>';
   }).join('') + '</div>';
   box.innerHTML = !show ? '' : (aid || rev ? '<span class="aid-gear-wrap">' + btn('firstaid', '⛑️', '急救包', firstAid.picking ? '選隊員' : '×' + aid + (rev ? '・異質×' + rev : ''), 'H', !!firstAid.channel, firstAid.picking ? 'on' : '') + faceRow + '</span>' : '') +
-    (adr ? btn('adrenaline', '💉', '腎上腺素', active ? '生效中' : '×' + adr, 'J', active, active ? 'on' : '') : '');
+    (adr ? btn('adrenaline', '💉', '腎上腺素', active ? '生效中' : '×' + adr, '', active, active ? 'on' : '') : '');
 }
 document.addEventListener('click', e => { const b = e.target.closest && e.target.closest('[data-gear-use]'); if (!b) return; if (b.dataset.gearUse === 'firstaid') useFirstAid(); else useAdrenaline(); });
 // 急救包按鈕上方的隊員小頭像：點＝治療那位；滑鼠每換到一位隊員就響一次

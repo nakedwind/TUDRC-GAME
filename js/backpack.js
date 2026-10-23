@@ -137,8 +137,8 @@ function renderBulletDetail(b) {
     : `<button type="button" class="bag-use" data-mag-load="${b.bullet}">裝進彈匣</button>`;
   backpackDetail.innerHTML = `
     <div class="bag-detail-image bullet">${b.image ? `<img src="${b.image}" alt="">` : `<i class="bag-gear-emoji">${b.icon}</i>`}</div>
-    <h3>${b.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${BAG_ICON.weapon}子彈</span>${tag ? `<span class="bag-tag">${tag}</span>` : ''}${b.free ? '<span class="bag-tag worn">不佔格子</span>' : slot >= 0 ? `<span class="bag-tag worn">彈匣第 ${slot + 1} 格</span>` : ''}</div>
+    <div class="bag-item-heading"><h3>${b.name}</h3>
+    <div class="bag-tags"><span class="bag-tag">${BAG_ICON.weapon}子彈</span>${tag ? `<span class="bag-tag">${tag}</span>` : ''}${b.free ? '<span class="bag-tag worn">不佔格子</span>' : slot >= 0 ? `<span class="bag-tag worn">彈匣第 ${slot + 1} 格</span>` : ''}</div></div>
     ${b.def.desc ? `<p class="bag-desc">${b.def.desc}</p>` : ''}
     <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note">也可以直接拖曳到武器分頁的彈匣格</p>'}</div>`;
 }
@@ -252,7 +252,7 @@ backpackEl.addEventListener('click', e => {
   if (e.target === backpackEl) { closeBackpack(); return; }
   const tab = e.target.closest('[data-bag-tab]');
   if (tab) { backpackTab = tab.dataset.bagTab; backpackSel = null; backpackDrop = null; renderBackpack(); sfx('switch'); return; }
-  const cell = e.target.closest('[data-bag-item]');
+  const cell = e.target.closest('#backpackGrid [data-bag-item]');   // 只認格子：右邊說明欄身上也有 data-bag-item（js/backpack-layout.js 寫的），不能把說明欄的按鈕當成點格子
   if (cell) { if (backpackSel !== cell.dataset.bagItem) selectBackpackItem(cell.dataset.bagItem); backpackGrid.querySelector('.bag-cell.sel')?.focus(); return; }
   if (e.target.closest('[data-bag-drop]')) { startDrop(e.target.closest('[data-bag-drop]').dataset.bagDrop); return; }
   if (e.target.closest('[data-drop-cancel]')) { cancelDrop(); return; }

@@ -2,7 +2,7 @@
    ・skin（服裝）：一整套 15 張 64×64 動作圖，綁定某一個角色；基地、戰鬥可以各自選穿哪一套。
        每個角色現有的 A（基地）、B（戰鬥）兩套自動算進來，不用寫在這裡。
        新的 skin：把圖放在 images/character/<folder>/（檔名跟其他角色一樣：<folder 去掉底線>_0000_Front.png …），再加一筆到 COSTUME_SKINS。
-   ・配件：疊在角色身上的小圖，所有角色共用同一張圖；一個欄位戴一個（頭飾、臉部、背部、手持）。
+   ・配件：疊在角色身上的小圖，所有角色共用同一張圖；一個欄位戴一個（頭飾、臉部、背部、手持、下身＝尾巴這類）。
        art.front＝正面圖；art.side＝側面圖（畫朝左，往右時自動左右翻；沒畫就用正面圖）；art.back＝背面圖（沒畫就用正面圖）。
    ・rarity：稀有度 N／R／SR（扭蛋機的機率看這個）；gacha: false＝不放進扭蛋池；giftable: false＝不能當禮物送（沒寫＝可以送；skin 只能送給那個角色）。
 */
@@ -12,6 +12,7 @@ const COSTUME_SLOTS = [
   { id: 'face', name: '臉部' },
   { id: 'back', name: '背部' },
   { id: 'hand', name: '手持' },
+  { id: 'lower', name: '下身' },   // 尾巴這類：預設畫在腰後面
 ];
 // 每個欄位的配件預設放在角色圖（64×64）的哪裡：x、y＝配件中心；behind＝畫在角色後面；hidden＝這個方向看不到
 // 每個角色、每個配件、每個方向的位置用「服裝編輯器」調，存在 data/costume-placement.js（有調過就優先用那裡的）
@@ -20,6 +21,7 @@ const COSTUME_SLOT_ANCHORS = {
   face: { front: { x: 32, y: 27 }, left: { x: 22, y: 27 }, right: { x: 42, y: 27 }, back: { hidden: true } },
   back: { front: { x: 32, y: 40, behind: true }, left: { x: 40, y: 40, behind: true }, right: { x: 24, y: 40, behind: true }, back: { x: 32, y: 40 } },
   hand: { front: { x: 46, y: 46 }, left: { x: 22, y: 46 }, right: { x: 42, y: 46 }, back: { x: 18, y: 46, behind: true } },
+  lower: { front: { x: 32, y: 50, behind: true }, left: { x: 42, y: 50, behind: true }, right: { x: 22, y: 50, behind: true }, back: { x: 32, y: 50 } },   // 尾巴：正面、側面在身體後面，背面看得到
 };
 // 內建兩套（每個角色原本的 A、B 圖）的名稱
 const COSTUME_DEFAULT_SKINS = { A: '基地便服', B: '出勤制服' };
