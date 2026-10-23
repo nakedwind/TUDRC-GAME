@@ -140,7 +140,7 @@ function renderSupplyShop() {
     const use = item.use && SUPPLY_KIND[item.use], inCart = shopCart.get(item.id) || 0, short = item.price - left;
     const full = inCart >= shopRoom(item);
     const left2 = isEocVending() ? (eocVendingState()[vendingColor] || {})[item.id] || 0 : null, owned = supplyInventory.get(item.id) || 0;
-    const limitTxt = (left2 != null ? (left2 ? '・剩 ' + left2 + ' 個' : '・售完') : '') + (CARRY_LIMIT.kinds.includes(item.kind) ? '・持有 ' + owned + '/' + CARRY_LIMIT.max : '');
+    const limitTxt = (left2 != null ? (left2 ? '・剩 ' + left2 + ' 個' : '・售完') : '') + (CARRY_LIMIT.kinds.includes(item.kind) && owned ? '・持有 ' + owned + ' 個' : '');   // 持有 0 個：不寫
     return `<article class="shop-item ${item.kind} ${item.use || 'gift'}" data-item="${item.id}">
       ${inCart ? `<span class="shop-owned" title="購物車裡有 ${inCart} 個">🛒${inCart}</span>` : ''}
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
