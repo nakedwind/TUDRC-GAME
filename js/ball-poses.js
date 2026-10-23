@@ -62,6 +62,8 @@ function ballBedStep(npc, dt) {
   return true;
 }
 const ballSleeping = npc => !!(npc && npc.ballSleep && !npc.ballSleep.going);
+// 排前後用的 y（js/render.js）：睡覺圖底邊對齊床底，就用床底；其他時候回傳 null 照一般角色算
+const ballSortY = npc => ballSleeping(npc) ? npc.ballSleep.bed.y0 + npc.ballSleep.bed.h : null;
 
 // 畫球球（js/render.js 的 drawWanderer 先問這裡）：睡覺、坐著時畫特別的圖並回傳 true；其他時候照一般走路圖
 function drawBallPose(npc, size) {
