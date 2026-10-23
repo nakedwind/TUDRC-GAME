@@ -62,8 +62,8 @@ function costumeSkinSet(id, folder, skinId) {
   const fail = (rec.B && rec.B.fail) || (rec.A && rec.A.fail);   // 換穿的那套沒有倒地圖：用原本那套的
   return !set.fail && fail ? Object.assign({}, set, { fail }) : set;
 }
-function costumeSelectedSkin(id, mode) {
-  const eq = costumeState.equip[id] || {};
+function costumeSelectedSkin(id, mode, eqOverride) {
+  const eq = eqOverride || costumeState.equip[id] || {};
   // 溫特穿女僕裝出勤時沿用身上的服裝。
   if (id === 'winter' && mode === 'battle' && eq.base === 'winter-maid') return 'winter-maid';
   return mode === 'base' ? eq.base : eq.battle;
@@ -150,7 +150,7 @@ const wardrobeNearPlayer = () => costumeSpotNearPlayer(wardrobeSpots());
 function useWardrobeNearPlayer() { if (!wardrobeNearPlayer()) return false; openWardrobe(); return true; }
 
 // ---- 服裝介面 ----
-const wd = { el: null, who: 'winter', mode: 'base', slot: 'skin', dir: 0, t0: 0 };
+const wd = { el: null, who: 'winter', mode: 'base', slot: 'skin', dir: 0, t0: 0, draft: {} };   // draft＝試穿中的服裝，按「確定更換」才真的換上
 const WD_DIRS = ['front', 'left', 'back', 'right'], WD_DIR_NAMES = { front: '正面', left: '左側', back: '背面', right: '右側' };
 const wardrobePeople = () => ['winter', ...(typeof ROSTER !== 'undefined' ? ROSTER : [])].filter((id, i, a) => a.indexOf(id) === i && CHARACTERS[id] && CHARACTERS[id].sprite);
 function buildWardrobe() {
@@ -163,10 +163,11 @@ function buildWardrobe() {
     + '<div class="wd-stage"><nav class="wd-mode"><button type="button" data-mode="base">基地</button><button type="button" data-mode="battle">戰鬥</button></nav>'
     + '<canvas class="wd-preview" width="192" height="192"></canvas>'
     + '<div class="wd-turn"><button type="button" data-turn="-1" aria-label="往左轉">◀</button><span></span><button type="button" data-turn="1" aria-label="往右轉">▶</button></div>'
-    + '<p class="wd-wearing"></p></div>'
+    + '<p class="wd-wearing"></p><button type="button" class="wd-confirm">確定更換</button></div>'
     + '<div class="wd-closet"><nav class="wd-tabs"></nav><div class="wd-grid"></div></div></div></section>';
   document.getElementById('wrap').appendChild(el);
   el.querySelector('.wd-close').addEventListener('click', closeWardrobe);
+  el.querySelector('.wd-confirm').addEventListener('click', confirmCostume);
   el.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.mode) { wd.mode = b.dataset.mode; renderWardrobe(); }
@@ -177,27 +178,38 @@ function buildWardrobe() {
 }
 // 目前穿的 skin（沒設＝照原本：基地 A、戰鬥 B）
 function wdSkinOf(id, mode) {
-  const set = costumeSelectedSkin(id, mode);
+  const set = costumeSelectedSkin(id, mode, wd.draft);
   if (set && costumeSkinFitsMode(SKIN_BY_ID[set], mode)) return set;
   const list = costumeSkinsFor(id), want = mode === 'base' ? 'A' : 'B';
   return list.some(s => s.id === want) ? want : (list[0] && list[0].id) || want;
 }
+// 點衣服：只換試穿（預覽），還沒真的換上
 function wearCostume(itemId) {
-  const eq = costumeEquip(wd.who);
+  const eq = wd.draft;
   if (wd.slot === 'skin') {
     if (!costumeSkinFitsMode(SKIN_BY_ID[itemId], wd.mode)) return;   // 限定場合：這一邊不能穿
     eq[wd.mode === 'base' ? 'base' : 'battle'] = itemId;
   }
   else eq[wd.slot] = itemId || null;
+  if (typeof sfx === 'function') sfx('button');
+  renderWardrobe();
+}
+const wdDirty = () => { const a = costumeState.equip[wd.who] || {}, b = wd.draft;
+  return [...new Set([...Object.keys(a), ...Object.keys(b)])].some(k => (a[k] || null) !== (b[k] || null)); };
+// 「確定更換」：試穿的那套真的換上
+function confirmCostume() {
+  if (!wdDirty()) return;
+  costumeState.equip[wd.who] = Object.assign({}, wd.draft);
   saveCostumes();
   if (typeof applyOutfits === 'function') applyOutfits();   // 遊戲裡的角色馬上跟著換
   if (typeof checkAchievements === 'function') checkAchievements('allWear:');   // 成就：全員戴上某件配件
   if (typeof sfx === 'function') sfx('switch');
+  if (typeof systemNotice === 'function') systemNotice(CHARACTERS[wd.who].name + '換上新的穿搭了');
   renderWardrobe();
 }
 function renderWardrobe() {
   if (!wd.el) return;
-  const el = wd.el, id = wd.who, eq = costumeState.equip[id] || {};
+  const el = wd.el, id = wd.who, eq = wd.draft;
   const self = id === 'winter';   // 衣櫃＝換自己的；跟隊友對話的「推薦穿搭」＝換那位隊友的
   el.querySelector('.wd-title h2').textContent = self ? '衣櫃' : '推薦穿搭';
   el.querySelector('.wd-title p').textContent = self ? '換上服裝和配件' : '幫' + CHARACTERS[id].name + '挑選服裝和配件';
@@ -227,6 +239,8 @@ function renderWardrobe() {
   const skin = wdSkinOf(id, wd.mode), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || COSTUME_DEFAULT_SKINS[skin] || skin;
   const accs = ACC_SLOTS.map(s => eq[s] && ACC_BY_ID[eq[s]] && ACC_BY_ID[eq[s]].name).filter(Boolean);
   el.querySelector('.wd-wearing').textContent = CHARACTERS[id].name + '：' + skinName + (accs.length ? '・' + accs.join('、') : '');
+  const dirty = wdDirty(), ok = el.querySelector('.wd-confirm');
+  ok.disabled = !dirty; ok.textContent = dirty ? '確定更換' : '目前穿著';
 }
 // 預覽：站著的圖（不播走路動畫），配件跟著畫
 function wardrobePreviewLoop(now) {
@@ -238,15 +252,16 @@ function wardrobePreviewLoop(now) {
   const size = 168, dx = (cvs.width - size) / 2, dy = cvs.height - size - 6;
   c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(cvs.width / 2, cvs.height - 14, 40, 9, 0, 0, Math.PI * 2); c.fill();
   c.imageSmoothingEnabled = false;
-  drawCostumeAccessories(c, id, { dir, frame: step }, dx, dy, size, 'behind');
+  drawCostumeAccessories(c, id, { dir, frame: step }, dx, dy, size, 'behind', wd.draft);
   if (img && img.complete && img.naturalWidth) c.drawImage(img, dx, dy, size, size);
-  drawCostumeAccessories(c, id, { dir, frame: step }, dx, dy, size, 'front');
+  drawCostumeAccessories(c, id, { dir, frame: step }, dx, dy, size, 'front', wd.draft);
   requestAnimationFrame(wardrobePreviewLoop);
 }
 function openWardrobe(who = 'winter') {
   if (wardrobeOpen || !CHARACTERS[who]) return;
   if (!wd.el) buildWardrobe();
   wardrobeOpen = true; wd.t0 = performance.now(); wd.who = who;
+  wd.draft = Object.assign({}, costumeState.equip[who] || {});   // 試穿從身上這套開始；沒按「確定更換」就關掉＝不換
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
   wd.el.classList.remove('hidden'); renderWardrobe();
   if (typeof sfx === 'function') sfx('menu');

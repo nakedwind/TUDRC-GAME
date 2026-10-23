@@ -2452,6 +2452,9 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 #wardrobe .wd-turn span { min-width: 34px; text-align: center; }
 #wardrobe .wd-turn button { width: 30px; height: 26px; border: 1px solid rgba(143,211,255,.35); border-radius: 7px; background: rgba(23,32,42,.85); color: #d8ecff; cursor: pointer; }
 #wardrobe .wd-wearing { margin: 0; color: #8c9aa8; font-size: 12px; text-align: center; line-height: 1.5; }
+#wardrobe .wd-confirm { margin-top: 4px; padding: 7px 22px; border: 1px solid #ffd479; border-radius: 999px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #2a1d05; cursor: pointer; font: 700 14px "Microsoft JhengHei", sans-serif; }   /* 確定更換：試穿的服裝真的換上 */
+#wardrobe .wd-confirm:hover:not(:disabled) { filter: brightness(1.08); }
+#wardrobe .wd-confirm:disabled { border-color: rgba(255,255,255,.1); background: transparent; color: #7d8996; cursor: default; }
 /* 右：衣服 */
 #wardrobe .wd-closet { min-height: 0; display: flex; flex-direction: column; }
 #wardrobe .wd-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 8px; }
