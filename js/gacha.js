@@ -65,23 +65,26 @@ function gachaPull(times, pay = 'crystal') {
   stage.className = 'gc-stage show' + (rare ? ' gold' : best >= 1 ? ' blue' : '');
   stage.querySelector('.gc-banner').textContent = ''; stage.querySelector('.gc-hero').innerHTML = ''; stage.querySelector('.gc-sparks').innerHTML = '';
   const W = R.wobble || GACHA_ANIM.wobble; stage.style.setProperty('--wobble', W + 'ms');
-  SFX.play('gachaDrop', .8, 'gacha-drop');   // 轉扭蛋：扭蛋掉出來
+  SFX.play('gachaCrank', 1, 'gacha-crank');   // 投幣＋轉把手
   const A = GACHA_ANIM, at = (ms, fn) => gc.timers.push(setTimeout(fn, ms));
-  at(A.dark, () => stage.classList.add('drop'));
-  at(A.dark + A.drop, () => { stage.classList.add('wobble'); if (rare) stage.classList.add('charge'); });   // 好東西：越搖越快、發光、光芒在後面轉
+  at(A.dark, () => { stage.classList.add('drop'); SFX.play('gachaDrop', .8, 'gacha-drop'); });   // 扭蛋掉出來
+  at(A.dark + A.drop, () => {   // 好東西：越搖越快、發光、光芒在後面轉，配集氣聲
+    stage.classList.add('wobble');
+    if (rare) { stage.classList.add('charge'); SFX.play('gachaCharge', 1, 'gacha-charge'); }
+  });
   if (rare === 'SSR') at(A.dark + A.drop + W * R.upgrade, () => {   // 升格：金 → 彩虹，閃一下
     stage.classList.replace('gold', 'rainbow'); stage.classList.add('upgrade');
     gachaFlash(card); gachaSparks(stage, 16, GACHA_SPARK_COLORS.SSR, .6);
-    sfx('soothe');
+    SFX.play('gachaUpgrade', 1, 'gacha-upgrade');
   });
   at(A.dark + A.drop + W, () => {
     stage.classList.add('open');
-    if (!rare) { sfx('itemPickup'); return; }
+    if (!rare) { SFX.play('gachaOpen', 1, 'gacha-pop'); return; }
+    SFX.fadeOut('gacha-charge', .15);
     stage.classList.add('big');   // 大爆光、標題橫幅、碎光噴出來
     stage.querySelector('.gc-banner').textContent = rare === 'SSR' ? 'SSR!!' : 'SR!';
     gachaFlash(card); gachaSparks(stage, R.sparks, GACHA_SPARK_COLORS[rare], 1);
-    sfx('achievement');
-    if (rare === 'SSR') gc.timers.push(setTimeout(() => sfx('win'), 260));
+    SFX.play(rare === 'SSR' ? 'gachaSSR' : 'gachaSR', 1, 'gacha-reveal');
   });
   const opened = A.dark + A.drop + W + A.open;
   if (rare === 'SSR') { at(opened + R.linger, gachaShowHero); at(opened + R.linger + R.hero, gachaRevealDone); }
@@ -108,10 +111,10 @@ function gachaShowHero() {
   stage.querySelector('.gc-hero').innerHTML = gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(rarityOf(item));
   stage.classList.add('hero');
   gachaSparks(stage, 22, GACHA_SPARK_COLORS.SSR, .8);
-  SFX.play('crystalGet', .8, 'gacha-hero');
+  SFX.play('gachaHero', 1, 'gacha-hero');
 }
 function gachaSkipToHero() {
-  gc.timers.forEach(clearTimeout); gc.timers = [];
+  gc.timers.forEach(clearTimeout); gc.timers = []; SFX.fadeOut('gacha-charge', .15);
   const stage = gc.el.querySelector('.gc-stage');
   stage.classList.remove('gold', 'charge'); stage.classList.add('drop', 'wobble', 'open', 'big', 'rainbow');
   stage.querySelector('.gc-banner').textContent = 'SSR!!';
@@ -119,7 +122,7 @@ function gachaSkipToHero() {
   gc.timers.push(setTimeout(gachaRevealDone, GACHA_RARE.SSR.hero));
 }
 function gachaRevealDone() {   // 動畫結束（或點一下跳過）：收掉黑幕，翻出轉到的東西
-  gc.timers.forEach(clearTimeout); gc.timers = [];
+  gc.timers.forEach(clearTimeout); gc.timers = []; SFX.fadeOut('gacha-charge', .15);
   if (!gc.busy) return;
   gc.busy = false;
   if (!gachaOpen) return;
@@ -183,7 +186,7 @@ function buildGacha() {
   el.querySelector('.gc-stage').addEventListener('click', () => {
     if (!gc.busy) return;
     if (gc.rare === 'SSR' && !gc.heroShown) { gachaSkipToHero(); return; }   // SSR：第一下跳到獨照，第二下才收掉
-    if (!el.querySelector('.gc-stage.open')) sfx('itemPickup');
+    if (!el.querySelector('.gc-stage.open')) SFX.play('gachaOpen', 1, 'gacha-pop');
     gachaRevealDone();
   });
   el.addEventListener('click', e => {
@@ -241,6 +244,7 @@ function openGacha() {
 function closeGacha() {
   if (!gachaOpen) return;
   gachaOpen = false; gc.busy = false; gc.timers.forEach(clearTimeout); gc.timers = []; gc.el.classList.add('hidden');
+  SFX.fadeOut('gacha-charge', .15);
   sfx('switch');
 }
 // 開著的時候：Esc 關掉，其他按鍵都不要傳給遊戲
