@@ -19,6 +19,10 @@ const BACKPACK_PARTS = {
   'panel.grid':   { group: '面板區域', label: '道具格子區', sel: '#backpackGrid' },
   'panel.detail': { group: '面板區域', label: '物品說明欄', sel: '#backpackDetail' },
   'panel.battery': { group: '面板區域', label: '手電筒電量（裝備高亮度手電筒時出現）', sel: '#equipPanel .equip-battery' },
+  // 手電筒電量區塊裡的文字（js/equipment.js 畫的）：各自調位置、字級
+  'text.batteryLabel': { group: '手電筒電量的文字', label: '「🔋 手電筒電量」', sel: '#equipPanel .equip-battery > span', text: 'fixed' },
+  'text.batteryPct':   { group: '手電筒電量的文字', label: '電量百分比（100%）', sel: '#equipPanel .equip-battery > b' },
+  'text.batteryCount': { group: '手電筒電量的文字', label: '「背包裡的電池：N 顆」', sel: '#equipPanel .equip-battery > small' },
   'box.bagIcon':  { group: '圖片的框', label: '背包圖示的框', sel: '#backpack .backpack-head .backpack-icon' },
   'box.detailImage': { group: '圖片的框', label: '說明欄的圖片框', sel: '#backpackDetail .bag-detail-image' },
   'img.bagIcon':  { group: '圖片', label: '背包圖示', sel: '#backpack .backpack-head .backpack-button-image', kind: 'img' },
@@ -352,7 +356,7 @@ if (/[?&]bagedit=1(&|$)/.test(location.search)) (() => {
       ev.preventDefault(); ev.stopImmediatePropagation();
       const el = els(selKey)[0]; if (!el) return;
       const o = over(selKey);
-      const img = backpackPart(selKey).kind === 'img', frame = /^(box\.|slot:)/.test(selKey);   // 圖片的框：也鎖長寬比例
+      const img = backpackPart(selKey).kind === 'img', frame = /^(box\.|slot:|panel\.battery$)/.test(selKey);   // 圖片的框、手電筒電量：也鎖長寬比例
       drag = { key: selKey, resize: true, img, frame, sx: ev.clientX, sy: ev.clientY, size: o.size || el.offsetWidth, w: o.w || el.offsetWidth, h: o.h || el.offsetHeight, s: scaleOf(el), moved: false };
       return;
     }

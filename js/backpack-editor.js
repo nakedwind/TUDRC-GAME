@@ -24,7 +24,7 @@ const partOf = key => backpackPart(key) || {};
 const labelOf = key => { const d = dynParts.find(p => p.key === key); return d ? d.label : partOf(key).label || key; };
 const elOf = key => state.layout.elements[key] || {};
 const isImg = key => partOf(key).kind === 'img';
-const isFrame = key => /^(box\.|slot:)/.test(key);   // 圖片的框（背包圖示的框、說明欄的圖片框、裝備格的框）：跟圖片一樣鎖長寬比例
+const isFrame = key => /^(box\.|slot:|panel\.battery$)/.test(key);   // 圖片的框（背包圖示的框、說明欄的圖片框、裝備格的框）、手電筒電量：跟圖片一樣鎖長寬比例
 const isText = key => { const p = partOf(key); return !isImg(key) && (!!p.text || /^(text|btn|tab|slotText)/.test(key)); };
 const isChanged = key => !!state.layout.elements[key] || !!state.layout.texts[key];
 
@@ -85,7 +85,7 @@ function listGroups() {
   for (const p of dynParts) add(p.group, p.key);
   return groups;
 }
-const openGroups = new Set(['面板區域', '圖片', '文字與按鈕']);
+const openGroups = new Set(['面板區域', '圖片', '文字與按鈕', '手電筒電量的文字']);
 function renderList() {
   let html = '';
   for (const [group, keys] of listGroups()) {

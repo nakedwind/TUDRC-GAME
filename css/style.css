@@ -954,7 +954,12 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .shop-item-image img { width:80px; height:80px; object-fit:contain; image-rendering:pixelated; transition:transform .15s; }
 .shop-item:hover .shop-item-image img { transform:scale(1.08); }
 .shop-item-image strong { width:100%; overflow:hidden; color:#f3f5f7; font-size:13px; line-height:1.3; text-overflow:ellipsis; white-space:nowrap; }
-.shop-effect { padding:1px 8px; border-radius:99px; font-size:13px; font-weight:700; }
+.shop-effect { padding:1px 8px; border-radius:99px; font-size:13px; font-weight:700; text-align:center; }
+.shop-effect small { display:block; font-size:inherit; }   /* 第二行：剩幾個／持有幾個 */
+.shop-effect:has(small) { border-radius:10px; padding:2px 10px; }
+/* 買滿（持有上限、售完）：圖片右上角的小標籤；購物車數量移到左上角 */
+.shop-full-tag { position:absolute; top:6px; right:6px; z-index:1; padding:2px 7px; border:1px solid rgba(255,157,143,.55); border-radius:7px; background:rgba(40,20,22,.88); color:#ff9d8f; font-size:11px; font-weight:800; box-shadow:0 2px 6px rgba(0,0,0,.35); }
+.shop-item.maxed .shop-owned { right:auto; left:6px; }
 .shop-item.hp .shop-effect { background:rgba(121,219,173,.12); color:#79dbad; }
 .shop-item.sp .shop-effect { background:rgba(140,199,255,.12); color:#8cc7ff; }
 .shop-item.gift .shop-effect { background:rgba(255,156,207,.1); color:#ff9ccf; }
@@ -965,6 +970,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .shop-buy:hover:not(:disabled) { filter:brightness(1.07); }
 .shop-buy:active:not(:disabled) { transform:translateY(2px); box-shadow:inset 0 1px 2px rgba(120,70,10,.3), 0 0 0 #9a6a20; }
 .shop-buy:disabled { border-color:rgba(255,255,255,.08); background:rgba(0,0,0,.28); color:#ff9d8f; cursor:not-allowed; font-size:13px; box-shadow:inset 0 1px 3px rgba(0,0,0,.4); transform:translateY(2px); }   /* 錢不夠：凹下去、沒有厚度 */
+.shop-buy.maxed:disabled, .shop-buy.maxed:disabled b { background:rgba(0,0,0,.45); color:#8a939c; font-size:14px; }   /* 買滿：黑底灰字，只顯示價錢 */
 .shop-item.bought { animation:shop-bought .5s ease-out; }
 @keyframes shop-bought { 35% { border-color:#ffd479; box-shadow:0 0 0 1px rgba(255,212,121,.7), 0 0 22px rgba(255,212,121,.55); } }   /* 買到：只發光，不放大 */
 .shop-pop { position:absolute; top:28px; left:50%; color:#ffe08b; font:900 18px "Microsoft JhengHei",sans-serif; font-style:normal; text-shadow:0 2px 4px rgba(0,0,0,.8); pointer-events:none; animation:shop-pop .7s ease-out forwards; }

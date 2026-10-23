@@ -163,6 +163,20 @@ const BACKPACK_LAYOUT = {
     },
     "text.name": {
       "font": 20
+    },
+    "panel.battery": {
+      "w": 191
+    },
+    "detailImg:battery": {
+      "size": 59
+    },
+    "text.batteryLabel": {
+      "font": 15,
+      "align": "center"
+    },
+    "text.batteryCount": {
+      "font": 13,
+      "align": "center"
     }
   },
   "texts": {}

@@ -140,12 +140,15 @@ function renderSupplyShop() {
     const use = item.use && SUPPLY_KIND[item.use], inCart = shopCart.get(item.id) || 0, short = item.price - left;
     const full = inCart >= shopRoom(item);
     const left2 = isEocVending() ? (eocVendingState()[vendingColor] || {})[item.id] || 0 : null, owned = supplyInventory.get(item.id) || 0;
-    const limitTxt = (left2 != null ? (left2 ? '・剩 ' + left2 + ' 個' : '・售完') : '') + (CARRY_LIMIT.kinds.includes(item.kind) && owned ? '・持有 ' + owned + ' 個' : '');   // 持有 0 個：不寫
-    return `<article class="shop-item ${item.kind} ${item.use || 'gift'}" data-item="${item.id}">
+    const limitTxt = [left2 != null ? (left2 ? '剩 ' + left2 + ' 個' : '售完') : '', CARRY_LIMIT.kinds.includes(item.kind) && owned ? '持有 ' + owned + ' 個' : ''].filter(Boolean).join('・');   // 持有 0 個：不寫；放在效果下面第二行
+    const fullTag = left2 === 0 ? '售完' : '已達上限';
+    const effectLines = String(item.effect || '').split('・'), line2 = [...effectLines.slice(1), limitTxt].filter(Boolean).join('・');   // 效果文字有「・」（子彈：每份 1 發・持有 0 / 6）：點刪掉、後半段換到第二行   // 買滿：圖片右上角的小標籤
+    return `<article class="shop-item ${item.kind} ${item.use || 'gift'}${full ? ' maxed' : ''}" data-item="${item.id}">
+      ${full ? `<span class="shop-full-tag">${fullTag}</span>` : ''}
       ${inCart ? `<span class="shop-owned" title="購物車裡有 ${inCart} 個">🛒${inCart}</span>` : ''}
       <div class="shop-item-image"><img src="${item.image}" alt=""><strong title="${item.name}">${item.name}</strong></div>
-      <span class="shop-effect">${use ? use.icon + ' ' + supplyEffect(item) : item.effect ? item.effect : item.id === 'battery' ? '🔋 手電筒用' : '🎁 送禮用'}${limitTxt}</span>
-      <button class="shop-buy" type="button" data-buy-supply="${item.id}" ${full ? `disabled aria-label="${item.name}，已達持有上限"` : short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="把 ${item.name} 加入購物車，$${item.price}"`}>${full ? '已達上限' : short > 0 ? `還差 $${short}` : `<span>加入</span><b>$${item.price}</b>`}</button>
+      <span class="shop-effect">${use ? use.icon + ' ' + supplyEffect(item) : item.effect ? effectLines[0] : item.id === 'battery' ? '🔋 手電筒用' : '🎁 送禮用'}${line2 ? `<small>${line2}</small>` : ''}</span>
+      <button class="shop-buy${full ? ' maxed' : ''}" type="button" data-buy-supply="${item.id}" ${full ? `disabled aria-label="${item.name}，${fullTag}，$${item.price}"` : short > 0 ? `disabled aria-label="${item.name}，還差 $${short}"` : `aria-label="把 ${item.name} 加入購物車，$${item.price}"`}>${full ? `<b>$${item.price}</b>` : short > 0 ? `還差 $${short}` : `<span>加入</span><b>$${item.price}</b>`}</button>
     </article>`;
   }).join('');
   renderCart(money);

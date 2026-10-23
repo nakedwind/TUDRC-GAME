@@ -4,22 +4,26 @@
    套用的程式在 js/backpack-layout.js。 */
 const ITEM_TEXTS = {
   "oyster-omelet": {
-    "desc": "沒有什麼蚵仔味但很好吃的阿子煎。"
+    "desc": "沒有什麼蚵仔味但很好吃的阿子煎。",
+    "effect": "出勤 ❤️ 生命上限 +5%"
   },
   "almond-water": {
     "desc": "喝了可以讓精神穩定下來。\n可以在後室商店購買，也有機率在戰鬥區域拾取。"
   },
   "tomato-soda": {
-    "desc": "番茄口味？到底誰會喜歡喝這種東西？"
+    "desc": "番茄口味？到底誰會喜歡喝這種東西？",
+    "effect": "出勤 ⚔️ 攻擊 +8%"
   },
   "sarsaparilla": {
-    "desc": "令人懷念的老味道。"
+    "desc": "令人懷念的老味道。",
+    "effect": "出勤 ⚡ 攻速 +8%"
   },
   "youyou-card": {
     "desc": "捷運用的儲值卡，裡面只剩下一點點的錢，看來只能夠刷一次。"
   },
   "kuai-kuai": {
-    "desc": "大家都太迷信了，辦公室裡都是這個傢伙的臉。"
+    "desc": "大家都太迷信了，辦公室裡都是這個傢伙的臉。",
+    "effect": "出勤 🍃 負荷累積 −5%"
   },
   "thermos": {
     "desc": "一整杯溫熱的杏仁水，喝了可以讓精神大幅穩定下來。\n可以在後室商店購買，也有機率在戰鬥區域拾取。"
@@ -77,5 +81,41 @@ const ITEM_TEXTS = {
   },
   "bullet:heal": {
     "desc": "可以在後室商店購買。\n打中隊員可以幫他補血；打歪打到怪物，也會幫怪物補血。"
+  },
+  "little-noodles": {
+    "effect": "出勤 ⚔️ 攻擊 +3%"
+  },
+  "cadina": {
+    "effect": "出勤 ⚔️ 攻擊 +5%"
+  },
+  "fish-snack": {
+    "effect": "出勤 🛡️ 防禦 +5%"
+  },
+  "cream-puff": {
+    "effect": "出勤 ❤️ 生命上限 +3%"
+  },
+  "spicy-snack": {
+    "effect": "出勤 ⚔️ 攻擊 +5%"
+  },
+  "battery": {
+    "desc": "有機率在戰鬥區域拾取。"
+  },
+  "cola": {
+    "effect": "出勤 ⚡ 攻速 +4%"
+  },
+  "water": {
+    "effect": "出勤 🍃 負荷累積 −3%"
+  },
+  "pure-tea": {
+    "effect": "出勤 🍃 負荷累積 −8%"
+  },
+  "papaya-milk": {
+    "effect": "出勤 ❤️ 生命上限 +5%"
+  },
+  "milk-tea": {
+    "effect": "出勤 ⚔️ 攻擊 +5%"
+  },
+  "vegetable-juice": {
+    "effect": "出勤 ❤️ 生命上限 +10%"
   }
 };
