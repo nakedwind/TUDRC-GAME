@@ -3067,3 +3067,6 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .hover-tip-name { transform: translateX(-50%); color: #fff; font-size: 11px; line-height: 1.15; text-shadow: 0 1px 2px #000, 0 0 3px #000, 0 0 1px #000; }
 .hover-tip-box[hidden], .hover-tip-name[hidden] { display: none; }
 @keyframes hoverTipIn { from { opacity: 0; } to { opacity: 1; } }
+
+/* 成就說明（data/achievements.js 的 desc）：名稱下面一行小字 */
+.aa-desc, .achv-desc { display: block; margin-top: -2px; color: #9fb0c0; font-size: 11px; font-style: normal; line-height: 1.35; }

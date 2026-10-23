@@ -3,8 +3,9 @@
    ・ACHIEVE_STATS：遊戲會累計的數字（程式裡呼叫 addStat 的地方）。成就的條件只能從這裡選；要加新的種類得改程式。
    ・kill:怪物 id：擊倒某一種怪物的次數＝怪物圖鑑的消滅次數（js/bestiary.js；史萊姆變體是 kill:slime:splitter 這樣），
      怪物清單跟怪物圖鑑一樣（js/bestiary-config.js 的 bestiaryBaseList），所以新增怪物後不用改這裡。
-   ・自訂條件（stat: 'custom'）：遊戲還不會算的條件，先用文字寫在 custom；請 Claude 讀 data/achievements.js 實作，
-     實作後換成正式的 stat（加進 ACHIEVE_STATS 或 kill: 這類），custom 拿掉。還沒實作前遊戲裡不顯示（js/achievements.js）。
+   ・desc：成就說明＝玩家在成就畫面看到的達成條件（照寫的顯示）。stat／goal 是遊戲怎麼算，玩家看不到。
+   ・自訂條件（stat: 'custom'）：遊戲還不會算的條件；請 Claude 照 desc 的說明實作，實作後換成正式的 stat（desc 保留）。
+     還沒實作前遊戲裡不顯示（js/achievements.js）。舊資料的 custom 文字會讀成 desc。
    必須在 data/achievements.js 之後載入；怪物名稱要等 js/bestiary-config.js 載入後才拿得到（用到時才去讀）。
 */
 const ACHIEVE_STATS = [
@@ -73,7 +74,7 @@ function achieveCfg(data) {
   const list = (Array.isArray(d.list) ? d.list : []).filter(a => a && a.id).map(a => ({
     id: String(a.id), group: String(a.group || '其他'), name: String(a.name || ''), stat: String(a.stat || ''),
     goal: Math.max(1, Math.floor(Number(a.goal) || 1)), secret: !!a.secret,
-    ...(String(a.stat) === ACHIEVE_CUSTOM ? { custom: String(a.custom || '') } : {}),   // 自訂條件的文字
+    desc: String(a.desc ?? a.custom ?? ''),   // 成就說明（玩家看得到）；舊的自訂條件文字（custom）也當說明
   }));
   const groups = (Array.isArray(d.groups) ? d.groups : []).map(String);
   for (const a of list) if (!groups.includes(a.group)) groups.push(a.group);   // 成就用到、但分類清單裡沒有的分類：接在後面

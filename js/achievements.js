@@ -240,6 +240,7 @@ const achieveEsc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': 
 const achieveDate = ts => { const d = new Date(ts); return d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate(); };
 // 隱藏成就（secret）達成前：名稱顯示 texts.secret、不顯示進度
 const achieveShownName = (a, got, T) => (a.secret && !got ? T.secret : a.name);
+const achieveShownDesc = (a, got) => (a.secret && !got) || !a.desc ? '' : a.desc;   // 成就說明：隱藏成就達成前不顯示
 function renderAchievementPanel() {
   const { list, groups, board, texts: T } = achieveSet(), un = achieveData.unlocked, esc = achieveEsc;
   const done = list.filter(a => un[a.id]).length, total = list.length;
@@ -247,7 +248,7 @@ function renderAchievementPanel() {
     const value = achieveStatValue(a.stat), got = !!un[a.id], k = Math.min(1, value / a.goal), hide = a.secret && !got;
     return '<div class="achv-card' + (got ? ' got' : '') + (hide ? ' secret' : '') + '">' +
       '<span class="achv-icon">' + (got ? '🏆' : '🔒') + '</span>' +
-      '<div class="achv-body"><b>' + esc(achieveShownName(a, got, T)) + '</b>' +
+      '<div class="achv-body"><b>' + esc(achieveShownName(a, got, T)) + '</b>' + (achieveShownDesc(a, got) ? '<em class="achv-desc">' + esc(achieveShownDesc(a, got)) + '</em>' : '') +
       (got ? '<small>' + achieveDate(un[a.id]) + ' ' + esc(T.doneDate) + '</small>'
            : hide ? '' : '<i class="achv-bar"><u style="width:' + (k * 100).toFixed(1) + '%"></u></i><small>' + Math.min(value, a.goal) + ' / ' + a.goal + '</small>') +
       '</div></div>';
@@ -284,7 +285,7 @@ function renderAchievementApp(el) {
   const row = a => {
     const value = achieveStatValue(a.stat), got = !!un[a.id], k = Math.min(1, value / a.goal), hide = a.secret && !got;
     return '<div class="aa-row' + (got ? ' got' : '') + (hide ? ' secret' : '') + '"><span class="aa-ico">' + (got ? ACHV_SVG.trophy : ACHV_SVG.lock) + '</span>' +
-      '<div class="aa-txt"><b>' + esc(achieveShownName(a, got, T)) + '</b>' +
+      '<div class="aa-txt"><b>' + esc(achieveShownName(a, got, T)) + '</b>' + (achieveShownDesc(a, got) ? '<em class="aa-desc">' + esc(achieveShownDesc(a, got)) + '</em>' : '') +
       (got ? '<small>' + achieveDate(un[a.id]) + ' ' + esc(T.doneDate) + '</small>' : hide ? '' : '<i class="aa-bar"><u style="width:' + (k * 100).toFixed(1) + '%"></u></i>') + '</div>' +
       '<span class="aa-val">' + (got ? '✓' : hide ? '' : Math.min(value, a.goal) + ' / ' + a.goal) + '</span></div>';
   };

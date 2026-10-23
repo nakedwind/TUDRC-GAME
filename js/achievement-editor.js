@@ -22,9 +22,9 @@ let selected = ALL;
 
 // 欄位補齊（舊資料、手改過的檔案也能開）：normalized() 回傳整理好的新副本（匯出用，不動正在編輯的 data）；normalize() 只在載入、重新載入時用
 function normalize() { data = normalized(); }
-function normalized() {
-  const c = achieveCfg(data);
-  return { groups: c.groups, list: c.list.map(a => { const o = { id: a.id, group: a.group, name: a.name, stat: a.stat, goal: a.goal }; if (a.secret) o.secret = true; if (a.stat === ACHIEVE_CUSTOM) o.custom = a.custom || ''; return o; }),
+function normalized(d = data) {
+  const c = achieveCfg(d);
+  return { groups: c.groups, list: c.list.map(a => { const o = { id: a.id, group: a.group, name: a.name, stat: a.stat, goal: a.goal }; if (a.secret) o.secret = true; if (a.desc) o.desc = a.desc; return o; }),
            board: c.board, texts: c.texts, counts: c.counts };
 }
 
@@ -74,7 +74,7 @@ $a('addGroup').addEventListener('click', () => {
 
 // ---- 搜尋：名稱、分類、條件、自訂條件的文字、編號都找得到 ----
 const query = () => $a('achvSearch').value.trim().toLowerCase();
-const matches = a => { const q = query(); return !q || [a.name, a.group, a.id, a.custom || '', achieveStatName(a.stat)].some(t => String(t).toLowerCase().includes(q)); };
+const matches = a => { const q = query(); return !q || [a.name, a.group, a.id, a.desc || '', achieveStatName(a.stat)].some(t => String(t).toLowerCase().includes(q)); };
 $a('achvSearch').addEventListener('input', () => { renderGroups(); renderMain(); });
 $a('achvSearch').addEventListener('keydown', e => { if (e.key === 'Escape' && e.target.value) { e.preventDefault(); e.target.value = ''; renderGroups(); renderMain(); } });
 function renderSearch() {
@@ -156,14 +156,15 @@ function achvCard(a, prev, next) {
       '<button type="button" class="icon" data-act="copy" title="複製一個">⧉</button>' +
       '<button type="button" class="icon del" data-act="del" title="刪除這個成就">✕</button>' +
     '</div>' +
+    '<div class="achv-row desc-row"><label class="field grow"><span>成就說明（玩家在成就畫面看得到，達成條件寫在這裡）</span>' +
+      '<input class="desc-input" type="text" placeholder="例如：溫特第一次躺自己的床"></label></div>' +
     '<div class="achv-row sub">' +
-      '<label class="field grow"><span>條件：累計哪一項</span><select class="stat-input">' + statOptions(a.stat, true) + '</select></label>' +
+      '<label class="field grow"><span>遊戲怎麼算（只有編輯器看得到）</span><select class="stat-input">' + statOptions(a.stat, true) + '</select></label>' +
       '<label class="field goal"><span>達到多少</span><input class="goal-input" type="number" min="1" step="1"></label>' +
       '<label class="field group"><span>分類</span><select class="group-input">' + groupOptions(a.group) + '</select></label>' +
       '<label class="check" title="達成前，名稱顯示成「' + aEsc(data.texts.secret) + '」、也不顯示進度"><input class="secret-input" type="checkbox"' + (a.secret ? ' checked' : '') + '> 隱藏成就</label>' +
     '</div>' +
-    (a.stat === ACHIEVE_CUSTOM ? '<div class="custom-box"><label class="field"><span>⏳ 自訂條件：寫清楚要算什麼（誰、做了什麼、怎樣才算一次）。存到專案後，跟 Claude 說「幫我實作成就的自訂條件」；實作前遊戲裡不會顯示這個成就。</span>' +
-      '<textarea class="custom-input" rows="2" placeholder="例如：溫特被暴走的雷德打倒（任務失敗那一下）算一次"></textarea></label></div>' : '') +
+    (a.stat === ACHIEVE_CUSTOM ? '<p class="custom-box">⏳ 自訂條件：Claude 會照上面的「成就說明」寫程式（請寫清楚誰、做了什麼、怎樣才算一次）。存到專案後，跟 Claude 說「幫我實作成就的自訂條件」；實作前遊戲裡不會顯示這個成就。</p>' : '') +
     '<small class="id">編號 ' + aEsc(a.id) + (FILE_IDS.has(a.id) ? '（存玩家進度用，不會變）' : '（新成就：存到專案後就固定下來）') + '</small>';
   const q = s => card.querySelector(s);
   q('.name-input').value = a.name;
@@ -173,12 +174,12 @@ function achvCard(a, prev, next) {
   const idLabel = () => { const el = q('.id'); el.textContent = '編號 ' + a.id + (FILE_IDS.has(a.id) ? '（存玩家進度用，不會變）' : '（新成就：存到專案後就固定下來）'); card.dataset.id = a.id; };
   q('.stat-input').addEventListener('change', e => {
     const wasCustom = a.stat === ACHIEVE_CUSTOM; a.stat = e.target.value; renewId(a);
-    if (a.stat === ACHIEVE_CUSTOM) a.custom = a.custom || ''; else delete a.custom;
-    if (wasCustom !== (a.stat === ACHIEVE_CUSTOM)) { changed(); renderAll(); return; }   // 自訂條件的輸入框要出現／消失
+    if (wasCustom !== (a.stat === ACHIEVE_CUSTOM)) { changed(); renderAll(); return; }   // 自訂條件的提示要出現／消失
     idLabel(); changed();
   });
-  const ci = q('.custom-input');
-  if (ci) { ci.value = a.custom || ''; ci.classList.toggle('warn', !ci.value.trim()); ci.addEventListener('input', () => { a.custom = ci.value; ci.classList.toggle('warn', !ci.value.trim()); changed(false); }); }
+  const di = q('.desc-input'), descWarn = () => di.classList.toggle('warn', a.stat === ACHIEVE_CUSTOM && !String(a.desc || '').trim());
+  di.value = a.desc || ''; descWarn();
+  di.addEventListener('input', () => { if (di.value) a.desc = di.value; else delete a.desc; descWarn(); changed(false); });
   q('.goal-input').addEventListener('change', e => { const v = Math.floor(Number(e.target.value)); if (!(v >= 1)) { e.target.value = a.goal; setStatus('數量要是 1 以上的整數。', true); return; } a.goal = v; renewId(a); idLabel(); changed(); });
   q('.group-input').addEventListener('change', e => { a.group = e.target.value; changed(); renderAll(); });
   q('.secret-input').addEventListener('change', e => { if (e.target.checked) a.secret = true; else delete a.secret; changed(); renderAll(); });
@@ -243,15 +244,31 @@ function renderTexts() {
   }
 }
 
-// ---- 檢查：沒有名稱、條件不存在 ----
+// ---- 還沒存到專案的項目：跟專案檔（按「💾 存到專案」之後＝剛存的那一版）比，每個成就、分類清單、累計戰績、畫面文字各算一項 ----
+let savedData = normalized(fromFile());
+function markSaved() { savedData = normalized(); renderChecks(); }   // 成就編輯器.html 的 ProjectSave 存好後呼叫
+function unsavedCount() {
+  const cur = normalized(), key = o => JSON.stringify(o);
+  const before = new Map(savedData.list.map(a => [a.id, key(a)])), now = new Map(cur.list.map(a => [a.id, key(a)]));
+  let n = 0;
+  for (const [id, s] of now) if (before.get(id) !== s) n++;   // 新增、修改
+  for (const id of before.keys()) if (!now.has(id)) n++;      // 刪除
+  const sameIds = cur.list.length === savedData.list.length && cur.list.every(a => before.has(a.id));
+  if (sameIds && key(cur.list.map(a => a.id)) !== key(savedData.list.map(a => a.id))) n++;   // 只有順序變了
+  for (const k of ['groups', 'board', 'texts', 'counts']) if (key(cur[k]) !== key(savedData[k])) n++;
+  return n;
+}
+// ---- 檢查：還沒存、還沒實作、沒有名稱、條件不存在 ----
 function renderChecks() {
   const issues = [];
+  const unsaved = unsavedCount(), custom = data.list.filter(a => a.stat === ACHIEVE_CUSTOM);
+  if (unsaved || custom.length) issues.push('目前有 ' + [unsaved ? unsaved + ' 個項目尚未儲存到專案' : '', custom.length ? custom.length + ' 個項目尚未實作（自訂條件；遊戲裡先不顯示，存到專案後跟 Claude 說「幫我實作成就的自訂條件」）' : ''].filter(Boolean).join('、'));
   const noName = data.list.filter(a => !a.name.trim()).length;
   if (noName) issues.push(noName + ' 個成就沒有名稱');
-  const custom = data.list.filter(a => a.stat === ACHIEVE_CUSTOM);
-  if (custom.length) issues.push(custom.length + ' 個成就是自訂條件、還沒實作（遊戲裡先不顯示）：存到專案後，跟 Claude 說「幫我實作成就的自訂條件」');
-  const noText = custom.filter(a => !String(a.custom || '').trim()).length;
-  if (noText) issues.push(noText + ' 個自訂條件還沒寫要算什麼');
+  const noText = custom.filter(a => !String(a.desc || '').trim()).length;
+  if (noText) issues.push(noText + ' 個自訂條件還沒寫成就說明（Claude 要照說明實作）');
+  const noDesc = data.list.filter(a => a.stat !== ACHIEVE_CUSTOM && !String(a.desc || '').trim()).length;
+  if (noDesc) issues.push(noDesc + ' 個成就沒有成就說明（玩家只看得到名稱）');
   const bad = data.list.filter(a => a.stat !== ACHIEVE_CUSTOM && !STATS.some(s => s.id === a.stat));
   if (bad.length) issues.push(bad.length + ' 個成就的條件遊戲不會累計（' + bad.map(a => a.name || a.id).join('、') + '）');
   $a('checks').innerHTML = issues.length ? '⚠ ' + issues.map(aEsc).join('；') : '';
@@ -282,9 +299,9 @@ function exportSource() {
   return '/* ===== 成就（由「🏆 成就編輯器」匯出，整段覆蓋即可）=====\n' +
     '   ・groups：分類（照這個順序顯示）\n' +
     '   ・list：每一個成就（照這個順序顯示）：\n' +
-    '     id 編號（存進度用，不要改）、group 分類、name 名稱、stat 累計哪一項數字、goal 達到多少解鎖、secret 隱藏成就（達成前顯示 texts.secret）\n' +
+    '     id 編號（存進度用，不要改）、group 分類、name 名稱、desc 成就說明（玩家看得到的達成條件）、stat 累計哪一項數字、goal 達到多少解鎖、secret 隱藏成就（達成前顯示 texts.secret）\n' +
     '     stat 可以用的數字：js/achievement-config.js 的 ACHIEVE_STATS；kill:怪物 id＝擊倒那種怪物的次數（跟怪物圖鑑的消滅次數同一份）\n' +
-    '     stat 是 "custom"＝自訂條件：custom 寫要算什麼，等 Claude 寫成程式、換成正式的 stat（還沒實作前，遊戲裡不顯示這個成就）\n' +
+    '     stat 是 "custom"＝自訂條件：等 Claude 照 desc 寫成程式、換成正式的 stat（還沒實作前，遊戲裡不顯示這個成就）\n' +
     '   ・board：總覽上方「累計戰績」顯示哪些數字（stat）、叫什麼（label）\n' +
     '   ・texts：成就畫面上的文字；counts：總覽的「最近達成」「尚未完成」各列幾個 */\n' +
     'const ACHIEVEMENT_DATA = {\n' +
