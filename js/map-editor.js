@@ -1161,13 +1161,14 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (pi >= 0) { m.portals.splice(pi, 1); saveMaps(); draw(); setStatus('已移除出入口', '#ffd24a'); return; }
     const others = maps.filter(x => x.id !== m.id);
     if (!others.length) { setStatus('只有一張地圖，先新增另一張才能設出入口', '#ff8f8f'); return; }
-    const listTxt = others.map((x, idx) => (idx + 1) + ') ' + x.name).join('\n');
-    const ans = prompt('這個出入口要通到哪一張地圖？輸入編號：\n' + listTxt, '1');
-    if (ans === null) return;
-    const n = parseInt(ans, 10);
-    if (!(n >= 1 && n <= others.length)) { setStatus('編號不正確', '#ff8f8f'); return; }
-    m.portals.push({ c, r, to: others[n - 1].id });
-    setStatus('已設出入口 → ' + others[n - 1].name, '#7ee0c0');
+    // 頁面上的選單（js/map-picker.js）：地圖多的時候 prompt() 會把清單截斷，後面的地圖選不到
+    pickMapDialog('這個出入口要通到哪一張地圖？', others).then(to => {
+      if (!to) return;
+      m.portals.push({ c, r, to: to.id });
+      saveMaps(); draw();
+      setStatus('已設出入口 → ' + to.name, '#7ee0c0');
+    });
+    return;
   } else if (brush.mode === 'erase') {
     // 由上往下擦：大圖 → 最上面有圖的那層
     const si = pointerPx ? stampIndexAtPx(m, pointerPx.x, pointerPx.y) : stampIndexAt(m, c, r);
