@@ -328,6 +328,7 @@ function openDialogue(actor) {
   if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);
   if (typeof onDialogueOpenedPractice === 'function') onDialogueOpenedPractice(actor);   // 塔納：開始訓練按鈕（js/practice.js）
   if (typeof onDialogueOpenedWorkshop === 'function') onDialogueOpenedWorkshop(actor);   // 諾亞：開發工坊按鈕（js/equipment.js）   // 好感度、送禮按鈕（js/gifts.js）
+  if (typeof onDialogueOpenedOutfit === 'function') onDialogueOpenedOutfit(actor);   // 隊友：推薦穿搭按鈕（js/costumes.js）
   if (typeof onDialogueOpenedVitals === 'function') onDialogueOpenedVitals(actor);   // 受傷的隊員：去醫院休息；疏導室的亞許：請亞許疏導（js/vitals.js）
 }
 // 不是跟角色說話的對話框（海報、告示…）：name＝名稱欄、image＝左邊的圖、lines＝一句一句的文字
@@ -338,7 +339,7 @@ function openTextDialogue({ name, image, lines, kind = 'text' }) {
   closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   dialoguePortrait.src = image || ''; dialoguePortrait.alt = name || '';
   dialoguePortrait.parentElement.dataset.char = kind;   // css：整張圖縮進框裡（不是裁半身像）
-  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueHospital', 'dialogueAshSoothe']) document.getElementById(id)?.classList.add('hidden');
+  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueOutfit', 'dialogueHospital', 'dialogueAshSoothe']) document.getElementById(id)?.classList.add('hidden');
   document.getElementById('dialogueFavor')?.classList.add('hidden');
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
