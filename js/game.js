@@ -374,6 +374,7 @@ function updateBlink(who, dt) {
   }
 }
 // 依朝向／走路／眨眼狀態挑出這一幀要畫的圖
+const TWO_FRAME_WALK = new Set(['ball']);   // 走路只輪流用 Walking01、02（不夾站立圖）的角色
 function pickCharacterFrame(set, who) {
   if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
@@ -388,7 +389,7 @@ function pickCharacterFrame(set, who) {
     return set.blink[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(who.blinkTime / 0.07))]];
   }
   const frames = set[who.dir || 'front'];
-  const walkOrder = [1, 0, 2, 0];
+  const walkOrder = TWO_FRAME_WALK.has(who.id || who.type) ? [1, 2] : [1, 0, 2, 0];
   return frames && frames[who.moving ? walkOrder[Math.floor(who.anim * 8) % walkOrder.length] : 0];
 }
 // 哨兵走路動畫：用這一幀實際移動的距離決定朝向與是否在走

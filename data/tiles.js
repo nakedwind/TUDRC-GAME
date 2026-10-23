@@ -719,6 +719,14 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_eoc_ball_bed",
+    "name": "球球的床",
+    "role": "floor",
+    "file": "images/應變中心/ball_bed.png",
+    "w": 1.825,
+    "h": 0.85
+  },
+  {
     "id": "tile_eoc_bubble_tea",
     "name": "珍奶",
     "role": "floor",

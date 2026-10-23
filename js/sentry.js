@@ -754,6 +754,7 @@ function updateWanderer(npc, dt) {
   if (typeof ashBusy === 'function' && ashBusy(npc)) return;   // 亞許正在疏導室幫隊員疏導（js/vitals.js）
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(npc, dt)) return;   // 正在跟別人閒聊（js/npc-chats.js）
   if (npcSeatStep(npc, dt, 65)) { updateNpcTalk(npc, dt); return; }   // 坐著或正走向椅子
+  if (npc.id === 'ball' && typeof ballBedStep === 'function' && ballBedStep(npc, dt)) { updateNpcTalk(npc, dt); return; }   // 球球：睡在自己的床上或正走過去（js/ball-poses.js）
   rescueStuck(npc, sentryBlocked);
   updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）
   if (escapeDarkness(npc, dt)) return;
@@ -773,6 +774,7 @@ function updateWanderer(npc, dt) {
   if (npc.waitT > 0) { npc.waitT -= dt; return; }
   if (!npc.target) {
     if (trySeatActor(npc)) return;   // 路過椅子／床：有機率去坐
+    if (npc.id === 'ball' && typeof tryBallBed === 'function' && tryBallBed(npc)) return;   // 球球：有機率回自己的床睡覺
     const home = homeAreaOf(npc.id);   // 平時待在自己的活動範圍（研究部…）
     npc.target = home ? sampleHomeTarget(home, npc) : sampleWanderTarget(npc.x, npc.y, 180);
     if (!npc.target) npc.waitT = 0.8;

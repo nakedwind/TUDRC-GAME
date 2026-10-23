@@ -493,10 +493,12 @@ const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 // 衣櫃裡戴上的配件（js/costumes.js）：behind＝畫在角色後面、front＝前面
 const costumeLayer = (id, who, x, y, size, layer) => { if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer); };
 function drawWanderer(npc) {
-  drawCharacterShadow(npc);
-  const set = wandererSprites[npc.id];
-  const img = set && pickCharacterFrame(set, npc);
   const size = PLAYER.drawSize;
+  const ballSleep = npc.id === 'ball' && typeof ballSleeping === 'function' && ballSleeping(npc);
+  if (!ballSleep) drawCharacterShadow(npc);   // 睡在床上：床那張圖已經有影子
+  const posed = npc.id === 'ball' && typeof drawBallPose === 'function' && drawBallPose(npc, size);   // 球球：坐下、睡在床上（js/ball-poses.js）
+  const set = wandererSprites[npc.id];
+  const img = !posed && set && pickCharacterFrame(set, npc);
   if (img && img.complete && img.naturalWidth) {
     const hop = NPC_HOP[npc.id], hopY = hop && npc.moving && !npc.sitting ? -Math.abs(Math.sin((npc.anim || 0) * Math.PI * hop.perSec)) * hop.height : 0;
     ctx.imageSmoothingEnabled = false;
