@@ -15,7 +15,8 @@
 const ELITE_BIRD = {
   name: '鳥頭大隊長',
   hpMul: 8.25, dmgMul: 2.2, rewardMul: 5, crystalMul: 5,   // 以原型鳥頭人（data/monsters.js）的數值為基準
-  scale: 1.6, hue: -35,          // 體型放大倍率、換色（色相旋轉角度）
+  scale: 1.8, hue: -35,          // 體型放大倍率、換色（色相旋轉角度）
+  speedMul: .5,                  // 走路速度倍率（以原型鳥頭人為基準；衝撞速度另外看 chargeSpeed）。動畫步伐、腳步聲照移動距離觸發，跟著一起變慢
   knockMul: 0,                   // 被隊員打時的擊退倍率：0＝推不動（雷德盾撞、大招擊退也推不動）
   stagger: 0,                    // 被重擊硬直幾秒：0＝不會硬直
   stunResist: .5,                // 站著、走路時被暈眩（路德大招、安柏雷電…）只暈幾成時間；大叫、蓄力、衝撞中完全不會被暈
@@ -24,22 +25,22 @@ const ELITE_BIRD = {
   scream: 1.2,                   // 大叫幾秒
   loseRange: 12,                 // 目標離開幾格就放棄
   chargeRange: 8,                // 幾格內才衝撞
-  leash: 9,                      // 離原位超過幾格就走回去
+  leash: 24,                     // 離原位超過幾格就走回去（一次衝 20 格，守備範圍要比衝刺長）
   windup: 1,                     // 衝撞前蓄力（秒）：身體發抖、腳下刨地
   aimLock: .55,                  // 蓄力前幾成時間會跟著目標轉向，之後鎖定方向
-  chargeSpeed: 220,              // 衝撞最高速度（像素／秒；一般鳥頭人 250）
+  chargeSpeed: 110,              // 衝撞最高速度（像素／秒；一般鳥頭人 250）
   chargeStart: .3,               // 起跑時只有最高速度的幾成，慢慢加速（沉重的起步）
   chargeAccel: .6,               // 幾秒加到最高速度
   chargeBrake: 1.4,              // 最後幾格煞車滑行（越來越慢、腳下噴灰）
-  overshoot: 1.5,                // 衝過目標多衝幾格
-  hitWidth: 34,                  // 路線中心往左右各幾像素內會被撞到（大約 1.7 格寬）
+  dashCells: 20,                 // 每次衝撞一定衝這麼多格，中途只有撞到牆才會停（建築直接撞爛、繼續衝）
+  hitWidth: 40,                  // 路線中心往左右各幾像素內會被撞到（大約 2 格寬）
   knockback: 140,                // 溫特被撞飛的距離（像素）；隊員 × sentryKnockMul
   sentryKnockMul: .8,
   knockTime: .36,                // 被撞飛滑行幾秒
   redBlockDmgMul: .5,            // 雷德舉盾頂住：只吃幾成傷害、只被推開幾成距離，衝撞照樣繼續（只會被拖慢一下）
   redBlockKnockMul: .35, redBlockSlow: .45,
   recoverHit: 1, recoverMiss: .8,// 衝完撞到人／沒撞到的停頓（秒）
-  dazed: 2.6,                    // 撞牆、撞建築的暈眩（秒）＝輸出時間
+  dazed: 2.6,                    // 撞牆的暈眩（秒）＝輸出時間
   coreShield: .6,                // 牠活著時，核心少受幾成傷害
   returnSpeedMul: 1.1,           // 走回原位的速度倍率
   stepEvery: 50,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
@@ -69,6 +70,8 @@ function seedEliteGuards() {
   e.buildingDamage = Math.round(e.buildingDamage * E.dmgMul);
   e.reward = Math.round(e.reward * E.rewardMul); e.crystals = Math.round((e.crystals ?? 3) * E.crystalMul);
   e.drawWidth = Math.round(base.width * E.scale); e.drawHeight = Math.round(base.height * E.scale);
+  e.speed = base.speed * E.speedMul;
+  e.shockResist = 1;   // 不怕電：雷電照樣吃全額傷害，但不會被麻痺停住（安柏的雷擊、雷電彈）
   e.tint = E.hue; e.knockMul = E.knockMul; e.staggerTime = E.stagger; e.unpushable = true;   // unpushable：隊員的盾撞、大招擊退都推不動（game.js）
   e.home = { x, y }; e.guardCore = core;
   e.faceRight = false; e.faceBack = true;   // 背對玩家、看著核心
@@ -196,8 +199,31 @@ function eliteBirdAim(e, target) {
 function eliteBirdAimAt(e, target) {
   const E = ELITE_BIRD, dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
   e.eb.dir = e.ch.dir = { x: dx / d, y: dy / d };   // 撞擊特效（spawnChargeImpact）讀 e.ch.dir
-  e.eb.len = Math.min(d, E.chargeRange * CELL) + E.overshoot * CELL;
+  e.eb.len = E.dashCells * CELL;
+  e.eb.showLen = eliteBirdWallDistance(e, e.eb.dir, e.eb.len);   // 紅線畫到第一道牆為止
   chargerFace(e, target.x);
+}
+// 沿著方向往前找第一道牆（建築不算，會被撞爛）；回傳距離（像素），最多 maxLen
+function eliteBirdWallDistance(e, dir, maxLen) {
+  for (let d = 8; d < maxLen; d += 8) {
+    const [c, r] = cellAt(e.x + dir.x * d, e.y + dir.y * d);
+    if (!inGrid(c, r) || isWall(c, r)) return d;
+  }
+  return maxLen;
+}
+// 撞上建築：不管是什麼、血量多少，直接撞爛，衝撞不停
+function eliteBirdSmash(e, o) {
+  const ox = OX + (o.c + (o.w || 1) / 2) * CELL, oy = OY + (o.r + (o.h || 1) / 2) * CELL;
+  o.lastHitBy = 'monster'; o.hp = 0; o.hitT = HIT_DUR;   // lastHitBy：油桶被怪物撞壞只漏油、不爆炸（js/oil-barrels.js）
+  removeBarrier(o);
+  if (o.isBase) { flash('基地被摧毀！', OX + (o.c + o.w / 2) * CELL, OY + o.r * CELL - 18, '#ff5b5b'); if (!G.over) baseLost(); }
+  G.effects.push({ ring: true, x: ox, y: oy, r: 6, r2: 44, life: .3, life0: .3, color: '#d9d2c0' });
+  for (let i = 0; i < 8; i++) {   // 碎片往衝刺方向噴
+    const a = Math.atan2(e.eb.dir.y, e.eb.dir.x) + (Math.random() * 2 - 1) * .9, sp = 120 + Math.random() * 140;
+    G.effects.push({ particle: true, kind: 'spark', x: ox, y: oy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30, r: 2 + Math.random() * 3, life: .4, life0: .4, color: '#9a9283' });
+  }
+  eliteBirdShake(e, 6); addHitstop(.05);
+  if (typeof sfxAt === 'function') sfxAt('knock2', ox, oy, 1, 'elite-bird-smash');
 }
 
 // ---- 衝撞：穿過路線上的每一個人 ----
@@ -259,13 +285,14 @@ function eliteBirdChargeStep(e, dt) {
   while (move > 0) {
     const s = Math.min(4, move); move -= s;
     const nx = e.x + e.eb.dir.x * s, ny = e.y + e.eb.dir.y * s;
-    if (enemyBlocked(nx, ny)) {
-      const [c, r] = cellAt(nx, ny), blocker = inGrid(c, r) && barrierAt(c, r);
-      if (blocker) { e.atkCd = 0; enemyAttackObstacle(e, blocker, dt); }   // 撞上建築：撞壞它
+    const [c, r] = cellAt(nx, ny);
+    if (!inGrid(c, r) || isWall(c, r)) {   // 只有牆擋得住：停下來暈眩
       eliteBirdDaze(e);
       eliteBirdFootsteps(e, Math.hypot(e.x - x0, e.y - y0), true);
       return;
     }
+    const blocker = barrierAt(c, r);
+    if (blocker) eliteBirdSmash(e, blocker);   // 建築：直接撞爛，繼續衝
     e.x = nx; e.y = ny;
     eliteBirdCheckHits(e);
   }
@@ -399,7 +426,7 @@ function drawEliteTelegraphs(ctx) {
 function drawEliteTelegraph(ctx, e) {
   if (!e.eb || e.eb.state !== 'aim' || !e.eb.dir) return;
   const E = ELITE_BIRD, k = 1 - Math.max(0, e.eb.t) / E.windup, locked = e.eb.t <= E.windup * (1 - E.aimLock);
-  const ang = Math.atan2(e.eb.dir.y, e.eb.dir.x), len = e.eb.len, w = E.hitWidth;
+  const ang = Math.atan2(e.eb.dir.y, e.eb.dir.x), len = e.eb.showLen || e.eb.len, w = E.hitWidth;
   ctx.save();
   ctx.translate(e.x, e.y + 8); ctx.rotate(ang);
   // 沿著路線的漸層：腳下淡入、中段最濃、尾端慢慢淡出（不畫硬邊的方框）
