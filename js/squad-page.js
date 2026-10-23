@@ -11,9 +11,9 @@ const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 
 const SQ_STATS = [
   { id: 'atk', name: '攻擊', icon: 'atk', val: s => s.noAttack ? '—' : String(s.dmg), num: s => s.dmg },
   { id: 'def', name: '防禦', icon: 'def', val: s => Math.round((s.defense || 0) * 100) + '%', num: s => Math.round((s.defense || 0) * 100) },
-  { id: 'range', name: '射程', icon: 'range', val: s => (s.range || 0).toFixed(1) + ' 格', num: s => Math.round((s.range || 0) * 10) / 10 },
-  { id: 'rate', name: '攻速', icon: 'rate', val: s => (s.rate || 0).toFixed(1) + '/秒', num: s => Math.round((s.rate || 0) * 10) / 10 },
-  { id: 'acc', name: '命中', icon: 'acc', val: s => Math.round((s.accuracy || 0) * 100) + '%', num: s => Math.round((s.accuracy || 0) * 100) },
+  { id: 'range', name: '射程', icon: 'range', val: s => s.noAttack ? '—' : (s.range || 0).toFixed(1) + ' 格', num: s => Math.round((s.range || 0) * 10) / 10 },
+  { id: 'rate', name: '攻速', icon: 'rate', val: s => s.noAttack ? '—' : (s.rate || 0).toFixed(1) + '/秒', num: s => Math.round((s.rate || 0) * 10) / 10 },
+  { id: 'acc', name: '命中', icon: 'acc', val: s => s.noAttack ? '—' : Math.round((s.accuracy || 0) * 100) + '%', num: s => Math.round((s.accuracy || 0) * 100) },
   { id: 'move', name: '移動速度', icon: 'move', val: s => String(Math.round(s.walkSpeed || 0)), num: s => Math.round(s.walkSpeed || 0) },
 ];
 const SQ_MOVE_ICON = '<svg class="stat-ico move" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M13.5 3.5a2 2 0 1 1 0 4 2 2 0 0 1 0-4ZM9.8 8.6l3.6-.4 2.2 3.2 3 1-.6 1.9-3.7-1.2-1-1.4-1 3.6 2.6 2.4V22h-2v-4.3l-2.7-2.3-1 3.8-4.3 2.6-1-1.7 3.6-2.2 1.6-6.1-1.6.7-.9 3H5.4l1.3-4.4Z"/></svg>';
@@ -21,7 +21,9 @@ const SQ_CRYSTAL = 'images/碎片鑰匙/anomalous-shard-ground-glow.png';
 const sqEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 // 可以在編輯器改字的介面文字：sqT(名字, 原本的字)
 const SQ_TEXT_DEFAULT = {};
-function sqT(key, def) { SQ_TEXT_DEFAULT[key] = def; const t = typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.texts && SQUAD_LAYOUT.texts[key]; return sqEsc(t || def); }
+function sqT(key, def) { SQ_TEXT_DEFAULT[key] = def; const t = typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.texts && SQUAD_LAYOUT.texts[key]; return sqEsc(t || def).replace(/\n/g, '<br>'); }   // 編輯器裡按 Enter 換行＝畫面上也換行
+// 同一個位置、但存成不同名字的字（技能分類每格各一個、條件提示有兩種句型）：畫面上最後畫的是哪一個
+let sqSkillTagKey = '', sqLockHintKey = '', sqIntroKey = '';   // 簡介：每位隊員各一個
 const sqIsImgSrc = v => /[./]/.test(String(v || '')) && !/^\p{Extended_Pictographic}/u.test(String(v || ''));
 const sqIcon = (icon, key) => sqIsImgSrc(icon) ? '<img data-sq="' + key + '" src="' + sqEsc(icon) + '" alt="">' : '<span class="sq-emoji" data-sq="' + key + '">' + sqEsc(icon) + '</span>';
 const sqSpriteOf = spec => typeof memberPortraitPath === 'function' ? memberPortraitPath(spec) : '';
@@ -37,10 +39,10 @@ const SQ_PARTS = {
   'text.loadValue': ['角色資料', 'SP／負荷 數字'], 'bar.load': ['角色資料', 'SP／負荷 條'], 'box.stats': ['角色資料', '數值區'],
   'text.progress': ['技能樹頁', '已學幾格'], 'text.crystals': ['技能樹頁', '持有的異質碎片'], 'img.crystalsIcon': ['技能樹頁', '異質碎片圖示（持有）'],
   'text.labelA': ['技能樹頁', '「A系列－生存」標題'], 'text.labelB': ['技能樹頁', '「B系列－攻擊」標題'], 'text.switchLabel': ['技能樹頁', '「切換技能樹／裝備」'],
-  'btn.switch': ['技能樹頁', '切換按鈕'], 'img.switch': ['技能樹頁', '切換按鈕的圖'], 'btn.reset': ['技能樹頁', '「重置技能」'], 'svg.lines': ['技能樹頁', '技能之間的連線（整組）'],
+  'btn.switch': ['技能樹頁', '切換按鈕'], 'text.noSkill': ['技能樹頁', '「支援人員沒有技能樹…」（選到支援人員時）'], 'img.switch': ['技能樹頁', '切換按鈕的圖'], 'btn.reset': ['技能樹頁', '「重置技能」'], 'svg.lines': ['技能樹頁', '技能之間的連線（整組）'],
   'box.skillIcon': ['技能說明', '技能圖示的框'], 'img.skillIcon': ['技能說明', '技能圖示'], 'text.skillName': ['技能說明', '技能名稱'], 'text.skillTag': ['技能說明', '技能分類（Lv1、A 系列…）'],
-  'text.skillDesc': ['技能說明', '技能描述'], 'text.skillEffect': ['技能說明', '技能效果（數值）'], 'box.learn': ['技能說明', '培養區塊'], 'text.costLabel': ['技能說明', '「需要」'],
-  'img.costIcon': ['技能說明', '異質碎片圖示（價格）'], 'text.cost': ['技能說明', '價格數字'], 'btn.learn': ['技能說明', '「培養」按鈕'],
+  'text.skillDesc': ['技能說明', '技能描述'], 'text.skillEffect': ['技能說明', '技能效果（數值）'], 'text.skillNote': ['技能說明', '補充說明（效果下面）'], 'box.learn': ['技能說明', '培養區塊（還沒學）'], 'box.learned': ['技能說明', '已學會：按鈕區塊'], 'text.costLabel': ['技能說明', '「需要」'],
+  'img.costIcon': ['技能說明', '異質碎片圖示（價格）'], 'text.cost': ['技能說明', '價格數字'], 'btn.learn': ['技能說明', '「培養」按鈕'], 'btn.learned': ['技能說明', '「已學會」按鈕'],
   'box.locked': ['技能說明', '還沒解鎖：整塊'], 'box.lockIcon': ['技能說明', '還沒解鎖：鎖頭的框'], 'img.lockIcon': ['技能說明', '還沒解鎖：鎖頭'], 'text.lockHint': ['技能說明', '還沒解鎖：條件提示'], 'text.lockDesc': ['技能說明', '還沒解鎖：技能說明'],
   'text.gearTitle': ['裝備頁', '「隊員裝備」'], 'box.preview': ['裝備頁', '角色外觀預覽的框'], 'img.preview': ['裝備頁', '角色外觀預覽'], 'text.lookTitle': ['裝備頁', '「外觀裝備」'],
   'text.switchLabelG': ['裝備頁', '「切換技能樹／裝備」'], 'btn.switchG': ['裝備頁', '切換按鈕'], 'img.switchG': ['裝備頁', '切換按鈕的圖'],
@@ -91,7 +93,7 @@ function renderSquadPage(body) {
   if (!actor) html += '<section class="sq-profile" data-sq="panel.profile"><p class="sq-empty">本次任務沒有攜帶隊員。</p></section>';
   else {
     html += squadProfileHtml(actor, safe);
-    if (actor.noncombat || !TYPES[actor.type]) html += '<section class="sq-main" data-sq="panel.tree"><p class="sq-empty">支援人員沒有技能樹，也沒有隊員裝備。</p></section>';
+    if (actor.noncombat || !TYPES[actor.type]) html += '<section class="sq-main" data-sq="panel.tree"><p class="sq-empty" data-sq="text.noSkill">' + sqT('text.noSkill', '支援人員沒有技能樹，也沒有隊員裝備。') + '</p></section>';
     else if (st.page === 'gear') html += squadGearHtml(actor, safe);
     else html += squadSkillHtml(actor, safe);
   }
@@ -108,14 +110,14 @@ function squadProfileHtml(actor, safe) {
     '<div class="sq-portrait" data-sq="box.portrait"><img data-sq="img.portrait" src="' + sqSpriteOf(spec) + '" alt=""></div>' +
     (!actor.noncombat && typeof ROLE_ICON !== 'undefined' ? '<span class="sq-job" data-sq="box.job"><img data-sq="img.job" src="' + (spec.guide ? ROLE_ICON.guide : ROLE_ICON.sentinel) + '" alt="' + (spec.guide ? '嚮導' : '哨兵') + '"></span>' : '') +
     '<div class="sq-name-row"><b class="sq-name" data-sq="text.name">' + sqEsc(spec.name || actor.type) + '</b><em class="sq-status ' + cond.cls + '" data-sq="text.status">' + sqEsc(cond.text) + '</em></div>';
-  if (actor.noncombat) return h + '<p class="sq-intro" data-sq="text.intro">' + sqEsc(ch.intro || (actor.profile && actor.profile.intro) || '') + '</p></section>';
+  if (actor.noncombat) return h + '<p class="sq-intro" data-sq="text.intro">' + sqT(sqIntroKey = 'intro:' + actor.type, ch.intro || (actor.profile && actor.profile.intro) || '') + '</p></section>';
   const live = actor.live, hp = live ? Math.max(0, Math.round(live.hp)) : spec.hp, maxhp = live ? live.maxhp : spec.hp;
   const guide = !!spec.guide, sp = guide && typeof guideSPFor === 'function' ? Math.floor(guideSPFor(actor.type)) : 0, spMax = guide && typeof guideSPMax === 'function' ? guideSPMax() : 100;
   const taint = live ? Math.max(0, Math.min(100, Math.round(live.taint || 0))) : 0;
   const load = guide ? { label: sqT('text.spLabel', 'SP'), key: 'text.spLabel', v: sp, max: spMax } : { label: sqT('text.taintLabel', '負荷'), key: 'text.taintLabel', v: taint, max: 100 };
   const noGear = (typeof SKILL_NO_GEAR !== 'undefined' && SKILL_NO_GEAR[actor.type]) || spec;
   h += '<div class="sq-tags"><span class="sq-tag" data-sq="text.role">' + sqEsc(spec.role || '') + '</span><span class="sq-tag" data-sq="text.ability">' + (guide ? '疏導能力' : '異能力') + '：' + sqEsc(spec.ability || '—') + '</span></div>' +
-    '<p class="sq-intro" data-sq="text.intro">' + sqEsc(ch.intro || '') + '</p>' +
+    '<p class="sq-intro" data-sq="text.intro">' + sqT(sqIntroKey = 'intro:' + actor.type, ch.intro || '') + '</p>' +
     '<div class="sq-bars" data-sq="box.bars">' +
       '<div class="sq-bar hp"><span data-sq="text.hpLabel">' + sqT('text.hpLabel', 'HP') + '</span><b data-sq="text.hpValue">' + hp + ' / ' + maxhp + '</b><i data-sq="bar.hp"><u style="width:' + Math.max(0, Math.min(100, hp / Math.max(1, maxhp) * 100)) + '%"></u></i></div>' +
       '<div class="sq-bar ' + (guide ? 'sp' : 'taint') + '"><span data-sq="' + load.key + '">' + load.label + '</span><b data-sq="text.loadValue">' + load.v + ' / ' + load.max + '</b><i data-sq="bar.load"><u style="width:' + Math.max(0, Math.min(100, load.v / Math.max(1, load.max) * 100)) + '%"></u></i></div>' +
@@ -153,19 +155,26 @@ function squadSkillHtml(actor, safe) {
   const icon = node.icon || SKILL_GROUP_ICON[lay.group], effect = node.effect || (typeof modsText === 'function' ? modsText(node.mods) : '');
   if (state === 'locked') {
     const req = skillNodeOf(type, lay.req), need = lay.req && !hasSkill(type, lay.req) ? null : (lay.reqAny || []).filter(id => !hasSkill(type, id)).map(id => '「' + sqEsc(skillNodeOf(type, id).name) + '」');
+    // 條件提示是可以在編輯器改的範本：{name}＝這格技能、{req}＝要先學的技能、{reqs}＝還沒學的那幾個（用「或」連起來）
+    sqLockHintKey = need && need.length ? 'text.lockHintAny' : 'text.lockHint';
+    // 範本裡沒有 {name} 的話（例如在編輯器直接打成某一格的句子），所有技能都會顯示同一句 → 改用預設範本
+    const tpl = (key, def) => { const t = sqT(key, def); return t.includes('{name}') ? t : sqEsc(def).replace(/\n/g, '<br>'); };
+    const hint = (need && need.length ? tpl('text.lockHintAny', '「{name}」需先解鎖\n{reqs}其中一項技能。') : tpl('text.lockHint', '「{name}」需先解鎖\n「{req}」技能。'))
+      .replace(/\{(name|reqs|req)\}/g, (_, k) => k === 'name' ? sqEsc(node.name) : k === 'reqs' ? (need || []).join('或') : sqEsc(req ? req.name : lay.req));
     h += '<section class="sq-info locked" data-sq="panel.skillInfo"><div class="sq-locked" data-sq="box.locked">' +
-      '<span class="sq-lock-icon" data-sq="box.lockIcon"><img data-sq="img.lockIcon" src="images/ui/skill-lock.svg" alt="未解鎖"></span>' +
-      '<p class="sq-lock-hint" data-sq="text.lockHint">「' + sqEsc(node.name) + '」' + (need && need.length ? '需先解鎖' + need.join('或') + '其中一項。' : '需先解鎖「' + sqEsc(req ? req.name : lay.req) + '」技能。') + '</p>' +
-      '<p class="sq-lock-desc" data-sq="text.lockDesc">' + sqEsc(node.desc) + (effect ? '<br>' + sqEsc(effect) : '') + '</p></div></section>';
+      '<span class="sq-lock-icon" data-sq="box.lockIcon" data-sq-center><img data-sq="img.lockIcon" src="images/ui/skill-lock.svg" alt="未解鎖"></span>' +
+      '<p class="sq-lock-hint" data-sq="text.lockHint">' + hint + '</p>' +
+      '<p class="sq-lock-desc" data-sq="text.lockDesc">' + sqEsc(node.desc).replace(/\n/g, '<br>') + (effect ? '<br>' + sqEsc(effect) : '') + (node.note ? '<br>' + sqEsc(node.note).replace(/\n/g, '<br>') : '') + '</p></div></section>';
   } else {
-    const label = state === 'owned' ? '已學會' : !safe ? '回基地才能培養' : afford ? sqT('btn.learn', '培養') : '碎片不足';
+    const owned = state === 'owned', label = owned ? sqT('btn.learned', '已學會') : !safe ? '回基地才能培養' : afford ? sqT('btn.learn', '培養') : '碎片不足';
     h += '<section class="sq-info" data-sq="panel.skillInfo">' +
       '<span class="sq-info-icon" data-sq="box.skillIcon">' + sqIcon(icon, 'img.skillIcon') + '</span>' +
-      '<b class="sq-info-name" data-sq="text.skillName">' + sqEsc(node.name) + '</b><small class="sq-info-tag" data-sq="text.skillTag">' + sqEsc(lay.tag) + '</small>' +
-      '<p class="sq-info-desc" data-sq="text.skillDesc">' + sqEsc(node.desc) + '</p>' +
+      '<b class="sq-info-name" data-sq="text.skillName">' + sqEsc(node.name) + '</b><small class="sq-info-tag" data-sq="text.skillTag">' + sqT(sqSkillTagKey = 'skillTag:' + sel, lay.tag) + '</small>' +
+      '<p class="sq-info-desc" data-sq="text.skillDesc">' + sqEsc(node.desc).replace(/\n/g, '<br>') + '</p>' +
       '<p class="sq-info-effect" data-sq="text.skillEffect">' + sqEsc(effect) + '</p>' +
-      '<div class="sq-learn' + (state === 'owned' ? ' owned' : '') + '" data-sq="box.learn">' + (state === 'owned' ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
-      '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' + label + '</button></div></section>';
+      '<p class="sq-info-note" data-sq="text.skillNote">' + sqEsc(node.note).replace(/\n/g, '<br>') + '</p>' +
+      '<div class="sq-learn' + (owned ? ' owned' : '') + '" data-sq="box.learn' + (owned ? 'ed' : '') + '">' + (owned ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
+      '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' + label + '</button></div></section>';
   }
   return h;
 }
@@ -186,7 +195,7 @@ function squadAvailList(type) {   // 下面「可用裝備」：選的是隊員�
   if (sl.kind === 'gear') return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0).map(g => ({ id: g.id, name: g.name, image: squadGearImage(g), n: supplyInventory.get(g.id), desc: g.desc, stat: squadGearEffect(g) }));
   if (typeof costumeSkinsFor === 'undefined') return [];
   if (sl.id === 'skin') return costumeSkinsFor(type).map(s => ({ id: 'skin-' + s.id, wear: s.id, name: s.name, image: 'images/character/' + s.folder + '/' + s.folder.replace('_', '') + '_0000_Front.png', desc: s.builtin ? '原本的服裝。' : '扭蛋得到的服裝' + (s.rarity ? '（' + s.rarity + '）' : '') + '。', stat: '外觀裝備，不影響數值' }));
-  return COSTUME_ACCESSORIES.filter(a => a.slot === sl.id && costumeCanWear(type, a.id)).map(a => ({ id: a.id, wear: a.id, name: a.name, image: a.art.front, desc: '扭蛋得到的配件' + (a.rarity ? '（' + a.rarity + '）' : '') + '。', stat: '外觀裝備，不影響數值' }));
+  return COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, sl.id) && costumeCanWear(type, a.id)).map(a => ({ id: a.id, wear: a.id, name: a.name, image: a.art.front, desc: '扭蛋得到的配件' + (a.rarity ? '（' + a.rarity + '）' : '') + '。', stat: '外觀裝備，不影響數值' }));
 }
 function squadGearHtml(actor, safe) {
   const type = actor.type, st = squadPageState, gear = squadGearOf(type);
@@ -422,8 +431,13 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
       members: members.filter(m => TYPES[m.type]).map(m => ({ id: m.type, name: TYPES[m.type].name })), nodes: SKILL_LAYOUT.map(n => ({ id: n.id, tag: n.tag })) });
   }
   function textInfo(key) {
-    if (!(key in SQ_TEXT_DEFAULT)) return null;
-    return { store: 'texts', k: key, value: (SQUAD_LAYOUT.texts || {})[key] || '', original: SQ_TEXT_DEFAULT[key], scope: '所有隊員共用這個字' };
+    const k = key === 'text.skillTag' ? sqSkillTagKey : key === 'text.lockHint' ? sqLockHintKey : key === 'text.intro' ? sqIntroKey : key;
+    if (!k || !(k in SQ_TEXT_DEFAULT)) return null;
+    const scope = k.startsWith('intro:') ? '只改「' + ((TYPES[k.slice(6)] || (typeof CHARACTERS !== 'undefined' && CHARACTERS[k.slice(6)]) || {}).name || k.slice(6)) + '」在 Y102隊員頁的簡介（每位隊員各自一段；選隊員畫面的簡介不受影響）' :
+      k.startsWith('skillTag:') ? '所有隊員的這一格（' + k.slice(9) + '）共用這個字' :
+      k === 'text.lockHint' ? '所有隊員共用。{name}＝這格技能的名稱、{req}＝要先學會的技能' :
+      k === 'text.lockHintAny' ? '所有隊員共用（前面的技能學會其中一個就能學的格子）。{name}＝這格技能的名稱、{reqs}＝還沒學的那幾個技能（自動用「或」連起來）' : '所有隊員共用這個字';
+    return { store: 'texts', k, value: (SQUAD_LAYOUT.texts || {})[k] || '', original: SQ_TEXT_DEFAULT[k], scope };
   }
   function sendInfo(key) {
     if (!key) return;
@@ -438,8 +452,8 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
       }
       values.font = Math.round(parseFloat(cs.fontSize)); values.align = cs.textAlign === 'start' ? 'left' : cs.textAlign === 'end' ? 'right' : cs.textAlign;
     }
-    const type = squadPageState.member, nodeId = key.startsWith('node:') || key.startsWith('nodeIcon:') ? key.split(':')[1] : null;
-    const skill = nodeId && TYPES[type] ? { member: type, memberName: TYPES[type].name, id: nodeId, tag: skillLayoutOf(nodeId).tag, node: skillNodeOf(type, nodeId) } : null;
+    const type = squadPageState.member, nodeId = key.startsWith('node:') || key.startsWith('nodeIcon:') ? key.split(':')[1] : /^text\.(skillName|skillDesc|skillEffect|skillNote|lockDesc)$/.test(key) ? squadPageState.skill[type] : null;   // 技能說明的字：右下現在顯示的那一格
+    const skill = nodeId && TYPES[type] && skillLayoutOf(nodeId) ? { member: type, memberName: TYPES[type].name, id: nodeId, tag: skillLayoutOf(nodeId).tag, node: skillNodeOf(type, nodeId) } : null;
     post({ type: 'info', key, visible: !!el, count: list.length, values, text: textInfo(key), skill, page: squadPageState.page, member: type });
   }
   function setup() {
@@ -485,11 +499,16 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
   function reveal(key) {
     if (els(key).length) return;
     const st = squadPageState, [p, id] = key.split(':');
-    if (/^(node|nodeIcon)$/.test(p) || /^(text\.(labelA|labelB|switchLabel|progress|crystals|skill|cost|lock)|btn\.(switch|reset|learn)$|img\.(switch|skillIcon|costIcon|lockIcon|crystalsIcon)$|box\.(skillIcon|learn|locked|lockIcon)|panel\.(tree|skillInfo)|svg\.)/.test(key)) st.page = 'skills';
+    if (/^(node|nodeIcon)$/.test(p) || /^(text\.(labelA|labelB|switchLabel|progress|crystals|skill|cost|lock)|btn\.(switch|reset|learn|learned)$|img\.(switch|skillIcon|costIcon|lockIcon|crystalsIcon)$|box\.(skillIcon|learn|locked|lockIcon)|panel\.(tree|skillInfo)|svg\.)/.test(key)) st.page = 'skills';
     if (/^(gearSlot|gearSlotImg|gearSlotName|lookSlot|lookSlotImg|lookSlotName|avail|availImg)$/.test(p) || /(G$|^text\.(gearTitle|lookTitle|desc|stat|avail)|^box\.(preview|desc|stat)|^img\.preview|^btn\.(un)?equip|^panel\.(gear|gearInfo|avail))/.test(key)) st.page = 'gear';
     if (p === 'roster' || p === 'rosterImg') st.member = id;
+    if (key === 'text.noSkill') { const m = squadMemberList().find(x => x.noncombat || !TYPES[x.type]); if (m) st.member = m.type; }   // 換到一位支援人員
     if (/^box\.(locked|lockIcon)$|^img\.lockIcon$|^text\.lock/.test(key)) { const n = SKILL_LAYOUT.find(x => skillStateOf(st.member, x.id) === 'locked'); if (n) st.skill[st.member] = n.id; }
-    if (/^(box\.skillIcon|img\.skillIcon|text\.skill|box\.learn|btn\.learn|text\.cost|img\.costIcon)/.test(key)) { const n = SKILL_LAYOUT.find(x => skillStateOf(st.member, x.id) === 'open'); if (n && skillStateOf(st.member, st.skill[st.member]) === 'locked') st.skill[st.member] = n.id; }
+    if (/^(box\.skillIcon|img\.skillIcon|text\.skill|(box|btn)\.learn$|text\.cost|img\.costIcon)/.test(key)) {   // 培養按鈕、價格：要換到還沒學的格子；其他：不是鎖住的就好
+      const n = SKILL_LAYOUT.find(x => skillStateOf(st.member, x.id) === 'open'), cur = skillStateOf(st.member, st.skill[st.member]);
+      if (n && (cur === 'locked' || (cur === 'owned' && /^(box|btn)\.learn$|^text\.cost|^img\.costIcon/.test(key)))) st.skill[st.member] = n.id;
+    }
+    if (/^(box|btn)\.learned$/.test(key)) { const n = SKILL_LAYOUT.find(x => skillStateOf(st.member, x.id) === 'owned'); if (n) st.skill[st.member] = n.id; }   // 換到學會的格子
     if (p === 'gearSlotImg') { st.slot = { kind: 'gear', id: Number(id) }; if (!squadGearOf(st.member)[id]) { const g = squadGearList().find(x => supplyInventory.get(x.id) > 0); if (g) equipSquadGear(st.member, Number(id), g.id); } }
     if (p === 'avail' || p === 'availImg') st.slot = { kind: 'gear', id: st.slot.kind === 'gear' ? st.slot.id : 0 };
     refreshSquadPage(); applySquadLayout();
@@ -514,7 +533,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
       ev.preventDefault(); ev.stopImmediatePropagation();
       const el = els(selKey)[0]; if (!el) return;
       const o = over(selKey), img = /^(img|box)$/.test((squadPart(selKey) || {}).kind);   // 圖片、方框：長寬一起縮放
-      drag = { key: selKey, resize: true, img, sx: ev.clientX, sy: ev.clientY, size: o.size || el.offsetWidth || el.getBoundingClientRect().width / scaleOf(el), w: o.w || el.offsetWidth, h: o.h || el.offsetHeight, s: scaleOf(el.parentElement || el), moved: false };
+      drag = { key: selKey, resize: true, img, k: el.hasAttribute('data-sq-center') ? 2 : 1, sx: ev.clientX, sy: ev.clientY, size: o.size || el.offsetWidth || el.getBoundingClientRect().width / scaleOf(el), w: o.w || el.offsetWidth, h: o.h || el.offsetHeight, s: scaleOf(el.parentElement || el), moved: false };
       return;
     }
     if (play) return;
@@ -542,7 +561,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     if (!drag.moved) post({ type: 'dragstart', key: drag.key });   // 編輯器記下拖之前的樣子（Ctrl+Z 用）
     drag.moved = true;
     const dx = (ev.clientX - drag.sx) / drag.s, dy = (ev.clientY - drag.sy) / drag.s, o = over(drag.key);
-    if (drag.resize && drag.img) { o.size = Math.max(4, Math.round(drag.size + dx)); post({ type: 'resize', key: drag.key, size: o.size }); }   // 圖片：長寬一起、1px 一格
+    if (drag.resize && drag.img) { o.size = Math.max(4, Math.round(drag.size + dx * drag.k)); post({ type: 'resize', key: drag.key, size: o.size }); }   // 圖片：長寬一起、1px 一格
     else if (drag.resize) { o.w = Math.max(4, Math.round(drag.w + dx)); o.h = Math.max(4, Math.round(drag.h + dy)); post({ type: 'resize', key: drag.key, w: o.w, h: o.h }); }
     else { o.x = Math.round(drag.x + dx); o.y = Math.round(drag.y + dy); post({ type: 'move', key: drag.key, x: o.x, y: o.y }); }
     applySquadLayout();   // 先在這邊動，拖起來比較順

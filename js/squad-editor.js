@@ -141,6 +141,7 @@ function skillsHtml() {
     '<label class="field">名稱<input type="text" data-sk="name"></label>' +
     '<label class="field">技能描述（文字說明）<textarea data-sk="desc" rows="3"></textarea></label>' +
     '<label class="field">技能效果（顯示的數值文字；空白＝依下面的數值自動產生）<input type="text" data-sk="effect"></label>' +
+    '<label class="field">補充說明（顯示在技能效果下面；空白＝不顯示）<textarea data-sk="note" rows="2"></textarea></label>' +
     '<div class="two"><label class="field">圖示（emoji 或圖片路徑）<input type="text" data-sk="icon" placeholder="空白＝預設圖示"></label>' +
     '<label class="field">價格（異質碎片）<input type="number" min="0" step="1" data-sk="cost"' + (skillNode === 'trait-1' ? ' disabled title="Lv1 一開始就會"' : '') + '></label></div>' +
     '<div class="field">實際改的數值' + modsHtml(node.mods, 'sk') + '</div></div>';
@@ -165,7 +166,7 @@ function fillContentFields() {
   const box = $q('leftBody');
   if (leftTab === 'skills') {
     const node = currentNode(); if (!node) return;
-    for (const f of ['name', 'desc', 'effect', 'icon', 'cost']) { const el = box.querySelector('[data-sk="' + f + '"]'); if (el && document.activeElement !== el) el.value = node[f] != null ? node[f] : ''; }
+    for (const f of ['name', 'desc', 'effect', 'note', 'icon', 'cost']) { const el = box.querySelector('[data-sk="' + f + '"]'); if (el && document.activeElement !== el) el.value = node[f] != null ? node[f] : ''; }
     const eff = box.querySelector('[data-sk="effect"]'); if (eff) eff.placeholder = modsText(node.mods) || '（沒有數值效果）';
   } else if (leftTab === 'gear') {
     const g = state.gear.find(x => x.id === gearSel); if (!g) return;
@@ -226,8 +227,8 @@ const num = (f, label) => '<label>' + label + '<input type="number" step="1" dat
 function renderProps(rebuild = true) {
   const box = $q('props');
   if (!selKey) { box.innerHTML = '<p class="empty">先在左邊清單或中間的畫面上選一個東西</p>'; return; }
-  const inf = info[selKey] || {}, t = inf.text;
-  const sig = selKey + '|' + (t ? t.k : '-');
+  const inf = info[selKey] || {}, t = inf.text, sk = SKILL_TEXT_KEY.test(selKey) && inf.skill;
+  const sig = selKey + '|' + (t ? t.k : '-') + '|' + (sk ? sk.member + sk.id : '-');
   if (rebuild || box.dataset.sig !== sig) {
     box.dataset.sig = sig;
     let html = '<div class="sel-name">' + esc(labelOf(selKey)) + '</div><div class="sel-sub" id="selSub"></div>' +
@@ -245,10 +246,16 @@ function renderProps(rebuild = true) {
       '<div class="two">' + num('font', '字級（px，空白＝原本）') + '<label>對齊<span class="btns" style="margin:0">' +
       ['left', 'center', 'right'].map(a => '<button type="button" class="small" data-align="' + a + '">' + ALIGN_NAMES[a] + '</button>').join('') + '</span></label></div></div>';
     if (t) html += '<div class="sec"><div class="sec-head">文字內容<span class="sp"></span><button type="button" class="small" data-reset="text">↺ 恢復預設</button></div>' +
-      '<input type="text" data-text><div class="orig">' + esc(t.scope || '') + '</div><div class="orig" id="textOrig"></div></div>';
+      '<textarea data-text rows="2"></textarea><div class="orig">' + esc(t.scope || '') + '（按 Enter 換行，畫面上也會跟著換行）</div><div class="orig" id="textOrig"></div></div>';
+    else if (sk) html += '<div class="sec"><div class="sec-head">文字內容（' + esc(sk.memberName) + '・' + esc(sk.tag) + '）<span class="sp"></span><button type="button" class="small" data-reset="skill">↺ 恢復預設</button></div>' +
+      '<label class="field">名稱<input type="text" data-psk="name"></label>' +
+      '<label class="field">技能描述<textarea data-psk="desc" rows="3"></textarea></label>' +
+      '<label class="field">技能效果（空白＝依數值自動產生）<input type="text" data-psk="effect"></label>' +
+      '<label class="field">補充說明（顯示在技能效果下面；空白＝不顯示）<textarea data-psk="note" rows="2"></textarea></label>' +
+      '<div class="orig">只改這位隊員的這一格；跟左邊「技能內容」改的是同一份</div></div>';
     else if (/^text\.(name|intro|role|ability|status)$|^text\.skill|^text\.(desc|stat)$/.test(selKey)) html += '<div class="sec"><div class="note">這段文字每個隊員／每格技能都不一樣：' +
       (/skill/.test(selKey) ? '到左邊「技能內容」改。' : /^text\.(desc|stat)$/.test(selKey) ? '到左邊「裝備清單」改。' : '名字、簡介在「角色資料頁」改。') + '</div></div>';
-    if (inf.skill) html += '<div class="sec"><div class="note">這是「' + esc(inf.skill.memberName) + '」的「' + esc(inf.skill.node.name) + '」。<br><button type="button" class="small" id="goSkill">到「技能內容」改這格技能</button></div></div>';
+    if (inf.skill && !sk) html += '<div class="sec"><div class="note">這是「' + esc(inf.skill.memberName) + '」的「' + esc(inf.skill.node.name) + '」。<br><button type="button" class="small" id="goSkill">到「技能內容」改這格技能</button></div></div>';
     html += '<div class="actions" style="margin-top:12px"><button type="button" class="danger" id="resetOne">這一個全部恢復預設</button></div>';
     box.innerHTML = html;
   }
@@ -262,8 +269,15 @@ function renderProps(rebuild = true) {
   const sub = $q('selSub');
   if (sub) sub.textContent = [inf.visible === false ? '（現在畫面上看不到）' : '', inf.count > 1 ? '同名的有 ' + inf.count + ' 個，一起調整' : ''].filter(Boolean).join('　');
   const ta = box.querySelector('[data-text]');
-  if (ta && t) { if (document.activeElement !== ta) ta.value = t.value || ''; ta.placeholder = t.original || ''; $q('textOrig').textContent = '預設：' + (t.original || '（空白）'); }
+  if (ta && t) { if (document.activeElement !== ta) ta.value = t.value || t.original || ''; /* 沒改過＝先填原本的字，直接在上面改 */ ta.placeholder = t.original || ''; $q('textOrig').textContent = '預設：' + (t.original || '（空白）'); }
+  if (sk) {
+    const node = savedNode(sk.member, sk.id) || sk.node;
+    box.querySelectorAll('[data-psk]').forEach(el => { if (document.activeElement !== el) el.value = node[el.dataset.psk] != null ? node[el.dataset.psk] : ''; });
+    const eff = box.querySelector('[data-psk="effect"]'); if (eff) eff.placeholder = modsText(node.mods) || '（沒有數值效果）';
+  }
 }
+// 右邊直接改技能說明的字（名稱、描述、效果）：改的是畫面上那一格，左邊「技能內容」也一起換到那一格
+const SKILL_TEXT_KEY = /^text\.(skillName|skillDesc|skillEffect|skillNote|lockDesc)$/;
 // 數字欄是空白（＝原本的大小）時按上下小箭頭：先填入原本的數字，再從它開始加減（不是從 0 開始）
 function prefillDefault(e) {
   const el = e.target;
@@ -275,6 +289,14 @@ $q('props').addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key 
 $q('props').addEventListener('input', e => {
   if (!selKey) return;
   if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t) { remember('text:' + selKey); setText(t, e.target.value); } return; }
+  if (e.target.dataset.psk) {
+    const s = (info[selKey] || {}).skill, f = e.target.dataset.psk; if (!s) return;
+    const moved = skillMember !== s.member || skillNode !== s.id;
+    skillMember = s.member; skillNode = s.id;
+    updateSkill(nd => { nd[f] = e.target.value; }, 'sk:' + skillMember + skillNode + f);
+    if (leftTab === 'skills') { if (moved) renderLeft(); else fillContentFields(); }
+    return;
+  }
   const f = e.target.dataset.f; if (!f) return;
   remember('field:' + selKey + ':' + f);
   const val = e.target.value === '' ? 0 : +e.target.value;
@@ -292,6 +314,11 @@ $q('props').addEventListener('click', e => {
   else if (r === 'size') setEl(selKey, { w: 0, h: 0, size: 0 });
   else if (r === 'font') setEl(selKey, { font: 0, align: '' });
   else if (r === 'text') { const t = (info[selKey] || {}).text; if (t) { setText(t, ''); renderProps(false); } }
+  else if (r === 'skill') {   // 這格技能整格恢復預設（跟左邊「技能內容」的恢復預設一樣）
+    const s = (info[selKey] || {}).skill, m = s && state.skills.members[s.member]; if (!m || !m[s.id]) return;
+    delete m[s.id]; if (!Object.keys(m).length) delete state.skills.members[s.member];
+    saveDraft(); sendState(); if (leftTab === 'skills') renderLeft(); setStatus('這格技能恢復預設（還沒存到專案）');
+  }
   else if (b.id === 'resetOne') {
     delete state.layout.elements[selKey];
     const t = (info[selKey] || {}).text; if (t) setText(t, '');
@@ -373,7 +400,7 @@ function layoutText() {
 }
 function skillsText() {
   return '/* ===== Y102隊員技能樹的內容（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
-    '   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值 }\n' +
+    '   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, note：補充說明（顯示在效果下面）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值 }\n' +
     '   技能格 id：trait-1（普通技能 Lv1＝原本的特性）、trait-2（Lv2）、a-1／a-2（A 系列－生存）、core-1～3（核心技能）、ult（終極核心大招）、b-1／b-2（B 系列－攻擊）、aux-1／aux-2（輔助技能）\n' +
     '   mods：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }（數值名稱見 js/skills.js 開頭）\n' +
     '   這裡沒寫的隊員／格子，會從 data/skills.js（舊版技能資料）自動換算。 */\n' +

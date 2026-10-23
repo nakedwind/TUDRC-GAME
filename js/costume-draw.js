@@ -18,7 +18,11 @@ const COSTUME_PLACEMENT = (() => {
   return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {}, offsets: p.offsets || {}, blocked: p.blocked || {}, layers: p.layers || {} };
 })();
 const ACC_BY_ID = Object.fromEntries(COSTUME_ACCESSORIES.map(a => [a.id, a]));
-const ACC_SLOTS = ['lower', 'back', 'hand', 'head', 'face'];   // 畫的順序（後面的蓋前面的）
+const ACC_SLOTS = ['lower', 'back', 'hand', 'hand2', 'head', 'face'];   // 畫的順序（後面的蓋前面的）
+// 這個配件能不能戴在這個欄位（手持2（左手）也能戴手持的配件，見 data/costumes.js 的 accepts）
+const accFitsSlot = (acc, slotId) => acc.slot === ((COSTUME_SLOTS.find(s => s.id === slotId) || {}).accepts || slotId);
+// 戴在別的欄位（例如手持配件拿在左手）：當成那個欄位的配件來放位置
+const accWornIn = (acc, slotId) => acc.slot === slotId ? acc : { ...acc, slot: slotId };
 // 圖層：數字大的畫在上面；沒設定＝欄位在 ACC_SLOTS 的順序（下身 1、背部 2…臉部 5）
 const accLayerDefault = acc => ACC_SLOTS.indexOf(acc.slot) + 1;
 function accLayer(acc) { const v = (COSTUME_PLACEMENT.layers || {})[acc.id]; return v != null && v !== '' && isFinite(v) ? Number(v) : accLayerDefault(acc); }
@@ -32,7 +36,7 @@ for (const a of COSTUME_ACCESSORIES) for (const src of Object.values(a.art || {}
 const pick3 = (o, a, b, c) => o && o[a] && o[a][b] && o[a][b][c];
 // 這個配件在這個角色、這個方向要放哪裡；from＝用到哪一層（'item'、'anchor'、'slot'）
 function accPlacementInfo(acc, id, dir) {
-  const own = pick3(COSTUME_PLACEMENT.items, acc.id, id, dir);
+  const own = ACC_BY_ID[acc.id] && ACC_BY_ID[acc.id].slot === acc.slot && pick3(COSTUME_PLACEMENT.items, acc.id, id, dir);   // 拿在左手時不用右手調好的位置
   if (own) return { pl: own, from: 'item' };
   const anchor = pick3(COSTUME_PLACEMENT.anchors, id, acc.slot, dir);
   if (anchor) return { pl: anchor, from: 'anchor' };

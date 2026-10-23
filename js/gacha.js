@@ -98,7 +98,7 @@ function gachaArt(item) {   // 配件：正面圖；skin：那套的正面胸像
   return '<span class="wd-face gc-skin" data-char="' + item.char + '"><img src="images/character/' + item.folder + '/' + item.folder.replace('_', '') + '_0000_Front.png" alt=""></span>';
 }
 function gachaKind(item) {
-  if (item.slot) return (COSTUME_SLOTS.find(s => s.id === item.slot) || {}).name || item.slot;
+  if (item.slot) return ((s => s && (s.short || s.name))(COSTUME_SLOTS.find(s => s.id === item.slot))) || item.slot;
   return ((CHARACTERS[item.char] || {}).name || item.char) + '的服裝';
 }
 const rarityTag = r => '<em class="r-' + r + '">' + r + '</em>';

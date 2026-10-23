@@ -69,7 +69,7 @@ function costumeOutfit(id, folder) {
 function drawCostumeAccessories(ctx, id, who, dx, dy, size, layer, equipOverride) {
   const eq = equipOverride || costumeState.equip[id]; if (!eq) return;
   const dir = (who && who.dir) || 'front', frame = costumeFrameOf(who);
-  const accs = sortAccsByLayer(ACC_SLOTS.map(slot => eq[slot] && ACC_BY_ID[eq[slot]]).filter(Boolean));   // 照圖層（服裝編輯器設定）由下往上畫
+  const accs = sortAccsByLayer(ACC_SLOTS.map(slot => eq[slot] && ACC_BY_ID[eq[slot]] && accWornIn(ACC_BY_ID[eq[slot]], slot)).filter(Boolean));   // 照圖層（服裝編輯器設定）由下往上畫
   for (const acc of accs) drawAccessory(ctx, acc, id, dir, frame, dx, dy, size, layer);
 }
 
@@ -200,10 +200,10 @@ function renderWardrobe() {
   } else {
     const cur = eq[wd.slot] || '';
     cards = '<button type="button" class="wd-item wd-none' + (!cur ? ' on' : '') + '" data-wear=""><span class="wd-icon">✕</span><b>不戴</b></button>'
-      + COSTUME_ACCESSORIES.filter(a => a.slot === wd.slot && costumeCanWear(id, a.id)).map(a => '<button type="button" class="wd-item' + (a.id === cur ? ' on' : '') + '" data-wear="' + a.id + '"' + (costumeGifted(id, a.id) ? ' title="你送的禮物"' : '') + '>'
+      + COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id)).map(a => '<button type="button" class="wd-item' + (a.id === cur ? ' on' : '') + '" data-wear="' + a.id + '"' + (costumeGifted(id, a.id) ? ' title="你送的禮物"' : '') + '>'
         + '<span class="wd-icon"><img src="' + a.art.front + '" alt=""></span><b>' + a.name + '</b>'
         + (a.rarity ? '<em class="r-' + a.rarity + '">' + a.rarity + '</em>' : '') + (costumeGifted(id, a.id) ? '<i>🎁</i>' : costumeState.owned[a.id] > 1 ? '<i>×' + costumeState.owned[a.id] + '</i>' : '') + '</button>').join('');
-    if (!COSTUME_ACCESSORIES.some(a => a.slot === wd.slot && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">還沒有這個欄位的配件</p>';
+    if (!COSTUME_ACCESSORIES.some(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">還沒有這個欄位的配件</p>';
   }
   el.querySelector('.wd-grid').innerHTML = cards;
   const skin = wdSkinOf(id, wd.mode), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || COSTUME_DEFAULT_SKINS[skin] || skin;

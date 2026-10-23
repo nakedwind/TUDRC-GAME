@@ -99,16 +99,17 @@
 .sq-info-tag { position: absolute; left: 92px; top: 50px; font-size: 11px; color: #9fb1c2; }
 .sq-info-desc { position: absolute; left: 18px; top: 90px; width: 340px; margin: 0; font-size: 13px; line-height: 1.55; color: #dfe7ef; }
 .sq-info-effect { position: absolute; left: 18px; top: 146px; width: 340px; margin: 0; font-size: 13px; line-height: 1.5; color: #9fd8ff; font-weight: 700; }
-.sq-learn { position: absolute; right: 16px; top: 116px; width: 150px; padding: 8px; display: grid; gap: 6px; justify-items: center; border-radius: 10px; background: rgba(0,0,0,.35); }
+.sq-info-note { position: absolute; left: 18px; top: 168px; width: 340px; margin: 0; font-size: 12px; line-height: 1.5; color: #c3ced9; }   /* 補充說明（技能效果下面） */
+.sq-learn { position: absolute; right: 16px; top: 116px; width: 150px; padding: 8px; display: grid; gap: 6px; justify-items: center; border-radius: 10px; }   /* 不要黑底 */
 .sq-learn.owned { top: auto; right: 0; bottom: 0; width: auto; padding: 12px 16px 16px 12px; justify-items: end; border-radius: 10px 0 12px 0; }   /* 已學會：按鈕靠右下 */
 .sq-cost { display: flex; align-items: center; gap: 5px; font-size: 13px; color: #dfe7ef; }
 .sq-cost b { font-size: 15px; color: #fff; }
 .sq-learn-btn { width: 132px; height: 36px; border: 0; border-radius: 8px; background: linear-gradient(180deg, #f6d27a, #d9a640); color: #3a2a08; font-size: 15px; font-weight: 800; cursor: pointer; box-shadow: inset 0 1px 0 rgba(255,255,255,.5), 0 3px 8px rgba(0,0,0,.35); }
 .sq-learn-btn:hover:not(:disabled) { filter: brightness(1.08); }
-.sq-learn-btn:disabled { background: #4a4f57; color: #aab3bd; cursor: default; box-shadow: none; font-size: 13px; }
+.sq-learn-btn:disabled { background: #4a4f57; color: #aab3bd; cursor: default; box-shadow: 0 0 0 1px rgba(0,0,0,.35); font-size: 13px; }   /* 灰色按鈕：只留 1px 黑邊貼著框 */
 .sq-info.locked { background: linear-gradient(170deg, rgba(70,74,82,.95), rgba(48,52,60,.95)); }
 .sq-locked { position: absolute; inset: 0; }
-.sq-lock-icon { position: absolute; left: 232px; top: 26px; width: 80px; height: 80px; display: grid; place-items: center; border: 3px solid #1a1e24; border-radius: 10px; background: radial-gradient(circle, #3a424d, #22272e); box-shadow: 0 0 0 2px rgba(255,255,255,.2); }
+.sq-lock-icon { position: absolute; left: 272px; top: 66px; transform: translate(-50%, -50%); width: 80px; height: 80px; display: grid; place-items: center; border: 3px solid #1a1e24; border-radius: 10px; background: radial-gradient(circle, #3a424d, #22272e); box-shadow: 0 0 0 2px rgba(255,255,255,.2); }   /* left／top＝框的中心：在編輯器改大小時從中心縮放 */
 .sq-lock-icon img { width: 44px; }
 .sq-lock-hint { position: absolute; left: 0; top: 120px; width: 544px; margin: 0; font-size: 15px; font-weight: 700; color: #fff; text-align: center; }
 .sq-lock-desc { position: absolute; left: 60px; top: 150px; width: 424px; margin: 0; font-size: 12px; line-height: 1.5; color: #d2d8de; text-align: center; }

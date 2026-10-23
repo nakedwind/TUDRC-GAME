@@ -14,8 +14,8 @@ const SKILL_LAYOUT = [
   { id: 'trait-1', group: 'trait', req: null, tag: '普通技能 Lv1' },
   { id: 'trait-2', group: 'trait', req: 'trait-1', tag: '普通技能 Lv2' },
   { id: 'a-1', group: 'a', req: 'trait-2', tag: 'A 系列－生存' }, { id: 'a-2', group: 'a', req: 'a-1', tag: 'A 系列－生存' },
-  // core-1 的 reqAny：A1、B1 要先學其中一個（技能樹上的兩條斜線）
-  { id: 'core-1', group: 'core', req: 'trait-2', reqAny: ['a-1', 'b-1'], tag: '核心技能' }, { id: 'core-2', group: 'core', req: 'core-1', tag: '核心技能' }, { id: 'core-3', group: 'core', req: 'core-2', tag: '核心技能' },
+  // core-1 沒有 req、只有 reqAny：A1、B1 要先學其中一個（技能樹上的兩條斜線）；Lv2 不直接連過來，免得看起來學完 Lv2 就能學
+  { id: 'core-1', group: 'core', req: null, reqAny: ['a-1', 'b-1'], tag: '核心技能' }, { id: 'core-2', group: 'core', req: 'core-1', tag: '核心技能' }, { id: 'core-3', group: 'core', req: 'core-2', tag: '核心技能' },
   { id: 'ult', group: 'ult', req: 'core-3', tag: '終極核心大招' },
   { id: 'b-1', group: 'b', req: 'trait-2', tag: 'B 系列－攻擊' }, { id: 'b-2', group: 'b', req: 'b-1', tag: 'B 系列－攻擊' },
   { id: 'aux-1', group: 'aux', req: 'trait-2', tag: '輔助技能（永久被動）' }, { id: 'aux-2', group: 'aux', req: 'trait-2', tag: '輔助技能（永久被動）' },
@@ -55,7 +55,7 @@ function skillNodeOf(type, id) {
   const saved = typeof SQUAD_SKILLS !== 'undefined' && SQUAD_SKILLS.members && SQUAD_SKILLS.members[type] && SQUAD_SKILLS.members[type][id];
   const base = saved || legacySkillNodes(type)[id] || { name: lay.tag, desc: '', effect: '', mods: [] };
   return {
-    name: base.name || lay.tag, desc: base.desc || '', effect: base.effect || '', icon: base.icon || '', mods: base.mods || [],
+    name: base.name || lay.tag, desc: base.desc || '', effect: base.effect || '', note: base.note || '', icon: base.icon || '', mods: base.mods || [],
     cost: id === 'trait-1' ? 0 : base.cost != null ? Number(base.cost) || 0 : SKILL_DEFAULT_COST[id] || 0,
   };
 }
