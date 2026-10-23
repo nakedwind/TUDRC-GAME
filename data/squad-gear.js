@@ -11,7 +11,12 @@ const SQUAD_GEAR = [
     "price": 120,
     "desc": "應變中心配發的輕量防護背心，不太影響行動。",
     "effect": "",
-    "mods": [{ "path": "defense", "add": 0.05 }]
+    "mods": [
+      {
+        "path": "defense",
+        "add": 0.05
+      }
+    ]
   },
   {
     "id": "sg-gloves",
@@ -21,7 +26,12 @@ const SQUAD_GEAR = [
     "price": 140,
     "desc": "加了護甲片的手套，出手更有力。",
     "effect": "",
-    "mods": [{ "path": "dmg", "mul": 1.1 }]
+    "mods": [
+      {
+        "path": "dmg",
+        "mul": 1.1
+      }
+    ]
   },
   {
     "id": "sg-scope",
@@ -31,7 +41,16 @@ const SQUAD_GEAR = [
     "price": 150,
     "desc": "看得更遠、更準。",
     "effect": "",
-    "mods": [{ "path": "accuracy", "add": 0.1 }, { "path": "range", "add": 0.5 }]
+    "mods": [
+      {
+        "path": "accuracy",
+        "add": 0.1
+      },
+      {
+        "path": "range",
+        "add": 0.5
+      }
+    ]
   },
   {
     "id": "sg-boots",
@@ -41,7 +60,12 @@ const SQUAD_GEAR = [
     "price": 100,
     "desc": "輕巧的戰術靴，移動更快。",
     "effect": "",
-    "mods": [{ "path": "walkSpeed", "mul": 1.15 }]
+    "mods": [
+      {
+        "path": "walkSpeed",
+        "mul": 1.15
+      }
+    ]
   },
   {
     "id": "sg-pouch",
@@ -51,6 +75,11 @@ const SQUAD_GEAR = [
     "price": 130,
     "desc": "隨身的急救用品，受傷時可以自己處理。",
     "effect": "",
-    "mods": [{ "path": "hpRegen", "add": 1 }]
+    "mods": [
+      {
+        "path": "hpRegen",
+        "add": 1
+      }
+    ]
   }
 ];

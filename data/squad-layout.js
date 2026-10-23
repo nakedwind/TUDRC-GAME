@@ -3,6 +3,31 @@
    texts：改過的介面文字（標題、按鈕…）
    沒寫在這裡的就照原本的樣子。套用的程式在 js/squad-page.js。 */
 const SQUAD_LAYOUT = {
-  "elements": {},
+  "elements": {
+    "box.bars": {
+      "y": -10
+    },
+    "stat:atk": {
+      "y": -10
+    },
+    "stat:rate": {
+      "y": -10
+    },
+    "stat:acc": {
+      "y": -10
+    },
+    "stat:def": {
+      "y": -10
+    },
+    "stat:range": {
+      "y": -10
+    },
+    "stat:move": {
+      "y": -10
+    },
+    "text.status": {
+      "y": 2
+    }
+  },
   "texts": {}
 };

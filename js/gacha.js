@@ -1,4 +1,5 @@
-/* ===== 扭蛋機：花異質碎片轉服裝扭蛋（設定在 data/costumes.js 的 GACHA）=====
+/* ===== 扭蛋機：花異質碎片或經費轉服裝扭蛋（設定在 data/costumes.js 的 GACHA）=====
+   ・按鈕：轉 1 次、轉 10 次各一欄，上面花異質碎片、下面花經費（基地裡花的是錢包的錢）
    ・地圖上的扭蛋機（GACHA.machineTiles，或名稱有「扭蛋機」的地圖素材；基地、戰鬥地圖都可以）前按 Space 打開
    ・轉到的 skin、配件加進擁有的服裝（js/costumes.js 的 costumeGrant），到衣櫃就能換上
    ・「收藏」分頁：看扭蛋池裡有哪些、拿到幾個；重複的可以分解換回碎片（每樣至少留 1 個）
@@ -23,12 +24,20 @@ function gachaRoll() {
   const items = pool.filter(i => rarityOf(i) === tier);
   return items[Math.floor(Math.random() * items.length)];
 }
-function gachaPull(times) {
+// 要花多少：pay＝'crystal' 異質碎片／'money' 經費（data/costumes.js 的 GACHA）
+const gachaCost = (times, pay) => pay === 'money' ? (times >= 10 ? GACHA.moneyTenCost : GACHA.moneyCost * times) : (times >= 10 ? GACHA.tenCost : GACHA.cost * times);
+const gachaMoney = () => Math.floor((typeof G !== 'undefined' && G && G.money) || 0);
+function gachaPull(times, pay = 'crystal') {
   if (gc.busy) return;
-  const cost = times >= 10 ? GACHA.tenCost : GACHA.cost * times;
+  const cost = gachaCost(times, pay);
   if (!gachaPool().length) { gc.msg = '扭蛋機還是空的（data/costumes.js 還沒有服裝）'; renderGacha(); return; }
-  if (training.crystals < cost) { sfx('error'); gc.msg = '異質碎片不夠（還差 ' + (cost - training.crystals) + ' 個）'; renderGacha(); return; }
-  if (!spendCrystals(cost)) return;
+  if (pay === 'money') {   // 花經費（基地裡＝錢包的錢，js/game.js 的 updateHUD 會存回錢包）
+    if (gachaMoney() < cost) { sfx('error'); gc.msg = '經費不夠（還差 $' + (cost - gachaMoney()).toLocaleString() + '）'; renderGacha(); return; }
+    G.money -= cost; if (typeof updateHUD === 'function') updateHUD();
+  } else {
+    if (training.crystals < cost) { sfx('error'); gc.msg = '異質碎片不夠（還差 ' + (cost - training.crystals) + ' 個）'; renderGacha(); return; }
+    if (!spendCrystals(cost)) return;
+  }
   const results = [];
   for (let i = 0; i < times; i++) { const item = gachaRoll(); if (item) results.push({ item, isNew: costumeGrant(item.id) }); }
   costumeState.pulls = (costumeState.pulls || 0) + times; saveCostumes();
@@ -101,7 +110,10 @@ function buildGacha() {
     + '<span class="gc-shards"><img src="images/碎片鑰匙/anomalous-shard.png" alt=""><b></b></span>'
     + '<button type="button" class="gc-close" aria-label="關閉（Esc）">×</button></header>'
     + '<div class="gc-body"><div class="gc-machine"><div class="gc-machine-art"><img src="images/street/street-capsule-toy-machines.png" alt=""></div>'
-    + '<div class="gc-buttons"><button type="button" data-pull="1"></button><button type="button" data-pull="10"></button></div><p class="gc-rates"></p></div>'
+    + '<div class="gc-buttons">'   // 轉 1 次、轉 10 次各一欄：上面花異質碎片、下面花經費
+    + '<div class="gc-pull-group"><button type="button" data-pull="1" data-pay="crystal"></button><button type="button" data-pull="1" data-pay="money"></button></div>'
+    + '<div class="gc-pull-group"><button type="button" data-pull="10" data-pay="crystal"></button><button type="button" data-pull="10" data-pay="money"></button></div>'
+    + '</div><p class="gc-rates"></p></div>'
     + '<div class="gc-side"><nav class="gc-tabs"><button type="button" data-tab="result">轉到的</button><button type="button" data-tab="book">收藏</button></nav>'
     + '<p class="gc-msg" role="status"></p><div class="gc-list"></div>'
     + '<div class="gc-stage" title="點一下跳過"><div class="gc-ball"><img class="gc-ball-whole" src="images/items/gashapon-capsule.png" alt="">'
@@ -112,7 +124,7 @@ function buildGacha() {
   el.querySelector('.gc-stage').addEventListener('click', () => { if (gc.busy) { if (!el.querySelector('.gc-stage.open')) sfx('itemPickup'); gachaRevealDone(); } });
   el.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.pull) gachaPull(Number(b.dataset.pull));
+    if (b.dataset.pull) gachaPull(Number(b.dataset.pull), b.dataset.pay);
     else if (b.dataset.tab) { gc.tab = b.dataset.tab; gc.msg = ''; sfx('switch'); renderGacha(); }
     else if (b.dataset.dismantle) gachaDismantle(b.dataset.dismantle, e.shiftKey);
     else if ('dismantleAll' in b.dataset) gachaDismantleAll();
@@ -122,11 +134,12 @@ function renderGacha() {
   if (!gc.el) return;
   const el = gc.el;
   el.querySelector('.gc-shards b').textContent = training.crystals;
-  const [one, ten] = el.querySelectorAll('[data-pull]');
-  one.innerHTML = '轉 1 次<small><img src="images/碎片鑰匙/anomalous-shard.png" alt="">' + GACHA.cost + '</small>';
-  ten.innerHTML = '轉 10 次<small><img src="images/碎片鑰匙/anomalous-shard.png" alt="">' + GACHA.tenCost + '</small>';
-  one.disabled = ten.disabled = gc.busy;
-  one.classList.toggle('poor', training.crystals < GACHA.cost); ten.classList.toggle('poor', training.crystals < GACHA.tenCost);
+  for (const b of el.querySelectorAll('[data-pull]')) {   // 每顆按鈕一行：「轉 1 次 ◆30」「轉 1 次 $5,000」
+    const times = Number(b.dataset.pull), money = b.dataset.pay === 'money', cost = gachaCost(times, b.dataset.pay);
+    b.innerHTML = '轉 ' + times + ' 次<small>' + (money ? '$' + cost.toLocaleString() : '<img src="images/碎片鑰匙/anomalous-shard.png" alt="">' + cost) + '</small>';
+    b.disabled = gc.busy;
+    b.classList.toggle('poor', money ? gachaMoney() < cost : training.crystals < cost);
+  }
   const pool = gachaPool(), tiers = Object.keys(GACHA.rates).filter(r => pool.some(i => rarityOf(i) === r)), total = tiers.reduce((s, r) => s + GACHA.rates[r], 0);
   el.querySelector('.gc-rates').innerHTML = tiers.map(r => rarityTag(r) + ' ' + Math.round(GACHA.rates[r] / total * 1000) / 10 + '%').join('　') + '<br>共 ' + pool.length + ' 種・已收集 ' + pool.filter(i => costumeCollected(i.id)).length + ' 種';
   el.querySelectorAll('.gc-tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === gc.tab));

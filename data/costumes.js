@@ -63,6 +63,8 @@ const COSTUME_GIFT = { reaction: 'like', rarityBonus: { N: 0, R: 4, SR: 10 } };
 const GACHA = {
   cost: 30,                        // 轉 1 次花幾個異質碎片
   tenCost: 270,                    // 轉 10 次（打九折）
+  moneyCost: 5000,                 // 也可以花經費：轉 1 次花多少錢
+  moneyTenCost: 50000,             //               轉 10 次花多少錢
   rates: { N: 70, R: 25, SR: 5 },  // 各稀有度的機率（%）；某個稀有度還沒有東西時，機率平均分給其他的
   dismantle: { N: 5, R: 15, SR: 40 },   // 分解 1 個重複的換回幾個異質碎片（每樣至少留 1 個）
   machineTiles: ['tile_street_capsule_toy_machines'],   // 可以轉的地圖素材（名稱有「扭蛋機」的也算）
