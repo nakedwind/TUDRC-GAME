@@ -47,7 +47,6 @@ function placeCheckCells(v) {
 }
 function canPlaceObstacle(v, c, r, lightExtra = 0) {
   if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;
-  if (typeof burrowMouseBlocksBuild === 'function' && burrowMouseBlocksBuild(v, c, r)) return false;
   // 只有「擋路格(solid)」才要求空地／不壓牆／不疊其他建築的擋路格／夠亮；
   // 其餘格子只是圖片，可以疊在牆或其他建築的圖片前面。
   for (const [dc, dr] of placeCheckCells(v)) {
@@ -84,15 +83,14 @@ function buildFail(msg, c, r, color = '#ff8f8f') {
 function placeObstacle(ob, c, r) {
   if(!ob||DISABLED_BUILD_IDS.has(ob.id))return false;
   const v = ob[buildOrient], extra = placeExtra(ob);
-  if (!buildInRange(v, c, r)) return buildFail('太遠了，只能蓋在溫特 ' + BUILD_RANGE + ' 格以內', c, r);
-  if (typeof burrowMouseBlocksBuild === 'function' && burrowMouseBlocksBuild(v, c, r)) return buildFail('地洞尚未消失，這裡暫時無法放置', c, r);
-  if (!footprintNearLight(v, c, r, extra)) return buildFail('太暗了，無法放置建築', c, r, '#ffd24a');
-  if (!canPlaceObstacle(v, c, r, extra)) return buildFail('這裡不能放置建築', c, r);
-  if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) return buildFail('這裡已經有地雷了', c, r);
+  if (!buildInRange(v, c, r)) return buildFail('太遠了', c, r);
+  if (!footprintNearLight(v, c, r, extra)) return buildFail('太黑了', c, r, '#ffd24a');
+  if (!canPlaceObstacle(v, c, r, extra)) return buildFail('不能放這裡', c, r);
+  if (ob.trap && typeof landmineAt === 'function' && landmineAt(c, r)) return buildFail('已經有地雷了', c, r);
   // 不擋路的建築（鐵絲網、露營燈…）不會被擋路格擋住，要另外檢查：同一格不能疊同一種
   const passable = !ob.trap && ((typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[ob.id]) || !variantSolidCells(v).length);
-  if (passable && sameBuildingOverlaps(ob.id, v, c, r)) return buildFail('這裡已經有' + ob.name + '了', c, r);
-  if (G.money < ob.cost) return buildFail('經費不足，無法放置建築', c, r);
+  if (passable && sameBuildingOverlaps(ob.id, v, c, r)) return buildFail('已經有' + ob.name + '了', c, r);
+  if (G.money < ob.cost) return buildFail('經費不足', c, r);
   G.money -= ob.cost; if (G.battle) G.battle.spent += ob.cost; if (typeof achieveOnSpend === 'function') achieveOnSpend('build', ob.cost);   // 結算畫面：本次花掉的經費
   // 地雷（trap）埋在地上、減速建築（鐵絲網）可以走過去：都不登記擋路格
   const slow = typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[ob.id];
@@ -222,7 +220,7 @@ demolishToggle.addEventListener('click', () => {
   const wasActive = G.selType === 'demolish';
   closeBuildMenu(); closeGroundMenu();
   G.selType = wasActive ? null : 'demolish';
-  if (!wasActive && G.player) flash('點選要拆除的建築', G.player.x, G.player.y - 28, '#ffd479');
+  if (!wasActive && G.player) flash('點選要拆的建築', G.player.x, G.player.y - 28, '#ffd479');
   sfx('button'); updateBuildToggle();
 });
 buildToggle.addEventListener('click', () => {
@@ -326,6 +324,7 @@ function slowFactorAt(x, y, who) {
     if (!o.slow || o.hp <= 0) continue;
     if (c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)) k = Math.min(k, o.slow[who] ?? 1);
   }
+  if (typeof burrowMouseSlowAt === 'function') k = Math.min(k, burrowMouseSlowAt(x, y));   // 版權老鼠死後的洞（js/burrowing-mouse.js）
   return k;
 }
 // 這個位置是不是已經有同一種建築（不擋路的建築一格只能放一個）

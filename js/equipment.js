@@ -259,9 +259,9 @@ function adrenalineSpeedMul() {
 function useAdrenaline() {
   if (!G?.player || G.player.hp <= 0) return;
   if (itemCount('adrenaline') <= 0) { sfx('error'); flash('沒有腎上腺素了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
-  if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (MAP_SAFE) { sfx('error'); flash('戰鬥中才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   const t = nowSec();
-  if (adrenalineActive()) { sfx('error'); flash('腎上腺素還在生效', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (adrenalineActive()) { sfx('error'); flash('還在生效', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   consumeItem('adrenaline');
   adrenaline.until = t + ADRENALINE.dur; adrenaline.sideUntil = adrenaline.until + ADRENALINE.side;
   flash('💉 腎上腺素！', G.player.x, G.player.y - 54, '#ff8a8a', 1.4); sfx('soothe');
@@ -283,15 +283,15 @@ function useFirstAid() {
   if (!G?.player || G.player.hp <= 0 || firstAid.channel) return;
   if (firstAid.picking) { cancelFirstAidPick(); return; }   // 再按一次＝取消
   if (aidKits() <= 0) { sfx('error'); flash('沒有急救包了', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
-  if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
-  if (!(G.towers || []).length) { sfx('error'); flash('沒有可以治療的隊員', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (MAP_SAFE) { sfx('error'); flash('戰鬥中才能用', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
+  if (!(G.towers || []).length) { sfx('error'); flash('沒人需要治療', G.player.x, G.player.y - 54, '#c9d3dc'); return; }
   if (!G.towers.some(aidUsableOn)) {
     const downedOnly = G.towers.some(t => t.hp <= 0) && !G.towers.some(t => t.hp > 0 && t.hp < t.maxhp);
-    sfx('aidCannot'); flash(downedOnly ? '要用異質急救包才能救回倒下的隊員' : itemCount('firstaid') <= 0 && G.towers.some(t => t.hp > 0 && t.hp < t.maxhp) ? '沒有急救包了' : '沒有人受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return;
+    sfx('aidCannot'); flash(downedOnly ? '需要異質急救包' : itemCount('firstaid') <= 0 && G.towers.some(t => t.hp > 0 && t.hp < t.maxhp) ? '沒有急救包了' : '沒有人受傷', G.player.x, G.player.y - 54, '#c9d3dc'); return;
   }
   firstAid.picking = true; firstAid.hover = null;
   sfx('menu');
-  flash('⛑️ 選擇要治療的隊員', G.player.x, G.player.y - 54, '#9ff0c0', 1.8);
+  flash('⛑️ 選擇隊員', G.player.x, G.player.y - 54, '#9ff0c0', 1.8);
   refreshFirstAidPick();
 }
 function cancelFirstAidPick() {
@@ -317,7 +317,7 @@ function firstAidPickMember(type) {
 function firstAidOn(t) {
   const p = G && G.player;
   if (!p || !t || p.hp <= 0 || firstAid.channel) return;
-  if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', p.x, p.y - 54, '#c9d3dc'); return; }
+  if (MAP_SAFE) { sfx('error'); flash('戰鬥中才能用', p.x, p.y - 54, '#c9d3dc'); return; }
   if (t.hp <= 0 && itemCount('anomaly-firstaid') <= 0) { showFirstAidTip('要用異質急救包才能救回來'); return; }   // 倒下的隊員：一般急救包救不回來
   if (t.hp > 0 && t.hp >= t.maxhp) { showFirstAidTip('沒有受傷'); return; }   // 滿血不能用
   if (t.hp > 0 && itemCount('firstaid') <= 0) { cancelFirstAidPick(); sfx('error'); flash('沒有急救包了', p.x, p.y - 54, '#c9d3dc'); return; }
@@ -344,7 +344,7 @@ function finishFirstAid() {
   consumeItem(kit);
   if (wasDown) { t.hp = Math.max(1, Math.round(t.maxhp * FIRST_AID.reviveHp)); flash('✚ 救回來了！HP ' + t.hp, t.x, t.y - 50, '#79dbad', 1.8); }   // 異質急救包：HP 變 30%
   else { t.hp = Math.min(t.maxhp, t.hp + c.heal); flash('+' + c.heal, t.x, t.y - 50, '#79dbad', 1.6); }
-  if (!isPlayer && wasDown && typeof sentryStatus === 'function') sentryStatus(t, '被溫特救起來了', '#79dbad');
+  if (!isPlayer && wasDown && typeof sentryStatus === 'function') sentryStatus(t, '獲救了！', '#79dbad');
   if (!isPlayer && wasDown && typeof addStat === 'function') addStat('revives');   // 成就：把倒下的隊員救回來
   for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: t.x + (Math.random() - .5) * 26, y: t.y - 10, vx: 0, vy: -40 - Math.random() * 30, r: 2, life: .7, life0: .7, color: '#9ff0c0' });
   sfx('soothe'); if (typeof updateHUD === 'function') updateHUD();

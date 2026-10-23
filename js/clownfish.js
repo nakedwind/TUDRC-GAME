@@ -60,7 +60,7 @@ const CLOWNFISH = {
   hatchlingId: 'clownfish_small',
   hatchMax: 8,         // 場上最多幾隻幼體（避免滾雪球到卡頓）
   // ---- 測試用 ----
-  testSpawn: true,     // 開戰 1 秒後，在離溫特約 testSpawnDist 格的空地放一隻比基尼小丑魚（測完改成 false）
+  testSpawn: false,    // 測試生成已關閉；正式生成仍依地圖怪物設定。
   testSpawnDist: 10,   // 離溫特幾格
 };
 const CF_ART = {

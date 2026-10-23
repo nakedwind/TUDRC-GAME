@@ -267,7 +267,7 @@ document.getElementById('cv').addEventListener('mousedown', e => {   // 這個�
   const { x, y } = clientToWorld(e.clientX, e.clientY), t = rootedTeammateAt(x, y);
   if (!t || canHelpFree(t)) return;   // 打得到藤蔓：交給平常的開槍（js/game.js 的 updatePlayerAttack → shootVine）
   const now = performance.now();   // 太遠或看不到：照樣開槍（只是射不到藤蔓），旁邊提示一下（連點時不要一直疊字）
-  if (now - (t.helpFarAt || 0) > 900) { t.helpFarAt = now; flash(helpInRange(t) ? '看不到他，射不到藤蔓' : '太遠了，要在手槍射程內才射得到藤蔓', t.x, t.y - 58, '#ffd479', .6); sfx('error'); }
+  if (now - (t.helpFarAt || 0) > 900) { t.helpFarAt = now; flash(helpInRange(t) ? '看不到' : '太遠了', t.x, t.y - 58, '#ffd479', .6); sfx('error'); }
 }, true);
 // 游標點在哪位被纏住、打得到的隊員身上（js/game.js 的 updatePlayerAttack 呼叫；沒有就回傳 null，照平常打怪）
 function vineShotTarget(aim) {

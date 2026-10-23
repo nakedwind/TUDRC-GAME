@@ -82,7 +82,7 @@ function backroomStock(stock = BACKROOM_SHOP.stock) {
 }
 // 基地：便利商店賣一般商品、販賣機和飲料店只賣飲料；後室：販賣機、60BLUE 照上面的清單，便利商店多賣杏仁水
 // 後室道具（special）只有後室商店賣
-const shopItems = () => backroomMode ? [...backroomStock(), ...SUPPLIES.filter(item => (item.kind === 'snack' || item.kind === 'drink') && !item.special), ...backroomBulletStock()]   // 後室商店：全部的零食、飲料都賣
+const shopItems = () => backroomMode ? [...backroomStock().filter(item => item.kind !== 'snack' && item.kind !== 'drink'), ...backroomBulletStock()]   // 後室商店暫不販售零食、飲料，保留補給與子彈
   : vendingMode && isEocVending() ? Object.keys(eocVendingState()[vendingColor] || {}).map(supplyById).filter(Boolean)   // 2F應變中心的販賣機：這次抽到的 6 種
   : vendingMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_VENDING))
   : drinkShopMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_DRINKSHOP))

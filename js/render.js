@@ -386,7 +386,7 @@ function drawEnemy(e) {
   const bottomY = e.y + 13 - lift;
   const shadowScale = Math.max(.55, 1 - lift / 22) * size;
   ctx.globalAlpha = .28 * Math.min(1, shadowScale); ctx.fillStyle = '#071015';
-  ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill();
+  if (e.behavior !== 'burrow') { ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill(); }   // 版權老鼠從土堆裡出來，不畫腳下陰影
   // 撲擊落點警示：蓄力時由外往內縮的紅圈＋逐漸填滿，飛撲時保持顯示
   const pounceGoal = e.playerPounceGoal;
   if (pounceGoal && (e.playerWindupT > 0 || e.playerPounceT > 0)) {
@@ -441,7 +441,7 @@ function drawEnemy(e) {
     ctx.fillText(SLIME_VARIANTS.giant.name, e.x, barY - 4);
   }
   if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
-  if (e.stunT > 0) { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.sleepT > 0 ? '睡著' : e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
+  if (e.stunT > 0 && e.behavior !== 'burrow') { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.sleepT > 0 ? '睡著' : e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
   if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
   if (SHOW_ENEMY_ALERT && e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」（目前關掉）
     const age = ENEMY_ALERT_TIME - e.alertT, pop = age < .12 ? .6 + age / .12 * .7 : 1.3 - Math.min(.3, (age - .12) * 1.5);
@@ -909,6 +909,39 @@ function drawPlayer(p) {
   drawPlayerReloadCountdown(p, size);
 }
 
+// 點隊員頭像：畫面內標出本人，畫面外沿視窗邊緣指向所在方向。
+function fieldLocatePosition(sx, sy, width, height) {
+  const left = Math.min(160, width * .22), right = width - Math.min(64, width * .12);
+  const top = Math.min(90, height * .18), bottom = height - Math.min(90, height * .18);
+  const inside = sx >= left && sx <= right && sy >= top && sy <= bottom;
+  if (inside) return { x: sx, y: sy, angle: Math.PI / 2, inside };
+  const cx = (left + right) / 2, cy = (top + bottom) / 2, dx = sx - cx, dy = sy - cy;
+  const k = Math.min((right - left) / 2 / Math.max(.001, Math.abs(dx)), (bottom - top) / 2 / Math.max(.001, Math.abs(dy)));
+  return { x: cx + dx * k, y: cy + dy * k, angle: Math.atan2(dy, dx), inside };
+}
+function drawFieldMemberLocator() {
+  const hint = G.fieldLocate, now = performance.now();
+  if (MAP_SAFE || !hint || now >= hint.until) return;
+  const actor = hint.actor;
+  if (!(G.towers || []).includes(actor) && !(G.npcs || []).includes(actor)) return;
+  const spec = TYPES[actor.type] || CHARACTERS[actor.id] || {};
+  const sx = (actor.x - cam.x) * VIEW_SCALE;
+  const sy = (actor.y - PLAYER.drawSize - cam.y) * VIEW_SCALE;
+  const pos = fieldLocatePosition(sx, sy, cv.width, cv.height);
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, (hint.until - now) / 400);
+  ctx.translate(pos.x, pos.y);
+  ctx.save(); ctx.rotate(pos.angle);
+  ctx.translate(Math.sin(now / 140) * 3, 0);
+  ctx.fillStyle = '#ffd479'; ctx.strokeStyle = '#14202d'; ctx.lineWidth = 3; ctx.lineJoin = 'round';
+  ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(-7, -11); ctx.lineTo(-3, 0); ctx.lineTo(-7, 11); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  ctx.font = 'bold 14px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const label = spec.name || '隊員', w = ctx.measureText(label).width + 18;
+  const labelY = pos.inside ? -24 : 29;
+  ctx.fillStyle = 'rgba(10,18,28,.92)'; roundRect(-w / 2, labelY - 12, w, 24, 6); ctx.fill();
+  ctx.fillStyle = '#ffd479'; ctx.fillText(label, 0, labelY);
+  ctx.restore();
+}
 // ---- 繪製 ----
 function draw() {
   lightsCache = LIGHT.enabled ? getLights() : [];   // 更新這一幀的光源
@@ -1382,6 +1415,7 @@ function draw() {
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
   if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
@@ -1477,6 +1511,7 @@ function draw() {
   drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
   if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
   if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
+  drawFieldMemberLocator();
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y);

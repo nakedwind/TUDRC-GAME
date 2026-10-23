@@ -71,7 +71,7 @@ function oreNearPlayer() {
 // 對著礦物按互動鍵：提醒打開礦物的方法
 function oreHint(o) {
   const c = oreCenter(o);
-  flash('太硬了！用地雷、瓦斯爐炸開，或用手槍多打幾發', c.x, c.y - 34, '#d6b8ff', 1.4);
+  flash('太硬了！', c.x, c.y - 34, '#d6b8ff', 1.4);
   sfx('error');
 }
 

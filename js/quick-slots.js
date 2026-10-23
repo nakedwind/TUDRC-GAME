@@ -81,10 +81,10 @@ function renderQuickSupplies() {
 // ---- 使用 ----
 function useQuickSlot(slot) {
   const it = quickItem(quickSlots[slot]), p = G && G.player; if (!p) return;
-  if (!it) { sfx('error'); flash(slot.toUpperCase() + ' 是空的：打開背包把道具拖進來', p.x, p.y - 54, '#c9d3dc'); return; }
+  if (!it) { sfx('error'); flash(slot.toUpperCase() + ' 是空的', p.x, p.y - 54, '#c9d3dc'); return; }
   if (!(supplyInventory.get(it.id) > 0)) { sfx('error'); flash(`沒有${it.name}了`, p.x, p.y - 54, '#c9d3dc'); return; }
   if (it.act === 'graffiti') { if (typeof openGraffitiPalette === 'function') openGraffitiPalette(it.id); return; }   // 塗鴉筆：選圖案再畫（js/graffiti.js；基地也可以畫）
-  if (MAP_SAFE) { sfx('error'); flash('在戰鬥區域才能用', p.x, p.y - 54, '#c9d3dc'); return; }
+  if (MAP_SAFE) { sfx('error'); flash('戰鬥中才能用', p.x, p.y - 54, '#c9d3dc'); return; }
   if (it.act === 'adrenaline') { if (typeof useAdrenaline === 'function') useAdrenaline(); return; }   // js/equipment.js
   if (it.act === 'firstaid') { if (typeof useFirstAid === 'function') useFirstAid(); return; }   // 急救包、異質急救包：選要治療的隊員（js/equipment.js；再按一次＝取消）
   useSupply(it.id);   // 醫療包、杏仁水…（js/shop.js）

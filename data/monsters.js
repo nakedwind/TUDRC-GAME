@@ -350,7 +350,7 @@ const MONSTERS_DEFAULT = [
   {
     "id": "burrowing_mouse",
     "name": "花蓮版權老鼠",
-    "sprite": "images/monster/burrowing-mouse/mouse-hole-open.png",
+    "sprite": "images/monster/burrowing-mouse/mouse-open.png",
     "hp": 180,
     "speed": 65,
     "playerDamage": 14,
@@ -361,15 +361,16 @@ const MONSTERS_DEFAULT = [
     "width": 110,
     "height": 90,
     "frames": {
-      "front": "images/monster/burrowing-mouse/mouse-hole-open.png",
+      "front": "images/monster/burrowing-mouse/mouse-open.png",
       "walkFront": [
-        "images/monster/burrowing-mouse/mouse-hole-open.png"
+        "images/monster/burrowing-mouse/mouse-open.png"
       ]
     },
     "behavior": "burrow",
     "burrow": {
       "noticeRange": 14,
-      "hitRadius": 0.8,
+      "hitRadius": 1.2,
+      "tunnelSpeed": 1.75,
       "windup": 0.8,
       "handRise": 0.2,
       "handHold": 0.4,
@@ -377,21 +378,23 @@ const MONSTERS_DEFAULT = [
       "emergeTime": 0.75
     },
     "art": {
-      "normal": "images/monster/burrowing-mouse/mouse-hole-open.png",
-      "half": "images/monster/burrowing-mouse/mouse-hole-half.png",
-      "closed": "images/monster/burrowing-mouse/mouse-hole-closed.png",
-      "emerge": "images/monster/burrowing-mouse/mouse-emerge.png",
+      "body": "images/monster/burrowing-mouse/mouse-open.png",
+      "bodyHalf": "images/monster/burrowing-mouse/mouse-half.png",
+      "bodyClosed": "images/monster/burrowing-mouse/mouse-closed.png",
       "hole": "images/monster/burrowing-mouse/hole.png",
       "crack": "images/monster/burrowing-mouse/hole-appear.png",
-      "leftHole": "images/monster/burrowing-mouse/left-hole.png",
-      "rightHole": "images/monster/burrowing-mouse/right-hole.png",
-      "leftRise": "images/monster/burrowing-mouse/left-hand-rise.png",
-      "rightRise": "images/monster/burrowing-mouse/right-hand-rise.png",
-      "leftHand": "images/monster/burrowing-mouse/left-hand-hole.png",
-      "rightHand": "images/monster/burrowing-mouse/right-hand-hole.png"
+      "deathHole": "images/monster/burrowing-mouse/hole02.png",
+      "dizzy1": "images/monster/burrowing-mouse/mouse-dizzy01.png",
+      "dizzy2": "images/monster/burrowing-mouse/mouse-dizzy02.png",
+      "dizzy3": "images/monster/burrowing-mouse/mouse-dizzy03.png",
+      "dizzy4": "images/monster/burrowing-mouse/mouse-dizzy04.png",
+      "hand": "images/monster/burrowing-mouse/left-hand.png",
+      "handHole": "images/monster/burrowing-mouse/left-hole.png"
     },
     "noHitSquash": true,
-    "knockMul": 0
+    "knockMul": 0,
+    "hitSound": "mouseHurt",
+    "deathSound": "mouseDeath"
   },
   {
     "id": "clownfish",

@@ -209,7 +209,7 @@ function ammoCrateNearPlayer() {
 function useAmmoCrateNearPlayer() {
   const crate = ammoCrateNearPlayer(); if (!crate) return false;
   const p = G.player;
-  if (bulletCount('flare') >= BULLETS.flare.max) { flash('照明彈已經是滿的', p.x, p.y - 70, '#9aa4b2', 1.2); sfx('error'); return true; }
+  if (bulletCount('flare') >= BULLETS.flare.max) { flash('照明彈已滿', p.x, p.y - 70, '#9aa4b2', 1.2); sfx('error'); return true; }
   const got = bulletOwned('flare') ? fillBullets('flare') : addBullets('flare', BULLETS.flare.max);
   crate.stamp.openUntil = performance.now() + AMMO_CRATE.openFor * 1000;   // 箱子打開一下
   flash('🔥 照明彈補滿 +' + got, p.x, p.y - 70, '#ffb38a', 1.4);

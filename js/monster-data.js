@@ -94,7 +94,8 @@ const CHARGER_FIELDS = [
 // 鑽地型：本體從洞口探出；手鎖定地面位置，出手前保留可閃避的預警。
 const BURROW_FIELDS = [
   { key: 'noticeRange', label: '注意範圍（格）', min: 1, max: 30, step: .5, def: 14 },
-  { key: 'hitRadius', label: '地底手命中半徑（格）', min: .3, max: 2, step: .1, def: .8 },
+  { key: 'hitRadius', label: '地底手命中半徑（格）', min: .3, max: 3, step: .1, def: 1.2 },
+  { key: 'tunnelSpeed', label: '地底鑽行速度（格／秒）', min: .5, max: 10, step: .05, def: 1.75 },
   { key: 'windup', label: '地洞預警（秒）', min: .2, max: 4, step: .05, def: .8 },
   { key: 'handRise', label: '手鑽出到命中（秒）', min: .1, max: 1, step: .05, def: .2 },
   { key: 'handHold', label: '手停留（秒）', min: .1, max: 2, step: .05, def: .4 },

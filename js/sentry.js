@@ -208,7 +208,6 @@ function spawnWanderers() {
 // ---- 哨兵移動 AI（哨兵是「人」：在亮處走動巡邏）----
 // 模式：free=自由走動（亮處隨便逛）/ hold=在錨點附近小範圍巡邏 / goto=走去指派位置後轉 hold
 function sentryBlocked(x, y) {
-  if (typeof burrowMouseBlocksActor === 'function' && burrowMouseBlocksActor(x, y, 12)) return true;
   const r = 12;
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
@@ -796,13 +795,13 @@ function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden
 function setSentryEscort(t) {
   t.mode = 'escort'; t.guardSummoned = false; t.guardBase = null;
   t.target = null; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
-  sentryStatus(t, '跟隨護衛部隊長');
+  sentryStatus(t, '跟隨護衛');
 }
 function sentryMenuAct(act) {
   const t = menuSentry; if (!t) return;
   if (act === 'free') { sfx('button'); t.mode = 'free'; t.guardSummoned = false; t.guardBase = null; t.anchor = null; t.target = null; sentryStatus(t, '自由走動'); }
   else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.guardBase = null; t.anchor = { x: t.x, y: t.y }; t.target = null; sentryStatus(t, '在原地巡邏'); }
-  else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); sentryStatus(t, '點地圖指定巡邏位置（Esc 取消）', '#ffd479'); return; }
+  else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); sentryStatus(t, '點地圖指定位置', '#ffd479'); return; }
   else if (act === 'talk') { openDialogue(t); return; }
   else if (act === 'hospital') { sfx('button'); sendToHospital(t); }
   else if (act === 'escort') { sfx('button'); setSentryEscort(t); }

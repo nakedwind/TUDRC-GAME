@@ -2,8 +2,8 @@
    虱目魚小子：
    ・攻擊方式是「吃隊友」：看到哨兵或嚮導就鎖定一個受害者，一直追到吃到、他倒下或跑太遠才換人；
      靠近到 MILKFISH.chargeRange 格內就高速衝過去（走路圖），一貼近就張嘴（攻擊圖）一口吞下；張嘴後被打暈也會咬完這一口。
-   ・不會吞溫特（玩家），但會咬他（攻擊圖，只扣血）：被溫特開槍打中（仇恨期間，連鎖定的受害者都先不管），
-     或溫特比任何隊友都近時，就衝過去咬溫特。嘴裡含著人的時候只顧著逃。
+   ・不會吞溫特（玩家），但會咬他：被玩家射擊或沒有隊友目標且玩家進入 4 格時短暫追擊，最多 4 秒。
+     拉開 8 格或遮住視線 1.5 秒會脫離；對玩家衝刺 3 秒後喘氣 1.5 秒。嘴裡含著人時只顧著逃。
    ・吞下後逃離現場約 MILKFISH.fleeDist 格（盡量往離溫特遠的方向），到了才慢慢晃。
    ・被吃的隊友卡在頭上的魚嘴裡（只露出兩隻腳在踢），不能動、不能攻擊，每 MILKFISH.digestEvery 秒扣一次血
      （扣多少＝怪物編輯器的「哨兵傷害」）。一次只能含一個人。
@@ -17,7 +17,7 @@
    必須在 enemy-ai.js 之後、game.js 之前載入。數值在下面的 MILKFISH。
 */
 const MILKFISH = {
-  noticeRange: 12,        // 看到隊友、溫特的距離（格）
+  noticeRange: 12,        // 看到隊友的距離（格）；玩家另用 playerNoticeRange
   loseRange: 16,          // 追多遠就放棄（格）
   eatReach: 42,           // 離隊友幾像素內可以吃
   windup: 0.25,           // 貼近後張嘴到吞下的時間（秒）：這段時間隊友跑掉就吃不到
@@ -25,9 +25,13 @@ const MILKFISH = {
   chargeSpeedMul: 4,      // 衝刺速度是平常走路的幾倍
   chargeDustEvery: 0.07,  // 衝刺時每幾秒揚起一團灰塵
   playerReach: 46,        // 溫特在幾像素內就咬他（只扣血，不會吞；扣多少＝怪物編輯器的「玩家傷害」）
-  playerWindup: 0.25,     // 咬溫特的前搖（攻擊圖）
+  playerWindup: 0.5,      // 咬溫特的前搖，留時間閃避
   playerHitReach: 64,     // 前搖結束時溫特還在幾像素內才咬得到
   playerCooldown: 1.2,    // 兩次咬溫特之間隔幾秒
+  playerNoticeRange: 4, playerLoseRange: 8,
+  playerChaseTime: 4, playerLostSightTime: 1.5,
+  playerChargeTime: 3, playerChargeRest: 1.5,
+  playerMissRest: 1, playerReacquireDelay: 1.5,
   gulpReach: 70,          // 張嘴結束時，隊友還在幾像素內就吃到
   missCooldown: 0.3,      // 撲空（隊友跑掉）後隔幾秒再撲；鎖定的人不變
   digestEvery: 5,         // 被吃的隊友每幾秒扣一次血
@@ -63,6 +67,33 @@ function mfPose(e, name, towardX) {
   e.forceFlip = e.forceAttack && towardX != null && towardX > e.x;
 }
 const mfIsSmall = e => e.behavior === 'milkfishSmall';
+
+// 咬玩家前的藍色眼光：與鳥頭人一樣畫在黑幕上方，跟隨攻擊圖左右翻轉。
+function drawMilkfishEyeFlashes(context) {
+  for (const e of G.enemies) {
+    if (e.behavior !== 'milkfish' || e.dead || e.hp <= 0 || e.stunT > 0 || !(e.mf?.pwindup > 0)) continue;
+    const front = monsterImage(e.frames?.front || e.sprite), attack = monsterImage(MILKFISH_ART + 'attack.png');
+    if (!front.naturalWidth || !front.naturalHeight || !attack.naturalWidth || !attack.naturalHeight) continue;
+    const squash = (e.hitSquashT || 0) / .16;
+    const sx = (e.drawWidth || 110) * (1 + .22 * squash) / front.naturalWidth;
+    const sy = (e.drawHeight || 132) * (1 - .2 * squash) / front.naturalHeight;
+    const x = e.x + (e.forceFlip ? -1 : 1) * (25 - attack.naturalWidth / 2) * sx;
+    const y = e.y + 13 - (e.slimeLift || 0) - (attack.naturalHeight - 34) * sy;
+    const t = 1 - e.mf.pwindup / MILKFISH.playerWindup;
+    const k = t < EYE_FLASH.rise ? Math.max(0, t) / EYE_FLASH.rise : Math.pow(Math.max(0, 1 - (t - EYE_FLASH.rise) / (1 - EYE_FLASH.rise)), 1.5);
+    const [r, g, b] = EYE_FLASH.color, radius = EYE_FLASH.radius * (.55 + .45 * k);
+    context.save(); context.globalCompositeOperation = 'lighter';
+    const grad = context.createRadialGradient(x, y, 0, x, y, radius);
+    grad.addColorStop(0, `rgba(225,245,255,${.95 * k})`);
+    grad.addColorStop(.3, `rgba(${r},${g},${b},${.75 * k})`);
+    grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    context.fillStyle = grad; context.beginPath(); context.arc(x, y, radius, 0, Math.PI * 2); context.fill();
+    context.fillStyle = `rgba(200,236,255,${.85 * k})`;
+    context.fillRect(x - 13 * k, y - .75, 26 * k, 1.5);
+    context.fillRect(x - .75, y - 6 * k, 1.5, 12 * k);
+    context.restore();
+  }
+}
 
 // ---- 能吃的東西 ----
 // 一格大的物品：玩家蓋的建築，或地圖上的可破壞物（基地、礦石、地雷、減速網、鐵門、多格的都不吃）
@@ -101,6 +132,9 @@ function stepMilkfishEnemy(e, dt) {
   if (!e.mf) e.mf = { cd: 1 + Math.random(), wait: Math.random() * 2 };
   const mf = e.mf;
   mf.cd -= dt; mf.patk = (mf.patk || 0) - dt;
+  mf.playerRest = Math.max(0, (mf.playerRest || 0) - dt);
+  mf.playerIgnore = Math.max(0, (mf.playerIgnore || 0) - dt);
+  if (mf.playerChasing) mf.playerChaseAge = (mf.playerChaseAge || 0) + dt;
   // 張嘴要吞隊友（攻擊圖，朝隊友那邊）：已經張嘴就一定咬完這一口，被打暈也不會中斷
   if (mf.windup > 0) {
     mf.windup -= dt; mfPose(e, 'attack', mf.aim ? mf.aim.x : null);
@@ -134,12 +168,31 @@ function stepMilkfishEnemy(e, dt) {
   mf.mate = mate;
   const p = G.player, pd = p && p.hp > 0 && !mfIsSmall(e) ? Math.hypot(p.x - e.x, p.y - e.y) : Infinity;
   const mateD = mate ? Math.hypot(mate.x - e.x, mate.y - e.y) : Infinity;
-  // 溫特的仇恨：被溫特開槍打中（仇恨期間），或溫特比任何隊友都近 → 衝過去咬溫特（只扣血）
-  const playerAggro = pd <= C.loseRange * CELL && (e.playerAggroT || 0) > 0;
-  const playerCloser = pd <= C.noticeRange * CELL && pd < mateD && hasLineOfSight(e.x, e.y, p.x, p.y);
-  if (playerAggro || playerCloser) {
+  const seesPlayer = Number.isFinite(pd) && hasLineOfSight(e.x, e.y, p.x, p.y);
+  if (mf.playerChasing) {
+    mf.playerLostSight = seesPlayer ? 0 : (mf.playerLostSight || 0) + dt;
+    if (pd >= C.playerLoseRange * CELL || mf.playerChaseAge >= C.playerChaseTime || mf.playerLostSight >= C.playerLostSightTime) {
+      mf.playerChasing = false; mf.playerBurst = 0; e.playerAggroT = 0;
+      mf.playerIgnore = C.playerReacquireDelay;
+    }
+  }
+  // 已鎖定隊友就不因玩家比較近而換人；玩家射擊仍可短暫引走牠。
+  if (!mf.playerChasing && !mf.playerIgnore && seesPlayer && pd < C.playerLoseRange * CELL
+    && ((e.playerAggroT || 0) > 0 || (!mate && pd <= C.playerNoticeRange * CELL))) {
+    mf.playerChasing = true; mf.playerChaseAge = 0; mf.playerLostSight = 0;
+  }
+  if (mf.playerRest > 0) return;   // 短衝後喘氣／咬空後停頓，不立刻改追隊友
+  if (mf.playerChasing) {
     if (pd <= C.playerReach) { if (mf.patk <= 0) { mf.pwindup = C.playerWindup; e.faceRight = p.x > e.x; } return; }
-    mfChase(e, p, dt, 'mfp');
+    if (pd <= C.chargeRange * CELL && seesPlayer) {
+      mf.playerBurst = (mf.playerBurst || 0) + dt;
+      const chargeDt = Math.min(dt, Math.max(0, C.playerChargeTime - (mf.playerBurst - dt)));
+      if (chargeDt > 0) mfChase(e, p, chargeDt, 'mfp');
+      if (mf.playerBurst >= C.playerChargeTime) { mf.playerBurst = 0; mf.playerRest = C.playerChargeRest; }
+    } else {
+      if (mf.playerBurst > 0) { mf.playerBurst = 0; mf.playerRest = C.playerChargeRest; return; }
+      mfChase(e, p, dt, 'mfp', false);
+    }
     return;
   }
   // 溫特靠太近：咬他一口（隊友已經在嘴邊就先吃隊友）
@@ -211,7 +264,7 @@ function mfGulp(e) {
   t.x = e.x; t.y = e.y;
   G.effects.push({ ring: true, x: e.x, y: e.y - 40, r: 6, r2: 34, life: .3, life0: .3, color: '#f3e7c9' });
   if (typeof sfxAt === 'function') sfxAt('milkfishGulp', e.x, e.y, .9, 'milkfish-gulp');
-  if (typeof sentryStatus === 'function') sentryStatus(t, '被虱目魚小子吃掉了！', '#ffb36b', true);
+  if (typeof sentryStatus === 'function') sentryStatus(t, '被吃掉了！', '#ffb36b', true);
   addShake(2);
 }
 // ---- 吞下隊友後逃跑 ----
@@ -255,7 +308,13 @@ function mfFleeStep(e, dt) {
 function mfBitePlayer(e) {
   const p = G.player, mf = e.mf;
   mfPose(e, null); mf.patk = MILKFISH.playerCooldown;
-  if (!p || p.hp <= 0 || Math.hypot(p.x - e.x, p.y - e.y) > MILKFISH.playerHitReach) return;   // 閃開了
+  const wasCharging = mf.playerBurst > 0;
+  mf.playerBurst = 0;
+  if (!p || p.hp <= 0 || Math.hypot(p.x - e.x, p.y - e.y) > MILKFISH.playerHitReach) {
+    mf.playerRest = Math.max(mf.playerRest || 0, wasCharging ? MILKFISH.playerChargeRest : MILKFISH.playerMissRest);
+    return;
+  }
+  if (wasCharging) mf.playerRest = MILKFISH.playerChargeRest;
   e.playerTouchCd = 0;
   enemyAttackPlayer(e, 0);
 }

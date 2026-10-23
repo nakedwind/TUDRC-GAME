@@ -307,7 +307,7 @@ function canTalk(actor) {   // 有沒有可以說的台詞（沒有就不顯示�
 }
 function openDialogue(actor) {
   if (!actor || dialogueState) return;
-  if (actor.berserk) { flash('污染失控，現在無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
+  if (actor.berserk) { flash('無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
   const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
     || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」
@@ -595,7 +595,7 @@ function autoStairTravel() {
 }
 function enterPortal(pt) {
   if (mapTransitioning) return;
-  if (mapIndexById(pt.to) < 0) { flash('目標地圖不存在（可能已被刪除）', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
+  if (mapIndexById(pt.to) < 0) { flash('地圖不存在', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
   const fromId = MAP.id;
   const source = { map: MAP, c: pt.c, r: pt.r, cols: MAP.cols, rows: MAP.rows,
     stair: !pt.elevator && typeof stairPortalDir === 'function' ? stairPortalDir(pt) : null };
@@ -684,9 +684,9 @@ function addGroundCloseButton() {
 function assignSentryToGround(t, guard = false) {
   if (!groundTarget) return;
   const { c, r } = groundTarget, [x, y] = center(c, r);
-  if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '正在暴走，無法指派', x, y, '#ff8f8f'); return; }
-  if (!isLit(x, y)) { sfx('error'); flash('巡邏點必須在亮處', x, y, '#ffd24a'); return; }
-  if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return; }
+  if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '暴走中', x, y, '#ff8f8f'); return; }
+  if (!isLit(x, y)) { sfx('error'); flash('太黑了', x, y, '#ffd24a'); return; }
+  if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('不能巡邏', x, y, '#ff8f8f'); return; }
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   t.summonDark = true;   // 召喚：途中遇到黑暗也照走（js/sentry.js 的 escapeDarkness）
   t.guardSummoned = guard;
@@ -715,14 +715,14 @@ function summonAllSentriesToGround() {
     count++;
   }
   sfx(count ? 'button' : 'error');
-  systemNotice(count ? '已召喚 ' + count + ' 位哨兵前往此處' : '沒有可到達此處的哨兵');
+  systemNotice(count ? '已召喚 ' + count + ' 位哨兵前往此處' : '沒人到得了');
   if (count) closeGroundMenu();
 }
 function summonNearestSentryToGround() {
   if (!groundTarget) return;
   const { c, r } = groundTarget, [x, y] = center(c, r);
   if (!sentryCellWalkable(c, r)) {
-    sfx('error'); flash('此處無法讓哨兵駐守', x, y, '#ff8f8f'); return;
+    sfx('error'); flash('不能駐守', x, y, '#ff8f8f'); return;
   }
   const choices = G.towers.filter(t => t.hp > 0 && !t.berserk && !TYPES[t.type].guide)
     .map(t => ({ t, path: buildSentryPath(t, x, y, true) }))   // 召喚：可以穿過黑暗
@@ -730,7 +730,7 @@ function summonNearestSentryToGround() {
     .sort((a, b) => a.path.length - b.path.length ||
       Math.hypot(a.t.x - x, a.t.y - y) - Math.hypot(b.t.x - x, b.t.y - y));
   if (!choices.length) {
-    sfx('error'); flash('沒有可到達此處的哨兵', x, y, '#ff8f8f'); return;
+    sfx('error'); flash('沒人到得了', x, y, '#ff8f8f'); return;
   }
   assignSentryToGround(choices[0].t, true);
 }
@@ -850,7 +850,7 @@ function sendSentryRest(t) {
   if (!bestSpot) return;
   t.mode = 'goto'; t.target = { x: bestSpot.x, y: bestSpot.y }; t.anchor = null; t.waitT = 0;
   t.guardSummoned = true; t.guardBase = base; t.navPath = null; t.navGoal = null; t.navTimer = 0; t.navFailed = false;
-  sentryStatus(t, '瀕臨暴走，退守營地', '#ffb24d', true);
+  sentryStatus(t, '瀕臨暴走', '#ffb24d', true);
 }
 // 暴走（污染 100）：無差別攻擊最近的任意目標——敵人、其他哨兵、玩家、基地、核心
 // 隊友避開腐蝕池：在池內／貼邊時往外推（阿瓦倫本人免疫、不避；暴走中不避）
@@ -954,7 +954,7 @@ function openCampMenu(base, clientX, clientY) {
     const x = (base.artX ?? OX + base.c * CELL) + base.w * CELL / 2;
     const y = (base.artY ?? OY + base.r * CELL) + base.h * CELL / 2;
     sfx(count ? 'button' : 'error');
-    flash(count ? `已召回 ${count} 位哨兵守衛營地` : '營地附近沒有可到達的守衛位置',
+    flash(count ? `召回 ${count} 人` : '沒有守衛位置',
       x, y - 24, count ? '#7ee0c0' : '#ff8f8f');
   });
   groundMenu.appendChild(recall);
@@ -1089,7 +1089,6 @@ function playerSpawnPos() {
 }
 // ---- 玩家移動與碰撞（牆、哨兵、障礙物都擋路；水平垂直分開判斷可貼牆滑行）----
 function playerBlocked(x, y) {
-  if (typeof burrowMouseBlocksActor === 'function' && burrowMouseBlocksActor(x, y, PLAYER.r)) return true;
   const r = PLAYER.r;
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
@@ -1376,8 +1375,8 @@ function handleMapClick(e, isLeft) {
   if (isLeft && assigning) {   // 指派巡邏點
     spawnGroundRipple(e.clientX, e.clientY); closeGroundMenu();
     const t = assigning;
-    if (!isLit(x, y)) { sfx('error'); flash('要指派在亮處', x, y, '#ffd24a'); return false; }
-    if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('這裡不能巡邏', x, y, '#ff8f8f'); return false; }
+    if (!isLit(x, y)) { sfx('error'); flash('太黑了', x, y, '#ffd24a'); return false; }
+    if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('不能巡邏', x, y, '#ff8f8f'); return false; }
     t.mode = 'goto'; t.guardSummoned = false; t.guardBase = null; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; assigning = null;
     sfx('button'); flash(TYPES[t.type].name + '：前往巡邏點', t.x, t.y - 24, '#8fd3ff', 3); systemNotice(TYPES[t.type].name + '正前往巡邏點');
     return false;
@@ -1391,7 +1390,7 @@ function handleMapClick(e, isLeft) {
   if (isLeft && G.selType === 'demolish') {   // 拆除
     const target = playerBuildingAt(c, r);
     if (target) { spawnGroundRipple(e.clientX, e.clientY); demolishPlayerBuilding(target); }
-    else { sfx('error'); flash('這裡沒有可以拆除的東西', x, y - 18, '#ff8f8f'); }
+    else { sfx('error'); flash('沒有可拆的', x, y - 18, '#ff8f8f'); }
     return false;
   }
 
@@ -2169,7 +2168,7 @@ function update(dt) {
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
-    earnCrystals(core.reward); if (G.battle) G.battle.cores++; flash('異質核心已摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    earnCrystals(core.reward); if (G.battle) G.battle.cores++; flash('核心摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -2254,7 +2253,7 @@ function update(dt) {
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
   if (G.baseLostT > 0 && !G.over) { G.baseLostT -= dt; if (G.baseLostT <= 0) lose('base'); }   // 基地被打壞：等一下才跳失敗
   if (typeof checkCoreClear === 'function') checkCoreClear(dt);
-  else if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0) win();
+  else if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) win();   // 地底的老鼠也要清掉
   updateHUD();
 }
 const FLASH_LIFE = 1.5;   // 提示字停留時間（秒）；想更久／更短改這裡

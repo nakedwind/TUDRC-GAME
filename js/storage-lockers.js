@@ -107,7 +107,7 @@ function useStoragePropNearPlayer(filter){
   }else if(prop.open){
     flash('置物箱已打開',prop.x,prop.top-8,'#dce6ed',1.2);
   }else if((supplyInventory.get('storage-locker-key')||0)<=0){
-    sfx('error');flash('需要置物箱鑰匙',prop.x,prop.top-8,'#ffcf89',1.4);
+    sfx('error');flash('需要鑰匙',prop.x,prop.top-8,'#ffcf89',1.4);
   }else{
     const remainingKeys=supplyInventory.get('storage-locker-key')-1;
     if(remainingKeys>0)supplyInventory.set('storage-locker-key',remainingKeys);
@@ -128,7 +128,7 @@ function useStoragePropNearPlayer(filter){
         if(typeof tryYouyouCardFind==='function')tryYouyouCardFind();   // 好遊卡（js/mrt-locks.js）
       }
     }finally{if(typeof itemIntroFromLocker!=='undefined')itemIntroFromLocker=false;}
-    if(typeof itemIntroCount!=='undefined'&&itemIntroCount===before)flash('置物櫃裡什麼也沒有',prop.x,prop.top-8,'#dce6ed',1.6);
+    if(typeof itemIntroCount!=='undefined'&&itemIntroCount===before)flash('空的',prop.x,prop.top-8,'#dce6ed',1.6);
     updateHUD();saveGame();
   }
   return true;

@@ -116,7 +116,7 @@ function spawnCoreGroup(core) {
   if (!cells.length) return;
   const rule = coreSpawnRule(core);
   const want = Math.round(randRange([rule.group[0], rule.group[1] + .99]) - .49);
-  const count = Math.min(want, coreMaxEnemies() - G.enemies.length, cells.length);
+  const count = Math.min(want, coreMaxEnemies() - G.enemies.length - (typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0), cells.length);
   for (let i = 0; i < count; i++) {
     const index = Math.floor(Math.random() * cells.length), [c, r] = cells.splice(index, 1)[0];
     const [x, y] = center(c, r);
@@ -201,7 +201,7 @@ function updateCores(dt) {
       }
     }
     core.timer -= dt;
-    if (core.timer <= 0 && G.enemies.length < coreMaxEnemies()) {
+    if (core.timer <= 0 && G.enemies.length + (typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0) < coreMaxEnemies()) {
       spawnCoreGroup(core);
       core.timer = randRange(coreSpawnRule(core).every);
     }

@@ -92,7 +92,7 @@ function unlockDoor(door) {
 function toggleDoorNearPlayer() {
   const door = doorNearPlayer(); if (!door) return false;
   if (doorLocked(door)) { unlockDoor(door); return true; }
-  if (!setDoorOpen(door, !door.open)) { sfx('error'); flash('門口有人，關不起來', door.x, door.top, '#ff8f8f'); }
+  if (!setDoorOpen(door, !door.open)) { sfx('error'); flash('門口有人', door.x, door.top, '#ff8f8f'); }
   return true;
 }
 // 自動門：觸發條件達成時打開（trigger 目前只有 'core-awake'＝異質核心醒來）

@@ -1,19 +1,15 @@
 {
-  "老鼠地洞睜眼.png": "mouse-hole-open.png",
-  "老鼠地洞閉眼過度.png": "mouse-hole-half.png",
-  "老鼠地洞閉眼.png": "mouse-hole-closed.png",
   "老鼠睜眼.png": "mouse-open.png",
   "老鼠閉眼過度.png": "mouse-half.png",
   "老鼠閉眼.png": "mouse-closed.png",
-  "老鼠鑽出.png": "mouse-emerge.png",
   "地洞.png": "hole.png",
   "地洞剛出現.png": "hole-appear.png",
+  "死亡地洞.png": "hole02.png",
   "左手地洞.png": "left-hole.png",
-  "右手地洞.png": "right-hole.png",
-  "地洞左手鑽出.png": "left-hand-rise.png",
-  "地洞右手鑽出.png": "right-hand-rise.png",
-  "地洞左手.png": "left-hand-hole.png",
-  "地洞右手.png": "right-hand-hole.png",
   "左手.png": "left-hand.png",
-  "右手.png": "right-hand.png"
+  "地底潛伏.png": "hole03.png",
+  "老鼠暈眩01.png": "mouse-dizzy01.png",
+  "老鼠暈眩02.png": "mouse-dizzy02.png",
+  "老鼠暈眩03.png": "mouse-dizzy03.png",
+  "老鼠暈眩04.png": "mouse-dizzy04.png"
 }
