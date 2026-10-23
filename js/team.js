@@ -149,8 +149,11 @@ function memberPortraitPath(spec) {
   const prefix = spec.sprite.replace('_', '') + '_';
   return 'images/character/' + spec.sprite + '/' + prefix + '0000_Front.png';
 }
+// 劇情上暫時不能出勤的隊員：基地裡的狀態改顯示這段文字（只改顯示的字；之後劇情好了，把他從這裡拿掉就好）
+const MEMBER_UNAVAILABLE = { tino: '負傷中：無法出勤' };
 function memberCondition(actor, safe) {
   if (actor.noncombat) return { text: '非戰鬥人員', cls: 'support' };
+  if (safe && MEMBER_UNAVAILABLE[actor.type]) return { text: MEMBER_UNAVAILABLE[actor.type], cls: 'warning' };
   if (safe) return { text: getTeam().includes(actor.type) ? '已編入' : '待命', cls: getTeam().includes(actor.type) ? 'ready' : 'standby' };
   if (!actor.live) return { text: '未部署', cls: 'standby' };
   if (TYPES[actor.type]?.guide && guideSP(actor.live) < SANITY.swayBelow) return { text: 'SP 偏低', cls: 'warning' };

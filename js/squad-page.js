@@ -7,6 +7,8 @@
    ・?squadedit=1：編輯器裡的預覽（最下面），用 postMessage 跟編輯器溝通
 */
 const SQ_W = 888, SQ_H = 520;
+// 先藏起技能樹的隊員：技能的效果、說明、畫面都還在，只是玩家在 Y102隊員頁看不到技能樹（只看得到裝備頁）；要打開時把他從這裡拿掉
+const SQ_SKILL_TREE_HIDDEN = ['tino'];
 const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null };
 const SQ_STATS = [
   { id: 'atk', name: '攻擊', icon: 'atk', val: s => s.noAttack ? '—' : String(s.dmg), num: s => s.dmg },
@@ -46,11 +48,13 @@ const SQ_PARTS = {
   'box.locked': ['技能說明', '還沒解鎖：整塊'], 'box.lockIcon': ['技能說明', '還沒解鎖：鎖頭的框'], 'img.lockIcon': ['技能說明', '還沒解鎖：鎖頭'], 'text.lockHint': ['技能說明', '還沒解鎖：條件提示'], 'text.lockDesc': ['技能說明', '還沒解鎖：技能說明'],
   'text.gearTitle': ['裝備頁', '「隊員裝備」'], 'box.preview': ['裝備頁', '角色外觀預覽的框'], 'img.preview': ['裝備頁', '角色外觀預覽'], 'text.lookTitle': ['裝備頁', '「外觀裝備」'],
   'text.switchLabelG': ['裝備頁', '「切換技能樹／裝備」'], 'btn.switchG': ['裝備頁', '切換按鈕'], 'img.switchG': ['裝備頁', '切換按鈕的圖'],
-  'text.descTitle': ['裝備說明', '「裝備說明」'], 'text.descHint': ['裝備說明', '「（點選上方裝備 ICON）」'], 'box.desc': ['裝備說明', '裝備說明的框'], 'text.desc': ['裝備說明', '裝備說明文字'],
+  'text.descTitle': ['裝備說明', '「裝備說明」'], 'box.desc': ['裝備說明', '裝備說明的框'], 'text.desc': ['裝備說明', '裝備說明文字'],
   'text.statTitle': ['裝備說明', '「裝備數值」'], 'box.stat': ['裝備說明', '裝備數值的框'], 'text.stat': ['裝備說明', '裝備數值文字'], 'text.availTitle': ['裝備說明', '「可用裝備」'],
   'btn.unequip': ['裝備說明', '「卸下裝備」'], 'btn.equip': ['裝備說明', '「穿上裝備」'],
 };
-const SQ_LOOK_SLOTS = () => typeof COSTUME_SLOTS !== 'undefined' ? COSTUME_SLOTS : [{ id: 'skin', name: '服裝' }];
+// 外觀裝備格：服裝系統的欄位，但「下身」不放在這一頁（只有 6 格位置：服裝、頭飾、臉部、背部、手持1、手持2）
+const SQ_LOOK_HIDDEN = ['lower'];
+const SQ_LOOK_SLOTS = () => typeof COSTUME_SLOTS !== 'undefined' ? COSTUME_SLOTS.filter(s => !SQ_LOOK_HIDDEN.includes(s.id)) : [{ id: 'skin', name: '服裝' }];
 function squadPart(key) {
   key = String(key || '');
   // img＝圖片（大小＝寬，高度照比例）；box＝方形的框（大小＝寬＝高，長寬一起縮放）；其他＝面板、文字（寬、高分開）
@@ -94,7 +98,7 @@ function renderSquadPage(body) {
   else {
     html += squadProfileHtml(actor, safe);
     if (actor.noncombat || !TYPES[actor.type]) html += '<section class="sq-main" data-sq="panel.tree"><p class="sq-empty" data-sq="text.noSkill">' + sqT('text.noSkill', '支援人員沒有技能樹，也沒有隊員裝備。') + '</p></section>';
-    else if (st.page === 'gear') html += squadGearHtml(actor, safe);
+    else if (st.page === 'gear' || SQ_SKILL_TREE_HIDDEN.includes(actor.type)) html += squadGearHtml(actor, safe);
     else html += squadSkillHtml(actor, safe);
   }
   const keep = body.querySelector('.sq-roster-list')?.scrollTop || 0;
@@ -130,6 +134,7 @@ function squadProfileHtml(actor, safe) {
   return h + '</section>';
 }
 function squadSwitchHtml(suffix) {
+  if (SQ_SKILL_TREE_HIDDEN.includes(squadPageState.member)) return '';   // 技能樹藏起來的隊員：不顯示「切換技能樹／裝備」
   return '<span class="sq-switch-label" data-sq="text.switchLabel' + suffix + '">' + sqT('text.switchLabel' + suffix, '切換技能樹／裝備') + '</span>' +
     '<button type="button" class="sq-switch" data-sq-switch data-sq="btn.switch' + suffix + '" title="切換技能樹／裝備"><img data-sq="img.switch' + suffix + '" src="images/ui/squad-switch.svg" alt=""></button>';
 }
@@ -224,10 +229,10 @@ function squadGearHtml(actor, safe) {
   else { const it = squadLookItem(type, st.slot.id); if (it) cur = { name: it.name, desc: it.builtin ? '原本的服裝。' : '外觀裝備。', stat: '外觀裝備，不影響數值' }; }
   const show = pick || cur;
   h += '<section class="sq-info sq-gear-info" data-sq="panel.gearInfo">' +
-    '<b class="sq-title desc" data-sq="text.descTitle">' + sqT('text.descTitle', '裝備說明') + '</b><small class="sq-hint" data-sq="text.descHint">' + sqT('text.descHint', '（點選上方裝備 ICON）') + '</small>' +
+    '<b class="sq-title desc" data-sq="text.descTitle">' + sqT('text.descTitle', '裝備說明') + '</b>' +
     '<div class="sq-box desc" data-sq="box.desc"><p data-sq="text.desc">' + (show ? '<b>' + sqEsc(show.name) + '</b>　' + sqEsc(show.desc || '') : '<span class="sq-dim">這一格還沒有裝備。</span>') + '</p></div>' +
     '<b class="sq-title stat" data-sq="text.statTitle">' + sqT('text.statTitle', '裝備數值') + '</b>' +
-    '<div class="sq-box stat" data-sq="box.stat"><p data-sq="text.stat">' + (show ? sqEsc(show.stat || '—') : '') + '</p></div>' +
+    '<div class="sq-box stat" data-sq="box.stat"><p data-sq="text.stat">' + (show ? sqEsc(show.stat || '—') : '<span class="sq-dim">無。</span>') + '</p></div>' +
     '<b class="sq-title avail" data-sq="text.availTitle">' + sqT('text.availTitle', '可用裝備') + '</b>' +
     '<div class="sq-avail" data-sq="panel.avail">' + (avail.length ? avail.map(a => '<button type="button" class="sq-avail-item' + (a.id === st.avail ? ' sel' : '') + '" data-avail="' + sqEsc(a.id) + '" data-sq="avail:' + sqEsc(a.id) + '" title="' + sqEsc(a.name) + '"><img data-sq="availImg:' + sqEsc(a.id) + '" src="' + sqEsc(a.image) + '" alt="">' + (a.n > 1 ? '<em>×' + a.n + '</em>' : '') + '</button>').join('')
       : '<p class="sq-dim">' + (st.slot.kind === 'gear' ? '背包裡沒有隊員裝備（便利商店有賣）' : '還沒有這個欄位的外觀裝備') + '</p>') + '</div>' +

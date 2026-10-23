@@ -48,7 +48,8 @@ function renderDialogueFavor() {
   box.classList.remove('hidden');
   box.innerHTML = `<b>♥ ${f.name}</b><i><u style="width:${Math.round(f.pct * 100)}%"></u></i>`;
   box.title = f.next ? `好感度 ${f.points}／${f.next.need}` : `好感度 ${f.points}（最高等級）`;
-  btn.classList.toggle('hidden', !MAP_SAFE || dialogueState.giftReply);   // 送禮只在基地；送完這句就先藏起來
+  btn.classList.toggle('hidden', !MAP_SAFE || !!dialogueState.giftReply);   // 送禮只在基地；送完這句就先藏起來
+  // ↑ 一定要是 true／false：還沒送過禮時 giftReply 是 undefined，toggle 收到 undefined 會變成「切換」，按鈕就會一次有、一次沒有
   const done = giftedThisVisit.has(id);
   btn.disabled = done;
   btn.innerHTML = done ? '已送過禮' : '🎁 送禮 <span>G</span>';
