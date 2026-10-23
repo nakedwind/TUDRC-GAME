@@ -61,7 +61,7 @@
     <section class="panel">
       <div class="stage-head"><b id="mapTitle"></b><span class="grow"></span>
         <label class="row" style="font-size:12px"><input type="checkbox" id="showSolid" checked>顯示不可穿透格</label>
-        <button type="button" class="small" id="zoomOut">－</button><span id="zoomText" style="font-size:12px;min-width:40px;text-align:center"></span><button type="button" class="small" id="zoomIn">＋</button>
+        <button type="button" class="small" id="zoomOut">－</button><span id="zoomText" style="font-size:12px;min-width:40px;text-align:center" title="在地圖上按住 Alt＋滾輪也可以放大縮小"></span><small style="color:#7f93a6;font-size:11px">Alt＋滾輪縮放</small><button type="button" class="small" id="zoomIn">＋</button>
       </div>
       <div class="stage" id="stage"><canvas id="map"></canvas></div>
       <p class="note">按右邊某人的「⌖ 站位」，再點地圖上的一格。圓點＝站位、箭頭＝說話時面向哪邊；虛線連起一起聊天的人。</p>
@@ -84,7 +84,7 @@
   <script src="js/sfx.js?v=smalldeath2-20261023"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>
-  <script src="js/chat-editor.js?v=chatlisten-20261023"></script>
+  <script src="js/chat-editor.js?v=floorsort-20261023"></script>
   <script>ProjectSave.attach({
     after: ['exportFile'],
     files: [{ path: 'data/npc-chats.js', label: 'NPC 閒聊', text: () => chatExportText() }],

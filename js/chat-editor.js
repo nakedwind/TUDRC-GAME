@@ -26,8 +26,11 @@ function status(msg, err = false) { const el = $('status'); el.textContent = msg
 
 // ---- 資料 ----
 let chatData = null, chatSel = null, chatTalk = 0, chatStandPick = null;
-const baseMaps = (typeof BASE_MAPS !== 'undefined' ? BASE_MAPS : []).filter(m => m.safe !== false);
-let mapName = (baseMaps[0] || {}).name;
+// 地圖清單照樓層排，高樓層在上面：4F → 2F → 1F → B1 → B4（同一層照原本的順序；名稱前面沒寫樓層的排最後）
+const floorOf = m => { const f = /^\s*(B)?-?(\d+)/i.exec(String(m.name || '')); return f ? (f[1] ? -Number(f[2]) : Number(f[2])) : -Infinity; };
+const baseMaps = (typeof BASE_MAPS !== 'undefined' ? BASE_MAPS : []).filter(m => m.safe !== false)
+  .map((m, i) => [m, i]).sort((a, b) => (floorOf(b[0]) - floorOf(a[0])) || a[1] - b[1]).map(([m]) => m);
+let mapName = (baseMaps.find(m => m.name === '2F應變中心') || baseMaps[0] || {}).name;   // 預設打開 2F應變中心
 const curMap = () => baseMaps.find(m => m.name === mapName) || baseMaps[0];
 function loadChatData(useFile) {
   let d = null;
@@ -52,6 +55,7 @@ function tileImg(t) {
 const LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'object2', 'object3', 'object4', 'overlay', 'top'];
 const cv = $('map'), ctx = cv.getContext('2d');
 let zoom = .6, hoverCell = null, drawPending = false;
+const ZOOM_MIN = .2, ZOOM_MAX = 4;   // 地圖縮放範圍（＋／－按鈕、Alt＋滾輪）
 function drawSoon() { if (drawPending) return; drawPending = true; requestAnimationFrame(() => { drawPending = false; drawMap(); }); }
 function drawImg(img, x, y, w, h, fx, fy, rot) {
   if (!fx && !fy && !rot) { ctx.drawImage(img, x, y, w, h); return; }
@@ -132,8 +136,19 @@ cv.addEventListener('pointerdown', e => {
   saveChatData(); renderAll();
   status(chatName(id) + '站在 ' + col + ',' + row + (next ? '。接著點' + chatName(next) + '的站位' : ''));
 });
-$('zoomIn').onclick = () => { zoom = Math.min(2, +(zoom + .1).toFixed(2)); drawMap(); };
-$('zoomOut').onclick = () => { zoom = Math.max(.2, +(zoom - .1).toFixed(2)); drawMap(); };
+$('zoomIn').onclick = () => { zoom = Math.min(ZOOM_MAX, +(zoom + .1).toFixed(2)); drawMap(); };
+$('zoomOut').onclick = () => { zoom = Math.max(ZOOM_MIN, +(zoom - .1).toFixed(2)); drawMap(); };
+// Alt＋滾輪：以游標所在的位置為中心放大／縮小（方便對準格子設定站位）
+$('stage').addEventListener('wheel', e => {
+  if (!e.altKey) return;
+  e.preventDefault();
+  const r = cv.getBoundingClientRect(), px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;   // 游標在地圖上的位置（0～1）
+  const next = Math.min(ZOOM_MAX, Math.max(ZOOM_MIN, zoom * (e.deltaY < 0 ? 1.15 : 1 / 1.15)));
+  if (Math.abs(next - zoom) < .001) return;
+  zoom = +next.toFixed(3); drawMap();
+  const r2 = cv.getBoundingClientRect(), st = $('stage');   // 放大後把同一個點捲回游標底下
+  st.scrollLeft += r2.left + px * r2.width - e.clientX; st.scrollTop += r2.top + py * r2.height - e.clientY;
+}, { passive: false });
 $('showSolid').onchange = drawMap;
 
 // ---- 左邊：地圖、清單 ----
