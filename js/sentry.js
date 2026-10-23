@@ -21,10 +21,44 @@ function npcLocationTable() {
 }
 // 這個人平時在哪裡：{ map, rect?:[c0,r0,c1,r1], area? } 或 null（不在基地）
 // 受傷住院、負荷高的隊員先問 js/vitals.js（醫院、疏導室）；只換地圖，平常就不在基地的人照樣不出現
+let tinoSootheVisit = null;   // 本次遊戲中，堤諾走進疏導室後改在室內活動。
 function npcLocation(id) {
   const loc = npcLocationTable()[id] || null;
   const moved = loc && typeof vitalsLocation === 'function' ? vitalsLocation(id) : null;
-  return moved || loc;
+  if (moved) return moved;
+  if (id === 'tino' && loc && loc.map === '2F應變中心' && tinoSootheVisit) return tinoSootheVisit;
+  return loc;
+}
+
+// 使用實際地圖的連接門與尋路；到門口才換所在地，不切換玩家的地圖。
+function tinoSootheTripStep(t, dt) {
+  if (!MAP_SAFE || MAP.name !== '2F應變中心' || t.type !== 'tino' || tinoSootheVisit) return false;
+  const loc = npcLocation(t.type);
+  if (!loc || loc.map !== MAP.name || t.vitalsLeaving || t.berserk) return false;
+  const room = mapList().find(m => m.name === '2F疏導室');
+  const doors = room && (MAP.portals || []).filter(p => p.to === room.id);
+  if (!doors || !doors.length) return false;
+  if (menuSentry === t || t.rootT > 0) return true;
+  if (!t.sootheDoor || t.navFailed) {
+    const candidates = [];
+    for (const door of doors) for (const [dc, dr] of [[0, 0], [0, 1], [1, 0], [-1, 0], [0, -1]]) {
+      const c = door.c + dc, r = door.r + dr;
+      if (!sentryCellWalkable(c, r)) continue;
+      const [x, y] = center(c, r), path = buildSentryPath(t, x, y);
+      if (path) candidates.push({ x, y, cost: path.length + Math.hypot(dc, dr) * 2 });
+    }
+    candidates.sort((a, b) => a.cost - b.cost);
+    t.sootheDoor = candidates[0] || null;
+    t.navPath = null; t.navGoal = null;
+  }
+  if (!t.sootheDoor) return true;   // 門暫時被擋住時等待，不隔牆傳送。
+  t.target = null; t.seatGoal = null; t.waitT = 0;
+  if (moveSentryWithPath(t, t.sootheDoor.x, t.sootheDoor.y, TYPES[t.type].walkSpeed || 80, dt)) {
+    const entrance = (room.portals || []).find(p => p.to === MAP.id);
+    tinoSootheVisit = { map: room.name, ...(entrance ? { spawn: [entrance.c, entrance.r] } : {}) };
+    G.towers = G.towers.filter(a => a !== t);
+  }
+  return true;
 }
 
 // ---- 平時活動範圍：rect＝基地編輯器在地圖上框的方框；area＝舊寫法（NPC_AREAS 用素材圍出來的範圍）----
@@ -448,6 +482,7 @@ function campAttackerFor(t, maxDistance = Infinity) {
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
+  if (tinoSootheTripStep(t, dt)) return;
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(t, dt)) return;   // 基地：正在跟別人閒聊（js/npc-chats.js）
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
   rescueStuck(t, sentryBlocked);                      // 被卡在建築裡→自動脫困
