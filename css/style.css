@@ -2436,14 +2436,14 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 /* 衣櫃的服裝介面（js/costumes.js）：外觀跟背包同一套 */
 #wardrobe { position: absolute; inset: 10px; z-index: 28; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); animation: shop-fade .16s ease-out both; }
 #wardrobe.hidden { display: none; }
-#wardrobe .wd-card { width: min(900px, 100%); height: 100%; max-height: 600px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(143,211,255,.35); border-radius: 16px; background: linear-gradient(160deg, rgba(24,33,44,.9), rgba(10,15,22,.94)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); animation: shop-in .2s cubic-bezier(.2,.9,.3,1.15) both; }
+#wardrobe .wd-card { width: min(1040px, 100%); height: 100%; max-height: 680px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid rgba(143,211,255,.35); border-radius: 16px; background: linear-gradient(160deg, rgba(24,33,44,.9), rgba(10,15,22,.94)); box-shadow: 0 30px 80px rgba(0,0,0,.5), inset 0 1px rgba(255,255,255,.1); animation: shop-in .2s cubic-bezier(.2,.9,.3,1.15) both; }
 #wardrobe .wd-head { display: flex; align-items: center; gap: 14px; padding: 12px 18px 10px; border-bottom: 1px solid rgba(143,211,255,.13); background: linear-gradient(90deg, rgba(143,211,255,.08), transparent 60%); }
 #wardrobe .wd-title { flex: 1; }
-#wardrobe .wd-title h2 { margin: 0 0 2px; color: #f2f8ff; font-size: 20px; }
-#wardrobe .wd-title p { margin: 0; color: #8c9aa8; font-size: 12px; }
+#wardrobe .wd-title h2 { margin: 0 0 2px; color: #f2f8ff; font-size: 23px; }
+#wardrobe .wd-title p { margin: 0; color: #8c9aa8; font-size: 14px; }
 #wardrobe .wd-close { width: 32px; height: 32px; padding: 0; border: 1px solid #59616c; border-radius: 50%; background: #202730; color: #dfe7ee; cursor: pointer; font-size: 19px; line-height: 1; }
 #wardrobe .wd-close:hover { border-color: #c9d3dc; background: #2b3440; }
-#wardrobe .wd-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 230px minmax(0,1fr); }
+#wardrobe .wd-body { flex: 1; min-height: 0; display: grid; grid-template-columns: 250px minmax(0,1fr); }
 /* 胸像（跟隊員頭像一樣的裁切） */
 #wardrobe .wd-face { position: relative; flex: none; display: block; width: 30px; height: 34px; overflow: hidden; border-radius: 6px; background: radial-gradient(circle at 50% 45%, rgba(255,255,255,.1), rgba(7,10,14,.55) 70%); }
 #wardrobe .wd-face img { position: absolute; left: 50%; top: -12.8%; width: 153%; height: auto; aspect-ratio: 1; max-width: none; transform: translateX(-50%); image-rendering: pixelated; }
@@ -2451,31 +2451,31 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 /* 中：預覽 */
 #wardrobe .wd-stage { display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 12px 10px; border-right: 1px solid rgba(143,211,255,.12); background: radial-gradient(circle at 50% 55%, rgba(143,211,255,.08), transparent 65%); }
 #wardrobe .wd-mode { display: flex; gap: 4px; }
-#wardrobe .wd-mode button, #wardrobe .wd-tabs button { padding: 5px 12px; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; background: rgba(16,22,31,.75); color: #a9b6c3; cursor: pointer; font: 700 13px "Microsoft JhengHei", sans-serif; }
+#wardrobe .wd-mode button, #wardrobe .wd-tabs button { padding: 6px 15px; border: 1px solid rgba(255,255,255,.1); border-radius: 999px; background: rgba(16,22,31,.75); color: #a9b6c3; cursor: pointer; font: 700 15px "Microsoft JhengHei", sans-serif; }
 #wardrobe .wd-mode button.on, #wardrobe .wd-tabs button.on { border-color: #ffd479; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; }
-#wardrobe .wd-preview { width: 192px; height: 192px; background: transparent; border-radius: 12px; box-shadow: none; cursor: default; image-rendering: pixelated; }
-#wardrobe .wd-turn { display: flex; align-items: center; gap: 10px; color: #c9d3dc; font: 700 13px "Microsoft JhengHei", sans-serif; }
+#wardrobe .wd-preview { width: 216px; height: 216px; background: transparent; border-radius: 12px; box-shadow: none; cursor: default; image-rendering: pixelated; }
+#wardrobe .wd-turn { display: flex; align-items: center; gap: 10px; color: #c9d3dc; font: 700 15px "Microsoft JhengHei", sans-serif; }
 #wardrobe .wd-turn span { min-width: 34px; text-align: center; }
-#wardrobe .wd-turn button { width: 30px; height: 26px; border: 1px solid rgba(143,211,255,.35); border-radius: 7px; background: rgba(23,32,42,.85); color: #d8ecff; cursor: pointer; }
-#wardrobe .wd-wearing { margin: 0; color: #8c9aa8; font-size: 12px; text-align: center; line-height: 1.5; }
-#wardrobe .wd-confirm { margin-top: 4px; padding: 7px 22px; border: 1px solid #ffd479; border-radius: 999px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #2a1d05; cursor: pointer; font: 700 14px "Microsoft JhengHei", sans-serif; }   /* 確定更換：試穿的服裝真的換上 */
+#wardrobe .wd-turn button { width: 34px; height: 30px; border: 1px solid rgba(143,211,255,.35); border-radius: 7px; background: rgba(23,32,42,.85); color: #d8ecff; cursor: pointer; }
+#wardrobe .wd-wearing { margin: 0; color: #8c9aa8; font-size: 14px; text-align: center; line-height: 1.5; }
+#wardrobe .wd-confirm { margin-top: 4px; padding: 8px 26px; border: 1px solid #ffd479; border-radius: 999px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #2a1d05; cursor: pointer; font: 700 16px "Microsoft JhengHei", sans-serif; }   /* 確定更換：試穿的服裝真的換上 */
 #wardrobe .wd-confirm:hover:not(:disabled) { filter: brightness(1.08); }
 #wardrobe .wd-confirm:disabled { border-color: rgba(255,255,255,.1); background: transparent; color: #7d8996; cursor: default; }
 /* 右：衣服 */
 #wardrobe .wd-closet { min-height: 0; display: flex; flex-direction: column; }
 #wardrobe .wd-tabs { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 14px 8px; }
-#wardrobe .wd-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); align-content: start; gap: 8px; padding: 4px 14px 14px; scrollbar-color: #3d5266 transparent; }
-#wardrobe .wd-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 10px 6px 8px; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; background: rgba(23,32,42,.6); color: #dfe8ef; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
+#wardrobe .wd-grid { flex: 1; min-height: 0; overflow-y: auto; display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); align-content: start; gap: 10px; padding: 4px 14px 14px; scrollbar-color: #3d5266 transparent; }
+#wardrobe .wd-item { position: relative; display: flex; flex-direction: column; align-items: center; gap: 7px; padding: 12px 6px 22px; border: 1px solid rgba(255,255,255,.1); border-radius: 10px; background: rgba(23,32,42,.6); color: #dfe8ef; cursor: pointer; font: 700 15px "Microsoft JhengHei", sans-serif; }
 #wardrobe .wd-item:hover { border-color: rgba(143,211,255,.45); }
 #wardrobe .wd-item.on { border-color: #ffd479; box-shadow: 0 0 0 1px rgba(255,212,121,.5), 0 0 12px rgba(255,212,121,.25); }
-#wardrobe .wd-item .wd-face { width: 48px; height: 54px; }
-#wardrobe .wd-icon { display: grid; place-items: center; width: 48px; height: 48px; border-radius: 8px; background: rgba(7,10,14,.5); color: #6f7d8b; font-size: 20px; }
-#wardrobe .wd-icon img { max-width: 40px; max-height: 40px; min-width: 24px; image-rendering: pixelated; }
-#wardrobe .wd-item em { position: absolute; top: 4px; right: 5px; padding: 0 4px; border-radius: 4px; background: rgba(255,255,255,.1); color: #c9d3dc; font: 800 10px sans-serif; font-style: normal; }
-#wardrobe .wd-item i { position: absolute; bottom: 4px; right: 6px; color: #8fd3ff; font: 700 11px sans-serif; font-style: normal; }
-#wardrobe .wd-item .wd-wear { color: #9fb2c2; font: 700 10px "Microsoft JhengHei", sans-serif; }
+#wardrobe .wd-item .wd-face { width: 86px; height: 96px; }
+#wardrobe .wd-icon { display: grid; place-items: center; width: 86px; height: 86px; border-radius: 10px; background: rgba(7,10,14,.5); color: #6f7d8b; font-size: 26px; }
+#wardrobe .wd-icon img { width: 74px; height: 74px; object-fit: contain; image-rendering: pixelated; }   /* 配件圖很小（約 8～48px）：放大到填滿格子 */
+#wardrobe .wd-item em { position: absolute; top: 4px; right: 5px; padding: 0 4px; border-radius: 4px; background: rgba(255,255,255,.1); color: #c9d3dc; font: 800 12px sans-serif; font-style: normal; }
+#wardrobe .wd-item i { position: absolute; bottom: 4px; right: 7px; color: #8fd3ff; font: 700 13px sans-serif; font-style: normal; }
+#wardrobe .wd-item .wd-wear { color: #9fb2c2; font: 700 12px "Microsoft JhengHei", sans-serif; }
 #wardrobe .wd-item.wd-off { opacity: .42; cursor: not-allowed; } #wardrobe .wd-item.wd-off:hover { border-color: rgba(255,255,255,.1); }   /* 限定場合：這一邊不能穿 */
-#wardrobe .wd-empty { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; color: #7f91a5; font-size: 13px; text-align: center; white-space: nowrap; pointer-events: none; }   /* 「還沒有這個欄位的配件」：在配件區正中間 */
+#wardrobe .wd-empty { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); margin: 0; color: #7f91a5; font-size: 15px; text-align: center; white-space: nowrap; pointer-events: none; }   /* 「還沒有這個欄位的配件」：在配件區正中間 */
 #wardrobe .wd-grid { position: relative; }
 @media (prefers-reduced-motion: reduce) { #wardrobe, #wardrobe .wd-card { animation: none; } }
 
