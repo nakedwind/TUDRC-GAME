@@ -11,7 +11,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=vitals-20261023"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=outfit-confirm-20261023">
+<link rel="stylesheet" href="css/style.css?v=gift-tabs-20261023">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=nolower-20261023">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
@@ -113,7 +113,7 @@
     </div>
     <!-- 送禮選單（對話中按「送禮」打開） -->
     <div id="giftPicker" class="hidden" role="dialog" aria-labelledby="giftPickerTitle">
-      <div class="gift-head"><strong id="giftPickerTitle">送禮</strong><span>每次回基地限送一次</span><button id="giftPickerClose" type="button" aria-label="關閉（Esc）">×</button></div>
+      <div class="gift-head"><strong id="giftPickerTitle">送禮</strong><nav id="giftTabs" class="gift-tabs"></nav><span id="giftPickerLeft"></span><button id="giftPickerClose" type="button" aria-label="關閉（Esc）">×</button></div>
       <div id="giftPickerList" class="gift-list"></div>
     </div>
     <!-- 建築快捷欄與完整清單：浮在遊戲畫面左下角 -->
@@ -244,7 +244,7 @@
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js?v=tino-c-20261023"></script>  <!-- 集中管理所有角色 -->
-  <script src="data/gifts.js?v=giftlines-20261023"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
+  <script src="data/gifts.js?v=gift-tabs-20261023"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=card-consume-20261018"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=effnum-20261023"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/equipment.js?v=effnum-20261023"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
@@ -316,7 +316,7 @@
   <script src="js/backpack.js?v=nodel-20261023"></script> <!-- 9j. 背包：物品格與說明 -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
   <script src="js/squad-gear.js?v=squad1-20261023"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
-  <script src="js/gifts.js?v=giftbtn-20261023"></script> <!-- 9l. 送禮與好感度 -->
+  <script src="js/gifts.js?v=gift-tabs-20261023"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=winter-maid-battle-20261023"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=bear-20261022"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=costume-char-20261023"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
@@ -328,7 +328,7 @@
   <script src="js/rescue-dog.js?v=carry-20261023"></script>
   <script src="js/missions.js?v=vitals-20261023"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
-  <script src="js/save.js?v=esclayer-20261023"></script> <!-- 9k. 存檔、設定選單 -->
+  <script src="js/save.js?v=gift-tabs-20261023"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=basequiet-20261023"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=merge-monster-vitals-20261023"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->

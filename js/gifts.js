@@ -1,7 +1,7 @@
 // ============================================================
 //  送禮與好感度
 //  ・在基地裡和角色對話時，按「🎁 送禮」（或 G）打開禮物選單，選背包裡的零食飲料送出。
-//  ・每個人每次回到基地只能收一次禮物（出勤一次之後才能再送）。
+//  ・每個人每次回到基地最多收 GIFTS_PER_VISIT（data/gifts.js）次禮物（出勤一次之後才能再送）。
 //  ・今日想吃委託：回到基地時有幾個人想吃某樣東西（頭上冒圖示），照著送好感度加倍，還會給回憶碎片或異質碎片。
 //  ・回憶碎片集滿 3 個會自動拼成鑰匙（data/items.js 的 MEMORY_KEYS）。
 //  ・喜好、點數、等級在 data/gifts.js；收禮、委託時說的話在「對話編輯器」的「送禮與委託」（data/dialogues.js），沒寫就不說。好感度會存檔（js/save.js）。
@@ -9,7 +9,9 @@
 // ============================================================
 const favorPoints = {};        // 角色 id → 好感點數
 const giftKnown = {};          // 角色 id → { 物品 id: 反應 }（送過才知道對方喜不喜歡）
-const giftedThisVisit = new Set();   // 這次回基地已經收過禮的人
+const giftedThisVisit = new Map();   // 這次回基地收過幾次禮：角色 id → 次數
+const giftsGiven = id => giftedThisVisit.get(id) || 0;
+const giftLimitReached = id => giftsGiven(id) >= GIFTS_PER_VISIT;
 const giftPicker = document.getElementById('giftPicker');
 let giftPickerOpen = false, giftTarget = null;
 const giftRequests = {};       // 今日想吃：角色 id → 想吃的物品 id
@@ -50,12 +52,12 @@ function renderDialogueFavor() {
   box.title = f.next ? `好感度 ${f.points}／${f.next.need}` : `好感度 ${f.points}（最高等級）`;
   btn.classList.toggle('hidden', !MAP_SAFE || !!dialogueState.giftReply);   // 送禮只在基地；送完這句就先藏起來
   // ↑ 一定要是 true／false：還沒送過禮時 giftReply 是 undefined，toggle 收到 undefined 會變成「切換」，按鈕就會一次有、一次沒有
-  const done = giftedThisVisit.has(id);
+  const done = giftLimitReached(id);
   btn.disabled = done;
-  btn.innerHTML = done ? '已送過禮' : '🎁 送禮 <span>G</span>';
+  btn.innerHTML = done ? '這次已送完' : '🎁 送禮 <span>G</span>';
 }
 function onDialogueOpened(actor) {
-  const id = giftableId(actor), want = MAP_SAFE && giftRequests[id] && !giftedThisVisit.has(id) ? itemById(giftRequests[id]) : null;
+  const id = giftableId(actor), want = MAP_SAFE && giftRequests[id] && !giftLimitReached(id) ? itemById(giftRequests[id]) : null;
   const ask = want && dialogueState ? giftLine(id, 'requestAsk', want.name) : null;   // 有委託：先說想吃什麼（沒寫就不說，想吃的東西在禮物選單裡會標「想吃！」）
   if (ask) {
     dialogueState.lines = [ask, ...dialogueState.lines];
@@ -69,11 +71,27 @@ function onDialogueClosed() { closeGiftPicker(true); }
 function openGiftPicker() {
   const actor = dialogueState && dialogueState.actor, id = giftableId(actor);
   if (!actor || !MAP_SAFE || !canReceiveGifts(id) || giftPickerOpen) return;
-  if (giftedThisVisit.has(id)) { sfx('error'); return; }
+  if (giftLimitReached(id)) { sfx('error'); return; }
   finishDialogueTyping();
   giftTarget = actor; giftPickerOpen = true;
+  // 一打開先看哪一類：有委託就看想吃的那一類，不然看第一個有東西的
+  const want = giftRequests[id] && itemById(giftRequests[id]);
+  giftTab = want ? giftTabOf(want) : (GIFT_TABS.find(t => giftTabCells(id, t.id).length) || GIFT_TABS[0]).id;
   renderGiftPicker(); giftPicker.classList.remove('hidden'); sfx('menu');
   (giftPicker.querySelector('.gift-cell') || document.getElementById('giftPickerClose')).focus();
+}
+// ---- 分類：零食、飲料、服飾 ----
+const GIFT_TABS = [{ id: 'snack', name: '零食' }, { id: 'drink', name: '飲料' }, { id: 'costume', name: '服飾' }];
+let giftTab = 'snack';
+const giftTabOf = item => item.kind === 'drink' ? 'drink' : 'snack';   // 飲料以外能送的東西（giftable）都放零食
+function giftTabCells(id, tab) {
+  if (tab === 'costume') return typeof costumeGiftable === 'function' ? costumeGiftable(id) : [];
+  return giftableItems().filter(item => giftTabOf(item) === tab);
+}
+function switchGiftTab(tab) {
+  if (tab === giftTab) return;
+  giftTab = tab; sfx('button'); renderGiftPicker();
+  (giftPicker.querySelector('.gift-cell') || giftPicker.querySelector('.gift-tab.on')).focus();
 }
 function closeGiftPicker(silent = false) {
   if (!giftPickerOpen) return;
@@ -83,31 +101,38 @@ function closeGiftPicker(silent = false) {
 function renderGiftPicker() {
   const id = giftableId(giftTarget), profile = dialogueProfile(giftTarget) || { name: '？？？' };
   document.getElementById('giftPickerTitle').textContent = `送給 ${profile.name}`;
-  const want = giftRequests[id], known = giftKnown[id] || {};
-  const items = giftableItems().sort((a, b) => (b.id === want) - (a.id === want));   // 想吃的東西排第一
-  document.getElementById('giftPickerList').innerHTML = items.length ? items.map(item => {
+  document.getElementById('giftPickerLeft').textContent = `這次回基地還能送 ${GIFTS_PER_VISIT - giftsGiven(id)} 次`;
+  const want = giftRequests[id], known = giftKnown[id] || {}, wantItem = want && itemById(want);
+  document.getElementById('giftTabs').innerHTML = GIFT_TABS.map(t => {
+    const n = giftTabCells(id, t.id).length, wants = wantItem && giftTabOf(wantItem) === t.id;
+    return `<button type="button" class="gift-tab${t.id === giftTab ? ' on' : ''}" data-tab="${t.id}" aria-pressed="${t.id === giftTab}">${t.name}${n ? `<small>${n}</small>` : ''}${wants ? '<i title="想吃的東西在這裡">♥</i>' : ''}</button>`;
+  }).join('');
+  const list = document.getElementById('giftPickerList');
+  if (giftTab === 'costume') {   // 服飾：扭蛋轉到的配件、skin
+    const costumes = giftTabCells(id, 'costume');
+    list.innerHTML = costumes.length ? costumes.map(item => {
+      const r = known[item.id], tag = r ? GIFT_REACTION[r] : null;
+      return `<button type="button" class="gift-cell costume r-${item.rarity || 'N'}${r ? ' ' + r : ''}" data-costume="${item.id}" title="${item.name}（服裝，送出後${profile.name}會馬上穿上）${tag ? '｜' + tag.label : ''}">
+        <img src="${costumeIconSrc(item)}" alt=""><b>${costumeState.owned[item.id]}</b><em>${tag ? tag.icon : '👗'}</em><span>${item.name}</span></button>`;
+    }).join('') : `<div class="gift-empty">還沒有能送的服飾<small>到扭蛋機轉轉看</small></div>`;
+    return;
+  }
+  const items = giftTabCells(id, giftTab).sort((a, b) => (b.id === want) - (a.id === want));   // 想吃的東西排第一
+  const tabName = GIFT_TABS.find(t => t.id === giftTab).name;
+  list.innerHTML = items.length ? items.map(item => {
     const r = known[item.id], tag = r ? GIFT_REACTION[r] : null;
     const wanted = item.id === want;
     return `<button type="button" class="gift-cell${r ? ' ' + r : ''}${wanted ? ' wanted' : ''}" data-gift="${item.id}" title="${item.name}${wanted ? '｜想吃這個！' : tag ? '｜' + tag.label : '｜還不知道喜不喜歡'}">
       ${wanted ? '<i class="gift-want">想吃！</i>' : ''}<img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b><em>${tag ? tag.icon : '❔'}</em><span>${item.name}</span></button>`;
-  }).join('') : `<div class="gift-empty">背包裡沒有能送的東西<small>到 1 樓 HOME Mart 或販賣機買</small></div>`;
-  const costumes = typeof costumeGiftable === 'function' ? costumeGiftable(id) : [];   // 服裝排在零食飲料後面
-  if (costumes.length) {
-    const list = document.getElementById('giftPickerList');
+  }).join('') : `<div class="gift-empty">背包裡沒有${tabName}<small>到 1 樓 HOME Mart 或販賣機買</small></div>`;
+  if (wantItem && giftTabOf(wantItem) === giftTab && !items.some(item => item.id === want)) {   // 想吃的東西背包裡沒有：提示去買
     list.querySelector('.gift-empty')?.remove();
-    list.insertAdjacentHTML('beforeend', costumes.map(item => {
-      const r = known[item.id], tag = r ? GIFT_REACTION[r] : null;
-      return `<button type="button" class="gift-cell costume r-${item.rarity || 'N'}${r ? ' ' + r : ''}" data-costume="${item.id}" title="${item.name}（服裝，送出後${profile.name}會馬上穿上）${tag ? '｜' + tag.label : ''}">
-        <img src="${costumeIconSrc(item)}" alt=""><b>${costumeState.owned[item.id]}</b><em>${tag ? tag.icon : '👗'}</em><span>${item.name}</span></button>`;
-    }).join(''));
-  }
-  if (want && !items.some(item => item.id === want)) {   // 想吃的東西背包裡沒有：提示去買
-    document.getElementById('giftPickerList').insertAdjacentHTML('afterbegin', `<div class="gift-want-missing"><img src="${itemById(want)?.image}" alt=""><span>想吃：${itemById(want)?.name}<small>背包裡沒有，可以去商店買</small></span></div>`);
+    list.insertAdjacentHTML('afterbegin', `<div class="gift-want-missing"><img src="${wantItem.image}" alt=""><span>想吃：${wantItem.name}<small>背包裡沒有，可以去商店買</small></span></div>`);
   }
 }
 function giveGift(itemId) {
   const actor = giftTarget, id = giftableId(actor), item = itemById(itemId), count = supplyInventory.get(itemId) || 0;
-  if (!actor || !item || count <= 0 || giftedThisVisit.has(id)) { sfx('error'); return; }
+  if (!actor || !item || count <= 0 || giftLimitReached(id)) { sfx('error'); return; }
   // 東西從背包拿走
   if (count <= 1) supplyInventory.delete(itemId); else supplyInventory.set(itemId, count - 1);
   // 反應與好感
@@ -116,7 +141,7 @@ function giveGift(itemId) {
   const gain = GIFT_POINTS[reaction] * (wanted ? REQUEST_RULES.favorMul : 1);
   favorPoints[id] = Math.max(0, (favorPoints[id] || 0) + gain);
   (giftKnown[id] = giftKnown[id] || {})[itemId] = reaction;
-  giftedThisVisit.add(id);
+  giftedThisVisit.set(id, giftsGiven(id) + 1);
   if (typeof addStat === 'function') { addStat('gifts'); addStat('giftsTo:' + id); }   // 成就：送禮次數（全部、送給這個人）
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
@@ -140,13 +165,13 @@ function giveGift(itemId) {
 // 送服裝：對方馬上穿上，好感照喜好＋稀有度
 function giveCostumeGift(costumeId) {
   const actor = giftTarget, id = giftableId(actor), item = typeof costumeItem === 'function' && costumeItem(costumeId);
-  if (!actor || !item || giftedThisVisit.has(id) || !costumeGive(id, costumeId)) { sfx('error'); return; }
+  if (!actor || !item || giftLimitReached(id) || !costumeGive(id, costumeId)) { sfx('error'); return; }
   let reaction = giftReaction(id, costumeId);
   if (reaction === 'normal') reaction = COSTUME_GIFT.reaction;   // 沒特別寫的服裝：預設「喜歡」
   const before = favorInfo(id), gain = GIFT_POINTS[reaction] + (reaction === 'dislike' ? 0 : COSTUME_GIFT.rarityBonus[item.rarity || 'N'] || 0);
   favorPoints[id] = Math.max(0, (favorPoints[id] || 0) + gain);
   (giftKnown[id] = giftKnown[id] || {})[costumeId] = reaction;
-  giftedThisVisit.add(id);
+  giftedThisVisit.set(id, giftsGiven(id) + 1);
   if (typeof addStat === 'function') { addStat('gifts'); addStat('giftsTo:' + id); }   // 成就：送禮次數（全部、送給這個人）
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
@@ -221,7 +246,7 @@ function drawRequestBubbles(ctx) {
   const now = performance.now() / 1000;
   for (const actor of [...(G.npcs || []), ...(G.towers || [])]) {
     const id = giftableId(actor), want = giftRequests[id];
-    if (!want || giftedThisVisit.has(id)) continue;
+    if (!want || giftLimitReached(id)) continue;
     const item = itemById(want); if (!item) continue;
     const img = requestImgCache[item.image] || (requestImgCache[item.image] = Object.assign(new Image(), { src: item.image }));
     // 放在頭的右上方（不要擋到名字和平常的對話泡泡）
@@ -245,11 +270,12 @@ function onGiftNewGame() {
 document.getElementById('dialogueGift').addEventListener('click', openGiftPicker);
 document.getElementById('giftPickerClose').addEventListener('click', () => closeGiftPicker());
 giftPicker.addEventListener('click', e => {
+  const tab = e.target.closest('[data-tab]'); if (tab) { switchGiftTab(tab.dataset.tab); return; }
   const cell = e.target.closest('[data-gift]'); if (cell) { giveGift(cell.dataset.gift); return; }
   const outfit = e.target.closest('[data-costume]'); if (outfit) { giveCostumeGift(outfit.dataset.costume); return; }
 });
 document.getElementById('dialogueFavor').addEventListener('animationend', e => e.currentTarget.classList.remove('pulse'));
-// 鍵盤：對話中按 G 送禮；禮物選單打開時，方向鍵選、Enter 送出、Esc 關閉（不會關掉對話框）
+// 鍵盤：對話中按 G 送禮；禮物選單打開時，左右鍵選、上下鍵換分類、Enter 送出、Esc 關閉（不會關掉對話框）
 window.addEventListener('keydown', e => {
   const k = e.key.toLowerCase();
   if (giftPickerOpen) {
@@ -258,7 +284,9 @@ window.addEventListener('keydown', e => {
     const cells = [...giftPicker.querySelectorAll('.gift-cell, #giftGoShop, #giftPickerClose')];
     const i = cells.indexOf(document.activeElement);
     const step = { arrowleft: -1, arrowright: 1 }[k];   // 一排橫向：左右鍵選
-    if (step) { e.preventDefault(); cells[Math.max(0, Math.min(cells.length - 1, (i < 0 ? 0 : i) + step))]?.focus(); }
+    const tabStep = { arrowup: -1, arrowdown: 1 }[k];   // 上下鍵：換分類
+    if (tabStep) { e.preventDefault(); const t = GIFT_TABS.findIndex(x => x.id === giftTab); switchGiftTab(GIFT_TABS[(t + tabStep + GIFT_TABS.length) % GIFT_TABS.length].id); }
+    else if (step) { e.preventDefault(); cells[Math.max(0, Math.min(cells.length - 1, (i < 0 ? 0 : i) + step))]?.focus(); }
     else if ((k === 'enter' || k === ' ') && document.activeElement?.closest('#giftPicker')) { e.preventDefault(); document.activeElement.click(); }
     return;
   }
