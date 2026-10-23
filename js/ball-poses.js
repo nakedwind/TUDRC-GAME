@@ -1,7 +1,7 @@
 /* ===== 球球（搜救犬）的額外姿勢：坐下、睡在自己的床上 =====
    ・停下來超過 sitAfter 秒就坐下：安全區 ballA_sit.png、戰鬥區 ballB_sit.png（images/character/ball/；圖是朝左，朝右時左右翻）
    ・安全區閒逛時，有機率走到「球球的床」（基地編輯器的素材 tile_eoc_ball_bed）睡一陣子；
-     睡覺時在床的位置畫 ballsleep.png（狗躺在床上的整張圖，蓋住原本的床）
+     睡覺時在床的位置畫 ballsleep.png（狗躺在床上的整張圖），原本的床先藏起來（js/maploader.js 問 ballBedHidden）
    ・走路只用 Walking01、02 兩張：js/game.js 的 pickCharacterFrame（TWO_FRAME_WALK）
 */
 // sitAfter：停幾秒才坐下；sleepChance：每次挑新的閒逛點時去睡的機率；sleep：睡幾秒（最短、最長）；
@@ -22,12 +22,12 @@ function ballBeds() {
   const t = mapTileById(BALL_BED_ID), beds = [];
   if (t) {
     const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
-    const add = (x0, y0, fx) => beds.push({ x0, y0, w, h, fx: !!fx, x: x0 + w / 2, y: y0 + h - 6 });
+    const add = (x0, y0, fx, src) => beds.push({ x0, y0, w, h, fx: !!fx, x: x0 + w / 2, y: y0 + h - 6, src });   // src＝那張貼圖，或格子的 'c,r'
     for (const layer of Object.values(MAP.layers || {})) for (const [key, id] of Object.entries(layer)) {
       if (id !== BALL_BED_ID) continue;
-      const [c, r] = key.split(',').map(Number); add(c * CELL, r * CELL);
+      const [c, r] = key.split(',').map(Number); add(c * CELL, r * CELL, false, key);
     }
-    for (const s of MAP.stamps || []) if (s.id === BALL_BED_ID && !mapStampTurn(s)) add(s.c * CELL + (s.ox || 0), s.r * CELL + (s.oy || 0), s.fx);
+    for (const s of MAP.stamps || []) if (s.id === BALL_BED_ID && !mapStampTurn(s)) add(s.c * CELL + (s.ox || 0), s.r * CELL + (s.oy || 0), s.fx, s);
   }
   ballBedCache = beds; ballBedCacheFor = MAP;
   return beds;
@@ -62,6 +62,12 @@ function ballBedStep(npc, dt) {
   return true;
 }
 const ballSleeping = npc => !!(npc && npc.ballSleep && !npc.ballSleep.going);
+// 這張床（貼圖，或格子的 'c,r'＋素材 id）上正睡著球球：原本的床不畫，免得跟睡覺圖疊成兩張床（js/maploader.js）
+function ballBedHidden(src, id) {
+  if (id != null && id !== BALL_BED_ID) return false;
+  const ball = typeof G !== 'undefined' && G && G.npcs && G.npcs.find(n => n.id === 'ball');
+  return ballSleeping(ball) && ball.ballSleep.bed.src === src;
+}
 // 排前後用的 y（js/render.js）：睡覺圖底邊對齊床底，就用床底；其他時候回傳 null 照一般角色算
 const ballSortY = npc => ballSleeping(npc) ? npc.ballSleep.bed.y0 + npc.ballSleep.bed.h : null;
 

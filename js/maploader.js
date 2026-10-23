@@ -460,6 +460,7 @@ function drawMapTileImg(ctx, id, x, y, layer='top') {
   const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(id,c,r,layer):null;
   if(display===false)return;
   if(display)t=display;
+  if (typeof ballBedHidden === 'function' && ballBedHidden(c + ',' + r, id)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, CELL, CELL); return; }
   const img = tileImage(t);
   if (img) {
@@ -492,6 +493,7 @@ function destroyedBaseDisplayTile(s, t) {
 function drawMapStampImg(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
+  if (typeof ballBedHidden === 'function' && ballBedHidden(s)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
   let t = mapTileById(s.id); if (!t) return;
   t = destroyedBaseDisplayTile(s, t);
   if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）
@@ -734,7 +736,8 @@ function occluderStateSig(x) {
   return (G.mapDestroyed && G.mapDestroyed.has(s) ? 'x' : '') + ((typeof doorStampOpen === 'function' && doorStampOpen(s)) ? 'o' : '')
     + ((typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s)) ? 'a' : '')
     + (destroyedBaseDisplayTile(s, mapTileById(s.id) || {}).id || '')
-    + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '');
+    + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
+    + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '');
 }
 function occluderImageReady(x) {
   return !!tileImage(mapTileById(x.kind === 'cell' ? x.id : x.stamp.id));
