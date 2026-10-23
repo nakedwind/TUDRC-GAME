@@ -20,7 +20,12 @@ function npcLocationTable() {
   return npcLocationData[usable.length ? usable[usable.length - 1] : all[0]] || {};
 }
 // 這個人平時在哪裡：{ map, rect?:[c0,r0,c1,r1], area? } 或 null（不在基地）
-function npcLocation(id) { return npcLocationTable()[id] || null; }
+// 受傷住院、負荷高的隊員先問 js/vitals.js（醫院、疏導室）；只換地圖，平常就不在基地的人照樣不出現
+function npcLocation(id) {
+  const loc = npcLocationTable()[id] || null;
+  const moved = loc && typeof vitalsLocation === 'function' ? vitalsLocation(id) : null;
+  return moved || loc;
+}
 
 // ---- 平時活動範圍：rect＝基地編輯器在地圖上框的方框；area＝舊寫法（NPC_AREAS 用素材圍出來的範圍）----
 const homeAreaCache = { map: null, areas: {} };
@@ -157,6 +162,7 @@ function spawnSentries() {
     const t = { kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() };
     if (spec.guide && typeof initGuideSP === 'function') initGuideSP(t);
     if (!MAP_SAFE && typeof applySortieBuff === 'function') applySortieBuff(t);   // 出勤補給（js/sortie-supply.js）
+    if (typeof applyVitals === 'function') applyVitals(t);   // 用現在的 HP、負荷（不會每張地圖補滿，js/vitals.js）
     G.towers.push(t);
     const configuredSpawn = placeAtConfiguredSpawn(t, type);
     if (!configuredSpawn) placeInHomeArea(t, type);   // 未指定出生格時，沿用活動範圍內的隨機出生
@@ -505,7 +511,7 @@ function updateSentry(t, dt) {
   // 嚮導身上的醫療包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
   if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
   // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
-  if ((t.type === 'eldrin' || ownSpec.careFollow) && t.mode !== 'goto' && t.mode !== 'escort') {   // careFollow：塔納也一樣
+  if (!MAP_SAFE && (t.type === 'eldrin' || ownSpec.careFollow) && t.mode !== 'goto' && t.mode !== 'escort') {   // careFollow：塔納也一樣；應變中心裡不跟（受傷的人去醫院休養，js/vitals.js）
     const sentinels = G.towers.filter(o =>
       o !== t && o.hp > 0 && !TYPES[o.type].guide &&
       (o.berserk || (o.taint || 0) >= 10 || o.maxhp - o.hp >= 10)
@@ -711,6 +717,7 @@ function npcSeatStep(a, dt, speed) {
 }
 
 function updateWanderer(npc, dt) {
+  if (typeof ashBusy === 'function' && ashBusy(npc)) return;   // 亞許正在疏導室幫隊員疏導（js/vitals.js）
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(npc, dt)) return;   // 正在跟別人閒聊（js/npc-chats.js）
   if (npcSeatStep(npc, dt, 65)) { updateNpcTalk(npc, dt); return; }   // 坐著或正走向椅子
   rescueStuck(npc, sentryBlocked);
@@ -774,7 +781,8 @@ function openSentryMenu(t, silent) {
     '<button data-act="hold">📍 在原地巡邏</button>' +
     '<button data-act="goto">🎯 指派位置巡邏</button>' +
     (MAP_SAFE ? '' : '<button data-act="escort">🛡️ 跟隨護衛部隊長' + (t.mode === 'escort' ? '（護衛中）' : '') + '</button>') +
-    (MAP_SAFE && typeof canTalk === 'function' && canTalk(t) ? '<button data-act="talk">💬 對話</button>' : '');   // 基地裡、有「找他說話（基地）」的台詞才有
+    (MAP_SAFE && typeof canTalk === 'function' && canTalk(t) ? '<button data-act="talk">💬 對話</button>' : '') +   // 基地裡、有「找他說話（基地）」的台詞才有
+    (typeof canSendToHospital === 'function' && canSendToHospital(t) ? '<button data-act="hospital">🏥 去醫院休息</button>' : '');   // 基地裡、HP 沒滿（js/vitals.js）
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
   const rect = cv.getBoundingClientRect();
@@ -796,6 +804,7 @@ function sentryMenuAct(act) {
   else if (act === 'hold') { sfx('button'); t.mode = 'hold'; t.guardSummoned = false; t.guardBase = null; t.anchor = { x: t.x, y: t.y }; t.target = null; sentryStatus(t, '在原地巡邏'); }
   else if (act === 'goto') { sfx('button'); assigning = t; closeSentryMenu(); sentryStatus(t, '點地圖指定巡邏位置（Esc 取消）', '#ffd479'); return; }
   else if (act === 'talk') { openDialogue(t); return; }
+  else if (act === 'hospital') { sfx('button'); sendToHospital(t); }
   else if (act === 'escort') { sfx('button'); setSentryEscort(t); }
   closeSentryMenu();
 }

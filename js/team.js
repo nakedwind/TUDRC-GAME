@@ -181,7 +181,7 @@ function closeCaptainImpression() { if (impressionPanel) impressionPanel.classLi
 function squadCard(actor, safe) {
   if (actor.noncombat) return supportCard(actor);
   const spec = TYPES[actor.type]; if (!spec) return '';
-  const live = actor.live;
+  const live = actor.live || (typeof vitalsOf === 'function' ? vitalsOf(actor.type) : null);   // 應變中心：看記住的 HP、負荷（不在這張地圖的人也看得到，js/vitals.js）
   const hp = live ? Math.max(0, Math.round(live.hp)) : spec.hp, maxhp = live ? live.maxhp : spec.hp;
   const taint = live ? Math.max(0, Math.min(100, Math.round(live.taint || 0))) : 0;
   const condition = memberCondition(actor, safe);

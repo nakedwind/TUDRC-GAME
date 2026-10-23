@@ -14,6 +14,7 @@
     'tudrc_costumes_v1',   // 擁有的服裝、每個人穿什麼（js/costumes.js）
     'tudrc_bestiary_v1',   // 怪物圖鑑：每種怪物消滅過幾次（js/bestiary.js）
     'tudrc_quickslots_v1',   // 下方快捷欄 1～0 放了什麼（js/quick-slots.js）
+    'tudrc_vitals_v1',   // 溫特和隊員的 HP、負荷、住院（js/vitals.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;

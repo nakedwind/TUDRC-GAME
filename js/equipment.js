@@ -839,7 +839,8 @@ function downedTeammateNear() {
 }
 // 現在頭上有選項的那位隊員（暴走的優先，再來倒下的，最後是旁邊的隊員）
 function promptTeammate() {
-  if (!G || !G.player || MAP_SAFE || G.player.sitting) return null;
+  if (!G || !G.player || G.player.sitting) return null;
+  if (MAP_SAFE && !(typeof onSootheRoom === 'function' && onSootheRoom())) return null;   // 應變中心裡只有 2F疏導室可以疏導隊員（js/vitals.js）
   const urgent = typeof urgentSootheTarget === 'function' && urgentSootheTarget(); if (urgent) return urgent;
   const down = downedTeammateNear(); if (down) return down;
   const a = typeof interactionNearPlayer === 'function' && interactionNearPlayer();
@@ -849,7 +850,7 @@ function promptTeammate() {
 // 互動的第一優先：旁邊的隊員現在需要治療（有對應的急救包）或疏導（有污染、暴走）（js/game.js、js/render.js）
 function teammateActionTarget() {
   const t = promptTeammate(); if (!t) return null;
-  return aidUsableOn(t) || (t.hp > 0 && (t.taint > 0 || t.berserk)) ? t : null;
+  return (!MAP_SAFE && aidUsableOn(t)) || (t.hp > 0 && (t.taint > 0 || t.berserk)) ? t : null;   // 疏導室裡只有疏導（急救包在戰鬥區才能用）
 }
 function aidKeyTarget() { const t = promptTeammate(); return t && aidUsableOn(t) && !firstAid.channel ? t : null; }
 // 按 C：疏導頭上有「C 疏導」的那位隊員（暴走、負荷很高的優先，見 promptTeammate）；疏導中再按一次 C＝取消

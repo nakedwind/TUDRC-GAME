@@ -1675,6 +1675,10 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #dialogueWorkshop:hover { border-color: #ffd479; background: rgba(140,100,30,.5); }
 #dialoguePractice { padding: 6px 11px; border: 1px solid rgba(143,211,255,.45); border-radius: 8px; background: rgba(30,75,110,.35); color: #d6efff; cursor: pointer; font-size: 14px; }   /* 塔納：開始訓練（js/practice.js） */
 #dialoguePractice:hover { border-color: #8fd3ff; background: rgba(40,95,140,.5); }
+#dialogueHospital { padding: 6px 11px; border: 1px solid rgba(255,150,150,.45); border-radius: 8px; background: rgba(110,40,45,.35); color: #ffd9d9; cursor: pointer; font-size: 14px; }   /* 受傷的隊員：去醫院休息（js/vitals.js） */
+#dialogueHospital:hover { border-color: #ff9a9a; background: rgba(140,50,55,.5); }
+#dialogueAshSoothe { padding: 6px 11px; border: 1px solid rgba(176,196,214,.5); border-radius: 8px; background: rgba(60,75,95,.4); color: #e4edf7; cursor: pointer; font-size: 14px; }   /* 疏導室的亞許：請亞許疏導（js/vitals.js） */
+#dialogueAshSoothe:hover { border-color: #c8d8ea; background: rgba(80,98,120,.55); }
 /* ===== 諾亞的開發工坊 ===== */
 #workshop { position: absolute; inset: 10px; z-index: 30; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); font-family: "Microsoft JhengHei", sans-serif; }
 #workshop.hidden { display: none; }

@@ -328,6 +328,7 @@ function openDialogue(actor) {
   if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);
   if (typeof onDialogueOpenedPractice === 'function') onDialogueOpenedPractice(actor);   // 塔納：開始訓練按鈕（js/practice.js）
   if (typeof onDialogueOpenedWorkshop === 'function') onDialogueOpenedWorkshop(actor);   // 諾亞：開發工坊按鈕（js/equipment.js）   // 好感度、送禮按鈕（js/gifts.js）
+  if (typeof onDialogueOpenedVitals === 'function') onDialogueOpenedVitals(actor);   // 受傷的隊員：去醫院休息；疏導室的亞許：請亞許疏導（js/vitals.js）
 }
 // 不是跟角色說話的對話框（海報、告示…）：name＝名稱欄、image＝左邊的圖、lines＝一句一句的文字
 function openTextDialogue({ name, image, lines, kind = 'text' }) {
@@ -337,7 +338,7 @@ function openTextDialogue({ name, image, lines, kind = 'text' }) {
   closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   dialoguePortrait.src = image || ''; dialoguePortrait.alt = name || '';
   dialoguePortrait.parentElement.dataset.char = kind;   // css：整張圖縮進框裡（不是裁半身像）
-  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice']) document.getElementById(id)?.classList.add('hidden');
+  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueHospital', 'dialogueAshSoothe']) document.getElementById(id)?.classList.add('hidden');
   document.getElementById('dialogueFavor')?.classList.add('hidden');
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
@@ -1021,6 +1022,7 @@ function newGame() {
   if (typeof onGiftNewGame === 'function' && !(typeof practiceOn === 'function' && practiceOn())) onGiftNewGame();   // 出勤後大家又可以收禮
   if (typeof rememberSanitySP === 'function') rememberSanitySP();   // 換地圖前先記住目前的 SP（js/sanity.js）
   if (typeof rememberGuideSP === 'function') rememberGuideSP();
+  if (typeof rememberVitals === 'function') rememberVitals();   // 換地圖前記住溫特和隊員的 HP、負荷（js/vitals.js）
   if (typeof resetSmilers === 'function') resetSmilers();   // 黑暗中的笑臉（js/smiler.js）
   if (typeof onSortieNewGame === 'function' && !(typeof practiceOn === 'function' && practiceOn())) onSortieNewGame();   // 出勤時吃掉補給、回基地清掉效果（js/sortie-supply.js）
   setNpcArrangeMode(false);
@@ -1049,11 +1051,13 @@ function newGame() {
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
+  if (typeof arriveVitals === 'function') arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
   if (typeof achieveOnSortie === 'function') achieveOnSortie();   // 成就：同時帶著○○出勤
   spawnWanderers();     // 場景 NPC 只會在亮處自由走動
   const [px, py] = playerSpawnPos();
   G.player = { x: px, y: py, hp: PLAYER.hp ?? 100, maxhp: PLAYER.hp ?? 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
+  if (typeof afterVitalsSpawn === 'function') afterVitalsSpawn();   // 溫特的 HP 帶到這張地圖、住院的隊員躺上病床（js/vitals.js）
   updateCamera();
   if (typeof restoreSanitySP === 'function') restoreSanitySP();   // SP 帶到這張地圖，不補滿（js/sanity.js）
   updateHUD();
@@ -2236,6 +2240,7 @@ function update(dt) {
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
   if (typeof updateDarkDrain === 'function') updateDarkDrain(dt);   // 站在全黑的地方：SP 慢慢下降（js/sanity.js）
   if (typeof updateChannel === 'function') updateChannel(dt);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
+  if (typeof updateVitals === 'function') updateVitals(dt);   // 應變中心：HP、SP 慢慢恢復，醫院病床上恢復得快（js/vitals.js）
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);

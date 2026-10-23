@@ -22,17 +22,19 @@ function missionStatus(m) {
 }
 // 下一個要打的任務（還沒控制、已開放的第一個）
 const nextMission = () => MISSIONS.find(m => !missionCleared(m) && missionOpen(m)) || null;
-// 亞許有沒有新任務要報告
+// 通訊員（艾德林，data/missions.js 的 MISSION_BASE.briefer）有沒有新任務要報告
 const briefLines = m => (typeof dialogueLines === 'function' && dialogueLines(MISSION_BASE.briefer, 'brief_' + m.id)) || [];   // 對話編輯器裡的「報告任務」
 const briefPending = () => { const m = nextMission(); return m && !missionState.briefed.includes(m.id) && briefLines(m).length ? m : null; };   // 沒填報告台詞的任務：不用報告
-const missionBriefReady = actor => !!(actor && actor.id === MISSION_BASE.briefer && briefPending());
-const brieferNpc = () => (G && G.npcs || []).find(n => n.id === MISSION_BASE.briefer) || null;
+// 通訊員可能是場景 NPC（用 id）或隊員（用 type，例如艾德林）
+const isBriefer = actor => !!actor && (actor.kind === 'tower' ? actor.type : actor.id) === MISSION_BASE.briefer;
+const missionBriefReady = actor => isBriefer(actor) && !!briefPending();
+const brieferNpc = () => (G ? [...(G.npcs || []), ...(G.towers || [])] : []).find(isBriefer) || null;
 const onBaseMap = () => MAP_SAFE && MAP && sameMapId(MAP.id, MISSION_BASE.map);
 
-// ---- 和亞許對話：有新任務就先報告任務（game.js 的 openDialogue 呼叫）----
+// ---- 和通訊員對話：有新任務就先報告任務（game.js 的 openDialogue 呼叫）----
 function missionDialogueLines(actor) {
   const m = briefPending();
-  if (!m || !actor || actor.id !== MISSION_BASE.briefer) return null;
+  if (!m || !isBriefer(actor)) return null;
   missionState.briefed.push(m.id); saveMissions();
   return briefLines(m);   // briefPending 已經確認有台詞
 }

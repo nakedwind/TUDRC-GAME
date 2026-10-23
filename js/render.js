@@ -751,7 +751,7 @@ const TOWER_PROMPT_STYLE = {
 };
 function drawTowerPrompts(actor, topY) {
   if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在疏導／急救／包紮：頭上換成進度條，不顯示選項
-  const canAid = typeof aidUsableOn === 'function' ? aidUsableOn(actor) : true;
+  const canAid = !MAP_SAFE && (typeof aidUsableOn === 'function' ? aidUsableOn(actor) : true);   // 疏導室（安全區）裡只有「C 疏導」
   const items = actor.hp <= 0 ? [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }]   // 由上往下
     : [{ kind: 'firstaid', label: '急救', key: canAid ? 'F' : '', off: !canAid }, { kind: 'soothe', label: '疏導', key: 'C', off: !(actor.taint > 0 || actor.berserk) }].filter(it => !it.off);   // 現在用不到的選項（不需要補血、不需要疏導）不顯示
   if (!items.length) return;   // 兩個都用不到：頭上什麼都不出現

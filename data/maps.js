@@ -3501,7 +3501,7 @@ const BATTLE_MAPS = [
         "id": "tile_mr4czvpx",
         "c": 29,
         "r": 23,
-        "layer": "overlay",
+        "layer": "top",
         "ox": 0,
         "oy": 0
       },
@@ -5482,6 +5482,20 @@ const BATTLE_MAPS = [
         "r": 32,
         "layer": "object3",
         "circuit": 2
+      },
+      {
+        "id": "tile_field_camp_bed",
+        "c": 26,
+        "r": 55,
+        "layer": "overlay",
+        "ox": 30
+      },
+      {
+        "id": "tile_field_camp_bed",
+        "c": 28,
+        "r": 55,
+        "layer": "overlay",
+        "ox": 30
       }
     ],
     "solid": [
@@ -11037,38 +11051,6 @@ const BATTLE_MAPS = [
             1
           ],
           [
-            0,
-            2
-          ],
-          [
-            10,
-            2
-          ],
-          [
-            0,
-            3
-          ],
-          [
-            10,
-            3
-          ],
-          [
-            0,
-            4
-          ],
-          [
-            10,
-            4
-          ],
-          [
-            0,
-            5
-          ],
-          [
-            10,
-            5
-          ],
-          [
             10,
             6
           ],
@@ -11209,6 +11191,21 @@ const BATTLE_MAPS = [
             4
           ]
         ]
+      },
+      {
+        "id": "tile_field_camp_bed_v",
+        "c": 22,
+        "r": 25,
+        "layer": "top",
+        "ox": 10,
+        "oy": 6
+      },
+      {
+        "id": "tile_field_camp_bed_v",
+        "c": 22,
+        "r": 27,
+        "layer": "floor",
+        "ox": 10
       }
     ],
     "solid": [
