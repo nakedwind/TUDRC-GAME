@@ -5488,14 +5488,16 @@ const BATTLE_MAPS = [
         "c": 26,
         "r": 55,
         "layer": "overlay",
-        "ox": 30
+        "ox": 30,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_field_camp_bed",
         "c": 28,
         "r": 55,
         "layer": "overlay",
-        "ox": 30
+        "ox": 30,
+        "sortDepth": 1.5
       }
     ],
     "solid": [
@@ -11189,6 +11191,22 @@ const BATTLE_MAPS = [
           [
             9,
             4
+          ],
+          [
+            10,
+            2
+          ],
+          [
+            10,
+            3
+          ],
+          [
+            10,
+            4
+          ],
+          [
+            10,
+            5
           ]
         ]
       },
@@ -12721,7 +12739,8 @@ const BATTLE_MAPS = [
         "37,6": "tile_mr4czvpx",
         "37,5": "tile_mr4czvpx",
         "37,4": "tile_mr4czvpx"
-      }
+      },
+      "object5": {}
     },
     "stamps": [
       {
@@ -14330,10 +14349,6 @@ const BATTLE_MAPS = [
             3
           ],
           [
-            5,
-            5
-          ],
-          [
             6,
             5
           ],
@@ -14348,9 +14363,47 @@ const BATTLE_MAPS = [
           [
             9,
             5
+          ],
+          [
+            6,
+            6
+          ],
+          [
+            7,
+            6
+          ],
+          [
+            8,
+            6
+          ],
+          [
+            5,
+            5
+          ],
+          [
+            5,
+            6
           ]
         ],
         "oy": 30
+      },
+      {
+        "id": "tile_field_camp_bed",
+        "c": 5,
+        "r": 29,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 20,
+        "sortDepth": 1.5
+      },
+      {
+        "id": "tile_field_camp_bed",
+        "c": 7,
+        "r": 29,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 20,
+        "sortDepth": 1.5
       }
     ],
     "solid": [
@@ -14727,6 +14780,52 @@ const BATTLE_MAPS = [
     "portals": [],
     "cols": 40,
     "rows": 32,
-    "spawnZone": []
+    "spawnZone": [],
+    "layerOrder": [
+      {
+        "id": "floor",
+        "name": "🟫 地板"
+      },
+      {
+        "id": "ground",
+        "name": "🌿 地面裝飾"
+      },
+      {
+        "id": "ground2",
+        "name": "🍂 地面裝飾 2"
+      },
+      {
+        "id": "ground3",
+        "name": "🩹 地面裝飾 3"
+      },
+      {
+        "id": "object",
+        "name": "📦 物件"
+      },
+      {
+        "id": "object2",
+        "name": "🧰 物件 2"
+      },
+      {
+        "id": "object3",
+        "name": "🪑 物件 3"
+      },
+      {
+        "id": "object4",
+        "name": "🚧 物件 4"
+      },
+      {
+        "id": "overlay",
+        "name": "🎯 物件裝飾"
+      },
+      {
+        "id": "top",
+        "name": "☁️ 上層"
+      },
+      {
+        "id": "object5",
+        "name": "行軍床"
+      }
+    ]
   }
 ];

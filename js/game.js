@@ -1883,6 +1883,7 @@ function update(dt) {
     else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
     else if (t.dazeT > 0 && t.hp > 0) { t.dazeT -= dt; t.moving = false; t.navPath = null; }   // 被閃光彈閃到、被雷電彈電到：暈一下（js/special-guns.js）
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
+    else if (!MAP_SAFE && typeof campBedStep === 'function' && campBedStep(t, dt)) {}   // 殘血：走回營地、躺行軍床休息（js/camp-beds.js）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
     avoidAcidPools(t, dt);   // 被腐蝕池推開（阿瓦倫本人免疫、不避）
     avoidOilFires(t, dt, Math.hypot(t.x - ox, t.y - oy) > .3);    // 被火海推開（js/oil-barrels.js 的火）；這幀有沒有在走
@@ -1925,6 +1926,7 @@ function update(dt) {
     if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
     if (t.sleepT > 0 || t.dazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著、暈眩：不攻擊
     if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
+    if (typeof campBedResting === 'function' && campBedResting(t)) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 躺在行軍床上休息：不攻擊、不疏導（js/camp-beds.js）
     if (spec.guide) updateGuideSP(t, dt);
     if (t.soothingT > 0) {   // 疏導施法計時；期間嚮導和被疏導的隊員身邊飄出嚮導顏色的小光點（js/attack-fx.js）
       t.soothingT = Math.max(0, t.soothingT - dt);
@@ -2241,6 +2243,7 @@ function update(dt) {
   if (typeof updateDarkDrain === 'function') updateDarkDrain(dt);   // 站在全黑的地方：SP 慢慢下降（js/sanity.js）
   if (typeof updateChannel === 'function') updateChannel(dt);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
   if (typeof updateVitals === 'function') updateVitals(dt);   // 應變中心：HP、SP 慢慢恢復，醫院病床上恢復得快（js/vitals.js）
+  if (typeof updateCampBeds === 'function') updateCampBeds(dt);   // 戰鬥地圖：殘血的隊員回營地躺行軍床、溫特躺床（js/camp-beds.js）
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
