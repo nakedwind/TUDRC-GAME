@@ -72,7 +72,7 @@ const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid'
 // 腎上腺素（道具；快捷欄或背包使用）：speed 跑速加成、dur 持續秒數、side 藥效退了變慢幾秒、slow 變慢多少
 const ADRENALINE = { speed: .45, dur: 8, side: 2, slow: .3 };
 // 急救包（道具，按 H）：heal 治療量、time 處理傷口要站著幾秒、reach 幾格內的隊員
-const FIRST_AID = { heal: 60, time: 2.5, reach: 1.8, reviveHp: .3 };   // time：急救要幾秒（進度條跑完才算成功）   // reviveHp：異質急救包救回倒下的隊員時，HP 變成幾成
+const FIRST_AID = { heal: 30, time: 2.5, reach: 1.8, reviveHp: .3 };   // time：急救要幾秒（進度條跑完才算成功）   // reviveHp：異質急救包救回倒下的隊員時，HP 變成幾成
 
 // 武器升級（找諾亞）：Lv1 是原本的樣子；cost：[升到 Lv2, 升到 Lv3, 升到 Lv4, 升到 Lv5]
 // 測試用：true＝所有槍都解鎖，每次開遊戲彈藥補滿（測完改成 false）

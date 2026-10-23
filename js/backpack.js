@@ -107,14 +107,31 @@ function renderBackpack() {
   const columns = window.innerWidth <= 560 ? 4 : window.innerWidth <= 900 ? 5 : 7;
   const slots = Math.ceil(Math.max(BAG_MIN_SLOTS, items.length) / columns) * columns;
   if (backpackTab === WEAPON_TAB.id) { renderWeaponGrid(items, columns); renderBackpackDetail(); return; }
-  let html = items.map(item => item.bullet ? bulletCellHtml(item) : item.gear ? `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${equipTier(item.lv)}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
-      ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn && !item.weapon ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}<span class="bag-cell-name">${item.name}</span></button>` : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${supplyInventory.get(item.id)}" aria-pressed="${item.id === backpackSel}">
+  if (backpackTab === GEAR_TAB.id) { renderGearGrid(items, columns); renderBackpackDetail(); return; }
+  let html = items.map(item => item.bullet ? bulletCellHtml(item) : item.gear ? gearCellHtml(item) : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${supplyInventory.get(item.id)}" aria-pressed="${item.id === backpackSel}">
       <img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b><span class="bag-cell-name">${item.name}</span></button>`).join('');
   for (let i = items.length; i < slots; i++) html += '<span class="bag-cell empty" aria-hidden="true"></span>';
   backpackGrid.classList.add('no-anim');   // 重畫時不要重播滑鼠下那格的浮起動畫
   backpackGrid.innerHTML = html;
   requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
   renderBackpackDetail();
+}
+function gearCellHtml(item) {
+  return `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${equipTier(item.lv)}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
+      ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn && !item.weapon ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}<span class="bag-cell-name">${item.name}</span></button>`;
+}
+// ---- 防具分頁：依部位分成頭部、上身、下身、隨身物品，每一類自己一段（還沒有的部位也留一排空格）----
+function renderGearGrid(items, columns) {
+  let html = '';
+  for (const [kind, name] of Object.entries(GEAR_KIND_NAME)) {
+    const group = items.filter(g => g.gear.kind === kind);
+    html += `<p class="bag-weapon-hint bag-gear-group">${name} <small>${group.length} 件</small></p>` + group.map(gearCellHtml).join('');
+    const total = Math.max(1, Math.ceil(group.length / columns)) * columns;
+    for (let i = group.length; i < total; i++) html += '<span class="bag-cell empty" aria-hidden="true"></span>';
+  }
+  backpackGrid.classList.add('no-anim');
+  backpackGrid.innerHTML = html;
+  requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
 }
 // ---- 武器分頁：第一排手槍＋彈匣格（可以拖曳子彈上去），下面是子彈 ----
 function bulletCellHtml(b) {

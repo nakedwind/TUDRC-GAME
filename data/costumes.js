@@ -71,7 +71,7 @@ const COSTUME_ACCESSORIES = [
   { id: 'devil-tail', name: '惡魔尾巴', slot: 'lower', rarity: 'R', art: { front: 'images/costumes/04.back/tail_devil/Tail_devil.png' } },
   { id: 'wolf-tail', name: '狼尾巴', slot: 'lower', char: 'winter', rarity: 'R', art: { front: 'images/costumes/04.back/tail_wolf_winter/Tail_winter wolf_front.png', side: 'images/costumes/04.back/tail_wolf_winter/Tail_winter wolf_side.png' } },
   { id: 'star-wand', name: '星星魔杖', slot: 'hand', rarity: 'N', art: { front: 'images/costumes/05.hand_R/satr_wand/Hand_star.png' } },
-  { id: 'striped-bag', name: '條紋提袋', slot: 'hand', rarity: 'N', art: { front: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_front.png', side: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_side.png' } },
+  { id: 'striped-bag', name: '條紋提袋', slot: 'hand', rarity: 'N', icon: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_side.png', art: { front: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_front.png', side: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_side.png' } },
 ];
 // 一開始就擁有的服裝（新存檔送的；空的＝全部要從扭蛋轉）
 const COSTUME_STARTER = [];

@@ -1944,10 +1944,10 @@ function update(dt) {
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
         const soothed = [];
-        let usedSP = false, usedMedkit = false;   // 同一次範圍疏導只扣一次 SP；治療仍消耗一個醫療包
+        let usedSP = false, usedMedkit = false;   // 同一次範圍疏導只扣一次 SP；治療消耗一個急救包
         for (const o of G.towers) {
           if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
-          // 疏導消耗 SP；補血消耗醫療包，兩項資源各自檢查。
+          // 疏導消耗 SP；補血消耗急救包，兩項資源各自檢查。
           const needSoothe = !TYPES[o.type].guide && (o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1));
           const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1);
           const doSoothe = needSoothe && (typeof guideCanSoothe !== 'function' || guideCanSoothe(t));
@@ -1956,7 +1956,7 @@ function update(dt) {
           if (doSoothe) usedSP = true; if (doHeal) usedMedkit = true;
           const taintBefore = o.taint || 0;
           if (doSoothe) o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD * (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.sootheMul : 1));   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
-          if (doHeal) o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * AURA_CD);
+          if (doHeal) o.hp = Math.min(o.maxhp, o.hp + FIRST_AID.heal);   // 用一個急救包：跟溫特用急救包補一樣的量（data/equipment.js）
           if (o.berserk && o.taint < 60) o.berserk = false;
           spawnSootheEffect(o.x, o.y - 8, sc, o);
           const cleared = Math.round(taintBefore - o.taint);
@@ -1965,7 +1965,7 @@ function update(dt) {
         }
         if (soothed.length) {
           if (usedSP) spendGuideSP(t);
-          if (usedMedkit && typeof guideUse === 'function') guideUse(t, 'medkit');
+          if (usedMedkit && typeof guideUse === 'function') guideUse(t, 'firstaid');
           t.auraCd = AURA_CD;
           spawnSootheCast(t, sc, spec.aura.r * CELL);   // 疏導表演：法陣、光波
           t.soothingT = SOOTHE_CHANNEL; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;   // 停下來閉眼疏導

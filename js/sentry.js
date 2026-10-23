@@ -542,13 +542,13 @@ function updateSentry(t, dt) {
       t.target=null; t.waitT=0; return;
     }
   }
-  // 嚮導身上的醫療包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
+  // 嚮導身上的急救包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
   if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
   // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
   if (!MAP_SAFE && (t.type === 'eldrin' || ownSpec.careFollow) && t.mode !== 'goto' && t.mode !== 'escort') {   // careFollow：塔納也一樣；應變中心裡不跟（受傷的人去醫院休養，js/vitals.js）
     const sentinels = G.towers.filter(o =>
       o !== t && o.hp > 0 && !TYPES[o.type].guide &&
-      (o.berserk || (o.taint || 0) >= 10 || o.maxhp - o.hp >= 10)
+      (o.berserk || (o.taint || 0) >= CAMP_SUPPLY.minTaint || o.maxhp - o.hp >= CAMP_SUPPLY.minHeal)   // 跟疏導／補血的門檻一樣（js/camp-supply.js），免得走過去卻不動手
     );
     if (sentinels.length) {
       sentinels.sort((a, b) => {

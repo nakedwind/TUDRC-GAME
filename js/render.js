@@ -1424,7 +1424,7 @@ function draw() {
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
-  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺醫療包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
+  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
   // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
   if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）

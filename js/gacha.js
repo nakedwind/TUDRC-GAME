@@ -153,7 +153,7 @@ function gachaDismantleAll() {
 
 // ---- 介面 ----
 function gachaArt(item) {   // 配件：正面圖；skin：那套的正面胸像
-  if (item.slot) return '<span class="gc-icon"><img src="' + item.art.front + '" alt=""></span>';
+  if (item.slot) return '<span class="gc-icon"><img src="' + costumeIconSrc(item) + '" alt=""></span>';
   return '<span class="wd-face gc-skin" data-char="' + item.char + '"><img src="images/character/' + item.folder + '/' + item.folder.replace('_', '') + '_0000_Front.png" alt=""></span>';
 }
 function gachaKind(item) {

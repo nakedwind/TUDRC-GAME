@@ -129,7 +129,7 @@ function costumeGive(who, id) {
   return true;
 }
 // 禮物選單、扭蛋收藏裡的小圖
-const costumeIconSrc = item => item.slot ? item.art.front : `images/character/${item.folder}/${item.folder.replace('_', '')}_0000_Front.png`;
+const costumeIconSrc = item => item.icon || (item.slot ? item.art.front : `images/character/${item.folder}/${item.folder.replace('_', '')}_0000_Front.png`);
 
 // ---- 地圖上某種素材（衣櫃、扭蛋機）的位置；test(素材id, 素材) 決定要哪些；safeOnly＝只在基地（安全區）找 ----
 function costumeSpots(test, safeOnly = true) {
@@ -240,7 +240,7 @@ function renderWardrobe() {
     const cur = eq[wd.slot] || '';
     cards = '<button type="button" class="wd-item wd-none' + (!cur ? ' on' : '') + '" data-wear=""><span class="wd-icon">✕</span><b>不戴</b></button>'
       + COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id)).map(a => '<button type="button" class="wd-item' + (a.id === cur ? ' on' : '') + '" data-wear="' + a.id + '"' + (costumeGifted(id, a.id) ? ' title="你送的禮物"' : '') + '>'
-        + '<span class="wd-icon"><img src="' + a.art.front + '" alt=""></span><b>' + a.name + '</b>'
+        + '<span class="wd-icon"><img src="' + costumeIconSrc(a) + '" alt=""></span><b>' + a.name + '</b>'
         + (a.rarity ? '<em class="r-' + a.rarity + '">' + a.rarity + '</em>' : '') + (costumeGifted(id, a.id) ? '<i>🎁</i>' : costumeState.owned[a.id] > 1 ? '<i>×' + costumeState.owned[a.id] + '</i>' : '') + '</button>').join('');
     if (!COSTUME_ACCESSORIES.some(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">' + (id === 'winter' ? '還沒有這個欄位的配件' : '還沒送' + CHARACTERS[id].name + '這個欄位的配件<br><small>在對話裡按「🎁 送禮」→「服飾」送給他</small>') + '</p>';
   }
