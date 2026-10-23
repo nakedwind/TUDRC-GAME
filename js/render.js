@@ -909,15 +909,16 @@ function drawPlayer(p) {
   drawPlayerReloadCountdown(p, size);
 }
 
-// 點隊員頭像：畫面內標出本人，畫面外沿視窗邊緣指向所在方向。
+// 點隊員頭像：畫面內標出本人，畫面外貼著畫面邊緣指向所在方向（跟暴走的邊緣箭頭同一種做法，js/berserk-fx.js）。
 function fieldLocatePosition(sx, sy, width, height) {
-  const left = Math.min(160, width * .22), right = width - Math.min(64, width * .12);
-  const top = Math.min(90, height * .18), bottom = height - Math.min(90, height * .18);
-  const inside = sx >= left && sx <= right && sy >= top && sy <= bottom;
+  const m = EDGE_ALERT.margin, inset = EDGE_ALERT.inset;
+  const inside = sx > m && sx < width - m && sy > m && sy < height - m;
   if (inside) return { x: sx, y: sy, angle: Math.PI / 2, inside };
-  const cx = (left + right) / 2, cy = (top + bottom) / 2, dx = sx - cx, dy = sy - cy;
-  const k = Math.min((right - left) / 2 / Math.max(.001, Math.abs(dx)), (bottom - top) / 2 / Math.max(.001, Math.abs(dy)));
-  return { x: cx + dx * k, y: cy + dy * k, angle: Math.atan2(dy, dx), inside };
+  // 從畫面中心往隊員方向，找到碰到畫面邊緣的那一點，再往內縮一點免得被切掉
+  const dx = sx - width / 2, dy = sy - height / 2;
+  const k = Math.min(Math.abs(dx) > 1e-6 ? (width / 2) / Math.abs(dx) : Infinity, Math.abs(dy) > 1e-6 ? (height / 2) / Math.abs(dy) : Infinity);
+  const x = Math.max(inset, Math.min(width - inset, width / 2 + dx * k)), y = Math.max(inset, Math.min(height - inset, height / 2 + dy * k));
+  return { x, y, angle: Math.atan2(dy, dx), inside };
 }
 function drawFieldMemberLocator() {
   const hint = G.fieldLocate, now = performance.now();
@@ -937,9 +938,11 @@ function drawFieldMemberLocator() {
   ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(-7, -11); ctx.lineTo(-3, 0); ctx.lineTo(-7, 11); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
   ctx.font = 'bold 14px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   const label = spec.name || '隊員', w = ctx.measureText(label).width + 18;
-  const labelY = pos.inside ? -24 : 29;
-  ctx.fillStyle = 'rgba(10,18,28,.92)'; roundRect(-w / 2, labelY - 12, w, 24, 6); ctx.fill();
-  ctx.fillStyle = '#ffd479'; ctx.fillText(label, 0, labelY);
+  // 畫面內：名字在箭頭上方；畫面外：名字放在箭頭往畫面內側那邊
+  const labelX = pos.inside ? 0 : -Math.cos(pos.angle) * (w / 2 + 20);
+  const labelY = pos.inside ? -24 : -Math.sin(pos.angle) * 30;
+  ctx.fillStyle = 'rgba(10,18,28,.92)'; roundRect(labelX - w / 2, labelY - 12, w, 24, 6); ctx.fill();
+  ctx.fillStyle = '#ffd479'; ctx.fillText(label, labelX, labelY);
   ctx.restore();
 }
 // ---- 繪製 ----
