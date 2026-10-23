@@ -3858,8 +3858,8 @@ const SHARED_TILES = [
     "name": "訓練區警示框線",
     "role": "floor",
     "file": "images/地下訓練室/training-hazard-frame.png",
-    "w": 12,
-    "h": 11,
+    "w": 15,
+    "h": 14,
     "flat": true
   },
   {
@@ -3867,7 +3867,7 @@ const SHARED_TILES = [
     "name": "containment-glass-door02",
     "role": "floor",
     "file": "images/地下訓練室/containment-glass-door02.png",
-    "w": 12,
+    "w": 16,
     "h": 3
   },
   {
