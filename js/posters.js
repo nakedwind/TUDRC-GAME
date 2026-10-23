@@ -30,6 +30,7 @@ function viewPoster(spot) {
   if (!spot || typeof openTextDialogue !== 'function') return false;
   openTextDialogue({ name: spot.cfg.title, image: String(spot.tile.file || ''), lines: String(spot.cfg.text || '').split('\n').filter(Boolean), kind: 'poster' });
   if (spot.cfg.art) showPosterArt(spot.cfg.art);
+  if (typeof achieveRemember === 'function') achieveRemember('posters', spot.id, 'allPosters');   // 成就：看過每一張宣導海報
   return true;
 }
 // ---- 原始海報的大圖（data/posters.js 的 art）：畫面左右置中，從低一點的位置在 POSTER_ART.time 秒內滑到最終位置（easeOutCubic）----

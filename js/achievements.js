@@ -61,12 +61,12 @@ function achieveRemember(set, key, stat) {
 }
 const achieveHas = (set, keys) => { const got = new Set(achieveData.sets[set] || []); return keys.length > 0 && keys.every(k => got.has(k)); };
 const achieveBaseMaps = () => (typeof BASE_MAPS !== 'undefined' ? BASE_MAPS : []);
-// 「說到坐到」要坐過哪幾張地圖的椅子（地圖名稱）
-const ACHIEVE_CHAIR_MAPS = ['2F應變中心', '1F餐廳', 'B1訓練室', 'B2射擊訓練室'];
+// 「說到坐到」要坐過哪幾張地圖的椅子（地圖名稱）；空的＝基地全部地圖的椅子都要坐過
+const ACHIEVE_CHAIR_MAPS = [];
 // 座位編號：地圖 id:素材 id@格子（跟 js/game.js 的 mapSeats 一樣；床不算椅子）
 function achieveAllChairKeys() {
   const out = new Set();
-  for (const m of achieveBaseMaps().filter(m => ACHIEVE_CHAIR_MAPS.includes(String(m.name || '').trim()))) {
+  for (const m of achieveBaseMaps().filter(m => !ACHIEVE_CHAIR_MAPS.length || ACHIEVE_CHAIR_MAPS.includes(String(m.name || '').trim()))) {
     const add = (id, c, r) => { if (typeof chairConfig === 'function' && chairConfig(id) && !/bed|床/i.test(id)) out.add(m.id + ':' + id + '@' + c + ',' + r); };
     for (const st of m.stamps || []) add(st.id, st.c, st.r);
     for (const layer of Object.values(m.layers || {})) for (const [k, id] of Object.entries(layer)) { const [c, r] = k.split(',').map(Number); add(id, c, r); }
@@ -84,6 +84,7 @@ const ACHIEVE_ALL = {
   allChairs: () => achieveHas('chairs', achieveAllChairKeys()),
   allSnacks: () => achieveHas('snacks', (typeof SUPPLIES !== 'undefined' ? SUPPLIES : []).filter(i => i.kind === 'snack' || i.kind === 'drink').map(i => i.id)),
   talkedAll: () => achieveHas('talked', achieveTalkableIds()),
+  allPosters: () => achieveHas('posters', Object.keys(typeof POSTERS !== 'undefined' ? POSTERS : {}).filter(id => POSTERS[id].art)),   // 宣導海報＝有原始大圖的海報
 };
 // 全員（衣櫃裡的每一個人）都戴著這件配件
 function achieveAllWear(accId) {

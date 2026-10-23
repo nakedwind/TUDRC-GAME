@@ -308,13 +308,14 @@ function select(key) { selKey = key; if (leftTab === 'parts') renderLeft(); rend
 
 // ---- 中間：遊戲畫面（iframe）----
 const frame = $q('game'), stageWrap = $q('stageWrap');
-const GAME_W = 960, GAME_H = 700;   // iframe 用固定大小（T-Pad 剛好是最大的 888 寬），再縮放到放得下
+const GAME_W = 960, GAME_H = 700;   // iframe 用固定大小（T-Pad 剛好是最大的 888 寬），再縮放到剛好貼合框框寬度
 function fitFrame() {
-  const s = Math.min(1, stageWrap.clientWidth / GAME_W);
+  const s = stageWrap.clientWidth / GAME_W;   // 框框比較寬時也會放大，T-Pad 看得比較清楚
   frame.style.width = GAME_W + 'px'; frame.style.height = GAME_H + 'px'; frame.style.transform = 'scale(' + s + ')';
   stageWrap.style.height = Math.round(GAME_H * s) + 'px';
 }
 window.addEventListener('resize', fitFrame); fitFrame();
+if (window.ResizeObserver) new ResizeObserver(fitFrame).observe(stageWrap);   // 框框寬度一變（例如右邊出現捲軸）就重算，才不會被切到
 // 跟遊戲畫面溝通一律用訊息（postMessage）：直接雙擊 HTML 打開時，瀏覽器不准這邊直接碰 iframe 裡面
 const toGame = m => { try { frame.contentWindow.postMessage(Object.assign({ src: 'squadedit-editor' }, m), '*'); } catch (_) {} };
 function sendState() { toGame({ type: 'state', layout: state.layout, skills: state.skills, gear: state.gear }); }

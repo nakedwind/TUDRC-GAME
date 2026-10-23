@@ -40,6 +40,7 @@ const ACHIEVE_STATS = [
   { id: 'allChairs', name: '坐過基地裡的每一張椅子（全部坐過＝1，不算床）' },
   { id: 'allSnacks', name: '買過每一種零食和飲料（全部買過＝1）' },
   { id: 'talkedAll', name: '跟基地裡每一位角色都說過話（全部說過＝1）' },
+  { id: 'allPosters', name: '看過每一張宣導海報（data/posters.js 裡有大圖 art 的海報；全部看過＝1）' },
   { id: 'gifts', name: '送禮（次數，零食飲料和服裝都算）' },
   { id: 'tpBestScore', name: '射擊練習室限時挑戰：最高分' },
   { id: 'tpMostShots', name: '射擊練習室限時挑戰：一場最多發射幾發' },
@@ -75,6 +76,7 @@ function achieveCfg(data) {
     id: String(a.id), group: String(a.group || '其他'), name: String(a.name || ''), stat: String(a.stat || ''),
     goal: Math.max(1, Math.floor(Number(a.goal) || 1)), secret: !!a.secret,
     desc: String(a.desc ?? a.custom ?? ''),   // 成就說明（玩家看得到）；舊的自訂條件文字（custom）也當說明
+    note: String(a.note || ''),               // 算法補充（只有編輯器看得到；給 Claude 實作自訂條件用）
   }));
   const groups = (Array.isArray(d.groups) ? d.groups : []).map(String);
   for (const a of list) if (!groups.includes(a.group)) groups.push(a.group);   // 成就用到、但分類清單裡沒有的分類：接在後面
