@@ -194,8 +194,13 @@ let selectionDrag = null;
 const SUB = CELL / 4;
 let pointerPx = null;   // 滑鼠目前在畫布上的像素位置
 const snapSub = v => Math.floor(v / SUB) * SUB;
+// 「只貼在整格」打勾時：物件也整格整格擺（ox、oy 都是 0），不打勾才用四分之一格
+const STORAGE_SNAP_WHOLE = 'tudrc_editor_snap_whole_v1';
+let snapWhole = false;
+try { snapWhole = localStorage.getItem(STORAGE_SNAP_WHOLE) === '1'; } catch (_) {}
 // 像素位置 → 擺放位置（格子 c、r＋格內偏移 ox、oy，都是 10px 的倍數）
 function subPosAt(x, y) {
+  if (snapWhole) return { c: Math.floor((x - OX) / CELL), r: Math.floor((y - OY) / CELL), ox: 0, oy: 0 };
   const gx = snapSub(x - OX), gy = snapSub(y - OY), c = Math.floor(gx / CELL), r = Math.floor(gy / CELL);
   return { c, r, ox: gx - c * CELL, oy: gy - r * CELL };
 }
@@ -1252,8 +1257,9 @@ function dragSelectionTo(c, r) {
   const dr = Math.max(1 - d.maxR, Math.min(ROWS - 1 - d.minR, r - d.startR));
   // 物件：滑鼠移動多少就搬多少（四分之一格對齊）；限制在跟整格同樣的範圍內
   const clampPx = (v, lo, hi) => Math.max(lo * CELL, Math.min(hi * CELL, v));
-  const dx = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.x - d.startPx.x) / SUB) * SUB, 1 - d.maxC, COLS - 1 - d.minC) : dc * CELL;
-  const dy = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.y - d.startPx.y) / SUB) * SUB, 1 - d.maxR, ROWS - 1 - d.minR) : dr * CELL;
+  const step = snapWhole ? CELL : SUB;   // 只貼在整格：一次搬一整格
+  const dx = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.x - d.startPx.x) / step) * step, 1 - d.maxC, COLS - 1 - d.minC) : dc * CELL;
+  const dy = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.y - d.startPx.y) / step) * step, 1 - d.maxR, ROWS - 1 - d.minR) : dr * CELL;
   if (dc === d.dc && dr === d.dr && dx === d.dx && dy === d.dy) return;
   d.dc = dc; d.dr = dr; d.dx = dx; d.dy = dy; d.moved = dc !== 0 || dr !== 0 || dx !== 0 || dy !== 0;
   m.layers = clone(d.layers); m.stamps = clone(d.stamps);
@@ -1261,7 +1267,8 @@ function dragSelectionTo(c, r) {
   d.items.filter(item => item.type === 'tile').forEach(item => delete m.layers[item.layer][item.key]);
   selections = d.items.map(item => {
     if (item.type === 'stamp') {
-      const s = m.stamps[item.index], nx = item.px + dx, ny = item.py + dy;
+      const s = m.stamps[item.index], whole = v => snapWhole ? Math.round(v / CELL) * CELL : v;   // 原本在半格上的物件，搬動後四捨五入到整格
+      const nx = whole(item.px + dx), ny = whole(item.py + dy);
       s.c = Math.floor(nx / CELL); s.r = Math.floor(ny / CELL);
       const ox = nx - s.c * CELL, oy = ny - s.r * CELL;
       if (ox) s.ox = ox; else delete s.ox;
@@ -2398,6 +2405,18 @@ document.getElementById('gridToggle').addEventListener('click', e => {
   draw();
   setStatus(showGrid ? '格線已開啟' : '格線已關閉', '#8fd3ff');
 });
+
+// 「只貼在整格」勾選框：貼上、拖曳都只落在整格上（記在瀏覽器）
+const snapWholeBox = document.getElementById('snapWhole');
+if (snapWholeBox) {
+  snapWholeBox.checked = snapWhole;
+  snapWholeBox.addEventListener('change', () => {
+    snapWhole = snapWholeBox.checked;
+    try { localStorage.setItem(STORAGE_SNAP_WHOLE, snapWhole ? '1' : '0'); } catch (_) {}
+    draw();
+    setStatus(snapWhole ? '已改成只貼在整格' : '已恢復四分之一格微調', '#8fd3ff');
+  });
+}
 
 // 不可穿透紅格的顯示開關（純顯示，不會動到地圖的不可穿透設定）
 document.getElementById('solidToggle').addEventListener('click', e => {
