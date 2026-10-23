@@ -94,6 +94,7 @@ const ACHIEVEMENT_DATA = {
     { "id": "custom_10_18", "group": "隱藏成就", "name": "啾！啾啾～", "stat": "custom", "goal": 10, "secret": true, "desc": "讓全員戴上綠繡眼頭飾" },
     { "id": "custom_10_19", "group": "隱藏成就", "name": "嗚呼～超大雙人床！", "stat": "custom", "goal": 10, "secret": true, "desc": "溫特第一次躺自己的床" },
     { "id": "custom_10_20", "group": "隱藏成就", "name": "聽我說，這比魔法好用！", "stat": "custom", "goal": 10, "secret": true, "desc": "溫特用手槍造成的傷害累計達到 50,000 點" },
+    { "id": "custom_10_22", "group": "隱藏成就", "name": "部隊長的用心我看得見", "stat": "custom", "goal": 10, "desc": "查看每張宣導海報" },
     { "id": "custom_10_21", "group": "互動．角色", "name": "社交達人", "stat": "custom", "goal": 10, "desc": "與應變中心每一位角色對話 1 次" },
     { "id": "custom_10_23", "group": "互動．角色", "name": "禮輕情意重", "stat": "custom", "goal": 10, "desc": "累計送禮 20 次" },
     { "id": "custom_10_24", "group": "小遊戲", "name": "神射手", "stat": "custom", "goal": 10, "desc": "在射擊練習室的限時挑戰得到 1,000 分" },

@@ -29,6 +29,35 @@ function posterNearPlayer() {
 function viewPoster(spot) {
   if (!spot || typeof openTextDialogue !== 'function') return false;
   openTextDialogue({ name: spot.cfg.title, image: String(spot.tile.file || ''), lines: String(spot.cfg.text || '').split('\n').filter(Boolean), kind: 'poster' });
+  if (spot.cfg.art) showPosterArt(spot.cfg.art);
   return true;
+}
+// ---- 原始海報的大圖（data/posters.js 的 art）：畫面左右置中，從低一點的位置在 POSTER_ART.time 秒內滑到最終位置（easeOutCubic）----
+// 位置、大小都是「遊戲畫面高度的幾 %」：h＝海報高度、from＝剛出現時的上緣、to＝最後停住的上緣（照示意圖量的）
+// gap＝海報下緣和說明對話框之間至少留幾 px：視窗比較矮、會被對話框擋到時，海報自動縮小（從剛出現的最低點就不會被擋）
+const POSTER_ART = { time: 1, h: 51.7, from: 23.8, to: 18.9, gap: 12 };
+let posterArtEl = null, posterArtRaf = 0;
+function posterArtHeight(wrap) {
+  const H = wrap.clientHeight, box = document.getElementById('dialogueBox');
+  let h = H * POSTER_ART.h / 100;
+  if (box && !box.classList.contains('hidden')) {
+    const room = (box.getBoundingClientRect().top - wrap.getBoundingClientRect().top) - POSTER_ART.gap - H * POSTER_ART.from / 100;
+    h = Math.min(h, room);
+  }
+  return Math.max(80, h);
+}
+function showPosterArt(src) {
+  const wrap = document.getElementById('wrap'); if (!wrap) return;
+  if (!posterArtEl) { posterArtEl = document.createElement('img'); posterArtEl.id = 'posterArt'; posterArtEl.alt = ''; wrap.appendChild(posterArtEl); }
+  const el = posterArtEl, t0 = performance.now();
+  el.src = src; el.style.height = posterArtHeight(wrap) + 'px'; el.style.top = POSTER_ART.from + '%'; el.hidden = false;
+  cancelAnimationFrame(posterArtRaf);
+  const step = now => {
+    if (typeof dialogueState === 'undefined' || !dialogueState) { el.hidden = true; return; }   // 對話框關掉：海報一起收起來
+    const k = Math.min(1, (now - t0) / (POSTER_ART.time * 1000)), ease = 1 - Math.pow(1 - k, 3);   // easeOutCubic
+    el.style.top = (POSTER_ART.from + (POSTER_ART.to - POSTER_ART.from) * ease) + '%';
+    posterArtRaf = requestAnimationFrame(step);
+  };
+  posterArtRaf = requestAnimationFrame(step);
 }
 const usePosterNearPlayer = () => viewPoster(posterNearPlayer());

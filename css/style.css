@@ -3070,3 +3070,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 
 /* 成就說明（data/achievements.js 的 desc）：名稱下面一行小字 */
 .aa-desc, .achv-desc { display: block; margin-top: -2px; color: #9fb0c0; font-size: 11px; font-style: normal; line-height: 1.35; }
+
+/* 查看海報時的原始海報大圖（js/posters.js 的 showPosterArt）：左右置中，蓋在遊戲畫面上、對話框下面 */
+#posterArt { position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); width: auto; pointer-events: none; box-shadow: 0 0 14px 4px rgba(0,0,0,.5); }   /* 邊緣一圈黑色陰影（全黑、不透明度 50%） */
+#posterArt[hidden] { display: none; }
