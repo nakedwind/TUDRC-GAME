@@ -48,12 +48,12 @@ function magazineWorkshopEntries() {
   const bullets = Object.entries(BULLETS).filter(([id, b]) => b.source === 'develop' && !b.removed).map(([id, b]) => {
     const have = bulletOwned(id);
     return { key: 'b:' + id, kind: 'bullet', def: b, name: b.name, lv: have ? 1 : 0, max: 1, icon: bulletIcon(b, 'ws-bullet-img'), image: b.image, emoji: b.icon,
-      tag: '子彈', worn: magazineCarries(id), about: b.desc || '', stat: () => '最多帶 ' + b.max + ' 發・出勤時自動補滿',
+      tag: '子彈', worn: magazineCarries(id), about: b.desc || '', stat: () => '最多帶 ' + b.max + ' 發・出勤時自動補滿' + (have ? '・到背包的「武器」分頁裝進彈匣' : ''),
       canDev: !have, where: '', devCost: b.cost || 0, upCost: 0, buy: 'bd:' + id };
   });
   const m = magState();
   const mag = { key: 'm:magazine', kind: 'magazine', def: MAGAZINE, name: MAGAZINE.name, lv: m.lv, max: MAGAZINE.slots.length, icon: '<i>' + MAGAZINE.icon + '</i>', image: null, emoji: MAGAZINE.icon,
-    tag: '彈匣', worn: false, about: '在背包的「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪就換得到。只有一般子彈不佔格子；照明彈也需要一格。', stat: n => '彈匣 ' + MAGAZINE.slots[n - 1] + ' 格',
+    tag: '彈匣', worn: false, about: MAGAZINE.desc || '', stat: n => '彈匣 ' + MAGAZINE.slots[n - 1] + ' 格',
     canDev: false, where: '', upCost: MAGAZINE.cost[m.lv - 1] || 0, buy: 'mg:magazine' };
   return { bullets, mag };
 }

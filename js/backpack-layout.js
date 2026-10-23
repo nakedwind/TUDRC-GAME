@@ -19,6 +19,7 @@ const BACKPACK_PARTS = {
   'panel.grid':   { group: '面板區域', label: '道具格子區', sel: '#backpackGrid' },
   'panel.detail': { group: '面板區域', label: '物品說明欄', sel: '#backpackDetail' },
   'panel.battery': { group: '面板區域', label: '手電筒電量（裝備高亮度手電筒時出現）', sel: '#equipPanel .equip-battery' },
+  'panel.gearStats': { group: '面板區域', label: '裝備的效果框（「目前效果」那一格）', sel: '#backpackDetail .bag-gear-stats' },
   // 手電筒電量區塊裡的文字（js/equipment.js 畫的）：各自調位置、字級
   'text.batteryLabel': { group: '手電筒電量的文字', label: '「🔋 手電筒電量」', sel: '#equipPanel .equip-battery > span', text: 'fixed' },
   'text.batteryPct':   { group: '手電筒電量的文字', label: '電量百分比（100%）', sel: '#equipPanel .equip-battery > b' },
@@ -36,12 +37,21 @@ const BACKPACK_PARTS = {
   'text.catTag':    { group: '文字與按鈕', label: '分類標籤', sel: '#backpackDetail .bag-tags > .bag-tag:first-child', text: 'category' },
   'text.effectTag': { group: '文字與按鈕', label: '效果標籤', sel: '#backpackDetail .bag-tags > .bag-tag.effect', text: 'item.effect' },
   'text.desc':      { group: '文字與按鈕', label: '物品說明', sel: '#backpackDetail .bag-desc', text: 'item.desc' },
-  'text.useNote':  { group: '文字與按鈕', label: '「無法使用」「可以送禮」說明', sel: '#backpackDetail .bag-actions > .bag-note:not(:last-child)' },
-  'text.dropNote': { group: '文字與按鈕', label: '「無法丟棄」說明', sel: '#backpackDetail .bag-actions > .bag-note:last-child' },
+  'text.useNote':  { group: '文字與按鈕', label: '「無法使用」「可以送禮」說明', sel: '#backpackDetail .bag-actions > .bag-note:not(:last-child):not(.drag-hint, .free-hint, .gear-hint)' },
+  'text.dropNote': { group: '文字與按鈕', label: '「無法丟棄」說明', sel: '#backpackDetail .bag-actions > .bag-note:last-child:not(.drag-hint, .free-hint, .gear-hint)' },   // 子彈、裝備的提示有自己的項目（下面）
   'text.hint':      { group: '文字與按鈕', label: '「可直接拖曳到下方快捷鍵」提示', sel: '#backpackDetail .bag-quick small', text: 'fixed' },
-  'btn.use':        { group: '文字與按鈕', label: '使用按鈕', sel: '#backpackDetail .bag-use', text: 'use' },
+  'btn.use':        { group: '文字與按鈕', label: '使用按鈕', sel: '#backpackDetail .bag-use:not([data-mag-load], [data-gear-equip])', text: 'use' },   // 子彈、裝備的按鈕有自己的項目（下面）
+  'btn.magLoad':    { group: '文字與按鈕', label: '子彈「裝進彈匣」按鈕', sel: '#backpackDetail [data-mag-load]', text: 'fixed' },
+  'btn.magUnload':  { group: '文字與按鈕', label: '子彈「從彈匣拿下」按鈕', sel: '#backpackDetail [data-mag-unload]', text: 'fixed' },
+  'btn.gearEquip':  { group: '文字與按鈕', label: '裝備「裝備／裝到…」按鈕（字跟著格子變，只能調位置大小）', sel: '#backpackDetail [data-gear-equip]' },
+  'btn.gearOff':    { group: '文字與按鈕', label: '裝備「卸下」按鈕（字跟著格子變，只能調位置大小）', sel: '#backpackDetail [data-gear-off]' },
   'btn.drop':       { group: '文字與按鈕', label: '丟棄按鈕', sel: '#backpackDetail .bag-drop', text: 'fixed' },
   'btn.close':      { group: '文字與按鈕', label: '關閉按鈕 ×', sel: '#backpackClose' },
+  'text.dragNote':  { group: '文字與按鈕', label: '子彈「也可以直接拖曳到武器分頁的彈匣格」提示', sel: '#backpackDetail .bag-actions > .bag-note.drag-hint', text: 'fixed' },
+  'text.freeNote':  { group: '文字與按鈕', label: '一般子彈「不佔彈匣格子」提示', sel: '#backpackDetail .bag-actions > .bag-note.free-hint', text: 'fixed' },
+  'text.gearNote':  { group: '文字與按鈕', label: '裝備「升級找諾亞」提示', sel: '#backpackDetail .bag-actions > .bag-note.gear-hint', text: 'fixed' },
+  'text.gearStatLabel': { group: '文字與按鈕', label: '裝備效果框的標題「目前效果」', sel: '#backpackDetail .bag-gear-stat small' },
+  'text.gearStatValue': { group: '文字與按鈕', label: '裝備效果框的內容（例如「偵測範圍 8 格」）', sel: '#backpackDetail .bag-gear-stat b' },
 };
 const bagAttr = v => String(v).replace(/["\\]/g, '\\$&');
 // 某個名字（key）的資料：{ key, group, label, sel, text }；找不到回傳 null
@@ -76,8 +86,48 @@ function applyItemTexts() {
     const key = 'bullet:' + bid;
     if (!itemTextOriginal.has(key)) itemTextOriginal.set(key, { name: def.name, desc: def.desc });
     const orig = itemTextOriginal.get(key), o = ITEM_TEXTS[key] || {};
+    if (isWorkshopBullet(def)) continue;   // 開發工坊裡的子彈：下面的 applyWorkshopTexts 處理
     def.name = o.name ? o.name : orig.name;
     if (o.desc) def.desc = o.desc; else if (orig.desc === undefined) delete def.desc; else def.desc = orig.desc;
+  }
+  applyWorkshopTexts();
+}
+// ---- 開發工坊裡也有的東西（子彈、裝備、武器）：名稱、說明以開發工坊編輯器為準 ----
+// ・存在 data/workshop.js（開發工坊編輯器、背包編輯器改字都寫到這裡，兩邊連通）。
+// ・換行只留在背包：背包編輯器的說明（ITEM_TEXTS）跟工坊的說明拿掉換行後一樣＝背包照背包的換行顯示（bagDesc）；
+//   不一樣（工坊後來改了字）＝背包也照工坊的。
+// ・要等 js/workshop-config.js 載入之後才算（遊戲裡這個檔比較早載入，那邊載完會再呼叫一次 applyItemTexts）。
+function bagWorkshopEntries() {   // [背包的物品 id, 開發工坊的 key, 資料]
+  const out = [];
+  if (typeof BULLETS !== 'undefined') for (const [id, d] of Object.entries(BULLETS)) if (isWorkshopBullet(d)) out.push(['bullet:' + id, 'b:' + id, d]);
+  if (typeof WEAPON_UPGRADES !== 'undefined') for (const [id, w] of Object.entries(WEAPON_UPGRADES)) out.push(['gear:w:' + id, 'w:' + id, w]);
+  if (typeof EQUIPMENT !== 'undefined') for (const d of EQUIPMENT) out.push(['gear:' + d.id, d.id, d]);
+  return out;
+}
+const bagWorkshopKey = itemId => { const e = bagWorkshopEntries().find(x => x[0] === itemId); return e ? e[1] : null; };
+// 工坊沒改過時原本的名稱、說明
+function bagWorkshopBase(itemId, key) {
+  if (key.startsWith('b:')) return itemTextOriginal.get(itemId) || {};
+  const b = WORKSHOP_BASE[key];   // 用編輯器新增的裝備沒有原本的（名稱、說明都在設定檔的 added 裡）
+  return b ? { name: b.name, desc: b.ownedDesc || b.desc || '' } : { name: '新裝備', desc: '' };
+}
+// 工坊現在的名稱、說明（設定檔寫的，沒寫＝原本的）
+function bagWorkshopNow(itemId, key) {
+  const cfg = WORKSHOP_CONFIG, base = bagWorkshopBase(itemId, key), field = workshopDescField(key);
+  return {
+    name: workshopTextGet(cfg, key, 'name') || base.name,
+    desc: workshopTextGet(cfg, key, field) || (field === 'ownedDesc' ? workshopTextGet(cfg, key, 'desc') : '') || base.desc || '',   // 裝備：舊的設定檔寫在 desc
+  };
+}
+function applyWorkshopTexts() {
+  if (typeof WORKSHOP_CONFIG === 'undefined' || typeof WORKSHOP_BASE === 'undefined' || typeof workshopTextGet !== 'function') return;
+  for (const [itemId, key, def] of bagWorkshopEntries()) {
+    const now = bagWorkshopNow(itemId, key), o = ITEM_TEXTS[itemId] || {};
+    if (now.name) def.name = now.name;
+    if (workshopDescField(key) === 'desc') { if (now.desc) def.desc = now.desc; else delete def.desc; }
+    else def.ownedDesc = now.desc;
+    // 背包顯示：工坊的字＋背包自己的換行（背包沒排過＝不換行，工坊的換行不會跑到背包來）
+    if (now.desc) def.bagDesc = o.desc ? workshopMergeBreaks(now.desc, o.desc) : workshopNoBreaks(now.desc); else delete def.bagDesc;
   }
 }
 // ---- 效果標籤裡的數字＝實際效果：在背包編輯器改「出勤 ❤️ 生命上限 +10%」的 10、「✦ SP +30」的 30，遊戲就照新的數字算 ----
@@ -113,11 +163,17 @@ const BACKPACK_BASE_CSS =
   //   原本左邊的圖比較高，多出來的高度會平均分給每一列，說明只有一行的物品會被往下擠、兩行的不會，同樣填 Y −30 卻高高低低。
   //   改成多出來的高度全部給最下面那一列；說明往下留 25px，跟原本一行說明的位置一樣（背包編輯器裡填的 Y 才不用重調）。
   '@media (min-width:861px){#backpack .backpack-body > #backpackDetail:not(.gear-detail){grid-template-rows:auto auto auto 1fr;}' +
-  '#backpack .backpack-body > #backpackDetail:not(.gear-detail) > .bag-desc{margin-top:25px;}' +
+  '#backpack .backpack-body > #backpackDetail > .bag-desc{margin-top:25px;}' +   // 裝備、武器的說明也一樣（同一個 Y 才會在名稱正下方）
   // 說明欄左邊的圖片框：永遠 100×112，不管裡面的圖調多大都不會跟著變（框的大小要改請在背包編輯器調「說明欄的圖片框」）
   //   圖放大超過框的時候，從框的正中間往四周長出去，不會把框撐大
   '#backpack .backpack-body > #backpackDetail > .bag-detail-image{box-sizing:border-box;height:112px;grid-template:minmax(0,1fr) / minmax(0,1fr);place-items:center;overflow:visible;}' +
-  '#backpack .backpack-body > #backpackDetail > .bag-detail-image > img{min-width:0;min-height:0;}}';
+  '#backpack .backpack-body > #backpackDetail > .bag-detail-image > img{min-width:0;min-height:0;}}' +
+  // 說明欄不顯示捲軸（滾輪照樣能捲）：說明比較長的物品（例如異質急救包）會多出捲軸，把右邊的按鈕往左擠 10px，
+  // 跟其他物品對不齊；藏起來之後每個物品的「使用」「丟棄」按鈕位置、大小都一樣
+  '#backpackDetail{scrollbar-width:none;}#backpackDetail::-webkit-scrollbar{display:none;}' +
+  // 裝備、武器的說明（跟開發工坊連通的那段）：放在名稱下面，「目前效果」往下移一列，不會疊在一起
+  //   說明往上移了 30（背包編輯器「物品說明」Y −30），效果框也往上 30，跟說明保持原本的間距
+  '#backpackDetail.gear-detail > .bag-desc ~ .bag-gear-stats{grid-row:3 / 5;margin-top:-30px;}';
 function backpackLayoutCss() {
   let css = BACKPACK_BASE_CSS;
   const els = (typeof BACKPACK_LAYOUT !== 'undefined' && BACKPACK_LAYOUT.elements) || {};
@@ -153,12 +209,19 @@ function bagSetOwnText(el, text) {
   if (nodes[0].nodeValue !== text) nodes[0].nodeValue = text;
   nodes.slice(1).forEach(n => n.remove());
 }
+// 開發工坊裡的子彈（諾亞開發得出來的）：名稱、說明跟開發工坊連通
+// （用 function 寫：上面的 applyItemTexts() 在這行之前就會用到它）
+function isWorkshopBullet(def) { return !!def && def.source === 'develop' && !def.removed; }
 // 目前背包說明欄顯示的物品
 function backpackCurrentItem() {
   if (typeof backpackSel === 'undefined') return null;
   if (String(backpackSel).startsWith('bullet:') && typeof BULLETS !== 'undefined') {   // 子彈：當成一個物品（名稱、說明可以改）
     const def = BULLETS[String(backpackSel).slice(7)];
-    return def ? { id: backpackSel, name: def.name, desc: def.desc, bullet: true } : null;
+    return def ? { id: backpackSel, name: def.name, desc: def.bagDesc || def.desc, bullet: true, ws: isWorkshopBullet(def) ? 'b:' + String(backpackSel).slice(7) : null } : null;
+  }
+  if (String(backpackSel).startsWith('gear:') && typeof gearById === 'function') {   // 裝備、武器：說明跟開發工坊連通
+    const g = gearById(backpackSel);
+    return g ? { id: backpackSel, name: g.name, desc: g.gear.bagDesc || g.gear.ownedDesc || g.gear.desc || '', gear: true, ws: bagWorkshopKey(backpackSel) } : null;
   }
   return typeof itemById === 'function' ? itemById(backpackSel) : null;
 }
@@ -270,15 +333,19 @@ if (/[?&]bagedit=1(&|$)/.test(location.search)) (() => {
       return { store: 'texts', k: key, value: (L.texts || {})[key] || '', original: orig(key), scope: '所有物品共用這個字' };
     }
     if (!it) return { note: '先在道具一覽點一個物品，再改它的文字。' };
-    if (part.text === 'category' && it.bullet) return { note: '子彈的分類標籤（子彈、後室…）不能改。' };
+    if (part.text === 'category' && (it.bullet || it.gear)) return { note: '子彈、裝備的分類標籤不能改。' };
     if (part.text === 'category') {
       const k = 'catTag:' + it.category;
       return { store: 'texts', k, value: (L.texts || {})[k] || '', original: orig(k), scope: '分類「' + categoryOf(it.category).name + '」的標籤都會改' };
     }
-    const field = part.text.slice(5), o = itemTextOriginal.get(it.id) || { name: it.name, desc: it.desc };
+    const field = part.text.slice(5), wsKey = it.ws || null;
+    if (it.gear && field !== 'desc') return { note: '裝備、武器的名稱請到開發工坊編輯器改；這裡可以改說明。' };
+    const o = wsKey ? bagWorkshopNow(it.id, wsKey) : itemTextOriginal.get(it.id) || { name: it.name, desc: it.desc };   // 開發工坊裡也有的：「原本的字」＝工坊現在的
     if (field === 'effect' && !el) return { note: '這個物品沒有效果標籤。' };
-    const original = field === 'name' ? o.name : field === 'desc' ? itemDesc(Object.assign({}, it, { desc: o.desc })) : orig('effect:' + it.id);
-    return { store: 'items', id: it.id, field, value: (ITEM_TEXTS[it.id] || {})[field] || '', original, scope: '只改「' + o.name + '」這個物品（商店等其他地方也會跟著變）', multiline: field === 'desc' };
+    // 開發工坊裡也有的：「原本的字」＝工坊的說明拿掉換行（換行各自排）；wsDesc＝工坊原本的（含工坊的換行，同步時保留）
+    const original = field === 'name' ? o.name : field === 'desc' ? (wsKey ? workshopNoBreaks(o.desc) : itemDesc(Object.assign({}, it, { desc: o.desc }))) : orig('effect:' + it.id);
+    return { store: 'items', id: it.id, field, value: (ITEM_TEXTS[it.id] || {})[field] || '', original, multiline: field === 'desc', ws: wsKey, wsDesc: wsKey ? o.desc : undefined,
+      scope: wsKey ? '「' + o.name + '」跟開發工坊連通：改的字也會改到開發工坊編輯器（換行只留在背包）' : '只改「' + o.name + '」這個物品（商店等其他地方也會跟著變）' };
   }
   function sendInfo(key) {
     if (!key) return;
@@ -326,6 +393,13 @@ if (/[?&]bagedit=1(&|$)/.test(location.search)) (() => {
     const replace = (obj, data) => { for (const k of Object.keys(obj)) delete obj[k]; Object.assign(obj, JSON.parse(JSON.stringify(data || {}))); };
     replace(BACKPACK_LAYOUT, m.layout || { elements: {}, texts: {} });
     replace(ITEM_TEXTS, m.itemTexts || {});
+    if (m.ws && typeof WORKSHOP_CONFIG !== 'undefined') {   // 背包編輯器改的名稱、說明（開發工坊的設定：子彈、裝備、武器）
+      for (const [key, w] of Object.entries(m.ws)) {
+        workshopTextSet(WORKSHOP_CONFIG, key, 'name', w.name || '');
+        workshopTextSet(WORKSHOP_CONFIG, key, workshopDescField(key), w.desc || '');
+      }
+      lastTexts = null;   // 一定重算
+    }
     const texts = JSON.stringify([BACKPACK_LAYOUT.texts, ITEM_TEXTS]);
     if (texts !== lastTexts) { lastTexts = texts; applyItemTexts(); if (backpackOpen) renderBackpack(); }   // 改了字：重畫背包，拿掉的字才會變回原本的
     applyBackpackLayout();

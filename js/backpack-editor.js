@@ -8,11 +8,28 @@
 const BAG_DRAFT_KEY = 'tudrc_backpack_layout_draft_v1';
 const $b = id => document.getElementById(id);
 const clone = v => JSON.parse(JSON.stringify(v));
-let state = (() => {   // { layout: { elements, texts }, itemTexts }
-  const file = { layout: typeof BACKPACK_LAYOUT !== 'undefined' ? BACKPACK_LAYOUT : {}, itemTexts: typeof ITEM_TEXTS !== 'undefined' ? ITEM_TEXTS : {} };
+// 開發工坊（data/workshop.js）裡的名稱、說明：{ 工坊的 key: { name, desc } }——跟開發工坊編輯器連通，以工坊為準
+//   key：子彈 b:id、裝備 id、武器 w:id（說明在工坊存在哪一格見 js/workshop-file.js 的 workshopDescField）
+function wsTextsFromFile() {
+  const out = {}, cfg = typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {};
+  const keys = [...Object.keys(cfg.items || {}), ...(Array.isArray(cfg.added) ? cfg.added : []).map(a => a && a.id).filter(Boolean)];
+  for (const k of keys) {
+    if (k.startsWith('m:')) continue;   // 彈匣不在背包裡
+    const field = workshopDescField(k), name = workshopTextGet(cfg, k, 'name');
+    const desc = workshopTextGet(cfg, k, field) || (field === 'ownedDesc' ? workshopTextGet(cfg, k, 'desc') : '');
+    if (name || desc) out[k] = { ...(name ? { name } : {}), ...(desc ? { desc } : {}) };
+  }
+  return out;
+}
+let state = (() => {   // { layout: { elements, texts }, itemTexts, ws }
+  const file = { layout: typeof BACKPACK_LAYOUT !== 'undefined' ? BACKPACK_LAYOUT : {}, itemTexts: typeof ITEM_TEXTS !== 'undefined' ? ITEM_TEXTS : {}, ws: wsTextsFromFile() };
   const d = typeof DraftSync !== 'undefined' ? DraftSync.load(BAG_DRAFT_KEY, file, { label: '背包版面' }) : null;
   const out = clone(d && d.layout ? d : file);
-  out.layout = out.layout || {}; out.layout.elements = out.layout.elements || {}; out.layout.texts = out.layout.texts || {}; out.itemTexts = out.itemTexts || {};
+  out.layout = out.layout || {}; out.layout.elements = out.layout.elements || {}; out.layout.texts = out.layout.texts || {}; out.itemTexts = out.itemTexts || {}; out.ws = out.ws || {};
+  if (out.wsBullets) {   // 舊的暫存只有子彈（{ 子彈 id: … }）：搬進 ws（key 前面加 b:）
+    for (const [bid, w] of Object.entries(out.wsBullets)) if (!out.ws['b:' + bid]) out.ws['b:' + bid] = w;
+    delete out.wsBullets;
+  }
   return out;
 })();
 let selKey = null, play = false, dynParts = [];
@@ -73,6 +90,11 @@ function setText(t, value) {
     const o = state.itemTexts[t.id] || {};
     if (v) o[t.field] = v; else delete o[t.field];
     if (Object.keys(o).length) state.itemTexts[t.id] = o; else delete state.itemTexts[t.id];
+    // 開發工坊裡也有的（子彈、裝備、武器）：字改了（不只是換行）就同步到開發工坊——換行各自保留（工坊的換行留在工坊原本的位置）
+    if (t.ws && v && (t.field === 'name' || t.field === 'desc') && workshopNoBreaks(v) !== workshopNoBreaks(t.original)) {
+      const w = state.ws[t.ws] || (state.ws[t.ws] = {});
+      w[t.field] = t.field === 'desc' ? workshopMergeBreaks(v, w.desc || t.wsDesc || t.original) : v;
+    }
   }
   t.value = v; saveDraft(); sendState(); renderList();
 }
@@ -207,7 +229,18 @@ window.addEventListener('resize', fitFrame); fitFrame();
 // 跟遊戲畫面溝通一律用訊息（postMessage）：直接雙擊 HTML 打開時，瀏覽器不准這邊直接碰 iframe 裡面
 // 遊戲那邊的接收程式在 js/backpack-layout.js 的最下面（?bagedit=1 才會啟動）
 const toGame = m => { try { frame.contentWindow.postMessage(Object.assign({ src: 'bagedit-editor' }, m), '*'); } catch (_) {} };
-function sendState() { toGame({ type: 'state', layout: state.layout, itemTexts: state.itemTexts }); }
+function sendState() { toGame({ type: 'state', layout: state.layout, itemTexts: state.itemTexts, ws: state.ws }); }
+// data/workshop.js：檔案裡的設定＋這裡改的名稱、說明（開頭說明跟開發工坊編輯器一樣，js/workshop-file.js）
+//   只寫跟檔案不一樣的（沒改的照檔案原樣，不會多出欄位）
+function workshopText() {
+  const c = clone(typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : { items: {}, added: [], removed: [], style: {} }), file = wsTextsFromFile();
+  for (const [key, w] of Object.entries(state.ws)) {
+    const f = file[key] || {};
+    if ((w.name || '') !== (f.name || '')) workshopTextSet(c, key, 'name', w.name || '');
+    if ((w.desc || '') !== (f.desc || '')) workshopTextSet(c, key, workshopDescField(key), w.desc || '');
+  }
+  return workshopConfigText(c);
+}
 let gameReady = false;
 setInterval(() => { if (!gameReady) toGame({ type: 'ping' }); }, 700);
 frame.addEventListener('load', () => { gameReady = false; toGame({ type: 'ping' }); });
@@ -263,6 +296,7 @@ function itemTextsText() {
 const bagSave = ProjectSave.attach({ after: [], files: [
   { path: 'data/backpack-layout.js', label: '背包版面', text: layoutText },
   { path: 'data/item-texts.js', label: '物品文字', text: itemTextsText },
+  { path: 'data/workshop.js', label: '開發工坊（子彈、裝備、武器的名稱、說明）', text: workshopText },
 ], status: (m, err) => setStatus(m, err) });
 $b('saveBtn').addEventListener('click', e => bagSave.save(e.shiftKey));
 $b('downloadBtn').addEventListener('click', () => {

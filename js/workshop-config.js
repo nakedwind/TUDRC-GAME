@@ -92,6 +92,52 @@ const workshopIconStyle = d => { const v = d ? workshopIconVars(d.iconScale, d.i
 const workshopInfoImgVars = (x, y) => [x ? '--ws-info-img-x:' + x + 'px' : '', y ? '--ws-info-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
 const workshopInfoImgStyle = d => { const v = d ? workshopInfoImgVars(d.infoImgX, d.infoImgY) : ''; return v ? ' style="' + v + '"' : ''; };
 
+// ---- 下方說明欄的四塊，每件各自調位置、大小、字級（開發工坊編輯器每件的「下方說明欄的版面」）----
+// 存在設定檔 items[key].infoParts（新增的裝備存在 added 裡）：{ name: { x, y, w, h, font }, tag: {…}, desc: {…}, stats: {…}, btn: {…} }
+//   x／y＝位移（px，正數＝往右／往下）、w／h＝寬高（px，0／沒寫＝原本的）、font＝字級（px，0＝原本的）
+//   每一塊也可以改字（見下面 WORKSHOP_INFO_LABELS；名稱、說明照原本的欄位）
+const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）', desc: '說明', stats: '效果框（開發後／目前效果／取得方式）', btn: '按鈕（開發／升級）' };
+// 每一塊可以改的字：[欄位, 什麼時候出現, 原本的字]；{lv}＝目前等級、{next}＝下一級
+const WORKSHOP_INFO_LABELS = {
+  tag: [['dev', '還沒開發', '未開發'], ['field', '只能在戰鬥區域拿到、還沒拿到', '戰鬥區域取得'], ['lv', '拿到之後', 'Lv{lv}']],
+  stats: [['dev', '還沒開發（效果框的標題）', '開發後（Lv1）'], ['now', '拿到之後', '目前效果（Lv{lv}）'], ['next', '還能升級時（下面那一格）', '升級後（Lv{next}）'], ['where', '只能在戰鬥區域拿到', '取得方式']],
+  btn: [['dev', '開發按鈕（後面接費用）', '開發'], ['up', '升級按鈕（後面接費用）', '升級']],
+};
+// 這一塊改過的字（沒改＝原本的字 fallback）；vars＝{ lv, next }
+function workshopInfoLabel(key, part, field, fallback, vars, cfg) {
+  const o = workshopInfoPartsOf(key, cfg)[part] || {}, t = typeof o[field] === 'string' && o[field] !== '' ? o[field] : null;
+  if (t === null) return fallback;
+  return t.replace(/\{lv\}/g, vars && vars.lv != null ? vars.lv : '').replace(/\{next\}/g, vars && vars.next != null ? vars.next : '');
+}
+function workshopInfoPartsOf(key, cfg) {
+  const c = cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {});
+  const src = (Array.isArray(c.added) && c.added.find(a => a && a.id === key)) || (c.items || {})[key] || {};
+  return src.infoParts || {};
+}
+// 放在那一塊的標籤上：data-wsp（css/style.css 用它套字級）＋位移、寬高
+//   按鈕：寬、高、字級用原本「外觀 → 升級／開發按鈕」的那組變數（--ws-act-*），只蓋過這一件
+function workshopInfoPartAttr(key, part, cfg) {
+  const o = workshopInfoPartsOf(key, cfg)[part] || {}, n = v => Number.isFinite(v) ? v : 0, s = [];
+  if (n(o.x) || n(o.y)) s.push('translate:' + n(o.x) + 'px ' + n(o.y) + 'px');
+  if (part === 'btn') {
+    // 按鈕的寬、高、字級直接寫在按鈕本身（workshopInfoBtnStyle），這裡外面那層只管位移
+  } else {
+    if (n(o.w) > 0) s.push('width:' + o.w + 'px', 'max-width:none', 'flex:none');
+    if (n(o.h) > 0) s.push('height:' + o.h + 'px', 'overflow:auto');
+    if (n(o.font) > 0) s.push('--wsp-font:' + o.font + 'px');
+  }
+  return ' data-wsp="' + part + '"' + (s.length ? ' style="' + s.join(';') + '"' : '');
+}
+// 按鈕本身的寬、高、字級：直接寫在每一顆 <button class="ws-btn"> 上（最優先，不會被外觀設定蓋掉）
+//   btnHtml＝已經組好的按鈕 HTML；回傳加上 style 的版本
+function workshopInfoBtnStyle(key, btnHtml, cfg) {
+  const o = workshopInfoPartsOf(key, cfg).btn || {}, n = v => Number.isFinite(v) && v > 0 ? v : 0, s = [];
+  if (n(o.w)) s.push('width:' + o.w + 'px', 'min-width:0', 'max-width:none');
+  if (n(o.h)) s.push('height:' + o.h + 'px');
+  if (n(o.font)) s.push('font-size:' + o.font + 'px');
+  return s.length ? String(btnHtml).replace(/<button type="button" class="ws-btn"/g, '$& style="' + s.join(';') + '"') : btnHtml;
+}
+
 // 「可升級」分頁前面的圖示：兩個疊在一起的綠色箭頭（照參考圖描的，取代原本的 ⬆️ emoji；遊戲的開發工坊、編輯器的預覽共用）
 const WS_UP_ICON = '<svg class="ws-up-icon" viewBox="0 0 286 337" aria-hidden="true">' +
   '<polygon points="0,96 143,0 286,96 286,205 143,111 0,205" fill="#7be495"/>' +
@@ -262,3 +308,36 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
     for (const [k, w] of entries) WEAPON_UPGRADES[k] = w;
   }
 })();
+
+// ---- 子彈、彈匣（data/equipment.js 的 BULLETS、MAGAZINE）：名稱、圖片、說明、費用、數量 ----
+// 設定檔 items 裡的 key：子彈＝b:子彈id（例如 b:tranq）、彈匣＝m:magazine
+//   子彈：name 名稱、image 圖片、desc 說明、cost 開發要幾個異質碎片、max 最多帶幾發
+//   彈匣：name 名稱、desc 說明、slots 每一級裝得下幾種子彈 [Lv1, Lv2, …]、cost 升級費用 [升到 Lv2, …]
+const WORKSHOP_MAG_DESC = '在背包的「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪就換得到。只有一般子彈不佔格子；照明彈也需要一格。';
+const WORKSHOP_AMMO_BASE = {};   // 還沒套用設定檔前的原始資料（編輯器的「恢復原本」用）
+(function applyWorkshopAmmo() {
+  const items = (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.items) || {};
+  const str = v => typeof v === 'string' && v !== '', num = v => typeof v === 'number' && Number.isFinite(v) && v >= 0;
+  if (typeof BULLETS !== 'undefined') for (const [id, b] of Object.entries(BULLETS)) {
+    const key = 'b:' + id;
+    WORKSHOP_AMMO_BASE[key] = { name: b.name, image: b.image || '', desc: b.desc || '', icon: b.icon, cost: b.cost || 0, max: b.max || 0, source: b.source || '' };
+    const o = items[key]; if (!o) continue;
+    for (const f of ['name', 'image', 'desc']) if (str(o[f])) b[f] = o[f];
+    if (num(o.cost)) b.cost = Math.round(o.cost);
+    if (num(o.max) && o.max >= 1) b.max = Math.round(o.max);
+  }
+  if (typeof MAGAZINE !== 'undefined') {
+    if (!MAGAZINE.desc) MAGAZINE.desc = WORKSHOP_MAG_DESC;
+    WORKSHOP_AMMO_BASE['m:magazine'] = { name: MAGAZINE.name, image: '', desc: MAGAZINE.desc, icon: MAGAZINE.icon, cost: MAGAZINE.cost.slice(), slots: MAGAZINE.slots.slice() };
+    const o = items['m:magazine'];
+    if (o) {
+      for (const f of ['name', 'desc']) if (str(o[f])) MAGAZINE[f] = o[f];
+      if (Array.isArray(o.slots)) o.slots.forEach((n, i) => { if (num(n) && n >= 1 && i < MAGAZINE.slots.length) MAGAZINE.slots[i] = Math.round(n); });
+      if (Array.isArray(o.cost)) o.cost.forEach((n, i) => { if (num(n) && i < MAGAZINE.cost.length) MAGAZINE.cost[i] = Math.round(n); });
+    }
+  }
+})();
+// 背包裡子彈的說明（有沒有換行）要照工坊的說明重算：js/backpack-layout.js 比這個檔早載入，那時還讀不到工坊的設定
+if (typeof applyItemTexts === 'function') applyItemTexts();
+// 開發工坊裡會出現的子彈、彈匣（諾亞開發得出來的子彈＋彈匣）
+const workshopAmmoKeys = () => Object.keys(WORKSHOP_AMMO_BASE).filter(k => k === 'm:magazine' || (WORKSHOP_AMMO_BASE[k].source === 'develop' && !(BULLETS[k.slice(2)] || {}).removed));

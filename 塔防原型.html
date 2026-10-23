@@ -11,7 +11,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=vitals-20261023"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=paymoney-20261023">
+<link rel="stylesheet" href="css/style.css?v=noclip-20261023">
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=nolower-20261023">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
@@ -248,9 +248,10 @@
   <script src="data/supplies.js?v=effnum-20261023"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/equipment.js?v=effnum-20261023"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
-  <script src="js/backpack-layout.js?v=batterytext-20261023"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
-  <script src="data/workshop.js?v=pistolcell2-20261022"></script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器） -->
-  <script src="js/workshop-config.js?v=infoimg-20261022"></script>   <!-- 把上面的設定套用到裝備資料 -->
+  <script src="js/workshop-file.js?v=parts5-20261023"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
+  <script src="js/backpack-layout.js?v=noscroll-20261023"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
+  <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器、背包編輯器都會存）；每次都讀最新的，兩邊改的說明才會馬上連動 -->
+  <script src="js/workshop-config.js?v=btnsize-20261023"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=vitals-20261023"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/dialogues.js?v=vitals-20261023"></script>  <!-- 所有台詞（對話編輯器） -->
@@ -311,7 +312,7 @@
   <script src="js/ore.js?v=short-tips-20261023"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=mouse-tunnel-20261023"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=backroom-no-snacks-20261023"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=carry-20261023"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/backpack.js?v=nodel-20261023"></script> <!-- 9j. 背包：物品格與說明 -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
   <script src="js/squad-gear.js?v=squad1-20261023"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=giftbtn-20261023"></script> <!-- 9l. 送禮與好感度 -->
@@ -330,9 +331,9 @@
   <script src="js/ambience.js?v=basequiet-20261023"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=merge-monster-vitals-20261023"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=merge-monster-vitals-20261023"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=btnsize-20261023"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=merge-monster-vitals-20261023"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
-  <script src="js/magazine.js?v=bag-labels-20261022"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
+  <script src="js/magazine.js?v=wsbtn-20261023"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=guide-sp-20261021"></script>
   <script src="js/camp-interactions.js?v=tab-mag-20261022"></script>
   <script src="js/camp-supply.js?v=short-tips-20261023"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->

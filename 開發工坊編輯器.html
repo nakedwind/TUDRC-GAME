@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>開發工坊編輯器｜Y102 應變中心</title>
-<link rel="stylesheet" href="css/style.css?v=tierlv-20261023">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
+<link rel="stylesheet" href="css/style.css?v=noclip-20261023">   <!-- 遊戲本身的樣式：預覽跟遊戲裡看到的一模一樣 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <style>
   /* ---- 編輯器自己的樣子（蓋掉遊戲樣式裡 body 的設定） ---- */
@@ -26,7 +26,7 @@
   .field { display: grid; gap: 4px; margin-bottom: 10px; font-size: 12px; color: #b9cad9; }
   .field input[type=text], .field textarea, .field select { width: 100%; background: #101923; border: 1px solid #536b80; border-radius: 7px; color: #edf5ff; font: inherit; font-size: 13px; padding: 6px 8px; }
   .field textarea { min-height: 54px; resize: vertical; line-height: 1.45; }
-  .field .hint { color: #7f93a6; font-size: 11px; }
+  .field .hint, .form-sec-body > .hint, .info-part > .hint { color: #7f93a6; font-size: 11px; line-height: 1.5; }
   .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 10px; }
   .num { display: grid; grid-template-columns: minmax(0,1fr) 64px; gap: 6px; align-items: center; }
   .num input[type=range] { width: 100%; accent-color: #6bdbbd; }
@@ -87,6 +87,30 @@
   .cost-row .field { margin: 0; font-size: 11px; white-space: nowrap; }
   .cost-row input { width: 100%; min-width: 0; background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; font-size: 12px; padding: 4px 5px; text-align: right; }
   .cost-row input.is-edited { border-color: #c79a5a; }   /* 改過的 */
+  /* 左邊每一段都可以收起來／打開（js/workshop-editor.js 的 sec） */
+  .form-sec { margin: 0 0 8px; border: 1px solid #34495c; border-radius: 9px; background: #182532; }
+  .form-sec > summary { cursor: pointer; padding: 8px 10px; font-size: 13px; font-weight: 700; color: #e3edf6; list-style: none; user-select: none; }
+  .form-sec > summary::-webkit-details-marker { display: none; }
+  .form-sec > summary::before { content: '▸'; display: inline-block; width: 14px; color: #8fb4d3; transition: transform .15s; }
+  .form-sec[open] > summary::before { transform: rotate(90deg); }
+  .form-sec > summary:hover { background: #20303f; border-radius: 9px; }
+  .form-sec-body, .form-sec > #itemList { padding: 4px 10px 8px; }
+  .sec-tools { display: flex; gap: 6px; margin: 0 0 8px; }
+  .sec-tools .ed-btn { padding: 3px 9px; font-size: 12px; }
+  .info-part { margin: 0 0 8px; padding: 0 8px; border: 1px solid #2f4152; border-radius: 8px; background: #15202b; }   /* 下方說明欄的版面：一塊一格（名稱、標籤、說明、效果框、按鈕），也可以收起來 */
+  .info-part[open] { padding-bottom: 6px; }
+  .info-part-head { display: flex; align-items: center; gap: 8px; padding: 7px 0; font-size: 12px; cursor: pointer; list-style: none; }
+  .info-part-head::-webkit-details-marker { display: none; }
+  .info-part-head::before { content: '▸'; color: #8fb4d3; transition: transform .15s; }
+  .info-part[open] > .info-part-head::before { transform: rotate(90deg); }
+  .info-part-head em { margin-left: auto; font-style: normal; font-size: 11px; color: #8be0c2; }
+  .info-part-tools { display: flex; justify-content: flex-end; margin: -2px 0 6px; }
+  .info-part-tools .ed-btn { padding: 2px 8px; font-size: 11px; }
+  .info-part .cost-row { margin: 0 0 2px; }
+  .info-part > label.field { gap: 2px; margin: 6px 0 2px; font-size: 11px; }   /* 每一塊的內文 */
+  .info-part.flash { animation: infoPartFlash 1.4s; }   /* 從預覽點過來：框一下 */
+  @keyframes infoPartFlash { 0%, 60% { border-color: #ffd479; box-shadow: 0 0 0 2px rgba(255,212,121,.45); } }
+  #previewStage .ws-info [data-wsp] { cursor: pointer; }
   .cost-row input:disabled { opacity: .35; }
   .val-table input.is-text { border-color: #c79a5a; color: #ffd9a3; text-align: left; }   /* 填了文字（只顯示在效果說明） */
   /* ---- 素材圖（預覽下面）：跟地圖編輯器下方的素材列一樣 ---- */
@@ -145,7 +169,7 @@
       <section class="panel">
         <div class="bar" style="justify-content:space-between;margin-bottom:8px"><h2 style="margin:0">裝備與武器</h2>
           <button type="button" class="ed-btn primary" id="addItem" title="新增一件裝備（右邊預覽的最後面會多一格）">＋ 新增裝備</button></div>
-        <div id="itemList"></div>
+        <details class="form-sec" data-sec="list" open><summary>📋 清單（點一件來改）</summary><div id="itemList"></div></details>   <!-- 可以收起來，下面的設定比較快看到 -->
         <div id="itemForm"></div>
       </section>
     </div>
@@ -174,12 +198,13 @@
   <script src="data/equipment.js?v=effnum-20261023"></script>   <!-- 裝備、武器的原始資料 -->
   <script src="data/supplies.js?v=effnum-20261023"></script>   <!-- 道具名稱（說明裡的道具上色用） -->
   <script src="data/items.js"></script>
-  <script src="data/workshop.js?v=pistolcell2-20261022"></script>       <!-- 目前存在檔案裡的工坊設定 -->
+  <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 目前存在檔案裡的工坊設定；每次都讀最新的（背包編輯器改的說明也存在這裡） -->
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/workshop-config.js?v=infoimg-20261022"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="js/workshop-config.js?v=btnsize-20261023"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-editor.js?v=fieldinfo-20261022"></script>
+  <script src="js/workshop-file.js?v=parts5-20261023"></script>   <!-- data/workshop.js 的存檔文字（跟背包編輯器共用） -->
+  <script src="js/workshop-editor.js?v=btnsize-20261023"></script>
   <script src="js/editor-nav.js?v=achv-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

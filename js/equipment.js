@@ -756,22 +756,25 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   if (!e) info = '<div class="bag-detail-empty"><span>🔧</span><p>' + empty + '</p></div>';
   else {
     const img = e.image ? '<img src="' + e.image + '" alt=""' + (e.kind === 'weapon' ? ' class="weapon"' : '') + '>' : '<i class="bag-gear-emoji">' + e.emoji + '</i>';
-    const tags = (e.lv ? '<span class="bag-tag effect">Lv' + e.lv + '</span>' : e.canDev ? '<span class="bag-tag">未開發</span>' : '<span class="bag-tag">戰鬥區域取得</span>') + (e.worn ? '<span class="bag-tag worn">穿戴中</span>' : '');
+    // 五塊（名稱、標籤、說明、效果框、按鈕）每件各自的位置、大小、字級、改過的字：js/workshop-config.js 的 workshopInfoPartAttr／workshopInfoLabel（工坊的 key：裝備＝id、其他照原本的）
+    const wk = e.key.startsWith('g:') ? e.key.slice(2) : e.key, part = p => typeof workshopInfoPartAttr === 'function' ? workshopInfoPartAttr(wk, p) : '';
+    const L = (p, f, txt) => typeof workshopInfoLabel === 'function' ? workshopInfoLabel(wk, p, f, txt, { lv: e.lv, next: e.lv + 1 }) : txt;
+    const tags = (e.lv ? '<span class="bag-tag effect">' + L('tag', 'lv', 'Lv' + e.lv) + '</span>' : e.canDev ? '<span class="bag-tag">' + L('tag', 'dev', '未開發') + '</span>' : '<span class="bag-tag">' + L('tag', 'field', '戰鬥區域取得') + '</span>') + (e.worn ? '<span class="bag-tag worn">穿戴中</span>' : '');
     let stats, btn;
     if (e.lv) {
-      stats = '<div class="bag-gear-stat"><small>目前效果（Lv' + e.lv + '）</small><b>' + wsColor(e.stat(e.lv)) + '</b></div>' +
-        (e.lv < e.max ? '<div class="bag-gear-stat next"><small>升級後（Lv' + (e.lv + 1) + '）</small><b>' + wsColor(e.stat(e.lv + 1)) + '</b></div>' : '');
-      btn = e.kind === 'bullet' ? '<button type="button" class="ws-btn" disabled>已開發・到背包的武器分頁裝進彈匣</button>'
-        : e.lv < e.max ? '<button type="button" class="ws-btn" data-ws="' + e.buy + '">升級 ' + cost(e.upCost) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
+      stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + e.lv + '）') + '</small><b>' + wsColor(e.stat(e.lv)) + '</b></div>' +
+        (e.lv < e.max ? '<div class="bag-gear-stat next"><small>' + L('stats', 'next', '升級後（Lv' + (e.lv + 1) + '）') + '</small><b>' + wsColor(e.stat(e.lv + 1)) + '</b></div>' : '');
+      btn = e.kind === 'bullet' ? '<button type="button" class="ws-btn" disabled>已開發</button>'
+        : e.lv < e.max ? '<button type="button" class="ws-btn" data-ws="' + e.buy + '">' + L('btn', 'up', '升級') + ' ' + cost(e.upCost) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
     } else if (e.canDev) {
-      stats = '<div class="bag-gear-stat next"><small>開發後（Lv1）</small><b>' + wsColor(e.stat(1)) + '</b></div>';
-      btn = '<button type="button" class="ws-btn" data-ws="' + e.buy + '">開發 ' + cost(e.devCost) + '</button>';
+      stats = '<div class="bag-gear-stat next"><small>' + L('stats', 'dev', '開發後（Lv1）') + '</small><b>' + wsColor(e.stat(1)) + '</b></div>';
+      btn = '<button type="button" class="ws-btn" data-ws="' + e.buy + '">' + L('btn', 'dev', '開發') + ' ' + cost(e.devCost) + '</button>';
     } else {
-      stats = '<div class="bag-gear-stat where"><small>取得方式</small><b>' + wsColor(e.where || '只能在戰鬥區域取得') + '</b></div>';
+      stats = '<div class="bag-gear-stat where"><small>' + L('stats', 'where', '取得方式') + '</small><b>' + wsColor(e.where || '只能在戰鬥區域取得') + '</b></div>';
       btn = '<button type="button" class="ws-btn" disabled>尚未取得</button>';
     }
-    info = '<div class="bag-detail-image"' + workshopInfoImgStyle(e.def) + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3>' + e.name + '</h3><div class="bag-tags">' + tags + '</div></div>' +
-      (e.about ? '<p class="bag-desc">' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats">' + stats + '</div></div><div class="bag-actions">' + btn + '</div>';
+    info = '<div class="bag-detail-image"' + workshopInfoImgStyle(e.def) + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + e.name + '</h3><div class="bag-tags"' + part('tag') + '>' + tags + '</div></div>' +
+      (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + (typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(wk, btn) : btn) + '</div>';   // 按鈕本身的寬高字級
   }
   const count = tab => [...all.gear, ...all.weapons, ...all.bullets, ...all.mags].filter(x => tabOf(x, tab)).length;
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '⚙️ 可開發'], ['up', WS_UP_ICON + ' 可升級']].map(([id, label]) =>

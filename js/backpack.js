@@ -155,15 +155,16 @@ function renderBulletDetail(b) {
   backpackDetail.classList.remove('dropping', 'gear-detail');
   const tag = typeof bulletSourceTag === 'function' ? bulletSourceTag(b.def) : '';
   const slot = magState().load.slice(0, magSlotCount()).indexOf(b.bullet);
-  const btn = b.free ? '<p class="bag-note">一般子彈不佔彈匣格子，一定帶著</p>'
+  // 提示文字各有自己的 class：背包編輯器可以分開改字、調位置（js/backpack-layout.js 的 text.freeNote／text.dragNote）
+  const btn = b.free ? '<p class="bag-note free-hint">一般子彈不佔彈匣格子，一定帶著</p>'
     : slot >= 0 ? `<button type="button" class="bag-unequip" data-mag-unload="${slot}">從彈匣拿下</button>`
     : `<button type="button" class="bag-use" data-mag-load="${b.bullet}">裝進彈匣</button>`;
   backpackDetail.innerHTML = `
     <div class="bag-detail-image bullet">${b.image ? `<img src="${b.image}" alt="">` : `<i class="bag-gear-emoji">${b.icon}</i>`}</div>
     <div class="bag-item-heading"><h3>${b.name}</h3>
     <div class="bag-tags"><span class="bag-tag">${BAG_ICON.weapon}子彈</span>${tag ? `<span class="bag-tag">${tag}</span>` : ''}${b.free ? '<span class="bag-tag worn">不佔格子</span>' : slot >= 0 ? `<span class="bag-tag worn">彈匣第 ${slot + 1} 格</span>` : ''}</div></div>
-    ${b.def.desc ? `<p class="bag-desc">${b.def.desc}</p>` : ''}
-    <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note">也可以直接拖曳到武器分頁的彈匣格</p>'}</div>`;
+    ${(b.def.bagDesc || b.def.desc) ? `<p class="bag-desc">${b.def.bagDesc || b.def.desc}</p>` : ''}
+    <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note drag-hint">也可以直接拖曳到武器分頁的彈匣格</p>'}</div>`;
 }
 // 裝備按鈕：只有一格能放就「裝備」；可以放兩格（主／副武器、隨身物品 1／2）就各一顆。已經在那格就變「卸下」
 function gearButtons(g) {
@@ -189,8 +190,9 @@ function renderGearDetail(g) {
   backpackDetail.innerHTML = `
     <div class="bag-detail-image">${g.image ? `<img src="${g.image}" alt=""${g.weapon ? ' class="weapon"' : ''}>` : `<i class="bag-gear-emoji">${g.icon}</i>`}</div>
     <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? BAG_ICON.weapon + '武器' : BAG_ICON.equip + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div></div>
+    ${(d.bagDesc || d.ownedDesc || d.desc) ? `<p class="bag-desc">${d.bagDesc || d.ownedDesc || d.desc}</p>` : ''}<!-- 說明：跟開發工坊連通（js/backpack-layout.js 的 applyWorkshopTexts） -->
     <div class="bag-gear-stats"><div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}</b></div></div>
-    <div class="bag-actions">${gearButtons(g)}<p class="bag-note">升級找諾亞</p></div>`;
+    <div class="bag-actions">${gearButtons(g)}<p class="bag-note gear-hint">升級找諾亞</p></div>`;
 }
 // 只換選取的格子：不重畫整個背包（重畫會讓格子、溫特立繪重新建立而閃一下）
 function selectBackpackItem(id) {
@@ -227,7 +229,7 @@ function renderBackpackDetail() {
         <div class="bag-drop-buttons"><button type="button" class="bag-drop-cancel" data-drop-cancel>取消</button><button type="button" class="bag-drop-ok" data-drop-ok>丟棄 ${backpackDrop.qty} 個</button></div>
       </div>` : `
       ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}" ${full ? 'disabled' : ''}>${full ? `${kind.stat} 已滿` : '使用'}${kind && !full ? `<kbd>${kind.key}</kbd>` : actKey ? `<kbd>${actKey}</kbd>` : ''}</button>` : (item.category === 'gift' ? '<p class="bag-note">在基地和大家對話時可以送禮</p>' : `<p class="bag-note">${item.note || '無法使用'}</p>`)}
-      ${canDrop(item) ? `<button type="button" class="bag-drop" data-bag-drop="${item.id}">🗑 丟棄<kbd>Del</kbd></button>` : '<p class="bag-note">無法丟棄</p>'}`}
+      ${canDrop(item) ? `<button type="button" class="bag-drop" data-bag-drop="${item.id}">🗑 丟棄</button>` : '<p class="bag-note">無法丟棄</p>'}`}
     </div>`;
 }
 function startDrop(id) {

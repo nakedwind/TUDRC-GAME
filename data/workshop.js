@@ -2,9 +2,11 @@
    items：要改哪件裝備／武器（沒寫的就用 data/equipment.js 原本的設定）
      key：裝備用 id（例如 headlamp）；武器前面加 w:（例如 w:pistol）
      name 名稱、image 圖片路徑、iconScale 圖片大小（%，100＝原本）、iconX／iconY 圖片位移（px，正數＝往右／往下）、infoImgX／infoImgY 下方說明欄裡的圖片位移（px）、ownedDesc 說明（desc 舊的「還沒拿到時」說明，已經不用）、where 取得方式的說明（整段照寫的顯示，「戰鬥區域」等字會是紫色；只能在戰鬥區域取得的才會用到）
+     infoParts：下方說明欄四塊各自的位置、大小、字級 { head 名稱＋標籤, desc 說明, stats 效果框, btn 按鈕：{ x, y, w, h, font }（px） }（子彈、彈匣也可以寫）
      levels：Lv1～Lv5 的效果說明文字（空白＝照數值自動產生）
      values：Lv1～Lv5 改過的實際數值（例如 {"dmg": 7}；沒寫的＝data/equipment.js 原本的；填文字的話只顯示在效果說明）
      cost：要花幾個異質碎片（裝備：[開發, 升到 Lv2, …, 升到 Lv5]；武器：[升到 Lv2, …, 升到 Lv5]；null／沒寫的＝原本的）
+     子彈 b:子彈id（例如 b:tranq）：name、image、desc 說明、cost 開發費用、max 最多帶幾發；彈匣 m:magazine：name、desc、slots 每一級裝得下幾種、cost 升級費用
    added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）
    removed：刪除的原本裝備 id（武器前面加 w:）
    order：開發工坊裡的排列順序（gear 裝備 id、weapons 武器 w:id；沒列到的接在後面）
@@ -37,17 +39,68 @@ const WORKSHOP_CONFIG = {
         }
       ],
       "iconScale": 85,
-      "infoImgY": -9
+      "infoImgY": -9,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "lamphelmet": {
       "ownedDesc": "持續照亮周圍，無須電池。",
       "iconScale": 94,
       "iconY": -6,
-      "infoImgY": -22
+      "infoImgY": -22,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "mask": {
       "iconY": -3,
-      "infoImgY": -16
+      "infoImgY": -16,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "helmet": {
       "values": [
@@ -68,7 +121,24 @@ const WORKSHOP_CONFIG = {
       "iconScale": 108,
       "iconX": 2,
       "iconY": -2,
-      "infoImgY": -18
+      "infoImgY": -18,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "earmuffs": {
       "values": [
@@ -90,7 +160,24 @@ const WORKSHOP_CONFIG = {
       ],
       "iconScale": 95,
       "iconY": -5,
-      "infoImgY": -19
+      "infoImgY": -19,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "vest": {
       "values": [
@@ -109,7 +196,24 @@ const WORKSHOP_CONFIG = {
         }
       ],
       "iconScale": 93,
-      "infoImgY": -12
+      "infoImgY": -12,
+      "infoParts": {
+        "tag": {
+          "y": -20
+        },
+        "name": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "bracelet": {
       "values": [
@@ -129,7 +233,24 @@ const WORKSHOP_CONFIG = {
           "save": 0.2
         }
       ],
-      "infoImgY": -12
+      "infoImgY": -12,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "sneakers": {
       "values": [
@@ -150,7 +271,24 @@ const WORKSHOP_CONFIG = {
         }
       ],
       "iconY": -3,
-      "infoImgY": -15
+      "infoImgY": -15,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "fireboots": {
       "values": [
@@ -170,7 +308,24 @@ const WORKSHOP_CONFIG = {
           "fire": 0.5
         }
       ],
-      "infoImgY": -10
+      "infoImgY": -10,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "acidboots": {
       "ownedDesc": "減少踩到腐蝕池、酸液的傷害；可以跟防毒面具疊加。",
@@ -191,7 +346,24 @@ const WORKSHOP_CONFIG = {
           "corrode": 0.5
         }
       ],
-      "infoImgY": -10
+      "infoImgY": -10,
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "radio": {
       "values": [
@@ -219,7 +391,24 @@ const WORKSHOP_CONFIG = {
           "mark": 15
         }
       ],
-      "infoImgY": -6
+      "infoImgY": -6,
+      "infoParts": {
+        "tag": {
+          "y": -20
+        },
+        "name": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "detector": {
       "values": [
@@ -231,28 +420,52 @@ const WORKSHOP_CONFIG = {
           "range": 15
         }
       ],
-      "infoImgY": -17
+      "infoImgY": -17,
+      "infoParts": {
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "w:pistol": {
       "values": [
         {
-          "reload": 1.3
+          "reload": 1.1,
+          "reserve": "∞"
         },
         {
-          "reload": 1.1
-        },
-        {
-          "reload": 0.8
+          "reload": 0.8,
+          "reserve": "∞"
         },
         {
           "reload": 0.6
         },
         {
           "reload": 0.4
+        },
+        {
+          "reload": 1.3
         }
       ],
       "iconScale": 96,
-      "infoImgY": -8
+      "infoImgY": -8,
+      "infoParts": {
+        "btn": {
+          "y": -55
+        },
+        "name": {
+          "y": -22
+        },
+        "tag": {
+          "y": -22
+        },
+        "stats": {
+          "y": -22
+        },
+        "desc": {
+          "y": -22
+        }
+      }
     },
     "w:flare": {
       "values": [
@@ -281,7 +494,24 @@ const WORKSHOP_CONFIG = {
         }
       ],
       "iconScale": 96,
-      "infoImgY": -8
+      "infoImgY": -8,
+      "infoParts": {
+        "btn": {
+          "y": -55
+        },
+        "name": {
+          "y": -30
+        },
+        "tag": {
+          "y": -30
+        },
+        "stats": {
+          "y": -30
+        },
+        "desc": {
+          "y": -30
+        }
+      }
     },
     "w:incendiary": {
       "where": "於戰鬥區域：有機率在上鎖的置物箱取得",
@@ -319,12 +549,101 @@ const WORKSHOP_CONFIG = {
           "reserve": 10
         }
       ],
-      "infoImgY": -12
+      "infoImgY": -12,
+      "infoParts": {
+        "btn": {
+          "y": -55
+        }
+      }
     },
     "w:tranq": {
       "ownedDesc": "使怪物睡眠或使暴走隊員冷靜下來；大型怪物效果較短，對怪物「生命體」無效。",
       "where": "於戰鬥區域：有機率在上鎖的置物箱取得",
-      "infoImgY": -6
+      "infoImgY": -6,
+      "infoParts": {
+        "btn": {
+          "y": -55
+        }
+      }
+    },
+    "b:tranq": {
+      "desc": "可以在後室商店購買。打中的怪物陷入沉睡；打中暴走的隊員會睡著，醒來後解除暴走狀態。對怪物「生命體」沒有效果。",
+      "infoParts": {
+        "name": {
+          "y": -11
+        },
+        "tag": {
+          "y": -11
+        },
+        "desc": {
+          "y": -11
+        },
+        "stats": {
+          "y": -11
+        },
+        "btn": {
+          "y": -55
+        }
+      }
+    },
+    "b:paint": {
+      "desc": "可以在後室商店購買。打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。一次只能標一隻，打新的舊的就消失。",
+      "infoParts": {
+        "name": {
+          "y": -11
+        },
+        "tag": {
+          "y": -11
+        },
+        "desc": {
+          "y": -11
+        },
+        "stats": {
+          "y": -11
+        },
+        "btn": {
+          "y": -55
+        }
+      }
+    },
+    "b:split": {
+      "desc": "可以在後室商店購買。一次扇形噴出好幾顆小子彈，近距離打一整群小怪。距離越遠越散。",
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
+    },
+    "m:magazine": {
+      "infoParts": {
+        "btn": {
+          "y": -55
+        },
+        "name": {
+          "y": -9
+        },
+        "tag": {
+          "y": -9
+        },
+        "stats": {
+          "y": -9
+        },
+        "desc": {
+          "y": -9
+        }
+      }
     }
   },
   "added": [],

@@ -13,6 +13,18 @@ const BACKPACK_LAYOUT = {
     "text.dropNote": {
       "align": "center"
     },
+    "text.dragNote": {
+      "x": 15,
+      "w": 150,
+      "h": 16,
+      "align": "center"
+    },
+    "text.freeNote": {
+      "align": "center"
+    },
+    "text.gearNote": {
+      "align": "center"
+    },
     "text.desc": {
       "y": -30,
       "font": 15,
@@ -177,7 +189,19 @@ const BACKPACK_LAYOUT = {
     "text.batteryCount": {
       "font": 13,
       "align": "center"
+    },
+    "btn.use": {
+      "x": -3,
+      "y": 5,
+      "w": 185,
+      "h": 40,
+      "align": "center"
+    },
+    "btn.drop": {
+      "align": "center"
     }
   },
-  "texts": {}
+  "texts": {
+    "text.dragNote": "也可以在彈匣格來回拖曳"
+  }
 };
