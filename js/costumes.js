@@ -30,6 +30,12 @@ for (const [who, eq] of Object.entries(costumeState.equip)) {
     eq[k] = (k === 'base' || k === 'battle') ? undefined : null;
   }
 }
+// 舊存檔：以前手部分左右手兩格，拿在左手（hand2）的改拿到手部；手部已經有拿東西就卸下
+for (const eq of Object.values(costumeState.equip)) {
+  if (!eq || !('hand2' in eq)) continue;
+  if (!eq.hand && eq.hand2) eq.hand = eq.hand2;
+  delete eq.hand2;
+}
 const costumeBase = folder => String(folder).replace(/_[A-Z]$/, '');
 const costumeFolderOf = id => (CHARACTERS[id] && CHARACTERS[id].sprite) || '';
 
@@ -89,7 +95,7 @@ function costumeOutfit(id, folder) {
 function drawCostumeAccessories(ctx, id, who, dx, dy, size, layer, equipOverride) {
   const eq = equipOverride || costumeState.equip[id]; if (!eq) return;
   const dir = (who && who.dir) || 'front', frame = costumeFrameOf(who);
-  const accs = sortAccsByLayer(ACC_SLOTS.map(slot => eq[slot] && ACC_BY_ID[eq[slot]] && accWornIn(ACC_BY_ID[eq[slot]], slot)).filter(Boolean));   // 照圖層（服裝編輯器設定）由下往上畫
+  const accs = sortAccsByLayer(ACC_SLOTS.map(slot => eq[slot] && ACC_BY_ID[eq[slot]]).filter(Boolean));   // 照圖層（服裝編輯器設定）由下往上畫
   for (const acc of accs) drawAccessory(ctx, acc, id, dir, frame, dx, dy, size, layer);
 }
 

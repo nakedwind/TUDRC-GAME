@@ -5,7 +5,7 @@
    offsets[角色]＝這個角色的身高偏移 { x, y }（比較矮的角色 y 填正數＝往下）：
      還沒替這個角色調過（用到欄位通用位置）時會加上；服裝編輯器「複製給所有角色」時也會自動加上兩個角色偏移的差。
    blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件（衣櫃不列出、不能送給他、身上有也不會畫）。
-   layers[配件]＝圖層數字：同時戴好幾個配件時，數字大的蓋在上面（沒寫＝照欄位：下身 1、背部 2、手持 3、頭飾 4、臉部 5）。
+   layers[配件]＝圖層數字：同時戴好幾個配件時，數字大的蓋在上面（沒寫＝照欄位：下身 1、背部 2、手部 3、頭飾 4、臉部 5）。
      例如尾巴要蓋在翅膀上面：尾巴填 3（比背部的 2 大）。
    從服裝編輯器按「▶ 暫存設定預覽」開的遊戲（?previewCostumes=1）用編輯器裡還沒存到專案的位置。
 */
@@ -18,11 +18,9 @@ const COSTUME_PLACEMENT = (() => {
   return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {}, offsets: p.offsets || {}, blocked: p.blocked || {}, layers: p.layers || {} };
 })();
 const ACC_BY_ID = Object.fromEntries(COSTUME_ACCESSORIES.map(a => [a.id, a]));
-const ACC_SLOTS = ['lower', 'back', 'hand', 'hand2', 'head', 'face'];   // 畫的順序（後面的蓋前面的）
-// 這個配件能不能戴在這個欄位（手持2（左手）也能戴手持的配件，見 data/costumes.js 的 accepts）
-const accFitsSlot = (acc, slotId) => acc.slot === ((COSTUME_SLOTS.find(s => s.id === slotId) || {}).accepts || slotId);
-// 戴在別的欄位（例如手持配件拿在左手）：當成那個欄位的配件來放位置
-const accWornIn = (acc, slotId) => acc.slot === slotId ? acc : { ...acc, slot: slotId };
+const ACC_SLOTS = ['lower', 'back', 'hand', 'head', 'face'];   // 畫的順序（後面的蓋前面的）
+// 這個配件能不能戴在這個欄位
+const accFitsSlot = (acc, slotId) => acc.slot === slotId;
 // 圖層：數字大的畫在上面；沒設定＝欄位在 ACC_SLOTS 的順序（下身 1、背部 2…臉部 5）
 const accLayerDefault = acc => ACC_SLOTS.indexOf(acc.slot) + 1;
 function accLayer(acc) { const v = (COSTUME_PLACEMENT.layers || {})[acc.id]; return v != null && v !== '' && isFinite(v) ? Number(v) : accLayerDefault(acc); }
@@ -36,7 +34,7 @@ for (const a of COSTUME_ACCESSORIES) for (const src of Object.values(a.art || {}
 const pick3 = (o, a, b, c) => o && o[a] && o[a][b] && o[a][b][c];
 // 這個配件在這個角色、這個方向要放哪裡；from＝用到哪一層（'item'、'anchor'、'slot'）
 function accPlacementInfo(acc, id, dir) {
-  const own = ACC_BY_ID[acc.id] && ACC_BY_ID[acc.id].slot === acc.slot && pick3(COSTUME_PLACEMENT.items, acc.id, id, dir);   // 拿在左手時不用右手調好的位置
+  const own = pick3(COSTUME_PLACEMENT.items, acc.id, id, dir);
   if (own) return { pl: own, from: 'item' };
   const anchor = pick3(COSTUME_PLACEMENT.anchors, id, acc.slot, dir);
   if (anchor) return { pl: anchor, from: 'anchor' };
