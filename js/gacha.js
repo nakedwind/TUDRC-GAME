@@ -9,6 +9,12 @@ let gachaOpen = false;
 const gc = { el: null, tab: 'result', results: null, busy: false, msg: '', timers: [] };
 // 轉扭蛋的動畫（右邊區塊）：壓黑 → 大扭蛋掉下來 → 搖一搖 → 打開（啵）→ 出現轉到的東西；時間（毫秒）
 const GACHA_ANIM = { dark: 250, drop: 550, wobble: 750, open: 450 };
+// 抽到好東西的加演：wobble＝搖比較久（集氣）、linger＝打開後多停一下、hero＝SSR 獨照展示多久；upgrade＝SSR 搖到幾成時「金→彩虹」升格
+const GACHA_RARE = {
+  SR: { wobble: 1150, linger: 650, sparks: 26 },
+  SSR: { wobble: 1700, upgrade: .5, linger: 300, hero: 2600, sparks: 44 },
+};
+const GACHA_SPARK_COLORS = { SR: ['#ffe6a3', '#ffc95c', '#fff6d8'], SSR: ['#ff7ad9', '#7ad7ff', '#ffe36e', '#a6ff9b', '#ffffff'] };
 const gachaSpots = () => costumeSpots((id, t) => GACHA.machineTiles.includes(id) || /扭蛋機/.test(t.name || ''), false);   // 戰鬥地圖上擺的也能轉（例如地下街入口）
 const gachaNearPlayer = () => costumeSpotNearPlayer(gachaSpots());
 function useGachaNearPlayer() { if (!gachaNearPlayer()) return false; openGacha(); return true; }
@@ -27,15 +33,20 @@ function gachaRoll() {
 // 要花多少：pay＝'crystal' 異質碎片／'money' 經費（data/costumes.js 的 GACHA）
 const gachaCost = (times, pay) => pay === 'money' ? (times >= 10 ? GACHA.moneyTenCost : GACHA.moneyCost * times) : (times >= 10 ? GACHA.tenCost : GACHA.cost * times);
 const gachaMoney = () => Math.floor((typeof G !== 'undefined' && G && G.money) || 0);
+// 抽取失敗只更新提示；重建結果卡片會重新觸發上一次獎品的出場動畫。
+function gachaPullNotice(message) {
+  gc.msg = message;
+  if (gc.el) gc.el.querySelector('.gc-msg').textContent = message;
+}
 function gachaPull(times, pay = 'crystal') {
   if (gc.busy) return;
   const cost = gachaCost(times, pay);
-  if (!gachaPool().length) { gc.msg = '扭蛋機還是空的（data/costumes.js 還沒有服裝）'; renderGacha(); return; }
+  if (!gachaPool().length) { gachaPullNotice('扭蛋機還是空的（data/costumes.js 還沒有服裝）'); return; }
   if (pay === 'money') {   // 花經費（基地裡＝錢包的錢，js/game.js 的 updateHUD 會存回錢包）
-    if (gachaMoney() < cost) { sfx('error'); gc.msg = '經費不夠（還差 $' + (cost - gachaMoney()).toLocaleString() + '）'; renderGacha(); return; }
+    if (gachaMoney() < cost) { sfx('error'); gachaPullNotice('經費不夠（還差 $' + (cost - gachaMoney()).toLocaleString() + '）'); return; }
     G.money -= cost; if (typeof updateHUD === 'function') updateHUD();
   } else {
-    if (training.crystals < cost) { sfx('error'); gc.msg = '異質碎片不夠（還差 ' + (cost - training.crystals) + ' 個）'; renderGacha(); return; }
+    if (training.crystals < cost) { sfx('error'); gachaPullNotice('異質碎片不夠（還差 ' + (cost - training.crystals) + ' 個）'); return; }
     if (!spendCrystals(cost)) return;
   }
   const results = [];
@@ -47,24 +58,72 @@ function gachaPull(times, pay = 'crystal') {
   // 動畫：左邊機器搖一搖；右邊壓黑 → 大扭蛋掉下來 → 搖一搖 → 打開 → 出現轉到的東西（點一下可以跳過）
   const card = gc.el.querySelector('.gc-card'), stage = gc.el.querySelector('.gc-stage');
   const best = results.reduce((b, r) => Math.max(b, Object.keys(GACHA.rates).indexOf(rarityOf(r.item))), 0);
-  card.classList.remove('gc-turning'); void card.offsetWidth; card.classList.add('gc-turning');
-  stage.className = 'gc-stage show' + (best >= 2 ? ' gold' : best >= 1 ? ' blue' : '');
+  const rare = best >= 3 ? 'SSR' : best >= 2 ? 'SR' : '', R = GACHA_RARE[rare] || {};
+  gc.rare = rare; gc.heroShown = false; gc.heroItem = rare ? (results.find(r => rarityOf(r.item) === rare) || {}).item : null;
+  card.classList.remove('gc-turning', 'gc-rare'); void card.offsetWidth; card.classList.add('gc-turning'); if (rare) card.classList.add('gc-rare');
+  // SSR 先裝成金色（像 SR），搖到一半才升格成彩虹
+  stage.className = 'gc-stage show' + (rare ? ' gold' : best >= 1 ? ' blue' : '');
+  stage.querySelector('.gc-banner').textContent = ''; stage.querySelector('.gc-hero').innerHTML = ''; stage.querySelector('.gc-sparks').innerHTML = '';
+  const W = R.wobble || GACHA_ANIM.wobble; stage.style.setProperty('--wobble', W + 'ms');
   SFX.play('gachaDrop', .8, 'gacha-drop');   // 轉扭蛋：扭蛋掉出來
   const A = GACHA_ANIM, at = (ms, fn) => gc.timers.push(setTimeout(fn, ms));
   at(A.dark, () => stage.classList.add('drop'));
-  at(A.dark + A.drop, () => stage.classList.add('wobble'));
-  at(A.dark + A.drop + A.wobble, () => {
-    stage.classList.add('open');
-    sfx(best >= 2 ? 'achievement' : 'itemPickup');   // 扭蛋打開：啵（SR 用升級的音效）
+  at(A.dark + A.drop, () => { stage.classList.add('wobble'); if (rare) stage.classList.add('charge'); });   // 好東西：越搖越快、發光、光芒在後面轉
+  if (rare === 'SSR') at(A.dark + A.drop + W * R.upgrade, () => {   // 升格：金 → 彩虹，閃一下
+    stage.classList.replace('gold', 'rainbow'); stage.classList.add('upgrade');
+    gachaFlash(card); gachaSparks(stage, 16, GACHA_SPARK_COLORS.SSR, .6);
+    sfx('soothe');
   });
-  at(A.dark + A.drop + A.wobble + A.open, gachaRevealDone);
+  at(A.dark + A.drop + W, () => {
+    stage.classList.add('open');
+    if (!rare) { sfx('itemPickup'); return; }
+    stage.classList.add('big');   // 大爆光、標題橫幅、碎光噴出來
+    stage.querySelector('.gc-banner').textContent = rare === 'SSR' ? 'SSR!!' : 'SR!';
+    gachaFlash(card); gachaSparks(stage, R.sparks, GACHA_SPARK_COLORS[rare], 1);
+    sfx('achievement');
+    if (rare === 'SSR') gc.timers.push(setTimeout(() => sfx('win'), 260));
+  });
+  const opened = A.dark + A.drop + W + A.open;
+  if (rare === 'SSR') { at(opened + R.linger, gachaShowHero); at(opened + R.linger + R.hero, gachaRevealDone); }
+  else at(opened + (R.linger || 0), gachaRevealDone);
+}
+// 畫面閃白光（整個扭蛋視窗）
+function gachaFlash(card) { card.classList.remove('gc-flash'); void card.offsetWidth; card.classList.add('gc-flash'); }
+// 從扭蛋中心往外噴的碎光（power 越大噴越遠）
+function gachaSparks(stage, n, colors, power) {
+  const box = stage.querySelector('.gc-sparks');
+  for (let i = 0; i < n; i++) {
+    const s = document.createElement('i'), a = Math.random() * Math.PI * 2, d = (90 + Math.random() * 170) * power;
+    s.style.cssText = '--dx:' + Math.cos(a) * d + 'px;--dy:' + (Math.sin(a) * d * .8 - 30 * power) + 'px;--rot:' + (Math.random() * 540 - 270) + 'deg;--t:' + (700 + Math.random() * 600) + 'ms;--c:' + colors[i % colors.length] + ';--s:' + (5 + Math.random() * 7) + 'px';
+    if (Math.random() < .45) s.className = 'star';
+    box.appendChild(s);
+    setTimeout(() => s.remove(), 1500);
+  }
+}
+// SSR 獨照：轉到的那件放大、轉圈光、名字，點一下或時間到收掉
+function gachaShowHero() {
+  if (!gc.busy || gc.heroShown || !gc.heroItem) return;
+  gc.heroShown = true;
+  const stage = gc.el.querySelector('.gc-stage'), item = gc.heroItem;
+  stage.querySelector('.gc-hero').innerHTML = gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(rarityOf(item));
+  stage.classList.add('hero');
+  gachaSparks(stage, 22, GACHA_SPARK_COLORS.SSR, .8);
+  SFX.play('crystalGet', .8, 'gacha-hero');
+}
+function gachaSkipToHero() {
+  gc.timers.forEach(clearTimeout); gc.timers = [];
+  const stage = gc.el.querySelector('.gc-stage');
+  stage.classList.remove('gold', 'charge'); stage.classList.add('drop', 'wobble', 'open', 'big', 'rainbow');
+  stage.querySelector('.gc-banner').textContent = 'SSR!!';
+  gachaShowHero();
+  gc.timers.push(setTimeout(gachaRevealDone, GACHA_RARE.SSR.hero));
 }
 function gachaRevealDone() {   // 動畫結束（或點一下跳過）：收掉黑幕，翻出轉到的東西
   gc.timers.forEach(clearTimeout); gc.timers = [];
   if (!gc.busy) return;
   gc.busy = false;
   if (!gachaOpen) return;
-  gc.el.querySelector('.gc-card').classList.remove('gc-turning');
+  gc.el.querySelector('.gc-card').classList.remove('gc-turning', 'gc-rare');
   gc.el.querySelector('.gc-stage').classList.add('done');
   renderGacha();
 }
@@ -116,12 +175,17 @@ function buildGacha() {
     + '</div><p class="gc-rates"></p></div>'
     + '<div class="gc-side"><nav class="gc-tabs"><button type="button" data-tab="result">轉到的</button><button type="button" data-tab="book">收藏</button></nav>'
     + '<p class="gc-msg" role="status"></p><div class="gc-list"></div>'
-    + '<div class="gc-stage" title="點一下跳過"><div class="gc-ball"><img class="gc-ball-whole" src="images/items/gashapon-capsule.png" alt="">'
-    + '<img class="gc-ball-top" src="images/items/gashapon-capsule01.png" alt=""><img class="gc-ball-bottom" src="images/items/gashapon-capsule02.png" alt=""><i class="gc-burst"></i></div></div>'
+    + '<div class="gc-stage" title="點一下跳過"><i class="gc-rays"></i><div class="gc-sparks"></div><div class="gc-ball"><img class="gc-ball-whole" src="images/items/gashapon-capsule.png" alt="">'
+    + '<img class="gc-ball-top" src="images/items/gashapon-capsule01.png" alt=""><img class="gc-ball-bottom" src="images/items/gashapon-capsule02.png" alt=""><i class="gc-burst"></i></div><b class="gc-banner"></b><div class="gc-hero"></div></div>'
     + '</div></div></section>';
   document.getElementById('wrap').appendChild(el);
   el.querySelector('.gc-close').addEventListener('click', closeGacha);
-  el.querySelector('.gc-stage').addEventListener('click', () => { if (gc.busy) { if (!el.querySelector('.gc-stage.open')) sfx('itemPickup'); gachaRevealDone(); } });
+  el.querySelector('.gc-stage').addEventListener('click', () => {
+    if (!gc.busy) return;
+    if (gc.rare === 'SSR' && !gc.heroShown) { gachaSkipToHero(); return; }   // SSR：第一下跳到獨照，第二下才收掉
+    if (!el.querySelector('.gc-stage.open')) sfx('itemPickup');
+    gachaRevealDone();
+  });
   el.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.pull) gachaPull(Number(b.dataset.pull), b.dataset.pay);

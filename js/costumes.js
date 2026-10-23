@@ -59,11 +59,17 @@ function costumeSkinSet(id, folder, skinId) {
   }
   if (set.fail) return set;
   const fail = (rec.B && rec.B.fail) || (rec.A && rec.A.fail);   // 換穿的那套沒有倒地圖：用原本那套的
-  return fail ? Object.assign({}, set, { fail }) : set;
+  return !set.fail && fail ? Object.assign({}, set, { fail }) : set;
+}
+function costumeSelectedSkin(id, mode) {
+  const eq = costumeState.equip[id] || {};
+  // 溫特穿女僕裝出勤時沿用身上的服裝。
+  if (id === 'winter' && mode === 'battle' && eq.base === 'winter-maid') return 'winter-maid';
+  return mode === 'base' ? eq.base : eq.battle;
 }
 function costumeOutfit(id, folder) {
   const eq = costumeState.equip[id]; if (!eq) return null;
-  const want = MAP_SAFE ? eq.base : eq.battle;
+  const want = costumeSelectedSkin(id, MAP_SAFE ? 'base' : 'battle');
   if (want && !costumeSkinFitsMode(SKIN_BY_ID[want], MAP_SAFE ? 'base' : 'battle')) return null;   // 這裡不能穿：照原本
   return want ? costumeSkinSet(id, folder, want) : null;
 }
@@ -172,7 +178,7 @@ function buildWardrobe() {
 }
 // 目前穿的 skin（沒設＝照原本：基地 A、戰鬥 B）
 function wdSkinOf(id, mode) {
-  const eq = costumeState.equip[id] || {}, set = mode === 'base' ? eq.base : eq.battle;
+  const set = costumeSelectedSkin(id, mode);
   if (set && costumeSkinFitsMode(SKIN_BY_ID[set], mode)) return set;
   const list = costumeSkinsFor(id), want = mode === 'base' ? 'A' : 'B';
   return list.some(s => s.id === want) ? want : (list[0] && list[0].id) || want;

@@ -33,7 +33,7 @@ const COSTUME_DEFAULT_SKINS = { A: '基地便服', B: '出勤制服' };
 const COSTUME_SKINS = [
   // { id: 'red-swim', char: 'red', name: '夏日泳裝', folder: 'red_swim', rarity: 'R', giftable: true },
   // 原圖在 images/costumes/03.body/，切好的 15 張在 images/character/<folder>/
-  { id: 'winter-maid', char: 'winter', name: '女僕裝', folder: 'winter_M', rarity: 'SSR', wear: 'base' },
+  { id: 'winter-maid', char: 'winter', name: '女僕裝', folder: 'winter_M', rarity: 'SSR' },
   { id: 'avaren-student-long', char: 'avaren', name: '學生制服（長袖）', folder: 'avaren_L', rarity: 'SR', wear: 'base' },
   { id: 'avaren-student-short', char: 'avaren', name: '學生制服（短袖）', folder: 'avaren_S', rarity: 'SR', wear: 'base' },
   { id: 'eldrin-student-long', char: 'eldrin', name: '學生制服（長袖）', folder: 'eldrin_L', rarity: 'SR', wear: 'base' },
