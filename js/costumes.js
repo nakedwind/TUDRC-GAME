@@ -19,8 +19,17 @@ const SKIN_BY_ID = Object.fromEntries(COSTUME_SKINS.map(s => [s.id, s]));
 const costumeEquip = id => costumeState.equip[id] || (costumeState.equip[id] = {});
 const costumeOwned = id => (costumeState.owned[id] || 0) > 0;
 const costumeGifted = (who, id) => ((costumeState.gifted || {})[who] || []).includes(id);   // 這件是送給 who 的禮物
-const costumeCanWear = (who, id) => (costumeOwned(id) || costumeGifted(who, id)) && (typeof costumeAllowed !== 'function' || costumeAllowed(who, id));   // 服裝編輯器設定「不能擁有」的不算
+// 能穿：溫特＝自己擁有的（＋送給她的）；隊友＝只有你送給他的。服裝編輯器設定「不能擁有」的不算
+const costumeCanWear = (who, id) => (costumeGifted(who, id) || (who === 'winter' && costumeOwned(id))) && (typeof costumeAllowed !== 'function' || costumeAllowed(who, id));
 const costumeCollected = id => costumeOwned(id) || Object.values(costumeState.gifted || {}).some(list => list.includes(id));   // 拿到過（扭蛋收藏用）
+// 隊友身上沒送給他的服裝脫下來（以前隊友可以穿你背包裡的服裝）
+for (const [who, eq] of Object.entries(costumeState.equip)) {
+  if (who === 'winter' || !eq) continue;
+  for (const k of Object.keys(eq)) {
+    const v = eq[k]; if (!v || v === 'A' || v === 'B' || costumeGifted(who, v)) continue;
+    eq[k] = (k === 'base' || k === 'battle') ? undefined : null;
+  }
+}
 const costumeBase = folder => String(folder).replace(/_[A-Z]$/, '');
 const costumeFolderOf = id => (CHARACTERS[id] && CHARACTERS[id].sprite) || '';
 
@@ -233,7 +242,7 @@ function renderWardrobe() {
       + COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id)).map(a => '<button type="button" class="wd-item' + (a.id === cur ? ' on' : '') + '" data-wear="' + a.id + '"' + (costumeGifted(id, a.id) ? ' title="你送的禮物"' : '') + '>'
         + '<span class="wd-icon"><img src="' + a.art.front + '" alt=""></span><b>' + a.name + '</b>'
         + (a.rarity ? '<em class="r-' + a.rarity + '">' + a.rarity + '</em>' : '') + (costumeGifted(id, a.id) ? '<i>🎁</i>' : costumeState.owned[a.id] > 1 ? '<i>×' + costumeState.owned[a.id] + '</i>' : '') + '</button>').join('');
-    if (!COSTUME_ACCESSORIES.some(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">還沒有這個欄位的配件</p>';
+    if (!COSTUME_ACCESSORIES.some(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">' + (id === 'winter' ? '還沒有這個欄位的配件' : '還沒送' + CHARACTERS[id].name + '這個欄位的配件<br><small>在對話裡按「🎁 送禮」→「服飾」送給他</small>') + '</p>';
   }
   el.querySelector('.wd-grid').innerHTML = cards;
   const skin = wdSkinOf(id, wd.mode), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || COSTUME_DEFAULT_SKINS[skin] || skin;
