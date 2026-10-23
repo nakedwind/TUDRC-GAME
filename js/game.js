@@ -28,9 +28,9 @@ const CHARACTER_SPRITE_FILES = {
 };
 // 持槍攻擊圖（四個方向各一張靜態圖）；只有這些角色有，避免對其他角色發出 404。
 const GUN_FILES = { gunFront: '0000_Front_withgun.png', gunBack: '0009_back_withgun.png', gunLeft: '0003_Leftside_withgun.png', gunRight: '0006_right-side_withgun.png' };
-const GUN_FOLDERS = new Set(['theonie_B', 'amber_B', 'eldrin_B', 'chris_B', 'winter_B', 'winter_M']);
+const GUN_FOLDERS = new Set(['theonie_B', 'amber_B', 'eldrin_B', 'chris_B', 'winter_B', 'winter_M', 'eldrin_M']);
 // 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
-const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png' };
+const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png', winter_M: 'fail.png', eldrin_M: 'fail.png' };
 function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
   const prefix = folder.replace('_', '') + '_';
   const revision = folder === 'chris_A' ? '?v=chris-a-20261021-2' : '';
@@ -40,7 +40,7 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
       const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}${revision}`; return img;
     });
   }
-  if (FAIL_FILES[folder] || folder === 'winter_M') { const img = new Image(); img.src = `images/character/${folder}/${prefix}${FAIL_FILES[folder] || 'fail.png'}`; set.fail = img; }   // 倒地圖
+  if (FAIL_FILES[folder]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}${FAIL_FILES[folder]}`; set.fail = img; }   // 倒地圖
   if (GUN_FOLDERS.has(folder)) {   // 攻擊時用的持槍圖
     for (const k of Object.keys(GUN_FILES)) {
       const img = new Image(); img.src = `images/character/${folder}/${prefix}${GUN_FILES[k]}`; set[k] = [img];

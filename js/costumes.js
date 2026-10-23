@@ -73,8 +73,8 @@ function costumeSkinSet(id, folder, skinId) {
 }
 function costumeSelectedSkin(id, mode, eqOverride) {
   const eq = eqOverride || costumeState.equip[id] || {};
-  // 溫特穿女僕裝出勤時沿用身上的服裝。
-  if (id === 'winter' && mode === 'battle' && eq.base === 'winter-maid') return 'winter-maid';
+  // 在基地穿著 sortie 的服裝（例如女僕裝）：出勤時沿用身上的服裝
+  if (mode === 'battle' && SKIN_BY_ID[eq.base] && SKIN_BY_ID[eq.base].sortie) return eq.base;
   return mode === 'base' ? eq.base : eq.battle;
 }
 function costumeOutfit(id, folder) {
@@ -185,9 +185,9 @@ function buildWardrobe() {
     else if ('wear' in b.dataset) wearCostume(b.dataset.wear);
   });
 }
-// 目前穿的 skin（沒設＝照原本：基地 A、戰鬥 B）
-function wdSkinOf(id, mode) {
-  const set = costumeSelectedSkin(id, mode, wd.draft);
+// 目前穿的 skin（沒設＝照原本：基地 A、戰鬥 B）；eq＝看哪一套（衣櫃裡傳試穿中的 wd.draft，沒傳＝身上真的穿的）
+function wdSkinOf(id, mode, eq) {
+  const set = costumeSelectedSkin(id, mode, eq);
   if (set && costumeSkinFitsMode(SKIN_BY_ID[set], mode)) return set;
   const list = costumeSkinsFor(id), want = mode === 'base' ? 'A' : 'B';
   return list.some(s => s.id === want) ? want : (list[0] && list[0].id) || want;
@@ -229,7 +229,7 @@ function renderWardrobe() {
   // 衣服格：skin＝這個角色能穿的；配件＝擁有的、這個欄位的，第一格是「不戴」
   let cards = '';
   if (wd.slot === 'skin') {
-    const cur = wdSkinOf(id, wd.mode);
+    const cur = wdSkinOf(id, wd.mode, wd.draft);
     // 限定場合、這一邊不能穿的 skin：照樣列出來但變灰、不能點，標出能在哪裡穿
     cards = costumeSkinsFor(id).map(s => { const ok = costumeSkinFitsMode(s, wd.mode);
       return '<button type="button" class="wd-item' + (s.id === cur ? ' on' : '') + (ok ? '' : ' wd-off') + '" data-wear="' + s.id + '"' + (ok ? '' : ' disabled title="' + COSTUME_WEAR_NAMES[s.wear] + '"') + '>'
@@ -245,7 +245,7 @@ function renderWardrobe() {
     if (!COSTUME_ACCESSORIES.some(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">' + (id === 'winter' ? '還沒有這個欄位的配件' : '還沒送' + CHARACTERS[id].name + '這個欄位的配件<br><small>在對話裡按「🎁 送禮」→「服飾」送給他</small>') + '</p>';
   }
   el.querySelector('.wd-grid').innerHTML = cards;
-  const skin = wdSkinOf(id, wd.mode), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || COSTUME_DEFAULT_SKINS[skin] || skin;
+  const skin = wdSkinOf(id, wd.mode, wd.draft), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || COSTUME_DEFAULT_SKINS[skin] || skin;
   const accs = ACC_SLOTS.map(s => eq[s] && ACC_BY_ID[eq[s]] && ACC_BY_ID[eq[s]].name).filter(Boolean);
   el.querySelector('.wd-wearing').textContent = CHARACTERS[id].name + '：' + skinName + (accs.length ? '・' + accs.join('、') : '');
   const dirty = wdDirty(), ok = el.querySelector('.wd-confirm');
@@ -256,7 +256,7 @@ function wardrobePreviewLoop(now) {
   if (!wardrobeOpen || !wd.el) return;
   const cvs = wd.el.querySelector('.wd-preview'), c = cvs.getContext('2d'), id = wd.who, dir = WD_DIRS[wd.dir];
   c.clearRect(0, 0, cvs.width, cvs.height);
-  const set = costumeSkinSet(id, costumeFolderOf(id), wdSkinOf(id, wd.mode));
+  const set = costumeSkinSet(id, costumeFolderOf(id), wdSkinOf(id, wd.mode, wd.draft));
   const frames = set && set[dir], step = 0, img = frames && frames[step];   // 0＝站著的那張
   const size = 168, dx = (cvs.width - size) / 2, dy = cvs.height - size - 6;
   c.fillStyle = 'rgba(0,0,0,.28)'; c.beginPath(); c.ellipse(cvs.width / 2, cvs.height - 14, 40, 9, 0, 0, Math.PI * 2); c.fill();

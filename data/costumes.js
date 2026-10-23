@@ -33,12 +33,13 @@ const COSTUME_DEFAULT_SKINS = { A: '基地便服', B: '出勤制服' };
 const COSTUME_SKINS = [
   // { id: 'red-swim', char: 'red', name: '夏日泳裝', folder: 'red_swim', rarity: 'R', giftable: true },
   // 原圖在 images/costumes/03.body/，切好的 15 張在 images/character/<folder>/
-  { id: 'winter-maid', char: 'winter', name: '女僕裝', folder: 'winter_M', rarity: 'SSR' },
+  // sortie: true＝在基地穿著，出勤時也穿這套（要有持槍圖、倒地圖：資料夾加進 js/game.js 的 GUN_FOLDERS、FAIL_FILES）
+  { id: 'winter-maid', char: 'winter', name: '女僕裝', folder: 'winter_M', rarity: 'SSR', sortie: true },
   { id: 'avaren-student-long', char: 'avaren', name: '學生制服（長袖）', folder: 'avaren_L', rarity: 'SR', wear: 'base' },
   { id: 'avaren-student-short', char: 'avaren', name: '學生制服（短袖）', folder: 'avaren_S', rarity: 'SR', wear: 'base' },
   { id: 'eldrin-student-long', char: 'eldrin', name: '學生制服（長袖）', folder: 'eldrin_L', rarity: 'SR', wear: 'base' },
   { id: 'eldrin-student-short', char: 'eldrin', name: '學生制服（短袖）', folder: 'eldrin_S', rarity: 'SR', wear: 'base' },
-  { id: 'eldrin-maid', char: 'eldrin', name: '女僕裝', folder: 'eldrin_M', rarity: 'SSR' },
+  { id: 'eldrin-maid', char: 'eldrin', name: '女僕裝', folder: 'eldrin_M', rarity: 'SSR', sortie: true },
 ];
 // 配件
 const COSTUME_ACCESSORIES = [
@@ -63,6 +64,7 @@ const COSTUME_ACCESSORIES = [
   { id: 'flower-blue-two', name: '藍色雙花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_blue/Head_blue flower two.png' } },
   { id: 'flower-white', name: '白色小花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_white/Head_white flower.png' } },
   { id: 'flower-white-two', name: '白色雙花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_white/Head_white flower two.png' } },
+  { id: 'maid-headdress', name: '女僕頭飾', slot: 'head', rarity: 'R', art: { front: 'images/costumes/01.head/maid_headdress/maid_headdress_01.png', side: 'images/costumes/01.head/maid_headdress/maid_headdress.png' } },
   { id: 'angel-wings', name: '天使小翅膀', slot: 'back', rarity: 'R', art: { front: 'images/costumes/04.back/angel_wings/Back_wing_front.png', side: 'images/costumes/04.back/angel_wings/Back_wing_side.png' } },
   { id: 'white-wings', name: '白色羽翼', slot: 'back', rarity: 'SR', art: { front: 'images/costumes/04.back/wings/wings_back.png', side: 'images/costumes/04.back/wings/wings_side.png', back: 'images/costumes/04.back/wings/wings_back.png' } },   // 沒有正面圖：正面用背面圖（翅膀在身體後面）
   { id: 'devil-wings', name: '惡魔翅膀', slot: 'back', rarity: 'SR', art: { front: 'images/costumes/04.back/devil_wings/Back_devil_front.png', side: 'images/costumes/04.back/devil_wings/Back_devil_side.png', back: 'images/costumes/04.back/devil_wings/Back_devil_back.png' } },
