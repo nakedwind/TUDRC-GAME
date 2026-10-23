@@ -89,19 +89,44 @@ function workshopColorize(text, st) {   // st：外觀設定（編輯器傳編�
 const workshopIconVars = (scale, x, y) => [scale && scale !== 100 ? '--ws-img-scale:' + scale / 100 : '', x ? '--ws-img-x:' + x + 'px' : '', y ? '--ws-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
 const workshopIconStyle = d => { const v = d ? workshopIconVars(d.iconScale, d.iconX, d.iconY) : ''; return v ? ' style="' + v + '"' : ''; };
 // 下方說明欄裡的圖片位移（infoImgX／infoImgY，px，每件分開）：正數＝往右／往下（--ws-info-img-x／--ws-info-img-y）
-const workshopInfoImgVars = (x, y) => [x ? '--ws-info-img-x:' + x + 'px' : '', y ? '--ws-info-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
-const workshopInfoImgStyle = d => { const v = d ? workshopInfoImgVars(d.infoImgX, d.infoImgY) : ''; return v ? ' style="' + v + '"' : ''; };
+// 圖片大小（infoImgSize，px＝圖的寬，高度照比例；沒寫＝原本的 88，武器 100）：用縮放畫，圖片框、文字位置都不會動（--ws-info-img-size）
+const workshopInfoImgVars = (x, y, size) => [x ? '--ws-info-img-x:' + x + 'px' : '', y ? '--ws-info-img-y:' + y + 'px' : '', size > 0 ? '--ws-info-img-size:' + Math.round(size) : ''].filter(Boolean).join(';');
+const workshopInfoImgStyle = d => { const v = d ? workshopInfoImgVars(d.infoImgX, d.infoImgY, d.infoImgSize) : ''; return v ? ' style="' + v + '"' : ''; };
+
+// ---- 開發／升級除了異質碎片，也要花經費（錢包的錢，G.money）----
+// 預設＝那一次要花的異質碎片 × WORKSHOP_MONEY_RATE，再取到 50 的倍數（例如 60 個碎片 → $900）；想整體調貴／調便宜改這個數字。
+// 每件可以在開發工坊編輯器另外填（設定檔 items[key].money；新增的裝備在 added 裡）：
+//   裝備 [開發, 升到 Lv2, …]、武器 [升到 Lv2, …]、彈匣 [升到 Lv2, …]（跟 cost 同一格對同一格；null＝照預設算）；子彈＝一個數字
+const WORKSHOP_MONEY_RATE = 15;
+const workshopMoneyAuto = shards => Math.max(0, Math.round((Number(shards) || 0) * WORKSHOP_MONEY_RATE / 50) * 50);
+// key＝工坊的 key、i＝第幾格（跟 cost 一樣）、shards＝這一次的異質碎片（算預設用）
+function workshopMoney(key, i, shards, cfg) {
+  const c = cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {});
+  const src = (Array.isArray(c.added) && c.added.find(a => a && a.id === key)) || (c.items || {})[key] || {};
+  const m = Array.isArray(src.money) ? src.money[i] : src.money;
+  return typeof m === 'number' && Number.isFinite(m) && m >= 0 ? Math.round(m) : workshopMoneyAuto(shards);
+}
+// 經費的框（按鈕下面那個小框，看起來不像按鈕）：-$1,500；short＝錢不夠（字變紅）
+function workshopMoneyHtml(key, money, attr, short, cfg) {
+  if (!(money > 0)) return '';
+  const txt = (typeof workshopInfoLabel === 'function' ? workshopInfoLabel(key, 'money', 'fmt', '-${money}', null, cfg) : '-${money}').replace(/\{money\}/g, money.toLocaleString('en-US'));
+  const o = workshopInfoPartsOf(key, cfg).money || {}, n = v => Number.isFinite(v) && v > 0 ? v : 0, s = [];   // 框的寬高、字級直接寫在框上
+  if (n(o.w)) s.push('width:' + o.w + 'px'); if (n(o.h)) s.push('height:' + o.h + 'px'); if (n(o.font)) s.push('font-size:' + o.font + 'px');
+  if (n(o.x) || Number.isFinite(o.y) && o.y) s.push('translate:' + (o.x || 0) + 'px ' + (o.y || 0) + 'px');
+  return '<div class="ws-money' + (short ? ' short' : '') + '" data-wsp="money"' + (s.length ? ' style="' + s.join(';') + '"' : '') + ' title="開發／升級要花的經費">' + txt.replace(/</g, '&lt;') + '</div>';
+}
 
 // ---- 下方說明欄的四塊，每件各自調位置、大小、字級（開發工坊編輯器每件的「下方說明欄的版面」）----
 // 存在設定檔 items[key].infoParts（新增的裝備存在 added 裡）：{ name: { x, y, w, h, font }, tag: {…}, desc: {…}, stats: {…}, btn: {…} }
 //   x／y＝位移（px，正數＝往右／往下）、w／h＝寬高（px，0／沒寫＝原本的）、font＝字級（px，0＝原本的）
 //   每一塊也可以改字（見下面 WORKSHOP_INFO_LABELS；名稱、說明照原本的欄位）
-const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）', desc: '說明', stats: '效果框（開發後／目前效果／取得方式）', btn: '按鈕（開發／升級）' };
+const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）', desc: '說明', stats: '效果框（開發後／目前效果／取得方式）', btn: '按鈕（開發／升級）', money: '經費框（按鈕下面的 -$1,500）' };
 // 每一塊可以改的字：[欄位, 什麼時候出現, 原本的字]；{lv}＝目前等級、{next}＝下一級
 const WORKSHOP_INFO_LABELS = {
   tag: [['dev', '還沒開發', '未開發'], ['field', '只能在戰鬥區域拿到、還沒拿到', '戰鬥區域取得'], ['lv', '拿到之後', 'Lv{lv}']],
   stats: [['dev', '還沒開發（效果框的標題）', '開發後（Lv1）'], ['now', '拿到之後', '目前效果（Lv{lv}）'], ['next', '還能升級時（下面那一格）', '升級後（Lv{next}）'], ['where', '只能在戰鬥區域拿到', '取得方式']],
   btn: [['dev', '開發按鈕（後面接費用）', '開發'], ['up', '升級按鈕（後面接費用）', '升級']],
+  money: [['fmt', '經費的寫法（{money}＝花多少錢，例如 1,500）', '-${money}']],
 };
 // 這一塊改過的字（沒改＝原本的字 fallback）；vars＝{ lv, next }
 function workshopInfoLabel(key, part, field, fallback, vars, cfg) {
@@ -182,6 +207,7 @@ function workshopCustomDef(a) {   // 設定檔裡一件新增的裝備 → 遊�
     iconScale: typeof a.iconScale === 'number' && a.iconScale > 0 ? a.iconScale : 100,
     iconX: Number.isFinite(a.iconX) ? a.iconX : 0, iconY: Number.isFinite(a.iconY) ? a.iconY : 0,
     infoImgX: Number.isFinite(a.infoImgX) ? a.infoImgX : 0, infoImgY: Number.isFinite(a.infoImgY) ? a.infoImgY : 0,   // 下方說明欄裡的圖片位移
+    infoImgSize: Number.isFinite(a.infoImgSize) && a.infoImgSize > 0 ? a.infoImgSize : 0,   // 下方說明欄裡的圖片大小（px，0＝原本的）
     cost: WORKSHOP_LV_INDEX.map(i => cost[i] ?? [50, 100, 160, 240, 340][i] ?? 340),   // [開發, 升到 Lv2, …, 升到最高級]
     stat: lv => lv.text, levels: WORKSHOP_LV_INDEX.map(i => ({ text: String(texts[i] ?? '') })),
     custom: true,
@@ -261,6 +287,7 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
     const o = items[key]; if (!o) continue;
     if (typeof o.iconScale === 'number' && o.iconScale > 0) def.iconScale = o.iconScale;   // 開發工坊裡圖片的大小（%）
     for (const k of ['iconX', 'iconY', 'infoImgX', 'infoImgY']) if (Number.isFinite(o[k])) def[k] = o[k];   // 圖片位移（px）：開發工坊格子裡、下方說明欄裡
+    if (Number.isFinite(o.infoImgSize) && o.infoImgSize > 0) def.infoImgSize = o.infoImgSize;   // 下方說明欄裡的圖片大小（px）
     // 舊的設定檔只有「還沒拿到時」的說明（desc）：現在說明只有一段，就當成這件的說明（ownedDesc）
     if (typeof o.desc === 'string' && o.desc !== '' && !(typeof o.ownedDesc === 'string' && o.ownedDesc !== '')) def.ownedDesc = o.desc;
     for (const f of WORKSHOP_TEXT_FIELDS) if (typeof o[f] === 'string' && o[f] !== '') def[f] = o[f];
@@ -315,6 +342,8 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
 //   彈匣：name 名稱、desc 說明、slots 每一級裝得下幾種子彈 [Lv1, Lv2, …]、cost 升級費用 [升到 Lv2, …]
 const WORKSHOP_MAG_DESC = '在背包的「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪就換得到。只有一般子彈不佔格子；照明彈也需要一格。';
 const WORKSHOP_AMMO_BASE = {};   // 還沒套用設定檔前的原始資料（編輯器的「恢復原本」用）
+// 子彈、彈匣的圖片：開發工坊格子裡的大小（iconScale，%）、位移（iconX／iconY），下方說明欄的位移、大小（infoImgX／infoImgY／infoImgSize）
+function workshopAmmoImg(d, o) { for (const k of ['iconScale', 'iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize']) if (typeof o[k] === 'number' && Number.isFinite(o[k])) d[k] = o[k]; }
 (function applyWorkshopAmmo() {
   const items = (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.items) || {};
   const str = v => typeof v === 'string' && v !== '', num = v => typeof v === 'number' && Number.isFinite(v) && v >= 0;
@@ -325,6 +354,7 @@ const WORKSHOP_AMMO_BASE = {};   // 還沒套用設定檔前的原始資料（�
     for (const f of ['name', 'image', 'desc']) if (str(o[f])) b[f] = o[f];
     if (num(o.cost)) b.cost = Math.round(o.cost);
     if (num(o.max) && o.max >= 1) b.max = Math.round(o.max);
+    workshopAmmoImg(b, o);
   }
   if (typeof MAGAZINE !== 'undefined') {
     if (!MAGAZINE.desc) MAGAZINE.desc = WORKSHOP_MAG_DESC;
@@ -334,6 +364,7 @@ const WORKSHOP_AMMO_BASE = {};   // 還沒套用設定檔前的原始資料（�
       for (const f of ['name', 'desc']) if (str(o[f])) MAGAZINE[f] = o[f];
       if (Array.isArray(o.slots)) o.slots.forEach((n, i) => { if (num(n) && n >= 1 && i < MAGAZINE.slots.length) MAGAZINE.slots[i] = Math.round(n); });
       if (Array.isArray(o.cost)) o.cost.forEach((n, i) => { if (num(n) && i < MAGAZINE.cost.length) MAGAZINE.cost[i] = Math.round(n); });
+      workshopAmmoImg(MAGAZINE, o);
     }
   }
 })();

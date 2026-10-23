@@ -2368,6 +2368,9 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-info-text { min-width: 0; display: flex; flex-direction: column; gap: 5px; overflow: visible; }   /* 不裁切：名稱、說明、效果框各自移出框外（開發工坊編輯器的「下方說明欄的版面」）也看得到 */
 /* 說明欄裡的圖片、文字各自移動：圖片每件分開（編輯器每件的「下方說明欄的圖片位移」，--ws-info-img-*），文字全部一起（「外觀 → 下方說明欄」，--ws-info-text-*）；按鈕是 --ws-act-* */
 .ws-info .bag-detail-image { translate: var(--ws-info-img-x, 0px) var(--ws-info-img-y, 0px); }
+/* 說明欄的圖片大小（每件分開，編輯器的「下方說明欄的圖片大小」，--ws-info-img-size＝圖的寬 px）：用縮放，圖片框和旁邊的文字不會被推動 */
+.ws-info .bag-detail-image > * { transform: scale(calc(var(--ws-info-img-size, 88) / 88)); }
+.ws-info .bag-detail-image > img.weapon { transform: scale(calc(var(--ws-info-img-size, 100) / 100)); }
 .ws-info-text { translate: var(--ws-info-text-x, 0px) var(--ws-info-text-y, 0px); }
 .ws-info h3 { margin: 0; color: #f3f6f9; font-size: 17px; }
 .ws-info .bag-gear-heading { display: flex; align-items: center; flex-wrap: wrap; gap: 4px 10px; }
@@ -2386,6 +2389,12 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-info i.ws-num { font-style: normal; color: var(--ws-num-color, #CF9447); }
 .ws-info i.ws-where, .ws-info i.ws-item { font-style: normal; color: var(--ws-where-color, #A958E2); }
 .ws-info .bag-gear-stat.next i.ws-num { color: var(--ws-num-color, #CF9447); }   /* 升級後（綠框）裡的數字也是橘色，跟目前效果一樣 */
+/* 開發／升級要花的經費：金色按鈕下面的小框（細框線、圓角、透明底，看起來不像按鈕，點不到）。
+   放在按鈕那一塊裡面但不佔位置（absolute），按鈕原本的位置不會被擠動；位置、大小、字級在開發工坊編輯器每件的「經費框」調 */
+.ws-info .bag-actions { position: relative; }
+.ws-money { position: absolute; top: calc(100% + 8px + var(--ws-act-y, 0px));   /* 跟著按鈕本身的上下位移（外觀 → 升級／開發按鈕） */ left: 0; right: 0; width: fit-content; margin: 0 auto; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
+  padding: 3px 12px; border: 1px solid rgba(233,189,98,.45); border-radius: 999px; background: transparent; color: #e9c77e; font: 700 12px/1.4 Consolas, "Microsoft JhengHei", sans-serif; white-space: nowrap; pointer-events: none; }
+.ws-money.short { border-color: rgba(255,120,110,.5); color: #ff9d8f; }   /* 經費不夠：變紅 */
 /* 說明欄五塊每件各自的字級（開發工坊編輯器每件的「下方說明欄的版面」；--wsp-font，有調才套用）。位移、寬高直接寫在那一塊上（js/workshop-config.js 的 workshopInfoPartAttr） */
 .ws-info h3[style*="--wsp-font"], .ws-info .bag-desc[style*="--wsp-font"], .ws-info [data-wsp][style*="--wsp-font"] .bag-tag,
 .ws-info [data-wsp][style*="--wsp-font"] .bag-gear-stat b { font-size: var(--wsp-font); }

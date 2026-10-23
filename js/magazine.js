@@ -44,30 +44,32 @@ function onMagazineSortie() {
 
 // ---- 開發工坊（js/equipment.js 的 workshopEntries、workshopBuy 呼叫）----
 // 子彈：可開發的（develop）放「可開發」分頁，開發好了放「可升級」分頁看說明（子彈不會升級）；彈匣：放「可升級」分頁
+// 開發工坊格子裡的圖：套用開發工坊編輯器調的大小、位移（js/workshop-config.js）
+const wsAmmoIcon = (h, d) => { const st = typeof workshopIconStyle === 'function' ? workshopIconStyle(d) : ''; return st ? h.replace(/^<(img|i)/, '<$1' + st) : h; };
 function magazineWorkshopEntries() {
   const bullets = Object.entries(BULLETS).filter(([id, b]) => b.source === 'develop' && !b.removed).map(([id, b]) => {
     const have = bulletOwned(id);
-    return { key: 'b:' + id, kind: 'bullet', def: b, name: b.name, lv: have ? 1 : 0, max: 1, icon: bulletIcon(b, 'ws-bullet-img'), image: b.image, emoji: b.icon,
+    return { key: 'b:' + id, kind: 'bullet', def: b, name: b.name, lv: have ? 1 : 0, max: 1, icon: wsAmmoIcon(bulletIcon(b, 'ws-bullet-img'), b), image: b.image, emoji: b.icon,
       tag: '子彈', worn: magazineCarries(id), about: b.desc || '', stat: () => '最多帶 ' + b.max + ' 發・出勤時自動補滿' + (have ? '・到背包的「武器」分頁裝進彈匣' : ''),
-      canDev: !have, where: '', devCost: b.cost || 0, upCost: 0, buy: 'bd:' + id };
+      canDev: !have, where: '', devCost: b.cost || 0, upCost: 0, devMoney: wsMoney('b:' + id, 0, b.cost || 0), buy: 'bd:' + id };   // devMoney＝開發要花的經費
   });
   const m = magState();
-  const mag = { key: 'm:magazine', kind: 'magazine', def: MAGAZINE, name: MAGAZINE.name, lv: m.lv, max: MAGAZINE.slots.length, icon: '<i>' + MAGAZINE.icon + '</i>', image: null, emoji: MAGAZINE.icon,
+  const mag = { key: 'm:magazine', kind: 'magazine', def: MAGAZINE, name: MAGAZINE.name, lv: m.lv, max: MAGAZINE.slots.length, icon: wsAmmoIcon('<i>' + MAGAZINE.icon + '</i>', MAGAZINE), image: null, emoji: MAGAZINE.icon,
     tag: '彈匣', worn: false, about: MAGAZINE.desc || '', stat: n => '彈匣 ' + MAGAZINE.slots[n - 1] + ' 格',
-    canDev: false, where: '', upCost: MAGAZINE.cost[m.lv - 1] || 0, buy: 'mg:magazine' };
+    canDev: false, where: '', upCost: MAGAZINE.cost[m.lv - 1] || 0, upMoney: m.lv < MAGAZINE.slots.length ? wsMoney('m:magazine', m.lv - 1, MAGAZINE.cost[m.lv - 1] || 0) : 0, buy: 'mg:magazine' };
   return { bullets, mag };
 }
 function magazineWorkshopBuy(kind, id) {
   if (kind === 'bd') {
     const b = BULLETS[id]; if (!b || b.source !== 'develop' || bulletOwned(id)) return false;
-    if (!spendCrystals(b.cost || 0)) return true;
+    if (!spendWorkshop(b.cost || 0, wsMoney('b:' + id, 0, b.cost || 0))) return true;   // 異質碎片＋經費（js/equipment.js）
     addBullets(id, b.max); SFX.play('achievement', .7, 'equip-up');
     showWorkshopToast('🎁 諾亞開發好了「' + b.name + '」，到背包的武器分頁裝進彈匣');
     return true;
   }
   if (kind === 'mg') {
     const m = magState(); if (m.lv >= MAGAZINE.slots.length) return true;
-    if (!spendCrystals(MAGAZINE.cost[m.lv - 1])) return true;
+    if (!spendWorkshop(MAGAZINE.cost[m.lv - 1], wsMoney('m:magazine', m.lv - 1, MAGAZINE.cost[m.lv - 1]))) return true;
     m.lv++; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
     showWorkshopToast('🔧 彈匣升級：可以裝 ' + magSlotCount() + ' 種子彈');
     return true;

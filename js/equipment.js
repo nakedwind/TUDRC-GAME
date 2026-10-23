@@ -686,21 +686,40 @@ function spendCrystals(n) {
   if (typeof addStat === 'function') addStat('crystalsSpent', n);   // 成就：花掉的異質碎片
   return true;
 }
+// 開發／升級要花的：異質碎片＋經費（經費見 js/workshop-config.js 的 workshopMoney）。兩樣都夠才一起扣，不會只扣一半
+function spendWorkshop(shards, money) {
+  money = Math.max(0, Math.round(Number(money) || 0));
+  const cash = Math.floor(G.money || 0);
+  if (money > cash) {
+    sfx('error');
+    const short = (money - cash).toLocaleString('en-US');
+    if (workshopOpen) showWorkshopToast('經費不夠（還差 <b>$' + short + '</b>）', true); else systemNotice('經費不夠（還差 $' + short + '）', true);
+    return false;
+  }
+  if (!spendCrystals(shards)) return false;
+  if (money) {
+    G.money -= money;
+    if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE && !window.TEST_MODE && typeof walletSet === 'function') walletSet(G.money);   // 基地裡花的：馬上存回錢包
+    if (typeof updateHUD === 'function') updateHUD();
+  }
+  return true;
+}
+const wsMoney = (key, i, shards) => typeof workshopMoney === 'function' ? workshopMoney(key, i, shards) : 0;
 function workshopBuy(kind, id) {
   if (typeof magazineWorkshopBuy === 'function' && magazineWorkshopBuy(kind, id)) { renderWorkshop(); return; }   // 子彈開發、彈匣升級（js/magazine.js）
   if (kind === 'dev') {
     const def = equipDef(id); if (!def || equipState.owned[id] || def.source !== 'develop') return;
-    if (!spendCrystals(def.cost[0])) return;
+    if (!spendWorkshop(def.cost[0], wsMoney(def.id, 0, def.cost[0]))) return;
     grantEquipment(id, '諾亞開發好了');
     showWorkshopToast('🎁 諾亞開發好了「' + def.name + '」');
   } else if (kind === 'up') {
     const def = equipDef(id), lv = equipState.owned[id]; if (!def || !lv || lv >= def.levels.length) return;
-    if (!spendCrystals(def.cost[lv])) return;
+    if (!spendWorkshop(def.cost[lv], wsMoney(def.id, lv, def.cost[lv]))) return;
     equipState.owned[id] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
     showWorkshopToast('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
   } else if (kind === 'wp') {
     const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= w.levels.length) return;
-    if (!spendCrystals(w.cost[lv - 1])) return;
+    if (!spendWorkshop(w.cost[lv - 1], wsMoney('w:' + id, lv - 1, w.cost[lv - 1]))) return;
     equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); SFX.play('achievement', .7, 'equip-up');
     showWorkshopToast('🔧 「' + w.name + '」升到 Lv' + (lv + 1));
   }
@@ -724,14 +743,15 @@ function workshopEntries() {   // 所有裝備、武器整理成同一種格式
     return { key: 'g:' + def.id, kind: 'gear', def, name: def.name, lv, max: def.levels.length, icon: wsIcon(def), image: def.image, emoji: def.icon,
       tag: (typeof GEAR_KIND_NAME !== 'undefined' && GEAR_KIND_NAME[def.kind]) || '裝備', worn: Object.values(equipState.equipped).includes(def.id),
       about: def.ownedDesc || def.desc || '', stat: n => def.stat(def.levels[n - 1]),
-      canDev: !lv && def.source === 'develop', where: def.where, devCost: def.cost[0], upCost: lv ? def.cost[lv] : 0, buy: lv ? 'up:' + def.id : 'dev:' + def.id };
+      canDev: !lv && def.source === 'develop', where: def.where, devCost: def.cost[0], upCost: lv ? def.cost[lv] : 0,
+      devMoney: wsMoney(def.id, 0, def.cost[0]), upMoney: lv && lv < def.levels.length ? wsMoney(def.id, lv, def.cost[lv]) : 0, buy: lv ? 'up:' + def.id : 'dev:' + def.id };
   });
   const weapons = Object.entries(WEAPON_UPGRADES).filter(([k, w]) => !w.removed && k === 'pistol').map(([k, w]) => {   // 只有手槍能升級（其他槍改成子彈了）
     const lv = equipState.weapons[k] || 0;
     return { key: 'w:' + k, kind: 'weapon', def: w, name: w.name, lv, max: w.levels.length, icon: wsIcon(w), image: w.image, emoji: w.icon,
       tag: '武器', worn: Object.values(equipState.loadout).includes(k),
       about: w.ownedDesc || w.desc || '', stat: n => w.stat(w.levels[n - 1]),
-      canDev: false, where: w.where || '', upCost: lv ? w.cost[lv - 1] : 0, buy: 'wp:' + k };
+      canDev: false, where: w.where || '', upCost: lv ? w.cost[lv - 1] : 0, upMoney: lv && lv < w.levels.length ? wsMoney('w:' + k, lv - 1, w.cost[lv - 1]) : 0, buy: 'wp:' + k };
   });
   const extra = typeof magazineWorkshopEntries === 'function' ? magazineWorkshopEntries() : { bullets: [], mag: null };   // 子彈、彈匣（js/magazine.js）
   return { gear, weapons, bullets: extra.bullets, mags: extra.mag ? [extra.mag] : [] };
@@ -773,8 +793,11 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
       stats = '<div class="bag-gear-stat where"><small>' + L('stats', 'where', '取得方式') + '</small><b>' + wsColor(e.where || '只能在戰鬥區域取得') + '</b></div>';
       btn = '<button type="button" class="ws-btn" disabled>尚未取得</button>';
     }
+    // 經費框：這一次開發／升級要花多少錢（能按的時候才有；錢不夠字變紅）
+    const cash = e.lv ? (e.kind !== 'bullet' && e.lv < e.max ? e.upMoney || 0 : 0) : e.canDev ? e.devMoney || 0 : 0;
+    const money = typeof workshopMoneyHtml === 'function' ? workshopMoneyHtml(wk, cash, '', cash > Math.floor(G.money || 0)) : '';
     info = '<div class="bag-detail-image"' + workshopInfoImgStyle(e.def) + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + e.name + '</h3><div class="bag-tags"' + part('tag') + '>' + tags + '</div></div>' +
-      (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + (typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(wk, btn) : btn) + '</div>';   // 按鈕本身的寬高字級
+      (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + (typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(wk, btn) : btn) + money + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
   }
   const count = tab => [...all.gear, ...all.weapons, ...all.bullets, ...all.mags].filter(x => tabOf(x, tab)).length;
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '⚙️ 可開發'], ['up', WS_UP_ICON + ' 可升級']].map(([id, label]) =>

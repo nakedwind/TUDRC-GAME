@@ -7,8 +7,9 @@ function workshopConfigText(obj) {
   return '/* ===== 諾亞的開發工坊：裝備文字、圖片與外觀（由「🔧 開發工坊編輯器」匯出，整段覆蓋即可）=====\n' +
     '   items：要改哪件裝備／武器（沒寫的就用 data/equipment.js 原本的設定）\n' +
     '     key：裝備用 id（例如 headlamp）；武器前面加 w:（例如 w:pistol）\n' +
-    '     name 名稱、image 圖片路徑、iconScale 圖片大小（%，100＝原本）、iconX／iconY 圖片位移（px，正數＝往右／往下）、infoImgX／infoImgY 下方說明欄裡的圖片位移（px）、ownedDesc 說明（desc 舊的「還沒拿到時」說明，已經不用）、where 取得方式的說明（整段照寫的顯示，「戰鬥區域」等字會是紫色；只能在戰鬥區域取得的才會用到）\n' +
-    '     infoParts：下方說明欄四塊各自的位置、大小、字級 { head 名稱＋標籤, desc 說明, stats 效果框, btn 按鈕：{ x, y, w, h, font }（px） }（子彈、彈匣也可以寫）\n' +
+    '     name 名稱、image 圖片路徑、iconScale 圖片大小（%，100＝原本）、iconX／iconY 圖片位移（px，正數＝往右／往下）、infoImgX／infoImgY 下方說明欄裡的圖片位移（px）、infoImgSize 下方說明欄裡的圖片大小（px＝圖的寬，高度照比例；沒寫＝原本的 88，武器 100）、ownedDesc 說明（desc 舊的「還沒拿到時」說明，已經不用）、where 取得方式的說明（整段照寫的顯示，「戰鬥區域」等字會是紫色；只能在戰鬥區域取得的才會用到）\n' +
+    '     infoParts：下方說明欄各塊的位置、大小、字級 { name 名稱, tag 標籤, desc 說明, stats 效果框, btn 按鈕, money 經費框：{ x, y, w, h, font }（px），也可以寫改過的字 }（子彈、彈匣也可以寫）\n' +
+    '     money：開發／升級要花的經費（跟 cost 同一格對同一格，null＝照異質碎片自動算；子彈是一個數字）\n' +
     '     levels：Lv1～Lv5 的效果說明文字（空白＝照數值自動產生）\n' +
     '     values：Lv1～Lv5 改過的實際數值（例如 {"dmg": 7}；沒寫的＝data/equipment.js 原本的；填文字的話只顯示在效果說明）\n' +
     '     cost：要花幾個異質碎片（裝備：[開發, 升到 Lv2, …, 升到 Lv5]；武器：[升到 Lv2, …, 升到 Lv5]；null／沒寫的＝原本的）\n' +
