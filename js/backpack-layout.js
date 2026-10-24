@@ -97,14 +97,14 @@ function applyItemTexts() {
 // ・換行只留在背包：背包編輯器的說明（ITEM_TEXTS）跟工坊的說明拿掉換行後一樣＝背包照背包的換行顯示（bagDesc）；
 //   不一樣（工坊後來改了字）＝背包也照工坊的。
 // ・要等 js/workshop-config.js 載入之後才算（遊戲裡這個檔比較早載入，那邊載完會再呼叫一次 applyItemTexts）。
-function bagWorkshopEntries() {   // [背包的物品 id, 開發工坊的 key, 資料]
+function bagWorkshopTextEntries() {   // [背包的物品 id, 開發工坊的 key, 資料]
   const out = [];
   if (typeof BULLETS !== 'undefined') for (const [id, d] of Object.entries(BULLETS)) if (isWorkshopBullet(d)) out.push(['bullet:' + id, 'b:' + id, d]);
   if (typeof WEAPON_UPGRADES !== 'undefined') for (const [id, w] of Object.entries(WEAPON_UPGRADES)) out.push(['gear:w:' + id, 'w:' + id, w]);
   if (typeof EQUIPMENT !== 'undefined') for (const d of EQUIPMENT) out.push(['gear:' + d.id, d.id, d]);
   return out;
 }
-const bagWorkshopKey = itemId => { const e = bagWorkshopEntries().find(x => x[0] === itemId); return e ? e[1] : null; };
+const bagWorkshopKey = itemId => { const e = bagWorkshopTextEntries().find(x => x[0] === itemId); return e ? e[1] : null; };
 // 工坊沒改過時原本的名稱、說明
 function bagWorkshopBase(itemId, key) {
   if (key.startsWith('b:')) return itemTextOriginal.get(itemId) || {};
@@ -121,7 +121,7 @@ function bagWorkshopNow(itemId, key) {
 }
 function applyWorkshopTexts() {
   if (typeof WORKSHOP_CONFIG === 'undefined' || typeof WORKSHOP_BASE === 'undefined' || typeof workshopTextGet !== 'function') return;
-  for (const [itemId, key, def] of bagWorkshopEntries()) {
+  for (const [itemId, key, def] of bagWorkshopTextEntries()) {
     const now = bagWorkshopNow(itemId, key), o = ITEM_TEXTS[itemId] || {};
     if (now.name) def.name = now.name;
     if (workshopDescField(key) === 'desc') { if (now.desc) def.desc = now.desc; else delete def.desc; }

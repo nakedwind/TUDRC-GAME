@@ -1,6 +1,7 @@
 /* ===== Y102隊員裝備（資料在 data/squad-gear.js）=====
    ・溫特在便利商店「隊員裝備」分頁用經費買 → 放進背包（背包多一個「隊員裝備」分頁）
    ・T-Pad「Y102隊員」→ 裝備頁：每位隊員 3 格（不分種類）；穿上＝從背包拿走一件，卸下＝放回背包（一件只能給一個人穿）
+   ・同一種裝備，一位隊員只能穿一格（買了兩件也不能疊在同一人身上）
    ・穿著的裝備數值在 js/skills.js 的 applySkills() 一起套到 TYPES
    存檔：localStorage（SQUAD_GEAR_STORE）＝ { equip: { 隊員: [裝備 id 或 null ×3] } }
 */
@@ -78,11 +79,14 @@ function squadGearOf(type) {
   const list = squadGearState.equip[type] || [];
   return Array.from({ length: SQUAD_GEAR_SLOTS }, (_, i) => (list[i] && squadGearById(list[i]) ? list[i] : null));
 }
-function squadGearMods(type) { return squadGearOf(type).flatMap(id => (id && squadGearById(id).mods) || []); }
+function squadGearMods(type) { return [...new Set(squadGearOf(type).filter(Boolean))].flatMap(id => squadGearById(id).mods || []); }   // 同一種只算一次（舊存檔可能疊過）
+// 這位隊員的另一格已經穿著同一種裝備嗎？回傳那一格（0 起算），沒有＝-1
+const squadGearWornAt = (type, id, slot) => squadGearOf(type).findIndex((g, i) => g === id && i !== slot);
 // 穿上：背包裡要有一件；那一格原本有穿的放回背包
 function equipSquadGear(type, slot, id) {
   if (!bagCanManageEquipment()) { systemNotice('請到營地帳篷調整隊員物資', true); return false; }
   if (!squadGearById(id) || typeof supplyInventory === 'undefined' || !(supplyInventory.get(id) > 0)) return false;
+  if (squadGearWornAt(type, id, slot) >= 0) { systemNotice('同一件裝備只能穿一格', true); return false; }
   const list = squadGearOf(type), old = list[slot];
   if (!bagCanApply([[id, -1], ...(old ? [[old, 1]] : [])])) { systemNotice('背包空間不足，無法換下原本的裝備', true); return false; }
   const n = supplyInventory.get(id); if (n <= 1) supplyInventory.delete(id); else supplyInventory.set(id, n - 1);

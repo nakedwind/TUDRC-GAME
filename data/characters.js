@@ -213,7 +213,7 @@ const CHARACTERS = {
     "combat": {
       "rank": "B",
       "role": "醫療支援",
-      "ability": "疏導",
+      "ability": "治癒",
       "range": 5,
       "aggroRange": 6,
       "dmg": 10,
@@ -253,7 +253,7 @@ const CHARACTERS = {
     "combat": {
       "rank": "A",
       "role": "戰鬥嚮導",
-      "ability": "疏導",
+      "ability": "屏障",
       "range": 6,
       "aggroRange": 8,
       "dmg": 15,
@@ -382,7 +382,7 @@ const CHARACTERS = {
     "combat": {
       "rank": "A",
       "role": "疏導支援",
-      "ability": "疏導",
+      "ability": "淨化",
       "range": 3,
       "aggroRange": 6,
       "dmg": 0,
