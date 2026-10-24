@@ -66,6 +66,14 @@ const SFX = (() => {
     vendingOpen: '開販賣機.mp3',        // 打開販賣機（js/shop.js）
     vendingCheckout: '販賣機結帳.mp3',  // 販賣機結帳、飲料掉出來（js/shop.js）
     gachaDrop: '扭蛋掉落.mp3',          // 轉扭蛋：扭蛋掉出來（js/gacha.js）
+    // 扭蛋演出（js/gacha.js；音檔用 tools/make_gacha_sfx.py 合成）
+    gachaCrank: '獎勵/扭蛋/扭蛋轉動.wav',     // 按下轉扭蛋：投幣＋轉把手
+    gachaCharge: '獎勵/扭蛋/扭蛋集氣.wav',    // SR／SSR 搖蛋集氣
+    gachaOpen: '獎勵/扭蛋/開蛋.wav',          // 普通開蛋
+    gachaSR: '獎勵/扭蛋/SR出貨.wav',          // 出 SR
+    gachaUpgrade: '獎勵/扭蛋/SSR升格.wav',    // SSR 搖到一半：金色變彩虹
+    gachaSSR: '獎勵/扭蛋/SSR出貨.wav',        // 出 SSR
+    gachaHero: '獎勵/扭蛋/SSR獨照.wav',       // SSR 獨照展示
     favorUp: '獎勵/升等.mp3',
     mineGrind: '設施/打磨.mp3',
     crystalGet: '獎勵/得到碎片.mp3',

@@ -1,18 +1,19 @@
 // ============================================================
-//  營地物資箱：放醫療包、杏仁水給嚮導用（溫特也可以拿、可以補）
+//  營地物資箱：放醫療包、杏仁水、急救包（溫特也可以拿、可以補；嚮導拿杏仁水和急救包）
 //  ・每張戰鬥地圖一個箱子（營地合圖裡彈藥箱右邊）。第一次在這張地圖出任務時補滿 start 的數量，
 //    之後就一直維持（用掉就少了，中止任務再回來也不會補），要溫特自己放東西進去。
-//  ・嚮導身上最多帶 carry 個醫療包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血花醫療包。
+//  ・嚮導身上最多帶 carry 個急救包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血（隊友和自己）花急救包。
 //    其中一樣用完就自己走回物資箱拿；箱子裡也沒有的話，頭上冒思考泡泡顯示缺什麼。
 //  ・存檔：localStorage（CAMP_SUPPLY_KEY），依地圖分開存；開始新遊戲會清掉（js/new-game.js）。
 // ============================================================
 const CAMP_SUPPLY = {
   slots: 20,                                   // 箱子幾格（一格放一個）
-  items: ['medkit', 'almond-water'],           // 能放什麼
-  start: { medkit: 10, 'almond-water': 10 },   // 第一次出任務時箱子裡有多少
+  items: ['medkit', 'almond-water', 'firstaid'],             // 能放什麼
+  start: { medkit: 7, 'almond-water': 6, firstaid: 7 },      // 第一次出任務時箱子裡有多少
+  guideItems: ['firstaid', 'almond-water'],                   // 嚮導身上帶的（醫療包是給溫特自己用的）
   carry: 2,                                    // 嚮導每樣最多帶幾個
-  minTaint: 15,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
-  minHeal: 15,                                 // 隊員少多少血，嚮導才會花一個醫療包補血
+  minTaint: 30,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
+  minHeal: 30,                                 // 隊員少多少血，嚮導才會花一個急救包補血
   sootheMul: 2,                                // 疏導量倍率（原本：艾德林一次清 15）
   art: { full: 'images/field-camp/field-base-02.png', empty: 'images/field-camp/field-base-03.png' },   // 疊在營地合圖上的箱子（同樣 440×320）
   rect: [232, 100, 282, 170],                  // 箱子在營地合圖裡的位置（圖片像素：左、上、右、下）
@@ -27,6 +28,10 @@ const campSupplyMapId = () => (MAP && (MAP.id || MAP.name)) || 'map';
 function campBox() {
   const id = campSupplyMapId();
   if (!campSupplyData[id]) { campSupplyData[id] = { ...CAMP_SUPPLY.start }; saveCampSupply(); }
+  else if (CAMP_SUPPLY.items.some(k => !(k in campSupplyData[id]))) {   // 舊存檔的箱子沒有後來加的物品（急救包）：補上初始數量
+    for (const k of CAMP_SUPPLY.items) if (!(k in campSupplyData[id])) campSupplyData[id][k] = CAMP_SUPPLY.start[k] || 0;
+    saveCampSupply();
+  }
   return campSupplyData[id];
 }
 const campBoxTotal = () => CAMP_SUPPLY.items.reduce((sum, k) => sum + (campBox()[k] || 0), 0);
@@ -50,14 +55,14 @@ function campSupplySpot() {
 // ---- 嚮導身上的補給 ----
 function guideKit(t) {
   if (!t.kit) {   // 這次出勤剛開始：從箱子拿（人就在營地）
-    t.kit = { medkit: 0, 'almond-water': 0 };
+    t.kit = { firstaid: 0, 'almond-water': 0 };
     if (!MAP_SAFE && campSupplySpot()) refillGuideKit(t, true);
   }
   return t.kit;
 }
 function refillGuideKit(t, silent) {
   const box = campBox(), got = [];
-  for (const k of CAMP_SUPPLY.items) {
+  for (const k of CAMP_SUPPLY.guideItems) {
     const n = Math.min(CAMP_SUPPLY.carry - (t.kit[k] || 0), box[k] || 0);
     if (n > 0) { t.kit[k] += n; box[k] -= n; got.push(itemById(k).name + '×' + n); }
   }
@@ -67,10 +72,10 @@ function refillGuideKit(t, silent) {
 }
 // 杏仁水用來恢復 SP；沒有水時，只要 SP 足夠仍能疏導。
 const guideCanSoothe = t => guideSPPractice() || guideSP(t) >= guideSPCost();
-const guideCanHeal = t => !MAP_SAFE ? (guideKit(t).medkit || 0) > 0 : true;
+const guideCanHeal = t => !MAP_SAFE ? (guideKit(t).firstaid || 0) > 0 : true;
 function guideUse(t, k) { if (MAP_SAFE) return; const kit = guideKit(t); kit[k] = Math.max(0, (kit[k] || 0) - 1); }
 // 缺什麼（身上用完的）
-const guideMissing = t => CAMP_SUPPLY.items.filter(k => (guideKit(t)[k] || 0) <= 0);
+const guideMissing = t => CAMP_SUPPLY.guideItems.filter(k => (guideKit(t)[k] || 0) <= 0);
 
 // ---- 嚮導自己回箱子拿（js/sentry.js 呼叫；回傳 true＝這一幀在走去拿，不做別的）----
 function guideSupplyStep(t, dt) {
@@ -185,7 +190,7 @@ function renderCampSupply() {
         '<button type="button" data-supply-take="' + k + '"' + ((box[k] || 0) <= 0 ? ' disabled' : '') + '>拿 1 個</button>' +
         '<button type="button" data-supply-put="' + k + '"' + (bag <= 0 || full ? ' disabled' : '') + '>放 1 個</button></div>';
     }).join('') + '</div>' +
-    (guides.length ? '<footer>' + guides.map(t => TYPES[t.type].name + '身上：醫療包 ' + t.kit.medkit + '・杏仁水 ' + t.kit['almond-water']).join('　') + '</footer>' : '') +
+    (guides.length ? '<footer>' + guides.map(t => TYPES[t.type].name + '身上：急救包 ' + (t.kit.firstaid || 0) + '・杏仁水 ' + t.kit['almond-water']).join('　') + '</footer>' : '') +
     '</section>';
 }
 window.addEventListener('keydown', e => {

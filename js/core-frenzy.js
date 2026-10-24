@@ -23,6 +23,7 @@ function updateCoreFrenzy(dt) {
   if (!G || !G.enemies) return;
   const on = coreFrenzyActive();
   for (const e of G.enemies) {
+    if (e.elite) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js）
     if (e.coreGiveUpT > 0) e.coreGiveUpT -= dt;
     if (on && !e.frenzy && e.hp > 0) {
       e.frenzy = { speed: e.speed, sentryDamage: e.sentryDamage, playerDamage: e.playerDamage };
@@ -88,6 +89,24 @@ function drawCoreBossUI(ctx, cv) {
     grad.addColorStop(0, c.phase === 2 ? '#ff3f9a' : '#7b3cff'); grad.addColorStop(1, c.phase === 2 ? '#ff8ad8' : '#c78bff');
     ctx.fillStyle = hit ? '#ffffff' : grad; ctx.fillRect(x, y, w * ratio, h);
     ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;   // 每 10% 一條刻度
+    for (let k = 1; k < 10; k++) { ctx.beginPath(); ctx.moveTo(x + w * k / 10, y); ctx.lineTo(x + w * k / 10, y + h); ctx.stroke(); }
+    ctx.restore();
+  });
+  // 菁英怪的血條：接在核心血條下面（js/elite-bird-head.js）
+  const elites = typeof eliteBossBars === 'function' ? eliteBossBars() : [];
+  elites.slice(0, 2).forEach((bar, j) => {
+    const i = Math.min(3, awake.length) + j;
+    const w = Math.min(520, cv.width * .45), h = 14, x = (cv.width - w) / 2, y = 58 + i * 40;
+    ctx.save();
+    ctx.font = 'bold 15px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+    ctx.strokeText(bar.label, cv.width / 2, y - 3); ctx.fillStyle = bar.text; ctx.fillText(bar.label, cv.width / 2, y - 3);
+    ctx.fillStyle = 'rgba(16,10,4,.85)'; ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
+    ctx.strokeStyle = bar.frame; ctx.lineWidth = 2; ctx.strokeRect(x - 3, y - 3, w + 6, h + 6);
+    const grad = ctx.createLinearGradient(x, 0, x + w, 0);
+    grad.addColorStop(0, bar.colors[0]); grad.addColorStop(1, bar.colors[1]);
+    ctx.fillStyle = bar.hit ? '#ffffff' : grad; ctx.fillRect(x, y, w * Math.max(0, bar.ratio), h);
+    ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;
     for (let k = 1; k < 10; k++) { ctx.beginPath(); ctx.moveTo(x + w * k / 10, y); ctx.lineTo(x + w * k / 10, y + h); ctx.stroke(); }
     ctx.restore();
   });

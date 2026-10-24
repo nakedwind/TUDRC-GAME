@@ -177,6 +177,7 @@ function keepCoreScorch(core) {
 }
 
 function updateCores(dt) {
+  if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 菁英怪活著：核心少受傷（js/elite-bird-head.js）
   for (const core of G.cores) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;

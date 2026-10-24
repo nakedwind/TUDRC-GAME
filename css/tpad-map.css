@@ -1,0 +1,78 @@
+/* T-Pad「地圖」App（js/tpad-map.js）：左邊樓層＋人，右邊樓層示意圖 */
+.tm { grid-template-columns: 148px 1fr; }
+.tm .aa-side { padding: 14px 8px; }
+.tm .aa-tab { font-size: 15px; }
+.tm .aa-tab em { font-size: 13px; }
+.tm .aa-title { font-size: 26px; }
+.tm .aa-sub { font-size: 14px; }
+.tm-side { gap: 2px; }
+.tm-sec { margin: 10px 4px 4px; font-size: 13px; font-weight: 700; color: #8f9caa; letter-spacing: .05em; }
+.tm-sec:first-child { margin-top: 0; }
+.tm-floor-btn span { display: flex; align-items: center; gap: 6px; }
+.tm .aa-tab.on { background: #3e8c4f; color: #f2fff4; }
+.tm .aa-tab.on em { color: #d4f0da; }
+.tm-here-dot { width: 9px; height: 9px; border-radius: 50%; background: #4aa3ff; box-shadow: 0 0 0 2px rgba(74,163,255,.3); }
+.tm-person { display: grid; grid-template-columns: 36px 1fr; align-items: center; column-gap: 8px; padding: 4px 6px; border: 0; border-radius: 8px; background: none; color: #dfe6ee; cursor: pointer; font: 600 14px "Microsoft JhengHei", sans-serif; text-align: left; }
+.tm-face { grid-row: span 2; position: relative; width: 36px; height: 36px; overflow: hidden; border-radius: 50%; background: #2c3138; }
+.tm-face img { position: absolute; left: 50%; top: 0; width: 140%;   /* Q 版角色頭很大：圖片寬 140%、從頂端開始＝整張臉 */ height: auto; aspect-ratio: 1; max-width: none; transform: translateX(-50%); image-rendering: pixelated; }
+.tm-face[data-char="ball"] img { left: 0; top: -76%; width: 231%; transform: none; }   /* 球球是狗、臉朝左：裁左邊的狗頭 */
+.tm-person b { display: flex; align-items: center; gap: 5px; }
+.tm-kind { flex: none; width: 8px; height: 8px; border-radius: 50%; }
+.tm-person small { grid-column: 2; font-size: 13px; font-weight: 400; color: #8592a0; }
+.tm-person:hover { background: rgba(255,255,255,.06); }
+.tm-person.on { background: rgba(255,255,255,.12); }
+.tm-empty, .tm-away { margin: 2px 6px; font-size: 14px; line-height: 1.6; color: #6f7b88; }
+
+.tm-main { display: flex; flex-direction: column; min-height: 0; padding: 12px 18px 10px; }
+.tm-head { display: flex; align-items: baseline; gap: 12px; }
+.tm-head .aa-sub { margin: 0; }
+.tm-svg { flex: 1; min-height: 0; width: 100%; margin: 6px 0; border-radius: 12px; background: #16191e; font-family: "Microsoft JhengHei", sans-serif; }
+.tm-room { cursor: pointer; }
+.tm-room-box { fill: #1d2128; stroke: rgba(255,255,255,.14); stroke-width: calc(.18px * var(--u, 1)); }
+.tm-room:hover .tm-room-box { stroke: rgba(255,255,255,.35); }
+.tm-room.sel .tm-room-box { stroke: #ffe08a; stroke-width: calc(.3px * var(--u, 1)); }
+.tm-room.here .tm-room-box { stroke: #4aa3ff; stroke-width: calc(.35px * var(--u, 1)); }
+.tm-floor { fill: #3a424d; }
+.tm-room.here .tm-floor { fill: #3d4a5c; }
+.tm-wall { fill: #262b33; }
+.tm-room-name { font-size: calc(2.4px * var(--u, 1)); font-weight: 700; fill: #c9d3dd; pointer-events: none; paint-order: stroke; stroke: #16191e; stroke-width: calc(.35px * var(--u, 1)); }   /* --u：js/tpad-map.js 依樓層大小設定 */
+.tm-link { stroke: rgba(95,211,138,.45); stroke-width: calc(.22px * var(--u, 1)); stroke-dasharray: calc(.6px * var(--u, 1)) calc(.5px * var(--u, 1)); }
+.tm-door rect { fill: #5fd38a; stroke: #16191e; stroke-width: .2; }
+.tm-stair rect { fill: #e8c15a; stroke: #16191e; stroke-width: .2; }
+.tm-stair path { fill: #2a2106; }
+.tm-stair text { font-size: 1.6px; font-weight: 700; fill: #ffe7a0; paint-order: stroke; stroke: #16191e; stroke-width: .35; }
+.tm-elev rect { fill: #9b8cff; stroke: #16191e; stroke-width: .2; }
+.tm-elev path { fill: #1d1640; }
+.tm-lock rect { fill: #8a939e; }
+.tm-lock path { stroke: #8a939e; stroke-width: .22; }
+.tm-door, .tm-stair, .tm-elev, .tm-lock { pointer-events: none; }
+.tm-npc { cursor: pointer; }
+.tm-npc circle:not(.tm-ping) { stroke: #16191e; stroke-width: .25; }
+.tm-name { font-size: calc(2.17px * var(--u, 1)); font-weight: 700; fill: #eef3f8; paint-order: stroke; stroke: #16191e; stroke-width: calc(.5px * var(--u, 1)); pointer-events: none; }   /* 2.17 ＝ 1.55 × TMAP_MARK（js/tpad-map.js）；--u 抵銷每層的縮放 */
+.tm-name.sel { fill: #ffe08a; }
+.tm-me { pointer-events: none; }
+.tm-me circle:not(.tm-ping) { fill: #4aa3ff; stroke: #fff; stroke-width: .3; }
+.tm-name.me { fill: #9fd0ff; }
+.tm-ping { fill: none; stroke: #4aa3ff; stroke-width: .25; transform-box: fill-box; transform-origin: center; animation: tm-ping 1.6s ease-out infinite; }
+.tm-npc .tm-ping { stroke: #ffe08a; }
+@keyframes tm-ping { from { transform: scale(.6); opacity: 1; } to { transform: scale(1.8); opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .tm-ping { animation: none; } }
+
+.tm-info { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; min-height: 20px; font-size: 14px; color: #dfe6ee; }
+.tm-info b { font-size: 15px; color: #f4f7fa; }
+.tm-you { font-style: normal; font-size: 13px; color: #4aa3ff; }
+.tm-dim { color: #8592a0; }
+.tm-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 13px; color: #9aa6b2; }
+.tm-legend span { display: flex; align-items: center; gap: 5px; }
+.tm-legend i { display: inline-block; width: 11px; height: 11px; }
+.tm-legend .lg-me { border-radius: 50%; background: #4aa3ff; box-shadow: 0 0 0 1.5px #fff inset; }
+.tm-legend .lg-dot { border-radius: 50%; }
+.tm-legend .lg-door { border-radius: 2px; background: #5fd38a; }
+.tm-legend .lg-stair { border-radius: 2px; background: #e8c15a; }
+.tm-legend .lg-elev { border-radius: 2px; background: #9b8cff; }
+.tm-legend .lg-lock { border-radius: 2px; background: #8a939e; }
+
+.tm-nosignal { display: grid; place-content: center; justify-items: center; gap: 8px; height: 100%; text-align: center; color: #9aa6b2; }
+.tm-nosignal svg { width: 56px; height: 56px; color: #8592a0; }
+.tm-nosignal b { font-size: 22px; color: #eef3f8; }
+.tm-nosignal p { margin: 0; font-size: 15px; line-height: 1.7; }

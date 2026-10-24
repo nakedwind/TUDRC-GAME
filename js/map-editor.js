@@ -194,8 +194,13 @@ let selectionDrag = null;
 const SUB = CELL / 4;
 let pointerPx = null;   // 滑鼠目前在畫布上的像素位置
 const snapSub = v => Math.floor(v / SUB) * SUB;
+// 「只貼在整格」打勾時：物件也整格整格擺（ox、oy 都是 0），不打勾才用四分之一格
+const STORAGE_SNAP_WHOLE = 'tudrc_editor_snap_whole_v1';
+let snapWhole = false;
+try { snapWhole = localStorage.getItem(STORAGE_SNAP_WHOLE) === '1'; } catch (_) {}
 // 像素位置 → 擺放位置（格子 c、r＋格內偏移 ox、oy，都是 10px 的倍數）
 function subPosAt(x, y) {
+  if (snapWhole) return { c: Math.floor((x - OX) / CELL), r: Math.floor((y - OY) / CELL), ox: 0, oy: 0 };
   const gx = snapSub(x - OX), gy = snapSub(y - OY), c = Math.floor(gx / CELL), r = Math.floor(gy / CELL);
   return { c, r, ox: gx - c * CELL, oy: gy - r * CELL };
 }
@@ -388,6 +393,7 @@ function loadTiles() {
   const graffitiPensAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_interactive_pickup_graffiti_'), STORAGE_GRAFFITI_PENS);
   const trainingRoomAdded = mergeDefaultAssetPack('tile_training_', 'tudrc_asset_pack_training_room_v2');   // 地下訓練室素材包
   const floorSignsAdded = mergeDefaultAssetPack('tile_eoc_floor_sign_', 'tudrc_asset_eoc_floor_signs_v1', true);   // 應變中心：樓層標示 1F～4F、B1～B4
+  const ballBedAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_ball_bed', 'tudrc_asset_eoc_ball_bed_v1', true);   // 應變中心：球球的床（球球會去睡，js/ball-poses.js）
   const doorKeyAdded = mergeDefaultAssetPack(t => t.id === 'tile_interactive_pickup_backroom_door_key', 'tudrc_asset_pack_door_key_v1');   // 地上撿的後室門鑰匙（js/doors.js）
   const backroomCorePillarsAdded = mergeDefaultAssetPack(t => BACKROOM_CORE_PILLAR_IDS.has(t.id), STORAGE_BACKROOM_CORE_PILLARS, true);
   let restaurantChairsFixed = false;
@@ -404,7 +410,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded) saveTiles();
+  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;
@@ -1160,13 +1166,14 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (pi >= 0) { m.portals.splice(pi, 1); saveMaps(); draw(); setStatus('已移除出入口', '#ffd24a'); return; }
     const others = maps.filter(x => x.id !== m.id);
     if (!others.length) { setStatus('只有一張地圖，先新增另一張才能設出入口', '#ff8f8f'); return; }
-    const listTxt = others.map((x, idx) => (idx + 1) + ') ' + x.name).join('\n');
-    const ans = prompt('這個出入口要通到哪一張地圖？輸入編號：\n' + listTxt, '1');
-    if (ans === null) return;
-    const n = parseInt(ans, 10);
-    if (!(n >= 1 && n <= others.length)) { setStatus('編號不正確', '#ff8f8f'); return; }
-    m.portals.push({ c, r, to: others[n - 1].id });
-    setStatus('已設出入口 → ' + others[n - 1].name, '#7ee0c0');
+    // 頁面上的選單（js/map-picker.js）：地圖多的時候 prompt() 會把清單截斷，後面的地圖選不到
+    pickMapDialog('這個出入口要通到哪一張地圖？', others).then(to => {
+      if (!to) return;
+      m.portals.push({ c, r, to: to.id });
+      saveMaps(); draw();
+      setStatus('已設出入口 → ' + to.name, '#7ee0c0');
+    });
+    return;
   } else if (brush.mode === 'erase') {
     // 由上往下擦：大圖 → 最上面有圖的那層
     const si = pointerPx ? stampIndexAtPx(m, pointerPx.x, pointerPx.y) : stampIndexAt(m, c, r);
@@ -1250,8 +1257,9 @@ function dragSelectionTo(c, r) {
   const dr = Math.max(1 - d.maxR, Math.min(ROWS - 1 - d.minR, r - d.startR));
   // 物件：滑鼠移動多少就搬多少（四分之一格對齊）；限制在跟整格同樣的範圍內
   const clampPx = (v, lo, hi) => Math.max(lo * CELL, Math.min(hi * CELL, v));
-  const dx = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.x - d.startPx.x) / SUB) * SUB, 1 - d.maxC, COLS - 1 - d.minC) : dc * CELL;
-  const dy = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.y - d.startPx.y) / SUB) * SUB, 1 - d.maxR, ROWS - 1 - d.minR) : dr * CELL;
+  const step = snapWhole ? CELL : SUB;   // 只貼在整格：一次搬一整格
+  const dx = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.x - d.startPx.x) / step) * step, 1 - d.maxC, COLS - 1 - d.minC) : dc * CELL;
+  const dy = d.startPx && pointerPx ? clampPx(Math.round((pointerPx.y - d.startPx.y) / step) * step, 1 - d.maxR, ROWS - 1 - d.minR) : dr * CELL;
   if (dc === d.dc && dr === d.dr && dx === d.dx && dy === d.dy) return;
   d.dc = dc; d.dr = dr; d.dx = dx; d.dy = dy; d.moved = dc !== 0 || dr !== 0 || dx !== 0 || dy !== 0;
   m.layers = clone(d.layers); m.stamps = clone(d.stamps);
@@ -1259,7 +1267,8 @@ function dragSelectionTo(c, r) {
   d.items.filter(item => item.type === 'tile').forEach(item => delete m.layers[item.layer][item.key]);
   selections = d.items.map(item => {
     if (item.type === 'stamp') {
-      const s = m.stamps[item.index], nx = item.px + dx, ny = item.py + dy;
+      const s = m.stamps[item.index], whole = v => snapWhole ? Math.round(v / CELL) * CELL : v;   // 原本在半格上的物件，搬動後四捨五入到整格
+      const nx = whole(item.px + dx), ny = whole(item.py + dy);
       s.c = Math.floor(nx / CELL); s.r = Math.floor(ny / CELL);
       const ox = nx - s.c * CELL, oy = ny - s.r * CELL;
       if (ox) s.ox = ox; else delete s.ox;
@@ -2396,6 +2405,18 @@ document.getElementById('gridToggle').addEventListener('click', e => {
   draw();
   setStatus(showGrid ? '格線已開啟' : '格線已關閉', '#8fd3ff');
 });
+
+// 「只貼在整格」勾選框：貼上、拖曳都只落在整格上（記在瀏覽器）
+const snapWholeBox = document.getElementById('snapWhole');
+if (snapWholeBox) {
+  snapWholeBox.checked = snapWhole;
+  snapWholeBox.addEventListener('change', () => {
+    snapWhole = snapWholeBox.checked;
+    try { localStorage.setItem(STORAGE_SNAP_WHOLE, snapWhole ? '1' : '0'); } catch (_) {}
+    draw();
+    setStatus(snapWhole ? '已改成只貼在整格' : '已恢復四分之一格微調', '#8fd3ff');
+  });
+}
 
 // 不可穿透紅格的顯示開關（純顯示，不會動到地圖的不可穿透設定）
 document.getElementById('solidToggle').addEventListener('click', e => {

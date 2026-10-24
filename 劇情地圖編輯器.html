@@ -23,6 +23,7 @@
         <span class="sep"></span>
         <button class="btn" id="undoBtn" hidden style="display:none">↶ 回復 (Ctrl+Z)</button>
         <button class="btn" id="gridToggle">🔳 格線：開</button>
+        <label class="btn" title="打勾：貼上、拖曳物件都只落在整格上；不打勾可微調到半格／1/4 格"><input type="checkbox" id="snapWhole"> 只貼在整格</label>
         <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透紅格與怪物出生區綠格（不影響設定）">🧱 紅綠格：開</button>
         <details class="tool-more">
           <summary class="btn">⋯ 更多</summary>
@@ -190,6 +191,7 @@
   <script src="data/doors.js?v=lockeddoor-20261018"></script>        <!-- 可開關的門 -->
   <script src="js/sfx.js?v=mouse-dizzy3-20261023"></script>
   <script src="js/ui-feedback.js"></script>
+  <script src="js/map-picker.js?v=mappicker-20261024"></script>   <!-- 設出入口時選地圖的清單（取代 prompt，地圖多也不會被截斷） -->
   <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script>
     window.MAP_EDITOR_CONFIG = {
@@ -206,7 +208,7 @@
     };
   </script>
   <script src="js/map-editor-store.js?v=story-20261021"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
-  <script>EditorStore.boot(["js/map-editor.js?v=basesolid-20261023", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021"]);</script>
+  <script>EditorStore.boot(["js/map-editor.js?v=snapwhole-20261024", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021"]);</script>
   <script src="js/editor-nav.js?v=achv-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

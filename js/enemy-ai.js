@@ -415,6 +415,8 @@ function stepEnemy(e, dt) {
   if (e.behavior === 'burrow') { stepBurrowingMouse(e, dt); return; }   // 地底追蹤不用史萊姆跳躍；自身處理核心守衛
   // 飛撲途中已經騰空，不受接觸判定或暈眩打斷，落地時才結算傷害。
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
+  if (e.elite) { stepEliteBird(e, dt); return; }   // 菁英鳥頭人：守在核心旁、自己管走回原位（js/elite-bird-head.js）
+  if (e.guardPose && stepEliteGuardPose(e, dt)) return;   // 大隊長身邊的手下：背對玩家站崗，大隊長大叫才轉身
   // 核心醒著：狂暴的異質體離核心太遠就衝回去守著（js/core-frenzy.js）；溫特貼在旁邊時照樣先打溫特
   const guardCore = typeof frenzyCoreGoal === 'function' ? frenzyCoreGoal(e) : null;
   if (guardCore && !(G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= CELL * 2.25)) {

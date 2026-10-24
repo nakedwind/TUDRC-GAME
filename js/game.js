@@ -28,9 +28,9 @@ const CHARACTER_SPRITE_FILES = {
 };
 // 持槍攻擊圖（四個方向各一張靜態圖）；只有這些角色有，避免對其他角色發出 404。
 const GUN_FILES = { gunFront: '0000_Front_withgun.png', gunBack: '0009_back_withgun.png', gunLeft: '0003_Leftside_withgun.png', gunRight: '0006_right-side_withgun.png' };
-const GUN_FOLDERS = new Set(['theonie_B', 'amber_B', 'eldrin_B', 'chris_B', 'winter_B']);
+const GUN_FOLDERS = new Set(['theonie_B', 'amber_B', 'eldrin_B', 'chris_B', 'winter_B', 'winter_M', 'eldrin_M']);
 // 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
-const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png' };
+const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png', winter_M: 'fail.png', eldrin_M: 'fail.png' };
 function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
   const prefix = folder.replace('_', '') + '_';
   const revision = folder === 'chris_A' ? '?v=chris-a-20261021-2' : '';
@@ -328,6 +328,7 @@ function openDialogue(actor) {
   if (typeof onDialogueOpened === 'function') onDialogueOpened(actor);
   if (typeof onDialogueOpenedPractice === 'function') onDialogueOpenedPractice(actor);   // 塔納：開始訓練按鈕（js/practice.js）
   if (typeof onDialogueOpenedWorkshop === 'function') onDialogueOpenedWorkshop(actor);   // 諾亞：開發工坊按鈕（js/equipment.js）   // 好感度、送禮按鈕（js/gifts.js）
+  if (typeof onDialogueOpenedOutfit === 'function') onDialogueOpenedOutfit(actor);   // 隊友：推薦穿搭按鈕（js/costumes.js）
   if (typeof onDialogueOpenedVitals === 'function') onDialogueOpenedVitals(actor);   // 受傷的隊員：去醫院休息；疏導室的亞許：請亞許疏導（js/vitals.js）
 }
 // 不是跟角色說話的對話框（海報、告示…）：name＝名稱欄、image＝左邊的圖、lines＝一句一句的文字
@@ -338,7 +339,7 @@ function openTextDialogue({ name, image, lines, kind = 'text' }) {
   closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   dialoguePortrait.src = image || ''; dialoguePortrait.alt = name || '';
   dialoguePortrait.parentElement.dataset.char = kind;   // css：整張圖縮進框裡（不是裁半身像）
-  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueHospital', 'dialogueAshSoothe']) document.getElementById(id)?.classList.add('hidden');
+  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueOutfit', 'dialogueHospital', 'dialogueAshSoothe']) document.getElementById(id)?.classList.add('hidden');
   document.getElementById('dialogueFavor')?.classList.add('hidden');
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
@@ -373,6 +374,7 @@ function updateBlink(who, dt) {
   }
 }
 // 依朝向／走路／眨眼狀態挑出這一幀要畫的圖
+const TWO_FRAME_WALK = new Set(['ball']);   // 走路只輪流用 Walking01、02（不夾站立圖）的角色
 function pickCharacterFrame(set, who) {
   if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
@@ -387,7 +389,7 @@ function pickCharacterFrame(set, who) {
     return set.blink[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(who.blinkTime / 0.07))]];
   }
   const frames = set[who.dir || 'front'];
-  const walkOrder = [1, 0, 2, 0];
+  const walkOrder = TWO_FRAME_WALK.has(who.id || who.type) ? [1, 2] : [1, 0, 2, 0];
   return frames && frames[who.moving ? walkOrder[Math.floor(who.anim * 8) % walkOrder.length] : 0];
 }
 // 哨兵走路動畫：用這一幀實際移動的距離決定朝向與是否在走
@@ -1051,6 +1053,7 @@ function newGame() {
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
+  if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof arriveVitals === 'function') arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
   spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
   if (typeof achieveOnSortie === 'function') achieveOnSortie();   // 成就：同時帶著○○出勤
@@ -1897,7 +1900,7 @@ function update(dt) {
       foe.hp -= ramDmg;
       aggroOnSentry(foe, t);
       const dx = foe.x - t.x, dy = foe.y - t.y;
-      displaceEnemy(foe, dx, dy, CELL * 1.2);
+      if (!foe.unpushable) displaceEnemy(foe, dx, dy, CELL * 1.2);   // unpushable：菁英鳥頭人推不動
       foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = '#dbe7ff';
       sfxMonsterHit(foe, 0.48, 'red-ram');
       flashDmg('-' + ramDmg, foe.x, foe.y - 26, '#dbe7ff');
@@ -1943,10 +1946,10 @@ function update(dt) {
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
         const soothed = [];
-        let usedSP = false, usedMedkit = false;   // 同一次範圍疏導只扣一次 SP；治療仍消耗一個醫療包
+        let usedSP = false, usedMedkit = false;   // 同一次範圍疏導只扣一次 SP；治療消耗一個急救包
         for (const o of G.towers) {
           if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
-          // 疏導消耗 SP；補血消耗醫療包，兩項資源各自檢查。
+          // 疏導消耗 SP；補血消耗急救包，兩項資源各自檢查。
           const needSoothe = !TYPES[o.type].guide && (o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1));
           const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1);
           const doSoothe = needSoothe && (typeof guideCanSoothe !== 'function' || guideCanSoothe(t));
@@ -1955,7 +1958,7 @@ function update(dt) {
           if (doSoothe) usedSP = true; if (doHeal) usedMedkit = true;
           const taintBefore = o.taint || 0;
           if (doSoothe) o.taint = Math.max(0, taintBefore - spec.aura.rate * (1 + sortieBuff(t, 'calm')) * AURA_CD * (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.sootheMul : 1));   // 嚮導吃了鎮定類補給：疏導量增加          // 一次清一批（平均速率不變）
-          if (doHeal) o.hp = Math.min(o.maxhp, o.hp + (spec.aura.heal || 0) * AURA_CD);
+          if (doHeal) o.hp = Math.min(o.maxhp, o.hp + FIRST_AID.heal);   // 用一個急救包：跟溫特用急救包補一樣的量（data/equipment.js）
           if (o.berserk && o.taint < 60) o.berserk = false;
           spawnSootheEffect(o.x, o.y - 8, sc, o);
           const cleared = Math.round(taintBefore - o.taint);
@@ -1964,7 +1967,7 @@ function update(dt) {
         }
         if (soothed.length) {
           if (usedSP) spendGuideSP(t);
-          if (usedMedkit && typeof guideUse === 'function') guideUse(t, 'medkit');
+          if (usedMedkit && typeof guideUse === 'function') guideUse(t, 'firstaid');
           t.auraCd = AURA_CD;
           spawnSootheCast(t, sc, spec.aura.r * CELL);   // 疏導表演：法陣、光波
           t.soothingT = SOOTHE_CHANNEL; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;   // 停下來閉眼疏導
@@ -2054,7 +2057,7 @@ function update(dt) {
           if (e.dead || Math.hypot(e.x - t.x, e.y - t.y) > r || !hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 牆後的不受影響
           e.hp -= dmg;
           aggroOnSentry(e, t);
-          if (U.knockback) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
+          if (U.knockback && !e.unpushable) { const dx = e.x - t.x, dy = e.y - t.y; displaceEnemy(e, dx, dy, CELL * U.knockback); }
           if (U.stun && !e.noStun) e.stunT = Math.max(e.stunT || 0, U.stun);   // 路德的大招：生命體不會被停住
           e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = col;
           flashDmg('-' + Math.round(dmg), e.x, e.y - 26, col);
@@ -2084,7 +2087,7 @@ function update(dt) {
             if (spec.ability === '雷電') e.shockT = Math.max(e.shockT || 0, spec.stun);   // 安柏的雷擊：麻痺（停住＋微微顫抖）
           }
           if (spec.confuse) e.confuseT=Math.max(e.confuseT||0,spec.confuse);
-          if (spec.knockback) {
+          if (spec.knockback && !e.unpushable) {
             const dx=e.x-t.x,dy=e.y-t.y;
             displaceEnemy(e,dx,dy,CELL*spec.knockback);
           }
@@ -2165,6 +2168,7 @@ function update(dt) {
     e.prevHp = e.hp;
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
+  if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -2252,6 +2256,7 @@ function update(dt) {
   // 波次（安全場景沒有波次，也不會有勝負）
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
   if (G.baseLostT > 0 && !G.over) { G.baseLostT -= dt; if (G.baseLostT <= 0) lose('base'); }   // 基地被打壞：等一下才跳失敗
+  if (typeof updateCoreKeyDrops === 'function') updateCoreKeyDrops(dt);   // 核心掉出的異質鑰匙：落地、幾秒後自動收進背包（js/core-clear.js）
   if (typeof checkCoreClear === 'function') checkCoreClear(dt);
   else if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) win();   // 地底的老鼠也要清掉
   updateHUD();

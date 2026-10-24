@@ -222,7 +222,7 @@ function stepChargerEnemy(e, dt) {
 const EYE_FLASH = { time: .6, rise: .1, radius: 15, color: [90, 185, 255] };
 function drawChargerEyeFlashes(ctx) {
   for (const e of G.enemies) {
-    if (!(e.eyeFlashT > 0) || !e.frames || e.hp <= 0) continue;
+    if (!(e.eyeFlashT > 0) || !e.frames || e.hp <= 0 || e.showBack) continue;   // 背對畫面時看不到眼睛
     const f = e.frames, lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';
     const eyes = (lazy && f.idleEyes) || f.eyes;
     if (!eyes) continue;

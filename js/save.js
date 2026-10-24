@@ -47,7 +47,7 @@ function loadGame() {
   (Array.isArray(data.collectedStorageKeys)?data.collectedStorageKeys:[]).filter(x=>typeof x==='string').forEach(x=>collectedStorageKeys.add(x));
   shopCart.clear(); (data.cart || []).filter(valid).forEach(([id, n]) => shopCart.set(id, n));
   Object.assign(favorPoints, data.favor || {}); Object.assign(giftKnown, data.giftKnown || {});   // 好感度（js/gifts.js）
-  (data.gifted || []).forEach(id => giftedThisVisit.add(id));
+  (data.gifted || []).forEach(g => Array.isArray(g) ? giftedThisVisit.set(g[0], g[1]) : giftedThisVisit.set(g, 1));   // 舊存檔只記誰收過（＝1 次）
   for (const [id, item] of Object.entries(data.requests || {})) if (itemById(item)) giftRequests[id] = item;   // 今日想吃
   if (typeof data.requestsStale === 'boolean') requestsStale = data.requestsStale;
   lastSavedAt = data.savedAt || 0; lastSavedSnapshot = saveSnapshot();

@@ -343,6 +343,13 @@ function monsterWalkFrame(e) {
   const walking = (e.walkUntil || 0) > now && !(e.stunT > 0);
   const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : 10));   // 衝刺時步伐大一點
   const lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';   // 沒在追人的時候
+  if (f.walkBack && e.behavior === 'charger') {   // 鳥頭人：往畫面上方走露出背面；守衛（faceBack）背對玩家看著核心
+    if (e.faceBack) e.showBack = true;
+    else if (!walking) e.showBack = false;   // 停下來就轉回正面（發呆轉眼睛、蓄力瞪人）
+    else if (moved > .15 && moved < 20 && !(e.knockT > 0)) e.showBack = mdy < -Math.abs(mdx) * .3 ? true : mdy > Math.abs(mdx) * .3 ? false : e.showBack;
+    // 背面站姿圖比正面窄：照原圖比例畫（natural），不要被撐寬
+    if (e.showBack) return { file: walking && !e.faceBack ? f.walkBack[step % f.walkBack.length] : f.back, flip: !!e.faceRight === (f.backFacing === 'left'), natural: true };
+  }
   if (f.walkBack && e.showBack) return { file: walking ? f.walkBack[step % f.walkBack.length] : f.back, flip: !!e.faceRight === (f.backFacing === 'left') };   // 背面（魚頭君露出魚肉）
   if (!walking && f.blink && f.blink.length) {   // 站著不動：每隔幾秒眨一次眼（半閉→全閉→半閉）
     if (e.blinkAt == null) e.blinkAt = now + 1 + Math.random() * 3;
@@ -404,6 +411,7 @@ function drawEnemy(e) {
   ctx.globalAlpha = 1;
   const walkFrame = e.frames ? monsterWalkFrame(e) : null;
   if (walkFrame && walkFrame.charging) ctx.translate((Math.random() * 2 - 1) * 1.2, 0);   // 高舉蓄力時微微發抖
+  if (e.tremble) ctx.translate((Math.random() * 2 - 1) * 1.8, (Math.random() * 2 - 1) * .6);   // 菁英鳥頭人衝撞前蓄力：全身發抖（js/elite-bird-head.js）
   if (walkFrame) { e.lastFrameFile = walkFrame.file; e.lastFrameFlip = walkFrame.flip; }   // 死亡倒地用目前這張圖
   const baseSprite = monsterImage(walkFrame ? walkFrame.file : e.art ? shooterFrame(e) : (e.sprite || 'images/monster/Monster_Slime.png'));   // 珍珠小童：眨眼／生氣圖
   if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
@@ -413,7 +421,7 @@ function drawEnemy(e) {
     const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
     ctx.imageSmoothingEnabled = false;
     let fw = slimeW, fh = slimeH;
-    if (walkFrame && walkFrame.attack) {   // 攻擊圖畫布比較大：照站姿圖的比例換算，腳底中央對齊
+    if (walkFrame && (walkFrame.attack || walkFrame.natural)) {   // 攻擊圖畫布比較大（鳥頭人背面圖比較窄）：照站姿圖的比例換算，腳底中央對齊
       const base = monsterImage(e.frames.front);
       if (base.naturalWidth) { fw = baseSprite.naturalWidth * slimeW / base.naturalWidth; fh = baseSprite.naturalHeight * slimeH / base.naturalHeight; }
     }
@@ -493,10 +501,12 @@ const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 // 衣櫃裡戴上的配件（js/costumes.js）：behind＝畫在角色後面、front＝前面
 const costumeLayer = (id, who, x, y, size, layer) => { if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer); };
 function drawWanderer(npc) {
-  drawCharacterShadow(npc);
-  const set = wandererSprites[npc.id];
-  const img = set && pickCharacterFrame(set, npc);
   const size = PLAYER.drawSize;
+  const ballSleep = npc.id === 'ball' && typeof ballSleeping === 'function' && ballSleeping(npc);
+  if (!ballSleep) drawCharacterShadow(npc);   // 睡在床上：床那張圖已經有影子
+  const posed = npc.id === 'ball' && typeof drawBallPose === 'function' && drawBallPose(npc, size);   // 球球：坐下、睡在床上（js/ball-poses.js）
+  const set = wandererSprites[npc.id];
+  const img = !posed && set && pickCharacterFrame(set, npc);
   if (img && img.complete && img.naturalWidth) {
     const hop = NPC_HOP[npc.id], hopY = hop && npc.moving && !npc.sitting ? -Math.abs(Math.sin((npc.anim || 0) * Math.PI * hop.perSec)) * hop.height : 0;
     ctx.imageSmoothingEnabled = false;
@@ -909,15 +919,16 @@ function drawPlayer(p) {
   drawPlayerReloadCountdown(p, size);
 }
 
-// 點隊員頭像：畫面內標出本人，畫面外沿視窗邊緣指向所在方向。
+// 點隊員頭像：畫面內標出本人，畫面外貼著畫面邊緣指向所在方向（跟暴走的邊緣箭頭同一種做法，js/berserk-fx.js）。
 function fieldLocatePosition(sx, sy, width, height) {
-  const left = Math.min(160, width * .22), right = width - Math.min(64, width * .12);
-  const top = Math.min(90, height * .18), bottom = height - Math.min(90, height * .18);
-  const inside = sx >= left && sx <= right && sy >= top && sy <= bottom;
+  const m = EDGE_ALERT.margin, inset = EDGE_ALERT.inset;
+  const inside = sx > m && sx < width - m && sy > m && sy < height - m;
   if (inside) return { x: sx, y: sy, angle: Math.PI / 2, inside };
-  const cx = (left + right) / 2, cy = (top + bottom) / 2, dx = sx - cx, dy = sy - cy;
-  const k = Math.min((right - left) / 2 / Math.max(.001, Math.abs(dx)), (bottom - top) / 2 / Math.max(.001, Math.abs(dy)));
-  return { x: cx + dx * k, y: cy + dy * k, angle: Math.atan2(dy, dx), inside };
+  // 從畫面中心往隊員方向，找到碰到畫面邊緣的那一點，再往內縮一點免得被切掉
+  const dx = sx - width / 2, dy = sy - height / 2;
+  const k = Math.min(Math.abs(dx) > 1e-6 ? (width / 2) / Math.abs(dx) : Infinity, Math.abs(dy) > 1e-6 ? (height / 2) / Math.abs(dy) : Infinity);
+  const x = Math.max(inset, Math.min(width - inset, width / 2 + dx * k)), y = Math.max(inset, Math.min(height - inset, height / 2 + dy * k));
+  return { x, y, angle: Math.atan2(dy, dx), inside };
 }
 function drawFieldMemberLocator() {
   const hint = G.fieldLocate, now = performance.now();
@@ -937,9 +948,11 @@ function drawFieldMemberLocator() {
   ctx.beginPath(); ctx.moveTo(15, 0); ctx.lineTo(-7, -11); ctx.lineTo(-3, 0); ctx.lineTo(-7, 11); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
   ctx.font = 'bold 14px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   const label = spec.name || '隊員', w = ctx.measureText(label).width + 18;
-  const labelY = pos.inside ? -24 : 29;
-  ctx.fillStyle = 'rgba(10,18,28,.92)'; roundRect(-w / 2, labelY - 12, w, 24, 6); ctx.fill();
-  ctx.fillStyle = '#ffd479'; ctx.fillText(label, 0, labelY);
+  // 畫面內：名字在箭頭上方；畫面外：名字放在箭頭往畫面內側那邊
+  const labelX = pos.inside ? 0 : -Math.cos(pos.angle) * (w / 2 + 20);
+  const labelY = pos.inside ? -24 : -Math.sin(pos.angle) * 30;
+  ctx.fillStyle = 'rgba(10,18,28,.92)'; roundRect(labelX - w / 2, labelY - 12, w, 24, 6); ctx.fill();
+  ctx.fillStyle = '#ffd479'; ctx.fillText(label, labelX, labelY);
   ctx.restore();
 }
 // ---- 繪製 ----
@@ -976,7 +989,7 @@ function draw() {
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
-  for (const npc of G.npcs) sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : npc.y + 17, draw: () => drawWanderer(npc) });
+  for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : bedY != null ? bedY : npc.y + 17, draw: () => drawWanderer(npc) }); }   // 球球睡在床上：用床底排（js/ball-poses.js）
   for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); } });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
@@ -1415,13 +1428,15 @@ function draw() {
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
+  if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
   if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
   if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
-  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺醫療包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
+  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
   // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
   if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）

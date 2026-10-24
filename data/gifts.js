@@ -1,6 +1,6 @@
 /* 送禮與好感度資料
    ・在基地裡找角色說話（Space），對話框會出現「🎁 送禮」，把背包裡的零食、飲料送給他。
-   ・每次回到基地，每個人只能收一次禮物。
+   ・每次回到基地，每個人最多收 GIFTS_PER_VISIT 次禮物。
    ・想改誰喜歡什麼，改這個檔案；收到禮物、委託時說的話在「對話編輯器」的「送禮與委託」（data/dialogues.js）。
    ・商品 id 對照（data/supplies.js）：
      補給（不能送）：medkit 醫療包、almond-water 杏仁水
@@ -18,6 +18,7 @@ const FAVOR_LEVELS = [
   { need: 100, name: '羈絆' },
 ];
 // 每種反應加幾點好感
+const GIFTS_PER_VISIT = 3;   // 每次回到基地，每個人能收幾次禮物
 const GIFT_POINTS = { love: 10, like: 6, normal: 3, dislike: -2 };
 const GIFT_REACTION = {
   love:    { label: '最愛',   icon: '💖' },

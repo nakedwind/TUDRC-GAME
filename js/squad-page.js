@@ -52,7 +52,7 @@ const SQ_PARTS = {
   'text.statTitle': ['裝備說明', '「裝備數值」'], 'box.stat': ['裝備說明', '裝備數值的框'], 'text.stat': ['裝備說明', '裝備數值文字'], 'text.availTitle': ['裝備說明', '「可用裝備」'],
   'btn.unequip': ['裝備說明', '「卸下裝備」'], 'btn.equip': ['裝備說明', '「穿上裝備」'],
 };
-// 外觀裝備格：服裝系統的欄位，但「下身」不放在這一頁（只有 6 格位置：服裝、頭飾、臉部、背部、手持1、手持2）
+// 外觀裝備格：服裝系統的欄位，但「下身」不放在這一頁（服裝、頭飾、臉部、背部、手部 5 格）
 const SQ_LOOK_HIDDEN = ['lower'];
 const SQ_LOOK_SLOTS = () => typeof COSTUME_SLOTS !== 'undefined' ? COSTUME_SLOTS.filter(s => !SQ_LOOK_HIDDEN.includes(s.id)) : [{ id: 'skin', name: '服裝' }];
 function squadPart(key) {

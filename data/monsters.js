@@ -35,6 +35,13 @@ const MONSTERS_DEFAULT = [
         "images/monster/bird-head/bird-head-front-walk-02.png",
         "images/monster/bird-head/bird-head-front.png"
       ],
+      "back": "images/monster/bird-head/bird-head-back.png",
+      "walkBack": [
+        "images/monster/bird-head/bird-head-back-walk-01.png",
+        "images/monster/bird-head/bird-head-back.png",
+        "images/monster/bird-head/bird-head-back-walk-02.png",
+        "images/monster/bird-head/bird-head-back.png"
+      ],
       "idle": [
         "images/monster/bird-head/bird-head-side-01.png",
         "images/monster/bird-head/bird-head-side-02.png",

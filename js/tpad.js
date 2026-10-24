@@ -25,7 +25,7 @@ const TPAD_APPS = [
   { id: 'achieve',  name: '成就',     color: '#c9a227', icon: TPAD_ICON.achieve,  view: el => renderAchievementApp(el) },   // view＝直接在 T-Pad 螢幕裡打開
   { id: 'bestiary', name: '怪物圖鑑', color: '#8a4fd1', icon: TPAD_ICON.bestiary, view: el => renderBestiaryApp(el) },
   { id: 'settings', name: '設定',     color: '#6b7a8c', icon: TPAD_ICON.settings, view: el => renderTPadSettingsApp(el) },
-  { id: 'map',      name: '地圖',     color: '#3e8c4f', icon: TPAD_ICON.map,      soon: true },
+  { id: 'map',      name: '地圖',     color: '#3e8c4f', icon: TPAD_ICON.map,      view: el => { resetMapApp(); renderMapApp(el); } },   // js/tpad-map.js（基地樓層示意圖）
 ];
 let tpadEscDirect = false;   // 按 Esc 直接打開設定：在設定裡再按 Esc＝整個關掉
 let tpadOpen = false, tpadEl = null, tpadLaunched = null, tpadClock = null, tpadView = null;   // tpadView：螢幕裡正在開的 App

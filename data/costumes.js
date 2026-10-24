@@ -2,7 +2,7 @@
    ・skin（服裝）：一整套 15 張 64×64 動作圖，綁定某一個角色；基地、戰鬥可以各自選穿哪一套。
        每個角色現有的 A（基地）、B（戰鬥）兩套自動算進來，不用寫在這裡。
        新的 skin：把圖放在 images/character/<folder>/（檔名跟其他角色一樣：<folder 去掉底線>_0000_Front.png …），再加一筆到 COSTUME_SKINS。
-   ・配件：疊在角色身上的小圖，所有角色共用同一張圖；一個欄位戴一個（頭飾、臉部、背部、手持、下身＝尾巴這類）。
+   ・配件：疊在角色身上的小圖，所有角色共用同一張圖；一個欄位戴一個（頭飾、臉部、背部、手部、下身＝尾巴這類）。
        art.front＝正面圖；art.side＝側面圖（畫朝左，往右時自動左右翻；沒畫就用正面圖）；art.back＝背面圖（沒畫就用正面圖）。
    ・wear：skin 能在哪裡穿：'base'＝只能在應變中心（基地）穿、'battle'＝只能出勤穿；沒寫＝兩邊都能穿。
    ・char：角色專屬的配件（只有那個角色能戴、能收；例如 char: 'winter'＝溫特專用）。
@@ -13,8 +13,7 @@ const COSTUME_SLOTS = [
   { id: 'head', name: '頭飾' },
   { id: 'face', name: '臉部' },
   { id: 'back', name: '背部' },
-  { id: 'hand', name: '手持1（右手）', short: '手持' },
-  { id: 'hand2', name: '手持2（左手）', short: '手持', accepts: 'hand' },   // accepts：可以戴哪個欄位的配件（手持配件左右手都能拿）
+  { id: 'hand', name: '手部' },
   { id: 'lower', name: '下身' },   // 尾巴這類：預設畫在腰後面
 ];
 // 每個欄位的配件預設放在角色圖（64×64）的哪裡：x、y＝配件中心；behind＝畫在角色後面；hidden＝這個方向看不到
@@ -24,7 +23,6 @@ const COSTUME_SLOT_ANCHORS = {
   face: { front: { x: 32, y: 27 }, left: { x: 22, y: 27 }, right: { x: 42, y: 27 }, back: { hidden: true } },
   back: { front: { x: 32, y: 40, behind: true }, left: { x: 40, y: 40, behind: true }, right: { x: 24, y: 40, behind: true }, back: { x: 32, y: 40 } },
   hand: { front: { x: 46, y: 46 }, left: { x: 22, y: 46 }, right: { x: 42, y: 46 }, back: { x: 18, y: 46, behind: true } },
-  hand2: { front: { x: 18, y: 46 }, left: { x: 26, y: 46, behind: true }, right: { x: 38, y: 46 }, back: { x: 46, y: 46, behind: true } },   // 左手：位置跟右手相反
   lower: { front: { x: 32, y: 50, behind: true }, left: { x: 42, y: 50, behind: true }, right: { x: 22, y: 50, behind: true }, back: { x: 32, y: 50 } },   // 尾巴：正面、側面在身體後面，背面看得到
 };
 // 內建兩套（每個角色原本的 A、B 圖）的名稱
@@ -33,12 +31,13 @@ const COSTUME_DEFAULT_SKINS = { A: '基地便服', B: '出勤制服' };
 const COSTUME_SKINS = [
   // { id: 'red-swim', char: 'red', name: '夏日泳裝', folder: 'red_swim', rarity: 'R', giftable: true },
   // 原圖在 images/costumes/03.body/，切好的 15 張在 images/character/<folder>/
-  { id: 'winter-maid', char: 'winter', name: '女僕裝', folder: 'winter_M', rarity: 'SSR', wear: 'base' },
+  // sortie: true＝在基地穿著，出勤時也穿這套（要有持槍圖、倒地圖：資料夾加進 js/game.js 的 GUN_FOLDERS、FAIL_FILES）
+  { id: 'winter-maid', char: 'winter', name: '女僕裝', folder: 'winter_M', rarity: 'SSR', sortie: true },
   { id: 'avaren-student-long', char: 'avaren', name: '學生制服（長袖）', folder: 'avaren_L', rarity: 'SR', wear: 'base' },
   { id: 'avaren-student-short', char: 'avaren', name: '學生制服（短袖）', folder: 'avaren_S', rarity: 'SR', wear: 'base' },
   { id: 'eldrin-student-long', char: 'eldrin', name: '學生制服（長袖）', folder: 'eldrin_L', rarity: 'SR', wear: 'base' },
   { id: 'eldrin-student-short', char: 'eldrin', name: '學生制服（短袖）', folder: 'eldrin_S', rarity: 'SR', wear: 'base' },
-  { id: 'eldrin-maid', char: 'eldrin', name: '女僕裝', folder: 'eldrin_M', rarity: 'SSR' },
+  { id: 'eldrin-maid', char: 'eldrin', name: '女僕裝', folder: 'eldrin_M', rarity: 'SSR', sortie: true },
 ];
 // 配件
 const COSTUME_ACCESSORIES = [
@@ -63,13 +62,14 @@ const COSTUME_ACCESSORIES = [
   { id: 'flower-blue-two', name: '藍色雙花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_blue/Head_blue flower two.png' } },
   { id: 'flower-white', name: '白色小花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_white/Head_white flower.png' } },
   { id: 'flower-white-two', name: '白色雙花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_white/Head_white flower two.png' } },
+  { id: 'maid-headdress', name: '女僕頭飾', slot: 'head', rarity: 'R', art: { front: 'images/costumes/01.head/maid_headdress/maid_headdress_01.png', side: 'images/costumes/01.head/maid_headdress/maid_headdress.png' } },
   { id: 'angel-wings', name: '天使小翅膀', slot: 'back', rarity: 'R', art: { front: 'images/costumes/04.back/angel_wings/Back_wing_front.png', side: 'images/costumes/04.back/angel_wings/Back_wing_side.png' } },
   { id: 'white-wings', name: '白色羽翼', slot: 'back', rarity: 'SR', art: { front: 'images/costumes/04.back/wings/wings_back.png', side: 'images/costumes/04.back/wings/wings_side.png', back: 'images/costumes/04.back/wings/wings_back.png' } },   // 沒有正面圖：正面用背面圖（翅膀在身體後面）
   { id: 'devil-wings', name: '惡魔翅膀', slot: 'back', rarity: 'SR', art: { front: 'images/costumes/04.back/devil_wings/Back_devil_front.png', side: 'images/costumes/04.back/devil_wings/Back_devil_side.png', back: 'images/costumes/04.back/devil_wings/Back_devil_back.png' } },
   { id: 'devil-tail', name: '惡魔尾巴', slot: 'lower', rarity: 'R', art: { front: 'images/costumes/04.back/tail_devil/Tail_devil.png' } },
   { id: 'wolf-tail', name: '狼尾巴', slot: 'lower', char: 'winter', rarity: 'R', art: { front: 'images/costumes/04.back/tail_wolf_winter/Tail_winter wolf_front.png', side: 'images/costumes/04.back/tail_wolf_winter/Tail_winter wolf_side.png' } },
   { id: 'star-wand', name: '星星魔杖', slot: 'hand', rarity: 'N', art: { front: 'images/costumes/05.hand_R/satr_wand/Hand_star.png' } },
-  { id: 'striped-bag', name: '條紋提袋', slot: 'hand', rarity: 'N', art: { front: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_front.png', side: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_side.png' } },
+  { id: 'striped-bag', name: '條紋提袋', slot: 'hand', rarity: 'N', icon: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_side.png', art: { front: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_front.png', side: 'images/costumes/05.hand_R/gaji_bag/Hand_gaji bag_side.png' } },
 ];
 // 一開始就擁有的服裝（新存檔送的；空的＝全部要從扭蛋轉）
 const COSTUME_STARTER = [];

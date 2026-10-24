@@ -58,7 +58,7 @@ function costumePlacementText() {
     + '   bob[角色][方向]＝[走路第 1 張, 走路第 2 張] 頭部相對站立圖的位移 [dx, dy]（配件跟著晃）\n'
     + '   offsets[角色]＝角色身高偏移 { x, y }（矮的角色 y 填正數）：還沒調過的配件會加上；「複製給所有角色」時自動加上兩個角色偏移的差\n'
     + '   blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件\n'
-    + '   layers[配件]＝圖層：同時戴好幾個配件時數字大的蓋在上面（沒寫＝下身 1、背部 2、手持 3、頭飾 4、臉部 5） */\n'
+    + '   layers[配件]＝圖層：同時戴好幾個配件時數字大的蓋在上面（沒寫＝下身 1、背部 2、手部 3、頭飾 4、臉部 5） */\n'
     + 'const COSTUME_PLACEMENT_DEFAULT = {\n'
     + ['anchors', 'items', 'bob', 'offsets', 'blocked', 'layers'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n') + '\n};\n';
 }
