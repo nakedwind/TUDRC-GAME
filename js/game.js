@@ -1132,6 +1132,7 @@ function mapSeats() {
   const seats = [];
   function addSeat(s, occ) {
     const cfg = chairConfig(s.id); if (!cfg) return;
+    if (typeof BALL_BED_ID !== 'undefined' && s.id === BALL_BED_ID) return;   // 球球的床只給球球睡（js/ball-poses.js），溫特和其他人都不能躺
     const t = mapTileById(s.id) || {};
     const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
     const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
