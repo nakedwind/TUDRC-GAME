@@ -11,7 +11,7 @@ const CAMP_SUPPLY = {
   items: ['medkit', 'almond-water', 'firstaid'],             // 能放什麼
   start: { medkit: 7, 'almond-water': 6, firstaid: 7 },      // 第一次出任務時箱子裡有多少
   guideItems: ['firstaid', 'almond-water'],                   // 嚮導身上帶的（醫療包是給溫特自己用的）
-  carry: 2,                                    // 嚮導每樣最多帶幾個
+  carry: 3,                                    // 嚮導每樣最多帶幾個
   minTaint: 30,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
   minHeal: 30,                                 // 隊員少多少血，嚮導才會花一個急救包補血
   sootheMul: 2,                                // 疏導量倍率（原本：艾德林一次清 15）

@@ -360,8 +360,8 @@ function drawLoofahVines(ctx) {
     ctx.globalAlpha = 1;
     if (v.caught.length) for (const a of v.caught) if (a.rootT > 0) drawWrap(ctx, a, grow, now, v.seed);   // 只畫還被纏著的人（掙脫、時間到的人身上不留藤蔓）
     const p = G.player;
-    if (p && p.rootT > 0 && v.caught.includes(p)) {   // 溫特頭上的掙扎進度條
-      const T0 = p.rootT0 || LOOFAH.rootTime, prog = 1 - p.rootT / T0, bx = p.x - 22, by = p.y - 74;
+    if (p && p.rootT > 0 && v.caught.includes(p)) {   // 溫特頭上的掙扎進度條：還要被纏多久（一開始是滿的，掙扎、時間過去就變短）
+      const T0 = p.rootT0 || LOOFAH.rootTime, prog = Math.min(1, p.rootT / T0), bx = p.x - 22, by = p.y - 74;
       ctx.globalAlpha = .9; ctx.fillStyle = '#0d1218'; ctx.fillRect(bx - 1, by - 1, 46, 7);
       ctx.fillStyle = '#5f9c3e'; ctx.fillRect(bx, by, 44 * prog, 5);
       ctx.strokeStyle = '#c8f59a'; ctx.lineWidth = 1; ctx.strokeRect(bx - .5, by - .5, 45, 6);
@@ -373,9 +373,9 @@ function drawLoofahVines(ctx) {
       }
       ctx.globalAlpha = 1;
     }
-    for (const t of v.caught) {   // 被纏住的隊友頭上：掙脫進度條；溫特在旁邊時提示可以幫忙
+    for (const t of v.caught) {   // 被纏住的隊友頭上：掙脫進度條（跟溫特的一樣，從滿的往下減）；溫特在旁邊時提示可以幫忙
       if (!G.towers.includes(t) || !(t.rootT > 0) || t.hp <= 0) continue;
-      const T0 = t.rootT0 || LOOFAH.rootTime, prog = 1 - t.rootT / T0, bx = t.x - 22, by = t.y - 64;
+      const T0 = t.rootT0 || LOOFAH.rootTime, prog = Math.min(1, t.rootT / T0), bx = t.x - 22, by = t.y - 64;
       ctx.globalAlpha = .9; ctx.fillStyle = '#0d1218'; ctx.fillRect(bx - 1, by - 1, 46, 7);
       ctx.fillStyle = '#5f9c3e'; ctx.fillRect(bx, by, 44 * prog, 5);
       ctx.strokeStyle = '#c8f59a'; ctx.lineWidth = 1; ctx.strokeRect(bx - .5, by - .5, 45, 6);
