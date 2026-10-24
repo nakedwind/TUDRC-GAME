@@ -1417,6 +1417,44 @@ const SQUAD_SKILLS = {
           }
         ],
         "cost": 80
+      },
+      "ult": {
+        "name": "深眠搖籃",
+        "desc": "讓失控邊緣的隊友沉沉睡去、重新清醒。",
+        "effect": "",
+        "effect2": "",
+        "note": "有兩名以上隊友負荷值超過 50 以上或暴走時自動發動；\n詠唱 3 秒、花 20 SP；冷卻 60 秒。",
+        "icon": "",
+        "mods": [],
+        "active": {
+          "when": "taintAbove",
+          "at": 70,
+          "orBerserk": true,
+          "soothe": 35,
+          "wake": true,
+          "cast": 3,
+          "sp": 20,
+          "cd": 60
+        },
+        "cost": 250
+      },
+      "a-1": {
+        "name": "群體疏導",
+        "desc": "一口氣安撫全隊的精神。",
+        "effect": "",
+        "effect2": "",
+        "note": "有兩名以上隊友負荷值超過50以上或暴走時自動發動；\n詠唱 2.5 秒、花 15 SP；冷卻 20 秒。",
+        "icon": "",
+        "mods": [],
+        "active": {
+          "when": "taintAbove",
+          "at": 50,
+          "soothe": 15,
+          "cast": 2.5,
+          "sp": 15,
+          "cd": 20
+        },
+        "cost": 40
       }
     }
   }

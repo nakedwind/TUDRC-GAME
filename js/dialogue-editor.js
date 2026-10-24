@@ -10,6 +10,8 @@ const clone = v => JSON.parse(JSON.stringify(v));
 // 遊戲裡角色說的每一句話都從這裡來（程式裡不寫台詞）
 const SITUATIONS = [
   { group: '日常（基地裡）', key: 'idle', label: '閒晃時的頭上泡泡', when: '在基地等安全場景閒晃時，每隔 <b>5～13 秒</b>隨機冒出一句。' },
+  { group: '日常（基地裡）', key: 'idleSoothe', label: '在疏導室閒晃（負荷高被送來）', when: '負荷 <b>30</b> 以上、回基地時被送到 <b>2F疏導室</b>：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞（每隔 5～13 秒隨機一句）。沒填就不說話。' },
+  { group: '日常（基地裡）', key: 'idleHospital', label: '住院時的頭上泡泡', when: '受傷住進 <b>1F醫院</b>（躺病床或在醫院走動）：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完。沒填就不說話。' },
   { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
   { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>（大約四次有一次改說「偶爾閒聊」）。抽到的那一格沒填就不說話。' },
@@ -76,8 +78,8 @@ if (typeof MISSIONS !== 'undefined' && typeof MISSION_BASE !== 'undefined' && dr
 // 1. 草稿是舊的時候，正式檔案裡新加的角色整組補進草稿；2. 檔案裡也沒有的，照身分給空白的情境格子。
 // 空白的角色匯出時會略過（cleaned），檔案不會多一堆空資料。
 const EMPTY_SITUATIONS = {
-  sentinel: ['idle', 'npc', 'battle', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
-  guide: ['idle', 'npc', 'battle', 'friendlyHit', 'lowSp'],
+  sentinel: ['idle', 'idleSoothe', 'idleHospital', 'npc', 'battle', 'ultimate', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
+  guide: ['idle', 'idleHospital', 'npc', 'battle', 'friendlyHit', 'lowSp'],
   support: ['idle', 'npc'],
 };
 if (typeof CHARACTERS !== 'undefined') {   // 原本有的照原本的順序（存檔內容才不會因為順序變了而不同），補上的接在後面
@@ -127,6 +129,16 @@ for (const [id, entry] of Object.entries(draft.characters)) {
   const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
   entry.talk = [];
   if (!('talk' in inFile)) autoAdded.add(id + '.talk');
+}
+// 出勤隊員（哨兵、嚮導）都有「在疏導室閒晃」「住院時的頭上泡泡」這兩格：負荷高、受傷被送去時改說這裡的（沒寫台詞的話匯出時拿掉＝那時候不說話）
+if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHARACTERS)) {
+  if (c.kind !== 'sentinel' && c.kind !== 'guide') continue;
+  const entry = draft.characters[id]; if (!entry) continue;
+  const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
+  for (const k of c.kind === 'guide' ? ['idleHospital'] : ['idleSoothe', 'idleHospital']) {   // 嚮導不會被送去疏導室
+    if (!(k in entry)) entry[k] = [];
+    if (!(k in inFile) && Array.isArray(entry[k]) && !entry[k].length) autoAdded.add(id + '.' + k);
+  }
 }
 // 自動補上、沒動過的格子拿掉（匯出、存暫存都用）：空的情境格子、完全沒動過的狂戰士人格
 function stripAuto(d) {

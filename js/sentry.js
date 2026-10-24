@@ -164,11 +164,31 @@ function npcHomeHere(id) {
   return !!loc && loc.map === MAP.name;
 }
 // 在整張地圖隨機挑一個站得住、沒人的格子（平時在這張地圖、又沒有指定活動範圍的人用）
+// 溫特走得到的格子：從這張地圖的出生點、出入口往外找。房間外面看不見、但不算牆的空白區走不到，就不會把人放到那裡
+// （放隊員時溫特還沒移到這張地圖，所以用 playerSpawnPos 跟出入口，不用 G.player 的位置）
+function reachableFromPlayer() {
+  const seeds = [];
+  if (typeof playerSpawnPos === 'function') seeds.push(cellAt(...playerSpawnPos()));
+  for (const p of (typeof mapPortals !== 'undefined' && mapPortals) || []) seeds.push([p.c, p.r]);
+  if (!seeds.length) return null;
+  const seen = new Set(seeds.map(([c, r]) => c + ',' + r)), queue = seeds.slice();
+  while (queue.length) {
+    const [c, r] = queue.shift();
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
+      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr) || G.grid[k]) continue;
+      const [x, y] = center(nc, nr); if (sentryBlocked(x, y)) continue;
+      seen.add(k); queue.push([nc, nr]);
+    }
+  }
+  return seen.size > 1 ? seen : null;
+}
 function placeAnywhere(a) {
   const taken = new Set([...(G.towers || []), ...(G.npcs || [])].filter(o => o !== a).map(o => cellAt(o.x, o.y).join(',')));
-  const cells = [];
+  const reach = reachableFromPlayer(), cells = [];   // 只挑溫特走得到的地方（例如被送去疏導室的隊員，不會跑到房間外面）
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
     if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r] || taken.has(c + ',' + r)) continue;
+    if (reach && !reach.has(c + ',' + r)) continue;
     const [x, y] = center(c, r);
     if (!sentryBlocked(x, y)) cells.push([c, r]);
   }
@@ -647,6 +667,12 @@ function updateSentry(t, dt) {
 }
 
 // 平時對話：倒數到 0 隨機冒一句話，顯示幾秒後消失、再排下一次
+// 這個人是不是被送來這裡的（js/vitals.js：負荷高＝疏導室、受傷＝醫院）：回傳要用的台詞格子 key；平常就待在這裡的人＝null
+function awayLineKey(id) {
+  const moved = typeof vitalsLocation === 'function' && typeof VITALS !== 'undefined' ? vitalsLocation(id) : null;
+  if (!moved || !MAP || moved.map !== MAP.name) return null;
+  return moved.map === VITALS.hospitalMap ? 'idleHospital' : moved.map === VITALS.sootheRoomMap ? 'idleSoothe' : null;
+}
 function updateNpcTalk(npc, dt) {
   if (typeof WANDER_TALK === 'undefined') return;
   if (npc.berserk) { npc.say = null; return; }   // 暴走的哨兵不說話
@@ -669,7 +695,8 @@ function updateNpcTalk(npc, dt) {
   }
   if (npc.sayWait <= 0) {
     const key = npc.id || npc.type;   // NPC 用 id、哨兵用 type
-    const lines = battle ? chapterPick(BATTLE_WANDER_LINES[key]) : ((typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null);   // 各說各的：出勤泡泡沒填就不說（不借用閒晃台詞）
+    const away = !battle && awayLineKey(key);   // 負荷高被送到疏導室、受傷住院：改說那裡的台詞（對話編輯器的「在疏導室閒晃」「住院時的頭上泡泡」），沒填就不說
+    const lines = battle ? chapterPick(BATTLE_WANDER_LINES[key]) : away ? dialogueLines(key, away) : ((typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null);   // 各說各的：出勤泡泡沒填就不說（不借用閒晃台詞）
     if (lines && lines.length) npc.say = { text: lines[Math.floor(Math.random() * lines.length)], life: talkCfg.duration };
     else npc.sayWait = 4;   // 沒台詞：晚點再檢查
   }
