@@ -20,8 +20,23 @@ let requestsStale = true;      // 出勤過後回到基地要重新抽委託
 const giftableId = actor => actor && (actor.kind === 'tower' ? actor.type : actor.id);
 // 收禮、委託的台詞（對話編輯器「送禮與委託」）：隨機一句，{item} 換成東西的名稱；沒寫就回傳 null（不說話）
 const GIFT_LINE_KEY = { love: 'giftLove', like: 'giftLike', normal: 'giftNormal', dislike: 'giftDislike' };
+const giftAfterLine = (id, itemName) => giftLine(id, 'giftAfter', itemName);   // 收下任何禮物之後再說的一句（對話編輯器「收到禮物後會說的台詞」）；沒寫就不說
 function giftLine(id, key, itemName) { const line = pickDialogueLine(id, key); return line ? line.replaceAll('{item}', itemName || '') : null; }
-const canReceiveGifts = id => !!GIFT_PREFS[id];
+// 所有角色都能收禮（溫特＝玩家自己除外）；喜好沒寫在 GIFT_PREFS 的全部算普通
+const canReceiveGifts = id => !!id && id !== 'winter' && (!!GIFT_PREFS[id] || (typeof CHARACTERS !== 'undefined' && !!CHARACTERS[id]));
+const giftOnly = id => (GIFT_PREFS[id] || {}).only || null;   // 只收這幾樣（例：塔納只收少喝水）；null＝什麼都收
+const giftAccepts = (id, itemId) => { const only = giftOnly(id); return !only || only.includes(itemId); };   // 只管零食飲料，服飾不受 only 限制
+const giftRefuses = (id, itemId) => ((GIFT_PREFS[id] || {}).refuse || []).includes(itemId);   // 送了會拒收（東西退回、不算次數）
+function refuseGift(actor, id, itemId, itemName) {
+  const profile = dialogueProfile(actor) || { name: '' };
+  (giftKnown[id] = giftKnown[id] || {})[itemId] = 'refuse';
+  closeGiftPicker(true);
+  dialogueState.lines = [giftLine(id, 'giftRefuse', itemName) || { speaker: '系統', text: `${profile.name}不收「${itemName}」。` }];
+  dialogueState.index = 0; dialogueState.giftReply = true;
+  renderDialogueLine(); renderDialogueFavor();
+  flash(GIFT_REACTION.refuse.icon, actor.x, actor.y - 46, '#c9d3dc', 1.4); sfx('error');
+  document.getElementById('dialogueNext').focus();
+}
 function favorLevel(points) {
   let lv = 0;
   FAVOR_LEVELS.forEach((level, i) => { if (points >= level.need) lv = i; });
@@ -86,7 +101,7 @@ let giftTab = 'snack';
 const giftTabOf = item => item.kind === 'drink' ? 'drink' : 'snack';   // 飲料以外能送的東西（giftable）都放零食
 function giftTabCells(id, tab) {
   if (tab === 'costume') return typeof costumeGiftable === 'function' ? costumeGiftable(id) : [];
-  return giftableItems().filter(item => giftTabOf(item) === tab);
+  return giftableItems().filter(item => giftTabOf(item) === tab && giftAccepts(id, item.id));
 }
 function switchGiftTab(tab) {
   if (tab === giftTab) return;
@@ -124,7 +139,8 @@ function renderGiftPicker() {
     const wanted = item.id === want;
     return `<button type="button" class="gift-cell${r ? ' ' + r : ''}${wanted ? ' wanted' : ''}" data-gift="${item.id}" title="${item.name}${wanted ? '｜想吃這個！' : tag ? '｜' + tag.label : '｜還不知道喜不喜歡'}">
       ${wanted ? '<i class="gift-want">想吃！</i>' : ''}<img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b><em>${tag ? tag.icon : '❔'}</em><span>${item.name}</span></button>`;
-  }).join('') : `<div class="gift-empty">背包裡沒有${tabName}<small>到 1 樓 HOME Mart 或販賣機買</small></div>`;
+  }).join('') : giftOnly(id) ? `<div class="gift-empty">${profile.name}只收「${giftOnly(id).map(x => (itemById(x) || {}).name || x).join('」「')}」<small>背包裡沒有的話，到 1 樓 HOME Mart 或販賣機買</small></div>`
+    : `<div class="gift-empty">背包裡沒有${tabName}<small>到 1 樓 HOME Mart 或販賣機買</small></div>`;
   if (wantItem && giftTabOf(wantItem) === giftTab && !items.some(item => item.id === want)) {   // 想吃的東西背包裡沒有：提示去買
     list.querySelector('.gift-empty')?.remove();
     list.insertAdjacentHTML('afterbegin', `<div class="gift-want-missing"><img src="${wantItem.image}" alt=""><span>想吃：${wantItem.name}<small>背包裡沒有，可以去商店買</small></span></div>`);
@@ -132,7 +148,8 @@ function renderGiftPicker() {
 }
 function giveGift(itemId) {
   const actor = giftTarget, id = giftableId(actor), item = itemById(itemId), count = supplyInventory.get(itemId) || 0;
-  if (!actor || !item || count <= 0 || giftLimitReached(id)) { sfx('error'); return; }
+  if (!actor || !item || count <= 0 || giftLimitReached(id) || !giftAccepts(id, itemId)) { sfx('error'); return; }
+  if (giftRefuses(id, itemId)) { refuseGift(actor, id, itemId, item.name); return; }
   const rewardShard = giftRequests[id] === itemId && REQUEST_SHARDS[id];
   const rewardKey = rewardShard && MEMORY_KEYS.find(m => m.shard === rewardShard);
   if (rewardKey && !(supplyInventory.get(rewardKey.key) > 0) && !bagCanApply([[itemId, -1], [rewardShard, 1]])) {
@@ -153,6 +170,7 @@ function giveGift(itemId) {
   // 對話框換成收到禮物的反應
   const said = giftLine(id, GIFT_LINE_KEY[reaction], item.name);   // 沒寫台詞：只顯示系統訊息
   const lines = [said || { speaker: '系統', text: `${profile.name}收下了「${item.name}」。` }];
+  const afterSaid = giftAfterLine(id, item.name); if (afterSaid) lines.push(afterSaid);
   const reward = wanted ? fulfillRequest(id) : null;   // 委託完成：回憶碎片或異質碎片
   if (reward) { if (reward.line) lines.push(reward.line); lines.push({ speaker: '系統', text: reward.text }); }
   if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
@@ -170,7 +188,9 @@ function giveGift(itemId) {
 // 送服裝：對方馬上穿上，好感照喜好＋稀有度
 function giveCostumeGift(costumeId) {
   const actor = giftTarget, id = giftableId(actor), item = typeof costumeItem === 'function' && costumeItem(costumeId);
-  if (!actor || !item || giftLimitReached(id) || !costumeGive(id, costumeId)) { sfx('error'); return; }
+  if (!actor || !item || giftLimitReached(id)) { sfx('error'); return; }
+  if (giftRefuses(id, costumeId)) { refuseGift(actor, id, costumeId, item.name); return; }   // 拒收：服裝留在溫特身上
+  if (!costumeGive(id, costumeId)) { sfx('error'); return; }
   let reaction = giftReaction(id, costumeId);
   if (reaction === 'normal') reaction = COSTUME_GIFT.reaction;   // 沒特別寫的服裝：預設「喜歡」
   const before = favorInfo(id), gain = GIFT_POINTS[reaction] + (reaction === 'dislike' ? 0 : COSTUME_GIFT.rarityBonus[item.rarity || 'N'] || 0);
@@ -181,7 +201,8 @@ function giveCostumeGift(costumeId) {
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
   const said = giftLine(id, reaction === 'dislike' ? 'giftDislike' : 'giftCostume', item.name);   // 「收到服裝」；不喜歡的服裝說「收到不喜歡的禮物」
-  const lines = [...(said ? [said] : []), { speaker: '系統', text: `${profile.name}換上了「${item.name}」！` }];
+  const afterSaid = giftAfterLine(id, item.name);
+  const lines = [...(said ? [said] : []), ...(afterSaid ? [afterSaid] : []), { speaker: '系統', text: `${profile.name}換上了「${item.name}」！` }];
   if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
   dialogueState.lines = lines; dialogueState.index = 0; dialogueState.giftReply = true;
   renderDialogueLine(); renderDialogueFavor();
@@ -201,7 +222,7 @@ function generateRequests() {
   for (const id of pool) {
     const prefs = GIFT_PREFS[id] || {}, all = giftItemList().map(item => item.id).filter(x => !(prefs.dislike || []).includes(x));
     const fav = [...(prefs.love || []), ...(prefs.like || [])].filter(x => all.includes(x));
-    const list = fav.length && Math.random() < .7 ? fav : all;   // 大多想吃自己喜歡的（也是在偷偷告訴玩家他的口味）
+    const list = giftOnly(id) || (fav.length && Math.random() < .7 ? fav : all);   // 大多想吃自己喜歡的（也是在偷偷告訴玩家他的口味）；只收某幾樣的人只會想吃那幾樣
     giftRequests[id] = list[Math.floor(Math.random() * list.length)];
   }
 }

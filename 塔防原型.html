@@ -245,9 +245,9 @@
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
 
   <script src="data/characters.js?v=guideability-20261025"></script>  <!-- 集中管理所有角色 -->
-  <script src="data/gifts.js?v=gift-tabs-20261023"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
+  <script src="data/gifts.js?v=giftrefuse-20261025"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=ground-items4-20261024"></script>   <!-- 背包物品分類與其他物品 -->
-  <script src="data/supplies.js?v=banana-art-20261024"></script>   <!-- 溫特可購買、使用的個人補給 -->
+  <script src="data/supplies.js?v=haoguai-20261025"></script>   <!-- 溫特可購買、使用的個人補給 -->
   <script src="data/equipment.js?v=bag-slots-20261024"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=infoimgsize-20261023"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
@@ -256,7 +256,7 @@
   <script src="js/workshop-config.js?v=ammoimg-20261023"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=vitals-20261023"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
-  <script src="data/dialogues.js?v=vitals-20261023"></script>  <!-- 所有台詞（對話編輯器） -->
+  <script src="data/dialogues.js?v=giftrefuse-20261025"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=default-team-20261024"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
@@ -321,7 +321,7 @@
   <script src="js/backpack.js?v=merged-20261024"></script> <!-- 9j. 背包：物品格與說明 -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
   <script src="js/squad-gear.js?v=oneslot-20261025"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
-  <script src="js/gifts.js?v=gift-tabs-20261023"></script> <!-- 9l. 送禮與好感度 -->
+  <script src="js/gifts.js?v=giftrefuse-20261025"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=slimecolors-20261025"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=slimecolors-20261025"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=autofill-20261024"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
@@ -354,7 +354,7 @@
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=banana-king-ballbed-20261025"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=movecancel-20261025"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=core-key-drop-20261024"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=carry-20261023"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=quick-drop1-20261024"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
@@ -371,7 +371,7 @@
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
   <script src="js/practice.js?v=banana-king-20261024"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
-  <script src="js/channel-actions.js?v=motes-20261021"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
+  <script src="js/channel-actions.js?v=movecancel-20261025"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=mouse-mound-slow-20261023"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=tpadm2-20261022"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
   <script src="js/tpad-map.js?v=dorms-20261024"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->

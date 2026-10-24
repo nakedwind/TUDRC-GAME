@@ -21,6 +21,8 @@ const SITUATIONS = [
   { group: '送禮與委託', key: 'giftNormal', label: '收到普通的禮物', item: true, when: '送他<b>普通</b>（沒特別喜歡、也不討厭）的東西時，隨機說一句。' },
   { group: '送禮與委託', key: 'giftDislike', label: '收到不喜歡的禮物', item: true, when: '送他<b>不喜歡</b>的東西時（包括不喜歡的服裝），隨機說一句。' },
   { group: '送禮與委託', key: 'giftCostume', label: '收到服裝', item: true, when: '送他扭蛋轉到的<b>服裝</b>、他馬上換上時，隨機說一句（不喜歡的服裝改說「收到不喜歡的禮物」）。' },
+  { group: '送禮與委託', key: 'giftAfter', label: '收到禮物後會說的台詞', item: true, when: '收下<b>任何</b>禮物（零食、飲料、服裝都算，不管喜不喜歡）之後，接在上面那句反應<b>後面</b>再說一句（隨機）。沒填就不說。' },
+  { group: '送禮與委託', key: 'giftRefuse', label: '拒收禮物', item: true, when: '送他<b>不收</b>的東西時（data/gifts.js 喜好裡的 refuse，例如塔納不收熊熊頭套），他說這句拒絕，東西留在你身上、不算送禮次數。沒填就只顯示「不收」的系統訊息。' },
   { group: '送禮與委託', key: 'requestAsk', label: '委託：想吃東西', item: true, when: '回到基地時他想吃某樣東西（頭上冒圖示），找他說話時<b>先說這一句</b>。沒填就不說（禮物選單裡還是會標「想吃！」）。' },
   { group: '送禮與委託', key: 'requestReward', label: '委託：完成時交給你東西', when: '照他想吃的送了之後，把回憶碎片（或異質碎片）交給溫特時說的話（隨機一句）。' },
   { group: '保留（遊戲不會用）', key: 'reserve', label: '保留台詞', when: '先收起來的台詞，<b>遊戲不會說</b>。之後要用時，複製到上面的情境就好（例如角色搬到別的地方時）。' },
@@ -51,7 +53,7 @@ const RAGE_FIELDS = [
   { key: 'soothed', label: '從暴走被疏導回來', when: '從暴走恢復時。沒填就不說。' },
 ];
 // 可以收禮的角色（data/gifts.js 的 GIFT_PREFS）都有「送禮與委託」這幾格
-const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'requestAsk', 'requestReward'];
+const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'giftAfter', 'giftRefuse', 'requestAsk', 'requestReward'];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };
 const DEFAULT_ID = '__default';

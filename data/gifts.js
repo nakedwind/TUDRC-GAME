@@ -4,7 +4,7 @@
    ・想改誰喜歡什麼，改這個檔案；收到禮物、委託時說的話在「對話編輯器」的「送禮與委託」（data/dialogues.js）。
    ・商品 id 對照（data/supplies.js）：
      補給（不能送）：medkit 醫療包、almond-water 杏仁水
-     零食：little-noodles 小學麵、cadina 卡迪這、corn-snack 可喜果、kuai-kuai 乖乖、oyster-omelet 阿子煎、
+     零食：little-noodles 小學麵、cadina 卡迪這、corn-snack 可喜果、kuai-kuai 好乖、oyster-omelet 阿子煎、
            fish-snack 南海鱈魚香絲、cream-puff 美美小泡芙、spicy-snack 真有味、shrimp-snack 蝦未生、cola 口客
      飲料：water 少喝水、papaya-milk 木瓜牛奶、tea 玉茶元、sarsaparilla 白松沙士、
            tea-collection 吃冰室茶集、asparagus-juice 聿聿蘆筍汁、vegetable-juice 波蜜果菜汁、
@@ -25,6 +25,7 @@ const GIFT_REACTION = {
   like:    { label: '喜歡',   icon: '😊' },
   normal:  { label: '普通',   icon: '🙂' },
   dislike: { label: '不喜歡', icon: '😣' },
+  refuse:  { label: '不收',   icon: '🙅' },   // GIFT_PREFS 的 refuse：拒收，東西退回
 };
 
 // ---- 今日想吃委託 ----
@@ -40,6 +41,8 @@ const REQUEST_SHARDS = {
 // 想吃的時候說的話、完成委託把碎片交給溫特時說的話：在「對話編輯器」的「送禮與委託」（requestAsk、requestReward）
 
 // 每個角色的喜好。沒列在 love／like／dislike 裡的東西都算「普通」。
+// only：零食飲料只收這幾樣（禮物選單只列出這些；沒寫＝什麼都收；服飾不受影響）。
+// refuse：不收的東西（服飾也可以）：送了他會拒收（說「對話編輯器」的「拒收禮物」台詞），東西留在你身上、不算次數。沒列在這裡的角色也能送禮（全部算普通），溫特（玩家）除外。
 // 收到禮物時說的話在「對話編輯器」的「送禮與委託」（giftLove／giftLike／giftNormal／giftDislike／giftCostume）；沒寫就不說。
 const GIFT_PREFS = {
   red: {
@@ -79,4 +82,18 @@ const GIFT_PREFS = {
     // 亞許總是說「都可以」，其實偷偷喜歡木瓜牛奶（連他自己都沒發現）
     love: ['papaya-milk'], like: [], dislike: [],
   },
+  taana: {
+    only: ['water'], love: ['water'], like: [], dislike: [], refuse: ['bear-hood', 'minnie-ribbon'],   // 塔納只收少喝水；服飾都收，除了熊熊頭套、鼠耳蝴蝶結
+  },
+  colyn: {
+    only: ['kuai-kuai'], love: ['kuai-kuai'], like: [], dislike: [],   // 柯林只收好乖
+  },
+  // 以下還沒設定喜好（全部算普通）
+  eden: { love: [], like: [], dislike: [] },
+  salem: { love: [], like: [], dislike: [] },
+  ball: { love: [], like: [], dislike: [] },
+  rowan: { love: [], like: [], dislike: [] },
+  cael: { love: [], like: [], dislike: [] },
+  saku: { love: [], like: [], dislike: [] },
+  kakuma: { love: [], like: [], dislike: [] },
 };

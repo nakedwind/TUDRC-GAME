@@ -23,7 +23,7 @@ const SUPPLIES = [
   { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.05 }, file:'小學麵.png' },
   { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.07 }, file:'卡迪這.png' },
   { id:'corn-snack', name:'可喜果', kind:'snack', price:22, buff:{ spd:.06 }, file:'可喜果.png' },
-  { id:'kuai-kuai', name:'乖乖', kind:'snack', price:20, buff:{ calm:.08 }, file:'乖乖.png' },
+  { id:'kuai-kuai', name:'好乖', kind:'snack', price:20, buff:{ calm:.08 }, file:'乖乖.png' },
   { id:'oyster-omelet', name:'阿子煎', kind:'snack', price:30, buff:{ hp:.10 }, file:'阿子煎.png' },
   { id:'fish-snack', name:'南海鱈魚香絲', kind:'snack', price:28, buff:{ def:.06 }, file:'南海鱈魚香絲.png' },
   { id:'cream-puff', name:'美美小泡芙', kind:'snack', price:25, buff:{ hp:.08 }, file:'美美小泡芙.png' },

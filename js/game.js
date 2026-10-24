@@ -1223,7 +1223,7 @@ function updatePlayer(dt) {
   p.dashPart = dt > 0 ? Math.min(dt, p.dashT || 0) / dt : 0;   // 衝刺剩下的時間、冷卻
   p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
-  if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼，按移動鍵也不會走
+  if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼（按移動鍵會中斷疏導、急救，js/channel-actions.js）
     p.soothingT = Math.max(0, p.soothingT - dt);
     p.moving = false; p.anim = 0; p.dir = 'front';
     return;

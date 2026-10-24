@@ -2,6 +2,8 @@
    - 開始後溫特站著不動、不能開槍；對隊員做的（疏導、急救），那位隊員也站著不動、不攻擊。
    - 頭上出現進度條，跑完才算成功（效果、消耗都在跑完那一刻才發生）。
    - 溫特倒下、換地圖、戰鬥結束、疏導對象倒下時中斷（什麼都不消耗）。
+   - 按移動鍵（WASD、方向鍵）也會中斷，馬上可以走開：補血、疏導到一半被怪物圍住時，不會被困在原地挨打。
+     開始時本來就按著的移動鍵不算（放開再按才算），免得邊走邊按急救就馬上被取消。
    秒數在下面的 CHANNEL_TIME（急救的秒數在 data/equipment.js 的 FIRST_AID.time）。
 */
 const CHANNEL_TIME = { medkit: 2 };   // 用醫療包要幾秒（疏導的秒數在 data/balance.js 的 SOOTHE.time）
@@ -10,6 +12,7 @@ let playerChannel = null;
 function startChannel(ch) {
   const p = G && G.player; if (!p || playerChannel) return null;
   ch.t = 0; ch.forG = G; playerChannel = ch;
+  ch.heldKeys = new Set(MOVE_KEYS.filter(k => keys[k]));   // 開始時就按著的移動鍵（放開之前不算中斷）
   Object.assign(p, { soothingT: ch.total + .05, gunT: 0, moving: false, dir: 'front' });   // 站定（js/game.js 的 updatePlayer：soothingT 期間不能走）
   return ch;
 }
@@ -24,6 +27,12 @@ function updateChannel(dt) {
   const ch = playerChannel; if (!ch) return;
   const p = G && G.player, tg = ch.target;
   if (ch.forG !== G || !p || p.hp <= 0 || G.over || (ch.needAlive && tg && tg !== p && tg.hp <= 0)) { cancelChannel(); return; }
+  for (const k of ch.heldKeys) if (!keys[k]) ch.heldKeys.delete(k);   // 開始時按著的鍵放開了：之後再按就算
+  if (MOVE_KEYS.some(k => keys[k] && !ch.heldKeys.has(k))) {   // 按了移動鍵：中斷，馬上可以走
+    cancelChannel();
+    if (typeof flash === 'function') flash(ch.label.replace(/中$/, '') + '中斷', p.x, p.y - 40, '#ffb36b');
+    return;
+  }
   ch.t += dt;
   if (ch.onTick) ch.onTick(dt);   // 進行中每幀要做的事（例如疏導的光點）
   p.soothingT = Math.max(p.soothingT || 0, ch.total - ch.t + .05);
