@@ -260,7 +260,7 @@
   <script src="data/balance.js?v=default-team-20261024"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
-  <script src="data/monsters.js?v=banana-sfx-20261024"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="data/monsters.js?v=bananahp-20261025"></script>  <!-- 2b. 怪物種類與數值 -->
   <script src="js/monster-data.js?v=banana-king-20261024"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
@@ -343,12 +343,12 @@
   <script src="js/equipment.js?v=merged-20261024"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=tranqmate-20261025"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=merged-20261024"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
-  <script src="js/combat-progress.js?v=guide-sp-20261021"></script>
+  <script src="js/combat-progress.js?v=resumehp-20261025"></script>
   <script src="js/camp-interactions.js?v=box-reach-20261024"></script>
   <script src="js/camp-supply.js?v=guide-carry3-20261024"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
   <script src="js/guide-skills.js?v=guideact-20261024"></script>   <!-- 嚮導技能：戰鬥中自動發動（群體補血、增益、大招…） -->
-  <script src="js/vitals.js?v=guideskill-20261024"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
+  <script src="js/vitals.js?v=resumehp-20261025"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
   <script src="js/camp-beds.js?v=campbed4-hp-20261024"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
   <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
