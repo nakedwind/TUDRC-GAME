@@ -4194,136 +4194,270 @@ const COSTUME_PLACEMENT_DEFAULT = {
     },
     "slime-giant": {
       "taana": {
-        "front": {"x":32,"y":6},
+        "front": {"x":32,"y":6,"scale":1.3},
         "left": {"x":33,"y":6},
         "right": {"x":31,"y":6},
         "back": {"x":32,"y":6}
       },
       "winter": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "theonie": {
-        "front": {"x":32,"y":8},
+        "front": {"x":32,"y":8,"scale":1.3},
         "left": {"x":33,"y":8},
         "right": {"x":31,"y":8},
         "back": {"x":32,"y":8}
       },
       "amber": {
-        "front": {"x":32,"y":7},
+        "front": {"x":32,"y":7,"scale":1.3},
         "left": {"x":33,"y":7},
         "right": {"x":31,"y":7},
         "back": {"x":32,"y":7}
       },
       "red": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "avaren": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "luther": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "eldrin": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "chris": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "tino": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "claire": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "muomn": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "noah": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "ash": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "eden": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "salem": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "ball": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "colyn": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "rowan": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "cael": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "saku": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
       },
       "kakuma": {
-        "front": {"x":32,"y":4},
+        "front": {"x":32,"y":4,"scale":1.3},
         "left": {"x":33,"y":4},
         "right": {"x":31,"y":4},
         "back": {"x":32,"y":4}
+      }
+    },
+    "acc-mvmpnysg": {
+      "taana": {
+        "front": {"x":41.5,"y":16.5},
+        "left": {"x":41.5,"y":16.5},
+        "back": {"x":22.5,"y":16.5,"flip":true},
+        "right": {"x":23.5,"y":16.5,"flip":true}
+      },
+      "winter": {
+        "front": {"x":41.5,"y":16.5},
+        "left": {"x":41.5,"y":16.5},
+        "back": {"x":24.5,"y":16.5,"flip":true},
+        "right": {"x":23.5,"y":16.5,"flip":true}
+      },
+      "theonie": {
+        "front": {"x":41.5,"y":23.5},
+        "left": {"x":41.5,"y":23.5},
+        "back": {"x":24.5,"y":23.5,"flip":true},
+        "right": {"x":24.5,"y":23.5,"flip":true}
+      },
+      "amber": {
+        "front": {"x":40.5,"y":20.5},
+        "left": {"x":40.5,"y":20.5},
+        "back": {"x":22.5,"y":20.5,"flip":true},
+        "right": {"x":24.5,"y":20.5,"flip":true}
+      },
+      "red": {
+        "front": {"x":40.5,"y":17.5},
+        "left": {"x":39.5,"y":17.5},
+        "back": {"x":24.5,"y":17.5,"flip":true},
+        "right": {"x":25.5,"y":17.5,"flip":true}
+      },
+      "avaren": {
+        "front": {"x":40.5,"y":17.5},
+        "left": {"x":40.5,"y":17.5},
+        "back": {"x":23.5,"y":17.5,"flip":true},
+        "right": {"x":23.5,"y":17.5,"flip":true}
+      },
+      "luther": {
+        "front": {"x":41.5,"y":16.5},
+        "left": {"x":40.5,"y":16.5},
+        "back": {"x":25.5,"y":16.5,"flip":true},
+        "right": {"x":24.5,"y":16.5,"flip":true}
+      },
+      "eldrin": {
+        "front": {"x":22.5,"y":16.5,"flip":true},
+        "left": {"x":40.5,"y":16.5},
+        "back": {"x":23.5,"y":16.5,"flip":true},
+        "right": {"x":22.5,"y":16.5,"flip":true}
+      },
+      "chris": {
+        "front": {"x":39.5,"y":18.5},
+        "left": {"x":41.5,"y":18.5},
+        "back": {"x":24.5,"y":18.5,"flip":true},
+        "right": {"x":23.5,"y":18.5,"flip":true}
+      },
+      "tino": {
+        "front": {"x":23.5,"y":17.5,"flip":true},
+        "left": {"x":41.5,"y":17.5},
+        "back": {"x":22.5,"y":17.5,"flip":true},
+        "right": {"x":23.5,"y":17.5,"flip":true}
+      },
+      "claire": {
+        "front": {"x":40.5,"y":19.5},
+        "left": {"x":41.5,"y":19.5},
+        "back": {"x":24.5,"y":19.5,"flip":true},
+        "right": {"x":23.5,"y":19.5,"flip":true}
+      },
+      "muomn": {
+        "front": {"x":22.5,"y":18.5,"flip":true},
+        "left": {"x":40.5,"y":18.5},
+        "back": {"x":23.5,"y":18.5,"flip":true},
+        "right": {"x":23.5,"y":18.5,"flip":true}
+      },
+      "noah": {
+        "front": {"x":41.5,"y":16.5},
+        "left": {"x":41.5,"y":16.5},
+        "back": {"x":22.5,"y":16.5,"flip":true},
+        "right": {"x":23.5,"y":16.5,"flip":true}
+      },
+      "ash": {
+        "front": {"x":41.5,"y":14.5},
+        "left": {"x":41.5,"y":14.5},
+        "back": {"x":22.5,"y":14.5,"flip":true},
+        "right": {"x":23.5,"y":14.5,"flip":true}
+      },
+      "eden": {
+        "front": {"x":41.5,"y":14.5},
+        "left": {"x":41.5,"y":14.5},
+        "back": {"x":22.5,"y":14.5,"flip":true},
+        "right": {"x":23.5,"y":14.5,"flip":true}
+      },
+      "salem": {
+        "front": {"x":41.5,"y":16.5},
+        "left": {"x":39.5,"y":16.5},
+        "back": {"x":24.5,"y":16.5,"flip":true},
+        "right": {"x":24.5,"y":16.5,"flip":true}
+      },
+      "ball": {
+        "front": {"x":17.5,"y":40.5,"scale":0.5},
+        "left": {"x":17.5,"y":40.5,"scale":0.5},
+        "back": {"x":17.5,"y":40.5,"scale":0.5},
+        "right": {"x":46.5,"y":40.5,"scale":0.5,"flip":true}
+      },
+      "colyn": {
+        "front": {"x":23.5,"y":17.5,"flip":true},
+        "left": {"x":41.5,"y":17.5},
+        "back": {"x":23.5,"y":17.5,"flip":true},
+        "right": {"x":22.5,"y":17.5,"flip":true}
+      },
+      "rowan": {
+        "front": {"x":41.5,"y":14.5},
+        "left": {"x":41.5,"y":14.5},
+        "back": {"x":22.5,"y":14.5,"flip":true},
+        "right": {"x":23.5,"y":14.5,"flip":true}
+      },
+      "cael": {
+        "front": {"x":41.5,"y":14.5},
+        "left": {"x":41.5,"y":14.5},
+        "back": {"x":22.5,"y":14.5,"flip":true},
+        "right": {"x":23.5,"y":14.5,"flip":true}
+      },
+      "saku": {
+        "front": {"x":23.5,"y":16.5,"flip":true},
+        "left": {"x":42.5,"y":16.5},
+        "back": {"x":23.5,"y":16.5,"flip":true},
+        "right": {"x":21.5,"y":16.5}
+      },
+      "kakuma": {
+        "front": {"x":21.5,"y":16.5,"flip":true},
+        "left": {"x":41.5,"y":16.5},
+        "back": {"x":40.5,"y":17.5},
+        "right": {"x":22.5,"y":16.5}
       }
     }
   },
@@ -4343,7 +4477,7 @@ const COSTUME_PLACEMENT_DEFAULT = {
     "rowan": {"back":[[0,1],[0,0]],"front":[[0,1],[0,0]],"left":[[0,1],[0,0]],"right":[[0,1],[0,0]]},
     "cael": {"front":[[0,0],[0,1]],"back":[[0,1],[0,0]],"left":[[0,0],[0,1]],"right":[[0,0],[0,1]]},
     "saku": {"back":[[0,1],[0,0]],"front":[[0,1],[0,0]],"left":[[0,1],[0,0]],"right":[[0,1],[0,0]]},
-    "kakuma": {"back":[[-2,1],[-1,0]],"front":[[0,1],[0,0]],"left":[[0,1],[0,0]],"right":[[0,1],[0,0]]},
+    "kakuma": {"back":[[-2,1],[-2,0]],"front":[[0,1],[0,0]],"left":[[0,1],[0,0]],"right":[[0,1],[0,0]]},
     "taana": {"back":[[0,1],[0,0]],"front":[[0,1],[0,0]],"left":[[0,1],[0,0]],"right":[[0,1],[0,0]]},
     "chris": {"front":[[0,1],[0,0]],"left":[[0,1],[0,0]],"right":[[0,1],[0,0]],"back":[[0,1],[0,0]]},
     "claire": {"front":[[0,1],[0,0]],"left":[[0,1],[0,0]],"right":[[0,1],[0,0]],"back":[[0,1],[0,0]]},
@@ -4361,5 +4495,7 @@ const COSTUME_PLACEMENT_DEFAULT = {
   "names": {},
   "rarity": {},
   "artFill": {},
-  "added": []
+  "added": [
+    {"id":"acc-mvmpnysg","name":"OK蹦","slot":"head","rarity":"R","art":{"front":"images/costumes/01.head/Band-Aid/Band_Aid.png"}}
+  ]
 };
