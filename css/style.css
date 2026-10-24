@@ -1200,13 +1200,15 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .bag-drop::before { content:''; width:14px; height:8px; border:2px solid currentColor; border-top:0; border-radius:0 0 4px 4px; }   /* 小托盤圖示：放下來 */
 .bag-drop:hover { border-color:#8fc2ea; background:rgba(120,170,215,.16); color:#e2f0fb; }
 .bag-drop kbd { min-width:15px; padding:0 4px; border:1px solid rgba(185,214,238,.35); border-bottom-width:2px; border-radius:4px; color:inherit; font:700 10px/1.4 Consolas,monospace; }
-.bag-drop-row { display:flex; align-items:stretch; gap:6px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08); }   /* 跟「使用」拉開距離，中間一條細線 */
+.bag-ghost { visibility:hidden; pointer-events:none; }   /* 看不見的佔位（js/backpack.js 的 noUseHtml） */
+.bag-use-slot > * { grid-area:1 / 1; }   /* 說明和看不見的提示疊在同一格 */
+.bag-drop-row { display:flex; align-items:flex-start; gap:6px; margin-top:25px; }   /* 跟「使用」拉開距離（原本中間的細線拿掉了，間距照舊）；數量、按鈕的高度在背包編輯器各自調 */   /* 跟「使用」拉開距離，中間一條細線；不互相撐高（數量、按鈕的高度在背包編輯器各自調） */
 .bag-drop-row .bag-drop { flex:1; width:auto; min-width:0; padding:7px 6px; white-space:nowrap; }
 .bag-qty + .bag-drop::before { display:none; }   /* 旁邊有數量鈕時位置不夠：拿掉小托盤圖示 */
-.bag-qty { display:flex; align-items:center; gap:2px; padding:2px; border:1px solid rgba(143,190,230,.25); border-radius:9px; background:rgba(0,0,0,.25); }
-.bag-qty button { min-width:20px; height:26px; padding:0 3px; border:0; border-radius:6px; background:transparent; color:#cfe3f3; cursor:pointer; font:700 15px "Microsoft JhengHei",sans-serif; }
+.bag-qty { display:flex; align-items:center; justify-content:center; gap:2px; height:33px; padding:2px; border:1px solid rgba(143,190,230,.25); border-radius:9px; background:rgba(0,0,0,.25); box-sizing:border-box; font-size:15px; }   /* 字級在背包編輯器調（裡面的 −、數字、＋ 跟著變） */
+.bag-qty button { min-width:20px; align-self:stretch; min-height:0; padding:0 3px; border:0; border-radius:6px; background:transparent; color:#cfe3f3; cursor:pointer; font:700 1em "Microsoft JhengHei",sans-serif; }   /* 高度跟著外框（編輯器改高度時一起變） */
 .bag-qty button:hover:not(:disabled) { background:rgba(143,190,230,.18); } .bag-qty button:disabled { opacity:.3; cursor:default; }
-.bag-qty b { min-width:18px; color:#fff; font-size:15px; text-align:center; font-variant-numeric:tabular-nums; }
+.bag-qty b { min-width:18px; color:#fff; font-size:1em; text-align:center; font-variant-numeric:tabular-nums; }
 .bag-actions button:focus-visible { outline:2px solid #ffd479; outline-offset:2px; }
 .bag-detail-empty { margin:auto; color:#6f7d8a; font-size:13px; line-height:1.7; }
 .bag-detail-empty span { display:block; font-size:40px; opacity:.5; }

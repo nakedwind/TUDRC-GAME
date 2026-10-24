@@ -8,6 +8,7 @@ const BACKPACK_LAYOUT = {
       "align": "center"
     },
     "text.useNote": {
+      "y": 25,
       "align": "center"
     },
     "text.dropNote": {
@@ -198,7 +199,16 @@ const BACKPACK_LAYOUT = {
       "align": "center"
     },
     "btn.drop": {
+      "y": -15,
       "align": "center"
+    },
+    "item:banana": {
+      "size": 65
+    },
+    "btn.dropQty": {
+      "y": -15,
+      "w": 69,
+      "font": 13
     }
   },
   "texts": {

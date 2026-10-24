@@ -300,10 +300,14 @@ function renderBackpackDetail() {
     <div class="bag-tags"><span class="bag-tag">${BAG_ICON[cat.id] || cat.icon + ' '}${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div></div>
     ${itemDesc(item) ? `<p class="bag-desc">${itemDesc(item)}</p>` : ''}
     <div class="bag-actions">
-      ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}">使用${kind ? `<kbd>${kind.key}</kbd>` : actKey ? `<kbd>${actKey}</kbd>` : ''}</button>` : (item.category === 'gift' ? '<p class="bag-note">在基地和大家對話時可以送禮</p>' : `<p class="bag-note">${item.note || '無法使用'}</p>`)}
+      ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}">使用${kind ? `<kbd>${kind.key}</kbd>` : actKey ? `<kbd>${actKey}</kbd>` : ''}</button>` : noUseHtml(item.category === 'gift' ? '在基地和大家對話時可以送禮' : item.note || '無法使用')}
       ${canDrop(item) ? dropRowHtml(item, count) : '<p class="bag-note">無法放在地上</p>'}
     </div>`;
 }
+// 不能使用的物品：說明放在「可直接拖曳到下方快捷鍵」那一行，下面留一個看不見的「使用」按鈕佔位，
+// 「放在地上」和數量才會停在跟能使用的物品一樣的位置（背包編輯器調的位置兩種都對得上）
+const noUseHtml = note => `<div class="bag-quick bag-use-slot"><small class="bag-ghost" aria-hidden="true">可直接拖曳到下方快捷鍵</small><p class="bag-note">${note}</p></div>`
+  + '<button type="button" class="bag-use bag-ghost" tabindex="-1" aria-hidden="true">使用</button>';
 // 「放在地上」：左邊直接調數量（只有一個就不顯示），按按鈕就放下（撿得回來，不用再確認）
 function dropRowHtml(item, count) {
   const q = Math.min(bagDropQty, count);

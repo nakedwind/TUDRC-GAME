@@ -11,7 +11,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=bag-slots-20261024"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=baggutter-20261025">
+<link rel="stylesheet" href="css/style.css?v=dropfix-20261025">
 <link rel="stylesheet" href="css/tpad-map.css?v=tmap7-20261024">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=statbox-20261025">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
@@ -251,7 +251,7 @@
   <script src="data/equipment.js?v=bag-slots-20261024"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=infoimgsize-20261023"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
-  <script src="js/backpack-layout.js?v=wstext-20261025"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
+  <script src="js/backpack-layout.js?v=dropfix-20261025"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
   <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器、背包編輯器都會存）；每次都讀最新的，兩邊改的說明才會馬上連動 -->
   <script src="js/workshop-config.js?v=ammoimg-20261023"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
@@ -318,7 +318,7 @@
   <script src="js/ore.js?v=short-tips-20261023"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=mouse-tunnel-20261023"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=merged-20261024"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=merged-20261024"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/backpack.js?v=dropfix-20261025"></script> <!-- 9j. 背包：物品格與說明 -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
   <script src="js/squad-gear.js?v=oneslot-20261025"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=giftrefuse-20261025"></script> <!-- 9l. 送禮與好感度 -->

@@ -37,7 +37,7 @@ const BACKPACK_PARTS = {
   'text.catTag':    { group: '文字與按鈕', label: '分類標籤', sel: '#backpackDetail .bag-tags > .bag-tag:first-child', text: 'category' },
   'text.effectTag': { group: '文字與按鈕', label: '效果標籤', sel: '#backpackDetail .bag-tags > .bag-tag.effect', text: 'item.effect' },
   'text.desc':      { group: '文字與按鈕', label: '物品說明', sel: '#backpackDetail .bag-desc', text: 'item.desc' },
-  'text.useNote':  { group: '文字與按鈕', label: '「無法使用」「可以送禮」說明', sel: '#backpackDetail .bag-actions > .bag-note:not(:last-child):not(.drag-hint, .free-hint, .gear-hint)' },
+  'text.useNote':  { group: '文字與按鈕', label: '「無法使用」「可以送禮」說明', sel: '#backpackDetail .bag-actions > .bag-note:not(:last-child):not(.drag-hint, .free-hint, .gear-hint), #backpackDetail .bag-use-slot > .bag-note' },
   'text.dropNote': { group: '文字與按鈕', label: '「無法放在地上」說明', sel: '#backpackDetail .bag-actions > .bag-note:last-child:not(.drag-hint, .free-hint, .gear-hint)' },   // 子彈、裝備的提示有自己的項目（下面）
   'text.hint':      { group: '文字與按鈕', label: '「可直接拖曳到下方快捷鍵」提示', sel: '#backpackDetail .bag-quick small', text: 'fixed' },
   'btn.use':        { group: '文字與按鈕', label: '使用按鈕', sel: '#backpackDetail .bag-use:not([data-mag-load], [data-gear-equip])', text: 'use' },   // 子彈、裝備的按鈕有自己的項目（下面）
@@ -45,7 +45,8 @@ const BACKPACK_PARTS = {
   'btn.magUnload':  { group: '文字與按鈕', label: '子彈「從彈匣拿下」按鈕', sel: '#backpackDetail [data-mag-unload]', text: 'fixed' },
   'btn.gearEquip':  { group: '文字與按鈕', label: '裝備「裝備／裝到…」按鈕（字跟著格子變，只能調位置大小）', sel: '#backpackDetail [data-gear-equip]' },
   'btn.gearOff':    { group: '文字與按鈕', label: '裝備「卸下」按鈕（字跟著格子變，只能調位置大小）', sel: '#backpackDetail [data-gear-off]' },
-  'btn.drop':       { group: '文字與按鈕', label: '放在地上按鈕', sel: '#backpackDetail .bag-drop', text: 'fixed' },
+  'btn.drop':       { group: '文字與按鈕', label: '「放在地上」按鈕', sel: '#backpackDetail .bag-drop', text: 'fixed' },
+  'btn.dropQty':    { group: '文字與按鈕', label: '「放在地上」的數量 −／＋（有 2 個以上才出現）', sel: '#backpackDetail .bag-qty' },
   'btn.close':      { group: '文字與按鈕', label: '關閉按鈕 ×', sel: '#backpackClose' },
   'text.dragNote':  { group: '文字與按鈕', label: '子彈「也可以直接拖曳到武器分頁的彈匣格」提示', sel: '#backpackDetail .bag-actions > .bag-note.drag-hint', text: 'fixed' },
   'text.freeNote':  { group: '文字與按鈕', label: '一般子彈「不佔彈匣格子」提示', sel: '#backpackDetail .bag-actions > .bag-note.free-hint', text: 'fixed' },
