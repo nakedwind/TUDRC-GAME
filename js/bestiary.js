@@ -29,7 +29,8 @@ function bestiaryCycleSort() {   // 換下一種排序，翻到選著的那一�
 }
 
 // ---- 消滅次數 ----
-const bestiaryKeyOf = e => e.type === 'slime' ? (!e.variant || e.variant === 'normal' ? 'slime' : 'slime:' + e.variant) : e.type;   // 史萊姆變體分開算
+const bestiaryKeyOf = e => e.type === 'slime' ? (!e.variant || e.variant === 'normal' ? 'slime' : 'slime:' + e.variant)
+  : e.elite ? e.type + ':elite' : e.type;   // 史萊姆變體、菁英怪（例如鳥頭大隊長）分開算
 function bestiaryRecordKill(e) {
   if (!e || !e.type || e.dummy || e.exploded) return;   // 沙包、自爆史萊姆自己炸掉的不算
   if (!bestiaryStyle().countPractice && typeof practiceOn === 'function' && practiceOn()) return;

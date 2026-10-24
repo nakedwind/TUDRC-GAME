@@ -97,13 +97,23 @@ function bestiaryLayout(cfg) {   // 預設版面＋設定檔裡改過的
 const bestiaryTexts = cfg => ({ ...BESTIARY_TEXT_DEFAULT, ...(bestiaryCfg(cfg).texts || {}) });
 const bestiaryStyle = cfg => ({ ...BESTIARY_STYLE_DEFAULT, ...(bestiaryCfg(cfg).style || {}) });
 
-// ---- 遊戲裡有哪些怪物：怪物編輯器的怪物＋史萊姆變體 ----
+// ---- 菁英怪（地圖 BOSS）：遊戲裡是拿原本的怪物加強出來的，圖鑑裡當成另一隻（key＝原本的 id + ':elite'，接在原本那隻後面）----
+// 新增菁英怪時在這裡加一行：of＝拿哪一隻怪物加強、def＝那隻菁英怪的設定（名稱 name、換色 hue；圖片跟原本那隻一樣）
+// 消滅次數另外算（js/bestiary.js 的 bestiaryKeyOf）
+const BESTIARY_ELITES = [
+  { of: 'bird_head', def: () => typeof ELITE_BIRD !== 'undefined' ? ELITE_BIRD : { name: '鳥頭大隊長', hue: -35 } },   // js/elite-bird-head.js（沒載入時用括號裡的）
+];
+// ---- 遊戲裡有哪些怪物：怪物編輯器的怪物＋史萊姆變體＋菁英怪 ----
 function bestiaryBaseList() {
   const cat = typeof ACTIVE_MONSTERS !== 'undefined' ? ACTIVE_MONSTERS : (typeof monsterCatalog === 'function' ? monsterCatalog() : []);
   const variants = typeof slimeSettings === 'function' ? slimeSettings().variants : [];
   const out = [];
   for (const m of cat) {
-    if (m.id !== 'slime') { out.push({ key: m.id, name: m.name, image: m.sprite, hue: null }); continue; }
+    if (m.id !== 'slime') {
+      out.push({ key: m.id, name: m.name, image: m.sprite, hue: null });
+      for (const el of BESTIARY_ELITES) if (el.of === m.id) { const d = el.def(); out.push({ key: m.id + ':elite', name: d.name, image: m.sprite, hue: Number.isFinite(d.hue) ? d.hue : null }); }
+      continue;
+    }
     for (const v of variants.length ? variants : [{ id: 'normal', name: m.name }]) {   // 史萊姆：每一種變體各一隻（顏色跟遊戲一樣）
       out.push({ key: v.id === 'normal' ? 'slime' : 'slime:' + v.id, name: v.name || m.name, image: m.sprite, hue: v.id === 'normal' || !v.hue ? null : v.hue });
     }

@@ -59,6 +59,8 @@ function squadPart(key) {
   key = String(key || '');
   if (key.includes('@')) {   // 每格技能各自的（例：text.skillEffect@red/core-1）：跟共用的那一份同一種東西，只套用在這一格
     const [base, who] = key.split('@'), [t, id] = who.split('/'), bp = squadPart(base); if (!bp) return null;
+    // @trait／@other：所有隊員的「特性」技能共用一份、其他技能共用另一份（補充說明的位置、大小）
+    if (who === 'trait' || who === 'other') return { ...bp, key, group: '技能說明（分組）', label: bp.label + '（' + (who === 'trait' ? '所有「特性」技能' : '「特性」以外的所有技能') + '）' };
     const lay = typeof skillLayoutOf === 'function' ? skillLayoutOf(id, t) : null, name = ((typeof TYPES !== 'undefined' && TYPES[t]) || {}).name || t;
     return { ...bp, key, group: '技能說明（每格技能各自）', label: bp.label.replace('・所有技能一起', '') + '（只有這格：' + name + '・' + (lay ? lay.tag : id) + '）' };
   }
@@ -186,7 +188,7 @@ function squadSkillHtml(actor, safe) {
       '<b class="sq-info-name" data-sq="text.skillName">' + sqEsc(node.name) + '</b><small class="sq-info-tag" data-sq="text.skillTag">' + sqT(sqSkillTagKey = 'skillTag:' + sel, lay.tag) + '</small>' +
       '<p class="sq-info-effect" data-sq="text.skillEffect@' + type + '/' + sel + '" data-sq-base="text.skillEffect">' + sqEsc(effect) + '</p>' +   // 位置、大小每格技能各自調（沒調的照大家共用的）
       '<p class="sq-info-effect sq-info-effect2" data-sq="text.skillEffect2@' + type + '/' + sel + '" data-sq-base="text.skillEffect2">' + sqEsc(node.effect2).replace(/\n/g, '<br>') + '</p>' +   // 技能效果 2：同上，每格各自調
-      '<p class="sq-info-note" data-sq="text.skillNote">' + sqEsc(note).replace(/\n/g, '<br>') + '</p>' +
+      '<p class="sq-info-note" data-sq="text.skillNote@' + (sel === 'trait-1' ? 'trait' : 'other') + '" data-sq-base="text.skillNote">' + sqEsc(note).replace(/\n/g, '<br>') + '</p>' +
       '<div class="sq-learn' + (owned ? ' owned' : '') + '" data-sq="box.learn' + (owned ? 'ed' : '') + '">' + (owned ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
       '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' + label + '</button></div></section>';
   }
@@ -204,12 +206,15 @@ function squadLookItem(type, slot) {   // 這一格外觀現在穿的：{ id, na
   const a = eq[slot] && typeof ACC_BY_ID !== 'undefined' && ACC_BY_ID[eq[slot]];
   return a ? { id: a.id, name: a.name, image: a.art.front } : null;
 }
+// 外觀裝備（服裝、配件）的說明、數值文字：編輯器可以改，存在 data/squad-layout.js 的 texts（lookDesc:id／lookStat:id）；沒改＝照下面的預設
+const sqLookText = (id, f, def) => { const t = typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.texts && SQUAD_LAYOUT.texts[(f === 'desc' ? 'lookDesc:' : 'lookStat:') + id]; return t || def; };
+let squadShownItem = null;   // 下方「裝備說明／裝備數值」現在顯示的是哪一件：{ kind: 'gear'|'look', id }（編輯器改字用）
 function squadAvailList(type) {   // 下面「可用裝備」：選的是隊員裝備格→背包裡的隊員裝備；外觀格→能穿的服裝／配件
   const sl = squadPageState.slot;
-  if (sl.kind === 'gear') return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0).map(g => ({ id: g.id, name: g.name, image: squadGearImage(g), n: supplyInventory.get(g.id), desc: g.desc, stat: squadGearEffect(g) }));
+  if (sl.kind === 'gear') return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0).map(g => ({ id: g.id, ref: { kind: 'gear', id: g.id }, name: g.name, image: squadGearImage(g), n: supplyInventory.get(g.id), desc: g.desc, stat: squadGearEffect(g) }));
   if (typeof costumeSkinsFor === 'undefined') return [];
-  if (sl.id === 'skin') return costumeSkinsFor(type).map(s => ({ id: 'skin-' + s.id, wear: s.id, name: s.name, image: 'images/character/' + s.folder + '/' + s.folder.replace('_', '') + '_0000_Front.png', desc: s.builtin ? '原本的服裝。' : '扭蛋得到的服裝' + (s.rarity ? '（' + s.rarity + '）' : '') + '。', stat: '外觀裝備，不影響數值' }));
-  return COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, sl.id) && costumeCanWear(type, a.id)).map(a => ({ id: a.id, wear: a.id, name: a.name, image: a.art.front, desc: '扭蛋得到的配件' + (a.rarity ? '（' + a.rarity + '）' : '') + '。', stat: '外觀裝備，不影響數值' }));
+  if (sl.id === 'skin') return costumeSkinsFor(type).map(s => ({ id: 'skin-' + s.id, wear: s.id, name: s.name, image: 'images/character/' + s.folder + '/' + s.folder.replace('_', '') + '_0000_Front.png', ref: { kind: 'look', id: s.id }, desc: sqLookText(s.id, 'desc', s.builtin ? '原本的服裝。' : '扭蛋得到的服裝' + (s.rarity ? '（' + s.rarity + '）' : '') + '。'), stat: sqLookText(s.id, 'stat', '外觀裝備，不影響數值') }));
+  return COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, sl.id) && costumeCanWear(type, a.id)).map(a => ({ id: a.id, wear: a.id, name: a.name, image: a.art.front, ref: { kind: 'look', id: a.id }, desc: sqLookText(a.id, 'desc', '扭蛋得到的配件' + (a.rarity ? '（' + a.rarity + '）' : '') + '。'), stat: sqLookText(a.id, 'stat', '外觀裝備，不影響數值') }));
 }
 function squadGearHtml(actor, safe) {
   const type = actor.type, st = squadPageState, gear = squadGearOf(type);
@@ -234,14 +239,15 @@ function squadGearHtml(actor, safe) {
   if (st.avail && !avail.some(a => a.id === st.avail)) st.avail = null;
   const pick = st.avail ? avail.find(a => a.id === st.avail) : null;
   let cur = null;
-  if (st.slot.kind === 'gear') { const g = squadGearById(gear[st.slot.id]); if (g) cur = { name: g.name, desc: g.desc, stat: squadGearEffect(g) }; }
-  else { const it = squadLookItem(type, st.slot.id); if (it) cur = { name: it.name, desc: it.builtin ? '原本的服裝。' : '外觀裝備。', stat: '外觀裝備，不影響數值' }; }
+  if (st.slot.kind === 'gear') { const g = squadGearById(gear[st.slot.id]); if (g) cur = { ref: { kind: 'gear', id: g.id }, name: g.name, desc: g.desc, stat: squadGearEffect(g) }; }
+  else { const it = squadLookItem(type, st.slot.id); if (it) cur = { ref: { kind: 'look', id: it.id }, name: it.name, desc: sqLookText(it.id, 'desc', it.builtin ? '原本的服裝。' : '外觀裝備。'), stat: sqLookText(it.id, 'stat', '外觀裝備，不影響數值') }; }
   const show = pick || cur;
+  squadShownItem = show ? { ...show.ref, name: show.name, desc: show.desc || '', stat: show.stat || '' } : null;
   h += '<section class="sq-info sq-gear-info" data-sq="panel.gearInfo">' +
     '<b class="sq-title desc" data-sq="text.descTitle">' + sqT('text.descTitle', '裝備說明') + '</b>' +
-    '<div class="sq-box desc" data-sq="box.desc"><p data-sq="text.desc">' + (show ? '<b>' + sqEsc(show.name) + '</b>　' + sqEsc(show.desc || '') : '<span class="sq-dim">這一格還沒有裝備。</span>') + '</p></div>' +
+    '<div class="sq-box desc" data-sq="box.desc"><p data-sq="text.desc">' + (show ? '<b>' + sqEsc(show.name) + '</b>：' + sqEsc(show.desc || '').replace(/\n/g, '<br>') : '<span class="sq-dim">這一格還沒有裝備。</span>') + '</p></div>' +
     '<b class="sq-title stat" data-sq="text.statTitle">' + sqT('text.statTitle', '裝備數值') + '</b>' +
-    '<div class="sq-box stat" data-sq="box.stat"><p data-sq="text.stat">' + (show ? sqEsc(show.stat || '—') : '<span class="sq-dim">無。</span>') + '</p></div>' +
+    '<div class="sq-box stat" data-sq="box.stat"><p data-sq="text.stat">' + (show ? sqEsc(show.stat || '—').replace(/\n/g, '<br>') : '<span class="sq-dim">無。</span>') + '</p></div>' +
     '<b class="sq-title avail" data-sq="text.availTitle">' + sqT('text.availTitle', '可用裝備') + '</b>' +
     '<div class="sq-avail" data-sq="panel.avail">' + (avail.length ? avail.map(a => '<button type="button" class="sq-avail-item' + (a.id === st.avail ? ' sel' : '') + '" data-avail="' + sqEsc(a.id) + '" data-sq="avail:' + sqEsc(a.id) + '" title="' + sqEsc(a.name) + '"><img data-sq="availImg:' + sqEsc(a.id) + '" src="' + sqEsc(a.image) + '" alt="">' + (a.n > 1 ? '<em>×' + a.n + '</em>' : '') + '</button>').join('')
       : '<p class="sq-dim">' + (st.slot.kind === 'gear' ? '背包裡沒有隊員裝備（便利商店有賣）' : '還沒有這個欄位的外觀裝備') + '</p>') + '</div>' +
@@ -516,10 +522,11 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
       }
       values.font = Math.round(parseFloat(cs.fontSize)); values.align = cs.textAlign === 'start' ? 'left' : cs.textAlign === 'end' ? 'right' : cs.textAlign;
     }
-    const type = squadPageState.member, nodeId = /^g?node(Icon)?:/.test(key) ? key.split(':')[1] : /^text\.(skillName|skillDesc|skillEffect2?|skillNote|lockDesc)(@|$)/.test(key) ? (key.includes('@') ? key.split('/')[1] : squadPageState.skill[type]) : null;   // 技能說明的字：右下現在顯示的那一格
+    const type = squadPageState.member, nodeId = /^g?node(Icon)?:/.test(key) ? key.split(':')[1] : /^text\.(skillName|skillDesc|skillEffect2?|skillNote|lockDesc)(@|$)/.test(key) ? (key.includes('/') ? key.split('/')[1] : squadPageState.skill[type]) : null;   // 技能說明的字：右下現在顯示的那一格
     const skill = nodeId && TYPES[type] && skillLayoutOf(nodeId, type) ? { member: type, memberName: TYPES[type].name, id: nodeId, tag: skillLayoutOf(nodeId, type).tag, node: skillNodeOf(type, nodeId) } : null;
     const pt = squadPart(key);
-    post({ type: 'info', key, visible: !!el, count: list.length, values, text: textInfo(key), skill, page: squadPageState.page, member: type, part: pt && { key, group: pt.group, label: pt.label, kind: pt.kind } });
+    const gearText = /^(text|box)\.(desc|stat)$/.test(key) && squadPageState.page === 'gear' ? squadShownItem : null;   // 裝備說明／裝備數值：現在顯示的那一件
+    post({ type: 'info', key, visible: !!el, count: list.length, values, text: textInfo(key), skill, gearText, page: squadPageState.page, member: type, part: pt && { key, group: pt.group, label: pt.label, kind: pt.kind } });
   }
   function setup() {
     try {
@@ -563,6 +570,11 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
   // 從清單選到現在看不到的東西：換頁、換隊員、換格子，把它叫出來
   function reveal(key) {
     if (els(key).length) return;
+    if (/@(trait|other)$/.test(key)) {   // 分組的：換到特性／其他技能
+      const st = squadPageState, m = st.member; st.page = 'skills';
+      if (key.endsWith('@trait')) st.skill[m] = 'trait-1'; else if (!st.skill[m] || st.skill[m] === 'trait-1') st.skill[m] = 'trait-2';
+      refreshSquadPage(); applySquadLayout(); return;
+    }
     if (key.includes('@')) { const [t, id] = key.split('@')[1].split('/'); squadPageState.page = 'skills'; squadPageState.member = t; squadPageState.skill[t] = id; refreshSquadPage(); applySquadLayout(); return; }
     const st = squadPageState, [p, id] = key.split(':');
     if (/^(gnode|gnodeIcon)$/.test(p) && !isGuideTree(st.member)) { const g = squadMemberList().find(x => isGuideTree(x.type)); if (g) st.member = g.type; }   // 嚮導的技能格：換到一位嚮導

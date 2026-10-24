@@ -39,7 +39,36 @@ function saveDraft() {
   for (const [id, list] of Object.entries(COSTUME_PLACEMENT.blocked || {})) if (!list || !list.length) delete COSTUME_PLACEMENT.blocked[id];
   try { localStorage.setItem(COSTUME_PLACEMENT_KEY, JSON.stringify(COSTUME_PLACEMENT)); status('已自動儲存到這台瀏覽器。'); }
   catch (e) { status('暫存失敗：' + e.message, true); }
+  rememberStep();   // 上一步／下一步：記下這次改之前的樣子
 }
+// ---- 上一步／下一步（Ctrl+Z／Ctrl+Y）：每次自動暫存時，記下改之前的整份設定 ----
+// 連續的修改（拖曳一次、按住方向鍵、一直滾）在 0.6 秒內算同一步，按一次 Ctrl+Z 就整段回去。記在這個頁面裡，重新整理就清掉。
+const undoStack = [], redoStack = [];
+let lastSnap = JSON.stringify(COSTUME_PLACEMENT), lastStepAt = 0, restoring = false;
+function rememberStep() {
+  if (restoring) return;
+  const snap = JSON.stringify(COSTUME_PLACEMENT); if (snap === lastSnap) return;
+  const now = performance.now();
+  if (now - lastStepAt > 600) { undoStack.push(lastSnap); if (undoStack.length > 300) undoStack.shift(); }   // 跟上一次修改隔太久：算新的一步
+  lastStepAt = now; lastSnap = snap; redoStack.length = 0;
+}
+function stepHistory(from, to, word) {
+  if (!from.length) { status(word === 'undo' ? '沒有上一步了' : '沒有下一步了'); return; }
+  to.push(JSON.stringify(COSTUME_PLACEMENT));
+  const data = JSON.parse(from.pop());
+  for (const k of Object.keys(COSTUME_PLACEMENT)) if (!(k in data)) delete COSTUME_PLACEMENT[k];
+  Object.assign(COSTUME_PLACEMENT, data);
+  restoring = true; saveDraft(); restoring = false;
+  lastSnap = JSON.stringify(COSTUME_PLACEMENT); lastStepAt = 0;
+  renderAll(); if (typeof drawStage === 'function') drawStage();
+  status(word === 'undo' ? '↶ 回到上一步（已自動儲存到這台瀏覽器）' : '↷ 重做下一步（已自動儲存到這台瀏覽器）');
+}
+document.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey) return;
+  const k = e.key.toLowerCase();
+  if (k === 'z' && !e.shiftKey) { e.preventDefault(); stepHistory(undoStack, redoStack, 'undo'); }
+  else if (k === 'y' || (k === 'z' && e.shiftKey)) { e.preventDefault(); stepHistory(redoStack, undoStack, 'redo'); }
+}, true);
 // 匯出：最裡層的 { x, y… } 和陣列寫成一行，比較好讀
 function fmt(v, ind) {
   if (Array.isArray(v) || !v || typeof v !== 'object' || Object.values(v).every(x => !x || typeof x !== 'object' || Array.isArray(x) && x.every(y => !y || typeof y !== 'object' || Array.isArray(y))))
@@ -119,6 +148,14 @@ function edit(fn, dir = ED.dir) {
 
 // ---- 畫 ----
 const stage = document.getElementById('stage'), sctx = stage.getContext('2d');
+// 整體預覽縮放（只是看的大小，不會改到配件的位置、縮放數值）：以畫面中心縮放；Alt＋滾輪、或上面的 − ＋ 按鈕
+let viewZoom = 1;
+const VIEW_MIN = 0.5, VIEW_MAX = 2, VIEW_STEP = 0.1;
+function setViewZoom(z) {
+  viewZoom = Math.round(Math.max(VIEW_MIN, Math.min(VIEW_MAX, z)) * 100) / 100;
+  const t = document.getElementById('viewZoomText'); if (t) t.textContent = Math.round(viewZoom * 100) + '%';
+  drawStage();
+}
 let selBox = null;
 function wornAccs() {   // 要畫的配件：選中的那個＋（勾選時）其他欄位試戴的
   const acc = curAcc(), list = [];
@@ -151,6 +188,8 @@ function drawFigure(c, dir, frame, dx, dy, size, highlight) {
 function drawStage() {
   const c = sctx, z = CE_ZOOM;
   c.clearRect(0, 0, CE_SIZE, CE_SIZE);
+  c.fillStyle = '#0d141b'; c.fillRect(0, 0, CE_SIZE, CE_SIZE);   // 縮小時，格子外面的底色
+  c.save(); c.translate(CE_SIZE / 2, CE_SIZE / 2); c.scale(viewZoom, viewZoom); c.translate(-CE_SIZE / 2, -CE_SIZE / 2);   // 整體預覽縮放：畫面裡的東西一起縮放
   for (let y = 0; y < 8; y++) for (let x = 0; x < 8; x++) { c.fillStyle = (x + y) % 2 ? '#17212c' : '#1c2834'; c.fillRect(x * 8 * z, y * 8 * z, 8 * z, 8 * z); }
   c.strokeStyle = 'rgba(255,255,255,.05)'; c.lineWidth = 1; c.beginPath();
   for (let i = 1; i < 64; i++) { c.moveTo(i * z + .5, 0); c.lineTo(i * z + .5, CE_SIZE); c.moveTo(0, i * z + .5); c.lineTo(CE_SIZE, i * z + .5); }
@@ -165,6 +204,7 @@ function drawStage() {
     c.setLineDash([]); c.strokeStyle = '#ffd36f'; c.beginPath(); c.moveTo(cx - 6, cy); c.lineTo(cx + 6, cy); c.moveTo(cx, cy - 6); c.lineTo(cx, cy + 6); c.stroke();
     c.restore();
   }
+  c.restore();   // 整體預覽縮放結束
 }
 const strip = document.getElementById('strip');
 const stripCanvases = CE_DIRS.map(d => {
@@ -353,13 +393,19 @@ stage.addEventListener('pointerdown', e => {
 });
 stage.addEventListener('pointermove', e => {
   if (!drag) return;
-  const nx = drag.px + (e.clientX - drag.x) * drag.k / CE_ZOOM, ny = drag.py + (e.clientY - drag.y) * drag.k / CE_ZOOM;
+  const nx = drag.px + (e.clientX - drag.x) * drag.k / (CE_ZOOM * viewZoom), ny = drag.py + (e.clientY - drag.y) * drag.k / (CE_ZOOM * viewZoom);   // 預覽縮放過也照樣跟著游標
   const pl = effective();
   if (Math.round(nx * 2) / 2 !== pl.x || Math.round(ny * 2) / 2 !== pl.y) edit(p => { p.x = nx; p.y = ny; });
 });
 const endDrag = () => { drag = null; };
 stage.addEventListener('pointerup', endDrag); stage.addEventListener('pointercancel', endDrag);
-stage.addEventListener('wheel', e => { if (!curAcc()) return; e.preventDefault(); edit(p => { p.scale = (p.scale || 1) + (e.deltaY < 0 ? 0.05 : -0.05); }); }, { passive: false });
+stage.addEventListener('wheel', e => {
+  if (e.altKey) { e.preventDefault(); setViewZoom(viewZoom + (e.deltaY < 0 ? VIEW_STEP : -VIEW_STEP)); return; }   // Alt＋滾輪：整體預覽縮放（不改配件）
+  if (!curAcc()) return; e.preventDefault(); edit(p => { p.scale = (p.scale || 1) + (e.deltaY < 0 ? 0.05 : -0.05); });
+}, { passive: false });
+document.getElementById('viewZoomOut').addEventListener('click', () => setViewZoom(viewZoom - VIEW_STEP));
+document.getElementById('viewZoomIn').addEventListener('click', () => setViewZoom(viewZoom + VIEW_STEP));
+document.getElementById('viewZoomReset').addEventListener('click', () => setViewZoom(1));
 document.addEventListener('keydown', e => {
   if (/^(INPUT|SELECT|TEXTAREA)$/.test(document.activeElement && document.activeElement.tagName) || e.ctrlKey || e.metaKey || e.altKey) return;
   const step = e.shiftKey ? 0.5 : 1, moves = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] };

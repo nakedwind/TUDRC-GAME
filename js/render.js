@@ -707,15 +707,16 @@ function drawTextEffects() {
     const life0 = f.life0 || 0.8;
     const alpha = Math.min(1, f.life / 0.6);                 // 最後 0.6 秒才淡出，其餘維持清晰
     const ty = f.y + (f.vy || 0) * Math.min(0.8, life0 - f.life);   // 只在前段緩緩上飄
-    ctx.font = 'bold 14px sans-serif'; ctx.textAlign = 'center';
+    ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';   // 字小一點（12px），上下置中在黑底標籤裡
     // 黑底標籤：讓提示字在任何背景上都看得清楚
     const tw = ctx.measureText(f.text).width;
     const iconSpace=f.iconImage?34:0,totalWidth=tw+iconSpace;
     const textX=f.x+iconSpace/2;
     ctx.globalAlpha = alpha * 0.72; ctx.fillStyle = '#000';
-    roundRect(f.x - totalWidth / 2 - 8, ty - (f.iconImage?20:15), totalWidth + 16, f.iconImage?30:21, 6); ctx.fill();
+    const boxH = f.iconImage ? 30 : 19, cy = ty - (f.iconImage ? 5 : 4.5);   // 標籤的正中間（跟原本的位置一樣）
+    roundRect(f.x - totalWidth / 2 - 8, cy - boxH / 2, totalWidth + 16, boxH, 6); ctx.fill();
     ctx.globalAlpha = alpha; ctx.fillStyle = f.color;
-    ctx.fillText(f.text, textX, ty);
+    ctx.fillText(f.text, textX, cy + 1);   // +1：中文字的視覺中心稍微偏上，往下補一點
     if(f.iconImage){
       let img=textEffectIconImages[f.iconImage];
       if(!img){img=new Image();img.src=f.iconImage;textEffectIconImages[f.iconImage]=img;}
@@ -725,7 +726,7 @@ function drawTextEffects() {
         ctx.imageSmoothingEnabled=false;ctx.drawImage(img,f.x-totalWidth/2+(28-w)/2,ty-5-h/2,w,h);
       }
     }
-    ctx.globalAlpha = 1;
+    ctx.globalAlpha = 1; ctx.textBaseline = 'alphabetic';
   }
 }
 function drawDemolishPreview() {
@@ -1525,8 +1526,28 @@ function draw() {
   if (typeof drawNpcChatOffscreen === 'function') drawNpcChatOffscreen(ctx, cv);   // 閒聊的人在畫面外：邊緣的方向箭頭（js/npc-chats.js）
   drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
   if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
+  drawBaseHpTopBar(ctx, cv);   // 戰鬥區域：畫面最上方的基地血條
   if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
   drawFieldMemberLocator();
+}
+// 戰鬥區域：畫面最上方（離上緣 2px）的基地血條。規則跟基地身上的血條一樣（目前血量 / 總血量，依剩餘 HP 變色）
+// 高度只有 18px，在異質核心的 BOSS 血條（標題約從 40px 開始）上面，不會擋到它
+const BASE_TOP_BAR = { top: 2, h: 12, maxW: 520 };
+function drawBaseHpTopBar(ctx, cv) {
+  if (!G || MAP_SAFE || !G.obstacles) return;
+  const o = G.obstacles.find(b => b.isBase); if (!o || !o.maxhp) return;
+  const ratio = Math.max(0, Math.min(1, o.hp / o.maxhp)), B = BASE_TOP_BAR;
+  const w = Math.min(B.maxW, cv.width * .45), x = (cv.width - w) / 2, y = B.top + 3;   // y＝血條本體（外框比它多 3px）
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.82)'; roundRect(x - 3, B.top, w + 6, B.h + 6, 4); ctx.fill();
+  ctx.fillStyle = '#352d2d'; roundRect(x, y, w, B.h, 2); ctx.fill();
+  ctx.fillStyle = ratio > 0.5 ? '#59d26f' : (ratio > 0.25 ? '#f0c54d' : '#ef5b5b');
+  if (ratio > 0) { roundRect(x, y, w * ratio, B.h, 2); ctx.fill(); }
+  ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const label = '基地 HP ' + Math.max(0, Math.ceil(o.hp)) + ' / ' + o.maxhp;
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(label, cv.width / 2, y + B.h / 2 + 1);
+  ctx.fillStyle = '#fff'; ctx.fillText(label, cv.width / 2, y + B.h / 2 + 1);
+  ctx.restore();
 }
 function roundRect(x, y, w, h, r) {
   ctx.beginPath(); ctx.moveTo(x + r, y);

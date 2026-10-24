@@ -760,7 +760,7 @@ function demolishPlayerBuilding(o) {
   computeFlow();
   const refund = demolishRefund(o);
   if (refund) G.money += refund;
-  sfx('demolish'); flash(refund ? '已拆除　+$' + refund : '已拆除', fx, fy - 20, '#ffd479');
+  sfx('demolish'); flash(refund ? '已拆除 +$' + refund : '已拆除', fx, fy - 20, '#ffd479');
   spawnHammerHit(fx, fy, o);   // 槌子敲下去＋碎片＋煙塵（js/attack-fx.js）
   closeGroundMenu(); updateHUD();
   return true;

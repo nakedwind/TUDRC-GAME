@@ -2,9 +2,9 @@
    在 2F應變中心的電腦（電腦辦公桌）前按 Space 打開。消滅過的怪物才會出現縮圖，還沒消滅過的是黑底問號。
    ・layout：每一塊的位置、大小（px，以 1060×620 的視窗為準），沒寫的用預設值（js/bestiary-config.js 的 BESTIARY_LAYOUT_DEFAULT）
    ・texts：標題、按鈕的文字；style：maxStars 星星最多幾顆、imageFrame 圖片框要不要框線、countPractice 練習室打死的算不算
-   ・monsters：每一隻怪物（key＝怪物 id；史萊姆變體是 slime:splitter 這樣）：
+   ・monsters：每一隻怪物（key＝怪物 id；史萊姆變體是 slime:splitter、菁英怪是 bird_head:elite 這樣）：
      name 名稱、stars 星級、abilities 能力（最多 4 條，第 1 條在最上面，往下排）、about 背景介紹、image 圖片、
-     imageBox 這隻自己的怪物圖片框（x、y、w 寬、h 高；沒寫＝用 layout.image）、thumbScale／thumbX／thumbY 縮圖大小（%）與位移（px）、hue 換色（史萊姆變體）、hidden 不放進圖鑑
+     imageBox 這隻自己的怪物圖片框（x、y、w 寬、h 高；沒寫＝用 layout.image）、imgScale／imgX／imgY 框裡的怪物圖片大小（%，以圖片中心縮放）與位移（px）、thumbScale／thumbX／thumbY 縮圖大小（%）與位移（px）、hue 換色（史萊姆變體）、hidden 不放進圖鑑
    ・order：怪物的排列順序（沒列到的接在後面） */
 const BESTIARY_CONFIG = {
   "layout": {},
@@ -80,6 +80,18 @@ const BESTIARY_CONFIG = {
       ],
       "thumbY": 20,
       "thumbScale": 160
+    },
+    "bird_head:elite": {
+      "stars": 7,
+      "imgScale": 50,
+      "abilities": [
+        "號令甦醒：被驚動時大叫，喚醒核心，背後冒出鳥頭人夾擊。",
+        "重型衝撞：蓄力後直衝 20 格，撞飛路線上所有人，建築直接撞爛。",
+        "核心護盾：牠還活著時，守護的核心只受 40% 傷害。",
+        "鋼鐵身軀：推不動、不會被電麻；撞到牆會暈好幾秒。"
+      ],
+      "thumbY": 20,
+      "thumbScale": 180
     },
     "pearl_kid": {
       "stars": 3,
@@ -208,6 +220,7 @@ const BESTIARY_CONFIG = {
     "slime:bomber",
     "slime:giant",
     "bird_head",
+    "bird_head:elite",
     "pearl_kid",
     "lifeform",
     "hangi_bao",

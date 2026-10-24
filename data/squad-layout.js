@@ -853,6 +853,11 @@ const SQUAD_LAYOUT = {
     },
     "lookSlotImg:skin": {
       "size": 32
+    },
+    "text.skillNote@other": {
+      "y": -60,
+      "font": 12,
+      "x": 0
     }
   },
   "texts": {

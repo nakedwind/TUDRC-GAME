@@ -259,7 +259,7 @@ $q('leftBody').addEventListener('click', e => {
 });
 $q('leftBody').addEventListener('input', e => {
   const t = e.target;
-  if (t.dataset.sk) { const f = t.dataset.sk; updateSkill(nd => { nd[f] = f === 'cost' ? Math.max(0, Math.round(+t.value || 0)) : t.value; }, 'sk:' + skillMember + skillNode + f); if (f === 'name') { /* 名稱改了，清單不用重畫 */ } return; }
+  if (t.dataset.sk) { const f = t.dataset.sk; updateSkill(nd => { nd[f] = f === 'cost' ? Math.max(0, Math.round(+t.value || 0)) : t.value; }, 'sk:' + skillMember + skillNode + f); syncRightSkill(); return; }
   if (t.matches('[data-sk-mod]')) { const box = t.closest('.mods'); updateSkill(nd => { nd.mods = readMods(box, 'sk'); }, 'skmod:' + skillMember + skillNode); fillContentFields(); return; }
   if (t.dataset.act) {   // 嚮導自動發動的技能：改數字
     const box = t.closest('.sec'); updateSkill(nd => { nd.active = readActive(box); }, 'skact:' + skillMember + skillNode + t.dataset.act);
@@ -281,12 +281,14 @@ function renderProps(rebuild = true) {
   const box = $q('props');
   if (!selKey) { box.innerHTML = '<p class="empty">先在左邊清單或中間的畫面上選一個東西</p>'; return; }
   const inf = info[selKey] || {}, t = inf.text, sk = SKILL_TEXT_KEY.test(selKey) && inf.skill;
-  const sig = selKey + '|' + (t ? t.k : '-') + '|' + (sk ? sk.member + sk.id : '-');
+  const sig = selKey + '|' + (t ? t.k : '-') + '|' + (sk ? sk.member + sk.id : '-') + '|' + (inf.gearText ? inf.gearText.kind + ':' + inf.gearText.id : '-');   // 換了技能、換了顯示的裝備：右邊重畫
   if (rebuild || box.dataset.sig !== sig) {
     box.dataset.sig = sig;
     let html = '<div class="sel-name">' + esc(labelOf(selKey)) + '</div><div class="sel-sub" id="selSub"></div>' +
       '<div class="sec"><div class="sec-head">位置（往右／往下為正，px）<span class="sp"></span><button type="button" class="small" data-reset="pos">↺ 恢復預設</button></div>' +
       '<div class="two">' + num('x', 'X') + num('y', 'Y') + '</div>' +
+      '<div class="btns"><button type="button" class="small" data-move="ArrowLeft" title="往左 1px（Shift＝10px）">←</button><button type="button" class="small" data-move="ArrowUp" title="往上 1px（Shift＝10px）">↑</button>' +
+      '<button type="button" class="small" data-move="ArrowDown" title="往下 1px（Shift＝10px）">↓</button><button type="button" class="small" data-move="ArrowRight" title="往右 1px（Shift＝10px）">→</button><span class="orig" style="margin:0">微調 1px（按住 Shift＝10px）</span></div>' +
       '<div class="btns"><button type="button" class="small" data-center="both">⊕ 置中</button><button type="button" class="small" data-center="x">↔ 水平置中</button><button type="button" class="small" data-center="y">↕ 垂直置中</button></div>' +
       '<div class="btns"><button type="button" class="small" id="copyLayout">📋 複製當前數值</button><button type="button" class="small" id="pasteLayout"' + (layoutClip ? '' : ' disabled') + '>📥 貼上複製數值</button></div>' +
       '<div class="orig" id="clipInfo"></div>' +
@@ -312,6 +314,7 @@ function renderProps(rebuild = true) {
     else if (/^text\.(name|intro|role|ability|status)$|^text\.skill|^text\.(desc|stat)$/.test(selKey)) html += '<div class="sec"><div class="note">這段文字每個隊員／每格技能都不一樣：' +
       (/skill/.test(selKey) ? '到左邊「技能內容」改。' : /^text\.(desc|stat)$/.test(selKey) ? '到左邊「裝備清單」改。' : '名字、簡介在「角色資料頁」改。') + '</div></div>';
     if (inf.skill && !sk) html += '<div class="sec"><div class="note">這是「' + esc(inf.skill.memberName) + '」的「' + esc(inf.skill.node.name) + '」。<br><button type="button" class="small" id="goSkill">到「技能內容」改這格技能</button></div></div>';
+    if (inf.gearText) html += gearTextHtml(inf.gearText);   // 裝備說明／裝備數值：改現在顯示的那一件
     html += '<div class="actions" style="margin-top:12px"><button type="button" class="danger" id="resetOne">這一個全部恢復預設</button></div>';
     box.innerHTML = html;
   }
@@ -327,11 +330,41 @@ function renderProps(rebuild = true) {
   if (sub) sub.textContent = [inf.visible === false ? '（現在畫面上看不到）' : '', inf.count > 1 ? '同名的有 ' + inf.count + ' 個，一起調整' : ''].filter(Boolean).join('　');
   const ta = box.querySelector('[data-text]');
   if (ta && t) { if (document.activeElement !== ta) ta.value = t.value || t.original || ''; /* 沒改過＝先填原本的字，直接在上面改 */ ta.placeholder = t.original || ''; $q('textOrig').textContent = '預設：' + (t.original || '（空白）'); }
+  if (inf.gearText) fillGearText(box, inf.gearText);
   if (sk) {
     const node = savedNode(sk.member, sk.id) || sk.node;
     box.querySelectorAll('[data-psk]').forEach(el => { if (document.activeElement !== el) el.value = node[el.dataset.psk] != null ? node[el.dataset.psk] : ''; });
-    const eff = box.querySelector('[data-psk="effect"]'); if (eff) eff.placeholder = modsText(node.mods) || '（沒有數值效果）';
+    const auto = node.active && typeof guideActiveTexts === 'function' ? guideActiveTexts(node.active) : null;   // 跟左邊「技能內容」同一套：空白時自動產生的字
+    const eff = box.querySelector('[data-psk="effect"]'); if (eff) eff.placeholder = (auto ? auto.effect : modsText(node.mods)) || '（沒有數值效果）';
+    const nt = box.querySelector('[data-psk="note"]'); if (nt) nt.placeholder = auto ? auto.note : '';
   }
+}
+// 左邊「技能內容」改了字：右邊選著的如果是同一格技能，欄位也跟著更新（反過來右邊改，左邊也會更新）
+function syncRightSkill() { const s = (info[selKey] || {}).skill; if (s && s.member === skillMember && s.id === skillNode) renderProps(false); }
+// ---- 裝備頁下方的「裝備說明」「裝備數值」：選到那兩塊時，右邊直接改現在顯示的那一件 ----
+// 隊員裝備：說明＝裝備清單裡的說明；數值＝實際改的數值（mods），顯示的文字照數值自動產生 → 背包、商店、戰鬥的數值都一起變
+// 外觀裝備：說明、數值都是文字（不影響戰鬥），存在 data/squad-layout.js 的 texts（lookDesc:／lookStat:）
+function gearTextHtml(g) {
+  if (g.kind === 'gear') {
+    const item = state.gear.find(x => x.id === g.id); if (!item) return '';
+    return '<div class="sec"><div class="sec-head">裝備內容（' + esc(item.name || item.id) + '）</div>' +
+      '<label class="field">裝備說明<textarea data-gt="desc" rows="3"></textarea></label>' +
+      '<div class="field">裝備數值（實際改的數值；顯示的文字照這裡自動產生）' + modsHtml(item.mods, 'gt') + '</div>' +
+      '<div class="orig" id="gtPreview"></div><div class="orig">跟左邊「裝備清單」改的是同一份；背包、商店的說明和戰鬥中的數值都會一起變。</div></div>';
+  }
+  return '<div class="sec"><div class="sec-head">外觀內容（' + esc(g.name || g.id) + '）<span class="sp"></span><button type="button" class="small" data-gt-reset>↺ 恢復預設</button></div>' +
+    '<label class="field">裝備說明<textarea data-gt="lookDesc" rows="2"></textarea></label>' +
+    '<label class="field">裝備數值（文字；外觀裝備不影響戰鬥）<textarea data-gt="lookStat" rows="2"></textarea></label>' +
+    '<div class="orig">只改這一件外觀（每件分開）</div></div>';
+}
+function fillGearText(box, g) {
+  if (g.kind === 'gear') {
+    const item = state.gear.find(x => x.id === g.id); if (!item) return;
+    const d = box.querySelector('[data-gt="desc"]'); if (d && document.activeElement !== d) d.value = item.desc || '';
+    const pv = $q('gtPreview'); if (pv) pv.textContent = '顯示成：' + ((item.effect || modsText(item.mods)) || '（沒有數值效果）');
+    return;
+  }
+  for (const [f, k] of [['lookDesc', 'desc'], ['lookStat', 'stat']]) { const el = box.querySelector('[data-gt="' + f + '"]'); if (el && document.activeElement !== el) el.value = state.layout.texts[f + ':' + g.id] || g[k] || ''; }
 }
 // ---- 複製／貼上數值：把一個區塊的位置、大小、字級、對齊記下來，貼到另一個區塊（例如別格技能的同一段字）----
 // 記在瀏覽器裡（重新整理也還在）；貼上可以按 Ctrl+Z 回來
@@ -362,6 +395,19 @@ $q('props').addEventListener('pointerdown', prefillDefault, true);
 $q('props').addEventListener('keydown', e => { if (e.key === 'ArrowUp' || e.key === 'ArrowDown') prefillDefault(e); }, true);
 $q('props').addEventListener('input', e => {
   if (!selKey) return;
+  const gt = (info[selKey] || {}).gearText;
+  if (gt && (e.target.dataset.gt || e.target.matches('[data-gt-mod]'))) {   // 裝備說明／裝備數值
+    if (gt.kind === 'gear') {
+      const item = state.gear.find(x => x.id === gt.id); if (!item) return;
+      remember('gt:' + gt.id + (e.target.dataset.gt || 'mod'));
+      if (e.target.dataset.gt === 'desc') item.desc = e.target.value;
+      else { item.mods = readMods(e.target.closest('.mods'), 'gt'); item.effect = ''; }   // 改了數值：顯示的文字一律照數值自動產生，才不會跟實際對不上
+    } else {
+      const k = e.target.dataset.gt + ':' + gt.id, def = gt[e.target.dataset.gt === 'lookDesc' ? 'desc' : 'stat']; remember('gt:' + k);
+      if (e.target.value && e.target.value !== def) state.layout.texts[k] = e.target.value; else delete state.layout.texts[k];
+    }
+    saveDraft(); sendState(); if (leftTab === 'gear') renderLeft(); fillGearText($q('props'), gt); return;
+  }
   if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t) { remember('text:' + selKey); setText(t, e.target.value); } return; }
   if (e.target.dataset.psk) {
     const s = (info[selKey] || {}).skill, f = e.target.dataset.psk; if (!s) return;
@@ -382,6 +428,18 @@ $q('props').addEventListener('click', e => {
   if (b.id === 'goSkill') { const s = info[selKey].skill; skillMember = s.member; skillNode = s.id; leftTab = 'skills'; document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === 'skills')); renderLeft(); return; }
   if (b.id === 'copyLayout') { copyLayout(); return; }
   if (b.id === 'pasteLayout') { pasteLayout(); return; }
+  if (b.dataset.move) { nudge(b.dataset.move, e.shiftKey); return; }
+  const gt = (info[selKey] || {}).gearText;
+  if (gt && (b.matches('[data-gt-mod-add], [data-gt-mod-del]') || b.hasAttribute('data-gt-reset'))) {
+    remember();
+    if (b.hasAttribute('data-gt-reset')) { delete state.layout.texts['lookDesc:' + gt.id]; delete state.layout.texts['lookStat:' + gt.id]; }
+    else {
+      const item = state.gear.find(x => x.id === gt.id); if (!item) return;
+      if (b.matches('[data-gt-mod-add]')) item.mods = (item.mods || []).concat([{ path: 'dmg', mul: 1.05 }]); else item.mods.splice(Number(b.closest('.mod').dataset.mod), 1);
+      item.effect = '';
+    }
+    saveDraft(); sendState(); if (leftTab === 'gear') renderLeft(); renderProps(); return;
+  }   // ←↑↓→ 微調位置（跟方向鍵一樣）
   if (b.dataset.center || b.dataset.align || b.dataset.reset || b.id === 'resetOne') remember();
   if (b.dataset.center) { toGame({ type: 'center', key: selKey, axis: b.dataset.center }); return; }
   if (b.dataset.align) { const o = elOf(selKey); setEl(selKey, { align: o.align === b.dataset.align ? '' : b.dataset.align }); return; }
@@ -433,6 +491,9 @@ window.addEventListener('message', e => {
   else if (m.type === 'pick') { if (m.key !== selKey) { selKey = m.key; if (leftTab === 'parts') renderLeft(); renderProps(); } }
   else if (m.type === 'info') {
     info[m.key] = m;
+    if (m.skill && m.key === selKey && (m.skill.member !== skillMember || m.skill.id !== skillNode)) {   // 預覽點到技能：左邊「技能內容」也換到同一位隊員、同一格（兩邊改的是同一份）
+      skillMember = m.skill.member; skillNode = m.skill.id; if (leftTab === 'skills') renderLeft();
+    }
     if (m.part && !parts.some(p => p.key === m.key)) parts.push(m.part);   // 每格技能各自的（@）不在清單裡：記下名字，右邊才顯示得出來
     if (m.page && m.page !== page) { page = m.page; document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('on', x.dataset.page === page)); }
     if (m.skill && leftTab === 'skills' && m.skill.member === skillMember && m.skill.id === skillNode && !savedNode(skillMember, skillNode)) renderLeft();
