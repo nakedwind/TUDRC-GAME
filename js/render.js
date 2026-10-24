@@ -857,7 +857,7 @@ function drawFallDown(p, set, age, wobble = true) {
   ctx.restore();
   return true;
 }
-// 衝刺（js/game.js 的 DASH）：身後淡藍色的殘影；頭上血條上方一條細細的藍色冷卻條（冷卻好了就不畫）
+// 衝刺（js/game.js 的 DASH）：身後淡藍色的殘影；頭上血條上方一條細細的白色冷卻條（冷卻好了就不畫）
 function drawDashTrail(p, img, size) {
   const tr = p.dashTrail; if (!tr || !tr.length || typeof DASH === 'undefined') return;
   const now = performance.now() / 1000;
@@ -872,14 +872,14 @@ function drawDashTrail(p, img, size) {
 }
 // 冷卻條：跟左上角隊員頭像的大招冷卻條（css/style.css 的 .field-cd-bar）同一個樣子——剛衝完是滿的，往左慢慢縮短
 // hpY＝血條的 y（戰鬥地圖：畫在血條上方 DASH_BAR.gap；基地沒有血條：畫在血條的位置再往上 DASH_BAR.lift，才不會擋到頭飾）
-const DASH_BAR = { w: 34, h: 2, gap: 2, lift: 7, color: '#4db5ff' };
+const DASH_BAR = { w: 34, h: 2, gap: 2, lift: 7, color: '#ffffff' };
 function drawDashCooldown(p, hpY) {
   if (typeof DASH === 'undefined' || !(p.dashCd > 0)) return;
   const remain = Math.min(1, p.dashCd / DASH.cd), { w, h, gap } = DASH_BAR;
   const x = p.x - w / 2, y = MAP_SAFE ? hpY + 1 - DASH_BAR.lift : hpY - 1 - gap - 1 - h;
   ctx.save();
   ctx.fillStyle = 'rgba(8,15,24,.75)'; roundRect(x - 1, y - 1, w + 2, h + 2, 2); ctx.fill();
-  ctx.shadowColor = DASH_BAR.color; ctx.shadowBlur = 4;   // 淡淡的藍色光暈
+  ctx.shadowColor = DASH_BAR.color; ctx.shadowBlur = 4;   // 淡淡的光暈
   ctx.fillStyle = DASH_BAR.color; ctx.fillRect(x, y, w * remain, h);
   ctx.restore();
 }

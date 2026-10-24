@@ -48,12 +48,13 @@
 .sq-bar u { display: block; height: 100%; border-radius: 4px; background: linear-gradient(90deg, #4fcf8e, #8ff0b8); }
 .sq-bar.sp u { background: linear-gradient(90deg, #4c8de0, #8cc7ff); }
 .sq-bar.taint u { background: linear-gradient(90deg, #d88a3c, #ffbf6e); }
-.sq-stats { position: absolute; left: 10px; top: 404px; width: 216px; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; }
-.sq-stat { display: grid; grid-template-columns: auto auto; justify-content: center; justify-items: center; text-align: center; align-items: center; gap: 1px 4px; padding: 5px 6px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; background: rgba(0,0,0,.25); }
+.sq-stats { position: absolute; left: 10px; top: 404px; width: 216px; margin: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; }   /* 三格固定一樣寬：數值多寬都不會把格子撐開 */
+/* 格子裡：上排＝圖示＋名稱（置中），下排＝數值（置中）；數值變寬不會推動上排 */
+.sq-stat { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; text-align: center; gap: 1px 4px; min-width: 0; padding: 5px 3px; border: 1px solid rgba(255,255,255,.08); border-radius: 8px; background: rgba(0,0,0,.25); }
 .sq-stat-icon { display: inline-block; width: 13px; color: #9fb4c8; line-height: 0; }
 .sq-stat-icon svg { width: 100%; height: auto; }
 .sq-stat dt { font-size: 10px; color: #9fb1c2; white-space: nowrap; }
-.sq-stat dd { grid-column: 1 / -1; margin: 0; font-size: 13px; color: #fff; font-weight: 700; white-space: nowrap; }
+.sq-stat dd { flex: 0 0 100%; display: flex; justify-content: center; align-items: baseline; margin: 0; font-size: 13px; color: #fff; font-weight: 700; white-space: nowrap; }
 .sq-plus { margin-left: 3px; font-size: 10px; color: #8fe3b0; } .sq-plus.minus { color: #ff9b9b; }
 
 /* 技能樹 */

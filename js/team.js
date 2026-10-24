@@ -350,8 +350,7 @@ function renderFieldSquadHud() {
         : (lowSP ? '<em class="taint-tag">頭暈</em>' : !spec.guide && taint > 85 ? '<em class="taint-tag danger">瀕臨暴走</em>' : '');
       const hasUlt = ((typeof ULTIMATES !== 'undefined') && ULTIMATES[member.type]) || spec.aura;   // 有大招（嚮導＝疏導）才顯示冷卻條
       const cdRemain = hasUlt ? ultCooldownRemain(member) : 0;
-      const sc = spec.aura && typeof SOOTHE_COLORS !== 'undefined' && SOOTHE_COLORS[member.type];   // 嚮導的冷卻條用疏導的顏色
-      const barStyle = sc ? 'background:rgb(' + sc.join(',') + ');box-shadow:0 0 4px rgb(' + sc.join(',') + ');' : '';
+      const barStyle = '';   // 冷卻條顏色：哨兵、嚮導都用白色（css/style.css 的 .field-cd-bar）
       const cdRing = hasUlt
         ? '<span class="field-cd-bar" data-type="' + member.type + '"' + (cdRemain > .001 ? '' : ' hidden') + '><i style="' + barStyle + 'width:' + (cdRemain * 100).toFixed(1) + '%"></i></span>'
         : '';
