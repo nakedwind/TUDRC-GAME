@@ -28,9 +28,9 @@ const GUIDE_SKILLS = {
     'ult': { when: 'hpBelow', at: .35, heal: 40, cast: 3, sp: 20, cd: 60 },                     // 生命之泉
   },
   taana: {
-    'a-1': { when: 'taintAbove', at: 50, soothe: 15, cast: 2.5, sp: 15, cd: 20 },              // 群體疏導
+    'a-1': { when: 'taintAbove', at: 30, soothe: 25, cast: 2.5, sp: 15, cd: 20 },              // 群體疏導（門檻跟被動疏導一樣 30：比被動疏導先判斷，才放得出來）
     'b-1': { when: 'combat', buff: { spd: .15 }, time: 5, cd: 30 },                             // 輕快節拍：攻擊速度
-    'ult': { when: 'taintAbove', at: 70, orBerserk: true, soothe: 35, wake: true, cast: 3, sp: 20, cd: 60 },   // 深眠搖籃
+    'ult': { when: 'taintAbove', at: 60, orBerserk: true, soothe: 35, wake: true, cast: 3, sp: 20, cd: 60 },   // 深眠搖籃
   },
   chris: {
     'a-1': { when: 'taintAbove', at: 70, soothe: 25, one: true, cast: 0, sp: 10, cd: 25 },     // 緊急疏導

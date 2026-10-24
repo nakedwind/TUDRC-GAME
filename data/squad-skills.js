@@ -1428,7 +1428,7 @@ const SQUAD_SKILLS = {
         "mods": [],
         "active": {
           "when": "taintAbove",
-          "at": 70,
+          "at": 60,
           "orBerserk": true,
           "soothe": 35,
           "wake": true,
@@ -1448,8 +1448,8 @@ const SQUAD_SKILLS = {
         "mods": [],
         "active": {
           "when": "taintAbove",
-          "at": 50,
-          "soothe": 15,
+          "at": 30,
+          "soothe": 25,
           "cast": 2.5,
           "sp": 15,
           "cd": 20
