@@ -4,6 +4,8 @@
        新的 skin：把圖放在 images/character/<folder>/（檔名跟其他角色一樣：<folder 去掉底線>_0000_Front.png …），再加一筆到 COSTUME_SKINS。
    ・配件：疊在角色身上的小圖，所有角色共用同一張圖；一個欄位戴一個（頭飾、臉部、背部、手部、下身＝尾巴這類）。
        art.front＝正面圖；art.side＝側面圖（畫朝左，往右時自動左右翻；沒畫就用正面圖）；art.back＝背面圖（沒畫就用正面圖）。
+       blink＝會眨眼的配件：平常用 art 的圖，大約每 every 秒換成 blink 的第 2 張圖、停 hold 秒（blink.front／side／back，沒畫的方向不換）。
+       也可以在服裝編輯器按「＋ 新增配件」加（存在 data/costume-placement.js 的 added，不用改這裡）。
    ・wear：skin 能在哪裡穿：'base'＝只能在應變中心（基地）穿、'battle'＝只能出勤穿；沒寫＝兩邊都能穿。
    ・char：角色專屬的配件（只有那個角色能戴、能收；例如 char: 'winter'＝溫特專用）。
    ・rarity：稀有度 N／R／SR／SSR（扭蛋機的機率看這個）；gacha: false＝不放進扭蛋池；giftable: false＝不能當禮物送（沒寫＝可以送；skin 只能送給那個角色）。
@@ -43,6 +45,18 @@ const COSTUME_SKINS = [
 const COSTUME_ACCESSORIES = [
   // 圖放在 images/costumes/<欄位資料夾>/<配件>/：01.head 頭飾、02.face 臉部、03.body 服裝、04.back 背部（尾巴放下身 lower）、05.hand_R 手持。
   { id: 'bow-red', name: '紅色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/bows/bow-red.png' } },
+  // 史萊姆：平常是 _1，大約每 5 秒眨一次眼（_2，停 0.1 秒）
+  { id: 'slime-01', name: '史萊姆', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/slime_01/slime_01_front_1.png', side: 'images/costumes/01.head/slime_01/slime_01_side_1.png', back: 'images/costumes/01.head/slime_01/slime_01_back.png' },   // 背面看不到眼睛：不眨
+    blink: { front: 'images/costumes/01.head/slime_01/slime_01_front_2.png', side: 'images/costumes/01.head/slime_01/slime_01_side_2.png', every: 5, hold: 0.1 } },
+  // 其他顏色的史萊姆：跟怪物的史萊姆變體同一種換色（hue-rotate＋saturate 1.35），大小、位置、眨眼跟原本的史萊姆一樣
+  { id: 'slime-splitter', name: '分裂史萊姆', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/slime_splitter/slime_splitter_front_1.png', side: 'images/costumes/01.head/slime_splitter/slime_splitter_side_1.png', back: 'images/costumes/01.head/slime_splitter/slime_splitter_back.png' },
+    blink: { front: 'images/costumes/01.head/slime_splitter/slime_splitter_front_2.png', side: 'images/costumes/01.head/slime_splitter/slime_splitter_side_2.png', every: 5, hold: 0.1 } },
+  { id: 'slime-bomber', name: '自爆史萊姆', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/slime_bomber/slime_bomber_front_1.png', side: 'images/costumes/01.head/slime_bomber/slime_bomber_side_1.png', back: 'images/costumes/01.head/slime_bomber/slime_bomber_back.png' },
+    blink: { front: 'images/costumes/01.head/slime_bomber/slime_bomber_front_2.png', side: 'images/costumes/01.head/slime_bomber/slime_bomber_side_2.png', every: 5, hold: 0.1 } },
+  { id: 'slime-spitter', name: '吐酸史萊姆', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/slime_spitter/slime_spitter_front_1.png', side: 'images/costumes/01.head/slime_spitter/slime_spitter_side_1.png', back: 'images/costumes/01.head/slime_spitter/slime_spitter_back.png' },
+    blink: { front: 'images/costumes/01.head/slime_spitter/slime_spitter_front_2.png', side: 'images/costumes/01.head/slime_spitter/slime_spitter_side_2.png', every: 5, hold: 0.1 } },
+  { id: 'slime-giant', name: '巨型史萊姆', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/slime_giant/slime_giant_front_1.png', side: 'images/costumes/01.head/slime_giant/slime_giant_side_1.png', back: 'images/costumes/01.head/slime_giant/slime_giant_back.png' },
+    blink: { front: 'images/costumes/01.head/slime_giant/slime_giant_front_2.png', side: 'images/costumes/01.head/slime_giant/slime_giant_side_2.png', every: 5, hold: 0.1 } },
   { id: 'bow-blue', name: '藍色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/bows/bow-blue.png' } },
   { id: 'bow-white', name: '白色蝴蝶結', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/bows/bow-white.png' } },
   { id: 'bird-green', name: '綠繡眼', slot: 'head', rarity: 'R', art: { front: 'images/costumes/01.head/birds/white-eye-front.png', side: 'images/costumes/01.head/birds/white-eye-side.png', back: 'images/costumes/01.head/birds/white-eye-back.png' } },   // 停在頭頂的小鳥

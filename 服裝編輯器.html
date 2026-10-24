@@ -88,17 +88,35 @@
   .status { min-height:18px; color:#8be0c2; font-size:12px; margin-top:6px } .status.error { color:#ff9b9b }
   @media(max-width:1180px) { .layout { grid-template-columns:270px 1fr } .settings { grid-column:1/-1 } .pick { position:static; max-height:none } }
   @media(max-width:820px) { body { padding:14px } .layout { grid-template-columns:1fr } }
+  .acc-name { display:flex; gap:8px; align-items:end; margin:10px 0 4px } .acc-name label { flex:1; display:grid; gap:4px; color:#b9cad9; font-size:12px } .acc-name input { width:100% }
+  .acc-rarity { margin:6px 0 4px; font-size:12px; color:#b9cad9 } .acc-rarity small { color:#8fb3c9 } #accRarity { display:flex; gap:6px; margin-top:4px }
+  #accRarity label { display:flex; align-items:center; gap:4px; padding:3px 9px; border:1px solid #3d5a72; border-radius:7px; background:#15202b; cursor:pointer; font-weight:bold }
+  #accRarity label:has(input:checked) { background:#224358; border-color:#82cbe2 } #accRarity .r-R { color:#8cc7ff } #accRarity .r-SR { color:#d59bff } #accRarity .r-SSR { color:#ffd479 }
+  /* ---- ＋ 新增配件視窗 ---- */
+  .add-acc { width:min(620px,94vw); background:#18212b; color:#e8edf5; border:1px solid #46617a; border-radius:12px; padding:16px 18px }
+  .add-acc::backdrop { background:rgba(0,0,0,.55) }
+  .add-acc h3 { margin:0 0 10px; font-size:16px }
+  .aa-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px 12px; margin-bottom:8px } .aa-grid label { display:grid; gap:4px; font-size:12px; color:#b9cad9 } .aa-grid small { color:#7f98ad }
+  .aa-check { display:flex; gap:6px; align-items:center; font-size:13px; margin:6px 0 }
+  .aa-tip { font-size:12px; margin:4px 0 8px }
+  .aa-row { display:grid; grid-template-columns:110px 1fr auto 36px; gap:6px; align-items:center; margin:4px 0; font-size:12px; color:#b9cad9 } .aa-row img { width:32px; height:32px; object-fit:contain; image-rendering:pixelated; background:#0b131b; border-radius:5px }
+  .aa-row.aa-blink span { color:#8fb3c9; padding-left:8px }
+  .aa-actions { display:flex; gap:8px; margin-top:10px } .aa-actions .grow { flex:1 } button.danger { background:#5a2630; border-color:#b65b68 }
+  #aaMsg { min-height:18px; font-size:12px; color:#8be0c2 } #aaMsg.error { color:#ff8f8f }
+  .acc-tools { display:flex; gap:6px } .acc-tools input { flex:1 }
+  .autofill { margin:0 0 12px; padding:10px 14px; border:1px solid #c99a3f; border-radius:10px; background:#2d2615; color:#ffe2a3; font-size:13px; line-height:1.6 } .autofill button { margin-left:8px; padding:3px 9px; font-size:12px }
 </style>
 </head>
 <body>
   <div class="top"><div><h1>👗 服裝編輯器</h1></div><p>調配件戴在每個角色、每個方向的位置</p></div>
+  <div id="autoFillNote" class="autofill" hidden></div>
   <div class="layout">
     <section class="panel pick">
       <h2>角色</h2>
       <div id="charList"></div>
       <h2>配件</h2>
       <div class="tabs" id="slotTabs"></div>
-      <input id="accSearch" type="search" placeholder="搜尋配件名稱…" autocomplete="off">
+      <div class="acc-tools"><input id="accSearch" type="search" placeholder="搜尋配件名稱…" autocomplete="off"><button type="button" id="addAcc" title="加一個新配件（圖片先放進 images/costumes/）">＋ 新增配件</button></div>
       <div id="accList"></div>
     </section>
     <section class="panel">
@@ -116,6 +134,9 @@
     </section>
     <section class="panel settings">
       <h2 id="editTitle">位置</h2>
+      <div class="acc-name"><label>配件名稱<input id="faccName" type="text" maxlength="30" title="改了之後遊戲裡（衣櫃、扭蛋…）也會顯示這個名字"></label><button type="button" id="accNameReset" title="改回 data/costumes.js 的原本名稱">原本名稱</button></div>
+      <div class="acc-rarity"><span>稀有等級 <small id="rarityNote"></small></span><div id="accRarity" title="扭蛋機抽到的機率看這個（遊戲裡也會用這個等級）"></div></div>
+      <button type="button" id="editAdded" hidden title="這是在編輯器裡新增的配件：可以改圖片、欄位、眨眼動態，或刪掉">✎ 編輯這個新增的配件（圖片、動態…）</button>
       <div class="scope">
         <label title="只有這個配件、這個角色用"><input type="radio" name="scope" value="item" checked><span>只調<b id="scopeItemName">這個配件</b></span></label>
         <label title="這個角色同欄位所有配件的預設位置；新配件沒調過就戴這裡"><input type="radio" name="scope" value="anchor"><span><b id="scopeAnchorName">這類預設</b></span></label>
@@ -128,7 +149,7 @@
         <label>旋轉°<input id="frot" type="number" step="5"></label>
       </div>
       <div class="checks"><label><input id="fbehind" type="checkbox">在角色後面</label><label><input id="fhidden" type="checkbox">這方向不顯示</label><label><input id="fflip" type="checkbox">左右翻轉</label></div>
-      <div class="actions"><button type="button" id="mirror">⇋ 左右對調</button><button type="button" id="clearDir">清除這個方向</button></div>
+      <div class="actions"><button type="button" id="centerChar" title="把配件放到預覽框的正中間（X、Y 都是 32；只改目前這個角色、這個方向）">⊕ 置中</button><button type="button" id="centerX" title="只把 X 放到預覽框的左右正中間（32）">↔ 水平置中</button><button type="button" id="centerY" title="只把 Y 放到預覽框的上下正中間（32）">↕ 垂直置中</button><button type="button" id="mirror">⇋ 左右對調</button><button type="button" id="clearDir">清除這個方向</button></div>
 
       <details data-key="layer">
         <summary>圖層 <small id="layerNote"></small></summary>
@@ -181,15 +202,34 @@
       </div>
     </section>
   </div>
+  <dialog id="addAccDlg" class="add-acc">
+    <h3 id="aaTitle">＋ 新增配件</h3>
+    <div class="aa-grid">
+      <label>名稱<input id="aaName" type="text" maxlength="30" placeholder="例如：史萊姆"></label>
+      <label>代號 <small>英文小寫／數字／-，存檔用、建立後不能改；空白＝自動</small><input id="aaId" type="text" maxlength="40" placeholder="例如：slime-02"></label>
+      <label>欄位<select id="aaSlot"></select></label>
+      <label>稀有等級<select id="aaRarity"></select></label>
+    </div>
+    <label class="aa-check"><input id="aaGacha" type="checkbox" checked>放進扭蛋機</label>
+    <p class="aa-tip">圖片請先放進遊戲資料夾（例如 <code>images/costumes/01.head/配件名/</code>），再按「選圖…」。選了正面圖，同資料夾的側面、背面、第 2 張（檔名 front→side／back、_1→_2）會自動找。</p>
+    <label class="aa-check"><input id="aaBlinkOn" type="checkbox">會眨眼（平常用第 1 張，偶爾換成第 2 張一下）</label>
+    <div id="aaImgs"></div>
+    <div class="aa-grid" id="aaBlinkTime">
+      <label>大約每幾秒眨一次<input id="aaEvery" type="number" step="0.5" min="0.5" value="5"></label>
+      <label>第 2 張停幾秒 <small>0.1 ≒ 6 幀</small><input id="aaHold" type="number" step="0.02" min="0.02" value="0.1"></label>
+    </div>
+    <p id="aaMsg" class="status"></p>
+    <div class="aa-actions"><button type="button" id="aaDelete" class="danger">🗑 刪除這個配件</button><span class="grow"></span><button type="button" id="aaCancel">取消</button><button type="button" id="aaOk" class="primary">建立</button></div>
+  </dialog>
   <script src="data/characters.js?v=colynparry-20261023"></script>
-  <script src="data/costumes.js?v=maid-headdress-20261023"></script>
-  <script src="data/costume-placement.js?v=maid-headdress-20261023"></script>
+  <script src="data/costumes.js?v=slimecolors-20261025"></script>
+  <script src="data/costume-placement.js?v=slimecolors-20261025"></script>
   <script src="js/draft-sync.js?v=sync-20261021"></script>
-  <script src="js/costume-draw.js?v=costume-char-20261023"></script>
+  <script src="js/costume-draw.js?v=autofill-20261024"></script>
   <script src="js/sfx.js?v=mouse-dizzy3-20261023"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>
-  <script src="js/costume-editor.js?v=undo-20261024"></script>
+  <script src="js/costume-editor.js?v=autofill-20261024"></script>
   <script>ProjectSave.attach({
     after: ['exportFile'],
     files: [{ path: 'data/costume-placement.js', label: '配件位置', text: () => costumePlacementText() }],

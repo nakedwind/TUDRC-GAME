@@ -25,7 +25,8 @@ function loadDraft(useFile) {
   let data = COSTUME_PLACEMENT_DEFAULT;
   if (!useFile) { const merged = DraftSync.load(COSTUME_PLACEMENT_KEY, COSTUME_PLACEMENT_DEFAULT, { label: '配件位置' }); if (merged) data = merged; }
   data = JSON.parse(JSON.stringify(data));
-  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {}; COSTUME_PLACEMENT.offsets = data.offsets || {}; COSTUME_PLACEMENT.blocked = data.blocked || {}; COSTUME_PLACEMENT.layers = data.layers || {};
+  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {}; COSTUME_PLACEMENT.offsets = data.offsets || {}; COSTUME_PLACEMENT.blocked = data.blocked || {}; COSTUME_PLACEMENT.layers = data.layers || {}; COSTUME_PLACEMENT.names = data.names || {}; COSTUME_PLACEMENT.rarity = data.rarity || {}; COSTUME_PLACEMENT.added = data.added || []; COSTUME_PLACEMENT.artFill = data.artFill || {};
+  applyAccNames();
 }
 loadDraft(false);
 function status(message, error = false) { const el = document.getElementById('status'); el.textContent = message; el.classList.toggle('error', !!error); }
@@ -37,6 +38,9 @@ function saveDraft() {
   prune(COSTUME_PLACEMENT.anchors); prune(COSTUME_PLACEMENT.items); prune(COSTUME_PLACEMENT.bob);
   for (const [id, o] of Object.entries(COSTUME_PLACEMENT.offsets || {})) if (!o || (!o.x && !o.y)) delete COSTUME_PLACEMENT.offsets[id];   // 0,0＝沒偏移，不用存
   for (const [id, list] of Object.entries(COSTUME_PLACEMENT.blocked || {})) if (!list || !list.length) delete COSTUME_PLACEMENT.blocked[id];
+  for (const [id, n] of Object.entries(COSTUME_PLACEMENT.names || {})) if (!n || !ACC_BY_ID[id] || n === ACC_BY_ID[id].baseName) delete COSTUME_PLACEMENT.names[id];   // 空白、跟原本一樣＝不用存
+  for (const [id, r] of Object.entries(COSTUME_PLACEMENT.rarity || {})) if (!r || !ACC_BY_ID[id] || r === (ACC_BY_ID[id].baseRarity || 'N')) delete COSTUME_PLACEMENT.rarity[id];   // 跟原本一樣＝不用存
+  applyAccNames();   // 上一步／下一步也會走到這裡：名字、稀有等級跟著回去
   try { localStorage.setItem(COSTUME_PLACEMENT_KEY, JSON.stringify(COSTUME_PLACEMENT)); status('已自動儲存到這台瀏覽器。'); }
   catch (e) { status('暫存失敗：' + e.message, true); }
   rememberStep();   // 上一步／下一步：記下這次改之前的樣子
@@ -79,7 +83,7 @@ function fmt(v, ind) {
 }
 function costumePlacementText() {
   saveDraft();
-  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob, offsets: COSTUME_PLACEMENT.offsets || {}, blocked: COSTUME_PLACEMENT.blocked || {}, layers: COSTUME_PLACEMENT.layers || {} };
+  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob, offsets: COSTUME_PLACEMENT.offsets || {}, blocked: COSTUME_PLACEMENT.blocked || {}, layers: COSTUME_PLACEMENT.layers || {}, names: COSTUME_PLACEMENT.names || {}, rarity: COSTUME_PLACEMENT.rarity || {}, added: COSTUME_PLACEMENT.added || [], artFill: COSTUME_PLACEMENT.artFill || {} };
   return '/* 由服裝編輯器匯出：配件戴在每個角色身上的位置（配件、角色清單在 data/costumes.js）。\n'
     + '   anchors[角色][欄位][方向]＝這個角色每個欄位的預設位置（新配件沒調過就用這個）\n'
     + '   items[配件][角色][方向]＝某個配件專屬的位置（優先）\n'
@@ -87,9 +91,14 @@ function costumePlacementText() {
     + '   bob[角色][方向]＝[走路第 1 張, 走路第 2 張] 頭部相對站立圖的位移 [dx, dy]（配件跟著晃）\n'
     + '   offsets[角色]＝角色身高偏移 { x, y }（矮的角色 y 填正數）：還沒調過的配件會加上；「複製給所有角色」時自動加上兩個角色偏移的差\n'
     + '   blocked[配件]＝[角色, …]：這些角色不能擁有、不能戴這個配件\n'
-    + '   layers[配件]＝圖層：同時戴好幾個配件時數字大的蓋在上面（沒寫＝下身 1、背部 2、手部 3、頭飾 4、臉部 5） */\n'
+    + '   layers[配件]＝圖層：同時戴好幾個配件時數字大的蓋在上面（沒寫＝下身 1、背部 2、手部 3、頭飾 4、臉部 5）\n'
+    + '   names[配件]＝配件名稱（服裝編輯器改的，蓋過 data/costumes.js 的 name；遊戲裡也用這個名字）\n'
+    + '   rarity[配件]＝稀有等級（N／R／SR／SSR，扭蛋機的機率看這個；蓋過 data/costumes.js 的 rarity）\n'
+    + '   added＝服裝編輯器「＋ 新增配件」加的配件（寫法跟 data/costumes.js 的 COSTUME_ACCESSORIES 一樣；blink＝偶爾換成第 2 張圖）\n'
+    + '   artFill[配件]＝{ art, blink }：編輯器打開時自動找到、幫 data/costumes.js 的配件補上的側面／背面／第 2 張圖 */\n'
     + 'const COSTUME_PLACEMENT_DEFAULT = {\n'
-    + ['anchors', 'items', 'bob', 'offsets', 'blocked', 'layers'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n') + '\n};\n';
+    + ['anchors', 'items', 'bob', 'offsets', 'blocked', 'layers', 'names', 'rarity', 'artFill'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n')
+    + ',\n  "added": ' + (data.added.length ? '[\n' + data.added.map(x => '    ' + JSON.stringify(x)).join(',\n') + '\n  ]' : '[]') + '\n};\n';   // 新增的配件：一個一行
 }
 
 // ---- 角色圖 ----
@@ -275,6 +284,10 @@ function renderPanel() {
   $('b1x').value = bob[0][0]; $('b1y').value = bob[0][1]; $('b2x').value = bob[1][0]; $('b2y').value = bob[1][1];
   if (off) { $('fromNote').textContent = '先在 data/costumes.js 加配件'; return; }
   $('editTitle').textContent = acc.name + '・' + ch.name + '・' + CE_DIR_NAMES[ED.dir];
+  if (document.activeElement !== $('faccName')) $('faccName').value = acc.name;
+  $('faccName').placeholder = acc.baseName; $('accNameReset').disabled = !(COSTUME_PLACEMENT.names || {})[acc.id];
+  renderRarity(acc);
+  $('editAdded').hidden = !acc.added;   // 編輯器新增的配件：可以改圖片、動態
   $('scopeItemName').textContent = '這個配件';
   $('scopeAnchorName').textContent = '所有' + slotShort(acc.slot) + '預設';
   document.querySelectorAll('input[name=scope]').forEach(r => { r.checked = r.value === ED.scope; });
@@ -325,6 +338,142 @@ numEdit('fx', 'x'); numEdit('fy', 'y'); numEdit('fscale', 'scale'); numEdit('fro
 $('fbehind').addEventListener('change', e => edit(p => { p.behind = e.target.checked; }));
 $('fhidden').addEventListener('change', e => edit(p => { p.hidden = e.target.checked; }));
 $('fflip').addEventListener('change', e => edit(p => { p.flip = e.target.checked; }));
+// ---- 配件名稱：改了就存在 names[配件]，遊戲裡（衣櫃、扭蛋…）也用這個名字 ----
+function setAccName(v) {
+  const acc = curAcc(); if (!acc) return;
+  const names = COSTUME_PLACEMENT.names = COSTUME_PLACEMENT.names || {};
+  v = String(v || '').trim();
+  if (!v || v === acc.baseName) delete names[acc.id]; else names[acc.id] = v;
+  saveDraft(); renderLists(); renderPanel();
+}
+$('faccName').addEventListener('input', e => setAccName(e.target.value));
+// ---- 稀有等級：扭蛋機有的等級（data/costumes.js 的 GACHA.rates）；改了存在 rarity[配件]，遊戲裡也用這個等級 ----
+const ACC_RARITIES = Object.keys((typeof GACHA !== 'undefined' && GACHA.rates) || { N: 1, R: 1, SR: 1, SSR: 1 });
+$('accRarity').innerHTML = ACC_RARITIES.map(r => '<label class="r-' + r + '"><input type="radio" name="accRarity" value="' + r + '">' + r + '</label>').join('');
+function renderRarity(acc) {
+  const cur = acc.rarity || 'N';
+  document.querySelectorAll('input[name=accRarity]').forEach(el => { el.checked = el.value === cur; });
+  $('rarityNote').textContent = (COSTUME_PLACEMENT.rarity || {})[acc.id] ? '（原本是 ' + (acc.baseRarity || 'N') + '）' : '';
+}
+$('accRarity').addEventListener('change', e => {
+  const acc = curAcc(); if (!acc || e.target.name !== 'accRarity') return;
+  const all = COSTUME_PLACEMENT.rarity = COSTUME_PLACEMENT.rarity || {};
+  if (e.target.value === (acc.baseRarity || 'N')) delete all[acc.id]; else all[acc.id] = e.target.value;
+  saveDraft(); renderLists(); renderPanel();
+  status('「' + acc.name + '」的稀有等級改成 ' + e.target.value);
+});
+$('faccName').addEventListener('blur', () => renderPanel());   // 清空後離開欄位：顯示回原本的名字
+$('accNameReset').addEventListener('click', () => { setAccName(''); status('配件名稱已恢復成「' + curAcc().baseName + '」'); });
+// ---- 置中：以預覽框（角色圖 64×64）的正中間為準；只改目前這個角色、這個方向 ----
+// ⊕ 置中＝X、Y 都放到中間；↔＝只改 X（左右置中）；↕＝只改 Y（上下置中）
+const CE_CENTER = 32;
+function centerAcc(axis) {
+  if (!curAcc()) return;
+  edit(p => { if (axis !== 'y') p.x = CE_CENTER; if (axis !== 'x') p.y = CE_CENTER; });
+  status('已把「' + curAcc().name + '」放到預覽框的' + (axis === 'x' ? '左右正中間（X = 32）' : axis === 'y' ? '上下正中間（Y = 32）' : '正中間（X = 32、Y = 32）') + '：只改' + CHARACTERS[ED.char].name + '的' + CE_DIR_NAMES[ED.dir]);
+}
+$('centerChar').addEventListener('click', () => centerAcc('both'));
+$('centerX').addEventListener('click', () => centerAcc('x'));
+$('centerY').addEventListener('click', () => centerAcc('y'));
+// ---- ＋ 新增配件：在編輯器裡加配件（存在 costume-placement.js 的 added，不用改 data/costumes.js）----
+// 圖片要先放進遊戲資料夾（例如 images/costumes/01.head/<配件>/），再用「選圖…」挑（Chrome／Edge，跟「存到專案」用同一個資料夾）
+const AA = { editing: null };   // 正在改的新增配件 id（null＝新增一個新的）
+const AA_DIRS = [['front', '正面'], ['side', '側面（畫朝左）'], ['back', '背面']];
+$('aaSlot').innerHTML = ACC_TABS.map(s => '<option value="' + s + '">' + esc(SLOT_NAME[s] || s) + '</option>').join('');
+$('aaRarity').innerHTML = ACC_RARITIES.map(r => '<option value="' + r + '">' + r + '</option>').join('');
+$('aaImgs').innerHTML = AA_DIRS.map(([k, n]) =>
+  '<div class="aa-row"><span>' + n + '</span><input id="aa_' + k + '" type="text" placeholder="' + (k === 'front' ? '必填' : '沒有＝用正面圖') + '"><button type="button" data-aapick="aa_' + k + '">選圖…</button><img id="aa_' + k + '_pv" alt=""></div>'
+  + '<div class="aa-row aa-blink"><span>└ 眨眼第 2 張</span><input id="aab_' + k + '" type="text" placeholder="沒有＝這個方向不眨"><button type="button" data-aapick="aab_' + k + '">選圖…</button><img id="aab_' + k + '_pv" alt=""></div>').join('');
+const aaMsg = (m, err) => { $('aaMsg').textContent = m || ''; $('aaMsg').classList.toggle('error', !!err); };
+function aaPreview(id) { const v = $(id).value.trim(), pv = $(id + '_pv'); pv.src = v ? encodeURI(v) : ''; pv.hidden = !v; }
+function aaShowBlink() { document.querySelectorAll('.aa-blink, #aaBlinkTime').forEach(el => { el.hidden = !$('aaBlinkOn').checked; }); }
+function openAddAcc(editId) {
+  const x = editId ? (COSTUME_PLACEMENT.added || []).find(o => o.id === editId) : null;
+  AA.editing = x ? x.id : null;
+  $('aaTitle').textContent = x ? '✎ 編輯新增的配件' : '＋ 新增配件';
+  $('aaName').value = x ? x.name : ''; $('aaId').value = x ? x.id : ''; $('aaId').disabled = !!x;
+  $('aaSlot').value = x ? x.slot : (ACC_TABS.includes(ED.tab) ? ED.tab : 'head');
+  $('aaRarity').value = x ? (x.rarity || 'N') : 'N';
+  $('aaGacha').checked = !x || x.gacha !== false;
+  for (const [k] of AA_DIRS) { $('aa_' + k).value = x && x.art[k] || ''; $('aab_' + k).value = x && x.blink && x.blink[k] || ''; aaPreview('aa_' + k); aaPreview('aab_' + k); }
+  $('aaBlinkOn').checked = !!(x && x.blink);
+  $('aaEvery').value = x && x.blink ? x.blink.every : 5; $('aaHold').value = x && x.blink ? x.blink.hold : 0.1;
+  $('aaDelete').hidden = !x; $('aaOk').textContent = x ? '儲存變更' : '建立';
+  aaShowBlink(); aaMsg('');
+  $('addAccDlg').showModal();
+}
+// 從遊戲資料夾挑圖：存成「images/…」這種從遊戲資料夾算起的路徑
+async function aaPick(inputId) {
+  try {
+    if (!window.showOpenFilePicker) throw new Error('這個瀏覽器不能選檔案，請用 Chrome 或 Edge，或直接把路徑打進去');
+    const root = await ProjectSave.projectDir(false, m => aaMsg(m));
+    const [h] = await window.showOpenFilePicker({ startIn: root, types: [{ description: '圖片', accept: { 'image/png': ['.png'], 'image/webp': ['.webp'], 'image/gif': ['.gif'] } }] });
+    const parts = await root.resolve(h);
+    if (!parts) { aaMsg('這張圖不在遊戲資料夾裡：請先把圖放進 images/costumes/ 再選', true); return; }
+    $(inputId).value = parts.join('/'); aaPreview(inputId); aaMsg('');
+    if (inputId === 'aa_front') await aaGuess(parts.join('/'));
+  } catch (e) { if (!e || e.name !== 'AbortError') aaMsg('選圖失敗：' + (e && e.message || e), true); }
+}
+// 選了正面圖：猜同資料夾的側面、背面、第 2 張（檔名裡 front→side／back、_1→_2），有這張圖才填
+async function aaGuess(front) {
+  const exists = async p => { try { return (await fetch(encodeURI(p), { method: 'HEAD', cache: 'no-store' })).ok; } catch (_) { return false; } };
+  const two = p => p.replace(/([_-])1(\.\w+)$/, '$12$2');
+  const found = [];
+  for (const [k] of AA_DIRS) {
+    const p = k === 'front' ? front : front.replace(/front/gi, k);
+    if (k !== 'front' && p !== front && !$('aa_' + k).value && await exists(p)) { $('aa_' + k).value = p; aaPreview('aa_' + k); found.push(k); }
+    const b = two(k === 'front' ? front : $('aa_' + k).value || '');
+    if (b && b !== (k === 'front' ? front : $('aa_' + k).value) && !$('aab_' + k).value && await exists(b)) { $('aab_' + k).value = b; aaPreview('aab_' + k); found.push(k + '2'); }
+  }
+  if (found.some(f => f.endsWith('2'))) { $('aaBlinkOn').checked = true; aaShowBlink(); }
+  if (found.length) aaMsg('同資料夾找到：' + found.map(f => ({ side: '側面', back: '背面', front2: '正面第 2 張', side2: '側面第 2 張', back2: '背面第 2 張' }[f])).join('、') + '（已自動填好，不對可以改）');
+}
+const aaImgOk = src => new Promise(res => { const img = new Image(); img.onload = () => res(true); img.onerror = () => res(false); img.src = encodeURI(src); });
+async function aaSave() {
+  const name = $('aaName').value.trim(), front = $('aa_front').value.trim();
+  if (!name) { aaMsg('請填名稱', true); return; }
+  if (!front) { aaMsg('請選正面圖', true); return; }
+  let id = AA.editing || $('aaId').value.trim().toLowerCase();
+  if (!id) id = 'acc-' + Date.now().toString(36);
+  if (!/^[a-z0-9_-]+$/.test(id)) { aaMsg('代號只能用英文小寫、數字、- 和 _', true); return; }
+  if (!AA.editing && ACC_BY_ID[id]) { aaMsg('代號「' + id + '」已經有配件在用了，換一個', true); return; }
+  const art = {}, blink = {};
+  for (const [k] of AA_DIRS) {
+    const v = $('aa_' + k).value.trim(); if (v) art[k] = v;
+    const b = $('aab_' + k).value.trim(); if (b && $('aaBlinkOn').checked) blink[k] = b;
+  }
+  for (const src of [...Object.values(art), ...Object.values(blink)]) if (!(await aaImgOk(src))) { aaMsg('讀不到圖片：' + src + '（路徑要從遊戲資料夾算起，例如 images/costumes/01.head/…）', true); return; }
+  const x = { id, name, slot: $('aaSlot').value, rarity: $('aaRarity').value, art };
+  if (!$('aaGacha').checked) x.gacha = false;
+  if (Object.keys(blink).length) Object.assign(x, { blink: Object.assign(blink, { every: Math.max(.5, Number($('aaEvery').value) || 5), hold: Math.max(.02, Number($('aaHold').value) || .1) }) });
+  const list = COSTUME_PLACEMENT.added = COSTUME_PLACEMENT.added || [];
+  const i = list.findIndex(o => o.id === id);
+  if (i >= 0) list[i] = x; else list.push(x);
+  if (COSTUME_PLACEMENT.names) delete COSTUME_PLACEMENT.names[id];   // 名稱、稀有等級以這裡填的為準
+  if (COSTUME_PLACEMENT.rarity) delete COSTUME_PLACEMENT.rarity[id];
+  saveDraft();
+  ED.acc = id; ED.wear[x.slot] = id; ED.search = ''; $('accSearch').value = ''; setTab(x.slot); renderAll();
+  $('addAccDlg').close();
+  status((i >= 0 ? '已更新' : '已新增') + '配件「' + name + '」。記得按「存到專案」或下載 costume-placement.js，遊戲裡才會有');
+}
+function aaDelete() {
+  const x = (COSTUME_PLACEMENT.added || []).find(o => o.id === AA.editing); if (!x) return;
+  if (!confirm('確定刪除配件「' + x.name + '」？（它的位置設定也會一起刪掉；圖片檔不會刪）')) return;
+  COSTUME_PLACEMENT.added = COSTUME_PLACEMENT.added.filter(o => o.id !== x.id);
+  for (const k of ['items', 'names', 'rarity', 'layers', 'blocked']) if (COSTUME_PLACEMENT[k]) delete COSTUME_PLACEMENT[k][x.id];
+  saveDraft();
+  ED.acc = (COSTUME_ACCESSORIES.find(a => a.slot === x.slot) || COSTUME_ACCESSORIES[0] || {}).id; renderAll();
+  $('addAccDlg').close();
+  status('已刪除配件「' + x.name + '」');
+}
+$('addAcc').addEventListener('click', () => openAddAcc(null));
+$('editAdded').addEventListener('click', () => { const acc = curAcc(); if (acc && acc.added) openAddAcc(acc.id); });
+$('addAccDlg').addEventListener('click', e => { const b = e.target.closest('[data-aapick]'); if (b) aaPick(b.dataset.aapick); });
+$('addAccDlg').addEventListener('input', e => { if (/^aab?_/.test(e.target.id)) aaPreview(e.target.id); });
+$('aaBlinkOn').addEventListener('change', aaShowBlink);
+$('aaOk').addEventListener('click', aaSave);
+$('aaCancel').addEventListener('click', () => $('addAccDlg').close());
+$('aaDelete').addEventListener('click', aaDelete);
 $('mirror').addEventListener('click', () => {
   const src = effective();
   if (ED.dir === 'left' || ED.dir === 'right') {   // 側面：對稱複製到另一側（右側的圖本來就會自動翻面）
@@ -504,8 +653,65 @@ $('resetFile').addEventListener('click', () => {
   DraftSync.forget(COSTUME_PLACEMENT_KEY); loadDraft(true); renderAll(); status('已從檔案重新載入。');
 });
 
+// ---- 打開編輯器時：自動找配件資料夾裡新放的側面、背面、第 2 張（眨眼）圖，找到就補上並提醒 ----
+// 猜檔名：正面檔名裡的 front 換成 side／back（也試把結尾的 _1 拿掉，例如 slime_01_back.png）；檔名沒有 front 就試「名字-side」「名字_side」
+//        第 2 張：結尾 _1 → _2；沒有 _1 就試「名字_2」「名字-2」
+// data/costumes.js 的配件：補在 artFill（存在 costume-placement.js）；編輯器新增的配件：直接補進它自己的 art／blink
+// 不想要某張被補上：按提醒上的「復原」，之後就不會再自動補那幾張
+const AUTOFILL_SKIP_KEY = 'tudrc_costume_autofill_skip';
+const splitExt = p => { const m = /^(.*?)(\.\w+)$/.exec(p) || [p, p, '']; return [m[1], m[2]]; };
+function dirCands(front, k) {
+  if (/front/i.test(front)) { const r = front.replace(/front/gi, k), [b, e] = splitExt(r); return [r, b.replace(/[_-]1$/, '') + e]; }
+  const [b, e] = splitExt(front); return [b + '-' + k + e, b + '_' + k + e];
+}
+function secondCands(p) { const [b, e] = splitExt(p); return /[_-]1$/.test(b) ? [b.replace(/([_-])1$/, '$12') + e] : [b + '_2' + e, b + '-2' + e]; }
+const imgExists = src => new Promise(res => { const i = new Image(); i.onload = () => res(true); i.onerror = () => res(false); i.src = encodeURI(src); });
+async function firstExisting(list, skip) { for (const c of [...new Set(list)]) if (!skip.has(c) && await imgExists(c)) return c; return null; }
+async function autoFindArt() {
+  let skip; try { skip = new Set(JSON.parse(localStorage.getItem(AUTOFILL_SKIP_KEY) || '[]')); } catch (_) { skip = new Set(); }
+  const results = await Promise.all(COSTUME_ACCESSORIES.map(async a => {
+    const art = a.art || {}, blink = a.blink || {}, got = { art: {}, blink: {} };
+    if (!art.front) return null;
+    for (const k of ['side', 'back']) if (!art[k]) { const c = await firstExisting(dirCands(art.front, k).filter(c => c !== art.front), skip); if (c) got.art[k] = c; }
+    for (const k of ['front', 'side', 'back']) {
+      const base = art[k] || got.art[k]; if (!base || blink[k]) continue;
+      const c = await firstExisting(secondCands(base), skip); if (c) got.blink[k] = c;
+    }
+    return Object.keys(got.art).length || Object.keys(got.blink).length ? { a, got } : null;
+  }));
+  const found = results.filter(Boolean); if (!found.length) return;
+  const before = JSON.stringify(COSTUME_PLACEMENT), lines = [], srcs = [];
+  const DIR = { front: '正面', side: '側面', back: '背面' };
+  for (const { a, got } of found) {
+    const x = a.added && (COSTUME_PLACEMENT.added || []).find(o => o.id === a.id);
+    if (x) {   // 編輯器新增的配件：直接補進它自己
+      Object.assign(x.art, got.art);
+      if (Object.keys(got.blink).length) x.blink = Object.assign({ every: 5, hold: 0.1 }, x.blink, got.blink);
+    } else {
+      const f = (COSTUME_PLACEMENT.artFill = COSTUME_PLACEMENT.artFill || {})[a.id] = COSTUME_PLACEMENT.artFill[a.id] || {};
+      if (Object.keys(got.art).length) f.art = Object.assign({}, f.art, got.art);
+      if (Object.keys(got.blink).length) f.blink = Object.assign({}, f.blink, got.blink);
+    }
+    lines.push('「' + a.name + '」' + [...Object.keys(got.art).map(k => DIR[k]), ...Object.keys(got.blink).map(k => DIR[k] + '第 2 張')].join('、'));
+    srcs.push(...Object.values(got.art), ...Object.values(got.blink));
+  }
+  saveDraft(); renderAll();
+  const note = $('autoFillNote');
+  note.innerHTML = '🔍 找到新放的圖，已自動補上：' + lines.map(esc).join('；') + '。記得按「存到專案」或下載 costume-placement.js，遊戲裡才會有。'
+    + ' <button type="button" id="autoFillUndo">復原（以後不再自動補這幾張）</button><button type="button" id="autoFillClose">知道了</button>';
+  note.hidden = false;
+  $('autoFillClose').onclick = () => { note.hidden = true; };
+  $('autoFillUndo').onclick = () => {
+    const data = JSON.parse(before);
+    for (const k of Object.keys(COSTUME_PLACEMENT)) if (!(k in data)) delete COSTUME_PLACEMENT[k];
+    Object.assign(COSTUME_PLACEMENT, data); saveDraft(); renderAll();
+    try { localStorage.setItem(AUTOFILL_SKIP_KEY, JSON.stringify([...skip, ...srcs])); } catch (_) {}
+    note.hidden = true; status('已復原自動補上的圖，之後不會再自動補這幾張');
+  };
+}
 renderAll();
 requestAnimationFrame(loop);
+autoFindArt();   // 自動找新放的圖
 
 // ---- 角色身高偏移：比較矮／高的角色，配件整體要往下／往上幾 px ----
 for (const id of ['offx', 'offy']) $(id).addEventListener('input', () => {
