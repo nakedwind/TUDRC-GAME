@@ -2,7 +2,7 @@
    資料在 data/bestiary.js 的 BESTIARY_CONFIG（由「📕 怪物圖鑑編輯器」匯出）：
    ・layout：每一塊的位置、大小、文字大小（px，以 1060×620 的圖鑑視窗為準；遊戲視窗比較小時整個等比例縮小）
    ・texts：標題、按鈕等文字；style：星星最多幾顆、圖片框要不要框線、練習室打死的算不算
-   ・monsters：每一隻怪物的名稱、星級、能力（最多 4 條，1 在最下面往上排）、背景介紹、圖片、自己的圖片框（imageBox：位置、大小）、縮圖（大小／位移）
+   ・monsters：每一隻怪物的名稱、星級、能力（最多 4 條，1 在最上面往下排，位置固定）、背景介紹、圖片、自己的圖片框（imageBox：位置、大小）、縮圖（大小／位移）
    ・order：怪物的排列順序（沒列到的接在後面）
    怪物清單＝怪物編輯器的怪物（data/monsters.js）＋史萊姆的變體（分裂、自爆、吐酸、巨型、小史萊姆）。
    遊戲裡「消滅過」的怪物才會出現縮圖，還沒消滅過的是黑底問號；消滅次數由遊戲自己記（js/bestiary.js）。
@@ -18,8 +18,9 @@ const BESTIARY_BLOCKS = [
   ['title', '「怪物圖鑑」標題', true],
   ['name', '怪物名稱', true],
   ['image', '怪物圖片框（每隻怪物分開；圖片放進框裡、以框的中心為準）', false],
-  ['abilities', '怪物能力（1 在最下面，往上排）', true],
+  ['abilities', '怪物能力（1 在最上面，往下排）', true],
   ['stars', '星級（怪物等級）', true],
+  ['sort', '排序按鈕（照星級／名字／消滅次數，點一下換下一種）', true],
   ['grid', '怪物縮圖區', false],
   ['prev', '上一頁按鈕', true],
   ['next', '下一頁按鈕', true],
@@ -34,9 +35,10 @@ const BESTIARY_LAYOUT_DEFAULT = {
   infoPanel: { x: 532, y: 290, w: 496, h: 300 },
   title: { x: 16, y: 14, w: 190, h: 42, font: 20 },
   name: { x: 300, y: 14, w: 200, h: 42, font: 17 },
-  image: { x: 131, y: 104, w: 254, h: 254 },
+  image: { x: 98, y: 85, w: 320, h: 320 },   // 320×320，放在左側大框裡、怪物能力上面的正中間
   abilities: { x: 32, y: 424, w: 452, h: 166, font: 13, rowH: 34, gap: 7 },   // rowH 每一條的高度、gap 條和條的間距
-  stars: { x: 552, y: 30, w: 176, h: 38, font: 20 },
+  stars: { x: 552, y: 30, w: 260, h: 38, font: 20 },   // 寬 260：放得下 10 顆星
+  sort: { x: 828, y: 30, w: 164, h: 38, font: 14 },    // 星級右邊、關閉按鈕左邊
   grid: { x: 566, y: 84, w: 428, h: 190, cols: 7, rows: 3, gap: 10 },        // cols × rows＝一頁幾格
   prev: { x: 530, y: 159, w: 28, h: 40, font: 30 },
   next: { x: 1002, y: 159, w: 28, h: 40, font: 30 },
@@ -54,9 +56,29 @@ const BESTIARY_TEXT_DEFAULT = {
   unknown: '?',                    // 還沒消滅過的怪物：黑底上的字
   prev: '‹', next: '›', close: '×',
   star: '★',
+  sortStars: '照星級排序', sortName: '照名字排序', sortKills: '照消滅次數排序',   // 排序按鈕：現在照什麼排
 };
+// ---- 縮圖的排序（排序按鈕，點一下換下一種）----
+// stars＝星級少的在前（星級一樣的：同一個系列排在一起，例如史萊姆系列、虱目魚系列、小丑魚系列）；name＝名字第一個字筆劃少的在前（瀏覽器的筆劃排序）；kills＝消滅次數多的在前
+// 一樣的時候照編輯器排的順序（order）。null＝不排序（只有怪物圖鑑編輯器的預覽會用：照編輯器的順序）
+const BESTIARY_SORTS = ['stars', 'name', 'kills'];
+const BESTIARY_SORT_TEXT = { stars: 'sortStars', name: 'sortName', kills: 'sortKills' };
+const bestiaryStroke = (() => { try { return new Intl.Collator('zh-Hant-TW-u-co-stroke').compare; } catch (_) { return (a, b) => String(a).localeCompare(String(b), 'zh-Hant'); } })();
+// 同一個系列：key 冒號前面那段，再拿掉結尾的 _small（slime:splitter → slime、milkfish_kid_small → milkfish_kid、clownfish_small → clownfish）
+const bestiaryFamily = key => String(key).split(':')[0].replace(/_small$/, '');
+function bestiarySorted(list, mode, kills) {
+  const fam = {};   // 每個系列第一次出現在第幾個（照星級排時：星級一樣的，同一個系列排在一起，系列之間照編輯器的順序）
+  list.forEach((e, i) => { const f = bestiaryFamily(e.key); if (!(f in fam)) fam[f] = i; });
+  const k = kills || {}, by = {
+    stars: (a, b) => a.stars - b.stars || fam[bestiaryFamily(a.key)] - fam[bestiaryFamily(b.key)],
+    name: (a, b) => bestiaryStroke(a.name, b.name),
+    kills: (a, b) => (k[b.key] || 0) - (k[a.key] || 0),
+  }[mode];
+  return by ? list.map((e, i) => [e, i]).sort((a, b) => by(a[0], b[0]) || a[1] - b[1]).map(x => x[0]) : list.slice();   // 一樣的照原本的順序
+}
+const bestiaryNextSort = mode => BESTIARY_SORTS[(BESTIARY_SORTS.indexOf(mode) + 1) % BESTIARY_SORTS.length];
 const BESTIARY_STYLE_DEFAULT = {
-  maxStars: 5,          // 星星最多幾顆（沒亮的用暗色顯示）
+  maxStars: 10,         // 星星最多幾顆（沒亮的用暗色顯示）
   imageFrame: true,     // 怪物圖片框：要不要畫框線和底色
   countPractice: false, // B1 訓練室（練習模式）打死的也算進圖鑑
 };
@@ -116,6 +138,7 @@ function bestiaryEntries(cfg, withHidden = false) {
 const bestiaryEsc = s => String(s ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const bestiaryPos = b => 'left:' + b.x + 'px;top:' + b.y + 'px;width:' + b.w + 'px;height:' + b.h + 'px' + (b.font ? ';font-size:' + b.font + 'px' : '');
 // 圖片：先照框的大小等比例放大／縮小（整張放得進去），再乘上大小（%）、移動位移（px）；史萊姆變體換色跟遊戲一樣
+//   大小是以圖片的中心縮放（css/style.css 的 .bst-art），只動圖片本身，框和背景不動（怪物圖鑑編輯器每隻的「怪物圖片大小／位移」）
 const bestiaryArtStyle = (scale, x, y, hue) => '--s:' + (scale / 100) + ';--x:' + x + 'px;--y:' + y + 'px' + (hue != null ? ';filter:hue-rotate(' + hue + 'deg) saturate(1.35)' : '');
 // 能力：「名稱：說明」的名稱用金色
 const bestiaryAbility = t => { const s = bestiaryEsc(t), i = s.indexOf('：'); return i > 0 ? '<b>' + s.slice(0, i + 1) + '</b>' + s.slice(i + 1) : s; };
@@ -131,11 +154,13 @@ function bestiaryHtml(cfg, st) {
   // 左邊：怪物圖片、能力
   const art = sel ? '<img class="bst-art" src="' + bestiaryEsc(sel.image) + '" alt="" style="' + bestiaryArtStyle(sel.imgScale, sel.imgX, sel.imgY, sel.hue) + '">'
     : '<p class="bst-empty">' + bestiaryEsc(list.some(known) ? '' : T.empty) + '</p>';
-  const abil = sel ? sel.abilities.map(t => t.trim()).filter(Boolean).slice(0, BESTIARY_MAX_ABILITIES) : [];   // 第 1 條在最下面，往上排；沒寫的那幾條不顯示
-  const rows = abil.map((t, i) => '<div class="bst-ability" data-ability="' + (i + 1) + '" style="height:' + L.abilities.rowH + 'px">' + bestiaryAbility(t) + '</div>').join('');
+  // 能力 1～4 的位置固定（1 在最上面，往下排）：沒寫的那一條還是佔著位置、只是看不到，不會讓下面的往上補位
+  const abil = sel ? Array.from({ length: BESTIARY_MAX_ABILITIES }, (_, k) => String(sel.abilities[k] || '').trim()) : [];
+  const rows = abil.map((t, i) => '<div class="bst-ability' + (t ? '' : ' empty') + '" data-ability="' + (i + 1) + '" style="height:' + L.abilities.rowH + 'px">' + (t ? bestiaryAbility(t) : '') + '</div>').join('');
   // 右邊：星級、縮圖、基礎訊息
   const max = Math.max(1, S.maxStars | 0), on = sel ? Math.max(0, Math.min(max, sel.stars | 0)) : 0;
-  const stars = Array.from({ length: max }, (_, i) => '<i class="' + (i < on ? 'on' : 'off') + '">' + bestiaryEsc(T.star) + '</i>').join('');
+  // data-star＝第幾顆（怪物圖鑑編輯器的預覽：點第 n 顆＝這隻設成 n 星）
+  const stars = Array.from({ length: max }, (_, i) => '<i class="' + (i < on ? 'on' : 'off') + '" data-star="' + (i + 1) + '">' + bestiaryEsc(T.star) + '</i>').join('');
   const g = L.grid, cell = Math.max(10, Math.min((g.w - g.gap * (g.cols - 1)) / g.cols, (g.h - g.gap * (g.rows - 1)) / g.rows));
   const cells = Array.from({ length: per }, (_, i) => {
     const e = list[page * per + i];
@@ -153,6 +178,7 @@ function bestiaryHtml(cfg, st) {
     block('image', S.imageFrame ? 'framed' : '', art, 'div', '', '', sel && sel.imageBox ? sel.imageBox : L.image) +   // 怪物圖片框：每隻自己的（沒調過＝預設的）
     block('abilities', '', rows, 'div', '', ';gap:' + L.abilities.gap + 'px') +
     block('stars', '', stars) +
+    block('sort', '', bestiaryEsc(st.sort ? T[BESTIARY_SORT_TEXT[st.sort]] : '編輯器的順序'), 'button', ' aria-label="換排序方式"') +   // 排序按鈕：寫現在照什麼排（st.sort；entries 要先用 bestiarySorted 排好）
     block('grid', '', cells, 'div', '', ';grid-template-columns:repeat(' + g.cols + ',' + cell + 'px);grid-auto-rows:' + cell + 'px;gap:' + g.gap + 'px') +
     block('prev', page > 0 ? '' : 'off', bestiaryEsc(T.prev), 'button', ' aria-label="上一頁"' + (page > 0 ? '' : ' disabled')) +
     block('next', page < pages - 1 ? '' : 'off', bestiaryEsc(T.next), 'button', ' aria-label="下一頁"' + (page < pages - 1 ? '' : ' disabled')) +

@@ -1,5 +1,5 @@
 /* ===== 📕 怪物圖鑑編輯器 =====
-   左邊：選一隻怪物，改名稱、星級、能力（最多 4 條，1 在最下面）、背景介紹、圖片、縮圖（大小／位移）、換色、要不要放進圖鑑、排序。
+   左邊：選一隻怪物，改名稱、星級、能力（最多 4 條，1 在最上面）、背景介紹、圖片、縮圖（大小／位移）、換色、要不要放進圖鑑、排序。
    右邊：預覽＝遊戲裡的怪物圖鑑（同一份 css/style.css、js/bestiary-config.js，長得一模一樣）。
          拖曳＝移動那一塊、按住 Shift 拖曳＝以中心等比例縮放、拖右下角的小方塊＝自由改寬高、點縮圖＝選那隻怪物；方向鍵＝移動選到的那一塊（Shift＝10px）。
          怪物圖片框是每隻怪物分開的（imageBox）：調的永遠是目前選的那隻；還沒單獨調過的怪物用預設的框（layout.image）。
@@ -24,18 +24,9 @@ let cfg = (() => {
   return fromFile();
 })();
 function saveDraft() { try { localStorage.setItem(BST_DRAFT_KEY, JSON.stringify(cfg)); } catch (_) {} }
-// 10/22：圖片大小／位移（imgScale、imgX、imgY）改成每隻自己的圖片框（imageBox）：換算成一樣大、一樣位置的框（看起來不變）
-function migrateImgScale(c) {
-  const D = bestiaryLayout(c).image;
-  for (const [k, o] of Object.entries(c.monsters)) {
-    if (!o || !['imgScale', 'imgX', 'imgY'].some(f => f in o)) continue;
-    const sc = (Number(o.imgScale) || 100) / 100, x = Number(o.imgX) || 0, y = Number(o.imgY) || 0;
-    if (!o.imageBox && (sc !== 1 || x || y)) { const w = Math.round(D.w * sc), h = Math.round(D.h * sc); o.imageBox = { x: Math.round(D.x + D.w / 2 + x - w / 2), y: Math.round(D.y + D.h / 2 + y - h / 2), w, h }; }
-    delete o.imgScale; delete o.imgX; delete o.imgY;
-    if (!Object.keys(o).length) delete c.monsters[k];
-  }
-}
-migrateImgScale(cfg);
+// 10/24：怪物圖片框（imageBox）和框裡的怪物圖片（imgScale 大小、imgX／imgY 位移）分開調：
+//   框＝位置、大小（背景、框線跟著框）；圖片＝在框裡以圖片中心放大縮小、移動，框和背景不動。
+//   （10/22 那時把圖片大小換算成框的做法已經拿掉）
 
 const allEntries = () => bestiaryEntries(cfg, true);   // 連「不放進圖鑑」的也列
 const entryOf = key => allEntries().find(e => e.key === key);
@@ -105,14 +96,15 @@ document.getElementById('pvModes').addEventListener('click', e => {
 // ---- 預覽 ----
 const stage = document.getElementById('previewStage');
 let pvScale = 1;
-function pageOf(key) { const per = Math.max(1, bestiaryLayout(cfg).grid.cols * bestiaryLayout(cfg).grid.rows), i = bestiaryEntries(cfg).findIndex(e => e.key === key); return i < 0 ? null : Math.floor(i / per); }
+function pageOf(key) { const per = Math.max(1, bestiaryLayout(cfg).grid.cols * bestiaryLayout(cfg).grid.rows), i = bestiarySorted(bestiaryEntries(cfg), pvSort, pvKills(bestiaryEntries(cfg))).findIndex(e => e.key === key); return i < 0 ? null : Math.floor(i / per); }
+let pvSort = null;   // 預覽的排序（點預覽裡的排序按鈕換）：null＝照編輯器的順序（拖曳縮圖排的）；遊戲裡一打開是「照星級排序」
 function renderPreview() {
-  const entries = bestiaryEntries(cfg), kills = pvKills(entries);
+  const kills = pvKills(bestiaryEntries(cfg)), entries = bestiarySorted(bestiaryEntries(cfg), pvSort, kills);
   const avail = Math.max(300, stage.parentElement.clientWidth - 24);
   pvScale = Math.min(1, avail / BESTIARY_W);
   pvPage = Math.max(0, Math.min(bestiaryPageCount(cfg, entries.length) - 1, pvPage));
   stage.style.width = BESTIARY_W * pvScale + 'px'; stage.style.height = BESTIARY_H * pvScale + 'px';
-  stage.innerHTML = '<div id="bestiary"><div class="bst-scale" style="width:' + BESTIARY_W * pvScale + 'px;height:' + BESTIARY_H * pvScale + 'px">' + bestiaryHtml(cfg, { entries, kills, sel: selKey, page: pvPage }) + '</div></div>';
+  stage.innerHTML = '<div id="bestiary"><div class="bst-scale" style="width:' + BESTIARY_W * pvScale + 'px;height:' + BESTIARY_H * pvScale + 'px">' + bestiaryHtml(cfg, { entries, kills, sel: selKey, page: pvPage, sort: pvSort }) + '</div></div>';
   const card = stage.querySelector('.bst-card'); card.style.transform = 'scale(' + pvScale + ')';
   stage.classList.toggle('show-blocks', document.getElementById('showBlocks').checked);
   const L = rectOf(selBlock), A = centerArea(selBlock), name = selBlock === 'image' && entryOf(selKey) ? '怪物圖片框（' + entryOf(selKey).name + '）' : blockName(selBlock);
@@ -135,11 +127,25 @@ const cardPoint = e => { const r = stage.querySelector('.bst-card').getBoundingC
 // 怪物圖片框：改的是目前選的那隻自己的框（rectOf／setRect）
 // 沒拖動＝點一下（選縮圖、翻頁、選那一塊）
 let drag = null;
+let artDrag = false;   // true＝在怪物圖片框上拖曳時只調框裡的怪物圖片（imgX／imgY；Shift＝以圖片中心縮放 imgScale），框不動
 stage.addEventListener('pointerdown', e => {
   if (e.button !== 0) return;
   const handle = e.target.closest('.ed-handle'), blockEl = e.target.closest('[data-block]');
   const blk = handle ? selBlock : blockEl && blockEl.dataset.block; if (!blk) return;
   e.preventDefault();
+  const me = entryOf(selKey), cellEl = !handle && !e.shiftKey && e.target.closest('.bst-cell[data-key]');
+  if (cellEl) {   // 拖曳縮圖＝換順序（放到別的縮圖上＝插到那一格；放到空格＝排到最後；停在 ‹ › 上一下＝翻頁）
+    drag = { blk, cell: cellEl.dataset.key, sx: e.clientX, sy: e.clientY, moved: false, target: e.target };
+    stage.setPointerCapture(e.pointerId);
+    if (pvSort) { pvSort = null; renderPreview(); }   // 拖曳排的是編輯器的順序：預覽先切回「編輯器的順序」再拖（排序按鈕排的時候，一樣的照這個順序）
+    return;
+  }
+  if (artDrag && !handle && blk === 'image' && me) {   // 只調怪物圖片
+    const B = rectOf('image'), [px, py] = cardPoint(e), cx = B.x + B.w / 2 + me.imgX, cy = B.y + B.h / 2 + me.imgY;
+    drag = { blk, art: true, mode: e.shiftKey ? 'scale' : 'move', sx: e.clientX, sy: e.clientY, start: { x: me.imgX, y: me.imgY, s: me.imgScale }, moved: false, target: e.target,
+      cx, cy, d0: Math.max(20, Math.hypot(px - cx, py - cy)) };   // 縮放：以圖片的中心為準
+    stage.setPointerCapture(e.pointerId); return;
+  }
   const start = { ...rectOf(blk) }, [px, py] = cardPoint(e);
   drag = { blk, mode: e.shiftKey ? 'scale' : handle ? 'size' : 'move', sx: e.clientX, sy: e.clientY, start, moved: false, target: e.target,
     d0: Math.max(20, Math.hypot(px - (start.x + start.w / 2), py - (start.y + start.h / 2))) };   // 縮放：按下時離中心多遠（太靠近中心時當 20px，才不會一動就變很大）
@@ -149,7 +155,14 @@ stage.addEventListener('pointermove', e => {
   if (!drag) return;
   if (!drag.moved && Math.hypot(e.clientX - drag.sx, e.clientY - drag.sy) < 4) return;
   drag.moved = true;
+  if (drag.cell) { cellDragOver(e); return; }
   const dx = Math.round((e.clientX - drag.sx) / pvScale), dy = Math.round((e.clientY - drag.sy) / pvScale), s = drag.start;
+  if (drag.art) {   // 只調怪物圖片：框不動
+    if (drag.mode === 'scale') { const [px, py] = cardPoint(e), k = Math.hypot(px - drag.cx, py - drag.cy) / drag.d0; setMon(selKey, 'imgScale', Math.max(5, Math.min(800, Math.round(s.s * k)))); }
+    else { setMon(selKey, 'imgX', s.x + dx); setMon(selKey, 'imgY', s.y + dy); }
+    const n = entryOf(selKey); setStatus('怪物圖片（' + n.name + '）：大小 ' + n.imgScale + '%、位移 ' + n.imgX + ', ' + n.imgY + '（框不動）');
+    renderPreview(); syncMonNumbers(); return;
+  }
   if (selBlock !== drag.blk) { selBlock = drag.blk; renderBlockForm(); }
   if (drag.mode === 'scale') {
     const [px, py] = cardPoint(e), k = Math.max(.05, Math.hypot(px - (s.x + s.w / 2), py - (s.y + s.h / 2)) / drag.d0);
@@ -161,14 +174,53 @@ stage.addEventListener('pointermove', e => {
 stage.addEventListener('pointerup', e => {
   if (!drag) return;
   const d = drag; drag = null;
+  if (d.cell) { clearTimeout(cellFlipTimer); if (d.moved) cellDrop(d.cell, e); else selectMonster(d.cell, false); return; }   // 沒拖動＝點一下選那隻
+  if (d.art) { if (d.moved) { saveDraft(); renderList(); const r = document.getElementById('monReset'); if (r) r.disabled = !cfg.monsters[selKey]; } return; }
   if (d.moved) { saveDraft(); if (d.blk === 'image') afterBox(); rectStatus(d.blk, d.mode === 'move' ? '移動' : d.mode === 'scale' ? '等比例縮放' : '改大小', true); return; }
   const cell = d.target.closest('.bst-cell[data-key]');
   if (cell) { selectMonster(cell.dataset.key, false); return; }   // 點縮圖＝選那隻怪物
+  if (d.target.closest('.bst-sort')) {   // 排序按鈕：預覽也能試（照星級 → 照名字 → 照消滅次數 → 照星級…）
+    pvSort = bestiaryNextSort(pvSort); const p = pageOf(selKey); pvPage = p == null ? 0 : p;
+    selBlock = 'sort'; renderBlockForm(); renderPreview(); setStatus('預覽：' + bestiaryTexts(cfg)[BESTIARY_SORT_TEXT[pvSort]] + '（遊戲裡一打開是照星級排序，玩家點了會記住）'); return;
+  }
+  const star = d.target.closest('.bst-stars [data-star]'), se = entryOf(selKey);
+  if (star && se) {   // 點星星＝這隻設成第幾顆星（點已經亮著的最後一顆＝少一顆，可以點回 0 星）
+    const n = Number(star.dataset.star), v = n === se.stars ? n - 1 : n;
+    setMon(selKey, 'stars', v); saveDraft(); renderList(); renderMonForm(); renderPreview();
+    setStatus('「' + se.name + '」設成 ' + v + ' 星（還沒存到專案）'); return;
+  }
   const nav = d.target.closest('.bst-prev, .bst-next');
   if (nav && !nav.disabled) pvPage += nav.classList.contains('bst-next') ? 1 : -1;
   selBlock = d.blk; renderBlockForm(); renderPreview(); showSelInfo();
 });
-stage.addEventListener('pointercancel', () => { drag = null; });
+stage.addEventListener('pointercancel', () => { drag = null; clearTimeout(cellFlipTimer); renderPreview(); });
+// ---- 拖曳縮圖換順序（存在 cfg.order，遊戲也照這個順序）----
+let cellFlipTimer = 0;
+const cellUnder = e => { const el = document.elementFromPoint(e.clientX, e.clientY); return el && stage.contains(el) ? el : null; };
+function cellDragOver(e) {   // 拖的那格變淡、要放的那格加虛線框；停在 ‹ › 上 0.5 秒＝翻頁
+  stage.querySelectorAll('.ed-drop').forEach(x => x.classList.remove('ed-drop'));
+  stage.querySelectorAll('.bst-cell[data-key]').forEach(x => x.classList.toggle('ed-dragging', x.dataset.key === drag.cell));
+  const el = cellUnder(e), over = el && el.closest('.bst-cell');
+  if (over && over.dataset.key !== drag.cell) over.classList.add('ed-drop');
+  const nav = el && el.closest('.bst-prev:not([disabled]), .bst-next:not([disabled])');
+  if (nav && !cellFlipTimer) cellFlipTimer = setTimeout(() => {
+    cellFlipTimer = 0; if (!drag || !drag.cell) return;
+    pvPage += nav.classList.contains('bst-next') ? 1 : -1; renderPreview(); setStatus('翻到第 ' + (pvPage + 1) + ' 頁：放到想要的位置');
+  }, 500);
+  if (!nav) { clearTimeout(cellFlipTimer); cellFlipTimer = 0; }
+  setStatus('拖曳「' + (entryOf(drag.cell) || {}).name + '」：放到別的縮圖上＝排到那一格；放到空格＝排到最後');
+}
+function cellDrop(key, e) {
+  const el = cellUnder(e), over = el && el.closest('.bst-cell'), keys = allEntries().map(x => x.key), from = keys.indexOf(key);
+  if (!over || from < 0 || over.dataset.key === key) { renderPreview(); setStatus('沒有換順序'); return; }
+  keys.splice(from, 1);
+  let to = over.dataset.key ? keys.indexOf(over.dataset.key) : keys.length;   // 空格＝排到最後
+  if (over.dataset.key && from <= to) to++;   // 往後拖：放到那一格的後面（那一格往前補）
+  keys.splice(to, 0, key); cfg.order = keys;
+  const p = pageOf(key); if (p != null) pvPage = p;
+  saveDraft(); selKey = key; renderList(); renderMonForm(); renderPreview();
+  setStatus('「' + entryOf(key).name + '」換到第 ' + (keys.filter(k => !entryOf(k).hidden).indexOf(key) + 1) + ' 格（還沒存到專案）');
+}
 // 方向鍵：移動選到的那一塊（打字的時候不算）
 document.addEventListener('keydown', e => {
   if (!e.key.startsWith('Arrow') || e.target.closest('input, textarea, select')) return;
@@ -208,7 +260,7 @@ function centerArea(id) {
 }
 // 每一塊裡面的文字（在版面這邊也能改；跟「文字與設定」是同一份）
 const BLOCK_TEXT = { title: [['title', '文字']], name: [['noName', '還沒選怪物時顯示']], infoTitle: [['infoTitle', '文字']], kills: [['kills', '文字（{n}＝消滅次數）']],
-  prev: [['prev', '按鈕上的字']], next: [['next', '按鈕上的字']], close: [['close', '按鈕上的字']], stars: [['star', '星星的字']], grid: [['unknown', '還沒消滅過的怪物：黑底上的字']], image: [['empty', '一隻都還沒消滅時，圖片框裡的字']] };
+  prev: [['prev', '按鈕上的字']], next: [['next', '按鈕上的字']], close: [['close', '按鈕上的字']], stars: [['star', '星星的字']], sort: [['sortStars', '照星級排序時，按鈕上的字'], ['sortName', '照名字排序時'], ['sortKills', '照消滅次數排序時']], grid: [['unknown', '還沒消滅過的怪物：黑底上的字']], image: [['empty', '一隻都還沒消滅時，圖片框裡的字']] };
 const BLOCK_EXTRA = { grid: [['cols', '一排幾格', 1, 12], ['rows', '幾排', 1, 8], ['gap', '格子間距', 0, 40]], abilities: [['rowH', '每一條的高度', 14, 80], ['gap', '條和條的間距', 0, 30]] };
 function numField(attr, label, v, min, max, step = 1) {
   return '<div class="field">' + label + '<div class="num"><input type="range" ' + attr + ' min="' + min + '" max="' + max + '" step="' + step + '" value="' + v + '"><input type="number" ' + attr + ' step="' + step + '" value="' + v + '"></div></div>';
@@ -238,9 +290,10 @@ function renderBlockForm() {
     (BLOCK_EXTRA[selBlock] || []).map(([k, n, mn, mx]) => numField('data-l="' + k + '"', n, L[k], mn, mx)).join('') +
     (BLOCK_TEXT[selBlock] || []).map(([k, n]) => textField(k, n, T[k])).join('') +
     (isImg ? '<div class="field">預設的框（還沒單獨調過的怪物用這個）<div class="img-btns" style="margin:0">' +
-      '<button type="button" class="ed-btn" id="boxAsDefault" title="把這隻的框設成預設；還沒單獨調過的怪物都會用這個">把這個框設成預設</button></div>' +
-      '<span class="hint">怪物圖片會整張放進框裡（等比例），以框的中心為準：框拉小＝這隻的圖變小。</span></div>' : '') +
-    (selBlock === 'abilities' ? '<p class="hint" style="margin:0 0 10px">能力的內容是每隻怪物自己的：在左邊選怪物後寫（1 在最下面，往上排）。</p>' : '') +
+      '<button type="button" class="ed-btn" id="boxAsDefault" title="把這隻的框設成預設；還沒單獨調過的怪物都會用這個">把這個框設成預設</button>' +
+      '<button type="button" class="ed-btn" id="allBoxDefault" title="清掉每隻自己調過的框，全部用預設的框（怪物圖片的大小、位移不動）">所有怪物都用預設的框</button></div>' +
+      '<span class="hint">框裡的怪物圖片要單獨放大縮小、移動：在左邊這隻怪物的「怪物圖片大小／位移」調，或切到「只調怪物圖片」在預覽裡拖曳。</span></div>' : '') +
+    (selBlock === 'abilities' ? '<p class="hint" style="margin:0 0 10px">能力的內容是每隻怪物自己的：在左邊選怪物後寫（1 在最上面，往下排）。</p>' : '') +
     (selBlock === 'about' ? '<p class="hint" style="margin:0 0 10px">背景介紹是每隻怪物自己的：在左邊選怪物後寫。</p>' : '') +
     '<button type="button" class="ed-btn" id="blockReset"' + (changed ? '' : ' disabled') + '>' + (isImg ? '這隻用回預設的框' : '這一塊恢復預設') + '</button>';
 }
@@ -279,6 +332,12 @@ blockFormEl.addEventListener('click', e => {
     const o = cfg.monsters[selKey]; if (o) { delete o.imageBox; if (!Object.keys(o).length) delete cfg.monsters[selKey]; }
     saveDraft(); renderBlockForm(); renderPreview(); afterBox(); setStatus('預設的怪物圖片框改成 ' + L.w + '×' + L.h + '（還沒單獨調過的怪物都用這個；還沒存到專案）'); return;
   }
+  if (e.target.id === 'allBoxDefault') {   // 所有怪物都用預設的框（每隻自己的 imageBox 清掉）
+    let n = 0;
+    for (const [k, o] of Object.entries(cfg.monsters)) if (o && o.imageBox) { delete o.imageBox; n++; if (!Object.keys(o).length) delete cfg.monsters[k]; }
+    const D = bestiaryLayout(cfg).image;
+    saveDraft(); renderBlockForm(); renderPreview(); afterBox(); setStatus((n ? n + ' 隻怪物' : '所有怪物') + '改用預設的框 ' + D.w + '×' + D.h + '（還沒存到專案）'); return;
+  }
   if (e.target.id === 'blockReset') {
     if (selBlock === 'image' && entryOf(selKey)) { const o = cfg.monsters[selKey]; if (o) { delete o.imageBox; if (!Object.keys(o).length) delete cfg.monsters[selKey]; } afterBox(); }
     else delete cfg.layout[selBlock];
@@ -288,7 +347,7 @@ blockFormEl.addEventListener('click', e => {
 
 // ---- 文字與設定 ----
 const TEXT_FIELDS = [['title', '「怪物圖鑑」標題'], ['infoTitle', '「基礎訊息」標題'], ['kills', '消滅次數（{n}＝次數）'], ['noName', '還沒選怪物時，名稱欄的字'],
-  ['empty', '一隻都還沒消滅時，圖片框裡的字'], ['unknown', '還沒消滅過的怪物：黑底上的字'], ['star', '星星的字'], ['prev', '上一頁按鈕'], ['next', '下一頁按鈕'], ['close', '關閉按鈕']];
+  ['empty', '一隻都還沒消滅時，圖片框裡的字'], ['unknown', '還沒消滅過的怪物：黑底上的字'], ['star', '星星的字'], ['sortStars', '排序按鈕：照星級排序時'], ['sortName', '排序按鈕：照名字排序時'], ['sortKills', '排序按鈕：照消滅次數排序時'], ['prev', '上一頁按鈕'], ['next', '下一頁按鈕'], ['close', '關閉按鈕']];
 const textField = (k, label, v) => '<div class="field">' + label + (k === 'empty'
   ? '<textarea data-t="' + k + '" rows="2">' + esc(v) + '</textarea>' : '<input type="text" data-t="' + k + '" value="' + esc(v) + '">') + '</div>';
 function renderTextForm() {
@@ -345,33 +404,49 @@ function offField(label, kx, ky, e, hint) {
     '<button type="button" class="ed-btn" data-mz="' + kx + ',' + ky + '" title="回到原本的位置">歸零</button></span></div>' +
     '<span class="hint">' + hint + '</span></div>';
 }
+// ---- 左邊的每一段都可以收起來／打開（點標題）：記在這台瀏覽器，換選別隻怪物也照樣 ----
+const SEC_KEY = 'tudrc_bestiary_editor_sections_v1';
+const secOpen = (() => { try { return JSON.parse(localStorage.getItem(SEC_KEY) || '{}'); } catch (_) { return {}; } })();
+const isSecOpen = id => typeof secOpen[id] === 'boolean' ? secOpen[id] : true;
+const sec = (id, title, html) => '<details class="form-sec" data-sec="' + id + '"' + (isSecOpen(id) ? ' open' : '') + '><summary>' + title + '</summary><div class="form-sec-body">' + html + '</div></details>';
+document.addEventListener('toggle', ev => { const d = ev.target; if (!d || !d.dataset || !d.dataset.sec) return; secOpen[d.dataset.sec] = d.open; try { localStorage.setItem(SEC_KEY, JSON.stringify(secOpen)); } catch (_) {} }, true);
+document.addEventListener('click', ev => {   // 全部收起／全部打開
+  const b = ev.target.closest('[data-sec-all]'); if (!b) return;
+  document.querySelectorAll('.left-col details[data-sec]').forEach(d => { d.open = b.dataset.secAll === '1'; });
+});
+document.querySelectorAll('details[data-sec]').forEach(d => { d.open = isSecOpen(d.dataset.sec); });   // 頁面上本來就有的（怪物清單）：照上次的
 function renderMonForm() {
   const form = document.getElementById('monForm'), e = entryOf(selKey);
   if (!e) { form.innerHTML = '<p class="hint">沒有怪物。</p>'; return; }
   const max = bestiaryStyle(cfg).maxStars, list = allEntries(), i = list.findIndex(x => x.key === e.key);
   form.innerHTML =
-    '<div class="img-btns" style="margin:0 0 10px"><button type="button" class="ed-btn" data-move="-1"' + (i <= 0 ? ' disabled' : '') + ' title="在圖鑑裡往前排">↑ 往前</button>' +
+    sec('basic', '📝 排序、名稱、星級', '<div class="img-btns" style="margin:0 0 10px"><button type="button" class="ed-btn" data-move="-1"' + (i <= 0 ? ' disabled' : '') + ' title="在圖鑑裡往前排">↑ 往前</button>' +
       '<button type="button" class="ed-btn" data-move="1"' + (i >= list.length - 1 ? ' disabled' : '') + ' title="在圖鑑裡往後排">↓ 往後</button>' +
       '<label class="field" style="margin:0 0 0 auto;display:flex;align-items:center;gap:6px;color:#dbe6f1;font-size:13px"><input type="checkbox" data-m="hidden"' + (e.hidden ? ' checked' : '') + '> 不放進圖鑑</label></div>' +
     '<div class="field">名稱<input type="text" data-m="name" value="' + esc(cfg.monsters[e.key]?.name || '') + '" placeholder="' + esc(e.baseName) + '"><span class="hint">空白＝用怪物編輯器裡的名稱（' + esc(e.baseName) + '）。</span></div>' +
     '<div class="field">星級（怪物等級）<div class="stars-pick">' + '<button type="button" class="zero' + (e.stars <= 0 ? ' on' : '') + '" data-star="0">0</button>' +
-      Array.from({ length: max }, (_, k) => '<button type="button" class="' + (k < e.stars ? 'on' : '') + '" data-star="' + (k + 1) + '" title="' + (k + 1) + ' 星">★</button>').join('') + '</div></div>' +
-    '<div class="field">怪物能力（最多 4 條）<span class="hint">從第 1 條開始寫：1 在最下面，往上排；沒寫的那幾條不顯示。寫成「名稱：說明」，名稱會是金色。</span></div>' +
-    [3, 2, 1, 0].map(k => '<div class="ab-row"><span>能力 ' + (k + 1) + (k === 3 ? '（最上）' : k === 0 ? '（最下）' : '') + '</span><input type="text" data-ab="' + k + '" value="' + esc(e.abilities[k]) + '" placeholder="例如：分裂：被打倒時分成兩隻小史萊姆"></div>').join('') +
-    '<div class="field" style="margin-top:8px">背景介紹（基礎訊息裡的文字）<textarea data-m="about" rows="5">' + esc(e.about) + '</textarea></div>' +
-    '<div class="sub"><b>圖片（左邊的怪物圖片框，以框的中心為準）</b>' +
+      Array.from({ length: max }, (_, k) => '<button type="button" class="' + (k < e.stars ? 'on' : '') + '" data-star="' + (k + 1) + '" title="' + (k + 1) + ' 星">★</button>').join('') + '</div></div>') +
+    sec('abilities', '⚔️ 怪物能力（最多 4 條）', '<span class="hint" style="display:block;margin-bottom:6px">從第 1 條開始寫：1 在最上面，往下排；沒寫的那幾條留空（1～4 的位置固定，不會往上補位）。寫成「名稱：說明」，名稱會是金色。</span>' +
+    [0, 1, 2, 3].map(k => '<div class="ab-row"><span>能力 ' + (k + 1) + (k === 0 ? '（最上）' : k === 3 ? '（最下）' : '') + '</span><input type="text" data-ab="' + k + '" value="' + esc(e.abilities[k]) + '" placeholder="例如：分裂：被打倒時分成兩隻小史萊姆"></div>').join('')) +
+    sec('about', '📖 背景介紹（基礎訊息裡的文字）', '<textarea data-m="about" rows="5">' + esc(e.about) + '</textarea>') +
+    sec('image', '🖼️ 圖片（左邊的怪物圖片框）', '<div class="sub" style="border:0;margin:0;padding:0">' +
       '<div class="field"><div class="img-row"><span class="thumb">' + artImg(e) + '</span><input type="text" data-m="image" value="' + esc(cfg.monsters[e.key]?.image || '') + '" placeholder="' + esc(e.baseImage) + '"></div>' +
         '<div class="img-btns"><button type="button" class="ed-btn" id="pickImage">從資料夾選…</button>' + (cfg.monsters[e.key]?.image ? '<button type="button" class="ed-btn" id="imageReset">用原本的圖</button>' : '') + '</div>' +
         '<span class="hint">也可以點最下面「怪物圖素」裡的圖。空白＝怪物編輯器裡的圖。</span></div>' +
       '<div class="field">這隻的怪物圖片框（只有這隻）：<b id="monBoxText" style="color:#dbe6f1">' + esc(monBoxText(e)) + '</b>' +
         '<div class="img-btns"><button type="button" class="ed-btn" id="editBox">調這隻的圖片框</button></div>' +
-        '<span class="hint">圖片會整張放進框裡、以框的中心為準：框拉小＝圖變小。在預覽裡拖曳框＝移動、Shift＋拖曳＝以中心等比例縮放、右下角小方塊＝改寬高；也可以在「版面」打數字、置中。</span></div></div>' +
-    '<div class="sub"><b>縮圖（右邊的格子：只露出怪物的一部分）</b>' +
+        '<span class="hint">在預覽裡拖曳框＝移動、Shift＋拖曳＝以中心等比例縮放、右下角小方塊＝改寬高；也可以在「版面」打數字、置中。</span></div>' +
+      '<div class="field">在預覽裡拖曳怪物圖片框時<div class="nudge">' +
+        '<button type="button" class="ed-btn' + (artDrag ? '' : ' primary') + '" data-artdrag="0">調框</button><button type="button" class="ed-btn' + (artDrag ? ' primary' : '') + '" data-artdrag="1">只調怪物圖片</button></div>' +
+        '<span class="hint">「只調怪物圖片」：拖曳＝移動圖片、Shift＋拖曳＝以圖片中心放大縮小；框和背景都不會動。</span></div>' +
+      numField('data-m="imgScale"', '怪物圖片大小（%，以圖片中心縮放；100＝整張剛好放進框裡）', e.imgScale, 10, 400) +
+      offField('怪物圖片位移（px）', 'imgX', 'imgY', e, '只移動框裡的怪物圖片，框和背景不動。正數＝往右／往下。') + '</div>') +
+    sec('thumb', '🔲 縮圖（右邊的格子：只露出怪物的一部分）',
       numField('data-m="thumbScale"', '縮圖大小（%，100＝整隻剛好放進格子）', e.thumbScale, 50, 600) +
-      offField('縮圖位移（px）', 'thumbX', 'thumbY', e, '正數＝往右／往下（例如往下移＝多露出頭）。') + '</div>' +
-    '<div class="sub"><b>換色</b>' + numField('data-m="hue"', '色相（度；史萊姆變體跟遊戲一樣換色）', e.hue ?? 0, -180, 180) +
+      offField('縮圖位移（px）', 'thumbX', 'thumbY', e, '正數＝往右／往下（例如往下移＝多露出頭）。')) +
+    sec('hue', '🎨 換色', numField('data-m="hue"', '色相（度；史萊姆變體跟遊戲一樣換色）', e.hue ?? 0, -180, 180) +
       '<div class="img-btns" style="margin-top:-4px"><button type="button" class="ed-btn" id="hueReset"' + (cfg.monsters[e.key] && 'hue' in cfg.monsters[e.key] ? '' : ' disabled') + '>原本的顏色' + (e.baseHue != null ? '（' + e.baseHue + '°）' : '') + '</button>' +
-      (e.hue != null ? '<button type="button" class="ed-btn" id="hueOff">不換色</button>' : '') + '</div></div>' +
+      (e.hue != null ? '<button type="button" class="ed-btn" id="hueOff">不換色</button>' : '') + '</div>') +
     '<div class="img-btns" style="margin-top:12px"><button type="button" class="ed-btn" id="monReset"' + (cfg.monsters[e.key] ? '' : ' disabled') + '>這隻恢復預設</button></div>';
 }
 const monBoxText = e => !e ? '' : e.imageBox ? 'X ' + e.imageBox.x + '、Y ' + e.imageBox.y + '、' + e.imageBox.w + '×' + e.imageBox.h : '用預設的框（' + bestiaryLayout(cfg).image.w + '×' + bestiaryLayout(cfg).image.h + '）';
@@ -415,6 +490,9 @@ monFormEl.addEventListener('click', ev => {
   if (nb) { const [k, d] = nb.dataset.mn.split(':'); setMon(selKey, k, e[k] + Number(d) * (ev.shiftKey ? 10 : 1)); saveDraft(); renderPreview(); syncMonNumbers(); return; }
   const z = t.closest('[data-mz]');
   if (z) { z.dataset.mz.split(',').forEach(k => setMon(selKey, k, BESTIARY_MONSTER_DEFAULT[k])); saveDraft(); renderPreview(); syncMonNumbers(); return; }
+  const ad = t.closest('[data-artdrag]');
+  if (ad) { artDrag = ad.dataset.artdrag === '1'; selBlock = 'image'; renderMonForm(); renderBlockForm(); renderPreview();
+    setStatus(artDrag ? '在預覽裡拖曳＝移動「' + e.name + '」的怪物圖片、Shift＋拖曳＝以圖片中心縮放（框不動）' : '在預覽裡拖曳＝調「' + e.name + '」的怪物圖片框'); return; }
   if (t.id === 'pickImage') { pickImage(); return; }
   if (t.id === 'editBox') { selBlock = 'image'; renderBlockForm(); renderPreview(); document.getElementById('blockForm').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); setStatus('已選「' + e.name + '」的怪物圖片框：在預覽裡拖曳／Shift＋拖曳，或在「版面」調'); return; }
   if (t.id === 'imageReset') { setMon(selKey, 'image', ''); return afterMon(e.name + '：改回原本的圖'); }
@@ -496,7 +574,7 @@ const FILE_HEAD = '/* ===== 怪物圖鑑（由「📕 怪物圖鑑編輯器」�
   '   ・layout：每一塊的位置、大小（px，以 1060×620 的視窗為準），沒寫的用預設值（js/bestiary-config.js 的 BESTIARY_LAYOUT_DEFAULT）\n' +
   '   ・texts：標題、按鈕的文字；style：maxStars 星星最多幾顆、imageFrame 圖片框要不要框線、countPractice 練習室打死的算不算\n' +
   '   ・monsters：每一隻怪物（key＝怪物 id；史萊姆變體是 slime:splitter 這樣）：\n' +
-  '     name 名稱、stars 星級、abilities 能力（最多 4 條，第 1 條在最下面）、about 背景介紹、image 圖片、\n' +
+  '     name 名稱、stars 星級、abilities 能力（最多 4 條，第 1 條在最上面，往下排）、about 背景介紹、image 圖片、\n' +
   '     imageBox 這隻自己的怪物圖片框（x、y、w 寬、h 高；沒寫＝用 layout.image）、thumbScale／thumbX／thumbY 縮圖大小（%）與位移（px）、hue 換色（史萊姆變體）、hidden 不放進圖鑑\n' +
   '   ・order：怪物的排列順序（沒列到的接在後面） */\n';
 function exportText() {

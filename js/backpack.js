@@ -245,7 +245,7 @@ function renderBackpackDetail() {
         ${count > 1 ? `<div class="bag-qty"><button type="button" data-drop-qty="-1" aria-label="少一個" ${backpackDrop.qty <= 1 ? 'disabled' : ''}>−</button><b>${backpackDrop.qty}</b><button type="button" data-drop-qty="1" aria-label="多一個" ${backpackDrop.qty >= count ? 'disabled' : ''}>＋</button><button type="button" class="bag-qty-all" data-drop-qty="all" ${backpackDrop.qty >= count ? 'disabled' : ''}>全部</button></div>` : ''}
         <div class="bag-drop-buttons"><button type="button" class="bag-drop-cancel" data-drop-cancel>取消</button><button type="button" class="bag-drop-ok" data-drop-ok>丟棄 ${backpackDrop.qty} 個</button></div>
       </div>` : `
-      ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}" ${full ? 'disabled' : ''}>${full ? `${kind.stat} 已滿` : '使用'}${kind && !full ? `<kbd>${kind.key}</kbd>` : actKey ? `<kbd>${actKey}</kbd>` : ''}</button>` : (item.category === 'gift' ? '<p class="bag-note">在基地和大家對話時可以送禮</p>' : `<p class="bag-note">${item.note || '無法使用'}</p>`)}
+      ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}">使用${kind ? `<kbd>${kind.key}</kbd>` : actKey ? `<kbd>${actKey}</kbd>` : ''}</button>` : (item.category === 'gift' ? '<p class="bag-note">在基地和大家對話時可以送禮</p>' : `<p class="bag-note">${item.note || '無法使用'}</p>`)}
       ${canDrop(item) ? `<button type="button" class="bag-drop" data-bag-drop="${item.id}">🗑 丟棄</button>` : '<p class="bag-note">無法丟棄</p>'}`}
     </div>`;
 }

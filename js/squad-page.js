@@ -40,10 +40,10 @@ const SQ_PARTS = {
   'text.hpLabel': ['角色資料', '「HP」'], 'text.hpValue': ['角色資料', 'HP 數字'], 'bar.hp': ['角色資料', 'HP 條'], 'text.spLabel': ['角色資料', '「SP」（嚮導）'], 'text.taintLabel': ['角色資料', '「負荷」（哨兵）'],
   'text.loadValue': ['角色資料', 'SP／負荷 數字'], 'bar.load': ['角色資料', 'SP／負荷 條'], 'box.stats': ['角色資料', '數值區'],
   'text.progress': ['技能樹頁', '已學幾格'], 'text.crystals': ['技能樹頁', '持有的異質碎片'], 'img.crystalsIcon': ['技能樹頁', '異質碎片圖示（持有）'],
-  'text.labelA': ['技能樹頁', '「A系列－生存」標題'], 'text.labelB': ['技能樹頁', '「B系列－攻擊」標題'], 'text.switchLabel': ['技能樹頁', '「切換技能樹／裝備」'],
+  'text.switchLabel': ['技能樹頁', '「切換技能樹／裝備」'],   // 原本的「A系列－生存」「B系列－攻擊」標題拿掉了：分類只寫在程式裡（js/skills.js 的 tag）
   'btn.switch': ['技能樹頁', '切換按鈕'], 'text.noSkill': ['技能樹頁', '「支援人員沒有技能樹…」（選到支援人員時）'], 'img.switch': ['技能樹頁', '切換按鈕的圖'], 'btn.reset': ['技能樹頁', '「重置技能」'], 'svg.lines': ['技能樹頁', '技能之間的連線（整組）'],
   'box.skillIcon': ['技能說明', '技能圖示的框'], 'img.skillIcon': ['技能說明', '技能圖示'], 'text.skillName': ['技能說明', '技能名稱'], 'text.skillTag': ['技能說明', '技能分類（Lv1、A 系列…）'],
-  'text.skillDesc': ['技能說明', '技能描述'], 'text.skillEffect': ['技能說明', '技能效果（數值）・所有技能一起'], 'text.skillNote': ['技能說明', '補充說明（效果下面）'], 'box.learn': ['技能說明', '培養區塊（還沒學）'], 'box.learned': ['技能說明', '已學會：按鈕區塊'], 'text.costLabel': ['技能說明', '「需要」'],
+'text.skillEffect': ['技能說明', '技能效果（數值）・所有技能一起'], 'text.skillEffect2': ['技能說明', '技能效果 2・所有技能一起'],'text.skillNote': ['技能說明', '補充說明（效果下面）'], 'box.learn': ['技能說明', '培養區塊（還沒學）'], 'box.learned': ['技能說明', '已學會：按鈕區塊'], 'text.costLabel': ['技能說明', '「需要」'],
   'img.costIcon': ['技能說明', '異質碎片圖示（價格）'], 'text.cost': ['技能說明', '價格數字'], 'btn.learn': ['技能說明', '「培養」按鈕'], 'btn.learned': ['技能說明', '「已學會」按鈕'],
   'box.locked': ['技能說明', '還沒解鎖：整塊'], 'box.lockIcon': ['技能說明', '還沒解鎖：鎖頭的框'], 'img.lockIcon': ['技能說明', '還沒解鎖：鎖頭'], 'text.lockHint': ['技能說明', '還沒解鎖：條件提示'], 'text.lockDesc': ['技能說明', '還沒解鎖：技能說明'],
   'text.gearTitle': ['裝備頁', '「隊員裝備」'], 'box.preview': ['裝備頁', '角色外觀預覽的框'], 'img.preview': ['裝備頁', '角色外觀預覽'], 'text.lookTitle': ['裝備頁', '「外觀裝備」'],
@@ -59,18 +59,19 @@ function squadPart(key) {
   key = String(key || '');
   if (key.includes('@')) {   // 每格技能各自的（例：text.skillEffect@red/core-1）：跟共用的那一份同一種東西，只套用在這一格
     const [base, who] = key.split('@'), [t, id] = who.split('/'), bp = squadPart(base); if (!bp) return null;
-    const lay = typeof skillLayoutOf === 'function' ? skillLayoutOf(id) : null, name = ((typeof TYPES !== 'undefined' && TYPES[t]) || {}).name || t;
+    const lay = typeof skillLayoutOf === 'function' ? skillLayoutOf(id, t) : null, name = ((typeof TYPES !== 'undefined' && TYPES[t]) || {}).name || t;
     return { ...bp, key, group: '技能說明（每格技能各自）', label: bp.label.replace('・所有技能一起', '') + '（只有這格：' + name + '・' + (lay ? lay.tag : id) + '）' };
   }
   // img＝圖片（大小＝寬，高度照比例）；box＝方形的框（大小＝寬＝高，長寬一起縮放）；其他＝面板、文字（寬、高分開）
-  const kind = /^img\.|Img:|Icon:|^img:/.test(key) ? 'img' : /^(roster|node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '';
+  const kind = /^img\.|Img:|Icon:|^img:/.test(key) ? 'img' : /^(roster|g?node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '';
   if (SQ_PARTS[key]) return { key, group: SQ_PARTS[key][0], label: SQ_PARTS[key][1], kind, text: key in SQ_TEXT_DEFAULT };
   const [p, ...rest] = key.split(':'), id = rest.join(':'), nm = t => (TYPES[t] || (typeof CHARACTERS !== 'undefined' && CHARACTERS[t]) || {}).name || t;
-  const lay = typeof skillLayoutOf === 'function' ? skillLayoutOf(id) : null, st = SQ_STATS.find(s => s.id === id), look = SQ_LOOK_SLOTS().find(s => s.id === id);
+  const lay = typeof skillLayoutOf === 'function' ? (/^gnode/.test(p) ? GUIDE_SKILL_LAYOUT.find(n => n.id === id) : skillLayoutOf(id)) : null, st = SQ_STATS.find(s => s.id === id), look = SQ_LOOK_SLOTS().find(s => s.id === id);
   const gearName = x => { const g = typeof squadGearById === 'function' && squadGearById(x); return g ? g.name : x; };
   const L = {
     roster: ['隊員列', '隊員格：' + nm(id)], rosterImg: ['隊員列', '隊員頭像：' + nm(id)],
     node: ['技能格', '技能格：' + (lay ? lay.tag + '（' + id + '）' : id)], nodeIcon: ['技能格', '技能圖示：' + (lay ? lay.tag + '（' + id + '）' : id)],
+    gnode: ['技能格（嚮導）', '技能格：' + (lay ? lay.tag + '（' + id + '）' : id)], gnodeIcon: ['技能格（嚮導）', '技能圖示：' + (lay ? lay.tag + '（' + id + '）' : id)],   // 嚮導的技能樹格子比較少、位置不同：另外一組，跟哨兵的分開調
     stat: ['數值格', '數值格：' + (st ? st.name : id)], statIcon: ['數值格', '數值圖示：' + (st ? st.name : id)], statLabel: ['數值格', '數值名稱：' + (st ? st.name : id)], statValue: ['數值格', '數值數字：' + (st ? st.name : id)],
     gearSlot: ['裝備格', '隊員裝備第 ' + (Number(id) + 1) + ' 格（框）'], gearSlotImg: ['裝備格', '隊員裝備第 ' + (Number(id) + 1) + ' 格（圖）'], gearSlotName: ['裝備格', '隊員裝備第 ' + (Number(id) + 1) + ' 格（名稱）'],
     lookSlot: ['外觀裝備格', '外觀：' + (look ? look.name : id) + '（框）'], lookSlotImg: ['外觀裝備格', '外觀：' + (look ? look.name : id) + '（圖）'], lookSlotName: ['外觀裝備格', '外觀：' + (look ? look.name : id) + '（名稱）'],
@@ -121,20 +122,20 @@ function squadProfileHtml(actor, safe) {
     '<div class="sq-name-row"><b class="sq-name" data-sq="text.name">' + sqEsc(spec.name || actor.type) + '</b><em class="sq-status ' + cond.cls + '" data-sq="text.status">' + sqEsc(cond.text) + '</em></div>';
   if (actor.noncombat) return h + '<p class="sq-intro" data-sq="text.intro">' + sqT(sqIntroKey = 'intro:' + actor.type, ch.intro || (actor.profile && actor.profile.intro) || '') + '</p></section>';
   const live = actor.live, hp = live ? Math.max(0, Math.round(live.hp)) : spec.hp, maxhp = live ? live.maxhp : spec.hp;
-  const guide = !!spec.guide, sp = guide && typeof guideSPFor === 'function' ? Math.floor(guideSPFor(actor.type)) : 0, spMax = guide && typeof guideSPMax === 'function' ? guideSPMax() : 100;
+  const guide = !!spec.guide, sp = guide && typeof guideSPFor === 'function' ? Math.floor(guideSPFor(actor.type)) : 0, spMax = guide && typeof guideSPMax === 'function' ? guideSPMax(actor.type) : 100;
   const taint = live ? Math.max(0, Math.min(100, Math.round(live.taint || 0))) : 0;
   const load = guide ? { label: sqT('text.spLabel', 'SP'), key: 'text.spLabel', v: sp, max: spMax } : { label: sqT('text.taintLabel', '負荷'), key: 'text.taintLabel', v: taint, max: 100 };
-  const noGear = (typeof SKILL_NO_GEAR !== 'undefined' && SKILL_NO_GEAR[actor.type]) || spec;
+  const base = (typeof SKILL_BASE !== 'undefined' && SKILL_BASE[actor.type]) || spec;   // 沒學技能、沒穿裝備時的原始數值
   h += '<div class="sq-tags"><span class="sq-tag" data-sq="text.role">' + sqEsc(spec.role || '') + '</span><span class="sq-tag" data-sq="text.ability">' + (guide ? '疏導能力' : '異能力') + '：' + sqEsc(spec.ability || '—') + '</span></div>' +
     '<p class="sq-intro" data-sq="text.intro">' + sqT(sqIntroKey = 'intro:' + actor.type, ch.intro || '') + '</p>' +
     '<div class="sq-bars" data-sq="box.bars">' +
       '<div class="sq-bar hp"><span data-sq="text.hpLabel">' + sqT('text.hpLabel', 'HP') + '</span><b data-sq="text.hpValue">' + hp + ' / ' + maxhp + '</b><i data-sq="bar.hp"><u style="width:' + Math.max(0, Math.min(100, hp / Math.max(1, maxhp) * 100)) + '%"></u></i></div>' +
       '<div class="sq-bar ' + (guide ? 'sp' : 'taint') + '"><span data-sq="' + load.key + '">' + load.label + '</span><b data-sq="text.loadValue">' + load.v + ' / ' + load.max + '</b><i data-sq="bar.load"><u style="width:' + Math.max(0, Math.min(100, load.v / Math.max(1, load.max) * 100)) + '%"></u></i></div>' +
     '</div><dl class="sq-stats" data-sq="box.stats">' + SQ_STATS.map(s => {
-      const d = Math.round((s.num(spec) - s.num(noGear)) * 10) / 10;   // 裝備加了多少
+      const d = Math.round((s.num(spec) - s.num(base)) * 10) / 10;   // 技能＋裝備一共加了多少（綠色小字）；滑鼠停 0.25 秒會跳出算式（squadStatTipHtml）
       const icon = s.icon === 'move' ? SQ_MOVE_ICON : (typeof STAT_ICON !== 'undefined' && STAT_ICON[s.icon]) || '';
-      return '<div class="sq-stat" data-sq="stat:' + s.id + '"><span class="sq-stat-icon" data-sq="statIcon:' + s.id + '">' + icon + '</span><dt data-sq="statLabel:' + s.id + '">' + sqT('statLabel:' + s.id, s.name) + '</dt>' +
-        '<dd data-sq="statValue:' + s.id + '">' + s.val(spec) + (d && !spec.noAttack ? '<small class="sq-plus' + (d < 0 ? ' minus' : '') + '">' + (d > 0 ? '+' : '') + d + '</small>' : '') + '</dd></div>';
+      return '<div class="sq-stat" data-sq="stat:' + s.id + '" data-sq-stat="' + s.id + '"><span class="sq-stat-icon" data-sq="statIcon:' + s.id + '">' + icon + '</span><dt data-sq="statLabel:' + s.id + '">' + sqT('statLabel:' + s.id, s.name) + '</dt>' +
+        '<dd data-sq="statValue:' + s.id + '">' + s.val(spec) + (d && !spec.noAttack ? '<small class="sq-plus' + (d < 0 ? ' minus' : '') + '">' + (d > 0 ? '+' : '') + d + (SQ_STAT_PCT[s.id] ? '%' : '') + '</small>' : '') + '</dd></div>';
     }).join('') + '</dl>';
   return h + '</section>';
 }
@@ -145,24 +146,27 @@ function squadSwitchHtml(suffix) {
 }
 function squadSkillHtml(actor, safe) {
   const type = actor.type, st = squadPageState;
-  let sel = st.skill[type]; if (!skillLayoutOf(sel)) sel = (SKILL_LAYOUT.find(n => skillStateOf(type, n.id) === 'open') || SKILL_LAYOUT[0]).id;
+  // 嚮導的技能樹格子比較少（js/skills.js 的 GUIDE_SKILL_LAYOUT），排法也不同：整塊加 guide，格子用 gnode:（編輯器裡跟哨兵的分開調）
+  const layout = skillLayoutFor(type), guide = isGuideTree(type), nk = guide ? 'gnode' : 'node';
+  let sel = st.skill[type]; if (!skillLayoutOf(sel, type)) sel = (layout.find(n => skillStateOf(type, n.id) === 'open') || layout[0]).id;
   st.skill[type] = sel;
-  const nodes = SKILL_LAYOUT.map(n => {
-    const node = skillNodeOf(type, n.id), state = skillStateOf(type, n.id), icon = node.icon || SKILL_GROUP_ICON[n.group];
-    return '<button type="button" class="sq-node g-' + n.group + ' ' + state + (n.id === sel ? ' sel' : '') + '" data-skill-pick="' + n.id + '" data-sq="node:' + n.id + '" data-sq-tip="' + sqEsc(node.name) + '" data-sq-tip-desc="' + sqEsc(node.desc || node.effect) + '">' +
-      sqIcon(icon, 'nodeIcon:' + n.id) + (state === 'locked' ? '<i class="sq-node-lock">🔒</i>' : '') + '</button>';
+  const nodes = layout.map(n => {
+    const node = skillNodeOf(type, n.id), state = skillStateOf(type, n.id), icon = node.icon || skillGroupIcon(type, n.group);
+    return '<button type="button" class="sq-node g-' + n.group + ' ' + state + (n.id === sel ? ' sel' : '') + '" data-skill-pick="' + n.id + '" data-sq="' + nk + ':' + n.id + '" data-sq-tip="' + sqEsc(node.name) + '" data-sq-tip-desc="' + sqEsc(node.desc || node.effect || (node.active && typeof guideActiveTexts === 'function' ? guideActiveTexts(node.active).effect : '')) + '">' +
+      sqIcon(icon, nk + 'Icon:' + n.id) + (state === 'locked' ? '<i class="sq-node-lock">🔒</i>' : '') + '</button>';
   }).join('');
   const learned = skillLearnedCount(type);
-  let h = '<section class="sq-main sq-tree" data-sq="panel.tree"><svg class="sq-lines" data-sq="svg.lines" aria-hidden="true"></svg>' +
-    '<span class="sq-progress" data-sq="text.progress">已學 ' + learned + ' / ' + SKILL_TOTAL + '</span>' +
+  let h = '<section class="sq-main sq-tree' + (guide ? ' guide' : '') + '" data-sq="panel.tree"><svg class="sq-lines" data-sq="svg.lines" aria-hidden="true"></svg>' +
+    '<span class="sq-progress" data-sq="text.progress">已學 ' + learned + ' / ' + skillTotalFor(type) + '</span>' +
     '<span class="sq-crystals" data-sq="text.crystals"><img data-sq="img.crystalsIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片">' + training.crystals + '</span>' +
-    '<span class="sq-label a" data-sq="text.labelA">' + sqT('text.labelA', 'A系列－生存（防禦、血量、迴避等數值）') + '</span>' +
-    '<span class="sq-label b" data-sq="text.labelB">' + sqT('text.labelB', 'B系列－攻擊（物理攻擊、射程、攻速、命中等）') + '</span>' +
     squadSwitchHtml('') + nodes +
     ((training.skills[type] || []).length ? '<button type="button" class="sq-reset" data-squad-reset data-sq="btn.reset">' + sqT('btn.reset', '重置技能') + '</button>' : '') + '</section>';
   // 右下：說明
-  const lay = skillLayoutOf(sel), node = skillNodeOf(type, sel), state = skillStateOf(type, sel), cost = node.cost, afford = training.crystals >= cost;
-  const icon = node.icon || SKILL_GROUP_ICON[lay.group], effect = node.effect || (typeof modsText === 'function' ? modsText(node.mods) : '');
+  const lay = skillLayoutOf(sel, type), node = skillNodeOf(type, sel), state = skillStateOf(type, sel), cost = node.cost, afford = training.crystals >= cost;
+  // 技能效果、補充說明空白：嚮導會自己發動的技能依數字自動產生（js/squad-gear.js 的 guideActiveTexts）；其他技能的效果依 mods 產生
+  const auto = node.active && typeof guideActiveTexts === 'function' ? guideActiveTexts(node.active) : null;
+  const icon = node.icon || skillGroupIcon(type, lay.group), effect = node.effect || (auto ? auto.effect : typeof modsText === 'function' ? modsText(node.mods) : '');
+  const note = node.note || (auto ? auto.note : '');
   if (state === 'locked') {
     const req = skillNodeOf(type, lay.req), need = lay.req && !hasSkill(type, lay.req) ? null : (lay.reqAny || []).filter(id => !hasSkill(type, id)).map(id => '「' + sqEsc(skillNodeOf(type, id).name) + '」');
     // 條件提示是可以在編輯器改的範本：{name}＝這格技能、{req}＝要先學的技能、{reqs}＝還沒學的那幾個（用「或」連起來）
@@ -174,15 +178,15 @@ function squadSkillHtml(actor, safe) {
     h += '<section class="sq-info locked" data-sq="panel.skillInfo"><div class="sq-locked" data-sq="box.locked">' +
       '<span class="sq-lock-icon" data-sq="box.lockIcon" data-sq-center><img data-sq="img.lockIcon" src="images/ui/skill-lock.svg" alt="未解鎖"></span>' +
       '<p class="sq-lock-hint" data-sq="text.lockHint">' + hint + '</p>' +
-      '<p class="sq-lock-desc" data-sq="text.lockDesc">' + sqEsc(node.desc).replace(/\n/g, '<br>') + (effect ? '<br>' + sqEsc(effect) : '') + (node.note ? '<br>' + sqEsc(node.note).replace(/\n/g, '<br>') : '') + '</p></div></section>';
+      '<p class="sq-lock-desc" data-sq="text.lockDesc">' + [effect ? sqEsc(effect) : '', note ? sqEsc(note).replace(/\n/g, '<br>') : ''].filter(Boolean).join('<br>') + '</p></div></section>';   // 「技能描述」只在滑鼠停在技能圖示上時顯示，這裡不重複
   } else {
     const owned = state === 'owned', label = owned ? sqT('btn.learned', '已學會') : !safe ? '回基地才能培養' : afford ? sqT('btn.learn', '培養') : '碎片不足';
     h += '<section class="sq-info" data-sq="panel.skillInfo">' +
       '<span class="sq-info-icon" data-sq="box.skillIcon">' + sqIcon(icon, 'img.skillIcon') + '</span>' +
       '<b class="sq-info-name" data-sq="text.skillName">' + sqEsc(node.name) + '</b><small class="sq-info-tag" data-sq="text.skillTag">' + sqT(sqSkillTagKey = 'skillTag:' + sel, lay.tag) + '</small>' +
-      '<p class="sq-info-desc" data-sq="text.skillDesc">' + sqEsc(node.desc).replace(/\n/g, '<br>') + '</p>' +
       '<p class="sq-info-effect" data-sq="text.skillEffect@' + type + '/' + sel + '" data-sq-base="text.skillEffect">' + sqEsc(effect) + '</p>' +   // 位置、大小每格技能各自調（沒調的照大家共用的）
-      '<p class="sq-info-note" data-sq="text.skillNote">' + sqEsc(node.note).replace(/\n/g, '<br>') + '</p>' +
+      '<p class="sq-info-effect sq-info-effect2" data-sq="text.skillEffect2@' + type + '/' + sel + '" data-sq-base="text.skillEffect2">' + sqEsc(node.effect2).replace(/\n/g, '<br>') + '</p>' +   // 技能效果 2：同上，每格各自調
+      '<p class="sq-info-note" data-sq="text.skillNote">' + sqEsc(note).replace(/\n/g, '<br>') + '</p>' +
       '<div class="sq-learn' + (owned ? ' owned' : '') + '" data-sq="box.learn' + (owned ? 'ed' : '') + '">' + (owned ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
       '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' + label + '</button></div></section>';
   }
@@ -274,19 +278,20 @@ function placeSquadArrow(body) {
 function drawSquadLines(body) {
   const svg = body.querySelector('.sq-lines'), panel = svg && svg.parentElement; if (!svg || !panel.offsetWidth) return;
   const type = squadPageState.member, els = (typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.elements) || {};
+  const layout = skillLayoutFor(type), nk = isGuideTree(type) ? 'gnode:' : 'node:';   // 嚮導：格子少、編輯器位移另外一組
   svg.setAttribute('viewBox', '0 0 ' + panel.offsetWidth + ' ' + panel.offsetHeight);
   const box = id => {
     const el = panel.querySelector('[data-skill-pick="' + id + '"]'); if (!el) return null;
-    const o = els['node:' + id] || {}, l = el.offsetLeft + (o.x || 0), t = el.offsetTop + (o.y || 0), w = el.offsetWidth, h = el.offsetHeight;
+    const o = els[nk + id] || {}, l = el.offsetLeft + (o.x || 0), t = el.offsetTop + (o.y || 0), w = el.offsetWidth, h = el.offsetHeight;
     return { l, r: l + w, t, b: t + h, cx: l + w / 2, cy: t + h / 2, w };
   };
   const cls = (from, to) => hasSkill(type, to) && hasSkill(type, from) ? 'on' : hasSkill(type, from) && skillStateOf(type, to) === 'open' ? 'next' : '';
-  let paths = SKILL_LAYOUT.filter(n => n.req && n.group !== 'aux').map(n => {
+  let paths = layout.filter(n => n.req && n.group !== 'aux').map(n => {
     const a = box(n.req), b = box(n.id); if (!a || !b) return '';
     const mx = (a.r + b.l) / 2, d = Math.abs(a.cy - b.cy) < 3 ? 'M' + a.r + ' ' + a.cy + ' H' + b.l : 'M' + a.r + ' ' + a.cy + ' H' + mx + ' V' + b.cy + ' H' + b.l;
     return '<path d="' + d + '" class="' + cls(n.req, n.id) + '"/>';
   }).join('');
-  for (const n of SKILL_LAYOUT) for (const from of n.reqAny || []) {
+  for (const n of layout) for (const from of n.reqAny || []) {
     const a = box(from), b = box(n.id); if (!a || !b) continue;
     const down = a.cy < b.cy, ax = a.cx + a.w / 4, bx = b.cx - b.w / 4;
     paths += '<path d="M' + ax + ' ' + (down ? a.b : a.t) + ' L' + bx + ' ' + (down ? b.t : b.b) + '" class="diag ' + cls(from, n.id) + '"/>';
@@ -357,15 +362,60 @@ function squadUnequip(body) {
   if (typeof sfx === 'function') sfx('switch');
   renderSquadPage(body);
 }
-// 滑鼠停在技能格上：小視窗顯示名稱和說明（第一格＝原本的特性）
-function handleSquadHover(body, e) {
-  const tip = body.querySelector('.sq-tip'), node = e.target.closest && e.target.closest('[data-sq-tip]'), canvas = body.querySelector('.sq-canvas');
-  if (!tip || !canvas) return;
-  if (!node) { tip.hidden = true; return; }
-  const s = sqScale(canvas), cr = canvas.getBoundingClientRect(), r = node.getBoundingClientRect();
-  tip.innerHTML = '<b>' + node.dataset.sqTip + '</b><p>' + node.dataset.sqTipDesc + '</p>'; tip.hidden = false;
+// ---- 數值格的算式（滑鼠停 0.25 秒）：原始數值 ＋ 每個技能、裝備加的 ＝ 現在的數值 ----
+const SQ_STAT_PATH = { atk: 'dmg', def: 'defense', range: 'range', rate: 'rate', acc: 'accuracy', move: 'walkSpeed' };   // 數值格 → 技能／裝備 mods 的數值名稱
+const SQ_STAT_PCT = { def: true, acc: true };   // 這兩格本身就是百分比（加 0.1＝+10%）
+function squadStatTipHtml(type, statId) {
+  const st = SQ_STATS.find(x => x.id === statId), path = SQ_STAT_PATH[statId], spec = TYPES[type], base = (typeof SKILL_BASE !== 'undefined' && SKILL_BASE[type]) || spec;
+  if (!st || !path || !spec) return '';
+  const unit = ((typeof STAT_MOD_NAMES !== 'undefined' && STAT_MOD_NAMES[path]) || {}).unit || '';
+  const amount = m => m.mul != null ? (m.mul >= 1 ? '+' : '−') + Math.round(Math.abs(m.mul - 1) * 100) + '%'
+    : SQ_STAT_PCT[statId] ? (m.add >= 0 ? '+' : '−') + Math.round(Math.abs(m.add) * 100) + '%'
+    : (m.add >= 0 ? '+' : '−') + Math.round(Math.abs(m.add) * 100) / 100 + unit;
+  const parts = [];   // { amount：加多少, from：哪個技能／裝備, mul：是不是 % 加成 }
+  for (const n of skillLayoutFor(type)) if (hasSkill(type, n.id)) {
+    const node = skillNodeOf(type, n.id) || {};
+    for (const m of node.mods || []) if (m && m.path === path) parts.push({ amount: amount(m), from: node.name, mul: m.mul != null });
+  }
+  if (typeof squadGearOf === 'function') for (const id of squadGearOf(type)) {
+    const g = id && squadGearById(id); if (!g) continue;
+    for (const m of g.mods || []) if (m && m.path === path) parts.push({ amount: amount(m), from: g.name, mul: m.mul != null });
+  }
+  let h = '<b>' + sqEsc(st.name) + '</b><p class="sq-formula">' + sqEsc(st.val(base)) + parts.map(p => ' ' + p.amount).join('') + ' ＝ ' + sqEsc(st.val(spec)) + '</p>';
+  h += '<p>原始　' + sqEsc(st.val(base)) + parts.map(p => '<br><span class="sq-tip-add">' + p.amount + '</span>　' + sqEsc(p.from)).join('') + '</p>';
+  if (!parts.length) h += '<p class="sq-tip-note">還沒有技能或裝備加成。</p>';
+  else if (parts.filter(p => p.mul).length > 1) h += '<p class="sq-tip-note">％加成是一個一個乘上去的。</p>';
+  if ((statId === 'def' && spec.defense >= .75) || (statId === 'acc' && spec.accuracy >= 1)) h += '<p class="sq-tip-note">已經到上限（' + (statId === 'def' ? '75%' : '100%') + '）。</p>';
+  return h;
+}
+// 小視窗放在 el 的正上方
+function placeSquadTip(body, tip, el) {
+  const canvas = body.querySelector('.sq-canvas'), s = sqScale(canvas), cr = canvas.getBoundingClientRect(), r = el.getBoundingClientRect();
   const x = Math.min(SQ_W - tip.offsetWidth - 6, Math.max(6, (r.left + r.width / 2 - cr.left) / s - tip.offsetWidth / 2));
   tip.style.left = x + 'px'; tip.style.top = Math.max(4, (r.top - cr.top) / s - tip.offsetHeight - 8) + 'px';
+}
+// 滑鼠停在技能格上：小視窗馬上顯示名稱和「技能描述」（第一格＝原本的特性）
+// 滑鼠停在數值格上：0.25 秒後顯示算式
+let sqStatTipTimer = 0;
+function handleSquadHover(body, e) {
+  const tip = body.querySelector('.sq-tip'), node = e.target.closest && e.target.closest('[data-sq-tip]'), canvas = body.querySelector('.sq-canvas');
+  const stat = e.target.closest && e.target.closest('[data-sq-stat]');
+  if (!tip || !canvas) return;
+  if (stat) {
+    if (tip.dataset.for === 'stat:' + stat.dataset.sqStat && (!tip.hidden || sqStatTipTimer)) return;   // 還在同一格裡移動
+    clearTimeout(sqStatTipTimer); tip.hidden = true; tip.dataset.for = 'stat:' + stat.dataset.sqStat;
+    sqStatTipTimer = setTimeout(() => {
+      sqStatTipTimer = 0; if (!stat.isConnected) return;
+      const html = squadStatTipHtml(squadPageState.member, stat.dataset.sqStat); if (!html) return;
+      tip.innerHTML = html; tip.hidden = false; placeSquadTip(body, tip, stat);
+    }, 250);
+    return;
+  }
+  clearTimeout(sqStatTipTimer); sqStatTipTimer = 0;
+  if (!node) { tip.hidden = true; tip.dataset.for = ''; return; }
+  tip.dataset.for = 'node';
+  tip.innerHTML = '<b>' + node.dataset.sqTip + '</b><p>' + node.dataset.sqTipDesc + '</p>'; tip.hidden = false;
+  placeSquadTip(body, tip, node);
 }
 
 // ---- 版面設定（data/squad-layout.js）：產生 CSS 蓋在原本的樣式上 ----
@@ -403,7 +453,7 @@ function renderTPadSquadApp(el) {
     el._sqBound = true;
     el.addEventListener('click', e => { if (tpadView === 'squad') handleSquadClick(el, e); });
     el.addEventListener('mouseover', e => { if (tpadView === 'squad') handleSquadHover(el, e); });
-    el.addEventListener('mouseleave', () => { const tip = el.querySelector('.sq-tip'); if (tip) tip.hidden = true; });
+    el.addEventListener('mouseleave', () => { clearTimeout(sqStatTipTimer); sqStatTipTimer = 0; const tip = el.querySelector('.sq-tip'); if (tip) { tip.hidden = true; tip.dataset.for = ''; } });
     el.addEventListener('scroll', e => { if (e.target.classList && e.target.classList.contains('sq-roster-list')) placeSquadArrow(el); }, true);
   }
   renderSquadPage(el);
@@ -435,12 +485,14 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     refreshSquadPage();   // 先畫一次，SQ_TEXT_DEFAULT（可以改字的介面文字）才完整
     for (const m of members) { list.push('roster:' + m.type, 'rosterImg:' + m.type); }
     for (const n of SKILL_LAYOUT) list.push('node:' + n.id, 'nodeIcon:' + n.id);
+    for (const n of GUIDE_SKILL_LAYOUT) list.push('gnode:' + n.id, 'gnodeIcon:' + n.id);   // 嚮導的技能格（另外一組位置）
     for (const s of SQ_STATS) list.push('stat:' + s.id, 'statIcon:' + s.id, 'statLabel:' + s.id, 'statValue:' + s.id);
     for (let i = 0; i < SQUAD_GEAR_SLOTS; i++) list.push('gearSlot:' + i, 'gearSlotImg:' + i, 'gearSlotName:' + i);
     for (const s of SQ_LOOK_SLOTS()) list.push('lookSlot:' + s.id, 'lookSlotImg:' + s.id, 'lookSlotName:' + s.id);
     for (const g of squadGearList()) list.push('avail:' + g.id, 'availImg:' + g.id);
     post({ type: 'parts', list: list.map(k => squadPart(k)).filter(Boolean).map(p => ({ key: p.key, group: p.group, label: p.label, kind: p.kind })),
-      members: members.filter(m => TYPES[m.type]).map(m => ({ id: m.type, name: TYPES[m.type].name })), nodes: SKILL_LAYOUT.map(n => ({ id: n.id, tag: n.tag })) });
+      members: members.filter(m => TYPES[m.type]).map(m => ({ id: m.type, name: TYPES[m.type].name, guide: isGuideTree(m.type), nodes: skillLayoutFor(m.type).map(n => ({ id: n.id, tag: n.tag })) })),   // 每位隊員自己的格子（嚮導比較少）
+      nodes: SKILL_LAYOUT.map(n => ({ id: n.id, tag: n.tag })) });
   }
   function textInfo(key) {
     const k = key === 'text.skillTag' ? sqSkillTagKey : key === 'text.lockHint' ? sqLockHintKey : key === 'text.intro' ? sqIntroKey : key;
@@ -464,8 +516,8 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
       }
       values.font = Math.round(parseFloat(cs.fontSize)); values.align = cs.textAlign === 'start' ? 'left' : cs.textAlign === 'end' ? 'right' : cs.textAlign;
     }
-    const type = squadPageState.member, nodeId = key.startsWith('node:') || key.startsWith('nodeIcon:') ? key.split(':')[1] : /^text\.(skillName|skillDesc|skillEffect|skillNote|lockDesc)(@|$)/.test(key) ? (key.includes('@') ? key.split('/')[1] : squadPageState.skill[type]) : null;   // 技能說明的字：右下現在顯示的那一格
-    const skill = nodeId && TYPES[type] && skillLayoutOf(nodeId) ? { member: type, memberName: TYPES[type].name, id: nodeId, tag: skillLayoutOf(nodeId).tag, node: skillNodeOf(type, nodeId) } : null;
+    const type = squadPageState.member, nodeId = /^g?node(Icon)?:/.test(key) ? key.split(':')[1] : /^text\.(skillName|skillDesc|skillEffect2?|skillNote|lockDesc)(@|$)/.test(key) ? (key.includes('@') ? key.split('/')[1] : squadPageState.skill[type]) : null;   // 技能說明的字：右下現在顯示的那一格
+    const skill = nodeId && TYPES[type] && skillLayoutOf(nodeId, type) ? { member: type, memberName: TYPES[type].name, id: nodeId, tag: skillLayoutOf(nodeId, type).tag, node: skillNodeOf(type, nodeId) } : null;
     const pt = squadPart(key);
     post({ type: 'info', key, visible: !!el, count: list.length, values, text: textInfo(key), skill, page: squadPageState.page, member: type, part: pt && { key, group: pt.group, label: pt.label, kind: pt.kind } });
   }
@@ -513,16 +565,18 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     if (els(key).length) return;
     if (key.includes('@')) { const [t, id] = key.split('@')[1].split('/'); squadPageState.page = 'skills'; squadPageState.member = t; squadPageState.skill[t] = id; refreshSquadPage(); applySquadLayout(); return; }
     const st = squadPageState, [p, id] = key.split(':');
-    if (/^(node|nodeIcon)$/.test(p) || /^(text\.(labelA|labelB|switchLabel|progress|crystals|skill|cost|lock)|btn\.(switch|reset|learn|learned)$|img\.(switch|skillIcon|costIcon|lockIcon|crystalsIcon)$|box\.(skillIcon|learn|locked|lockIcon)|panel\.(tree|skillInfo)|svg\.)/.test(key)) st.page = 'skills';
+    if (/^(gnode|gnodeIcon)$/.test(p) && !isGuideTree(st.member)) { const g = squadMemberList().find(x => isGuideTree(x.type)); if (g) st.member = g.type; }   // 嚮導的技能格：換到一位嚮導
+    if (/^(node|nodeIcon)$/.test(p) && isGuideTree(st.member)) { const s = squadMemberList().find(x => TYPES[x.type] && !isGuideTree(x.type)); if (s) st.member = s.type; }   // 哨兵的技能格：換到一位哨兵
+    if (/^g?(node|nodeIcon)$/.test(p) || /^(text\.(switchLabel|progress|crystals|skill|cost|lock)|btn\.(switch|reset|learn|learned)$|img\.(switch|skillIcon|costIcon|lockIcon|crystalsIcon)$|box\.(skillIcon|learn|locked|lockIcon)|panel\.(tree|skillInfo)|svg\.)/.test(key)) st.page = 'skills';
     if (/^(gearSlot|gearSlotImg|gearSlotName|lookSlot|lookSlotImg|lookSlotName|avail|availImg)$/.test(p) || /(G$|^text\.(gearTitle|lookTitle|desc|stat|avail)|^box\.(preview|desc|stat)|^img\.preview|^btn\.(un)?equip|^panel\.(gear|gearInfo|avail))/.test(key)) st.page = 'gear';
     if (p === 'roster' || p === 'rosterImg') st.member = id;
     if (key === 'text.noSkill') { const m = squadMemberList().find(x => x.noncombat || !TYPES[x.type]); if (m) st.member = m.type; }   // 換到一位支援人員
-    if (/^box\.(locked|lockIcon)$|^img\.lockIcon$|^text\.lock/.test(key)) { const n = SKILL_LAYOUT.find(x => skillStateOf(st.member, x.id) === 'locked'); if (n) st.skill[st.member] = n.id; }
+    if (/^box\.(locked|lockIcon)$|^img\.lockIcon$|^text\.lock/.test(key)) { const n = skillLayoutFor(st.member).find(x => skillStateOf(st.member, x.id) === 'locked'); if (n) st.skill[st.member] = n.id; }
     if (/^(box\.skillIcon|img\.skillIcon|text\.skill|(box|btn)\.learn$|text\.cost|img\.costIcon)/.test(key)) {   // 培養按鈕、價格：要換到還沒學的格子；其他：不是鎖住的就好
-      const n = SKILL_LAYOUT.find(x => skillStateOf(st.member, x.id) === 'open'), cur = skillStateOf(st.member, st.skill[st.member]);
+      const n = skillLayoutFor(st.member).find(x => skillStateOf(st.member, x.id) === 'open'), cur = skillStateOf(st.member, st.skill[st.member]);
       if (n && (cur === 'locked' || (cur === 'owned' && /^(box|btn)\.learn$|^text\.cost|^img\.costIcon/.test(key)))) st.skill[st.member] = n.id;
     }
-    if (/^(box|btn)\.learned$/.test(key)) { const n = SKILL_LAYOUT.find(x => skillStateOf(st.member, x.id) === 'owned'); if (n) st.skill[st.member] = n.id; }   // 換到學會的格子
+    if (/^(box|btn)\.learned$/.test(key)) { const n = skillLayoutFor(st.member).find(x => skillStateOf(st.member, x.id) === 'owned'); if (n) st.skill[st.member] = n.id; }   // 換到學會的格子
     if (p === 'gearSlotImg') { st.slot = { kind: 'gear', id: Number(id) }; if (!squadGearOf(st.member)[id]) { const g = squadGearList().find(x => supplyInventory.get(x.id) > 0); if (g) equipSquadGear(st.member, Number(id), g.id); } }
     if (p === 'avail' || p === 'availImg') st.slot = { kind: 'gear', id: st.slot.kind === 'gear' ? st.slot.id : 0 };
     refreshSquadPage(); applySquadLayout();

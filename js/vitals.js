@@ -137,7 +137,7 @@ function updateVitals(dt) {
   }
   if (typeof guideSPRecords !== 'undefined') for (const id of Object.keys(TYPES)) {
     if (here.has(id) || !TYPES[id].guide || !(id in guideSPRecords)) continue;
-    guideSPRecords[id] = Math.min(guideSPMax(), guideSPRecords[id] + VITALS.baseRegen * dt);
+    guideSPRecords[id] = Math.min(guideSPMax(id), guideSPRecords[id] + VITALS.baseRegen * dt);
   }
   G.towers = G.towers.filter(t => !t.vitalsGone);   // 走去醫院的隊員：離開這張地圖
   updateAshSoothe(dt);

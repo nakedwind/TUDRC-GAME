@@ -16,6 +16,17 @@ try {
   if (d && d.kills && typeof d.kills === 'object') for (const [k, n] of Object.entries(d.kills)) if (Number(n) > 0) bst.kills[k] = Math.floor(Number(n));
 } catch (_) {}
 function saveBestiary() { try { localStorage.setItem(BESTIARY_STORE, JSON.stringify({ kills: bst.kills })); } catch (_) {} }
+// 縮圖的排序（右上的排序按鈕，點一下換下一種：照星級 → 照名字 → 照消滅次數；js/bestiary-config.js 的 bestiarySorted）：記住玩家上次選的
+const BESTIARY_SORT_STORE = 'tudrc_bestiary_sort_v1';
+bst.sort = (() => { try { const s = localStorage.getItem(BESTIARY_SORT_STORE); return BESTIARY_SORTS.includes(s) ? s : 'stars'; } catch (_) { return 'stars'; } })();
+const bestiaryList = () => bestiarySorted(bestiaryEntries(), bst.sort, bst.kills);   // 照現在的排序排好的怪物
+function bestiaryCycleSort() {   // 換下一種排序，翻到選著的那一隻所在的那一頁
+  bst.sort = bestiaryNextSort(bst.sort);
+  try { localStorage.setItem(BESTIARY_SORT_STORE, bst.sort); } catch (_) {}
+  const per = Math.max(1, bestiaryLayout().grid.cols * bestiaryLayout().grid.rows), i = bestiaryList().findIndex(e => e.key === bst.sel);
+  bst.page = i >= 0 ? Math.floor(i / per) : 0;
+  sfx('switch');
+}
 
 // ---- 消滅次數 ----
 const bestiaryKeyOf = e => e.type === 'slime' ? (!e.variant || e.variant === 'normal' ? 'slime' : 'slime:' + e.variant) : e.type;   // 史萊姆變體分開算
@@ -39,7 +50,8 @@ function buildBestiary() {
   document.getElementById('wrap').appendChild(el);
   el.addEventListener('click', e => {
     if (e.target === el) { closeBestiary(); return; }   // 點視窗外面＝關掉
-    const b = e.target.closest('.bst-cell.known, .bst-prev, .bst-next, .bst-close'); if (!b) return;
+    const b = e.target.closest('.bst-cell.known, .bst-prev, .bst-next, .bst-close, .bst-sort'); if (!b) return;
+    if (b.classList.contains('bst-sort')) { bestiaryCycleSort(); renderBestiary(); return; }   // 排序按鈕
     if (b.classList.contains('bst-close')) { closeBestiary(); return; }
     if (b.classList.contains('bst-prev') || b.classList.contains('bst-next')) { if (!b.disabled) { bst.page += b.classList.contains('bst-next') ? 1 : -1; sfx('switch'); renderBestiary(); } return; }
     if (b.dataset.key !== bst.sel) { bst.sel = b.dataset.key; sfx('switch'); renderBestiary(); }
@@ -47,10 +59,10 @@ function buildBestiary() {
 }
 function renderBestiary() {
   if (!bst.el) return;
-  const entries = bestiaryEntries(), known = e => (bst.kills[e.key] || 0) > 0;
+  const entries = bestiaryList(), known = e => (bst.kills[e.key] || 0) > 0;
   if (!entries.some(e => e.key === bst.sel && known(e))) bst.sel = (entries.find(known) || {}).key || null;   // 沒選、選的不在了：選第一隻消滅過的
   bst.page = Math.max(0, Math.min(bestiaryPageCount(null, entries.length) - 1, bst.page));
-  bst.el.innerHTML = '<div class="bst-scale">' + bestiaryHtml(null, { entries, kills: bst.kills, sel: bst.sel, page: bst.page }) + '</div>';
+  bst.el.innerHTML = '<div class="bst-scale">' + bestiaryHtml(null, { entries, kills: bst.kills, sel: bst.sel, page: bst.page, sort: bst.sort }) + '</div>';
   fitBestiary();
 }
 function fitBestiary() {   // 視窗比 1060×620 小：整個等比例縮小
@@ -64,17 +76,18 @@ function fitBestiary() {   // 視窗比 1060×620 小：整個等比例縮小
 // ---- T-Pad 裡的怪物圖鑑 App（js/tpad.js 的 TPAD_APPS 用 view 打開）----
 // 用原本的排版（js/bestiary-config.js 的 bestiaryHtml，跟怪物圖鑑編輯器同一份），整張等比例縮小放進 T-Pad 螢幕
 function renderBestiaryApp(el, keepPage = false) {
-  const entries = bestiaryEntries(), known = e => (bst.kills[e.key] || 0) > 0;
+  const entries = bestiaryList(), known = e => (bst.kills[e.key] || 0) > 0;
   if (!entries.some(e => e.key === bst.sel && known(e))) bst.sel = (entries.find(known) || {}).key || null;   // 沒選、選的不在了：選第一隻消滅過的
   if (!keepPage) { const per = Math.max(1, bestiaryLayout().grid.cols * bestiaryLayout().grid.rows), i = entries.findIndex(e => e.key === bst.sel); if (i >= 0) bst.page = Math.floor(i / per); }   // 剛打開：翻到選著的那一隻
   bst.page = Math.max(0, Math.min(bestiaryPageCount(null, entries.length) - 1, bst.page));
-  el.innerHTML = '<div class="bst-app"><div class="bst-scale">' + bestiaryHtml(null, { entries, kills: bst.kills, sel: bst.sel, page: bst.page }) + '</div></div>';
+  el.innerHTML = '<div class="bst-app"><div class="bst-scale">' + bestiaryHtml(null, { entries, kills: bst.kills, sel: bst.sel, page: bst.page, sort: bst.sort }) + '</div></div>';
   fitBestiaryApp(el);
   if (el._bstBound) return;
   el._bstBound = true;   // appbody 一直是同一個：點擊、尺寸變化只綁一次
   el.addEventListener('click', ev => {
     if (typeof tpadView === 'undefined' || tpadView !== 'bestiary') return;
-    const b = ev.target.closest('.bst-cell.known, .bst-prev, .bst-next, .bst-close'); if (!b) return;
+    const b = ev.target.closest('.bst-cell.known, .bst-prev, .bst-next, .bst-close, .bst-sort'); if (!b) return;
+    if (b.classList.contains('bst-sort')) { bestiaryCycleSort(); renderBestiaryApp(el, true); return; }   // 排序按鈕
     if (b.classList.contains('bst-close')) { showTPadHome(); return; }   // 關閉＝回 T-Pad 主畫面
     if (b.classList.contains('bst-prev') || b.classList.contains('bst-next')) { if (!b.disabled) { bst.page += b.classList.contains('bst-next') ? 1 : -1; sfx('switch'); renderBestiaryApp(el, true); } return; }
     if (b.dataset.key !== bst.sel) { bst.sel = b.dataset.key; sfx('switch'); renderBestiaryApp(el, true); }
@@ -97,7 +110,7 @@ function openBestiary() {
   bestiaryOpen = true;
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
   bst.el.classList.remove('hidden');
-  const entries = bestiaryEntries(), per = Math.max(1, bestiaryLayout().grid.cols * bestiaryLayout().grid.rows), i = entries.findIndex(e => e.key === bst.sel);
+  const entries = bestiaryList(), per = Math.max(1, bestiaryLayout().grid.cols * bestiaryLayout().grid.rows), i = entries.findIndex(e => e.key === bst.sel);
   if (i >= 0) bst.page = Math.floor(i / per);   // 打開時翻到選著的那一隻所在的那一頁
   renderBestiary();
   sfx('menu');

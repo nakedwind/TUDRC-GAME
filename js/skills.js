@@ -20,10 +20,25 @@ const SKILL_LAYOUT = [
   { id: 'b-1', group: 'b', req: 'trait-2', tag: 'B 系列－攻擊' }, { id: 'b-2', group: 'b', req: 'b-1', tag: 'B 系列－攻擊' },
   { id: 'aux-1', group: 'aux', req: 'trait-2', tag: '輔助技能（永久被動）' }, { id: 'aux-2', group: 'aux', req: 'trait-2', tag: '輔助技能（永久被動）' },
 ];
+// 嚮導（艾德林、克莉思、塔納）的技能樹比較小，免得嚮導跟哨兵一樣強：
+//   拿掉 A2、B2、核心技能 2、3 → 剩 8 格；大招直接接在核心技能 1 後面
+//   A 系列改成「輔助（回復）」、B 系列改成「增益（幫隊友加 BUFF）」；實際的技能效果在 js/guide-skills.js
+const GUIDE_SKILL_DROP = ['a-2', 'b-2', 'core-2', 'core-3'];
+const GUIDE_SKILL_CHANGE = {
+  'a-1': { tag: 'A 系列－輔助（回復）' }, 'b-1': { tag: 'B 系列－增益（幫隊友加 BUFF）' },
+  'ult': { req: 'core-1' },
+};
+const GUIDE_SKILL_LAYOUT = SKILL_LAYOUT.filter(n => !GUIDE_SKILL_DROP.includes(n.id)).map(n => ({ ...n, ...(GUIDE_SKILL_CHANGE[n.id] || {}) }));
+const isGuideTree = type => !!(typeof TYPES !== 'undefined' && TYPES[type] && TYPES[type].guide);
+const skillLayoutFor = type => isGuideTree(type) ? GUIDE_SKILL_LAYOUT : SKILL_LAYOUT;   // 這位隊員的技能樹有哪幾格
 const SKILL_TOTAL = SKILL_LAYOUT.length;
+const skillTotalFor = type => skillLayoutFor(type).length;
 const SKILL_DEFAULT_COST = { 'trait-1': 0, 'trait-2': 40, 'a-1': 40, 'a-2': 150, 'core-1': 80, 'core-2': 150, 'core-3': 200, 'ult': 250, 'b-1': 40, 'b-2': 150, 'aux-1': 80, 'aux-2': 80 };
 const SKILL_GROUP_ICON = { trait: '✦', a: '🛡️', b: '⚔️', core: '✨', ult: '🌟', aux: '◎' };
-const skillLayoutOf = id => SKILL_LAYOUT.find(n => n.id === id) || null;
+const GUIDE_GROUP_ICON = { ...SKILL_GROUP_ICON, a: '💚', b: '📯' };
+const skillGroupIcon = (type, group) => (isGuideTree(type) ? GUIDE_GROUP_ICON : SKILL_GROUP_ICON)[group];
+// type 有給：照這位隊員的技能樹（嚮導的格子少、分類名稱不同）；沒給：哨兵的完整 12 格
+const skillLayoutOf = (id, type) => (type ? skillLayoutFor(type) : SKILL_LAYOUT).find(n => n.id === id) || null;
 const SKILL_BASE = Object.fromEntries(Object.entries(TYPES).map(([k, s]) => [k, JSON.parse(JSON.stringify(s))]));   // 沒學技能、沒穿裝備時的原始數值
 const SKILL_NO_GEAR = {};   // 套完技能、還沒套裝備的數值（隊員頁顯示「裝備加了多少」用）
 if (!training.skills) training.skills = {};
@@ -51,11 +66,17 @@ function legacySkillNodes(type) {
 }
 // 某位隊員某一格的技能：{ name, desc, effect, icon, cost, mods }
 function skillNodeOf(type, id) {
-  const lay = skillLayoutOf(id); if (!lay || !TYPES[type]) return null;
+  const lay = skillLayoutOf(id, type); if (!lay || !TYPES[type]) return null;
   const saved = typeof SQUAD_SKILLS !== 'undefined' && SQUAD_SKILLS.members && SQUAD_SKILLS.members[type] && SQUAD_SKILLS.members[type][id];
-  const base = saved || legacySkillNodes(type)[id] || { name: lay.tag, desc: '', effect: '', mods: [] };
+  // 嚮導沒存過的格子：用 data/guide-skills.js 寫好的預設內容
+  const guideDefault = isGuideTree(type) && typeof GUIDE_SKILL_TEXTS !== 'undefined' && GUIDE_SKILL_TEXTS[type] && GUIDE_SKILL_TEXTS[type][id];
+  const base = saved || guideDefault || legacySkillNodes(type)[id] || { name: lay.tag, desc: '', effect: '', mods: [] };
+  // active：嚮導會自己發動的技能（群體補血、增益、大招…）的設定；編輯器存過的優先，沒有就用 data/guide-skills.js 的 GUIDE_SKILLS
+  const activeDefault = isGuideTree(type) && typeof GUIDE_SKILLS !== 'undefined' && GUIDE_SKILLS[type] && GUIDE_SKILLS[type][id];
+  const active = (saved && saved.active) || activeDefault || null;
   return {
-    name: base.name || lay.tag, desc: base.desc || '', effect: base.effect || '', note: base.note || '', icon: base.icon || '', mods: base.mods || [],
+    name: base.name || lay.tag, desc: base.desc || '', effect: base.effect || '', effect2: base.effect2 || '', note: base.note || '', icon: base.icon || '', mods: base.mods || [],
+    ...(active ? { active: JSON.parse(JSON.stringify(active)) } : {}),
     cost: id === 'trait-1' ? 0 : base.cost != null ? Number(base.cost) || 0 : SKILL_DEFAULT_COST[id] || 0,
   };
 }
@@ -64,12 +85,12 @@ const skillTreeOpen = type => !!TYPES[type];
 const hasSkill = (type, id) => id === 'trait-1' || (training.skills[type] || []).includes(id);
 function skillStateOf(type, id) {
   if (hasSkill(type, id)) return 'owned';
-  const lay = skillLayoutOf(id); if (!lay) return 'locked';
+  const lay = skillLayoutOf(id, type); if (!lay) return 'locked';
   if (lay.req && !hasSkill(type, lay.req)) return 'locked';   // 前面那一格還沒學
   if (lay.reqAny && !lay.reqAny.some(id => hasSkill(type, id))) return 'locked';   // 斜線的那幾格一個都還沒學
   return 'open';
 }
-const skillLearnedCount = type => SKILL_LAYOUT.filter(n => hasSkill(type, n.id)).length;
+const skillLearnedCount = type => skillLayoutFor(type).filter(n => hasSkill(type, n.id)).length;
 
 // ---- 舊存檔（舊的 10 格技能樹）：學過的全部退回碎片，改用新的技能樹 ----
 (() => {
@@ -84,6 +105,20 @@ const skillLearnedCount = type => SKILL_LAYOUT.filter(n => hasSkill(type, n.id))
     training.crystals += refund;
     if (typeof saveTraining === 'function') saveTraining();
     setTimeout(() => { if (typeof systemNotice === 'function') systemNotice('技能樹改版：舊的技能已重置，退回異質碎片 ◆ ' + refund); }, 1500);
+  }
+})();
+// ---- 嚮導技能樹改小（拿掉 A2、B2、核心 2、3）：嚮導的技能全部重置、退回碎片（大招的前置條件也變了，整個重學比較乾淨）----
+(() => {
+  let refund = 0;
+  for (const [type, list] of Object.entries(training.skills || {})) {
+    if (!isGuideTree(type) || !Array.isArray(list) || !list.some(id => GUIDE_SKILL_DROP.includes(id))) continue;
+    refund += list.reduce((sum, id) => sum + (GUIDE_SKILL_DROP.includes(id) ? SKILL_DEFAULT_COST[id] || 0 : skillCost(type, id)), 0);
+    training.skills[type] = [];
+  }
+  if (refund > 0) {
+    training.crystals += refund;
+    if (typeof saveTraining === 'function') saveTraining();
+    setTimeout(() => { if (typeof systemNotice === 'function') systemNotice('嚮導技能樹改版：嚮導的技能已重置，退回異質碎片 ◆ ' + refund); }, 1800);
   }
 })();
 
@@ -106,7 +141,7 @@ function applySkills() {
     const spec = TYPES[type]; if (!spec) continue;
     for (const k of Object.keys(spec)) if (!(k in base)) delete spec[k];   // 技能、裝備加出來的數值（例如 hpRegen）拿掉了要跟著消失
     for (const [k, v] of Object.entries(JSON.parse(JSON.stringify(base)))) spec[k] = v;
-    for (const n of SKILL_LAYOUT) if (hasSkill(type, n.id)) applyModList(spec, (skillNodeOf(type, n.id) || {}).mods);
+    for (const n of skillLayoutFor(type)) if (hasSkill(type, n.id)) applyModList(spec, (skillNodeOf(type, n.id) || {}).mods);
     const noGear = JSON.parse(JSON.stringify(spec)); finishSpec(noGear); SKILL_NO_GEAR[type] = noGear;
     if (typeof squadGearMods === 'function') applyModList(spec, squadGearMods(type));
     finishSpec(spec);

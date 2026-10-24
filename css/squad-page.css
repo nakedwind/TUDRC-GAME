@@ -64,8 +64,6 @@
 .sq-progress { position: absolute; left: 14px; top: 10px; font-size: 11px; color: #9fb1c2; }
 .sq-crystals { position: absolute; left: 14px; top: 26px; display: flex; align-items: center; gap: 3px; font-size: 12px; font-weight: 700; color: #d9c6ff; }
 .sq-crystals img, .sq-cost img { width: 16px; }
-.sq-label { position: absolute; font-size: 11px; font-weight: 700; color: #8fe08f; white-space: nowrap; }
-.sq-label.a { left: 150px; top: 14px; } .sq-label.b { left: 150px; top: 252px; }
 .sq-switch-label { position: absolute; right: 60px; top: 21px; font-size: 11px; font-weight: 700; color: #dfe7ef; white-space: nowrap; }
 .sq-switch { position: absolute; right: 12px; top: 10px; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(130,180,255,.55); border-radius: 10px; background: linear-gradient(160deg, #2b3c55, #1a2433); cursor: pointer; }
 .sq-switch img { width: 28px; }
@@ -87,10 +85,19 @@
 .sq-node[data-skill-pick="b-1"] { left: 170px; top: 192px; } .sq-node[data-skill-pick="b-2"] { left: 240px; top: 192px; }
 .sq-node.g-aux { border-radius: 50%; }
 .sq-node[data-skill-pick="aux-1"] { left: 404px; top: 204px; } .sq-node[data-skill-pick="aux-2"] { left: 468px; top: 204px; }
+/* 嚮導的技能樹（8 格，js/skills.js 的 GUIDE_SKILL_LAYOUT）：沒有 A2、B2、核心 2、3，整排往左收；兩格輔助技能（圓圈）跟哨兵一樣放在右下角 */
+.sq-tree.guide .sq-node[data-skill-pick="a-1"] { left: 180px; top: 44px; } .sq-tree.guide .sq-node[data-skill-pick="b-1"] { left: 180px; top: 192px; }
+.sq-tree.guide .sq-node[data-skill-pick="core-1"] { left: 268px; top: 118px; }
+.sq-tree.guide .sq-node[data-skill-pick="ult"] { left: 360px; top: 108px; }
 .sq-reset { position: absolute; left: 12px; top: 250px; padding: 3px 8px; border: 1px solid rgba(255,140,140,.4); border-radius: 6px; background: rgba(80,30,30,.5); color: #ffb3b3; font-size: 10px; cursor: pointer; }
 .sq-tip { position: absolute; z-index: 5; max-width: 240px; padding: 8px 10px; border: 1px solid rgba(255,255,255,.14); border-radius: 6px; background: rgba(28,32,40,.97); box-shadow: 0 6px 16px rgba(0,0,0,.45); pointer-events: none; }
 .sq-tip b { display: block; font-size: 12px; color: #dfe7ef; margin-bottom: 3px; text-align: center; }
 .sq-tip p { margin: 0; font-size: 11px; line-height: 1.5; color: #c4ced8; }
+/* 數值格的算式（js/squad-page.js 的 squadStatTipHtml） */
+.sq-tip .sq-formula { margin-bottom: 4px; font-size: 12px; font-weight: 700; color: #fff; text-align: center; white-space: nowrap; }
+.sq-tip .sq-tip-add { color: #8fe08f; font-weight: 700; }
+.sq-tip .sq-tip-note { margin-top: 4px; font-size: 10px; color: #8a99a8; }
+.sq-stat { cursor: help; }
 
 /* 技能說明 */
 .sq-info-icon { position: absolute; left: 16px; top: 16px; width: 60px; height: 60px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.22); border-radius: 10px; background: #1c232d; }
@@ -98,7 +105,9 @@
 .sq-info-name { position: absolute; left: 92px; top: 18px; font-size: 20px; color: #fff; white-space: nowrap; }
 .sq-info-tag { position: absolute; left: 92px; top: 50px; font-size: 11px; color: #9fb1c2; }
 .sq-info-desc { position: absolute; left: 18px; top: 90px; width: 340px; margin: 0; font-size: 13px; line-height: 1.55; color: #dfe7ef; }
-.sq-info-effect { position: absolute; left: 18px; top: 146px; width: 340px; margin: 0; font-size: 13px; line-height: 1.5; color: #9fd8ff; font-weight: 700; }
+.sq-info-effect { position: absolute; left: 18px; top: 146px; width: 340px; margin: 0; font-size: 13px; line-height: 1.5; color: #8fe08f; font-weight: 700; }
+.sq-info-effect2 { top: 168px; }   /* 技能效果 2（編輯器新增的第二段字）：顏色同上；位置、大小、字級每格技能各自調 */
+.sq-info-effect2:empty { display: none; }
 .sq-info-note { position: absolute; left: 18px; top: 168px; width: 340px; margin: 0; font-size: 12px; line-height: 1.5; color: #c3ced9; }   /* 補充說明（技能效果下面） */
 .sq-learn { position: absolute; right: 16px; top: 116px; width: 150px; padding: 8px; display: grid; gap: 6px; justify-items: center; border-radius: 10px; }   /* 不要黑底 */
 .sq-learn.owned { top: auto; right: 0; bottom: 0; width: auto; padding: 12px 16px 16px 12px; justify-items: end; border-radius: 10px 0 12px 0; }   /* 已學會：按鈕靠右下 */

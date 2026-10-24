@@ -178,7 +178,7 @@ function renderQuickSupplies() {
   const key = JSON.stringify(state); if (key === quickSupplyKey) return; quickSupplyKey = key;
   box.innerHTML = state.map(([kind, id, count, full]) => {
     const k = SUPPLY_KIND[kind], item = supplyById(id);
-    const tip = !count ? `沒有${k.name}` : full ? `${k.stat} 已滿` : `${k.key}｜${item.name} ${supplyEffect(item)}`;
+    const tip = !count ? `沒有${k.name}` : `${k.key}｜${item.name} ${supplyEffect(item)}`;   // 滿了也照樣顯示補多少
     return `<button class="quick-supply ${kind}" type="button" data-quick-supply="${kind}" ${!count || full ? 'disabled' : ''} title="${tip}" aria-label="${tip}">
       <span class="qs-icon">${item ? `<img src="${item.image}" alt="">` : k.icon}</span><span class="qs-text"><small>${k.name}</small><b>×${count}</b></span><kbd>${k.key}</kbd></button>`;
   }).join('');

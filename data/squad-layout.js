@@ -143,8 +143,7 @@ const SQUAD_LAYOUT = {
       "y": 95
     },
     "text.skillDesc": {
-      "x": 160,
-      "y": -43
+      "y": 20
     },
     "text.skillEffect": {
       "x": 160,
@@ -157,11 +156,656 @@ const SQUAD_LAYOUT = {
       "y": -77,
       "font": 12
     },
-    "text.labelA": {
-      "x": 10
+    "text.skillEffect@colyn/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
     },
-    "text.labelB": {
-      "x": 10
+    "text.skillEffect@colyn/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/a-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/core-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/core-3": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@red/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@avaren/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@theonie/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@amber/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@luther/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@eldrin/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@chris/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@taana/trait-1": {
+      "x": 120,
+      "y": -125,
+      "w": 340,
+      "h": 20,
+      "font": 15
+    },
+    "text.skillEffect@colyn/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/b-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@colyn/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/a-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/b-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/core-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/core-3": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@red/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/b-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/core-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/core-3": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@avaren/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/core-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/a-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/b-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/core-3": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@theonie/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/core-3": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/a-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/b-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/core-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@amber/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/b-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/a-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/core-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/core-3": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@luther/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@eldrin/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@eldrin/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@eldrin/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@eldrin/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@eldrin/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@eldrin/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@eldrin/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@chris/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@chris/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@chris/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@chris/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@chris/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@taana/trait-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@taana/a-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@taana/b-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@taana/core-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@taana/ult": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@taana/aux-1": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
+    },
+    "text.skillEffect@taana/aux-2": {
+      "y": -60,
+      "w": 340,
+      "h": 20,
+      "font": 15,
+      "x": 0
     }
   },
   "texts": {
@@ -175,7 +819,12 @@ const SQUAD_LAYOUT = {
     "intro:eldrin": "溫柔又愛操心的嚮導。\n持續疏導附近隊友，適合隨隊支援。",
     "intro:chris": "懶散又親近人的戰鬥嚮導。\n能隨隊疏導，總會留意路德。",
     "intro:tino": "感官敏銳的年輕哨兵。能察覺黑暗中的怪物，防禦與生命偏低。",
-    "text.labelA": "生存（防禦、血量、迴避）",
-    "text.labelB": "攻擊（物理攻擊、射程、攻速、命中）"
+    "skillTag:a-2": "生存技能 Lv2",
+    "skillTag:a-1": "生存技能 Lv1",
+    "skillTag:b-1": "攻擊技能 Lv1",
+    "skillTag:b-2": "攻擊技能 Lv2",
+    "skillTag:core-1": "核心技能 Lv1",
+    "skillTag:core-2": "核心技能 Lv2",
+    "skillTag:core-3": "核心技能 Lv3"
   }
 };

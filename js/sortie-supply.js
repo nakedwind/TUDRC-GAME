@@ -45,8 +45,8 @@ function sumBuffs(list) {
   return out;
 }
 
-// ---- 戰鬥裡讀效果（沒帶補給＝0）----
-function sortieBuff(t, key) { return (t && t.buff && t.buff[key]) || 0; }
+// ---- 戰鬥裡讀效果（沒帶補給＝0）；再加上嚮導技能給的暫時增益（js/guide-skills.js：atk、def、spd）----
+function sortieBuff(t, key) { return ((t && t.buff && t.buff[key]) || 0) + (typeof guideBuff === 'function' ? guideBuff(t, key) : 0); }
 
 // ---- 出勤：從基地進戰鬥地圖時吃掉補給；回基地清掉效果（game.js 的 newGame 呼叫，要在 spawnSentries 之前）----
 function onSortieNewGame() {

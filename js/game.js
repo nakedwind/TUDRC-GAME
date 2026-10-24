@@ -1918,6 +1918,8 @@ function update(dt) {
   // 哨兵攻擊
   for (const t of G.towers) {
     const spec = TYPES[t.type];
+    if (typeof tickSkillBuffs === 'function') tickSkillBuffs(t, dt);   // 嚮導技能給的增益倒數（js/guide-skills.js）
+    if (t.gsCast && (t.hp <= 0 || t.grabbed || t.grabFall || t.eatenBy || t.sleepT > 0 || t.dazeT > 0 || t.frozenT > 0)) cancelGuideCast(t);   // 嚮導詠唱中被打斷：技能取消
     if (t.hp <= 0 || t.grabbed || t.grabFall) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 倒下、被抓著（js/grab.js）：不攻擊
     if (t.gunT > 0) t.gunT -= dt;   // 持槍攻擊圖計時
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0) {
@@ -1930,6 +1932,7 @@ function update(dt) {
     if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
     if (typeof campBedResting === 'function' && campBedResting(t)) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 躺在行軍床上休息：不攻擊、不疏導（js/camp-beds.js）
     if (spec.guide) updateGuideSP(t, dt);
+    if (spec.guide && typeof updateGuideSkills === 'function') updateGuideSkills(t, dt);   // 嚮導技能樹學會的技能：自動發動（js/guide-skills.js）
     if (t.soothingT > 0) {   // 疏導施法計時；期間嚮導和被疏導的隊員身邊飄出嚮導顏色的小光點（js/attack-fx.js）
       t.soothingT = Math.max(0, t.soothingT - dt);
       if (typeof spawnSootheMotes === 'function' && SOOTHE_MOTE_COLORS[t.type]) spawnSootheMotes([t, ...(t.sootheTargets || []).filter(o => o.hp > 0)], SOOTHE_MOTE_COLORS[t.type], dt, t);
@@ -1941,7 +1944,7 @@ function update(dt) {
     if (!t.berserk && !TYPES[t.type].guide && !spec.noRetreat && t.taint > 85) {   // 瀕臨暴走：自動退守營地（觸發一次）；noRetreat 的角色（路德）會留在前線
       if (!t.resting) { t.resting = true; sendSentryRest(t); }
     } else if (t.taint <= 80) t.resting = false;
-    if (spec.aura && !t.berserk) {   // 嚮導隨身疏導：改成「冷卻一到就一次清一批」，不再每幀連續疏導
+    if (spec.aura && !t.berserk && !t.gsCast) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
       t.auraCd = Math.max(0, (t.auraCd || 0) - dt);
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;

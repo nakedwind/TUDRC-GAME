@@ -2659,6 +2659,10 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .bst-stars i { font-style: normal; line-height: 1; }
 .bst-stars i.on { color: #ffd479; text-shadow: 0 0 8px rgba(255,212,121,.45); }
 .bst-stars i.off { color: rgba(255,255,255,.16); }
+/* 排序按鈕（照星級／名字／消滅次數，點一下換下一種；js/bestiary.js 的 bestiaryCycleSort） */
+.bst-sort { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 12px; border: 1px solid rgba(255,212,121,.38); border-radius: 999px; background: rgba(7,12,18,.6); color: #ffe3a1; font-family: inherit; font-weight: 800; white-space: nowrap; cursor: pointer; transition: border-color .12s, background .12s; }
+.bst-sort::before { content: '⇅'; color: #ffd479; }
+.bst-sort:hover { border-color: #ffd479; background: rgba(60,48,24,.6); }
 .bst-kills { border: 1px solid rgba(143,211,255,.3); background: rgba(20,30,42,.7); color: #cfe6ff; font-weight: 700; }
 .bst-kills b { color: #8fd3ff; margin: 0 2px; }
 /* 怪物圖片：以框的中心為準，先整張放進框裡，再照設定放大縮小、移動 */
@@ -2667,10 +2671,11 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .bst-art, .bst-cell img { position: absolute; left: 0; top: 0; width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; transform: translate(var(--x, 0px), var(--y, 0px)) scale(var(--s, 1)); pointer-events: none; }
 .bst-art { filter: drop-shadow(0 10px 14px rgba(0,0,0,.45)); }
 .bst-empty { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; padding: 0 16px; color: #8c9aa8; font-size: 14px; line-height: 1.8; text-align: center; white-space: pre-line; }
-/* 能力：第 1 條在最下面，往上排 */
-.bst-abilities { display: flex; flex-direction: column-reverse; justify-content: flex-start; }
+/* 能力：第 1 條在最上面，往下排（1～4 的位置固定，沒寫的留空） */
+.bst-abilities { display: flex; flex-direction: column; justify-content: flex-start; }
 .bst-ability { flex: none; display: flex; align-items: center; padding: 0 16px; overflow: hidden; border: 1px solid rgba(255,255,255,.12); border-radius: 999px; background: rgba(16,22,31,.78); color: #e8eef3; line-height: 1.3; white-space: nowrap; text-overflow: ellipsis; }
 .bst-ability b { color: #ffd479; font-weight: 800; }
+.bst-ability.empty { visibility: hidden; }   /* 沒寫的能力：位置留著（1～4 固定），只是看不到 */
 /* 縮圖：消滅過的＝怪物的一部分；還沒消滅過＝黑底問號 */
 .bst-grid { display: grid; align-content: start; justify-content: center; }
 .bst-cell { position: relative; display: grid; place-items: center; box-sizing: border-box; overflow: hidden; padding: 0; border-radius: 12px; font: 900 26px "Microsoft JhengHei", sans-serif; }

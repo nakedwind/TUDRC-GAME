@@ -201,9 +201,9 @@ function squadCard(actor, safe) {
   const learned = typeof training !== 'undefined' && training.skills ? (training.skills[actor.type] || []).length : 0;
   const trainingAction = typeof SKILL_TREES !== 'undefined' && !SKILL_TREES[actor.type]
     ? '<button class="squad-upgrade squad-skill-btn" disabled>技能樹<small>還沒有技能樹（data/skills.js）</small></button>'   // 新加入的隊員還沒設計技能樹
-    : '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / ' + (typeof SKILL_TOTAL !== 'undefined' ? SKILL_TOTAL : 10) + (safe ? '' : '・回基地才能學') + '</small></button>';
+    : '<button class="squad-upgrade squad-skill-btn" data-skill-tree="' + actor.type + '">技能樹<small>已學 ' + learned + ' / ' + (typeof skillTotalFor === 'function' ? skillTotalFor(actor.type) : 10) + (safe ? '' : '・回基地才能學') + '</small></button>';
   const loadBar = spec.guide
-    ? '<div><span>SP <b>' + Math.floor(guideSPFor(actor.type)) + ' / ' + guideSPMax() + '</b></span><i class="sp-bar"><u style="width:' + (guideSPFor(actor.type) / guideSPMax() * 100) + '%"></u></i></div>'
+    ? '<div><span>SP <b>' + Math.floor(guideSPFor(actor.type)) + ' / ' + guideSPMax(actor.type) + '</b></span><i class="sp-bar"><u style="width:' + (guideSPFor(actor.type) / guideSPMax(actor.type) * 100) + '%"></u></i></div>'
     : '<div><span>負荷 <b>' + taint + ' / 100</b></span><i class="taint-bar"><u style="width:' + taint + '%"></u></i></div>';
   return '<article class="squad-card squad-card-combat" style="--member-color:' + spec.color + '">' +
     '<span class="squad-portrait"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '"></span>' +   // 頭像框：放大顯示上半身（半身像）
@@ -305,7 +305,7 @@ function openFieldCommandMenu(type, avatar) {
     (unavailable ? '<p>' + (member.hp <= 0 ? '目前無法行動' : '暴走中，無法接受指令') + '</p>' :
     '<button type="button" class="field-command-option" data-destination="base">返回基地巡邏</button>' +
     '<button type="button" class="field-command-option' + (escorting ? ' active' : '') + '" data-destination="escort">跟隨護衛部隊長' + (escorting ? '<small>護衛中</small>' : '') + '</button>' +
-    (spec.guide && !guideSPPractice() ? '<button type="button" class="field-command-option" data-guide-drink' + ((supplyInventory.get('almond-water') || 0) <= 0 || guideSP(member) >= guideSPMax() || member.soothingT > 0 || member.sleepT > 0 || member.frozenT > 0 || member.eatenBy ? ' disabled' : '') + '>喝杏仁水<small>背包 ' + (supplyInventory.get('almond-water') || 0) + ' 瓶・恢復 ' + supplyById('almond-water').restore + ' SP</small></button>' : ''));
+    (spec.guide && !guideSPPractice() ? '<button type="button" class="field-command-option" data-guide-drink' + ((supplyInventory.get('almond-water') || 0) <= 0 || guideSP(member) >= guideSPMax(member.type) || member.soothingT > 0 || member.sleepT > 0 || member.frozenT > 0 || member.eatenBy ? ' disabled' : '') + '>喝杏仁水<small>背包 ' + (supplyInventory.get('almond-water') || 0) + ' 瓶・恢復 ' + supplyById('almond-water').restore + ' SP</small></button>' : ''));
   fieldCommandMenu.querySelector('.field-command-close').addEventListener('click', () => { if (typeof sfx === 'function') sfx('switch'); closeFieldCommandMenu(); });
   fieldCommandMenu.querySelectorAll('[data-destination]').forEach(button => button.addEventListener('click', () => commandFieldMember(type, button.dataset.destination)));
   fieldCommandMenu.querySelector('[data-guide-drink]')?.addEventListener('click', () => { drinkGuideAlmond(member, true); closeFieldCommandMenu(); });
@@ -338,7 +338,7 @@ function renderFieldSquadHud() {
       const taint = Math.max(0, Math.min(100, Math.round(member.taint || 0)));
       const sp = spec.guide ? Math.floor(guideSP(member)) : 0;
       const lowSP = spec.guide && sp < SANITY.swayBelow;
-      const loadWidth = spec.guide ? sp / guideSPMax() * 100 : taint;
+      const loadWidth = spec.guide ? sp / guideSPMax(member.type) * 100 : taint;
       const sootheAction = '';   // 正式遊戲停用隊友欄的手動疏導按鈕（靠近哨兵仍可疏導）
       const stateLabel = hp <= 0 ? ''   // 倒下時不顯示汙染標籤，改由下方的「重傷」橫條說明
         : member.berserk
@@ -364,7 +364,7 @@ function renderFieldSquadHud() {
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + stateLabel + '</b>' +
         // 嚮導顯示 SP；哨兵顯示精神負荷。
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +
-        '<div><i class="' + (spec.guide ? 'field-sp' : 'field-load') + '" aria-label="' + (spec.guide ? 'SP' : '精神負荷') + '"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? sp + '/' + guideSPMax() : taint + '/100') + '</span></div>' +
+        '<div><i class="' + (spec.guide ? 'field-sp' : 'field-load') + '" aria-label="' + (spec.guide ? 'SP' : '精神負荷') + '"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? sp + '/' + guideSPMax(member.type) : taint + '/100') + '</span></div>' +
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
         '</article>';

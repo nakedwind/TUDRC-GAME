@@ -16,6 +16,7 @@ const STAT_MOD_NAMES = {
   sense: { name: '感知範圍', unit: ' 格' }, 'burn.duration': { name: '燃燒時間', unit: ' 秒' }, 'burn.damage': { name: '燃燒每秒傷害' },
   'aura.rate': { name: '疏導量', unit: '/秒' }, 'aura.r': { name: '疏導光環範圍', unit: ' 格' }, 'aura.heal': { name: '每次疏導回復' },
   ultDmgBonus: { name: '大招傷害', pct: true }, ultCdCut: { name: '大招冷卻減少', pct: true },
+  spMax: { name: '嚮導 SP 上限' }, spCostCut: { name: '疏導少花的 SP', pct: true },   // 嚮導專用（js/guide-sp.js）
 };
 // mods → 顯示用的文字（例：攻擊力 +10%、射程 +0.5 格）
 function modsText(mods) {
@@ -26,6 +27,25 @@ function modsText(mods) {
     if (info.pct) { const p = Math.round(v * 100); return info.name + ' ' + (p >= 0 ? '+' : '') + p + '%'; }
     return info.name + ' ' + (v >= 0 ? '+' : '') + (Math.round(v * 100) / 100) + (info.unit || '');
   }).join('、');
+}
+// 嚮導會自己發動的技能（技能內容的 active，js/guide-skills.js 執行）→ 顯示用的文字
+//   effect：技能效果那一行（例：全隊 HP +15）　note：補充說明（什麼時候發動、詠唱、SP、冷卻）
+//   技能編輯器的「技能效果」「補充說明」空白時，就顯示這裡產生的字（改數字，文字跟著變）
+const GUIDE_BUFF_LABEL = { atk: '攻擊力', def: '防禦率', spd: '攻擊速度' };
+function guideActiveTexts(a) {
+  if (!a) return { effect: '', note: '' };
+  const who = a.one ? (a.soothe ? '負荷最高的隊員' : 'HP 最低的隊員') : '全隊', fx = [];
+  if (a.heal) fx.push(who + ' HP +' + a.heal);
+  if (a.soothe) fx.push((a.heal ? '' : who) + '負荷 −' + a.soothe);
+  if (a.wake) fx.push('暴走的隊員立刻清醒');
+  const buffs = Object.entries(a.buff || {}).filter(([, v]) => v > 0);
+  if (buffs.length) fx.push(who + buffs.map(([k, v]) => (GUIDE_BUFF_LABEL[k] || k) + ' +' + Math.round(v * 100) + '%').join('、') + (a.time ? '，持續 ' + a.time + ' 秒' : ''));
+  const when = a.when === 'hpBelow' ? '有隊友 HP 低於 ' + Math.round((a.at || 0) * 100) + '% 時自動發動'
+    : a.when === 'taintAbove' ? '有隊友負荷 ' + (a.at || 0) + ' 以上' + (a.orBerserk ? '或暴走' : '') + '時自動發動'
+    : a.when === 'combat' ? '戰鬥中每 ' + (a.cd || 0) + ' 秒自動發動一次' : '自動發動';
+  const parts = [when, a.cast > 0 ? '詠唱 ' + a.cast + ' 秒' : '不用詠唱', a.sp > 0 ? '花 ' + a.sp + ' SP' : '不花 SP'];
+  if (a.when !== 'combat' && a.cd) parts.push('冷卻 ' + a.cd + ' 秒');
+  return { effect: fx.join('，'), note: parts.join('；') + '。' };
 }
 // 沒有圖片的裝備：用 emoji 畫成小圖（商店、背包都要 <img>）
 function squadGearImage(g) {

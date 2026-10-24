@@ -70,9 +70,9 @@ function renderQuickSupplies() {
     if (!it) return `<button class="quick-supply quick-empty" type="button" data-qs-slot="${k}" data-tip="把背包的道具拖到這裡" data-tip-key="qs-${k}" aria-label="${K} 空格">
       <span class="qs-icon">＋</span><span class="qs-text"><small>空格</small><b>　</b></span><kbd>${K}</kbd></button>`;
     const kind = it.use === 'hp' || it.use === 'sp' ? it.use : 'item', off = !count || full;
-    const tip = !count ? `${K}｜沒有${it.name}了` : full ? `${K}｜${SUPPLY_KIND[it.use].stat} 已滿` : `${K}｜${it.name}` + (SUPPLY_KIND[it.use] ? ' ' + supplyEffect(it) : '');
-    // 懸停提示（js/hover-tip.js）：上方框＝效果（SP+30；用完、已滿時顯示狀態），下方＝名稱
-    const effect = !count ? '用完了' : full ? `${SUPPLY_KIND[it.use].stat} 已滿` : SUPPLY_KIND[it.use] ? `${SUPPLY_KIND[it.use].stat}+${it.restore}` : (it.effect || '');
+    const tip = !count ? `${K}｜沒有${it.name}了` : `${K}｜${it.name}` + (SUPPLY_KIND[it.use] ? ' ' + supplyEffect(it) : '');
+    // 懸停提示（js/hover-tip.js）：上方框＝效果（SP+30；HP／SP 滿了也照樣顯示，按下去才提示已滿、播不能用的音效；用完了才顯示「用完了」），下方＝名稱
+    const effect = !count ? '用完了' : SUPPLY_KIND[it.use] ? `${SUPPLY_KIND[it.use].stat}+${it.restore}` : (it.effect || '');
     return `<button class="quick-supply ${kind}${off ? ' off' : ''}" type="button" draggable="true" data-qs-slot="${k}" aria-disabled="${off}" data-tip="${effect}" data-tip-name="${it.name}" data-tip-key="qs-${k}" aria-label="${tip}">
       <span class="qs-icon"><img src="${it.image}" alt=""></span><span class="qs-text"><small>${it.name}</small><b>×${count}</b></span><kbd>${K}</kbd></button>`;
   }).join('');

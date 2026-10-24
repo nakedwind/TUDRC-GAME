@@ -5,12 +5,14 @@ try {
   const saved = JSON.parse(localStorage.getItem(GUIDE_SP_STORE) || '{}');
   for (const [id, value] of Object.entries(saved || {})) if (TYPES[id]?.guide && Number.isFinite(value)) guideSPRecords[id] = value;
 } catch (_) {}
-const guideSPMax = () => START.guideMax;
-const guideSPCost = () => SOOTHE.cost;
+// SP 上限：大家一樣是 START.guideMax，再加上技能樹的「永久增加 SP」（spMax）；沒給 type＝基本上限
+const guideSPMax = type => START.guideMax + ((type && TYPES[type] && TYPES[type].spMax) || 0);
+// 一次疏導花多少 SP：技能「疏導少花 SP」（spCostCut：0.2＝少 20%）
+const guideSPCost = t => SOOTHE.cost * (1 - Math.min(.9, (t && TYPES[t.type] && TYPES[t.type].spCostCut) || 0));
 const guideSPPractice = () => typeof practiceOn === 'function' && practiceOn();
 function initGuideSP(t) {
   if (!TYPES[t.type]?.guide) return;
-  t.maxsp = guideSPMax();
+  t.maxsp = guideSPMax(t.type);
   if (!Number.isFinite(t.sp)) t.sp = guideSPRecords[t.type] ?? t.maxsp;
   t.sp = Math.max(0, Math.min(t.maxsp, t.sp));
 }
@@ -18,7 +20,7 @@ function guideSP(t) { initGuideSP(t); return t.sp; }
 function guideSPFor(id) {
   const live = typeof G !== 'undefined' && G?.towers?.find(t => t.type === id);
   if (live) return guideSP(live);
-  return Math.max(0, Math.min(guideSPMax(), guideSPRecords[id] ?? guideSPMax()));
+  return Math.max(0, Math.min(guideSPMax(id), guideSPRecords[id] ?? guideSPMax(id)));
 }
 function saveGuideSP(t) {
   if (t && TYPES[t.type]?.guide) guideSPRecords[t.type] = guideSP(t);
@@ -39,10 +41,11 @@ function warnGuideSP(t) {
   t.say = { text: lines[Math.floor(Math.random() * lines.length)], life: 4 };   // 泡泡用這位嚮導自己的顏色（js/render.js 的 BUBBLE_COLORS）
   t.sayWait = 8;
 }
-function spendGuideSP(t) {
+// amount：花多少 SP（沒給＝一次疏導的量；嚮導技能會給自己的量，js/guide-skills.js）
+function spendGuideSP(t, amount = guideSPCost(t)) {
   if (guideSPPractice()) return true;
-  if (guideSP(t) < guideSPCost()) return false;
-  t.sp -= guideSPCost(); saveGuideSP(t); warnGuideSP(t);
+  if (guideSP(t) < amount) return false;
+  t.sp -= amount; saveGuideSP(t); warnGuideSP(t);
   return true;
 }
 function drinkGuideAlmond(t, fromInventory = false) {

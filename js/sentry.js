@@ -794,7 +794,7 @@ function updateWanderer(npc, dt) {
 const sentryMenu = document.getElementById('sentryMenu');
 // 怪力加成：汙染值越高攻擊力越高。rageDmg＝汙染 100 時「額外」增加的倍率（1 → 2 倍、0.5 → 1.5 倍）
 function sentryDamageMul(t) {
-  const spec = TYPES[t.type], food = 1 + ((t.buff && t.buff.atk) || 0);   // 出勤補給的攻擊加成
+  const spec = TYPES[t.type], food = 1 + sortieBuff(t, 'atk');   // 出勤補給＋嚮導技能的攻擊加成
   if (!spec || !spec.rageDmg) return food;
   return food * (1 + spec.rageDmg * Math.max(0, Math.min(100, t.taint || 0)) / 100);
 }
@@ -802,7 +802,7 @@ function sentryDamageMul(t) {
 function sentryDefense(t) {
   if (t.grabbed || t.grabFall) return 1;   // 被抓起來（js/grab.js）：打不到
   const spec = TYPES[t.type];
-  return Math.max(0, Math.min(.75, ((spec && spec.defense) || 0) + ((t.buff && t.buff.def) || 0)));
+  return Math.max(0, Math.min(.75, ((spec && spec.defense) || 0) + sortieBuff(t, 'def')));   // 出勤補給＋嚮導技能的防禦加成
 }
 let menuSentry = null;    // 目前開著選單的哨兵
 let assigning = null;     // 「指派位置巡邏」等待點地圖的哨兵

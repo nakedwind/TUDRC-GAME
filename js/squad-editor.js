@@ -24,9 +24,13 @@ let state = (() => {   // { layout: { elements, texts }, skills: { members }, ge
 let selKey = null, play = false, page = 'skills', leftTab = 'parts', parts = [], members = [], nodes = [], skillMember = null, skillNode = null, gearSel = null;
 const info = {};   // 遊戲畫面量到的：info[key] = { visible, count, values, text, skill }
 const ALIGN_NAMES = { left: '靠左', center: '置中', right: '靠右' };
+// 「複製當前數值」記下來的（下面的 copyLayout／pasteLayout）；記在瀏覽器裡，重新整理也還在
+const CLIP_STORE = 'tudrc_squad_editor_layout_clip';
+let layoutClip = null;   // { from：從哪裡複製的（名稱）, v：{ x, y, w, h, size, font, align } }
+try { layoutClip = JSON.parse(localStorage.getItem(CLIP_STORE) || 'null'); } catch (_) {}
 function setStatus(msg, err = false) { $q('status').textContent = msg; $q('status').classList.toggle('err', !!err); }
 function saveDraft() { try { localStorage.setItem(SQ_DRAFT_KEY, JSON.stringify(state)); } catch (_) {} }
-const partOf = key => parts.find(p => p.key === key) || { key, label: key, group: '', kind: /^img\.|Img:|Icon:/.test(key) ? 'img' : /^(roster|node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '' };
+const partOf = key => parts.find(p => p.key === key) || { key, label: key, group: '', kind: /^img\.|Img:|Icon:/.test(key) ? 'img' : /^(roster|g?node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '' };
 const labelOf = key => partOf(key).label;
 // @隊員/技能格＝只套用在那一格（例如技能效果的字）：還沒調過就照大家共用的那一份
 const baseKeyOf = key => key.includes('@') ? key.split('@')[0] : null;
@@ -136,23 +140,58 @@ function currentNode() {   // 編輯中的那一格：存過的優先，沒有�
   const inf = Object.values(info).find(i => i.skill && i.skill.member === skillMember && i.skill.id === skillNode);
   return inf ? inf.skill.node : null;
 }
+const memberOf = id => members.find(m => m.id === id) || {};
+const memberNodes = id => memberOf(id).nodes || nodes;   // 這位隊員的技能樹有哪幾格（嚮導只有 8 格）
+const nodeKey = id => (memberOf(skillMember).guide ? 'gnode:' : 'node:') + id;   // 嚮導的技能格在畫面上是 gnode:
 function skillsHtml() {
   if (!members.length) return '<p class="empty">等遊戲畫面載入…</p>';
   if (!skillMember) skillMember = members[0].id;
+  if (skillNode && !memberNodes(skillMember).some(n => n.id === skillNode)) skillNode = null;   // 換到嚮導：拿掉的格子不能選
   let h = '<label class="field">隊員<select id="skMember">' + members.map(m => '<option value="' + m.id + '"' + (m.id === skillMember ? ' selected' : '') + '>' + esc(m.name) + (state.skills.members[m.id] ? '（改過）' : '') + '</option>').join('') + '</select></label>' +
-    '<div class="nodes">' + nodes.map(n => '<button type="button" data-node="' + n.id + '" class="' + (n.id === skillNode ? 'on ' : '') + (savedNode(skillMember, n.id) ? 'saved' : '') + '">' + esc(n.tag) + '<br><small>' + n.id + '</small></button>').join('') + '</div>';
+    '<div class="nodes">' + memberNodes(skillMember).map(n => '<button type="button" data-node="' + n.id + '" class="' + (n.id === skillNode ? 'on ' : '') + (savedNode(skillMember, n.id) ? 'saved' : '') + '">' + esc(n.tag) + '<br><small>' + n.id + '</small></button>').join('') + '</div>';
   const node = currentNode();
   if (!skillNode) return h + '<p class="note" style="margin-top:10px">選一格技能來改內容（中間的畫面會跟著顯示）。綠字＝改過。</p>';
   if (!node) return h + '<p class="note" style="margin-top:10px">讀取中…</p>';
-  h += '<div class="sec"><div class="sec-head">' + esc((nodes.find(n => n.id === skillNode) || {}).tag || skillNode) + '<span class="sp"></span>' + (savedNode(skillMember, skillNode) ? '<button type="button" class="small" id="skReset">↺ 恢復預設</button>' : '') + '</div>' +
+  h += '<div class="sec"><div class="sec-head">' + esc((memberNodes(skillMember).find(n => n.id === skillNode) || {}).tag || skillNode) + '<span class="sp"></span>' + (savedNode(skillMember, skillNode) ? '<button type="button" class="small" id="skReset">↺ 恢復預設</button>' : '') + '</div>' +
     '<label class="field">名稱<input type="text" data-sk="name"></label>' +
-    '<label class="field">技能描述（文字說明）<textarea data-sk="desc" rows="3"></textarea></label>' +
+    '<label class="field">技能描述（滑鼠停在技能圖示上時顯示）<textarea data-sk="desc" rows="3"></textarea></label>' +
     '<label class="field">技能效果（顯示的數值文字；空白＝依下面的數值自動產生）<input type="text" data-sk="effect"></label>' +
-    '<label class="field">補充說明（顯示在技能效果下面；空白＝不顯示）<textarea data-sk="note" rows="2"></textarea></label>' +
+    '<label class="field">技能效果 2（第二段亮綠色字；空白＝不顯示）<textarea data-sk="effect2" rows="2"></textarea></label>' +
+    '<label class="field">補充說明（技能本身的詳細說明，顯示在下方技能說明欄；空白＝不顯示）<textarea data-sk="note" rows="2"></textarea></label>' +
     '<div class="two"><label class="field">圖示（emoji 或圖片路徑）<input type="text" data-sk="icon" placeholder="空白＝預設圖示"></label>' +
     '<label class="field">價格（異質碎片）<input type="number" min="0" step="1" data-sk="cost"' + (skillNode === 'trait-1' ? ' disabled title="Lv1 一開始就會"' : '') + '></label></div>' +
-    '<div class="field">實際改的數值' + modsHtml(node.mods, 'sk') + '</div></div>';
+    '<div class="field">實際改的數值' + modsHtml(node.mods, 'sk') + '</div>' +
+    (node.active ? activeHtml(node.active) : '') + '</div>';
   return h;
+}
+// ---- 嚮導會自己發動的技能（群體補血、增益、大招…）：技能內容的 active，js/guide-skills.js 照這裡的數字執行 ----
+// 畫面上用好懂的單位：HP 條件、增益都用 %（50＝50%），存檔時換回小數（0.5）
+const ACT_WHEN = { hpBelow: '有隊友 HP 低於幾 %', taintAbove: '有隊友負荷幾以上', combat: '戰鬥中（8 格內有怪物）定時發動' };
+function activeHtml(a) {
+  const num = (k, label, v, step = 1) => '<label class="field">' + label + '<input type="number" min="0" step="' + step + '" data-act="' + k + '" value="' + (v != null ? v : 0) + '"></label>';
+  const chk = (k, label, v) => '<label class="field chk" style="display:flex;align-items:center;gap:6px"><input type="checkbox" style="width:auto;margin:0" data-act="' + k + '"' + (v ? ' checked' : '') + '> ' + label + '</label>';
+  const pct = v => Math.round((v || 0) * 100), b = a.buff || {};
+  return '<div class="field" style="margin-top:10px"><b>自動發動的技能（實際功能）</b><div class="orig">改這裡的數字，遊戲裡的效果就跟著變；上面「技能效果」「補充說明」空白的話，文字也會自動跟著變</div></div>' +
+    '<label class="field">什麼時候發動<select data-act="when">' + Object.entries(ACT_WHEN).map(([k, v]) => '<option value="' + k + '"' + (a.when === k ? ' selected' : '') + '>' + v + '</option>').join('') + '</select></label>' +
+    '<div class="two">' + (a.when === 'combat' ? '' : num('at', a.when === 'hpBelow' ? '條件：HP 低於幾 %' : '條件：負荷幾以上（滿 100）', a.when === 'hpBelow' ? pct(a.at) : a.at)) +
+      (a.when === 'taintAbove' ? chk('orBerserk', '有人暴走也發動', a.orBerserk) : '') + '</div>' +
+    '<div class="two">' + num('heal', '回復 HP', a.heal) + num('soothe', '降低負荷', a.soothe) + '</div>' +
+    '<div class="two">' + chk('one', '只幫最需要的一個人（不勾＝全隊）', a.one) + chk('wake', '暴走的隊員立刻清醒', a.wake) + '</div>' +
+    '<div class="two">' + num('buff.atk', '增益：攻擊力 +%', pct(b.atk)) + num('buff.def', '增益：防禦率 +%', pct(b.def)) + '</div>' +
+    '<div class="two">' + num('buff.spd', '增益：攻擊速度 +%', pct(b.spd)) + num('time', '增益持續幾秒', a.time, .5) + '</div>' +
+    '<div class="two">' + num('cast', '詠唱幾秒（0＝馬上放）', a.cast, .5) + num('sp', '花多少 SP', a.sp) + '</div>' +
+    num('cd', a.when === 'combat' ? '每幾秒發動一次' : '冷卻幾秒', a.cd, .5);
+}
+function readActive(box) {
+  const v = k => { const el = box.querySelector('[data-act="' + k + '"]'); return !el ? 0 : el.type === 'checkbox' ? el.checked : el.tagName === 'SELECT' ? el.value : Math.max(0, +el.value || 0); };
+  const a = { when: v('when') }, put = (k, x) => { if (x) a[k] = x; };
+  if (a.when !== 'combat') put('at', a.when === 'hpBelow' ? v('at') / 100 : v('at'));
+  if (a.when === 'taintAbove') put('orBerserk', v('orBerserk'));
+  put('heal', v('heal')); put('soothe', v('soothe')); put('one', v('one')); put('wake', v('wake'));
+  const buff = {}; for (const k of ['atk', 'def', 'spd']) if (v('buff.' + k)) buff[k] = v('buff.' + k) / 100;
+  if (Object.keys(buff).length) { a.buff = buff; put('time', v('time')); }
+  put('cast', v('cast')); put('sp', v('sp')); put('cd', v('cd'));
+  return a;
 }
 function gearHtml() {
   let h = '<div class="btns" style="margin-top:0"><button type="button" class="primary" id="gearAdd">＋ 新增裝備</button></div><div class="list" style="margin-top:8px">' +
@@ -173,8 +212,10 @@ function fillContentFields() {
   const box = $q('leftBody');
   if (leftTab === 'skills') {
     const node = currentNode(); if (!node) return;
-    for (const f of ['name', 'desc', 'effect', 'note', 'icon', 'cost']) { const el = box.querySelector('[data-sk="' + f + '"]'); if (el && document.activeElement !== el) el.value = node[f] != null ? node[f] : ''; }
-    const eff = box.querySelector('[data-sk="effect"]'); if (eff) eff.placeholder = modsText(node.mods) || '（沒有數值效果）';
+    for (const f of ['name', 'desc', 'effect', 'effect2', 'note', 'icon', 'cost']) { const el = box.querySelector('[data-sk="' + f + '"]'); if (el && document.activeElement !== el) el.value = node[f] != null ? node[f] : ''; }
+    const auto = node.active ? guideActiveTexts(node.active) : null;   // 嚮導會自己發動的技能：空白時自動產生的字
+    const eff = box.querySelector('[data-sk="effect"]'); if (eff) eff.placeholder = (auto ? auto.effect : modsText(node.mods)) || '（沒有數值效果）';
+    const note = box.querySelector('[data-sk="note"]'); if (note) note.placeholder = auto ? auto.note : '';
   } else if (leftTab === 'gear') {
     const g = state.gear.find(x => x.id === gearSel); if (!g) return;
     for (const f of ['name', 'icon', 'price', 'image', 'desc', 'effect']) { const el = box.querySelector('[data-gf="' + f + '"]'); if (el && document.activeElement !== el) el.value = g[f] != null ? g[f] : ''; }
@@ -199,7 +240,7 @@ $q('leftBody').addEventListener('click', e => {
   const t = e.target;
   const k = t.closest('[data-key]'); if (k) { select(k.dataset.key); return; }
   const n = t.closest('[data-node]');
-  if (n) { skillNode = n.dataset.node; toGame({ type: 'member', member: skillMember, node: skillNode }); select('node:' + skillNode); renderLeft(); return; }
+  if (n) { skillNode = n.dataset.node; toGame({ type: 'member', member: skillMember, node: skillNode }); select(nodeKey(skillNode)); renderLeft(); return; }
   if (t.id === 'skReset') { remember(); const m = state.skills.members[skillMember]; if (m) { delete m[skillNode]; if (!Object.keys(m).length) delete state.skills.members[skillMember]; } saveDraft(); sendState(); renderLeft(); setStatus('這格技能恢復預設（還沒存到專案）'); return; }
   if (t.matches('[data-sk-mod-add]')) { updateSkill(nd => { nd.mods = (nd.mods || []).concat([{ path: 'dmg', mul: 1.1 }]); }); renderLeft(); return; }
   if (t.matches('[data-sk-mod-del]')) { const i = Number(t.closest('.mod').dataset.mod); updateSkill(nd => { nd.mods.splice(i, 1); }); renderLeft(); return; }
@@ -220,6 +261,11 @@ $q('leftBody').addEventListener('input', e => {
   const t = e.target;
   if (t.dataset.sk) { const f = t.dataset.sk; updateSkill(nd => { nd[f] = f === 'cost' ? Math.max(0, Math.round(+t.value || 0)) : t.value; }, 'sk:' + skillMember + skillNode + f); if (f === 'name') { /* 名稱改了，清單不用重畫 */ } return; }
   if (t.matches('[data-sk-mod]')) { const box = t.closest('.mods'); updateSkill(nd => { nd.mods = readMods(box, 'sk'); }, 'skmod:' + skillMember + skillNode); fillContentFields(); return; }
+  if (t.dataset.act) {   // 嚮導自動發動的技能：改數字
+    const box = t.closest('.sec'); updateSkill(nd => { nd.active = readActive(box); }, 'skact:' + skillMember + skillNode + t.dataset.act);
+    if (t.dataset.act === 'when') renderLeft(); else fillContentFields();   // 換發動條件：欄位不一樣，整個重畫
+    return;
+  }
   if (t.dataset.gf) { const f = t.dataset.gf; updateGear(g => { g[f] = f === 'price' ? Math.max(0, Math.round(+t.value || 0)) : t.value; }, 'gf:' + gearSel + f); return; }
   if (t.matches('[data-gf-mod]')) { const box = t.closest('.mods'); updateGear(g => { g.mods = readMods(box, 'gf'); }, 'gfmod:' + gearSel); fillContentFields(); return; }
 });
@@ -242,6 +288,8 @@ function renderProps(rebuild = true) {
       '<div class="sec"><div class="sec-head">位置（往右／往下為正，px）<span class="sp"></span><button type="button" class="small" data-reset="pos">↺ 恢復預設</button></div>' +
       '<div class="two">' + num('x', 'X') + num('y', 'Y') + '</div>' +
       '<div class="btns"><button type="button" class="small" data-center="both">⊕ 置中</button><button type="button" class="small" data-center="x">↔ 水平置中</button><button type="button" class="small" data-center="y">↕ 垂直置中</button></div>' +
+      '<div class="btns"><button type="button" class="small" id="copyLayout">📋 複製當前數值</button><button type="button" class="small" id="pasteLayout"' + (layoutClip ? '' : ' disabled') + '>📥 貼上複製數值</button></div>' +
+      '<div class="orig" id="clipInfo"></div>' +
       '<div class="orig">置中＝放到外面那一層框的正中間</div></div>' +
       (isImg(selKey) || isBox(selKey)
         ? '<div class="sec"><div class="sec-head">大小（px，長寬等比例）<span class="sp"></span><button type="button" class="small" data-reset="size">↺ 恢復預設</button></div>' +
@@ -256,9 +304,10 @@ function renderProps(rebuild = true) {
       '<textarea data-text rows="2"></textarea><div class="orig">' + esc(t.scope || '') + '（按 Enter 換行，畫面上也會跟著換行）</div><div class="orig" id="textOrig"></div></div>';
     else if (sk) html += '<div class="sec"><div class="sec-head">文字內容（' + esc(sk.memberName) + '・' + esc(sk.tag) + '）<span class="sp"></span><button type="button" class="small" data-reset="skill">↺ 恢復預設</button></div>' +
       '<label class="field">名稱<input type="text" data-psk="name"></label>' +
-      '<label class="field">技能描述<textarea data-psk="desc" rows="3"></textarea></label>' +
+      '<label class="field">技能描述（滑鼠停在技能圖示上時顯示）<textarea data-psk="desc" rows="3"></textarea></label>' +
       '<label class="field">技能效果（空白＝依數值自動產生）<input type="text" data-psk="effect"></label>' +
-      '<label class="field">補充說明（顯示在技能效果下面；空白＝不顯示）<textarea data-psk="note" rows="2"></textarea></label>' +
+      '<label class="field">技能效果 2（第二段亮綠色字；空白＝不顯示）<textarea data-psk="effect2" rows="2"></textarea></label>' +
+      '<label class="field">補充說明（技能本身的詳細說明，顯示在下方技能說明欄；空白＝不顯示）<textarea data-psk="note" rows="2"></textarea></label>' +
       '<div class="orig">只改這位隊員的這一格；跟左邊「技能內容」改的是同一份</div></div>';
     else if (/^text\.(name|intro|role|ability|status)$|^text\.skill|^text\.(desc|stat)$/.test(selKey)) html += '<div class="sec"><div class="note">這段文字每個隊員／每格技能都不一樣：' +
       (/skill/.test(selKey) ? '到左邊「技能內容」改。' : /^text\.(desc|stat)$/.test(selKey) ? '到左邊「裝備清單」改。' : '名字、簡介在「角色資料頁」改。') + '</div></div>';
@@ -273,6 +322,7 @@ function renderProps(rebuild = true) {
   set('size', o.size || '', v.size != null ? '原本 ' + v.size : '原本');
   set('font', o.font || '', v.font != null ? '原本 ' + v.font : '原本');
   box.querySelectorAll('[data-align]').forEach(b => b.classList.toggle('on', (o.align || '') === b.dataset.align));
+  const clip = $q('clipInfo'); if (clip) clip.textContent = layoutClip ? '已複製「' + layoutClip.from + '」：' + clipText(layoutClip.v) : '複製後，換到別頁選同一個區塊，按「貼上」就套用一樣的位置、大小、字級';
   const sub = $q('selSub');
   if (sub) sub.textContent = [inf.visible === false ? '（現在畫面上看不到）' : '', inf.count > 1 ? '同名的有 ' + inf.count + ' 個，一起調整' : ''].filter(Boolean).join('　');
   const ta = box.querySelector('[data-text]');
@@ -283,8 +333,25 @@ function renderProps(rebuild = true) {
     const eff = box.querySelector('[data-psk="effect"]'); if (eff) eff.placeholder = modsText(node.mods) || '（沒有數值效果）';
   }
 }
+// ---- 複製／貼上數值：把一個區塊的位置、大小、字級、對齊記下來，貼到另一個區塊（例如別格技能的同一段字）----
+// 記在瀏覽器裡（重新整理也還在）；貼上可以按 Ctrl+Z 回來
+const CLIP_KEYS = ['x', 'y', 'w', 'h', 'size', 'font', 'align'];
+const clipText = v => ['X ' + (v.x || 0), 'Y ' + (v.y || 0), v.w ? '寬 ' + v.w : '', v.h ? '高 ' + v.h : '', v.size ? '大小 ' + v.size : '', v.font ? '字級 ' + v.font : '', v.align ? ALIGN_NAMES[v.align] : ''].filter(Boolean).join('、');
+function copyLayout() {
+  const o = elOf(selKey), v = {}; for (const k of CLIP_KEYS) if (o[k]) v[k] = o[k];
+  layoutClip = { from: labelOf(selKey), v };
+  try { localStorage.setItem(CLIP_STORE, JSON.stringify(layoutClip)); } catch (_) {}
+  renderProps(false); const p = $q('pasteLayout'); if (p) p.disabled = false;
+  setStatus('已複製「' + layoutClip.from + '」的數值');
+}
+function pasteLayout() {
+  if (!layoutClip) return;
+  remember(); const v = layoutClip.v;
+  setEl(selKey, { x: v.x || 0, y: v.y || 0, w: v.w || 0, h: v.h || 0, size: v.size || 0, font: v.font || 0, align: v.align || '' });
+  setStatus('已把「' + layoutClip.from + '」的數值貼到「' + labelOf(selKey) + '」（還沒存到專案）');
+}
 // 右邊直接改技能說明的字（名稱、描述、效果）：改的是畫面上那一格，左邊「技能內容」也一起換到那一格
-const SKILL_TEXT_KEY = /^text\.(skillName|skillDesc|skillEffect|skillNote|lockDesc)(@|$)/;   // @隊員/技能格＝只套用在那一格的位置、大小
+const SKILL_TEXT_KEY = /^text\.(skillName|skillDesc|skillEffect2?|skillNote|lockDesc)(@|$)/;   // @隊員/技能格＝只套用在那一格的位置、大小
 // 數字欄是空白（＝原本的大小）時按上下小箭頭：先填入原本的數字，再從它開始加減（不是從 0 開始）
 function prefillDefault(e) {
   const el = e.target;
@@ -313,6 +380,8 @@ $q('props').addEventListener('click', e => {
   if (!selKey) return;
   const b = e.target.closest('button'); if (!b) return;
   if (b.id === 'goSkill') { const s = info[selKey].skill; skillMember = s.member; skillNode = s.id; leftTab = 'skills'; document.querySelectorAll('[data-tab]').forEach(x => x.classList.toggle('on', x.dataset.tab === 'skills')); renderLeft(); return; }
+  if (b.id === 'copyLayout') { copyLayout(); return; }
+  if (b.id === 'pasteLayout') { pasteLayout(); return; }
   if (b.dataset.center || b.dataset.align || b.dataset.reset || b.id === 'resetOne') remember();
   if (b.dataset.center) { toGame({ type: 'center', key: selKey, axis: b.dataset.center }); return; }
   if (b.dataset.align) { const o = elOf(selKey); setEl(selKey, { align: o.align === b.dataset.align ? '' : b.dataset.align }); return; }
@@ -408,7 +477,7 @@ function layoutText() {
 }
 function skillsText() {
   return '/* ===== Y102隊員技能樹的內容（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
-    '   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, note：補充說明（顯示在效果下面）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值 }\n' +
+    '   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, effect2：技能效果 2（第二段亮綠色字）, note：補充說明（顯示在效果下面）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值, active：嚮導會自己發動的技能（數字說明見 data/guide-skills.js） }\n' +
     '   技能格 id：trait-1（普通技能 Lv1＝原本的特性）、trait-2（Lv2）、a-1／a-2（A 系列－生存）、core-1～3（核心技能）、ult（終極核心大招）、b-1／b-2（B 系列－攻擊）、aux-1／aux-2（輔助技能）\n' +
     '   mods：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }（數值名稱見 js/skills.js 開頭）\n' +
     '   這裡沒寫的隊員／格子，會從 data/skills.js（舊版技能資料）自動換算。 */\n' +
