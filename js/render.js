@@ -45,7 +45,8 @@ function drawObstacle(o) {
       const sx = s ? OX + s.c * CELL + (s.ox || 0) + shX : x, sy = s ? OY + s.r * CELL + (s.oy || 0) + shY : y;
       const sw = s ? mapStampW(s, t) * CELL : t ? CELL : w, sh = s ? mapStampH(s, t) * CELL : t ? CELL : h;   // 格子素材固定畫一格大
       ctx.save(); ctx.globalAlpha = ORE_GUN_FLASH.alpha * gunFlash; ctx.imageSmoothingEnabled = false;
-      if (s && (s.fx || s.fy)) { ctx.translate(sx + sw / 2, sy + sh / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(sil, -sw / 2, -sh / 2, sw, sh); }
+      const rot = s ? mapStampTurn(s) : 0, iw = rot % 2 ? sh : sw, ih = rot % 2 ? sw : sh;   // 旋轉過的圖章：閃光也要跟著轉
+      if (s && (s.fx || s.fy || rot)) { ctx.translate(sx + sw / 2, sy + sh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(sil, -iw / 2, -ih / 2, iw, ih); }
       else ctx.drawImage(sil, sx, sy, sw, sh);
       ctx.restore();
     }
