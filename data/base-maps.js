@@ -698,9 +698,9 @@ const BASE_MAPS = [
         "27,5": "tile_new_bg_wall_front_edge",
         "27,6": "tile_new_bg_wall_front_edge",
         "27,7": "tile_new_bg_wall_front_edge",
-        "8,8": "tile_new_decor_exit_sign",
         "3,14": "tile_new_decor_fire_extinguisher",
-        "1,14": "tile_new_decor_box_large"
+        "1,14": "tile_new_decor_box_large",
+        "18,8": "tile_new_decor_exit_sign"
       },
       "overlay": {},
       "top": {},
@@ -1218,7 +1218,7 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_exit_sign",
-        "c": 55,
+        "c": 46,
         "r": 8,
         "layer": "object2",
         "fx": true
@@ -2417,12 +2417,10 @@ const BASE_MAPS = [
       "8,5",
       "8,6",
       "8,7",
-      "8,8",
       "8,9",
       "55,10",
       "55,9",
       "55,7",
-      "55,8",
       "55,4",
       "55,5",
       "55,6",
@@ -2585,7 +2583,9 @@ const BASE_MAPS = [
       "11,14",
       "10,14",
       "9,14",
-      "8,14"
+      "8,14",
+      "18,8",
+      "46,8"
     ],
     "breakable": [],
     "camp": [
@@ -6426,8 +6426,8 @@ const BASE_MAPS = [
         "0,8": "tile_new_bg_wall_front_edge"
       },
       "object": {
-        "8,8": "tile_new_decor_exit_sign",
-        "1,14": "tile_new_decor_box_large"
+        "1,14": "tile_new_decor_box_large",
+        "16,8": "tile_new_decor_exit_sign"
       },
       "overlay": {
         "4,9": "tile_eoc_floor_sign_4f",
@@ -6640,7 +6640,7 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_exit_sign",
-        "c": 55,
+        "c": 45,
         "r": 8,
         "layer": "object2",
         "fx": true
@@ -7174,12 +7174,10 @@ const BASE_MAPS = [
       "8,5",
       "8,6",
       "8,7",
-      "8,8",
       "8,9",
       "55,10",
       "55,9",
       "55,7",
-      "55,8",
       "55,4",
       "55,5",
       "55,6",
@@ -7217,7 +7215,9 @@ const BASE_MAPS = [
       "36,10",
       "1,13",
       "1,14",
-      "2,14"
+      "2,14",
+      "55,8",
+      "8,8"
     ],
     "breakable": [],
     "camp": [
@@ -8487,13 +8487,6 @@ const BASE_MAPS = [
         "oy": 0
       },
       {
-        "id": "tile_new_decor_exit_sign",
-        "c": 17,
-        "r": 5,
-        "layer": "object",
-        "fx": true
-      },
-      {
         "id": "tile_mufxpxnl",
         "c": 24,
         "r": 5,
@@ -8865,7 +8858,6 @@ const BASE_MAPS = [
       "26,7",
       "20,7",
       "17,6",
-      "17,5",
       "17,4",
       "17,3",
       "17,2",
@@ -8963,7 +8955,8 @@ const BASE_MAPS = [
       "19,1",
       "21,1",
       "18,1",
-      "17,1"
+      "17,1",
+      "14,4"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -11210,9 +11203,7 @@ const BASE_MAPS = [
       "23,0",
       "24,0",
       "25,0",
-      "26,0",
       "21,0",
-      "26,1",
       "25,3",
       "25,2",
       "25,1",
@@ -11712,7 +11703,7 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_exit_sign",
-        "c": 15,
+        "c": 12,
         "r": 5,
         "layer": "overlay",
         "fx": true
@@ -11875,7 +11866,6 @@ const BASE_MAPS = [
       "0,11",
       "0,12",
       "0,13",
-      "15,6",
       "16,6",
       "16,7",
       "16,5",
@@ -11900,7 +11890,6 @@ const BASE_MAPS = [
       "21,5",
       "23,5",
       "22,5",
-      "15,5",
       "24,5",
       "24,6",
       "24,7",
@@ -13436,7 +13425,7 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_exit_sign",
-        "c": 23,
+        "c": 20,
         "r": 17,
         "layer": "overlay",
         "fx": true
@@ -13808,7 +13797,6 @@ const BASE_MAPS = [
       "31,22",
       "31,23",
       "23,18",
-      "23,17",
       "23,16",
       "23,15",
       "23,14",
@@ -13939,7 +13927,8 @@ const BASE_MAPS = [
       "21,17",
       "22,17",
       "22,16",
-      "21,16"
+      "21,16",
+      "23,17"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14333,7 +14322,7 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_exit_sign",
-        "c": 20,
+        "c": 16,
         "r": 9,
         "layer": "overlay",
         "fx": true
@@ -14743,7 +14732,6 @@ const BASE_MAPS = [
       "14,3",
       "14,4",
       "15,4",
-      "20,9",
       "20,11",
       "15,3",
       "12,1",
@@ -14777,7 +14765,8 @@ const BASE_MAPS = [
       "28,11",
       "28,12",
       "28,13",
-      "28,8"
+      "28,8",
+      "20,9"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -15274,7 +15263,7 @@ const BASE_MAPS = [
         "0,8": "tile_new_bg_wall_front_edge"
       },
       "object": {
-        "8,8": "tile_new_decor_exit_sign"
+        "16,8": "tile_new_decor_exit_sign"
       },
       "overlay": {
         "4,9": "tile_eoc_floor_sign_b3",
@@ -15487,7 +15476,7 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_exit_sign",
-        "c": 55,
+        "c": 45,
         "r": 8,
         "layer": "object2",
         "fx": true
@@ -16195,12 +16184,10 @@ const BASE_MAPS = [
       "8,5",
       "8,6",
       "8,7",
-      "8,8",
       "8,9",
       "55,10",
       "55,9",
       "55,7",
-      "55,8",
       "55,4",
       "55,5",
       "55,6",
@@ -16244,7 +16231,9 @@ const BASE_MAPS = [
       "22,10",
       "20,10",
       "9,10",
-      "10,10"
+      "10,10",
+      "55,8",
+      "8,8"
     ],
     "breakable": [],
     "camp": [
