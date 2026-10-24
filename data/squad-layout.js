@@ -806,6 +806,53 @@ const SQUAD_LAYOUT = {
       "h": 20,
       "font": 15,
       "x": 0
+    },
+    "lookSlot:face": {
+      "y": -12
+    },
+    "lookSlotName:face": {
+      "y": -12
+    },
+    "lookSlot:hand": {
+      "y": -15
+    },
+    "lookSlotName:hand": {
+      "y": -15
+    },
+    "lookSlot:back": {
+      "y": -12
+    },
+    "lookSlotName:back": {
+      "y": -12
+    },
+    "text.gearTitle": {
+      "x": 10
+    },
+    "text.lookTitle": {
+      "x": 15,
+      "y": -10
+    },
+    "btn.switchG": {
+      "size": 35
+    },
+    "text.switchLabelG": {
+      "x": 5,
+      "y": -5
+    },
+    "lookSlot:skin": {
+      "y": -7
+    },
+    "lookSlot:head": {
+      "y": -7
+    },
+    "lookSlotName:head": {
+      "y": -7
+    },
+    "lookSlotName:skin": {
+      "y": -7
+    },
+    "lookSlotImg:skin": {
+      "size": 32
     }
   },
   "texts": {

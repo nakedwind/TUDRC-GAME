@@ -1129,6 +1129,31 @@ const SQUAD_SKILLS = {
         "icon": "",
         "mods": [],
         "cost": 0
+      },
+      "trait-2": {
+        "name": "疏導熟練",
+        "desc": "疏導的手法更熟練了。",
+        "effect": "每秒疏導量 +1",
+        "effect2": "",
+        "note": "",
+        "icon": "",
+        "mods": [
+          {
+            "path": "aura.rate",
+            "add": 1
+          }
+        ],
+        "cost": 40
+      },
+      "ult": {
+        "name": "生命之泉",
+        "desc": "危急時刻，為全隊注入大量生命力。",
+        "effect": "全隊 HP +40",
+        "effect2": "",
+        "note": "有隊友 HP 負荷值 35% 時自動發動；詠唱 3 秒，花 20 SP，冷卻 60 秒。",
+        "icon": "",
+        "mods": [],
+        "cost": 250
       }
     },
     "chris": {
@@ -1140,6 +1165,21 @@ const SQUAD_SKILLS = {
         "icon": "",
         "mods": [],
         "cost": 0
+      },
+      "trait-2": {
+        "name": "疏導熟練",
+        "desc": "疏導的手法更熟練了。",
+        "effect": "疏導量 +1／秒",
+        "effect2": "",
+        "note": "說明說明說明說明",
+        "icon": "",
+        "mods": [
+          {
+            "path": "aura.rate",
+            "add": 1
+          }
+        ],
+        "cost": 40
       }
     },
     "taana": {
@@ -1151,6 +1191,21 @@ const SQUAD_SKILLS = {
         "icon": "",
         "mods": [],
         "cost": 0
+      },
+      "trait-2": {
+        "name": "疏導熟練",
+        "desc": "疏導的手法更熟練了。",
+        "effect": "每秒疏導量 +1",
+        "effect2": "",
+        "note": "",
+        "icon": "",
+        "mods": [
+          {
+            "path": "aura.rate",
+            "add": 1
+          }
+        ],
+        "cost": 40
       }
     }
   }
