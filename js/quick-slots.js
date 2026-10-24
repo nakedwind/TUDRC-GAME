@@ -63,13 +63,13 @@ function clearQuickSlot(slot) { if (!quickSlots[slot]) return; quickSlots[slot] 
 function renderQuickSupplies() {
   const box = document.getElementById('quickSupplies'); if (!box) return;
   quickAutoFill();
-  const state = QUICK_KEYS.map(k => { const it = quickItem(quickSlots[k]); return [k, it ? it.id : '', it ? (supplyInventory.get(it.id) || 0) : 0, it && (it.use === 'hp' || it.use === 'sp') ? supplyNeed(it.use) <= 0 : false]; });
+  const state = QUICK_KEYS.map(k => { const it = quickItem(quickSlots[k]); return [k, it ? it.id : '', it ? (supplyInventory.get(it.id) || 0) : 0]; });
   const key = JSON.stringify(state); if (key === quickSupplyKey) return; quickSupplyKey = key;
-  box.innerHTML = state.map(([k, id, count, full]) => {
+  box.innerHTML = state.map(([k, id, count]) => {
     const it = quickItem(id), K = k.toUpperCase();
     if (!it) return `<button class="quick-supply quick-empty" type="button" data-qs-slot="${k}" data-tip="把背包的道具拖到這裡" data-tip-key="qs-${k}" aria-label="${K} 空格">
       <span class="qs-icon">＋</span><span class="qs-text"><small>空格</small><b>　</b></span><kbd>${K}</kbd></button>`;
-    const kind = it.use === 'hp' || it.use === 'sp' ? it.use : 'item', off = !count || full;
+    const kind = it.use === 'hp' || it.use === 'sp' ? it.use : 'item', off = !count;   // 只有用完了才變暗（HP／SP 滿了不暗，按下去才提示已滿）
     const tip = !count ? `${K}｜沒有${it.name}了` : `${K}｜${it.name}` + (SUPPLY_KIND[it.use] ? ' ' + supplyEffect(it) : '');
     // 懸停提示（js/hover-tip.js）：上方框＝效果（SP+30；HP／SP 滿了也照樣顯示，按下去才提示已滿、播不能用的音效；用完了才顯示「用完了」），下方＝名稱
     const effect = !count ? '用完了' : SUPPLY_KIND[it.use] ? `${SUPPLY_KIND[it.use].stat}+${it.restore}` : (it.effect || '');
@@ -102,8 +102,9 @@ const quickBox = document.getElementById('quickSupplies');
 quickBox.addEventListener('click', e => { const b = e.target.closest('[data-qs-slot]'); if (!b || !G?.player) return; if (!quickSlots[b.dataset.qsSlot]) { if (typeof openBackpack === 'function') openBackpack(); return; } useQuickSlot(b.dataset.qsSlot); });
 quickBox.addEventListener('contextmenu', e => { const b = e.target.closest('[data-qs-slot]'); if (!b) return; e.preventDefault(); clearQuickSlot(b.dataset.qsSlot); });
 
-// ---- 拖曳：背包的道具 → 快捷格；快捷格 → 另一格（互換）；快捷格 → 背包（拿掉）----
+// ---- 拖曳：背包的道具 → 快捷格；快捷格 → 另一格（互換）；快捷格 → 背包（拿掉）；快捷格 → 地圖（放一個在地上）----
 const QS_MIME = 'application/x-tudrc-quick';
+const QUICK_DRAG_IMG = 40;   // 從快捷格拖出去時，跟著游標的道具圖多大（px）
 let quickDrag = null;   // { id, from }：拖的是哪個道具、從哪一格拖出來（從背包拖＝null）
 document.addEventListener('dragstart', e => {
   const cell = e.target.closest && e.target.closest('.bag-cell[data-bag-item]');
@@ -112,9 +113,27 @@ document.addEventListener('dragstart', e => {
   if (!id || !quickAllowed(quickItem(id))) return;
   quickDrag = { id, from: slot ? slot.dataset.qsSlot : null };
   e.dataTransfer.setData(QS_MIME, id); e.dataTransfer.effectAllowed = 'move';
+  const it = slot && quickItem(id);   // 從快捷格拖：拖著的只有道具圖（沒有格子底色、數字），中心對準游標（丟到地上才會落在看到的位置）
+  if (it && it.image) {
+    const ghost = document.createElement('div'), S = QUICK_DRAG_IMG;
+    ghost.style.cssText = `position:fixed;left:-200px;top:-200px;width:${S}px;height:${S}px;background:transparent;pointer-events:none`;   // 要在畫面上（畫面外也行）瀏覽器才畫得出來
+    ghost.innerHTML = `<img src="${it.image}" alt="" style="width:100%;height:100%;object-fit:contain;image-rendering:pixelated">`;
+    document.body.appendChild(ghost);
+    e.dataTransfer.setDragImage(ghost, S / 2, S / 2);
+    setTimeout(() => ghost.remove());   // 瀏覽器拍好拖曳圖就可以拿掉
+  }
   quickBox.classList.add('dropping');
 });
-document.addEventListener('dragend', () => { quickDrag = null; quickBox.classList.remove('dropping'); quickBox.querySelectorAll('.drop-over').forEach(el => el.classList.remove('drop-over')); });
+// 拖曳結束的收尾。放開時也要做：放開後快捷欄會重畫，被拖的那格已經不在畫面上，瀏覽器的 dragend 傳不到這裡
+function endQuickDrag() {
+  if (quickDrag && quickDrag.blocked) {   // 在地圖的障礙物上放開（瀏覽器不會送 drop 進來）：提示不能放
+    sfx('error'); systemNotice('這裡有障礙物，不能放東西', true);
+  }
+  if (typeof releaseMoveKeys === 'function') releaseMoveKeys();   // 拖曳中瀏覽器收不到放開按鍵：全部放開，不然溫特會一直走
+  quickDrag = null; quickBox.classList.remove('dropping'); quickBox.querySelectorAll('.drop-over').forEach(el => el.classList.remove('drop-over'));
+}
+document.addEventListener('dragend', endQuickDrag);
+document.addEventListener('drop', () => setTimeout(endQuickDrag));   // 等各處的 drop 處理完再收尾
 quickBox.addEventListener('dragover', e => {
   const b = e.target.closest('[data-qs-slot]'); if (!b || !quickDrag) return;
   e.preventDefault(); e.dataTransfer.dropEffect = 'move';
@@ -128,6 +147,26 @@ quickBox.addEventListener('drop', e => {
 // 快捷格拖回背包：拿掉
 document.addEventListener('dragover', e => { if (quickDrag && quickDrag.from && e.target.closest && e.target.closest('#backpack')) e.preventDefault(); });
 document.addEventListener('drop', e => { if (quickDrag && quickDrag.from && e.target.closest && e.target.closest('#backpack')) { e.preventDefault(); clearQuickSlot(quickDrag.from); } });
+
+// 快捷格拖到地圖上：放一個在那裡（js/ground-items.js 的 dropItemOnGround；同一個位置再放會疊在一起）
+const gameCanvas = document.getElementById('cv');
+const quickCanThrow = () => quickDrag && quickDrag.from && G?.running && !G.over && G.player && G.player.hp > 0 && !dialogueState && !mapTransitioning;
+gameCanvas.addEventListener('dragover', e => {   // 只有能放的地方才接受（障礙物上游標會變成「不能放」）
+  if (!quickCanThrow()) return;
+  const at = npcPointerPosition(e); at.y += GROUND_ITEMS.size / 2;
+  quickDrag.blocked = !groundDropSpot(at);   // 記下來：在這裡放開就提示不能放（endQuickDrag）
+  if (!quickDrag.blocked) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; }
+});
+document.addEventListener('dragover', e => { if (quickDrag && e.target !== gameCanvas) quickDrag.blocked = false; });   // 游標移到地圖以外（快捷欄、介面）：不算。不用 dragleave：在障礙物上放開時瀏覽器會先送 dragleave 才送 dragend
+gameCanvas.addEventListener('drop', e => {
+  if (!quickCanThrow()) return;
+  e.preventDefault();
+  const item = itemById(quickDrag.id), n = Math.min(1, supplyInventory.get(quickDrag.id) || 0);   // 一次只放一個
+  if (!canDrop(item) || n <= 0) { sfx('error'); return; }
+  const at = npcPointerPosition(e); at.y += GROUND_ITEMS.size / 2;   // 游標對準道具中間（地上的道具畫在落點上方）
+  if (!dropItemOnGround(item.id, n, at)) { quickDrag.blocked = true; return; }   // 有障礙物：endQuickDrag 會提示
+  sfx('place'); systemNotice(`已把 ${item.name} 放在地上`); updateHUD();
+});
 
 // ---- 背包：可以放進快捷欄的道具格可以拖；說明欄顯示拖曳提示 ----
 const quickOrigRenderBackpack = renderBackpack;

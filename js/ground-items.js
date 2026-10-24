@@ -1,26 +1,34 @@
 // ============================================================
 //  放在地上的物品：背包裡按「放在地上」，東西就掉在溫特腳邊，走過去按互動鍵可以撿回來
-//  ・存在 G.groundItems：{ id, qty, x, y, at }（qty＝這一堆有幾個，地上不顯示數字、靠近時的拾取提示才寫；at＝什麼時候放的，播拋出去的動畫）。換地圖就清掉（G 每張地圖重建），不存檔。
+//  ・存在 G.groundItems：{ id, qty, x, y, at }（qty＝這一堆有幾個，地上不顯示數字、靠近時的拾取提示才寫；at＝什麼時候放的，播從上面掉下來的動畫）。換地圖就清掉（G 每張地圖重建），不存檔。
 //  ・撿起：跟地上的道具一樣走 js/storage-lockers.js 的拾取（kind 'ground-item'），遵守持有上限，拿不下的留在地上。
 //  ・搜救犬球球：只撿 GROUND_ITEMS.kitItems（嚮導身上帶的急救包、杏仁水），叼去給身上還沒帶滿、最缺的嚮導（js/rescue-dog.js）；
 //    嚮導都帶滿了就不撿。其他東西球球不碰，怪物也不會撿。
 //  ・嚮導：身上急救包、杏仁水沒帶滿時，走過地上的就順手撿；用完了會先走去撿地上的，不用回營地物資箱（guideGroundStep）。
 // ============================================================
-const GROUND_ITEMS = { size: 26, toss: .35, sortDy: 10, guideReach: 30, kitItems: ['firstaid', 'almond-water'] };   // size：地上畫多大；toss：丟出去落地要幾秒
+const GROUND_ITEMS = { size: 26, sortDy: 10, guideReach: 30, throwReach: 120, kitItems: ['firstaid', 'almond-water'] };   // size：地上畫多大；throwReach：從快捷欄拖到地圖上，最遠丟多遠（px）
 
 // 背包「放在地上」呼叫：從背包拿掉 qty 個，放在溫特面前一點點的地上（同一個位置已經有同樣的東西就疊在一起）
-function dropItemOnGround(id, qty = 1) {
+// aim＝{x, y}：丟到這個位置（快捷欄拖到地圖上，js/quick-slots.js）；太遠就丟到 throwReach 那麼遠。那裡有障礙物＝不能放（回傳 0）
+const groundBlocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y) : solidBlocksPoint(x, y);
+function groundDropSpot(aim) {   // 拖到 aim 會落在哪裡；有障礙物＝null
+  const p = G && G.player; if (!p) return null;
+  const dx = aim.x - p.x, dy = aim.y - p.y, d = Math.hypot(dx, dy), k = d > GROUND_ITEMS.throwReach ? GROUND_ITEMS.throwReach / d : 1;
+  const x = p.x + dx * k, y = p.y + dy * k;
+  return groundBlocked(x, y) ? null : { x, y };
+}
+function dropItemOnGround(id, qty = 1, aim = null) {
   const p = G && G.player, count = supplyInventory.get(id) || 0, n = Math.min(qty, count);
   if (!p || n <= 0) return 0;
   const off = { left: [-16, 4], right: [16, 4], back: [0, -10], front: [0, 12] }[p.dir] || [0, 12];
-  const blocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y) : solidBlocksPoint(x, y);
   let x = p.x + off[0], y = p.y + off[1];
-  if (blocked(x, y)) { x = p.x; y = p.y + 4; }   // 面前是牆：就放在腳下
+  if (aim) { const spot = groundDropSpot(aim); if (!spot) return 0; ({ x, y } = spot); }
+  else if (groundBlocked(x, y)) { x = p.x; y = p.y + 4; }   // 背包的「放在地上」：面前是牆就放在腳下
   if (n >= count) supplyInventory.delete(id); else supplyInventory.set(id, count - n);
   G.groundItems = G.groundItems || [];
   const pile = G.groundItems.find(g => g.id === id && Math.hypot(g.x - x, g.y - y) < 10);
-  const from = { x: p.x, y: p.y - 20 }, at = performance.now() / 1000;
-  if (pile) Object.assign(pile, { qty: pile.qty + n, from, at }); else G.groundItems.push({ id, qty: n, x, y, from, at });
+  const at = performance.now() / 1000;   // 什麼時候放的：從上面掉下來的動畫（drawGroundItem）
+  if (pile) Object.assign(pile, { qty: pile.qty + n, at }); else G.groundItems.push({ id, qty: n, x, y, at });
   return n;
 }
 function removeGroundItem(g, n) {
@@ -96,13 +104,13 @@ function groundItemImg(id) {
   const img = groundItemImgs[id]; return img.complete && img.naturalWidth ? img : null;
 }
 function drawGroundItem(ctx, g) {
-  const now = performance.now() / 1000, S = GROUND_ITEMS.size;
-  const k = Math.min(1, (now - (g.at || 0)) / GROUND_ITEMS.toss), from = g.from || g;
-  const x = from.x + (g.x - from.x) * k, y = from.y + (g.y - from.y) * k - Math.sin(k * Math.PI) * 14;   // 從手上拋到地上
+  const now = performance.now() / 1000, S = GROUND_ITEMS.size, x = g.x, y = g.y;
+  const a = typeof dropAnim === 'function' ? dropAnim(now - (g.at || 0)) : null;   // 從上面掉下來 → 壓扁 → 回彈（跟放建築一樣，js/build.js）
   ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(g.x, g.y + 2, S * .36, S * .13, 0, 0, Math.PI * 2); ctx.fill();   // 影子
-  const img = groundItemImg(g.id), bob = k >= 1 ? Math.sin(now * 2.5 + g.x * .05) * 1 : 0;
+  ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y + 2, S * .36, S * .13, 0, 0, Math.PI * 2); ctx.fill();   // 影子
+  const img = groundItemImg(g.id), bob = a ? 0 : Math.sin(now * 2.5 + g.x * .05) * 1;
   ctx.imageSmoothingEnabled = false;
+  if (a) { ctx.translate(x, y + 2 + a.dy); ctx.scale(a.sx, a.sy); ctx.translate(-x, -(y + 2)); }   // 以底部中央為錨點縮放
   if (img) {
     const sc = S / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * sc, h = img.naturalHeight * sc;
     ctx.drawImage(img, x - w / 2, y - h + 2 + bob, w, h);
