@@ -307,6 +307,7 @@ function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   return {};
 }
 function chooseDarkWanderCell(e) {
+  if (e.squadLeader && typeof squadWanderCell === 'function') { const near = squadWanderCell(e); if (near) return near; }   // 金蕉王的隊員：待在隊長附近（js/golden-banana-king.js）
   const [ec, er] = cellAt(e.x, e.y), choices = [];
   for (let r = Math.max(0, er - 7); r <= Math.min(ROWS - 1, er + 7); r++) {
     for (let c = Math.max(0, ec - 7); c <= Math.min(COLS - 1, ec + 7); c++) {
@@ -418,9 +419,11 @@ function stepEnemy(e, dt) {
     resetEnemyNavigation(e);
   }
   e.lastSafeX = e.x; e.lastSafeY = e.y;
-  if (e.behavior === 'burrow') { stepBurrowingMouse(e, dt); return; }   // 地底追蹤不用史萊姆跳躍；自身處理核心守衛
+  if (e.behavior === 'burrow') { stepBurrowingMouse(e, dt); return; }
+  if (e.behavior === 'healer') { stepHealerEnemy(e, dt); return; }   // 金蕉王：補血、逃跑，核心醒著也不回去守（js/golden-banana-king.js）   // 地底追蹤不用史萊姆跳躍；自身處理核心守衛
   // 飛撲途中已經騰空，不受接觸判定或暈眩打斷，落地時才結算傷害。
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
+  if (e.squadLeader && typeof stepSquadLeash === 'function' && stepSquadLeash(e, dt)) return;   // 金蕉王的隊員：離隊長太遠就走回去（js/golden-banana-king.js）
   if (e.elite) { stepEliteBird(e, dt); return; }   // 菁英鳥頭人：守在核心旁、自己管走回原位（js/elite-bird-head.js）
   if (e.guardPose && stepEliteGuardPose(e, dt)) return;   // 大隊長身邊的手下：背對玩家站崗，大隊長大叫才轉身
   // 核心醒著：狂暴的異質體離核心太遠就衝回去守著（js/core-frenzy.js）；溫特貼在旁邊時照樣先打溫特

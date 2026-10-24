@@ -51,9 +51,10 @@ function shooterPickTarget(e) {
 }
 function shooterWanderSpot(e) {
   const r = shooterCfg(e).wanderRadius;
+  const o = typeof squadAnchor === 'function' ? squadAnchor(e) : e;   // 金蕉王的隊員：繞著隊長散步（js/golden-banana-king.js）
   for (let i = 0; i < 8; i++) {
     const a = Math.random() * Math.PI * 2, d = (.6 + Math.random() * (r - .6)) * CELL;
-    const x = e.x + Math.cos(a) * d, y = e.y + Math.sin(a) * d;
+    const x = o.x + Math.cos(a) * d, y = o.y + Math.sin(a) * d;
     if (!enemyBlocked(x, y) && hasLineOfSight(e.x, e.y, x, y)) return { x, y };
   }
   return null;

@@ -18,6 +18,7 @@ const CAMP_BED = {
   walkSpeed: 1.2,       // 走回營地的速度（走路速度的幾倍）
   retry: 4,             // 走不過去（被擋住）時，幾秒後才再試
   cooldown: 60,         // 躺滿起床後，幾秒內不會再去躺（躺到一半被打斷不算）
+  popEvery: 1,          // 隊員躺著回血：每幾秒在頭旁跳一次「+數字 HP」（照這段時間實際補了多少；滿血不跳）
 };
 // 這張地圖上的行軍床座位（js/game.js 的 mapSeats 裡，位置對得上行軍床素材的那幾個）
 let campBedCache = { map: null, list: [] };
@@ -79,13 +80,27 @@ function campBedStep(t, dt) {
   if (t.hitT > 0) return stop('被攻擊了，起來應戰');
   c.t += dt;
   t.x = c.seat.x; t.y = c.seat.y; t.moving = false;
+  const hp0 = t.hp;
   t.hp = Math.min(t.maxhp, t.hp + CAMP_BED.regen * dt);
+  campBedHealPop(t, c, t.hp - hp0, dt);
   if (c.t < CAMP_BED.rest) return true;
   // 躺滿：下床，在床邊原地巡邏
   t.sitting = null; t.x = c.approach.x; t.y = c.approach.y; t.cot = null; t.calmT = 0; t.bedRetryT = CAMP_BED.cooldown;   // 冷卻：一段時間內不再去躺
   t.mode = 'hold'; t.anchor = { x: t.x, y: t.y }; t.guardSummoned = false; t.guardBase = null; t.target = null; t.waitT = .5;
   sentryStatus(t, '休息完畢，在基地附近巡邏', '#7ee0c0');
   return true;
+}
+// 躺著回血的「+數字 HP」：累積實際補的量，每 popEvery 秒跳一次；
+// 頭上右側是 ZZZ（js/bed-zzz.js），這個跳在另一側（直放的床：頭的左邊；橫放的床：腳那一頭）
+function campBedHealPop(t, c, gain, dt) {
+  c.healSum = (c.healSum || 0) + gain; c.healT = (c.healT || 0) + dt;
+  if (c.healT < CAMP_BED.popEvery) return;
+  c.healT = 0;
+  const n = Math.floor(c.healSum); if (n < 1) return;
+  c.healSum -= n;
+  const deg = (t.sitting && t.sitting.rotation || 0) * Math.PI / 180;
+  const x = deg ? t.x - Math.sin(deg) * 34 : t.x - 24, y = t.y - (deg ? 26 : 44);
+  flashDmg('+' + n + ' HP', x, y, '#7ee0a0');
 }
 // 被玩家召喚：放開床位、躺著的先下床（game.js 的召喚至此呼叫）；冷卻一段時間，免得一到目的地又跑回去躺
 function leaveCampBed(t) {

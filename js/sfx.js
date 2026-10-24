@@ -121,6 +121,10 @@ const SFX = (() => {
     mouseAttack: '怪物/老鼠/老鼠攻擊.mp3',
     mouseHurt: '怪物/老鼠/老鼠被打.mp3',
     mouseDeath: '怪物/老鼠/老鼠被打.mp3',
+    // 金蕉王：補血、被打、死掉（js/golden-banana-king.js）
+    bananaHeal: '怪物/金蕉王/治療.mp3',
+    bananaHurt: '怪物/金蕉王/金蕉王被打.mp3',
+    bananaDeath: '怪物/金蕉王/金蕉王死掉.mp3',
     pop: 'pop.mp3',
     milkfishGulp: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吞下隊友（js/milkfish-kid.js）
     milkfishChew: '怪物/虱目魚小子/虱目魚小子吃人.mp3',   // 虱目魚小子吃掉一格的物品
@@ -146,7 +150,7 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'pop', 'playerHit', 'playerHitMonster']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'pop', 'playerHit', 'playerHitMonster']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };

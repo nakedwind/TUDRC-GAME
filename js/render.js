@@ -205,6 +205,7 @@ function drawTower(t) {
     }
     seatRotate(t, size);   // 躺在橫放的床上：跟溫特一樣旋轉
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, t);   // 被絲瓜藤纏住：扭動
+    if (typeof applySlipTransform === 'function') applySlipTransform(ctx, t);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
     if (t.hp > 0) t.downAt = null;
     else if (t.downAt == null) t.downAt = performance.now();   // 剛失去戰鬥能力：播倒下動畫
     const downAge = t.downAt != null ? (performance.now() - t.downAt) / 1000 : Infinity;
@@ -416,6 +417,8 @@ function drawEnemy(e) {
   if (e.tremble) ctx.translate((Math.random() * 2 - 1) * 1.8, (Math.random() * 2 - 1) * .6);   // 菁英鳥頭人衝撞前蓄力：全身發抖（js/elite-bird-head.js）
   if (walkFrame) { e.lastFrameFile = walkFrame.file; e.lastFrameFlip = walkFrame.flip; }   // 死亡倒地用目前這張圖
   const baseSprite = monsterImage(walkFrame ? walkFrame.file : e.art ? shooterFrame(e) : (e.sprite || 'images/monster/Monster_Slime.png'));   // 珍珠小童：眨眼／生氣圖
+  const sway = e.behavior === 'charger' && typeof chargerSwayAngle === 'function' ? chargerSwayAngle(e) : 0;   // 鳥頭人暈眩：以腳底為軸左右斜晃（js/bird-head.js）
+  if (sway) { ctx.save(); ctx.translate(e.x, bottomY); ctx.rotate(sway); ctx.translate(-e.x, -bottomY); }
   if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 朝另一邊：左右翻
   if (e.behavior === 'burrow' && typeof drawBurrowingMouseBody === 'function') {
     drawBurrowingMouseBody(ctx, e);
@@ -442,7 +445,8 @@ function drawEnemy(e) {
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
   }
-  if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
+  if (sway) ctx.restore();   // 斜晃只套在身體上（連左右翻一起還原），血條和文字不跟著晃
+  else if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
   // 血條放在圖的上方（體型大的變體血條也跟著變寬、變高）
   const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
   ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW / 2, barY, barW, 3);
@@ -892,6 +896,7 @@ function drawPlayer(p) {
       ctx.translate(-Math.cos(p.recoilAng || 0) * k, -Math.sin(p.recoilAng || 0) * k);
     }
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, p);   // 被絲瓜藤纏住：掙扎扭動（js/loofah-lady.js）
+    if (typeof applySlipTransform === 'function') applySlipTransform(ctx, p);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
     ctx.imageSmoothingEnabled = false;
     const hitK = p.hitT > 0 ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出
     if (p.sitting?.rotation) {
@@ -1009,6 +1014,7 @@ function draw() {
   drawFlares(ctx);             // 地上燃燒的照明彈
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
+  if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   if (typeof drawFishWater === 'function') drawFishWater(ctx);
@@ -1281,9 +1287,11 @@ function draw() {
     } else if (f.fglow) {                                  // 火焰爆閃光暈（加色疊加）
       const p = Math.max(0, f.life / f.life0), r = f.r0 + (f.r1 - f.r0) * (1 - p);
       const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
-      g.addColorStop(0, `rgba(255,240,190,${(0.9 * p).toFixed(3)})`);
-      g.addColorStop(0.4, `rgba(255,150,40,${(0.6 * p).toFixed(3)})`);
-      g.addColorStop(1, 'rgba(120,20,0,0)');
+      const pal = f.green ? [[220, 255, 200], [90, 230, 110], [10, 90, 30]] : [[255, 240, 190], [255, 150, 40], [120, 20, 0]];   // green：金蕉王補血的綠色光暈（js/golden-banana-king.js）
+      const fade = (f.grow ? Math.min(1, (1 - p) * 4) * p * 1.6 : p) * (f.strength ?? 1);   // grow：先亮起來再淡出（不是一出現就最亮）；strength：亮度倍率
+      g.addColorStop(0, `rgba(${pal[0]},${(0.9 * fade).toFixed(3)})`);
+      g.addColorStop(0.4, `rgba(${pal[1]},${(0.6 * fade).toFixed(3)})`);
+      g.addColorStop(1, `rgba(${pal[2]},0)`);
       ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = g;
       ctx.beginPath(); ctx.arc(f.x, f.y, r, 0, Math.PI * 2); ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
@@ -1435,6 +1443,7 @@ function draw() {
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
   if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
   if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
   if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
@@ -1456,6 +1465,7 @@ function draw() {
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
   if (typeof drawChannelBar === 'function') drawChannelBar(ctx);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
   if (typeof drawLoofahHelpHints === 'function') drawLoofahHelpHints(ctx);   // 射隊友身上的絲瓜藤時旁邊的「幫隊友掙脫」（js/loofah-lady.js）
+  if (typeof drawBedZzz === 'function') drawBedZzz(ctx);   // 躺床睡覺的頭上飄 ZZZ（js/bed-zzz.js）
   if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉彈打睡的頭上飄 Zzz（js/special-guns.js）
   if (typeof drawPaintMarks === 'function') drawPaintMarks(ctx);   // 漆彈標記的怪物：螢光漆、準心（黑暗中也看得到）
   if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）

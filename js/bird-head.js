@@ -159,6 +159,7 @@ function chargerChargeMove(e, dt) {
       if (blocker) { e.atkCd = 0; enemyAttackObstacle(e, blocker, dt); }   // 撞上建築：撞一下
       G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 4, r2: 20, life: .22, life0: .22, color: '#c9c2b0' });
       chargerSetState(e, 'recover', chargerCfg(e).recoverWall);
+      if (!blocker) e.wallDazedT = chargerCfg(e).recoverWall;   // 撞到牆：暈眩（頭上冒星星、左右斜晃）；撞建築不算
       return;
     }
     e.x = nx; e.y = ny;
@@ -167,9 +168,10 @@ function chargerChargeMove(e, dt) {
   if (e.ch.left <= 0) chargerSetState(e, 'recover', chargerCfg(e).recoverMiss);
 }
 function chargerPickWanderSpot(e) {
+  const o = typeof squadAnchor === 'function' ? squadAnchor(e) : e;   // 金蕉王的隊員：繞著隊長散步（js/golden-banana-king.js）
   for (let i = 0; i < 8; i++) {
     const a = Math.random() * Math.PI * 2, d = (.8 + Math.random() * (chargerCfg(e).wanderRadius - .8)) * CELL;
-    const x = e.x + Math.cos(a) * d, y = e.y + Math.sin(a) * d;
+    const x = o.x + Math.cos(a) * d, y = o.y + Math.sin(a) * d;
     if (!enemyBlocked(x, y) && hasLineOfSight(e.x, e.y, x, y)) return { x, y };
   }
   return null;
@@ -180,6 +182,7 @@ function stepChargerEnemy(e, dt) {
   if (!e.ch) { e.ch = {}; chargerIdle(e); e.ch.t *= Math.random(); }
   const ch = e.ch;
   if (e.eyeFlashT > 0) e.eyeFlashT = Math.max(0, e.eyeFlashT - dt);
+  if (e.wallDazedT > 0) e.wallDazedT = Math.max(0, e.wallDazedT - dt);
   if (e.stunT > 0 || e.confuseT > 0) { if (ch.state === 'charge') chargerSetState(e, 'recover', .3); return; }
   ch.t -= dt;
   switch (ch.state) {
@@ -233,6 +236,29 @@ function stepChargerEnemy(e, dt) {
       return;
     }
     default: chargerIdle(e);
+  }
+}
+
+// ---- 暈眩：頭上冒星星、身體左右斜晃（一般鳥頭人撞牆；鳥頭大隊長撞牆或被暈，js/elite-bird-head.js）----
+function chargerDizzy(e) {
+  if (!e || e.behavior !== 'charger' || e.hp <= 0) return false;
+  if (e.elite) return !!(e.eb && e.eb.state === 'dazed' && e.eb.t > 0) || e.stunT > 0;
+  return e.wallDazedT > 0;
+}
+// 斜晃角度（弧度）：以腳底為軸左右搖，大約 ±5 度（render.js 的 drawEnemy 呼叫）
+const DIZZY_SWAY = { angle: .09, speed: 6 };
+function chargerSwayAngle(e) {
+  if (!chargerDizzy(e)) return 0;
+  return Math.sin(performance.now() / 1000 * DIZZY_SWAY.speed + (e.swayPhase ??= Math.random() * 6)) * DIZZY_SWAY.angle;
+}
+// 頭上轉圈的星星，跟版權老鼠同一套（js/burrowing-mouse.js）；畫在黑幕上面（render.js 呼叫）
+function drawChargerDizzyStars(ctx) {
+  if (!G || !G.enemies || typeof drawBurrowDizzyStars !== 'function') return;
+  const t = performance.now() / 1000;
+  for (const e of G.enemies) {
+    if (!chargerDizzy(e)) continue;
+    const w = e.drawWidth || 60, h = e.drawHeight || 80;
+    drawBurrowDizzyStars(ctx, e.x, e.y + 13 - h + 6, w / (e.elite ? 100 : 70), t);
   }
 }
 

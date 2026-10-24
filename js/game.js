@@ -2261,7 +2261,8 @@ function update(dt) {
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
-  if (typeof updateHangi === 'function') updateHangi(dt);   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
+  if (typeof updateHangi === 'function') updateHangi(dt);
+  if (typeof updateBananaKing === 'function') updateBananaKing(dt);   // 金蕉王的測試生成（js/golden-banana-king.js）   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
   if (G.baseLostT > 0 && !G.over) { G.baseLostT -= dt; if (G.baseLostT <= 0) lose('base'); }   // 基地被打壞：等一下才跳失敗
@@ -2373,7 +2374,7 @@ function prepareMonsterPreview() {
   const spec = ACTIVE_MONSTERS.find(m => m.id === MONSTER_PREVIEW_ID);
   G.cores = []; G.enemies = []; G.towers = []; G.npcs = []; LIGHT.enabled = false;
   // Existing per-monster debug spawners must not add unrelated species to this test scene.
-  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true; G.clownfishTestDone = true;
+  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true; G.clownfishTestDone = true; G.bananaKingTestDone = true;
   G.player.x = CELL * 10; G.player.y = CELL * 7; G.player.hp = PLAYER.hp; G.guide = G.guideMax;
   if (spec) G.enemies.push(createMonster(spec, CELL * 14, CELL * 7));
   const note = document.querySelector('.header-note');

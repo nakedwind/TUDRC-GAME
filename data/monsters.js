@@ -461,6 +461,33 @@ const MONSTERS_DEFAULT = [
     "hitSound": "clownfishHurt",
     "deathSound": "clownfishSmallDeath",
     "knockMul": 1.2
+  },
+  {
+    "id": "golden_banana_king",
+    "name": "金蕉王",
+    "sprite": "images/monster/golden-banana-king/golden-banana-king-front.png",
+    "hp": 150,
+    "speed": 30,
+    "playerDamage": 0,
+    "sentryDamage": 0,
+    "buildingDamage": 0,
+    "reward": 40,
+    "crystals": 5,
+    "width": 78,
+    "height": 143,
+    "frames": {
+      "front": "images/monster/golden-banana-king/golden-banana-king-front.png",
+      "walkFacing": "left",
+      "walkFront": [
+        "images/monster/golden-banana-king/golden-banana-king-walk-01.png",
+        "images/monster/golden-banana-king/golden-banana-king-walk-02.png",
+        "images/monster/golden-banana-king/golden-banana-king-walk-03.png",
+        "images/monster/golden-banana-king/golden-banana-king-walk-02.png"
+      ]
+    },
+    "behavior": "healer",
+    "hitSound": "bananaHurt",
+    "deathSound": "bananaDeath"
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

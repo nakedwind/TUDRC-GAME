@@ -427,10 +427,7 @@ function drawEliteTelegraphs(ctx) {
   const t = performance.now() / 1000;
   for (const e of G.enemies) {
     if (!e.elite || e.hp <= 0) continue;
-    drawEliteTelegraph(ctx, e);
-    // 暈眩（撞牆、被路德／安柏暈）：頭上轉圈的星星，跟版權老鼠同一套（js/burrowing-mouse.js）
-    if ((e.eb && e.eb.state === 'dazed' && e.eb.t > 0 || e.stunT > 0) && typeof drawBurrowDizzyStars === 'function')
-      drawBurrowDizzyStars(ctx, e.x, e.y + 13 - e.drawHeight + 6, e.drawWidth / 100, t);
+    drawEliteTelegraph(ctx, e);   // 暈眩的星星跟一般鳥頭人一起畫（js/bird-head.js 的 drawChargerDizzyStars）
   }
 }
 function drawEliteTelegraph(ctx, e) {

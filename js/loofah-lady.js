@@ -95,8 +95,9 @@ function stepVineEnemy(e, dt) {
   }
   ll.wait -= dt;
   if (ll.wait <= 0) {
+    const o = typeof squadAnchor === 'function' ? squadAnchor(e) : e;   // 金蕉王的隊員：繞著隊長散步（js/golden-banana-king.js）
     for (let i = 0; i < 8; i++) {
-      const a = Math.random() * Math.PI * 2, r = (.6 + Math.random() * (C.wanderRadius - .6)) * CELL, x = e.x + Math.cos(a) * r, y = e.y + Math.sin(a) * r;
+      const a = Math.random() * Math.PI * 2, r = (.6 + Math.random() * (C.wanderRadius - .6)) * CELL, x = o.x + Math.cos(a) * r, y = o.y + Math.sin(a) * r;
       if (!enemyBlocked(x, y) && hasLineOfSight(e.x, e.y, x, y)) { ll.spot = { x, y }; break; }
     }
     ll.wait = llRand(C.idleMin, C.idleMax);

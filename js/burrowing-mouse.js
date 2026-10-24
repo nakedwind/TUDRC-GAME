@@ -19,7 +19,7 @@ const BURROW_MOUSE_ART = {
 const BURROW_DEATH_HOLE = { lifetime: 60, slow: .2, fade: 2 };
 // 暫時的地圖實測開關，與小丑魚測試生怪同樣獨立於核心隨機生成。
 // 測完改 enabled:false；只對 monsterMix 包含老鼠的戰鬥地圖生效。
-const BURROW_MOUSE_TEST = { enabled: true, delay: 1, campDistance: 20 };
+const BURROW_MOUSE_TEST = { enabled: false, delay: 1, campDistance: 20 };
 // 世界座標落點：地圖仍提供碰撞／地板資訊，但位置不吸附格線。
 function burrowMouseCanStand(x, y, actor = null) {
   const floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null;

@@ -20,6 +20,7 @@ const LIGHT_FLASH = {
   core:      { r: 420, life: 1.1, power: 1,   color: [220, 160, 255] },   // 異質核心被摧毀
   explosion: { r: 380, life: .6,  power: 1,   color: [255, 170, 80] },    // 油桶爆炸
   soothe:    { r: 150, life: .70, power: .55, color: [140, 220, 160] },   // 疏導（顏色跟著施術者）
+  heal:      { r: 260, life: 1.0, power: .4,  color: [110, 255, 130] },   // 金蕉王補血（綠光，js/golden-banana-king.js）
 };
 const LIGHT_FLASH_MAX = 14;   // 同時最多幾個閃光（太多會拖慢畫面；超過就擠掉最快熄的）
 function addLightFlash(kind, x, y, scale = 1, color) {

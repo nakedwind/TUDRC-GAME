@@ -18,6 +18,7 @@ const SUPPLIES = [
   { id:'graffiti-blue', name:'塗鴉筆（藍）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-blue.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個藍色記號，會一直留在那裡。畫一個用掉一支。' },
   { id:'graffiti-black', name:'塗鴉筆（黑）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-black.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個黑色記號，會一直留在那裡。畫一個用掉一支。' },
   { id:'charm', name:'順順宮平安符', kind:'medical', price:100, special:true, image:'images/裝備/lucky-charm.png', effect:'🧧 擋一次咬', note:'帶在身上就有效：被 Smiler 咬的時候自動用掉，擋下那一次。', desc:'順順宮求來的平安符。在黑暗中被 Smiler 咬的時候，會替你擋下一次（擋完就用掉了）。' },
+  { id:'banana', name:'香蕉', kind:'medical', use:'hp', restore:15, price:10, special:true, image:'images/monster/golden-banana-king/banana.png', desc:'打倒金蕉王掉下來的香蕉，金黃飽滿。吃下去恢復一點 HP。' },
   // ---- 零食 ----
   { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.05 }, file:'小學麵.png' },
   { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.07 }, file:'卡迪這.png' },

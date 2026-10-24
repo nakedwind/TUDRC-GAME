@@ -260,6 +260,7 @@ function onEnemyDeath(e) {
     if (e.forceAttack && e.frames) { e.lastFrameFile = e.frames.front; e.lastFrameFlip = false; }   // 死在撲咬的瞬間：攻擊圖尺寸不同，改用站姿圖倒下才不會變形
     pushFallCorpse(e); return;
   }
+  if (e.behavior === 'healer') { if (typeof bananaKingDeath === 'function') bananaKingDeath(e); pushFallCorpse(e); return; }   // 金蕉王：倒下、掉香蕉（js/golden-banana-king.js）
   if (e.behavior === 'boomerang' || e.behavior === 'fishhead' || e.behavior === 'vine' || e.behavior === 'clownfish') { pushFallCorpse(e); return; }   // 比基尼小丑魚也跟絲瓜小姐一樣倒下（js/clownfish.js）   // 魚頭君也倒下   // 夯吉寶：倒下變黑（跟鳥頭人一樣）
   const v = SLIME_VARIANTS[e.variant] || SLIME_VARIANTS.normal;
   const size = e.sizeMul || 1;

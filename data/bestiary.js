@@ -210,6 +210,18 @@ const BESTIARY_CONFIG = {
       ],
       "thumbScale": 180,
       "thumbY": 0
+    },
+    "golden_banana_king": {
+      "stars": 3,
+      "imgScale": 60,
+      "abilities": [
+        "治癒權杖：每 10 秒幫附近所有怪物恢復 30 HP。",
+        "膽小：看到人就慢吞吞地逃走，自己不會攻擊。",
+        "捨身救援：看到受傷的怪物，會不顧危險靠過去補血。",
+        "香蕉：打倒後會掉下香蕉，吃了可以恢復 HP。"
+      ],
+      "thumbScale": 200,
+      "thumbY": 10
     }
   },
   "order": [
@@ -230,6 +242,7 @@ const BESTIARY_CONFIG = {
     "milkfish_kid_small",
     "burrowing_mouse",
     "clownfish",
-    "clownfish_small"
+    "clownfish_small",
+    "golden_banana_king"
   ]
 };
