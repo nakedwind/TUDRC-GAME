@@ -7,9 +7,56 @@
      imageBox 這隻自己的怪物圖片框（x、y、w 寬、h 高；沒寫＝用 layout.image）、thumbScale／thumbX／thumbY 縮圖大小（%）與位移（px）、hue 換色（史萊姆變體）、hidden 不放進圖鑑
    ・order：怪物的排列順序（沒列到的接在後面） */
 const BESTIARY_CONFIG = {
-  "layout": {},
+  "layout": {
+    "image": {
+      "w": 153,
+      "h": 153,
+      "x": 182,
+      "y": 155
+    }
+  },
   "texts": {},
   "style": {},
-  "monsters": {},
+  "monsters": {
+    "slime:splitter": {
+      "stars": 2
+    },
+    "slime:bomber": {
+      "stars": 3
+    },
+    "slime:spitter": {
+      "stars": 2
+    },
+    "slime:giant": {
+      "stars": 4
+    },
+    "bird_head": {
+      "stars": 3
+    },
+    "pearl_kid": {
+      "stars": 3
+    },
+    "lifeform": {
+      "stars": 5
+    },
+    "hangi_bao": {
+      "stars": 2
+    },
+    "fish_head": {
+      "stars": 2
+    },
+    "loofah_lady": {
+      "stars": 4
+    },
+    "milkfish_kid": {
+      "stars": 5
+    },
+    "burrowing_mouse": {
+      "stars": 4
+    },
+    "clownfish": {
+      "stars": 3
+    }
+  },
   "order": []
 };

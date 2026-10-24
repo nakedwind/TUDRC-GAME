@@ -28,7 +28,9 @@ function setStatus(msg, err = false) { $q('status').textContent = msg; $q('statu
 function saveDraft() { try { localStorage.setItem(SQ_DRAFT_KEY, JSON.stringify(state)); } catch (_) {} }
 const partOf = key => parts.find(p => p.key === key) || { key, label: key, group: '', kind: /^img\.|Img:|Icon:/.test(key) ? 'img' : /^(roster|node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '' };
 const labelOf = key => partOf(key).label;
-const elOf = key => state.layout.elements[key] || {};
+// @隊員/技能格＝只套用在那一格（例如技能效果的字）：還沒調過就照大家共用的那一份
+const baseKeyOf = key => key.includes('@') ? key.split('@')[0] : null;
+const elOf = key => state.layout.elements[key] || (baseKeyOf(key) ? state.layout.elements[baseKeyOf(key)] || {} : {});
 const isImg = key => partOf(key).kind === 'img';
 const isBox = key => partOf(key).kind === 'box';   // 方形的框：大小＝寬＝高
 const isText = key => !isImg(key) && !isBox(key) && /^(text|btn|stat(Label|Value)|gearSlotName|lookSlotName)/.test(key);
@@ -67,7 +69,12 @@ function setEl(key, patch, send = true) {
   for (const k of ['x', 'y']) if (Math.round(+o[k] || 0)) clean[k] = Math.round(+o[k]);
   for (const k of ['w', 'h', 'size', 'font']) if (+o[k] > 0) clean[k] = Math.round(+o[k]);
   if (o.align) clean.align = o.align;
-  if (Object.keys(clean).length) state.layout.elements[key] = clean; else delete state.layout.elements[key];
+  const bk = baseKeyOf(key);
+  if (bk) {   // 每格各自的：位置 0 也要記（才蓋得過共用的位移）；跟共用的一模一樣＝不用另外記
+    clean.x = Math.round(+o.x || 0); clean.y = Math.round(+o.y || 0);
+    const b = state.layout.elements[bk] || {}, same = ['x', 'y', 'w', 'h', 'size', 'font', 'align'].every(k => (clean[k] || 0) === (b[k] || 0));
+    if (same) delete state.layout.elements[key]; else state.layout.elements[key] = clean;
+  } else if (Object.keys(clean).length) state.layout.elements[key] = clean; else delete state.layout.elements[key];
   saveDraft(); if (send) sendState(); if (leftTab === 'parts') renderLeft(); renderProps(false);
 }
 function setText(t, value) {
@@ -277,7 +284,7 @@ function renderProps(rebuild = true) {
   }
 }
 // 右邊直接改技能說明的字（名稱、描述、效果）：改的是畫面上那一格，左邊「技能內容」也一起換到那一格
-const SKILL_TEXT_KEY = /^text\.(skillName|skillDesc|skillEffect|skillNote|lockDesc)$/;
+const SKILL_TEXT_KEY = /^text\.(skillName|skillDesc|skillEffect|skillNote|lockDesc)(@|$)/;   // @隊員/技能格＝只套用在那一格的位置、大小
 // 數字欄是空白（＝原本的大小）時按上下小箭頭：先填入原本的數字，再從它開始加減（不是從 0 開始）
 function prefillDefault(e) {
   const el = e.target;
@@ -309,10 +316,10 @@ $q('props').addEventListener('click', e => {
   if (b.dataset.center || b.dataset.align || b.dataset.reset || b.id === 'resetOne') remember();
   if (b.dataset.center) { toGame({ type: 'center', key: selKey, axis: b.dataset.center }); return; }
   if (b.dataset.align) { const o = elOf(selKey); setEl(selKey, { align: o.align === b.dataset.align ? '' : b.dataset.align }); return; }
-  const r = b.dataset.reset;
-  if (r === 'pos') setEl(selKey, { x: 0, y: 0 });
-  else if (r === 'size') setEl(selKey, { w: 0, h: 0, size: 0 });
-  else if (r === 'font') setEl(selKey, { font: 0, align: '' });
+  const r = b.dataset.reset, bs = baseKeyOf(selKey) ? state.layout.elements[baseKeyOf(selKey)] || {} : {};   // 每格各自的：恢復成大家共用的那一份
+  if (r === 'pos') setEl(selKey, { x: bs.x || 0, y: bs.y || 0 });
+  else if (r === 'size') setEl(selKey, { w: bs.w || 0, h: bs.h || 0, size: bs.size || 0 });
+  else if (r === 'font') setEl(selKey, { font: bs.font || 0, align: bs.align || '' });
   else if (r === 'text') { const t = (info[selKey] || {}).text; if (t) { setText(t, ''); renderProps(false); } }
   else if (r === 'skill') {   // 這格技能整格恢復預設（跟左邊「技能內容」的恢復預設一樣）
     const s = (info[selKey] || {}).skill, m = s && state.skills.members[s.member]; if (!m || !m[s.id]) return;
@@ -357,6 +364,7 @@ window.addEventListener('message', e => {
   else if (m.type === 'pick') { if (m.key !== selKey) { selKey = m.key; if (leftTab === 'parts') renderLeft(); renderProps(); } }
   else if (m.type === 'info') {
     info[m.key] = m;
+    if (m.part && !parts.some(p => p.key === m.key)) parts.push(m.part);   // 每格技能各自的（@）不在清單裡：記下名字，右邊才顯示得出來
     if (m.page && m.page !== page) { page = m.page; document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('on', x.dataset.page === page)); }
     if (m.skill && leftTab === 'skills' && m.skill.member === skillMember && m.skill.id === skillNode && !savedNode(skillMember, skillNode)) renderLeft();
     if (m.key === selKey) renderProps(false);
