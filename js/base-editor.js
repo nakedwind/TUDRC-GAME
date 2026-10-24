@@ -100,7 +100,7 @@ const STORAGE_BACKROOM_WALL_HALF_HOLE = 'tudrc_asset_backroom_wall_half_hole_v1'
 const STORAGE_BACKROOM_DOOR_WOOD = 'tudrc_asset_backroom_door_wood_v1'; // 後補：後室木門（黃色，配門洞用）
 const STORAGE_BACKROOM_CORE_PILLARS = 'tudrc_asset_backroom_core_pillars_v1'; // 後補：異質核心與柱子變化
 const BACKROOM_CORE_PILLAR_IDS = new Set(['tile_bg_anomalous_core', 'tile_bg_backroom_pillar3', 'tile_bg_pillar', 'tile_bg_pillar02', 'tile_bg_pillar03', 'tile_bg_pillar04']);
-const BACKROOM_DAMAGE_EXTRA_IDS = new Set(["tile_bg_backroom_floor03", "tile_bg_backroom_floor04", "tile_bg_backroom_wall02", "tile_bg_backroom_wall02_dmg_light", "tile_bg_backroom_wall02_dmg_medium", "tile_bg_backroom_wall02_dmg_heavy", "tile_bg_electric_light", "tile_bg_road_signs", "tile_bg_word_y28", "tile_dmg_backroom_pillar_damaged", "tile_dmg_pillar_damaged", "tile_dmg_floor_crack_cross", "tile_dmg_floor_crack_fork", "tile_dmg_floor_crack_stained", "tile_dmg_floor_stain_seep", "tile_dmg_floor_stain_smudge", "tile_dmg_rubble_brick_chunks", "tile_dmg_rubble_chips_02", "tile_dmg_rubble_scatter_02", "tile_dmg_rubble_slab_fragments", "tile_dmg_rubble_wall_chunks", "tile_dmg_rubble_rebar_chunk"]);
+const BACKROOM_DAMAGE_EXTRA_IDS = new Set(["tile_bg_backroom_floor03", "tile_bg_backroom_floor04", "tile_bg_backroom_wall02", "tile_bg_backroom_wall02_dmg_light", "tile_bg_backroom_wall02_dmg_medium", "tile_bg_backroom_wall02_dmg_heavy", "tile_bg_electric_light", "tile_bg_road_signs", "tile_bg_word_y28", "tile_dmg_pillar_damaged", "tile_dmg_floor_crack_cross", "tile_dmg_floor_crack_fork", "tile_dmg_floor_crack_stained", "tile_dmg_floor_stain_seep", "tile_dmg_floor_stain_smudge", "tile_dmg_rubble_brick_chunks", "tile_dmg_rubble_chips_02", "tile_dmg_rubble_scatter_02", "tile_dmg_rubble_slab_fragments", "tile_dmg_rubble_wall_chunks", "tile_dmg_rubble_rebar_chunk"]);
 const STORAGE_OIL_TANK = 'tudrc_asset_pack_oil_tank_v2';   // 新增素材：油箱
 const STORAGE_GRAFFITI_PENS = 'tudrc_asset_pack_graffiti_pens_v1';   // 新增素材：地上撿的塗鴉筆（js/graffiti.js）
 const STORAGE_RESTAURANT_CHAIR_FIX = 'tudrc_fix_restaurant_folding_chairs_v1'; // 餐廳「飲水機」其實是折疊椅：改檔名與名稱
@@ -2336,10 +2336,15 @@ tileFile.addEventListener('change', () => {
   reader.onload = () => {
     const dataUrl = reader.result, probe = new Image();
     probe.onload = async () => {
-      const wS = Math.max(1, Math.round(probe.naturalWidth / CELL));
-      const hS = Math.max(1, Math.round(probe.naturalHeight / CELL));
+      // 猜佔幾格：新素材一格畫 60×60（遊戲放大 1.5 倍後剛好 1 點＝1 像素，線條不會粗細不一）；舊素材一格 40×40
+      // 寬、高都能被 60 整除 → 當成新素材（÷60）；不然照舊（÷40）。只影響「建議的數字」，已經加過的素材不會變
+      const pw = probe.naturalWidth, ph = probe.naturalHeight, new60 = pw % 60 === 0 && ph % 60 === 0, per = new60 ? 60 : CELL;
+      const wS = Math.max(1, Math.round(pw / per));
+      const hS = Math.max(1, Math.round(ph / per));
+      const also40 = new60 && pw % CELL === 0 && ph % CELL === 0 && (pw / CELL !== wS || ph / CELL !== hS);   // 例如 120×120：新素材 2×2、舊素材 3×3
+      const hint = new60 ? '依「60px 一格」的新素材建議' + (also40 ? '；如果是 40px 一格的舊素材，請改成 ' + pw / CELL + '×' + ph / CELL + ' 格' : '') : '依圖片大小建議';
       const projectPath = await findProjectImagePath(f.name);
-      finishAddTile(projectPath || dataUrl, nameDefault, wS, hS);
+      finishAddTile(projectPath || dataUrl, nameDefault, wS, hS, hint);
     };
     probe.onerror = () => setStatus('圖片讀取失敗，請確認檔案格式是否正確', '#ff8f8f');
     probe.src = dataUrl;
@@ -2348,9 +2353,9 @@ tileFile.addEventListener('change', () => {
   reader.readAsDataURL(f);
   tileFile.value = '';
 });
-function finishAddTile(path, nameDefault, wS, hS) {
+function finishAddTile(path, nameDefault, wS, hS, hint = '依圖片大小建議') {
   const name = (prompt('磚塊名稱？', nameDefault) || nameDefault).trim();
-  const w = Math.max(1, parseInt(prompt('這塊圖佔「幾格寬」？（依圖片大小建議）', wS), 10) || wS);
+  const w = Math.max(1, parseInt(prompt('這塊圖佔「幾格寬」？（' + hint + '）', wS), 10) || wS);
   const h = Math.max(1, parseInt(prompt('這塊圖佔「幾格高」？', hS), 10) || hS);
   const flat = confirm('這張圖是「平貼地面」嗎？\n\n【確定】＝平貼地面（地板、裂痕、紅線…）：永遠畫在角色下方，不會遮住角色。\n【取消】＝立體物（牆、柱子、家具…）：角色走到它後面時會被擋住。');
   pushUndo();

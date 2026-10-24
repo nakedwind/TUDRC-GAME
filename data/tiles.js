@@ -2563,14 +2563,6 @@ const SHARED_TILES = [
     "h": 1
   },
   {
-    "id": "tile_dmg_backroom_pillar_damaged",
-    "name": "後室柱子（破損）",
-    "role": "floor",
-    "file": "images/破損建築/Back-room-Pillar-damaged.png",
-    "w": 1,
-    "h": 4
-  },
-  {
     "id": "tile_dmg_pillar_damaged",
     "name": "大廳柱子（破損）",
     "role": "floor",
@@ -3885,14 +3877,6 @@ const SHARED_TILES = [
     "file": "images/地下訓練室/containment-glass-door03.png",
     "w": 2,
     "h": 3
-  },
-  {
-    "id": "tile_mvfqc6g7",
-    "name": "shoe-cabinet02",
-    "role": "floor",
-    "file": "images/地下訓練室/shoe-cabinet02.png",
-    "w": 2,
-    "h": 1
   },
   {
     "id": "tile_training_bench",

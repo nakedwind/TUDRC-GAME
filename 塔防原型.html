@@ -264,7 +264,7 @@
   <script src="js/monster-data.js?v=mouse-mound-slow-20261023"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
-  <script src="data/tiles.js?v=ammo-crate2-20261024"></script>      <!-- 4. 素材庫（兩個編輯器共用） -->
+  <script src="data/tiles.js?v=rm-missing-ammo-crate2-20261024"></script>      <!-- 4. 素材庫（兩個編輯器共用） -->
   <script src="data/maps.js?v=mouse-map-test-20261023"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=dorms-20261024"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
