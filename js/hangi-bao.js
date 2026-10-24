@@ -270,7 +270,7 @@ function updateCapShots(dt) {
         const step = Math.min(5, move); move -= step; s.left -= step;
         const nx = s.x + s.ux * step, ny = s.y + s.uy * step, [c, r] = cellAt(nx, ny);
         if (!inGrid(c, r) || isWall(c, r)) { s.phase = 'back'; break; }   // 撞牆就折回來
-        const blocker = barrierAt(c, r);
+        const blocker = enemyBarrierAt(c, r);
         if (blocker) { e.atkCd = 0; enemyAttackObstacle(e, blocker, 0); s.phase = 'back'; break; }   // 打到建築：損壞建築，再折回來
         s.x = nx; s.y = ny;
         capCheckHits(s);

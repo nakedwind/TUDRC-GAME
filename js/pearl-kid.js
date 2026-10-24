@@ -188,7 +188,7 @@ function updatePearls(dt) {
       pl.x += ux * s; pl.y += uy * s;
       const [c, r] = cellAt(pl.x, pl.y);
       if (!inGrid(c, r) || isWall(c, r)) { pl.done = true; pearlBurst(pl.x, pl.y, pl.z); break; }
-      const blocker = barrierAt(c, r);
+      const blocker = enemyBarrierAt(c, r);
       if (blocker) {
         pl.done = true; pearlBurst(pl.x, pl.y, pl.z);
         if (G.enemies.includes(pl.owner)) { pl.owner.atkCd = 0; enemyAttackObstacle(pl.owner, blocker, 0); }

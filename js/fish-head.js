@@ -310,7 +310,7 @@ function updateFishDrops(dt) {
     const k = 1 - Math.max(0, d.left / d.len);   // 0＝剛離開嘴巴、1＝飛到底
     d.z = d.z0 * (1 - k) + 8 * k + FISH_HEAD.arcHeight * 4 * k * (1 - k);   // 先往上拱、再落下（拋物線）
     const [c, r] = cellAt(d.x, d.y);
-    const building = inGrid(c, r) && barrierAt(c, r);
+    const building = inGrid(c, r) && enemyBarrierAt(c, r);
     if (building) {   // 打到建築：一次噴水對同一個建築只算一次傷害
       d.done = true;
       if (e && !e.dead && G.obstacles.includes(building) && !d.spray.hit.has(building)) { d.spray.hit.add(building); e.atkCd = 0; enemyAttackObstacle(e, building, 0); }

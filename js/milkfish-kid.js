@@ -279,7 +279,7 @@ function mfPickFleeSpots(e) {
     if (d >= maxSteps) continue;
     for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (seen.has(key) || !inGrid(nc, nr) || isWall(nc, nr) || barrierAt(nc, nr) || (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr))) continue;
+      if (seen.has(key) || !inGrid(nc, nr) || isWall(nc, nr) || enemyBarrierAt(nc, nr) || (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr))) continue;
       seen.set(key, d + 1); queue.push([nc, nr]);
     }
   }

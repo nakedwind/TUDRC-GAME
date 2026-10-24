@@ -40,6 +40,21 @@ function chargerPickTarget(e) {
   }
   return best;
 }
+// 看得到的人（溫特、注意到的隊員）裡最近的一個；except＝不算這個（原本追的目標）。要打障礙物之前先找人打
+function chargerVisiblePerson(e, except) {
+  let best = null, bestD = chargerCfg(e).noticeRange * CELL;
+  for (const a of chargerTargets(e)) {
+    const d = Math.hypot(a.x - e.x, a.y - e.y);
+    if (a !== except && d <= bestD && hasLineOfSight(e.x, e.y, a.x, a.y)) { best = a; bestD = d; }
+  }
+  return best;
+}
+// 衝撞路線上有沒有障礙物（建築、牆）：有的話不直接衝，改成繞過去追（不然會一直撞同一個路障）
+function chargerLaneClear(e, target) {
+  const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy);
+  for (let s = 4; s < d - 14; s += 4) if (enemyBlocked(e.x + dx / d * s, e.y + dy / d * s)) return false;   // 跟衝撞一樣每 4 像素檢查一次（js/bird-head.js 的 chargerChargeMove）
+  return true;
+}
 function chargerSetState(e, state, t = 0) { e.ch.state = state; e.ch.t = t; }
 function chargerIdle(e) {
   const { idleMin: lo, idleMax: hi } = chargerCfg(e);
@@ -140,7 +155,7 @@ function chargerChargeMove(e, dt) {
     const s = Math.min(4, move); move -= s;
     const nx = e.x + e.ch.dir.x * s, ny = e.y + e.ch.dir.y * s;
     if (enemyBlocked(nx, ny)) {
-      const [c, r] = cellAt(nx, ny), blocker = inGrid(c, r) && barrierAt(c, r);
+      const [c, r] = cellAt(nx, ny), blocker = inGrid(c, r) && enemyBarrierAt(c, r);
       if (blocker) { e.atkCd = 0; enemyAttackObstacle(e, blocker, dt); }   // 撞上建築：撞一下
       G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 4, r2: 20, life: .22, life0: .22, color: '#c9c2b0' });
       chargerSetState(e, 'recover', chargerCfg(e).recoverWall);
@@ -189,7 +204,7 @@ function stepChargerEnemy(e, dt) {
       chargerFace(e, target.x);
       if (ch.t > 0) return;
       const d = Math.hypot(target.x - e.x, target.y - e.y);
-      if (d <= chargerCfg(e).chargeRange * CELL && hasLineOfSight(e.x, e.y, target.x, target.y)) chargerStartCharge(e, target);
+      if (d <= chargerCfg(e).chargeRange * CELL && hasLineOfSight(e.x, e.y, target.x, target.y) && chargerLaneClear(e, target)) chargerStartCharge(e, target);
       else chargerSetState(e, 'hunt', 0);
       return;
     }
@@ -205,12 +220,16 @@ function stepChargerEnemy(e, dt) {
       const target = ch.target;
       const d = target ? Math.hypot(target.x - e.x, target.y - e.y) : Infinity;
       if (!target || target.hp <= 0 || d > chargerCfg(e).loseRange * CELL) { chargerIdle(e); return; }
-      if (d <= chargerCfg(e).chargeRange * CELL && hasLineOfSight(e.x, e.y, target.x, target.y)) { chargerNotice(e, target, chargerCfg(e).noticeTime * .6); return; }
+      if (d <= chargerCfg(e).chargeRange * CELL && hasLineOfSight(e.x, e.y, target.x, target.y) && chargerLaneClear(e, target)) { chargerNotice(e, target, chargerCfg(e).noticeTime * .6); return; }
       const [gc, gr] = cellAt(target.x, target.y);
       const hx = e.x, hy = e.y;
-      const nav = enemyNavigate(e, gc, gr, dt * chargerCfg(e).huntSpeedMul, 'hunt:' + gc + ',' + gr, true);
+      const nav = enemyNavigate(e, gc, gr, dt * chargerCfg(e).huntSpeedMul, 'hunt:' + gc + ',' + gr, 'detour');   // 繞得過去就繞，不先打障礙物
       chargerFootsteps(e, Math.hypot(e.x - hx, e.y - hy), false);
-      if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
+      if (nav.blocker) {   // 真的過不去：附近看得到別人就改去撞人，沒有才打障礙物
+        const other = chargerVisiblePerson(e, target);
+        if (other) { chargerNotice(e, other, chargerCfg(e).noticeTime * .6); return; }
+        enemyAttackObstacle(e, nav.blocker, dt);
+      }
       return;
     }
     default: chargerIdle(e);

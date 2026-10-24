@@ -43,9 +43,9 @@ const ELITE_BIRD = {
   dazed: 2.6,                    // 撞牆的暈眩（秒）＝輸出時間
   coreShield: .6,                // 牠活著時，核心少受幾成傷害
   returnSpeedMul: 1.1,           // 走回原位的速度倍率
-  stepEvery: 50,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
-  stepShake: 10, walkShake: 3,   // 衝撞、走路時每一步的畫面震動（貼身時的最大值；溫特在 shakeRange 格內才震，越近越大）
-  shakeRange: 10,
+  stepEvery: 60,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
+  stepShake: 10, walkShake: 5,   // 衝撞、走路時每一步的畫面震動（貼身時的最大值；溫特在 shakeRange 格內才震，越近越大）
+  shakeRange: 20,
 };
 
 // ---- 開場：照地圖設定擺上場（game.js 在 seedCores 之後呼叫）----
@@ -73,6 +73,7 @@ function seedEliteGuards() {
   e.speed = base.speed * E.speedMul;
   e.shockResist = 1;   // 不怕電：雷電照樣吃全額傷害，但不會被麻痺停住（安柏的雷擊、雷電彈）
   e.tint = E.hue; e.knockMul = E.knockMul; e.staggerTime = E.stagger; e.unpushable = true;   // unpushable：隊員的盾撞、大招擊退都推不動（game.js）
+  e.noHitSquash = true;   // 被打中不壓扁回彈（js/combat-feel.js；落腳時的壓扁是 eliteBirdFootsteps 另外設的，不受影響）
   e.home = { x, y }; e.guardCore = core;
   e.faceRight = false; e.faceBack = true;   // 背對玩家、看著核心
   e.eb = { state: 'guard', t: 0, stunSeen: 0 }; e.ch = { state: 'idle', t: 0 };
@@ -299,7 +300,7 @@ function eliteBirdChargeStep(e, dt) {
       eliteBirdFootsteps(e, Math.hypot(e.x - x0, e.y - y0), true);
       return;
     }
-    const blocker = barrierAt(c, r);
+    const blocker = enemyBarrierAt(c, r);
     if (blocker) eliteBirdSmash(e, blocker);   // 建築：直接撞爛，繼續衝
     e.x = nx; e.y = ny;
     eliteBirdCheckHits(e);
@@ -374,7 +375,7 @@ function stepEliteBird(e, dt) {
       chargerFace(e, target.x);
       if (awayHome > E.leash * CELL * .7) return;   // 走到守備範圍邊緣就停下來等，不再往外追
       const [tc, tr] = cellAt(target.x, target.y), hx = e.x, hy = e.y;
-      const nav = enemyNavigate(e, tc, tr, dt, 'elite-approach:' + tc + ',' + tr, true);
+      const nav = enemyNavigate(e, tc, tr, dt, 'elite-approach:' + tc + ',' + tr, 'detour');   // 繞得過去就繞，不先打障礙物
       eliteBirdFootsteps(e, Math.hypot(e.x - hx, e.y - hy), false);
       if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
       return;

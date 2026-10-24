@@ -198,9 +198,14 @@ function enemyChaseSentry(e, target, distance, moveDt, dt) {
   const nav = enemyNavigate(e, gc, gr, moveDt, 'sentry:' + target.type + ':' + gc + ',' + gr, true);
   if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
 }
+// 怪物眼中的擋路建築：異質礦（js/ore.js）不算，怪物直接穿過去、也不會去打它（哨兵和溫特照樣被礦擋住）
+function enemyBarrierAt(c, r) {
+  const o = barrierAt(c, r);
+  return o && !o.ore ? o : null;
+}
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
-  return !inGrid(c, r) || isWall(c, r) || !!barrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r));   // 順順宮帽也擋路（js/hangi-bao.js）
+  return !inGrid(c, r) || isWall(c, r) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r));   // 順順宮帽也擋路（js/hangi-bao.js）
 }
 function resetEnemyNavigation(e) {
   e.hasTarget = false; e.baseTarget = null;
@@ -269,7 +274,7 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
     for (const [dc, dr] of ENEMY_NEIGHBORS) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
       if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key)) continue;
-      if (barrierAt(nc, nr) && !canBreakBuildings) continue;
+      if (enemyBarrierAt(nc, nr) && !canBreakBuildings) continue;
       if (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr)) continue;   // 繞過順順宮帽
       cameFrom.set(key, [c, r]); queue.push([nc, nr]);
     }
@@ -282,15 +287,16 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
   path.reverse();
   return path;
 }
+// canBreakBuildings：true＝可以直接打穿建築走過去；'detour'＝先找繞得過去的路，真的過不去才打穿（鳥頭人，js/bird-head.js）
 function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   e.aiRouteTimer = (e.aiRouteTimer || 0) - moveDt;
   const goal = goalC + ',' + goalR;
   if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || !e.aiPath || !e.aiPath.length) {
-    e.aiPath = buildEnemyRoute(e, goalC, goalR, canBreakBuildings);
+    e.aiPath = (canBreakBuildings === 'detour' && buildEnemyRoute(e, goalC, goalR, false)) || buildEnemyRoute(e, goalC, goalR, !!canBreakBuildings);
     e.aiRouteKey = routeKey; e.aiGoal = goal; e.aiRouteTimer = .65 + Math.random() * .35;
   }
   if (!e.aiPath || !e.aiPath.length) return { reached: true };
-  const [nc, nr] = e.aiPath[0], blocker = barrierAt(nc, nr);
+  const [nc, nr] = e.aiPath[0], blocker = enemyBarrierAt(nc, nr);
   if (blocker) return { blocker };
   const [tx, ty] = center(nc, nr), d = Math.hypot(tx - e.x, ty - e.y);
   if (d <= Math.max(2, e.speed * moveDt)) {
@@ -305,7 +311,7 @@ function chooseDarkWanderCell(e) {
   for (let r = Math.max(0, er - 7); r <= Math.min(ROWS - 1, er + 7); r++) {
     for (let c = Math.max(0, ec - 7); c <= Math.min(COLS - 1, ec + 7); c++) {
       const distance = Math.abs(c - ec) + Math.abs(r - er);
-      if (distance < 2 || distance > 9 || isWall(c, r) || barrierAt(c, r) || cellLit(c, r)) continue;
+      if (distance < 2 || distance > 9 || isWall(c, r) || enemyBarrierAt(c, r) || cellLit(c, r)) continue;
       choices.push([c, r]);
     }
   }
@@ -419,9 +425,14 @@ function stepEnemy(e, dt) {
   if (e.guardPose && stepEliteGuardPose(e, dt)) return;   // 大隊長身邊的手下：背對玩家站崗，大隊長大叫才轉身
   // 核心醒著：狂暴的異質體離核心太遠就衝回去守著（js/core-frenzy.js）；溫特貼在旁邊時照樣先打溫特
   const guardCore = typeof frenzyCoreGoal === 'function' ? frenzyCoreGoal(e) : null;
-  if (guardCore && !(G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= CELL * 2.25)) {
+  // 鳥頭人：看得到人（或正在蓄力、衝撞、追人）就先打人，不回核心、也不一路拆建築回去
+  const chargerBusy = e.behavior === 'charger' && (chargerPickTarget(e)
+    || (e.ch && ['notice', 'charge', 'recover', 'hunt'].includes(e.ch.state) && e.ch.target && e.ch.target.hp > 0));
+  if (guardCore && !chargerBusy && !(G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= CELL * 2.25)) {
     const [gc, gr] = cellAt(guardCore.x, guardCore.y);
-    const nav = enemyNavigate(e, gc, gr, e.frames ? dt : updateSlimeJump(e, dt), 'core:' + gc + ',' + gr, true);
+    // 比基尼小丑魚：回核心也要一跳一跳（只有騰空那段前進），不然會卡在跳起來的姿勢一路滑過去（js/clownfish.js）
+    const moveDt = e.behavior === 'clownfish' && typeof updateClownfishHop === 'function' ? updateClownfishHop(e, dt) : e.frames ? dt : updateSlimeJump(e, dt);
+    const nav = enemyNavigate(e, gc, gr, moveDt, 'core:' + gc + ',' + gr, e.behavior === 'charger' ? 'detour' : true);   // 鳥頭人回核心：繞得過去就繞，不先拆建築
     if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
     else if (nav.reached && Math.hypot(guardCore.x - e.x, guardCore.y - e.y) > CELL * 2) { e.coreReturning = false; e.coreGiveUpT = 4; }   // 走不到核心：先放棄，過一下再試
     return;
