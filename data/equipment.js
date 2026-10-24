@@ -143,3 +143,9 @@ const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal'],
 // ===== 彈匣（js/magazine.js）：在背包「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪只換得到彈匣裡的 =====
 // free：不佔彈匣、一定帶著；slots[等級-1]＝彈匣裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
 const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5], cost: [150, 250, 380], name: '彈匣', icon: '🧰' };
+// ===== 背包格數（js/backpack.js）：開發工坊升級；slots[等級-1]＝幾格，cost[i]＝從第 i+1 級升到下一級花幾個異質碎片 =====
+// items＝「物品」分頁，ammo＝「彈藥包」分頁（一種子彈一格）。重要物品、隊員物資沒有格數上限。
+const BAG_UPGRADES = {
+  items: { name: '背包擴充', icon: '🎒', tab: '物品', slots: [12, 18, 24, 30], cost: [150, 250, 380] },
+  ammo: { name: '彈藥包擴充', icon: '🧰', tab: '彈藥包', slots: [12, 18, 24, 30, 36, 42], cost: [150, 250, 380, 520, 700] },
+};

@@ -70,7 +70,13 @@ function eocVendingState() {
 const eocVendingMinutesLeft = () => Math.max(1, Math.ceil((eocVendingState().at + EOC_VENDING.refillMin * 60000 - Date.now()) / 60000));
 // 這一格還能放幾個進購物車：子彈上限、零食飲料的持有上限、販賣機的庫存
 function shopRoom(item) {
-  let room = Math.min(shopBulletRoom(item), carryRoom(item));
+  const reserved = new Map(supplyInventory);
+  for (const [id, n] of shopCart) if (id !== item.id && !shopItemById(id)?.bullet) reserved.set(id, (reserved.get(id) || 0) + n);
+  let room = Math.min(shopBulletRoom(item), item.bullet ? Infinity : carryRoom(item, reserved));
+  if (item.bullet && !bulletOwned(item.bullet)) {
+    const reservedBullets = new Set([...shopCart].filter(([id, n]) => n > 0 && id !== item.id).map(([id]) => shopItemById(id)?.bullet).filter(id => id && !bulletOwned(id)));
+    if (bagUsedSlots(supplyInventory, 'weapon') + reservedBullets.size >= bagCapacity('weapon')) room = 0;
+  }
   if (vendingMode && isEocVending()) room = Math.min(room, (eocVendingState()[vendingColor] || {})[item.id] || 0);
   return room;
 }
@@ -313,7 +319,7 @@ function checkoutCart() {
   if (!shopCart.size || !G || total > G.money) { sfx('error'); return; }
   for (const [id, n] of shopCart) {
     const item = shopItemById(id);
-    if (!item || n > shopRoom(item)) { sfx('error'); systemNotice(!item ? '找不到這個商品，請調整購物車' : item.bullet ? '子彈已達持有上限，請調整購物車數量' : '超過持有上限（' + item.name + '最多 ' + carryMax(item) + ' 個）或販賣機庫存不夠，請調整購物車數量', true); return; }
+    if (!item || n > shopRoom(item)) { sfx('error'); systemNotice(!item ? '找不到這個商品，請調整購物車' : item.bullet ? '子彈已達持有上限，請調整購物車數量' : '背包空間或販賣機庫存不足，請調整購物車數量', true); return; }
   }
   const count = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
   G.money -= total;

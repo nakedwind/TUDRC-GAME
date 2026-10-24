@@ -138,7 +138,7 @@ renderBackpack = function () {
 const quickOrigRenderDetail = renderBackpackDetail;
 renderBackpackDetail = function () {
   quickOrigRenderDetail();
-  const it = quickItem(backpackSel); if (!quickAllowed(it) || backpackDrop) return;
+  const it = quickItem(backpackSel); if (!quickAllowed(it)) return;
   const acts = backpackDetail.querySelector('.bag-actions'); if (!acts) return;
   const cur = quickSlotOf(it.id);
   const row = document.createElement('div'); row.className = 'bag-quick';

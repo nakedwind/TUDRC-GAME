@@ -128,7 +128,6 @@ const BASE_MAPS = [
         "31,9": "tile_new_bg_floor",
         "31,8": "tile_new_bg_floor",
         "31,7": "tile_new_bg_floor",
-        "32,10": "tile_new_bg_floor",
         "32,11": "tile_new_bg_floor",
         "32,12": "tile_new_bg_floor",
         "32,13": "tile_new_bg_floor",
@@ -1852,14 +1851,6 @@ const BASE_MAPS = [
         "oy": -22
       },
       {
-        "id": "tile_hq_server_rack",
-        "c": 24,
-        "r": 15,
-        "layer": "object3",
-        "ox": 0,
-        "oy": -22
-      },
-      {
         "id": "tile_hq_desk_vertical",
         "c": 23,
         "r": 16,
@@ -1910,8 +1901,8 @@ const BASE_MAPS = [
         "r": 14,
         "layer": "object3",
         "fx": true,
-        "ox": 0,
-        "oy": 18
+        "oy": 18,
+        "ox": 0
       },
       {
         "id": "tile_hq_server_rack",
@@ -1951,12 +1942,12 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
-        "c": 28,
+        "c": 29,
         "r": 15,
         "layer": "object3",
         "fx": true,
-        "ox": 0,
-        "oy": 6
+        "ox": -34,
+        "oy": 12
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -2325,6 +2316,31 @@ const BASE_MAPS = [
         "layer": "object3",
         "ox": 20,
         "oy": 8
+      },
+      {
+        "id": "tile_mvma4ws7",
+        "c": 24,
+        "r": 14,
+        "layer": "object4",
+        "sortDepth": 1,
+        "oy": 28,
+        "ox": 0
+      },
+      {
+        "id": "tile_new_bg_floor",
+        "c": 32,
+        "r": 10,
+        "layer": "floor",
+        "ox": 0,
+        "oy": 0
+      },
+      {
+        "id": "tile_hq_server_rack",
+        "c": 39,
+        "r": 14,
+        "layer": "object3",
+        "oy": 18,
+        "ox": 0
       }
     ],
     "solid": [
@@ -2452,19 +2468,11 @@ const BASE_MAPS = [
       "6,5",
       "22,15",
       "23,15",
-      "24,15",
-      "25,15",
-      "28,15",
-      "29,15",
-      "30,15",
-      "31,15",
       "32,15",
       "33,15",
       "34,15",
       "35,15",
       "36,15",
-      "39,15",
-      "40,15",
       "41,15",
       "42,15",
       "42,16",
@@ -2534,11 +2542,8 @@ const BASE_MAPS = [
       "63,15",
       "22,14",
       "23,14",
-      "24,14",
       "25,14",
-      "28,14",
       "30,14",
-      "29,14",
       "31,14",
       "32,14",
       "33,14",
@@ -2546,7 +2551,6 @@ const BASE_MAPS = [
       "35,14",
       "36,14",
       "39,14",
-      "40,14",
       "41,14",
       "42,14",
       "39,19",
@@ -2584,8 +2588,21 @@ const BASE_MAPS = [
       "10,14",
       "9,14",
       "8,14",
-      "18,8",
-      "46,8"
+      "8,8",
+      "55,8",
+      "24,15",
+      "25,15",
+      "28,15",
+      "40,15",
+      "40,14",
+      "29,15",
+      "30,15",
+      "31,15",
+      "29,14",
+      "28,14",
+      "24,14",
+      "24,16",
+      "25,16"
     ],
     "breakable": [],
     "camp": [
@@ -2709,6 +2726,14 @@ const BASE_MAPS = [
         -17
       ],
       "39,19": [
+        0,
+        -16
+      ],
+      "25,16": [
+        0,
+        -15
+      ],
+      "24,16": [
         0,
         -16
       ]

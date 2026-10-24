@@ -96,6 +96,10 @@ function ensureTeamUI() {
           if (e.button === 0) firstAidPickMember(avatar.dataset.type); else cancelFirstAidPick();
           return;
         }
+        if (avatar.dataset.char === 'ball') {   // 球球的頭像：左鍵、右鍵都開「跟誰」選單（js/rescue-dog.js）
+          if (e.button === 0 || e.button === 2) { const r = avatar.getBoundingClientRect(); openDogFollowMenu(r.right + 7, r.top); }
+          return;
+        }
         if (e.button === 2) openFieldCommandMenu(avatar.dataset.type, avatar);   // 只有右鍵開命令選單（左鍵不會）
         else if (e.button === 0) locateFieldMember(avatar.dataset.type || avatar.dataset.char);
       }
@@ -370,7 +374,7 @@ function renderFieldSquadHud() {
         '</article>';
     }).join('') : '<p class="field-squad-empty">尚無出勤隊員</p>') +
     ((G.npcs || []).some(npc => npc.id === 'ball') && getTeam().includes('ball')
-      ? '<article class="field-member field-member-support" data-type="ball"><span class="field-member-avatar" data-char="ball"><img src="' + memberPortraitPath(CHARACTERS.ball) + '" alt="球球"></span><div class="field-member-status"><b>球球</b><span>搜救犬・隨領犬員出勤</span></div></article>' : ''));
+      ? '<article class="field-member field-member-support" data-type="ball"><span class="field-member-avatar" data-char="ball" style="cursor:pointer" title="選球球要跟誰"><img src="' + memberPortraitPath(CHARACTERS.ball) + '" alt="球球"></span><div class="field-member-status"><b>球球</b><span>搜救犬・跟著' + dogFollowName(dogFollowAnchor()) + '</span></div></article>' : ''));
   fieldSquadHud.classList.remove('hidden');
 }
 // 隊員欄收起／展開：只切 class，CSS 負責滑順的動畫

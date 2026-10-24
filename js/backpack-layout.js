@@ -38,14 +38,14 @@ const BACKPACK_PARTS = {
   'text.effectTag': { group: '文字與按鈕', label: '效果標籤', sel: '#backpackDetail .bag-tags > .bag-tag.effect', text: 'item.effect' },
   'text.desc':      { group: '文字與按鈕', label: '物品說明', sel: '#backpackDetail .bag-desc', text: 'item.desc' },
   'text.useNote':  { group: '文字與按鈕', label: '「無法使用」「可以送禮」說明', sel: '#backpackDetail .bag-actions > .bag-note:not(:last-child):not(.drag-hint, .free-hint, .gear-hint)' },
-  'text.dropNote': { group: '文字與按鈕', label: '「無法丟棄」說明', sel: '#backpackDetail .bag-actions > .bag-note:last-child:not(.drag-hint, .free-hint, .gear-hint)' },   // 子彈、裝備的提示有自己的項目（下面）
+  'text.dropNote': { group: '文字與按鈕', label: '「無法放在地上」說明', sel: '#backpackDetail .bag-actions > .bag-note:last-child:not(.drag-hint, .free-hint, .gear-hint)' },   // 子彈、裝備的提示有自己的項目（下面）
   'text.hint':      { group: '文字與按鈕', label: '「可直接拖曳到下方快捷鍵」提示', sel: '#backpackDetail .bag-quick small', text: 'fixed' },
   'btn.use':        { group: '文字與按鈕', label: '使用按鈕', sel: '#backpackDetail .bag-use:not([data-mag-load], [data-gear-equip])', text: 'use' },   // 子彈、裝備的按鈕有自己的項目（下面）
   'btn.magLoad':    { group: '文字與按鈕', label: '子彈「裝進彈匣」按鈕', sel: '#backpackDetail [data-mag-load]', text: 'fixed' },
   'btn.magUnload':  { group: '文字與按鈕', label: '子彈「從彈匣拿下」按鈕', sel: '#backpackDetail [data-mag-unload]', text: 'fixed' },
   'btn.gearEquip':  { group: '文字與按鈕', label: '裝備「裝備／裝到…」按鈕（字跟著格子變，只能調位置大小）', sel: '#backpackDetail [data-gear-equip]' },
   'btn.gearOff':    { group: '文字與按鈕', label: '裝備「卸下」按鈕（字跟著格子變，只能調位置大小）', sel: '#backpackDetail [data-gear-off]' },
-  'btn.drop':       { group: '文字與按鈕', label: '丟棄按鈕', sel: '#backpackDetail .bag-drop', text: 'fixed' },
+  'btn.drop':       { group: '文字與按鈕', label: '放在地上按鈕', sel: '#backpackDetail .bag-drop', text: 'fixed' },
   'btn.close':      { group: '文字與按鈕', label: '關閉按鈕 ×', sel: '#backpackClose' },
   'text.dragNote':  { group: '文字與按鈕', label: '子彈「也可以直接拖曳到武器分頁的彈匣格」提示', sel: '#backpackDetail .bag-actions > .bag-note.drag-hint', text: 'fixed' },
   'text.freeNote':  { group: '文字與按鈕', label: '一般子彈「不佔彈匣格子」提示', sel: '#backpackDetail .bag-actions > .bag-note.free-hint', text: 'fixed' },
@@ -169,7 +169,7 @@ const BACKPACK_BASE_CSS =
   '#backpack .backpack-body > #backpackDetail > .bag-detail-image{box-sizing:border-box;height:112px;grid-template:minmax(0,1fr) / minmax(0,1fr);place-items:center;overflow:visible;}' +
   '#backpack .backpack-body > #backpackDetail > .bag-detail-image > img{min-width:0;min-height:0;}}' +
   // 說明欄不顯示捲軸（滾輪照樣能捲）：說明比較長的物品（例如異質急救包）會多出捲軸，把右邊的按鈕往左擠 10px，
-  // 跟其他物品對不齊；藏起來之後每個物品的「使用」「丟棄」按鈕位置、大小都一樣
+  // 跟其他物品對不齊；藏起來之後每個物品的「使用」「放在地上」按鈕位置、大小都一樣
   '#backpackDetail{scrollbar-width:none;}#backpackDetail::-webkit-scrollbar{display:none;}' +
   // 裝備、武器的說明（跟開發工坊連通的那段）：放在名稱下面，「目前效果」往下移一列，不會疊在一起
   //   說明往上移了 30（背包編輯器「物品說明」Y −30），效果框也往上 30，跟說明保持原本的間距

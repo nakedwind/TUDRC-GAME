@@ -457,6 +457,7 @@ function hasAggroTarget(t) {
   const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
   for (const e of [...G.enemies, ...cores]) {
     if (e.dead || e.awake === false) continue;   // 沉睡的核心不算目標
+    if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不主動接敵（js/elite-bird-head.js）
     if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
   }
@@ -609,6 +610,7 @@ function updateSentry(t, dt) {
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
       if (e.dead || e.awake === false) continue;   // 沉睡的核心不去追
+      if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不去追
       if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
       if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心
       if (Math.hypot(e.x - anchor.x, e.y - anchor.y) > leashR) continue;  // 不離崗太遠
@@ -759,8 +761,7 @@ function updateWanderer(npc, dt) {
   updateNpcTalk(npc, dt);   // 對話倒數（即使站著不動也會說話）
   if (escapeDarkness(npc, dt)) return;
   if (npc.id === 'ball' && !MAP_SAFE && getTeam().includes('ball')) {
-    const handler = G.towers.find(t => RESCUE_DOG_HANDLERS.includes(t.type) && t.hp > 0 && !t.berserk);
-    const anchor = handler || G.player;
+    const anchor = dogFollowAnchor();   // 預設跟領犬員；可以改跟別的隊員或溫特（js/rescue-dog.js）
     if (updateRescueDogPickup(npc, anchor, dt)) return;
     followTarget(npc, anchor, { dist: CELL * 1.25, speed: 110 }, dt);
     npc.target = null; npc.waitT = 0;

@@ -14,7 +14,7 @@
 */
 const ELITE_BIRD = {
   name: '鳥頭大隊長',
-  hpMul: 8.25, dmgMul: 2.2, rewardMul: 5, crystalMul: 5,   // 以原型鳥頭人（data/monsters.js）的數值為基準
+  hpMul: 12, dmgMul: 2.2, rewardMul: 5, crystalMul: 5,   // 以原型鳥頭人（data/monsters.js）的數值為基準；hpMul 12 → 血量 1800
   scale: 1.8, hue: -35,          // 體型放大倍率、換色（色相旋轉角度）
   speedMul: .5,                  // 走路速度倍率（以原型鳥頭人為基準；衝撞速度另外看 chargeSpeed）。動畫步伐、腳步聲照移動距離觸發，跟著一起變慢
   knockMul: 0,                   // 被隊員打時的擊退倍率：0＝推不動（雷德盾撞、大招擊退也推不動）
@@ -44,7 +44,7 @@ const ELITE_BIRD = {
   coreShield: .6,                // 牠活著時，核心少受幾成傷害
   returnSpeedMul: 1.1,           // 走回原位的速度倍率
   stepEvery: 50,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
-  stepShake: 4.5, walkShake: 1.6,// 衝撞、走路時每一步的畫面震動（溫特在 shakeRange 格內才震，越近越大）
+  stepShake: 10, walkShake: 3,   // 衝撞、走路時每一步的畫面震動（貼身時的最大值；溫特在 shakeRange 格內才震，越近越大）
   shakeRange: 10,
 };
 
@@ -136,6 +136,14 @@ function stepEliteGuardPose(e, dt) {
   return false;
 }
 
+// ---- 特殊對象：大隊長和身邊的手下，在大隊長醒來前隊友不會主動去打 ----
+// 等溫特開第一槍（打中就會叫醒）、或大隊長／核心已經醒了才開始主動攻擊；隊友打歪、範圍攻擊波及到照樣會叫醒
+// （js/sentry.js 的索敵、js/game.js 的選目標與雷德舉盾都會跳過 holdFire 的怪物）
+function eliteHoldFire(e) {
+  const boss = e.elite ? e : e.guardPose ? e.guardPose.boss : null;
+  if (!boss || boss.eliteAwake || boss.hp <= 0 || boss.dead) return false;
+  return !(boss.guardCore && boss.guardCore.awake);
+}
 const eliteBirdAlive = core => G.enemies.some(e => e.elite && e.hp > 0 && !e.dead && e.guardCore === core);
 const eliteDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
@@ -321,7 +329,8 @@ function eliteBirdFootsteps(e, moved, loud) {
 function eliteBirdShake(e, amount) {
   const p = G.player; if (!p) return;
   const d = Math.hypot(p.x - e.x, p.y - e.y) / CELL, R = ELITE_BIRD.shakeRange;
-  if (d < R) addShake(amount * (.3 + .7 * (1 - d / R)));
+  const k = 1 - d / R;
+  if (d < R) addShake(amount * (.2 + .8 * k * k));   // 平方衰減：貼身震很大，越遠越小
 }
 
 // 有目標：夠近就蓄力衝撞，不夠近就走過去。回傳 true＝找到目標了

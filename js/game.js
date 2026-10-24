@@ -482,7 +482,7 @@ window.addEventListener('keydown', e => {
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
   if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) startReload(G.player);   // 手動裝填手槍的彈匣（特殊子彈不用裝填）
   if (npcArrangeMode) return;
-  if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或 E
+  if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或空白鍵（isInteractKey）
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
     // 互動優先順序：① 拾取（異質碎片、地上的道具）→ ② 地圖物件（電梯、門、置物櫃…）
@@ -510,6 +510,7 @@ window.addEventListener('keydown', e => {
     else if (typeof useWardrobeNearPlayer === 'function' && useWardrobeNearPlayer()) {}   // 衣櫃：服裝介面（js/costumes.js）
     else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
     else if (typeof useBestiaryNearPlayer === 'function' && useBestiaryNearPlayer()) {}   // 2F應變中心的電腦：怪物圖鑑（js/bestiary.js）
+    else if (typeof useArmorChestNearPlayer === 'function' && useArmorChestNearPlayer()) {}   // 裝備箱：防具視窗（js/backpack.js）
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
     else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
     else if (typeof tryLockedDoorNearPlayer === 'function' && tryLockedDoorNearPlayer()) {}   // 鎖住的房門：溫特說「好像被鎖住了」（js/locked-doors.js）
@@ -689,6 +690,7 @@ function assignSentryToGround(t, guard = false) {
   if (t.berserk) { sfx('error'); flash(TYPES[t.type].name + '暴走中', x, y, '#ff8f8f'); return; }
   if (!isLit(x, y)) { sfx('error'); flash('太黑了', x, y, '#ffd24a'); return; }
   if (isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) { sfx('error'); flash('不能巡邏', x, y, '#ff8f8f'); return; }
+  if (typeof leaveCampBed === 'function') leaveCampBed(t);   // 正在走去／躺在行軍床上：先下床（js/camp-beds.js）
   t.mode = 'goto'; t.target = { x, y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null;
   t.summonDark = true;   // 召喚：途中遇到黑暗也照走（js/sentry.js 的 escapeDarkness）
   t.guardSummoned = guard;
@@ -708,7 +710,8 @@ function summonAllSentriesToGround() {
   spots.sort((a, b) => a.distance - b.distance);
   let count = 0;
   for (const t of G.towers) {
-    if (t.hp <= 0 || t.berserk || TYPES[t.type].guide) continue;
+    if (t.hp <= 0 || t.berserk) continue;   // 嚮導也一起叫過來（以前會漏掉嚮導）
+    if (typeof leaveCampBed === 'function') leaveCampBed(t);   // 躺在行軍床上：先下床，人在床上會找不到路（js/camp-beds.js）
     const index = spots.findIndex(p => buildSentryPath(t, p.x, p.y, true) !== null);   // 召喚：可以穿過黑暗
     if (index < 0) continue;
     const p = spots.splice(index, 1)[0];
@@ -717,7 +720,7 @@ function summonAllSentriesToGround() {
     count++;
   }
   sfx(count ? 'button' : 'error');
-  systemNotice(count ? '已召喚 ' + count + ' 位哨兵前往此處' : '沒人到得了');
+  systemNotice(count ? '已召喚 ' + count + ' 位隊員前往此處' : '沒人到得了');
   if (count) closeGroundMenu();
 }
 function summonNearestSentryToGround() {
@@ -972,7 +975,7 @@ function renderGroundActions() {
   addGroundCloseButton();
   const nearest = document.createElement('button');
   nearest.className = 'gm-nearest';
-  nearest.textContent = '🎯 召喚全部哨兵';
+  nearest.textContent = '🎯 召喚全部隊員';
   nearest.addEventListener('click', summonAllSentriesToGround);
   groundMenu.appendChild(nearest);
   for (const t of G.towers) {
@@ -1399,6 +1402,8 @@ function handleMapClick(e, isLeft) {
 
   // ── 哨兵／營地／自己蓋的建築：只有右鍵開選單（左鍵照常開槍）；哨兵站在營地裡時哨兵優先 ──
   const hitR = t => (t.berserk || (t.taint || 0) >= 70 ? 12 : 0) + (sentrySprites[t.type] ? 28 : 22);   // 暴走中的哨兵點擊範圍放大，比較好點到
+  const dog = !isLeft && typeof dogAt === 'function' && dogAt(x, y);   // 右鍵點球球：選他要跟誰（js/rescue-dog.js）
+  if (dog) { closeGroundMenu(); closeSentryMenu(); openDogFollowMenu(e.clientX + 12, e.clientY - 20); return false; }
   const hit = !isLeft && G.towers.find(t => Math.hypot(t.x - x, t.y - (sentrySprites[t.type] ? 14 : 0) - y) <= hitR(t));
   if (hit) { closeGroundMenu(); openSentryMenu(hit); return false; }
   const campBase = !isLeft && !MAP_SAFE && campBaseAt(x, y);
@@ -1443,6 +1448,7 @@ function pickSentryTarget(t, R) {
   let best = null, bestScore = Infinity;
   for (const e of G.enemies) {
     if (e.dead) continue;
+    if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：等溫特先開槍（js/elite-bird-head.js）
     const distance = Math.hypot(e.x - t.x, e.y - t.y);
     if (distance > R) continue;
     if (!hasLineOfSight(t.x, t.y, e.x, e.y)) continue;   // 隔著牆看不到就不能打
@@ -1767,7 +1773,7 @@ function setPaused(on) {
   if (badge) badge.classList.toggle('hidden', !paused);
 }
 window.addEventListener('keydown', e => {
-  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || mapTransitioning) return;
+  if (e.repeat || e.key.toLowerCase() !== 'p' || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campArmorOpen || mapTransitioning) return;
   if (!G || !G.running || G.over || MAP_SAFE) return;   // 只有戰鬥中可以暫停
   sfx('switch'); setPaused(!paused);
 });
@@ -1821,7 +1827,7 @@ function frame(ts) {
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
   const introOpen = typeof itemIntroOpen !== 'undefined' && itemIntroOpen;   // 第一次拿到新東西的說明視窗（js/item-intro.js）
-  const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campSupplyOpen || mapTransitioning
+  const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campArmorOpen || campSupplyOpen || mapTransitioning
     || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen)   // 射擊練習（js/target-practice.js）
     || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
     || (typeof gachaOpen !== 'undefined' && gachaOpen)   // 扭蛋機（js/gacha.js）
@@ -1831,7 +1837,7 @@ function frame(ts) {
   if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
-  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !settingsOpen && !campPlanOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
+  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
@@ -1870,7 +1876,7 @@ function update(dt) {
   for (const t of G.towers) {
     if (t.type !== 'red') continue;
     let nd = Infinity, near = null;
-    if (!MAP_SAFE && !t.berserk && t.hp > 0 && !t.eatenBy && !(t.sleepT > 0)) for (const e of G.enemies) { if (e.dead) continue; const d = Math.hypot(e.x - t.x, e.y - t.y); if (d < nd) { nd = d; near = e; } }   // 被虱目魚小子吃掉、睡著時不舉盾（不然會一直撞吃掉他的虱目魚小子）
+    if (!MAP_SAFE && !t.berserk && t.hp > 0 && !t.eatenBy && !(t.sleepT > 0)) for (const e of G.enemies) { if (e.dead || (typeof eliteHoldFire === 'function' && eliteHoldFire(e))) continue; const d = Math.hypot(e.x - t.x, e.y - t.y); if (d < nd) { nd = d; near = e; } }   // 被虱目魚小子吃掉、睡著時不舉盾（不然會一直撞吃掉他的虱目魚小子）
     t.shieldMode = nd <= 3 * CELL;
     t.ramTarget = t.shieldMode ? near : null;
     t.nearestEnemyDist = nd;

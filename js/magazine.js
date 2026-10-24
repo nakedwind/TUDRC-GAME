@@ -62,9 +62,10 @@ function magazineWorkshopEntries() {
 function magazineWorkshopBuy(kind, id) {
   if (kind === 'bd') {
     const b = BULLETS[id]; if (!b || b.source !== 'develop' || bulletOwned(id)) return false;
+    if (bagUsedSlots(supplyInventory, 'weapon') >= bagCapacity('weapon')) { systemNotice('彈藥包已滿（' + bagCapacity('weapon') + ' 格），先升級彈藥包擴充', true); return true; }
     if (!spendWorkshop(b.cost || 0, wsMoney('b:' + id, 0, b.cost || 0))) return true;   // 異質碎片＋經費（js/equipment.js）
     addBullets(id, b.max); SFX.play('achievement', .7, 'equip-up');
-    showWorkshopToast('🎁 諾亞開發好了「' + b.name + '」，到背包的武器分頁裝進彈匣');
+    showWorkshopToast('🎁 諾亞開發好了「' + b.name + '」，到背包的彈藥包分頁裝進彈匣');
     return true;
   }
   if (kind === 'mg') {

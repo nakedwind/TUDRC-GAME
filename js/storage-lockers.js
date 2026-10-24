@@ -54,6 +54,7 @@ function storagePropEntries(){
     const [c,r]=key.split(',').map(Number);add(id,c,r,layer);
   }
   for (const drop of G?.equipmentDrops || []) entries.push({ kind:'equipment-drop', drop, x:drop.x, y:drop.y, top:drop.y-28 });
+  for (const drop of G?.groundItems || []) entries.push({ kind:'ground-item', drop, x:drop.x, y:drop.y, top:drop.y-30 });   // 溫特自己放在地上的（js/ground-items.js）
   return entries;
 }
 // filter：只找某一類（例如 isPickupProp＝只找可以拾取的東西）
@@ -68,18 +69,20 @@ function storagePropNearPlayer(filter){
   return nearest;
 }
 function storagePropPrompt(prop){
+  if(prop.kind==='ground-item')return '拾取'+groundItemName(prop.drop)+(prop.drop.qty>1?' ×'+prop.drop.qty:'');
   if(prop.kind==='equipment-drop')return '拾取'+(prop.drop.item?(itemById(prop.drop.item)?.name||'道具'):(equipDef(prop.drop.id)?.name||'裝備'));
   if(isWorldPickup(prop.kind))return '拾取';
   if(prop.kind==='power')return mapPowerIsOn(circuitOf(prop.stamp))?'關閉電源':'開啟電源';
   if(prop.open)return '查看置物箱';
   return (supplyInventory.get('storage-locker-key')||0)>0?'用鑰匙開啟置物箱':'置物箱已上鎖（需要鑰匙）';
 }
-// 可以拾取的東西（地上的拾取亮點、怪物掉的道具／裝備）：互動優先順序比置物櫃、電源這類地圖物件高
-const isPickupProp=prop=>prop.kind==='equipment-drop'||isWorldPickup(prop.kind);
+// 可以拾取的東西（地上的拾取亮點、怪物掉的道具／裝備、溫特自己放在地上的）：互動優先順序比置物櫃、電源這類地圖物件高
+const isPickupProp=prop=>prop.kind==='equipment-drop'||prop.kind==='ground-item'||isWorldPickup(prop.kind);
 const pickupPropNearPlayer=()=>storagePropNearPlayer(isPickupProp);
 // Shared by player interaction and the rescue dog; stale targets cannot grant loot twice.
 function pickupStorageProp(prop){
   if(!prop||!isPickupProp(prop))return false;
+  if(prop.kind==='ground-item'){if(!pickupGroundItem(prop.drop))return false;saveGame();return true;}
   if(prop.kind==='equipment-drop'){
     if(!(G.equipmentDrops||[]).includes(prop.drop))return false;
   }else if(collectedStorageKeys.has(prop.token)||!storagePropEntries().some(p=>p.token===prop.token))return false;
@@ -139,6 +142,11 @@ function grantLockerLoot(loot){
     const item=itemById(loot.id);if(!item)return;
     const qty=Math.max(1,Math.min(999,Math.floor(Number(loot.qty)||1)));
     const got=supplyGain(item.id,qty);   // 持有上限：拿不下的會跳提示
+    if(got<qty&&G?.player){
+      G.groundItems=G.groundItems||[];
+      G.groundItems.push({id:item.id,qty:qty-got,x:G.player.x,y:G.player.y+12,at:performance.now()/1000});
+      systemNotice('背包放不下的「'+item.name+'」留在地上');
+    }
     if(got){showItemPickupNotice(item.id,got);systemNotice('在置物櫃找到「'+item.name+'」×'+got);}
   }else if(loot.kind==='equipment'){
     if(!grantEquipment(loot.id,'在置物櫃找到'))systemNotice('已擁有這件裝備');

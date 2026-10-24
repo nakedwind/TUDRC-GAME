@@ -217,6 +217,7 @@ function squadAvailList(type) {   // 下面「可用裝備」：選的是隊員�
   return COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, sl.id) && costumeCanWear(type, a.id)).map(a => ({ id: a.id, wear: a.id, name: a.name, image: a.art.front, ref: { kind: 'look', id: a.id }, desc: sqLookText(a.id, 'desc', '扭蛋得到的配件' + (a.rarity ? '（' + a.rarity + '）' : '') + '。'), stat: sqLookText(a.id, 'stat', '外觀裝備，不影響數值') }));
 }
 function squadGearHtml(actor, safe) {
+  safe = safe || (squadPageState.slot.kind === 'gear' && bagCanManageEquipment());
   const type = actor.type, st = squadPageState, gear = squadGearOf(type);
   let h = '<section class="sq-main sq-gear" data-sq="panel.gear">' + squadSwitchHtml('G') +
     '<b class="sq-title gear" data-sq="text.gearTitle">' + sqT('text.gearTitle', '隊員裝備') + '</b>' +
@@ -344,7 +345,7 @@ function handleSquadClick(body, e) {
 }
 function squadEquip(body) {
   const st = squadPageState, type = st.member, safe = typeof MAP_SAFE !== 'undefined' && MAP_SAFE;
-  if (!safe) { if (typeof tpadToast === 'function') tpadToast('回到基地才能換裝備'); return; }
+  if (!safe && !(st.slot.kind === 'gear' && bagCanManageEquipment())) { if (typeof tpadToast === 'function') tpadToast('請到基地或營地帳篷換裝備'); return; }
   const a = squadAvailList(type).find(x => x.id === st.avail); if (!a) return;
   let ok = false;
   if (st.slot.kind === 'gear') ok = equipSquadGear(type, st.slot.id, a.id);
@@ -358,7 +359,7 @@ function squadEquip(body) {
 }
 function squadUnequip(body) {
   const st = squadPageState, type = st.member, safe = typeof MAP_SAFE !== 'undefined' && MAP_SAFE;
-  if (!safe) { if (typeof tpadToast === 'function') tpadToast('回到基地才能換裝備'); return; }
+  if (!safe && !(st.slot.kind === 'gear' && bagCanManageEquipment())) { if (typeof tpadToast === 'function') tpadToast('請到基地或營地帳篷換裝備'); return; }
   if (st.slot.kind === 'gear') unequipSquadGear(type, st.slot.id);
   else {
     const eq = costumeEquip(type);

@@ -6,7 +6,7 @@
 */
 const SQUAD_GEAR_STORE = 'tudrc_squad_gear_v1';
 const SQUAD_GEAR_SLOTS = 3;
-const SQUAD_GEAR_CATEGORY = { id: 'squadgear', name: '隊員裝備', icon: '🎽' };
+const SQUAD_GEAR_CATEGORY = { id: 'squadgear', name: '隊員物資', icon: '🎽' };
 // 數值名稱（技能、裝備的 mods 共用；編輯器的下拉選單也用這份）。pct：加的時候用百分比顯示；unit：單位
 const STAT_MOD_NAMES = {
   dmg: { name: '攻擊力' }, rate: { name: '攻擊速度', unit: '/秒' }, hp: { name: '最大 HP' }, range: { name: '射程', unit: ' 格' },
@@ -81,15 +81,19 @@ function squadGearOf(type) {
 function squadGearMods(type) { return squadGearOf(type).flatMap(id => (id && squadGearById(id).mods) || []); }
 // 穿上：背包裡要有一件；那一格原本有穿的放回背包
 function equipSquadGear(type, slot, id) {
+  if (!bagCanManageEquipment()) { systemNotice('請到營地帳篷調整隊員物資', true); return false; }
   if (!squadGearById(id) || typeof supplyInventory === 'undefined' || !(supplyInventory.get(id) > 0)) return false;
   const list = squadGearOf(type), old = list[slot];
+  if (!bagCanApply([[id, -1], ...(old ? [[old, 1]] : [])])) { systemNotice('背包空間不足，無法換下原本的裝備', true); return false; }
   const n = supplyInventory.get(id); if (n <= 1) supplyInventory.delete(id); else supplyInventory.set(id, n - 1);
   if (old) supplyInventory.set(old, (supplyInventory.get(old) || 0) + 1);
   list[slot] = id; squadGearState.equip[type] = list;
   afterSquadGearChange(type); return true;
 }
 function unequipSquadGear(type, slot) {
+  if (!bagCanManageEquipment()) { systemNotice('請到營地帳篷調整隊員物資', true); return false; }
   const list = squadGearOf(type), old = list[slot]; if (!old) return false;
+  if (carryRoom(old) < 1) { systemNotice('背包空間不足，無法卸下裝備', true); return false; }
   if (typeof supplyInventory !== 'undefined') supplyInventory.set(old, (supplyInventory.get(old) || 0) + 1);
   list[slot] = null; squadGearState.equip[type] = list;
   afterSquadGearChange(type); return true;
