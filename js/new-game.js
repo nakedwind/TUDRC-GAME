@@ -103,13 +103,15 @@
     // 等所有載入存檔的 DOMContentLoaded 處理完成後才進場。
     if (startedFresh) setTimeout(() => {
       if (window.TEST_MODE) {
-        for (const item of [...SUPPLIES, ...ITEMS]) supplyInventory.set(item.id, Math.max(99, supplyInventory.get(item.id) || 0));
+        // 測試模式直接設定每種物品 20 個，略過一般背包容量，確保全品項都能測試。
+        for (const item of [...SUPPLIES, ...ITEMS]) Map.prototype.set.call(supplyInventory, item.id, 20);
         for (const def of EQUIPMENT) equipState.owned[def.id] = def.levels.length;
         for (const [id, def] of Object.entries(WEAPON_UPGRADES)) {
           if (def.removed) continue;   // 開發工坊編輯器刪掉的武器不給
           equipState.weapons[id] = def.levels.length;
         }
         for (const id of Object.keys(BULLETS)) if (id !== 'pistol' && !BULLETS[id].removed) { equipState.bullets.owned[id] = true; equipState.bullets.n[id] = BULLETS[id].max; }   // 所有子彈補滿
+        equipState.bag = { items: BAG_UPGRADES.items.slots.length, ammo: BAG_UPGRADES.ammo.slots.length };   // 背包、彈藥包擴充到最大
         equipState.battery = 100; training.crystals = Math.max(training.crystals, 99999);
         saveEquipment(); saveTraining();
       }
@@ -121,7 +123,7 @@
       if (window.TEST_MODE) {
         G.money = Math.max(G.money, 99999); updateHUD();
         const note = document.querySelector('.header-note'); if (note) note.textContent = '🧪 測試模式 · 全物品解鎖';
-        systemNotice('測試模式：全部物品 ×99、最高等級的裝備與武器已解鎖');
+        systemNotice('測試模式：全部物品 ×20、最高等級的裝備與武器已解鎖');
       }
       if (resumeScene && G?.player && Number.isFinite(resumeScene.x) && Number.isFinite(resumeScene.y) && !playerBlocked(resumeScene.x, resumeScene.y)) {
         G.player.x = resumeScene.x; G.player.y = resumeScene.y;

@@ -188,7 +188,7 @@ function endPractice() {
     practice.active = false;
     switchMap(MAP_INDEX); begin(false);    // 變回安全區
     if (s) {
-      supplyInventory.clear(); for (const [k, v] of s.supplies) supplyInventory.set(k, v);
+      supplyInventory.clear(); for (const [k, v] of s.supplies) Map.prototype.set.call(supplyInventory, k, v);
       if (typeof equipState !== 'undefined') { if (s.bullets && s.bullets.n) equipState.bullets = s.bullets; equipState.battery = s.battery; saveEquipment(); }
     }
     practice.snap = null;
@@ -229,7 +229,7 @@ function updatePractice(dt) {
   for (const t of G.towers) { if (t.hp < t.maxhp) t.hp = t.maxhp; if (!practice.taint) { t.taint = 0; t.berserk = false; } }
   // 不消耗物資、彈藥
   const s = practice.snap;
-  if (s) for (const [k, v] of s.supplies) if ((supplyInventory.get(k) || 0) < v) supplyInventory.set(k, v);
+  if (s) for (const [k, v] of s.supplies) if ((supplyInventory.get(k) || 0) < v) Map.prototype.set.call(supplyInventory, k, v);
   if (typeof equipState !== 'undefined') {
     equipState.battery = 100;
     if (s && s.bullets && s.bullets.n) for (const [id, n] of Object.entries(s.bullets.n)) if (bulletCount(id) < n) equipState.bullets.n[id] = n;   // 子彈：補回訓練前的數量

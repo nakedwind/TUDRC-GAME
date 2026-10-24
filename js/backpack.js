@@ -4,40 +4,80 @@
 //  背包裡有什麼存在 supplyInventory（就在下面）：物品 id → 數量。商店、送禮、存檔都會用到。
 // ============================================================
 const supplyInventory = new Map();   // 背包裡的東西：物品 id → 數量
-// ---- 溫特的持有上限：每一種東西最多帶幾個（沒寫＝無上限）----
-// kinds＋max＝這幾類（零食、飲料）每一種最多幾個；items＝個別物品的上限（物品 id → 最多幾個，優先）
-// 背包的數量一律照這個截掉：商店、撿到、置物櫃、任務獎勵…所有取得方式都一樣，之後新增的取得方式也自動套用。
-// 會「撿起來」的地方請用 supplyGain(id, n)：拿不下時跳提示，回傳實際拿到幾個（0＝滿了，東西可以留在原地）。
-const CARRY_LIMIT = { kinds: ['snack', 'drink'], max: 2,
-  items: { 'medkit': 20, 'almond-water': 20, 'firstaid': 20, 'anomaly-firstaid': 20, 'adrenaline': 5, 'battery': 10 } };
-function carryMax(x) {   // x＝物品 id 或物品；Infinity＝無上限
-  const id = typeof x === 'string' ? x : x && x.id; if (!id) return Infinity;
-  if (id in CARRY_LIMIT.items) return CARRY_LIMIT.items[id];
-  const kind = typeof x === 'object' && x.kind || (typeof SUPPLIES !== 'undefined' && (SUPPLIES.find(s => s.id === id) || {}).kind);
-  return CARRY_LIMIT.kinds.includes(kind) ? CARRY_LIMIT.max : Infinity;
+// 格數：「物品」、「彈藥包」一開始各 12 格，開發工坊升級（data/equipment.js 的 BAG_UPGRADES，等級存在 equipState.bag）。
+// 同種物品每 20 個佔一格；彈藥包一種子彈一格。重要物品、隊員物資、防具沒有格數上限。
+const BAG_STACK_MAX = 20;
+const bagUnlimited = category => category === 'equip' || category === 'squadgear' || category === 'key';
+const bagUpgradeKey = category => category === 'weapon' ? 'ammo' : 'items';
+function bagLevel(key) {
+  const b = equipState.bag || (equipState.bag = { items: 1, ammo: 1 });
+  return Math.max(1, Math.min(BAG_UPGRADES[key].slots.length, b[key] | 0 || 1));
 }
-const carryRoom = x => Math.max(0, carryMax(x) - (supplyInventory.get(typeof x === 'string' ? x : x.id) || 0));   // 還能再拿幾個
-supplyInventory.set = function (id, n) { return Map.prototype.set.call(this, id, Math.min(n, carryMax(id))); };   // 超過上限的部分不會放進背包
+const bagCapacity = category => BAG_UPGRADES[bagUpgradeKey(category)].slots[bagLevel(bagUpgradeKey(category)) - 1];
+function bagCategory(x) {
+  const id = typeof x === 'string' ? x : x.id;
+  const supply = typeof SUPPLIES !== 'undefined' && SUPPLIES.find(item => item.id === id);
+  if (supply) return supply.kind === 'snack' || supply.kind === 'drink' ? 'squadgear' : 'consumable';
+  const item = typeof ITEMS !== 'undefined' && ITEMS.find(item => item.id === id);
+  return (item && item.category) || (typeof x === 'object' && x.category) || 'consumable';
+}
+function bagUsedSlots(inventory = supplyInventory, category = null) {
+  if (category === 'weapon') return typeof ownedBullets === 'function' ? ownedBullets().length : 0;   // 彈藥包：一種子彈一格（手槍、一般子彈不佔）
+  if (category === 'equip') return typeof ownedGear === 'function' ? ownedGear().length : 0;
+  return [...inventory].reduce((sum, [id, n]) => sum + ((!category || bagCategory(id) === category) ? Math.ceil(Math.max(0, n) / BAG_STACK_MAX) : 0), 0);
+}
+const carryMax = () => Infinity;
+function carryRoom(x, inventory = supplyInventory) {
+  if (bagUnlimited(bagCategory(x))) return Infinity;
+  const id = typeof x === 'string' ? x : x.id, n = inventory.get(id) || 0;
+  const used = bagUsedSlots(inventory, bagCategory(x)), cap = bagCapacity(bagCategory(x));
+  if (used > cap) return 0;
+  return Math.max(0, cap - used) * BAG_STACK_MAX + (n % BAG_STACK_MAX ? BAG_STACK_MAX - n % BAG_STACK_MAX : 0);
+}
+// 直接寫入也遵守容量；減少數量不受限制。讀檔另走原生 set，保留舊存檔物品。
+supplyInventory.set = function (id, n) {
+  const old = this.get(id) || 0;
+  n = Number.isFinite(n) ? Math.max(0, Math.floor(n)) : old;
+  return Map.prototype.set.call(this, id, n > old ? old + Math.min(n - old, carryRoom(id, this)) : n);
+};
+function bagCanApply(changes) {
+  const next = new Map(supplyInventory);
+  for (const [id, delta] of changes) next.set(id, Math.max(0, (next.get(id) || 0) + delta));
+  const categories = new Set(changes.map(([id]) => bagCategory(id)));
+  return [...categories].every(category => bagUnlimited(category) || bagUsedSlots(next, category) <= bagCapacity(category));
+}
 function supplyGain(id, n = 1, quiet = false) {
   const got = Math.min(n, carryRoom(id));
   if (got > 0) supplyInventory.set(id, (supplyInventory.get(id) || 0) + got);
   if (got < n && !quiet && typeof systemNotice === 'function') {
     const it = typeof itemById === 'function' && itemById(id);
-    systemNotice('「' + (it ? it.name : id) + '」已達持有上限（最多 ' + carryMax(id) + ' 個）' + (got ? '，只拿了 ' + got + ' 個' : '，拿不下了'), true);
+    systemNotice('這個分類空間不足（' + bagCapacity(bagCategory(id)) + ' 格，每格 ' + BAG_STACK_MAX + ' 個）：「' + (it ? it.name : id) + '」' + (got ? '只拿了 ' + got + ' 個' : '拿不下了'), true);
   }
   return got;
 }
-const BAG_MIN_SLOTS = 24;   // 至少畫幾格（不夠的用空格補滿，看起來像背包）
 const backpackEl = document.getElementById('backpack');
 const backpackGrid = document.getElementById('backpackGrid');
 const backpackDetail = document.getElementById('backpackDetail');
-let backpackOpen = false, backpackTab = 'all', backpackSel = null;
-let backpackDrop = null;   // 正在確認丟棄：{ id, qty }；沒有在丟就是 null
-// 能不能丟：重要物品不能丟；個別物品也可以在資料裡寫 noDrop: true
+let backpackOpen = false, backpackTab = 'consumable', backpackSel = null;
+let backpackCampContext = null;
+let campArmorOpen = false;   // true＝背包視窗現在是防具視窗（openArmorPanel）
+function bagAtCampTent() {
+  const spot = typeof campInteractionNearPlayer === 'function' && campInteractionNearPlayer();
+  return !!spot && spot.kind === 'retreat';
+}
+function bagCanManageEquipment() {
+  return MAP_SAFE || (backpackCampContext === G && bagAtCampTent());
+}
+// 能不能換防具：只有防具視窗裡、裝備箱旁邊
+const bagCanChangeArmor = () => campArmorOpen || !!armorChestNearPlayer();
+const armorWhereHint = () => '請到裝備箱調整防具';
+const bagTabVisible = category => campArmorOpen ? category === 'equip' : category !== 'equip' && (category !== 'squadgear' || bagCanManageEquipment());   // 防具視窗只有「防具」分頁；背包沒有
+let bagDropQty = 1;   // 「放在地上」旁邊選的數量（換選別的物品就回到 1）
+// 能不能放在地上：重要物品不能；個別物品也可以在資料裡寫 noDrop: true（放下去的東西走過去可以撿回來，js/ground-items.js）
 const canDrop = item => !!item && !item.noDrop && item.category !== 'key';
 
 // 所有物品：商店補給品歸在「消耗品」，再加上 data/items.js 的其他物品
-const allItems = () => [...SUPPLIES.map(item => ({ ...item, category: item.use || item.kind === 'medical' ? 'consumable' : 'gift' })), ...ITEMS];   // 補給、後室道具＝消耗品；零食飲料＝禮物
+const allItems = () => [...SUPPLIES.map(item => ({ ...item, category: item.kind === 'snack' || item.kind === 'drink' ? 'squadgear' : 'consumable' })), ...ITEMS];
 const itemById = id => allItems().find(item => item.id === id) || null;
 const categoryOf = id => ITEM_CATEGORIES.find(c => c.id === id) || { id, name: id, icon: '•' };
 function itemDesc(item) {
@@ -47,7 +87,7 @@ function itemDesc(item) {
 }
 // 「武器」分頁：第一排＝手槍＋彈匣格，下面＝擁有的子彈（拖曳到彈匣格就換子彈，js/magazine.js）
 // 「防具」分頁：列出擁有的部隊長裝備（js/equipment.js 的 equipState），換裝備用左邊的裝備格
-const WEAPON_TAB = { id: 'weapon', name: '武器', icon: '🔫' };
+const WEAPON_TAB = { id: 'weapon', name: '彈藥包', icon: '🔫' };
 const GEAR_TAB = { id: 'equip', name: '防具', icon: '🛡️' };
 // 背包分頁、說明欄標籤的小圖示：實心剪影（跟隊員數值、NPC 頭上的圖示同一種風格），顏色跟著文字（currentColor）
 const BAG_ICON = (() => {
@@ -88,28 +128,36 @@ const gearById = id => String(id || '').startsWith('gear:') ? ownedGear(true).fi
 function ownedItems() {
   if (backpackTab === GEAR_TAB.id) return ownedGear();
   if (backpackTab === WEAPON_TAB.id) return [pistolEntry(), ...ownedBullets()].filter(Boolean);
-  const items = allItems().filter(item => (supplyInventory.get(item.id) || 0) > 0 && (backpackTab === 'all' || item.category === backpackTab));
-  return backpackTab === 'all' ? items.concat(ownedBullets()) : items;   // 全部：最後面放身上的子彈
+  const items = allItems().filter(item => (supplyInventory.get(item.id) || 0) > 0 && item.category === backpackTab);
+  if (backpackTab === 'squadgear') items.sort((a, b) => Number(!!b.squadGear) - Number(!!a.squadGear));
+  return items;
 }
 
 function renderBackpack() {
   if (!backpackEl) return;
-  const total = [...supplyInventory.values()].reduce((sum, n) => sum + n, 0);
-  document.getElementById('backpackCount').textContent = total;
+  if (!bagTabVisible(backpackTab)) { backpackTab = 'consumable'; backpackSel = null; }
+  document.getElementById('backpackTitle').textContent = campArmorOpen ? '防具' : '背包';
+  document.getElementById('backpackCount').textContent = campArmorOpen ? ownedGear().length + ' 件'
+    : bagUsedSlots(supplyInventory, backpackTab) + (bagUnlimited(backpackTab) ? ' 格（無上限）' : ' / ' + bagCapacity(backpackTab) + ' 格');
   if (typeof renderEquipPanel === 'function') renderEquipPanel();   // 左邊的部隊長裝備（js/equipment.js）
-  // 分類分頁：顯示每一類有幾件
-  document.getElementById('backpackTabs').innerHTML = [{ id: 'all', name: '全部', icon: '' }, ...ITEM_CATEGORIES, WEAPON_TAB, GEAR_TAB].map(cat => {
-    return `<button type="button" role="tab" data-bag-tab="${cat.id}" class="${backpackTab === cat.id ? 'active' : ''}" aria-selected="${backpackTab === cat.id}">${BAG_ICON[cat.id] || (cat.icon ? cat.icon + ' ' : '')}${cat.name}</button>`;   // 分頁後面不顯示數量
-  }).join('');
+  // 分類分頁：有格數上限的（物品、彈藥包）在左邊，後面標「用了幾格/幾格」；沒有上限的（重要物品…）放在「|」右邊
+  const tabBtn = cat => `<button type="button" role="tab" data-bag-tab="${cat.id}" class="${backpackTab === cat.id ? 'active' : ''}" aria-selected="${backpackTab === cat.id}">${BAG_ICON[cat.id] || (cat.icon ? cat.icon + ' ' : '')}${cat.name}${bagUnlimited(cat.id) ? '' : `<em class="bag-tab-count">${bagUsedSlots(supplyInventory, cat.id)}/${bagCapacity(cat.id)}</em>`}</button>`;
+  const cats = [...ITEM_CATEGORIES, WEAPON_TAB, GEAR_TAB].filter(cat => bagTabVisible(cat.id));
+  const limited = cats.filter(cat => !bagUnlimited(cat.id)), unlimited = cats.filter(cat => bagUnlimited(cat.id));
+  document.getElementById('backpackTabs').innerHTML = limited.map(tabBtn).join('') + (limited.length && unlimited.length ? '<span class="bag-tab-sep" aria-hidden="true">|</span>' : '') + unlimited.map(tabBtn).join('');
   // 格子
-  const items = ownedItems();
+  const items = ownedItems().flatMap(item => {
+    if (item.bullet || item.gear) return [item];
+    const n = supplyInventory.get(item.id) || 0;
+    return Array.from({ length: Math.ceil(n / BAG_STACK_MAX) }, (_, i) => ({ ...item, stackCount: Math.min(BAG_STACK_MAX, n - i * BAG_STACK_MAX) }));
+  });
   if (!items.some(item => item.id === backpackSel)) backpackSel = items[0]?.id || null;
-  const columns = window.innerWidth <= 560 ? 4 : window.innerWidth <= 900 ? 5 : 7;
-  const slots = Math.ceil(Math.max(BAG_MIN_SLOTS, items.length) / columns) * columns;
+  const columns = window.innerWidth <= 560 ? 4 : window.innerWidth <= 900 ? 5 : 6;
+  const slots = bagUnlimited(backpackTab) ? items.length : Math.max(bagCapacity(backpackTab), items.length);
   if (backpackTab === WEAPON_TAB.id) { renderWeaponGrid(items, columns); renderBackpackDetail(); return; }
   if (backpackTab === GEAR_TAB.id) { renderGearGrid(items, columns); renderBackpackDetail(); return; }
-  let html = items.map(item => item.bullet ? bulletCellHtml(item) : item.gear ? gearCellHtml(item) : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${supplyInventory.get(item.id)}" aria-pressed="${item.id === backpackSel}">
-      <img src="${item.image}" alt=""><b>${supplyInventory.get(item.id)}</b><span class="bag-cell-name">${item.name}</span></button>`).join('');
+  let html = items.map(item => item.bullet ? bulletCellHtml(item) : item.gear ? gearCellHtml(item) : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${item.stackCount}" aria-pressed="${item.id === backpackSel}">
+      <img src="${item.image}" alt=""><b>${item.stackCount}</b><span class="bag-cell-name">${item.name}</span></button>`).join('');
   for (let i = items.length; i < slots; i++) html += '<span class="bag-cell empty" aria-hidden="true"></span>';
   backpackGrid.classList.add('no-anim');   // 重畫時不要重播滑鼠下那格的浮起動畫
   backpackGrid.innerHTML = html;
@@ -120,14 +168,13 @@ function gearCellHtml(item) {
   return `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${equipTier(item.lv)}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
       ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn && !item.weapon ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}<span class="bag-cell-name">${item.name}</span></button>`;
 }
-// ---- 防具分頁：依部位分成頭部、上身、下身、隨身物品，每一類自己一段（還沒有的部位也留一排空格）----
+// ---- 防具分頁：依部位分段，整個分類共 35 格 ----
 function renderGearGrid(items, columns) {
   let html = '';
   for (const [kind, name] of Object.entries(GEAR_KIND_NAME)) {
     const group = items.filter(g => g.gear.kind === kind);
+    if (!group.length) continue;
     html += `<p class="bag-weapon-hint bag-gear-group">${name} <small>${group.length} 件</small></p>` + group.map(gearCellHtml).join('');
-    const total = Math.max(1, Math.ceil(group.length / columns)) * columns;
-    for (let i = group.length; i < total; i++) html += '<span class="bag-cell empty" aria-hidden="true"></span>';
   }
   backpackGrid.classList.add('no-anim');
   backpackGrid.innerHTML = html;
@@ -153,7 +200,7 @@ function renderWeaponGrid(items, columns) {
   const filled = m.load.slice(0, n).filter(Boolean).length;
   row += `<div class="bag-mag-rack" style="--rack-span:${Math.max(1, columns - (pistol ? 1 : 0))};--mag-max:${Math.min(maxSlots, columns > 4 ? maxSlots : 3)}"><div class="bag-mag-head">彈匣 <b>${filled} / ${n}</b><small>${n < maxSlots ? '開發工坊可以擴充到 ' + maxSlots + ' 格' : '已擴充到最多格'}</small></div><div class="bag-mag-slots">${slots}</div></div>`;
   let rest = bullets.map(bulletCellHtml).join('');
-  const total = Math.ceil(Math.max(BAG_MIN_SLOTS - columns, bullets.length) / columns) * columns;
+  const total = Math.max(bagCapacity('weapon'), bullets.length);
   for (let i = bullets.length; i < total; i++) rest += '<span class="bag-cell empty" aria-hidden="true"></span>';
   backpackGrid.classList.add('no-anim');
   backpackGrid.innerHTML = row + `<p class="bag-weapon-hint">子彈 <small>拖曳到上面的彈匣格就能換子彈；只有一般子彈不佔格子；照明彈也需要一格</small></p>` + rest;
@@ -169,7 +216,7 @@ function loadBulletToMagazine(id, slot) {
 }
 function unloadMagazineSlot(slot) { if (typeof setMagSlot !== 'function') return; setMagSlot(slot, null); sfx('switch'); afterMagazineChange(); }
 function renderBulletDetail(b) {
-  backpackDetail.classList.remove('dropping', 'gear-detail');
+  backpackDetail.classList.remove('gear-detail');
   const tag = typeof bulletSourceTag === 'function' ? bulletSourceTag(b.def) : '';
   const slot = magState().load.slice(0, magSlotCount()).indexOf(b.bullet);
   // 提示文字各有自己的 class：背包編輯器可以分開改字、調位置（js/backpack-layout.js 的 text.freeNote／text.dragNote）
@@ -181,7 +228,7 @@ function renderBulletDetail(b) {
     <div class="bag-item-heading"><h3>${b.name}</h3>
     <div class="bag-tags"><span class="bag-tag">${BAG_ICON.weapon}子彈</span>${tag ? `<span class="bag-tag">${tag}</span>` : ''}${b.free ? '<span class="bag-tag worn">不佔格子</span>' : slot >= 0 ? `<span class="bag-tag worn">彈匣第 ${slot + 1} 格</span>` : ''}</div></div>
     ${(b.def.bagDesc || b.def.desc) ? `<p class="bag-desc">${b.def.bagDesc || b.def.desc}</p>` : ''}
-    <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note drag-hint">也可以直接拖曳到武器分頁的彈匣格</p>'}</div>`;
+    <div class="bag-actions">${btn}${b.free ? '' : '<p class="bag-note drag-hint">也可以直接拖曳到彈藥包分頁的彈匣格</p>'}</div>`;
 }
 // 裝備按鈕：只有一格能放就「裝備」；可以放兩格（主／副武器、隨身物品 1／2）就各一顆。已經在那格就變「卸下」
 function gearButtons(g) {
@@ -191,18 +238,18 @@ function gearButtons(g) {
     ? `<button type="button" class="bag-unequip" data-gear-off="${s.id}">卸下${slots.length > 1 ? '（' + s.name + '）' : ''}</button>`
     : `<button type="button" class="bag-use" data-gear-equip="${s.id}" data-gear-id="${id}">${slots.length > 1 ? '裝到' + s.name : '裝備'}</button>`).join('') + '</div>';
 }
-// 左邊點空格：切到「裝備」分頁，選第一件能放這格的
+// 左邊點空格：選第一件能放這格的防具（從背包點：換成防具視窗）
 function showGearForSlot(slotId) {
-  backpackTab = GEAR_TAB.id; backpackDrop = null;
+  if (!bagCanChangeArmor()) { systemNotice(armorWhereHint(), true); return; }
   const fit = ownedGear().find(g => slotsForGear(g.weapon ? 'weapon' : 'gear', g.weapon || g.gear.id).some(s => s.id === slotId && !s.cur));
+  if (!campArmorOpen) { openArmorPanel(fit?.id); return; }
   backpackSel = fit ? fit.id : null;
   sfx('switch'); renderBackpack();
-  if (!fit) systemNotice('沒有可以放這一格的' + (slotId.startsWith('w:') ? '武器' : '裝備'));
+  if (!fit) systemNotice('沒有可以放這一格的裝備');
   backpackGrid.querySelector('.bag-cell.sel')?.focus();
 }
 function renderGearDetail(g) {
   const d = g.gear;
-  backpackDetail.classList.remove('dropping');
   backpackDetail.classList.add('gear-detail');
   backpackDetail.innerHTML = `
     <div class="bag-detail-image">${g.image ? `<img src="${g.image}" alt=""${g.weapon ? ' class="weapon"' : ''}>` : `<i class="bag-gear-emoji">${g.icon}</i>`}</div>
@@ -211,9 +258,23 @@ function renderGearDetail(g) {
     <div class="bag-gear-stats"><div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}</b></div></div>
     <div class="bag-actions">${gearButtons(g)}<p class="bag-note gear-hint">升級找諾亞</p></div>`;
 }
+// ---- 防具視窗：借用背包視窗，只顯示「防具」分頁（排版、外觀跟背包的防具分頁一樣）----
+// 只能靠近裝備箱按互動鍵開（基地、戰鬥地圖都一樣；裝備箱放在哪張地圖都可以）
+// 裝備箱：地圖編輯器上傳的 ammo-crate02（素材 ID 或名稱都認）。要讓別的物件也能開防具，加在這裡
+const ARMOR_CHEST = { tiles: ['tile_mvma4ws7'], names: ['ammo-crate02'] };
+const armorChestNearPlayer = () => typeof mapBoxNearPlayer === 'function' ? mapBoxNearPlayer('armor') : null;   // 判定範圍：js/camp-interactions.js 的 MAP_BOX
+function useArmorChestNearPlayer() { if (!armorChestNearPlayer()) return false; openArmorPanel(); return true; }
+function openArmorPanel(selection) {
+  if (!G?.player || G.over || !armorChestNearPlayer()) return;
+  closeBackpack(true);
+  campArmorOpen = true; backpackTab = GEAR_TAB.id; backpackSel = null;
+  openBackpack({ camp: true });
+  if (!backpackOpen) { campArmorOpen = false; backpackTab = 'consumable'; return; }
+  if (selection) { backpackSel = selection; renderBackpack(); backpackGrid.querySelector('.bag-cell.sel')?.focus(); }
+}
 // 只換選取的格子：不重畫整個背包（重畫會讓格子、溫特立繪重新建立而閃一下）
 function selectBackpackItem(id) {
-  backpackSel = id; backpackDrop = null;
+  backpackSel = id; bagDropQty = 1;
   backpackGrid.querySelectorAll('.bag-cell[data-bag-item]').forEach(c => {
     const on = c.dataset.bagItem === id; c.classList.toggle('sel', on); c.setAttribute('aria-pressed', on);
   });
@@ -224,9 +285,8 @@ function renderBackpackDetail() {
   const g = gearById(backpackSel); if (g) { renderGearDetail(g); return; }
   backpackDetail.classList.remove('gear-detail');
   const item = itemById(backpackSel);
-  backpackDetail.classList.toggle('dropping', !!(backpackDrop && item && backpackDrop.id === item.id));   // 確認丟棄時把圖縮小，留空間給確認框
   if (!item) {
-    backpackDetail.innerHTML = `<div class="bag-detail-empty"><span>🎒</span><p>${backpackTab === 'all' ? '背包是空的' : '沒有物品'}</p></div>`;
+    backpackDetail.innerHTML = '<div class="bag-detail-empty"><span>🎒</span><p>沒有物品</p></div>';
     return;
   }
   const cat = categoryOf(item.category), count = supplyInventory.get(item.id) || 0;
@@ -239,33 +299,24 @@ function renderBackpackDetail() {
     <div class="bag-item-heading"><h3>${item.name}</h3>
     <div class="bag-tags"><span class="bag-tag">${BAG_ICON[cat.id] || cat.icon + ' '}${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}${item.buff && typeof buffText === 'function' ? `<span class="bag-tag effect">出勤 ${buffText(item.buff)}</span>` : ''}</div></div>
     ${itemDesc(item) ? `<p class="bag-desc">${itemDesc(item)}</p>` : ''}
-    <div class="bag-actions">${backpackDrop && backpackDrop.id === item.id ? `
-      <div class="bag-drop-confirm" role="group" aria-label="確認丟棄">
-        <p>丟棄幾個？<small>無法復原</small></p>
-        ${count > 1 ? `<div class="bag-qty"><button type="button" data-drop-qty="-1" aria-label="少一個" ${backpackDrop.qty <= 1 ? 'disabled' : ''}>−</button><b>${backpackDrop.qty}</b><button type="button" data-drop-qty="1" aria-label="多一個" ${backpackDrop.qty >= count ? 'disabled' : ''}>＋</button><button type="button" class="bag-qty-all" data-drop-qty="all" ${backpackDrop.qty >= count ? 'disabled' : ''}>全部</button></div>` : ''}
-        <div class="bag-drop-buttons"><button type="button" class="bag-drop-cancel" data-drop-cancel>取消</button><button type="button" class="bag-drop-ok" data-drop-ok>丟棄 ${backpackDrop.qty} 個</button></div>
-      </div>` : `
+    <div class="bag-actions">
       ${usable ? `<button type="button" class="bag-use" data-bag-use="${item.id}">使用${kind ? `<kbd>${kind.key}</kbd>` : actKey ? `<kbd>${actKey}</kbd>` : ''}</button>` : (item.category === 'gift' ? '<p class="bag-note">在基地和大家對話時可以送禮</p>' : `<p class="bag-note">${item.note || '無法使用'}</p>`)}
-      ${canDrop(item) ? `<button type="button" class="bag-drop" data-bag-drop="${item.id}">🗑 丟棄</button>` : '<p class="bag-note">無法丟棄</p>'}`}
+      ${canDrop(item) ? dropRowHtml(item, count) : '<p class="bag-note">無法放在地上</p>'}
     </div>`;
 }
-function startDrop(id) {
-  const item = itemById(id);
-  if (!canDrop(item) || !(supplyInventory.get(id) > 0)) { sfx('error'); return; }
-  backpackDrop = { id, qty: 1 }; renderBackpackDetail(); sfx('menu');
-  backpackDetail.querySelector('.bag-drop-confirm')?.scrollIntoView({ block: 'nearest' });   // 畫面矮的時候，確認框也要看得到
-  backpackDetail.querySelector('.bag-drop-cancel')?.focus();   // 焦點先放在「取消」，不小心按 Enter 也不會丟掉
+// 「放在地上」：左邊直接調數量（只有一個就不顯示），按按鈕就放下（撿得回來，不用再確認）
+function dropRowHtml(item, count) {
+  const q = Math.min(bagDropQty, count);
+  return `<div class="bag-drop-row">${count > 1 ? `<div class="bag-qty"><button type="button" data-drop-qty="-1" aria-label="少一個" ${q <= 1 ? 'disabled' : ''}>−</button><b>${q}</b><button type="button" data-drop-qty="1" aria-label="多一個" ${q >= count ? 'disabled' : ''}>＋</button></div>` : ''}<button type="button" class="bag-drop" data-bag-drop="${item.id}">放在地上</button></div>`;
 }
-function cancelDrop() { if (!backpackDrop) return; const id = backpackDrop.id; backpackDrop = null; renderBackpackDetail(); sfx('switch'); backpackDetail.querySelector(`[data-bag-drop="${id}"]`)?.focus(); }
-function confirmDrop() {
-  if (!backpackDrop) return;
-  const { id, qty } = backpackDrop, item = itemById(id), count = supplyInventory.get(id) || 0, n = Math.min(qty, count);
-  backpackDrop = null;
-  if (n <= 0) return;
-  if (n >= count) supplyInventory.delete(id); else supplyInventory.set(id, count - n);
-  sfx('place'); systemNotice(`已丟棄 ${item.name} ×${n}`);
+function dropFromBackpack(id) {
+  const item = itemById(id), count = supplyInventory.get(id) || 0, n = Math.min(bagDropQty, count);
+  if (!canDrop(item) || n <= 0) { sfx('error'); return; }
+  if (!dropItemOnGround(id, n)) return;   // 放在溫特腳邊（js/ground-items.js）
+  bagDropQty = 1;
+  sfx('place'); systemNotice(`已把 ${item.name} ×${n} 放在地上`);
   updateHUD(); renderBackpack(); if (typeof supplyShopOpen !== 'undefined' && supplyShopOpen) renderSupplyShop();
-  (backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus();
+  (backpackDetail.querySelector('.bag-drop') || backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus();
 }
 function useBackpackItem(id) {
   const bl = bulletEntryById(id);   // 子彈：連點兩下＝裝進彈匣／從彈匣拿下
@@ -279,32 +330,35 @@ function useBackpackItem(id) {
   if (backpackOpen) renderBackpack();
 }
 
-function openBackpack() {
+function openBackpack(options = {}) {
   if (!G || G.over || !G.player || backpackOpen) return;
+  backpackCampContext = options.camp === true && bagAtCampTent() ? G : null;
+  if (options.category && bagTabVisible(options.category)) backpackTab = options.category;
   if (typeof closeSupplyShop === 'function') closeSupplyShop(true);
   backpackOpen = true; aimHeld = false; Object.keys(keys).forEach(key => { keys[key] = false; });
   closeElevatorMenu(); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   renderBackpack(); backpackEl.classList.remove('hidden'); sfx('menu');
   (backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus();
 }
-function closeBackpack(silent = false) { if (!backpackOpen) return; backpackOpen = false; backpackDrop = null; backpackEl.classList.add('hidden'); if (!silent) sfx('switch'); }
+function closeBackpack(silent = false) {
+  if (!backpackOpen) return; backpackOpen = false; bagDropQty = 1; backpackEl.classList.add('hidden'); if (!silent) sfx('switch');
+  if (campArmorOpen) { campArmorOpen = false; backpackTab = 'consumable'; backpackSel = null; }   // 防具視窗關掉：下次按 B 是一般背包
+}
 
 document.getElementById('backpackClose').addEventListener('click', () => closeBackpack());
 backpackEl.addEventListener('click', e => {
   if (e.target === backpackEl) { closeBackpack(); return; }
   const tab = e.target.closest('[data-bag-tab]');
-  if (tab) { backpackTab = tab.dataset.bagTab; backpackSel = null; backpackDrop = null; renderBackpack(); sfx('switch'); return; }
+  if (tab) { if (!bagTabVisible(tab.dataset.bagTab)) return; backpackTab = tab.dataset.bagTab; backpackSel = null; bagDropQty = 1; renderBackpack(); sfx('switch'); return; }
   const cell = e.target.closest('#backpackGrid [data-bag-item]');   // 只認格子：右邊說明欄身上也有 data-bag-item（js/backpack-layout.js 寫的），不能把說明欄的按鈕當成點格子
   if (cell) { if (backpackSel !== cell.dataset.bagItem) selectBackpackItem(cell.dataset.bagItem); backpackGrid.querySelector('.bag-cell.sel')?.focus(); return; }
-  if (e.target.closest('[data-bag-drop]')) { startDrop(e.target.closest('[data-bag-drop]').dataset.bagDrop); return; }
-  if (e.target.closest('[data-drop-cancel]')) { cancelDrop(); return; }
-  if (e.target.closest('[data-drop-ok]')) { confirmDrop(); return; }
+  if (e.target.closest('[data-bag-drop]')) { dropFromBackpack(e.target.closest('[data-bag-drop]').dataset.bagDrop); return; }
   const qtyBtn = e.target.closest('[data-drop-qty]');
-  if (qtyBtn && backpackDrop) {
-    const max = supplyInventory.get(backpackDrop.id) || 1, v = qtyBtn.dataset.dropQty;
-    backpackDrop.qty = v === 'all' ? max : Math.max(1, Math.min(max, backpackDrop.qty + Number(v)));
+  if (qtyBtn) {
+    const max = supplyInventory.get(backpackSel) || 1, v = qtyBtn.dataset.dropQty;
+    bagDropQty = Math.max(1, Math.min(max, bagDropQty + Number(v)));
     renderBackpackDetail(); sfx('blip');
-    (backpackDetail.querySelector(`[data-drop-qty="${v}"]:not(:disabled)`) || backpackDetail.querySelector('.bag-drop-ok')).focus();
+    (backpackDetail.querySelector(`[data-drop-qty="${v}"]:not(:disabled)`) || backpackDetail.querySelector('.bag-drop')).focus();
     return;
   }
   const ge = e.target.closest('[data-gear-equip]');
@@ -356,9 +410,7 @@ window.addEventListener('keydown', e => {
     return;
   }
   if (!backpackOpen) return;
-  if (backpackDrop && k === 'escape') { e.preventDefault(); e.stopImmediatePropagation(); cancelDrop(); return; }
-  if ((k === 'delete' || k === 'backspace') && !backpackDrop && backpackSel) { e.preventDefault(); startDrop(backpackSel); return; }
-  if (backpackDrop) return;   // 確認丟棄時，方向鍵不要換物品
+  if ((k === 'delete' || k === 'backspace') && backpackSel && itemById(backpackSel)) { e.preventDefault(); dropFromBackpack(backpackSel); return; }   // Delete：照目前選的數量放在地上
   // 方向鍵在格子之間移動；Enter 使用
   const items = ownedItems(), i = items.findIndex(item => item.id === backpackSel);
   const cols = getComputedStyle(backpackGrid).gridTemplateColumns.split(' ').length || 6;
@@ -372,3 +424,21 @@ window.addEventListener('keydown', e => {
     e.preventDefault(); useBackpackItem(backpackSel); backpackGrid.querySelector('.bag-cell.sel')?.focus();
   }
 });
+
+// ---- 開發工坊：背包擴充、彈藥包擴充（js/equipment.js 的 workshopEntries、workshopBuy 呼叫）----
+function bagWorkshopEntries() {
+  return Object.entries(BAG_UPGRADES).map(([key, u]) => {
+    const lv = bagLevel(key), cost = u.cost[lv - 1] || 0;
+    return { key: 'bag:' + key, kind: 'bag', def: u, name: u.name, lv, max: u.slots.length, icon: '<i>' + u.icon + '</i>', image: null, emoji: u.icon,
+      tag: '背包', worn: false, about: '背包的「' + u.tab + '」分頁多 ' + (u.slots[1] - u.slots[0]) + ' 格（最多 ' + u.slots[u.slots.length - 1] + ' 格）', stat: n => u.tab + ' ' + u.slots[n - 1] + ' 格',
+      canDev: false, where: '', upCost: cost, upMoney: lv < u.slots.length ? wsMoney('bag:' + key, lv - 1, cost) : 0, buy: 'bg:' + key };
+  });
+}
+function bagWorkshopBuy(kind, key) {
+  if (kind !== 'bg' || !BAG_UPGRADES[key]) return false;
+  const u = BAG_UPGRADES[key], lv = bagLevel(key); if (lv >= u.slots.length) return true;
+  if (!spendWorkshop(u.cost[lv - 1], wsMoney('bag:' + key, lv - 1, u.cost[lv - 1]))) return true;
+  equipState.bag[key] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
+  showWorkshopToast(u.icon + ' ' + u.name + '：「' + u.tab + '」可以放 ' + u.slots[lv] + ' 格');
+  return true;
+}

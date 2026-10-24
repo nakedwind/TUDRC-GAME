@@ -96,7 +96,8 @@ const STORAGE_HOSPITAL_PACK = 'tudrc_asset_pack_hospital_v1';     // 醫院病�
 const STORAGE_CONTAINMENT_PACK = 'tudrc_asset_pack_containment_v1'; // 收容觀察室素材包
 const STORAGE_MRT_PACK = 'tudrc_asset_pack_mrt_station_v1';       // 捷運車站素材包
 const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商店素材包
-const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v1'; // 後補：彈藥箱（打開）
+const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v2'; // 後補：彈藥箱（打開）；v2：圖改成 80×80（2×2 格），編輯器裡的素材大小跟著更新
+const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：物資箱（js/camp-supply.js）
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
@@ -375,6 +376,7 @@ function loadTiles() {
   const streetAdded = mergeDefaultAssetPack(t => STREET_PACK_IDS.has(t.id), STORAGE_STREET_PACK);
   const drinkShopAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_street_drink_shop_'), STORAGE_DRINK_SHOP_PACK);
   const ammoCrateOpenAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_ammo_crate_open', STORAGE_AMMO_CRATE_OPEN);
+  const supplyBoxAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_supply_box', STORAGE_SUPPLY_BOX);
   const oreTilesAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_obstacle_ore_'), STORAGE_ORE_TILES);
   const ironGateAdded=mergeDefaultAssetPack('tile_obstacle_irongate','tudrc_irongate_v1');
   const interactiveAdded = mergeDefaultAssetPack('tile_interactive_', 'tudrc_asset_interactive_20261013_v3');
@@ -410,7 +412,7 @@ function loadTiles() {
   const sizeFixed = mergeDefaultAssetPack(t => t.id === 'tile_station_hall_pillar' || t.id === 'tile_eoc_pillar', STORAGE_TILE_SIZE_FIX);
   const eocPosterAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_distance_poster', STORAGE_EOC_POSTER);
   const eocWallAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_security_door' || t.id === 'tile_eoc_fire_hydrant', STORAGE_EOC_WALL_ITEMS);
-  if (backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
+  if (supplyBoxAdded || backgroundExtrasAdded || ironGateAdded || interactiveAdded || decorAdded || obstaclesAdded || newAssetsAdded || stationHallAdded || eocAdded || bgExtraAdded || damageAssetsRemoved || damagedAdded || sizeFixed || eocPosterAdded || eocWallAdded || fieldAdded || fieldBaseAdded || scenePropsAdded || counselingRoomAdded || restaurantAdded || hospitalAdded || containmentAdded || mrtAdded || cvsAdded || streetAdded || drinkShopAdded || ammoCrateOpenAdded || oreTilesAdded || poolcoreAdded || hqAdded || breakableWallAdded || secretWallAdded || backroomCounterAdded || researchLabAdded || backroomDamageAdded || backroomEdgeAdded || backroomWallHalfHoleAdded || backroomDoorWoodAdded || backroomCorePillarsAdded || restaurantChairsFixed || propsFurnitureAdded || eocHydrantsAdded || counselingTissueFixed || noEntryAdded || oilTankAdded || graffitiPensAdded || doorKeyAdded || trainingRoomAdded || floorSignsAdded || ballBedAdded) saveTiles();
 
   // 一次性遷移：圖片已搬到 images/ 資料夾，把瀏覽器暫存裡的舊路徑自動更新
   let migrated = false;

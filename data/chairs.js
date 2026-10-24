@@ -258,19 +258,11 @@ const CHAIRS_DEFAULT = {
   },
   "tile_field_camp_bed": {
     "enabled": true,
-    "depth": 72,
+    "depth": 64,
     "solid": [
       [
         0,
-        0
-      ],
-      [
-        0,
         1
-      ],
-      [
-        1,
-        0
       ],
       [
         1,
@@ -700,6 +692,22 @@ const CHAIRS_DEFAULT = {
       "x": 21,
       "y": 8,
       "dir": "front"
+    }
+  },
+  "tile_eoc_ball_bed": {
+    "enabled": true,
+    "depth": 32,
+    "solid": [
+      [
+        0,
+        0
+      ]
+    ],
+    "seat": {
+      "x": 37,
+      "y": 22,
+      "dir": "front",
+      "rotation": 0
     }
   }
 };

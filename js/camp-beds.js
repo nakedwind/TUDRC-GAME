@@ -87,4 +87,10 @@ function campBedStep(t, dt) {
   sentryStatus(t, '休息完畢，在基地附近巡邏', '#7ee0c0');
   return true;
 }
+// 被玩家召喚：放開床位、躺著的先下床（game.js 的召喚至此呼叫）；冷卻一段時間，免得一到目的地又跑回去躺
+function leaveCampBed(t) {
+  const c = t.cot; if (!c) return;
+  if (t.sitting === c.seat) { t.sitting = null; if (c.approach) { t.x = c.approach.x; t.y = c.approach.y; } }
+  t.seatGoal = null; t.cot = null; t.calmT = 0; t.bedRetryT = CAMP_BED.cooldown;
+}
 const campBedResting = t => !!(t && t.cot && t.cot.phase === 'rest');

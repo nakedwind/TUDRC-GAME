@@ -1,9 +1,9 @@
 // ============================================================
 //  營地物資箱：放醫療包、杏仁水、急救包（溫特也可以拿、可以補；嚮導拿杏仁水和急救包）
-//  ・每張戰鬥地圖一個箱子（營地合圖裡彈藥箱右邊）。第一次在這張地圖出任務時補滿 start 的數量，
+//  ・箱子是地圖上放的「物資箱」物件（地圖編輯器的素材 tile_field_supply_box）；同一張地圖放幾個都共用同一份物資。第一次在這張地圖出任務時補滿 start 的數量，
 //    之後就一直維持（用掉就少了，中止任務再回來也不會補），要溫特自己放東西進去。
 //  ・嚮導身上最多帶 carry 個急救包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血（隊友和自己）花急救包。
-//    其中一樣用完就自己走回物資箱拿；箱子裡也沒有的話，頭上冒思考泡泡顯示缺什麼。
+//    其中一樣用完就自己走回物資箱拿（地上有溫特放的就先撿地上的，js/ground-items.js）；箱子裡也沒有的話，頭上冒思考泡泡顯示缺什麼。
 //  ・存檔：localStorage（CAMP_SUPPLY_KEY），依地圖分開存；開始新遊戲會清掉（js/new-game.js）。
 // ============================================================
 const CAMP_SUPPLY = {
@@ -15,8 +15,8 @@ const CAMP_SUPPLY = {
   minTaint: 30,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
   minHeal: 30,                                 // 隊員少多少血，嚮導才會花一個急救包補血
   sootheMul: 2,                                // 疏導量倍率（原本：艾德林一次清 15）
-  art: { full: 'images/field-camp/field-base-02.png', empty: 'images/field-camp/field-base-03.png' },   // 疊在營地合圖上的箱子（同樣 440×320）
-  rect: [232, 100, 282, 170],                  // 箱子在營地合圖裡的位置（圖片像素：左、上、右、下）
+  box: { id: 'tile_field_supply_box',          // 地圖上的物資箱物件（data/tiles.js）
+    art: { full: 'images/field-camp/field-base-01.png?v=20261024', some: 'images/field-camp/field-base-02.png?v=20261024', empty: 'images/field-camp/field-base-03.png?v=20261024' } },   // 10 個以上／1～9 個／空的（?v＝02、03 以前是 440×320 的營地疊圖，避免瀏覽器拿到舊圖）
 };
 const CAMP_SUPPLY_KEY = 'tudrc_camp_supply_v1';
 const SUPPLY_KEY_OF = { medkit: 'medkit', 'almond-water': 'almond' };
@@ -36,27 +36,32 @@ function campBox() {
 }
 const campBoxTotal = () => CAMP_SUPPLY.items.reduce((sum, k) => sum + (campBox()[k] || 0), 0);
 
-// ---- 營地物資：10 個以上用原圖，1～9 個用 02，0 個用 03 ----
-const campSupplyImgs = {};
-for (const [k, src] of Object.entries(CAMP_SUPPLY.art)) { const img = new Image(); img.src = src; campSupplyImgs[k] = img; }
-function campSupplyOverlay(s, t) {
-  if (MAP_SAFE || !/field-base\.png$/.test(String(t.file || '').replace(/\\/g, '/'))) return null;
-  const total=campBoxTotal();
-  if(total>=10)return null;
-  const img = campSupplyImgs[total>0?'full':'empty'];
-  return img && img.complete && img.naturalWidth ? img : null;
+// ---- 物資箱：地圖上放的物資箱物件。圖片跟著箱子裡的數量換：10 個以上 01、1～9 個 02、0 個 03 ----
+function supplyBoxSpots() {   // js/camp-interactions.js 的互動點（kind 'supply'）也用這個
+  if (MAP_SAFE || !MAP) return [];
+  const spots = [];
+  for (const s of MAP.stamps || []) {
+    if (s.id !== CAMP_SUPPLY.box.id) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
+    spots.push({ kind: 'supply', stamp: s, x: x0 + w / 2, y: y0 + h, top: y0, left: x0, right: x0 + w, bottom: y0 + h });
+  }
+  return spots;
 }
-// 箱子在世界座標的位置（跟著營地翻轉、旋轉）：js/camp-interactions.js 的互動點也用這個
-function campSupplySpot() {
-  if (typeof campInteractionSpots !== 'function') return null;
-  return campInteractionSpots().find(s => s.kind === 'supply') || null;
+// 畫地圖物件時換圖（js/maploader.js 會問這裡）
+function supplyBoxTile(s) {
+  if (s.id !== CAMP_SUPPLY.box.id || MAP_SAFE) return null;
+  const total = campBoxTotal(), k = total >= 10 ? 'full' : total > 0 ? 'some' : 'empty';
+  return { ...mapTileById(s.id), id: '__supply-box-' + k, file: CAMP_SUPPLY.box.art[k] };
 }
+// 嚮導回來拿東西的箱子（有好幾個就拿第一個）
+function campSupplySpot() { return supplyBoxSpots()[0] || null; }
 
 // ---- 嚮導身上的補給 ----
 function guideKit(t) {
   if (!t.kit) {   // 這次出勤剛開始：從箱子拿（人就在營地）
     t.kit = { firstaid: 0, 'almond-water': 0 };
-    if (!MAP_SAFE && campSupplySpot()) refillGuideKit(t, true);
+    if (!MAP_SAFE && campSupplySpot() && !window.TEST_MODE) refillGuideKit(t, true);   // 🧪 測試模式：空手出勤（方便測球球叼急救包、杏仁水給嚮導，js/ground-items.js）
   }
   return t.kit;
 }
@@ -80,6 +85,8 @@ const guideMissing = t => CAMP_SUPPLY.guideItems.filter(k => (guideKit(t)[k] || 
 // ---- 嚮導自己回箱子拿（js/sentry.js 呼叫；回傳 true＝這一幀在走去拿，不做別的）----
 function guideSupplyStep(t, dt) {
   if (MAP_SAFE || t.berserk || t.hp <= 0 || t.mode === 'goto') { t.supplyTrip = null; return false; }
+  if (typeof guideGroundStep === 'function' && guideGroundStep(t, dt)) { t.supplyTrip = null; return true; }   // 地上有溫特放的急救包、杏仁水：先去撿（js/ground-items.js）
+  if (window.TEST_MODE) { t.supplyTrip = null; return false; }   // 🧪 測試模式：不回物資箱拿，只靠地上的、球球叼來的
   const missing = guideMissing(t), box = campBox();
   const canGet = missing.filter(k => (box[k] || 0) > 0);
   if (!canGet.length) { t.supplyTrip = null; return false; }

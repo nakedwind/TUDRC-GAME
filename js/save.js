@@ -41,7 +41,7 @@ function loadGame() {
   try { data = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (_) {}
   if (!data) return;
   const valid = ([id, n]) => itemById(id) && Number.isInteger(n) && n > 0;   // 已經刪掉的物品就不讀
-  supplyInventory.clear(); (data.inventory || []).filter(valid).forEach(([id, n]) => supplyInventory.set(id, n));
+  supplyInventory.clear(); (data.inventory || []).filter(valid).forEach(([id, n]) => Map.prototype.set.call(supplyInventory, id, n));
   unlockedStorageLockers.clear(); collectedStorageKeys.clear();
   (Array.isArray(data.unlockedStorageLockers)?data.unlockedStorageLockers:[]).filter(x=>typeof x==='string').forEach(x=>unlockedStorageLockers.add(x));
   (Array.isArray(data.collectedStorageKeys)?data.collectedStorageKeys:[]).filter(x=>typeof x==='string').forEach(x=>collectedStorageKeys.add(x));
@@ -144,7 +144,7 @@ function renderSettings() {
   renderSaveSlots();
 }
 function openSettings() {
-  if ((typeof campPlanOpen !== 'undefined' && campPlanOpen) || settingsOpen || typeof G === 'undefined' || !G) return;
+  if ((typeof campPlanOpen !== 'undefined' && campPlanOpen) || (typeof campArmorOpen !== 'undefined' && campArmorOpen) || settingsOpen || typeof G === 'undefined' || !G) return;
   if (typeof closeSupplyShop === 'function') closeSupplyShop(true);
   if (typeof closeBackpack === 'function') closeBackpack(true);
   settingsOpen = true; aimHeld = false; Object.keys(keys).forEach(key => { keys[key] = false; });

@@ -133,6 +133,11 @@ function renderGiftPicker() {
 function giveGift(itemId) {
   const actor = giftTarget, id = giftableId(actor), item = itemById(itemId), count = supplyInventory.get(itemId) || 0;
   if (!actor || !item || count <= 0 || giftLimitReached(id)) { sfx('error'); return; }
+  const rewardShard = giftRequests[id] === itemId && REQUEST_SHARDS[id];
+  const rewardKey = rewardShard && MEMORY_KEYS.find(m => m.shard === rewardShard);
+  if (rewardKey && !(supplyInventory.get(rewardKey.key) > 0) && !bagCanApply([[itemId, -1], [rewardShard, 1]])) {
+    sfx('error'); systemNotice('背包空間不足，請先留出一格領取委託碎片', true); return;
+  }
   // 東西從背包拿走
   if (count <= 1) supplyInventory.delete(itemId); else supplyInventory.set(itemId, count - 1);
   // 反應與好感
@@ -201,17 +206,18 @@ function generateRequests() {
   }
 }
 function fulfillRequest(id) {
-  delete giftRequests[id];
   const lineFor = pickDialogueLine(id, 'requestReward');   // 對話編輯器「委託：完成時交給你東西」；沒寫就不說
   const shard = REQUEST_SHARDS[id], mk = shard && MEMORY_KEYS.find(m => m.shard === shard);
   if (mk && !(supplyInventory.get(mk.key) > 0)) {   // 給回憶碎片（鑰匙還沒拼好的話）
-    supplyInventory.set(shard, (supplyInventory.get(shard) || 0) + 1);
+    if (!supplyGain(shard, 1)) return { text: '背包已滿，這次委託保留，整理背包後可以再完成。' };
+    delete giftRequests[id];
     const it = itemById(shard), have = supplyInventory.get(shard);
     systemNotice(`獲得「${it.name}」（${Math.min(have, mk.need)}／${mk.need}）`);
     SFX.play('crystalGet', .7, 'request-shard');
     setTimeout(checkMemoryKeys, 600);
     return { line: lineFor, text: `獲得了「${it.name}」！（${Math.min(have, mk.need)}／${mk.need}）` };
   }
+  delete giftRequests[id];
   earnCrystals(REQUEST_RULES.crystals);   // 其他人：給異質碎片
   if (typeof showPickupToast === 'function') showPickupToast(REQUEST_RULES.crystals);
   return { line: lineFor, text: `獲得了 ${REQUEST_RULES.crystals} 個異質碎片！` };
@@ -221,6 +227,7 @@ function checkMemoryKeys() {
   for (const mk of MEMORY_KEYS) {
     const have = supplyInventory.get(mk.shard) || 0;
     if (have < mk.need || supplyInventory.get(mk.key) > 0) continue;
+    if (!bagCanApply([[mk.shard, -mk.need], [mk.key, 1]])) continue;
     if (have - mk.need <= 0) supplyInventory.delete(mk.shard); else supplyInventory.set(mk.shard, have - mk.need);
     supplyInventory.set(mk.key, 1);
     const shard = itemById(mk.shard), key = itemById(mk.key);

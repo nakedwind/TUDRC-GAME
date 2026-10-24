@@ -18,7 +18,7 @@ const FLARE = {
 // 滾輪切換的順序
 // special＝效果寫在 js/special-guns.js 的子彈（一般子彈、照明彈、螢光漆彈另外處理）
 const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
-const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], openId: 'tile_field_ammo_crate_open', radius: 72, openFor: 1.6 };
+const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], openId: 'tile_field_ammo_crate_open', openFor: 1.6 };
 
 // 子彈的小圖（data/equipment.js 的 image；沒有圖就用 emoji）
 const bulletIcon = (b, cls = 'bullet-img') => b && b.image ? '<img class="' + cls + '" src="' + b.image + '" alt="">' : '<i>' + ((b && b.icon) || '') + '</i>';
@@ -33,6 +33,7 @@ function bulletSave() { if (typeof saveEquipment === 'function') saveEquipment()
 // 加子彈（第一次拿到也算拿到這種）：回傳實際加了幾發（滿了就加不進去）
 function addBullets(id, n) {
   const s = bulletState(), b = BULLETS[id]; if (!b || id === 'pistol') return 0;
+  if (!s.owned[id] && bagUsedSlots(supplyInventory, 'weapon') >= bagCapacity('weapon')) { systemNotice('彈藥包已滿（' + bagCapacity('weapon') + ' 格），到開發工坊擴充', true); return 0; }
   s.owned[id] = true;
   const before = s.n[id] || 0; s.n[id] = Math.min(b.max, before + Math.max(0, n | 0));
   bulletSave(); return s.n[id] - before;
@@ -189,31 +190,12 @@ function drawFlareGlow(ctx) {   // 紅橘色光暈與火焰（畫在黑幕上面
   }
 }
 
-// ---- 彈藥箱：靠近按 Space 補滿照明彈 ----
-function ammoCrates() {
-  const list = [];
-  for (const s of (MAP && MAP.stamps) || []) {
-    if (!AMMO_CRATE.ids.includes(s.id)) continue;
-    const t = mapTileById(s.id); if (!t) continue;
-    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
-    list.push({ stamp: s, x: x0 + w / 2, y: y0 + h - CELL / 2, top: y0 });
-  }
-  return list;
-}
-function ammoCrateNearPlayer() {
-  const p = G.player; if (!p || p.sitting || MAP_SAFE) return null;
-  let best = null, bd = AMMO_CRATE.radius;
-  for (const c of ammoCrates()) { const d = Math.hypot(c.x - p.x, c.y - p.y); if (d < bd) { bd = d; best = c; } }
-  return best;
-}
+// ---- 彈藥箱：地圖上放的彈藥箱物件，靠近按 Space 補滿所有子彈（以前營地合圖裡的彈藥箱搬出來了）----
+const ammoCrateNearPlayer = () => mapBoxNearPlayer('ammo');   // 判定範圍：js/camp-interactions.js 的 MAP_BOX
 function useAmmoCrateNearPlayer() {
   const crate = ammoCrateNearPlayer(); if (!crate) return false;
-  const p = G.player;
-  if (bulletCount('flare') >= BULLETS.flare.max) { flash('照明彈已滿', p.x, p.y - 70, '#9aa4b2', 1.2); sfx('error'); return true; }
-  const got = bulletOwned('flare') ? fillBullets('flare') : addBullets('flare', BULLETS.flare.max);
   crate.stamp.openUntil = performance.now() + AMMO_CRATE.openFor * 1000;   // 箱子打開一下
-  flash('🔥 照明彈補滿 +' + got, p.x, p.y - 70, '#ffb38a', 1.4);
-  sfx('reload'); updateAmmoHud();
+  refillCampAmmo();   // 補滿所有子彈（js/camp-interactions.js）
   return true;
 }
 // 剛補給過的關著的彈藥箱，暫時畫成打開的樣子（js/maploader.js 會問這裡）

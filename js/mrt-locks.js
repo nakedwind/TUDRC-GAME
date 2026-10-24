@@ -103,7 +103,7 @@ function useMrtLockNearPlayer() {
 // 置物櫃（沒指定內容的）：有機會找到好遊卡（js/storage-lockers.js 呼叫）
 function tryYouyouCardFind() {
   if (Math.random() >= MRT_YOUYOU_CHANCE) return;
-  supplyInventory.set('youyou-card', (supplyInventory.get('youyou-card') || 0) + 1);
+  if (!supplyGain('youyou-card', 1)) return;
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice('youyou-card', 1);
 }
 

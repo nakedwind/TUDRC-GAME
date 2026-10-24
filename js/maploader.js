@@ -504,7 +504,8 @@ function drawMapStampImg(ctx, s) {
   let w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, rot = mapStampTurn(s);
   // 旋轉後的圖跟編輯器一樣：左上角固定在 (c, r)＋微調，往右下佔「轉向後的寬高」，不再以原本大小的中心為準
   let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
-  const opened = typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s);   // 剛補給過的彈藥箱：換成打開的圖
+  const opened = (typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s))   // 剛補給過的彈藥箱：換成打開的圖
+    || (typeof supplyBoxTile === 'function' && supplyBoxTile(s));   // 物資箱：照箱子裡的數量換圖（js/camp-supply.js）
   if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
   const img = isElevatorLightTile(t) && elevatorLightIsOpen(s.c, s.r) && elevatorLightOpenImage.complete && elevatorLightOpenImage.naturalWidth
@@ -514,19 +515,17 @@ function drawMapStampImg(ctx, s) {
     if(gate&&drawSlidingIronGate(ctx,gate,img,x,y,w,h))return;
     ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn(circuitOf(s)))ctx.filter='brightness(0.35)';   // 電路編號（js/powered-lights.js）
     const drawW = rot % 2 ? h : w, drawH = rot % 2 ? w : h;
-    const supply = typeof campSupplyOverlay === 'function' ? campSupplyOverlay(s, t) : null;   // 營地物資箱：疊在營地合圖上（js/camp-supply.js）
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
       ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
       if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
-      if (supply) ctx.drawImage(supply, -w / 2, -h / 2, w, h);
       ctx.restore();
     } else if(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,x,y,w,h)) {
       // 閘門的靜態機台與滑動門翼由專用繪製處理。
     } else {
       const hole = typeof mrtStampHole === 'function' ? mrtStampHole(s) : null;   // 打開的捷運閘門：門板那塊不畫（js/mrt-locks.js）
       if (hole) { ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.rect(x + hole[0] * w, y + hole[1] * h, hole[2] * w, hole[3] * h); ctx.clip('evenodd'); }
-      ctx.drawImage(img, x, y, w, h); if (supply) ctx.drawImage(supply, x, y, w, h);
+      ctx.drawImage(img, x, y, w, h);
       if (hole) ctx.restore();
     }
     ctx.restore();

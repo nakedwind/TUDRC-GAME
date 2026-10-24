@@ -1141,12 +1141,14 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .backpack-tabs { display:flex; flex-wrap:wrap; gap:6px; padding:10px 18px 8px; }
 .backpack-tabs button { display:flex; align-items:center; gap:6px; padding:6px 12px; border:1px solid rgba(255,255,255,.08); border-radius:999px; background:transparent; color:#8e9aa7; cursor:pointer; font:700 12px "Microsoft JhengHei",sans-serif; }
 .backpack-tabs button em { padding:0 6px; border-radius:99px; background:rgba(255,255,255,.08); font-size:10px; font-style:normal; }
+.backpack-tabs .bag-tab-count { padding:0 5px; background:rgba(0,0,0,.18); font-variant-numeric:tabular-nums; }   /* 物品、彈藥包後面的「用了幾格/幾格」 */
+.backpack-tabs .bag-tab-sep { flex:none; align-self:center; padding:0 4px; color:#5d6a76; font-size:16px; }   /* 有上限｜沒上限的分頁中間 */
 .backpack-tabs button:hover { color:#dfe8ef; }
 .backpack-tabs button.active { border-color:rgba(143,211,255,.45); background:rgba(143,211,255,.12); color:#d8ecff; }
 .backpack-body { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 260px; }
 
 /* 左邊：物品格 */
-.backpack-grid { min-height:0; display:grid; grid-template-columns:repeat(7,minmax(0,1fr)); align-content:start; gap:8px; overflow-y:auto; padding:6px 16px 16px 18px; scrollbar-color:#3d5266 transparent; }
+.backpack-grid { min-height:0; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); align-content:start; gap:8px; overflow-y:auto; padding:6px 16px 16px 18px; scrollbar-color:#3d5266 transparent; }
 .bag-cell { position:relative; aspect-ratio:1; display:grid; place-items:center; min-width:0; padding:6px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(23,32,42,.6); cursor:pointer; transition:transform .12s, border-color .12s, background .12s, box-shadow .12s; }
 .bag-cell.snack { border-color:rgba(121,219,173,.28); } .bag-cell.drink { border-color:rgba(140,199,255,.28); }
 .bag-cell img { position:absolute; inset:6px; margin:auto; width:calc(100% - 12px); height:calc(100% - 12px); max-width:80px; max-height:80px; object-fit:contain; image-rendering:pixelated; }
@@ -1193,25 +1195,18 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .bag-use:disabled { border-color:rgba(255,255,255,.08); background:rgba(0,0,0,.28); color:#9aa6b2; cursor:not-allowed; box-shadow:inset 0 1px 3px rgba(0,0,0,.4); }
 .bag-use:focus-visible { outline:2px solid #ffd479; outline-offset:2px; }
 .bag-note { margin:0; color:#6f7d8a; font-size:12px; }
-/* 丟棄：平常是低調的紅框按鈕，確認時才變成紅色實心 */
-.bag-drop { display:flex; align-items:center; justify-content:center; gap:8px; width:100%; padding:7px 10px; border:1px solid rgba(255,120,110,.35); border-radius:9px; background:transparent; color:#ff9d8f; cursor:pointer; font:700 13px "Microsoft JhengHei",sans-serif; transition:background .12s, border-color .12s; }
-.bag-drop:hover { border-color:#ff8f80; background:rgba(255,100,90,.1); }
-.bag-drop kbd { min-width:15px; padding:0 4px; border:1px solid rgba(255,157,143,.35); border-bottom-width:2px; border-radius:4px; color:inherit; font:700 10px/1.4 Consolas,monospace; }
-.backpack-detail.dropping .bag-detail-image { padding:4px 0; } .backpack-detail.dropping .bag-detail-image img { width:80px; height:80px; }
-.bag-drop-confirm { display:flex; flex-direction:column; gap:9px; padding:11px; border:1px solid rgba(255,120,110,.4); border-radius:10px; background:rgba(80,20,20,.35); animation:shop-fade .15s ease-out both; }
-.bag-drop-confirm p { margin:0; color:#ffd9d3; font-size:13px; font-weight:700; }
-.bag-drop-confirm small { display:block; margin-top:2px; color:#c99a93; font-size:11px; font-weight:400; }
-.bag-qty { display:flex; align-items:center; justify-content:center; gap:6px; }
-.bag-qty button { min-width:30px; height:28px; padding:0 8px; border:1px solid rgba(255,255,255,.18); border-radius:7px; background:rgba(0,0,0,.25); color:#eef3f7; cursor:pointer; font:700 14px "Microsoft JhengHei",sans-serif; }
-.bag-qty button:hover:not(:disabled) { border-color:#ffb3a8; } .bag-qty button:disabled { opacity:.35; cursor:default; }
-.bag-qty .bag-qty-all { font-size:12px; }
-.bag-qty b { min-width:30px; color:#fff; font-size:17px; font-variant-numeric:tabular-nums; }
-.bag-drop-buttons { display:grid; grid-template-columns:1fr 1fr; gap:7px; }
-.bag-drop-buttons button { padding:8px 6px; border-radius:8px; cursor:pointer; font:700 13px "Microsoft JhengHei",sans-serif; }
-.bag-drop-cancel { border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.06); color:#e3e9ee; }
-.bag-drop-cancel:hover { background:rgba(255,255,255,.12); }
-.bag-drop-ok { border:1px solid #e0574b; background:linear-gradient(180deg,#e9685c,#c9443a); color:#fff; box-shadow:0 2px 0 #8a2a22; }
-.bag-drop-ok:hover { filter:brightness(1.08); } .bag-drop-ok:active { transform:translateY(2px); box-shadow:none; }
+/* 放在地上：低調的藍灰框按鈕（東西撿得回來，不用紅色警告）；選數量的小框也是同一色系 */
+.bag-drop { display:flex; align-items:center; justify-content:center; gap:7px; width:100%; padding:7px 10px; border:1px solid rgba(143,190,230,.35); border-radius:9px; background:rgba(120,170,215,.08); color:#b9d6ee; cursor:pointer; font:700 13px "Microsoft JhengHei",sans-serif; transition:background .12s, border-color .12s, color .12s; }
+.bag-drop::before { content:''; width:14px; height:8px; border:2px solid currentColor; border-top:0; border-radius:0 0 4px 4px; }   /* 小托盤圖示：放下來 */
+.bag-drop:hover { border-color:#8fc2ea; background:rgba(120,170,215,.16); color:#e2f0fb; }
+.bag-drop kbd { min-width:15px; padding:0 4px; border:1px solid rgba(185,214,238,.35); border-bottom-width:2px; border-radius:4px; color:inherit; font:700 10px/1.4 Consolas,monospace; }
+.bag-drop-row { display:flex; align-items:stretch; gap:6px; margin-top:12px; padding-top:12px; border-top:1px solid rgba(255,255,255,.08); }   /* 跟「使用」拉開距離，中間一條細線 */
+.bag-drop-row .bag-drop { flex:1; width:auto; min-width:0; padding:7px 6px; white-space:nowrap; }
+.bag-qty + .bag-drop::before { display:none; }   /* 旁邊有數量鈕時位置不夠：拿掉小托盤圖示 */
+.bag-qty { display:flex; align-items:center; gap:2px; padding:2px; border:1px solid rgba(143,190,230,.25); border-radius:9px; background:rgba(0,0,0,.25); }
+.bag-qty button { min-width:20px; height:26px; padding:0 3px; border:0; border-radius:6px; background:transparent; color:#cfe3f3; cursor:pointer; font:700 15px "Microsoft JhengHei",sans-serif; }
+.bag-qty button:hover:not(:disabled) { background:rgba(143,190,230,.18); } .bag-qty button:disabled { opacity:.3; cursor:default; }
+.bag-qty b { min-width:18px; color:#fff; font-size:15px; text-align:center; font-variant-numeric:tabular-nums; }
 .bag-actions button:focus-visible { outline:2px solid #ffd479; outline-offset:2px; }
 .bag-detail-empty { margin:auto; color:#6f7d8a; font-size:13px; line-height:1.7; }
 .bag-detail-empty span { display:block; font-size:40px; opacity:.5; }
@@ -1340,20 +1335,21 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* 帳篷作戰計畫：獨立暫停彈窗。 */
 #campPlanDialog { position:absolute; inset:0; z-index:45; display:grid; place-items:center; padding:20px; background:rgba(3,8,13,.72); backdrop-filter:blur(6px); }
 #campPlanDialog.hidden { display:none; }
-.camp-plan-card { box-sizing:border-box; width:min(580px,100%); max-height:100%; overflow-y:auto; padding:26px; border:1px solid #668a94; border-top:3px solid #e7c47c; border-radius:16px; background:linear-gradient(145deg,#25353c,#111e25); box-shadow:0 24px 80px rgba(0,0,0,.65); color:#e4edf0; }
+.camp-plan-card { box-sizing:border-box; width:min(464px,100%); max-height:100%; overflow-y:auto; padding:21px; border:1px solid #668a94; border-top:3px solid #e7c47c; border-radius:16px; background:linear-gradient(145deg,#25353c,#111e25); box-shadow:0 24px 80px rgba(0,0,0,.65); color:#e4edf0; }
 .camp-plan-card header { position:relative; display:flex; align-items:center; justify-content:center; min-height:38px; padding:0 46px; text-align:center; }
 
 .camp-plan-card h2 { margin:0; font-size:27px; }
 .camp-plan-card header button { position:absolute; right:0; top:calc(50% - 17px); flex:none; width:34px; height:34px; border:1px solid #52707c; border-radius:50%; background:#1a2a32; color:#d5e6ec; font-size:24px; cursor:pointer; }
 .camp-plan-card > p { margin:16px 0; color:#e7c47c; font-size:15px; }
-.camp-plan-options { display:flex; flex-direction:column; gap:12px; margin-top:20px; }
-.camp-plan-options > button { display:flex; align-items:center; gap:15px; width:100%; padding:17px; border:1px solid #47616e; border-radius:11px; background:rgba(7,15,22,.5); color:#e4edf0; text-align:left; cursor:pointer; }
+.camp-plan-options { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
+.camp-plan-options > button { display:flex; align-items:center; gap:12px; width:100%; padding:10px 14px; border:1px solid #47616e; border-radius:11px; background:rgba(7,15,22,.5); color:#e4edf0; text-align:left; cursor:pointer; }
 .camp-plan-options > button:hover { border-color:#e7c47c; background:#30414a; }
 .camp-plan-options i { flex:none; color:#e7c47c; font:700 22px monospace; font-style:normal; }
-.camp-plan-options span { display:flex; flex-direction:column; gap:7px; min-width:0; }
+.camp-plan-options .plan-icon { flex:none; width:28px; height:28px; color:#e7c47c; }   /* 圖示跟編號一樣是金色（js/camp-interactions.js 的 PLAN_ICON） */
+.camp-plan-options span { display:flex; flex-direction:column; gap:4px; min-width:0; }
 .camp-plan-options b { font-size:17px; line-height:1.5; }
 .camp-plan-options small { font-size:14px; color:#e7c47c; line-height:1.5; }
-.camp-plan-card footer { display:flex; align-items:center; justify-content:space-between; gap:12px; margin-top:22px; color:#90a7b3; font-size:14px; }
+.camp-plan-card footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:18px; color:#90a7b3; font-size:14px; }
 .camp-plan-card footer button { padding:9px 18px; border:1px solid #e7c47c; border-radius:8px; background:#e7c47c; color:#302818; font:700 16px "Microsoft JhengHei",sans-serif; cursor:pointer; }
 .camp-plan-card button:focus-visible { outline:2px solid #8edacb; outline-offset:3px; }
 .camp-plan-card[hidden] { display:none; }
@@ -1638,7 +1634,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .squad-card-support .squad-portrait img { filter: saturate(.78); }
 .squad-card-support .squad-portrait { filter: none; }
 /* ===== 部隊長裝備（背包左邊；js/equipment.js）===== */
-.backpack-card { width: min(1060px, 100%); }
+.backpack-card { width: min(948px, 100%); }
 .backpack-body { grid-template-columns: 240px minmax(0,1fr) 260px; }
 .equip-panel { position: relative; min-height: 0; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; padding: 12px; border-right: 1px solid rgba(255,212,121,.13); background: rgba(40,33,18,.18); scrollbar-color: #776642 transparent; }
 .equip-panel h3 { margin: 4px 0 2px; color: #ffe3a1; font-size: 14px; }
@@ -2143,6 +2139,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* ===== 營地物資箱（js/camp-supply.js）===== */
 #campSupply { position: absolute; inset: 0; z-index: 32; display: grid; place-items: center; padding: 14px; background: rgba(4,7,11,.5); font-family: "Microsoft JhengHei", sans-serif; }
 #campSupply.hidden { display: none; }
+/* 獨立防具視窗 */
 /* 配色跟「作戰計畫」視窗一樣（.camp-plan-card） */
 .camp-supply-card { zoom: 1.2; box-sizing: border-box; width: min(615px, calc(100vw / 1.2)); max-height: 100%; overflow-y: auto; padding: 22px; border: 1px solid #668a94; border-top: 3px solid #e7c47c; border-radius: 16px; color: #e4edf0; background: linear-gradient(145deg, #25353c, #111e25); box-shadow: 0 24px 80px rgba(0,0,0,.65); }
 .camp-supply-card header { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 38px; padding: 0 46px; text-align: center; }
