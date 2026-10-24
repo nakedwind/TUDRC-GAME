@@ -502,8 +502,8 @@ function drawMapStampImg(ctx, s) {
   if(display===false)return;
   if(display)t=display;
   let w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, rot = mapStampTurn(s);
-  const rotatedW = rot % 2 ? h : w, rotatedH = rot % 2 ? w : h;
-  let x = OX + s.c * CELL + (s.ox || 0) - (rotatedW - w) / 2, y = OY + s.r * CELL + (s.oy || 0) - (rotatedH - h) / 2;
+  // 旋轉後的圖跟編輯器一樣：左上角固定在 (c, r)＋微調，往右下佔「轉向後的寬高」，不再以原本大小的中心為準
+  let x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
   const opened = typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s);   // 剛補給過的彈藥箱：換成打開的圖
   if (opened) { const h2 = mapTileH(opened) * CELL; y += h - h2; h = h2; w = mapTileW(opened) * CELL; t = opened; }
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); return; }
