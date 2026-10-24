@@ -186,6 +186,7 @@ function drawTower(t) {
       ctx.fillStyle = 'rgba(255,60,60,0.45)';
       ctx.beginPath(); ctx.ellipse(t.x, t.y + 14, 20, 7, 0, 0, Math.PI * 2); ctx.fill();
     }
+    const prevSmooth = ctx.imageSmoothingEnabled;   // 畫完放回原本的設定（不要直接打開平滑，不然後面畫的牆、道具會被糊掉）
     ctx.imageSmoothingEnabled = false;
     ctx.save();
     if (t.meleeSwing) {
@@ -221,7 +222,7 @@ function drawTower(t) {
       ctx.globalAlpha = 1;
     }
     ctx.restore();
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = prevSmooth;
   } else {
     ctx.fillStyle = t.berserk ? '#5a1f27' : spec.color; roundRect(t.x - 17, t.y - 17, 34, 34, 6); ctx.fill();
   }
@@ -420,6 +421,7 @@ function drawEnemy(e) {
     drawBurrowingMouseBody(ctx, e);
   } else if (baseSprite.complete && baseSprite.naturalWidth) {
     const sprite = tintedSprite(baseSprite, e.tint);   // 變體換色
+    const prevSmooth = ctx.imageSmoothingEnabled;   // 畫完放回原本的設定（不要直接打開平滑，不然後面畫的牆、道具會被糊掉）
     ctx.imageSmoothingEnabled = false;
     let fw = slimeW, fh = slimeH;
     if (walkFrame && (walkFrame.attack || walkFrame.natural)) {   // 攻擊圖畫布比較大（鳥頭人背面圖比較窄）：照站姿圖的比例換算，腳底中央對齊
@@ -436,7 +438,7 @@ function drawEnemy(e) {
     if (walkFrame && walkFrame.rig) drawRigArm(e, walkFrame, dx, dy, dw, dh);   // 揮手：即時轉動的手臂
     const fuseSil = fuseFlash ? flashSprite(sprite, '#ff6a3d') : null;
     if (fuseSil) { ctx.globalAlpha = fuseFlash * .75; ctx.drawImage(fuseSil, dx, dy, dw, dh); ctx.globalAlpha = 1; }
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = prevSmooth;
   } else {
     ctx.fillStyle = '#48c7d5'; ctx.beginPath(); ctx.ellipse(e.x, bottomY - slimeH / 2, slimeW / 2.8, slimeH / 2.8, 0, 0, Math.PI * 2); ctx.fill();
   }
@@ -510,13 +512,14 @@ function drawWanderer(npc) {
   const img = !posed && set && pickCharacterFrame(set, npc);
   if (img && img.complete && img.naturalWidth) {
     const hop = NPC_HOP[npc.id], hopY = hop && npc.moving && !npc.sitting ? -Math.abs(Math.sin((npc.anim || 0) * Math.PI * hop.perSec)) * hop.height : 0;
+    const prevSmooth = ctx.imageSmoothingEnabled;   // 畫完放回原本的設定（不要直接打開平滑，不然後面畫的牆、道具會被糊掉）
     ctx.imageSmoothingEnabled = false;
     ctx.save(); seatRotate(npc, size);
     costumeLayer(npc.id, npc, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, 'behind');
     ctx.drawImage(img, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, size);
     costumeLayer(npc.id, npc, npc.x - size / 2, Math.round(npc.y - size + 18 + hopY), size, 'front');
     ctx.restore();
-    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingEnabled = prevSmooth;
   }
   // 頭頂名字（跟哨兵同樣式；NPC 沒有血條）
   const name = (WANDERERS.find(w => w.id === npc.id) || {}).name;
