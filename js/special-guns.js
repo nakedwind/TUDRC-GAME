@@ -3,7 +3,7 @@
    - 燃燒彈：拋過去（會飛過怪物頭上），落地燒出一片火海（js/oil-barrels.js 的火海，敵我都會燙）。
      火海會點燃油汙、油桶，也會把生命體碎掉的那堆燒成灰。
    - 麻醉彈：直線飛出去，打中的怪物睡著（不動、沒有傷害）；打中暴走的隊員：睡一下，醒來恢復正常。
-     沒暴走的隊員不會被打到（直接穿過去）。生命體沒有效果，大型怪物睡一半的時間。
+     打中沒暴走的隊員：一樣睡著（不動、不攻擊），負荷不變。生命體沒有效果，大型怪物睡一半的時間。
    - 分裂彈：一次扇形噴出好幾顆小子彈（每顆各自算打到誰）。
    - 閃光彈：拋過去落地爆出強光，範圍內的怪物暈眩；隊員也會被閃到（站著不動、不攻擊）。生命體沒有效果。
    - 雷電彈：直線打中的怪物觸電受傷、麻痺，電流再跳到附近幾隻；打到的地方旁邊有隊員也會被電到。
@@ -97,10 +97,10 @@ function fireTranq(p, aim, lv) {
   const S = SPECIAL_GUN.tranq, ang = Math.atan2(aim.y - p.y, aim.x - p.x), want = S.range * CELL;
   aimPose(p, ang);
   const dist = clearDistance(p, ang, want);
-  // 沿路線找第一個打到的：怪物、或暴走的隊員（沒暴走的隊員直接穿過去）
+  // 沿路線找第一個打到的：怪物、或隊員（暴走的、沒暴走的都會被打到）
   const cands = [];
   for (const e of G.enemies) if (!e.dead && e.hp > 0) cands.push(e);
-  for (const t of G.towers) if (t.berserk && t.hp > 0) cands.push(t);
+  for (const t of G.towers) if (t.hp > 0 && !t.eatenBy) cands.push(t);
   const { target, d: hitD } = lineHit(p, ang, dist, cands, S.hitR);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
   let x1 = p.x + Math.cos(ang) * hitD, y1 = p.y + Math.sin(ang) * hitD;
@@ -110,11 +110,14 @@ function fireTranq(p, aim, lv) {
   if (typeof sfxAt === 'function') sfxAt('gunshot', mx, my, .18, 'tranq'); else sfx('switch');
 }
 function tranqHit(o, lv) {
-  if (G.towers.includes(o)) {   // 暴走的隊員：睡著，醒來恢復正常
-    if (!o.berserk || o.hp <= 0) return false;
-    o.berserk = false; o.taint = Math.min(o.taint, 55); o.sleepT = lv.sleep;
+  if (G.towers.includes(o)) {   // 隊員：睡著（暴走的醒來恢復正常；沒暴走的就只是睡一下，負荷不變）
+    if (o.hp <= 0 || o.eatenBy) return false;
+    const wasBerserk = o.berserk;
+    if (wasBerserk) { o.berserk = false; o.taint = Math.min(o.taint, 55); }
+    o.sleepT = Math.max(o.sleepT || 0, lv.sleep);
     o.meleeSwing = null; o.gunSwing = null; o.target = null; o.moving = false;
-    sentryStatus(o, '睡著了…', '#b9a7ff');
+    flash('💤', o.x, o.y - 44, '#b9a7ff', 1);   // 不設 hitT：隊員的 hitT＝被怪物打（行軍床、反擊都看它）
+    sentryStatus(o, wasBerserk ? '睡著了…' : '被麻醉針打中，睡著了…', '#b9a7ff');
     return true;
   }
   if (o.dead || o.hp <= 0) return false;
