@@ -25,6 +25,11 @@ const sqEsc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&
 const SQ_TEXT_DEFAULT = {};
 function sqT(key, def) { SQ_TEXT_DEFAULT[key] = def; const t = typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.texts && SQUAD_LAYOUT.texts[key]; return sqEsc(t || def).replace(/\n/g, '<br>'); }   // 編輯器裡按 Enter 換行＝畫面上也換行
 // 同一個位置、但存成不同名字的字（技能分類每格各一個、條件提示有兩種句型）：畫面上最後畫的是哪一個
+// 每格各自的版面（text.xxx@隊員/格子）沒調時照哪一份：補充說明先看分組的（@trait／@other，有調過的話），再看大家共用的
+function sqParentKey(key) {
+  const [b, who = ''] = String(key).split('@'), id = who.split('/')[1], g = b === 'text.skillNote' && id ? b + '@' + (id === 'trait-1' ? 'trait' : 'other') : null;
+  return g && ((typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.elements) || {})[g] ? g : b;
+}
 let sqSkillTagKey = '', sqLockHintKey = '', sqIntroKey = '';   // 簡介：每位隊員各一個
 const sqIsImgSrc = v => /[./]/.test(String(v || '')) && !/^\p{Extended_Pictographic}/u.test(String(v || ''));
 const sqIcon = (icon, key) => sqIsImgSrc(icon) ? '<img data-sq="' + key + '" src="' + sqEsc(icon) + '" alt="">' : '<span class="sq-emoji" data-sq="' + key + '">' + sqEsc(icon) + '</span>';
@@ -188,7 +193,7 @@ function squadSkillHtml(actor, safe) {
       '<b class="sq-info-name" data-sq="text.skillName">' + sqEsc(node.name) + '</b><small class="sq-info-tag" data-sq="text.skillTag">' + sqT(sqSkillTagKey = 'skillTag:' + sel, lay.tag) + '</small>' +
       '<p class="sq-info-effect" data-sq="text.skillEffect@' + type + '/' + sel + '" data-sq-base="text.skillEffect">' + sqEsc(effect) + '</p>' +   // 位置、大小每格技能各自調（沒調的照大家共用的）
       '<p class="sq-info-effect sq-info-effect2" data-sq="text.skillEffect2@' + type + '/' + sel + '" data-sq-base="text.skillEffect2">' + sqEsc(node.effect2).replace(/\n/g, '<br>') + '</p>' +   // 技能效果 2：同上，每格各自調
-      '<p class="sq-info-note" data-sq="text.skillNote@' + (sel === 'trait-1' ? 'trait' : 'other') + '" data-sq-base="text.skillNote">' + sqEsc(note).replace(/\n/g, '<br>') + '</p>' +
+      '<p class="sq-info-note" data-sq="text.skillNote@' + type + '/' + sel + '" data-sq-base="text.skillNote" data-sq-group="text.skillNote@' + (sel === 'trait-1' ? 'trait' : 'other') + '">' + sqEsc(note).replace(/\n/g, '<br>') + '</p>' +
       '<div class="sq-learn' + (owned ? ' owned' : '') + '" data-sq="box.learn' + (owned ? 'ed' : '') + '">' + (owned ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
       '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' + label + '</button></div></section>';
   }
@@ -430,7 +435,8 @@ function handleSquadHover(body, e) {
 function squadLayoutCss() {
   let css = '';
   const els = (typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.elements) || {};
-  const order = Object.entries(els).sort((a, b) => (a[0].includes('@') ? 1 : 0) - (b[0].includes('@') ? 1 : 0));   // 共用的先、每格各自的後
+  const rank = k => !k.includes('@') ? 0 : k.includes('/') ? 2 : 1;
+  const order = Object.entries(els).sort((a, b) => rank(a[0]) - rank(b[0]));   // 共用的先、分組的（@trait／@other）、每格各自的最後
   for (const [key, o] of order) {
     const part = squadPart(key); if (!part || !o) continue;
     const r = [], img = part.kind === 'img', sq = part.kind === 'box';
@@ -442,7 +448,7 @@ function squadLayoutCss() {
     if (o.font > 0) r.push('font-size:' + o.font + 'px !important');
     if (o.align) r.push('text-align:' + o.align + ' !important', 'justify-content:' + ({ left: 'flex-start', center: 'center', right: 'flex-end' }[o.align] || 'center') + ' !important');
     const q = key.replace(/["\\]/g, '\\$&');
-    if (r.length) css += '#tpad [data-sq="' + q + '"]' + (key.includes('@') ? '' : ',#tpad [data-sq-base="' + q + '"]') + '{' + r.join(';') + '}';
+    if (r.length) css += '#tpad [data-sq="' + q + '"]' + (!key.includes('@') ? ',#tpad [data-sq-base="' + q + '"]' : rank(key) === 1 ? ',#tpad [data-sq-group="' + q + '"]' : '') + '{' + r.join(';') + '}';
   }
   return css;
 }
@@ -481,8 +487,8 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
   let selKey = null, hoverKey = null, drag = null, play = false, keepOpen = false;
   const post = m => parent.postMessage(Object.assign({ src: 'squadedit-game' }, m), '*');
   const root = () => document.querySelector('#tpad .sq-canvas');
-  const els = key => { const r = root(); return r ? [...r.querySelectorAll('[data-sq="' + String(key).replace(/["\\]/g, '\\$&') + '"]')].filter(el => el.getClientRects().length) : []; };
-  const over = key => { const E = SQUAD_LAYOUT.elements = SQUAD_LAYOUT.elements || {}; if (!E[key]) E[key] = key.includes('@') ? { ...(E[key.split('@')[0]] || {}) } : {}; return E[key]; };   // @＝每格各自：從共用的那一份開始
+  const els = key => { const r = root(), q = String(key).replace(/["\\]/g, '\\$&'); return r ? [...r.querySelectorAll('[data-sq="' + q + '"],[data-sq-group="' + q + '"]')].filter(el => el.getClientRects().length) : []; };   // 分組的（@trait／@other）：畫面上那一格的補充說明
+  const over = key => { const E = SQUAD_LAYOUT.elements = SQUAD_LAYOUT.elements || {}; if (!E[key]) E[key] = key.includes('@') ? { ...(E[sqParentKey(key)] || {}) } : {}; return E[key]; };   // @＝每格各自：從共用（或分組）的那一份開始
   const scaleOf = el => sqScale(el);
   function hit(target) {
     const r = root(); if (!r || !target || !target.closest || !r.contains(target)) return null;

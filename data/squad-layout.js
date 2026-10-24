@@ -855,7 +855,12 @@ const SQUAD_LAYOUT = {
       "size": 32
     },
     "text.skillNote@other": {
-      "y": -60,
+      "y": -58,
+      "font": 12,
+      "x": 0
+    },
+    "text.skillNote@theonie/a-2": {
+      "y": -35,
       "font": 12,
       "x": 0
     }

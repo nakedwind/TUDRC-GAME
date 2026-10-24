@@ -33,7 +33,11 @@ function saveDraft() { try { localStorage.setItem(SQ_DRAFT_KEY, JSON.stringify(s
 const partOf = key => parts.find(p => p.key === key) || { key, label: key, group: '', kind: /^img\.|Img:|Icon:/.test(key) ? 'img' : /^(roster|g?node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '' };
 const labelOf = key => partOf(key).label;
 // @隊員/技能格＝只套用在那一格（例如技能效果的字）：還沒調過就照大家共用的那一份
-const baseKeyOf = key => key.includes('@') ? key.split('@')[0] : null;
+const baseKeyOf = key => {   // 每格各自的（@隊員/格子）沒調時照哪一份：補充說明先看分組的（@trait／@other，有調過的話），再看大家共用的
+  if (!key.includes('@')) return null;
+  const [b, who] = key.split('@'), id = who.split('/')[1], g = b === 'text.skillNote' && id ? b + '@' + (id === 'trait-1' ? 'trait' : 'other') : null;
+  return g && state.layout.elements[g] ? g : b;
+};
 const elOf = key => state.layout.elements[key] || (baseKeyOf(key) ? state.layout.elements[baseKeyOf(key)] || {} : {});
 const isImg = key => partOf(key).kind === 'img';
 const isBox = key => partOf(key).kind === 'box';   // 方形的框：大小＝寬＝高
