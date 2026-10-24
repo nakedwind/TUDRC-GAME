@@ -366,7 +366,7 @@ function applySupplyNow(id) {
   if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1);
   const k = SUPPLY_KIND[item.use];
   sfx(item.use === 'sp' ? 'drink' : 'soothe');   // 杏仁水：喝飲料的聲音；醫療包維持原本的聲音
-  flash(`${item.name}　+${Math.ceil(restored)} ${k.stat}`, G.player.x, G.player.y - 54, k.color);
+  flash(`${item.name} +${Math.ceil(restored)} ${k.stat}`, G.player.x, G.player.y - 54, k.color);   // 名稱和數字中間：一個半形空格
   updateHUD(); if (supplyShopOpen) renderSupplyShop(); if (backpackOpen) renderBackpack();
   return true;
 }

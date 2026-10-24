@@ -103,7 +103,8 @@ function fireTranq(p, aim, lv) {
   for (const t of G.towers) if (t.berserk && t.hp > 0) cands.push(t);
   const { target, d: hitD } = lineHit(p, ang, dist, cands, S.hitR);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
-  const x1 = p.x + Math.cos(ang) * hitD, y1 = p.y + Math.sin(ang) * hitD;
+  let x1 = p.x + Math.cos(ang) * hitD, y1 = p.y + Math.sin(ang) * hitD;
+  if (!target) { const cap = shotOpensHangiCap(p, ang, hitD); if (cap) { x1 = cap.x; y1 = cap.y; } }   // 麻醉針打到順順宮帽：打開
   (G.tranqDarts = G.tranqDarts || []).push({ x0: mx, y0: my, x1, y1, ang, t: 0, T: Math.max(.04, hitD / S.speed), target, lv });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .05, life0: .05 });
   if (typeof sfxAt === 'function') sfxAt('gunshot', mx, my, .18, 'tranq'); else sfx('switch');
@@ -172,6 +173,11 @@ function bulletHurtTower(t, dmg, col) {
 }
 
 // ---- 分裂彈：扇形噴出好幾顆小子彈 ----
+// 沒打到怪物時：沿著子彈的路線打到順順宮帽就把它打開（跟一般手槍一樣，js/hangi-bao.js），回傳命中點；沒打到回傳 null
+function shotOpensHangiCap(p, ang, d) {
+  if (typeof shootHangiCapOnLine !== 'function') return null;
+  return shootHangiCapOnLine(p.x, p.y, p.x + Math.cos(ang) * d, p.y + Math.sin(ang) * d);
+}
 function fireSplit(p, aim, b) {
   const ang = Math.atan2(aim.y - p.y, aim.x - p.x), range = b.range * CELL, hits = new Map();
   aimPose(p, ang);
@@ -179,7 +185,8 @@ function fireSplit(p, aim, b) {
   for (let i = 0; i < b.pellets; i++) {
     const a = ang + (b.pellets > 1 ? (i / (b.pellets - 1) - .5) * b.spread : 0) + (Math.random() - .5) * .05;
     const dist = clearDistance(p, a, range), r = lineHit(p, a, dist, cands, 14);
-    const ex = p.x + Math.cos(a) * r.d, ey = p.y + Math.sin(a) * r.d;
+    let ex = p.x + Math.cos(a) * r.d, ey = p.y + Math.sin(a) * r.d;
+    if (!r.target) { const cap = shotOpensHangiCap(p, a, r.d); if (cap) { ex = cap.x; ey = cap.y; } }   // 彈丸打到順順宮帽：打開
     G.effects.push({ bullet: true, x1: mx, y1: my, x2: ex, y2: ey, life: .08, life0: .08, color: b.color });
     if (r.target) { hits.set(r.target, (hits.get(r.target) || 0) + b.dmg); G.effects.push({ ring: true, x: ex, y: ey, r: 2, r2: 7, life: .12, life0: .12, color: b.color }); }
   }
@@ -231,7 +238,8 @@ function fireShock(p, aim, b) {
   aimPose(p, ang);
   const dist = clearDistance(p, ang, 9 * CELL), r = lineHit(p, ang, dist, liveEnemies(), 16);
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
-  const end = r.target ? bodyPoint(r.target) : { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
+  const capHit = r.target ? null : shotOpensHangiCap(p, ang, r.d);   // 電擊打到順順宮帽：打開
+  const end = r.target ? bodyPoint(r.target) : capHit || { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .12, life0: .12, color: b.color });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
   const struck = [];   // 被電到的地方（隊員在旁邊就會被波及）

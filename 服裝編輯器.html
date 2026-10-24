@@ -49,6 +49,9 @@
   .seg button.on { background:#245668 } .seg button:hover { background:#2a4157 }
   .toolbar label { display:flex; gap:6px; align-items:center; font-size:13px; color:#b9cad9 }
   .toolbar .grow { flex:1 }
+  .view-zoom { display:inline-flex; align-items:center; gap:4px; font-size:12px; color:#ffd36f; white-space:nowrap }
+  .view-zoom b { min-width:40px; text-align:center; color:#ffe3a1 }
+  .view-zoom button { padding:2px 8px; font-size:12px }
   .stage { display:grid; place-items:center; padding:10px; border:1px solid #2f4152; border-radius:10px; background:#0d141b }
   #stage { display:block; image-rendering:pixelated; cursor:move; touch-action:none; max-width:100% }
   .strip { display:flex; justify-content:center; gap:10px; margin-top:10px }
@@ -103,11 +106,13 @@
       <div class="toolbar">
         <label>服裝 <select id="skinSel" title="換預覽用的身體（服裝本身沒有位置可以調）"></select></label>
         <span class="grow"></span>
+        <span class="view-zoom" title="整體預覽縮放：只是看的大小，不會改到配件的位置和數值（快捷鍵：Alt＋滾輪）">整體預覽縮放 <button type="button" id="viewZoomOut" aria-label="縮小預覽">−</button><b id="viewZoomText">100%</b><button type="button" id="viewZoomIn" aria-label="放大預覽">＋</button><button type="button" id="viewZoomReset">100%</button></span>
+        <span class="grow"></span>
         <label title="同時戴著其他欄位選過的配件，方便看誰蓋誰"><input type="checkbox" id="others" checked>一起戴上其他配件</label>
       </div>
       <div class="stage"><canvas id="stage" width="448" height="448" aria-label="配件位置預覽"></canvas></div>
       <div class="strip" id="strip"></div>
-      <p class="keys"><b>拖曳</b> 移動　<b>滾輪 / + −</b> 縮放　<b>Q E</b> 旋轉　<b>方向鍵</b> 微調（Shift 0.5px）　<b>1–4</b> 方向　<b>空白</b> 走路動畫</p>
+      <p class="keys"><b>拖曳</b> 移動　<b>滾輪 / + −</b> 縮放配件　<b>Alt＋滾輪</b> 整體預覽縮放　<b>Q E</b> 旋轉　<b>方向鍵</b> 微調（Shift 0.5px）　<b>Ctrl+Z／Ctrl+Y</b> 上一步／下一步　<b>1–4</b> 方向　<b>空白</b> 走路動畫</p>
     </section>
     <section class="panel settings">
       <h2 id="editTitle">位置</h2>
@@ -184,7 +189,7 @@
   <script src="js/sfx.js?v=mouse-dizzy3-20261023"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=sync-20261021"></script>
-  <script src="js/costume-editor.js?v=clean-20261023"></script>
+  <script src="js/costume-editor.js?v=undo-20261024"></script>
   <script>ProjectSave.attach({
     after: ['exportFile'],
     files: [{ path: 'data/costume-placement.js', label: '配件位置', text: () => costumePlacementText() }],

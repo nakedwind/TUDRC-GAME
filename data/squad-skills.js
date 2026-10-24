@@ -1,5 +1,5 @@
 /* ===== Y102隊員技能樹的內容（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====
-   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, effect2：技能效果 2（第二段亮綠色字）, note：補充說明（顯示在效果下面）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值 }
+   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, effect2：技能效果 2（第二段亮綠色字）, note：補充說明（顯示在效果下面）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值, active：嚮導會自己發動的技能（數字說明見 data/guide-skills.js） }
    技能格 id：trait-1（普通技能 Lv1＝原本的特性）、trait-2（Lv2）、a-1／a-2（A 系列－生存）、core-1～3（核心技能）、ult（終極核心大招）、b-1／b-2（B 系列－攻擊）、aux-1／aux-2（輔助技能）
    mods：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }（數值名稱見 js/skills.js 開頭）
    這裡沒寫的隊員／格子，會從 data/skills.js（舊版技能資料）自動換算。 */
@@ -39,7 +39,8 @@ const SQUAD_SKILLS = {
             "path": "hp",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "吃飽了特別有力氣，HP 上限提升。"
       },
       "a-2": {
         "name": "格擋",
@@ -51,7 +52,8 @@ const SQUAD_SKILLS = {
             "path": "defense",
             "add": 0.1
           }
-        ]
+        ],
+        "note": "用劍擋下攻擊，受到的傷害減少。"
       },
       "core-1": {
         "name": "護衛之劍",
@@ -63,7 +65,8 @@ const SQUAD_SKILLS = {
             "path": "parry.guard",
             "add": 0.1
           }
-        ]
+        ],
+        "note": "守在溫特身邊時，怪物打溫特更容易打空。"
       },
       "core-2": {
         "name": "寬廣劍圈",
@@ -79,7 +82,8 @@ const SQUAD_SKILLS = {
             "path": "taunt",
             "add": 0.5
           }
-        ]
+        ],
+        "note": "能保護溫特的範圍變大，吸引仇恨的範圍也擴大。"
       },
       "core-3": {
         "name": "見切",
@@ -95,7 +99,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.1
           }
-        ]
+        ],
+        "note": "看穿攻擊的時機：自己更容易閃過攻擊，大招也更快準備好。"
       },
       "ult": {
         "name": "突擊連刺・流星",
@@ -107,7 +112,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "強化大招「突擊連刺」：放得更頻繁。"
       },
       "b-1": {
         "name": "快劍",
@@ -119,7 +125,8 @@ const SQUAD_SKILLS = {
             "path": "rate",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "出劍更快，攻擊速度提升。"
       },
       "b-2": {
         "name": "重刺",
@@ -131,7 +138,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.3
           }
-        ]
+        ],
+        "note": "每一刺都更深，攻擊力大幅提升。"
       },
       "aux-1": {
         "name": "精神飽滿",
@@ -143,7 +151,8 @@ const SQUAD_SKILLS = {
             "path": "walkSpeed",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "精神好、腳步輕，移動速度變快。"
       },
       "aux-2": {
         "name": "飯後好心情",
@@ -155,7 +164,8 @@ const SQUAD_SKILLS = {
             "path": "taintRegen",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "吃飽心情好，精神負荷恢復得更快。"
       }
     },
     "avaren": {
@@ -178,7 +188,8 @@ const SQUAD_SKILLS = {
             "path": "confuse",
             "add": 1
           }
-        ]
+        ],
+        "note": "「蝕心毒霧」讓異質體混亂得更久，互相攻擊的時間更長。"
       },
       "a-1": {
         "name": "戒備",
@@ -190,7 +201,8 @@ const SQUAD_SKILLS = {
             "path": "defense",
             "add": 0.06
           }
-        ]
+        ],
+        "note": "時時保持戒備，受到的傷害減少。"
       },
       "a-2": {
         "name": "隱匿",
@@ -206,7 +218,8 @@ const SQUAD_SKILLS = {
             "path": "walkSpeed",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "更擅長藏身和移動：HP 上限提升，移動速度也變快。"
       },
       "core-1": {
         "name": "腐蝕擴散",
@@ -218,7 +231,8 @@ const SQUAD_SKILLS = {
             "path": "splash",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "腐蝕的範圍變大，一次影響更多異質體。"
       },
       "core-2": {
         "name": "同類相殘",
@@ -230,7 +244,8 @@ const SQUAD_SKILLS = {
             "path": "confuse",
             "add": 1
           }
-        ]
+        ],
+        "note": "混亂的時間再延長，讓異質體自相殘殺得更久。"
       },
       "core-3": {
         "name": "劇毒",
@@ -246,7 +261,8 @@ const SQUAD_SKILLS = {
             "path": "splash",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "毒性更強：攻擊力提升，腐蝕範圍再擴大。"
       },
       "ult": {
         "name": "腐蝕綻放・腐蝕領域",
@@ -262,7 +278,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.2
           }
-        ]
+        ],
+        "note": "強化大招「腐蝕綻放」：腐蝕的傷害更高，也放得更頻繁。"
       },
       "b-1": {
         "name": "致命刺擊",
@@ -274,7 +291,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.08
           }
-        ]
+        ],
+        "note": "瞄準要害出手，攻擊力提升。"
       },
       "b-2": {
         "name": "連續侵蝕",
@@ -290,7 +308,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.08
           }
-        ]
+        ],
+        "note": "出手更快更狠，攻擊速度和攻擊力都提升。"
       },
       "aux-1": {
         "name": "安心的距離",
@@ -302,7 +321,8 @@ const SQUAD_SKILLS = {
             "path": "taint",
             "mul": 0.7
           }
-        ]
+        ],
+        "note": "待在讓自己安心的距離作戰，每次攻擊累積的負荷大幅減少。"
       },
       "aux-2": {
         "name": "伸長的毒手",
@@ -314,7 +334,8 @@ const SQUAD_SKILLS = {
             "path": "range",
             "add": 0.5
           }
-        ]
+        ],
+        "note": "腐蝕能伸得更遠，射程增加。"
       }
     },
     "theonie": {
@@ -337,7 +358,8 @@ const SQUAD_SKILLS = {
             "path": "burn.duration",
             "add": 2
           }
-        ]
+        ],
+        "note": "「餘燼烙印」留下的燒傷會持續更久，異質體被燒的時間更長。"
       },
       "a-1": {
         "name": "耐熱體質",
@@ -349,7 +371,8 @@ const SQUAD_SKILLS = {
             "path": "hp",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "習慣了火焰的高溫，身體更耐打，能在前線撐得更久。"
       },
       "a-2": {
         "name": "冷靜呼吸",
@@ -365,7 +388,8 @@ const SQUAD_SKILLS = {
             "path": "defense",
             "add": 0.05
           }
-        ]
+        ],
+        "note": "出手時保持呼吸節奏：精神負荷累積得更慢，受到的傷害也減少。"
       },
       "core-1": {
         "name": "烈焰",
@@ -377,7 +401,8 @@ const SQUAD_SKILLS = {
             "path": "burn.damage",
             "add": 3
           }
-        ]
+        ],
+        "note": "燒傷的火勢更猛，被點燃的異質體每秒受到更多傷害。"
       },
       "core-2": {
         "name": "助燃",
@@ -393,7 +418,8 @@ const SQUAD_SKILLS = {
             "path": "burn.damage",
             "add": 2
           }
-        ]
+        ],
+        "note": "讓火燒得更旺：本身的攻擊力提升，燒傷每秒的傷害也再提高。"
       },
       "core-3": {
         "name": "業火",
@@ -409,7 +435,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.1
           }
-        ]
+        ],
+        "note": "燒傷持續得更久，大招「烈焰新星」也更快準備好。"
       },
       "ult": {
         "name": "烈焰新星・焚天",
@@ -425,7 +452,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.2
           }
-        ]
+        ],
+        "note": "強化大招「烈焰新星」：爆炎的傷害更高，也放得更頻繁。"
       },
       "b-1": {
         "name": "精準點火",
@@ -437,7 +465,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "瞄準要害點火，每一發攻擊都更痛。"
       },
       "b-2": {
         "name": "遠程壓制",
@@ -453,7 +482,8 @@ const SQUAD_SKILLS = {
             "path": "range",
             "add": 1
           }
-        ]
+        ],
+        "note": "從更遠的地方開火、火力也更強，在異質體靠近前就先削弱它們。"
       },
       "aux-1": {
         "name": "天才的節奏",
@@ -465,7 +495,8 @@ const SQUAD_SKILLS = {
             "path": "rate",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "抓到出手的節奏，攻擊速度變快。"
       },
       "aux-2": {
         "name": "火光引路",
@@ -477,7 +508,8 @@ const SQUAD_SKILLS = {
             "path": "aggroRange",
             "add": 2
           }
-        ]
+        ],
+        "note": "火光照得更遠，能更早發現遠處的異質體。"
       }
     },
     "red": {
@@ -500,7 +532,8 @@ const SQUAD_SKILLS = {
             "path": "hpRegen",
             "add": 2
           }
-        ]
+        ],
+        "note": "「鐵壁守護」的恢復力更強，每秒回復更多 HP。"
       },
       "a-1": {
         "name": "隊長的體格",
@@ -512,7 +545,8 @@ const SQUAD_SKILLS = {
             "path": "hp",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "身為小隊長的鍛鍊成果，HP 上限提升。"
       },
       "a-2": {
         "name": "鋼鐵意志",
@@ -528,7 +562,8 @@ const SQUAD_SKILLS = {
             "path": "hpRegen",
             "add": 2
           }
-        ]
+        ],
+        "note": "意志堅定：受到的傷害減少，每秒回復的 HP 也再增加。"
       },
       "core-1": {
         "name": "挑釁",
@@ -540,7 +575,8 @@ const SQUAD_SKILLS = {
             "path": "taunt",
             "add": 1
           }
-        ]
+        ],
+        "note": "吸引仇恨的範圍變大，把更遠的異質體都拉到自己身上。"
       },
       "core-2": {
         "name": "堅盾",
@@ -552,7 +588,8 @@ const SQUAD_SKILLS = {
             "path": "defense",
             "add": 0.07
           }
-        ]
+        ],
+        "note": "盾牌架得更穩，受到的傷害再減少。"
       },
       "core-3": {
         "name": "穩住陣腳",
@@ -568,7 +605,8 @@ const SQUAD_SKILLS = {
             "path": "taunt",
             "add": 0.5
           }
-        ]
+        ],
+        "note": "站得穩、心也穩：精神負荷恢復得更快，吸引仇恨的範圍再擴大。"
       },
       "ult": {
         "name": "盾擊衝鋒・不倒之盾",
@@ -584,7 +622,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "強化大招「盾擊衝鋒」：衝撞的傷害更高，也放得更頻繁。"
       },
       "b-1": {
         "name": "盾緣打擊",
@@ -596,7 +635,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "用盾牌邊緣攻擊，攻擊力提升。"
       },
       "b-2": {
         "name": "重盾橫掃",
@@ -612,7 +652,8 @@ const SQUAD_SKILLS = {
             "path": "splash",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "揮動重盾橫掃：攻擊力提升，攻擊範圍也變大。"
       },
       "aux-1": {
         "name": "可靠的背影",
@@ -624,7 +665,8 @@ const SQUAD_SKILLS = {
             "path": "walkSpeed",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "跑得更快，能更早擋到隊友前面。"
       },
       "aux-2": {
         "name": "不用一個人扛",
@@ -636,7 +678,8 @@ const SQUAD_SKILLS = {
             "path": "taint",
             "mul": 0.75
           }
-        ]
+        ],
+        "note": "相信隊友，不再什麼都一個人扛，每次攻擊累積的負荷變少。"
       }
     },
     "amber": {
@@ -659,7 +702,8 @@ const SQUAD_SKILLS = {
             "path": "stun",
             "add": 0.5
           }
-        ]
+        ],
+        "note": "「靜電麻痺」讓異質體停住的時間更久。"
       },
       "a-1": {
         "name": "基礎體能",
@@ -671,7 +715,8 @@ const SQUAD_SKILLS = {
             "path": "hp",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "照著訓練表鍛鍊體能，HP 上限提升。"
       },
       "a-2": {
         "name": "避雷針",
@@ -687,7 +732,8 @@ const SQUAD_SKILLS = {
             "path": "hp",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "學會把電流導開：受到的傷害減少，HP 上限也再提高。"
       },
       "core-1": {
         "name": "瞄準守則",
@@ -699,7 +745,8 @@ const SQUAD_SKILLS = {
             "path": "accuracy",
             "add": 0.15
           }
-        ]
+        ],
+        "note": "按照守則確實瞄準，落雷更容易打中目標。"
       },
       "core-2": {
         "name": "落雷範圍",
@@ -711,7 +758,8 @@ const SQUAD_SKILLS = {
             "path": "splash",
             "add": 0.4
           }
-        ]
+        ],
+        "note": "落雷的範圍變大，一次能波及更多異質體。"
       },
       "core-3": {
         "name": "精準雷擊",
@@ -727,7 +775,8 @@ const SQUAD_SKILLS = {
             "path": "stun",
             "add": 0.5
           }
-        ]
+        ],
+        "note": "命中率再提升，被打中的異質體也會麻痺得更久。"
       },
       "ult": {
         "name": "天雷落・雷神降臨",
@@ -743,7 +792,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.2
           }
-        ]
+        ],
+        "note": "強化大招「天雷落」：落雷的傷害更高，也放得更頻繁。"
       },
       "b-1": {
         "name": "加壓電流",
@@ -755,7 +805,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "提高電流的強度，攻擊力上升。"
       },
       "b-2": {
         "name": "雷霆萬鈞",
@@ -771,7 +822,8 @@ const SQUAD_SKILLS = {
             "path": "splash",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "電流更強、雷擊範圍更大，對付成群的異質體更有效。"
       },
       "aux-1": {
         "name": "規律作息",
@@ -783,7 +835,8 @@ const SQUAD_SKILLS = {
             "path": "taint",
             "mul": 0.8
           }
-        ]
+        ],
+        "note": "規律的生活讓精神更穩定，每次攻擊累積的負荷變少。"
       },
       "aux-2": {
         "name": "快速充能",
@@ -795,7 +848,8 @@ const SQUAD_SKILLS = {
             "path": "rate",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "充能速度變快，攻擊速度提升。"
       }
     },
     "luther": {
@@ -818,7 +872,8 @@ const SQUAD_SKILLS = {
             "path": "knockback",
             "add": 0.5
           }
-        ]
+        ],
+        "note": "攻擊把異質體擊退得更遠。"
       },
       "a-1": {
         "name": "硬骨頭",
@@ -830,7 +885,8 @@ const SQUAD_SKILLS = {
             "path": "hp",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "骨頭夠硬，HP 上限提升。"
       },
       "a-2": {
         "name": "硬漢",
@@ -846,7 +902,8 @@ const SQUAD_SKILLS = {
             "path": "hp",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "受到的傷害減少，HP 上限也再提高。"
       },
       "core-1": {
         "name": "重擊暈眩",
@@ -858,7 +915,8 @@ const SQUAD_SKILLS = {
             "path": "stun",
             "add": 0.5
           }
-        ]
+        ],
+        "note": "重擊讓異質體停住的時間更久。"
       },
       "core-2": {
         "name": "狂暴",
@@ -870,7 +928,8 @@ const SQUAD_SKILLS = {
             "path": "rageDmg",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "「狂怒之血」更強：汙染越高，攻擊力提升得越多。"
       },
       "core-3": {
         "name": "守住身邊的人",
@@ -886,7 +945,8 @@ const SQUAD_SKILLS = {
             "path": "knockback",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "吸引仇恨的範圍變大，把異質體擋在隊友前面，擊退也更遠。"
       },
       "ult": {
         "name": "崩地重擊・崩山",
@@ -902,7 +962,8 @@ const SQUAD_SKILLS = {
             "path": "ultCdCut",
             "add": 0.15
           }
-        ]
+        ],
+        "note": "強化大招「崩地重擊」：重擊的傷害更高，也放得更頻繁。"
       },
       "b-1": {
         "name": "怪力",
@@ -914,7 +975,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.12
           }
-        ]
+        ],
+        "note": "純粹的力氣，攻擊力提升。"
       },
       "b-2": {
         "name": "破壞拳",
@@ -930,7 +992,8 @@ const SQUAD_SKILLS = {
             "path": "splash",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "拳頭更重：攻擊力提升，攻擊範圍也變大。"
       },
       "aux-1": {
         "name": "沉默的步伐",
@@ -942,7 +1005,8 @@ const SQUAD_SKILLS = {
             "path": "walkSpeed",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "移動速度變快，更快趕到戰線上。"
       },
       "aux-2": {
         "name": "壓抑",
@@ -954,7 +1018,8 @@ const SQUAD_SKILLS = {
             "path": "taint",
             "mul": 0.8
           }
-        ]
+        ],
+        "note": "學會壓住怒氣，每次攻擊累積的負荷變少。"
       }
     },
     "tino": {
@@ -977,7 +1042,8 @@ const SQUAD_SKILLS = {
             "path": "sense",
             "add": 5
           }
-        ]
+        ],
+        "note": "「夜視感知」的範圍變大，能看見更遠的黑暗中的怪物。"
       },
       "a-1": {
         "name": "閃身",
@@ -989,7 +1055,8 @@ const SQUAD_SKILLS = {
             "path": "defense",
             "add": 0.06
           }
-        ]
+        ],
+        "note": "身手靈巧，受到的傷害減少。"
       },
       "a-2": {
         "name": "靈敏",
@@ -1005,7 +1072,8 @@ const SQUAD_SKILLS = {
             "path": "walkSpeed",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "HP 上限提升，移動速度也變快。"
       },
       "core-1": {
         "name": "鷹眼",
@@ -1017,7 +1085,8 @@ const SQUAD_SKILLS = {
             "path": "range",
             "add": 1
           }
-        ]
+        ],
+        "note": "看得更遠，射程增加。"
       },
       "core-2": {
         "name": "全域感知",
@@ -1029,7 +1098,8 @@ const SQUAD_SKILLS = {
             "path": "sense",
             "add": 10
           }
-        ]
+        ],
+        "note": "「夜視感知」的範圍再大幅擴大。"
       },
       "core-3": {
         "name": "弱點看穿",
@@ -1045,7 +1115,8 @@ const SQUAD_SKILLS = {
             "path": "accuracy",
             "add": 0.05
           }
-        ]
+        ],
+        "note": "看穿怪物的弱點，攻擊力和命中率都提升。"
       },
       "ult": {
         "name": "夜之眼",
@@ -1065,7 +1136,8 @@ const SQUAD_SKILLS = {
             "path": "rate",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "堤諾沒有大招，這是感知的極致：夜視範圍再擴大，攻擊力和攻擊速度也提升。"
       },
       "b-1": {
         "name": "速射",
@@ -1077,7 +1149,8 @@ const SQUAD_SKILLS = {
             "path": "rate",
             "mul": 1.15
           }
-        ]
+        ],
+        "note": "出手更快，攻擊速度提升。"
       },
       "b-2": {
         "name": "連射",
@@ -1093,7 +1166,8 @@ const SQUAD_SKILLS = {
             "path": "dmg",
             "mul": 1.1
           }
-        ]
+        ],
+        "note": "連續射擊，攻擊速度和攻擊力都提升。"
       },
       "aux-1": {
         "name": "先一步發現",
@@ -1105,7 +1179,8 @@ const SQUAD_SKILLS = {
             "path": "aggroRange",
             "add": 3
           }
-        ]
+        ],
+        "note": "比其他人更早發現遠處的異質體。"
       },
       "aux-2": {
         "name": "年輕的恢復力",
@@ -1117,7 +1192,8 @@ const SQUAD_SKILLS = {
             "path": "taintRegen",
             "add": 0.3
           }
-        ]
+        ],
+        "note": "年輕就是本錢，精神負荷恢復得更快。"
       }
     },
     "eldrin": {
@@ -1154,6 +1230,51 @@ const SQUAD_SKILLS = {
         "icon": "",
         "mods": [],
         "cost": 250
+      },
+      "core-1": {
+        "name": "細心照護",
+        "desc": "把照顧的範圍再放大一點。",
+        "effect": "疏導光環範圍 +0.5 格",
+        "effect2": "",
+        "note": "疏導光環的範圍變大，能照顧到更遠的隊員。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "aura.r",
+            "add": 0.5
+          }
+        ],
+        "cost": 80
+      },
+      "aux-1": {
+        "name": "體能鍛鍊",
+        "desc": "永久被動技能。",
+        "effect": "最大 HP +20",
+        "effect2": "",
+        "note": "HP 上限提升，在隊員身邊待得更久。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "hp",
+            "add": 20
+          }
+        ],
+        "cost": 80
+      },
+      "aux-2": {
+        "name": "精神鍛鍊",
+        "desc": "永久被動技能。",
+        "effect": "SP 上限 +20",
+        "effect2": "",
+        "note": "SP 上限提升，能發動更多次疏導技能。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "spMax",
+            "add": 20
+          }
+        ],
+        "cost": 80
       }
     },
     "chris": {
@@ -1180,6 +1301,51 @@ const SQUAD_SKILLS = {
           }
         ],
         "cost": 40
+      },
+      "core-1": {
+        "name": "省力疏導",
+        "desc": "用最少的力氣做好疏導。",
+        "effect": "一般疏導少花 20% SP",
+        "effect2": "",
+        "note": "一般疏導花的 SP 減少，同樣的 SP 能疏導更多次。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "spCostCut",
+            "add": 0.2
+          }
+        ],
+        "cost": 80
+      },
+      "aux-1": {
+        "name": "體能鍛鍊",
+        "desc": "永久被動技能。",
+        "effect": "最大 HP +20",
+        "effect2": "",
+        "note": "HP 上限提升，在隊員身邊待得更久。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "hp",
+            "add": 20
+          }
+        ],
+        "cost": 80
+      },
+      "aux-2": {
+        "name": "精神鍛鍊",
+        "desc": "永久被動技能。",
+        "effect": "SP 上限 +20",
+        "effect2": "",
+        "note": "SP 上限提升，能發動更多次疏導技能。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "spMax",
+            "add": 20
+          }
+        ],
+        "cost": 80
       }
     },
     "taana": {
@@ -1206,6 +1372,51 @@ const SQUAD_SKILLS = {
           }
         ],
         "cost": 40
+      },
+      "core-1": {
+        "name": "熟睡守護",
+        "desc": "不攻擊的她，更懂得照顧好自己。",
+        "effect": "每秒回復 HP +1",
+        "effect2": "",
+        "note": "塔納自己每秒會回復少量 HP，能在隊員身邊待得更久。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "hpRegen",
+            "add": 1
+          }
+        ],
+        "cost": 80
+      },
+      "aux-1": {
+        "name": "體能鍛鍊",
+        "desc": "永久被動技能。",
+        "effect": "最大 HP +20",
+        "effect2": "",
+        "note": "HP 上限提升，在隊員身邊待得更久。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "hp",
+            "add": 20
+          }
+        ],
+        "cost": 80
+      },
+      "aux-2": {
+        "name": "精神鍛鍊",
+        "desc": "永久被動技能。",
+        "effect": "SP 上限 +20",
+        "effect2": "",
+        "note": "SP 上限提升，能發動更多次疏導技能。",
+        "icon": "",
+        "mods": [
+          {
+            "path": "spMax",
+            "add": 20
+          }
+        ],
+        "cost": 80
       }
     }
   }

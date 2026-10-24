@@ -156,7 +156,7 @@ function learnSkill(type, id) {
   training.crystals -= cost;
   if (typeof addStat === 'function') addStat('crystalsSpent', cost);   // 成就：花掉的異質碎片
   (training.skills[type] = training.skills[type] || []).push(id);
-  applySkills(); saveTraining(); refreshLiveSentries(type);
+  applySkills(); saveTraining(); refreshLiveSentries(type); if (typeof updateHUD === "function") updateHUD();   // 右下角的異質碎片馬上跟著變
   return true;
 }
 // 重置技能：退回這位隊員學技能花掉的全部碎片
@@ -164,7 +164,7 @@ function resetSkills(type) {
   const list = training.skills[type] || []; if (!list.length) return 0;
   const refund = list.reduce((sum, id) => sum + skillCost(type, id), 0);
   training.crystals += refund; training.skills[type] = [];
-  applySkills(); saveTraining(); refreshLiveSentries(type);
+  applySkills(); saveTraining(); refreshLiveSentries(type); if (typeof updateHUD === "function") updateHUD();   // 右下角的異質碎片馬上跟著變
   return refund;
 }
 // 場上的這位隊員：血量上限跟著變（照比例保留目前血量）

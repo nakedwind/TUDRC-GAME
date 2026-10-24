@@ -97,7 +97,7 @@
 .sq-tip .sq-formula { margin-bottom: 4px; font-size: 12px; font-weight: 700; color: #fff; text-align: center; white-space: nowrap; }
 .sq-tip .sq-tip-add { color: #8fe08f; font-weight: 700; }
 .sq-tip .sq-tip-note { margin-top: 4px; font-size: 10px; color: #8a99a8; }
-.sq-stat { cursor: help; }
+.sq-stat { cursor: default; }   /* 一般游標（不要小問號） */
 
 /* 技能說明 */
 .sq-info-icon { position: absolute; left: 16px; top: 16px; width: 60px; height: 60px; display: grid; place-items: center; border: 2px solid rgba(255,255,255,.22); border-radius: 10px; background: #1c232d; }
