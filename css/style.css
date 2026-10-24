@@ -317,13 +317,13 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 }
 /* 滑鼠移到隊友欄上：名字、血條、底色變淡，露出底下的戰場；頭像維持清楚，方便點擊 */
 #fieldSquadHud .field-member, #fieldSquadHud .field-member-status, #fieldSquadHud .field-down-banner { transition: opacity .15s ease, background-color .15s ease; }
-/* 大招冷卻條：頭像框內上緣的一條藍線 */
+/* 大招冷卻條：頭像框內上緣的一條白線（哨兵、嚮導都一樣；溫特頭上的衝刺冷卻條也是白色，js/render.js 的 DASH_BAR） */
 .field-cd-bar {
   position: absolute; z-index: 2; top: 2px; left: 2px; right: 2px; height: 3px;
   border-radius: 2px; background: rgba(8,15,24,.65); pointer-events: none; overflow: hidden;
 }
 .field-cd-bar[hidden] { display: none; }
-.field-cd-bar i { display: block; height: 100%; background: #4db5ff; box-shadow: 0 0 4px #4db5ff; }
+.field-cd-bar i { display: block; height: 100%; background: #fff; box-shadow: 0 0 4px rgba(255,255,255,.8); }
 #fieldSquadHud.hidden { display: none; }
 #wrap.placing-building #fieldSquadHud { opacity: .35; }
 #wrap.placing-building #fieldSquadHud,
@@ -1148,7 +1148,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .backpack-body { flex:1; min-height:0; display:grid; grid-template-columns:minmax(0,1fr) 260px; }
 
 /* 左邊：物品格 */
-.backpack-grid { min-height:0; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); align-content:start; gap:8px; overflow-y:auto; padding:6px 16px 16px 18px; scrollbar-color:#3d5266 transparent; }
+.backpack-grid { min-height:0; display:grid; grid-template-columns:repeat(6,minmax(0,1fr)); align-content:start; gap:8px; overflow-y:auto; padding:6px 6px 16px 18px; scrollbar-gutter:stable; scrollbar-width:thin; scrollbar-color:#3d5266 transparent; }   /* 捲軸的位置一直留著（細捲軸約 10px＋右內距 6px＝原本的 16px）：東西多到出現捲軸時，格子不會被擠窄、不會位移 */
 .bag-cell { position:relative; aspect-ratio:1; display:grid; place-items:center; min-width:0; padding:6px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(23,32,42,.6); cursor:pointer; transition:transform .12s, border-color .12s, background .12s, box-shadow .12s; }
 .bag-cell.snack { border-color:rgba(121,219,173,.28); } .bag-cell.drink { border-color:rgba(140,199,255,.28); }
 .bag-cell img { position:absolute; inset:6px; margin:auto; width:calc(100% - 12px); height:calc(100% - 12px); max-width:80px; max-height:80px; object-fit:contain; image-rendering:pixelated; }
