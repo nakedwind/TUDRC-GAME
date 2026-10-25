@@ -246,6 +246,48 @@ function moveEnemyToward(e, target, dt) {
 // ---- 異質體行為：18 格感知、尋路與黑暗遊蕩 ----
 const ENEMY_SENSE_RANGE = 18 * CELL;
 const ENEMY_NEIGHBORS = [[0, -1], [-1, 0], [1, 0], [0, 1]];
+// ---- 逃跑地點（魚頭君、金蕉王、太近時往後退的遠程怪共用）----
+// 從現在的位置沿著走得到的格子往外找（繞過牆和建築），挑離威脅最遠的一格；路程越遠、死路（只有一個出口）都扣分。
+// 不直接往「威脅的反方向」跑：被逼進牆角時反方向就是牆，會一直貼著牆角原地踏步
+function enemyFleeCell(e, threats, minSteps = 3, maxSteps = 8) {
+  const open = (c, r) => inGrid(c, r) && !isWall(c, r) && !enemyBarrierAt(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r));
+  const [ec, er] = cellAt(e.x, e.y), seen = new Set([ec + ',' + er]), queue = [[ec, er, 0]];
+  let best = null, bestScore = -Infinity;
+  for (let qi = 0; qi < queue.length; qi++) {
+    const [c, r, steps] = queue[qi];
+    if (steps >= minSteps) {
+      const [x, y] = center(c, r), exits = ENEMY_NEIGHBORS.filter(([dc, dr]) => open(c + dc, r + dr)).length;
+      const score = Math.min(...threats.map(t => Math.hypot(t.x - x, t.y - y))) - steps * 2 - (exits <= 1 ? CELL : 0);
+      if (score > bestScore) { bestScore = score; best = [c, r]; }
+    }
+    if (steps >= maxSteps) continue;
+    for (const [dc, dr] of ENEMY_NEIGHBORS) {
+      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
+      if (seen.has(key) || !open(nc, nr)) continue;
+      seen.add(key); queue.push([nc, nr, steps + 1]);
+    }
+  }
+  return best;
+}
+// 往逃跑地點跑（繞過建築，不停下來拆）；每 re 秒重找一次，到了也馬上重找。回傳 true＝這幀有動
+function enemyFleeStep(e, threats, dt, speedMul, re = .6) {
+  const s = e.fleeNav || (e.fleeNav = { t: 0, cell: null });
+  s.t -= dt;
+  if (!s.cell || s.t <= 0) { s.cell = threats.length ? enemyFleeCell(e, threats) : null; s.t = re; }
+  if (!s.cell) return false;
+  const [c, r] = s.cell, x0 = e.x, y0 = e.y;
+  if (enemyNavigate(e, c, r, dt * speedMul, 'flee:' + c + ',' + r, false).reached) s.t = 0;
+  return e.x !== x0 || e.y !== y0;
+}
+// 遠程怪太近時往後退：正後方退得動就直接退；退不動（背後是牆、卡在牆角）就改找逃跑地點繞出去，繞到了再恢復直接退
+function enemyBackOff(e, from, dt, speedMul) {
+  if (e.fleeNav && e.fleeNav.cell && e.fleeNav.t > 0) { enemyFleeStep(e, [from], dt, speedMul); return; }
+  const x0 = e.x, y0 = e.y;
+  moveEnemyToward(e, { x: e.x - (from.x - e.x), y: e.y - (from.y - e.y) }, dt * speedMul);
+  if (Math.hypot(e.x - x0, e.y - y0) >= e.speed * dt * speedMul * .4) return;
+  if (e.fleeNav) e.fleeNav.cell = null;
+  enemyFleeStep(e, [from], dt, speedMul);
+}
 function enemyObstacleDistance(e, o) {
   let best = Infinity;
   for (const [dc, dr] of obstacleSolidCells(o)) {

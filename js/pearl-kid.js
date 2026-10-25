@@ -105,10 +105,7 @@ function stepShooterEnemy(e, dt) {
   if (target) {
     const d = Math.hypot(target.x - e.x, target.y - e.y), see = hasLineOfSight(e.x, e.y, target.x, target.y);
     if (see && d <= cfg.shootRange * CELL) {
-      if (d < cfg.keepDistance * CELL) {   // 太近：往後飄
-        const away = { x: e.x - (target.x - e.x), y: e.y - (target.y - e.y) };
-        moveEnemyToward(e, away, dt * cfg.retreatSpeedMul);
-      }
+      if (d < cfg.keepDistance * CELL) enemyBackOff(e, target, dt, cfg.retreatSpeedMul);   // 太近：往後飄（背後是牆就繞出去，js/enemy-ai.js）
       if (pk.cd <= 0) { pk.windup = cfg.windup; pk.shotTarget = { x: target.x, y: target.y }; }   // 開始蓄力（手上的珍珠會閃光）
       return;
     }

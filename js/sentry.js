@@ -401,6 +401,27 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!t.summonDark) {   //
   }
   return path.reverse();
 }
+// 嚮導被逼到牆角時要繞去的地方：沿著走得到的格子往外找，離威脅越遠越好（路程越遠、死路都扣分）
+function sentryFleeSpot(t, threat, maxSteps = 6) {
+  const [sc, sr] = cellAt(t.x, t.y), seen = new Set([sc + ',' + sr]), queue = [[sc, sr, 0]];
+  const dirs = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+  let best = null, bestScore = -Infinity;
+  for (let head = 0; head < queue.length; head++) {
+    const [c, r, steps] = queue[head];
+    if (steps >= 2) {
+      const [x, y] = center(c, r), exits = dirs.filter(([dc, dr]) => sentryCellWalkable(c + dc, r + dr)).length;
+      const score = Math.hypot(x - threat.x, y - threat.y) - steps * 2 - (exits <= 1 ? CELL : 0);
+      if (score > bestScore) { bestScore = score; best = { x, y }; }
+    }
+    if (steps >= maxSteps) continue;
+    for (const [dc, dr] of dirs) {
+      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
+      if (seen.has(key) || !sentryCellWalkable(nc, nr)) continue;
+      seen.add(key); queue.push([nc, nr, steps + 1]);
+    }
+  }
+  return best;
+}
 function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
   t.navTimer = (t.navTimer || 0) - dt;
@@ -556,11 +577,15 @@ function updateSentry(t, dt) {
     }
     const safeDistance = (ownSpec.evade || 3) * CELL;
     if (threat && threatD < safeDistance) {
-      const dx=t.x-threat.x,dy=t.y-threat.y,d=threatD||1,step=(ownSpec.walkSpeed||80)*1.35*dt;
-      const nx=t.x+dx/d*step,ny=t.y+dy/d*step;
+      const dx=t.x-threat.x,dy=t.y-threat.y,d=threatD||1,speed=(ownSpec.walkSpeed||80)*1.35,step=speed*dt;
+      t.target=null; t.waitT=0;
+      t.evadeT=(t.evadeT||0)-dt;
+      if (t.evadeCell && t.evadeT>0) { if (moveSentryWithPath(t,t.evadeCell.x,t.evadeCell.y,speed,dt) || t.navFailed) t.evadeCell=null; return; }   // 正在繞出牆角
+      const nx=t.x+dx/d*step,ny=t.y+dy/d*step,ox=t.x,oy=t.y;
       if (personnelStepAllowed(t.x,t.y,nx,t.y)) t.x=nx;
       if (personnelStepAllowed(t.x,t.y,t.x,ny)) t.y=ny;
-      t.target=null; t.waitT=0; return;
+      if (Math.hypot(t.x-ox,t.y-oy)<step*.4) { t.evadeCell=sentryFleeSpot(t,threat); t.evadeT=.8; t.navPath=null; }   // 往後退不動（背後是牆、牆角）：改找走得到的地方繞出去
+      return;
     }
   }
   // 嚮導身上的急救包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）

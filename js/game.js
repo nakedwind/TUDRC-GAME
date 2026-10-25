@@ -911,12 +911,48 @@ const SENTRY_FIRE_TRAITS = { theonie: 'immune', red: 'brave' };
 const SENTRY_FIRE_BRAVE = { core: .55, speed: 60 };   // 雷德：火海半徑幾成以內才走出來、走出來的速度（像素／秒）
 const sentryFireTrait = t => (t && SENTRY_FIRE_TRAITS[t.type]) || null;
 let sentryFireWalker = null;   // 目前正在找路的哨兵（js/sentry.js 的 sentryCellWalkable 依他的特性決定火能不能走）
-// 隊友避開火海（油桶、油汙燒起來的火）：在火裡／貼邊時往外推，比腐蝕池推得快（暴走中不避）
+// 在火裡：沿著走得到的格子找最近一格不在火裡的地方，回傳走過去的路線（格子中心）。
+// 只往火的反方向推的話，反方向剛好是牆或建築就會一直卡在火裡
+function sentryFireExit(t, hot) {
+  const [sc, sr] = cellAt(t.x, t.y), startKey = sc + ',' + sr, queue = [[sc, sr]], cameFrom = new Map([[startKey, null]]);
+  for (let head = 0; head < queue.length && head < 400; head++) {
+    const [c, r] = queue[head], key = c + ',' + r;
+    if (!hot(...center(c, r))) {
+      const path = [];
+      for (let k = key; k; k = cameFrom.get(k)) { const [pc, pr] = k.split(',').map(Number); path.push(center(pc, pr)); }
+      return path.reverse();   // 包含現在這一格的中心：先走回格子中間再出去，才不會切角卡牆
+    }
+    for (const [dc, dr] of [[0, -1], [1, 0], [0, 1], [-1, 0]]) {
+      const nc = c + dc, nr = r + dr, nk = nc + ',' + nr;
+      if (cameFrom.has(nk) || !sentryCellWalkable(nc, nr, true)) continue;
+      cameFrom.set(nk, key); queue.push([nc, nr]);
+    }
+  }
+  return null;
+}
+// 隊友避開火海（油桶、油汙燒起來的火）：在火裡／貼邊時照 sentryFireExit 的路線走出去，比腐蝕池推得快（暴走中不避）
 function avoidOilFires(t, dt, moved = false) {
-  if (MAP_SAFE || t.berserk || t.hp <= 0 || !G.oilFires || !G.oilFires.length) return;
+  if (MAP_SAFE || t.berserk || t.hp <= 0 || !G.oilFires || !G.oilFires.length) { t.fireExit = null; return; }
   const trait = sentryFireTrait(t);
   if (trait === 'immune') return;   // 希奧妮：不怕火
   if (trait === 'brave' && moved) return;   // 雷德正在走（例如穿過火海）：不推他，讓他一口氣走過去
+  const brave = trait === 'brave';
+  const hot = (x, y) => G.oilFires.some(f => f.t > 0 && Math.hypot(x - f.x, (y - f.y) / .7) < (brave ? f.r * SENTRY_FIRE_BRAVE.core : f.r + 12));   // 雷德：只有在火中心附近才走
+  if (!hot(t.x, t.y)) { t.fireExit = null; return; }
+  t.fireExitT = (t.fireExitT || 0) - dt;
+  if (!t.fireExit || t.fireExitT <= 0) { t.fireExit = sentryFireExit(t, hot); t.fireExitT = .4; }   // 火會變大變小：每 0.4 秒重找
+  const path = t.fireExit;
+  while (path && path.length && Math.hypot(path[0][0] - t.x, path[0][1] - t.y) < 2) path.shift();
+  if (path && path.length) {
+    const [tx, ty] = path[0], dx = tx - t.x, dy = ty - t.y, d = Math.hypot(dx, dy);
+    const step = Math.min(d, (brave ? SENTRY_FIRE_BRAVE.speed : 170) * dt), nx = t.x + dx / d * step, ny = t.y + dy / d * step;
+    const ox = t.x, oy = t.y;
+    if (personnelStepAllowed(t.x, t.y, nx, t.y, true)) t.x = nx;
+    if (personnelStepAllowed(t.x, t.y, t.x, ny, true)) t.y = ny;
+    if (t.x !== ox || t.y !== oy) { t.navPath = null; return; }
+    t.fireExitT = 0;   // 被擋住：下一幀重找
+  }
+  // 找不到出去的路：照舊往火的反方向推
   for (const f of G.oilFires) {
     if (f.t <= 0) continue;
     let dx = t.x - f.x, dy = (t.y - f.y) / .7;
