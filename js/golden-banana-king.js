@@ -162,25 +162,7 @@ function bkPickBuddy(e, threats, range, ok) {
   return best;
 }
 // ---- 逃跑：在走得到的 8 步內，找一格離我方最遠的地方 ----
-function bkFleeCell(e, threats) {
-  const [ec, er] = cellAt(e.x, e.y), seen = new Set([ec + ',' + er]), queue = [[ec, er, 0]];
-  let best = null, bestScore = -Infinity;
-  for (let qi = 0; qi < queue.length; qi++) {
-    const [c, r, steps] = queue[qi];
-    if (steps >= 3) {
-      const [x, y] = center(c, r);
-      const score = Math.min(...threats.map(t => Math.hypot(t.x - x, t.y - y))) - steps * 2;
-      if (score > bestScore) { bestScore = score; best = [c, r]; }
-    }
-    if (steps >= 8) continue;
-    for (const [dc, dr] of ENEMY_NEIGHBORS) {
-      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (seen.has(key) || !inGrid(nc, nr) || isWall(nc, nr) || enemyBarrierAt(nc, nr)) continue;
-      seen.add(key); queue.push([nc, nr, steps + 1]);
-    }
-  }
-  return best;
-}
+const bkFleeCell = (e, threats) => enemyFleeCell(e, threats);   // js/enemy-ai.js（死路會扣分，不會躲進牆角）
 
 // ---- 行為（enemy-ai.js 的 stepEnemy 呼叫）----
 function stepHealerEnemy(e, dt) {

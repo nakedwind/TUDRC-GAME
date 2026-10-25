@@ -4,21 +4,21 @@
     {
       "name": "game",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8768"],
+      "runtimeArgs": ["tools/editor-server.py", "8768"],
       "port": 8768,
       "autoPort": false
     },
     {
       "name": "game-alt",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8769"],
+      "runtimeArgs": ["tools/editor-server.py", "8769"],
       "port": 8769,
       "autoPort": false
     },
     {
       "name": "game-local",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8767"],
+      "runtimeArgs": ["tools/editor-server.py", "8767"],
       "port": 8767
     }
   ]

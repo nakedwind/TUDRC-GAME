@@ -1669,5 +1669,63 @@ const STORY_MAPS = [
       "speed": 44,
       "reward": 8
     }
+  },
+  {
+    "id": "map_mvoain42",
+    "name": "雷德回憶02",
+    "desc": "",
+    "layers": {
+      "floor": {},
+      "ground": {},
+      "ground2": {},
+      "ground3": {},
+      "object": {},
+      "object2": {},
+      "object3": {},
+      "object4": {},
+      "overlay": {},
+      "top": {}
+    },
+    "stamps": [
+      {
+        "id": "tile_mvoanvn6",
+        "c": 0,
+        "r": -1,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvoarums",
+        "c": 10,
+        "r": 5,
+        "layer": "object",
+        "ox": -10,
+        "oy": -2
+      }
+    ],
+    "solid": [],
+    "breakable": [],
+    "coreSpots": [],
+    "spawnZone": [],
+    "coreCount": 1,
+    "monsterMix": [
+      {
+        "id": "slime",
+        "weight": 100
+      }
+    ],
+    "camp": [],
+    "rules": {
+      "money": 3000,
+      "guide": 100,
+      "guideRegen": 9,
+      "speed": 44,
+      "reward": 8
+    },
+    "solidOffsets": {},
+    "safe": true,
+    "npcs": false,
+    "portals": [],
+    "cols": 22,
+    "rows": 18
   }
 ];

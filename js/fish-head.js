@@ -203,10 +203,12 @@ function stepFishHeadEnemy(e, dt) {
   }
   fishTrack(e, dt);
 }
-// 逃跑：附近所有威脅（玩家、哨兵）都會把牠往外推，越近推越大力 → 往合起來的方向跑；被擋住就試著斜著跑
-// 逃跑方向在開始逃的時候決定一次，每 0.6 秒重算，才不會被兩邊的人夾著原地來回抖
+// 逃跑：沿著走得到的格子，往離附近威脅（玩家、哨兵）最遠的地方跑（js/enemy-ai.js 的 enemyFleeStep；被逼進牆角也繞得出去）
+// 找不到地方跑時才用舊的方法：附近所有威脅都會把牠往外推，越近推越大力 → 往合起來的方向跑；被擋住就試著斜著跑
 function fishFlee(e, dt) {
   const fh = e.fh;
+  const threats = [G.player, ...G.towers].filter(t => t && t.hp > 0 && !t.berserk && Math.hypot(e.x - t.x, e.y - t.y) <= 9 * CELL);
+  if (enemyFleeStep(e, threats, dt, FISH_HEAD.fleeSpeedMul)) return;
   fh.fleeRe = (fh.fleeRe || 0) - dt;
   if (fh.fleeDir == null || fh.fleeRe <= 0) {
     let vx = 0, vy = 0;

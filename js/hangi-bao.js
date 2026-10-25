@@ -204,7 +204,7 @@ function stepBoomerangEnemy(e, dt) {
   if (target) {
     const d = Math.hypot(target.x - e.x, target.y - e.y), see = hasLineOfSight(e.x, e.y, target.x, target.y);
     if (see && d <= cfg.throwRange * CELL) {
-      if (d < cfg.keepDistance * CELL) moveEnemyToward(e, { x: e.x - (target.x - e.x), y: e.y - (target.y - e.y) }, dt * cfg.retreatSpeedMul);   // 太近：往後退
+      if (d < cfg.keepDistance * CELL) enemyBackOff(e, target, dt, cfg.retreatSpeedMul);   // 太近：往後退（背後是牆就繞出去，js/enemy-ai.js）
       if (!hb.capOut && hb.cd <= 0) { hb.windup = cfg.windup; e.faceRight = target.x > e.x; }
       return;
     }
