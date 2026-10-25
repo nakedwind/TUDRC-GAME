@@ -7,6 +7,7 @@ const SOUND_SETTINGS = {
     "birdHurt": 0.35,
     "birdRun": 1.8,
     "birdWalk": 1.95,
+    "chainUnlock": 1.2,
     "clownfishHop1": 1.5,
     "clownfishHop2": 1.45,
     "clownfishHurt": 1.5,
@@ -28,15 +29,17 @@ const SOUND_SETTINGS = {
     "kill": 1.85,
     "lifeformAttack": 1.55,
     "lifeformWalk": 1.45,
+    "lockedDoor": 2.5,
     "midBoom": 1.2,
     "milkfishChew": 1.35,
     "milkfishDeath": 1.5,
     "milkfishGulp": 1.5,
     "milkfishSpit": 1.75,
     "mineBeep": 1.3,
-    "mouseDeath": 2.7,
+    "mouseDeath": 2.3,
     "mouseHurt": 1.9,
     "mouseOut": 1.25,
+    "mrtUnlock": 1.85,
     "oreMine": 1.45,
     "pearlDeath": 1.15,
     "pearlHit": 1.7,
@@ -48,10 +51,10 @@ const SOUND_SETTINGS = {
     "shopBell": 0.6,
     "shopEnter": 0.85,
     "smallBoom": 1.15,
-    "stairsDown": 1.9,
+    "stairsDown": 2.4,
     "stairsUp": 1.95,
     "vendingCheckout": 1.8,
-    "vendingOpen": 2.95
+    "vendingOpen": 3
   },
   "files": {
     "overrides": {
@@ -60,7 +63,13 @@ const SOUND_SETTINGS = {
       "lifeformAttack": "怪物/生命體/生命體攻擊.mp3",
       "fishDouse": "怪物/魚頭君/火被澆熄.mp3",
       "itemPickup": "pop.mp3",
-      "achievement": "獎勵/拾取.mp3"
+      "achievement": "獎勵/拾取.mp3",
+      "mrtUnlock": [
+        "開鎖03.mp3",
+        "設施/打磨.mp3"
+      ],
+      "chainUnlock": "開鎖03.mp3",
+      "lockedDoor": "開鎖02.mp3"
     },
     "extras": {},
     "meta": {}

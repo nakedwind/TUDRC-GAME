@@ -687,9 +687,7 @@ window.addEventListener('keydown', e => {
     });
     selections.filter(s => s.type === 'stamp').forEach(sel => {
       const s = m.stamps[sel.index]; if (!s) return;
-      const cells = collisionFootprint(m, [sel]), c0 = Math.round(s.c + (s.ox || 0) / CELL), r0 = Math.round(s.r + (s.oy || 0) / CELL);
-      s.ox = (s.ox || 0) + dx; s.oy = (s.oy || 0) + dy;
-      shiftCollision(m, collisionSnapshot(m), cells, Math.round(s.c + s.ox / CELL) - c0, Math.round(s.r + s.oy / CELL) - r0);   // 微調超過半格：底下的碰撞格跟著移一格
+      s.ox = (s.ox || 0) + dx; s.oy = (s.oy || 0) + dy;   // 只動圖片，不可穿透格不跟著動
     });
     selection = selections.length ? selections[selections.length - 1] : null;
     refreshSelPanel(); saveMaps(); draw();
@@ -1209,40 +1207,6 @@ function cellFromEvent(e) {
   pointerPx = { x, y };   // 物件擺放、選取用的像素位置
   return cellAt(x, y);
 }
-// ---- 搬物件時，它底下的碰撞格一起搬 ----
-// 物件蓋住的格子（照它畫出來的位置，四捨五入到整格）裡的不可穿透紅格、可破壞格、碰撞微調，跟著物件移動一樣的格數
-function collisionFootprint(m, sels) {
-  const cells = new Set();
-  sels.forEach(sel => {
-    if (sel.type !== 'stamp') { if (sel.key) cells.add(sel.key); return; }
-    const s = m.stamps[sel.index]; if (!s) return;
-    const t = tileById(s.id) || {}, c0 = Math.round(s.c + (s.ox || 0) / CELL), r0 = Math.round(s.r + (s.oy || 0) / CELL);
-    for (let r = 0; r < stampH(s, t); r++) for (let c = 0; c < stampW(s, t); c++) cells.add((c0 + c) + ',' + (r0 + r));
-  });
-  return cells;
-}
-const collisionSnapshot = m => ({ solid: (m.solid || []).slice(), breakable: (m.breakable || []).slice(), offsets: clone(m.solidOffsets || {}) });
-// 從 snap（搬之前的樣子）重來：cells 裡的碰撞格移動 (dc, dr) 格；回傳搬了幾格
-function shiftCollision(m, snap, cells, dc, dr) {
-  m.solid = snap.solid.slice(); m.breakable = snap.breakable.slice(); m.solidOffsets = clone(snap.offsets);
-  if (!dc && !dr) return 0;
-  let n = 0;
-  const to = k => { const [c, r] = k.split(',').map(Number); return inGrid(c + dc, r + dr) ? (c + dc) + ',' + (r + dr) : null; };
-  const move = list => {
-    const out = new Set(list.filter(k => !cells.has(k)));
-    list.filter(k => cells.has(k)).forEach(k => { n++; const k2 = to(k); if (k2) out.add(k2); });
-    return [...out];
-  };
-  m.solid = move(snap.solid);
-  const solidSet = new Set(m.solid);
-  m.breakable = move(snap.breakable).filter(k => !solidSet.has(k));   // 同一格不會同時是紅格和可破壞格
-  const offs = {};
-  for (const [k, v] of Object.entries(snap.offsets)) if (!cells.has(k)) offs[k] = v;
-  for (const [k, v] of Object.entries(snap.offsets)) if (cells.has(k)) { const k2 = to(k); if (k2) offs[k2] = v; }
-  for (const k of Object.keys(offs)) if (!solidSet.has(k)) delete offs[k];
-  m.solidOffsets = offs;
-  return n;
-}
 function beginSelectionDrag(c, r) {
   if (brush.mode !== 'select' || !selections.length) { selectionDrag = null; return; }
   if (selections.some(sel => isLockedLayer(selectionLayer(sel)))) {   // 鎖定圖層上的物件不能拖
@@ -1264,8 +1228,7 @@ function beginSelectionDrag(c, r) {
   if (!items.length) { selectionDrag = null; return; }
   const minC = Math.min(...items.map(item => item.c)), minR = Math.min(...items.map(item => item.r));
   const maxC = Math.max(...items.map(item => item.c + item.w)), maxR = Math.max(...items.map(item => item.r + item.h));
-  selectionDrag = { startC: c, startR: r, startPx: pointerPx ? { ...pointerPx } : null, items, layers: clone(m.layers), stamps: clone(m.stamps), minC, minR, maxC, maxR, dc: 0, dr: 0, dx: 0, dy: 0, moved: false,
-    collision: collisionSnapshot(m), collisionCells: collisionFootprint(m, selections), collisionMoved: 0 };   // 物件底下的碰撞格跟著搬
+  selectionDrag = { startC: c, startR: r, startPx: pointerPx ? { ...pointerPx } : null, items, layers: clone(m.layers), stamps: clone(m.stamps), minC, minR, maxC, maxR, dc: 0, dr: 0, dx: 0, dy: 0, moved: false };   // 只搬圖片；不可穿透格、可破壞格留在原地
 }
 function dragSelectionTo(c, r) {
   if (!selectionDrag) return;
@@ -1281,7 +1244,6 @@ function dragSelectionTo(c, r) {
   if (dc === d.dc && dr === d.dr && dx === d.dx && dy === d.dy) return;
   d.dc = dc; d.dr = dr; d.dx = dx; d.dy = dy; d.moved = dc !== 0 || dr !== 0 || dx !== 0 || dy !== 0;
   m.layers = clone(d.layers); m.stamps = clone(d.stamps);
-  d.collisionMoved = shiftCollision(m, d.collision, d.collisionCells, Math.round(dx / CELL), Math.round(dy / CELL));   // 碰撞格移動整格（物件移超過半格才跟著移）
   d.items.filter(item => item.type === 'tile').forEach(item => delete m.layers[item.layer][item.key]);
   selections = d.items.map(item => {
     if (item.type === 'stamp') {
@@ -1298,7 +1260,7 @@ function dragSelectionTo(c, r) {
     return { type: 'tile', layer: item.layer, key };
   });
   selection = selections[selections.length - 1];
-  setStatus('正在移動 ' + selections.length + ' 個物件（' + dc + ', ' + dr + '）' + (d.collisionMoved ? '，連同 ' + d.collisionMoved + ' 格碰撞區' : ''), '#8fd3ff');
+  setStatus('正在移動 ' + selections.length + ' 個物件（' + dc + ', ' + dr + '）', '#8fd3ff');
   draw();
 }
 cv.addEventListener('pointerdown', e => {
@@ -1316,7 +1278,7 @@ cv.addEventListener('pointermove', e => {
 });
 cv.addEventListener('pointerup', () => {
   painting = false;
-  if (selectionDrag && selectionDrag.moved) { saveMaps(); refreshSelPanel(); setStatus('已移動 ' + selections.length + ' 個物件' + (selectionDrag.collisionMoved ? '（連同 ' + selectionDrag.collisionMoved + ' 格碰撞區）' : ''), '#7ee0c0'); }
+  if (selectionDrag && selectionDrag.moved) { saveMaps(); refreshSelPanel(); setStatus('已移動 ' + selections.length + ' 個物件', '#7ee0c0'); }
   selectionDrag = null;
   if (undoStack.length && undoStack[undoStack.length - 1] === snapshot()) undoStack.pop();
 });

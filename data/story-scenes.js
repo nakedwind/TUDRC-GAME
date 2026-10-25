@@ -4,7 +4,7 @@ const STORY_SCENES = {
   "red_memory_01": {
     "map": "story_start",
     "title": "雷德回憶01",
-    "zoom": 1.6,
+    "zoom": 1.75,
     "subtitle": "六年前 · 臨時救護區",
     "endTitle": "「天使」的謊言",
     "endText": "六年前，那句讓他安心閉上眼睛的話。",

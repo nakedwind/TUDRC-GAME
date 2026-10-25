@@ -76,3 +76,16 @@
 .tm-nosignal svg { width: 56px; height: 56px; color: #8592a0; }
 .tm-nosignal b { font-size: 22px; color: #eef3f8; }
 .tm-nosignal p { margin: 0; font-size: 15px; line-height: 1.7; }
+
+/* 戰鬥區域：慣性導航記錄器（js/tpad-map.js 的 renderFieldMapApp） */
+.tmf-pct { display: flex; align-items: baseline; gap: 6px; margin: 2px 4px 6px; }
+.tmf-pct b { font-size: 34px; color: #f4f7fa; font-variant-numeric: tabular-nums; }
+.tmf-pct b small { font-size: 16px; margin-left: 1px; }
+.tmf-pct span { font-size: 13px; color: #8f9caa; }
+.tmf-bar { margin: 0 4px; }
+.tmf-bar u { background: linear-gradient(90deg, #2f7a45, #6fe39a); }
+.tmf-note { margin: 10px 4px 0; font-size: 13px; line-height: 1.6; color: #c9d3dd; }
+.tmf-note.dim { color: #8592a0; }
+.tm-core path { fill: #b77cff; stroke: #16191e; stroke-width: .2; }
+.tm-legend .lg-core { width: 9px; height: 9px; background: #b77cff; transform: rotate(45deg); }
+.tm-legend .lg-fog { border-radius: 2px; background: #16191e; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }

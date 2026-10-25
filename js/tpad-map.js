@@ -3,7 +3,7 @@
    ・右邊：這層樓每個房間的形狀（地圖的地板格），標出自己的位置、出入口、樓梯、電梯、鎖住的門、NPC。
    ・房間怎麼排：data/base-floorplan.js（手寫）；樓層從地圖名稱開頭讀；NPC 在哪：data/npc-locations.js（js/sentry.js 的 npcLocation）。
    ・同一張地圖裡的人用遊戲中的實際位置；別張地圖的人用出生格／活動範圍中間。
-   ・只有在基地（安全區）收得到訊號；出任務時打開＝顯示無訊號。
+   ・基地（安全區）：樓層示意圖。戰鬥區域沒有訊號：要裝備「慣性導航記錄器」，才看得到自己走過的地方（下面「戰鬥區域」那一段）。
    必須在 data/base-maps.js、data/base-floorplan.js、js/sentry.js、js/maploader.js 之後載入。
 */
 let tmapFloor = null, tmapSel = null, tmapRoomSel = null;   // tmapFloor：正在看的樓層（null＝目前所在的樓層）；tmapSel：點選的人；tmapRoomSel：點選的房間
@@ -130,11 +130,17 @@ function tmapRoomShape(room) {
   return (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '');
 }
 
+const TMAP_NOSIGNAL_ICON = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20h2v-3H2zM7 20h2v-6H7zM12 20h2v-9h-2zM17 20h2V8h-2z" fill="currentColor" opacity=".35"/><path d="M3 4 21 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>';
 function renderMapApp(el) {
+  // 戰鬥區域（含劇情地圖）：有帶慣性導航記錄器才看得到走過的地方（下面的 renderFieldMapApp）
+  if (typeof MAP_FIELD !== 'undefined' && MAP_FIELD && typeof MAP !== 'undefined' && MAP) {
+    if (typeof equipLv === 'function' && equipLv('navrecorder')) { renderFieldMapApp(el); return; }
+    el.innerHTML = '<div class="tm-nosignal">' + TMAP_NOSIGNAL_ICON + '<b>無訊號</b><p>戰鬥區域收不到應變中心網路。<br>裝備「🧭 慣性導航記錄器」就能記錄走過的路線、在這裡查看地圖。</p></div>';
+    return;
+  }
   const here = tmapHereMap();
-  if (!here) {
-    el.innerHTML = '<div class="tm-nosignal"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 20h2v-3H2zM7 20h2v-6H7zM12 20h2v-9h-2zM17 20h2V8h-2z" fill="currentColor" opacity=".35"/><path d="M3 4 21 20" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>' +
-      '<b>無訊號</b><p>基地地圖只能在應變中心網路內查看。<br>回到基地後再打開。</p></div>';
+  if (!here || !tmapMaps().some(m => m.id === here.id)) {
+    el.innerHTML = '<div class="tm-nosignal">' + TMAP_NOSIGNAL_ICON + '<b>無訊號</b><p>基地地圖只能在應變中心網路內查看。<br>回到基地後再打開。</p></div>';
     return;
   }
   const floors = tmapFloors(), byId = new Map(tmapMaps().map(m => [m.id, m]));
@@ -267,3 +273,104 @@ function renderMapApp(el) {
 }
 // 每次打開地圖都從目前所在的樓層開始
 function resetMapApp() { tmapFloor = null; tmapSel = null; tmapRoomSel = null; }
+
+// ================= 戰鬥區域：慣性導航記錄器 =================
+// 走過的地方記成「已探索」：溫特周圍 range 格（裝備等級決定）、而且視線沒被牆擋住的格子。
+// 每張地圖各自記（地圖 id → 位元組，每格一個 bit），存在瀏覽器 tudrc_explored_v1（新遊戲會清掉，見 js/new-game.js）。
+// 地圖上「地板格又不是固定牆」的格子全部記過＝地圖完整。
+const TMAP_EXPLORE_KEY = 'tudrc_explored_v1';
+let tmapExplored = {}, tmapExploreDirty = false, tmapExploreSavedAt = 0;
+try { tmapExplored = JSON.parse(localStorage.getItem(TMAP_EXPLORE_KEY) || '{}') || {}; } catch (_) { tmapExplored = {}; }
+const tmapBitsCache = new Map();   // 地圖 id → { bits: Uint8Array, open: 可走的格數, seen: 記過的可走格數 }
+function tmapExploreState(m) {
+  let st = tmapBitsCache.get(m.id);
+  if (st && st.cols === m.cols && st.rows === m.rows) return st;
+  const n = m.cols * m.rows, bits = new Uint8Array(Math.ceil(n / 8)), hex = tmapExplored[m.id] || '';
+  for (let i = 0; i < bits.length && i * 2 + 1 < hex.length; i++) bits[i] = parseInt(hex.substr(i * 2, 2), 16) || 0;
+  const floor = (m.layers && m.layers.floor) || {}, solid = new Set(m.solid || []), open = new Uint8Array(n);
+  let total = 0, seen = 0;
+  for (const k of Object.keys(floor)) {
+    const [c, r] = k.split(',').map(Number);
+    if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || solid.has(k)) continue;
+    const i = r * m.cols + c; open[i] = 1; total++;
+    if (bits[i >> 3] & (1 << (i & 7))) seen++;
+  }
+  st = { cols: m.cols, rows: m.rows, bits, open, total, seen, done: total > 0 && seen >= total };
+  tmapBitsCache.set(m.id, st);
+  return st;
+}
+const tmapSeen = (st, c, r) => { const i = r * st.cols + c; return !!(st.bits[i >> 3] & (1 << (i & 7))); };
+function tmapExploreSave(force) {
+  if (!tmapExploreDirty || (!force && Date.now() - tmapExploreSavedAt < 2000)) return;
+  for (const [id, st] of tmapBitsCache) tmapExplored[id] = Array.from(st.bits, b => b.toString(16).padStart(2, '0')).join('');
+  try { localStorage.setItem(TMAP_EXPLORE_KEY, JSON.stringify(tmapExplored)); } catch (_) {}
+  tmapExploreDirty = false; tmapExploreSavedAt = Date.now();
+}
+// 視線：從溫特那一格到目標格，中間經過的格子不能是牆（目標格本身是牆也算看得到：牆面要畫出來）
+function tmapLineClear(c0, r0, c1, r1) {
+  const steps = Math.max(Math.abs(c1 - c0), Math.abs(r1 - r0));
+  for (let s = 1; s < steps; s++) {
+    const c = Math.round(c0 + (c1 - c0) * s / steps), r = Math.round(r0 + (r1 - r0) * s / steps);
+    if (typeof isWall === 'function' && isWall(c, r)) return false;
+  }
+  return true;
+}
+function tmapExploreTick() {
+  if (typeof MAP_FIELD === 'undefined' || !MAP_FIELD || typeof MAP === 'undefined' || !MAP || typeof G === 'undefined' || !G || !G.player) return;
+  const lv = typeof equipLv === 'function' ? equipLv('navrecorder') : null;
+  if (!lv) return;
+  const st = tmapExploreState(MAP), [pc, pr] = tmapCellOf(G.player).map(Math.floor), R = lv.range;
+  const wasDone = st.done;
+  for (let dr = -R; dr <= R; dr++) for (let dc = -R; dc <= R; dc++) {
+    const c = pc + dc, r = pr + dr;
+    if (dc * dc + dr * dr > R * R + R || c < 0 || r < 0 || c >= st.cols || r >= st.rows || tmapSeen(st, c, r)) continue;
+    if (!tmapLineClear(pc, pr, c, r)) continue;
+    const i = r * st.cols + c; st.bits[i >> 3] |= 1 << (i & 7); tmapExploreDirty = true;
+    if (st.open[i]) st.seen++;
+  }
+  st.done = st.total > 0 && st.seen >= st.total;
+  if (st.done && !wasDone && typeof systemNotice === 'function') systemNotice('🧭 「' + MAP.name + '」的地圖已經完整記錄');
+  tmapExploreSave(false);
+}
+setInterval(tmapExploreTick, 250);
+window.addEventListener('beforeunload', () => tmapExploreSave(true));
+
+// T-Pad「地圖」在戰鬥區域：只畫記過的格子，加上自己的位置、記過的出入口、還沒打碎的異質核心
+function renderFieldMapApp(el) {
+  tmapExploreTick();
+  const m = MAP, st = tmapExploreState(m), pct = st.total ? Math.floor(st.seen / st.total * 100) : 0;
+  const pad = 1.5, vx = -pad, vy = -pad, vw = m.cols + pad * 2, vh = m.rows + pad * 2;
+  const u = Math.max(vw, vh * 2.1) / 98, mk = TMAP_MARK * u;
+  const floor = (m.layers && m.layers.floor) || {}, solid = new Set(m.solid || []);
+  let open = '', wall = '';
+  for (const k of Object.keys(floor)) {
+    const [c, r] = k.split(',').map(Number);
+    if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || !tmapSeen(st, c, r)) continue;
+    const d = 'M' + c + ' ' + r + 'h1v1h-1z';
+    if (solid.has(k)) wall += d; else open += d;
+  }
+  const marks = [], names = new Map((typeof mapList === 'function' ? mapList() : []).map(x => [x.id, x.name])), groups = [];
+  for (const p of m.portals || []) {   // 相鄰的同一個去處合成一個
+    if (!tmapSeen(st, p.c, p.r)) continue;
+    const g = groups.find(q => q.to === p.to && Math.abs(q.c / q.k - p.c) <= 2.5 && Math.abs(q.r / q.k - p.r) <= 2.5);
+    if (g) { g.c += p.c; g.r += p.r; g.k++; } else groups.push({ to: p.to, c: p.c, r: p.r, k: 1 });
+  }
+  for (const g of groups) marks.push('<g class="tm-door" transform="translate(' + (g.c / g.k + .5) + ' ' + (g.r / g.k + .5) + ') scale(' + mk + ')"><title>出入口：' + tmapEsc(names.get(g.to) || '') + '</title><rect x="-.8" y="-.8" width="1.6" height="1.6" rx=".3"/></g>');
+  for (const core of (G.cores || [])) {
+    if (core.dead) continue;
+    const [c, r] = tmapCellOf(core);
+    if (!tmapSeen(st, Math.floor(c), Math.floor(r))) continue;
+    marks.push('<g class="tm-core" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>異質核心</title><path d="M0 -1.2 1 0 0 1.2 -1 0Z"/></g>');
+  }
+  const [pc, pr] = tmapCellOf(G.player);
+  const me = '<g class="tm-me" transform="translate(' + pc + ' ' + pr + ') scale(' + mk + ')"><title>你的位置</title><circle class="tm-ping" r="1.8"/><circle r="1.05"/></g>';
+  const side = '<nav class="aa-side tm-side tmf-side"><div class="tm-sec">慣性導航記錄器</div>' +
+    '<div class="tmf-pct"><b>' + pct + '<small>%</small></b><span>已記錄</span></div><i class="aa-bar tmf-bar"><u style="width:' + pct + '%"></u></i>' +
+    '<p class="tmf-note">' + (st.done ? '這張地圖已經完整記錄。' : '走過的地方會自動畫進地圖；把整張地圖走過一遍，就能得到完整的地圖。') + '</p>' +
+    '<p class="tmf-note dim">記錄範圍：周圍 ' + equipLv('navrecorder').range + ' 格（牆後面看不到）<br>沒有訊號：看不到隊友和怪物。</p></nav>';
+  const main = '<main class="tm-main"><div class="tm-head"><h2 class="aa-title">' + tmapEsc(m.name) + '</h2><p class="aa-sub">離線模式・導航記錄中</p></div>' +
+    '<svg class="tm-svg" style="--u:' + u.toFixed(3) + '" viewBox="' + [vx, vy, vw, vh].join(' ') + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + tmapEsc(m.name) + ' 已探索的地圖">' +
+    (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '') + marks.join('') + me + '</svg>' +
+    '<div class="tm-legend"><span><i class="lg-me"></i>你</span><span><i class="lg-door"></i>出入口</span><span><i class="lg-core"></i>異質核心</span><span><i class="lg-fog"></i>還沒走過</span></div></main>';
+  el.innerHTML = '<div class="aa tm tmf">' + side + main + '</div>';
+}

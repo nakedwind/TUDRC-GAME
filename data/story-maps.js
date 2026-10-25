@@ -70,8 +70,8 @@ const STORY_MAPS = [
         "7,4": "tile_obstacle_wirecloth_v"
       },
       "object4": {
-        "16,10": "tile_obstacle_camping_lights",
-        "13,13": "tile_obstacle_camping_lights"
+        "13,13": "tile_obstacle_camping_lights",
+        "12,8": "tile_obstacle_camping_lights"
       },
       "overlay": {},
       "top": {
@@ -587,8 +587,10 @@ const STORY_MAPS = [
       {
         "id": "tile_dmg_floor_stain_smudge",
         "c": 22,
-        "r": 13,
-        "layer": "ground2"
+        "r": 15,
+        "layer": "ground2",
+        "ox": 10,
+        "oy": 30
       },
       {
         "id": "tile_dmg_rubble_brick_chunks",
@@ -640,9 +642,10 @@ const STORY_MAPS = [
       },
       {
         "id": "tile_dmg_floor_crater",
-        "c": 24,
+        "c": 22,
         "r": 13,
-        "layer": "ground2"
+        "layer": "ground2",
+        "oy": 20
       },
       {
         "id": "tile_new_decor_rock02",
@@ -688,9 +691,11 @@ const STORY_MAPS = [
       },
       {
         "id": "tile_new_decor_rock03",
-        "c": 16,
-        "r": 7,
-        "layer": "ground3"
+        "c": 15,
+        "r": 6,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 20
       },
       {
         "id": "tile_new_decor_rock03",
@@ -877,150 +882,6 @@ const STORY_MAPS = [
         "c": 30,
         "r": 13,
         "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 4,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 5,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 6,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 7,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 8,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 9,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 10,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 11,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 12,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 13,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 15,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 14,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 16,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 18,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 17,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 20,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 19,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 21,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 22,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 23,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 24,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 26,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 25,
-        "r": 15,
-        "layer": "overlay"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 27,
-        "r": 15,
-        "layer": "overlay"
       },
       {
         "id": "tile_field_camp_bed",
@@ -1237,31 +1098,27 @@ const STORY_MAPS = [
         "id": "tile_mr4ja2cb",
         "c": 27,
         "r": 12,
-        "layer": "object3"
+        "layer": "object"
       },
       {
         "id": "tile_mr4ja2cb",
         "c": 26,
         "r": 12,
-        "layer": "object3"
+        "layer": "object"
       },
       {
         "id": "tile_mr4ja2cb",
         "c": 25,
         "r": 12,
-        "layer": "object3"
+        "layer": "object"
       },
       {
         "id": "tile_obstacle_searchlight_h",
         "c": 24,
-        "r": 12,
-        "layer": "object4"
-      },
-      {
-        "id": "tile_obstacle_searchlight_h",
-        "c": 3,
-        "r": 5,
-        "layer": "object4"
+        "r": 13,
+        "layer": "object4",
+        "ox": 30,
+        "oy": 10
       },
       {
         "id": "tile_obstacle_searchlight_h",
@@ -1355,6 +1212,118 @@ const STORY_MAPS = [
         "c": 18,
         "r": 15,
         "layer": "top"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 4,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 7,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 10,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 16,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 19,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 22,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 16,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 4,
+        "r": 15,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 7,
+        "r": 15,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 10,
+        "r": 15,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 13,
+        "r": 15,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 16,
+        "r": 15,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 19,
+        "r": 15,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 22,
+        "r": 14,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 27,
+        "r": 14,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_dmg_broken_wall_right",
+        "c": 24,
+        "r": 14,
+        "layer": "overlay",
+        "fx": true,
+        "ox": 0,
+        "oy": 2
+      },
+      {
+        "id": "tile_obstacle_camping_lights",
+        "c": 4,
+        "r": 3,
+        "layer": "object3",
+        "oy": 20
       }
     ],
     "solid": [
@@ -1504,9 +1473,6 @@ const STORY_MAPS = [
       "28,15",
       "27,15",
       "26,15",
-      "25,15",
-      "24,15",
-      "23,15",
       "22,15",
       "21,15",
       "20,15",
@@ -1551,9 +1517,6 @@ const STORY_MAPS = [
       "20,17",
       "21,17",
       "22,17",
-      "23,17",
-      "24,17",
-      "24,16",
       "25,16",
       "26,16",
       "27,16",
@@ -1562,7 +1525,6 @@ const STORY_MAPS = [
       "27,17",
       "26,17",
       "25,17",
-      "23,16",
       "22,16",
       "21,16",
       "20,16",
@@ -1684,7 +1646,8 @@ const STORY_MAPS = [
       "7,9",
       "6,3",
       "16,3",
-      "19,3"
+      "19,3",
+      "4,15"
     ],
     "solidOffsets": {},
     "breakable": [],
