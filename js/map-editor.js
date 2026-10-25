@@ -1557,6 +1557,24 @@ function renderLayerItems(lid) {
     row.innerHTML = thumb + '<span class="layer-obj-name"></span><small>' + (item.type === 'stamp' ? '物件' : '格子') + '・' + item.c + ',' + item.r + '</small>';
     row.querySelector('.layer-obj-name').textContent = t.name || item.id;
     row.addEventListener('click', e => selectFromLayerList(item, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey }, list.slice(0, layerListLimit)));
+    if (item.type === 'stamp') {   // 物件：拖曳排前後（清單越上面＝越前面，蓋在別人上面）
+      row.draggable = true; row.dataset.stamp = item.index;
+      row.title += '\n拖曳上下移動＝決定前後：越上面的越前面（重疊時蓋在下面那些上面）';
+      row.addEventListener('dragstart', e => { layerObjDrag = item.index; row.classList.add('dragging'); e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', String(item.index)); });
+      row.addEventListener('dragend', () => { layerObjDrag = null; row.classList.remove('dragging'); clearLayerObjMarks(); });
+      row.addEventListener('dragover', e => {
+        if (layerObjDrag == null || layerObjDrag === item.index) return;
+        e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+        const r = row.getBoundingClientRect(), above = e.clientY < r.top + r.height / 2;
+        clearLayerObjMarks(); row.classList.add(above ? 'drop-above' : 'drop-below');
+      });
+      row.addEventListener('drop', e => {
+        if (layerObjDrag == null || layerObjDrag === item.index) return;
+        e.preventDefault();
+        const r = row.getBoundingClientRect(), above = e.clientY < r.top + r.height / 2;
+        moveStampOrder(layerObjDrag, item.index, above);
+      });
+    }
     box.appendChild(row);
   });
   if (list.length > layerListLimit) {
@@ -1566,6 +1584,25 @@ function renderLayerItems(lid) {
     box.appendChild(more);
   }
   return box;
+}
+// ---- 物件清單拖曳排前後 ----
+// 同一個圖層裡的物件照 m.stamps 的順序畫：後面的蓋在前面的上面（清單是反過來列，最上面＝最後畫＝最前面）。
+// 遊戲裡同一圖層的物件重疊時也照這個順序蓋（js/maploader.js 的 buildLayerOverdraw）。
+let layerObjDrag = null;   // 正在拖的物件（m.stamps 的第幾個）
+const clearLayerObjMarks = () => layerBtnsEl.querySelectorAll('.layer-obj.drop-above, .layer-obj.drop-below').forEach(el => el.classList.remove('drop-above', 'drop-below'));
+// 把 from 這個物件移到 to 的前面（above＝放在清單上方＝蓋在它上面）或後面
+function moveStampOrder(from, to, above) {
+  const m = curMap(), s = m.stamps[from], target = m.stamps[to]; if (!s || !target) return;
+  pushUndo();
+  m.stamps.splice(from, 1);
+  const at = m.stamps.indexOf(target);
+  m.stamps.splice(above ? at + 1 : at, 0, s);   // 清單上方＝陣列後面（後畫＝在上面）
+  const now = m.stamps.indexOf(s);
+  selections = [{ type: 'stamp', index: now }];   // 位置變了：選取改成剛拖的這個
+  layerObjDrag = null;
+  syncLayers(); renderLayers(); refreshSelPanel(); saveMaps(); draw();
+  const name = (tileById(s.id) || {}).name || s.id, other = (tileById(target.id) || {}).name || target.id;
+  setStatus('「' + name + '」移到「' + other + '」的' + (above ? '前面（蓋在它上面）' : '後面（被它蓋住）'), '#8fd3ff');
 }
 // 畫面上的東西變了（貼圖、刪除、選取…）：物件清單晚一點再重畫（避免拖曳時一直重畫）
 let layerListTimer = null;

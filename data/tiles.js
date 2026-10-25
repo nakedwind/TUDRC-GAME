@@ -4129,5 +4129,22 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_wall_01_3.png",
     "w": 2,
     "h": 4
+  },
+  {
+    "id": "tile_mvoe808h",
+    "name": "Poolcore_field-base",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_field-base.png",
+    "w": 12,
+    "h": 9
+  },
+  {
+    "id": "tile_mvofs5nu",
+    "name": "Poolcore_warning_line",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_warning_line.png",
+    "w": 11,
+    "h": 6,
+    "flat": true
   }
 ];

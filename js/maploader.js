@@ -744,16 +744,19 @@ function buildLayerOverdraw(items) {
   // 立體物在遊戲裡的實際先後（底部Y，同樣的話照原本順序）
   const rank = new Map([...items].map((it, k) => ({ it, k })).sort((a, b) => a.it.y - b.it.y || a.k - b.k).map((o, n) => [o.it, n]));
   const order = new Map([...items, ...flats].map((it, k) => [it, k]));
+  // 同一個圖層裡的物件：編輯器的物件清單可以拖曳排前後（m.stamps 越後面＝越前面）；格子圖算在同一層物件的下面
+  const sub = it => it.kind === 'stamp' ? (MAP.stamps || []).indexOf(it.stamp) : -1;
+  const higher = (a, x) => a.li > x.li || (a.li === x.li && sub(a) > sub(x));
   for (const x of items) {
     x.overdraw = [];
     for (const a of [...items, ...flats]) {
-      if (a === x || a.li <= x.li) continue;                   // 只管比它上層的圖
+      if (a === x || !higher(a, x)) continue;                  // 只管比它上層（或同層排在它前面）的圖
       if (!a.flat && rank.get(a) > rank.get(x)) continue;       // 本來就比它晚畫，不用補
       const cx0 = Math.max(a.x0, x.x0), cy0 = Math.max(a.y0, x.y0), cx1 = Math.min(a.x1, x.x1), cy1 = Math.min(a.y1, x.y1);
       if (cx1 <= cx0 || cy1 <= cy0) continue;
       x.overdraw.push({ a, clip: [cx0, cy0, cx1 - cx0, cy1 - cy0] });
     }
-    x.overdraw.sort((p, q) => p.a.li - q.a.li || order.get(p.a) - order.get(q.a));   // 依編輯器圖層由下往上補畫
+    x.overdraw.sort((p, q) => p.a.li - q.a.li || sub(p.a) - sub(q.a) || order.get(p.a) - order.get(q.a));   // 依編輯器圖層（同層照前後）由下往上補畫
   }
 }
 function drawOccluderItem(ctx, it) {
