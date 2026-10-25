@@ -1413,7 +1413,7 @@ function handleMapClick(e, isLeft) {
     return false;
   }
   if (isLeft && G.selType && G.selType.startsWith('build:')) {   // 放建築
-    if (MAP_SAFE) return false;
+    if (!MAP_FIELD) return false;
     closeGroundMenu(); closeSentryMenu(); spawnGroundRipple(e.clientX, e.clientY);
     const ob = buildableById(G.selType.slice(6)); if (ob) placeObstacle(ob, c, r); updateHUD();
     return false;
@@ -1434,7 +1434,7 @@ function handleMapClick(e, isLeft) {
   const campBase = !isLeft && !MAP_SAFE && campBaseAt(x, y);
   if (campBase) { closeSentryMenu(); openCampMenu(campBase, e.clientX, e.clientY); return false; }
   closeSentryMenu();
-  if (MAP_SAFE) { closeGroundMenu(); return false; }
+  if (!MAP_FIELD) { closeGroundMenu(); return false; }
   const clickedBuilding = playerBuildingAt(c, r);
   if (clickedBuilding) {
     if (isLeft) { closeGroundMenu(); return true; }   // 左鍵點到建築：不開拆除選單，當成開槍
@@ -2288,11 +2288,11 @@ function updateHUD() {
   const hud = document.getElementById('hud');
   if (hud) hud.classList.remove('hidden');
   const buildToolbar = document.getElementById('buildToolbar');
-  if (buildToolbar) buildToolbar.classList.toggle('hidden', MAP_SAFE);
+  if (buildToolbar) buildToolbar.classList.toggle('hidden', !MAP_FIELD);   // 劇情地圖也有建築按鈕（自己放燈）
   if (typeof updateTeamButton === 'function') updateTeamButton();   // 安全場景才顯示「出勤編隊」按鈕
-  if (MAP_SAFE && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
+  if (!MAP_FIELD && typeof buildBar !== 'undefined' && buildBar) buildBar.classList.add('hidden');
   document.getElementById('money').textContent = Math.floor(G.money);
-  if (MAP_SAFE && !MAP_STORY && !window.TEST_MODE && typeof walletSet === 'function' && walletGet() !== Math.floor(G.money)) walletSet(G.money);   // 基地裡花錢：存回錢包
+  if (MAP_SAFE && !(MAP_STORY && typeof pausedBattle !== 'undefined' && pausedBattle) && !window.TEST_MODE && typeof walletSet === 'function' && walletGet() !== Math.floor(G.money)) walletSet(G.money);   // 基地裡花錢：存回錢包
   document.getElementById('safeCornerButtons').classList.add('hidden');   // 右下角的背包按鈕不用了：資訊條上就有背包
   renderQuickSupplies();
   document.getElementById('crystals').textContent = training.crystals;

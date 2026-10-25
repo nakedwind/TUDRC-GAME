@@ -136,7 +136,7 @@ function renderBuildQuickSlots() {
   if (typeof refreshHoverTip === 'function') refreshHoverTip();
 }
 function selectBuildType(id) {
-  if (!G || !G.running || MAP_SAFE || !buildableById(id)) return;
+  if (!G || !G.running || !MAP_FIELD || !buildableById(id)) return;   // 劇情地圖也能蓋（自己放燈照亮）
   if (buildTargetCell) {
     const [c, r] = buildTargetCell;
     const placed = placeObstacle(buildableById(id), c, r);
@@ -216,7 +216,7 @@ function updateBuildToggle() {
   if (placing && typeof closeFieldCommandMenu === 'function') closeFieldCommandMenu();
 }
 demolishToggle.addEventListener('click', () => {
-  if (!G || !G.running || MAP_SAFE) return;
+  if (!G || !G.running || !MAP_FIELD) return;
   const wasActive = G.selType === 'demolish';
   closeBuildMenu(); closeGroundMenu();
   G.selType = wasActive ? null : 'demolish';

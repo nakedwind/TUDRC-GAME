@@ -102,15 +102,15 @@ const equipAcidMul = () => { const v = equipLv('mask'), b = equipLv('acidboots')
 const equipSootheCost = c => { const v = equipLv('bracelet'); return v ? Math.round(c * (1 - v.save)) : c; };   // 共感手環：疏導花的 SP
 const equipSpeedMul = () => { const v = equipLv('sneakers'); return (v ? 1 + v.speed : 1) * adrenalineSpeedMul(); };   // 輕量跑鞋、腎上腺素（道具）
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
-const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && !MAP_SAFE ? h.fear : 0)); };   // 照明頭盔也算
-const flashlightOn = () => !!(equipLv('headlamp') && !MAP_SAFE && equipState.battery > 0);
+const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && MAP_FIELD ? h.fear : 0)); };   // 照明頭盔也算
+const flashlightOn = () => !!(equipLv('headlamp') && MAP_FIELD && equipState.battery > 0);   // 劇情地圖也有黑幕：手電筒照樣亮
 // 無線電：疏導距離（js/game.js）、指派時隊員跑更快（js/sentry.js）
 const equipTalkReach = () => { const v = equipLv('radio'); return v && !MAP_SAFE ? 1 + v.reach : 1; };
 const equipRushMul = () => { const v = equipLv('radio'); return v && v.rush ? 1 + v.rush : 1; };
 // 照明（js/lighting.js 的 getLights 呼叫，只有戰鬥區域）：
 //   照明頭盔＝溫特身邊一小圈光；高亮度手電筒（有電時）＝朝滑鼠方向的扇形光，照得遠
 function equipLight() {
-  if (MAP_SAFE || !G || !G.player) return [];
+  if (!MAP_FIELD || !G || !G.player) return [];
   const p = G.player, L = [], h = equipLv('lamphelmet'), v = equipLv('headlamp');
   // smooth：畫面上用平滑的形狀挖開黑幕（js/lighting.js），遊戲判定照樣用格子
   if (h) L.push({ x: p.x, y: p.y - 10, r: h.light, smooth: true, helmet: true });
@@ -412,7 +412,7 @@ function updateEquipment(dt) {
   if (firstAid.picking && (MAP_SAFE || G.over || G.player.hp <= 0 || aidKits() <= 0)) cancelFirstAidPick();   // 換到基地、倒下、急救包用完：不用選了
   renderGearQuick();
   const v = equipLv('headlamp');
-  if (!v || MAP_SAFE) return;
+  if (!v || !MAP_FIELD) return;
   if (equipState.battery > 0) {
     equipState.battery = Math.max(0, equipState.battery - dt * 100 / v.battery);
     if (equipState.battery > 0) return;
@@ -426,7 +426,7 @@ function updateEquipment(dt) {
     systemNotice('手電筒沒電了，在地圖上找找電池吧', true);
   }
 }
-setInterval(() => { if (equipLv('headlamp') && !MAP_SAFE) saveEquipment(); }, 3000);   // 電量每 3 秒存一次
+setInterval(() => { if (equipLv('headlamp') && MAP_FIELD) saveEquipment(); }, 3000);   // 電量每 3 秒存一次
 
 // ---- 異質探測器：附近黑暗中的礦物、核心微微發光（render.js 在黑幕上面畫）----
 function drawDetector(ctx) {

@@ -2625,7 +2625,7 @@ document.getElementById('f_npcs').addEventListener('change', e => {
 const storyField = document.getElementById('f_story');
 if (storyField) storyField.addEventListener('change', e => {
   pushUndo(); if (e.target.checked) curMap().story = true; else delete curMap().story; saveMaps();
-  setStatus(e.target.checked ? '這張是劇情地圖：不生怪、沒有核心，只有溫特一個人進來；從戰鬥地圖進來時那邊會時間暫停' : '這張地圖不是劇情地圖了', '#8fd3ff');
+  setStatus(e.target.checked ? '這張是劇情地圖：不生怪、沒有核心、有黑幕（要自己放燈），只有溫特一個人進來；從戰鬥地圖進來時那邊會時間暫停' : '這張地圖不是劇情地圖了', '#8fd3ff');
 });
 const safeField = document.getElementById('f_safe');
 if (safeField) safeField.addEventListener('change', e => {

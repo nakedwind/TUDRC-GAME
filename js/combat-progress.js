@@ -99,6 +99,7 @@ function resumePausedBattle(toId) {
   if (!pausedBattle) return false;
   if (!MAP_STORY || toId !== pausedBattle.mapId || mapIndexById(toId) < 0) { dropPausedBattle(); return false; }
   const b = pausedBattle; pausedBattle = null;
+  b.G.money = G.money;   // 在劇情地圖蓋燈花掉的經費，算在這場作戰裡
   switchMap(mapIndexById(toId));
   closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false);
   G = b.G; mapWalls = b.walls; mapDoors = b.doors; doorAddedWalls = b.doorWalls; mapSolidOffsets = b.offsets;

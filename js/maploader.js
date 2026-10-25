@@ -131,8 +131,10 @@ let MAP_SAFE = false;
 // 場景 NPC（克莉思、路德…）只在有勾「場景 NPC」的地圖出現
 let MAP_NPCS = false;
 // 劇情地圖（地圖編輯器勾「劇情地圖」＝地圖的 story 欄位）：只有溫特一個人走進來看劇情。
-// 跟安全區一樣不生怪、沒有核心、不算戰鬥，但隊友不會跟進來；從戰鬥地圖進來時戰場會暫停保存（js/combat-progress.js）
+// 跟安全區一樣不生怪、沒有核心、不算戰鬥，但隊友不會跟進來、跟戰鬥地圖一樣有黑幕（MAP_FIELD）；從戰鬥地圖進來時戰場會暫停保存（js/combat-progress.js）
 let MAP_STORY = false;
+// 有黑幕、可以自己蓋建築放燈、頭燈和手電筒會亮的地方：戰鬥地圖，加上劇情地圖（劇情地圖一樣沒有怪物）
+let MAP_FIELD = false;
 const LIGHT_BASE_ENABLED = LIGHT.enabled;   // balance.js 的原始設定，離開安全場景要還原
 
 let MAP_INDEX = 0;   // 目前玩第幾張地圖（由開始畫面的地圖選單切換）
@@ -230,7 +232,8 @@ function initMap() {
   MAP_STORY = !window.STORY_MODE && !!MAP.story;
   MAP_SAFE = (window.STORY_MODE || !!MAP.safe || MAP_STORY) && !(typeof practiceOn === 'function' && practiceOn());   // 訓練室練習中：暫時當成戰鬥區域（js/practice.js）
   MAP_NPCS = !!MAP.npcs;
-  LIGHT.enabled = window.STORY_MODE ? !!StoryScene.config().darkness : LIGHT_BASE_ENABLED && !MAP_SAFE;
+  MAP_FIELD = !MAP_SAFE || MAP_STORY;
+  LIGHT.enabled = window.STORY_MODE ? !!StoryScene.config().darkness : LIGHT_BASE_ENABLED && MAP_FIELD;
 
   // 規則覆蓋數值（沒填的沿用 balance.js 預設）
   const R = MAP.rules || {};

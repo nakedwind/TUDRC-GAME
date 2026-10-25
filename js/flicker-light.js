@@ -143,7 +143,7 @@ function humContext() {
 }
 // 聽聲音的位置：玩家；回憶劇情裡沒有玩家，改用鏡頭中心（js/story-scene.js）
 const flickerListener = () => G.player || (window.STORY_MODE && typeof StoryScene !== 'undefined' ? StoryScene.listener() : null);
-const flickerQuiet = () => MAP_SAFE && !window.STORY_MODE;   // 應變中心（安全區）沒有嗡嗡聲；回憶劇情的地圖也算安全區，但要聽得到
+const flickerQuiet = () => MAP_SAFE && !MAP_STORY && !window.STORY_MODE;   // 應變中心（安全區）沒有嗡嗡聲；回憶劇情的地圖也算安全區，但要聽得到
 let humUpdatedAt = 0;   // 上一次照遊戲畫面更新嗡嗡聲的時間（遊戲邏輯停住時，下面的計時器會把聲音關掉）
 function updateFlickerHum() {
   const list = flickerLights(), p = flickerListener();
