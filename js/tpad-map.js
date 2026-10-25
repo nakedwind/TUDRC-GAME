@@ -284,25 +284,37 @@ const TMAP_EXPLORE_DONE = .95;
 let tmapExplored = {}, tmapExploreDirty = false, tmapExploreSavedAt = 0;
 try { tmapExplored = JSON.parse(localStorage.getItem(TMAP_EXPLORE_KEY) || '{}') || {}; } catch (_) { tmapExplored = {}; }
 const tmapBitsCache = new Map();   // 地圖 id → { bits: Uint8Array, open: 可走的格數, seen: 記過的可走格數 }
+// 還沒炸開的隱藏區（js/breakable-walls.js 的 G.hiddenAreas）：不能記、也不算進完整度；炸開之後才算
+function tmapHiddenKeys(m) {
+  const keys = new Set();
+  if (typeof MAP !== 'undefined' && MAP === m && typeof G !== 'undefined' && G && G.hiddenAreas)
+    for (const a of G.hiddenAreas) if (!a.revealAt) for (const k of a.cells) keys.add(k);
+  return keys;
+}
 function tmapExploreState(m) {
   let st = tmapBitsCache.get(m.id);
-  if (st && st.cols === m.cols && st.rows === m.rows) return st;
-  const n = m.cols * m.rows, bits = new Uint8Array(Math.ceil(n / 8)), hex = tmapExplored[m.id] || '';
-  for (let i = 0; i < bits.length && i * 2 + 1 < hex.length; i++) bits[i] = parseInt(hex.substr(i * 2, 2), 16) || 0;
+  const hidden = tmapHiddenKeys(m), sig = hidden.size;   // 隱藏區炸開（格數變了）就重算一次可走的格子
+  if (st && st.cols === m.cols && st.rows === m.rows && st.sig === sig) return st;
+  const n = m.cols * m.rows;
+  let bits = st && st.cols === m.cols && st.rows === m.rows ? st.bits : null;   // 已經在記憶體裡的比存檔新
+  if (!bits) {
+    bits = new Uint8Array(Math.ceil(n / 8)); const hex = tmapExplored[m.id] || '';
+    for (let i = 0; i < bits.length && i * 2 + 1 < hex.length; i++) bits[i] = parseInt(hex.substr(i * 2, 2), 16) || 0;
+  }
   const floor = (m.layers && m.layers.floor) || {}, solid = new Set(m.solid || []), open = new Uint8Array(n);
   let total = 0, seen = 0;
   for (const k of Object.keys(floor)) {
     const [c, r] = k.split(',').map(Number);
-    if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || solid.has(k)) continue;
+    if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || solid.has(k) || hidden.has(k)) continue;
     const i = r * m.cols + c; open[i] = 1; total++;
     if (bits[i >> 3] & (1 << (i & 7))) seen++;
   }
-  st = { cols: m.cols, rows: m.rows, bits, open, total, seen, done: total > 0 && seen >= total };
-  if (!st.done && total > 0 && seen >= total * TMAP_EXPLORE_DONE) tmapExploreFill(st);
+  st = { cols: m.cols, rows: m.rows, bits, open, total, seen, done: total > 0 && seen >= total, sig, hidden };
   tmapBitsCache.set(m.id, st);
   return st;
 }
-// 記到 95%：剩下的可走格子全部補上（地圖完整）
+// 記到 95%（這一步才剛跨過去）：剩下的可走格子全部補上（地圖完整）。
+// 只在「剛跨過」時補：炸開隱藏區之後完整度本來就在 95% 以上，不會一炸開就自動補好，要自己走進去記。
 function tmapExploreFill(st) {
   for (let i = 0; i < st.open.length; i++) if (st.open[i]) st.bits[i >> 3] |= 1 << (i & 7);
   st.seen = st.total; st.done = true; tmapExploreDirty = true;
@@ -328,15 +340,16 @@ function tmapExploreTick() {
   const lv = typeof equipLv === 'function' ? equipLv('navrecorder') : null;
   if (!lv) return;
   const st = tmapExploreState(MAP), [pc, pr] = tmapCellOf(G.player).map(Math.floor), R = lv.range;
-  const wasDone = st.done;
+  const wasDone = st.done, before = st.seen, need = st.total * TMAP_EXPLORE_DONE;
   for (let dr = -R; dr <= R; dr++) for (let dc = -R; dc <= R; dc++) {
     const c = pc + dc, r = pr + dr;
-    if (dc * dc + dr * dr > R * R + R || c < 0 || r < 0 || c >= st.cols || r >= st.rows || tmapSeen(st, c, r)) continue;
+    if (dc * dc + dr * dr > R * R + R || c < 0 || r < 0 || c >= st.cols || r >= st.rows || tmapSeen(st, c, r) || st.hidden.has(c + ',' + r)) continue;
     if (!tmapLineClear(pc, pr, c, r)) continue;
     const i = r * st.cols + c; st.bits[i >> 3] |= 1 << (i & 7); tmapExploreDirty = true;
     if (st.open[i]) st.seen++;
   }
-  if (!st.done && st.total > 0 && st.seen >= st.total * TMAP_EXPLORE_DONE) tmapExploreFill(st);
+  if (!st.done && st.total > 0 && before < need && st.seen >= need) tmapExploreFill(st);
+  else st.done = st.total > 0 && st.seen >= st.total;
   if (st.done && !wasDone && typeof systemNotice === 'function') systemNotice('🧭 「' + MAP.name + '」的地圖已經完整記錄');
   tmapExploreSave(false);
 }
@@ -353,13 +366,13 @@ function renderFieldMapApp(el) {
   let open = '', wall = '';
   for (const k of Object.keys(floor)) {
     const [c, r] = k.split(',').map(Number);
-    if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || !tmapSeen(st, c, r)) continue;
+    if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || !tmapSeen(st, c, r) || st.hidden.has(k)) continue;   // 隱藏區炸開前不畫
     const d = 'M' + c + ' ' + r + 'h1v1h-1z';
     if (solid.has(k)) wall += d; else open += d;
   }
   const marks = [], names = new Map((typeof mapList === 'function' ? mapList() : []).map(x => [x.id, x.name])), groups = [];
   for (const p of m.portals || []) {   // 相鄰的同一個去處合成一個
-    if (!tmapSeen(st, p.c, p.r)) continue;
+    if (!tmapSeen(st, p.c, p.r) || st.hidden.has(p.c + ',' + p.r)) continue;
     const g = groups.find(q => q.to === p.to && Math.abs(q.c / q.k - p.c) <= 2.5 && Math.abs(q.r / q.k - p.r) <= 2.5);
     if (g) { g.c += p.c; g.r += p.r; g.k++; } else groups.push({ to: p.to, c: p.c, r: p.r, k: 1 });
   }
@@ -367,7 +380,7 @@ function renderFieldMapApp(el) {
   for (const core of (G.cores || [])) {
     if (core.dead) continue;
     const [c, r] = tmapCellOf(core);
-    if (!tmapSeen(st, Math.floor(c), Math.floor(r))) continue;
+    if ((!tmapSeen(st, Math.floor(c), Math.floor(r)) || st.hidden.has(Math.floor(c) + ',' + Math.floor(r)))) continue;
     marks.push('<g class="tm-core" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>異質核心</title><path d="M0 -1.2 1 0 0 1.2 -1 0Z"/></g>');
   }
   const [pc, pr] = tmapCellOf(G.player);
@@ -417,16 +430,16 @@ function tmapMiniUpdate() {
   ctx.clearRect(0, 0, W, H);
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
     const k = c + ',' + r;
-    if (!floor[k] || !tmapSeen(st, c, r)) continue;
+    if (!floor[k] || !tmapSeen(st, c, r) || st.hidden.has(k)) continue;
     ctx.fillStyle = solid.has(k) ? '#262b33' : '#4a5462';
     ctx.fillRect(Math.round(ox + c * S), Math.round(oy + r * S), S, S);
   }
   ctx.fillStyle = '#5fd38a';   // 出入口
-  for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r)) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
+  for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r) && !st.hidden.has(p.c + ',' + p.r)) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
   ctx.fillStyle = '#b77cff';   // 還沒打碎的異質核心
   for (const core of (G.cores || [])) {
     if (core.dead) continue;
-    const [c, r] = tmapCellOf(core); if (!tmapSeen(st, Math.floor(c), Math.floor(r))) continue;
+    const [c, r] = tmapCellOf(core); if ((!tmapSeen(st, Math.floor(c), Math.floor(r)) || st.hidden.has(Math.floor(c) + ',' + Math.floor(r)))) continue;
     const x = ox + c * S, y = oy + r * S;
     ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 5); ctx.lineTo(x - 4, y); ctx.closePath(); ctx.fill();
   }
