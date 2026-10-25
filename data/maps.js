@@ -12645,15 +12645,15 @@ const BATTLE_MAPS = [
       "object4": {},
       "overlay": {},
       "top": {
-        "37,10": "tile_mr4czvpx",
-        "37,8": "tile_mr4czvpx",
         "37,7": "tile_mr4czvpx",
         "37,6": "tile_mr4czvpx",
         "37,5": "tile_mr4czvpx",
         "37,4": "tile_mr4czvpx"
       },
       "object5": {},
-      "ground4": {}
+      "ground4": {},
+      "object6": {},
+      "object7": {}
     },
     "stamps": [
       {
@@ -13935,12 +13935,6 @@ const BATTLE_MAPS = [
         "layer": "ground2"
       },
       {
-        "id": "tile_mr4cyq54",
-        "c": 37,
-        "r": 11,
-        "layer": "ground2"
-      },
-      {
         "id": "tile_poolcore_waterline_wall",
         "c": 26,
         "r": 15,
@@ -13991,12 +13985,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mr4cyq54",
-        "c": 12,
-        "r": 26,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyq54",
         "c": 37,
         "r": 26,
         "layer": "object"
@@ -14013,7 +14001,7 @@ const BATTLE_MAPS = [
         "id": "tile_cvs_sign_twelve",
         "c": 3,
         "r": 18,
-        "layer": "overlay",
+        "layer": "object6",
         "ox": 4,
         "oy": 10
       },
@@ -14021,7 +14009,7 @@ const BATTLE_MAPS = [
         "id": "tile_cvs_back_counter",
         "c": 5,
         "r": 19,
-        "layer": "overlay",
+        "layer": "object6",
         "fx": true,
         "sortDepth": 2.5,
         "ox": 10
@@ -14030,14 +14018,14 @@ const BATTLE_MAPS = [
         "id": "tile_cvs_drink_cooler",
         "c": 3,
         "r": 19,
-        "layer": "overlay",
+        "layer": "object6",
         "sortDepth": 2.5
       },
       {
         "id": "tile_cvs_checkout_counter_backroom",
         "c": 6,
         "r": 20,
-        "layer": "overlay",
+        "layer": "object6",
         "ox": 30,
         "oy": 30,
         "sortDepth": 1.75
@@ -14046,7 +14034,7 @@ const BATTLE_MAPS = [
         "id": "tile_cvs_counter_extension",
         "c": 4,
         "r": 21,
-        "layer": "overlay",
+        "layer": "object6",
         "ox": 30,
         "oy": 30,
         "sortDepth": 0.75
@@ -14055,7 +14043,7 @@ const BATTLE_MAPS = [
         "id": "tile_field_base",
         "c": 0,
         "r": 23,
-        "layer": "top",
+        "layer": "object6",
         "ox": 10,
         "baseHp": 2000,
         "baseDepth": 4,
@@ -14195,7 +14183,7 @@ const BATTLE_MAPS = [
         "id": "tile_field_camp_bed",
         "c": 5,
         "r": 28,
-        "layer": "object5",
+        "layer": "object6",
         "ox": 20,
         "sortDepth": 1.5,
         "oy": 30
@@ -14204,7 +14192,7 @@ const BATTLE_MAPS = [
         "id": "tile_field_camp_bed",
         "c": 7,
         "r": 28,
-        "layer": "object5",
+        "layer": "object6",
         "ox": 20,
         "sortDepth": 1.5,
         "oy": 30
@@ -15594,6 +15582,27 @@ const BATTLE_MAPS = [
         "c": 57,
         "r": 30,
         "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 11,
+        "r": 26,
+        "layer": "object7",
+        "ox": 20
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 36,
+        "r": 11,
+        "layer": "ground2",
+        "ox": 20
+      },
+      {
+        "id": "tile_mvoa0cqd",
+        "c": 36,
+        "r": 9,
+        "layer": "floor",
+        "ox": 20
       }
     ],
     "solid": [
@@ -15975,6 +15984,14 @@ const BATTLE_MAPS = [
       {
         "id": "ground4",
         "name": "池核地板"
+      },
+      {
+        "id": "object6",
+        "name": "基地和商店"
+      },
+      {
+        "id": "object7",
+        "name": "柱子、牆壁"
       },
       {
         "id": "floor",
