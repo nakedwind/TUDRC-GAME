@@ -2402,6 +2402,14 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-money { position: absolute; top: calc(100% + 8px + var(--ws-act-y, 0px));   /* 跟著按鈕本身的上下位移（外觀 → 升級／開發按鈕） */ left: 0; right: 0; width: fit-content; margin: 0 auto; box-sizing: border-box; display: flex; align-items: center; justify-content: center;
   padding: 3px 12px; border: 1px solid rgba(233,189,98,.45); border-radius: 999px; background: transparent; color: #e9c77e; font: 700 12px/1.4 Consolas, "Microsoft JhengHei", sans-serif; white-space: nowrap; pointer-events: none; }
 .ws-money.short { border-color: rgba(255,120,110,.5); color: #ff9d8f; }   /* 經費不夠：變紅 */
+/* 開發／升級按鈕：左邊大字「開發／升級」，右邊兩行＝經費、異質碎片（同一個字體、顏色；js/workshop-config.js 的 workshopPriceBtn） */
+.ws-btn.ws-btn-price { display: inline-flex; align-items: center; justify-content: center; gap: 12px; }   /* gap：左邊「開發／升級」和右邊花費中間的空隙 */
+.ws-btn-price .ws-btn-label { font-size: 20px; line-height: 1.2; letter-spacing: .08em; }
+.ws-btn-price .ws-btn-cost { display: flex; flex-direction: column; align-items: flex-start; gap: 0; line-height: 1.1; }
+.ws-btn-price .ws-btn-cost b { display: flex; align-items: center; gap: 2px; margin-left: 0; font: 700 18px Consolas, "Microsoft JhengHei", sans-serif; color: #3b2304; }
+.ws-btn-price .ws-cost-sym { flex: none; display: flex; align-items: center; justify-content: center; width: 13px; font-style: normal; }   /* 「$」和碎片圖的符號格：一樣寬、置中，上下兩行才會對齊 */
+.ws-btn-price .ws-cost-sym .ws-shard { margin: -10px -7.2px -10px -7.8px; }   /* 碎片圖照一般大小（28px）；水晶本體不在圖的正中間，用左右不一樣的負邊距把水晶放到符號格中間 */   /* 碎片圖左邊有光暈：往左一點，讓數字跟上面的經費對齊比較好看 */
+.ws-btn-price .ws-btn-money.short { color: #b3261e; }   /* 經費不夠：變紅 */
 /* 說明欄五塊每件各自的字級（開發工坊編輯器每件的「下方說明欄的版面」；--wsp-font，有調才套用）。位移、寬高直接寫在那一塊上（js/workshop-config.js 的 workshopInfoPartAttr） */
 .ws-info h3[style*="--wsp-font"], .ws-info .bag-desc[style*="--wsp-font"], .ws-info [data-wsp][style*="--wsp-font"] .bag-tag,
 .ws-info [data-wsp][style*="--wsp-font"] .bag-gear-stat b { font-size: var(--wsp-font); }

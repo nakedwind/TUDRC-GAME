@@ -155,6 +155,16 @@ function workshopInfoPartAttr(key, part, cfg) {
 }
 // 按鈕本身的寬、高、字級：直接寫在每一顆 <button class="ws-btn"> 上（最優先，不會被外觀設定蓋掉）
 //   btnHtml＝已經組好的按鈕 HTML；回傳加上 style 的版本
+// 開發／升級按鈕：左邊「開發／升級」，右邊兩行＝經費（$900）、異質碎片（碎片圖＋60），兩行同一個樣式（css/style.css 的 .ws-btn-price）
+// btnHtml：原本的按鈕（文字＋碎片價錢）；money＝經費（0＝不用錢就只顯示碎片）；short＝錢不夠（經費變紅）。沒有價錢的按鈕（已達最高等級…）照舊
+function workshopPriceBtn(btnHtml, money, short) {
+  const m = String(btnHtml).match(/^(<button[^>]*class="ws-btn)("[^>]*>)([\s\S]*?)\s*(<b>[\s\S]*<\/b>)<\/button>$/);
+  if (!m) return btnHtml;
+  // 「$」和碎片圖各放在一樣寬的符號格（.ws-cost-sym）裡置中：上下兩行的符號對齊、後面的數字也對齊
+  const cash = money > 0 ? '<b class="ws-btn-money' + (short ? ' short' : '') + '"><i class="ws-cost-sym">$</i>' + money + '</b>' : '';   // 數字不加千分位逗號
+  const shards = m[4].replace(/<i class="ws-shard"[^>]*><\/i>/, '<i class="ws-cost-sym">$&</i>');
+  return m[1] + ' ws-btn-price' + m[2] + '<span class="ws-btn-label">' + m[3] + '</span><span class="ws-btn-cost">' + cash + shards + '</span></button>';
+}
 function workshopInfoBtnStyle(key, btnHtml, cfg) {
   const o = workshopInfoPartsOf(key, cfg).btn || {}, n = v => Number.isFinite(v) && v > 0 ? v : 0, s = [];
   if (n(o.w)) s.push('width:' + o.w + 'px', 'min-width:0', 'max-width:none');

@@ -661,14 +661,14 @@ function previewInfo(key) {
     stats = '<div class="bag-gear-stat where"><small>' + L('stats', 'where', '取得方式') + '</small><b>' + wsColor(esc(v.where || '只能在戰鬥區域取得')) + '</b></div>';
     btn = '<button type="button" class="ws-btn" disabled>尚未取得</button>';
   }
-  // 經費框（跟遊戲一樣：能開發／升級的時候才有）
+  // 經費（跟遊戲一樣：能開發／升級的時候才有，寫在按鈕裡碎片的上面，js/workshop-config.js 的 workshopPriceBtn）
   const mi = lv ? (lv < maxLv ? (w ? lv - 1 : lv) : -1) : isField(key, def) ? -1 : 0;
-  const money = mi < 0 ? '' : workshopMoneyHtml(key, workshopMoney(key, mi, effCost(key, mi), cfg), '', false, cfg);
+  const cash = mi < 0 ? 0 : workshopMoney(key, mi, effCost(key, mi), cfg);
   const about = v.ownedDesc || v.desc || '';   // 說明只有一段（跟遊戲一樣）
   const io = workshopInfoImgVars(iconOffOf(key, 'ix'), iconOffOf(key, 'iy'), iconOffOf(key, 'is'));   // 這件自己的圖片位移、大小（編輯中的值）
   const part = p => workshopInfoPartAttr(key, p, cfg);   // 五塊每件各自的位置、大小、字級（編輯中的值）
   return '<div class="bag-detail-image"' + (io ? ' style="' + io + '"' : '') + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + esc(v.name) + '</h3><div class="bag-tags"' + part('tag') + '>' + tags + '</div></div>' +
-    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + workshopInfoBtnStyle(key, btn, cfg) + money + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
+    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + workshopPriceBtn(workshopInfoBtnStyle(key, btn, cfg), cash, false) + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
 }
 // 子彈、彈匣的說明欄（跟遊戲一樣：js/equipment.js 的 renderWorkshop＋js/magazine.js）
 function ammoPreviewInfo(key) {
@@ -690,13 +690,13 @@ function ammoPreviewInfo(key) {
     btn = owned ? '<button type="button" class="ws-btn" disabled>已開發</button>' : '<button type="button" class="ws-btn">' + L('btn', 'dev', '開發') + ' ' + cost(ammoVal(key, 'cost')) + '</button>';
   }
   const about = v.ownedDesc || '';
-  // 經費框：彈匣還能升級／子彈還沒開發的時候才有
-  const money = isMag(key) ? (lv < ammoVal(key, 'slots').length ? workshopMoneyHtml(key, workshopMoney(key, lv - 1, ammoVal(key, 'cost')[lv - 1], cfg), '', false, cfg) : '')
-    : owned ? '' : workshopMoneyHtml(key, workshopMoney(key, 0, ammoVal(key, 'cost'), cfg), '', false, cfg);
+  // 經費：彈匣還能升級／子彈還沒開發的時候才有（寫在按鈕裡碎片的上面）
+  const cash = isMag(key) ? (lv < ammoVal(key, 'slots').length ? workshopMoney(key, lv - 1, ammoVal(key, 'cost')[lv - 1], cfg) : 0)
+    : owned ? 0 : workshopMoney(key, 0, ammoVal(key, 'cost'), cfg);
   const part = p => workshopInfoPartAttr(key, p, cfg);   // 五塊每件各自的位置、大小、字級（編輯中的值）
   const io = workshopInfoImgVars(iconOffOf(key, 'ix'), iconOffOf(key, 'iy'), iconOffOf(key, 'is'));   // 這件自己的說明欄圖片位移、大小
   return '<div class="bag-detail-image"' + (io ? ' style="' + io + '"' : '') + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + esc(v.name) + '</h3><div class="bag-tags"' + part('tag') + '>' + tag + '</div></div>' +
-    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + workshopInfoBtnStyle(key, btn, cfg) + money + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
+    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + workshopPriceBtn(workshopInfoBtnStyle(key, btn, cfg), cash, false) + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
 }
 // 拖曳調整過順序（cfg.order 有這一區）才顯示「恢復原本順序」
 const orderCustom = kind => Array.isArray(cfg.order[kind]);
