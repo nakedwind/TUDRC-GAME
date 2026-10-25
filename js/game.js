@@ -1509,6 +1509,7 @@ function pickSentryTarget(t, R) {
 const SOOTHE_AURA_CD = 3;   // 嚮導被動疏導的冷卻秒數
 const SOOTHE_CHANNEL = 1;  // 嚮導疏導時站定、閉眼施法的秒數（期間不走動、不攻擊）
 const ACID_TICK = 1;   // 阿瓦倫腐蝕池：每隔幾秒扣一次血（每次扣「每秒傷害 × 間隔」）
+const ACID_ALLY_DPS = 10;   // 阿瓦倫腐蝕池對溫特、隊友的每秒傷害（固定，不跟著阿瓦倫的攻擊力變；怪物照樣吃「攻擊力的一半」）
 // 大招：平時普攻，冷卻好時放一次（傷害高、範圍大、特效大）；喊的話在 data/dialogues.js 的 ultimate
 const ULTIMATES = {
   theonie: { cd: 8,  dmgMul: 2.6, splash: 2.2, scale: 1.9 },
@@ -2153,7 +2154,7 @@ function update(dt) {
     const acidDps = o => {   // 站在哪幾灘裡 → 取最痛的那一灘的每秒傷害；不在任何一灘裡回傳 0（異質核心腳下的腐蝕不傷異質體）
       let best = 0;
       const isEnemy = G.enemies.includes(o);
-      for (const pool of G.acidPools) if (pool.t > 0 && !(isEnemy && pool.noEnemy) && Math.hypot(o.x - pool.x, o.y - pool.y) <= pool.r) best = Math.max(best, pool.dps);
+      for (const pool of G.acidPools) if (pool.t > 0 && !(isEnemy && pool.noEnemy) && Math.hypot(o.x - pool.x, o.y - pool.y) <= pool.r) best = Math.max(best, !isEnemy && pool.allyDps != null ? pool.allyDps : pool.dps);   // 我方踩到：用比較低的固定傷害
       return best;
     };
     // 回傳這一刻要扣多少血（0＝還沒到時間或不在池子裡）；剛踩進去要等 1 秒才第一次扣

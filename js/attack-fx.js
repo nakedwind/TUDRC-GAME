@@ -385,7 +385,7 @@ function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
   // 地上腐蝕痕跡（存活 5 秒，範圍內怪物持續扣血）
   const blobs = [];
   for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * R * 0.5, dy: (Math.random() * 2 - 1) * R * 0.35, rr: R * (0.55 + Math.random() * 0.5) });
-  const pool = { x, y, r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), blobs, fizz: 0 };
+  const pool = { x, y, r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), allyDps: typeof ACID_ALLY_DPS !== 'undefined' ? ACID_ALLY_DPS : 10, blobs, fizz: 0 };   // dps＝怪物踩到；allyDps＝溫特、隊友踩到（js/game.js 的 ACID_ALLY_DPS）
   (G.acidPools = G.acidPools || []).push(pool);
   addScorchMark(x, y, R, pool);   // 地上焦黑燒痕
   for (let i = 0; i < Math.round(4 * scale); i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * R * .5, y + (Math.random() * 2 - 1) * R * .25, true);
