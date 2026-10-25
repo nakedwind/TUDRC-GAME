@@ -704,7 +704,6 @@ const BASE_MAPS = [
       "overlay": {},
       "top": {},
       "object2": {
-        "36,9": "tile_new_decor_box_large",
         "63,8": "tile_new_bg_wall_front_edge",
         "63,9": "tile_new_bg_wall_front_edge",
         "63,10": "tile_new_bg_wall_front_edge",
@@ -825,19 +824,19 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_table",
-        "c": 33,
-        "r": 5,
+        "c": 32,
+        "r": 4,
         "layer": "object",
-        "ox": 0,
-        "oy": 18
+        "ox": 10,
+        "oy": 38
       },
       {
         "id": "tile_new_decor_table",
-        "c": 33,
-        "r": 7,
+        "c": 32,
+        "r": 6,
         "layer": "object",
-        "ox": 0,
-        "oy": 10
+        "ox": 10,
+        "oy": 30
       },
       {
         "id": "tile_new_bg_window",
@@ -983,29 +982,28 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_chair_side",
-        "c": 35,
+        "c": 34,
         "r": 5,
         "layer": "object",
-        "ox": 0,
-        "oy": 22
+        "ox": 10,
+        "oy": 2
       },
       {
         "id": "tile_new_decor_chair_side",
-        "c": 32,
-        "r": 7,
+        "c": 31,
+        "r": 6,
         "layer": "object",
         "fx": true,
-        "ox": 0,
-        "oy": 6
+        "ox": 10,
+        "oy": 26
       },
       {
         "id": "tile_new_decor_chair_side",
-        "c": 32,
+        "c": 31,
         "r": 5,
         "layer": "object",
         "fx": true,
-        "ox": 0,
-        "oy": 20
+        "ox": 10
       },
       {
         "id": "tile_new_decor_poster",
@@ -1080,18 +1078,18 @@ const BASE_MAPS = [
       {
         "id": "tile_new_decor_box_medium",
         "c": 36,
-        "r": 10,
+        "r": 9,
         "layer": "object2",
         "ox": 4,
-        "oy": -12
+        "oy": 38
       },
       {
         "id": "tile_new_decor_box_small_diagonal",
-        "c": 35,
-        "r": 9,
-        "layer": "object2",
-        "ox": 42,
-        "oy": -14
+        "c": 36,
+        "r": 8,
+        "layer": "object3",
+        "ox": 2,
+        "oy": 36
       },
       {
         "id": "tile_new_decor_box_three",
@@ -1103,11 +1101,10 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_coffee_cup",
-        "c": 34,
+        "c": 33,
         "r": 5,
         "layer": "object3",
-        "ox": -2,
-        "oy": 20
+        "ox": 8
       },
       {
         "id": "tile_new_bg_wall_front_edge",
@@ -1209,11 +1206,12 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_chair_side",
-        "c": 35,
-        "r": 7,
+        "c": 34,
+        "r": 6,
         "layer": "object",
-        "ox": 0,
-        "oy": 6
+        "ox": 10,
+        "oy": 26,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_new_decor_exit_sign",
@@ -2341,6 +2339,13 @@ const BASE_MAPS = [
         "layer": "object3",
         "oy": 18,
         "ox": 0
+      },
+      {
+        "id": "tile_new_decor_box_large",
+        "c": 36,
+        "r": 9,
+        "layer": "object2",
+        "oy": 10
       }
     ],
     "solid": [
@@ -2383,12 +2388,7 @@ const BASE_MAPS = [
       "47,10",
       "48,10",
       "37,10",
-      "33,8",
-      "34,8",
-      "33,6",
-      "34,6",
       "27,9",
-      "36,9",
       "36,10",
       "49,10",
       "50,10",
@@ -2602,7 +2602,21 @@ const BASE_MAPS = [
       "28,14",
       "24,14",
       "24,16",
-      "25,16"
+      "25,16",
+      "28,9",
+      "28,10",
+      "36,9",
+      "32,7",
+      "33,7",
+      "34,7",
+      "34,6",
+      "33,6",
+      "32,6",
+      "33,8",
+      "32,8",
+      "32,5",
+      "33,5",
+      "34,5"
     ],
     "breakable": [],
     "camp": [
@@ -2736,6 +2750,34 @@ const BASE_MAPS = [
       "24,16": [
         0,
         -16
+      ],
+      "28,9": [
+        -21,
+        0
+      ],
+      "28,10": [
+        -20,
+        0
+      ],
+      "33,8": [
+        0,
+        -18
+      ],
+      "32,8": [
+        0,
+        -18
+      ],
+      "32,5": [
+        0,
+        7
+      ],
+      "33,5": [
+        0,
+        7
+      ],
+      "34,5": [
+        0,
+        7
       ]
     },
     "coreSpots": [],
