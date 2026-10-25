@@ -12626,13 +12626,13 @@ const BATTLE_MAPS = [
         "23,18": "tile_poolcore_floor_pale",
         "23,17": "tile_poolcore_floor_pale",
         "23,16": "tile_poolcore_floor_pale",
-        "13,28": "tile_mv1cfh6l",
-        "13,27": "tile_poolcore_floor_pale",
-        "13,26": "tile_poolcore_floor_pale",
-        "13,25": "tile_poolcore_floor_pale",
-        "13,24": "tile_poolcore_floor_pale",
-        "13,23": "tile_poolcore_floor_pale",
-        "13,22": "tile_poolcore_floor_pale"
+        "14,28": "tile_mv1cfh6l",
+        "14,27": "tile_poolcore_floor_pale",
+        "14,26": "tile_poolcore_floor_pale",
+        "14,25": "tile_poolcore_floor_pale",
+        "14,24": "tile_poolcore_floor_pale",
+        "14,23": "tile_poolcore_floor_pale",
+        "14,22": "tile_poolcore_floor_pale"
       },
       "ground2": {},
       "ground3": {},
@@ -13131,7 +13131,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_wide",
-        "c": 14,
+        "c": 15,
         "r": 20,
         "layer": "ground",
         "sortDepth": 0.5
@@ -13166,13 +13166,13 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_edge",
-        "c": 14,
+        "c": 15,
         "r": 23,
         "layer": "ground"
       },
       {
         "id": "tile_poolcore_wall_edge",
-        "c": 14,
+        "c": 15,
         "r": 24,
         "layer": "ground"
       },
@@ -13298,19 +13298,19 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_edge",
-        "c": 14,
+        "c": 15,
         "r": 26,
         "layer": "ground"
       },
       {
         "id": "tile_poolcore_wall_edge",
-        "c": 14,
+        "c": 15,
         "r": 27,
         "layer": "ground"
       },
       {
         "id": "tile_poolcore_wall_edge",
-        "c": 14,
+        "c": 15,
         "r": 25,
         "layer": "ground"
       },
@@ -13803,7 +13803,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mv1cftaj",
-        "c": 14,
+        "c": 15,
         "r": 28,
         "layer": "ground"
       },
@@ -13885,14 +13885,14 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_corner",
-        "c": 13,
+        "c": 14,
         "r": 20,
         "layer": "ground",
         "oy": 12
       },
       {
         "id": "tile_poolcore_floor_pale",
-        "c": 13,
+        "c": 14,
         "r": 21,
         "layer": "ground"
       },
@@ -15601,6 +15601,85 @@ const BATTLE_MAPS = [
         "r": 9,
         "layer": "floor",
         "ox": 20
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 15,
+        "r": 29,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 16,
+        "r": 29,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvobzfro",
+        "c": 18,
+        "r": 29,
+        "layer": "floor",
+        "oy": 30
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 13,
+        "r": 27,
+        "layer": "floor",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 20,
+        "r": 29,
+        "layer": "object7",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvocpp0c",
+        "c": 22,
+        "r": 29,
+        "layer": "object7",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_pillar",
+        "c": 19,
+        "r": 28,
+        "layer": "object7",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 24,
+        "r": 29,
+        "layer": "object7",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvoddiqi",
+        "c": 26,
+        "r": 29,
+        "layer": "object7",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvodgug9",
+        "c": 28,
+        "r": 29,
+        "layer": "object7",
+        "ox": 30,
+        "oy": 10
       }
     ],
     "solid": [
