@@ -1122,6 +1122,7 @@ function draw() {
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
+  if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
   for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
   drawPoweredLights(ctx);
   drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）

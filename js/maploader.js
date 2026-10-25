@@ -510,7 +510,39 @@ function destroyedBaseDisplayTile(s, t) {
   }
   return t;
 }
-function drawMapStampImg(ctx, s) {
+// ---- 混合模式、不透明度、發光（地圖編輯器／基地編輯器選物件時設定，存在這個 stamp 上；素材本身不動）----
+//   s.blend＝混合模式（canvas 的 globalCompositeOperation：overlay 覆蓋、multiply 色彩增值、soft-light 柔光、screen 濾色、lighter 相加…）
+//   s.alpha＝不透明度 0～100（沒寫＝100）
+//   s.glow＝會發光：黑幕畫完之後才畫（暗處也看得到），同時當成光源照亮周圍（s.glowR＝照亮半徑 px，沒寫＝160；光一樣會被牆擋住）
+const MAP_GLOW_R = 160;
+function drawMapStampImg(ctx, s, glowPass = false) {
+  if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
+  const alpha = Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1;
+  if (!s.blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
+  ctx.save();
+  if (s.blend) ctx.globalCompositeOperation = s.blend;
+  ctx.globalAlpha *= alpha;
+  drawMapStampRaw(ctx, s);
+  ctx.restore();
+}
+// 會發光的物件：render.js 在蓋上黑幕之後呼叫，所以在黑暗裡也亮著（畫在角色上面）
+function drawMapGlow(ctx) {
+  if (!MAP) return;
+  for (const s of MAP.stamps || []) if (s.glow && stampInDrawRect(s) && !(G.mapDestroyed && G.mapDestroyed.has(s))) drawMapStampImg(ctx, s, true);
+}
+// 會發光的物件當光源（js/lighting.js 的 getLights 呼叫）：光從圖片中心往外照
+function mapGlowLights() {
+  if (!MAP) return [];
+  const out = [];
+  for (const s of MAP.stamps || []) {
+    if (!s.glow) continue;
+    const t = mapTileById(s.id) || {};
+    out.push({ x: OX + s.c * CELL + (s.ox || 0) + mapStampW(s, t) * CELL / 2, y: OY + s.r * CELL + (s.oy || 0) + mapStampH(s, t) * CELL / 2,
+      r: s.glowR > 0 ? s.glowR : MAP_GLOW_R });
+  }
+  return out;
+}
+function drawMapStampRaw(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
   if (typeof ballBedHidden === 'function' && ballBedHidden(s)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）

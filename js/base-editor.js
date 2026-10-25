@@ -854,8 +854,18 @@ function drawImageFlipped(img, x, y, w, h, fx, fy, rot = 0, keepRatio = false) {
   else ctx.drawImage(img, -iw / 2, -ih / 2, iw, ih);
   ctx.restore();
 }
-// 畫多格大圖
+// 畫多格大圖：混合模式、不透明度（選物件時設定，存在 stamp 上；遊戲照一樣的方式畫，見 js/maploader.js 的 drawMapStampImg）
 function drawStamp(s) {
+  const alpha = Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1;
+  if (!s.blend && alpha === 1) drawStampRaw(s);
+  else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
+  if (s.glow) {   // 發光：畫一圈淡淡的虛線，標出照亮的範圍（只在編輯器裡看得到）
+    const t = tileById(s.id) || {}, cx = OX + s.c * CELL + (s.ox || 0) + stampW(s, t) * CELL / 2, cy = OY + s.r * CELL + (s.oy || 0) + stampH(s, t) * CELL / 2;
+    ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = 'rgba(255,214,102,.55)'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(cx, cy, s.glowR > 0 ? s.glowR : 160, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
+  }
+}
+function drawStampRaw(s) {
   const t = tileById(s.id); if (!t) return;
   const drawW = stampW(s, t) * CELL, drawH = stampH(s, t) * CELL;
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
@@ -1938,6 +1948,57 @@ document.getElementById('selDoorMode').addEventListener('change', e => {
   saveMaps(); draw(); refreshDoorControl();
   setStatus('已設為「' + DOOR_MODES[e.target.value] + '」', '#7ee0c0');
 });
+// ---- 混合模式、不透明度、發光：選一個物件時設定（存在這個 stamp 上，素材本身不動；遊戲的畫法見 js/maploader.js）----
+// 小圖（格子）設了之後會變成大圖（stamp），位置、圖片都不變
+const BLEND_MODES = [['', '一般'], ['overlay', '覆蓋'], ['multiply', '色彩增值'], ['soft-light', '柔光'], ['screen', '濾色'],
+  ['lighter', '相加（發光）'], ['color-dodge', '加亮顏色'], ['hard-light', '實光'], ['lighten', '變亮'], ['darken', '變暗'], ['color-burn', '加深顏色'],
+  ['difference', '差異化'], ['hue', '色相'], ['saturation', '飽和度'], ['color', '顏色'], ['luminosity', '明度']];
+function selectedBlendTarget() {   // 只選一個物件時：{ s（大圖）或 sel（小圖）, id }
+  if (selections.length !== 1) return null;
+  const sel = selections[0], m = curMap();
+  const s = sel.type === 'stamp' ? m.stamps[sel.index] : null, id = s ? s.id : m.layers[sel.layer]?.[sel.key];
+  return id ? { sel, s, id } : null;
+}
+function refreshBlendControl() {
+  let box = document.getElementById('blendControl');
+  if (!box) {
+    box = document.createElement('div'); box.id = 'blendControl'; box.className = 'blend-control';
+    box.innerHTML = '<label>混合模式 <select id="blendMode">' + BLEND_MODES.map(([v, n]) => '<option value="' + v + '">' + n + '</option>').join('') + '</select></label>' +
+      '<label>不透明度 <input type="number" id="blendAlpha" min="0" max="100" step="5" style="width:56px"> %</label>' +
+      '<label title="黑幕畫完才畫這個物件（暗處也看得到），並且當成光源照亮周圍（光會被牆擋住）"><input type="checkbox" id="blendGlow"> 發光（照亮黑暗）</label>' +
+      '<label id="blendGlowRBox">照亮半徑 <input type="number" id="blendGlowR" min="20" max="800" step="10" style="width:60px"> px</label>';
+    document.getElementById('selControls').appendChild(box);
+    const apply = () => {
+      const picked = selectedBlendTarget(); if (!picked) return;
+      if (dropLockedSelections('設定混合模式')) return;
+      pushUndo(); let s = picked.s;
+      if (!s) {   // 小圖：變成大圖才能存設定（位置不變）
+        const [c, r] = picked.sel.key.split(',').map(Number);
+        s = { id: picked.id, c, r, layer: picked.sel.layer };
+        delete curMap().layers[picked.sel.layer][picked.sel.key]; curMap().stamps.push(s);
+        selections = [{ type: 'stamp', index: curMap().stamps.length - 1 }]; selection = selections[0];
+      }
+      const mode = document.getElementById('blendMode').value, a = Math.round(Number(document.getElementById('blendAlpha').value));
+      if (mode) s.blend = mode; else delete s.blend;
+      if (Number.isFinite(a) && a >= 0 && a < 100) s.alpha = a; else delete s.alpha;
+      if (document.getElementById('blendGlow').checked) {
+        s.glow = true; const gr = Math.round(Number(document.getElementById('blendGlowR').value));
+        if (Number.isFinite(gr) && gr > 0 && gr !== 160) s.glowR = gr; else delete s.glowR;
+      } else { delete s.glow; delete s.glowR; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus('已設定：' + (BLEND_MODES.find(b => b[0] === (s.blend || '')) || [, '一般'])[1] + '、不透明度 ' + (s.alpha ?? 100) + '%' + (s.glow ? '、發光（半徑 ' + (s.glowR || 160) + 'px）' : ''), '#7ee0c0');
+    };
+    box.querySelectorAll('select, input').forEach(el => el.addEventListener('change', apply));
+  }
+  const picked = selectedBlendTarget(); box.classList.toggle('hidden', !picked);
+  if (!picked) return;
+  const s = picked.s || {};
+  document.getElementById('blendMode').value = s.blend || '';
+  document.getElementById('blendAlpha').value = Number.isFinite(s.alpha) ? s.alpha : 100;
+  document.getElementById('blendGlow').checked = !!s.glow;
+  document.getElementById('blendGlowR').value = s.glowR > 0 ? s.glowR : 160;
+  document.getElementById('blendGlowRBox').classList.toggle('hidden', !s.glow);
+}
 // 置物櫃內容跟著擺放的物件保存，避免同素材的所有櫃子共用獎勵。
 function selectedLocker() {
   if (selections.length !== 1) return null;
@@ -2089,6 +2150,7 @@ function refreshSelPanel() {
   refreshLockerControl();
   refreshCircuitControl();
   refreshLockTextControl();
+  refreshBlendControl();   // 混合模式、不透明度、發光
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;

@@ -230,6 +230,7 @@ function getLights() {
   if (typeof flareLightSources === 'function') L.push(...flareLightSources());   // 燃燒中的照明彈（js/flare.js）
   if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());
   if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
+  if (typeof mapGlowLights === 'function') L.push(...mapGlowLights());   // 地圖上設成「發光」的物件（地圖編輯器／基地編輯器；js/maploader.js）
   return L;
 }
 function isLit(x, y) {
