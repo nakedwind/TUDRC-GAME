@@ -30,7 +30,7 @@ function bedHeadPoint(a) {
 function ballHeadPoint(npc) {
   const b = npc.ballSleep.bed, img = ballPoseImgs.sleep;
   const h = img && img.naturalWidth ? b.w * img.naturalHeight / img.naturalWidth : b.h;
-  return { x: b.x0 + b.w * (b.fx ? .88 : .12), y: b.y0 + b.h - h + h * .35, dir: b.fx ? 1 : -1 };
+  return { x: b.x0 + b.w * (b.fx ? .88 : .12) - 10, y: b.y0 + b.h - h + h * .35, dir: b.fx ? 1 : -1 };
 }
 function drawZzzAt(ctx, x, y, now, dir = 1) {   // dir：往右（1）或往左（-1）飄
   const still = bedZzzStill && bedZzzStill.matches;

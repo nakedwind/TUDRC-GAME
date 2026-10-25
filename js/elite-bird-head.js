@@ -43,6 +43,7 @@ const ELITE_BIRD = {
   dazed: 2.6,                    // 撞牆的暈眩（秒）＝輸出時間
   coreShield: .6,                // 牠活著時，核心少受幾成傷害
   returnSpeedMul: 1.1,           // 走回原位的速度倍率
+  returnDashFrom: 1,           // 離原位超過幾格：用衝刺的速度（chargeSpeed）跑回去，到這個距離內才改用走的
   stepEvery: 60,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
   stepShake: 10, walkShake: 5,   // 衝撞、走路時每一步的畫面震動（貼身時的最大值；溫特在 shakeRange 格內才震，越近越大）
   shakeRange: 20,
@@ -410,9 +411,12 @@ function stepEliteBird(e, dt) {
         if (target && eliteDist(target, e) <= E.chargeRange * CELL) { eliteBirdAim(e, target); return; }
       }
       if (awayHome <= 3) { e.x = e.home.x; e.y = e.home.y; eliteBirdSet(e, 'guard'); return; }
+      // 離家太遠：用衝刺的速度、衝刺的步伐跑回去（不撞人，只是趕路）；接近原位再改用走的
+      const dash = awayHome > E.returnDashFrom * CELL;
+      e.ch.state = dash ? 'charge' : 'notice';
       const [hc, hr] = cellAt(e.home.x, e.home.y), hx = e.x, hy = e.y;
-      const nav = enemyNavigate(e, hc, hr, dt * E.returnSpeedMul, 'elite-home', true);
-      eliteBirdFootsteps(e, Math.hypot(e.x - hx, e.y - hy), false);
+      const nav = enemyNavigate(e, hc, hr, dt * (dash ? E.chargeSpeed / (e.speed || 1) : E.returnSpeedMul), 'elite-home', true);
+      eliteBirdFootsteps(e, Math.hypot(e.x - hx, e.y - hy), dash);
       if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
       else if (nav.reached && awayHome <= CELL) eliteBirdSet(e, 'guard');
       return;

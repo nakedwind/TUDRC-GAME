@@ -3,7 +3,8 @@
 //  ・箱子是地圖上放的「物資箱」物件（地圖編輯器的素材 tile_field_supply_box）；同一張地圖放幾個都共用同一份物資。第一次在這張地圖出任務時補滿 start 的數量，
 //    之後就一直維持（用掉就少了，中止任務再回來也不會補），要溫特自己放東西進去。
 //  ・嚮導身上最多帶 carry 個急救包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血（隊友和自己）花急救包。
-//    其中一樣用完就自己走回物資箱拿（地上有溫特放的就先撿地上的，js/ground-items.js）；箱子裡也沒有的話，頭上冒思考泡泡顯示缺什麼。
+//    其中一樣用完就自己走回物資箱拿；沒用完但沒帶滿，手上沒事時也會回去補滿（地上有溫特放的就先撿地上的，js/ground-items.js）；
+//    箱子裡也沒有的話，頭上冒思考泡泡顯示缺什麼。
 //  ・存檔：localStorage（CAMP_SUPPLY_KEY），依地圖分開存；開始新遊戲會清掉（js/new-game.js）。
 // ============================================================
 const CAMP_SUPPLY = {
@@ -11,7 +12,7 @@ const CAMP_SUPPLY = {
   items: ['medkit', 'almond-water', 'firstaid'],             // 能放什麼
   start: { medkit: 7, 'almond-water': 6, firstaid: 7 },      // 第一次出任務時箱子裡有多少
   guideItems: ['firstaid', 'almond-water'],                   // 嚮導身上帶的（醫療包是給溫特自己用的）
-  carry: 3,                                    // 嚮導每樣最多帶幾個
+  carry: 5,                                    // 嚮導每樣最多帶幾個
   minTaint: 30,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
   minHeal: 30,                                 // 隊員少多少血，嚮導才會花一個急救包補血
   sootheMul: 2,                                // 疏導量倍率（原本：艾德林一次清 15）
@@ -61,7 +62,7 @@ function campSupplySpot() { return supplyBoxSpots()[0] || null; }
 function guideKit(t) {
   if (!t.kit) {   // 這次出勤剛開始：從箱子拿（人就在營地）
     t.kit = { firstaid: 0, 'almond-water': 0 };
-    if (!MAP_SAFE && campSupplySpot() && !window.TEST_MODE) refillGuideKit(t, true);   // 🧪 測試模式：空手出勤（方便測球球叼急救包、杏仁水給嚮導，js/ground-items.js）
+    if (!MAP_SAFE && campSupplySpot()) refillGuideKit(t, true);
   }
   return t.kit;
 }
@@ -81,19 +82,29 @@ const guideCanHeal = t => !MAP_SAFE ? (guideKit(t).firstaid || 0) > 0 : true;
 function guideUse(t, k) { if (MAP_SAFE) return; const kit = guideKit(t); kit[k] = Math.max(0, (kit[k] || 0) - 1); }
 // 缺什麼（身上用完的）
 const guideMissing = t => CAMP_SUPPLY.guideItems.filter(k => (guideKit(t)[k] || 0) <= 0);
+// 沒帶滿的（還有，但不到 carry 個）
+const guideShort = t => CAMP_SUPPLY.guideItems.filter(k => (guideKit(t)[k] || 0) < CAMP_SUPPLY.carry);
+// 手上沒事：沒有隊員需要疏導或補血（門檻跟 js/sentry.js 的照顧對象一樣）
+const guideIdle = t => !G.towers.some(o => o !== t && o.hp > 0 && !TYPES[o.type].guide &&
+  (o.berserk || (o.taint || 0) >= CAMP_SUPPLY.minTaint || o.maxhp - o.hp >= CAMP_SUPPLY.minHeal));
+// 現在要去補的：用完的馬上補；都還有的話，沒帶滿的在手上沒事時（或已經在去拿的路上）補滿
+// 地上的（js/ground-items.js）和物資箱都看這個，地上有就先撿地上的
+function guideWants(t) {
+  const missing = guideMissing(t);
+  return missing.length ? missing : (t.supplyTrip || t.groundTrip || guideIdle(t)) ? guideShort(t) : [];
+}
 
 // ---- 嚮導自己回箱子拿（js/sentry.js 呼叫；回傳 true＝這一幀在走去拿，不做別的）----
 function guideSupplyStep(t, dt) {
   if (MAP_SAFE || t.berserk || t.hp <= 0 || t.mode === 'goto') { t.supplyTrip = null; return false; }
   if (typeof guideGroundStep === 'function' && guideGroundStep(t, dt)) { t.supplyTrip = null; return true; }   // 地上有溫特放的急救包、杏仁水：先去撿（js/ground-items.js）
-  if (window.TEST_MODE) { t.supplyTrip = null; return false; }   // 🧪 測試模式：不回物資箱拿，只靠地上的、球球叼來的
-  const missing = guideMissing(t), box = campBox();
-  const canGet = missing.filter(k => (box[k] || 0) > 0);
+  const box = campBox(), canGet = guideWants(t).filter(k => (box[k] || 0) > 0);
   if (!canGet.length) { t.supplyTrip = null; return false; }
   const spot = campSupplySpot(); if (!spot) { t.supplyTrip = null; return false; }
   if (!t.supplyTrip) {
+    if ((t.supplyRetryT = (t.supplyRetryT || 0) - dt) > 0) return false;   // 剛剛找不到路：等一下再找（找路很花時間，不要每幀都找）
     t.supplyTrip = { goal: campSupplyStand(t, spot) };
-    if (!t.supplyTrip.goal) { t.supplyTrip = null; return false; }
+    if (!t.supplyTrip.goal) { t.supplyTrip = null; t.supplyRetryT = 1.5; return false; }
     if (typeof sentryStatus === 'function') sentryStatus(t, '回營地拿' + canGet.map(k => itemById(k).name).join('、'), '#8fd3ff');
   }
   const g = t.supplyTrip.goal, speed = (TYPES[t.type].walkSpeed || 80) * 1.3;

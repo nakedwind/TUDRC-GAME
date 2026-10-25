@@ -65,7 +65,7 @@ function giveGuideItem(t, id) {
 }
 
 // ---- 嚮導自己撿（js/camp-supply.js 的 guideSupplyStep 呼叫；回傳 true＝這一幀在走去撿）----
-// 身上沒帶滿：走過旁邊順手撿；其中一樣用完了：先走去撿地上的，不用回營地物資箱拿
+// 身上沒帶滿：走過旁邊順手撿；要補東西時（用完了、或手上沒事要補滿）：先走去撿地上的，不用回營地物資箱拿
 function guideGroundStep(t, dt) {
   const list = G.groundItems || [], kit = guideKit(t);
   const want = g => GROUND_ITEMS.kitItems.includes(g.id) && (kit[g.id] || 0) < CAMP_SUPPLY.carry;
@@ -74,10 +74,10 @@ function guideGroundStep(t, dt) {
   if (trip && (!list.includes(trip.g) || !want(trip.g))) trip = t.groundTrip = null;
   if (!trip) {
     if ((t.groundTripCd = Math.max(0, (t.groundTripCd || 0) - dt)) > 0) return false;   // 剛剛走不到：等一下再找
-    const missing = guideMissing(t);
+    const wants = guideWants(t);   // 用完的、或手上沒事時沒帶滿的（js/camp-supply.js）：地上有就先撿，不回物資箱
     let best = null, bd = Infinity;
     for (const g of list) {
-      if (!missing.includes(g.id) || !isLit(g.x, g.y)) continue;
+      if (!wants.includes(g.id) || !isLit(g.x, g.y)) continue;
       const d = Math.hypot(g.x - t.x, g.y - t.y); if (d < bd) { bd = d; best = g; }
     }
     if (!best) return false;

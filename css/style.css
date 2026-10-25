@@ -345,11 +345,15 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 }
 /* 瀕臨暴走：只有頭像閃紅，名字變橘色 */
 .field-member.danger .field-member-avatar::after,
+.field-member.hp-low .field-member-avatar::after,
 .field-member.berserk .field-member-avatar::after {   /* 頭像上的紅色疊層 */
   content: ''; position: absolute; inset: 0; pointer-events: none; background: rgba(255,30,50,0);
 }
-.field-member.danger .field-member-avatar::after { animation: avatarTaintBlink 1.1s ease-in-out infinite; animation-delay: var(--blink-sync, 0s); }
-.field-member.danger .field-member-avatar { border-color: rgba(255,90,90,.8); }
+/* HP 過低（js/team.js 的 FIELD_HP_LOW）：頭像跟瀕臨暴走一樣閃紅 */
+.field-member.danger .field-member-avatar::after,
+.field-member.hp-low .field-member-avatar::after { animation: avatarTaintBlink 1.1s ease-in-out infinite; animation-delay: var(--blink-sync, 0s); }
+.field-member.danger .field-member-avatar,
+.field-member.hp-low .field-member-avatar { border-color: rgba(255,90,90,.8); }
 .field-member.danger .field-member-status > b { color: #ffb24d; }
 /* 暴走：頭像套紅色濾鏡並快速閃紅，名字變紅色 */
 .field-member.berserk .field-member-avatar { border-color: #ff3b4a; }

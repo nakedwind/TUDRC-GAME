@@ -321,6 +321,7 @@ function openFieldCommandMenu(type, avatar) {
   if (typeof sfx === 'function') sfx('menu');
 }
 
+const FIELD_HP_LOW = 30;   // 隊員 HP 低於這個數字：左上角頭像閃紅光
 function renderFieldSquadHud() {
   if (!fieldSquadHud) return;
   const safe = (typeof MAP_SAFE !== 'undefined') && MAP_SAFE;
@@ -355,15 +356,16 @@ function renderFieldSquadHud() {
         ? '<span class="field-cd-bar" data-type="' + member.type + '"' + (cdRemain > .001 ? '' : ' hidden') + '><i style="' + barStyle + 'width:' + (cdRemain * 100).toFixed(1) + '%"></i></span>'
         : '';
       const taintCls = hp <= 0 ? '' : member.berserk ? ' berserk' : (!spec.guide && taint > 85 ? ' danger' : '');   // 整個隊員框閃紅／紅色濾鏡
+      const hpLowCls = hp > 0 && hp < FIELD_HP_LOW ? ' hp-low' : '';   // HP 過低：頭像閃紅光（css/style.css）
       // 這個面板每 0.3 秒重畫一次；用負的 animation-delay 對齊時鐘，閃爍才不會每次重畫就從頭開始
       const nowS = performance.now() / 1000;
-      const syncStyle = taintCls ? ' style="--blink-sync:-' + (nowS % 1.1).toFixed(2) + 's;--blink-sync-fast:-' + (nowS % .38).toFixed(2) + 's"' : '';
+      const syncStyle = taintCls || hpLowCls ?' style="--blink-sync:-' + (nowS % 1.1).toFixed(2) + 's;--blink-sync-fast:-' + (nowS % .38).toFixed(2) + 's"' : '';
       // 急救包選隊員（js/equipment.js）：發光（大小兩張圖交替淡入淡出）＋箭頭；滑鼠停在頭像上才看得到
       const aid = typeof firstAid !== 'undefined' ? firstAid : null;
       const aidPick = !!(aid && aid.picking);
       const aidCls = aidPick && aid.hover === member.type ? ' aid-hover' : '';
       const aidFx = aidPick ? '<span class="aid-glow" style="--aid-sync:-' + (nowS % 3.2).toFixed(2) + 's"><i class="s"></i><i class="m"></i></span><span class="aid-arrow"></span>' : '';
-      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + (lowSP ? ' sp-low' : '') + taintCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
+      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + (lowSP ? ' sp-low' : '') + taintCls + hpLowCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + stateLabel + '</b>' +
         // 嚮導顯示 SP；哨兵顯示精神負荷。
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +

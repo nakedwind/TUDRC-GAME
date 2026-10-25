@@ -530,6 +530,7 @@ window.addEventListener('keydown', e => {
     else if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (useStoragePropNearPlayer()) {}      // 鑰匙拾取與置物箱解鎖
     else if (useCampInteractionNearPlayer(true)) {}
+    else if (useAmmoRefillNearPlayer()) {}      // 靠近營地的補彈藥箱→照明彈、螢光漆彈補到 20 發（js/flare.js）
     else if (useAmmoCrateNearPlayer()) {}       // 靠近彈藥箱→打開拿裡面的東西（只能開一次）
     else if (toggleIronGateNearPlayer()) {}
     else if (typeof usePracticeDoorNearPlayer === 'function' && usePracticeDoorNearPlayer()) {}   // 訓練室的門：訓練選單（js/practice.js）

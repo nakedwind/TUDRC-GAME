@@ -2112,7 +2112,7 @@ function selectedLocker() {
   const id = s ? s.id : m.layers[sel.layer]?.[sel.key];
   const t = tileById(id);
   if (!t) return null;
-  if (id === 'tile_field_ammo_crate' || id === 'tile_field_ammo_crate_open') return { sel, s, id, ammo: true };   // 彈藥箱：不用鑰匙、只能開一次（js/flare.js）
+  if (id === 'tile_field_ammo_crate') return { sel, s, id, ammo: true };   // 彈藥箱：不用鑰匙、只能開一次（js/flare.js）；營地的補彈藥箱（打開的）只補彈藥，不能放東西
   if (!(id === 'tile_interactive_storage_locker' || /storage-locker-closed\.png$/.test(String(t.file || '')) || /置物[箱櫃].*關|置物[箱櫃]（上鎖）/.test(t.name || ''))) return null;
   return { sel, s, id };
 }

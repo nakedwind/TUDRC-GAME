@@ -23,7 +23,8 @@ function campInteractionSpots() {
 // 判定範圍＝圖片裡真正有畫東西的地方（art：圖片像素的左、上、右、下；沒寫＝整張圖），溫特腳下離它 reach 以內就算靠近。
 // 同時靠近好幾個：算最近的那一個（每個箱子的 xxxNearPlayer 只在自己是最近的那個時才回傳）。換了圖記得重量 art。
 const MAP_BOX = { reach: 30, kinds: [
-  { kind: 'ammo', match: id => AMMO_CRATE.ids.includes(id), art: { tile_field_ammo_crate_open: [0, 16, 46, 80, 80, 80] } },   // 最後兩個數字＝圖片寬高
+  { kind: 'ammo', match: id => AMMO_CRATE.ids.includes(id), art: {} },   // 能打開、開出東西的彈藥箱（js/flare.js）
+  { kind: 'refill', match: (id, t) => AMMO_REFILL.ids.includes(id) || AMMO_REFILL.file.test(String(t.file || '')), art: { tile_field_ammo_crate_open: [0, 16, 46, 80, 80, 80] } },   // 營地的補彈藥箱（js/flare.js）；最後兩個數字＝圖片寬高
   { kind: 'supply', match: id => id === CAMP_SUPPLY.box.id, art: { tile_field_supply_box: [0, 16, 46, 80, 80, 80] } },   // field-base-01～03 都一樣
   { kind: 'armor', match: (id, t) => ARMOR_CHEST.tiles.includes(id) || ARMOR_CHEST.names.includes(String(t.name || '').trim()), art: { tile_mvma4ws7: [0, 11, 76, 80, 80, 80] } },
 ] };
@@ -53,7 +54,7 @@ function mapBoxNearPlayer(kind) {
 }
 function campInteractionNearPlayer() {
   const p = G.player; if (!p || p.hp <= 0 || p.sitting || MAP_SAFE || G.over) return null;
-  const box = mapBoxNearPlayer(); if (box) return box.kind === 'supply' ? box : null;   // 站在箱子前面：箱子優先（帳篷不搶）
+  const box = mapBoxNearPlayer(); if (box) return box.kind === 'supply' ? box : null;   // 補彈藥箱、彈藥箱、裝備箱各自處理（js/flare.js、js/backpack.js）   // 站在箱子前面：箱子優先（帳篷不搶）
   let nearest = null, distance = CELL * 1.6;
   for (const spot of campInteractionSpots()) {
     const d = Math.hypot(p.x - spot.x, p.y - spot.y);
