@@ -802,11 +802,12 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
       stats = '<div class="bag-gear-stat where"><small>' + L('stats', 'where', '取得方式') + '</small><b>' + wsColor(e.where || '只能在戰鬥區域取得') + '</b></div>';
       btn = '<button type="button" class="ws-btn" disabled>尚未取得</button>';
     }
-    // 經費框：這一次開發／升級要花多少錢（能按的時候才有；錢不夠字變紅）
+    // 經費：這一次開發／升級要花多少錢，寫在按鈕裡碎片的上面（能按的時候才有；錢不夠字變紅，js/workshop-config.js 的 workshopPriceBtn）
     const cash = e.lv ? (e.kind !== 'bullet' && e.lv < e.max ? e.upMoney || 0 : 0) : e.canDev ? e.devMoney || 0 : 0;
-    const money = typeof workshopMoneyHtml === 'function' ? workshopMoneyHtml(wk, cash, '', cash > Math.floor(G.money || 0)) : '';
+    const styled = typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(wk, btn) : btn;
+    const money = '', priced = typeof workshopPriceBtn === 'function' ? workshopPriceBtn(styled, cash, cash > Math.floor(G.money || 0)) : styled;
     info = '<div class="bag-detail-image"' + workshopInfoImgStyle(e.def) + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + e.name + '</h3><div class="bag-tags"' + part('tag') + '>' + tags + '</div></div>' +
-      (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + (typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(wk, btn) : btn) + money + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
+      (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + priced + money + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
   }
   const count = tab => [...all.gear, ...all.weapons, ...all.bullets, ...all.mags, ...all.bags].filter(x => tabOf(x, tab)).length;
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '⚙️ 可開發'], ['up', WS_UP_ICON + ' 可升級']].map(([id, label]) =>

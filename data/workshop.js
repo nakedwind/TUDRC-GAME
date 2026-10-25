@@ -699,8 +699,10 @@ const WORKSHOP_CONFIG = {
     "headSmallSize": 12,
     "panelW": 1100,
     "panelH": 610,
+    "actBtnW": 148,
+    "actBtnH": 63,
     "actBtnX": 1,
-    "actBtnY": 9,
+    "actBtnY": 53,
     "infoY": 11,
     "infoTextY": 5
   },
