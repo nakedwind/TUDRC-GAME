@@ -65,7 +65,7 @@ const EQUIPMENT = [
     ownedDesc: '顯示附近暗處的異質礦與核心。',
     stat: lv => '偵測範圍 ' + lv.range + ' 格', levels: [{ range: 6 }, { range: 8 }, { range: 10 }, { range: 12 }, { range: 14 }] },
   // 戰鬥區域沒有訊號：靠計步和方向感應記錄走過的路，T-Pad「地圖」才看得到（js/tpad-map.js）；range＝溫特周圍幾格內會被記下來
-  { id: 'navrecorder', name: '慣性導航記錄器', kind: 'acc', icon: '🧭', source: 'develop', cost: [60, 120, 200, 290, 390],
+  { id: 'navrecorder', name: '慣性導航記錄器', kind: 'acc', icon: '🧭', image: 'images/裝備/inertial-navigation-recorder-concept-v2.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '不靠訊號，自動記錄走過的路線並畫成地圖。裝備後在戰鬥區域也能打開 T-Pad 的「地圖」；把整張地圖走過一遍，就能得到完整的地圖。',
     stat: lv => '記錄範圍 ' + lv.range + ' 格', levels: [{ range: 3 }, { range: 4 }, { range: 5 }, { range: 6 }, { range: 7 }] },
 ];

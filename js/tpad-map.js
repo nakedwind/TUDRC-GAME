@@ -277,8 +277,10 @@ function resetMapApp() { tmapFloor = null; tmapSel = null; tmapRoomSel = null; }
 // ================= 戰鬥區域：慣性導航記錄器 =================
 // 走過的地方記成「已探索」：溫特周圍 range 格（裝備等級決定）、而且視線沒被牆擋住的格子。
 // 每張地圖各自記（地圖 id → 位元組，每格一個 bit），存在瀏覽器 tudrc_explored_v1（新遊戲會清掉，見 js/new-game.js）。
-// 地圖上「地板格又不是固定牆」的格子全部記過＝地圖完整。
+// 地圖上「地板格又不是固定牆」的格子記過 TMAP_EXPLORE_DONE（95%）＝地圖完整：剩下的格子自動補齊
+// （有些地板被牆整個圍住、根本走不到，一定要 100% 的話會永遠差一點）。
 const TMAP_EXPLORE_KEY = 'tudrc_explored_v1';
+const TMAP_EXPLORE_DONE = .95;
 let tmapExplored = {}, tmapExploreDirty = false, tmapExploreSavedAt = 0;
 try { tmapExplored = JSON.parse(localStorage.getItem(TMAP_EXPLORE_KEY) || '{}') || {}; } catch (_) { tmapExplored = {}; }
 const tmapBitsCache = new Map();   // 地圖 id → { bits: Uint8Array, open: 可走的格數, seen: 記過的可走格數 }
@@ -296,8 +298,14 @@ function tmapExploreState(m) {
     if (bits[i >> 3] & (1 << (i & 7))) seen++;
   }
   st = { cols: m.cols, rows: m.rows, bits, open, total, seen, done: total > 0 && seen >= total };
+  if (!st.done && total > 0 && seen >= total * TMAP_EXPLORE_DONE) tmapExploreFill(st);
   tmapBitsCache.set(m.id, st);
   return st;
+}
+// 記到 95%：剩下的可走格子全部補上（地圖完整）
+function tmapExploreFill(st) {
+  for (let i = 0; i < st.open.length; i++) if (st.open[i]) st.bits[i >> 3] |= 1 << (i & 7);
+  st.seen = st.total; st.done = true; tmapExploreDirty = true;
 }
 const tmapSeen = (st, c, r) => { const i = r * st.cols + c; return !!(st.bits[i >> 3] & (1 << (i & 7))); };
 function tmapExploreSave(force) {
@@ -328,7 +336,7 @@ function tmapExploreTick() {
     const i = r * st.cols + c; st.bits[i >> 3] |= 1 << (i & 7); tmapExploreDirty = true;
     if (st.open[i]) st.seen++;
   }
-  st.done = st.total > 0 && st.seen >= st.total;
+  if (!st.done && st.total > 0 && st.seen >= st.total * TMAP_EXPLORE_DONE) tmapExploreFill(st);
   if (st.done && !wasDone && typeof systemNotice === 'function') systemNotice('🧭 「' + MAP.name + '」的地圖已經完整記錄');
   tmapExploreSave(false);
 }
