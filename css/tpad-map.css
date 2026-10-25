@@ -89,3 +89,15 @@
 .tm-core path { fill: #b77cff; stroke: #16191e; stroke-width: .2; }
 .tm-legend .lg-core { width: 9px; height: 9px; background: #b77cff; transform: rotate(45deg); }
 .tm-legend .lg-fog { border-radius: 2px; background: #16191e; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
+
+/* 戰鬥區域地圖的配色與雷達格線（js/tpad-map.js 的 tmapRadarLayer） */
+.tmf .tm-svg { background: #00040a; }
+.tmf .tm-floor { fill: #4c5869; }
+.tmf .tm-wall { fill: #2a313c; }
+.tmf .tm-legend .lg-fog { background: #00040a; }
+.tmf-grid { fill: none; stroke: rgba(80,200,255,.09); stroke-width: calc(.06px * var(--u, 1)); }
+.tmf-grid.major { stroke: rgba(80,200,255,.2); stroke-width: calc(.1px * var(--u, 1)); }
+.tmf-ring { fill: none; stroke: rgba(80,200,255,.16); stroke-width: calc(.12px * var(--u, 1)); stroke-dasharray: calc(.6px * var(--u, 1)) calc(.4px * var(--u, 1)); }
+.tmf-sweep { animation: tmf-sweep 4s linear infinite; pointer-events: none; }
+@keyframes tmf-sweep { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .tmf-sweep { animation: none; } }

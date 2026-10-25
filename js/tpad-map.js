@@ -356,6 +356,18 @@ function tmapExploreTick() {
 setInterval(tmapExploreTick, 250);
 window.addEventListener('beforeunload', () => tmapExploreSave(true));
 
+// 雷達風格：細格線（每 2 格）＋粗格線（每 10 格）、以溫特為中心的同心圓、慢慢轉的掃描扇形
+// 線條粗細、圓的大小都乘上 u：不管地圖多大，畫面上看起來一樣粗、一樣大（顏色在 css/tpad-map.css 的 .tmf-*）
+function tmapRadarLayer(vx, vy, vw, vh, pc, pr, u) {
+  const R = 30 * u, a = 40 * Math.PI / 180;
+  const rings = [8, 16, 24].map(r => '<circle class="tmf-ring" cx="' + pc + '" cy="' + pr + '" r="' + (r * u).toFixed(2) + '"/>').join('');
+  return '<defs><pattern id="tmfGridS" width="2" height="2" patternUnits="userSpaceOnUse"><path class="tmf-grid" d="M2 0H0V2"/></pattern>' +
+    '<pattern id="tmfGridL" width="10" height="10" patternUnits="userSpaceOnUse"><path class="tmf-grid major" d="M10 0H0V10"/></pattern>' +
+    '<radialGradient id="tmfSweep" cx="0" cy="0" r="' + R.toFixed(2) + '" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#50c8ff" stop-opacity=".22"/><stop offset="1" stop-color="#50c8ff" stop-opacity="0"/></radialGradient></defs>' +
+    '<rect x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '" fill="url(#tmfGridS)"/><rect x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '" fill="url(#tmfGridL)"/>' + rings +
+    '<g transform="translate(' + pc + ' ' + pr + ')"><g class="tmf-sweep"><path d="M0 0L' + R.toFixed(2) + ' 0A' + R.toFixed(2) + ' ' + R.toFixed(2) + ' 0 0 1 ' + (R * Math.cos(a)).toFixed(2) + ' ' + (R * Math.sin(a)).toFixed(2) + 'Z" fill="url(#tmfSweep)"/></g></g>';
+}
+
 // T-Pad「地圖」在戰鬥區域：只畫記過的格子，加上自己的位置、記過的出入口、還沒打碎的異質核心
 function renderFieldMapApp(el) {
   tmapExploreTick();
@@ -391,7 +403,7 @@ function renderFieldMapApp(el) {
     '<p class="tmf-note dim">記錄範圍：周圍 ' + equipLv('navrecorder').range + ' 格（牆後面看不到）<br>沒有訊號：看不到隊友和怪物。</p></nav>';
   const main = '<main class="tm-main"><div class="tm-head"><h2 class="aa-title">' + tmapEsc(m.name) + '</h2><p class="aa-sub">離線模式・導航記錄中</p></div>' +
     '<svg class="tm-svg" style="--u:' + u.toFixed(3) + '" viewBox="' + [vx, vy, vw, vh].join(' ') + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + tmapEsc(m.name) + ' 已探索的地圖">' +
-    (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '') + marks.join('') + me + '</svg>' +
+    (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '') + tmapRadarLayer(vx, vy, vw, vh, pc, pr, u) + marks.join('') + me + '</svg>' +
     '<div class="tm-legend"><span><i class="lg-me"></i>你</span><span><i class="lg-door"></i>出入口</span><span><i class="lg-core"></i>異質核心</span><span><i class="lg-fog"></i>還沒走過</span></div></main>';
   el.innerHTML = '<div class="aa tm tmf">' + side + main + '</div>';
 }
@@ -403,7 +415,7 @@ let tmapMiniEl = null, tmapMiniCtx = null, tmapMiniPct = null;
 function tmapMiniBuild() {
   const css = document.createElement('style');
   css.textContent = '#navMinimap{position:absolute;right:' + TMAP_MINI.right + 'px;bottom:14px;z-index:9;width:' + TMAP_MINI.w + 'px;height:' + TMAP_MINI.h + 'px;border-radius:10px;overflow:hidden;pointer-events:none;' +
-    'background:rgba(12,14,18,.72);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45)}' +
+    'background:rgba(0,4,10,.86);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45)}' +
     '#navMinimap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}' +
     '#navMinimap span{position:absolute;left:7px;top:5px;font:700 12px "Microsoft JhengHei",sans-serif;color:#cfe9d6;text-shadow:0 1px 2px #000,0 0 3px #000}';
   document.head.appendChild(css);
@@ -431,9 +443,18 @@ function tmapMiniUpdate() {
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
     const k = c + ',' + r;
     if (!floor[k] || !tmapSeen(st, c, r) || st.hidden.has(k)) continue;
-    ctx.fillStyle = solid.has(k) ? '#262b33' : '#4a5462';
+    ctx.fillStyle = solid.has(k) ? '#2a313c' : '#4c5869';   // 跟 T-Pad 戰鬥地圖同一組顏色（css/tpad-map.css 的 .tmf）
     ctx.fillRect(Math.round(ox + c * S), Math.round(oy + r * S), S, S);
   }
+  // 雷達格線：每 5 格一條（跟著地圖移動），加上以自己為中心的同心圓
+  ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(80,200,255,.14)'; ctx.beginPath();
+  const G5 = S * 5;
+  for (let x = ((ox % G5) + G5) % G5; x <= W; x += G5) { ctx.moveTo(Math.round(x) + .5, 0); ctx.lineTo(Math.round(x) + .5, H); }
+  for (let y = ((oy % G5) + G5) % G5; y <= H; y += G5) { ctx.moveTo(0, Math.round(y) + .5); ctx.lineTo(W, Math.round(y) + .5); }
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(80,200,255,.2)'; ctx.setLineDash([3, 3]);
+  for (const rr of [24, 48]) { ctx.beginPath(); ctx.arc(W / 2, H / 2, rr, 0, Math.PI * 2); ctx.stroke(); }
+  ctx.setLineDash([]);
   ctx.fillStyle = '#5fd38a';   // 出入口
   for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r) && !st.hidden.has(p.c + ',' + p.r)) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
   ctx.fillStyle = '#b77cff';   // 還沒打碎的異質核心
