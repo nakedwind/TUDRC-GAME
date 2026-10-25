@@ -765,7 +765,10 @@ const TILE_IMAGE_FOLDERS = [
   'images/指揮部',
   'images/研究部',
   'images/地下訓練室',
-];
+  'images/回憶場景',
+  'images/field-camp',
+  'images/scene-props',
+];   // 上傳的圖不在這些資料夾裡：會把整張圖嵌進素材庫（data:），之後改圖檔不會更新，所以新資料夾要加在這裡
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
   const clean = file.replace(/\\/g, '/');
@@ -1695,6 +1698,7 @@ const PALETTE_CATEGORIES = [
   { id: 'hq', name: '指揮部' },
   { id: 'research', name: '研究部' },
   { id: 'training', name: '地下訓練室' },
+  { id: 'memory', name: '回憶場景' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -1726,6 +1730,7 @@ function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_hq_') || file.includes('/指揮部/')) return 'hq';
   if (String(t.id || '').startsWith('tile_research_lab_') || file.includes('/研究部/')) return 'research';
   if (String(t.id || '').startsWith('tile_training_') || file.includes('/地下訓練室/')) return 'training';
+  if (file.includes('/回憶場景/')) return 'memory';
   if (file.includes('/應變中心/')) return 'eoc';
   if (file.includes('/宿舍/')) return 'dorm';
   if (file.includes('/破損建築/')) return 'damaged';

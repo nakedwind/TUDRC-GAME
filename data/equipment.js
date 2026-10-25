@@ -129,7 +129,7 @@ const BULLETS = {
     desc: '拋物線飛過怪物頭上，落地燒出一片火海；會點燃油桶、油汙，燒掉怪物「生命體」碎掉的那堆。火海敵我都會燙。' },
   tranq:      { name: '麻醉彈', icon: '💤', image: 'images/weapon/bullet/tranquilizerdarts.png', color: '#b9a7ff', max: 10, gap: .35, sleep: 3, mist: 0, source: 'develop', cost: 120,   // sleep：睡幾秒（大型怪物一半）、mist：麻醉霧半徑（格，0＝沒有）
     desc: '打中的怪物睡著（不動、不攻擊）；打中暴走的隊員會睡一下，醒來恢復正常。對怪物「生命體」沒有效果。' },
-  paint:      { name: '螢光漆彈', icon: '🎨', image: 'images/weapon/bullet/Paintball.png', color: '#ff5fd6', max: 20, gap: .3, source: 'develop', cost: 100,
+  paint:      { name: '螢光漆彈', icon: '🎨', image: 'images/weapon/bullet/Paintball.png', color: '#39ff14', max: 20, gap: .3, source: 'develop', cost: 100,
     desc: '打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。同時只能標一隻，打新的舊的就消失；怪物死掉漆就跟著消失。' },
   split:      { name: '分裂彈', icon: '✳️', image: 'images/weapon/bullet/SplitBullet.png', color: '#9fe3ff', max: 20, gap: .5, pellets: 5, spread: .55, dmg: 4, range: 5, source: 'develop', cost: 150,   // pellets：一次幾顆、spread：扇形角度（弧度）、dmg：每顆傷害、range：射程（格）
     desc: '一次扇形噴出好幾顆小子彈，近距離打一整群小怪。距離越遠越散。' },

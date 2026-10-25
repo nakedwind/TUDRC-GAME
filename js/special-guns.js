@@ -360,6 +360,7 @@ function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉彈、閃光
   }
 }
 // ---- 漆彈：打中的怪物沾上螢光漆，隊員優先集火（js/game.js 的 pickSentryTarget、js/sentry.js 的追擊）----
+const PAINT_MARK = { color: '#39ff14', glow: '57,255,20' };   // 標記的顏色（螢光綠，跟 BULLETS.paint.color 一樣）：身上的漆、光暈、腳下準心、「集火」字
 function paintTarget() {   // 現在被標記的怪物（死掉、不見了＝沒有）
   const e = G.paintTarget;
   if (e && (e.dead || e.hp <= 0 || !G.enemies.includes(e))) G.paintTarget = null;
@@ -368,17 +369,17 @@ function paintTarget() {   // 現在被標記的怪物（死掉、不見了＝�
 function paintMark(e) {
   const old = paintTarget();
   G.paintTarget = e; e.paintAt = performance.now();
-  if (old !== e) { flash('🎯 集火！', e.x, e.y - 56, BULLETS.paint.color, .9); systemNotice('隊員優先攻擊被漆彈標記的怪物'); }
+  if (old !== e) { flash('🎯 集火！', e.x, e.y - 56, PAINT_MARK.color, .9); systemNotice('隊員優先攻擊被漆彈標記的怪物'); }
   for (let i = 0; i < 8; i++) { const a = Math.random() * Math.PI * 2, b = targetBodyBox(e);
-    G.effects.push({ ember: true, spark: true, x: b.cx, y: b.cy, vx: Math.cos(a) * 70, vy: Math.sin(a) * 70, r: 1.6, life: .3, life0: .3, color: BULLETS.paint.color }); }
+    G.effects.push({ ember: true, spark: true, x: b.cx, y: b.cy, vx: Math.cos(a) * 70, vy: Math.sin(a) * 70, r: 1.6, life: .3, life0: .3, color: PAINT_MARK.color }); }
 }
 // 螢光漆：畫在黑幕上面（躲進黑暗也看得到），身上幾塊漆＋腳下轉動的準心
 function drawPaintMarks(ctx) {
   const e = paintTarget(); if (!e) return;
-  const now = performance.now() / 1000, b = targetBodyBox(e), col = BULLETS.paint.color, pop = Math.min(1, (performance.now() - (e.paintAt || 0)) / 180);
+  const now = performance.now() / 1000, b = targetBodyBox(e), col = PAINT_MARK.color, pop = Math.min(1, (performance.now() - (e.paintAt || 0)) / 180);
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   const g = ctx.createRadialGradient(b.cx, b.cy, 0, b.cx, b.cy, 30);
-  g.addColorStop(0, 'rgba(255,95,214,.35)'); g.addColorStop(1, 'rgba(255,95,214,0)');
+  g.addColorStop(0, 'rgba(' + PAINT_MARK.glow + ',.35)'); g.addColorStop(1, 'rgba(' + PAINT_MARK.glow + ',0)');
   ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.cx, b.cy, 30, 0, Math.PI * 2); ctx.fill();
   ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = col;
   for (const [dx, dy, r] of [[-5, -3, 5], [4, 2, 4], [-1, 6, 3], [6, -6, 2.5]]) { ctx.beginPath(); ctx.arc(b.cx + dx, b.cy + dy, r * pop, 0, Math.PI * 2); ctx.fill(); }

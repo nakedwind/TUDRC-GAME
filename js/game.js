@@ -1683,7 +1683,7 @@ function updatePlayerAttack(dt) {
   const hitPt = best && !best.oilRef && !best.oreRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
   let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
-  if (paint) {   // 漆彈：粉紅色的彈道，打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
+  if (paint) {   // 漆彈：螢光綠的彈道（BULLETS.paint.color），打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
     const { x: mx, y: my } = gunMuzzleAt(p, aimAng), col = BULLETS.paint.color;
     G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .06, life0: .06 });
     G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .09, life0: .09, color: col });

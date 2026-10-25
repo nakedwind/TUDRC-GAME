@@ -16,6 +16,10 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))   # 遊戲資
 
 
 class Handler(http.server.SimpleHTTPRequestHandler):
+    # HTTP/1.1：同一條連線可以連續抓很多張圖。預設 HTTP/1.0 每張圖都要重新連線，
+    # 用 localhost 開的時候每次連線都要先試 IPv6 再改用 127.0.0.1（約 0.3 秒），圖一多載入畫面就會卡很久
+    protocol_version = 'HTTP/1.1'
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, directory=ROOT, **kwargs)
 
