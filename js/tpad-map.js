@@ -405,8 +405,7 @@ function renderFieldMapApp(el) {
   const me = '<g class="tm-me" transform="translate(' + pc + ' ' + pr + ') scale(' + mk + ')"><title>你的位置</title><circle class="tm-ping" r="1.8"/><circle r="1.05"/></g>';
   const side = '<nav class="aa-side tm-side tmf-side"><div class="tm-sec">慣性導航記錄器</div>' +
     '<div class="tmf-pct"><b>' + pct + '<small>%</small></b><span>已記錄</span></div><i class="aa-bar tmf-bar"><u style="width:' + pct + '%"></u></i>' +
-    '<p class="tmf-note">' + (st.done ? '這張地圖已經完整記錄。' : '走過的地方會自動畫進地圖；把整張地圖走過一遍，就能得到完整的地圖。') + '</p>' +
-    '<p class="tmf-note dim">記錄範圍：周圍 ' + equipLv('navrecorder').range + ' 格（牆後面看不到）<br>沒有訊號：看不到隊友和怪物。</p></nav>';
+    '<p class="tmf-note">' + (st.done ? '地圖已完整記錄。' : '走過的地方會自動記錄。') + '</p></nav>';
   const main = '<main class="tm-main"><div class="tm-head"><h2 class="aa-title">' + tmapEsc(m.name) + '</h2><p class="aa-sub">離線模式・導航記錄中</p></div>' +
     '<svg class="tm-svg" style="--u:' + u.toFixed(3) + '" viewBox="' + [vx, vy, vw, vh].join(' ') + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + tmapEsc(m.name) + ' 已探索的地圖">' +
     tmapRadarLayer(vx, vy, vw, vh, u) + (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '') + marks.join('') + me + '</svg>' +
@@ -417,18 +416,16 @@ function renderFieldMapApp(el) {
 // ================= 右下角小地圖（裝備慣性導航記錄器、在戰鬥區域時）=================
 // 以溫特為中心、畫附近記過的格子；右下角的子彈（js/game.js 的 #ammoHud）往左讓位到小地圖左邊。
 const TMAP_MINI = { w: 184, h: 132, cell: 6, gap: 12, right: 14 };   // 大小（px）、一格幾 px、跟子彈之間的距離、離右邊幾 px
-let tmapMiniEl = null, tmapMiniCtx = null, tmapMiniPct = null;
+let tmapMiniEl = null, tmapMiniCtx = null;
 function tmapMiniBuild() {
   const css = document.createElement('style');
   css.textContent = '#navMinimap{position:absolute;right:' + TMAP_MINI.right + 'px;bottom:14px;z-index:9;width:' + TMAP_MINI.w + 'px;height:' + TMAP_MINI.h + 'px;border-radius:10px;overflow:hidden;pointer-events:none;' +
-    'background:rgba(0,4,10,.86);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45)}' +
-    '#navMinimap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}' +
-    '#navMinimap span{position:absolute;left:7px;top:5px;font:700 12px "Microsoft JhengHei",sans-serif;color:#cfe9d6;text-shadow:0 1px 2px #000,0 0 3px #000}';
+    'background:rgba(0,4,10,.6);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45)}' +
+    '#navMinimap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}';
   document.head.appendChild(css);
   tmapMiniEl = document.createElement('div'); tmapMiniEl.id = 'navMinimap';
   const cv = document.createElement('canvas'); cv.width = TMAP_MINI.w; cv.height = TMAP_MINI.h;
-  tmapMiniPct = document.createElement('span');
-  tmapMiniEl.append(cv, tmapMiniPct);
+  tmapMiniEl.append(cv);   // 完整度只在 T-Pad「地圖」裡看
   (document.getElementById('wrap') || document.body).appendChild(tmapMiniEl);
   tmapMiniCtx = cv.getContext('2d');
 }
@@ -469,6 +466,5 @@ function tmapMiniUpdate() {
   }
   ctx.beginPath(); ctx.arc(W / 2, H / 2, 4, 0, Math.PI * 2);   // 自己
   ctx.fillStyle = '#4aa3ff'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
-  tmapMiniPct.textContent = '🧭 ' + (st.total ? Math.floor(st.seen / st.total * 100) : 0) + '%';
 }
 setInterval(tmapMiniUpdate, 100);

@@ -85,7 +85,6 @@
 .tmf-bar { margin: 0 4px; }
 .tmf-bar u { background: linear-gradient(90deg, #2f7a45, #6fe39a); }
 .tmf-note { margin: 10px 4px 0; font-size: 13px; line-height: 1.6; color: #c9d3dd; }
-.tmf-note.dim { color: #8592a0; }
 .tm-core path { fill: #b77cff; stroke: #16191e; stroke-width: .2; }
 .tm-legend .lg-core { width: 9px; height: 9px; background: #b77cff; transform: rotate(45deg); }
 .tm-legend .lg-fog { border-radius: 2px; background: #16191e; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
