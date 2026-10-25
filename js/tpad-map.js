@@ -339,6 +339,14 @@ function tmapExploreFill(st) {
   for (let i = 0; i < st.open.length; i++) if (st.open[i]) st.bits[i >> 3] |= 1 << (i & 7);
   st.seen = st.total; st.done = true; tmapExploreDirty = true;
 }
+// 地圖上的「牆」：不能走（沒地板、擋路格、還沒炸開的隱藏區）、又貼著走過的地板的格子＝沿著走過的地方外圍畫一圈。
+// 這樣走廊邊緣是一條完整的牆，隱藏區的入口跟其他地方一樣被牆封住：不會凸出一塊，也不會看起來還有路。
+const tmapOpenSeen = (st, c, r) => c >= 0 && r >= 0 && c < st.cols && r < st.rows && !!st.open[r * st.cols + c] && tmapSeen(st, c, r);
+function tmapWallAt(st, c, r) {
+  if (c < 0 || r < 0 || c >= st.cols || r >= st.rows || st.open[r * st.cols + c]) return false;
+  for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) if ((dc || dr) && tmapOpenSeen(st, c + dc, r + dr)) return true;
+  return false;
+}
 const tmapSeen = (st, c, r) => { const i = r * st.cols + c; return !!(st.bits[i >> 3] & (1 << (i & 7))); };
 function tmapExploreSave(force) {
   if (!tmapExploreDirty || (!force && Date.now() - tmapExploreSavedAt < 2000)) return;
@@ -389,13 +397,10 @@ function renderFieldMapApp(el) {
   const m = MAP, st = tmapExploreState(m), pct = st.total ? Math.floor(st.seen / st.total * 100) : 0;
   const pad = 1.5, vx = -pad, vy = -pad, vw = m.cols + pad * 2, vh = m.rows + pad * 2;
   const u = Math.max(vw, vh * 2.1) / 98, mk = TMAP_MARK * u;
-  const floor = (m.layers && m.layers.floor) || {}, solid = new Set(m.solid || []);
   let open = '', wall = '';
-  for (const k of Object.keys(floor)) {
-    const [c, r] = k.split(',').map(Number);
-    if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || !tmapSeen(st, c, r) || st.hidden.has(k)) continue;   // 隱藏區炸開前不畫
+  for (let r = 0; r < m.rows; r++) for (let c = 0; c < m.cols; c++) {
     const d = 'M' + c + ' ' + r + 'h1v1h-1z';
-    if (solid.has(k)) wall += d; else open += d;
+    if (tmapOpenSeen(st, c, r)) open += d; else if (tmapWallAt(st, c, r)) wall += d;
   }
   const marks = [], names = new Map((typeof mapList === 'function' ? mapList() : []).map(x => [x.id, x.name])), groups = [];
   for (const p of m.portals || []) {   // 相鄰的同一個去處合成一個
@@ -450,7 +455,6 @@ function tmapMiniUpdate() {
   const [pc, pr] = tmapCellOf(G.player), ox = W / 2 - pc * S, oy = H / 2 - pr * S;   // 格子 → 小地圖上的 px（溫特在正中間）
   const c0 = Math.max(0, Math.floor(-ox / S)), c1 = Math.min(m.cols - 1, Math.ceil((W - ox) / S));
   const r0 = Math.max(0, Math.floor(-oy / S)), r1 = Math.min(m.rows - 1, Math.ceil((H - oy) / S));
-  const floor = (m.layers && m.layers.floor) || {}, solid = m.solid ? (m._miniSolid || (m._miniSolid = new Set(m.solid))) : new Set();
   ctx.clearRect(0, 0, W, H);
   ctx.globalAlpha = TMAP_MINI.alpha;   // 格線、地面、牆半透明，看得到後面的遊戲畫面；出入口、核心、自己照樣不透明
   // 雷達格線：每 5 格一條（跟著地圖移動），先畫、在地圖下面
@@ -460,9 +464,9 @@ function tmapMiniUpdate() {
   for (let y = ((oy % G5) + G5) % G5; y <= H; y += G5) { ctx.moveTo(0, Math.round(y) + .5); ctx.lineTo(W, Math.round(y) + .5); }
   ctx.stroke();
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
-    const k = c + ',' + r;
-    if (!floor[k] || !tmapSeen(st, c, r) || st.hidden.has(k)) continue;
-    ctx.fillStyle = solid.has(k) ? '#2a313c' : '#4c5869';   // 地面跟 T-Pad 戰鬥地圖同色；牆用深色（T-Pad 地圖的牆是亮色 #8d9bb0）
+    const isOpen = tmapOpenSeen(st, c, r);
+    if (!isOpen && !tmapWallAt(st, c, r)) continue;
+    ctx.fillStyle = isOpen ? '#4c5869' : '#2a313c';   // 地面跟 T-Pad 戰鬥地圖同色；牆：小地圖 #2a313c、T-Pad 地圖 #1f242d
     ctx.fillRect(Math.round(ox + c * S), Math.round(oy + r * S), S, S);
   }
   ctx.globalAlpha = 1;
