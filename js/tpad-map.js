@@ -429,7 +429,7 @@ function renderFieldMapApp(el) {
 
 // ================= 右下角小地圖（裝備慣性導航記錄器、在戰鬥區域時）=================
 // 以溫特為中心、畫附近記過的格子；右下角的子彈（js/game.js 的 #ammoHud）往左讓位到小地圖左邊。
-const TMAP_MINI = { w: 184, h: 132, cell: 6, gap: 12, right: 14, alpha: .6 };   // 大小（px）、一格幾 px、跟子彈之間的距離、離右邊幾 px、地面／牆／格線的不透明度（背景另外寫在下面的 CSS）
+const TMAP_MINI = { w: 184, h: 132, cell: 6, gap: 12, right: 14 };   // 大小（px）、一格幾 px、跟子彈之間的距離、離右邊幾 px（背景 60% 不透明寫在下面的 CSS；地面、牆不透明）
 let tmapMiniEl = null, tmapMiniCtx = null;
 function tmapMiniBuild() {
   const css = document.createElement('style');
@@ -456,7 +456,6 @@ function tmapMiniUpdate() {
   const c0 = Math.max(0, Math.floor(-ox / S)), c1 = Math.min(m.cols - 1, Math.ceil((W - ox) / S));
   const r0 = Math.max(0, Math.floor(-oy / S)), r1 = Math.min(m.rows - 1, Math.ceil((H - oy) / S));
   ctx.clearRect(0, 0, W, H);
-  ctx.globalAlpha = TMAP_MINI.alpha;   // 格線、地面、牆半透明，看得到後面的遊戲畫面；出入口、核心、自己照樣不透明
   // 雷達格線：每 5 格一條（跟著地圖移動），先畫、在地圖下面
   ctx.lineWidth = 1; ctx.strokeStyle = 'rgba(80,200,255,.14)'; ctx.beginPath();
   const G5 = S * 5;
@@ -469,7 +468,6 @@ function tmapMiniUpdate() {
     ctx.fillStyle = isOpen ? '#4c5869' : '#2a313c';   // 地面跟 T-Pad 戰鬥地圖同色；牆：小地圖 #2a313c、T-Pad 地圖 #1f242d
     ctx.fillRect(Math.round(ox + c * S), Math.round(oy + r * S), S, S);
   }
-  ctx.globalAlpha = 1;
   ctx.fillStyle = '#5fd38a';   // 出入口
   for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r) && !st.hidden.has(p.c + ',' + p.r)) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
   ctx.fillStyle = '#b77cff';   // 還沒打碎的異質核心
