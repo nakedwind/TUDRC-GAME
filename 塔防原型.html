@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<script src="data/story-scenes.js?v=20261025o"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
+<script src="data/story-scenes.js?v=story-zoom16-20261025"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
 <script>
   window.STORY_PREVIEW = /[?&]storyPreview=/.test(location.search);
   if (/[?&]preview=1(&|$)/.test(location.search)) {   // 劇情地圖編輯器預覽的是有劇情的地圖：同樣只讀
     try { const id = JSON.parse(localStorage.getItem('tudrc_map_preview_v1') || 'null')?.map?.id; window.STORY_PREVIEW = Object.values(STORY_SCENES).some(s => s.map === id); } catch (_) {}
   }
 </script>
-<script src="js/story-scene.js?v=20261025q"></script>
-<link rel="stylesheet" href="css/story-scene.css?v=20261025q">
+<script src="js/story-scene.js?v=story-zoom16-20261025"></script>
+<link rel="stylesheet" href="css/story-scene.css?v=opening-3s-20261025">
 <link rel="stylesheet" href="css/memory-doors.css?v=20261025c">
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
   { const readonlyPreview = /[?&](uiedit|bagedit|squadedit|monsterPreview)=1(&|$)/.test(location.search) || window.STORY_PREVIEW; const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage && (readonlyPreview || window.STORY_MODE); } catch (_) { return false; } };
@@ -19,10 +19,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
-<script src="js/new-game.js?v=memory-20261025"></script>
+<script src="js/new-game.js?v=navrec-20261025"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
 <link rel="stylesheet" href="css/style.css?v=merged-20261025">
-<link rel="stylesheet" href="css/tpad-map.css?v=tmap7-20261024">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
+<link rel="stylesheet" href="css/tpad-map.css?v=navrec-20261025">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=statbox-20261025">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
@@ -259,7 +259,7 @@
   <script src="data/gifts.js?v=giftrefuse-20261025"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=ground-items4-20261024"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=haoguai-20261025"></script>   <!-- 溫特可購買、使用的個人補給 -->
-  <script src="data/equipment.js?v=bag-slots-20261024"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/equipment.js?v=navrec-20261025"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=infoimgsize-20261023"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
   <script src="js/backpack-layout.js?v=dropfix-20261025"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
@@ -386,7 +386,7 @@
   <script src="js/channel-actions.js?v=movecancel-20261025"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=mouse-mound-slow-20261023"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=memory-20261025"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
-  <script src="js/tpad-map.js?v=dorms-20261024"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->
+  <script src="js/tpad-map.js?v=navrec-20261025"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->
   <script src="js/tpad-memories.js?v=20261025b"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->
   <script src="js/tpad.js?v=memory-20261025"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
   <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->

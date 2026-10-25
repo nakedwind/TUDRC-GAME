@@ -76,13 +76,17 @@ const StoryScene = (() => {
       for (const k in MOB_B_EXTRA) set[k] = [image('images/character/mob_B/' + MOB_B_EXTRA[k])];
       set.wounded = image('images/character/mob_B/mobB_0012_wounded.png');
     }
+    if (name === 'red_B') {
+      set.woundedOpen = image('images/character/red_B/redB_0000_Front_hurt.png');
+      set.wounded = image('images/character/red_B/redB_0012_closeeyes_hurt.png');
+    }
     return (spriteCache[name] = set);
   }
   function ensureUI() {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    ui.innerHTML = '<header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
@@ -96,9 +100,29 @@ const StoryScene = (() => {
     box().classList.toggle('story-narration', !sprite);
     el('dialogueName').textContent = beat.speaker || '';
     if (sprite) {
-      el('dialoguePortrait').src = sprites(sprite).front[0].src; el('dialoguePortrait').alt = beat.speaker;
+      const who = state.actors.find(a => a.name === beat.speaker && a.sprite === sprite);
+      const set = sprites(sprite);
+      const portrait = who ? portraitFrame(who) : null;
+      el('dialoguePortrait').src = (portrait || set.front[0]).src; el('dialoguePortrait').alt = beat.speaker;
       el('dialoguePortraitFrame').dataset.char = sprite.replace(/_[A-Z]$/, '');
     }
+  }
+  // 受傷的雷德只在兩張受傷圖之間切換，避免眨眼時閃回健康的臉。
+  function woundedFrame(a) {
+    return a.eyesClosed || (a.blinkTime >= .07 && a.blinkTime < .28)
+      ? a.set.wounded : a.set.woundedOpen || a.set.wounded;
+  }
+  function portraitFrame(a) {
+    if (a.wounded) return a.eyesClosed ? a.set.wounded : a.set.woundedOpen || a.set.wounded;
+    if (a.eyesClosed) return a.set.blink?.[2] || a.set.front[0];
+    return a.set.front[0];
+  }
+  function tickActorBlink(a, dt) {
+    if (a.hidden || a.eyesClosed || a.moving || a.target || a.gunT > 0) {
+      a.blinkTime = -1;
+      return;
+    }
+    updateBlink(a, dt);
   }
   function clearInput() {
     if (typeof keys !== 'undefined') for (const k of Object.keys(keys)) keys[k] = false;
@@ -109,7 +133,7 @@ const StoryScene = (() => {
     if (a.bed && !seat) throw new Error('劇情床位不存在：' + (a.name || a.id) + '（' + a.bed + '）');
     return { ...a, set: sprites(a.sprite), sitting: seat || null,
       x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL,
-      dir: a.dir || 'front', anim: 0, moving: false, blinkTime: -1, eyesClosed: !!a.bed };
+      dir: a.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!a.bed };
   }
   function makeMonster(m) {
     const spec = ACTIVE_MONSTERS.find(s => s.id === (m.type || 'lifeform'));
@@ -119,6 +143,7 @@ const StoryScene = (() => {
   function prepare() {
     ensureUI(); clearInput();
     const cfg = config();
+    if (Number.isFinite(cfg.zoom) && cfg.zoom > 0) VIEW_SCALE = cfg.zoom;
     G = { story: true, phase: 'ready', running: false, over: false, player: null,
       towers: [], npcs: [], enemies: [], obstacles: [], cores: [], effects: [], acidPools: [],
       grid: {}, mapDestroyed: new Set(), lightFlashes: [], selType: null, guide: NaN,
@@ -135,21 +160,26 @@ const StoryScene = (() => {
     const cameraKey = cfg.beats[0]?.camera || Object.keys(cfg.cameras || {})[0];
     state = { cfg, actors, monsters: (cfg.monsters || []).map(makeMonster), time: 0, beatTime: 0, index: -1, chars: 0,
       playing: false, ending: false, ended: false, nextAt: 0, cameraKey, camera: [...(cfg.cameras?.[cameraKey] || [COLS / 2, ROWS / 2])],
-      heal: false, hush: false, shake: 0, rumble: null, moteT: 0, boomT: rnd(3, 6) };
+      heal: false, hush: false, shake: 0, rumble: null, moteT: 0, boomT: cfg.opening?.firstExplosion ?? rnd(3, 6),
+      openingBlack: Math.max(0, Number(cfg.opening?.black) || 0), openingFade: Math.max(.1, Number(cfg.opening?.fade) || 1.5), waitingForSound: false };
     document.body.classList.add('story-scene');
     ui.hidden = true;
     el('storyTitle').textContent = cfg.title || ''; el('storySubtitle').textContent = cfg.subtitle || '';
     el('storyEndTitle').textContent = cfg.endTitle || cfg.title || ''; el('storyEndText').textContent = cfg.endText || '';
     el('storyExitTop').textContent = resume ? '離開回憶' : '離開預覽'; el('storyExitEnd').textContent = resume ? '回到現實' : '返回開始畫面';
     showBox(false); el('storyEnd').hidden = true;
-    el('storyFade').style.opacity = '0';
+    el('storyFade').style.opacity = '1';
+    el('storyAudioStart').hidden = true;
+    ui.querySelector('.story-head').style.opacity = '0';
     state.lights = lights();
     positionCamera();
   }
   function start() {
     prepare(); hideOverlay(); ui.hidden = false;
     state.playing = true; G.phase = 'story';
-    startBgm();
+    state.waitingForSound = !!state.cfg.opening && navigator.userActivation?.hasBeenActive === false;
+    el('storyAudioStart').hidden = !state.waitingForSound;
+    if (!state.waitingForSound) startBgm();
     // G.running 保持 false：成就、自動存檔與戰鬥的外掛不會把演員視作真正隊伍。
     // &storyFrom=N：前面幾頁的走位、轉向一次做完，直接從第 N 頁開始（劇情編輯器調整用）
     const from = Math.min(state.cfg.beats.length, Math.max(1, Number(params.get('storyFrom')) || 1)) - 1;
@@ -160,7 +190,7 @@ const StoryScene = (() => {
         a.target = null; a.path = []; a.dir = a.arriveDir || a.dir;
       }
     }
-    if (from) { state.camera = [...(state.cfg.cameras?.[state.cameraKey] || state.camera)]; state.time = 1.5; }
+    if (from) { state.camera = [...(state.cfg.cameras?.[state.cameraKey] || state.camera)]; state.time = state.openingBlack + state.openingFade; }
     setBeat(from);
   }
   const actor = id => state.actors.find(a => a.id === id);
@@ -171,10 +201,11 @@ const StoryScene = (() => {
   function setBeat(index) {
     state.index = index; state.beatTime = 0; state.chars = 0;
     const beat = state.cfg.beats[index];
-    state.shown = false; showBox(false); setSpeaker(beat);
+    state.shown = false; showBox(false);
     el('dialogueProgress').textContent = (index + 1) + ' / ' + state.cfg.beats.length;
     el('dialogueText').textContent = '';
-    state.nextAt = state.time + beat.wait;
+    state.beatWait = index === 0 ? Math.max(beat.wait || 0, state.openingBlack + state.openingFade) : (beat.wait || 0);
+    state.nextAt = state.time + state.beatWait;
     if (beat.camera) state.cameraKey = beat.camera;
     for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; a.hidden = false; walkTo(a, p); }
     for (const [id, d] of Object.entries(beat.face || {})) {   // 方向，或看向某個地點／某個人
@@ -186,6 +217,7 @@ const StoryScene = (() => {
     for (const [id, e] of Object.entries(beat.eyes || {})) { const a = actor(id); if (a) a.eyesClosed = e === 'closed'; }
     if ('heal' in beat) state.heal = beat.heal;
     if ('hush' in beat) state.hush = beat.hush;
+    setSpeaker(beat);   // 眼睛狀態套用後，頭像才跟著切換睜眼／閉眼受傷圖。
   }
   function next() {
     if (!state?.playing || state.ending || state.time < state.nextAt) return;
@@ -311,6 +343,7 @@ const StoryScene = (() => {
   }
   function tick(dt) {
     if (!state) return;
+    if (state.waitingForSound) { draw(); return; }
     if (document.hidden) dt = 0;
     if (state.playing) {
       state.time += dt; state.beatTime += dt;
@@ -322,8 +355,10 @@ const StoryScene = (() => {
           el('storyEnd').hidden = false; el('storyEnd').querySelector('button').focus();
         }
       } else {
-        el('storyFade').style.opacity = String(Math.max(0, 1 - state.time / 1.5));
-        if (state.beatTime >= beat.wait) {
+        const reveal = Math.max(0, Math.min(1, (state.time - state.openingBlack) / state.openingFade));
+        el('storyFade').style.opacity = String(1 - reveal);
+        ui.querySelector('.story-head').style.opacity = String(reveal);
+        if (state.beatTime >= state.beatWait) {
           if (!state.shown) { state.shown = true; showBox(true); }
           // 打字速度跟遊戲對話一樣（NPC_TALK.typeSpeed＝每個字幾毫秒）
           state.chars = Math.min(Array.from(beat.text).length, state.chars + dt * 1000 / Math.max(5, Number(NPC_TALK.typeSpeed) || 24));
@@ -342,6 +377,7 @@ const StoryScene = (() => {
         if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) a.dir = a.arriveDir || a.dir; }
         else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
       }
+      for (const a of state.actors) tickActorBlink(a, dt);
       for (const e of state.monsters) tickMonster(e, dt);
       // heal：{ from: 治療者, to: 被治療的人 }；光點用治療者的疏導色
       const patient = state.heal && actor(state.heal.to);
@@ -360,7 +396,7 @@ const StoryScene = (() => {
   function drawActor(a) {
     const size = PLAYER.drawSize;
     const frameActor = { ...a, sitting: null };
-    let img = a.wounded ? a.set.wounded : a.eyesClosed ? a.set.blink?.[2] : pickCharacterFrame(a.set, frameActor);
+    let img = a.wounded ? woundedFrame(a) : a.eyesClosed ? a.set.blink?.[2] : pickCharacterFrame(a.set, frameActor);
     if (!readyImage(img)) img = a.set.front?.[0];
     if (!readyImage(img)) return;
     ctx.save(); ctx.imageSmoothingEnabled = false;
@@ -448,10 +484,13 @@ const StoryScene = (() => {
     computeFlow(); updateCamera(); updateHUD();
     r.onDone?.();
   }
-  function action(name) { if (name === 'exit') exit(); else if (name === 'replay') start(); else if (name === 'next') next(); }
+  function action(name) { if (name === 'opening') { wakeSound(); return; } if (name === 'exit') exit(); else if (name === 'replay') start(); else if (name === 'next') next(); }
   // 最早註冊的 capture 擋住所有遊戲快捷鍵與滑鼠操作。只接受劇情介面的動作。
   // 擋住之後 js/sfx.js 收不到「第一次按鍵／點擊」，所以這裡替它喚醒音效引擎
   const wakeSound = () => {
+    if (state?.waitingForSound) {
+      state.waitingForSound = false; el('storyAudioStart').hidden = true; startBgm();
+    }
     if (typeof SFX !== 'undefined') SFX.unlock?.();
     if (typeof humAudio !== 'undefined' && humAudio && humAudio.ctx.state === 'suspended') humAudio.ctx.resume();   // 日光燈嗡嗡聲（js/flicker-light.js）
     if (bgm && bgm.paused) bgm.play().catch(() => {});   // 劇情自動開始時瀏覽器還不准出聲：第一次按鍵／點擊再開始播 BGM
