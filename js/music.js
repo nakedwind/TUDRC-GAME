@@ -15,7 +15,9 @@ const MUSIC = (() => {
   let volume = 0.5, unlocked = false, mode = null, index = 0;
   let audio = null;
 
-  const wanted = () => (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) ? 'safe' : 'battle';
+  // 回憶劇情有自己的 BGM（js/story-scene.js）：這裡停下來，不要兩首疊在一起
+  // 劇情地圖（地圖屬性 story）：時間暫停，背景音樂也停
+  const wanted = () => window.STORY_MODE || (typeof MAP_STORY !== 'undefined' && MAP_STORY) ? 'story' : (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) ? 'safe' : 'battle';
   const muted = () => typeof SFX !== 'undefined' && !SFX.enabled;
   const target = () => muted() ? 0 : volume * MAX;
 
@@ -29,7 +31,8 @@ const MUSIC = (() => {
     }, 40);
   }
   function play(newMode) {
-    const list = PLAYLISTS[newMode]; if (!list || !list.length) return;
+    const list = PLAYLISTS[newMode];
+    if (!list || !list.length) { mode = newMode; const old = audio; audio = null; if (old) fadeTo(old, 0, () => old.pause()); return; }
     if (newMode !== mode) index = Math.floor(Math.random() * list.length);
     mode = newMode;
     const next = new Audio(list[index % list.length]);

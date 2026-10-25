@@ -18,7 +18,9 @@ const FLARE = {
 // 滾輪切換的順序
 // special＝效果寫在 js/special-guns.js 的子彈（一般子彈、照明彈、螢光漆彈另外處理）
 const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
-const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], openId: 'tile_field_ammo_crate_open', openFor: 1.6 };
+const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], emptyId: 'tile_field_ammo_crate_empty' };
+// 空的彈藥箱：素材庫（data/tiles.js）沒有這張時用這份，編輯器存檔蓋掉素材庫也不會變回關著的圖
+const AMMO_CRATE_EMPTY_TILE = { id: 'tile_field_ammo_crate_empty', name: '彈藥箱（空）', role: 'floor', file: 'images/field-camp/ammo-crate_empty.png', w: 1, h: 1 };
 
 // 子彈的小圖（data/equipment.js 的 image；沒有圖就用 emoji）
 const bulletIcon = (b, cls = 'bullet-img') => b && b.image ? '<img class="' + cls + '" src="' + b.image + '" alt="">' : '<i>' + ((b && b.icon) || '') + '</i>';
@@ -190,16 +192,26 @@ function drawFlareGlow(ctx) {   // 紅橘色光暈與火焰（畫在黑幕上面
   }
 }
 
-// ---- 彈藥箱：地圖上放的彈藥箱物件，靠近按 Space 補滿所有子彈（以前營地合圖裡的彈藥箱搬出來了）----
+// ---- 彈藥箱：地圖上放的彈藥箱物件，跟置物櫃一樣能開出東西，但不用鑰匙、每個箱子只能開一次 ----
+// 內容物在地圖編輯器指定（lockerLoot，格式跟置物櫃一樣）；沒指定＝空箱。開過的換成空箱的圖
 const ammoCrateNearPlayer = () => mapBoxNearPlayer('ammo');   // 判定範圍：js/camp-interactions.js 的 MAP_BOX
+const ammoCrateToken = s => storagePropToken(s.id, s.c, s.r, s.layer || 'top', s.ox || 0, s.oy || 0);
+const ammoCrateLooted = s => !!s && unlockedStorageLockers.has(ammoCrateToken(s));   // 開過的跟置物櫃一起存檔（js/save.js）
 function useAmmoCrateNearPlayer() {
   const crate = ammoCrateNearPlayer(); if (!crate) return false;
-  crate.stamp.openUntil = performance.now() + AMMO_CRATE.openFor * 1000;   // 箱子打開一下
-  refillCampAmmo();   // 補滿所有子彈（js/camp-interactions.js）
+  const s = crate.stamp; if (ammoCrateLooted(s)) return false;
+  unlockedStorageLockers.add(ammoCrateToken(s)); sfx('door');
+  // 開出來的東西跳視窗（js/item-intro.js）；什麼都沒有就飄字
+  const before = typeof itemIntroCount !== 'undefined' ? itemIntroCount : 0;
+  if (typeof itemIntroFromLocker !== 'undefined') itemIntroFromLocker = true;
+  try { if (s.lockerLoot) grantLockerLoot(s.lockerLoot, '彈藥箱'); }
+  finally { if (typeof itemIntroFromLocker !== 'undefined') itemIntroFromLocker = false; }
+  if (typeof itemIntroCount !== 'undefined' && itemIntroCount === before) flash('空的', crate.x, crate.top - 8, '#dce6ed', 1.6);
+  updateHUD(); saveGame();
   return true;
 }
-// 剛補給過的關著的彈藥箱，暫時畫成打開的樣子（js/maploader.js 會問這裡）
+// 開過的關著的彈藥箱畫成空箱（js/maploader.js 會問這裡）；本來就是打開圖的彈藥箱不換圖
 function ammoCrateOpenTile(s) {
-  if (s.id !== 'tile_field_ammo_crate' || !(s.openUntil > performance.now())) return null;
-  return mapTileById(AMMO_CRATE.openId) || null;
+  if (s.id !== 'tile_field_ammo_crate' || !ammoCrateLooted(s)) return null;
+  return mapTileById(AMMO_CRATE.emptyId) || AMMO_CRATE_EMPTY_TILE;
 }

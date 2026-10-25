@@ -346,6 +346,7 @@ const SFX = (() => {
   return {
     play,
     fadeOut,
+    unlock,   // 劇情播放時輸入被擋住，由 js/story-scene.js 代為喚醒
     GAIN_KEY,
     FILE_KEY,
     gainOf: name => SOUND_GAIN[name] ?? 1,                 // 某個音效目前的音量倍率

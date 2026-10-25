@@ -4842,8 +4842,7 @@ const BASE_MAPS = [
       "ground2": {},
       "ground3": {},
       "object": {
-        "2,10": "tile_new_bg_wall_front_edge",
-        "5,8": "tile_counseling_medical_stool"
+        "2,10": "tile_new_bg_wall_front_edge"
       },
       "object2": {
         "2,3": "tile_new_bg_wall_front_edge",
@@ -5029,7 +5028,8 @@ const BASE_MAPS = [
         "id": "tile_counseling_load_monitor",
         "c": 4,
         "r": 6,
-        "layer": "object4"
+        "layer": "object4",
+        "sortDepth": 1.25
       },
       {
         "id": "tile_eoc_security_camera",
@@ -5133,6 +5133,14 @@ const BASE_MAPS = [
         "r": 10,
         "layer": "top",
         "ox": 20
+      },
+      {
+        "id": "tile_counseling_medical_stool",
+        "c": 5,
+        "r": 8,
+        "layer": "object",
+        "ox": -12,
+        "oy": 0
       }
     ],
     "solid": [
@@ -13913,7 +13921,6 @@ const BASE_MAPS = [
       "7,18",
       "8,18",
       "9,18",
-      "12,18",
       "13,18",
       "14,18",
       "15,18",
@@ -13953,7 +13960,8 @@ const BASE_MAPS = [
       "22,17",
       "22,16",
       "21,16",
-      "23,17"
+      "23,17",
+      "10,18"
     ],
     "breakable": [],
     "coreSpots": [],

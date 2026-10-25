@@ -97,6 +97,7 @@ const STORAGE_CONTAINMENT_PACK = 'tudrc_asset_pack_containment_v1'; // 收容觀
 const STORAGE_MRT_PACK = 'tudrc_asset_pack_mrt_station_v1';       // 捷運車站素材包
 const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商店素材包
 const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v2'; // 後補：彈藥箱（打開）；v2：圖改成 80×80（2×2 格），編輯器裡的素材大小跟著更新
+const STORAGE_AMMO_CRATE_EMPTY = 'tudrc_asset_ammo_crate_empty_v1'; // 後補：彈藥箱（空）；指定內容物的彈藥箱開過後換這張（js/flare.js）
 const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：物資箱（js/camp-supply.js）
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
@@ -376,6 +377,7 @@ function loadTiles() {
   const streetAdded = mergeDefaultAssetPack(t => STREET_PACK_IDS.has(t.id), STORAGE_STREET_PACK);
   const drinkShopAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_street_drink_shop_'), STORAGE_DRINK_SHOP_PACK);
   const ammoCrateOpenAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_ammo_crate_open', STORAGE_AMMO_CRATE_OPEN);
+  if (SHARED_TILES.some(t => t.id === 'tile_field_ammo_crate_empty') && mergeDefaultAssetPack(t => t.id === 'tile_field_ammo_crate_empty', STORAGE_AMMO_CRATE_EMPTY)) saveTiles();   // 素材庫裡有了才記「已加過」
   const supplyBoxAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_supply_box', STORAGE_SUPPLY_BOX);
   const oreTilesAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_obstacle_ore_'), STORAGE_ORE_TILES);
   const ironGateAdded=mergeDefaultAssetPack('tile_obstacle_irongate','tudrc_irongate_v1');
@@ -505,6 +507,7 @@ function fixMap(m) {
   Object.keys(m.solidOffsets).forEach(k => { if (m.solid.indexOf(k) < 0) delete m.solidOffsets[k]; });   // 沒有紅格就不留微調
   m.safe = !!m.safe;   // 安全場景：遊戲裡不生怪、不套黑幕
   m.npcs = !!m.npcs;   // 場景 NPC：這張地圖會不會出現克莉思、路德等人
+  if (m.story) m.story = true; else delete m.story;   // 劇情地圖（時間暫停）：只有溫特一個人進來看劇情（js/maploader.js 的 MAP_STORY）
   m.portals = Array.isArray(m.portals) ? m.portals : [];   // 出入口：[{c,r,to:目標地圖id}]
   m.cols = m.cols || 32; m.rows = m.rows || 18;   // 地圖大小（舊地圖沒存就用預設）
   return m;
@@ -1947,12 +1950,18 @@ function refreshDoorControl() {
     const o = document.createElement('option'); o.value = value; o.textContent = label; select.appendChild(o);
   }
   select.value = DOOR_MODES[s.doorMode] ? s.doorMode : 'manual';
+  if (typeof refreshMemoryDoorFields === 'function') refreshMemoryDoorFields(s, (field, value) => {   // 記憶之門：鑰匙、劇情（js/memory-door-editor.js）
+    pushUndo();
+    if (value) s[field] = value; else delete s[field];
+    saveMaps(); draw();
+    setStatus('記憶之門已更新', '#7ee0c0');
+  });
 }
 document.getElementById('selDoorMode').addEventListener('change', e => {
   const s = selectedDoorStamp(); if (!s) return;
   pushUndo();
   if (e.target.value !== 'manual') s.doorMode = e.target.value; else delete s.doorMode;   // 自由開關是預設，不另外存
-  saveMaps(); draw();
+  saveMaps(); draw(); refreshDoorControl();
   setStatus('已設為「' + DOOR_MODES[e.target.value] + '」', '#7ee0c0');
 });
 // 置物櫃內容跟著擺放的物件保存，避免同素材的所有櫃子共用獎勵。
@@ -1962,14 +1971,16 @@ function selectedLocker() {
   const s = sel.type === 'stamp' ? m.stamps[sel.index] : null;
   const id = s ? s.id : m.layers[sel.layer]?.[sel.key];
   const t = tileById(id);
-  if (!t || !(id === 'tile_interactive_storage_locker' || /storage-locker-closed\.png$/.test(String(t.file || '')) || /置物[箱櫃].*關|置物[箱櫃]（上鎖）/.test(t.name || ''))) return null;
+  if (!t) return null;
+  if (id === 'tile_field_ammo_crate' || id === 'tile_field_ammo_crate_open') return { sel, s, id, ammo: true };   // 彈藥箱：不用鑰匙、只能開一次（js/flare.js）
+  if (!(id === 'tile_interactive_storage_locker' || /storage-locker-closed\.png$/.test(String(t.file || '')) || /置物[箱櫃].*關|置物[箱櫃]（上鎖）/.test(t.name || ''))) return null;
   return { sel, s, id };
 }
 function refreshLockerControl() {
   let box = document.getElementById('lockerLootControl');
   if (!box) {
     box = document.createElement('label'); box.id = 'lockerLootControl';
-    box.append('置物櫃內容：');
+    const title = document.createElement('span'); title.id = 'lockerLootTitle'; box.append(title);
     const select = document.createElement('select'); select.id = 'lockerLootItem';
     const add = (value, name, parent = select) => { const o = document.createElement('option'); o.value = value; o.textContent = name; parent.appendChild(o); };
     add('random', '隨機掉落（原設定）'); add('empty', '空櫃');
@@ -1995,7 +2006,7 @@ function refreshLockerControl() {
       const [kind, id] = select.value.split(':');
       if (kind === 'random') delete s.lockerLoot;
       else s.lockerLoot = { kind, ...(id ? { id } : {}), qty: kind === 'item' ? Math.max(1, Math.min(999, Math.floor(Number(qty.value) || 1))) : 1 };
-      saveMaps(); refreshSelPanel(); draw(); setStatus('已設定這個置物櫃的內容', '#7ee0c0');
+      saveMaps(); refreshSelPanel(); draw(); setStatus('已設定這個' + (picked.ammo ? '彈藥箱' : '置物櫃') + '的內容', '#7ee0c0');
     };
     select.addEventListener('change', change); qty.addEventListener('change', change);
   }
@@ -2003,6 +2014,11 @@ function refreshLockerControl() {
   if (!picked) return;
   const loot = picked.s?.lockerLoot;
   const select = document.getElementById('lockerLootItem'), qty = document.getElementById('lockerLootQty');
+  // 彈藥箱沒指定內容＝空箱，不另外給「空櫃」選項
+  document.getElementById('lockerLootTitle').textContent = picked.ammo ? '彈藥箱內容：' : '置物櫃內容：';
+  select.options[0].textContent = picked.ammo ? '空箱（原設定）' : '隨機掉落（原設定）';
+  select.options[1].hidden = !!picked.ammo;
+  if (picked.ammo && loot?.kind === 'empty') select.value = 'random';
   select.value = loot ? loot.kind === 'empty' ? 'empty' : loot.kind + ':' + loot.id : 'random';
   qty.value = loot?.qty || 1; qty.disabled = !select.value.startsWith('item:');
 }
@@ -2510,6 +2526,8 @@ function loadRules() {
   document.getElementById('f_cols').value = m.cols;
   document.getElementById('f_rows').value = m.rows;
   document.getElementById('f_npcs').checked = !!m.npcs;
+  const storyField = document.getElementById('f_story');
+  if (storyField) storyField.checked = !!m.story;
   const safeField = document.getElementById('f_safe');
   if (safeField) safeField.checked = !!m.safe;
   document.getElementById('f_coreCount').value = m.coreCount;
@@ -2603,6 +2621,11 @@ document.getElementById('f_desc').addEventListener('input', e => { curMap().desc
 document.getElementById('f_npcs').addEventListener('change', e => {
   curMap().npcs = e.target.checked; saveMaps();
   setStatus(e.target.checked ? '這張地圖會出現場景 NPC（克莉思、克萊兒、路德、穆恩、艾德林、諾亞、阿瓦倫）' : '這張地圖不會出現場景 NPC', '#8fd3ff');
+});
+const storyField = document.getElementById('f_story');
+if (storyField) storyField.addEventListener('change', e => {
+  pushUndo(); if (e.target.checked) curMap().story = true; else delete curMap().story; saveMaps();
+  setStatus(e.target.checked ? '這張是劇情地圖：不生怪、沒有核心，只有溫特一個人進來；從戰鬥地圖進來時那邊會時間暫停' : '這張地圖不是劇情地圖了', '#8fd3ff');
 });
 const safeField = document.getElementById('f_safe');
 if (safeField) safeField.addEventListener('change', e => {

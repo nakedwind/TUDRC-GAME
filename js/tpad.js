@@ -16,6 +16,7 @@ const TPAD_ICON = (() => {
     bestiary: svg('<path fill-rule="evenodd" d="M4.6 2.6H17.4A2 2 0 0 1 19.4 4.6V21.4H6.4A2.4 2.4 0 0 1 4 19V3.2A.6.6 0 0 1 4.6 2.6ZM12 6.6C9.2 6.6 7.4 9 7.4 10.4 7.4 11.8 9.2 14.2 12 14.2 14.8 14.2 16.6 11.8 16.6 10.4 16.6 9 14.8 6.6 12 6.6ZM12 8.6A1.8 1.8 0 1 0 12 12.2 1.8 1.8 0 1 0 12 8.6ZM6.4 17.6V19.4H17.4V17.6Z"/>'),
     settings: svg('<path fill-rule="evenodd" d="M10.3 1.8H13.7L14.2 4.6 16 5.4 18.4 3.8 20.8 6.2 19.2 8.6 20 10.4 22.8 10.9V14.3L20 14.8 19.2 16.6 20.8 19 18.4 21.4 16 19.8 14.2 20.6 13.7 23.4H10.3L9.8 20.6 8 19.8 5.6 21.4 3.2 19 4.8 16.6 4 14.8 1.2 14.3V10.9L4 10.4 4.8 8.6 3.2 6.2 5.6 3.8 8 5.4 9.8 4.6ZM12 8.6A4 4 0 1 0 12 16.6 4 4 0 1 0 12 8.6Z"/>'),
     map: svg('<path d="M2.4 5.4 8.2 3.2V18.8L2.4 21Z"/><path d="M9.6 3.2 14.4 5.2V20.8L9.6 18.8Z"/><path d="M15.8 5.2 21.6 3V18.6L15.8 20.8Z"/>'),
+    memory: svg('<path fill-rule="evenodd" d="M3.4 4.2H20.6A1.6 1.6 0 0 1 22.2 5.8V18.2A1.6 1.6 0 0 1 20.6 19.8H3.4A1.6 1.6 0 0 1 1.8 18.2V5.8A1.6 1.6 0 0 1 3.4 4.2ZM4 6.2V7.8H5.8V6.2ZM4 16.2V17.8H5.8V16.2ZM18.2 6.2V7.8H20V6.2ZM18.2 16.2V17.8H20V16.2ZM10 8.6V15.4L15.6 12Z"/>'),   // 底片＋播放：回憶
   };
 })();
 const tpadNeed = name => typeof window[name] === 'function' || (() => { try { return typeof eval(name) === 'function'; } catch (_) { return false; } })();
@@ -26,6 +27,7 @@ const TPAD_APPS = [
   { id: 'bestiary', name: '怪物圖鑑', color: '#8a4fd1', icon: TPAD_ICON.bestiary, view: el => renderBestiaryApp(el) },
   { id: 'settings', name: '設定',     color: '#6b7a8c', icon: TPAD_ICON.settings, view: el => renderTPadSettingsApp(el) },
   { id: 'map',      name: '地圖',     color: '#3e8c4f', icon: TPAD_ICON.map,      view: el => { resetMapApp(); renderMapApp(el); } },   // js/tpad-map.js（基地樓層示意圖）
+  { id: 'memory',   name: '回憶',     color: '#7b5cc4', icon: TPAD_ICON.memory,   view: el => { mmSel = null; renderMemoryApp(el); } },   // js/tpad-memories.js（解鎖過的回憶可以重看）
 ];
 let tpadEscDirect = false;   // 按 Esc 直接打開設定：在設定裡再按 Esc＝整個關掉
 let tpadOpen = false, tpadEl = null, tpadLaunched = null, tpadClock = null, tpadView = null;   // tpadView：螢幕裡正在開的 App

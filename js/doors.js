@@ -35,7 +35,8 @@ function setupDoors() {
     const door = { stamp: s, mode, open: false, cells, own, sound: DOOR_TILES[s.id].sound || 'door',
       x: (left + right) / 2, y: bottom, top: y0 + 2, left, right, y0,
       randomT: mode === 'random' ? doorRandomWait() : 0 };
-    for (const k of own) { mapWalls.add(k); doorAddedWalls.add(k); }
+    if (mode === 'memory' && typeof setupMemoryDoor === 'function') setupMemoryDoor(door);   // 記憶之門：鑰匙、劇情、解開過沒（解開過的一開始就開著，js/memory-doors.js）
+    for (const k of own) { if (!door.open) mapWalls.add(k); doorAddedWalls.add(k); }
     mapDoors.push(door);
   }
 }
@@ -57,13 +58,13 @@ function setDoorOpen(door, open, silent = false) {
   return true;
 }
 // 溫特附近、可以按 Space 的門（手動門，還有上鎖的門：按了會開鎖或說要什麼鑰匙）
-const doorLocked = d => d.mode === 'key' || d.mode === 'chain';
-const doorKeyItem = d => (typeof DOOR_LOCKS !== 'undefined' && DOOR_LOCKS[d.mode]) || null;
+const doorLocked = d => d.mode === 'key' || d.mode === 'chain' || (d.mode === 'memory' && !d.unlocked);
+const doorKeyItem = d => d.mode === 'memory' ? d.memoryKey : (typeof DOOR_LOCKS !== 'undefined' && DOOR_LOCKS[d.mode]) || null;
 function doorNearPlayer() {
   const p = G.player; if (!p || p.sitting) return null;
   let best = null, bd = DOOR.radius;
   for (const d of mapDoors) {
-    if (d.mode !== 'manual' && !doorLocked(d)) continue;
+    if (d.mode !== 'manual' && d.mode !== 'memory' && !doorLocked(d)) continue;
     const dd = Math.hypot(d.x - p.x, d.y - CELL / 2 - p.y);
     if (dd < bd) { bd = dd; best = d; }
   }
@@ -71,9 +72,11 @@ function doorNearPlayer() {
 }
 // 提示文字（js/render.js）
 function doorPrompt(d) {
+  if (d.mode === 'memory' && d.unlocked) return '進入回憶';
   if (!doorLocked(d)) return d.open ? '關門' : '開門';
   const key = itemById(doorKeyItem(d)), have = (supplyInventory.get(doorKeyItem(d)) || 0) > 0;
-  if (d.mode === 'chain') return have ? '用' + key.name + '解開鎖鏈' : '被鎖鏈鎖住了（需要' + key.name + '）';
+  if (!key) return '被鎖鏈鎖住了';   // 記憶之門還沒設定鑰匙
+  if (d.mode === 'chain' || d.mode === 'memory') return have ? '用' + key.name + '解開鎖鏈' : '被鎖鏈鎖住了（需要' + key.name + '）';
   return have ? '用' + key.name + '開鎖' : '門鎖住了（需要' + key.name + '）';
 }
 // 上鎖的門：有鑰匙就用掉一把開鎖（之後變成一般的手動門），沒有就說要什麼
@@ -92,6 +95,7 @@ function unlockDoor(door) {
 }
 function toggleDoorNearPlayer() {
   const door = doorNearPlayer(); if (!door) return false;
+  if (door.mode === 'memory') { memoryDoorInteract(door); return true; }   // 記憶之門（js/memory-doors.js）
   if (doorLocked(door)) { unlockDoor(door); return true; }
   if (!setDoorOpen(door, !door.open)) { sfx('error'); flash('門口有人', door.x, door.top, '#ff8f8f'); }
   return true;
@@ -115,11 +119,16 @@ function updateRandomDoors(dt) {
 // ---- 鎖鏈神秘門、上鎖的門：畫在門上（關著時）；鎖鏈解開時往下掉 ----
 function drawDoorLock(ctx, d) {   // 一扇門的鎖鏈＋大鎖（跟門一起排前後）
   if (d.open) return;
+  if (d.mode === 'memory') {   // 記憶之門：門上有疊鎖鏈圖就用那張圖，沒有才畫程式的鎖鏈
+    if (!d.unlocked && !(d.chainArt || []).length) { drawChainX(ctx, d.left + 2, d.y0 + (d.y - d.y0) * .2, d.right - 2, d.y - 6, 0); drawPadlock(ctx, d.x, d.y0 + (d.y - d.y0) * .55, 1.25, '#b58cff', 0); }
+    return;
+  }
   const h = d.y - d.y0;
   if (d.mode === 'chain') drawChainX(ctx, d.left + 2, d.y0 + h * .2, d.right - 2, d.y - 6, 0);
   if (d.mode === 'chain' || d.mode === 'key') drawPadlock(ctx, d.x, d.y0 + h * .55, d.mode === 'chain' ? 1.25 : .8, d.mode === 'chain' ? '#b58cff' : '#e9bd62', 0);
 }
 function drawDoorLocks(ctx) {   // 解開時掉下來的鎖鏈
+  if (typeof drawMemoryShards === 'function') drawMemoryShards(ctx);   // 記憶之門碎掉的鎖鏈（js/memory-doors.js）
   for (const f of G.doorChainFx || []) {   // 掉下來的鎖鏈
     const k = f.t / f.life;
     ctx.save(); ctx.globalAlpha = 1 - k; drawChainX(ctx, f.left, f.top + f.drop, f.right, f.bottom + f.drop, f.spin); ctx.restore();
@@ -151,6 +160,7 @@ function dropDoorChains(d) {
   (G.doorChainFx = G.doorChainFx || []).push({ left: d.left + 2, right: d.right - 2, top: d.y0 + (d.y - d.y0) * .2, bottom: d.y - 6, drop: 0, vy: 0, spin: 0, t: 0, life: .9 });
 }
 function updateDoorFx(dt) {
+  if (typeof updateMemoryShards === 'function') updateMemoryShards(dt);
   if (!G.doorChainFx || !G.doorChainFx.length) return;
   for (const f of G.doorChainFx) { f.t += dt; f.vy += 600 * dt; f.drop += f.vy * dt; f.spin += dt * 1.5; }
   G.doorChainFx = G.doorChainFx.filter(f => f.t < f.life);

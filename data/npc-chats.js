@@ -34,7 +34,7 @@ const NPC_CHATS = [
     "who": ["noah", "theonie"],
     "stand": {
       "noah": [16, 18],
-      "theonie": [17, 18]
+      "theonie": [18, 18]
     },
     "spot": {
       "tile": "tile_research_lab_analysis_table"
@@ -128,6 +128,25 @@ const NPC_CHATS = [
         ["kakuma", "喔～那我下次做給你吃！！"],
         ["kakuma", "那你想加什麼料！馬鈴薯？玉米？蘑菇？"],
         ["saku", "都可以......赫真你好吵......但謝謝你。"]
+      ]
+    ]
+  },
+  {
+    "id": "閒聊3",
+    "map": "2F疏導室",
+    "who": ["ash", "tino"],
+    "stand": {
+      "ash": [7, 7],
+      "tino": [7, 8]
+    },
+    "talks": [
+      [
+        ["ash", "你怎麼又來這裡了？"],
+        ["tino", "我不能來嗎？"],
+        ["ash", "不是..."],
+        ["ash", "那麼你需要疏導嗎？"],
+        ["tino", "不用。"],
+        ["ash", "喔...嗯...那你隨便坐吧...。"]
       ]
     ]
   }

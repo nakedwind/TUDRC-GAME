@@ -86,6 +86,7 @@ const STORAGE_CONTAINMENT_PACK = 'tudrc_asset_pack_containment_v1'; // 收容觀
 const STORAGE_MRT_PACK = 'tudrc_asset_pack_mrt_station_v1';       // 捷運車站素材包
 const STORAGE_CVS_PACK = 'tudrc_asset_pack_convenience_store_v1'; // 便利商店素材包
 const STORAGE_AMMO_CRATE_OPEN = 'tudrc_asset_ammo_crate_open_v2'; // 後補：彈藥箱（打開）；v2：圖改成 80×80（2×2 格），編輯器裡的素材大小跟著更新
+const STORAGE_AMMO_CRATE_EMPTY = 'tudrc_asset_ammo_crate_empty_v1'; // 後補：彈藥箱（空）；指定內容物的彈藥箱開過後換這張（js/flare.js）
 const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：物資箱（js/camp-supply.js）
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
@@ -365,6 +366,7 @@ function loadTiles() {
   const streetAdded = mergeDefaultAssetPack(t => STREET_PACK_IDS.has(t.id), STORAGE_STREET_PACK);
   const drinkShopAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_street_drink_shop_'), STORAGE_DRINK_SHOP_PACK);
   const ammoCrateOpenAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_ammo_crate_open', STORAGE_AMMO_CRATE_OPEN);
+  if (SHARED_TILES.some(t => t.id === 'tile_field_ammo_crate_empty') && mergeDefaultAssetPack(t => t.id === 'tile_field_ammo_crate_empty', STORAGE_AMMO_CRATE_EMPTY)) saveTiles();   // 素材庫裡有了才記「已加過」
   const supplyBoxAdded = mergeDefaultAssetPack(t => t.id === 'tile_field_supply_box', STORAGE_SUPPLY_BOX);
   const oreTilesAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_obstacle_ore_'), STORAGE_ORE_TILES);
   const ironGateAdded=mergeDefaultAssetPack('tile_obstacle_irongate','tudrc_irongate_v1');
@@ -1960,12 +1962,18 @@ function refreshDoorControl() {
     const o = document.createElement('option'); o.value = value; o.textContent = label; select.appendChild(o);
   }
   select.value = DOOR_MODES[s.doorMode] ? s.doorMode : 'manual';
+  if (typeof refreshMemoryDoorFields === 'function') refreshMemoryDoorFields(s, (field, value) => {   // 記憶之門：鑰匙、劇情（js/memory-door-editor.js）
+    pushUndo();
+    if (value) s[field] = value; else delete s[field];
+    saveMaps(); draw();
+    setStatus('記憶之門已更新', '#7ee0c0');
+  });
 }
 document.getElementById('selDoorMode').addEventListener('change', e => {
   const s = selectedDoorStamp(); if (!s) return;
   pushUndo();
   if (e.target.value !== 'manual') s.doorMode = e.target.value; else delete s.doorMode;   // 自由開關是預設，不另外存
-  saveMaps(); draw();
+  saveMaps(); draw(); refreshDoorControl();
   setStatus('已設為「' + DOOR_MODES[e.target.value] + '」', '#7ee0c0');
 });
 // 置物櫃內容跟著擺放的物件保存，避免同素材的所有櫃子共用獎勵。

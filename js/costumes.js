@@ -85,8 +85,9 @@ function costumeSelectedSkin(id, mode, eqOverride) {
 }
 function costumeOutfit(id, folder) {
   const eq = costumeState.equip[id]; if (!eq) return null;
-  const want = costumeSelectedSkin(id, MAP_SAFE ? 'base' : 'battle');
-  if (want && !costumeSkinFitsMode(SKIN_BY_ID[want], MAP_SAFE ? 'base' : 'battle')) return null;   // 這裡不能穿：照原本
+  const mode = MAP_SAFE && !MAP_STORY ? 'base' : 'battle';   // 劇情地圖：穿著原本出勤的那套
+  const want = costumeSelectedSkin(id, mode);
+  if (want && !costumeSkinFitsMode(SKIN_BY_ID[want], mode)) return null;   // 這裡不能穿：照原本
   return want ? costumeSkinSet(id, folder, want) : null;
 }
 

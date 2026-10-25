@@ -23,6 +23,7 @@ applySettings();
 let lastSavedAt = 0, lastSavedSnapshot = '';
 const saveSnapshot = () => JSON.stringify({ inventory: [...supplyInventory], unlockedStorageLockers: [...unlockedStorageLockers], collectedStorageKeys: [...collectedStorageKeys], cart: [...shopCart], favor: favorPoints, giftKnown, gifted: [...giftedThisVisit], requests: giftRequests, requestsStale });
 function saveGame(manual = false) {
+  if (window.STORY_MODE || window.STORY_PREVIEW) return;
   try {
     if (typeof rememberGuideSP === 'function') rememberGuideSP();
     const snap = saveSnapshot();

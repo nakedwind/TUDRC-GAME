@@ -56,9 +56,9 @@ const SOUND_SETTINGS = {
   "files": {
     "overrides": {
       "knock2": "戰鬥/命中/hit.mp3",
-      "pearlShot": "珍珠小童攻擊.mp3",
-      "lifeformAttack": "生命體攻擊.mp3",
-      "fishDouse": "火被澆熄.mp3",
+      "pearlShot": "怪物/珍珠小童/珍珠小童攻擊.mp3",
+      "lifeformAttack": "怪物/生命體/生命體攻擊.mp3",
+      "fishDouse": "怪物/魚頭君/火被澆熄.mp3",
       "itemPickup": "pop.mp3",
       "achievement": "獎勵/拾取.mp3"
     },

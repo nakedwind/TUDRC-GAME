@@ -74,3 +74,38 @@ function executeCampPlan(action) {
   else returnToBase();
   return true;
 }
+
+// ---- 劇情地圖（地圖屬性 story，js/maploader.js 的 MAP_STORY）：時間暫停 ----
+// 從戰鬥地圖走出入口進劇情地圖時，把戰場（G：怪物、核心、隊友、計時…）跟牆、門、電源、電梯整份留在記憶體裡；
+// 劇情地圖裡的時間是另一份 G，原本的戰場完全不會動。從劇情地圖走回原地圖時把留著的放回去，接著打。
+// 從劇情地圖走去別張地圖：這場作戰就算結束了（剩下的經費帶回錢包）。重新整理網頁不會留（跟回憶劇情一樣只放記憶體）。
+let pausedBattle = null;
+function pauseBattleForStory() {
+  pausedBattle = { mapId: MAP.id, G, walls: mapWalls, doors: mapDoors, doorWalls: doorAddedWalls, offsets: mapSolidOffsets,
+    power: new Set(mapPowerOn), elevator: openElevatorStamp,
+    mrtWalls: typeof mrtAddedWalls !== 'undefined' ? mrtAddedWalls : null,
+    breakCells: typeof breakableWallCells !== 'undefined' ? breakableWallCells : null,
+    breakSolid: typeof breakableWallSolid !== 'undefined' ? breakableWallSolid : null,
+    storageWalls: typeof storageAddedWalls !== 'undefined' ? storageAddedWalls : null };
+}
+function dropPausedBattle() {   // 不回原地圖了：暫停的戰場作廢，剩下的作戰經費帶回錢包（同 js/progression.js 的 settleSortieMoney）
+  const g = pausedBattle && pausedBattle.G; pausedBattle = null;
+  if (!g || g.moneySettled || window.TEST_MODE || typeof walletSet !== 'function') return;
+  g.moneySettled = true; walletSet(Math.max(0, Math.floor(g.money || 0)));
+}
+// 從劇情地圖走出入口時呼叫（js/game.js 的 enterPortal）：要去的正是暫停中的那張地圖，就換過去並把戰場放回去；回傳有沒有接續
+function resumePausedBattle(toId) {
+  if (!pausedBattle) return false;
+  if (!MAP_STORY || toId !== pausedBattle.mapId || mapIndexById(toId) < 0) { dropPausedBattle(); return false; }
+  const b = pausedBattle; pausedBattle = null;
+  switchMap(mapIndexById(toId));
+  closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false);
+  G = b.G; mapWalls = b.walls; mapDoors = b.doors; doorAddedWalls = b.doorWalls; mapSolidOffsets = b.offsets;
+  if (b.mrtWalls) mrtAddedWalls = b.mrtWalls;
+  if (b.breakCells) { breakableWallCells = b.breakCells; breakableWallSolid = b.breakSolid; }
+  if (b.storageWalls) storageAddedWalls = b.storageWalls;
+  poweredMap = MAP; mapPowerOn = b.power; openElevatorStamp = b.elevator;
+  sanitySP = G.guide; rememberGuideSP(); applyOutfits(); occCache = null; occCacheFor = null;
+  computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
+  return true;
+}

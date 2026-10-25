@@ -136,7 +136,8 @@ function useStoragePropNearPlayer(filter){
   }
   return true;
 }
-function grantLockerLoot(loot){
+// where：飄字裡說在哪裡找到的（彈藥箱也用這裡，js/flare.js）
+function grantLockerLoot(loot,where='置物櫃'){
   if(loot.kind==='empty')return;
   if(loot.kind==='item'){
     const item=itemById(loot.id);if(!item)return;
@@ -147,14 +148,14 @@ function grantLockerLoot(loot){
       G.groundItems.push({id:item.id,qty:qty-got,x:G.player.x,y:G.player.y+12,at:performance.now()/1000});
       systemNotice('背包放不下的「'+item.name+'」留在地上');
     }
-    if(got){showItemPickupNotice(item.id,got);systemNotice('在置物櫃找到「'+item.name+'」×'+got);}
+    if(got){showItemPickupNotice(item.id,got);systemNotice('在'+where+'找到「'+item.name+'」×'+got);}
   }else if(loot.kind==='equipment'){
-    if(!grantEquipment(loot.id,'在置物櫃找到'))systemNotice('已擁有這件裝備');
+    if(!grantEquipment(loot.id,'在'+where+'找到'))systemNotice('已擁有這件裝備');
   }else if(loot.kind==='weapon'){
     // 以前的槍（照明彈槍、燃燒彈槍、麻醉槍）現在是手槍的子彈：給那種子彈（js/special-guns.js 的 grantBullets）
     const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
     if(bulletCount(loot.id)>=b.max){systemNotice(b.name+'已經是滿的');return;}
-    grantBullets(loot.id,GUN_FINDS.start[loot.id]||b.max,'在置物櫃找到');
+    grantBullets(loot.id,GUN_FINDS.start[loot.id]||b.max,'在'+where+'找到');
   }
 }
 function storagePropDisplayTile(id,c,r,layer,stamp=null){

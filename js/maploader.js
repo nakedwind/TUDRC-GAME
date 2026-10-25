@@ -27,6 +27,12 @@ if (MONSTER_PREVIEW_ID) {
     spawnZone: [], portals: [], monsterMix: [{ id: MONSTER_PREVIEW_ID, weight: 100 }], rules: { money: 3000, guide: 100 } }, tiles: [] };
 }
 
+// 回憶預覽直接取正式劇情地圖；編輯器的 preview=1 仍優先保留其草稿。
+if (/[?&]storyPreview=/.test(location.search) && !PREVIEW) {
+  const scene = StoryScene.previewScene(), story = scene && MAP_DATA_STORY.find(m => m.id === scene.map);
+  if (story) PREVIEW = { map: story, tiles: MAP_DATA_TILES };
+}
+
 // ---- 磚塊登錄（內建 + 編輯器匯出的自訂磚塊）----
 const DEFAULT_MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'object', 'object2', 'object3', 'object4', 'overlay', 'top'];
 // 目前這張地圖的圖層順序（由底到上）：編輯器裡新增／刪除過圖層的地圖存在 MAP.layerOrder，沒改過的用上面的預設。
@@ -124,6 +130,9 @@ let MAP = null, mapBreakable = [], mapPortals = [], mapBases = [];
 let MAP_SAFE = false;
 // 場景 NPC（克莉思、路德…）只在有勾「場景 NPC」的地圖出現
 let MAP_NPCS = false;
+// 劇情地圖（地圖編輯器勾「劇情地圖」＝地圖的 story 欄位）：只有溫特一個人走進來看劇情。
+// 跟安全區一樣不生怪、沒有核心、不算戰鬥，但隊友不會跟進來；從戰鬥地圖進來時戰場會暫停保存（js/combat-progress.js）
+let MAP_STORY = false;
 const LIGHT_BASE_ENABLED = LIGHT.enabled;   // balance.js 的原始設定，離開安全場景要還原
 
 let MAP_INDEX = 0;   // 目前玩第幾張地圖（由開始畫面的地圖選單切換）
@@ -186,7 +195,7 @@ function pickMap() {
   return list[MAP_INDEX] || list[0] || null;
 }
 function switchMap(i) {                 // 切換到第 i 張並重新載入地圖
-  if (typeof settleSortieMoney === 'function') settleSortieMoney();   // 離開戰鬥地圖：剩下的作戰經費帶回基地（js/progression.js）
+  if (typeof settleSortieMoney === 'function' && !(typeof pausedBattle !== 'undefined' && pausedBattle && pausedBattle.G === G)) settleSortieMoney();   // 離開戰鬥地圖：剩下的作戰經費帶回基地（js/progression.js）；走進劇情地圖、戰場暫停中的不算（還沒打完）
   const list = mapList();
   if (typeof AssetGate !== 'undefined' && AssetGate.arm) AssetGate.arm();   // 換地圖：這張地圖要的圖片下載好之前先擋住（js/asset-gate.js）
   if (i >= 0 && i < list.length) { MAP_INDEX = i; initMap(); }
@@ -195,6 +204,7 @@ function initMap() {
   const next = pickMap();
   buildTileRegistry(next);
   MAP = next;
+  window.STORY_MODE = !!StoryScene.config();
   MAP_LAYER_ORDER = mapLayerOrderOf(MAP);   // 這張地圖自己的圖層
   if(typeof resetMapPower==='function')resetMapPower();
   preloadMapTiles(MAP);
@@ -217,9 +227,10 @@ function initMap() {
   else VIEW_SCALE = Math.max(VIEW_SCALE, VIEW_ZOOM);
 
   // 安全場景：沒有怪物、沒有黑幕（整張地圖都是亮的）
-  MAP_SAFE = !!MAP.safe && !(typeof practiceOn === 'function' && practiceOn());   // 訓練室練習中：暫時當成戰鬥區域（js/practice.js）
+  MAP_STORY = !window.STORY_MODE && !!MAP.story;
+  MAP_SAFE = (window.STORY_MODE || !!MAP.safe || MAP_STORY) && !(typeof practiceOn === 'function' && practiceOn());   // 訓練室練習中：暫時當成戰鬥區域（js/practice.js）
   MAP_NPCS = !!MAP.npcs;
-  LIGHT.enabled = LIGHT_BASE_ENABLED && !MAP_SAFE;
+  LIGHT.enabled = window.STORY_MODE ? !!StoryScene.config().darkness : LIGHT_BASE_ENABLED && !MAP_SAFE;
 
   // 規則覆蓋數值（沒填的沿用 balance.js 預設）
   const R = MAP.rules || {};
@@ -420,6 +431,12 @@ function seedMapObstacles() {
     const slow = typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[spec.type];
     if (slow) {   // 減速建築（鐵絲網）：不擋路，走在上面變慢
       G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w, h, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0, slow });
+      return;
+    }
+    const glow = LIGHT.buildings && LIGHT.buildings[spec.type];
+    if (glow && !(spec.solid || []).length) {   // 露營燈：不擋路，但要擺上場才會發光（跟玩家自己放的一樣）；同一格不同圖層各畫一盞只算一盞
+      if (G.obstacles.some(o => o.mapSource && o.type === spec.type && o.c === c && o.r === r)) return;
+      G.obstacles.push({ kind: 'obstacle', mapSource: source, mapTileId: t.id, type: spec.type, c, r, w, h, solid: [], hp: spec.hp, maxhp: spec.hp, hitT: 0 });
       return;
     }
     const solid = (stamp ? mapStampCells(spec.solid || [], mapTileW(t), mapTileH(t), mapStampTurn(stamp)) : (spec.solid || []))

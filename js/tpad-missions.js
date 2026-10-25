@@ -115,6 +115,6 @@ function memoryDetail(mem) {
   return mappBack('回憶') +
     '<div class="ma-hero">' + (face ? '<span class="ma-face big"><img src="' + face + '" alt=""></span>' : '') + '<div><em class="ma-pill ' + (mem.hasKey ? 'green' : 'orange') + '">回憶</em><h2 class="aa-title">' + mappEsc(mem.name) + '</h2></div></div>' +
     '<div class="ma-card"><div class="side-shards">' + Array.from({ length: mem.mk.need }, (_, i) => '<img src="' + it.image + '" alt="" class="' + (i < mem.have ? 'got' : '') + '">').join('') + '</div>' +
-    '<p>' + (mem.hasKey ? '「' + mappEsc(key.name) + '」已經拼好了。找到記憶之門，就能看到這段回憶。<br><small>（記憶之門尚未開放）</small>'
+    '<p>' + (mem.hasKey ? '「' + mappEsc(key.name) + '」已經拼好了。找到記憶之門，就能看到這段回憶。<br><small>看過的回憶可以在「回憶」App 重看。</small>'
       : '集滿 ' + mem.mk.need + ' 片「' + mappEsc(it.name) + '」就能拼成鑰匙。目前 ' + mem.have + ' / ' + mem.mk.need + '。<br><small>回憶碎片可以從「今日想吃」委託拿到。</small>') + '</p></div>';
 }

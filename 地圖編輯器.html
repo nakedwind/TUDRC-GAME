@@ -150,6 +150,7 @@
 
         <div class="field col"><small>這裡的地圖都是<b>戰鬥地圖</b>（有怪物、有黑幕）。基地（安全區域）的地圖請到 <a href="基地編輯器.html">🏠 基地編輯器</a>。想把地圖搬過去：「📤 匯出這張地圖」→ 到基地編輯器「📥 匯入地圖」。</small></div>
         <div class="field col"><label><input id="f_npcs" type="checkbox"> 場景 NPC（克莉思、路德等人會走動並可對話）</label></div>
+        <div class="field col"><label><input id="f_story" type="checkbox"> 🎬 劇情地圖（時間暫停）</label><small>不生怪、沒有核心、不算戰鬥，只有溫特一個人進來（隊友不會跟）。從戰鬥地圖的出入口走進來時，那張戰鬥地圖會整個暫停；走回去就照原本的樣子接著打。</small></div>
 
         <div class="subhead">地圖大小</div>
         <div class="map-size-panel">
@@ -182,18 +183,20 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=mouse-dizzy-20261023"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=mouse-mound-slow-20261023"></script>
-  <script src="data/tiles.js?v=rm-missing-ammo-crate2-20261024"></script>        <!-- 素材庫（兩個編輯器共用） -->
-  <script src="data/maps.js?v=mouse-map-test-20261023"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
+  <script src="data/tiles.js?v=ammo-loot2-20261025"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/maps.js?v=storymap-20261025"></script>        <!-- 戰鬥地圖資料（BATTLE_MAPS） -->
   <script src="data/supplies.js?v=haoguai-20261025"></script>
   <script src="data/items.js?v=doors4-20261018"></script>
   <script src="data/equipment.js?v=effnum-20261023"></script>
-  <script src="data/doors.js?v=lockeddoor-20261018"></script>        <!-- 可開關的門 -->
+  <script src="data/doors.js?v=memory-20261025"></script>        <!-- 可開關的門 -->
+  <script src="data/story-scenes.js?v=20261025o"></script>   <!-- 記憶之門可以選的劇情 -->
+  <script src="js/memory-door-editor.js?v=20261025"></script>   <!-- 記憶之門：鑰匙、劇情選單 -->
   <script src="js/sfx.js?v=mouse-dizzy3-20261023"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/map-picker.js?v=mappicker-20261024"></script>   <!-- 設出入口時選地圖的清單（取代 prompt，地圖多也不會被截斷） -->
   <script src="js/project-save.js?v=sync-20261021"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/map-editor-store.js?v=sync-20261021"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/map-editor.js?v=tile60b-ammo-crate2-20261024", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/map-editor.js?v=storymap-20261025", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
   <script src="js/editor-nav.js?v=achv-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

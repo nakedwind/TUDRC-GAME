@@ -141,12 +141,15 @@ function humContext() {
   window.addEventListener('pointerdown', resume); window.addEventListener('keydown', resume);
   return humAudio;
 }
+// 聽聲音的位置：玩家；回憶劇情裡沒有玩家，改用鏡頭中心（js/story-scene.js）
+const flickerListener = () => G.player || (window.STORY_MODE && typeof StoryScene !== 'undefined' ? StoryScene.listener() : null);
+const flickerQuiet = () => MAP_SAFE && !window.STORY_MODE;   // 應變中心（安全區）沒有嗡嗡聲；回憶劇情的地圖也算安全區，但要聽得到
 let humUpdatedAt = 0;   // 上一次照遊戲畫面更新嗡嗡聲的時間（遊戲邏輯停住時，下面的計時器會把聲音關掉）
 function updateFlickerHum() {
-  const list = flickerLights(), p = G.player;
+  const list = flickerLights(), p = flickerListener();
   humUpdatedAt = performance.now();
   let best = 0;
-  if (p && list.length && !MAP_SAFE) for (const L of list) {   // 應變中心（安全區）：不會有嗡嗡聲
+  if (p && list.length && !flickerQuiet()) for (const L of list) {   // 應變中心（安全區）：不會有嗡嗡聲
     if (!L.on) continue;
     const d = Math.hypot(L.x - p.x, L.y - p.y) / CELL;
     best = Math.max(best, Math.max(0, 1 - d / FLICKER.humRange));
@@ -161,10 +164,10 @@ function updateFlickerHum() {
 setInterval(() => {
   if (!humAudio) return;
   const idle = performance.now() - humUpdatedAt > 300;
-  if (idle || (typeof MAP_SAFE !== 'undefined' && MAP_SAFE)) humAudio.out.gain.setTargetAtTime(0, humAudio.ctx.currentTime, .05);
+  if (idle || (typeof MAP_SAFE !== 'undefined' && flickerQuiet())) humAudio.out.gain.setTargetAtTime(0, humAudio.ctx.currentTime, .05);
 }, 200);
 function playZap(L) {
-  const p = G.player; if (!p || MAP_SAFE) return;
+  const p = flickerListener(); if (!p || flickerQuiet()) return;
   const d = Math.hypot(L.x - p.x, L.y - p.y) / CELL; if (d > FLICKER.humRange + 4) return;
   if (typeof SFX !== 'undefined' && !SFX.enabled) return;
   const h = humContext(); if (!h || h.ctx.state !== 'running') return;

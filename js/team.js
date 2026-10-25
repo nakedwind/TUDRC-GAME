@@ -480,7 +480,7 @@ function renderTeamPanel() {
 // 只有在安全場景（基地）才顯示編隊按鈕
 function updateTeamButton() {
   ensureTeamUI();
-  const safe = (typeof MAP_SAFE !== 'undefined') && MAP_SAFE;
+  const safe = (typeof MAP_SAFE !== 'undefined') && MAP_SAFE && !MAP_STORY;   // 劇情地圖（戰場可能暫停中）：不能編隊
   if (!safe) closeTeamPanel();
   if (typeof updateAchievementButton === 'function') updateAchievementButton(safe);   // 🏆 成就按鈕（js/achievements.js）
   if (squadBtn) {

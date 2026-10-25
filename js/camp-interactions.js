@@ -33,6 +33,7 @@ function mapBoxes() {
   for (const s of MAP.stamps || []) {
     const t = mapTileById(s.id); if (!t) continue;
     const k = MAP_BOX.kinds.find(k => k.match(s.id, t)); if (!k || (MAP_SAFE && k.kind !== 'armor')) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用
+    if (k.kind === 'ammo' && typeof ammoCrateLooted === 'function' && ammoCrateLooted(s)) continue;   // 開過的彈藥箱：不能再開（js/flare.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     const a = k.art[s.id] || [0, 0, 1, 1, 1, 1], fx = u => s.fx ? w - u : u;   // 左右翻轉的箱子：範圍也翻過去
     const l = Math.min(fx(a[0] / a[4] * w), fx(a[2] / a[4] * w)), r = Math.max(fx(a[0] / a[4] * w), fx(a[2] / a[4] * w));
@@ -59,13 +60,6 @@ function campInteractionNearPlayer() {
     if (d < distance) { distance = d; nearest = spot; }
   }
   return nearest;
-}
-function refillCampAmmo() {
-  const p = G.player; if (!p) return;
-  p.ammo = PLAYER_ATK.mag; p.reloadT = 0;
-  for (const id of Object.keys(BULLETS)) if (BULLETS[id].source !== 'field') fillBullets(id);   // 拿到過的子彈補滿（js/flare.js）；後室撿的特殊子彈（field）不補
-  saveEquipment(); saveGame(); updateAmmoHud(); sfx('reload');
-  systemNotice('已補滿所有子彈');
 }
 let campPlanOpen = false, campPlanDialog = null, campPlanFocus = null;
 let campPlanPending = null, campPlanConfirmFocus = null;

@@ -449,8 +449,10 @@ function drawEnemy(e) {
   else if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
   // 血條放在圖的上方（體型大的變體血條也跟著變寬、變高）
   const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
-  ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW / 2, barY, barW, 3);
-  ctx.fillStyle = e.variant === 'giant' ? '#c79bff' : '#7CFC7C'; ctx.fillRect(e.x - barW / 2, barY, barW * Math.max(0, e.hp) / e.maxhp, 3);
+  if (!e.hideBar) {   // 劇情裡的怪物不畫血條（js/story-scene.js）
+    ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW / 2, barY, barW, 3);
+    ctx.fillStyle = e.variant === 'giant' ? '#c79bff' : '#7CFC7C'; ctx.fillRect(e.x - barW / 2, barY, barW * Math.max(0, e.hp) / e.maxhp, 3);
+  }
   if (e.variant === 'giant') {
     ctx.fillStyle = '#e3c8ff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(SLIME_VARIANTS.giant.name, e.x, barY - 4);
@@ -967,6 +969,7 @@ function drawFieldMemberLocator() {
 }
 // ---- 繪製 ----
 function draw() {
+  if (StoryScene.active()) { StoryScene.draw(); return; }
   lightsCache = LIGHT.enabled ? getLights() : [];   // 更新這一幀的光源
   computeLightField();                              // 光沿格子擴散、碰牆停（牆後全黑）
   computeFlashField();                              // 攻擊閃光（只影響畫面）
@@ -994,7 +997,7 @@ function draw() {
   const sortables = [];
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
-  if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && (d.mode === 'chain' || d.mode === 'key')) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
+  if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
   for(const core of G.cores) if(!core.dead && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -1066,7 +1069,7 @@ function draw() {
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
-    else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }
+    else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '打開彈藥箱'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）
     else if (typeof wardrobeNearPlayer === 'function' && !doorNearPlayer() && wardrobeNearPlayer()) { const w = wardrobeNearPlayer(); drawInteractPrompt(w.x, w.top - 4, '換裝'); }   // 衣櫃（js/costumes.js）
@@ -1096,6 +1099,166 @@ function draw() {
     }
   }
   // 特效
+  drawWorldEffects();
+  // 建築放置預覽（40% 半透明，放不下時紅框）
+  if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
+    const ob = buildableById(G.selType.slice(6));   // 去掉 'build:' 前綴，跨障礙物/裝飾查找
+    if (ob) {
+      const v = ob[buildOrient], [c, r] = hoverCell;
+      const x = OX + c * CELL, y = OY + r * CELL, w = v.w * CELL, h = v.h * CELL;
+      const ok = canPlaceObstacle(v, c, r, placeExtra(ob)) && G.money >= ob.cost && buildInRange(v, c, r);
+      const img = obstacleImgs[ob.id][buildOrient];
+      ctx.globalAlpha = 0.4;
+      if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
+      else { ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x + 3, y + 3, w - 6, h - 6); }
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = ok ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+      ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.setLineDash([]);
+      ctx.fillStyle = ok ? 'rgba(80,210,150,.28)' : 'rgba(255,80,80,.3)';
+      for (const [dc, dr] of placeCheckCells(v)) ctx.fillRect(x + dc * CELL, y + dr * CELL, CELL, CELL);
+    }
+  }
+  // 情境選單或指定建築的目標格
+  const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
+  if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
+  drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
+  for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
+  drawPoweredLights(ctx);
+  drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
+  drawEquipmentGroundDrops(ctx);
+  drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
+  drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
+  drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
+  drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
+  if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
+  if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
+  if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
+  if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
+  drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
+  drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
+  if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
+  drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
+  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
+  // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
+  if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
+  if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
+  flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
+  if (typeof drawNpcChatMarks === 'function') drawNpcChatMarks(ctx);   // 有人在閒聊、等溫特來聽：中間的「● ● ●」（js/npc-chats.js）
+  drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
+  if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
+  if (typeof drawSmilers === 'function') drawSmilers(ctx);
+  if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
+  drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
+  if (typeof drawChannelBar === 'function') drawChannelBar(ctx);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
+  if (typeof drawLoofahHelpHints === 'function') drawLoofahHelpHints(ctx);   // 射隊友身上的絲瓜藤時旁邊的「幫隊友掙脫」（js/loofah-lady.js）
+  if (typeof drawBedZzz === 'function') drawBedZzz(ctx);   // 躺床睡覺的頭上飄 ZZZ（js/bed-zzz.js）
+  if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉彈打睡的頭上飄 Zzz（js/special-guns.js）
+  if (typeof drawPaintMarks === 'function') drawPaintMarks(ctx);   // 漆彈標記的怪物：螢光漆、準心（黑暗中也看得到）
+  if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）
+  drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
+  // 選好建築並移到地圖上時，在預覽圖上方提示快捷鍵：［R］旋轉、［ESC］取消（取消後就切回槍）。
+  if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
+    const ob = buildableById(G.selType.slice(6));
+    if (ob) {
+      const v = ob[buildOrient], [c, r] = hoverCell;
+      const lines = ['［R］旋轉', '［ESC］取消'];
+      const LINE_GAP = 4, PAD_X = 7, PAD_Y = 5, RADIUS = 8;   // 兩行字的間距、深色框左右／上下留白、四個角的圓角（小一點，整體還是方塊）
+      ctx.save();
+      ctx.font = 'bold 10px "Microsoft JhengHei", sans-serif';
+      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+      // 用字「實際畫出來」的範圍來置中（全形括號左右有留白，直接用字寬置中會偏一邊）
+      const ms = lines.map(t => ctx.measureText(t));
+      const inkW = m => m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
+      const ascent = Math.max(...ms.map(m => m.actualBoundingBoxAscent));    // 每行字頂到基線
+      const descent = Math.max(...ms.map(m => m.actualBoundingBoxDescent));  // 基線到每行字底
+      const lineH = ascent + descent;
+      const textH = lines.length * lineH + (lines.length - 1) * LINE_GAP;
+      const boxW = Math.max(...ms.map(inkW)) + PAD_X * 2;
+      const boxH = textH + PAD_Y * 2;
+      const labelX = OX + (c + v.w / 2) * CELL;
+      const boxTop = Math.max(OY + 4, OY + r * CELL - 6 - boxH);
+      ctx.fillStyle = 'rgba(10, 16, 23, .88)';
+      ctx.beginPath();
+      ctx.roundRect(labelX - boxW / 2, boxTop, boxW, boxH, RADIUS);
+      ctx.fill();
+      ctx.fillStyle = '#f1f7fc';
+      ms.forEach((m, i) => {
+        const x = labelX - inkW(m) / 2 + m.actualBoundingBoxLeft;              // 左右置中
+        const y = boxTop + PAD_Y + i * (lineH + LINE_GAP) + ascent;            // 上下置中
+        ctx.fillText(lines[i], x, y);
+      });
+      ctx.restore();
+    }
+  }
+  // 目標框畫在黑幕上方，黑暗區域也能清楚看到所選格子。
+  if (actionCell) {
+    const [ac, ar] = actionCell, ax = OX + ac * CELL, ay = OY + ar * CELL;
+    ctx.fillStyle = 'rgba(143,211,255,.13)'; ctx.fillRect(ax + 1, ay + 1, CELL - 2, CELL - 2);
+    ctx.strokeStyle = '#9fddff'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
+    ctx.strokeRect(ax + 2, ay + 2, CELL - 4, CELL - 4); ctx.setLineDash([]);
+  }
+  ctx.restore();   // 世界座標畫完，回到螢幕座標（下面的提示固定在畫面上）
+  // 指派巡邏位置中：畫面上方顯示提示
+  if (assigning) {
+    ctx.fillStyle = 'rgba(20,25,35,.75)'; ctx.fillRect(0, 0, cv.width, 44);
+    ctx.fillStyle = '#ffd479'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
+    ctx.fillText('🎯 點擊地圖，指定「' + TYPES[assigning.type].name + '」的巡邏位置（Esc 取消）', cv.width / 2, 29);
+  }
+  // 玩家受擊：畫面四周紅暈快速閃現後淡出（同《苦艾與甘露》的受擊回饋）。
+  if ((G.damageVignetteT || 0) > 0) {
+    const elapsed = 1 - G.damageVignetteT / .45;
+    const strength = elapsed < .25 ? elapsed / .25 : Math.max(0, 1 - (elapsed - .25) / .75);
+    const radius = Math.max(cv.width, cv.height) * .72;
+    const vignette = ctx.createRadialGradient(cv.width / 2, cv.height / 2, radius * .35, cv.width / 2, cv.height / 2, radius);
+    vignette.addColorStop(0, 'rgba(170,0,0,0)');
+    vignette.addColorStop(.62, `rgba(190,0,0,${.08 * strength})`);
+    vignette.addColorStop(1, `rgba(210,0,0,${.72 * strength})`);
+    ctx.fillStyle = vignette; ctx.fillRect(0, 0, cv.width, cv.height);
+  }
+  const lowEdge = lowHpPulse();   // 低血量：畫面四周跟著心跳閃紅光
+  if (lowEdge > .01) {
+    // 橢圓形的紅暈：畫面比較寬，用圓形的話上下邊幾乎沒有紅光 → 把圓壓扁成橢圓，上下也看得到（topBottom 越小，上下越紅）
+    const radius = cv.width * .59, a = LOW_HP_FX.edge * lowEdge, squash = cv.height / cv.width * LOW_HP_FX.topBottom;
+    ctx.save(); ctx.translate(cv.width / 2, cv.height / 2); ctx.scale(1, squash);
+    const v = ctx.createRadialGradient(0, 0, radius * .5, 0, 0, radius);
+    v.addColorStop(0, 'rgba(170,0,0,0)'); v.addColorStop(.45, `rgba(195,0,0,${(.35 * a).toFixed(3)})`); v.addColorStop(1, `rgba(215,0,0,${a.toFixed(3)})`);
+    ctx.fillStyle = v; ctx.fillRect(-cv.width / 2, -cv.height / 2 / squash, cv.width, cv.height / squash);
+    ctx.restore();
+  }
+  if (typeof drawNpcChatOffscreen === 'function') drawNpcChatOffscreen(ctx, cv);   // 閒聊的人在畫面外：邊緣的方向箭頭（js/npc-chats.js）
+  drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
+  if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
+  drawBaseHpTopBar(ctx, cv);   // 戰鬥區域：畫面最上方的基地血條
+  if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
+  drawFieldMemberLocator();
+}
+// 戰鬥區域：畫面最上方（離上緣 2px）的基地血條。規則跟基地身上的血條一樣（目前血量 / 總血量，依剩餘 HP 變色）
+// 高度只有 18px，在異質核心的 BOSS 血條（標題約從 40px 開始）上面，不會擋到它
+const BASE_TOP_BAR = { top: 2, h: 12, maxW: 520 };
+function drawBaseHpTopBar(ctx, cv) {
+  if (!G || MAP_SAFE || !G.obstacles) return;
+  const o = G.obstacles.find(b => b.isBase); if (!o || !o.maxhp) return;
+  const ratio = Math.max(0, Math.min(1, o.hp / o.maxhp)), B = BASE_TOP_BAR;
+  const w = Math.min(B.maxW, cv.width * .45), x = (cv.width - w) / 2, y = B.top + 3;   // y＝血條本體（外框比它多 3px）
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,.82)'; roundRect(x - 3, B.top, w + 6, B.h + 6, 4); ctx.fill();
+  ctx.fillStyle = '#352d2d'; roundRect(x, y, w, B.h, 2); ctx.fill();
+  ctx.fillStyle = ratio > 0.5 ? '#59d26f' : (ratio > 0.25 ? '#f0c54d' : '#ef5b5b');
+  if (ratio > 0) { roundRect(x, y, w * ratio, B.h, 2); ctx.fill(); }
+  ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  const label = '基地 HP ' + Math.max(0, Math.ceil(o.hp)) + ' / ' + o.maxhp;
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(label, cv.width / 2, y + B.h / 2 + 1);
+  ctx.fillStyle = '#fff'; ctx.fillText(label, cv.width / 2, y + B.h / 2 + 1);
+  ctx.restore();
+}
+function roundRect(x, y, w, h, r) {
+  ctx.beginPath(); ctx.moveTo(x + r, y);
+  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
+  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
+}
+
+// 世界座標上的特效（槍口火光、子彈、彈殼、斬擊…）；劇情播放器也會呼叫（js/story-scene.js）
+function drawWorldEffects() {
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];
@@ -1414,159 +1577,4 @@ function draw() {
       ctx.beginPath(); ctx.moveTo(f.x1, f.y1); ctx.lineTo(f.x2, f.y2); ctx.stroke(); ctx.globalAlpha = 1;
     }
   }
-  // 建築放置預覽（40% 半透明，放不下時紅框）
-  if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
-    const ob = buildableById(G.selType.slice(6));   // 去掉 'build:' 前綴，跨障礙物/裝飾查找
-    if (ob) {
-      const v = ob[buildOrient], [c, r] = hoverCell;
-      const x = OX + c * CELL, y = OY + r * CELL, w = v.w * CELL, h = v.h * CELL;
-      const ok = canPlaceObstacle(v, c, r, placeExtra(ob)) && G.money >= ob.cost && buildInRange(v, c, r);
-      const img = obstacleImgs[ob.id][buildOrient];
-      ctx.globalAlpha = 0.4;
-      if (img && img.complete && img.naturalWidth) ctx.drawImage(img, x, y, w, h);
-      else { ctx.fillStyle = '#7a5a3a'; ctx.fillRect(x + 3, y + 3, w - 6, h - 6); }
-      ctx.globalAlpha = 1;
-      ctx.strokeStyle = ok ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
-      ctx.strokeRect(x + 1, y + 1, w - 2, h - 2); ctx.setLineDash([]);
-      ctx.fillStyle = ok ? 'rgba(80,210,150,.28)' : 'rgba(255,80,80,.3)';
-      for (const [dc, dr] of placeCheckCells(v)) ctx.fillRect(x + dc * CELL, y + dr * CELL, CELL, CELL);
-    }
-  }
-  // 情境選單或指定建築的目標格
-  const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
-  if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
-  drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
-  for (const f of G.effects) if (f.hammerHit) drawHammerHit(ctx, f);   // 拆除建築的槌子＋白光：畫在黑幕上面，暗處也看得清楚（js/attack-fx.js）
-  drawPoweredLights(ctx);
-  drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
-  drawEquipmentGroundDrops(ctx);
-  drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
-  drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
-  drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
-  drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
-  if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
-  if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
-  if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
-  if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
-  drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
-  drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
-  if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
-  drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
-  if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
-  // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
-  if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
-  if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
-  flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
-  if (typeof drawNpcChatMarks === 'function') drawNpcChatMarks(ctx);   // 有人在閒聊、等溫特來聽：中間的「● ● ●」（js/npc-chats.js）
-  drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
-  if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
-  if (typeof drawSmilers === 'function') drawSmilers(ctx);
-  if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
-  drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）
-  if (typeof drawChannelBar === 'function') drawChannelBar(ctx);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
-  if (typeof drawLoofahHelpHints === 'function') drawLoofahHelpHints(ctx);   // 射隊友身上的絲瓜藤時旁邊的「幫隊友掙脫」（js/loofah-lady.js）
-  if (typeof drawBedZzz === 'function') drawBedZzz(ctx);   // 躺床睡覺的頭上飄 ZZZ（js/bed-zzz.js）
-  if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉彈打睡的頭上飄 Zzz（js/special-guns.js）
-  if (typeof drawPaintMarks === 'function') drawPaintMarks(ctx);   // 漆彈標記的怪物：螢光漆、準心（黑暗中也看得到）
-  if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 無線電 Lv3：標記溫特附近黑暗中的怪物（js/equipment.js）
-  drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕
-  // 選好建築並移到地圖上時，在預覽圖上方提示快捷鍵：［R］旋轉、［ESC］取消（取消後就切回槍）。
-  if (hoverCell && G.running && G.selType && G.selType.startsWith('build:')) {
-    const ob = buildableById(G.selType.slice(6));
-    if (ob) {
-      const v = ob[buildOrient], [c, r] = hoverCell;
-      const lines = ['［R］旋轉', '［ESC］取消'];
-      const LINE_GAP = 4, PAD_X = 7, PAD_Y = 5, RADIUS = 8;   // 兩行字的間距、深色框左右／上下留白、四個角的圓角（小一點，整體還是方塊）
-      ctx.save();
-      ctx.font = 'bold 10px "Microsoft JhengHei", sans-serif';
-      ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
-      // 用字「實際畫出來」的範圍來置中（全形括號左右有留白，直接用字寬置中會偏一邊）
-      const ms = lines.map(t => ctx.measureText(t));
-      const inkW = m => m.actualBoundingBoxLeft + m.actualBoundingBoxRight;
-      const ascent = Math.max(...ms.map(m => m.actualBoundingBoxAscent));    // 每行字頂到基線
-      const descent = Math.max(...ms.map(m => m.actualBoundingBoxDescent));  // 基線到每行字底
-      const lineH = ascent + descent;
-      const textH = lines.length * lineH + (lines.length - 1) * LINE_GAP;
-      const boxW = Math.max(...ms.map(inkW)) + PAD_X * 2;
-      const boxH = textH + PAD_Y * 2;
-      const labelX = OX + (c + v.w / 2) * CELL;
-      const boxTop = Math.max(OY + 4, OY + r * CELL - 6 - boxH);
-      ctx.fillStyle = 'rgba(10, 16, 23, .88)';
-      ctx.beginPath();
-      ctx.roundRect(labelX - boxW / 2, boxTop, boxW, boxH, RADIUS);
-      ctx.fill();
-      ctx.fillStyle = '#f1f7fc';
-      ms.forEach((m, i) => {
-        const x = labelX - inkW(m) / 2 + m.actualBoundingBoxLeft;              // 左右置中
-        const y = boxTop + PAD_Y + i * (lineH + LINE_GAP) + ascent;            // 上下置中
-        ctx.fillText(lines[i], x, y);
-      });
-      ctx.restore();
-    }
-  }
-  // 目標框畫在黑幕上方，黑暗區域也能清楚看到所選格子。
-  if (actionCell) {
-    const [ac, ar] = actionCell, ax = OX + ac * CELL, ay = OY + ar * CELL;
-    ctx.fillStyle = 'rgba(143,211,255,.13)'; ctx.fillRect(ax + 1, ay + 1, CELL - 2, CELL - 2);
-    ctx.strokeStyle = '#9fddff'; ctx.lineWidth = 2; ctx.setLineDash([5, 4]);
-    ctx.strokeRect(ax + 2, ay + 2, CELL - 4, CELL - 4); ctx.setLineDash([]);
-  }
-  ctx.restore();   // 世界座標畫完，回到螢幕座標（下面的提示固定在畫面上）
-  // 指派巡邏位置中：畫面上方顯示提示
-  if (assigning) {
-    ctx.fillStyle = 'rgba(20,25,35,.75)'; ctx.fillRect(0, 0, cv.width, 44);
-    ctx.fillStyle = '#ffd479'; ctx.font = 'bold 18px sans-serif'; ctx.textAlign = 'center';
-    ctx.fillText('🎯 點擊地圖，指定「' + TYPES[assigning.type].name + '」的巡邏位置（Esc 取消）', cv.width / 2, 29);
-  }
-  // 玩家受擊：畫面四周紅暈快速閃現後淡出（同《苦艾與甘露》的受擊回饋）。
-  if ((G.damageVignetteT || 0) > 0) {
-    const elapsed = 1 - G.damageVignetteT / .45;
-    const strength = elapsed < .25 ? elapsed / .25 : Math.max(0, 1 - (elapsed - .25) / .75);
-    const radius = Math.max(cv.width, cv.height) * .72;
-    const vignette = ctx.createRadialGradient(cv.width / 2, cv.height / 2, radius * .35, cv.width / 2, cv.height / 2, radius);
-    vignette.addColorStop(0, 'rgba(170,0,0,0)');
-    vignette.addColorStop(.62, `rgba(190,0,0,${.08 * strength})`);
-    vignette.addColorStop(1, `rgba(210,0,0,${.72 * strength})`);
-    ctx.fillStyle = vignette; ctx.fillRect(0, 0, cv.width, cv.height);
-  }
-  const lowEdge = lowHpPulse();   // 低血量：畫面四周跟著心跳閃紅光
-  if (lowEdge > .01) {
-    // 橢圓形的紅暈：畫面比較寬，用圓形的話上下邊幾乎沒有紅光 → 把圓壓扁成橢圓，上下也看得到（topBottom 越小，上下越紅）
-    const radius = cv.width * .59, a = LOW_HP_FX.edge * lowEdge, squash = cv.height / cv.width * LOW_HP_FX.topBottom;
-    ctx.save(); ctx.translate(cv.width / 2, cv.height / 2); ctx.scale(1, squash);
-    const v = ctx.createRadialGradient(0, 0, radius * .5, 0, 0, radius);
-    v.addColorStop(0, 'rgba(170,0,0,0)'); v.addColorStop(.45, `rgba(195,0,0,${(.35 * a).toFixed(3)})`); v.addColorStop(1, `rgba(215,0,0,${a.toFixed(3)})`);
-    ctx.fillStyle = v; ctx.fillRect(-cv.width / 2, -cv.height / 2 / squash, cv.width, cv.height / squash);
-    ctx.restore();
-  }
-  if (typeof drawNpcChatOffscreen === 'function') drawNpcChatOffscreen(ctx, cv);   // 閒聊的人在畫面外：邊緣的方向箭頭（js/npc-chats.js）
-  drawBerserkFxScreen(ctx, cv);   // 哨兵汙染偏高：畫面四周紫色暗角；暴走瞬間閃暗紅
-  if (typeof drawSmilerScreenFlash === 'function') drawSmilerScreenFlash(ctx, cv);   // 被 Smiler 咬：畫面邊框閃紅（js/smiler.js）
-  drawBaseHpTopBar(ctx, cv);   // 戰鬥區域：畫面最上方的基地血條
-  if (typeof drawCoreBossUI === 'function') drawCoreBossUI(ctx, cv);   // 異質核心的 BOSS 血條、甦醒大橫幅（js/core-frenzy.js）
-  drawFieldMemberLocator();
-}
-// 戰鬥區域：畫面最上方（離上緣 2px）的基地血條。規則跟基地身上的血條一樣（目前血量 / 總血量，依剩餘 HP 變色）
-// 高度只有 18px，在異質核心的 BOSS 血條（標題約從 40px 開始）上面，不會擋到它
-const BASE_TOP_BAR = { top: 2, h: 12, maxW: 520 };
-function drawBaseHpTopBar(ctx, cv) {
-  if (!G || MAP_SAFE || !G.obstacles) return;
-  const o = G.obstacles.find(b => b.isBase); if (!o || !o.maxhp) return;
-  const ratio = Math.max(0, Math.min(1, o.hp / o.maxhp)), B = BASE_TOP_BAR;
-  const w = Math.min(B.maxW, cv.width * .45), x = (cv.width - w) / 2, y = B.top + 3;   // y＝血條本體（外框比它多 3px）
-  ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,.82)'; roundRect(x - 3, B.top, w + 6, B.h + 6, 4); ctx.fill();
-  ctx.fillStyle = '#352d2d'; roundRect(x, y, w, B.h, 2); ctx.fill();
-  ctx.fillStyle = ratio > 0.5 ? '#59d26f' : (ratio > 0.25 ? '#f0c54d' : '#ef5b5b');
-  if (ratio > 0) { roundRect(x, y, w * ratio, B.h, 2); ctx.fill(); }
-  ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-  const label = '基地 HP ' + Math.max(0, Math.ceil(o.hp)) + ' / ' + o.maxhp;
-  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(label, cv.width / 2, y + B.h / 2 + 1);
-  ctx.fillStyle = '#fff'; ctx.fillText(label, cv.width / 2, y + B.h / 2 + 1);
-  ctx.restore();
-}
-function roundRect(x, y, w, h, r) {
-  ctx.beginPath(); ctx.moveTo(x + r, y);
-  ctx.arcTo(x + w, y, x + w, y + h, r); ctx.arcTo(x + w, y + h, x, y + h, r);
-  ctx.arcTo(x, y + h, x, y, r); ctx.arcTo(x, y, x + w, y, r); ctx.closePath();
 }
