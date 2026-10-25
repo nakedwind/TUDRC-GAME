@@ -54,7 +54,7 @@ const ACHIEVEMENT_DATA = {
     { "id": "broke_in_battle", "group": "隱藏成就", "name": "孤注一擲", "stat": "brokeInBattle", "goal": 1, "secret": true, "desc": "在戰鬥中花完所有經費", "note": "戰鬥中蓋建築或在後室商店買東西，把經費花到 0。" },
     { "id": "idle_30min", "group": "隱藏成就", "name": "沉思者", "stat": "longestIdle", "goal": 30, "secret": true, "desc": "待在原地不動 30 分鐘" },
     { "id": "almond_50", "group": "隱藏成就", "name": "杏好有你", "stat": "almondInBattle", "goal": 50, "secret": true, "desc": "在一場戰鬥中使用 50 瓶杏仁水" },
-    { "id": "acid_death_30", "group": "隱藏成就", "name": "我就知道是你，又是你，你最爛", "stat": "acidDeaths", "goal": 30, "secret": true, "desc": "被阿瓦倫的腐蝕波及導致死亡 30 次" },
+    { "id": "acid_death_30", "group": "隱藏成就", "name": "我就知道是你，又是你，你最爛", "stat": "acidDeaths", "goal": 5, "secret": true, "desc": "被阿瓦倫的腐蝕波及導致死亡 5 次" },
     { "id": "all_white_eye", "group": "隱藏成就", "name": "啾！啾啾～", "stat": "allWear:bird-green", "goal": 1, "secret": true, "desc": "讓全員戴上綠繡眼頭飾" },
     { "id": "own_bed", "group": "隱藏成就", "name": "嗚呼～超大雙人床！", "stat": "ownBed", "goal": 1, "secret": true, "desc": "溫特第一次躺自己的床" },
     { "id": "pistol_50000", "group": "隱藏成就", "name": "聽我說，這比魔法好用！", "stat": "pistolDamage", "goal": 50000, "secret": true, "desc": "溫特用手槍造成的傷害累計達到 50,000 點" },

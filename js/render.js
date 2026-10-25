@@ -33,21 +33,26 @@ function drawObstacle(o) {
     }
     else { ctx.fillStyle = '#7a5a3a'; roundRect(x + 3, y + 3, w - 6, h - 6, 5); ctx.fill(); ctx.strokeStyle = '#5a4128'; ctx.lineWidth = 2; ctx.stroke(); }
   }
-  if (o.ore && typeof drawOreGlow === 'function') drawOreGlow(ctx, o, x, y, w, h);   // 被照亮時結晶發出紫光（js/ore.js）
+  // 地圖上的異質礦：發光、閃白都要畫在圖章的位置，並跟著圖章翻轉／旋轉
+  // mapSource：格子素材是 "圖層:c,r" 字串，圖章素材是圖章物件
+  const s = o.ore && o.mapSource && typeof o.mapSource === 'object' ? o.mapSource : null;
+  const t = o.ore && o.mapTileId ? mapTileById(o.mapTileId) : null;
+  const sx = s ? OX + s.c * CELL + (s.ox || 0) + shX : x, sy = s ? OY + s.r * CELL + (s.oy || 0) + shY : y;
+  const sw = s ? mapStampW(s, t) * CELL : t ? CELL : w, sh = s ? mapStampH(s, t) * CELL : t ? CELL : h;   // 格子素材固定畫一格大
+  const rot = s ? mapStampTurn(s) : 0, iw = rot % 2 ? sh : sw, ih = rot % 2 ? sw : sh;
+  const inStamp = draw => {   // draw(x, y, w, h)：在圖章翻轉／旋轉後的座標裡畫
+    if (s && (s.fx || s.fy || rot)) { ctx.save(); ctx.translate(sx + sw / 2, sy + sh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); draw(-iw / 2, -ih / 2, iw, ih); ctx.restore(); }
+    else draw(sx, sy, sw, sh);
+  };
+  if (o.ore && typeof drawOreGlow === 'function') inStamp((gx, gy, gw, gh) => drawOreGlow(ctx, o, gx, gy, gw, gh));   // 被照亮時結晶發出紫光（js/ore.js）
   // 手槍打中異質礦：礦石的形狀閃一下白（ORE_GUN_FLASH 毫秒內淡掉）
   const gunFlash = o.ore && o.gunFlashAt ? 1 - (performance.now() - o.gunFlashAt) / ORE_GUN_FLASH.ms : 0;
   if (gunFlash > 0 && typeof flashSprite === 'function') {
-    // mapSource：格子素材是 "圖層:c,r" 字串，圖章素材是圖章物件
-    const s = o.mapSource && typeof o.mapSource === 'object' ? o.mapSource : null;
-    const t = o.mapTileId ? mapTileById(o.mapTileId) : null, im = t ? tileImage(t) : img;
+    const im = t ? tileImage(t) : img;
     const sil = im && im.complete !== false && (im.naturalWidth || im.width) ? flashSprite(im, '#ffffff') : null;
     if (sil) {
-      const sx = s ? OX + s.c * CELL + (s.ox || 0) + shX : x, sy = s ? OY + s.r * CELL + (s.oy || 0) + shY : y;
-      const sw = s ? mapStampW(s, t) * CELL : t ? CELL : w, sh = s ? mapStampH(s, t) * CELL : t ? CELL : h;   // 格子素材固定畫一格大
       ctx.save(); ctx.globalAlpha = ORE_GUN_FLASH.alpha * gunFlash; ctx.imageSmoothingEnabled = false;
-      const rot = s ? mapStampTurn(s) : 0, iw = rot % 2 ? sh : sw, ih = rot % 2 ? sw : sh;   // 旋轉過的圖章：閃光也要跟著轉
-      if (s && (s.fx || s.fy || rot)) { ctx.translate(sx + sw / 2, sy + sh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); ctx.drawImage(sil, -iw / 2, -ih / 2, iw, ih); }
-      else ctx.drawImage(sil, sx, sy, sw, sh);
+      inStamp((fx, fy, fw, fh) => ctx.drawImage(sil, fx, fy, fw, fh));
       ctx.restore();
     }
   }
@@ -1071,6 +1076,7 @@ function draw() {
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
+    else if (ammoRefillNearPlayer()) { const c = ammoRefillNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }   // 營地的補彈藥箱（js/flare.js）
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '打開彈藥箱'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）

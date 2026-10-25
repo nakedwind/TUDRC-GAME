@@ -114,16 +114,10 @@ function updateSmilers(dt) {
     if (v.darkT < SMILER.grace || v.smilerCd > 0 || smilers.some(s => s.victim === v)) continue;
     const rate = Math.min(SMILER.biteMax, SMILER.biteRate + (v.darkT - SMILER.grace) * SMILER.biteRamp);
     if (Math.random() < rate * dt) {
-      // 順順宮平安符（道具）：溫特要被咬的時候自動用掉，擋下這一次
-      if (v === G.player && (supplyInventory.get('charm') || 0) > 0) {
-        if (typeof consumeItem === 'function') consumeItem('charm');
-        v.smilerCd = Math.max(v.smilerCd || 0, 8); v.darkT = 0;
-        flash('🧧 平安符擋下了！', v.x, v.y - 60, '#ffd479', 2.2);
-        if (typeof sfx === 'function') sfx('soothe');
-        G.effects.push({ ring: true, x: v.x, y: v.y - 20, r: 8, r2: 46, life: .45, life0: .45, color: '#ffd479' });
-        continue;
-      }
-      startSmilerBite(v);
+      // 順順宮平安符（道具）：溫特要被咬的時候自動用掉，擋下這一次（咬人動畫、打擊效果照樣播，只是不扣 HP；smilerBite 處理）
+      const charmed = v === G.player && (supplyInventory.get('charm') || 0) > 0;
+      if (charmed && typeof consumeItem === 'function') consumeItem('charm');
+      startSmilerBite(v, charmed);
     }
   }
   // ---- 動畫 ----
@@ -144,15 +138,15 @@ function updateSmilers(dt) {
   }
   smilers = smilers.filter(s => !s.fading || s.fadeT < s.fadeDur);
 }
-function startSmilerBite(v) {
+function startSmilerBite(v, charmed = false) {   // charmed：平安符擋下，照樣咬但不扣 HP
   const a = Math.random() * Math.PI * 2;
-  smilers.push({ kind: 'bite', victim: v, ox: Math.cos(a) * 26, oy: Math.sin(a) * 18 - 10, t: 0 });
+  smilers.push({ kind: 'bite', victim: v, ox: Math.cos(a) * 26, oy: Math.sin(a) * 18 - 10, t: 0, charmed });
 }
 function smilerBite(v, s) {
   v.smilerCd = SMILER.biteCd;
   if (v.hp <= 0) return;
-  const isPlayer = v === G.player;
-  const dmg = isPlayer ? (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SMILER.playerDmg) : SMILER.playerDmg) : SMILER.sentryDmg * (1 - sentryDefense(v));
+  const isPlayer = v === G.player, charmed = s && s.charmed;
+  const dmg = charmed ? 0 : isPlayer ? (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SMILER.playerDmg) : SMILER.playerDmg) : SMILER.sentryDmg * (1 - sentryDefense(v));
   v.hp = Math.max(0, v.hp - dmg);
   v.hitT = Math.max(v.hitT || 0, .3); v.hitColor = '#ff3b4f';
   if (isPlayer) playPlayerHit(1, true);   // 咬到溫特：跟其他怪物一樣用溫特被打中的音效
@@ -163,8 +157,15 @@ function smilerBite(v, s) {
   addShake(isPlayer ? SMILER.shakePlayer : SMILER.shakeTeammate);
   const strength = isPlayer ? 1 : SMILER.flashTeammate;
   if (strength > 0 && (!smilerScreenFlash || smilerScreenFlash.strength <= strength)) smilerScreenFlash = { t: 0, strength };
-  flashDmg('-' + Math.round(dmg), v.x, v.y - 30, '#ff5b6e');
   if (!smilerWarned) { smilerWarned = true; systemNotice('黑暗裡有東西……待在亮處！', true); }
+  if (charmed) {   // 平安符擋下：不扣血、不跳傷害數字，改成金色提示
+    v.smilerCd = Math.max(v.smilerCd, 8); v.darkT = 0;
+    flash('🧧 平安符擋下了！', v.x, v.y - 60, '#ffd479', 2.2);
+    if (typeof sfx === 'function') sfx('soothe');
+    G.effects.push({ ring: true, x: v.x, y: v.y - 20, r: 8, r2: 46, life: .45, life0: .45, color: '#ffd479' });
+    return;
+  }
+  flashDmg('-' + Math.round(dmg), v.x, v.y - 30, '#ff5b6e');
   if (isPlayer) {
     flash('被咬了！', v.x, v.y - 58, '#ff5b6e');
     if (v.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', v.x, v.y - 58, '#ff5b6e'); lose('player', '在黑暗中被 Smiler 咬傷'); }

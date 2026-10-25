@@ -3,7 +3,7 @@
    - 滾輪（滑鼠在遊戲畫面上）換子彈，只會換到拿到過、而且出勤前裝進彈匣的子彈（js/magazine.js）；特殊子彈打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的。
    - 照明彈：朝滑鼠方向打出去（最遠 FLARE.range 格，碰到牆會停在牆前），落地燃燒一段時間。
      是「真的光」：照亮的地方哨兵看得到怪、可以蓋建築、溫特的槍也能瞄準。怪物不會被它吸引。
-   - 照明彈打完：走到地圖上的彈藥箱按 Space 補滿。
+   - 照明彈打完：走到營地的補彈藥箱按 Space 補到 20 發（AMMO_REFILL）。能打開的彈藥箱（ammo-crate）是另一種，開一次拿裡面的東西。
    - 子彈數量存在 equipState.bullets（js/equipment.js，跟裝備一起存）；燃燒彈、麻醉彈的效果在 js/special-guns.js，漆彈在 js/game.js 的 updatePlayerAttack。
    數值都在下面的表格。
 */
@@ -18,7 +18,9 @@ const FLARE = {
 // 滾輪切換的順序
 // special＝效果寫在 js/special-guns.js 的子彈（一般子彈、照明彈、螢光漆彈另外處理）
 const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
-const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_field_ammo_crate_open'], emptyId: 'tile_field_ammo_crate_empty' };
+const AMMO_CRATE = { ids: ['tile_field_ammo_crate'], emptyId: 'tile_field_ammo_crate_empty' };   // 能打開、開出東西的彈藥箱（ammo-crate.png）
+// 營地的補彈藥箱（ammo-crate-open-02.png；地圖上放的「彈藥箱（打開）」也算）：按 Space 把照明彈、螢光漆彈補到 to 發，已經有 to 發以上就不補，可以一直補
+const AMMO_REFILL = { ids: ['tile_field_ammo_crate_open'], file: /ammo-crate-open-02\.png$/, bullets: ['flare', 'paint'], to: 20 };
 // 空的彈藥箱：素材庫（data/tiles.js）沒有這張時用這份，編輯器存檔蓋掉素材庫也不會變回關著的圖
 const AMMO_CRATE_EMPTY_TILE = { id: 'tile_field_ammo_crate_empty', name: '彈藥箱（空）', role: 'floor', file: 'images/field-camp/ammo-crate_empty.png', w: 1, h: 1 };
 
@@ -208,6 +210,20 @@ function useAmmoCrateNearPlayer() {
   finally { if (typeof itemIntroFromLocker !== 'undefined') itemIntroFromLocker = false; }
   if (typeof itemIntroCount !== 'undefined' && itemIntroCount === before) flash('空的', crate.x, crate.top - 8, '#dce6ed', 1.6);
   updateHUD(); saveGame();
+  return true;
+}
+// ---- 營地的補彈藥箱：照明彈、螢光漆彈補到 AMMO_REFILL.to 發（拿到過的才補）----
+const ammoRefillNearPlayer = () => mapBoxNearPlayer('refill');   // 判定範圍：js/camp-interactions.js 的 MAP_BOX
+function useAmmoRefillNearPlayer() {
+  const crate = ammoRefillNearPlayer(); if (!crate) return false;
+  const s = bulletState(), got = [];
+  for (const id of AMMO_REFILL.bullets) {
+    if (!BULLETS[id] || !s.owned[id]) continue;
+    const n = AMMO_REFILL.to - (s.n[id] || 0); if (n <= 0) continue;   // 已經有 to 發以上：不補（也不會變少）
+    s.n[id] = AMMO_REFILL.to; got.push(BULLETS[id].name + ' +' + n);
+  }
+  if (got.length) { bulletSave(); sfx('reload'); flash('補充彈藥：' + got.join('、'), crate.x, crate.top - 8, '#ffd27a', 1.8); }
+  else { sfx('error'); flash('彈藥已經補滿了', crate.x, crate.top - 8, '#dce6ed', 1.4); }
   return true;
 }
 // 開過的關著的彈藥箱畫成空箱（js/maploader.js 會問這裡）；本來就是打開圖的彈藥箱不換圖
