@@ -368,6 +368,7 @@ function slowFactorAt(x, y, who) {
     if (c >= o.c && r >= o.r && c < o.c + (o.w || 1) && r < o.r + (o.h || 1)) k = Math.min(k, o.slow[who] ?? 1);
   }
   if (typeof burrowMouseSlowAt === 'function') k = Math.min(k, burrowMouseSlowAt(x, y));   // 版權老鼠死後的洞（js/burrowing-mouse.js）
+  if (typeof waterSlowAt === 'function') k = Math.min(k, waterSlowAt(x, y));   // 走在水裡（js/water.js：素材勾了「這是水」，速度 % 在編輯器填）
   return k;
 }
 // 這個位置是不是已經有同一種建築（不擋路的建築一格只能放一個）

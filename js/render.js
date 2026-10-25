@@ -995,15 +995,17 @@ function draw() {
   // ---- 深度排序：會遮擋的地圖圖片（牆/物件）＋障礙物＋哨兵＋怪物＋玩家，一起依「底部Y」由上往下畫 ----
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
+  // 角色泡在水裡：下半身半透明＋水面波紋（js/water.js 的 drawWaded；沒載入就照常畫）
+  const wadeDraw = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
   for(const core of G.cores) if(!core.dead && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
-  for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => drawTower(t) });
-  for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : bedY != null ? bedY : npc.y + 17, draw: () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); } }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
-  for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); } });   // 狂暴的異質體腳下冒紅光
+  for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
+  for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : bedY != null ? bedY : npc.y + 17, draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
+  for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
@@ -1011,7 +1013,7 @@ function draw() {
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (typeof drawGroundItem === 'function') for (const g of G.groundItems || []) sortables.push({ y: g.y + GROUND_ITEMS.sortDy, draw: () => drawGroundItem(ctx, g) });   // 溫特從背包放在地上的東西（js/ground-items.js）
-  if (G.player) sortables.push({ y: G.player.sitting ? seatDrawY(G.player.sitting) : G.player.y + 16, draw: () => drawPlayer(G.player) });
+  if (G.player) sortables.push({ y: G.player.sitting ? seatDrawY(G.player.sitting) : G.player.y + 16, draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
   drawFlares(ctx);             // 地上燃燒的照明彈

@@ -7,7 +7,7 @@
    數值在 data/balance.js；格線在 js/config.js；尋路在 js/pathfinding.js。
 */
 const cv = document.getElementById('cv');
-const ctx = cv.getContext('2d');
+let ctx = cv.getContext('2d');   // let：畫泡在水裡的角色時，會暫時換成旁邊的空白畫布（js/water.js 的 drawWaded），畫完馬上換回來
 
 // ---- 地板 ----
 // 不再自動鋪滿地板貼圖：沒鋪素材的格子就是黑的（地板請在地圖編輯器裡鋪）

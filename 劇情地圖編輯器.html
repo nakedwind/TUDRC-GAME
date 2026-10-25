@@ -119,6 +119,13 @@
         <label>高 <input type="number" id="tileH" min="1" max="20" style="width:64px"> <span id="tileHUnit">格</span></label>
         <label id="tileColorLabel" class="hidden">顏色 <input type="color" id="tileColor"></label>
         <label style="cursor:pointer"><input type="checkbox" id="tileFlat"> 平貼地面（不遮角色）</label>
+        <!-- 水：角色走進來會泡在水裡（下半身半透明、走路變慢；js/water.js）。數字都用 % -->
+        <label style="cursor:pointer"><input type="checkbox" id="tileWater"> 這是水（角色會泡在水裡）</label>
+        <span id="tileWaterOpts" class="hidden" style="display:inline-flex;align-items:center;gap:10px;flex-wrap:wrap">
+          <label title="水面在角色身高的幾 %（50＝到腰）">水深 <input type="number" id="tileWaterDepth" min="5" max="95" step="5" style="width:56px"> %</label>
+          <label title="在水裡走路是平常速度的幾 %（100＝不變慢）">水中走路速度 <input type="number" id="tileWaterSpeed" min="10" max="100" step="5" style="width:56px"> %</label>
+          <label title="水面下的身體看得多清楚（0＝完全看不到、100＝跟水面上一樣）">水下看得見 <input type="number" id="tileWaterSee" min="0" max="100" step="5" style="width:56px"> %</label>
+        </span>
       </div>
 
       <!-- 磚塊調色盤（由程式產生：內建地板/牆/障礙物 + 你加入的磚塊）-->
@@ -210,7 +217,7 @@
     };
   </script>
   <script src="js/map-editor-store.js?v=story-20261021"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
-  <script>EditorStore.boot(["js/map-editor.js?v=ammo-loot3-20261025", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021"]);</script>
+  <script>EditorStore.boot(["js/map-editor.js?v=water-20261026", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021"]);</script>
   <script src="js/editor-nav.js?v=achv-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

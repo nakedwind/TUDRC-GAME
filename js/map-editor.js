@@ -261,6 +261,7 @@ function mergeDefaultAssetPack(match, storageKey, idOnly = false) {
     if (existing) {
       existing.file = t.file; existing.w = t.w; existing.h = t.h;
       if (t.flat) existing.flat = true; else delete existing.flat;   // 讓「平貼地面」標記同步到編輯器暫存，匯出才不會掉
+      if (t.water) existing.water = { ...t.water }; else delete existing.water;   // 「這是水」的設定也一樣
       if (t.baseHp) {
         existing.baseHp = t.baseHp;
         existing.baseDepth = t.baseDepth;
@@ -1751,6 +1752,7 @@ function updateFlatUI() {   // 名稱沿用；現在也負責寬高欄位
   const t = brushTile();
   if (t && !t.builtin) {
     tileFlatCb.checked = !!t.flat;
+    updateWaterUI(t);
     if (t.systemColor) {
       tileWInput.value = tilePixelW(t); tileHInput.value = tilePixelH(t);
       tileWInput.min = tileHInput.min = 20; tileWInput.max = tileHInput.max = 2000;
@@ -1770,6 +1772,31 @@ if (tileFlatCb) tileFlatCb.addEventListener('change', () => {
   if (tileFlatCb.checked) t.flat = true; else delete t.flat;
   saveTiles(); draw();
   setStatus('「' + t.name + '」' + (t.flat ? '已設為平貼地面（不遮角色）' : '已設為立體物（會遮角色）'), '#8fd3ff');
+});
+// ---- 水：勾「這是水」→ 角色走進這個素材的範圍會泡在水裡（遊戲裡的效果在 js/water.js）----
+// 存在素材的 water：{ depth：水深（角色身高的 %）, speed：水中走路速度（%）, see：水下看得見（%） }
+const WATER_EDIT_DEFAULT = { depth: 50, speed: 70, see: 45 };
+const WATER_EDIT_RANGE = { depth: [5, 95], speed: [10, 100], see: [0, 100] };
+const tileWaterCb = document.getElementById('tileWater'), tileWaterOpts = document.getElementById('tileWaterOpts');
+const tileWaterInputs = { depth: document.getElementById('tileWaterDepth'), speed: document.getElementById('tileWaterSpeed'), see: document.getElementById('tileWaterSee') };
+function updateWaterUI(t) {
+  if (!tileWaterCb) return;
+  tileWaterCb.checked = !!t.water;
+  tileWaterOpts.classList.toggle('hidden', !t.water);
+  for (const [k, el] of Object.entries(tileWaterInputs)) if (el && document.activeElement !== el) el.value = t.water ? (t.water[k] ?? WATER_EDIT_DEFAULT[k]) : WATER_EDIT_DEFAULT[k];
+}
+if (tileWaterCb) tileWaterCb.addEventListener('change', () => {
+  const t = brushTile(); if (!t || t.builtin) return;
+  pushUndo();
+  if (tileWaterCb.checked) t.water = { ...WATER_EDIT_DEFAULT }; else delete t.water;
+  updateWaterUI(t); saveTiles(); draw();
+  setStatus('「' + t.name + '」' + (t.water ? '設為水：水深 ' + t.water.depth + '%、走路速度 ' + t.water.speed + '%、水下看得見 ' + t.water.see + '%' : '不再是水'), '#8fd3ff');
+});
+for (const [k, el] of Object.entries(tileWaterInputs)) if (el) el.addEventListener('change', () => {
+  const t = brushTile(); if (!t || t.builtin || !t.water) return;
+  const [lo, hi] = WATER_EDIT_RANGE[k], v = Math.max(lo, Math.min(hi, Math.round(+el.value || WATER_EDIT_DEFAULT[k])));
+  pushUndo(); t.water[k] = v; el.value = v; saveTiles();
+  setStatus('「' + t.name + '」水深 ' + t.water.depth + '%、走路速度 ' + t.water.speed + '%、水下看得見 ' + t.water.see + '%', '#8fd3ff');
 });
 function setTileSize() {
   const t = brushTile(); if (!t || t.builtin) return;
