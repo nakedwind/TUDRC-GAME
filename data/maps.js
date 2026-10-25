@@ -12535,273 +12535,36 @@ const BATTLE_MAPS = [
     "desc": "",
     "layers": {
       "floor": {
-        "27,16": "floor",
-        "27,17": "floor",
-        "26,17": "floor",
-        "4,18": "floor",
-        "4,19": "floor",
-        "4,20": "floor",
-        "4,21": "floor",
-        "5,18": "floor",
-        "5,19": "floor",
-        "5,20": "floor",
-        "5,21": "floor",
-        "6,7": "floor",
-        "6,8": "floor",
-        "6,9": "floor",
         "6,10": "tile_poolcore_floor_blue",
         "6,11": "tile_poolcore_floor_blue",
         "6,12": "tile_poolcore_floor_blue",
-        "6,13": "floor",
-        "6,14": "floor",
-        "6,18": "floor",
-        "6,19": "floor",
-        "6,20": "floor",
-        "6,21": "floor",
-        "7,7": "floor",
-        "7,8": "floor",
-        "7,9": "floor",
         "7,10": "tile_poolcore_floor_blue",
         "7,11": "tile_poolcore_floor_blue",
         "7,12": "tile_poolcore_floor_blue",
-        "7,13": "floor",
-        "7,14": "floor",
-        "7,18": "floor",
-        "7,19": "floor",
-        "7,20": "floor",
-        "7,21": "floor",
-        "8,7": "floor",
-        "8,8": "floor",
-        "8,9": "floor",
         "8,10": "tile_poolcore_floor_blue",
         "8,11": "tile_poolcore_floor_blue",
         "8,12": "tile_poolcore_floor_blue",
-        "8,13": "floor",
-        "8,14": "floor",
-        "8,18": "floor",
-        "8,19": "floor",
-        "8,20": "floor",
-        "8,21": "floor",
-        "9,7": "floor",
-        "9,8": "floor",
-        "9,9": "floor",
         "9,10": "tile_poolcore_floor_blue",
         "9,11": "tile_poolcore_floor_blue",
         "9,12": "tile_poolcore_floor_blue",
-        "9,13": "floor",
-        "9,14": "floor",
-        "9,18": "floor",
-        "9,19": "floor",
-        "9,20": "floor",
-        "9,21": "floor",
-        "10,7": "floor",
-        "10,8": "floor",
-        "10,9": "floor",
         "10,10": "tile_poolcore_floor_blue",
         "10,11": "tile_poolcore_floor_blue",
         "10,12": "tile_poolcore_floor_blue",
-        "10,13": "floor",
-        "10,14": "floor",
-        "10,18": "floor",
-        "10,19": "floor",
-        "10,20": "floor",
-        "10,21": "floor",
-        "11,7": "floor",
-        "11,8": "floor",
-        "11,9": "floor",
         "11,10": "tile_poolcore_floor_blue",
         "11,11": "tile_poolcore_floor_blue",
         "11,12": "tile_poolcore_floor_blue",
-        "11,13": "floor",
-        "11,14": "floor",
-        "11,18": "floor",
-        "11,19": "floor",
-        "11,20": "floor",
-        "11,21": "floor",
-        "12,7": "floor",
-        "12,8": "floor",
-        "12,9": "floor",
         "12,10": "tile_poolcore_floor_blue",
         "12,11": "tile_poolcore_floor_blue",
         "12,12": "tile_poolcore_floor_blue",
-        "12,13": "floor",
-        "12,14": "floor",
-        "12,17": "floor",
-        "12,18": "floor",
-        "12,19": "floor",
-        "12,20": "floor",
-        "13,7": "floor",
-        "13,8": "floor",
-        "13,9": "floor",
         "13,10": "tile_poolcore_floor_blue",
         "13,11": "tile_poolcore_floor_blue",
         "13,12": "tile_poolcore_floor_blue",
-        "13,13": "floor",
-        "13,14": "floor",
-        "14,7": "floor",
-        "14,8": "floor",
-        "14,9": "floor",
         "14,10": "tile_poolcore_floor_blue",
         "14,11": "tile_poolcore_floor_blue",
         "14,12": "tile_poolcore_floor_blue",
-        "14,13": "floor",
-        "14,14": "floor",
-        "15,7": "floor",
-        "15,8": "floor",
-        "15,9": "floor",
         "15,10": "tile_poolcore_floor_blue",
         "15,11": "tile_poolcore_floor_blue",
-        "15,12": "tile_poolcore_floor_blue",
-        "15,13": "floor",
-        "15,14": "floor",
-        "17,5": "floor",
-        "17,14": "floor",
-        "26,15": "floor",
-        "26,16": "floor",
-        "27,15": "floor",
-        "33,11": "floor",
-        "33,12": "floor",
-        "33,13": "floor",
-        "33,14": "floor",
-        "34,12": "floor",
-        "34,13": "floor",
-        "34,14": "floor",
-        "35,12": "floor",
-        "35,13": "floor",
-        "35,14": "floor",
-        "36,14": "floor",
-        "36,13": "floor",
-        "36,12": "floor",
-        "37,5": "floor",
-        "37,6": "floor",
-        "37,7": "floor",
-        "37,8": "floor",
-        "37,10": "floor",
-        "37,13": "floor",
-        "37,14": "floor",
-        "37,12": "floor",
-        "37,11": "floor",
-        "4,22": "floor",
-        "5,22": "floor",
-        "6,22": "floor",
-        "7,22": "floor",
-        "9,22": "floor",
-        "10,22": "floor",
-        "37,26": "floor",
-        "11,23": "floor",
-        "10,23": "floor",
-        "9,23": "floor",
-        "8,23": "floor",
-        "7,23": "floor",
-        "6,23": "floor",
-        "5,23": "floor",
-        "4,23": "floor",
-        "8,22": "floor",
-        "11,22": "floor",
-        "11,24": "floor",
-        "10,24": "floor",
-        "9,24": "floor",
-        "8,25": "floor",
-        "6,25": "floor",
-        "5,25": "floor",
-        "4,25": "floor",
-        "4,24": "floor",
-        "5,24": "floor",
-        "6,24": "floor",
-        "7,24": "floor",
-        "8,24": "floor",
-        "11,25": "floor",
-        "9,25": "floor",
-        "6,26": "floor",
-        "4,26": "floor",
-        "5,26": "floor",
-        "7,26": "floor",
-        "8,26": "floor",
-        "9,26": "floor",
-        "7,25": "floor",
-        "10,25": "floor",
-        "10,26": "floor",
-        "11,26": "floor",
-        "12,26": "floor",
-        "5,27": "floor",
-        "6,27": "floor",
-        "7,27": "floor",
-        "9,27": "floor",
-        "10,27": "floor",
-        "11,27": "floor",
-        "12,27": "floor",
-        "37,27": "floor",
-        "8,27": "floor",
-        "4,27": "floor",
-        "4,28": "floor",
-        "4,29": "floor",
-        "5,29": "floor",
-        "5,28": "floor",
-        "6,29": "floor",
-        "7,29": "floor",
-        "7,28": "floor",
-        "6,28": "floor",
-        "8,28": "floor",
-        "9,28": "floor",
-        "10,28": "floor",
-        "11,28": "floor",
-        "12,28": "floor",
-        "37,28": "floor",
-        "37,29": "floor",
-        "12,29": "floor",
-        "11,29": "floor",
-        "10,29": "floor",
-        "9,29": "floor",
-        "8,29": "floor",
-        "7,30": "floor",
-        "8,30": "floor",
-        "9,30": "floor",
-        "10,30": "floor",
-        "11,30": "floor",
-        "1,30": "floor",
-        "0,30": "floor",
-        "2,30": "floor",
-        "3,30": "floor",
-        "4,30": "floor",
-        "5,30": "floor",
-        "6,30": "floor",
-        "0,23": "floor",
-        "0,24": "floor",
-        "0,29": "floor",
-        "1,29": "floor",
-        "2,28": "floor",
-        "2,27": "floor",
-        "1,27": "floor",
-        "1,26": "floor",
-        "1,25": "floor",
-        "1,24": "floor",
-        "1,23": "floor",
-        "1,28": "floor",
-        "0,28": "floor",
-        "0,27": "floor",
-        "0,26": "floor",
-        "0,25": "floor",
-        "3,18": "floor",
-        "3,19": "floor",
-        "3,20": "floor",
-        "3,21": "floor",
-        "3,22": "floor",
-        "3,23": "floor",
-        "3,24": "floor",
-        "3,25": "floor",
-        "3,26": "floor",
-        "3,27": "floor",
-        "3,28": "floor",
-        "3,29": "floor",
-        "2,29": "floor",
-        "2,26": "floor",
-        "2,24": "floor",
-        "2,25": "floor",
-        "22,1": "floor",
-        "22,2": "floor",
-        "4,3": "floor",
-        "17,3": "floor",
-        "37,2": "floor"
+        "15,12": "tile_poolcore_floor_blue"
       },
       "ground": {
         "5,14": "tile_poolcore_floor_pale",
@@ -14703,6 +14466,738 @@ const BATTLE_MAPS = [
         "c": 0,
         "r": 18,
         "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 0,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 0,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 39,
+        "r": 0,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 39,
+        "r": 3,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 6,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 9,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 12,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 15,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 18,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 0,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 0,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 0,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 0,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 3,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 6,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 9,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 12,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 21,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 24,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 36,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 27,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 33,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 30,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 27,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 24,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 21,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 18,
+        "r": 30,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_poolcore_floor_l",
+        "c": 15,
+        "r": 30,
+        "layer": "ground4"
       }
     ],
     "solid": [
@@ -15082,12 +15577,12 @@ const BATTLE_MAPS = [
     "spawnZone": [],
     "layerOrder": [
       {
-        "id": "floor",
-        "name": "🟫 地板"
-      },
-      {
         "id": "ground4",
         "name": "池核地板"
+      },
+      {
+        "id": "floor",
+        "name": "🟫 地板"
       },
       {
         "id": "ground",

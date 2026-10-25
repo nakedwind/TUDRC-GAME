@@ -627,12 +627,54 @@ function restoreEditorSnapshot(value) {
   checkResult = null;
   applyMapSize(); refreshMapSelect(); renderPalette(); loadRules(); draw();
 }
+// ---- 複製／貼上（Ctrl+C／Ctrl+V）：把選取的物件（可以多選）整組複製，貼在滑鼠所在的格子 ----
+// ・貼上時整組的形狀不變：整組最左上的那一格對到滑鼠的格子（大圖的格內微調 ox、oy 照抄）；滑鼠不在地圖上就貼在原本那組的右邊
+// ・同一層同一格已經有小圖的話會蓋過去（跟貼圖一樣）；貼好的那一組會變成選取狀態，可以直接拖曳、再貼、或刪除
+// ・剪貼簿只存在這個編輯器頁面裡（可以貼到別張地圖）；Ctrl+Z 可以復原
+let editorClipboard = null;
+function copySelection() {
+  const m = curMap(), items = [];
+  for (const sel of selections) {
+    if (sel.type === 'stamp') { const s = m.stamps[sel.index]; if (s) items.push({ stamp: clone(s) }); }
+    else { const id = m.layers[sel.layer] && m.layers[sel.layer][sel.key]; if (!id) continue; const [c, r] = sel.key.split(',').map(Number); items.push({ tile: { layer: sel.layer, c, r, id } }); }
+  }
+  if (!items.length) return;
+  const cs = items.map(it => (it.stamp || it.tile).c), rs = items.map(it => (it.stamp || it.tile).r);
+  editorClipboard = { items, c0: Math.min(...cs), r0: Math.min(...rs), w: Math.max(...cs) - Math.min(...cs) + 1, from: [Math.min(...cs), Math.min(...rs)] };
+  setStatus('已複製 ' + items.length + ' 個物件（Ctrl+V 貼在滑鼠的位置）', '#7ee0c0');
+}
+function pasteClipboard() {
+  const cb = editorClipboard; if (!cb || !cb.items.length) { setStatus('還沒有複製東西（先選取，再按 Ctrl+C）', '#ffd24a'); return; }
+  const m = curMap();
+  const [tc, tr] = hoverCell || [cb.from[0] + cb.w, cb.from[1]];   // 滑鼠不在地圖上：貼在原本那組的右邊
+  const dc = tc - cb.c0, dr = tr - cb.r0, layerOk = lid => m.layers[lid] ? lid : activeLayer;   // 貼到別張地圖、沒有那個圖層：改放目前圖層
+  pushUndo();
+  const picked = []; let skipped = 0;
+  for (const it of cb.items) {
+    if (it.tile) {
+      const c = it.tile.c + dc, r = it.tile.r + dr, lid = layerOk(it.tile.layer);
+      if (!inGrid(c, r) || isLockedLayer(lid) || hiddenLayers.has(lid)) { skipped++; continue; }
+      (m.layers[lid] = m.layers[lid] || {})[c + ',' + r] = it.tile.id;
+      picked.push({ type: 'tile', layer: lid, key: c + ',' + r });
+    } else {
+      const s = clone(it.stamp); s.c += dc; s.r += dr; s.layer = layerOk(s.layer || 'top');
+      if (!inGrid(s.c, s.r) || isLockedLayer(s.layer) || hiddenLayers.has(s.layer)) { skipped++; continue; }
+      m.stamps.push(s); picked.push({ type: 'stamp', index: m.stamps.length - 1 });
+    }
+  }
+  if (brush.mode !== 'select') { brush = { mode: 'select', tile: brush.tile }; updateToolUI(); renderPalette(); }
+  selections = picked; selection = picked[picked.length - 1] || null;
+  saveMaps(); draw(); refreshSelPanel(); refreshLayerListSoon();
+  setStatus('已貼上 ' + picked.length + ' 個物件' + (skipped ? '（' + skipped + ' 個超出地圖或圖層鎖住／隱藏，沒貼）' : '') + '，Ctrl+Z 可以復原', '#7ee0c0');
+}
 window.addEventListener('keydown', e => {
   const inField = /^(input|textarea)$/i.test(e.target.tagName || '');
   if (!inField && e.key === 'Alt' && !tempTool) { e.preventDefault(); enterTemp('pick'); return; }
   if (!inField && (e.key === 'Control' || e.key === 'Meta') && !tempTool) { enterTemp('select'); return; }
   if ((e.ctrlKey || e.metaKey) && !e.shiftKey && (e.key === 'z' || e.key === 'Z')) { if (inField) return; e.preventDefault(); undo(); }
   if ((e.ctrlKey || e.metaKey) && !inField && ((e.key.toLowerCase() === 'y') || (e.shiftKey && e.key.toLowerCase() === 'z'))) { e.preventDefault(); redo(); return; }
+  if ((e.ctrlKey || e.metaKey) && !inField && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'c') { if (selections.length) { e.preventDefault(); copySelection(); } return; }   // 複製選取的物件
+  if ((e.ctrlKey || e.metaKey) && !inField && !e.shiftKey && !e.altKey && e.key.toLowerCase() === 'v') { e.preventDefault(); pasteClipboard(); return; }   // 貼在滑鼠的位置
   if (e.key === 'Delete' && !inField && selections.length) { e.preventDefault(); deleteSelection(); }
   if (!inField && (e.key === 'f' || e.key === 'F')) { e.preventDefault(); flipAction('x'); }
   // 工具快捷鍵：Q＝選取、E＝清除、I＝吸管（上下翻沒有快捷鍵，請點按鈕）
