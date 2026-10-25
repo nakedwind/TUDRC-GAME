@@ -288,6 +288,7 @@ const tmapBitsCache = new Map();   // 地圖 id → { bits: Uint8Array, open: �
 // ・還沒炸開的隱藏區（js/breakable-walls.js 的 G.hiddenAreas），炸開之後才算
 // ・可以炸開的牆：整張牆圖蓋住的格子（底下有地板磚、又沒畫擋路格，不排掉的話地圖上會凸出一塊，一看就知道那裡有東西）；
 //   炸開之後只剩牆一直擋路的格子（breakableWallSolid）不算，中間的破洞照常記
+// ・貼著上面兩種格子的牆（地板磚＋擋路格，例如隱藏通道兩側的牆）：不排掉的話走廊上會多凸出幾顆牆，一樣會露餡；炸開後恢復
 function tmapHiddenKeys(m) {
   const keys = new Set();
   if (typeof MAP === 'undefined' || MAP !== m || typeof G === 'undefined' || !G) return keys;
@@ -298,6 +299,14 @@ function tmapHiddenKeys(m) {
     const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null, w = mapTileW(t), h = mapTileH(t);
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
     for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) keys.add((c0 + dc) + ',' + (r0 + dr));
+  }
+  if (keys.size) {   // 貼著的牆（上下左右、斜角都算）
+    const solid = m._tmapSolid || (m._tmapSolid = new Set(m.solid || [])), around = [];
+    for (const k of keys) {
+      const [c, r] = k.split(',').map(Number);
+      for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) { const n = (c + dc) + ',' + (r + dr); if (solid.has(n)) around.push(n); }
+    }
+    around.forEach(k => keys.add(k));
   }
   if (typeof breakableWallSolid !== 'undefined') for (const k of breakableWallSolid) keys.add(k);
   return keys;
