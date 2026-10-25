@@ -3,6 +3,7 @@
    - 打開：門的圖片直接消失，可以通過。
    - 手動門：溫特走到門前按 Spacenter 開關（有人站在門口時不能關）。
    - 自動門：平常關著、玩家打不開；觸發條件達成時自動打開（目前：異質核心醒來）。
+   - 只是圖片（picture）：永遠關著（一樣擋路），按 Space 沒反應、不顯示提示、不會播開關門音效。
 */
 const DOOR = { radius: 58, minOverlap: 10 };   // radius＝離門多近可以按 Space；minOverlap＝門板蓋到一格多少像素才算擋那格
 let mapDoors = [];

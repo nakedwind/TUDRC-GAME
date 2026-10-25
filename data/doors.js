@@ -12,6 +12,7 @@ const DOOR_MODES = {
   chain: '鎖鏈神秘門（要異質鑰匙）',
   auto: '自動門（異質核心醒來時打開）',
   practice: '訓練室的門（關著；跟塔納對話開始訓練，在門邊結束訓練）',
+  picture: '只是圖片（永遠關著、不能開，沒有互動提示和開關門音效）',   // 照樣擋住門板下方那一格（js/doors.js）
 };
 // 上鎖的門要什麼鑰匙（物品 id，data/items.js）；random：隨機開關的門每隔幾秒（最短～最長）動一次
 const DOOR_LOCKS = { key: 'backroom-door-key', chain: 'anomaly-key' };
