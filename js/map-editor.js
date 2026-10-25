@@ -102,7 +102,7 @@ const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：�
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
-const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v3';       // 池核磁磚素材（含救生圈與水線牆；v3：資料夾改名 images/Poolcore、加地板大中小）
+const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v5';       // 池核磁磚素材（v3：資料夾改名 images/Poolcore、加地板大中小；v5：柱子 1×4）
 const STORAGE_HQ_PACK = 'tudrc_asset_pack_command_hq_v1';           // 指揮部素材包
 const STORAGE_RESEARCH_LAB_PACK = 'tudrc_asset_pack_research_lab_v1'; // 研究部素材包
 const STREET_PACK_IDS = new Set(["tile_street_ubike", "tile_street_scooter_delivery_green", "tile_street_scooter_delivery_pink", "tile_street_capsule_toy_machines", "tile_street_utility_box_painted", "tile_street_utility_box", "tile_street_folding_table", "tile_street_plastic_stool", "tile_street_plastic_stools_stacked", "tile_street_bottle_red", "tile_street_bollard_red", "tile_street_bollard_yellow", "tile_street_sign_no_entry", "tile_street_sign_stop", "tile_street_sign_scooter_lanes", "tile_street_sign_two_stage_turn", "tile_street_sign_turn_right", "tile_street_sign_no_left_turn", "tile_street_sign_speed_limit_50", "tile_street_traffic_light", "tile_street_name_sign_pole", "tile_street_crosswalk", "tile_street_area_map_board", "tile_street_stall_steak", "tile_street_stall_noodles", "tile_street_stall_drinks", "tile_mrt_exit_2", "tile_mrt_exit_2_sealed", "tile_mrt_map_kiosk", "tile_bg_backroom_wall02_dmg_crack", "tile_bg_backroom_wall02_hole2", "tile_street_claw_machine"]);
@@ -513,12 +513,17 @@ function fixMap(m) {
   m.cols = m.cols || 32; m.rows = m.rows || 18;   // 地圖大小（舊地圖沒存就用預設）
   return m;
 }
+// ---- 遊戲畫質：畫布用跟遊戲一樣的放大倍率畫（js/config.js 的 VIEW_ZOOM，1.5 倍＝一格 60px）----
+// 遊戲裡地圖放大 1.5 倍，60px 的素材剛好 1 個像素對 1 個像素；編輯器原本一格只畫 40px，
+// 60px 的素材被縮小，有的 1px 線會不見、有的會變 2px。打開這個就能看到素材在遊戲裡真正的樣子（點擊、擺放都照常）。
+const EDITOR_RES_KEY = 'tudrc_map_editor_game_res';
+let EDITOR_RES = (() => { try { return localStorage.getItem(EDITOR_RES_KEY) === '1' ? (typeof VIEW_ZOOM !== 'undefined' ? VIEW_ZOOM : 1.5) : 1; } catch (_) { return 1; } })();
 // 依目前地圖的大小調整格數與畫布（畫布太大時外框會出現捲軸）
 function applyMapSize() {
   const m = curMap();
   syncLayers(); renderLayers();   // 每張地圖的圖層可能不一樣
   COLS = m.cols; ROWS = m.rows;
-  const w = COLS * CELL, h = ROWS * CELL;
+  const w = Math.round(COLS * CELL * EDITOR_RES), h = Math.round(ROWS * CELL * EDITOR_RES);   // 遊戲畫質：畫布的像素變多，顯示大小不變
   if (cv.width !== w || cv.height !== h) {
     cv.width = w; cv.height = h;
     ctx.imageSmoothingEnabled = false;   // 改畫布大小會重置設定，要再關一次模糊
@@ -532,13 +537,13 @@ function fitZoom() {
   const availW = Math.max(120, wrap.clientWidth - 4);
   const maxHeight = parseFloat(getComputedStyle(wrap).maxHeight);
   const availH = Math.max(120, (Number.isFinite(maxHeight) ? maxHeight : window.innerHeight * 0.88) - 20);
-  return Math.max(0.1, Math.min(1, Math.min(availW / cv.width, availH / cv.height)));
+  return Math.max(0.1, Math.min(1, Math.min(availW / (COLS * CELL), availH / (ROWS * CELL))));
 }
 function applyZoom() {
   if (!editorZoom) editorZoom = fitZoom();
   cv.style.maxWidth = 'none';
-  cv.style.width = Math.round(cv.width * editorZoom) + 'px';
-  cv.style.height = Math.round(cv.height * editorZoom) + 'px';
+  cv.style.width = Math.round(COLS * CELL * editorZoom) + 'px';   // 顯示大小照地圖的格數算（遊戲畫質打開也一樣大）
+  cv.style.height = Math.round(ROWS * CELL * editorZoom) + 'px';
   const lbl = document.getElementById('zoomLabel');
   if (lbl) lbl.textContent = Math.round(editorZoom * 100) + '%';
 }
@@ -547,6 +552,21 @@ document.getElementById('zoomIn').onclick = () => setZoom(editorZoom * 1.25);
 document.getElementById('zoomOut').onclick = () => setZoom(editorZoom / 1.25);
 document.getElementById('zoomFit').onclick = () => { editorZoom = fitZoom(); applyZoom(); };
 document.getElementById('zoom100').onclick = () => setZoom(1);
+// 「🎮 遊戲畫質」按鈕（放在 1:1 旁邊）：打開＝畫布跟遊戲一樣 1.5 倍，並縮放到跟遊戲一樣大（畫面上 1 個像素＝素材 1 個像素）
+(() => {
+  const z = document.getElementById('zoom100'); if (!z) return;
+  const b = document.createElement('button'); b.className = 'btn'; b.id = 'gameRes';
+  b.title = '用跟遊戲一樣的放大倍率畫地圖（一格 60px）：素材的細線不會被縮掉或變粗，看到的就是遊戲裡的樣子';
+  const label = () => { b.textContent = EDITOR_RES > 1 ? '🎮 遊戲畫質：開' : '🎮 遊戲畫質：關'; b.setAttribute('aria-pressed', String(EDITOR_RES > 1)); };
+  b.onclick = () => {
+    EDITOR_RES = EDITOR_RES > 1 ? 1 : (typeof VIEW_ZOOM !== 'undefined' ? VIEW_ZOOM : 1.5);
+    try { localStorage.setItem(EDITOR_RES_KEY, EDITOR_RES > 1 ? '1' : '0'); } catch (_) {}
+    label(); applyMapSize();
+    if (EDITOR_RES > 1) setZoom(EDITOR_RES);   // 跟遊戲一樣大
+    draw();
+  };
+  label(); z.after(b);
+})();
 // Alt＋滑鼠滾輪：在地圖上直接縮放（往上滾＝放大、往下滾＝縮小），以滑鼠所在的位置為中心
 document.getElementById('wrap').addEventListener('wheel', e => {
   if (!e.altKey || !e.deltaY) return;
@@ -925,14 +945,16 @@ function rotateBaseCells(cells, w, h, rot) {
 
 // ================= 畫布繪製 =================
 let showGrid = true;    // 格線開關（可用工具列按鈕切換）
-let showSolid = true;        // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）
+let showSolid = false;       // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）；載入／重新整理時預設關著
 let solidNudgeCell = null;   // 目前用「碰撞微調」選中的紅格（'c,r'）
 function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
   const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
 
-  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0);   // 遊戲畫質：放大畫（座標照舊用一格 40）
+  ctx.imageSmoothingEnabled = false;
+  ctx.clearRect(0, 0, COLS * CELL, ROWS * CELL);
   // 每格先鋪棋盤底
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) drawCellBase(OX + c * CELL, OY + r * CELL);
   // 由下往上：每層先畫小圖、再畫「屬於這層」的大圖
@@ -1244,8 +1266,8 @@ function paintCell(c, r, isDown, additiveSelect = false) {
 // ================= 滑鼠操作 =================
 function cellFromEvent(e) {
   const rect = cv.getBoundingClientRect();
-  const x = (e.clientX - rect.left) * (cv.width / rect.width);
-  const y = (e.clientY - rect.top) * (cv.height / rect.height);
+  const x = (e.clientX - rect.left) * (COLS * CELL / rect.width);   // 照地圖的格數換算（遊戲畫質打開時畫布像素比較多）
+  const y = (e.clientY - rect.top) * (ROWS * CELL / rect.height);
   pointerPx = { x, y };   // 物件擺放、選取用的像素位置
   return cellAt(x, y);
 }
@@ -2590,6 +2612,7 @@ document.getElementById('solidToggle').addEventListener('click', e => {
   draw();
   setStatus(showSolid ? '已顯示紅格與怪物出生區綠格' : '已隱藏紅格與怪物出生區綠格（設定保留）', '#8fd3ff');
 });
+{ const b = document.getElementById('solidToggle'); b.textContent = showSolid ? '🧱 紅綠格：開' : '🧱 紅綠格：關'; b.classList.toggle('off', !showSolid); }   // 按鈕一開始就照預設（關）
 
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;

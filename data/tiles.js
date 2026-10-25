@@ -3276,6 +3276,14 @@ const SHARED_TILES = [
     "flat": true
   },
   {
+    "id": "tile_poolcore_pillar",
+    "name": "池核｜柱子",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_Pillar.png",
+    "w": 2,
+    "h": 5
+  },
+  {
     "id": "tile_mv1ejvf0",
     "name": "Back-room-wall03",
     "role": "floor",
@@ -4073,5 +4081,13 @@ const SHARED_TILES = [
     "file": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAFAAAABQCAYAAACOEfKtAAADoElEQVR4nO2cPWgUQRTH98Q0FnJaGQxoOFAjRiXpVCSFQqKFlYJFhBSiFqLGRpuA6Y2KhYqFYAohnYXJgSJB1O6CGvFUCBoIRBH0EElzxcpb2XVn3d37eB83e74fHDn23c3O/O+9mXmzk8k5ROQ61kBBLlV5zOTc6grJHVYT1tM9dugeYXF8TE2PwA9N4jyrLG1jZiAVcOHTvPXtpq6jeiASFRCJCohEBUSiAiJRAZFQTqQ9sjCVoYRcwFJ5oqUNqkV/zyhpeaQCFrp7nUK3/elcqUxXlvaBSMhDOMzU9IhgU5LhXORgExDEezL7gqv4hjgwsJdNRFYPhIq3O6wCdnZtskK+5aVFtrJZBXRiKh8WVdrGAauA0Jill0XjWteeQa9RYKvMPDZs+aGDge3552eGbd/m/YHt450xw7bl1HhgW5hZNmyFoU7ydoVh98A0vr9+51nX79re0Pd+LW6UrWgKOg9E0lIP9PE9MYuoByJRAZGogEgodyYYD9ZtTuWgbm51haTtmsoh0VQOiaZySNhTuQs37hvXrp07kZp2+bbJB6cN2/Dx24HtTfGmYds5eDawzd06Ytj6zjwkb1cYHYWRqIBIRFK5L/MdErdpCeweGBZvQ2/VtvajEQ3hdvREUQHb0QM1lUOiqRwSTeWQaCqHhD2VS3vyNjk7Z9iGB/oC29gjM10bP/w3XSs+vRRc//a1YqR5cakjJ6KjcDlPF0ogHLyinO/fRnaPemAXkFI0GxHxQGkRJb2QXcCeiuxIfL30XvR+on2gpJhSXqjLWUg0lUOiqRwSNgGz8s/XWKzYXERNdHN7JjeZO03u0o/2VY18PvydrTt2e38/vH3lXcvcJvNmB5Foh+8LEQeIE0dYPHif9DkKrA9hzsZTYLWAtcI5KXx90ryXiswMIvX2YeHwbfS7zWC9gGkDSS1hJKZSVgsI4qWFYXR0hfe+4FLz0EyE8M/Kj3+urc2vi/2s9AReFxOQWD8KJ/WB8PzDhnTR+hC2PafWEEaiAiJhXc5qZj0wa8tgrH3g/7AmyLoa0yr8H05iUs3qgRLJfBQ/Bwbx/H0xnOuBOoggYZ8HxqVhXCSld5yoByJpWwGhz4N0jzvlYw1hyfCNu1/m1wM5t9bagj5YR0IqIJxeCWcIptklkKyDyHIWVFryZEs4YBFOqkwTkgqRM1RBvIt3R8l2gtXD1ZMTruPQHvcZB6mASV7mi3fl6GXK29Ui90dERhzH+Q3skZCbE7NwLAAAAABJRU5ErkJggg==",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_mvoa0cqd",
+    "name": "Poolcore_wall_02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_wall_02.png",
+    "w": 2,
+    "h": 1
   }
 ];
