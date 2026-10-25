@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 劇情地圖編輯器</title>
-<link rel="stylesheet" href="css/map-editor.css?v=layerdrag-20261026">   <!-- 與戰鬥地圖編輯器共用完整功能與樣式 -->
+<link rel="stylesheet" href="css/map-editor.css?v=finder3-20261026">   <!-- 與戰鬥地圖編輯器共用完整功能與樣式 -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/map-editor-copy.css?v=copy-20261021">
 </head>
@@ -29,6 +29,7 @@
           <summary class="btn">⋯ 更多</summary>
           <div class="tool-more-menu">
             <button class="btn" id="addTile">＋ 加入磚塊（圖片）</button>
+            <button class="btn" id="findNewTiles" title="列出素材資料夾裡還沒加進編輯器的圖，可以一次加好幾張">🔍 找新素材</button>
             <button class="btn" id="addColorBlock">■ 新增色塊</button>
             <button class="btn" id="fillAll">🪣 用目前的磚塊填滿整張</button>
             <button class="btn danger" id="clearLayout">🗑 全部清空</button>
@@ -190,7 +191,7 @@
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=bananahp-20261025"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=mouse-mound-slow-20261023"></script>
-  <script src="data/tiles.js?v=poolcore-20261026"></script>        <!-- 素材庫（兩個編輯器共用） -->
+  <script src="data/tiles.js?v=pillar2-20261026"></script>        <!-- 素材庫（兩個編輯器共用） -->
   <script src="data/story-maps.js?v=story-20261021"></script>        <!-- 劇情地圖資料（STORY_MAPS） -->
   <script src="data/supplies.js?v=haoguai-20261025"></script>
   <script src="data/items.js?v=doors4-20261018"></script>
@@ -217,7 +218,7 @@
     };
   </script>
   <script src="js/map-editor-store.js?v=story-20261021"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
-  <script>EditorStore.boot(["js/map-editor.js?v=copypaste-20261026", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021"]);</script>
+  <script>EditorStore.boot(["js/map-editor.js?v=pillar2-20261026", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
   <script src="js/editor-nav.js?v=achv-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

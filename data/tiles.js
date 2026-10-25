@@ -3276,6 +3276,14 @@ const SHARED_TILES = [
     "flat": true
   },
   {
+    "id": "tile_poolcore_pillar",
+    "name": "池核｜柱子",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_Pillar.png",
+    "w": 1,
+    "h": 4
+  },
+  {
     "id": "tile_mv1ejvf0",
     "name": "Back-room-wall03",
     "role": "floor",

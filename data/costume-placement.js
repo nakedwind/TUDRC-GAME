@@ -4631,6 +4631,6 @@ const COSTUME_PLACEMENT_DEFAULT = {
   "artFill": {},
   "added": [
     {"id":"acc-mvmpnysg","name":"OK蹦","slot":"head","rarity":"R","art":{"front":"images/costumes/01.head/Band-Aid/Band_Aid.png"}},
-    {"id":"acc-mvny1gen","name":"一坨草莓奶油","slot":"head","rarity":"SR","art":{"front":"images/costumes/01.head/strawberry_cream/strawberry_cream.png"},"gacha":false}
+    {"id":"acc-mvny1gen","name":"一坨草莓奶油","slot":"head","rarity":"SR","art":{"front":"images/costumes/01.head/strawberry_cream/strawberry_cream.png"}}
   ]
 };
