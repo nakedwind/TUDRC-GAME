@@ -55,7 +55,13 @@ function drawOreGlow(ctx, o, x, y, w, h) {
   ctx.restore();
 }
 const oreByFile = file => Object.entries(ORE_TYPES).find(([, spec]) => file.endsWith(spec.file.replace('images/', ''))) || null;
-const oreCenter = o => ({ x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + (o.h || 1) / 2) * CELL });   // 整張圖的中心（大型、稀有礦不只一格）
+// 礦物的「中心」（瞄準、打中、亮不亮、碎片噴出的位置）：左右＝整張圖的中間；高度＝擋路那幾格（石頭底座）的中間。
+// 不用整張圖的中心：高的礦（稀有紫晶礦 2×3）上半部常常疊在牆上，中心會落在牆裡，子彈的視線、照明判定都會失敗（打不到）
+const oreCenter = o => {
+  const sol = Array.isArray(o.solid) && o.solid.length ? o.solid : null;
+  const ry = sol ? sol.reduce((sum, [, r]) => sum + r + .5, 0) / sol.length : (o.h || 1) / 2;
+  return { x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + ry) * CELL };
+};
 
 // 靠近礦物時的提示（礦物在 1.5 格內）
 function oreNearPlayer() {

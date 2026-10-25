@@ -77,6 +77,20 @@ function applyVitals(t) {
   t.hp = Math.max(1, Math.min(t.maxhp, m.hp + bonus));
   t.taint = Math.min(m.berserk || m.taint >= 100 ? VITALS.berserkEdge : m.taint, 100);   // 暴走的不會一出場就暴走
 }
+// ---- 接續「保留進度」的戰場（js/combat-progress.js 的 restoreCombatProgress 呼叫；這時不會跑 newGame）----
+// 存起來的戰場裡是離開那時的 HP、負荷（倒下的隊員 HP 是 0）；中間回應變中心住院、休息過，要換成現在的數字
+function resumeVitals() {
+  if (vitalsPractice() || !G || !G.player) return;
+  for (const t of G.towers || []) {
+    if (!TYPES[t.type] || !vitals.mates[t.type]) continue;
+    const wasDown = t.hp <= 0;
+    applyVitals(t); t.berserk = false;
+    if (wasDown && t.hp > 0) { t.target = null; t.meleeSwing = null; t.gunSwing = null; t.navPath = null; t.moving = false; }   // 治好了：重新站起來
+  }
+  if (vitals.player && Number.isFinite(vitals.player.hp)) G.player.hp = Math.max(1, Math.min(G.player.maxhp, vitals.player.hp));
+  vitals.sortie = JSON.parse(JSON.stringify({ player: vitals.player, mates: vitals.mates }));   // 出勤：記下出發時的狀態（重新挑戰用）
+  saveVitals();
+}
 // ---- G.player 建好之後（game.js 的 newGame 呼叫）：溫特的 HP、醫院病床、訓練室標記 ----
 function afterVitalsSpawn() {
   G.vitalsSafe = MAP_SAFE; G.vitalsMapId = MAP && MAP.id; G.vitalsSkip = vitalsPractice();

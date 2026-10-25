@@ -466,7 +466,7 @@ const MONSTERS_DEFAULT = [
     "id": "golden_banana_king",
     "name": "金蕉王",
     "sprite": "images/monster/golden-banana-king/golden-banana-king-front.png",
-    "hp": 150,
+    "hp": 300,
     "speed": 30,
     "playerDamage": 0,
     "sentryDamage": 0,
