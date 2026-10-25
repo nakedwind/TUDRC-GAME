@@ -284,11 +284,22 @@ const TMAP_EXPLORE_DONE = .95;
 let tmapExplored = {}, tmapExploreDirty = false, tmapExploreSavedAt = 0;
 try { tmapExplored = JSON.parse(localStorage.getItem(TMAP_EXPLORE_KEY) || '{}') || {}; } catch (_) { tmapExplored = {}; }
 const tmapBitsCache = new Map();   // 地圖 id → { bits: Uint8Array, open: 可走的格數, seen: 記過的可走格數 }
-// 還沒炸開的隱藏區（js/breakable-walls.js 的 G.hiddenAreas）：不能記、也不算進完整度；炸開之後才算
+// 不能記、也不算進完整度的格子（只看目前這張地圖）：
+// ・還沒炸開的隱藏區（js/breakable-walls.js 的 G.hiddenAreas），炸開之後才算
+// ・可以炸開的牆：整張牆圖蓋住的格子（底下有地板磚、又沒畫擋路格，不排掉的話地圖上會凸出一塊，一看就知道那裡有東西）；
+//   炸開之後只剩牆一直擋路的格子（breakableWallSolid）不算，中間的破洞照常記
 function tmapHiddenKeys(m) {
   const keys = new Set();
-  if (typeof MAP !== 'undefined' && MAP === m && typeof G !== 'undefined' && G && G.hiddenAreas)
-    for (const a of G.hiddenAreas) if (!a.revealAt) for (const k of a.cells) keys.add(k);
+  if (typeof MAP === 'undefined' || MAP !== m || typeof G === 'undefined' || !G) return keys;
+  for (const a of G.hiddenAreas || []) if (!a.revealAt) for (const k of a.cells) keys.add(k);
+  if (typeof breakableWallSpec === 'function') for (const s of m.stamps || []) {
+    if (!breakableWallSpec(s)) continue;
+    if (breakableWallStage(s) >= 2) continue;   // 已經炸開：下面統一排掉一直擋路的格子
+    const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null, w = mapTileW(t), h = mapTileH(t);
+    const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+    for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) keys.add((c0 + dc) + ',' + (r0 + dr));
+  }
+  if (typeof breakableWallSolid !== 'undefined') for (const k of breakableWallSolid) keys.add(k);
   return keys;
 }
 function tmapExploreState(m) {
