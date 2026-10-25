@@ -382,3 +382,56 @@ function renderFieldMapApp(el) {
     '<div class="tm-legend"><span><i class="lg-me"></i>你</span><span><i class="lg-door"></i>出入口</span><span><i class="lg-core"></i>異質核心</span><span><i class="lg-fog"></i>還沒走過</span></div></main>';
   el.innerHTML = '<div class="aa tm tmf">' + side + main + '</div>';
 }
+
+// ================= 右下角小地圖（裝備慣性導航記錄器、在戰鬥區域時）=================
+// 以溫特為中心、畫附近記過的格子；右下角的子彈（js/game.js 的 #ammoHud）往左讓位到小地圖左邊。
+const TMAP_MINI = { w: 184, h: 132, cell: 6, gap: 12, right: 14 };   // 大小（px）、一格幾 px、跟子彈之間的距離、離右邊幾 px
+let tmapMiniEl = null, tmapMiniCtx = null, tmapMiniPct = null;
+function tmapMiniBuild() {
+  const css = document.createElement('style');
+  css.textContent = '#navMinimap{position:absolute;right:' + TMAP_MINI.right + 'px;bottom:14px;z-index:9;width:' + TMAP_MINI.w + 'px;height:' + TMAP_MINI.h + 'px;border-radius:10px;overflow:hidden;pointer-events:none;' +
+    'background:rgba(12,14,18,.72);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45)}' +
+    '#navMinimap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}' +
+    '#navMinimap span{position:absolute;left:7px;top:5px;font:700 12px "Microsoft JhengHei",sans-serif;color:#cfe9d6;text-shadow:0 1px 2px #000,0 0 3px #000}';
+  document.head.appendChild(css);
+  tmapMiniEl = document.createElement('div'); tmapMiniEl.id = 'navMinimap';
+  const cv = document.createElement('canvas'); cv.width = TMAP_MINI.w; cv.height = TMAP_MINI.h;
+  tmapMiniPct = document.createElement('span');
+  tmapMiniEl.append(cv, tmapMiniPct);
+  (document.getElementById('wrap') || document.body).appendChild(tmapMiniEl);
+  tmapMiniCtx = cv.getContext('2d');
+}
+function tmapMiniUpdate() {
+  const ammo = document.getElementById('ammoHud');
+  const on = typeof MAP_FIELD !== 'undefined' && MAP_FIELD && typeof MAP !== 'undefined' && MAP && typeof G !== 'undefined' && G && G.player &&
+    typeof equipLv === 'function' && !!equipLv('navrecorder');
+  if (!on) { if (tmapMiniEl) tmapMiniEl.style.display = 'none'; if (ammo) ammo.style.right = ''; return; }
+  if (!tmapMiniEl) tmapMiniBuild();
+  tmapMiniEl.style.display = '';
+  if (ammo) ammo.style.right = (TMAP_MINI.right + TMAP_MINI.w + TMAP_MINI.gap) + 'px';
+  const m = MAP, st = tmapExploreState(m), ctx = tmapMiniCtx, S = TMAP_MINI.cell, W = TMAP_MINI.w, H = TMAP_MINI.h;
+  const [pc, pr] = tmapCellOf(G.player), ox = W / 2 - pc * S, oy = H / 2 - pr * S;   // 格子 → 小地圖上的 px（溫特在正中間）
+  const c0 = Math.max(0, Math.floor(-ox / S)), c1 = Math.min(m.cols - 1, Math.ceil((W - ox) / S));
+  const r0 = Math.max(0, Math.floor(-oy / S)), r1 = Math.min(m.rows - 1, Math.ceil((H - oy) / S));
+  const floor = (m.layers && m.layers.floor) || {}, solid = m.solid ? (m._miniSolid || (m._miniSolid = new Set(m.solid))) : new Set();
+  ctx.clearRect(0, 0, W, H);
+  for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
+    const k = c + ',' + r;
+    if (!floor[k] || !tmapSeen(st, c, r)) continue;
+    ctx.fillStyle = solid.has(k) ? '#262b33' : '#4a5462';
+    ctx.fillRect(Math.round(ox + c * S), Math.round(oy + r * S), S, S);
+  }
+  ctx.fillStyle = '#5fd38a';   // 出入口
+  for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r)) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
+  ctx.fillStyle = '#b77cff';   // 還沒打碎的異質核心
+  for (const core of (G.cores || [])) {
+    if (core.dead) continue;
+    const [c, r] = tmapCellOf(core); if (!tmapSeen(st, Math.floor(c), Math.floor(r))) continue;
+    const x = ox + c * S, y = oy + r * S;
+    ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 5); ctx.lineTo(x - 4, y); ctx.closePath(); ctx.fill();
+  }
+  ctx.beginPath(); ctx.arc(W / 2, H / 2, 4, 0, Math.PI * 2);   // 自己
+  ctx.fillStyle = '#4aa3ff'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
+  tmapMiniPct.textContent = '🧭 ' + (st.total ? Math.floor(st.seen / st.total * 100) : 0) + '%';
+}
+setInterval(tmapMiniUpdate, 100);
