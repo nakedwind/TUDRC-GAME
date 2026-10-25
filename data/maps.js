@@ -12650,10 +12650,10 @@ const BATTLE_MAPS = [
         "37,5": "tile_mr4czvpx",
         "37,4": "tile_mr4czvpx"
       },
-      "object5": {},
       "ground4": {},
       "object6": {},
-      "object7": {}
+      "object7": {},
+      "object5": {}
     },
     "stamps": [
       {
@@ -13999,44 +13999,45 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_cvs_sign_twelve",
-        "c": 3,
-        "r": 18,
-        "layer": "object6",
-        "ox": 4,
-        "oy": 10
+        "c": 45,
+        "r": 19,
+        "layer": "object5",
+        "ox": 4
       },
       {
         "id": "tile_cvs_back_counter",
-        "c": 5,
+        "c": 47,
         "r": 19,
-        "layer": "object6",
+        "layer": "object5",
         "fx": true,
         "sortDepth": 2.5,
-        "ox": 10
+        "ox": 10,
+        "oy": 30
       },
       {
         "id": "tile_cvs_drink_cooler",
-        "c": 3,
+        "c": 45,
         "r": 19,
-        "layer": "object6",
-        "sortDepth": 2.5
+        "layer": "object5",
+        "sortDepth": 2.5,
+        "oy": 30
       },
       {
         "id": "tile_cvs_checkout_counter_backroom",
-        "c": 6,
-        "r": 20,
-        "layer": "object6",
+        "c": 48,
+        "r": 21,
+        "layer": "object5",
         "ox": 30,
-        "oy": 30,
+        "oy": 20,
         "sortDepth": 1.75
       },
       {
         "id": "tile_cvs_counter_extension",
-        "c": 4,
-        "r": 21,
-        "layer": "object6",
+        "c": 46,
+        "r": 22,
+        "layer": "object5",
         "ox": 30,
-        "oy": 30,
+        "oy": 20,
         "sortDepth": 0.75
       },
       {
@@ -14044,7 +14045,7 @@ const BATTLE_MAPS = [
         "c": 0,
         "r": 23,
         "layer": "object6",
-        "ox": 10,
+        "ox": 30,
         "baseHp": 2000,
         "baseDepth": 4,
         "baseSolid": [
@@ -14181,19 +14182,17 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_field_camp_bed",
-        "c": 5,
+        "c": 6,
         "r": 28,
         "layer": "object6",
-        "ox": 20,
         "sortDepth": 1.5,
         "oy": 30
       },
       {
         "id": "tile_field_camp_bed",
-        "c": 7,
+        "c": 8,
         "r": 28,
         "layer": "object6",
-        "ox": 20,
         "sortDepth": 1.5,
         "oy": 30
       },
@@ -15585,10 +15584,9 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_pillar",
-        "c": 11,
+        "c": 12,
         "r": 26,
-        "layer": "object7",
-        "ox": 20
+        "layer": "object7"
       },
       {
         "id": "tile_poolcore_pillar",
@@ -15987,7 +15985,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "object6",
-        "name": "基地和商店"
+        "name": "基地"
+      },
+      {
+        "id": "object5",
+        "name": "商店"
       },
       {
         "id": "object7",
@@ -16032,10 +16034,6 @@ const BATTLE_MAPS = [
       {
         "id": "top",
         "name": "☁️ 上層"
-      },
-      {
-        "id": "object5",
-        "name": "行軍床"
       }
     ]
   },
