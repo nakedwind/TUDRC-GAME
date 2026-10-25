@@ -29,9 +29,21 @@ const CHARACTER_SPRITE_FILES = {
 // 持槍攻擊圖（四個方向各一張靜態圖）；只有這些角色有，避免對其他角色發出 404。
 const GUN_FILES = { gunFront: '0000_Front_withgun.png', gunBack: '0009_back_withgun.png', gunLeft: '0003_Leftside_withgun.png', gunRight: '0006_right-side_withgun.png' };
 const GUN_FOLDERS = new Set(['theonie_B', 'amber_B', 'eldrin_B', 'chris_B', 'winter_B', 'winter_M', 'eldrin_M']);
-// 近戰揮擊圖（四個方向各兩張：[舉手, 揮下]）；只有這些角色有
-const SWING_FILES = { swingFront: ['0000_Front_attack.png', '0000_Front_attack02.png'], swingBack: ['0009_back_attack01.png', '0009_back_attack02.png'], swingLeft: ['0003_Leftside_attack.png', '0003_Leftside_attack02.png'], swingRight: ['0006_right-side_attack.png', '0006_right-side_attack02.png'] };
-const SWING_FOLDERS = new Set(['avaren_B']);
+// 近戰揮擊圖（四個方向各兩張：[舉手, 揮下]）；只有列在這裡的角色有，檔名各角色略有不同
+const SWING_FILES = {
+  avaren_B: { swingFront: ['0000_Front_attack.png', '0000_Front_attack02.png'], swingBack: ['0009_back_attack01.png', '0009_back_attack02.png'], swingLeft: ['0003_Leftside_attack.png', '0003_Leftside_attack02.png'], swingRight: ['0006_right-side_attack.png', '0006_right-side_attack02.png'] },
+  red_B: { swingFront: ['0000_Front_attack.png', '0000_Front_attack02.png'], swingBack: ['0009_back_attack01.png', '0009_back_attack02.png'], swingLeft: ['0003_Leftside_attack01.png', '0003_Leftside_attack02.png'], swingRight: ['0006_right-side_attack01.png', '0006_right-side_attack02.png'] },
+  colyn_B: { swingFront: ['0000_Front_attack01.png', '0000_Front_attack02.png'], swingBack: ['0009_back_attack01.png', '0009_back_attack02.png'], swingLeft: ['0003_Leftside_attack01.png', '0003_Leftside_attack02.png'], swingRight: ['0006_right-side_attack01.png', '0006_right-side_attack02.png'] },
+  luther_B: { swingFront: ['0000_Front_attack01.png', '0000_Front_attack02.png'], swingBack: ['0009_back_attack01.png', '0009_back_attack02.png'], swingLeft: ['0003_Leftside_attack01.png', '0003_Leftside_attack02.png'], swingRight: ['0006_right-side_attack01.png', '0006_right-side_attack02.png'] },
+};
+// 雷德舉盾時的揮擊圖
+const RED_SHIELD_SWING_FILES = { swingFront: ['0000_Front_Shield_attack01.png', '0000_Front_Shield_attack02.png'], swingBack: ['0009_back_Shield_attack01.png', '0009_back_Shield_attack02.png'], swingLeft: ['0003_Leftside_Shield_attack01.png', '0003_Leftside_Shield_attack02.png'], swingRight: ['0006_right-side_Shield_attack01.png', '0006_right-side_Shield_attack02.png'] };
+function loadSwingSprites(set, folder, files) {
+  const prefix = folder.replace('_', '') + '_';
+  for (const k of Object.keys(files)) {
+    set[k] = files[k].map(file => { const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}`; return img; });
+  }
+}
 // 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
 const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png', winter_M: 'fail.png', eldrin_M: 'fail.png' };
 function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
@@ -49,11 +61,7 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
       const img = new Image(); img.src = `images/character/${folder}/${prefix}${GUN_FILES[k]}`; set[k] = [img];
     }
   }
-  if (SWING_FOLDERS.has(folder)) {   // 近戰揮擊圖
-    for (const k of Object.keys(SWING_FILES)) {
-      set[k] = SWING_FILES[k].map(file => { const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}`; return img; });
-    }
-  }
+  if (SWING_FILES[folder]) loadSwingSprites(set, folder, SWING_FILES[folder]);   // 近戰揮擊圖
   return set;
 }
 // ---- 造型切換：安全區穿 A 版、戰鬥區穿 B 版 ----
@@ -110,6 +118,7 @@ function loadRedShieldSprites() {
       const img = new Image(); img.src = `images/character/red_B/redB_${file.replace('.png', '_Shield.png')}`; return img;
     });
   }
+  loadSwingSprites(set, 'red_B', RED_SHIELD_SWING_FILES);   // 舉盾揮擊圖
   return set;
 }
 const redShieldSprites = loadRedShieldSprites();
@@ -395,7 +404,12 @@ function pickCharacterFrame(set, who) {
   if (who.meleeSwing && set.swingLeft) {   // 近戰揮擊：前搖舉手、之後揮下；依目標方向挑四向之一
     const s = who.meleeSwing, dx = Math.cos(s.angle), dy = Math.sin(s.angle);
     const frames = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? set.swingLeft : set.swingRight) : (dy < 0 ? set.swingBack : set.swingFront);
-    const g = frames[s.age < s.wind ? 0 : 1];
+    let down = s.age >= s.wind;
+    if (s.stabs) {   // 柯林的突擊連刺：每刺一下的瞬間揮下，刺與刺之間收回舉手
+      let last = -1; for (const ts of s.stabs) if (s.age >= ts) last = ts;
+      down = last >= 0 && s.age - last < .13;
+    }
+    const g = frames[Math.min(down ? 1 : 0, frames.length - 1)];   // 只有一張的方向就一直用它
     if (g && g.complete && g.naturalWidth) return g;
   }
   if (!who.moving && who.dir === 'front' && who.blinkTime >= 0) {

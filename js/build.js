@@ -131,6 +131,7 @@ function renderBuildQuickSlots() {
     button.setAttribute('aria-label', '建造' + ob.name);
     button.innerHTML = '<i class="bq-art" aria-hidden="true"><img src="' + ob[buildOrient].file + '" alt=""></i><span>' + ob.name + '</span>';   // bq-art：只把圖片裁在框裡，名稱不會被切掉（css/style.css）
     button.addEventListener('click', () => selectBuildType(id));
+    button.draggable = true;   // 也可以直接拖到地圖上蓋（下面的 buildDrag）
     buildQuickSlots.appendChild(button);
   });
   if (typeof refreshHoverTip === 'function') refreshHoverTip();
@@ -148,6 +149,48 @@ function selectBuildType(id) {
   buildBar.classList.add('hidden');
   closeGroundMenu(); sfx('button'); renderBuildBar(); updateBuildToggle();
 }
+
+// ---- 拖曳蓋建築：把下方建築欄的按鈕拖到地圖上放開，就在那一格蓋（跟快捷欄拖道具一樣，js/quick-slots.js）----
+// 拖曳中地圖上照常畫半透明預覽（放不下是紅框）；放不下就照點擊蓋的規則提示（太遠了、太黑了、經費不足…）
+let buildDrag = null;   // { id, prevSel }：拖的是哪種建築、拖之前選的是什麼
+const buildCanvas = document.getElementById('cv');
+function buildDragCell(e) {
+  const rect = buildCanvas.getBoundingClientRect();
+  const x = (e.clientX - rect.left) * (buildCanvas.width / rect.width) / VIEW_SCALE + cam.x;
+  const y = (e.clientY - rect.top) * (buildCanvas.height / rect.height) / VIEW_SCALE + cam.y;
+  const [c, r] = cellAt(x, y);
+  return inGrid(c, r) ? [c, r] : null;
+}
+function endBuildDrag() {   // 放開後建築欄會重畫，被拖的按鈕不在畫面上、收不到 dragend：放開時也收尾
+  if (!buildDrag) return;
+  if (typeof releaseMoveKeys === 'function') releaseMoveKeys();   // 拖曳中瀏覽器收不到放開按鍵：全部放開，不然溫特會一直走
+  if (G && G.selType === 'build:' + buildDrag.id) G.selType = buildDrag.prevSel;
+  buildDrag = null; renderBuildBar(); updateBuildToggle();
+}
+buildQuickSlots.addEventListener('dragstart', e => {
+  const button = e.target.closest && e.target.closest('.build-quick-slot');
+  if (!button || !G || !G.running || G.over || !MAP_FIELD || !buildableById(button.dataset.buildId)) { e.preventDefault(); return; }
+  buildDrag = { id: button.dataset.buildId, prevSel: G.selType };
+  G.selType = 'build:' + buildDrag.id; buildTargetCell = null; closeGroundMenu();
+  e.dataTransfer.setData('application/x-tudrc-build', buildDrag.id); e.dataTransfer.effectAllowed = 'copy';
+  const ghost = document.createElement('div');   // 拖著的小圖不要畫（地圖上已經有預覽）：給一個透明的
+  ghost.style.cssText = 'position:fixed;left:-50px;top:-50px;width:1px;height:1px;';
+  document.body.appendChild(ghost); e.dataTransfer.setDragImage(ghost, 0, 0); setTimeout(() => ghost.remove());
+});
+buildCanvas.addEventListener('dragover', e => {
+  if (!buildDrag) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = 'copy';
+  hoverCell = buildDragCell(e);   // 拖曳中沒有 mousemove：預覽跟著游標要自己更新（js/game.js 的 hoverCell）
+});
+buildCanvas.addEventListener('drop', e => {
+  if (!buildDrag) return;
+  e.preventDefault();
+  const cell = buildDragCell(e), ob = buildableById(buildDrag.id);
+  if (cell && ob) { spawnGroundRipple(e.clientX, e.clientY); placeObstacle(ob, cell[0], cell[1]); updateHUD(); }
+  endBuildDrag();
+});
+document.addEventListener('dragend', endBuildDrag);
+document.addEventListener('drop', () => setTimeout(endBuildDrag));
 
 const obstacleImgs = {};       // 預先載入每種物件的兩張圖（障礙物＋裝飾共用）
 [...OBSTACLES, ...DECOS].forEach(o => {
