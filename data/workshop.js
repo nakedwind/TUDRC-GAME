@@ -456,6 +456,22 @@ const WORKSHOP_CONFIG = {
         }
       }
     },
+    "navrecorder": {
+      "infoParts": {
+        "name": {
+          "y": -10
+        },
+        "tag": {
+          "y": -10
+        },
+        "desc": {
+          "y": -10
+        },
+        "stats": {
+          "y": -10
+        }
+      }
+    },
     "w:pistol": {
       "values": [
         {
@@ -701,7 +717,8 @@ const WORKSHOP_CONFIG = {
       "fireboots",
       "acidboots",
       "radio",
-      "detector"
+      "detector",
+      "navrecorder"
     ],
     "weapons": [
       "w:pistol",

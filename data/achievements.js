@@ -87,8 +87,8 @@ const ACHIEVEMENT_DATA = {
     { "id": "custom_10_22", "group": "隱藏成就", "name": "部隊長的用心我看得見", "stat": "allPosters", "goal": 1, "desc": "查看每張宣導海報" },
     { "id": "custom_10_13", "group": "隱藏成就", "name": "抱歉了錢錢，我需要這個酷東西", "stat": "gachaItems", "goal": 50, "secret": true, "desc": "累計從扭蛋機獲得 50 個商品", "note": "累計從扭蛋機獲得 50 個商品，含重複商品" },
     { "id": "custom_10_14", "group": "隱藏成就", "name": "這就是愛吧", "stat": "sortieWith:red+eldrin+avaren", "goal": 1, "secret": true, "desc": "同時帶著雷德、溫特、艾德林、阿瓦倫出勤", "note": "剛編入隊伍時不算，進入戰鬥區域後才算。" },
-    { "id": "custom_30", "group": "隱藏成就", "name": "好吃的瓜", "stat": "custom", "goal": 30, "secret": true, "desc": "聽別人的閒聊 30 次", "note": "點擊「聽閒聊」算 1 次" },
-    { "id": "custom_10_15", "group": "隱藏成就", "name": "狗勾！那裡有隻可愛的狗勾！", "stat": "custom", "goal": 10, "secret": true, "desc": "跟球球互動 20 次" }
+    { "id": "custom_30", "group": "隱藏成就", "name": "好吃的瓜", "stat": "chatsHeard", "goal": 30, "secret": true, "desc": "聽別人的閒聊 30 次", "note": "點擊「聽閒聊」算 1 次" },
+    { "id": "custom_10_15", "group": "隱藏成就", "name": "狗勾！那裡有隻可愛的狗勾！", "stat": "ballInteracts", "goal": 20, "secret": true, "desc": "跟球球互動 20 次" }
   ],
   "board": [
     { "stat": "slimeKills", "label": "討伐史萊姆" },

@@ -330,6 +330,7 @@ function openDialogue(actor) {
     || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」
   if (!lines || !lines.length) return;   // 這一格沒填：不說話
   if (typeof achieveRemember === 'function') achieveRemember('talked', key, 'talkedAll');   // 成就：跟每一位角色說過話
+  if (key === 'ball' && typeof addStat === 'function') addStat('ballInteracts');   // 成就：跟球球互動（說話）
   dialogueState = { actor, lines, index: 0 };
   actor.target = null; actor.say = null; actor.sayWait = 2;
   MOVE_KEYS.forEach(key => { keys[key] = false; });

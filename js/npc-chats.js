@@ -164,6 +164,7 @@ function useNpcChatNearPlayer() {
   for (const a of st.actors) if (a.say && a.say.chat) a.say = null;
   st.phase = 'talk'; st.t = -NPC_CHAT_RULES.startPause; st.idx = -1; st.gap = false;
   if (typeof sfx === 'function') sfx('blip');
+  if (typeof addStat === 'function') addStat('chatsHeard');   // 成就：聽閒聊的次數
   return true;
 }
 // 「● ● ●」：等玩家來聽時浮在大家中間（render.js 在角色泡泡之後畫，世界座標）

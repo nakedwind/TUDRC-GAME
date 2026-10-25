@@ -55,6 +55,9 @@ const ACHIEVE_STATS = [
   { id: 'gachaItems', name: '從扭蛋機拿到的東西（個數，重複的也算）' },
   { id: 'crystalsSpent', name: '花掉的異質碎片（扭蛋、開發工坊、技能）' },
   { id: 'crystalsEarned', name: '獲得的異質碎片' },
+  // ---- 10/25 加的（成就編輯器的自訂條件）----
+  { id: 'chatsHeard', name: '聽別人閒聊（按「聽閒聊」的次數）' },
+  { id: 'ballInteracts', name: '跟球球互動（找球球說話、送球球禮物，各算 1 次）' },
 ];
 // 「溫特被暴走的○○打倒」（downedBy:角色 id）、「全員戴上○○」（allWear:配件 id）：跟擊倒怪物一樣，用第二層選單選對象
 const ACHIEVE_CUSTOM = 'custom';   // 自訂條件（等 Claude 實作）
