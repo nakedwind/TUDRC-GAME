@@ -430,7 +430,7 @@ function tmapMiniBuild() {
   const css = document.createElement('style');
   css.textContent = '#navMinimap{position:absolute;right:' + TMAP_MINI.right + 'px;bottom:14px;z-index:9;width:' + TMAP_MINI.w + 'px;height:' + TMAP_MINI.h + 'px;border-radius:10px;overflow:hidden;pointer-events:none;' +
     'background:rgba(0,4,10,.6);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45)}' +
-    '#navMinimap canvas{display:block;width:100%;height:100%;image-rendering:pixelated}';
+    '#navMinimap canvas{display:block;width:100%;height:100%;image-rendering:pixelated;background:none;border-radius:0;box-shadow:none;cursor:inherit}';   // 蓋掉 css/style.css 全域 canvas 的深色底（不然外圍永遠不透明）
   document.head.appendChild(css);
   tmapMiniEl = document.createElement('div'); tmapMiniEl.id = 'navMinimap';
   const cv = document.createElement('canvas'); cv.width = TMAP_MINI.w; cv.height = TMAP_MINI.h;
