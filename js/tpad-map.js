@@ -461,7 +461,7 @@ function tmapMiniUpdate() {
   for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) {
     const k = c + ',' + r;
     if (!floor[k] || !tmapSeen(st, c, r) || st.hidden.has(k)) continue;
-    ctx.fillStyle = solid.has(k) ? '#2a313c' : '#4c5869';   // 跟 T-Pad 戰鬥地圖同一組顏色（css/tpad-map.css 的 .tmf）
+    ctx.fillStyle = solid.has(k) ? '#8d9bb0' : '#4c5869';   // 跟 T-Pad 戰鬥地圖同一組顏色（css/tpad-map.css 的 .tmf）：牆比地面亮，在暗背景上才看得出來
     ctx.fillRect(Math.round(ox + c * S), Math.round(oy + r * S), S, S);
   }
   ctx.fillStyle = '#5fd38a';   // 出入口
