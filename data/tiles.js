@@ -3120,7 +3120,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_wall_corner",
     "name": "池核｜牆角磁磚",
     "role": "floor",
-    "file": "images/池核/poolcore-wall-corner.png",
+    "file": "images/Poolcore/poolcore-wall-corner.png",
     "w": 1,
     "h": 1,
     "flat": true
@@ -3129,7 +3129,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_wall_vertical",
     "name": "池核｜直向牆面",
     "role": "floor",
-    "file": "images/池核/poolcore-wall-vertical.png",
+    "file": "images/Poolcore/poolcore-wall-vertical.png",
     "w": 1,
     "h": 3,
     "flat": true
@@ -3138,7 +3138,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_floor_blue",
     "name": "池核｜藍色地磚",
     "role": "floor",
-    "file": "images/池核/poolcore-floor-blue.png",
+    "file": "images/Poolcore/poolcore-floor-blue.png",
     "w": 1,
     "h": 1,
     "flat": true
@@ -3147,7 +3147,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_floor_gradient",
     "name": "池核｜漸層地磚",
     "role": "floor",
-    "file": "images/池核/poolcore-floor-gradient.png",
+    "file": "images/Poolcore/poolcore-floor-gradient.png",
     "w": 1,
     "h": 2
   },
@@ -3155,7 +3155,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_deep_water_gradient",
     "name": "池核｜深水漸層",
     "role": "floor",
-    "file": "images/池核/poolcore-deep-water-gradient.png",
+    "file": "images/Poolcore/poolcore-deep-water-gradient.png",
     "w": 1,
     "h": 5,
     "flat": true
@@ -3164,7 +3164,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_deep_water",
     "name": "池核｜深色水面",
     "role": "floor",
-    "file": "images/池核/poolcore-deep-water.png",
+    "file": "images/Poolcore/poolcore-deep-water.png",
     "w": 1,
     "h": 1,
     "flat": true
@@ -3173,7 +3173,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_wall_wide",
     "name": "池核｜橫向牆面",
     "role": "floor",
-    "file": "images/池核/poolcore-wall-wide.png",
+    "file": "images/Poolcore/poolcore-wall-wide.png",
     "w": 2,
     "h": 3,
     "flat": true
@@ -3182,7 +3182,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_wall_edge",
     "name": "池核｜牆面收邊",
     "role": "floor",
-    "file": "images/池核/poolcore-wall-edge.png",
+    "file": "images/Poolcore/poolcore-wall-edge.png",
     "w": 2,
     "h": 1,
     "flat": true
@@ -3191,7 +3191,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_floor_pale",
     "name": "池核｜淺色地磚",
     "role": "floor",
-    "file": "images/池核/poolcore-floor-pale.png",
+    "file": "images/Poolcore/poolcore-floor-pale.png",
     "w": 1,
     "h": 1,
     "flat": true
@@ -3200,7 +3200,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_wall_edge_wide",
     "name": "池核｜寬版牆面收邊",
     "role": "floor",
-    "file": "images/池核/poolcore-wall-edge-wide.png",
+    "file": "images/Poolcore/poolcore-wall-edge-wide.png",
     "w": 2,
     "h": 1,
     "flat": true
@@ -3209,7 +3209,7 @@ const SHARED_TILES = [
     "id": "tile_mv1cfh6l",
     "name": "poolcore-wall-corner02",
     "role": "floor",
-    "file": "images/池核/poolcore-wall-corner02.png",
+    "file": "images/Poolcore/poolcore-wall-corner02.png",
     "w": 1,
     "h": 1,
     "flat": true
@@ -3218,7 +3218,7 @@ const SHARED_TILES = [
     "id": "tile_mv1cftaj",
     "name": "poolcore-wall-edge-wide02",
     "role": "floor",
-    "file": "images/池核/poolcore-wall-edge-wide02.png",
+    "file": "images/Poolcore/poolcore-wall-edge-wide02.png",
     "w": 2,
     "h": 1,
     "flat": true
@@ -3227,7 +3227,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_life_ring_blue",
     "name": "池核｜藍白救生圈",
     "role": "floor",
-    "file": "images/池核/poolcore-life-ring-blue.png",
+    "file": "images/Poolcore/poolcore-life-ring-blue.png",
     "w": 1,
     "h": 1
   },
@@ -3235,7 +3235,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_life_ring_red",
     "name": "池核｜紅白救生圈",
     "role": "floor",
-    "file": "images/池核/poolcore-life-ring-red.png",
+    "file": "images/Poolcore/poolcore-life-ring-red.png",
     "w": 1,
     "h": 1
   },
@@ -3243,9 +3243,36 @@ const SHARED_TILES = [
     "id": "tile_poolcore_waterline_wall",
     "name": "池核｜條紋水線牆",
     "role": "floor",
-    "file": "images/池核/poolcore-waterline-wall.png",
+    "file": "images/Poolcore/poolcore-waterline-wall.png",
     "w": 2,
     "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_poolcore_floor_l",
+    "name": "池核｜地板（大）",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore_floor_L.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_poolcore_floor_m",
+    "name": "池核｜地板（中）",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore_floor_M.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_poolcore_floor_s",
+    "name": "池核｜地板（小）",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore_floor_S.png",
+    "w": 1,
+    "h": 1,
     "flat": true
   },
   {

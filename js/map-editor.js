@@ -102,7 +102,7 @@ const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：�
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
-const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v2';       // 池核磁磚素材（含救生圈與水線牆）
+const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v3';       // 池核磁磚素材（含救生圈與水線牆；v3：資料夾改名 images/Poolcore、加地板大中小）
 const STORAGE_HQ_PACK = 'tudrc_asset_pack_command_hq_v1';           // 指揮部素材包
 const STORAGE_RESEARCH_LAB_PACK = 'tudrc_asset_pack_research_lab_v1'; // 研究部素材包
 const STREET_PACK_IDS = new Set(["tile_street_ubike", "tile_street_scooter_delivery_green", "tile_street_scooter_delivery_pink", "tile_street_capsule_toy_machines", "tile_street_utility_box_painted", "tile_street_utility_box", "tile_street_folding_table", "tile_street_plastic_stool", "tile_street_plastic_stools_stacked", "tile_street_bottle_red", "tile_street_bollard_red", "tile_street_bollard_yellow", "tile_street_sign_no_entry", "tile_street_sign_stop", "tile_street_sign_scooter_lanes", "tile_street_sign_two_stage_turn", "tile_street_sign_turn_right", "tile_street_sign_no_left_turn", "tile_street_sign_speed_limit_50", "tile_street_traffic_light", "tile_street_name_sign_pole", "tile_street_crosswalk", "tile_street_area_map_board", "tile_street_stall_steak", "tile_street_stall_noodles", "tile_street_stall_drinks", "tile_mrt_exit_2", "tile_mrt_exit_2_sealed", "tile_mrt_map_kiosk", "tile_bg_backroom_wall02_dmg_crack", "tile_bg_backroom_wall02_hole2", "tile_street_claw_machine"]);
@@ -707,6 +707,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/convenience-store',
   'images/street',
   'images/池核',
+  'images/Poolcore',   // 池核素材資料夾改名成英文（舊路徑的素材也找得到）
   'images/指揮部',
   'images/研究部',
   'images/地下訓練室',
@@ -1406,15 +1407,26 @@ function deleteLayer(id = activeLayer) {
   setStatus('已刪除圖層「' + cur.name + '」' + (count ? '（連同 ' + count + ' 個物件）' : ''), '#ffd24a');
 }
 // 從物件清單選取：跟在畫面上用「👆 選取」點到一樣（之後可以拖曳、翻轉、刪除、換圖層）
-function selectFromLayerList(item, additive) {
+// 物件清單點選：直接點＝只選這一個；Ctrl＋點＝加選／取消這一個；Shift＋點＝選取「上一次點的那個」到這一個之間的全部（清單上的順序）
+let layerListAnchor = null;   // Shift 範圍選取的起點（上一次直接點或 Ctrl＋點的那一個）
+const layerItemPick = item => item.type === 'stamp' ? { type: 'stamp', index: item.index } : { type: 'tile', layer: item.layer, key: item.key };
+function selectFromLayerList(item, mode = {}, list = null) {
   if (hiddenLayers.has(item.layer || layerOfItem(item))) { setStatus('這個圖層被隱藏中，請先打開眼睛 👁 才能選取', '#ffd24a'); return; }
   if (isLockedLayer(item.layer || layerOfItem(item))) { setStatus('這個圖層已鎖定，請先按 🔒 解鎖才能選取', '#ffd24a'); return; }
-  const picked = item.type === 'stamp' ? { type: 'stamp', index: item.index } : { type: 'tile', layer: item.layer, key: item.key };
+  const picked = layerItemPick(item);
   if (brush.mode !== 'select') { brush = { mode: 'select', tile: brush.tile }; updateToolUI(); renderPalette(); }
-  if (additive) {
-    const at = selections.findIndex(s => selectionId(s) === selectionId(picked));
-    if (at >= 0) selections.splice(at, 1); else selections.push(picked);
-  } else selections = [picked];
+  const from = mode.shift && list && layerListAnchor ? list.findIndex(it => selectionId(layerItemPick(it)) === layerListAnchor) : -1;
+  if (from >= 0) {   // Shift：起點到這一個之間全部選起來（起點不動，可以再 Shift 點別的改範圍）
+    const to = list.indexOf(item), [a, b] = from <= to ? [from, to] : [to, from];
+    selections = list.slice(a, b + 1).map(layerItemPick);
+    if (from > to) selections.reverse();   // 最後一個＝剛點的那一個（右邊面板顯示它）
+  } else {
+    if (mode.ctrl) {
+      const at = selections.findIndex(s => selectionId(s) === selectionId(picked));
+      if (at >= 0) selections.splice(at, 1); else selections.push(picked);
+    } else selections = [picked];
+    layerListAnchor = selectionId(picked);
+  }
   selection = selections.length ? selections[selections.length - 1] : null;
   refreshSelPanel(); scrollToItem(item); flashLocate(item); draw();
   setStatus('已選取「' + ((tileById(item.id) || {}).name || item.id) + '」（' + item.c + ', ' + item.r + '）' + (selections.length > 1 ? '，共 ' + selections.length + ' 個' : ''), '#ffd479');
@@ -1472,12 +1484,12 @@ function renderLayerItems(lid) {
   list.slice(0, layerListLimit).forEach(item => {
     const t = tileById(item.id) || {};
     const row = document.createElement('button'); row.type = 'button'; row.className = 'layer-obj' + (isItemSelected(item) ? ' sel' : '');
-    row.title = '點一下選取（Shift＋點＝多選）';
+    row.title = '點一下選取（Ctrl＋點＝加選／取消；Shift＋點＝選取上一個點的到這一個之間的全部）';
     const rec = t.file ? ensureTileImg(t) : null;
     const thumb = rec && rec.loaded ? '<img src="' + t.file + '" alt="">' : '<span class="layer-obj-swatch"' + (t.color ? ' style="background:' + t.color + '"' : '') + '></span>';
     row.innerHTML = thumb + '<span class="layer-obj-name"></span><small>' + (item.type === 'stamp' ? '物件' : '格子') + '・' + item.c + ',' + item.r + '</small>';
     row.querySelector('.layer-obj-name').textContent = t.name || item.id;
-    row.addEventListener('click', e => selectFromLayerList(item, e.shiftKey));
+    row.addEventListener('click', e => selectFromLayerList(item, { ctrl: e.ctrlKey || e.metaKey, shift: e.shiftKey }, list.slice(0, layerListLimit)));
     box.appendChild(row);
   });
   if (list.length > layerListLimit) {
@@ -1542,10 +1554,45 @@ function renderLayers() {
       setStatus((hiddenLayers.has(l.id) ? '已隱藏「' : '已顯示「') + l.name + '」', '#8fd3ff');
     });
     group.append(b, lock, eye); layerBtnsEl.appendChild(group);
+    makeLayerDraggable(group, b, l);
     if (expandedLayer === l.id) layerBtnsEl.appendChild(renderLayerItems(l.id));   // 展開：這層的物件清單
   });
   const newList = layerBtnsEl.querySelector('.layer-objs'); if (newList) newList.scrollTop = keepScroll;
   updateLayerUI();
+}
+// ---- 拖曳圖層改前後：抓住圖層名稱拖到別的圖層上，放在它上面或下面（看放在那一格的上半還是下半）----
+// 圖層上的物件跟著圖層走（物件記的是圖層 id，不用搬）；遊戲照 layerOrder 的順序疊圖（js/maploader.js），
+// 但圖層的種類看 id：地面類（ground…）永遠在角色下面、物件類跟角色排前後、top 永遠在角色上面，拖過去也不會變
+let layerDrag = null;   // 正在拖的圖層 id
+function makeLayerDraggable(group, handle, l) {
+  handle.draggable = true;
+  handle.addEventListener('dragstart', e => {
+    layerDrag = l.id; group.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move'; try { e.dataTransfer.setData('text/plain', l.id); } catch (_) {}
+  });
+  handle.addEventListener('dragend', () => { layerDrag = null; layerBtnsEl.querySelectorAll('.layer-group').forEach(g => g.classList.remove('dragging', 'drop-above', 'drop-below')); });
+  const above = e => { const r = group.getBoundingClientRect(); return e.clientY < r.top + r.height / 2; };
+  group.addEventListener('dragover', e => {
+    if (!layerDrag || layerDrag === l.id) return;
+    e.preventDefault(); e.dataTransfer.dropEffect = 'move';
+    const up = above(e); group.classList.toggle('drop-above', up); group.classList.toggle('drop-below', !up);
+  });
+  group.addEventListener('dragleave', e => { if (!group.contains(e.relatedTarget)) group.classList.remove('drop-above', 'drop-below'); });
+  group.addEventListener('drop', e => {
+    if (!layerDrag || layerDrag === l.id) return;
+    e.preventDefault();
+    moveLayer(layerDrag, l.id, above(e));
+  });
+}
+// 把 id 這層搬到 target 那層的上面（up）或下面；清單上「上面」＝疊在比較上面（LAYERS 裡排在後面）
+function moveLayer(id, target, up) {
+  const m = curMap(); pushUndo();
+  const list = customizeLayers(m), from = list.findIndex(x => x.id === id); if (from < 0) return;
+  const [moved] = list.splice(from, 1);
+  let at = list.findIndex(x => x.id === target); if (at < 0) { list.splice(from, 0, moved); return; }
+  list.splice(up ? at + 1 : at, 0, moved);
+  syncLayers(); renderLayers(); refreshSelPanel(); saveMaps(); draw();
+  setStatus('「' + moved.name + '」移到「' + layerName(target) + '」的' + (up ? '上面' : '下面') + '（Ctrl+Z 可以復原）', '#b39ddb');
 }
 function updateLayerUI() {
   document.querySelectorAll('.layer').forEach(b => b.classList.toggle('sel', b.dataset.layer === activeLayer));
@@ -1621,7 +1668,7 @@ function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
   if (t.systemColor) return 'color';
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
-  if (String(t.id || '').startsWith('tile_poolcore_') || file.includes('/池核/')) return 'poolcore';
+  if (String(t.id || '').startsWith('tile_poolcore_') || file.includes('/池核/') || file.includes('/poolcore/')) return 'poolcore';
   if (String(t.id || '').startsWith('tile_hq_') || file.includes('/指揮部/')) return 'hq';
   if (String(t.id || '').startsWith('tile_research_lab_') || file.includes('/研究部/')) return 'research';
   if (String(t.id || '').startsWith('tile_training_') || file.includes('/地下訓練室/')) return 'training';

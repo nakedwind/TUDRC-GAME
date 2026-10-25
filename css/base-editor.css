@@ -43,6 +43,9 @@ canvas { background: #0e1116; border-radius: 8px; display: block; width: 100%; h
 .layerbar-title { font-size: 14px; color: #8fd3ff; font-weight: 600; }
 #layerBtns { display: flex; flex-direction: column; gap: 6px; }
 .layer-group { display: flex; align-items: stretch; width: 100%; }
+.layer-group.dragging { opacity: .45; }   /* 拖曳中的圖層 */
+.layer-group.drop-above { box-shadow: 0 -3px 0 #b39ddb; }   /* 會放在這一層的上面 */
+.layer-group.drop-below { box-shadow: 0 3px 0 #b39ddb; }    /* 會放在這一層的下面 */
 .layer { flex: 1; background: #232a35; border: 2px solid #333c49; color: #e6e9ee; padding: 7px 12px; border-radius: 8px 0 0 8px; cursor: pointer; font-size: 13px; text-align: left; }
 .layer.sel { border-color: #b39ddb; background: #3a2f55; color: #fff; }
 .layer-eye { width: 40px; border: 2px solid #333c49; border-left: 0; border-radius: 0 8px 8px 0; background: #232a35; color: #8fd3ff; cursor: pointer; font-size: 14px; }
