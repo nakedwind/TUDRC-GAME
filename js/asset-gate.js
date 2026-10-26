@@ -15,7 +15,7 @@ const AssetGate = (() => {
   const TIMEOUT = 60;       // 秒：單張圖片等超過這麼久就當作好了
   const pending = new Map();   // 圖片 → 開始下載的時間
   let batchTotal = 0, batchDone = 0, batchStart = 0, quietDepth = 0, skipped = false;
-  let el = null, barEl = null, textEl = null, skipBtn = null;
+  let el = null, barEl = null, birdEl = null, textEl = null, skipBtn = null;
   const idleWaiters = [];
   const ARM_MIN = 500;   // 毫秒：開場／換地圖之後至少等這麼久（讓這段時間裡要下載的東西都先登記到）
   let armed = true, armedAt = performance.now();   // 開場先擋
@@ -53,10 +53,14 @@ const AssetGate = (() => {
     });
   }
 
+  // 載入畫面上跟著進度條飛的小鳥（兩張圖輪流＝拍翅膀）；先在背景下載好，載入畫面出現時就有圖
+  const BIRD = ['images/loading/bird-fly01.png', 'images/loading/bird-fly02.png'];
+  quietDepth++; BIRD.forEach(src => { new Image().src = src; }); quietDepth--;
+
   function build() {
     el = document.createElement('div');
     el.id = 'assetGate';
-    el.innerHTML = '<div class="ag-box"><div class="ag-title">載入中…</div><div class="ag-bar"><i></i></div>'
+    el.innerHTML = '<div class="ag-box"><div class="ag-title">載入中…</div><div class="ag-track"><b class="ag-bird"></b><div class="ag-bar"><i></i></div></div>'
       + '<div class="ag-text"></div><div class="ag-note">第一次開啟要下載遊戲圖片和音效，網路比較慢時需要等一下。</div>'
       + '<button type="button" class="ag-skip" hidden>先開始遊戲</button></div>';
     const css = document.createElement('style');
@@ -66,6 +70,11 @@ const AssetGate = (() => {
       #assetGate[hidden] { display:none }
       #assetGate .ag-box { width:min(360px, calc(100vw - 32px)); text-align:center; }
       #assetGate .ag-title { font-size:20px; font-weight:700; margin-bottom:14px; letter-spacing:2px }
+      #assetGate .ag-track { position:relative; padding-top:34px }
+      #assetGate .ag-bird { position:absolute; top:-5px; left:0; width:40px; height:40px; margin-left:-20px; transition:left .2s;
+        background:url(${BIRD[0]}) center/contain no-repeat; image-rendering:pixelated; animation:ag-flap .3s step-end infinite, ag-bob .6s ease-in-out infinite }
+      @keyframes ag-flap { 0% { background-image:url(${BIRD[0]}) } 50% { background-image:url(${BIRD[1]}) } }
+      @keyframes ag-bob { 0%,100% { transform:translateY(0) scaleX(-1) } 50% { transform:translateY(-3px) scaleX(-1) } }   /* scaleX(-1)：圖是朝左畫的，翻成朝右飛 */
       #assetGate .ag-bar { height:10px; border-radius:99px; background:#1f2a36; border:1px solid #3a4b60; overflow:hidden }
       #assetGate .ag-bar i { display:block; height:100%; width:0; background:linear-gradient(90deg,#5fb3c4,#a98bff); transition:width .2s }
       #assetGate .ag-text { margin-top:10px; font-size:14px; color:#b8c9da }
@@ -73,7 +82,7 @@ const AssetGate = (() => {
       #assetGate .ag-skip { margin-top:16px; cursor:pointer; color:#eaf3ff; background:#2a3e54; border:1px solid #5b7793; border-radius:8px; padding:8px 14px; font:inherit }`;
     document.head.appendChild(css);
     document.body.appendChild(el);
-    barEl = el.querySelector('.ag-bar i'); textEl = el.querySelector('.ag-text'); skipBtn = el.querySelector('.ag-skip');
+    barEl = el.querySelector('.ag-bar i'); birdEl = el.querySelector('.ag-bird'); textEl = el.querySelector('.ag-text'); skipBtn = el.querySelector('.ag-skip');
     skipBtn.dataset.uiSound = 'none';
     skipBtn.addEventListener('click', () => { skipped = true; refresh(); });
   }
@@ -91,6 +100,7 @@ const AssetGate = (() => {
     if (!show) return;
     const pct = batchTotal ? Math.round(batchDone / batchTotal * 100) : 0;
     barEl.style.width = pct + '%';
+    birdEl.style.left = pct + '%';   // 小鳥跟著進度條的前端飛
     textEl.textContent = `圖片、音效 ${batchDone} / ${batchTotal}（${pct}%）`;
     skipBtn.hidden = performance.now() - batchStart < SKIP_AFTER * 1000;
   }

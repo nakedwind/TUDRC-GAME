@@ -197,6 +197,7 @@ function pickMap() {
   return list[MAP_INDEX] || list[0] || null;
 }
 function switchMap(i) {                 // 切換到第 i 張並重新載入地圖
+  if (typeof rememberStoryBuilds === 'function') rememberStoryBuilds();   // 離開劇情地圖：蓋的建築記下來，下次回來還在（js/combat-progress.js）
   if (typeof settleSortieMoney === 'function' && !(typeof pausedBattle !== 'undefined' && pausedBattle && pausedBattle.G === G)) settleSortieMoney();   // 離開戰鬥地圖：剩下的作戰經費帶回基地（js/progression.js）；走進劇情地圖、戰場暫停中的不算（還沒打完）
   const list = mapList();
   if (typeof AssetGate !== 'undefined' && AssetGate.arm) AssetGate.arm();   // 換地圖：這張地圖要的圖片下載好之前先擋住（js/asset-gate.js）

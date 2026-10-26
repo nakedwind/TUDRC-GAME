@@ -98,6 +98,7 @@ function placeObstacle(ob, c, r) {
   const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0, trap: !!ob.trap, slow: slow || null };
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
+  if (typeof rememberStoryBuilds === 'function') rememberStoryBuilds();   // 劇情地圖：蓋好就記下來（js/combat-progress.js）
   sfx(LIGHT.buildings && LIGHT.buildings[ob.id] ? 'placeLight' : 'place');   // 放置成功：燈類建築（探照燈、露營燈…，data/balance.js 的 LIGHT.buildings）播放燈聲，其他是落地「叩」聲
   return true;
 }

@@ -1,5 +1,5 @@
 /* ===== 門（data/doors.js 決定哪些素材是門）=====
-   - 關著：門板正下方的地板格會擋路（玩家、隊友、怪物都過不去，光也透不過）。
+   - 關著：門板最下面兩排的地板格會擋路（玩家、隊友、怪物都過不去，光也透不過；兩排都擋，門板才會跟牆一樣被照亮）。
    - 打開：門的圖片直接消失，可以通過。
    - 手動門：溫特走到門前按 Spacenter 開關（有人站在門口時不能關）。
    - 自動門：平常關著、玩家打不開；觸發條件達成時自動打開（目前：異質核心醒來）。
@@ -25,9 +25,12 @@ function setupDoors() {
     // 擋哪一排：門的下緣只跨進下一排不到 minOverlap 像素（例如編輯器裡往下微調了幾像素），就算上一排（真正的門洞），不然門前會多一排擋路
     const [, lastRow] = cellAt(left, bottom), cells = [];
     const row = bottom - (OY + lastRow * CELL) + 1 < DOOR.minOverlap ? lastRow - 1 : lastRow;
+    // 擋兩排：門板最下面那排，加上它上面一排（門板有蓋到才算）。光碰到擋路格會停，
+    // 只擋一排的話門的上半部照不到燈、黑一塊；兩排都擋，門板就跟兩格高的牆一樣會被照亮。打開時兩排一起放開。
+    const rows = [row]; if (row - 1 >= cellAt(left, y0 + DOOR.minOverlap)[1]) rows.push(row - 1);
     for (let c = cellAt(left, bottom)[0]; c <= cellAt(right - 1, bottom)[0]; c++) {
       const overlap = Math.min(right, OX + (c + 1) * CELL) - Math.max(left, OX + c * CELL);
-      if (overlap >= DOOR.minOverlap && inGrid(c, row)) cells.push(c + ',' + row);
+      if (overlap >= DOOR.minOverlap) for (const r of rows) if (inGrid(c, r)) cells.push(c + ',' + r);
     }
     // 只管理原本不是牆的格子（編輯器裡畫了不可穿透的格子維持擋路）
     const own = cells.filter(k => !mapWalls.has(k));

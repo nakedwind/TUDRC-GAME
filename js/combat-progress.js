@@ -111,3 +111,30 @@ function resumePausedBattle(toId) {
   computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
   return true;
 }
+
+// ---- 劇情地圖裡蓋的建築會留著（例如在時間混亂的房間放的燈）----
+// 劇情地圖每次走進來都是新的一份 G，蓋過的建築本來會不見。這裡把溫特蓋的建築（playerBuilt）依地圖記在存檔裡：
+// 蓋好、拆掉、離開這張地圖時記下來；下次走進來（js/game.js 的 newGame）照原樣擺回去，不用再花錢。
+// 「開始新遊戲」會清掉（js/new-game.js 的 progressKeys）。
+const STORY_BUILDS_KEY = 'tudrc_story_builds_v1';
+function readStoryBuilds() { try { return JSON.parse(localStorage.getItem(STORY_BUILDS_KEY) || '{}') || {}; } catch (_) { return {}; } }
+function rememberStoryBuilds() {
+  if (!MAP_STORY || !MAP || !G || !Array.isArray(G.obstacles) || window.STORY_MODE) return;
+  const all = readStoryBuilds();
+  all[MAP.id] = G.obstacles.filter(o => o.playerBuilt && !(o.hp <= 0)).map(o => ({
+    type: o.type, orient: o.orient, c: o.c, r: o.r, w: o.w, h: o.h, solid: o.solid || [], hp: o.hp, maxhp: o.maxhp, trap: !!o.trap, slow: o.slow || null }));
+  if (!all[MAP.id].length) delete all[MAP.id];
+  try { localStorage.setItem(STORY_BUILDS_KEY, JSON.stringify(all)); } catch (_) {}
+}
+function restoreStoryBuilds() {
+  if (!MAP_STORY || !MAP || window.STORY_MODE) return;
+  for (const b of readStoryBuilds()[MAP.id] || []) {
+    const cells = (b.solid || []).map(([dc, dr]) => (b.c + dc) + ',' + (b.r + dr));
+    if (cells.some(k => G.grid[k] || mapWalls.has(k))) continue;   // 地圖改過、那裡被擋住了：這個就不放
+    const o = { kind: 'obstacle', playerBuilt: true, type: b.type, orient: b.orient, c: b.c, r: b.r, w: b.w, h: b.h,
+      solid: (b.solid || []).map(x => x.slice()), hp: b.hp, maxhp: b.maxhp, trap: !!b.trap, slow: b.slow || null };
+    for (const k of cells) G.grid[k] = o;
+    G.obstacles.push(o);
+  }
+}
+addEventListener('pagehide', rememberStoryBuilds);   // 關掉、重新整理網頁前也記一次

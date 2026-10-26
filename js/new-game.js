@@ -17,6 +17,7 @@
     'tudrc_quickslots_v1',   // 下方快捷欄 1～0 放了什麼（js/quick-slots.js）
     'tudrc_vitals_v1',   // 溫特和隊員的 HP、負荷、住院（js/vitals.js）
     'tudrc_explored_v1',   // 慣性導航記錄器記下的戰鬥地圖（js/tpad-map.js）
+    'tudrc_story_builds_v1',   // 劇情地圖裡蓋的建築（js/combat-progress.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
