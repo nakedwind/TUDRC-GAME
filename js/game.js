@@ -439,7 +439,7 @@ function openElevatorMenu() {
   sfx('menu');
   elevatorMenuOpen = true;
   Object.keys(keys).forEach(key => { keys[key] = false; });
-  document.getElementById('elevatorMessage').textContent = '選擇要前往的樓層';
+  document.getElementById('elevatorMessage').textContent = '選擇要前往的樓層（W／S 選擇、空白鍵確定）';
   renderElevatorFloors();
   elevatorMenu.classList.remove('hidden');
   document.getElementById('elevatorClose').focus();
@@ -465,6 +465,21 @@ function renderElevatorFloors() {
     // 目前所在的樓層：名稱照樣顯示，後面加一個小一點的「．目前所在」
     return '<button type="button" data-floor="' + f.id + '"' + (here ? ' class="sel" disabled' : '') + '><b>' + f.label + '</b>' + (f.rest || here ? '<small>' + f.rest + (here ? '<em class="floor-here">．目前所在</em>' : '') + '</small>' : '') + '</button>';
   }).join('') || '<p>沒有可以去的樓層</p>';
+}
+// 鍵盤選樓層：W／S（↑／↓）在樓層之間移動（跳過目前所在的那層），空白鍵／Enter＝按下去
+const elevatorFloorButtons = () => [...elevatorMenu.querySelectorAll('.elevator-floors [data-floor]')];
+function stepElevatorFloor(dir) {
+  const list = elevatorFloorButtons(); if (!list.length) return;
+  let i = list.indexOf(document.activeElement);
+  if (i < 0) i = list.findIndex(b => b.classList.contains('sel'));   // 還沒選：從目前所在的樓層開始往上／往下
+  if (i < 0) i = dir > 0 ? -1 : list.length;
+  for (let j = i + dir; j >= 0 && j < list.length; j += dir) if (!list[j].disabled) { list[j].focus(); sfx('blip'); return; }
+}
+function pressElevatorChoice() {
+  const el = document.activeElement;
+  if (!el || !elevatorMenu.contains(el) || !(el.matches('[data-floor]') || el.id === 'elevatorClose')) return;
+  el.blur();   // 先放開焦點：按鈕本身不會在放開空白鍵時又被按一次
+  el.click();
 }
 elevatorMenu.querySelector('.elevator-floors').addEventListener('click', e => {
   const button = e.target.closest('[data-floor]'); if (!button || button.disabled) return;
@@ -497,7 +512,9 @@ window.addEventListener('keydown', e => {
   }
   if (elevatorMenuOpen) {
     if (k === 'escape') { e.preventDefault(); closeElevatorMenu(); }
-    else if (isInteractKey(k) || MOVE_KEYS.includes(k)) e.preventDefault();
+    else if (k === 'w' || k === 'arrowup' || k === 's' || k === 'arrowdown') { e.preventDefault(); stepElevatorFloor(k === 'w' || k === 'arrowup' ? -1 : 1); }   // W／S（↑／↓）：上下選樓層
+    else if (isInteractKey(k)) { e.preventDefault(); if (!e.repeat) pressElevatorChoice(); }   // 空白鍵／Enter＝點選目前選到的樓層
+    else if (MOVE_KEYS.includes(k)) e.preventDefault();
     return;
   }
   if (dialogueState) {
