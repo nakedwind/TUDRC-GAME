@@ -622,7 +622,7 @@ const StoryScene = (() => {
   window.addEventListener('keydown', e => {
     if (!active()) return;
     wakeSound();
-    if (['F5', 'F12'].includes(e.key) || ((e.ctrlKey || e.metaKey) && ['r', 'l', 'w'].includes(e.key.toLowerCase()))) return;
+    if (['F5', 'F9', 'F12'].includes(e.key) || ((e.ctrlKey || e.metaKey) && ['r', 'l', 'w'].includes(e.key.toLowerCase()))) return;
     e.preventDefault(); e.stopImmediatePropagation();
     if (e.repeat) return;
     if (e.key === 'Tab') {

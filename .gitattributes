@@ -1,3 +1,0 @@
-# hook 腳本一定要用 LF（Windows 的 autocrlf 會把它變成 CRLF，hook 就跑不起來）
-.githooks/* text eol=lf
-*.bat text eol=crlf

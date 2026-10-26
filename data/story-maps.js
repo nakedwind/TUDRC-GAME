@@ -1723,13 +1723,13 @@ const STORY_MAPS = [
     },
     "stamps": [
       {
-        "id": "tile_mvoanvn6",
+        "id": "tile_memory_building_v2",
         "c": 0,
         "r": 0,
         "layer": "ground3"
       },
       {
-        "id": "tile_mvoarums",
+        "id": "tile_memory_building_door_v2",
         "c": 10,
         "r": 6,
         "layer": "object",

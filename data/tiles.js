@@ -4259,5 +4259,22 @@ const SHARED_TILES = [
     "file": "images/回憶場景/building_door.png",
     "w": 3,
     "h": 3
+  },
+  {
+    "id": "tile_memory_building_v2",
+    "name": "building_v2",
+    "role": "floor",
+    "file": "images/回憶場景/building_v2.png",
+    "w": 22,
+    "h": 18,
+    "flat": true
+  },
+  {
+    "id": "tile_memory_building_door_v2",
+    "name": "building_door_v2",
+    "role": "floor",
+    "file": "images/回憶場景/building_door_v2.png",
+    "w": 3,
+    "h": 3
   }
 ];
