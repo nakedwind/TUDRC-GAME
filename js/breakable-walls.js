@@ -6,6 +6,7 @@
    只在這一局有效，重新開始就恢復完整的牆。
    「後室牆面（可炸開・隱藏區）」：一樣可以炸開，而且牆另一邊（上方）跟它連通的整片區域平常全黑，
    炸開之後才慢慢顯現（隱藏的通道／房間）。
+   「後室牆面（裂縫）」（Back-room-wall02-damage-03 的圖）：已經裂開的隱藏區牆，炸一次就開（CRACKED_WALL）。
 */
 // 素材 id → stages：依序換成哪些圖；open：炸開後可以通過的格子（[第幾欄, 第幾列]，從大圖左上角算）
 // solid：一直擋路的格子（不管地圖編輯器有沒有畫擋路格，牆最下排的左右兩格都擋住）
@@ -23,11 +24,22 @@ const BREAKABLE_WALLS = {
     hide: true, hideFrom: [1, 1], hideMax: 1500,   // hideMax：隱藏區最多幾格（太大代表其實跟外面連通，就不隱藏）
   },
 };
+// 已經裂開的牆（圖是 Back-room-wall02-damage-03，例如素材「後室牆面（裂縫）」）：照圖檔認，不管素材 id。
+// 本來就是裂痕的樣子，所以炸一次就開洞；跟隱藏區版本一樣，牆上方被圍起來的區域炸開前塗黑（沒圍起來就不藏）
+const CRACKED_WALL = {
+  file: /\/Back-room-wall02-damage-03\.png$/,
+  spec: { stages: ['tile_bg_backroom_wall02_hole2'], open: [[1, 2]], solid: [[0, 2], [2, 2]], pad: 1, hide: true, hideFrom: [1, 1], hideMax: 1500 },
+};
 const HIDDEN_REVEAL_SEC = .9;   // 炸開後黑幕淡出幾秒
 let breakableWallCells = new Set();   // 這局因為「還沒炸開」而加進固定牆的格子（換地圖／重開時先還原）
 let breakableWallSolid = new Set();   // 牆本身一直擋路的格子（同樣換地圖／重開時先還原）
 
-const breakableWallSpec = s => s && BREAKABLE_WALLS[s.id];
+function breakableWallSpec(s) {
+  if (!s) return null;
+  if (BREAKABLE_WALLS[s.id]) return BREAKABLE_WALLS[s.id];
+  const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null;
+  return t && CRACKED_WALL.file.test(String(t.file || '').replace(/\\/g, '/')) ? CRACKED_WALL.spec : null;
+}
 function breakableWallStage(s) { return (G && G.wallStage && G.wallStage.get(s)) || 0; }
 // 牆上要通過的那幾格（地圖格座標）
 function breakableWallOpenCells(s) {
@@ -68,6 +80,9 @@ function hiddenAreaOf(s, spec) {
   const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
   const w = mapStampW(s, t), h = mapStampH(s, t);
   const inWall = (c, r) => c >= c0 && c < c0 + w && r >= r0 && r < r0 + h;
+  // 門（js/doors.js）當成通的：房間有門可以進去就不是隱藏區，不然玩家開門會看到一片黑
+  const doorCells = new Set(typeof mapDoors !== 'undefined' ? mapDoors.flatMap(d => d.cells || []) : []);
+  const blocked = (c, r) => isWall(c, r) && !doorCells.has(c + ',' + r);
   const start = [c0 + spec.hideFrom[0], r0 + spec.hideFrom[1]];
   const cells = new Set(), q = [start];
   const startKey = start.join(',');
@@ -79,7 +94,7 @@ function hiddenAreaOf(s, spec) {
     if (cells.size > (spec.hideMax || 1500)) { console.warn('隱藏區太大（可能跟外面連通），不隱藏', s); return null; }
     for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
-      if (!inGrid(nc, nr) || cells.has(k) || isWall(nc, nr) || (inWall(nc, nr) && nr >= r0 + spec.hideFrom[1])) continue;
+      if (!inGrid(nc, nr) || cells.has(k) || blocked(nc, nr) || (inWall(nc, nr) && nr >= r0 + spec.hideFrom[1])) continue;
       cells.add(k); q.push([nc, nr]);
     }
   }

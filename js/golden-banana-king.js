@@ -54,7 +54,7 @@ const BANANA_KING = {
   dropMin: 1,          // 掉幾根：dropMin～dropMax 隨機
   dropMax: 2,
   // ---- 測試用 ----
-  testSpawn: true,     // 測完改 false
+  testSpawn: false,    // 測試用：true＝進戰鬥地圖時在營地右邊生一隻
   testCampDist: 20,    // 營地右邊幾格
 };
 const BK_ART = {

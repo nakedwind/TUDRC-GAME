@@ -6,7 +6,8 @@
 //  ・商品資料在 data/supplies.js
 //  ・便利商店：只能在 1 樓 HOME Mart 的結帳櫃台（SHOP_COUNTER）靠近按 Spacenter 打開
 //  ・飲料店：地圖編輯器「街道」分類的飲料店素材靠近按 Spacenter 打開，只賣飲料
-//  ・販賣機：地圖上的販賣機（素材 id 含 vending）靠近按 Spacenter，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開
+//  ・販賣機：地圖上的販賣機（素材 id 或圖檔名含 vending）靠近按 Spacenter，用同一個介面，但只賣飲料（kind: 'drink'），購物車跟商店分開；都不收東西（不能賣出）
+//    紫色的是後室販賣機：只賣杏仁水（BACKROOM_VENDING）
 //    2F應變中心的兩台（EOC_VENDING）：紅＝零食、綠＝飲料，各隨機 6 種、每種最多 3 個，每 10 分鐘（現實時間）重新抽、補滿
 //  ・溫特的持有上限（CARRY_LIMIT，在 js/backpack.js）：買到上限就不能再加進購物車
 //  ・後室商店也賣全部的零食、飲料
@@ -16,11 +17,11 @@
 const supplyShop = document.getElementById('supplyShop');
 const supplyShopList = document.getElementById('supplyShopList');
 const shopCartList = document.getElementById('cartList');
-const storeCart = new Map(), vendingCart = new Map(), vendingCarts = { red: new Map(), green: new Map() };   // 購物車：商品 id → 數量（結帳後才放進背包）；一般商店與飲料店分開
+const storeCart = new Map(), vendingCart = new Map(), vendingCarts = { red: new Map(), green: new Map(), purple: new Map() };   // 購物車：商品 id → 數量（結帳後才放進背包）；一般商店與飲料店分開
 let shopCart = storeCart;
 let supplyShopOpen = false, supplyShopTab = 'all';
 let vendingMode = false, drinkShopMode = false;   // 販賣機或飲料店模式都只賣飲料
-const VENDING = { kinds: ['drink'], reach: 1, match: id => /vending/.test(id) };   // 賣什麼、離販賣機邊緣幾格內按得到、哪些素材算販賣機
+const VENDING = { kinds: ['drink'], reach: 1, match: (id, t) => /vending/.test(id) || /vending-machine/.test(String(t && t.file || '')) };   // 賣什麼、離販賣機邊緣幾格內按得到、哪些素材算販賣機（素材 id 或圖檔名含 vending）
 const SHOP_COUNTER = { reach: 1.2, match: id => id === 'tile_cvs_checkout_counter' };   // 商店的結帳櫃台（地圖編輯器「結帳櫃台」）
 const DRINK_SHOP = { kinds: ['drink'], reach: 1.2, match: id => String(id).startsWith('tile_street_drink_shop_') };
 // 後室商店：stock＝賣什麼（price 沒寫就用商品本身的價錢）；sellRate＝賣掉的東西拿回原價的幾成；sellPrice＝沒有原價的東西賣多少
@@ -31,7 +32,7 @@ const BACKROOM_SHOP = {
 };
 const BACKROOM_ONLY = ['almond-water'];   // 只有在後室（戰鬥地圖）裡的店買得到；基地的便利商店、飲料店、販賣機不賣
 // 後室（戰鬥地圖）裡的販賣機、飲料店（60BLUE）賣什麼；基地裡的照舊只賣飲料
-const BACKROOM_VENDING = [{ id: 'almond-water' }];
+const BACKROOM_VENDING = [{ id: 'almond-water' }];   // 紫色的後室販賣機（不管在哪張地圖）
 const BACKROOM_DRINKSHOP = [{ id: 'almond-water' }, { id: 'thermos' }];
 let backroomMode = false, backroomTab = 'buy';   // backroomTab：buy 購買／sell 賣出（便利商店、飲料店、後室商店都能賣；販賣機不收）
 const shopCanSell = () => !vendingMode;
@@ -51,8 +52,12 @@ const shopBulletRoom = item => item.bullet ? Math.max(0, BULLETS[item.bullet].ma
 // slots＝每台賣幾種（每次補貨時從全部的零食／飲料裡隨機抽）；max＝每種補滿時有幾個；refillMin＝幾分鐘（現實時間）補一次貨
 // 庫存存在瀏覽器（store），關掉遊戲時間也照算；開新遊戲會重設（js/new-game.js）
 const EOC_VENDING = { map: '2F應變中心', kinds: { red: 'snack', green: 'drink' }, slots: 6, max: 3, refillMin: 10, store: 'tudrc_vending_stock_v1' };
-let vendingColor = null;   // 目前打開的是哪一台（red／green；其他地圖的販賣機＝null，照舊只賣飲料）
-const vendingColorOf = id => (/vending_red/.test(id) ? 'red' : /vending_green/.test(id) ? 'green' : null);
+let vendingColor = null;   // 目前打開的是哪一台（red／green／purple；紅綠只賣飲料，2F應變中心的紅綠見 EOC_VENDING；purple＝後室販賣機，只賣杏仁水）
+function vendingColorOf(id) {
+  const file = String((mapTileById(id) || {}).file || '');
+  return /vending_purple|vending-machine-purple/.test(id + ' ' + file) ? 'purple'
+    : /vending_red|vending-machine-red/.test(id + ' ' + file) ? 'red' : /vending_green|vending-machine-green/.test(id + ' ' + file) ? 'green' : null;
+}
 const isEocVending = () => !!vendingColor && typeof MAP_SAFE !== 'undefined' && MAP_SAFE && MAP && String(MAP.name || '').trim() === EOC_VENDING.map;
 function eocVendingState() {
   const period = EOC_VENDING.refillMin * 60000, now = Date.now();
@@ -90,7 +95,7 @@ function backroomStock(stock = BACKROOM_SHOP.stock) {
 // 後室道具（special）只有後室商店賣
 const shopItems = () => backroomMode ? [...backroomStock().filter(item => item.kind !== 'snack' && item.kind !== 'drink'), ...backroomBulletStock()]   // 後室商店暫不販售零食、飲料，保留補給與子彈
   : vendingMode && isEocVending() ? Object.keys(eocVendingState()[vendingColor] || {}).map(supplyById).filter(Boolean)   // 2F應變中心的販賣機：這次抽到的 6 種
-  : vendingMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_VENDING))
+  : vendingMode ? (vendingColor === 'purple' ? backroomStock(BACKROOM_VENDING) : SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)))   // 紫色後室販賣機：杏仁水；其他販賣機：只賣飲料
   : drinkShopMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_DRINKSHOP))
   : [...SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id))), ...(MAP_SAFE && typeof squadGearShopItems === 'function' ? squadGearShopItems() : [])];   // 基地的便利商店也賣隊員裝備（js/squad-gear.js）
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
@@ -237,13 +242,14 @@ function setShopMode(mode) {
   vendingMode = mode === 'vending'; drinkShopMode = mode === 'drinkshop'; backroomMode = mode === 'backroom';
   backroomTab = 'buy';
   if (!vendingMode) vendingColor = null;
-  shopCart = backroomMode ? backroomCart : vendingMode && isEocVending() ? vendingCarts[vendingColor] : vendingMode || drinkShopMode ? vendingCart : storeCart;
+  shopCart = backroomMode ? backroomCart : vendingMode && (isEocVending() || vendingColor === 'purple') ? vendingCarts[vendingColor] : vendingMode || drinkShopMode ? vendingCart : storeCart;
   supplyShop.classList.toggle('vending', vendingMode);
   supplyShop.classList.toggle('drinkshop', drinkShopMode);
   supplyShop.classList.toggle('backroom', backroomMode);
   const eoc = vendingMode && isEocVending();
-  const smallTitle = backroomMode ? '後室・便利商店' : eoc ? '自動販賣機・' + eocVendingMinutesLeft() + ' 分鐘後補貨' : vendingMode ? '自動販賣機' : drinkShopMode ? '飲料店' : '便利商店';
-  const title = backroomMode ? '後室商店' : eoc ? (vendingColor === 'red' ? '零食販賣機' : '飲料販賣機') : vendingMode ? '販賣機' : drinkShopMode ? '飲料店' : '商店';
+  const purple = vendingMode && vendingColor === 'purple';
+  const smallTitle = backroomMode ? '後室・便利商店' : eoc ? '自動販賣機・' + eocVendingMinutesLeft() + ' 分鐘後補貨' : purple ? '後室・自動販賣機' : vendingMode ? '自動販賣機' : drinkShopMode ? '飲料店' : '便利商店';
+  const title = backroomMode ? '後室商店' : eoc ? (vendingColor === 'red' ? '零食販賣機' : '飲料販賣機') : purple ? '後室販賣機' : vendingMode ? '販賣機' : drinkShopMode ? '飲料店' : '商店';
   supplyShop.querySelector('.shop-title small').textContent = smallTitle;
   document.getElementById('supplyShopTitle').textContent = title;
   supplyShop.querySelector('.shop-sign').textContent = eoc && vendingColor === 'red' ? '🍘' : vendingMode || drinkShopMode ? '🥤' : '24H';
@@ -288,8 +294,7 @@ function shopStampNearPlayer(cfg) {
   if (!G || !G.player || !MAP) return null;
   const p = G.player; let best = null, bestD = cfg.reach * CELL;
   for (const s of MAP.stamps || []) {
-    if (!cfg.match(s.id)) continue;
-    const t = mapTileById(s.id); if (!t) continue;
+    const t = mapTileById(s.id); if (!t || !cfg.match(s.id, t)) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), x1 = x0 + mapTileW(t) * CELL, y1 = y0 + mapTileH(t) * CELL;
     const d = Math.hypot(Math.max(x0 - p.x, 0, p.x - x1), Math.max(y0 - p.y, 0, p.y - y1));
     if (d <= bestD) { bestD = d; best = { x: (x0 + x1) / 2, top: y0, dist: d, id: s.id }; }
