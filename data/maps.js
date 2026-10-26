@@ -12541,49 +12541,38 @@ const BATTLE_MAPS = [
     "desc": "",
     "layers": {
       "floor": {
-        "6,10": "tile_poolcore_floor_blue",
-        "6,11": "tile_poolcore_floor_blue",
-        "6,12": "tile_poolcore_floor_blue",
-        "7,10": "tile_poolcore_floor_blue",
-        "7,11": "tile_poolcore_floor_blue",
-        "7,12": "tile_poolcore_floor_blue",
-        "8,10": "tile_poolcore_floor_blue",
-        "8,11": "tile_poolcore_floor_blue",
-        "8,12": "tile_poolcore_floor_blue",
-        "9,10": "tile_poolcore_floor_blue",
-        "9,11": "tile_poolcore_floor_blue",
-        "9,12": "tile_poolcore_floor_blue",
-        "10,10": "tile_poolcore_floor_blue",
-        "10,11": "tile_poolcore_floor_blue",
-        "10,12": "tile_poolcore_floor_blue",
-        "11,10": "tile_poolcore_floor_blue",
-        "11,11": "tile_poolcore_floor_blue",
-        "11,12": "tile_poolcore_floor_blue",
-        "12,10": "tile_poolcore_floor_blue",
-        "12,11": "tile_poolcore_floor_blue",
-        "12,12": "tile_poolcore_floor_blue",
-        "13,10": "tile_poolcore_floor_blue",
-        "13,11": "tile_poolcore_floor_blue",
-        "13,12": "tile_poolcore_floor_blue",
-        "14,10": "tile_poolcore_floor_blue",
-        "14,11": "tile_poolcore_floor_blue",
-        "14,12": "tile_poolcore_floor_blue",
-        "15,10": "tile_poolcore_floor_blue",
-        "15,11": "tile_poolcore_floor_blue",
-        "15,12": "tile_poolcore_floor_blue"
+        "5,7": "tile_poolcore_floor_blue",
+        "6,7": "tile_poolcore_floor_blue",
+        "7,7": "tile_poolcore_floor_blue",
+        "8,7": "tile_poolcore_floor_blue",
+        "9,7": "tile_poolcore_floor_blue",
+        "10,7": "tile_poolcore_floor_blue",
+        "11,7": "tile_poolcore_floor_blue",
+        "12,7": "tile_poolcore_floor_blue",
+        "13,7": "tile_poolcore_floor_blue",
+        "14,7": "tile_poolcore_floor_blue",
+        "14,5": "tile_poolcore_floor_blue",
+        "14,6": "tile_poolcore_floor_blue",
+        "13,5": "tile_poolcore_floor_blue",
+        "13,6": "tile_poolcore_floor_blue",
+        "12,5": "tile_poolcore_floor_blue",
+        "12,6": "tile_poolcore_floor_blue",
+        "11,6": "tile_poolcore_floor_blue",
+        "11,5": "tile_poolcore_floor_blue",
+        "10,5": "tile_poolcore_floor_blue",
+        "10,6": "tile_poolcore_floor_blue",
+        "9,6": "tile_poolcore_floor_blue",
+        "9,5": "tile_poolcore_floor_blue",
+        "8,5": "tile_poolcore_floor_blue",
+        "8,6": "tile_poolcore_floor_blue",
+        "7,6": "tile_poolcore_floor_blue",
+        "7,5": "tile_poolcore_floor_blue",
+        "6,5": "tile_poolcore_floor_blue",
+        "6,6": "tile_poolcore_floor_blue",
+        "5,6": "tile_poolcore_floor_blue",
+        "5,5": "tile_poolcore_floor_blue"
       },
       "ground": {
-        "5,14": "tile_poolcore_floor_pale",
-        "5,13": "tile_poolcore_floor_pale",
-        "5,12": "tile_poolcore_floor_pale",
-        "5,11": "tile_poolcore_floor_pale",
-        "5,10": "tile_poolcore_floor_pale",
-        "5,9": "tile_poolcore_floor_pale",
-        "5,8": "tile_poolcore_floor_pale",
-        "5,7": "tile_poolcore_floor_pale",
-        "5,6": "tile_poolcore_wall_corner",
-        "24,10": "tile_poolcore_deep_water",
-        "25,10": "tile_poolcore_deep_water",
         "26,10": "tile_poolcore_deep_water",
         "27,10": "tile_poolcore_deep_water",
         "28,10": "tile_poolcore_deep_water",
@@ -12593,8 +12582,6 @@ const BATTLE_MAPS = [
         "32,10": "tile_poolcore_deep_water",
         "33,10": "tile_poolcore_deep_water",
         "34,10": "tile_poolcore_deep_water",
-        "24,11": "tile_poolcore_deep_water",
-        "25,11": "tile_poolcore_deep_water",
         "26,11": "tile_poolcore_deep_water",
         "27,11": "tile_poolcore_deep_water",
         "28,11": "tile_poolcore_deep_water",
@@ -12604,8 +12591,6 @@ const BATTLE_MAPS = [
         "32,11": "tile_poolcore_deep_water",
         "33,11": "tile_poolcore_deep_water",
         "34,11": "tile_poolcore_deep_water",
-        "24,12": "tile_poolcore_deep_water",
-        "25,12": "tile_poolcore_deep_water",
         "26,12": "tile_poolcore_deep_water",
         "27,12": "tile_poolcore_deep_water",
         "28,12": "tile_poolcore_deep_water",
@@ -12618,15 +12603,6 @@ const BATTLE_MAPS = [
         "35,10": "tile_poolcore_deep_water",
         "35,11": "tile_poolcore_deep_water",
         "35,12": "tile_poolcore_deep_water",
-        "23,4": "tile_poolcore_wall_corner",
-        "23,5": "tile_poolcore_floor_pale",
-        "23,6": "tile_poolcore_floor_pale",
-        "23,7": "tile_poolcore_floor_pale",
-        "23,8": "tile_poolcore_floor_pale",
-        "23,9": "tile_poolcore_floor_pale",
-        "23,10": "tile_poolcore_floor_pale",
-        "23,12": "tile_poolcore_floor_pale",
-        "23,11": "tile_poolcore_floor_pale",
         "23,20": "tile_poolcore_floor_pale",
         "23,19": "tile_poolcore_floor_pale",
         "23,18": "tile_poolcore_floor_pale",
@@ -12638,153 +12614,201 @@ const BATTLE_MAPS = [
         "14,25": "tile_poolcore_floor_pale",
         "14,24": "tile_poolcore_floor_pale",
         "14,23": "tile_poolcore_floor_pale",
-        "14,22": "tile_poolcore_floor_pale"
+        "14,22": "tile_poolcore_floor_pale",
+        "24,4": "tile_poolcore_wall_corner",
+        "24,5": "tile_poolcore_floor_pale",
+        "24,6": "tile_poolcore_floor_pale",
+        "24,7": "tile_poolcore_floor_pale",
+        "24,8": "tile_poolcore_floor_pale",
+        "24,9": "tile_poolcore_floor_pale",
+        "24,10": "tile_poolcore_floor_pale",
+        "24,11": "tile_poolcore_floor_pale",
+        "24,12": "tile_poolcore_floor_pale",
+        "25,12": "tile_poolcore_deep_water",
+        "25,11": "tile_poolcore_deep_water",
+        "25,10": "tile_poolcore_deep_water",
+        "4,9": "tile_poolcore_floor_pale",
+        "4,8": "tile_poolcore_floor_pale",
+        "4,7": "tile_poolcore_floor_pale",
+        "4,6": "tile_poolcore_floor_pale",
+        "4,5": "tile_poolcore_floor_pale",
+        "4,4": "tile_poolcore_floor_pale",
+        "4,3": "tile_poolcore_floor_pale",
+        "4,2": "tile_poolcore_floor_pale",
+        "4,1": "tile_poolcore_wall_corner"
       },
       "ground2": {},
       "ground3": {},
       "object": {},
-      "object2": {},
-      "object3": {},
-      "object4": {},
-      "overlay": {},
       "top": {},
-      "ground4": {},
+      "ground4": {
+        "10,13": "tile_mvpj60hi"
+      },
       "object6": {},
       "object7": {},
-      "object5": {}
+      "object5": {},
+      "object8": {}
     },
     "stamps": [
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 9,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 10,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 11,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 12,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 13,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 8,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 7,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 6,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 14,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_wall_vertical",
         "c": 15,
-        "r": 7,
+        "r": 2,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 6,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 7,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 8,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 9,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 10,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 12,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 11,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 13,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 14,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_gradient",
         "c": 15,
-        "r": 13,
+        "r": 8,
         "layer": "floor"
       },
       {
         "id": "tile_poolcore_floor_pale",
         "c": 16,
-        "r": 7,
+        "r": 2,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_floor_pale",
         "c": 16,
-        "r": 8,
+        "r": 3,
+        "layer": "ground",
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_floor_pale",
+        "c": 16,
+        "r": 4,
+        "layer": "ground",
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_floor_pale",
+        "c": 16,
+        "r": 5,
+        "layer": "ground",
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_floor_pale",
+        "c": 16,
+        "r": 6,
+        "layer": "ground",
+        "fx": true
+      },
+      {
+        "id": "tile_poolcore_floor_pale",
+        "c": 16,
+        "r": 7,
         "layer": "ground",
         "fx": true
       },
@@ -12798,140 +12822,98 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_floor_pale",
         "c": 16,
-        "r": 10,
-        "layer": "ground",
-        "fx": true
-      },
-      {
-        "id": "tile_poolcore_floor_pale",
-        "c": 16,
-        "r": 11,
-        "layer": "ground",
-        "fx": true
-      },
-      {
-        "id": "tile_poolcore_floor_pale",
-        "c": 16,
-        "r": 12,
-        "layer": "ground",
-        "fx": true
-      },
-      {
-        "id": "tile_poolcore_floor_pale",
-        "c": 16,
-        "r": 14,
-        "layer": "ground",
-        "fx": true
-      },
-      {
-        "id": "tile_poolcore_floor_pale",
-        "c": 16,
-        "r": 13,
+        "r": 8,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
         "c": 6,
-        "r": 6,
+        "r": 1,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
         "c": 8,
-        "r": 6,
+        "r": 1,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
         "c": 10,
-        "r": 6,
+        "r": 1,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
         "c": 12,
-        "r": 6,
+        "r": 1,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
         "c": 14,
-        "r": 6,
+        "r": 1,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_wall_corner",
         "c": 16,
-        "r": 6,
+        "r": 1,
         "layer": "ground",
         "fx": true
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
         "c": 6,
-        "r": 15,
+        "r": 9,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8
+        "oy": 32
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
         "c": 8,
-        "r": 15,
+        "r": 9,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8
+        "oy": 32
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
-        "c": 10,
-        "r": 15,
+        "c": 17,
+        "r": 17,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8
+        "oy": 2
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
-        "c": 12,
-        "r": 15,
+        "c": 19,
+        "r": 17,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8
-      },
-      {
-        "id": "tile_poolcore_wall_edge_wide",
-        "c": 14,
-        "r": 15,
-        "layer": "ground",
-        "ox": 0,
-        "oy": -8
+        "oy": 2
       },
       {
         "id": "tile_poolcore_wall_corner",
         "c": 5,
-        "r": 15,
+        "r": 9,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8
+        "oy": 32
       },
       {
         "id": "tile_poolcore_wall_corner",
-        "c": 16,
-        "r": 15,
+        "c": 21,
+        "r": 17,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8,
+        "oy": 2,
         "fx": true
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
-        "c": 24,
+        "c": 25,
         "r": 5,
         "layer": "ground"
       },
@@ -12943,7 +12925,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_deep_water_gradient",
-        "c": 25,
+        "c": 26,
         "r": 5,
         "layer": "ground"
       },
@@ -12997,7 +12979,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
-        "c": 26,
+        "c": 25,
         "r": 4,
         "layer": "ground"
       },
@@ -13064,11 +13046,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
-        "c": 24,
-        "r": 13,
+        "c": 25,
+        "r": 12,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8
+        "oy": 32
       },
       {
         "id": "tile_poolcore_wall_edge_wide",
@@ -13121,11 +13102,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_wall_corner",
-        "c": 23,
-        "r": 13,
+        "c": 24,
+        "r": 12,
         "layer": "ground",
-        "ox": 0,
-        "oy": -8
+        "oy": 32
       },
       {
         "id": "tile_poolcore_wall_wide",
@@ -13904,20 +13884,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_poolcore_waterline_wall",
-        "c": 26,
-        "r": 15,
+        "c": 15,
+        "r": 13,
         "layer": "ground2",
         "sortDepth": 0.25,
-        "ox": 10,
-        "oy": 10
-      },
-      {
-        "id": "tile_bg_electric_light",
-        "c": 17,
-        "r": 14,
-        "layer": "object2",
-        "ox": -18,
-        "oy": 0
+        "ox": 30
       },
       {
         "id": "tile_cvs_sign_twelve",
@@ -15678,6 +15649,110 @@ const BATTLE_MAPS = [
         "layer": "object",
         "ox": 30,
         "oy": 30
+      },
+      {
+        "id": "tile_mvp8n5zs",
+        "c": 7,
+        "r": 19,
+        "layer": "top",
+        "oy": 20
+      },
+      {
+        "id": "tile_mvp8nxz4",
+        "c": 7,
+        "r": 19,
+        "layer": "top",
+        "oy": 20,
+        "blend": "hard-light"
+      },
+      {
+        "id": "tile_mvobex5o",
+        "c": 20,
+        "r": 12,
+        "layer": "object",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvph1jix",
+        "c": 3,
+        "r": 12,
+        "layer": "object8",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1odn",
+        "c": 5,
+        "r": 12,
+        "layer": "object8",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1tds",
+        "c": 7,
+        "r": 12,
+        "layer": "object8",
+        "ox": 2,
+        "oy": 0
+      },
+      {
+        "id": "tile_mvph143o",
+        "c": 3,
+        "r": 14,
+        "layer": "object8",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph19b4",
+        "c": 5,
+        "r": 14,
+        "layer": "object8",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvph1e62",
+        "c": 7,
+        "r": 14,
+        "layer": "object8",
+        "ox": 2,
+        "oy": 0
+      },
+      {
+        "id": "tile_mvpj1fdy",
+        "c": 3,
+        "r": 12,
+        "layer": "object8",
+        "ox": 10
+      },
+      {
+        "id": "tile_mvpj53ld",
+        "c": 5,
+        "r": 12,
+        "layer": "object8",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_mvpj60hi",
+        "c": 6,
+        "r": 12,
+        "layer": "object8",
+        "ox": 10
+      },
+      {
+        "id": "tile_poolcore_life_ring_blue",
+        "c": 6,
+        "r": 13,
+        "layer": "object8",
+        "ox": 30
+      },
+      {
+        "id": "tile_poolcore_life_ring_red",
+        "c": 7,
+        "r": 12,
+        "layer": "object8",
+        "ox": 30,
+        "oy": 20
       }
     ],
     "solid": [
@@ -15745,20 +15820,8 @@ const BATTLE_MAPS = [
         "name": "🍂 地面裝飾 2"
       },
       {
-        "id": "object2",
-        "name": "🧰 物件 2"
-      },
-      {
-        "id": "object3",
-        "name": "🪑 物件 3"
-      },
-      {
-        "id": "object4",
-        "name": "🚧 物件 4"
-      },
-      {
-        "id": "overlay",
-        "name": "🎯 物件裝飾"
+        "id": "object8",
+        "name": "測試小塊"
       },
       {
         "id": "top",

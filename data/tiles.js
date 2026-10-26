@@ -2566,6 +2566,14 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_dmg_backroom_pillar_damaged",
+    "name": "後室柱子（破損）",
+    "role": "floor",
+    "file": "images/破損建築/Back-room-Pillar-damaged.png",
+    "w": 1,
+    "h": 4
+  },
+  {
     "id": "tile_dmg_pillar_damaged",
     "name": "大廳柱子（破損）",
     "role": "floor",
@@ -3991,6 +3999,14 @@ const SHARED_TILES = [
     "h": 3
   },
   {
+    "id": "tile_mvfqc6g7",
+    "name": "shoe-cabinet02",
+    "role": "floor",
+    "file": "images/地下訓練室/shoe-cabinet02.png",
+    "w": 2,
+    "h": 1
+  },
+  {
     "id": "tile_training_bench",
     "name": "長椅",
     "role": "floor",
@@ -4152,7 +4168,7 @@ const SHARED_TILES = [
     "name": "Poolcore_wall_02",
     "role": "floor",
     "file": "images/Poolcore/Poolcore_wall_02.png",
-    "w": 2,
+    "w": 1,
     "h": 1
   },
   {
@@ -4309,5 +4325,93 @@ const SHARED_TILES = [
     "file": "images/background/Back-room-wall06.png",
     "w": 2,
     "h": 4
+  },
+  {
+    "id": "tile_mvp8n5zs",
+    "name": "Poolcore_LED",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_LED.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_mvp8nxz4",
+    "name": "Poolcore_LED_glow",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_LED_glow.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_mvph143o",
+    "name": "Poolcore_block_dwn_L",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_block_dwn_L.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvph19b4",
+    "name": "Poolcore_block_dwn_M",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_block_dwn_M.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvph1e62",
+    "name": "Poolcore_block_dwn_R",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_block_dwn_R.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvph1jix",
+    "name": "Poolcore_block_up_L",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_block_up_L.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvph1odn",
+    "name": "Poolcore_block_up_M",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_block_up_M.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvph1tds",
+    "name": "Poolcore_block_up_R",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_block_up_R.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvpj1fdy",
+    "name": "Poolcore_deep_area",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_deep_area.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_mvpj53ld",
+    "name": "Poolcore_No_diving",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_No_diving.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_mvpj60hi",
+    "name": "Poolcore_notice",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_notice.png",
+    "w": 1,
+    "h": 1
   }
 ];
