@@ -3227,7 +3227,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_life_ring_blue",
     "name": "池核｜藍白救生圈",
     "role": "floor",
-    "file": "images/Poolcore/poolcore-life-ring-blue.png",
+    "file": "images/Poolcore/Poolcore-life-ring_blue.png",
     "w": 1,
     "h": 1
   },
@@ -3235,7 +3235,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_life_ring_red",
     "name": "池核｜紅白救生圈",
     "role": "floor",
-    "file": "images/Poolcore/poolcore-life-ring-red.png",
+    "file": "images/Poolcore/Poolcore-life-ring_red.png",
     "w": 1,
     "h": 1
   },
