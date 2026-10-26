@@ -19,7 +19,7 @@ const Ambience = (() => {
 
   const fileOf = () => { const it = SFX.list().find(x => x.name === AMBIENCE.sound); return it && typeof it.file === 'string' ? it.file : null; };
   const inYZone = () => typeof MAP_SAFE !== 'undefined' && typeof MAP !== 'undefined' && MAP && !MAP_SAFE && !MAP.safe;   // Y 區＝戰鬥地圖（B1 訓練室練習時暫時算戰鬥區，但還是在應變中心裡：不播）
-  const baseVolume = () => (SFX.enabled ? SFX.volume : 0) * AMBIENCE.volume * (SFX.gainOf(AMBIENCE.sound) ?? 1);
+  const baseVolume = () => (SFX.enabled ? SFX.volume : 0) * AMBIENCE.volume * (SFX.gainOf(AMBIENCE.sound) ?? 1) * (typeof previewBgMuted === 'function' && previewBgMuted() ? 0 : 1);   // 編輯器的預覽視窗可以關掉背景音（js/preview-mute.js）
 
   async function load() {
     if (buffer || loading || fallback) return;   // 已經在用備用方式播了：不要再建一個（之前每按一次鍵就多疊一層白噪音，越來越大聲）

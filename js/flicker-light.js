@@ -156,7 +156,7 @@ function updateFlickerHum() {
   }
   if (!best && !humAudio) return;
   const h = humContext(); if (!h) return;
-  const enabled = typeof SFX === 'undefined' || SFX.enabled;
+  const enabled = (typeof SFX === 'undefined' || SFX.enabled) && !(typeof previewBgMuted === 'function' && previewBgMuted());   // 編輯器的預覽視窗可以關掉背景音（js/preview-mute.js）
   const vol = enabled ? best * best * FLICKER.humVolume * ((typeof SFX !== 'undefined' ? SFX.volume : .35) / .35) : 0;
   h.out.gain.setTargetAtTime(vol, h.ctx.currentTime, .05);
 }

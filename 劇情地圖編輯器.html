@@ -16,6 +16,7 @@
         <span>目前地圖：</span>
         <select id="mapSelect"></select>
         <button class="btn" id="previewGame" title="用目前編輯中的地圖開遊戲畫面（不用先匯出）">▶ 預覽遊戲</button>
+        <button class="btn" id="previewBgMute">🔇 預覽背景音：關</button>
         <button class="btn" id="newMap">＋ 新增</button>
         <button class="btn" id="dupMap">⧉ 複製</button>
         <button class="btn" id="renameMap">✎ 改名</button>
@@ -219,6 +220,7 @@
   </script>
   <script src="js/map-editor-store.js?v=story-20261021"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
   <script>EditorStore.boot(["js/map-editor.js?v=memorycat-20261026", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
+  <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=achv-20261023"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>
