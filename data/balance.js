@@ -38,7 +38,7 @@ const RESCUE_DOG_HANDLERS = ['eldrin', 'avaren'];
 // 新手區專用開場配置，不覆蓋其他地圖的玩家編隊。
 const NEWBIE_START = {
   mapId: 'map_a46c5e1a-9802-4db5-a3b9-486b4649c206',
-  team: ['avaren', 'eldrin', 'ball'],
+  team: ['avaren', 'eldrin', 'ball', 'luther'],
   box: { medkit: 6, firstaid: 7, 'almond-water': 7 },
   guideKit: { firstaid: 3, 'almond-water': 3 },
   flares: 30,         // 溫特身上的照明彈（已裝進彈匣）
