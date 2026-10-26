@@ -71,10 +71,10 @@ const AssetGate = (() => {
       #assetGate .ag-box { width:min(360px, calc(100vw - 32px)); text-align:center; }
       #assetGate .ag-title { font-size:20px; font-weight:700; margin-bottom:14px; letter-spacing:2px }
       #assetGate .ag-track { position:relative; padding-top:34px }
-      #assetGate .ag-bird { position:absolute; top:0; left:0; width:40px; height:40px; margin-left:-20px; transition:left .2s;
+      #assetGate .ag-bird { position:absolute; top:-5px; left:0; width:40px; height:40px; margin-left:-20px; transition:left .2s;
         background:url(${BIRD[0]}) center/contain no-repeat; image-rendering:pixelated; animation:ag-flap .3s step-end infinite, ag-bob .6s ease-in-out infinite }
       @keyframes ag-flap { 0% { background-image:url(${BIRD[0]}) } 50% { background-image:url(${BIRD[1]}) } }
-      @keyframes ag-bob { 0%,100% { transform:translateY(0) } 50% { transform:translateY(-3px) } }
+      @keyframes ag-bob { 0%,100% { transform:translateY(0) scaleX(-1) } 50% { transform:translateY(-3px) scaleX(-1) } }   /* scaleX(-1)：圖是朝左畫的，翻成朝右飛 */
       #assetGate .ag-bar { height:10px; border-radius:99px; background:#1f2a36; border:1px solid #3a4b60; overflow:hidden }
       #assetGate .ag-bar i { display:block; height:100%; width:0; background:linear-gradient(90deg,#5fb3c4,#a98bff); transition:width .2s }
       #assetGate .ag-text { margin-top:10px; font-size:14px; color:#b8c9da }
