@@ -4242,5 +4242,22 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_ammo_crate02.png",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_mvoanvn6",
+    "name": "building",
+    "role": "floor",
+    "file": "images/回憶場景/building.png",
+    "w": 22,
+    "h": 18,
+    "flat": true
+  },
+  {
+    "id": "tile_mvoarums",
+    "name": "building_door",
+    "role": "floor",
+    "file": "images/回憶場景/building_door.png",
+    "w": 3,
+    "h": 3
   }
 ];

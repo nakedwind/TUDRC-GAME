@@ -141,7 +141,7 @@ const StoryScene = (() => {
     if (a.bed && !seat) throw new Error('劇情床位不存在：' + (a.name || a.id) + '（' + a.bed + '）');
     return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null,
       x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL, alpha: 1,
-      dir: a.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!a.bed };
+      dir: a.dir || seat?.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!seat?.bed };   // bed 也可以是椅子：坐椅子的人眼睛睜開
   }
   // ---- 自動門（door: [欄, 列]＝地圖上門圖章的位置）：劇情自己畫，兩片門板往左右滑開 ----
   // 門圖（images/回憶場景/building_door.png，120×120）裡兩片門板的範圍，單位是圖片像素：
@@ -166,8 +166,10 @@ const StoryScene = (() => {
     ctx.restore();
   }
   // 大喊（每頁 shout: { 角色id: true }）：台詞出現的那一刻，那個人頓一下、對話框跟著震一下
-  const SHOUT_TIME = .4;
+  // 驚訝小跳（每頁 hop: { 角色id: true }）：同一個時機往上輕輕跳一下，對話框不震
+  const SHOUT_TIME = .4, HOP_TIME = .32;
   function shout(beat) {
+    for (const [id, on] of Object.entries(beat.hop || {})) { const a = on && actor(id); if (a) a.hopT = HOP_TIME; }
     const ids = Object.keys(beat.shout || {}).filter(id => beat.shout[id]);
     for (const id of ids) { const a = actor(id); if (a) a.shoutT = SHOUT_TIME; }
     const b = box(); b.classList.remove('story-shout');
@@ -190,7 +192,7 @@ const StoryScene = (() => {
   }
   // 中途的黑幕轉場（screen: 'black'／'clear'，screenFade＝幾秒）
   const screenDark = () => { const sc = state.screen; if (!sc) return 0; const k = Math.min(1, sc.t / sc.dur); return sc.from + (sc.to - sc.from) * k; };
-  const screenBusy = () => !!state.screen && state.screen.t < state.screen.dur;
+  const screenBusy = () => !!state.screen && !state.screen.free && state.screen.t < state.screen.dur;
   function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
     state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(5);
   }
@@ -211,7 +213,7 @@ const StoryScene = (() => {
     const seats = mapSeats();
     const actors = [
       ...cfg.actors.map(a => makeActor(a, seats)),
-      ...(cfg.wounded || []).map((w, i) => makeActor({ id: 'wounded' + i, sprite: 'mob_B', breathing: true, wounded: true, ...w }, seats)),
+      ...(cfg.wounded || []).map((w, i) => makeActor({ id: 'wounded' + i, sprite: 'mob_B', wounded: true, ...w }, seats)),   // 呼吸起伏看起來像漂浮，預設不開（要的話傷員自己寫 breathing: true）
       ...(cfg.shooters || []).map((s, i) => makeActor({ id: 'shooter' + i, sprite: 'mob_B', role: 'shooter', gunT: 1, cd: rnd(0, 1.2), ...s }, seats)),
       ...(cfg.medics || []).map((m, i) => makeActor({ id: 'medic' + i, sprite: 'mob_A', role: 'medic', speed: 40,
         at: m.route[0].at, leg: 0, pause: (m.delay || 0) + (m.route[0].wait || 0), dir: m.route[0].face || 'front', ...m }, seats))
@@ -281,7 +283,8 @@ const StoryScene = (() => {
     if (beat.camera) state.cameraKey = beat.camera;
     if (beat.screen === 'black' || beat.screen === 'clear') {   // 黑幕：從現在的亮度慢慢變過去
       const from = state.screen ? screenDark() : 0;
-      state.screen = { from, to: beat.screen === 'black' ? 1 : 0, t: 0, dur: Math.max(.1, Number(beat.screenFade) || 2) };
+      // screenFree：變暗途中也可以翻頁（一邊說話一邊慢慢變黑）
+      state.screen = { from, to: beat.screen === 'black' ? 1 : 0, t: 0, dur: Math.max(.1, Number(beat.screenFade) || 2), free: !!beat.screenFree };
     }
     if (state.door && (beat.door === 'open' || beat.door === 'close')) state.door.target = beat.door === 'open' ? 1 : 0;
     // sfx：翻到這頁時播一個音效（js/sfx.js 的名字，例如 storyDoor 自動門）；sfxVolume＝音量倍率；快轉（storyFrom）時不播
@@ -290,13 +293,14 @@ const StoryScene = (() => {
     for (const id of Object.keys(beat.hide || {})) { const a = actor(id); if (a) { a.hidden = true; a.target = null; a.path = []; a.exiting = a.fading = false; } }
     for (const [id, p] of Object.entries(beat.place || {})) {   // 瞬間移到某處（黑幕轉場時用）
       const a = actor(id); if (!a) continue;
-      a.hidden = false; a.alpha = 1; a.fading = a.exiting = false; a.target = null; a.path = []; a.x = p[0] * CELL; a.y = p[1] * CELL;
+      a.hidden = false; a.alpha = 1; a.fading = a.exiting = false; a.target = null; a.path = []; a.x = p[0] * CELL; a.y = p[1] * CELL; a.sitting = null;
     }
     for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
     for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
-    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); a.exiting = false; walkTo(a, p); }
-    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); a.exiting = true; walkTo(a, p); }   // 走到那裡後淡出消失（走進門裡）
+    const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
+    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p); }
+    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p); }   // 走到那裡後淡出消失（走進門裡）
     for (const [id, d] of Object.entries(beat.face || {})) {   // 方向，或看向某個地點／某個人
       const a = actor(id); if (!a) continue;
       const point = state.cfg.points?.[d], other = !point && actor(d);
@@ -355,12 +359,19 @@ const StoryScene = (() => {
       if (k >= 1) { clearInterval(a._fade); done?.(); }
     }, 40);
   }
+  // bgm 也可以是清單：["music/a.mp3", "music/a.mp3", "music/b.mp3"]＝照順序播，最後一首一直循環
   function startBgm() {
     stopBgm(0);
-    if (!state?.cfg.bgm) return;
-    bgm = new Audio(state.cfg.bgm); bgm.loop = true; bgm.volume = 0;
-    bgm.play().catch(() => {});
-    bgmFade(bgm, bgmTarget(), 1.5);
+    const list = (Array.isArray(state?.cfg.bgm) ? state.cfg.bgm : [state?.cfg.bgm]).filter(Boolean);
+    if (!list.length) return;
+    const a = bgm = new Audio(list[0]); let i = 0;
+    a.loop = list.length === 1; a.volume = 0;
+    a.addEventListener('ended', () => {   // 一首播完換下一首（同一個播放器，音量與淡出照舊）
+      if (bgm !== a || i >= list.length - 1) return;
+      i++; a.src = list[i]; a.loop = i === list.length - 1; a.play().catch(() => {});
+    });
+    a.play().catch(() => {});
+    bgmFade(a, bgmTarget(), 1.5);
   }
   function stopBgm(sec = 1.5) {
     const a = bgm; bgm = null; if (!a) return;
@@ -471,6 +482,7 @@ const StoryScene = (() => {
       for (const a of state.actors) {
         tickActorBlink(a, dt);
         if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
+        if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
         if (a.fading) { a.alpha -= dt / .45; if (a.alpha <= 0) { a.alpha = 1; a.hidden = true; a.fading = a.exiting = false; } }   // 走進門裡：淡出
         else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
       }
@@ -505,7 +517,8 @@ const StoryScene = (() => {
     const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * .45 : 0;   // 顫抖：左右快速小幅晃動（不取整數，晃動才夠細）
     // 大喊（shout）：說出口那一刻整個人往上一頓、左右震幾下，0.4 秒內收掉
     const sk = a.shoutT > 0 ? a.shoutT / SHOUT_TIME : 0;
-    const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0;
+    const hk = a.hopT > 0 ? 1 - a.hopT / HOP_TIME : 0;   // 小跳：拋物線往上 5 像素再落回
+    const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = (sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0) - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
     ctx.translate(Math.round(a.x + kick) + shiver + shoutX, a.y - size / 2 + 18 + breath + shoutY);
     ctx.rotate(treating ? .035 + Math.sin(state.time * 2) * .015 : 0);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);

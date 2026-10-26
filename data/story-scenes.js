@@ -15,7 +15,7 @@ const STORY_SCENES = {
     "points": { "耶魯的床": [11.2, 7.2] },
     "portraits": { "雷德": "red_B", "溫特": "winter_B", "哨兵": "mob_B", "嚮導": "mob_A" },
     "actors": [
-      { "id": "red", "sprite": "red_B", "name": "雷德", "bed": [14, 10], "breathing": true, "wounded": true },
+      { "id": "red", "sprite": "red_B", "name": "雷德", "bed": [14, 10], "wounded": true },
       { "id": "winter", "sprite": "winter_B", "name": "溫特", "at": [23.9, 18.1], "dir": "left", "speed": 90, "hidden": true }
     ],
     "wounded": [{ "bed": [11, 10] }, { "bed": [16, 12] }, { "bed": [19, 12] }],
@@ -209,5 +209,63 @@ const STORY_SCENES = {
     "bgm": "music/雷德回憶01.mp3",
     "bgmVolume": 0.25,
     "vignette": 0.5
+  },
+  "red_memory_02": {
+    "map": "map_e4459a4f-3218-4441-9f32-f052d1c683e2",
+    "title": "雷德回憶02",
+    "zoom": 1.75,
+    "subtitle": "六年前 · 中心附設醫院",
+    "endTitle": "天使的名字",
+    "vignette": 0.55,
+    "cameras": { "病房": [8.4, 6.3], "床邊": [7.5, 6.2, 2.3] },
+    "portraits": { "雷德": "red_B", "艾德林": "eldrin_B" },
+    "actors": [
+      { "id": "red", "sprite": "red_B", "name": "雷德", "bed": [7, 4], "wounded": true },
+      { "id": "eldrin", "sprite": "eldrin_B", "name": "艾德林", "bed": [6, 5], "dir": "right", "speed": 40 }
+    ],
+    "wounded": [{ "bed": [2, 4] }, { "bed": [12, 4] }],
+    "beats": [
+      { "speaker": "", "text": "六年前。\n地下街那場戰役之後的第三天。", "camera": "病房", "wait": 2 },
+      { "speaker": "", "text": "中心附設醫院的病房裡，點滴一滴一滴落下。\n艾德林坐在病床旁的長椅上，已經守了一整個下午。", "wait": 0.4 },
+      { "speaker": "艾德林", "text": "……還是沒醒啊。", "face": { "eldrin": "red" }, "wait": 0.3 },
+      { "speaker": "", "text": "雷德的眼皮動了動。", "wait": 0.6 },
+      { "speaker": "雷德", "text": "……唔……\n這裡是……", "eyes": { "red": "open" }, "move": { "eldrin": [7, 5.9] }, "face": { "eldrin": "red" }, "wait": 1.2 },
+      { "speaker": "艾德林", "text": "雷德！你醒了？\n這裡是中心的醫院。你已經昏睡三天了。", "camera": "床邊", "hop": { "eldrin": true }, "wait": 0.3 },
+      { "speaker": "雷德", "text": "三天……？\n……哈哈……\n我還以為……這次真的要死了……", "wait": 0.3 },
+      { "speaker": "雷德", "text": "艾德林，我跟你說喔……\n我好像……看到天使了。", "wait": 0.4 },
+      { "speaker": "艾德林", "text": "……天使？", "wait": 0.3 },
+      { "speaker": "雷德", "text": "嗯……一個超級漂亮的天使……\n在大家都快撐不住的時候出現……\n一直一直在幫大家治療……", "wait": 0.3 },
+      { "speaker": "雷德", "text": "那時候我還在想……\n啊，原來人要死掉之前，真的會有天使來接啊……", "wait": 0.3 },
+      { "speaker": "雷德", "text": "結果我居然沒死耶！\n果然是因為我的身體太強壯了……\n怎麼打都打不死……哈哈……咳、咳咳！", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "你別亂動，傷口才剛縫好。", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "……你說的天使……\n難道是指溫特嚮導嗎？", "wait": 0.6 },
+      { "speaker": "雷德", "text": "……溫特？", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "那天最後趕到救護區支援的 S 級嚮導。\n聽說是他一個人，把救護區的重傷員撐了下來。", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "長得很漂亮的……那一位。", "wait": 0.3 },
+      { "speaker": "雷德", "text": "……原來，天使有名字啊。\n溫特……溫特嚮導……", "wait": 0.6 },
+      { "speaker": "雷德", "text": "我得去跟他道謝才行！\n他還跟我說……我的隊友已經沒事了。", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "…………", "wait": 0.6 },
+      { "speaker": "雷德", "text": "對了，耶魯呢？\n那傢伙應該也在這間醫院吧？我去看看他！", "shout": { "red": true }, "wait": 0.3 },
+      { "speaker": "", "text": "雷德撐著床沿，想要坐起身。", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "等、等一下！雷德，你先躺好……！", "hop": { "eldrin": true }, "wait": 0.3 },
+      { "speaker": "雷德", "text": "怎麼了啦？我已經沒事了，你看——", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "不是……\n不是那樣的……", "wait": 0.4 },
+      { "speaker": "艾德林", "text": "耶魯他……\n耶魯他……", "wait": 0.4 },
+      { "speaker": "", "text": "艾德林握緊了手，好一會兒都說不出話。", "wait": 0.4 },
+      { "speaker": "雷德", "text": "……艾德林？", "wait": 0.6 },
+      {
+        "speaker": "艾德林",
+        "text": "那天……你們小隊被困住的地方……\n生命體從牆裡一直湧出來……\n支援……支援沒能及時趕到……",
+        "screen": "black",
+        "screenFade": 9,
+        "screenFree": true,
+        "wait": 0.6
+      },
+      { "speaker": "艾德林", "text": "等救援找到你們的時候……\n你們小隊……除了你以外……", "wait": 0.4 },
+      { "speaker": "艾德林", "text": "……對不起，雷德。\n耶魯他……已經……", "wait": 0.6 }
+    ],
+    "opening": { "black": 1.5, "fade": 2 },
+    "bgm": ["music/creepy-music-box01.mp3", "music/creepy-music-box01.mp3", "music/creepy-music-box02.mp3"],
+    "bgmVolume": 0.45
   }
 };

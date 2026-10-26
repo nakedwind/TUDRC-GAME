@@ -111,12 +111,18 @@ function drawImg(img, x, y, w, hh, fx, fy, rot) {
   ctx.save(); ctx.translate(x + w / 2, y + hh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(fx ? -1 : 1, fy ? -1 : 1);
   const iw = rot % 2 ? hh : w, ih = rot % 2 ? w : hh; ctx.drawImage(img, -iw / 2, -ih / 2, iw, ih); ctx.restore();
 }
-// 床位：地圖上的床圖章（遊戲用 bed: [欄, 列] 找這張床）
-const bedStamps = m => (m?.stamps || []).filter(s => /bed/i.test(s.id));
+// 床位／座位：地圖上的床圖章，和椅子編輯器設定過坐姿的椅子（遊戲用 bed: [欄, 列] 找這張床或椅子）
+const seatCfg = id => { const c = typeof CHAIRS_DEFAULT !== 'undefined' && CHAIRS_DEFAULT[id]; return c && c.enabled && c.seat ? c : null; };
+const bedStamps = m => (m?.stamps || []).filter(s => /bed/i.test(s.id) || seatCfg(s.id));
+const seatName = s => (/bed|床/i.test(s.id) ? '床' : (tileMap.get(s.id)?.name || '椅子')) + ' (' + s.c + ', ' + s.r + ')';
 function bedCenter(m, bed) {
   const s = bedStamps(m).find(b => b.c === bed[0] && b.r === bed[1]); if (!s) return null;
-  const t = tileMap.get(s.id) || {}, rot = ((Number(s.rot) || 0) % 4 + 4) % 4;
+  const t = tileMap.get(s.id) || {}, rot = ((Number(s.rot) || 0) % 4 + 4) % 4, cfg = seatCfg(s.id);
   const w = rot % 2 ? (t.h || 1) : (t.w || 1), hh = rot % 2 ? (t.w || 1) : (t.h || 1);
+  if (cfg && !rot) {   // 椅子：用椅子編輯器設定的坐下位置（跟遊戲一樣，左右／上下翻轉也照算）
+    const x = s.fx ? w * C - cfg.seat.x : cfg.seat.x, y = s.fy ? hh * C - cfg.seat.y : cfg.seat.y;
+    return [s.c + (x + (s.ox || 0)) / C, s.r + (y + (s.oy || 0)) / C];
+  }
   return [s.c + w / 2 + (s.ox || 0) / C, s.r + hh / 2 + (s.oy || 0) / C];
 }
 // 遊戲畫面看得到幾格（跟 js/maploader.js 的 VIEW_SCALE 算法一樣）
@@ -370,16 +376,26 @@ function doorBox(s) {
 }
 // BGM：bgm＝音樂檔路徑（放在 music/ 資料夾）、bgmVolume＝音量 0～1；劇情開始淡入、整段循環、結尾淡出
 let bgmTest = null;
+function bgmList(s, stopTest) {   // 一首＝存成字串；好幾首＝存成清單
+  const list = Array.isArray(s.bgm) ? s.bgm : s.bgm ? [s.bgm] : [];
+  const area = h('textarea', { rows: Math.max(2, list.length), placeholder: 'music/檔名.mp3', onchange: e => {
+    const v = e.target.value.split('\n').map(x => x.trim()).filter(Boolean);
+    if (!v.length) delete s.bgm; else s.bgm = v.length === 1 ? v[0] : v;
+    stopTest(); commit();
+  } });
+  area.value = list.join('\n');
+  return area;
+}
 function bgmBox(s) {
   const stopTest = () => { if (bgmTest) { bgmTest.pause(); bgmTest = null; } };
   const test = h('button', { type: 'button', class: 'small', onclick: e => {
     if (bgmTest) { stopTest(); e.target.textContent = '▶ 試聽'; return; }
     if (!s.bgm) return;
-    bgmTest = new Audio(s.bgm); bgmTest.volume = Math.max(0, Math.min(1, s.bgmVolume ?? .5)); bgmTest.loop = true;
+    bgmTest = new Audio(Array.isArray(s.bgm) ? s.bgm[0] : s.bgm);   // 清單：試聽第一首 bgmTest.volume = Math.max(0, Math.min(1, s.bgmVolume ?? .5)); bgmTest.loop = true;
     bgmTest.play().then(() => { e.target.textContent = '■ 停止'; }).catch(() => { stopTest(); status('播放失敗：找不到音樂檔 ' + s.bgm, true); });
   } }, bgmTest ? '■ 停止' : '▶ 試聽');
   return h('div', {},
-    field('BGM（音樂檔，放在 music/ 資料夾；空白＝沒有音樂）', txt(s, 'bgm', { optional: true, placeholder: 'music/檔名.mp3', after: stopTest, rerender: true })),
+    field('BGM（音樂檔，放在 music/ 資料夾；一行一首，照順序播放，最後一首一直循環；空白＝沒有音樂）', bgmList(s, stopTest)),
     s.bgm && h('div', { class: 'row', style: 'font-size:12px' }, '音量', num(s, 'bgmVolume', { min: 0, step: .05, optional: true, placeholder: '0.5' }), h('small', { style: 'color:#8c98a6' }, '（0～1）'), test));
 }
 function explosionBox(s) {   // 遠處爆炸：explosions: { min, max, gain, shake }，沒有這個欄位＝不會爆炸
@@ -459,7 +475,7 @@ function renderObj() {
   const del = (text, fn) => h('div', { class: 'row', style: 'margin-top:10px' }, h('button', { type: 'button', class: 'small danger', onclick: () => { if (!confirm('刪除' + text + '？')) return; fn(); sel = null; commit(); } }, '刪除' + text));
   if (kind === 'actor') {
     const ac = s.actors[i]; if (!ac) return;
-    const beds = bedStamps(curMap()).map(st => [st.c + ',' + st.r, '床 (' + st.c + ', ' + st.r + ')']);
+    const beds = bedStamps(curMap()).map(st => [st.c + ',' + st.r, '躺／坐：' + seatName(st)]);
     const posMode = { mode: ac.bed ? ac.bed.join(',') : '' };
     box.append(h('h2', {}, '主要角色：' + (ac.name || ac.id)),
       field('名字（對話框、清單顯示）', txt(ac, 'name', { rerender: true })),
@@ -476,9 +492,9 @@ function renderObj() {
       del('這個角色', () => s.actors.splice(i, 1)));
   } else if (kind === 'wounded') {
     const w = s.wounded[i]; if (!w) return;
-    const beds = bedStamps(curMap()).map(st => [st.c + ',' + st.r, '床 (' + st.c + ', ' + st.r + ')']);
+    const beds = bedStamps(curMap()).filter(st => /bed/i.test(st.id)).map(st => [st.c + ',' + st.r, '床 (' + st.c + ', ' + st.r + ')']);
     const pos = { bed: (w.bed || []).join(',') };
-    box.append(h('h2', {}, '受傷的路人哨兵 ' + (i + 1)), h('p', { class: 'note' }, '用 mob_B 的受傷圖躺在床上，會慢慢呼吸。'),
+    box.append(h('h2', {}, '受傷的路人哨兵 ' + (i + 1)), h('p', { class: 'note' }, '用 mob_B 的受傷圖躺在床上。'),
       field('躺哪張床', choose(pos, 'bed', beds, { parse: v => { w.bed = v.split(',').map(Number); return v; } })),
       del('這個傷員', () => s.wounded.splice(i, 1)));
   } else if (kind === 'monster') {
@@ -528,8 +544,8 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'carry'];
-const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.shout && '❗', b.carry && '📦',
+const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry'];
+const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
   'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
@@ -570,6 +586,7 @@ function beatBody(s, b, i) {
   const onOff = (map, id, on, off) => { const hd = { v: map[id] ? 'on' : 'off' }; return choose(hd, 'v', [['on', on], ['off', off]], { parse: v => { map[id] = v === 'on'; return v; } }); };
   rows('tremble', '顫抖', id => onOff(b.tremble, id, '開始顫抖', '停止顫抖'));
   rows('shout', '大喊', () => h('small', {}, '台詞出現時這個人頓一下，對話框也震一下'));
+  rows('hop', '小跳', () => h('small', {}, '台詞出現時驚訝地輕輕跳一下（對話框不震）'));
   rows('carry', '拿著', id => txt(b.carry, id, { placeholder: '圖片路徑；空白＝放下', style: 'flex:1' }));
   const healHolder = { v: b.heal === false ? 'stop' : b.heal ? 'start' : '' };
   const healRow = h('div', { class: 'act' }, h('b', {}, '治療'), choose(healHolder, 'v', [['', '不變'], ['start', '開始'], ['stop', '停止']], { parse: v => {
@@ -584,7 +601,7 @@ function beatBody(s, b, i) {
   }
   const screenHolder = { v: b.screen || '' };
   const screenRow = h('div', { class: 'act' }, h('b', {}, '黑幕'), choose(screenHolder, 'v', [['', '不變'], ['black', '畫面漸漸變黑'], ['clear', '從黑幕亮回來']], { parse: v => { if (v) b.screen = v; else { delete b.screen; delete b.screenFade; } return v; } }));
-  if (b.screen) screenRow.append('花', num(b, 'screenFade', { min: .1, optional: true, placeholder: '2' }), '秒（變完才能翻頁）');
+  if (b.screen) screenRow.append('花', num(b, 'screenFade', { min: .1, optional: true, placeholder: '2' }), '秒', chk(b, 'screenFree', '變暗途中也能翻頁（一邊說一邊變黑；沒勾＝變完才能翻頁）'));
   acts.append(screenRow);
   const sfxRow = h('div', { class: 'act' }, h('b', {}, '音效'), txt(b, 'sfx', { optional: true, list: 'sfxList', placeholder: '翻到這頁時播（空白＝不播）', rerender: true, style: 'width:150px' }));
   if (b.sfx) sfxRow.append('音量', num(b, 'sfxVolume', { min: 0, step: .1, optional: true, placeholder: '1' }), h('button', { type: 'button', class: 'small', onclick: () => testSfx(b.sfx, b.sfxVolume) }, '▶ 試聽'));
@@ -606,7 +623,7 @@ function beatBody(s, b, i) {
     acts,
     h('div', { class: 'row' }, moveBtn, addAct('face', '＋ 轉向', () => 'front'), addAct('eyes', '＋ 眼睛', () => 'open'),
       pickAct('exit', '＋ 離場', '走到哪後消失'), pickAct('place', '＋ 瞬移', '瞬移到哪'), addAct('hide', '＋ 消失', () => true),
-      addAct('speed', '＋ 速度', () => 60), addAct('tremble', '＋ 顫抖', () => true), addAct('shout', '＋ 大喊', () => true), addAct('carry', '＋ 拿著', () => '')),
+      addAct('speed', '＋ 速度', () => 60), addAct('tremble', '＋ 顫抖', () => true), addAct('shout', '＋ 大喊', () => true), addAct('hop', '＋ 小跳', () => true), addAct('carry', '＋ 拿著', () => '')),
     actorSwitchNote(s),
     h('div', { class: 'row', style: 'margin-top:8px' },
       h('button', { type: 'button', class: 'small', disabled: i === 0, onclick: () => { [s.beats[i - 1], s.beats[i]] = [s.beats[i], s.beats[i - 1]]; beatSel = i - 1; commit(); } }, '↑ 上移'),
@@ -684,10 +701,30 @@ $('tabBeats').onclick = () => showTab('beats'); $('tabObj').onclick = () => { sh
 function renderPanels() {
   renderScenes(); renderObjects(); renderObj(); renderBeats(); renderFaces(); renderChecks();
 }
-function preview(from = 1) {
+// ---- 專案檔在編輯器開著的時候被別人（例如 Claude）改過了 ----
+// 這時編輯器記憶體裡還是舊資料：直接預覽或存檔會把舊的蓋回去（例如新加的 BGM 不見）。
+// 重新整理頁面就會跟暫存自動合併（js/draft-sync.js），所以偵測到就提醒重新整理。
+const FILE_AT_LOAD = JSON.stringify(typeof STORY_SCENES !== 'undefined' ? STORY_SCENES : {});
+async function fileChangedOnDisk() {
+  try {   // 雙擊開啟（file://）讀不到檔案：當作沒變
+    const text = await (await fetch('data/story-scenes.js?t=' + Date.now(), { cache: 'no-store' })).text();
+    return JSON.stringify(new Function(text.replace('const STORY_SCENES =', 'return ').replace(/;\s*$/, ''))()) !== FILE_AT_LOAD;
+  } catch (_) { return false; }
+}
+async function askReloadIfStale() {
+  if (!(await fileChangedOnDisk())) return false;
+  status('專案檔 data/story-scenes.js 有新的內容，請重新整理這頁（你的修改會自動合併保留）。', true);
+  if (!confirm('專案檔 data/story-scenes.js 在這頁開著時被更新了（例如新加的 BGM 或演出）。\n\n現在重新整理編輯器嗎？你在這裡的修改會先存好，再跟新內容自動合併。')) return false;
+  saveDraft(); location.reload(); return true;
+}
+window.addEventListener('focus', () => { askReloadIfStale(); });
+async function preview(from = 1) {
   if (!scene()) return;
+  const win = window.open('', 'story_preview');   // 先開視窗（點擊當下才不會被擋），確認檔案沒過期再載入預覽
+  if (await askReloadIfStale()) { win?.close(); return; }
   saveDraft();
-  window.open('塔防原型.html?storyPreview=' + encodeURIComponent(sceneId) + '&storyDraft=1' + (from > 1 ? '&storyFrom=' + from : ''), 'story_preview');
+  const url = '塔防原型.html?storyPreview=' + encodeURIComponent(sceneId) + '&storyDraft=1' + (from > 1 ? '&storyFrom=' + from : '');
+  if (win) win.location.href = url; else window.open(url, 'story_preview');
 }
 $('previewGame').onclick = () => preview(1);
 $('exportFile').onclick = () => {
