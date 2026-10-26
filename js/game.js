@@ -1180,11 +1180,31 @@ function playerSpawnPos() {
       }
     }
   }
-  const cand = [];
-  campCells.forEach(k => cand.push(k.split(',').map(Number)));
-  for (let r = ROWS - 1; r >= 0; r--) for (let c = 0; c < COLS; c++) cand.push([c, r]);
-  for (const [c, r] of cand) if (inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r)) return center(c, r);
+  for (const k of campCells) { const [c, r] = k.split(',').map(Number); if (inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r)) return center(c, r); }
+  // 沒有指定出生點、也沒有營地（例如基地編輯器預覽餐廳）：只站在「有畫地板」的格子上，
+  // 地圖外圍沒畫東西、又沒標成牆的黑色空地不算（以前會從左下角那格出生，跑到地圖外面）
+  const ok = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && groundDrawnAt(c, r) && !playerBlocked(...center(c, r));
+  const nearest = (c0, r0, list) => list.slice().sort((a, b) => Math.hypot(a[0] - c0, a[1] - r0) - Math.hypot(b[0] - c0, b[1] - r0))[0];
+  const cells = []; for (let r = 0; r < ROWS; r++) for (let c = 0; c < COLS; c++) if (ok(c, r)) cells.push([c, r]);
+  if (cells.length) {
+    const elevator = (MAP && MAP.stamps || []).find(s => typeof isElevatorStamp === 'function' && isElevatorStamp(s));
+    if (elevator) { const t = mapTileById(elevator.id); return center(...nearest(elevator.c + mapStampW(elevator, t) / 2 - .5, elevator.r + mapStampH(elevator, t), cells)); }   // 有電梯：站在電梯門口
+    const mc = cells.reduce((s, [c]) => s + c, 0) / cells.length, mr = cells.reduce((s, [, r]) => s + r, 0) / cells.length;
+    return center(...nearest(mc, mr, cells));   // 不然站在地板範圍的中間附近
+  }
+  for (let r = ROWS - 1; r >= 0; r--) for (let c = 0; c < COLS; c++) if (inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r)) return center(c, r);
   return center(Math.floor(COLS / 2), ROWS - 1);
+}
+// 這一格有沒有畫地面：地面類圖層（地板、地面裝飾…）有小圖，或被這些圖層的大圖蓋到
+function groundDrawnAt(c, r) {
+  const groundLayers = (typeof MAP_LAYER_ORDER !== 'undefined' ? MAP_LAYER_ORDER : []).filter(lid => lid !== 'top' && !isOccLayer(lid));
+  if (groundLayers.some(lid => MAP.layers && MAP.layers[lid] && MAP.layers[lid][c + ',' + r])) return true;
+  return (MAP.stamps || []).some(s => {
+    if (!groundLayers.includes(s.layer || 'top')) return false;
+    const t = mapTileById(s.id); if (!t) return false;
+    const c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL;
+    return c + .5 >= c0 && c + .5 < c0 + mapStampW(s, t) && r + .5 >= r0 && r + .5 < r0 + mapStampH(s, t);
+  });
 }
 // ---- 玩家移動與碰撞（牆、哨兵、障礙物都擋路；水平垂直分開判斷可貼牆滑行）----
 function playerBlocked(x, y) {
