@@ -817,6 +817,7 @@ function demolishPlayerBuilding(o) {
   sfx('demolish'); flash(refund ? '已拆除 +$' + refund : '已拆除', fx, fy - 20, '#ffd479');
   spawnHammerHit(fx, fy, o);   // 槌子敲下去＋碎片＋煙塵（js/attack-fx.js）
   closeGroundMenu(); updateHUD();
+  if (typeof rememberStoryBuilds === 'function') rememberStoryBuilds();   // 劇情地圖：拆掉的也記下來
   return true;
 }
 function renderBuildingActions(o) {
@@ -1145,6 +1146,7 @@ function newGame() {
   setupDoors();         // 門一開始都關著（js/doors.js）
   if (typeof setupMrtLocks === 'function') setupMrtLocks();   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
+  if (typeof restoreStoryBuilds === 'function') restoreStoryBuilds();   // 劇情地圖：上次蓋的建築擺回去（js/combat-progress.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）

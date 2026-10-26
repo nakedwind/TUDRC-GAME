@@ -1059,6 +1059,8 @@ function draw() {
     if (G.player && inFront(G.player)) drawPlayer(G.player);
   }
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
+  // 在黑幕之後才畫（下面 drawInteractionPrompts()），暗處的門、物件提示才不會被黑幕蓋住
+  const drawInteractionPrompts = () => {
   towerPrompts = [];   // 這一幀重新記錄隊員頭上的選項
   if (G.player && !G.player.sitting && !G.over && !dialogueState && !elevatorMenuOpen) {
     const elevator = G.running ? elevatorNearPlayer() : null;
@@ -1106,6 +1108,7 @@ function draw() {
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }
   }
+  };
   // 特效
   drawWorldEffects();
   // 建築放置預覽（40% 半透明，放不下時紅框）
@@ -1149,6 +1152,7 @@ function draw() {
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
   if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
   // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
+  drawInteractionPrompts();   // 互動提示（開門、對話、拾取…）：黑幕之上，暗處也看得到
   if (typeof drawRequestBubbles === 'function') drawRequestBubbles(ctx);   // 基地：角色頭上的「今日想吃」泡泡（js/gifts.js）
   if (typeof drawMissionMarks === 'function') drawMissionMarks(ctx);       // 通訊員頭上的「！」、作戰桌記號（js/missions.js）
   flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
