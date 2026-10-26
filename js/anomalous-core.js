@@ -75,7 +75,10 @@ function spawnReachCells() {
   const seen = new Set(), q = [];
   const seed = (c, r) => { const k = c + ',' + r; if (inGrid(c, r) && !blocked(c, r) && !seen.has(k)) { seen.add(k); q.push([c, r]); } };
   if (campCells.size) campCells.forEach(k => seed(...k.split(',').map(Number)));
-  else for (let c = 0; c < COLS; c++) seed(c, ROWS - 1);
+  else {   // 沒有營地（例如新手區）：從溫特、隊員站的地方往外走；最下面一排也照舊當起點
+    for (const o of [G.player, ...G.towers]) if (o) seed(Math.floor(o.x / CELL), Math.floor(o.y / CELL));
+    for (let c = 0; c < COLS; c++) seed(c, ROWS - 1);
+  }
   for (let i = 0; i < q.length; i++) {
     const [c, r] = q[i];
     for (const [dc, dr] of [[0, 1], [0, -1], [-1, 0], [1, 0]]) seed(c + dc, r + dr);

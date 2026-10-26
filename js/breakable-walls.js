@@ -6,7 +6,8 @@
    只在這一局有效，重新開始就恢復完整的牆。
    「後室牆面（可炸開・隱藏區）」：一樣可以炸開，而且牆另一邊（上方）跟它連通的整片區域平常全黑，
    炸開之後才慢慢顯現（隱藏的通道／房間）。
-   「後室牆面（裂縫）」（Back-room-wall02-damage-03 的圖）：已經裂開的隱藏區牆，炸一次就開（CRACKED_WALL）。
+   「後室牆面（裂縫・可炸開）」「後室牆面（裂縫・可炸開・隱藏區）」（Back-room-wall02-damage-03 的圖）：已經裂開，炸一次就開。
+   「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
 */
 // 素材 id → stages：依序換成哪些圖；open：炸開後可以通過的格子（[第幾欄, 第幾列]，從大圖左上角算）
 // solid：一直擋路的格子（不管地圖編輯器有沒有畫擋路格，牆最下排的左右兩格都擋住）
@@ -23,23 +24,24 @@ const BREAKABLE_WALLS = {
     pad: 1,
     hide: true, hideFrom: [1, 1], hideMax: 1500,   // hideMax：隱藏區最多幾格（太大代表其實跟外面連通，就不隱藏）
   },
-};
-// 已經裂開的牆（圖是 Back-room-wall02-damage-03，例如素材「後室牆面（裂縫）」）：照圖檔認，不管素材 id。
-// 本來就是裂痕的樣子，所以炸一次就開洞；跟隱藏區版本一樣，牆上方被圍起來的區域炸開前塗黑（沒圍起來就不藏）
-const CRACKED_WALL = {
-  file: /\/Back-room-wall02-damage-03\.png$/,
-  spec: { stages: ['tile_bg_backroom_wall02_hole2'], open: [[1, 2]], solid: [[0, 2], [2, 2]], pad: 1, hide: true, hideFrom: [1, 1], hideMax: 1500 },
+  // 已經裂開的牆（圖是 Back-room-wall02-damage-03）：本來就是裂痕的樣子，所以炸一次就開洞
+  tile_bg_backroom_wall02_crack_breakable: {   // 純障礙物：上方區域照常看得到
+    stages: ['tile_bg_backroom_wall02_hole2'],
+    open: [[1, 2]], solid: [[0, 2], [2, 2]],
+    pad: 1,
+  },
+  tile_bg_backroom_wall02_crack_secret: {      // 隱藏區版本：炸開前牆上方被圍起來的區域塗黑
+    stages: ['tile_bg_backroom_wall02_hole2'],
+    open: [[1, 2]], solid: [[0, 2], [2, 2]],
+    pad: 1,
+    hide: true, hideFrom: [1, 1], hideMax: 1500,
+  },
 };
 const HIDDEN_REVEAL_SEC = .9;   // 炸開後黑幕淡出幾秒
 let breakableWallCells = new Set();   // 這局因為「還沒炸開」而加進固定牆的格子（換地圖／重開時先還原）
 let breakableWallSolid = new Set();   // 牆本身一直擋路的格子（同樣換地圖／重開時先還原）
 
-function breakableWallSpec(s) {
-  if (!s) return null;
-  if (BREAKABLE_WALLS[s.id]) return BREAKABLE_WALLS[s.id];
-  const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null;
-  return t && CRACKED_WALL.file.test(String(t.file || '').replace(/\\/g, '/')) ? CRACKED_WALL.spec : null;
-}
+const breakableWallSpec = s => (s && BREAKABLE_WALLS[s.id]) || null;
 function breakableWallStage(s) { return (G && G.wallStage && G.wallStage.get(s)) || 0; }
 // 牆上要通過的那幾格（地圖格座標）
 function breakableWallOpenCells(s) {

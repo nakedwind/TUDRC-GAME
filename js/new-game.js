@@ -1,10 +1,12 @@
 /* 在其他遊戲程式讀檔前重設進度，避開離頁自動存檔把舊資料寫回。 */
 (() => {
   const REQUEST = 'tudrc-new-game-request-v1';
+  const START_MAP = 'tudrc-new-game-map-v1';
   const BACKUP = 'tudrc-before-new-game-v1';
   const progressKeys = [
     'tudrc-save-v1', 'tudrc_equipment_v1', 'sentinel-crystals-v1',
     'tudrc_team_v1', 'tudrc_achievements_v1', 'tudrc_quests_v1',
+    'tudrc_wallet_v1', 'tudrc_talk_seen_v1',
     'tudrc_missions_v1', 'tudrc_sortie_v1', 'tudrc_sp_v1', 'tudrc-combat-progress-v1',
     'tudrc_guide_sp_v1',
     'tudrc_graffiti_v1',   // 牆上、地上的塗鴉（js/graffiti.js）
@@ -52,6 +54,9 @@
     if (request === 'new' || request === 'restore' || /^slot:[1-6]$/.test(request || '')) {
       sessionStorage.removeItem(REQUEST);
       if (request === 'new') {
+        const mapId = sessionStorage.getItem(START_MAP);
+        sessionStorage.removeItem(START_MAP);
+        if (mapId) resumeScene = { mapId };
         const values = Object.fromEntries(progressKeys.map(key => [key, localStorage.getItem(key)]));
         localStorage.setItem(BACKUP, JSON.stringify({ at: Date.now(), values }));
         progressKeys.forEach(key => localStorage.removeItem(key));
@@ -77,6 +82,8 @@
       : '還原上次開始新遊戲前的備份？目前進度將被取代。';
     if (!confirm(text)) return;
     try {
+      if (action === 'new' && typeof MAP !== 'undefined' && MAP?.id) sessionStorage.setItem(START_MAP, MAP.id);
+      else sessionStorage.removeItem(START_MAP);
       sessionStorage.setItem(REQUEST, action);
       location.reload();
     } catch (error) { alert('無法重新開始：' + error.message); }

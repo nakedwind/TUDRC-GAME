@@ -60,8 +60,11 @@ function placeHangiCap(minFromPlayer) {
 function hangiCapAt(c, r) { const o = G.grid && G.grid[c + ',' + r]; return !!(o && o.kind === 'hangiCap'); }
 
 // ---- 每幀更新（game.js 的 update 呼叫）----
+// 這張地圖的異質體有勾夯吉寶才放帽子（地圖編輯器「這張地圖的異質體」）
+const mapHasHangi = () => !!MAP?.monsterMix?.some(m => m.id === 'hangi_bao' && Number(m.weight) > 0);
 function updateHangi(dt) {
   if (MAP_SAFE || !LIGHT.enabled) return;
+  if (!mapHasHangi()) { updateCapShots(dt); return; }
   if (!G.hangiCaps) {   // 開場：等亮光算好（約半秒）再把帽子藏進黑暗
     G.hangiSeedT = (G.hangiSeedT || 0) + dt;
     if (G.hangiSeedT < 0.5) return;

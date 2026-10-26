@@ -40,13 +40,32 @@
     'nav.editor-nav a { display: inline-block; flex: none; margin: 0; padding: 3px 9px; border: 1px solid #34465a; border-radius: 999px; background: #1a2430; color: #9fd3ff; text-decoration: none; white-space: nowrap; }' +
     'nav.editor-nav a:hover { border-color: #8fd3ff; color: #fff; }' +
     'nav.editor-nav a.home { color: #ffe3a1; border-color: #5a4d32; }' +
-    'nav.editor-nav a[aria-current="page"] { background: #2b526b; border-color: #8fd3ff; color: #fff; cursor: default; }';
+    'nav.editor-nav a[aria-current="page"] { background: #2b526b; border-color: #8fd3ff; color: #fff; cursor: default; }' +
+    // 收合鈕：收起來時只留「回遊戲」和目前這一頁
+    'nav.editor-nav .nav-fold { flex: none; margin: 0; padding: 3px 9px; border: 1px dashed #34465a; border-radius: 999px; background: transparent; color: #8a9bb0; font: inherit; cursor: pointer; white-space: nowrap; }' +
+    'nav.editor-nav .nav-fold:hover { border-color: #8fd3ff; color: #fff; }' +
+    'nav.editor-nav.folded a:not(.home):not([aria-current="page"]) { display: none; }';
   document.head.appendChild(style);
 
   const nav = document.createElement('nav');
   nav.className = 'editor-nav'; nav.setAttribute('aria-label', '切換編輯器');
   nav.innerHTML = EDITORS.map(([file, label, cls]) =>
     '<a href="' + file + '"' + (cls ? ' class="' + cls + '"' : '') + (file === here ? ' aria-current="page"' : '') + '>' + label + '</a>').join('');
+
+  // ---- 收合：記在瀏覽器裡，換到別的編輯器也一樣 ----
+  const FOLD = 'tudrc_editor_nav_folded';
+  const fold = document.createElement('button');
+  fold.type = 'button'; fold.className = 'nav-fold';
+  const setFolded = on => {
+    nav.classList.toggle('folded', on);
+    fold.textContent = on ? '▸ 展開編輯器' : '◂ 收起';
+    fold.title = on ? '顯示所有編輯器的入口' : '只留「回遊戲」和這一頁';
+    fold.setAttribute('aria-expanded', String(!on));
+  };
+  let folded = false; try { folded = localStorage.getItem(FOLD) === '1'; } catch (_) {}
+  setFolded(folded);
+  fold.onclick = () => { folded = !folded; setFolded(folded); try { localStorage.setItem(FOLD, folded ? '1' : '0'); } catch (_) {} };
+  nav.prepend(fold);
 
   // 原本零散的連結：標題裡的、.nav 區塊裡的，只要是連到遊戲或編輯器的就拿掉
   const oldLinks = [...document.querySelectorAll('h1 a[href], .nav a[href], nav.nav a[href]')].filter(a => pages.has(fileOf(a.getAttribute('href'))));

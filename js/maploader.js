@@ -789,14 +789,21 @@ function occluderStateSig(x) {
     return (G.mapDestroyed.has(layer + ':' + x.c + ',' + x.r) ? 'x' : '') + (shown === false ? 'h' : shown ? (shown.id || 's') : '');   // h＝這格目前不顯示
   }
   const s = x.stamp;
+  const shown = typeof storagePropDisplayTile === 'function' ? storagePropDisplayTile(s.id, s.c, s.r, s.layer || 'top', s) : null;
   return (G.mapDestroyed && G.mapDestroyed.has(s) ? 'x' : '') + ((typeof doorStampOpen === 'function' && doorStampOpen(s)) ? 'o' : '')
+    + (shown === false ? 'h' : shown ? (shown.id || 's') : '')   // 置物櫃開啟後，重疊補畫也必須換圖。
     + ((typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s)) ? 'a' : '')
     + (destroyedBaseDisplayTile(s, mapTileById(s.id) || {}).id || '')
     + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
     + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '');
 }
 function occluderImageReady(x) {
-  return !!tileImage(mapTileById(x.kind === 'cell' ? x.id : x.stamp.id));
+  const s = x.kind === 'cell' ? null : x.stamp;
+  const id = s ? s.id : x.id;
+  const shown = typeof storagePropDisplayTile === 'function'
+    ? storagePropDisplayTile(id, s ? s.c : x.c, s ? s.r : x.r, s ? (s.layer || 'top') : MAP_LAYER_ORDER[x.li], s) : null;
+  if (shown === false) return true;
+  return !!tileImage(shown || mapTileById(id));   // 開啟圖尚未載好時，下一幀繼續重建，避免快取空白。
 }
 function drawOverdrawPatch(ctx, it, od) {
   const [cx, cy, cw, ch] = od.clip;

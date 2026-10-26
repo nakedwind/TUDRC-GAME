@@ -198,9 +198,57 @@ function placeAnywhere(a) {
 }
 
 // ---- 開場佈署：三位哨兵在基地（營地）區隨機位置出現 ----
+// 沒有營地的戰鬥地圖（沒畫營地格、也沒放營地，例如新手區）：溫特和隊員出生在營地箱子（物資箱、補彈藥箱、裝備箱）前面那一區。
+// 從所有營地箱子圍起來的範圍正中間（高度對齊箱子底部那一排）往外找走得到、有畫地板的格子，近的排前面；
+// 第一格給溫特（js/game.js 的 playerSpawnPos），其他給隊員。例如新手區：左邊物資箱、右邊裝備箱，溫特站兩邊中間
+function boxStartCells(n = 16) {
+  if (MAP_SAFE || campCells.size || !MAP || typeof mapBoxes !== 'function') return [];
+  const ok = (c, r) => inGrid(c, r) && !isWall(c, r) && !G.grid[c + ',' + r] && (typeof groundDrawnAt !== 'function' || groundDrawnAt(c, r));
+  const boxes = mapBoxes().filter(b => ['supply', 'refill', 'armor'].includes(b.kind));   // 只看營地的箱子；散落在地圖上、能打開的彈藥箱不算
+  if (!boxes.length) return [];
+  const cx = (Math.min(...boxes.map(b => b.left)) + Math.max(...boxes.map(b => b.right))) / 2;
+  const cy = Math.max(...boxes.map(b => b.bottom)) - CELL * .5;
+  const [sc, sr] = cellAt(cx, cy);
+  const seen = new Set([sc + ',' + sr]), queue = [[sc, sr]], out = [];
+  for (let i = 0; i < queue.length && out.length < n; i++) {
+    const [c, r] = queue[i];
+    if (ok(c, r)) out.push([c, r]);
+    for (const [dc, dr] of [[0, 1], [1, 0], [-1, 0], [0, -1]]) {
+      const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
+      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr)) continue;
+      seen.add(k); queue.push([nc, nr]);
+    }
+  }
+  return out;
+}
+// 有營地的戰鬥地圖：出生在營地裡。放了營地（帳篷）：用營地周圍走得到的格子（campCells 在這時只有營地正中間一格——
+// 那是怪物的目標，不夠大家站）；沒放營地、只畫了營地格：用畫的格子。近營地中心的排前面
+// （有放營地時不用畫的營地格：地圖編輯器預設會把最下面兩排畫成營地，常常跟真正的營地不在一起）
+function campSpawnCells(n = 24) {
+  if (MAP_SAFE || !MAP || !campCells.size) return [];
+  const free = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r];
+  const [cc, cr] = [...campCells][0].split(',').map(Number);
+  const byDist = list => list.sort((a, b) => Math.hypot(a[0] - cc, a[1] - cr) - Math.hypot(b[0] - cc, b[1] - cr));
+  const hasBase = typeof mapBases !== 'undefined' && mapBases.length > 0;
+  const drawn = hasBase ? [] : [...campCells].map(k => k.split(',').map(Number)).filter(([c, r]) => free(c, r));
+  if (drawn.length) return byDist(drawn).slice(0, n);
+  const seen = new Set([cc + ',' + cr]), queue = [[cc, cr]], out = [];
+  for (let i = 0; i < queue.length && out.length < n && i < 2000; i++) {
+    const [c, r] = queue[i];
+    if (free(c, r)) out.push([c, r]);
+    for (const [dc, dr] of [[0, 1], [1, 0], [-1, 0], [0, -1]]) {
+      const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
+      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr)) continue;   // 營地本身（G.grid）照樣往外找，才找得到帳篷外面
+      seen.add(k); queue.push([nc, nr]);
+    }
+  }
+  return out;
+}
 function spawnSentries() {
-  const cand = [];
-  if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
+  const cand = [], start = boxStartCells(), camp = campSpawnCells();
+  if (camp.length > 1) cand.push(...camp.slice(1));   // 有營地：營地裡（第一格留給溫特）
+  else if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
+  else if (start.length > 1) cand.push(...start.slice(1));   // 沒營地、有營地箱子：箱子前面（第一格留給溫特）
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
   const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r]);
   // 應變中心是全員集合的安全區；戰鬥地圖仍只生成已編入的出勤隊伍。

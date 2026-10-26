@@ -35,6 +35,17 @@ const ROSTER = ['theonie', 'amber', 'red', 'avaren', 'luther', 'colyn', 'eldrin'
 const DEFAULT_TEAM = ['eldrin', 'avaren', 'theonie', 'red'];   // 艾德林、阿瓦倫、希奧妮、雷德
 const RESCUE_DOG_HANDLERS = ['eldrin', 'avaren'];
 
+// 新手區專用開場配置，不覆蓋其他地圖的玩家編隊。
+const NEWBIE_START = {
+  mapId: 'map_a46c5e1a-9802-4db5-a3b9-486b4649c206',
+  team: ['avaren', 'eldrin', 'ball'],
+  box: { medkit: 6, firstaid: 7, 'almond-water': 7 },
+  guideKit: { firstaid: 3, 'almond-water': 3 },
+  flares: 30,         // 溫特身上的照明彈（已裝進彈匣）
+  gear: ['helmet'],    // 已經擁有、放在裝備箱裡（不穿上）的防具（data/equipment.js 的 id）
+};
+const isNewbieMap = () => typeof MAP !== 'undefined' && MAP?.id === NEWBIE_START.mapId;
+
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。
 // ---- 基地裡每個人平時在哪張地圖、哪一區（可依章節不同）：在 data/npc-locations.js ----

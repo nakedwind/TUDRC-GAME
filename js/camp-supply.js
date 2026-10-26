@@ -28,6 +28,11 @@ const campSupplyMapId = () => (MAP && (MAP.id || MAP.name)) || 'map';
 // 這張地圖的箱子（第一次來就補滿）
 function campBox() {
   const id = campSupplyMapId();
+  // 舊的新手區庫存也補滿一次；之後消耗、讀檔都維持實際數量。
+  if (isNewbieMap() && !campSupplyData[id]?.newbieStockV1) {
+    campSupplyData[id] = { ...NEWBIE_START.box, newbieStockV1: true };
+    saveCampSupply();
+  }
   if (!campSupplyData[id]) { campSupplyData[id] = { ...CAMP_SUPPLY.start }; saveCampSupply(); }
   else if (CAMP_SUPPLY.items.some(k => !(k in campSupplyData[id]))) {   // 舊存檔的箱子沒有後來加的物品（急救包）：補上初始數量
     for (const k of CAMP_SUPPLY.items) if (!(k in campSupplyData[id])) campSupplyData[id][k] = CAMP_SUPPLY.start[k] || 0;
@@ -61,6 +66,10 @@ function campSupplySpot() { return supplyBoxSpots()[0] || null; }
 // ---- 嚮導身上的補給 ----
 function guideKit(t) {
   if (!t.kit) {   // 這次出勤剛開始：從箱子拿（人就在營地）
+    if (isNewbieMap() && t.type === 'eldrin') {
+      t.kit = { ...NEWBIE_START.guideKit };   // 自帶補給，不扣箱內的 6／7／7。
+      return t.kit;
+    }
     t.kit = { firstaid: 0, 'almond-water': 0 };
     if (!MAP_SAFE && campSupplySpot()) refillGuideKit(t, true);
   }
@@ -69,7 +78,7 @@ function guideKit(t) {
 function refillGuideKit(t, silent) {
   const box = campBox(), got = [];
   for (const k of CAMP_SUPPLY.guideItems) {
-    const n = Math.min(CAMP_SUPPLY.carry - (t.kit[k] || 0), box[k] || 0);
+    const n = Math.min(guideCarryTarget(t, k) - (t.kit[k] || 0), box[k] || 0);
     if (n > 0) { t.kit[k] += n; box[k] -= n; got.push(itemById(k).name + '×' + n); }
   }
   if (got.length) { saveCampSupply(); if (!silent && typeof sentryStatus === 'function') sentryStatus(t, '拿了 ' + got.join('、'), '#9ff0c0'); }
@@ -83,7 +92,9 @@ function guideUse(t, k) { if (MAP_SAFE) return; const kit = guideKit(t); kit[k] 
 // 缺什麼（身上用完的）
 const guideMissing = t => CAMP_SUPPLY.guideItems.filter(k => (guideKit(t)[k] || 0) <= 0);
 // 沒帶滿的（還有，但不到 carry 個）
-const guideShort = t => CAMP_SUPPLY.guideItems.filter(k => (guideKit(t)[k] || 0) < CAMP_SUPPLY.carry);
+// 新手區艾德林維持每樣三個，避免開場立即把箱內補給拿走。
+const guideCarryTarget = (t, k) => isNewbieMap() && t.type === 'eldrin' ? NEWBIE_START.guideKit[k] : CAMP_SUPPLY.carry;
+const guideShort = t => CAMP_SUPPLY.guideItems.filter(k => (guideKit(t)[k] || 0) < guideCarryTarget(t, k));
 // 手上沒事：沒有隊員需要疏導或補血（門檻跟 js/sentry.js 的照顧對象一樣）
 const guideIdle = t => !G.towers.some(o => o !== t && o.hp > 0 && !TYPES[o.type].guide &&
   (o.berserk || (o.taint || 0) >= CAMP_SUPPLY.minTaint || o.maxhp - o.hp >= CAMP_SUPPLY.minHeal));

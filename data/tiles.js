@@ -1176,7 +1176,7 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/field-camp/ammo-crate.png",
     "w": 1,
-    "h": 1
+    "h": 2
   },
   {
     "id": "tile_field_base",
@@ -3363,7 +3363,7 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/field-camp/ammo-crate_empty.png",
     "w": 1,
-    "h": 1
+    "h": 2
   },
   {
     "id": "tile_field_supply_box",
@@ -3719,6 +3719,22 @@ const SHARED_TILES = [
     "h": 3
   },
   {
+    "id": "tile_bg_backroom_wall02_crack_breakable",
+    "name": "後室牆面（裂縫・可炸開）",
+    "role": "floor",
+    "file": "images/background/Back-room-wall02-damage-03.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_bg_backroom_wall02_crack_secret",
+    "name": "後室牆面（裂縫・可炸開・隱藏區）",
+    "role": "floor",
+    "file": "images/background/Back-room-wall02-damage-03.png",
+    "w": 3,
+    "h": 3
+  },
+  {
     "id": "tile_cvs_checkout_counter_backroom",
     "name": "後室便利商店櫃台（後室商店）",
     "role": "floor",
@@ -3881,7 +3897,8 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/background/Back-room-floor_M.png",
     "w": 2,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_bg_station_floor_l",
@@ -4276,5 +4293,21 @@ const SHARED_TILES = [
     "file": "images/回憶場景/building_door_v2.png",
     "w": 3,
     "h": 3
+  },
+  {
+    "id": "tile_mvpa0o8b",
+    "name": "Back-room-wall05",
+    "role": "floor",
+    "file": "images/background/Back-room-wall05.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_mvpa16jw",
+    "name": "Back-room-wall06",
+    "role": "floor",
+    "file": "images/background/Back-room-wall06.png",
+    "w": 2,
+    "h": 4
   }
 ];

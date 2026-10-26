@@ -2142,7 +2142,7 @@ function refreshBlendControl() {
     box = document.createElement('div'); box.id = 'blendControl'; box.className = 'blend-control';
     box.innerHTML = '<label>混合模式 <select id="blendMode">' + BLEND_MODES.map(([v, n]) => '<option value="' + v + '">' + n + '</option>').join('') + '</select></label>' +
       '<label>不透明度 <input type="number" id="blendAlpha" min="0" max="100" step="5" style="width:56px"> %</label>' +
-      '<label title="黑幕畫完才畫這個物件（暗處也看得到），並且當成光源照亮周圍（光會被牆擋住）"><input type="checkbox" id="blendGlow"> 發光（照亮黑暗）</label>' +
+      '<label title="黑幕畫完才畫這個物件（暗處也看得到），並且當成光源照亮周圍（光會被牆擋住）"><input type="checkbox" id="blendGlow"> 發光</label>' +   // 字短一點，混合模式這塊才擠得進選取列同一排（說明在 title）
       '<label id="blendGlowRBox">照亮半徑 <input type="number" id="blendGlowR" min="20" max="800" step="10" style="width:60px"> px</label>';
     document.getElementById('selControls').appendChild(box);
     const apply = () => {

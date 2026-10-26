@@ -317,13 +317,14 @@ function specialTalkLines(actor) {
 // 戰鬥中的隊員不能對話（10/22 拿掉「找他說話（出勤中）」）
 const talkKeyOf = () => 'npc';
 const hasSpecialTalk = actor => ['firstTalk', 'talk', 'chat'].some(k => (dialogueLines(dialogueKey(actor), k) || []).length);
+const fieldTalkBlocked = actor => !MAP_SAFE && (actor.kind === 'tower' || actor.id === 'ball');
 function canTalk(actor) {   // 有沒有可以說的台詞（沒有就不顯示「與○○對話」、選單也沒有「對話」）
-  if (!actor || (!MAP_SAFE && actor.kind === 'tower')) return false;   // 戰鬥中的隊員：不對話（空白鍵、C、F 是疏導、急救）
+  if (!actor || fieldTalkBlocked(actor)) return false;   // 戰鬥中的隊員與球球不對話；保留疏導、急救與跟隨指令。
   if (typeof missionBriefReady === 'function' && missionBriefReady(actor)) return true;
   return hasSpecialTalk(actor) || (dialogueLines(dialogueKey(actor), talkKeyOf(actor)) || []).length > 0;
 }
 function openDialogue(actor) {
-  if (!actor || dialogueState) return;
+  if (!actor || dialogueState || fieldTalkBlocked(actor)) return;
   if (actor.berserk) { flash('無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
   const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
@@ -1138,12 +1139,23 @@ function newGame() {
   if (MAP_SAFE && !MAP_STORY && !window.TEST_MODE && typeof walletGet === 'function') G.money = walletGet();
   if (MAP_STORY) G.money = typeof pausedBattle !== 'undefined' && pausedBattle ? pausedBattle.G.money : walletGet();   // 劇情地圖：只顯示暫停中那場作戰的經費（從基地來的就是錢包），不動錢包
   // 出勤：應變中心錢包裡的錢全部帶出來，加在這張地圖的作戰經費上（回基地時剩多少就帶回多少，js/progression.js）
-  if (!MAP_SAFE && !window.TEST_MODE && typeof walletGet === 'function') G.money += walletGet();
+  if (!MAP_SAFE && !window.TEST_MODE) {
+    // 新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
+    if (!isNewbieMap() && typeof walletGet === 'function') G.money += walletGet();
+  }
+  if (isNewbieMap() && !window.TEST_MODE) {   // 新手區：照明彈裝好在彈匣、防護頭盔放在裝備箱（data/balance.js 的 NEWBIE_START）
+    const bullets = bulletState(), mag = magState();
+    bullets.owned.flare = true; bullets.n.flare = NEWBIE_START.flares;
+    if (!magazineCarries('flare')) { const load = Array.from({ length: magSlotCount() }, (_, k) => mag.load[k] || null); load[Math.max(0, load.indexOf(null))] = 'flare'; mag.load = load; }
+    for (const id of NEWBIE_START.gear) if (equipDef(id) && !equipState.owned[id]) equipState.owned[id] = 1;
+    saveEquipment();
+  }
   if (G.battle && !MAP_SAFE) G.battle.budget = G.money;
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場
   setupStorageBoxWalls();
-  setupDoors();         // 門一開始都關著（js/doors.js）
+  if (typeof setupPropCollisions === 'function') setupPropCollisions();   // 販賣機、營地箱子自帶的擋路格（js/prop-collisions.js）
+  setupDoors();        // 門一開始都關著（js/doors.js）
   if (typeof setupMrtLocks === 'function') setupMrtLocks();   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
   if (typeof restoreStoryBuilds === 'function') restoreStoryBuilds();   // 劇情地圖：上次蓋的建築擺回去（js/combat-progress.js）
@@ -1182,7 +1194,13 @@ function playerSpawnPos() {
       }
     }
   }
+  const camp = typeof campSpawnCells === 'function' ? campSpawnCells() : [];   // 有營地：站在營地裡（js/sentry.js），有燈照到的優先
+  const campOk = camp.filter(([c, r]) => !playerBlocked(...center(c, r)));
+  const campPick = campOk.find(([c, r]) => typeof isLit !== 'function' || isLit(...center(c, r))) || campOk[0];
+  if (campPick) return center(...campPick);
   for (const k of campCells) { const [c, r] = k.split(',').map(Number); if (inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r)) return center(c, r); }
+  const start = typeof boxStartCells === 'function' ? boxStartCells().find(([c, r]) => !playerBlocked(...center(c, r))) : null;   // 沒營地的地圖：站在營地箱子前面（js/sentry.js）
+  if (start) return center(...start);
   // 沒有指定出生點、也沒有營地（例如基地編輯器預覽餐廳）：只站在「有畫地板」的格子上，
   // 地圖外圍沒畫東西、又沒標成牆的黑色空地不算（以前會從左下角那格出生，跑到地圖外面）
   const ok = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && groundDrawnAt(c, r) && !playerBlocked(...center(c, r));
@@ -2485,12 +2503,12 @@ function lose(reason, cause) {
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
-const MAP_PICK_NAMES = ['Y 區 · 地下街入口', '2F應變中心'];   // 開始畫面能選的地圖（照地圖名稱）；清空＝全部地圖都能選
+const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2'];   // 用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
 if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {
   MAPS_DEFAULT.forEach((m, i) => {
-    if (MAP_PICK_NAMES.length && !MAP_PICK_NAMES.includes(m.name)) return;
+    if (MAP_PICK_IDS.length && !MAP_PICK_IDS.includes(m.id)) return;
     const o = document.createElement('option'); o.value = i; o.textContent = m.name || ('地圖 ' + (i + 1)); mapPick.appendChild(o);
   });
   mapPick.value = MAP_INDEX;

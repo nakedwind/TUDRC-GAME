@@ -16,6 +16,7 @@ function normalizeTeam(list) {
 }
 
 function getTeam() {
+  if (isNewbieMap()) return normalizeTeam(NEWBIE_START.team);
   let t = null;
   try { t = JSON.parse(localStorage.getItem(TEAM_STORE)); } catch (e) {}
   if (!Array.isArray(t)) t = (typeof DEFAULT_TEAM !== 'undefined') ? DEFAULT_TEAM.slice() : [];
