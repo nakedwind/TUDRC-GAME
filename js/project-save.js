@@ -94,6 +94,10 @@ const ProjectSave = (() => {
 
   // 存這一頁的所有檔案
   async function save(files, say, pickAgain, buttons) {
+    // 雙擊開啟（file://）沒辦法做下面的存檔保護：存之前再問一次（提醒列在 js/editor-nav.js）
+    if (location.protocol === 'file:' && !confirm('你是直接雙擊開啟編輯器的，沒辦法檢查檔案有沒有被朋友或 Claude 更新過，存檔可能會蓋掉新內容。\n\n建議按「取消」，改用「開啟編輯器.bat」開啟後再存。\n確定還是要存嗎？')) {
+      say('已取消存檔：請改用「開啟編輯器.bat」開啟編輯器再存。', true); return false;
+    }
     buttons.forEach(b => { b.disabled = true; });
     try {
       const root = await projectDir(pickAgain, m => say(m, false)), stamp = timeStamp(), done = [];

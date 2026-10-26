@@ -65,4 +65,20 @@
   } else {   // 其他頁面：最上面一排
     nav.classList.add('top'); document.body.insertBefore(nav, document.body.firstChild);
   }
+
+  // ---- 直接雙擊 html 開啟（file://）的提醒 ----
+  // 這種開法讀不到硬碟上的檔案，「💾 存到專案」的多人協作保護（js/project-save.js）沒辦法檢查，
+  // 存檔可能把朋友剛拉下來、或 Claude 剛改的內容蓋掉。請改用遊戲資料夾裡的「開啟編輯器.bat」。
+  const DISMISS = 'tudrc_file_protocol_warning_hidden';
+  let hidden = false; try { hidden = sessionStorage.getItem(DISMISS) === '1'; } catch (_) {}
+  if (location.protocol === 'file:' && !hidden) {
+    const bar = document.createElement('div');
+    bar.setAttribute('role', 'alert');
+    bar.style.cssText = 'position:sticky;top:0;z-index:100000;display:flex;gap:10px;align-items:center;margin:0 0 10px;padding:9px 12px;border:1px solid #c9a24f;border-radius:10px;background:#3a2e12;color:#ffe7a6;font:600 13px/1.55 system-ui,"Microsoft JhengHei",sans-serif';
+    bar.innerHTML = '<span style="flex:1">⚠ 你是直接雙擊開啟編輯器的：這樣沒有多人協作的存檔保護，存檔可能會蓋掉朋友或 Claude 剛加的內容（例如素材、地圖）。'
+      + '請關掉這頁，改用遊戲資料夾裡的「<b>開啟編輯器.bat</b>」開啟。</span>'
+      + '<button type="button" style="flex:none;cursor:pointer;font:inherit;color:#ffe7a6;background:transparent;border:1px solid #c9a24f;border-radius:7px;padding:3px 10px">知道了</button>';
+    bar.querySelector('button').onclick = () => { bar.remove(); try { sessionStorage.setItem(DISMISS, '1'); } catch (_) {} };
+    document.body.insertBefore(bar, document.body.firstChild);
+  }
 })();

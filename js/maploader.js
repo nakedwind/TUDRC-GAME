@@ -545,6 +545,7 @@ function mapGlowLights() {
 function drawMapStampRaw(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
+  if (typeof StoryScene !== 'undefined' && StoryScene.ownsStamp(s)) return;   // 回憶劇情的自動門：由 js/story-scene.js 自己畫開關動畫
   if (typeof ballBedHidden === 'function' && ballBedHidden(s)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
   let t = mapTileById(s.id); if (!t) return;
   t = destroyedBaseDisplayTile(s, t);

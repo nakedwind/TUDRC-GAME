@@ -34,6 +34,7 @@ const SFX = (() => {
     mrtGate: '設施/BB聲.mp3',                 // 捷運閘門刷好遊卡（js/mrt-locks.js）
     mrtUnlock: '設施/打磨.mp3',               // 用異質鑰匙解封捷運入口（js/mrt-locks.js）
     elevator: '環境/門與機關/電梯.mp3',
+    storyDoor: '環境/門與機關/電梯.mp3',   // 回憶劇情的自動門開關（data/story-scenes.js 的 sfx；先借電梯聲，可在音效編輯器換）
     stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3',   // 走逃生樓梯下樓（js/game.js 的 enterPortal）
     stairsUp: '環境/腳步/footsteps03 (mp3cut.net).mp3',     // 走逃生樓梯上樓（js/game.js 的 enterPortal）
     gunshot: '戰鬥/槍械/開槍.mp3',

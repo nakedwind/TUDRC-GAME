@@ -3227,7 +3227,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_life_ring_blue",
     "name": "池核｜藍白救生圈",
     "role": "floor",
-    "file": "images/Poolcore/poolcore-life-ring-blue.png",
+    "file": "images/Poolcore/Poolcore-life-ring_blue.png",
     "w": 1,
     "h": 1
   },
@@ -3235,7 +3235,7 @@ const SHARED_TILES = [
     "id": "tile_poolcore_life_ring_red",
     "name": "池核｜紅白救生圈",
     "role": "floor",
-    "file": "images/Poolcore/poolcore-life-ring-red.png",
+    "file": "images/Poolcore/Poolcore-life-ring_red.png",
     "w": 1,
     "h": 1
   },
@@ -3282,6 +3282,54 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_Pillar.png",
     "w": 2,
     "h": 5
+  },
+  {
+    "id": "tile_poolcore_ammo_crate",
+    "name": "池核｜彈藥箱",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_ammo-crate.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_poolcore_backpack",
+    "name": "池核｜背包",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_Backpack.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_poolcore_camp_bed",
+    "name": "池核｜行軍床",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_camp-bed.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_poolcore_camp_bed_v",
+    "name": "池核｜行軍床（直）",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_camp-bed-vertical.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_poolcore_camp_bed_fail",
+    "name": "池核｜行軍床（直・壞掉）",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_camp-bed-fail.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_poolcore_camp_bed_fail02",
+    "name": "池核｜行軍床（壞掉）",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_camp-bed-fail02.png",
+    "w": 2,
+    "h": 2
   },
   {
     "id": "tile_mv1ejvf0",
@@ -4146,5 +4194,87 @@ const SHARED_TILES = [
     "w": 11,
     "h": 6,
     "flat": true
+  },
+  {
+    "id": "tile_mvortyiv",
+    "name": "Poolcore_field-generator",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_field-generator.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_mvory18h",
+    "name": "Poolcore_field-base-02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_field-base-02.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvot2yuu",
+    "name": "Poolcore_field-base-01",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_field-base-01.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvot3dds",
+    "name": "Poolcore_field-base-03",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_field-base-03.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvotgy7w",
+    "name": "Poolcore_ammo-crate-open",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_ammo-crate-open.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvotwe6t",
+    "name": "Poolcore_ammo_crate02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_ammo_crate02.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvoanvn6",
+    "name": "building",
+    "role": "floor",
+    "file": "images/回憶場景/building.png",
+    "w": 22,
+    "h": 18,
+    "flat": true
+  },
+  {
+    "id": "tile_mvoarums",
+    "name": "building_door",
+    "role": "floor",
+    "file": "images/回憶場景/building_door.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_memory_building_v2",
+    "name": "building_v2",
+    "role": "floor",
+    "file": "images/回憶場景/building_v2.png",
+    "w": 22,
+    "h": 18,
+    "flat": true
+  },
+  {
+    "id": "tile_memory_building_door_v2",
+    "name": "building_door_v2",
+    "role": "floor",
+    "file": "images/回憶場景/building_door_v2.png",
+    "w": 3,
+    "h": 3
   }
 ];

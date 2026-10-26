@@ -11,9 +11,20 @@ body.story-scene #hud, body.story-scene #editors { display: none !important; }
 /* 劇情借用遊戲的正式對話框：只留名字、頁數、文字和「下一句」；旁白不放頭像 */
 body.story-scene #dialogueBox { z-index: 161; }
 body.story-scene #dialogueClose, body.story-scene #dialogueFavor, body.story-scene .dialogue-actions > :not(#dialogueNext) { display: none !important; }
-body.story-scene #dialogueBox.story-narration #dialoguePortraitFrame { display: none; }
+body.story-scene #dialogueBox.story-narration #dialoguePortraitFrame,
+body.story-scene #dialogueBox.story-noface #dialoguePortraitFrame { display: none; }
 body.story-scene #dialogueBox.story-narration #dialogueText { color: #d8dee6; font-style: italic; }
+body.story-scene #dialogueText { white-space: pre-line; }
+/* 大喊（劇情的 shout）：對話框震一下 */
+body.story-scene #dialogueBox.story-shout { animation: story-shout .35s ease-out; }
+@keyframes story-shout {
+  0% { translate: 0 0; } 15% { translate: -7px -2px; } 30% { translate: 6px 1px; } 45% { translate: -4px 0; }
+  60% { translate: 3px 0; } 80% { translate: -1px 0; } 100% { translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) { body.story-scene #dialogueBox.story-shout { animation: none; } }   /* 劇情台詞照編輯器裡的換行分行顯示 */
 #storyFade { position:absolute; inset:0; background:#000; pointer-events:none; }
+/* 四周壓暗（劇情設定 vignette＝強度，用 opacity 調）：中間保持原樣，越往邊角越暗 */
+#storyVignette { position:absolute; inset:0; pointer-events:none; background:radial-gradient(ellipse 58% 56% at 50% 46%, transparent 25%, rgba(0,0,0,.5) 52%, rgba(0,0,0,.85) 78%, #000 100%); }
 #storyEnd { position:absolute; z-index:4; inset:0; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; background:#080b0e; }
 #storyEnd small { letter-spacing:.3em; color:#b7a27c; }
 #storyEnd h2 { font-size:32px; font-weight:500; letter-spacing:.15em; margin:20px 0; }
