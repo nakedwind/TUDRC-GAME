@@ -4449,7 +4449,8 @@ const BATTLE_MAPS = [
         "id": "tile_mv1ejvf0",
         "c": 17,
         "r": 19,
-        "layer": "object"
+        "layer": "object",
+        "sortDepth": 4
       },
       {
         "id": "tile_mr4cyy36",
@@ -6169,7 +6170,8 @@ const BATTLE_MAPS = [
         "r": 53,
         "layer": "object3",
         "ox": 16,
-        "oy": 20
+        "oy": 20,
+        "sortDepth": 1.25
       }
     ],
     "solid": [
