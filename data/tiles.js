@@ -3284,54 +3284,6 @@ const SHARED_TILES = [
     "h": 5
   },
   {
-    "id": "tile_poolcore_ammo_crate",
-    "name": "池核｜彈藥箱",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_ammo-crate.png",
-    "w": 2,
-    "h": 2
-  },
-  {
-    "id": "tile_poolcore_backpack",
-    "name": "池核｜背包",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_Backpack.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_poolcore_camp_bed",
-    "name": "池核｜行軍床",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_camp-bed.png",
-    "w": 2,
-    "h": 2
-  },
-  {
-    "id": "tile_poolcore_camp_bed_v",
-    "name": "池核｜行軍床（直）",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_camp-bed-vertical.png",
-    "w": 1,
-    "h": 2
-  },
-  {
-    "id": "tile_poolcore_camp_bed_fail",
-    "name": "池核｜行軍床（直・壞掉）",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_camp-bed-fail.png",
-    "w": 1,
-    "h": 2
-  },
-  {
-    "id": "tile_poolcore_camp_bed_fail02",
-    "name": "池核｜行軍床（壞掉）",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_camp-bed-fail02.png",
-    "w": 2,
-    "h": 2
-  },
-  {
     "id": "tile_mv1ejvf0",
     "name": "Back-room-wall03",
     "role": "floor",
@@ -4194,53 +4146,5 @@ const SHARED_TILES = [
     "w": 11,
     "h": 6,
     "flat": true
-  },
-  {
-    "id": "tile_mvortyiv",
-    "name": "Poolcore_field-generator",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_field-generator.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_mvory18h",
-    "name": "Poolcore_field-base-02",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_field-base-02.png",
-    "w": 2,
-    "h": 2
-  },
-  {
-    "id": "tile_mvot2yuu",
-    "name": "Poolcore_field-base-01",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_field-base-01.png",
-    "w": 2,
-    "h": 2
-  },
-  {
-    "id": "tile_mvot3dds",
-    "name": "Poolcore_field-base-03",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_field-base-03.png",
-    "w": 2,
-    "h": 2
-  },
-  {
-    "id": "tile_mvotgy7w",
-    "name": "Poolcore_ammo-crate-open",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_ammo-crate-open.png",
-    "w": 2,
-    "h": 2
-  },
-  {
-    "id": "tile_mvotwe6t",
-    "name": "Poolcore_ammo_crate02",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_ammo_crate02.png",
-    "w": 2,
-    "h": 2
   }
 ];
