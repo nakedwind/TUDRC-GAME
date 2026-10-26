@@ -9,7 +9,7 @@
    必須在 js/game.js 之前載入（game.js 的 update 會呼叫這裡）。
 */
 const CAMP_BED = {
-  ids: ['tile_field_camp_bed', 'tile_field_camp_bed_v'],   // 哪些素材算行軍床
+  ids: ['tile_field_camp_bed', 'tile_field_camp_bed_v', 'tile_poolcore_camp_bed', 'tile_poolcore_camp_bed_v'],   // 哪些素材算行軍床（池核版也算；壞掉的不能躺）
   calm: 5,              // 脫離戰鬥幾秒後才去躺
   below: .5,            // HP 低於最大值的幾成才去躺
   rest: 10,             // 躺幾秒

@@ -102,7 +102,7 @@ const STORAGE_SUPPLY_BOX = 'tudrc_asset_supply_box_v1';           // 後補：�
 const STORAGE_ORE_TILES = 'tudrc_asset_ore_tiles_v2';              // 後補：三種異質礦（可炸開採集，js/ore.js）；v2：大型 2×2、稀有 2×3
 const STORAGE_STREET_PACK = 'tudrc_asset_pack_street_v1';         // 街道素材包＋後補的捷運出口、路網圖、後室破損牆
 const STORAGE_DRINK_SHOP_PACK = 'tudrc_asset_pack_drink_shop_v1'; // 新增的可互動飲料店素材
-const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v5';       // 池核磁磚素材（v3：資料夾改名 images/Poolcore、加地板大中小；v5：柱子 1×4）
+const STORAGE_POOLCORE_PACK = 'tudrc_asset_pack_poolcore_v6';       // 池核磁磚素材（v3：資料夾改名 images/Poolcore、加地板大中小；v5：柱子；v6：彈藥箱、背包、行軍床）
 const STORAGE_HQ_PACK = 'tudrc_asset_pack_command_hq_v1';           // 指揮部素材包
 const STORAGE_RESEARCH_LAB_PACK = 'tudrc_asset_pack_research_lab_v1'; // 研究部素材包
 const STREET_PACK_IDS = new Set(["tile_street_ubike", "tile_street_scooter_delivery_green", "tile_street_scooter_delivery_pink", "tile_street_capsule_toy_machines", "tile_street_utility_box_painted", "tile_street_utility_box", "tile_street_folding_table", "tile_street_plastic_stool", "tile_street_plastic_stools_stacked", "tile_street_bottle_red", "tile_street_bollard_red", "tile_street_bollard_yellow", "tile_street_sign_no_entry", "tile_street_sign_stop", "tile_street_sign_scooter_lanes", "tile_street_sign_two_stage_turn", "tile_street_sign_turn_right", "tile_street_sign_no_left_turn", "tile_street_sign_speed_limit_50", "tile_street_traffic_light", "tile_street_name_sign_pole", "tile_street_crosswalk", "tile_street_area_map_board", "tile_street_stall_steak", "tile_street_stall_noodles", "tile_street_stall_drinks", "tile_mrt_exit_2", "tile_mrt_exit_2_sealed", "tile_mrt_map_kiosk", "tile_bg_backroom_wall02_dmg_crack", "tile_bg_backroom_wall02_hole2", "tile_street_claw_machine"]);
@@ -2176,7 +2176,7 @@ function selectedLocker() {
   const id = s ? s.id : m.layers[sel.layer]?.[sel.key];
   const t = tileById(id);
   if (!t) return null;
-  if (id === 'tile_field_ammo_crate') return { sel, s, id, ammo: true };   // 彈藥箱：不用鑰匙、只能開一次（js/flare.js）；營地的補彈藥箱（打開的）只補彈藥，不能放東西
+  if (id === 'tile_field_ammo_crate' || id === 'tile_poolcore_ammo_crate') return { sel, s, id, ammo: true };   // 彈藥箱：不用鑰匙、只能開一次（js/flare.js）；營地的補彈藥箱（打開的）只補彈藥，不能放東西
   if (!(id === 'tile_interactive_storage_locker' || /storage-locker-closed\.png$/.test(String(t.file || '')) || /置物[箱櫃].*關|置物[箱櫃]（上鎖）/.test(t.name || ''))) return null;
   return { sel, s, id };
 }

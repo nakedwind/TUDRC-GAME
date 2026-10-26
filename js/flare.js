@@ -18,11 +18,13 @@ const FLARE = {
 // 滾輪切換的順序
 // special＝效果寫在 js/special-guns.js 的子彈（一般子彈、照明彈、螢光漆彈另外處理）
 const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
-const AMMO_CRATE = { ids: ['tile_field_ammo_crate'], emptyId: 'tile_field_ammo_crate_empty' };   // 能打開、開出東西的彈藥箱（ammo-crate.png）
+const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_poolcore_ammo_crate'], emptyId: 'tile_field_ammo_crate_empty',   // 能打開、開出東西的彈藥箱（ammo-crate.png；池核版 Poolcore_ammo-crate.png）
+  emptyOf: { tile_field_ammo_crate: 'tile_field_ammo_crate_empty', tile_poolcore_ammo_crate: 'tile_mvot3dds' } };   // 開過之後換成哪張空箱圖（池核版：Poolcore_field-base-03.png）
 // 營地的補彈藥箱（ammo-crate-open-02.png；地圖上放的「彈藥箱（打開）」也算）：按 Space 把照明彈、螢光漆彈補到 to 發，已經有 to 發以上就不補，可以一直補
-const AMMO_REFILL = { ids: ['tile_field_ammo_crate_open'], file: /ammo-crate-open-02\.png$/, bullets: ['flare', 'paint'], to: 20 };
+const AMMO_REFILL = { ids: ['tile_field_ammo_crate_open', 'tile_mvotgy7w'], file: /(ammo-crate-open-02|Poolcore_ammo-crate-open)\.png$/, bullets: ['flare', 'paint'], to: 20 };   // 池核版：Poolcore_ammo-crate-open.png
 // 空的彈藥箱：素材庫（data/tiles.js）沒有這張時用這份，編輯器存檔蓋掉素材庫也不會變回關著的圖
 const AMMO_CRATE_EMPTY_TILE = { id: 'tile_field_ammo_crate_empty', name: '彈藥箱（空）', role: 'floor', file: 'images/field-camp/ammo-crate_empty.png', w: 1, h: 1 };
+const AMMO_CRATE_EMPTY_FALLBACK = { tile_mvot3dds: { id: 'tile_mvot3dds', name: '池核｜彈藥箱（空）', role: 'floor', file: 'images/Poolcore/Poolcore_field-base-03.png', w: 2, h: 2 } };   // 池核空箱：素材庫裡的 id 不見了也照樣換圖
 
 // 子彈的小圖（data/equipment.js 的 image；沒有圖就用 emoji）
 const bulletIcon = (b, cls = 'bullet-img') => b && b.image ? '<img class="' + cls + '" src="' + b.image + '" alt="">' : '<i>' + ((b && b.icon) || '') + '</i>';
@@ -228,6 +230,7 @@ function useAmmoRefillNearPlayer() {
 }
 // 開過的關著的彈藥箱畫成空箱（js/maploader.js 會問這裡）；本來就是打開圖的彈藥箱不換圖
 function ammoCrateOpenTile(s) {
-  if (s.id !== 'tile_field_ammo_crate' || !ammoCrateLooted(s)) return null;
-  return mapTileById(AMMO_CRATE.emptyId) || AMMO_CRATE_EMPTY_TILE;
+  const emptyId = AMMO_CRATE.emptyOf[s.id];
+  if (!emptyId || !ammoCrateLooted(s)) return null;
+  return mapTileById(emptyId) || AMMO_CRATE_EMPTY_FALLBACK[emptyId] || AMMO_CRATE_EMPTY_TILE;
 }

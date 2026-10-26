@@ -261,7 +261,7 @@ function renderGearDetail(g) {
 // ---- 防具視窗：借用背包視窗，只顯示「防具」分頁（排版、外觀跟背包的防具分頁一樣）----
 // 只能靠近裝備箱按互動鍵開（基地、戰鬥地圖都一樣；裝備箱放在哪張地圖都可以）
 // 裝備箱：地圖編輯器上傳的 ammo-crate02（素材 ID 或名稱都認）。要讓別的物件也能開防具，加在這裡
-const ARMOR_CHEST = { tiles: ['tile_mvma4ws7'], names: ['ammo-crate02'] };
+const ARMOR_CHEST = { tiles: ['tile_mvma4ws7', 'tile_mvotwe6t'], names: ['ammo-crate02', 'Poolcore_ammo_crate02'] };   // 池核版：Poolcore_ammo_crate02.png
 const armorChestNearPlayer = () => typeof mapBoxNearPlayer === 'function' ? mapBoxNearPlayer('armor') : null;   // 判定範圍：js/camp-interactions.js 的 MAP_BOX
 function useArmorChestNearPlayer() { if (!armorChestNearPlayer()) return false; openArmorPanel(); return true; }
 function openArmorPanel(selection) {

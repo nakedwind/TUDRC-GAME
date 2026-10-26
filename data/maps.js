@@ -15562,6 +15562,12 @@ const BATTLE_MAPS = [
         "r": 22,
         "layer": "object6",
         "oy": 10
+      },
+      {
+        "id": "tile_mvortyiv",
+        "c": 13,
+        "r": 25,
+        "layer": "object6"
       }
     ],
     "solid": [

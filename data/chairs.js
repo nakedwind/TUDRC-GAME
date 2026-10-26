@@ -276,7 +276,46 @@ const CHAIRS_DEFAULT = {
       "rotation": 270
     }
   },
+  "tile_poolcore_camp_bed": {
+    "enabled": true,
+    "depth": 64,
+    "solid": [
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 30,
+      "y": 57,
+      "dir": "front",
+      "rotation": 270
+    }
+  },
   "tile_field_camp_bed_v": {
+    "enabled": true,
+    "depth": 55,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 45,
+      "dir": "front"
+    }
+  },
+  "tile_poolcore_camp_bed_v": {
     "enabled": true,
     "depth": 55,
     "solid": [
