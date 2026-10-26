@@ -82,11 +82,18 @@ const StoryScene = (() => {
     }
     return (spriteCache[name] = set);
   }
+  function imageSet(src) {   // 只有一張圖的路人（例如家屬的背影）：每個方向、走路、眨眼都用同一張
+    if (spriteCache[src]) return spriteCache[src];
+    const im = image(src), one = [im, im, im];
+    return (spriteCache[src] = { front: one, back: one, left: one, right: one, blink: one, single: true });
+  }
+  const extraImages = {};
+  const imageOnce = src => extraImages[src] || (extraImages[src] = image(src));
   function ensureUI() {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
@@ -97,7 +104,8 @@ const StoryScene = (() => {
   }
   function setSpeaker(beat) {   // 頭像用說話者的正面圖；旁白（沒有 speaker）不放頭像
     const sprite = beat.speaker && state.cfg.portraits?.[beat.speaker];
-    box().classList.toggle('story-narration', !sprite);
+    box().classList.toggle('story-narration', !beat.speaker);
+    box().classList.toggle('story-noface', !!beat.speaker && !sprite);   // 有名字、沒頭像的人（家屬）：不放頭像，但不是旁白的斜體
     el('dialogueName').textContent = beat.speaker || '';
     if (sprite) {
       const who = state.actors.find(a => a.name === beat.speaker && a.sprite === sprite);
@@ -131,9 +139,60 @@ const StoryScene = (() => {
   function makeActor(a, seats) {
     const seat = a.bed && seats.find(s => s.key.endsWith('@' + a.bed.join(',')));
     if (a.bed && !seat) throw new Error('劇情床位不存在：' + (a.name || a.id) + '（' + a.bed + '）');
-    return { ...a, set: sprites(a.sprite), sitting: seat || null,
-      x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL,
+    return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null,
+      x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL, alpha: 1,
       dir: a.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!a.bed };
+  }
+  // ---- 自動門（door: [欄, 列]＝地圖上門圖章的位置）：劇情自己畫，兩片門板往左右滑開 ----
+  // 門圖（images/回憶場景/building_door.png，120×120）裡兩片門板的範圍，單位是圖片像素：
+  // box＝門板整塊（左、上、寬、高），也是遮罩，門板滑出這塊就看不到；split＝兩片門板中間的縫（左片 0～57、右片 58～113）
+  const DOOR_PANELS = { box: [0, 32, 114, 88], split: 58 }, DOOR_TIME = .8;
+  function findDoor(cfg) {
+    if (!Array.isArray(cfg.door)) return null;
+    const stamp = (MAP.stamps || []).find(s => s.c === cfg.door[0] && s.r === cfg.door[1]);
+    return stamp ? { stamp, open: 0, target: 0 } : null;
+  }
+  const ownsStamp = s => !!state?.door && state.door.stamp === s;   // js/maploader.js 問：這張圖章由劇情自己畫嗎
+  function drawDoor() {
+    const d = state.door; if (!d) return;
+    const s = d.stamp, t = mapTileById(s.id), img = t && tileImage(t); if (!readyImage(img)) return;
+    const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+    const iw = img.naturalWidth, ih = img.naturalHeight, sx = w / iw, sy = h / ih;
+    const [bx, by, bw, bh] = DOOR_PANELS.box, cut = DOOR_PANELS.split;
+    const k = d.open * d.open * (3 - 2 * d.open);   // 慢慢起步、慢慢停
+    ctx.save(); ctx.beginPath(); ctx.rect(x + bx * sx, y + by * sy, bw * sx, bh * sy); ctx.clip();   // 門後直接露出地圖上鋪的地板
+    ctx.drawImage(img, bx, by, cut - bx, bh, x + (bx - k * (cut - bx)) * sx, y + by * sy, (cut - bx) * sx, bh * sy);   // 左片往左滑
+    ctx.drawImage(img, cut, by, bx + bw - cut, bh, x + (cut + k * (bx + bw - cut)) * sx, y + by * sy, (bx + bw - cut) * sx, bh * sy);   // 右片往右滑
+    ctx.restore();
+  }
+  // 大喊（每頁 shout: { 角色id: true }）：台詞出現的那一刻，那個人頓一下、對話框跟著震一下
+  const SHOUT_TIME = .4;
+  function shout(beat) {
+    const ids = Object.keys(beat.shout || {}).filter(id => beat.shout[id]);
+    for (const id of ids) { const a = actor(id); if (a) a.shoutT = SHOUT_TIME; }
+    const b = box(); b.classList.remove('story-shout');
+    if (ids.length) { void b.offsetWidth; b.classList.add('story-shout'); }
+  }
+  // 鏡頭 [欄, 列, 縮放]：第三個數字可省略（＝劇情的 zoom），越大拍得越近
+  const camZoom = (p, base) => Number(p?.[2]) > 0 ? Number(p[2]) : base;
+  // ---- 腳步聲（劇情設定 footsteps: true）：主要角色走路時循環播放，跟遊戲裡玩家走路同一個音檔；跑得快播得快 ----
+  const STEP_FILE = 'Sound effects/環境/腳步/footsteps02.mp3';
+  let stepAudio = null;
+  function updateSteps() {
+    const walkers = state?.cfg.footsteps && !state.ended ? state.actors.filter(a => !a.hidden && a.moving && a.role !== 'medic') : [];
+    if (!walkers.length) { if (stepAudio && !stepAudio.paused) stepAudio.pause(); return; }
+    if (!stepAudio) { stepAudio = new Audio(STEP_FILE); stepAudio.loop = true; }
+    const speed = Math.max(...walkers.map(a => a.speed || 26));
+    stepAudio.playbackRate = Math.max(.7, Math.min(1.8, speed / 45));
+    stepAudio.volume = typeof SFX === 'undefined' ? .4 : Math.min(1, .45 * SFX.volume / .35 * (SFX.gainOf?.('footsteps') ?? 1));
+    stepAudio.muted = typeof SFX !== 'undefined' && !SFX.enabled;
+    if (stepAudio.paused) stepAudio.play().catch(() => {});
+  }
+  // 中途的黑幕轉場（screen: 'black'／'clear'，screenFade＝幾秒）
+  const screenDark = () => { const sc = state.screen; if (!sc) return 0; const k = Math.min(1, sc.t / sc.dur); return sc.from + (sc.to - sc.from) * k; };
+  const screenBusy = () => !!state.screen && state.screen.t < state.screen.dur;
+  function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
+    state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(5);
   }
   function makeMonster(m) {
     const spec = ACTIVE_MONSTERS.find(s => s.id === (m.type || 'lifeform'));
@@ -158,10 +217,13 @@ const StoryScene = (() => {
         at: m.route[0].at, leg: 0, pause: (m.delay || 0) + (m.route[0].wait || 0), dir: m.route[0].face || 'front', ...m }, seats))
     ];
     const cameraKey = cfg.beats[0]?.camera || Object.keys(cfg.cameras || {})[0];
+    const baseZoom = VIEW_SCALE;   // 鏡頭沒寫第三個數字（縮放）時用劇情的 zoom
     state = { cfg, actors, monsters: (cfg.monsters || []).map(makeMonster), time: 0, beatTime: 0, index: -1, chars: 0,
       playing: false, ending: false, ended: false, nextAt: 0, cameraKey, camera: [...(cfg.cameras?.[cameraKey] || [COLS / 2, ROWS / 2])],
       heal: false, hush: false, shake: 0, rumble: null, moteT: 0, boomT: cfg.opening?.firstExplosion ?? rnd(3, 6),
-      openingBlack: Math.max(0, Number(cfg.opening?.black) || 0), openingFade: Math.max(.1, Number(cfg.opening?.fade) || 1.5), waitingForSound: false };
+      openingBlack: Math.max(0, Number(cfg.opening?.black) || 0), openingFade: Math.max(.1, Number(cfg.opening?.fade) || 1.5), waitingForSound: false,
+      door: findDoor(cfg), screen: null, endDelay: 1.4, baseZoom, zoom: camZoom(cfg.cameras?.[cameraKey], baseZoom) };
+    VIEW_SCALE = state.zoom;
     document.body.classList.add('story-scene');
     ui.hidden = true;
     el('storyTitle').textContent = cfg.title || ''; el('storySubtitle').textContent = cfg.subtitle || '';
@@ -169,6 +231,7 @@ const StoryScene = (() => {
     el('storyExitTop').textContent = resume ? '離開回憶' : '離開預覽'; el('storyExitEnd').textContent = resume ? '回到現實' : '返回開始畫面';
     showBox(false); el('storyEnd').hidden = true;
     el('storyFade').style.opacity = '1';
+    el('storyVignette').style.opacity = String(Math.max(0, Math.min(1, Number(cfg.vignette) || 0)));   // vignette：畫面四周壓暗的強度 0～1
     el('storyAudioStart').hidden = true;
     ui.querySelector('.story-head').style.opacity = '0';
     state.lights = lights();
@@ -183,14 +246,23 @@ const StoryScene = (() => {
     // G.running 保持 false：成就、自動存檔與戰鬥的外掛不會把演員視作真正隊伍。
     // &storyFrom=N：前面幾頁的走位、轉向一次做完，直接從第 N 頁開始（劇情編輯器調整用）
     const from = Math.min(state.cfg.beats.length, Math.max(1, Number(params.get('storyFrom')) || 1)) - 1;
+    state.skipping = true;
     for (let i = 0; i < from; i++) {
       setBeat(i);
       for (const a of state.actors) if (a.target && a.role !== 'medic') {
         [a.x, a.y] = a.path?.length ? a.path[a.path.length - 1] : a.target;
         a.target = null; a.path = []; a.dir = a.arriveDir || a.dir;
       }
+      for (const a of state.actors) { if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; }
+      if (state.door) state.door.open = state.door.target;
+      if (state.screen) state.screen.t = state.screen.dur;
     }
-    if (from) { state.camera = [...(state.cfg.cameras?.[state.cameraKey] || state.camera)]; state.time = state.openingBlack + state.openingFade; }
+    state.skipping = false;
+    if (from) {
+      const p = state.cfg.cameras?.[state.cameraKey];
+      state.camera = p ? [p[0], p[1]] : state.camera; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom);
+      state.time = state.openingBlack + state.openingFade;
+    }
     setBeat(from);
   }
   const actor = id => state.actors.find(a => a.id === id);
@@ -207,7 +279,24 @@ const StoryScene = (() => {
     state.beatWait = index === 0 ? Math.max(beat.wait || 0, state.openingBlack + state.openingFade) : (beat.wait || 0);
     state.nextAt = state.time + state.beatWait;
     if (beat.camera) state.cameraKey = beat.camera;
-    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; a.hidden = false; walkTo(a, p); }
+    if (beat.screen === 'black' || beat.screen === 'clear') {   // 黑幕：從現在的亮度慢慢變過去
+      const from = state.screen ? screenDark() : 0;
+      state.screen = { from, to: beat.screen === 'black' ? 1 : 0, t: 0, dur: Math.max(.1, Number(beat.screenFade) || 2) };
+    }
+    if (state.door && (beat.door === 'open' || beat.door === 'close')) state.door.target = beat.door === 'open' ? 1 : 0;
+    // sfx：翻到這頁時播一個音效（js/sfx.js 的名字，例如 storyDoor 自動門）；sfxVolume＝音量倍率；快轉（storyFrom）時不播
+    if (beat.sfx && typeof SFX !== 'undefined' && !state.skipping) SFX.play(beat.sfx, Number(beat.sfxVolume) > 0 ? Number(beat.sfxVolume) : 1, beat.sfx + ':story-beat');
+    const show = a => { if (a.hidden) { a.hidden = false; a.alpha = 0; } a.fading = false; };   // 先隱藏的人：淡入出現
+    for (const id of Object.keys(beat.hide || {})) { const a = actor(id); if (a) { a.hidden = true; a.target = null; a.path = []; a.exiting = a.fading = false; } }
+    for (const [id, p] of Object.entries(beat.place || {})) {   // 瞬間移到某處（黑幕轉場時用）
+      const a = actor(id); if (!a) continue;
+      a.hidden = false; a.alpha = 1; a.fading = a.exiting = false; a.target = null; a.path = []; a.x = p[0] * CELL; a.y = p[1] * CELL;
+    }
+    for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
+    for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
+    for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
+    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); a.exiting = false; walkTo(a, p); }
+    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); a.exiting = true; walkTo(a, p); }   // 走到那裡後淡出消失（走進門裡）
     for (const [id, d] of Object.entries(beat.face || {})) {   // 方向，或看向某個地點／某個人
       const a = actor(id); if (!a) continue;
       const point = state.cfg.points?.[d], other = !point && actor(d);
@@ -220,13 +309,13 @@ const StoryScene = (() => {
     setSpeaker(beat);   // 眼睛狀態套用後，頭像才跟著切換睜眼／閉眼受傷圖。
   }
   function next() {
-    if (!state?.playing || state.ending || state.time < state.nextAt) return;
+    if (!state?.playing || state.ending || state.time < state.nextAt || screenBusy()) return;   // 黑幕還在變：等它變完才能翻頁
     const beat = state.cfg.beats[state.index], length = Array.from(beat.text).length;
     state.nextAt = state.time + .18;
     if (typeof sfx === 'function') sfx('blip');
     if (state.chars < length) { state.chars = length; renderText(); return; }
     if (state.index + 1 < state.cfg.beats.length) setBeat(state.index + 1);
-    else { state.ending = true; state.beatTime = 0; showBox(false); stopBgm(5); }   // 畫面淡黑時音樂慢慢收掉
+    else finish(false);   // 畫面淡黑時音樂慢慢收掉
   }
   function renderText() {
     const beat = state.cfg.beats[state.index], chars = Array.from(beat.text);
@@ -348,18 +437,20 @@ const StoryScene = (() => {
     if (state.playing) {
       state.time += dt; state.beatTime += dt;
       const beat = state.cfg.beats[state.index];
+      if (state.screen) state.screen.t += dt;
       if (state.ending) {
-        el('storyFade').style.opacity = String(Math.min(1, Math.max(0, (state.beatTime - 1.4) / 1.8)));
-        if (state.beatTime >= 3.2) {
+        el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
+        if (state.beatTime >= state.endDelay + 1.8) {
           state.playing = false; state.ended = true; G.phase = 'story-ended';
           el('storyEnd').hidden = false; el('storyEnd').querySelector('button').focus();
         }
       } else {
         const reveal = Math.max(0, Math.min(1, (state.time - state.openingBlack) / state.openingFade));
-        el('storyFade').style.opacity = String(1 - reveal);
+        el('storyFade').style.opacity = String(Math.max(1 - reveal, screenDark()));
         ui.querySelector('.story-head').style.opacity = String(reveal);
-        if (state.beatTime >= state.beatWait) {
-          if (!state.shown) { state.shown = true; showBox(true); }
+        if (Number.isFinite(beat.end) && state.beatTime >= beat.end) finish(true);   // end：這頁幾秒後自動結束（邊走邊轉場）
+        else if (state.beatTime >= state.beatWait) {
+          if (!state.shown) { state.shown = true; showBox(true); shout(beat); }
           // 打字速度跟遊戲對話一樣（NPC_TALK.typeSpeed＝每個字幾毫秒）
           state.chars = Math.min(Array.from(beat.text).length, state.chars + dt * 1000 / Math.max(5, Number(NPC_TALK.typeSpeed) || 24));
           renderText();
@@ -374,10 +465,16 @@ const StoryScene = (() => {
         if (!a.target) continue;
         const dx = a.target[0] - a.x, dy = a.target[1] - a.y, d = Math.hypot(dx, dy), step = dt * (a.speed || 26);
         a.moving = d > step;
-        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) a.dir = a.arriveDir || a.dir; }
+        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) { a.dir = a.arriveDir || a.dir; if (a.exiting) a.fading = true; } }
         else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
       }
-      for (const a of state.actors) tickActorBlink(a, dt);
+      for (const a of state.actors) {
+        tickActorBlink(a, dt);
+        if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
+        if (a.fading) { a.alpha -= dt / .45; if (a.alpha <= 0) { a.alpha = 1; a.hidden = true; a.fading = a.exiting = false; } }   // 走進門裡：淡出
+        else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
+      }
+      if (state.door) { const d = state.door, s = dt / DOOR_TIME; d.open = d.open < d.target ? Math.min(d.target, d.open + s) : Math.max(d.target, d.open - s); }
       for (const e of state.monsters) tickMonster(e, dt);
       // heal：{ from: 治療者, to: 被治療的人 }；光點用治療者的疏導色
       const patient = state.heal && actor(state.heal.to);
@@ -389,7 +486,9 @@ const StoryScene = (() => {
       state.shake = Math.max(0, state.shake - dt * 10);
       if (state.rumble && (state.rumble.t += dt) >= state.rumble.dur) state.rumble = null;
       const target = state.cfg.cameras?.[state.cameraKey] || state.camera, k = 1 - Math.exp(-dt * 1.5);
-      state.camera = state.camera.map((v, i) => v + (target[i] - v) * k);
+      state.camera = [0, 1].map(i => state.camera[i] + (target[i] - state.camera[i]) * k);
+      state.zoom += (camZoom(target, state.baseZoom) - state.zoom) * k; VIEW_SCALE = state.zoom;   // 鏡頭推近／拉遠跟移動一樣慢慢來
+      updateSteps();
     }
     positionCamera(); draw();
   }
@@ -399,14 +498,25 @@ const StoryScene = (() => {
     let img = a.wounded ? woundedFrame(a) : a.eyesClosed ? a.set.blink?.[2] : pickCharacterFrame(a.set, frameActor);
     if (!readyImage(img)) img = a.set.front?.[0];
     if (!readyImage(img)) return;
-    ctx.save(); ctx.imageSmoothingEnabled = false;
+    ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1));
     const breath = a.breathing ? Math.sin(state.time * 2.1 + a.x) * .45 : 0;
     const treating = state.heal && a.id === state.heal.from && !a.target;
     const kick = a.recoil ? (a.dir === 'left' ? a.recoil : -a.recoil) : 0;   // 開槍後座力：往後退一點
-    ctx.translate(a.x + kick, a.y - size / 2 + 18 + breath);
+    const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * .45 : 0;   // 顫抖：左右快速小幅晃動（不取整數，晃動才夠細）
+    // 大喊（shout）：說出口那一刻整個人往上一頓、左右震幾下，0.4 秒內收掉
+    const sk = a.shoutT > 0 ? a.shoutT / SHOUT_TIME : 0;
+    const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0;
+    ctx.translate(Math.round(a.x + kick) + shiver + shoutX, a.y - size / 2 + 18 + breath + shoutY);
     ctx.rotate(treating ? .035 + Math.sin(state.time * 2) * .015 : 0);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
-    ctx.drawImage(img, -size / 2, -size / 2, size, size);
+    const w = a.set.single ? size * img.naturalWidth / img.naturalHeight : size;   // 單張圖的路人照原本比例
+    ctx.drawImage(img, -w / 2, -size / 2, w, size);
+    // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
+    const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
+    if (readyImage(held)) {
+      const k = size / 64, hw = held.naturalWidth * k, hh = held.naturalHeight * k;
+      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14), hw, hh);
+    }
     ctx.restore();
   }
   function lights() {
@@ -438,6 +548,7 @@ const StoryScene = (() => {
     ctx.scale(VIEW_SCALE, VIEW_SCALE); ctx.translate(-cam.x, -cam.y); ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = '#000'; ctx.fillRect(cam.x, cam.y, viewW(), viewH());
     drawMapGround(ctx);
+    drawDoor();   // 自動門畫在地面這層：從門裡走出來、走進去的人都在門前面
     const sortables = []; collectMapOccluders(ctx, sortables);
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
     for (const e of state.monsters) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });
@@ -450,7 +561,7 @@ const StoryScene = (() => {
     ctx.restore();
   }
   function leave() {
-    stopBgm(0); clearInput(); state = null;
+    stopBgm(0); clearInput(); state = null; updateSteps();
     document.body.classList.remove('story-scene');
     if (ui) ui.hidden = true;
     if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration'); }
@@ -523,5 +634,5 @@ const StoryScene = (() => {
   }, true);
   // 劇情裡沒有玩家：要算「離聲音多遠」的地方（日光燈嗡嗡聲）改用鏡頭中心
   const listener = () => state && { x: cam.x + viewW() / 2, y: cam.y + viewH() * .42 };
-  return { config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame };
+  return { config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame, ownsStamp };
 })();

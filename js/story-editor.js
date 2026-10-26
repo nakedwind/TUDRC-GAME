@@ -35,6 +35,15 @@ const monsterSpec = id => (typeof MONSTERS_DEFAULT !== 'undefined' ? MONSTERS_DE
 // 角色圖資料夾：角色資料頁的人（戰鬥服 _B、便服 _A）＋路人（mob_A 嚮導、mob_B 哨兵）
 const SPRITES = [...new Set([...Object.values(typeof CHARACTERS !== 'undefined' ? CHARACTERS : {}).flatMap(c => c.sprite ? [c.sprite, c.sprite.replace(/_[A-Z]$/, '_A')] : []), 'mob_A', 'mob_B'])].sort();
 document.body.append(h('datalist', { id: 'spriteList' }, SPRITES.map(s => h('option', { value: s }))));
+// 每頁的音效：js/sfx.js 的音效名字（音效編輯器裡看得到全部）；選單先列劇情常用的
+const STORY_SFX = [['storyDoor', '自動門開關'], ['door', '關門'], ['backroomDoor', '後室開門'], ['elevator', '電梯'], ['ironGateSlide', '鐵門滑動'], ['stairsDown', '腳步聲（樓梯）'],
+  ['soothe', '疏導'], ['itemPickup', '撿東西'], ['knock2', '敲打'], ['glassBreak3', '玻璃破掉'], ['midBoom', '中爆炸']];
+document.body.append(h('datalist', { id: 'sfxList' }, STORY_SFX.map(([v, t]) => h('option', { value: v }, t))));
+function testSfx(name, gain) {   // 編輯器沒有載入音效引擎：照 js/sfx.js 的檔名直接播
+  const file = (typeof SFX !== 'undefined' && SFX.defaultFiles?.()[name]) || { storyDoor: '環境/門與機關/電梯.mp3', door: '環境/門與機關/關門.mp3', backroomDoor: '環境/門與機關/後室開門.mp3', elevator: '環境/門與機關/電梯.mp3', ironGateSlide: '環境/門與機關/鐵門滑動.mp3', stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3' }[name];
+  if (typeof file !== 'string') { status('這個音效只能在遊戲預覽裡聽：' + name, true); return; }
+  const a = new Audio('Sound effects/' + file); a.volume = Math.min(1, .5 * (Number(gain) > 0 ? Number(gain) : 1)); a.play().catch(() => status('播放失敗：' + file, true));
+}
 const faceSrc = sprite => sprite ? 'images/character/' + sprite + '/' + sprite.replace('_', '') + '_0000_Front.png' : '';
 
 // ---- 資料 ----
@@ -111,7 +120,8 @@ function bedCenter(m, bed) {
   return [s.c + w / 2 + (s.ox || 0) / C, s.r + hh / 2 + (s.oy || 0) / C];
 }
 // 遊戲畫面看得到幾格（跟 js/maploader.js 的 VIEW_SCALE 算法一樣）
-function viewCells(m) {
+function viewCells(m, zoom) {
+  if (zoom > 0) return [1280 / (C * zoom), 720 / (C * zoom)];   // 劇情的 zoom 或鏡頭自己的縮放（第三個數字）
   const fw = 1280 / (m.cols * C), fh = 720 / (m.rows * C);
   let sc = Math.max(1, Math.min(fw, fh));
   if (fw < 1 && fh > 1) sc = fh;
@@ -119,7 +129,7 @@ function viewCells(m) {
   return [1280 / (C * sc), 720 / (C * sc)];
 }
 function camRect(m, p) {   // 鏡頭中心 → 實際拍到的範圍（貼地圖邊時會被擋住，跟遊戲一樣）
-  const [vw, vh] = viewCells(m);
+  const [vw, vh] = viewCells(m, Number(p[2]) || Number(scene()?.zoom) || 0);
   const x = m.cols <= vw ? (m.cols - vw) / 2 : Math.max(0, Math.min(m.cols - vw, p[0] - vw / 2));
   const y = m.rows <= vh ? (m.rows - vh) / 2 : Math.max(0, Math.min(m.rows - vh, p[1] - vh * .42));
   return [x, y, vw, vh];
@@ -184,7 +194,7 @@ function drawMap() {
     ctx.strokeRect(x * C + 2, y * C + 2, w * C - 4, hh * C - 4); ctx.restore();
     ctx.fillStyle = cur ? '#ffd479' : '#8fd3ff'; ctx.beginPath(); ctx.arc(p[0] * C, p[1] * C, 6, 0, Math.PI * 2); ctx.fill();
     label('🎥 ' + name, p[0] * C, p[1] * C - 10, cur ? '#ffd479' : '#8fd3ff');
-    handle(key, p, 12, q => { s.cameras[name] = q; });
+    handle(key, p, 12, q => { s.cameras[name] = [...q, ...s.cameras[name].slice(2)]; });   // 拖曳只改位置，縮放保留
   }
   // 地點（轉頭看的目標）
   for (const [name, p] of Object.entries(s.points)) {
@@ -233,25 +243,26 @@ function drawMap() {
   });
   s.actors.forEach((a, i) => {
     const key = 'actor:' + i, p = a.bed ? bedCenter(m, a.bed) : a.at; if (!p) return;
-    figure(faceSrc(a.sprite), p, '#ffb38a', key, (a.name || a.id) + (a.hidden ? '（先隱藏）' : ''), !!a.hidden);
+    figure(a.image || faceSrc(a.sprite), p, '#ffb38a', key, (a.name || a.id) + (a.hidden ? '（先隱藏）' : ''), !!a.hidden);
     if (!a.bed && a.dir) { const d = dirVec(a.dir); arrow(p[0] * C, p[1] * C, p[0] * C + d[0] * 24, p[1] * C + d[1] * 24, '#ffb38a'); }
     handle(key, p, 14, q => { if (a.bed) { const b = nearestBed(q); if (b) a.bed = b; } else a.at = q; });
   });
   // 目前這一頁：走位目標（紫色箭頭，起點是上一個已知位置）
-  if (beat) for (const [id, q] of Object.entries(beat.move || {})) {
-    const from = actorPosBefore(beatSel, id), key = 'move:' + beatSel + ':' + id;
-    if (from) arrow(from[0] * C, from[1] * C, q[0] * C, q[1] * C, '#c39bff', true);
-    ctx.fillStyle = '#c39bff'; ctx.strokeStyle = selKey() === key ? '#ffd479' : '#000'; ctx.lineWidth = 2;
+  // 離場（走過去後淡出，橘色）、瞬移（黑幕轉場時直接換位置，青色、不畫箭頭）
+  if (beat) for (const [kind, color, text] of [['move', '#c39bff', '走到這'], ['exit', '#ffab5e', '走到這後消失'], ['place', '#5fe0d0', '瞬移到這']]) for (const [id, q] of Object.entries(beat[kind] || {})) {
+    const from = actorPosBefore(beatSel, id), key = kind + ':' + beatSel + ':' + id;
+    if (from && kind !== 'place') arrow(from[0] * C, from[1] * C, q[0] * C, q[1] * C, color, true);
+    ctx.fillStyle = color; ctx.strokeStyle = selKey() === key ? '#ffd479' : '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(q[0] * C, q[1] * C, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    label('第' + (beatSel + 1) + '頁：' + actorName(id) + '走到這', q[0] * C, q[1] * C - 12, '#d9c2ff');
-    handle(key, q, 12, p => { beat.move[id] = p; });
+    label('第' + (beatSel + 1) + '頁：' + actorName(id) + text, q[0] * C, q[1] * C - 12, color);
+    handle(key, q, 12, p => { beat[kind][id] = p; });
   }
   if (pick) { ctx.fillStyle = 'rgba(255,212,121,.08)'; ctx.fillRect(0, 0, W, H); }
 }
 // 某一頁開始前，這個角色在哪（往前找最近一次走位；沒有就用初始位置）
 function actorPosBefore(index, id) {
   const s = scene();
-  for (let i = index - 1; i >= 0; i--) { const q = s.beats[i].move?.[id]; if (q) return q; }
+  for (let i = index - 1; i >= 0; i--) { const b = s.beats[i], q = b.move?.[id] || b.exit?.[id] || b.place?.[id]; if (q) return q; }
   const a = s.actors.find(x => x.id === id); if (!a) return null;
   return a.bed ? bedCenter(curMap(), a.bed) : a.at;
 }
@@ -296,7 +307,7 @@ window.addEventListener('keydown', e => { if (e.key === 'Escape' && pick) setPic
 function select(key) {
   sel = key ? { key } : null;
   const [kind, a] = (key || '').split(':');
-  if (kind === 'move') { beatSel = Number(a); showTab('beats'); }
+  if (kind === 'move' || kind === 'exit' || kind === 'place') { beatSel = Number(a); showTab('beats'); }
   else if (key) showTab('obj');
   renderPanels(); drawSoon();
 }
@@ -319,11 +330,11 @@ function choose(obj, key, options, opts = {}) {
 function chk(obj, key, text, opts = {}) {
   return h('label', { class: 'row', style: 'font-size:12px' }, h('input', { type: 'checkbox', checked: !!obj[key], onchange: e => { if (e.target.checked) obj[key] = true; else delete obj[key]; commit(opts.rerender !== false); } }), text);
 }
-function xy(obj, key, text) {   // 座標：兩個數字＋「⌖ 點地圖」
-  const p = obj[key] || [0, 0];
-  const nx = h('input', { type: 'number', step: .1, value: p[0], onchange: e => { obj[key] = [r1(Number(e.target.value) || 0), obj[key]?.[1] ?? 0]; commit(false); } });
-  const ny = h('input', { type: 'number', step: .1, value: p[1], onchange: e => { obj[key] = [obj[key]?.[0] ?? 0, r1(Number(e.target.value) || 0)]; commit(false); } });
-  return h('span', { class: 'row' }, nx, ny, h('button', { type: 'button', class: 'small', onclick: () => setPick({ label: text || '選位置', fn: q => { obj[key] = q; } }) }, '⌖ 點地圖'));
+function xy(obj, key, text) {   // 座標：兩個數字＋「⌖ 點地圖」（後面多的數字，例如鏡頭的縮放，原樣保留）
+  const p = obj[key] || [0, 0], rest = () => obj[key]?.slice(2) || [];
+  const nx = h('input', { type: 'number', step: .1, value: p[0], onchange: e => { obj[key] = [r1(Number(e.target.value) || 0), obj[key]?.[1] ?? 0, ...rest()]; commit(false); } });
+  const ny = h('input', { type: 'number', step: .1, value: p[1], onchange: e => { obj[key] = [obj[key]?.[0] ?? 0, r1(Number(e.target.value) || 0), ...rest()]; commit(false); } });
+  return h('span', { class: 'row' }, nx, ny, h('button', { type: 'button', class: 'small', onclick: () => setPick({ label: text || '選位置', fn: q => { obj[key] = [...q, ...rest()]; } }) }, '⌖ 點地圖'));
 }
 const field = (text, ...input) => h('label', { class: 'f' }, text, ...input);
 const actorOptions = () => scene().actors.map(a => [a.id, (a.name || a.id)]);
@@ -344,8 +355,18 @@ function renderScenes() {
     field('結尾標題', txt(s, 'endTitle', { optional: true, placeholder: '沒填就用標題' })),
     field('結尾說明', txt(s, 'endText', { optional: true })),
     chk(s, 'darkness', '後室黑幕（只有燈照得到的地方亮）'),
+    chk(s, 'footsteps', '主要角色走路時有腳步聲（跑得快播得快）'),
+    h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '畫面四周壓暗', num(s, 'vignette', { min: 0, step: .05, optional: true, placeholder: '0' }), h('small', { style: 'color:#8c98a6' }, '（0＝不壓暗，1＝最暗）')),
+    doorBox(s),
     explosionBox(s),
     bgmBox(s));
+}
+// 自動門：door: [欄, 列]＝地圖上哪張門圖章；對話演出用「門：打開／關上」，兩片門板往左右滑開
+function doorBox(s) {
+  const stamps = (curMap()?.stamps || []).filter(st => { const t = tileMap.get(st.id); return t && (t.w || 1) * (t.h || 1) <= 16; });
+  const holder = { v: Array.isArray(s.door) ? s.door.join(',') : '' };
+  return field('會開關的自動門（選地圖上的門圖章）', choose(holder, 'v', [['', '沒有'], ...stamps.map(st => [st.c + ',' + st.r, (tileMap.get(st.id)?.name || st.id) + '（' + st.c + ', ' + st.r + '）'])],
+    { parse: v => { if (v) s.door = v.split(',').map(Number); else delete s.door; return v; } }));
 }
 // BGM：bgm＝音樂檔路徑（放在 music/ 資料夾）、bgmVolume＝音量 0～1；劇情開始淡入、整段循環、結尾淡出
 let bgmTest = null;
@@ -443,7 +464,9 @@ function renderObj() {
     box.append(h('h2', {}, '主要角色：' + (ac.name || ac.id)),
       field('名字（對話框、清單顯示）', txt(ac, 'name', { rerender: true })),
       field('id（對話演出裡用這個指名）', txt(ac, 'id', { after: (v, old) => renameActor(s, old, v), rerender: true })),
-      field('角色圖資料夾', txt(ac, 'sprite', { list: 'spriteList', rerender: true })),
+      field('角色圖資料夾', txt(ac, 'sprite', { list: 'spriteList', rerender: true, optional: true })),
+      field('單張圖（只有一張圖的路人，例如家屬的背影；填了就不用角色圖資料夾）', txt(ac, 'image', { optional: true, rerender: true, placeholder: 'images/回憶場景/檔名.png' })),
+      field('一開始手上拿著（圖片，例如遺物箱；空白＝沒拿東西）', txt(ac, 'carry', { optional: true, placeholder: 'images/回憶場景/relics.png' })),
       field('位置', choose(posMode, 'mode', [['', '站著（自己選格子）'], ...beds], { parse: v => { if (v) { ac.bed = v.split(',').map(Number); delete ac.at; } else { delete ac.bed; ac.at = ac.at || [r1(curMap().cols / 2), r1(curMap().rows / 2)]; } return v; } })),
       !ac.bed && field('站的格子', xy(ac, 'at', '選' + (ac.name || '角色') + '站的位置')),
       !ac.bed && field('一開始面向', choose(ac, 'dir', DIRS)),
@@ -490,19 +513,24 @@ function renderObj() {
       h('p', { class: 'note' }, kind === 'camera' ? '點是鏡頭中心，框是遊戲畫面實際拍到的範圍（貼地圖邊時會被擋住）。對話的人會留在對話框上方。' : '對話演出的「轉向」可以選「看向這個地點」。'),
       field('名字', h('input', { type: 'text', value: name, onchange: e => renameKey(map, name, e.target.value.trim(), kind) })),
       field(kind === 'camera' ? '中心' : '位置', xy(map, name, '選' + (kind === 'camera' ? '鏡頭中心' : '地點'))),
+      kind === 'camera' && field('縮放（越大拍得越近；空白＝用劇情的 ' + (s.zoom || '預設') + '）', h('input', { type: 'number', step: .05, min: .5, value: map[name][2] ?? '', placeholder: String(s.zoom || ''),
+        onchange: e => { const v = Number(e.target.value); map[name] = v > 0 ? [map[name][0], map[name][1], v] : map[name].slice(0, 2); commit(false); } })),
       del(kind === 'camera' ? '這個鏡頭' : '這個地點', () => delete map[name]));
-  } else if (kind === 'move') {
+  } else if (kind === 'move' || kind === 'exit' || kind === 'place') {
     showTab('beats');
   }
 }
 function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的指名一起改
   if (!old || !v || old === v) return;
-  for (const b of s.beats) for (const k of ['move', 'face', 'eyes']) if (b[k] && old in b[k]) { b[k][v] = b[k][old]; delete b[k][old]; }
+  for (const b of s.beats) for (const k of ACTOR_ACTS) if (b[k] && old in b[k]) { b[k][v] = b[k][old]; delete b[k][old]; }
   for (const b of s.beats) { if (b.heal) { if (b.heal.from === old) b.heal.from = v; if (b.heal.to === old) b.heal.to = v; } for (const [k, d] of Object.entries(b.face || {})) if (d === old) b.face[k] = v; }
 }
 
 // ---- 右邊：對話與演出 ----
-const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.face && '↻', b.eyes && '👁', 'heal' in b && '✚', 'hush' in b && '🔇'].filter(Boolean).join('');
+// 每頁可以指名角色的演出（同一個人一頁只能有一筆）
+const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'carry'];
+const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.shout && '❗', b.carry && '📦',
+  'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
   box.append(h('p', { class: 'note' }, '一頁一句話。點一頁展開編輯；「等幾秒」＝翻到這頁後，先讓畫面演幾秒才出現文字（不會自動翻頁）。'));
@@ -535,6 +563,14 @@ function beatBody(s, b, i) {
   const faceOptions = [...DIRS, ...Object.keys(s.points).map(k => [k, '看向📍' + k]), ...s.actors.map(a => [a.id, '看向' + (a.name || a.id)])];
   rows('face', '轉向', id => choose(b.face, id, faceOptions.filter(o => o[0] !== id)));
   rows('eyes', '眼睛', id => choose(b.eyes, id, [['open', '睜開'], ['closed', '閉上']]));
+  rows('exit', '離場', id => h('span', { class: 'row' }, xy(b.exit, id, actorName(id) + '在第 ' + (i + 1) + ' 頁走到哪後消失'), h('small', {}, '走到後淡出')));
+  rows('place', '瞬移', id => h('span', { class: 'row' }, xy(b.place, id, actorName(id) + '在第 ' + (i + 1) + ' 頁瞬移到哪'), h('small', {}, '直接換位置（黑幕時用）')));
+  rows('hide', '消失', () => h('small', {}, '這頁一開始就不見'));
+  rows('speed', '速度', id => h('span', { class: 'row' }, num(b.speed, id, { min: 1, step: 1 }), h('small', {}, '像素／秒（之後都用這個速度）')));
+  const onOff = (map, id, on, off) => { const hd = { v: map[id] ? 'on' : 'off' }; return choose(hd, 'v', [['on', on], ['off', off]], { parse: v => { map[id] = v === 'on'; return v; } }); };
+  rows('tremble', '顫抖', id => onOff(b.tremble, id, '開始顫抖', '停止顫抖'));
+  rows('shout', '大喊', () => h('small', {}, '台詞出現時這個人頓一下，對話框也震一下'));
+  rows('carry', '拿著', id => txt(b.carry, id, { placeholder: '圖片路徑；空白＝放下', style: 'flex:1' }));
   const healHolder = { v: b.heal === false ? 'stop' : b.heal ? 'start' : '' };
   const healRow = h('div', { class: 'act' }, h('b', {}, '治療'), choose(healHolder, 'v', [['', '不變'], ['start', '開始'], ['stop', '停止']], { parse: v => {
     if (v === 'start') b.heal = { from: s.actors[1]?.id || s.actors[0]?.id || '', to: s.actors[0]?.id || '' }; else if (v === 'stop') b.heal = false; else delete b.heal; return v; } }));
@@ -542,20 +578,35 @@ function beatBody(s, b, i) {
   acts.append(healRow);
   const hushHolder = { v: b.hush === true ? 'on' : b.hush === false ? 'off' : '' };
   acts.append(h('div', { class: 'act' }, h('b', {}, '槍聲'), choose(hushHolder, 'v', [['', '不變'], ['on', '變稀疏（安靜下來）'], ['off', '恢復']], { parse: v => { if (v === 'on') b.hush = true; else if (v === 'off') b.hush = false; else delete b.hush; return v; } })));
+  if (s.door) {
+    const doorHolder = { v: b.door || '' };
+    acts.append(h('div', { class: 'act' }, h('b', {}, '自動門'), choose(doorHolder, 'v', [['', '不變'], ['open', '打開'], ['close', '關上']], { parse: v => { if (v) b.door = v; else delete b.door; return v; } })));
+  }
+  const screenHolder = { v: b.screen || '' };
+  const screenRow = h('div', { class: 'act' }, h('b', {}, '黑幕'), choose(screenHolder, 'v', [['', '不變'], ['black', '畫面漸漸變黑'], ['clear', '從黑幕亮回來']], { parse: v => { if (v) b.screen = v; else { delete b.screen; delete b.screenFade; } return v; } }));
+  if (b.screen) screenRow.append('花', num(b, 'screenFade', { min: .1, optional: true, placeholder: '2' }), '秒（變完才能翻頁）');
+  acts.append(screenRow);
+  const sfxRow = h('div', { class: 'act' }, h('b', {}, '音效'), txt(b, 'sfx', { optional: true, list: 'sfxList', placeholder: '翻到這頁時播（空白＝不播）', rerender: true, style: 'width:150px' }));
+  if (b.sfx) sfxRow.append('音量', num(b, 'sfxVolume', { min: 0, step: .1, optional: true, placeholder: '1' }), h('button', { type: 'button', class: 'small', onclick: () => testSfx(b.sfx, b.sfxVolume) }, '▶ 試聽'));
+  acts.append(sfxRow);
+  acts.append(h('div', { class: 'act' }, h('b', {}, '結束'), '這頁', num(b, 'end', { min: 0, optional: true, placeholder: '—' }), '秒後自動結束劇情（空白＝最後一頁按了才結束）'));
   const addAct = (key, text, make) => h('button', { type: 'button', class: 'small', disabled: !s.actors.length, onclick: () => {
     const id = s.actors.find(a => !(b[key] && a.id in b[key]))?.id; if (!id) return;
     (b[key] = b[key] || {})[id] = make(id); commit();
   } }, text);
-  const moveBtn = h('button', { type: 'button', class: 'small', disabled: !s.actors.length, onclick: () => {
-    const id = s.actors.find(a => !(b.move && a.id in b.move))?.id; if (!id) return;
-    setPick({ label: actorName(id) + '在第 ' + (i + 1) + ' 頁走到哪（加好後可以換人）', fn: q => { (b.move = b.move || {})[id] = q; } });
-  } }, '＋ 走位');
+  const pickAct = (key, text, what) => h('button', { type: 'button', class: 'small', disabled: !s.actors.length, onclick: () => {
+    const id = s.actors.find(a => !(b[key] && a.id in b[key]))?.id; if (!id) return;
+    setPick({ label: actorName(id) + '在第 ' + (i + 1) + ' 頁' + what + '（加好後可以換人）', fn: q => { (b[key] = b[key] || {})[id] = q; } });
+  } }, text);
+  const moveBtn = pickAct('move', '＋ 走位', '走到哪');
   return h('div', { class: 'beat-body' },
     dl, h('div', { class: 'row' }, h('label', { class: 'f', style: 'flex:1' }, '說話者（空白＝旁白）', txt(b, 'speaker', { list: 'speakerList', rerender: true, placeholder: '旁白' })),
       h('label', { class: 'f' }, '等幾秒', num(b, 'wait', { min: 0 }))),
     h('label', { class: 'f' }, '台詞', text),
     acts,
-    h('div', { class: 'row' }, moveBtn, addAct('face', '＋ 轉向', () => 'front'), addAct('eyes', '＋ 眼睛', () => 'open')),
+    h('div', { class: 'row' }, moveBtn, addAct('face', '＋ 轉向', () => 'front'), addAct('eyes', '＋ 眼睛', () => 'open'),
+      pickAct('exit', '＋ 離場', '走到哪後消失'), pickAct('place', '＋ 瞬移', '瞬移到哪'), addAct('hide', '＋ 消失', () => true),
+      addAct('speed', '＋ 速度', () => 60), addAct('tremble', '＋ 顫抖', () => true), addAct('shout', '＋ 大喊', () => true), addAct('carry', '＋ 拿著', () => '')),
     actorSwitchNote(s),
     h('div', { class: 'row', style: 'margin-top:8px' },
       h('button', { type: 'button', class: 'small', disabled: i === 0, onclick: () => { [s.beats[i - 1], s.beats[i]] = [s.beats[i], s.beats[i - 1]]; beatSel = i - 1; commit(); } }, '↑ 上移'),
@@ -565,7 +616,7 @@ function beatBody(s, b, i) {
       h('span', { class: 'grow' }),
       h('button', { type: 'button', class: 'small primary', onclick: () => preview(i + 1) }, '▶ 從這頁預覽')));
 }
-function actorSwitchNote(s) { return s.actors.length > 1 ? h('p', { class: 'note' }, '同一個人一頁只能有一筆走位／轉向／眼睛；按「＋」會先加給還沒有的人，再用左邊的選單換人。') : null; }
+function actorSwitchNote(s) { return s.actors.length > 1 ? h('p', { class: 'note' }, '同一個人一頁只能有一筆同類的演出（走位、轉向、離場…）；按「＋」會先加給還沒有的人，再用左邊的選單換人。') : null; }
 
 // ---- 右邊：頭像 ----
 function renderFaces() {
@@ -597,16 +648,20 @@ function problems() {
   s.shooters.forEach((x, i) => { inWall(x.at, '哨兵' + (i + 1), 'shooter:' + i); if (!mons.has(x.shoot)) out.push(['哨兵' + (i + 1) + '要打的怪物「' + (x.shoot || '') + '」不存在', 'shooter:' + i]); });
   s.medics.forEach((md, i) => { if (!md.route.length) out.push(['嚮導' + (i + 1) + '沒有停留點', 'medic:' + i]); md.route.forEach((st, j) => inWall(st.at, '嚮導' + (i + 1) + '第' + (j + 1) + '站', 'medic:' + i + ':' + j)); });
   if (!Object.keys(s.cameras).length) out.push(['至少要有一個鏡頭', null]);
+  if (s.door && !(m.stamps || []).some(st => st.c === s.door[0] && st.r === s.door[1])) out.push(['自動門（' + s.door.join(', ') + '）不在地圖上', null]);
+  s.actors.forEach((a, i) => { if (!a.bed && !a.sprite && !a.image) out.push([(a.name || a.id) + '沒有角色圖資料夾，也沒有單張圖', 'actor:' + i]); });
   if (s.explosions && !(s.explosions.max >= s.explosions.min)) out.push(['遠處爆炸的秒數：後面的數字要比前面大', null]);
   if (!s.beats.length) out.push(['至少要有一頁對話', null]);
   s.beats.forEach((b, i) => {
     const at = '第' + (i + 1) + '頁：', key = 'beat:' + i;
     if (b.camera && !s.cameras[b.camera]) out.push([at + '鏡頭「' + b.camera + '」不存在', key]);
-    for (const k of ['move', 'face', 'eyes']) for (const id of Object.keys(b[k] || {})) if (!ids.has(id)) out.push([at + '找不到角色「' + id + '」', key]);
-    for (const [id, q] of Object.entries(b.move || {})) if (isSolid(m, q)) out.push([at + actorName(id) + '的走位目標在不可穿透的格子裡', key]);
+    for (const k of ACTOR_ACTS) for (const id of Object.keys(b[k] || {})) if (!ids.has(id)) out.push([at + '找不到角色「' + id + '」', key]);
+    for (const k of ['move', 'exit', 'place']) for (const [id, q] of Object.entries(b[k] || {})) if (isSolid(m, q)) out.push([at + actorName(id) + '的目標位置在不可穿透的格子裡', key]);
+    if (b.door && !s.door) out.push([at + '要開關自動門，但劇情設定裡還沒選門', key]);
     for (const d of Object.values(b.face || {})) if (!DIRS.some(x => x[0] === d) && !s.points[d] && !ids.has(d)) out.push([at + '轉向的目標「' + d + '」不存在', key]);
     if (b.heal && (!ids.has(b.heal.from) || !ids.has(b.heal.to))) out.push([at + '治療的人不存在', key]);
-    if (b.speaker && !s.portraits[b.speaker]) out.push([at + '「' + b.speaker + '」沒有設定頭像（會不放頭像）', key]);
+    // 單張圖的路人（家屬背影）本來就沒有正面頭像，不用提醒
+    if (b.speaker && !s.portraits[b.speaker] && !s.actors.some(a => a.image && a.name === b.speaker)) out.push([at + '「' + b.speaker + '」沒有設定頭像（會不放頭像）', key]);
   });
   return out;
 }
