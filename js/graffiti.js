@@ -69,7 +69,7 @@ function graffitiSurfaceAt(x, y) {
   if (best && best.kind === 'stamp') {
     const s = best.stamp, t = mapTileById(s.id) || {};
     if (t.baseHp) return { on: null };   // 營地：當地板畫（營地範圍很大，跟著它排前後會蓋到營地裡的人）
-    if (typeof BREAKABLE_WALLS !== 'undefined' && BREAKABLE_WALLS[s.id]) return { bad: '這面牆好像會塌，不能畫' };
+    if (typeof breakableWallSpec === 'function' && breakableWallSpec(s)) return { bad: '這面牆好像會塌，不能畫' };   // 可炸開的牆（含裂縫牆，js/breakable-walls.js）
     if (typeof mapDoors !== 'undefined' && mapDoors.some(d => d.stamp === s)) return { bad: '門會打開，不能畫' };
     if (typeof isElevatorStamp === 'function' && isElevatorStamp(s)) return { bad: '這裡不能畫' };
   }

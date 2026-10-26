@@ -1724,6 +1724,7 @@ function tileMatchesSearch(t) {
 function tileCategory(t) {
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
+  if (/vending/.test(String(t.id || '')) || file.includes('vending-machine')) return 'interactive';   // 販賣機（紅、綠、紫）：可以互動（js/shop.js）
   if (t.systemColor) return 'color';
   if (t.builtin || file.includes('/background/') || file.includes('/01-station-hall/')) return 'map';
   if (String(t.id || '').startsWith('tile_poolcore_') || file.includes('/池核/') || file.includes('/poolcore/')) return 'poolcore';
