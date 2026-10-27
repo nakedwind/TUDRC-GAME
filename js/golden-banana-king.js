@@ -269,7 +269,7 @@ function bkSlip(a, peel) {
   a.slipPose = { dir: ['front', 'back', 'left', 'right'][Math.floor(Math.random() * 4)], frame: 1 + Math.floor(Math.random() * 2) };
   flash('滑倒！', a.x, a.y - 50, '#ffe066');
   G.effects.push({ ring: true, x: peel.x, y: peel.y, r: 3, r2: 18, life: .25, life0: .25, color: '#ffe066' });
-  if (typeof sfxAt === 'function') sfxAt('eggSquish', peel.x, peel.y, .8, 'banana-slip');
+  if (typeof sfxAt === 'function') sfxAt('bananaSlip', peel.x, peel.y, .8, 'banana-slip');
 }
 function updateBananaPeels(dt) {
   const C = BANANA_KING, peels = G.bananaPeels, actors = bkPeelVictims();

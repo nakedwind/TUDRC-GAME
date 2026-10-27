@@ -20,6 +20,7 @@
     'tudrc_vitals_v1',   // 溫特和隊員的 HP、負荷、住院（js/vitals.js）
     'tudrc_explored_v1',   // 慣性導航記錄器記下的戰鬥地圖（js/tpad-map.js）
     'tudrc_story_builds_v1',   // 劇情地圖裡蓋的建築（js/combat-progress.js）
+    'tudrc_tutorial_v1',   // 新手區教學：要不要看、看過哪些提示（js/tutorial.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
@@ -132,7 +133,9 @@
       }
       if (typeof begin === 'function') begin(false);
       if (window.TEST_MODE) {
-        G.money = Math.max(G.money, 99999); updateHUD();
+        G.money = Math.max(G.money, 99999);
+        G.guide = G.guideMax; if (typeof rememberSanitySP === 'function') rememberSanitySP();   // SP 補滿（不沿用正式存檔裡剩下的 SP，js/sanity.js）
+        updateHUD();
         const note = document.querySelector('.header-note'); if (note) note.textContent = '🧪 測試模式 · 全物品解鎖';
         systemNotice('測試模式：全部物品 ×20、最高等級的裝備與武器已解鎖');
       }

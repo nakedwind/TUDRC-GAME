@@ -43,6 +43,7 @@ const NEWBIE_START = {
   guideKit: { firstaid: 3, 'almond-water': 3 },
   flares: 30,         // 溫特身上的照明彈（已裝進彈匣）
   gear: ['helmet'],    // 已經擁有、放在裝備箱裡（不穿上）的防具（data/equipment.js 的 id）
+  monsterHp: .5,       // 怪物血量倍率（.5＝一半；異質核心不算）
 };
 const isNewbieMap = () => typeof MAP !== 'undefined' && MAP?.id === NEWBIE_START.mapId;
 

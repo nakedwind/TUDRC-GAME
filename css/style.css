@@ -2055,6 +2055,13 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .item-intro-card p.item-intro-stat { color: #a9d8c9; font-size: 13px; }
 .item-intro-ok { margin-top: 16px; padding: 9px 28px; border: 1px solid #e9bd62; border-radius: 10px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; cursor: pointer; font: 800 15px "Microsoft JhengHei", sans-serif; }
 .item-intro-ok kbd { margin-left: 6px; padding: 0 5px; border: 1px solid rgba(59,35,4,.35); border-radius: 4px; font: 700 10px Consolas, monospace; }
+/* 新手區：要不要看教學（js/tutorial.js），借用上面的說明視窗外觀 */
+#tutorialAsk { position: absolute; inset: 0; z-index: 40; display: grid; place-items: center; background: rgba(4,6,10,.45); animation: item-intro-fade .18s ease-out; }
+#tutorialAsk.hidden { display: none; }
+#tutorialAsk .item-intro-card p { text-align: center; }
+.tutorial-ask-buttons { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.tutorial-ask-buttons .tutorial-skip { background: rgba(255,255,255,.08); border-color: rgba(232,238,243,.35); color: #e8eef3; }
+.tutorial-ask-buttons .tutorial-skip kbd { border-color: rgba(232,238,243,.35); }
 @keyframes item-intro-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes item-intro-pop { from { transform: scale(.85); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 

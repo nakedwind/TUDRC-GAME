@@ -136,7 +136,7 @@ function createMonster(spec, x, y, variant) {
   if (spec.behavior === 'burrow') Object.values(burrowMouseArt(spec)).forEach(monsterImage);
   const legacy = !Array.isArray(MAP?.monsterMix) || !MAP.monsterMix.length;
   const oldRules = legacy && spec.id === 'slime' ? (MAP.rules || {}) : {};
-  const hp = Math.max(1, Math.round(spec.hp * difficultyOf('monsterHp')));   // 血量用怪物編輯器的設定 × 整體難度（data/balance.js）
+  const hp = Math.max(1, Math.round(spec.hp * difficultyOf('monsterHp') * (isNewbieMap() ? NEWBIE_START.monsterHp : 1)));   // 血量用怪物編輯器的設定 × 整體難度（data/balance.js）；新手區再打折
   const dmg = n => n == null ? n : Math.round(n * difficultyOf('monsterDamage'));
   const monster = {
     type: spec.id, x, y, hp, maxhp: hp,
@@ -1966,7 +1966,7 @@ function frame(ts) {
   if (StoryScene.active()) { StoryScene.tick(dt); return; }
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
-  const introOpen = typeof itemIntroOpen !== 'undefined' && itemIntroOpen;   // 第一次拿到新東西的說明視窗（js/item-intro.js）
+  const introOpen = (typeof itemIntroOpen !== 'undefined' && itemIntroOpen) || (typeof tutorialAskOpen !== 'undefined' && tutorialAskOpen);   // 第一次拿到新東西的說明視窗（js/item-intro.js）、新手區問要不要看教學（js/tutorial.js）
   const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campArmorOpen || campSupplyOpen || mapTransitioning
     || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen)   // 射擊練習（js/target-practice.js）
     || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
@@ -2001,6 +2001,7 @@ function update(dt) {
   if (typeof updateBurrowingMouseFx === 'function') updateBurrowingMouseFx(dt);
   if(typeof updateMrtGateAnimations==='function')updateMrtGateAnimations(dt);
   updateCores(dt);
+  if (typeof updateTutorial === 'function') updateTutorial(dt);   // 新手區教學提示（js/tutorial.js）
   if (typeof updateCoreFrenzy === 'function') updateCoreFrenzy(dt);   // 核心醒著：異質體狂暴化（js/core-frenzy.js）
   if (G.player) {
     G.player.hitT = Math.max(0, (G.player.hitT || 0) - dt);

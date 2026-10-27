@@ -22383,10 +22383,6 @@ const BATTLE_MAPS = [
       {
         "id": "bird_head",
         "weight": 80
-      },
-      {
-        "id": "fish_head",
-        "weight": 30
       }
     ],
     "camp": [],
