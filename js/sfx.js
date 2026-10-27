@@ -37,9 +37,30 @@ const SFX = (() => {
     storyDoor: '環境/門與機關/電梯.mp3',   // 回憶劇情的自動門開關（data/story-scenes.js 的 sfx；先借電梯聲，可在音效編輯器換）
     stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3',   // 走逃生樓梯下樓（js/game.js 的 enterPortal）
     stairsUp: '環境/腳步/footsteps03 (mp3cut.net).mp3',     // 走逃生樓梯上樓（js/game.js 的 enterPortal）
-    gunshot: '戰鬥/槍械/開槍.mp3',
-    flare: '戰鬥/槍械/射擊.mp3',
+    gunshot: '戰鬥/槍械/開槍.mp3',   // 隊員開槍、劇情裡開槍（溫特的手槍用下面的 shotPistol）
+    // 子彈：每種子彈各自的射擊聲（shot…）、打擊聲（hit…），音效編輯器「子彈」分類可以分開換。預設沿用原本的音檔；
+    // 原本沒有聲音的（螢光漆彈打中、麻醉彈打中、雷電彈／治療彈射擊）在 data/sound-settings.js 設成 0%，調高才會響
+    shotPistol: '戰鬥/槍械/開槍.mp3',
+    hitPistol: '戰鬥/命中/hit.mp3',          // 打中沒有專屬「被打」音效的怪物（有專屬的照舊播牠自己的）
+    shotFlare: '戰鬥/槍械/射擊.mp3',
+    hitFlare: { mode: 'random', files: ['戰鬥/元素/火焰.mp3', '戰鬥/元素/火焰02.mp3'] },   // 照明彈落地
+    shotIncendiary: '戰鬥/槍械/射擊.mp3',
+    hitIncendiary: { mode: 'random', files: ['戰鬥/元素/火焰.mp3', '戰鬥/元素/火焰02.mp3'] },   // 燃燒彈落地燒出火海
+    shotTranq: '戰鬥/槍械/開槍.mp3',
+    hitTranq: '戰鬥/命中/hit.mp3',
+    shotPaint: '戰鬥/槍械/開槍.mp3',
+    hitPaint: '戰鬥/命中/hit.mp3',
+    shotSplit: '戰鬥/槍械/開槍.mp3',
+    hitSplit: '戰鬥/命中/hit.mp3',           // 同 hitPistol：沒有專屬「被打」音效的怪物才播
+    shotFlash: '介面/切換.mp3',
+    hitFlash: '戰鬥/爆炸/小爆炸.mp3',        // 落地爆閃（另外還會疊一聲 glassBreak3）
+    shotShock: '戰鬥/槍械/開槍.mp3',
+    hitShock: '戰鬥/元素/雷電.mp3',
+    shotHeal: '戰鬥/槍械/開槍.mp3',
+    hitHeal: '玩家/疏導.mp3',
     reload: '戰鬥/槍械/reload.mp3',
+    ammoRefill: '戰鬥/槍械/reload02.mp3',   // 營地的補彈藥箱補子彈（js/flare.js 的 useAmmoRefillNearPlayer）
+    magLoad: '戰鬥/槍械/reload02.mp3',      // 背包裡把子彈裝進彈匣、彈匣格互換（js/backpack.js）
     monsterHit: '戰鬥/命中/hit.mp3',
     fireImpact: { mode: 'random', files: ['戰鬥/元素/火焰.mp3', '戰鬥/元素/火焰02.mp3'] },
     lightningImpact: '戰鬥/元素/雷電.mp3',
@@ -152,7 +173,8 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'pop', 'playerHit', 'playerHitMonster']);
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'pop', 'playerHit', 'playerHitMonster',
+    'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };

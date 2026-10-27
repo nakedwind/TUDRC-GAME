@@ -73,7 +73,7 @@ function fireIncendiary(p, aim, lv) {
     T: S.flight[0] + (S.flight[1] - S.flight[0]) * k, h: S.arc[0] + (S.arc[1] - S.arc[0]) * k, lv });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .12, life0: .12 });
   addLightFlash('muzzle', mx, my, 1.4);
-  sfx('flare');
+  sfx('shotIncendiary');
 }
 function incendiaryLand(s) {
   const x = s.x1, y = s.y1, R = s.lv.r * CELL, S = SPECIAL_GUN.incendiary;
@@ -89,7 +89,7 @@ function incendiaryLand(s) {
   G.effects.push({ ring: true, x, y, r: 6, r2: R, life: .3, life0: .3, color: '#ff9a3c' });
   addLightFlash('flame', x, y, 1.3);
   if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 4, .08);
-  if (typeof sfxAt === 'function') sfxAt('fireImpact', x, y, .6, 'incendiary-land');
+  if (typeof sfxAt === 'function') sfxAt('hitIncendiary', x, y, .6, 'incendiary-land');
 }
 
 // ---- 麻醉針 ----
@@ -107,7 +107,7 @@ function fireTranq(p, aim, lv) {
   if (!target) { const cap = shotOpensHangiCap(p, ang, hitD); if (cap) { x1 = cap.x; y1 = cap.y; } }   // 麻醉針打到順順宮帽：打開
   (G.tranqDarts = G.tranqDarts || []).push({ x0: mx, y0: my, x1, y1, ang, t: 0, T: Math.max(.04, hitD / S.speed), target, lv });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .05, life0: .05 });
-  if (typeof sfxAt === 'function') sfxAt('gunshot', mx, my, .18, 'tranq'); else sfx('switch');
+  if (typeof sfxAt === 'function') sfxAt('shotTranq', mx, my, .18, 'tranq'); else sfx('switch');
 }
 function tranqHit(o, lv) {
   if (G.towers.includes(o)) {   // 隊員：睡著（暴走的醒來恢復正常；沒暴走的就只是睡一下，負荷不變）
@@ -130,7 +130,7 @@ function tranqHit(o, lv) {
 }
 function tranqLand(s) {
   const hits = new Set();
-  if (s.target && tranqHit(s.target, s.lv)) hits.add(s.target);
+  if (s.target && tranqHit(s.target, s.lv)) { hits.add(s.target); if (typeof sfxAt === 'function') sfxAt('hitTranq', s.x1, s.y1, .4, 'tranq-hit'); }
   G.effects.push({ ring: true, x: s.x1, y: s.y1, r: 2, r2: 8, life: .14, life0: .14, color: '#c9b8ff' });
   if (!s.lv.mist || !s.target) return;
   const R = s.lv.mist * CELL;   // mist：麻醉霧，附近的也一起睡
@@ -157,14 +157,14 @@ function lineHit(p, ang, maxD, cands, hitR) {
 const liveEnemies = () => G.enemies.filter(e => !e.dead && e.hp > 0);
 const bodyPoint = o => G.enemies.includes(o) && typeof targetBodyBox === 'function' ? (b => ({ x: b.cx, y: b.cy }))(targetBodyBox(o)) : { x: o.x, y: o.y - 20 };
 // 子彈打中怪物：扣血、吸仇恨、閃色、跳數字（跟一般子彈一樣）
-function bulletHurtEnemy(e, dmg, col, p) {
+function bulletHurtEnemy(e, dmg, col, p, hitSound = 'monsterHit') {   // hitSound：怪物沒有專屬「被打」音效時播的（分裂彈＝hitSplit）
   e.hp -= dmg;
   if (!(e.playerAggroT > 0)) e.alertT = ENEMY_ALERT_TIME;
   e.playerAggroT = PLAYER_ATK.aggro;
   e.hitT = Math.max(e.hitT || 0, .14); e.hitColor = col;
   enemyHitReact(e, p.x, p.y, false);
   flashDmg('-' + Math.round(dmg), e.x, e.y - 26, col);
-  if (typeof sfxMonsterHit === 'function') sfxMonsterHit(e, .4, 'player');
+  if (typeof sfxMonsterHit === 'function') sfxMonsterHit(e, .4, 'player', hitSound);
 }
 // 子彈波及隊員（雷電彈）：照防禦打折
 function bulletHurtTower(t, dmg, col) {
@@ -193,11 +193,11 @@ function fireSplit(p, aim, b) {
     G.effects.push({ bullet: true, x1: mx, y1: my, x2: ex, y2: ey, life: .08, life0: .08, color: b.color });
     if (r.target) { hits.set(r.target, (hits.get(r.target) || 0) + b.dmg); G.effects.push({ ring: true, x: ex, y: ey, r: 2, r2: 7, life: .12, life0: .12, color: b.color }); }
   }
-  for (const [e, dmg] of hits) bulletHurtEnemy(e, dmg, b.color, p);
+  for (const [e, dmg] of hits) bulletHurtEnemy(e, dmg, b.color, p, 'hitSplit');
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .09, life0: .09 });
   addLightFlash('muzzle', mx, my, 1.2);
   if (typeof spawnShellCasing === 'function') spawnShellCasing(mx, my, ang);
-  sfx('gunshot');
+  sfx('shotSplit');
 }
 
 // ---- 閃光彈：拋過去，落地爆出強光（敵我都暈）----
@@ -209,7 +209,7 @@ function fireFlashBang(p, aim, b) {
   (G.flashShots = G.flashShots || []).push({ x0: mx, y0: my, x1: p.x + Math.cos(ang) * dist, y1: p.y + Math.sin(ang) * dist, t: 0,
     T: S.flight[0] + (S.flight[1] - S.flight[0]) * k, h: S.arc[0] + (S.arc[1] - S.arc[0]) * k, lv: b });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .1, life0: .1 });
-  sfx('switch');
+  sfx('shotFlash');
 }
 function flashBangLand(s) {
   const x = s.x1, y = s.y1, R = s.lv.r * CELL, stun = s.lv.stun;
@@ -232,7 +232,7 @@ function flashBangLand(s) {
   addLightFlash('lightning', x, y, 3);
   G.flashBangs = G.flashBangs || []; G.flashBangs.push({ x, y, t: .45, T: .45, R });   // 畫面上的白光（drawFlashBangs）
   if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 3, .06);
-  if (typeof sfxAt === 'function') { sfxAt('smallBoom', x, y, .6, 'flashbang'); sfxAt('glassBreak3', x, y, .25, 'flashbang-ring'); }
+  if (typeof sfxAt === 'function') { sfxAt('hitFlash', x, y, .6, 'flashbang'); sfxAt('glassBreak3', x, y, .25, 'flashbang-ring'); }
 }
 
 // ---- 雷電彈：直線打中，電流跳到附近的怪物；旁邊的隊員也會被電到 ----
@@ -245,6 +245,7 @@ function fireShock(p, aim, b) {
   const end = r.target ? bodyPoint(r.target) : capHit || { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .12, life0: .12, color: b.color });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
+  sfx('shotShock');
   const struck = [];   // 被電到的地方（隊員在旁邊就會被波及）
   if (r.target) {
     const hits = [r.target];
@@ -269,7 +270,7 @@ function fireShock(p, aim, b) {
     sentryStatus(t, '被電到了！', b.color);
   }
   addLightFlash('lightning', end.x, end.y, 1);
-  if (typeof sfxAt === 'function') sfxAt('lightningImpact', end.x, end.y, .55, 'shock-bullet');
+  if (typeof sfxAt === 'function') sfxAt('hitShock', end.x, end.y, .55, 'shock-bullet');
 }
 
 // ---- 治療彈：打中誰就補誰 ----
@@ -283,6 +284,7 @@ function fireHeal(p, aim, b) {
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .14, life0: .14, color: b.color });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .06, life0: .06 });
   G.effects.push({ ring: true, x: end.x, y: end.y, r: 3, r2: r.target ? 22 : 10, life: .3, life0: .3, color: b.color });
+  sfx('shotHeal');
   if (r.target) {
     const o = r.target, before = o.hp;
     o.hp = Math.min(o.maxhp || o.hp + b.heal, o.hp + b.heal);
@@ -290,7 +292,7 @@ function fireHeal(p, aim, b) {
     flash('+' + got, o.x, o.y - (enemy ? 30 : 40), enemy ? '#ff9a9a' : b.color, 1);
     if (enemy) flash('幫怪物補血了…', o.x, o.y - 56, '#ff9a9a', 1.2);
     for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: end.x + (Math.random() - .5) * 18, y: end.y + (Math.random() - .5) * 10, vx: (Math.random() - .5) * 12, vy: -20 - Math.random() * 25, r: 2 + Math.random() * 2, life: .7, life0: .7, color: b.color });
-    sfx('soothe');
+    sfx('hitHeal');
   } else sfx('switch');
 }
 

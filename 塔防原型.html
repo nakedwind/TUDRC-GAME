@@ -252,8 +252,8 @@
   <!-- ===== 程式檔案，順序很重要，要由上往下依序載入 ===== -->
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
-  <script src="data/sound-settings.js?v=unlockpaths-20261027"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=newsfx-20261027"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="data/sound-settings.js?v=pathfix-20261027"></script> <!-- 1a. 音量、替換與自訂音效 -->
+  <script src="js/sfx.js?v=reload02-20261027"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=storymap-20261025"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -321,7 +321,7 @@
   <script src="js/pearl-kid.js?v=fleefix-20261026"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=mixgate-20261026"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fleefix-20261026"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/loofah-lady.js?v=squad-20261024"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
+  <script src="js/loofah-lady.js?v=bulletsfx-20261027"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
   <script src="js/clownfish.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
   <script src="js/golden-banana-king.js?v=newsfx-20261027"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
   <script src="js/milkfish-kid.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
@@ -335,7 +335,7 @@
   <script src="js/ore.js?v=orebase-20261025"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=mouse-tunnel-20261023"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=vending3-20261026"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=gear-drag-20261027"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/backpack.js?v=reload02-20261027"></script> <!-- 9j. 背包：物品格與說明 -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
   <script src="js/squad-gear.js?v=oneslot-20261025"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=achvcustom-20261025"></script> <!-- 9l. 送禮與好感度 -->
@@ -358,9 +358,9 @@
   <script src="js/save.js?v=story-preview-20261025"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=poolempty-20261026"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/flare.js?v=reload02-20261027"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=ws-price-btn-20261025"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
-  <script src="js/special-guns.js?v=paintgreen2-20261026"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/special-guns.js?v=bulletsfx-20261027"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=merged-20261024"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=storybuild-20261026"></script>
   <script src="js/camp-interactions.js?v=ammorefill-20261026"></script>
@@ -373,7 +373,7 @@
   <script src="js/mrt-locks.js?v=mrt-stairs-20261027"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=mrt-stairs-20261027"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=bulletsfx-20261027"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=core-key-drop-20261024"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=crackwall-20261026"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=quick-drop1-20261024"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
@@ -386,7 +386,7 @@
   <script src="js/bestiary-config.js?v=elite-20261024"></script>   <!-- 怪物圖鑑的畫面（跟怪物圖鑑編輯器共用） -->
   <script src="js/bestiary.js?v=elite-20261024"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->
-  <script src="js/target-practice.js?v=achvimpl-20261023"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
+  <script src="js/target-practice.js?v=bulletsfx-20261027"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
   <script src="js/locked-doors.js?v=winter-locked-20261027"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->

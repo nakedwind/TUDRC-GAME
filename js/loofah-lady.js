@@ -284,7 +284,7 @@ function shootVine(p, t, aim, aimAng) {
   spawnShellCasing(mx, my, aimAng);
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: hx, y2: hy, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光
   G.effects.push({ ring: true, x: hx, y: hy, r: 2, r2: 9, life: .14, life0: .14, color: '#a7dd7a' });   // 打中藤蔓：綠色小火花
-  sfx('gunshot');
+  sfx('shotPistol');
   t.helpHintT = HELP_HINT.show;   // 旁邊冒出「幫隊友掙脫」
   loofahHelpFree(t, hx, hy);
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填

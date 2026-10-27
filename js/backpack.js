@@ -213,7 +213,7 @@ function loadBulletToMagazine(id, slot) {
   const m = magState(), n = magSlotCount();
   if (slot == null) { slot = m.load.slice(0, n).indexOf(id); if (slot < 0) slot = Array.from({ length: n }, (_, i) => i).find(i => !m.load[i]); }
   if (slot == null || slot < 0) { sfx('error'); systemNotice('彈匣滿了：把子彈拖到想換掉的那一格上', true); return; }
-  setMagSlot(slot, id); sfx('reload'); afterMagazineChange();
+  setMagSlot(slot, id); sfx('magLoad'); afterMagazineChange();
 }
 function unloadMagazineSlot(slot) { if (typeof setMagSlot !== 'function') return; setMagSlot(slot, null); sfx('switch'); afterMagazineChange(); }
 function renderBulletDetail(b) {
@@ -416,7 +416,7 @@ backpackGrid.addEventListener('drop', e => {
   if (slotEl) {
     const to = Number(slotEl.dataset.magSlot);
     if (d.bullet) loadBulletToMagazine(d.bullet, to);
-    else if (d.slot !== to) { const m = magState(), id = m.load[d.slot]; if (id) { setMagSlot(to, id); sfx('reload'); afterMagazineChange(); } }   // setMagSlot 會把兩格對調
+    else if (d.slot !== to) { const m = magState(), id = m.load[d.slot]; if (id) { setMagSlot(to, id); sfx('magLoad'); afterMagazineChange(); } }   // setMagSlot 會把兩格對調
   } else if (d.slot != null) unloadMagazineSlot(d.slot);   // 從彈匣拖到其他地方＝拿下
 });
 backpackGrid.addEventListener('dblclick', e => { const cell = e.target.closest('[data-bag-item]'); if (cell) useBackpackItem(cell.dataset.bagItem); });   // 連點兩下直接使用

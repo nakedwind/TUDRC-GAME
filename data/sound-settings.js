@@ -22,12 +22,14 @@ const SOUND_SETTINGS = {
     "fishHurt": 1.15,
     "fishSpray": 1.35,
     "fishStep": 1.3,
-    "flare": 1.35,
     "footsteps": 2.6,
     "gachaDrop": 1.45,
     "glassBreak3": 2.15,
     "glassBreak4": 1.85,
     "hit": 3,
+    "hitFlash": 1.15,
+    "hitPaint": 0,
+    "hitTranq": 0,
     "ironGateSlide": 2.8,
     "itemPickup": 1.65,
     "kill": 1.85,
@@ -55,6 +57,10 @@ const SOUND_SETTINGS = {
     "reload": 0.8,
     "shopBell": 0.6,
     "shopEnter": 0.85,
+    "shotFlare": 1.35,
+    "shotHeal": 0,
+    "shotIncendiary": 1.35,
+    "shotShock": 0,
     "smallBoom": 1.15,
     "stairsDown": 2.4,
     "stairsUp": 1.95,
@@ -69,7 +75,7 @@ const SOUND_SETTINGS = {
       "lifeformAttack": "怪物/生命體/生命體攻擊.mp3",
       "fishDouse": "怪物/魚頭君/火被澆熄.mp3",
       "itemPickup": "pop.mp3",
-      "achievement": "成就.mp3",
+      "achievement": "獎勵/成就.mp3",
       "mrtUnlock": [
         "環境/門與機關/開鎖03.mp3",
         "設施/打磨.mp3"
@@ -77,8 +83,10 @@ const SOUND_SETTINGS = {
       "chainUnlock": "環境/門與機關/開鎖03.mp3",
       "lockedDoor": "環境/門與機關/開鎖02.mp3",
       "storyDoor": "環境/門與機關/鐵門滑動.mp3",
-      "mrtGate": "剪票口.mp3",
-      "favorUp": "獎勵/升級.mp3"
+      "mrtGate": "環境/門與機關/剪票口.mp3",
+      "favorUp": "獎勵/升級.mp3",
+      "milkfishChew": "怪物/虱目魚小子/虱目魚小子吃人2.mp3",
+      "milkfishGulp": "怪物/虱目魚小子/虱目魚小子吃人2.mp3"
     },
     "extras": {},
     "meta": {}

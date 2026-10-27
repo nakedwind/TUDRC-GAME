@@ -60,7 +60,7 @@
     <div class="new-sound">
       <label>程式名稱<input id="newSoundId" placeholder="例如 radioAlert"></label>
       <label>顯示名稱<input id="newSoundLabel" placeholder="例如 廣播警告"></label>
-      <label>分類<select id="newSoundGroup"><option>介面</option><option>溫特</option><option>哨兵攻擊</option><option>怪物</option><option>場景與物件</option><option selected>其他</option></select></label>
+      <label>分類<select id="newSoundGroup"><option>介面</option><option>溫特</option><option>子彈</option><option>哨兵攻擊</option><option>怪物</option><option>場景與物件</option><option selected>其他</option></select></label>
       <label>音效檔<input id="newSoundFile" type="file" accept="audio/*"></label>
       <button id="addSound" class="primary">加入音效</button>
     </div>
@@ -68,11 +68,11 @@
   <div id="groups"></div>
   <section class="panel"><h2>匯出內容</h2><small>按任一「下載」時也會顯示在這裡。</small>
     <textarea id="exportOut" readonly aria-label="匯出內容"></textarea></section>
-  <script src="data/sound-settings.js?v=unlockpaths-20261027"></script>
+  <script src="data/sound-settings.js?v=pathfix-20261027"></script>
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/sfx.js?v=newsfx-20261027"></script>
+  <script src="js/sfx.js?v=reload02-20261027"></script>
   <script src="js/ui-feedback.js?v=mute-20261011"></script>
-  <script src="js/sound-editor.js?v=newsfx-20261027"></script>
+  <script src="js/sound-editor.js?v=reload02-20261027"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['exportSettings'], files: [{ path: 'data/sound-settings.js', label: '音效設定', text: () => settingsExport() }], status: (m, e) => status(m, e) });</script>
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

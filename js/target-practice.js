@@ -211,7 +211,7 @@ function shootTarget(e) {
   if (tp.ammo <= 0) { startTpReload(); return; }
   tpLastShot = now;
   tp.ammo--;
-  if (typeof sfx === 'function') sfx('gunshot');
+  if (typeof sfx === 'function') sfx('shotPistol');
   const rect = tpPaper.getBoundingClientRect();   // 先量位置，再讓靶紙震（震動中的位置才不會影響這一槍）
   tpPaper.classList.remove('kick'); void tpPaper.offsetWidth; tpPaper.classList.add('kick');   // 靶紙被打到震一下
   if (tp.mode === 'free' && tp.magDone) { tp.magScore = 0; tp.magShots = 0; tp.magDone = false; tp.newBest = false; }   // 新的一匣

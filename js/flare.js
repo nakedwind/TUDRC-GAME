@@ -113,7 +113,7 @@ function fireFlare(p, aim) {
   (G.flareShots = G.flareShots || []).push({ x0: mx, y0: my, x1: tx, y1: ty, t: 0, T: Math.max(.04, dist / FLARE.speed) });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .1, life0: .1 });
   addLightFlash('muzzle', mx, my, 1.3);
-  sfx('flare');
+  sfx('shotFlare');
 }
 
 // ---- 照明彈：飛行、燃燒（每幀由 game.js 的 update 呼叫）----
@@ -124,7 +124,7 @@ function updateFlares(dt) {
       if (s.t >= s.T) {   // 落地：開始燃燒
         (G.flares = G.flares || []).push({ x: s.x1, y: s.y1, t: FLARE.burn, emberT: 0, seed: Math.random() * 10 });
         if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(s.x1, s.y1, 6);   // 照明彈落在順順宮帽上：打開帽子
-        if (typeof sfxAt === 'function') sfxAt('fireImpact', s.x1, s.y1, .35, 'flare-land');
+        if (typeof sfxAt === 'function') sfxAt('hitFlare', s.x1, s.y1, .35, 'flare-land');
       } else if (Math.random() < .6) {   // 飛行中拖出火星
         const k = s.t / s.T, x = s.x0 + (s.x1 - s.x0) * k, y = s.y0 + (s.y1 - s.y0) * k;
         G.effects.push({ ember: true, spark: true, x, y, vx: (Math.random() - .5) * 30, vy: (Math.random() - .5) * 30, r: 1.2 + Math.random(), life: .3, life0: .3, color: '#ffb38a' });
@@ -224,7 +224,7 @@ function useAmmoRefillNearPlayer() {
     const n = AMMO_REFILL.to - (s.n[id] || 0); if (n <= 0) continue;   // 已經有 to 發以上：不補（也不會變少）
     s.n[id] = AMMO_REFILL.to; got.push(BULLETS[id].name + ' +' + n);
   }
-  if (got.length) { bulletSave(); sfx('reload'); flash('補充彈藥：' + got.join('、'), crate.x, crate.top - 8, '#ffd27a', 1.8); }
+  if (got.length) { bulletSave(); sfx('ammoRefill'); flash('補充彈藥：' + got.join('、'), crate.x, crate.top - 8, '#ffd27a', 1.8); }
   else { sfx('error'); flash('彈藥已經補滿了', crate.x, crate.top - 8, '#dce6ed', 1.4); }
   return true;
 }

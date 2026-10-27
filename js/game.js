@@ -175,14 +175,15 @@ for (const [kind, cfg] of Object.entries(CUSTOM_ATTACK_EFFECTS)) {
 }
 // 怪物被打中的音效：有專屬音效的怪物（鳥頭人）每隻各自冷卻，連續被打時不會一直重複響
 const MONSTER_HIT_SOUND_CD = .5;   // 秒
-function sfxMonsterHit(e, gain, sourceId) {
+// fallback：怪物沒有專屬「被打」音效時播哪個（溫特的子彈傳自己的打擊聲，例如 hitPistol）
+function sfxMonsterHit(e, gain, sourceId, fallback = 'monsterHit') {
   if (typeof sfxAt !== 'function' || !e) return;
   if (e.hitSound) {
     const now = performance.now();
     if (now < (e.hitSoundAt || -Infinity) + MONSTER_HIT_SOUND_CD * 1000) return;
     e.hitSoundAt = now;
     sfxAt(e.hitSound, e.x, e.y, gain, sourceId);
-  } else sfxAt('monsterHit', e.x, e.y, gain, sourceId);
+  } else sfxAt(fallback, e.x, e.y, gain, sourceId);
 }
 function playAttackSprite(kind, x, y, duration = .32, angle = 0) {
   if (!G || !attackEffectFrames[kind]) return;
@@ -1785,8 +1786,8 @@ function updatePlayerAttack(dt) {
     G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .06, life0: .06 });
     G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .09, life0: .09, color: col });
     G.effects.push({ ring: true, x: endX, y: endY, r: 3, r2: best ? 14 : 8, life: .2, life0: .2, color: col });
-    if (best) paintMark(best);
-    SFX.play('gunshot', .55, 'paint-shot');
+    if (best) { paintMark(best); sfxAt('hitPaint', endX, endY, .4, 'paint-hit'); }
+    SFX.play('shotPaint', .55, 'paint-shot');
     return;
   }
   let eggShot = null;
@@ -1826,9 +1827,9 @@ function updatePlayerAttack(dt) {
     enemyHitReact(best, p.x, p.y, !!critMul);   // 爆擊算重擊（會擊退、硬直）
     if (critMul) flashCrit('-' + shotDmg, best.x, best.y - 30, true);   // 溫特開槍：算成就
     else flashDmg('-' + shotDmg, best.x, best.y - 26, '#bfe0ff');
-    sfxMonsterHit(best, 0.48, 'player');
+    sfxMonsterHit(best, 0.48, 'player', 'hitPistol');
   }
-  if (typeof sfx === 'function') sfx('gunshot');
+  if (typeof sfx === 'function') sfx('shotPistol');
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
   else if (PLAYER_ATK.double && Math.random() < PLAYER_ATK.double) p.atkCd = .07;   // 快速射擊（手槍 Lv3 起）：馬上再開一發
 }
