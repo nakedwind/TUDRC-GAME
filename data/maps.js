@@ -20034,8 +20034,8 @@ const BATTLE_MAPS = [
         "sortDepth": 2.5,
         "lockerLoot": {
           "kind": "item",
-          "id": "thermos",
-          "qty": 1
+          "id": "firstaid",
+          "qty": 2
         }
       },
       {
@@ -20381,7 +20381,7 @@ const BATTLE_MAPS = [
         "lockerLoot": {
           "kind": "item",
           "id": "firstaid",
-          "qty": 1
+          "qty": 2
         },
         "ox": 2,
         "oy": -22,
@@ -20512,6 +20512,19 @@ const BATTLE_MAPS = [
         "c": 16,
         "r": 56,
         "layer": "ground3"
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 19,
+        "r": 11,
+        "layer": "object2",
+        "ox": 0,
+        "oy": -12,
+        "lockerLoot": {
+          "kind": "item",
+          "id": "medkit",
+          "qty": 1
+        }
       }
     ],
     "solid": [
@@ -22399,11 +22412,11 @@ const BATTLE_MAPS = [
     "monsterMix": [
       {
         "id": "slime",
-        "weight": 80
+        "weight": 100
       },
       {
         "id": "bird_head",
-        "weight": 80
+        "weight": 60
       }
     ],
     "camp": [],

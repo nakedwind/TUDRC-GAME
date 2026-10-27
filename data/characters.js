@@ -34,7 +34,7 @@ const CHARACTERS = {
       "ability": "火焰",
       "range": 6,
       "aggroRange": 10,
-      "dmg": 35,
+      "dmg": 30,
       "rate": 0.5,
       "taint": 3,
       "splash": 0,

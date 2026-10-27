@@ -371,6 +371,36 @@ function drawScorchMarks(ctx) {
     ctx.restore();
   }
 }
+// 腐蝕池的危險範圍：照實際扣血範圍（貼地橢圓）畫紫色底＋鮮豔的外圈光暈，脈動提醒別踩；最後 1 秒淡出。
+// 焦痕本身是壓扁、隨機轉向的裝飾，而且比池子留得久，看不出哪裡會扣血，所以另外畫這圈。
+function drawAcidWarnings(ctx) {
+  if (!G.acidPools || !G.acidPools.length) return;
+  const now = performance.now() / 1000;
+  ctx.save();
+  for (const p of G.acidPools) {
+    if (!(p.t > 0)) continue;
+    const a = Math.min(1, (p.t0 - p.t) / .25, p.t);   // 0.25 秒浮現、最後 1 秒淡出
+    if (a <= 0) continue;
+    const pulse = .5 + .5 * Math.sin(now * 5 + p.x * .05);
+    ctx.globalAlpha = a;
+    const ry = p.r * ACID_SQUASH;   // 貼地的橢圓，跟扣血範圍一樣（js/game.js 的 acidPoolDist）
+    ctx.save(); ctx.translate(p.x, p.y); ctx.scale(1, ACID_SQUASH);   // 漸層跟著壓扁
+    const g = ctx.createRadialGradient(0, 0, 0, 0, 0, p.r);   // 中間淡、靠邊緣越亮
+    // 顏色 #180061（深靛紫）
+    g.addColorStop(0, `rgba(24,0,97,${(.1 + .06 * pulse).toFixed(3)})`);
+    g.addColorStop(.7, `rgba(24,0,97,${(.18 + .08 * pulse).toFixed(3)})`);
+    g.addColorStop(1, `rgba(24,0,97,${(.45 + .15 * pulse).toFixed(3)})`);
+    ctx.fillStyle = g;
+    ctx.beginPath(); ctx.arc(0, 0, p.r, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+    // 外圈光暈：鮮豔的紫色亮邊，往內外各暈開一點（不在壓扁的座標裡畫，線才不會上下變細）
+    ctx.shadowColor = 'rgba(24,0,97,1)'; ctx.shadowBlur = 14 + 8 * pulse;
+    ctx.lineWidth = 4; ctx.strokeStyle = `rgba(24,0,97,${(.75 + .25 * pulse).toFixed(3)})`;
+    ctx.beginPath(); ctx.ellipse(p.x, p.y, p.r, ry, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.shadowBlur = 0;
+  }
+  ctx.restore();
+}
 // 黑霧：從焦痕緩緩往上飄、邊飄邊左右搖擺並擴散變淡（像燒焦冒出的黑煙）
 function pushBlackSmoke(x, y, big = false) {
   const L = 1.7 + Math.random() * 1;
@@ -381,11 +411,11 @@ function pushBlackSmoke(x, y, big = false) {
 // 腐蝕命中特效：濃稠扭曲的紫黑霧＋暗紫液滴，並在地上留下 6 秒的腐蝕焦痕（碰到會扣血），焦痕上持續冒黑霧。
 function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
   addLightFlash('corrosion', x, y, scale);
-  const R = (splash > 0 ? Math.min(46 * scale, splash * CELL * 0.9) : 22) * (scale > 1 ? 1.1 : 1);
+  const R = (splash > 0 ? Math.min(46 * scale, splash * CELL * 0.9) : 22) * (scale > 1 ? 1.1 * 0.64 : 1);   // 大招（scale > 1）：放大 1.1 倍後再縮成 0.64 倍（0.8 × 0.8）
   // 地上腐蝕痕跡（存活 5 秒，範圍內怪物持續扣血）
   const blobs = [];
   for (let i = 0; i < 4; i++) blobs.push({ dx: (Math.random() * 2 - 1) * R * 0.5, dy: (Math.random() * 2 - 1) * R * 0.35, rr: R * (0.55 + Math.random() * 0.5) });
-  const pool = { x, y, r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), allyDps: typeof ACID_ALLY_DPS !== 'undefined' ? ACID_ALLY_DPS : 10, blobs, fizz: 0 };   // dps＝怪物踩到；allyDps＝溫特、隊友踩到（js/game.js 的 ACID_ALLY_DPS）
+  const pool = { x, y, r: R, t: 6, t0: 6, dps: Math.max(2, dmg * 0.5), allyHit: ACID_ALLY_HIT, allyTick: ACID_ALLY_TICK, blobs, fizz: 0 };   // dps＝怪物踩到（每秒）；allyHit／allyTick＝溫特、隊友踩到（js/game.js）
   (G.acidPools = G.acidPools || []).push(pool);
   addScorchMark(x, y, R, pool);   // 地上焦黑燒痕
   for (let i = 0; i < Math.round(4 * scale); i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * R * .5, y + (Math.random() * 2 - 1) * R * .25, true);

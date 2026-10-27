@@ -98,6 +98,9 @@ const TUTORIAL = {
     exit: [
       '這裡通往 Y25 區，希奧妮求救的訊號就是從這裡發出來的。',
     ],
+    key: [   // 打破核心、拿到異質鑰匙（關掉鑰匙的說明視窗後馬上說；跳過教學也會說）
+      '拿到異質鑰匙了，趕快前往Y25區地下街吧！',
+    ],
   },
   // 動畫卡片上的字（{key}＝快捷鍵、{name}＝隊員名字；可以用 <small> 寫小字）
   cards: {
@@ -706,6 +709,9 @@ function updateTutorial(dt) {
   if (!tutorialSeen('story')) return;   // 開場劇情演完才問要不要看教學
   if (!tutorialState.decided) { if (!tutorialAskOpen) openTutorialAsk(); return; }
   if (!tutorialState.skip && !tutorialSeen('intro')) { if (!dialogueState) tutorialSay('intro'); return; }
+  // 拿到異質鑰匙（比進這張地圖時多了一把）：艾德林催大家出發（結算畫面在這句說完後才跳）
+  const keys0 = supplyInventory.get(CORE_CLEAR.keyItem) || 0; if (G.tutorialKeyBase == null) G.tutorialKeyBase = keys0;
+  if (!tutorialSeen('key') && !dialogueState && !tutLesson && keys0 > G.tutorialKeyBase && tutorialSay('key')) return;
   if (tutorialWaveStep(dt) || tutorialState.skip || dialogueState || tutLesson) return;
   if (tutQueued) { const f = tutQueued; tutQueued = null; f(); if (tutLesson) return; }   // 艾德林說完了：開始動畫教學
   if (tutGuideStep()) return;

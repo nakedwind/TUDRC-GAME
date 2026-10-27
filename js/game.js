@@ -923,13 +923,16 @@ function sendSentryRest(t) {
   sentryStatus(t, '瀕臨暴走', '#ffb24d', true);
 }
 // 暴走（污染 100）：無差別攻擊最近的任意目標——敵人、其他哨兵、玩家、基地、核心
+// 腐蝕池是貼地的橢圓：橫向半徑 pool.r、縱向 pool.r × ACID_SQUASH（跟地上焦痕、警示光暈一樣扁）
+const ACID_SQUASH = .6;
+const acidPoolDist = (pool, x, y) => Math.hypot(x - pool.x, (y - pool.y) / ACID_SQUASH);   // 換算成「橫向像素」的距離，跟 pool.r 比
 // 隊友避開腐蝕池：在池內／貼邊時往外推（阿瓦倫本人免疫、不避；暴走中不避）
 function avoidAcidPools(t, dt) {
   if (MAP_SAFE || t.type === 'avaren' || t.berserk || t.hp <= 0 || !G.acidPools || !G.acidPools.length) return;
   for (const pool of G.acidPools) {
-    const dx = t.x - pool.x, dy = t.y - pool.y, d = Math.hypot(dx, dy) || 1, margin = pool.r + 10;
-    if (d >= margin) continue;
-    const step = Math.min(margin - d, 130 * dt), nx = t.x + dx / d * step, ny = t.y + dy / d * step;
+    const dx = t.x - pool.x, dy = t.y - pool.y, d = Math.hypot(dx, dy) || 1, margin = pool.r + 10, ed = acidPoolDist(pool, t.x, t.y);
+    if (ed >= margin) continue;
+    const step = Math.min(margin - ed, 130 * dt), nx = t.x + dx / d * step, ny = t.y + dy / d * step;
     const [cc, cr] = cellAt(nx, ny);
     if (sentryCellWalkable(cc, cr)) { t.x = nx; t.y = ny; }
     else { const [ac] = cellAt(nx, t.y); if (sentryCellWalkable(ac, cellAt(t.x, t.y)[1])) t.x = nx; else { const [, br] = cellAt(t.x, ny); if (sentryCellWalkable(cellAt(t.x, t.y)[0], br)) t.y = ny; } }
@@ -1616,7 +1619,7 @@ function pickSentryTarget(t, R) {
 const SOOTHE_AURA_CD = 3;   // 嚮導被動疏導的冷卻秒數
 const SOOTHE_CHANNEL = 1;  // 嚮導疏導時站定、閉眼施法的秒數（期間不走動、不攻擊）
 const ACID_TICK = 1;   // 阿瓦倫腐蝕池：每隔幾秒扣一次血（每次扣「每秒傷害 × 間隔」）
-const ACID_ALLY_DPS = 5;   // 阿瓦倫腐蝕池對溫特、隊友的每秒傷害（固定，不跟著阿瓦倫的攻擊力變；怪物照樣吃「攻擊力的一半」）
+const ACID_ALLY_HIT = 5, ACID_ALLY_TICK = 2;   // 阿瓦倫腐蝕池對溫特、隊友：每 4 秒扣一次 10（固定，不跟著阿瓦倫的攻擊力變；怪物照樣每秒吃「攻擊力的一半」）
 // 大招：平時普攻，冷卻好時放一次（傷害高、範圍大、特效大）；喊的話在 data/dialogues.js 的 ultimate
 const ULTIMATES = {
   theonie: { cd: 8,  dmgMul: 2.6, splash: 2.2, scale: 1.9 },
@@ -1983,6 +1986,7 @@ function frame(ts) {
     || (typeof gachaOpen !== 'undefined' && gachaOpen)   // 扭蛋機（js/gacha.js）
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
+  if (menuOpen && G.cameraShakeT) G.cameraShakeT = 0;   // 暫停中（教學、對話、選單…）：被打到的鏡頭震動倒數在 update 裡跑、不會減少，不歸零畫面會一直抖
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
   if (!menuOpen && !frozen && typeof updateBallBark === 'function') updateBallBark(dt);   // 球球偶爾叫一下（js/ball-poses.js）
   if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓
@@ -2262,20 +2266,25 @@ function update(dt) {
   // 地上腐蝕痕跡：站在裡面的對象每 ACID_TICK 秒扣一次血、偶爾冒紫黑霧。
   // 計時跟著「被腐蝕的對象」走：同時站在好幾灘裡，也只吃最痛的那一灘（不疊加）。
   if (G.acidPools && G.acidPools.length) {
-    const acidDps = o => {   // 站在哪幾灘裡 → 取最痛的那一灘的每秒傷害；不在任何一灘裡回傳 0（異質核心腳下的腐蝕不傷異質體）
-      let best = 0;
+    const acidHit = o => {   // 站在哪幾灘裡 → 取最痛的那一灘：{ 每次扣多少, 隔幾秒扣一次 }；不在任何一灘裡回傳 null（異質核心腳下的腐蝕不傷異質體）
+      let best = null;
       const isEnemy = G.enemies.includes(o);
-      for (const pool of G.acidPools) if (pool.t > 0 && !(isEnemy && pool.noEnemy) && Math.hypot(o.x - pool.x, o.y - pool.y) <= pool.r) best = Math.max(best, !isEnemy && pool.allyDps != null ? pool.allyDps : pool.dps);   // 我方踩到：用比較低的固定傷害
+      for (const pool of G.acidPools) {
+        if (!(pool.t > 0) || (isEnemy && pool.noEnemy) || acidPoolDist(pool, o.x, o.y) > pool.r) continue;
+        const h = !isEnemy && pool.allyHit != null ? { dmg: pool.allyHit, tick: pool.allyTick || ACID_TICK }   // 我方踩到阿瓦倫的池子：固定、間隔比較長
+          : { dmg: pool.dps * ACID_TICK, tick: ACID_TICK };
+        if (!best || h.dmg / h.tick > best.dmg / best.tick) best = h;
+      }
       return best;
     };
-    // 回傳這一刻要扣多少血（0＝還沒到時間或不在池子裡）；剛踩進去要等 1 秒才第一次扣
+    // 回傳這一刻要扣多少血（0＝還沒到時間或不在池子裡）；剛踩進去要等 1 秒才第一次扣，之後照該池的間隔扣
     const acidTick = o => {
-      const dps = acidDps(o);
-      if (!dps) { o.acidT = ACID_TICK; return 0; }
+      const h = acidHit(o);
+      if (!h) { o.acidT = ACID_TICK; return 0; }
       o.acidT = (o.acidT ?? ACID_TICK) - dt;
       if (o.acidT > 0) return 0;
-      o.acidT += ACID_TICK;
-      return dps * ACID_TICK;   // 一次扣掉「每秒傷害 × 間隔」
+      o.acidT += h.tick;
+      return h.dmg;
     };
     for (const e of G.enemies) {
       if (e.dead) continue;

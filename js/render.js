@@ -1025,7 +1025,8 @@ function draw() {
   if (G.player) sortables.push({ y: G.player.sitting ? seatDrawY(G.player.sitting) : G.player.y + 16, draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
-  drawFlares(ctx);             // 地上燃燒的照明彈
+  drawAcidWarnings(ctx);       // 腐蝕池的危險範圍圈（js/attack-fx.js）
+  drawFlares(ctx);            // 地上燃燒的照明彈
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
   if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）

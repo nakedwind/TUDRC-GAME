@@ -212,7 +212,7 @@ function updateOreDissolve(dt) {
   for (const o of [...G.obstacles]) {
     if (!o.ore || o.hp <= 0) continue;
     const c = oreCenter(o);
-    if (!pools.some(p => Math.hypot(p.x - c.x, p.y - c.y) <= p.r + 16)) continue;
+    if (!pools.some(p => acidPoolDist(p, c.x, c.y) <= p.r + 16)) continue;
     o.dissolve = (o.dissolve || 0) + dt;
     o.fizzT = (o.fizzT || 0) - dt;
     if (o.fizzT <= 0) {   // 冒泡、礦物微微閃光
