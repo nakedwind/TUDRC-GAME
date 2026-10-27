@@ -277,6 +277,7 @@ function updateDropCorpse(c, dt) {   // 由 combat-feel.js 的屍體更新呼叫
   if (c.z > 0) { c.vz -= 600 * dt; c.z = Math.max(0, c.z + c.vz * dt); }
   if (!c.landed && c.z <= 0) {
     c.landed = true; c.landT = c.t;
+    if (c.noBits) return;   // 葫蘆猴：沒有珍珠滾出來（js/gourd-monkey.js）
     G.effects.push({ ring: true, x: c.x, y: c.y + 10, r: 6, r2: 32, life: .3, life0: .3, color: '#c9c2b0' });
     G.pearlBits = G.pearlBits || [];
     for (let i = 0; i < 3; i++) {
@@ -296,9 +297,19 @@ function updatePearlBits(dt) {
   }
   G.pearlBits = G.pearlBits.filter(b => b.life > 0);
 }
-// ---- 瓦解：變黑之後，從頭頂開始碎成小方塊，像灰燼一樣往上飄散 ----
-// start：死後幾秒開始瓦解；spread：從頭頂碎到底部要幾秒；life：每一塊飄散多久；block：碎塊大小（原圖像素）
-const DISSOLVE = { start: 1.15, spread: .8, life: .75, block: 3, dark: .9 };
+// ---- 瓦解：變黑之後，從頭頂開始碎成小方塊，往下崩落、在腳邊堆成一攤灰再淡掉，腳下揚起灰塵（珍珠小童、葫蘆猴共用）----
+// start：死後幾秒開始瓦解；spread：從頭頂碎到底部要幾秒；life：每一塊從碎開到消失最多幾秒（掉下去＋在地上淡掉）
+// block：碎塊大小（原圖像素）；gravity：碎塊往下掉的重力；fade：落地後幾秒淡掉；pile：落地時往前後散開幾像素
+const DISSOLVE = { start: 1.15, spread: .8, life: 1.4, block: 3, dark: .9, gravity: 700, fade: .5, pile: 6 };
+// 碎塊往下掉：算出落到地上的時間（y 往下為正，腳底＝0）
+function dissolveFall(ch) {
+  const g = DISSOLVE.gravity, dy = ch.gy - ch.y;
+  ch.tl = dy <= 0 ? 0 : (-ch.vy + Math.sqrt(ch.vy * ch.vy + 2 * g * dy)) / g;
+  return ch;
+}
+const dissolveChunk = (x, y, color, h, c) => dissolveFall({ x, y, color, h,
+  delay: h * DISSOLVE.spread + Math.random() * .18, vx: (Math.random() * 2 - 1) * 18, vy: Math.random() * 25, rot: Math.random(),
+  gy: -DISSOLVE.block + (Math.random() * 2 - 1) * DISSOLVE.pile });
 const dissolveCache = new Map();
 function dissolveChunks(c) {   // 把這張圖切成小方塊（同一張圖只算一次）
   const key = c.img.src + '|' + c.w + 'x' + c.h;
@@ -316,8 +327,7 @@ function dissolveChunks(c) {   // 把這張圖切成小方塊（同一張圖只�
       const nx = (bx + B / 2 - c.w / 2) / (c.w / 2), ny = (by + B / 2 - c.h * .55) / (c.h * .5);
       if (nx * nx + ny * ny > 1 || Math.random() < .35) continue;
       const v = 14 + Math.floor(Math.random() * 14);
-      out.push({ x: bx - c.w / 2, y: by - c.h, color: `rgb(${v},${v - 2},${v + 6})`, h: by / c.h,
-        delay: (by / c.h) * DISSOLVE.spread + Math.random() * .18, vx: (Math.random() * 2 - 1) * 22, vy: -(18 + Math.random() * 34), rot: Math.random() });
+      out.push(dissolveChunk(bx - c.w / 2, by - c.h, `rgb(${v},${v - 2},${v + 6})`, by / c.h, c));
     }
     dissolveCache.set(key, out);
     return out;
@@ -326,8 +336,7 @@ function dissolveChunks(c) {   // 把這張圖切成小方塊（同一張圖只�
     const cx = Math.min(c.w - 1, bx + 1), cy = Math.min(c.h - 1, by + 1), i = (cy * c.w + cx) * 4;
     if (d[i + 3] < 90) continue;
     const mix = v => Math.round(v * (1 - DISSOLVE.dark) + 9 * DISSOLVE.dark);   // 跟變黑後的顏色一致
-    out.push({ x: bx - c.w / 2, y: by - c.h, color: `rgb(${mix(d[i])},${mix(d[i + 1])},${mix(d[i + 2])})`, h: by / c.h,
-      delay: (by / c.h) * DISSOLVE.spread + Math.random() * .18, vx: (Math.random() * 2 - 1) * 22, vy: -(18 + Math.random() * 34), rot: Math.random() });
+    out.push(dissolveChunk(bx - c.w / 2, by - c.h, `rgb(${mix(d[i])},${mix(d[i + 1])},${mix(d[i + 2])})`, by / c.h, c));
   }
   dissolveCache.set(key, out);
   return out;
@@ -347,13 +356,30 @@ function drawDissolve(ctx, c) {
   for (const ch of chunks) {
     const age = T - ch.delay;
     if (age < 0) { if (chunks.approx) continue; ctx.globalAlpha = 1; ctx.fillStyle = ch.color; ctx.fillRect(ch.x, ch.y, B, B); continue; }   // 還沒碎到這裡
-    const p = age / DISSOLVE.life;
-    if (p >= 1) continue;
-    const x = ch.x + ch.vx * age + Math.sin(age * 6 + ch.rot * 9) * 3, y = ch.y + ch.vy * age - 40 * age * age;   // 往上飄、左右晃
-    const s = B * (1 - p * .6);
-    ctx.globalAlpha = 1 - p;
-    ctx.fillStyle = p < .18 ? '#6b5a8a' : ch.color;   // 剛碎開時帶一點淡紫微光
+    // 往下掉（越掉越快）→ 落地後停在腳邊、慢慢淡掉
+    const fallT = Math.min(age, ch.tl), onGround = age >= ch.tl;
+    const fade = onGround ? (age - ch.tl) / DISSOLVE.fade : 0;
+    if (fade >= 1) continue;
+    const x = ch.x + ch.vx * fallT + (onGround ? ch.vx * .15 * Math.min(.3, age - ch.tl) : 0);
+    const y = onGround ? ch.gy : ch.y + ch.vy * fallT + .5 * DISSOLVE.gravity * fallT * fallT;
+    const s = onGround ? B * (1 - fade * .5) : B;
+    ctx.globalAlpha = 1 - fade;
+    ctx.fillStyle = age < .06 ? '#5e574d' : ch.color;   // 剛碎開時閃一下灰
     ctx.fillRect(x, y, s, s);
+  }
+  drawDissolveDust(ctx, c, T);
+}
+// 崩落時腳下揚起的灰塵：沿著身體寬度排幾團，慢慢變大、變淡
+function drawDissolveDust(ctx, c, T) {
+  const k = (T - .15) / (DISSOLVE.spread + DISSOLVE.life - .15);
+  if (k <= 0 || k >= 1) return;
+  const n = Math.max(3, Math.round(c.w / 18)), alpha = (k < .2 ? k / .2 : (1 - k) / .8) * .3;
+  for (let i = 0; i < n; i++) {
+    const u = n > 1 ? i / (n - 1) - .5 : 0, px = u * c.w * .9 + Math.sin(i * 7.3) * 4, py = -4 - Math.abs(Math.sin(i * 3.1)) * 6 - k * 10;
+    const r = (6 + c.w * .12) * (.5 + k * .9) * (.8 + Math.abs(Math.sin(i * 5.7)) * .4);
+    const g = ctx.createRadialGradient(px, py, 0, px, py, r);
+    g.addColorStop(0, `rgba(128,120,108,${alpha.toFixed(3)})`); g.addColorStop(1, 'rgba(128,120,108,0)');
+    ctx.globalAlpha = 1; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
   }
 }
 function drawDropCorpse(ctx, c) {   // 由 combat-feel.js 的地面層呼叫

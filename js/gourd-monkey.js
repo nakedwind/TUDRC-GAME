@@ -635,3 +635,14 @@ function gourdHopOffset(o) {
   const u = (h.t - C.hopTime) / .14, q = Math.sin(u * Math.PI) * .07;   // 落地：壓扁一下再回正
   return { z: 0, sx: 1 + q, sy: 1 - q };
 }
+
+// ---- 死掉：不倒下，原地閉上眼睛、變黑，再從頭頂碎成灰燼往上飄散（沿用珍珠小童的 drop 屍體，js/pearl-kid.js）----
+// 在空中被打死會先掉回地上再消散；站在地上死掉就不壓扁、直接開始變黑
+function gourdDeathCorpse(e) {
+  const f = e.frames || {}, file = (f.blink && f.blink[f.blink.length - 1]) || f.front || e.sprite;   // 眨眼最後一張＝閉眼
+  const z = e.slimeLift || 0, onGround = z <= .5;
+  (G.fxCorpses = G.fxCorpses || []).push({ drop: true, noBits: true, img: monsterImage(file), x: e.x, y: e.y, z: onGround ? 0 : z, vz: 0,
+    w: e.drawWidth || 70, h: e.drawHeight || 110, t: 0, life: DISSOLVE.start + DISSOLVE.spread + DISSOLVE.life + .05,
+    landed: onGround, landT: onGround ? -1 : 0 });
+  e.tremble = false;
+}
