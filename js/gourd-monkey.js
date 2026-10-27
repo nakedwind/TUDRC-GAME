@@ -31,6 +31,9 @@ const GOURD = {
   bounceTime: 0.2,      // 落地後再小彈一下（秒）
   knockPlayer: true,    // 溫特也會被震飛（false＝只震飛隊友）
   shockBuildingDamage: 15,   // 震波範圍內（沒被壓到）的建築受到的傷害：只晃一下、不會飛
+  hopMax: 18,           // 震波範圍內的建築原地彈起來多高（像素）：最靠近葫蘆猴的
+  hopMin: 7,            // 震波邊緣的建築彈多高（像素）
+  hopTime: 0.38,        // 建築彈起來到落回原位幾秒
   shakeMax: 14,         // 落地畫面震動：就在旁邊時的強度（上限 16）
   shakeMin: 4,          // 落地畫面震動：shakeRange 格外圍的強度
   shakeRange: 12,       // 幾格內看得到就會震
@@ -311,7 +314,11 @@ function gourdImpact(e) {
   }
   for (const [o, d] of blds) {
     if (d <= R + CELL / 2) gourdCrushObstacle(e, o, e.buildingDamage ?? BARRIER.breakDmg);
-    else if (d <= C.knockRadius + CELL / 2) gourdCrushObstacle(e, o, C.shockBuildingDamage);
+    else if (d <= C.knockRadius + CELL / 2) {
+      gourdCrushObstacle(e, o, C.shockBuildingDamage);
+      const k = Math.max(0, Math.min(1, (d - R) / (C.knockRadius + CELL / 2 - R)));   // 越靠近葫蘆猴彈越高
+      if (o.hp > 0 && !o.isBase) o.gourdHop = { t: -k * .08, h: C.hopMax + (C.hopMin - C.hopMax) * k, landed: false };   // 外圈晚一點點才彈，像震波往外傳
+    }
   }
 }
 function gourdHitPlayer(e, p) {
@@ -372,6 +379,7 @@ function updateGourd(dt) {
   updateGourdTosses(dt);
   updateGourdBodies();
   updateGourdDebris(dt);
+  updateGourdHops(dt);
   gourdTestSpawn();
 }
 // ---- 身體擋人：溫特、隊友走不進葫蘆猴的身體（腳下的橢圓），貼上去會沿著邊緣滑開；牠拖過來也會把人推開 ----
@@ -602,4 +610,28 @@ function drawGourdTop(ctx) {
     ctx.restore();
   }
   ctx.restore();
+}
+
+// ---- 震波範圍內的建築：原地彈一下（只動畫面，格子位置不變；擋路、尋路都不受影響）----
+function updateGourdHops(dt) {
+  const C = GOURD;
+  for (const o of G.obstacles) {
+    const h = o.gourdHop;
+    if (!h) continue;
+    h.t += dt;
+    if (!h.landed && h.t >= C.hopTime) {   // 落回原位：腳下揚一點灰塵
+      h.landed = true;
+      const w = (o.w || 1) * CELL, bx = OX + o.c * CELL + w / 2, by = OY + (o.r + (o.h || 1)) * CELL;
+      for (let i = 0; i < 3 + (o.w || 1) * 2; i++) gmDust(bx + gmRand(-w / 2, w / 2), by - 2, false);
+    }
+    if (h.t >= C.hopTime + .14) o.gourdHop = null;
+  }
+}
+// 由 js/render.js 的 drawObstacle 呼叫：回傳這一幀要往上抬多少、落地壓扁多少；沒在彈就回傳 null
+function gourdHopOffset(o) {
+  const C = GOURD, h = o.gourdHop;
+  if (!h || h.t < 0) return null;
+  if (h.t < C.hopTime) { const u = h.t / C.hopTime; return { z: 4 * h.h * u * (1 - u), sx: 1 - .04 * Math.sin(u * Math.PI), sy: 1 + .05 * Math.sin(u * Math.PI) }; }   // 空中微微拉長
+  const u = (h.t - C.hopTime) / .14, q = Math.sin(u * Math.PI) * .07;   // 落地：壓扁一下再回正
+  return { z: 0, sx: 1 + q, sy: 1 - q };
 }

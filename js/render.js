@@ -25,6 +25,13 @@ function drawObstacle(o) {
     ctx.scale(a.sx, a.sy);
     ctx.translate(-(x + w / 2), -(y + h));
   }
+  // 被葫蘆猴的震波震到：原地彈一下（影子留在地上；js/gourd-monkey.js）
+  const hop = !o.isBase && !o.mapSource && typeof gourdHopOffset === 'function' ? gourdHopOffset(o) : null;
+  if (hop) {
+    if (hop.z > .5) { ctx.save(); ctx.globalAlpha = .22 * (1 - Math.min(1, hop.z / 40)); ctx.fillStyle = '#0b0906'; ctx.beginPath(); ctx.ellipse(x + w / 2, y + h - 3, w * .42, 5, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore(); }
+    ctx.save();
+    ctx.translate(x + w / 2, y + h - hop.z); ctx.scale(hop.sx, hop.sy); ctx.translate(-(x + w / 2), -(y + h));
+  }
   const img = o.type && obstacleImgs[o.type] && obstacleImgs[o.type][o.orient || 'h'];
   // 基地本體是地圖上的平面大圖，這裡只負責碰撞、受擊效果與血條，避免重複繪製。
   if (!o.isBase && !o.mapSource) {
@@ -63,6 +70,7 @@ function drawObstacle(o) {
     } else ctx.fillRect(x, y, w, h);
     ctx.globalAlpha = 1;
   }
+  if (hop) ctx.restore();
   if (a) ctx.restore();
   if (o.isBase) {         // 基地血條永久顯示，並依剩餘 HP 變色
     const ratio = Math.max(0, Math.min(1, o.hp / o.maxhp));
