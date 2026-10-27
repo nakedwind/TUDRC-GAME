@@ -1982,6 +1982,7 @@ function frame(ts) {
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
+  if (!menuOpen && !frozen && typeof updateBallBark === 'function') updateBallBark(dt);   // 球球偶爾叫一下（js/ball-poses.js）
   if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();

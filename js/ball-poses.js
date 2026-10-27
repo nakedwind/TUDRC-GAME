@@ -97,3 +97,19 @@ function drawBallPose(npc, size) {
   ctx.restore();
   return true;
 }
+
+// ---- 球球偶爾叫：在溫特身邊 range 格內時，每 every 秒（隨機）叫一次（音效 ballBark：叫 1 聲／叫 2 聲隨機，音效編輯器可以換）----
+// 越遠越小聲：near 格內最大聲，到 range 格變成 0；睡覺時不叫；走遠了計時先停著，回到範圍內再接著數
+const BALL_BARK = { range: 20, near: 2, every: [20, 60], gain: .5 };
+let ballBarkT = null;
+function updateBallBark(dt) {
+  const p = G && G.player, ball = p && G.npcs && G.npcs.find(n => n.id === 'ball');
+  if (!ball || ballSleeping(ball) || ball.eatenBy) return;
+  const d = Math.hypot(ball.x - p.x, ball.y - p.y) / CELL;
+  if (d > BALL_BARK.range) return;
+  if (ballBarkT == null) ballBarkT = BALL_BARK.every[0] + Math.random() * (BALL_BARK.every[1] - BALL_BARK.every[0]);
+  if ((ballBarkT -= dt) > 0) return;
+  ballBarkT = null;
+  const fade = d <= BALL_BARK.near ? 1 : Math.max(0, (BALL_BARK.range - d) / (BALL_BARK.range - BALL_BARK.near));
+  if (fade > 0 && typeof SFX !== 'undefined') SFX.play('ballBark', BALL_BARK.gain * fade, 'ball-bark');
+}
