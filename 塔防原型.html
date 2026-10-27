@@ -21,10 +21,10 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=test-sp-20261027"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=gear-drag-20261027">
+<link rel="stylesheet" href="css/style.css?v=dialogue-cols-20261027">
 <link rel="stylesheet" href="css/tpad-map.css?v=outline-20261025">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
-<link rel="stylesheet" href="css/squad-page.css?v=statbox-20261025">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
+<link rel="stylesheet" href="css/squad-page.css?v=solo-20261027">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 </head>
 <body>
@@ -114,14 +114,18 @@
         </div>
         <p id="dialogueText"></p>
         <div class="dialogue-actions">
-          <button id="dialogueGift" class="hidden" type="button">🎁 送禮 <span>G</span></button>
-          <button id="dialogueWorkshop" class="hidden" type="button">🔧 開發工坊</button>
-          <button id="dialoguePractice" class="hidden" type="button">🎯 開始訓練</button>
-          <button id="dialogueOutfit" class="hidden" type="button">👗 推薦穿搭</button>   <!-- 基地裡的隊友：打開他的服裝介面（js/costumes.js） -->
-          <button id="dialogueHospital" class="hidden" type="button">🏥 去醫院休息</button>   <!-- 受傷的隊員（js/vitals.js） -->
-          <button id="dialogueAshSoothe" class="hidden" type="button">🫶 請亞許疏導</button>   <!-- 疏導室的亞許（js/vitals.js） -->
           <button id="dialogueNext" type="button"><span class="dn-keys" aria-label="Space 或滑鼠點一下"><i class="dn-space"></i><em> / </em><i class="dn-mouse"></i></span> 下一句</button>
         </div>
+      </div>
+      <!-- 右邊一欄：選項（有任何一個顯示時才出現，js/game.js 的 updateDialogueOptions） -->
+      <div class="dialogue-options">
+        <button id="dialogueGift" class="hidden" type="button">🎁 送禮 <span>G</span></button>
+        <button id="dialogueOutfit" class="hidden" type="button">👗 推薦穿搭</button>   <!-- 基地裡的隊友：打開他的服裝介面（js/costumes.js） -->
+        <button id="dialogueGear" class="hidden" type="button">🎽 推薦裝備</button>   <!-- 基地裡的隊友：打開 T-Pad 他的裝備頁（js/squad-page.js） -->
+        <button id="dialogueWorkshop" class="hidden" type="button">🔧 開發工坊</button>
+        <button id="dialoguePractice" class="hidden" type="button">🎯 開始訓練</button>
+        <button id="dialogueHospital" class="hidden" type="button">🏥 去醫院休息</button>   <!-- 受傷的隊員（js/vitals.js） -->
+        <button id="dialogueAshSoothe" class="hidden" type="button">🫶 請亞許疏導</button>   <!-- 疏導室的亞許（js/vitals.js） -->
       </div>
     </div>
     <!-- 送禮選單（對話中按「送禮」打開） -->
@@ -373,7 +377,7 @@
   <script src="js/mrt-locks.js?v=mrt-stairs-20261027"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=bulletsfx-20261027"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=dialogue-cols-20261027"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=core-key-drop-20261024"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=crackwall-20261026"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=quick-drop1-20261024"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
@@ -398,6 +402,6 @@
   <script src="js/tpad-memories.js?v=20261025b"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->
   <script src="js/tpad.js?v=memory-20261025"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
   <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->
-  <script src="js/squad-page.js?v=notecell-20261025"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
+  <script src="js/squad-page.js?v=solo-20261027"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
 </body>
 </html>

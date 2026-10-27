@@ -158,3 +158,6 @@
 .sq-btn { position: absolute; top: 172px; width: 86px; height: 30px; border: 1px solid rgba(255,255,255,.3); border-radius: 7px; background: #2a313c; color: #eef4fa; font-size: 12px; font-weight: 700; cursor: pointer; }
 .sq-btn.unequip { left: 352px; } .sq-btn.equip { left: 444px; background: linear-gradient(180deg, #f6d27a, #d9a640); color: #3a2a08; border-color: transparent; }
 .sq-btn:disabled { opacity: .45; cursor: default; }
+/* 只看一位隊員（對話的「推薦裝備」打開的，js/squad-page.js 的 squadPageState.solo）：左邊的隊員列表、箭頭拿掉 */
+.sq-canvas.sq-solo .sq-roster, .sq-canvas.sq-solo .sq-arrow { display: none; }
+.sq-canvas.sq-solo { translate: -42px 0; }   /* 列表拿掉後左邊空一條：整頁往左移一半，左右留白一樣 */

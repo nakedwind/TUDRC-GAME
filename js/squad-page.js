@@ -9,7 +9,7 @@
 const SQ_W = 888, SQ_H = 520;
 // 先藏起技能樹的隊員：技能的效果、說明、畫面都還在，只是玩家在 Y102隊員頁看不到技能樹（只看得到裝備頁）；要打開時把他從這裡拿掉
 const SQ_SKILL_TREE_HIDDEN = ['tino'];
-const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null };
+const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null, solo: null };   // solo：只看這一位（對話的「推薦裝備」打開的，左邊不列其他隊員）
 const SQ_STATS = [
   { id: 'atk', name: '攻擊', icon: 'atk', val: s => s.noAttack ? '—' : String(s.dmg), num: s => s.dmg },
   { id: 'def', name: '防禦', icon: 'def', val: s => Math.round((s.defense || 0) * 100) + '%', num: s => Math.round((s.defense || 0) * 100) },
@@ -98,6 +98,7 @@ function squadMemberList() {
 function renderSquadPage(body) {
   if (!body) return;
   const st = squadPageState, safe = typeof MAP_SAFE !== 'undefined' && MAP_SAFE, members = squadMemberList();
+  if (st.solo && members.some(m => m.type === st.solo)) st.member = st.solo; else st.solo = null;
   if (!members.some(m => m.type === st.member)) st.member = members[0] ? members[0].type : null;
   const actor = members.find(m => m.type === st.member) || null;
   body.classList.add('tpad-squad-app', 'sq-app');
@@ -115,7 +116,7 @@ function renderSquadPage(body) {
     else html += squadSkillHtml(actor, safe);
   }
   const keep = body.querySelector('.sq-roster-list')?.scrollTop || 0;
-  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
+  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas' + (st.solo ? ' sq-solo' : '') + '" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
   const list = body.querySelector('.sq-roster-list'); if (list) list.scrollTop = keep;
   fitSquadCanvas(body); afterSquadRender(body);
 }
@@ -473,6 +474,7 @@ function renderTPadSquadApp(el) {
   renderSquadPage(el);
 }
 function restoreTPadSquadApp() {
+  squadPageState.solo = null;   // 離開隊員畫面：下次從 T-Pad 打開就是一般的（左邊有全部隊員）
   if (typeof closeCaptainImpression === 'function') closeCaptainImpression();
   const body = tpadEl && tpadEl.querySelector('.tpad-appbody');
   if (body) { body.classList.remove('tpad-squad-app', 'squad-safe', 'sq-app'); if (body._sqResize) { body._sqResize.disconnect(); body._sqResize = null; } }
@@ -691,3 +693,21 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
   }
   requestAnimationFrame(loop);
 })();
+
+// ---- 跟隊友對話：「🎽 推薦裝備」按鈕（js/game.js 的 openDialogue 呼叫），只在基地：直接打開 T-Pad 這位隊員的裝備頁 ----
+const gearTargetOf = actor => { const id = actor && (actor.kind === 'tower' ? actor.type : actor.id);
+  return id && typeof ROSTER !== 'undefined' && ROSTER.includes(id) && TYPES[id] ? id : null; };
+function onDialogueOpenedGear(actor) {
+  document.getElementById('dialogueGear')?.classList.toggle('hidden', !(MAP_SAFE && gearTargetOf(actor)));
+}
+function openSquadGearOf(id) {
+  if (!tpadOpen) openTPad();
+  if (!tpadOpen) return;
+  Object.assign(squadPageState, { member: id, page: 'gear', slot: { kind: 'gear', id: 0 }, solo: id });   // 只看這一位：左邊不列其他隊員
+  launchTPadApp('squad');
+}
+document.getElementById('dialogueGear')?.addEventListener('click', () => {
+  const id = gearTargetOf(dialogueState && dialogueState.actor); if (!id) return;
+  closeDialogue(true);
+  openSquadGearOf(id);
+});
