@@ -511,16 +511,21 @@ function destroyedBaseDisplayTile(s, t) {
   if (!G.destroyedBases?.size) return t;
   const file = String(t.file || '').replace(/\\/g, '/');
   if (G.destroyedBases.has(s) && (t.baseHp || file.endsWith('/field-base.png'))) {
+    if (/Poolcore_field-base\.png$/i.test(file)) {   // 池核基地：有畫 Poolcore_field-base-fail.png 就用它，沒有就照原本的樣子（不換成後室的綠色殘骸）
+      const img = tileImage({ id: '__pool-base-fail', file: 'images/Poolcore/Poolcore_field-base-fail.png' });
+      return img && img.complete && img.naturalWidth ? { ...t, id: '__pool-base-fail', file: 'images/Poolcore/Poolcore_field-base-fail.png' } : t;
+    }
     return { ...t, id: '__field-base-fail', file: 'images/field-camp/field-base-fail.png' };
   }
-  if (file.endsWith('/warning-line.png') || t.name === 'warning-line') {
+  const poolLine = /Poolcore_warning_line\.png$/i.test(file);   // 池核的警戒線：壞掉時換成 Poolcore_warning-line-fail.png
+  if (poolLine || file.endsWith('/warning-line.png') || t.name === 'warning-line') {
     const x = s.c * CELL + (s.ox || 0), y = s.r * CELL + (s.oy || 0);
     for (const base of G.destroyedBases) {
       const bt = mapTileById(base.id); if (!bt) continue;
       const bx = base.c * CELL + (base.ox || 0), by = base.r * CELL + (base.oy || 0);
       if (x < bx + mapStampW(base, bt) * CELL && x + mapStampW(s, t) * CELL > bx &&
           y < by + mapStampH(base, bt) * CELL && y + mapStampH(s, t) * CELL > by) {
-        return { ...t, id: '__warning-line-fail', file: 'images/field-camp/warning-line-fail.png' };
+        return poolLine ? { ...t, id: '__pool-warning-line-fail', file: 'images/Poolcore/Poolcore_warning-line-fail.png' } : { ...t, id: '__warning-line-fail', file: 'images/field-camp/warning-line-fail.png' };
       }
     }
   }
@@ -563,6 +568,7 @@ function drawMapStampRaw(ctx, s) {
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
   if (typeof StoryScene !== 'undefined' && StoryScene.ownsStamp(s)) return;   // 回憶劇情的自動門：由 js/story-scene.js 自己畫開關動畫
   if (typeof ballBedHidden === 'function' && ballBedHidden(s)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
+  if (typeof G !== 'undefined' && G && G.flickerGlowStamps && G.flickerGlowStamps.has(s)) return;   // 疊在燈上的光暈圖（池核 LED）：由 js/flicker-light.js 畫在黑幕上面、跟著燈亮暗
   let t = mapTileById(s.id); if (!t) return;
   t = destroyedBaseDisplayTile(s, t);
   if (typeof breakableWallDisplayTile === 'function') t = breakableWallDisplayTile(s, t);   // 可炸開的牆：裂痕／破洞（js/breakable-walls.js）

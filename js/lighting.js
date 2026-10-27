@@ -191,6 +191,9 @@ function bodyVisible(box, x, y) {
   return pts.some(([px, py]) => isVisible(px, py) || visualLightAt(px, py) > SEE_MIN);
 }
 const enemyVisible = e => !(typeof inHiddenArea === 'function' && inHiddenArea(e.x, e.y)) && bodyVisible(targetBodyBox(e), e.x, e.y);
+const BASE_ART_LAMPS = [
+  { file: /Poolcore_field-base\.png$/i, lamps: [[.094, .2], [.904, .2], [.094, .767], [.904, .767]] },   // 池核基地：四角的燈頭
+];
 function getLights() {
   const L = [];
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
@@ -209,7 +212,10 @@ function getLights() {
       // 基地中央提供穩定環境光；四角燈各自提供暖色光與光暈。
       L.push({ x: x0 + w / 2, y: y0 + h / 2, r: LIGHT.baseR || 300 });
       const lampR = LIGHT.baseLampR || 190;
-      const lamps = [
+      const bt = typeof mapTileById === 'function' && mapTileById(o.mapTileId), art = bt && BASE_ART_LAMPS.find(b => b.file.test(String(bt.file || '')));
+      const flip = o.baseStamp && o.baseStamp.fx;
+      const lamps = art ? art.lamps.map(([fx, fy]) => [x0 + w * (flip ? 1 - fx : fx), y0 + h * fy])   // 池核基地這種圖不一樣大的：照圖片比例放燈
+        : [
         [x0 + 17, y0 + 46],
         [x0 + w - 18, y0 + 46],
         [x0 + 17, y0 + h - 63],
@@ -226,6 +232,16 @@ function getLights() {
       L.push({ x, y, visualX: x, visualY, r: lr, warm: true,
         single: o.type === 'camping_lights', phase: o.c * 7 + o.r * 13 });
     }
+  }
+  // 長得像臨時基地、但只是圖片的基地（沒有 baseHp、不會被打壞的）：一樣有中央的光和四角的燈。
+  // 四盞燈的位置用圖片寬高的比例（池核那張圖比較大）：x 左右、y 上下
+  if (typeof MAP !== 'undefined' && MAP) for (const s of MAP.stamps || []) {
+    const t = mapTileById(s.id), spec = t && !t.baseHp && BASE_ART_LAMPS.find(b => b.file.test(String(t.file || '')));
+    if (!spec || (G && G.mapDestroyed && G.mapDestroyed.has(s))) continue;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
+    L.push({ x: x0 + w / 2, y: y0 + h / 2, r: LIGHT.baseR || 300 });
+    const lampR = LIGHT.baseLampR || 190;
+    spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * fy; L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }); });
   }
   if (typeof flareLightSources === 'function') L.push(...flareLightSources());   // 燃燒中的照明彈（js/flare.js）
   if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());

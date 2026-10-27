@@ -15,7 +15,15 @@ const FLICKER = {
   sparkEvery: [15, 60],            // 每隔幾秒噴一次火花
   humRange: 18,                     // 幾格內聽得到嗡嗡聲
   humVolume: 0.08,                 // 嗡嗡聲最大音量（小數要寫成 0.15 這樣，只能有一個小數點）
+  // 其他長得不一樣的燈管：檔名 → 燈管在圖片裡的位置（寬、高的比例）、燈管半長（寬的比例）、光暈圖（疊在燈上、跟著亮暗）
+  // 地圖上跟燈疊在同一個位置的光暈圖物件，改由這裡畫（亮著才發光、畫在黑幕上面），不會被黑幕蓋掉
+  variants: [
+    { file: /Poolcore_LED\.png$/i, tube: { fx: .5, fy: .4 }, half: .4, glow: 'images/Poolcore/Poolcore_LED_glow.png' },   // 池核的 LED 燈
+  ],
 };
+const flickerVariantOf = t => t && FLICKER.variants.find(v => v.file.test(String(t.file || '')) || v.file.test(String(t.name || '') + '.png'));
+const flickerGlowImgs = {};
+const flickerGlowImg = src => flickerGlowImgs[src] || (flickerGlowImgs[src] = Object.assign(new Image(), { src }));
 const flickRand = ([a, b]) => a + Math.random() * (b - a);
 
 // ---- 找出地圖上所有日光燈（每次換地圖／重新開始時重建）----
@@ -28,18 +36,28 @@ function flickerLights() {
     if (typeof isPoweredLightTile==='function'&&isPoweredLightTile(mapTileById(id)))return false;
     if (id === 'tile_bg_electric_light') return true;
     const t = typeof mapTileById === 'function' && mapTileById(id); if (!t) return false;
+    if (flickerVariantOf(t)) return true;
     const file = String(t.file || '').startsWith('data:') ? '' : String(t.file || '');
     return file.includes(FLICKER.file) || /electric-light|日光燈/i.test(String(t.name || ''));
   };
-  const add = (left, top, fx) => list.push({
-    x: left + (fx ? 80 - FLICKER.tube.dx : FLICKER.tube.dx), y: top + FLICKER.tube.dy,
+  const glowOwned = new Set();
+  const add = (left, top, fx, id) => {
+    const t = mapTileById(id), v = flickerVariantOf(t), w = t ? mapTileW(t) * CELL : 80, h = t ? mapTileH(t) * CELL : 80;
+    const x = v ? left + w * (fx ? 1 - v.tube.fx : v.tube.fx) : left + (fx ? 80 - FLICKER.tube.dx : FLICKER.tube.dx), y = v ? top + h * v.tube.fy : top + FLICKER.tube.dy;
+    if (v && v.glow) for (const s of MAP.stamps || []) {   // 疊在同一個位置的光暈圖物件：這裡接手畫
+      const gt = mapTileById(s.id);
+      if (gt && String(gt.file || '').endsWith(v.glow.split('/').pop()) && Math.abs(OX + s.c * CELL + (s.ox || 0) - left) < 6 && Math.abs(OY + s.r * CELL + (s.oy || 0) - top) < 6) glowOwned.add(s);
+    }
+    list.push({
+    x, y, half: v ? w * v.half : 19, glow: v && v.glow ? { src: v.glow, left, top, w, h, fx } : null,
     on: true, level: 1, blinkT: flickRand(FLICKER.blinkEvery), outT: flickRand(FLICKER.outEvery), sparkT: flickRand(FLICKER.sparkEvery),
     flick: null, seed: Math.random() * 10,
   });
+  };
   for (const layer of Object.values(MAP.layers || {}))
-    for (const [key, id] of Object.entries(layer)) if (isTube(id)) { const [c, r] = key.split(',').map(Number); add(OX + c * CELL, OY + r * CELL, false); }
-  for (const s of MAP.stamps || []) if (isTube(s.id)) add(OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), s.fx);
-  G.flickerLights = list; G.flickerLightsMap = MAP; G.elecArcs = [];
+    for (const [key, id] of Object.entries(layer)) if (isTube(id)) { const [c, r] = key.split(',').map(Number); add(OX + c * CELL, OY + r * CELL, false, id); }
+  for (const s of MAP.stamps || []) if (isTube(s.id)) add(OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), s.fx, s.id);
+  G.flickerLights = list; G.flickerLightsMap = MAP; G.elecArcs = []; G.flickerGlowStamps = glowOwned;
   return list;
 }
 
@@ -113,7 +131,11 @@ function drawFlickerLights(ctx) {
     g.addColorStop(.6, `rgba(210,225,255,${.05 * k})`); g.addColorStop(1, 'rgba(200,220,255,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    ctx.fillStyle = `rgba(255,255,235,${.85 * k})`; ctx.fillRect(L.x - 19, L.y - 1.5, 38, 3);   // 燈管本身發亮
+    ctx.fillStyle = `rgba(255,255,235,${.85 * k})`; ctx.fillRect(L.x - L.half, L.y - 1.5, L.half * 2, 3);   // 燈管本身發亮
+    if (L.glow) {   // 有自己的光暈圖（池核 LED）：亮著時疊上去，跟著閃
+      const img = flickerGlowImg(L.glow.src), g = L.glow;
+      if (img.complete && img.naturalWidth) { ctx.globalAlpha = k; ctx.save(); if (g.fx) { ctx.translate(g.left * 2 + g.w, 0); ctx.scale(-1, 1); } ctx.drawImage(img, g.left, g.top, g.w, g.h); ctx.restore(); ctx.globalAlpha = 1; }
+    }
   }
   for (const a of G.elecArcs || []) {   // 鋸齒電弧
     const k = a.life / a.life0;

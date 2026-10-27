@@ -4217,7 +4217,108 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_field-base.png",
     "w": 12,
-    "h": 9
+    "h": 9,
+    "flat": true,
+    "baseHp": 2000,
+    "baseSolid": [
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        2
+      ],
+      [
+        3,
+        2
+      ],
+      [
+        4,
+        2
+      ],
+      [
+        5,
+        2
+      ],
+      [
+        6,
+        2
+      ],
+      [
+        7,
+        2
+      ],
+      [
+        8,
+        2
+      ],
+      [
+        9,
+        2
+      ],
+      [
+        10,
+        2
+      ],
+      [
+        1,
+        3
+      ],
+      [
+        1,
+        4
+      ],
+      [
+        1,
+        5
+      ],
+      [
+        1,
+        6
+      ],
+      [
+        10,
+        3
+      ],
+      [
+        10,
+        4
+      ],
+      [
+        10,
+        5
+      ],
+      [
+        10,
+        6
+      ],
+      [
+        1,
+        7
+      ],
+      [
+        2,
+        7
+      ],
+      [
+        3,
+        7
+      ],
+      [
+        8,
+        7
+      ],
+      [
+        9,
+        7
+      ],
+      [
+        10,
+        7
+      ]
+    ],
+    "baseDepth": 5
   },
   {
     "id": "tile_mvofs5nu",
@@ -4413,5 +4514,101 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_notice.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_mvquvyy8",
+    "name": "Poolcore_notice_slip",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_notice_slip.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvqv5agz",
+    "name": "Poolcore_No_diving_02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_No_diving_02.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvqyrysf",
+    "name": "Poolcore_duck",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_duck.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvr11rba",
+    "name": "Poolcore_notice_deep",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_notice_deep.png",
+    "w": 2,
+    "h": 4
+  },
+  {
+    "id": "tile_mvr11zmd",
+    "name": "Poolcore_No_diving_03",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_No_diving_03.png",
+    "w": 2,
+    "h": 4
+  },
+  {
+    "id": "tile_mvr2fi62",
+    "name": "Poolcore-pool_stair_block_02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-pool_stair_block_02.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_mvr2g292",
+    "name": "Poolcore-pool_stair_block",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-pool_stair_block.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_mvr32pqo",
+    "name": "Poolcore-pool_stair_block_01",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-pool_stair_block_01.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_mvr3kqob",
+    "name": "Poolcore-stair_full",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-stair_full.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_mvr3la0q",
+    "name": "Poolcore-stair_middle",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-stair_middle.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_mvr3nuyx",
+    "name": "Poolcore-stair_full_02",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-stair_full_02.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_mvr40sp8",
+    "name": "Poolcore-pool_stair_block_Straight",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore-pool_stair_block_Straight.png",
+    "w": 1,
+    "h": 2
   }
 ];

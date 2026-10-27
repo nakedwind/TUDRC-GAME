@@ -3,7 +3,9 @@
    每扇門在地圖編輯器選取後可設定：manual＝手動門（玩家按 Space 開關）／auto＝自動門（觸發條件達成時自動打開）。 */
 const DOOR_TILES = {
   tile_bg_backroom_door_wood: { panel: [19, 61], sound: 'backroomDoor' },
-  tile_mvfonrdd: { panel: [0, 80], mode: 'practice' },   // B-2 訓練室的玻璃門（2×3 格，整片都是門板）：平常關著，訓練時從選單結束（js/practice.js）   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
+  tile_mvfonrdd: { panel: [0, 80], mode: 'practice' },
+  tile_mvobex5o: { panel: [0, 40] },   // 池核的門（Poolcore_door.png，1×2 格，整片都是門板）
+  tile_mvobzfro: { panel: [0, 40] },   // 池核的門（Poolcore_door_2.png，1×2 格，整片都是門板）   // B-2 訓練室的玻璃門（2×3 格，整片都是門板）：平常關著，訓練時從選單結束（js/practice.js）   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
 };
 const DOOR_MODES = {
   manual: '自由開關（玩家按 Space 開關）',
