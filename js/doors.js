@@ -37,6 +37,7 @@ function setupDoors() {
     const mode = typeof DOOR_MODES !== 'undefined' && DOOR_MODES[s.doorMode] ? s.doorMode : (DOOR_TILES[s.id].mode || 'manual');   // 素材可以指定預設的門種類
     const door = { stamp: s, mode, open: false, cells, own, sound: DOOR_TILES[s.id].sound || 'door',
       x: (left + right) / 2, y: bottom, top: y0 + 2, left, right, y0,
+      rowTopY: OY + Math.min(...rows) * CELL + CELL / 2, rowBotY: OY + row * CELL + CELL / 2,   // 擋路那幾排的中心高度（算「離門多近」用，上下兩邊都能按）
       randomT: mode === 'random' ? doorRandomWait() : 0 };
     if (typeof findChainArt === 'function') door.chainArt = findChainArt(door);   // 疊在門上的鎖鏈圖（js/memory-doors.js）
     if (mode === 'memory' && typeof setupMemoryDoor === 'function') setupMemoryDoor(door);   // 記憶之門：鑰匙、劇情、解開過沒（解開過的一開始就開著，js/memory-doors.js）
@@ -71,7 +72,7 @@ function doorNearPlayer() {
   let best = null, bd = DOOR.radius;
   for (const d of mapDoors) {
     if (d.mode !== 'manual' && d.mode !== 'memory' && !doorLocked(d)) continue;
-    const dd = Math.hypot(d.x - p.x, d.y - CELL / 2 - p.y);
+    const dd = Math.hypot(d.x - p.x, Math.max(d.rowTopY, Math.min(d.rowBotY, p.y)) - p.y);   // 量到擋路那幾排最近的地方（門擋兩排時，從上方也搆得到）
     if (dd < bd) { bd = dd; best = d; }
   }
   return best;

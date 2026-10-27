@@ -1,12 +1,15 @@
 /* 音效設定（由音效編輯器匯出）。音檔可放在 Sound effects 的分類子資料夾。 */
 const SOUND_SETTINGS = {
   "gains": {
+    "achievement": 1.35,
+    "aidStart": 1.7,
     "berserk": 1.2,
     "bigBoom": 1.2,
     "birdDeath": 1.35,
     "birdHurt": 0.35,
     "birdRun": 1.8,
     "birdWalk": 1.95,
+    "blip": 1.5,
     "chainUnlock": 1.45,
     "clownfishHop1": 1.5,
     "clownfishHop2": 1.45,
@@ -14,6 +17,7 @@ const SOUND_SETTINGS = {
     "dryFire": 1.35,
     "eggSquish": 1.3,
     "elevator": 1.85,
+    "favorUp": 1.3,
     "fishDeath": 1.1,
     "fishHurt": 1.15,
     "fishSpray": 1.35,
@@ -39,6 +43,7 @@ const SOUND_SETTINGS = {
     "mouseDeath": 2.3,
     "mouseHurt": 1.9,
     "mouseOut": 1.25,
+    "mrtGate": 1.4,
     "mrtUnlock": 1.85,
     "oreMine": 1.45,
     "pearlDeath": 1.15,
@@ -64,14 +69,16 @@ const SOUND_SETTINGS = {
       "lifeformAttack": "怪物/生命體/生命體攻擊.mp3",
       "fishDouse": "怪物/魚頭君/火被澆熄.mp3",
       "itemPickup": "pop.mp3",
-      "achievement": "獎勵/拾取.mp3",
+      "achievement": "成就.mp3",
       "mrtUnlock": [
         "環境/門與機關/開鎖03.mp3",
         "設施/打磨.mp3"
       ],
       "chainUnlock": "環境/門與機關/開鎖03.mp3",
       "lockedDoor": "環境/門與機關/開鎖02.mp3",
-      "storyDoor": "環境/門與機關/鐵門滑動.mp3"
+      "storyDoor": "環境/門與機關/鐵門滑動.mp3",
+      "mrtGate": "剪票口.mp3",
+      "favorUp": "獎勵/升級.mp3"
     },
     "extras": {},
     "meta": {}
