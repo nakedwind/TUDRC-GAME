@@ -146,10 +146,10 @@ const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal'],
   start: { incendiary: 3, flash: 3, shock: 4, heal: 2, tranq: 5, paint: 6 } };
 // ===== 彈匣（js/magazine.js）：在背包「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪只換得到彈匣裡的 =====
 // free：不佔彈匣、一定帶著；slots[等級-1]＝彈匣裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
-const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5], cost: [150, 250, 380], name: '彈匣', icon: '🧰' };
+const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5], cost: [150, 250, 380], name: '彈匣', icon: '🧰', image: 'images/裝備/magazine.png' };   // image：開發工坊的圖（沒有就用 icon）
 // ===== 背包格數（js/backpack.js）：開發工坊升級；slots[等級-1]＝幾格，cost[i]＝從第 i+1 級升到下一級花幾個異質碎片 =====
 // items＝「物品」分頁，ammo＝「彈藥包」分頁（一種子彈一格）。重要物品、隊員物資沒有格數上限。
 const BAG_UPGRADES = {
-  items: { name: '背包擴充', icon: '🎒', tab: '物品', slots: [12, 18, 24, 30], cost: [150, 250, 380] },
-  ammo: { name: '彈藥包擴充', icon: '🧰', tab: '彈藥包', slots: [12, 18, 24, 30, 36, 42], cost: [150, 250, 380, 520, 700] },
+  items: { name: '背包擴充', icon: '🎒', image: 'images/裝備/Backpack.png', tab: '物品', slots: [12, 18, 24, 30], cost: [150, 250, 380] },   // image：開發工坊的圖（檔名大寫 B，要跟檔案一樣，網頁上大小寫有差）
+  ammo: { name: '彈藥包擴充', icon: '🧰', image: 'images/裝備/ammo-pouch.png', tab: '彈藥包', slots: [12, 18, 24, 30, 36, 42], cost: [150, 250, 380, 520, 700] },   // image：開發工坊的圖（沒有就用 icon）
 };

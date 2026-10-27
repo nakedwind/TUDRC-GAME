@@ -54,7 +54,7 @@ function magazineWorkshopEntries() {
       canDev: !have, where: '', devCost: b.cost || 0, upCost: 0, devMoney: wsMoney('b:' + id, 0, b.cost || 0), buy: 'bd:' + id };   // devMoney＝開發要花的經費
   });
   const m = magState();
-  const mag = { key: 'm:magazine', kind: 'magazine', def: MAGAZINE, name: MAGAZINE.name, lv: m.lv, max: MAGAZINE.slots.length, icon: wsAmmoIcon('<i>' + MAGAZINE.icon + '</i>', MAGAZINE), image: null, emoji: MAGAZINE.icon,
+  const mag = { key: 'm:magazine', kind: 'magazine', def: MAGAZINE, name: MAGAZINE.name, lv: m.lv, max: MAGAZINE.slots.length, icon: wsAmmoIcon(equipIcon(MAGAZINE), MAGAZINE), image: MAGAZINE.image || null, emoji: MAGAZINE.icon,
     tag: '彈匣', worn: false, about: MAGAZINE.desc || '', stat: n => '彈匣 ' + MAGAZINE.slots[n - 1] + ' 格',
     canDev: false, where: '', upCost: MAGAZINE.cost[m.lv - 1] || 0, upMoney: m.lv < MAGAZINE.slots.length ? wsMoney('m:magazine', m.lv - 1, MAGAZINE.cost[m.lv - 1] || 0) : 0, buy: 'mg:magazine' };
   return { bullets, mag };
