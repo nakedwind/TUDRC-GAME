@@ -679,16 +679,54 @@ const WORKSHOP_CONFIG = {
           "y": -55
         },
         "name": {
-          "y": -9
+          "y": -22
         },
         "tag": {
-          "y": -9
+          "y": -22
         },
         "stats": {
-          "y": -9
+          "y": -22
         },
         "desc": {
-          "y": -9
+          "y": -22
+        }
+      }
+    },
+    "bag:items": {
+      "infoParts": {
+        "btn": {
+          "y": -55
+        },
+        "name": {
+          "y": -22
+        },
+        "tag": {
+          "y": -22
+        },
+        "desc": {
+          "y": -22
+        },
+        "stats": {
+          "y": -22
+        }
+      }
+    },
+    "bag:ammo": {
+      "infoParts": {
+        "btn": {
+          "y": -55
+        },
+        "name": {
+          "y": -22
+        },
+        "tag": {
+          "y": -22
+        },
+        "desc": {
+          "y": -22
+        },
+        "stats": {
+          "y": -22
         }
       }
     }
