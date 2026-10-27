@@ -30,11 +30,11 @@ function setupMrtLocks() {
   for (const s of MAP.stamps || []) {
     const cfg = MRT_LOCKS[s.id]; if (!cfg) continue;
     const t = mapTileById(s.id); if (!t) continue;
-    const w = mapTileW(t), h = mapTileH(t), row = s.r + h - 1;
+    const o = stampSolidOrigin(s), w = mapTileW(t), h = mapTileH(t), row = o.r + h - 1;   // 擋路格照像素微調對齊圖片（js/maploader.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
     const lock = { stamp: s, cfg, open: cfg.kind === 'exit' && perm.includes(mrtToken(s)), cells: [], added: [],
-      x: x0 + w * CELL / 2, top: y0, bottom: y0 + h * CELL, c0: s.c, c1: s.c + w - 1, r0: s.r, r1: row };
-    for (let dc = 0; dc < w; dc++) lock.cells.push({ key: (s.c + dc) + ',' + row, dc });
+      x: x0 + w * CELL / 2, top: y0, bottom: y0 + h * CELL, c0: o.c, c1: o.c + w - 1, r0: o.r, r1: row };
+    for (let dc = 0; dc < w; dc++) lock.cells.push({ key: (o.c + dc) + ',' + row, dc, off: o.off });
     G.mrtLocks.push(lock);
     applyMrtLock(lock);
   }
@@ -43,9 +43,9 @@ function setupMrtLocks() {
 function applyMrtLock(lock) {
   for (const k of lock.added) { mapWalls.delete(k); mrtAddedWalls.delete(k); }
   lock.added = [];
-  for (const { key, dc } of lock.cells) {
+  for (const { key, dc, off } of lock.cells) {
     const passable = lock.open && !lock.opening && (lock.cfg.kind === 'exit' || (lock.cfg.open || []).includes(dc));
-    if (!passable && !mapWalls.has(key)) { mapWalls.add(key); lock.added.push(key); mrtAddedWalls.add(key); }
+    if (!passable && !mapWalls.has(key)) { mapWalls.add(key); lock.added.push(key); mrtAddedWalls.add(key); addStampSolidOffset(key, off); }
   }
   if (typeof computeFlow === 'function') computeFlow();
 }

@@ -23,8 +23,9 @@ function setupPropCollisions() {
   for (const s of MAP.stamps || []) {
     const cfg = byTile.get(s.id), v = cfg && cfg.h; if (!v) continue;
     const ox = s.ox || 0, oy = s.oy || 0;
-    const c0 = s.c + Math.floor(ox / CELL), r0 = s.r + Math.floor(oy / CELL);   // 往下取整：剩下的 0～39 像素用像素微調補上
-    const off = [ox - Math.floor(ox / CELL) * CELL, oy - Math.floor(oy / CELL) * CELL];
+    // 四捨五入到最近的格子，剩下的 ±半格用像素微調補上（往下取整的話，往上微調幾像素就會整塊跑到上一列，可能剛好疊在牆上被略過）
+    const c0 = s.c + Math.round(ox / CELL), r0 = s.r + Math.round(oy / CELL);
+    const off = [ox - Math.round(ox / CELL) * CELL, oy - Math.round(oy / CELL) * CELL];
     for (const [dc, dr] of v.solid || []) {
       if (dc < 0 || dr < 0 || dc >= v.w || dr >= v.h) continue;
       const c = c0 + (s.fx ? v.w - 1 - dc : dc), r = r0 + (s.fy ? v.h - 1 - dr : dr), key = c + ',' + r;

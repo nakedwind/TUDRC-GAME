@@ -17540,7 +17540,20 @@ const BATTLE_MAPS = [
         "25,38": "floor",
         "11,50": "floor",
         "12,50": "floor",
-        "12,42": "floor"
+        "12,42": "floor",
+        "10,58": "floor",
+        "11,58": "floor",
+        "12,58": "floor",
+        "13,58": "floor",
+        "14,58": "floor",
+        "15,58": "floor",
+        "16,58": "floor",
+        "17,58": "floor",
+        "18,58": "floor",
+        "19,58": "floor",
+        "20,58": "floor",
+        "21,58": "floor",
+        "21,57": "floor"
       },
       "ground": {},
       "ground2": {},
@@ -17702,7 +17715,9 @@ const BATTLE_MAPS = [
         "21,52": "tile_mr4czvpx",
         "21,53": "tile_mr4czvpx",
         "10,53": "tile_mr4czvpx",
-        "10,52": "tile_mr4czvpx"
+        "10,52": "tile_mr4czvpx",
+        "21,54": "tile_mr4czvpx",
+        "10,54": "tile_mr4czvpx"
       }
     },
     "stamps": [
@@ -18711,13 +18726,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mr4cyq54",
         "c": 10,
-        "r": 54,
+        "r": 55,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyq54",
         "c": 21,
-        "r": 54,
+        "r": 55,
         "layer": "object"
       },
       {
@@ -18903,13 +18918,13 @@ const BATTLE_MAPS = [
       {
         "id": "tile_bg_backroom_wall02",
         "c": 11,
-        "r": 55,
+        "r": 56,
         "layer": "object"
       },
       {
         "id": "tile_bg_backroom_wall02",
         "c": 18,
-        "r": 55,
+        "r": 56,
         "layer": "object"
       },
       {
@@ -19042,12 +19057,6 @@ const BATTLE_MAPS = [
         "id": "tile_mr4cyy36",
         "c": 6,
         "r": 49,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 14,
-        "r": 55,
         "layer": "object"
       },
       {
@@ -20073,12 +20082,6 @@ const BATTLE_MAPS = [
         "layer": "object"
       },
       {
-        "id": "tile_bg_backroom_wall02_hole",
-        "c": 15,
-        "r": 55,
-        "layer": "object"
-      },
-      {
         "id": "tile_bg_backroom_wall02",
         "c": 28,
         "r": 37,
@@ -20100,24 +20103,6 @@ const BATTLE_MAPS = [
         "id": "tile_mr4ja2cb",
         "c": 16,
         "r": 40,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_obstacle_searchlight_h",
-        "c": 12,
-        "r": 49,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_obstacle_searchlight_h",
-        "c": 19,
-        "r": 49,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_obstacle_searchlight_h",
-        "c": 11,
-        "r": 49,
         "layer": "object2"
       },
       {
@@ -20238,30 +20223,6 @@ const BATTLE_MAPS = [
         "c": 20,
         "r": 54,
         "layer": "floor"
-      },
-      {
-        "id": "tile_obstacle_redroadblocks_h",
-        "c": 11,
-        "r": 49,
-        "layer": "object"
-      },
-      {
-        "id": "tile_obstacle_redroadblocks_h",
-        "c": 19,
-        "r": 49,
-        "layer": "object"
-      },
-      {
-        "id": "tile_obstacle_redroadblocks_h",
-        "c": 13,
-        "r": 49,
-        "layer": "object"
-      },
-      {
-        "id": "tile_obstacle_redroadblocks_h",
-        "c": 17,
-        "r": 49,
-        "layer": "object"
       },
       {
         "id": "tile_bg_backroom_floor_m",
@@ -20488,6 +20449,68 @@ const BATTLE_MAPS = [
         "fx": true,
         "ox": 0,
         "oy": 6
+      },
+      {
+        "id": "tile_dmg_broken_wall_breach",
+        "c": 14,
+        "r": 55,
+        "layer": "object2",
+        "ox": 0,
+        "oy": 10
+      },
+      {
+        "id": "tile_obstacle_irongate",
+        "c": 14,
+        "r": 48,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mr4ja2cb",
+        "c": 13,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4ja2cb",
+        "c": 18,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4ja2cb",
+        "c": 19,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4ja2cb",
+        "c": 20,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4ja2cb",
+        "c": 11,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4ja2cb",
+        "c": 12,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_obstacle_searchlight_h",
+        "c": 11,
+        "r": 49,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_obstacle_searchlight_h",
+        "c": 16,
+        "r": 56,
+        "layer": "ground3"
       }
     ],
     "solid": [
@@ -20526,23 +20549,12 @@ const BATTLE_MAPS = [
       "12,57",
       "13,57",
       "14,57",
-      "15,57",
       "10,57",
-      "11,56",
-      "12,56",
-      "13,56",
-      "14,56",
-      "15,56",
-      "16,57",
       "17,57",
       "18,57",
       "19,57",
       "20,57",
       "21,57",
-      "17,56",
-      "18,56",
-      "19,56",
-      "20,56",
       "21,56",
       "21,55",
       "21,54",
@@ -21927,7 +21939,22 @@ const BATTLE_MAPS = [
       "26,24",
       "18,39",
       "19,39",
-      "19,38"
+      "19,38",
+      "10,58",
+      "11,58",
+      "12,58",
+      "13,58",
+      "14,58",
+      "15,58",
+      "16,58",
+      "17,58",
+      "18,58",
+      "19,58",
+      "20,58",
+      "21,58",
+      "20,56",
+      "15,57",
+      "16,57"
     ],
     "breakable": [],
     "coreSpots": [
@@ -22148,12 +22175,6 @@ const BATTLE_MAPS = [
       "3,47",
       "4,47",
       "4,48",
-      "5,47",
-      "6,47",
-      "6,46",
-      "6,45",
-      "7,45",
-      "6,44",
       "6,43",
       "5,42",
       "5,41",
@@ -22188,9 +22209,6 @@ const BATTLE_MAPS = [
       "8,40",
       "8,41",
       "8,42",
-      "8,43",
-      "7,44",
-      "7,43",
       "9,43",
       "10,43",
       "12,43",
@@ -22201,8 +22219,6 @@ const BATTLE_MAPS = [
       "21,43",
       "22,43",
       "23,43",
-      "8,44",
-      "9,44",
       "10,44",
       "13,44",
       "14,44",
@@ -22370,9 +22386,10 @@ const BATTLE_MAPS = [
       "11,45",
       "12,44",
       "13,46",
+      "10,45",
+      "7,45",
       "8,45",
-      "9,45",
-      "10,45"
+      "9,45"
     ],
     "coreCount": 1,
     "monsterMix": [
@@ -22449,7 +22466,7 @@ const BATTLE_MAPS = [
       }
     ],
     "cols": 40,
-    "rows": 58
+    "rows": 60
   }
 ];
 // 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來

@@ -156,14 +156,15 @@ function elevatorLightIsOpen(c, r) {
 function setElevatorSolids(stamp, phase) {
   const tile = mapTileById(stamp.id), cfg = elevatorConfig(stamp.id);
   if (!tile || !cfg) return;
-  const c0 = stamp.c + Math.round((stamp.ox || 0) / CELL);
-  const r0 = stamp.r + Math.round((stamp.oy || 0) / CELL);
+  const { c: c0, r: r0, off } = stampSolidOrigin(stamp);   // 擋路格照像素微調對齊圖片
   for (let dr = 0; dr < mapTileH(tile); dr++) for (let dc = 0; dc < mapTileW(tile); dc++) {
     mapWalls.delete((c0 + dc) + ',' + (r0 + dr));
   }
   for (const [dc, dr] of cfg[phase].solid || []) {
-    if (dc >= 0 && dc < mapTileW(tile) && dr >= 0 && dr < mapTileH(tile))
-      mapWalls.add((c0 + dc) + ',' + (r0 + dr));
+    if (dc >= 0 && dc < mapTileW(tile) && dr >= 0 && dr < mapTileH(tile)) {
+      const key = (c0 + dc) + ',' + (r0 + dr);
+      mapWalls.add(key); addStampSolidOffset(key, off);
+    }
   }
 }
 function openElevator(stamp) {
@@ -250,25 +251,27 @@ function initMap() {
   if (typeof mrtAddedWalls !== 'undefined') mrtAddedWalls = new Set();
   if (typeof breakableWallCells !== 'undefined') { breakableWallCells = new Set(); breakableWallSolid = new Set(); }
   if (typeof storageAddedWalls !== 'undefined') storageAddedWalls = new Set();
+  mapSolidOffsets = MAP.solidOffsets || {};                              // 不可穿透格的像素微調（要在電梯、椅子加擋路格之前）
   for (const stamp of MAP.stamps || []) if (isElevatorStamp(stamp)) setElevatorSolids(stamp, 'closed');
-  mapSolidOffsets = MAP.solidOffsets || {};                              // 不可穿透格的像素微調
   // 每張椅子的擋路格由椅子編輯器決定；一般格子圖片與大圖擺放都套用。
+  // 用方向鍵微調過位置的椅子：擋路格也照像素對齊圖片（stampSolidOrigin／addStampSolidOffset）
   const addChairSolid = (id, c, r, fx = false, fy = false, stamp = null) => {
     const cfg = chairConfig(id), tile = mapTileById(id);
     if (!cfg || !tile) return;
     const w = stamp ? mapStampW(stamp, tile) : mapTileW(tile), h = stamp ? mapStampH(stamp, tile) : mapTileH(tile);
     const cells = stamp ? mapStampCells(cfg.solid, mapTileW(tile), mapTileH(tile), mapStampTurn(stamp)) : cfg.solid;
+    const off = stamp ? stampSolidOrigin(stamp).off : null;
     for (const [dx, dy] of cells) {
-      const cc = c + (fx ? w - 1 - dx : dx), rr = r + (fy ? h - 1 - dy : dy);
-      if (inGrid(cc, rr)) mapWalls.add(cc + ',' + rr);
+      const cc = c + (fx ? w - 1 - dx : dx), rr = r + (fy ? h - 1 - dy : dy), key = cc + ',' + rr;
+      if (!inGrid(cc, rr) || mapWalls.has(key)) continue;   // 已經是牆（地圖上畫的不可穿透格）：照舊整格擋
+      mapWalls.add(key); addStampSolidOffset(key, off);
     }
   };
   for (const layer of Object.values(MAP.layers || {})) for (const [key, id] of Object.entries(layer)) {
     const [c, r] = key.split(',').map(Number);
     addChairSolid(id, c, r);
   }
-  for (const s of MAP.stamps || []) addChairSolid(s.id,
-    s.c + Math.round((s.ox || 0) / CELL), s.r + Math.round((s.oy || 0) / CELL), !!s.fx, !!s.fy, s);
+  for (const s of MAP.stamps || []) { const o = stampSolidOrigin(s); addChairSolid(s.id, o.c, o.r, !!s.fx, !!s.fy, s); }
   mapBases = (MAP.stamps || []).filter(s => {
     const t = mapTileById(s.id);
     return !!(t && t.baseHp);
@@ -323,6 +326,18 @@ function returnPortalCell(fromId, source = null) {
 // 所以判定時要連周圍 8 格一起看。怪物尋路仍然以「整格」為單位（見 pathfinding.js）。
 let mapSolidOffsets = {};
 const solidOffsetAt = (c, r) => mapSolidOffsets[c + ',' + r];
+// 物件自帶的擋路格（椅子、置物箱、電梯、捷運閘門）：用方向鍵微調過位置（ox、oy 像素）的物件，
+// 先四捨五入到最近的格子（stampSolidOrigin），剩下的 ±半格記成這格的像素微調（addStampSolidOffset），擋路範圍就跟著圖片走
+function stampSolidOrigin(s) {
+  const ox = s.ox || 0, oy = s.oy || 0, dc = Math.round(ox / CELL), dr = Math.round(oy / CELL);
+  return { c: s.c + dc, r: s.r + dr, off: [ox - dc * CELL, oy - dr * CELL] };
+}
+function addStampSolidOffset(key, off) {   // 回傳有沒有加（這格本來就有微調、或沒偏移就不加）
+  if (!off || (!off[0] && !off[1]) || mapSolidOffsets[key]) return false;
+  if (MAP && mapSolidOffsets === MAP.solidOffsets) mapSolidOffsets = { ...mapSolidOffsets };   // 別改到地圖資料本身
+  mapSolidOffsets[key] = off.slice();
+  return true;
+}
 // 電梯物件清單快取：地圖物件很多，每次碰撞判定都整張掃一遍會很慢
 let elevatorStampCache = { list: null, src: null, len: -1 };
 function elevatorStamps() {

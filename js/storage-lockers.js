@@ -203,7 +203,7 @@ function showItemPickupNotice(id,amount=1){
   return notice;
 }
 
-let storageWallMap=null,storageAddedWalls=new Set();
+let storageWallMap=null,storageAddedWalls=new Set(),storageAddedOffsets=new Set();
 function storageBoxConfig(open){
   const id='storage-box-'+(open?'open':'closed');
   let edited=[];try{edited=JSON.parse(localStorage.getItem('td-object-editor-v1')||'[]');}catch(_){}
@@ -211,18 +211,18 @@ function storageBoxConfig(open){
 }
 function setupStorageBoxWalls(){
   if(!MAP)return;
-  if(storageWallMap===MAP)for(const key of storageAddedWalls)mapWalls.delete(key);
-  storageWallMap=MAP;storageAddedWalls=new Set();
+  if(storageWallMap===MAP){for(const key of storageAddedWalls)mapWalls.delete(key);for(const key of storageAddedOffsets)delete mapSolidOffsets[key];}
+  storageWallMap=MAP;storageAddedWalls=new Set();storageAddedOffsets=new Set();
   for(const prop of storagePropEntries()){
     if(prop.kind!=='closed'&&prop.kind!=='open')continue;
     const v=storageBoxConfig(prop.open)?.h;if(!v)continue;
-    const token=JSON.parse(prop.token),c=token[2],r=token[3],ox=token[5],oy=token[6];
+    const token=JSON.parse(prop.token),o=stampSolidOrigin({c:token[2],r:token[3],ox:token[5],oy:token[6]});   // 擋路格照像素微調對齊圖片（js/maploader.js）
     for(const [dc,dr] of v.solid||[]){
       if(dc<0||dr<0||dc>=v.w||dr>=v.h)continue;
-      const cc=c+Math.round(ox/CELL)+(prop.stamp?.fx?v.w-1-dc:dc);
-      const rr=r+Math.round(oy/CELL)+(prop.stamp?.fy?v.h-1-dr:dr);
+      const cc=o.c+(prop.stamp?.fx?v.w-1-dc:dc);
+      const rr=o.r+(prop.stamp?.fy?v.h-1-dr:dr);
       const key=cc+','+rr;
-      if(inGrid(cc,rr)&&!mapWalls.has(key)){mapWalls.add(key);storageAddedWalls.add(key);}
+      if(inGrid(cc,rr)&&!mapWalls.has(key)){mapWalls.add(key);storageAddedWalls.add(key);if(addStampSolidOffset(key,o.off))storageAddedOffsets.add(key);}
     }
   }
 }
