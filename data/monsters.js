@@ -488,6 +488,37 @@ const MONSTERS_DEFAULT = [
     "behavior": "healer",
     "hitSound": "bananaHurt",
     "deathSound": "bananaDeath"
+  },
+  {
+    "id": "gourd_monkey",
+    "name": "葫蘆猴",
+    "sprite": "images/monster/gourd-monkey/gourd-monkey-front.png",
+    "hp": 700,
+    "speed": 24,
+    "playerDamage": 22,
+    "sentryDamage": 28,
+    "buildingDamage": 80,
+    "reward": 60,
+    "crystals": 6,
+    "width": 105,
+    "height": 165,
+    "frames": {
+      "front": "images/monster/gourd-monkey/gourd-monkey-front.png",
+      "walkFront": [
+        "images/monster/gourd-monkey/gourd-monkey-sway-right.png",
+        "images/monster/gourd-monkey/gourd-monkey-sway-left.png"
+      ],
+      "blink": [
+        "images/monster/gourd-monkey/gourd-monkey-blink-01.png",
+        "images/monster/gourd-monkey/gourd-monkey-blink-02.png"
+      ]
+    },
+    "behavior": "gourd",
+    "deathSound": "gourdDeath",
+    "noHitSquash": true,
+    "stagger": 0,
+    "noStun": true,
+    "knockMul": 0
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

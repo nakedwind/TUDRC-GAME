@@ -26,6 +26,10 @@ const SOUND_SETTINGS = {
     "gachaDrop": 1.45,
     "glassBreak3": 2.15,
     "glassBreak4": 1.85,
+    "gourdDeath": 2,
+    "gourdDrag": 2,
+    "gourdLandCry": 1.4,
+    "gourdLaugh": 1.8,
     "hit": 3,
     "hitFlash": 1.15,
     "hitPaint": 0,
@@ -86,7 +90,12 @@ const SOUND_SETTINGS = {
       "mrtGate": "環境/門與機關/剪票口.mp3",
       "favorUp": "獎勵/升級.mp3",
       "milkfishChew": "怪物/虱目魚小子/虱目魚小子吃人2.mp3",
-      "milkfishGulp": "怪物/虱目魚小子/虱目魚小子吃人2.mp3"
+      "milkfishGulp": "怪物/虱目魚小子/虱目魚小子吃人2.mp3",
+      "gourdDrag": "怪物/葫蘆猴/葫蘆猴走路02.mp3",
+      "gourdSlam": [
+        "怪物/葫蘆猴/葫蘆猴落地02.mp3",
+        "環境/破壞/挖礦.mp3"
+      ]
     },
     "extras": {},
     "meta": {}

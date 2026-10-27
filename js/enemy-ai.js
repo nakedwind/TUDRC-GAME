@@ -462,6 +462,7 @@ function stepEnemy(e, dt) {
   }
   e.lastSafeX = e.x; e.lastSafeY = e.y;
   if (e.behavior === 'burrow') { stepBurrowingMouse(e, dt); return; }
+  if (e.behavior === 'gourd') { stepGourdEnemy(e, dt); return; }   // 葫蘆猴：拖行、泰山壓頂，自己找寬的路回核心（js/gourd-monkey.js）
   if (e.behavior === 'healer') { stepHealerEnemy(e, dt); return; }   // 金蕉王：補血、逃跑，核心醒著也不回去守（js/golden-banana-king.js）   // 地底追蹤不用史萊姆跳躍；自身處理核心守衛
   // 飛撲途中已經騰空，不受接觸判定或暈眩打斷，落地時才結算傷害。
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }

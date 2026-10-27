@@ -254,7 +254,8 @@ function onEnemyDeath(e) {
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.elite && typeof eliteBirdDown === 'function') eliteBirdDown(e);   // 菁英鳥頭人：橫幅提示核心護盾消失（js/elite-bird-head.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
-  if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
+  if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童
+  if (e.behavior === 'gourd') { e.lastFrameFile = e.frames ? e.frames.front : e.sprite; e.lastFrameFlip = false; pushFallCorpse(e); return; }   // 葫蘆猴：像石頭一樣倒下（在空中被打死也用站姿圖）   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
   if (e.behavior === 'milkfish' || e.behavior === 'milkfishSmall') {   // 虱目魚小子：倒下變黑（跟鳥頭人一樣）
     if (e.forceAttack && e.frames) { e.lastFrameFile = e.frames.front; e.lastFrameFlip = false; }   // 死在撲咬的瞬間：攻擊圖尺寸不同，改用站姿圖倒下才不會變形

@@ -211,6 +211,7 @@ function drawTower(t) {
     seatRotate(t, size);   // 躺在橫放的床上：跟溫特一樣旋轉
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, t);   // 被絲瓜藤纏住：扭動
     if (typeof applySlipTransform === 'function') applySlipTransform(ctx, t);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
+    if (typeof applyGourdTossTransform === 'function') applyGourdTossTransform(ctx, t);   // 被葫蘆猴震飛：飛起來（js/gourd-monkey.js）
     if (t.hp > 0) t.downAt = null;
     else if (t.downAt == null) t.downAt = performance.now();   // 剛失去戰鬥能力：播倒下動畫
     const downAge = t.downAt != null ? (performance.now() - t.downAt) / 1000 : Infinity;
@@ -399,7 +400,7 @@ function drawEnemy(e) {
   const bodyX = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleX || 1), bodyY = e.behavior || e.noHitSquash ? 1 : (e.slimeScaleY || 1);
   const slimeW = (e.drawWidth || 42) * bodyX * sqX, slimeH = (e.drawHeight || 33) * bodyY * sqY;
   const bottomY = e.y + 13 - lift;
-  const shadowScale = Math.max(.55, 1 - lift / 22) * size;
+  const shadowScale = Math.max(.55, 1 - lift / 22) * size * (e.behavior === 'gourd' ? (e.drawWidth || 42) / 40 : 1);   // 葫蘆猴身體很寬：影子跟著變大
   ctx.globalAlpha = .28 * Math.min(1, shadowScale); ctx.fillStyle = '#071015';
   if (e.behavior !== 'burrow') { ctx.beginPath(); ctx.ellipse(e.x, e.y + 13, 15 * shadowScale, 4 * shadowScale, 0, 0, Math.PI * 2); ctx.fill(); }   // 版權老鼠從土堆裡出來，不畫腳下陰影
   // 撲擊落點警示：蓄力時由外往內縮的紅圈＋逐漸填滿，飛撲時保持顯示
@@ -453,7 +454,7 @@ function drawEnemy(e) {
   if (sway) ctx.restore();   // 斜晃只套在身體上（連左右翻一起還原），血條和文字不跟著晃
   else if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
   // 血條放在圖的上方（體型大的變體血條也跟著變寬、變高）
-  const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
+  const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' || e.behavior === 'gourd' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
   if (!e.hideBar) {   // 劇情裡的怪物不畫血條（js/story-scene.js）
     ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW / 2, barY, barW, 3);
     ctx.fillStyle = e.variant === 'giant' ? '#c79bff' : '#7CFC7C'; ctx.fillRect(e.x - barW / 2, barY, barW * Math.max(0, e.hp) / e.maxhp, 3);
@@ -907,6 +908,7 @@ function drawPlayer(p) {
     }
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, p);   // 被絲瓜藤纏住：掙扎扭動（js/loofah-lady.js）
     if (typeof applySlipTransform === 'function') applySlipTransform(ctx, p);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
+    if (typeof applyGourdTossTransform === 'function') applyGourdTossTransform(ctx, p);   // 被葫蘆猴震飛：飛起來（js/gourd-monkey.js）
     ctx.imageSmoothingEnabled = false;
     const hitK = p.hitT > 0 ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出
     if (p.sitting?.rotation) {
@@ -1033,6 +1035,7 @@ function draw() {
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   if (typeof drawFishWater === 'function') drawFishWater(ctx);
+  if (typeof drawGourdGround === 'function') drawGourdGround(ctx);   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
   if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   sortables.sort((a, b) => a.y - b.y);
@@ -1044,7 +1047,8 @@ function draw() {
   drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
   if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
   if (typeof drawFishSprays === 'function') drawFishSprays(ctx);
-  if (typeof drawLoofahVines === 'function') drawLoofahVines(ctx);   // 冒出地面、纏住人的絲瓜藤（js/loofah-lady.js）   // 魚頭君噴出的水柱（js/fish-head.js）
+  if (typeof drawLoofahVines === 'function') drawLoofahVines(ctx);
+  if (typeof drawGourdTop === 'function') drawGourdTop(ctx);   // 葫蘆猴落地：撞擊白光、飛起來的石礫、灰塵團（js/gourd-monkey.js）   // 冒出地面、纏住人的絲瓜藤（js/loofah-lady.js）   // 魚頭君噴出的水柱（js/fish-head.js）
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
   drawBerserkFxWorld(ctx);     // 哨兵身上的黑紫霧、腳下心跳光圈、暴走台詞
 

@@ -222,6 +222,18 @@ const BESTIARY_CONFIG = {
       ],
       "thumbScale": 200,
       "thumbY": 10
+    },
+    "gourd_monkey": {
+      "stars": 3,
+      "imgScale": 60,
+      "abilities": [
+        "泰山壓頂：升到空中，朝地上的紅圈砸下來，壓傷圈內的人和建築。",
+        "沉重：不會硬直、打不退、推不動。",
+        "拖行：貼著地面慢慢拖著走，地上留下刮痕。",
+        "身寬體胖：只有一格寬的通道擠不過去。"
+      ],
+      "thumbScale": 200,
+      "thumbY": 10
     }
   },
   "order": [
@@ -243,6 +255,7 @@ const BESTIARY_CONFIG = {
     "burrowing_mouse",
     "clownfish",
     "clownfish_small",
-    "golden_banana_king"
+    "golden_banana_king",
+    "gourd_monkey"
   ]
 };

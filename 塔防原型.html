@@ -257,7 +257,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=pathfix-20261027"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=radio-20261027"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=gourd-sfx-20261028"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=storymap-20261025"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -278,8 +278,8 @@
   <script src="data/balance.js?v=newbie-flare10-20261027"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
-  <script src="data/monsters.js?v=bananahp-20261025"></script>  <!-- 2b. 怪物種類與數值 -->
-  <script src="js/monster-data.js?v=banana-king-20261024"></script>
+  <script src="data/monsters.js?v=gourd-hp700-20261028"></script>  <!-- 2b. 怪物種類與數值 -->
+  <script src="js/monster-data.js?v=gourd-20261028"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script src="data/tiles.js?v=crack2kinds-20261026"></script>      <!-- 4. 素材庫（兩個編輯器共用） -->
@@ -313,13 +313,13 @@
   <script src="js/skills.js?v=notes-20261024"></script>   <!-- 技能樹：12 格、花碎片學技能 -->
   <script src="js/anomalous-core.js?v=newbie-max20-20261027"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
   <script src="js/core-frenzy.js?v=elite-bar-20261024"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
-  <script src="js/combat-feel.js?v=banana-king-20261024"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/combat-feel.js?v=gourd-20261028"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="data/achievements.js?v=achvcustom-20261026"></script>   <!-- 9d. 成就的內容（分類、名稱、條件、文字；用「🏆 成就編輯器」編輯） -->
   <script src="js/achievement-config.js?v=achvcustom-20261025"></script>   <!-- 成就的設定（跟成就編輯器共用） -->
   <script src="js/achievements.js?v=achv7-20261023"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=nofallback-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/burrowing-mouse.js?v=mouse-test-off-20261024"></script> <!-- 花蓮版權老鼠：出土與地底手 -->
-  <script src="js/enemy-ai.js?v=fleefix-20261026"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=gourd-20261028"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=squad-20261024"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/elite-bird-head.js?v=elite-dashhome2-20261026"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
   <script src="js/pearl-kid.js?v=fleefix-20261026"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
@@ -328,8 +328,9 @@
   <script src="js/loofah-lady.js?v=bulletsfx-20261027"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
   <script src="js/clownfish.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
   <script src="js/golden-banana-king.js?v=newsfx-20261027"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
+  <script src="js/gourd-monkey.js?v=en2-20261028"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/milkfish-kid.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=acidwarn-20261027"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=gourd-fx-20261028"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=acidult064-20261027"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=mouse-tunnel-20261023"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
@@ -377,7 +378,7 @@
   <script src="js/mrt-locks.js?v=stamppx-20261027"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=acidellipse-20261027"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=gourd-test-20261028"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=newbie-result-20261027"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=crackwall-20261026"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=quick-drop1-20261024"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
@@ -394,7 +395,7 @@
   <script src="js/locked-doors.js?v=winter-locked-20261027"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
-  <script src="js/practice.js?v=banana-king-20261024"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
+  <script src="js/practice.js?v=gourd-test-20261028"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
   <script src="js/channel-actions.js?v=movecancel-20261025"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=grab-building-20261027"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=memory-20261025"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->

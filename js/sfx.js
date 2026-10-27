@@ -147,6 +147,13 @@ const SFX = (() => {
     bananaHeal: '怪物/金蕉王/治療.mp3',
     bananaHurt: '怪物/金蕉王/金蕉王被打.mp3',
     bananaDeath: '怪物/金蕉王/金蕉王死掉.mp3',
+    // 葫蘆猴：拖地行走、泰山壓頂落地（撞擊＋叫聲）、笑、死掉、被震飛的人落地（js/gourd-monkey.js）
+    gourdDrag: '怪物/絲瓜小姐/絲瓜小姐走路.mp3',   // 暫用絲瓜小姐走路，可在音效編輯器換
+    gourdSlam: ['怪物/絲瓜小姐/絲瓜小姐踩踏.mp3', '戰鬥/命中/敲打2.mp3'],   // 砸到地面的撞擊聲（兩個一起播）
+    gourdLandCry: '怪物/葫蘆猴/葫蘆猴落地叫聲.mp3',
+    gourdLaugh: '怪物/葫蘆猴/葫蘆猴笑聲.mp3',
+    gourdDeath: '怪物/葫蘆猴/葫蘆猴死掉.mp3',
+    gourdTossLand: '戰鬥/命中/敲打2.mp3',   // 被震飛的溫特／隊友落地
     bananaSlip: '環境/踩到香蕉.mp3',   // 踩到香蕉皮滑倒（js/golden-banana-king.js 的 bkSlip）
     pop: 'pop.mp3',
     ballBark: { mode: 'random', files: ['狗/叫1聲.mp3', '狗/叫2聲.mp3'] },   // 球球叫：叫 1 聲或叫 2 聲隨機（js/ball-poses.js 的 updateBallBark）
@@ -174,7 +181,7 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'pop', 'playerHit', 'playerHitMonster',
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'pop', 'playerHit', 'playerHitMonster',
     'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音

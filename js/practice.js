@@ -169,7 +169,7 @@ function startPractice() {
     practice.active = true; practice.hits = []; practice.total = 0; practice.spawnT = .8; practice.waveT = 0;
     switchMap(MAP_INDEX); begin(false);   // 同一張地圖重新佈置成「戰鬥區域」（MAP_SAFE 關掉，js/maploader.js）
     G.money = PRACTICE.money; G.guide = practice.snap.guide;
-    G.loofahTestDone = G.fishTestDone = G.bananaKingTestDone = true;   // 戰鬥地圖的測試用生怪（絲瓜、魚頭）不要出現在訓練室
+    G.loofahTestDone = G.fishTestDone = G.bananaKingTestDone = G.gourdTestDone = true;   // 戰鬥地圖的測試用生怪（絲瓜、魚頭）不要出現在訓練室
     const [ec, er] = PRACTICE.enter, [px, py] = center(ec, er);
     G.player.x = px + CELL / 2; G.player.y = py; G.player.dir = 'back';
     const cells = practiceCellsNear(ec, er - 2, G.towers.length, [PRACTICE.sandbag]);
