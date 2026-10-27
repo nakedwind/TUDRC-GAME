@@ -16,6 +16,7 @@ const OIL_ITEMS = {
   camping_lights: { name: '露營燈', smallFire: true, fire: { radius: .6, life: 2, dps: 5 } },
   // 三種的強弱：爐具（小爆炸、能炸礦）＜ 油箱 ＜ 油桶（最大最痛）
   deco_oil_drum: { name: '油桶', breaksOre: true, file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
+    alsoFiles: ['images/background/oil-drum.png'],   // 「油桶（背景素材）」長得一樣，也當成油桶（打得爆）
     blast: { radius: 3.5, enemy: 150, sentry: 45, player: 40 },
     fire: { radius: 3.2, life: 12, dps: 18 },   // 打爆後的火海燒 12 秒
     slick: { radius: 2, life: 300 } },   // 油汙留 5 分鐘
@@ -35,7 +36,7 @@ const FIRE_TICK = 1;   // 火海每隔幾秒燙一次（同時站在好幾片火
 const oilItem = o => o && OIL_ITEMS[o.type];
 function oilItemByFile(file) {
   const f = String(file || '').replace(/\\/g, '/');
-  return Object.entries(OIL_ITEMS).find(([, it]) => it.file === f) || null;
+  return Object.entries(OIL_ITEMS).find(([, it]) => it.file === f || (it.alsoFiles || []).includes(f)) || null;
 }
 // 油桶站立的位置（最下面那一格的中心）
 function oilCenter(o) {
