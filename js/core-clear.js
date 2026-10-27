@@ -5,7 +5,7 @@
 //  ・這張地圖的核心全部打破：跳出結算畫面，可以「返回應變中心」或「留下來繼續探索」。
 //  ・核心全破、異質體也清光：畫面中間跳「已徹底控制」的大橫幅，記一次成就（fullControls）。
 // ============================================================
-const CORE_CLEAR = { keyItem: 'anomaly-key', fullColor: '#7ee0a8', resultDelay: 3 };   // resultDelay：最後一個核心碎掉後幾秒才跳結算（先看碎裂表演）
+const CORE_CLEAR = { keyItem: 'anomaly-key', fullColor: '#7ee0a8', resultDelay: 3, newbieTitle: '✅ Y區入口已控制' };   // resultDelay：最後一個核心碎掉後幾秒才跳結算（先看碎裂表演）；newbieTitle：新手區結算的標題
 
 const CORE_KEY_DROP = { wait: 3, image: 'images/碎片鑰匙/異質鑰匙小.png', w: 16, h: 36 };   // wait：掉在地上幾秒後自動收進背包
 const coreKeyGroundImg = new Image(); coreKeyGroundImg.src = CORE_KEY_DROP.image;
@@ -44,7 +44,7 @@ function collectCoreKey(d) {
   if (typeof itemIntroSeen !== 'undefined') itemIntroSeen.add('item:' + id);   // 下面自己跳視窗，拾取提示就不要再跳「第一次拿到」
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   const item = itemById(id);   // 異質鑰匙比較特別：每次拿到都跳說明視窗
-  if (typeof itemIntro === 'function') itemIntro({ key: 'item:' + id, always: true, name: item.name, image: item.image, imageScale: 2, desc: item.desc });
+  if (typeof itemIntro === 'function') itemIntro({ key: 'item:' + id, always: true, name: item.name, image: item.image, desc: item.desc });
   G.effects.push({ text: itemById(id).name, iconImage: CORE_KEY_DROP.image, x: d.x, y: d.y - 40, life: 3, life0: 3, color: '#d69bff', vy: -22 });   // 飄字前面放異質鑰匙小圖
   if (typeof updateHUD === 'function') updateHUD();
 }
@@ -107,10 +107,14 @@ function addCoreClearChoices() {
   document.getElementById('coreStay')?.remove();
   const stay = document.createElement('button'); stay.type = 'button'; stay.id = 'coreStay'; stay.className = 'core-stay'; stay.textContent = '留下來繼續探索';
   ok.after(stay);
+  if (typeof isNewbieMap === 'function' && isNewbieMap()) {   // 新手區：自己的標題，只留「繼續探索」（沒有「再玩一次」）
+    document.getElementById('ov-title').textContent = CORE_CLEAR.newbieTitle;
+    stay.textContent = '繼續探索'; ok.style.display = 'none';
+  }
 }
 // 其他時候跳出結算畫面（輸了、開始畫面…）不要留著這個按鈕
 const coreClearShowOverlay = showOverlay;
-showOverlay = function (...args) { document.getElementById('coreStay')?.remove(); return coreClearShowOverlay.apply(this, args); };
+showOverlay = function (...args) { document.getElementById('coreStay')?.remove(); const ok = document.getElementById('ov-btn'); if (ok) ok.style.display = ''; return coreClearShowOverlay.apply(this, args); };
 document.addEventListener('click', e => {
   if (!e.target.closest('#coreStay') || !G) return;
   sfx('button');

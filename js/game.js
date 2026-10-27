@@ -1155,6 +1155,7 @@ function newGame() {
     // 新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
     if (!isNewbieMap() && typeof walletGet === 'function') G.money += walletGet();
   }
+  if (typeof renderBuildQuickSlots === 'function') renderBuildQuickSlots();   // 下方建築欄：這張地圖能蓋的（新手區只有幾種，js/build.js）
   if (isNewbieMap() && !window.TEST_MODE) {   // 新手區：照明彈裝好在彈匣、防護頭盔放在裝備箱（data/balance.js 的 NEWBIE_START）
     const bullets = bulletState(), mag = magState();
     bullets.owned.flare = true; bullets.n.flare = NEWBIE_START.flares;
@@ -1974,7 +1975,8 @@ function frame(ts) {
   if (StoryScene.active()) { StoryScene.tick(dt); return; }
   const frozen = hitstop > 0; if (frozen) hitstop = Math.max(0, hitstop - dt);   // 命中頓格：短暫凍結戰場
   const sdt = dt * battleTimeScale(dt);   // 哨兵暴走瞬間的慢動作（js/berserk-fx.js）
-  const introOpen = (typeof itemIntroOpen !== 'undefined' && itemIntroOpen) || (typeof tutorialAskOpen !== 'undefined' && tutorialAskOpen);   // 第一次拿到新東西的說明視窗（js/item-intro.js）、新手區問要不要看教學（js/tutorial.js）
+  const introOpen = (typeof itemIntroOpen !== 'undefined' && itemIntroOpen) || (typeof tutorialAskOpen !== 'undefined' && tutorialAskOpen)
+    || (typeof tutorialPaused === 'function' && tutorialPaused());   // 第一次拿到新東西的說明視窗（js/item-intro.js）、新手區問要不要看教學（js/tutorial.js）
   const menuOpen = paused || introOpen || G.over || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || settingsOpen || campPlanOpen || campArmorOpen || campSupplyOpen || mapTransitioning
     || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen)   // 射擊練習（js/target-practice.js）
     || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
@@ -1986,6 +1988,7 @@ function frame(ts) {
   if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
+  if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）
   if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }

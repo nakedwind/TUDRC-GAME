@@ -139,7 +139,7 @@ const CHARACTERS = {
       "rank": "S",
       "role": "腐蝕特攻",
       "ability": "腐蝕",
-      "range": 1,
+      "range": 1.5,
       "aggroRange": 10,
       "dmg": 30,
       "rate": 1,

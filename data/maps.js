@@ -17128,7 +17128,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_a46c5e1a-9802-4db5-a3b9-486b4649c206",
-    "name": "Y區地下街-75號入口-新手教學",
+    "name": "Y25區入口-新手教學",
     "desc": "",
     "layers": {
       "floor": {

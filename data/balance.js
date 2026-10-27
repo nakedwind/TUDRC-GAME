@@ -38,12 +38,15 @@ const RESCUE_DOG_HANDLERS = ['eldrin', 'avaren'];
 // 新手區專用開場配置，不覆蓋其他地圖的玩家編隊。
 const NEWBIE_START = {
   mapId: 'map_a46c5e1a-9802-4db5-a3b9-486b4649c206',
-  team: ['avaren', 'eldrin', 'ball', 'luther'],
+  team: ['avaren', 'eldrin', 'colyn'],
   box: { medkit: 6, firstaid: 7, 'almond-water': 7 },
   guideKit: { firstaid: 3, 'almond-water': 3 },
-  flares: 30,         // 溫特身上的照明彈（已裝進彈匣）
+  flares: 10,         // 溫特身上的照明彈（已裝進彈匣）
+  bag: { medkit: 2, 'almond-water': 2, firstaid: 1 },   // 溫特背包一開始就有的補品（只在第一次進新手區時給一次，js/tutorial.js 的 tutorialStartBag）
   gear: ['helmet'],    // 已經擁有、放在裝備箱裡（不穿上）的防具（data/equipment.js 的 id）
   monsterHp: .5,       // 怪物血量倍率（.5＝一半；異質核心不算）
+  builds: ['searchlight', 'landmine', 'roadblocks', 'deco_oil_tank'],   // 能蓋的建築（探照燈、地雷、路障、油箱；js/build.js 的 buildAllowedHere）
+  maxEnemies: 20,     // 場上異質體上限（其他地圖是 CORE.maxEnemies × 難度，現在是 30；js/anomalous-core.js 的 coreMaxEnemies）
 };
 const isNewbieMap = () => typeof MAP !== 'undefined' && MAP?.id === NEWBIE_START.mapId;
 

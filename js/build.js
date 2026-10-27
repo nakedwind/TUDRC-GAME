@@ -114,16 +114,18 @@ let buildTargetCell = null;    // 從地面情境選單指定的建築格
 const BUILD_CATS = [['obstacle', '🧱 障礙物']];
 const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
 const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence']);   // 暫時不能蓋的建築（鐵圍籬先停用）
-const buildList = () => [...OBSTACLES, ...DECOS].filter(o=>!DISABLED_BUILD_IDS.has(o.id));
+// 這張地圖能不能蓋：新手區只能蓋 NEWBIE_START.builds 裡的（data/balance.js）
+const buildAllowedHere = id => !(typeof isNewbieMap === 'function' && isNewbieMap() && NEWBIE_START.builds) || NEWBIE_START.builds.includes(id);
+const buildList = () => [...OBSTACLES, ...DECOS].filter(o=>!DISABLED_BUILD_IDS.has(o.id) && buildAllowedHere(o.id));
 // 依 id 找建築（跨兩類），放置時用
-const buildableById = id => DISABLED_BUILD_IDS.has(id) ? null : (OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id));
+const buildableById = id => DISABLED_BUILD_IDS.has(id) || !buildAllowedHere(id) ? null : (OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id));
 // 下方建築欄：直接列出全部可以蓋的東西（不再有「建築」選單）。
 // 排列：先照 BUILD_ORDER，其他的接在後面（物件編輯器新增的建築會自動出現在最後）
 const BUILD_ORDER = ['camping_lights', 'searchlight', 'wirecloth', 'roadblocks', 'wirefence', 'landmine'];
-const buildQuickIds = [...BUILD_ORDER.filter(id => buildableById(id)), ...buildList().map(o => o.id).filter(id => !BUILD_ORDER.includes(id))];
+const buildQuickIds = () => [...BUILD_ORDER.filter(id => buildableById(id)), ...buildList().map(o => o.id).filter(id => !BUILD_ORDER.includes(id))];   // 每次重畫都重算（換地圖時能蓋的不一樣）
 function renderBuildQuickSlots() {
   buildQuickSlots.innerHTML = '';
-  buildQuickIds.forEach((id, index) => {
+  buildQuickIds().forEach((id, index) => {
     const ob = buildableById(id); if (!ob) return;
     const button = document.createElement('button');
     button.type = 'button'; button.className = 'build-quick-slot';
@@ -254,7 +256,7 @@ function updateBuildToggle() {
   buildToggle.classList.toggle('sel', !!active);
   demolishToggle.classList.toggle('sel', !!(G && G.selType === 'demolish'));
   buildQuickSlots.querySelectorAll('.build-quick-slot').forEach((button, index) =>
-    button.classList.toggle('sel', !!(G && G.selType === 'build:' + buildQuickIds[index])));
+    button.classList.toggle('sel', !!(G && G.selType === 'build:' + button.dataset.buildId)));
   document.getElementById('wrap').classList.toggle('placing-building', placing);
   document.getElementById('wrap').classList.toggle('demolishing', !!(G && G.selType === 'demolish'));   // 拆除模式：游標變槌子（css/style.css）
   if (placing && typeof closeFieldCommandMenu === 'function') closeFieldCommandMenu();

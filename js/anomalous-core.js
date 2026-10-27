@@ -113,7 +113,7 @@ function coreSpawnRule(core) {
   const rate = difficultyOf('spawnRate');   // 整體難度（data/balance.js 的 DIFFICULTY）：召喚間隔跟著拉長
   return { ...rule, every: [rule.every[0] / rate, rule.every[1] / rate] };
 }
-const coreMaxEnemies = () => Math.max(4, Math.round(CORE.maxEnemies * difficultyOf('spawnRate')));   // 場上異質體上限
+const coreMaxEnemies = () => isNewbieMap() && NEWBIE_START.maxEnemies ? NEWBIE_START.maxEnemies : Math.max(4, Math.round(CORE.maxEnemies * difficultyOf('spawnRate')));   // 場上異質體上限（新手區另外設，data/balance.js 的 NEWBIE_START）
 function spawnCoreGroup(core) {
   const cells = darkMonsterSpawnCells();
   if (!cells.length) return;
