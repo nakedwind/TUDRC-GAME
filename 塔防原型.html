@@ -284,7 +284,7 @@
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=v2tiles-20261026"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
   <script src="js/map-data.js?v=story-20261021"></script>          <!-- 4c. 三份地圖合在一起給遊戲用（MAPS_DEFAULT） -->
-  <script src="data/doors.js?v=memory-20261025"></script> <!-- 可開關的門（哪些素材是門）-->
+  <script src="data/doors.js?v=winter-locked-20261027"></script> <!-- 可開關的門（哪些素材是門）-->
   <script src="data/chairs.js?v=poolbed-20261026"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
   <script src="js/chair-data.js?v=sync-20261021"></script>
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
@@ -292,8 +292,8 @@
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/maploader.js?v=locker-overdraw-20261027"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=water-20261026"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
-  <script src="js/doors.js?v=chainart-20261027"></script> <!-- 門：手動門／自動門 -->
-  <script src="js/memory-doors.js?v=chainart-20261027"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
+  <script src="js/doors.js?v=winter-locked-20261027"></script> <!-- 門：手動門／自動門 -->
+  <script src="js/memory-doors.js?v=winter-locked-20261027"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
   <script src="js/breakable-walls.js?v=crack2kinds-20261026"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=blend-20261026"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
@@ -323,9 +323,9 @@
   <script src="js/fish-head.js?v=fleefix-20261026"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=squad-20261024"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
   <script src="js/clownfish.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
-  <script src="js/golden-banana-king.js?v=notest-20261026"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
+  <script src="js/golden-banana-king.js?v=slip-pose-20261027"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
   <script src="js/milkfish-kid.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=promptdark-20261026"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=slip-pose-20261027"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=acidally-20261026"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=mouse-tunnel-20261023"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
@@ -370,10 +370,10 @@
   <script src="js/vitals.js?v=resumehp-20261025"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
   <script src="js/camp-beds.js?v=poolbed-20261026"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
-  <script src="js/mrt-locks.js?v=mrt-layered-art-20261018"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
+  <script src="js/mrt-locks.js?v=mrt-stairs-20261027"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=newbie-gear-20261027"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=mrt-stairs-20261027"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/core-clear.js?v=core-key-drop-20261024"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=crackwall-20261026"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=quick-drop1-20261024"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
@@ -386,7 +386,7 @@
   <script src="js/bestiary.js?v=elite-20261024"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->
   <script src="js/target-practice.js?v=achvimpl-20261023"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
-  <script src="js/locked-doors.js?v=sfxkeys-20261018"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
+  <script src="js/locked-doors.js?v=winter-locked-20261027"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
   <script src="js/practice.js?v=banana-king-20261024"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->

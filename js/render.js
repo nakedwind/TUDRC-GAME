@@ -513,7 +513,10 @@ function npcIconOutline(id, img) {
 // 走路時一蹦一蹦的 NPC：height＝最高蹦幾像素、perSec＝每秒蹦幾下（只有圖會跳，頭上的名字和泡泡不跳）
 const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 // 衣櫃裡戴上的配件（js/costumes.js）：behind＝畫在角色後面、front＝前面
-const costumeLayer = (id, who, x, y, size, layer) => { if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer); };
+const costumeLayer = (id, who, x, y, size, layer) => {
+  if (who && who.slipT > 0 && who.slipPose) who = { ...who, dir: who.slipPose.dir, frame: who.slipPose.frame };   // 滑倒定格的走路圖可能是別的方向：配件跟著那張圖的方向、那一幀
+  if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer);
+};
 function drawWanderer(npc) {
   const size = PLAYER.drawSize;
   const ballSleep = npc.id === 'ball' && typeof ballSleeping === 'function' && ballSleeping(npc);
@@ -1089,7 +1092,7 @@ function draw() {
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）
     else if (typeof lockedDoorNearPlayer === 'function' && !doorNearPlayer() && lockedDoorNearPlayer()) { const d = lockedDoorNearPlayer(); drawInteractPrompt(d.x, d.top - 4, '開門'); }   // 鎖住的房門（js/locked-doors.js）
-    else if (typeof mrtLockNearPlayer === 'function' && mrtLockNearPlayer()) { const l = mrtLockNearPlayer(); drawInteractPrompt(l.x, l.top - 4, mrtLockPrompt(l)); }   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
+    else if (typeof mrtLockNearPlayer === 'function' && mrtLockNearPlayer()) { const l = mrtLockNearPlayer(); drawInteractPrompt(l.x, mrtLabelY(l), mrtLockPrompt(l)); }   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
     else if (typeof practiceDoorNear === 'function' && practiceDoorNear()) { const d = practiceDoorNear(); drawInteractPrompt(d.x, d.top - 6, practiceDoorPrompt()); }   // 訓練室的門（js/practice.js）
     else if (doorNearPlayer()) { const d = doorNearPlayer(); drawInteractPrompt(d.x, d.top - 6, typeof doorPrompt === 'function' ? doorPrompt(d) : d.open ? '關門' : '開門'); }
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) { const t = missionTableUsable(); drawInteractPrompt(t.x, t.top, t.label || '作戰桌'); }   // 作戰桌／作戰螢幕（js/missions.js）

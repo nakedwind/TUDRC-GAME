@@ -35,9 +35,15 @@ function lockedDoorNearPlayer() {
 function tryLockedDoorNearPlayer() {
   const d = lockedDoorNearPlayer(); if (!d || typeof openTextDialogue !== 'function') return false;
   if (typeof sfxAt === 'function') sfxAt('lockedDoor', d.x, d.bottom, .35, 'locked-door');   // 轉一下門把（小聲；音效編輯器可以換）
-  const text = d.stamp.lockText || (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '……好像被鎖住了。');
+  winterSay(d.stamp.lockText || (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '……好像被鎖住了。'));
+  return true;
+}
+// 下方跳出對話框，溫特說話（\n＝換下一句）。上鎖的門、記憶之門、捷運閘門／入口沒有鑰匙時也用這個
+function winterSay(text) {
+  if (typeof openTextDialogue !== 'function') return false;
   const face = typeof playerSprites !== 'undefined' && playerSprites.front && playerSprites.front[0];
   openTextDialogue({ name: (typeof CHARACTERS !== 'undefined' && CHARACTERS.winter && CHARACTERS.winter.name) || '溫特',
     image: face ? face.src : '', lines: String(text).split('\n').filter(Boolean), kind: 'winter' });
   return true;
 }
+const lockedNeedKeyText = () => typeof LOCKED_NEED_KEY_TEXT !== 'undefined' ? LOCKED_NEED_KEY_TEXT : '門被鎖住了，好像需要特定的鑰匙。';

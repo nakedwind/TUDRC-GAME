@@ -40,7 +40,7 @@ function showChainArt(d) { if (G && G.mapDestroyed) for (const s of d.chainArt |
 function memoryDoorInteract(d) {
   if (d.unlocked) { openMemoryChoice(d); return; }
   const key = d.memoryKey && itemById(d.memoryKey);
-  const say = text => { sfx('error'); flash(text, d.x, d.top, '#c9b5ff', 1.6); };
+  const say = text => lockedNeedKey(d.x, d.y, text, d.top);   // 溫特在對話框說「需要特定的鑰匙」（js/doors.js）
   if (!key) { say('被鎖鏈鎖住了，打不開'); return; }
   if (!((supplyInventory.get(key.id) || 0) > 0)) { say('被鎖鏈鎖住了，需要' + key.name); return; }
   d.unlocked = true; rememberMemoryDoor(d);

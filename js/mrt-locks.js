@@ -62,6 +62,15 @@ function mrtStampHole(s) {
   const lock = mrtLockOf(s);
   return lock && lock.open ? cfg.hole : null;
 }
+// 捷運入口裡面的出入口：走進去播下樓梯的腳步聲（js/game.js 的 enterPortal）
+const MRT_STAIR_TILES = ['tile_mrt_exit_2', 'tile_mrt_exit_2_sealed'];
+function mrtStairPortal(pt) {
+  return !!MAP && (MAP.stamps || []).some(s => {
+    if (!MRT_STAIR_TILES.includes(s.id)) return false;
+    const t = mapTileById(s.id); if (!t) return false;
+    return pt.c >= s.c && pt.c < s.c + mapTileW(t) && pt.r >= s.r && pt.r < s.r + mapTileH(t);
+  });
+}
 // 封鎖中的入口裡面的出入口不作用（js/game.js 的 portalNearPlayer）
 function mrtPortalBlocked(pt) {
   return (G && G.mrtLocks || []).some(l => !l.open && l.cfg.kind === 'exit' && pt.c >= l.c0 && pt.c <= l.c1 && pt.r >= l.r0 && pt.r <= l.r1);
@@ -74,16 +83,23 @@ function mrtLockNearPlayer() {
   for (const l of G.mrtLocks || []) {
     if (l.open) continue;
     if (p.y < l.bottom - 12) continue;   // 從前面（下方）靠近
-    const d = Math.hypot(l.x - p.x, l.bottom - p.y);
+    // 左右只算離素材邊緣多遠：很寬的入口（5 格）站在左右兩側前面也算靠近
+    const dx = Math.max(0, Math.abs(l.x - p.x) - (l.c1 - l.c0) * CELL / 2);
+    const d = Math.hypot(dx, l.bottom - p.y);
     if (d < bd) { bd = d; best = l; }
   }
   return best;
 }
+// 提示、訊息的高度：最多在擋路那排往上 2 格（很高的入口圖片頂端可能在地圖外面，畫在那裡會看不到）
+const mrtLabelY = l => Math.max(l.top, l.bottom - 2 * CELL) - 4;
 function mrtLockPrompt(l) { return (supplyInventory.get(l.cfg.item) || 0) > 0 ? l.cfg.use : l.cfg.locked; }
 function useMrtLockNearPlayer() {
   const l = mrtLockNearPlayer(); if (!l) return false;
   const n = supplyInventory.get(l.cfg.item) || 0;
-  if (n <= 0) { sfx('error'); flash(l.cfg.locked, l.x, l.top - 6, '#ffcf89', 1.8); return true; }
+  if (n <= 0) {   // 沒有好遊卡／異質鑰匙：溫特在對話框說話（data/doors.js 的 LOCKED_NEED_KEY_TEXT）
+    if (typeof winterSay === 'function' && winterSay(lockedNeedKeyText())) return true;
+    sfx('error'); flash(l.cfg.locked, l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
+  }
   if (l.cfg.consume) { if (n <= 1) supplyInventory.delete(l.cfg.item); else supplyInventory.set(l.cfg.item, n - 1); }
   l.open = true;
   if(l.cfg.kind==='gate'){l.opening=true;l.openProgress=0;}
@@ -93,7 +109,7 @@ function useMrtLockNearPlayer() {
     G.effects.push({ ring: true, x: l.x, y: l.bottom - CELL, r: 10, r2: 110, life: .6, life0: .6, color: '#b56bff' });
   }
   if (typeof sfxAt === 'function') sfxAt(l.cfg.sound, l.x, l.bottom, .7, 'mrt-lock');
-  flash(l.cfg.done, l.x, l.top - 6, '#9ff0c0', 2);
+  flash(l.cfg.done, l.x, mrtLabelY(l), '#9ff0c0', 2);
   if (l.cfg.consume) systemNotice('消耗 1 ' + (l.cfg.unit || '支') + itemById(l.cfg.item).name);
   for (const a of [...G.towers, ...G.npcs]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
   if (typeof updateHUD === 'function') updateHUD();

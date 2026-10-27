@@ -398,6 +398,10 @@ function pickCharacterFrame(set, who) {
   if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
+  if (who.slipT > 0 && who.slipPose) {   // 踩到香蕉皮滑倒：定格在隨機挑的那張走路圖（js/golden-banana-king.js 的 bkSlip）
+    const g = set[who.slipPose.dir] && set[who.slipPose.dir][who.slipPose.frame];
+    if (g && g.complete && g.naturalWidth) return g;
+  }
   if (who.gunT > 0) {   // 攻擊中：用面向目標的持槍圖（沒有該圖就照常）
     const gunKey = { front: 'gunFront', back: 'gunBack', left: 'gunLeft', right: 'gunRight' }[who.dir || 'front'];
     const g = set[gunKey] && set[gunKey][0];
@@ -654,8 +658,8 @@ function enterPortal(pt) {
   mapTransitioning = true;
   if (typeof achieveOnTravel === 'function') achieveOnTravel(pt.elevator ? 'elevator' : source.stair ? 'stair' : 'door');   // 成就：爬樓梯、只搭電梯
   Object.keys(keys).forEach(key => { keys[key] = false; });
-  if (!pt.elevator) {   // 上／下樓梯：腳步聲；其他出入口：開門聲
-    const stair = source.stair;
+  if (!pt.elevator) {   // 上／下樓梯、走進捷運入口：腳步聲；其他出入口：開門聲
+    const stair = source.stair || (typeof mrtStairPortal === 'function' && mrtStairPortal(pt) ? 'down' : null);
     sfx(stair === 'down' ? 'stairsDown' : stair === 'up' ? 'stairsUp' : 'door');
   }
   requestAnimationFrame(() => {

@@ -22,3 +22,5 @@ const DOOR_RANDOM = { every: [10, 30] };
 // 每扇門的台詞可以在地圖編輯器另外寫；沒寫就用 LOCKED_DOOR_TEXT（\n＝換下一句）
 const LOCKED_DOOR_TILES = ['tile_eoc_door', 'tile_eoc_security_door', 'tile_containment_glass_door'];
 const LOCKED_DOOR_TEXT = '……好像被鎖住了。';
+// 上鎖的門、記憶之門、捷運閘門、封鎖的捷運入口：沒有需要的鑰匙（卡）時，溫特在對話框說的話（\n＝換下一句）
+const LOCKED_NEED_KEY_TEXT = '門被鎖住了，好像需要特定的鑰匙。';

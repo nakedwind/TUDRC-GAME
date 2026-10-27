@@ -265,6 +265,8 @@ function bkSlip(a, peel) {
   const d = Math.hypot(vx, vy) || 1, v = C.slipDist * CELL * 2 / C.slipTime;   // 速度線性遞減：滑行距離 = v × T ÷ 2
   a.knockT = a.knockT0 = C.slipTime; a.knockVX = vx / d * v; a.knockVY = vy / d * v;
   a.slipT = C.slipTime;
+  // 滑倒的姿勢：隨機挑一張走路圖（任一方向、Walking01 或 02），整段滑行定格在這張（js/game.js 的 pickCharacterFrame）
+  a.slipPose = { dir: ['front', 'back', 'left', 'right'][Math.floor(Math.random() * 4)], frame: 1 + Math.floor(Math.random() * 2) };
   flash('滑倒！', a.x, a.y - 50, '#ffe066');
   G.effects.push({ ring: true, x: peel.x, y: peel.y, r: 3, r2: 18, life: .25, life0: .25, color: '#ffe066' });
   if (typeof sfxAt === 'function') sfxAt('eggSquish', peel.x, peel.y, .8, 'banana-slip');

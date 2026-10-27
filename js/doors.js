@@ -85,10 +85,16 @@ function doorPrompt(d) {
   if (d.mode === 'chain' || d.mode === 'memory') return have ? '用' + key.name + '解開鎖鏈' : '被鎖鏈鎖住了（需要' + key.name + '）';
   return have ? '用' + key.name + '開鎖' : '門鎖住了（需要' + key.name + '）';
 }
+// 沒有鑰匙打不開：轉一下門把，溫特在對話框說話（data/doors.js 的 LOCKED_NEED_KEY_TEXT）；對話框不能開時退回飄字
+function lockedNeedKey(x, y, fallback, top) {
+  if (typeof sfxAt === 'function') sfxAt('lockedDoor', x, y, .35, 'locked-door');
+  if (typeof winterSay === 'function' && winterSay(lockedNeedKeyText())) return;
+  sfx('error'); flash(fallback, x, top, '#ffcf89', 1.6);
+}
 // 上鎖的門：有鑰匙就用掉一把開鎖（之後變成一般的手動門），沒有就說要什麼
 function unlockDoor(door) {
   const id = doorKeyItem(door), key = itemById(id), n = supplyInventory.get(id) || 0;
-  if (n <= 0) { sfx('error'); flash(door.mode === 'chain' ? '被鎖鏈鎖住了，需要' + key.name : '門鎖住了，需要' + key.name, door.x, door.top, '#ffcf89', 1.6); return; }
+  if (n <= 0) { lockedNeedKey(door.x, door.y, door.mode === 'chain' ? '被鎖鏈鎖住了，需要' + key.name : '門鎖住了，需要' + key.name, door.top); return; }
   if (n <= 1) supplyInventory.delete(id); else supplyInventory.set(id, n - 1);
   const chain = door.mode === 'chain';
   door.mode = 'manual';
