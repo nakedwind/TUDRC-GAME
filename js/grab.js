@@ -7,6 +7,7 @@
        戰鬥區的隊友＝在落地的地方巡邏（等於「在原地巡邏」）；掉在黑暗裡會自己走到最近的亮處，再在那裡巡邏
        基地裡的人＝在附近閒晃 GRAB.wanderTime 秒，再走回自己原本的區域
    ・倒下的隊友也抓得起來（可以拖到安全的地方再急救）
+   ・溫特自己蓋的建築（地雷除外）也抓得起來：拖到新位置放開；太遠、太黑、放不下就回到原位（檔案下面「抓建築」那段）
    必須在 js/render.js（drawTower、drawWanderer）、js/game.js、js/channel-actions.js 之後載入。
 */
 const GRAB = {
@@ -155,24 +156,124 @@ function stepGrabAfter(dt) {
 function updateGrab(dt, paused) {
   if (!G || !G.towers) return;
   const now = performance.now();
-  cv.classList.toggle('grab-holding', !!grab || (grabRightAt > 0 && now - grabRightAt >= GRAB.holdTime * 1000));   // 右鍵按住：抓取手勢的游標
-  if (paused || !G.running || G.over) { if (grab) dropGrab(); grabPress = null; return; }
+  cv.classList.toggle('grab-holding', !!grab || !!grabB || (grabRightAt > 0 && now - grabRightAt >= GRAB.holdTime * 1000));
+  if (paused || !G.running || G.over) { if (grab) dropGrab(); if (grabB) dropGrabBuilding(true); grabPress = null; return; }
   stepGrabFalls(dt);
   stepGrabAfter(dt);
   if (grabPress && !grab) {
     const a = grabPress.actor, moved = grabMouse ? Math.hypot(grabMouse.x - grabPress.cx, grabMouse.y - grabPress.cy) : 0;
-    if (!grabCanStart() || a.eatenBy || a.grabFall || !G.towers.concat(MAP_SAFE ? G.npcs : []).includes(a)) grabPress = null;
-    else if (now - grabPress.t >= GRAB.holdTime * 1000 || moved > GRAB.moveStart) startGrab(a, grabPress);
+    if (!grabCanStart() || (a.kind === 'obstacle' ? !grabbableBuilding(a) || !G.obstacles.includes(a) : a.eatenBy || a.grabFall || !G.towers.concat(MAP_SAFE ? G.npcs : []).includes(a))) grabPress = null;
+    else if (now - grabPress.t >= GRAB.holdTime * 1000 || moved > GRAB.moveStart) a.kind === 'obstacle' ? startGrabBuilding(a, grabPress) : startGrab(a, grabPress);
   }
   if (grab) moveGrab(dt);
+  if (grabB) moveGrabBuilding(dt);
+}
+
+// ---- 抓建築：溫特自己蓋的障礙物（地雷除外）右鍵按住拿起來，拖到新位置放開 ----
+// 拿起來的時候建築先從地圖上拿掉（不擋路、怪物打不到）；放下的規則跟蓋建築一樣（太遠、太黑、放不下＝回到原位）
+let grabB = null;   // 抓著的建築：{ o, G, from: [c, r], dx, dy, x, y, lift, sway, swayV, vx }（x, y＝圖片左上角）
+const grabbableBuilding = o => !!o && o.playerBuilt && !o.trap && o.hp > 0;
+function grabBuildingAt(x, y) {
+  return G.obstacles.filter(grabbableBuilding).sort((a, b) => (b.r + (b.h || 1)) - (a.r + (a.h || 1))).find(o => {
+    const x0 = OX + o.c * CELL, y0 = OY + o.r * CELL;
+    return x >= x0 && x < x0 + (o.w || 1) * CELL && y >= y0 && y < y0 + (o.h || 1) * CELL;
+  }) || null;
+}
+function grabBuildingRepath() {
+  for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }
+  for (const e of G.enemies) { e.aiPath = null; e.aiGoal = null; e.aiRouteTimer = 0; }
+  computeFlow();
+}
+function startGrabBuilding(o, press) {
+  const p = clientToWorld(press.cx, press.cy), x = OX + o.c * CELL, y = OY + o.r * CELL;
+  grabB = { o, G, from: [o.c, o.r], dx: x - p.x, dy: y - p.y, x, y, lift: 0, sway: 0, swayV: 0, vx: 0 };
+  grabPress = null;
+  for (const [dc, dr] of obstacleSolidCells(o)) { const k = (o.c + dc) + ',' + (o.r + dr); if (G.grid[k] === o) delete G.grid[k]; }
+  G.obstacles = G.obstacles.filter(x => x !== o);
+  closeSentryMenu(); closeGroundMenu();
+  grabBuildingRepath();
+  sfx('blip');
+}
+// 放下的格子：圖片左上角最靠近的那格
+const grabBuildingCell = g => [Math.round((g.x - OX) / CELL), Math.round((g.y - OY) / CELL)];
+// 能不能放在 (c, r)：可以就回傳 ''，不行就回傳原因（跟 js/build.js 的 placeObstacle 一樣的規則，只是不用錢）
+function grabBuildingProblem(o, c, r) {
+  const v = { w: o.w || 1, h: o.h || 1, solid: obstacleSolidCells(o) }, extra = placeExtra({ id: o.type });
+  if (!buildInRange(v, c, r)) return '太遠了';
+  if (!footprintNearLight(v, c, r, extra)) return '太黑了';
+  if (!canPlaceObstacle(v, c, r, extra)) return '不能放這裡';
+  if (!v.solid.length && sameBuildingOverlaps(o.type, v, c, r)) return '已經有' + (buildableById(o.type)?.name || '同樣的建築') + '了';
+  return '';
+}
+function moveGrabBuilding(dt) {
+  const g = grabB;
+  g.lift = Math.min(GRAB.lift, g.lift + GRAB.lift * dt / GRAB.liftTime);
+  if (grabMouse) {
+    const p = clientToWorld(grabMouse.x, grabMouse.y), nx = p.x + g.dx;
+    g.vx += ((nx - g.x) / Math.max(dt, 1e-3) - g.vx) * Math.min(1, dt * 12);
+    g.x = nx; g.y = p.y + g.dy;
+  }
+  const want = Math.max(-.25, Math.min(.25, -g.vx * .0006));   // 建築比人重：晃得小一點
+  g.swayV += ((want - g.sway) * 60 - g.swayV * 6) * dt;
+  g.sway += g.swayV * dt;
+}
+// 放下：cancel＝直接放回原位（選單打開、切出視窗…）
+function dropGrabBuilding(cancel = false) {
+  const g = grabB; if (!g) return;
+  grabB = null;
+  grabEatMenuUntil = performance.now() + GRAB.menuCooldown * 1000;
+  if (grabRightAt > 0) grabDroppedHeld = true;
+  if (g.G !== G) return;   // 已經換地圖了
+  const o = g.o;
+  let [c, r] = grabBuildingCell(g);
+  const problem = cancel ? 'cancel' : grabBuildingProblem(o, c, r);
+  if (problem) { if (!cancel && (c !== g.from[0] || r !== g.from[1])) buildFail(problem, c, r); [c, r] = g.from; }
+  o.c = c; o.r = r;
+  for (const [dc, dr] of obstacleSolidCells(o)) G.grid[(c + dc) + ',' + (r + dr)] = o;
+  G.obstacles.push(o);
+  o.spawnT = DROP.fall * .85;   // 從手上的高度掉下來：落地壓扁＋塵埃（js/build.js 的 dropAnim）
+  grabBuildingRepath();
+  if (typeof rememberStoryBuilds === 'function') rememberStoryBuilds();
+  if (!problem) sfx(LIGHT.buildings && LIGHT.buildings[o.type] ? 'placeLight' : 'place');
+}
+// 畫：抓著的建築跟著滑鼠、離地晃（跟其他東西一起排前後；js/render.js 呼叫）
+function grabBuildingSortables(list) {
+  const g = grabB; if (!g || g.G !== G) return;
+  const o = g.o, w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
+  list.push({ y: g.y - OY + h + 1, draw: () => {
+    ctx.fillStyle = 'rgba(0,0,0,.25)';
+    ctx.beginPath(); ctx.ellipse(g.x + w / 2, g.y + h - 4, w * .42, Math.max(4, h * .08), 0, 0, Math.PI * 2); ctx.fill();
+    ctx.save();
+    const px = g.x + w / 2, py = g.y - g.lift;   // 以上緣中間（手抓的地方）為軸晃
+    ctx.translate(px, py); ctx.rotate(g.sway + Math.sin(performance.now() / 1000 * 3.2) * .03); ctx.translate(-px, -py);
+    ctx.translate(g.x - (OX + o.c * CELL), g.y - g.lift - (OY + o.r * CELL));
+    drawObstacle(o);
+    ctx.restore();
+  } });
+}
+// 放下去的位置：虛線框（藍＝可以放、紅＝放不下會回原位），加上能蓋的範圍圈。畫在黑幕上面，暗處也看得到
+function drawGrabBuildingTarget(ctx) {
+  const g = grabB; if (!g || g.G !== G) return;
+  const o = g.o, [c, r] = grabBuildingCell(g), ok = !grabBuildingProblem(o, c, r);
+  const x = OX + c * CELL, y = OY + r * CELL, w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
+  ctx.save();
+  ctx.strokeStyle = ok ? '#8fd3ff' : '#ff5b5b'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+  ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+  ctx.fillStyle = ok ? 'rgba(80,210,150,.28)' : 'rgba(255,80,80,.3)';
+  for (const [dc, dr] of placeCheckCells({ w: o.w || 1, h: o.h || 1, solid: obstacleSolidCells(o) })) ctx.fillRect(x + dc * CELL, y + dr * CELL, CELL, CELL);
+  if (G.player && typeof BUILD_RANGE !== 'undefined') {
+    ctx.beginPath(); ctx.arc(G.player.x, G.player.y, BUILD_RANGE * CELL, 0, Math.PI * 2);
+    ctx.lineWidth = 1.3; ctx.strokeStyle = 'rgba(143,211,255,.9)'; ctx.setLineDash([10, 6]); ctx.stroke();
+  }
+  ctx.restore();
 }
 
 // ---- 滑鼠 ----
 cv.addEventListener('mousedown', e => {
   if (e.button !== 2) return;
   grabMouse = { x: e.clientX, y: e.clientY }; grabRightAt = performance.now();
-  if (grab || !grabCanStart()) return;
-  const p = clientToWorld(e.clientX, e.clientY), actor = grabActorAt(p.x, p.y);
+  if (grab || grabB || !grabCanStart()) return;
+  const p = clientToWorld(e.clientX, e.clientY), actor = grabActorAt(p.x, p.y) || grabBuildingAt(p.x, p.y);   // 人優先，再來是建築
   grabPress = actor ? { actor, cx: e.clientX, cy: e.clientY, t: performance.now() } : null;
 }, true);
 window.addEventListener('mousemove', e => { grabMouse = { x: e.clientX, y: e.clientY }; });
@@ -180,15 +281,16 @@ window.addEventListener('mouseup', e => {
   if (e.button !== 2) return;
   grabRightAt = 0; grabPress = null;
   if (grab) dropGrab();
+  if (grabB) dropGrabBuilding();
   if (grabDroppedHeld || performance.now() < grabEatMenuUntil) grabEatMenuUntil = performance.now() + GRAB.menuCooldown * 1000;   // 從放開右鍵算起
   grabDroppedHeld = false;
 });
 // 剛放開抓取：GRAB.menuCooldown 秒內不要開命令選單（Windows 的右鍵選單是放開時才跳）
 cv.addEventListener('contextmenu', e => {
-  if (!grab && !grabDroppedHeld && performance.now() > grabEatMenuUntil) return;
+  if (!grab && !grabB && !grabDroppedHeld && performance.now() > grabEatMenuUntil) return;
   e.preventDefault(); e.stopImmediatePropagation();
 }, true);
-window.addEventListener('blur', () => { grabRightAt = 0; grabPress = null; if (grab) dropGrab(); });
+window.addEventListener('blur', () => { grabRightAt = 0; grabPress = null; if (grab) dropGrab(); if (grabB) dropGrabBuilding(true); });
 
 // ---- 畫：抓著／掉下來的人離地、跟著手晃，地上留影子 ----
 function grabDrawWrap(a, draw) {
