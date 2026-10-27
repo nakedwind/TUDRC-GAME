@@ -16451,7 +16451,8 @@ const BATTLE_MAPS = [
         "id": "tile_bg_backroom_door_wood",
         "c": 12,
         "r": 14,
-        "layer": "object2"
+        "layer": "object2",
+        "doorMode": "memory"
       },
       {
         "id": "tile_bg_backroom_door_wood",

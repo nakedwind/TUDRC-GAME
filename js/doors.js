@@ -38,6 +38,7 @@ function setupDoors() {
     const door = { stamp: s, mode, open: false, cells, own, sound: DOOR_TILES[s.id].sound || 'door',
       x: (left + right) / 2, y: bottom, top: y0 + 2, left, right, y0,
       randomT: mode === 'random' ? doorRandomWait() : 0 };
+    if (typeof findChainArt === 'function') door.chainArt = findChainArt(door);   // 疊在門上的鎖鏈圖（js/memory-doors.js）
     if (mode === 'memory' && typeof setupMemoryDoor === 'function') setupMemoryDoor(door);   // 記憶之門：鑰匙、劇情、解開過沒（解開過的一開始就開著，js/memory-doors.js）
     for (const k of own) { if (!door.open) mapWalls.add(k); doorAddedWalls.add(k); }
     mapDoors.push(door);
@@ -53,6 +54,8 @@ function setDoorOpen(door, open, silent = false) {
   if (door.open === open) return true;
   if (!open && doorOccupied(door)) return false;   // 有人站在門口，關不起來
   door.open = open;
+  if (open && typeof hideChainArt === 'function') hideChainArt(door);   // 門的圖片消失，疊在上面的鎖鏈圖也一起消失
+  else if (!open && typeof showChainArt === 'function') showChainArt(door);
   for (const k of door.own) { if (open) mapWalls.delete(k); else mapWalls.add(k); }
   computeFlow();
   for (const a of [...G.towers, ...G.npcs]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }

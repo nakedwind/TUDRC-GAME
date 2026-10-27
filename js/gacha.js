@@ -20,10 +20,12 @@ const gachaNearPlayer = () => costumeSpotNearPlayer(gachaSpots());
 function useGachaNearPlayer() { if (!gachaNearPlayer()) return false; openGacha(); return true; }
 
 // ---- 抽 ----
-const gachaPool = () => [...COSTUME_ACCESSORIES, ...COSTUME_SKINS].filter(i => i.gacha !== false);
+const gachaPool = () => [...COSTUME_ACCESSORIES, ...COSTUME_SKINS].filter(i => i.gacha !== false);   // 收藏分頁列出來的全部
+// 真的會轉出來的：角色限定（有寫 char）的拿到過一次就不再出（送給隊員的也算拿過）
+const gachaDrawPool = () => gachaPool().filter(i => !(i.char && costumeCollected(i.id)));
 const rarityOf = item => item.rarity || 'N';
 function gachaRoll() {
-  const pool = gachaPool(); if (!pool.length) return null;
+  const pool = gachaDrawPool(); if (!pool.length) return null;
   const tiers = Object.keys(GACHA.rates).filter(r => pool.some(i => rarityOf(i) === r));   // 還沒有東西的稀有度不算
   let roll = Math.random() * tiers.reduce((sum, r) => sum + GACHA.rates[r], 0), tier = tiers[tiers.length - 1];
   for (const r of tiers) { roll -= GACHA.rates[r]; if (roll < 0) { tier = r; break; } }
@@ -42,6 +44,7 @@ function gachaPull(times, pay = 'crystal') {
   if (gc.busy) return;
   const cost = gachaCost(times, pay);
   if (!gachaPool().length) { gachaPullNotice('扭蛋機還是空的（data/costumes.js 還沒有服裝）'); return; }
+  if (!gachaDrawPool().length) { gachaPullNotice('扭蛋機裡的東西都轉完了'); return; }
   if (pay === 'money') {   // 花經費（基地裡＝錢包的錢，js/game.js 的 updateHUD 會存回錢包）
     if (gachaMoney() < cost) { sfx('error'); gachaPullNotice('經費不夠（還差 $' + (cost - gachaMoney()).toLocaleString() + '）'); return; }
     G.money -= cost; if (typeof updateHUD === 'function') updateHUD();
@@ -91,7 +94,10 @@ function gachaPull(times, pay = 'crystal') {
   else at(opened + (R.linger || 0), gachaRevealDone);
 }
 // 畫面閃白光（整個扭蛋視窗）
-function gachaFlash(card) { card.classList.remove('gc-flash'); void card.offsetWidth; card.classList.add('gc-flash'); }
+function gachaFlash(card) {
+  clearTimeout(gc.flashTimer); card.classList.remove('gc-flash'); void card.offsetWidth; card.classList.add('gc-flash');
+  gc.flashTimer = setTimeout(() => card.classList.remove('gc-flash'), 600);   // 閃完就拿掉白光層，不讓它留在畫面上
+}
 // 從扭蛋中心往外噴的碎光（power 越大噴越遠）
 function gachaSparks(stage, n, colors, power) {
   const box = stage.querySelector('.gc-sparks');
@@ -207,7 +213,7 @@ function renderGacha() {
     b.disabled = gc.busy;
     b.classList.toggle('poor', money ? gachaMoney() < cost : training.crystals < cost);
   }
-  const pool = gachaPool(), tiers = Object.keys(GACHA.rates).filter(r => pool.some(i => rarityOf(i) === r)), total = tiers.reduce((s, r) => s + GACHA.rates[r], 0);
+  const pool = gachaPool(), draw = gachaDrawPool(), tiers = Object.keys(GACHA.rates).filter(r => draw.some(i => rarityOf(i) === r)), total = tiers.reduce((s, r) => s + GACHA.rates[r], 0);
   el.querySelector('.gc-rates').innerHTML = tiers.map(r => rarityTag(r) + ' ' + Math.round(GACHA.rates[r] / total * 1000) / 10 + '%').join('　') + '<br>共 ' + pool.length + ' 種・已收集 ' + pool.filter(i => costumeCollected(i.id)).length + ' 種';
   el.querySelectorAll('.gc-tabs [data-tab]').forEach(b => b.classList.toggle('on', b.dataset.tab === gc.tab));
   el.querySelector('.gc-msg').textContent = gc.msg;

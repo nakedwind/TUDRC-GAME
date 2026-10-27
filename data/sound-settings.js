@@ -7,7 +7,7 @@ const SOUND_SETTINGS = {
     "birdHurt": 0.35,
     "birdRun": 1.8,
     "birdWalk": 1.95,
-    "chainUnlock": 1.2,
+    "chainUnlock": 1.45,
     "clownfishHop1": 1.5,
     "clownfishHop2": 1.45,
     "clownfishHurt": 1.5,
@@ -53,6 +53,7 @@ const SOUND_SETTINGS = {
     "smallBoom": 1.15,
     "stairsDown": 2.4,
     "stairsUp": 1.95,
+    "storyDoor": 2.5,
     "vendingCheckout": 1.8,
     "vendingOpen": 3
   },
@@ -65,11 +66,12 @@ const SOUND_SETTINGS = {
       "itemPickup": "pop.mp3",
       "achievement": "獎勵/拾取.mp3",
       "mrtUnlock": [
-        "開鎖03.mp3",
+        "環境/門與機關/開鎖03.mp3",
         "設施/打磨.mp3"
       ],
-      "chainUnlock": "開鎖03.mp3",
-      "lockedDoor": "開鎖02.mp3"
+      "chainUnlock": "環境/門與機關/開鎖03.mp3",
+      "lockedDoor": "環境/門與機關/開鎖02.mp3",
+      "storyDoor": "環境/門與機關/鐵門滑動.mp3"
     },
     "extras": {},
     "meta": {}

@@ -102,6 +102,7 @@ const COSTUME_RARITIES = {
 // 台詞：對話編輯器「送禮與委託」的「收到服裝」（沒寫就不說；不喜歡的服裝說「收到不喜歡的禮物」）
 const COSTUME_GIFT = { reaction: 'like', rarityBonus: { N: 0, R: 4, SR: 10, SSR: 20 } };
 // 扭蛋機（js/gacha.js）：所有 skin、配件都會進扭蛋池，除非寫 gacha: false
+// 角色限定（有寫 char 的 skin、配件）拿到過一次就從扭蛋池拿掉，不會再轉到重複的
 const GACHA = {
   cost: 30,                        // 轉 1 次花幾個異質碎片
   tenCost: 270,                    // 轉 10 次（打九折）

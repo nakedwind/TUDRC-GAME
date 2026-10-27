@@ -21,16 +21,20 @@ const isChainArt = t => !!t && /chain|鎖鏈/i.test([String(t.file || '').starts
 // ---- 開局時（js/doors.js 的 setupDoors）：讀設定、找疊在門上的鎖鏈圖、解開過就直接開著 ----
 function setupMemoryDoor(d) {
   d.memoryKey = d.stamp.memoryKey || null; d.memoryScene = d.stamp.memoryScene || null;
-  d.chainArt = (MAP.stamps || []).filter(s => {   // 跟門板左右、上下都有重疊的鎖鏈圖章
+  d.unlocked = memoryDoorsOpened().has(memoryDoorKey(d));
+  if (d.unlocked) { d.open = true; hideChainArt(d); }
+}
+// 跟門板左右、上下都有重疊的鎖鏈圖章（每種門都會找：門打開時鎖鏈圖一起藏起來，js/doors.js 的 setDoorOpen）
+function findChainArt(d) {
+  return (MAP.stamps || []).filter(s => {
     if (s === d.stamp) return false;
     const t = mapTileById(s.id); if (!isChainArt(t)) return false;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
     return x0 < d.right && x0 + mapStampW(s, t) * CELL > d.left && y0 < d.y && y0 + mapStampH(s, t) * CELL > d.y0;
   });
-  d.unlocked = memoryDoorsOpened().has(memoryDoorKey(d));
-  if (d.unlocked) { d.open = true; hideChainArt(d); }
 }
 function hideChainArt(d) { if (G && G.mapDestroyed) for (const s of d.chainArt || []) G.mapDestroyed.add(s); }
+function showChainArt(d) { if (G && G.mapDestroyed) for (const s of d.chainArt || []) G.mapDestroyed.delete(s); }
 
 // ---- 按 Space（js/doors.js 的 toggleDoorNearPlayer）----
 function memoryDoorInteract(d) {

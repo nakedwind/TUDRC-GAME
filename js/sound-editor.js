@@ -12,7 +12,11 @@ const organizedPaths=new Map();
 Object.values(defaultFiles).flatMap(soundFiles).forEach(path=>organizedPaths.set(path.split('/').pop(),path));
 organizedPaths.set('footsteps01.mp3','環境/腳步/footsteps01.mp3');organizedPaths.set('footsteps02.mp3','環境/腳步/footsteps02.mp3');
 const migratePath=path=>typeof path==='string'&&!path.includes('/')&&organizedPaths.has(path)?organizedPaths.get(path):path;
-const libraryPath=file=>{const raw=(file.webkitRelativePath||file.name).replaceAll('\\','/'),parts=raw.split('/');return parts.length>1?parts.slice(1).join('/'):file.name;};
+const libraryPath=file=>{const raw=(file.webkitRelativePath||file.name).replaceAll('\\','/'),parts=raw.split('/');if(parts.length>1)return parts.slice(1).join('/');
+  // 單獨選一個檔案時瀏覽器只給檔名：先到已載入的素材資料夾找同名檔（帶出分類子資料夾），找不到就檢查 Sound effects 最外層有沒有這個檔
+  const known=[...library.keys()].find(k=>k.includes('/')&&k.split('/').pop()===file.name),path=known||migratePath(file.name);
+  if(!path.includes('/')&&location.protocol.startsWith('http'))fetch(encodeURI('Sound effects/'+path),{method:'HEAD'}).then(r=>{if(!r.ok)status(`「${path}」不在 Sound effects 最外層，遊戲會找不到。請先按上面的「選擇音效素材資料夾」選 Sound effects，再重新選這個檔案（會自動帶出子資料夾）。`,true);}).catch(()=>{});
+  return path;};
 function cleanGains(map){const out={};for(const[k,v]of Object.entries(map||{})){const n=Math.round(Math.max(0,Math.min(MAX_GAIN,Number(v)))*100)/100;if(Number.isFinite(n)&&n!==1)out[k]=n;}return out;}
 function soundFiles(value){if(value&&value.mode==='random'&&Array.isArray(value.files))return value.files.filter(v=>typeof v==='string'&&v);return(Array.isArray(value)?value:[value]).filter(v=>typeof v==='string'&&v);}
 function cleanSoundValue(value){const list=[...new Set(soundFiles(value).map(migratePath))];if(value&&value.mode==='random')return list.length?{mode:'random',files:list}:null;return list.length>1?list:(list[0]||null);}

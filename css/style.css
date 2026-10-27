@@ -2589,7 +2589,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 @media (max-width: 640px) { #gacha .gc-body { grid-template-columns:1fr; } #gacha .gc-machine { border-right:0; border-bottom:1px solid rgba(143,211,255,.14); } #gacha .gc-machine-art img { width:120px; height:120px; } }
 /* ---- 抽到好東西的加演（js/gacha.js 的 GACHA_RARE）：charge 集氣 → (SSR) upgrade 金變彩虹 → big 大爆光＋橫幅＋碎光 → (SSR) hero 獨照 ---- */
 #gacha .gc-card { position:relative; }
-#gacha .gc-card.gc-flash::after { content:''; position:absolute; inset:0; z-index:5; pointer-events:none; background:#fff; animation:gc-flash .5s ease-out both; }
+#gacha .gc-card.gc-flash::after { content:''; position:absolute; inset:0; z-index:5; pointer-events:none; background:#fff; opacity:0; animation:gc-flash .5s ease-out both; }   /* opacity:0＝動畫沒跑（關掉動畫效果等）時白光不會一直蓋著 */
 @keyframes gc-flash { 0% { opacity:.85; } 100% { opacity:0; } }
 #gacha .gc-card.gc-rare.gc-turning .gc-machine-art img { animation:gc-shake .35s ease-in-out 3; }
 #gacha .gc-rays { position:absolute; left:50%; top:50%; width:620px; height:620px; margin:-310px; border-radius:50%; opacity:0; pointer-events:none;
