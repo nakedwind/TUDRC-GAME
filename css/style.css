@@ -1792,6 +1792,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .doll-slot.filled span { border-style: solid; border-color: rgba(255,255,255,.18); background: rgba(37,43,51,.85); }
 .doll-slot:hover span, .doll-slot.picking span { border-color: #ffd479; transform: translateY(-2px); }
 .doll-slot.picking span { box-shadow: 0 0 0 2px rgba(255,212,121,.35); }
+.doll-slot.drop-ok span { border: 1px solid rgba(255,212,121,.75); }   /* 拖防具時：能放的格子 */
+.doll-slot.drop-on span { border-color: #ffd479; box-shadow: 0 0 0 2px rgba(255,212,121,.35), 0 0 16px rgba(255,212,121,.3); transform: translateY(-2px); }
 .doll-slot span img { width: 38px; height: 38px; object-fit: contain; image-rendering: pixelated; }
 .doll-slot span i { font-style: normal; font-size: 24px; }
 .doll-slot small { max-width: 64px; overflow: hidden; padding: 1px 6px; border-radius: 99px; background: rgba(0,0,0,.55); font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }

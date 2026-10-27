@@ -45,6 +45,8 @@ function showNextItemIntro() {
     (info.desc ? '<p>' + esc(info.desc) + '</p>' : '') +
     (info.stat ? '<p class="item-intro-stat">' + esc(info.stat) + '</p>' : '') +
     '<button type="button" class="item-intro-ok">知道了 <kbd>Enter</kbd></button></section>';
+  const img = el.querySelector('.item-intro-image img');   // 很小的圖（最長邊 ≤ 48 像素，例如急救包、鑰匙）放大 2 倍
+  if (img) { const big = () => { const w = img.naturalWidth, h = img.naturalHeight; if (w && Math.max(w, h) <= 48) { img.style.width = w * 2 + 'px'; img.style.height = h * 2 + 'px'; } }; if (img.complete) big(); else img.onload = big; }
   el.classList.remove('hidden');
   if (typeof SFX !== 'undefined') SFX.play('itemReveal', .8, 'item-reveal'); else if (typeof sfx === 'function') sfx('menu');   // 開置物櫃音效（js/sfx.js）
   setTimeout(() => el.querySelector('.item-intro-ok')?.focus(), 0);

@@ -63,8 +63,9 @@ function storagePropNearPlayer(filter){
   let nearest=null,distance=72;
   for(const prop of storagePropEntries()){
     if(filter&&!filter(prop))continue;
-    const d=Math.hypot(prop.x-p.x,prop.y-p.y);
-    if(d<distance){nearest=prop;distance=d;}
+    const power=prop.kind==='power';   // 電源開關：判定範圍半徑 50、往下移 30 像素
+    const d=Math.hypot(prop.x-p.x,prop.y+(power?30:0)-p.y);
+    if(d<distance&&(!power||d<50)){nearest=prop;distance=d;}
   }
   return nearest;
 }

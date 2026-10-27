@@ -165,7 +165,8 @@ function renderBackpack() {
   renderBackpackDetail();
 }
 function gearCellHtml(item) {
-  return `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${equipTier(item.lv)}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
+  const drag = campArmorOpen && !item.weapon ? ` draggable="true" data-drag-gear="${item.gear.id}"` : '';   // 防具視窗：可以拖到左邊的裝備格
+  return `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${equipTier(item.lv)}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}"${drag} aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
       ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn && !item.weapon ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}<span class="bag-cell-name">${item.name}</span></button>`;
 }
 // ---- 防具分頁：依部位分段，整個分類共 35 格 ----
@@ -377,14 +378,30 @@ backpackEl.addEventListener('click', e => {
   if (use) { useBackpackItem(use.dataset.bagUse); (backpackDetail.querySelector('.bag-use:not(:disabled)') || backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus(); }
 });
 // 拖曳：子彈 → 彈匣格（裝進去／換掉那格）；彈匣格 → 另一格（互換）、拖回下面（拿下）
-let bagDrag = null;   // { bullet } 或 { slot }
+// 防具視窗：防具 → 左邊部隊長裝備的格子（能放的格子會亮起來）
+let bagDrag = null;   // { bullet }、{ slot } 或 { gear }
 backpackGrid.addEventListener('dragstart', e => {
-  const c = e.target.closest('[data-drag-bullet], [data-drag-slot]'); if (!c) return;
-  bagDrag = c.dataset.dragSlot != null ? { slot: Number(c.dataset.dragSlot) } : { bullet: c.dataset.dragBullet };
+  const c = e.target.closest('[data-drag-bullet], [data-drag-slot], [data-drag-gear]'); if (!c) return;
+  bagDrag = c.dataset.dragGear ? { gear: c.dataset.dragGear } : c.dataset.dragSlot != null ? { slot: Number(c.dataset.dragSlot) } : { bullet: c.dataset.dragBullet };
   e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', JSON.stringify(bagDrag));
   backpackGrid.classList.add('dragging');
+  if (bagDrag.gear) for (const s of slotsForGear('gear', bagDrag.gear)) document.querySelector(`#equipPanel [data-equip-slot="${s.id}"]`)?.classList.add('drop-ok');
 });
-backpackGrid.addEventListener('dragend', () => { bagDrag = null; backpackGrid.classList.remove('dragging'); backpackGrid.querySelectorAll('.drop-on').forEach(c => c.classList.remove('drop-on')); });
+backpackGrid.addEventListener('dragend', () => { bagDrag = null; backpackGrid.classList.remove('dragging'); document.querySelectorAll('#backpackGrid .drop-on, #equipPanel .drop-on, #equipPanel .drop-ok').forEach(c => c.classList.remove('drop-on', 'drop-ok')); });
+const gearDropSlot = e => bagDrag?.gear ? e.target.closest?.('#equipPanel [data-equip-slot].drop-ok') : null;   // 拖到能放這件防具的格子上
+document.addEventListener('dragover', e => {
+  if (!bagDrag?.gear) return;
+  const slot = gearDropSlot(e);
+  document.querySelectorAll('#equipPanel .drop-on').forEach(c => { if (c !== slot) c.classList.remove('drop-on'); });
+  if (slot) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; slot.classList.add('drop-on'); }
+});
+document.addEventListener('drop', e => {
+  const slot = gearDropSlot(e); if (!slot) return;
+  e.preventDefault();
+  const id = bagDrag.gear; bagDrag = null;
+  equipToSlot(slot.dataset.equipSlot, id);
+  backpackSel = 'gear:' + id; renderBackpack();
+});
 backpackGrid.addEventListener('dragover', e => {
   if (!bagDrag) return;
   const slot = e.target.closest('.mag-cell[data-mag-slot]');
