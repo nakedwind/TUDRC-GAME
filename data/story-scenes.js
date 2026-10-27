@@ -107,8 +107,7 @@ const STORY_SCENES = {
     "title": "雷德回憶03",
     "zoom": 1.5,
     "subtitle": "六年前 · 中心大樓門口",
-    "endTitle": "這不是你的錯",
-    "endText": "那一天，有人站到了他的前面。",
+    "endTitle": "天使的庇護",
     "door": [10, 6],
     "footsteps": true,
     "cameras": { "開場": [11.2, 10.7, 2], "門口": [11.2, 10.2], "人行道": [11.3, 10.4], "近景": [11.2, 11.1, 2.1], "兩人近景": [11.3, 11.6, 2.1] },
@@ -217,7 +216,7 @@ const STORY_SCENES = {
     "subtitle": "六年前 · 中心附設醫院",
     "endTitle": "天使的名字",
     "vignette": 0.55,
-    "cameras": { "病房": [8.4, 6.3], "床邊": [7.5, 6.2, 2.3] },
+    "cameras": { "病房": [9.1, 5.3, 1.8], "床邊": [8.4, 5.4, 2.4] },
     "portraits": { "雷德": "red_B", "艾德林": "eldrin_B" },
     "actors": [
       { "id": "red", "sprite": "red_B", "name": "雷德", "bed": [7, 4], "wounded": true },

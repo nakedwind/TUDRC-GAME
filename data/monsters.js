@@ -42,6 +42,7 @@ const MONSTERS_DEFAULT = [
         "images/monster/bird-head/bird-head-back-walk-02.png",
         "images/monster/bird-head/bird-head-back.png"
       ],
+      "backFacing": "right",
       "idle": [
         "images/monster/bird-head/bird-head-side-01.png",
         "images/monster/bird-head/bird-head-side-02.png",
@@ -398,10 +399,10 @@ const MONSTERS_DEFAULT = [
       "hand": "images/monster/burrowing-mouse/left-hand.png",
       "handHole": "images/monster/burrowing-mouse/left-hole.png"
     },
-    "noHitSquash": true,
-    "knockMul": 0,
     "hitSound": "mouseHurt",
-    "deathSound": "mouseDeath"
+    "deathSound": "mouseDeath",
+    "noHitSquash": true,
+    "knockMul": 0
   },
   {
     "id": "clownfish",
@@ -418,24 +419,25 @@ const MONSTERS_DEFAULT = [
     "height": 132,
     "frames": {
       "front": "images/monster/clownfish/clownfish-front.png",
+      "walkFront": [
+        "images/monster/clownfish/clownfish-hop-crouch.png",
+        "images/monster/clownfish/clownfish-hop-air.png"
+      ],
       "idle": [
         "images/monster/clownfish/clownfish-front.png",
         "images/monster/clownfish/clownfish-front-02.png"
       ],
+      "idleFacing": "left",
       "idleFps": 1.6,
       "blink": [
         "images/monster/clownfish/clownfish-blink.png"
-      ],
-      "walkFront": [
-        "images/monster/clownfish/clownfish-hop-crouch.png",
-        "images/monster/clownfish/clownfish-hop-air.png"
       ]
     },
     "behavior": "clownfish",
     "hitSound": "clownfishHurt",
     "deathSound": "clownfishDeath",
-    "knockMul": 0.6,
-    "shockResist": 0.6
+    "shockResist": 0.6,
+    "knockMul": 0.6
   },
   {
     "id": "clownfish_small",
@@ -467,7 +469,7 @@ const MONSTERS_DEFAULT = [
     "name": "金蕉王",
     "sprite": "images/monster/golden-banana-king/golden-banana-king-front.png",
     "hp": 300,
-    "speed": 30,
+    "speed": 40,
     "playerDamage": 0,
     "sentryDamage": 0,
     "buildingDamage": 0,
@@ -477,13 +479,13 @@ const MONSTERS_DEFAULT = [
     "height": 143,
     "frames": {
       "front": "images/monster/golden-banana-king/golden-banana-king-front.png",
-      "walkFacing": "left",
       "walkFront": [
         "images/monster/golden-banana-king/golden-banana-king-walk-01.png",
         "images/monster/golden-banana-king/golden-banana-king-walk-02.png",
         "images/monster/golden-banana-king/golden-banana-king-walk-03.png",
         "images/monster/golden-banana-king/golden-banana-king-walk-02.png"
-      ]
+      ],
+      "walkFacing": "left"
     },
     "behavior": "healer",
     "hitSound": "bananaHurt",
@@ -494,7 +496,7 @@ const MONSTERS_DEFAULT = [
     "name": "葫蘆猴",
     "sprite": "images/monster/gourd-monkey/gourd-monkey-front.png",
     "hp": 700,
-    "speed": 24,
+    "speed": 36,
     "playerDamage": 22,
     "sentryDamage": 28,
     "buildingDamage": 80,
