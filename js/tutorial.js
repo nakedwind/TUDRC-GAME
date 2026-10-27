@@ -1,6 +1,9 @@
 /* ===== 新手區教學（第一關：Y區地下街-75號入口，data/balance.js 的 NEWBIE_START）=====
    ・第一次進新手區：先問要不要看教學（選「跳過」就不跳任何提示）。
    ・看教學：艾德林先說營地有箱子可以開；之後玩家自由走，靠近東西（或第一次遇到某件事）才由艾德林跳一段提示。
+   ・開場突襲（TUTORIAL.opening）：開場白說完，路障北邊冒出 3 隻史萊姆去打營地的路障和探照燈；艾德林提醒一句，
+     畫面下方出現 WASD 和滑鼠點擊的小動畫（按下去的鍵會亮），3 隻都打倒才收起來。這 3 隻打完之前核心不召喚（js/anomalous-core.js）。
+     選「跳過教學」也照樣有這 3 隻，只是不說話、不跳動畫。
    ・每段提示只跳一次：死掉重來不會再跳。看過哪些記在瀏覽器（TUTORIAL_KEY），開新遊戲會清掉（js/new-game.js）。
    ・台詞都在下面的 TUTORIAL.hints，直接改文字就好（一個字串＝一句，按 Space 換下一句）。
    必須在 js/game.js、js/camp-interactions.js 之後載入。
@@ -14,12 +17,17 @@ const TUTORIAL = {
   coreCells: 7,               // 核心在溫特幾格內、看得到，才跳「異質核心」提示
   coreDarkCells: 4,           // 核心在暗處：走到幾格內也算看到（核心很大顆）
   exitCells: 3,               // 離出口幾格內跳「出口」提示
+  // 開場突襲：cells＝史萊姆冒出來的格子 [欄, 列]（路障北邊；那格是牆或被佔住就找旁邊最近的空格）、
+  // delay＝冒出來幾秒後艾德林才提醒（讓玩家先看到牠們衝過來）
+  opening: { monster: 'slime', cells: [[14, 43], [17, 43], [20, 43]], delay: 1.2 },
   hints: {
     intro: [
       '溫特，這裡是 75 號入口，再往裡面就是 Y 區地下街了。',
-      '先熟悉一下吧：WASD 移動，滑鼠瞄準，按住左鍵開槍。',
       '營地這邊有物資箱和裝備箱，走到箱子前面按 Space 就能打開。',
-      '準備好了就往前走，我們會跟在你後面。',
+    ],
+    wave: [
+      '小心！有史萊姆在打我們的路障！',
+      'WASD 移動，滑鼠瞄準，按住左鍵開槍，把牠們打掉！',
     ],
     supply: [
       '這是物資箱，裡面有醫療包、急救包和杏仁水。',
@@ -112,12 +120,80 @@ window.addEventListener('keydown', e => {
   else if (e.key === 'Escape') closeTutorialAsk(true);
 }, true);
 
+// ---- 開場突襲：3 隻史萊姆＋操作提示動畫 ----
+let tutorialControlsEl = null;
+function ensureTutorialControlsEl() {
+  if (tutorialControlsEl) return tutorialControlsEl;
+  tutorialControlsEl = document.createElement('div');
+  tutorialControlsEl.id = 'tutorialControls'; tutorialControlsEl.className = 'hidden';
+  tutorialControlsEl.setAttribute('aria-hidden', 'true');
+  tutorialControlsEl.innerHTML =
+    '<div class="tc-group"><div class="tc-keys"><kbd data-k="w">W</kbd><kbd data-k="a">A</kbd><kbd data-k="s">S</kbd><kbd data-k="d">D</kbd></div><span>移動</span></div>' +
+    '<div class="tc-group"><div class="tc-mouse"><i class="tc-btn"></i><i class="tc-wheel"></i><b class="tc-ripple"></b></div><span>瞄準・按住<b>左鍵</b>開槍</span></div>';
+  (document.getElementById('wrap') || document.body).appendChild(tutorialControlsEl);
+  return tutorialControlsEl;
+}
+function showTutorialControls(on) {
+  if (!on && !tutorialControlsEl) return;
+  const el = ensureTutorialControlsEl();
+  if (on === !el.classList.contains('hidden')) return;
+  el.classList.toggle('hidden', !on);
+}
+// 按下去的鍵、滑鼠左鍵跟著亮（WASD 和方向鍵都算）
+function lightTutorialControls() {
+  if (!tutorialControlsEl || tutorialControlsEl.classList.contains('hidden')) return;
+  const arrow = { w: 'arrowup', a: 'arrowleft', s: 'arrowdown', d: 'arrowright' };
+  tutorialControlsEl.querySelectorAll('kbd[data-k]').forEach(k => k.classList.toggle('on', !!(keys[k.dataset.k] || keys[arrow[k.dataset.k]])));
+  tutorialControlsEl.querySelector('.tc-mouse').classList.toggle('on', !!aimHeld);
+}
+// 史萊姆冒出來的格子：指定的格子不能站就找旁邊最近的空格
+function tutorialWaveSpot(c, r) {
+  for (let d = 0; d <= 3; d++) for (let dc = -d; dc <= d; dc++) for (let dr = -d; dr <= d; dr++) {
+    if (Math.max(Math.abs(dc), Math.abs(dr)) !== d) continue;
+    const cc = c + dc, rr = r + dr;
+    if (!inGrid(cc, rr) || isWall(cc, rr) || G.grid[cc + ',' + rr]) continue;
+    const [x, y] = center(cc, rr);
+    if (!G.enemies.some(e => Math.hypot(e.x - x, e.y - y) < CELL * .8)) return [x, y];
+  }
+  return null;
+}
+function spawnTutorialWave() {
+  const O = TUTORIAL.opening, spec = ACTIVE_MONSTERS.find(m => m.id === O.monster) || ACTIVE_MONSTERS.find(m => m.id === 'slime');
+  const wave = { enemies: [], t: 0, said: false, done: false };
+  if (spec) for (const [c, r] of O.cells) {
+    const spot = tutorialWaveSpot(c, r); if (!spot) continue;
+    const e = createMonster(spec, spot[0], spot[1]);
+    G.enemies.push(e); wave.enemies.push(e);
+  }
+  if (!wave.enemies.length) wave.done = true;
+  G.tutorialWave = wave;
+}
+// 開場突襲還沒打完：回傳 true（這段期間不跳其他提示）
+function tutorialWaveStep(dt) {
+  if (!G.tutorialWave) spawnTutorialWave();
+  const w = G.tutorialWave;
+  if (w.done) { showTutorialControls(false); return false; }
+  w.t += dt;
+  if (!w.enemies.some(e => e.hp > 0 && G.enemies.includes(e))) {
+    w.done = true; showTutorialControls(false);
+    if (!tutorialState.skip && !tutorialSeen('controls')) { tutorialState.seen.push('controls'); tutorialSave(); }
+    return false;
+  }
+  if (tutorialState.skip) return true;
+  if (!w.said && w.t >= TUTORIAL.opening.delay && !dialogueState) { tutorialSay('wave'); w.said = true; }
+  showTutorialControls(w.said && !tutorialSeen('controls'));
+  lightTutorialControls();
+  return true;
+}
+// 開場突襲的史萊姆還沒打完：核心先不召喚（js/anomalous-core.js 的 updateCores）
+const tutorialHoldsSpawns = () => isNewbieMap() && !(G && G.tutorialWave && G.tutorialWave.done);
+
 // ---- 每幀（js/game.js 的 update 呼叫）：檢查要不要跳提示 ----
 function updateTutorial(dt) {
-  if (!isNewbieMap() || !G || !G.running || G.over || !G.player || G.player.hp <= 0) return;
+  if (!isNewbieMap() || !G || !G.running || G.over || !G.player || G.player.hp <= 0) { showTutorialControls(false); return; }
   if (!tutorialState.decided) { if (!tutorialAskOpen) openTutorialAsk(); return; }
-  if (tutorialState.skip || dialogueState) return;
-  if (!tutorialSeen('intro')) { tutorialSay('intro'); return; }
+  if (!tutorialState.skip && !tutorialSeen('intro')) { if (!dialogueState) tutorialSay('intro'); return; }
+  if (tutorialWaveStep(dt) || tutorialState.skip || dialogueState) return;
   const p = G.player, near = (x, y, cells) => Math.hypot(x - p.x, y - p.y) <= tutorialCells(cells);
   // 營地的箱子
   if (typeof mapBoxes === 'function') {   // 箱子擠在一起時 mapBoxNearPlayer 只認最近的那個，這裡每一種各自量

@@ -204,6 +204,7 @@ function updateCores(dt) {
           vx: Math.cos(a) * (6 + Math.random() * 14), vy: -(10 + Math.random() * 22), r: 1.4 + Math.random() * 2.4, life: L, life0: L });
       }
     }
+    if (typeof tutorialHoldsSpawns === 'function' && tutorialHoldsSpawns()) continue;   // 新手區開場的 3 隻史萊姆打完之前不召喚（js/tutorial.js）
     core.timer -= dt;
     if (core.timer <= 0 && G.enemies.length + (typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0) < coreMaxEnemies()) {
       spawnCoreGroup(core);
