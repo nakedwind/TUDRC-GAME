@@ -5,7 +5,7 @@
    - 自動門：平常關著、玩家打不開；觸發條件達成時自動打開（目前：異質核心醒來）。
    - 只是圖片（picture）：永遠關著（一樣擋路），按 Space 沒反應、不顯示提示、不會播開關門音效。
 */
-const DOOR = { radius: 58, minOverlap: 10 };   // radius＝離門多近可以按 Space；minOverlap＝門板蓋到一格多少像素才算擋那格
+const DOOR = { radius: 58, minOverlap: 10, hug: 12 };   // hug＝門關著時，擋路的下緣在門圖下緣往上幾像素（所有門的預設；data/doors.js 每種門可以另外寫 hug）   // radius＝離門多近可以按 Space；minOverlap＝門板蓋到一格多少像素才算擋那格
 let mapDoors = [];
 let doorAddedWalls = new Set();   // 門加進固定牆的格子（換地圖／重開時先還原）
 const isDoorStamp = s => !!(s && typeof DOOR_TILES !== 'undefined' && DOOR_TILES[s.id]);
@@ -34,6 +34,11 @@ function setupDoors() {
     }
     // 只管理原本不是牆的格子（編輯器裡畫了不可穿透的格子維持擋路）
     const own = cells.filter(k => !mapWalls.has(k));
+    // hug：門關著時，最下面那排的擋路往上縮幾像素（地圖像素），角色可以走到貼著門的地方（不然會被角色的碰撞半徑卡在離門一小段）
+    const hug = DOOR_TILES[s.id].hug ?? DOOR.hug;   // 沒寫就用預設：之後新增的門也一樣能走到貼著門
+    // 擋路的下緣對齊「門圖的下緣往上 hug」（門在編輯器裡往下微調過也對得上）；最多移不到一整格
+    const hugDy = Math.max(-(CELL - 1), Math.min(CELL - 1, (y0 + h - hug) - (OY + (row + 1) * CELL)));
+    if (hug > 0 && hugDy && typeof addStampSolidOffset === 'function') for (const k of own) if (Number(k.split(',')[1]) === row) addStampSolidOffset(k, [0, hugDy]);
     const mode = typeof DOOR_MODES !== 'undefined' && DOOR_MODES[s.doorMode] ? s.doorMode : (DOOR_TILES[s.id].mode || 'manual');   // 素材可以指定預設的門種類
     const door = { stamp: s, mode, open: false, cells, own, sound: DOOR_TILES[s.id].sound || 'door',
       x: (left + right) / 2, y: bottom, top: y0 + 2, left, right, y0,
@@ -46,6 +51,58 @@ function setupDoors() {
   }
 }
 const doorStampOpen = s => mapDoors.some(d => d.open && d.stamp === s);
+// ---- 打開時挖空門洞（data/doors.js 的 cutout）：門可以直接放在任何牆上，不用另外畫「牆＋門框」的素材 ----
+//   門打開時：① 立體物（牆、柱子…）在門的範圍裡不畫（挖一個洞）；② 地面那一輪最後補畫：門洞裡露出最底下那層地板，再疊上門框。
+//   門洞的地板、門框都畫在地面那一輪（角色下面）：門框永遠不會蓋住角色（走過門口、站在門口都一樣）。
+//   門框：有給 frameFile（另外畫的門框圖，跟門一樣大、中間透明）就用那張；不然留門圖最外圈 frame 像素（下緣不留，門洞直通地面）。
+const doorCutoutOf = s => (s && typeof DOOR_TILES !== 'undefined' && DOOR_TILES[s.id] && DOOR_TILES[s.id].cutout) || null;
+function doorCutoutRects(d) {
+  const s = d.stamp, cfg = doorCutoutOf(s), t = mapTileById(s.id); if (!cfg || !t) return null;
+  const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
+  let [p0, p1] = DOOR_TILES[s.id].panel || [0, w]; if (s.fx) [p0, p1] = [w - p1, w - p0];
+  const f = cfg.frame ?? 2;
+  return { s, t, cfg, x0, y0, w, h, outer: { x: x0 + p0, y: y0, w: p1 - p0, h }, inner: { x: x0 + p0 + f, y: y0 + f, w: p1 - p0 - f * 2, h: h - f } };
+}
+const openCutoutDoors = () => (typeof mapDoors !== 'undefined' ? mapDoors : []).filter(d => d.open && doorCutoutOf(d.stamp)).map(doorCutoutRects).filter(Boolean);
+// 畫立體物之前呼叫（js/maploader.js）：跟打開的門重疊、而且在門後面或跟門同一排的（牆）→ 把門的範圍挖掉（呼叫的人負責 restore）
+function doorCutoutClip(ctx, x, y, w, h) {
+  const holes = openCutoutDoors().filter(R => { const o = R.outer; return x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y && y + h <= o.y + o.h + CELL / 2; });
+  if (!holes.length) return false;
+  ctx.beginPath(); ctx.rect(x - 1, y - 1, w + 2, h + 2); for (const R of holes) ctx.rect(R.outer.x, R.outer.y, R.outer.w, R.outer.h); ctx.clip('evenodd');
+  return true;
+}
+// 地面那一輪最後呼叫（js/maploader.js 的 drawMapGround）：門洞的地板＋門框
+function drawOpenDoorsGround(ctx) {
+  for (const R of openCutoutDoors()) {
+    const { s, t, cfg } = R, patch = cfg.frameFile ? R.outer : R.inner;   // 另外畫的門框：整個門的範圍都先鋪地板，門框圖透明的地方就是地板
+    ctx.save(); ctx.beginPath(); ctx.rect(patch.x, patch.y, patch.w, patch.h); ctx.clip();
+    const c0 = Math.floor((patch.x - OX) / CELL), c1 = Math.floor((patch.x + patch.w - 1 - OX) / CELL), r0 = Math.floor((patch.y - OY) / CELL), r1 = Math.floor((patch.y + patch.h - 1 - OY) / CELL);
+    const overlaps = st => { const tt = mapTileById(st.id); if (!tt) return false; const sx = OX + st.c * CELL + (st.ox || 0), sy = OY + st.r * CELL + (st.oy || 0); return sx < patch.x + patch.w && sx + mapStampW(st, tt) * CELL > patch.x && sy < patch.y + patch.h && sy + mapStampH(st, tt) * CELL > patch.y; };
+    let drawn = false;
+    for (const lid of MAP_LAYER_ORDER) {   // 只露出最底下那層有東西的地面類圖層（上面那幾層可能是平貼的牆）
+      if (lid === 'top' || isOccLayer(lid)) continue;
+      const layer = (MAP.layers && MAP.layers[lid]) || {}, cells = [];
+      for (let r = r0; r <= r1; r++) for (let c = c0; c <= c1; c++) if (layer[c + ',' + r] && !chairConfig(layer[c + ',' + r])) cells.push([c, r, layer[c + ',' + r]]);
+      const stamps = (MAP.stamps || []).filter(st => st !== s && (st.layer || 'top') === lid && overlaps(st));
+      if (!cells.length && !stamps.length) continue;
+      for (const [c, r, id] of cells) drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL, lid);
+      for (const st of stamps) drawMapStampImg(ctx, st);
+      drawn = true; break;
+    }
+    if (!drawn) { ctx.fillStyle = '#0b0e12'; ctx.fillRect(patch.x, patch.y, patch.w, patch.h); }   // 底下沒鋪地板：黑色門洞
+    ctx.restore();
+    drawOpenDoorFrame(ctx, R);
+  }
+}
+// 門框（跟門洞一起畫在角色下面）
+function drawOpenDoorFrame(ctx, R) {
+  const s = R.s;
+  const flip = img => { ctx.save(); if (s.fx) { ctx.translate(R.x0 * 2 + R.w, 0); ctx.scale(-1, 1); } ctx.drawImage(img, R.x0, R.y0, R.w, R.h); ctx.restore(); };
+  if (R.cfg.frameFile) { const img = tileImage({ id: '__door-frame:' + R.cfg.frameFile, file: R.cfg.frameFile }); if (img) flip(img); return; }
+  const img = tileImage(R.t); if (!img) return;
+  ctx.save(); ctx.beginPath(); ctx.rect(R.x0, R.y0, R.w, R.h); ctx.rect(R.inner.x, R.inner.y, R.inner.w, R.inner.h); ctx.clip('evenodd');   // 只留外圈
+  flip(img); ctx.restore();
+}
 
 function doorOccupied(door) {
   const inDoor = a => a && door.cells.includes(cellAt(a.x, a.y).join(','));

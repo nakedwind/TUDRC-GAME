@@ -12603,16 +12603,12 @@ const BATTLE_MAPS = [
         "35,10": "tile_poolcore_deep_water",
         "35,11": "tile_poolcore_deep_water",
         "35,12": "tile_poolcore_deep_water",
-        "23,20": "tile_poolcore_floor_pale",
-        "23,19": "tile_poolcore_floor_pale",
-        "23,17": "tile_poolcore_floor_pale",
         "14,28": "tile_mv1cfh6l",
         "14,27": "tile_poolcore_floor_pale",
         "14,26": "tile_poolcore_floor_pale",
         "14,25": "tile_poolcore_floor_pale",
         "14,24": "tile_poolcore_floor_pale",
         "14,23": "tile_poolcore_floor_pale",
-        "14,22": "tile_poolcore_floor_pale",
         "24,4": "tile_poolcore_wall_corner",
         "24,5": "tile_poolcore_floor_pale",
         "24,6": "tile_poolcore_floor_pale",
@@ -12634,8 +12630,9 @@ const BATTLE_MAPS = [
         "4,3": "tile_poolcore_floor_pale",
         "4,2": "tile_poolcore_floor_pale",
         "4,1": "tile_poolcore_wall_corner",
-        "24,15": "tile_poolcore_floor_pale",
-        "30,14": "tile_poolcore_floor_pale"
+        "30,14": "tile_poolcore_floor_pale",
+        "26,20": "tile_poolcore_floor_pale",
+        "26,21": "tile_poolcore_floor_pale"
       },
       "ground2": {},
       "object": {},
@@ -13103,448 +13100,432 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_wall_wide",
         "c": 15,
-        "r": 20,
+        "r": 23,
         "layer": "ground",
-        "sortDepth": 0.5
+        "sortDepth": 0.5,
+        "oy": 10
       },
       {
         "id": "tile_poolcore_wall_wide",
         "c": 16,
-        "r": 20,
+        "r": 23,
         "layer": "ground",
-        "sortDepth": 0.5
+        "sortDepth": 0.5,
+        "oy": 10
       },
       {
         "id": "tile_poolcore_wall_wide",
         "c": 18,
-        "r": 20,
+        "r": 23,
         "layer": "ground",
-        "sortDepth": 0.5
+        "sortDepth": 0.5,
+        "oy": 10
       },
       {
         "id": "tile_poolcore_wall_wide",
         "c": 20,
-        "r": 20,
+        "r": 23,
         "layer": "ground",
-        "sortDepth": 0.5
+        "sortDepth": 0.5,
+        "oy": 10
       },
       {
         "id": "tile_poolcore_wall_wide",
         "c": 22,
-        "r": 20,
-        "layer": "ground",
-        "sortDepth": 0.25
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 15,
         "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 15,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 16,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 16,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 18,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 18,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 20,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 20,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 22,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 22,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 26,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 26,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 28,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 28,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 30,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 30,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 32,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 32,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 34,
-        "r": 23,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 34,
-        "r": 24,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 15,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 15,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 15,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 16,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 16,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 16,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 18,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 18,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 18,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 20,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 20,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 20,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 22,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 22,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 22,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 26,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 26,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 26,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 28,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 28,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 28,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 32,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 30,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 34,
-        "r": 25,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 34,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 34,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 30,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 32,
-        "r": 26,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 32,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 30,
-        "r": 27,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 22,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 21,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 26,
-        "r": 21,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 26,
-        "r": 22,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 28,
-        "r": 21,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 30,
-        "r": 21,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 32,
-        "r": 21,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 34,
-        "r": 21,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 28,
-        "r": 22,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 30,
-        "r": 22,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 32,
-        "r": 22,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 34,
-        "r": 22,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_wide",
-        "c": 24,
-        "r": 16,
         "layer": "ground",
         "sortDepth": 0.25,
-        "ox": 30,
         "oy": 10
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 15,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 15,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 16,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 16,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 18,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 18,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 20,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 20,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 22,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 22,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 24,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 24,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 26,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 26,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 28,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 28,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 30,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 30,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 32,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 32,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 34,
+        "r": 23,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 34,
+        "r": 24,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 15,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 15,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 15,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 16,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 16,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 16,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 18,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 18,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 18,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 20,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 20,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 20,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 22,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 22,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 22,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 24,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 24,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 24,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 26,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 26,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 26,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 28,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 28,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 28,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 32,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 30,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 34,
+        "r": 25,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 34,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 34,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 30,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 32,
+        "r": 26,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 32,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 30,
+        "r": 27,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 26,
+        "r": 21,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 26,
+        "r": 22,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 28,
+        "r": 21,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 30,
+        "r": 21,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 32,
+        "r": 21,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 34,
+        "r": 21,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 28,
+        "r": 22,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 30,
+        "r": 22,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 32,
+        "r": 22,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_poolcore_wall_edge",
+        "c": 34,
+        "r": 22,
+        "layer": "ground"
       },
       {
         "id": "tile_poolcore_wall_wide",
@@ -13581,24 +13562,6 @@ const BATTLE_MAPS = [
         "r": 15,
         "layer": "ground",
         "sortDepth": 0.25
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 18,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 19,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_edge",
-        "c": 24,
-        "r": 20,
-        "layer": "ground"
       },
       {
         "id": "tile_poolcore_wall_edge",
@@ -13859,23 +13822,16 @@ const BATTLE_MAPS = [
       {
         "id": "tile_poolcore_wall_corner",
         "c": 14,
-        "r": 20,
+        "r": 23,
         "layer": "ground",
-        "oy": 12
+        "oy": 22
       },
       {
         "id": "tile_poolcore_floor_pale",
         "c": 14,
-        "r": 21,
-        "layer": "ground"
-      },
-      {
-        "id": "tile_poolcore_wall_corner",
-        "c": 24,
-        "r": 13,
+        "r": 24,
         "layer": "ground",
-        "oy": 26,
-        "ox": 10
+        "oy": 10
       },
       {
         "id": "tile_cvs_sign_twelve",
@@ -15439,15 +15395,8 @@ const BATTLE_MAPS = [
         "id": "tile_mvobex5o",
         "c": 17,
         "r": 20,
-        "layer": "object7"
-      },
-      {
-        "id": "tile_poolcore_pillar",
-        "c": 23,
-        "r": 17,
         "layer": "object7",
-        "ox": 20,
-        "oy": 20
+        "sortDepth": 1.5
       },
       {
         "id": "tile_poolcore_pillar",
@@ -15642,7 +15591,8 @@ const BATTLE_MAPS = [
         "r": 12,
         "layer": "object",
         "ox": 10,
-        "oy": 10
+        "oy": 10,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_mvph1jix",

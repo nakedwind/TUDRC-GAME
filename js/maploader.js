@@ -501,6 +501,7 @@ function drawMapTileImg(ctx, id, x, y, layer='top') {
   const img = tileImage(t);
   if (img) {
     ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn())ctx.filter='brightness(0.35)';
+    if (typeof doorCutoutClip === 'function' && (isOccLayer(layer) || layer === 'top')) doorCutoutClip(ctx, x, y, CELL, CELL);   // 打開的挖空門：立體物在門的範圍裡不畫
     ctx.drawImage(img,x,y,CELL,CELL);ctx.restore();return;
   }
   if (t.role === 'wall') { ctx.fillStyle = '#3f434b'; ctx.fillRect(x + 2, y + 2, CELL - 4, CELL - 4); }
@@ -565,7 +566,7 @@ function mapGlowLights() {
 }
 function drawMapStampRaw(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
-  if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失
+  if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失（挖空門洞的門：門洞、門框在 drawMapGround 最後畫、在角色下面，js/doors.js）
   if (typeof StoryScene !== 'undefined' && StoryScene.ownsStamp(s)) return;   // 回憶劇情的自動門：由 js/story-scene.js 自己畫開關動畫
   if (typeof ballBedHidden === 'function' && ballBedHidden(s)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
   if (typeof G !== 'undefined' && G && G.flickerGlowStamps && G.flickerGlowStamps.has(s)) return;   // 疊在燈上的光暈圖（池核 LED）：由 js/flicker-light.js 畫在黑幕上面、跟著燈亮暗
@@ -589,6 +590,7 @@ function drawMapStampRaw(ctx, s) {
     const gate=G.obstacles.find(o=>o.type==='irongate'&&o.mapSource===s);
     if(gate&&drawSlidingIronGate(ctx,gate,img,x,y,w,h))return;
     ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn(circuitOf(s)))ctx.filter='brightness(0.35)';   // 電路編號（js/powered-lights.js）
+    if (typeof doorCutoutClip === 'function' && stampIsOcc(s)) doorCutoutClip(ctx, x, y, rot % 2 ? h : w, rot % 2 ? w : h);   // 打開的挖空門：牆在門的範圍裡不畫（js/doors.js）
     const drawW = rot % 2 ? h : w, drawH = rot % 2 ? w : h;
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
@@ -688,6 +690,7 @@ function drawMapGround(ctx) {
     if (!isOccLayer(lid)) drawLayerCellsInView(ctx, lid);
     for (const s of (MAP.stamps || [])) if (!isElevatorStamp(s) && (s.layer || 'top') === lid && !stampIsOcc(s) && stampInDrawRect(s)) drawMapStampImg(ctx, s);
   }
+  if (typeof drawOpenDoorsGround === 'function') drawOpenDoorsGround(ctx);   // 打開的挖空門：門洞的地板＋門框（在角色下面，js/doors.js）
 }
 // 上層：'top' 圖層，永遠畫在角色上面
 function drawMapTop(ctx) {

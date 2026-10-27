@@ -1,11 +1,15 @@
 /* 可開關的門：素材 id → 門板在圖片裡的左右範圍（像素）、開關門音效（js/sfx.js 的音效名稱，沒寫就用「關門」）。
    門關著時，門板正下方那一格（圖片最底下一排）會擋路；打開時門的圖片消失、可以通過。
-   每扇門在地圖編輯器選取後可設定：manual＝手動門（玩家按 Space 開關）／auto＝自動門（觸發條件達成時自動打開）。 */
+   每扇門在地圖編輯器選取後可設定：manual＝手動門（玩家按 Space 開關）／auto＝自動門（觸發條件達成時自動打開）。
+   cutout：打開時挖空門洞（門可以直接放在任何牆上，不用另外畫「牆＋門框」的素材；js/doors.js 的 drawOpenDoorCutout）
+     打開時門板範圍裡的牆不畫、露出最底下那層地板；frame＝留門圖最外圈幾像素當門框（地圖上的像素，預設 2）；
+     frameFile＝另外畫的門框圖（跟門一樣大、中間透明），有給就用它當門框。門要放在牆的上層、門底下要有鋪地板。
+   hug：門關著時，擋路的下緣在門圖下緣往上幾像素，角色可以走到貼著門（沒寫＝js/doors.js 的 DOOR.hug，所有門都適用）。 */
 const DOOR_TILES = {
   tile_bg_backroom_door_wood: { panel: [19, 61], sound: 'backroomDoor' },
   tile_mvfonrdd: { panel: [0, 80], mode: 'practice' },
-  tile_mvobex5o: { panel: [0, 40] },   // 池核的門（Poolcore_door.png，1×2 格，整片都是門板）
-  tile_mvobzfro: { panel: [0, 40] },   // 池核的門（Poolcore_door_2.png，1×2 格，整片都是門板）   // B-2 訓練室的玻璃門（2×3 格，整片都是門板）：平常關著，訓練時從選單結束（js/practice.js）   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
+  tile_mvobex5o: { panel: [0, 40], cutout: { frame: 2, frameFile: 'images/Poolcore/Poolcore_door_frame.png' } },   // 池核的門（Poolcore_door.png，1×2 格，整片都是門板）：打開時挖空門洞、留外框
+  tile_mvobzfro: { panel: [0, 40], cutout: { frame: 2, frameFile: 'images/Poolcore/Poolcore_door_frame.png' } },   // 池核的門（Poolcore_door_2.png）：同上；想用另外畫的門框就加 frameFile: 'images/Poolcore/xxx.png'   // B-2 訓練室的玻璃門（2×3 格，整片都是門板）：平常關著，訓練時從選單結束（js/practice.js）   // 後室木門（黃色），80×80，門板在 x 19～60；開關門音效「後室開門」
 };
 const DOOR_MODES = {
   manual: '自由開關（玩家按 Space 開關）',
