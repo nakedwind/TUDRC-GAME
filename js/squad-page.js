@@ -9,7 +9,12 @@
 const SQ_W = 888, SQ_H = 520;
 // 先藏起技能樹的隊員：技能的效果、說明、畫面都還在，只是玩家在 Y102隊員頁看不到技能樹（只看得到裝備頁）；要打開時把他從這裡拿掉
 const SQ_SKILL_TREE_HIDDEN = ['tino'];
-const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null, solo: null };   // solo：只看這一位（對話的「推薦裝備」打開的，左邊不列其他隊員）
+// 隊員頁版本：true＝V2（上面技能樹、點技能跳出說明卡；下面是現在穿的隊員裝備，「更換裝備」打開防具視窗）
+//            false＝舊版（右上角切換技能樹／裝備頁，在這裡直接換裝備）。舊版的程式和排版設定都還在，改回 false 就回去
+// 編輯器預覽（?squadedit=1）一律用舊版，排版編輯器調的位置才對得上
+const SQUAD_UI_V2 = true;
+const sqV2 = () => SQUAD_UI_V2 && !/[?&]squadedit=1(&|$)/.test(location.search);
+const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null, solo: null, card: null };   // card：V2 說明卡開著的是哪位隊員   // solo：只看這一位（對話的「推薦裝備」打開的，左邊不列其他隊員）
 const SQ_STATS = [
   { id: 'atk', name: '攻擊', icon: 'atk', val: s => s.noAttack ? '—' : String(s.dmg), num: s => s.dmg },
   { id: 'def', name: '防禦', icon: 'def', val: s => Math.round((s.defense || 0) * 100) + '%', num: s => Math.round((s.defense || 0) * 100) },
@@ -112,11 +117,12 @@ function renderSquadPage(body) {
   else {
     html += squadProfileHtml(actor, safe);
     if (actor.noncombat || !TYPES[actor.type]) html += '<section class="sq-main" data-sq="panel.tree"><p class="sq-empty" data-sq="text.noSkill">' + sqT('text.noSkill', '支援人員沒有技能樹，也沒有隊員裝備。') + '</p></section>';
+    else if (sqV2()) html += squadV2Html(actor, safe);
     else if (st.page === 'gear' || SQ_SKILL_TREE_HIDDEN.includes(actor.type)) html += squadGearHtml(actor, safe);
     else html += squadSkillHtml(actor, safe);
   }
   const keep = body.querySelector('.sq-roster-list')?.scrollTop || 0;
-  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas' + (st.solo ? ' sq-solo' : '') + '" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
+  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas' + (st.solo ? ' sq-solo' : '') + (sqV2() ? ' sq-v2' : '') + '" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
   const list = body.querySelector('.sq-roster-list'); if (list) list.scrollTop = keep;
   fitSquadCanvas(body); afterSquadRender(body);
 }
@@ -163,11 +169,11 @@ function squadSkillHtml(actor, safe) {
     return '<button type="button" class="sq-node g-' + n.group + ' ' + state + (n.id === sel ? ' sel' : '') + '" data-skill-pick="' + n.id + '" data-sq="' + nk + ':' + n.id + '" data-sq-tip="' + sqEsc(node.name) + '" data-sq-tip-desc="' + sqEsc(node.desc || node.effect || (node.active && typeof guideActiveTexts === 'function' ? guideActiveTexts(node.active).effect : '')) + '">' +
       sqIcon(icon, nk + 'Icon:' + n.id) + (state === 'locked' ? '<i class="sq-node-lock">🔒</i>' : '') + '</button>';
   }).join('');
-  const learned = skillLearnedCount(type);
-  let h = '<section class="sq-main sq-tree' + (guide ? ' guide' : '') + '" data-sq="panel.tree"><svg class="sq-lines" data-sq="svg.lines" aria-hidden="true"></svg>' +
+  const learned = skillLearnedCount(type), v2 = sqV2();   // V2：連線＋格子包在 sq-tree-in 裡（面板變高，格子整組往下放在中間）；沒有切換按鈕
+  let h = '<section class="sq-main sq-tree' + (guide ? ' guide' : '') + '" data-sq="panel.tree">' + (v2 ? '<div class="sq-tree-in">' : '') + '<svg class="sq-lines" data-sq="svg.lines" aria-hidden="true"></svg>' + (v2 ? nodes + '</div>' : '') +
     '<span class="sq-progress" data-sq="text.progress">已學 ' + learned + ' / ' + skillTotalFor(type) + '</span>' +
     '<span class="sq-crystals" data-sq="text.crystals"><img data-sq="img.crystalsIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片">' + training.crystals + '</span>' +
-    squadSwitchHtml('') + nodes +
+    (v2 ? '' : squadSwitchHtml('') + nodes) +
     ((training.skills[type] || []).length ? '<button type="button" class="sq-reset" data-squad-reset data-sq="btn.reset">' + sqT('btn.reset', '重置技能') + '</button>' : '') + '</section>';
   // 右下：說明
   const lay = skillLayoutOf(sel, type), node = skillNodeOf(type, sel), state = skillStateOf(type, sel), cost = node.cost, afford = training.crystals >= cost;
@@ -195,10 +201,42 @@ function squadSkillHtml(actor, safe) {
       '<p class="sq-info-effect" data-sq="text.skillEffect@' + type + '/' + sel + '" data-sq-base="text.skillEffect">' + sqEsc(effect) + '</p>' +   // 位置、大小每格技能各自調（沒調的照大家共用的）
       '<p class="sq-info-effect sq-info-effect2" data-sq="text.skillEffect2@' + type + '/' + sel + '" data-sq-base="text.skillEffect2">' + sqEsc(node.effect2).replace(/\n/g, '<br>') + '</p>' +   // 技能效果 2：同上，每格各自調
       '<p class="sq-info-note" data-sq="text.skillNote@' + type + '/' + sel + '" data-sq-base="text.skillNote" data-sq-group="text.skillNote@' + (sel === 'trait-1' ? 'trait' : 'other') + '">' + sqEsc(note).replace(/\n/g, '<br>') + '</p>' +
-      '<div class="sq-learn' + (owned ? ' owned' : '') + '" data-sq="box.learn' + (owned ? 'ed' : '') + '">' + (owned ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
-      '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' + label + '</button></div></section>';
+      '<div class="sq-learn' + (owned ? ' owned' : '') + '" data-sq="box.learn' + (owned ? 'ed' : '') + '">' + (owned || v2 ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
+      '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' +
+      (v2 && !owned ? '<span class="sq-btn-cost"><img src="' + SQ_CRYSTAL + '" alt="異質碎片"><b>' + cost + '</b></span>' : '') + (v2 ? '<span class="sq-btn-label">' + label + '</span>' : label) + '</button></div></section>';   // V2：碎片數量放進按鈕裡（［◆40　培養］）
   }
   return h;
+}
+// ---- V2：上面技能樹（點技能跳出說明卡）、下面現在穿的隊員裝備 ----
+function squadV2Html(actor, safe) {
+  const type = actor.type, st = squadPageState;
+  let h;
+  if (SQ_SKILL_TREE_HIDDEN.includes(type)) h = '<section class="sq-main sq-tree" data-sq="panel.tree"><p class="sq-empty">' + sqEsc(TYPES[type].name) + '的技能樹還沒開放。</p></section>';
+  else {
+    const full = squadSkillHtml(actor, safe), cut = full.indexOf('<section class="sq-info');
+    h = full.slice(0, cut);
+    if (st.card === type) h += full.slice(cut).replace('<section class="sq-info', '<section class="sq-info sq-card"').replace(/<\/section>$/, '<button type="button" class="sq-card-close" data-sq-card-close aria-label="關閉說明">×</button></section>');   // 說明卡：跟舊版右下的說明同一份
+  }
+  return h + squadGearBarHtml(type);
+}
+function squadGearBarHtml(type) {
+  return '<section class="sq-info sq-gearbar" data-sq="panel.gearBar"><b class="sq-gearbar-title">隊員裝備</b><div class="sq-gearbar-slots">' +
+    squadGearOf(type).map((id, i) => {
+      const g = id && squadGearById(id);
+      return '<span class="sq-gearbar-slot' + (g ? ' filled' : '') + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="裝備 ' + (i + 1) + '：空"') + '>' +
+        (g ? '<img src="' + squadGearImage(g) + '" alt="">' : '<i>' + (i + 1) + '</i>') + '</span>';
+    }).join('') + '</div><button type="button" class="sq-gearbar-btn" data-sq-armor>更換裝備</button></section>';
+}
+// 「更換裝備」：打開防具視窗、選好這位隊員（js/backpack.js 的 openArmorPanelFor）；關掉後回到這一頁
+function squadOpenArmor(type) {
+  if (typeof openArmorPanelFor === 'function' && openArmorPanelFor(type)) return;
+  if (typeof tpadToast === 'function') tpadToast('回基地，或到營地帳篷、裝備箱旁邊才能更換裝備');
+}
+function openSquadPageOf(id, solo) {   // 打開 T-Pad 這位隊員的頁面（防具視窗關掉後回來用）
+  if (!tpadOpen) openTPad();
+  if (!tpadOpen) return;
+  Object.assign(squadPageState, { member: id, solo: solo || null });
+  launchTPadApp('squad');
 }
 // ---- 裝備頁 ----
 function squadLookItem(type, slot) {   // 這一格外觀現在穿的：{ id, name, image } 或 null
@@ -330,7 +368,14 @@ function handleSquadClick(body, e) {
   const st = squadPageState, safe = typeof MAP_SAFE !== 'undefined' && MAP_SAFE, sound = n => { if (typeof sfx === 'function') sfx(n); };
   const t = e.target, type = st.member;
   const member = t.closest('[data-squad-member]');
-  if (member) { st.member = member.dataset.squadMember; st.avail = null; sound('switch'); renderSquadPage(body); return; }
+  if (member) { st.member = member.dataset.squadMember; st.avail = null; st.card = null; sound('switch'); renderSquadPage(body); return; }
+  if (sqV2()) {   // V2：點技能＝打開／關掉說明卡；點卡片以外的地方＝關掉
+    if (t.closest('[data-sq-armor]')) { squadOpenArmor(type); return; }
+    if (t.closest('[data-sq-card-close]')) { st.card = null; sound('switch'); renderSquadPage(body); return; }
+    const pk = t.closest('[data-skill-pick]');
+    if (pk) { const same = st.card === type && st.skill[type] === pk.dataset.skillPick; st.skill[type] = pk.dataset.skillPick; st.card = same ? null : type; sound('switch'); renderSquadPage(body); return; }
+    if (st.card && !t.closest('.sq-card')) { st.card = null; renderSquadPage(body); }
+  }
   if (t.closest('[data-sq-switch]')) { st.page = st.page === 'gear' ? 'skills' : 'gear'; sound('switch'); renderSquadPage(body); return; }
   const pick = t.closest('[data-skill-pick]');
   if (pick) { st.skill[type] = pick.dataset.skillPick; sound('switch'); renderSquadPage(body); return; }
@@ -474,7 +519,7 @@ function renderTPadSquadApp(el) {
   renderSquadPage(el);
 }
 function restoreTPadSquadApp() {
-  squadPageState.solo = null;   // 離開隊員畫面：下次從 T-Pad 打開就是一般的（左邊有全部隊員）
+  squadPageState.solo = null; squadPageState.card = null;   // 離開隊員畫面：下次從 T-Pad 打開就是一般的（左邊有全部隊員）
   if (typeof closeCaptainImpression === 'function') closeCaptainImpression();
   const body = tpadEl && tpadEl.querySelector('.tpad-appbody');
   if (body) { body.classList.remove('tpad-squad-app', 'squad-safe', 'sq-app'); if (body._sqResize) { body._sqResize.disconnect(); body._sqResize = null; } }

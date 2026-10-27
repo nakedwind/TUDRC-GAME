@@ -186,6 +186,7 @@ window.addEventListener('keydown', e => {
   }
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (tpadOpen) {
+    if (k === 'escape' && tpadView === 'squad' && typeof squadPageState !== 'undefined' && squadPageState.card) { squadPageState.card = null; refreshSquadPage(); e.preventDefault(); e.stopImmediatePropagation(); return; }   // V2 技能說明卡：Esc 先關卡片
     if (k === 'escape' && tpadView === 'squad') {
       const impression = document.getElementById('captainImpressionPanel');
       const skills = document.getElementById('skillTreePanel');

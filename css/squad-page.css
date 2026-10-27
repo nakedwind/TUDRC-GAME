@@ -161,3 +161,28 @@
 /* 只看一位隊員（對話的「推薦裝備」打開的，js/squad-page.js 的 squadPageState.solo）：左邊的隊員列表、箭頭拿掉 */
 .sq-canvas.sq-solo .sq-roster, .sq-canvas.sq-solo .sq-arrow { display: none; }
 .sq-canvas.sq-solo { translate: -42px 0; }   /* 列表拿掉後左邊空一條：整頁往左移一半，左右留白一樣 */
+
+/* ===== V2（js/squad-page.js 的 SQUAD_UI_V2）：上面技能樹（變高）、下面隊員裝備列；點技能跳出說明卡 ===== */
+.sq-v2 .sq-main.sq-tree { height: 384px; }
+.sq-v2 .sq-tree-in { position: absolute; left: 0; top: 50px; width: 100%; height: 284px; }   /* 格子、連線整組往下，放在變高的面板中間 */
+.sq-v2 .sq-reset { top: auto; bottom: 10px; }
+.sq-v2 .sq-info.sq-gearbar { top: 400px; height: 112px; display: flex; align-items: center; gap: 20px; padding: 0 22px; }
+.sq-gearbar-title { font-size: 18px; color: #fff; white-space: nowrap; }
+.sq-gearbar-slots { display: flex; gap: 14px; padding: 9px 14px; border: 1px solid rgba(110,150,255,.6); border-radius: 10px; background: rgba(10,14,20,.55); }
+.sq-gearbar-slot { width: 62px; height: 62px; display: grid; place-items: center; border: 2px solid rgba(110,150,255,.6); border-radius: 9px; background: #0c1117; }
+.sq-gearbar-slot.filled { border-color: rgba(255,212,121,.65); background: radial-gradient(circle at 50% 45%, rgba(255,212,121,.16), #0c1117 72%); }
+.sq-gearbar-slot img { width: 48px; image-rendering: pixelated; }
+.sq-gearbar-slot i { font-style: normal; font-size: 13px; color: rgba(160,190,235,.35); }
+.sq-gearbar-btn { margin-left: auto; padding: 11px 20px; border: 1px solid rgba(255,212,121,.7); border-radius: 10px; background: linear-gradient(180deg, #f7d886, #e6b04a); color: #3b2304; font-size: 15px; font-weight: 800; white-space: nowrap; cursor: pointer; }
+.sq-gearbar-btn:hover { filter: brightness(1.08); }
+.sq-v2 .sq-info.sq-card { z-index: 5; border-color: rgba(143,211,255,.5); box-shadow: 0 16px 40px rgba(0,0,0,.65); }   /* 說明卡：跟舊版說明同一個位置，蓋在技能樹下半、裝備列上面 */
+.sq-card-close { position: absolute; right: 8px; top: 8px; width: 26px; height: 26px; padding: 0; border: 1px solid rgba(143,211,255,.6); border-radius: 50%; background: rgba(18,25,34,.95); color: #dcecff; font-size: 17px; line-height: 22px; cursor: pointer; }
+.sq-card-close:hover { color: #fff; background: rgba(68,91,111,.98); }
+/* V2 說明卡的「培養」按鈕：碎片圖示（放大 2 倍）＋數量放在按鈕裡，按鈕高 ×1.1 */
+.sq-v2 .sq-learn-btn { position: relative; left: -5px; width: auto; min-width: 150px; white-space: nowrap; height: 40px; display: inline-flex; align-items: center; justify-content: center; gap: 10px; padding: 0 14px 0 6px; font-size: 16px; }   /* left −5：按鈕往左；左右留白差 8＝裡面的內容整組往左 4；字比較長（回基地才能培養）時按鈕自動變寬，不會換行 */
+.sq-v2 .sq-learn-btn:disabled { font-size: 14px; }
+.sq-btn-cost { display: inline-flex; align-items: center; gap: 0; }
+.sq-btn-cost img { margin-right: -8px !important; translate: 0 1px; }   /* 碎片和數字的間距 −8（圖本身左右有透明留白，所以是負的）；碎片往下 1 */
+.sq-btn-label { font-weight: 900; -webkit-text-stroke: .5px currentColor; }   /* 「培養」粗體：這個字型的粗體不夠明顯，加一點描邊 */
+.sq-btn-cost img { width: 38px; height: 38px; margin: -9px 0; }   /* 32 再放大 1.2 倍；上下負邊距：圖變大按鈕也不會被撐高 */
+.sq-btn-cost b { font-size: 16px; }

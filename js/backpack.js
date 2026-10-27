@@ -65,6 +65,7 @@ let armorWho = 'winter';     // 防具視窗正在換誰的：'winter'＝部隊�
 let armorSlotPick = null;    // 點了隊員的空格：「穿上」就放這一格
 const SQ_ARMOR_PREFIX = 'sgear:', SQ_WORN_PREFIX = 'sworn:';   // 右邊格子的 id／選到隊員身上第幾格
 const armorForMember = () => campArmorOpen && armorWho !== 'winter';
+let armorRemote = null;      // 從 T-Pad 隊員頁（V2「更換裝備」）打開的：{ member, solo }；只能換隊員的，關掉後回到 T-Pad 那一頁
 function bagAtCampTent() {
   const spot = typeof campInteractionNearPlayer === 'function' && campInteractionNearPlayer();
   return !!spot && spot.kind === 'retreat';
@@ -359,6 +360,7 @@ function openBackpack(options = {}) {
 function closeBackpack(silent = false) {
   if (!backpackOpen) return; backpackOpen = false; bagDropQty = 1; backpackEl.classList.add('hidden'); if (!silent) sfx('switch');
   if (campArmorOpen) { campArmorOpen = false; backpackTab = 'consumable'; backpackSel = null; }   // 防具視窗關掉：下次按 B 是一般背包
+  if (armorRemote) { const r = armorRemote; armorRemote = null; setTimeout(() => { if (typeof openSquadPageOf === 'function') openSquadPageOf(r.member, r.solo); }, 0); }   // 從 T-Pad 打開的：回到那位隊員的頁面
 }
 
 document.getElementById('backpackClose').addEventListener('click', () => closeBackpack());
@@ -490,8 +492,8 @@ function squadArmorItems() {
 // 左上角：部隊長＋每位隊員的頭像，點了切換要換誰的
 function addArmorWhoTabs() {
   const box = document.getElementById('equipPanel'); if (!box) return;
-  const who = ['winter', ...armorMembers()];
-  if (!who.includes(armorWho)) armorWho = 'winter';
+  const who = armorRemote ? armorMembers() : ['winter', ...armorMembers()];   // 從 T-Pad 打開：不能換部隊長的防具（那要到裝備箱）
+  if (!who.includes(armorWho)) armorWho = who[0] || 'winter';
   const nameOf = id => id === 'winter' ? '部隊長' : (TYPES[id]?.name || id);
   const imgOf = id => memberPortraitPath(id === 'winter' ? CHARACTERS.winter : TYPES[id]);
   // 排版跟 T-Pad「Y102隊員」左邊的名單一樣：左邊一條直的頭像列，右邊是原本的內容
@@ -570,4 +572,17 @@ function handleSquadArmorClick(e) {
   const off = e.target.closest('[data-sq-off]');
   if (off) { if (unequipSquadGear(armorWho, Number(off.dataset.sqOff))) { sfx('switch'); backpackSel = null; } else sfx('error'); renderBackpack(); return true; }
   return false;
+}
+// 從 T-Pad 隊員頁（V2 的「更換裝備」）打開防具視窗，直接選好這位隊員。
+// 跟隊員裝備原本的規則一樣：基地、營地帳篷旁、裝備箱旁才能換；不行就回傳 false（T-Pad 跳提示）
+function openArmorPanelFor(type) {
+  if (!G?.player || G.over || !(MAP_SAFE || bagAtCampTent() || armorChestNearPlayer())) return false;
+  const solo = typeof squadPageState !== 'undefined' ? squadPageState.solo : null;
+  if (typeof closeTPad === 'function') closeTPad(true);
+  closeBackpack(true);
+  campArmorOpen = true; backpackTab = GEAR_TAB.id; backpackSel = null; armorWho = type; armorSlotPick = null;
+  armorRemote = { member: type, solo };
+  openBackpack({ camp: true });
+  if (!backpackOpen) { campArmorOpen = false; armorRemote = null; backpackTab = 'consumable'; return false; }
+  return true;
 }
