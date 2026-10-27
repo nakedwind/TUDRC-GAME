@@ -209,10 +209,8 @@ function storageBoxConfig(open){
   let edited=[];try{edited=JSON.parse(localStorage.getItem('td-object-editor-v1')||'[]');}catch(_){}
   return (Array.isArray(edited)&&edited.find(o=>o.id===id))||STORAGE_BOXES.find(o=>o.id===id);
 }
-function setupStorageBoxWalls(){
-  if(!MAP)return;
-  if(storageWallMap===MAP){for(const key of storageAddedWalls)mapWalls.delete(key);for(const key of storageAddedOffsets)delete mapSolidOffsets[key];}
-  storageWallMap=MAP;storageAddedWalls=new Set();storageAddedOffsets=new Set();
+// 每個置物箱自帶的擋路格：each(格子 key, 像素微調)
+function eachStorageBoxSolid(each){
   for(const prop of storagePropEntries()){
     if(prop.kind!=='closed'&&prop.kind!=='open')continue;
     const v=storageBoxConfig(prop.open)?.h;if(!v)continue;
@@ -221,8 +219,24 @@ function setupStorageBoxWalls(){
       if(dc<0||dr<0||dc>=v.w||dr>=v.h)continue;
       const cc=o.c+(prop.stamp?.fx?v.w-1-dc:dc);
       const rr=o.r+(prop.stamp?.fy?v.h-1-dr:dr);
-      const key=cc+','+rr;
-      if(inGrid(cc,rr)&&!mapWalls.has(key)){mapWalls.add(key);storageAddedWalls.add(key);if(addStampSolidOffset(key,o.off))storageAddedOffsets.add(key);}
+      if(inGrid(cc,rr))each(cc+','+rr,o.off);
     }
   }
+}
+function setupStorageBoxWalls(){
+  if(!MAP)return;
+  if(storageWallMap===MAP){for(const key of storageAddedWalls)mapWalls.delete(key);for(const key of storageAddedOffsets)delete mapSolidOffsets[key];}
+  storageWallMap=MAP;storageAddedWalls=new Set();storageAddedOffsets=new Set();
+  eachStorageBoxSolid((key,off)=>{if(!mapWalls.has(key)){mapWalls.add(key);storageAddedWalls.add(key);if(addStampSolidOffset(key,off))storageAddedOffsets.add(key);}});
+}
+// 接續「保留進度」的戰場（js/combat-progress.js，這時不會跑 newGame）：牆格整組換成存起來的那份，
+// 「哪些格是置物箱加的」沒存，打開置物箱時關著的擋路格會刪不掉。照地圖資料重新認一次：地圖本來沒畫、現在卻是牆的就是置物箱加的
+function restoreStorageBoxWalls(){
+  storageWallMap=MAP;storageAddedWalls=new Set();storageAddedOffsets=new Set();
+  if(!MAP)return;
+  const drawn=new Set(MAP.solid||[]),drawnOff=MAP.solidOffsets||{};
+  eachStorageBoxSolid(key=>{
+    if(!mapWalls.has(key)||drawn.has(key))return;
+    storageAddedWalls.add(key);if(mapSolidOffsets[key]&&!drawnOff[key])storageAddedOffsets.add(key);
+  });
 }

@@ -76,6 +76,24 @@ function setupBreakableWalls() {
     if (spec && spec.hide) { const area = hiddenAreaOf(s, spec); if (area) G.hiddenAreas.push(area); }
   }
 }
+// 接續「保留進度」的戰場（js/combat-progress.js 的 restoreCombatProgress，這時不會跑 newGame）：
+// 牆格整組換成存起來的那份，但「哪些格是可炸牆加的」沒存，炸開時就刪不掉（洞炸開了還是走不過去）。
+// 照地圖資料重新認一次：還沒炸開的牆上、地圖本來沒畫擋路格、現在卻是牆的格子，就是可炸牆加的
+function restoreBreakableWalls() {
+  breakableWallCells = new Set(); breakableWallSolid = new Set();
+  if (!G || !MAP) return;
+  if (!(G.wallStage instanceof Map)) G.wallStage = new Map();
+  if (!G.hiddenAreas) G.hiddenAreas = [];
+  const drawn = new Set(MAP.solid || []);
+  const added = (c, r) => { const k = c + ',' + r; return inGrid(c, r) && mapWalls.has(k) && !drawn.has(k) ? k : null; };
+  for (const s of MAP.stamps || []) {
+    const spec = breakableWallSpec(s); if (!spec) continue;
+    const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+    for (const [dc, dr] of spec.solid || []) { const k = added(c0 + dc, r0 + dr); if (k) breakableWallSolid.add(k); }
+    if (breakableWallStage(s) >= spec.stages.length) continue;   // 已經炸開了
+    for (const [c, r] of breakableWallOpenCells(s)) { const k = added(c, r); if (k) breakableWallCells.add(k); }
+  }
+}
 // 隱藏區：從牆上方那格往外，沿著沒有牆的格子連過去的整片區域（不含牆本身的圖片範圍，牆要看得到）
 function hiddenAreaOf(s, spec) {
   const t = mapTileById(s.id); if (!t) return null;

@@ -39,6 +39,14 @@ function setupMrtLocks() {
     applyMrtLock(lock);
   }
 }
+// 接續「保留進度」的戰場（js/combat-progress.js，這時不會跑 newGame）：每個鎖自己加的格子（lock.added）跟著 G 存起來了，
+// 但總表 mrtAddedWalls 沒有，重新開始時會刪不掉、閘門就再也打不開。照每個鎖重新湊回來
+function restoreMrtLocks() {
+  mrtAddedWalls = new Set();
+  if (!G) return;
+  if (!G.mrtLocks) G.mrtLocks = [];
+  for (const l of G.mrtLocks) for (const k of l.added || []) mrtAddedWalls.add(k);
+}
 // 依開關狀態加／拿掉擋路格（只管原本不是牆的格子）
 function applyMrtLock(lock) {
   for (const k of lock.added) { mapWalls.delete(k); mrtAddedWalls.delete(k); }

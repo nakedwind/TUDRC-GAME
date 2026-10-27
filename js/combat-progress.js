@@ -56,6 +56,10 @@ function restoreCombatProgress() {
     sortie.active = data.activeSupply; sortieLastSafe = false; saveSortie();
     poweredMap = MAP; mapPowerOn = new Set(Array.isArray(data.power) ? data.power : data.power ? [0] : []);   // 舊存檔：true＝沒編號的電路開著
     openElevatorStamp = data.elevator || null;   // 電梯開著還是關著（擋路格已經跟著 mapWalls 一起還原）
+    // 各自「加進牆裡的格子」清單沒存，照還原後的牆重新認一次（不然打開／炸開時擋路格刪不掉）
+    if (typeof restoreBreakableWalls === 'function') restoreBreakableWalls();   // 可炸開的牆（js/breakable-walls.js）
+    if (typeof restoreMrtLocks === 'function') restoreMrtLocks();               // 捷運閘門、封鎖的入口（js/mrt-locks.js）
+    if (typeof restoreStorageBoxWalls === 'function') restoreStorageBoxWalls();  // 置物箱（js/storage-lockers.js）
     if (typeof resumeVitals === 'function') resumeVitals();   // 中間回應變中心治療過：換成現在的 HP、負荷（倒下的隊員治好了就站起來，js/vitals.js）
     sanitySP = G.guide; rememberGuideSP(); applyOutfits(); occCache = null; occCacheFor = null;
     computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
