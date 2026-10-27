@@ -1616,7 +1616,7 @@ function pickSentryTarget(t, R) {
 const SOOTHE_AURA_CD = 3;   // 嚮導被動疏導的冷卻秒數
 const SOOTHE_CHANNEL = 1;  // 嚮導疏導時站定、閉眼施法的秒數（期間不走動、不攻擊）
 const ACID_TICK = 1;   // 阿瓦倫腐蝕池：每隔幾秒扣一次血（每次扣「每秒傷害 × 間隔」）
-const ACID_ALLY_DPS = 10;   // 阿瓦倫腐蝕池對溫特、隊友的每秒傷害（固定，不跟著阿瓦倫的攻擊力變；怪物照樣吃「攻擊力的一半」）
+const ACID_ALLY_DPS = 5;   // 阿瓦倫腐蝕池對溫特、隊友的每秒傷害（固定，不跟著阿瓦倫的攻擊力變；怪物照樣吃「攻擊力的一半」）
 // 大招：平時普攻，冷卻好時放一次（傷害高、範圍大、特效大）；喊的話在 data/dialogues.js 的 ultimate
 const ULTIMATES = {
   theonie: { cd: 8,  dmgMul: 2.6, splash: 2.2, scale: 1.9 },
@@ -2124,7 +2124,7 @@ function update(dt) {
           if (o.berserk && o.taint < 60) o.berserk = false;
           spawnSootheEffect(o.x, o.y - 8, sc, o);
           const cleared = Math.round(taintBefore - o.taint);
-          if (cleared > 0) flashDmg('汙染 -' + cleared, o.x, o.y - 44, `rgb(${sc[0]},${sc[1]},${sc[2]})`);
+          if (cleared > 0) flashDmg('負荷 -' + cleared, o.x, o.y - 44, `rgb(${sc[0]},${sc[1]},${sc[2]})`);
           soothed.push(o);
         }
         if (soothed.length) {

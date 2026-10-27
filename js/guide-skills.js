@@ -38,7 +38,7 @@ function guideSkillFire(t, s) {
       const before = o.taint || 0; o.taint = Math.max(0, before - s.soothe);
       if (s.wake && o.berserk) o.berserk = false;
       else if (o.berserk && o.taint < 60) o.berserk = false;
-      if (before - o.taint >= 1) flashDmg('汙染 -' + Math.round(before - o.taint), o.x, o.y - 44, color);
+      if (before - o.taint >= 1) flashDmg('負荷 -' + Math.round(before - o.taint), o.x, o.y - 44, color);
     }
     if (s.buff) {
       o.skillBuffs = o.skillBuffs || {};

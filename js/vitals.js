@@ -226,7 +226,7 @@ function updateAshSoothe(dt) {
   t.taint = Math.max(0, before - SOOTHE.heal); if (t.berserk && t.taint < 60) t.berserk = false;   // 跟溫特疏導一次一樣的量
   spawnSootheEffect(t.x, t.y - 8, VITALS.ashSootheColor, t);
   if (typeof sfxAt === 'function') sfxAt('sootheEnd', t.x, t.y, .5, 'ash-soothe-end');
-  sentryStatus(t, '疏導 -' + Math.round(before - t.taint), '#7ee0c0');
+  sentryStatus(t, '負荷 -' + Math.round(before - t.taint), '#7ee0c0');
   ash.soothingT = 0; ashJob.t = 0;
 }
 // 疏導中的亞許：不要自己走開（js/sentry.js 的 updateWanderer 先問這裡）

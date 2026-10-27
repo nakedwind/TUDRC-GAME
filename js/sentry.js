@@ -976,5 +976,5 @@ function finishSoothe(t) {
   sfx('sootheEnd');   // 疏導成功：「疏導2」音效
   addStat('soothes');   // 成就：親自疏導次數
   spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
-  sentryStatus(t, '疏導 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
+  sentryStatus(t, '負荷 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
 }
