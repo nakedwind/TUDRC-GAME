@@ -3202,3 +3202,20 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 /* 查看海報時的原始海報大圖（js/posters.js 的 showPosterArt）：左右置中，蓋在遊戲畫面上、對話框下面 */
 #posterArt { position: absolute; z-index: 30; left: 50%; transform: translateX(-50%); width: auto; pointer-events: none; box-shadow: 0 0 14px 4px rgba(0,0,0,.5); }   /* 邊緣一圈黑色陰影（全黑、不透明度 50%） */
 #posterArt[hidden] { display: none; }
+/* 防具視窗：左邊一條直的頭像列（部隊長＋隊員），排法跟 T-Pad「Y102隊員」的名單一樣；js/backpack.js 的 addArmorWhoTabs */
+@media (min-width: 861px) { #backpack.armor-mode .backpack-body { grid-template-columns: 282px minmax(0,1fr); } }   /* 左欄加寬放頭像列，紙娃娃才不會被擠窄 */
+#equipPanel.with-who { flex-direction: row; gap: 8px; overflow: hidden; }
+#equipPanel.with-who > .armor-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 6px; overflow-y: auto; }
+#equipPanel.with-who > .armor-main > * { flex-shrink: 0; }
+.armor-who { flex: none; width: 66px; display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: 6px 16px 6px 6px; overflow-y: auto; scrollbar-width: none; border: 1px solid rgba(255,255,255,.1); border-radius: 12px; background: linear-gradient(170deg, rgba(34,40,50,.95), rgba(20,24,31,.95)); box-shadow: 0 6px 18px rgba(0,0,0,.35); }
+.armor-who::-webkit-scrollbar { display: none; }
+.aw-item { position: relative; flex: none; display: block; }
+.aw-item.on::after { content: '◀'; position: absolute; left: calc(100% + 3px); top: 50%; transform: translateY(-50%); color: #ffd27a; font-size: 11px; line-height: 1; text-shadow: 0 0 6px rgba(255,210,122,.6); }   /* 選中的那位：右邊的小箭頭 */
+.armor-who button { position: relative; display: block; width: 44px; height: 44px; padding: 0; overflow: hidden; border: 2px solid rgba(255,255,255,.14); border-radius: 10px; background: #1b222c; cursor: pointer; }
+.armor-who button img { position: absolute; left: 50%; top: -22px; width: 88px; max-width: none; transform: translateX(-50%); image-rendering: pixelated; }   /* 臉的裁法跟 T-Pad 名單一樣（圖寬＝格子 2 倍；往上移跟 data/squad-layout.js 的 rosterImg y −22 同比例），露出整張臉 */
+.armor-who button:hover { border-color: rgba(255,214,120,.55); }
+.armor-who button.on { border-color: #ffd27a; box-shadow: 0 0 0 2px rgba(255,210,122,.25), 0 0 12px rgba(255,210,122,.35); }
+.doll-slot.drop-ok.filled span { border-style: solid; }
+/* 道具格的數量／等級標籤：背包編輯器把它設成固定大小（裝不下就出現捲軸），字比格子寬時捲軸箭頭會蓋住「Lv5」；改成不捲動、字不換行 */
+#backpackGrid .bag-cell > b { overflow: visible !important; white-space: nowrap; padding-left: 3px; padding-right: 3px; }
+.equip-doll.sq-doll .doll-slots { grid-template-columns: max-content; justify-content: center; row-gap: 4px; }   /* 隊員的 3 格：1、2、3 由上往下直排 */

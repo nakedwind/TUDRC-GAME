@@ -61,12 +61,16 @@ const backpackDetail = document.getElementById('backpackDetail');
 let backpackOpen = false, backpackTab = 'consumable', backpackSel = null;
 let backpackCampContext = null;
 let campArmorOpen = false;   // true＝背包視窗現在是防具視窗（openArmorPanel）
+let armorWho = 'winter';     // 防具視窗正在換誰的：'winter'＝部隊長（防具），其他＝隊員 type（隊員裝備，js/squad-gear.js）
+let armorSlotPick = null;    // 點了隊員的空格：「穿上」就放這一格
+const SQ_ARMOR_PREFIX = 'sgear:', SQ_WORN_PREFIX = 'sworn:';   // 右邊格子的 id／選到隊員身上第幾格
+const armorForMember = () => campArmorOpen && armorWho !== 'winter';
 function bagAtCampTent() {
   const spot = typeof campInteractionNearPlayer === 'function' && campInteractionNearPlayer();
   return !!spot && spot.kind === 'retreat';
 }
 function bagCanManageEquipment() {
-  return MAP_SAFE || (backpackCampContext === G && bagAtCampTent());
+  return campArmorOpen || MAP_SAFE || (backpackCampContext === G && bagAtCampTent());
 }
 // 能不能換防具：只有防具視窗裡、裝備箱旁邊
 const bagCanChangeArmor = () => campArmorOpen || !!armorChestNearPlayer();
@@ -126,6 +130,7 @@ function ownedGear(withWeapons) {
 }
 const gearById = id => String(id || '').startsWith('gear:') ? ownedGear(true).find(g => g.id === id) || null : null;
 function ownedItems() {
+  if (armorForMember()) return squadArmorItems();
   if (backpackTab === GEAR_TAB.id) return ownedGear();
   if (backpackTab === WEAPON_TAB.id) return [pistolEntry(), ...ownedBullets()].filter(Boolean);
   const items = allItems().filter(item => (supplyInventory.get(item.id) || 0) > 0 && item.category === backpackTab);
@@ -137,9 +142,13 @@ function renderBackpack() {
   if (!backpackEl) return;
   if (!bagTabVisible(backpackTab)) { backpackTab = 'consumable'; backpackSel = null; }
   document.getElementById('backpackTitle').textContent = campArmorOpen ? '防具' : '背包';
-  document.getElementById('backpackCount').textContent = campArmorOpen ? ownedGear().length + ' 件'
+  document.getElementById('backpackCount').textContent = armorForMember() ? squadArmorItems().reduce((n, g) => n + g.count, 0) + ' 件' : campArmorOpen ? ownedGear().length + ' 件'
     : bagUsedSlots(supplyInventory, backpackTab) + (bagUnlimited(backpackTab) ? ' 格（無上限）' : ' / ' + bagCapacity(backpackTab) + ' 格');
-  if (typeof renderEquipPanel === 'function') renderEquipPanel();   // 左邊的部隊長裝備（js/equipment.js）
+  if (armorForMember()) renderSquadArmorPanel();   // 防具視窗選了隊員：左邊換成那位隊員的 3 格
+  else if (typeof renderEquipPanel === 'function') renderEquipPanel();   // 左邊的部隊長裝備（js/equipment.js）
+  backpackEl.classList.toggle('armor-mode', campArmorOpen);
+  if (campArmorOpen) addArmorWhoTabs();   // 防具視窗：左邊一條選要換誰的
+  else document.getElementById('equipPanel')?.classList.remove('with-who');
   // 分類分頁：有格數上限的（物品、彈藥包）在左邊，後面標「用了幾格/幾格」；沒有上限的（重要物品…）放在「|」右邊
   const tabBtn = cat => `<button type="button" role="tab" data-bag-tab="${cat.id}" class="${backpackTab === cat.id ? 'active' : ''}" aria-selected="${backpackTab === cat.id}">${BAG_ICON[cat.id] || (cat.icon ? cat.icon + ' ' : '')}${cat.name}${bagUnlimited(cat.id) ? '' : `<em class="bag-tab-count">${bagUsedSlots(supplyInventory, cat.id)}/${bagCapacity(cat.id)}</em>`}</button>`;
   const cats = [...ITEM_CATEGORIES, WEAPON_TAB, GEAR_TAB].filter(cat => bagTabVisible(cat.id));
@@ -147,14 +156,15 @@ function renderBackpack() {
   document.getElementById('backpackTabs').innerHTML = limited.map(tabBtn).join('') + (limited.length && unlimited.length ? '<span class="bag-tab-sep" aria-hidden="true">|</span>' : '') + unlimited.map(tabBtn).join('');
   // 格子
   const items = ownedItems().flatMap(item => {
-    if (item.bullet || item.gear) return [item];
+    if (item.bullet || item.gear || item.sgear) return [item];
     const n = supplyInventory.get(item.id) || 0;
     return Array.from({ length: Math.ceil(n / BAG_STACK_MAX) }, (_, i) => ({ ...item, stackCount: Math.min(BAG_STACK_MAX, n - i * BAG_STACK_MAX) }));
   });
-  if (!items.some(item => item.id === backpackSel)) backpackSel = items[0]?.id || null;
+  if (!items.some(item => item.id === backpackSel) && !(armorForMember() && String(backpackSel).startsWith(SQ_WORN_PREFIX))) backpackSel = items[0]?.id || null;
   const columns = window.innerWidth <= 560 ? 4 : window.innerWidth <= 900 ? 5 : 6;
   const slots = bagUnlimited(backpackTab) ? items.length : Math.max(bagCapacity(backpackTab), items.length);
   if (backpackTab === WEAPON_TAB.id) { renderWeaponGrid(items, columns); renderBackpackDetail(); return; }
+  if (armorForMember()) { renderSquadArmorGrid(items); renderBackpackDetail(); return; }
   if (backpackTab === GEAR_TAB.id) { renderGearGrid(items, columns); renderBackpackDetail(); return; }
   let html = items.map(item => item.bullet ? bulletCellHtml(item) : item.gear ? gearCellHtml(item) : `<button type="button" class="bag-cell ${item.kind || item.category}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}" aria-label="${item.name} ×${item.stackCount}" aria-pressed="${item.id === backpackSel}">
       <img src="${item.image}" alt=""><b>${item.stackCount}</b><span class="bag-cell-name">${item.name}</span></button>`).join('');
@@ -268,7 +278,7 @@ function useArmorChestNearPlayer() { if (!armorChestNearPlayer()) return false; 
 function openArmorPanel(selection) {
   if (!G?.player || G.over || !armorChestNearPlayer()) return;
   closeBackpack(true);
-  campArmorOpen = true; backpackTab = GEAR_TAB.id; backpackSel = null;
+  campArmorOpen = true; backpackTab = GEAR_TAB.id; backpackSel = null; armorWho = 'winter'; armorSlotPick = null;
   openBackpack({ camp: true });
   if (!backpackOpen) { campArmorOpen = false; backpackTab = 'consumable'; return; }
   if (selection) { backpackSel = selection; renderBackpack(); backpackGrid.querySelector('.bag-cell.sel')?.focus(); }
@@ -282,6 +292,7 @@ function selectBackpackItem(id) {
   renderBackpackDetail(); sfx('blip');
 }
 function renderBackpackDetail() {
+  if (armorForMember()) { renderSquadArmorDetail(); return; }
   const bl = bulletEntryById(backpackSel); if (bl) { renderBulletDetail(bl); return; }
   const g = gearById(backpackSel); if (g) { renderGearDetail(g); return; }
   backpackDetail.classList.remove('gear-detail');
@@ -355,6 +366,7 @@ backpackEl.addEventListener('click', e => {
   if (e.target === backpackEl) { closeBackpack(); return; }
   const tab = e.target.closest('[data-bag-tab]');
   if (tab) { if (!bagTabVisible(tab.dataset.bagTab)) return; backpackTab = tab.dataset.bagTab; backpackSel = null; bagDropQty = 1; renderBackpack(); sfx('switch'); return; }
+  if (handleSquadArmorClick(e)) return;   // 防具視窗：選人、隊員的格子、穿上／卸下
   const cell = e.target.closest('#backpackGrid [data-bag-item]');   // 只認格子：右邊說明欄身上也有 data-bag-item（js/backpack-layout.js 寫的），不能把說明欄的按鈕當成點格子
   if (cell) { if (backpackSel !== cell.dataset.bagItem) selectBackpackItem(cell.dataset.bagItem); backpackGrid.querySelector('.bag-cell.sel')?.focus(); return; }
   if (e.target.closest('[data-bag-drop]')) { dropFromBackpack(e.target.closest('[data-bag-drop]').dataset.bagDrop); return; }
@@ -381,16 +393,17 @@ backpackEl.addEventListener('click', e => {
 // 防具視窗：防具 → 左邊部隊長裝備的格子（能放的格子會亮起來）
 let bagDrag = null;   // { bullet }、{ slot } 或 { gear }
 backpackGrid.addEventListener('dragstart', e => {
-  const c = e.target.closest('[data-drag-bullet], [data-drag-slot], [data-drag-gear]'); if (!c) return;
-  bagDrag = c.dataset.dragGear ? { gear: c.dataset.dragGear } : c.dataset.dragSlot != null ? { slot: Number(c.dataset.dragSlot) } : { bullet: c.dataset.dragBullet };
+  const c = e.target.closest('[data-drag-bullet], [data-drag-slot], [data-drag-gear], [data-drag-sgear]'); if (!c) return;
+  bagDrag = c.dataset.dragSgear ? { sgear: c.dataset.dragSgear } : c.dataset.dragGear ? { gear: c.dataset.dragGear } : c.dataset.dragSlot != null ? { slot: Number(c.dataset.dragSlot) } : { bullet: c.dataset.dragBullet };
   e.dataTransfer.effectAllowed = 'move'; e.dataTransfer.setData('text/plain', JSON.stringify(bagDrag));
   backpackGrid.classList.add('dragging');
+  if (bagDrag.sgear) document.querySelectorAll('#equipPanel [data-sq-slot]').forEach(s => s.classList.add('drop-ok'));   // 隊員裝備：三格都能放（放在有東西的格子＝換掉）
   if (bagDrag.gear) for (const s of slotsForGear('gear', bagDrag.gear)) document.querySelector(`#equipPanel [data-equip-slot="${s.id}"]`)?.classList.add('drop-ok');
 });
 backpackGrid.addEventListener('dragend', () => { bagDrag = null; backpackGrid.classList.remove('dragging'); document.querySelectorAll('#backpackGrid .drop-on, #equipPanel .drop-on, #equipPanel .drop-ok').forEach(c => c.classList.remove('drop-on', 'drop-ok')); });
-const gearDropSlot = e => bagDrag?.gear ? e.target.closest?.('#equipPanel [data-equip-slot].drop-ok') : null;   // 拖到能放這件防具的格子上
+const gearDropSlot = e => bagDrag?.gear || bagDrag?.sgear ? e.target.closest?.('#equipPanel .drop-ok') : null;   // 拖到能放這件防具的格子上
 document.addEventListener('dragover', e => {
-  if (!bagDrag?.gear) return;
+  if (!bagDrag?.gear && !bagDrag?.sgear) return;
   const slot = gearDropSlot(e);
   document.querySelectorAll('#equipPanel .drop-on').forEach(c => { if (c !== slot) c.classList.remove('drop-on'); });
   if (slot) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; slot.classList.add('drop-on'); }
@@ -398,9 +411,10 @@ document.addEventListener('dragover', e => {
 document.addEventListener('drop', e => {
   const slot = gearDropSlot(e); if (!slot) return;
   e.preventDefault();
-  const id = bagDrag.gear; bagDrag = null;
-  equipToSlot(slot.dataset.equipSlot, id);
-  backpackSel = 'gear:' + id; renderBackpack();
+  const d = bagDrag; bagDrag = null;
+  if (d.sgear) { wearSquadArmor(d.sgear, Number(slot.dataset.sqSlot)); return; }
+  equipToSlot(slot.dataset.equipSlot, d.gear);
+  backpackSel = 'gear:' + d.gear; renderBackpack();
 });
 backpackGrid.addEventListener('dragover', e => {
   if (!bagDrag) return;
@@ -419,7 +433,8 @@ backpackGrid.addEventListener('drop', e => {
     else if (d.slot !== to) { const m = magState(), id = m.load[d.slot]; if (id) { setMagSlot(to, id); sfx('magLoad'); afterMagazineChange(); } }   // setMagSlot 會把兩格對調
   } else if (d.slot != null) unloadMagazineSlot(d.slot);   // 從彈匣拖到其他地方＝拿下
 });
-backpackGrid.addEventListener('dblclick', e => { const cell = e.target.closest('[data-bag-item]'); if (cell) useBackpackItem(cell.dataset.bagItem); });   // 連點兩下直接使用
+backpackGrid.addEventListener('dblclick', e => { const cell = e.target.closest('[data-bag-item]'); if (!cell) return;   // 連點兩下直接使用（防具視窗的隊員裝備＝穿上）
+  if (armorForMember() && cell.dataset.bagItem.startsWith(SQ_ARMOR_PREFIX)) wearSquadArmor(cell.dataset.bagItem.slice(SQ_ARMOR_PREFIX.length)); else useBackpackItem(cell.dataset.bagItem); });
 ['backpackButton', 'hudBackpackButton'].forEach(id => document.getElementById(id)?.addEventListener('click', openBackpack));
 
 window.addEventListener('keydown', e => {
@@ -462,4 +477,97 @@ function bagWorkshopBuy(kind, key) {
   equipState.bag[key] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
   showWorkshopToast(u.icon + ' ' + u.name + '：「' + u.tab + '」可以放 ' + u.slots[lv] + ' 格');
   return true;
+}
+
+// ---- 防具視窗：也能換 Y102 隊員的隊員裝備（左上角選人；部隊長＝原本的防具）----
+// 隊員裝備的資料、穿上／卸下的規則在 js/squad-gear.js（一件只能給一個人、同一種一人只能穿一格）
+const armorMembers = () => typeof squadMemberList === 'function' ? squadMemberList().filter(m => !m.noncombat && TYPES[m.type]).map(m => m.type) : [];
+function squadArmorItems() {
+  if (typeof squadGearList !== 'function') return [];
+  return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0)
+    .map(g => ({ id: SQ_ARMOR_PREFIX + g.id, name: g.name, image: squadGearImage(g), sgear: g, count: supplyInventory.get(g.id) }));
+}
+// 左上角：部隊長＋每位隊員的頭像，點了切換要換誰的
+function addArmorWhoTabs() {
+  const box = document.getElementById('equipPanel'); if (!box) return;
+  const who = ['winter', ...armorMembers()];
+  if (!who.includes(armorWho)) armorWho = 'winter';
+  const nameOf = id => id === 'winter' ? '部隊長' : (TYPES[id]?.name || id);
+  const imgOf = id => memberPortraitPath(id === 'winter' ? CHARACTERS.winter : TYPES[id]);
+  // 排版跟 T-Pad「Y102隊員」左邊的名單一樣：左邊一條直的頭像列，右邊是原本的內容
+  const keep = box.querySelector('.armor-who')?.scrollTop || 0;
+  const main = document.createElement('div'); main.className = 'armor-main';
+  main.append(...box.childNodes);
+  box.innerHTML = '<div class="armor-who" role="tablist" aria-label="要換誰的裝備">' + who.map(id =>
+    `<span class="aw-item${id === armorWho ? ' on' : ''}"><button type="button" role="tab" data-armor-who="${id}" class="${id === armorWho ? 'on' : ''}" aria-selected="${id === armorWho}" title="${nameOf(id)}"><img src="${imgOf(id)}" alt="${nameOf(id)}"></button></span>`).join('') + '</div>';
+  box.append(main); box.classList.add('with-who');
+  box.querySelector('.armor-who').scrollTop = keep;
+}
+// 左邊：隊員的立繪＋3 格隊員裝備
+function renderSquadArmorPanel() {
+  const box = document.getElementById('equipPanel'); if (!box) return;
+  const spec = TYPES[armorWho] || {}, gear = squadGearOf(armorWho);
+  const slots = gear.map((id, i) => {
+    const g = id && squadGearById(id), sel = backpackSel === SQ_WORN_PREFIX + i || (!g && armorSlotPick === i);
+    return `<button type="button" class="doll-slot${g ? ' filled' : ''}${sel ? ' picking' : ''}" data-sq-slot="${i}" title="裝備 ${i + 1}${g ? '：' + g.name : '：未裝備'}">`
+      + `<span>${g ? `<img src="${squadGearImage(g)}" alt="">` : '＋'}</span><small>${g ? g.name : '裝備 ' + (i + 1)}</small></button>`;
+  }).join('');
+  box.classList.remove('with-who');
+  box.innerHTML = `<h3>${spec.name || armorWho}${spec.guide ? '嚮導' : '哨兵'}裝備</h3><div class="equip-doll sq-doll"><img class="doll-art sprite" data-member="${armorWho}" src="${memberPortraitPath(spec)}" alt="${spec.name || ''}"><div class="doll-slots">${slots}</div></div>`;
+}
+// 右邊：背包裡的隊員裝備
+function renderSquadArmorGrid(items) {
+  const name = (TYPES[armorWho]?.name || armorWho) + (TYPES[armorWho]?.guide ? '嚮導' : '哨兵');
+  let html = `<p class="bag-weapon-hint bag-gear-group">隊員裝備 <small>點一下再按「穿上」，或直接拖到左邊${name}的格子</small></p>`;
+  html += items.map(g => `<button type="button" class="bag-cell squadgear${g.id === backpackSel ? ' sel' : ''}" data-bag-item="${g.id}" draggable="true" data-drag-sgear="${g.sgear.id}" aria-label="${g.name} ×${g.count}" aria-pressed="${g.id === backpackSel}">
+      <img src="${g.image}" alt=""><b>${g.count}</b><span class="bag-cell-name">${g.name}</span></button>`).join('');
+  if (!items.length) html += '<p class="bag-weapon-hint">背包裡沒有隊員裝備 <small>可以在基地的便利商店「隊員裝備」分頁購買</small></p>';
+  backpackGrid.classList.add('no-anim');
+  backpackGrid.innerHTML = html;
+  requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
+}
+// 右下說明：選到背包裡的＝「穿上」；選到隊員身上的那格＝「卸下」
+function renderSquadArmorDetail() {
+  backpackDetail.classList.add('gear-detail');
+  const worn = String(backpackSel || '').startsWith(SQ_WORN_PREFIX), slot = worn ? Number(backpackSel.slice(SQ_WORN_PREFIX.length)) : -1;
+  const id = worn ? squadGearOf(armorWho)[slot] : String(backpackSel || '').startsWith(SQ_ARMOR_PREFIX) ? backpackSel.slice(SQ_ARMOR_PREFIX.length) : null;
+  const g = id && squadGearById(id);
+  if (!g) { backpackDetail.innerHTML = '<div class="bag-detail-empty"><span>🎽</span><p>點左邊的格子，或選一件隊員裝備</p></div>'; return; }
+  const name = (TYPES[armorWho]?.name || armorWho) + (TYPES[armorWho]?.guide ? '嚮導' : '哨兵'), dup = !worn && squadGearWornAt(armorWho, g.id, -1) >= 0;
+  const btn = worn ? `<button type="button" class="bag-unequip" data-sq-off="${slot}">卸下</button>`
+    : dup ? `<p class="bag-note">${name}已經穿著同一種裝備了</p>`
+    : `<button type="button" class="bag-use" data-sq-wear="${g.id}">穿上${armorSlotPick != null ? '（裝備 ' + (armorSlotPick + 1) + '）' : ''}</button>`;
+  backpackDetail.innerHTML = `
+    <div class="bag-detail-image"><img src="${squadGearImage(g)}" alt=""></div>
+    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">🎽 隊員裝備</span>${worn ? `<span class="bag-tag worn">${name}・裝備 ${slot + 1}</span>` : ''}</div></div>
+    ${g.desc ? `<p class="bag-desc">${g.desc}</p>` : ''}
+    <div class="bag-gear-stats"><div class="bag-gear-stat"><small>效果</small><b>${squadGearEffect(g) || '—'}</b></div></div>
+    <div class="bag-actions">${btn}</div>`;
+}
+// 穿上：slot 沒指定就放剛剛點的空格，再不然放第一個空格；都滿了就請玩家拖到要換掉的那格
+function wearSquadArmor(id, slot) {
+  const list = squadGearOf(armorWho);
+  if (slot == null) slot = armorSlotPick != null ? armorSlotPick : list.indexOf(null);
+  if (slot < 0) { sfx('error'); systemNotice('三格都穿滿了：先卸下一件，或把裝備拖到要換掉的那一格', true); return; }
+  if (equipSquadGear(armorWho, slot, id)) { sfx('button'); armorSlotPick = null; backpackSel = SQ_WORN_PREFIX + slot; }
+  else sfx('error');
+  renderBackpack();
+}
+function handleSquadArmorClick(e) {
+  if (!campArmorOpen) return false;
+  const who = e.target.closest('[data-armor-who]');
+  if (who) { if (who.dataset.armorWho !== armorWho) { armorWho = who.dataset.armorWho; backpackSel = null; armorSlotPick = null; sfx('switch'); renderBackpack(); } return true; }
+  if (!armorForMember()) return false;
+  const slot = e.target.closest('#equipPanel [data-sq-slot]');
+  if (slot) {
+    const i = Number(slot.dataset.sqSlot);
+    if (squadGearOf(armorWho)[i]) { backpackSel = SQ_WORN_PREFIX + i; armorSlotPick = null; }
+    else { armorSlotPick = i; const first = squadArmorItems().find(g => squadGearWornAt(armorWho, g.sgear.id, -1) < 0); backpackSel = first ? first.id : null; if (!first) systemNotice('背包裡沒有可以穿的隊員裝備，可以在基地的便利商店購買'); }
+    sfx('blip'); renderBackpack(); return true;
+  }
+  const wear = e.target.closest('[data-sq-wear]');
+  if (wear) { wearSquadArmor(wear.dataset.sqWear); return true; }
+  const off = e.target.closest('[data-sq-off]');
+  if (off) { if (unequipSquadGear(armorWho, Number(off.dataset.sqOff))) { sfx('switch'); backpackSel = null; } else sfx('error'); renderBackpack(); return true; }
+  return false;
 }

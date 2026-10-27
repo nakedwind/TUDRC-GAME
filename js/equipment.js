@@ -525,7 +525,7 @@ function renderEquipmentDoll(box) {
   box.classList.add('no-anim');   // 重畫的這一瞬間不要播格子的浮起／變色動畫
   box.innerHTML = '<h3>部隊長裝備</h3><div class="equip-doll">' + art + '<div class="doll-slots">' + slots + '</div></div>' +
     lamp;
-  if (oldArt && oldArt.complete) box.querySelector('.doll-art').replaceWith(oldArt);   // 沿用已經載好的立繪，不要重新載入（會閃）
+  if (oldArt && oldArt.complete && !oldArt.dataset.member) box.querySelector('.doll-art').replaceWith(oldArt);   // 沿用已經載好的立繪，不要重新載入（會閃）；防具視窗剛看過隊員（data-member）就不能沿用，不然部隊長會變成那位隊員
   box.scrollTop = scroll;
   requestAnimationFrame(() => requestAnimationFrame(() => box.classList.remove('no-anim')));
 }

@@ -63,7 +63,7 @@ function syncSquadGearItems() {
   if (typeof ITEMS === 'undefined') return;
   if (typeof ITEM_CATEGORIES !== 'undefined' && !ITEM_CATEGORIES.some(c => c.id === SQUAD_GEAR_CATEGORY.id)) ITEM_CATEGORIES.push({ ...SQUAD_GEAR_CATEGORY });
   for (let i = ITEMS.length - 1; i >= 0; i--) if (ITEMS[i].squadGear) ITEMS.splice(i, 1);
-  for (const g of squadGearList()) ITEMS.push({ id: g.id, name: g.name, category: SQUAD_GEAR_CATEGORY.id, image: squadGearImage(g), desc: g.desc || '', effect: squadGearEffect(g), note: '在 T-Pad「Y102隊員」→ 裝備頁給隊員穿', squadGear: true });
+  for (const g of squadGearList()) ITEMS.push({ id: g.id, name: g.name, category: SQUAD_GEAR_CATEGORY.id, image: squadGearImage(g), desc: g.desc || '', effect: squadGearEffect(g), note: '在 T-Pad「Y102隊員」→ 裝備頁，或裝備箱的防具視窗給隊員穿', squadGear: true });
 }
 syncSquadGearItems();
 // 便利商店賣的（js/shop.js 的 shopItems 會加進來）
