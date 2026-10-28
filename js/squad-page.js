@@ -296,7 +296,7 @@ function squadGearHtml(actor, safe) {
     '<div class="sq-box stat" data-sq="box.stat"><p data-sq="text.stat">' + (show ? sqEsc(show.stat || '—').replace(/\n/g, '<br>') : '<span class="sq-dim">無。</span>') + '</p></div>' +
     '<b class="sq-title avail" data-sq="text.availTitle">' + sqT('text.availTitle', '可用裝備') + '</b>' +
     '<div class="sq-avail" data-sq="panel.avail">' + (avail.length ? avail.map(a => '<button type="button" class="sq-avail-item' + (a.id === st.avail ? ' sel' : '') + '" data-avail="' + sqEsc(a.id) + '" data-sq="avail:' + sqEsc(a.id) + '" title="' + sqEsc(a.name) + '"><img data-sq="availImg:' + sqEsc(a.id) + '" src="' + sqEsc(a.image) + '" alt="">' + (a.n > 1 ? '<em>×' + a.n + '</em>' : '') + '</button>').join('')
-      : '<p class="sq-dim">' + (st.slot.kind === 'gear' ? '背包裡沒有隊員裝備（便利商店有賣）' : '還沒有這個欄位的外觀裝備') + '</p>') + '</div>' +
+      : '<p class="sq-dim">' + (st.slot.kind === 'gear' ? '背包裡沒有隊員裝備（找諾亞的開發工坊製作）' : '還沒有這個欄位的外觀裝備') + '</p>') + '</div>' +
     '<button type="button" class="sq-btn unequip" data-gear-unequip data-sq="btn.unequip"' + (cur && safe && !(st.slot.kind === 'look' && st.slot.id === 'skin' && cur.desc === '原本的服裝。') ? '' : ' disabled') + '>' + sqT('btn.unequip', '卸下裝備') + '</button>' +
     '<button type="button" class="sq-btn equip" data-gear-equip data-sq="btn.equip"' + (pick && safe && wornAt < 0 ? '' : ' disabled') + '>' + (wornAt >= 0 ? '已穿在第 ' + (wornAt + 1) + ' 格' : sqT('btn.equip', '穿上裝備')) + '</button></section>';
   return h;

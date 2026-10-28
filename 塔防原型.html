@@ -21,7 +21,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=test-sp-20261027"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=result-font-20261027">
+<link rel="stylesheet" href="css/style.css?v=build-more-narrow-20261028">
 <link rel="stylesheet" href="css/tpad-map.css?v=outline-20261025">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=learn-btn7-20261027">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
@@ -138,7 +138,7 @@
       <button class="hud-collapse" id="buildCollapse" type="button" aria-expanded="true" title="收起建築欄"></button>
       <div class="build-fold">
       <div class="build-toolbar-actions">
-      <button class="tbtn" id="buildToggle" type="button" title="打開更多建築（完整清單）"><span class="build-tool-icon" aria-hidden="true">🧱</span><span>建築</span></button>
+      <button class="tbtn" id="buildToggle" type="button" title="打開更多建築（完整清單）" aria-label="更多建築"><svg class="build-more-ico" viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><rect x="3" y="3" width="8" height="8" rx="2"/><rect x="13" y="3" width="8" height="8" rx="2"/><rect x="3" y="13" width="8" height="8" rx="2"/><rect x="13" y="13" width="8" height="8" rx="2"/></svg></button>
       <button class="tbtn" id="demolishToggle" type="button" data-tip="點選建築或障礙物拆除" aria-label="拆除：點擊後，再點選要拆除的建築或障礙物"><img class="build-tool-icon demolish-icon" src="images/weapon/icon-hammer.png" alt=""><span>拆除</span></button>
       </div>
       <div id="buildQuickSlots" aria-label="建築快捷欄"></div>
@@ -193,7 +193,6 @@
               <button type="button" role="tab" data-supply-tab="medical" aria-selected="false">🩹 補給 <em></em></button>
               <button type="button" role="tab" data-supply-tab="snack" aria-selected="false">🍙 零食 <em></em></button>
               <button type="button" role="tab" data-supply-tab="drink" aria-selected="false">🥤 飲料 <em></em></button>
-              <button type="button" role="tab" data-supply-tab="squadgear" aria-selected="false">🎽 隊員裝備 <em></em></button>
             </nav>
             <div id="supplyShopList" class="supply-shop-list"></div>
           </div>
@@ -271,11 +270,11 @@
   <script src="js/workshop-file.js?v=infoimgsize-20261023"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
   <script src="js/backpack-layout.js?v=dropfix-20261025"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
   <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器、背包編輯器都會存）；每次都讀最新的，兩邊改的說明才會馬上連動 -->
-  <script src="js/workshop-config.js?v=ws-price-btn12-20261025"></script>   <!-- 把上面的設定套用到裝備資料 -->
+  <script src="js/workshop-config.js?v=sgear-ws-20261028"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=vitals-20261023"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/dialogues.js?v=giftrefuse-20261025"></script>  <!-- 所有台詞（對話編輯器） -->
-  <script src="data/balance.js?v=newbie-flare10-20261027"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/balance.js?v=sgear-ws-20261028"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="data/monsters.js?v=gourd-speed-20261028"></script>  <!-- 2b. 怪物種類與數值 -->
@@ -301,7 +300,7 @@
   <script src="js/breakable-walls.js?v=crack2kinds-20261026"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=poolbase-20261028"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
-  <script src="js/build.js?v=newbie-builds-20261027"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/build.js?v=build-dev-20261028"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=newbie-start-20261027"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=load-text-20261027"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
@@ -339,10 +338,10 @@
   <script src="js/smiler.js?v=charmbite-20261026"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=acidellipse-20261027"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=mouse-tunnel-20261023"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
-  <script src="js/shop.js?v=vending3-20261026"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=ammo-img-20261027"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/shop.js?v=sgear-ws-20261028"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
+  <script src="js/backpack.js?v=sgear-ws-20261028"></script> <!-- 9j. 背包：物品格與說明 -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
-  <script src="js/squad-gear.js?v=armor-squad-20261027"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
+  <script src="js/squad-gear.js?v=sgear-ws-20261028"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=achvcustom-20261025"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=gacha-once-20261027"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=strawberry-20261026"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
@@ -364,7 +363,7 @@
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=reload02-20261027"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=armor-strip-20261027"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/equipment.js?v=sgear-last-20261028"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=bulletsfx-20261027"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=ammo-img-20261027"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=storybuild-20261026"></script>
@@ -403,6 +402,6 @@
   <script src="js/tpad-memories.js?v=20261025b"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->
   <script src="js/tpad.js?v=squad-v2-20261027"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
   <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->
-  <script src="js/squad-page.js?v=learn-btn4-20261027"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
+  <script src="js/squad-page.js?v=sgear-ws-20261028"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
 </body>
 </html>

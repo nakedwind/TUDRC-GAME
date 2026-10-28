@@ -49,6 +49,20 @@ const NEWBIE_START = {
   maxEnemies: 20,     // 場上異質體上限（其他地圖是 CORE.maxEnemies × 難度，現在是 30；js/anomalous-core.js 的 coreMaxEnemies）
 };
 const isNewbieMap = () => typeof MAP !== 'undefined' && MAP?.id === NEWBIE_START.mapId;
+// ---- 建築的開發：一開始只能蓋 NEWBIE_START.builds 那幾種；其他的要到諾亞的開發工坊開發（js/build.js 的 buildWorkshopEntries）----
+// shards＝要花幾個異質碎片；money＝經費（不寫＝照碎片自動算，跟裝備一樣）；沒列到的建築（物件編輯器新增的）用 default
+const BUILD_DEV = {
+  default: { shards: 50 },
+  camping_lights: { shards: 30 },   // 露營燈
+  wirecloth: { shards: 50 },        // 鐵絲網
+  deco_gasstove2: { shards: 30 },   // 爐具
+  deco_oil_drum: { shards: 50 },    // 油桶
+  irongate: { shards: 80 },         // 滑動鐵門
+};
+// ---- 下方建築快捷欄：格數玩家可以自己調（建築選單裡的 − ＋），每格放哪個也能自己拖 ----
+const BUILD_QUICK = { min: 1, max: 8, start: 4 };   // start＝一開始幾格
+// Y102隊員裝備：在諾亞的開發工坊「製作」（每按一次做一件放進背包）。shards＝異質碎片；經費＝裝備清單的價錢（data/squad-gear.js 的 price）
+const SQUAD_GEAR_DEV = { default: { shards: 20 } };   // 想個別調：加一行，例如 'sg-scope': { shards: 30 }
 
 // ---- 場景 NPC ----
 // 只有外觀與自由走動，不參與攻擊、污染、疏導或哨兵指派。

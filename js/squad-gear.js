@@ -1,5 +1,5 @@
 /* ===== Y102隊員裝備（資料在 data/squad-gear.js）=====
-   ・溫特在便利商店「隊員裝備」分頁用經費買 → 放進背包（背包多一個「隊員裝備」分頁）
+   ・溫特在諾亞的開發工坊「隊員裝備」區製作（異質碎片＋經費，每次一件）→ 放進背包（背包多一個「隊員裝備」分頁）
    ・T-Pad「Y102隊員」→ 裝備頁：每位隊員 3 格（不分種類）；穿上＝從背包拿走一件，卸下＝放回背包（一件只能給一個人穿）
    ・同一種裝備，一位隊員只能穿一格（買了兩件也不能疊在同一人身上）
    ・穿著的裝備數值在 js/skills.js 的 applySkills() 一起套到 TYPES
@@ -63,12 +63,35 @@ function syncSquadGearItems() {
   if (typeof ITEMS === 'undefined') return;
   if (typeof ITEM_CATEGORIES !== 'undefined' && !ITEM_CATEGORIES.some(c => c.id === SQUAD_GEAR_CATEGORY.id)) ITEM_CATEGORIES.push({ ...SQUAD_GEAR_CATEGORY });
   for (let i = ITEMS.length - 1; i >= 0; i--) if (ITEMS[i].squadGear) ITEMS.splice(i, 1);
-  for (const g of squadGearList()) ITEMS.push({ id: g.id, name: g.name, category: SQUAD_GEAR_CATEGORY.id, image: squadGearImage(g), desc: g.desc || '', effect: squadGearEffect(g), note: '在 T-Pad「Y102隊員」→ 裝備頁，或裝備箱的防具視窗給隊員穿', squadGear: true });
+  for (const g of squadGearList()) ITEMS.push({ id: g.id, name: g.name, category: SQUAD_GEAR_CATEGORY.id, image: squadGearImage(g), desc: g.desc || '', effect: squadGearEffect(g), note: '在諾亞的開發工坊製作；在 T-Pad「Y102隊員」→ 裝備頁，或裝備箱的防具視窗給隊員穿', squadGear: true });
 }
 syncSquadGearItems();
-// 便利商店賣的（js/shop.js 的 shopItems 會加進來）
-function squadGearShopItems() {
-  return squadGearList().filter(g => g.price > 0).map(g => ({ id: g.id, name: g.name, image: squadGearImage(g), price: g.price, kind: SQUAD_GEAR_CATEGORY.id, effect: squadGearEffect(g), squadGear: true }));
+// ---- 諾亞的開發工坊：製作隊員裝備（js/equipment.js 的 workshopEntries／workshopBuy 會呼叫）----
+// 價錢 0 的不能做（跟以前「商店不賣」一樣）；每按一次做一件放進背包，可以一直做（幾位隊員就做幾件）
+const squadGearHave = id => (typeof supplyInventory !== 'undefined' ? supplyInventory.get(id) || 0 : 0) + Object.values(squadGearState.equip).filter(list => (list || []).includes(id)).length;
+const squadGearDevCost = g => {
+  const d = (typeof SQUAD_GEAR_DEV !== 'undefined' && (SQUAD_GEAR_DEV[g.id] || SQUAD_GEAR_DEV.default)) || { shards: 20 };
+  return { shards: d.shards | 0, money: Number.isFinite(d.money) ? d.money : Math.max(0, Number(g.price) || 0) };
+};
+function squadGearWorkshopEntries() {
+  return squadGearList().filter(g => g.price > 0).map(g => {
+    const have = squadGearHave(g.id), cost = squadGearDevCost(g);
+    return { key: 'sg:' + g.id, kind: 'sgear', def: g, name: g.name, lv: 0, max: 1, icon: '<img src="' + squadGearImage(g) + '" alt="">', image: squadGearImage(g), emoji: g.icon || '🎽',
+      tag: '隊員裝備', worn: false, about: (g.desc ? g.desc + ' ' : '') + '做好放進背包，在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 ' + have + ' 件）',
+      stat: () => squadGearEffect(g), canDev: true, where: '', devCost: cost.shards, upCost: 0, devMoney: cost.money, buy: 'sg:' + g.id };
+  });
+}
+function squadGearWorkshopBuy(kind, id) {
+  if (kind !== 'sg') return false;
+  const g = squadGearById(id); if (!g || !(g.price > 0)) return true;
+  if (typeof bagCanApply === 'function' && !bagCanApply([[id, 1]])) { showWorkshopToast('背包空間不足', true); return true; }
+  const cost = squadGearDevCost(g);
+  if (!spendWorkshop(cost.shards, cost.money)) return true;
+  supplyInventory.set(id, (supplyInventory.get(id) || 0) + 1);
+  if (typeof saveGame === 'function') saveGame();
+  SFX.play('achievement', .7, 'equip-up');
+  showWorkshopToast('🎽 諾亞做好了「' + g.name + '」，放進背包了（共 ' + squadGearHave(id) + ' 件）');
+  return true;
 }
 
 // ---- 誰穿了什麼 ----

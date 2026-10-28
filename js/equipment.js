@@ -9,7 +9,7 @@
 // ============================================================
 const EQUIP_STORE = 'tudrc_equipment_v1';
 const WS_KEEP_WEAPON = 'pistol';   // 溫特一開始就持有的手槍：不能分解，也不能用任何方式丟掉
-const equipState = { owned: {}, equipped: { head: null, body: null, legs1: null, legs2: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: null }, gunAmmo: {}, bullets: null, battery: 100, scrapped: {}, bag: { items: 1, ammo: 1 } };   // scrapped：開發工坊分解掉的武器（一開始就有的也不會再補回來）
+const equipState = { owned: {}, equipped: { head: null, body: null, legs1: null, legs2: null, acc1: null, acc2: null }, weapons: { pistol: 1, flare: 1, incendiary: 0, tranq: 0 }, loadout: { main: 'pistol', sub: null }, gunAmmo: {}, bullets: null, battery: 100, scrapped: {}, bag: { items: 1, ammo: 1 }, builds: {}, buildQuick: null };   // builds：開發工坊開發好的建築；buildQuick：下方建築快捷欄 { n 幾格, ids 每格放哪個 }（js/build.js）   // scrapped：開發工坊分解掉的武器（一開始就有的也不會再補回來）
 const EQUIP_TO_ITEM = ['thermos', 'firstaid', 'adrenaline', 'charm'];   // 以前是裝備、現在改成道具：舊存檔有的話換成 1 個道具
 let equipLegacyItems = [];
 // 開發工坊編輯器刪掉的裝備／武器：對玩家來說就是永久從遊戲消失——存檔裡拿到的也清掉（之後就算在編輯器復原，也要重新取得）。
@@ -40,6 +40,8 @@ try {
   if (Number.isFinite(s.battery)) equipState.battery = Math.max(0, Math.min(100, s.battery));
   if (s.bag && typeof s.bag === 'object') equipState.bag = { items: s.bag.items | 0 || 1, ammo: s.bag.ammo | 0 || 1 };   // 背包格數等級（js/backpack.js）
   if (s.magazine && typeof s.magazine === 'object') equipState.magazine = { lv: s.magazine.lv | 0 || 1, load: Array.isArray(s.magazine.load) ? s.magazine.load.filter(id => id === null || BULLETS[id]) : [] };   // 彈匣（js/magazine.js）
+  if (s.builds && typeof s.builds === 'object') for (const id of Object.keys(s.builds)) if (s.builds[id]) equipState.builds[id] = true;   // 開發好的建築（js/build.js）
+  if (s.buildQuick && Array.isArray(s.buildQuick.ids)) equipState.buildQuick = { n: s.buildQuick.n | 0, ids: s.buildQuick.ids.map(id => typeof id === 'string' ? id : null) };
   if (s.loadout) for (const k of ['main', 'sub']) if (s.loadout[k] === null || WEAPON_UPGRADES[s.loadout[k]]) equipState.loadout[k] = s.loadout[k];
   // 手槍的子彈（js/flare.js 的 bulletState）：owned 拿到過哪幾種、n 剩幾發
   if (s.bullets && s.bullets.owned && s.bullets.n) {
@@ -715,7 +717,9 @@ function spendWorkshop(shards, money) {
 const wsMoney = (key, i, shards) => typeof workshopMoney === 'function' ? workshopMoney(key, i, shards) : 0;
 function workshopBuy(kind, id) {
   if (typeof magazineWorkshopBuy === 'function' && magazineWorkshopBuy(kind, id)) { renderWorkshop(); return; }   // 子彈開發、彈匣升級（js/magazine.js）
-  if (typeof bagWorkshopBuy === 'function' && bagWorkshopBuy(kind, id)) { renderWorkshop(); return; }   // 背包、彈藥包擴充（js/backpack.js）
+  if (typeof bagWorkshopBuy === 'function' && bagWorkshopBuy(kind, id)) { renderWorkshop(); return; }
+  if (typeof buildWorkshopBuy === 'function' && buildWorkshopBuy(kind, id)) { renderWorkshop(); return; }
+  if (typeof squadGearWorkshopBuy === 'function' && squadGearWorkshopBuy(kind, id)) { renderWorkshop(); return; }   // 隊員裝備製作（js/squad-gear.js）   // 建築開發（js/build.js）   // 背包、彈藥包擴充（js/backpack.js）
   if (kind === 'dev') {
     const def = equipDef(id); if (!def || equipState.owned[id] || def.source !== 'develop') return;
     if (!spendWorkshop(def.cost[0], wsMoney(def.id, 0, def.cost[0]))) return;
@@ -763,7 +767,7 @@ function workshopEntries() {   // 所有裝備、武器整理成同一種格式
       canDev: false, where: w.where || '', upCost: lv ? w.cost[lv - 1] : 0, upMoney: lv && lv < w.levels.length ? wsMoney('w:' + k, lv - 1, w.cost[lv - 1]) : 0, buy: 'wp:' + k };
   });
   const extra = typeof magazineWorkshopEntries === 'function' ? magazineWorkshopEntries() : { bullets: [], mag: null };   // 子彈、彈匣（js/magazine.js）
-  return { gear, weapons, bullets: extra.bullets, mags: extra.mag ? [extra.mag] : [], bags: typeof bagWorkshopEntries === 'function' ? bagWorkshopEntries() : [] };   // bags：背包、彈藥包擴充（js/backpack.js）
+  return { gear, weapons, bullets: extra.bullets, mags: extra.mag ? [extra.mag] : [], bags: typeof bagWorkshopEntries === 'function' ? bagWorkshopEntries() : [], builds: typeof buildWorkshopEntries === 'function' ? buildWorkshopEntries() : [], sgear: typeof squadGearWorkshopEntries === 'function' ? squadGearWorkshopEntries() : [] };   // sgear：隊員裝備（js/squad-gear.js）   // builds：建築（js/build.js）   // bags：背包、彈藥包擴充（js/backpack.js）
 }
 function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發後重畫時，捲軸停在原本的位置（剛打開工坊時才從最上面開始）
   const cost = n => '<b>' + WS_SHARD_IMG + n + '</b>';   // 按鈕上的價錢：結晶碎片圖＋數字
@@ -771,9 +775,9 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   const all = workshopEntries();
   // 開發分頁只放諾亞做得出來的：只能在後室撿到的（燃燒彈槍、麻醉槍、異質探測器…）不放，撿到之後出現在升級分頁
   const tabOf = (x, tab) => tab === 'up' ? x.lv > 0 : !x.lv && x.canDev, inTab = x => tabOf(x, wsTab);
-  const gearAll = all.gear.filter(inTab), weaponList = all.weapons.filter(inTab), bulletList = all.bullets.filter(inTab), magList = all.mags.filter(inTab), bagList = all.bags.filter(inTab);
+  const gearAll = all.gear.filter(inTab), weaponList = all.weapons.filter(inTab), bulletList = all.bullets.filter(inTab), magList = all.mags.filter(inTab), bagList = all.bags.filter(inTab), buildEntryList = all.builds.filter(inTab), sgearList = all.sgear.filter(inTab);
   const gearList = WORKSHOP_GEAR_GROUPS.flatMap(([k]) => gearAll.filter(e => workshopGearGroup(e.def.kind) === k));   // 照部位排（跟畫面上的分組一樣）
-  const list = [...weaponList, ...magList, ...bagList, ...bulletList, ...gearList];   // 武器、彈匣、背包、子彈排在裝備上面
+  const list = [...weaponList, ...magList, ...bagList, ...bulletList, ...buildEntryList, ...gearList, ...sgearList];   // 隊員裝備排最下面   // 武器、彈匣、背包、子彈排在裝備上面
   if (!list.some(e => e.key === wsPick)) wsPick = list[0] ? list[0].key : null;   // 跟背包一樣：自動選第一格
   const tile = e => '<button type="button" class="ws-tile' + (e.lv ? tier(e.lv) + ' owned' : e.canDev ? ' unowned' : ' locked') + (wsPick === e.key ? ' sel' : '') + '" data-ws-pick="' + e.key + '" aria-pressed="' + (wsPick === e.key) + '">' +
     '<span class="ws-tile-icon">' + e.icon + '</span><b>' + e.name + '</b>' + (e.lv ? '<em>Lv' + e.lv + '</em>' : '') + '</button>';
@@ -793,23 +797,23 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     if (e.lv) {
       stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + e.lv + '）') + '</small><b>' + wsColor(e.stat(e.lv)) + '</b></div>' +
         (e.lv < e.max ? '<div class="bag-gear-stat next"><small>' + L('stats', 'next', '升級後（Lv' + (e.lv + 1) + '）') + '</small><b>' + wsColor(e.stat(e.lv + 1)) + '</b></div>' : '');
-      btn = e.kind === 'bullet' ? '<button type="button" class="ws-btn" disabled>已開發</button>'
+      btn = e.kind === 'bullet' || e.kind === 'build' ? '<button type="button" class="ws-btn" disabled>已開發</button>'
         : e.lv < e.max ? '<button type="button" class="ws-btn" data-ws="' + e.buy + '">' + L('btn', 'up', '升級') + ' ' + cost(e.upCost) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
     } else if (e.canDev) {
       stats = '<div class="bag-gear-stat next"><small>' + L('stats', 'dev', '開發後（Lv1）') + '</small><b>' + wsColor(e.stat(1)) + '</b></div>';
-      btn = '<button type="button" class="ws-btn" data-ws="' + e.buy + '">' + L('btn', 'dev', '開發') + ' ' + cost(e.devCost) + '</button>';
+      btn = '<button type="button" class="ws-btn" data-ws="' + e.buy + '">' + (e.kind === 'sgear' ? '製作' : L('btn', 'dev', '開發')) + ' ' + cost(e.devCost) + '</button>';
     } else {
       stats = '<div class="bag-gear-stat where"><small>' + L('stats', 'where', '取得方式') + '</small><b>' + wsColor(e.where || '只能在戰鬥區域取得') + '</b></div>';
       btn = '<button type="button" class="ws-btn" disabled>尚未取得</button>';
     }
     // 經費：這一次開發／升級要花多少錢，寫在按鈕裡碎片的上面（能按的時候才有；錢不夠字變紅，js/workshop-config.js 的 workshopPriceBtn）
-    const cash = e.lv ? (e.kind !== 'bullet' && e.lv < e.max ? e.upMoney || 0 : 0) : e.canDev ? e.devMoney || 0 : 0;
+    const cash = e.lv ? (e.kind !== 'bullet' && e.kind !== 'build' && e.lv < e.max ? e.upMoney || 0 : 0) : e.canDev ? e.devMoney || 0 : 0;
     const styled = typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(wk, btn) : btn;
     const money = '', priced = typeof workshopPriceBtn === 'function' ? workshopPriceBtn(styled, cash, cash > Math.floor(G.money || 0)) : styled;
     info = '<div class="bag-detail-image"' + workshopInfoImgStyle(e.def) + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + e.name + '</h3><div class="bag-tags"' + part('tag') + '>' + tags + '</div></div>' +
       (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + priced + money + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
   }
-  const count = tab => [...all.gear, ...all.weapons, ...all.bullets, ...all.mags, ...all.bags].filter(x => tabOf(x, tab)).length;
+  const count = tab => [...all.gear, ...all.weapons, ...all.bullets, ...all.mags, ...all.bags, ...all.builds, ...all.sgear].filter(x => tabOf(x, tab)).length;
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '⚙️ 可開發'], ['up', WS_UP_ICON + ' 可升級']].map(([id, label]) =>
     '<button type="button" role="tab" data-ws-tab="' + id + '" class="' + (wsTab === id ? 'active' : '') + '" aria-selected="' + (wsTab === id) + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
   // 右側：跟背包一樣的紙娃娃（溫特＋主／副武器、頭部、上身、下身 ×2、隨身物品 ×2），點格子＝選它來分解
@@ -835,7 +839,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     '<header class="workshop-head">' + workshopHeadHtml() +   // 標題列的文字（開發工坊編輯器可以改：js/workshop-config.js）
     '<button type="button" class="workshop-close" aria-label="關閉（Esc）">×</button></header>' +   // 擁有的碎片數：畫面右下方本來就有，這裡不重複顯示
     '<div class="workshop-main"><div class="workshop-body">' + tabs +
-    '<div class="ws-scroll">' + (list.length ? section('武器', weaponList) + section('彈匣', magList) + section('背包', bagList) + section('子彈', bulletList) + WORKSHOP_GEAR_GROUPS.map(([k, title]) => section(title, gearList.filter(e => workshopGearGroup(e.def.kind) === k))).join('') : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
+    '<div class="ws-scroll">' + (list.length ? section('武器', weaponList) + section('彈匣', magList) + section('背包', bagList) + section('子彈', bulletList) + section('建築', buildEntryList) + WORKSHOP_GEAR_GROUPS.map(([k, title]) => section(title, gearList.filter(e => workshopGearGroup(e.def.kind) === k))).join('') + section('隊員裝備', sgearList) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
     '<div class="ws-info' + (e ? '' : ' empty') + '">' + info + '</div></div>' + side + '</div></section>';
   if (scroll) SCROLLERS.forEach((q, i) => { const el = workshopEl.querySelector(q); if (el) el.scrollTop = scroll[i]; });
   attachWorkshopToast();

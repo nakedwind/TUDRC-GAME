@@ -97,7 +97,7 @@ const shopItems = () => backroomMode ? [...backroomStock().filter(item => item.k
   : vendingMode && isEocVending() ? Object.keys(eocVendingState()[vendingColor] || {}).map(supplyById).filter(Boolean)   // 2F應變中心的販賣機：這次抽到的 6 種
   : vendingMode ? (vendingColor === 'purple' ? backroomStock(BACKROOM_VENDING) : SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)))   // 紫色後室販賣機：杏仁水；其他販賣機：只賣飲料
   : drinkShopMode ? (MAP_SAFE ? SUPPLIES.filter(item => VENDING.kinds.includes(item.kind)) : backroomStock(BACKROOM_DRINKSHOP))
-  : [...SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id))), ...(MAP_SAFE && typeof squadGearShopItems === 'function' ? squadGearShopItems() : [])];   // 基地的便利商店也賣隊員裝備（js/squad-gear.js）
+  : [...SUPPLIES.filter(item => !item.special && (!MAP_SAFE || !BACKROOM_ONLY.includes(item.id)))];   // 隊員裝備改到諾亞的開發工坊製作（js/squad-gear.js）
 const shopItemById = id => shopItems().find(item => item.id === id) || null;
 // 賣掉一個能拿多少錢（0＝不能賣：重要物品、回憶碎片這類 noDrop 的、沒有價錢的）
 const CRYSTAL_SELL_ITEM = {id:'anomalous-crystals',name:'異質碎片',image:'images/碎片鑰匙/anomalous-shard.png'};

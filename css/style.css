@@ -862,6 +862,13 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   background: #0e1116; border-radius: 5px; flex: none;
 }
 #buildbar .tbtn.rotate { min-width: 0; padding: 8px 9px; font-size: 12px; }
+#buildbar .tbtn.build.locked { opacity: .45; cursor: default; filter: grayscale(1); }
+#buildbar .build-quick-count { display: flex; align-items: center; justify-content: center; gap: 8px; color: #dfe7f0; font-size: 12px; padding-bottom: 4px; }
+#buildbar .build-quick-count button { width: 26px; height: 26px; border-radius: 7px; border: 1px solid #405167; background: #202936; color: #e6e9ee; font-size: 15px; cursor: pointer; }
+#buildbar .build-quick-count button:disabled { opacity: .35; cursor: default; }
+#buildbar .build-quick-count b { min-width: 16px; text-align: center; font-size: 14px; }
+.build-quick-slot.empty { opacity: .6; border-style: dashed; }
+.build-quick-slot.empty .bq-art { display: flex; align-items: center; justify-content: center; padding-bottom: 14px; font-style: normal; font-size: 22px; color: #9aa4b2; }
 #buildbar .tbtn.rotate { border-color: #6a5acd; }
 #hint { font-size: 12px; color: #9aa4b2; max-width: 900px; text-align: center; line-height: 1.7; margin-top: 4px; }
 #overlay {
@@ -2875,8 +2882,7 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .backpack-tabs button { font-size: 14px; }
 .backpack-tabs button .bag-ico { width: 20px; height: 20px; }   /* 17px × 1.2 */
 .bag-tag .bag-ico { width: 1.45em; height: 1.45em; vertical-align: -0.38em; }   /* 說明欄標籤裡的圖示放大 */
-/* 建造列：「建築」（打開更多建築）按鈕先藏起來；探照燈圖示再放大 1.2 倍；物件名稱 12 → 13px */
-#buildToggle { display: none !important; }
+/* 建造列：探照燈圖示再放大 1.2 倍；物件名稱 12 → 13px（「建築」按鈕＝打開建築選單、調快捷欄，要顯示） */
 #buildToolbar .build-quick-slot[data-build-id="searchlight"] img { width: 72px; height: 72px; top: -11px; }   /* 探照燈再大 1.2 倍（60 → 72）：直接改尺寸，置中才不會跑掉 */
 #buildToolbar .build-quick-slot span { font-size: 13px; }
 
@@ -3307,3 +3313,9 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 /* 道具格的數量／等級標籤：背包編輯器把它設成固定大小（裝不下就出現捲軸），字比格子寬時捲軸箭頭會蓋住「Lv5」；改成不捲動、字不換行 */
 #backpackGrid .bag-cell > b { overflow: visible !important; white-space: nowrap; padding-left: 3px; padding-right: 3px; }
 .equip-doll.sq-doll .doll-slots { grid-template-columns: max-content; justify-content: center; row-gap: 4px; }   /* 隊員的 3 格：1、2、3 由上往下直排 */
+
+/* 建造列：「建築」按鈕跟「拆除」排同一行、一樣高（寬度是拆除的 80%：41 → 33px） */
+#buildToolbar .build-toolbar-actions { flex-direction: row; align-items: center; }
+#buildToolbar .build-toolbar-actions #buildToggle { position: relative; width: 33px; height: 52px; flex-direction: column; justify-content: center; padding: 2px; }
+/* 「更多建築」按鈕：只放背包「全部」分頁的四格圖示（js/backpack.js 的 BAG_ICON.all），不放字 */
+#buildToolbar #buildToggle .build-more-ico { width: 24px; height: 24px; filter: drop-shadow(0 0 1px #000) drop-shadow(0 1px 1px rgba(0,0,0,.6)); }

@@ -201,7 +201,7 @@ function gearHtml() {
   let h = '<div class="btns" style="margin-top:0"><button type="button" class="primary" id="gearAdd">＋ 新增裝備</button></div><div class="list" style="margin-top:8px">' +
     state.gear.map(g => '<button type="button" data-gear="' + esc(g.id) + '" class="' + (g.id === gearSel ? 'on' : '') + '"><img src="' + esc(squadGearImage(g)) + '" alt="">' + esc(g.name || g.id) + '<em>$' + (g.price || 0) + '</em></button>').join('') + '</div>';
   const g = state.gear.find(x => x.id === gearSel);
-  if (!g) return h + '<p class="note" style="margin-top:10px">選一件裝備來改。溫特在便利商店「隊員裝備」分頁用經費買；價格 0＝商店不賣。</p>';
+  if (!g) return h + '<p class="note" style="margin-top:10px">選一件裝備來改。溫特在諾亞的開發工坊製作（異質碎片＋這裡的價格當經費）；價格 0＝不能製作。</p>';
   h += '<div class="sec"><div class="sec-head">' + esc(g.name || g.id) + '<span class="sp"></span><button type="button" class="small danger" id="gearDel">刪除這件</button></div>' +
     '<label class="field">名稱<input type="text" data-gf="name"></label>' +
     '<div class="two"><label class="field">圖示 emoji（沒有圖片時用）<input type="text" data-gf="icon"></label><label class="field">價格（經費 $）<input type="number" min="0" step="1" data-gf="price"></label></div>' +
@@ -550,7 +550,7 @@ function skillsText() {
 }
 function gearText() {
   return '/* ===== Y102隊員裝備（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
-    '   溫特在便利商店（「隊員裝備」分頁）用經費買，買了放進背包；在 T-Pad「Y102隊員」→ 裝備頁給隊員穿（每人 3 格、不分種類，一件只能給一個人穿）。\n' +
+    '   溫特在諾亞的開發工坊製作（異質碎片＋price 當經費），做好放進背包；在 T-Pad「Y102隊員」→ 裝備頁給隊員穿（每人 3 格、不分種類，一件只能給一個人穿）。\n' +
     '   每件：{ id, name：名稱, icon：沒有圖片時用的 emoji, image：圖片路徑（可不填）, price：價錢, desc：裝備說明, effect：裝備數值（顯示用；空白＝依 mods 自動產生）, mods：實際改的數值 }\n' +
     '   mods 的寫法跟技能一樣：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }。 */\n' +
     'const SQUAD_GEAR = ' + JSON.stringify(state.gear, null, 2) + ';\n';

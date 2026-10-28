@@ -137,8 +137,10 @@ function workshopInfoLabel(key, part, field, fallback, vars, cfg) {
 function workshopInfoPartsOf(key, cfg) {
   const c = cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {});
   const src = (Array.isArray(c.added) && c.added.find(a => a && a.id === key)) || (c.items || {})[key] || {};
-  return src.infoParts || {};
+  return src.infoParts || (/^(bld|sg):/.test(String(key)) ? WORKSHOP_BUILD_INFO_PARTS : {});   // 建築（js/build.js）、隊員裝備（js/squad-gear.js）沒在編輯器調過：跟其他裝備一樣往上移
 }
+// 開發工坊的建築：說明欄各塊的位置（跟編輯器裡調好的裝備一樣：文字往上 20、按鈕往上 55）
+const WORKSHOP_BUILD_INFO_PARTS = { name: { y: -20 }, tag: { y: -20 }, desc: { y: -20 }, stats: { y: -20 }, btn: { y: -55 } };
 // 放在那一塊的標籤上：data-wsp（css/style.css 用它套字級）＋位移、寬高
 //   按鈕：寬、高、字級用原本「外觀 → 升級／開發按鈕」的那組變數（--ws-act-*），只蓋過這一件
 function workshopInfoPartAttr(key, part, cfg) {

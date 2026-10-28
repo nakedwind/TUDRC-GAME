@@ -523,7 +523,7 @@ function renderSquadArmorGrid(items) {
   let html = `<p class="bag-weapon-hint bag-gear-group">隊員裝備 <small>點一下再按「穿上」，或直接拖到左邊${name}的格子</small></p>`;
   html += items.map(g => `<button type="button" class="bag-cell squadgear${g.id === backpackSel ? ' sel' : ''}" data-bag-item="${g.id}" draggable="true" data-drag-sgear="${g.sgear.id}" aria-label="${g.name} ×${g.count}" aria-pressed="${g.id === backpackSel}">
       <img src="${g.image}" alt=""><b>${g.count}</b><span class="bag-cell-name">${g.name}</span></button>`).join('');
-  if (!items.length) html += '<p class="bag-weapon-hint">背包裡沒有隊員裝備 <small>可以在基地的便利商店「隊員裝備」分頁購買</small></p>';
+  if (!items.length) html += '<p class="bag-weapon-hint">背包裡沒有隊員裝備 <small>可以找諾亞的開發工坊製作</small></p>';
   backpackGrid.classList.add('no-anim');
   backpackGrid.innerHTML = html;
   requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
@@ -564,7 +564,7 @@ function handleSquadArmorClick(e) {
   if (slot) {
     const i = Number(slot.dataset.sqSlot);
     if (squadGearOf(armorWho)[i]) { backpackSel = SQ_WORN_PREFIX + i; armorSlotPick = null; }
-    else { armorSlotPick = i; const first = squadArmorItems().find(g => squadGearWornAt(armorWho, g.sgear.id, -1) < 0); backpackSel = first ? first.id : null; if (!first) systemNotice('背包裡沒有可以穿的隊員裝備，可以在基地的便利商店購買'); }
+    else { armorSlotPick = i; const first = squadArmorItems().find(g => squadGearWornAt(armorWho, g.sgear.id, -1) < 0); backpackSel = first ? first.id : null; if (!first) systemNotice('背包裡沒有可以穿的隊員裝備，可以找諾亞的開發工坊製作'); }
     sfx('blip'); renderBackpack(); return true;
   }
   const wear = e.target.closest('[data-sq-wear]');

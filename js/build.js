@@ -114,31 +114,124 @@ let buildTargetCell = null;    // 從地面情境選單指定的建築格
 const BUILD_CATS = [['obstacle', '🧱 障礙物']];
 const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
 const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence']);   // 暫時不能蓋的建築（鐵圍籬先停用）
-// 這張地圖能不能蓋：新手區只能蓋 NEWBIE_START.builds 裡的（data/balance.js）
-const buildAllowedHere = id => !(typeof isNewbieMap === 'function' && isNewbieMap() && NEWBIE_START.builds) || NEWBIE_START.builds.includes(id);
-const buildList = () => [...OBSTACLES, ...DECOS].filter(o=>!DISABLED_BUILD_IDS.has(o.id) && buildAllowedHere(o.id));
+// 能不能蓋：一開始只有 NEWBIE_START.builds 那幾種（data/balance.js），其他的要到諾亞的開發工坊開發（下面的 buildWorkshopEntries）
+// 新手區照樣只能蓋那幾種（開發好的也不行）
+const buildStarter = id => !NEWBIE_START.builds || NEWBIE_START.builds.includes(id);
+const buildUnlocked = id => buildStarter(id) || !!(typeof equipState !== 'undefined' && equipState.builds && equipState.builds[id]);
+const buildAllowedHere = id => (typeof isNewbieMap === 'function' && isNewbieMap()) ? buildStarter(id) : buildUnlocked(id);
+const buildAll = () => [...OBSTACLES, ...DECOS].filter(o => !DISABLED_BUILD_IDS.has(o.id));   // 遊戲裡有的全部建築（不管開發了沒）
+const buildList = () => buildAll().filter(o => buildAllowedHere(o.id));
 // 依 id 找建築（跨兩類），放置時用
 const buildableById = id => DISABLED_BUILD_IDS.has(id) || !buildAllowedHere(id) ? null : (OBSTACLES.find(o => o.id === id) || DECOS.find(o => o.id === id));
-// 下方建築欄：直接列出全部可以蓋的東西（不再有「建築」選單）。
 // 排列：先照 BUILD_ORDER，其他的接在後面（物件編輯器新增的建築會自動出現在最後）
 const BUILD_ORDER = ['camping_lights', 'searchlight', 'wirecloth', 'roadblocks', 'wirefence', 'landmine'];
-const buildQuickIds = () => [...BUILD_ORDER.filter(id => buildableById(id)), ...buildList().map(o => o.id).filter(id => !BUILD_ORDER.includes(id))];   // 每次重畫都重算（換地圖時能蓋的不一樣）
+const buildQuickIds = () => [...BUILD_ORDER.filter(id => buildableById(id)), ...buildList().map(o => o.id).filter(id => !BUILD_ORDER.includes(id))];
+
+// ---- 開發工坊：開發新的建築（js/equipment.js 的 workshopEntries／workshopBuy 會呼叫）----
+const buildDevCost = id => {
+  const d = (typeof BUILD_DEV !== 'undefined' && (BUILD_DEV[id] || BUILD_DEV.default)) || { shards: 50 };
+  const shards = d.shards | 0;
+  return { shards, money: Number.isFinite(d.money) ? d.money : wsMoney('bld:' + id, 0, shards) };
+};
+function buildWorkshopEntries() {
+  return buildAll().filter(o => !buildStarter(o.id)).map(o => {
+    const have = buildUnlocked(o.id), cost = buildDevCost(o.id);
+    return { key: 'bld:' + o.id, kind: 'build', def: o, name: o.name, lv: have ? 1 : 0, max: 1, icon: '<img src="' + o.h.file + '" alt="">', image: o.h.file, emoji: '🧱',
+      tag: '建築', worn: false, about: have ? '已經可以在戰鬥區域蓋了（新手區除外）。打開下方的「🧱 建築」，拖到快捷欄就能用。' : '開發好之後，在戰鬥區域就能蓋（新手區除外）。',
+      stat: () => '建造經費 $' + o.cost + '・HP ' + o.hp, canDev: !have, where: '', devCost: cost.shards, upCost: 0, devMoney: cost.money, buy: 'bld:' + o.id };
+  });
+}
+function buildWorkshopBuy(kind, id) {
+  if (kind !== 'bld') return false;
+  const o = buildAll().find(x => x.id === id); if (!o || buildUnlocked(id)) return true;
+  const cost = buildDevCost(id);
+  if (!spendWorkshop(cost.shards, cost.money)) return true;
+  equipState.builds[id] = true;
+  const q = buildQuickState(), free = q.ids.indexOf(null);   // 快捷欄有空格：自動放進去
+  if (free >= 0) q.ids[free] = id;
+  saveEquipment(); SFX.play('achievement', .7, 'equip-up');
+  showWorkshopToast('🧱 諾亞開發好了「' + o.name + '」' + (free >= 0 ? '，已經放進建築快捷欄' : '，可以從「🧱 建築」拖到快捷欄'));
+  renderBuildQuickSlots(); renderBuildBar();
+  return true;
+}
+
+// ---- 下方建築快捷欄：幾格、每格放哪個，玩家自己決定（存在 equipState.buildQuick，跟裝備一起存檔）----
+// ・建築選單裡的 − ＋ 調格數；把選單裡的建築拖到某一格＝放進那一格；快捷欄的格子互相拖＝交換位置；右鍵＝清空那一格
+function buildQuickState() {
+  const B = typeof BUILD_QUICK !== 'undefined' ? BUILD_QUICK : { min: 1, max: 8, start: 4 };
+  if (typeof equipState === 'undefined') return { n: B.start, ids: buildQuickIds().slice(0, B.start) };   // 裝備還沒讀進來（載入中）：先照預設
+  let q = equipState.buildQuick;
+  if (!q || !Array.isArray(q.ids)) {   // 第一次：照預設順序把能蓋的放進去
+    const ids = buildAll().filter(o => buildUnlocked(o.id)).map(o => o.id);
+    const n = Math.max(B.start, Math.min(B.max, ids.length));
+    const order = [...BUILD_ORDER.filter(id => ids.includes(id)), ...ids.filter(id => !BUILD_ORDER.includes(id))];
+    q = equipState.buildQuick = { n, ids: order.slice(0, n) };
+  }
+  q.n = Math.max(B.min, Math.min(B.max, q.n | 0 || B.start));
+  q.ids = q.ids.slice(0, q.n).map(id => id && buildAll().some(o => o.id === id) && buildUnlocked(id) ? id : null);
+  while (q.ids.length < q.n) q.ids.push(null);
+  q.ids = q.ids.map((id, i) => id && q.ids.indexOf(id) === i ? id : null);   // 同一個建築只放一格
+  return q;
+}
+function setBuildQuickSlot(index, id, fromIndex) {
+  const q = buildQuickState(); if (index < 0 || index >= q.n) return;
+  if (fromIndex != null && fromIndex >= 0) [q.ids[index], q.ids[fromIndex]] = [q.ids[fromIndex], q.ids[index]];   // 快捷欄裡互換
+  else {
+    const was = id ? q.ids.indexOf(id) : -1;
+    if (was >= 0) q.ids[was] = q.ids[index];   // 已經在別格：兩格交換
+    q.ids[index] = id;
+  }
+  saveEquipment(); sfx('switch'); renderBuildQuickSlots(); renderBuildBar();
+}
+function changeBuildQuickCount(d) {
+  const q = buildQuickState(), B = BUILD_QUICK, n = Math.max(B.min, Math.min(B.max, q.n + d));
+  if (n === q.n) { sfx('error'); return; }
+  q.n = n; buildQuickState(); saveEquipment(); sfx('switch'); renderBuildQuickSlots(); renderBuildBar();
+}
 function renderBuildQuickSlots() {
   buildQuickSlots.innerHTML = '';
-  buildQuickIds().forEach((id, index) => {
-    const ob = buildableById(id); if (!ob) return;
+  const q = buildQuickState();
+  q.ids.forEach((id, index) => {
+    const ob = id && buildableById(id);
     const button = document.createElement('button');
-    button.type = 'button'; button.className = 'build-quick-slot';
+    button.type = 'button'; button.className = 'build-quick-slot' + (ob ? '' : ' empty');
+    button.dataset.slot = index;
+    if (!ob) {   // 空格（或這張地圖不能蓋的，例如新手區）：點了打開建築選單
+      button.dataset.tip = '空的快捷格：打開「🧱 建築」，把建築拖到這裡'; button.dataset.tipKey = 'build-empty';
+      button.setAttribute('aria-label', '空的建築快捷格');
+      button.innerHTML = '<i class="bq-art" aria-hidden="true">＋</i><span>空</span>';
+      button.addEventListener('click', () => { if (buildBar.classList.contains('hidden')) buildToggle.click(); });
+      buildQuickSlots.appendChild(button);
+      return;
+    }
     button.dataset.buildId = id;
-    button.dataset.tip = '經費 $' + ob.cost + '・HP ' + ob.hp; button.dataset.tipKey = 'build-' + id;   // 懸停提示（js/hover-tip.js）；名稱本來就寫在圖示下面
+    button.dataset.tip = '經費 $' + ob.cost + '・HP ' + ob.hp + '（右鍵清空這格）'; button.dataset.tipKey = 'build-' + id;   // 懸停提示（js/hover-tip.js）；名稱本來就寫在圖示下面
     button.setAttribute('aria-label', '建造' + ob.name);
     button.innerHTML = '<i class="bq-art" aria-hidden="true"><img src="' + ob[buildOrient].file + '" alt=""></i><span>' + ob.name + '</span>';   // bq-art：只把圖片裁在框裡，名稱不會被切掉（css/style.css）
     button.addEventListener('click', () => selectBuildType(id));
-    button.draggable = true;   // 也可以直接拖到地圖上蓋（下面的 buildDrag）
+    button.addEventListener('contextmenu', e => { e.preventDefault(); if (G && G.selType === 'build:' + id) G.selType = null; setBuildQuickSlot(index, null); updateBuildToggle(); });
+    button.draggable = true;   // 也可以直接拖到地圖上蓋（下面的 buildDrag）；拖到別格＝交換位置
     buildQuickSlots.appendChild(button);
   });
   if (typeof refreshHoverTip === 'function') refreshHoverTip();
 }
+// 拖到快捷欄的格子上：選單裡的建築＝放進這格；快捷欄的格子＝交換
+buildQuickSlots.addEventListener('dragover', e => {
+  const slot = e.target.closest && e.target.closest('.build-quick-slot');
+  if (!slot || !(buildDrag || [...e.dataTransfer.types].includes('application/x-tudrc-build'))) return;
+  e.preventDefault(); e.dataTransfer.dropEffect = buildDrag ? 'move' : 'copy';
+  buildQuickSlots.querySelectorAll('.drag-over').forEach(b => b !== slot && b.classList.remove('drag-over'));
+  slot.classList.add('drag-over');
+});
+buildQuickSlots.addEventListener('dragleave', e => { const slot = e.target.closest && e.target.closest('.build-quick-slot'); if (slot && !slot.contains(e.relatedTarget)) slot.classList.remove('drag-over'); });
+buildQuickSlots.addEventListener('drop', e => {
+  const slot = e.target.closest && e.target.closest('.build-quick-slot'); if (!slot) return;
+  e.preventDefault(); e.stopPropagation();
+  const index = +slot.dataset.slot, id = buildDrag ? buildDrag.id : e.dataTransfer.getData('application/x-tudrc-build');
+  const from = buildDrag ? buildDrag.from : null;
+  if (buildDrag) endBuildDrag();
+  if (id && buildableById(id)) setBuildQuickSlot(index, id, from); else renderBuildQuickSlots();
+});
 function selectBuildType(id) {
   if (!G || !G.running || !MAP_FIELD || !buildableById(id)) return;   // 劇情地圖也能蓋（自己放燈照亮）
   if (buildTargetCell) {
@@ -155,7 +248,7 @@ function selectBuildType(id) {
 
 // ---- 拖曳蓋建築：把下方建築欄的按鈕拖到地圖上放開，就在那一格蓋（跟快捷欄拖道具一樣，js/quick-slots.js）----
 // 拖曳中地圖上照常畫半透明預覽（放不下是紅框）；放不下就照點擊蓋的規則提示（太遠了、太黑了、經費不足…）
-let buildDrag = null;   // { id, prevSel }：拖的是哪種建築、拖之前選的是什麼
+let buildDrag = null;   // { id, prevSel, from }：拖的是哪種建築、拖之前選的是什麼、從快捷欄第幾格拖出來
 const buildCanvas = document.getElementById('cv');
 function buildDragCell(e) {
   const rect = buildCanvas.getBoundingClientRect();
@@ -173,7 +266,7 @@ function endBuildDrag() {   // 放開後建築欄會重畫，被拖的按鈕不�
 buildQuickSlots.addEventListener('dragstart', e => {
   const button = e.target.closest && e.target.closest('.build-quick-slot');
   if (!button || !G || !G.running || G.over || !MAP_FIELD || !buildableById(button.dataset.buildId)) { e.preventDefault(); return; }
-  buildDrag = { id: button.dataset.buildId, prevSel: G.selType };
+  buildDrag = { id: button.dataset.buildId, prevSel: G.selType, from: +button.dataset.slot };
   G.selType = 'build:' + buildDrag.id; buildTargetCell = null; closeGroundMenu();
   e.dataTransfer.setData('application/x-tudrc-build', buildDrag.id); e.dataTransfer.effectAllowed = 'copy';
   const ghost = document.createElement('div');   // 拖著的小圖不要畫（地圖上已經有預覽）：給一個透明的
@@ -204,8 +297,14 @@ function renderBuildBar() {
   buildBar.innerHTML = '';
   const quickHint = document.createElement('div');
   quickHint.className = 'build-quick-hint';
-  quickHint.textContent = '拖曳建築到下方快捷欄，可以替換';
+  quickHint.textContent = '把建築拖到下方快捷欄的格子（右鍵清空那格）';
   buildBar.appendChild(quickHint);
+  // 快捷欄要幾格：− ＋（BUILD_QUICK.min～max，data/balance.js）
+  const q = buildQuickState(), count = document.createElement('div');
+  count.className = 'build-quick-count';
+  count.innerHTML = '<span>快捷欄格數</span><button type="button" data-d="-1" aria-label="少一格"' + (q.n <= BUILD_QUICK.min ? ' disabled' : '') + '>−</button><b>' + q.n + '</b><button type="button" data-d="1" aria-label="多一格"' + (q.n >= BUILD_QUICK.max ? ' disabled' : '') + '>＋</button>';
+  count.addEventListener('click', e => { const b = e.target.closest('button[data-d]'); if (b) changeBuildQuickCount(+b.dataset.d); });
+  buildBar.appendChild(count);
   if (buildTargetCell) {
     const note = document.createElement('div'); note.className = 'build-target';
     note.textContent = '選擇要建造的物件';
@@ -240,6 +339,13 @@ function renderBuildBar() {
       }
       selectBuildType(o.id);
     });
+    buildBar.appendChild(b);
+  });
+  const newbie = typeof isNewbieMap === 'function' && isNewbieMap();
+  buildAll().filter(o => !buildAllowedHere(o.id)).forEach(o => {   // 不能蓋的：灰色、不能點也不能拖
+    const b = document.createElement('div'); b.className = 'tbtn build locked';
+    b.innerHTML = '<img src="' + o[buildOrient].file + '" alt=""><span class="build-option-info"><span class="build-option-name">🔒 ' + o.name + '</span><span class="build-option-stats">' +
+      (newbie && buildUnlocked(o.id) ? '新手區不能蓋' : '找諾亞的開發工坊開發') + '</span></span>';
     buildBar.appendChild(b);
   });
   const rot = document.createElement('button');
