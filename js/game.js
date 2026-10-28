@@ -926,17 +926,31 @@ function sendSentryRest(t) {
 // 腐蝕池是貼地的橢圓：橫向半徑 pool.r、縱向 pool.r × ACID_SQUASH（跟地上焦痕、警示光暈一樣扁）
 const ACID_SQUASH = .6;
 const acidPoolDist = (pool, x, y) => Math.hypot(x - pool.x, (y - pool.y) / ACID_SQUASH);   // 換算成「橫向像素」的距離，跟 pool.r 比
-// 隊友避開腐蝕池：在池內／貼邊時往外推（阿瓦倫本人免疫、不避；暴走中不避）
+// 隊友會怕的地上酸液：阿瓦倫的腐蝕池、異質核心腳下的腐蝕（阿瓦倫本人免疫）＋吐酸史萊姆的酸液（js/combat-feel.js 的 G.spitPools，阿瓦倫也會被燙）
+// t＝哪位隊友（null 或暴走中＝不怕）；pad＝往外多留幾像素
+function acidHazardAt(t, x, y, pad = 0) {
+  if (!t || t.berserk) return false;
+  if (t.type !== 'avaren') for (const pool of G.acidPools || []) if (pool.t > 0 && acidPoolDist(pool, x, y) < pool.r + pad) return true;
+  for (const pool of G.spitPools || []) if (pool.t > 0 && acidPoolDist(pool, x, y) < pool.r + pad) return true;
+  return false;
+}
+// 隊友避開酸液：站在裡面／貼邊時，照 sentryFireExit 找最近走得出去的格子走出去（跟火海一樣；暴走中不避）
+// 找路時也會繞開酸液（js/sentry.js 的 sentryCellWalkable）
 function avoidAcidPools(t, dt) {
-  if (MAP_SAFE || t.type === 'avaren' || t.berserk || t.hp <= 0 || !G.acidPools || !G.acidPools.length) return;
-  for (const pool of G.acidPools) {
-    const dx = t.x - pool.x, dy = t.y - pool.y, d = Math.hypot(dx, dy) || 1, margin = pool.r + 10, ed = acidPoolDist(pool, t.x, t.y);
-    if (ed >= margin) continue;
-    const step = Math.min(margin - ed, 130 * dt), nx = t.x + dx / d * step, ny = t.y + dy / d * step;
-    const [cc, cr] = cellAt(nx, ny);
-    if (sentryCellWalkable(cc, cr)) { t.x = nx; t.y = ny; }
-    else { const [ac] = cellAt(nx, t.y); if (sentryCellWalkable(ac, cellAt(t.x, t.y)[1])) t.x = nx; else { const [, br] = cellAt(t.x, ny); if (sentryCellWalkable(cellAt(t.x, t.y)[0], br)) t.y = ny; } }
-  }
+  if (MAP_SAFE || t.berserk || t.hp <= 0) { t.acidExit = null; return; }
+  const hot = (x, y) => acidHazardAt(t, x, y, 10);
+  if (!hot(t.x, t.y)) { t.acidExit = null; return; }
+  t.acidExitT = (t.acidExitT || 0) - dt;
+  if (!t.acidExit || t.acidExitT <= 0) { t.acidExit = sentryFireExit(t, hot); t.acidExitT = .4; }   // 池子會消失、新的會出現：每 0.4 秒重找
+  const path = t.acidExit;
+  while (path && path.length && Math.hypot(path[0][0] - t.x, path[0][1] - t.y) < 2) path.shift();
+  if (!path || !path.length) return;
+  const [tx, ty] = path[0], dx = tx - t.x, dy = ty - t.y, d = Math.hypot(dx, dy), step = Math.min(d, 150 * dt);
+  const ox = t.x, oy = t.y, nx = t.x + dx / d * step, ny = t.y + dy / d * step;
+  if (personnelStepAllowed(t.x, t.y, nx, t.y, true)) t.x = nx;
+  if (personnelStepAllowed(t.x, t.y, t.x, ny, true)) t.y = ny;
+  if (t.x !== ox || t.y !== oy) t.navPath = null;
+  else t.acidExitT = 0;   // 被擋住：下一幀重找
 }
 // 各哨兵對火海的反應：
 //   immune（希奧妮）＝火燙不到、不躲；brave（雷德）＝找路不繞開火、直接穿過去；
@@ -2050,7 +2064,7 @@ function update(dt) {
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if (!MAP_SAFE && typeof campBedStep === 'function' && campBedStep(t, dt)) {}   // 殘血：走回營地、躺行軍床休息（js/camp-beds.js）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
-    avoidAcidPools(t, dt);   // 被腐蝕池推開（阿瓦倫本人免疫、不避）
+    avoidAcidPools(t, dt);   // 走出腐蝕池、酸液（阿瓦倫只躲酸液，自己的腐蝕免疫）
     avoidOilFires(t, dt, Math.hypot(t.x - ox, t.y - oy) > .3);    // 被火海推開（js/oil-barrels.js 的火）；這幀有沒有在走
     animateSentry(t, t.x - ox, t.y - oy, dt);
   }
