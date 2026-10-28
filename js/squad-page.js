@@ -406,7 +406,7 @@ function squadEquip(body) {
     if (st.slot.id === 'skin') eq.base = a.wear; else eq[st.slot.id] = a.wear;   // 服裝：換基地穿的那套（戰鬥區的在衣櫃換）
     saveCostumes(); if (typeof applyOutfits === 'function') applyOutfits(); ok = true;
   }
-  if (typeof sfx === 'function') sfx(ok ? 'button' : 'error');
+  if (typeof sfx === 'function') sfx(ok ? (st.slot.kind === 'gear' ? 'wearGear' : 'button') : 'error');   // 隊員裝備：穿裝備的聲音
   st.avail = null; renderSquadPage(body);
 }
 function squadUnequip(body) {

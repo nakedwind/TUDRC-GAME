@@ -98,11 +98,12 @@ function equipLv(id) {
 }
 
 // ---- 效果（其他程式呼叫）----
-const equipPlayerDamage = d => { const v = equipLv('vest'), h = equipLv('helmet'); return d * (v ? 1 - v.guard : 1) * (h ? 1 - h.guard : 1); };   // 防護背心、防護頭盔：溫特受到的傷害
+const equipVest = () => equipLv('vest_light') || equipLv('vest') || equipLv('vest_heavy');   // 三種防護背心（上身，只會穿一件）
+const equipPlayerDamage = d => { const v = equipVest(), h = equipLv('helmet'); return d * (v ? 1 - v.guard : 1) * (h ? 1 - h.guard : 1); };   // 防護背心、防護頭盔：溫特受到的傷害
 const equipFireMul = () => { const v = equipLv('fireboots'); return v ? 1 - v.fire : 1; };   // 防火鞋：火海燙傷（js/oil-barrels.js）
 const equipAcidMul = () => { const v = equipLv('mask'), b = equipLv('acidboots'); return (v ? 1 - v.filter : 1) * (b ? 1 - b.corrode : 1); };   // 防腐鞋：一起減（可疊加）   // 防毒面具：腐蝕池、酸液的傷害
 const equipSootheCost = c => { const v = equipLv('bracelet'); return v ? Math.round(c * (1 - v.save)) : c; };   // 共感手環：疏導花的 SP
-const equipSpeedMul = () => { const v = equipLv('sneakers'); return (v ? 1 + v.speed : 1) * adrenalineSpeedMul(); };   // 輕量跑鞋、腎上腺素（道具）
+const equipSpeedMul = () => { const v = equipLv('sneakers'), b = equipVest(); return (v ? 1 + v.speed : 1) * (b && b.speed ? 1 + b.speed : 1) * adrenalineSpeedMul(); };   // 輕量跑鞋、輕型／重型防護背心、腎上腺素（道具）
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
 const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && MAP_FIELD ? h.fear : 0)); };   // 照明頭盔也算
 const flashlightOn = () => !!(equipLv('headlamp') && MAP_FIELD && equipState.battery > 0);   // 劇情地圖也有黑幕：手電筒照樣亮
@@ -575,7 +576,7 @@ function equipToSlot(slotId, id) {
     for (const k of Object.keys(equipState.equipped)) if (equipState.equipped[k] === id) equipState.equipped[k] = null;   // 同一件只能穿一格
     equipState.equipped[slotId] = id;
   }
-  sfx('button'); afterLoadoutChange();
+  sfx(slotId.startsWith('w:') ? 'button' : 'wearGear'); afterLoadoutChange();   // 防具：穿裝備的聲音（js/sfx.js 的 wearGear）
 }
 // 這件可以放哪幾格（背包「裝備」分頁的按鈕用）
 function slotsForGear(kind, id) {

@@ -551,7 +551,7 @@ function wearSquadArmor(id, slot) {
   const list = squadGearOf(armorWho);
   if (slot == null) slot = armorSlotPick != null ? armorSlotPick : list.indexOf(null);
   if (slot < 0) { sfx('error'); systemNotice('三格都穿滿了：先卸下一件，或把裝備拖到要換掉的那一格', true); return; }
-  if (equipSquadGear(armorWho, slot, id)) { sfx('button'); armorSlotPick = null; backpackSel = SQ_WORN_PREFIX + slot; }
+  if (equipSquadGear(armorWho, slot, id)) { sfx('wearGear'); armorSlotPick = null; backpackSel = SQ_WORN_PREFIX + slot; }
   else sfx('error');
   renderBackpack();
 }

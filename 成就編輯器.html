@@ -134,7 +134,7 @@
   <script src="data/costumes.js?v=gacha-once-20261027"></script>   <!-- 配件：「全員戴上○○」的清單 -->
   <script src="data/achievements.js?v=achvcustom-20261026"></script>   <!-- 目前存在檔案裡的成就 -->
   <script src="js/achievement-config.js?v=achvcustom-20261025"></script>   <!-- 成就的設定（跟遊戲共用） -->
-  <script src="js/sfx.js?v=mouse-dizzy3-20261023"></script><script src="js/ui-feedback.js"></script>
+  <script src="js/sfx.js?v=weargear-20261028"></script><script src="js/ui-feedback.js"></script>
   <script src="js/achievement-editor.js?v=achv6-20261023"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>   <!-- 一鍵存到專案 -->
   <script>ProjectSave.attach({ after: ['download'], files: [{ path: 'data/achievements.js', label: '成就', text: () => exportSource() }], status: (m, e) => { setStatus(m, e); if (!e && /^已存到專案/.test(m)) markSaved(); } });</script>   <!-- 存好了：「尚未儲存」的提醒歸零 -->

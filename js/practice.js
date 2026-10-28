@@ -275,10 +275,21 @@ function spawnPracticeSlime() {
 }
 
 // ---- 繪製沙包（render.js 依腳底位置排前後時呼叫）----
+// 圖片：images/地下訓練室/sandbag.png（76×180）；畫成 SANDBAG_IMG_H 高、底部貼在腳底，被打到會晃、變亮。圖還沒讀到時用下面畫的
+const SANDBAG_IMG = new Image(); SANDBAG_IMG.src = 'images/地下訓練室/sandbag.png';
+const SANDBAG_IMG_H = 70;
 function drawSandbag(ctx, e) {
   const now = performance.now() / 1000, sway = Math.sin(now * 18) * e.sway * .18;
   const x = e.x, y = e.y + 13;
   ctx.save();
+  if (SANDBAG_IMG.complete && SANDBAG_IMG.naturalWidth) {
+    const h = SANDBAG_IMG_H, w = h * SANDBAG_IMG.naturalWidth / SANDBAG_IMG.naturalHeight;
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y - 7, w * .6, 5, 0, 0, Math.PI * 2); ctx.fill();   // 影子（比腳底高 5）
+    ctx.translate(x, y); ctx.rotate(sway);   // 以底座為軸晃
+    ctx.drawImage(SANDBAG_IMG, -w / 2, -h, w, h);
+    if (e.hitT > 0) { ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .35; ctx.drawImage(SANDBAG_IMG, -w / 2, -h, w, h); }   // 被打到：變亮
+    ctx.restore();
+  } else {
   ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(x, y, 17, 5, 0, 0, Math.PI * 2); ctx.fill();   // 影子
   ctx.fillStyle = '#3a3f47'; ctx.beginPath(); ctx.ellipse(x, y - 2, 14, 5, 0, 0, Math.PI * 2); ctx.fill();   // 底座
   ctx.fillStyle = '#585f6a'; ctx.beginPath(); ctx.ellipse(x, y - 4, 13, 4, 0, 0, Math.PI * 2); ctx.fill();
@@ -292,14 +303,15 @@ function drawSandbag(ctx, e) {
   ctx.fillRect(-w / 2, -h + 9, w, 4); ctx.fillRect(-w / 2, -12, w, 4);
   ctx.fillStyle = 'rgba(255,255,255,.18)'; ctx.fillRect(-w / 2 + 4, -h + 5, 3, h - 12);   // 反光
   ctx.restore();
+  }
   // DPS 數字
   const dps = practiceDps();
   ctx.save(); ctx.textAlign = 'center';
   ctx.font = 'bold 12px "Microsoft JhengHei", sans-serif';
   const label = 'DPS ' + dps.toFixed(1), sub = '總傷害 ' + Math.round(practice.total);
   const tw = Math.max(ctx.measureText(label).width, 70) + 14;
-  ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - tw / 2, y - 92, tw, 30, 7) : ctx.rect(x - tw / 2, y - 92, tw, 30); ctx.fill();
-  ctx.fillStyle = dps > 0 ? '#ffd479' : '#c9d3dc'; ctx.fillText(label, x, y - 79);
-  ctx.font = '10px "Microsoft JhengHei", sans-serif'; ctx.fillStyle = '#c9d3dc'; ctx.fillText(sub, x, y - 67);
+  ctx.fillStyle = 'rgba(0,0,0,.6)'; ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x - tw / 2, y - 106, tw, 30, 7) : ctx.rect(x - tw / 2, y - 106, tw, 30); ctx.fill();
+  ctx.fillStyle = dps > 0 ? '#ffd479' : '#c9d3dc'; ctx.fillText(label, x, y - 93);
+  ctx.font = '10px "Microsoft JhengHei", sans-serif'; ctx.fillStyle = '#c9d3dc'; ctx.fillText(sub, x, y - 81);
   ctx.restore();
 }
