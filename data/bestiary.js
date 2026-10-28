@@ -234,6 +234,15 @@ const BESTIARY_CONFIG = {
       ],
       "thumbScale": 200,
       "thumbY": 10
+    },
+    "human_face_butterfly": {
+      "stars": 3,
+      "abilities": [
+        "三色鱗粉：綠色中毒、紫色混亂、藍色睡著 20 秒。",
+        "吸滿才發作：站在霧裡量表會漲，滿了才中招。",
+        "粉塵爆炸：鱗粉碰到火會連鎖爆炸，連自己都會炸到。",
+        "趨光：會飛去停在露營燈、探照燈上休息，停著的時候不撒粉。"
+      ]
     }
   },
   "order": [
@@ -256,6 +265,7 @@ const BESTIARY_CONFIG = {
     "clownfish",
     "clownfish_small",
     "golden_banana_king",
-    "gourd_monkey"
+    "gourd_monkey",
+    "human_face_butterfly"
   ]
 };

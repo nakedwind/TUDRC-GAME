@@ -1345,36 +1345,37 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   .save-slot > div { flex-basis:100%; }
 }
 
-/* 帳篷作戰計畫：獨立暫停彈窗。 */
-#campPlanDialog { position:absolute; inset:0; z-index:45; display:grid; place-items:center; padding:20px; background:rgba(3,8,13,.72); backdrop-filter:blur(6px); }
+/* 帳篷作戰計畫：獨立暫停彈窗。外觀跟背包同一套（半透明玻璃卡片、上方標題列、圓形關閉鈕、格子、金色主按鈕） */
+#campPlanDialog { position:absolute; inset:0; z-index:45; display:grid; place-items:center; padding:20px; background:rgba(4,7,11,.3); backdrop-filter:blur(8px) saturate(1.1); -webkit-backdrop-filter:blur(8px) saturate(1.1); animation:shop-fade .16s ease-out both; }
 #campPlanDialog.hidden { display:none; }
-.camp-plan-card { box-sizing:border-box; width:min(464px,100%); max-height:100%; overflow-y:auto; padding:21px; border:1px solid #668a94; border-top:3px solid #e7c47c; border-radius:16px; background:linear-gradient(145deg,#25353c,#111e25); box-shadow:0 24px 80px rgba(0,0,0,.65); color:#e4edf0; }
-.camp-plan-card header { position:relative; display:flex; align-items:center; justify-content:center; min-height:38px; padding:0 46px; text-align:center; }
-
-.camp-plan-card h2 { margin:0; font-size:27px; }
-.camp-plan-card header button { position:absolute; right:0; top:calc(50% - 17px); flex:none; width:34px; height:34px; border:1px solid #52707c; border-radius:50%; background:#1a2a32; color:#d5e6ec; font-size:24px; cursor:pointer; }
-.camp-plan-card > p { margin:16px 0; color:#e7c47c; font-size:15px; }
-.camp-plan-options { display:flex; flex-direction:column; gap:10px; margin-top:16px; }
-.camp-plan-options > button { display:flex; align-items:center; gap:12px; width:100%; padding:10px 14px; border:1px solid #47616e; border-radius:11px; background:rgba(7,15,22,.5); color:#e4edf0; text-align:left; cursor:pointer; }
-.camp-plan-options > button:hover { border-color:#e7c47c; background:#30414a; }
-.camp-plan-options i { flex:none; color:#e7c47c; font:700 22px monospace; font-style:normal; }
-.camp-plan-options .plan-icon { flex:none; width:28px; height:28px; color:#e7c47c; }   /* 圖示跟編號一樣是金色（js/camp-interactions.js 的 PLAN_ICON） */
-.camp-plan-options span { display:flex; flex-direction:column; gap:4px; min-width:0; }
-.camp-plan-options b { font-size:17px; line-height:1.5; }
-.camp-plan-options small { font-size:14px; color:#e7c47c; line-height:1.5; }
-.camp-plan-card footer { display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:18px; color:#90a7b3; font-size:14px; }
-.camp-plan-card footer button { padding:9px 18px; border:1px solid #e7c47c; border-radius:8px; background:#e7c47c; color:#302818; font:700 16px "Microsoft JhengHei",sans-serif; cursor:pointer; }
-.camp-plan-card button:focus-visible { outline:2px solid #8edacb; outline-offset:3px; }
+.camp-plan-card, .camp-plan-confirm { box-sizing:border-box; max-height:100%; display:flex; flex-direction:column; overflow:hidden; border:1px solid rgba(143,211,255,.35); border-radius:16px; background:linear-gradient(160deg,rgba(24,33,44,.64),rgba(10,15,22,.72)); box-shadow:0 30px 80px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.1); color:#e6edf4; animation:shop-in .2s cubic-bezier(.2,.9,.3,1.15) both; }
+.camp-plan-card { width:min(464px,100%); }
+.camp-plan-card header, .camp-plan-confirm header { display:flex; align-items:center; gap:14px; padding:14px 18px 12px; border-bottom:1px solid rgba(143,211,255,.13); background:linear-gradient(90deg,rgba(143,211,255,.08),transparent 60%); }
+.camp-plan-card header > div { flex:1; min-width:0; }
+.camp-plan-card h2 { margin:0; color:#f2f8ff; font-size:22px; line-height:1.1; }
+.camp-plan-card header button, .camp-plan-confirm header button { flex:none; width:32px; height:32px; padding:0; border:1px solid #59616c; border-radius:50%; background:#202730; color:#dfe7ee; font-size:19px; line-height:1; cursor:pointer; }   /* 跟背包的關閉鈕一樣 */
+.camp-plan-card header button:hover, .camp-plan-confirm header button:hover { border-color:#c9d3dc; background:#2b3440; }
+.camp-plan-options { display:flex; flex-direction:column; gap:8px; min-height:0; overflow-y:auto; padding:14px 18px 16px; scrollbar-width:thin; scrollbar-color:#3d5266 transparent; }
+.camp-plan-options > button { display:flex; align-items:center; gap:12px; width:100%; padding:10px 14px; border:1px solid rgba(255,255,255,.12); border-radius:10px; background:rgba(23,32,42,.6); color:#e6edf4; font-family:"Microsoft JhengHei",sans-serif; text-align:left; cursor:pointer; transition:transform .12s, border-color .12s, background .12s, box-shadow .12s; }   /* 跟背包的物品格一樣 */
+.camp-plan-options > button:hover, .camp-plan-options > button:focus-visible { transform:translateY(-2px); border-color:#ffd479; background:rgba(70,60,36,.55); box-shadow:0 0 0 1px rgba(255,212,121,.6),0 0 16px rgba(255,212,121,.3); outline:none; }   /* 跟背包選中的格子一樣（金框） */
+.camp-plan-options i { flex:none; color:#ffd479; font:700 20px Consolas,monospace; font-style:normal; }
+.camp-plan-options .plan-icon { flex:none; width:28px; height:28px; color:#ffd479; }   /* 圖示跟編號一樣是金色（js/camp-interactions.js 的 PLAN_ICON） */
+.camp-plan-options span { display:flex; flex-direction:column; gap:2px; min-width:0; }
+.camp-plan-options b { color:#f3f6f9; font-size:17px; line-height:1.5; }
+.camp-plan-options small { color:#a3afbb; font-size:13px; line-height:1.5; }   /* 跟背包說明欄的字一樣 */
+.camp-plan-card footer, .camp-plan-confirm > div { position:relative; display:flex; align-items:center; justify-content:center; gap:10px; padding:12px 18px; border-top:1px solid rgba(143,211,255,.14); background:rgba(7,12,18,.4); color:#8c9aa8; font-size:13px; }
+.camp-plan-card footer button, .camp-plan-confirm > div button { padding:9px 22px; border:1px solid rgba(143,211,255,.35); border-radius:9px; background:rgba(23,32,42,.8); color:#d8ecff; font:800 15px "Microsoft JhengHei",sans-serif; cursor:pointer; }
+.camp-plan-card footer button, .camp-plan-confirm [data-plan-confirm] { border-color:#e9bd62; background:linear-gradient(180deg,#f7d886,#e6b04a); color:#3b2304; box-shadow:inset 0 1px 0 rgba(255,255,255,.45),0 2px 0 #9a6a20; }   /* 金色主按鈕（跟結算畫面一樣） */
+.camp-plan-card footer button:hover, .camp-plan-confirm > div button:hover { filter:brightness(1.08); }
+.camp-plan-card button:focus-visible, .camp-plan-confirm button:focus-visible { outline:2px solid #ffd479; outline-offset:2px; }
+.camp-plan-card footer span { position:absolute; right:18px; top:50%; transform:translateY(-50%); }   /* 「繼續作戰」置中，「Esc 關閉」靠右 */
 .camp-plan-card[hidden] { display:none; }
-.camp-plan-confirm { box-sizing:border-box; width:min(460px,100%); padding:28px; border:1px solid #668a94; border-top:3px solid #e7c47c; border-radius:16px; background:linear-gradient(145deg,#25353c,#111e25); box-shadow:0 24px 80px rgba(0,0,0,.65); color:#e4edf0; text-align:center; }
-.camp-plan-confirm h2 { margin:14px 0; font-size:25px; }
-.camp-plan-confirm p { margin:0 0 26px; color:#e7c47c; font-size:16px; line-height:1.8; }
-.camp-plan-confirm > div { display:flex; justify-content:center; gap:12px; }
-.camp-plan-confirm button { padding:10px 25px; border:1px solid #63818d; border-radius:9px; background:#243a44; color:#e4edf0; font:700 16px "Microsoft JhengHei",sans-serif; cursor:pointer; }
-.camp-plan-confirm [data-plan-confirm] { background:#e7c47c; border-color:#e7c47c; color:#302818; }
-.camp-plan-confirm button:hover { filter:brightness(1.12); }
-.camp-plan-confirm button:focus-visible { outline:2px solid #8edacb; outline-offset:3px; }
-@media (max-width:560px) { .camp-plan-card { padding:18px; } .camp-plan-options > button { padding:13px; gap:10px; } }
+.camp-plan-confirm { width:min(420px,100%); text-align:left; }
+.camp-plan-confirm h2 { flex:1; min-width:0; margin:0; color:#f2f8ff; font-size:22px; line-height:1.1; }
+.camp-plan-confirm p { margin:0; padding:16px 18px 18px; color:#a3afbb; font-size:15px; line-height:1.7; }
+.camp-plan-confirm > div { flex-direction:column; gap:8px; }   /* 上面確定、下面取消，置中 */
+.camp-plan-confirm > div button { width:min(200px,100%); }
+@media (max-width:560px) { .camp-plan-options > button { padding:12px; gap:10px; } }
 
 /* ===== 送禮與好感度 ===== */
 .dialogue-head { justify-content:flex-start; }

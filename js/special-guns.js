@@ -143,6 +143,7 @@ function tranqLand(s) {
 // ---- 共用：沿瞄準線找第一個打到的（腳底或身體中心離線夠近就算）----
 function lineHit(p, ang, maxD, cands, hitR) {
   let target = null, d = maxD;
+  if (typeof mothPlayerMisses === 'function' && mothPlayerMisses(p)) return { target, d };   // 吸了人面蝶的混亂鱗粉：八成打偏（js/human-face-butterfly.js）
   for (const o of cands) {
     const b = typeof targetBodyBox === 'function' && G.enemies.includes(o) ? targetBodyBox(o) : { cx: o.x, cy: o.y - 20 };
     for (const [px, py] of [[o.x, o.y], [b.cx, b.cy]]) {
@@ -407,6 +408,7 @@ function drawSleepMarks(ctx) {   // 睡著的怪物、隊員頭上飄 Zzz；暈�
   ctx.globalAlpha = 1;
   for (const o of [...(G.enemies || []), ...(G.towers || [])]) {
     if (!(o.sleepT > 0) || o.dead || (o.hp <= 0 && G.towers.includes(o))) continue;
+    if (o.mothSleep && typeof mothSleepPose === 'function' && (mothSleepPose(o) || {}).lying) continue;   // 吸了睡眠鱗粉倒在地上：Zzz 改從頭那一側飄（js/human-face-butterfly.js）
     if (G.enemies.includes(o) && !isVisible(o.x, o.y)) continue;
     const top = o.y - (o.drawHeight || 50) - 6;
     for (let i = 0; i < 3; i++) {

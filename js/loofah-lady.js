@@ -326,12 +326,37 @@ function applyStruggleTransform(ctx, a) {
 }
 
 // 被纏住的人不能移動（game.js 玩家移動、sentry.js 哨兵移動呼叫）
+// 溫特被纏住：頭上畫 [A] [D] 兩顆按鍵輪流被按下（連打動畫），下面一行「掙扎」（深色外框）；bottom＝「掙扎」字的底
+function drawStruggleKeys(ctx, cx, bottom, now) {
+  const K = 17, gap = 6, beat = Math.floor(now * 8) % 2;   // 一秒按 8 下：A、D 輪流
+  ctx.save();
+  ctx.font = 'bold 12px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom'; ctx.lineJoin = 'round';
+  ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(10,14,20,.9)'; ctx.fillStyle = '#e8ffd2';
+  ctx.strokeText('掙扎', cx, bottom); ctx.fillText('掙扎', cx, bottom);
+  const keyBottom = bottom - 15;
+  ['A', 'D'].forEach((label, i) => {
+    const down = beat === i, x = cx + (i ? gap / 2 : -gap / 2 - K), y = keyBottom - K + (down ? 2 : 0), h = K - (down ? 2 : 0);
+    ctx.fillStyle = 'rgba(10,14,20,.9)'; roundRect(x - 1, keyBottom - K - 1, K + 2, K + 2, 4); ctx.fill();   // 外框
+    ctx.fillStyle = '#6d7c88'; roundRect(x, keyBottom - K + 2, K, K - 2, 3); ctx.fill();   // 鍵帽側面（按下去時被蓋住）
+    ctx.fillStyle = down ? '#bcd6a6' : '#f1f6ea'; roundRect(x, y, K, h - 3, 3); ctx.fill();   // 鍵帽頂面：按下去時往下沉、變綠
+    ctx.font = 'bold 11px sans-serif'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#1b2530';
+    ctx.fillText(label, x + K / 2, y + (h - 3) / 2 + 1);
+  });
+  ctx.restore();
+}
 function isRooted(a) { return !!(a && a.rootT > 0); }
 
 // ---- 繪圖 ----
 // 地面：鑽地時的裂痕（畫在角色下面）
 function drawLoofahGround(ctx) {
+  const now = performance.now() / 1000;
   for (const v of G.loofahVines || []) {
+    if (v.state !== 'dig' && !v.done && isVisible(v.x, v.y)) {   // 藤蔓冒出來的地方：地上破開的洞（畫在角色底下）
+      const grow = v.state === 'retract' ? Math.max(0, 1 - v.rt / .35) : Math.min(1, (now - v.eruptAt) / .22);
+      ctx.save(); ctx.globalAlpha = .55; ctx.fillStyle = '#3a2d1c';
+      ctx.beginPath(); ctx.ellipse(v.x, v.y + 6, 16 * grow + 4, 6 * grow + 2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
     ctx.save(); ctx.strokeStyle = '#4a3b26'; ctx.lineCap = 'round';
     for (const k of v.cracks) {
       if (!isVisible(k.x, k.y)) continue;
@@ -355,11 +380,7 @@ function drawLoofahVines(ctx) {
   for (const v of G.loofahVines || []) {
     if (v.state === 'dig' || v.done || !isVisible(v.x, v.y)) continue;
     const grow = v.state === 'retract' ? Math.max(0, 1 - v.rt / .35) : Math.min(1, (now - v.eruptAt) / .22);
-    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    // 地上破開的洞
-    ctx.globalAlpha = .55; ctx.fillStyle = '#3a2d1c';
-    ctx.beginPath(); ctx.ellipse(v.x, v.y + 6, 16 * grow + 4, 6 * grow + 2, 0, 0, Math.PI * 2); ctx.fill();
-    ctx.globalAlpha = 1;
+    ctx.save(); ctx.lineCap = 'round'; ctx.lineJoin = 'round';   // 地上破開的洞畫在地面層（drawLoofahGround），不然洞在人的上方時會蓋到臉上
     if (v.caught.length) for (const a of v.caught) if (a.rootT > 0) drawWrap(ctx, a, grow, now, v.seed);   // 只畫還被纏著的人（掙脫、時間到的人身上不留藤蔓）
     const p = G.player;
     if (p && p.rootT > 0 && v.caught.includes(p)) {   // 溫特頭上的掙扎進度條：還要被纏多久（一開始是滿的，掙扎、時間過去就變短）
@@ -367,26 +388,15 @@ function drawLoofahVines(ctx) {
       ctx.globalAlpha = .9; ctx.fillStyle = '#0d1218'; ctx.fillRect(bx - 1, by - 1, 46, 7);
       ctx.fillStyle = '#5f9c3e'; ctx.fillRect(bx, by, 44 * prog, 5);
       ctx.strokeStyle = '#c8f59a'; ctx.lineWidth = 1; ctx.strokeRect(bx - .5, by - .5, 45, 6);
-      if ((p.struggleCount || 0) < 4) {
-        ctx.font = 'bold 11px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        const blink = .65 + .35 * Math.sin(now * 8);
-        ctx.globalAlpha = blink; ctx.fillStyle = '#0d1218'; ctx.fillText('連按方向鍵掙扎！', p.x + 1, by - 2);
-        ctx.fillStyle = '#e8ffd2'; ctx.fillText('連按方向鍵掙扎！', p.x, by - 3);
-      }
+      if ((p.struggleCount || 0) < 4) drawStruggleKeys(ctx, p.x, by - 3, now);   // [A] [D] 連打提示＋「掙扎」
       ctx.globalAlpha = 1;
     }
-    for (const t of v.caught) {   // 被纏住的隊友頭上：掙脫進度條（跟溫特的一樣，從滿的往下減）；溫特在旁邊時提示可以幫忙
+    for (const t of v.caught) {   // 被纏住的隊友頭上：掙脫進度條（跟溫特的一樣，從滿的往下減；不另外跳文字提示）
       if (!G.towers.includes(t) || !(t.rootT > 0) || t.hp <= 0) continue;
       const T0 = t.rootT0 || LOOFAH.rootTime, prog = Math.min(1, t.rootT / T0), bx = t.x - 22, by = t.y - 64;
       ctx.globalAlpha = .9; ctx.fillStyle = '#0d1218'; ctx.fillRect(bx - 1, by - 1, 46, 7);
       ctx.fillStyle = '#5f9c3e'; ctx.fillRect(bx, by, 44 * prog, 5);
       ctx.strokeStyle = '#c8f59a'; ctx.lineWidth = 1; ctx.strokeRect(bx - .5, by - .5, 45, 6);
-      if (!(t.helpHintT > 0) && ((t.helpCount || 0) < 4 && canHelpFree(t) && playerWeapon(G.player).id === 'pistol')) {   // 正在射藤蔓時換成旁邊的「幫隊友掙脫」（drawLoofahHelpHints）
-        ctx.font = 'bold 11px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-        ctx.globalAlpha = .65 + .35 * Math.sin(now * 8);
-        ctx.fillStyle = '#0d1218'; ctx.fillText('開槍射斷藤蔓幫他掙脫！', t.x + 1, by - 2);
-        ctx.fillStyle = '#e8ffd2'; ctx.fillText('開槍射斷藤蔓幫他掙脫！', t.x, by - 3);
-      }
       ctx.globalAlpha = 1;
     }
     if (!(p && p.rootT > 0 && v.caught.includes(p))) for (const k of [0, 1, 2]) {   // 沒抓到人：三根高矮不一的捲鬚從洞裡竄出來，中段繞成彈簧圈、頂端有葉子和勾起的捲尖

@@ -148,7 +148,7 @@ function createMonster(spec, x, y, variant) {
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
     undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, shockResist: spec.shockResist ?? null, sweep: spec.sweep || null,   /* shockResist：不怕電（雷電傷害倍率、不會麻痺） */   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
     shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null, burrowCfg: spec.burrow || null,   // boomerang：夯吉寶（js/hangi-bao.js）
-    flying: spec.behavior === 'shooter',   // 飄在空中：踩不到地雷
+    flying: spec.behavior === 'shooter' || spec.behavior === 'moth',   // 飄在空中（珍珠小童、人面蝶）：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,
   };
   // 史萊姆變體（分裂／自爆／巨型…），設定在 js/combat-feel.js
@@ -404,6 +404,8 @@ function updateBlink(who, dt) {
 const TWO_FRAME_WALK = new Set(['ball']);   // 走路只輪流用 Walking01、02（不夾站立圖）的角色
 function pickCharacterFrame(set, who) {
   if (who.kind === 'tower' && who.hp <= 0 && set.fail && set.fail.complete && set.fail.naturalWidth) return set.fail;   // 失去戰鬥能力：倒地圖
+  const mothFrame = (who.mothSleep || who.mothWakeT > 0) && typeof mothSleepFrame === 'function' ? mothSleepFrame(set, who) : null;   // 吸了人面蝶的睡眠鱗粉：半閉眼 → 閉眼（js/human-face-butterfly.js）
+  if (mothFrame) return mothFrame;
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
   if (who.slipT > 0 && who.slipPose) {   // 踩到香蕉皮滑倒：定格在隨機挑的那張走路圖（js/golden-banana-king.js 的 bkSlip）
@@ -1397,7 +1399,9 @@ function updatePlayer(dt) {
   }
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
+  if (p.sleepT > 0) { p.moving = false; p.anim = 0; stepActorKnock(p, dt, playerBlocked); return; }   // 吸了人面蝶的睡眠鱗粉：睡著不能動（js/human-face-butterfly.js）
   if (stepActorKnock(p, dt, playerBlocked)) { p.moving = false; p.anim = 0; return; }   // 被鳥頭人撞飛：滑行中不能走（js/bird-head.js）
+  if (p.slipDizzyT > 0) { p.moving = false; p.anim = 0; return; }   // 踩香蕉皮滑去撞到東西：頭暈不能動（js/golden-banana-king.js）
   startDashIfPressed(p, dt);   // Shift：衝刺（能走路的時候才算）
   const dx = ((keys['d'] || keys['arrowright']) ? 1 : 0) - ((keys['a'] || keys['arrowleft']) ? 1 : 0);
   const dy = ((keys['s'] || keys['arrowdown']) ? 1 : 0) - ((keys['w'] || keys['arrowup']) ? 1 : 0);
@@ -1762,7 +1766,7 @@ function updatePlayerAttack(dt) {
   }
   updateAmmoHud();
   const queued = performance.now() - shotQueuedAt < SHOT_QUEUE * 1000;   // 剛點了一下（已經放開也算）
-  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
+  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.slipDizzyT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
   if (canFire) shotQueuedAt = -Infinity;   // 這一下開了：用掉
   if (wid === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈（js/flare.js）
   if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
@@ -1777,6 +1781,8 @@ function updatePlayerAttack(dt) {
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   const vineMate = !paint && typeof vineShotTarget === 'function' ? vineShotTarget(aim) : null;   // 游標點在被絲瓜藤纏住的隊友身上：子彈射斷藤蔓（js/loofah-lady.js）
   if (vineMate) { shootVine(p, vineMate, aim, aimAng); return; }
+  const sleepMate = !paint && typeof mothSleepShotTarget === 'function' ? mothSleepShotTarget(aim) : null;   // 游標點在吸了睡眠鱗粉、睡著的隊友身上：開槍把他打醒（js/human-face-butterfly.js）
+  if (sleepMate) { shootWakeMate(p, sleepMate, aim, aimAng); return; }
   // 朝游標方向、射程內、照亮的最近怪。
   // 浮在空中／很高的目標（珍珠小童、異質核心）畫面上的身體比腳底高：游標直接點在身體上就一定打中；
   // 扇形判定也同時看腳底和身體中心，取比較接近的角度。
@@ -1815,6 +1821,8 @@ function updatePlayerAttack(dt) {
     SFX.play('shotPaint', .55, 'paint-shot');
     return;
   }
+  const wild = typeof mothWildShot === 'function' ? mothWildShot(p, aimAng) : null;   // 吸了人面蝶的混亂鱗粉：八成打偏（js/human-face-butterfly.js）
+  if (wild) { best = null; endX = wild.x; endY = wild.y; }
   let eggShot = null;
   if (!best && typeof shootFishEggOnLine === 'function') {   // 沒打到怪物：打中魚卵就引爆（js/clownfish.js）
     eggShot = shootFishEggOnLine(p.x, p.y, endX, endY);
@@ -2060,8 +2068,9 @@ function update(dt) {
     if (t.grabbed || t.grabFall) { faceNpcFront(t); continue; }   // 被抓著／正在掉下來（js/grab.js）
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
     else if (t.frozenT > 0) { t.frozenT -= dt; t.moving = false; t.navPath = null; if (t.hp > 0) t.dir = 'front'; }   // 溫特正在疏導／急救這位隊員：站著不動（js/channel-actions.js）
-    else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
+    else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0 && !t.mothSleep) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
     else if (t.dazeT > 0 && t.hp > 0) { t.dazeT -= dt; t.moving = false; t.navPath = null; }   // 被閃光彈閃到、被雷電彈電到：暈一下（js/special-guns.js）
+    else if (t.slipDizzyT > 0 && t.hp > 0) { t.moving = false; t.navPath = null; }   // 踩香蕉皮滑去撞到東西：頭暈（js/golden-banana-king.js 倒數）
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if (!MAP_SAFE && typeof campBedStep === 'function' && campBedStep(t, dt)) {}   // 殘血：走回營地、躺行軍床休息（js/camp-beds.js）
     else if ((!t.meleeSwing && !t.gunSwing) || t.hp <= 0 || t.berserk) { sentryFireWalker = t; updateSentry(t, dt); sentryFireWalker = null; }
@@ -2106,7 +2115,7 @@ function update(dt) {
     }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
     if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
-    if (t.sleepT > 0 || t.dazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著、暈眩：不攻擊
+    if (t.sleepT > 0 || t.dazeT > 0 || t.slipDizzyT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著、暈眩：不攻擊
     if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
     if (typeof campBedResting === 'function' && campBedResting(t)) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 躺在行軍床上休息：不攻擊、不疏導（js/camp-beds.js）
     if (spec.guide) updateGuideSP(t, dt);
@@ -2162,6 +2171,7 @@ function update(dt) {
     t.cd -= dt;
     let swingTarget = null;
     if (t.berserk) { t.meleeSwing = null; t.gunSwing = null; updateChaosSentry(t, spec, dt); continue; }   // 暴走：無差別攻擊
+    if (t.mothConfuseT > 0 && typeof mothConfusedSentry === 'function') { t.meleeSwing = null; t.gunSwing = null; mothConfusedSentry(t, spec, dt); continue; }   // 人面蝶的混亂鱗粉：改打隊友和溫特（js/human-face-butterfly.js）
     if (t.meleeSwing) {
       const swing = t.meleeSwing;
       swing.age += dt;
@@ -2247,6 +2257,8 @@ function update(dt) {
         if (U.healTaint) t.taint = Math.max(0, t.taint - U.healTaint);
         spawnUltShockwave(t.x, t.y, r, col);
         if (hitEnemy) sfxMonsterHit(hitEnemy, 0.48, t.type + '-ult');
+      } else if (typeof mothDodgesMelee === 'function' && mothDodgesMelee(t, target)) {   // 近戰打飛在空中的人面蝶：有一半打不到（js/human-face-butterfly.js）
+        flashDmg('打不到', target.x, target.y - 26 - (target.slimeLift || 0), '#c6d1dd');
       } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy) {
         const impactPoint = { x: target.x, y: target.y };
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
@@ -2398,6 +2410,7 @@ function update(dt) {
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);
   if (typeof updateGourd === 'function') updateGourd(dt);   // 葫蘆猴拖行的刮痕、砸出來的地裂（js/gourd-monkey.js）
+  if (typeof updateMoths === 'function') updateMoths(dt);   // 人面蝶的鱗粉霧、吸入、中毒／混亂／睡眠、粉塵爆炸（js/human-face-butterfly.js）
   if (typeof updateBananaKing === 'function') updateBananaKing(dt);   // 金蕉王的測試生成（js/golden-banana-king.js）   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
@@ -2511,7 +2524,7 @@ function prepareMonsterPreview() {
   const spec = ACTIVE_MONSTERS.find(m => m.id === MONSTER_PREVIEW_ID);
   G.cores = []; G.enemies = []; G.towers = []; G.npcs = []; LIGHT.enabled = false;
   // Existing per-monster debug spawners must not add unrelated species to this test scene.
-  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true; G.clownfishTestDone = true; G.bananaKingTestDone = true; G.gourdTestDone = true;
+  G.milkfishTestDone = true; G.loofahTestDone = true; G.fishTestDone = true; G.clownfishTestDone = true; G.bananaKingTestDone = true; G.gourdTestDone = true; G.mothTestDone = true;
   G.player.x = CELL * 10; G.player.y = CELL * 7; G.player.hp = PLAYER.hp; G.guide = G.guideMax;
   if (spec) G.enemies.push(createMonster(spec, CELL * 14, CELL * 7));
   const note = document.querySelector('.header-note');

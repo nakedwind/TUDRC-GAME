@@ -55,6 +55,7 @@ function validMonsterCatalog(list) {
     ...(monster.behavior === 'vine' ? { behavior: 'vine' } : {}),
     ...(monster.behavior === 'clownfish' ? { behavior: 'clownfish' } : {}),
     ...(monster.behavior === 'gourd' ? { behavior: 'gourd' } : {}),   // gourd＝葫蘆猴：慢慢拖行、升空泰山壓頂、一格的窄道過不去（js/gourd-monkey.js，數值在 GOURD）
+    ...(monster.behavior === 'moth' ? { behavior: 'moth' } : {}),   // moth＝人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、趨光（js/human-face-butterfly.js，數值在 MOTH）
     ...(monster.behavior === 'healer' ? { behavior: 'healer' } : {}),   // healer＝金蕉王：幫附近的怪物補血、看到人就逃（js/golden-banana-king.js，數值在 BANANA_KING）   // vine＝絲瓜小姐：重踏放藤蔓纏人（js/loofah-lady.js，數值在 LOOFAH）   // fishhead＝魚頭君：噴水、去滅火、留水漬（js/fish-head.js，數值在 FISH_HEAD）   // boomerang＝夯吉寶丟迴力鏢帽子（js/hangi-bao.js）
     ...(validMonsterArt(monster.art) ? { art: validMonsterArt(monster.art) } : {}),   // 狀態圖（一般／眨眼／生氣、子彈），給 shooter 用
     // 專屬音效（js/sfx.js 裡的名稱）：hitSound 被打中、deathSound 死掉；沒填就用通用的

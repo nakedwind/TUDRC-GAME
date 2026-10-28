@@ -225,6 +225,7 @@ function drawTower(t) {
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, t);   // 被絲瓜藤纏住：扭動
     if (typeof applySlipTransform === 'function') applySlipTransform(ctx, t);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
     if (typeof applyGourdTossTransform === 'function') applyGourdTossTransform(ctx, t);   // 被葫蘆猴震飛：飛起來（js/gourd-monkey.js）
+    if (typeof applyMothSleepTransform === 'function') applyMothSleepTransform(ctx, t);   // 人面蝶的睡眠鱗粉：搖晃、倒在地上（js/human-face-butterfly.js）
     if (t.hp > 0) t.downAt = null;
     else if (t.downAt == null) t.downAt = performance.now();   // 剛失去戰鬥能力：播倒下動畫
     const downAge = t.downAt != null ? (performance.now() - t.downAt) / 1000 : Infinity;
@@ -280,7 +281,7 @@ function drawTower(t) {
   // 「暴走」「瀕臨暴走」標籤：黑底＋外框
   const tagText = t.berserk && t.hp > 0 ? '暴走' : taintDanger ? '瀕臨暴走' : '';
   if (tagText) drawTaintTag(t.x, nameY - 15, tagText, t.berserk ? '#ff4d4d' : '#ffb24d');
-  if (t.say && t.say.text && !t.berserk) queueTowerBubble(t, t.x, nameY - (tagText ? 30 : 13), t.say.text, t.say.col || BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡（有標籤時往上移；等頭上的選項畫完才畫）
+  if (t.say && t.say.text && !t.berserk && !(t.sleepT > 0)) queueTowerBubble(t, t.x, nameY - (tagText ? 30 : 13), t.say.text, t.say.col || BUBBLE_COLORS[t.type]);   // 哨兵對話泡泡（有標籤時往上移；等頭上的選項畫完才畫）
 }
 function drawTaintTag(cx, centerY, text, color) {
   ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -467,7 +468,7 @@ function drawEnemy(e) {
   if (sway) ctx.restore();   // 斜晃只套在身體上（連左右翻一起還原），血條和文字不跟著晃
   else if (walkFrame && walkFrame.flip) { ctx.translate(e.x, 0); ctx.scale(-1, 1); ctx.translate(-e.x, 0); }   // 翻回來，血條和文字才不會左右顛倒
   // 血條放在圖的上方（體型大的變體血條也跟著變寬、變高）
-  const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' || e.behavior === 'gourd' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
+  const barW = 32 * Math.max(1, size), barY = e.y + 13 - (e.drawHeight || 33) - 6 - (e.behavior === 'shooter' || e.behavior === 'gourd' || e.behavior === 'moth' ? lift : 0);   // 浮在空中的怪物，血條跟著往上
   if (!e.hideBar) {   // 劇情裡的怪物不畫血條（js/story-scene.js）
     ctx.fillStyle = '#000'; ctx.fillRect(e.x - barW / 2, barY, barW, 3);
     ctx.fillStyle = e.variant === 'giant' ? '#c79bff' : '#7CFC7C'; ctx.fillRect(e.x - barW / 2, barY, barW * Math.max(0, e.hp) / e.maxhp, 3);
@@ -922,6 +923,7 @@ function drawPlayer(p) {
     if (typeof applyStruggleTransform === 'function') applyStruggleTransform(ctx, p);   // 被絲瓜藤纏住：掙扎扭動（js/loofah-lady.js）
     if (typeof applySlipTransform === 'function') applySlipTransform(ctx, p);   // 踩到香蕉皮：往後仰（js/golden-banana-king.js）
     if (typeof applyGourdTossTransform === 'function') applyGourdTossTransform(ctx, p);   // 被葫蘆猴震飛：飛起來（js/gourd-monkey.js）
+    if (typeof applyMothSleepTransform === 'function') applyMothSleepTransform(ctx, p);   // 人面蝶的睡眠鱗粉：搖晃、倒在地上（js/human-face-butterfly.js）
     ctx.imageSmoothingEnabled = false;
     const hitK = p.hitT > 0 ? Math.min(1, p.hitT / .45) : 0;   // 受擊：先閃白，再轉紅淡出
     if (p.sitting?.rotation) {
@@ -1031,7 +1033,7 @@ function draw() {
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
   for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ y: npc.sitting ? seatDrawY(npc.sitting) : bedY != null ? bedY : npc.y + 17, draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
-  for (const e of G.enemies) if (enemyVisible(e)) sortables.push({ y: e.y + 13, draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
+  for (const e of G.enemies) if (enemyVisible(e) && e.behavior !== 'moth') sortables.push({ y: e.y + 13, draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
@@ -1082,6 +1084,9 @@ function draw() {
     for (const npc of G.npcs) if (inFront(npc)) drawWanderer(npc);
     if (G.player && inFront(G.player)) drawPlayer(G.player);
   }
+  // 人面蝶和牠的鱗粉霧：飛在空中，蓋在牆、屋簷、電梯等所有圖層上面（看起來是飛過牆，不是穿牆；js/human-face-butterfly.js）
+  if (typeof drawMothClouds === 'function') drawMothClouds(ctx);
+  for (const e of G.enemies) if (e.behavior === 'moth' && enemyVisible(e)) { if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }
   // 互動提示（靠近且還沒坐下時）：出入口優先，其次 NPC，最後椅子
   // 在黑幕之後才畫（下面 drawInteractionPrompts()），暗處的門、物件提示才不會被黑幕蓋住
   const drawInteractionPrompts = () => {
@@ -1166,6 +1171,7 @@ function draw() {
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
+  if (typeof drawSlipDizzyStars === 'function') drawSlipDizzyStars(ctx);   // 踩香蕉皮撞到東西頭暈的星星（js/golden-banana-king.js）
   if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
   if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
   if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
@@ -1191,6 +1197,7 @@ function draw() {
   if (typeof drawLoofahHelpHints === 'function') drawLoofahHelpHints(ctx);   // 射隊友身上的絲瓜藤時旁邊的「幫隊友掙脫」（js/loofah-lady.js）
   if (typeof drawBedZzz === 'function') drawBedZzz(ctx);   // 躺床睡覺的頭上飄 ZZZ（js/bed-zzz.js）
   if (typeof drawSleepMarks === 'function') drawSleepMarks(ctx);   // 被麻醉彈打睡的頭上飄 Zzz（js/special-guns.js）
+  if (typeof drawMothOverlay === 'function') drawMothOverlay(ctx);   // 人面蝶：暗處的鱗粉光、翅膀預告光、吸入量表、中毒／混亂記號、溫特睡著（js/human-face-butterfly.js）
   if (typeof drawPaintMarks === 'function') drawPaintMarks(ctx);   // 漆彈標記的怪物：螢光漆、準心（黑暗中也看得到）
   if (typeof drawRadioMarks === 'function') drawRadioMarks(ctx);   // 異質探測器：標記溫特附近黑暗中的怪物（js/equipment.js）
   drawHitMarker();       // 溫特開槍打中時，準星（游標）旁閃一下 ✕

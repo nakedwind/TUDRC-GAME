@@ -41,6 +41,7 @@ const BANANA_KING = {
   peelTrigger: 16,     // 離香蕉皮幾像素算踩到
   slipDist: 2.5,       // 滑多遠（格）
   slipTime: .9,        // 滑行（含最後滑停）幾秒，期間不能操作
+  slipDizzy: 3,        // 滑行中撞到障礙物：頭暈幾秒（頭上冒星星、左右斜晃，不能走、不能攻擊）
   peelScale: 1.6,      // 香蕉皮畫成原圖的幾倍
   // ---- 帶隊（出現時一起生成的隊員）----
   squadSize: 3,        // 帶幾隻
@@ -248,7 +249,6 @@ function bkTossPeels(e, threats) {
   }
   while (peels.length > C.peelMax) peels.shift();
   e.forceFrame = BK_ART.cast1; e.forceFlip = !!e.faceRight; bk.tossT = .25;   // 舉手拋出的一瞬間
-  flash('🍌', e.x, e.y - 70, '#ffe066');
   if (typeof sfxAt === 'function') sfxAt('pop', e.x, e.y, .6, 'banana-peel-toss');
 }
 function bkPeelVictims() {
@@ -278,16 +278,46 @@ function updateBananaPeels(dt) {
       if (peel.t < peel.fly) { peel.t += dt; peel.rot += peel.spin * dt; continue; }   // 還在空中
       peel.life -= dt;
       if (peel.life <= 0) { peels.splice(peels.indexOf(peel), 1); continue; }
-      const a = actors.find(o => !(o.knockT > 0) && Math.hypot(o.x - peel.x, o.y - peel.y) <= C.peelTrigger);
+      const a = actors.find(o => !(o.knockT > 0) && !(o.slipDizzyT > 0) && Math.hypot(o.x - peel.x, o.y - peel.y) <= C.peelTrigger);
       if (!a) continue;
       peels.splice(peels.indexOf(peel), 1);   // 踩過就爛掉
       bkSlip(a, peel);
     }
   }
-  for (const a of actors) { a.bkPrevX = a.x; a.bkPrevY = a.y; if (a.slipT > 0) a.slipT -= dt; }
+  for (const a of actors) { a.bkPrevX = a.x; a.bkPrevY = a.y; if (a.slipT > 0) a.slipT -= dt; if (a.slipDizzyT > 0) a.slipDizzyT -= dt; }
+  for (const t of G.towers) if (t.hp <= 0) t.slipDizzyT = 0;   // 倒下就不暈了
+  if (G.player && G.player.hp <= 0) G.player.slipDizzyT = 0;
 }
-// ---- 滑倒中：身體往後仰、手忙腳亂地晃（js/render.js 畫溫特、隊友時呼叫）----
+// ---- 滑行中撞到障礙物：停下來頭暈（js/bird-head.js 的 stepActorKnock、js/berserk-fx.js 的 updateKnockSlide 呼叫）----
+function bkSlipBump(a) {
+  if (!(a.slipT > 0)) return false;
+  const C = BANANA_KING;
+  a.knockT = 0; a.slipT = 0;
+  a.slipDizzyT = C.slipDizzy; a.moving = false; a.navPath = null; a.meleeSwing = null; a.gunSwing = null;
+  if (a.gsCast && typeof cancelGuideCast === 'function') cancelGuideCast(a);   // 嚮導詠唱中：技能取消
+  flash('頭暈！', a.x, a.y - 50, '#ffe36e');
+  G.effects.push({ ring: true, x: a.x, y: a.y - 10, r: 4, r2: 22, life: .2, life0: .2, color: '#d9d2c0' });
+  if (typeof sfxAt === 'function') sfxAt('knock2', a.x, a.y, .6, 'banana-slip-bump');
+  return true;
+}
+// 頭暈的星星：跟鳥頭人同一套（js/burrowing-mouse.js 的 drawBurrowDizzyStars）；畫在黑幕上面（render.js 呼叫）
+function drawSlipDizzyStars(ctx) {
+  if (!G || typeof drawBurrowDizzyStars !== 'function') return;
+  const t = performance.now() / 1000, size = PLAYER.drawSize;
+  for (const a of [G.player, ...(G.towers || [])]) {
+    if (!a || !(a.slipDizzyT > 0) || a.hp <= 0) continue;
+    drawBurrowDizzyStars(ctx, a.x, a.y - size + 28, 1, t);
+  }
+}
+// ---- 滑倒中：身體往後仰、手忙腳亂地晃；頭暈中：以腳底為軸左右斜晃（js/render.js 畫溫特、隊友時呼叫）----
 function applySlipTransform(ctx, a) {
+  if (a && a.slipDizzyT > 0 && a.hp > 0) {
+    const S = typeof DIZZY_SWAY !== 'undefined' ? DIZZY_SWAY : { angle: .09, speed: 6 };
+    const ang = Math.sin(performance.now() / 1000 * S.speed + (a.swayPhase ??= Math.random() * 6)) * S.angle;
+    const fx = a.x, fy = a.y + 16;
+    ctx.translate(fx, fy); ctx.rotate(ang); ctx.translate(-fx, -fy);
+    return;
+  }
   if (!(a && a.slipT > 0)) return;
   const C = BANANA_KING, k = a.slipT / C.slipTime, side = (a.knockVX || 0) >= 0 ? 1 : -1;
   const lean = Math.sin(Math.min(1, (1 - k) * 4) * Math.PI / 2) * k * .55;   // 一踩到就往後仰，慢慢站穩

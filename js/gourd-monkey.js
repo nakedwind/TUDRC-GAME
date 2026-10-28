@@ -45,7 +45,7 @@ const GOURD = {
   soundEvery: 26,       // 拖幾像素響一聲
   laughCooldown: 8,     // 發現目標時笑一聲，之後幾秒內不再笑
   laughDelay: 0.45,     // 壓到人之後隔幾秒笑
-  testSpawn: true,      // 測試用：true＝進戰鬥地圖時在營地右邊生一隻（測完改成 false）
+  testSpawn: false,     // 測試用：true＝進戰鬥地圖時在營地右邊生一隻（測完改成 false）
   testCampDist: 20,     // 測試用：營地右邊幾格
   bodyW: 0.42,          // 擋人的身體橢圓：橫向半徑＝圖寬 × 這個比例
   bodyFlat: 0.5,        // 身體橢圓的扁度（縱向半徑＝橫向 × 這個比例）

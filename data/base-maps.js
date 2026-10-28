@@ -811,7 +811,7 @@ const BASE_MAPS = [
         "c": 34,
         "r": 2,
         "layer": "object",
-        "ox": -22,
+        "ox": -10,
         "oy": 10
       },
       {
@@ -819,7 +819,7 @@ const BASE_MAPS = [
         "c": 35,
         "r": 2,
         "layer": "ground3",
-        "ox": -18,
+        "ox": -4,
         "oy": 10
       },
       {
@@ -1096,7 +1096,7 @@ const BASE_MAPS = [
         "c": 34,
         "r": 2,
         "layer": "object2",
-        "ox": 14,
+        "ox": 18,
         "oy": -12
       },
       {
@@ -7336,26 +7336,6 @@ const BASE_MAPS = [
     "npcs": true,
     "portals": [
       {
-        "c": 7,
-        "r": 5,
-        "to": "map_mu5ad7t2"
-      },
-      {
-        "c": 5,
-        "r": 7,
-        "to": "map_mu5ad7t2"
-      },
-      {
-        "c": 56,
-        "r": 7,
-        "to": "map_mu5ad7t2"
-      },
-      {
-        "c": 57,
-        "r": 7,
-        "to": "map_mu5ad7t2"
-      },
-      {
         "c": 51,
         "r": 10,
         "to": "map_mufu03od"
@@ -7384,6 +7364,26 @@ const BASE_MAPS = [
         "c": 13,
         "r": 10,
         "to": "map_7a2ae372-677d-4be0-8c86-c9b814eeb085"
+      },
+      {
+        "c": 7,
+        "r": 5,
+        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734"
+      },
+      {
+        "c": 5,
+        "r": 7,
+        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734"
+      },
+      {
+        "c": 56,
+        "r": 7,
+        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734"
+      },
+      {
+        "c": 57,
+        "r": 7,
+        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734"
       }
     ],
     "solidOffsets": {

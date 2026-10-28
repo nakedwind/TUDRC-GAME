@@ -82,9 +82,9 @@ function showCampPlanConfirmation(action, trigger) {
   const panel = document.createElement('section'); panel.className = 'camp-plan-confirm';
   panel.setAttribute('role', 'alertdialog'); panel.setAttribute('aria-modal', 'true');
   panel.setAttribute('aria-labelledby', 'campPlanConfirmTitle'); panel.setAttribute('aria-describedby', 'campPlanConfirmText');
-  panel.innerHTML = '<h2 id="campPlanConfirmTitle"></h2><p id="campPlanConfirmText"></p><div><button type="button" data-plan-cancel>取消</button><button type="button" data-plan-confirm>確定</button></div>';
+  panel.innerHTML = '<header><h2 id="campPlanConfirmTitle"></h2><button type="button" data-plan-cancel aria-label="關閉">×</button></header><p id="campPlanConfirmText"></p><div class="camp-plan-confirm-actions"><button type="button" data-plan-confirm>確定</button><button type="button" data-plan-cancel>取消</button></div>';   // 右上角叉叉＝取消（回到作戰計畫）
   panel.querySelector('h2').textContent = text[0]; panel.querySelector('p').textContent = text[1];
-  campPlanDialog.appendChild(panel); panel.querySelector('[data-plan-cancel]').focus();
+  campPlanDialog.appendChild(panel); panel.querySelector('.camp-plan-confirm-actions [data-plan-cancel]').focus();
 }
 function closeCampPlanDialog() {
   if (!campPlanOpen) return;

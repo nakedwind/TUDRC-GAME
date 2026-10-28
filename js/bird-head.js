@@ -91,6 +91,7 @@ function stepActorKnock(actor, dt, blocked) {
   while (move > 0) {
     const s = Math.min(4, move); move -= s;
     const nx = actor.x + ux * s, ny = actor.y + uy * s;
+    if (actor.slipT > 0 && blocked(nx, ny) && typeof bkSlipBump === 'function' && bkSlipBump(actor)) break;   // 踩到香蕉皮滑去撞到東西：頭暈（js/golden-banana-king.js）
     if (!blocked(nx, ny)) { actor.x = nx; actor.y = ny; }
     else if (!blocked(nx, actor.y)) actor.x = nx;
     else if (!blocked(actor.x, ny)) actor.y = ny;

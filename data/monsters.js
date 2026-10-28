@@ -521,6 +521,30 @@ const MONSTERS_DEFAULT = [
     "stagger": 0,
     "noStun": true,
     "knockMul": 0
+  },
+  {
+    "id": "human_face_butterfly",
+    "name": "人面蝶",
+    "sprite": "images/monster/人面蝶/人面蝶 正.png",
+    "hp": 250,
+    "speed": 30,
+    "playerDamage": 0,
+    "sentryDamage": 0,
+    "buildingDamage": 0,
+    "reward": 55,
+    "crystals": 5,
+    "width": 163,
+    "height": 125,
+    "frames": {
+      "front": "images/monster/人面蝶/人面蝶 正.png",
+      "walkFront": [
+        "images/monster/人面蝶/怪物 人面蝶01.png",
+        "images/monster/人面蝶/怪物 人面蝶02.png"
+      ]
+    },
+    "behavior": "moth",
+    "noHitSquash": true,
+    "knockMul": 0.5
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

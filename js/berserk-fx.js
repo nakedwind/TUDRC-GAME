@@ -82,6 +82,7 @@ function updateKnockSlide(o, dt, blocked) {
   const step = Math.min(dt, o.knockT); o.knockT -= step;
   const n = 3, sx = o.knockVX * step / n, sy = o.knockVY * step / n;
   for (let i = 0; i < n; i++) {
+    if (o.slipT > 0 && blocked(o.x + sx, o.y + sy) && typeof bkSlipBump === 'function' && bkSlipBump(o)) break;   // 踩到香蕉皮滑去撞到東西：頭暈（js/golden-banana-king.js）
     if (!blocked(o.x + sx, o.y + sy)) { o.x += sx; o.y += sy; }
     else if (!blocked(o.x + sx, o.y)) o.x += sx;
     else if (!blocked(o.x, o.y + sy)) o.y += sy;

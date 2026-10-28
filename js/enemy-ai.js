@@ -452,6 +452,7 @@ function stepEnemy(e, dt) {
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信
+  if (e.behavior === 'moth') { stepMothEnemy(e, dt); return; }   // 人面蝶：在空中飛（飛得過牆，不用下面的卡牆檢查）、撒鱗粉、趨光（js/human-face-butterfly.js）
   const blocked = (x, y) => enemyBlocked(x, y, e);
   if (blocked(e.x, e.y)) {
     const safeX = e.lastSafeX, safeY = e.lastSafeY;
@@ -548,7 +549,10 @@ function stepEnemy(e, dt) {
     .map(o => ({ o, d: enemyObstacleDistance(e, o) }))
     .filter(item => item.d <= ENEMY_SENSE_RANGE)
     .sort((a, b) => a.d - b.d)[0];
-  if (lightChoice) {
+  // 生命體：隊友或溫特比探照燈近，就先打人（不會從隊友身邊路過、直接去拆燈）
+  const personD = Math.min(sensedSentries.length ? sensedSentries[0].d : Infinity, playerDistance);
+  const lightFirst = lightChoice && !(e.undying && personD < lightChoice.d);
+  if (lightFirst) {
     const [gc, gr] = closestObstacleCell(e, lightChoice.o);
     const nav = enemyNavigate(e, gc, gr, moveDt, 'light:' + gc + ',' + gr, true);
     if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);

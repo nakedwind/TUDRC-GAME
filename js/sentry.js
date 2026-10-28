@@ -582,6 +582,7 @@ function updateSentry(t, dt) {
   updateNpcTalk(t, dt);                                // 哨兵平時也會冒泡泡說話
   t.guardSpeechCd = Math.max(0, (t.guardSpeechCd || 0) - dt);
   if (t.berserk) { t.target = null; return; }        // 暴走中：站在原地失控
+  if (t.mothConfuseT > 0) { t.target = null; return; }   // 人面蝶的混亂鱗粉：走路由 mothConfusedSentry 處理（js/human-face-butterfly.js）
   if (escapeDarkness(t, dt)) return;
   const ownSpec = TYPES[t.type];
   // 召回營地的哨兵抵達後，優先攔截正在破壞營地的怪物。

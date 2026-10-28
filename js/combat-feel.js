@@ -173,7 +173,8 @@ function updateEnemyFeel(e, dt) {
   }
   if (e.staggerT > 0) {
     e.staggerT -= dt;
-    e.slimeLift = 0; e.slimeScaleX = 1.12; e.slimeScaleY = .88;
+    if (!e.mo) e.slimeLift = 0;   // 人面蝶被打到硬直：還是停在空中，不要掉到地上（js/human-face-butterfly.js）
+    e.slimeScaleX = 1.12; e.slimeScaleY = .88;
     return true;
   }
   if (e.variant === 'spitter' && updateSpitter(e, dt)) return true;   // 吐酸蓄力／吐完的後座
@@ -255,6 +256,7 @@ function onEnemyDeath(e) {
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.elite && typeof eliteBirdDown === 'function') eliteBirdDown(e);   // 菁英鳥頭人：橫幅提示核心護盾消失（js/elite-bird-head.js）
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
+  if (e.behavior === 'moth' && typeof mothDeathBurst === 'function') { mothDeathBurst(e); return; }   // 人面蝶：炸出一大團鱗粉，從空中掉下來化成灰（js/human-face-butterfly.js）
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童
   if (e.behavior === 'gourd') { gourdDeathCorpse(e); return; }   // 葫蘆猴：不倒下，原地閉眼變黑、碎成灰燼飄散（跟珍珠小童一樣；js/gourd-monkey.js）   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）

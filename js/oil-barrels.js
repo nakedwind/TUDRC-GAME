@@ -192,6 +192,7 @@ function addOilSlick(x, y, r, life) {
 function slickContains(s, x, y) { const dx = x - s.x, dy = (y - s.y) / .6; return dx * dx + dy * dy <= s.r * s.r; }
 // 在 (x, y) 半徑 r 內碰到的油汙全部點燃
 function igniteSlicksNear(x, y, r = 0) {
+  if (typeof mothIgniteNear === 'function') mothIgniteNear(x, y, r);   // 人面蝶的鱗粉霧也會被點燃：粉塵爆炸（js/human-face-butterfly.js）
   if (!G.oilSlicks) return;
   for (const s of G.oilSlicks) {
     if (s.lit || s.t <= 0) continue;

@@ -117,7 +117,7 @@ window.addEventListener('keydown', e => {
   const k = e.key;   // 1～9、0 裡現在有用到的格子（數字鍵盤的也算）
   if (e.repeat || !QUICK_KEYS.includes(k) || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
-  if (!G?.player || G.over || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
+  if (!G?.player || G.over || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0 || G.player.sleepT > 0) return;   // 睡著（人面蝶的睡眠鱗粉）不能用道具
   if (typeof supplyShopOpen !== 'undefined' && supplyShopOpen) return;
   if (typeof backpackOpen !== 'undefined' && backpackOpen) return;
   e.preventDefault(); useQuickSlot(k);
