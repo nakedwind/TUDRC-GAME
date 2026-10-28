@@ -37,9 +37,10 @@ const TUTORIAL = {
     { sfx: 'bigBoom', volume: .45, shake: 1.8, power: 9, debris: 1.6, rocks: 20, dust: 15 },
     { wait: 1.2 },
     { who: 'winter', lines: ['……！？', '好大的爆炸聲……是從裡面傳來的？'] },
-    { sfx: 'radio', wait: .7 },
+    { sfx: 'radio', wait: .7 },   // 無線電接起來
     { who: 'eldrin', lines: ['隊長，有無線電。'] },
     { who: 'theonie', radio: true, lines: ['這裡是希奧妮……我們在 Y25 區，剛才...發生了意外！', '雷德受傷了……請求醫療組立即支援！重複，請求醫療組立即支援！'] },
+    { sfx: 'radio', wait: .6 },   // 無線電掛斷
     { who: 'eldrin', lines: ['收到，我們馬上過去！', '隊長，Y25 區就在這個入口裡面，我們出發吧。'] },
   ],
   // 開場突襲：cells＝史萊姆冒出來的格子 [欄, 列]（路障北邊；那格是牆或被佔住就找旁邊最近的空格）、

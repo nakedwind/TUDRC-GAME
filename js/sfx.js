@@ -168,6 +168,8 @@ const SFX = (() => {
     // BOSS 音樂（js/boss-music.js）：一直循環、淡入淡出；音量在音效編輯器的「音樂」調整
     bossElite: '戰鬥/中BOSS.mp3',             // 鳥頭大隊長盯上玩家
     bossCore: '戰鬥/異質核心甦醒.mp3',        // 異質核心甦醒到被打破
+    radio: ['無線電.mp3', '無線電雜音.mp3'],   // 無線電接起來／掛斷：兩個一起播（新手區開場希奧妮的無線電，js/tutorial.js）
+    baseMusic: '../music/基地音樂.mp3',      // 基地（安全區）背景音樂（js/music.js）；檔案在 music/ 資料夾
     // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
     weirdNoise: '玩家/怪聲.mp3',
   };
@@ -307,7 +309,7 @@ const SFX = (() => {
     win() { [523, 659, 784, 1047].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: 0.2, gain: 0.2, when: i * 0.11 })); },
     lose() { [440, 392, 311, 233].forEach((f, i) => tone({ freq: f, type: 'sawtooth', dur: 0.26, gain: 0.17, when: i * 0.14 })); },
     error() { tone({ freq: 200, freq2: 150, type: 'square', dur: 0.16, gain: 0.18 }); },
-    // 無線電接通：一段沙沙的雜訊＋「嗶」一聲（新手區開場希奧妮的無線電，js/tutorial.js）
+    // 無線電接通的合成音（備用：上面 files 的 radio 有音檔時用音檔）
     radio() { noise({ dur: 0.32, gain: 0.1, freq: 1900, q: 0.6 }); noise({ dur: 0.18, gain: 0.07, freq: 3200, q: 1.2, when: 0.12 }); tone({ freq: 1250, type: 'square', dur: 0.07, gain: 0.05, when: 0.3 }); },
     // 空槍：子彈打完扣扳機，擊錘「喀、嗒」兩聲金屬聲（js/flare.js 的 dryFire）
     dryFire() { noise({ dur: 0.025, gain: 0.32, freq: 3400, q: 6 }); tone({ freq: 2100, freq2: 1300, type: 'square', dur: 0.02, gain: 0.05 }); noise({ dur: 0.02, gain: 0.18, freq: 2600, q: 5, when: 0.07 }); },

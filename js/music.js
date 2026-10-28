@@ -1,15 +1,15 @@
 // ============================================================
-//  背景音樂：安全區（基地）放鋼琴曲，戰鬥地圖放戰鬥曲；換地圖時淡出淡入。
-//  音量在設定選單調整（MUSIC.volume，0～1）。按 M 靜音時音樂也一起靜音。
+//  背景音樂：安全區（基地）放基地音樂；戰鬥地圖目前不放（BOSS 音樂另外在 js/boss-music.js）；換地圖時淡出淡入。
+//  音檔、這首自己的音量在「音效編輯器」的「音樂」分類（baseMusic）調整；
+//  整體音量在設定選單調整（MUSIC.volume，0～1）。按 M 靜音時音樂也一起靜音。
 //  瀏覽器規定要先有點擊或按鍵才能播放聲音，所以第一次操作後才會開始播。
 // ============================================================
 const MUSIC = (() => {
-  const ENABLED = false;   // 還沒選好曲目，先關掉；選好後改成 true
-  // 曲目清單：想換歌或加歌，改這裡就好（檔案放在 music/ 資料夾）
-  const PLAYLISTS = {
-    safe:   ['music/relaxing-piano-music.mp3', 'music/sunset-piano-music.mp3'],   // 基地：輪流播
-    battle: ['music/bluelike_u-3-strike-battle-game-bgm-261231.mp3'],             // 戰鬥
-  };
+  const ENABLED = true;
+  // 每個場景用哪個音效名稱（js/sfx.js；檔案和音量在音效編輯器換）；沒寫的場景不放音樂
+  const SOUNDS = { safe: 'baseMusic' };
+  const fileOf = name => { const it = typeof SFX !== 'undefined' && SFX.list().find(x => x.name === name); return it && typeof it.file === 'string' ? 'Sound effects/' + it.file : null; };
+  const playlist = m => SOUNDS[m] && fileOf(SOUNDS[m]) ? [fileOf(SOUNDS[m])] : [];
   const MAX = 0.6;            // 音量 100% 時實際的大小（不要蓋過音效）
   const FADE = 1.2;           // 淡出淡入秒數
   let volume = 0.5, unlocked = false, mode = null, index = 0;
@@ -19,7 +19,7 @@ const MUSIC = (() => {
   // 劇情地圖（地圖屬性 story）：時間暫停，背景音樂也停
   const wanted = () => window.STORY_MODE || (typeof MAP_STORY !== 'undefined' && MAP_STORY) ? 'story' : (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) ? 'safe' : 'battle';
   const muted = () => typeof SFX !== 'undefined' && !SFX.enabled;
-  const target = () => muted() ? 0 : volume * MAX;
+  const target = () => muted() ? 0 : Math.min(1, volume * MAX * (SOUNDS[mode] ? SFX.gainOf(SOUNDS[mode]) ?? 1 : 1));
 
   function fadeTo(a, to, done) {   // 每首歌各自的淡入淡出計時器（a._fade）
     clearInterval(a._fade);
@@ -31,12 +31,12 @@ const MUSIC = (() => {
     }, 40);
   }
   function play(newMode) {
-    const list = PLAYLISTS[newMode];
+    const list = playlist(newMode);
     if (!list || !list.length) { mode = newMode; const old = audio; audio = null; if (old) fadeTo(old, 0, () => old.pause()); return; }
     if (newMode !== mode) index = Math.floor(Math.random() * list.length);
     mode = newMode;
     const next = new Audio(list[index % list.length]);
-    next.volume = 0;
+    next.volume = 0; next.loop = list.length === 1;   // 只有一首：直接循環，不用每次重新淡入
     next.addEventListener('ended', () => { if (audio === next) { index++; play(mode); } });   // 一首播完換下一首
     const old = audio; audio = next;
     const start = () => { next.play().catch(() => {}); fadeTo(next, target()); };
