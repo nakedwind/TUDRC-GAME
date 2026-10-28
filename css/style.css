@@ -3319,3 +3319,11 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 #buildToolbar .build-toolbar-actions #buildToggle { position: relative; width: 33px; height: 52px; flex-direction: column; justify-content: center; padding: 2px; }
 /* 「更多建築」按鈕：只放背包「全部」分頁的四格圖示（js/backpack.js 的 BAG_ICON.all），不放字 */
 #buildToolbar #buildToggle .build-more-ico { width: 24px; height: 24px; filter: drop-shadow(0 0 1px #000) drop-shadow(0 1px 1px rgba(0,0,0,.6)); }
+/* 設定 → 快捷鍵：道具快捷欄格數（− 8 ＋） */
+.set-stepper { display:flex; align-items:center; justify-content:space-between; color:#dfe8ef; font-size:13px; margin-bottom:10px; }
+.set-stepper-ctrl { display:flex; align-items:center; gap:8px; }
+.set-stepper-ctrl button { width:28px; height:28px; border-radius:7px; border:1px solid rgba(255,255,255,.2); background:rgba(255,255,255,.08); color:#dfe8ef; font-size:16px; cursor:pointer; }
+.set-stepper-ctrl button:disabled { opacity:.35; cursor:default; }
+.set-stepper-ctrl output { min-width:20px; text-align:center; font-weight:700; font-size:15px; }
+/* 快捷欄跟背包按鈕之間的空隙：gap 6px＋這裡 14px＝20px（下方資訊條放大 1.2 倍，畫面上量起來 24px） */
+#hud .hud-supplies #quickSupplies { margin-right: 14px; }

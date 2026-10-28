@@ -265,6 +265,7 @@ function mfGulp(e) {
   G.effects.push({ ring: true, x: e.x, y: e.y - 40, r: 6, r2: 34, life: .3, life0: .3, color: '#f3e7c9' });
   if (typeof sfxAt === 'function') sfxAt('milkfishGulp', e.x, e.y, .9, 'milkfish-gulp');
   if (typeof sentryStatus === 'function') sentryStatus(t, '被吃掉了！', '#ffb36b', true);
+  if (typeof mateHurtSay === 'function') mateHurtSay(t, 'swallowed');   // 對話編輯器「被虱目魚小子吞掉」
   addShake(2);
 }
 // ---- 吞下隊友後逃跑 ----

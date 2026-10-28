@@ -2043,6 +2043,7 @@ function update(dt) {
   if (typeof SANITY === 'undefined' || SANITY.autoRegen) G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);   // SP 不會自己恢復，要喝杏仁水（js/sanity.js）
   // 怪物移動
   for (const e of G.enemies) stepEnemy(e, dt);
+  if (typeof mateHurtTick === 'function') mateHurtTick(dt);   // 隊友被打、快沒血、倒下時頭上冒泡泡（js/mate-hurt-talk.js）
   // 雷德：偵測最近怪物，3 格內進入「舉盾衝撞」模式（供移動衝刺、撞擊、繪製共用）
   for (const t of G.towers) {
     if (t.type !== 'red') continue;

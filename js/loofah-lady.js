@@ -209,6 +209,7 @@ function llCatchNearby(v) {
     if (t.hp <= 0 || t.berserk || !inR(t)) continue;
     v.caught.push(t); t.rootT = C.rootTime; t.rootT0 = C.rootTime; t.helpCount = 0; t.knockT = 0; t.navPath = null; t.navGoal = null;
     if (C.eruptDamage && e && !e.dead) { e.atkCd = 0; enemyAttackSentry(e, t, 0); t.knockT = 0; }
+    if (typeof mateHurtSay === 'function') mateHurtSay(t, 'rooted');   // 對話編輯器「被絲瓜藤纏住」
   }
 }
 // 測試用：開戰 1 秒後，在離溫特約 testSpawnDist 格、離哨兵至少 6 格的空地放一隻（太遠放不下就慢慢往近處找）

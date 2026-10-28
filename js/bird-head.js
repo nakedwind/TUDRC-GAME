@@ -130,6 +130,7 @@ function chargerHitSomeone(e, dt) {
     enemyAttackSentry(e, t, dt);
     knockActor(t, dir.x, dir.y, chargerCfg(e).knockback * .8);
     t.navPath = null; t.navGoal = null;
+    if (typeof mateHurtSay === 'function') mateHurtSay(t, 'rammed');   // 對話編輯器「被鳥頭人撞飛」
     return true;
   }
   return false;

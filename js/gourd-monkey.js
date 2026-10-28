@@ -336,6 +336,7 @@ function gourdHitSentry(e, t) {
   t.hitT = Math.max(t.hitT || 0, .25);
   t.navPath = null; t.navGoal = null;
   flash('-' + Math.round(dmg), t.x, t.y - 30, '#ff8f8f');
+  if (typeof mateHurtSay === 'function') mateHurtSay(t, 'slammed');   // 對話編輯器「被葫蘆猴壓到」
   if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
 }
 function gourdCrushObstacle(e, o, dmg) {   // 跟 enemyAttackObstacle 一樣扣血，只是不揮手、一次壓一下；hitT 會讓建築閃紅、晃一下（js/render.js）

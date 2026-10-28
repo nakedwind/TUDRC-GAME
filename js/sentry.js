@@ -571,7 +571,7 @@ function campAttackerFor(t, maxDistance = Infinity) {
   return closest;
 }
 function updateSentry(t, dt) {
-  if (t.hp <= 0) { t.target = null; t.moving = false; t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉
+  if (t.hp <= 0) { t.target = null; t.moving = false; if (!(t.say && t.say.hurt)) t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉（倒下時喊的那句留著，js/mate-hurt-talk.js）
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
   if (tinoSootheTripStep(t, dt)) return;
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(t, dt)) return;   // 基地：正在跟別人閒聊（js/npc-chats.js）
@@ -755,7 +755,7 @@ function updateNpcTalk(npc, dt) {
   const nextGap = () => talkCfg.minGap + Math.random() * (talkCfg.maxGap - talkCfg.minGap);
   if (npc.sayWait == null) npc.sayWait = nextGap();
   if (npc.say) {
-    npc.say.life -= dt;
+    if (!npc.say.hurt) npc.say.life -= dt;   // 被攻擊的台詞由 js/mate-hurt-talk.js 倒數
     if (npc.say.life <= 0) { npc.say = null; npc.sayWait = nextGap(); }
     return;
   }

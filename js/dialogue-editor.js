@@ -31,6 +31,13 @@ const SITUATIONS = [
   { group: '戰鬥中', key: 'ultimate', label: '放大招時喊的話', when: '大招冷卻好、<b>放大招的瞬間</b>。' },
   { group: '戰鬥中', key: 'bitten', label: '在黑暗中被咬', when: '待在暗處被 Smiler 咬到、還站得住時。' },
   { group: '戰鬥中', key: 'guard', label: '衝去保護部隊長', when: '部隊長被怪物攻擊、他衝過去保護時（每 <b>6 秒</b>最多一次）。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'hurt', label: '一般被打', when: '被怪物打到時<b>有時候</b>說一句（大約一半機率，說完至少隔 <b>7 秒</b>）。數值在 js/mate-hurt-talk.js 的 MATE_HURT_TALK。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'lowHp', label: '快沒血', when: '血量掉到 <b>3 成</b>以下時說一句；回到 5 成以上後，下次掉下去會再說。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'down', label: '倒下（失去戰鬥能力）', when: '血量歸零、倒下的那一刻說一句。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'swallowed', label: '被虱目魚小子吞掉', when: '被虱目魚小子一口吞下時說一句（泡泡畫在魚頭上）。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'rooted', label: '被絲瓜藤纏住', when: '絲瓜小姐的藤蔓從地下冒出來、把他纏住時。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'slammed', label: '被葫蘆猴壓到', when: '被葫蘆猴的泰山壓頂砸到時。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'rammed', label: '被鳥頭人撞飛', when: '被鳥頭人（包括鳥頭大隊長）衝撞撞到時（雷德舉盾頂住不算）。' },
   { group: '汙染與暴走', key: 'taintWarn', label: '瀕臨暴走', when: '汙染超過 <b>85</b> 時說一句，之後沒人疏導，每 <b>8～12 秒</b>再說一句。' },
   { group: '汙染與暴走', key: 'berserk', label: '暴走瞬間', when: '汙染到 <b>100</b>、暴走的那一刻（暗紅色泡泡）。' },
   { group: '汙染與暴走', key: 'relief', label: '瀕臨暴走時被疏導', when: '汙染 70 以上時被疏導、降到 <b>70 以下</b>。' },
@@ -53,6 +60,8 @@ const RAGE_FIELDS = [
   { key: 'soothed', label: '從暴走被疏導回來', when: '從暴走恢復時。沒填就不說。' },
 ];
 // 可以收禮的角色（data/gifts.js 的 GIFT_PREFS）都有「送禮與委託」這幾格
+// 被怪物攻擊時的台詞（js/mate-hurt-talk.js）：出勤隊員都有這幾格
+const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed'];
 const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'giftAfter', 'giftRefuse', 'requestAsk', 'requestReward'];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };
@@ -69,7 +78,7 @@ try {
 if (usingDraft && typeof DIALOGUES !== 'undefined') {
   for (const [id, entry] of Object.entries(DIALOGUES.characters || {})) {
     if (!draft.characters[id]) continue;
-    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
+    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key) || MATE_HURT_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
   }
 }
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
@@ -94,8 +103,8 @@ if (typeof CHARACTERS !== 'undefined') {   // 原本有的照原本的順序（�
 // 可以編入戰鬥的角色（哨兵、嚮導）一定要有「戰鬥中」「汙染與暴走」的情境格子（例如後來才加入出勤的塔納、柯林，原本只有基地的台詞）。
 // 補上的格子沒寫台詞的話，匯出時會拿掉（autoAdded），檔案不會多一堆空資料。
 const COMBAT_SITUATIONS = {
-  sentinel: ['battle', 'ultimate', 'bitten', 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
-  guide: ['battle', 'bitten', 'friendlyHit', 'lowSp'],
+  sentinel: ['battle', 'ultimate', 'bitten', ...MATE_HURT_SITUATIONS, 'friendlyHit', 'taintWarn', 'berserk', 'relief', 'soothed'],
+  guide: ['battle', 'bitten', ...MATE_HURT_SITUATIONS, 'friendlyHit', 'lowSp'],
 };
 const NO_ULTIMATE = ['tino'];   // 沒有大招的哨兵（大招在 js/game.js 的 ULTIMATES），不補「放大招時喊的話」
 const autoAdded = new Set();

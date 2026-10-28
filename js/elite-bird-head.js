@@ -262,6 +262,7 @@ function eliteBirdHitSentry(e, t, mul) {
   t.hp = Math.max(0, t.hp - damage);
   t.hitT = Math.max(t.hitT || 0, .2);
   flash('-' + Math.round(damage), t.x, t.y - 30, '#ff8f8f');
+  if (mul >= 1 && typeof mateHurtSay === 'function') mateHurtSay(t, 'rammed');   // 對話編輯器「被鳥頭人撞飛」（雷德舉盾頂住時不算）
   if (t.hp <= 0) { t.target = null; sentryStatus(t, '失去戰鬥能力', '#ff5b6e', true); }
 }
 function eliteBirdCheckHits(e) {

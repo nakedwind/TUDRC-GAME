@@ -1,7 +1,7 @@
-/* ===== 下方資訊條的快捷欄：10 格，按 1～9、0 使用 =====
+/* ===== 下方資訊條的快捷欄：幾格可以在「設定 → 快捷鍵」調（QUICK_COUNT，預設 8 格、最多 10 格＝1～9、0）=====
    ・新拿到的道具（之前沒有、現在有）會依拿到的順序自動放進第一個空格；預設 1＝醫療包、2＝杏仁水。
      自己拿掉的不會馬上又放回去：要等用完、之後再拿到才會自動放。
-   ・設定方式：打開背包，把道具拖到下方的快捷格；或在背包的說明欄按「1～0」。
+   ・設定方式：打開背包，把道具拖到下方的快捷格；或在背包的說明欄按格子的數字鍵。
      快捷格之間也可以拖來拖去（兩格互換）；對快捷格按右鍵、或把它拖回背包＝拿掉。
    ・同一種道具只會在一格（放到別格＝搬過去）。用完（×0）格子變暗但保留，補貨後可以直接用。
    ・可以放的：補 HP／SP 的道具（醫療包、杏仁水、保溫杯）、急救包、異質急救包（按了選要治療的隊員）、腎上腺素、塗鴉筆。零食飲料是送禮用的。
@@ -9,9 +9,16 @@
      內容：{ slots：每一格放什麼, seen：已經自動放過的道具 }；以前的 Q／E／Z／X 讀進來時搬到 1～4。
    必須在 js/shop.js、js/backpack.js、js/equipment.js、js/graffiti.js 之後載入（這裡的 renderQuickSupplies 取代 shop.js 的同名函式）。
 */
-const QUICK_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];
+const QUICK_ALL_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', '0'];   // 最多 10 格
+const QUICK_COUNT = { min: 4, max: QUICK_ALL_KEYS.length, start: 8 };   // 設定裡能調的格數範圍、預設幾格
 const QUICK_STORE = 'tudrc_quickslots_v1';
-const QUICK_DEFAULT = Object.fromEntries(QUICK_KEYS.map(k => [k, null]));
+// 現在用的格子（設定裡調格數會換掉）；格數變少時，後面格子放的東西會記著，加回來就回來（道具本身一直在背包）
+let QUICK_KEYS = (() => {
+  let n = QUICK_COUNT.start;
+  try { const s = JSON.parse(localStorage.getItem(QUICK_STORE) || 'null'); if (s && Number.isFinite(s.n)) n = s.n; } catch (_) {}
+  return QUICK_ALL_KEYS.slice(0, Math.max(QUICK_COUNT.min, Math.min(QUICK_COUNT.max, n | 0)));
+})();
+const QUICK_DEFAULT = Object.fromEntries(QUICK_ALL_KEYS.map(k => [k, null]));
 QUICK_DEFAULT['1'] = 'medkit'; QUICK_DEFAULT['2'] = 'almond-water';
 const quickSeen = new Set();   // 已經自動放過的道具（自己拿掉的不會再自動放回去；用完了才清掉）
 let quickSlots = (() => {
@@ -19,19 +26,36 @@ let quickSlots = (() => {
     const s = JSON.parse(localStorage.getItem(QUICK_STORE) || 'null');
     if (s && typeof s === 'object') {
       if ('q' in s || 'e' in s || 'z' in s || 'x' in s) {   // 舊的 Q／E／Z／X 四格：照順序搬到 1～4
-        const out = Object.fromEntries(QUICK_KEYS.map(k => [k, null]));
-        ['q', 'e', 'z', 'x'].forEach((k, i) => { out[QUICK_KEYS[i]] = s[k] || null; });
+        const out = Object.fromEntries(QUICK_ALL_KEYS.map(k => [k, null]));
+        ['q', 'e', 'z', 'x'].forEach((k, i) => { out[QUICK_ALL_KEYS[i]] = s[k] || null; });
         return out;
       }
       if (s.slots && typeof s.slots === 'object') {
         (Array.isArray(s.seen) ? s.seen : []).forEach(id => quickSeen.add(id));
-        return Object.fromEntries(QUICK_KEYS.map(k => [k, s.slots[k] || null]));
+        return Object.fromEntries(QUICK_ALL_KEYS.map(k => [k, s.slots[k] || null]));
       }
     }
   } catch (_) {}
   return { ...QUICK_DEFAULT };
 })();
-function saveQuickSlots() { try { localStorage.setItem(QUICK_STORE, JSON.stringify({ slots: quickSlots, seen: [...quickSeen] })); } catch (_) {} }
+function saveQuickSlots() { try { localStorage.setItem(QUICK_STORE, JSON.stringify({ slots: quickSlots, seen: [...quickSeen], n: QUICK_KEYS.length })); } catch (_) {} }   // n＝快捷欄幾格
+// 設定 → 快捷鍵：增加／減少快捷欄格數（d＝+1／-1）
+function changeQuickCount(d) {
+  const n = Math.max(QUICK_COUNT.min, Math.min(QUICK_COUNT.max, QUICK_KEYS.length + d));
+  if (n === QUICK_KEYS.length) { sfx('error'); return; }
+  QUICK_KEYS = QUICK_ALL_KEYS.slice(0, n);
+  saveQuickSlots(); sfx('switch'); quickSupplyKey = ''; renderQuickSupplies(); renderQuickCountSetting();
+  if (typeof backpackOpen !== 'undefined' && backpackOpen) renderBackpackDetail();
+}
+function renderQuickCountSetting() {
+  const n = QUICK_KEYS.length, last = QUICK_KEYS[n - 1];
+  const val = document.getElementById('quickCountVal'); if (val) val.textContent = n;
+  document.querySelectorAll('[data-qs-count]').forEach(b => { b.disabled = +b.dataset.qsCount < 0 ? n <= QUICK_COUNT.min : n >= QUICK_COUNT.max; });
+  const range = document.getElementById('quickKeysRange');   // 快捷鍵清單裡那一行：1～8
+  if (range) range.innerHTML = '<kbd>1</kbd>～<kbd>' + (last === '0' ? '9' : last) + '</kbd>' + (last === '0' ? ' <kbd>0</kbd>' : '');
+}
+document.querySelectorAll('[data-qs-count]').forEach(b => b.addEventListener('click', () => changeQuickCount(+b.dataset.qsCount)));
+renderQuickCountSetting();
 const quickItem = id => (id && typeof itemById === 'function' ? itemById(id) : null) || (typeof supplyById === 'function' ? supplyById(id) : null);
 function quickAllowed(item) { return !!item && (item.use === 'hp' || item.use === 'sp' || item.act === 'adrenaline' || item.act === 'graffiti' || item.act === 'firstaid'); }
 // 新拿到的道具：依拿到的順序（背包的先後）放進第一個空格。用完的從 seen 拿掉，下次拿到會再自動放
@@ -90,7 +114,7 @@ function useQuickSlot(slot) {
   useSupply(it.id);   // 醫療包、杏仁水…（js/shop.js）
 }
 window.addEventListener('keydown', e => {
-  const k = e.key;   // 1～9、0（數字鍵盤的也算）
+  const k = e.key;   // 1～9、0 裡現在有用到的格子（數字鍵盤的也算）
   if (e.repeat || !QUICK_KEYS.includes(k) || e.ctrlKey || e.altKey || e.metaKey) return;
   if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;
   if (!G?.player || G.over || dialogueState || elevatorMenuOpen || mapTransitioning || G.player.hp <= 0) return;
