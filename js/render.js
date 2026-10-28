@@ -1019,7 +1019,9 @@ function draw() {
   //      底部Y 較小（畫面上方）的先畫、會被後畫的蓋住 → 走到牆後面就會被牆遮住。
   const sortables = [];
   // 角色泡在水裡：下半身半透明＋水面波紋（js/water.js 的 drawWaded；沒載入就照常畫）
-  const wadeDraw = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
+  const wadeDraw0 = (a, kind, fn) => typeof drawWaded === 'function' ? drawWaded(a, kind, fn) : fn();
+  // 站在打開的門口裡：只露出門洞和牆下緣以下（js/doors.js 的 doorActorClip），兩旁的牆、門框照樣蓋住角色
+  const wadeDraw = (a, kind, fn) => { ctx.save(); if (typeof doorActorClip === 'function') doorActorClip(ctx, a); wadeDraw0(a, kind, fn); ctx.restore(); };
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫

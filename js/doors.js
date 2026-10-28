@@ -68,8 +68,39 @@ const openCutoutDoors = () => (typeof mapDoors !== 'undefined' ? mapDoors : []).
 function doorCutoutClip(ctx, x, y, w, h) {
   const holes = openCutoutDoors().filter(R => { const o = R.outer; return x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y && y + h <= o.y + o.h + CELL / 2; });
   if (!holes.length) return false;
-  ctx.beginPath(); ctx.rect(x - 1, y - 1, w + 2, h + 2); for (const R of holes) ctx.rect(R.outer.x, R.outer.y, R.outer.w, R.outer.h); ctx.clip('evenodd');
+  const rects = holes.map(R => R.outer);
+  // 一塊一塊挖（每次 clip 都是「全部扣掉這一塊」，疊起來＝扣掉所有洞；洞重疊也沒關係）
+  for (const q of rects) { ctx.beginPath(); ctx.rect(-1e5, -1e5, 2e5, 2e5); ctx.rect(q.x, q.y, q.w, q.h); ctx.clip('evenodd'); }
   return true;
+}
+// 站在打開的挖空門口裡的角色（溫特、隊員、NPC、怪物；腳在門那一排、還沒走出牆的下緣）：
+//   角色圖比門寬 → 只露出門洞裡面（門框內側）和牆下緣以下的部分，兩旁的牆、門框、門上方的牆都完整蓋住他。
+//   js/render.js 畫角色時呼叫：回傳 true 表示已經 clip（呼叫的人負責 restore）
+const doorWallBotCache = new WeakMap();   // 門 stamp → 牆的下緣（換地圖、移動 stamp 時 mapOccluders 會重建，跟著重算）
+// 牆的下緣：跟門重疊、被挖洞的那些牆最低的地方（牆常常比門高一點或矮一點）
+function doorWallBottom(R) {
+  const occ = mapOccluders(), hit = doorWallBotCache.get(R.s);
+  if (hit && hit.occ === occ) return hit.bot;
+  const o = R.outer; let bot = o.y + o.h;
+  for (const it of occ) {
+    const x0 = it.x0 + OX, x1 = it.x1 + OX, y0 = it.y0 + OY, y1 = it.y1 + OY;
+    if (it.stamp !== R.s && x0 < o.x + o.w && x1 > o.x && y0 < o.y + o.h && y1 > o.y && y1 <= o.y + o.h + CELL / 2) bot = Math.max(bot, y1);
+  }
+  doorWallBotCache.set(R.s, { occ, bot });
+  return bot;
+}
+function doorActorClip(ctx, a) {
+  if (!a || !Number.isFinite(a.x)) return false;
+  const half = ((typeof PLAYER !== 'undefined' && PLAYER.drawSize) || 64) / 2;
+  for (const R of openCutoutDoors()) {
+    const o = R.outer, i = R.inner;
+    if (a.x < o.x - half || a.x > o.x + o.w + half || a.y < o.y) continue;   // 角色圖跟門左右重疊、腳在門頂以下
+    const bot = doorWallBottom(R);
+    if (a.y >= bot) continue;   // 已經走出牆的下緣（站在牆前面）：照常畫
+    ctx.beginPath(); ctx.rect(i.x, o.y, i.w, bot - o.y); ctx.rect(-1e5, bot, 2e5, 1e5); ctx.clip();
+    return true;
+  }
+  return false;
 }
 // 地面那一輪最後呼叫（js/maploader.js 的 drawMapGround）：門洞的地板＋門框
 function drawOpenDoorsGround(ctx) {
