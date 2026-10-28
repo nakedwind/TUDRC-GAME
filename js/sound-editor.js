@@ -22,7 +22,16 @@ async function indexSoundFolder(dir=''){
     if(name.endsWith('/'))subdirs.push(dir+name);else if(/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(name)&&!organizedPaths.has(name))organizedPaths.set(name,dir+name);}
   for(const sub of subdirs)await indexSoundFolder(sub);
 }
-const libraryPath=file=>{const raw=(file.webkitRelativePath||file.name).replaceAll('\\','/'),parts=raw.split('/');if(parts.length>1)return parts.slice(1).join('/');
+// 音樂放在 music/（不在 Sound effects 裡）：記成 ../music/檔名，只選單一個音樂檔時也能補回正確路徑
+async function indexMusicFolder(){
+  const res=await fetch('music/');if(!res.ok||!(res.headers.get('content-type')||'').includes('html'))return;
+  const doc=new DOMParser().parseFromString(await res.text(),'text/html');
+  for(const a of doc.querySelectorAll('a[href]')){let name;try{name=decodeURIComponent(a.getAttribute('href'));}catch(_){continue;}
+    if(name&&!/[/?#]/.test(name)&&/\.(mp3|wav|ogg|m4a|aac|flac)$/i.test(name)&&!organizedPaths.has(name))organizedPaths.set(name,'../music/'+name);}
+}
+const libraryPath=file=>{const raw=(file.webkitRelativePath||file.name).replaceAll('\\','/'),parts=raw.split('/');
+  // 選的是 music 資料夾：遊戲從 Sound effects 找檔，所以要寫成 ../music/…
+  if(parts.length>1)return (parts[0]==='music'?'../music/':'')+parts.slice(1).join('/');
   // 單獨選一個檔案時瀏覽器只給檔名：先到已載入的素材資料夾找同名檔（帶出分類子資料夾），找不到就檢查 Sound effects 最外層有沒有這個檔
   const known=[...library.keys()].find(k=>k.includes('/')&&k.split('/').pop()===file.name),path=known||migratePath(file.name);
   if(!path.includes('/')&&location.protocol.startsWith('http'))fetch(encodeURI('Sound effects/'+path),{method:'HEAD'}).then(r=>{if(!r.ok)status(`「${path}」不在 Sound effects 最外層，遊戲會找不到。請先按上面的「選擇音效素材資料夾」選 Sound effects，再重新選這個檔案（會自動帶出子資料夾）。`,true);}).catch(()=>{});
@@ -62,4 +71,4 @@ document.getElementById('resetAll').addEventListener('click',()=>{if(!confirm('�
 document.getElementById('reloadFile').addEventListener('click',()=>{if(!confirm('丟棄瀏覽器裡尚未匯出的設定，重新載入 data/sound-settings.js？'))return;localStorage.removeItem(SFX.GAIN_KEY);localStorage.removeItem(SFX.FILE_KEY);gains=cleanGains(FILE_GAINS);fileConfig=cleanFiles(FILE_SOUNDS);SFX.setGains(gains);SFX.setFiles(fileConfig);render();status('已從 sound-settings.js 重新載入。');});
 SFX.setGains(gains);SFX.setFiles(fileConfig);render();
 // 索引好之後：已經設定好、但只有檔名的音效自動補上資料夾
-if(location.protocol.startsWith('http'))indexSoundFolder().then(()=>{const before=JSON.stringify(fileConfig);fileConfig=cleanFiles(fileConfig);if(JSON.stringify(fileConfig)!==before){saveFiles();render();status('有音效只寫了檔名、沒有資料夾，已自動補上完整路徑（例如 獎勵/成就.mp3）。記得存檔／匯出。');}}).catch(()=>{});
+if(location.protocol.startsWith('http'))indexSoundFolder().then(()=>indexMusicFolder()).then(()=>{const before=JSON.stringify(fileConfig);fileConfig=cleanFiles(fileConfig);if(JSON.stringify(fileConfig)!==before){saveFiles();render();status('有音效只寫了檔名、沒有資料夾，已自動補上完整路徑（例如 獎勵/成就.mp3）。記得存檔／匯出。');}}).catch(()=>{});

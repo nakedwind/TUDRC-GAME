@@ -11,7 +11,6 @@ const SOUND_SETTINGS = {
     "birdRun": 1.8,
     "birdWalk": 1.95,
     "blip": 1.5,
-    "bossCore": 0.55,
     "bossElite": 0.5,
     "chainUnlock": 1.45,
     "clownfishHop1": 1.5,
@@ -110,7 +109,8 @@ const SOUND_SETTINGS = {
       "gourdSlam": [
         "怪物/葫蘆猴/葫蘆猴落地02.mp3",
         "環境/破壞/挖礦.mp3"
-      ]
+      ],
+      "baseMusic": "../music/relaxing-piano-music.mp3"
     },
     "extras": {},
     "meta": {}
