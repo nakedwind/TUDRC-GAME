@@ -95,6 +95,7 @@ function detonateMine(o) {
       r: 1.5 + Math.random() * 2.5, life: .35 + Math.random() * .3, life0: .65 });
   }
   if (typeof spawnGoo === 'function') spawnGoo(x, y - 4, '#6d6458', 10, 1.3);   // 炸飛的泥土碎石
+  if (typeof rockBurstFx === 'function') rockBurstFx(x, y, 'mine');   // 石礫、灰塵噴飛（js/gourd-monkey.js）
   for (let i = 0; i < 4; i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * 12, y - 8, true);
   addScorchMark(x, y + 4, R * .55, null, 'flame');
   nearbyImpact(x, y, 11, .07);

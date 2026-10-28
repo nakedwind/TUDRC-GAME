@@ -191,6 +191,7 @@ function burrowMouseSurface(e, stun = 0) {
   G.burrowLurkers = (G.burrowLurkers || []).filter(o => o !== e);
   if (!G.enemies.includes(e)) G.enemies.push(e);
   if (typeof sfxAt === 'function') sfxAt('mouseOut', e.x, e.y, .8, 'mouse-out');
+  if (typeof rockBurstFx === 'function') rockBurstFx(e.x, e.y, 'mouseOut');   // 鑽出地面：噴小石頭、土塊（js/gourd-monkey.js）
 }
 function burrowMouseTrail(e, b) {
   const [c, r] = cellAt(e.x, e.y), floor = typeof mapFloorCells !== 'function' || mapFloorCells().has(c + ',' + r);
@@ -266,7 +267,7 @@ function stepBurrowingMouse(e, dt) {
   b.age += dt; b.cd = Math.max(0, b.cd - dt);
   for (const h of b.hands) {
     const before = h.age; h.age += dt;
-    if (before < c.windup && h.age >= c.windup && typeof sfxAt === 'function') sfxAt('mouseAttack', h.x, h.y, .8, 'mouse-attack');   // 手鑽出地面
+    if (before < c.windup && h.age >= c.windup && typeof sfxAt === 'function') { sfxAt('mouseAttack', h.x, h.y, .8, 'mouse-attack'); if (typeof rockBurstFx === 'function') rockBurstFx(h.x, h.y, 'mouseHand'); }   // 手鑽出地面：噴一點小石頭
     if (!h.hit && h.age >= c.windup + c.handRise) { h.hit = true; burrowMouseStrike(e, h, c); }
   }
   b.hands = b.hands.filter(h => h.age < c.windup + c.handRise + c.handHold + .22);

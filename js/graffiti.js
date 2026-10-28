@@ -6,6 +6,8 @@
 //  ・擦掉：走到塗鴉旁邊按空白鍵「擦掉塗鴉」，站著不動擦一下就消失。
 //  ・圖案素材只有紅色一份（images/塗鴉筆/），藍、黑是程式換顏色。
 //  ・存檔：localStorage（GRAFFITI_KEY），依地圖分開存。
+//  ・自訂圖案：選圖案的視窗按「＋ 自己畫」，在 24×24 的小格子上畫（左鍵畫、右鍵擦），存起來之後跟內建圖案一起列出來。
+//    存在 localStorage（GRAFFITI_CUSTOM_KEY），開新遊戲也會留著。畫到地圖上的塗鴉會自己帶一份圖案，刪掉自訂圖案也不會不見。
 // ============================================================
 const GRAFFITI = {
   dir: 'images/塗鴉筆/',
@@ -20,6 +22,9 @@ const GRAFFITI = {
   eraseReach: 1.8,     // 離塗鴉幾格內可以擦
   eraseTime: 1,        // 擦掉要站著幾秒
   lockerChance: .4,    // 打開置物櫃找到塗鴉筆的機率（沒有指定內容的置物櫃）
+  red: '#df0d0d',      // 原圖的紅色（自訂圖案畫紅色時用）
+  customSize: 24,      // 自訂圖案的格子數（24×24，跟內建圖案差不多大）
+  customMax: 8,        // 最多存幾個自訂圖案
 };
 const GRAFFITI_KEY = 'tudrc_graffiti_v1';
 const GRAFFITI_PENS = { 'graffiti-red': 'red', 'graffiti-blue': 'blue', 'graffiti-black': 'black' };
@@ -40,8 +45,38 @@ function graffitiImage(sym, color) {
   const x = c.getContext('2d'); x.drawImage(img, 0, 0); x.globalCompositeOperation = 'source-in'; x.fillStyle = tint; x.fillRect(0, 0, c.width, c.height);
   return (graffitiTinted[key] = c);
 }
+// ---- 自訂圖案：每格 1 個位元，存成 16 進位字串（24×24＝144 個字）----
+const GRAFFITI_CUSTOM_KEY = 'tudrc_graffiti_custom_v1';
+let graffitiCustom = [];   // [{ id, p }]
+try { const d = JSON.parse(localStorage.getItem(GRAFFITI_CUSTOM_KEY) || '[]'); if (Array.isArray(d)) graffitiCustom = d.filter(c => c && typeof c.p === 'string'); } catch (_) {}
+function saveGraffitiCustom() { try { localStorage.setItem(GRAFFITI_CUSTOM_KEY, JSON.stringify(graffitiCustom)); } catch (_) {} }
+function graffitiBitsToHex(bits) {
+  let s = '';
+  for (let i = 0; i < bits.length; i += 4) s += ((bits[i] << 3) | (bits[i + 1] << 2) | (bits[i + 2] << 1) | (bits[i + 3] | 0)).toString(16);
+  return s;
+}
+function graffitiHexToBits(hex) {
+  const n = GRAFFITI.customSize * GRAFFITI.customSize, bits = new Uint8Array(n);
+  for (let i = 0; i < n; i++) bits[i] = (parseInt(hex[i >> 2] || '0', 16) >> (3 - (i & 3))) & 1;
+  return bits;
+}
+const graffitiCustomImgs = {};
+function graffitiCustomImage(hex, color) {
+  const key = hex + ':' + color; if (graffitiCustomImgs[key]) return graffitiCustomImgs[key];
+  const n = GRAFFITI.customSize, bits = graffitiHexToBits(hex);
+  let x0 = n, y0 = n, x1 = -1, y1 = -1;   // 只留有畫的範圍（位置才會對準滑鼠）
+  for (let i = 0; i < bits.length; i++) if (bits[i]) { const x = i % n, y = (i / n) | 0; x0 = Math.min(x0, x); y0 = Math.min(y0, y); x1 = Math.max(x1, x); y1 = Math.max(y1, y); }
+  if (x1 < 0) return null;
+  const c = document.createElement('canvas'); c.width = x1 - x0 + 1; c.height = y1 - y0 + 1;
+  const x = c.getContext('2d'); x.fillStyle = GRAFFITI.colors[color] || GRAFFITI.red;
+  for (let i = 0; i < bits.length; i++) if (bits[i]) x.fillRect(i % n - x0, ((i / n) | 0) - y0, 1, 1);
+  return (graffitiCustomImgs[key] = c);
+}
+// 塗鴉用的圖：自訂的（g.p）或內建的（g.s）
+const graffitiMarkImage = g => g.p ? graffitiCustomImage(g.p, g.c) : graffitiImage(g.s, g.c);
+
 function drawGraffitiMark(ctx, g, alpha = 1) {
-  const img = graffitiImage(g.s, g.c); if (!img) return;
+  const img = graffitiMarkImage(g); if (!img) return;
   const w = img.width * GRAFFITI.scale, h = img.height * GRAFFITI.scale;
   ctx.save(); ctx.globalAlpha = alpha * .92; ctx.imageSmoothingEnabled = false;   // 稍微透一點，像漆在表面上
   ctx.drawImage(img, Math.round(g.x - w / 2), Math.round(g.y - h / 2), Math.round(w), Math.round(h));
@@ -113,36 +148,115 @@ function openGraffitiPalette(penId) {
   if (!graffitiPalette) {
     graffitiPalette = document.createElement('div'); graffitiPalette.id = 'graffitiPalette'; graffitiPalette.className = 'hidden';
     graffitiPalette.addEventListener('click', e => {
+      const pen = graffitiPalette.dataset.pen;
+      // 畫板的按鈕也用 .graffiti-cancel 的樣式，要先判斷
+      if (e.target.closest('.graffiti-back')) { renderGraffitiPick(pen); sfx('switch'); return; }
+      if (e.target.closest('.graffiti-clear')) { graffitiPad.bits.fill(0); drawGraffitiPad(); sfx('switch'); return; }
+      if (e.target.closest('.graffiti-save')) { saveGraffitiPad(pen); return; }
       if (e.target === graffitiPalette || e.target.closest('.graffiti-cancel')) { closeGraffitiPalette(); sfx('switch'); return; }
+      const del = e.target.closest('[data-graffiti-del]');
+      if (del) {   // 刪掉自訂圖案（已經畫在地圖上的不受影響）
+        graffitiCustom = graffitiCustom.filter(c => c.id !== del.dataset.graffitiDel); saveGraffitiCustom();
+        sfx('switch'); renderGraffitiPick(pen); return;
+      }
+      if (e.target.closest('[data-graffiti-new]')) { renderGraffitiDraw(pen); sfx('button'); return; }
+      const cb = e.target.closest('[data-graffiti-custom]');
+      if (cb) { const c = graffitiCustom.find(c => c.id === cb.dataset.graffitiCustom); if (c) startGraffitiPlace(pen, null, c.p); return; }
       const b = e.target.closest('[data-graffiti-sym]'); if (!b) return;
-      startGraffitiPlace(graffitiPalette.dataset.pen, b.dataset.graffitiSym);
+      startGraffitiPlace(pen, b.dataset.graffitiSym);
     });
+    graffitiPalette.addEventListener('contextmenu', e => { if (e.target.closest('.graffiti-pad')) e.preventDefault(); });
     (document.getElementById('wrap') || document.body).appendChild(graffitiPalette);
   }
-  const item = itemById(penId);
   graffitiPalette.dataset.pen = penId;
+  renderGraffitiPick(penId);
+  graffitiPalette.classList.remove('hidden'); sfx('menu');
+}
+// 圖案放進按鈕：直接複製到小畫布上顯示（雙擊開啟遊戲時不能用 toDataURL，換色的圖會讀不到）
+function graffitiButtonCanvas(b, img, k) {
+  if (!img) return;
+  const c = document.createElement('canvas'); c.width = img.width || img.naturalWidth; c.height = img.height || img.naturalHeight;
+  c.getContext('2d').drawImage(img, 0, 0);
+  c.style.width = Math.round(c.width * k) + 'px'; c.style.height = Math.round(c.height * k) + 'px';
+  b.insertBefore(c, b.firstChild);
+}
+// 選圖案：內建圖案＋自訂圖案＋「自己畫」
+function renderGraffitiPick(penId) {
+  const color = GRAFFITI_PENS[penId], item = itemById(penId);
+  const full = graffitiCustom.length >= GRAFFITI.customMax;
   graffitiPalette.innerHTML = '<section class="graffiti-card" role="dialog" aria-label="選擇塗鴉圖案">' +
     '<header><img src="' + item.image + '" alt=""><div><small>GRAFFITI</small><h3>要畫什麼？</h3><p>' + item.name + '・畫一個會用掉一支</p></div></header>' +
     '<div class="graffiti-grid">' + GRAFFITI.symbols.map(s => {
       return '<button type="button" data-graffiti-sym="' + s.id + '" title="' + s.name + '" aria-label="' + s.name + '"></button>';
     }).join('') + '</div>' +
+    '<h4 class="graffiti-sub">自訂圖案 <span>' + graffitiCustom.length + '／' + GRAFFITI.customMax + '</span></h4>' +
+    '<div class="graffiti-grid">' + graffitiCustom.map(c => {
+      return '<button type="button" class="graffiti-custom" data-graffiti-custom="' + c.id + '" title="自訂圖案" aria-label="自訂圖案"><span class="graffiti-del" data-graffiti-del="' + c.id + '" title="刪掉這個圖案">×</span></button>';
+    }).join('') +
+    (full ? '' : '<button type="button" class="graffiti-new" data-graffiti-new title="自己畫一個圖案">＋<small>自己畫</small></button>') + '</div>' +
     '<footer><span>選好之後，點溫特附近的牆、地板或物品畫上去</span><button type="button" class="graffiti-cancel">取消</button></footer></section>';
-  // 換色後的圖直接複製到小畫布上顯示（雙擊開啟遊戲時不能用 toDataURL，換色的圖會讀不到）
   graffitiPalette.querySelectorAll('[data-graffiti-sym]').forEach(b => {
-    const img = graffitiImage(b.dataset.graffitiSym, color); if (!img) return;
-    const c = document.createElement('canvas'); c.width = img.width || img.naturalWidth; c.height = img.height || img.naturalHeight;
-    c.getContext('2d').drawImage(img, 0, 0);
-    const k = b.dataset.graffitiSym === 'help' ? 1 : 1.6;   // 按鈕裡顯示的大小（HELP 比較寬，不放大）
-    c.style.width = Math.round(c.width * k) + 'px'; c.style.height = Math.round(c.height * k) + 'px';
-    b.appendChild(c);
+    graffitiButtonCanvas(b, graffitiImage(b.dataset.graffitiSym, color), b.dataset.graffitiSym === 'help' ? 1 : 1.6);   // 按鈕裡顯示的大小（HELP 比較寬，不放大）
   });
-  graffitiPalette.classList.remove('hidden'); sfx('menu');
+  graffitiPalette.querySelectorAll('[data-graffiti-custom]').forEach(b => {
+    const c = graffitiCustom.find(c => c.id === b.dataset.graffitiCustom);
+    graffitiButtonCanvas(b, c && graffitiCustomImage(c.p, color), 1.6);
+  });
+}
+
+// ---- 自己畫：24×24 的格子，左鍵畫、右鍵擦 ----
+const GRAFFITI_PAD_PX = 12;   // 畫板上每一格幾個像素
+let graffitiPad = null;   // { bits, canvas, color, mode }
+function renderGraffitiDraw(penId) {
+  const n = GRAFFITI.customSize, color = GRAFFITI_PENS[penId];
+  graffitiPalette.innerHTML = '<section class="graffiti-card" role="dialog" aria-label="自己畫塗鴉圖案">' +
+    '<header><div><small>GRAFFITI</small><h3>自己畫一個圖案</h3><p>左鍵畫、右鍵擦。畫好按「存起來」</p></div></header>' +
+    '<div class="graffiti-pad-wrap"><canvas class="graffiti-pad" width="' + n * GRAFFITI_PAD_PX + '" height="' + n * GRAFFITI_PAD_PX + '"></canvas></div>' +
+    '<footer><span><button type="button" class="graffiti-cancel graffiti-back">← 返回</button> <button type="button" class="graffiti-cancel graffiti-clear">全部清掉</button></span>' +
+    '<button type="button" class="graffiti-cancel graffiti-save">存起來</button></footer></section>';
+  const cvs = graffitiPalette.querySelector('.graffiti-pad');
+  graffitiPad = { bits: new Uint8Array(n * n), canvas: cvs, color: GRAFFITI.colors[color] || GRAFFITI.red, mode: 0 };
+  const cellOf = e => {
+    const r = cvs.getBoundingClientRect();
+    return [Math.floor((e.clientX - r.left) / r.width * n), Math.floor((e.clientY - r.top) / r.height * n)];
+  };
+  const paint = e => {
+    const [x, y] = cellOf(e); if (x < 0 || y < 0 || x >= n || y >= n) return;
+    if (graffitiPad.bits[y * n + x] === graffitiPad.mode) return;
+    graffitiPad.bits[y * n + x] = graffitiPad.mode; drawGraffitiPad();
+  };
+  cvs.addEventListener('pointerdown', e => {
+    e.preventDefault(); try { cvs.setPointerCapture(e.pointerId); } catch (_) {}   // 拖到畫板外面也繼續畫
+    graffitiPad.mode = e.button === 2 ? 0 : 1;
+    graffitiPad.drawing = true; paint(e);
+  });
+  cvs.addEventListener('pointermove', e => { if (graffitiPad.drawing) paint(e); });
+  const stop = () => { graffitiPad.drawing = false; };
+  cvs.addEventListener('pointerup', stop); cvs.addEventListener('pointercancel', stop);
+  drawGraffitiPad();
+}
+function drawGraffitiPad() {
+  const p = graffitiPad, n = GRAFFITI.customSize, s = GRAFFITI_PAD_PX, x = p.canvas.getContext('2d');
+  x.fillStyle = '#d9d4c4'; x.fillRect(0, 0, n * s, n * s);   // 跟選圖案按鈕同樣的牆色
+  x.fillStyle = p.color;
+  for (let i = 0; i < p.bits.length; i++) if (p.bits[i]) x.fillRect((i % n) * s, ((i / n) | 0) * s, s, s);
+  x.strokeStyle = 'rgba(0,0,0,.08)'; x.lineWidth = 1; x.beginPath();
+  for (let i = 1; i < n; i++) { x.moveTo(i * s + .5, 0); x.lineTo(i * s + .5, n * s); x.moveTo(0, i * s + .5); x.lineTo(n * s, i * s + .5); }
+  x.stroke();
+  x.strokeStyle = 'rgba(0,0,0,.2)'; x.beginPath(); x.moveTo(n * s / 2 + .5, 0); x.lineTo(n * s / 2 + .5, n * s); x.moveTo(0, n * s / 2 + .5); x.lineTo(n * s, n * s / 2 + .5); x.stroke();   // 中線
+}
+function saveGraffitiPad(penId) {
+  if (!graffitiPad.bits.some(b => b)) { sfx('error'); return; }
+  if (graffitiCustom.length >= GRAFFITI.customMax) { sfx('error'); return; }
+  graffitiCustom.push({ id: 'c' + Date.now().toString(36), p: graffitiBitsToHex(graffitiPad.bits) });
+  saveGraffitiCustom(); sfx('place');
+  renderGraffitiPick(penId);
 }
 function closeGraffitiPalette() { if (graffitiPalette) graffitiPalette.classList.add('hidden'); }
 const graffitiPaletteOpen = () => !!(graffitiPalette && !graffitiPalette.classList.contains('hidden'));
-function startGraffitiPlace(penId, sym) {
+function startGraffitiPlace(penId, sym, custom) {
   closeGraffitiPalette();
-  graffitiPlace = { pen: penId, color: GRAFFITI_PENS[penId], sym };
+  graffitiPlace = { pen: penId, color: GRAFFITI_PENS[penId], sym, custom };   // custom＝自訂圖案的資料（sym 就是 null）
   cv.classList.add('graffiti-placing');
   systemNotice('🖍️ 點溫特附近的牆、地板或物品畫上去（右鍵或 Esc 取消）');
 }
@@ -166,7 +280,9 @@ function placeGraffiti(x, y) {
   if (!(supplyInventory.get(pl.pen) > 0)) { cancelGraffitiPlace(true); sfx('error'); return; }
   const chk = graffitiCheck(x, y);
   if (chk.bad) { sfx('error'); flash(chk.bad, x, y - 20, '#ff8f8f', 1.4); return; }
-  graffitiHere().push({ s: pl.sym, c: pl.color, x: Math.round(x), y: Math.round(y), on: chk.on });
+  const mark = { s: pl.sym, c: pl.color, x: Math.round(x), y: Math.round(y), on: chk.on };
+  if (pl.custom) { delete mark.s; mark.p = pl.custom; }   // 自訂圖案：塗鴉自己帶一份圖
+  graffitiHere().push(mark);
   saveGraffiti();
   const n = supplyInventory.get(pl.pen); if (n <= 1) supplyInventory.delete(pl.pen); else supplyInventory.set(pl.pen, n - 1);
   sfx('place'); cancelGraffitiPlace(true);
@@ -199,7 +315,7 @@ function drawGraffitiPreview(ctx) {
   ctx.strokeStyle = 'rgba(143,211,255,.9)'; ctx.setLineDash([10, 6]); ctx.lineWidth = 1.3;   // 畫得到的範圍（跟放建築的範圍圈同樣式，render.js 的 drawBuildRange）
   ctx.beginPath(); ctx.arc(p.x, p.y, GRAFFITI.reach * CELL, 0, Math.PI * 2); ctx.stroke();
   ctx.restore();
-  drawGraffitiMark(ctx, { s: graffitiPlace.sym, c: graffitiPlace.color, x, y }, ok ? .7 : .35);
+  drawGraffitiMark(ctx, { s: graffitiPlace.sym, p: graffitiPlace.custom, c: graffitiPlace.color, x, y }, ok ? .7 : .35);
   if (!ok) { ctx.save(); ctx.strokeStyle = '#ff5a5a'; ctx.lineWidth = 2; ctx.beginPath(); ctx.moveTo(x - 9, y - 9); ctx.lineTo(x + 9, y + 9); ctx.moveTo(x + 9, y - 9); ctx.lineTo(x - 9, y + 9); ctx.stroke(); ctx.restore(); }
 }
 

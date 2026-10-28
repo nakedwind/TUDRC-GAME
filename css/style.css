@@ -2251,6 +2251,17 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .graffiti-card footer { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 16px; border-top: 1px solid rgba(255,212,121,.1); color: #8f9aa7; font-size: 12px; }
 .graffiti-cancel { padding: 6px 14px; border: 1px solid #59616c; border-radius: 8px; background: #202730; color: #dfe7ee; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
 #cv.graffiti-placing { cursor: crosshair; }
+.graffiti-sub { display: flex; justify-content: space-between; margin: 0; padding: 4px 16px 0; color: #d8ae5d; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.graffiti-sub span { color: #8f9aa7; font-weight: 400; }
+.graffiti-grid button.graffiti-custom { position: relative; }
+.graffiti-del { position: absolute; top: 2px; right: 2px; width: 18px; height: 18px; display: grid; place-items: center; border-radius: 50%; background: rgba(20,24,30,.75); color: #fff; font-size: 13px; line-height: 1; opacity: 0; transition: opacity .12s; }
+.graffiti-custom:hover .graffiti-del, .graffiti-custom:focus-visible .graffiti-del { opacity: 1; }
+.graffiti-del:hover { background: #c94040; }
+.graffiti-grid button.graffiti-new { background: rgba(255,255,255,.04); border-style: dashed; border-color: rgba(255,212,121,.4); color: #ffd479; font-size: 22px; line-height: 1; gap: 2px; align-content: center; }
+.graffiti-new small { font-size: 11px; color: #c9b88f; }
+.graffiti-pad-wrap { display: grid; place-items: center; padding: 14px 16px; }
+#graffitiPalette canvas.graffiti-pad { display: block; width: min(288px, 100%); aspect-ratio: 1; border-radius: 6px; image-rendering: pixelated; cursor: crosshair; touch-action: none; box-shadow: 0 0 0 1px rgba(255,212,121,.3); }
+.graffiti-save { border-color: #d8ae5d; background: #5a4520; color: #fff3d6; }
 
 /* 像素背包圖示 */
 .backpack-button-image{display:inline-block;width:20px;height:24px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;flex:none;}

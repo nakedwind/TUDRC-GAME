@@ -30,11 +30,11 @@ const TUTORIAL = {
   exitCells: 3,               // 離出口幾格內跳「出口」提示
   boxCells: 7,                // 離箱子幾格內才浮出 Space 鍵
   // 開場劇情：一步一步往下演。wait＝等幾秒；sfx＝音效（volume＝音量，小一點聽起來比較遠）；shake＝畫面搖晃幾秒（power＝多用力）；
-  // debris＝天花板掉碎石和粉塵幾秒（rocks＝每秒掉幾顆碎石、dust＝每秒飄幾團粉塵）；
+  // debris＝天花板掉碎石和粉塵幾秒（rocks＝每秒掉幾顆碎石、dust＝每秒飄幾團粉塵）；flicker＝畫面像電路不穩一樣閃黑幾下；
   // who＋lines＝誰說話（winter＝溫特，其他用隊員 id：eldrin 艾德林、theonie 希奧妮…）；radio＝用無線電說（名字後面加「（無線電）」）
   story: [
     { wait: .8 },
-    { sfx: 'bigBoom', volume: .45, shake: 1.8, power: 9, debris: 1.6, rocks: 20, dust: 15 },
+    { sfx: 'bigBoom', volume: .45, shake: 1.8, power: 9, debris: 1.6, rocks: 20, dust: 15, flicker: 2 },
     { wait: 1.2 },
     { who: 'winter', lines: ['……！？', '好大的爆炸聲……是從裡面傳來的？'] },
     { sfx: 'radio', wait: .7 },   // 無線電接起來
@@ -235,6 +235,7 @@ function tutStoryFrame(dt) {
       if (st.sfx) SFX.play(st.sfx, st.volume ?? 1);
       if (st.shake) { S.shakeT = st.shake; S.power = st.power || 8; }
       if (st.debris) tutDebrisStart(st.debris, st.rocks ?? 28, st.dust ?? 22);
+      if (st.flicker && typeof powerFlicker === 'function') powerFlicker(st.flicker);   // js/flicker-light.js
       if (st.lines && st.lines.length) { tutSpeak(st.who || TUTORIAL.speaker, st.lines, st.radio); return; }
     }
     S.t += dt;

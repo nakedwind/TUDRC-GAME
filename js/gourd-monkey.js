@@ -534,22 +534,40 @@ function gourdImpactFx(x, y) {
       r: 2 + Math.random() * 2, life: .16 + Math.random() * .14, life0: .3, color: i % 2 ? '#fff0c8' : '#ffb066' });
   }
   (G.gourdFlashes = G.gourdFlashes || []).push({ x, y, life: F.flash, life0: F.flash });
+  rockBurstFx(x, y, { rocks: F.rocks, speed: F.rockSpeed, up: F.rockUp, dust: F.dust, dustRise: F.dustRise });
+}
+// ---- 共用：石礫＋灰塵噴飛（葫蘆猴落地、自爆史萊姆、希奧妮／安柏大招、油桶油箱、地雷、花蓮老鼠出土和伸手都用這個）----
+// 石礫、灰塵跟葫蘆猴共用同一組陣列，所以更新、繪製都不用另外接。
+// o：rocks＝石礫顆數、speed／up＝往外飛／往上彈的速度範圍、dust＝貼地翻滾的灰塵團數、dustRise＝往上冒的灰塵團數、
+//    size＝石塊與灰塵大小倍率、spread＝從中心多遠的地方噴出來（像素）
+const ROCK_BURST = {
+  bomber:  { rocks: 10, speed: [60, 160], up: [110, 220], dust: 6, dustRise: 2, size: .75 },   // 自爆史萊姆
+  ult:     { rocks: 12, speed: [70, 170], up: [120, 240], dust: 7, dustRise: 3, size: .85 },   // 希奧妮、安柏大招打中的地方
+  mine:    { rocks: 14, speed: [70, 190], up: [140, 280], dust: 8, dustRise: 3, size: .9 },    // 地雷
+  oil:     { rocks: 20, speed: [80, 220], up: [150, 300], dust: 12, dustRise: 5, size: 1 },    // 油桶、油箱（瓦斯爐用一半）
+  mouseOut:  { rocks: 9, speed: [40, 110], up: [110, 200], dust: 5, dustRise: 2, size: .7, spread: 20 },   // 花蓮老鼠鑽出地面
+  mouseHand: { rocks: 5, speed: [30, 90], up: [90, 170], dust: 2, dustRise: 1, size: .55, spread: 8 },     // 花蓮老鼠的手戳出地面
+};
+function rockBurstFx(x, y, o) {
+  if (typeof o === 'string') o = ROCK_BURST[o];
+  if (!o || typeof G === 'undefined') return;
+  const S = o.size || 1, sp0 = o.spread == null ? 14 : o.spread, speed = o.speed || [70, 190], up = o.up || [140, 280];
   const rocks = G.gourdRocks = G.gourdRocks || [];
-  for (let i = 0; i < F.rocks; i++) {
-    const a = Math.random() * Math.PI * 2, sp = gmRand(F.rockSpeed[0], F.rockSpeed[1]), big = Math.random() < .3;
+  for (let i = 0; i < (o.rocks || 0); i++) {
+    const a = Math.random() * Math.PI * 2, sp = gmRand(speed[0], speed[1]), big = Math.random() < .3;
     const pts = [];   // 不規則的小石塊（5～6 個角）
-    const n = 5 + (Math.random() < .5 ? 1 : 0), sz = big ? gmRand(4, 6.5) : gmRand(2, 4);
+    const n = 5 + (Math.random() < .5 ? 1 : 0), sz = (big ? gmRand(4, 6.5) : gmRand(2, 4)) * S;
     for (let k = 0; k < n; k++) { const t = k / n * Math.PI * 2; pts.push([Math.cos(t) * sz * gmRand(.65, 1.1), Math.sin(t) * sz * gmRand(.55, 1)]); }
-    rocks.push({ x: x + Math.cos(a) * 14, y: y + Math.sin(a) * 6, z: gmRand(4, 14), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: gmRand(F.rockUp[0], F.rockUp[1]) * (big ? .75 : 1),
+    rocks.push({ x: x + Math.cos(a) * sp0, y: y + Math.sin(a) * sp0 * .43, z: gmRand(4, 14), vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5, vz: gmRand(up[0], up[1]) * (big ? .75 : 1),
       spin: gmRand(-12, 12), rot: Math.random() * 6, pts, col: GM_ROCK_COLORS[Math.floor(Math.random() * GM_ROCK_COLORS.length)], life: gmRand(1.6, 2.6), bounces: 0 });
   }
-  const dust = [];
-  for (let i = 0; i < F.dust; i++) {   // 貼著地面往外翻滾的一圈灰塵
-    const a = i / F.dust * Math.PI * 2 + gmRand(-.2, .2), sp = gmRand(70, 130);
-    dust.push({ x: x + Math.cos(a) * 18, y: y + Math.sin(a) * 8, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45 - 6, r0: gmRand(8, 12), r1: gmRand(26, 38), life: 0, life0: gmRand(.9, 1.4), shade: Math.random() });
+  const dust = [], nd = o.dust || 0;
+  for (let i = 0; i < nd; i++) {   // 貼著地面往外翻滾的一圈灰塵
+    const a = i / nd * Math.PI * 2 + gmRand(-.2, .2), sp = gmRand(70, 130) * S;
+    dust.push({ x: x + Math.cos(a) * sp0 * 1.3, y: y + Math.sin(a) * sp0 * .57, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .45 - 6, r0: gmRand(8, 12) * S, r1: gmRand(26, 38) * S, life: 0, life0: gmRand(.9, 1.4), shade: Math.random() });
   }
-  for (let i = 0; i < F.dustRise; i++)   // 從正中間往上冒的灰塵
-    dust.push({ x: x + gmRand(-16, 16), y: y - gmRand(0, 10), vx: gmRand(-15, 15), vy: -gmRand(25, 50), r0: gmRand(10, 14), r1: gmRand(30, 44), life: 0, life0: gmRand(1.1, 1.6), shade: Math.random() });
+  for (let i = 0; i < (o.dustRise || 0); i++)   // 從正中間往上冒的灰塵
+    dust.push({ x: x + gmRand(-16, 16) * S, y: y - gmRand(0, 10), vx: gmRand(-15, 15), vy: -gmRand(25, 50), r0: gmRand(10, 14) * S, r1: gmRand(30, 44) * S, life: 0, life0: gmRand(1.1, 1.6), shade: Math.random() });
   for (const d of dust) d.life = d.life0;
   (G.gourdDust = G.gourdDust || []).push(...dust);
 }

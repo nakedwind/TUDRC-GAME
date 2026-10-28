@@ -242,8 +242,9 @@ function slimeExplode(e, mul) {
   }
   spawnGoo(x, y, SLIME_VARIANTS.bomber.goo, 14, 1.3);
   addSlimeSplat(x, y, SLIME_VARIANTS.bomber.goo, 30);
+  if (typeof rockBurstFx === 'function') rockBurstFx(x, y, 'bomber');   // 炸飛的石礫、灰塵（js/gourd-monkey.js）
   nearbyImpact(x, y, 12, .07);
-  if (typeof sfxAt === 'function') sfxAt('fireImpact', x, y, .8, 'bomber-boom');
+  if (typeof sfxAt === 'function') { sfxAt('fireImpact', x, y, .8, 'bomber-boom'); sfxAt('smallBoom', x, y, .7, 'bomber-boom2'); }
 }
 
 // ---- 死亡表演 ----

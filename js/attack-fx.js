@@ -525,6 +525,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   if (kind === 'flame' && G.enemies.includes(target)) target.fireHitAt = performance.now() / 1000;
   if (kind === 'flame' && scale > 1.3 && typeof blastOres === 'function') blastOres(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 希奧妮大招的小爆炸：炸開礦物（js/ore.js）
   if (kind === 'flame' && scale > 1.3 && typeof blastWalls === 'function') blastWalls(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 也炸得開可炸開的牆
+  if ((kind === 'flame' || kind === 'lightning') && scale > 1.3 && typeof rockBurstFx === 'function') rockBurstFx(impactPoint.x, impactPoint.y, 'ult');   // 希奧妮、安柏大招：打中的地方噴石礫、灰塵（js/gourd-monkey.js）
   if (kind === 'flame' && typeof hitHangiCapsAt === 'function')   // 希奧妮的火焰燒到順順宮帽：打開帽子（大招的爆炸範圍比較大）
     hitHangiCapsAt(impactPoint.x, impactPoint.y, scale > 1.3 && typeof ORE_THEONIE_R !== 'undefined' ? ORE_THEONIE_R * CELL : (spec.splash || 0) * CELL + 22);
   if (!proc) G.effects.push({ ring: true, x: impactPoint.x, y: impactPoint.y, r: 5, r2: (spec.splash > 0 ? spec.splash * CELL + 6 : CELL * 0.85), life: 0.22, life0: 0.22, color: feel.ring });

@@ -87,11 +87,28 @@ function blastPush(o, x, y, hurt, numY) {
   o.hitT = Math.max(o.hitT || 0, .32); o.hitColor = '#ff8a3a';
   flashDmg('-' + Math.round(hurt), o.x, o.y - numY, '#ff9a3c');
 }
+// 一口氣炸好幾個油桶／油箱（瓦斯爐不算）：畫面像電路不穩一樣閃黑（js/flicker-light.js 的 powerFlicker）
+// 連鎖爆炸在 window 秒內接連發生都算同一波；這一波炸完才數：flicker 由多到少比對，炸幾個以上就閃幾下
+const OIL_POWER_FLICKER = { window: .25, flicker: [[5, 2], [3, 1]] };
+function countOilBurst(it) {
+  if (it.gas) return;
+  const W = OIL_POWER_FLICKER, wave = G.oilBurst || (G.oilBurst = { n: 0, timer: 0 });
+  wave.n++;
+  clearTimeout(wave.timer);
+  wave.timer = setTimeout(() => {
+    const hit = W.flicker.find(([n]) => wave.n >= n);
+    wave.n = 0;
+    if (hit && typeof powerFlicker === 'function') powerFlicker(hit[1]);
+  }, W.window * 1000);
+}
 function oilExplode(x, y, it) {
   const B = it.blast, R = B.radius * CELL;
+  countOilBurst(it);
   // 先播放，且每次爆炸使用獨立來源，避免連鎖爆炸被 70ms 去重吞音。
   G.oilExplosionSerial = (G.oilExplosionSerial || 0) + 1;
   if (typeof sfxAt === 'function') sfxAt(it.boom || (it === OIL_ITEMS.deco_oil_tank ? 'midBoom' : 'bigBoom'), x, y, .9, 'oil-boom-' + G.oilExplosionSerial);
+  if (typeof rockBurstFx === 'function')   // 石礫、灰塵噴飛（js/gourd-monkey.js）；瓦斯爐威力小，噴一半
+    rockBurstFx(x, y, it.gas ? { ...ROCK_BURST.oil, rocks: 10, dust: 6, dustRise: 2, size: .8 } : 'oil');
   damageCoresInBlast(x, y, R, B.enemy);
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {

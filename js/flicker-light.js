@@ -201,3 +201,50 @@ function playZap(L) {
   const g = ctx.createGain(); g.gain.value = .5 * Math.max(.15, 1 - d / (FLICKER.humRange + 4)) * ((typeof SFX !== 'undefined' ? SFX.volume : .35) / .35);
   src.connect(hp); hp.connect(g); g.connect(ctx.destination); src.start(now);
 }
+
+// ============================================================
+//  畫面閃黑：大爆炸震到電路，整個畫面的燈像跳電一樣暗下來再亮回來（times＝閃幾下）
+//  ・用一張蓋在遊戲畫面上的黑色板子（對話框下面），用真實時間跑，遊戲暫停（劇情）中也會閃
+//  ・呼叫的地方：js/oil-barrels.js（一次炸 3 個以上油桶／油箱）、js/tutorial.js（新手區開場爆炸）
+// ============================================================
+const POWER_FLICKER = {
+  dark: .82,                 // 暗下去時多黑（0～1）
+  // 每一下：[暗到底後停多久, 亮回來後隔多久才閃下一下]（秒，不含下面的淡入淡出時間）；長短不一，看起來比較像電路不穩
+  beats: [[.03, .07], [.02, .1], [.04, .06]],
+  dim: .25,                  // 兩下之間沒有完全亮回來，還是微暗一點
+  fadeIn: .025,              // 暗下去要幾秒（淡入）
+  fadeOut: .06,              // 亮回來要幾秒（淡出）
+  fadeEnd: .15,              // 最後一下完全亮回來要幾秒（慢慢恢復）
+};
+let powerFlickerRun = null;
+function powerFlicker(times = 1) {
+  if (typeof document === 'undefined' || times <= 0) return;
+  const P = POWER_FLICKER, steps = [];
+  for (let i = 0; i < times; i++) {
+    const [on, off] = P.beats[i % P.beats.length];
+    const last = i === times - 1, out = last ? P.fadeEnd : P.fadeOut;
+    // 每一步：[變到多暗, 這一步共幾秒, 花幾秒變過去]
+    steps.push([P.dark * (.85 + Math.random() * .15), P.fadeIn + on, P.fadeIn], [last ? 0 : P.dim, out + off, out]);
+  }
+  let el = document.getElementById('powerFlicker');
+  if (!el) {
+    el = document.createElement('div'); el.id = 'powerFlicker'; el.setAttribute('aria-hidden', 'true');
+    Object.assign(el.style, { position: 'fixed', zIndex: 13, pointerEvents: 'none', background: '#000', opacity: 0 });
+    document.body.appendChild(el);
+  }
+  const run = powerFlickerRun = { steps, i: 0, t0: performance.now() };
+  const frame = now => {
+    if (powerFlickerRun !== run) return;   // 新的一次閃黑接手
+    const cv = document.getElementById('cv');
+    if (cv) { const r = cv.getBoundingClientRect(); Object.assign(el.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' }); }
+    // 一幀最多往下走一步：畫面卡的時候也不會整個跳過某一下暗
+    if (run.shown && (now - run.t0) / 1000 >= steps[run.i][1]) { run.t0 = now; run.i++; run.shown = false; }
+    if (run.i >= steps.length) { powerFlickerRun = null; return; }   // 最後一步已經在淡回 0
+    if (!run.shown) {   // 用 CSS 的 transition 慢慢變過去（淡入淡出）
+      el.style.transition = 'opacity ' + steps[run.i][2] + 's ' + (steps[run.i][0] > .5 ? 'ease-out' : 'ease-in');
+      el.style.opacity = steps[run.i][0]; run.shown = true; run.t0 = now;
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}

@@ -3,6 +3,7 @@ const SOUND_SETTINGS = {
   "gains": {
     "achievement": 1.35,
     "aidStart": 1.7,
+    "baseMusic": 0.55,
     "berserk": 1.2,
     "bigBoom": 1.2,
     "birdDeath": 1.35,
@@ -63,7 +64,7 @@ const SOUND_SETTINGS = {
     "pearlHurt": 1.85,
     "pearlShot": 1.45,
     "powerOn": 1.4,
-    "rangedShot": 1.35,
+    "rangedShot": 1.75,
     "reload": 0.8,
     "shopBell": 0.6,
     "shopEnter": 0.85,
