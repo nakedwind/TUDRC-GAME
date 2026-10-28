@@ -106,8 +106,9 @@ const equipSpeedMul = () => { const v = equipLv('sneakers'); return (v ? 1 + v.s
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
 const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && MAP_FIELD ? h.fear : 0)); };   // 照明頭盔也算
 const flashlightOn = () => !!(equipLv('headlamp') && MAP_FIELD && equipState.battery > 0);   // 劇情地圖也有黑幕：手電筒照樣亮
-// 無線電：疏導距離（js/game.js）、指派時隊員跑更快（js/sentry.js）
+// 無線電：疏導距離（js/game.js）、急救距離（下面的 firstAid）、指派時隊員跑更快（js/sentry.js）；跟慣性導航記錄器一起帶：地圖上看得到隊員（js/tpad-map.js）
 const equipTalkReach = () => { const v = equipLv('radio'); return v && !MAP_SAFE ? 1 + v.reach : 1; };
+const equipAidReach = () => FIRST_AID.reach * CELL * equipTalkReach();   // 急救要站多近（px）
 const equipRushMul = () => { const v = equipLv('radio'); return v && v.rush ? 1 + v.rush : 1; };
 // 照明（js/lighting.js 的 getLights 呼叫，只有戰鬥區域）：
 //   照明頭盔＝溫特身邊一小圈光；高亮度手電筒（有電時）＝朝滑鼠方向的扇形光，照得遠
@@ -324,7 +325,7 @@ function firstAidOn(t) {
   if (t.hp <= 0 && itemCount('anomaly-firstaid') <= 0) { showFirstAidTip('要用異質急救包才能救回來'); return; }   // 倒下的隊員：一般急救包救不回來
   if (t.hp > 0 && t.hp >= t.maxhp) { showFirstAidTip('沒有受傷'); return; }   // 滿血不能用
   if (t.hp > 0 && itemCount('firstaid') <= 0) { cancelFirstAidPick(); sfx('error'); flash('沒有急救包了', p.x, p.y - 54, '#c9d3dc'); return; }
-  if (Math.hypot(t.x - p.x, t.y - p.y) > FIRST_AID.reach * CELL) { showFirstAidTip('距離太遠了'); return; }   // 要走到隊員旁邊
+  if (Math.hypot(t.x - p.x, t.y - p.y) > equipAidReach()) { showFirstAidTip('距離太遠了'); return; }   // 要走到隊員旁邊
   cancelFirstAidPick();
   const v = FIRST_AID;
   if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在做別的事
@@ -352,10 +353,10 @@ function finishFirstAid() {
   for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: t.x + (Math.random() - .5) * 26, y: t.y - 10, vx: 0, vy: -40 - Math.random() * 30, r: 2, life: .7, life0: .7, color: '#9ff0c0' });
   sfx('soothe'); if (typeof updateHUD === 'function') updateHUD();
 }
-// ---- 無線電 Lv3：標記溫特附近黑暗中的怪物（render.js 在黑幕上面畫）----
+// ---- 異質探測器：標記溫特附近黑暗中的怪物（render.js 在黑幕上面畫；礦物、核心在下面的 drawDetector）----
 function drawRadioMarks(ctx) {
-  const v = equipLv('radio'); if (!v || !v.mark || MAP_SAFE || !G || !G.player) return;
-  const p = G.player, R = v.mark * CELL, pulse = .55 + .3 * Math.sin(performance.now() / 220);
+  const v = equipLv('detector'); if (!v || !v.range || MAP_SAFE || !G || !G.player) return;
+  const p = G.player, R = v.range * CELL, pulse = .55 + .3 * Math.sin(performance.now() / 220);
   ctx.save();
   for (const e of G.enemies) {
     if (e.dead || e.hp <= 0 || enemyVisible(e) || Math.hypot(e.x - p.x, e.y - p.y) > R) continue;
@@ -430,7 +431,7 @@ function updateEquipment(dt) {
 }
 setInterval(() => { if (equipLv('headlamp') && MAP_FIELD) saveEquipment(); }, 3000);   // 電量每 3 秒存一次
 
-// ---- 異質探測器：附近黑暗中的礦物、核心微微發光（render.js 在黑幕上面畫）----
+// ---- 異質探測器：附近黑暗中的礦物、核心微微發光（怪物：上面的 drawRadioMarks）（render.js 在黑幕上面畫）----
 function drawDetector(ctx) {
   const v = equipLv('detector'); if (!v || MAP_SAFE || !G || !G.player) return;
   const p = G.player, R = v.range * CELL, t = performance.now() / 1000;
@@ -873,7 +874,7 @@ window.addEventListener('keydown', e => {
 // 附近倒下的隊員（站在 FIRST_AID.reach 格內）：頭上只出現「急救」；身上沒有異質急救包就不出現（救不回來）
 function downedTeammateNear() {
   const p = G && G.player; if (!p || MAP_SAFE || p.hp <= 0 || itemCount('anomaly-firstaid') <= 0) return null;
-  let best = null, bd = FIRST_AID.reach * CELL;
+  let best = null, bd = equipAidReach();
   for (const t of G.towers || []) { if (t.hp > 0) continue; const d = Math.hypot(t.x - p.x, t.y - p.y); if (d < bd) { bd = d; best = t; } }
   return best;
 }

@@ -87,6 +87,8 @@
 .tmf-note { margin: 10px 4px 0; font-size: 13px; line-height: 1.6; color: #c9d3dd; }
 .tm-core path { fill: #b77cff; stroke: #16191e; stroke-width: .2; }
 .tm-legend .lg-core { width: 9px; height: 9px; background: #b77cff; transform: rotate(45deg); }
+.tm-mate { pointer-events: none; } .tm-mate circle { fill: #ffb84a; stroke: #16191e; stroke-width: .25; } .tm-mate.down circle { fill: #ff5a5a; }   /* 隊員（無線電＋導航，js/tpad-map.js） */
+.tm-legend .lg-mate { border-radius: 50%; background: #ffb84a; }
 .tm-legend .lg-fog { border-radius: 2px; background: #16191e; box-shadow: inset 0 0 0 1px rgba(255,255,255,.25); }
 
 /* 戰鬥區域地圖的配色與雷達格線（js/tpad-map.js 的 tmapRadarLayer；格線在地圖下面） */

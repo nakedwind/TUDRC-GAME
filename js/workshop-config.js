@@ -193,8 +193,8 @@ const WORKSHOP_VALUE_INFO = {
   guard: { label: '受到的傷害減少', unit: '%', scale: 100 }, calm: { label: '理智影響減少', unit: '%', scale: 100 },
   save: { label: '疏導省 SP', unit: '%', scale: 100 }, speed: { label: '移動速度加成', unit: '%', scale: 100 },
   fire: { label: '火海燙傷減少', unit: '%', scale: 100 }, corrode: { label: '腐蝕池、酸液減傷', unit: '%', scale: 100 },
-  reach: { label: '疏導距離加成', unit: '%', scale: 100 }, rush: { label: '指派時隊員移動加成', unit: '%', scale: 100 },
-  mark: { label: '標記黑暗中怪物的範圍', unit: '格' }, range: { label: '偵測範圍', unit: '格' },
+  reach: { label: '疏導、急救距離加成', unit: '%', scale: 100 }, rush: { label: '指派時隊員移動加成', unit: '%', scale: 100 },
+  mark: { label: '標記黑暗中怪物的範圍', unit: '格' }, range: { label: '暗處偵測範圍（怪物、核心、礦）', unit: '格' },
 };
 const WORKSHOP_BASE = {};   // 還沒套用設定檔前的原始資料（編輯器的「恢復原本」用）
 function workshopItemDefs() {   // key → 那件裝備／武器的資料

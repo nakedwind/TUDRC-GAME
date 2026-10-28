@@ -391,6 +391,9 @@ function tmapRadarLayer(vx, vy, vw, vh, u) {
     '<rect x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '" fill="url(#tmfGridS)"/><rect x="' + vx + '" y="' + vy + '" width="' + vw + '" height="' + vh + '" fill="url(#tmfGridL)"/>';
 }
 
+// 無線電＋慣性導航記錄器都帶著：地圖上（T-Pad、右下小地圖）看得到隊員在哪（被虱目魚小子吃掉的不畫）
+const tmapSquadOn = () => typeof equipLv === 'function' && !!equipLv('radio') && !!equipLv('navrecorder');
+const tmapSquad = () => (G.towers || []).filter(t => !t.eatenBy && TYPES[t.type]);
 // T-Pad「地圖」在戰鬥區域：只畫記過的格子，加上自己的位置、記過的出入口、還沒打碎的異質核心
 function renderFieldMapApp(el) {
   tmapExploreTick();
@@ -415,6 +418,11 @@ function renderFieldMapApp(el) {
     if ((!tmapSeen(st, Math.floor(c), Math.floor(r)) || st.hidden.has(Math.floor(c) + ',' + Math.floor(r)))) continue;
     marks.push('<g class="tm-core" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>異質核心</title><path d="M0 -1.2 1 0 0 1.2 -1 0Z"/></g>');
   }
+  const squad = tmapSquadOn();
+  if (squad) for (const t of tmapSquad()) {   // 無線電＋導航：隊員的位置（沒走過的地方也看得到）
+    const [c, r] = tmapCellOf(t), name = (TYPES[t.type] && TYPES[t.type].name) || '';
+    marks.push('<g class="tm-mate' + (t.hp <= 0 ? ' down' : '') + '" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>' + tmapEsc(name + (t.hp <= 0 ? '（倒下）' : '')) + '</title><circle r=".85"/></g>');
+  }
   const [pc, pr] = tmapCellOf(G.player);
   const me = '<g class="tm-me" transform="translate(' + pc + ' ' + pr + ') scale(' + mk + ')"><title>你的位置</title><circle class="tm-ping" r="1.8"/><circle r="1.05"/></g>';
   const side = '<nav class="aa-side tm-side tmf-side"><div class="tm-sec">慣性導航記錄器</div>' +
@@ -423,7 +431,7 @@ function renderFieldMapApp(el) {
   const main = '<main class="tm-main"><div class="tm-head"><h2 class="aa-title">' + tmapEsc(m.name) + '</h2><p class="aa-sub">離線模式・導航記錄中</p></div>' +
     '<svg class="tm-svg" style="--u:' + u.toFixed(3) + '" viewBox="' + [vx, vy, vw, vh].join(' ') + '" preserveAspectRatio="xMidYMid meet" role="img" aria-label="' + tmapEsc(m.name) + ' 已探索的地圖">' +
     tmapRadarLayer(vx, vy, vw, vh, u) + (wall ? '<path class="tm-wall" d="' + wall + '"/>' : '') + (open ? '<path class="tm-floor" d="' + open + '"/>' : '') + marks.join('') + me + '</svg>' +
-    '<div class="tm-legend"><span><i class="lg-me"></i>你</span><span><i class="lg-door"></i>出入口</span><span><i class="lg-core"></i>異質核心</span><span><i class="lg-fog"></i>還沒走過</span></div></main>';
+    '<div class="tm-legend"><span><i class="lg-me"></i>你</span><span><i class="lg-door"></i>出入口</span><span><i class="lg-core"></i>異質核心</span>' + (squad ? '<span><i class="lg-mate"></i>隊員</span>' : '') + '<span><i class="lg-fog"></i>還沒走過</span></div></main>';
   el.innerHTML = '<div class="aa tm tmf">' + side + main + '</div>';
 }
 
@@ -476,6 +484,10 @@ function tmapMiniUpdate() {
     const [c, r] = tmapCellOf(core); if ((!tmapSeen(st, Math.floor(c), Math.floor(r)) || st.hidden.has(Math.floor(c) + ',' + Math.floor(r)))) continue;
     const x = ox + c * S, y = oy + r * S;
     ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 5); ctx.lineTo(x - 4, y); ctx.closePath(); ctx.fill();
+  }
+  if (tmapSquadOn()) for (const t of tmapSquad()) {   // 無線電＋導航：隊員（倒下＝紅色）
+    const [c, r] = tmapCellOf(t), x = ox + c * S, y = oy + r * S; if (x < -4 || y < -4 || x > W + 4 || y > H + 4) continue;
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fillStyle = t.hp <= 0 ? '#ff5a5a' : '#ffb84a'; ctx.fill(); ctx.lineWidth = 1; ctx.strokeStyle = '#16191e'; ctx.stroke();
   }
   ctx.beginPath(); ctx.arc(W / 2, H / 2, 4, 0, Math.PI * 2);   // 自己
   ctx.fillStyle = '#4aa3ff'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();

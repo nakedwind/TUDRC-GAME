@@ -398,26 +398,23 @@ const WORKSHOP_CONFIG = {
       "values": [
         {
           "reach": 0.15,
-          "mark": 5
+          "rush": 0.2
         },
         {
           "reach": 0.3,
-          "mark": 8
+          "rush": 0.25
         },
         {
           "reach": 0.4,
-          "rush": 0.3,
-          "mark": 10
+          "rush": 0.3
         },
         {
           "reach": 0.5,
-          "rush": 0.4,
-          "mark": 13
+          "rush": 0.4
         },
         {
           "reach": 0.7,
-          "rush": 0.5,
-          "mark": 15
+          "rush": 0.5
         }
       ],
       "infoImgY": -6,

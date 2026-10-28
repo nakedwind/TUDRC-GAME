@@ -695,7 +695,7 @@ function tutGuideStep() {
   const t = g.t, need = g.kind === 'soothe' ? t.taint > 0 || t.berserk : aidUsableOn(t);
   if (t.hp <= 0 || !G.towers.includes(t) || !need) { tutGuide = null; return false; }
   // 要走到「這位」隊員旁邊才算（路上經過別的受傷隊員不算）：急救看 FIRST_AID.reach，疏導看對話距離（跟頭上出現 C 疏導一樣）
-  const reach = g.kind === 'soothe' ? NPC_TALK.radius * (typeof equipTalkReach === 'function' ? equipTalkReach() : 1) : FIRST_AID.reach * CELL;
+  const reach = g.kind === 'soothe' ? NPC_TALK.radius * (typeof equipTalkReach === 'function' ? equipTalkReach() : 1) : (typeof equipAidReach === 'function' ? equipAidReach() : FIRST_AID.reach * CELL);
   if (Math.hypot(t.x - G.player.x, t.y - G.player.y) > reach || (typeof playerChannel !== 'undefined' && playerChannel)) return false;
   tutGuide = null;
   startMateKeyLesson(g.kind, g.kind === 'soothe' ? 'c' : 'f', t);
