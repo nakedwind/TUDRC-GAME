@@ -44,6 +44,7 @@ const ELITE_BIRD = {
   coreShield: .6,                // 牠活著時，核心少受幾成傷害
   returnSpeedMul: 1.1,           // 走回原位的速度倍率
   returnDashFrom: 1,           // 離原位超過幾格：用衝刺的速度（chargeSpeed）跑回去，到這個距離內才改用走的
+  returnRamCd: 1,                // 走回原位的路上撞到溫特：撞一次後幾秒內不再撞（傷害、擊退跟衝撞一樣）
   stepEvery: 60,                 // 衝撞時每跑幾像素踩一步（一般鳥頭人 40）
   stepShake: 10, walkShake: 5,   // 衝撞、走路時每一步的畫面震動（貼身時的最大值；溫特在 shakeRange 格內才震，越近越大）
   shakeRange: 20,
@@ -279,6 +280,16 @@ function eliteBirdCheckHits(e) {
     if (braced) { sentryStatus(t, '頂住衝撞！', '#dbe7ff'); e.eb.speedK = Math.min(e.eb.speedK, E.redBlockSlow); }
   }
 }
+// 走回原位的路上：擋在路上的溫特一樣會被撞飛（往牠身體外側飛出去；撞一次後 returnRamCd 秒內不再撞）。隊員不會被撞
+function eliteBirdReturnRam(e, dt) {
+  const E = ELITE_BIRD, eb = e.eb, p = G.player;
+  eb.returnRamCd = Math.max(0, (eb.returnRamCd || 0) - dt);
+  if (eb.returnRamCd > 0 || !p || p.hp <= 0 || eliteDist(p, e) > E.hitWidth + 12) return;
+  const dx = p.x - e.x, dy = p.y - e.y, d = Math.hypot(dx, dy) || 1;
+  eb.dir = e.ch.dir = { x: dx / d, y: dy / d };   // 撞擊特效（spawnChargeImpact）、擊退方向
+  eb.returnRamCd = E.returnRamCd;
+  eliteBirdHitPlayer(e, p);
+}
 // 速度：起跑慢慢加速 → 最高速 → 最後一段煞車滑行；撞到人（雷德）會被拖慢，再慢慢加回來
 function eliteBirdChargeSpeed(e, dt) {
   const E = ELITE_BIRD, eb = e.eb;
@@ -411,12 +422,13 @@ function stepEliteBird(e, dt) {
         if (target && eliteDist(target, e) <= E.chargeRange * CELL) { eliteBirdAim(e, target); return; }
       }
       if (awayHome <= 3) { e.x = e.home.x; e.y = e.home.y; eliteBirdSet(e, 'guard'); return; }
-      // 離家太遠：用衝刺的速度、衝刺的步伐跑回去（不撞人，只是趕路）；接近原位再改用走的
+      // 離家太遠：用衝刺的速度、衝刺的步伐跑回去；接近原位再改用走的
       const dash = awayHome > E.returnDashFrom * CELL;
       e.ch.state = dash ? 'charge' : 'notice';
       const [hc, hr] = cellAt(e.home.x, e.home.y), hx = e.x, hy = e.y;
       const nav = enemyNavigate(e, hc, hr, dt * (dash ? E.chargeSpeed / (e.speed || 1) : E.returnSpeedMul), 'elite-home', true);
       eliteBirdFootsteps(e, Math.hypot(e.x - hx, e.y - hy), dash);
+      eliteBirdReturnRam(e, dt);
       if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
       else if (nav.reached && awayHome <= CELL) eliteBirdSet(e, 'guard');
       return;
