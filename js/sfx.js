@@ -165,6 +165,9 @@ const SFX = (() => {
     milkfishDeath: '怪物/虱目魚小子/虱目魚小子死掉.mp3',
     // 環境背景音：Y 區地圖一直循環播放（js/ambience.js）
     whiteNoise: '環境/白噪音.mp3',
+    // BOSS 音樂（js/boss-music.js）：一直循環、淡入淡出；音量在音效編輯器的「音樂」調整
+    bossElite: '戰鬥/中BOSS.mp3',             // 鳥頭大隊長盯上玩家
+    bossCore: '戰鬥/異質核心甦醒.mp3',        // 異質核心甦醒到被打破
     // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
     weirdNoise: '玩家/怪聲.mp3',
   };

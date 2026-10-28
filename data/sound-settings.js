@@ -10,6 +10,8 @@ const SOUND_SETTINGS = {
     "birdRun": 1.8,
     "birdWalk": 1.95,
     "blip": 1.5,
+    "bossCore": 0.55,
+    "bossElite": 0.5,
     "chainUnlock": 1.45,
     "clownfishHop1": 1.5,
     "clownfishHop2": 1.45,
