@@ -2213,7 +2213,7 @@ function update(dt) {
         if (isUlt) { t.ultCd = ULTIMATES[t.type].cd * (1 - (spec.ultCdCut || 0)); const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
         const U0 = isUlt ? ULTIMATES[t.type] : null, stab = !!(U0 && U0.stabs);   // 柯林的大招：連刺（自己的節奏）
         const sw = stab ? { wind: 0, impact: 0, duration: U0.duration } : isUlt ? ULT_SWING : (MELEE_SWING[t.type] || MELEE_SWING.normal);
-        t.meleeSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, hit: false, ult: isUlt, ...(stab ? { stabs: U0.stabs, stabIdx: 0, slashFx: true } : {}) };
+        t.meleeSwing = { target, angle: Math.atan2(dy, dx), side: t.dir === 'front' ? -1 : 0, age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, hit: false, ult: isUlt, ...(stab ? { stabs: U0.stabs, stabIdx: 0, slashFx: true } : {}) };   // side：正面攻擊（怪物在下方）往左劈（js/render.js 的 drawSwingWeapon）
         if (stab) addSentryTaint(t, U0.taint);   // 突擊連刺：整招只加一次汙染
         if (stab) { const fx = G.effects.filter(o => o.charge).pop(); if (fx) fx.life = fx.life0 = U0.stabs[0]; }   // 蓄力光圈只到第一刺（不要跟連刺疊在一起）
         t.moving = false;

@@ -16,7 +16,8 @@
 // crystals：炸開後總共掉幾個異質碎片；shards：分成幾塊掉在地上；glow：黑暗中的紫光亮度
 
 const ORE_BLAST_PAD = .6;   // 爆炸半徑外再多算幾格也會炸到礦物（礦物本身有一格大）
-const SHARD = { reach: 56, delay: .45 };   // reach：可拾取的距離（像素）；delay：落地後幾秒才能撿
+const SHARD = { reach: 56, delay: .45, wallGap: 16, bounce: .6, slide: 70 };   // reach：可拾取的距離（像素）；delay：落地後幾秒才能撿
+// wallGap：離牆、碰撞格幾像素內就彈開；bounce：彈回去保留幾成速度；slide：一開始就太靠牆時，往外滑的速度（像素／秒）
 // 路德的拳頭剛好波及礦物：hits＝敲幾下會碎（暴走時每下算 2 下）；pad＝攻擊範圍外再多算幾格
 const ORE_LUTHER = { hits: 4, pad: .5 };
 // 溫特的手槍：累積多少傷害才打得碎（手槍 Lv1 一發 5 → 小型 16 發、大型 28 發、稀有 40 發）
@@ -126,11 +127,17 @@ function updateOre(dt) {
       s.vz -= 620 * dt; s.z += s.vz * dt;
       if (s.z <= 0) { s.z = 0; s.vz = Math.abs(s.vz) > 60 ? -s.vz * .32 : 0; s.vx *= .55; s.vy *= .55; }
     }
-    const nx = s.x + s.vx * dt, ny = s.y + s.vy * dt;
-    // 溫特站不到的地方，碎片也不會落進去（已經卡在裡面時允許滑出來）
+    // 溫特站不到的地方，碎片也不會落進去；離牆、碰撞格 wallGap 像素內就彈回來（才不會看起來卡進牆裡）
     const blocked = (x, y) => typeof playerBlocked === 'function' ? playerBlocked(x, y) : solidBlocksPoint(x, y);
-    if (blocked(nx, ny) && !blocked(s.x, s.y)) { s.vx = 0; s.vy = 0; }
-    else { s.x = nx; s.y = ny; }
+    const gap = SHARD.wallGap, tooClose = (x, y) => blocked(x, y) || blocked(x - gap, y) || blocked(x + gap, y) || blocked(x, y - gap) || blocked(x, y + gap);
+    const nx = s.x + s.vx * dt;
+    if (blocked(nx, s.y) || (tooClose(nx, s.y) && !tooClose(s.x, s.y))) s.vx = -s.vx * SHARD.bounce; else s.x = nx;
+    const ny = s.y + s.vy * dt;
+    if (blocked(s.x, ny) || (tooClose(s.x, ny) && !tooClose(s.x, s.y))) s.vy = -s.vy * SHARD.bounce; else s.y = ny;
+    // 一開始就太靠牆（例如礦物貼著牆）：慢慢往牆的反方向滑開
+    const px = (blocked(s.x - gap, s.y) ? 1 : 0) - (blocked(s.x + gap, s.y) ? 1 : 0), py = (blocked(s.x, s.y - gap) ? 1 : 0) - (blocked(s.x, s.y + gap) ? 1 : 0);
+    if (px && !blocked(s.x + px * SHARD.slide * dt, s.y)) s.x += px * SHARD.slide * dt;
+    if (py && !blocked(s.x, s.y + py * SHARD.slide * dt)) s.y += py * SHARD.slide * dt;
     if (s.z === 0) { s.vx *= Math.pow(.02, dt); s.vy *= Math.pow(.02, dt); }   // 在地上滑一下就停
   }
 }

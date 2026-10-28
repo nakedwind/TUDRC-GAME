@@ -115,15 +115,17 @@ function meleeSwingAngle(s) {
   const u = Math.min(1, (s.age - s.impact - .06) / (s.duration - s.impact - .06));   // 收招回正
   return CHOP + (REST - CHOP) * (1 - (1 - u) * (1 - u));
 }
-function drawSwingWeapon(t, img, w, h, arm) {   // 揮擊時才出現的武器圖（過頭揮，沿弧線往外）
+// 圖中朝上的武器：圖的右邊＝往下劈時在前面的那一側；flip＝左右翻（刀刃畫在圖左邊的斧頭）
+function drawSwingWeapon(t, img, w, h, arm, flip = false) {   // 揮擊時才出現的武器圖（過頭揮，沿弧線往外）
   const s = t.meleeSwing;
   if (!s || !img.complete || !img.naturalWidth) return;
-  const fx = Math.cos(s.angle) >= 0 ? 1 : -1, sweep = meleeSwingAngle(s);
+  const fx = s.side || (Math.cos(s.angle) >= 0 ? 1 : -1), sweep = meleeSwingAngle(s);   // 正面攻擊：side＝-1 往左劈；其他照怪物在左／右
   ctx.save();
   ctx.translate(t.x + fx * 4, t.y - 14);   // 肩膀支點（揮擊弧線中心）
   ctx.scale(fx, 1);
   ctx.rotate(sweep + Math.PI / 2);   // 讓圖中朝上的武器對齊揮砍方向
   ctx.translate(0, -arm);            // 沿弧線往外推，離身體遠一點
+  if (flip) ctx.scale(-1, 1);
   ctx.imageSmoothingEnabled = false;
   ctx.drawImage(img, -w / 2, -h, w, h);
   ctx.restore();
@@ -132,7 +134,7 @@ function drawFireAxe(t) {
   if (MAP_SAFE || t.hp <= 0 || t.berserk) return;
   if (t.type === 'red') { if (!(t.meleeSwing && t.meleeSwing.ult)) drawSwingWeapon(t, redAxeImg, 21, 32, 22); return; }   // 雷德：fire_axe_01（大招用盾衝撞，不拿斧）
   if (t.type === 'avaren') { drawSwingWeapon(t, avarenKnifeImg, 9, 29, 20); return; }  // 阿瓦倫：military_knife
-  if (t.type === 'luther') { drawSwingWeapon(t, lutherAxeImg, 28, 46, 26); return; }   // 路德：fire_axe_02（攻擊時才出現）
+  if (t.type === 'luther') { drawSwingWeapon(t, lutherAxeImg, 28, 46, 26, true); return; }   // 路德：fire_axe_02（攻擊時才出現；圖的刀刃在左邊，翻過來讓刀刃往下劈）
   if (t.type === 'colyn') { drawColynSword(t); return; }   // 柯林：長劍
 }
 // 柯林的突擊連刺：身體前後衝的量（-＝往後、+＝往前）。先往後蓄力；每刺一下 0.05 秒衝到最前，
