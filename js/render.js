@@ -254,14 +254,15 @@ function drawTower(t) {
   const nameY = visualTop - (MAP_SAFE ? 6 : 11);
   ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   // 戰鬥區域：名字前面加職業圖示（哨兵＝交叉雙劍、嚮導＝盾牌＋十字），名字跟圖示一起置中
-  const roleKey = spec.guide ? 'guide' : 'sentinel', roleImg = !MAP_SAFE ? roleNameIcons[roleKey] : npcNameIcons[t.type];   // 基地裡：特殊 NPC 的小圖示（例如塔納的哨子）
+  const hospitalized = MAP_SAFE && typeof isHospitalized === 'function' && isHospitalized(t.type);   // 基地裡住院中的隊員：名字前面換成醫院圖示
+  const roleKey = spec.guide ? 'guide' : 'sentinel', roleImg = !MAP_SAFE ? roleNameIcons[roleKey] : hospitalized ? npcNameIcons.hospital : npcNameIcons[t.type];   // 基地裡：特殊 NPC 的小圖示（例如塔納的哨子）
   const hasRole = roleImg && roleImg.complete && roleImg.naturalWidth, roleSize = 12, roleGap = 3;
   const nameX = t.x + (hasRole ? (roleSize + roleGap) / 2 : 0);
   ctx.lineWidth = 3; ctx.lineJoin = 'round'; ctx.miterLimit = 2; ctx.strokeStyle = 'rgba(0,0,0,.9)'; ctx.strokeText(spec.name, nameX, nameY);
   const taintDanger = !MAP_SAFE && !t.berserk && !spec.guide && t.taint > 85 && t.hp > 0;
   ctx.fillStyle = t.berserk ? '#ff4d4d' : taintDanger ? '#ffb24d' : '#fff'; ctx.fillText(spec.name, nameX, nameY);   // 暴走紅字、瀕臨暴走橘字
   if (hasRole) {
-    const ix = nameX - ctx.measureText(spec.name).width / 2 - roleGap - roleSize, iy = nameY - 10, edge = npcIconOutline(MAP_SAFE ? t.type : 'role-' + roleKey, roleImg);
+    const ix = nameX - ctx.measureText(spec.name).width / 2 - roleGap - roleSize, iy = nameY - 10, edge = npcIconOutline(MAP_SAFE ? (hospitalized ? 'hospital' : t.type) : 'role-' + roleKey, roleImg);
     ctx.save(); ctx.imageSmoothingEnabled = true;
     for (let a = 0; a < 16; a++) ctx.drawImage(edge, ix + Math.cos(a / 8 * Math.PI) * 1.5, iy + Math.sin(a / 8 * Math.PI) * 1.5, roleSize, roleSize);   // 黑邊
     ctx.drawImage(roleImg, ix, iy, roleSize, roleSize);
@@ -510,6 +511,7 @@ const NPC_NAME_ICON_SRC = {
   noah: 'images/ui/noah-wrench.svg?v=20261021cute',   // 諾亞：開發工坊（扳手，粗圓版）
   ash: 'images/ui/ash-clipboard.svg?v=20261021',   // 亞許：通訊員、報告任務（任務板）
   taana: 'images/ui/taana-whistle.svg?v=20261021', // 塔納：訓練室負責人（哨子）
+  hospital: 'images/ui/hospital.svg?v=20261029', // 住院中的隊員（不是角色 id：js/vitals.js 的 isHospitalized）
 };
 const npcNameIcons = {};
 for (const id in NPC_NAME_ICON_SRC) { npcNameIcons[id] = new Image(); npcNameIcons[id].src = NPC_NAME_ICON_SRC[id]; }
@@ -1053,7 +1055,8 @@ function draw() {
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   if (typeof drawFishWater === 'function') drawFishWater(ctx);
   if (typeof drawGourdGround === 'function') drawGourdGround(ctx);   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
-  if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）
+  if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);
+  if (typeof drawHiddenTunnels === 'function') drawHiddenTunnels(ctx);   // 球球找到的地道（js/rescue-dog.js）   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
   if (typeof drawGluePools === 'function') drawGluePools(ctx);   // 黏著彈的黏膠（js/special-guns.js）
   sortables.sort((a, b) => a.y - b.y);
@@ -1114,7 +1117,7 @@ function draw() {
     else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）
     else if (typeof wardrobeNearPlayer === 'function' && !doorNearPlayer() && wardrobeNearPlayer()) { const w = wardrobeNearPlayer(); drawInteractPrompt(w.x, w.top - 4, '換裝'); }   // 衣櫃（js/costumes.js）
     else if (typeof gachaNearPlayer === 'function' && !doorNearPlayer() && gachaNearPlayer()) { const g = gachaNearPlayer(); drawInteractPrompt(g.x, g.top - 4, '扭蛋'); }   // 扭蛋機（js/gacha.js）
-    else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '怪物圖鑑'); }   // 2F應變中心的電腦（js/bestiary.js）
+    else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '使用電腦'); }   // 2F應變中心的電腦：打開電腦桌面（js/bestiary.js、js/pc-desktop.js）
     else if (typeof armorChestNearPlayer === 'function' && !doorNearPlayer() && armorChestNearPlayer()) { const c = armorChestNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '整理防具'); }   // 裝備箱（js/backpack.js）
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）

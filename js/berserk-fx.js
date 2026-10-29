@@ -67,8 +67,8 @@ function friendlyHitReact(o, fromX, fromY, dmg, heavy, attacker) {
     if (o.hp > 0 && !o.berserk && now - (o.friendlyLineAt || -1e9) > FRIENDLY_HIT.lineCd * 1000) {
       o.friendlyLineAt = now;
       const name = (attacker && TYPES[attacker.type]?.name) || '喂';
-      const rp = ragePersona(o);
-      const text = pickLine(personaLines(rp, 'hit', 'friendlyHit', o.type), 'x', o);
+      const rp = ragePersona(o), confused = attacker && attacker.mothConfuseT > 0 && !attacker.berserk;   // 打人的是吸了混亂鱗粉的隊友：說「被混亂的隊友打到」（js/human-face-butterfly.js）
+      const text = confused ? pickLine(dialogueLines(o.type, 'confusedHit') || [], 'x', o) : pickLine(personaLines(rp, 'hit', 'friendlyHit', o.type), 'x', o);
       if (text) { o.say = { text: text.replace(/\{name\}/g, name), life: 2.6, ...(rp ? { col: rp.bubble } : {}) }; o.sayWait = Math.max(o.sayWait || 0, 4); }
     }
   }

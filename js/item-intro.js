@@ -39,16 +39,16 @@ function showNextItemIntro() {
   const esc = s => String(s || '').replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
   el.innerHTML = '<section class="item-intro-card">' +
     '<small class="item-intro-new">✦ ' + (info.headline ? esc(info.headline) : '獲得新' + esc(info.kindLabel || '物品')) + '</small>' +
-    '<div class="item-intro-image">' + (info.image ? '<img src="' + esc(info.image) + '" alt="">' : '<i>' + esc(info.icon || '🎁') + '</i>') + '</div>' +
+    '<div class="item-intro-image' + (info.imageHtml ? ' custom' : '') + '">' + (info.imageHtml ? info.imageHtml : info.image ? '<img' + (info.imageClass ? ' class="' + esc(info.imageClass) + '"' : '') + ' src="' + esc(info.image) + '" alt="">' : '<i>' + esc(info.icon || '🎁') + '</i>') + '</div>' +
     '<h2>' + esc(info.name) + '</h2>' +
     (info.tag ? '<span class="item-intro-tag">' + esc(info.tag) + '</span>' : '') +
     (info.desc ? '<p>' + esc(info.desc) + '</p>' : '') +
-    (info.stat ? '<p class="item-intro-stat">' + esc(info.stat) + '</p>' : '') +
+    (info.stat ? '<p class="item-intro-stat">' + esc(info.stat).replace(/\n/g, '<br>') + '</p>' : '') +   // stat 裡的換行（\n）＝分排
     '<button type="button" class="item-intro-ok">知道了 <kbd>Enter</kbd></button></section>';
   const img = el.querySelector('.item-intro-image img');   // 很小的圖（最長邊 ≤ 48 像素，例如急救包、鑰匙）放大 2 倍
-  if (img) { const big = () => { const w = img.naturalWidth, h = img.naturalHeight; if (w && Math.max(w, h) <= 48) { img.style.width = w * 2 + 'px'; img.style.height = h * 2 + 'px'; } }; if (img.complete) big(); else img.onload = big; }
+  if (img && !img.classList.contains('ui-icon')) { const big = () => { const w = img.naturalWidth, h = img.naturalHeight; if (w && Math.max(w, h) <= 48) { img.style.width = w * 2 + 'px'; img.style.height = h * 2 + 'px'; } }; if (img.complete) big(); else img.onload = big; }
   el.classList.remove('hidden');
-  if (typeof SFX !== 'undefined') SFX.play('itemReveal', .8, 'item-reveal'); else if (typeof sfx === 'function') sfx('menu');   // 開置物櫃音效（js/sfx.js）
+  if (typeof SFX !== 'undefined') SFX.play(info.sound || 'itemReveal', .8, 'item-reveal');   // info.sound：指定別的音效（例如住院通知用提示彈窗） else if (typeof sfx === 'function') sfx('menu');   // 開置物櫃音效（js/sfx.js）
   setTimeout(() => el.querySelector('.item-intro-ok')?.focus(), 0);
 }
 function closeItemIntro() {

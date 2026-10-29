@@ -1,5 +1,5 @@
 /* ===== 怪物圖鑑（遊戲）=====
-   ・在 T-Pad 的「怪物圖鑑」App 看；2F應變中心的電腦前按 Space 打開原本的獨立視窗（兩邊同一份排版、同一份紀錄）；左邊是選到的怪物（圖片、名稱、能力），右邊是星級、縮圖、基礎訊息
+   ・在 T-Pad 的「怪物圖鑑」App 看；2F應變中心的電腦前按 Space 打開電腦桌面（js/pc-desktop.js），點桌面的「怪物圖鑑」打開原本的獨立視窗（兩邊同一份排版、同一份紀錄）；左邊是選到的怪物（圖片、名稱、能力），右邊是星級、縮圖、基礎訊息
    ・消滅次數：怪物死掉時記一次（js/combat-feel.js 的 onEnemyDeath 呼叫 bestiaryRecordKill）。
      自爆史萊姆自己炸掉的不算；B1 訓練室（練習模式）打死的預設不算（data/bestiary.js 的 style.countPractice）。
    ・消滅過的怪物才有縮圖、才能點來看；還沒消滅過的是黑底問號
@@ -43,7 +43,8 @@ function bestiaryRecordKill(e) {
 const bestiarySpots = () => (!BESTIARY_COMPUTER.maps.length || (MAP && BESTIARY_COMPUTER.maps.includes(MAP.name)))
   ? costumeSpots(id => BESTIARY_COMPUTER.tiles.includes(id)) : [];
 const bestiaryNearPlayer = () => costumeSpotNearPlayer(bestiarySpots());
-function useBestiaryNearPlayer() { if (!bestiaryNearPlayer()) return false; openBestiary(); return true; }
+// 電腦打開的是桌面（js/pc-desktop.js），圖鑑在桌面上的「怪物圖鑑」圖示；沒載入桌面時直接開圖鑑
+function useBestiaryNearPlayer() { if (!bestiaryNearPlayer()) return false; if (typeof openPcDesktop === 'function') openPcDesktop(); else openBestiary(); return true; }
 
 function buildBestiary() {
   const el = bst.el = document.createElement('div');

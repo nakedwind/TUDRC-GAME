@@ -510,7 +510,8 @@ function fixMap(m) {
   m.safe = !!m.safe;   // 安全場景：遊戲裡不生怪、不套黑幕
   m.npcs = !!m.npcs;   // 場景 NPC：這張地圖會不會出現克莉思、路德等人
   if (m.story) m.story = true; else delete m.story;   // 劇情地圖（時間暫停）：只有溫特一個人進來看劇情（js/maploader.js 的 MAP_STORY）
-  m.portals = Array.isArray(m.portals) ? m.portals : [];   // 出入口：[{c,r,to:目標地圖id}]
+  m.portals = Array.isArray(m.portals) ? m.portals : [];   // 出入口：[{c,r,to:目標地圖id, hidden?:隱藏地道（球球找到才出現）}]
+  m.hiddenPickups = Array.isArray(m.hiddenPickups) ? m.hiddenPickups : [];   // 隱藏的拾取物（沒有亮點）：['圖層:c,r'…]（大圖用左上角那一格）
   m.cols = m.cols || 32; m.rows = m.rows || 18;   // 地圖大小（舊地圖沒存就用預設）
   return m;
 }
@@ -1021,15 +1022,22 @@ function draw() {
   }
   // 出入口記號（紫格＋🚪＋通往哪張地圖）
   for (const pt of (m.portals || [])) {
-    const x = OX + pt.c * CELL, y = OY + pt.r * CELL;
-    ctx.fillStyle = 'rgba(150,90,220,.45)'; ctx.fillRect(x, y, CELL, CELL);
-    ctx.strokeStyle = '#b58cff'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
+    const x = OX + pt.c * CELL, y = OY + pt.r * CELL, hid = !!pt.hidden;   // 隱藏地道：咖啡色＋🕳️
+    ctx.fillStyle = hid ? 'rgba(140,100,50,.5)' : 'rgba(150,90,220,.45)'; ctx.fillRect(x, y, CELL, CELL);
+    ctx.strokeStyle = hid ? '#d9a55a' : '#b58cff'; ctx.lineWidth = 2; if (hid) ctx.setLineDash([5, 3]); ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4); ctx.setLineDash([]);
     ctx.fillStyle = '#fff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('🚪', x + CELL / 2, y + CELL / 2);
+    ctx.fillText(hid ? '🕳️' : '🚪', x + CELL / 2, y + CELL / 2);
     const target = (maps.find(mm => mm.id === pt.to) || {}).name || '（目標已刪除）';
     ctx.font = 'bold 10px sans-serif'; ctx.textBaseline = 'top';
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText('→' + target, x + CELL / 2, y + CELL + 1);
     ctx.fillStyle = '#d9c6ff'; ctx.fillText('→' + target, x + CELL / 2, y + CELL + 1);
+  }
+  // 隱藏的拾取物：格子角落標 🙈
+  for (const k of (m.hiddenPickups || [])) {
+    const [c, r] = k.split(':').pop().split(',').map(Number), x = OX + c * CELL, y = OY + r * CELL;
+    ctx.fillStyle = 'rgba(20,20,30,.75)'; ctx.fillRect(x + CELL - 19, y + 1, 18, 18);
+    ctx.font = '13px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🙈', x + CELL - 10, y + 11);
   }
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
   // 懸停：選到磚塊圖時先顯示 40% 半透明預覽（放置前看得到圖與位置），再加外框
@@ -1127,6 +1135,14 @@ function placeStamp(c, r, t, ox = 0, oy = 0) {
   }
   m.stamps.push(st);
   checkResult = null; saveMaps(); draw();
+}
+// 這格有沒有可以拾取的東西（拾取亮點、電池、杏仁水、鑰匙、塗鴉筆…）：回傳 { layer, c, r }（大圖＝左上角那一格）
+const editorIsPickupTile = id => { const t = tileById(id) || {}; return /^tile_interactive_pickup/.test(id) || id === 'tile_interactive_storage_locker_key' || /拾取亮點|鑰匙|電池|杏仁水|腎上腺素|塗鴉筆/.test(String(t.name || '')); };
+function editorPickupAt(m, c, r) {
+  const si = stampIndexAt(m, c, r);
+  if (si >= 0 && editorIsPickupTile(m.stamps[si].id)) { const s = m.stamps[si]; return { layer: s.layer || 'top', c: s.c, r: s.r }; }
+  for (const [lid, cells] of Object.entries(m.layers || {})) { const id = cells[c + ',' + r]; if (id && editorIsPickupTile(id)) return { layer: lid, c, r }; }
+  return null;
 }
 function stampIndexAt(m, c, r) {   // 上層優先（topStampIndex）
   return topStampIndex(m, (s, t) => c >= s.c && c < s.c + stampW(s, t) && r >= s.r && r < s.r + stampH(s, t));
@@ -1244,6 +1260,33 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       setStatus('請選空格作為核心候選點', '#ff8f8f'); return;
     }
     toggle(m.coreSpots, key);
+  } else if (brush.mode === 'hidepick') {   // 🙈 隱藏拾取：點地上的拾取物（拾取亮點、鑰匙…）切換「隱藏／一般」
+    if (!isDown) return;
+    const found = editorPickupAt(m, c, r);
+    if (!found) { setStatus('這格沒有可以拾取的東西（拾取亮點、電池、杏仁水、鑰匙…）', '#ff8f8f'); return; }
+    const k = found.layer + ':' + found.c + ',' + found.r, i = m.hiddenPickups.indexOf(k);
+    if (i >= 0) m.hiddenPickups.splice(i, 1); else m.hiddenPickups.push(k);
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已改回一般拾取物（有亮點）' : '已設成隱藏拾取物：沒有亮點，要靠近才有拾取提示；球球學會「尋寶犬」才找得到', '#7ee0c0');
+    return;
+  } else if (brush.mode === 'tunnel') {   // 🕳️ 隱藏地道：點出入口切換隱藏；點空格新增一個隱藏地道
+    if (!isDown) return;
+    const pt = m.portals.find(p => p.c === c && p.r === r);
+    if (pt) {
+      if (pt.hidden) delete pt.hidden; else pt.hidden = true;
+      saveMaps(); draw();
+      setStatus(pt.hidden ? '已設成隱藏地道：要球球學會「地道搜索」找到才會出現' : '已改回一般出入口', '#7ee0c0');
+      return;
+    }
+    const others = maps.filter(x => x.id !== m.id);
+    if (!others.length) { setStatus('只有一張地圖，先新增另一張才能設地道', '#ff8f8f'); return; }
+    pickMapDialog('這個隱藏地道要通到哪一張地圖？', others).then(to => {
+      if (!to) return;
+      m.portals.push({ c, r, to: to.id, hidden: true });
+      saveMaps(); draw();
+      setStatus('已設隱藏地道 → ' + to.name + '（球球找到之前看不到、進不去）', '#7ee0c0');
+    });
+    return;
   } else if (brush.mode === 'portal') {
     if (!isDown) return;   // 只在按下時處理，避免拖曳一直跳視窗
     const pi = m.portals.findIndex(p => p.c === c && p.r === r);
@@ -2780,6 +2823,7 @@ function shiftMapContent(m, dc, dr) {
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
   (m.portals || []).forEach(p => { p.c += dc; p.r += dr; });
+  m.hiddenPickups = (m.hiddenPickups || []).map(k => { const i = k.lastIndexOf(':'); return k.slice(0, i + 1) + shiftKey(k.slice(i + 1)); });
   if (solidNudgeCell) solidNudgeCell = shiftKey(solidNudgeCell);
 }
 // 把落在地圖外的內容清掉（縮小後用）
@@ -2809,6 +2853,7 @@ function dropOutsideContent(m) {
   const pn = (m.portals || []).length;
   m.portals = (m.portals || []).filter(p => inside(p.c, p.r));
   removed += pn - m.portals.length;
+  m.hiddenPickups = (m.hiddenPickups || []).filter(k => insideKey(k.slice(k.lastIndexOf(':') + 1)));
   if (solidNudgeCell && !insideKey(solidNudgeCell)) solidNudgeCell = null;
   return removed;
 }

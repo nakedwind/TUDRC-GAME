@@ -186,3 +186,9 @@
 .sq-btn-label { font-weight: 900; -webkit-text-stroke: .5px currentColor; }   /* 「培養」粗體：這個字型的粗體不夠明顯，加一點描邊 */
 .sq-btn-cost img { width: 38px; height: 38px; margin: -9px 0; }   /* 32 再放大 1.2 倍；上下負邊距：圖變大按鈕也不會被撐高 */
 .sq-btn-cost b { font-size: 16px; }
+
+/* 球球（搜救犬）的技能樹：5 格（js/skills.js 的 DOG_SKILL_LAYOUT） */
+.sq-tree.dog .sq-node[data-skill-pick="trait-1"] { left: 60px; top: 118px; }
+.sq-tree.dog .sq-node[data-skill-pick="a-1"] { left: 170px; top: 44px; } .sq-tree.dog .sq-node[data-skill-pick="b-1"] { left: 170px; top: 192px; }
+.sq-tree.dog .sq-node[data-skill-pick="core-1"] { left: 270px; top: 118px; }
+.sq-tree.dog .sq-node[data-skill-pick="ult"] { left: 372px; top: 108px; }

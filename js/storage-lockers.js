@@ -46,7 +46,8 @@ function storagePropEntries(){
     const token=storagePropToken(id,c,r,layer,ox,oy);
     if(isWorldPickup(kind)&&collectedStorageKeys.has(token))return;
     const x0=OX+c*CELL+ox,y0=OY+r*CELL+oy;
-    entries.push({id,kind,token,stamp,x:x0+mapTileW(t)*CELL/2,y:y0+mapTileH(t)*CELL-CELL/2,top:y0,
+    const hidden=isWorldPickup(kind)&&(MAP.hiddenPickups||[]).includes(layer+':'+c+','+r);   // 隱藏的拾取物：沒有亮點，靠近才有提示（地圖編輯器「🙈 隱藏拾取」）
+    entries.push({id,kind,token,stamp,hidden,x:x0+mapTileW(t)*CELL/2,y:y0+mapTileH(t)*CELL-CELL/2,top:y0,
       open:kind==='open'||unlockedStorageLockers.has(token)});
   };
   for(const s of MAP.stamps||[]) add(s.id,s.c,s.r,s.layer||'top',s);
@@ -175,7 +176,7 @@ function drawWorldPickupSparkles(ctx){
   const time=performance.now()/1000;
   ctx.save();ctx.globalAlpha=1;ctx.globalCompositeOperation='source-over';
   for(const prop of storagePropEntries()){
-    if(!isWorldPickup(prop.kind)||!isLit(prop.x,prop.y))continue;
+    if(!isWorldPickup(prop.kind)||prop.hidden||!isLit(prop.x,prop.y))continue;   // 隱藏的拾取物不畫亮點
     const pulse=.7+.3*Math.sin(time*3.2+prop.x*.03+prop.y*.02);
     const x=Math.round(prop.x),y=Math.round(prop.y);
     const glow=ctx.createRadialGradient(x,y,0,x,y,10);

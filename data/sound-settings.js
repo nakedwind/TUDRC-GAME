@@ -11,7 +11,8 @@ const SOUND_SETTINGS = {
     "birdRun": 1.8,
     "birdWalk": 1.95,
     "blip": 1.5,
-    "bossElite": 0.5,
+    "bossElite": 0.8,
+    "boxLand": 1.5,
     "chainUnlock": 1.45,
     "clownfishHop1": 1.5,
     "clownfishHop2": 1.45,
@@ -42,6 +43,7 @@ const SOUND_SETTINGS = {
     "hitTranq": 1.85,
     "ironGateSlide": 2.8,
     "itemPickup": 1.65,
+    "itemReveal": 1.2,
     "kill": 1.85,
     "lifeformAttack": 1.55,
     "lifeformWalk": 1.45,
@@ -78,7 +80,8 @@ const SOUND_SETTINGS = {
     "stairsUp": 1.95,
     "storyDoor": 2.5,
     "vendingCheckout": 1.8,
-    "vendingOpen": 3
+    "vendingOpen": 3,
+    "wearGear": 2.1
   },
   "files": {
     "overrides": {
@@ -110,7 +113,9 @@ const SOUND_SETTINGS = {
         "怪物/葫蘆猴/葫蘆猴落地02.mp3",
         "環境/破壞/挖礦.mp3"
       ],
-      "baseMusic": "../music/relaxing-piano-music.mp3"
+      "baseMusic": "../music/relaxing-piano-music.mp3",
+      "bossElite": "../music/0-top-battle-game-bgm.mp3",
+      "boxLand": "pop.mp3"
     },
     "extras": {},
     "meta": {}

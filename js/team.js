@@ -20,6 +20,7 @@ function getTeam() {
   let t = null;
   try { t = JSON.parse(localStorage.getItem(TEAM_STORE)); } catch (e) {}
   if (!Array.isArray(t)) t = (typeof DEFAULT_TEAM !== 'undefined') ? DEFAULT_TEAM.slice() : [];
+  if (typeof isHospitalized === 'function') t = t.filter(id => !isHospitalized(id));   // 住院中的隊員不能出勤（js/vitals.js）
   return normalizeTeam(t);
 }
 function setTeam(list) {
@@ -423,15 +424,17 @@ function renderTeamPanel() {
   const team = getTeam();
   const memberCard = (id, selected) => {
     const spec = teamProfile(id) || {};
-    const locked = id === 'ball' && !selected && !hasDogHandler(team);
+    const hosp = !selected && typeof isHospitalized === 'function' && isHospitalized(id);   // 住院中：不能編入
+    const hospText = hosp ? '住院中・約 ' + hospitalMinutesLeft(id) + ' 分鐘出院' : '';
+    const locked = hosp || (id === 'ball' && !selected && !hasDogHandler(team));
     const role = id === 'ball' ? '搜救犬' : (spec.guide ? '嚮導・弱戰鬥＋隨身疏導' : '哨兵') + (RESCUE_DOG_HANDLERS.includes(id) ? '・領犬員' : '');
     const profile = TEAM_PROFILES[id] || {};
-    return '<button class="team-pick' + (selected ? ' team-pick-selected' : '') + '" type="button" data-id="' + id + '"' + (locked ? ' disabled title="' + RESCUE_DOG_REQUIREMENT + '"' : '') + ' aria-label="' + (selected ? '移出' : '編入') + spec.name + '">' +
+    return '<button class="team-pick' + (selected ? ' team-pick-selected' : '') + '" type="button" data-id="' + id + '"' + (locked ? ' disabled title="' + (hosp ? hospText : RESCUE_DOG_REQUIREMENT) + '"' : '') + ' aria-label="' + (selected ? '移出' : '編入') + spec.name + '">' +
       '<span class="team-avatar-frame" data-char="' + id + '"><img class="team-avatar" src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '正面圖"></span>' +
       '<span class="team-summary"><span class="team-name-line"><b>' + (spec.name || id) + '</b>' +
       '<span class="team-role">' + role + '</span></span>' +   // 評級（S／A 級）先不顯示
-      '<span class="team-intro">' + (locked ? RESCUE_DOG_REQUIREMENT : profile.intro || spec.role || '') + '</span></span>' +
-      '<span class="team-choice">' + (selected ? '移出 −' : locked ? '需領犬員' : '編入 ＋') + '</span></button>';
+      '<span class="team-intro">' + (hosp ? '<img class="hosp-ico" src="images/ui/hospital.svg?v=20261029" alt="">' + hospText : locked ? RESCUE_DOG_REQUIREMENT : profile.intro || spec.role || '') + '</span></span>' +
+      '<span class="team-choice">' + (selected ? '移出 −' : hosp ? '<img class="hosp-ico" src="images/ui/hospital.svg?v=20261029" alt="">住院中' : locked ? '需領犬員' : '編入 ＋') + '</span></button>';
   };
   const available = roster.filter(id => !team.includes(id));
   const oldAvailable = teamPanel.querySelector('#teamAvailable'), availableScroll = oldAvailable ? oldAvailable.scrollTop : 0;

@@ -864,8 +864,9 @@ function updateWanderer(npc, dt) {
   if (escapeDarkness(npc, dt)) return;
   if (npc.id === 'ball' && !MAP_SAFE && getTeam().includes('ball')) {
     const anchor = dogFollowAnchor();   // 預設跟領犬員；可以改跟別的隊員或溫特（js/rescue-dog.js）
+    if (typeof updateDogTunnel === 'function' && updateDogTunnel(npc, anchor, dt)) return;   // 🕳️ 聞到隱藏的地道：跑過去坐下汪汪叫（js/rescue-dog.js）
     if (updateRescueDogPickup(npc, anchor, dt)) return;
-    followTarget(npc, anchor, { dist: CELL * 1.25, speed: 110 }, dt);
+    followTarget(npc, anchor, { dist: CELL * 1.25, speed: 110 * (typeof dogSpeedMul === 'function' ? dogSpeedMul() : 1) }, dt);   // 💨 技能：跑更快
     npc.target = null; npc.waitT = 0;
     return;
   }

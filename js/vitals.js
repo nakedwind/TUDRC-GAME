@@ -5,7 +5,9 @@
        HP 低於 VITALS.hospitalBelow（30%）的隊員：自動住院（待在 1F醫院、躺在病床上）。
        HP 歸零的隊員回來時至少剩 1。
    ・在應變中心：溫特和每位隊員每秒回 VITALS.baseRegen（1）HP；溫特、嚮導每秒回 1 SP。負荷不會自己降（雷德的自癒照舊）。
-   ・1F醫院：躺在病床上每秒回 VITALS.bedRegen（10）HP（溫特自己躺上去也算）。住院的隊員補滿就出院，下次回來待在平常的位置。
+   ・1F醫院：住院的隊員躺在病床上睡覺，每分鐘回最大 HP 的 VITALS.hospitalPerMin（10%），回滿 100% 才出院（下次回來待在平常的位置）；
+       住院期間不能出勤（js/team.js），在戰鬥地圖的時候也照樣在恢復。溫特自己躺上去每秒回 VITALS.bedRegen（10）HP。
+       從戰鬥地圖回來時，有人住院會跳出通知，列出誰在住院、大約還要幾分鐘。
        HP 沒滿、但沒有低於 30% 的隊員：跟他對話按「🏥 去醫院休息」，他就會走去醫院（js/game.js 的對話框按鈕）。
    ・2F疏導室：負荷 ≥ VITALS.sootheRoomFrom 的隊員回來時待在疏導室。
        溫特走到旁邊按 C 自己疏導（花 SP）；或跟常駐在疏導室的亞許對話按「🫶 請亞許疏導」，亞許一個一個走過去幫忙疏導（不花溫特的 SP）。
@@ -18,13 +20,38 @@ const VITALS = {
   berserkEdge: 85,        // 暴走的隊員回應變中心時，負荷降到多少（暴走邊緣）
   hospitalBelow: .3,      // HP 低於最大值的幾成：回應變中心時自動住院
   baseRegen: 1,           // 在應變中心：每秒回幾 HP／SP
-  bedRegen: 10,           // 醫院病床上：每秒回幾 HP
+  bedRegen: 10,           // 病床上（溫特自己躺、沒住院的隊員躺）：每秒回幾 HP
+  hospitalPerMin: .1,     // 住院的隊員：每分鐘回最大 HP 的幾成（.1＝10%：倒下的人大約 10 分鐘才回滿）；回滿 100% 才出院，住院期間不能出勤
   sootheRoomFrom: 30,     // 負荷到多少以上：回應變中心時待在疏導室
   hospitalMap: '1F醫院', sootheRoomMap: '2F疏導室',   // 地圖名稱（基地編輯器裡的名稱）
   ash: 'ash', ashSootheTime: 3, ashSootheColor: [176, 196, 214], ashWalkMax: 4,   // 亞許：疏導一次幾秒、光點顏色、最多走幾秒過去
   leaveTimeout: 10,       // 被叫去醫院的隊員：最多走幾秒就離開這張地圖
 };
 const VITALS_STORE = 'tudrc_vitals_v1';
+// 住院：每秒回幾 HP（最大 HP × 每分鐘幾成 ÷ 60）；max 不給就用原本的最大 HP
+const hospitalRate = (id, max) => (max || vitalsMax(id)) * VITALS.hospitalPerMin / 60;
+// 這位隊員是不是正在住院（js/team.js：住院中不能出勤）
+const isHospitalized = id => !!(vitals.mates[id] && vitals.mates[id].hospital && TYPES[id]);
+// 還要幾分鐘出院（無條件進位）
+function hospitalMinutesLeft(id) {
+  const m = vitals.mates[id]; if (!m || !m.hospital) return 0;
+  return Math.max(1, Math.ceil((vitalsMax(id) - m.hp) / (vitalsMax(id) * VITALS.hospitalPerMin)));
+}
+let vitalsHospitalNotice = false;
+// 從戰鬥地圖回來：跳出通知，列出誰在住院（借用「獲得新物品」的說明視窗，js/item-intro.js）
+function showHospitalNotice() {
+  const ids = Object.keys(vitals.mates).filter(isHospitalized); if (!ids.length) return;
+  const name = id => (TYPES[id] && TYPES[id].name) || id;
+  const pct = id => Math.round(Math.max(0, vitals.mates[id].hp) / vitalsMax(id) * 100);
+  // 圖：住院隊員的頭像，右上角壓醫院圖示（好幾個人就排一排）
+  const face = id => '<span class="hosp-av" title="' + name(id) + '"><span class="hosp-av-frame"><img src="' + (typeof memberPortraitPath === 'function' ? memberPortraitPath(TYPES[id]) : '') + '" alt=""></span><img class="hosp-badge" src="images/ui/hospital.svg?v=20261029" alt="住院中"></span>';
+  const info = { key: 'hospital-notice', always: true, headline: '住院通知', icon: '🏥', imageHtml: '<span class="hosp-avs">' + ids.map(face).join('') + '</span>', sound: 'noticePopup', name: ids.map(name).join('、') + ' 住院中',
+    tag: VITALS.hospitalMap,
+    desc: '受傷的隊員正在' + VITALS.hospitalMap + '的病床上休息，要回滿 100% 才會出院，住院期間不能出勤。',
+    stat: ids.map(id => name(id) + '　HP ' + pct(id) + '%・約 ' + hospitalMinutesLeft(id) + ' 分鐘出院').join('\n') };   // 一位隊員一排
+  if (typeof itemIntro === 'function') itemIntro(info);
+  else if (typeof systemNotice === 'function') systemNotice('🏥 ' + info.name + '（' + info.stat + '）');
+}
 // player：{ hp }；mates：隊員 → { hp, taint, berserk, hospital }；fromBattle：上一張地圖是戰鬥區（回應變中心時套用規則用）；sortie：出勤時的紀錄（重新挑戰時用）
 let vitals = { player: null, mates: {}, fromBattle: false, sortie: null };
 try { const saved = JSON.parse(localStorage.getItem(VITALS_STORE) || 'null'); if (saved && typeof saved === 'object') vitals = { ...vitals, ...saved, mates: saved.mates || {} }; } catch (_) {}
@@ -66,6 +93,7 @@ function arriveVitals() {
     }
     if (vitals.player) vitals.player.hp = Math.max(1, vitals.player.hp);
     vitals.fromBattle = false; vitals.sortie = null;
+    vitalsHospitalNotice = Object.keys(vitals.mates).some(isHospitalized);   // 有人住院：地圖載好後跳通知（afterVitalsSpawn）
     saveVitals();
   }
   if (!MAP_SAFE && !vitals.sortie) { vitals.sortie = JSON.parse(JSON.stringify({ player: vitals.player, mates: vitals.mates })); saveVitals(); }   // 出勤：記下出發時的狀態
@@ -96,6 +124,7 @@ function afterVitalsSpawn() {
   G.vitalsSafe = MAP_SAFE; G.vitalsMapId = MAP && MAP.id; G.vitalsSkip = vitalsPractice();
   if (vitals.player && Number.isFinite(vitals.player.hp)) G.player.hp = Math.max(1, Math.min(G.player.maxhp, vitals.player.hp));
   if (onHospitalMap()) for (const t of G.towers) if (vitalsMate(t.type).hospital) putInBed(t);   // 住院的隊員：躺在病床上
+  if (vitalsHospitalNotice) { vitalsHospitalNotice = false; setTimeout(showHospitalNotice, 900); }   // 剛從戰鬥回來：誰在住院
 }
 // 這位隊員平時在哪（js/sentry.js 的 npcLocation 先問這裡）：住院＝醫院、負荷高＝疏導室；其他照基地編輯器的設定
 function vitalsLocation(id) {
@@ -118,7 +147,17 @@ const inBed = a => !!(a && a.sitting && a.sitting.bed) && onHospitalMap();
 
 // ---- 每幀（game.js 的 update 呼叫）：應變中心裡慢慢恢復 ----
 function updateVitals(dt) {
-  if (!MAP_SAFE || vitalsPractice() || !G.player) return;
+  if (vitalsPractice() || !G.player) return;
+  if (!MAP_SAFE) {   // 出勤中：留在醫院的隊員照樣在恢復
+    const out = new Set((G.towers || []).map(t => t.type));
+    for (const [id, m] of Object.entries(vitals.mates)) {
+      if (!m.hospital || out.has(id) || !TYPES[id]) continue;
+      m.hp = Math.min(vitalsMax(id), m.hp + hospitalRate(id) * dt);
+      if (m.hp >= vitalsMax(id)) m.hospital = false;
+    }
+    if (performance.now() - vitalsSavedAt > 5000) saveVitals();
+    return;
+  }
   const p = G.player;
   p.hp = Math.min(p.maxhp, p.hp + (inBed(p) ? VITALS.bedRegen : VITALS.baseRegen) * dt);
   G.guide = Math.min(G.guideMax, G.guide + VITALS.baseRegen * dt);   // 溫特的 SP
@@ -128,7 +167,7 @@ function updateVitals(dt) {
     if (!TYPES[t.type]) continue;
     here.add(t.type);
     const m = vitalsMate(t.type);
-    if (t.hp > 0) t.hp = Math.min(t.maxhp, t.hp + (inBed(t) ? VITALS.bedRegen : VITALS.baseRegen) * dt);
+    if (t.hp > 0) t.hp = Math.min(t.maxhp, t.hp + (m.hospital ? hospitalRate(t.type, t.maxhp) : inBed(t) ? VITALS.bedRegen : VITALS.baseRegen) * dt);   // 住院：慢慢回（每分鐘 10%）
     if (TYPES[t.type].guide && typeof initGuideSP === 'function') { initGuideSP(t); t.sp = Math.min(t.maxsp, t.sp + VITALS.baseRegen * dt); guideSPRecords[t.type] = t.sp; }
     if (onHospitalMap() && m.hospital) {
       if (t.hp >= t.maxhp) {   // 補滿：出院
@@ -146,7 +185,7 @@ function updateVitals(dt) {
   }
   for (const [id, m] of Object.entries(vitals.mates)) {   // 不在這張地圖的隊員：住院的當作躺在病床上
     if (here.has(id) || !TYPES[id]) continue;
-    m.hp = Math.min(vitalsMax(id), m.hp + (m.hospital ? VITALS.bedRegen : VITALS.baseRegen) * dt);
+    m.hp = Math.min(vitalsMax(id), m.hp + (m.hospital ? hospitalRate(id) : VITALS.baseRegen) * dt);
     if (m.hospital && m.hp >= vitalsMax(id)) m.hospital = false;
   }
   if (typeof guideSPRecords !== 'undefined') for (const id of Object.keys(TYPES)) {

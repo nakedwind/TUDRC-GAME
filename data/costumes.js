@@ -88,7 +88,8 @@ const COSTUME_ACCESSORIES = [
 // 一開始就擁有的服裝（新存檔送的；空的＝全部要從扭蛋轉）
 const COSTUME_STARTER = [];
 // 可以打開服裝介面的地圖素材（衣櫃）
-const WARDROBE_TILES = ['tile_dorm_wardrobe_lab_coat'];
+// 衣櫃：在這些素材前按 Space 可以換衣服（js/costumes.js）；名稱裡有「衣櫃」的素材也算
+const WARDROBE_TILES = ['tile_dorm_wardrobe_lab_coat', 'tile_prop_shelf_locker_unit', 'tile_prop_shelf_locker_unit_02', 'tile_eoc_locker'];   // 白袍衣櫃、層架置物櫃、層架置物櫃 02、置物櫃
 
 // 稀有度：名稱、顏色（衣櫃、扭蛋共用）
 const COSTUME_RARITIES = {

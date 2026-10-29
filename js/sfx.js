@@ -20,6 +20,7 @@ const SFX = (() => {
     demolish: '設施/拆建築.mp3',
     placeLight: '設施/放燈.mp3',   // 放置燈類建築（js/build.js）   // 拆除自己蓋的建築（js/game.js 的 demolishPlayerBuilding）
     itemPickup: '獎勵/拾取.mp3',
+    noticePopup: '介面/提示彈窗.mp3',   // 提示彈窗（住院通知…）：js/item-intro.js 的 sound
     itemReveal: '獎勵/開置物櫃.mp3',   // 第一次拿到東西、開置物櫃開出東西：跳出說明視窗時（js/item-intro.js）
     powerOn: '環境/門與機關/很大聲的開燈.mp3',
     ironGateSlide: '環境/門與機關/鐵門滑動.mp3',
@@ -169,6 +170,11 @@ const SFX = (() => {
     milkfishSpit: '怪物/史萊姆/slime-land.mp3',           // 吐出隊友（被打死獲救、被消化到倒下）
     milkfishHurt: '怪物/虱目魚小子/虱目魚小子被打.mp3',
     milkfishDeath: '怪物/虱目魚小子/虱目魚小子死掉.mp3',
+    // 人面蝶：拍翅膀（飛的時候每拍一輪翅膀播一次）、撒鱗粉、被打、死掉（js/human-face-butterfly.js）
+    mothFlap: '怪物/人面蝶/人面蝶拍翅膀.mp3',
+    mothSpray: '怪物/人面蝶/撒麟粉.mp3',
+    mothHurt: '怪物/人面蝶/人面蝶被打.mp3',
+    mothDeath: '怪物/人面蝶/人面蝶死掉.mp3',
     // 環境背景音：Y 區地圖一直循環播放（js/ambience.js）
     whiteNoise: '環境/白噪音.mp3',
     // BOSS 音樂（js/boss-music.js）：一直循環、淡入淡出；音量在音效編輯器的「音樂」調整
@@ -193,7 +199,7 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'pop', 'playerHit', 'playerHitMonster',
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'mothFlap', 'mothSpray', 'mothHurt', 'mothDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'pop', 'playerHit', 'playerHitMonster',
     'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音

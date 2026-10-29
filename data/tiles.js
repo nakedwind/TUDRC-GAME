@@ -1444,6 +1444,14 @@ const SHARED_TILES = [
     "h": 3
   },
   {
+    "id": "tile_prop_shelf_locker_unit_02",
+    "name": "層架置物櫃 02",
+    "role": "floor",
+    "file": "images/scene-props/shelf-locker-unit02.png",
+    "w": 1,
+    "h": 3
+  },
+  {
     "id": "tile_prop_tv_monitor",
     "name": "電視",
     "role": "floor",

@@ -116,7 +116,7 @@ function renderSquadPage(body) {
   if (!actor) html += '<section class="sq-profile" data-sq="panel.profile"><p class="sq-empty">本次任務沒有攜帶隊員。</p></section>';
   else {
     html += squadProfileHtml(actor, safe);
-    if (actor.noncombat || !TYPES[actor.type]) html += '<section class="sq-main" data-sq="panel.tree"><p class="sq-empty" data-sq="text.noSkill">' + sqT('text.noSkill', '支援人員沒有技能樹，也沒有隊員裝備。') + '</p></section>';
+    if ((actor.noncombat || !TYPES[actor.type]) && !isDogTree(actor.type)) html += '<section class="sq-main" data-sq="panel.tree"><p class="sq-empty" data-sq="text.noSkill">' + sqT('text.noSkill', '支援人員沒有技能樹，也沒有隊員裝備。') + '</p></section>';
     else if (sqV2()) html += squadV2Html(actor, safe);
     else if (st.page === 'gear' || SQ_SKILL_TREE_HIDDEN.includes(actor.type)) html += squadGearHtml(actor, safe);
     else html += squadSkillHtml(actor, safe);
@@ -161,7 +161,7 @@ function squadSwitchHtml(suffix) {
 function squadSkillHtml(actor, safe) {
   const type = actor.type, st = squadPageState;
   // 嚮導的技能樹格子比較少（js/skills.js 的 GUIDE_SKILL_LAYOUT），排法也不同：整塊加 guide，格子用 gnode:（編輯器裡跟哨兵的分開調）
-  const layout = skillLayoutFor(type), guide = isGuideTree(type), nk = guide ? 'gnode' : 'node';
+  const layout = skillLayoutFor(type), guide = isGuideTree(type), dog = isDogTree(type), nk = dog ? 'dnode' : guide ? 'gnode' : 'node';   // 球球：5 格的小技能樹（js/skills.js 的 DOG_SKILL_LAYOUT）
   let sel = st.skill[type]; if (!skillLayoutOf(sel, type)) sel = (layout.find(n => skillStateOf(type, n.id) === 'open') || layout[0]).id;
   st.skill[type] = sel;
   const nodes = layout.map(n => {
@@ -170,7 +170,7 @@ function squadSkillHtml(actor, safe) {
       sqIcon(icon, nk + 'Icon:' + n.id) + (state === 'locked' ? '<i class="sq-node-lock">🔒</i>' : '') + '</button>';
   }).join('');
   const learned = skillLearnedCount(type), v2 = sqV2();   // V2：連線＋格子包在 sq-tree-in 裡（面板變高，格子整組往下放在中間）；沒有切換按鈕
-  let h = '<section class="sq-main sq-tree' + (guide ? ' guide' : '') + '" data-sq="panel.tree">' + (v2 ? '<div class="sq-tree-in">' : '') + '<svg class="sq-lines" data-sq="svg.lines" aria-hidden="true"></svg>' + (v2 ? nodes + '</div>' : '') +
+  let h = '<section class="sq-main sq-tree' + (guide ? ' guide' : '') + (dog ? ' dog' : '') + '" data-sq="panel.tree">' + (v2 ? '<div class="sq-tree-in">' : '') + '<svg class="sq-lines" data-sq="svg.lines" aria-hidden="true"></svg>' + (v2 ? nodes + '</div>' : '') +
     '<span class="sq-progress" data-sq="text.progress">已學 ' + learned + ' / ' + skillTotalFor(type) + '</span>' +
     '<span class="sq-crystals" data-sq="text.crystals"><img data-sq="img.crystalsIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片">' + training.crystals + '</span>' +
     (v2 ? '' : squadSwitchHtml('') + nodes) +
@@ -217,7 +217,7 @@ function squadV2Html(actor, safe) {
     h = full.slice(0, cut);
     if (st.card === type) h += full.slice(cut).replace('<section class="sq-info', '<section class="sq-info sq-card"').replace(/<\/section>$/, '<button type="button" class="sq-card-close" data-sq-card-close aria-label="關閉說明">×</button></section>');   // 說明卡：跟舊版右下的說明同一份
   }
-  return h + squadGearBarHtml(type);
+  return h + (isDogTree(type) ? '' : squadGearBarHtml(type));   // 球球沒有隊員裝備
 }
 function squadGearBarHtml(type) {
   return '<section class="sq-info sq-gearbar" data-sq="panel.gearBar"><b class="sq-gearbar-title">隊員裝備</b><div class="sq-gearbar-slots">' +
@@ -330,7 +330,7 @@ function placeSquadArrow(body) {
 function drawSquadLines(body) {
   const svg = body.querySelector('.sq-lines'), panel = svg && svg.parentElement; if (!svg || !panel.offsetWidth) return;
   const type = squadPageState.member, els = (typeof SQUAD_LAYOUT !== 'undefined' && SQUAD_LAYOUT.elements) || {};
-  const layout = skillLayoutFor(type), nk = isGuideTree(type) ? 'gnode:' : 'node:';   // 嚮導：格子少、編輯器位移另外一組
+  const layout = skillLayoutFor(type), nk = isDogTree(type) ? 'dnode:' : isGuideTree(type) ? 'gnode:' : 'node:';   // 嚮導：格子少、編輯器位移另外一組
   svg.setAttribute('viewBox', '0 0 ' + panel.offsetWidth + ' ' + panel.offsetHeight);
   const box = id => {
     const el = panel.querySelector('[data-skill-pick="' + id + '"]'); if (!el) return null;
@@ -382,7 +382,7 @@ function handleSquadClick(body, e) {
   const learn = t.closest('[data-skill-learn]');
   if (learn) { if (learnSkill(type, learn.dataset.skillLearn)) sound('achievement'); else sound('error'); renderSquadPage(body); return; }
   if (t.closest('[data-squad-reset]')) {
-    if (!confirm('重置 ' + TYPES[type].name + ' 的技能？學技能花掉的碎片會全部退回。')) return;
+    if (!confirm('重置 ' + ((TYPES[type] || CHARACTERS[type] || {}).name || type) + ' 的技能？學技能花掉的碎片會全部退回。')) return;
     const refund = resetSkills(type);
     if (typeof systemNotice === 'function') systemNotice('已重置技能，退回 ◆ ' + refund);
     sound('switch'); renderSquadPage(body); return;

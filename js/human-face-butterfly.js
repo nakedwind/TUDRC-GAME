@@ -34,7 +34,7 @@ const MOTH = {
   doseDecay: .45,       // 離開霧之後，量表每秒退多少（滿＝1）
   immune: 2,            // 發作後幾秒內同一種鱗粉不再累積
   poison: { time: 8, tick: 1, dmg: 3 },      // 中毒：持續幾秒、每幾秒扣一次、每次扣多少
-  confuse: { time: 6, playerMiss: .8 },      // 混亂：持續幾秒、溫特開槍打偏的機率
+  confuse: { time: 6, playerMiss: .8, lineGap: 5 },   // 混亂：持續幾秒、溫特開槍打偏的機率、打到自己人的台詞至少隔幾秒
   sleep: { time: 20 },                       // 睡眠：睡幾秒（被打到就醒）
   meleeMiss: .95,       // 近戰隊員打牠打不到的機率（飛得高，只有 5% 打得到）
   // ---- 粉塵爆炸 ----
@@ -45,6 +45,7 @@ const MOTH = {
   // ---- 趨光 ----
   lure: { range: 7, perch: 6, cooldown: 14 },   // 幾格內的燈會吸引牠、停在燈上幾秒、休息完那盞燈幾秒內不再吸引牠
   deathPuffs: 7,        // 死掉時炸出幾團鱗粉
+  sound: { flap: .35, flapEvery: .8, spray: .6, sprayEvery: 1.2 },   // 音量：拍翅膀、撒鱗粉（0～1，再乘音效編輯器的音量）；拍翅膀、撒鱗粉每幾秒播一次（音檔約 0.8、1.25 秒）
   testSpawn: true,      // 測試用：true＝進戰鬥地圖時在營地右邊生一隻（測完改成 false）
   testCampDist: 20,     // 測試用：營地右邊幾格（跟之前測試的葫蘆猴同一個位置）
 };
@@ -145,7 +146,10 @@ function stepMothEnemy(e, dt) {
   m.phase += dt;
   // 拍翅膀：停在燈上時拍得比較慢
   const wings = f.walkFront && f.walkFront.length ? f.walkFront : [f.front || e.sprite];
-  e.forceFrame = wings[Math.floor(m.phase * C.flapFps * (m.perch ? .4 : 1)) % wings.length];
+  m.flapT = (m.flapT || 0) + dt * C.flapFps * (m.perch ? .4 : 1);
+  e.forceFrame = wings[Math.floor(m.flapT) % wings.length];
+  const flapRound = Math.floor(m.flapT / Math.max(wings.length, Math.round(C.flapFps * C.sound.flapEvery)));   // 大約每 flapEvery 秒播一次拍翅膀聲，跟翅膀的圖對齊（停在燈上拍得慢、比較小聲）
+  if (flapRound !== m.flapRound) { m.flapRound = flapRound; if (typeof sfxAt === 'function') sfxAt('mothFlap', e.x, e.y, C.sound.flap * (m.perch ? .5 : 1), 'moth-flap-' + (e.mothKey ||= Math.random().toString(36).slice(2, 7))); }
   e.forceFlip = !!e.faceRight;   // 原圖朝左
   const goalLift = m.perch ? mothLampSpot(m.perch).lift : C.height;
   m.lift += (goalLift - m.lift) * Math.min(1, dt * 3);
@@ -235,8 +239,10 @@ function mothSpray(e, dt, active) {
     const s = m.spray;
     s.t += dt;
     if (s.phase === 'tele') {
-      if (s.t >= C.telegraph) { s.phase = 'spray'; s.t = 0; s.puff = 0; }
+      if (s.t >= C.telegraph) { s.phase = 'spray'; s.t = 0; s.puff = 0; s.snd = 0; }
     } else {
+      s.snd -= dt;   // 撒粉的沙沙聲：撒的時候一直接著播
+      if (s.snd <= 0 && s.t < C.sprayTime - .4) { s.snd = C.sound.sprayEvery; if (typeof sfxAt === 'function') sfxAt('mothSpray', e.x, e.y, C.sound.spray, 'moth-spray-' + (e.mothKey ||= Math.random().toString(36).slice(2, 7))); }
       s.puff -= dt;
       if (s.puff <= 0) { s.puff = C.puffEvery; mothPuff(e.x + mothRand(-62, 62), e.y + mothRand(-24, 34), s.kind); }
       if (s.t >= C.sprayTime) {
@@ -249,7 +255,6 @@ function mothSpray(e, dt, active) {
   m.cd -= dt;
   if (active && m.cd <= 0) {
     m.spray = { kind: mothPick(MOTH_KINDS), phase: 'tele', t: 0 };
-    if (typeof sfxAt === 'function') sfxAt('fishSpray', e.x, e.y, .12, 'moth-spray');
   }
 }
 // 落下一團鱗粉霧
@@ -475,15 +480,19 @@ function shootWakeMate(p, t, aim, aimAng) {   // 彈匣已經在 game.js 扣過�
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
   else if (PLAYER_ATK.double && Math.random() < PLAYER_ATK.double) p.atkCd = .07;   // 快速射擊（手槍 Lv3 起）
 }
-// 醒來：已經倒在地上的才播爬起來（還沒倒下就直接站好）
+// 醒來：先張大眼睛驚醒，再半閉著眼慢慢爬起來（還沒倒下的：驚一下、半閉眼回神）；這段時間不能動、不能攻擊
 function mothWake(a) {
   const A = MOTH_SLEEP_ANIM, fallen = (a.mothSleepAge || 0) > A.sway + A.close;
   a.mothSleep = false; a.mothSleepHp = null; a.sleepT = 0;
-  a.mothWakeT = fallen ? A.wake : 0;
+  a.mothWakeFell = fallen;
+  a.mothWakeLen = a.mothWakeT = fallen ? A.startle + A.rise + A.settle : A.standStartle + A.standDaze;
 }
 
 // ---- 睡著的動畫：左右搖晃、眼睛半閉 → 眼睛閉上 → 側身倒在地上（轉 90 度）→ 頭上飄 Zzz；醒來時爬起來 ----
-const MOTH_SLEEP_ANIM = { sway: 1.2, close: .45, fall: .35, wake: .3 };   // 各段幾秒
+const MOTH_SLEEP_ANIM = { sway: 1.2, close: .45, fall: .35,   // 睡著：搖晃、閉眼、倒下各幾秒
+  startle: .35, rise: .9, settle: .3,                           // 倒在地上被叫醒：張眼驚醒、半閉眼慢慢爬起來、站好晃一下
+  hop: 12, hopTime: .22,                                        // 驚醒時往上彈多高（像素）、彈一下花幾秒
+  standStartle: .3, standDaze: .4 };                            // 還沒倒下就被叫醒：驚一下、半閉眼回神
 function mothSleepPose(a) {
   const A = MOTH_SLEEP_ANIM, side = a.mothFallSide || 1;
   if (a.mothSleep && a.sleepT > 0) {
@@ -493,7 +502,23 @@ function mothSleepPose(a) {
     const u = Math.min(1, (t - A.sway - A.close) / A.fall);
     return { angle: side * Math.PI / 2 * u * u, eyes: 2, lying: u >= 1, lift: u };   // 往旁邊倒下
   }
-  if (a.mothWakeT > 0) { const u = a.mothWakeT / A.wake; return { angle: side * Math.PI / 2 * u, eyes: 2, lift: u }; }   // 爬起來
+  if (a.mothWakeT > 0) {
+    const w = (a.mothWakeLen || 0) - a.mothWakeT;
+    if (!a.mothWakeFell) {
+      if (w < A.standStartle) { const k = Math.sin(w / A.standStartle * Math.PI); return { angle: 0, eyes: 0, lift: k * .6 }; }   // 驚一下：眼睛張開、身體一跳
+      return { angle: Math.sin(w * 6) * .04, eyes: 1 };   // 半閉眼回神
+    }
+    if (w < A.startle) {   // 還躺著，眼睛突然張開、整個人往上（畫面的上方）彈一下再落回地上；身體不轉，不然躺著時會像往旁邊彈
+      const k = w < A.hopTime ? Math.sin(w / A.hopTime * Math.PI) : 0;
+      return { angle: side * Math.PI / 2, eyes: 0, lift: 1, hop: k * A.hop, lying: true };
+    }
+    if (w < A.startle + A.rise) {   // 半閉著眼，慢慢撐起來
+      const u = (w - A.startle) / A.rise, e = u * u * (3 - 2 * u);
+      return { angle: side * Math.PI / 2 * (1 - e), eyes: 1, lift: 1 - e };
+    }
+    const v = Math.min(1, (w - A.startle - A.rise) / A.settle);   // 站起來後還有點迷糊，輕輕晃一下
+    return { angle: Math.sin(v * Math.PI * 2) * .06 * (1 - v), eyes: 1 };
+  }
   return null;
 }
 // game.js 的 pickCharacterFrame 呼叫：睡著時用正面的半閉眼／閉眼圖
@@ -506,7 +531,7 @@ function applyMothSleepTransform(ctx, a) {
   const pose = (a.mothSleep || a.mothWakeT > 0) && mothSleepPose(a);
   if (!pose) return;
   const fx = a.x, fy = a.y + 18;   // 腳底（溫特、隊員的圖都畫在 y - size + 18 ～ y + 18）
-  ctx.translate(fx, fy - (pose.lift || 0) * 8); ctx.rotate(pose.angle); ctx.translate(-fx, -fy);
+  ctx.translate(fx, fy - (pose.lift || 0) * 8 - (pose.hop || 0)); ctx.rotate(pose.angle); ctx.translate(-fx, -fy);   // 先往畫面上方移、再轉：彈起來永遠是往上
 }
 // 溫特睡著時：建築欄、建築清單、下方快捷欄變暗、不能點
 (() => {
@@ -530,19 +555,38 @@ function mothConfusedSentry(t, spec, dt) {
   const consider = o => { const d = Math.hypot(o.x - t.x, o.y - t.y); if (d < bestD) { bestD = d; best = { o, x: o.x, y: o.y }; } };
   for (const o of G.towers) if (o !== t && o.hp > 0 && !o.eatenBy && !o.grabbed) consider(o);
   if (G.player && G.player.hp > 0) consider(G.player);
-  if (!best) return;
+  if (!best) { animateSentry(t, 0, 0, dt); return; }
   const range = spec.range * CELL;
   if (bestD > range * .9 || !hasLineOfSight(t.x, t.y, best.x, best.y)) {
     const sp = (spec.walkSpeed || 80) * dt, dx = best.x - t.x, dy = best.y - t.y, d = bestD || 1;
-    const nx = t.x + dx / d * sp, ny = t.y + dy / d * sp, [cc, cr] = cellAt(nx, ny);
+    const nx = t.x + dx / d * sp, ny = t.y + dy / d * sp, [cc, cr] = cellAt(nx, ny), ox = t.x, oy = t.y;
     if (sentryCellWalkable(cc, cr)) { t.x = nx; t.y = ny; }
     else if (sentryCellWalkable(cellAt(nx, t.y)[0], cellAt(t.x, t.y)[1])) t.x = nx;
     else if (sentryCellWalkable(cellAt(t.x, t.y)[0], cellAt(t.x, ny)[1])) t.y = ny;
-    t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
-  } else if (t.cd <= 0) {
-    t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')));
-    applyChaosDamage(t, best, spec);
+    t.anim = t.mothWalkAnim || 0;   // game.js 前面的 animateSentry 每幀會把 anim 歸零（那時還沒走），所以自己記著
+    animateSentry(t, t.x - ox, t.y - oy, dt);   // 走路動畫（跟平常走路一樣用實際移動的距離）
+    t.mothWalkAnim = t.moving ? t.anim : 0;
+    if (!t.moving) t.dir = Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');   // 卡住時還是面向目標
+  } else {
+    animateSentry(t, 0, 0, dt); t.mothWalkAnim = 0;
+    t.dir = Math.abs(best.x - t.x) > Math.abs(best.y - t.y) ? (best.x < t.x ? 'left' : 'right') : (best.y < t.y ? 'back' : 'front');
+    if (t.cd <= 0) {
+      t.cd = 1 / (spec.rate * (1 + sortieBuff(t, 'spd')));
+      applyChaosDamage(t, best, spec);
+      mothConfusedSay(t, best.o);
+    }
   }
+  if (t.mothLineCd > 0) t.mothLineCd -= dt;
+}
+// 混亂時打到自己人：喊一句（對話編輯器「混亂時打到自己人」，{name}＝被打的人）；正在說被吞、倒下這種更重要的話就不蓋掉
+function mothConfusedSay(t, victim) {
+  if (t.mothLineCd > 0 || t.hp <= 0 || (t.say && t.say.text && (t.say.hurt || 0) >= 3)) return;
+  const line = pickLine(dialogueLines(t.type, 'confusedAttack') || [], 'x', t);
+  if (!line) return;
+  const name = victim === G.player ? '部隊長' : (TYPES[victim.type] && TYPES[victim.type].name) || '';
+  t.say = { text: line.replace(/\{name\}/g, name), life: 2.6, hurt: 2 };
+  t.sayWait = Math.max(t.sayWait || 0, 4);
+  t.mothLineCd = MOTH.confuse.lineGap;
 }
 // 近戰隊員打飛在空中的人面蝶：有 meleeMiss 的機率打不到
 const MOTH_MELEE_TYPES = new Set(['red', 'luther', 'avaren', 'colyn']);

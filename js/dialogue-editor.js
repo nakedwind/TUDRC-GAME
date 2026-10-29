@@ -38,6 +38,8 @@ const SITUATIONS = [
   { group: '戰鬥中・被怪物攻擊', key: 'rooted', label: '被絲瓜藤纏住', when: '絲瓜小姐的藤蔓從地下冒出來、把他纏住時。' },
   { group: '戰鬥中・被怪物攻擊', key: 'slammed', label: '被葫蘆猴壓到', when: '被葫蘆猴的泰山壓頂砸到時。' },
   { group: '戰鬥中・被怪物攻擊', key: 'rammed', label: '被鳥頭人撞飛', when: '被鳥頭人（包括鳥頭大隊長）衝撞撞到時（雷德舉盾頂住不算）。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'confusedAttack', label: '混亂時打到自己人', name: '被他打到的人', when: '吸了人面蝶的混亂鱗粉、打到隊友或部隊長時說一句（每 <b>5 秒</b>最多一次）。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'confusedHit', label: '被混亂的隊友打到', name: true, when: '被吸了混亂鱗粉的隊友打到時（取代「被暴走的隊友打到」那句，每 <b>4 秒</b>最多一次）。' },
   { group: '汙染與暴走', key: 'taintWarn', label: '瀕臨暴走', when: '汙染超過 <b>85</b> 時說一句，之後沒人疏導，每 <b>8～12 秒</b>再說一句。' },
   { group: '汙染與暴走', key: 'berserk', label: '暴走瞬間', when: '汙染到 <b>100</b>、暴走的那一刻（暗紅色泡泡）。' },
   { group: '汙染與暴走', key: 'relief', label: '瀕臨暴走時被疏導', when: '汙染 70 以上時被疏導、降到 <b>70 以下</b>。' },
@@ -61,7 +63,7 @@ const RAGE_FIELDS = [
 ];
 // 可以收禮的角色（data/gifts.js 的 GIFT_PREFS）都有「送禮與委託」這幾格
 // 被怪物攻擊時的台詞（js/mate-hurt-talk.js）：出勤隊員都有這幾格
-const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed'];
+const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed', 'confusedAttack', 'confusedHit'];
 const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'giftAfter', 'giftRefuse', 'requestAsk', 'requestReward'];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };
@@ -352,7 +354,7 @@ function renderEditor() {
     const lines = allLines(entry[s.key]);
     const hit = q && lines.some(l => l.toLowerCase().includes(q));
     let when = s.when;
-    if (s.name) when += ' 可以用 <code>{name}</code> 代表攻擊他的人的名字。';
+    if (s.name) when += ' 可以用 <code>{name}</code> 代表' + (typeof s.name === 'string' ? s.name : '攻擊他的人') + '的名字。';   // name 寫文字＝{name} 代表誰
     if (s.item) when += ' 可以用 <code>{item}</code> 代表東西的名稱。';
     if (s.ordered) when += ' 可以用 ↑↓ 調整順序。';
     const box = situationBox(ed, s.label, when, lines.length, hit ? 'match' : '');

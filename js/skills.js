@@ -30,13 +30,35 @@ const GUIDE_SKILL_CHANGE = {
 };
 const GUIDE_SKILL_LAYOUT = SKILL_LAYOUT.filter(n => !GUIDE_SKILL_DROP.includes(n.id)).map(n => ({ ...n, ...(GUIDE_SKILL_CHANGE[n.id] || {}) }));
 const isGuideTree = type => !!(typeof TYPES !== 'undefined' && TYPES[type] && TYPES[type].guide);
-const skillLayoutFor = type => isGuideTree(type) ? GUIDE_SKILL_LAYOUT : SKILL_LAYOUT;   // 這位隊員的技能樹有哪幾格
+// ---- 球球（搜救犬）的技能樹：只有 5 格 ----
+//   🐾 嗅覺（一開始就會：找地上的東西叼給溫特）
+//   → 👃 搜尋範圍加大、💨 移動速度加快（兩條都接在嗅覺後面）
+//   → 🔍 找到隱藏的物品（先學上面其中一個）→ 🕳️ 找到隱藏的地道
+//   效果寫在 js/rescue-dog.js（dogSearchCells、dogSpeedMul、dogFindsHidden、dogFindsTunnels）；數字在下面的 DOG_SKILL
+const isDogTree = type => type === 'ball';
+const DOG_SKILL_LAYOUT = [
+  { id: 'trait-1', group: 'trait', req: null, tag: '嗅覺' },
+  { id: 'a-1', group: 'a', req: 'trait-1', tag: '搜尋' },
+  { id: 'b-1', group: 'b', req: 'trait-1', tag: '敏捷' },
+  { id: 'core-1', group: 'core', req: null, reqAny: ['a-1', 'b-1'], tag: '搜救技能' },
+  { id: 'ult', group: 'ult', req: 'core-1', tag: '終極搜救技能' },
+];
+const DOG_SKILL = { searchMul: 1.6, speedMul: 1.35 };   // 搜尋範圍 ×1.6、移動速度 ×1.35
+const DOG_SKILL_TEXTS = {
+  'trait-1': { name: '嗅覺', icon: '🐾', cost: 0, desc: '球球會自己找附近地上的東西（異質碎片、拾取亮點、怪物掉的道具），叼回來給溫特。', effect: '初始技能' },
+  'a-1': { name: '靈敏鼻子', icon: '👃', cost: 40, desc: '鼻子更靈，聞得到更遠的東西。', effect: '搜尋物品的範圍 ×1.6' },
+  'b-1': { name: '飛奔', icon: '💨', cost: 40, desc: '跑得更快，跟隊伍、去撿東西都更快。', effect: '移動速度 ×1.35' },
+  'core-1': { name: '尋寶犬', icon: '🔍', cost: 80, desc: '找得到沒有光點、藏在地上的隱藏物品，叼回來給溫特。', effect: '可以撿到隱藏的物品' },
+  'ult': { name: '地道搜索', icon: '🕳️', cost: 150, desc: '聞得出藏起來的地道：走到那裡坐下汪汪叫，地道就會出現，可以進去。', effect: '可以找到隱藏的地道' },
+};
+const skillLayoutFor = type => isDogTree(type) ? DOG_SKILL_LAYOUT : isGuideTree(type) ? GUIDE_SKILL_LAYOUT : SKILL_LAYOUT;   // 這位隊員的技能樹有哪幾格
 const SKILL_TOTAL = SKILL_LAYOUT.length;
 const skillTotalFor = type => skillLayoutFor(type).length;
 const SKILL_DEFAULT_COST = { 'trait-1': 0, 'trait-2': 40, 'a-1': 40, 'a-2': 150, 'core-1': 80, 'core-2': 150, 'core-3': 200, 'ult': 250, 'b-1': 40, 'b-2': 150, 'aux-1': 80, 'aux-2': 80 };
 const SKILL_GROUP_ICON = { trait: '✦', a: '🛡️', b: '⚔️', core: '✨', ult: '🌟', aux: '◎' };
 const GUIDE_GROUP_ICON = { ...SKILL_GROUP_ICON, a: '💚', b: '📯' };
-const skillGroupIcon = (type, group) => (isGuideTree(type) ? GUIDE_GROUP_ICON : SKILL_GROUP_ICON)[group];
+const DOG_GROUP_ICON = { trait: '🐾', a: '👃', b: '💨', core: '🔍', ult: '🕳️' };
+const skillGroupIcon = (type, group) => (isDogTree(type) ? DOG_GROUP_ICON : isGuideTree(type) ? GUIDE_GROUP_ICON : SKILL_GROUP_ICON)[group];
 // type 有給：照這位隊員的技能樹（嚮導的格子少、分類名稱不同）；沒給：哨兵的完整 12 格
 const skillLayoutOf = (id, type) => (type ? skillLayoutFor(type) : SKILL_LAYOUT).find(n => n.id === id) || null;
 const SKILL_BASE = Object.fromEntries(Object.entries(TYPES).map(([k, s]) => [k, JSON.parse(JSON.stringify(s))]));   // 沒學技能、沒穿裝備時的原始數值
@@ -66,11 +88,12 @@ function legacySkillNodes(type) {
 }
 // 某位隊員某一格的技能：{ name, desc, effect, icon, cost, mods }
 function skillNodeOf(type, id) {
-  const lay = skillLayoutOf(id, type); if (!lay || !TYPES[type]) return null;
+  const lay = skillLayoutOf(id, type); if (!lay || (!TYPES[type] && !isDogTree(type))) return null;
   const saved = typeof SQUAD_SKILLS !== 'undefined' && SQUAD_SKILLS.members && SQUAD_SKILLS.members[type] && SQUAD_SKILLS.members[type][id];
   // 嚮導沒存過的格子：用 data/guide-skills.js 寫好的預設內容
   const guideDefault = isGuideTree(type) && typeof GUIDE_SKILL_TEXTS !== 'undefined' && GUIDE_SKILL_TEXTS[type] && GUIDE_SKILL_TEXTS[type][id];
-  const base = saved || guideDefault || legacySkillNodes(type)[id] || { name: lay.tag, desc: '', effect: '', mods: [] };
+  const dogDefault = isDogTree(type) && DOG_SKILL_TEXTS[id];
+  const base = saved || dogDefault || guideDefault || legacySkillNodes(type)[id] || { name: lay.tag, desc: '', effect: '', mods: [] };
   // active：嚮導會自己發動的技能（群體補血、增益、大招…）的設定；編輯器存過的優先，沒有就用 data/guide-skills.js 的 GUIDE_SKILLS
   const activeDefault = isGuideTree(type) && typeof GUIDE_SKILLS !== 'undefined' && GUIDE_SKILLS[type] && GUIDE_SKILLS[type][id];
   const active = (saved && saved.active) || activeDefault || null;
@@ -81,7 +104,7 @@ function skillNodeOf(type, id) {
   };
 }
 const skillCost = (type, id) => (skillNodeOf(type, id) || {}).cost || 0;
-const skillTreeOpen = type => !!TYPES[type];
+const skillTreeOpen = type => !!TYPES[type] || isDogTree(type);
 const hasSkill = (type, id) => id === 'trait-1' || (training.skills[type] || []).includes(id);
 function skillStateOf(type, id) {
   if (hasSkill(type, id)) return 'owned';

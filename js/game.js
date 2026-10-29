@@ -571,7 +571,7 @@ window.addEventListener('keydown', e => {
     else if (typeof useNpcChatNearPlayer === 'function' && useNpcChatNearPlayer()) {}   // 有人在閒聊：聽閒聊（js/npc-chats.js）
     else if (typeof useWardrobeNearPlayer === 'function' && useWardrobeNearPlayer()) {}   // 衣櫃：服裝介面（js/costumes.js）
     else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
-    else if (typeof useBestiaryNearPlayer === 'function' && useBestiaryNearPlayer()) {}   // 2F應變中心的電腦：怪物圖鑑（js/bestiary.js）
+    else if (typeof useBestiaryNearPlayer === 'function' && useBestiaryNearPlayer()) {}   // 2F應變中心的電腦：電腦桌面（音樂、踩地雷、怪物圖鑑；js/pc-desktop.js）
     else if (typeof useArmorChestNearPlayer === 'function' && useArmorChestNearPlayer()) {}   // 裝備箱：防具視窗（js/backpack.js）
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
     else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
@@ -625,6 +625,7 @@ function portalNearPlayer() {
   let best = null, bd = PORTAL_RADIUS;
   for (const pt of mapPortals) {
     if (typeof mrtPortalBlocked === 'function' && mrtPortalBlocked(pt)) continue;   // 封鎖中的捷運入口裡面的出入口不作用
+    if (typeof portalUsable === 'function' && !portalUsable(pt)) continue;   // 隱藏地道：要先被球球找到（js/rescue-dog.js）
     const [x, y] = center(pt.c, pt.r), d = Math.hypot(x - p.x, y - p.y);
     if (d < bd) { bd = d; best = { portal: pt, x, y }; }
   }
@@ -1399,7 +1400,7 @@ function updatePlayer(dt) {
   }
   rescueStuck(p, playerBlocked);          // 被卡住時自動移到可走位置，不顯示除錯符號
   if (p.rootT > 0) { p.moving = false; p.anim = 0; p.knockT = 0; return; }   // 被絲瓜藤纏住：不能移動（js/loofah-lady.js）
-  if (p.sleepT > 0) { p.moving = false; p.anim = 0; stepActorKnock(p, dt, playerBlocked); return; }   // 吸了人面蝶的睡眠鱗粉：睡著不能動（js/human-face-butterfly.js）
+  if (p.sleepT > 0 || p.mothWakeT > 0) { p.moving = false; p.anim = 0; stepActorKnock(p, dt, playerBlocked); return; }   // 吸了人面蝶的睡眠鱗粉：睡著、正在爬起來都不能動（js/human-face-butterfly.js）
   if (stepActorKnock(p, dt, playerBlocked)) { p.moving = false; p.anim = 0; return; }   // 被鳥頭人撞飛：滑行中不能走（js/bird-head.js）
   if (p.slipDizzyT > 0) { p.moving = false; p.anim = 0; return; }   // 踩香蕉皮滑去撞到東西：頭暈不能動（js/golden-banana-king.js）
   startDashIfPressed(p, dt);   // Shift：衝刺（能走路的時候才算）
@@ -1766,7 +1767,7 @@ function updatePlayerAttack(dt) {
   }
   updateAmmoHud();
   const queued = performance.now() - shotQueuedAt < SHOT_QUEUE * 1000;   // 剛點了一下（已經放開也算）
-  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.slipDizzyT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
+  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.mothWakeT > 0 || p.slipDizzyT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
   if (canFire) shotQueuedAt = -Infinity;   // 這一下開了：用掉
   if (wid === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈（js/flare.js）
   if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
@@ -2007,6 +2008,7 @@ function frame(ts) {
     || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
     || (typeof gachaOpen !== 'undefined' && gachaOpen)   // 扭蛋機（js/gacha.js）
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
+    || (typeof pcDesktopOpen !== 'undefined' && pcDesktopOpen)   // 2F應變中心的電腦桌面（js/pc-desktop.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
   if (menuOpen && G.cameraShakeT) G.cameraShakeT = 0;   // 暫停中（教學、對話、選單…）：被打到的鏡頭震動倒數在 update 裡跑、不會減少，不歸零畫面會一直抖
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
@@ -2070,6 +2072,7 @@ function update(dt) {
     else if (t.frozenT > 0) { t.frozenT -= dt; t.moving = false; t.navPath = null; if (t.hp > 0) t.dir = 'front'; }   // 溫特正在疏導／急救這位隊員：站著不動（js/channel-actions.js）
     else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0 && !t.mothSleep) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
     else if (t.dazeT > 0 && t.hp > 0) { t.dazeT -= dt; t.moving = false; t.navPath = null; }   // 被閃光彈閃到、被雷電彈電到：暈一下（js/special-guns.js）
+    else if (t.mothWakeT > 0 && t.hp > 0) { t.moving = false; t.navPath = null; }   // 吸了睡眠鱗粉剛醒：正在爬起來（js/human-face-butterfly.js）
     else if (t.slipDizzyT > 0 && t.hp > 0) { t.moving = false; t.navPath = null; }   // 踩香蕉皮滑去撞到東西：頭暈（js/golden-banana-king.js 倒數）
     else if (t.soothingT > 0 && t.hp > 0 && !t.berserk) t.dir = 'front';   // 疏導中：站定、面向鏡頭（原本的指令保留，施法完繼續）
     else if (!MAP_SAFE && typeof campBedStep === 'function' && campBedStep(t, dt)) {}   // 殘血：走回營地、躺行軍床休息（js/camp-beds.js）
@@ -2115,7 +2118,7 @@ function update(dt) {
     }
     if (t.hitT > 0) t.hitT -= dt;   // 受擊閃紅計時
     if (t.eatenBy) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 被虱目魚小子吃掉：不攻擊（js/milkfish-kid.js）
-    if (t.sleepT > 0 || t.dazeT > 0 || t.slipDizzyT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著、暈眩：不攻擊
+    if (t.sleepT > 0 || t.mothWakeT > 0 || t.dazeT > 0 || t.slipDizzyT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 睡著、剛醒爬起來、暈眩：不攻擊
     if (t.frozenT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 正在被疏導／急救：不攻擊（暴走中也一樣）
     if (typeof campBedResting === 'function' && campBedResting(t)) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 躺在行軍床上休息：不攻擊、不疏導（js/camp-beds.js）
     if (spec.guide) updateGuideSP(t, dt);

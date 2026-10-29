@@ -182,7 +182,7 @@ function openSettingsOnEsc(e) {
   // 保險：這些狀態下也不打開設定（地圖切換中、放置建築、指派哨兵…）
   const busy = (typeof campPlanOpen !== 'undefined' && campPlanOpen) || (typeof campSupplyOpen !== 'undefined' && campSupplyOpen) || (typeof npcArrangeMode !== 'undefined' && npcArrangeMode) || dialogueState || elevatorMenuOpen || supplyShopOpen || backpackOpen || mapTransitioning
     || visible('sentryMenu') || visible('groundMenu') || visible('buildbar') || visible('teamEditPanel') || visible('squadStatusPanel')
-    || (typeof tpadOpen !== 'undefined' && tpadOpen) || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen) || (G && G.selType) || assigning;   // 怪物圖鑑
+    || (typeof tpadOpen !== 'undefined' && tpadOpen) || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen) || (typeof pcDesktopOpen !== 'undefined' && pcDesktopOpen) || (G && G.selType) || assigning;   // 怪物圖鑑、2F 電腦桌面
   if (busy) return;
   e.preventDefault(); if (!(typeof openTPadSettings === 'function' && openTPadSettings())) openSettings();
 }

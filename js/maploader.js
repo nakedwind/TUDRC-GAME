@@ -284,7 +284,7 @@ function initMap() {
   });
   campCells = new Set(baseTargets.length ? baseTargets : ((MAP.camp && MAP.camp.length) ? MAP.camp : []));    // 空＝預設最下排
   mapBreakable = (MAP.breakable || []).map(k => k.split(',').map(Number));
-  mapPortals = (MAP.portals || []).map(p => ({ c: p.c, r: p.r, to: p.to }));   // 出入口：走到門旁按鍵可換地圖
+  mapPortals = (MAP.portals || []).map(p => ({ c: p.c, r: p.r, to: p.to, ...(p.hidden ? { hidden: true } : {}) }));   // hidden＝隱藏地道（js/rescue-dog.js）   // 出入口：走到門旁按鍵可換地圖
 }
 // 出入口查詢
 function mapIndexById(id) { const list = mapList(); return list.findIndex(m => m && m.id === id); }

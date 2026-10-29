@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- 醫院：圓角大樓＋屋頂上的醫療十字（十字、門、窗挖空），白色剪影；風格跟諾亞的扳手、亞許的任務板一樣（粗圓、白色實心） -->
+  <defs>
+    <mask id="hospitalCut">
+      <!-- 主樓＋上面突出的一塊 -->
+      <rect x="2.6" y="9" width="18.8" height="13" rx="2.6" fill="#fff"/>
+      <rect x="6.8" y="2.6" width="10.4" height="9" rx="2.4" fill="#fff"/>
+      <!-- 醫療十字（挖空） -->
+      <rect x="10.75" y="4.1" width="2.5" height="6.2" rx=".8" fill="#000"/>
+      <rect x="8.9" y="5.95" width="6.2" height="2.5" rx=".8" fill="#000"/>
+      <!-- 大門（挖空，上緣圓角） -->
+      <path d="M9.9 22V17.6A2.1 2.1 0 0 1 14.1 17.6V22Z" fill="#000"/>
+      <!-- 左右兩扇窗（挖空） -->
+      <rect x="4.6" y="13.2" width="3" height="2.8" rx=".7" fill="#000"/>
+      <rect x="16.4" y="13.2" width="3" height="2.8" rx=".7" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="24" height="24" fill="#fff" mask="url(#hospitalCut)"/>
+</svg>

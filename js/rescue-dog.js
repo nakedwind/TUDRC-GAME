@@ -3,6 +3,12 @@
    ・溫特放在地上的急救包、杏仁水 → 給嚮導（js/ground-items.js）
    ・其他（異質碎片、拾取亮點、怪物掉的道具／裝備）→ 給溫特 */
 const DOG_PICKUP = { searchCells: 16, leashCells: 16, reach: 30, speed: 170, interval: .65, scanInterval: .4, timeout: 8 };   // searchCells：找地上東西的範圍；leashCells：離領犬員多遠以內的才去撿（要跟 searchCells 一樣大，不然遠的撿不到）；speed：去撿東西、叼給嚮導時跑多快（平常跟著走是 110）
+// ---- 球球的技能（T-Pad「Y102隊員」→ 球球的技能樹；js/skills.js 的 DOG_SKILL_LAYOUT）----
+const dogSkill = id => typeof hasSkill === 'function' && hasSkill('ball', id);
+const dogSearchCells = () => DOG_PICKUP.searchCells * (dogSkill('a-1') ? DOG_SKILL.searchMul : 1);   // 👃 搜尋範圍加大（牽繩距離跟著變大）
+const dogSpeedMul = () => dogSkill('b-1') ? DOG_SKILL.speedMul : 1;                                    // 💨 移動速度加快
+const dogFindsHidden = () => dogSkill('core-1');                                                      // 🔍 撿得到隱藏的物品（沒有光點的）
+const dogFindsTunnels = () => dogSkill('ult');                                                        // 🕳️ 找得到隱藏的地道
 
 function dogPickupTargetExists(target) {
   if (target.kind === 'shard') {
@@ -32,12 +38,12 @@ function dogPickupApproach(dog, position) {
 function findDogPickup(dog, anchor) {
   const candidates = [];
   for (const shard of G.oreShards || []) if (!shard.picked && shard.z <= 0 && shard.t >= SHARD.delay) candidates.push({ kind: 'shard', shard });
-  for (const prop of storagePropEntries()) if (isPickupProp(prop) && (prop.kind !== 'ground-item' || groundItemGuide(prop.drop.id, prop))) candidates.push({ kind: 'prop', prop });   // 溫特放在地上的：只撿嚮導用得到、還沒帶滿的（js/ground-items.js）
+  for (const prop of storagePropEntries()) if (isPickupProp(prop) && !(prop.hidden && !dogFindsHidden()) && (prop.kind !== 'ground-item' || groundItemGuide(prop.drop.id, prop))) candidates.push({ kind: 'prop', prop });   // 溫特放在地上的：只撿嚮導用得到、還沒帶滿的（js/ground-items.js）
   const nearby = candidates.filter(target => {
     const pos = dogPickupPosition(target);
     const ignored = (dog.pickupIgnored || []).some(entry => entry.key === (target.shard || target.prop.drop || target.prop.token));
-    return !ignored && isLit(pos.x, pos.y) && Math.hypot(pos.x - dog.x, pos.y - dog.y) <= DOG_PICKUP.searchCells * CELL
-      && Math.hypot(pos.x - anchor.x, pos.y - anchor.y) <= DOG_PICKUP.leashCells * CELL;
+    return !ignored && isLit(pos.x, pos.y) && Math.hypot(pos.x - dog.x, pos.y - dog.y) <= dogSearchCells() * CELL
+      && Math.hypot(pos.x - anchor.x, pos.y - anchor.y) <= dogSearchCells() * CELL;
   }).sort((a, b) => {
     const pa = dogPickupPosition(a), pb = dogPickupPosition(b);
     return Math.hypot(pa.x - dog.x, pa.y - dog.y) - Math.hypot(pb.x - dog.x, pb.y - dog.y);
@@ -63,7 +69,7 @@ function updateRescueDogPickup(dog, anchor, dt) {
   dog.pickupScan = Math.max(0, (dog.pickupScan || 0) - dt);
   dog.pickupIgnored = (dog.pickupIgnored || []).filter(entry => (entry.remaining -= dt) > 0);
   if (dog.carryItem) return dogCarryStep(dog, dt);   // 嘴裡叼著要給嚮導的東西：先送過去（不受牽繩距離限制）
-  if (Math.hypot(dog.x - anchor.x, dog.y - anchor.y) > DOG_PICKUP.leashCells * CELL) {
+  if (Math.hypot(dog.x - anchor.x, dog.y - anchor.y) > dogSearchCells() * CELL) {
     if (dog.pickupTarget) clearDogPickup(dog);
     return false;
   }
@@ -73,7 +79,7 @@ function updateRescueDogPickup(dog, anchor, dt) {
     const pos = dogPickupPosition(target);
     target.age += dt;
     if (!dogPickupTargetExists(target) || !isLit(pos.x, pos.y) || target.age > DOG_PICKUP.timeout
-        || Math.hypot(pos.x - anchor.x, pos.y - anchor.y) > DOG_PICKUP.leashCells * CELL) {
+        || Math.hypot(pos.x - anchor.x, pos.y - anchor.y) > dogSearchCells() * CELL) {
       if (target.age > DOG_PICKUP.timeout) ignoreDogPickup(dog, target);
       clearDogPickup(dog); target = null;
     }
@@ -93,7 +99,7 @@ function updateRescueDogPickup(dog, anchor, dt) {
     if (typeof sfxAt === 'function') sfxAt('pop', dog.x, dog.y, .5, 'dog-carry');
     return true;
   }
-  moveSentryWithPath(dog, target.approach.x, target.approach.y, DOG_PICKUP.speed, dt);
+  moveSentryWithPath(dog, target.approach.x, target.approach.y, DOG_PICKUP.speed * dogSpeedMul(), dt);
   if (dog.navFailed) { ignoreDogPickup(dog, target); clearDogPickup(dog); return false; }
   return true;
 }
@@ -137,7 +143,7 @@ function dogCarryStep(dog, dt) {
     dog.carryItem = null; clearDogPickup(dog); dog.pickupCooldown = DOG_PICKUP.interval;
     return true;
   }
-  moveSentryWithPath(dog, who.x, who.y, DOG_PICKUP.speed, dt);
+  moveSentryWithPath(dog, who.x, who.y, DOG_PICKUP.speed * dogSpeedMul(), dt);
   if (dog.navFailed) c.age += dt * 3;   // 走不到：很快就放棄
   return true;
 }
@@ -206,4 +212,85 @@ function setDogFollow(key) {
   const dog = (G.npcs || []).find(n => n.id === 'ball'), who = dogFollowAnchor();
   if (dog) { dog.navPath = null; dog.navGoal = null; flash('球球：跟著' + dogFollowName(who), dog.x, dog.y - 24, '#8fd3ff', 3); }
   sfx('button'); closeFieldCommandMenu();
+}
+
+// ===== 🕳️ 隱藏的地道：學會「地道搜索」後，球球聞到附近藏起來的地道 → 跑過去坐下汪汪叫 → 地道出現，可以進去 =====
+// 隱藏地道＝地圖編輯器用「🕳️ 隱藏地道」工具設的出入口（portal.hidden）；發現過的記在瀏覽器（每張地圖、每個地道各自記）
+const TUNNEL_FOUND_KEY = 'tudrc_tunnels_found_v1';
+const DOG_TUNNEL = { barkTime: 2.2, barkEvery: .75, scanInterval: .6 };   // 叫多久地道才出現、多久叫一聲、多久聞一次
+const tunnelsFound = (() => { try { return new Set(JSON.parse(localStorage.getItem(TUNNEL_FOUND_KEY) || '[]')); } catch (_) { return new Set(); } })();
+const tunnelKey = pt => (MAP && (MAP.id || MAP_INDEX)) + '|' + pt.c + ',' + pt.r;
+function tunnelFound(pt) { return tunnelsFound.has(tunnelKey(pt)); }
+// 這個出入口現在能不能用：一般出入口都可以；隱藏地道要先被球球找到（js/game.js 的 portalNearPlayer、T-Pad 地圖用）
+function portalUsable(pt) { return !pt.hidden || tunnelFound(pt); }
+function revealTunnel(pt, dog) {
+  tunnelsFound.add(tunnelKey(pt));
+  try { localStorage.setItem(TUNNEL_FOUND_KEY, JSON.stringify([...tunnelsFound])); } catch (_) {}
+  const [x, y] = center(pt.c, pt.r);
+  G.effects.push({ ring: true, x, y: y + 6, r: 6, r2: 42, life: .45, life0: .45, color: '#c8a46a' });
+  for (let i = 0; i < 10; i++) G.effects.push({ particle: true, kind: 'spark', x: x + (Math.random() - .5) * 24, y: y + 6, vx: (Math.random() - .5) * 60, vy: -(30 + Math.random() * 50), r: 2 + Math.random() * 2, life: .5 + Math.random() * .3, life0: .8, color: Math.random() < .5 ? '#a8936c' : '#cdbb91' });
+  if (typeof systemNotice === 'function') systemNotice('🐾 球球發現了隱藏的地道！');
+  if (typeof flash === 'function') flash('發現地道！', x, y - 30, '#ffd479', 1.6);
+  if (typeof sfxAt === 'function') sfxAt('loofahVine', x, y, .5, 'tunnel-open');
+}
+function hiddenTunnelsHere() { return (MAP && MAP.portals || []).filter(pt => pt.hidden && !tunnelFound(pt)); }
+// 每幀由 js/sentry.js 呼叫（球球跟隊出勤時）；回傳 true＝這幀球球在忙著找地道
+function updateDogTunnel(dog, anchor, dt) {
+  if (dog.id !== 'ball' || MAP_SAFE || !anchor || !dogFindsTunnels() || dog.carryItem) { dog.tunnel = null; return false; }
+  const tn = dog.tunnel;
+  if (tn) {
+    if (tunnelFound(tn.pt) || Math.hypot(dog.x - anchor.x, dog.y - anchor.y) > dogSearchCells() * CELL * 1.3) { dog.tunnel = null; dog.navPath = null; return false; }
+    const [x, y] = center(tn.pt.c, tn.pt.r);
+    if (tn.state === 'go') {
+      if (Math.hypot(dog.x - tn.goal.x, dog.y - tn.goal.y) < 10) { tn.state = 'bark'; tn.t = 0; tn.next = .5; dog.moving = false; dog.faceRight = x > dog.x; return true; }
+      moveSentryWithPath(dog, tn.goal.x, tn.goal.y, DOG_PICKUP.speed * dogSpeedMul(), dt);
+      if (dog.navFailed) { dog.tunnel = null; dog.tunnelIgnore = { key: tunnelKey(tn.pt), t: 6 }; return false; }
+      return true;
+    }
+    // 坐下汪汪叫（停住超過一下子會自動坐下：js/ball-poses.js）
+    dog.moving = false; tn.t += dt; tn.next -= dt;
+    if (tn.next <= 0) {
+      tn.next = DOG_TUNNEL.barkEvery;
+      if (typeof sfxAt === 'function') sfxAt('ballBark', dog.x, dog.y, .8, 'dog-tunnel-bark');
+      if (typeof flash === 'function') flash('汪！', dog.x + (Math.random() - .5) * 10, dog.y - 40, '#fff2c4', .6);
+    }
+    if (tn.t >= DOG_TUNNEL.barkTime) { revealTunnel(tn.pt, dog); dog.tunnel = null; }
+    return true;
+  }
+  if (dog.tunnelIgnore && (dog.tunnelIgnore.t -= dt) <= 0) dog.tunnelIgnore = null;
+  dog.tunnelScan = (dog.tunnelScan || 0) - dt;
+  if (dog.tunnelScan > 0) return false;
+  dog.tunnelScan = DOG_TUNNEL.scanInterval;
+  const R = dogSearchCells() * CELL;
+  const near = hiddenTunnelsHere().map(pt => { const [x, y] = center(pt.c, pt.r); return { pt, x, y, d: Math.hypot(x - dog.x, y - dog.y) }; })
+    .filter(o => o.d <= R && Math.hypot(o.x - anchor.x, o.y - anchor.y) <= R && !(dog.tunnelIgnore && dog.tunnelIgnore.key === tunnelKey(o.pt)))
+    .sort((a, b) => a.d - b.d);
+  for (const o of near) {
+    // 站在地道旁邊（地道那一格常常是牆或門框）：找一格走得到的
+    for (const [dc, dr] of [[0, 1], [0, 0], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, 1]]) {
+      const c = o.pt.c + dc, r = o.pt.r + dr;
+      if (!sentryCellWalkable(c, r)) continue;
+      const [gx, gy] = center(c, r), path = buildSentryPath(dog, gx, gy);
+      if (!path) continue;
+      dog.tunnel = { pt: o.pt, goal: { x: gx, y: gy }, state: 'go', t: 0 };
+      dog.navPath = path; dog.navGoal = c + ',' + r; dog.navTimer = .75;
+      if (typeof flash === 'function') flash('？', dog.x, dog.y - 40, '#fff2c4', .7);   // 聞到了
+      return true;
+    }
+  }
+  return false;
+}
+// 找到的地道：地上畫一個洞（js/render.js 的地面層）
+function drawHiddenTunnels(ctx) {
+  for (const pt of (MAP && MAP.portals) || []) {
+    if (!pt.hidden || !tunnelFound(pt)) continue;
+    const [x, y] = center(pt.c, pt.r);
+    if (typeof isVisible === 'function' && !isVisible(x, y)) continue;
+    ctx.save();
+    ctx.fillStyle = 'rgba(122,101,69,.85)'; ctx.beginPath(); ctx.ellipse(x, y + 8, 19, 9, 0, 0, Math.PI * 2); ctx.fill();   // 翻起來的土
+    ctx.fillStyle = '#120d08'; ctx.beginPath(); ctx.ellipse(x, y + 8, 14, 6, 0, 0, Math.PI * 2); ctx.fill();               // 洞
+    ctx.fillStyle = 'rgba(205,187,145,.8)';
+    for (const [dx, dy] of [[-17, 3], [15, 5], [-8, 15], [10, 14], [0, -1]]) { ctx.beginPath(); ctx.arc(x + dx, y + 8 + dy * .5, 2, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
 }

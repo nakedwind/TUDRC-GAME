@@ -544,7 +544,9 @@ const MONSTERS_DEFAULT = [
     },
     "behavior": "moth",
     "noHitSquash": true,
-    "knockMul": 0.5
+    "knockMul": 0.5,
+    "hitSound": "mothHurt",
+    "deathSound": "mothDeath"
   }
 ];
 /* 史萊姆種類（由怪物編輯器匯出）：數值是「基本史萊姆」的倍率；chance 為生成時變成這種的機率（0～1），unlockAt 為開戰幾秒後才會出現。 */

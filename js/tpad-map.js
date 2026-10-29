@@ -407,7 +407,7 @@ function renderFieldMapApp(el) {
   }
   const marks = [], names = new Map((typeof mapList === 'function' ? mapList() : []).map(x => [x.id, x.name])), groups = [];
   for (const p of m.portals || []) {   // 相鄰的同一個去處合成一個
-    if (!tmapSeen(st, p.c, p.r) || st.hidden.has(p.c + ',' + p.r)) continue;
+    if (!tmapSeen(st, p.c, p.r) || st.hidden.has(p.c + ',' + p.r) || (p.hidden && typeof portalUsable === 'function' && !portalUsable(p))) continue;   // 還沒找到的隱藏地道不顯示
     const g = groups.find(q => q.to === p.to && Math.abs(q.c / q.k - p.c) <= 2.5 && Math.abs(q.r / q.k - p.r) <= 2.5);
     if (g) { g.c += p.c; g.r += p.r; g.k++; } else groups.push({ to: p.to, c: p.c, r: p.r, k: 1 });
   }
@@ -477,7 +477,7 @@ function tmapMiniUpdate() {
     ctx.fillRect(Math.round(ox + c * S), Math.round(oy + r * S), S, S);
   }
   ctx.fillStyle = '#5fd38a';   // 出入口
-  for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r) && !st.hidden.has(p.c + ',' + p.r)) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
+  for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r) && !st.hidden.has(p.c + ',' + p.r) && !(p.hidden && typeof portalUsable === 'function' && !portalUsable(p))) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
   ctx.fillStyle = '#b77cff';   // 還沒打碎的異質核心
   for (const core of (G.cores || [])) {
     if (core.dead) continue;
