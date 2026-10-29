@@ -414,31 +414,34 @@ function updateGourdBodies() {
   }
 }
 // ---- 被震飛：拋物線飛起來 → 落地揚塵 → 再小彈一下（只影響畫面位置；水平移動是 knockActor 的滑行）----
+// gourdToss 可以自帶 dur（飛幾秒）、bounce（落地小彈幾秒）、spin（往後仰幾度）；沒寫就用葫蘆猴的（花蓮老鼠戳飛也用這套）
 function updateGourdTosses(dt) {
   const C = GOURD, list = [G.player, ...G.towers];
   for (const a of list) {
     const s = a && a.gourdToss;
     if (!s) continue;
     s.t += dt;
-    if (!s.bounced && s.t >= C.knockTime) {   // 落地
+    const dur = s.dur || C.knockTime, bounce = s.bounce || C.bounceTime;
+    if (!s.bounced && s.t >= dur) {   // 落地
       s.bounced = true;
       G.effects.push({ ring: true, x: a.x, y: a.y + 14, r: 4, r2: 22, life: .22, life0: .22, color: '#c8b590' });
       for (let i = 0; i < 4; i++) gmDust(a.x + gmRand(-10, 10), a.y + 14, false);
       if (typeof sfxAt === 'function') sfxAt('gourdTossLand', a.x, a.y, .35, 'gourd-toss-land');
     }
-    if (s.t >= C.knockTime + C.bounceTime) a.gourdToss = null;
+    if (s.t >= dur + bounce) a.gourdToss = null;
   }
 }
 // 由 js/render.js 在畫溫特、隊友之前呼叫：往上抬、身體往後仰；落地那一下壓扁
 function applyGourdTossTransform(ctx, a) {
   const C = GOURD, s = a && a.gourdToss;
   if (!s) return;
+  const dur = s.dur || C.knockTime, bounce = s.bounce || C.bounceTime;
   let z, lean, squash = 0;
-  if (s.t < C.knockTime) {
-    const u = s.t / C.knockTime;
-    z = 4 * s.h * u * (1 - u); lean = Math.sin(u * Math.PI) * C.tossSpin;
+  if (s.t < dur) {
+    const u = s.t / dur;
+    z = 4 * s.h * u * (1 - u); lean = Math.sin(u * Math.PI) * (s.spin ?? C.tossSpin);
   } else {
-    const u = Math.min(1, (s.t - C.knockTime) / C.bounceTime);
+    const u = Math.min(1, (s.t - dur) / bounce);
     z = 4 * s.h * .18 * u * (1 - u); lean = 0; squash = u < .35 ? (1 - u / .35) * .18 : 0;
   }
   const fx = a.x, fy = a.y + 16;   // 以腳底為中心

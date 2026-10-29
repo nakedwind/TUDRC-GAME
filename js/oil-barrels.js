@@ -89,21 +89,29 @@ function blastPush(o, x, y, hurt, numY) {
 }
 // 一口氣炸好幾個油桶／油箱（瓦斯爐不算）：畫面像電路不穩一樣閃黑（js/flicker-light.js 的 powerFlicker）
 // 連鎖爆炸在 window 秒內接連發生都算同一波；這一波炸完才數：flicker 由多到少比對，炸幾個以上就閃幾下
-const OIL_POWER_FLICKER = { window: .25, flicker: [[5, 2], [3, 1]] };
-function countOilBurst(it) {
+// 只有溫特被震得夠大力才閃：這一波裡溫特感受到最大的搖晃要到 minShake 以上
+//（爆炸的搖晃：shake＝正中心的強度，離溫特 SHAKE_FEEL.range〔6〕格內才會搖，越遠越小，6 格外完全不搖；畫面搖晃最大 16）
+// 搖晃 13、門檻 8 ≈ 離爆炸約 3.5 格以內才會閃黑（剛好是油桶的爆炸範圍）
+const OIL_POWER_FLICKER = { window: .25, flicker: [[5, 2], [3, 1]], shake: 13, minShake: 8 };
+function oilShakeFelt(x, y) {   // 跟 js/combat-feel.js 的 nearbyImpact 同一套算法
+  if (!G.player) return 0;
+  const range = typeof SHAKE_FEEL !== 'undefined' ? SHAKE_FEEL.range : 6, d = Math.hypot(G.player.x - x, G.player.y - y) / CELL;
+  return d > range ? 0 : OIL_POWER_FLICKER.shake * (.35 + .65 * (1 - d / range));
+}
+function countOilBurst(x, y, it) {
   if (it.gas) return;
-  const W = OIL_POWER_FLICKER, wave = G.oilBurst || (G.oilBurst = { n: 0, timer: 0 });
-  wave.n++;
+  const W = OIL_POWER_FLICKER, wave = G.oilBurst || (G.oilBurst = { n: 0, shake: 0, timer: 0 });
+  wave.n++; wave.shake = Math.max(wave.shake, oilShakeFelt(x, y));
   clearTimeout(wave.timer);
   wave.timer = setTimeout(() => {
-    const hit = W.flicker.find(([n]) => wave.n >= n);
-    wave.n = 0;
+    const hit = wave.shake >= W.minShake && W.flicker.find(([n]) => wave.n >= n);
+    wave.n = 0; wave.shake = 0;
     if (hit && typeof powerFlicker === 'function') powerFlicker(hit[1]);
   }, W.window * 1000);
 }
 function oilExplode(x, y, it) {
   const B = it.blast, R = B.radius * CELL;
-  countOilBurst(it);
+  countOilBurst(x, y, it);
   // 先播放，且每次爆炸使用獨立來源，避免連鎖爆炸被 70ms 去重吞音。
   G.oilExplosionSerial = (G.oilExplosionSerial || 0) + 1;
   if (typeof sfxAt === 'function') sfxAt(it.boom || (it === OIL_ITEMS.deco_oil_tank ? 'midBoom' : 'bigBoom'), x, y, .9, 'oil-boom-' + G.oilExplosionSerial);
@@ -171,7 +179,7 @@ function oilExplode(x, y, it) {
   for (let i = 0; i < 6; i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * R * .4, y - 10 - Math.random() * 10, true);
   for (let i = 0; i < 4; i++) spawnFlameBurst(x + (Math.random() * 2 - 1) * R * .35, y + (Math.random() * 2 - 1) * R * .2, 1.3);
   addScorchMark(x, y + 6, R * .75, null, 'flame');
-  nearbyImpact(x, y, 13, .08);
+  nearbyImpact(x, y, OIL_POWER_FLICKER.shake, .08);
 }
 function damageCoresInBlast(x, y, radius, damage) {
   for (const core of G.cores || []) {

@@ -300,6 +300,22 @@ function stepBurrowingMouse(e, dt) {
   }
   e.forceFrame = burrowMouseBlinkFrame(art, b.age); e.forceFlip = false;
 }
+// 被地底的手戳中：從手的位置往外、往上戳飛（飛起來、落地小彈一下，沿用 js/gourd-monkey.js 的 gourdToss）
+const BURROW_POKE = {
+  height: 58,        // 飛多高（像素）：從下面戳上來，比葫蘆猴震飛（44）高
+  distance: 1.1,     // 往外飛幾格
+  time: .5,          // 在空中飛幾秒
+  bounce: .18,       // 落地後再小彈一下（秒）
+  spin: .7,          // 飛在空中往後仰幾度（弧度）
+};
+function burrowMousePoke(a, hand) {
+  if (!a || a.hp <= 0 || a.rootT > 0) return;   // 被絲瓜藤纏住的飛不動
+  const dx = a.x - hand.x, dy = a.y - hand.y, d = Math.hypot(dx, dy);
+  const ang = d > 3 ? Math.atan2(dy, dx) : Math.random() * Math.PI * 2, P = BURROW_POKE;
+  if (typeof knockActor === 'function') knockActor(a, Math.cos(ang), Math.sin(ang), P.distance * CELL, P.time);
+  a.gourdToss = { t: 0, h: P.height, dur: P.time, bounce: P.bounce, spin: P.spin, side: Math.cos(ang) >= 0 ? 1 : -1, bounced: false };
+  a.navPath = null; a.navGoal = null;
+}
 function burrowMouseStrike(e, hand, c) {
   if (e.dead || e.hp <= 0 || !burrowMouseInReach(e, hand) || (!hand.obstacle && !hasLineOfSight(e.x, e.y, hand.x, hand.y))) return;
   const within = t => t && t.hp > 0 && burrowMouseInReach(e, t) && Math.hypot(t.x - hand.x, t.y - hand.y) <= c.hitRadius * CELL
@@ -309,8 +325,9 @@ function burrowMouseStrike(e, hand, c) {
       other.hp -= e.sentryDamage; enemyHitReact(other, hand.x, hand.y, false);
     }
   } else {
-    if (within(G.player)) { e.playerTouchCd = 0; enemyAttackPlayer(e, 0); }
-    for (const t of G.towers) if (!t.eatenBy && enemyNoticesSentry(e, t) && within(t)) { e.atkCd = 0; enemyAttackSentry(e, t, 0); }
+    // 有真的打中（扣到血）才戳飛；被柯林架開、打空就不飛
+    if (within(G.player)) { const hp0 = G.player.hp; e.playerTouchCd = 0; enemyAttackPlayer(e, 0); if (G.player.hp < hp0) burrowMousePoke(G.player, hand); }
+    for (const t of G.towers) if (!t.eatenBy && enemyNoticesSentry(e, t) && within(t)) { const hp0 = t.hp; e.atkCd = 0; enemyAttackSentry(e, t, 0); if (t.hp < hp0) burrowMousePoke(t, hand); }
     if (hand.obstacle && hand.obstacle.hp > 0 && G.obstacles.includes(hand.obstacle)) { e.atkCd = 0; enemyAttackObstacle(e, hand.obstacle, 0); }
   }
 }
