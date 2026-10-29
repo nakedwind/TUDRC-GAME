@@ -38,9 +38,20 @@ const MUSIC = (() => {
       if (t >= 1) { clearInterval(a._fade); if (done) done(); }
     }, 40);
   }
+  // 一次只放一首：換歌時舊的先淡出，全部淡出完才開始放「最後選的那首」（連按很快換歌時，中間那幾首不會被叫起來，也不會疊在一起）
+  const outgoing = new Set();   // 正在淡出的舊歌
+  function retire(a) {
+    if (a.paused) { clearInterval(a._fade); return; }   // 還沒開始放（在排隊等淡出）：直接丟掉
+    outgoing.add(a);
+    fadeTo(a, 0, () => { a.pause(); outgoing.delete(a); begin(); });
+  }
+  function begin() {   // 舊歌都淡出完了，才開始放現在這首
+    if (!audio || !audio.paused || outgoing.size) return;
+    audio.play().catch(() => {}); fadeTo(audio, target());
+  }
   function play(newMode) {
     const list = playlist(newMode);
-    if (!list || !list.length) { mode = newMode; const old = audio; audio = null; if (old) fadeTo(old, 0, () => old.pause()); return; }
+    if (!list || !list.length) { mode = newMode; const old = audio; audio = null; if (old) retire(old); return; }
     if (newMode !== mode) index = Math.floor(Math.random() * list.length);
     mode = newMode;
     const next = new Audio(list[index % list.length]);
@@ -52,8 +63,8 @@ const MUSIC = (() => {
       else if (!baseBroken) { baseBroken = true; play('safe'); }
     });
     const old = audio; audio = next;
-    const start = () => { next.play().catch(() => {}); fadeTo(next, target()); };
-    if (old && !old.paused) fadeTo(old, 0, () => { old.pause(); start(); }); else start();
+    if (old) retire(old);
+    begin();
   }
   // 每秒檢查一次：地圖從基地換到戰鬥（或反過來）就換音樂
   setInterval(() => { if (unlocked && wanted() !== mode) play(wanted()); }, 1000);

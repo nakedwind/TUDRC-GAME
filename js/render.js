@@ -1054,6 +1054,7 @@ function draw() {
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   if (typeof drawFishWater === 'function') drawFishWater(ctx);
+  if (typeof drawEliteGround === 'function') drawEliteGround(ctx);   // 鳥頭大隊長跑步踩出的小裂痕（js/elite-bird-head.js）
   if (typeof drawGourdGround === 'function') drawGourdGround(ctx);   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
   if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);
   if (typeof drawHiddenTunnels === 'function') drawHiddenTunnels(ctx);   // 球球找到的地道（js/rescue-dog.js）   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）

@@ -180,6 +180,8 @@ const SFX = (() => {
     // BOSS 音樂（js/boss-music.js）：一直循環、淡入淡出；音量在音效編輯器的「音樂」調整
     bossElite: '戰鬥/中BOSS.mp3',             // 鳥頭大隊長盯上玩家
     bossCore: '戰鬥/異質核心甦醒.mp3',        // 異質核心甦醒到被打破
+    eliteScream: '怪物/鳥頭人/鳥頭人被打.mp3',   // 鳥頭大隊長甦醒時的尖叫：跟鳥頭人被打同一個音檔，開大聲、加回音（SOUND_ECHO）
+    eliteStep: '戰鬥/heavy-walking-footsteps.mp3',   // 鳥頭大隊長沉重的腳步（js/elite-bird-head.js 的 eliteBirdFootsteps）
     radio: ['無線電.mp3', '無線電雜音.mp3'],   // 無線電接起來／掛斷：兩個一起播（新手區開場希奧妮的無線電，js/tutorial.js）
     baseMusic: '../music/基地音樂.mp3',      // 基地（安全區）背景音樂（js/music.js）；檔案在 music/ 資料夾
     // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
@@ -199,13 +201,13 @@ const SFX = (() => {
   // 介面、警告、心跳等不列在 VARIED 裡，維持每次都一樣。
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
-    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'mothFlap', 'mothSpray', 'mothHurt', 'mothDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'pop', 'playerHit', 'playerHitMonster',
+    'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'mothFlap', 'mothSpray', 'mothHurt', 'mothDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'eliteStep', 'pop', 'playerHit', 'playerHitMonster',
     'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
-  const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 } };
+  const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer

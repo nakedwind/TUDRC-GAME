@@ -1,8 +1,8 @@
 // ============================================================
 //  戰鬥中的 BOSS 音樂（跟 js/music.js 的一般背景音樂分開）
 //  兩首各自獨立，條件都符合時一起播：
-//  ・鳥頭大隊長盯上玩家（醒著、有追打目標）→ 淡入「中BOSS」；失去仇恨（走回原位、目標跑掉）或倒下 → 淡出。
-//  ・異質核心甦醒 → 淡入「異質核心甦醒」，播放中音量慢慢忽大忽小；核心被打破 → 淡出。
+//  ・鳥頭大隊長盯上玩家（醒著、有追打目標）→ 淡入「中BOSS」（每場戰鬥第一次被盯上時晚 startDelay 秒才開始）；失去仇恨（走回原位、目標跑掉）或倒下 → 淡出。
+//  ・異質核心甦醒 → 馬上淡入「異質核心甦醒」，播放中音量慢慢忽大忽小；核心被打破 → 淡出。
 //  ・音檔、各自的音量在「音效編輯器」的「音樂」分類（bossElite、bossCore）調整；
 //    整體再乘上設定裡的「音樂」音量，按 M 靜音時也一起靜音。回到基地、劇情地圖時全部停掉。
 // ============================================================
@@ -12,11 +12,13 @@ const BOSS_MUSIC = {
   fadeIn: 2.0,          // 淡入幾秒
   fadeOut: 2.5,         // 淡出幾秒
   loseDelay: 1.5,       // 大隊長失去目標後等幾秒才淡出（衝撞完短暫停頓時不會一直切來切去）
+  startDelay: 2,        // 每場戰鬥第一次被大隊長盯上：等幾秒才開始播「中BOSS」（之後再被盯上就馬上播；核心甦醒的音樂一律馬上播）
   swell: { low: .6, high: 1.0, period: 7 },   // 核心音樂忽大忽小：最小／最大是原本的幾倍、一輪幾秒
 };
 const BossMusic = (() => {
   const B = BOSS_MUSIC, tracks = {};
   let unlocked = false, eliteHateT = 0, last = performance.now();
+  let eliteWaitT = 0, eliteHeard = false, battleG = null;   // 大隊長盯上了多久；這場戰鬥的「中BOSS」播過了沒（換地圖、新的一場重算）
 
   const fileOf = name => { const it = SFX.list().find(x => x.name === name); return it && typeof it.file === 'string' ? it.file : null; };
   function track(key) {
@@ -45,9 +47,15 @@ const BossMusic = (() => {
     if (!unlocked) return;
     const battle = inBattle();
     if (battle && eliteHunting()) eliteHateT = B.loseDelay; else eliteHateT = Math.max(0, eliteHateT - dt);
+    if (!battle || G !== battleG) { battleG = battle ? G : null; eliteHeard = false; eliteWaitT = 0; }   // 離開戰鬥、新的一場：重算「第一次」
     const want = { elite: battle && eliteHateT > 0, core: battle && coreAwake() };
     for (const key of Object.keys(B.sounds)) {
-      const on = want[key];
+      let on = want[key];
+      if (key === 'elite') {   // 這場戰鬥第一次被盯上：晚 startDelay 秒才開始播
+        eliteWaitT = on ? eliteWaitT + dt : 0;
+        if (on && !eliteHeard && eliteWaitT < B.startDelay) on = false;
+        if (on) eliteHeard = true;
+      }
       if (!on && !tracks[key]) continue;   // 還沒播過的不用建
       const t = track(key); if (!t) continue;
       t.level = on ? Math.min(1, t.level + dt / B.fadeIn) : Math.max(0, t.level - dt / B.fadeOut);
