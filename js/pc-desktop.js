@@ -77,8 +77,9 @@ function openPcDesktop() {
   pcd.el.classList.remove('hidden');
   pcd.el.querySelector('.pcd-bye').classList.add('hidden');
   toggleStartMenu(false); selectPcIcon(null);
+  if (pcd.wins.music) renderPcVolume(pcd.wins.music.querySelector('.pcd-body'));   // 音量可能在設定選單改過
   updatePcClock(); pcd.clock = setInterval(updatePcClock, 1000);
-  sfx('menu');
+  sfx('pcBoot');
 }
 function closePcDesktop() {
   if (!pcDesktopOpen) return;
@@ -89,7 +90,7 @@ function closePcDesktop() {
 }
 function shutdownPcDesktop() {   // 關機：螢幕先暗下來，再回到遊戲（打開的視窗、踩地雷的進度留著，下次打開還在）
   if (!pcDesktopOpen || pcd.shutting) return;
-  pcd.shutting = true; sfx('switch');
+  pcd.shutting = true; sfx('pcShutdown');
   pcd.el.querySelector('.pcd-bye').classList.remove('hidden');
   setTimeout(() => { pcd.shutting = false; closePcDesktop(); }, 450);
 }
@@ -159,13 +160,25 @@ function renderPcTasks() {
 
 // ---- 🎵 音樂播放器：換基地音樂 ----
 function initPcMusic(body) {
-  body.innerHTML = '<div class="pcd-music"><div class="pcd-now"></div><div class="pcd-tracks">讀取中…</div>' +
+  body.innerHTML = '<div class="pcd-music"><div class="pcd-now"></div>' +
+    '<label class="pcd-vol"><span>🔊 音量</span><input type="range" min="0" max="100" step="1"><b class="pcd-volval"></b></label>' +
+    '<div class="pcd-tracks">讀取中…</div>' +
     '<p class="pcd-hint">點一首歌，基地的背景音樂就會換成那首，下次打開遊戲也會記得。<br>想加新的歌：把音樂檔放進 <b>music/基地音樂/</b> 資料夾。</p></div>';
   body.addEventListener('click', e => {
     const b = e.target.closest('[data-track]'); if (!b) return;
     MUSIC.setBaseTrack(b.dataset.track || null); sfx('button'); renderPcMusic(body);
   });
+  // 音量：跟設定選單的「音樂」滑桿是同一個數值（js/save.js 的 SETTINGS.music）
+  const vol = body.querySelector('.pcd-vol input');
+  vol.addEventListener('input', () => { SETTINGS.music = Number(vol.value); applySettings(); renderPcVolume(body); });
+  vol.addEventListener('change', () => saveSettings());
+  renderPcVolume(body);
   loadPcTracks().then(() => renderPcMusic(body));
+}
+function renderPcVolume(body) {
+  const vol = body.querySelector('.pcd-vol input'), v = SETTINGS.music;
+  vol.value = v;
+  body.querySelector('.pcd-volval').textContent = v;
 }
 async function loadPcTracks() {   // 讀 music/基地音樂/ 的資料夾列表（跟音效編輯器讀 music/ 一樣的方法）
   if (pcd.tracks) return pcd.tracks;

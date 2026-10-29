@@ -16,6 +16,8 @@ const SFX = (() => {
     aidStart: '玩家/補血.mp3',   // 開始急救（進度條開始跑，js/equipment.js）；急救完成播 soothe（疏導）
     switch: '介面/切換.mp3',
     blip: '介面/對話框下一頁音效.mp3',
+    pcBoot: '介面/windows-xp 開機.mp3',   // 2F應變中心的電腦：打開（js/pc-desktop.js 的 openPcDesktop）
+    pcShutdown: '介面/windows-xp 關機.mp3',   // 2F應變中心的電腦：關機（js/pc-desktop.js 的 shutdownPcDesktop）
     place: '設施/放置.mp3',
     demolish: '設施/拆建築.mp3',
     placeLight: '設施/放燈.mp3',   // 放置燈類建築（js/build.js）   // 拆除自己蓋的建築（js/game.js 的 demolishPlayerBuilding）

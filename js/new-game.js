@@ -125,6 +125,8 @@
         }
         for (const id of Object.keys(BULLETS)) if (id !== 'pistol' && !BULLETS[id].removed) { equipState.bullets.owned[id] = true; equipState.bullets.n[id] = BULLETS[id].max; }   // 所有子彈補滿
         equipState.bag = { items: BAG_UPGRADES.items.slots.length, ammo: BAG_UPGRADES.ammo.slots.length };   // 背包、彈藥包擴充到最大
+        equipState.magazine = { lv: MAGAZINE.slots.length, load: magCandidates().slice(0, MAGAZINE.slots[MAGAZINE.slots.length - 1]) };   // 彈匣升到最大、先裝滿（測試模式滾輪本來就換得到全部子彈，js/magazine.js）
+        for (const o of buildAll()) equipState.builds[o.id] = true;   // 所有建築都開發好（js/build.js）
         equipState.battery = 100; training.crystals = Math.max(training.crystals, 99999);
         saveEquipment(); saveTraining();
       }

@@ -16,7 +16,7 @@ const magSlotCount = () => MAGAZINE.slots[magState().lv - 1];
 const magIsFree = id => MAGAZINE.free.includes(id);
 // 這種子彈這次有沒有帶著（滾輪換得到）
 function magazineCarries(id) {
-  if (magIsFree(id)) return true;
+  if (magIsFree(id) || window.TEST_MODE) return true;   // 測試模式：拿到的子彈全部都能用滾輪換，不用裝進彈匣
   const m = magState();
   return m.load.slice(0, magSlotCount()).includes(id);
 }
