@@ -272,6 +272,35 @@ function useAdrenaline() {
   flash('💉 腎上腺素！', G.player.x, G.player.y - 54, '#ff8a8a', 1.4); sfx('soothe');
   G.effects.push({ ring: true, x: G.player.x, y: G.player.y, r: 6, r2: 40, life: .35, life0: .35, color: '#ff8a8a' });
 }
+// ---- 工具箱（道具）：修理身邊的營地（TOOLBOX 在 data/equipment.js）----
+function toolboxBaseNear() {
+  const p = G.player, reach = TOOLBOX.reach * CELL;
+  let best = null, bestD = Infinity;
+  for (const o of G.obstacles) {
+    if (!o.isBase || o.hp <= 0) continue;
+    const left = o.artX ?? OX + o.c * CELL, top = o.artY ?? OY + o.r * CELL;
+    const dx = Math.max(left - p.x, 0, p.x - (left + o.w * CELL)), dy = Math.max(top - p.y, 0, p.y - (top + o.h * CELL));
+    const d = Math.hypot(dx, dy);
+    if (d <= reach && d < bestD) { best = o; bestD = d; }
+  }
+  return best;
+}
+function useToolbox() {
+  if (!G?.player || G.player.hp <= 0) return;
+  const p = G.player, say = (t, c = '#c9d3dc') => flash(t, p.x, p.y - 54, c);
+  if (itemCount('toolbox') <= 0) { sfx('error'); say('沒有工具箱了'); return; }
+  if (MAP_SAFE) { sfx('error'); say('戰鬥中才能用'); return; }
+  const o = toolboxBaseNear();
+  if (!o) { sfx('error'); say('要站在營地旁邊才能修'); return; }
+  if (o.hp >= o.maxhp) { sfx('error'); say('營地沒有損壞'); return; }
+  consumeItem('toolbox');
+  const add = Math.min(o.maxhp - o.hp, Math.round(o.maxhp * TOOLBOX.repair));
+  o.hp += add;
+  const cx = (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, cy = (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2;
+  flash('🔧 營地 HP +' + add, cx, cy - o.h * CELL / 2 - 10, '#7ee0c0', 1.6); sfx('place');
+  G.effects.push({ ring: true, x: cx, y: cy, r: 10, r2: Math.max(o.w, o.h) * CELL * .7, life: .5, life0: .5, color: '#7ee0c0' });
+  if (typeof updateHUD === 'function') updateHUD();
+}
 // ---- 急救包（道具，H）：先點左上角的隊員頭像，選要治療誰（倒地的也行） ----
 // ・不能用在溫特自己身上：溫特補血請用醫療包。
 // ・按 H 或點下方的「急救包」按鈕 → 進入「選隊員」：滑鼠停在哪位隊員的頭像上，那位就會發光＋出現箭頭（樣式在 css/style.css）。

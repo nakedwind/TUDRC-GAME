@@ -197,7 +197,7 @@ function drawFlareGlow(ctx) {   // 紅橘色光暈與火焰（畫在黑幕上面
 }
 
 // ---- 彈藥箱：地圖上放的彈藥箱物件，跟置物櫃一樣能開出東西，但不用鑰匙、每個箱子只能開一次 ----
-// 內容物在地圖編輯器指定（lockerLoot，格式跟置物櫃一樣）；沒指定＝空箱。開過的換成空箱的圖
+// 內容物在地圖編輯器指定（lockerLoot，格式跟置物櫃一樣）；沒指定＝隨機（有機會開出工具箱），沒抽到就是空箱。開過的換成空箱的圖
 const ammoCrateNearPlayer = () => mapBoxNearPlayer('ammo');   // 判定範圍：js/camp-interactions.js 的 MAP_BOX
 const ammoCrateToken = s => storagePropToken(s.id, s.c, s.r, s.layer || 'top', s.ox || 0, s.oy || 0);
 const ammoCrateLooted = s => !!s && unlockedStorageLockers.has(ammoCrateToken(s));   // 開過的跟置物櫃一起存檔（js/save.js）
@@ -208,7 +208,7 @@ function useAmmoCrateNearPlayer() {
   // 開出來的東西跳視窗（js/item-intro.js）；什麼都沒有就飄字
   const before = typeof itemIntroCount !== 'undefined' ? itemIntroCount : 0;
   if (typeof itemIntroFromLocker !== 'undefined') itemIntroFromLocker = true;
-  try { if (s.lockerLoot) grantLockerLoot(s.lockerLoot, '彈藥箱'); }
+  try { if (s.lockerLoot) grantLockerLoot(s.lockerLoot, '彈藥箱'); else if (typeof tryEquipDrop === 'function') tryEquipDrop('toolbox', crate.x, crate.top); }   // 沒指定內容物：有機會開出工具箱（data/equipment.js 的 ITEM_DROPS）
   finally { if (typeof itemIntroFromLocker !== 'undefined') itemIntroFromLocker = false; }
   if (typeof itemIntroCount !== 'undefined' && itemIntroCount === before) flash('空的', crate.x, crate.top - 8, '#dce6ed', 1.6);
   updateHUD(); saveGame();

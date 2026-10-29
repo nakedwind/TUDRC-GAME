@@ -8,6 +8,8 @@ const SUPPLIES = [
   // ---- 補給 ----
   { id:'medkit', name:'醫療包', kind:'medical', use:'hp', restore:35, price:30, file:'醫療包.png', desc:'應變中心配發的急救包。' },
   { id:'almond-water', name:'杏仁水', kind:'medical', use:'sp', restore:30, price:25, file:'杏仁水.png', desc:'溫溫的杏仁水，喝了心情會平靜下來。' },
+  // 工具箱：基地的便利商店買得到，後室的置物櫃、彈藥箱也撿得到（機率在 data/equipment.js 的 ITEM_DROPS）；修理效果在 data/equipment.js 的 TOOLBOX
+  { id:'toolbox', name:'工具箱', kind:'medical', act:'toolbox', price:50, image:'images/裝備/toolbox.png', effect:'🔧 營地 HP +30%', desc:'裝滿扳手、螺絲和膠帶的工具箱。站在營地旁邊使用，修好營地 30% 的 HP。被打壞（HP 歸零）的營地修不回來。用掉一個。' },
   // ---- 後室道具（special：基地的商店不賣，只在後室的店買得到、或在後室撿到）----
   //   act：在背包按「使用」或快捷鍵時做什麼（firstaid 急救包 H、adrenaline 腎上腺素）；note：背包裡的使用說明
   { id:'thermos', name:'杏仁水保溫杯', kind:'medical', use:'sp', restore:70, price:55, special:true, image:'images/裝備/almond-water-thermos.png', desc:'一整杯溫熱的杏仁水，能恢復大量 SP。' },

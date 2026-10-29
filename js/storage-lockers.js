@@ -128,6 +128,7 @@ function useStoragePropNearPlayer(filter){
         if(typeof tryEquipDrop==='function')tryEquipDrop('thermos',prop.x,prop.top);
         if(typeof tryEquipDrop==='function')tryEquipDrop('adrenaline',prop.x,prop.top);   // 腎上腺素（機率在 data/equipment.js 的 ITEM_DROPS）
         if(typeof tryEquipDrop==='function')tryEquipDrop('anomaly-firstaid',prop.x,prop.top);   // 異質急救包：只有置物櫃找得到
+        if(typeof tryEquipDrop==='function')tryEquipDrop('toolbox',prop.x,prop.top);   // 工具箱（機率在 data/equipment.js 的 ITEM_DROPS）
         if(typeof tryGunFind==='function')tryGunFind(prop.x,prop.top);
         if(typeof tryGraffitiPenFind==='function')tryGraffitiPenFind(prop.x,prop.top);   // 塗鴉筆（js/graffiti.js）
         if(typeof tryYouyouCardFind==='function')tryYouyouCardFind();   // 好遊卡（js/mrt-locks.js）

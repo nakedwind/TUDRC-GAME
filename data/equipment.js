@@ -79,7 +79,9 @@ const EQUIPMENT = [
 // 戰鬥區域掉落的機率（裝備：還沒拿到的時候；拿到之後就不會再掉）
 const EQUIP_DROPS = { detector: .5 };
 // 後室道具掉落的機率（data/supplies.js 的道具，可以重複拿）：平安符＝順順宮帽、保溫杯＝置物櫃、腎上腺素＝置物櫃（打怪不會掉）、異質急救包＝置物櫃
-const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid': .15 };
+const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid': .15, toolbox: .25 };   // toolbox：置物櫃、沒指定內容物的彈藥箱都會抽
+// 工具箱（道具；快捷欄或背包使用）：repair 修好營地最大 HP 的幾成；reach 離營地邊緣幾格內才能用
+const TOOLBOX = { repair: .3, reach: 3 };
 // 腎上腺素（道具；快捷欄或背包使用）：speed 跑速加成、dur 持續秒數、side 藥效退了變慢幾秒、slow 變慢多少
 const ADRENALINE = { speed: .45, dur: 8, side: 2, slow: .3 };
 // 急救包（道具，按 H）：heal 治療量、time 處理傷口要站著幾秒、reach 幾格內的隊員
