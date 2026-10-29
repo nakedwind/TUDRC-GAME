@@ -170,16 +170,91 @@ function drawGuideSupplyBubbles(ctx) {
   }
 }
 
-// ---- 溫特打開物資箱：拿（放進背包）、放（從背包放進來）----
-let campSupplyOpen = false, campSupplyEl = null;
-function openCampSupply() {
+// ============================================================
+//  營地彈藥箱：地圖上的「彈藥箱（打開）」（js/flare.js 的 AMMO_REFILL）。按 Space 打開，可以補子彈、把子彈放進去
+//  ・一樣依地圖分開存（CAMP_AMMO_KEY）；開始新遊戲會清掉（js/new-game.js）
+//  ・每次出勤（js/magazine.js 的 onMagazineSortie）：AMMO_BOX.sortie 裡拿到過（照明彈一開始就有、其他要開發）的子彈，
+//    箱子裡各補到至少一組（BULLET_SET 發）；自己放進去多的會留著，不會越積越多
+// ============================================================
+const AMMO_BOX = { sortie: ['flare', 'tranq', 'paint', 'split', 'knock'], image: 'images/field-camp/ammo-crate-open.png' };
+const CAMP_AMMO_KEY = 'tudrc_camp_ammo_v1';
+let campAmmoData = {};
+try { const d = JSON.parse(localStorage.getItem(CAMP_AMMO_KEY) || '{}'); if (d && typeof d === 'object') campAmmoData = d; } catch (_) {}
+function saveCampAmmo() { try { localStorage.setItem(CAMP_AMMO_KEY, JSON.stringify(campAmmoData)); } catch (_) {} }
+function campAmmo() { const id = campSupplyMapId(); return campAmmoData[id] || (campAmmoData[id] = {}); }
+// 這張地圖有沒有彈藥箱
+const mapHasAmmoBox = () => !!MAP && (MAP.stamps || []).some(s => { const t = mapTileById(s.id); return AMMO_REFILL.ids.includes(s.id) || (t && AMMO_REFILL.file.test(String(t.file || ''))); });
+// 出勤：箱子裡每種補到一組；回傳補了哪些
+function stockCampAmmoForSortie() {
+  if (MAP_SAFE || !mapHasAmmoBox()) return [];
+  const box = campAmmo(), got = [];
+  for (const id of AMMO_BOX.sortie) {
+    const b = BULLETS[id]; if (!b || b.removed || !bulletOwned(id)) continue;
+    if ((box[id] || 0) < BULLET_SET) { box[id] = BULLET_SET; got.push(b.icon + b.name); }
+  }
+  saveCampAmmo();
+  return got;
+}
+
+// ============================================================
+//  箱子視窗（物資箱、彈藥箱共用）：外觀跟背包一樣。左邊箱子、右邊溫特的背包，點格子就搬到另一邊，也可以拖過去；
+//  下方說明列可以選數量再按「拿到背包」「放進箱子」。兩種箱子的差別寫在 CAMP_BOXES。
+// ============================================================
+const ammoIdsOf = () => WEAPONS.map(w => w.id).filter(id => id !== 'pistol' && BULLETS[id] && !BULLETS[id].removed);
+const CAMP_BOXES = {
+  supply: {
+    title: '營地物資箱', sub: '嚮導的急救包、杏仁水用完會自己回來拿', icon: () => CAMP_SUPPLY.box.art.full, bagName: '溫特的背包', unit: '個',
+    ids: () => CAMP_SUPPLY.items,
+    box: k => campBox()[k] || 0, bag: k => supplyInventory.get(k) || 0, bagMax: () => 0,
+    boxRoom: () => CAMP_SUPPLY.slots - campBoxTotal(), boxCount: () => campBoxTotal() + ' / ' + CAMP_SUPPLY.slots + ' 個',
+    name: k => itemById(k).name, image: k => itemById(k).image, desc: k => typeof itemDesc === 'function' ? itemDesc(itemById(k)) : '',
+    clickTake: () => 1, clickPut: () => 1,
+    take(k, n) { const box = campBox(); n = Math.min(n, box[k] || 0); const got = n > 0 ? supplyGain(k, n) : 0; box[k] -= got; return got; },   // 溫特拿不下（背包滿了）：留在箱子裡
+    put(k, n) { const box = campBox(), bag = supplyInventory.get(k) || 0; n = Math.min(n, bag, CAMP_SUPPLY.slots - campBoxTotal()); if (n <= 0) return 0;
+      if (bag - n <= 0) supplyInventory.delete(k); else supplyInventory.set(k, bag - n); box[k] = (box[k] || 0) + n; return n; },
+    save: () => saveCampSupply(),
+    footer: () => { const guides = (G.towers || []).filter(t => TYPES[t.type].guide && t.kit);
+      return guides.map(t => TYPES[t.type].name + '身上：急救包 ' + (t.kit.firstaid || 0) + '・杏仁水 ' + (t.kit['almond-water'] || 0)).join('　'); },
+  },
+  ammo: {
+    title: '營地彈藥箱', sub: '每次出勤，照明彈和開發好的子彈會各放一組（' + BULLET_SET + ' 發）進來', icon: () => AMMO_BOX.image, bagName: '溫特的彈藥包', unit: '發',
+    ids: ammoIdsOf,
+    box: id => campAmmo()[id] || 0, bag: id => bulletOwned(id) ? bulletCount(id) : 0, bagMax: id => BULLETS[id].max,
+    boxRoom: () => Infinity, boxCount: () => '',
+    name: id => BULLETS[id].name, image: id => BULLETS[id].image, desc: id => BULLETS[id].desc || '',
+    clickTake: id => BULLETS[id].max - bulletCount(id), clickPut: id => bulletCount(id),   // 點一下：補滿／全部放回去
+    take(id, n) { const box = campAmmo(); n = Math.min(n, box[id] || 0, BULLETS[id].max - bulletCount(id)); const got = n > 0 ? addBullets(id, n) : 0; box[id] -= got; return got; },   // 彈藥包滿了（新的一種放不下）：加不進去
+    put(id, n) { n = Math.min(n, bulletOwned(id) ? bulletCount(id) : 0); if (n <= 0) return 0; bulletState().n[id] -= n; bulletSave(); const box = campAmmo(); box[id] = (box[id] || 0) + n; return n; },
+    save: () => saveCampAmmo(),
+    fillAll: true,
+  },
+};
+const campBoxDef = () => CAMP_BOXES[campSupplyMode] || CAMP_BOXES.supply;
+let campBoxSel = null, campBoxQty = 1, campBoxQtyKey = '', campBoxPop = false;   // campBoxPop：剛打開，視窗彈出來的動畫只播這一次（之後點格子重畫不再播）   // 選中的：{ side: 'box' | 'bag', id }；說明列的數量
+
+let campSupplyOpen = false, campSupplyEl = null, campSupplyMode = 'supply';   // mode：supply＝物資箱、ammo＝彈藥箱（共用同一個視窗）
+function openCampSupply(mode = 'supply') {
   if (campSupplyOpen || !G || G.over) return;
+  campSupplyMode = mode; campBoxSel = null; campBoxPop = true;
   if (!campSupplyEl) {
     campSupplyEl = document.createElement('div'); campSupplyEl.id = 'campSupply'; campSupplyEl.className = 'hidden';
     campSupplyEl.addEventListener('click', e => {
       if (e.target === campSupplyEl || e.target.closest('.camp-supply-close')) { closeCampSupply(); return; }
-      const take = e.target.closest('[data-supply-take]'); if (take) { campSupplyMove(take.dataset.supplyTake, -1); return; }
-      const put = e.target.closest('[data-supply-put]'); if (put) campSupplyMove(put.dataset.supplyPut, 1);
+      const cell = e.target.closest('[data-cb-cell]');
+      if (cell) { const [side, id] = cell.dataset.cbCell.split(':'); campBoxClickCell(side, id); return; }
+      const q = e.target.closest('[data-cb-qty]'); if (q) { campBoxQty += +q.dataset.cbQty; renderCampSupply(); return; }
+      const mv = e.target.closest('[data-cb-move]'); if (mv && campBoxSel) { campBoxMove(campBoxSel.id, mv.dataset.cbMove, campBoxQty); return; }
+      if (e.target.closest('[data-cb-fillall]')) campBoxFillAll();
+    });
+    // 拖曳：箱子的格子拖到背包那邊＝拿；背包的格子拖到箱子那邊＝放
+    campSupplyEl.addEventListener('dragstart', e => { const cell = e.target.closest && e.target.closest('[data-cb-cell]'); if (!cell) return; e.dataTransfer.setData('text/x-camp-box', cell.dataset.cbCell); e.dataTransfer.effectAllowed = 'move'; });
+    campSupplyEl.addEventListener('dragover', e => { const side = e.target.closest && e.target.closest('[data-cb-side]'); if (!side || ![...e.dataTransfer.types].includes('text/x-camp-box')) return; e.preventDefault(); side.classList.add('drop-over'); });
+    campSupplyEl.addEventListener('dragleave', e => { const side = e.target.closest && e.target.closest('[data-cb-side]'); if (side && !side.contains(e.relatedTarget)) side.classList.remove('drop-over'); });
+    campSupplyEl.addEventListener('drop', e => {
+      const side = e.target.closest && e.target.closest('[data-cb-side]'); if (!side) return;
+      e.preventDefault(); side.classList.remove('drop-over');
+      const [from, id] = (e.dataTransfer.getData('text/x-camp-box') || '').split(':');
+      if (id && from !== side.dataset.cbSide) campBoxClickCell(from, id);
     });
     (document.getElementById('wrap') || document.body).appendChild(campSupplyEl);
   }
@@ -188,39 +263,126 @@ function openCampSupply() {
   setTimeout(() => campSupplyEl.querySelector('.camp-supply-close')?.focus(), 0);
 }
 function closeCampSupply() { if (!campSupplyOpen) return; campSupplyOpen = false; campSupplyEl.classList.add('hidden'); sfx('switch'); }
-// dir：1＝從背包放進箱子、-1＝從箱子拿到背包
-function campSupplyMove(k, dir) {
-  const box = campBox(), bag = supplyInventory.get(k) || 0;
-  if (dir > 0) {
-    if (bag <= 0 || campBoxTotal() >= CAMP_SUPPLY.slots) { sfx('error'); return; }
-    if (bag <= 1) supplyInventory.delete(k); else supplyInventory.set(k, bag - 1);
-    box[k] = (box[k] || 0) + 1;
+// 點格子：選它，並搬到另一邊（物資一次 1 個；子彈：箱子→補滿、背包→全部放回去）
+function campBoxClickCell(side, id) {
+  const B = campBoxDef();
+  campBoxSel = { side: side === 'box' ? 'bag' : 'box', id };   // 搬過去之後，選取跟著到另一邊
+  campBoxMove(id, side === 'box' ? 'take' : 'put', side === 'box' ? B.clickTake(id) : B.clickPut(id));
+}
+// dir：take＝從箱子拿到背包、put＝從背包放進箱子
+function campBoxMove(id, dir, n, quiet) {
+  const from = dir === 'take' ? 'box' : 'bag', start = campBoxFlyStart(from, id);   // 搬之前先記下格子在哪（動畫從這裡飛出去）
+  const B = campBoxDef(), got = n > 0 ? B[dir](id, n) : 0;
+  if (quiet) return got;
+  if (got > 0) {
+    B.save(); sfx(campSupplyMode === 'ammo' && dir === 'take' ? 'ammoRefill' : 'button');
+    updateHUD(); if (typeof saveGame === 'function') saveGame();
   } else {
-    if ((box[k] || 0) <= 0) { sfx('error'); return; }
-    if (!supplyGain(k, 1)) { sfx('error'); return; }   // 溫特拿不下了（持有上限）：留在箱子裡
-    box[k]--;
+    sfx('error');
+    if (dir === 'put' && B.boxRoom() <= 0) systemNotice('箱子滿了（' + CAMP_SUPPLY.slots + ' 個）', true);
   }
-  saveCampSupply(); sfx('button'); updateHUD(); if (typeof saveGame === 'function') saveGame();
   renderCampSupply();
+  if (got > 0) campBoxFly(start, from === 'box' ? 'bag' : 'box', id, got);
+  return got;
+}
+function campBoxFillAll() {
+  const B = campBoxDef(), flies = []; let n = 0;
+  for (const id of B.ids()) if (B.box(id) > 0) {
+    const start = campBoxFlyStart('box', id), got = campBoxMove(id, 'take', B.clickTake(id), true);
+    if (got > 0) { n += got; flies.push([start, id, got]); }
+  }
+  if (n > 0) { B.save(); sfx('ammoRefill'); updateHUD(); if (typeof saveGame === 'function') saveGame(); } else sfx('error');
+  renderCampSupply();
+  flies.forEach(([start, id, got], i) => setTimeout(() => campBoxFly(start, 'bag', id, got, i > 0), i * 70));   // 一個接一個飛過去；音效只在第一個落地時播一次
+}
+// ---- 搬東西的動畫：物品從原本那格沿著弧線飛到另一邊的格子，落地時那格彈一下、冒出「+幾個」 ----
+// 位置都換算成 #campSupply 裡的座標（遊戲畫面可能有縮放，用 getBoundingClientRect 跟實際寬度的比例換回來）
+function campBoxLocal(rect) {
+  const o = campSupplyEl.getBoundingClientRect(), k = o.width / (campSupplyEl.offsetWidth || o.width) || 1;
+  return { x: (rect.left - o.left) / k, y: (rect.top - o.top) / k, w: rect.width / k, h: rect.height / k };
+}
+function campBoxFlyStart(side, id) {
+  const cell = campSupplyEl && campSupplyEl.querySelector('[data-cb-cell="' + side + ':' + id + '"]');
+  const img = cell && cell.querySelector('img');
+  return img ? campBoxLocal(img.getBoundingClientRect()) : null;
+}
+let campBoxLandAt = 0;   // 上次播落地音效的時間：連續點很快時只播一次
+function campBoxFly(start, toSide, id, n, silent) {
+  if (!start || !campSupplyOpen) return;
+  const cell = campSupplyEl.querySelector('[data-cb-cell="' + toSide + ':' + id + '"]'); if (!cell) return;
+  const img = cell.querySelector('img'), end = campBoxLocal((img || cell).getBoundingClientRect());
+  const fly = document.createElement('div'); fly.className = 'cb-fly';
+  fly.innerHTML = '<img src="' + campBoxDef().image(id) + '" alt="">' + (n > 1 ? '<b>' + n + '</b>' : '');
+  fly.style.width = start.w + 'px'; fly.style.height = start.h + 'px';
+  campSupplyEl.appendChild(fly);
+  const sx = end.w / start.w, sy = end.h / start.h, dx = end.x - start.x, dy = end.y - start.y;
+  const at = (k, lift, s) => 'translate(' + (start.x + dx * k) + 'px,' + (start.y + dy * k - lift) + 'px) scale(' + s + ')';
+  const anim = fly.animate([
+    { transform: at(0, 0, 1), opacity: .6 },   // 飛行中半透明
+    { transform: at(.5, 46, 1.18 * (1 + sx) / 2), opacity: .6, offset: .45 },   // 往上拋：弧線的最高點
+    { transform: at(1, 0, Math.min(sx, sy)), opacity: .45 },
+  ], { duration: 420, easing: 'cubic-bezier(.35,.1,.3,1)' });
+  anim.onfinish = () => {
+    fly.remove();
+    cell.classList.remove('cb-land'); void cell.offsetWidth; cell.classList.add('cb-land');   // 落地：那格彈一下
+    const now = performance.now();
+    if (!silent && now - campBoxLandAt > 250) { campBoxLandAt = now; sfx('boxLand'); }
+    const tip = document.createElement('span'); tip.className = 'cb-plus'; tip.textContent = '+' + n;
+    tip.style.left = (end.x + end.w / 2) + 'px'; tip.style.top = end.y + 'px';
+    campSupplyEl.appendChild(tip); setTimeout(() => tip.remove(), 700);
+  };
 }
 function renderCampSupply() {
   if (!campSupplyEl) return;
-  const box = campBox(), total = campBoxTotal(), full = total >= CAMP_SUPPLY.slots;
-  const cells = [];
-  for (const k of CAMP_SUPPLY.items) for (let i = 0; i < (box[k] || 0); i++) cells.push('<span class="cs-cell" title="' + itemById(k).name + '"><img src="' + itemById(k).image + '" alt=""></span>');
-  while (cells.length < CAMP_SUPPLY.slots) cells.push('<span class="cs-cell empty"></span>');
-  const guides = (G.towers || []).filter(t => TYPES[t.type].guide && t.kit);
-  campSupplyEl.innerHTML = '<section class="camp-supply-card" role="dialog" aria-modal="true" aria-label="營地物資箱">' +
-    '<header><div><small>CAMP SUPPLY</small><h3>營地物資箱</h3><p>嚮導用完會自己回來拿</p></div><button type="button" class="camp-supply-close" aria-label="關閉（Esc）">×</button></header>' +
-    '<div class="cs-grid">' + cells.join('') + '</div>' +
-    '<div class="cs-rows">' + CAMP_SUPPLY.items.map(k => {
-      const it = itemById(k), bag = supplyInventory.get(k) || 0;
-      return '<div class="cs-row"><img src="' + it.image + '" alt=""><b>' + it.name + '</b><span>背包 <em>' + bag + '</em></span>' +
-        '<button type="button" data-supply-take="' + k + '"' + ((box[k] || 0) <= 0 ? ' disabled' : '') + '>拿 1 個</button>' +
-        '<button type="button" data-supply-put="' + k + '"' + (bag <= 0 || full ? ' disabled' : '') + '>放 1 個</button></div>';
-    }).join('') + '</div>' +
-    (guides.length ? '<footer>' + guides.map(t => TYPES[t.type].name + '身上：急救包 ' + (t.kit.firstaid || 0) + '・杏仁水 ' + t.kit['almond-water']).join('　') + '</footer>' : '') +
+  const B = campBoxDef(), ids = B.ids();
+  const boxIds = ids.filter(id => B.box(id) > 0), bagIds = ids.filter(id => B.bag(id) > 0);
+  if (campBoxSel && !(campBoxSel.side === 'box' ? boxIds : bagIds).includes(campBoxSel.id)) {   // 選的那格搬空了：看另一邊還有沒有
+    const other = campBoxSel.side === 'box' ? bagIds : boxIds;
+    campBoxSel = other.includes(campBoxSel.id) ? { side: campBoxSel.side === 'box' ? 'bag' : 'box', id: campBoxSel.id } : null;
+  }
+  if (!campBoxSel) campBoxSel = boxIds[0] ? { side: 'box', id: boxIds[0] } : bagIds[0] ? { side: 'bag', id: bagIds[0] } : null;
+  const cell = (side, id) => {
+    const n = side === 'box' ? B.box(id) : B.bag(id), max = side === 'bag' ? B.bagMax(id) : 0, sel = campBoxSel && campBoxSel.side === side && campBoxSel.id === id;
+    return '<button type="button" class="bag-cell' + (campSupplyMode === 'ammo' ? ' bullet' : '') + (sel ? ' sel' : '') + '" data-cb-cell="' + side + ':' + id + '" draggable="true"' +
+      (campSupplyMode === 'ammo' ? ' style="--bc:' + BULLETS[id].color + '"' : '') + ' title="' + (side === 'box' ? '點一下：拿到背包' : '點一下：放進箱子') + '" aria-label="' + B.name(id) + ' ' + n + '">' +
+      '<img src="' + B.image(id) + '" alt=""><b>' + n + (max ? '<small>/' + max + '</small>' : '') + '</b><span class="bag-cell-name">' + B.name(id) + '</span></button>';
+  };
+  const pad = (list, min) => { let h = ''; for (let i = list.length; i < min; i++) h += '<span class="bag-cell empty" aria-hidden="true"></span>'; return h; };
+  const minCells = Math.max(8, Math.ceil(Math.max(boxIds.length, bagIds.length) / 4) * 4);
+  // 說明列
+  let detail = '<div class="bag-detail-empty cb-empty"><span>' + (campSupplyMode === 'ammo' ? '🧰' : '📦') + '</span><p>箱子和背包裡都沒有東西</p></div>';
+  if (campBoxSel) {
+    const id = campBoxSel.id, inBox = B.box(id), inBag = B.bag(id), max = B.bagMax(id);
+    const canTake = Math.min(inBox, max ? max - inBag : Infinity), canPut = Math.min(inBag, B.boxRoom()), qMax = Math.max(1, campBoxSel.side === 'box' ? canTake : canPut);
+    const key = campSupplyMode + ':' + campBoxSel.side + ':' + id;
+    if (key !== campBoxQtyKey) { campBoxQtyKey = key; campBoxQty = campSupplyMode === 'ammo' ? qMax : 1; }   // 換選別的：子彈預設整批、物資預設 1 個
+    campBoxQty = Math.max(1, Math.min(qMax, campBoxQty | 0));
+    detail = '<div class="bag-detail-image cb-image"><img src="' + B.image(id) + '" alt=""></div>' +
+      '<div class="cb-info"><h3>' + B.name(id) + '</h3><p class="cb-counts">箱子 <b>' + inBox + '</b>・' + (campSupplyMode === 'ammo' ? '身上' : '背包') + ' <b>' + inBag + '</b>' + (max ? ' / ' + max : '') + ' ' + B.unit + '</p>' +
+      (B.desc(id) ? '<p class="bag-desc">' + B.desc(id) + '</p>' : '') + '</div>' +
+      '<div class="cb-actions"><div class="bag-qty"><button type="button" data-cb-qty="-1" aria-label="少一個"' + (campBoxQty <= 1 ? ' disabled' : '') + '>−</button><b>' + campBoxQty + '</b><button type="button" data-cb-qty="1" aria-label="多一個"' + (campBoxQty >= qMax ? ' disabled' : '') + '>＋</button></div>' +
+      '<button type="button" class="bag-use" data-cb-move="take"' + (canTake <= 0 ? ' disabled' : '') + '>拿到' + (campSupplyMode === 'ammo' ? '身上' : '背包') + '</button>' +
+      '<button type="button" class="bag-drop" data-cb-move="put"' + (canPut <= 0 ? ' disabled' : '') + '>放進箱子</button></div>';
+  }
+  const canFill = B.fillAll && ids.some(id => B.box(id) > 0 && B.bag(id) < B.bagMax(id));
+  const foot = B.footer ? B.footer() : '';
+  campSupplyEl.innerHTML = '<section class="backpack-card camp-box-card' + (campBoxPop ? ' pop' : '') + '" role="dialog" aria-modal="true" aria-label="' + B.title + '">' +
+    '<header class="backpack-head"><div class="backpack-icon cb-icon" aria-hidden="true"><span class="cb-icon-crop"><img src="' + B.icon() + '" alt=""></span></div>' +
+    '<div class="backpack-title"><h2>' + B.title + '</h2><p>' + B.sub + '</p></div>' +
+    (B.fillAll ? '<button type="button" class="bag-use cb-fillall" data-cb-fillall' + (canFill ? '' : ' disabled') + '>全部補滿</button>' : '') +
+    '<button type="button" class="camp-supply-close" aria-label="關閉（Esc）">×</button></header>' +
+    '<div class="cb-body no-anim">' +
+      '<div class="cb-side" data-cb-side="box"><h4>' + (campSupplyMode === 'ammo' ? '🧰' : '📦') + ' 箱子 <em>' + B.boxCount() + '</em></h4><div class="cb-grid">' + boxIds.map(id => cell('box', id)).join('') + pad(boxIds, minCells) + '</div></div>' +
+      '<div class="cb-arrows" aria-hidden="true"><span>→</span><span>←</span></div>' +
+      '<div class="cb-side" data-cb-side="bag"><h4>🎒 ' + B.bagName + '</h4><div class="cb-grid">' + bagIds.map(id => cell('bag', id)).join('') + pad(bagIds, minCells) + '</div></div>' +
+    '</div>' +
+    '<p class="cb-hint">點格子就搬到另一邊，也可以拖過去' + (campSupplyMode === 'ammo' ? '（箱子 → 身上：補滿；身上 → 箱子：全部放回去）' : '（一次 1 個）') + '；要指定數量用下面的 − ＋</p>' +
+    '<div class="cb-detail">' + detail + '</div>' +
+    (foot ? '<footer class="cb-foot">' + foot + '</footer>' : '') +
     '</section>';
+  campBoxPop = false;
+  const body = campSupplyEl.querySelector('.cb-body');   // 重畫時不要重播滑鼠下那格的浮起動畫（跟背包一樣）
+  requestAnimationFrame(() => requestAnimationFrame(() => body && body.classList.remove('no-anim')));
 }
 window.addEventListener('keydown', e => {
   if (!campSupplyOpen) return;

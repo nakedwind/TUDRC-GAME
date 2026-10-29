@@ -302,7 +302,7 @@ function eliteBirdChargeSpeed(e, dt) {
 }
 function eliteBirdChargeStep(e, dt) {
   const E = ELITE_BIRD, x0 = e.x, y0 = e.y;
-  let move = Math.min(e.eb.left, eliteBirdChargeSpeed(e, dt) * dt);
+  let move = Math.min(e.eb.left, eliteBirdChargeSpeed(e, dt) * dt * (typeof glueSlowAt === 'function' ? glueSlowAt(e.x, e.y, e) : 1));   // 衝進黏著彈的黏膠：衝得很慢（距離不變）
   e.eb.left -= move;
   while (move > 0) {
     const s = Math.min(4, move); move -= s;

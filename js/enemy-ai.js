@@ -234,7 +234,7 @@ function displaceEnemy(e, dx, dy, distance, resetRoute = true) {
 }
 function moveEnemyToward(e, target, dt) {
   const dx = target.x - e.x, dy = target.y - e.y, d = Math.hypot(dx, dy) || 1;
-  const step = e.speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(e.x, e.y, 'enemy') : 1);   // 走在鐵絲網上變慢
+  const step = e.speed * dt * (typeof slowFactorAt === 'function' ? slowFactorAt(e.x, e.y, 'enemy', e) : 1);   // 走在鐵絲網上、黏膠裡變慢
   const moved = displaceEnemy(e, dx, dy, Math.min(step, d), false);
   if (moved && e.undying && typeof sfxAt === 'function') {
     e.lifeStepT = (e.lifeStepT || 0) - dt;

@@ -2,7 +2,7 @@
    ・背包「武器」分頁：手槍右邊是彈匣格，把下面的子彈拖上去就換（js/backpack.js；隨時都能換）。只有一般子彈不佔格子；照明彈需裝進彈匣。
    ・戰鬥中滾輪只會換到彈匣裡的子彈（js/flare.js 的 weaponUsable）。
    ・彈匣一開始 2 格，開發工坊可以升級（最多 5 格）；開發工坊也能開發 source: 'develop' 的子彈。
-   ・出勤時（基地 → 戰鬥）：開發的子彈（develop）自動補滿；後室撿的（field）打完就沒了。
+   ・出勤時（基地 → 戰鬥）：照明彈和開發的子彈（develop）在營地的彈藥箱各放一組（js/camp-supply.js），要自己去箱子補；後室撿的（field）打完就沒了。
    ・存在 equipState.magazine（跟裝備一起存，js/equipment.js 的 saveEquipment）：{ lv: 彈匣等級, load: [子彈 id…] }
    必須在 js/equipment.js、js/flare.js 之後載入。
 */
@@ -30,16 +30,12 @@ function setMagSlot(i, id) {
 }
 const bulletSourceTag = b => b.source === 'develop' ? '開發' : b.source === 'field' ? '後室' : b.source === 'supply' ? '補給' : '';
 
-// ---- 出勤（基地 → 戰鬥，js/sortie-supply.js 的 onSortieNewGame 呼叫）：開發的子彈補滿 ----
+// ---- 出勤（基地 → 戰鬥，js/sortie-supply.js 的 onSortieNewGame 呼叫）：營地的彈藥箱放子彈 ----
 function onMagazineSortie() {
-  const m = magState(), filled = [];
-  for (const id of m.load.slice(0, magSlotCount())) {
-    const b = id && BULLETS[id];
-    if (b && b.source === 'develop' && bulletOwned(id) && fillBullets(id) > 0) filled.push(b.icon + b.name);
-  }
-  if (filled.length) systemNotice('🧰 諾亞幫你補滿了' + filled.join('、'));
+  const m = magState(), stocked = typeof stockCampAmmoForSortie === 'function' ? stockCampAmmoForSortie() : [];
+  if (stocked.length) systemNotice('🧰 諾亞在營地的彈藥箱放了' + stocked.join('、') + '（各一組）');
   const empty = m.load.slice(0, magSlotCount()).filter(id => id && BULLETS[id] && bulletCount(id) <= 0).map(id => BULLETS[id].name);
-  if (empty.length) systemNotice('彈匣裡的' + empty.join('、') + '沒有子彈了', true);
+  if (empty.length) systemNotice('彈匣裡的' + empty.join('、') + '沒有子彈了' + (stocked.length ? '，到營地的彈藥箱補' : ''), true);
 }
 
 // ---- 開發工坊（js/equipment.js 的 workshopEntries、workshopBuy 呼叫）----
@@ -50,7 +46,7 @@ function magazineWorkshopEntries() {
   const bullets = Object.entries(BULLETS).filter(([id, b]) => b.source === 'develop' && !b.removed).map(([id, b]) => {
     const have = bulletOwned(id);
     return { key: 'b:' + id, kind: 'bullet', def: b, name: b.name, lv: have ? 1 : 0, max: 1, icon: wsAmmoIcon(bulletIcon(b, 'ws-bullet-img'), b), image: b.image, emoji: b.icon,
-      tag: '子彈', worn: magazineCarries(id), about: b.desc || '', stat: () => '最多帶 ' + b.max + ' 發・出勤時自動補滿' + (have ? '・到背包的「武器」分頁裝進彈匣' : ''),
+      tag: '子彈', worn: magazineCarries(id), about: b.desc || '', stat: () => '最多帶 ' + b.max + ' 發・每次出勤在營地的彈藥箱放一組' + (have ? '・到背包的「武器」分頁裝進彈匣' : ''),
       canDev: !have, where: '', devCost: b.cost || 0, upCost: 0, devMoney: wsMoney('b:' + id, 0, b.cost || 0), buy: 'bd:' + id };   // devMoney＝開發要花的經費
   });
   const m = magState();

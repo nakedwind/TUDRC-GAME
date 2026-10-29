@@ -59,8 +59,14 @@ const SFX = (() => {
     hitShock: '戰鬥/元素/雷電.mp3',
     shotHeal: '戰鬥/槍械/開槍.mp3',
     hitHeal: '玩家/疏導.mp3',
+    shotSticky: '戰鬥/槍械/開槍.mp3',
+    hitSticky: '怪物/史萊姆/slime-land.mp3',   // 黏膠落地
+    shotKnock: '戰鬥/槍械/開槍.mp3',
+    hitKnock: '戰鬥/近戰/classic-punch.mp3',     // 打中怪物（怪物沒有專屬「被打」音效時）
+    knockWall: '戰鬥/命中/小撞擊.mp3',           // 被推去撞牆
     reload: '戰鬥/槍械/reload.mp3',
-    ammoRefill: '戰鬥/槍械/reload02.mp3',   // 營地的補彈藥箱補子彈（js/flare.js 的 useAmmoRefillNearPlayer）
+    ammoRefill: '戰鬥/槍械/reload02.mp3',   // 營地的彈藥箱補子彈（js/camp-supply.js 的 campBoxMove）
+    boxLand: '介面/放進格子.wav',           // 物資箱、彈藥箱：搬過去的東西落進格子（js/camp-supply.js 的 campBoxFly）
     magLoad: '戰鬥/槍械/reload02.mp3',      // 背包裡把子彈裝進彈匣、彈匣格互換（js/backpack.js）
     monsterHit: '戰鬥/命中/hit.mp3',
     fireImpact: { mode: 'random', files: ['戰鬥/元素/火焰.mp3', '戰鬥/元素/火焰02.mp3'] },
@@ -188,7 +194,7 @@ const SFX = (() => {
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
     'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'pop', 'playerHit', 'playerHitMonster',
-    'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal']);
+    'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };

@@ -19,9 +19,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
-<script src="js/new-game.js?v=test-sp-20261027"></script>
+<script src="js/new-game.js?v=box-fly3-20261029"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=graffiti-custom-20261028">
+<link rel="stylesheet" href="css/style.css?v=box-fly3-20261029">
 <link rel="stylesheet" href="css/tpad-map.css?v=radio-nav-20261028">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=learn-btn7-20261027">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
@@ -257,7 +257,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=pathfix-20261027"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=radio-20261028"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=box-fly3-20261029"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=basebgm-20261028"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -266,7 +266,7 @@
   <script src="data/gifts.js?v=giftrefuse-20261025"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=ground-items4-20261024"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=haoguai-20261025"></script>   <!-- 溫特可購買、使用的個人補給 -->
-  <script src="data/equipment.js?v=vest3-20261028"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/equipment.js?v=box-fly3-20261029"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=infoimgsize-20261023"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
   <script src="js/backpack-layout.js?v=dropfix-20261025"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
@@ -302,7 +302,7 @@
   <script src="js/breakable-walls.js?v=crack2kinds-20261026"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=poolbase-20261028"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
-  <script src="js/build.js?v=build-dev-20261028"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/build.js?v=sticky-knock-20261029"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=newbie-start-20261027"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=moth-20261029"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
@@ -320,9 +320,9 @@
   <script src="js/achievements.js?v=achv7-20261023"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=nofallback-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/burrowing-mouse.js?v=mouse-test-off-20261024"></script> <!-- 花蓮版權老鼠：出土與地底手 -->
-  <script src="js/enemy-ai.js?v=lifeform-target-20261029"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
-  <script src="js/bird-head.js?v=mate-hurt-20261028"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
-  <script src="js/elite-bird-head.js?v=mate-hurt-20261028"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
+  <script src="js/enemy-ai.js?v=sticky-knock-20261029"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/bird-head.js?v=sticky-knock-20261029"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
+  <script src="js/elite-bird-head.js?v=sticky-knock-20261029"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
   <script src="js/pearl-kid.js?v=crumble-20261028"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
   <script src="js/hangi-bao.js?v=mixgate-20261026"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/fish-head.js?v=fleefix-20261026"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
@@ -332,7 +332,7 @@
   <script src="js/gourd-monkey.js?v=test-off-20261029"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=moth-wakeshot-20261029"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=mate-hurt-20261028"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=moth-doorclip-20261029"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=box-fly3-20261029"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=acidult064-20261027"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=moth-20261029"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
@@ -366,13 +366,13 @@
   <script src="js/boss-music.js?v=bossbgm2-20261028"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=reload02-20261027"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/flare.js?v=box-fly3-20261029"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=weargear-20261028"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
-  <script src="js/special-guns.js?v=moth-sleep-20261029"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
-  <script src="js/magazine.js?v=ammo-img-20261027"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
+  <script src="js/special-guns.js?v=sticky-knock-20261029"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
+  <script src="js/magazine.js?v=box-fly3-20261029"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=storybuild-20261026"></script>
   <script src="js/camp-interactions.js?v=ammorefill-20261026"></script>
-  <script src="js/camp-supply.js?v=newbie-start-20261027"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
+  <script src="js/camp-supply.js?v=box-fly3-20261029"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
   <script src="js/guide-skills.js?v=load-text-20261027"></script>   <!-- 嚮導技能：戰鬥中自動發動（群體補血、增益、大招…） -->
   <script src="js/vitals.js?v=load-text-20261027"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
@@ -388,7 +388,7 @@
   <script src="js/quick-slots.js?v=moth-sleep-20261029"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->
   <script src="js/item-intro.js?v=small-img-20261027"></script>   <!-- 第一次拿到新東西：說明視窗 -->
-  <script src="js/tutorial.js?v=radio-sfx-20261028"></script>   <!-- 新手區教學：開場劇情（爆炸、無線電）、要不要看教學、動畫教學 -->
+  <script src="js/tutorial.js?v=box-fly3-20261029"></script>   <!-- 新手區教學：開場劇情（爆炸、無線電）、要不要看教學、動畫教學 -->
   <script src="data/posters.js?v=posterart2-20261023"></script>   <!-- 可以查看的海報：說明文字 -->
   <script src="js/posters.js?v=achv4-20261023"></script>   <!-- 查看海報 -->
   <script>document.write('<script src="data/bestiary.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器）；每次都讀最新的 -->

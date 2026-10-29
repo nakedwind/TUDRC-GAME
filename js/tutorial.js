@@ -64,7 +64,8 @@ const TUTORIAL = {
       '把頭盔穿上，被打到會比較不痛。',
     ],
     refill: [
-      '這是彈藥箱。照明彈用完了，走過來就能補。',
+      '這是彈藥箱。每次出勤，照明彈和開發好的子彈都會放一組在這裡。',
+      '子彈用完了，按打開就能補；也可以把身上的子彈放進去。',
     ],
     hp: [
       '隊長，你受傷了！先用醫療包包紮一下。',
@@ -552,7 +553,7 @@ function tutorialFrame(dt) {
     else if (L.step.done && L.step.done(L)) tutNextStep();
   }
   drawTutFocus();
-  if (ok && typeof campSupplyOpen !== 'undefined' && campSupplyOpen && !tutorialState.boxes.supply) { tutorialState.boxes.supply = true; tutorialSave(); }
+  if (ok && typeof campSupplyOpen !== 'undefined' && campSupplyOpen && campSupplyMode !== 'ammo' && !tutorialState.boxes.supply) { tutorialState.boxes.supply = true; tutorialSave(); }
   drawTutMarks(ok && !tutLesson && !dialogueState && tutorialState.decided && !tutorialState.skip);
 }
 

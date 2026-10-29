@@ -151,7 +151,7 @@ function chargerChargeStep(e, dt) {
   chargerFootsteps(e, Math.hypot(e.x - x0, e.y - y0), true);
 }
 function chargerChargeMove(e, dt) {
-  let move = Math.min(e.ch.left, chargerCfg(e).chargeSpeed * dt);
+  let move = Math.min(e.ch.left, chargerCfg(e).chargeSpeed * dt * (typeof glueSlowAt === 'function' ? glueSlowAt(e.x, e.y, e) : 1));   // 衝進黏著彈的黏膠：衝得很慢（距離不變）
   e.ch.left -= move;
   while (move > 0) {
     const s = Math.min(4, move); move -= s;

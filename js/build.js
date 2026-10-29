@@ -468,7 +468,7 @@ document.querySelector('#buildToolbar .build-fold')?.addEventListener('wheel', e
 
 // ---- 減速建築（鐵絲網）：站在上面的速度倍率（data/balance.js 的 SLOW_BUILDINGS）----
 // who：'enemy' 怪物、'ally' 溫特和隊員。疊好幾個也只算最慢的那個
-function slowFactorAt(x, y, who) {
+function slowFactorAt(x, y, who, actor) {   // actor：誰在走（黏著彈的黏膠要知道是不是飛在空中；沒給＝當成在地上）
   if (!G || !G.obstacles) return 1;
   const [c, r] = cellAt(x, y);
   let k = 1;
@@ -478,6 +478,7 @@ function slowFactorAt(x, y, who) {
   }
   if (typeof burrowMouseSlowAt === 'function') k = Math.min(k, burrowMouseSlowAt(x, y));   // 版權老鼠死後的洞（js/burrowing-mouse.js）
   if (typeof waterSlowAt === 'function') k = Math.min(k, waterSlowAt(x, y));   // 走在水裡（js/water.js：素材勾了「這是水」，速度 % 在編輯器填）
+  if (typeof glueSlowAt === 'function') k = Math.min(k, glueSlowAt(x, y, actor));   // 黏著彈的黏膠（js/special-guns.js）
   return k;
 }
 // 這個位置是不是已經有同一種建築（不擋路的建築一格只能放一個）

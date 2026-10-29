@@ -1928,7 +1928,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .bag-detail-image img.weapon { width: 150px; height: 90px; }   /* 槍：40×30 → 放大 3 倍（120×90），50×30 的燃燒彈槍也放得下 */
 
 /* 重畫時暫停動畫（js/equipment.js 的 renderEquipPanel） */
-.equip-panel.no-anim *, .backpack-grid.no-anim * { transition: none !important; }
+.equip-panel.no-anim *, .backpack-grid.no-anim *, .cb-body.no-anim * { transition: none !important; }
 
 /* 背包分頁：排成一行（太窄時可以左右捲），選中的那個用金色填滿 */
 .backpack-main .backpack-tabs { flex-wrap: nowrap; gap: 4px; overflow-x: auto; scrollbar-width: none; }
@@ -2269,32 +2269,58 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .backpack-icon .backpack-button-image{width:28px;height:34px;}
 #hudBackpackButton .backpack-button-image{width:30px;height:31px;margin:0 0 -4px;}   /* 底部 HUD 的背包按鈕：圖示放大 1.5 倍（框剛好貼合圖片比例；按鈕大小不變） */
 
-/* ===== 營地物資箱（js/camp-supply.js）===== */
-#campSupply { position: absolute; inset: 0; z-index: 32; display: grid; place-items: center; padding: 14px; background: rgba(4,7,11,.5); font-family: "Microsoft JhengHei", sans-serif; }
+/* ===== 營地物資箱、彈藥箱（js/camp-supply.js）：外觀跟背包一樣（借用 .backpack-card、.bag-cell、.bag-use、.bag-drop、.bag-qty）===== */
+#campSupply { position: absolute; inset: 10px; z-index: 32; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); font-family: "Microsoft JhengHei", sans-serif; animation: shop-fade .16s ease-out both; }
 #campSupply.hidden { display: none; }
-/* 獨立防具視窗 */
-/* 配色跟「作戰計畫」視窗一樣（.camp-plan-card） */
-.camp-supply-card { zoom: 1.2; box-sizing: border-box; width: min(615px, calc(100vw / 1.2)); max-height: 100%; overflow-y: auto; padding: 22px; border: 1px solid #668a94; border-top: 3px solid #e7c47c; border-radius: 16px; color: #e4edf0; background: linear-gradient(145deg, #25353c, #111e25); box-shadow: 0 24px 80px rgba(0,0,0,.65); }
-.camp-supply-card header { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 38px; padding: 0 46px; text-align: center; }
-.camp-supply-card header small { display: none; }
-.camp-supply-card header h3 { margin: 0; font-size: 24px; color: #e4edf0; }
-.camp-supply-card header p { margin: 6px 0 0; color: #e7c47c; font-size: 13px; }
-.camp-supply-close { position: absolute; right: 0; top: calc(50% - 17px); width: 34px; height: 34px; border: 1px solid #52707c; border-radius: 50%; background: #1a2a32; color: #d5e6ec; cursor: pointer; font-size: 22px; line-height: 1; }
-.cs-grid { display: grid; grid-template-columns: repeat(10, 1fr); gap: 6px; margin-top: 18px; }
-.cs-cell { aspect-ratio: 1; display: grid; place-items: center; border: 1px solid #47616e; border-radius: 8px; background: rgba(7,15,22,.5); }
-.cs-cell.empty { border-style: dashed; border-color: #2f434d; background: rgba(7,15,22,.25); }
-.cs-cell img { width: 94%; height: 94%; object-fit: contain; image-rendering: pixelated; }
-.cs-rows { display: flex; flex-direction: column; gap: 10px; margin-top: 16px; }
-.cs-row { display: grid; grid-template-columns: 30px auto 1fr auto auto; align-items: center; gap: 10px; padding: 10px 12px; border: 1px solid #47616e; border-radius: 11px; background: rgba(7,15,22,.5); }
-.cs-row img { width: 28px; height: 28px; object-fit: contain; image-rendering: pixelated; }
-.cs-row b { color: #e4edf0; font-size: 15px; }
-.cs-row span { color: #90a7b3; font-size: 12px; }
-.cs-row em { color: #e7c47c; font-style: normal; font-weight: 700; }
-.cs-row button { padding: 7px 14px; border: 1px solid #63818d; border-radius: 8px; background: #243a44; color: #e4edf0; cursor: pointer; font: 700 13px "Microsoft JhengHei", sans-serif; }
-.cs-row button[data-supply-take] { border-color: #e7c47c; background: #e7c47c; color: #302818; }
-.cs-row button:disabled { opacity: .35; cursor: default; }
-.camp-supply-card button:focus-visible { outline: 2px solid #8edacb; outline-offset: 3px; }
-.camp-supply-card footer { margin-top: 16px; color: #90a7b3; font-size: 12px; }
+.camp-box-card { width: min(820px, 100%); height: auto; max-height: 100%; color: #dfe7ee; animation: none; }
+.camp-box-card.pop { animation: shop-in .2s cubic-bezier(.2,.9,.3,1.15) both; }   /* 只有剛打開時彈出來；點格子重畫不再播 */
+.camp-box-card .backpack-head { gap: 12px; }
+/* 箱子圖（80×80，箱子只畫在左下 46×65 那塊）：裁出箱子那塊放在框的正中間 */
+.cb-icon-crop { position: relative; width: 23px; height: 32px; overflow: hidden; }
+.cb-icon-crop img { position: absolute; left: 0; top: -7.5px; width: 40px; height: 40px; image-rendering: pixelated; }
+.camp-supply-close { width: 32px; height: 32px; flex: none; padding: 0; border: 1px solid #59616c; border-radius: 50%; background: #202730; color: #dfe7ee; cursor: pointer; font-size: 19px; line-height: 1; }
+.camp-supply-close:hover { border-color: #c9d3dc; background: #2b3440; }
+.cb-fillall { width: auto; flex: none; padding: 7px 16px; font-size: 14px; }
+.cb-body { flex: 0 1 auto; display: grid; grid-template-columns: minmax(0,1fr) 34px minmax(0,1fr); gap: 8px; padding: 14px 18px 4px; min-height: 170px; overflow-y: auto; scrollbar-width: thin; scrollbar-color: #3d5266 transparent; }
+.cb-side { min-width: 0; padding: 10px; border: 1px solid rgba(143,211,255,.13); border-radius: 12px; background: rgba(0,0,0,.14); transition: border-color .12s, background .12s; }
+.cb-side.drop-over { border-color: #ffd479; background: rgba(70,60,36,.3); }
+.cb-side h4 { display: flex; align-items: center; gap: 8px; margin: 0 0 8px; color: #d8ecff; font-size: 14px; }
+.cb-side h4 em { margin-left: auto; color: #8c9aa8; font-size: 12px; font-style: normal; font-weight: 700; font-variant-numeric: tabular-nums; }
+.cb-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 8px; }
+.cb-grid .bag-cell { padding: 6px 6px 18px; }
+.cb-grid .bag-cell img { inset: 6px 6px 18px; height: calc(100% - 24px); }
+.cb-grid .bag-cell.bullet img { inset: 4px 4px 16px !important; margin: auto; width: 82% !important; height: calc(100% - 20px) !important; }
+.cb-grid .bag-cell b { bottom: 18px; }
+.cb-grid .bag-cell b small { opacity: .55; font-size: 9px; }
+.cb-grid .bag-cell-name { position: absolute; left: 2px; right: 2px; bottom: 3px; overflow: hidden; color: #b7c3cf; font-size: 11px; text-align: center; white-space: nowrap; text-overflow: ellipsis; }
+.cb-arrows { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; color: #5d7a90; font-size: 20px; font-weight: 800; }
+.cb-hint { margin: 6px 18px 0; color: #6f7d8a; font-size: 12px; text-align: center; }
+.cb-detail { flex: none; display: grid; grid-template-columns: 76px minmax(0,1fr) 190px; align-items: center; gap: 14px; margin: 10px 18px 16px; padding: 10px 12px; border: 1px solid rgba(143,211,255,.13); border-radius: 12px; background: rgba(0,0,0,.2); }
+.cb-detail .cb-empty { grid-column: 1 / -1; text-align: center; }
+.cb-image { padding: 6px 0; }
+.cb-image img { width: 64px; height: 64px; object-fit: contain; image-rendering: pixelated; }
+.cb-info { min-width: 0; }
+.cb-info h3 { margin: 0; color: #f3f6f9; font-size: 18px; }
+.cb-counts { margin: 3px 0 4px; color: #8c9aa8; font-size: 13px; } .cb-counts b { color: #ffd479; font-size: 15px; }
+.cb-info .bag-desc { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.cb-actions { display: flex; flex-direction: column; gap: 7px; }
+.cb-actions .bag-qty { align-self: stretch; }
+.cb-actions .bag-drop:disabled { opacity: .35; cursor: not-allowed; }
+.cb-foot { margin: -6px 18px 14px; color: #8c9aa8; font-size: 12px; text-align: center; }
+.camp-box-card button:focus-visible { outline: 2px solid #ffd479; outline-offset: 2px; }
+/* 搬東西的動畫（js/camp-supply.js 的 campBoxFly） */
+.cb-fly { position: absolute; left: 0; top: 0; z-index: 5; pointer-events: none; transform-origin: 0 0; opacity: .6; filter: drop-shadow(0 6px 8px rgba(0,0,0,.4)); }   /* 飛行中半透明 */
+.cb-fly img { width: 100%; height: 100%; object-fit: contain; image-rendering: pixelated; }
+.cb-fly b { position: absolute; right: -6px; bottom: -6px; min-width: 18px; padding: 1px 5px; border-radius: 99px; background: #ffd479; color: #3b2304; font-size: 11px; font-weight: 800; text-align: center; }
+.cb-grid .bag-cell.cb-land { animation: cb-land .32s cubic-bezier(.3,1.6,.5,1); border-color: #ffd479; }
+@keyframes cb-land { 0% { transform: scale(1); } 35% { transform: scale(1.12); box-shadow: 0 0 18px rgba(255,212,121,.55); } 100% { transform: scale(1); } }
+.cb-plus { position: absolute; z-index: 6; pointer-events: none; transform: translate(-50%, -4px); color: #ffd479; font: 800 15px "Microsoft JhengHei", sans-serif; text-shadow: 0 1px 3px #000; animation: cb-plus .7s ease-out forwards; }
+@keyframes cb-plus { from { opacity: 0; transform: translate(-50%, 4px); } 20% { opacity: 1; } to { opacity: 0; transform: translate(-50%, -22px); } }
+@media (prefers-reduced-motion: reduce) { .cb-fly { display: none; } .cb-grid .bag-cell.cb-land { animation: none; } }
+@media (max-width: 700px) {
+  .cb-body { grid-template-columns: 1fr; } .cb-arrows { flex-direction: row; }
+  .cb-detail { grid-template-columns: 64px minmax(0,1fr); } .cb-actions { grid-column: 1 / -1; }
+}
 
 /* 電梯樓層按鈕：樓層＋地圖名稱（js/game.js 的 renderElevatorFloors） */
 .elevator-floors button { display: flex; flex-direction: column; align-items: center; gap: 2px; }

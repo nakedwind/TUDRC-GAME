@@ -1055,6 +1055,7 @@ function draw() {
   if (typeof drawGourdGround === 'function') drawGourdGround(ctx);   // 葫蘆猴的拖痕、地裂、泰山壓頂落點圈（js/gourd-monkey.js）
   if (typeof drawLoofahGround === 'function') drawLoofahGround(ctx);   // 絲瓜藤鑽地的裂痕（js/loofah-lady.js）   // 魚頭君留下的水漬、積水（js/fish-head.js）
   drawCombatFeelGround(ctx);   // 黏液痕跡、自爆範圍警示
+  if (typeof drawGluePools === 'function') drawGluePools(ctx);   // 黏著彈的黏膠（js/special-guns.js）
   sortables.sort((a, b) => a.y - b.y);
   for (const it of sortables) it.draw();
   if (typeof drawDoorLocks === 'function') drawDoorLocks(ctx);   // 解開時掉下來的鎖鏈（js/doors.js）
@@ -1107,7 +1108,7 @@ function draw() {
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
-    else if (ammoRefillNearPlayer()) { const c = ammoRefillNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '補充彈藥'); }   // 營地的補彈藥箱（js/flare.js）
+    else if (ammoRefillNearPlayer()) { const c = ammoRefillNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '打開彈藥箱'); }   // 營地的彈藥箱（js/flare.js）
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '打開彈藥箱'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）

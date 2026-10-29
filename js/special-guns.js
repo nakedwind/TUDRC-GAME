@@ -1,4 +1,4 @@
-/* ===== 手槍的特殊子彈：燃燒彈、麻醉彈、分裂彈、閃光彈、雷電彈、治療彈（data/equipment.js 的 BULLETS）=====
+/* ===== 手槍的特殊子彈：燃燒彈、麻醉彈、分裂彈、閃光彈、雷電彈、治療彈、黏著彈、擊退彈（data/equipment.js 的 BULLETS）=====
    - 在後室的置物箱找得到（第一次找到＝拿到這種子彈），之後用滾輪換到它（js/flare.js）。效果固定，不會升級。
    - 燃燒彈：拋過去（會飛過怪物頭上），落地燒出一片火海（js/oil-barrels.js 的火海，敵我都會燙）。
      火海會點燃油汙、油桶，也會把生命體碎掉的那堆燒成灰。
@@ -8,6 +8,11 @@
    - 閃光彈：拋過去落地爆出強光，範圍內的怪物暈眩；隊員也會被閃到（站著不動、不攻擊）。生命體沒有效果。
    - 雷電彈：直線打中的怪物觸電受傷、麻痺，電流再跳到附近幾隻；打到的地方旁邊有隊員也會被電到。
    - 治療彈：直線打中誰就補誰的 HP（隊員、怪物都會補；暴走的隊員也補）。
+   - 黏著彈：直線打出去，落地（打中怪物就落在牠腳下）噴出一灘黏膠，留在地上 BULLETS.sticky.stick 秒。
+     踩進去的都會變很慢：怪物、溫特、隊員都一樣（js/build.js 的 slowFactorAt 問 glueSlowAt）。飛在空中的人面蝶、珍珠小童，鑽在地底的版權老鼠不受影響。
+   - 擊退彈：直線打中的怪物被往後推開；推去撞到牆壁或建築：暈一下、再受一點傷。
+     推不動：鳥頭大隊長、葫蘆猴（unpushable）、躲在洞裡的版權老鼠（knockMul 0）；生命體、虱目魚小子比較重，推得比較近；
+     人面蝶飛在空中：推得開，但會飛過牆，不會撞牆；生命體撞牆不會暈（noStun）。
    - 數量存在 equipState.bullets（js/flare.js 的 bulletCount／addBullets）；每種的數值在 data/equipment.js 的 BULLETS。
 */
 const SPECIAL_GUN = {
@@ -44,7 +49,7 @@ function updateSpecialGun(id, p, dt, aim, canFire) {
   if (bulletCount(id) <= 0) { dryFire(p, aim, id); return; }
   useBullet(id);
   const b = BULLETS[id];
-  const fire = { incendiary: fireIncendiary, tranq: fireTranq, split: fireSplit, flash: fireFlashBang, shock: fireShock, heal: fireHeal }[id];
+  const fire = { incendiary: fireIncendiary, tranq: fireTranq, split: fireSplit, flash: fireFlashBang, shock: fireShock, heal: fireHeal, sticky: fireSticky, knock: fireKnock }[id];
   if (fire) fire(p, aim, b);
   p.atkCd = b.gap;
 }
@@ -297,6 +302,134 @@ function fireHeal(p, aim, b) {
   } else sfx('switch');
 }
 
+// ---- 黏著彈：直線飛出去，落地噴出一灘黏膠（敵我都黏）----
+const glueTargets = () => liveEnemies().filter(e => !(typeof burrowUnderground === 'function' && burrowUnderground(e)));   // 鑽在地底的打不到
+function fireSticky(p, aim, b) {
+  const ang = Math.atan2(aim.y - p.y, aim.x - p.x);
+  aimPose(p, ang);
+  const dist = clearDistance(p, ang, Math.min(Math.hypot(aim.x - p.x, aim.y - p.y), b.range * CELL)), r = lineHit(p, ang, dist, glueTargets(), 16);
+  const { x: mx, y: my } = gunMuzzleAt(p, ang);
+  const end = r.target ? { x: r.target.x, y: r.target.y } : { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };   // 打中怪物：黏膠落在牠腳下
+  (G.glueShots = G.glueShots || []).push({ x0: mx, y0: my, x1: end.x, y1: end.y, ang, t: 0, T: Math.max(.05, Math.hypot(end.x - mx, end.y - my) / b.speed), lv: b, hit: r.target || null });
+  G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
+  sfx('shotSticky');
+}
+function glueLand(s) {
+  const b = s.lv, x = s.x1, y = s.y1;
+  (G.gluePools = G.gluePools || []).push({ x, y, R: b.r * CELL, t: b.stick, T: b.stick, seed: Math.random() * 1000 });
+  if (s.hit && !s.hit.dead && s.hit.hp > 0) { s.hit.hitT = Math.max(s.hit.hitT || 0, .15); s.hit.hitColor = b.color; }
+  for (let i = 0; i < 12; i++) { const a = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 90;
+    G.effects.push({ ember: true, x, y: y - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 30, r: 1.8 + Math.random() * 1.6, life: .35, life0: .35, color: b.color }); }
+  G.effects.push({ ring: true, x, y, r: 4, r2: b.r * CELL, life: .25, life0: .25, color: b.color });
+  if (typeof sfxAt === 'function') sfxAt('hitSticky', x, y, .6, 'sticky-land');
+}
+// 給 js/build.js 的 slowFactorAt：站在黏膠裡走路變很慢；actor＝誰在走（飛在空中、鑽在地底的不受影響；沒給＝當成在地上）
+function glueSlowAt(x, y, actor) {
+  const pools = typeof G !== 'undefined' && G && G.gluePools; if (!pools || !pools.length) return 1;
+  if (actor && (actor.flying || (typeof burrowUnderground === 'function' && burrowUnderground(actor)))) return 1;
+  return pools.some(g => inGlue(g, x, y)) ? BULLETS.sticky.slow : 1;
+}
+const inGlue = (g, x, y) => Math.hypot(g.x - x, (g.y - y) / .7) <= g.R;   // 黏膠是扁的橢圓（地上透視）
+function updateGlue(dt) {
+  if (G.glueShots && G.glueShots.length) {
+    for (const s of G.glueShots) { s.t += dt; if (s.t >= s.T) glueLand(s); }
+    G.glueShots = G.glueShots.filter(s => s.t < s.T);
+  }
+  if (!G.gluePools || !G.gluePools.length) return;
+  for (const g of G.gluePools) g.t -= dt;
+  G.gluePools = G.gluePools.filter(g => g.t > 0);
+  const actors = [...(G.player && G.player.hp > 0 ? [G.player] : []), ...G.towers.filter(t => t.hp > 0), ...G.enemies.filter(e => !e.dead && e.hp > 0)];
+  for (const a of actors) {   // 剛踩進去：頭上跳「黏住了！」
+    const stuck = glueSlowAt(a.x, a.y, a) < 1;
+    if (stuck && !a.glueStuck) flash('黏住了！', a.x, a.y - (G.enemies.includes(a) ? 40 : 56), BULLETS.sticky.color, .9);
+    a.glueStuck = stuck;
+  }
+}
+// 地上的黏膠（render.js 畫在角色腳下）：快消失的最後幾秒慢慢變淡
+function drawGluePools(ctx) {
+  const pools = G.gluePools; if (!pools || !pools.length) return;
+  const now = performance.now() / 1000;
+  for (const g of pools) {
+    if (!isVisible(g.x, g.y)) continue;
+    const a = Math.min(1, g.t / 3, (g.T - g.t) / .15);
+    ctx.save(); ctx.globalAlpha = a;
+    ctx.translate(g.x, g.y);
+    ctx.fillStyle = 'rgba(70,140,30,.55)';   // 外圈：幾坨不規則的黏膠
+    for (let i = 0; i < 6; i++) {
+      const ang = g.seed + i * 1.05, d = g.R * (.35 + .25 * Math.sin(g.seed * 3 + i));
+      ctx.beginPath(); ctx.ellipse(Math.cos(ang) * d, Math.sin(ang) * d * .7, g.R * .55, g.R * .38, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.fillStyle = 'rgba(126,217,87,.75)';
+    ctx.beginPath(); ctx.ellipse(0, 0, g.R * .8, g.R * .56, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = 'rgba(220,255,190,.35)';   // 反光
+    ctx.beginPath(); ctx.ellipse(-g.R * .25, -g.R * .18, g.R * .3, g.R * .12, -.3, 0, Math.PI * 2); ctx.fill();
+    for (let i = 0; i < 3; i++) {   // 冒泡
+      const k = (now * .5 + i / 3 + g.seed) % 1, bx = Math.cos(g.seed + i * 2.1) * g.R * .45, by = Math.sin(g.seed + i * 2.1) * g.R * .3;
+      ctx.strokeStyle = 'rgba(220,255,190,' + (.6 * Math.sin(k * Math.PI)).toFixed(3) + ')'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(bx, by, 1.5 + k * 3, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+}
+
+// ---- 擊退彈：直線打中的怪物被往後推；撞到牆壁、建築：暈一下 ----
+function fireKnock(p, aim, b) {
+  const ang = Math.atan2(aim.y - p.y, aim.x - p.x);
+  aimPose(p, ang);
+  const dist = clearDistance(p, ang, b.range * CELL), r = lineHit(p, ang, dist, glueTargets(), 16);
+  const { x: mx, y: my } = gunMuzzleAt(p, ang);
+  const end = r.target ? bodyPoint(r.target) : { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
+  G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .12, life0: .12, color: b.color });
+  G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
+  G.effects.push({ ring: true, x: end.x, y: end.y, r: 3, r2: r.target ? 20 : 9, life: .2, life0: .2, color: b.color });
+  sfx('shotKnock');
+  const e = r.target; if (!e) return;
+  bulletHurtEnemy(e, b.dmg, b.color, p, 'hitKnock');
+  const mul = Math.min(1.2, e.knockMul ?? 1);
+  if (e.unpushable || mul <= 0) { flash('推不動', e.x, e.y - 44, '#c6d1dd', .9); return; }   // 鳥頭大隊長、葫蘆猴、躲在洞裡的版權老鼠
+  const len = b.push * CELL * mul;
+  e.knock = { dx: Math.cos(ang), dy: Math.sin(ang), left: len, speed: len / b.slide, air: e.behavior === 'moth' };   // air：飛在空中，飛得過牆
+  if (!e.noStun) e.stunT = Math.max(e.stunT || 0, b.slide);   // 被推的時候不能動
+}
+function knockFree(e, k, x, y) {
+  if (!k.air) return !enemyBlocked(x, y);
+  const [c, r] = cellAt(x, y), floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null;
+  return inGrid(c, r) && (!floor || !floor.size || floor.has(c + ',' + r));   // 人面蝶：飛得過牆，只是不能飛出地圖
+}
+function updateKnocks(dt) {
+  const b = BULLETS.knock;
+  for (const e of G.enemies) {
+    const k = e.knock; if (!k) continue;
+    if (e.dead || e.hp <= 0) { e.knock = null; continue; }
+    let move = Math.min(k.left, k.speed * dt), wall = false;
+    k.left -= move;
+    while (move > 0) {
+      const s = Math.min(4, move); move -= s;
+      const nx = e.x + k.dx * s, ny = e.y + k.dy * s;
+      if (!knockFree(e, k, nx, ny)) { wall = true; k.left = 0; break; }
+      e.x = nx; e.y = ny;
+    }
+    if (!k.air && Math.random() < .6) G.effects.push({ ember: true, x: e.x + (Math.random() - .5) * 14, y: e.y + 6, vx: -k.dx * 40, vy: -k.dy * 40 - 10, r: 2 + Math.random() * 2, life: .3, life0: .3, color: '#b9b2a2' });   // 地上擦出的灰
+    if (wall) {   // 撞上去了
+      const bp = bodyPoint(e);
+      e.hp -= b.wallDmg; flashDmg('-' + b.wallDmg, e.x, e.y - 26, b.color);
+      e.hitT = Math.max(e.hitT || 0, .2); e.hitColor = '#ffffff';
+      if (e.noStun) flash('沒有暈', e.x, e.y - 50, '#9aa4b2', .9);   // 生命體
+      else {
+        const dur = b.wallStun * ((e.maxhp || 0) >= SPECIAL_GUN.tranq.bigHp ? .5 : 1);   // 大型怪物暈一半
+        e.stunT = Math.max(e.stunT || 0, dur); e.dazeT = Math.max(e.dazeT || 0, dur);   // 頭上轉星星（drawSleepMarks）
+        flash('撞暈了！', e.x, e.y - 50, '#fff2a0', 1);
+      }
+      G.effects.push({ ring: true, x: bp.x + k.dx * 10, y: bp.y + k.dy * 10, r: 4, r2: 24, life: .22, life0: .22, color: '#fff2a0' });
+      for (let i = 0; i < 8; i++) { const a = Math.atan2(-k.dy, -k.dx) + (Math.random() - .5) * 2, sp = 60 + Math.random() * 80;
+        G.effects.push({ ember: true, spark: true, x: bp.x, y: bp.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 1.5, life: .25, life0: .25, color: '#fff2a0' }); }
+      if (typeof nearbyImpact === 'function') nearbyImpact(e.x, e.y, 2, .05);
+      if (typeof sfxAt === 'function') sfxAt('knockWall', e.x, e.y, .6, 'knock-wall');
+    }
+    if (k.left <= 0) { e.knock = null; resetEnemyNavigation(e); }
+  }
+}
+
 // ---- 每幀（game.js 的 update 呼叫）----
 function updateSpecialGuns(dt) {
   if (G.flashShots && G.flashShots.length) {
@@ -319,6 +452,7 @@ function updateSpecialGuns(dt) {
     G.tranqDarts = G.tranqDarts.filter(s => s.t < s.T);
   }
   for (const e of G.enemies) if (e.sleepT > 0) { e.sleepT -= dt; if (!(e.stunT > 0)) e.sleepT = 0; }   // 被別的方式解除停住：也醒了
+  updateGlue(dt); updateKnocks(dt);   // 黏著彈、擊退彈
 }
 function incShotPos(s) {
   const k = Math.min(1, s.t / s.T);
@@ -326,7 +460,15 @@ function incShotPos(s) {
 }
 
 // ---- 繪製 ----
-function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉彈、閃光彈（render.js 畫在角色上面）
+function drawSpecialShots(ctx) {   // 飛行中的燃燒彈、麻醉彈、閃光彈、黏著彈（render.js 畫在角色上面）
+  for (const s of (G.glueShots || [])) {   // 黏著彈：一坨綠色黏膠，拖著小尾巴
+    const k = Math.min(1, s.t / s.T), x = s.x0 + (s.x1 - s.x0) * k, y = s.y0 + (s.y1 - s.y0) * k;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(s.ang);
+    ctx.fillStyle = 'rgba(126,217,87,.45)'; ctx.beginPath(); ctx.ellipse(-7, 0, 7, 2.2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#5fbf3a'; ctx.beginPath(); ctx.ellipse(0, 0, 4.5, 3.5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#d8ffc0'; ctx.beginPath(); ctx.arc(1.2, -1.2, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.restore();
+  }
   for (const s of (G.flashShots || [])) {
     const { x, y, gx, gy } = incShotPos(s);
     ctx.save();
