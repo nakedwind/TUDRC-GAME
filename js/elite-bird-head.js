@@ -394,7 +394,9 @@ function stepEliteBird(e, dt) {
       if (!target) { eliteBirdSet(e, 'return'); return; }
       if (eliteDist(target, e) <= E.chargeRange * CELL) { eliteBirdAim(e, target); return; }
       chargerFace(e, target.x);
-      if (awayHome > E.leash * CELL * .7) return;   // 走到守備範圍邊緣就停下來等，不再往外追
+      // 已經在守備範圍邊緣：不再往外走，直接蓄力衝過去（一次衝 20 格，8～12 格外也搆得到）。
+      // 以前這裡是「停下來等」，目標一直站在看得到的地方，大隊長就會永遠站著不動、也不回原位
+      if (awayHome > E.leash * CELL * .7) { eliteBirdAim(e, target); return; }
       const [tc, tr] = cellAt(target.x, target.y), hx = e.x, hy = e.y;
       const nav = enemyNavigate(e, tc, tr, dt, 'elite-approach:' + tc + ',' + tr, 'detour');   // 繞得過去就繞，不先打障礙物
       eliteBirdFootsteps(e, Math.hypot(e.x - hx, e.y - hy), false);
