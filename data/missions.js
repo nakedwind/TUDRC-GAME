@@ -22,7 +22,7 @@ const MISSION_BASE = {
 
 const MISSIONS = [
   {
-    id: 'y1', map: 'Y1', name: '地下街入口', x: 14, y: 82, after: [],
+    id: 'y1', map: 'map_mvtnqrs7', name: 'Y25區地下街', x: 14, y: 82, after: [],   // id 維持 y1（存檔的進度、艾德林的報告台詞 brief_y1 都用這個）
     desc: 'Y 區的入口。異質體從四處的黑暗角落湧出，先在這裡站穩腳步。',
   },
   {
