@@ -45,6 +45,14 @@ function suspendCombatProgress() {
   }, MAP.stamps || []) };
   localStorage.setItem(COMBAT_PROGRESS_KEY, JSON.stringify(all));
 }
+// 不跑 newGame、直接把 mapWalls 整份換回來的地方（接續「保留進度」、劇情／回憶門看完回原地圖 js/story-scene.js 的 backToGame）都要呼叫：
+// 可炸牆、閘門、置物箱各自「加進牆裡的格子」清單是另外記的，不跟著牆一起換；中間換過別張地圖就會變成那張的，
+// 照換回來的牆重新認一次，不然打開／炸開時擋路格刪不掉（洞炸開了還是走不過去）
+function reclaimAddedWalls() {
+  if (typeof restoreBreakableWalls === 'function') restoreBreakableWalls();   // 可炸開的牆（js/breakable-walls.js）
+  if (typeof restoreMrtLocks === 'function') restoreMrtLocks();               // 捷運閘門、封鎖的入口（js/mrt-locks.js）
+  if (typeof restoreStorageBoxWalls === 'function') restoreStorageBoxWalls();  // 置物箱（js/storage-lockers.js）
+}
 function restoreCombatProgress() {
   if (MAP_SAFE || !MAP) return false;
   const saved = readCombatProgress()[MAP.id]; if (!saved) return false;
@@ -56,10 +64,7 @@ function restoreCombatProgress() {
     sortie.active = data.activeSupply; sortieLastSafe = false; saveSortie();
     poweredMap = MAP; mapPowerOn = new Set(Array.isArray(data.power) ? data.power : data.power ? [0] : []);   // 舊存檔：true＝沒編號的電路開著
     openElevatorStamp = data.elevator || null;   // 電梯開著還是關著（擋路格已經跟著 mapWalls 一起還原）
-    // 各自「加進牆裡的格子」清單沒存，照還原後的牆重新認一次（不然打開／炸開時擋路格刪不掉）
-    if (typeof restoreBreakableWalls === 'function') restoreBreakableWalls();   // 可炸開的牆（js/breakable-walls.js）
-    if (typeof restoreMrtLocks === 'function') restoreMrtLocks();               // 捷運閘門、封鎖的入口（js/mrt-locks.js）
-    if (typeof restoreStorageBoxWalls === 'function') restoreStorageBoxWalls();  // 置物箱（js/storage-lockers.js）
+    reclaimAddedWalls();
     if (typeof resumeVitals === 'function') resumeVitals();   // 中間回應變中心治療過：換成現在的 HP、負荷（倒下的隊員治好了就站起來，js/vitals.js）
     sanitySP = G.guide; rememberGuideSP(); applyOutfits(); occCache = null; occCacheFor = null;
     computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();

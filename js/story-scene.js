@@ -1018,6 +1018,7 @@ const StoryScene = (() => {
     G = r.G; mapWalls = r.walls; mapDoors = r.doors; doorAddedWalls = r.doorWalls; mapSolidOffsets = r.offsets;
     poweredMap = MAP; mapPowerOn = r.power; openElevatorStamp = r.elevator;
     occCache = null; occCacheFor = null;
+    if (typeof reclaimAddedWalls === 'function') reclaimAddedWalls();   // 可炸牆、閘門、置物箱加的擋路格：劇情地圖換掉了清單，照換回來的牆重新認（js/combat-progress.js）
     computeFlow(); updateCamera(); updateHUD();
     r.onDone?.(outcome);
   }
