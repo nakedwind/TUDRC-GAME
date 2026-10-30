@@ -226,7 +226,7 @@ const StoryScene = (() => {
   function spitOut(e) {
     e.spitT = 0;
     const a = state.actors.find(x => x.swallowedBy === e); e.mf = null; if (!a) return;
-    const x = e.fried ? e.x + (e.fallDir || 1) * 3.4 * CELL : e.x + (e.faceRight ? 1 : -1) * CELL, y = e.y + 9;
+    const x = e.fried ? e.x + (e.fallDir || 1) * 3.4 * CELL : e.x + (e.faceRight ? 1 : -1) * CELL, y = e.y + 19;
     Object.assign(a, { swallowedBy: null, hidden: false, alpha: 1, x, y, down: true, target: null, path: [] });
     if (e.fried) a.charred = true;
     if (state.skipping) return;
@@ -804,7 +804,7 @@ const StoryScene = (() => {
         if (!a.target) continue;
         const dx = a.target[0] - a.x, dy = a.target[1] - a.y, d = Math.hypot(dx, dy), step = dt * (a.speed || 26);
         a.moving = d > step;
-        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) { a.dir = a.arriveDir || a.dir; if (a.exiting) a.fading = true; } }
+        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) { if (a.exiting) a.fading = true; else a.dir = a.arriveDir || a.dir; } }   // 離場（exit）的人走到後維持走路的方向淡出，不轉身
         else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
       }
       for (const a of state.actors) {
