@@ -368,6 +368,7 @@ const STORY_SCENES = {
         "speaker": "希奧妮",
         "text": "喂……你這樣會把隊長劈死……",
         "thunder": true,
+        "gun": { "theonie": false, "amber": false },
         "thunderHold": 3.35,
         "thunderFade": 3.5,
         "bgm": "music/sneaky-movements.mp3",

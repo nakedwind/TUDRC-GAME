@@ -119,7 +119,7 @@ const StoryScene = (() => {
     el('dialogueName').textContent = beat.speaker || '';
     if (sprite) {
       const who = state.actors.find(a => a.name === beat.speaker && a.sprite === sprite);
-      const set = who ? actorSet(who) : sprites(sprite);
+      const set = who ? who.set : sprites(sprite);   // 頭像一律用一般正面圖（雷德舉盾時頭像也不拿盾）
       const portrait = who ? portraitFrame(who) : null;
       el('dialoguePortrait').src = (portrait || set.front[0]).src; el('dialoguePortrait').alt = beat.speaker;
       el('dialoguePortraitFrame').dataset.char = sprite.replace(/_[A-Z]$/, '');
@@ -132,9 +132,8 @@ const StoryScene = (() => {
   }
   function portraitFrame(a) {
     if (a.wounded) return a.eyesClosed ? a.set.wounded : a.set.woundedOpen || a.set.wounded;
-    const set = actorSet(a);
-    if (a.eyesClosed) return set.blink?.[2] || set.front[0];
-    return set.front[0];
+    if (a.eyesClosed) return a.set.blink?.[2] || a.set.front[0];
+    return a.set.front[0];
   }
   // 舉盾（shield）：雷德換成遊戲裡舉盾的那套圖（js/game.js 的 redShieldSprites）；其他人沒有盾牌圖，照常
   const actorSet = a => a.shield && a.sprite === 'red_B' && typeof redShieldSprites !== 'undefined' && redShieldSprites.front ? redShieldSprites : a.set;
