@@ -46,6 +46,7 @@ function render() {
   document.getElementById('f_id').value = monster.id;
   fields.forEach(input => { input.value = monster[input.dataset.field]; });
   document.getElementById('f_behavior').value = monster.behavior || '';
+  document.getElementById('f_wide').checked = !!monster.wide;
   document.getElementById('deleteMonster').disabled = monsters.length <= 1;
   previewSprite(monster); renderList(); renderBehaviorFields(monster);
 }
@@ -136,6 +137,11 @@ fields.forEach(input => input.addEventListener(input.dataset.field === 'name' ? 
   if (key === 'name') { document.getElementById('editingTitle').textContent = monster.name + '・資料'; renderList(); }
   if (key === 'sprite') { previewSprite(monster); renderList(); }
 }));
+document.getElementById('f_wide').addEventListener('change', e => {   // 大體型：一格寬的門口擠不過去（js/enemy-ai.js 的 enemyWideAt）
+  const monster = currentMonster();
+  if (e.target.checked) monster.wide = true; else delete monster.wide;
+  saveMonsters();
+});
 function exportText() {
   return '/* 怪物種類資料：由怪物編輯器匯出。地圖只記錄種類 ID 與權重。 */\n'
     + 'const MONSTERS_DEFAULT = ' + JSON.stringify(validMonsterCatalog(monsters), null, 2) + ';\n'

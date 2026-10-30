@@ -303,6 +303,7 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "milkfish_kid",
+    "wide": true,
     "name": "虱目魚小子",
     "sprite": "images/monster/milkfish-kid/milkfish-kid-front.png",
     "hp": 160,
@@ -406,6 +407,7 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "clownfish",
+    "wide": true,
     "name": "比基尼小丑魚",
     "sprite": "images/monster/clownfish/clownfish-front.png",
     "hp": 120,
@@ -493,6 +495,7 @@ const MONSTERS_DEFAULT = [
   },
   {
     "id": "gourd_monkey",
+    "wide": true,
     "name": "葫蘆猴",
     "sprite": "images/monster/gourd-monkey/gourd-monkey-front.png",
     "hp": 700,

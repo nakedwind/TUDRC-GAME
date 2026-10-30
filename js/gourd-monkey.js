@@ -70,38 +70,9 @@ const GOURD = {
 const gmRand = (a, b) => a + Math.random() * (b - a);
 
 // ---- 身體很寬：一格的通道走不過 ----
-// 能走的格子＝空地，而且旁邊湊得出一塊 2×2 的空地。建築算空地（擋到就壓壞它），牆、順順宮帽不算。
-function gourdOpen(c, r) { return inGrid(c, r) && !isWall(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)); }
-function gourdWide(c, r) {
-  if (!gourdOpen(c, r)) return false;
-  for (const [dc, dr] of [[-1, -1], [0, -1], [-1, 0], [0, 0]])
-    if (gourdOpen(c + dc, r + dr) && gourdOpen(c + dc + 1, r + dr) && gourdOpen(c + dc, r + dr + 1) && gourdOpen(c + dc + 1, r + dr + 1)) return true;
-  return false;
-}
-// 從現在的格子往外找：走得到目標就走過去，走不到（目標躲在窄道裡）就走到離目標最近、走得到的那一格。
-// 剛好卡在窄格裡（例如生在窄道）時，可以先走窄格出去，進到寬的地方之後就不再走窄格。
-function gourdRoute(e, goalC, goalR, maxSteps = Infinity) {
-  const [sc, sr] = cellAt(e.x, e.y), startKey = sc + ',' + sr;
-  const came = new Map([[startKey, null]]), queue = [[sc, sr, 0, !gourdWide(sc, sr)]];
-  let best = [sc, sr], bestD = Math.hypot(goalC - sc, goalR - sr);
-  for (let qi = 0; qi < queue.length; qi++) {
-    const [c, r, steps, narrow] = queue[qi];
-    if (c === goalC && r === goalR) { best = [c, r]; break; }
-    if (steps >= maxSteps) continue;
-    for (const [dc, dr] of ENEMY_NEIGHBORS) {
-      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (came.has(key)) continue;
-      const wide = gourdWide(nc, nr);
-      if (!wide && !(narrow && gourdOpen(nc, nr))) continue;
-      came.set(key, [c, r]); queue.push([nc, nr, steps + 1, narrow && !wide]);
-      const d = Math.hypot(goalC - nc, goalR - nr);
-      if (d < bestD - .01) { bestD = d; best = [nc, nr]; }
-    }
-  }
-  const path = [];
-  for (let cur = best; cur && (cur[0] !== sc || cur[1] !== sr); cur = came.get(cur[0] + ',' + cur[1])) path.push(cur);
-  return path.reverse();
-}
+// 規則跟其他大體型怪物共用（js/enemy-ai.js 的 enemyWideAt／wideEnemyRoute）；建築算空地，擋到就壓壞它
+function gourdWide(c, r) { return enemyWideAt(c, r); }
+function gourdRoute(e, goalC, goalR) { return wideEnemyRoute(e, goalC, goalR, true).path; }
 function gourdNavigate(e, goalC, goalR, moveDt, key) {
   const g = e.gm;
   g.routeT = (g.routeT || 0) - moveDt;

@@ -62,6 +62,7 @@ function validMonsterCatalog(list) {
     ...(typeof monster.hitSound === 'string' && monster.hitSound ? { hitSound: monster.hitSound } : {}),
     ...(typeof monster.deathSound === 'string' && monster.deathSound ? { deathSound: monster.deathSound } : {}),
     ...(monster.undying ? { undying: true } : {}),
+    ...(monster.wide ? { wide: true } : {}),   // 大體型：一格寬的通道（門口）擠不過去（js/enemy-ai.js 的 enemyWideAt）
     ...(monster.noHitSquash ? { noHitSquash: true } : {}),   // 被打中時不要壓扁回彈
     ...(Number.isFinite(+monster.stagger) ? { stagger: Math.max(0, Math.min(2, +monster.stagger)) } : {}),
     ...(monster.noStun ? { noStun: true } : {}),

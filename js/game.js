@@ -146,7 +146,7 @@ function createMonster(spec, x, y, variant) {
     sentryDamage: dmg(spec.sentryDamage), buildingDamage: dmg(spec.buildingDamage),
     sprite: spec.sprite, drawWidth: spec.width, drawHeight: spec.height, frames: spec.frames || null, behavior: spec.behavior || null, chargerCfg: spec.charger || null,
     hitSound: spec.hitSound || null, deathSound: spec.deathSound || null,
-    undying: !!spec.undying, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, shockResist: spec.shockResist ?? null, sweep: spec.sweep || null,   /* shockResist：不怕電（雷電傷害倍率、不會麻痺） */   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
+    undying: !!spec.undying, wide: !!spec.wide, noHitSquash: !!spec.noHitSquash, staggerTime: spec.stagger, knockMul: spec.knockMul ?? 1, noStun: !!spec.noStun, shockResist: spec.shockResist ?? null, sweep: spec.sweep || null,   /* shockResist：不怕電（雷電傷害倍率、不會麻痺） */   // 生命體：HP 歸零只會碎掉，要用火燒才會真的死（js/lifeform.js）
     shooterCfg: spec.shooter || null, art: spec.art || null, boomerangCfg: spec.boomerang || null, burrowCfg: spec.burrow || null,   // boomerang：夯吉寶（js/hangi-bao.js）
     flying: spec.behavior === 'shooter' || spec.behavior === 'moth',   // 飄在空中（珍珠小童、人面蝶）：踩不到地雷
     hasTarget: false, wanderWait: Math.random() * .8, slimeClock: Math.random() * 1.83,

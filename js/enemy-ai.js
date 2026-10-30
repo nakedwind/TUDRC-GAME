@@ -205,7 +205,43 @@ function enemyBarrierAt(c, r) {
 }
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
-  return !inGrid(c, r) || isWall(c, r) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r));   // 順順宮帽也擋路（js/hangi-bao.js）
+  if (!inGrid(c, r) || isWall(c, r) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 順順宮帽也擋路（js/hangi-bao.js）
+  return !!(actor && actor.wide && !enemyWideAt(c, r) && enemyWideAt(...cellAt(actor.x, actor.y)));   // 大體型：從寬的地方擠不進一格的窄道（已經在窄道裡就可以走出來）
+}
+// ---- 大體型（怪物編輯器的「大體型」、巨型史萊姆）：只有一格寬的通道（門口、窄走廊）擠不過去 ----
+// 能走的格子＝空地，而且旁邊湊得出一塊 2×2 的空地。建築算空地（可以拆掉），牆、順順宮帽不算。
+function enemyWideOpen(c, r) { return inGrid(c, r) && !isWall(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)); }
+function enemyWideAt(c, r) {
+  if (!enemyWideOpen(c, r)) return false;
+  for (const [dc, dr] of [[-1, -1], [0, -1], [-1, 0], [0, 0]])
+    if (enemyWideOpen(c + dc, r + dr) && enemyWideOpen(c + dc + 1, r + dr) && enemyWideOpen(c + dc, r + dr + 1) && enemyWideOpen(c + dc + 1, r + dr + 1)) return true;
+  return false;
+}
+// 大體型的路線：走得到目標就走過去，走不到（目標躲在窄道裡）就走到離目標最近、走得到的那一格，被擋在門口。
+// 剛好卡在窄格裡（例如生在窄道）時，可以先走窄格出去，進到寬的地方之後就不再走窄格。
+// canBreakBuildings＝false 時繞過建築；回傳 { path, reached }
+function wideEnemyRoute(e, goalC, goalR, canBreakBuildings = true, maxSteps = Infinity) {
+  const [sc, sr] = cellAt(e.x, e.y), startKey = sc + ',' + sr;
+  const came = new Map([[startKey, null]]), queue = [[sc, sr, 0, !enemyWideAt(sc, sr)]];
+  let best = [sc, sr], bestD = Math.hypot(goalC - sc, goalR - sr), reached = sc === goalC && sr === goalR;
+  for (let qi = 0; qi < queue.length && !reached; qi++) {
+    const [c, r, steps, narrow] = queue[qi];
+    if (steps >= maxSteps) continue;
+    for (const [dc, dr] of ENEMY_NEIGHBORS) {
+      const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
+      if (came.has(key)) continue;
+      const wide = enemyWideAt(nc, nr);
+      if (!wide && !(narrow && enemyWideOpen(nc, nr))) continue;
+      if (!canBreakBuildings && enemyBarrierAt(nc, nr)) continue;
+      came.set(key, [c, r]); queue.push([nc, nr, steps + 1, narrow && !wide]);
+      if (nc === goalC && nr === goalR) { best = [nc, nr]; reached = true; break; }
+      const d = Math.hypot(goalC - nc, goalR - nr);
+      if (d < bestD - .01) { bestD = d; best = [nc, nr]; }
+    }
+  }
+  const path = [];
+  for (let cur = best; cur && (cur[0] !== sc || cur[1] !== sr); cur = came.get(cur[0] + ',' + cur[1])) path.push(cur);
+  return { path: path.reverse(), reached };
 }
 function resetEnemyNavigation(e) {
   e.hasTarget = false; e.baseTarget = null;
@@ -221,9 +257,9 @@ function displaceEnemy(e, dx, dy, distance, resetRoute = true) {
   let moved = false;
   for (let i = 0; i < steps; i++) {
     const nx = e.x + sx, ny = e.y + sy;
-    if (!enemyBlocked(nx, ny)) { e.x = nx; e.y = ny; moved = true; continue; }
-    if (!enemyBlocked(nx, e.y)) { e.x = nx; moved = true; continue; }
-    if (!enemyBlocked(e.x, ny)) { e.y = ny; moved = true; continue; }
+    if (!enemyBlocked(nx, ny, e)) { e.x = nx; e.y = ny; moved = true; continue; }
+    if (!enemyBlocked(nx, e.y, e)) { e.x = nx; moved = true; continue; }
+    if (!enemyBlocked(e.x, ny, e)) { e.y = ny; moved = true; continue; }
     break;
   }
   if (moved) {
@@ -250,7 +286,7 @@ const ENEMY_NEIGHBORS = [[0, -1], [-1, 0], [1, 0], [0, 1]];
 // 從現在的位置沿著走得到的格子往外找（繞過牆和建築），挑離威脅最遠的一格；路程越遠、死路（只有一個出口）都扣分。
 // 不直接往「威脅的反方向」跑：被逼進牆角時反方向就是牆，會一直貼著牆角原地踏步
 function enemyFleeCell(e, threats, minSteps = 3, maxSteps = 8) {
-  const open = (c, r) => inGrid(c, r) && !isWall(c, r) && !enemyBarrierAt(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r));
+  const open = (c, r) => inGrid(c, r) && !isWall(c, r) && !enemyBarrierAt(c, r) && !(typeof hangiCapAt === 'function' && hangiCapAt(c, r)) && (!e.wide || enemyWideAt(c, r));
   const [ec, er] = cellAt(e.x, e.y), seen = new Set([ec + ',' + er]), queue = [[ec, er, 0]];
   let best = null, bestScore = -Infinity;
   for (let qi = 0; qi < queue.length; qi++) {
@@ -334,7 +370,10 @@ function enemyNavigate(e, goalC, goalR, moveDt, routeKey, canBreakBuildings) {
   e.aiRouteTimer = (e.aiRouteTimer || 0) - moveDt;
   const goal = goalC + ',' + goalR;
   if (e.aiRouteKey !== routeKey || e.aiGoal !== goal || e.aiRouteTimer <= 0 || !e.aiPath || !e.aiPath.length) {
-    e.aiPath = (canBreakBuildings === 'detour' && buildEnemyRoute(e, goalC, goalR, false)) || buildEnemyRoute(e, goalC, goalR, !!canBreakBuildings);
+    if (e.wide) {   // 大體型：只走寬的路，過不去就停在離目標最近的地方
+      const around = canBreakBuildings === 'detour' ? wideEnemyRoute(e, goalC, goalR, false) : null;
+      e.aiPath = around && around.reached ? around.path : wideEnemyRoute(e, goalC, goalR, !!canBreakBuildings).path;
+    } else e.aiPath = (canBreakBuildings === 'detour' && buildEnemyRoute(e, goalC, goalR, false)) || buildEnemyRoute(e, goalC, goalR, !!canBreakBuildings);
     e.aiRouteKey = routeKey; e.aiGoal = goal; e.aiRouteTimer = .65 + Math.random() * .35;
   }
   if (!e.aiPath || !e.aiPath.length) return { reached: true };
@@ -354,7 +393,7 @@ function chooseDarkWanderCell(e) {
   for (let r = Math.max(0, er - 7); r <= Math.min(ROWS - 1, er + 7); r++) {
     for (let c = Math.max(0, ec - 7); c <= Math.min(COLS - 1, ec + 7); c++) {
       const distance = Math.abs(c - ec) + Math.abs(r - er);
-      if (distance < 2 || distance > 9 || isWall(c, r) || enemyBarrierAt(c, r) || cellLit(c, r)) continue;
+      if (distance < 2 || distance > 9 || isWall(c, r) || enemyBarrierAt(c, r) || cellLit(c, r) || (e.wide && !enemyWideAt(c, r))) continue;
       choices.push([c, r]);
     }
   }

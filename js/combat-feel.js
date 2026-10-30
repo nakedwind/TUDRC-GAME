@@ -13,7 +13,7 @@ const SLIME_VARIANTS = {
   bomber:   { name: '自爆史萊姆', chance: .11, unlockAt: 30, hue: 170, hpMul: .7, speedMul: 1.3, goo: '#ff6d4f' },
   // 巨型不靠機率，改由下方 GIANT_EVENT 固定時間登場
   giant:    { name: '巨型史萊姆', maxAlive: 1, hue: 95, hpMul: 4, speedMul: .7,
-              dmgMul: 2, rewardMul: 4, scale: 1.65, knockResist: 1, goo: '#b983ff' },
+              dmgMul: 2, rewardMul: 4, scale: 1.65, knockResist: 1, wide: true, goo: '#b983ff' },   // wide：一格的門口擠不過去
   spitter:  { name: '吐酸史萊姆', chance: .12, unlockAt: 40, hue: -130, hpMul: .9, speedMul: .85, goo: '#d4e04a' },
   mini:     { name: '小史萊姆', hue: -75, hpMul: .3, speedMul: 1.35, dmgMul: .5, rewardMul: .25, scale: .6, goo: '#a4e35c' },
 };
@@ -67,6 +67,7 @@ function rollSlimeVariant() {
 function applySlimeVariant(e, id) {
   const v = SLIME_VARIANTS[id] || SLIME_VARIANTS.normal;
   e.variant = id; e.tint = v.hue ?? null; e.sizeMul = v.scale || 1;
+  if (v.wide) e.wide = true;
   e.hp = e.maxhp = Math.max(1, Math.round(e.hp * (v.hpMul || 1)));
   e.speed *= v.speedMul || 1;
   const dmg = v.dmgMul || 1;
