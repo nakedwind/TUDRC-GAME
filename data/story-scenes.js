@@ -274,7 +274,7 @@ const STORY_SCENES = {
     "subtitle": "Y25區地下街 · 異質體討伐任務",
     "autoExit": true,
     "footsteps": true,
-    "cameras": { "小隊": [28.8, 77, 2], "魚群": [38.5, 75.9, 2], "全景": [34.1, 76.2, 1.8], "兩人": [29.4, 76.8, 2.2], "魚嘴": [36.8, 76, 2] },
+    "cameras": { "小隊": [30.5, 76.9, 2], "魚群": [38.5, 75.9, 2], "全景": [34.1, 76.2, 1.8], "兩人": [30.2, 76.8, 2.2], "魚嘴": [36.8, 76, 2] },
     "portraits": { "雷德": "red_B", "安柏": "amber_B", "希奧妮": "theonie_B" },
     "actors": [
       { "id": "red", "sprite": "red_B", "name": "雷德", "at": [29.8, 77.2], "dir": "right", "shield": true, "speed": 30 },
@@ -306,7 +306,7 @@ const STORY_SCENES = {
       },
       {
         "speaker": "",
-        "text": "A級異質體 NO.727\n特色：長得很像台南某個可愛的吉祥物。",
+        "text": "A級異質體 NO.727 出現了！\n",
         "wait": 0.8,
         "card": { "image": "images/monster/milkfish-kid/milkfish-kid-front.png", "subtitle": "A級異質體 NO.727", "title": "虱目魚小子", "text": "特色：長得很像台南某個可愛的吉祥物。" },
         "sfx": "itemReveal"
@@ -325,7 +325,7 @@ const STORY_SCENES = {
         "wait": 0.1
       },
       { "speaker": "希奧妮", "text": "你看著這種東西也能有食慾嗎？", "wait": 0.6 },
-      { "speaker": "安柏", "text": "隊長……！我不要吃～～！", "wait": 0.3 },
+      { "speaker": "安柏", "text": "隊長……！我不要吃～～！", "wait": 0.3, "textSize": 20 },
       { "speaker": "希奧妮", "text": "喂，菜鳥，趁那些魚頭聚在一起的時候動手！\n把他們電的焦焦脆脆的。", "camera": "兩人", "face": { "theonie": "right", "amber": "right" }, "wait": 0.6 },
       { "speaker": "安柏", "text": "可是隊長還在那群魚頭裡……", "wait": 0.3 },
       { "speaker": "希奧妮", "text": "沒事啦，隊長就是吸怪的坦啊。", "wait": 0.3 },
@@ -334,7 +334,7 @@ const STORY_SCENES = {
         "text": "哇～～裡面好黑！",
         "camera": "魚嘴",
         "swallow": { "魚1": "red" },
-        "monsterPose": { "魚2": "attack", "魚3": "attack" },
+        "monsterPose": { "魚2": "", "魚3": "" },
         "face": { "theonie": "right", "amber": "right" },
         "portraitFlip": true,
         "portraitDark": 0.4,
@@ -352,7 +352,7 @@ const STORY_SCENES = {
         "monsterPose": { "魚1": "smile" },
         "wait": 0.3
       },
-      { "speaker": "安柏", "text": "（簡直就是地獄般的畫面……）", "face": { "amber": "right" }, "wait": 0.4, "gloom": true },
+      { "speaker": "安柏", "text": "簡直就是地獄般的畫面……", "face": { "amber": "right" }, "wait": 0.4, "gloom": true },
       {
         "speaker": "安柏",
         "text": "知道了！！隊長！！我來支援你了！！",
@@ -386,7 +386,7 @@ const STORY_SCENES = {
         "wait": 0.3,
         "textSize": 20
       },
-      { "speaker": "希奧妮", "text": "你這個爛砲兵……完蛋了……\n回去要寫一堆報告了……恭喜你殺人了。", "camera": "兩人", "wait": 0.3 },
+      { "speaker": "希奧妮", "text": "你這個爛砲兵……完蛋了……\n回去要寫一堆報告了……恭喜你殺人了。", "camera": "兩人", "wait": 0.3, "gloom": true, "sweat": true },
       {
         "speaker": "安柏",
         "text": "學姊！！怎……怎麼辦？對不起！！我不是故意的！！",
@@ -394,7 +394,9 @@ const STORY_SCENES = {
         "tremble": { "amber": true },
         "wait": 1,
         "textSize": 20,
-        "preyKick": { "魚1": true }
+        "preyKick": { "魚1": true },
+        "gloom": true,
+        "sweat": true
       }
     ],
     "opening": { "black": 1, "fade": 1.5 },
