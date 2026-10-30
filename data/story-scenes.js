@@ -273,8 +273,6 @@ const STORY_SCENES = {
     "zoom": 1.6,
     "subtitle": "Y25區地下街 · 異質體討伐任務",
     "autoExit": true,
-    "darkness": true,
-    "lights": [[37.4, 76.4, 5], [32, 76.8, 3]],
     "footsteps": true,
     "cameras": { "小隊": [28.8, 77], "魚群": [38.5, 76.6], "全景": [33, 76.8, 1.5], "兩人": [27.6, 77.2, 1.9], "魚嘴": [36.8, 76.4, 1.75] },
     "portraits": { "雷德": "red_B", "安柏": "amber_B", "希奧妮": "theonie_B" },
@@ -296,14 +294,15 @@ const STORY_SCENES = {
         "monsterMove": { "魚1": [38.2, 76.6], "魚2": [39.3, 74.9], "魚3": [38.9, 78.2] },
         "wait": 0.6
       },
-      { "speaker": "雷德", "text": "喂！希奧妮！安柏！任務結束之後！", "face": { "red": "left" }, "shout": { "red": true }, "wait": 0.4 },
+      { "speaker": "雷德", "text": "喂！希奧妮！安柏！任務結束之後！", "face": { "red": "right" }, "shout": { "red": true }, "wait": 0.4 },
       {
         "speaker": "雷德",
         "text": "我們晚餐去吃虱目魚湯吧！",
         "camera": "魚群",
         "monsterPose": { "魚1": "smile", "魚2": "smile", "魚3": "smile" },
         "sfx": "milkfishHurt",
-        "wait": 0.3
+        "wait": 0.3,
+        "shout": { "red": true }
       },
       { "speaker": "", "text": "A級異質體 NO.727\n特色：長得很像台南某個可愛的吉祥物。", "wait": 0.8 },
       {
@@ -321,13 +320,7 @@ const STORY_SCENES = {
       },
       { "speaker": "希奧妮", "text": "你看著這種東西也能有食慾嗎？", "wait": 0.6 },
       { "speaker": "安柏", "text": "隊長……！我不要吃～～！", "wait": 0.3 },
-      {
-        "speaker": "希奧妮",
-        "text": "喂，菜鳥，趁那些魚頭聚在一起的時候動手！\n把他們電的焦焦脆脆的。",
-        "camera": "兩人",
-        "face": { "theonie": "amber", "amber": "theonie" },
-        "wait": 0.6
-      },
+      { "speaker": "希奧妮", "text": "喂，菜鳥，趁那些魚頭聚在一起的時候動手！\n把他們電的焦焦脆脆的。", "camera": "兩人", "face": { "theonie": "right", "amber": "right" }, "wait": 0.6 },
       { "speaker": "安柏", "text": "可是隊長還在那群魚頭裡……", "wait": 0.3 },
       { "speaker": "希奧妮", "text": "沒事啦，隊長就是吸怪的坦啊。", "wait": 0.3 },
       {
@@ -347,7 +340,7 @@ const STORY_SCENES = {
         "speaker": "希奧妮",
         "text": "就是現在！所有的魚頭都在吃隊長了！",
         "camera": "兩人",
-        "face": { "theonie": "amber" },
+        "face": { "theonie": "right" },
         "shout": { "theonie": true },
         "monsterMove": { "魚2": [37.6, 75.4], "魚3": [37.8, 78.1] },
         "monsterPose": { "魚1": "smile" },
@@ -384,13 +377,16 @@ const STORY_SCENES = {
         "hop": { "amber": true },
         "sweat": true,
         "gloom": true,
-        "wait": 0.3
+        "wait": 0.3,
+        "textSize": 20
       },
       { "speaker": "希奧妮", "text": "你這個爛砲兵……完蛋了……\n回去要寫一堆報告了……恭喜你殺人了。", "camera": "兩人", "wait": 0.3 },
-      { "speaker": "安柏", "text": "學姊！！怎……怎麼辦？對不起！！我不是故意的！！", "tremble": { "amber": true }, "wait": 0.3 }
+      { "speaker": "安柏", "text": "學姊！！怎……怎麼辦？對不起！！我不是故意的！！", "tremble": { "amber": true }, "wait": 0.3, "textSize": 20 }
     ],
     "opening": { "black": 1, "fade": 1.5 },
     "bgm": "music/perfect-for-fight.mp3",
-    "bgmVolume": 0.3
+    "bgmVolume": 0.3,
+    "darkness": true,
+    "lights": [[37.4, 76.4, 5], [32, 76.8, 3]]
   }
 };
