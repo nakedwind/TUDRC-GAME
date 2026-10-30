@@ -1078,8 +1078,7 @@ function draw() {
   drawMapTop(ctx);
   // 電梯是獨立物件：牆之後繪製；深度線前方的所有人物都要顯示在門框前。
   drawElevators(ctx);
-  for (const stamp of MAP.stamps || []) {
-    if (!isElevatorStamp(stamp)) continue;
+  for (const stamp of elevatorStamps()) {
     const left = OX + stamp.c * CELL + (stamp.ox || 0), top = OY + stamp.r * CELL + (stamp.oy || 0);
     const cfg = elevatorConfig(stamp.id), phase = stamp === openElevatorStamp ? 'open' : 'closed';
     const depth = cfg?.[phase]?.depth ?? (phase === 'open' ? 35 : 120);
@@ -1173,6 +1172,7 @@ function draw() {
   drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
   drawEquipmentGroundDrops(ctx);
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
+  if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 再塗一次：上面這些畫在黑幕之上的發光物、亮點，在隱藏區裡也不能露出來
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）

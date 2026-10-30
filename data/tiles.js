@@ -2367,7 +2367,17 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/捷運車站/mrt-escalator-front.png",
     "w": 5,
-    "h": 4
+    "h": 4,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_escalator_front_high",
+    "name": "手扶梯（正面・高）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-escalator-front-high.png",
+    "w": 5,
+    "h": 8,
+    "flat": true
   },
   {
     "id": "tile_mrt_stairs_dark",
@@ -4618,5 +4628,61 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore-pool_stair_block_Straight.png",
     "w": 1,
     "h": 2
+  },
+  {
+    "id": "tile_halloween_pumpkin_large",
+    "name": "南瓜燈（大）",
+    "role": "floor",
+    "file": "images/萬聖節裝飾/halloween-pumpkin-large.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_halloween_pumpkin_medium",
+    "name": "南瓜燈（中）",
+    "role": "floor",
+    "file": "images/萬聖節裝飾/halloween-pumpkin-medium.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_halloween_pumpkin_small",
+    "name": "南瓜燈（小）",
+    "role": "floor",
+    "file": "images/萬聖節裝飾/halloween-pumpkin-small.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_halloween_pumpkin_pile",
+    "name": "南瓜燈堆",
+    "role": "floor",
+    "file": "images/萬聖節裝飾/halloween-pumpkin-pile.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_halloween_bat",
+    "name": "蝙蝠",
+    "role": "floor",
+    "file": "images/萬聖節裝飾/halloween-bat.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_halloween_spider_web",
+    "name": "蜘蛛網",
+    "role": "floor",
+    "file": "images/萬聖節裝飾/halloween-spider-web.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_halloween_bunting",
+    "name": "萬聖節三角旗",
+    "role": "floor",
+    "file": "images/萬聖節裝飾/halloween-bunting.png",
+    "w": 4,
+    "h": 1
   }
 ];

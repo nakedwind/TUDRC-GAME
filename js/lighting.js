@@ -13,7 +13,7 @@ const LIT_MIN = 0.1;                                   // 亮度低於這個值�
 const LIGHT_FILL_SOLID = 4;                            // 大物件（置物櫃等）裡面最多補亮幾格深，避免中間黑一塊
 let lightField = new Float32Array(COLS * ROWS);        // 每格亮度 0～1
 let warmField = new Float32Array(COLS * ROWS);         // 探照燈暖色量（沿用同一份遮牆結果）
-let lightDist = new Float32Array(COLS * ROWS);         // BFS 暫存
+let lightDist = new Float32Array(COLS * ROWS).fill(Infinity);   // BFS 暫存：平常全是 Infinity，spreadLight 用完只把碰過的格子改回來
 let flashField = new Float32Array(COLS * ROWS);        // 攻擊閃光的亮度（只影響畫面，不算進遊戲的「亮處」判定）
 let visField = new Float32Array(COLS * ROWS);          // 畫黑幕用的亮度：不含溫特身上的燈（頭燈、手電筒另外用平滑的形狀挖開，見 drawDarkness）
 let beamMask = new Float32Array(COLS * ROWS);          // 溫特身上的燈照得到的格子（只看牆有沒有擋住）
@@ -34,13 +34,34 @@ function ensureLightBuffers() {
   lightBufCols = COLS; lightBufRows = ROWS;
   lightField = new Float32Array(COLS * ROWS);
   warmField = new Float32Array(COLS * ROWS);
-  lightDist = new Float32Array(COLS * ROWS);
+  lightDist = new Float32Array(COLS * ROWS).fill(Infinity);
   flashField = new Float32Array(COLS * ROWS);
   visField = new Float32Array(COLS * ROWS);
   beamMask = new Float32Array(COLS * ROWS);
   fieldCv.width = COLS; fieldCv.height = ROWS; fieldImg = fieldCtx.createImageData(COLS, ROWS);
   warmCv.width = COLS; warmCv.height = ROWS; warmImg = warmCtx.createImageData(COLS, ROWS);
 }
+
+// ---- 光照用的牆格子表 ----
+// isWall 每次都要組 'c,r' 字串再查 Set，光照一幀要查好幾萬次，大地圖會很慢。
+// 所以每幀開頭把 mapWalls 轉成一格一個數字的表（字串→格子編號記起來重複用），擴散時直接查表。
+let lightWalls = new Uint8Array(COLS * ROWS);
+let lightWallKeyIdx = new Map(), lightWallKeyCols = COLS, lightWallKeyRows = ROWS;
+function refreshLightWalls() {
+  if (lightWalls.length !== COLS * ROWS) lightWalls = new Uint8Array(COLS * ROWS);
+  if (lightWallKeyCols !== COLS || lightWallKeyRows !== ROWS) { lightWallKeyIdx = new Map(); lightWallKeyCols = COLS; lightWallKeyRows = ROWS; }
+  lightWalls.fill(0);
+  for (const k of mapWalls) {
+    let i = lightWallKeyIdx.get(k);
+    if (i === undefined) {
+      const [c, r] = k.split(',').map(Number);
+      i = inGrid(c, r) ? r * COLS + c : -1;   // 地圖外的格子不用記
+      lightWallKeyIdx.set(k, i);
+    }
+    if (i >= 0) lightWalls[i] = 1;
+  }
+}
+const lightWall = (c, r) => c >= 0 && c < COLS && r >= 0 && r < ROWS && lightWalls[r * COLS + c] === 1;   // 跟 isWall 一樣，只是查表
 
 // 8 方向擴散（斜向成本 1.4，讓光圈接近圓形）
 const LIGHT_DIRS = [[0, 1, 1], [0, -1, 1], [1, 0, 1], [-1, 0, 1], [1, 1, 1.4], [1, -1, 1.4], [-1, 1, 1.4], [-1, -1, 1.4]];
@@ -51,6 +72,7 @@ function computeLightField() {
   visField.fill(0);
   beamMask.fill(0);
   if (!LIGHT.enabled) return;
+  refreshLightWalls();   // 這一幀的牆（門開關、炸牆都會改 mapWalls）；緊接著的 computeFlashField 也沿用
   for (const l of lightsCache) {
     spreadLight(l, (i, b) => {
       b *= l.intensity ?? 1;
@@ -72,25 +94,25 @@ function markBeamMask(l) {
     let [x, y] = center(c, r);
     const dx = x - l.x, dy = y - l.y, d = Math.hypot(dx, dy);
     if (d > CELL * 1.2 && (dx * ca + dy * sa) / d < wide) return;   // 離扇形太遠的不用管（省時間）
-    if (isWall(c, r)) { const k = Math.max(0, (d - CELL * .5) / (d || 1)); x = l.x + dx * k; y = l.y + dy * k; }   // 牆本身：看朝向手電筒那一面
+    if (lightWall(c, r)) { const k = Math.max(0, (d - CELL * .5) / (d || 1)); x = l.x + dx * k; y = l.y + dy * k; }   // 牆本身：看朝向手電筒那一面
     if (d <= CELL * .75 || hasLineOfSight(l.x, l.y, x, y)) beamMask[i] = 1;
   });
 }
 // 從一個光源沿格子擴散，對每個被照到的格子呼叫 onCell(格子編號, 亮度 0～1)
+// 只處理光走得到的格子（記在 q 裡），不掃整張地圖：大地圖、燈又多的時候每幀省很多時間。
 function spreadLight(l, onCell) {
   {
     const steps = l.r / CELL;                          // 這盞燈的光能走幾格
     const [sc, sr] = cellAt(l.x, l.y);
     if (!inGrid(sc, sr)) return;
     const coneK = l.cone ? coneFactor(l) : null;       // 扇形光（手電筒）：格子在扇形裡多少（0～1）
-    lightDist.fill(Infinity);
     // 平滑補間：用光源「實際座標」到附近格子中心的真實距離當起始距離，
     // 角色在格子內移動時亮度會連續滑動，光就不會一格一格跳。
     const q = [];
     for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
       const c0 = sc + dc, r0 = sr + dr;
       if (!inGrid(c0, r0)) continue;
-      if (dc && dr && isWall(sc + dc, sr) && isWall(sc, sr + dr)) continue;   // 斜角不穿牆縫
+      if (dc && dr && lightWall(sc + dc, sr) && lightWall(sc, sr + dr)) continue;   // 斜角不穿牆縫
       const [cx, cy] = center(c0, r0);
       const d0 = Math.hypot(cx - l.x, cy - l.y) / CELL;
       const i0 = r0 * COLS + c0;
@@ -100,11 +122,11 @@ function spreadLight(l, onCell) {
     while (head < q.length) {
       const idx = q[head++], c = idx % COLS, r = (idx - c) / COLS, d = lightDist[idx];
       if (d >= steps) continue;
-      if (isWall(c, r) && idx !== sr * COLS + sc) continue;   // 牆會被照亮，但光到此為止
+      if (lightWall(c, r) && idx !== sr * COLS + sc) continue;   // 牆會被照亮，但光到此為止
       for (const [dc, dr, w] of LIGHT_DIRS) {
         const nc = c + dc, nr = r + dr;
         if (!inGrid(nc, nr)) continue;
-        if (dc && dr && isWall(c + dc, r) && isWall(c, r + dr)) continue;   // 斜向不能穿牆角
+        if (dc && dr && lightWall(c + dc, r) && lightWall(c, r + dr)) continue;   // 斜向不能穿牆角
         const nd = d + w, ni = nr * COLS + nc;
         if (coneK && coneK(nc, nr) <= 0) continue;    // 扇形外面：光不往那裡走
         if (nd < lightDist[ni]) { lightDist[ni] = nd; q.push(ni); }
@@ -117,7 +139,7 @@ function spreadLight(l, onCell) {
       const fill = [];
       for (let r = rMin; r <= rMax; r++) for (let c = cMin; c <= cMax; c++) {
         const i = r * COLS + c;
-        if (!isWall(c, r)) continue;
+        if (!lightWall(c, r)) continue;
         let best = Infinity;
         if (c > 0) best = Math.min(best, lightDist[i - 1]);
         if (c < COLS - 1) best = Math.min(best, lightDist[i + 1]);
@@ -126,12 +148,14 @@ function spreadLight(l, onCell) {
         if (best + 1 < steps && best + 1 < lightDist[i] - 1e-6) fill.push(i, best + 1);
       }
       if (!fill.length) break;
-      for (let k = 0; k < fill.length; k += 2) lightDist[fill[k]] = fill[k + 1];
+      for (let k = 0; k < fill.length; k += 2) { lightDist[fill[k]] = fill[k + 1]; q.push(fill[k]); }
     }
-    for (let i = 0; i < lightDist.length; i++) {
+    // q 裡有重複的格子：處理過就改回 Infinity，第二次遇到會跳過；跑完 lightDist 也剛好全部還原
+    for (const i of q) {
       if (lightDist[i] === Infinity) continue;
       const k = coneK ? coneK(i % COLS, (i - i % COLS) / COLS) : 1;
       if (k > 0) onCell(i, (1 - lightDist[i] / steps) * k);
+      lightDist[i] = Infinity;
     }
   }
 }
@@ -247,6 +271,7 @@ function getLights() {
   if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());
   if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
   if (typeof mapGlowLights === 'function') L.push(...mapGlowLights());   // 地圖上設成「發光」的物件（地圖編輯器／基地編輯器；js/maploader.js）
+  if (typeof inHiddenArea === 'function') return L.filter(l => !inHiddenArea(l.x, l.y));   // 還沒炸開的隱藏區裡的燈不亮（js/breakable-walls.js）
   return L;
 }
 function isLit(x, y) {
@@ -306,7 +331,8 @@ function drawDarkness() {
   ctx.restore();
 
   // 亮度場 → 黑幕小圖（一格一像素），放大貼上時自動平滑成漸層
-  const px = fieldImg.data, maxA = Math.round(LIGHT.darkness * 255);
+  const darkness = typeof currentDarkness === 'function' ? currentDarkness() : LIGHT.darkness;   // 點了眼藥水會變淡（js/equipment.js）
+  const px = fieldImg.data, maxA = Math.round(darkness * 255);
   for (let i = 0; i < lightField.length; i++) {
     // 只改視覺曲線：中段亮度更柔順，實際的 isLit 判定仍使用原始 lightField。
     const b = Math.pow(Math.min(1, Math.max(visField[i], flashField[i])), 0.78);   // 攻擊閃光也會暫時掀開黑幕
@@ -392,7 +418,7 @@ function drawDarkness() {
 
   // 地圖範圍以外的畫面也保持黑暗（vx/vy/vw/vh＝目前看得到的世界範圍）
   const vx = cam.x, vy = cam.y, vw = viewW(), vh = viewH();
-  ctx.fillStyle = 'rgba(0,0,0,' + LIGHT.darkness + ')';
+  ctx.fillStyle = 'rgba(0,0,0,' + darkness + ')';
   if (my > vy) ctx.fillRect(vx, vy, vw, my - vy);
   if (my + mh < vy + vh) ctx.fillRect(vx, my + mh, vw, vy + vh - my - mh);
   if (mx > vx) ctx.fillRect(vx, Math.max(vy, my), mx - vx, Math.min(vh, mh));

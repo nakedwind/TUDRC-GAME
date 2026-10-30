@@ -272,6 +272,21 @@ function useAdrenaline() {
   flash('💉 腎上腺素！', G.player.x, G.player.y - 54, '#ff8a8a', 1.4); sfx('soothe');
   G.effects.push({ ring: true, x: G.player.x, y: G.player.y, r: 6, r2: 40, life: .35, life0: .35, color: '#ff8a8a' });
 }
+// ---- 眼藥水（道具）：一段時間內黑幕變淡（EYE_DROPS 在 data/equipment.js；js/lighting.js 問 currentDarkness）----
+const eyeDrops = { until: 0 };
+const eyeDropsActive = () => nowSec() < eyeDrops.until;
+const currentDarkness = () => eyeDropsActive() ? Math.min(LIGHT.darkness, EYE_DROPS.darkness) : LIGHT.darkness;
+function useEyeDrops() {
+  if (!G?.player || G.player.hp <= 0) return;
+  const say = (t, c = '#c9d3dc') => flash(t, G.player.x, G.player.y - 54, c);
+  if (itemCount('eye-drops') <= 0) { sfx('error'); say('沒有眼藥水了'); return; }
+  if (MAP_SAFE) { sfx('error'); say('戰鬥中才能用'); return; }
+  if (eyeDropsActive()) { sfx('error'); say('還在生效'); return; }
+  consumeItem('eye-drops');
+  eyeDrops.until = nowSec() + EYE_DROPS.dur;
+  say('👁️ 眼前清楚多了', '#9fe3ff'); sfx('soothe');
+  systemNotice('點了眼藥水：' + Math.round(EYE_DROPS.dur / 60) + ' 分鐘內看得清楚地圖（暗處一樣會被微笑者咬）');
+}
 // ---- 工具箱（道具）：修理身邊的營地（TOOLBOX 在 data/equipment.js）----
 function toolboxBaseNear() {
   const p = G.player, reach = TOOLBOX.reach * CELL;

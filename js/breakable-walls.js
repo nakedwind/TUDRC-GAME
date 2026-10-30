@@ -7,6 +7,7 @@
    「後室牆面（可炸開・隱藏區）」：一樣可以炸開，而且牆另一邊（上方）跟它連通的整片區域平常全黑，
    炸開之後才慢慢顯現（隱藏的通道／房間）。
    「後室牆面（裂縫・可炸開）」「後室牆面（裂縫・可炸開・隱藏區）」（Back-room-wall02-damage-03 的圖）：已經裂開，炸一次就開。
+   另一種做法：地圖編輯器把圖層設成「🧱 隱藏區」，那些圖層上的東西在炸開最近的可炸開牆之前塗黑（secretLayerAreas）。
    「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
 */
 // 素材 id → stages：依序換成哪些圖；open：炸開後可以通過的格子（[第幾欄, 第幾列]，從大圖左上角算）
@@ -49,6 +50,12 @@ function breakableWallOpenCells(s) {
   const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
   return spec.open.map(([dc, dr]) => [c0 + dc, r0 + dr]);
 }
+// 炸開後要打通的格子：洞口那幾格，加上同一欄往上到牆頂（牆面那幾排）。
+// 地圖編輯器在牆上畫了擋路格也一樣：沒炸開前擋著，炸開就拿掉（不然洞開了還是走不過去）
+function breakableWallPassCells(s) {
+  const r0 = s.r + Math.round((s.oy || 0) / CELL);
+  return breakableWallOpenCells(s).flatMap(([c, r]) => Array.from({ length: r - r0 + 1 }, (_, i) => [c, r0 + i]));
+}
 // 每局開始（js/game.js 的 newGame 呼叫）：完整的牆把要炸開的那幾格先擋起來
 function setupBreakableWalls() {
   for (const k of breakableWallCells) mapWalls.delete(k);
@@ -57,6 +64,7 @@ function setupBreakableWalls() {
   if (!G) return;
   G.wallStage = new Map();
   G.hiddenAreas = [];
+  const drawn = new Set((MAP && MAP.solid) || []);   // 重開時，上一局炸開拿掉的編輯器擋路格要補回來
   for (const s of (MAP && MAP.stamps) || []) {
     const spec = breakableWallSpec(s); if (!spec) continue;
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
@@ -65,16 +73,61 @@ function setupBreakableWalls() {
       if (!inGrid(c, r) || mapWalls.has(k)) continue;
       mapWalls.add(k); breakableWallSolid.add(k);
     }
-    for (const [c, r] of breakableWallOpenCells(s)) {
+    breakableWallOpenCells(s).forEach(([c, r]) => { if (inGrid(c, r)) mapWalls.add(c + ',' + r); });   // 洞口一定擋住
+    for (const [c, r] of breakableWallPassCells(s)) {   // 擋著的（含地圖編輯器畫的）都記下來，炸開時一起拿掉
       const k = c + ',' + r;
-      if (!inGrid(c, r) || mapWalls.has(k)) continue;
-      mapWalls.add(k); breakableWallCells.add(k);
+      if (inGrid(c, r) && (mapWalls.has(k) || drawn.has(k))) { mapWalls.add(k); breakableWallCells.add(k); }
     }
   }
+  G.hiddenAreas.push(...secretLayerAreas());   // 地圖編輯器設成「🧱 隱藏區」的圖層：已經綁好牆的，就不用再自己找範圍
+  const linked = new Set(G.hiddenAreas.map(a => a.stamp));
   for (const s of (MAP && MAP.stamps) || []) {   // 牆都擋好之後，再算隱藏區（才不會從洞漏出去）
     const spec = breakableWallSpec(s);
-    if (spec && spec.hide) { const area = hiddenAreaOf(s, spec); if (area) G.hiddenAreas.push(area); }
+    if (spec && spec.hide && !linked.has(s)) { const area = hiddenAreaOf(s, spec); if (area) G.hiddenAreas.push(area); }
   }
+}
+// 隱藏區圖層（地圖編輯器的圖層按「🧱 隱藏區」，存在 MAP.layerOrder 那一層的 secret: true）：
+// 這些圖層上有東西的格子，在炸開「最近的那面可炸開牆」之前全部塗黑（跟 hiddenAreaOf 一樣當成地圖外的空白區）。
+// 連在一起的一塊算一區，各自綁離它最近的牆；牆本身的圖片範圍不塗黑（牆要看得到）
+function secretLayerAreas() {
+  const ids = new Set(((MAP && MAP.layerOrder) || []).filter(l => l && l.secret).map(l => l.id));
+  if (!ids.size) return [];
+  const cells = new Set(), add = (c, r) => { if (inGrid(c, r)) cells.add(c + ',' + r); };
+  for (const lid of ids) for (const key in (MAP.layers && MAP.layers[lid]) || {}) add(...key.split(',').map(Number));
+  for (const s of MAP.stamps || []) {
+    if (!ids.has(s.layer || 'top')) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0), x1 = x0 + mapStampW(s, t) * CELL, y1 = y0 + mapStampH(s, t) * CELL;
+    for (let c = Math.floor(x0 / CELL); c < Math.ceil(x1 / CELL); c++) for (let r = Math.floor(y0 / CELL); r < Math.ceil(y1 / CELL); r++) add(c, r);
+  }
+  const walls = [];
+  for (const s of MAP.stamps || []) {
+    if (!breakableWallSpec(s)) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL), w = mapStampW(s, t), h = mapStampH(s, t);
+    for (let c = c0; c < c0 + w; c++) for (let r = r0; r < r0 + h; r++) cells.delete(c + ',' + r);
+    walls.push({ s, cells: breakableWallOpenCells(s) });
+  }
+  const areas = [], seen = new Set();
+  for (const k0 of cells) {
+    if (seen.has(k0)) continue;
+    const part = new Set([k0]), q = [k0]; seen.add(k0);
+    for (let i = 0; i < q.length; i++) {
+      const [c, r] = q[i].split(',').map(Number);
+      for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
+        const k = (c + dc) + ',' + (r + dr);
+        if (cells.has(k) && !seen.has(k)) { seen.add(k); part.add(k); q.push(k); }
+      }
+    }
+    let best = null, bestD = Infinity;
+    for (const w of walls) for (const [wc, wr] of w.cells) for (const k of part) {
+      const [c, r] = k.split(',').map(Number), d = Math.hypot(c - wc, r - wr);
+      if (d < bestD) { bestD = d; best = w.s; }
+    }
+    if (!best) { console.warn('隱藏區圖層附近沒有可炸開的牆，照常顯示', [...part][0]); continue; }
+    areas.push({ stamp: best, cells: part, revealAt: 0 });
+  }
+  return areas;
 }
 // 接續「保留進度」的戰場（js/combat-progress.js 的 restoreCombatProgress，這時不會跑 newGame）：
 // 牆格整組換成存起來的那份，但「哪些格是可炸牆加的」沒存，炸開時就刪不掉（洞炸開了還是走不過去）。
@@ -91,7 +144,7 @@ function restoreBreakableWalls() {
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
     for (const [dc, dr] of spec.solid || []) { const k = added(c0 + dc, r0 + dr); if (k) breakableWallSolid.add(k); }
     if (breakableWallStage(s) >= spec.stages.length) continue;   // 已經炸開了
-    for (const [c, r] of breakableWallOpenCells(s)) { const k = added(c, r); if (k) breakableWallCells.add(k); }
+    for (const [c, r] of breakableWallPassCells(s)) { const k = c + ',' + r; if (inGrid(c, r) && mapWalls.has(k)) breakableWallCells.add(k); }
   }
 }
 // 隱藏區：從牆上方那格往外，沿著沒有牆的格子連過去的整片區域（不含牆本身的圖片範圍，牆要看得到）
@@ -164,7 +217,7 @@ function blastWalls(x, y, R) {
     G.wallStage.set(s, next);
     const [hx, hy] = center(...cells[0]);
     if (next >= spec.stages.length) {   // 炸開：那幾格變成可以通過
-      for (const [c, r] of cells) { const k = c + ',' + r; if (breakableWallCells.has(k)) { mapWalls.delete(k); breakableWallCells.delete(k); } }
+      for (const [c, r] of breakableWallPassCells(s)) { const k = c + ',' + r; if (breakableWallCells.has(k)) { mapWalls.delete(k); breakableWallCells.delete(k); } }
       if (typeof computeFlow === 'function') computeFlow();
       for (const a of [...(G.towers || []), ...(G.npcs || [])]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
       for (const e of G.enemies || []) if (typeof resetEnemyNavigation === 'function') resetEnemyNavigation(e);

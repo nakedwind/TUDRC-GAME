@@ -159,6 +159,14 @@ function grantLockerLoot(loot,where='置物櫃'){
     const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
     if(bulletCount(loot.id)>=b.max){systemNotice(b.name+'已經是滿的');return;}
     grantBullets(loot.id,GUN_FINDS.start[loot.id]||b.max,'在'+where+'找到');
+  }else if(loot.kind==='bullet'){
+    // 1 組子彈（地圖編輯器「子彈（1 組）」）：補到滿為止
+    const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
+    if(bulletCount(loot.id)>=b.max){systemNotice(b.name+'已經是滿的');return;}
+    const first=!bulletOwned(loot.id),got=grantBullets(loot.id,b.max,'在'+where+'找到');
+    if(!got)return;
+    if(!first&&typeof itemIntroForBullet==='function')itemIntroForBullet(loot.id,got);   // 開出來的東西每次都跳視窗（第一次 grantBullets 已經跳過）
+    showItemPickupNotice({name:b.name,image:b.image},got,false);
   }
 }
 function storagePropDisplayTile(id,c,r,layer,stamp=null){
@@ -192,10 +200,11 @@ function drawWorldPickupSparkles(ctx){
 }
 
 // 固定在遊戲畫面中間偏右：拾取後才揭曉圖片與名稱，顯示三秒。
-function showItemPickupNotice(id,amount=1){
+// tally：算進結算畫面的「本次取得」（子彈 grantBullets 已經算過，傳 false）
+function showItemPickupNotice(id,amount=1,tally=true){
   const item=typeof id==='string'?itemById(id):id,box=document.getElementById('itemPickupNotices');
   if(typeof id==='string'&&typeof itemIntroForItem==='function')itemIntroForItem(id,amount);   // 第一次拿到：跳說明（js/item-intro.js）
-  if(item&&typeof battleGot==='function')battleGot(item.name,item.image,amount);   // 結算畫面的「本次取得」
+  if(tally&&item&&typeof battleGot==='function')battleGot(item.name,item.image,amount);   // 結算畫面的「本次取得」
   if(!item||!box)return;
   const notice=document.createElement('div');notice.className='item-pickup-notice';
   const image=document.createElement('img');image.src=item.image;image.alt='';

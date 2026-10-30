@@ -149,7 +149,7 @@ const isElevatorTile = tile => String(tile?.file || '').replaceAll('\\', '/').en
 const isElevatorStamp = stamp => isElevatorTile(mapTileById(stamp.id));
 const isElevatorLightTile = tile => String(tile?.file || '').replaceAll('\\', '/').endsWith('/應變中心/elevator-light01.png');
 function elevatorLightIsOpen(c, r) {
-  return (MAP?.stamps || []).some(stamp => isElevatorStamp(stamp) &&
+  return elevatorStamps().some(stamp =>
     Math.abs(stamp.c + 1 - c) <= 1 && Math.abs(stamp.r - r) <= 1 &&
     (stamp === openElevatorStamp || elevatorOpenAnim?.stamp === stamp || elevatorCloseAnim?.stamp === stamp));
 }
@@ -345,6 +345,14 @@ function elevatorStamps() {
   if (elevatorStampCache.src !== src || elevatorStampCache.len !== src.length)
     elevatorStampCache = { list: src.filter(isElevatorStamp), src, len: src.length };
   return elevatorStampCache.list;
+}
+// 這格在不在電梯上（整張電梯圖的範圍，再加門口前面一排）：不能蓋建築（js/build.js 的 canPlaceObstacle）
+function elevatorCoversCell(c, r) {
+  return elevatorStamps().some(stamp => {
+    const tile = mapTileById(stamp.id); if (!tile) return false;
+    const o = stampSolidOrigin(stamp);
+    return c >= o.c && c < o.c + mapTileW(tile) && r >= o.r && r <= o.r + mapTileH(tile);
+  });
 }
 function elevatorBlocksPoint(x, y) {
   for (const stamp of elevatorStamps()) {
@@ -595,10 +603,12 @@ function drawMapStampRaw(ctx, s) {
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
       ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1);
-      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
+      if(!(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,-w/2,-h/2,w,h))&&!(typeof drawEscalatorAnimation==='function'&&drawEscalatorAnimation(ctx,s,img,-w/2,-h/2,w,h)))ctx.drawImage(img,-w/2,-h/2,w,h);
       ctx.restore();
     } else if(typeof drawMrtGateAnimation==='function'&&drawMrtGateAnimation(ctx,s,img,x,y,w,h)) {
       // 閘門的靜態機台與滑動門翼由專用繪製處理。
+    } else if (typeof drawEscalatorAnimation === 'function' && drawEscalatorAnimation(ctx, s, img, x, y, w, h)) {
+      // 手扶梯：階梯循環捲動（js/escalators.js）
     } else {
       const hole = typeof mrtStampHole === 'function' ? mrtStampHole(s) : null;   // 打開的捷運閘門：門板那塊不畫（js/mrt-locks.js）
       if (hole) { ctx.save(); ctx.beginPath(); ctx.rect(x, y, w, h); ctx.rect(x + hole[0] * w, y + hole[1] * h, hole[2] * w, hole[3] * h); ctx.clip('evenodd'); }
@@ -681,14 +691,36 @@ function drawLayerCellsInView(ctx, lid) {
     drawMapTileImg(ctx, id, OX + c * CELL, OY + r * CELL, lid);
   }
 }
+// 地面、上層要畫的物件先依圖層分好（同一張地圖只分一次）：
+// 原本每一幀對每個圖層都把全部物件翻一遍（十幾層 × 上千個），大地圖光是挑物件就要 2 毫秒。
+// 跟電梯清單一樣，物件數量變了（編輯器新增、刪除）就重分；順序照 MAP.stamps，畫出來的上下關係不變。
+let mapStampGroupCache = { src: null, len: -1, ground: null, top: null };
+function mapStampGroups() {
+  const src = MAP?.stamps || [];
+  if (mapStampGroupCache.src === src && mapStampGroupCache.len === src.length) return mapStampGroupCache;
+  const ground = new Map(), top = [];
+  for (const s of src) {
+    if (isElevatorStamp(s)) continue;
+    const lid = s.layer || 'top';
+    if (lid === 'top') {
+      const t = mapTileById(s.id) || {};
+      if (!chairConfig(s.id) && !t.baseHp && !Number.isFinite(s.sortDepth)) top.push(s);
+    } else if (!stampIsOcc(s)) {
+      if (!ground.has(lid)) ground.set(lid, []);
+      ground.get(lid).push(s);
+    }
+  }
+  return (mapStampGroupCache = { src, len: src.length, ground, top });
+}
 // 地面：所有「非立體物、非上層」的圖片，永遠畫在角色下面
 function drawMapGround(ctx) {
   if (!MAP) return;
   updateMapDrawRect();   // 每一幀先算一次這一幀要畫的範圍（render.js 的 draw 最先畫地面）
+  const { ground } = mapStampGroups();
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
     if (!isOccLayer(lid)) drawLayerCellsInView(ctx, lid);
-    for (const s of (MAP.stamps || [])) if (!isElevatorStamp(s) && (s.layer || 'top') === lid && !stampIsOcc(s) && stampInDrawRect(s)) drawMapStampImg(ctx, s);
+    for (const s of ground.get(lid) || []) if (stampInDrawRect(s)) drawMapStampImg(ctx, s);
   }
   if (typeof drawOpenDoorsGround === 'function') drawOpenDoorsGround(ctx);   // 打開的挖空門：門洞的地板＋門框（在角色下面，js/doors.js）
 }
@@ -696,13 +728,7 @@ function drawMapGround(ctx) {
 function drawMapTop(ctx) {
   if (!MAP) return;
   drawLayerCellsInView(ctx, 'top');
-  for (const s of (MAP.stamps || [])) {
-    if (isElevatorStamp(s) || !stampInDrawRect(s)) continue;
-    if (chairConfig(s.id)) continue;
-    if ((s.layer || 'top') !== 'top') continue;
-    const t = mapTileById(s.id) || {};
-    if (!t.baseHp && !Number.isFinite(s.sortDepth)) drawMapStampImg(ctx, s);
-  }
+  for (const s of mapStampGroups().top) if (stampInDrawRect(s)) drawMapStampImg(ctx, s);
 }
 // 立體物：會和角色互相遮擋，回傳 {y:底部Y, draw:畫它} 加進 out
 //
@@ -847,8 +873,7 @@ function drawOverdrawPatch(ctx, it, od) {
   ctx.drawImage(od.patch, OX + cx, OY + cy);
 }
 function drawElevators(ctx) {
-  for (const stamp of MAP.stamps || []) {
-    if (!isElevatorStamp(stamp)) continue;
+  for (const stamp of elevatorStamps()) {   // 只翻電梯（快取），不用每幀掃全部物件
     if ((stamp === openElevatorStamp || elevatorOpenAnim?.stamp === stamp) && elevatorOpenImage.complete && elevatorOpenImage.naturalWidth) {
       const x = OX + stamp.c * CELL + (stamp.ox || 0), y = OY + stamp.r * CELL + (stamp.oy || 0);
       ctx.drawImage(elevatorOpenImage, x, y, mapTileW(mapTileById(stamp.id)) * CELL, mapTileH(mapTileById(stamp.id)) * CELL);

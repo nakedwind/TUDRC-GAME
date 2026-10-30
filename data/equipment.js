@@ -84,6 +84,8 @@ const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid'
 const TOOLBOX = { repair: .3, reach: 3 };
 // 腎上腺素（道具；快捷欄或背包使用）：speed 跑速加成、dur 持續秒數、side 藥效退了變慢幾秒、slow 變慢多少
 const ADRENALINE = { speed: .45, dur: 8, side: 2, slow: .3 };
+// 眼藥水（道具）：dur 秒內黑幕的濃度改成 darkness（原本 data/balance.js 的 LIGHT.darkness＝1 全黑）；只改看起來多黑，照不照得到光（微笑者咬不咬）不變
+const EYE_DROPS = { dur: 180, darkness: .85 };
 // 急救包（道具，按 H）：heal 治療量、time 處理傷口要站著幾秒、reach 幾格內的隊員
 const FIRST_AID = { heal: 30, time: 2.5, reach: 1.8, reviveHp: .3 };   // time：急救要幾秒（進度條跑完才算成功）   // reviveHp：異質急救包救回倒下的隊員時，HP 變成幾成
 

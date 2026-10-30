@@ -2402,6 +2402,7 @@ function update(dt) {
   if (typeof updateEquipment === 'function') updateEquipment(dt);   // 頭燈耗電（js/equipment.js）   // Smiler：黑暗中注視、咬人（js/smiler.js）
   updateFlares(dt);          // 照明彈的飛行與燃燒（js/flare.js）
   if (typeof updateSpecialGuns === 'function') updateSpecialGuns(dt);   // 燃燒彈、麻醉針（js/special-guns.js）
+  if (typeof updateEscalators === 'function') updateEscalators(dt);   // 手扶梯：階梯動畫、站在上面被帶著走（js/escalators.js）
   if (typeof updateDarkDrain === 'function') updateDarkDrain(dt);   // 站在全黑的地方：SP 慢慢下降（js/sanity.js）
   if (typeof updateChannel === 'function') updateChannel(dt);   // 疏導、急救、包紮的進度條（js/channel-actions.js）
   if (typeof updateVitals === 'function') updateVitals(dt);   // 應變中心：HP、SP 慢慢恢復，醫院病床上恢復得快（js/vitals.js）
@@ -2561,7 +2562,7 @@ function lose(reason, cause) {
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
-const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2'];   // 用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
+const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2', 'map_mvtnqrs7'];   // map_mvtnqrs7＝Y25區地下街；用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
 if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {

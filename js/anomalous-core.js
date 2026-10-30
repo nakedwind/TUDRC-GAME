@@ -46,6 +46,9 @@ function seedCores() {
     const j = Math.floor(Math.random() * (i + 1));
     [cells[i], cells[j]] = [cells[j], cells[i]];
   }
+  // 一定要出現的候選點（地圖的 "coreFixed": ["欄,列", …]，要同時是 coreSpots 裡的點）排最前面，其餘的照抽
+  const fixed = new Set(Array.isArray(map.coreFixed) ? map.coreFixed : []);
+  if (fixed.size) cells.sort((a, b) => fixed.has(b.join(',')) - fixed.has(a.join(',')));
   for (let i = 0; i < Math.min(count, cells.length); i++) {
     const [c, r] = cells[i];
     const [x, y] = center(c, r);

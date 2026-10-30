@@ -4,11 +4,12 @@
 //  ・閘門（gate）：關著時最下面一排擋路；刷卡後中間那格（門板）打開、紅色門板不畫（這次出勤一直開著）。刷一次用掉一張好遊卡。
 //  ・入口（exit）：封鎖時最下面一排擋路；用掉一把異質鑰匙解封，圖換成沒封鎖的出口（解封是永久的，存在 MRT_STORE）。
 //    入口裡面如果有出入口（通往捷運地圖），封鎖時不會作用。
+//    地圖可以設 "mrtExitKeys": 數字（data/maps.js）：這張地圖的封鎖入口要幾把異質鑰匙才解得開（沒寫＝1 把）。
 // ============================================================
 const MRT_LOCKS = {
   tile_mrt_ticket_gate: { kind: 'gate', item: 'youyou-card', consume: true, unit: '張', open: [1], hole: [26 / 120, 0, 68 / 120, 1],   // 門翼完整範圍：原圖 x=26～94，涵蓋整張高度，避免殘留紅邊。
     locked: '閘門關著（需要好遊卡）', use: '刷好遊卡', done: '嗶！閘門打開了', sound: 'mrtGate' },   // sound：音效編輯器裡的名稱
-  tile_mrt_exit_2_sealed: { kind: 'exit', item: 'anomaly-key', consume: true, openTile: 'tile_mrt_exit_2',
+  tile_mrt_exit_2_sealed: { kind: 'exit', item: 'anomaly-key', consume: true, unit: '把', openTile: 'tile_mrt_exit_2',
     locked: '入口被封鎖了（需要異質鑰匙）', use: '用異質鑰匙解開封鎖', done: '封鎖解開了，可以進去了', sound: 'mrtUnlock' },
 };
 const MRT_GATE_OPEN_SECONDS = .5;
@@ -100,15 +101,25 @@ function mrtLockNearPlayer() {
 }
 // 提示、訊息的高度：最多在擋路那排往上 2 格（很高的入口圖片頂端可能在地圖外面，畫在那裡會看不到）
 const mrtLabelY = l => Math.max(l.top, l.bottom - 2 * CELL) - 4;
-function mrtLockPrompt(l) { return (supplyInventory.get(l.cfg.item) || 0) > 0 ? l.cfg.use : l.cfg.locked; }
+// 要幾個道具：封鎖的入口照地圖的 mrtExitKeys（沒寫＝1）
+const mrtLockNeed = l => l.cfg.kind === 'exit' ? Math.max(1, Math.floor(Number(MAP && MAP.mrtExitKeys) || 1)) : 1;
+const mrtLockedText = l => mrtLockNeed(l) > 1 ? '入口被封鎖了（需要 ' + mrtLockNeed(l) + ' 把異質鑰匙）' : l.cfg.locked;
+function mrtLockPrompt(l) {
+  const n = supplyInventory.get(l.cfg.item) || 0, need = mrtLockNeed(l);
+  if (n >= need) return need > 1 ? '用 ' + need + ' 把異質鑰匙解開封鎖' : l.cfg.use;
+  return n > 0 ? mrtLockedText(l) + '，還差 ' + (need - n) + ' 把' : mrtLockedText(l);
+}
 function useMrtLockNearPlayer() {
   const l = mrtLockNearPlayer(); if (!l) return false;
-  const n = supplyInventory.get(l.cfg.item) || 0;
+  const n = supplyInventory.get(l.cfg.item) || 0, need = mrtLockNeed(l);
+  if (n > 0 && n < need) {   // 鑰匙不夠（例如要 2 把只有 1 把）：飄字說還差幾把
+    sfx('error'); flash(mrtLockPrompt(l), l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
+  }
   if (n <= 0) {   // 沒有好遊卡／異質鑰匙：溫特在對話框說話（data/doors.js 的 LOCKED_NEED_KEY_TEXT）
     if (typeof winterSay === 'function' && winterSay(lockedNeedKeyText())) return true;
-    sfx('error'); flash(l.cfg.locked, l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
+    sfx('error'); flash(mrtLockedText(l), l.x, mrtLabelY(l), '#ffcf89', 1.8); return true;
   }
-  if (l.cfg.consume) { if (n <= 1) supplyInventory.delete(l.cfg.item); else supplyInventory.set(l.cfg.item, n - 1); }
+  if (l.cfg.consume) { if (n <= need) supplyInventory.delete(l.cfg.item); else supplyInventory.set(l.cfg.item, n - need); }
   l.open = true;
   if(l.cfg.kind==='gate'){l.opening=true;l.openProgress=0;}
   applyMrtLock(l);
@@ -118,7 +129,7 @@ function useMrtLockNearPlayer() {
   }
   if (typeof sfxAt === 'function') sfxAt(l.cfg.sound, l.x, l.bottom, .7, 'mrt-lock');
   flash(l.cfg.done, l.x, mrtLabelY(l), '#9ff0c0', 2);
-  if (l.cfg.consume) systemNotice('消耗 1 ' + (l.cfg.unit || '支') + itemById(l.cfg.item).name);
+  if (l.cfg.consume) systemNotice('消耗 ' + need + ' ' + (l.cfg.unit || '支') + itemById(l.cfg.item).name);
   for (const a of [...G.towers, ...G.npcs]) { a.navPath = null; a.navGoal = null; a.navFailed = false; }
   if (typeof updateHUD === 'function') updateHUD();
   if (typeof saveGame === 'function') saveGame();

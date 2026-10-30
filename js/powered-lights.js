@@ -9,9 +9,13 @@ const isPoweredLightTile = tile => {
 function resetMapPower(){poweredMap=MAP;mapPowerOn=new Set();}
 function mapPowerIsOn(circuit=0){return poweredMap===MAP&&mapPowerOn.has(circuit);}
 function toggleMapPower(circuit=0){if(poweredMap!==MAP)resetMapPower();if(mapPowerOn.has(circuit))mapPowerOn.delete(circuit);else mapPowerOn.add(circuit);}
+let poweredFixturesCache=null,poweredFixturesFor=null,poweredFixturesStamps=-1;   // 燈的位置只跟地圖有關：同一張地圖不用每幀重掃全部格子、物件
 function poweredLightFixtures(){
   if(!MAP)return [];
-  const lamps=[];
+  const stampCount=(MAP.stamps||[]).length;
+  if(poweredFixturesCache&&poweredFixturesFor===MAP&&poweredFixturesStamps===stampCount)return poweredFixturesCache;
+  poweredFixturesFor=MAP;poweredFixturesStamps=stampCount;
+  const lamps=poweredFixturesCache=[];
   const add=(id,c,r,s=null)=>{
     const tile=mapTileById(id);if(!isPoweredLightTile(tile))return;
     const w=mapTileW(tile)*CELL,h=mapTileH(tile)*CELL;

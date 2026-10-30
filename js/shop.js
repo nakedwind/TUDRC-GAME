@@ -27,7 +27,7 @@ const DRINK_SHOP = { kinds: ['drink'], reach: 1.2, match: id => String(id).start
 // 後室商店：stock＝賣什麼（price 沒寫就用商品本身的價錢）；sellRate＝賣掉的東西拿回原價的幾成；sellPrice＝沒有原價的東西賣多少
 const BACKROOM_SHOP = {
   reach: 1.2, match: id => id === 'tile_cvs_checkout_counter_backroom',
-  stock: [{ id: 'almond-water' }, { id: 'thermos' }, { id: 'medkit' }, { id: 'firstaid' }, { id: 'adrenaline' }, { id: 'battery', price: 20 }, { id: 'graffiti-red' }, { id: 'graffiti-blue' }, { id: 'graffiti-black' }],
+  stock: [{ id: 'almond-water' }, { id: 'thermos' }, { id: 'medkit' }, { id: 'firstaid' }, { id: 'adrenaline' }, { id: 'eye-drops' }, { id: 'battery', price: 20 }, { id: 'graffiti-red' }, { id: 'graffiti-blue' }, { id: 'graffiti-black' }],
   sellRate: .5, crystalSellPrice: 5, sellPrice: { battery: 10 },
 };
 const BACKROOM_ONLY = ['almond-water'];   // 只有在後室（戰鬥地圖）裡的店買得到；基地的便利商店、飲料店、販賣機不賣

@@ -58,8 +58,10 @@ function seedEliteGuards() {
   if (!cfg || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === (cfg.of || 'bird_head'));
   if (!base || base.behavior !== 'charger') return;
-  const core = G.cores[0] || null;
   let c = Number(cfg.c), r = Number(cfg.r);
+  // 守的核心：有指定位置就挑離牠最近的那顆（核心不只一顆時，例如 Y25 地下街），沒指定就第一顆
+  const near = Number.isFinite(c) && Number.isFinite(r) ? center(c, r) : null;
+  const core = near ? G.cores.reduce((best, k) => !best || Math.hypot(k.x - near[0], k.y - near[1]) < Math.hypot(best.x - near[0], best.y - near[1]) ? k : best, null) : G.cores[0] || null;
   if (!Number.isFinite(c) || !Number.isFinite(r)) {
     if (!core) return;
     [c, r] = cellAt(core.x, core.y); r += 2;

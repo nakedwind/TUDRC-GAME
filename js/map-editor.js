@@ -778,6 +778,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/回憶場景',
   'images/field-camp',
   'images/scene-props',
+  'images/萬聖節裝飾',
 ];   // 上傳的圖不在這些資料夾裡：會把整張圖嵌進素材庫（data:），之後改圖檔不會更新，所以新資料夾要加在這裡
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -1500,6 +1501,18 @@ function renameLayer(id = activeLayer) {
   syncLayers(); renderLayers(); refreshSelPanel(); saveMaps();
   setStatus('圖層改名為「' + name.trim() + '」', '#7ee0c0');
 }
+// 隱藏區圖層（layerOrder 那一層的 secret: true）：遊戲裡炸開最近的可炸開牆之前塗黑（js/breakable-walls.js 的 secretLayerAreas）
+function toggleSecretLayer(id = activeLayer) {
+  const m = curMap();
+  pushUndo();
+  const cur = customizeLayers(m).find(l => l.id === id); if (!cur) return;
+  if (cur.secret) delete cur.secret; else cur.secret = true;
+  syncLayers(); renderLayers(); saveMaps();
+  const hasWall = (m.stamps || []).some(s => /^tile_bg_backroom_wall02_(crack_)?(breakable|secret)$/.test(s.id));
+  setStatus(cur.secret
+    ? '「' + cur.name + '」設成隱藏區：遊戲裡平常全黑，炸開最近的可炸開牆才出現' + (hasWall ? '' : '（這張地圖還沒有可炸開的牆，記得放一面）')
+    : '「' + cur.name + '」改回一般圖層', cur.secret && !hasWall ? '#ffd24a' : '#7ee0c0');
+}
 function deleteLayer(id = activeLayer) {
   const m = curMap(), list = layersOf(m), cur = list.find(l => l.id === id); if (!cur) return;
   if (list.length <= 1) { alert('至少要留一個圖層'); return; }
@@ -1673,7 +1686,8 @@ function renderLayers() {
   tools.append(
     mk('＋ 新增圖層', '在目前圖層的上面加一個新圖層', addLayer),
     mk('✎ 改名', '改目前圖層的名字（也可以雙擊圖層）', () => renameLayer()),
-    mk('🗑 刪除圖層', '刪除目前圖層（上面的物件會一起刪掉）', () => deleteLayer(), 'danger'));
+    mk('🗑 刪除圖層', '刪除目前圖層（上面的物件會一起刪掉）', () => deleteLayer(), 'danger'),
+    mk('🧱 隱藏區', '把目前圖層設成／取消「隱藏區」：遊戲裡這層的東西平常全黑，炸開最近的可炸開牆才出現', () => toggleSecretLayer()));
   layerBtnsEl.appendChild(tools);
   // 顯示順序反轉：上層在最上、地板在最下（不改 LAYERS 本身的疊圖 z 順序）
   [...LAYERS].reverse().forEach(l => {
@@ -1681,7 +1695,7 @@ function renderLayers() {
     const count = (m.stamps || []).filter(s => (s.layer || 'top') === l.id).length + Object.keys(m.layers[l.id] || {}).length;
     const b = document.createElement('button'); b.className = 'layer' + (l.id === activeLayer ? ' sel' : ''); b.dataset.layer = l.id;
     b.innerHTML = '<span class="layer-arrow">' + (expandedLayer === l.id ? '▾' : '▸') + '</span><span class="layer-label"></span><span class="layer-count">' + count + '</span>';
-    b.querySelector('.layer-label').textContent = l.name;
+    b.querySelector('.layer-label').textContent = (l.secret ? '🧱 ' : '') + l.name;
     b.title = '點一下：在這層編輯並展開物件清單；雙擊：改名';
     b.addEventListener('click', () => {
       const wasActive = activeLayer === l.id;
@@ -1797,6 +1811,7 @@ const PALETTE_CATEGORIES = [
   { id: 'research', name: '研究部' },
   { id: 'training', name: '地下訓練室' },
   { id: 'memory', name: '回憶場景' },
+  { id: 'halloween', name: '萬聖節' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -1830,6 +1845,7 @@ function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_research_lab_') || file.includes('/研究部/')) return 'research';
   if (String(t.id || '').startsWith('tile_training_') || file.includes('/地下訓練室/')) return 'training';
   if (file.includes('/回憶場景/')) return 'memory';
+  if (file.includes('/萬聖節裝飾/')) return 'halloween';
   if (file.includes('/應變中心/')) return 'eoc';
   if (file.includes('/宿舍/')) return 'dorm';
   if (file.includes('/破損建築/')) return 'damaged';
@@ -2232,6 +2248,11 @@ function selectedLocker() {
   if (!(id === 'tile_interactive_storage_locker' || /storage-locker-closed\.png$/.test(String(t.file || '')) || /置物[箱櫃].*關|置物[箱櫃]（上鎖）/.test(t.name || ''))) return null;
   return { sel, s, id };
 }
+const isStoryLootItem = value => { const [kind, id] = String(value).split(':');
+  if (kind === 'equipment') return typeof EQUIPMENT !== 'undefined' && EQUIPMENT.some(e => e.id === id && e.source === 'develop');   // 開發工坊做得出來的裝備
+  if (kind !== 'item') return false;
+  return id === 'anomaly-key' || /-shard$/.test(id) || (typeof MEMORY_KEYS !== 'undefined' && MEMORY_KEYS.some(k => k.key === id))
+    || (typeof SUPPLIES !== 'undefined' && SUPPLIES.some(s => s.id === id && (s.kind === 'snack' || s.kind === 'drink'))); };   // 零食、飲料
 function refreshLockerControl() {
   let box = document.getElementById('lockerLootControl');
   if (!box) {
@@ -2241,12 +2262,16 @@ function refreshLockerControl() {
     const add = (value, name, parent = select) => { const o = document.createElement('option'); o.value = value; o.textContent = name; parent.appendChild(o); };
     add('random', '隨機掉落（原設定）'); add('empty', '空櫃');
     const groups = [
-      ['補給、零食飲料', 'item', typeof SUPPLIES === 'undefined' ? [] : SUPPLIES],
+      ['補給', 'item', typeof SUPPLIES === 'undefined' ? [] : SUPPLIES],
       ['素材與重要物品', 'item', typeof ITEMS === 'undefined' ? [] : ITEMS],
       ['裝備', 'equipment', typeof EQUIPMENT === 'undefined' ? [] : EQUIPMENT],
       ['武器', 'weapon', typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).map(([id, w]) => ({ ...w, id }))],
+      // 1 組子彈（BULLET_SET 發，data/equipment.js）；一般子彈無限，不放
+      ['子彈（1 組）', 'bullet', typeof BULLETS === 'undefined' ? [] : Object.entries(BULLETS).filter(([id, b]) => id !== 'pistol' && !b.removed).map(([id, b]) => ({ id, name: b.icon + ' ' + b.name + ' ×' + b.max }))],
     ];
     groups.forEach(([label, kind, entries]) => { const g = document.createElement('optgroup'); g.label = label; entries.forEach(t => add(kind + ':' + t.id, t.name, g)); select.appendChild(g); });
+    // 劇情道具（回憶碎片、回憶鑰匙、異質鑰匙）、零食、飲料、開發工坊的裝備不放進櫃子、箱子：選單裡藏起來；以前設好的還是會顯示（下面 refresh 時打開）
+    [...select.options].forEach(o => { if (isStoryLootItem(o.value)) { o.hidden = true; o.dataset.story = '1'; } });
     const qty = document.createElement('input'); qty.id = 'lockerLootQty'; qty.type = 'number'; qty.min = '1'; qty.max = '999'; qty.step = '1'; qty.style.width = '60px'; qty.setAttribute('aria-label', '置物櫃物品數量');
     box.append(select, ' 數量 ', qty); document.getElementById('selControls').appendChild(box);
     const change = () => {
@@ -2276,6 +2301,7 @@ function refreshLockerControl() {
   select.options[1].hidden = !!picked.ammo;
   if (picked.ammo && loot?.kind === 'empty') select.value = 'random';
   select.value = loot ? loot.kind === 'empty' ? 'empty' : loot.kind + ':' + loot.id : 'random';
+  select.querySelectorAll('option[data-story]').forEach(o => { o.hidden = o.value !== select.value; });   // 劇情道具、零食、飲料、開發工坊的裝備：只有本來就設成它的櫃子看得到
   qty.value = loot?.qty || 1; qty.disabled = !select.value.startsWith('item:');
 }
 // 電源開關、電源控制的電燈：設定電路編號（1～5），同編號的開關只控制同編號的燈（js/powered-lights.js）

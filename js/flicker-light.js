@@ -67,6 +67,7 @@ const flickerStable = () => !!(G && G.cores && G.cores.some(c => c.dead));
 function updateFlickerLights(dt) {
   const stable = flickerStable();
   for (const L of flickerLights()) {
+    if (typeof inHiddenArea === 'function' && inHiddenArea(L.x, L.y)) { L.flick = null; L.on = false; L.level = 0; continue; }   // 還沒炸開的隱藏區：不亮、不跳電、沒有嗡嗡聲
     if (stable) { L.flick = null; L.on = true; L.level = 1; continue; }
     if (L.flick) {   // 正在閃：照一串「亮／暗」的節奏走完
       L.flick.t -= dt;
