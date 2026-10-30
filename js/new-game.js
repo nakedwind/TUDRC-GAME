@@ -79,13 +79,15 @@
   } catch (error) {
     alert('無法重設或還原遊戲進度：' + error.message);
   }
-  function requestRestart(action) {
+  // fromStart：從頭開始新遊戲＝進度重設，而且一定從新手區開始（開場劇情 → 新手區 → Y25區地下街的救援劇情都會重新播）
+  function requestRestart(action, fromStart) {
     const text = action === 'new'
-      ? '開始新遊戲？背包、裝備、養成、任務、成就與開櫃紀錄將重設。舊進度會先備份。'
+      ? (fromStart ? '從頭開始新遊戲？會從開場劇情和新手區重新開始。' : '開始新遊戲？') + '背包、裝備、養成、任務、成就與開櫃紀錄將重設。舊進度會先備份。'
       : '還原上次開始新遊戲前的備份？目前進度將被取代。';
     if (!confirm(text)) return;
     try {
-      if (action === 'new' && typeof MAP !== 'undefined' && MAP?.id) sessionStorage.setItem(START_MAP, MAP.id);
+      if (action === 'new' && fromStart && typeof NEWBIE_START !== 'undefined') sessionStorage.setItem(START_MAP, NEWBIE_START.mapId);
+      else if (action === 'new' && typeof MAP !== 'undefined' && MAP?.id) sessionStorage.setItem(START_MAP, MAP.id);
       else sessionStorage.removeItem(START_MAP);
       sessionStorage.setItem(REQUEST, action);
       location.reload();
@@ -97,6 +99,7 @@
       if (continueButton) continueButton.textContent = localStorage.getItem('tudrc-save-v1') ? '繼續遊戲' : '開始遊戲';
     }
     document.querySelectorAll('[data-new-game]').forEach(button => button.addEventListener('click', () => requestRestart('new')));
+    document.querySelectorAll('[data-new-game-from-start]').forEach(button => button.addEventListener('click', () => requestRestart('new', true)));
     document.querySelectorAll('[data-test-mode]').forEach(button => button.addEventListener('click', () => {
       try { sessionStorage.setItem(REQUEST, 'test'); location.reload(); }
       catch (error) { alert('無法開啟測試模式：' + error.message); }
