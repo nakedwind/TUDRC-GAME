@@ -95,6 +95,9 @@ const StoryScene = (() => {
     ui.setAttribute('aria-label', '回憶劇情');
     ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
+    // 頭像外面包一層：上下顛倒時只翻頭像，頭像框上的汗滴、陰沉線條不跟著翻（框裡原本的排版規則照樣套用）
+    const pic = el('dialoguePortrait');
+    if (pic && pic.parentNode.id === 'dialoguePortraitFrame') { const wrap = document.createElement('span'); wrap.id = 'storyPortraitFlip'; pic.before(wrap); wrap.appendChild(pic); }
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
   const box = () => el('dialogueBox');
@@ -106,7 +109,13 @@ const StoryScene = (() => {
     const sprite = beat.speaker && state.cfg.portraits?.[beat.speaker];
     box().classList.toggle('story-narration', !beat.speaker);
     box().classList.toggle('story-noface', !!beat.speaker && !sprite);   // 有名字、沒頭像的人（家屬）：不放頭像，但不是旁白的斜體
-    box().classList.toggle('story-sweat', !!beat.sweat);   // 流汗：頭像旁邊一滴汗一直往下滑（css/story-scene.css）
+    // 頭像情緒（css/story-scene.css）：sweat 流汗（一滴汗往下滑）、gloom 陰沉線條（頭上垂下黑線）、
+    // portraitFlip 頭像上下顛倒、portraitDark 頭像壓黑（0～1，0.4＝暗四成）
+    box().classList.toggle('story-sweat', !!beat.sweat);
+    box().classList.toggle('story-gloom', !!beat.gloom);
+    box().classList.toggle('story-flip', !!beat.portraitFlip);
+    const dark = Math.max(0, Math.min(1, Number(beat.portraitDark) || 0));
+    el('dialoguePortrait').style.filter = dark ? 'brightness(' + (1 - dark) + ')' : '';
     el('dialogueName').textContent = beat.speaker || '';
     if (sprite) {
       const who = state.actors.find(a => a.name === beat.speaker && a.sprite === sprite);
@@ -456,6 +465,8 @@ const StoryScene = (() => {
     state.shown = false; showBox(false);
     el('dialogueProgress').textContent = (index + 1) + ' / ' + state.cfg.beats.length;
     el('dialogueText').textContent = '';
+    // textSize：這頁台詞的字體大小（像素）；沒填＝預設（一般 17、大喊 23，css/story-scene.css）
+    el('dialogueText').style.fontSize = Number(beat.textSize) > 0 ? Number(beat.textSize) + 'px' : '';
     state.beatWait = index === 0 ? Math.max(beat.wait || 0, state.openingBlack + state.openingFade) : (beat.wait || 0);
     state.nextAt = state.time + state.beatWait;
     if (beat.camera) state.cameraKey = beat.camera;
@@ -828,7 +839,7 @@ const StoryScene = (() => {
     stopBgm(0); clearInput(); state = null; updateSteps();
     document.body.classList.remove('story-scene');
     if (ui) ui.hidden = true;
-    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat', 'story-loud'); }
+    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat', 'story-loud', 'story-gloom', 'story-flip'); el('dialogueText').style.fontSize = ''; el('dialoguePortrait').style.filter = ''; }
   }
   function exit() {
     if (resume) { backToGame(); return; }   // 從記憶之門進來的：回到門前

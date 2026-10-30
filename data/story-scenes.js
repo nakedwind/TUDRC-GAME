@@ -337,6 +337,8 @@ const STORY_SCENES = {
         "swallow": { "魚1": "red" },
         "monsterPose": { "魚2": "attack", "魚3": "attack" },
         "face": { "theonie": "right", "amber": "right" },
+        "portraitFlip": true,
+        "portraitDark": 0.4,
         "wait": 1.4
       },
       { "speaker": "安柏", "text": "啊！！怎麼辦！隊長被吃掉了！！", "camera": "全景", "hop": { "amber": true }, "wait": 0.3 },
@@ -371,6 +373,7 @@ const STORY_SCENES = {
         "bgm": "music/sneaky-movements.mp3",
         "bgmDelay": 4.5,
         "sweat": true,
+        "gloom": true,
         "wait": 4.8
       },
       {
@@ -379,6 +382,7 @@ const STORY_SCENES = {
         "face": { "amber": "theonie", "theonie": "amber" },
         "hop": { "amber": true },
         "sweat": true,
+        "gloom": true,
         "wait": 0.3
       },
       { "speaker": "希奧妮", "text": "你這個爛砲兵……完蛋了……\n回去要寫一堆報告了……恭喜你殺人了。", "camera": "兩人", "wait": 0.3 },

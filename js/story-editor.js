@@ -576,8 +576,8 @@ const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 't
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
 const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
-  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.thunder && '⚡', b.sweat && '💧',
-  'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
+  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
+  'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
   box.append(h('p', { class: 'note' }, '一頁一句話。點一頁展開編輯；「等幾秒」＝翻到這頁後，先讓畫面演幾秒才出現文字（不會自動翻頁）。'));
@@ -637,7 +637,9 @@ function beatBody(s, b, i) {
   monRows('swallow', '吞人', id => h('span', { class: 'row' }, '吞掉', choose(b.swallow, id, actorOptions()), h('small', {}, '撲過去一口吞進魚嘴（虱目魚小子）')));
   acts.append(h('div', { class: 'act' }, h('b', {}, '巨雷'), chk(b, 'thunder', '雷劈在所有怪物身上＋大爆炸：畫面白黑閃、劇烈搖晃、掉碎石，怪物焦黑倒地（被吞的人還在嘴裡）', { rerender: true }),
     b.thunder && h('span', { class: 'row' }, '全白停', num(b, 'thunderHold', { min: .1, optional: true, placeholder: '0.35' }), '秒，再花', num(b, 'thunderFade', { min: .3, optional: true, placeholder: '3' }), '秒慢慢退掉')));
-  acts.append(h('div', { class: 'act' }, h('b', {}, '流汗'), chk(b, 'sweat', '說話的人頭像旁邊流一滴汗')));
+  // 頭像情緒：可以同時開好幾個
+  acts.append(h('div', { class: 'act' }, h('b', {}, '頭像情緒'), chk(b, 'sweat', '流汗'), chk(b, 'gloom', '陰沉線條（頭上垂下黑線）'), chk(b, 'portraitFlip', '上下顛倒'),
+    h('span', { class: 'row', style: 'font-size:12px' }, '壓黑', num(b, 'portraitDark', { min: 0, step: .05, optional: true, placeholder: '0' }), h('small', {}, '（0～1，0.4＝暗四成）'))));
   const healHolder = { v: b.heal === false ? 'stop' : b.heal ? 'start' : '' };
   const healRow = h('div', { class: 'act' }, h('b', {}, '治療'), choose(healHolder, 'v', [['', '不變'], ['start', '開始'], ['stop', '停止']], { parse: v => {
     if (v === 'start') b.heal = { from: s.actors[1]?.id || s.actors[0]?.id || '', to: s.actors[0]?.id || '' }; else if (v === 'stop') b.heal = false; else delete b.heal; return v; } }));
@@ -683,7 +685,8 @@ function beatBody(s, b, i) {
   } }, '＋ 怪物走位');
   return h('div', { class: 'beat-body' },
     dl, h('div', { class: 'row' }, h('label', { class: 'f', style: 'flex:1' }, '說話者（空白＝旁白）', txt(b, 'speaker', { list: 'speakerList', rerender: true, placeholder: '旁白' })),
-      h('label', { class: 'f' }, '等幾秒', num(b, 'wait', { min: 0 }))),
+      h('label', { class: 'f' }, '等幾秒', num(b, 'wait', { min: 0 })),
+      h('label', { class: 'f', title: '空白＝預設：一般台詞 17、大喊 23' }, '字體大小', num(b, 'textSize', { min: 8, step: 1, optional: true, placeholder: b.shout && Object.values(b.shout).some(Boolean) ? '23' : '17' }))),
     h('label', { class: 'f' }, '台詞', text),
     acts,
     h('div', { class: 'row' }, moveBtn, addAct('face', '＋ 轉向', () => 'front'), addAct('eyes', '＋ 眼睛', () => 'open'),
