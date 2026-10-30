@@ -21,6 +21,8 @@ body.story-scene #dialogueBox.story-shout { animation: story-shout .35s ease-out
   0% { translate: 0 0; } 15% { translate: -7px -2px; } 30% { translate: 6px 1px; } 45% { translate: -4px 0; }
   60% { translate: 3px 0; } 80% { translate: -1px 0; } 100% { translate: 0 0; }
 }
+/* 大喊的台詞：字放大加粗 */
+body.story-scene #dialogueBox.story-loud #dialogueText { font-size: 23px; font-weight: 900; letter-spacing: .03em; line-height: 1.5; }
 @media (prefers-reduced-motion: reduce) { body.story-scene #dialogueBox.story-shout { animation: none; } }   /* 劇情台詞照編輯器裡的換行分行顯示 */
 #storyFade { position:absolute; inset:0; background:#000; pointer-events:none; }
 /* 巨雷的閃白（劇情的 thunder）：透明度由 js/story-scene.js 每幀設定 */

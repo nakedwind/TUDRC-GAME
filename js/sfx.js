@@ -172,8 +172,8 @@ const SFX = (() => {
     milkfishSpit: '怪物/史萊姆/slime-land.mp3',           // 吐出隊友（被打死獲救、被消化到倒下）
     milkfishHurt: '怪物/虱目魚小子/虱目魚小子被打.mp3',
     milkfishDeath: '怪物/虱目魚小子/虱目魚小子死掉.mp3',
-    milkfishLaugh: '怪物/葫蘆猴/葫蘆猴笑聲.mp3',   // 虱目魚小子的笑聲（開場劇情 data/story-scenes.js 的 sfx）；還沒有專用音檔，先借葫蘆猴笑聲播高一點
-    storyThunder: ['戰鬥/元素/雷電.mp3', '戰鬥/爆炸/爆炸.mp3'],   // 劇情的巨雷（js/story-scene.js 的 thunder）：雷電＋大爆炸一起播
+    storyThunder: ['戰鬥/元素/雷電.mp3', '戰鬥/爆炸/大爆炸.mp3', '戰鬥/爆炸/石塊掉落.mp3'],   // 劇情的巨雷（js/story-scene.js 的 thunder）：雷電＋大爆炸＋石塊掉落一起播
+    storyCharge: '戰鬥/元素/集氣.mp3',   // 劇情的集氣（開場安柏放大招前，data/story-scenes.js 的 sfx）
     // 人面蝶：拍翅膀（飛的時候每拍一輪翅膀播一次）、撒鱗粉、被打、死掉（js/human-face-butterfly.js）
     mothFlap: '怪物/人面蝶/人面蝶拍翅膀.mp3',
     mothSpray: '怪物/人面蝶/撒麟粉.mp3',
@@ -209,7 +209,7 @@ const SFX = (() => {
     'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
-  const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72, milkfishLaugh: 1.3 };
+  const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
   const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音

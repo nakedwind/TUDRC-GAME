@@ -179,6 +179,7 @@ const StoryScene = (() => {
     for (const id of ids) { const a = actor(id); if (a) a.shoutT = SHOUT_TIME; }
     const b = box(); b.classList.remove('story-shout');
     if (ids.length) { void b.offsetWidth; b.classList.add('story-shout'); }
+    b.classList.toggle('story-loud', ids.length > 0);   // 大喊的台詞字放大加粗（css/story-scene.css）
   }
   // 鏡頭 [欄, 列, 縮放]：第三個數字可省略（＝劇情的 zoom），越大拍得越近
   const camZoom = (p, base) => Number(p?.[2]) > 0 ? Number(p[2]) : base;
@@ -189,7 +190,7 @@ const StoryScene = (() => {
   const isMilkfish = e => e.behavior === 'milkfish' || e.behavior === 'milkfishSmall';
   function gulpNow(e, a) {
     e.gulp = null; e.x = a.x; e.y = a.y + 2;
-    a.hidden = true; a.target = null; a.path = []; a.charging = false; a.swallowedBy = e;
+    a.hidden = true; a.target = null; a.path = []; a.charging = false; a.fight = false; a.meleeSwing = null; a.swallowedBy = e;
     // 嘴裡的腳用遊戲的畫法；storyPrey：不畫名字和血條（js/milkfish-kid.js 的 drawMilkfishPrey）
     e.mf = { prey: { type: String(a.sprite || '').replace(/_[A-Z]$/, ''), storyPrey: true } };
     if (state.skipping) return;
@@ -201,7 +202,7 @@ const StoryScene = (() => {
     if (!isMilkfish(e) || typeof mfPose !== 'function') return;
     if (e.gulp) { mfPose(e, 'attack', e.gulp.who.x); return; }
     if (e.pose === 'smile') { mfPose(e, 'smile-0' + (1 + Math.floor((state.time + (e.phase || 0)) * LAUGH_FPS) % 2)); return; }
-    if (e.pose === 'attack') {   // 朝最近的人（或嘴裡含著人的那隻）張嘴
+    if (e.pose === 'attack' || e.biteT > 0) {   // 朝最近的人（或嘴裡含著人的那隻）張嘴；biteT＝被打時咬回去
       const marks = [...state.actors.filter(a => !a.hidden), ...state.monsters.filter(m => m !== e && m.mf?.prey && !m.gone)];
       const near = marks.sort((p, q) => Math.hypot(p.x - e.x, p.y - e.y) - Math.hypot(q.x - e.x, q.y - e.y))[0];
       mfPose(e, 'attack', near ? near.x : e.x + (e.faceRight ? 1 : -1)); return;
@@ -219,28 +220,85 @@ const StoryScene = (() => {
         r: rnd(1.4, 2.6), life: rnd(.15, .3), life0: .3, color: '#cbf2ff' });
     }
   }
-  // ---- 巨雷（每頁 thunder: true）：好幾道雷劈在所有怪物（和被吞掉的人）身上，畫面整個閃白，thunderFade 秒慢慢亮回來 ----
-  // 怪物被劈得焦黑、抖一下後消失；被吞掉的人掉出來，焦黑倒在地上冒煙
-  // bolts＝連續劈幾秒、every＝每隔幾秒一道、strike＝劈下來幾秒後才全白、hold＝全白停幾秒、fry＝怪物焦黑抖多久才消失
-  const THUNDER = { bolts: .9, every: .07, strike: .16, fry: 1.6, hold: .35, sfx: 'storyThunder' };
+  // ---- 巨雷（每頁 thunder: true）：好幾道雷劈在所有怪物身上＋大爆炸：畫面白、黑閃好幾下再全白，thunderFade 秒慢慢亮回來 ----
+  // 畫面劇烈搖晃、天花板掉碎石和粉塵（跟新手區開場一樣，js/tutorial.js 的 tutDebrisStart）
+  // 怪物被劈得焦黑、抖一下後往後倒，躺在地上冒煙；被吞掉的人還卡在魚嘴裡（腳也焦黑）
+  // bolts＝連續劈幾秒、every＝每隔幾秒一道、fry＝焦黑抖多久才倒下、fall＝倒下花幾秒、hold＝全白停幾秒
+  // shake＝鏡頭晃多大（像素）、shakeTime＝晃幾秒；debris＝碎石掉幾秒、rocks／dust＝每秒掉幾顆碎石、幾團粉塵；scorch＝焦痕大小
+  const THUNDER = { bolts: .9, every: .07, fry: .9, fall: .35, hold: .35, shake: 34, shakeTime: 2.6,
+    debris: 2.2, rocks: 30, dust: 24, scorch: 60, sfx: 'storyThunder' };
+  // 閃光的順序：[幾秒, 顏色, 濃度]；第一下淡淡的，讓大家先看到雷劈下來，接著白、黑、白、黑閃，最後全白再慢慢退
+  const FLASH_SEQ = [[.16, '#fff', .25], [.08, '#fff', 1], [.07, '#000', 1], [.09, '#fff', 1], [.07, '#000', .9]];
   function thunder(beat) {
     const targets = state.monsters.filter(e => !e.gone);
-    for (const a of state.actors) a.charging = false;
-    for (const e of targets) {
-      e.gulp = null; e.pose = ''; e.goal = null; poseMonster(e);   // 張著嘴的也收回站姿：焦黑的笑臉
-      const a = state.actors.find(x => x.swallowedBy === e);
-      if (a) { a.swallowedBy = null; a.hidden = false; a.alpha = 1; a.x = e.x; a.y = e.y; a.down = true; a.charred = true; e.mf = null; }
-      if (state.skipping) e.gone = true; else e.fried = THUNDER.fry;
-    }
+    for (const a of state.actors) { a.charging = false; a.fight = false; }
+    targets.forEach((e, i) => {
+      e.gulp = null; e.pose = ''; e.goal = null; e.biteT = 0; poseMonster(e);   // 張著嘴的也收回站姿：焦黑的笑臉
+      e.fried = true; e.friedT = state.skipping ? 99 : 0; e.fallDir = i % 2 ? -1 : 1;   // 一隻往右倒、一隻往左倒，才不會疊成一團
+    });
     if (state.skipping) return;
     const cx = targets.length ? targets.reduce((s, e) => s + e.x, 0) / targets.length : state.camera[0] * CELL;
     const cy = targets.length ? targets.reduce((s, e) => s + e.y, 0) / targets.length : state.camera[1] * CELL;
     state.zap = { t: 0, next: 0, targets, cx, cy };
     state.flash = { t: 0, hold: THUNDER.hold, dur: Math.max(.3, Number(beat.thunderFade) || 3) };
-    state.rumble = { amp: 16, t: 0, dur: 1.4 };
+    state.rumble = { amp: THUNDER.shake, t: 0, dur: THUNDER.shakeTime };
+    state.shake = Math.max(state.shake, THUNDER.shake * .4);
     if (typeof SFX !== 'undefined') SFX.play(THUNDER.sfx, 1, THUNDER.sfx + ':story');
-    for (const e of targets) if (typeof addScorchMark === 'function') addScorchMark(e.x, e.y + 10, 30, null, 'lightning');
-    if (typeof addScorchMark === 'function') addScorchMark(cx, cy + 10, 46, null, 'lightning');
+    if (typeof tutDebrisStart === 'function') tutDebrisStart(THUNDER.debris, THUNDER.rocks, THUNDER.dust);
+    for (const e of targets) if (typeof addScorchMark === 'function') addScorchMark(e.x, e.y + 10, THUNDER.scorch, null, 'lightning');
+    if (typeof addScorchMark === 'function') addScorchMark(cx, cy + 10, THUNDER.scorch * 1.5, null, 'lightning');
+  }
+  // 被雷劈的怪物：先焦黑抖，再往後倒、躺著冒煙（倒下那一刻播一次死掉的聲音）
+  function tickFried(e, dt) {
+    e.friedT += dt;
+    if (e.friedT < THUNDER.fry) e.hitT = .1;
+    else if (!e.fell) {
+      e.fell = true;
+      if (!state.skipping) {
+        G.effects.push({ ring: true, x: e.x + e.fallDir * 40, y: e.y + 10, r: 8, r2: 46, life: .35, life0: .35, color: '#6a6258' });
+        if (!state.deathSfx) { state.deathSfx = true; playSfx('milkfishDeath', .8, e.x, e.y, e.id); }   // 一起倒：只播一次
+        state.shake = Math.max(state.shake, 4);
+      }
+    }
+    if ((e.smokeT = (e.smokeT || 0) - dt) <= 0 && typeof pushBlackSmoke === 'function') {
+      e.smokeT = rnd(.3, .55); pushBlackSmoke(e.x + (e.fell ? e.fallDir * rnd(10, 60) : rnd(-20, 20)), e.y - (e.fell ? rnd(0, 14) : rnd(10, 50)));
+    }
+  }
+  // ---- 打架（每頁 fight: { 角色id: true／false }）：走到怪物旁邊後，第一下是舉盾衝撞（把怪物撞退、鏡頭震），之後一直揮擊最近的怪物 ----
+  // 用遊戲裡的近戰揮擊圖（雷德舉盾時是盾牌揮擊圖）；被吞掉、劈雷之後自動停
+  const FIGHT = { reach: 3.2, wind: .14, swing: .4, every: [.55, 1], ramPush: 26, hurtEvery: 2 };
+  function tickFight(a, dt) {
+    if (a.meleeSwing) {
+      const s = a.meleeSwing; s.age += dt;
+      if (!s.hit && s.age >= s.wind) { s.hit = true; fightHit(a, s); }
+      if (s.age >= FIGHT.swing) a.meleeSwing = null;
+    }
+    if (!a.fight || a.hidden || a.target || a.down) return;
+    if ((a.fightT = (a.fightT ?? 0) - dt) > 0) return;
+    const foes = state.monsters.filter(e => !e.gone && !e.fried && Math.hypot(e.x - a.x, e.y - a.y) <= FIGHT.reach * CELL);
+    const foe = foes.sort((p, q) => Math.hypot(p.x - a.x, p.y - a.y) - Math.hypot(q.x - a.x, q.y - a.y))[0];
+    if (!foe) { a.fightT = .3; return; }
+    const ram = !!a.fightRam; a.fightRam = false;
+    const ang = Math.atan2(foe.y - 20 - a.y, foe.x - a.x);
+    a.meleeSwing = { angle: ang, age: 0, wind: ram ? .06 : FIGHT.wind, foe, ram };
+    a.dir = Math.abs(Math.cos(ang)) >= Math.abs(Math.sin(ang)) ? (Math.cos(ang) < 0 ? 'left' : 'right') : (Math.sin(ang) < 0 ? 'back' : 'front');
+    a.fightT = ram ? .8 : rnd(...FIGHT.every);
+    playSfx('meleeAttack', .55, a.x, a.y, a.id + '-swing');
+  }
+  function fightHit(a, s) {
+    const e = s.foe; if (!e || e.gone || e.fried) return;
+    const hx = e.x - Math.cos(s.angle) * 22, hy = e.y - 30;
+    if (typeof spawnMeleeSlash === 'function') spawnMeleeSlash(hx, hy, s.angle, s.ram, 'blue');
+    if (typeof spawnMeleeImpact === 'function') spawnMeleeImpact(hx, hy, s.ram);
+    e.hitT = .16; e.hitSquashT = .16;
+    if (isMilkfish(e) && !e.pose && !e.mf?.prey) e.biteT = .35;   // 被打的那隻張嘴咬回去
+    if (s.ram) {   // 衝撞：怪物被撞退一段，之後自己走回來
+      const back = [e.x, e.y], push = Math.cos(s.angle) * FIGHT.ramPush;
+      e.x += push; if (!e.goal) e.goal = back;
+      state.shake = Math.max(state.shake, 7);
+      playSfx('knock2', .8, e.x, e.y, a.id + '-ram');
+    }
+    if ((a.hits = (a.hits || 0) + 1) % FIGHT.hurtEvery === 1 || s.ram) playSfx('milkfishHurt', .55, e.x, e.y, e.id);
   }
   function tickZap(dt) {
     const z = state.zap; if (!z) return;
@@ -254,13 +312,14 @@ const StoryScene = (() => {
     }
     if (z.t > THUNDER.bolts) state.zap = null;
   }
-  // 白光：一開始全白，停一下，再 dur 秒慢慢退掉（頭尾慢、中間快）
+  // 閃光：照 FLASH_SEQ 白黑閃，再全白停一下，dur 秒慢慢退掉（頭尾慢、中間快）；回傳 [顏色, 濃度]
   function flashLevel() {
-    const f = state.flash; if (!f) return 0;
-    if (f.t < THUNDER.strike) return .25;   // 先讓大家看到雷劈下來的那一下，才整個白掉
-    if (f.t < THUNDER.strike + f.hold) return 1;
-    const k = Math.min(1, (f.t - THUNDER.strike - f.hold) / f.dur);
-    return 1 - k * k * (3 - 2 * k);
+    const f = state?.flash; if (!f) return ['#fff', 0];
+    let t = f.t;
+    for (const [sec, col, a] of FLASH_SEQ) { if (t < sec) return [col, a]; t -= sec; }
+    if (t < f.hold) return ['#fff', 1];
+    const k = Math.min(1, (t - f.hold) / f.dur);
+    return ['#fff', 1 - k * k * (3 - 2 * k)];
   }
   // ---- 腳步聲（劇情設定 footsteps: true）：主要角色走路時循環播放，跟遊戲裡玩家走路同一個音檔；跑得快播得快 ----
   const STEP_FILE = 'Sound effects/環境/腳步/footsteps02.mp3';
@@ -403,6 +462,7 @@ const StoryScene = (() => {
     for (const [id, v] of Object.entries(beat.shield || {})) { const a = actor(id); if (a) a.shield = !!v; }   // 舉盾／放下
     for (const [id, v] of Object.entries(beat.down || {})) { const a = actor(id); if (a) { a.down = !!v; if (!v) a.charred = false; } }   // 倒在地上（倒地圖）／爬起來
     for (const [id, v] of Object.entries(beat.charge || {})) { const a = actor(id); if (a) { a.charging = !!v; a.chargeFx = 0; } }
+    for (const [id, v] of Object.entries(beat.fight || {})) { const a = actor(id); if (a) { a.fight = !!v; a.fightRam = !!v && !state.skipping; a.fightT = 0; } }   // 開始打：第一下是衝撞
     for (const [id, p] of Object.entries(beat.monsterMove || {})) { const e = monster(id); if (e) e.goal = [p[0] * CELL, p[1] * CELL]; }
     for (const [id, v] of Object.entries(beat.monsterPose || {})) { const e = monster(id); if (e) e.pose = v || ''; }
     for (const [id, who] of Object.entries(beat.swallow || {})) {
@@ -522,17 +582,10 @@ const StoryScene = (() => {
   }
   function tickMonster(e, dt) {
     if (e.hitT > 0) e.hitT -= dt;
+    if (e.hitSquashT > 0) e.hitSquashT = Math.max(0, e.hitSquashT - dt);   // 被打時壓扁回彈（js/render.js 的 drawEnemy）
+    if (e.biteT > 0) e.biteT -= dt;
     if (e.gone) return;
-    if (e.fried > 0) {   // 被雷劈：焦黑、一直抖，時間到消失成一團灰
-      e.hitT = .1;
-      if ((e.fried -= dt) <= 0) {
-        e.gone = true;
-        for (let i = 0; i < 3; i++) if (typeof pushBlackSmoke === 'function') pushBlackSmoke(e.x + rnd(-14, 14), e.y - rnd(10, 40), true);
-        G.effects.push({ ring: true, x: e.x, y: e.y - 20, r: 8, r2: 40, life: .35, life0: .35, color: '#3a3a40' });
-        if (!state.deathSfx) { state.deathSfx = true; playSfx('milkfishDeath', .8, e.x, e.y, e.id); }   // 一起倒：只播一次
-      }
-      return;
-    }
+    if (e.fried) { tickFried(e, dt); return; }
     if (e.gulp) {   // 張嘴撲過去，最後一下最快
       const g = e.gulp; g.t += dt; const k = Math.min(1, g.t / GULP_TIME);
       e.x = g.from[0] + (g.who.x - g.from[0]) * k * k; e.y = g.from[1] + (g.who.y + 2 - g.from[1]) * k * k;
@@ -611,6 +664,9 @@ const StoryScene = (() => {
       for (const a of state.actors) {
         tickActorBlink(a, dt);
         tickCharge(a, dt);
+        tickFight(a, dt);
+        if (a.moving && (a.speed || 26) >= 100 && Math.random() < dt * 18)   // 全力衝刺：腳下揚起灰塵
+          G.effects.push({ dust: true, x: a.x + rnd(-8, 8), y: a.y + 14, vx: rnd(-10, 10), vy: rnd(-12, -4), r: rnd(2, 3.5), life: .5, life0: .5 });
         if (a.charred && !a.hidden && (a.smokeT = (a.smokeT || 0) - dt) <= 0 && typeof pushBlackSmoke === 'function') { a.smokeT = rnd(.35, .6); pushBlackSmoke(a.x + rnd(-10, 10), a.y - 4); }   // 焦黑的人一直冒煙
         if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
         if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
@@ -635,7 +691,9 @@ const StoryScene = (() => {
       state.zoom += (camZoom(target, state.baseZoom) - state.zoom) * k; VIEW_SCALE = state.zoom;   // 鏡頭推近／拉遠跟移動一樣慢慢來
       updateSteps();
     }
-    el('storyFlash').style.opacity = String(flashLevel());
+    const [flashCol, flashA] = flashLevel();
+    el('storyFlash').style.background = flashCol; el('storyFlash').style.opacity = String(flashA);
+    if (typeof tutDebrisFrame === 'function') tutDebrisFrame(state ? dt : 0);   // 大爆炸震下來的碎石、粉塵
     positionCamera(); draw();
   }
   function drawActor(a) {
@@ -702,8 +760,13 @@ const StoryScene = (() => {
     drawDoor();   // 自動門畫在地面這層：從門裡走出來、走進去的人都在門前面
     const sortables = []; collectMapOccluders(ctx, sortables);
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
-    const drawFried = e => { ctx.save(); ctx.filter = 'brightness(.25) contrast(1.4)'; drawEnemy(e); ctx.restore(); };   // 被雷劈：焦黑
-    for (const e of state.monsters) if (!e.gone) sortables.push({ y: e.y + 13, draw: () => e.fried > 0 ? drawFried(e) : drawEnemy(e) });
+    const drawFried = e => {   // 被雷劈：焦黑；倒下時以腳底為軸往後轉 90 度，躺在地上
+      const k = Math.max(0, Math.min(1, (e.friedT - THUNDER.fry) / THUNDER.fall)), fy = e.y + 13;
+      ctx.save(); ctx.filter = 'brightness(.25) contrast(1.4)';
+      if (k > 0) { ctx.translate(e.x, fy); ctx.rotate(e.fallDir * Math.PI / 2 * k * k); ctx.translate(-e.x, -fy); }
+      drawEnemy(e); ctx.restore();
+    };
+    for (const e of state.monsters) if (!e.gone) sortables.push({ y: e.y + 13, draw: () => e.fried ? drawFried(e) : drawEnemy(e) });
     sortables.sort((a, b) => a.y - b.y).forEach(s => s.draw());
     drawMapTop(ctx);
     drawWorldEffects();
@@ -716,7 +779,7 @@ const StoryScene = (() => {
     stopBgm(0); clearInput(); state = null; updateSteps();
     document.body.classList.remove('story-scene');
     if (ui) ui.hidden = true;
-    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat'); }
+    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat', 'story-loud'); }
   }
   function exit() {
     if (resume) { backToGame(); return; }   // 從記憶之門進來的：回到門前

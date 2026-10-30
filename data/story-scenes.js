@@ -274,7 +274,7 @@ const STORY_SCENES = {
     "subtitle": "Y25區地下街 · 異質體討伐任務",
     "autoExit": true,
     "footsteps": true,
-    "cameras": { "小隊": [28.8, 77], "魚群": [39.5, 76.6], "全景": [33.5, 76.8, 1.5], "兩人": [27.6, 77.2, 1.9], "魚嘴": [37.8, 76.4, 1.75] },
+    "cameras": { "小隊": [28.8, 77], "魚群": [38.5, 76.6], "全景": [33, 76.8, 1.5], "兩人": [27.6, 77.2, 1.9], "魚嘴": [36.8, 76.4, 1.75] },
     "portraits": { "雷德": "red_B", "安柏": "amber_B", "希奧妮": "theonie_B" },
     "actors": [
       { "id": "red", "sprite": "red_B", "name": "雷德", "at": [29.8, 77.2], "dir": "right", "shield": true, "speed": 30 },
@@ -282,16 +282,16 @@ const STORY_SCENES = {
       { "id": "amber", "sprite": "amber_B", "name": "安柏", "at": [27, 78.5], "dir": "right", "gun": true }
     ],
     "monsters": [
-      { "id": "魚1", "type": "milkfish_kid", "at": [41.6, 76.7], "face": "left", "speed": 22 },
-      { "id": "魚2", "type": "milkfish_kid", "at": [42.4, 74.6], "face": "left", "speed": 22 },
-      { "id": "魚3", "type": "milkfish_kid", "at": [42.4, 78.3], "face": "left", "speed": 22 }
+      { "id": "魚1", "type": "milkfish_kid", "at": [40.6, 76.7], "face": "left", "speed": 22 },
+      { "id": "魚2", "type": "milkfish_kid", "at": [41.4, 74.6], "face": "left", "speed": 22 },
+      { "id": "魚3", "type": "milkfish_kid", "at": [41.4, 78.3], "face": "left", "speed": 22 }
     ],
     "beats": [
       {
         "speaker": "雷德",
         "text": "目標在前方5公尺處！往這裡靠過來了，10秒後開始行動！",
         "camera": "小隊",
-        "monsterMove": { "魚1": [39.2, 76.6], "魚2": [40.3, 74.9], "魚3": [39.9, 78.2] },
+        "monsterMove": { "魚1": [38.2, 76.6], "魚2": [39.3, 74.9], "魚3": [38.9, 78.2] },
         "wait": 0.6
       },
       { "speaker": "雷德", "text": "喂！希奧妮！安柏！任務結束之後！", "face": { "red": "left" }, "shout": { "red": true }, "wait": 0.4 },
@@ -300,7 +300,7 @@ const STORY_SCENES = {
         "text": "我們晚餐去吃虱目魚湯吧！",
         "camera": "魚群",
         "monsterPose": { "魚1": "smile", "魚2": "smile", "魚3": "smile" },
-        "sfx": "milkfishLaugh",
+        "sfx": "milkfishHurt",
         "wait": 0.3
       },
       { "speaker": "", "text": "A級異質體 NO.727\n特色：長得很像台南某個可愛的吉祥物。", "wait": 0.8 },
@@ -308,9 +308,10 @@ const STORY_SCENES = {
         "speaker": "雷德",
         "text": "衝啊！就是現在！",
         "camera": "全景",
-        "move": { "red": [37.4, 76.8] },
+        "move": { "red": [36.4, 76.8] },
         "face": { "red": "right" },
         "speed": { "red": 130 },
+        "fight": { "red": true },
         "shout": { "red": true },
         "monsterPose": { "魚1": "", "魚2": "", "魚3": "" },
         "wait": 0.1
@@ -343,7 +344,7 @@ const STORY_SCENES = {
         "camera": "兩人",
         "face": { "theonie": "amber" },
         "shout": { "theonie": true },
-        "monsterMove": { "魚2": [38.6, 75.4], "魚3": [38.8, 78.1] },
+        "monsterMove": { "魚2": [37.6, 75.4], "魚3": [37.8, 78.1] },
         "monsterPose": { "魚1": "smile" },
         "wait": 0.3
       },
@@ -355,7 +356,7 @@ const STORY_SCENES = {
         "face": { "theonie": "right" },
         "charge": { "amber": true },
         "shout": { "amber": true },
-        "sfx": "gachaCharge",
+        "sfx": "storyCharge",
         "wait": 1.2
       },
       { "speaker": "希奧妮", "text": "喂……你這樣會把隊長劈死……", "thunder": true, "thunderFade": 3.5, "sweat": true, "wait": 2.6 },
