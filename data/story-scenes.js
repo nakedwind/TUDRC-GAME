@@ -314,7 +314,7 @@ const STORY_SCENES = {
         "face": { "red": "right" },
         "speed": { "red": 130 },
         "fight": { "red": true },
-        "monsterWander": { "魚2": "red", "魚3": "red" },
+        "monsterWander": { "魚1": "red", "魚2": "red", "魚3": "red" },
         "shout": { "red": true },
         "monsterPose": { "魚1": "", "魚2": "", "魚3": "" },
         "wait": 0.1

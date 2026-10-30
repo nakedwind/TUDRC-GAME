@@ -270,16 +270,19 @@ const StoryScene = (() => {
   }
   // ---- 繞著人走（每頁 monsterWander: { 怪物名字: 角色id }）：在那個人身邊 WANDER.near～far 格內走來走去，停一下再換地方 ----
   // 換成走位、擺姿勢、吞人、劈雷，或那個人不見了（被吞）就停
-  const WANDER = { near: 1, far: 1.5, speed: 45, rest: [.3, 1] };
+  // bite＝每走到一個點，有多少機率張嘴撲咬那個人一下
+  const WANDER = { near: 1, far: 1.5, speed: 45, rest: [.3, 1], bite: .6 };
   function wanderStep(e, dt) {
     const a = actor(e.wander.who);
     if (!a || a.hidden) { e.wander = null; return; }
+    if (a.target) return;   // 那個人還在跑：等他停下來再圍過去（不然會走到他起跑的地方）
+    if (e.wander.arrived) { e.wander.arrived = false; if (Math.random() < WANDER.bite) { e.biteT = .45; playSfx('milkfishChew', .35, e.x, e.y, e.id + '-bite'); } }
     if ((e.wander.wait -= dt) > 0) return;
     for (let i = 0; i < 8; i++) {   // 挑一個走得到的點（不在牆裡）
       const ang = -rnd(.15, Math.PI - .15), r = rnd(WANDER.near, WANDER.far) * CELL;   // 只走到那個人的上方、左右：怪物很大隻，走到前面會把人整個擋住
       const x = a.x + Math.cos(ang) * r, y = a.y + Math.sin(ang) * r * .75;
       if (!open(...cellAt(x, y))) continue;
-      e.goal = [x, y]; break;
+      e.goal = [x, y]; e.wander.arrived = true; break;
     }
     e.wander.wait = rnd(...WANDER.rest);
   }
@@ -626,6 +629,10 @@ const StoryScene = (() => {
       if (k >= 1) gulpNow(e, g.who);
       return;
     }
+    if (e.wander && e.goal) {   // 繞著走的目標離那個人太遠了（他移動了）：重新挑
+      const a = actor(e.wander.who);
+      if (a && Math.hypot(e.goal[0] - a.x, e.goal[1] - a.y) > (WANDER.far + .6) * CELL) e.goal = null;
+    }
     if (!e.goal && e.wander) wanderStep(e, dt);
     if (e.goal) {   // 走位（直線走過去，走路圖由 js/render.js 依移動自動換）
       const dx = e.goal[0] - e.x, dy = e.goal[1] - e.y, d = Math.hypot(dx, dy), step = dt * (e.wander ? WANDER.speed : e.storySpeed);
@@ -814,6 +821,7 @@ const StoryScene = (() => {
     drawDarkness();
     if (typeof drawPoweredLights === 'function') drawPoweredLights(ctx);
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
+    if (typeof drawTextEffects === 'function') drawTextEffects();   // flash() 的提示字（「被吃掉了！」），跟遊戲一樣畫在黑幕上面
     ctx.restore();
   }
   function leave() {
