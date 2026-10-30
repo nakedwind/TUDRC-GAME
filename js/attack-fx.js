@@ -521,7 +521,8 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   })[kind] || { shake: 2.5, stop: 0, ring: spec.color };
   // 命中頓格只在玩家附近發生（遠處的戰鬥不凍結畫面，避免怪多時一直卡頓）
   if (feel.stop && G.player && Math.hypot(G.player.x - impactPoint.x, G.player.y - impactPoint.y) <= SHAKE_FEEL.range * CELL) addHitstop(feel.stop);
-  if (kind === 'flame' && typeof burnLifePilesNear === 'function') burnLifePilesNear(impactPoint.x, impactPoint.y, (spec.splash || 0) * CELL + 22);   // 希奧妮的火焰剛好燒到生命體的碎塊
+  if (kind === 'flame' && typeof burnLifePilesNear === 'function') burnLifePilesNear(impactPoint.x, impactPoint.y, (spec.splash || 0) * CELL + 22);
+  if (kind === 'flame' && typeof cookFoodNear === 'function') cookFoodNear(impactPoint.x, impactPoint.y, (spec.splash || 0) * CELL + 22);   // 希奧妮的火焰：地上的食物烤熟（js/food.js）   // 希奧妮的火焰剛好燒到生命體的碎塊
   if (kind === 'flame' && G.enemies.includes(target)) target.fireHitAt = performance.now() / 1000;
   if (kind === 'flame' && scale > 1.3 && typeof blastOres === 'function') blastOres(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 希奧妮大招的小爆炸：炸開礦物（js/ore.js）
   if (kind === 'flame' && scale > 1.3 && typeof blastWalls === 'function') blastWalls(impactPoint.x, impactPoint.y, ORE_THEONIE_R * CELL);   // 也炸得開可炸開的牆

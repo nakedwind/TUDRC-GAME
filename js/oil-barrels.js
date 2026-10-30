@@ -166,6 +166,7 @@ function oilExplode(x, y, it) {
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 油桶、油箱、瓦斯爐都炸得開可炸開的牆（js/breakable-walls.js）
   if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
   if ((it.fire || it.gas) && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 爆焰燒掉生命體碎塊
+  if ((it.fire || it.gas) && typeof cookFoodNear === 'function') cookFoodNear(x, y, R);   // 地上的食物烤熟（js/food.js）
   // 畫面：爆閃、雙層衝擊環、火星、碎片、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
   G.effects.push({ fglow: true, x, y: y - 8, r0: 20, r1: R * 1.15, life: .45, life0: .45 });
