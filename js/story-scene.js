@@ -234,7 +234,19 @@ const StoryScene = (() => {
   }
   // ---- 集氣（每頁 charge: { 角色id: true／false }）：身邊收束的光圈、電火花；劈雷之後自動停 ----
   // 越集越強：full＝幾秒集滿；集滿時光圈、電火花最密，腳下法陣全亮，鏡頭推近 zoom 倍（0.25＝近四分之一）
-  const CHARGE = { full: 2.5, zoom: .25, sparks: [14, 40], ring: [.45, .25] };   // sparks／ring：一開始→集滿（每秒幾顆電火花／每隔幾秒一圈光圈）
+  const CHARGE = { full: 2.5, zoom: .25, margin: 2, sparks: [14, 40], ring: [.45, .25] };   // sparks／ring：一開始→集滿（每秒幾顆電火花／每隔幾秒一圈光圈）
+  // 集氣的人一定要在畫面裡：鏡頭推近後他會跑出去的話，把鏡頭中心往他那邊挪（左右留 CHARGE.margin 格，下面要避開對話框）
+  function keepChargerInView(target, zoom) {
+    let [cx, cy] = target;
+    const halfW = VIEW_W / zoom / CELL / 2, vh = VIEW_H / zoom / CELL, m = CHARGE.margin;
+    for (const a of state.actors) {
+      if (!a.charging || a.hidden) continue;
+      const ax = a.x / CELL, ay = a.y / CELL;
+      cx = Math.min(Math.max(cx, ax - halfW + m), ax + halfW - m);
+      cy = Math.min(Math.max(cy, ay - vh * .2), ay + vh * .42 - m);   // 鏡頭中心在畫面 42% 高的地方（positionCamera）；下面 30% 是對話框
+    }
+    return [cx, cy];
+  }
   const chargeLevel = () => Math.max(0, ...state.actors.filter(a => a.charging && !a.hidden).map(a => Math.min(1, (a.chargeT || 0) / CHARGE.full)));
   function tickCharge(a, dt) {
     if (!a.charging || a.hidden) { if (a.sigil) { a.sigil.life = Math.min(a.sigil.life, .3); a.sigil = null; } a.chargeT = 0; return; }
@@ -772,8 +784,10 @@ const StoryScene = (() => {
       state.shake = Math.max(0, state.shake - dt * 10);
       if (state.rumble && (state.rumble.t += dt) >= state.rumble.dur) state.rumble = null;
       const target = state.cfg.cameras?.[state.cameraKey] || state.camera, k = 1 - Math.exp(-dt * 1.5);
-      state.camera = [0, 1].map(i => state.camera[i] + (target[i] - state.camera[i]) * k);
-      state.zoom += (camZoom(target, state.baseZoom) * (1 + CHARGE.zoom * chargeLevel()) - state.zoom) * k; VIEW_SCALE = state.zoom;   // 集氣時鏡頭慢慢推近   // 鏡頭推近／拉遠跟移動一樣慢慢來
+      const zoomTo = camZoom(target, state.baseZoom) * (1 + CHARGE.zoom * chargeLevel());   // 集氣時鏡頭慢慢推近
+      const aim = keepChargerInView(target, zoomTo);
+      state.camera = [0, 1].map(i => state.camera[i] + (aim[i] - state.camera[i]) * k);
+      state.zoom += (zoomTo - state.zoom) * k; VIEW_SCALE = state.zoom;   // 鏡頭推近／拉遠跟移動一樣慢慢來
       updateSteps();
     }
     const [flashCol, flashA] = flashLevel();
