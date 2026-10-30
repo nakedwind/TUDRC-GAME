@@ -2346,6 +2346,119 @@ const BASE_MAPS = [
         "r": 9,
         "layer": "object2",
         "oy": 10
+      },
+      {
+        "id": "tile_halloween_bunting",
+        "c": 30,
+        "r": 13,
+        "layer": "overlay",
+        "ox": -60,
+        "oy": -8
+      },
+      {
+        "id": "tile_halloween_bunting",
+        "c": 33,
+        "r": 13,
+        "layer": "overlay",
+        "ox": -22,
+        "oy": -8
+      },
+      {
+        "id": "tile_halloween_pumpkin_pile",
+        "c": 29,
+        "r": 16,
+        "layer": "overlay",
+        "ox": -8,
+        "oy": -32
+      },
+      {
+        "id": "tile_halloween_pumpkin_large",
+        "c": 34,
+        "r": 15,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 8
+      },
+      {
+        "id": "tile_halloween_pumpkin_large",
+        "c": 23,
+        "r": 16,
+        "layer": "overlay",
+        "ox": -4,
+        "oy": -2
+      },
+      {
+        "id": "tile_halloween_pumpkin_medium",
+        "c": 31,
+        "r": 18,
+        "layer": "overlay",
+        "ox": -12,
+        "oy": -26
+      },
+      {
+        "id": "tile_halloween_spider_web",
+        "c": 36,
+        "r": 13,
+        "layer": "overlay",
+        "ox": 6,
+        "oy": -6
+      },
+      {
+        "id": "tile_halloween_spider_web",
+        "c": 23,
+        "r": 13,
+        "layer": "overlay",
+        "fx": true,
+        "ox": -8,
+        "oy": -6
+      },
+      {
+        "id": "tile_halloween_spider_web",
+        "c": 39,
+        "r": 13,
+        "layer": "overlay",
+        "fx": true,
+        "ox": -6,
+        "oy": -6
+      },
+      {
+        "id": "tile_halloween_bat",
+        "c": 40,
+        "r": 13,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_halloween_bat",
+        "c": 28,
+        "r": 14,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_halloween_bat",
+        "c": 25,
+        "r": 13,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_halloween_bat",
+        "c": 24,
+        "r": 14,
+        "layer": "overlay",
+        "fx": true,
+        "ox": 6,
+        "oy": -24
+      },
+      {
+        "id": "tile_halloween_pumpkin_pile",
+        "c": 35,
+        "r": 16,
+        "layer": "overlay",
+        "fx": true,
+        "ox": -2,
+        "oy": -10
       }
     ],
     "solid": [
