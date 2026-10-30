@@ -463,7 +463,7 @@ const STORY_SCENES = {
       {
         "speaker": "安柏",
         "text": "隊長！活下去！",
-        "move": { "amber": [33.6, 77.9], "theonie": [35.3, 75.5] },
+        "move": { "amber": [32.9, 78.3], "theonie": [35.3, 75.5] },
         "face": { "amber": "red", "theonie": "red" },
         "shout": { "amber": true },
         "wait": 0.6
@@ -483,7 +483,7 @@ const STORY_SCENES = {
       {
         "speaker": "艾德林",
         "text": "我們來增援了！\n天啊！雷德隊長沒事吧？",
-        "move": { "winter": [31.4, 78.9], "eldrin": [32.4, 79.8], "avaren": [31.2, 80.4], "colyn": [30.4, 79.4] },
+        "move": { "winter": [30.8, 78.6], "eldrin": [32.6, 80.2], "avaren": [30.6, 80.9], "colyn": [29.3, 79.5] },
         "face": { "winter": "red", "eldrin": "red", "avaren": "red", "colyn": "red" },
         "wait": 2.2
       },
@@ -491,8 +491,8 @@ const STORY_SCENES = {
       {
         "speaker": "艾德林",
         "text": "雷德！撐著點，\n我現在就立刻幫你做緊急處置！",
-        "move": { "eldrin": [34.6, 77.9], "avaren": [33.3, 76.5] },
-        "face": { "eldrin": "red", "avaren": "red" },
+        "move": { "eldrin": [34.6, 78.5], "avaren": [32.8, 76.5] },
+        "face": { "eldrin": "red", "avaren": "front" },
         "wait": 0.9
       },
       {
@@ -539,19 +539,19 @@ const STORY_SCENES = {
         "place": {
           "stretcher": [34.5, 81.4],
           "red": [34.5, 81.55],
-          "avaren": [33.2, 82.1],
-          "amber": [35.8, 82.1],
+          "avaren": [33.075, 81.975],
+          "amber": [35.925, 81.975],
           "eldrin": [34.5, 80.7],
-          "winter": [31.6, 79],
-          "colyn": [30.6, 78.7],
-          "theonie": [32.6, 78.6],
-          "chris": [30.9, 79.9],
-          "luther": [32.2, 80]
+          "winter": [31.6, 79.1],
+          "colyn": [29.8, 78.5],
+          "theonie": [33.3, 78.3],
+          "chris": [30.2, 80.4],
+          "luther": [32.9, 80.5]
         },
         "carry": { "avaren": false },
         "face": { "winter": "left", "colyn": "left", "theonie": "left", "chris": "left", "luther": "left" },
-        "speed": { "stretcher": 34, "red": 34, "avaren": 34, "amber": 34, "eldrin": 34 },
-        "exit": { "stretcher": [23.5, 81.4], "red": [23.5, 81.55], "avaren": [22.2, 82.1], "amber": [24.8, 82.1], "eldrin": [23.5, 80.7] },
+        "speed": { "stretcher": 55, "red": 55, "avaren": 55, "amber": 55, "eldrin": 55 },
+        "exit": { "stretcher": [23.5, 81.4], "red": [23.5, 81.55], "avaren": [22.075, 81.975], "amber": [24.925, 81.975], "eldrin": [23.5, 80.7] },
         "down": { "red": true },
         "wait": 1
       },
@@ -570,20 +570,20 @@ const STORY_SCENES = {
         "place": {
           "stretcher": [34.5, 81.4],
           "red": [34.5, 81.55],
-          "avaren": [33.2, 82.1],
-          "amber": [35.8, 82.1],
+          "avaren": [33.075, 81.975],
+          "amber": [35.925, 81.975],
           "eldrin": [34.5, 80.7],
           "winter": [37.4, 81.2],
           "theonie": [38.2, 80.6],
           "colyn": [38.3, 81.9]
         },
         "carry": { "avaren": false },
-        "speed": { "stretcher": 34, "red": 34, "avaren": 34, "amber": 34, "eldrin": 34, "winter": 34, "theonie": 34, "colyn": 34 },
+        "speed": { "stretcher": 55, "red": 55, "avaren": 55, "amber": 55, "eldrin": 55, "winter": 55, "theonie": 55, "colyn": 55 },
         "exit": {
           "stretcher": [19.5, 81.4],
           "red": [19.5, 81.55],
-          "avaren": [18.2, 82.1],
-          "amber": [20.8, 82.1],
+          "avaren": [18.075, 81.975],
+          "amber": [20.925, 81.975],
           "eldrin": [19.5, 80.7],
           "winter": [22.4, 81.2],
           "theonie": [23.2, 80.6],

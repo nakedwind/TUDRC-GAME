@@ -226,7 +226,7 @@ const StoryScene = (() => {
   function spitOut(e) {
     e.spitT = 0;
     const a = state.actors.find(x => x.swallowedBy === e); e.mf = null; if (!a) return;
-    const x = e.fried ? e.x + (e.fallDir || 1) * 3.4 * CELL : e.x + (e.faceRight ? 1 : -1) * CELL, y = e.y + 4;
+    const x = e.fried ? e.x + (e.fallDir || 1) * 3.4 * CELL : e.x + (e.faceRight ? 1 : -1) * CELL, y = e.y + 9;
     Object.assign(a, { swallowedBy: null, hidden: false, alpha: 1, x, y, down: true, target: null, path: [] });
     if (e.fried) a.charred = true;
     if (state.skipping) return;
