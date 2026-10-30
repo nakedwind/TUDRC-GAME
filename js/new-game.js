@@ -60,6 +60,7 @@
         const mapId = sessionStorage.getItem(START_MAP);
         sessionStorage.removeItem(START_MAP);
         if (mapId) resumeScene = { mapId };
+        window.NEW_GAME_START_MAP = mapId || null;   // 開新遊戲要從哪張地圖開始（頁面載入完才換過去；js/tutorial.js 的開場黑幕要先知道）
         const values = Object.fromEntries(progressKeys.map(key => [key, localStorage.getItem(key)]));
         localStorage.setItem(BACKUP, JSON.stringify({ at: Date.now(), values }));
         progressKeys.forEach(key => localStorage.removeItem(key));

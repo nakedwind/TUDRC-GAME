@@ -8,7 +8,7 @@
     try { const id = JSON.parse(localStorage.getItem('tudrc_map_preview_v1') || 'null')?.map?.id; window.STORY_PREVIEW = Object.values(STORY_SCENES).some(s => s.map === id); } catch (_) {}
   }
 </script>
-<script src="js/story-scene.js?v=y25skip-20261031"></script>
+<script src="js/story-scene.js?v=y25entry-20261031"></script>
 <link rel="stylesheet" href="css/story-scene.css?v=y25skip-20261031">
 <link rel="stylesheet" href="css/memory-doors.css?v=20261025c">
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
@@ -19,7 +19,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
-<script src="js/new-game.js?v=fromstart-20261031"></script>
+<script src="js/new-game.js?v=y25entry-20261031"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
 <link rel="stylesheet" href="css/style.css?v=y25skip-20261031">
 <link rel="stylesheet" href="css/tpad-map.css?v=radio-nav-20261028">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
@@ -274,8 +274,8 @@
   <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器、背包編輯器都會存）；每次都讀最新的，兩邊改的說明才會馬上連動 -->
   <script src="js/workshop-config.js?v=radio-nav-20261028"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
-  <script src="data/missions.js?v=vitals-20261023"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
-  <script src="data/dialogues.js?v=mate-hurt-20261028"></script>  <!-- 所有台詞（對話編輯器） -->
+  <script src="data/missions.js?v=y25entry-20261031"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
+  <script src="data/dialogues.js?v=y25entry-20261031"></script>  <!-- 所有台詞（對話編輯器） -->
   <script src="data/balance.js?v=sgear-ws-20261028"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
@@ -285,8 +285,8 @@
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script src="data/tiles.js?v=escalator2-20261030"></script>      <!-- 4. 素材庫（兩個編輯器共用） -->
-  <script src="data/maps.js?v=y25-name-20261027"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
-  <script src="data/base-maps.js?v=dorms-20261024"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
+  <script src="data/maps.js?v=y25entry-20261031"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
+  <script src="data/base-maps.js?v=y25entry-20261031"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=v2tiles-20261026"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
   <script src="js/map-data.js?v=story-20261021"></script>          <!-- 4c. 三份地圖合在一起給遊戲用（MAPS_DEFAULT） -->
@@ -363,19 +363,19 @@
   <script src="js/food.js?v=food-20261030"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/ball-poses.js?v=ball-bark-20261027"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
-  <script src="js/missions.js?v=vitals-20261023"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
+  <script src="js/missions.js?v=y25entry-20261031"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
   <script src="js/save.js?v=pcdesk2-20261029"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/boss-music.js?v=elite-death-20261030"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
-  <script src="js/sanity.js?v=darktext-20261021"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
+  <script src="js/sanity.js?v=y25entry-20261031"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=box-fly3-20261029"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=merge-food-20261030"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=sticky-knock-20261029"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=box-fly3-20261029"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
-  <script src="js/combat-progress.js?v=storybuild-20261026"></script>
+  <script src="js/combat-progress.js?v=y25entry-20261031"></script>
   <script src="js/camp-interactions.js?v=ammorefill-20261026"></script>
-  <script src="js/camp-supply.js?v=cbdrag-20261029"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
+  <script src="js/camp-supply.js?v=y25entry-20261031"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
   <script src="js/guide-skills.js?v=load-text-20261027"></script>   <!-- 嚮導技能：戰鬥中自動發動（群體補血、增益、大招…） -->
   <script src="js/vitals.js?v=hosprows-20261029"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
@@ -384,15 +384,15 @@
   <script src="js/mrt-locks.js?v=stamppx-20261027"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=merge-food-20261030"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=y25entry-20261031"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=newbie-result-20261027"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=custom2-20261028"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=merge-food-20261030"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->
   <script src="js/item-intro.js?v=hosprows-20261029"></script>   <!-- 第一次拿到新東西：說明視窗 -->
-  <script src="js/tutorial.js?v=y25skip-20261031"></script>   <!-- 新手區教學：開場劇情（爆炸、無線電）、要不要看教學、動畫教學 -->
-  <script src="js/story-triggers.js?v=y25rescue-20261030"></script>   <!-- 走進某張地圖時先播劇情（新手區→Y25區地下街：救雷德），依選項換隊伍或回應變中心 -->
+  <script src="js/tutorial.js?v=y25entry-20261031"></script>   <!-- 新手區教學：開場劇情（爆炸、無線電）、要不要看教學、動畫教學 -->
+  <script src="js/story-triggers.js?v=y25entry-20261031"></script>   <!-- 走進某張地圖時先播劇情（新手區→Y25區地下街：救雷德），依選項換隊伍或回應變中心 -->
   <script src="data/posters.js?v=posterart2-20261023"></script>   <!-- 可以查看的海報：說明文字 -->
   <script src="js/posters.js?v=achv4-20261023"></script>   <!-- 查看海報 -->
   <script>document.write('<script src="data/bestiary.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器）；每次都讀最新的 -->

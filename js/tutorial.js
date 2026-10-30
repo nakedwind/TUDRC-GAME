@@ -556,6 +556,23 @@ function drawTutMarks(show) {
 // 第一次進新手區、還沒演爆炸那段之前：先切到 Y25區地下街播雷德小隊的開場（js/story-scene.js 的 playFromGame），
 // 播完（或按「跳過劇情」）回到新手區，接著演 TUTORIAL.story。只播一次：開始播就記成看過，開新遊戲才會再播。
 let tutOpeningPending = false;
+// 開新遊戲：一進新手區就要切去播開場，載入完到劇情接手之間會先露出新手區幾幀。
+// 要播開場的話，一開頁就用黑幕蓋住遊戲畫面（「載入中」畫面在它上面照樣看得到），劇情開始畫了才拿掉
+(function tutOpeningCover() {
+  const id = TUTORIAL.openingScene;
+  if (!id || tutorialSeen('opening') || window.TEST_MODE || typeof STORY_SCENES === 'undefined' || !STORY_SCENES[id]) return;
+  const toNewbie = window.NEW_GAME_START_MAP === NEWBIE_START.mapId || (typeof isNewbieMap === 'function' && isNewbieMap());   // 開新遊戲：頁面載入完才換到新手區（js/new-game.js）
+  if (!toNewbie) return;
+  const el = document.createElement('div'); el.id = 'tutOpeningCover';
+  el.style.cssText = 'position:absolute;inset:0;z-index:150;background:#000;border-radius:inherit;pointer-events:none';
+  (document.getElementById('wrap') || document.body).appendChild(el);
+  let frames = 0; const t0 = performance.now();
+  (function watch() {
+    if (StoryScene.active()) frames++;
+    if (frames >= 3 || performance.now() - t0 > 20000) { el.remove(); return; }   // 劇情畫了幾幀（本身從全黑淡入）就拿掉；萬一沒播成，20 秒後也拿掉
+    requestAnimationFrame(watch);
+  })();
+})();
 function tutorialOpeningScene() {
   const id = TUTORIAL.openingScene;
   if (tutOpeningPending) return true;
