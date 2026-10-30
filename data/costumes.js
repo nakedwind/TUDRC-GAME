@@ -76,10 +76,13 @@ const COSTUME_ACCESSORIES = [
   { id: 'flower-blue-two', name: '藍色雙花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_blue/Head_blue flower two.png' } },
   { id: 'flower-white', name: '白色小花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_white/Head_white flower.png' } },
   { id: 'flower-white-two', name: '白色雙花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_white/Head_white flower two.png' } },
+  { id: 'pumpkin-headdress', name: '南瓜頭飾', slot: 'head', rarity: 'R', art: { front: 'images/costumes/01.head/pumpkin/pumpkin.png' } },
+  { id: 'devil-horns-black', name: '黑色惡魔角', slot: 'head', rarity: 'R', art: { front: 'images/costumes/01.head/devil_horns_black/devil_horns_black_front.png', side: 'images/costumes/01.head/devil_horns_black/devil_horns_black_side.png' } },   // 比惡魔角大、往上彎
   { id: 'maid-headdress', name: '女僕頭飾', slot: 'head', rarity: 'R', art: { front: 'images/costumes/01.head/maid_headdress/maid_headdress_01.png', side: 'images/costumes/01.head/maid_headdress/maid_headdress.png' } },
   { id: 'angel-wings', name: '天使小翅膀', slot: 'back', rarity: 'R', art: { front: 'images/costumes/04.back/angel_wings/Back_wing_front.png', side: 'images/costumes/04.back/angel_wings/Back_wing_side.png' } },
   { id: 'white-wings', name: '白色羽翼', slot: 'back', rarity: 'SR', art: { front: 'images/costumes/04.back/wings/wings_back.png', side: 'images/costumes/04.back/wings/wings_side.png', back: 'images/costumes/04.back/wings/wings_back.png' } },   // 沒有正面圖：正面用背面圖（翅膀在身體後面）
   { id: 'devil-wings', name: '惡魔翅膀', slot: 'back', rarity: 'SR', art: { front: 'images/costumes/04.back/devil_wings/Back_devil_front.png', side: 'images/costumes/04.back/devil_wings/Back_devil_side.png', back: 'images/costumes/04.back/devil_wings/Back_devil_back.png' } },
+  { id: 'devil-wings-small', name: '小惡魔翅膀', slot: 'back', rarity: 'R', art: { front: 'images/costumes/04.back/devil_wings_small/devil_wings_small_front.png', side: 'images/costumes/04.back/devil_wings_small/devil_wings_small_side.png' } },
   { id: 'devil-tail', name: '惡魔尾巴', slot: 'lower', rarity: 'R', art: { front: 'images/costumes/04.back/tail_devil/Tail_devil.png' } },
   { id: 'wolf-tail', name: '狼尾巴', slot: 'lower', char: 'winter', rarity: 'R', art: { front: 'images/costumes/04.back/tail_wolf_winter/Tail_winter wolf_front.png', side: 'images/costumes/04.back/tail_wolf_winter/Tail_winter wolf_side.png' } },
   { id: 'star-wand', name: '星星魔杖', slot: 'hand', rarity: 'N', art: { front: 'images/costumes/05.hand_R/satr_wand/Hand_star.png' } },
