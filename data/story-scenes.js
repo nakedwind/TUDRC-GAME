@@ -457,7 +457,7 @@ const STORY_SCENES = {
       },
       { "speaker": "希奧妮", "text": "要不要我把那堆東西燒掉……\n然後報告寫隊長被吃掉了怎麼樣……？", "gloom": true, "wait": 0.3 },
       { "speaker": "安柏", "text": "學姊！別想著毀屍滅跡啊！", "shout": { "amber": true }, "hop": { "amber": true }, "tremble": { "amber": false }, "wait": 0.3 },
-      { "speaker": "", "text": "焦黑的虱目魚小子抖了一下——\n「噗」地把雷德吐了出來。", "spit": { "魚1": true }, "wait": 1 },
+      { "speaker": "", "text": "焦黑的虱目魚小子抖了一下——\n「噗」地把雷德吐了出來。", "spit": { "魚1": true }, "wait": 1, "eyes": { "red": "closed" } },
       { "speaker": "雷德", "text": "我……沒死……", "camera": "雷德", "portraitDark": 0.4, "wait": 0.4 },
       { "speaker": "希奧妮", "text": "嗚哇……好可怕的畫面。", "gloom": true, "wait": 0.3 },
       {
@@ -493,7 +493,7 @@ const STORY_SCENES = {
         "speaker": "艾德林",
         "text": "雷德！撐著點，\n我現在就立刻幫你做緊急處置！",
         "move": { "eldrin": [34.6, 78.25], "avaren": [33.3, 76] },
-        "face": { "eldrin": "red", "avaren": "front", "theonie": "front" },
+        "face": { "eldrin": "back", "avaren": "front", "theonie": "front" },
         "wait": 0.9
       },
       {

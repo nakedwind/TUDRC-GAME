@@ -500,7 +500,7 @@ const StoryScene = (() => {
       setBeat(i);
       for (const a of state.actors) if (a.target && a.role !== 'medic') {
         [a.x, a.y] = a.path?.length ? a.path[a.path.length - 1] : a.target;
-        a.target = null; a.path = []; a.dir = a.arriveDir || a.dir;
+        a.target = null; a.path = []; a.dir = arriveFace(a) || a.dir;
       }
       for (const a of state.actors) { if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; }
       for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
@@ -517,6 +517,11 @@ const StoryScene = (() => {
     setBeat(from);
   }
   const actor = id => state.actors.find(a => a.id === id);
+  // 走到後要面向哪：有 faceTarget（看向地點／某個人）就用現在的位置重算，不然用 arriveDir
+  function arriveFace(a) {
+    const point = a.faceTarget && state.cfg.points?.[a.faceTarget], other = a.faceTarget && !point && actor(a.faceTarget);
+    return point ? faceToward(a, point) : other ? faceToward(a, [other.x / CELL, other.y / CELL]) : a.arriveDir;
+  }
   function faceToward(a, p) {   // p：[欄, 列]
     const dx = p[0] * CELL - a.x, dy = p[1] * CELL - a.y;
     return Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front';
@@ -561,8 +566,8 @@ const StoryScene = (() => {
     for (const [id, d] of Object.entries(beat.face || {})) {   // 方向，或看向某個地點／某個人
       const a = actor(id); if (!a) continue;
       const point = state.cfg.points?.[d], other = !point && actor(d);
-      const dir = point ? faceToward(a, point) : other ? faceToward(a, [other.x / CELL, other.y / CELL]) : d;
-      a.arriveDir = dir; if (!a.target) a.dir = dir;
+      a.faceTarget = point || other ? d : null;   // 看向地點／某個人：走到之後才依當下的位置算方向（還在路上就翻頁也不會轉錯邊）
+      a.arriveDir = point || other ? arriveFace(a) : d; if (!a.target) a.dir = a.arriveDir;
     }
     for (const [id, e] of Object.entries(beat.eyes || {})) { const a = actor(id); if (a) a.eyesClosed = e === 'closed'; }
     for (const [id, v] of Object.entries(beat.gun || {})) { const a = actor(id); if (a) a.gunT = v ? 1 : 0; }   // 拿槍預備／放下
@@ -809,7 +814,7 @@ const StoryScene = (() => {
         if (!a.target) continue;
         const dx = a.target[0] - a.x, dy = a.target[1] - a.y, d = Math.hypot(dx, dy), step = dt * (a.speed || 26);
         a.moving = d > step;
-        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) { if (a.exiting) a.fading = true; else a.dir = a.arriveDir || a.dir; } }   // 離場（exit）的人走到後維持走路的方向淡出，不轉身
+        if (d <= step) { [a.x, a.y] = a.target; a.target = a.path?.shift() || null; if (!a.target) { if (a.exiting) a.fading = true; else a.dir = arriveFace(a) || a.dir; } }   // 離場（exit）的人走到後維持走路的方向淡出，不轉身
         else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
       }
       for (const a of state.actors) {
