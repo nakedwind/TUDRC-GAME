@@ -565,7 +565,8 @@ function tutorialOpeningScene() {
   setTimeout(() => {   // 換地圖不要在這一幀的更新中途做
     tutOpeningPending = false;
     if (typeof AssetGate !== 'undefined' && AssetGate.arm) AssetGate.arm();   // Y25區地下街的圖下載好之前先蓋「載入中」（劇情也跟著等）
-    StoryScene.playFromGame(id);
+    // 播完回到新手區的這一刻就開始演 TUTORIAL.story（第一步是黑底字卡）：等到下一幀才開始的話，劇情的黑幕已經收掉，會先閃一下新手區
+    StoryScene.playFromGame(id, () => { if (!tutStory && !tutorialSeen('story')) { tutStory = { i: 0, t: 0, started: false, shakeT: 0, power: 0 }; tutStoryFrame(0); } });
   }, 0);
   return true;
 }

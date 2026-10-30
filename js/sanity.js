@@ -32,6 +32,7 @@ const SANITY = {
   warnText: '……頭好暈。得喝點杏仁水才行。',   // 剛低於 swayBelow 時，溫特說的話
   darkDrain: 1,        // 站在全黑的地方：SP 每秒少多少
   darkCover: 0.9,      // 黑暗蓋住溫特身體多少以上才算「全黑」（0～1）
+  darkDelay: 1,        // 要連續待在全黑的地方幾秒才開始扣 SP、說台詞（避免剛進地圖照明還沒算好就誤判）
   darkText: '……太黑了，待在這裡真不舒服。',   // 第一次走進全黑的地方時，溫特說的話（每張地圖一次）
 };
 const SP_STORE = 'tudrc_sp_v1';
@@ -132,12 +133,15 @@ function playerDarkCover() {
   }
   return dark / n;
 }
-let darkDrainNoticeFor = null;
+let darkDrainNoticeFor = null, darkStayFor = null, darkStayT = 0;
 function updateDarkDrain(dt) {
   const p = G && G.player;
-  if (!p || MAP_SAFE || G.over || !G.running || p.hp <= 0 || G.guide <= 0) return;
-  if (typeof practiceOn === 'function' && practiceOn()) return;   // 訓練室不算
-  if (playerDarkCover() < SANITY.darkCover) return;
+  if (!p || MAP_SAFE || G.over || !G.running || p.hp <= 0 || G.guide <= 0) { darkStayT = 0; return; }
+  if (typeof practiceOn === 'function' && practiceOn()) { darkStayT = 0; return; }   // 訓練室不算
+  if (darkStayFor !== G) { darkStayFor = G; darkStayT = 0; }
+  if (playerDarkCover() < SANITY.darkCover) { darkStayT = 0; return; }
+  // 照明是畫面繪製時才算的（js/render.js 的 draw），剛進地圖、劇情剛結束的頭幾幀還是舊的：連續待在黑暗裡超過 darkDelay 秒才算
+  darkStayT += dt; if (darkStayT < SANITY.darkDelay) return;
   G.guide = Math.max(0, G.guide - SANITY.darkDrain * dt);
   if (darkDrainNoticeFor !== G) { darkDrainNoticeFor = G; if (typeof flash === 'function') flash(SANITY.darkText, p.x, p.y - 60, '#c9b8ff', 3); }
   if (typeof updateHUD === 'function' && Math.floor(G.guide + SANITY.darkDrain * dt) !== Math.floor(G.guide)) updateHUD();   // 每少 1 點更新一次畫面
