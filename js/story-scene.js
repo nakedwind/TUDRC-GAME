@@ -495,9 +495,14 @@ const StoryScene = (() => {
     // G.running 保持 false：成就、自動存檔與戰鬥的外掛不會把演員視作真正隊伍。
     // &storyFrom=N：前面幾頁的走位、轉向一次做完，直接從第 N 頁開始（劇情編輯器調整用）
     const from = Math.min(state.cfg.beats.length, Math.max(1, Number(params.get('storyFrom')) || 1)) - 1;
-    state.skipping = true;
-    for (let i = 0; i < from; i++) {
-      setBeat(i);
+    if (from) { fastForward(0, from); state.time = state.openingBlack + state.openingFade; }
+    setBeat(from);
+  }
+  const actor = id => state.actors.find(a => a.id === id);
+  // ---- 快轉：第 from～to-1 頁的走位、轉向、黑幕、換音樂一次做完（不播音效、不出特效），鏡頭直接到位 ----
+  // &storyFrom=N 從中間開始、按「跳過劇情」跳到選項頁都用這個
+  function fastForward(from, to) {
+    const settle = () => {
       for (const a of state.actors) if (a.target && a.role !== 'medic') {
         [a.x, a.y] = a.path?.length ? a.path[a.path.length - 1] : a.target;
         a.target = null; a.path = []; a.dir = arriveFace(a) || a.dir;
@@ -506,17 +511,25 @@ const StoryScene = (() => {
       for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
       if (state.door) state.door.open = state.door.target;
       if (state.screen) state.screen.t = state.screen.dur;
-    }
+    };
+    state.skipping = true; settle();
+    for (let i = from; i < to; i++) { setBeat(i); settle(); }
     state.skipping = false;
-    if ('skipBgm' in state && !state.waitingForSound) { if (state.skipBgm) startBgm(state.skipBgm); else stopBgm(0); }   // 快轉經過換音樂的頁
-    if (from) {
-      const p = state.cfg.cameras?.[state.cameraKey];
-      state.camera = p ? [p[0], p[1]] : state.camera; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom);
-      state.time = state.openingBlack + state.openingFade;
-    }
-    setBeat(from);
+    if ('skipBgm' in state && !state.waitingForSound) { if (state.skipBgm) startBgm(state.skipBgm); else stopBgm(0); delete state.skipBgm; }   // 快轉經過換音樂的頁
+    const p = state.cfg.cameras?.[state.cameraKey];
+    state.camera = p ? [p[0], p[1]] : state.camera; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom);
   }
-  const actor = id => state.actors.find(a => a.id === id);
+  // 按「跳過劇情」時，後面還有沒選的選項：直接快轉到選項那頁讓玩家選（選完再跳過就真的結束）
+  function skipToChoice() {
+    if (!state?.playing || state.ending || state.outcome) return false;
+    const to = state.cfg.beats.findIndex((b, i) => i >= state.index && b.choices?.length);
+    if (to < 0) return false;
+    state.freeze = null; state.zap = null; state.flash = null; showCard(null);
+    if (to > state.index) { fastForward(state.index + 1, to); setBeat(to); state.nextAt = state.time; state.beatWait = state.beatTime; }
+    state.chars = Array.from(state.cfg.beats[to].text).length; renderText();   // 台詞直接整句出來，選項跟著出現
+    if (!state.shown) { state.shown = true; showBox(true); }
+    return true;
+  }
   // 走到後要面向哪：有 faceTarget（看向地點／某個人）就用現在的位置重算，不然用 arriveDir
   function arriveFace(a) {
     const point = a.faceTarget && state.cfg.points?.[a.faceTarget], other = a.faceTarget && !point && actor(a.faceTarget);
@@ -613,6 +626,7 @@ const StoryScene = (() => {
     beat.choices.forEach((c, i) => {
       const b = document.createElement('button'); b.type = 'button'; b.dataset.storyAction = 'choose:' + i;
       b.innerHTML = '<kbd>' + (i + 1) + '</kbd> '; b.append(c.text || '…');
+      if (c.note) { const s = document.createElement('small'); s.textContent = c.note; b.append(s); }   // 選了會怎樣（小字說明）
       box.appendChild(b);
     });
     box.hidden = false; box.querySelector('button')?.focus();
@@ -977,6 +991,7 @@ const StoryScene = (() => {
     if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat', 'story-loud', 'story-gloom', 'story-flip', 'story-anger'); el('dialogueText').style.fontSize = ''; el('dialoguePortrait').style.filter = ''; }
   }
   function exit() {
+    if (resume && skipToChoice()) return;   // 選項還沒選：先跳到選項
     if (resume) { backToGame(); return; }   // 從記憶之門進來的：回到門前
     // 預覽回到一般入口，由原有存檔恢復；不把回憶中的人物寫回隊伍。
     location.href = location.pathname;

@@ -2113,6 +2113,14 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 @keyframes tc-ripple { 0% { opacity: .9; transform: scale(.4); } 60% { opacity: 0; transform: scale(2.6); } 100% { opacity: 0; } }
 /* 新手區開場劇情：爆炸震下來的碎石和粉塵（js/tutorial.js 的 tutDebrisFrame），蓋在遊戲畫面上、對話框下面 */
 #tutDebris { position: fixed; z-index: 12; pointer-events: none; background: transparent; border: 0; box-shadow: none; }
+/* 新手區開場劇情的過場字卡（js/tutorial.js 的 tutCaption）：黑底蓋住整個遊戲畫面，小字＋大字慢慢浮出，結束時整片淡出 */
+#tutCaption { position: absolute; inset: 0; z-index: 150; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px;
+  background: #000; color: #f1ece0; pointer-events: none; transition: opacity .8s ease; font-family: "Microsoft JhengHei", sans-serif; }
+#tutCaption small { font-size: 15px; letter-spacing: .4em; color: #c3b7a1; animation: tut-caption-in .9s ease-out .15s both; }
+#tutCaption b { font-size: 30px; font-weight: 600; letter-spacing: .18em; animation: tut-caption-in .9s ease-out .45s both; }
+#tutCaption.out { opacity: 0; }
+@keyframes tut-caption-in { from { opacity: 0; translate: 0 8px; } to { opacity: 1; translate: 0 0; } }
+@media (prefers-reduced-motion: reduce) { #tutCaption small, #tutCaption b { animation: none; } }
 /* 新手區動畫教學（js/tutorial.js）：暫停時畫面變暗（挖洞讓目標露出來）、目標外框發光、卡片播操作動畫 */
 #tutFocus { position: fixed; inset: 0; z-index: 80; pointer-events: none; font-family: "Microsoft JhengHei", sans-serif; }
 #tutFocus.hidden, #tutMarks.hidden, #tutMarks .hidden { display: none; }

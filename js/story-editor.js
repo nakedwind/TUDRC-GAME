@@ -685,6 +685,7 @@ function beatBody(s, b, i) {
   const choiceBox = h('div', { class: 'act', style: 'flex-wrap:wrap' }, h('b', {}, '選項'));
   (b.choices || []).forEach((c, j) => choiceBox.append(h('span', { class: 'row', style: 'width:100%' }, (j + 1) + '.', txt(c, 'text', { placeholder: '按鈕上的字', style: 'flex:1' }),
     '跳到', choose(c, 'goto', [['', '下一頁'], ...labels.map(l => [l, l])], { optional: true }), '結果', txt(c, 'outcome', { optional: true, placeholder: '例如 stay', style: 'width:80px' }),
+    h('span', { style: 'flex-basis:100%;display:flex;gap:6px;padding-left:18px;font-size:12px' }, '說明', txt(c, 'note', { optional: true, placeholder: '按鈕下面的小字：選了會怎樣（空白＝不寫）', style: 'flex:1' })),
     h('button', { type: 'button', class: 'small danger', onclick: () => { b.choices.splice(j, 1); if (!b.choices.length) delete b.choices; commit(); } }, '×'))));
   choiceBox.append(h('button', { type: 'button', class: 'small', onclick: () => { (b.choices = b.choices || []).push({ text: '' }); commit(); } }, '＋ 選項'),
     h('small', {}, '台詞打完字後出現按鈕，選了才往下；「結果」會交給遊戲決定接下來怎麼走（js/story-triggers.js）'));

@@ -33,7 +33,9 @@ const TUTORIAL = {
   // 開場劇情：一步一步往下演。wait＝等幾秒；sfx＝音效（volume＝音量，小一點聽起來比較遠）；shake＝畫面搖晃幾秒（power＝多用力）；
   // debris＝天花板掉碎石和粉塵幾秒（rocks＝每秒掉幾顆碎石、dust＝每秒飄幾團粉塵）；flicker＝畫面像電路不穩一樣閃黑幾下；
   // who＋lines＝誰說話（winter＝溫特，其他用隊員 id：eldrin 艾德林、theonie 希奧妮…）；radio＝用無線電說（名字後面加「（無線電）」）
+  // caption＝[小字, 大字]：整個畫面黑底的過場字卡，這一步結束時淡出
   story: [
+    { caption: ['同一時間', 'Y25區入口'], wait: 2.6 },   // 過場字卡：從雷德小隊的開場切到溫特這邊（黑底白字，結束時淡出）
     { wait: .8 },
     { sfx: 'bigBoom', volume: .45, shake: 1.8, power: 9, debris: 1.6, rocks: 20, dust: 15, flicker: 2 },
     { wait: 1.2 },
@@ -224,6 +226,17 @@ function tutDebrisFrame(dt) {
   c.globalAlpha = 1;
   if (!D.parts.length && D.spawnT <= 0) { D.el.remove(); tutDebris = null; }
 }
+// 過場字卡（TUTORIAL.story 的 caption）：蓋住整個遊戲畫面的黑底，中間一行小字＋一行大字；收起來時淡出
+let tutCaptionEl = null;
+function tutCaption(text) {
+  if (!text) { if (tutCaptionEl) { const el = tutCaptionEl; tutCaptionEl = null; el.classList.add('out'); setTimeout(() => el.remove(), 900); } return; }
+  tutCaptionEl?.remove();
+  const el = tutCaptionEl = document.createElement('div'); el.id = 'tutCaption'; el.setAttribute('role', 'status');
+  const small = document.createElement('small'), big = document.createElement('b');
+  small.textContent = text[0] || ''; big.textContent = text[1] || '';
+  el.append(small, big);
+  (document.getElementById('wrap') || document.body).appendChild(el);
+}
 function tutStoryFrame(dt) {
   tutDebrisFrame(dt);
   const S = tutStory; if (!S) return;
@@ -238,10 +251,12 @@ function tutStoryFrame(dt) {
       if (st.shake) { S.shakeT = st.shake; S.power = st.power || 8; }
       if (st.debris) tutDebrisStart(st.debris, st.rocks ?? 28, st.dust ?? 22);
       if (st.flicker && typeof powerFlicker === 'function') powerFlicker(st.flicker);   // js/flicker-light.js
+      if (st.caption) tutCaption(st.caption);
       if (st.lines && st.lines.length) { tutSpeak(st.who || TUTORIAL.speaker, st.lines, st.radio); return; }
     }
     S.t += dt;
     if (S.t < (st.wait || 0)) return;
+    if (st.caption) tutCaption(null);
     S.i++; S.started = false; dt = 0;
   }
   if (S.shakeT > 0 || (tutDebris && tutDebris.parts.length)) return;   // 等搖完、碎石掉完
