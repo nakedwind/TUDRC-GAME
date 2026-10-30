@@ -850,14 +850,14 @@ const StoryScene = (() => {
     positionCamera(); draw();
   }
   // ---- 頭上的情緒符號（每頁 emote: { 角色id: 'anger'／'sweat'／'' }），一直播到換掉為止 ----
-  // anger：頭的右上角一個紅色「💢」，一跳一跳；sweat：頭的兩側汗滴一滴一滴滑下來
+  // anger：頭的左上角一個紅色「💢」，一跳一跳；sweat：頭的兩側汗滴一滴一滴滑下來
   function drawEmote(a) {
     if (!a.emote || a.hidden) return;
     const size = PLAYER.drawSize, top = a.y - size + 18, t = state.time;
     ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1)); ctx.lineCap = 'round';
     if (a.emote === 'anger') {
       const s = 1 + .2 * Math.abs(Math.sin(t * 6));
-      ctx.translate(Math.round(a.x + 13), Math.round(top + 18)); ctx.rotate(-15 * Math.PI / 180); ctx.scale(s, s);   // 往左傾斜 15 度
+      ctx.translate(Math.round(a.x - 13), Math.round(top + 18)); ctx.rotate(-15 * Math.PI / 180); ctx.scale(s, s);   // 頭的左上角，往左傾斜 15 度
       for (let i = 0; i < 4; i++) {   // 四個彎角圍成一個十字
         ctx.save(); ctx.rotate(i * Math.PI / 2);
         ctx.beginPath(); ctx.moveTo(1.8, -7); ctx.quadraticCurveTo(1.8, -1.8, 7, -1.8);
