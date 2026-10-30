@@ -434,7 +434,7 @@ const STORY_SCENES = {
       { "id": "amber", "sprite": "amber_B", "name": "安柏", "at": [33.2, 77.85], "dir": "right" },
       { "id": "winter", "sprite": "winter_B", "name": "溫特", "at": [22.6, 82.4], "dir": "right", "speed": 60, "hidden": true },
       { "id": "eldrin", "sprite": "eldrin_B", "name": "艾德林", "at": [21.8, 82], "dir": "right", "speed": 60, "hidden": true },
-      { "id": "avaren", "sprite": "avaren_B", "name": "阿瓦倫", "at": [21.8, 83], "dir": "right", "speed": 60, "hidden": true },
+      { "id": "avaren", "sprite": "avaren_B", "name": "阿瓦倫", "at": [21.8, 83], "dir": "right", "speed": 60, "hidden": true, "carryDy": -5 },
       { "id": "colyn", "sprite": "colyn_B", "name": "柯林", "at": [21, 82.5], "dir": "right", "speed": 60, "hidden": true },
       { "id": "chris", "sprite": "chris_B", "name": "克莉思", "at": [21.6, 82.4], "dir": "right", "speed": 60, "hidden": true },
       { "id": "luther", "sprite": "luther_B", "name": "路德", "at": [20.8, 82.9], "dir": "right", "speed": 60, "hidden": true },
@@ -503,12 +503,27 @@ const STORY_SCENES = {
         "hop": { "eldrin": true },
         "wait": 0.6
       },
-      { "speaker": "溫特", "text": "……這是怎麼回事？", "face": { "winter": "theonie" }, "wait": 0.6 },
+      { "speaker": "溫特", "text": "……這是怎麼回事？", "move": { "winter": [31.9, 77.75] }, "face": { "winter": "amber" }, "wait": 0.6 },
       { "speaker": "溫特", "text": "無線電裡說雷德受傷了。\n我沒想到……是被自己人劈成這樣。", "portraitDark": 0.2, "wait": 0.3 },
       { "speaker": "安柏", "text": "對、對不起……！\n是我的雷擊……", "face": { "amber": "winter" }, "tremble": { "amber": true }, "sweat": true, "wait": 0.3 },
-      { "speaker": "希奧妮", "text": "……是我叫菜鳥趁魚頭聚在一起的時候動手的。", "face": { "theonie": "winter" }, "wait": 0.3 },
-      { "speaker": "溫特", "text": "…………", "tremble": { "winter": true }, "portraitDark": 0.35, "gloom": true, "wait": 0.4 },
-      { "speaker": "溫特", "text": "……這件事，回去再說。\n艾德林，雷德的狀況怎麼樣？", "tremble": { "winter": false }, "face": { "winter": "eldrin" }, "wait": 0.3 },
+      { "speaker": "希奧妮", "text": "……是我叫菜鳥趁魚頭聚在一起的時候動手的。", "face": { "theonie": "front" }, "wait": 0.3 },
+      {
+        "speaker": "溫特",
+        "text": "…………",
+        "tremble": { "winter": true },
+        "portraitDark": 0.35,
+        "gloom": true,
+        "wait": 0.4,
+        "emote": { "winter": "anger", "amber": "sweat" }
+      },
+      {
+        "speaker": "溫特",
+        "text": "……這件事，回去再說。\n艾德林，雷德的狀況怎麼樣？",
+        "tremble": { "winter": false },
+        "face": { "winter": "eldrin" },
+        "wait": 0.3,
+        "emote": { "winter": "", "amber": "" }
+      },
       { "speaker": "艾德林", "text": "生命跡象穩定，外傷很多……\n至少沒有生命危險。但得盡快送回中心治療。", "wait": 0.3 },
       {
         "speaker": "溫特",

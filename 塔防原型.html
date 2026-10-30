@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<script src="data/story-scenes.js?v=y25rescue6-20261030"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
+<script src="data/story-scenes.js?v=y25rescue11-20261030"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
 <script>
   window.STORY_PREVIEW = /[?&]storyPreview=/.test(location.search);
   if (/[?&]preview=1(&|$)/.test(location.search)) {   // 劇情地圖編輯器預覽的是有劇情的地圖：同樣只讀
     try { const id = JSON.parse(localStorage.getItem('tudrc_map_preview_v1') || 'null')?.map?.id; window.STORY_PREVIEW = Object.values(STORY_SCENES).some(s => s.map === id); } catch (_) {}
   }
 </script>
-<script src="js/story-scene.js?v=y25rescue5-20261030"></script>
-<link rel="stylesheet" href="css/story-scene.css?v=y25rescue-20261030">
+<script src="js/story-scene.js?v=y25rescue12-20261030"></script>
+<link rel="stylesheet" href="css/story-scene.css?v=y25rescue9-20261030">
 <link rel="stylesheet" href="css/memory-doors.css?v=20261025c">
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
   { const readonlyPreview = /[?&](uiedit|bagedit|squadedit|monsterPreview)=1(&|$)/.test(location.search) || window.STORY_PREVIEW; const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage && (readonlyPreview || window.STORY_MODE); } catch (_) { return false; } };

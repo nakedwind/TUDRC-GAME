@@ -98,6 +98,7 @@ const StoryScene = (() => {
     // 頭像外面包一層：上下顛倒時只翻頭像，頭像框上的汗滴、陰沉線條不跟著翻（框裡原本的排版規則照樣套用）
     const pic = el('dialoguePortrait');
     if (pic && pic.parentNode.id === 'dialoguePortraitFrame') { const wrap = document.createElement('span'); wrap.id = 'storyPortraitFlip'; pic.before(wrap); wrap.appendChild(pic); }
+    if (pic && !el('storyPortraitEmote')) { const mark = document.createElement('span'); mark.id = 'storyPortraitEmote'; mark.setAttribute('aria-hidden', 'true'); el('dialoguePortraitFrame').appendChild(mark); }   // 頭像上的生氣符號（css/story-scene.css）
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
   const box = () => el('dialogueBox');
@@ -111,7 +112,10 @@ const StoryScene = (() => {
     box().classList.toggle('story-noface', !!beat.speaker && !sprite);   // 有名字、沒頭像的人（家屬）：不放頭像，但不是旁白的斜體
     // 頭像情緒（css/story-scene.css）：sweat 流汗（一滴汗往下滑）、gloom 陰沉線條（頭上垂下黑線）、
     // portraitFlip 頭像上下顛倒、portraitDark 頭像壓黑（0～1，0.4＝暗四成）
-    box().classList.toggle('story-sweat', !!beat.sweat);
+    // 說話的人頭上有情緒符號（emote）：頭像也跟著出現——生氣＝💢、慌張冒汗＝汗滴
+    const talker = beat.speaker && state.actors.find(a => a.name === beat.speaker), emo = talker?.emote;
+    box().classList.toggle('story-sweat', !!beat.sweat || emo === 'sweat');
+    box().classList.toggle('story-anger', emo === 'anger');
     box().classList.toggle('story-gloom', !!beat.gloom);
     box().classList.toggle('story-flip', !!beat.portraitFlip);
     const dark = Math.max(0, Math.min(1, Number(beat.portraitDark) || 0));
@@ -550,6 +554,7 @@ const StoryScene = (() => {
     for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
     for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
+    for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) a.emote = v || null; }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
     for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p); }
     for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p); }   // 走到那裡後淡出消失（走進門裡）
@@ -844,6 +849,33 @@ const StoryScene = (() => {
     if (typeof tutDebrisFrame === 'function') tutDebrisFrame(state ? dt : 0);   // 大爆炸震下來的碎石、粉塵
     positionCamera(); draw();
   }
+  // ---- 頭上的情緒符號（每頁 emote: { 角色id: 'anger'／'sweat'／'' }），一直播到換掉為止 ----
+  // anger：頭的右上角一個紅色「💢」，一跳一跳；sweat：頭的兩側汗滴一滴一滴滑下來
+  function drawEmote(a) {
+    if (!a.emote || a.hidden) return;
+    const size = PLAYER.drawSize, top = a.y - size + 18, t = state.time;
+    ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1)); ctx.lineCap = 'round';
+    if (a.emote === 'anger') {
+      const s = 1 + .2 * Math.abs(Math.sin(t * 6));
+      ctx.translate(Math.round(a.x + 13), Math.round(top + 18)); ctx.rotate(-15 * Math.PI / 180); ctx.scale(s, s);   // 往左傾斜 15 度
+      for (let i = 0; i < 4; i++) {   // 四個彎角圍成一個十字
+        ctx.save(); ctx.rotate(i * Math.PI / 2);
+        ctx.beginPath(); ctx.moveTo(1.8, -7); ctx.quadraticCurveTo(1.8, -1.8, 7, -1.8);
+        ctx.strokeStyle = '#3a0c0c'; ctx.lineWidth = 4; ctx.stroke();
+        ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 2.2; ctx.stroke();
+        ctx.restore();
+      }
+    } else if (a.emote === 'sweat') {
+      for (let i = 0; i < 3; i++) {   // 左、右、右兩顆輪流滑下
+        const p = (t * 1.3 + i / 3) % 1, side = i === 1 ? -1 : 1;
+        const x = a.x + side * (17 + i * 2), y = top + 14 + i * 4 + p * 12;
+        ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1)) * (p < .2 ? p / .2 : 1 - (p - .2) / .8);
+        ctx.beginPath(); ctx.moveTo(x, y - 7); ctx.quadraticCurveTo(x + 5, y + 1.5, x, y + 4); ctx.quadraticCurveTo(x - 5, y + 1.5, x, y - 7);
+        ctx.fillStyle = '#b5e6ff'; ctx.fill(); ctx.strokeStyle = '#1f5e8f'; ctx.lineWidth = 1.4; ctx.stroke();
+      }
+    }
+    ctx.restore();
+  }
   function drawActor(a) {
     const size = PLAYER.drawSize;
     const frameActor = { ...a, sitting: null };
@@ -855,7 +887,6 @@ const StoryScene = (() => {
     if (a.charred) ctx.filter = 'brightness(.5) saturate(.55) contrast(1.15)';   // 被雷劈到焦黑（還認得出是誰）
     const zap = a.charging ? Math.sin(state.time * 60) * .6 : 0;   // 集氣：全身微微發抖
     const breath = a.breathing ? Math.sin(state.time * 2.1 + a.x) * .45 : 0;
-    const treating = state.heal && a.id === state.heal.from && !a.target;
     const kick = a.recoil ? (a.dir === 'left' ? a.recoil : -a.recoil) : 0;   // 開槍後座力：往後退一點
     const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * .45 : 0;   // 顫抖：左右快速小幅晃動（不取整數，晃動才夠細）
     // 大喊（shout）：說出口那一刻整個人往上一頓、左右震幾下，0.4 秒內收掉
@@ -863,7 +894,6 @@ const StoryScene = (() => {
     const hk = a.hopT > 0 ? 1 - a.hopT / HOP_TIME : 0;   // 小跳：拋物線往上 5 像素再落回
     const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = (sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0) - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
     ctx.translate(Math.round(a.x + kick) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY);
-    ctx.rotate(treating ? .035 + Math.sin(state.time * 2) * .015 : 0);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
     // 單張圖：照原本比例、跟人一樣高；imageScale＝照原圖像素大小畫（1＝跟角色同一個比例，例如擔架），底部對齊腳底
     const nat = a.set.single && Number(a.imageScale) > 0 ? Number(a.imageScale) * size / 64 : 0;
@@ -873,9 +903,10 @@ const StoryScene = (() => {
     const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
     if (readyImage(held)) {
       const k = size / 64 * Math.min(1, 24 / Math.max(held.naturalWidth, held.naturalHeight)), hw = held.naturalWidth * k, hh = held.naturalHeight * k;   // 太大的圖（急救包）縮到手拿得住
-      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14), hw, hh);
+      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDy：拿著的東西往上（負）／往下（正）幾像素
     }
     ctx.restore();
+    drawEmote(a);
     // 雷德揮擊時手上的斧頭（跟遊戲一樣：fire_axe_01，衝撞那一下只用盾不拿斧）
     if (a.meleeSwing && !a.meleeSwing.ram && a.sprite === 'red_B' && typeof drawSwingWeapon === 'function' && typeof redAxeImg !== 'undefined') {
       ctx.save(); if (a.charred) ctx.filter = 'brightness(.5) saturate(.55) contrast(1.15)'; drawSwingWeapon(a, redAxeImg, 21, 32, 22); ctx.restore();
@@ -938,7 +969,7 @@ const StoryScene = (() => {
     stopBgm(0); clearInput(); state = null; updateSteps();
     document.body.classList.remove('story-scene');
     if (ui) ui.hidden = true;
-    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat', 'story-loud', 'story-gloom', 'story-flip'); el('dialogueText').style.fontSize = ''; el('dialoguePortrait').style.filter = ''; }
+    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat', 'story-loud', 'story-gloom', 'story-flip', 'story-anger'); el('dialogueText').style.fontSize = ''; el('dialoguePortrait').style.filter = ''; }
   }
   function exit() {
     if (resume) { backToGame(); return; }   // 從記憶之門進來的：回到門前

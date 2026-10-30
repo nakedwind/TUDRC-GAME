@@ -495,6 +495,7 @@ function renderObj() {
       field('單張圖（只有一張圖的路人，例如家屬的背影；填了就不用角色圖資料夾）', txt(ac, 'image', { optional: true, rerender: true, placeholder: 'images/回憶場景/檔名.png' })),
       ac.image && field('單張圖照原圖大小畫（1＝跟角色同一個比例，例如擔架；空白＝跟人一樣高）', num(ac, 'imageScale', { optional: true, min: .1, step: .1, placeholder: '—' })),
       field('一開始手上拿著（圖片，例如遺物箱；空白＝沒拿東西）', txt(ac, 'carry', { optional: true, placeholder: 'images/回憶場景/relics.png' })),
+      field('拿著的東西往上／往下幾像素（負＝往上）', num(ac, 'carryDy', { optional: true, step: 1, placeholder: '0' })),
       field('位置', choose(posMode, 'mode', [['', '站著（自己選格子）'], ...beds], { parse: v => { if (v) { ac.bed = v.split(',').map(Number); delete ac.at; } else { delete ac.bed; ac.at = ac.at || [r1(curMap().cols / 2), r1(curMap().rows / 2)]; } return v; } })),
       !ac.bed && field('站的格子', xy(ac, 'at', '選' + (ac.name || '角色') + '站的位置')),
       !ac.bed && field('一開始面向', choose(ac, 'dir', DIRS)),
@@ -575,12 +576,12 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
 const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
-  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
+  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
   'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
@@ -627,6 +628,7 @@ function beatBody(s, b, i) {
   rows('shield', '盾牌', id => onOff(b.shield, id, '舉盾（只有雷德）', '放下盾'));
   rows('down', '倒地', id => onOff(b.down, id, '倒在地上', '爬起來'));
   rows('charge', '集氣', id => onOff(b.charge, id, '開始集氣（光圈、電火花）', '停止'));
+  rows('emote', '情緒符號', id => choose(b.emote, id, [['anger', '💢 生氣（紅色青筋一跳一跳）'], ['sweat', '💧 慌張冒汗（汗滴往下滑）'], ['', '收掉']]));
   rows('fight', '打架', id => onOff(b.fight, id, '開始打（走到怪物旁第一下是衝撞，之後一直揮擊）', '停手'));
   // 怪物的演出：每列一隻怪物
   const monRows = (key, title, make) => {
@@ -656,7 +658,7 @@ function beatBody(s, b, i) {
   const healHolder = { v: b.heal === false ? 'stop' : b.heal ? 'start' : '' };
   const healRow = h('div', { class: 'act' }, h('b', {}, '治療'), choose(healHolder, 'v', [['', '不變'], ['start', '開始'], ['stop', '停止']], { parse: v => {
     if (v === 'start') b.heal = { from: s.actors[1]?.id || s.actors[0]?.id || '', to: s.actors[0]?.id || '' }; else if (v === 'stop') b.heal = false; else delete b.heal; return v; } }));
-  if (b.heal) healRow.append(choose(b.heal, 'from', actorOptions()), '替', choose(b.heal, 'to', actorOptions()), '治療（光點、輕輕晃）');
+  if (b.heal) healRow.append(choose(b.heal, 'from', actorOptions()), '替', choose(b.heal, 'to', actorOptions()), '治療（光點）');
   acts.append(healRow);
   const hushHolder = { v: b.hush === true ? 'on' : b.hush === false ? 'off' : '' };
   acts.append(h('div', { class: 'act' }, h('b', {}, '槍聲'), choose(hushHolder, 'v', [['', '不變'], ['on', '變稀疏（安靜下來）'], ['off', '恢復']], { parse: v => { if (v === 'on') b.hush = true; else if (v === 'off') b.hush = false; else delete b.hush; return v; } })));
@@ -716,7 +718,7 @@ function beatBody(s, b, i) {
     h('div', { class: 'row' }, moveBtn, addAct('face', '＋ 轉向', () => 'front'), addAct('eyes', '＋ 眼睛', () => 'open'),
       pickAct('exit', '＋ 離場', '走到哪後消失'), pickAct('place', '＋ 瞬移', '瞬移到哪'), addAct('hide', '＋ 消失', () => true),
       addAct('speed', '＋ 速度', () => 60), addAct('tremble', '＋ 顫抖', () => true), addAct('shout', '＋ 大喊', () => true), addAct('hop', '＋ 小跳', () => true), addAct('carry', '＋ 拿著', () => ''),
-      addAct('gun', '＋ 持槍', () => true), addAct('shield', '＋ 盾牌', () => true), addAct('down', '＋ 倒地', () => true), addAct('charge', '＋ 集氣', () => true), addAct('fight', '＋ 打架', () => true)),
+      addAct('gun', '＋ 持槍', () => true), addAct('shield', '＋ 盾牌', () => true), addAct('down', '＋ 倒地', () => true), addAct('charge', '＋ 集氣', () => true), addAct('fight', '＋ 打架', () => true), addAct('emote', '＋ 情緒符號', () => 'anger')),
     s.monsters.length ? h('div', { class: 'row' }, monMoveBtn, monAct('monsterPose', '＋ 怪物姿勢', () => 'smile'),
       monAct('swallow', '＋ 吞人', () => s.actors[0]?.id || ''), monAct('monsterWander', '＋ 繞著人走', () => s.actors[0]?.id || ''), monAct('preyKick', '＋ 嘴裡的人抽一下', () => true), monAct('spit', '＋ 吐出來', () => true)) : null,
     actorSwitchNote(s),

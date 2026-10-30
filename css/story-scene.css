@@ -78,3 +78,11 @@ body.story-scene #dialogueBox.story-gloom #dialoguePortraitFrame::before {
 #storyChoices kbd { display: inline-block; min-width: 22px; margin-right: 8px; padding: 1px 6px; border-radius: 4px; background: #ffd23f; color: #111; font: 800 13px/1.4 inherit; text-align: center; }
 @keyframes story-choice-in { from { opacity: 0; translate: -50% 12px; } to { opacity: 1; translate: -50% 0; } }
 @media (prefers-reduced-motion: reduce) { #storyChoices { animation: none; } }
+/* 頭像上的生氣符號（說話的人頭上有 emote: 'anger'）：右上角一個 💢，往左傾斜 15 度，一跳一跳 */
+#storyPortraitEmote { display: none; }
+body.story-scene #dialogueBox.story-anger #storyPortraitEmote {
+  display: block; position: absolute; right: 6px; top: 6px; width: 26px; height: 26px; z-index: 4; pointer-events: none;
+  background: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='-10 -10 20 20'><g fill='none' stroke-linecap='round'><g stroke='%233a0c0c' stroke-width='4'><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(0)'/><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(90)'/><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(180)'/><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(270)'/></g><g stroke='%23ff3b3b' stroke-width='2.2'><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(0)'/><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(90)'/><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(180)'/><path d='M1.8 -7 Q1.8 -1.8 7 -1.8' transform='rotate(270)'/></g></g></svg>") center / contain no-repeat; rotate: -15deg; animation: story-anger .5s ease-in-out infinite alternate;
+}
+@keyframes story-anger { from { scale: 1; } to { scale: 1.2; } }
+@media (prefers-reduced-motion: reduce) { body.story-scene #dialogueBox.story-anger #storyPortraitEmote { animation: none; } }
