@@ -13,8 +13,14 @@ const missionById = id => MISSIONS.find(m => m.id === id) || null;
 const sameMapId = (a, b) => !!a && !!b && String(a).toLowerCase() === String(b).toLowerCase();
 const mapIndexOf = id => mapList().findIndex(m => m && sameMapId(m.id, id));
 const missionOfMap = mapId => MISSIONS.find(m => sameMapId(m.map, mapId)) || null;
-const missionCleared = m => missionState.cleared.includes(m.id);
-const missionOpen = m => m.after.every(id => missionState.cleared.includes(id));   // 前面的區域都控制了
+// 後面的區域已經控制了，前面的也算（舊存檔：後來才在前面插進新的區域，例如新手區 Y25區入口）
+const missionCleared = m => missionState.cleared.includes(m.id) || MISSIONS.some(x => x.after.includes(m.id) && missionCleared(x));
+const missionOpen = m => m.after.every(id => missionCleared(missionById(id) || { id }));   // 前面的區域都控制了
+// 不用打贏也算控制（例如新手區：看完救援劇情離開，js/story-triggers.js 呼叫）
+function markMissionMapCleared(mapId) {
+  const m = missionOfMap(mapId); if (!m || missionState.cleared.includes(m.id)) return;
+  missionState.cleared.push(m.id); saveMissions();
+}
 function missionStatus(m) {
   if (missionCleared(m)) return 'cleared';
   if (!missionOpen(m)) return 'locked';

@@ -34,6 +34,7 @@ function storyTriggerFor(pt) {
 function runStoryOutcome(trigger, outcome) {
   const o = trigger.outcomes[outcome] || trigger.outcomes[trigger.skip];
   if (!o) return;
+  if (typeof markMissionMapCleared === 'function') markMissionMapCleared(trigger.from);   // 離開的那一區算控制了（新手區 → 作戰桌的下一區開放，js/missions.js）
   if (o.team && typeof setTeam === 'function') setTeam(o.team);
   if (o.go === 'base' && typeof returnToBase === 'function') { returnToBase(); return; }
   missionTravel(trigger.to, () => {

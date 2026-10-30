@@ -22,23 +22,28 @@ const MISSION_BASE = {
 
 const MISSIONS = [
   {
-    id: 'y1', map: 'map_mvtnqrs7', name: 'Y25區地下街', x: 14, y: 82, after: [],   // id 維持 y1（存檔的進度、艾德林的報告台詞 brief_y1 都用這個）
+    // 新手區：打贏，或走出入口看完救援劇情（不管留下還是撤退，js/story-triggers.js）都算控制了
+    id: 'y25_entry', map: 'map_a46c5e1a-9802-4db5-a3b9-486b4649c206', name: 'Y25區入口', x: 11, y: 82, after: [],
     desc: 'Y 區的入口。異質體從四處的黑暗角落湧出，先在這裡站穩腳步。',
   },
   {
-    id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 34, y: 62, after: ['y1'],
-    desc: '入口後方的大廳，空間開闊，異質體容易從各個方向包夾。',
+    id: 'y1', map: 'map_mvtnqrs7', name: 'Y25區地下街', x: 26, y: 69, after: ['y25_entry'],   // id 維持 y1（存檔的進度、艾德林的報告台詞 brief_y1 都用這個）
+    desc: '入口往下的地下街，雷德小隊就是在這裡遇上虱目魚小子。異質體聚集得比平常多。',
   },
   {
-    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 54, y: 44, after: ['station'],
+    id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 42, y: 58, after: ['y1'],
+    desc: '地下街後方的大廳，空間開闊，異質體容易從各個方向包夾。',
+  },
+  {
+    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 58, y: 44, after: ['station'],
     desc: '大廳更深處的異質反應源，核心的反應特別強烈。',
   },
   {
-    id: 'zone4', map: null, name: '？？？', x: 72, y: 28, after: ['pool'],   // 第 4 區：地圖做好後填上 map 和名稱
+    id: 'zone4', map: null, name: '？？？', x: 74, y: 28, after: ['pool'],   // 第 4 區：地圖做好後填上 map 和名稱
     desc: '池核更深處的區域。應變中心還在收集情報。',
   },
   {
-    id: 'deep', map: null, name: 'Y 區最深處', x: 86, y: 12, after: ['zone4'], boss: true,
+    id: 'deep', map: null, name: 'Y 區最深處', x: 88, y: 12, after: ['zone4'], boss: true,
     desc: '應變中心預測會出現 BOSS 級異質體的地方。控制整個 Y 區之後才能前往。',
   },
 ];
