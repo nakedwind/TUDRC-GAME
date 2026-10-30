@@ -1183,6 +1183,7 @@ function newGame() {
     for (const id of NEWBIE_START.gear) if (equipDef(id) && !equipState.owned[id]) equipState.owned[id] = 1;
     saveEquipment();
   }
+  if (typeof stockCampAmmoForMapStart === 'function' && !window.TEST_MODE) stockCampAmmoForMapStart();   // 新手區、Y25區地下街：營地彈藥箱一開始就有照明彈（js/camp-supply.js 的 AMMO_BOX.mapStart）
   if (G.battle && !MAP_SAFE) G.battle.budget = G.money;
   computeFlow();
   seedMapObstacles();   // 把地圖裡預設的「可破壞障礙物」擺上場

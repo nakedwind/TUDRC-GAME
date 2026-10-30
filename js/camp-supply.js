@@ -176,7 +176,12 @@ function drawGuideSupplyBubbles(ctx) {
 //  ・每次出勤（js/magazine.js 的 onMagazineSortie）：AMMO_BOX.sortie 裡拿到過（照明彈一開始就有、其他要開發）的子彈，
 //    箱子裡各補到至少一組（BULLET_SET 發）；自己放進去多的會留著，不會越積越多
 // ============================================================
-const AMMO_BOX = { sortie: ['flare', 'tranq', 'paint', 'split', 'knock'], image: 'images/field-camp/ammo-crate-open.png' };
+const AMMO_BOX = { sortie: ['flare', 'tranq', 'paint', 'split', 'knock'], image: 'images/field-camp/ammo-crate-open.png',
+  // 不是從基地出勤進去的地圖（新手區、Y25區地下街）：第一次進去時箱子裡先放好這些（地圖 id → { 子彈 id: 幾發 }）；開新遊戲會重新放
+  mapStart: {
+    'map_a46c5e1a-9802-4db5-a3b9-486b4649c206': { flare: 20 },   // Y25區入口（新手區）
+    'map_mvtnqrs7': { flare: 20 },                               // Y25區地下街
+  } };
 const CAMP_AMMO_KEY = 'tudrc_camp_ammo_v1';
 let campAmmoData = {};
 try { const d = JSON.parse(localStorage.getItem(CAMP_AMMO_KEY) || '{}'); if (d && typeof d === 'object') campAmmoData = d; } catch (_) {}
@@ -194,6 +199,16 @@ function stockCampAmmoForSortie() {
   }
   saveCampAmmo();
   return got;
+}
+// 進地圖（js/game.js 的 newGame 呼叫）：AMMO_BOX.mapStart 有寫的地圖，第一次進來時把子彈放進箱子（每張地圖只放一次）
+function stockCampAmmoForMapStart() {
+  const id = campSupplyMapId(), start = AMMO_BOX.mapStart[id];
+  if (MAP_SAFE || !start || !mapHasAmmoBox()) return;
+  const done = campAmmoData._mapStart || (campAmmoData._mapStart = []);
+  if (done.includes(id)) return;
+  const box = campAmmo();
+  for (const [b, n] of Object.entries(start)) if (BULLETS[b] && !BULLETS[b].removed) box[b] = Math.max(box[b] || 0, n);
+  done.push(id); saveCampAmmo();
 }
 
 // ============================================================
