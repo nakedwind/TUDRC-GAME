@@ -93,7 +93,7 @@ const StoryScene = (() => {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
     // 頭像外面包一層：上下顛倒時只翻頭像，頭像框上的汗滴、陰沉線條不跟著翻（框裡原本的排版規則照樣套用）
     const pic = el('dialoguePortrait');
@@ -191,6 +191,20 @@ const StoryScene = (() => {
   }
   // 鏡頭 [欄, 列, 縮放]：第三個數字可省略（＝劇情的 zoom），越大拍得越近
   const camZoom = (p, base) => Number(p?.[2]) > 0 ? Number(p[2]) : base;
+  // ---- 登場介紹卡（每頁 card: { image, title, subtitle, text }）：像格鬥遊戲一樣從側邊滑出一張卡，翻到下一頁就收起來 ----
+  function showCard(card) {
+    const box = el('storyCard'); if (!box) return;
+    if (!card || !(card.title || card.image)) { box.hidden = true; return; }
+    el('storyCardImg').src = card.image || ''; el('storyCardImg').hidden = !card.image;
+    el('storyCardSub').textContent = card.subtitle || ''; el('storyCardTitle').textContent = card.title || ''; el('storyCardText').textContent = card.text || '';
+    box.hidden = false; box.classList.remove('in'); void box.offsetWidth; box.classList.add('in');   // 每次都重播滑入動畫
+  }
+  // ---- 嘴裡的人抽一下（每頁 preyKick: { 怪物名字: true }）：被吞的人的腳踢幾下、魚嘴冒一縷煙（還活著） ----
+  function kickPrey(e) {
+    e.mf.prey.kickUntil = performance.now() + 700;
+    const hx = e.fried ? e.x + (e.fallDir || 1) * 100 : e.x, hy = e.fried ? e.y - 4 : e.y - 110;   // 倒在地上時魚嘴在頭那一側
+    for (let i = 0; i < 3; i++) if (typeof pushBlackSmoke === 'function') pushBlackSmoke(hx + rnd(-8, 8), hy + rnd(-6, 6));
+  }
   // ---- 虱目魚小子的演出（js/milkfish-kid.js 的圖）----
   // 每頁 monsterPose: { 怪物名字: 'smile' 笑（兩張笑臉圖交替）／'attack' 張嘴（朝最近的人）／'' 站好 }；只有虱目魚小子有這些圖
   // 每頁 swallow: { 怪物名字: 角色id }：張嘴撲過去，一口把人吞進頭上的魚嘴（只露出兩隻腳在踢）
@@ -219,12 +233,19 @@ const StoryScene = (() => {
     mfPose(e, null);
   }
   // ---- 集氣（每頁 charge: { 角色id: true／false }）：身邊收束的光圈、電火花；劈雷之後自動停 ----
+  // 越集越強：full＝幾秒集滿；集滿時光圈、電火花最密，腳下法陣全亮，鏡頭推近 zoom 倍（0.25＝近四分之一）
+  const CHARGE = { full: 2.5, zoom: .25, sparks: [14, 40], ring: [.45, .25] };   // sparks／ring：一開始→集滿（每秒幾顆電火花／每隔幾秒一圈光圈）
+  const chargeLevel = () => Math.max(0, ...state.actors.filter(a => a.charging && !a.hidden).map(a => Math.min(1, (a.chargeT || 0) / CHARGE.full)));
   function tickCharge(a, dt) {
-    if (!a.charging || a.hidden) return;
+    if (!a.charging || a.hidden) { if (a.sigil) { a.sigil.life = Math.min(a.sigil.life, .3); a.sigil = null; } a.chargeT = 0; return; }
+    a.chargeT = (a.chargeT || 0) + dt;
+    const k = Math.min(1, a.chargeT / CHARGE.full), lerp = ([p, q]) => p + (q - p) * k;
     const col = (typeof ULT_CHARGE_COLOR !== 'undefined' && ULT_CHARGE_COLOR[String(a.sprite).replace(/_[A-Z]$/, '')]) || '#aee9ff';
-    if ((a.chargeFx = (a.chargeFx || 0) - dt) <= 0) { a.chargeFx = .45; if (typeof spawnChargeFx === 'function') spawnChargeFx(a.x, a.y - 12, col); }
-    if (Math.random() < dt * 14) {
-      const s = Math.random() * Math.PI * 2, d = rnd(14, 30);
+    if (!a.sigil) { a.sigil = { sootheSigil: true, follow: a, col: typeof hexRgb === 'function' ? hexRgb(col) : [174, 233, 255], life: 999, life0: 999, spin: 0 }; G.effects.push(a.sigil); }   // 腳下法陣（疏導法陣的畫法）
+    if ((a.chargeFx = (a.chargeFx || 0) - dt) <= 0) { a.chargeFx = lerp(CHARGE.ring); if (typeof spawnChargeFx === 'function') spawnChargeFx(a.x, a.y - 12, col); }
+    if (k > .5 && Math.random() < dt * 3 * k && typeof addLightFlash === 'function') addLightFlash('lightning', a.x, a.y - 12, .5 * k);   // 快集滿時身上一閃一閃
+    for (let n = Math.random() < (dt * lerp(CHARGE.sparks)) % 1 ? 1 : 0, m = Math.floor(dt * lerp(CHARGE.sparks)) + n; m > 0; m--) {
+      const s = Math.random() * Math.PI * 2, d = rnd(14, 30 + 16 * k);
       G.effects.push({ particle: true, kind: 'lightning', x: a.x + Math.cos(s) * d, y: a.y - 12 + Math.sin(s) * d * .8, vx: -Math.cos(s) * 40, vy: -Math.sin(s) * 40,
         r: rnd(1.4, 2.6), life: rnd(.15, .3), life0: .3, color: '#cbf2ff' });
     }
@@ -234,11 +255,16 @@ const StoryScene = (() => {
   // 怪物被劈得焦黑、抖一下後往後倒，躺在地上冒煙；被吞掉的人還卡在魚嘴裡（腳也焦黑）
   // bolts＝連續劈幾秒、every＝每隔幾秒一道、fry＝焦黑抖多久才倒下、fall＝倒下花幾秒、hold＝全白停幾秒
   // shake＝鏡頭晃多大（像素）、shakeTime＝晃幾秒；debris＝碎石掉幾秒、rocks／dust＝每秒掉幾顆碎石、幾團粉塵；scorch＝焦痕大小
-  const THUNDER = { bolts: .9, every: .07, fry: .9, fall: .35, hold: .35, shake: 34, shakeTime: 2.6,
+  const THUNDER = { freeze: .35, bolts: .9, every: .07, fry: .9, fall: .35, hold: .35, shake: 34, shakeTime: 2.6,
     debris: 2.2, rocks: 30, dust: 24, scorch: 60, sfx: 'storyThunder' };
   // 閃光的順序：[幾秒, 顏色, 濃度]；第一下淡淡的，讓大家先看到雷劈下來，接著白、黑、白、黑閃，最後全白再慢慢退
   const FLASH_SEQ = [[.16, '#fff', .25], [.08, '#fff', 1], [.07, '#000', 1], [.09, '#fff', 1], [.07, '#000', .9]];
+  // 劈下去之前畫面靜止一下（THUNDER.freeze 秒，什麼都不動），再劈
   function thunder(beat) {
+    if (state.skipping || !(THUNDER.freeze > 0)) { strike(beat); return; }
+    state.freeze = { t: THUNDER.freeze, beat };
+  }
+  function strike(beat) {
     const targets = state.monsters.filter(e => !e.gone);
     for (const a of state.actors) { a.charging = false; a.fight = false; }
     targets.forEach((e, i) => {
@@ -370,6 +396,7 @@ const StoryScene = (() => {
   const screenDark = () => { const sc = state.screen; if (!sc) return 0; const k = Math.min(1, sc.t / sc.dur); return sc.from + (sc.to - sc.from) * k; };
   const screenBusy = () => !!state.screen && !state.screen.free && state.screen.t < state.screen.dur;
   function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
+    showCard(null);
     state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(5);
   }
   function makeMonster(m) {
@@ -515,6 +542,8 @@ const StoryScene = (() => {
       if (state.skipping) gulpNow(e, a); else e.gulp = { who: a, t: 0, from: [e.x, e.y] };
     }
     if (beat.thunder) thunder(beat);
+    showCard(state.skipping ? null : beat.card);
+    for (const [id, v] of Object.entries(beat.preyKick || {})) { const e = monster(id) || state.monsters.find(m => m.id === id); if (v && e && e.mf?.prey && !state.skipping) kickPrey(e); }
     if ('heal' in beat) state.heal = beat.heal;
     if ('hush' in beat) state.hush = beat.hush;
     setSpeaker(beat);   // 眼睛狀態套用後，頭像才跟著切換睜眼／閉眼受傷圖。
@@ -702,6 +731,10 @@ const StoryScene = (() => {
         }
       }
     }
+    if (state.freeze) {   // 劈雷前的靜止：世界整個停住，時間到才劈
+      if ((state.freeze.t -= dt) <= 0) { const b = state.freeze.beat; state.freeze = null; strike(b); }
+      else { positionCamera(); draw(); return; }
+    }
     if (state.playing || state.ended) {   // 回憶結束畫面後面，背景的戰鬥仍繼續
       for (const a of state.actors) {
         a.anim += dt;
@@ -740,7 +773,7 @@ const StoryScene = (() => {
       if (state.rumble && (state.rumble.t += dt) >= state.rumble.dur) state.rumble = null;
       const target = state.cfg.cameras?.[state.cameraKey] || state.camera, k = 1 - Math.exp(-dt * 1.5);
       state.camera = [0, 1].map(i => state.camera[i] + (target[i] - state.camera[i]) * k);
-      state.zoom += (camZoom(target, state.baseZoom) - state.zoom) * k; VIEW_SCALE = state.zoom;   // 鏡頭推近／拉遠跟移動一樣慢慢來
+      state.zoom += (camZoom(target, state.baseZoom) * (1 + CHARGE.zoom * chargeLevel()) - state.zoom) * k; VIEW_SCALE = state.zoom;   // 集氣時鏡頭慢慢推近   // 鏡頭推近／拉遠跟移動一樣慢慢來
       updateSteps();
     }
     const [flashCol, flashA] = flashLevel();
@@ -835,6 +868,7 @@ const StoryScene = (() => {
     ctx.restore();
   }
   function leave() {
+    if (ui) showCard(null);
     stopBgm(0); clearInput(); state = null; updateSteps();
     document.body.classList.remove('story-scene');
     if (ui) ui.hidden = true;

@@ -573,10 +573,10 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
 const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
-const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander'];
+const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
 const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
-  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
+  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
   'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
@@ -634,9 +634,17 @@ function beatBody(s, b, i) {
   monRows('monsterMove', '怪物走位', id => xy(b.monsterMove, id, id + '在第 ' + (i + 1) + ' 頁走到哪'));
   monRows('monsterPose', '怪物姿勢', id => choose(b.monsterPose, id, MONSTER_POSES));
   monRows('monsterWander', '繞著人走', id => h('span', { class: 'row' }, '在', choose(b.monsterWander, id, actorOptions()), h('small', {}, '身邊 1～1.5 格走來走去（換走位、姿勢或那個人被吞就停）')));
+  monRows('preyKick', '嘴裡的人抽一下', () => h('small', {}, '被吞的人腳踢幾下、魚嘴冒一縷煙（還活著）'));
   monRows('swallow', '吞人', id => h('span', { class: 'row' }, '吞掉', choose(b.swallow, id, actorOptions()), h('small', {}, '撲過去一口吞進魚嘴（虱目魚小子）')));
   acts.append(h('div', { class: 'act' }, h('b', {}, '巨雷'), chk(b, 'thunder', '雷劈在所有怪物身上＋大爆炸：畫面白黑閃、劇烈搖晃、掉碎石，怪物焦黑倒地（被吞的人還在嘴裡）', { rerender: true }),
     b.thunder && h('span', { class: 'row' }, '全白停', num(b, 'thunderHold', { min: .1, optional: true, placeholder: '0.35' }), '秒，再花', num(b, 'thunderFade', { min: .3, optional: true, placeholder: '3' }), '秒慢慢退掉')));
+  // 登場介紹卡：勾了才出現欄位
+  const cardRow = h('div', { class: 'act' }, h('b', {}, '介紹卡'), h('label', { class: 'row', style: 'font-size:12px' }, h('input', { type: 'checkbox', checked: !!b.card,
+    onchange: e => { if (e.target.checked) b.card = { image: '', subtitle: '', title: '', text: '' }; else delete b.card; commit(); } }), '從右邊滑出一張介紹卡（翻下一頁收起來）'));
+  if (b.card) cardRow.append(h('div', { style: 'display:grid;gap:4px;width:100%' },
+    txt(b.card, 'image', { placeholder: '圖片，例如 images/monster/milkfish-kid/milkfish-kid-front.png' }), txt(b.card, 'subtitle', { placeholder: '小標（例如 A級異質體 NO.727）' }),
+    txt(b.card, 'title', { placeholder: '名字（大字）' }), txt(b.card, 'text', { placeholder: '說明' })));
+  acts.append(cardRow);
   // 頭像情緒：可以同時開好幾個
   acts.append(h('div', { class: 'act' }, h('b', {}, '頭像情緒'), chk(b, 'sweat', '流汗'), chk(b, 'gloom', '陰沉線條（頭上垂下黑線）'), chk(b, 'portraitFlip', '上下顛倒'),
     h('span', { class: 'row', style: 'font-size:12px' }, '壓黑', num(b, 'portraitDark', { min: 0, step: .05, optional: true, placeholder: '0' }), h('small', {}, '（0～1，0.4＝暗四成）'))));
@@ -694,7 +702,7 @@ function beatBody(s, b, i) {
       addAct('speed', '＋ 速度', () => 60), addAct('tremble', '＋ 顫抖', () => true), addAct('shout', '＋ 大喊', () => true), addAct('hop', '＋ 小跳', () => true), addAct('carry', '＋ 拿著', () => ''),
       addAct('gun', '＋ 持槍', () => true), addAct('shield', '＋ 盾牌', () => true), addAct('down', '＋ 倒地', () => true), addAct('charge', '＋ 集氣', () => true), addAct('fight', '＋ 打架', () => true)),
     s.monsters.length ? h('div', { class: 'row' }, monMoveBtn, monAct('monsterPose', '＋ 怪物姿勢', () => 'smile'),
-      monAct('swallow', '＋ 吞人', () => s.actors[0]?.id || ''), monAct('monsterWander', '＋ 繞著人走', () => s.actors[0]?.id || '')) : null,
+      monAct('swallow', '＋ 吞人', () => s.actors[0]?.id || ''), monAct('monsterWander', '＋ 繞著人走', () => s.actors[0]?.id || ''), monAct('preyKick', '＋ 嘴裡的人抽一下', () => true)) : null,
     actorSwitchNote(s),
     h('div', { class: 'row', style: 'margin-top:8px' },
       h('button', { type: 'button', class: 'small', disabled: i === 0, onclick: () => { [s.beats[i - 1], s.beats[i]] = [s.beats[i], s.beats[i - 1]]; beatSel = i - 1; commit(); } }, '↑ 上移'),
