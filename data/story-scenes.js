@@ -405,5 +405,203 @@ const STORY_SCENES = {
     "darkness": true,
     "lights": [[37.4, 76.4, 5], [32, 76.8, 3]],
     "vignette": 0.3
+  },
+  "y25_rescue": {
+    "map": "map_6879940d-49a5-4caf-81f6-f76fd0f547eb",
+    "title": "序章",
+    "zoom": 1.6,
+    "subtitle": "Y25區地下街 · 救援",
+    "autoExit": true,
+    "darkness": true,
+    "lights": [[37.4, 76.4, 5], [32, 76.8, 3], [31, 80.8, 4]],
+    "footsteps": true,
+    "vignette": 0.3,
+    "cameras": { "現場": [35, 77, 2], "雷德": [34.8, 76.8, 2.3], "全景": [33, 78.2, 1.7], "撤退": [30, 80.4, 1.8] },
+    "portraits": {
+      "雷德": "red_B",
+      "安柏": "amber_B",
+      "希奧妮": "theonie_B",
+      "溫特": "winter_B",
+      "艾德林": "eldrin_B",
+      "阿瓦倫": "avaren_B",
+      "柯林": "colyn_B",
+      "克莉思": "chris_B",
+      "路德": "luther_B"
+    },
+    "actors": [
+      { "id": "red", "sprite": "red_B", "name": "雷德", "at": [38.2, 76.6], "dir": "front", "speed": 32 },
+      { "id": "theonie", "sprite": "theonie_B", "name": "希奧妮", "at": [33.6, 75.4], "dir": "right" },
+      { "id": "amber", "sprite": "amber_B", "name": "安柏", "at": [33.2, 78.1], "dir": "right" },
+      { "id": "winter", "sprite": "winter_B", "name": "溫特", "at": [27.6, 82.6], "dir": "right", "speed": 60, "hidden": true },
+      { "id": "eldrin", "sprite": "eldrin_B", "name": "艾德林", "at": [26.8, 82.2], "dir": "right", "speed": 60, "hidden": true },
+      { "id": "avaren", "sprite": "avaren_B", "name": "阿瓦倫", "at": [26.8, 83.2], "dir": "right", "speed": 60, "hidden": true },
+      { "id": "colyn", "sprite": "colyn_B", "name": "柯林", "at": [26, 82.7], "dir": "right", "speed": 60, "hidden": true },
+      { "id": "chris", "sprite": "chris_B", "name": "克莉思", "at": [26.6, 82.4], "dir": "right", "speed": 60, "hidden": true },
+      { "id": "luther", "sprite": "luther_B", "name": "路德", "at": [25.8, 83], "dir": "right", "speed": 60, "hidden": true },
+      { "id": "stretcher", "image": "images/field-camp/stretcher.png", "imageScale": 1, "name": "擔架", "at": [34.5, 82.6], "hidden": true }
+    ],
+    "monsters": [
+      { "id": "魚1", "type": "milkfish_kid", "at": [38.2, 76.6], "face": "left", "fried": true, "fall": -1, "prey": "red" },
+      { "id": "魚2", "type": "milkfish_kid", "at": [37.6, 75.2], "face": "left", "fried": true, "fall": 1 },
+      { "id": "魚3", "type": "milkfish_kid", "at": [37.8, 78.3], "face": "left", "fried": true, "fall": 1 }
+    ],
+    "beats": [
+      {
+        "speaker": "安柏",
+        "text": "隊長別死啊！\n別讓你的下屬變成殺人犯！",
+        "camera": "現場",
+        "tremble": { "amber": true },
+        "shout": { "amber": true },
+        "sweat": true,
+        "wait": 0.6
+      },
+      { "speaker": "希奧妮", "text": "要不要我把那堆東西燒掉……\n然後報告寫隊長被吃掉了怎麼樣……？", "gloom": true, "wait": 0.3 },
+      { "speaker": "安柏", "text": "學姊！別想著毀屍滅跡啊！", "shout": { "amber": true }, "hop": { "amber": true }, "tremble": { "amber": false }, "wait": 0.3 },
+      { "speaker": "", "text": "焦黑的虱目魚小子抖了一下——\n「噗」地把雷德吐了出來。", "spit": { "魚1": true }, "wait": 1 },
+      { "speaker": "雷德", "text": "我……沒死……", "camera": "雷德", "portraitDark": 0.4, "wait": 0.4 },
+      { "speaker": "希奧妮", "text": "嗚哇……好可怕的畫面。", "gloom": true, "wait": 0.3 },
+      {
+        "speaker": "安柏",
+        "text": "隊長！活下去！",
+        "move": { "amber": [33.6, 77.9], "theonie": [35.3, 75.5] },
+        "face": { "amber": "red", "theonie": "red" },
+        "shout": { "amber": true },
+        "wait": 0.6
+      },
+      { "speaker": "雷德", "text": "晚餐……去吃那間林記虱目魚湯怎麼樣……？", "portraitDark": 0.4, "wait": 0.3 },
+      { "speaker": "安柏", "text": "你怎麼還在想晚餐！！\n要趕快送醫才行！！", "shout": { "amber": true }, "wait": 0.3 },
+      { "speaker": "雷德", "text": "我還要加點滷豆腐和炸雞腿……\n要和我一樣酥脆的……", "portraitDark": 0.4, "wait": 0.3 },
+      { "speaker": "安柏", "text": "隊長醒醒！隊長別睡啊！！", "shout": { "amber": true }, "tremble": { "amber": true }, "sweat": true, "wait": 0.3 },
+      {
+        "speaker": "艾德林",
+        "text": "203小隊！你們在哪？\n聽到請回答！",
+        "camera": "全景",
+        "tremble": { "amber": false },
+        "face": { "amber": "left", "theonie": "left" },
+        "wait": 0.8
+      },
+      {
+        "speaker": "艾德林",
+        "text": "我們來增援了！\n天啊！雷德隊長沒事吧？",
+        "move": { "winter": [31.4, 78.9], "eldrin": [32.4, 79.8], "avaren": [31.2, 80.4], "colyn": [30.4, 79.4] },
+        "face": { "winter": "red", "eldrin": "red", "avaren": "red", "colyn": "red" },
+        "wait": 2.2
+      },
+      { "speaker": "希奧妮", "text": "抱歉，恐怕有事。", "wait": 0.3 },
+      {
+        "speaker": "艾德林",
+        "text": "雷德！撐著點，\n我現在就立刻幫你做緊急處置！",
+        "move": { "eldrin": [34.6, 77.9], "avaren": [33.3, 76.5] },
+        "face": { "eldrin": "red", "avaren": "red" },
+        "wait": 0.9
+      },
+      {
+        "speaker": "艾德林",
+        "text": "快……快點……！\n哇啊有一股烤魚的味道！！",
+        "heal": { "from": "eldrin", "to": "red" },
+        "carry": { "avaren": "images/裝備/first-aid-kit.png" },
+        "hop": { "eldrin": true },
+        "wait": 0.6
+      },
+      { "speaker": "溫特", "text": "……這是怎麼回事？", "face": { "winter": "theonie" }, "wait": 0.6 },
+      { "speaker": "溫特", "text": "無線電裡說雷德受傷了。\n我沒想到……是被自己人劈成這樣。", "portraitDark": 0.2, "wait": 0.3 },
+      { "speaker": "安柏", "text": "對、對不起……！\n是我的雷擊……", "face": { "amber": "winter" }, "tremble": { "amber": true }, "sweat": true, "wait": 0.3 },
+      { "speaker": "希奧妮", "text": "……是我叫菜鳥趁魚頭聚在一起的時候動手的。", "face": { "theonie": "winter" }, "wait": 0.3 },
+      { "speaker": "溫特", "text": "…………", "tremble": { "winter": true }, "portraitDark": 0.35, "gloom": true, "wait": 0.4 },
+      { "speaker": "溫特", "text": "……這件事，回去再說。\n艾德林，雷德的狀況怎麼樣？", "tremble": { "winter": false }, "face": { "winter": "eldrin" }, "wait": 0.3 },
+      { "speaker": "艾德林", "text": "生命跡象穩定，外傷很多……\n至少沒有生命危險。但得盡快送回中心治療。", "wait": 0.3 },
+      {
+        "speaker": "溫特",
+        "text": "（雷德得盡快送回去……\n可是這一帶的異質體還沒清乾淨。）",
+        "choices": [{ "text": "留下來繼續探索", "goto": "stay", "outcome": "stay" }, { "text": "先一起撤退回應變中心", "goto": "retreat", "outcome": "retreat" }],
+        "wait": 0.4
+      },
+      { "speaker": "溫特", "text": "阿瓦倫、艾德林、安柏，\n你們三個先護送雷德回應變中心。", "label": "stay", "face": { "winter": "avaren" }, "wait": 0.3 },
+      { "speaker": "安柏", "text": "是、是的！", "hop": { "amber": true }, "wait": 0.3 },
+      { "speaker": "溫特", "text": "柯林、希奧妮，你們跟我留下來，\n把這一帶清乾淨。", "face": { "winter": "colyn" }, "wait": 0.3 },
+      { "speaker": "柯林", "text": "了解。", "wait": 0.3 },
+      {
+        "speaker": "克莉思",
+        "text": "隊長！我們聽到好大的爆炸聲，\n就趕過來了！",
+        "move": { "chris": [30.8, 80.6], "luther": [29.8, 80.2] },
+        "face": { "chris": "winter", "luther": "winter", "winter": "chris" },
+        "wait": 1.6
+      },
+      { "speaker": "路德", "text": "……這是什麼味道？烤魚？", "wait": 0.3 },
+      { "speaker": "溫特", "text": "……不要問。\n你們兩個也留下來支援。", "wait": 0.3 },
+      { "speaker": "", "text": "……", "screen": "black", "screenFade": 1.2, "heal": false, "wait": 0.2 },
+      {
+        "speaker": "艾德林",
+        "text": "快快快！這裡是哪裡啊？",
+        "screen": "clear",
+        "screenFade": 1,
+        "camera": "撤退",
+        "place": {
+          "stretcher": [34.5, 81.4],
+          "red": [34.5, 81.55],
+          "avaren": [33.2, 82.1],
+          "amber": [35.8, 82.1],
+          "eldrin": [34.5, 80.7],
+          "winter": [31.6, 79],
+          "colyn": [30.6, 78.7],
+          "theonie": [32.6, 78.6],
+          "chris": [30.9, 79.9],
+          "luther": [32.2, 80]
+        },
+        "carry": { "avaren": false },
+        "face": { "winter": "left", "colyn": "left", "theonie": "left", "chris": "left", "luther": "left" },
+        "speed": { "stretcher": 34, "red": 34, "avaren": 34, "amber": 34, "eldrin": 34 },
+        "exit": { "stretcher": [23.5, 81.4], "red": [23.5, 81.55], "avaren": [22.2, 82.1], "amber": [24.8, 82.1], "eldrin": [23.5, 80.7] },
+        "down": { "red": true },
+        "wait": 1
+      },
+      { "speaker": "安柏", "text": "走錯路了！左轉左轉！", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "為什麼這裡比密室逃脫還難啦！", "wait": 0.3 },
+      { "speaker": "安柏", "text": "這裡已經是最簡單的Y區了！", "stop": true, "wait": 0.3 },
+      { "speaker": "溫特", "text": "雷德的傷不能拖。\n全員撤退，一起回應變中心。", "label": "retreat", "wait": 0.3 },
+      { "speaker": "柯林", "text": "了解，我來斷後。", "wait": 0.3 },
+      { "speaker": "", "text": "……", "screen": "black", "screenFade": 1.2, "heal": false, "wait": 0.2 },
+      {
+        "speaker": "艾德林",
+        "text": "快快快！這裡是哪裡啊？",
+        "screen": "clear",
+        "screenFade": 1,
+        "camera": "撤退",
+        "place": {
+          "stretcher": [34.5, 81.4],
+          "red": [34.5, 81.55],
+          "avaren": [33.2, 82.1],
+          "amber": [35.8, 82.1],
+          "eldrin": [34.5, 80.7],
+          "winter": [37.4, 81.2],
+          "theonie": [38.2, 80.6],
+          "colyn": [38.3, 81.9]
+        },
+        "carry": { "avaren": false },
+        "speed": { "stretcher": 34, "red": 34, "avaren": 34, "amber": 34, "eldrin": 34, "winter": 34, "theonie": 34, "colyn": 34 },
+        "exit": {
+          "stretcher": [19.5, 81.4],
+          "red": [19.5, 81.55],
+          "avaren": [18.2, 82.1],
+          "amber": [20.8, 82.1],
+          "eldrin": [19.5, 80.7],
+          "winter": [22.4, 81.2],
+          "theonie": [23.2, 80.6],
+          "colyn": [23.3, 81.9]
+        },
+        "down": { "red": true },
+        "wait": 1
+      },
+      { "speaker": "安柏", "text": "走錯路了！左轉左轉！", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "為什麼這裡比密室逃脫還難啦！", "wait": 0.3 },
+      { "speaker": "安柏", "text": "這裡已經是最簡單的Y區了！", "wait": 0.3 },
+      { "speaker": "溫特", "text": "希奧妮、安柏。", "wait": 0.3 },
+      { "speaker": "溫特", "text": "回去之後做好心理準備——\n事故檢討報告書，一人一份。", "wait": 0.3 },
+      { "speaker": "安柏", "text": "是、是的……", "sweat": true, "gloom": true, "wait": 0.3 },
+      { "speaker": "希奧妮", "text": "……啊——又要寫報告了……", "gloom": true, "stop": true, "wait": 0.3 }
+    ],
+    "opening": { "black": 1, "fade": 1.5 },
+    "bgm": "music/sneaky-movements.mp3",
+    "bgmVolume": 0.3
   }
 };

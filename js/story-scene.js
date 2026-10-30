@@ -93,7 +93,7 @@ const StoryScene = (() => {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><div id="storyChoices" role="group" aria-label="要怎麼做" hidden></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
     // 頭像外面包一層：上下顛倒時只翻頭像，頭像框上的汗滴、陰沉線條不跟著翻（框裡原本的排版規則照樣套用）
     const pic = el('dialoguePortrait');
@@ -219,6 +219,19 @@ const StoryScene = (() => {
     if (typeof flash === 'function') flash('被吃掉了！', e.x, e.y - 30, '#ffb36b', 3, true);   // 跟遊戲一樣彈出提示（js/game.js 的 sentryStatus）
     G.effects.push({ ring: true, x: e.x, y: e.y - 40, r: 6, r2: 34, life: .3, life0: .3, color: '#f3e7c9' });
     playSfx('milkfishGulp', .9, e.x, e.y, e.id);
+    state.shake = Math.max(state.shake, 3);
+  }
+  // 吐出來（每頁 spit: { 怪物名字: true }）：嘴裡的人掉在魚嘴前面，倒在地上（被雷劈過的話還是焦黑的）
+  const SPIT_TIME = .6;
+  function spitOut(e) {
+    e.spitT = 0;
+    const a = state.actors.find(x => x.swallowedBy === e); e.mf = null; if (!a) return;
+    const x = e.fried ? e.x + (e.fallDir || 1) * 3.4 * CELL : e.x + (e.faceRight ? 1 : -1) * CELL, y = e.y + 4;
+    Object.assign(a, { swallowedBy: null, hidden: false, alpha: 1, x, y, down: true, target: null, path: [] });
+    if (e.fried) a.charred = true;
+    if (state.skipping) return;
+    G.effects.push({ ring: true, x, y: y - 6, r: 6, r2: 30, life: .3, life0: .3, color: '#f3e7c9' });
+    playSfx('milkfishSpit', .9, x, y, e.id);
     state.shake = Math.max(state.shake, 3);
   }
   function poseMonster(e) {
@@ -416,7 +429,9 @@ const StoryScene = (() => {
     if (!spec) throw new Error('劇情怪物不存在：' + (m.type || 'lifeform'));
     // speed＝演出裡走位的速度（像素／秒）；phase：每隻笑的節奏錯開一點
     return Object.assign(createMonster(spec, m.at[0] * CELL, m.at[1] * CELL), { id: m.id, hideBar: true, faceRight: m.face === 'right', cd: rnd(.8, 2.6),
-      storySpeed: Number(m.speed) > 0 ? Number(m.speed) : 40, pose: '', phase: Math.random() });
+      storySpeed: Number(m.speed) > 0 ? Number(m.speed) : 40, pose: '', phase: Math.random(),
+      // fried：一開始就是被雷劈過、焦黑倒在地上（fall：-1 往左倒、1 往右倒）
+      ...(m.fried ? { fried: true, friedT: 99, fell: true, fallDir: Number(m.fall) < 0 ? -1 : 1 } : {}) });
   }
   const monster = id => state.monsters.find(e => e.id === id && !e.gone);
   function prepare() {
@@ -457,6 +472,11 @@ const StoryScene = (() => {
     el('storyAudioStart').hidden = true;
     ui.querySelector('.story-head').style.opacity = '0';
     state.lights = lights();
+    // 怪物 prey＝一開始嘴裡就含著這個角色（被雷劈過倒地的話，腳也不踢了）
+    for (const m of cfg.monsters || []) {
+      const e = m.prey && state.monsters.find(x => x.id === m.id), a = e && actor(m.prey); if (!a) continue;
+      Object.assign(a, { hidden: true, swallowedBy: e }); e.mf = { prey: { type: String(a.sprite || '').replace(/_[A-Z]$/, ''), storyPrey: true, still: !!e.fried } };
+    }
     // 演出途中才用到的圖（虱目魚小子張嘴、笑、嘴裡的腳）先下載：開場的「載入中」會等它們好，演到一半才不會變成一團色塊
     if (state.monsters.some(isMilkfish) && typeof MILKFISH_ART !== 'undefined')
       for (const f of ['attack', 'smile-01', 'smile-02', ...[1, 2, 3].flatMap(i => ['legs-sentry-0' + i, 'legs-guide-0' + i])]) monsterImage(MILKFISH_ART + f + '.png');
@@ -553,6 +573,8 @@ const StoryScene = (() => {
       e.goal = null; e.pose = ''; e.wander = null;
       if (state.skipping) gulpNow(e, a); else e.gulp = { who: a, t: 0, from: [e.x, e.y] };
     }
+    state.choosing = false; if (el('storyChoices')) el('storyChoices').hidden = true;
+    for (const [id, v] of Object.entries(beat.spit || {})) { const e = monster(id); if (v && e?.mf?.prey) { if (state.skipping) spitOut(e); else e.spitT = SPIT_TIME; } }   // 吐出來：先抖一下
     if (beat.thunder) thunder(beat);
     showCard(state.skipping ? null : beat.card);
     for (const [id, v] of Object.entries(beat.preyKick || {})) { const e = monster(id) || state.monsters.find(m => m.id === id); if (v && e && e.mf?.prey && !state.skipping) kickPrey(e); }
@@ -566,13 +588,39 @@ const StoryScene = (() => {
     state.nextAt = state.time + .18;
     if (typeof sfx === 'function') sfx('blip');
     if (state.chars < length) { state.chars = length; renderText(); return; }
+    if (state.choosing) return;   // 有選項：要選了才能往下
+    if (beat.stop) { finish(false); return; }   // stop：這頁之後就結束（分支的最後一頁，後面接的是另一條分支）
     if (state.index + 1 < state.cfg.beats.length) setBeat(state.index + 1);
     else finish(false);   // 畫面淡黑時音樂慢慢收掉
+  }
+  // ---- 選項（每頁 choices: [{ text, goto: 跳到哪個 label 的頁, outcome: 結果 }]）：台詞打完字後出現按鈕，選了才往下 ----
+  // outcome 會在劇情結束時交給呼叫的程式（例如 js/story-triggers.js 依結果換隊伍、回應變中心）
+  function showChoices() {
+    const beat = state.cfg.beats[state.index], box = el('storyChoices');
+    if (!beat.choices?.length) { box.hidden = true; state.choosing = false; return; }
+    state.choosing = true;
+    box.innerHTML = '';
+    beat.choices.forEach((c, i) => {
+      const b = document.createElement('button'); b.type = 'button'; b.dataset.storyAction = 'choose:' + i;
+      b.innerHTML = '<kbd>' + (i + 1) + '</kbd> '; b.append(c.text || '…');
+      box.appendChild(b);
+    });
+    box.hidden = false; box.querySelector('button')?.focus();
+  }
+  function choose(i) {
+    const c = state?.choosing && state.cfg.beats[state.index].choices?.[i]; if (!c) return;
+    if (typeof sfx === 'function') sfx('button');
+    state.choosing = false; el('storyChoices').hidden = true;
+    if (el('storyChoices').contains(document.activeElement)) document.activeElement.blur();   // 焦點留在收起來的按鈕上，Enter 會一直按到它
+    if (c.outcome) state.outcome = c.outcome;
+    const to = c.goto ? state.cfg.beats.findIndex(b => b.label === c.goto) : -1;
+    if (to >= 0) setBeat(to); else if (state.index + 1 < state.cfg.beats.length) setBeat(state.index + 1); else finish(false);
   }
   function renderText() {
     const beat = state.cfg.beats[state.index], chars = Array.from(beat.text);
     const text = chars.slice(0, Math.floor(state.chars)).join('');
     const typing = state.chars < chars.length;
+    if (!typing && beat.choices?.length && !state.choosing && el('storyChoices').hidden) showChoices();
     if (el('dialogueText').textContent !== text) el('dialogueText').textContent = text;
     el('dialogueText').classList.toggle('typing', typing);
     setDialogueNextLabel(typing ? '快速顯示' : state.index === state.cfg.beats.length - 1 ? '結束' : '下一句');
@@ -672,6 +720,7 @@ const StoryScene = (() => {
     if (e.hitSquashT > 0) e.hitSquashT = Math.max(0, e.hitSquashT - dt);   // 被打時壓扁回彈（js/render.js 的 drawEnemy）
     if (e.biteT > 0) e.biteT -= dt;
     if (e.gone) return;
+    if (e.spitT > 0) { e.hitT = .1; if ((e.spitT -= dt) <= 0) spitOut(e); }   // 抖一抖再吐
     if (e.fried) { tickFried(e, dt); return; }
     if (e.gulp) {   // 張嘴撲過去，最後一下最快
       const g = e.gulp; g.t += dt; const k = Math.min(1, g.t / GULP_TIME);
@@ -816,12 +865,14 @@ const StoryScene = (() => {
     ctx.translate(Math.round(a.x + kick) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY);
     ctx.rotate(treating ? .035 + Math.sin(state.time * 2) * .015 : 0);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
-    const w = a.set.single ? size * img.naturalWidth / img.naturalHeight : size;   // 單張圖的路人照原本比例
-    ctx.drawImage(img, -w / 2, -size / 2, w, size);
+    // 單張圖：照原本比例、跟人一樣高；imageScale＝照原圖像素大小畫（1＝跟角色同一個比例，例如擔架），底部對齊腳底
+    const nat = a.set.single && Number(a.imageScale) > 0 ? Number(a.imageScale) * size / 64 : 0;
+    const w = nat ? img.naturalWidth * nat : a.set.single ? size * img.naturalWidth / img.naturalHeight : size, hgt = nat ? img.naturalHeight * nat : size;
+    ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt);
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
     const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
     if (readyImage(held)) {
-      const k = size / 64, hw = held.naturalWidth * k, hh = held.naturalHeight * k;
+      const k = size / 64 * Math.min(1, 24 / Math.max(held.naturalWidth, held.naturalHeight)), hw = held.naturalWidth * k, hh = held.naturalHeight * k;   // 太大的圖（急救包）縮到手拿得住
       ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14), hw, hh);
     }
     ctx.restore();
@@ -882,6 +933,7 @@ const StoryScene = (() => {
     ctx.restore();
   }
   function leave() {
+    if (ui) { el('storyChoices').hidden = true; }
     if (ui) showCard(null);
     stopBgm(0); clearInput(); state = null; updateSteps();
     document.body.classList.remove('story-scene');
@@ -909,15 +961,16 @@ const StoryScene = (() => {
   }
   function backToGame() {
     const r = resume; if (!r) return;
+    const outcome = state?.outcome || null;   // 選項選了什麼（沒選就跳過劇情＝null）
     leave(); forcedId = null; resume = null;
     MAP_INDEX = r.index; initMap();
     G = r.G; mapWalls = r.walls; mapDoors = r.doors; doorAddedWalls = r.doorWalls; mapSolidOffsets = r.offsets;
     poweredMap = MAP; mapPowerOn = r.power; openElevatorStamp = r.elevator;
     occCache = null; occCacheFor = null;
     computeFlow(); updateCamera(); updateHUD();
-    r.onDone?.();
+    r.onDone?.(outcome);
   }
-  function action(name) { if (name === 'opening') { wakeSound(); return; } if (name === 'exit') exit(); else if (name === 'replay') start(); else if (name === 'next') next(); }
+  function action(name) { if (name === 'opening') { wakeSound(); return; } if (name.startsWith('choose:')) { choose(Number(name.slice(7))); return; } if (name === 'exit') exit(); else if (name === 'replay') start(); else if (name === 'next') next(); }
   // 最早註冊的 capture 擋住所有遊戲快捷鍵與滑鼠操作。只接受劇情介面的動作。
   // 擋住之後 js/sfx.js 收不到「第一次按鍵／點擊」，所以這裡替它喚醒音效引擎
   const wakeSound = () => {
@@ -938,9 +991,11 @@ const StoryScene = (() => {
       const buttons = [...(ui?.querySelectorAll('button') || [])].filter(b => b.getClientRects().length);
       const i = buttons.indexOf(document.activeElement);
       buttons[(i + (e.shiftKey ? -1 : 1) + buttons.length) % buttons.length]?.focus();
+    } else if (state?.choosing && /^[1-9]$/.test(e.key)) {
+      choose(Number(e.key) - 1);
     } else if (e.key === ' ' || e.key === 'Enter') {
       const button = document.activeElement?.closest('[data-story-action]');
-      if (button) action(button.dataset.storyAction);
+      if (button && button.getClientRects().length) action(button.dataset.storyAction);
       else if (state?.playing) next(); else if (!state?.ended) start();
     }
   }, true);

@@ -22,6 +22,7 @@
     'tudrc_explored_v1',   // 慣性導航記錄器記下的戰鬥地圖（js/tpad-map.js）
     'tudrc_story_builds_v1',   // 劇情地圖裡蓋的建築（js/combat-progress.js）
     'tudrc_tutorial_v1',   // 新手區教學：要不要看、看過哪些提示（js/tutorial.js）
+    'tudrc_story_triggers_v1',   // 走進地圖時播過的劇情（js/story-triggers.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
