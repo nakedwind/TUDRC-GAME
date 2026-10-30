@@ -46,7 +46,7 @@ const MOTH = {
   lure: { range: 7, perch: 6, cooldown: 14 },   // 幾格內的燈會吸引牠、停在燈上幾秒、休息完那盞燈幾秒內不再吸引牠
   deathPuffs: 7,        // 死掉時炸出幾團鱗粉
   sound: { flap: .35, flapEvery: .8, spray: .6, sprayEvery: 1.2 },   // 音量：拍翅膀、撒鱗粉（0～1，再乘音效編輯器的音量）；拍翅膀、撒鱗粉每幾秒播一次（音檔約 0.8、1.25 秒）
-  testSpawn: true,      // 測試用：true＝進戰鬥地圖時在營地右邊生一隻（測完改成 false）
+  testSpawn: false,     // 測試用：true＝進戰鬥地圖時在營地右邊生一隻（測完改成 false）
   testCampDist: 20,     // 測試用：營地右邊幾格（跟之前測試的葫蘆猴同一個位置）
 };
 // 三種鱗粉的顏色
