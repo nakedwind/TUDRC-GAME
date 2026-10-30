@@ -342,6 +342,7 @@ function useBackpackItem(id) {
   if (item.act === 'firstaid') { if (typeof useFirstAid === 'function') { closeBackpack(); useFirstAid(); } }   // 急救包、腎上腺素：關掉背包再用（js/equipment.js）
   else if (item.act === 'adrenaline') { if (typeof useAdrenaline === 'function') { closeBackpack(); useAdrenaline(); } }
   else if (item.act === 'eyedrops') { if (typeof useEyeDrops === 'function') { closeBackpack(); useEyeDrops(); } }   // 眼藥水：黑幕變淡（js/equipment.js）
+  else if (item.act === 'food') { if (typeof useFood === 'function') useFood(id); }   // 怪物掉的食物：馬上吃（js/food.js）
   else if (item.act === 'toolbox') { if (typeof useToolbox === 'function') { closeBackpack(); useToolbox(); } }   // 工具箱：修營地（js/equipment.js）
   else if (item.act === 'graffiti') { if (typeof openGraffitiPalette === 'function') { closeBackpack(true); openGraffitiPalette(id); } }   // 塗鴉筆：選圖案再畫（js/graffiti.js）
   else if (typeof item.use === 'function') { item.use(); updateHUD(); }

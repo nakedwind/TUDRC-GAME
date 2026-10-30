@@ -22,7 +22,21 @@ const SUPPLIES = [
   { id:'charm', name:'順順宮平安符', kind:'medical', price:100, special:true, image:'images/裝備/lucky-charm.png', effect:'🧧 擋一次咬', note:'帶在身上就有效：被 Smiler 咬的時候自動用掉，擋下那一次。', desc:'順順宮求來的平安符。在黑暗中被 Smiler 咬的時候，會替你擋下一次（擋完就用掉了）。' },
   // 眼藥水：黑幕變淡一段時間（看得清地圖），但暗處還是暗處，微笑者照樣會咬；數值在 data/equipment.js 的 EYE_DROPS
   { id:'eye-drops', name:'眼藥水', kind:'medical', act:'eyedrops', price:120, special:true, file:'眼藥水.png', effect:'👁️ 看清黑暗 3 分鐘', note:'點了之後 3 分鐘內黑暗變淡，看得清楚地圖；站在暗處一樣會被微笑者咬。', desc:'清涼的眼藥水，點下去眼睛一亮，黑漆漆的地方也看得出輪廓了。' },
-  { id:'banana', name:'香蕉', kind:'medical', use:'hp', restore:15, price:10, special:true, image:'images/monster/golden-banana-king/banana.png', desc:'打倒金蕉王掉下來的香蕉，金黃飽滿。吃下去恢復一點 HP。' },
+  // ---- 怪物掉的食物（act 'food'：馬上吃掉，不用包紮；吃法、buff 在 food 欄，掉落、火烤在 js/food.js）----
+  //   food：hp／sp 恢復多少；buff＝{ kind, val, dur }（kind 見 js/food.js 的 FOOD_BUFFS：guard 減傷、rate 射速、speed 移速）；sick＝生吃有幾成機率鬧肚子
+  //   cookTo：放在地上碰到火（火海、燃燒彈、希奧妮的火焰、爆炸）會烤成哪一個
+  { id:'banana', name:'香蕉', kind:'medical', act:'food', price:10, special:true, image:'images/monster/golden-banana-king/banana.png', cookTo:'grilled-banana',
+    food:{ hp:12, buff:{ kind:'speed', val:.10, dur:15 } }, effect:'❤ HP +12　💨 移速 +10%', desc:'打倒金蕉王掉下來的香蕉，金黃飽滿。吃下去恢復一點 HP，15 秒內跑得快一點。放在地上用火烤，會變成烤香蕉。' },
+  { id:'grilled-banana', name:'烤香蕉', kind:'medical', act:'food', price:20, special:true, file:'烤香蕉.png',
+    food:{ hp:20, buff:{ kind:'speed', val:.18, dur:20 } }, effect:'❤ HP +20　💨 移速 +18%', desc:'皮烤得焦黑、裡面又軟又甜的香蕉。吃下去恢復 HP，20 秒內跑得更快。' },
+  { id:'milkfish-belly', name:'虱目魚肚', kind:'medical', act:'food', price:15, special:true, file:'虱目魚肚.png', cookTo:'grilled-milkfish-belly',
+    food:{ hp:8, sick:.35 }, effect:'❤ HP +8　🤢 可能鬧肚子', desc:'打倒虱目魚小子掉下來的魚肚，還是生的。直接吃只恢復一點 HP，而且有機會鬧肚子（一陣子走不快）。放在地上用火烤，會變成烤虱目魚肚。' },
+  { id:'grilled-milkfish-belly', name:'烤虱目魚肚', kind:'medical', act:'food', price:40, special:true, file:'烤虱目魚肚-金黃版.png',
+    food:{ hp:25, buff:{ kind:'guard', val:.20, dur:25 } }, effect:'❤ HP +25　🛡️ 減傷 20%', desc:'烤得金黃、滴著魚油的虱目魚肚。吃下去恢復不少 HP，25 秒內受到的傷害減少 20%。' },
+  { id:'sashimi', name:'生魚片', kind:'medical', act:'food', price:12, special:true, file:'生魚片.png', cookTo:'grilled-fish-slice',
+    food:{ hp:5, sp:10 }, effect:'❤ HP +5　✦ SP +10', desc:'小虱目魚小子和魚頭君掉下來的生魚片，清爽冰涼。吃下去恢復一點 HP 和 SP。放在地上用火烤，會變成烤魚片。' },
+  { id:'grilled-fish-slice', name:'烤魚片', kind:'medical', act:'food', price:30, special:true, file:'烤魚片-金黃版.png',
+    food:{ hp:12, buff:{ kind:'rate', val:.20, dur:60 } }, effect:'❤ HP +12　⚡ 射速 +20%', desc:'烤得香脆的魚片。吃下去恢復 HP，60 秒內開槍更快（射速 +20%）。' },
   // ---- 零食 ----
   { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.05 }, file:'小學麵.png' },
   { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.07 }, file:'卡迪這.png' },

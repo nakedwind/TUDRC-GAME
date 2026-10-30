@@ -354,6 +354,7 @@ function mothBlast(c) {
   }
   if (typeof igniteSlicksNear === 'function') igniteSlicksNear(x, y, R);
   if (typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);
+  if (typeof cookFoodNear === 'function') cookFoodNear(x, y, R);   // 地上的食物烤熟（js/food.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);
   // 畫面：帶著鱗粉顏色的爆閃、衝擊環、火星
   const col = MOTH_COLORS[c.kind] || MOTH_COLORS.poison;

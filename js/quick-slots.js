@@ -57,7 +57,7 @@ function renderQuickCountSetting() {
 document.querySelectorAll('[data-qs-count]').forEach(b => b.addEventListener('click', () => changeQuickCount(+b.dataset.qsCount)));
 renderQuickCountSetting();
 const quickItem = id => (id && typeof itemById === 'function' ? itemById(id) : null) || (typeof supplyById === 'function' ? supplyById(id) : null);
-function quickAllowed(item) { return !!item && (item.use === 'hp' || item.use === 'sp' || item.act === 'adrenaline' || item.act === 'eyedrops' || item.act === 'toolbox' || item.act === 'graffiti' || item.act === 'firstaid'); }
+function quickAllowed(item) { return !!item && (item.use === 'hp' || item.use === 'sp' || item.act === 'adrenaline' || item.act === 'eyedrops' || item.act === 'food' || item.act === 'toolbox' || item.act === 'graffiti' || item.act === 'firstaid'); }
 // 新拿到的道具：依拿到的順序（背包的先後）放進第一個空格。用完的從 seen 拿掉，下次拿到會再自動放
 function quickAutoFill() {
   let changed = false;
@@ -111,6 +111,7 @@ function useQuickSlot(slot) {
   if (MAP_SAFE) { sfx('error'); flash('戰鬥中才能用', p.x, p.y - 54, '#c9d3dc'); return; }
   if (it.act === 'adrenaline') { if (typeof useAdrenaline === 'function') useAdrenaline(); return; }   // js/equipment.js
   if (it.act === 'eyedrops') { if (typeof useEyeDrops === 'function') useEyeDrops(); return; }   // 眼藥水（js/equipment.js）
+  if (it.act === 'food') { if (typeof useFood === 'function') useFood(it.id); return; }   // 怪物掉的食物（js/food.js）
   if (it.act === 'toolbox') { if (typeof useToolbox === 'function') useToolbox(); return; }   // 工具箱：修營地（js/equipment.js）
   if (it.act === 'firstaid') { if (typeof useFirstAid === 'function') useFirstAid(); return; }   // 急救包、異質急救包：選要治療的隊員（js/equipment.js；再按一次＝取消）
   useSupply(it.id);   // 醫療包、杏仁水…（js/shop.js）

@@ -955,6 +955,7 @@ function drawPlayer(p) {
     if (ratio > 0) { ctx.fillStyle = ratio > .35 ? '#63d7aa' : '#ff6363'; roundRect(x, y, w * ratio, h, 2); ctx.fill(); }
   }
   drawDashCooldown(p, hpY);   // 衝刺冷卻條（血條上方）
+  if (!MAP_SAFE && typeof drawFoodBuffs === 'function') drawFoodBuffs(p, hpY);   // 吃食物的 buff（血條右邊，js/food.js）
   drawPlayerReloadCountdown(p, size);
 }
 

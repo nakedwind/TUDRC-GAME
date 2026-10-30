@@ -1777,7 +1777,7 @@ function updatePlayerAttack(dt) {
   else if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const adx = aim.x - p.x, ady = aim.y - p.y, aimAng = Math.atan2(ady, adx);
   if (paint) { p.atkCd = BULLETS.paint.gap; useBullet('paint'); }   // 漆彈：跟一般子彈一樣瞄準，打中的怪物被標記（不扣血）
-  else { p.atkCd = 1 / PLAYER_ATK.rate; p.ammo--; }
+  else { p.atkCd = 1 / PLAYER_ATK.rate / (typeof foodRateMul === 'function' ? foodRateMul() : 1); p.ammo--; }   // 烤魚片：射速變快（js/food.js）
   p.dir = Math.abs(adx) >= Math.abs(ady) ? (adx < 0 ? 'left' : 'right') : (ady < 0 ? 'back' : 'front');
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   const vineMate = !paint && typeof vineShotTarget === 'function' ? vineShotTarget(aim) : null;   // 游標點在被絲瓜藤纏住的隊友身上：子彈射斷藤蔓（js/loofah-lady.js）
@@ -2415,6 +2415,7 @@ function update(dt) {
   if (typeof updateHangi === 'function') updateHangi(dt);
   if (typeof updateGourd === 'function') updateGourd(dt);   // 葫蘆猴拖行的刮痕、砸出來的地裂（js/gourd-monkey.js）
   if (typeof updateMoths === 'function') updateMoths(dt);   // 人面蝶的鱗粉霧、吸入、中毒／混亂／睡眠、粉塵爆炸（js/human-face-butterfly.js）
+  if (typeof updateFood === 'function') updateFood(dt);   // 地上的食物在火裡烤熟、吃到的 buff 倒數（js/food.js）
   if (typeof updateBananaKing === 'function') updateBananaKing(dt);   // 金蕉王的測試生成（js/golden-banana-king.js）   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）
   // 核心全部打破就結算（可以留下來清場、徹底控制；js/core-clear.js）
