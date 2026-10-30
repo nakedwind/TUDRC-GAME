@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html lang="zh-Hant">
 <head>
-<script src="data/story-scenes.js?v=y25open2-20261030"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
+<script src="data/story-scenes.js?v=y25open3-20261030"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
 <script>
   window.STORY_PREVIEW = /[?&]storyPreview=/.test(location.search);
   if (/[?&]preview=1(&|$)/.test(location.search)) {   // 劇情地圖編輯器預覽的是有劇情的地圖：同樣只讀
     try { const id = JSON.parse(localStorage.getItem('tudrc_map_preview_v1') || 'null')?.map?.id; window.STORY_PREVIEW = Object.values(STORY_SCENES).some(s => s.map === id); } catch (_) {}
   }
 </script>
-<script src="js/story-scene.js?v=y25open2-20261030"></script>
-<link rel="stylesheet" href="css/story-scene.css?v=y25open2-20261030">
+<script src="js/story-scene.js?v=y25open3-20261030"></script>
+<link rel="stylesheet" href="css/story-scene.css?v=y25open3-20261030">
 <link rel="stylesheet" href="css/memory-doors.css?v=20261025c">
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
   { const readonlyPreview = /[?&](uiedit|bagedit|squadedit|monsterPreview)=1(&|$)/.test(location.search) || window.STORY_PREVIEW; const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage && (readonlyPreview || window.STORY_MODE); } catch (_) { return false; } };
@@ -257,7 +257,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=pathfix-20261027"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=y25open2-20261030"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=y25open3-20261030"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=onebgm-20261030"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -331,7 +331,7 @@
   <script src="js/golden-banana-king.js?v=newsfx-20261027"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
   <script src="js/gourd-monkey.js?v=test-off-20261029"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=food-20261030"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
-  <script src="js/milkfish-kid.js?v=y25open2-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
+  <script src="js/milkfish-kid.js?v=y25open3-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
   <script src="js/render.js?v=merge-food-20261030"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=food-20261030"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
@@ -390,7 +390,7 @@
   <script src="js/quick-slots.js?v=merge-food-20261030"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->
   <script src="js/item-intro.js?v=hosprows-20261029"></script>   <!-- 第一次拿到新東西：說明視窗 -->
-  <script src="js/tutorial.js?v=y25open2-20261030"></script>   <!-- 新手區教學：開場劇情（爆炸、無線電）、要不要看教學、動畫教學 -->
+  <script src="js/tutorial.js?v=y25open3-20261030"></script>   <!-- 新手區教學：開場劇情（爆炸、無線電）、要不要看教學、動畫教學 -->
   <script src="data/posters.js?v=posterart2-20261023"></script>   <!-- 可以查看的海報：說明文字 -->
   <script src="js/posters.js?v=achv4-20261023"></script>   <!-- 查看海報 -->
   <script>document.write('<script src="data/bestiary.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器）；每次都讀最新的 -->

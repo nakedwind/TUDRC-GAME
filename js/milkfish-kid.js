@@ -383,7 +383,7 @@ function mfSwallowItem(e) {
 function drawMilkfishPrey(ctx, e, dx, dy, dw, dh, frameImg) {
   const t = e.mf && e.mf.prey; if (!t) return;
   const set = TYPES[t.type] && TYPES[t.type].guide ? MILKFISH_LEGS.guide : MILKFISH_LEGS.sentry;
-  const img = monsterImage(set[Math.floor(performance.now() / 1000 * MILKFISH.legsFps) % set.length]);
+  const img = monsterImage(set[t.still ? 0 : Math.floor(performance.now() / 1000 * MILKFISH.legsFps) % set.length]);   // still：不踢了（劇情裡被雷劈之後，js/story-scene.js）
   if (!img.complete || !img.naturalWidth) return;
   const fw = (frameImg && frameImg.naturalWidth) || e.drawWidth || 100, fh = (frameImg && frameImg.naturalHeight) || e.drawHeight || 120;
   const kx = dw / fw, ky = dh / fh;                                     // 圖片 1 像素在畫面上多寬、多高（壓扁時 ky 變小、kx 變大）

@@ -194,6 +194,7 @@ const StoryScene = (() => {
     // 嘴裡的腳用遊戲的畫法；storyPrey：不畫名字和血條（js/milkfish-kid.js 的 drawMilkfishPrey）
     e.mf = { prey: { type: String(a.sprite || '').replace(/_[A-Z]$/, ''), storyPrey: true } };
     if (state.skipping) return;
+    if (typeof flash === 'function') flash('被吃掉了！', e.x, e.y - 30, '#ffb36b', 3, true);   // 跟遊戲一樣彈出提示（js/game.js 的 sentryStatus）
     G.effects.push({ ring: true, x: e.x, y: e.y - 40, r: 6, r2: 34, life: .3, life0: .3, color: '#f3e7c9' });
     playSfx('milkfishGulp', .9, e.x, e.y, e.id);
     state.shake = Math.max(state.shake, 3);
@@ -233,14 +234,17 @@ const StoryScene = (() => {
     const targets = state.monsters.filter(e => !e.gone);
     for (const a of state.actors) { a.charging = false; a.fight = false; }
     targets.forEach((e, i) => {
-      e.gulp = null; e.pose = ''; e.goal = null; e.biteT = 0; poseMonster(e);   // 張著嘴的也收回站姿：焦黑的笑臉
-      e.fried = true; e.friedT = state.skipping ? 99 : 0; e.fallDir = i % 2 ? -1 : 1;   // 一隻往右倒、一隻往左倒，才不會疊成一團
+      e.gulp = null; e.pose = ''; e.goal = null; e.wander = null; e.biteT = 0; poseMonster(e);   // 張著嘴的也收回站姿：焦黑的笑臉
+      // 嘴裡含著人的那隻往左倒、嘴裡的人不再踢腳；其他往右倒
+      e.fried = true; e.friedT = state.skipping ? 99 : 0; e.fallDir = e.mf?.prey ? -1 : 1;
+      if (e.mf?.prey) e.mf.prey.still = true;
     });
     if (state.skipping) return;
     const cx = targets.length ? targets.reduce((s, e) => s + e.x, 0) / targets.length : state.camera[0] * CELL;
     const cy = targets.length ? targets.reduce((s, e) => s + e.y, 0) / targets.length : state.camera[1] * CELL;
     state.zap = { t: 0, next: 0, targets, cx, cy };
-    state.flash = { t: 0, hold: THUNDER.hold, dur: Math.max(.3, Number(beat.thunderFade) || 3) };
+    // thunderHold＝全白停幾秒、thunderFade＝花幾秒亮回來
+    state.flash = { t: 0, hold: Number(beat.thunderHold) > 0 ? Number(beat.thunderHold) : THUNDER.hold, dur: Math.max(.3, Number(beat.thunderFade) || 3) };
     state.rumble = { amp: THUNDER.shake, t: 0, dur: THUNDER.shakeTime };
     state.shake = Math.max(state.shake, THUNDER.shake * .4);
     if (typeof SFX !== 'undefined') SFX.play(THUNDER.sfx, 1, THUNDER.sfx + ':story');
@@ -264,13 +268,29 @@ const StoryScene = (() => {
       e.smokeT = rnd(.3, .55); pushBlackSmoke(e.x + (e.fell ? e.fallDir * rnd(10, 60) : rnd(-20, 20)), e.y - (e.fell ? rnd(0, 14) : rnd(10, 50)));
     }
   }
+  // ---- 繞著人走（每頁 monsterWander: { 怪物名字: 角色id }）：在那個人身邊 WANDER.near～far 格內走來走去，停一下再換地方 ----
+  // 換成走位、擺姿勢、吞人、劈雷，或那個人不見了（被吞）就停
+  const WANDER = { near: 1, far: 1.5, speed: 45, rest: [.3, 1] };
+  function wanderStep(e, dt) {
+    const a = actor(e.wander.who);
+    if (!a || a.hidden) { e.wander = null; return; }
+    if ((e.wander.wait -= dt) > 0) return;
+    for (let i = 0; i < 8; i++) {   // 挑一個走得到的點（不在牆裡）
+      const ang = -rnd(.15, Math.PI - .15), r = rnd(WANDER.near, WANDER.far) * CELL;   // 只走到那個人的上方、左右：怪物很大隻，走到前面會把人整個擋住
+      const x = a.x + Math.cos(ang) * r, y = a.y + Math.sin(ang) * r * .75;
+      if (!open(...cellAt(x, y))) continue;
+      e.goal = [x, y]; break;
+    }
+    e.wander.wait = rnd(...WANDER.rest);
+  }
   // ---- 打架（每頁 fight: { 角色id: true／false }）：走到怪物旁邊後，第一下是舉盾衝撞（把怪物撞退、鏡頭震），之後一直揮擊最近的怪物 ----
   // 用遊戲裡的近戰揮擊圖（雷德舉盾時是盾牌揮擊圖）；被吞掉、劈雷之後自動停
-  const FIGHT = { reach: 3.2, wind: .14, swing: .4, every: [.55, 1], ramPush: 26, hurtEvery: 2 };
+  // wind＝舉斧、impact＝劈中的時間、swing＝整下揮完（秒）；斧頭的弧線用遊戲的 drawSwingWeapon（js/render.js）
+  const FIGHT = { reach: 3.2, wind: .12, impact: .2, swing: .42, every: [.55, 1], ramPush: 26, hurtEvery: 2 };
   function tickFight(a, dt) {
     if (a.meleeSwing) {
       const s = a.meleeSwing; s.age += dt;
-      if (!s.hit && s.age >= s.wind) { s.hit = true; fightHit(a, s); }
+      if (!s.hit && s.age >= s.impact) { s.hit = true; fightHit(a, s); }
       if (s.age >= FIGHT.swing) a.meleeSwing = null;
     }
     if (!a.fight || a.hidden || a.target || a.down) return;
@@ -280,7 +300,8 @@ const StoryScene = (() => {
     if (!foe) { a.fightT = .3; return; }
     const ram = !!a.fightRam; a.fightRam = false;
     const ang = Math.atan2(foe.y - 20 - a.y, foe.x - a.x);
-    a.meleeSwing = { angle: ang, age: 0, wind: ram ? .06 : FIGHT.wind, foe, ram };
+    a.meleeSwing = ram ? { angle: ang, age: 0, wind: .04, impact: .06, duration: FIGHT.swing, foe, ram }
+      : { angle: ang, age: 0, wind: FIGHT.wind, impact: FIGHT.impact, duration: FIGHT.swing, foe };
     a.dir = Math.abs(Math.cos(ang)) >= Math.abs(Math.sin(ang)) ? (Math.cos(ang) < 0 ? 'left' : 'right') : (Math.sin(ang) < 0 ? 'back' : 'front');
     a.fightT = ram ? .8 : rnd(...FIGHT.every);
     playSfx('meleeAttack', .55, a.x, a.y, a.id + '-swing');
@@ -386,6 +407,9 @@ const StoryScene = (() => {
     el('storyAudioStart').hidden = true;
     ui.querySelector('.story-head').style.opacity = '0';
     state.lights = lights();
+    // 演出途中才用到的圖（虱目魚小子張嘴、笑、嘴裡的腳）先下載：開場的「載入中」會等它們好，演到一半才不會變成一團色塊
+    if (state.monsters.some(isMilkfish) && typeof MILKFISH_ART !== 'undefined')
+      for (const f of ['attack', 'smile-01', 'smile-02', ...[1, 2, 3].flatMap(i => ['legs-sentry-0' + i, 'legs-guide-0' + i])]) monsterImage(MILKFISH_ART + f + '.png');
     positionCamera();
   }
   function start() {
@@ -410,6 +434,7 @@ const StoryScene = (() => {
       if (state.screen) state.screen.t = state.screen.dur;
     }
     state.skipping = false;
+    if ('skipBgm' in state && !state.waitingForSound) { if (state.skipBgm) startBgm(state.skipBgm); else stopBgm(0); }   // 快轉經過換音樂的頁
     if (from) {
       const p = state.cfg.cameras?.[state.cameraKey];
       state.camera = p ? [p[0], p[1]] : state.camera; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom);
@@ -438,6 +463,11 @@ const StoryScene = (() => {
     }
     if (state.door && (beat.door === 'open' || beat.door === 'close')) state.door.target = beat.door === 'open' ? 1 : 0;
     // sfx：翻到這頁時播一個音效（js/sfx.js 的名字，例如 storyDoor 自動門）；sfxVolume＝音量倍率；快轉（storyFrom）時不播
+    // bgm：這頁換音樂（先把現在的收掉，bgmDelay 秒後播新的；空白＝只停掉）
+    if ('bgm' in beat) {
+      if (state.skipping) state.skipBgm = beat.bgm || '';
+      else { stopBgm(.4); state.nextBgm = beat.bgm ? { src: beat.bgm, at: state.time + (Number(beat.bgmDelay) || 0) } : null; }
+    }
     if (beat.sfx && typeof SFX !== 'undefined' && !state.skipping) SFX.play(beat.sfx, Number(beat.sfxVolume) > 0 ? Number(beat.sfxVolume) : 1, beat.sfx + ':story-beat');
     const show = a => { if (a.hidden) { a.hidden = false; a.alpha = 0; } a.fading = false; };   // 先隱藏的人：淡入出現
     for (const id of Object.keys(beat.hide || {})) { const a = actor(id); if (a) { a.hidden = true; a.target = null; a.path = []; a.exiting = a.fading = false; } }
@@ -463,11 +493,12 @@ const StoryScene = (() => {
     for (const [id, v] of Object.entries(beat.down || {})) { const a = actor(id); if (a) { a.down = !!v; if (!v) a.charred = false; } }   // 倒在地上（倒地圖）／爬起來
     for (const [id, v] of Object.entries(beat.charge || {})) { const a = actor(id); if (a) { a.charging = !!v; a.chargeFx = 0; } }
     for (const [id, v] of Object.entries(beat.fight || {})) { const a = actor(id); if (a) { a.fight = !!v; a.fightRam = !!v && !state.skipping; a.fightT = 0; } }   // 開始打：第一下是衝撞
-    for (const [id, p] of Object.entries(beat.monsterMove || {})) { const e = monster(id); if (e) e.goal = [p[0] * CELL, p[1] * CELL]; }
-    for (const [id, v] of Object.entries(beat.monsterPose || {})) { const e = monster(id); if (e) e.pose = v || ''; }
+    for (const [id, who] of Object.entries(beat.monsterWander || {})) { const e = monster(id); if (e) e.wander = who ? { who, wait: rnd(0, .5) } : null; }
+    for (const [id, p] of Object.entries(beat.monsterMove || {})) { const e = monster(id); if (e) { e.goal = [p[0] * CELL, p[1] * CELL]; e.wander = null; } }
+    for (const [id, v] of Object.entries(beat.monsterPose || {})) { const e = monster(id); if (e) { e.pose = v || ''; if (v) e.wander = null; } }
     for (const [id, who] of Object.entries(beat.swallow || {})) {
       const e = monster(id), a = actor(who); if (!e || !a || a.hidden) continue;
-      e.goal = null; e.pose = '';
+      e.goal = null; e.pose = ''; e.wander = null;
       if (state.skipping) gulpNow(e, a); else e.gulp = { who: a, t: 0, from: [e.x, e.y] };
     }
     if (beat.thunder) thunder(beat);
@@ -523,9 +554,11 @@ const StoryScene = (() => {
     }, 40);
   }
   // bgm 也可以是清單：["music/a.mp3", "music/a.mp3", "music/b.mp3"]＝照順序播，最後一首一直循環
-  function startBgm() {
+  // src：換成這首（每頁 bgm）；沒給就用劇情設定的 bgm
+  function startBgm(src) {
     stopBgm(0);
-    const list = (Array.isArray(state?.cfg.bgm) ? state.cfg.bgm : [state?.cfg.bgm]).filter(Boolean);
+    const want = src !== undefined ? src : state?.cfg.bgm;
+    const list = (Array.isArray(want) ? want : [want]).filter(Boolean);
     if (!list.length) return;
     const a = bgm = new Audio(list[0]); let i = 0;
     a.loop = list.length === 1; a.volume = 0;
@@ -593,8 +626,9 @@ const StoryScene = (() => {
       if (k >= 1) gulpNow(e, g.who);
       return;
     }
+    if (!e.goal && e.wander) wanderStep(e, dt);
     if (e.goal) {   // 走位（直線走過去，走路圖由 js/render.js 依移動自動換）
-      const dx = e.goal[0] - e.x, dy = e.goal[1] - e.y, d = Math.hypot(dx, dy), step = dt * e.storySpeed;
+      const dx = e.goal[0] - e.x, dy = e.goal[1] - e.y, d = Math.hypot(dx, dy), step = dt * (e.wander ? WANDER.speed : e.storySpeed);
       if (d <= step) { [e.x, e.y] = e.goal; e.goal = null; } else { e.x += dx / d * step; e.y += dy / d * step; }
     }
     poseMonster(e);
@@ -630,6 +664,7 @@ const StoryScene = (() => {
       const beat = state.cfg.beats[state.index];
       if (state.screen) state.screen.t += dt;
       if (state.flash) state.flash.t += dt;
+      if (state.nextBgm && state.time >= state.nextBgm.at && !state.ending) { const src = state.nextBgm.src; state.nextBgm = null; startBgm(src); }
       if (state.ending) {
         el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
         if (state.beatTime >= state.endDelay + 1.8 && state.cfg.autoExit && resume) { backToGame(); return; }   // 開場這類：變黑後直接回遊戲
@@ -726,6 +761,10 @@ const StoryScene = (() => {
       ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14), hw, hh);
     }
     ctx.restore();
+    // 雷德揮擊時手上的斧頭（跟遊戲一樣：fire_axe_01，衝撞那一下只用盾不拿斧）
+    if (a.meleeSwing && !a.meleeSwing.ram && a.sprite === 'red_B' && typeof drawSwingWeapon === 'function' && typeof redAxeImg !== 'undefined') {
+      ctx.save(); if (a.charred) ctx.filter = 'brightness(.5) saturate(.55) contrast(1.15)'; drawSwingWeapon(a, redAxeImg, 21, 32, 22); ctx.restore();
+    }
   }
   function lights() {
     // 只取地圖實際放置的燈；不加入普通戰鬥地圖的預設營地底排光或玩家裝備光。
@@ -745,6 +784,8 @@ const StoryScene = (() => {
       const [c, r] = key.split(',').map(Number); add(t, c, r, mapTileW(t), mapTileH(t));
     }
     for (const s of MAP.stamps || []) { const t = mapTileById(s.id); if (t) add(t, s.c, s.r, mapStampW(s, t), mapStampH(s, t), s.ox || 0, s.oy || 0); }
+    // 劇情自己加的光（劇情設定 lights: [[欄, 列, 半徑格數], …]）：地圖上沒有燈、但演出要看得到的地方；只照亮，不畫燈頭光暈
+    for (const [c, r, rad] of state?.cfg.lights || []) out.push({ x: c * CELL, y: r * CELL, r: (Number(rad) || 4) * CELL, warm: false, phase: 0 });
     return out;
   }
   function drawScene() {

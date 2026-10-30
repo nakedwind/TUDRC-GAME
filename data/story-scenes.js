@@ -273,6 +273,8 @@ const STORY_SCENES = {
     "zoom": 1.6,
     "subtitle": "Y25區地下街 · 異質體討伐任務",
     "autoExit": true,
+    "darkness": true,
+    "lights": [[37.4, 76.4, 5], [32, 76.8, 3]],
     "footsteps": true,
     "cameras": { "小隊": [28.8, 77], "魚群": [38.5, 76.6], "全景": [33, 76.8, 1.5], "兩人": [27.6, 77.2, 1.9], "魚嘴": [36.8, 76.4, 1.75] },
     "portraits": { "雷德": "red_B", "安柏": "amber_B", "希奧妮": "theonie_B" },
@@ -312,6 +314,7 @@ const STORY_SCENES = {
         "face": { "red": "right" },
         "speed": { "red": 130 },
         "fight": { "red": true },
+        "monsterWander": { "魚2": "red", "魚3": "red" },
         "shout": { "red": true },
         "monsterPose": { "魚1": "", "魚2": "", "魚3": "" },
         "wait": 0.1
@@ -359,7 +362,17 @@ const STORY_SCENES = {
         "sfx": "storyCharge",
         "wait": 1.2
       },
-      { "speaker": "希奧妮", "text": "喂……你這樣會把隊長劈死……", "thunder": true, "thunderFade": 3.5, "sweat": true, "wait": 2.6 },
+      {
+        "speaker": "希奧妮",
+        "text": "喂……你這樣會把隊長劈死……",
+        "thunder": true,
+        "thunderHold": 3.35,
+        "thunderFade": 3.5,
+        "bgm": "music/sneaky-movements.mp3",
+        "bgmDelay": 4.5,
+        "sweat": true,
+        "wait": 4.8
+      },
       {
         "speaker": "安柏",
         "text": "什什什什什麼？？\n學姊不是說隊長的防禦力很強嗎？？？",
