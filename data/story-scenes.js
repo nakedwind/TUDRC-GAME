@@ -384,7 +384,8 @@ const STORY_SCENES = {
         "sweat": true,
         "gloom": true,
         "wait": 0.3,
-        "textSize": 20
+        "textSize": 20,
+        "emote": { "amber": "sweat" }
       },
       { "speaker": "希奧妮", "text": "你這個爛砲兵……完蛋了……\n回去要寫一堆報告了……恭喜你殺人了。", "camera": "兩人", "wait": 0.3, "gloom": true, "sweat": true },
       {
@@ -396,7 +397,8 @@ const STORY_SCENES = {
         "textSize": 20,
         "preyKick": { "魚1": true },
         "gloom": true,
-        "sweat": true
+        "sweat": true,
+        "emote": { "amber": "sweat" }
       }
     ],
     "opening": { "black": 1, "fade": 1.5 },
@@ -416,7 +418,7 @@ const STORY_SCENES = {
     "lights": [[37.4, 76.4, 5], [32, 76.8, 3], [31, 80.8, 4]],
     "footsteps": true,
     "vignette": 0.3,
-    "cameras": { "現場": [35, 76.5, 2], "雷德": [34.8, 76.8, 2.3], "全景": [33, 78, 1.7], "撤退": [30, 79.8, 1.8], "會合": [33, 77.25, 1.7] },
+    "cameras": { "現場": [35, 76.5, 2], "雷德": [34.8, 76.8, 2.3], "全景": [33, 78, 1.7], "撤退": [30, 79.8, 1.8], "會合": [33, 77, 1.7] },
     "portraits": {
       "雷德": "red_B",
       "安柏": "amber_B",
@@ -506,8 +508,15 @@ const STORY_SCENES = {
       },
       { "speaker": "溫特", "text": "……這是怎麼回事？", "move": { "winter": [31.9, 77.75] }, "face": { "winter": "amber" }, "wait": 0.6 },
       { "speaker": "溫特", "text": "無線電裡說雷德受傷了。\n我沒想到……是被自己人劈成這樣。", "portraitDark": 0.2, "wait": 0.3 },
-      { "speaker": "安柏", "text": "對、對不起……！\n是我的雷擊……", "face": { "amber": "winter" }, "tremble": { "amber": true }, "sweat": true, "wait": 0.3 },
-      { "speaker": "希奧妮", "text": "……是我叫菜鳥趁魚頭聚在一起的時候動手的。", "face": { "theonie": "front" }, "wait": 0.3 },
+      {
+        "speaker": "安柏",
+        "text": "對、對不起……！都是我的錯...\n是我的雷擊……",
+        "face": { "amber": "winter" },
+        "tremble": { "amber": true },
+        "sweat": true,
+        "wait": 0.3
+      },
+      { "speaker": "希奧妮", "text": "……", "face": { "theonie": "front" }, "wait": 0.3 },
       {
         "speaker": "溫特",
         "text": "…………",
@@ -544,8 +553,8 @@ const STORY_SCENES = {
         "wait": 1.6
       },
       { "speaker": "路德", "text": "……這是什麼味道？烤魚？", "wait": 0.3 },
-      { "speaker": "溫特", "text": "……不要問。\n你們兩個也留下來支援。", "wait": 0.3 },
-      { "speaker": "", "text": "……", "screen": "black", "screenFade": 1.2, "heal": false, "wait": 0.2 },
+      { "speaker": "溫特", "text": "……\n你們兩個也留下來支援。", "wait": 0.3 },
+      { "speaker": "", "text": "......", "screen": "black", "screenFade": 1.2, "heal": false, "wait": 0.2 },
       {
         "speaker": "艾德林",
         "text": "快快快！這裡是哪裡啊？",
@@ -612,9 +621,9 @@ const STORY_SCENES = {
       { "speaker": "艾德林", "text": "為什麼這裡比密室逃脫還難啦！", "wait": 0.3 },
       { "speaker": "安柏", "text": "這裡已經是最簡單的Y區了！", "wait": 0.3 },
       { "speaker": "溫特", "text": "希奧妮、安柏。", "wait": 0.3 },
-      { "speaker": "溫特", "text": "回去之後做好心理準備——\n事故檢討報告書，一人一份。", "wait": 0.3 },
+      { "speaker": "溫特", "text": "回去之後做好心理準備寫事故檢討報告書。", "wait": 0.3 },
       { "speaker": "安柏", "text": "是、是的……", "sweat": true, "gloom": true, "wait": 0.3 },
-      { "speaker": "希奧妮", "text": "……啊——又要寫報告了……", "gloom": true, "stop": true, "wait": 0.3 }
+      { "speaker": "希奧妮", "text": "……唉......", "gloom": true, "stop": true, "wait": 0.3 }
     ],
     "opening": { "black": 1, "fade": 1.5 },
     "bgm": "music/sneaky-movements.mp3",
