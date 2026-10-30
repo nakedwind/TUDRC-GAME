@@ -5,7 +5,7 @@
 const BATTLE_MAPS = [
   {
     "id": "y1",
-    "name": "Y 區(測試地圖)",
+    "name": "(測試地圖)",
     "desc": "第一張地圖，難度較低，用來熟悉守營地。",
     "layers": {
       "floor": {
@@ -22876,29 +22876,29 @@ const BATTLE_MAPS = [
     "npcs": false,
     "portals": [
       {
-        "c": 8,
+        "c": 4,
         "r": 3,
-        "to": "y1"
-      },
-      {
-        "c": 6,
-        "r": 3,
-        "to": "y1"
-      },
-      {
-        "c": 7,
-        "r": 3,
-        "to": "y1"
+        "to": "map_mvtnqrs7"
       },
       {
         "c": 5,
         "r": 3,
-        "to": "y1"
+        "to": "map_mvtnqrs7"
       },
       {
-        "c": 4,
+        "c": 6,
         "r": 3,
-        "to": "y1"
+        "to": "map_mvtnqrs7"
+      },
+      {
+        "c": 7,
+        "r": 3,
+        "to": "map_mvtnqrs7"
+      },
+      {
+        "c": 8,
+        "r": 3,
+        "to": "map_mvtnqrs7"
       }
     ],
     "cols": 40,
@@ -36987,15 +36987,15 @@ const BATTLE_MAPS = [
       },
       {
         "id": "bird_head",
-        "weight": 60
+        "weight": 90
       },
       {
         "id": "milkfish_kid",
-        "weight": 30
+        "weight": 40
       },
       {
         "id": "milkfish_kid_small",
-        "weight": 60
+        "weight": 70
       }
     ],
     "camp": [],
