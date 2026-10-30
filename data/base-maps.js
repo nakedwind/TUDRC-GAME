@@ -9710,7 +9710,7 @@ const BASE_MAPS = [
         "c": 1,
         "r": 2,
         "layer": "object4",
-        "sortDepth": 6.25
+        "sortDepth": 7
       },
       {
         "id": "tile_hospital_hospital_bed",
@@ -9749,28 +9749,28 @@ const BASE_MAPS = [
         "c": 6,
         "r": 2,
         "layer": "object4",
-        "sortDepth": 6.25
+        "sortDepth": 7
       },
       {
         "id": "tile_hospital_privacy_curtain_bottom",
         "c": 11,
         "r": 2,
         "layer": "object4",
-        "sortDepth": 6.25
+        "sortDepth": 7
       },
       {
         "id": "tile_hospital_privacy_curtain_top_half",
         "c": 1,
         "r": 9,
         "layer": "ground",
-        "sortDepth": 2.25
+        "sortDepth": 3.25
       },
       {
         "id": "tile_hospital_privacy_curtain_top",
         "c": 6,
         "r": 9,
         "layer": "ground",
-        "sortDepth": 2.25
+        "sortDepth": 3.25
       },
       {
         "id": "tile_hospital_bedside_cabinet",
@@ -10145,7 +10145,20 @@ const BASE_MAPS = [
       "speed": 44,
       "reward": 8
     },
-    "solidOffsets": {},
+    "solidOffsets": {
+      "10,8": [
+        0,
+        -13
+      ],
+      "15,8": [
+        0,
+        -13
+      ],
+      "5,8": [
+        0,
+        -13
+      ]
+    },
     "safe": true,
     "npcs": false,
     "portals": [
