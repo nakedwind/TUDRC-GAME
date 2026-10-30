@@ -392,6 +392,7 @@ function drawMilkfishPrey(ctx, e, dx, dy, dw, dh, frameImg) {
   const x = dx + dw / 2 - w / 2, y = dy + (MILKFISH.mouthRow + smile) * ky - h;   // 腳的下緣對齊魚嘴開口
   ctx.save(); ctx.imageSmoothingEnabled = false;
   ctx.drawImage(img, Math.round(x), Math.round(y), Math.round(w), Math.round(h));
+  if (t.storyPrey) { ctx.restore(); return; }   // 劇情裡被吞（js/story-scene.js）：只畫腳
   // 被吃的是誰：腳上面寫名字＋HP 條
   const name = (TYPES[t.type] && TYPES[t.type].name) || '', cx = dx + dw / 2;
   const by = Math.round(y) - 4, bw = 30;

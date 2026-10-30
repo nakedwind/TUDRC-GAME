@@ -29,6 +29,7 @@ const TUTORIAL = {
   coreDarkCells: 4,           // 核心在暗處：走到幾格內也算看到（核心很大顆）
   exitCells: 3,               // 離出口幾格內跳「出口」提示
   boxCells: 7,                // 離箱子幾格內才浮出 Space 鍵
+  openingScene: 'y25_opening',   // 最開頭先播的劇情（data/story-scenes.js 的 id，在 Y25區地下街演雷德小隊和虱目魚小子）；空白＝不播
   // 開場劇情：一步一步往下演。wait＝等幾秒；sfx＝音效（volume＝音量，小一點聽起來比較遠）；shake＝畫面搖晃幾秒（power＝多用力）；
   // debris＝天花板掉碎石和粉塵幾秒（rocks＝每秒掉幾顆碎石、dust＝每秒飄幾團粉塵）；flicker＝畫面像電路不穩一樣閃黑幾下；
   // who＋lines＝誰說話（winter＝溫特，其他用隊員 id：eldrin 艾德林、theonie 希奧妮…）；radio＝用無線電說（名字後面加「（無線電）」）
@@ -536,11 +537,30 @@ function drawTutMarks(show) {
   banner.style.left = Math.round((r.left + r.right) / 2) + 'px'; banner.style.top = Math.round(r.bottom - 74) + 'px';   // 貼著遊戲畫面下緣（建築欄上面）
 }
 
+// ---- 遊戲開場（TUTORIAL.openingScene＝data/story-scenes.js 的劇情 id）----
+// 第一次進新手區、還沒演爆炸那段之前：先切到 Y25區地下街播雷德小隊的開場（js/story-scene.js 的 playFromGame），
+// 播完（或按「跳過劇情」）回到新手區，接著演 TUTORIAL.story。只播一次：開始播就記成看過，開新遊戲才會再播。
+let tutOpeningPending = false;
+function tutorialOpeningScene() {
+  const id = TUTORIAL.openingScene;
+  if (tutOpeningPending) return true;
+  if (!id || tutorialSeen('opening') || typeof STORY_SCENES === 'undefined' || !STORY_SCENES[id]) return false;
+  tutorialState.seen.push('opening'); tutorialSave();
+  tutOpeningPending = true;
+  setTimeout(() => {   // 換地圖不要在這一幀的更新中途做
+    tutOpeningPending = false;
+    if (typeof AssetGate !== 'undefined' && AssetGate.arm) AssetGate.arm();   // Y25區地下街的圖下載好之前先蓋「載入中」（劇情也跟著等）
+    StoryScene.playFromGame(id);
+  }, 0);
+  return true;
+}
+
 // ---- 每幀（js/game.js 的 frame 呼叫，暫停中也會跑）：檢查教學步驟、畫遮罩和提示 ----
 function tutorialFrame(dt) {
   const ok = typeof isNewbieMap === 'function' && isNewbieMap() && G && G.running && !G.over && G.player && G.player.hp > 0;
   if (tutLesson && !ok) abortTutorialLesson();
   if (!ok) { tutGuide = null; tutQueued = null; }
+  if (ok && !tutStory && !tutorialSeen('story') && !(typeof mapTransitioning !== 'undefined' && mapTransitioning) && tutorialOpeningScene()) return;   // 最最開始：先播 Y25區地下街的開場（演完回來才接下面的爆炸、無線電）
   if (ok && !tutStory && !tutorialSeen('story') && !(typeof mapTransitioning !== 'undefined' && mapTransitioning)) tutStory = { i: 0, t: 0, started: false, shakeT: 0, power: 0 };   // 第一次進新手區：先演開場劇情
   if (!ok) tutStory = null;
   tutStoryFrame(dt);

@@ -93,7 +93,7 @@ const StoryScene = (() => {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
@@ -106,10 +106,11 @@ const StoryScene = (() => {
     const sprite = beat.speaker && state.cfg.portraits?.[beat.speaker];
     box().classList.toggle('story-narration', !beat.speaker);
     box().classList.toggle('story-noface', !!beat.speaker && !sprite);   // 有名字、沒頭像的人（家屬）：不放頭像，但不是旁白的斜體
+    box().classList.toggle('story-sweat', !!beat.sweat);   // 流汗：頭像旁邊一滴汗一直往下滑（css/story-scene.css）
     el('dialogueName').textContent = beat.speaker || '';
     if (sprite) {
       const who = state.actors.find(a => a.name === beat.speaker && a.sprite === sprite);
-      const set = sprites(sprite);
+      const set = who ? actorSet(who) : sprites(sprite);
       const portrait = who ? portraitFrame(who) : null;
       el('dialoguePortrait').src = (portrait || set.front[0]).src; el('dialoguePortrait').alt = beat.speaker;
       el('dialoguePortraitFrame').dataset.char = sprite.replace(/_[A-Z]$/, '');
@@ -122,9 +123,12 @@ const StoryScene = (() => {
   }
   function portraitFrame(a) {
     if (a.wounded) return a.eyesClosed ? a.set.wounded : a.set.woundedOpen || a.set.wounded;
-    if (a.eyesClosed) return a.set.blink?.[2] || a.set.front[0];
-    return a.set.front[0];
+    const set = actorSet(a);
+    if (a.eyesClosed) return set.blink?.[2] || set.front[0];
+    return set.front[0];
   }
+  // 舉盾（shield）：雷德換成遊戲裡舉盾的那套圖（js/game.js 的 redShieldSprites）；其他人沒有盾牌圖，照常
+  const actorSet = a => a.shield && a.sprite === 'red_B' && typeof redShieldSprites !== 'undefined' && redShieldSprites.front ? redShieldSprites : a.set;
   function tickActorBlink(a, dt) {
     if (a.hidden || a.eyesClosed || a.moving || a.target || a.gunT > 0) {
       a.blinkTime = -1;
@@ -141,7 +145,8 @@ const StoryScene = (() => {
     if (a.bed && !seat) throw new Error('劇情床位不存在：' + (a.name || a.id) + '（' + a.bed + '）');
     return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null,
       x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL, alpha: 1,
-      dir: a.dir || seat?.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!seat?.bed };   // bed 也可以是椅子：坐椅子的人眼睛睜開
+      dir: a.dir || seat?.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!seat?.bed,   // bed 也可以是椅子：坐椅子的人眼睛睜開
+      gunT: a.gun ? 1 : a.gunT || 0 };   // gun：拿著槍預備（用持槍圖，只有 GUN_FOLDERS 裡的角色有）
   }
   // ---- 自動門（door: [欄, 列]＝地圖上門圖章的位置）：劇情自己畫，兩片門板往左右滑開 ----
   // 門圖（images/回憶場景/building_door.png，120×120）裡兩片門板的範圍，單位是圖片像素：
@@ -177,6 +182,86 @@ const StoryScene = (() => {
   }
   // 鏡頭 [欄, 列, 縮放]：第三個數字可省略（＝劇情的 zoom），越大拍得越近
   const camZoom = (p, base) => Number(p?.[2]) > 0 ? Number(p[2]) : base;
+  // ---- 虱目魚小子的演出（js/milkfish-kid.js 的圖）----
+  // 每頁 monsterPose: { 怪物名字: 'smile' 笑（兩張笑臉圖交替）／'attack' 張嘴（朝最近的人）／'' 站好 }；只有虱目魚小子有這些圖
+  // 每頁 swallow: { 怪物名字: 角色id }：張嘴撲過去，一口把人吞進頭上的魚嘴（只露出兩隻腳在踢）
+  const GULP_TIME = .35, LAUGH_FPS = 7;
+  const isMilkfish = e => e.behavior === 'milkfish' || e.behavior === 'milkfishSmall';
+  function gulpNow(e, a) {
+    e.gulp = null; e.x = a.x; e.y = a.y + 2;
+    a.hidden = true; a.target = null; a.path = []; a.charging = false; a.swallowedBy = e;
+    // 嘴裡的腳用遊戲的畫法；storyPrey：不畫名字和血條（js/milkfish-kid.js 的 drawMilkfishPrey）
+    e.mf = { prey: { type: String(a.sprite || '').replace(/_[A-Z]$/, ''), storyPrey: true } };
+    if (state.skipping) return;
+    G.effects.push({ ring: true, x: e.x, y: e.y - 40, r: 6, r2: 34, life: .3, life0: .3, color: '#f3e7c9' });
+    playSfx('milkfishGulp', .9, e.x, e.y, e.id);
+    state.shake = Math.max(state.shake, 3);
+  }
+  function poseMonster(e) {
+    if (!isMilkfish(e) || typeof mfPose !== 'function') return;
+    if (e.gulp) { mfPose(e, 'attack', e.gulp.who.x); return; }
+    if (e.pose === 'smile') { mfPose(e, 'smile-0' + (1 + Math.floor((state.time + (e.phase || 0)) * LAUGH_FPS) % 2)); return; }
+    if (e.pose === 'attack') {   // 朝最近的人（或嘴裡含著人的那隻）張嘴
+      const marks = [...state.actors.filter(a => !a.hidden), ...state.monsters.filter(m => m !== e && m.mf?.prey && !m.gone)];
+      const near = marks.sort((p, q) => Math.hypot(p.x - e.x, p.y - e.y) - Math.hypot(q.x - e.x, q.y - e.y))[0];
+      mfPose(e, 'attack', near ? near.x : e.x + (e.faceRight ? 1 : -1)); return;
+    }
+    mfPose(e, null);
+  }
+  // ---- 集氣（每頁 charge: { 角色id: true／false }）：身邊收束的光圈、電火花；劈雷之後自動停 ----
+  function tickCharge(a, dt) {
+    if (!a.charging || a.hidden) return;
+    const col = (typeof ULT_CHARGE_COLOR !== 'undefined' && ULT_CHARGE_COLOR[String(a.sprite).replace(/_[A-Z]$/, '')]) || '#aee9ff';
+    if ((a.chargeFx = (a.chargeFx || 0) - dt) <= 0) { a.chargeFx = .45; if (typeof spawnChargeFx === 'function') spawnChargeFx(a.x, a.y - 12, col); }
+    if (Math.random() < dt * 14) {
+      const s = Math.random() * Math.PI * 2, d = rnd(14, 30);
+      G.effects.push({ particle: true, kind: 'lightning', x: a.x + Math.cos(s) * d, y: a.y - 12 + Math.sin(s) * d * .8, vx: -Math.cos(s) * 40, vy: -Math.sin(s) * 40,
+        r: rnd(1.4, 2.6), life: rnd(.15, .3), life0: .3, color: '#cbf2ff' });
+    }
+  }
+  // ---- 巨雷（每頁 thunder: true）：好幾道雷劈在所有怪物（和被吞掉的人）身上，畫面整個閃白，thunderFade 秒慢慢亮回來 ----
+  // 怪物被劈得焦黑、抖一下後消失；被吞掉的人掉出來，焦黑倒在地上冒煙
+  // bolts＝連續劈幾秒、every＝每隔幾秒一道、strike＝劈下來幾秒後才全白、hold＝全白停幾秒、fry＝怪物焦黑抖多久才消失
+  const THUNDER = { bolts: .9, every: .07, strike: .16, fry: 1.6, hold: .35, sfx: 'storyThunder' };
+  function thunder(beat) {
+    const targets = state.monsters.filter(e => !e.gone);
+    for (const a of state.actors) a.charging = false;
+    for (const e of targets) {
+      e.gulp = null; e.pose = ''; e.goal = null; poseMonster(e);   // 張著嘴的也收回站姿：焦黑的笑臉
+      const a = state.actors.find(x => x.swallowedBy === e);
+      if (a) { a.swallowedBy = null; a.hidden = false; a.alpha = 1; a.x = e.x; a.y = e.y; a.down = true; a.charred = true; e.mf = null; }
+      if (state.skipping) e.gone = true; else e.fried = THUNDER.fry;
+    }
+    if (state.skipping) return;
+    const cx = targets.length ? targets.reduce((s, e) => s + e.x, 0) / targets.length : state.camera[0] * CELL;
+    const cy = targets.length ? targets.reduce((s, e) => s + e.y, 0) / targets.length : state.camera[1] * CELL;
+    state.zap = { t: 0, next: 0, targets, cx, cy };
+    state.flash = { t: 0, hold: THUNDER.hold, dur: Math.max(.3, Number(beat.thunderFade) || 3) };
+    state.rumble = { amp: 16, t: 0, dur: 1.4 };
+    if (typeof SFX !== 'undefined') SFX.play(THUNDER.sfx, 1, THUNDER.sfx + ':story');
+    for (const e of targets) if (typeof addScorchMark === 'function') addScorchMark(e.x, e.y + 10, 30, null, 'lightning');
+    if (typeof addScorchMark === 'function') addScorchMark(cx, cy + 10, 46, null, 'lightning');
+  }
+  function tickZap(dt) {
+    const z = state.zap; if (!z) return;
+    z.t += dt;
+    while (z.next <= Math.min(z.t, THUNDER.bolts)) {   // 一開始最粗的一道劈在中間，接著每隻身上連續閃好幾道
+      if (typeof spawnLightningBolt === 'function') {
+        if (!z.next) spawnLightningBolt(z.cx, z.cy, 5);
+        for (const e of z.targets) spawnLightningBolt(e.x + rnd(-10, 10), e.y - 20, rnd(2.4, 3.4));
+      }
+      z.next += THUNDER.every;
+    }
+    if (z.t > THUNDER.bolts) state.zap = null;
+  }
+  // 白光：一開始全白，停一下，再 dur 秒慢慢退掉（頭尾慢、中間快）
+  function flashLevel() {
+    const f = state.flash; if (!f) return 0;
+    if (f.t < THUNDER.strike) return .25;   // 先讓大家看到雷劈下來的那一下，才整個白掉
+    if (f.t < THUNDER.strike + f.hold) return 1;
+    const k = Math.min(1, (f.t - THUNDER.strike - f.hold) / f.dur);
+    return 1 - k * k * (3 - 2 * k);
+  }
   // ---- 腳步聲（劇情設定 footsteps: true）：主要角色走路時循環播放，跟遊戲裡玩家走路同一個音檔；跑得快播得快 ----
   const STEP_FILE = 'Sound effects/環境/腳步/footsteps02.mp3';
   let stepAudio = null;
@@ -199,8 +284,11 @@ const StoryScene = (() => {
   function makeMonster(m) {
     const spec = ACTIVE_MONSTERS.find(s => s.id === (m.type || 'lifeform'));
     if (!spec) throw new Error('劇情怪物不存在：' + (m.type || 'lifeform'));
-    return Object.assign(createMonster(spec, m.at[0] * CELL, m.at[1] * CELL), { id: m.id, hideBar: true, faceRight: m.face === 'right', cd: rnd(.8, 2.6) });
+    // speed＝演出裡走位的速度（像素／秒）；phase：每隻笑的節奏錯開一點
+    return Object.assign(createMonster(spec, m.at[0] * CELL, m.at[1] * CELL), { id: m.id, hideBar: true, faceRight: m.face === 'right', cd: rnd(.8, 2.6),
+      storySpeed: Number(m.speed) > 0 ? Number(m.speed) : 40, pose: '', phase: Math.random() });
   }
+  const monster = id => state.monsters.find(e => e.id === id && !e.gone);
   function prepare() {
     ensureUI(); clearInput();
     const cfg = config();
@@ -224,13 +312,15 @@ const StoryScene = (() => {
       playing: false, ending: false, ended: false, nextAt: 0, cameraKey, camera: [...(cfg.cameras?.[cameraKey] || [COLS / 2, ROWS / 2])],
       heal: false, hush: false, shake: 0, rumble: null, moteT: 0, boomT: cfg.opening?.firstExplosion ?? rnd(3, 6),
       openingBlack: Math.max(0, Number(cfg.opening?.black) || 0), openingFade: Math.max(.1, Number(cfg.opening?.fade) || 1.5), waitingForSound: false,
-      door: findDoor(cfg), screen: null, endDelay: 1.4, baseZoom, zoom: camZoom(cfg.cameras?.[cameraKey], baseZoom) };
+      door: findDoor(cfg), screen: null, endDelay: 1.4, baseZoom, zoom: camZoom(cfg.cameras?.[cameraKey], baseZoom), flash: null, zap: null };
     VIEW_SCALE = state.zoom;
     document.body.classList.add('story-scene');
     ui.hidden = true;
     el('storyTitle').textContent = cfg.title || ''; el('storySubtitle').textContent = cfg.subtitle || '';
     el('storyEndTitle').textContent = cfg.endTitle || cfg.title || ''; el('storyEndText').textContent = cfg.endText || '';
-    el('storyExitTop').textContent = resume ? '離開回憶' : '離開預覽'; el('storyExitEnd').textContent = resume ? '回到現實' : '返回開始畫面';
+    // autoExit：從遊戲裡播的（例如新遊戲的開場）看完直接回遊戲，不出現結束畫面；上面的按鈕變成「跳過劇情」
+    el('storyExitTop').textContent = resume ? (cfg.autoExit ? '跳過劇情' : '離開回憶') : '離開預覽';
+    el('storyFlash').style.opacity = '0'; el('storyExitEnd').textContent = resume ? '回到現實' : '返回開始畫面';
     showBox(false); el('storyEnd').hidden = true;
     el('storyFade').style.opacity = '1';
     el('storyVignette').style.opacity = String(Math.max(0, Math.min(1, Number(cfg.vignette) || 0)));   // vignette：畫面四周壓暗的強度 0～1
@@ -256,6 +346,7 @@ const StoryScene = (() => {
         a.target = null; a.path = []; a.dir = a.arriveDir || a.dir;
       }
       for (const a of state.actors) { if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; }
+      for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
       if (state.door) state.door.open = state.door.target;
       if (state.screen) state.screen.t = state.screen.dur;
     }
@@ -308,6 +399,18 @@ const StoryScene = (() => {
       a.arriveDir = dir; if (!a.target) a.dir = dir;
     }
     for (const [id, e] of Object.entries(beat.eyes || {})) { const a = actor(id); if (a) a.eyesClosed = e === 'closed'; }
+    for (const [id, v] of Object.entries(beat.gun || {})) { const a = actor(id); if (a) a.gunT = v ? 1 : 0; }   // 拿槍預備／放下
+    for (const [id, v] of Object.entries(beat.shield || {})) { const a = actor(id); if (a) a.shield = !!v; }   // 舉盾／放下
+    for (const [id, v] of Object.entries(beat.down || {})) { const a = actor(id); if (a) { a.down = !!v; if (!v) a.charred = false; } }   // 倒在地上（倒地圖）／爬起來
+    for (const [id, v] of Object.entries(beat.charge || {})) { const a = actor(id); if (a) { a.charging = !!v; a.chargeFx = 0; } }
+    for (const [id, p] of Object.entries(beat.monsterMove || {})) { const e = monster(id); if (e) e.goal = [p[0] * CELL, p[1] * CELL]; }
+    for (const [id, v] of Object.entries(beat.monsterPose || {})) { const e = monster(id); if (e) e.pose = v || ''; }
+    for (const [id, who] of Object.entries(beat.swallow || {})) {
+      const e = monster(id), a = actor(who); if (!e || !a || a.hidden) continue;
+      e.goal = null; e.pose = '';
+      if (state.skipping) gulpNow(e, a); else e.gulp = { who: a, t: 0, from: [e.x, e.y] };
+    }
+    if (beat.thunder) thunder(beat);
     if ('heal' in beat) state.heal = beat.heal;
     if ('hush' in beat) state.hush = beat.hush;
     setSpeaker(beat);   // 眼睛狀態套用後，頭像才跟著切換睜眼／閉眼受傷圖。
@@ -419,6 +522,30 @@ const StoryScene = (() => {
   }
   function tickMonster(e, dt) {
     if (e.hitT > 0) e.hitT -= dt;
+    if (e.gone) return;
+    if (e.fried > 0) {   // 被雷劈：焦黑、一直抖，時間到消失成一團灰
+      e.hitT = .1;
+      if ((e.fried -= dt) <= 0) {
+        e.gone = true;
+        for (let i = 0; i < 3; i++) if (typeof pushBlackSmoke === 'function') pushBlackSmoke(e.x + rnd(-14, 14), e.y - rnd(10, 40), true);
+        G.effects.push({ ring: true, x: e.x, y: e.y - 20, r: 8, r2: 40, life: .35, life0: .35, color: '#3a3a40' });
+        if (!state.deathSfx) { state.deathSfx = true; playSfx('milkfishDeath', .8, e.x, e.y, e.id); }   // 一起倒：只播一次
+      }
+      return;
+    }
+    if (e.gulp) {   // 張嘴撲過去，最後一下最快
+      const g = e.gulp; g.t += dt; const k = Math.min(1, g.t / GULP_TIME);
+      e.x = g.from[0] + (g.who.x - g.from[0]) * k * k; e.y = g.from[1] + (g.who.y + 2 - g.from[1]) * k * k;
+      poseMonster(e);
+      if (k >= 1) gulpNow(e, g.who);
+      return;
+    }
+    if (e.goal) {   // 走位（直線走過去，走路圖由 js/render.js 依移動自動換）
+      const dx = e.goal[0] - e.x, dy = e.goal[1] - e.y, d = Math.hypot(dx, dy), step = dt * e.storySpeed;
+      if (d <= step) { [e.x, e.y] = e.goal; e.goal = null; } else { e.x += dx / d * step; e.y += dy / d * step; }
+    }
+    poseMonster(e);
+    if (e.type !== 'lifeform') return;   // 只有生命體會一直揮擊；其他怪物只做走位、姿勢
     e.cd -= dt;
     // 往面前一格多的地方揮（拒馬、哨兵那邊），只有斬擊與衝擊特效
     const tx = e.x + (e.faceRight ? 1 : -1) * CELL * 1.3, ty = e.y;
@@ -449,8 +576,10 @@ const StoryScene = (() => {
       state.time += dt; state.beatTime += dt;
       const beat = state.cfg.beats[state.index];
       if (state.screen) state.screen.t += dt;
+      if (state.flash) state.flash.t += dt;
       if (state.ending) {
         el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
+        if (state.beatTime >= state.endDelay + 1.8 && state.cfg.autoExit && resume) { backToGame(); return; }   // 開場這類：變黑後直接回遊戲
         if (state.beatTime >= state.endDelay + 1.8) {
           state.playing = false; state.ended = true; G.phase = 'story-ended';
           el('storyEnd').hidden = false; el('storyEnd').querySelector('button').focus();
@@ -481,6 +610,8 @@ const StoryScene = (() => {
       }
       for (const a of state.actors) {
         tickActorBlink(a, dt);
+        tickCharge(a, dt);
+        if (a.charred && !a.hidden && (a.smokeT = (a.smokeT || 0) - dt) <= 0 && typeof pushBlackSmoke === 'function') { a.smokeT = rnd(.35, .6); pushBlackSmoke(a.x + rnd(-10, 10), a.y - 4); }   // 焦黑的人一直冒煙
         if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
         if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
         if (a.fading) { a.alpha -= dt / .45; if (a.alpha <= 0) { a.alpha = 1; a.hidden = true; a.fading = a.exiting = false; } }   // 走進門裡：淡出
@@ -488,6 +619,8 @@ const StoryScene = (() => {
       }
       if (state.door) { const d = state.door, s = dt / DOOR_TIME; d.open = d.open < d.target ? Math.min(d.target, d.open + s) : Math.max(d.target, d.open - s); }
       for (const e of state.monsters) tickMonster(e, dt);
+      tickZap(dt);
+      if (G.scorchMarks) for (const m of G.scorchMarks) m.t = Math.max(m.t - dt, (m.st.fade || 0) + .01);   // 雷擊焦痕：劇情裡一直留著（不淡掉）
       // heal：{ from: 治療者, to: 被治療的人 }；光點用治療者的疏導色
       const patient = state.heal && actor(state.heal.to);
       if (patient && (state.moteT -= dt) <= 0) { state.moteT = .12; motes(patient.x, patient.y - 10, SOOTHE_MOTE_COLORS[state.heal.from] || [90, 230, 140], 22); }
@@ -502,15 +635,19 @@ const StoryScene = (() => {
       state.zoom += (camZoom(target, state.baseZoom) - state.zoom) * k; VIEW_SCALE = state.zoom;   // 鏡頭推近／拉遠跟移動一樣慢慢來
       updateSteps();
     }
+    el('storyFlash').style.opacity = String(flashLevel());
     positionCamera(); draw();
   }
   function drawActor(a) {
     const size = PLAYER.drawSize;
     const frameActor = { ...a, sitting: null };
-    let img = a.wounded ? woundedFrame(a) : a.eyesClosed ? a.set.blink?.[2] : pickCharacterFrame(a.set, frameActor);
-    if (!readyImage(img)) img = a.set.front?.[0];
+    const set = actorSet(a);
+    let img = a.down && readyImage(a.set.fail) ? a.set.fail : a.wounded ? woundedFrame(a) : a.eyesClosed ? set.blink?.[2] : pickCharacterFrame(set, frameActor);
+    if (!readyImage(img)) img = set.front?.[0];
     if (!readyImage(img)) return;
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1));
+    if (a.charred) ctx.filter = 'brightness(.5) saturate(.55) contrast(1.15)';   // 被雷劈到焦黑（還認得出是誰）
+    const zap = a.charging ? Math.sin(state.time * 60) * .6 : 0;   // 集氣：全身微微發抖
     const breath = a.breathing ? Math.sin(state.time * 2.1 + a.x) * .45 : 0;
     const treating = state.heal && a.id === state.heal.from && !a.target;
     const kick = a.recoil ? (a.dir === 'left' ? a.recoil : -a.recoil) : 0;   // 開槍後座力：往後退一點
@@ -519,7 +656,7 @@ const StoryScene = (() => {
     const sk = a.shoutT > 0 ? a.shoutT / SHOUT_TIME : 0;
     const hk = a.hopT > 0 ? 1 - a.hopT / HOP_TIME : 0;   // 小跳：拋物線往上 5 像素再落回
     const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = (sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0) - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
-    ctx.translate(Math.round(a.x + kick) + shiver + shoutX, a.y - size / 2 + 18 + breath + shoutY);
+    ctx.translate(Math.round(a.x + kick) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY);
     ctx.rotate(treating ? .035 + Math.sin(state.time * 2) * .015 : 0);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
     const w = a.set.single ? size * img.naturalWidth / img.naturalHeight : size;   // 單張圖的路人照原本比例
@@ -561,10 +698,12 @@ const StoryScene = (() => {
     ctx.scale(VIEW_SCALE, VIEW_SCALE); ctx.translate(-cam.x, -cam.y); ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = '#000'; ctx.fillRect(cam.x, cam.y, viewW(), viewH());
     drawMapGround(ctx);
+    if (typeof drawScorchMarks === 'function') drawScorchMarks(ctx);   // 雷擊焦痕
     drawDoor();   // 自動門畫在地面這層：從門裡走出來、走進去的人都在門前面
     const sortables = []; collectMapOccluders(ctx, sortables);
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
-    for (const e of state.monsters) sortables.push({ y: e.y + 13, draw: () => drawEnemy(e) });
+    const drawFried = e => { ctx.save(); ctx.filter = 'brightness(.25) contrast(1.4)'; drawEnemy(e); ctx.restore(); };   // 被雷劈：焦黑
+    for (const e of state.monsters) if (!e.gone) sortables.push({ y: e.y + 13, draw: () => e.fried > 0 ? drawFried(e) : drawEnemy(e) });
     sortables.sort((a, b) => a.y - b.y).forEach(s => s.draw());
     drawMapTop(ctx);
     drawWorldEffects();
@@ -577,7 +716,7 @@ const StoryScene = (() => {
     stopBgm(0); clearInput(); state = null; updateSteps();
     document.body.classList.remove('story-scene');
     if (ui) ui.hidden = true;
-    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration'); }
+    if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-sweat'); }
   }
   function exit() {
     if (resume) { backToGame(); return; }   // 從記憶之門進來的：回到門前

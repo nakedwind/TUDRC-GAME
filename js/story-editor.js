@@ -362,6 +362,7 @@ function renderScenes() {
     field('結尾說明', txt(s, 'endText', { optional: true })),
     chk(s, 'darkness', '後室黑幕（只有燈照得到的地方亮）'),
     chk(s, 'footsteps', '主要角色走路時有腳步聲（跑得快播得快）'),
+    chk(s, 'autoExit', '從遊戲裡播的時候，看完直接回遊戲（不出現結束畫面；上面的按鈕變「跳過劇情」）'),
     h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '畫面四周壓暗', num(s, 'vignette', { min: 0, step: .05, optional: true, placeholder: '0' }), h('small', { style: 'color:#8c98a6' }, '（0＝不壓暗，1＝最暗）')),
     doorBox(s),
     explosionBox(s),
@@ -444,7 +445,7 @@ function renderObjects() {
     placeNew('主要角色', q => { let n = s.actors.length + 1; while (s.actors.some(a => a.id === 'actor' + n)) n++; s.actors.push({ id: 'actor' + n, name: '新角色', sprite: 'winter_B', at: q, dir: 'front' }); return 'actor:' + (s.actors.length - 1); }));
   group('受傷躺床的路人', s.wounded.map((w, i) => ['wounded:' + i, '#c0c0c0', '傷員' + (i + 1), (w.bed || []).join(',')]),
     () => { const b = bedStamps(curMap()).find(b => ![...s.wounded, ...s.actors].some(x => x.bed && x.bed[0] === b.c && x.bed[1] === b.r)); if (!b) { status('地圖上沒有空的床了。', true); return; } s.wounded.push({ bed: [b.c, b.r] }); sel = { key: 'wounded:' + (s.wounded.length - 1) }; showTab('obj'); commit(); });
-  group('生命體（只做攻擊動作）', s.monsters.map((m, i) => ['monster:' + i, '#ff5b5b', m.id || '生命體', dirName(m.face)]),
+  group('怪物（生命體會一直揮擊）', s.monsters.map((m, i) => ['monster:' + i, '#ff5b5b', m.id || '生命體', dirName(m.face)]),
     placeNew('生命體', q => { let n = s.monsters.length + 1; while (s.monsters.some(m => m.id === '怪物' + n)) n++; s.monsters.push({ id: '怪物' + n, type: 'lifeform', at: q, face: 'left' }); return 'monster:' + (s.monsters.length - 1); }));
   group('開槍的路人哨兵', s.shooters.map((sh, i) => ['shooter:' + i, '#66c8ff', '哨兵' + (i + 1), '打 ' + (sh.shoot || '？')]),
     placeNew('哨兵', q => { s.shooters.push({ at: q, dir: 'left', shoot: s.monsters[0]?.id || '' }); return 'shooter:' + (s.shooters.length - 1); }));
@@ -488,6 +489,8 @@ function renderObj() {
       !ac.bed && field('一開始面向', choose(ac, 'dir', DIRS)),
       field('走路速度（像素／秒，預設 26，溫特用 90）', num(ac, 'speed', { optional: true, step: 1, placeholder: '26' })),
       chk(ac, 'hidden', '一開始先隱藏（第一次走位才出現）'),
+      chk(ac, 'gun', '一開始拿著槍預備（持槍圖：希奧妮、安柏、艾德林、克里斯、溫特有）'),
+      chk(ac, 'shield', '一開始舉著盾（只有雷德有盾牌圖）'),
       chk(ac, 'breathing', '呼吸起伏（躺著的人）'),
       del('這個角色', () => s.actors.splice(i, 1)));
   } else if (kind === 'wounded') {
@@ -499,11 +502,12 @@ function renderObj() {
       del('這個傷員', () => s.wounded.splice(i, 1)));
   } else if (kind === 'monster') {
     const mo = s.monsters[i]; if (!mo) return;
-    box.append(h('h2', {}, '怪物：' + (mo.id || '')), h('p', { class: 'note' }, '只做攻擊動作與打擊特效，不會移動、不會受傷。'),
-      field('名字（哨兵用這個指定要打誰）', txt(mo, 'id', { after: (v, old) => { for (const sh of s.shooters) if (sh.shoot === old) sh.shoot = v; }, rerender: true })),
+    box.append(h('h2', {}, '怪物：' + (mo.id || '')), h('p', { class: 'note' }, '不會受傷。生命體一直做攻擊動作與打擊特效；其他怪物站著不動，用對話演出的「怪物走位／姿勢／吞人」來演。'),
+      field('名字（哨兵、對話演出用這個指定是哪一隻）', txt(mo, 'id', { after: (v, old) => renameMonster(s, old, v), rerender: true })),
       field('種類', choose(mo, 'type', monsterTypes)),
       field('位置', xy(mo, 'at', '選怪物的位置')),
-      field('朝哪邊揮', choose(mo, 'face', DIRS.filter(d => d[0] === 'left' || d[0] === 'right'))),
+      field('朝哪邊（生命體往這邊揮）', choose(mo, 'face', DIRS.filter(d => d[0] === 'left' || d[0] === 'right'))),
+      field('走位速度（像素／秒，預設 40）', num(mo, 'speed', { optional: true, step: 1, placeholder: '40' })),
       del('這隻怪物', () => s.monsters.splice(i, 1)));
   } else if (kind === 'shooter') {
     const sh = s.shooters[i]; if (!sh) return;
@@ -536,16 +540,26 @@ function renderObj() {
     showTab('beats');
   }
 }
+function renameMonster(s, old, v) {   // 怪物改名：哨兵要打的、對話演出裡的指名一起改
+  if (!old || !v || old === v) return;
+  for (const sh of s.shooters) if (sh.shoot === old) sh.shoot = v;
+  for (const b of s.beats) for (const k of MONSTER_ACTS) if (b[k] && old in b[k]) { b[k][v] = b[k][old]; delete b[k][old]; }
+}
 function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的指名一起改
   if (!old || !v || old === v) return;
+  for (const b of s.beats) for (const id of Object.keys(b.swallow || {})) if (b.swallow[id] === old) b.swallow[id] = v;
   for (const b of s.beats) for (const k of ACTOR_ACTS) if (b[k] && old in b[k]) { b[k][v] = b[k][old]; delete b[k][old]; }
   for (const b of s.beats) { if (b.heal) { if (b.heal.from === old) b.heal.from = v; if (b.heal.to === old) b.heal.to = v; } for (const [k, d] of Object.entries(b.face || {})) if (d === old) b.face[k] = v; }
 }
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge'];
+// 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
+const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow'];
+const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
 const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
+  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.monsterMove && '🐟', b.monsterPose && '🐟', b.swallow && '🍽', b.thunder && '⚡', b.sweat && '💧',
   'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
@@ -588,6 +602,23 @@ function beatBody(s, b, i) {
   rows('shout', '大喊', () => h('small', {}, '台詞出現時這個人頓一下，對話框也震一下'));
   rows('hop', '小跳', () => h('small', {}, '台詞出現時驚訝地輕輕跳一下（對話框不震）'));
   rows('carry', '拿著', id => txt(b.carry, id, { placeholder: '圖片路徑；空白＝放下', style: 'flex:1' }));
+  rows('gun', '持槍', id => onOff(b.gun, id, '拿槍預備', '放下槍'));
+  rows('shield', '盾牌', id => onOff(b.shield, id, '舉盾（只有雷德）', '放下盾'));
+  rows('down', '倒地', id => onOff(b.down, id, '倒在地上', '爬起來'));
+  rows('charge', '集氣', id => onOff(b.charge, id, '開始集氣（光圈、電火花）', '停止'));
+  // 怪物的演出：每列一隻怪物
+  const monRows = (key, title, make) => {
+    for (const id of Object.keys(b[key] || {})) acts.append(h('div', { class: 'act' }, h('b', {}, title), monSelect(b[key], id), make(id),
+      h('button', { type: 'button', class: 'small danger', onclick: () => { delete b[key][id]; if (!Object.keys(b[key]).length) delete b[key]; commit(); } }, '×')));
+  };
+  const monSelect = (map, id) => h('select', { onchange: e => { const v = e.target.value; if (map[v] !== undefined) { status(v + '這頁已經有了。', true); e.target.value = id; return; } const n = {}; for (const [k, x] of Object.entries(map)) n[k === id ? v : k] = x; for (const k of Object.keys(map)) delete map[k]; Object.assign(map, n); commit(); } },
+    s.monsters.map(m => h('option', { value: m.id, ...(m.id === id ? { selected: true } : {}) }, m.id)));
+  monRows('monsterMove', '怪物走位', id => xy(b.monsterMove, id, id + '在第 ' + (i + 1) + ' 頁走到哪'));
+  monRows('monsterPose', '怪物姿勢', id => choose(b.monsterPose, id, MONSTER_POSES));
+  monRows('swallow', '吞人', id => h('span', { class: 'row' }, '吞掉', choose(b.swallow, id, actorOptions()), h('small', {}, '撲過去一口吞進魚嘴（虱目魚小子）')));
+  acts.append(h('div', { class: 'act' }, h('b', {}, '巨雷'), chk(b, 'thunder', '雷劈在所有怪物身上：畫面閃白、怪物焦黑消失、被吞的人焦黑倒地', { rerender: true }),
+    b.thunder && h('span', { class: 'row' }, '白光', num(b, 'thunderFade', { min: .3, optional: true, placeholder: '3' }), '秒慢慢退掉')));
+  acts.append(h('div', { class: 'act' }, h('b', {}, '流汗'), chk(b, 'sweat', '說話的人頭像旁邊流一滴汗')));
   const healHolder = { v: b.heal === false ? 'stop' : b.heal ? 'start' : '' };
   const healRow = h('div', { class: 'act' }, h('b', {}, '治療'), choose(healHolder, 'v', [['', '不變'], ['start', '開始'], ['stop', '停止']], { parse: v => {
     if (v === 'start') b.heal = { from: s.actors[1]?.id || s.actors[0]?.id || '', to: s.actors[0]?.id || '' }; else if (v === 'stop') b.heal = false; else delete b.heal; return v; } }));
@@ -616,6 +647,16 @@ function beatBody(s, b, i) {
     setPick({ label: actorName(id) + '在第 ' + (i + 1) + ' 頁' + what + '（加好後可以換人）', fn: q => { (b[key] = b[key] || {})[id] = q; } });
   } }, text);
   const moveBtn = pickAct('move', '＋ 走位', '走到哪');
+  // 怪物的演出：先加給這頁還沒有的那隻，再用左邊的選單換
+  const freeMon = key => s.monsters.find(m => !(b[key] && m.id in b[key]))?.id;
+  const monAct = (key, text, make) => h('button', { type: 'button', class: 'small', disabled: !s.monsters.length, onclick: () => {
+    const id = freeMon(key); if (!id) return;
+    (b[key] = b[key] || {})[id] = make(id); commit();
+  } }, text);
+  const monMoveBtn = h('button', { type: 'button', class: 'small', disabled: !s.monsters.length, onclick: () => {
+    const id = freeMon('monsterMove'); if (!id) return;
+    setPick({ label: id + '在第 ' + (i + 1) + ' 頁走到哪（加好後可以換別隻）', fn: q => { (b.monsterMove = b.monsterMove || {})[id] = q; } });
+  } }, '＋ 怪物走位');
   return h('div', { class: 'beat-body' },
     dl, h('div', { class: 'row' }, h('label', { class: 'f', style: 'flex:1' }, '說話者（空白＝旁白）', txt(b, 'speaker', { list: 'speakerList', rerender: true, placeholder: '旁白' })),
       h('label', { class: 'f' }, '等幾秒', num(b, 'wait', { min: 0 }))),
@@ -623,7 +664,10 @@ function beatBody(s, b, i) {
     acts,
     h('div', { class: 'row' }, moveBtn, addAct('face', '＋ 轉向', () => 'front'), addAct('eyes', '＋ 眼睛', () => 'open'),
       pickAct('exit', '＋ 離場', '走到哪後消失'), pickAct('place', '＋ 瞬移', '瞬移到哪'), addAct('hide', '＋ 消失', () => true),
-      addAct('speed', '＋ 速度', () => 60), addAct('tremble', '＋ 顫抖', () => true), addAct('shout', '＋ 大喊', () => true), addAct('hop', '＋ 小跳', () => true), addAct('carry', '＋ 拿著', () => '')),
+      addAct('speed', '＋ 速度', () => 60), addAct('tremble', '＋ 顫抖', () => true), addAct('shout', '＋ 大喊', () => true), addAct('hop', '＋ 小跳', () => true), addAct('carry', '＋ 拿著', () => ''),
+      addAct('gun', '＋ 持槍', () => true), addAct('shield', '＋ 盾牌', () => true), addAct('down', '＋ 倒地', () => true), addAct('charge', '＋ 集氣', () => true)),
+    s.monsters.length ? h('div', { class: 'row' }, monMoveBtn, monAct('monsterPose', '＋ 怪物姿勢', () => 'smile'),
+      monAct('swallow', '＋ 吞人', () => s.actors[0]?.id || '')) : null,
     actorSwitchNote(s),
     h('div', { class: 'row', style: 'margin-top:8px' },
       h('button', { type: 'button', class: 'small', disabled: i === 0, onclick: () => { [s.beats[i - 1], s.beats[i]] = [s.beats[i], s.beats[i - 1]]; beatSel = i - 1; commit(); } }, '↑ 上移'),
@@ -674,6 +718,9 @@ function problems() {
     if (b.camera && !s.cameras[b.camera]) out.push([at + '鏡頭「' + b.camera + '」不存在', key]);
     for (const k of ACTOR_ACTS) for (const id of Object.keys(b[k] || {})) if (!ids.has(id)) out.push([at + '找不到角色「' + id + '」', key]);
     for (const k of ['move', 'exit', 'place']) for (const [id, q] of Object.entries(b[k] || {})) if (isSolid(m, q)) out.push([at + actorName(id) + '的目標位置在不可穿透的格子裡', key]);
+    for (const k of MONSTER_ACTS) for (const id of Object.keys(b[k] || {})) if (!mons.has(id)) out.push([at + '找不到怪物「' + id + '」', key]);
+    for (const [id, q] of Object.entries(b.monsterMove || {})) if (isSolid(m, q)) out.push([at + id + '的目標位置在不可穿透的格子裡', key]);
+    for (const [id, who] of Object.entries(b.swallow || {})) if (!ids.has(who)) out.push([at + id + '要吞的角色「' + who + '」不存在', key]);
     if (b.door && !s.door) out.push([at + '要開關自動門，但劇情設定裡還沒選門', key]);
     for (const d of Object.values(b.face || {})) if (!DIRS.some(x => x[0] === d) && !s.points[d] && !ids.has(d)) out.push([at + '轉向的目標「' + d + '」不存在', key]);
     if (b.heal && (!ids.has(b.heal.from) || !ids.has(b.heal.to))) out.push([at + '治療的人不存在', key]);
