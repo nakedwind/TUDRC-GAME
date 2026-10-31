@@ -33,6 +33,29 @@ function storagePropKind(id){
   if(file.endsWith('/storage-locker-closed.png'))return 'closed';
   return null;
 }
+// 省效能：同一張地圖裡，同一個素材的種類不會變，算過一次就記起來（換地圖才重算）
+const storagePropKindMemo=new Map();
+let storagePropKindMap=null;
+function storagePropKindCached(id){
+  if(storagePropKindMap!==MAP){storagePropKindMemo.clear();storagePropKindMap=MAP;}
+  if(!storagePropKindMemo.has(id))storagePropKindMemo.set(id,storagePropKind(id));
+  return storagePropKindMemo.get(id);
+}
+// 省效能：地圖上哪幾格放了置物箱、拾取物、電源開關。整張地圖有幾千格，以前每一幀要整張掃好幾次（會卡），
+// 現在換地圖（或物件數量變了）才重掃一次、記起來。開箱、撿走這些會變的狀態，下面 storagePropEntries 照樣每次重新看。
+let storagePropScan=null;   // { map, stamps, list }
+function storagePropSpots(){
+  const stamps=(MAP.stamps||[]).length;
+  if(storagePropScan&&storagePropScan.map===MAP&&storagePropScan.stamps===stamps)return storagePropScan.list;
+  const list=[];
+  for(const s of MAP.stamps||[]) if(storagePropKindCached(s.id)) list.push({id:s.id,c:s.c,r:s.r,layer:s.layer||'top',stamp:s});
+  for(const [layer,tiles] of Object.entries(MAP.layers||{})) for(const [key,id] of Object.entries(tiles)){
+    if(!storagePropKindCached(id))continue;
+    const [c,r]=key.split(',').map(Number);list.push({id,c,r,layer,stamp:null});
+  }
+  storagePropScan={map:MAP,stamps,list};
+  return list;
+}
 function storagePropToken(id,c,r,layer,ox=0,oy=0){
   return JSON.stringify([MAP.id || MAP_INDEX,id,c,r,layer,ox,oy]);
 }
@@ -40,7 +63,7 @@ function storagePropEntries(){
   if(!MAP) return [];
   const entries=[];
   const add=(id,c,r,layer,stamp=null)=>{
-    const kind=storagePropKind(id);if(!kind)return;
+    const kind=storagePropKindCached(id);if(!kind)return;
     const t=mapTileById(id); if(!t) return;
     const ox=stamp?.ox||0,oy=stamp?.oy||0;
     const token=storagePropToken(id,c,r,layer,ox,oy);
@@ -50,10 +73,7 @@ function storagePropEntries(){
     entries.push({id,kind,token,stamp,hidden,x:x0+mapTileW(t)*CELL/2,y:y0+mapTileH(t)*CELL-CELL/2,top:y0,
       open:kind==='open'||unlockedStorageLockers.has(token)});
   };
-  for(const s of MAP.stamps||[]) add(s.id,s.c,s.r,s.layer||'top',s);
-  for(const [layer,tiles] of Object.entries(MAP.layers||{})) for(const [key,id] of Object.entries(tiles)){
-    const [c,r]=key.split(',').map(Number);add(id,c,r,layer);
-  }
+  for(const s of storagePropSpots()) add(s.id,s.c,s.r,s.layer,s.stamp);   // 順序跟以前一樣：先大圖章、再各圖層的格子
   for (const drop of G?.equipmentDrops || []) entries.push({ kind:'equipment-drop', drop, x:drop.x, y:drop.y, top:drop.y-28 });
   for (const drop of G?.groundItems || []) entries.push({ kind:'ground-item', drop, x:drop.x, y:drop.y, top:drop.y-30 });   // 溫特自己放在地上的（js/ground-items.js）
   return entries;
@@ -170,7 +190,7 @@ function grantLockerLoot(loot,where='置物櫃'){
   }
 }
 function storagePropDisplayTile(id,c,r,layer,stamp=null){
-  const kind=storagePropKind(id);
+  const kind=storagePropKindCached(id);   // 畫地圖時每一格都會問：用記起來的結果
   if(!kind)return null;
   if(kind==='power')return mapTileById(mapPowerIsOn(circuitOf(stamp))?'tile_interactive_power_switch_on':'tile_interactive_power_switch_off')||null;
   const token=storagePropToken(id,c,r,layer,stamp?.ox||0,stamp?.oy||0);
