@@ -771,6 +771,10 @@ function updateNpcTalk(npc, dt) {
   if (npc.sayWait <= 0) {
     const key = npc.id || npc.type;   // NPC 用 id、哨兵用 type
     const away = !battle && awayLineKey(key);   // 負荷高被送到疏導室、受傷住院：改說那裡的台詞（對話編輯器的「在疏導室閒晃」「住院時的頭上泡泡」），沒填就不說
+    // 在醫院裡、但不是住院中的隊員（剛出院正要走回去）：不說平常的閒晃台詞（平常就待在醫院的人照樣說）
+    const hospitalGuest = !battle && !away && npc.kind === 'tower' && typeof VITALS !== 'undefined' && MAP && MAP.name === VITALS.hospitalMap
+      && (typeof npcLocation !== 'function' || (npcLocation(key) || {}).map !== VITALS.hospitalMap);
+    if (hospitalGuest) { npc.sayWait = 4; return; }
     const lines = battle ? chapterPick(BATTLE_WANDER_LINES[key]) : away ? dialogueLines(key, away) : ((typeof WANDER_LINES !== 'undefined' && chapterPick(WANDER_LINES[key])) || null);   // 各說各的：出勤泡泡沒填就不說（不借用閒晃台詞）
     if (lines && lines.length) npc.say = { text: lines[Math.floor(Math.random() * lines.length)], life: talkCfg.duration };
     else npc.sayWait = 4;   // 沒台詞：晚點再檢查

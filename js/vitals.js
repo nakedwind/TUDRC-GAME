@@ -173,8 +173,10 @@ function updateVitals(dt) {
     if (onHospitalMap() && m.hospital) {
       if (t.hp >= t.maxhp) {   // 補滿：出院
         m.hospital = false;
-        if (t.sitting) t.sitT = 0;   // 起床（js/sentry.js 的 npcSeatStep）
+        if (t.sitting && typeof npcStandUp === 'function') npcStandUp(t);   // 起床
         if (typeof sentryStatus === 'function') sentryStatus(t, '傷好了，出院', '#7ee0a8');
+        const home = typeof npcLocation === 'function' ? npcLocation(t.type) : null;
+        if (!home || home.map !== VITALS.hospitalMap) walkOffMap(t);   // 走回平常待的地方（走出醫院的出入口就離開這張地圖）
       } else if (inBed(t)) t.sitT = Infinity;   // 住院中：一直躺著
       else if (!t.sitting && !t.seatGoal) {   // 走去找空的病床
         const bed = mapSeats().find(s => s.bed && !seatTaken(s, t)), approach = bed && seatApproachPoint(bed);
@@ -213,12 +215,15 @@ function sendToHospital(t) {
   if (!canSendToHospital(t)) return;
   vitalsMate(t.type).hospital = true; saveVitals();
   if (onHospitalMap()) { systemNotice(TYPES[t.type].name + '去病床躺著休息'); return; }   // 已經在醫院：下一幀自己去找病床
-  // 走到這張地圖最近的出入口，然後離開（下次去醫院就看得到他躺在病床上）
+  walkOffMap(t);   // 下次去醫院就看得到他躺在病床上
+  systemNotice(TYPES[t.type].name + '前往 ' + VITALS.hospitalMap + ' 休息');
+}
+// 走到這張地圖最近的出入口，然後離開這張地圖（去醫院、出院走回平常的位置都用這個；stepLeaving 每幀檢查走到了沒）
+function walkOffMap(t) {
   let best = null, bd = Infinity;
   for (const pt of mapPortals || []) { const [x, y] = center(pt.c, pt.r), d = Math.hypot(x - t.x, y - t.y); if (d < bd) { bd = d; best = { x, y }; } }
-  t.vitalsLeaving = { t: 0, to: best };
+  t.vitalsLeaving = { t: 0, to: best }; t.say = null;
   if (best) { t.mode = 'goto'; t.target = { x: best.x, y: best.y }; t.anchor = null; t.waitT = 0; t.navPath = null; t.navGoal = null; t.sitting = null; t.seatGoal = null; }
-  systemNotice(TYPES[t.type].name + '前往 ' + VITALS.hospitalMap + ' 休息');
 }
 function stepLeaving(t, dt) {
   const L = t.vitalsLeaving; L.t += dt;

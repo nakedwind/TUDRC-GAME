@@ -9915,7 +9915,7 @@ const BASE_MAPS = [
         "c": 6,
         "r": 12,
         "layer": "object",
-        "ox": -14,
+        "ox": -16,
         "oy": -8
       },
       {

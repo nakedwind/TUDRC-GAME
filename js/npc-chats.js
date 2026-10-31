@@ -24,7 +24,7 @@ const npcChatLastAt = {};        // 每一段上次聊完的時間（冷卻）
 const NPC_CHAT_GAP = 64;   // 聊天時兩人隔多遠站（像素）
 const npcChatActor = id => (G.npcs || []).find(n => n.id === id) || (G.towers || []).find(t => t.type === id) || null;
 const npcChatSpeed = a => a.kind === 'tower' ? ((TYPES[a.type] && TYPES[a.type].walkSpeed) || 80) : 65;
-const npcChatFree = a => a && !(a.hp <= 0) && !a.berserk && !a.grabbed && !a.grabFall && !a.eatenBy && !(typeof dialogueState !== 'undefined' && dialogueState && dialogueState.actor === a);
+const npcChatFree = a => a && !(a.hp <= 0) && !a.vitalsLeaving && !a.berserk && !a.grabbed && !a.grabFall && !a.eatenBy && !(typeof dialogueState !== 'undefined' && dialogueState && dialogueState.actor === a);
 
 // ---- 站位：素材（桌子）前面一排、或指定的格子；每個人隔 NPC_CHAT_GAP 像素站一排，左邊的面向右、右邊的面向左 ----
 function npcChatSpots(chat, n) {
