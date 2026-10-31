@@ -35,7 +35,9 @@ function runStoryOutcome(trigger, outcome) {
   const o = trigger.outcomes[outcome] || trigger.outcomes[trigger.skip];
   if (!o) return;
   if (typeof markMissionMapCleared === 'function') markMissionMapCleared(trigger.from);   // 離開的那一區算控制了（新手區 → 作戰桌的下一區開放，js/missions.js）
-  if (o.team && typeof setTeam === 'function') setTeam(o.team);
+  // 換隊員只在玩家還沒自己編過隊時才換：先回過應變中心、在「出勤配置」選好隊員，再從作戰桌出勤到新手區走進來的，保留玩家選的隊員
+  const chosenTeam = (() => { try { return localStorage.getItem(TEAM_STORE) != null; } catch (_) { return false; } })();
+  if (o.team && typeof setTeam === 'function' && !chosenTeam) setTeam(o.team);
   if (o.go === 'base' && typeof returnToBase === 'function') { returnToBase(); return; }
   missionTravel(trigger.to, () => {
     if (!o.at) return;
