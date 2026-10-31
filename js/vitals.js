@@ -11,7 +11,7 @@
        HP 沒滿、但沒有低於 30% 的隊員：跟他對話按「🏥 去醫院休息」，他就會走去醫院（js/game.js 的對話框按鈕）。
    ・2F疏導室：負荷 ≥ VITALS.sootheRoomFrom 的隊員回來時待在疏導室。
        溫特走到旁邊按 C 自己疏導（花 SP）；或跟常駐在疏導室的亞許對話按「🫶 請亞許疏導」，亞許一個一個走過去幫忙疏導（不花溫特的 SP）。
-   ・報告下一個任務的通訊員改成艾德林（data/missions.js 的 MISSION_BASE.briefer）。艾德林有任務要報告時，不會被送去醫院或疏導室。
+   ・報告下一個任務的通訊員改成艾德林（data/missions.js 的 MISSION_BASE.briefer）。艾德林有任務要報告時，負荷高也不會被送去疏導室；但重傷住院還是會去醫院，住院中不能對話：改由應變中心的其他人（諾亞除外）代為報告（js/missions.js 的 isBriefStandIn）。
    ・紀錄存在 tudrc_vitals_v1（js/new-game.js 的進度清單：開新遊戲會重設，存檔欄位會一起存）。
    ・訓練室（js/practice.js）裡的 HP、負荷變化不會帶出來。
    必須在 js/game.js 之前載入（game.js 的 newGame、update、openDialogue 會呼叫這裡）。
@@ -129,8 +129,9 @@ function afterVitalsSpawn() {
 // 這位隊員平時在哪（js/sentry.js 的 npcLocation 先問這裡）：住院＝醫院、負荷高＝疏導室；其他照基地編輯器的設定
 function vitalsLocation(id) {
   const m = vitals.mates[id];
-  if (!m || !TYPES[id] || briefWaiting(id)) return null;
-  if (m.hospital) return { map: VITALS.hospitalMap };
+  if (!m || !TYPES[id]) return null;
+  if (m.hospital) return { map: VITALS.hospitalMap };   // 住院一定在醫院（通訊員也一樣：要聽報告就到醫院找他，js/missions.js 的 missionHudText）
+  if (briefWaiting(id)) return null;   // 有任務要報告的通訊員：負荷高也先留在作戰桌旁
   if (m.taint >= VITALS.sootheRoomFrom) return { map: VITALS.sootheRoomMap };
   return null;
 }

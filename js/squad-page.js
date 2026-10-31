@@ -201,8 +201,9 @@ function squadSkillHtml(actor, safe) {
       '<p class="sq-info-effect" data-sq="text.skillEffect@' + type + '/' + sel + '" data-sq-base="text.skillEffect">' + sqEsc(effect) + '</p>' +   // 位置、大小每格技能各自調（沒調的照大家共用的）
       '<p class="sq-info-effect sq-info-effect2" data-sq="text.skillEffect2@' + type + '/' + sel + '" data-sq-base="text.skillEffect2">' + sqEsc(node.effect2).replace(/\n/g, '<br>') + '</p>' +   // 技能效果 2：同上，每格各自調
       '<p class="sq-info-note" data-sq="text.skillNote@' + type + '/' + sel + '" data-sq-base="text.skillNote" data-sq-group="text.skillNote@' + (sel === 'trait-1' ? 'trait' : 'other') + '">' + sqEsc(note).replace(/\n/g, '<br>') + '</p>' +
-      '<div class="sq-learn' + (owned ? ' owned' : '') + '" data-sq="box.learn' + (owned ? 'ed' : '') + '">' + (owned || v2 ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
-      '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' +
+      // V2 的說明卡：不管學了沒，按鈕都放在右下角同一個位置（跟「已學會」一樣，位置也共用 box.learned／btn.learned 的調整）
+      '<div class="sq-learn' + (owned || v2 ? ' owned' : '') + '" data-sq="box.learn' + (owned || v2 ? 'ed' : '') + '">' + (owned || v2 ? '' : '<span class="sq-cost"><span data-sq="text.costLabel">' + sqT('text.costLabel', '需要') + '</span><img data-sq="img.costIcon" src="' + SQ_CRYSTAL + '" alt="異質碎片"><b data-sq="text.cost">' + cost + '</b></span>') +
+      '<button type="button" class="sq-learn-btn" data-skill-learn="' + sel + '" data-sq="btn.learn' + (owned || v2 ? 'ed' : '') + '"' + (state === 'open' && safe && afford ? '' : ' disabled') + '>' +
       (v2 && !owned ? '<span class="sq-btn-cost"><img src="' + SQ_CRYSTAL + '" alt="異質碎片"><b>' + cost + '</b></span>' : '') + (v2 ? '<span class="sq-btn-label">' + label + '</span>' : label) + '</button></div></section>';   // V2：碎片數量放進按鈕裡（［◆40　培養］）
   }
   return h;

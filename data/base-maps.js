@@ -9906,8 +9906,8 @@ const BASE_MAPS = [
         "id": "tile_hospital_waiting_bench_side",
         "c": 1,
         "r": 12,
-        "layer": "object",
-        "ox": -6,
+        "layer": "ground3",
+        "ox": -16,
         "oy": -8
       },
       {

@@ -333,6 +333,12 @@ function canTalk(actor) {   // 有沒有可以說的台詞（沒有就不顯示�
 function openDialogue(actor) {
   if (!actor || dialogueState || fieldTalkBlocked(actor)) return;
   if (actor.berserk) { flash('無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
+  // 住院中的隊員（躺在醫院病床上休養）：不能聊天，只告訴玩家還要幾分鐘出院（js/vitals.js）
+  // 通訊員也一樣：他住院時改由應變中心的其他人代為報告任務（js/missions.js 的 isBriefStandIn）
+  if (actor.kind === 'tower' && typeof isHospitalized === 'function' && isHospitalized(actor.type)) {
+    systemNotice('這個隊員正在休養中，還需要' + hospitalMinutesLeft(actor.type) + '分鐘出院。');
+    return;
+  }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
   const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
     || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」

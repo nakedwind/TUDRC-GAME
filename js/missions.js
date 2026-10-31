@@ -32,10 +32,25 @@ const nextMission = () => MISSIONS.find(m => !missionCleared(m) && missionOpen(m
 const briefLines = m => (typeof dialogueLines === 'function' && dialogueLines(MISSION_BASE.briefer, 'brief_' + m.id)) || [];   // 對話編輯器裡的「報告任務」
 const briefPending = () => { const m = nextMission(); return m && !missionState.briefed.includes(m.id) && briefLines(m).length ? m : null; };   // 沒填報告台詞的任務：不用報告
 // 通訊員可能是場景 NPC（用 id）或隊員（用 type，例如艾德林）
-const isBriefer = actor => !!actor && (actor.kind === 'tower' ? actor.type : actor.id) === MISSION_BASE.briefer;
-const missionBriefReady = actor => isBriefer(actor) && !!briefPending();
-const brieferNpc = () => (G ? [...(G.npcs || []), ...(G.towers || [])] : []).find(isBriefer) || null;
+const actorId = actor => actor.kind === 'tower' ? actor.type : actor.id;
 const onBaseMap = () => MAP_SAFE && MAP && sameMapId(MAP.id, MISSION_BASE.map);
+const brieferName = () => CHARACTERS[MISSION_BASE.briefer]?.name || TYPES[MISSION_BASE.briefer]?.name || '通訊員';
+// 通訊員住院中（住院的隊員不能對話，js/vitals.js）：應變中心（MISSION_BASE.map）裡的任何一個人都可以代為報告，台詞照用通訊員的「報告任務」
+//   不能代為報告的：BRIEF_STAND_IN_EXCLUDE（諾亞），還有球球這種不是人的
+const BRIEF_STAND_IN_EXCLUDE = ['noah', 'ball'];
+const brieferHospitalized = () => typeof isHospitalized === 'function' && isHospitalized(MISSION_BASE.briefer);
+const isBriefStandIn = actor => brieferHospitalized() && onBaseMap() && !BRIEF_STAND_IN_EXCLUDE.includes(actorId(actor))
+  && !actor.dead && !!(CHARACTERS[actorId(actor)] || TYPES[actorId(actor)]);
+const isBriefer = actor => !!actor && (actorId(actor) === MISSION_BASE.briefer || isBriefStandIn(actor));
+const missionBriefReady = actor => isBriefer(actor) && !!briefPending();
+// 頭上打「！」、回應變中心時走過來報告的那一位：通訊員本人；他住院時改成離作戰桌最近的代報告的人
+const brieferNpc = () => {
+  const all = G ? [...(G.npcs || []), ...(G.towers || [])] : [];
+  const own = all.find(a => actorId(a) === MISSION_BASE.briefer); if (own) return own;
+  const subs = all.filter(isBriefStandIn); if (!subs.length) return null;
+  const t = missionTablePos();
+  return subs.reduce((a, b) => Math.hypot(a.x - t.x, a.y - t.y) <= Math.hypot(b.x - t.x, b.y - t.y) ? a : b);
+};
 
 // ---- 和通訊員對話：有新任務就先報告任務（game.js 的 openDialogue 呼叫）----
 function missionDialogueLines(actor) {
@@ -50,7 +65,7 @@ function missionHudText() {
   if (MAP_SAFE) {
     const m = nextMission();
     if (!m) return '目前任務：Y 區已全部控制';
-    if (briefPending()) return '目前任務：聽' + (CHARACTERS[MISSION_BASE.briefer]?.name || '通訊員') + '報告下一個任務';
+    if (briefPending()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告下一個任務' : '聽' + brieferName() + '報告下一個任務');
     if (!m.map) return '目前任務：等待「' + m.name + '」的情報';
     return '目前任務：到作戰桌出擊｜' + m.name;
   }
