@@ -7,7 +7,7 @@
    「後室牆面（可炸開・隱藏區）」：一樣可以炸開，而且牆另一邊（上方）跟它連通的整片區域平常全黑，
    炸開之後才慢慢顯現（隱藏的通道／房間）。
    「後室牆面（裂縫・可炸開）」「後室牆面（裂縫・可炸開・隱藏區）」（Back-room-wall02-damage-03 的圖）：已經裂開，炸一次就開。
-   另一種做法：地圖編輯器把圖層設成「🧱 隱藏區」，那些圖層上的東西在炸開最近的可炸開牆之前塗黑（secretLayerAreas）。
+   另一種做法：地圖編輯器把圖層設成「🧱 隱藏區」，那些圖層上的東西在炸開最近的可炸開牆之前不畫（secretLayerAreas、secretAlpha）。
    「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
 */
 // 素材 id → stages：依序換成哪些圖；open：炸開後可以通過的格子（[第幾欄, 第幾列]，從大圖左上角算）
@@ -87,8 +87,8 @@ function setupBreakableWalls() {
   }
 }
 // 隱藏區圖層（地圖編輯器的圖層按「🧱 隱藏區」，存在 MAP.layerOrder 那一層的 secret: true）：
-// 這些圖層上有東西的格子，在炸開「最近的那面可炸開牆」之前全部塗黑（跟 hiddenAreaOf 一樣當成地圖外的空白區）。
-// 連在一起的一塊算一區，各自綁離它最近的牆；牆本身的圖片範圍不塗黑（牆要看得到）
+// 這些圖層上的東西，在炸開「最近的那面可炸開牆」之前都不畫（secretAlpha），炸開後淡入。
+// 連在一起的一塊算一區，各自綁離它最近的牆；牆本身的圖片範圍不算隱藏區（牆要看得到）
 function secretLayerAreas() {
   const ids = new Set(((MAP && MAP.layerOrder) || []).filter(l => l && l.secret).map(l => l.id));
   if (!ids.size) return [];
@@ -125,9 +125,40 @@ function secretLayerAreas() {
       if (d < bestD) { bestD = d; best = w.s; }
     }
     if (!best) { console.warn('隱藏區圖層附近沒有可炸開的牆，照常顯示', [...part][0]); continue; }
-    areas.push({ stamp: best, cells: part, revealAt: 0 });
+    areas.push({ stamp: best, cells: part, revealAt: 0, layer: true });   // layer：炸開前不塗黑，改成圖層上的東西不畫（secretAlpha）
   }
   return areas;
+}
+// 隱藏區圖層上的東西：炸開前不透明度 0（不畫），炸開時跟著淡入。不用塗黑，牆面、周圍的地圖都保持原樣。
+// 回傳 0～1；不是隱藏圖層的東西一律 1。s＝圖章；或 (lid, key) ＝格子圖層的一格
+function secretAlpha(s, lid, key) {
+  if (typeof G === 'undefined' || !G || !G.hiddenAreas || !G.hiddenAreas.length || !MAP) return 1;
+  if (!G.secretOwner || G.secretOwner.areas !== G.hiddenAreas) G.secretOwner = { areas: G.hiddenAreas, map: new Map() };
+  const cache = G.secretOwner.map, ck = s || lid + ':' + key;
+  let a = cache.get(ck);
+  if (a === undefined) {
+    a = null;
+    const layer = s ? (s.layer || 'top') : lid;
+    if ((MAP.layerOrder || []).some(l => l && l.secret && l.id === layer)) {
+      let keys = [key];
+      if (s) {
+        const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
+        keys = [];
+        for (let c = Math.floor(x0 / CELL); c < Math.ceil(x0 / CELL + mapStampW(s, t)); c++) for (let r = Math.floor(y0 / CELL); r < Math.ceil(y0 / CELL + mapStampH(s, t)); r++) keys.push(c + ',' + r);
+      }
+      const owned = G.hiddenAreas.filter(x => x.layer);
+      a = owned.find(x => keys.some(k => x.cells.has(k))) || null;
+      if (!a && owned.length) {   // 整個都疊在牆的圖片上（那幾格不算隱藏區）：歸給最近的那一區
+        const [c0, r0] = keys[0].split(',').map(Number);
+        let bestD = Infinity;
+        for (const x of owned) for (const k of x.cells) { const [c, r] = k.split(',').map(Number), d = Math.hypot(c - c0, r - r0); if (d < bestD) { bestD = d; a = x; } }
+      }
+    }
+    cache.set(ck, a);
+  }
+  if (!a) return 1;
+  if (!a.revealAt) return 0;
+  return Math.min(1, (performance.now() / 1000 - a.revealAt) / HIDDEN_REVEAL_SEC);
 }
 // 接續「保留進度」的戰場（js/combat-progress.js 的 restoreCombatProgress，這時不會跑 newGame）：
 // 牆格整組換成存起來的那份，但「哪些格是可炸牆加的」沒存，炸開時就刪不掉（洞炸開了還是走不過去）。
@@ -186,6 +217,7 @@ function drawHiddenAreas(ctx) {
   if (!G || !G.hiddenAreas || !G.hiddenAreas.length) return;
   const now = performance.now() / 1000;
   for (const a of G.hiddenAreas) {
+    if (a.layer) continue;   // 隱藏區圖層：不塗黑，圖層上的東西本來就不畫（secretAlpha）
     let alpha = 1;
     if (a.revealAt) { alpha = 1 - (now - a.revealAt) / HIDDEN_REVEAL_SEC; if (alpha <= 0) continue; }
     ctx.save(); ctx.fillStyle = 'rgba(0,0,0,' + alpha + ')'; ctx.beginPath();

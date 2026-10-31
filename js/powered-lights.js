@@ -35,6 +35,7 @@ function drawPoweredLights(ctx){
   ctx.save();ctx.globalCompositeOperation='lighter';
   for(const l of poweredLightFixtures()){
     if(!mapPowerIsOn(l.circuit))continue;
+    if(typeof inHiddenArea==='function'&&inHiddenArea(l.x,l.y))continue;   // 還沒炸開的隱藏區：燈不亮（js/breakable-walls.js）
     const glow=ctx.createRadialGradient(l.x,l.y,0,l.x,l.y,28);
     glow.addColorStop(0,'rgba(255,248,212,.3)');glow.addColorStop(1,'rgba(255,248,212,0)');
     ctx.fillStyle=glow;ctx.fillRect(l.x-28,l.y-28,56,56);

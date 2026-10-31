@@ -10,6 +10,8 @@
 const HIT_DUR = 0.3;   // 建築被攻擊時「閃紅＋震動」持續秒數
 const ORE_GUN_FLASH = { ms: 120, alpha: .65 };   // 手槍打異質礦的閃白：持續毫秒、最亮多少
 function drawObstacle(o) {
+  if (o.mapSource && typeof secretAlpha === 'function' && (typeof o.mapSource === 'object' ? secretAlpha(o.mapSource)
+    : secretAlpha(null, ...String(o.mapSource).split(':'))) <= 0) return;   // 隱藏區圖層上的礦石等：炸開前不畫（js/breakable-walls.js）
   const w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
   // 受擊震動：依剩餘 hitT 隨機抖動，越接近結束越小
   const hit = o.hitT > 0 ? o.hitT / HIT_DUR : 0;

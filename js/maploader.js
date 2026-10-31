@@ -498,13 +498,16 @@ function seedMapObstacles() {
 }
 
 // ---- 繪製地圖圖片（圖層由下往上，最後大圖）----
-function drawMapTileImg(ctx, id, x, y, layer='top') {
+function drawMapTileImg(ctx, id, x, y, layer='top', fading=false) {
   let t = mapTileById(id); if (!t) return;
   const [c,r]=cellAt(x,y);
   const display=typeof storagePropDisplayTile==='function'?storagePropDisplayTile(id,c,r,layer):null;
   if(display===false)return;
   if(display)t=display;
   if (typeof ballBedHidden === 'function' && ballBedHidden(c + ',' + r, id)) return;   // 球球睡在這張床上：只畫睡覺圖（js/ball-poses.js）
+  const secret = !fading && typeof secretAlpha === 'function' ? secretAlpha(null, layer, c + ',' + r) : 1;   // 隱藏區圖層：炸開前不畫、炸開時淡入（js/breakable-walls.js）
+  if (secret <= 0) return;
+  if (secret < 1) { ctx.save(); ctx.globalAlpha *= secret; drawMapTileImg(ctx, id, x, y, layer, true); ctx.restore(); return; }
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, CELL, CELL); return; }
   const img = tileImage(t);
   if (img) {
@@ -547,7 +550,9 @@ function destroyedBaseDisplayTile(s, t) {
 const MAP_GLOW_R = 160;
 function drawMapStampImg(ctx, s, glowPass = false) {
   if (s.glow && !glowPass) return;   // 會發光的：drawMapGlow 在黑幕上面才畫
-  const alpha = Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1;
+  const secret = typeof secretAlpha === 'function' ? secretAlpha(s) : 1;   // 隱藏區圖層：炸開前不畫（js/breakable-walls.js）
+  if (secret <= 0) return;
+  const alpha = (Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1) * secret;
   if (!s.blend && alpha === 1) { drawMapStampRaw(ctx, s); return; }
   ctx.save();
   if (s.blend) ctx.globalCompositeOperation = s.blend;
@@ -565,7 +570,7 @@ function mapGlowLights() {
   if (!MAP) return [];
   const out = [];
   for (const s of MAP.stamps || []) {
-    if (!s.glow) continue;
+    if (!s.glow || (typeof secretAlpha === 'function' && secretAlpha(s) <= 0)) continue;   // 還沒炸開的隱藏區：不發光
     const t = mapTileById(s.id) || {};
     out.push({ x: OX + s.c * CELL + (s.ox || 0) + mapStampW(s, t) * CELL / 2, y: OY + s.r * CELL + (s.oy || 0) + mapStampH(s, t) * CELL / 2,
       r: s.glowR > 0 ? s.glowR : MAP_GLOW_R });
@@ -836,7 +841,8 @@ function collectMapOccluders(ctx, out) {
 function occluderStateSig(x) {
   if (x.kind === 'cell') {
     const layer = MAP_LAYER_ORDER[x.li], shown = typeof storagePropDisplayTile === 'function' ? storagePropDisplayTile(x.id, x.c, x.r, layer) : null;
-    return (G.mapDestroyed.has(layer + ':' + x.c + ',' + x.r) ? 'x' : '') + (shown === false ? 'h' : shown ? (shown.id || 's') : '');   // h＝這格目前不顯示
+    return (G.mapDestroyed.has(layer + ':' + x.c + ',' + x.r) ? 'x' : '') + (shown === false ? 'h' : shown ? (shown.id || 's') : '')   // h＝這格目前不顯示
+      + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(null, layer, x.c + ',' + x.r) * 10) : '');
   }
   const s = x.stamp;
   const shown = typeof storagePropDisplayTile === 'function' ? storagePropDisplayTile(s.id, s.c, s.r, s.layer || 'top', s) : null;
@@ -845,7 +851,8 @@ function occluderStateSig(x) {
     + ((typeof ammoCrateOpenTile === 'function' && ammoCrateOpenTile(s)) ? 'a' : '')
     + (destroyedBaseDisplayTile(s, mapTileById(s.id) || {}).id || '')
     + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
-    + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '');
+    + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '')
+    + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '');   // 隱藏區圖層淡入中：補畫也要跟著重做
 }
 function occluderImageReady(x) {
   const s = x.kind === 'cell' ? null : x.stamp;

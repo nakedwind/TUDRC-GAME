@@ -78,7 +78,7 @@ const SQUAD_GEAR = [
     "mods": [
       {
         "path": "hpRegen",
-        "add": 1
+        "add": 0.2
       }
     ]
   }
