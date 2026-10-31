@@ -2146,8 +2146,6 @@ function refreshLockerControl() {
     const groups = [
       ['補給、零食飲料', 'item', typeof SUPPLIES === 'undefined' ? [] : SUPPLIES],
       ['素材與重要物品', 'item', typeof ITEMS === 'undefined' ? [] : ITEMS],
-      ['裝備', 'equipment', typeof EQUIPMENT === 'undefined' ? [] : EQUIPMENT],
-      ['武器', 'weapon', typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).map(([id, w]) => ({ ...w, id }))],
     ];
     groups.forEach(([label, kind, entries]) => { const g = document.createElement('optgroup'); g.label = label; entries.forEach(t => add(kind + ':' + t.id, t.name, g)); select.appendChild(g); });
     const qty = document.createElement('input'); qty.id = 'lockerLootQty'; qty.type = 'number'; qty.min = '1'; qty.max = '999'; qty.step = '1'; qty.style.width = '60px'; qty.setAttribute('aria-label', '置物櫃物品數量');

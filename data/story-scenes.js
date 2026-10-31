@@ -7,7 +7,6 @@ const STORY_SCENES = {
     "zoom": 1.75,
     "subtitle": "六年前 · 臨時救護區",
     "endTitle": "「天使」的謊言",
-    "endText": "六年前，那句讓他安心閉上眼睛的話。",
     "darkness": true,
     "bgm": "music/雷德回憶01.mp3",
     "bgmVolume": 0.25,

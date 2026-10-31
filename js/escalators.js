@@ -14,6 +14,9 @@ const ESCALATOR = {
   tiles: {
     tile_mrt_escalator_front: { y: 27, h: 100, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
     tile_mrt_escalator_front_high: { y: 26, h: 270, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
+    tile_mrt_escalator_front_high02: { y: 26, h: 390, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
+    tile_mrt_escalator_front_high03: { y: 26, h: 270, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
+    tile_mrt_escalator_front_high04: { y: 26, h: 390, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
   },
 };
 let escalatorPhase = 0;   // 階梯捲了多遠（世界像素）；遊戲暫停時不動
@@ -63,6 +66,18 @@ function escalatorLanes() {
   // 圖片還沒載好就先不記（尺寸可能不對），下一幀再算
   if (lanes.every(l => l.x1 > l.x0)) escalatorCache = { map: MAP, n, lanes };
   return lanes;
+}
+// 這格在不在手扶梯上（整張手扶梯圖的範圍，含扶手）：不能蓋建築（js/build.js 的 canPlaceObstacle）
+function escalatorCoversCell(c, r) {
+  if (typeof MAP === 'undefined' || !MAP) return false;
+  for (const s of MAP.stamps || []) {
+    if (!escalatorSpec(s.id)) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const o = stampSolidOrigin(s), side = mapStampTurn(s) % 2;
+    const w = side ? mapTileH(t) : mapTileW(t), h = side ? mapTileW(t) : mapTileH(t);
+    if (c >= o.c && c < o.c + w && r >= o.r && r < o.r + h) return true;
+  }
+  return false;
 }
 function escalatorLaneAt(x, y) {
   for (const l of escalatorLanes()) if (x >= l.x0 && x < l.x1 && y >= l.y0 && y < l.y1) return l;

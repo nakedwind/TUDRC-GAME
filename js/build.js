@@ -49,6 +49,8 @@ function canPlaceObstacle(v, c, r, lightExtra = 0) {
   if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;
   if (typeof elevatorCoversCell === 'function')   // 電梯（含門口前面一排）：整個佔地都不能壓到
     for (let dc = 0; dc < (v.w || 1); dc++) for (let dr = 0; dr < (v.h || 1); dr++) if (elevatorCoversCell(c + dc, r + dr)) return false;
+  if (typeof escalatorCoversCell === 'function')   // 手扶梯（含扶手）：整個佔地都不能壓到（js/escalators.js）
+    for (let dc = 0; dc < (v.w || 1); dc++) for (let dr = 0; dr < (v.h || 1); dr++) if (escalatorCoversCell(c + dc, r + dr)) return false;
   // 只有「擋路格(solid)」才要求空地／不壓牆／不疊其他建築的擋路格／夠亮；
   // 其餘格子只是圖片，可以疊在牆或其他建築的圖片前面。
   for (const [dc, dr] of placeCheckCells(v)) {

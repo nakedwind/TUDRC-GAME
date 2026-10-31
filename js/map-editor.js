@@ -2249,7 +2249,6 @@ function selectedLocker() {
   return { sel, s, id };
 }
 const isStoryLootItem = value => { const [kind, id] = String(value).split(':');
-  if (kind === 'equipment') return typeof EQUIPMENT !== 'undefined' && EQUIPMENT.some(e => e.id === id && e.source === 'develop');   // 開發工坊做得出來的裝備
   if (kind !== 'item') return false;
   return id === 'anomaly-key' || /-shard$/.test(id) || (typeof MEMORY_KEYS !== 'undefined' && MEMORY_KEYS.some(k => k.key === id))
     || (typeof SUPPLIES !== 'undefined' && SUPPLIES.some(s => s.id === id && (s.kind === 'snack' || s.kind === 'drink'))); };   // 零食、飲料
@@ -2264,13 +2263,11 @@ function refreshLockerControl() {
     const groups = [
       ['補給', 'item', typeof SUPPLIES === 'undefined' ? [] : SUPPLIES],
       ['素材與重要物品', 'item', typeof ITEMS === 'undefined' ? [] : ITEMS],
-      ['裝備', 'equipment', typeof EQUIPMENT === 'undefined' ? [] : EQUIPMENT],
-      ['武器', 'weapon', typeof WEAPON_UPGRADES === 'undefined' ? [] : Object.entries(WEAPON_UPGRADES).map(([id, w]) => ({ ...w, id }))],
       // 1 組子彈（BULLET_SET 發，data/equipment.js）；一般子彈無限，不放
       ['子彈（1 組）', 'bullet', typeof BULLETS === 'undefined' ? [] : Object.entries(BULLETS).filter(([id, b]) => id !== 'pistol' && !b.removed).map(([id, b]) => ({ id, name: b.icon + ' ' + b.name + ' ×' + b.max }))],
     ];
     groups.forEach(([label, kind, entries]) => { const g = document.createElement('optgroup'); g.label = label; entries.forEach(t => add(kind + ':' + t.id, t.name, g)); select.appendChild(g); });
-    // 劇情道具（回憶碎片、回憶鑰匙、異質鑰匙）、零食、飲料、開發工坊的裝備不放進櫃子、箱子：選單裡藏起來；以前設好的還是會顯示（下面 refresh 時打開）
+    // 劇情道具（回憶碎片、回憶鑰匙、異質鑰匙）、零食、飲料不放進櫃子、箱子（裝備、武器整組不列）：選單裡藏起來；以前設好的還是會顯示（下面 refresh 時打開）
     [...select.options].forEach(o => { if (isStoryLootItem(o.value)) { o.hidden = true; o.dataset.story = '1'; } });
     const qty = document.createElement('input'); qty.id = 'lockerLootQty'; qty.type = 'number'; qty.min = '1'; qty.max = '999'; qty.step = '1'; qty.style.width = '60px'; qty.setAttribute('aria-label', '置物櫃物品數量');
     box.append(select, ' 數量 ', qty); document.getElementById('selControls').appendChild(box);
@@ -2301,7 +2298,7 @@ function refreshLockerControl() {
   select.options[1].hidden = !!picked.ammo;
   if (picked.ammo && loot?.kind === 'empty') select.value = 'random';
   select.value = loot ? loot.kind === 'empty' ? 'empty' : loot.kind + ':' + loot.id : 'random';
-  select.querySelectorAll('option[data-story]').forEach(o => { o.hidden = o.value !== select.value; });   // 劇情道具、零食、飲料、開發工坊的裝備：只有本來就設成它的櫃子看得到
+  select.querySelectorAll('option[data-story]').forEach(o => { o.hidden = o.value !== select.value; });   // 劇情道具、零食、飲料：只有本來就設成它的櫃子看得到
   qty.value = loot?.qty || 1; qty.disabled = !select.value.startsWith('item:');
 }
 // 電源開關、電源控制的電燈：設定電路編號（1～5），同編號的開關只控制同編號的燈（js/powered-lights.js）

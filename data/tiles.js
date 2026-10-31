@@ -2306,6 +2306,54 @@ const SHARED_TILES = [
     "h": 7
   },
   {
+    "id": "tile_mrt_room_wall",
+    "name": "捷運灰牆",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wall.png",
+    "w": 1,
+    "h": 3
+  },
+  {
+    "id": "tile_mrt_room_highwall",
+    "name": "捷運灰高牆",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwall.png",
+    "w": 1,
+    "h": 6
+  },
+  {
+    "id": "tile_mrt_room_highwall03",
+    "name": "捷運灰高牆（加高）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-highwall03.png",
+    "w": 1,
+    "h": 9
+  },
+  {
+    "id": "tile_mrt_room_pillar",
+    "name": "捷運灰柱",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-Pillar.png",
+    "w": 1,
+    "h": 4
+  },
+  {
+    "id": "tile_mrt_pillar_a",
+    "name": "捷運方柱",
+    "role": "floor",
+    "file": "images/捷運車站/pillar_A.png",
+    "w": 2,
+    "h": 8
+  },
+  {
+    "id": "tile_mrt_pillar_a02",
+    "name": "捷運方柱（加高）",
+    "role": "floor",
+    "file": "images/捷運車站/pillar_A02.png",
+    "w": 2,
+    "h": 10
+  },
+  {
     "id": "tile_mrt_platform_screen_doors",
     "name": "月台門",
     "role": "floor",
@@ -2377,6 +2425,33 @@ const SHARED_TILES = [
     "file": "images/捷運車站/mrt-escalator-front-high.png",
     "w": 5,
     "h": 8,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_escalator_front_high02",
+    "name": "手扶梯（正面・加高）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-escalator-front-high02.png",
+    "w": 5,
+    "h": 11,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_escalator_front_high03",
+    "name": "手扶梯（正面・高・灰牆）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-escalator-front-high03.png",
+    "w": 5,
+    "h": 8,
+    "flat": true
+  },
+  {
+    "id": "tile_mrt_escalator_front_high04",
+    "name": "手扶梯（正面・加高・灰牆）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-escalator-front-high04.png",
+    "w": 5,
+    "h": 11,
     "flat": true
   },
   {
@@ -3802,6 +3877,22 @@ const SHARED_TILES = [
     "h": 6
   },
   {
+    "id": "tile_bg_extra_high_pillar02",
+    "name": "後室高柱（加高）",
+    "role": "floor",
+    "file": "images/background/Back-room-highPillar02.png",
+    "w": 1,
+    "h": 10
+  },
+  {
+    "id": "tile_bg_extra_high_wall02",
+    "name": "後室高牆（加高）",
+    "role": "floor",
+    "file": "images/background/Back-room-highwall02.png",
+    "w": 1,
+    "h": 9
+  },
+  {
     "id": "tile_bg_extra_oil_drum_background",
     "name": "油桶（背景素材）",
     "role": "floor",
@@ -4684,5 +4775,23 @@ const SHARED_TILES = [
     "file": "images/萬聖節裝飾/halloween-bunting.png",
     "w": 4,
     "h": 1
+  },
+  {
+    "id": "tile_mvwilme2",
+    "name": "floor-03",
+    "role": "floor",
+    "file": "images/01-station-hall/floor-03.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_mvwj8b1i",
+    "name": "glass-floor",
+    "role": "floor",
+    "file": "images/background/glass-floor.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
   }
 ];

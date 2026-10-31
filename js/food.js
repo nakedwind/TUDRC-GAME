@@ -7,9 +7,9 @@
 //  ・buff 存在 G.foodBuffs（換地圖就沒了）；同一種 buff 再吃＝時間重算、效果取大的，不同種可以同時有
 // ============================================================
 const FOOD_DROPS = {   // 依怪物的 behavior：掉什麼、幾個、機率
-  milkfish:      { id: 'milkfish-belly', min: 1, max: 1, chance: 1 },    // 虱目魚小子 → 虱目魚肚
-  milkfishSmall: { id: 'sashimi',        min: 1, max: 1, chance: .6 },   // 小虱目魚小子 → 生魚片
-  fishhead:      { id: 'sashimi',        min: 1, max: 2, chance: 1 },    // 魚頭君 → 生魚片
+  milkfish:      { id: 'milkfish-belly', min: 1, max: 1, chance: .3 },   // 虱目魚小子 → 虱目魚肚
+  milkfishSmall: { id: 'sashimi',        min: 1, max: 1, chance: .3 },   // 小虱目魚小子 → 生魚片
+  fishhead:      { id: 'sashimi',        min: 1, max: 2, chance: .3 },   // 魚頭君 → 生魚片
 };
 const FOOD_COOK = { time: 1.2 };   // 待在火海裡幾秒會烤熟
 const FOOD_SICK = { dur: 6, slow: .25 };   // 生吃鬧肚子：幾秒、走慢多少

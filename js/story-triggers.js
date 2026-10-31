@@ -41,6 +41,26 @@ function runStoryOutcome(trigger, outcome) {
     if (!o.at) return;
     const x = (o.at[0] + .5) * CELL, y = (o.at[1] + .5) * CELL;
     if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; }
+    gatherTeamNearPlayer();
+  });
+}
+// 隊員本來生在營地：溫特被放到別的地方時，大家一起排到溫特身邊（不然自由走動只在自己附近逛，會一直待在營地裡）
+function gatherTeamNearPlayer() {
+  const [pc, pr] = cellAt(G.player.x, G.player.y);
+  const seen = new Set([pc + ',' + pr]), queue = [[pc, pr]], spots = [];
+  for (let i = 0; i < queue.length && spots.length < G.towers.length && i < 400; i++) {
+    const [c, r] = queue[i];
+    if (i > 0 && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r))) spots.push([c, r]);
+    for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
+      const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
+      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr)) continue;
+      seen.add(k); queue.push([nc, nr]);
+    }
+  }
+  G.towers.forEach((t, i) => {
+    if (!spots[i]) return;
+    [t.x, t.y] = center(...spots[i]);
+    t.target = null; t.navPath = null; t.navGoal = null; t.waitT = .4 + Math.random();
   });
 }
 // 走出入口時先檢查：有沒播過的劇情就先播，播完再依結果走
