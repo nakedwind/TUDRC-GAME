@@ -3,7 +3,7 @@
    - 觸發：溫特走到 wakeRange 格內（看得到）、或打中牠 → BOSS 戰開始（畫面上方 BOSS 血條＋中BOSS 音樂）。
    - 張殼：飄在空中、保持距離，蓄力後扇形散射珍珠。這時候是弱點。
    - 閉殼：張殼時被打中 → 蓋起來掉到地上，受到的傷害 × shell.defense（很硬），從天上降下大小珍珠：
-           地上先出現陰影圈，砸下來有傷害。小珍珠砸完就碎；大珍珠留在場上當掩體。時間到就張開，張開後 grace 秒內被打不會再閉殼（輸出時間）。
+           地上先出現陰影圈，砸下來有傷害。小珍珠砸完就碎；大珍珠留在場上當掩體。只有被爆炸炸到（pearlBossBlast）或被大珍珠撞到才會提早打開，不然要等 shell.time 秒；閉殼期間一直降珍珠。張開後 grace 秒內被打不會再閉殼（輸出時間）。
    - 大珍珠：擋住雙方的子彈和射線（視線）、擋路。溫特走過去頂著就能推；用手槍打會推得更快。
            滾得夠快（big.ramSpeed 以上）撞到大童 → 大傷害、強制打開貝殼、暈眩（暈眩中受到的傷害變多），大珍珠碎掉；
            滾得慢只會把大童推開，沒有傷害。落地時畫面震動、地上砸出裂痕、噴石礫和煙霧（跟葫蘆猴落地同一套特效）。
@@ -31,7 +31,7 @@ const PEARL_ELDER = {
   coreHp: 1000,                  // 牠抱著的核心血量（地圖難度 1；難度越高照比例加）
   coreArt: { x: .40, y: .70, len: .5, angle: -73 },   // 核心圖疊在牠身上的位置：中心（圖寬、圖高的比例）、長度（圖寬的比例）、旋轉角度（度）
   scatter: { count: 7, spread: 70, speed: 220, range: 9, windup: .8, cooldown: 2.4 },   // 散射：顆數、扇形角度、速度、射程（格）、蓄力、冷卻（秒）
-  shell: { time: 20, defense: .1, grace: 4 },          // 閉殼幾秒、閉殼時受到的傷害倍率、張開後幾秒內被打不會再閉殼
+  shell: { time: 30, defense: .1, grace: 4 },          // 閉殼幾秒（只有被爆炸炸到、被大珍珠撞到才會提早打開）、閉殼時受到的傷害倍率、張開後幾秒內被打不會再閉殼
   stun: { time: 2.5, dmgMul: 1.3 },                   // 被大珍珠撞到：暈幾秒、暈眩中受到的傷害倍率
   rain: {                        // 閉殼時從天上降下的珍珠
     smallEvery: .45, bigEvery: 2.2,   // 每隔幾秒降一顆小的、一顆大的
@@ -138,6 +138,16 @@ function pearlBossRammed(e, bp, speed) {
   nearbyImpact(e.x, e.y, 10, .08);
   if (typeof sfxAt === 'function') { sfxAt('knock2', e.x, e.y, 1.3, 'pearl-elder-ram'); sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-ram2'); }
   shatterBigPearl(bp);
+}
+// ---- 被爆炸炸到：閉著的貝殼被炸開（油桶、地雷、自爆史萊姆、希奧妮大招…呼叫 blastWalls 的地方一起呼叫）----
+// 爆炸的傷害在這之前已經扣了；這一幀結算時貝殼已經打開，所以不套閉殼減傷
+function pearlBossBlast(x, y, R) {
+  for (const e of pearlBosses()) {
+    if (!e.pk || e.pk.state !== 'shell' || Math.hypot(e.x - x, e.y - y) > R + e.drawWidth * .3) continue;
+    pearlBossSet(e, 'open'); e.pk.grace = PEARL_ELDER.shell.grace; e.pk.cd = Math.min(e.pk.cd, .6);
+    flash('炸開貝殼！', e.x, e.y - e.drawHeight - 10, '#fff2b0');
+    if (typeof sfxAt === 'function') sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-blast');
+  }
 }
 // 核心腳下的腐蝕痕跡：抱在身上時收掉（不然會留在甦醒的地方），掉到地上時在落點重新鋪上（js/anomalous-core.js 的 wakeCore 做的那一攤）
 function pearlBossCorePool(core, on) {

@@ -84,6 +84,7 @@ function detonateMine(o) {
   if (typeof igniteSlicksNear === 'function') igniteSlicksNear(x, y, R);
   if (typeof blastOres === 'function') blastOres(x, y, R);   // 炸開附近的異質礦物（js/ore.js）
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 可炸開的牆（js/breakable-walls.js）
+  if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 炸開珍珠大童的貝殼（js/pearl-elder.js）
   // 畫面：爆閃、衝擊環、火星、碎石、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
   G.effects.push({ fglow: true, x, y: y - 6, r0: 16, r1: R, life: .35, life0: .35 });

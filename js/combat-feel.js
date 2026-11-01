@@ -199,6 +199,7 @@ function bomberShouldArm(e) {
 function slimeExplode(e, mul) {
   const R = SLIME_BOMB.radius, x = e.x, y = e.y;
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 自爆史萊姆也炸得開可炸開的牆（js/breakable-walls.js）
+  if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 炸開珍珠大童的貝殼（js/pearl-elder.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 自爆史萊姆的爆炸波及順順宮帽：打開帽子
   const p = G.player;
   if (p && p.hp > 0 && Math.hypot(p.x - x, p.y - y) <= R) {

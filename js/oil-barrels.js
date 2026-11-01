@@ -164,6 +164,7 @@ function oilExplode(x, y, it) {
   igniteSlicksNear(x, y, R);
   if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 油桶、油箱、瓦斯爐爆炸皆可炸開附近異質礦物（js/ore.js）
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 油桶、油箱、瓦斯爐都炸得開可炸開的牆（js/breakable-walls.js）
+  if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 也炸得開珍珠大童的貝殼（js/pearl-elder.js）
   if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
   if ((it.fire || it.gas) && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 爆焰燒掉生命體碎塊
   if ((it.fire || it.gas) && typeof cookFoodNear === 'function') cookFoodNear(x, y, R);   // 地上的食物烤熟（js/food.js）
