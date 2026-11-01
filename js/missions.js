@@ -4,8 +4,8 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [] };   // 已控制的區域、亞許已經報告過的任務
-try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
+const missionState = { cleared: [], briefed: [], reached: [] };   // 已控制的區域、亞許已經報告過的任務、進去過的區域
+try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
 
 const missionById = id => MISSIONS.find(m => m.id === id) || null;
@@ -15,7 +15,12 @@ const mapIndexOf = id => mapList().findIndex(m => m && sameMapId(m.id, id));
 const missionOfMap = mapId => MISSIONS.find(m => sameMapId(m.map, mapId)) || null;
 // 後面的區域已經控制了，前面的也算（舊存檔：後來才在前面插進新的區域，例如新手區 Y25區入口）
 const missionCleared = m => missionState.cleared.includes(m.id) || MISSIONS.some(x => x.after.includes(m.id) && missionCleared(x));
-const missionOpen = m => m.after.every(id => missionCleared(missionById(id) || { id }));   // 前面的區域都控制了
+const missionOpen = m => missionState.reached.includes(m.id) || m.after.every(id => missionCleared(missionById(id) || { id }));   // 前面的區域都控制了，或已經進去過（戰敗回來才能再出發）
+// 進入戰鬥（game.js 的 begin 呼叫）：開始畫面的地圖選單可以跳過前面的區域直接進來，記下來之後作戰桌才選得到
+function markMissionMapReached(mapId) {
+  const m = missionOfMap(mapId); if (!m || missionState.reached.includes(m.id)) return;
+  missionState.reached.push(m.id); saveMissions();
+}
 // 不用打贏也算控制（例如新手區：看完救援劇情離開，js/story-triggers.js 呼叫）
 function markMissionMapCleared(mapId) {
   const m = missionOfMap(mapId); if (!m || missionState.cleared.includes(m.id)) return;
