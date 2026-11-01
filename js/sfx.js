@@ -31,6 +31,7 @@ const SFX = (() => {
     drink: '喝飲料.mp3',   // 喝杏仁水（js/shop.js 的 useSupply）
     wearGear: '穿裝備.mp3',   // 穿上裝備：溫特的防具（js/equipment.js 的 equipToSlot）、幫隊員穿隊員裝備（js/backpack.js、js/squad-page.js）
     // K56 路邊的機車、腳踏車（js/street-vehicles.js）：發動的聲音、撞到人的聲音
+    escalatorRide: '設施/手扶梯-緊握扶手.mp3',   // 溫特踩上手扶梯的廣播（js/escalators.js，冷卻 10 秒）
     scooterRev: '環境/機車聲.mp3',
     scooterHorn: '環境/機車喇叭聲.mp3',
     bikeRide: '環境/腳踏車聲.mp3',
