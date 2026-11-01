@@ -25,7 +25,7 @@ function campInteractionSpots() {
 const MAP_BOX = { reach: 30, kinds: [
   { kind: 'ammo', match: id => AMMO_CRATE.ids.includes(id), art: {} },   // 能打開、開出東西的彈藥箱（js/flare.js）
   { kind: 'refill', match: (id, t) => AMMO_REFILL.ids.includes(id) || AMMO_REFILL.file.test(String(t.file || '')), art: { tile_field_ammo_crate_open: [0, 16, 46, 80, 80, 80] } },   // 營地的補彈藥箱（js/flare.js）；最後兩個數字＝圖片寬高
-  { kind: 'supply', match: id => id === CAMP_SUPPLY.box.id, art: { tile_field_supply_box: [0, 16, 46, 80, 80, 80] } },   // field-base-01～03 都一樣
+  { kind: 'supply', match: id => isSupplyBoxId(id), art: { tile_field_supply_box: [0, 16, 46, 80, 80, 80], tile_mvot2yuu: [25, 23, 95, 120, 120, 120] } },   // field-base-01～03 都一樣；池核版 Poolcore_field-base-01～03 也一樣（js/camp-supply.js 的 boxSkins）
   { kind: 'armor', match: (id, t) => ARMOR_CHEST.tiles.includes(id) || ARMOR_CHEST.names.includes(String(t.name || '').trim()), art: { tile_mvma4ws7: [0, 11, 76, 80, 80, 80] } },
 ] };
 function mapBoxes() {

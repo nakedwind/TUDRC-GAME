@@ -702,15 +702,18 @@ window.addEventListener('keydown', e => {
   // 方向鍵：微調選取物件的位置（不貼齊格線；按住 Shift 一次移多一點）
   // 1×1 小圖原本存成「格子」，格子只有格座標、沒有像素位移 → 第一次微調時先轉成 1×1 大圖。
   // 碰撞微調：方向鍵移動選中紅格的擋路範圍（可以多選，選中的格子一起移；Shift 一次多移一點，Delete 歸零，Esc 取消選取）
-  if (!inField && brush.mode === 'solidnudge' && solidNudgeCells.size) {
+  if (!inField && brush.mode === 'solidnudge' && (solidNudgeCells.size || solidNudgeEdges.size)) {
     const m = curMap();
     for (const k of [...solidNudgeCells]) if (m.solid.indexOf(k) < 0) solidNudgeCells.delete(k);   // 回復（Ctrl+Z）後已經不是紅格的不算
-    const n = solidNudgeCells.size;
-    if (n && e.key === 'Escape') { e.preventDefault(); solidNudgeCells.clear(); draw(); setStatus('已取消選取紅格', '#9aa4b2'); return; }
+    for (const k of [...solidNudgeEdges]) if (!(m.edges || []).includes(k)) solidNudgeEdges.delete(k);   // 邊緣碰撞線也一樣
+    const n = solidNudgeCells.size + solidNudgeEdges.size;
+    if (n && e.key === 'Escape') { e.preventDefault(); solidNudgeCells.clear(); solidNudgeEdges.clear(); draw(); setStatus('已取消選取', '#9aa4b2'); return; }
     if (n && (e.key === 'Delete' || e.key === 'Backspace')) {
       e.preventDefault(); pushUndo();
       for (const k of solidNudgeCells) delete m.solidOffsets[k];
-      saveMaps(); draw(); setStatus((n > 1 ? '選中的 ' + n + ' 格' : '這格') + '碰撞範圍已歸零（回到整格對齊）', '#7ee0c0');
+      for (const k of solidNudgeEdges) if (m.edgeOffsets) delete m.edgeOffsets[k];
+      if (m.edgeOffsets && !Object.keys(m.edgeOffsets).length) delete m.edgeOffsets;
+      saveMaps(); draw(); setStatus((n > 1 ? '選中的 ' + n + ' 個' : '這個') + '碰撞範圍已歸零（回到對齊格線）', '#7ee0c0');
       return;
     }
     if (n && /^Arrow(Left|Right|Up|Down)$/.test(e.key)) {
@@ -723,6 +726,12 @@ window.addEventListener('keydown', e => {
         const off = m.solidOffsets[k] || [0, 0], next = [clamp(off[0] + dx), clamp(off[1] + dy)];
         if (next[0] === 0 && next[1] === 0) delete m.solidOffsets[k];
         else m.solidOffsets[k] = next;
+      }
+      const clampEdge = v => Math.max(-EDGE_NUDGE_MAX, Math.min(EDGE_NUDGE_MAX, v));   // 邊緣碰撞最多移半格：再多就跟隔壁格線的線分不清了
+      for (const k of solidNudgeEdges) {
+        const off = edgeOffsetOf(m, k), next = [clampEdge(off[0] + dx), clampEdge(off[1] + dy)];
+        if (next[0] === 0 && next[1] === 0) removeEdgeOffset(m, k), solidNudgeEdges.add(k);   // 歸零就不存（但還是選著）
+        else (m.edgeOffsets || (m.edgeOffsets = {}))[k] = next;
       }
       saveMaps(); draw();
       setStatus(solidNudgeStatus(m), '#ffd479');
@@ -970,13 +979,56 @@ let showGrid = true;    // 格線開關（可用工具列按鈕切換）
 let showSolid = false;       // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）；載入／重新整理時預設關著
 const solidNudgeCells = new Set();   // 目前用「碰撞微調」選中的紅格（'c,r'，可以多選）
 let solidNudgeAdd = true;            // 這次拖曳是「加選」還是「減選」（按下的那格決定）
-// 狀態列：選了幾格、目前偏移（選中的格子偏移不一樣就不列數字）
+// ---- 📏 邊緣碰撞：畫在格線上的薄牆（m.edges = ['c,r,R'＝那格的右邊, 'c,r,B'＝那格的下邊]；遊戲裡 js/pathfinding.js 判斷）----
+const edgePaint = { axis: null, add: true };   // 這次拖曳畫的是直線（R）還是橫線（B）、是畫還是擦（按下時決定）
+// 滑鼠位置最靠近的那條格線；axis＝只找直線（'R'）或橫線（'B'）。兩邊的格子都要在地圖裡才算
+function edgeAtPx(x, y, axis = null) {
+  const lx = x - OX, ly = y - OY, c = Math.floor(lx / CELL), r = Math.floor(ly / CELL);
+  const fx = lx - c * CELL, fy = ly - r * CELL;
+  const cand = [
+    { d: fx, c: c - 1, r, axis: 'R' }, { d: CELL - fx, c, r, axis: 'R' },
+    { d: fy, c, r: r - 1, axis: 'B' }, { d: CELL - fy, c, r, axis: 'B' },
+  ].filter(e => (!axis || e.axis === axis) && inGrid(e.c, e.r) && (e.axis === 'R' ? inGrid(e.c + 1, e.r) : inGrid(e.c, e.r + 1)))
+    .sort((a, b) => a.d - b.d);
+  const e = cand[0];
+  return e ? { key: e.c + ',' + e.r + ',' + e.axis, axis: e.axis, c: e.c, r: e.r } : null;
+}
+// 邊緣碰撞的微調：m.edgeOffsets = { 'c,r,R': [dx, dy] }＝整條線平移幾像素（最多半格，再多就改畫在隔壁的格線上）
+const EDGE_NUDGE_MAX = 20;
+const edgeOffsetOf = (m, k) => (m.edgeOffsets && m.edgeOffsets[k]) || [0, 0];
+function removeEdgeOffset(m, k) {
+  if (m.edgeOffsets) { delete m.edgeOffsets[k]; if (!Object.keys(m.edgeOffsets).length) delete m.edgeOffsets; }
+  solidNudgeEdges.delete(k);
+}
+// 滑鼠點到哪一條已經畫好的邊緣碰撞（照微調後的位置算，離線 tol 像素內）
+function edgeHitAtPx(m, x, y, tol = 8) {
+  let best = null, bestD = tol;
+  for (const k of m.edges || []) {
+    const [c, r, axis] = k.split(','), [dx, dy] = edgeOffsetOf(m, k);
+    const lx = x - OX - dx, ly = y - OY - dy;   // 換回沒微調時的位置來量
+    const d = axis === 'R'
+      ? Math.hypot(lx - (+c + 1) * CELL, Math.max(0, +r * CELL - ly, ly - (+r + 1) * CELL))
+      : Math.hypot(ly - (+r + 1) * CELL, Math.max(0, +c * CELL - lx, lx - (+c + 1) * CELL));
+    if (d <= bestD) { bestD = d; best = k; }
+  }
+  return best;
+}
+// 畫一條邊緣碰撞（格線上的粗線；off＝微調的像素）
+function drawEdgeLine(c, r, axis, color, width, off = [0, 0]) {
+  const x = OX + (axis === 'R' ? c + 1 : c) * CELL + off[0], y = OY + (axis === 'B' ? r + 1 : r) * CELL + off[1];
+  ctx.strokeStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(axis === 'R' ? x : x + CELL, axis === 'R' ? y + CELL : y); ctx.stroke();
+  ctx.lineCap = 'butt';
+}
+const solidNudgeEdges = new Set();   // 目前用「碰撞微調」選中的邊緣碰撞線（'c,r,R'／'c,r,B'）
+let nudgeDragKind = 'cell';          // 這次拖曳選的是紅格（cell）還是邊緣碰撞線（edge）：按下時點到什麼就是什麼
+// 狀態列：選了幾格／幾條、目前偏移（偏移不一樣就不列數字）
 function solidNudgeStatus(m) {
-  const offs = [...solidNudgeCells].map(k => (m.solidOffsets[k] || [0, 0]).join(', '));
-  const same = offs.every(o => o === offs[0]);
-  return (solidNudgeCells.size > 1 ? '已選 ' + solidNudgeCells.size + ' 格紅格' : '已選這格碰撞範圍') +
-    (same ? '（目前偏移 ' + offs[0] + '）' : '（各格偏移不同，會一起移動）') +
-    '：方向鍵移動、Shift 移多一點、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取';
+  const offs = [...[...solidNudgeCells].map(k => m.solidOffsets[k] || [0, 0]), ...[...solidNudgeEdges].map(k => edgeOffsetOf(m, k))].map(o => o.join(', '));
+  const same = offs.every(o => o === offs[0]), nc = solidNudgeCells.size, ne = solidNudgeEdges.size;
+  const what = [nc ? nc + ' 格紅格' : '', ne ? ne + ' 條邊緣碰撞' : ''].filter(Boolean).join('＋');
+  return '已選 ' + what + (same ? '（目前偏移 ' + offs[0] + '）' : '（各自偏移不同，會一起移動）') +
+    '：方向鍵移動、Shift 移多一點、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取' + (ne ? '（邊緣碰撞最多移半格）' : '');
 }
 function draw() {
   const m = curMap();
@@ -1030,6 +1082,19 @@ function draw() {
       ctx.fillText('💠', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
     }
     if (showGrid) { ctx.strokeStyle = 'rgba(255,255,255,.06)'; ctx.lineWidth = 1; ctx.strokeRect(x + .5, y + .5, CELL, CELL); }
+  }
+  // 📏 邊緣碰撞：紅綠格開著、或正在用這個工具時顯示（跟紅格一樣用紅色半透明的細線，不會蓋住底下的圖）
+  if (showSolid || brush.mode === 'edge' || brush.mode === 'solidnudge') {
+    for (const k of m.edges || []) {
+      const [c, r, axis] = k.split(','), off = edgeOffsetOf(m, k);
+      if (off[0] || off[1]) { ctx.setLineDash([3, 3]); drawEdgeLine(+c, +r, axis, 'rgba(255,91,91,.3)', 1); ctx.setLineDash([]); }   // 微調過：虛線標出原本的格線位置
+      drawEdgeLine(+c, +r, axis, 'rgba(255,60,60,.6)', 2, off);
+      if (solidNudgeEdges.has(k)) { ctx.setLineDash([5, 3]); drawEdgeLine(+c, +r, axis, '#ffe14d', 1.5, off); ctx.setLineDash([]); }   // 目前選中的線
+    }
+    if (brush.mode === 'edge' && pointerPx && hoverCell) {   // 滑鼠靠近的那條格線：預覽
+      const hit = edgeAtPx(pointerPx.x, pointerPx.y, painting ? edgePaint.axis : null);
+      if (hit) { ctx.setLineDash([4, 3]); drawEdgeLine(hit.c, hit.r, hit.axis, 'rgba(255,140,140,.85)', 1.5); ctx.setLineDash([]); }
+    }
   }
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
@@ -1303,16 +1368,34 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (m.solid.indexOf(key) < 0) { delete m.solidOffsets[key]; solidNudgeCells.delete(key); }   // 取消紅格時一併清掉微調
   } else if (brush.mode === 'solidnudge') {
     // 點一下＝只選這格；Shift＋點＝加選／減選；按著拖曳＝把經過的紅格一起選進來（Shift 拖曳從已選的格子開始＝減選）
-    const isSolid = m.solid.indexOf(key) >= 0;
+    // 點在紅色的邊緣碰撞細線上：選的是那條線（拖曳＝把經過的線一起選進來）；按下時點到什麼，這次拖曳就選什麼
+    const lineKey = pointerPx ? edgeHitAtPx(m, pointerPx.x, pointerPx.y) : null;
     if (isDown) {
-      if (!additiveSelect) solidNudgeCells.clear();
-      solidNudgeAdd = !(additiveSelect && solidNudgeCells.has(key));
+      if (!additiveSelect) { solidNudgeCells.clear(); solidNudgeEdges.clear(); }
+      nudgeDragKind = lineKey ? 'edge' : 'cell';
+      solidNudgeAdd = !(additiveSelect && (lineKey ? solidNudgeEdges.has(lineKey) : solidNudgeCells.has(key)));
     }
-    if (isSolid) { if (solidNudgeAdd) solidNudgeCells.add(key); else solidNudgeCells.delete(key); }
-    else if (isDown && !additiveSelect) { draw(); setStatus('這格不是「不可穿透」，先用 🧱 畫上紅格再微調', '#ffd24a'); return; }
+    if (nudgeDragKind === 'edge') { if (lineKey) { if (solidNudgeAdd) solidNudgeEdges.add(lineKey); else solidNudgeEdges.delete(lineKey); } }
+    else if (m.solid.indexOf(key) >= 0) { if (solidNudgeAdd) solidNudgeCells.add(key); else solidNudgeCells.delete(key); }
+    else if (isDown && !additiveSelect) { draw(); setStatus('這格不是「不可穿透」，先用 🧱 畫上紅格（或 📏 畫邊緣碰撞）再微調', '#ffd24a'); return; }
     draw();
-    if (solidNudgeCells.size) setStatus(solidNudgeStatus(m), '#ffd479');
-    else if (isDown) setStatus('沒有選中的紅格', '#9aa4b2');
+    if (solidNudgeCells.size || solidNudgeEdges.size) setStatus(solidNudgeStatus(m), '#ffd479');
+    else if (isDown) setStatus('沒有選中的紅格或邊緣碰撞', '#9aa4b2');
+    return;
+  } else if (brush.mode === 'edge') {
+    // 📏 邊緣碰撞：點格線（靠近哪條邊就是哪條）＝加上／拿掉薄牆；按著沿格線拖曳＝連續畫（或連續擦）
+    if (!pointerPx) return;
+    const moved = isDown ? edgeHitAtPx(m, pointerPx.x, pointerPx.y, 6) : null;   // 點在微調過的線上：拿掉那條（線已經不在格線上）
+    const hit = moved ? { key: moved, axis: moved.split(',')[2] } : edgeAtPx(pointerPx.x, pointerPx.y, isDown ? null : edgePaint.axis);
+    if (!hit) return;
+    const edges = m.edges || (m.edges = []), has = edges.includes(hit.key);
+    if (isDown) { edgePaint.axis = hit.axis; edgePaint.add = !has; }
+    if (edgePaint.add && !has) edges.push(hit.key);
+    else if (!edgePaint.add && has) { edges.splice(edges.indexOf(hit.key), 1); removeEdgeOffset(m, hit.key); }
+    else { if (!edges.length) delete m.edges; return; }
+    if (!edges.length) delete m.edges;
+    saveMaps(); draw();
+    setStatus((edgePaint.add ? '已加上' : '已拿掉') + '邊緣碰撞（這張地圖共 ' + ((m.edges || []).length) + ' 條）：按著沿格線拖曳可以連續' + (edgePaint.add ? '畫' : '擦'), '#ffb347');
     return;
   } else if (brush.mode === 'spawn') {
     m.spawnZone = m.spawnZone || [];
@@ -2831,7 +2914,7 @@ document.getElementById('solidToggle').addEventListener('click', e => {
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.capKing; checkResult = null; solidNudgeCells.clear();
+  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.capKing; delete m.edges; delete m.edgeOffsets; checkResult = null; solidNudgeCells.clear(); solidNudgeEdges.clear();
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -2843,7 +2926,7 @@ function refreshMapSelect() {
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], spawnZone: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], camp: [], rules: {} }); }
-function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; solidNudgeCells.clear(); applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
+function switchTo(id) { curId = id; checkResult = null; selection = null; selections = []; solidNudgeCells.clear(); solidNudgeEdges.clear(); applyMapSize(); refreshSelPanel(); refreshMapSelect(); loadRules(); draw(); }
 
 mapSelect.addEventListener('change', () => switchTo(mapSelect.value));
 document.getElementById('newMap').addEventListener('click', () => {
@@ -2946,6 +3029,10 @@ function shiftMapContent(m, dc, dr) {
   m.hiddenPickups = (m.hiddenPickups || []).map(k => { const i = k.lastIndexOf(':'); return k.slice(0, i + 1) + shiftKey(k.slice(i + 1)); });
   if (m.capKing) m.capKing.caps = capKingCaps(m).map(shiftKey);
   if (solidNudgeCells.size) { const moved = [...solidNudgeCells].map(shiftKey); solidNudgeCells.clear(); moved.forEach(k => solidNudgeCells.add(k)); }
+  const shiftEdge = k => { const [c, r, side] = k.split(','); return (+c + dc) + ',' + (+r + dr) + ',' + side; };   // 邊緣碰撞（含微調、選取）
+  if (m.edges) m.edges = m.edges.map(shiftEdge);
+  if (m.edgeOffsets) { const eo = {}; for (const k in m.edgeOffsets) eo[shiftEdge(k)] = m.edgeOffsets[k]; m.edgeOffsets = eo; }
+  if (solidNudgeEdges.size) { const moved = [...solidNudgeEdges].map(shiftEdge); solidNudgeEdges.clear(); moved.forEach(k => solidNudgeEdges.add(k)); }
 }
 // 把落在地圖外的內容清掉（縮小後用）
 function dropOutsideContent(m) {
@@ -2968,6 +3055,16 @@ function dropOutsideContent(m) {
     m[key] = (m[key] || []).filter(insideKey);
     removed += n - m[key].length;
   });
+  if (m.edges) {   // 邊緣碰撞：兩邊的格子都要還在地圖裡
+    const n = m.edges.length;
+    m.edges = m.edges.filter(k => { const [c, r, side] = k.split(','); return inside(+c, +r) && (side === 'R' ? inside(+c + 1, +r) : inside(+c, +r + 1)); });
+    removed += n - m.edges.length;
+    if (!m.edges.length) delete m.edges;
+  }
+  if (m.edgeOffsets) {   // 被清掉的線，微調也一起清
+    for (const k in m.edgeOffsets) if (!(m.edges || []).includes(k)) delete m.edgeOffsets[k];
+    if (!Object.keys(m.edgeOffsets).length) delete m.edgeOffsets;
+  }
   const off = {};
   for (const k in (m.solidOffsets || {})) { if (insideKey(k)) off[k] = m.solidOffsets[k]; }
   m.solidOffsets = off;

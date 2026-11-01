@@ -18,7 +18,11 @@ const CAMP_SUPPLY = {
   sootheMul: 2,                                // 疏導量倍率（原本：艾德林一次清 15）
   box: { id: 'tile_field_supply_box',          // 地圖上的物資箱物件（data/tiles.js）
     art: { full: 'images/field-camp/field-base-01.png?v=20261024', some: 'images/field-camp/field-base-02.png?v=20261024', empty: 'images/field-camp/field-base-03.png?v=20261024' } },   // 10 個以上／1～9 個／空的（?v＝02、03 以前是 440×320 的營地疊圖，避免瀏覽器拿到舊圖）
+  // 其他造型的物資箱（素材 id → 三張圖）：功能跟上面那個完全一樣、共用同一份物資
+  boxSkins: { tile_mvot2yuu: { full: 'images/Poolcore/Poolcore_field-base-01.png', some: 'images/Poolcore/Poolcore_field-base-02.png', empty: 'images/Poolcore/Poolcore_field-base-03.png' } },   // 池核版（Poolcore_field-base-01～03）
 };
+const isSupplyBoxId = id => id === CAMP_SUPPLY.box.id || !!CAMP_SUPPLY.boxSkins[id];
+const supplyBoxArt = id => CAMP_SUPPLY.boxSkins[id] || CAMP_SUPPLY.box.art;
 const CAMP_SUPPLY_KEY = 'tudrc_camp_supply_v1';
 const SUPPLY_KEY_OF = { medkit: 'medkit', 'almond-water': 'almond' };
 let campSupplyData = {};
@@ -47,7 +51,7 @@ function supplyBoxSpots() {   // js/camp-interactions.js 的互動點（kind 'su
   if (MAP_SAFE || !MAP) return [];
   const spots = [];
   for (const s of MAP.stamps || []) {
-    if (s.id !== CAMP_SUPPLY.box.id) continue;
+    if (!isSupplyBoxId(s.id)) continue;
     const t = mapTileById(s.id); if (!t) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     spots.push({ kind: 'supply', stamp: s, x: x0 + w / 2, y: y0 + h, top: y0, left: x0, right: x0 + w, bottom: y0 + h });
@@ -56,9 +60,9 @@ function supplyBoxSpots() {   // js/camp-interactions.js 的互動點（kind 'su
 }
 // 畫地圖物件時換圖（js/maploader.js 會問這裡）
 function supplyBoxTile(s) {
-  if (s.id !== CAMP_SUPPLY.box.id || MAP_SAFE) return null;
+  if (!isSupplyBoxId(s.id) || MAP_SAFE) return null;
   const total = campBoxTotal(), k = total >= 10 ? 'full' : total > 0 ? 'some' : 'empty';
-  return { ...mapTileById(s.id), id: '__supply-box-' + k, file: CAMP_SUPPLY.box.art[k] };
+  return { ...mapTileById(s.id), id: '__supply-box-' + s.id + '-' + k, file: supplyBoxArt(s.id)[k] };
 }
 // 嚮導回來拿東西的箱子（有好幾個就拿第一個）
 function campSupplySpot() { return supplyBoxSpots()[0] || null; }

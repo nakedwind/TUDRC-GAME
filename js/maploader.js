@@ -604,7 +604,7 @@ function drawMapStampRaw(ctx, s) {
     const gate=G.obstacles.find(o=>o.type==='irongate'&&o.mapSource===s);
     if(gate&&drawSlidingIronGate(ctx,gate,img,x,y,w,h))return;
     ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn(circuitOf(s)))ctx.filter='brightness(0.35)';   // 電路編號（js/powered-lights.js）
-    if (typeof doorCutoutClip === 'function' && stampIsOcc(s)) doorCutoutClip(ctx, x, y, rot % 2 ? h : w, rot % 2 ? w : h);   // 打開的挖空門：牆在門的範圍裡不畫（js/doors.js）
+    if (typeof doorCutoutClip === 'function' && stampIsOcc(s)) doorCutoutClip(ctx, x, y, rot % 2 ? h : w, rot % 2 ? w : h, s);   // 打開的挖空門：牆在門的範圍裡不畫（js/doors.js）
     const drawW = rot % 2 ? h : w, drawH = rot % 2 ? w : h;
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
@@ -853,7 +853,8 @@ function occluderStateSig(x) {
     + (destroyedBaseDisplayTile(s, mapTileById(s.id) || {}).id || '')
     + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
     + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '')
-    + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '');   // 隱藏區圖層淡入中：補畫也要跟著重做
+    + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '')   // 隱藏區圖層淡入中：補畫也要跟著重做
+    + (typeof doorCutoutSig === 'function' ? doorCutoutSig(s) : '');   // 疊在這張圖上的挖空門開了／關了：門洞也要挖進補畫裡（js/doors.js）
 }
 function occluderImageReady(x) {
   const s = x.kind === 'cell' ? null : x.stamp;
