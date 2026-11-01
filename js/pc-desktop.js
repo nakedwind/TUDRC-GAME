@@ -3,6 +3,7 @@
    ・桌面圖示點兩下打開（手機點一下）：
        🎵 音樂播放器：換基地的背景音樂（music/基地音樂/ 裡的檔案；js/music.js 的 MUSIC.setBaseTrack，記在瀏覽器）
        💣 踩地雷：左鍵翻開、右鍵插旗、點已翻開的數字＝旗子插夠了就把旁邊的一起翻開；笑臉＝重新開始
+       🃏 新接龍：FreeCell，牌局在 js/pc-freecell.js
        📕 怪物圖鑑：打開原本的圖鑑視窗（js/bestiary.js 的 openBestiary）
    ・左下「開始」選單、右下的電源按鈕都可以關機
    樣式在 css/style.css 的「2F 電腦桌面」。
@@ -12,6 +13,7 @@ const pcd = { el: null, z: 10, sel: null, wins: {}, tracks: null, mine: null, cl
 const PCD_APPS = [
   { id: 'music', name: '音樂播放器', icon: '🎵', title: '音樂播放器－基地音樂' },
   { id: 'mines', name: '踩地雷', icon: '💣', title: '踩地雷' },
+  { id: 'freecell', name: '新接龍', icon: '🃏', title: '新接龍' },
   { id: 'bestiary', name: '怪物圖鑑', icon: '📕' },
 ];
 // 列不出資料夾內容時（例如放到網路上的版本）用這份清單；在本機用 editor-server 開的話會自動讀 music/基地音樂/ 裡實際有的檔案
@@ -129,10 +131,12 @@ function openPcApp(id) {
     pcd.el.querySelector('.pcd-wins').appendChild(w);
     if (id === 'music') initPcMusic(w.querySelector('.pcd-body'));
     if (id === 'mines') initPcMines(w.querySelector('.pcd-body'));
+    if (id === 'freecell') initPcFreecell(w.querySelector('.pcd-body'));
     sfx('menu');
   }
   focusPcWin(id);
   if (id === 'mines') fitPcMines();
+  if (id === 'freecell') fitPcFreecell();
 }
 function focusPcWin(id) {
   const w = pcd.wins[id]; if (!w) return;
@@ -145,6 +149,7 @@ function minimizePcWin(id) { const w = pcd.wins[id]; if (!w) return; w.classList
 function closePcWin(id) {
   const w = pcd.wins[id]; if (!w) return;
   if (id === 'mines' && pcd.mine) clearInterval(pcd.mine.timer);
+  if (id === 'freecell' && pcd.fc) clearInterval(pcd.fc.timer);
   w.remove(); delete pcd.wins[id]; renderPcTasks(); sfx('switch');
 }
 function topPcWin() {   // 最上面、沒有縮小的那個視窗
@@ -314,7 +319,7 @@ function renderPcMines() {
   });
 }
 
-window.addEventListener('resize', () => { if (pcDesktopOpen) fitPcMines(); });
+window.addEventListener('resize', () => { if (pcDesktopOpen) { fitPcMines(); if (pcd.fc && pcd.fc.cols) { fitPcFreecell(); renderPcFreecell(true); } } });
 window.addEventListener('pointerup', () => { if (pcDesktopOpen && pcd.mine && pcd.mine.cells && !pcd.mine.over) setPcFace('🙂'); });   // 按住格子時笑臉張嘴，放開變回來
 
 // 開著的時候：Esc＝關掉開始選單／最上面的視窗／關機；其他按鍵都不要傳給遊戲（圖鑑開著時讓圖鑑自己處理）
