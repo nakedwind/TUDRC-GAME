@@ -39310,7 +39310,8 @@ const BATTLE_MAPS = [
         "62,7": "tile_bg_extra_floor02_extra",
         "62,8": "tile_bg_extra_floor02_extra",
         "62,9": "tile_bg_extra_floor02_extra",
-        "62,10": "tile_bg_extra_floor02_extra"
+        "62,10": "tile_bg_extra_floor02_extra",
+        "70,62": "floor"
       },
       "ground": {
         "67,60": "tile_bg_extra_floor02_extra",
@@ -48449,13 +48450,6 @@ const BATTLE_MAPS = [
         "fx": true
       },
       {
-        "id": "tile_bg_backroom_wall02_dmg_crack",
-        "c": 88,
-        "r": 47,
-        "layer": "object",
-        "fx": true
-      },
-      {
         "id": "tile_mr4cyq54",
         "c": 87,
         "r": 46,
@@ -49324,18 +49318,6 @@ const BATTLE_MAPS = [
         "id": "tile_bg_backroom_door_wood",
         "c": 34,
         "r": 59,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_bg_backroom_wall02_dmg_crack",
-        "c": 33,
-        "r": 73,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_bg_backroom_wall02_dmg_crack",
-        "c": 25,
-        "r": 80,
         "layer": "object2"
       },
       {
@@ -51075,6 +51057,24 @@ const BATTLE_MAPS = [
         "rot": 1,
         "ox": 32,
         "oy": 0
+      },
+      {
+        "id": "tile_bg_backroom_wall02_crack_breakable",
+        "c": 88,
+        "r": 47,
+        "layer": "object"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_crack_breakable",
+        "c": 25,
+        "r": 80,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_crack_breakable",
+        "c": 33,
+        "r": 74,
+        "layer": "object2"
       }
     ],
     "solid": [
@@ -56537,12 +56537,6 @@ const BATTLE_MAPS = [
       "71,47",
       "66,51",
       "71,52",
-      "66,61",
-      "71,61",
-      "67,61",
-      "70,61",
-      "55,66",
-      "56,66",
       "51,66",
       "52,66",
       "51,65",
@@ -56645,19 +56639,6 @@ const BATTLE_MAPS = [
       "69,14"
     ],
     "spawnZone": [],
-    "capKing": {
-      "caps": [
-        "12,16",
-        "21,16",
-        "30,16",
-        "12,23",
-        "21,23",
-        "30,23",
-        "12,30",
-        "21,30",
-        "30,30"
-      ]
-    },
     "coreCount": 1,
     "monsterMix": [
       {
@@ -56777,7 +56758,20 @@ const BATTLE_MAPS = [
         "id": "top",
         "name": "☁️ 上層"
       }
-    ]
+    ],
+    "capKing": {
+      "caps": [
+        "12,16",
+        "21,16",
+        "30,16",
+        "12,23",
+        "21,23",
+        "30,23",
+        "12,30",
+        "21,30",
+        "30,30"
+      ]
+    }
   }
 ];
 // 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來
