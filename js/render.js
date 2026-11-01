@@ -1197,7 +1197,6 @@ function draw() {
   flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
   if (typeof drawNpcChatMarks === 'function') drawNpcChatMarks(ctx);   // 有人在閒聊、等溫特來聽：中間的「● ● ●」（js/npc-chats.js）
   drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
-  if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）

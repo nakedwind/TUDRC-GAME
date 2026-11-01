@@ -1,5 +1,6 @@
 /* ===== 順順宮帽＆夯吉寶 =====
-   ・順順宮帽：戰鬥地圖開場時藏在隨機的黑暗角落（不會貼著牆；之後也會慢慢冒出新的）。黑暗中只看得到一點微微的閃光。
+   ・順順宮帽：跟夯吉寶綁在一起——這張地圖會出現夯吉寶才有帽子（判定同 js/monster-data.js 的 monsterChoices）。
+     戰鬥地圖開場時藏在隨機的黑暗角落（不會貼著牆；之後也會慢慢冒出新的）。黑暗中看不到，要照亮才看得到。
      攻擊帽子（溫特開槍打到、照明彈落在帽子上、地雷／油桶／瓦斯爐／自爆史萊姆爆炸波及、希奧妮的火焰、燒起來的油火），
      帽子就會打開，跳出 3～5 隻夯吉寶；
      有時候還會掉出有用的物品（物品表 HANGI_CAP.loot，之後再設定）。只是走近不會打開。
@@ -52,7 +53,7 @@ function hangiCapSpot(minFromPlayer) {
 function placeHangiCap(minFromPlayer) {
   const spot = hangiCapSpot(minFromPlayer);
   if (!spot) return;
-  const cap = { x: spot.x, y: spot.y, c: spot.c, r: spot.r, state: 'closed', t: 0, glint: Math.random() * 5 };
+  const cap = { x: spot.x, y: spot.y, c: spot.c, r: spot.r, state: 'closed', t: 0 };
   G.hangiCaps.push(cap);
   G.grid[cap.c + ',' + cap.r] = { kind: 'hangiCap', cap };   // 擋路：佔住腳下這一格
 }
@@ -60,11 +61,22 @@ function placeHangiCap(minFromPlayer) {
 function hangiCapAt(c, r) { const o = G.grid && G.grid[c + ',' + r]; return !!(o && o.kind === 'hangiCap'); }
 
 // ---- 每幀更新（game.js 的 update 呼叫）----
-// 這張地圖的異質體有勾夯吉寶才放帽子（地圖編輯器「這張地圖的異質體」）
-const mapHasHangi = () => !!MAP?.monsterMix?.some(m => m.id === 'hangi_bao' && Number(m.weight) > 0);
+// 帽子跟夯吉寶綁在一起：這張地圖真的會生成夯吉寶（地圖編輯器「這張地圖的異質體」有勾、怪物資料裡也有）才有帽子。
+// 跟異質核心挑怪物用同一套判定（js/monster-data.js 的 monsterChoices），兩邊才不會對不起來。
+const mapHasHangi = () => !!MAP && typeof monsterChoices === 'function' && monsterChoices(MAP, ACTIVE_MONSTERS).some(m => m.id === 'hangi_bao');
+const hangiCapsAllowed = () => !MAP_SAFE && LIGHT.enabled && mapHasHangi();
+// 現在場上的帽子（不該有帽子的地圖一律當成沒有：畫圖、打帽子都用這個）
+const liveHangiCaps = () => (G.hangiCaps && hangiCapsAllowed()) ? G.hangiCaps : null;
+// 不該有帽子卻留著（例如練習結束、換了設定）：連同擋路格一起清掉
+function clearHangiCaps() {
+  for (const cap of G.hangiCaps || []) {
+    const key = cap.c + ',' + cap.r;
+    if (G.grid[key] && G.grid[key].cap === cap) delete G.grid[key];
+  }
+  G.hangiCaps = null; G.hangiSeedT = 0;
+}
 function updateHangi(dt) {
-  if (MAP_SAFE || !LIGHT.enabled) return;
-  if (!mapHasHangi()) { updateCapShots(dt); return; }
+  if (!hangiCapsAllowed()) { if (G.hangiCaps) clearHangiCaps(); updateCapShots(dt); return; }
   if (!G.hangiCaps) {   // 開場：等亮光算好（約半秒）再把帽子藏進黑暗
     G.hangiSeedT = (G.hangiSeedT || 0) + dt;
     if (G.hangiSeedT < 0.5) return;
@@ -73,7 +85,7 @@ function updateHangi(dt) {
     for (let i = 0; i < n; i++) placeHangiCap(HANGI_CAP.minDistFromPlayer);
   }
   for (const cap of G.hangiCaps) {
-    cap.t += dt; cap.glint += dt;
+    cap.t += dt;
     // 燒起來的油火蔓延到帽子：打開帽子
     if (cap.state === 'closed' && G.oilFires && G.oilFires.some(f => f.t > 0 && Math.hypot(cap.x - f.x, (cap.y - f.y) / .7) <= f.r + 10)) openHangiCap(cap);
   }
@@ -94,10 +106,10 @@ function hangiCapBody(cap) {
 }
 // 子彈從 (x1,y1) 射向 (x2,y2)：打到最近的那頂關著的帽子就打開，回傳命中點（game.js 開槍時呼叫；黑暗中也打得到）
 function shootHangiCapOnLine(x1, y1, x2, y2) {
-  if (!G.hangiCaps) return null;
+  const caps = liveHangiCaps(); if (!caps) return null;
   const dx = x2 - x1, dy = y2 - y1, len2 = dx * dx + dy * dy || 1;
   let best = null, bestT = Infinity;
-  for (const cap of G.hangiCaps) {
+  for (const cap of caps) {
     if (cap.state !== 'closed') continue;
     const b = hangiCapBody(cap), t = Math.max(0, Math.min(1, ((b.x - x1) * dx + (b.y - y1) * dy) / len2));
     if (Math.hypot(x1 + dx * t - b.x, y1 + dy * t - b.y) > b.r || t >= bestT) continue;
@@ -111,8 +123,8 @@ function shootHangiCapOnLine(x1, y1, x2, y2) {
 }
 // 爆炸或照明彈落在 (x,y)、半徑 R 內的帽子都會打開（地雷、油桶、照明彈呼叫）
 function hitHangiCapsAt(x, y, R) {
-  if (!G.hangiCaps) return;
-  for (const cap of G.hangiCaps) {
+  const caps = liveHangiCaps(); if (!caps) return;
+  for (const cap of caps) {
     if (cap.state !== 'closed') continue;
     const b = hangiCapBody(cap);
     if (Math.hypot(b.x - x, b.y - y) <= R + b.r || Math.hypot(cap.x - x, cap.y - y) <= R + b.r) openHangiCap(cap);
@@ -296,8 +308,8 @@ function updateCapShots(dt) {
 // ---- 繪圖 ----
 // 地上的帽子：跟角色、障礙物一起依前後排序（站在帽子後面的人會被帽子擋住；被照亮才看得到）
 function hangiCapSortables(sortables) {
-  if (!G.hangiCaps) return;
-  for (const cap of G.hangiCaps) if (isVisible(cap.x, cap.y)) sortables.push({ y: cap.y + 13, draw: () => drawHangiCap(ctx, cap) });
+  const caps = liveHangiCaps(); if (!caps) return;
+  for (const cap of caps) if (isVisible(cap.x, cap.y)) sortables.push({ y: cap.y + 13, draw: () => drawHangiCap(ctx, cap) });
 }
 function drawHangiCap(ctx, cap) {
   const img = hbImg(cap.state === 'open' ? HANGI_CAP.openImage : HANGI_CAP.image);
@@ -309,20 +321,6 @@ function drawHangiCap(ctx, cap) {
   ctx.fillStyle = 'rgba(7,16,21,.3)'; ctx.beginPath(); ctx.ellipse(cap.x, cap.y + 12, w * .45, 5, 0, 0, Math.PI * 2); ctx.fill();
   ctx.drawImage(img, Math.round(cap.x - w / 2), Math.round(cap.y + 13 - h - pop), Math.round(w), Math.round(h));
   ctx.restore();
-}
-// 黑暗中：關著的帽子偶爾閃一下金光（畫在黑幕上面，引人靠近）
-function drawHangiCapGlints(ctx) {
-  if (!G.hangiCaps) return;
-  for (const cap of G.hangiCaps) {
-    if (cap.state !== 'closed' || isVisible(cap.x, cap.y)) continue;
-    const t = cap.glint % 3.2; if (t > .6) continue;               // 每 3.2 秒閃一次
-    const k = Math.sin(t / .6 * Math.PI), x = cap.x + 6, y = cap.y - 4;
-    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .75 * k;
-    ctx.fillStyle = '#ffd479';
-    ctx.fillRect(x - 6 * k, y - .75, 12 * k, 1.5); ctx.fillRect(x - .75, y - 6 * k, 1.5, 12 * k);
-    ctx.globalAlpha = .35 * k; ctx.beginPath(); ctx.arc(x, y, 3 * k, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  }
 }
 // 飛行中的帽子、準備丟時舉在手上的帽子（render.js 在角色之後畫）
 function drawCapShots(ctx) {
