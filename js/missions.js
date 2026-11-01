@@ -4,8 +4,8 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [] };   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）
-try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
+const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [] };   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
+try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
 
 const missionById = id => MISSIONS.find(m => m.id === id) || null;
@@ -18,11 +18,16 @@ const missionCleared = m => missionState.cleared.includes(m.id) || MISSIONS.some
 const missionOpen = m => missionState.reached.includes(m.id) || m.after.every(id => missionCleared(missionById(id) || { id }));   // 前面的區域都控制了，或已經進去過（戰敗回來才能再出發）
 // 進入戰鬥（game.js 的 begin 呼叫）：開始畫面的地圖選單可以跳過前面的區域直接進來，記下來之後作戰桌才選得到
 function markMissionMapReached(mapId) {
-  const m = missionOfMap(mapId); if (!m || missionState.reached.includes(m.id)) return;
+  const m = missionOfMap(mapId);
+  if (!m) {   // 不是任務的戰鬥地圖（測試地圖 y1 等）：一樣記下來，經費只給一次；訓練室是基地變的，經費另外算（js/practice.js）
+    if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) || missionState.fundedMaps.some(id => sameMapId(id, mapId))) return;
+    missionState.fundedMaps.push(mapId); saveMissions(); return;
+  }
+  if (missionState.reached.includes(m.id)) return;
   missionState.reached.push(m.id); saveMissions();
 }
-// 這張地圖的作戰經費給過了沒（進去過、或已經控制）：一個任務只給一次，重新部署、再次出擊都不會再給
-const missionMoneyGiven = mapId => { const m = missionOfMap(mapId); return !!m && (missionState.reached.includes(m.id) || missionCleared(m)); };
+// 這張地圖的作戰經費給過了沒（進去過、或已經控制）：每張戰鬥地圖只給一次，重新部署、再次出擊、重新整理後再進去都不會再給
+const missionMoneyGiven = mapId => { const m = missionOfMap(mapId); return m ? missionState.reached.includes(m.id) || missionCleared(m) : missionState.fundedMaps.some(id => sameMapId(id, mapId)); };
 // 不用打贏也算控制（例如新手區：看完救援劇情離開，js/story-triggers.js 呼叫）
 function markMissionMapCleared(mapId) {
   const m = missionOfMap(mapId); if (!m || missionState.cleared.includes(m.id)) return;
