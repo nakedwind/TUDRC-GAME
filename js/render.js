@@ -209,7 +209,6 @@ function drawTower(t) {
     const prevSmooth = ctx.imageSmoothingEnabled;   // 畫完放回原本的設定（不要直接打開平滑，不然後面畫的牆、道具會被糊掉）
     ctx.imageSmoothingEnabled = false;
     ctx.save();
-    if (typeof hurtGraceAlpha === 'function') ctx.globalAlpha *= hurtGraceAlpha(t);   // 被打後的短暫無敵：一閃一閃（js/combat-feel.js）
     if (t.meleeSwing) {
       const s = t.meleeSwing;
       let lunge;   // -1 後仰蓄力 → +1 前傾撲擊
@@ -922,7 +921,6 @@ function drawPlayer(p) {
   if (img && img.complete && img.naturalWidth && !p.sitting) drawDashTrail(p, img, size);   // 衝刺：殘影（畫在溫特後面）
   if (img && img.complete && img.naturalWidth) {
     ctx.save();
-    if (typeof hurtGraceAlpha === 'function') ctx.globalAlpha *= hurtGraceAlpha(p);   // 被打後的短暫無敵：一閃一閃（js/combat-feel.js）
     if (p.recoilT > 0) {   // 開槍後座力：往反方向頂一下再回正
       const k = (p.recoilT / 0.14) * 4;
       ctx.translate(-Math.cos(p.recoilAng || 0) * k, -Math.sin(p.recoilAng || 0) * k);

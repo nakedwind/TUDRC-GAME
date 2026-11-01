@@ -623,7 +623,7 @@ function drawAcidTop(ctx) {
 }
 
 // ---- 受傷後的短暫無敵（溫特和隊友共用）----
-// 被怪物「直接打中」（近戰、丟帽子、噴珍珠、水柱、砸地、藤蔓、咬人…）之後 HURT_GRACE 秒內，其他怪物的直接攻擊都不扣血，身體閃爍。
+// 被怪物「直接打中」（近戰、丟帽子、噴珍珠、水柱、砸地、藤蔓、咬人…）之後 HURT_GRACE 秒內，其他怪物的直接攻擊都不扣血（不閃爍，看不出來）。
 // 爆炸（自爆史萊姆、油桶、地雷、粉塵爆炸、魚卵）和持續傷害（腐蝕、火、消化）不算，照舊扣。
 const HURT_GRACE = 0.4;
 // 回傳 true＝還在無敵中、這一下不算；false＝可以扣血，並從現在開始無敵（各怪物的攻擊在扣血前呼叫）
@@ -637,5 +637,3 @@ function updateHurtGrace(dt) {   // game.js 的 update 呼叫
   if (!G) return;
   for (const o of [G.player, ...(G.towers || [])]) if (o && o.hurtGraceT > 0) o.hurtGraceT = Math.max(0, o.hurtGraceT - dt);
 }
-// 無敵中：身體一閃一閃（render.js 畫溫特、隊員時乘上這個透明度）
-const hurtGraceAlpha = o => o && o.hurtGraceT > 0 && Math.floor(o.hurtGraceT / .07) % 2 ? .4 : 1;
