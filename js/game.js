@@ -677,8 +677,46 @@ function autoStairTravel() {
   if (!pt) { stairArmed = true; return; }
   if (stairArmed && anyMoveKey()) { stairArmed = false; enterPortal(pt); }   // 要是自己走進去的（按著移動鍵）才會觸發
 }
+// ---- 同一張地圖裡的傳送點（地圖編輯器「🚪 出入口」選「這張地圖」設的，pt.at＝送到哪一格）----
+// 不重新載入地圖：怪物、戰況都照舊，只把溫特（和跟在身邊的隊員）移到對面那扇門前
+const WARP_FOLLOW_CELLS = 4;   // 離溫特幾格內的隊員會一起被傳送過去（跟隨護衛中的隊員不管多遠都會跟）
+function teleportInMap(pt) {
+  const p = G.player, [tc, tr] = pt.at;
+  if (!inGrid(tc, tr)) { flash('傳送點的目的地不在地圖裡', p.x, p.y - 30, '#ff8f8f'); return; }
+  const followers = (G.towers || []).filter(t => t.hp > 0 && !t.sitting && !t.berserk &&
+    (t.mode === 'escort' || Math.hypot(t.x - p.x, t.y - p.y) <= WARP_FOLLOW_CELLS * CELL));
+  mapTransitioning = true;
+  Object.keys(keys).forEach(key => { keys[key] = false; });
+  sfx('door');
+  requestAnimationFrame(() => {
+    mapTransition.classList.add('visible');
+    setTimeout(() => {
+      placePlayerNearPortal(mapPortals.find(q => q.c === tc && q.r === tr) || { c: tc, r: tr });
+      // 隊員排在溫特身邊的空格（由近到遠找，一人一格）
+      const [pc, pr] = cellAt(p.x, p.y), used = new Set([pc + ',' + pr]);
+      for (const t of followers) {
+        let spot = null;
+        for (let radius = 1; radius <= 4 && !spot; radius++) {
+          for (let dr = -radius; dr <= radius && !spot; dr++) for (let dc = -radius; dc <= radius && !spot; dc++) {
+            if (Math.max(Math.abs(dc), Math.abs(dr)) !== radius) continue;
+            const c = pc + dc, r = pr + dr;
+            if (!used.has(c + ',' + r) && sentryCellWalkable(c, r, true, true)) { used.add(c + ',' + r); spot = center(c, r); }
+          }
+        }
+        if (!spot) continue;   // 對面太擠：這位隊員留在原地
+        t.x = spot[0]; t.y = spot[1]; t.navPath = null; t.navGoal = null;
+        if (t.mode === 'goto') t.target = null;
+      }
+      stairArmed = false;
+      updateCamera(); draw();
+      requestAnimationFrame(() => mapTransition.classList.remove('visible'));
+      setTimeout(() => { mapTransitioning = false; }, PORTAL_FADE_MS);
+    }, PORTAL_FADE_MS + PORTAL_BLACK_MS);
+  });
+}
 function enterPortal(pt) {
   if (mapTransitioning) return;
+  if (pt.at && pt.to === MAP.id) { teleportInMap(pt); return; }   // 同一張地圖裡的傳送點
   if (mapIndexById(pt.to) < 0) { flash('地圖不存在', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
   const fromId = MAP.id;
   const pauseHere = !MAP_SAFE && !!mapList()[mapIndexById(pt.to)]?.story;   // 戰鬥地圖 → 劇情地圖：這裡的戰場暫停保存（js/combat-progress.js）

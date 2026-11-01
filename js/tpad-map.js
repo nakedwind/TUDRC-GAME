@@ -49,7 +49,7 @@ function tmapHereMap() { return typeof MAP !== 'undefined' && MAP && MAP_SAFE ? 
 function tmapPortals(room, floor, byId) {
   const groups = [];
   for (const p of room.map.portals || []) {
-    const to = byId.get(p.to); if (!to) continue;
+    const to = byId.get(p.to); if (!to || p.to === room.map.id) continue;   // 同一張地圖裡的傳送點：不算通往別的房間
     const g = groups.find(q => q.to === p.to && Math.abs(q.c / q.k - p.c) <= 2.5 && Math.abs(q.r / q.k - p.r) <= 2.5);
     if (g) { g.c += p.c; g.r += p.r; g.k++; } else groups.push({ to: p.to, c: p.c, r: p.r, k: 1 });
   }

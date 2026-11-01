@@ -132,7 +132,7 @@ function drawFlickerLights(ctx) {
     g.addColorStop(.6, `rgba(210,225,255,${.05 * k})`); g.addColorStop(1, 'rgba(200,220,255,0)');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 80, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
-    ctx.fillStyle = `rgba(255,255,235,${.85 * k})`; ctx.fillRect(L.x - L.half, L.y - 1.5, L.half * 2, 3);   // 燈管本身發亮
+    if (!L.glow) { ctx.fillStyle = `rgba(255,255,235,${.85 * k})`; ctx.fillRect(L.x - L.half, L.y - 1.5, L.half * 2, 3); }   // 燈管本身發亮（有自己光暈圖的燈不畫：例如池核 LED，這條線會浮在燈上方變成一條白條）
     if (L.glow) {   // 有自己的光暈圖（池核 LED）：亮著時疊上去，跟著閃
       const img = flickerGlowImg(L.glow.src), g = L.glow;
       if (img.complete && img.naturalWidth) { ctx.globalAlpha = k; ctx.save(); if (g.fx) { ctx.translate(g.left * 2 + g.w, 0); ctx.scale(-1, 1); } ctx.drawImage(img, g.left, g.top, g.w, g.h); ctx.restore(); ctx.globalAlpha = 1; }

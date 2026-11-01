@@ -4277,8 +4277,8 @@ const SHARED_TILES = [
     "name": "Poolcore_wall_02",
     "role": "floor",
     "file": "images/Poolcore/Poolcore_wall_02.png",
-    "w": 1,
-    "h": 1
+    "w": 2,
+    "h": 2
   },
   {
     "id": "tile_mvobex5o",
@@ -4793,5 +4793,21 @@ const SHARED_TILES = [
     "w": 2,
     "h": 2,
     "flat": true
+  },
+  {
+    "id": "tile_mvxf5so7",
+    "name": "Poolcore_round_arch",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_round_arch.png",
+    "w": 14,
+    "h": 8
+  },
+  {
+    "id": "tile_mvxgf9gt",
+    "name": "Poolcore_Pillar_cut",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_Pillar_cut.png",
+    "w": 2,
+    "h": 2
   }
 ];
