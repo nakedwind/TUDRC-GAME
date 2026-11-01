@@ -61,6 +61,7 @@ const vitalsMax = id => (TYPES[id] && TYPES[id].hp) || 100;
 const vitalsMate = id => vitals.mates[id] || (vitals.mates[id] = { hp: vitalsMax(id), taint: 0, berserk: false, hospital: false });
 const vitalsMapName = () => (typeof MAP !== 'undefined' && MAP && MAP.name) || '';
 const onHospitalMap = () => MAP_SAFE && vitalsMapName() === VITALS.hospitalMap;
+const hospitalResting = t => MAP_SAFE && isHospitalized(t.type);   // 這位隊員正在住院休養（js/game.js：不自己補血、不幫人治療，也不被嚮導補血）
 const onSootheRoom = () => MAP_SAFE && vitalsMapName() === VITALS.sootheRoomMap;
 const vitalsPractice = () => typeof practiceOn === 'function' && practiceOn();
 const briefWaiting = id => typeof MISSION_BASE !== 'undefined' && MISSION_BASE.briefer === id && typeof briefPending === 'function' && !!briefPending();
