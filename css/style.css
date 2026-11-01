@@ -3463,6 +3463,31 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-cell.n5 { color: #a8551b; } .pcd-cell.n6 { color: #138c8c; } .pcd-cell.n7 { color: #333; } .pcd-cell.n8 { color: #777; }
 .pcd-mmsg { color: #444; font-size: 12px; }
 
+/* 新接龍（js/pc-freecell.js）：牌的尺寸由 fitPcFreecell 依螢幕大小決定 */
+.pcd-fc { --fc-w: 76px; --fc-h: 103px; --fc-col: 400px; --fc-font: 15px; display: flex; flex-direction: column; gap: 6px; }
+.pcd-fc-bar { display: flex; align-items: center; gap: 4px; }
+.pcd-fc-bar button { padding: 3px 12px; border: 1px solid #8a8573; border-radius: 3px; background: linear-gradient(180deg, #fff, #e1dccb); font: inherit; cursor: pointer; }
+.pcd-fc-bar button:hover:not(:disabled) { filter: brightness(1.05); border-color: #2f62d4; }
+.pcd-fc-bar button:disabled { color: #a09b8a; cursor: default; }
+.pcd-fc-info { margin-left: auto; padding-left: 10px; color: #333; font-size: 12px; white-space: nowrap; }
+.pcd-fc-table { position: relative; padding: 8px; border: 1px solid #0a4d22; border-radius: 3px; background: radial-gradient(ellipse at 50% 35%, #1a9150, #0b6b35 75%); touch-action: none; }
+.pcd-fc-top, .pcd-fc-cols { display: grid; grid-template-columns: repeat(8, var(--fc-w)); gap: 8px; }
+.pcd-fc-top { margin-bottom: 10px; }
+.pcd-fc-cell { position: relative; height: var(--fc-h); border-radius: 5px; background: rgba(0,0,0,.18); box-shadow: inset 0 0 0 1px rgba(255,255,255,.28); }
+.pcd-fc-ghostsuit { position: absolute; inset: 0; display: grid; place-items: center; font-size: calc(var(--fc-w) * .55); color: rgba(0,0,0,.3); }
+.pcd-fc-ghostsuit.red { color: rgba(255,120,110,.4); }
+.pcd-fc-col { position: relative; height: var(--fc-col); }
+.pcd-fc-col:empty::before { content: ""; position: absolute; left: 0; right: 0; top: 0; height: var(--fc-h); border-radius: 5px; background: rgba(0,0,0,.12); box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+.pcd-fc-card { position: absolute; left: 0; width: var(--fc-w); height: var(--fc-h); box-sizing: border-box; border: 1px solid #5f6670; border-radius: 5px; background: #fdfdf8; box-shadow: 0 1px 2px rgba(0,0,0,.4); color: #1b1e24; cursor: pointer; overflow: hidden; touch-action: none; }
+.pcd-fc-card.red { color: #cf2a22; }
+.pcd-fc-card.sel { background: #cfe0ff; border-color: #1c4fd6; box-shadow: 0 0 0 2px #2f62d4; }
+.pcd-fc-corner { position: absolute; left: 3px; top: 0; font: bold var(--fc-font)/1.25 Tahoma, sans-serif; white-space: nowrap; letter-spacing: -.5px; }
+.pcd-fc-corner.flip { left: auto; right: 3px; top: auto; bottom: 0; transform: rotate(180deg); }
+.pcd-fc-suit { position: absolute; inset: 14% 0 0; display: grid; place-items: center; font-size: calc(var(--fc-w) * .6); line-height: 1; }
+.pcd-fc-ghost { position: absolute; z-index: 70; width: var(--fc-w); pointer-events: none; }
+.pcd-fc-ghost .pcd-fc-card { box-shadow: 2px 4px 8px rgba(0,0,0,.5); cursor: grabbing; }
+.pcd-fc-msg { color: #444; font-size: 12px; }
+
 /* 醫院圖示（images/ui/hospital.svg：白色剪影）：加一圈黑邊，跟遊戲裡名字前的小圖示一樣 */
 .hosp-ico, .item-intro-image img.ui-icon { filter: drop-shadow(1px 0 0 rgba(0,0,0,.9)) drop-shadow(-1px 0 0 rgba(0,0,0,.9)) drop-shadow(0 1px 0 rgba(0,0,0,.9)) drop-shadow(0 -1px 0 rgba(0,0,0,.9)); image-rendering: auto; }
 .hosp-ico { width: 14px; height: 14px; margin-right: 4px; vertical-align: -2px; }
