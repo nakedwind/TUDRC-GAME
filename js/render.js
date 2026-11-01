@@ -408,6 +408,10 @@ function drawRigArm(e, fr, dx, dy, dw, dh) {
 const SHOW_ENEMY_ALERT = false;   // 怪物被槍吸引過來時頭上彈出「！」：true＝顯示
 function drawEnemy(e) {
   ctx.save();
+  if (e.gourdToss && typeof applyGourdTossTransform === 'function') {   // 被 K56 的車撞飛：影子留在地上，身體飛起來（js/street-vehicles.js）
+    ctx.save(); ctx.globalAlpha = .28; ctx.fillStyle = '#0b0906'; ctx.beginPath(); ctx.ellipse(e.x, e.y + 16, 18, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    applyGourdTossTransform(ctx, e);
+  }
   if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
   else if (e.shockT > 0) ctx.translate((Math.random() * 2 - 1) * 1.3, (Math.random() * 2 - 1) * .6);   // 麻痺：微微顫抖
   const lift = e.slimeLift || 0, size = e.sizeMul || 1;
@@ -1043,6 +1047,7 @@ function draw() {
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
+  if (typeof streetVehicleSortables === 'function') streetVehicleSortables(sortables);   // K56 的機車、腳踏車（js/street-vehicles.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });

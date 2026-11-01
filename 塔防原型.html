@@ -258,7 +258,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=pathfix-20261027"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=k56merge-20261101"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=vehsfx-20261101"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=onebgm-20261030"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -328,14 +328,15 @@
   <script src="js/pearl-elder.js?v=knockpearl-20261101"></script> <!-- 9f3b. 菁英珍珠小童「珍珠大童」：抱著核心閒晃、閉殼降珍珠、大珍珠掩體可推動撞擊 -->
   <script src="js/hangi-bao.js?v=k56merge-20261101"></script> <!-- 9f4. 順順宮帽＆夯吉寶：黑暗中的帽子、迴力鏢帽子 -->
   <script src="js/elite-cap-king.js?v=k56merge-20261101"></script> <!-- 9f4a. 菁英 BOSS「順順宮主」：核心躲在大宮帽裡、大夯吉寶、蓋杯子洗牌 -->
+  <script src="js/street-vehicles.js?v=vehtoss-20261101"></script> <!-- 9f4b. K56 路邊會暴衝的機車、腳踏車：敵我都撞飛 -->
   <script src="js/fish-head.js?v=k56merge-20261101"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
   <script src="js/loofah-lady.js?v=k56merge-20261101"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
   <script src="js/clownfish.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
   <script src="js/golden-banana-king.js?v=newsfx-20261027"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
-  <script src="js/gourd-monkey.js?v=capking3-20261101"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
+  <script src="js/gourd-monkey.js?v=vehtoss-20261101"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=test-off-20261031"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=y25open9-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=merge2-20261101"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=vehtoss-20261101"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=merge2-20261101"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=merge2-20261101"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
@@ -386,7 +387,7 @@
   <script src="js/mrt-locks.js?v=stamppx-20261027"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=merge2-20261101"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=vehicles-20261101"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=newbie-result-20261027"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=custom2-20261028"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
