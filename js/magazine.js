@@ -46,7 +46,7 @@ function magazineWorkshopEntries() {
   const bullets = Object.entries(BULLETS).filter(([id, b]) => b.source === 'develop' && !b.removed).map(([id, b]) => {
     const have = bulletOwned(id);
     return { key: 'b:' + id, kind: 'bullet', def: b, name: b.name, lv: have ? 1 : 0, max: 1, icon: wsAmmoIcon(bulletIcon(b, 'ws-bullet-img'), b), image: b.image, emoji: b.icon,
-      tag: '子彈', worn: magazineCarries(id), about: b.desc || '', stat: () => '最多帶 ' + b.max + ' 發・每次出勤在營地的彈藥箱放一組' + (have ? '・到背包的「武器」分頁裝進彈匣' : ''),
+      tag: '子彈', worn: magazineCarries(id), about: b.desc || '', stat: () => '一組 ' + b.max + ' 發（彈藥包一格）・每次出勤在營地的彈藥箱放一組' + (have ? '・到背包的「武器」分頁裝進彈匣' : ''),
       canDev: !have, where: '', devCost: b.cost || 0, upCost: 0, devMoney: wsMoney('b:' + id, 0, b.cost || 0), buy: 'bd:' + id };   // devMoney＝開發要花的經費
   });
   const m = magState();

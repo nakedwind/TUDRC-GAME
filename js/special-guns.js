@@ -26,7 +26,7 @@ function weaponOwned(id) { const w = WEAPON_UPGRADES[id]; if (w && w.removed) re
 // ---- 取得：上鎖的置物箱打開時（js/storage-lockers.js 呼叫）----
 function tryGunFind(x, y) {
   if (MAP_SAFE || Math.random() >= GUN_FINDS.ammo) return;
-  const kinds = GUN_FINDS.kinds.filter(id => BULLETS[id] && !BULLETS[id].removed && bulletCount(id) < BULLETS[id].max);   // 滿了的不會再找到
+  const kinds = GUN_FINDS.kinds.filter(id => BULLETS[id] && !BULLETS[id].removed && bulletRoom(id) > 0);   // 彈藥包放不下的不會再找到
   if (!kinds.length) return;
   const id = kinds[Math.floor(Math.random() * kinds.length)];
   grantBullets(id, GUN_FINDS.ammoFind[id] || 1, '在置物箱裡找到', x, y);
@@ -37,7 +37,7 @@ function grantBullets(id, n, how, x, y) {
   const first = !bulletOwned(id), got = addBullets(id, n);
   if (first && typeof itemIntroForBullet === 'function') itemIntroForBullet(id, got);
   if (typeof battleGot === 'function') battleGot(b.icon + ' ' + b.name, null, got);
-  systemNotice((how || '找到') + b.icon + ' ' + b.name + ' +' + got + (first ? '！滾輪可以換成這種子彈' : '（現在 ' + bulletCount(id) + ' / ' + b.max + '）'));
+  systemNotice((how || '找到') + b.icon + ' ' + b.name + ' +' + got + (first ? '！滾輪可以換成這種子彈' : '（現在 ' + bulletCount(id) + ' 發）'));
   if (x != null) flash(b.icon + ' ' + b.name + ' +' + got, x, y - 40, b.color, 1.2);
   if (first) SFX.play('favorUp', .8, 'gun-get');
   return got;

@@ -48,7 +48,7 @@ try {
     equipState.bullets = { owned: { flare: true }, n: {} };
     for (const id of Object.keys(BULLETS)) if (id !== 'pistol') {
       if (s.bullets.owned[id]) equipState.bullets.owned[id] = true;
-      if (Number.isFinite(s.bullets.n[id])) equipState.bullets.n[id] = Math.max(0, Math.min(BULLETS[id].max, s.bullets.n[id] | 0));
+      if (Number.isFinite(s.bullets.n[id])) equipState.bullets.n[id] = Math.max(0, s.bullets.n[id] | 0);   // 可以超過一組（彈藥包的格數另外算）
     }
   } else {   // 舊存檔：以前撿到的燃燒彈槍、麻醉槍＝拿到這種子彈，槍裡和備用的彈藥加起來；照明彈補滿
     equipState.bullets = { owned: { flare: true }, n: { flare: BULLETS.flare.max } };

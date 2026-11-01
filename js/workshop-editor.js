@@ -200,7 +200,7 @@ document.addEventListener('click', e => {
 // ---- 下方說明欄的四塊（名稱＋標籤、說明、效果框、按鈕）：這件自己的位置、大小、字級 ----
 // 存在 items[key].infoParts（新增的裝備存在 added 裡）；套用見 js/workshop-config.js 的 workshopInfoPartAttr
 const INFO_PART_FIELDS = [['x', '左右'], ['y', '上下'], ['w', '寬'], ['h', '高'], ['font', '字級']];
-const INFO_PART_WHERE = { stats: '效果框裡的內容＝上面每一級的效果說明／數值（子彈：最多帶幾發）。', btn: '後面的數字＝上面的「異質碎片」費用。', money: '花多少錢在上面「💎 要花幾個異質碎片、多少經費」改；寬、高＝框的大小。已達最高等級、已開發、還沒拿到時不會出現。' };
+const INFO_PART_WHERE = { stats: '效果框裡的內容＝上面每一級的效果說明／數值（子彈：一組幾發）。', btn: '後面的數字＝上面的「異質碎片」費用。', money: '花多少錢在上面「💎 要花幾個異質碎片、多少經費」改；寬、高＝框的大小。已達最高等級、已開發、還沒拿到時不會出現。' };
 const infoPartsNow = key => workshopInfoPartsOf(key, cfg);
 const infoLabelFn = (key, lv) => (p, f, txt) => esc(workshopInfoLabel(key, p, f, txt, { lv, next: lv + 1 }, cfg));   // 預覽用：這件改過的字
 // attr／descAttr：名稱、說明原本那一格的欄位（原本的裝備 data-f、新增的裝備 data-c、子彈彈匣 data-a）——這裡的輸入框跟它連在一起
@@ -358,7 +358,7 @@ function renderAmmoForm() {
       moneyFields(key, cost.map((_, i) => '升到 Lv' + (i + 2)), i => ammoVal(key, 'cost')[i]));
   } else {
     h += sec('cost', '💎 費用與數量', '<div class="row2"><label class="field">開發要幾個異質碎片' + numIn('data-a="cost"', ammoVal(key, 'cost'), b.cost) + '</label>' +
-      '<label class="field">最多帶幾發' + numIn('data-a="max"', ammoVal(key, 'max'), b.max) + '</label></div>' +
+      '<label class="field">一組幾發（彈藥包一格）' + numIn('data-a="max"', ammoVal(key, 'max'), b.max) + '</label></div>' +
       moneyFields(key, ['開發'], () => ammoVal(key, 'cost')));
   }
   h += '<div class="img-btns"><button type="button" class="ed-btn" id="itemReset"' + (ammoChanged(key) ? '' : ' disabled') + '>恢復為初始設定</button></div>' +
@@ -684,7 +684,7 @@ function ammoPreviewInfo(key) {
       (lv < slots.length ? '<div class="bag-gear-stat next"><small>' + L('stats', 'next', '升級後（Lv' + (lv + 1) + '）') + '</small><b>' + wsColor('彈匣 ' + slots[lv] + ' 格') + '</b></div>' : '');
     btn = lv < slots.length ? '<button type="button" class="ws-btn">' + L('btn', 'up', '升級') + ' ' + cost(costs[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
   } else {
-    const line = wsColor('最多帶 ' + ammoVal(key, 'max') + ' 發・出勤時自動補滿' + (owned ? '・到背包的「武器」分頁裝進彈匣' : ''));
+    const line = wsColor('一組 ' + ammoVal(key, 'max') + ' 發（彈藥包一格）・每次出勤在營地的彈藥箱放一組' + (owned ? '・到背包的「武器」分頁裝進彈匣' : ''));
     tag = owned ? '<span class="bag-tag effect">' + L('tag', 'lv', 'Lv1') + '</span>' : '<span class="bag-tag">' + L('tag', 'dev', '未開發') + '</span>';
     stats = '<div class="bag-gear-stat' + (owned ? '' : ' next') + '"><small>' + (owned ? L('stats', 'now', '目前效果（Lv1）') : L('stats', 'dev', '開發後（Lv1）')) + '</small><b>' + line + '</b></div>';
     btn = owned ? '<button type="button" class="ws-btn" disabled>已開發</button>' : '<button type="button" class="ws-btn">' + L('btn', 'dev', '開發') + ' ' + cost(ammoVal(key, 'cost')) + '</button>';

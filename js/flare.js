@@ -36,15 +36,28 @@ function bulletState() {
 function bulletOwned(id) { if (id === 'pistol') return true; const b = BULLETS[id]; return !!b && !b.removed && !!bulletState().owned[id]; }
 function bulletCount(id) { return id === 'pistol' ? Infinity : (bulletState().n[id] || 0); }
 function bulletSave() { if (typeof saveEquipment === 'function') saveEquipment(); if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) updateAmmoHud(); }
-// 加子彈（第一次拿到也算拿到這種）：回傳實際加了幾發（滿了就加不進去）
+// 彈藥包：每種子彈一組（max 發）佔一格，超過一組再佔下一格；拿到過的子彈就算用光也留一格
+function bulletStacks(id, n = bulletCount(id)) { const b = BULLETS[id]; return !b || id === 'pistol' ? 0 : Math.max(1, Math.ceil(Math.max(0, n) / b.max)); }
+// 彈藥包還放得下幾發這種子彈（extraSlots：另外先預留掉的格數，例如商店購物車裡別的子彈）
+function bulletRoom(id, extraSlots = 0) {
+  const b = BULLETS[id]; if (!b || b.removed) return 0; if (id === 'pistol') return Infinity;
+  const free = Math.max(0, bagCapacity('weapon') - bagUsedSlots(supplyInventory, 'weapon') - extraSlots) * b.max;
+  if (!bulletOwned(id)) return free;
+  const n = bulletCount(id); return free + bulletStacks(id, n) * b.max - n;   // 最後一格還沒滿的部分＋空格
+}
+// 加子彈（第一次拿到也算拿到這種）：回傳實際加了幾發（彈藥包滿了就加不進去）
 function addBullets(id, n) {
   const s = bulletState(), b = BULLETS[id]; if (!b || id === 'pistol') return 0;
-  if (!s.owned[id] && bagUsedSlots(supplyInventory, 'weapon') >= bagCapacity('weapon')) { systemNotice('彈藥包已滿（' + bagCapacity('weapon') + ' 格），到開發工坊擴充', true); return 0; }
+  n = Math.max(0, n | 0);
+  const got = Math.min(n, bulletRoom(id));
+  if (got < n) systemNotice('彈藥包已滿（' + bagCapacity('weapon') + ' 格，每格 ' + b.max + ' 發）' + (got ? '：' + b.name + '只拿了 ' + got + ' 發' : '，到開發工坊擴充'), true);
+  if (got <= 0) return 0;
   s.owned[id] = true;
-  const before = s.n[id] || 0; s.n[id] = Math.min(b.max, before + Math.max(0, n | 0));
-  bulletSave(); return s.n[id] - before;
+  s.n[id] = (s.n[id] || 0) + got;
+  bulletSave(); return got;
 }
-function fillBullets(id) { const s = bulletState(), b = BULLETS[id]; if (!b || id === 'pistol' || !s.owned[id]) return 0; const got = b.max - (s.n[id] || 0); s.n[id] = b.max; bulletSave(); return got; }
+// 補到至少一組（已經超過一組的不動）
+function fillBullets(id) { const s = bulletState(), b = BULLETS[id]; if (!b || id === 'pistol' || !s.owned[id]) return 0; const got = Math.max(0, Math.min(b.max - (s.n[id] || 0), bulletRoom(id))); s.n[id] = (s.n[id] || 0) + got; bulletSave(); return got; }
 function useBullet(id) { const s = bulletState(); s.n[id] = Math.max(0, (s.n[id] || 0) - 1); bulletSave(); }
 
 // ---- 目前裝的子彈 ----

@@ -42,10 +42,9 @@ const BACKROOM_BULLET_PRICE = 10;   // 每發售價
 function backroomBulletStock() {
   return Object.entries(BULLETS).filter(([id, b]) => id !== 'pistol' && !b.removed).map(([id, b]) => ({
     id: 'shop-bullet:' + id, bullet: id, name: b.name, image: b.image, kind: 'ammo', price: BACKROOM_BULLET_PRICE,
-    effect: '每份 1 發・持有 ' + bulletCount(id) + ' / ' + b.max,
+    effect: '每份 1 發・持有 ' + bulletCount(id) + ' 發',
   }));
 }
-const shopBulletRoom = item => item.bullet ? Math.max(0, BULLETS[item.bullet].max - bulletCount(item.bullet)) : Infinity;
 // ---- 零食、飲料：溫特身上每一種最多帶幾個 ----
 // 溫特的持有上限：CARRY_LIMIT、carryMax、carryRoom 在 js/backpack.js
 // ---- 2F應變中心的兩台販賣機：紅＝零食、綠＝飲料 ----
@@ -77,10 +76,11 @@ const eocVendingMinutesLeft = () => Math.max(1, Math.ceil((eocVendingState().at 
 function shopRoom(item) {
   const reserved = new Map(supplyInventory);
   for (const [id, n] of shopCart) if (id !== item.id && !shopItemById(id)?.bullet) reserved.set(id, (reserved.get(id) || 0) + n);
-  let room = Math.min(shopBulletRoom(item), item.bullet ? Infinity : carryRoom(item, reserved));
-  if (item.bullet && !bulletOwned(item.bullet)) {
-    const reservedBullets = new Set([...shopCart].filter(([id, n]) => n > 0 && id !== item.id).map(([id]) => shopItemById(id)?.bullet).filter(id => id && !bulletOwned(id)));
-    if (bagUsedSlots(supplyInventory, 'weapon') + reservedBullets.size >= bagCapacity('weapon')) room = 0;
+  let room = item.bullet ? Infinity : carryRoom(item, reserved);
+  if (item.bullet) {   // 子彈：購物車裡別的子彈會多佔掉的格數先扣掉，剩下的才是這種放得下的
+    let extra = 0;
+    for (const [id, n] of shopCart) { const b = n > 0 && id !== item.id && shopItemById(id)?.bullet; if (b) extra += bulletStacks(b, bulletCount(b) + n) - (bulletOwned(b) ? bulletStacks(b) : 0); }
+    room = bulletRoom(item.bullet, extra);
   }
   if (vendingMode && isEocVending()) room = Math.min(room, (eocVendingState()[vendingColor] || {})[item.id] || 0);
   return room;
@@ -324,7 +324,7 @@ function checkoutCart() {
   if (!shopCart.size || !G || total > G.money) { sfx('error'); return; }
   for (const [id, n] of shopCart) {
     const item = shopItemById(id);
-    if (!item || n > shopRoom(item)) { sfx('error'); systemNotice(!item ? '找不到這個商品，請調整購物車' : item.bullet ? '子彈已達持有上限，請調整購物車數量' : '背包空間或販賣機庫存不足，請調整購物車數量', true); return; }
+    if (!item || n > shopRoom(item)) { sfx('error'); systemNotice(!item ? '找不到這個商品，請調整購物車' : item.bullet ? '彈藥包格子不夠，請調整購物車數量' : '背包空間或販賣機庫存不足，請調整購物車數量', true); return; }
   }
   const count = [...shopCart.values()].reduce((sum, n) => sum + n, 0);
   G.money -= total;
