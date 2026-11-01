@@ -578,6 +578,7 @@ window.addEventListener('keydown', e => {
     else if (typeof useNpcChatNearPlayer === 'function' && useNpcChatNearPlayer()) {}   // 有人在閒聊：聽閒聊（js/npc-chats.js）
     else if (typeof useWardrobeNearPlayer === 'function' && useWardrobeNearPlayer()) {}   // 衣櫃：服裝介面（js/costumes.js）
     else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
+    else if (typeof useClawNearPlayer === 'function' && useClawNearPlayer()) {}   // 夾娃娃機（js/claw-machine.js）
     else if (typeof useBestiaryNearPlayer === 'function' && useBestiaryNearPlayer()) {}   // 2F應變中心的電腦：電腦桌面（音樂、踩地雷、怪物圖鑑；js/pc-desktop.js）
     else if (typeof useArmorChestNearPlayer === 'function' && useArmorChestNearPlayer()) {}   // 裝備箱：防具視窗（js/backpack.js）
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
@@ -2072,6 +2073,7 @@ function frame(ts) {
     || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen)   // 射擊練習（js/target-practice.js）
     || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
     || (typeof gachaOpen !== 'undefined' && gachaOpen)   // 扭蛋機（js/gacha.js）
+    || (typeof clawOpen !== 'undefined' && clawOpen)   // 夾娃娃機（js/claw-machine.js）
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
     || (typeof pcDesktopOpen !== 'undefined' && pcDesktopOpen)   // 2F應變中心的電腦桌面（js/pc-desktop.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
@@ -2082,7 +2084,7 @@ function frame(ts) {
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）
-  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
+  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !(typeof clawOpen !== 'undefined' && clawOpen) && !(typeof gachaOpen !== 'undefined' && gachaOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
