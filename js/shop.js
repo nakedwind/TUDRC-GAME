@@ -17,7 +17,7 @@
 const supplyShop = document.getElementById('supplyShop');
 const supplyShopList = document.getElementById('supplyShopList');
 const shopCartList = document.getElementById('cartList');
-const storeCart = new Map(), vendingCart = new Map(), vendingCarts = { red: new Map(), green: new Map(), purple: new Map() };   // 購物車：商品 id → 數量（結帳後才放進背包）；一般商店與飲料店分開
+const storeCart = new Map(), vendingCart = new Map(), drinkShopCart = new Map(), vendingCarts = { red: new Map(), green: new Map(), purple: new Map() };   // 購物車：商品 id → 數量（結帳後才放進背包）；一般商店與飲料店分開
 let shopCart = storeCart;
 let supplyShopOpen = false, supplyShopTab = 'all';
 let vendingMode = false, drinkShopMode = false;   // 販賣機或飲料店模式都只賣飲料
@@ -242,7 +242,8 @@ function setShopMode(mode) {
   vendingMode = mode === 'vending'; drinkShopMode = mode === 'drinkshop'; backroomMode = mode === 'backroom';
   backroomTab = 'buy';
   if (!vendingMode) vendingColor = null;
-  shopCart = backroomMode ? backroomCart : vendingMode && (isEocVending() || vendingColor === 'purple') ? vendingCarts[vendingColor] : vendingMode || drinkShopMode ? vendingCart : storeCart;
+  shopCart = backroomMode ? backroomCart : vendingMode && (isEocVending() || vendingColor === 'purple') ? vendingCarts[vendingColor] : vendingMode ? vendingCart : drinkShopMode ? drinkShopCart : storeCart;
+  for (const id of [...shopCart.keys()]) if (!shopItemById(id)) shopCart.delete(id);   // 這間店沒賣的東西（例如基地飲料店放的飲料，到後室的 60BLUE 不賣）：拿出購物車，不然看不到又結不了帳
   supplyShop.classList.toggle('vending', vendingMode);
   supplyShop.classList.toggle('drinkshop', drinkShopMode);
   supplyShop.classList.toggle('backroom', backroomMode);
