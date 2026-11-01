@@ -571,6 +571,31 @@ function campAttackerFor(t, maxDistance = Infinity) {
   }
   return closest;
 }
+// 嚮導要先去照顧的隊員：門檻跟光環一樣（js/camp-supply.js 的 minTaint／minHeal、js/game.js 的嚮導隨身疏導），身上沒 SP／急救包的那項不算，免得走過去卻不動手
+// 不補溫特、不互補嚮導；前往指定地點途中不去；跟隨護衛時只照顧溫特附近（ESCORT.chaseCells）的人；應變中心裡不跟（受傷的人去醫院休養，js/vitals.js）
+const GUIDE_CARE_EVADE = 1.5;   // 正要去照顧人時，怪物貼到幾格內才往後退（平常是角色的 evade）
+function guideCareTarget(t, spec) {
+  if (MAP_SAFE || t.mode === 'goto' || !spec.aura) return null;
+  const canSoothe = typeof guideCanSoothe !== 'function' || guideCanSoothe(t);
+  const canHeal = (spec.aura.heal || 0) > 0 && (typeof guideCanHeal !== 'function' || guideCanHeal(t));
+  if (!canSoothe && !canHeal) return null;
+  const escortR = t.mode === 'escort' && G.player ? ESCORT.chaseCells * CELL : Infinity;
+  const needy = G.towers.filter(o =>
+    o !== t && o.hp > 0 && !TYPES[o.type].guide &&
+    ((canSoothe && (o.berserk || (o.taint || 0) >= CAMP_SUPPLY.minTaint)) || (canHeal && o.maxhp - o.hp >= CAMP_SUPPLY.minHeal)) &&
+    (escortR === Infinity || Math.hypot(o.x - G.player.x, o.y - G.player.y) <= escortR)
+  );
+  if (!needy.length) return null;
+  needy.sort((a, b) => {   // 暴走 → 汙染高 → 少血多 → 近
+    if (!!b.berserk !== !!a.berserk) return b.berserk ? 1 : -1;
+    const loadDiff = (b.taint || 0) - (a.taint || 0);
+    if (Math.abs(loadDiff) > 1) return loadDiff;
+    const injuryDiff = (b.maxhp - b.hp) - (a.maxhp - a.hp);
+    if (Math.abs(injuryDiff) > 1) return injuryDiff;
+    return Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y);
+  });
+  return needy.find(o => Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL || buildSentryPath(t, o.x, o.y) !== null) || null;
+}
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; if (!(t.say && t.say.hurt)) t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉（倒下時喊的那句留著，js/mate-hurt-talk.js）
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
@@ -618,7 +643,9 @@ function updateSentry(t, dt) {
     moveSentryWithPath(t, marked.x, marked.y, (ownSpec.walkSpeed || 80) * 1.2, dt);
     return;
   }
+  const care = ownSpec.guide ? guideCareTarget(t, ownSpec) : null;   // 有隊員要補血／疏導：先去處理，不被怪吸走
   // 嚮導保持安全距離：敵人靠近時優先往反方向撤退，仍可在遠處攻擊與治療。
+  // 正要去照顧人時只在怪真的貼身（GUIDE_CARE_EVADE 格）才退，不然站不進光環範圍
   if (ownSpec.guide && G.enemies.length) {
     let threat = null, threatD = Infinity;
     for (const e of G.enemies) {
@@ -626,7 +653,7 @@ function updateSentry(t, dt) {
       const d = Math.hypot(e.x - t.x, e.y - t.y);
       if (d < threatD) { threat = e; threatD = d; }
     }
-    const safeDistance = (ownSpec.evade || 3) * CELL;
+    const safeDistance = (care ? GUIDE_CARE_EVADE : (ownSpec.evade || 3)) * CELL;
     if (threat && threatD < safeDistance) {
       const dx=t.x-threat.x,dy=t.y-threat.y,d=threatD||1,speed=(ownSpec.walkSpeed||80)*1.35,step=speed*dt;
       t.target=null; t.waitT=0;
@@ -641,31 +668,12 @@ function updateSentry(t, dt) {
   }
   // 嚮導身上的急救包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
   if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
-  // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
-  if (!MAP_SAFE && (t.type === 'eldrin' || ownSpec.careFollow) && t.mode !== 'goto' && t.mode !== 'escort') {   // careFollow：塔納也一樣；應變中心裡不跟（受傷的人去醫院休養，js/vitals.js）
-    const sentinels = G.towers.filter(o =>
-      o !== t && o.hp > 0 && !TYPES[o.type].guide &&
-      (o.berserk || (o.taint || 0) >= CAMP_SUPPLY.minTaint || o.maxhp - o.hp >= CAMP_SUPPLY.minHeal)   // 跟疏導／補血的門檻一樣（js/camp-supply.js），免得走過去卻不動手
-    );
-    if (sentinels.length) {
-      sentinels.sort((a, b) => {
-        const loadDiff = (b.taint || 0) - (a.taint || 0);
-        if (Math.abs(loadDiff) > 1) return loadDiff;
-        const injuryDiff = (b.maxhp - b.hp) - (a.maxhp - a.hp);
-        if (Math.abs(injuryDiff) > 1) return injuryDiff;
-        return Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y);
-      });
-      const supportTarget = sentinels.find(o =>
-        Math.hypot(o.x - t.x, o.y - t.y) <= ownSpec.aura.r * CELL ||
-        buildSentryPath(t, o.x, o.y) !== null
-      );
-      if (supportTarget) {
-        t.supportTarget = supportTarget.type;
-        followTarget(t, supportTarget, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
-        t.target = null; t.waitT = 0;
-        return; // 支援位置優先；攻擊仍由 game.js 對射程內目標自動執行
-      }
-    }
+  // 所有嚮導：有人要補血／疏導就先走到他身邊，跳過下面的護衛圈和主動接敵（攻擊仍由 game.js 對射程內目標自動執行）
+  t.supportTarget = care ? care.type : null;
+  if (care) {
+    followTarget(t, care, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
+    t.target = null; t.waitT = 0;
+    return;
   }
   // 玩家明確下達的前往指令優先於追敵與角色跟隨關係，避免目的地被接敵邏輯清除。
   if (t.mode === 'goto' && t.target) {
