@@ -523,6 +523,7 @@ let portalLinkFrom = null;   // 正在設傳送點：已點了第一格、等第
 // 遊戲裡地圖放大 1.5 倍，60px 的素材剛好 1 個像素對 1 個像素；編輯器原本一格只畫 40px，
 // 60px 的素材被縮小，有的 1px 線會不見、有的會變 2px。打開這個就能看到素材在遊戲裡真正的樣子（點擊、擺放都照常）。
 const EDITOR_RES_KEY = 'tudrc_map_editor_game_res';
+const GAME_PX = 1 / (typeof VIEW_ZOOM !== 'undefined' ? VIEW_ZOOM : 1.5);   // 遊戲畫面上 1 個像素＝地圖座標多少（方向鍵微調一次移這麼多）
 let EDITOR_RES = (() => { try { return localStorage.getItem(EDITOR_RES_KEY) === '1' ? (typeof VIEW_ZOOM !== 'undefined' ? VIEW_ZOOM : 1.5) : 1; } catch (_) { return 1; } })();
 // 依目前地圖的大小調整格數與畫布（畫布太大時外框會出現捲軸）
 function applyMapSize() {
@@ -741,7 +742,9 @@ window.addEventListener('keydown', e => {
   if (!inField && /^Arrow(Left|Right|Up|Down)$/.test(e.key) && selections.length) {
     e.preventDefault();
     if (dropLockedSelections('微調位置')) return;
-    const step = e.shiftKey ? 10 : 2;
+    // 一次移「1 個遊戲像素」（Shift＝10 個）：遊戲畫面放大 VIEW_ZOOM 倍（1.5），一格 60 像素的素材 1 個像素＝地圖座標的 1/1.5。
+    // 原本一次移地圖座標 2（＝遊戲裡 3 個像素），兩張圖差 1 像素時怎麼按都對不齊
+    const step = e.shiftKey ? 10 : 1;
     const dx = e.key === 'ArrowLeft' ? -step : e.key === 'ArrowRight' ? step : 0;
     const dy = e.key === 'ArrowUp' ? -step : e.key === 'ArrowDown' ? step : 0;
     const m = curMap();
@@ -758,10 +761,16 @@ window.addEventListener('keydown', e => {
     });
     selections.filter(s => s.type === 'stamp').forEach(sel => {
       const s = m.stamps[sel.index]; if (!s) return;
-      s.ox = (s.ox || 0) + dx; s.oy = (s.oy || 0) + dy;   // 只動圖片，不可穿透格不跟著動
+      // 換算成遊戲像素再加，算完換回地圖座標（只留 6 位小數，存檔不會出現 1.3333333333333333 這種一長串）
+      const nudge = (v, d) => { const n = Math.round(Math.round((v || 0) / GAME_PX) * GAME_PX * 1e6 + d * GAME_PX * 1e6) / 1e6; return Math.abs(n) < 1e-6 ? 0 : n; };
+      const ox = nudge(s.ox, dx), oy = nudge(s.oy, dy);   // 只動圖片，不可穿透格不跟著動
+      if (ox) s.ox = ox; else delete s.ox;
+      if (oy) s.oy = oy; else delete s.oy;
     });
     selection = selections.length ? selections[selections.length - 1] : null;
     refreshSelPanel(); saveMaps(); draw();
+    const last = selection && selection.type === 'stamp' && m.stamps[selection.index];
+    if (last) setStatus('微調位置：偏移 ' + Math.round((last.ox || 0) / GAME_PX) + ', ' + Math.round((last.oy || 0) / GAME_PX) + ' 遊戲像素（方向鍵 1 像素、Shift 10 像素）', '#ffd479');
     if (converted) setStatus('已把 ' + converted + ' 張小圖轉成可微調的物件（想貼回格線按「↺ 回格線」）', '#8fd3ff');
   }
 });
