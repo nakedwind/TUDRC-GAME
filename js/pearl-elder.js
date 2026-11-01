@@ -43,9 +43,8 @@ const PEARL_ELDER = {
     warn: 2.2, fall: .7,         // 陰影圈出現幾秒後砸下來；最後幾秒看得到珍珠掉下來
     smallR: 24, bigR: 38,        // 砸中的範圍（像素）
     smallDmg: 12, bigDmg: 25,    // 砸中溫特的傷害（隊員一樣，再扣防禦）
-    nearTarget: 2,               // 小珍珠落在目標身邊幾格內
+    smallMin: 1, smallMax: 15,   // 小珍珠隨機落在大童身邊幾格～幾格（不瞄準我方，整個房間到處掉）
     bigMin: 3, bigMax: 10,        // 大珍珠落在大童身邊幾格～幾格（太近一落地就貼著大童）
-    towerChance: .3,             // 小珍珠有幾成機率瞄準隊員（不是溫特）
   },
   big: {                         // 留在場上的大珍珠
     r: 34, max: 10, hp: 8,        // 半徑（像素）、最多幾顆、被珍珠打幾下會碎
@@ -75,6 +74,7 @@ const PEARL_ELDER = {
     spread: 18, r: 4,            // 散多開（像素）、滾珠大小（半徑，比落下的小珍珠還小）
     life: 14, max: 24,           // 留幾秒、場上最多幾顆
     trigger: 14,                 // 離滾珠幾像素算踩到
+    safe: 2,                     // 滑倒（含頭暈）結束後幾秒內不會再被滾珠滑倒（避免被卡在牆邊連續滑倒）
   },
   land: { shakeMax: 10, shakeMin: 3, shakeRange: 12 },   // 大珍珠落地的畫面震動：就在旁邊、shakeRange 格外圍的強度（上限 16）
 };
@@ -350,12 +350,8 @@ function pearlBossRain(e, dt) {
   pk.rainSmall -= dt; pk.rainBig -= dt;
   if (pk.rainSmall <= 0) {
     pk.rainSmall += R.smallEvery;
-    const p = G.player, mates = G.towers.filter(t => t.hp > 0 && !t.berserk && peDist(t, e) <= PEARL_ELDER.loseRange * CELL);
-    const target = mates.length && (Math.random() < R.towerChance || !(p && p.hp > 0)) ? mates[Math.floor(Math.random() * mates.length)] : p;
-    if (target && target.hp > 0 && peDist(target, e) <= PEARL_ELDER.loseRange * CELL) {
-      const spot = pearlFallSpot(target, 0, R.nearTarget, false);
-      if (spot) pushPearlFall(spot.x, spot.y, false);
-    }
+    const spot = pearlFallSpot(e, R.smallMin, R.smallMax, false);   // 隨機落點：不瞄準溫特和隊員
+    if (spot) pushPearlFall(spot.x, spot.y, false);
   }
   if (pk.rainBig <= 0) {
     pk.rainBig += R.bigEvery;
@@ -487,13 +483,15 @@ function updatePearlBeads(dt) {
   const B = PEARL_ELDER.beads, list = G.pearlBeads;
   if (!list || !list.length) return;
   const actors = typeof bkPeelVictims === 'function' ? bkPeelVictims() : [];
+  for (const a of actors) if (a.beadSafeT > 0) a.beadSafeT -= dt;
   for (const b of [...list]) {
     b.life -= dt;
     if (b.life <= 0) { list.splice(list.indexOf(b), 1); continue; }
-    const a = actors.find(o => !(o.knockT > 0) && !(o.slipDizzyT > 0) && Math.hypot(o.x - b.x, o.y - b.y) <= B.trigger);
+    const a = actors.find(o => !(o.knockT > 0) && !(o.slipDizzyT > 0) && !(o.beadSafeT > 0) && Math.hypot(o.x - b.x, o.y - b.y) <= B.trigger);
     if (!a) continue;
     list.splice(list.indexOf(b), 1);   // 踩過就滾走了
     bkSlip(a, b);
+    a.beadSafeT = BANANA_KING.slipTime + BANANA_KING.slipDizzy + B.safe;   // 滑完、暈完再過 safe 秒才會再滑倒
   }
 }
 
