@@ -20,33 +20,33 @@
 const PEARL_ELDER = {
   name: '珍珠大童',
   maps: { map_mvvdbiyx: { c: 91, r: 32 } },   // 出現在哪幾張地圖、生在哪一格（K56區-地下街：右邊有斑馬線、電梯的大房間，斑馬線上方的中間；地圖改成 106×96 之後的座標）
-  hpMul: 25, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hpMul 25 → 血量 2000（再乘整體難度）
+  hp: 3500, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hp：血量（再乘整體難度）
   scale: 2.6,                    // 體型放大倍率
   speedMul: 1.2,                 // 飄的速度倍率（以珍珠小童為基準）
   hover: 26,                     // 張殼時飄多高（像素）
   wakeRange: 6,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
-  loseRange: 16, loseTime: 8,    // 目標離開幾格、超過幾秒沒有目標 → 放棄，回去閒晃
-  leash: 12,                     // 追人最遠追到離原位幾格：到了就停在那裡（射得到照樣射），不再往外追
-  returnAt: 14, returnTo: 8, returnMax: 6,   // 被推（或撞）到離原位幾格以外 → 飄回去；回到幾格內、或飄了幾秒就恢復戰鬥（不用回到原位，免得被大珍珠擋住卡住）
+  loseRange: 20, loseTime: 8,    // 目標離開幾格、超過幾秒沒有目標 → 放棄，回去閒晃
+  leash: 14,                     // 追人最遠追到離原位幾格：到了就停在那裡（射得到照樣射），不再往外追
+  returnAt: 18, returnTo: 10, returnMax: 6,   // 被推（或撞）到離原位幾格以外 → 飄回去；回到幾格內、或飄了幾秒就恢復戰鬥（不用回到原位，免得被大珍珠擋住卡住）
   wanderRadius: 4, wanderSpeedMul: .6, idle: [1.5, 3.5],   // 閒晃：繞著原位幾格內、速度倍率、每次發呆幾秒
   keepDistance: 4,               // 目標太近（格）：往後飄
   coreShare: .1,                 // 打在大童身上的傷害，核心跟著吃幾成
   coreHp: 1000,                  // 牠抱著的核心血量（地圖難度 1；難度越高照比例加）
   coreArt: { x: .40, y: .70, len: .5, angle: -73 },   // 核心圖疊在牠身上的位置：中心（圖寬、圖高的比例）、長度（圖寬的比例）、旋轉角度（度）
-  scatter: { count: 7, spread: 70, speed: 220, range: 9, windup: .8, cooldown: 2.4 },   // 散射：顆數、扇形角度、速度、射程（格）、蓄力、冷卻（秒）
+  scatter: { count: 7, spread: 70, speed: 220, range: 18, windup: .8, cooldown: 2.4 },   // 散射：顆數、扇形角度、速度、射程（格）、蓄力、冷卻（秒）
   shell: { time: 30, defense: .1, grace: 4 },          // 閉殼幾秒（只有被爆炸炸到、被大珍珠撞到才會提早打開）、閉殼時受到的傷害倍率、張開後幾秒內被打不會再閉殼
   stun: { time: 2.5, dmgMul: 1.3 },                   // 被大珍珠撞到：暈幾秒、暈眩中受到的傷害倍率
   rain: {                        // 閉殼時從天上降下的珍珠
-    smallEvery: .45, bigEvery: 2.2,   // 每隔幾秒降一顆小的、一顆大的
+    smallEvery: .35, bigEvery: 2.2,   // 每隔幾秒降一顆小的、一顆大的
     warn: 2.2, fall: .7,         // 陰影圈出現幾秒後砸下來；最後幾秒看得到珍珠掉下來
     smallR: 24, bigR: 38,        // 砸中的範圍（像素）
     smallDmg: 12, bigDmg: 25,    // 砸中溫特的傷害（隊員一樣，再扣防禦）
     nearTarget: 2,               // 小珍珠落在目標身邊幾格內
-    bigMin: 3, bigMax: 6,        // 大珍珠落在大童身邊幾格～幾格（太近一落地就貼著大童）
+    bigMin: 3, bigMax: 10,        // 大珍珠落在大童身邊幾格～幾格（太近一落地就貼著大童）
     towerChance: .3,             // 小珍珠有幾成機率瞄準隊員（不是溫特）
   },
   big: {                         // 留在場上的大珍珠
-    r: 34, max: 5, hp: 8,        // 半徑（像素）、最多幾顆、被珍珠打幾下會碎
+    r: 34, max: 10, hp: 8,        // 半徑（像素）、最多幾顆、被珍珠打幾下會碎
     pushSpeed: 110,              // 溫特頂著推的速度（像素／秒）
     shotPush: 150, maxSpeed: 380,// 手槍打一下加多少速度、最快多快
     friction: 1.4, bounce: .45,  // 滾動減速（越大停越快）、撞牆反彈保留幾成速度
@@ -58,9 +58,9 @@ const PEARL_ELDER = {
   },
   roll: {                        // 閉殼時整顆殼滾過去撞人（撞到建築直接撞爛、撞到大珍珠撞碎）
     first: 2, every: 5,          // 閉殼後幾秒第一次滾、之後每隔幾秒滾一次
-    range: 10,                   // 目標在幾格內才滾
+    range: 18,                   // 目標在幾格內才滾（整個大房間）
     windup: .9,                  // 蓄力幾秒（地上畫出滾動路線）
-    speed: 300, len: 9,          // 滾多快（像素／秒）、最遠滾幾格
+    speed: 300, len: 18,          // 滾多快（像素／秒）、最遠滾幾格
     hitR: 46,                    // 離殼中心幾像素算撞到
     dmg: 22,                     // 撞到溫特的傷害（隊員一樣，再扣防禦）
     knock: 1.6, knockTime: .3,   // 撞飛幾格、幾秒
@@ -94,7 +94,7 @@ function seedPearlElder() {
   G.cores.push(core);
   const P = PEARL_ELDER, S = P.scatter, e = createMonster(base, x, y);
   e.pearlBoss = true; e.eliteName = P.name;
-  e.hp = e.maxhp = Math.round(e.maxhp * P.hpMul);
+  e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是珍珠小童血量 × 整體難度：換成大童的血量，難度照樣乘
   e.playerDamage = Math.round(e.playerDamage * P.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * P.dmgMul);
   e.buildingDamage = Math.round(e.buildingDamage * P.dmgMul);
