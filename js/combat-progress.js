@@ -93,6 +93,13 @@ function resumeSquadFromBase(savedSupply) {
   });
   const missing = team.filter(id => !G.towers.some(t => t.type === id));
   if (missing.length) spawnSentries(missing);
+  // 球球不在 TYPES（是 G.npcs），上面換人管不到：移出了就帶走，新編入就生在要跟的人旁邊
+  if (!team.includes('ball')) G.npcs = G.npcs.filter(n => n.id !== 'ball');
+  else if (!G.npcs.some(n => n.id === 'ball')) {
+    spawnWanderers(['ball']);
+    const dog = G.npcs.find(n => n.id === 'ball'), who = dogFollowAnchor();
+    if (dog) { dog.x = who.x; dog.y = who.y; }
+  }
   for (const t of G.towers) {
     if (!TYPES[t.type]) continue;
     t.maxhp = TYPES[t.type].hp; t.buff = undefined; applySortieBuff(t);

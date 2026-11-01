@@ -274,10 +274,11 @@ function spawnSentries(only = null) {   // only：只生這幾位（接續戰場
 }
 
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
-function spawnWanderers() {
+function spawnWanderers(only = null) {   // only：只生這幾位（接續戰場時新編入的球球，js/combat-progress.js）
   // 基地（安全區）：只出現平時在這張地圖的人（data/npc-locations.js）；戰鬥地圖：勾了「場景 NPC」才有
   const deployed = typeof getTeam === 'function' ? getTeam() : [];
-  const list = MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id))
+  const list = only ? WANDERERS.filter(w => only.includes(w.id))
+    : MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id))
     : WANDERERS.filter(w => w.id === 'ball' ? deployed.includes('ball') && hasDogHandler(deployed) : MAP_NPCS);
   if (!list.length) return;
   const candidates = [], seen = new Set();
