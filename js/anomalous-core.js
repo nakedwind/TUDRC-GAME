@@ -102,6 +102,7 @@ function darkMonsterSpawnCells() {
     if (!reach.has(key)) continue;
     if (!floor.has(key)) continue;   // 沒鋪地板的黑色空白區（地圖邊緣）不生怪
     const [x, y] = center(c, r);
+    if (typeof inHiddenArea === 'function' && inHiddenArea(x, y)) continue;   // 還沒炸開的隱藏區不生怪（js/breakable-walls.js）
     if (G.player && Math.hypot(x - G.player.x, y - G.player.y) < CELL * 4) continue;
     if (G.towers.some(t => t.hp > 0 && Math.hypot(x - t.x, y - t.y) < CELL * 3)) continue;
     if (!cellLit(c, r)) {
@@ -382,6 +383,7 @@ function zoneSpawnCells(zone) {
     const [c, r] = key.split(',').map(Number);
     if (!inGrid(c, r) || isWall(c, r) || G.grid[key]) continue;
     const [x, y] = center(c, r);
+    if (typeof inHiddenArea === 'function' && inHiddenArea(x, y)) continue;   // 出生區畫到隱藏區裡也不生，免得露餡；炸開後才算（js/breakable-walls.js）
     any.push([c, r]);
     if (G.player && Math.hypot(x - G.player.x, y - G.player.y) < CELL * 4) continue;
     if (G.towers.some(t => t.hp > 0 && Math.hypot(x - t.x, y - t.y) < CELL * 3)) continue;
