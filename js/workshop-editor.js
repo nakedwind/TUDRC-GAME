@@ -164,7 +164,7 @@ const moneyHolder = (key, make) => isCustom(key) ? customEntry(key) : (cfg.items
 const moneyEdit = (key, i) => { const h = moneyHolder(key), m = h && (Array.isArray(h.money) ? h.money[i] : h.money); return typeof m === 'number' ? m : null; };
 function moneyFields(key, labels, shardsOf) {   // labels：每一格的名稱（開發、升到 Lv2…）；shardsOf(i)＝那一格的異質碎片（算自動的經費）
   if (!labels.length) return '';
-  return '<div class="field">要花多少經費（$）<span class="hint">空白＝照異質碎片自動算（碎片 × ' + WORKSHOP_MONEY_RATE + '，取到 50 的倍數，就是灰色那個數字）；填 0＝不用花錢。</span></div>' +
+  return '<div class="field">要花多少經費（$）<span class="hint">空白＝照異質碎片自動算（碎片 × ' + WORKSHOP_MONEY_RATE + '，取到 10 的倍數，就是灰色那個數字）；填 0＝不用花錢。</span></div>' +
     '<div class="cost-row" style="grid-template-columns:repeat(' + labels.length + ', minmax(0, 1fr))">' + labels.map((l, i) => { const m = moneyEdit(key, i);
       return '<label class="field">' + esc(l) + '<input type="text" inputmode="numeric" data-money="' + i + '" value="' + (m == null ? '' : m) + '" placeholder="' + workshopMoneyAuto(shardsOf(i)) + '"' + (m == null ? '' : ' class="is-edited"') + '></label>'; }).join('') + '</div>';
 }

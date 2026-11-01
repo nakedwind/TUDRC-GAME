@@ -94,11 +94,12 @@ const workshopInfoImgVars = (x, y, size) => [x ? '--ws-info-img-x:' + x + 'px' :
 const workshopInfoImgStyle = d => { const v = d ? workshopInfoImgVars(d.infoImgX, d.infoImgY, d.infoImgSize) : ''; return v ? ' style="' + v + '"' : ''; };
 
 // ---- 開發／升級除了異質碎片，也要花經費（錢包的錢，G.money）----
-// 預設＝那一次要花的異質碎片 × WORKSHOP_MONEY_RATE，再取到 50 的倍數（例如 60 個碎片 → $900）；想整體調貴／調便宜改這個數字。
+// 預設＝那一次要花的異質碎片 × WORKSHOP_MONEY_RATE，再取到 10 的倍數（例如 60 個碎片 → $120）；想整體調貴／調便宜改這個數字。
+// 2026-11-02 經費改成每張戰鬥地圖只給一次（全部地圖加起來約 $25,000，另有 BOSS 特別獎金），原本 × 15 全部開發完要三十幾萬，改成 × 2（全部約 $46,000）
 // 每件可以在開發工坊編輯器另外填（設定檔 items[key].money；新增的裝備在 added 裡）：
 //   裝備 [開發, 升到 Lv2, …]、武器 [升到 Lv2, …]、彈匣 [升到 Lv2, …]（跟 cost 同一格對同一格；null＝照預設算）；子彈＝一個數字
-const WORKSHOP_MONEY_RATE = 15;
-const workshopMoneyAuto = shards => Math.max(0, Math.round((Number(shards) || 0) * WORKSHOP_MONEY_RATE / 50) * 50);
+const WORKSHOP_MONEY_RATE = 2;
+const workshopMoneyAuto = shards => Math.max(0, Math.round((Number(shards) || 0) * WORKSHOP_MONEY_RATE / 10) * 10);
 // key＝工坊的 key、i＝第幾格（跟 cost 一樣）、shards＝這一次的異質碎片（算預設用）
 function workshopMoney(key, i, shards, cfg) {
   const c = cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {});
@@ -157,7 +158,7 @@ function workshopInfoPartAttr(key, part, cfg) {
 }
 // 按鈕本身的寬、高、字級：直接寫在每一顆 <button class="ws-btn"> 上（最優先，不會被外觀設定蓋掉）
 //   btnHtml＝已經組好的按鈕 HTML；回傳加上 style 的版本
-// 開發／升級按鈕：左邊「開發／升級」，右邊兩行＝經費（$900）、異質碎片（碎片圖＋60），兩行同一個樣式（css/style.css 的 .ws-btn-price）
+// 開發／升級按鈕：左邊「開發／升級」，右邊兩行＝經費（$120）、異質碎片（碎片圖＋60），兩行同一個樣式（css/style.css 的 .ws-btn-price）
 // btnHtml：原本的按鈕（文字＋碎片價錢）；money＝經費（0＝不用錢就只顯示碎片）；short＝錢不夠（經費變紅）。沒有價錢的按鈕（已達最高等級…）照舊
 function workshopPriceBtn(btnHtml, money, short) {
   const m = String(btnHtml).match(/^(<button[^>]*class="ws-btn)("[^>]*>)([\s\S]*?)\s*(<b>[\s\S]*<\/b>)<\/button>$/);
