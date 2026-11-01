@@ -63,7 +63,7 @@ function redeployCombat(mapId) {
 }
 // 同一張地圖直接重新部署（不經過換地圖）：剩下的經費留著，地圖的作戰經費不會再給一次（js/missions.js 的 missionMoneyGiven）
 function keepBattleMoney() {
-  if (!G || MAP_SAFE || G.moneySettled || window.TEST_MODE || isNewbieMap() || typeof walletSet !== 'function') return;
+  if (!G || MAP_SAFE || G.moneySettled || window.TEST_MODE || typeof walletSet !== 'function') return;
   G.moneySettled = true; walletSet(Math.max(0, Math.floor(G.money || 0)));
 }
 // 戰敗撤退：戰場像時間暫停一樣留著。回來時溫特站在營地；營地被打壞的話修回一半，不然一接續又馬上戰敗
@@ -111,7 +111,7 @@ function restoreCombatProgress() {
     G = data.state; mapWalls = data.walls; mapDoors = data.doors; doorAddedWalls = data.doorWalls; mapSolidOffsets = data.offsets;
     if (lastSafe !== false) sortie.active = data.activeSupply;   // 走出入口回來的：這趟出勤的補給效果還在
     sortieLastSafe = false; saveSortie();
-    if (!window.TEST_MODE && !isNewbieMap() && typeof walletGet === 'function') { G.money = walletGet(); G.moneySettled = false; }   // 錢包才是現在的錢：離開時帶回去了，基地裡可能花掉了
+    if (!window.TEST_MODE && typeof walletGet === 'function') { G.money = walletGet(); G.moneySettled = false; }   // 錢包才是現在的錢：離開時帶回去了，基地裡可能花掉了
     poweredMap = MAP; mapPowerOn = new Set(Array.isArray(data.power) ? data.power : data.power ? [0] : []);   // 舊存檔：true＝沒編號的電路開著
     openElevatorStamp = data.elevator || null;   // 電梯開著還是關著（擋路格已經跟著 mapWalls 一起還原）
     reclaimAddedWalls();

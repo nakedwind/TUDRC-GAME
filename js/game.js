@@ -1230,9 +1230,10 @@ function newGame() {
   if (MAP_STORY) G.money = typeof pausedBattle !== 'undefined' && pausedBattle ? pausedBattle.G.money : walletGet();   // 劇情地圖：只顯示暫停中那場作戰的經費（從基地來的就是錢包），不動錢包
   // 出勤：應變中心錢包裡的錢全部帶出來，加在這張地圖的作戰經費上（回基地時剩多少就帶回多少，js/progression.js）
   if (!MAP_SAFE && !window.TEST_MODE) {
-    // 新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
-    if (!isNewbieMap() && typeof missionMoneyGiven === 'function' && missionMoneyGiven(MAP && MAP.id)) G.money = 0;   // 這張地圖的作戰經費只給一次（js/missions.js）
-    if (!isNewbieMap() && typeof walletGet === 'function') G.money += walletGet();
+    const moneyGiven = typeof missionMoneyGiven === 'function' && missionMoneyGiven(MAP && MAP.id);
+    if (moneyGiven) G.money = 0;   // 這張地圖的作戰經費只給一次，新手區也一樣（js/missions.js）
+    // 第一次進新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
+    if ((moneyGiven || !isNewbieMap()) && typeof walletGet === 'function') G.money += walletGet();
   }
   if (typeof renderBuildQuickSlots === 'function') renderBuildQuickSlots();   // 下方建築欄：這張地圖能蓋的（新手區只有幾種，js/build.js）
   if (isNewbieMap() && !window.TEST_MODE) {   // 新手區：照明彈裝好在彈匣、防護頭盔放在裝備箱（data/balance.js 的 NEWBIE_START）
