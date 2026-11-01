@@ -5,6 +5,7 @@
        核心那頂＝大夯吉寶＋核心；其他頂＝大夯吉寶＋bigCapHangi 隻普通夯吉寶。
      其餘的帽子第一次打開跳出普通夯吉寶（spawnCount 隻）。蓋回去之後再打開，不管哪頂都只跳 reopenCount 隻。
    - 第一次找到核心：核心甦醒＝正式開戰（BOSS 血條、異質體狂暴化）。還有大夯吉寶活著時核心少受傷（coreShield）。
+     提示文字不告訴玩家還有大夯吉寶躲著、也不說打倒大夯吉寶才能解除護盾（讓玩家自己發現）。
    - 核心露出來 exposeTime 秒後：所有打開的大宮帽一起蓋回去，接著「蓋杯子」洗牌——帽子兩兩交換位置，
      核心跟著它的帽子一起移動，眼睛跟得上就知道核心躲到哪一頂（暗處要靠照明彈或黑暗中的閃光）。
    - 之後再找到核心：不會再出現大夯吉寶，改跳 reopenCount 隻普通夯吉寶。一樣 exposeTime 秒後再蓋回去洗牌。
@@ -133,7 +134,7 @@ function capKingExpose(cap) {
   if (!K.started) {   // 第一次找到：核心甦醒＝正式開戰
     K.started = true;
     if (!core.awake) { wakeCore(core); core.lastHp = core.hp; }
-    if (typeof coreBanner === 'function') coreBanner(CAP_KING.name + '現身了', '找到異質核心！還有' + CAP_KING.big.name + '躲在其他帽子裡', '#ffd27a');
+    if (typeof coreBanner === 'function') coreBanner(CAP_KING.name + '現身了', '找到異質核心了！', '#ffd27a');   // 不提示還有大夯吉寶躲在其他帽子裡（讓玩家自己發現）
     systemNotice('找到異質核心了！核心過一陣子又會躲回帽子裡', true);
     return;
   }
@@ -217,7 +218,7 @@ function capKingShieldCore() {
   const now = performance.now();
   if (now > (G.capKingShieldNoteAt || 0)) {   // 偶爾提示一下，不要每一槍都跳字
     G.capKingShieldNoteAt = now + 2500;
-    flash('核心護盾：' + CAP_KING.big.name + '還活著', core.x, core.y - CORE.h - 14, '#ffd27a');
+    flash('核心護盾', core.x, core.y - CORE.h - 14, '#ffd27a');   // 不說護盾跟大夯吉寶有關（讓玩家自己發現）
   }
 }
 // 畫面上方的 BOSS 血條（core-frenzy.js 的 drawCoreBossUI 呼叫）
@@ -231,15 +232,8 @@ function capKingBigDown(e) {
   nearbyImpact(e.x, e.y, 10, .08);
   e.deathSound = 'capKingDeath';   // 死掉的聲音：這裡先大聲播（有回音）；game.js 接著用同一個來源（monster-death）播的那聲會被去重吃掉，不會疊兩次
   if (typeof sfxAt === 'function') sfxAt('capKingDeath', e.x, e.y, 2.2, 'monster-death');
-  const K = G.capKing; if (!K) return;
-  const alive = capKingBigsAlive(K).filter(o => o !== e).length, hidden = capKingBigsHidden(K);
-  if (K.over) { systemNotice(e.eliteName + '倒下了！' + (alive ? '還剩 ' + alive + ' 隻' : ''), true); return; }   // 核心已經打破：沒有護盾可解除
-  if (alive || hidden) {   // 全部倒下（含還躲在帽子裡的）才解除核心護盾
-    systemNotice(e.eliteName + '倒下了！還剩 ' + (alive + hidden) + ' 隻' + (hidden ? '（' + hidden + ' 隻還躲在帽子裡）' : ''), true);
-    return;
-  }
-  systemNotice(e.eliteName + '全部倒下了！核心護盾消失', true);
-  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '全部倒下了', '核心護盾消失，趁核心露出來的時候打破它！', '#ffd27a');
+  // 只說倒下了：不提還有幾隻（含躲在帽子裡的）、也不提核心護盾消失（全部倒下時護盾會默默解除，讓玩家自己發現）
+  if (G.capKing) systemNotice(e.eliteName + '倒下了！', true);
 }
 
 // ---- 蓋回去、洗牌 ----

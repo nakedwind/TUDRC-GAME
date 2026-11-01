@@ -1,7 +1,8 @@
 // ============================================================
 //  戰鬥中的 BOSS 音樂（跟 js/music.js 的一般背景音樂分開）
 //  兩首各自獨立，條件都符合時一起播：
-//  ・鳥頭大隊長盯上玩家（醒著、有追打目標）、大夯吉寶盯上溫特（js/elite-cap-king.js）→ 淡入「中BOSS」（每場戰鬥第一次被盯上時晚 startDelay 秒才開始）；失去仇恨（走回原位、目標跑掉）或倒下 → 淡出。
+//  ・鳥頭大隊長盯上玩家（醒著、有追打目標）、大夯吉寶盯上溫特（js/elite-cap-king.js）→ 淡入「中BOSS」（每場戰鬥第一次被盯上時晚 startDelay 秒才開始）；
+//    失去仇恨（走回原位、目標跑掉）但畫面上方的 BOSS 血條還在 → 降成很小聲（quiet）繼續播；BOSS 全部倒下、血條消失 → 淡出。
 //  ・異質核心甦醒 → 馬上淡入「異質核心甦醒」，播放中音量慢慢忽大忽小；核心被打破 → 淡出。
 //  ・音檔、各自的音量在「音效編輯器」的「音樂」分類（bossElite、bossCore）調整；
 //    整體再乘上設定裡的「音樂」音量，按 M 靜音時也一起靜音。回到基地、劇情地圖時全部停掉。
@@ -12,6 +13,7 @@ const BOSS_MUSIC = {
   fadeIn: 2.0,          // 淡入幾秒
   fadeOut: 2.5,         // 淡出幾秒
   loseDelay: 1.5,       // 大隊長失去目標後等幾秒才淡出（衝撞完短暫停頓時不會一直切來切去）
+  quiet: .2,            // 「中BOSS」：沒在追打、但 BOSS 血條還在畫面上時，音量降成原本的幾倍（不會完全消失）
   startDelay: 2,        // 每場戰鬥第一次被大隊長盯上：等幾秒才開始播「中BOSS」（之後再被盯上就馬上播；核心甦醒的音樂一律馬上播）
   swell: { low: .6, high: 1.0, period: 7 },   // 核心音樂忽大忽小：最小／最大是原本的幾倍、一輪幾秒
 };
@@ -43,6 +45,9 @@ const BossMusic = (() => {
       && e.eb.state !== 'return' && (e.eb.state !== 'guard' || (typeof eliteBirdTarget === 'function' && eliteBirdTarget(e))));
   }
   const coreAwake = () => (G.cores || []).some(c => c.awake && !c.dead);
+  // 畫面上方還有 BOSS 血條（鳥頭大隊長、大夯吉寶、珍珠大童；跟 js/core-frenzy.js 的 drawCoreBossUI 同一份資料）
+  const bossBarShown = () => [typeof eliteBossBars === 'function' && eliteBossBars(), typeof capKingBossBars === 'function' && capKingBossBars(),
+    typeof pearlBossBars === 'function' && pearlBossBars()].some(bars => bars && bars.length);
 
   function tick() {
     const now = performance.now(), dt = Math.min(.5, (now - last) / 1000); last = now;
@@ -51,6 +56,7 @@ const BossMusic = (() => {
     if (battle && eliteHunting()) eliteHateT = B.loseDelay; else eliteHateT = Math.max(0, eliteHateT - dt);
     if (!battle || G !== battleG) { battleG = battle ? G : null; eliteHeard = false; eliteWaitT = 0; }   // 離開戰鬥、新的一場：重算「第一次」
     const want = { elite: battle && eliteHateT > 0, core: battle && coreAwake() };
+    const bars = battle && bossBarShown();
     for (const key of Object.keys(B.sounds)) {
       let on = want[key];
       if (key === 'elite') {   // 這場戰鬥第一次被盯上：晚 startDelay 秒才開始播
@@ -58,9 +64,11 @@ const BossMusic = (() => {
         if (on && !eliteHeard && eliteWaitT < B.startDelay) on = false;
         if (on) eliteHeard = true;
       }
-      if (!on && !tracks[key]) continue;   // 還沒播過的不用建
+      const goal = on ? 1 : key === 'elite' && bars ? B.quiet : 0;   // 中BOSS：血條還在就小聲播著，不會完全消失
+      if (!goal && !tracks[key]) continue;   // 還沒播過的不用建
       const t = track(key); if (!t) continue;
-      t.level = on ? Math.min(1, t.level + dt / B.fadeIn) : Math.max(0, t.level - dt / B.fadeOut);
+      t.level = t.level < goal ? Math.min(goal, t.level + dt / B.fadeIn) : Math.max(goal, t.level - dt / B.fadeOut);
+      on = goal > 0;
       const swell = key === 'core' ? B.swell.low + (B.swell.high - B.swell.low) * (.5 + .5 * Math.sin(now / 1000 * Math.PI * 2 / B.swell.period)) : 1;
       t.a.volume = Math.max(0, Math.min(1, musicVolume() * (SFX.gainOf(B.sounds[key]) ?? 1) * t.level * swell));
       if (on && t.a.paused) t.a.play().catch(() => {});
