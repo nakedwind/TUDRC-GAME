@@ -25,7 +25,7 @@ const CAP_KING = {
   warnTime: 3,             // 蓋回去前幾秒：露出核心的那頂帽子開始發抖（提示快要蓋回去了）
   closeTime: .45,          // 蓋回去的動畫（秒）
   shuffle: { rounds: 7, pairs: 2, swapTime: .55, arc: 34, pause: .12, near: 1.5 },   // 洗牌：交換幾輪、每輪同時交換幾對、每次交換幾秒、交錯時往旁邊繞開幾像素、每輪之間停多久、只跟多近的帽子交換（最近兩頂帽子距離的幾倍；1.5＝只換上下左右相鄰的，不換斜對角、不跨過中間）
-  coreShield: .75,         // 還有大夯吉寶活著（含還躲在帽子裡沒跳出來的）時，核心少受幾成傷害
+  coreShield: .9,          // 還有大夯吉寶活著（含還躲在帽子裡沒跳出來的）時，核心少受幾成傷害
   big: {                   // 大夯吉寶（以普通夯吉寶 data/monsters.js 的數值為基準）
     name: '大夯吉寶',
     scale: 2.6, hpMul: 18, dmgMul: 1.8, rewardMul: 5, crystalMul: 5,   // hpMul 18 → 血量 810
