@@ -518,7 +518,7 @@ function fixMap(m) {
 }
 // 同地圖傳送點：出入口通往自己這張地圖，at 記著要送到哪一格（遊戲裡 js/game.js 的 teleportInMap）
 const isSameMapPortal = (p, m) => !!(p && m && p.to === m.id && Array.isArray(p.at));
-let portalLinkFrom = null;   // 正在設傳送點：已點了第一格、等第二格 { mapId, c, r }
+let portalLinkFrom = null;   // 正在設傳送點：已點了第一格、等第二格 { mapId, c, r, oneWay }（oneWay＝單向，不在對面放回程的傳送點）
 // ---- 遊戲畫質：畫布用跟遊戲一樣的放大倍率畫（js/config.js 的 VIEW_ZOOM，1.5 倍＝一格 60px）----
 // 遊戲裡地圖放大 1.5 倍，60px 的素材剛好 1 個像素對 1 個像素；編輯器原本一格只畫 40px，
 // 60px 的素材被縮小，有的 1px 線會不見、有的會變 2px。打開這個就能看到素材在遊戲裡真正的樣子（點擊、擺放都照常）。
@@ -1121,6 +1121,11 @@ function draw() {
     const ang = Math.atan2(by - ay, bx - ax), hx = bx - Math.cos(ang) * CELL * .5, hy = by - Math.sin(ang) * CELL * .5;
     ctx.fillStyle = 'rgba(90,230,230,.9)'; ctx.beginPath(); ctx.moveTo(hx, hy);
     ctx.lineTo(hx - Math.cos(ang - .45) * 12, hy - Math.sin(ang - .45) * 12); ctx.lineTo(hx - Math.cos(ang + .45) * 12, hy - Math.sin(ang + .45) * 12); ctx.fill();
+    if (!m.portals.some(q => q.c === pt.at[0] && q.r === pt.at[1])) {   // 單向傳送：落地那格沒有傳送點，畫一個青色圓圈標出來
+      ctx.strokeStyle = 'rgba(90,230,230,.9)'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(bx, by, CELL * .32, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = '#a8f4f4'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText('落地', bx, by); ctx.fillText('落地', bx, by);
+    }
   }
   for (const pt of (m.portals || [])) {
     const x = OX + pt.c * CELL, y = OY + pt.r * CELL, hid = !!pt.hidden, warp = isSameMapPortal(pt, m);   // 隱藏地道：咖啡色＋🕳️；同地圖傳送點：青色＋🌀
@@ -1454,9 +1459,10 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       const there = m.portals.find(p => p.c === c && p.r === r);
       if (there && there.to !== m.id) { draw(); setStatus('那一格已經是通往別張地圖的出入口，換一格再試', '#ff8f8f'); return; }
       m.portals.push({ c: from.c, r: from.r, to: m.id, at: [c, r] });
-      if (!there) m.portals.push({ c, r, to: m.id, at: [from.c, from.r] });   // 對面也自動放一個，兩邊互通
+      if (!there && !from.oneWay) m.portals.push({ c, r, to: m.id, at: [from.c, from.r] });   // 雙向：對面也自動放一個，兩邊互通
       saveMaps(); draw();
-      setStatus(there ? '已設單向傳送點（對面原本就有傳送點，沒有改它）' : '已設一對傳送點：兩邊都可以按 Space 傳送到對面', '#7ee0c0');
+      setStatus(from.oneWay ? '已設單向傳送點：只能從這裡傳過去，那一格沒有回來的傳送點（青色圓圈＝落地位置）'
+        : there ? '已設單向傳送點（對面原本就有傳送點，沒有改它）' : '已設一對傳送點：兩邊都可以按 Space 傳送到對面', '#7ee0c0');
       return;
     }
     const pi = m.portals.findIndex(p => p.c === c && p.r === r);
@@ -1467,14 +1473,15 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       if (pair >= 0) m.portals.splice(pair, 1);
       saveMaps(); draw(); setStatus(pair >= 0 ? '已移除這一對傳送點' : '已移除出入口', '#ffd24a'); return;
     }
-    // 第一個選項＝同一張地圖裡的傳送點（假的地圖項目，id 用這張地圖自己的）
-    const here = { id: m.id, name: '⇄ 這張地圖（傳送到同一張地圖的另一個地點）', here: true };
+    // 前兩個選項＝同一張地圖裡的傳送點（假的地圖項目，id 用這張地圖自己的）：雙向（捷徑）／單向（陷阱，回不來）
+    const here = { id: m.id, name: '⇄ 這張地圖：雙向傳送（兩邊都能走，像捷徑）', here: true };
+    const hereOneWay = { id: m.id, name: '→ 這張地圖：單向傳送（只能從這裡過去、回不來，像陷阱）', here: true, oneWay: true };
     // 頁面上的選單（js/map-picker.js）：地圖多的時候 prompt() 會把清單截斷，後面的地圖選不到
-    pickMapDialog('這個出入口要通到哪一張地圖？', [here, ...maps.filter(x => x.id !== m.id)]).then(to => {
+    pickMapDialog('這個出入口要通到哪一張地圖？', [here, hereOneWay, ...maps.filter(x => x.id !== m.id)]).then(to => {
       if (!to) return;
       if (to.here) {
-        portalLinkFrom = { mapId: m.id, c, r }; draw();
-        setStatus('傳送點：再點一下地圖上「要送到的那一格」（點同一格＝取消）', '#ffd479');
+        portalLinkFrom = { mapId: m.id, c, r, oneWay: !!to.oneWay }; draw();
+        setStatus((to.oneWay ? '單向' : '雙向') + '傳送點：再點一下地圖上「要送到的那一格」（點同一格＝取消）', '#ffd479');
         return;
       }
       m.portals.push({ c, r, to: to.id });
