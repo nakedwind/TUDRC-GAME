@@ -111,11 +111,7 @@ function openCapKingCap(cap) {
   nearbyImpact(cap.x, cap.y, 3, 0);
   if (first) {
     if (typeof questEvent === 'function') questEvent('openCap');   // 支線進度（js/quests.js）
-    if (typeof tryEquipDrop === 'function' && !K.charmDone) {   // 偶爾掉出順順宮平安符（js/equipment.js）：9 頂大宮帽加起來最多掉一次
-      const before = (G.equipmentDrops || []).length;
-      tryEquipDrop('charm', cap.x, cap.y);
-      if ((G.equipmentDrops || []).length > before) K.charmDone = true;
-    }
+    if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮平安符（js/equipment.js）
   }
   if (first && cap.hasBig) capKingSpawnBig(cap);   // 大夯吉寶：每頂只有第一次打開會跳出來
   if (hasCore) { capKingExpose(cap); if (!first) capKingPopHangi(cap, ckRand(CAP_KING.reopenCount)); return; }
