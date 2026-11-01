@@ -2198,13 +2198,14 @@ function update(dt) {
       if (typeof spawnSootheMotes === 'function' && SOOTHE_MOTE_COLORS[t.type]) spawnSootheMotes([t, ...(t.sootheTargets || []).filter(o => o.hp > 0)], SOOTHE_MOTE_COLORS[t.type], dt, t);
     }
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
-    if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
-    if (sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
+    const inHospital = typeof hospitalResting === 'function' && hospitalResting(t);   // 住院中：HP 只照 js/vitals.js 的住院速度回，不能自己補血、也不幫別人治療
+    if (spec.hpRegen && !inHospital) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
+    if (!inHospital && sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
     if (spec.taintRegen && !t.berserk) t.taint = Math.max(0, t.taint - spec.taintRegen * dt);
     if (!t.berserk && !TYPES[t.type].guide && !spec.noRetreat && t.taint > 85) {   // 瀕臨暴走：自動退守營地（觸發一次）；noRetreat 的角色（路德）會留在前線
       if (!t.resting) { t.resting = true; sendSentryRest(t); }
     } else if (t.taint <= 80) t.resting = false;
-    if (spec.aura && !t.berserk && !t.gsCast) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
+    if (spec.aura && !t.berserk && !t.gsCast && !inHospital) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
       t.auraCd = Math.max(0, (t.auraCd || 0) - dt);
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
@@ -2214,7 +2215,7 @@ function update(dt) {
           if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
           // 疏導消耗 SP；補血消耗急救包，兩項資源各自檢查。
           const needSoothe = !TYPES[o.type].guide && (o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1));
-          const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1);
+          const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1) && !(typeof hospitalResting === 'function' && hospitalResting(o));   // 住院的人不靠嚮導補血
           const doSoothe = needSoothe && (typeof guideCanSoothe !== 'function' || guideCanSoothe(t));
           const doHeal = needHeal && (typeof guideCanHeal !== 'function' || guideCanHeal(t));
           if (!doSoothe && !doHeal) continue;   // 不需要、或身上沒東西可用就跳過
