@@ -367,7 +367,7 @@ function monsterWalkFrame(e) {
     else if (Math.abs(mdy) > Math.abs(mdx) * 1.1) e.animSide = false;
   }
   const walking = (e.walkUntil || 0) > now && !(e.stunT > 0);
-  const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : 10));   // 衝刺時步伐大一點
+  const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : e.walkStride || 10));   // 衝刺時步伐大一點；walkStride：體型大的怪物步伐也大（大夯吉寶，js/elite-cap-king.js）
   const lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';   // 沒在追人的時候
   if (f.walkBack && e.behavior === 'charger') {   // 鳥頭人：往畫面上方走露出背面；守衛（faceBack）背對玩家看著核心
     if (e.faceBack) e.showBack = true;
@@ -1032,7 +1032,7 @@ function draw() {
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
-  for(const core of G.cores) if(!core.dead && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
+  for(const core of G.cores) if(!core.dead && !core.hidden && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
