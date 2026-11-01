@@ -12641,7 +12641,8 @@ const BATTLE_MAPS = [
       "object7": {},
       "object5": {},
       "object8": {},
-      "object9": {}
+      "object9": {},
+      "object10": {}
     },
     "stamps": [
       {
@@ -16197,9 +16198,73 @@ const BATTLE_MAPS = [
         "r": 29,
         "layer": "object7",
         "oy": 10
+      },
+      {
+        "id": "tile_mvr2fi62",
+        "c": 21,
+        "r": 16,
+        "layer": "object8",
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 28,
+        "r": 14,
+        "layer": "object10",
+        "ox": 20
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 30,
+        "r": 13,
+        "layer": "object10",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 28,
+        "r": 15,
+        "layer": "object10",
+        "ox": 10
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 32,
+        "r": 14,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 28,
+        "r": 16,
+        "layer": "object10",
+        "ox": 30
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 32,
+        "r": 16,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 32,
+        "r": 15,
+        "layer": "object10",
+        "ox": 20
       }
     ],
-    "solid": [],
+    "solid": [
+      "16,21",
+      "18,21",
+      "6,26",
+      "7,26",
+      "8,26",
+      "9,26",
+      "10,26",
+      "23,12"
+    ],
     "breakable": [],
     "coreSpots": [],
     "coreCount": 1,
@@ -16225,6 +16290,10 @@ const BATTLE_MAPS = [
     "rows": 33,
     "spawnZone": [],
     "layerOrder": [
+      {
+        "id": "ground",
+        "name": "🌿 地面裝飾"
+      },
       {
         "id": "ground4",
         "name": "池核地板"
@@ -16254,8 +16323,8 @@ const BATTLE_MAPS = [
         "name": "🟫 地板"
       },
       {
-        "id": "ground",
-        "name": "🌿 地面裝飾"
+        "id": "object10",
+        "name": "礦石"
       },
       {
         "id": "object8",

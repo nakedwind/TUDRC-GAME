@@ -550,6 +550,7 @@ window.addEventListener('keydown', e => {
   if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) startReload(G.player);   // 手動裝填手槍的彈匣（特殊子彈不用裝填）
   if (npcArrangeMode) return;
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或空白鍵（isInteractKey）
+    holdPickupT = HOLD_PICKUP.first;   // 按住不放：過一下開始連續拾取（holdPickupTick）
     const elevator = (G.player && !G.player.sitting) ? elevatorNearPlayer() : null;
     const near = (G.player && !G.player.sitting) ? portalNearPlayer() : null;
     // 互動優先順序：① 拾取（異質碎片、地上的道具）→ ② 地圖物件（電梯、門、置物櫃…）
@@ -653,6 +654,17 @@ function placePlayerNearPortal(portal) {
     const [x, y] = center(c, r);
     if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; return; }
   }
+}
+// ---- 按住空白鍵／Enter 連續拾取：地上東西（結晶）很多時不用一直按 ----
+// 只連續「拾取」（異質碎片、地上的道具），不會連續開門、對話、坐下
+const HOLD_PICKUP = { first: 0.25, every: 0.08 };   // 按下後過 first 秒開始連撿，之後每 every 秒撿一個（秒）
+let holdPickupT = 0;
+function holdPickupTick(dt) {
+  if (!(keys[' '] || keys.enter) || npcArrangeMode || !G.running || G.over || dialogueState || elevatorMenuOpen || !G.player || G.player.sitting) return;
+  if ((holdPickupT -= dt) > 0) return;
+  holdPickupT = HOLD_PICKUP.every;   // 旁邊沒東西也一直檢查：按著走過去就會撿起來
+  if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 異質碎片（js/ore.js）
+  else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer()) useStoragePropNearPlayer(isPickupProp);   // 地上的道具（js/storage-lockers.js）
 }
 // ---- 逃生樓梯：溫特走到樓梯盡頭（出入口那一格）就自動上／下樓（黑幕淡入淡出），不用再按空白鍵 ----
 // 只有樓梯（render.js 的 stairPortalDir 認得的）會自動；門、電梯照舊按空白鍵
@@ -2020,7 +2032,7 @@ function frame(ts) {
   if (menuOpen && G.cameraShakeT) G.cameraShakeT = 0;   // 暫停中（教學、對話、選單…）：被打到的鏡頭震動倒數在 update 裡跑、不會減少，不歸零畫面會一直抖
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
   if (!menuOpen && !frozen && typeof updateBallBark === 'function') updateBallBark(dt);   // 球球偶爾叫一下（js/ball-poses.js）
-  if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓
+  if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); holdPickupTick(dt); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓；按住空白鍵連續拾取
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）

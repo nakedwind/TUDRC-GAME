@@ -18,11 +18,11 @@ const OIL_ITEMS = {
   deco_oil_drum: { name: '油桶', breaksOre: true, file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
     alsoFiles: ['images/background/oil-drum.png'],   // 「油桶（背景素材）」長得一樣，也當成油桶（打得爆）
     blast: { radius: 3.5, enemy: 150, sentry: 45, player: 40 },
-    fire: { radius: 3.2, life: 12, dps: 18 },   // 打爆後的火海燒 12 秒
+    fire: { radius: 3.2, life: 6, dps: 18 },   // 打爆後的火海燒 6 秒（原本 12 秒）
     slick: { radius: 2, life: 300 } },   // 油汙留 5 分鐘
   deco_oil_tank: { name: '油箱', breaksOre: true, file: 'images/item-decorate/oil-tank.png',
     blast: { radius: 2, enemy: 60, sentry: 22, player: 20 },
-    fire: { radius: 2, life: 8, dps: 10 },   // 打爆後的火海燒 8 秒
+    fire: { radius: 2, life: 4, dps: 10 },   // 打爆後的火海燒 4 秒（原本 8 秒）
     slick: { radius: 1, life: 300 } },   // 油汙留 5 分鐘
   deco_gasstove:  { name: '瓦斯爐', file: 'images/item-decorate/gasstove.png', gas: true, breaksOre: true, boom: 'smallBoom',   // 最弱：小範圍、低傷害，但炸得開礦物
     blast: { radius: 1, enemy: 20, sentry: 6, player: 5 } },
@@ -30,7 +30,7 @@ const OIL_ITEMS = {
     blast: { radius: 1, enemy: 20, sentry: 6, player: 5 } },
 };
 // 油汙被點燃後的火海：半徑是油汙的幾倍、燒幾秒、每秒傷害
-const SLICK_FIRE = { radiusMul: 1.15, life: 12, dps: 10 };   // 燒 12 秒（原本 6 秒）
+const SLICK_FIRE = { radiusMul: 1.15, life: 6, dps: 10 };   // 燒 6 秒（12 秒減半）
 const FIRE_TICK = 1;   // 火海每隔幾秒燙一次（同時站在好幾片火裡也只吃最燙的那片）
 
 const oilItem = o => o && OIL_ITEMS[o.type];
