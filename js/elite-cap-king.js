@@ -31,6 +31,7 @@ const CAP_KING = {
     name: '大夯吉寶',
     scale: 2.6, hpMul: 18, dmgMul: 1.8, rewardMul: 5, crystalMul: 5,   // hpMul 18 → 血量 810
     coreHpMul: 1.5,        // 跟核心躲在同一頂帽子裡的那隻：血量再乘幾倍（1.5 → 1215）
+    coreTint: '#ffb4a6',   // 跟核心躲在同一頂帽子裡的那隻：用色彩增值疊這個顏色，看起來稍微偏紅（越接近白色越淡，越紅越明顯）
     speedMul: 1.5,         // 移動速度倍率（1＝跟普通夯吉寶一樣快）
     walkStride: 18,        // 走路動畫每走幾像素換一步（普通 10；體型大，步伐跟著放大）
     capSpread: { n: 3, angle: 22, scale: 1.8, hitR: 28 },   // 一次丟幾頂、相鄰兩頂差幾度、帽子放大、打中判定半徑（像素）
@@ -172,8 +173,11 @@ function capKingSpawnBig(cap) {
   const spec = ACTIVE_MONSTERS.find(m => m.id === 'hangi_bao');
   if (!spec) return;
   const B = CAP_KING.big, e = createMonster(spec, cap.x, cap.y + CELL * .6);
-  e.capKing = true; e.eliteName = B.name;
-  e.hp = e.maxhp = Math.round(e.maxhp * B.hpMul * (cap === G.capKing.coreCap ? B.coreHpMul : 1));
+  const withCore = cap === G.capKing.coreCap;
+  e.capKing = true; e.eliteName = withCore ? CAP_KING.name : B.name;   // 跟核心躲在一起的那隻就是「順順宮主」本人（血條、倒下提示、擊殺統計都用這個名字）
+  e.capKingLord = withCore;
+  e.hp = e.maxhp = Math.round(e.maxhp * B.hpMul * (withCore ? B.coreHpMul : 1));
+  if (withCore && B.coreTint) e.tint = 'multiply:' + B.coreTint;   // 稍微偏紅（js/combat-feel.js 的 tintedSprite）
   e.playerDamage = Math.round(e.playerDamage * B.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * B.dmgMul);
   e.buildingDamage = Math.round(e.buildingDamage * B.dmgMul);
@@ -190,7 +194,7 @@ function capKingSpawnBig(cap) {
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: cap.x, y: cap.y - 40, r: 10 + i * 8, r2: 120 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ffd27a' : '#ffffff' });
   nearbyImpact(cap.x, cap.y, 9, .06);
   flash('！！', cap.x, cap.y - e.drawHeight - 20, '#ffd27a', 1.4);
-  systemNotice(B.name + '從帽子裡跳出來了！', true);
+  systemNotice(e.eliteName + '從帽子裡跳出來了！', true);
 }
 // 沉重的腳步：照實際走的距離算步數，每一步震一下畫面、揚灰、腳步聲
 function capKingBigSteps(e) {
@@ -230,8 +234,8 @@ function capKingShieldCore() {
 // 畫面上方的 BOSS 血條（core-frenzy.js 的 drawCoreBossUI 呼叫）
 function capKingBossBars() {
   const K = G && G.capKing; if (!K) return [];
-  const alive = capKingBigsAlive(K), many = K.bigs.length > 1;
-  return alive.map(e => ({ label: e.eliteName + (many ? ' ' + (K.bigs.indexOf(e) + 1) : ''), ratio: e.hp / e.maxhp, hit: e.hitT > 0, colors: ['#c9781f', '#ffd27a'], frame: '#ffb347', text: '#ffe2a8' }));
+  const alive = capKingBigsAlive(K), smalls = K.bigs.filter(e => !e.capKingLord);   // 編號只給大夯吉寶（順順宮主只有一隻，不用編號）
+  return alive.map(e => ({ label: e.eliteName + (!e.capKingLord && smalls.length > 1 ? ' ' + (smalls.indexOf(e) + 1) : ''), ratio: e.hp / e.maxhp, hit: e.hitT > 0, colors: ['#c9781f', '#ffd27a'], frame: '#ffb347', text: '#ffe2a8' }));
 }
 // 倒下（combat-feel.js 的 onEnemyDeath 呼叫）
 function capKingBigDown(e) {

@@ -91,8 +91,15 @@ function tintedSprite(img, hue) {
     const cv = document.createElement('canvas');
     cv.width = img.naturalWidth; cv.height = img.naturalHeight;
     const c = cv.getContext('2d');
-    c.filter = `hue-rotate(${hue}deg) saturate(1.35)`;
-    c.drawImage(img, 0, 0);
+    const mul = typeof hue === 'string' && hue.startsWith('multiply:') ? hue.slice(9) : null;
+    if (mul) {   // 'multiply:#色碼'：色彩增值疊一層顏色（例如順順宮主稍微偏紅，js/elite-cap-king.js），再用原圖的透明度剪回形狀
+      c.drawImage(img, 0, 0);
+      c.globalCompositeOperation = 'multiply'; c.fillStyle = mul; c.fillRect(0, 0, cv.width, cv.height);
+      c.globalCompositeOperation = 'destination-in'; c.drawImage(img, 0, 0);
+    } else {
+      c.filter = `hue-rotate(${hue}deg) saturate(1.35)`;
+      c.drawImage(img, 0, 0);
+    }
     tintedSpriteCache.set(key, cv);
   }
   return tintedSpriteCache.get(key);
