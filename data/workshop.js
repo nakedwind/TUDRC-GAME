@@ -466,6 +466,9 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -10
+        },
+        "btn": {
+          "y": -55
         }
       }
     },

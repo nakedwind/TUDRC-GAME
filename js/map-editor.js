@@ -1994,6 +1994,7 @@ const PALETTE_CATEGORIES = [
   { id: 'field', name: '野戰基地' },
   { id: 'scene', name: '場景物件' },
   { id: 'interactive', name: '互動與道具' },
+  { id: 'storage', name: '收納' },
   { id: 'restaurant', name: '餐廳' },
   { id: 'hospital', name: '醫院病房' },
   { id: 'containment', name: '收容觀察室' },
@@ -2028,7 +2029,21 @@ function tileMatchesSearch(t) {
   const q = paletteSearch.trim().toLowerCase(); if (!q) return true;
   return [t.name, t.id, t.file].some(v => String(v || '').toLowerCase().includes(q));
 }
+// 收納：箱子系列（紙箱、彈藥箱、物資箱、置物箱…）和櫃子、置物架，不管原本在哪個資料夾都放這一類（新的箱子、櫃子要放進來就加 id）
+const STORAGE_TILE_IDS = new Set([
+  'tile_mu4yyr9r', 'tile_mu4yzgcg', 'tile_decor_emptybox', 'tile_decor_medicalkit', 'tile_decor_waterboxes', 'tile_new_decor_box_three',
+  'tile_new_decor_box_large', 'tile_new_decor_box_small_diagonal', 'tile_new_decor_box_medium', 'tile_new_decor_box_side', 'tile_mrt_cardboard_boxes', 'tile_field_ammo_crate',
+  'tile_field_ammo_crate_open', 'tile_field_ammo_crate_empty', 'tile_mvma4ws7', 'tile_poolcore_ammo_crate', 'tile_mvotgy7w', 'tile_mvotwe6t',
+  'tile_field_supply_box', 'tile_mvot2yuu', 'tile_mvory18h', 'tile_mvot3dds', 'tile_counseling_medical_kit', 'tile_interactive_storage_locker',
+  'tile_interactive_storage_locker_open', 'tile_new_decor_cabinet_tall_metal', 'tile_new_decor_cabinet_tall', 'tile_new_decor_cabinet_low', 'tile_mu8rra80', 'tile_eoc_filing_cabinet',
+  'tile_eoc_drawer_unit', 'tile_eoc_locker', 'tile_eoc_wooden_cabinet', 'tile_eoc_binder_cabinet', 'tile_eoc_sideboard', 'tile_eoc_supply_shelf',
+  'tile_muu4ow6f', 'tile_muu4p4el', 'tile_muu6050n', 'tile_prop_shelf_locker_unit', 'tile_prop_shelf_locker_unit_02', 'tile_prop_tv_stand',
+  'tile_prop_drawer_cabinet', 'tile_counseling_wall_cabinet_counter', 'tile_dorm_wardrobe_lab_coat', 'tile_dorm_cabinet_tall', 'tile_dorm_bedside_drawers', 'tile_mufv6z24',
+  'tile_mvfqc6g7', 'tile_restaurant_storage_cabinet', 'tile_hospital_bedside_cabinet', 'tile_hospital_bedside_cabinet_back', 'tile_containment_equipment_cabinets', 'tile_containment_tall_cabinet',
+  'tile_research_lab_sample_storage', 'tile_research_lab_specimen_cabinet',
+]);
 function tileCategory(t) {
+  if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
   if (/vending/.test(String(t.id || '')) || file.includes('vending-machine')) return 'interactive';   // 販賣機（紅、綠、紫）：可以互動（js/shop.js）

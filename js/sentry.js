@@ -373,6 +373,8 @@ function escapeDarkness(actor, dt) {
   // 被召喚（summonDark）：召喚的優先順序比「怕黑」高，途中穿過黑暗也照走；到了、或改成別的命令就恢復怕黑
   if (actor.summonDark && actor.mode !== 'goto') actor.summonDark = false;
   if (actor.summonDark) return false;
+  // 跟著溫特走的隊員待在溫特身邊（FOLLOW_PLAYER），或嚮導正在撿溫特丟在地上的東西：不怕黑
+  if (actor.groundTrip || nearFollowedPlayer(actor)) return false;
   if (MAP_SAFE || !LIGHT.enabled || personnelInLight(actor.x, actor.y)) {
     if (actor.mode === 'goto' && actor.darkResumeTarget) actor.target = actor.darkResumeTarget;
     if (actor.escapePath) {
@@ -418,13 +420,13 @@ function sentryCellWalkable(c, r, ignoreFire = false, allowDark = false) {
   if (!allowDark && !personnelInLight(x, y)) return false;
   return true;
 }
-function nearestSentryGoal(c, r) {
+function nearestSentryGoal(c, r, allowDark = false) {   // allowDark：暗處的格子也可以當目的地
   for (let radius = 0; radius <= 4; radius++) {
     let best = null, bestDistance = Infinity;
     for (let dc = -radius; dc <= radius; dc++) for (let dr = -radius; dr <= radius; dr++) {
       if (radius && Math.abs(dc) !== radius && Math.abs(dr) !== radius) continue;
       const nc = c + dc, nr = r + dr;
-      if (!sentryCellWalkable(nc, nr)) continue;
+      if (!sentryCellWalkable(nc, nr, false, allowDark)) continue;
       const distance = Math.abs(dc) + Math.abs(dr);
       if (distance < bestDistance) { best = [nc, nr]; bestDistance = distance; }
     }
@@ -433,9 +435,9 @@ function nearestSentryGoal(c, r) {
   return null;
 }
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
-function buildSentryPath(t, targetX, targetY, allowDark = !!t.summonDark) {   // allowDark：找一條可以穿過黑暗的路（召喚時）
+function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.followDark)) {   // allowDark：找一條可以穿過黑暗的路（召喚時、跟著溫特走時、去撿地上的東西時）
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
-  const goal = nearestSentryGoal(rawGc, rawGr); if (!goal) return null;
+  const goal = nearestSentryGoal(rawGc, rawGr, allowDark); if (!goal) return null;
   const [gc, gr] = goal, startKey = sc + ',' + sr, goalKey = gc + ',' + gr;
   if (startKey === goalKey) return [];
   const queue = [[sc, sr]], cameFrom = new Map([[startKey, null]]);
@@ -481,7 +483,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   const [goalC, goalR] = cellAt(targetX, targetY), goalKey = goalC + ',' + goalR;
   t.navTimer = (t.navTimer || 0) - dt;
   const next = t.navPath && t.navPath[0];
-  const dark = !!t.summonDark;   // 被召喚：可以穿過黑暗
+  const dark = !!(t.summonDark || t.followDark);   // 被召喚、跟著溫特走、去撿地上的東西：可以穿過黑暗
   if (t.navGoal !== goalKey || (!t.navPath && t.navTimer <= 0) || t.navStall > .8 || (next && !sentryCellWalkable(next.c, next.r, false, dark))) {
     t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
     t.navStall = 0;
@@ -496,8 +498,8 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
   }
   const waypoint = t.navPath && t.navPath[0];
   let moveX = targetX, moveY = targetY;
-  if (!waypoint && (sentryBlocked(moveX, moveY) || !personnelInLight(moveX, moveY))) {
-    const goal = nearestSentryGoal(goalC, goalR);
+  if (!waypoint && (sentryBlocked(moveX, moveY) || (!dark && !personnelInLight(moveX, moveY)))) {
+    const goal = nearestSentryGoal(goalC, goalR, dark);
     if (!goal) { t.navFailed = true; return false; }
     [moveX, moveY] = center(...goal);
   }
@@ -543,7 +545,18 @@ function sentryCompanionRule(t) {
   if (t.type === 'red' && G.player) {
     return { anchor: G.player, radius: (FOLLOW.red.radiusCells || 7) * CELL, speed: FOLLOW.red.speed || 92 };
   }
+  // 其他人（含嚮導）：戰鬥地圖上沒下指令時，也慢慢跟著溫特，在溫特附近（頭燈、手電筒照得到的地方）巡邏；
+  // 溫特走進黑暗也會跟過去（不然營地外一片黑，大家只會待在營地的燈下）。應變中心等安全區照舊待在自己的活動範圍
+  if (!MAP_SAFE && G.player) return { anchor: G.player, radius: FOLLOW_PLAYER.radiusCells * CELL, speed: (TYPES[t.type].walkSpeed || 80) * FOLLOW_PLAYER.speedMul };
   return null;
+}
+// 自由走動的隊員跟著溫特的範圍：離溫特超過 radiusCells 格就追上去；speedMul＝追的時候比平常走路快幾倍
+const FOLLOW_PLAYER = { radiusCells: 6, speedMul: 1.15 };
+// 這個隊員是不是正跟著溫特、而且就在溫特身邊（在溫特身邊就算暗也不用逃回燈下：溫特會照著他們）
+function nearFollowedPlayer(t) {
+  if (!G || !G.player || !G.towers || !G.towers.includes(t)) return false;
+  const rule = sentryCompanionRule(t);
+  return !!(rule && rule.anchor === G.player && Math.hypot(G.player.x - t.x, G.player.y - t.y) <= rule.radius * 1.3);
 }
 // 索敵範圍內有沒有看得見的敵人／核心（有的話護衛圈先讓位給接敵，避免在圈邊抖動）
 function hasAggroTarget(t) {
@@ -599,9 +612,10 @@ function guideCareTarget(t, spec) {
     if (Math.abs(injuryDiff) > 1) return injuryDiff;
     return Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y);
   });
-  return needy.find(o => Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL || buildSentryPath(t, o.x, o.y) !== null) || null;
+  return needy.find(o => Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL || buildSentryPath(t, o.x, o.y, true) !== null) || null;   // true：走暗路也算走得到（隊員常跟著溫特在暗處）
 }
 function updateSentry(t, dt) {
+  t.followDark = false;   // 這一幀要不要穿過黑暗：跟著溫特、照顧人、撿地上的東西時才打開（moveSentryWithPath 看這個）
   if (t.hp <= 0) { t.target = null; t.moving = false; if (!(t.say && t.say.hurt)) t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉（倒下時喊的那句留著，js/mate-hurt-talk.js）
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
   if (tinoSootheTripStep(t, dt)) return;
@@ -676,6 +690,7 @@ function updateSentry(t, dt) {
   // 所有嚮導：有人要補血／疏導就先走到他身邊，跳過下面的護衛圈和主動接敵（攻擊仍由 game.js 對射程內目標自動執行）
   t.supportTarget = care ? care.type : null;
   if (care) {
+    t.followDark = true;   // 要照顧的人跟著溫特走到暗處了：照樣過去
     followTarget(t, care, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
     t.target = null; t.waitT = 0;
     return;
@@ -698,6 +713,7 @@ function updateSentry(t, dt) {
     const companionDistance = Math.hypot(companion.anchor.x - t.x, companion.anchor.y - t.y);
     if (companionDistance > companion.radius) {
       t.target = null; t.waitT = 0;
+      t.followDark = companion.anchor === G.player;   // 跟著溫特：中間是暗的也照走（溫特身上有燈）
       followTarget(t, companion.anchor, { dist: companion.radius * .82, speed: companion.speed }, dt);
       return;
     }

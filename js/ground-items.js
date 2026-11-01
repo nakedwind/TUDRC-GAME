@@ -77,13 +77,14 @@ function guideGroundStep(t, dt) {
     const wants = guideWants(t);   // 用完的、或手上沒事時沒帶滿的（js/camp-supply.js）：地上有就先撿，不回物資箱
     let best = null, bd = Infinity;
     for (const g of list) {
-      if (!wants.includes(g.id) || !isLit(g.x, g.y)) continue;
+      if (!wants.includes(g.id)) continue;   // 暗處的也去撿：只要走得到（走不到的下面會放棄、改回營地拿）
       const d = Math.hypot(g.x - t.x, g.y - t.y); if (d < bd) { bd = d; best = g; }
     }
     if (!best) return false;
     trip = t.groundTrip = { g: best };
     if (typeof sentryStatus === 'function') sentryStatus(t, '去撿地上的' + groundItemName(best), '#8fd3ff');
   }
+  t.followDark = true;   // 東西丟在暗處：照樣走過去（js/sentry.js 的 moveSentryWithPath）
   if (moveSentryWithPath(t, trip.g.x, trip.g.y, (TYPES[t.type].walkSpeed || 80) * 1.3, dt)) { guideTakeGround(t, trip.g); t.groundTrip = null; t.navPath = null; return true; }
   if (t.navFailed) { t.groundTrip = null; t.navFailed = false; t.groundTripCd = 3; return false; }   // 走不到：改回營地拿
   t.target = null;
