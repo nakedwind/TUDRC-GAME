@@ -147,6 +147,7 @@ function stepEliteGuardPose(e, dt) {
 // 等溫特開第一槍（打中就會叫醒）、或大隊長／核心已經醒了才開始主動攻擊；隊友打歪、範圍攻擊波及到照樣會叫醒
 // （js/sentry.js 的索敵、js/game.js 的選目標與雷德舉盾都會跳過 holdFire 的怪物）
 function eliteHoldFire(e) {
+  if (e.pearlBoss) return !e.eliteAwake;   // 珍珠大童：BOSS 戰開始前隊友也不主動去打（js/pearl-elder.js）
   const boss = e.elite ? e : e.guardPose ? e.guardPose.boss : null;
   if (!boss || boss.eliteAwake || boss.hp <= 0 || boss.dead) return false;
   return !(boss.guardCore && boss.guardCore.awake);

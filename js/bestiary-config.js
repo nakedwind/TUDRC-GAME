@@ -102,6 +102,7 @@ const bestiaryStyle = cfg => ({ ...BESTIARY_STYLE_DEFAULT, ...(bestiaryCfg(cfg).
 // 消滅次數另外算（js/bestiary.js 的 bestiaryKeyOf）
 const BESTIARY_ELITES = [
   { of: 'bird_head', def: () => typeof ELITE_BIRD !== 'undefined' ? ELITE_BIRD : { name: '鳥頭大隊長', hue: -35 } },   // js/elite-bird-head.js（沒載入時用括號裡的）
+  { of: 'pearl_kid', def: () => typeof PEARL_ELDER !== 'undefined' ? PEARL_ELDER : { name: '珍珠大童' } },   // js/pearl-elder.js
 ];
 // ---- 遊戲裡有哪些怪物：怪物編輯器的怪物＋史萊姆變體＋菁英怪 ----
 function bestiaryBaseList() {

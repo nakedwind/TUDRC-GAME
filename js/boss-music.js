@@ -37,6 +37,7 @@ const BossMusic = (() => {
 
   // 鳥頭大隊長有沒有在追打（醒著、活著、不是在走回原位、身邊有目標）
   function eliteHunting() {
+    if (typeof pearlBossHunting === 'function' && pearlBossHunting()) return true;   // 珍珠大童的 BOSS 戰（js/pearl-elder.js）
     return (G.enemies || []).some(e => e.elite && e.eliteAwake && e.hp > 0 && !e.dead && e.eb
       && e.eb.state !== 'return' && (e.eb.state !== 'guard' || (typeof eliteBirdTarget === 'function' && eliteBirdTarget(e))));
   }

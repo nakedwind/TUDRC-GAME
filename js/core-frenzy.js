@@ -23,7 +23,7 @@ function updateCoreFrenzy(dt) {
   if (!G || !G.enemies) return;
   const on = coreFrenzyActive();
   for (const e of G.enemies) {
-    if (e.elite) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js）
+    if (e.elite || e.pearlBoss) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js）
     if (e.coreGiveUpT > 0) e.coreGiveUpT -= dt;
     if (on && !e.frenzy && e.hp > 0) {
       e.frenzy = { speed: e.speed, sentryDamage: e.sentryDamage, playerDamage: e.playerDamage };
@@ -93,7 +93,7 @@ function drawCoreBossUI(ctx, cv) {
     ctx.restore();
   });
   // 菁英怪的血條：接在核心血條下面（js/elite-bird-head.js）
-  const elites = typeof eliteBossBars === 'function' ? eliteBossBars() : [];
+  const elites = [...(typeof eliteBossBars === 'function' ? eliteBossBars() : []), ...(typeof pearlBossBars === 'function' ? pearlBossBars() : [])];   // 珍珠大童＋牠身上的核心（js/pearl-elder.js）
   elites.slice(0, 2).forEach((bar, j) => {
     const i = Math.min(3, awake.length) + j;
     const w = Math.min(520, cv.width * .45), h = 14, x = (cv.width - w) / 2, y = 58 + i * 40;

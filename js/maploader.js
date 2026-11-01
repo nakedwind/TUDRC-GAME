@@ -387,6 +387,7 @@ function elevatorBlocksPoint(x, y) {
 // 只有地圖的固定牆（含微調過的牆面、關著的電梯門）會擋；玩家蓋的路障、鐵絲網等比較矮，可以從上面打過去。
 // 沿線每 6px 檢查一次；線剛好擦過牆角時，左右各偏 5px 再試一次，有一條通就算看得到（避免卡卡的誤判）。
 function hasLineOfSight(x0, y0, x1, y1) {
+  if (typeof bigPearlBlocksLine === 'function' && bigPearlBlocksLine(x0, y0, x1, y1)) return false;   // 珍珠大童的大珍珠：擋住雙方的子彈和射線（js/pearl-elder.js）
   const clear = (ox, oy) => {
     const ax = x0 + ox, ay = y0 + oy, bx = x1 + ox, by = y1 + oy;
     const n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 6));

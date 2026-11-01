@@ -192,7 +192,7 @@ function updateCores(dt) {
       else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）
     }
     core.lastHp = core.hp;
-    if (!core.awake && G.towers.some(t => t.type === 'avaren' && t.hp > 0 && Math.hypot(t.x - core.x, t.y - core.y) <= CORE.wakeAvarenCells * CELL)) wakeCore(core);
+    if (!core.awake && !core.carried && G.towers.some(t => t.type === 'avaren' && t.hp > 0 && Math.hypot(t.x - core.x, t.y - core.y) <= CORE.wakeAvarenCells * CELL)) wakeCore(core);
     if (core.awake) {
       core.awakeT += dt;
       if (core.phase === 1 && core.hp > 0 && core.hp <= core.maxhp * CORE.phase2At) enterPhase2(core);   // 一擊打破時不再跳第二階段
