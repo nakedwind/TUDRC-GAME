@@ -413,7 +413,7 @@ function renderFieldMapApp(el) {
   }
   for (const g of groups) marks.push('<g class="tm-door" transform="translate(' + (g.c / g.k + .5) + ' ' + (g.r / g.k + .5) + ') scale(' + mk + ')"><title>出入口：' + tmapEsc(names.get(g.to) || '') + '</title><rect x="-.8" y="-.8" width="1.6" height="1.6" rx=".3"/></g>');
   for (const core of (G.cores || [])) {
-    if (core.dead) continue;
+    if (core.dead || core.hidden) continue;   // 躲在順順宮帽裡：地圖上不顯示（js/elite-cap-king.js）
     const [c, r] = tmapCellOf(core);
     if ((!tmapSeen(st, Math.floor(c), Math.floor(r)) || st.hidden.has(Math.floor(c) + ',' + Math.floor(r)))) continue;
     marks.push('<g class="tm-core" transform="translate(' + c + ' ' + r + ') scale(' + mk + ')"><title>異質核心</title><path d="M0 -1.2 1 0 0 1.2 -1 0Z"/></g>');
@@ -480,7 +480,7 @@ function tmapMiniUpdate() {
   for (const p of m.portals || []) if (tmapSeen(st, p.c, p.r) && !st.hidden.has(p.c + ',' + p.r) && !(p.hidden && typeof portalUsable === 'function' && !portalUsable(p))) ctx.fillRect(Math.round(ox + p.c * S) + 1, Math.round(oy + p.r * S) + 1, S - 2, S - 2);
   ctx.fillStyle = '#b77cff';   // 還沒打碎的異質核心
   for (const core of (G.cores || [])) {
-    if (core.dead) continue;
+    if (core.dead || core.hidden) continue;   // 躲在順順宮帽裡：地圖上不顯示（js/elite-cap-king.js）
     const [c, r] = tmapCellOf(core); if ((!tmapSeen(st, Math.floor(c), Math.floor(r)) || st.hidden.has(Math.floor(c) + ',' + Math.floor(r)))) continue;
     const x = ox + c * S, y = oy + r * S;
     ctx.beginPath(); ctx.moveTo(x, y - 5); ctx.lineTo(x + 4, y); ctx.lineTo(x, y + 5); ctx.lineTo(x - 4, y); ctx.closePath(); ctx.fill();

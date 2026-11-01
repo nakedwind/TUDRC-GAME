@@ -50,6 +50,9 @@
       sessionStorage.setItem('tudrc-test-mode-v1', '1');
       localStorage.setItem('tudrc-test-active-v1', '1');
       sessionStorage.removeItem(REQUEST); startedFresh = true;
+      const mapId = sessionStorage.getItem(START_MAP);   // 開始畫面選好的地圖：測試模式直接從那張開始
+      sessionStorage.removeItem(START_MAP);
+      if (mapId) resumeScene = { mapId };
     } else if (request === 'test-exit') {
       sessionStorage.removeItem(REQUEST);
     }
@@ -102,7 +105,10 @@
     document.querySelectorAll('[data-new-game]').forEach(button => button.addEventListener('click', () => requestRestart('new')));
     document.querySelectorAll('[data-new-game-from-start]').forEach(button => button.addEventListener('click', () => requestRestart('new', true)));
     document.querySelectorAll('[data-test-mode]').forEach(button => button.addEventListener('click', () => {
-      try { sessionStorage.setItem(REQUEST, 'test'); location.reload(); }
+      try {
+        if (typeof MAP !== 'undefined' && MAP?.id) sessionStorage.setItem(START_MAP, MAP.id); else sessionStorage.removeItem(START_MAP);   // 記住現在選的地圖（開始畫面的地圖選單）
+        sessionStorage.setItem(REQUEST, 'test'); location.reload();
+      }
       catch (error) { alert('無法開啟測試模式：' + error.message); }
     }));
     const exitTest = document.getElementById('exitTestMode');
