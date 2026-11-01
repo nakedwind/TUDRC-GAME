@@ -64,7 +64,7 @@ const onHospitalMap = () => MAP_SAFE && vitalsMapName() === VITALS.hospitalMap;
 const hospitalResting = t => MAP_SAFE && isHospitalized(t.type);   // 這位隊員正在住院休養（js/game.js：不自己補血、不幫人治療，也不被嚮導補血）
 const onSootheRoom = () => MAP_SAFE && vitalsMapName() === VITALS.sootheRoomMap;
 const vitalsPractice = () => typeof practiceOn === 'function' && practiceOn();
-const briefWaiting = id => typeof MISSION_BASE !== 'undefined' && MISSION_BASE.briefer === id && typeof briefPending === 'function' && !!briefPending();
+const briefWaiting = id => typeof MISSION_BASE !== 'undefined' && MISSION_BASE.briefer === id && typeof briefPending === 'function' && (!!briefPending() || bossBountiesPending().length > 0);
 
 // ---- 換地圖前（game.js 的 newGame 一開始呼叫，這時 G 還是上一張地圖的；MAP 已經是新地圖）----
 function rememberVitals() {

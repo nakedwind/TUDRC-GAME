@@ -4,8 +4,8 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [], reached: [] };   // 已控制的區域、亞許已經報告過的任務、進去過的區域
-try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
+const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [] };   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）
+try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
 
 const missionById = id => MISSIONS.find(m => m.id === id) || null;
@@ -49,7 +49,29 @@ const brieferHospitalized = () => typeof isHospitalized === 'function' && isHosp
 const isBriefStandIn = actor => brieferHospitalized() && onBaseMap() && !BRIEF_STAND_IN_EXCLUDE.includes(actorId(actor))
   && !actor.dead && !!(CHARACTERS[actorId(actor)] || TYPES[actorId(actor)]);
 const isBriefer = actor => !!actor && (actorId(actor) === MISSION_BASE.briefer || isBriefStandIn(actor));
-const missionBriefReady = actor => isBriefer(actor) && !!briefPending();
+// ---- BOSS 特別獎金（名單、金額在 data/missions.js 的 BOSS_BOUNTIES）----
+// 打倒就記下來（combat-feel.js 的 onEnemyDeath 呼叫），之後戰敗撤退也算數；測試模式、不是任務的地圖（測試地圖 y1）不算
+function recordBossBounty(e) {
+  const b = BOSS_BOUNTIES.find(x => e[x.flag]);
+  if (!b || window.TEST_MODE || !missionOfMap(MAP && MAP.id)) return;
+  missionState.bossBounty.push(b.id); saveMissions();
+}
+// 還沒領的獎金：同一隻打倒好幾次，金額加起來、台詞只說一次
+const bossBountiesPending = () => window.TEST_MODE ? [] : BOSS_BOUNTIES.filter(b => missionState.bossBounty.includes(b.id))
+  .map(b => ({ ...b, money: b.money * missionState.bossBounty.filter(id => id === b.id).length }));
+const bossBountyReady = () => MAP_SAFE && !MAP_STORY && bossBountiesPending().length > 0;   // 基地裡才入帳（戰鬥地圖的錢是作戰經費，劇情地圖不動錢包）
+// 通訊員開口報告：獎金馬上入帳，回傳要說的台詞（這格台詞被清空也要交代錢是哪來的）
+function payBossBounties() {
+  const list = bossBountiesPending(), total = list.reduce((sum, b) => sum + b.money, 0);
+  G.money += total; walletSet(G.money);
+  missionState.bossBounty = []; saveMissions();
+  updateHUD(); sfx('blip'); systemNotice('💰 特別獎金 +$' + total);
+  return list.flatMap(b => {
+    const lines = dialogueLines(MISSION_BASE.briefer, 'bounty_' + b.id);
+    return (lines && lines.length ? lines : ['部隊長，討伐' + b.name + '的特別獎金撥下來了，{money} 元。']).map(s => s.replace(/\{money\}/g, b.money));
+  });
+}
+const missionBriefReady = actor => isBriefer(actor) && (!!briefPending() || bossBountyReady());
 // 頭上打「！」、回應變中心時走過來報告的那一位：通訊員本人；他住院時改成離作戰桌最近的代報告的人
 const brieferNpc = () => {
   const all = G ? [...(G.npcs || []), ...(G.towers || [])] : [];
@@ -59,17 +81,20 @@ const brieferNpc = () => {
   return subs.reduce((a, b) => Math.hypot(a.x - t.x, a.y - t.y) <= Math.hypot(b.x - t.x, b.y - t.y) ? a : b);
 };
 
-// ---- 和通訊員對話：有新任務就先報告任務（game.js 的 openDialogue 呼叫）----
+// ---- 和通訊員對話：有特別獎金先報告獎金，有新任務接著報告任務（game.js 的 openDialogue 呼叫）----
 function missionDialogueLines(actor) {
+  if (!missionBriefReady(actor)) return null;
+  const bounty = bossBountyReady() ? payBossBounties() : [];
   const m = briefPending();
-  if (!m || !isBriefer(actor)) return null;
+  if (!m) return bounty;
   missionState.briefed.push(m.id); saveMissions();
-  return briefLines(m);   // briefPending 已經確認有台詞
+  return [...bounty, ...briefLines(m)];   // briefPending 已經確認有台詞
 }
 
 // ---- 左上角「目前任務」（game.js 的 updateHUD 呼叫）----
 function missionHudText() {
   if (MAP_SAFE) {
+    if (bossBountyReady()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告特別獎金' : '聽' + brieferName() + '報告特別獎金');
     const m = nextMission();
     if (!m) return '目前任務：Y 區已全部控制';
     if (briefPending()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告下一個任務' : '聽' + brieferName() + '報告下一個任務');
@@ -149,7 +174,7 @@ function drawMissionMarks(ctx) {
     ctx.restore();
   };
   const ash = brieferNpc();
-  if (ash && briefPending()) mark(ash.x, ash.y - 70 + bob, '！', '#ffd479');
+  if (ash && (briefPending() || bossBountyReady())) mark(ash.x, ash.y - 70 + bob, '！', '#ffd479');
   else if (nextMission() && nextMission().map && !missionTableNear()) { const t = missionTablePos(); mark(t.x, t.top - 4 + bob, '作戰', '#ffd479'); }
 }
 
@@ -171,14 +196,14 @@ function missionTravel(mapId, after) {
     }, PORTAL_BLACK_MS), PORTAL_FADE_MS);
   });
 }
-// 回應變中心：站在作戰桌前；有新任務的話，亞許走過來報告
+// 回應變中心：站在作戰桌前；有特別獎金或新任務的話，亞許走過來報告
 function returnToBase() {
   missionTravel(MISSION_BASE.map, () => {
     const [ac, ar] = missionArriveCell();
     const [x, y] = center(ac, ar);
     if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; G.player.dir = 'back'; }
     const ash = brieferNpc();
-    if (ash && briefPending()) {
+    if (ash && (briefPending() || bossBountyReady())) {
       for (const [dc, dr] of [[1, 0], [-1, 0], [2, 0], [-2, 0], [0, 1]]) {
         const [ax, ay] = center(ac + dc, ar + dr);
         if (!playerBlocked(ax, ay)) { ash.x = ax; ash.y = ay; break; }

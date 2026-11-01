@@ -262,6 +262,7 @@ function onEnemyDeath(e) {
   if (typeof bestiaryRecordKill === 'function') bestiaryRecordKill(e);   // 怪物圖鑑的消滅次數（js/bestiary.js）
   trackKillAchievements(e);   // 成就計數（js/achievements.js；「擊倒某一種怪物」用上面圖鑑的消滅次數，所以放在後面）
   if (typeof foodDeathDrop === 'function') foodDeathDrop(e);   // 虱目魚小子、魚頭君：掉魚肚、生魚片（js/food.js）
+  if (typeof recordBossBounty === 'function') recordBossBounty(e);   // 討伐 BOSS：回應變中心由艾德林報告特別獎金（js/missions.js）
   if (e.behavior === 'burrow') { burrowingMouseDeath(e); return; }   // 沉回洞口，取消尚未命中的地底手
   if (e.undying && typeof lifeformBurnAway === 'function') { lifeformBurnAway(e); return; }   // 生命體被燒死：碎塊著火四散（js/lifeform.js）
   if (e.elite && typeof eliteBirdDown === 'function') eliteBirdDown(e);   // 菁英鳥頭人：橫幅提示核心護盾消失（js/elite-bird-head.js）

@@ -50,6 +50,11 @@ const SITUATIONS = [
     group: '報告任務（通訊員）', key: 'brief_' + m.id, label: '報告任務：' + m.name, ordered: true,
     when: '「' + m.name + '」開放後，回到應變中心時他會走過來，<b>依序</b>一句一句報告這個任務（只報告一次）。',
   })),
+  // 報告 BOSS 特別獎金（通訊員）：每隻 BOSS 一格，名單和金額在 data/missions.js
+  ...(typeof BOSS_BOUNTIES !== 'undefined' ? BOSS_BOUNTIES : []).map(b => ({
+    group: '報告任務（通訊員）', key: 'bounty_' + b.id, label: '特別獎金：' + b.name, ordered: true,
+    when: '討伐' + b.name + '後回到應變中心，他會走過來<b>依序</b>報告（每次討伐都會報告，排在報告任務前面）。<b>{money}</b> 會換成金額（' + b.money + '）。',
+  })),
 ];
 // 狂戰士人格的台詞欄位
 const RAGE_FIELDS = [
@@ -80,12 +85,13 @@ try {
 if (usingDraft && typeof DIALOGUES !== 'undefined') {
   for (const [id, entry] of Object.entries(DIALOGUES.characters || {})) {
     if (!draft.characters[id]) continue;
-    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key) || MATE_HURT_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
+    for (const [key, lines] of Object.entries(entry)) if ((key.startsWith('brief_') || key.startsWith('bounty_') || key === 'lowSp' || GIFT_SITUATIONS.includes(key) || MATE_HURT_SITUATIONS.includes(key)) && !(key in draft.characters[id])) draft.characters[id][key] = clone(lines);
   }
 }
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
 if (typeof MISSIONS !== 'undefined' && typeof MISSION_BASE !== 'undefined' && draft.characters[MISSION_BASE.briefer]) {
   for (const m of MISSIONS) if (!(('brief_' + m.id) in draft.characters[MISSION_BASE.briefer])) draft.characters[MISSION_BASE.briefer]['brief_' + m.id] = [];
+  for (const b of typeof BOSS_BOUNTIES !== 'undefined' ? BOSS_BOUNTIES : []) if (!(('bounty_' + b.id) in draft.characters[MISSION_BASE.briefer])) draft.characters[MISSION_BASE.briefer]['bounty_' + b.id] = [];
 }
 // 還沒有台詞的角色也要列出來（data/characters.js 裡的每個人；玩家溫特除外）：
 // 1. 草稿是舊的時候，正式檔案裡新加的角色整組補進草稿；2. 檔案裡也沒有的，照身分給空白的情境格子。
