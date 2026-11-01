@@ -4,6 +4,7 @@
    ・衝到牆邊、建築前面才停，路線上碰到的每個人各撞一次（敵我都撞飛、都會痛），撞到人時響喇叭／車鈴；
    ・撞上去時播撞牆動畫：車頭頂著牆、後輪翹起來，車身左右壓扁再彈回；
    ・動畫播完調頭，冷卻完可以再往回衝。玩家可以利用牠們把怪物引到路線上撞。
+   地圖編輯器選車子、取消「會暴衝撞人」（stamp.still）的那台就只是停著的圖。
    飛在空中的怪物、鑽在地底的老鼠撞不到；推不動的菁英怪只扣血、不會飛出去。
    （數值集中在最上面，想調整改這裡就好）
 */
@@ -36,7 +37,7 @@ function setupStreetVehicles() {
   if (!MAP || MAP_SAFE || !STREET_VEHICLES.maps.includes(MAP.id)) return;
   for (const s of MAP.stamps || []) {
     const kind = STREET_VEHICLES.types[s.id], tile = kind && mapTileById(s.id);
-    if (!tile) continue;
+    if (!tile || s.still) continue;   // still：地圖編輯器關掉的車，留在地圖上當一般物件
     G.mapDestroyed.add(s);
     G.streetVehicles.push({
       stamp: s, tile, cfg: STREET_VEHICLES[kind], kind, state: 'idle', dir: s.fx ? -1 : 1, spd: 0, cd: Math.random() * 2, scanT: Math.random() * .25,

@@ -5,6 +5,7 @@
    ・畫：js/maploader.js 的 drawMapStampRaw 先畫整張圖，再把階梯那條照時間往上／往下捲（drawEscalatorAnimation）
    ・帶人：game.js 的 update 每幀呼叫 updateEscalators：溫特、隊員、NPC、地上的怪物，腳踩在階梯上就跟著移動（撞到東西就停）
    ・扶手、中間隔板擋不擋路：物件編輯器（data/prop-collisions.js 的「手扶梯」）設定
+   ・不會動的手扶梯：地圖編輯器選手扶梯、取消「手扶梯會動」（stamp.still）：階梯不捲、不帶人
    ・左右翻轉的手扶梯：兩條階梯跟著換邊（方向不變）；上下翻轉：方向也跟著反過來；旋轉過的只有動畫、不帶人 */
 const ESCALATOR = {
   speed: 36,     // 階梯移動速度（像素／秒；溫特走路大約 120）
@@ -26,7 +27,7 @@ function escalatorSpec(id) { return ESCALATOR.tiles[id] || null; }
 // 畫手扶梯：回傳 true＝已經畫好（整張圖＋捲動的階梯）
 function drawEscalatorAnimation(ctx, s, img, x, y, w, h) {
   const spec = escalatorSpec(s.id);
-  if (!spec || !img.naturalWidth) return false;
+  if (!spec || s.still || !img.naturalWidth) return false;   // still：地圖編輯器關掉的手扶梯，當一般圖片畫
   ctx.drawImage(img, x, y, w, h);
   const kx = w / img.naturalWidth, ky = h / img.naturalHeight, P = ESCALATOR.period;
   const p = Math.floor(escalatorPhase / ky) % P;   // 捲了幾個原始像素（取整數，像素圖才不會糊）
@@ -52,7 +53,7 @@ function escalatorLanes() {
   if (escalatorCache.map === MAP && escalatorCache.n === n) return escalatorCache.lanes;
   const lanes = [];
   for (const s of MAP.stamps || []) {
-    const spec = escalatorSpec(s.id); if (!spec || mapStampTurn(s)) continue;
+    const spec = escalatorSpec(s.id); if (!spec || s.still || mapStampTurn(s)) continue;
     const t = mapTileById(s.id), img = t && tileImage(t);
     const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
     const iw = (img && img.naturalWidth) || w, ih = (img && img.naturalHeight) || h, kx = w / iw, ky = h / ih;
