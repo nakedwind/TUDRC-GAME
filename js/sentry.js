@@ -320,11 +320,14 @@ function sentryBlocked(x, y) {
   }
   return false;
 }
-// 身體邊緣也要留在光內，避免中心仍亮、人物已踏進黑暗。
+// 隊員能不能走到這裡：離最近的亮格 PERSONNEL_DARK_CELLS 格以內都算（光圈邊緣暗一點點也會跟過來）。
+// 設成 0＝舊的嚴格判定：身體中心和四個角都要在光內，一點點黑就不過去。
 const CORE_GLOW_WALK = 4;   // 醒著的異質核心會發光：周圍幾格內隊員也能走進去（才打得到核心）
+const PERSONNEL_DARK_CELLS = 1;
 function personnelInLight(x, y) {
   if (MAP_SAFE || !LIGHT.enabled) return true;
   if (G && G.cores && G.cores.some(c => c.awake && !c.dead && !c.hidden && Math.hypot(c.x - x, c.y - y) <= CORE_GLOW_WALK * CELL)) return true;
+  if (PERSONNEL_DARK_CELLS > 0) { const [c, r] = cellAt(x, y); return cellNearLight(c, r, PERSONNEL_DARK_CELLS * CELL); }
   return [[0,0],[-12,-12],[12,-12],[-12,12],[12,12]]
     .every(([dx,dy]) => isLit(x + dx, y + dy));
 }

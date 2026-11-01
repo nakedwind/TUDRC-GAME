@@ -259,6 +259,7 @@ function throwCap(e, target) {
   if (typeof sfxAt === 'function') sfxAt('swordSwing', e.x, e.y, .45, 'hangi-throw');
 }
 function capHitPlayer(s) {
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(G.player)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const p = G.player, e = s.owner, dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 8) : e.playerDamage ?? 8));
   p.hp = Math.max(0, p.hp - dmg);
   p.hitT = .35; p.underAttackT = 5; p.lastAttacker = e;

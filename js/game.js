@@ -2441,6 +2441,7 @@ function update(dt) {
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);
+  if (typeof updateHurtGrace === 'function') updateHurtGrace(dt);   // 溫特、隊友被打後的短暫無敵倒數（js/combat-feel.js）
   if (typeof updateCapKing === 'function') updateCapKing(dt);   // 順順宮主：大宮帽打開、蓋回、蓋杯子洗牌（js/elite-cap-king.js）
   if (typeof updateGourd === 'function') updateGourd(dt);   // 葫蘆猴拖行的刮痕、砸出來的地裂（js/gourd-monkey.js）
   if (typeof updateMoths === 'function') updateMoths(dt);   // 人面蝶的鱗粉霧、吸入、中毒／混亂／睡眠、粉塵爆炸（js/human-face-butterfly.js）
