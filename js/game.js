@@ -1083,7 +1083,7 @@ function updateChaosSentry(t, spec, dt) {
   for (const o of G.towers) if (o !== t && o.hp > 0) consider(o, o.x, o.y);
   if (G.player && G.player.hp > 0) consider(G.player, G.player.x, G.player.y);
   for (const o of G.obstacles) if (o.isBase && o.hp > 0) consider(o, (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2);
-  for (const c of G.cores) if (!c.dead && c.awake) consider(c, c.x, c.y);
+  for (const c of G.cores) if (!c.dead && c.awake && !c.hidden) consider(c, c.x, c.y);
   if (!best) return;
   const range = spec.range * CELL;
   const canSee = hasLineOfSight(t.x, t.y, best.x, best.y);
@@ -1252,6 +1252,8 @@ function newGame() {
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
+  if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
+  if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
   if (typeof arriveVitals === 'function' && !MAP_STORY) arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
   if (!MAP_STORY) {     // 劇情地圖：只有溫特一個人，隊友和場景 NPC 都不會跟進來
     spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
@@ -1325,6 +1327,7 @@ function playerBlocked(x, y) {
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
+  if (typeof bigPearlBlocksPlayer === 'function' && bigPearlBlocksPlayer(x, y)) return true;   // 珍珠大童的大珍珠（js/pearl-elder.js）
   return false;
 }
 // 救援機制：角色若被卡在牆／建築裡（例如放置時的邊角誤差），
@@ -1476,8 +1479,9 @@ function updatePlayer(dt) {
   const len = Math.hypot(dx, dy), step = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1) * dashMul(p) * dt   // 輕量跑鞋、腎上腺素（js/equipment.js）× 衝刺
     * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally') : 1);   // 走在鐵絲網上變慢
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
-  if (!playerBlocked(nx, p.y)) p.x = nx; else if (!dy) slideIntoGap(p, 'x', nx - p.x, step);
-  if (!playerBlocked(p.x, ny)) p.y = ny; else if (!dx) slideIntoGap(p, 'y', ny - p.y, step);
+  const pushing = typeof bigPearlPlayerPush === 'function' && bigPearlPlayerPush(p, nx, ny, dx / len, dy / len);   // 頂到大珍珠：往前推，不自動往旁邊滑開（js/pearl-elder.js）
+  if (!playerBlocked(nx, p.y)) p.x = nx; else if (!dy && !pushing) slideIntoGap(p, 'x', nx - p.x, step);
+  if (!playerBlocked(p.x, ny)) p.y = ny; else if (!dx && !pushing) slideIntoGap(p, 'y', ny - p.y, step);
   if (p.dashPart > 0) {   // 衝刺中：身後留殘影（js/render.js 的 drawDashTrail）
     const now = performance.now() / 1000, tr = p.dashTrail || (p.dashTrail = []);
     if (!tr.length || now - tr[tr.length - 1].t >= DASH.trailGap) tr.push({ x: p.x, y: p.y, t: now });
@@ -1684,7 +1688,7 @@ function pickSentryTarget(t, R) {
   }
   if (best || t.guardSummoned) return best;
   for (const core of G.cores) {
-    if (core.dead || !core.awake) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）
+    if (core.dead || !core.awake || core.hidden) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡的也打不到（js/elite-cap-king.js）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
     if (distance <= R + CORE_HIT_PAD && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
   }
@@ -1786,7 +1790,7 @@ function startReload(p) {
 const SHOT_BODY_PAD = 8;   // 游標點在身體框外幾像素內也算點到
 function playerShotCheck(p, e, aim, angDiff) {
   const isCore = G.cores.includes(e);
-  if (e.dead) return null;
+  if (e.dead || e.carried) return null;   // carried：抱在珍珠大童身上的核心打不到（js/pearl-elder.js）
   const box = targetBodyBox(e);
   const lit = bodyVisible(box, e.x, e.y) || isLit(e.x, e.y) || isLit(box.cx, box.cy);   // 畫面上看得到就打得到
   if (!lit) return null;
@@ -1846,7 +1850,7 @@ function updatePlayerAttack(dt) {
   // 扇形判定也同時看腳底和身體中心，取比較接近的角度。
   let best = null, bestD = PLAYER_ATK.range * CELL, bestOnBody = false;
   const angDiff = (x, y) => { let da = Math.abs(Math.atan2(y - p.y, x - p.x) - aimAng); return da > Math.PI ? 2 * Math.PI - da : da; };
-  for (const e of paint ? G.enemies : [...G.enemies, ...G.cores]) {   // 漆彈只標記怪物
+  for (const e of paint ? G.enemies : [...G.enemies, ...G.cores.filter(c => !c.hidden)]) {   // 漆彈只標記怪物；躲在順順宮帽裡的核心打不到（js/elite-cap-king.js）
     const shot = playerShotCheck(p, e, aim, angDiff);
     if (!shot) continue;
     // 點在身上的目標優先；同樣是點在身上或同樣在扇形內，就打最近的
@@ -1867,7 +1871,9 @@ function updatePlayerAttack(dt) {
     let da = Math.abs(Math.atan2(c.y - p.y, c.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
     if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = isOil ? oilProxy(o) : oreProxy(o); }
   }
-  const hitPt = best && !best.oilRef && !best.oreRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
+  const pearlShot = paint || typeof bigPearlShotTarget !== 'function' ? null : bigPearlShotTarget(p, aim, aimAng, bestD, bestOnBody);   // 珍珠大童的大珍珠：開槍推動（js/pearl-elder.js）
+  if (pearlShot) { best = pearlShot; bestD = pearlShot.d; bestOnBody = pearlShot.onBody; }
+  const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
   let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
   let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
   if (paint) {   // 漆彈：螢光綠的彈道（BULLETS.paint.color），打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
@@ -1899,6 +1905,7 @@ function updatePlayerAttack(dt) {
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
   if (best && best.oilRef) { damageOil(best.oilRef, Math.round(PLAYER_ATK.dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
   if (best && best.oreRef) { pistolHitOre(best.oreRef, PLAYER_ATK.dmg); best = null; }   // 打到異質礦：累積傷害，打夠了才碎（js/ore.js）
+  if (best && best.bigPearlRef) { shootBigPearl(best.bigPearlRef, p.x, p.y); best = null; }   // 打到大珍珠：往子彈的方向推（js/pearl-elder.js）
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
     const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
@@ -2427,6 +2434,7 @@ function update(dt) {
   }
   for (const e of G.enemies) { if (e.hp <= 0 && !e.dead) { if (e.undying && typeof lifeformCollapse === 'function' && lifeformCollapse(e)) continue;   /* 生命體：沒被火燒就只是碎掉（js/lifeform.js） */ e.dead = true; if ((typeof practiceOn === 'function' && practiceOn())) {} else if (typeof dropShard === 'function') dropShard(e.x, e.y, e.crystals ?? 3); else earnCrystals(e.crystals ?? 3);   /* 打怪不加錢；掉一顆碎片要走過去撿（js/ore.js） */ if (G.battle) { const nm = monsterNameOf(e); G.battle.kills[nm] = (G.battle.kills[nm] || 0) + 1; } onEnemyDeath(e); if (typeof questEvent === 'function') questEvent('kill', { monster: e.type }); if (e.deathSound && typeof sfxAt === 'function') sfxAt(e.deathSound, e.x, e.y, 0.8, 'monster-death'); else if (e.type === 'slime' && typeof sfxAt === 'function') sfxAt('monsterDown', e.x, e.y, 0.58, 'slime-death'); else sfx('kill'); } }
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 這一幀打在核心上的傷害先套護盾，再判定破掉（js/elite-bird-head.js）
+  if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
@@ -2466,10 +2474,12 @@ function update(dt) {
   if (typeof updateCampBeds === 'function') updateCampBeds(dt);   // 戰鬥地圖：殘血的隊員回營地躺行軍床、溫特躺床（js/camp-beds.js）
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
+  if (typeof updatePearlElder === 'function') updatePearlElder(dt);   // 珍珠大童降下的珍珠、場上的大珍珠（js/pearl-elder.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);
+  if (typeof updateCapKing === 'function') updateCapKing(dt);   // 順順宮主：大宮帽打開、蓋回、蓋杯子洗牌（js/elite-cap-king.js）
   if (typeof updateGourd === 'function') updateGourd(dt);   // 葫蘆猴拖行的刮痕、砸出來的地裂（js/gourd-monkey.js）
   if (typeof updateMoths === 'function') updateMoths(dt);   // 人面蝶的鱗粉霧、吸入、中毒／混亂／睡眠、粉塵爆炸（js/human-face-butterfly.js）
   if (typeof updateFood === 'function') updateFood(dt);   // 地上的食物在火裡烤熟、吃到的 buff 倒數（js/food.js）
@@ -2620,7 +2630,7 @@ function lose(reason, cause) {
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
-const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2', 'map_mvtnqrs7'];   // map_mvtnqrs7＝Y25區地下街；用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
+const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2', 'map_mvtnqrs7', 'map_mvvdbiyx'];   // map_mvtnqrs7＝Y25區地下街、map_mvvdbiyx＝K56區地下街（順順宮主，js/elite-cap-king.js）；用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
 if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {

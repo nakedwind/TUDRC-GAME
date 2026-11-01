@@ -367,7 +367,7 @@ function monsterWalkFrame(e) {
     else if (Math.abs(mdy) > Math.abs(mdx) * 1.1) e.animSide = false;
   }
   const walking = (e.walkUntil || 0) > now && !(e.stunT > 0);
-  const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : 10));   // 衝刺時步伐大一點
+  const step = Math.floor((e.walkDist || 0) / (e.ch && e.ch.state === 'charge' ? 20 : e.walkStride || 10));   // 衝刺時步伐大一點；walkStride：體型大的怪物步伐也大（大夯吉寶，js/elite-cap-king.js）
   const lazy = !e.ch || e.ch.state === 'idle' || e.ch.state === 'wander';   // 沒在追人的時候
   if (f.walkBack && e.behavior === 'charger') {   // 鳥頭人：往畫面上方走露出背面；守衛（faceBack）背對玩家看著核心
     if (e.faceBack) e.showBack = true;
@@ -460,6 +460,7 @@ function drawEnemy(e) {
     const fuseP = e.fuseT > 0 ? 1 - e.fuseT / SLIME_BOMB.fuse : 0;
     const fuseFlash = fuseP > 0 ? (Math.sin(fuseP * fuseP * 60) > 0 ? .85 : .15) : 0;
     if (e.hitT > 0) drawHitFlash(sprite, Math.min(1, e.hitT / .16), e.hitColor, dx, dy, dw, dh);   // 先閃白，再轉屬性色
+    if (e.pearlBoss && typeof drawPearlBossCore === 'function') drawPearlBossCore(ctx, e, dx, dy, dw, dh);   // 珍珠大童抱著的核心（js/pearl-elder.js）
     if (e.mf && e.mf.prey && typeof drawMilkfishPrey === 'function') drawMilkfishPrey(ctx, e, dx, dy, dw, dh, baseSprite);   // 虱目魚小子嘴裡的隊友：用這一幀實際畫的位置，被打壓扁、晃動時才會黏在嘴上（js/milkfish-kid.js）
     if (walkFrame && walkFrame.rig) drawRigArm(e, walkFrame, dx, dy, dw, dh);   // 揮手：即時轉動的手臂
     const fuseSil = fuseFlash ? flashSprite(sprite, '#ff6a3d') : null;
@@ -1032,7 +1033,7 @@ function draw() {
   collectMapOccluders(ctx, sortables);
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
-  for(const core of G.cores) if(!core.dead && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
+  for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -1041,6 +1042,7 @@ function draw() {
   for (const e of G.enemies) if (enemyVisible(e) && e.behavior !== 'moth') sortables.push({ y: e.y + 13, draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
+  if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
@@ -1070,6 +1072,7 @@ function draw() {
   drawFlareShots(ctx);         // 飛行中的照明彈
   if (typeof drawSpecialShots === 'function') drawSpecialShots(ctx);   // 飛行中的燃燒彈、麻醉針（js/special-guns.js）
   drawPearls(ctx);             // 珍珠小童噴出的珍珠、蓄力閃光
+  if (typeof drawPearlElderFx === 'function') drawPearlElderFx(ctx);   // 珍珠大童從天上降下的珍珠（js/pearl-elder.js）
   if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
   if (typeof drawFishSprays === 'function') drawFishSprays(ctx);
   if (typeof drawLoofahVines === 'function') drawLoofahVines(ctx);
@@ -1181,6 +1184,7 @@ function draw() {
   drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
   if (typeof drawSlipDizzyStars === 'function') drawSlipDizzyStars(ctx);   // 踩香蕉皮撞到東西頭暈的星星（js/golden-banana-king.js）
   if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
+  if (typeof drawPearlElderTelegraphs === 'function') drawPearlElderTelegraphs(ctx);   // 珍珠落點的陰影圈、大童暈眩的星星：畫在黑幕上面（js/pearl-elder.js）
   if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
   if (typeof drawMilkfishEyeFlashes === 'function') drawMilkfishEyeFlashes(ctx);
   if (typeof drawFrenzyTint === 'function') drawFrenzyTint(ctx);   // 核心醒著：燈光變紅（js/core-frenzy.js）
@@ -1197,7 +1201,6 @@ function draw() {
   flushTowerBubbles();   // 所有角色的對話泡泡（隊員頭上有「急救／疏導」選項時排到選項上面）
   if (typeof drawNpcChatMarks === 'function') drawNpcChatMarks(ctx);   // 有人在閒聊、等溫特來聽：中間的「● ● ●」（js/npc-chats.js）
   drawTextEffects();            // 「這裡不能放置建築」之類的提示字：畫在黑幕上面
-  if (typeof drawHangiCapGlints === 'function') drawHangiCapGlints(ctx);   // 黑暗中順順宮帽的閃光（js/hangi-bao.js）
   if (typeof drawSmilers === 'function') drawSmilers(ctx);
   if (typeof drawDetector === 'function') drawDetector(ctx);   // 異質探測器：黑暗中的礦物、核心微微發光（js/equipment.js）   // Smiler 的眼睛和笑臉（黑暗中才看得到，js/smiler.js）
   drawSensedEnemies();   // 堤諾的「感知」：黑暗中的怪物只對玩家顯示輪廓（畫在黑幕之上）

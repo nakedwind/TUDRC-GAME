@@ -11,8 +11,11 @@
    「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
 */
 // 素材 id → stages：依序換成哪些圖；open：炸開後可以通過的格子（[第幾欄, 第幾列]，從大圖左上角算）
-// solid：一直擋路的格子（不管地圖編輯器有沒有畫擋路格，牆最下排的左右兩格都擋住）
+// solid：一直擋路的格子（不管地圖編輯器有沒有畫擋路格；一般版本是牆最下排的左右兩格）
 // pad：爆炸範圍外再多幾格也算炸到（牆本身有一格厚）
+// 隱藏區版本自帶擋路格：跟一般後室牆一樣下面兩排都擋，炸開後中間那一欄打通（跟破洞牆 hole 的擋路格一樣），
+// 地圖編輯器不用另外畫擋路格；隱藏區從最上排中間那格（hideFrom）往外找
+const SECRET_WALL_OPEN = [[1, 2], [1, 1]], SECRET_WALL_SOLID = [[0, 1], [2, 1], [0, 2], [2, 2]];
 const BREAKABLE_WALLS = {
   tile_bg_backroom_wall02_breakable: {
     stages: ['tile_bg_backroom_wall02_dmg_crack', 'tile_bg_backroom_wall02_hole2'],
@@ -21,9 +24,9 @@ const BREAKABLE_WALLS = {
   },
   tile_bg_backroom_wall02_secret: {   // 隱藏區版本：hide＝從 hideFrom 那格（牆上方）往外連通的區域，炸開前塗黑
     stages: ['tile_bg_backroom_wall02_dmg_crack', 'tile_bg_backroom_wall02_hole2'],
-    open: [[1, 2]], solid: [[0, 2], [2, 2]],
+    open: SECRET_WALL_OPEN, solid: SECRET_WALL_SOLID,
     pad: 1,
-    hide: true, hideFrom: [1, 1], hideMax: 1500,   // hideMax：隱藏區最多幾格（太大代表其實跟外面連通，就不隱藏）
+    hide: true, hideFrom: [1, 0], hideMax: 1500,   // hideMax：隱藏區最多幾格（太大代表其實跟外面連通，就不隱藏）
   },
   // 已經裂開的牆（圖是 Back-room-wall02-damage-03）：本來就是裂痕的樣子，所以炸一次就開洞
   tile_bg_backroom_wall02_crack_breakable: {   // 純障礙物：上方區域照常看得到
@@ -33,9 +36,9 @@ const BREAKABLE_WALLS = {
   },
   tile_bg_backroom_wall02_crack_secret: {      // 隱藏區版本：炸開前牆上方被圍起來的區域塗黑
     stages: ['tile_bg_backroom_wall02_hole2'],
-    open: [[1, 2]], solid: [[0, 2], [2, 2]],
+    open: SECRET_WALL_OPEN, solid: SECRET_WALL_SOLID,
     pad: 1,
-    hide: true, hideFrom: [1, 1], hideMax: 1500,
+    hide: true, hideFrom: [1, 0], hideMax: 1500,
   },
 };
 const HIDDEN_REVEAL_SEC = .9;   // 炸開後黑幕淡出幾秒
@@ -168,8 +171,12 @@ function restoreBreakableWalls() {
   if (!G || !MAP) return;
   if (!(G.wallStage instanceof Map)) G.wallStage = new Map();
   if (!G.hiddenAreas) G.hiddenAreas = [];
+  // revealAt 是 performance.now 的秒數，重新整理網頁後從 0 重算：存起來的值會比現在大，淡入算成負的、隱藏區就一直看不到。
+  // 已經炸開的直接當成淡入完了
+  const doneAt = performance.now() / 1000 - HIDDEN_REVEAL_SEC;
+  for (const a of G.hiddenAreas) if (a.revealAt && a.revealAt > doneAt) a.revealAt = doneAt || -1;
   const drawn = new Set(MAP.solid || []);
-  const added = (c, r) => { const k = c + ',' + r; return inGrid(c, r) && mapWalls.has(k) && !drawn.has(k) ? k : null; };
+  const added =(c, r) => { const k = c + ',' + r; return inGrid(c, r) && mapWalls.has(k) && !drawn.has(k) ? k : null; };
   for (const s of MAP.stamps || []) {
     const spec = breakableWallSpec(s); if (!spec) continue;
     const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
@@ -239,7 +246,7 @@ function breakableWallDisplayTile(s, t) {
 }
 // 爆炸（x, y, 半徑 R 像素）：範圍內的可炸開牆往下一個階段
 function blastWalls(x, y, R) {
-  if (!G || !MAP) return;
+  if (!G || !MAP || !(G.wallStage instanceof Map)) return;   // 回憶劇情演出中（newGame 沒跑完）：牆還沒設定，不處理
   for (const s of MAP.stamps || []) {
     const spec = breakableWallSpec(s); if (!spec) continue;
     const stage = breakableWallStage(s); if (stage >= spec.stages.length) continue;   // 已經炸開了

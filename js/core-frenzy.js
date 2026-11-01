@@ -23,7 +23,7 @@ function updateCoreFrenzy(dt) {
   if (!G || !G.enemies) return;
   const on = coreFrenzyActive();
   for (const e of G.enemies) {
-    if (e.elite) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js）
+    if (e.elite || e.capKing || e.pearlBoss) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js、js/elite-cap-king.js、js/pearl-elder.js）
     if (e.coreGiveUpT > 0) e.coreGiveUpT -= dt;
     if (on && !e.frenzy && e.hp > 0) {
       e.frenzy = { speed: e.speed, sentryDamage: e.sentryDamage, playerDamage: e.playerDamage };
@@ -42,7 +42,7 @@ function updateCoreFrenzy(dt) {
 function frenzyCoreGoal(e) {
   if (!e.frenzy || e.coreGiveUpT > 0) return null;
   let core = null, d = Infinity;
-  for (const c of G.cores) if (c.awake && !c.dead) { const dd = Math.hypot(c.x - e.x, c.y - e.y); if (dd < d) { d = dd; core = c; } }
+  for (const c of G.cores) if (c.awake && !c.dead && !c.hidden) { const dd = Math.hypot(c.x - e.x, c.y - e.y); if (dd < d) { d = dd; core = c; } }
   if (!core) return null;
   if (e.coreReturning && d <= CORE_FRENZY.guardR * CELL) e.coreReturning = false;   // 到了：開始守著
   else if (!e.coreReturning && d > CORE_FRENZY.leash * CELL) e.coreReturning = true;   // 被引開太遠：跑回去
@@ -93,22 +93,31 @@ function drawCoreBossUI(ctx, cv) {
     ctx.restore();
   });
   // 菁英怪的血條：接在核心血條下面（js/elite-bird-head.js）
-  const elites = typeof eliteBossBars === 'function' ? eliteBossBars() : [];
-  elites.slice(0, 2).forEach((bar, j) => {
+  // 一列一組：鳥頭大隊長一條一列；好幾隻大夯吉寶（js/elite-cap-king.js）擠在同一列，血條縮短並排；珍珠大童和牠身上的核心（js/pearl-elder.js）同一列
+  const rows = (typeof eliteBossBars === 'function' ? eliteBossBars() : []).map(bar => [bar]);
+  const capBars = typeof capKingBossBars === 'function' ? capKingBossBars() : [];
+  if (capBars.length) rows.push(capBars);
+  const pearlBars = typeof pearlBossBars === 'function' ? pearlBossBars() : [];
+  if (pearlBars.length) rows.push(pearlBars);
+  rows.slice(0, 3).forEach((row, j) => {
     const i = Math.min(3, awake.length) + j;
-    const w = Math.min(520, cv.width * .45), h = 14, x = (cv.width - w) / 2, y = 58 + i * 40;
-    ctx.save();
-    ctx.font = 'bold 15px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
-    ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)';
-    ctx.strokeText(bar.label, cv.width / 2, y - 3); ctx.fillStyle = bar.text; ctx.fillText(bar.label, cv.width / 2, y - 3);
-    ctx.fillStyle = 'rgba(16,10,4,.85)'; ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
-    ctx.strokeStyle = bar.frame; ctx.lineWidth = 2; ctx.strokeRect(x - 3, y - 3, w + 6, h + 6);
-    const grad = ctx.createLinearGradient(x, 0, x + w, 0);
-    grad.addColorStop(0, bar.colors[0]); grad.addColorStop(1, bar.colors[1]);
-    ctx.fillStyle = bar.hit ? '#ffffff' : grad; ctx.fillRect(x, y, w * Math.max(0, bar.ratio), h);
-    ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;
-    for (let k = 1; k < 10; k++) { ctx.beginPath(); ctx.moveTo(x + w * k / 10, y); ctx.lineTo(x + w * k / 10, y + h); ctx.stroke(); }
-    ctx.restore();
+    const W = Math.min(520, cv.width * .45), gap = 14, h = 14, y = 58 + i * 40;
+    const w = (W - gap * (row.length - 1)) / row.length, ticks = row.length > 1 ? 5 : 10;
+    row.forEach((bar, n) => {
+      const x = (cv.width - W) / 2 + n * (w + gap), cx = x + w / 2;
+      ctx.save();
+      ctx.font = 'bold ' + (row.length > 1 ? 13 : 15) + 'px "Microsoft JhengHei", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'bottom';
+      ctx.lineWidth = 4; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+      ctx.strokeText(bar.label, cx, y - 3); ctx.fillStyle = bar.text; ctx.fillText(bar.label, cx, y - 3);
+      ctx.fillStyle = 'rgba(16,10,4,.85)'; ctx.fillRect(x - 3, y - 3, w + 6, h + 6);
+      ctx.strokeStyle = bar.frame; ctx.lineWidth = 2; ctx.strokeRect(x - 3, y - 3, w + 6, h + 6);
+      const grad = ctx.createLinearGradient(x, 0, x + w, 0);
+      grad.addColorStop(0, bar.colors[0]); grad.addColorStop(1, bar.colors[1]);
+      ctx.fillStyle = bar.hit ? '#ffffff' : grad; ctx.fillRect(x, y, w * Math.max(0, bar.ratio), h);
+      ctx.strokeStyle = 'rgba(255,255,255,.18)'; ctx.lineWidth = 1;   // 刻度：並排時每 20% 一條
+      for (let k = 1; k < ticks; k++) { ctx.beginPath(); ctx.moveTo(x + w * k / ticks, y); ctx.lineTo(x + w * k / ticks, y + h); ctx.stroke(); }
+      ctx.restore();
+    });
   });
   const b = G.coreBanner; if (!b) return;
   const T = CORE_FRENZY.banner, inT = .35, outT = .6;

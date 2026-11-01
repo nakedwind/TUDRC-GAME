@@ -512,6 +512,7 @@ function fixMap(m) {
   if (m.story) m.story = true; else delete m.story;   // 劇情地圖（時間暫停）：只有溫特一個人進來看劇情（js/maploader.js 的 MAP_STORY）
   m.portals = Array.isArray(m.portals) ? m.portals : [];   // 出入口：[{c,r,to:目標地圖id, hidden?:隱藏地道（球球找到才出現）, at?:[欄,列]＝同地圖傳送點要送到哪一格}]
   m.hiddenPickups = Array.isArray(m.hiddenPickups) ? m.hiddenPickups : [];   // 隱藏的拾取物（沒有亮點）：['圖層:c,r'…]（大圖用左上角那一格）
+  fixCapKing(m);
   m.cols = m.cols || 32; m.rows = m.rows || 18;   // 地圖大小（舊地圖沒存就用預設）
   return m;
 }
@@ -957,6 +958,13 @@ function rotateBaseCells(cells, w, h, rot) {
   return cells.map(([c, r]) => rot === 1 ? [h - 1 - r, c] : rot === 2 ? [w - 1 - c, h - 1 - r] : rot === 3 ? [r, w - 1 - c] : [c, r]);
 }
 
+// 順順宮主的大宮帽位置（js/elite-cap-king.js）：{ caps: ['c,r'…] }；一頂都沒有就整個拿掉
+function fixCapKing(m) {
+  const caps = m.capKing && Array.isArray(m.capKing.caps) ? [...new Set(m.capKing.caps.map(String))] : [];
+  if (caps.length) m.capKing = { ...m.capKing, caps }; else delete m.capKing;
+}
+const capKingCaps = m => (m.capKing && m.capKing.caps) || [];
+
 // ================= 畫布繪製 =================
 let showGrid = true;    // 格線開關（可用工具列按鈕切換）
 let showSolid = false;       // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）；載入／重新整理時預設關著
@@ -1068,6 +1076,22 @@ function draw() {
       ctx.strokeStyle = 'rgba(255,212,121,.7)'; ctx.lineWidth = 2; ctx.beginPath();
       ctx.moveTo(x + CELL / 2, y + CELL / 2); ctx.lineTo(OX + (hoverCell[0] + .5) * CELL, OY + (hoverCell[1] + .5) * CELL); ctx.stroke();
     }
+  }
+  // 順順宮主的大宮帽：標的那格＋擋路範圍（寬 3、高 2，跟 js/elite-cap-king.js 的 blockW、blockH 一樣）
+  capKingCaps(m).forEach((k, i) => {
+    const [c, r] = k.split(',').map(Number), x = OX + c * CELL, y = OY + r * CELL;
+    ctx.fillStyle = 'rgba(255,196,80,.16)'; ctx.fillRect(x - CELL, y - CELL, CELL * 3, CELL * 2);
+    ctx.strokeStyle = 'rgba(255,210,122,.8)'; ctx.lineWidth = 1.5; ctx.setLineDash([5, 3]);
+    ctx.strokeRect(x - CELL + 1.5, y - CELL + 1.5, CELL * 3 - 3, CELL * 2 - 3); ctx.setLineDash([]);
+    ctx.fillStyle = 'rgba(255,196,80,.45)'; ctx.fillRect(x, y, CELL, CELL);
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🎩', x + CELL / 2, y + CELL / 2);
+    ctx.font = 'bold 10px sans-serif'; ctx.textBaseline = 'top'; ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)';
+    ctx.strokeText(String(i + 1), x + CELL - 6, y + 2); ctx.fillStyle = '#ffd27a'; ctx.fillText(String(i + 1), x + CELL - 6, y + 2);
+  });
+  if (capKingCaps(m).length || brush.mode === 'capking') {
+    ctx.fillStyle = '#ffd27a'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';
+    ctx.fillText('🎩 順順宮主帽子 ' + capKingCaps(m).length + ' 頂（核心會躲在其中一頂；至少要 2 頂）', OX + 6, OY + 52);
   }
   // 隱藏的拾取物：格子角落標 🙈
   for (const k of (m.hiddenPickups || [])) {
@@ -1302,6 +1326,15 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       setStatus('請選空格作為核心候選點', '#ff8f8f'); return;
     }
     toggle(m.coreSpots, key);
+  } else if (brush.mode === 'capking') {   // 🎩 順順宮主帽子：點空格放一頂、再點一次拿掉
+    if (!isDown) return;
+    const caps = [...capKingCaps(m)], i = caps.indexOf(key);
+    if (i < 0 && (m.solid.includes(key) || m.breakable.includes(key))) { setStatus('請選空格放順順宮主的帽子', '#ff8f8f'); return; }
+    if (i >= 0) caps.splice(i, 1); else caps.push(key);
+    m.capKing = { ...(m.capKing || {}), caps }; fixCapKing(m);
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已拿掉這頂帽子（剩 ' + caps.length + ' 頂）' : '已放上第 ' + caps.length + ' 頂順順宮主帽子：虛線框是帽子蓋著時擋住的範圍', '#ffd27a');
+    return;
   } else if (brush.mode === 'hidepick') {   // 🙈 隱藏拾取：點地上的拾取物（拾取亮點、鑰匙…）切換「隱藏／一般」
     if (!isDown) return;
     const found = editorPickupAt(m, c, r);
@@ -2798,7 +2831,7 @@ document.getElementById('solidToggle').addEventListener('click', e => {
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();
-  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; checkResult = null; solidNudgeCells.clear();
+  const m = curMap(); m.layers = emptyLayers(layersOf(m)); m.stamps = []; m.solid = []; m.solidOffsets = {}; m.breakable = []; m.camp = []; m.coreSpots = []; m.spawnZone = []; delete m.capKing; checkResult = null; solidNudgeCells.clear();
   saveMaps(); draw(); setStatus('已清空這張地圖', '#ffd24a');
 });
 
@@ -2911,6 +2944,7 @@ function shiftMapContent(m, dc, dr) {
   m.solidOffsets = off;
   (m.portals || []).forEach(p => { p.c += dc; p.r += dr; if (Array.isArray(p.at)) p.at = [p.at[0] + dc, p.at[1] + dr]; });
   m.hiddenPickups = (m.hiddenPickups || []).map(k => { const i = k.lastIndexOf(':'); return k.slice(0, i + 1) + shiftKey(k.slice(i + 1)); });
+  if (m.capKing) m.capKing.caps = capKingCaps(m).map(shiftKey);
   if (solidNudgeCells.size) { const moved = [...solidNudgeCells].map(shiftKey); solidNudgeCells.clear(); moved.forEach(k => solidNudgeCells.add(k)); }
 }
 // 把落在地圖外的內容清掉（縮小後用）
@@ -2941,6 +2975,7 @@ function dropOutsideContent(m) {
   m.portals = (m.portals || []).filter(p => inside(p.c, p.r) && !(Array.isArray(p.at) && !inside(p.at[0], p.at[1])));   // 傳送點送到的那格被裁掉：這個傳送點也拿掉
   removed += pn - m.portals.length;
   m.hiddenPickups = (m.hiddenPickups || []).filter(k => insideKey(k.slice(k.lastIndexOf(':') + 1)));
+  if (m.capKing) { const n = capKingCaps(m).length; m.capKing.caps = capKingCaps(m).filter(insideKey); removed += n - m.capKing.caps.length; fixCapKing(m); }
   for (const k of [...solidNudgeCells]) if (!insideKey(k)) solidNudgeCells.delete(k);
   return removed;
 }

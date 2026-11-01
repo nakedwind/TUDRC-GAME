@@ -482,7 +482,7 @@ function drawDetector(ctx) {
   const p = G.player, R = v.range * CELL, t = performance.now() / 1000;
   const spots = [];
   for (const o of G.obstacles) if (o.ore && o.hp > 0) { const c = typeof oreCenter === 'function' ? oreCenter(o) : { x: OX + (o.c + .5) * CELL, y: OY + (o.r + .5) * CELL }; spots.push(c); }
-  for (const c of G.cores || []) if (!c.dead) spots.push({ x: c.x, y: c.y - 20 });
+  for (const c of G.cores || []) if (!c.dead && !c.hidden) spots.push({ x: c.x, y: c.y - 20 });
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   for (const s of spots) {
     const d = Math.hypot(s.x - p.x, s.y - p.y); if (d > R || isVisible(s.x, s.y)) continue;

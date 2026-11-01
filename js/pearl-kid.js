@@ -130,6 +130,7 @@ function stepShooterEnemy(e, dt) {
 function pearlShellArmor() {
   for (const e of G.enemies) {
     if (e.behavior !== 'shooter' || e.dead || !e.art || !e.art.shell) continue;
+    if (e.pearlBoss) { pearlBossArmor(e); continue; }   // 珍珠大童：自己的閉殼規則（js/pearl-elder.js）
     if (e.pkHp == null || e.hp > e.pkHp) { e.pkHp = e.hp; continue; }
     const lost = e.pkHp - e.hp;
     if (lost > 0) {
@@ -186,6 +187,7 @@ function updatePearls(dt) {
       pl.x += ux * s; pl.y += uy * s;
       const [c, r] = cellAt(pl.x, pl.y);
       if (!inGrid(c, r) || isWall(c, r)) { pl.done = true; pearlBurst(pl.x, pl.y, pl.z); break; }
+      if (typeof bigPearlCatch === 'function' && bigPearlCatch(pl)) { pl.done = true; pearlBurst(pl.x, pl.y, pl.z); break; }   // 打到珍珠大童的大珍珠：被擋下來（js/pearl-elder.js）
       const blocker = enemyBarrierAt(c, r);
       if (blocker) {
         pl.done = true; pearlBurst(pl.x, pl.y, pl.z);
@@ -215,7 +217,7 @@ function updatePearls(dt) {
 // ---- 繪圖 ----
 // 選圖：閉殼時用閉起來的貝殼；生氣用紅眼圖；每隔幾秒眨一次眼（半閉→閉→半閉）
 function shooterFrame(e) {
-  const art = e.art || {}, angry = pearlAngry();
+  const art = e.art || {}, angry = pearlAngry() || !!(e.pearlBoss && e.eliteAwake);   // 珍珠大童：BOSS 戰中用生氣的圖
   if (e.pk && e.pk.shellT > 0 && art.shell) return art.shell;
   const now = performance.now() / 1000;
   if (e.blinkAt == null) e.blinkAt = now + 1 + Math.random() * 3;
