@@ -24,11 +24,23 @@
     'tudrc_story_builds_v1',   // 劇情地圖裡蓋的建築（js/combat-progress.js）
     'tudrc_tutorial_v1',   // 新手區教學：要不要看、看過哪些提示（js/tutorial.js）
     'tudrc_story_triggers_v1',   // 走進地圖時播過的劇情（js/story-triggers.js）
+    'tudrc_squad_gear_v1',   // 隊員身上穿的裝備（js/squad-gear.js）：要跟背包一起重設／還原，不然測試模式穿上的裝備會留在正式存檔
+    'tudrc_tunnels_found_v1',   // 球球找到的隱藏地道（js/rescue-dog.js）
+    'tudrc_seen_items_v1',   // 看過說明的物品（js/item-intro.js）
+    'tudrc_target_best_v1',   // 射擊練習最佳紀錄（js/target-practice.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
   let resumeScene = null;
   window.TEST_MODE = false;
+  // 把備份（測試前、開新遊戲前、存檔欄位）寫回去；備份裡沒有記錄的鍵（清單後來才加的）不動，免得舊備份把現在的資料刪掉
+  function restoreProgress(values) {
+    progressKeys.forEach(key => {
+      if (!(key in values)) return;
+      const value = values[key];
+      if (typeof value === 'string') localStorage.setItem(key, value); else localStorage.removeItem(key);
+    });
+  }
   if (window.STORY_PREVIEW) return;   // 回憶預覽不處理待執行的新遊戲／讀檔／測試要求。
   try {
     const request = sessionStorage.getItem(REQUEST);
@@ -36,10 +48,7 @@
     if ((testActive && request !== 'test') || (!testActive && localStorage.getItem('tudrc-test-active-v1'))) {
       const normal = JSON.parse(localStorage.getItem('tudrc-before-test-v1') || 'null');
       if (!normal?.values) throw new Error('找不到測試前的進度備份');
-      progressKeys.forEach(key => {
-        const value = normal.values[key];
-        if (typeof value === 'string') localStorage.setItem(key, value); else localStorage.removeItem(key);
-      });
+      restoreProgress(normal.values);
       sessionStorage.removeItem('tudrc-test-mode-v1');
       localStorage.removeItem('tudrc-test-active-v1');
     }
@@ -73,11 +82,7 @@
         const isSlot = request.startsWith('slot:');
         const backup = JSON.parse(localStorage.getItem(isSlot ? 'tudrc-save-slot-v1-' + request.split(':')[1] : BACKUP) || 'null');
         if (!backup?.values) throw new Error('沒有可還原的存檔');
-        progressKeys.forEach(key => {
-          const value = backup.values[key];
-          if (typeof value === 'string') localStorage.setItem(key, value);
-          else localStorage.removeItem(key);
-        });
+        restoreProgress(backup.values);
         if (isSlot) { resumeScene = backup.scene; startedFresh = true; }
       }
     }
