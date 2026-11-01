@@ -846,6 +846,7 @@ function seatApproachPoint(seat) {
 const NPC_NO_SEAT = ['ball'];   // 不會去坐椅子、躺床的角色（球球是狗）
 function trySeatActor(a) {
   if (NPC_NO_SEAT.includes(a.kind === 'tower' ? a.type : a.id)) return false;
+  if (MAP_SAFE && typeof tryStartMeal === 'function' && tryStartMeal(a)) return true;   // 餐廳：有機率先去吃飯（js/meal.js）
   if (!MAP_SAFE || a.seatCd > 0 || Math.random() >= NPC_SEAT.chance || typeof mapSeats !== 'function') return false;
   let best = null, bestD = NPC_SEAT.radius * CELL;
   const home = (a.kind === 'tower' ? a.mode === 'free' : true) ? homeAreaOf(a.kind === 'tower' ? a.type : a.id) : null;
@@ -868,6 +869,7 @@ function npcStandUp(a) {
 }
 // 每幀先跑這裡：坐著／正走向椅子時回傳 true（這幀不跑一般閒逛）
 function npcSeatStep(a, dt, speed) {
+  if (typeof mealStep === 'function' && mealStep(a, dt, speed)) return true;   // 正在吃飯的流程（js/meal.js）
   if (a.seatCd > 0) a.seatCd -= dt;
   if (a.sitting) {
     if (!MAP_SAFE) { npcStandUp(a); return false; }

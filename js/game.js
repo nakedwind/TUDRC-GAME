@@ -557,6 +557,7 @@ window.addEventListener('keydown', e => {
     // 隊員的疏導改成 C、急救是 F（js/equipment.js、js/shop.js），空白鍵不會再撿東西撿到一半變成疏導
     if (typeof pickShardsNearPlayer === 'function' && pickShardsNearPlayer()) {}   // 撿起地上的異質碎片（js/ore.js）
     else if (typeof pickupPropNearPlayer === 'function' && pickupPropNearPlayer() && useStoragePropNearPlayer(isPickupProp)) {}   // 拾取地上的道具（js/storage-lockers.js）
+    else if (typeof useMealNearPlayer === 'function' && useMealNearPlayer()) {}   // 餐廳：拿餐盤、裝菜、坐下用餐、吃、回收（js/meal.js）
     else if (elevator) {
       if (elevator.mode === 'closed') {
         startElevatorOpen(elevator.stamp);
@@ -2498,6 +2499,7 @@ function update(dt) {
   if (typeof updateGourd === 'function') updateGourd(dt);   // 葫蘆猴拖行的刮痕、砸出來的地裂（js/gourd-monkey.js）
   if (typeof updateMoths === 'function') updateMoths(dt);   // 人面蝶的鱗粉霧、吸入、中毒／混亂／睡眠、粉塵爆炸（js/human-face-butterfly.js）
   if (typeof updateCooking === 'function') updateCooking(dt);   // 爐灶上正在煮的東西（js/cooking.js）
+  if (typeof updateMeal === 'function') updateMeal(dt);   // 餐廳：桌上的餐盤吃掉的進度（js/meal.js）
   if (typeof updateFood === 'function') updateFood(dt);   // 地上的食物在火裡烤熟、吃到的 buff 倒數（js/food.js）
   if (typeof updateBananaKing === 'function') updateBananaKing(dt);   // 金蕉王的測試生成（js/golden-banana-king.js）   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）

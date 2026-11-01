@@ -8947,6 +8947,14 @@ const BASE_MAPS = [
         "c": 1,
         "r": 9,
         "layer": "object"
+      },
+      {
+        "id": "tile_mvyf045t",
+        "c": 4,
+        "r": 10,
+        "layer": "object",
+        "ox": 20,
+        "oy": 30
       }
     ],
     "solid": [

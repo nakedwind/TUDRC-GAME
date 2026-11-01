@@ -1053,6 +1053,7 @@ function draw() {
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (typeof drawGroundItem === 'function') for (const g of G.groundItems || []) sortables.push({ y: g.y + GROUND_ITEMS.sortDy, draw: () => drawGroundItem(ctx, g) });   // 溫特從背包放在地上的東西（js/ground-items.js）
+  if (typeof mealSortables === 'function') mealSortables(sortables);   // 餐廳：桌上的餐盤、拿在手上的餐盤（js/meal.js）
   if (G.player) sortables.push({ y: G.player.sitting ? seatDrawY(G.player.sitting) : G.player.y + 16, draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
@@ -1142,6 +1143,7 @@ function draw() {
     else if (typeof missionTableUsable === 'function' && missionTableUsable()) { const t = missionTableUsable(); drawInteractPrompt(t.x, t.top, t.label || '作戰桌'); }   // 作戰桌／作戰螢幕（js/missions.js）
     else if (typeof vendingNearPlayer === 'function' && vendingNearPlayer()) { const v = vendingNearPlayer(); drawInteractPrompt(v.x, v.top, '販賣機'); }   // 販賣機（js/shop.js）
     else if (typeof drinkShopNearPlayer === 'function' && drinkShopNearPlayer()) { const s = drinkShopNearPlayer(); drawInteractPrompt(s.x, s.top, '飲料店'); }   // 飲料店（js/shop.js）
+    else if (typeof mealPrompt === 'function' && mealPrompt()) { const m = mealPrompt(); drawInteractPrompt(m.x, m.y, m.label); }   // 餐廳：拿餐盤、裝菜、坐下用餐、回收（js/meal.js）
     else if (typeof backroomShopNearPlayer === 'function' && backroomShopNearPlayer()) { const s = backroomShopNearPlayer(); drawInteractPrompt(s.x, s.top, '後室商店'); }   // 後室商店（js/shop.js）
     else if (typeof shopCounterNearPlayer === 'function' && shopCounterNearPlayer()) { const v = shopCounterNearPlayer(); drawInteractPrompt(v.x, v.top, MAP_SAFE ? '商店' : '後室商店'); }   // HOME Mart 結帳櫃台
     else {
@@ -1155,6 +1157,7 @@ function draw() {
       else { const seat = seatNearPlayer(); if (seat) drawSitPrompt(seat); }
     }
   }
+  if (G.player && G.player.sitting && !G.over && !dialogueState && typeof mealPrompt === 'function') { const m = mealPrompt(); if (m) drawInteractPrompt(m.x, m.y, m.label); }   // 坐著：「開動！」（js/meal.js）
   };
   // 特效
   drawWorldEffects();
@@ -1201,7 +1204,8 @@ function draw() {
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
-  if (typeof drawCooking === 'function') drawCooking(ctx);   // 爐灶：爐火、鍋上的食物、蒸氣、進度圈（js/cooking.js）
+  if (typeof drawCooking === 'function') drawCooking(ctx);
+  if (typeof drawMealFx === 'function') drawMealFx(ctx);   // 餐廳：正在吃的餐盤冒熱氣（js/meal.js）   // 爐灶：爐火、鍋上的食物、蒸氣、進度圈（js/cooking.js）
   if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
   // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
   drawInteractionPrompts();   // 互動提示（開門、對話、拾取…）：黑幕之上，暗處也看得到

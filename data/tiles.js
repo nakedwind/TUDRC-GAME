@@ -4801,5 +4801,13 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_wall_coner_01.png",
     "w": 3,
     "h": 5
+  },
+  {
+    "id": "tile_mvyf045t",
+    "name": "Return Area",
+    "role": "floor",
+    "file": "images/餐廳/Return Area.png",
+    "w": 2,
+    "h": 1
   }
 ];
