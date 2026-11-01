@@ -1248,6 +1248,7 @@ function newGame() {
   setupDoors();        // 門一開始都關著（js/doors.js）
   if (typeof setupMrtLocks === 'function') setupMrtLocks();   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
+  if (typeof setupStreetVehicles === 'function') setupStreetVehicles();   // K56 路邊會暴衝的機車、腳踏車（js/street-vehicles.js）
   if (typeof restoreStoryBuilds === 'function') restoreStoryBuilds();   // 劇情地圖：上次蓋的建築擺回去（js/combat-progress.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
@@ -2475,6 +2476,7 @@ function update(dt) {
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updatePearlElder === 'function') updatePearlElder(dt);   // 珍珠大童降下的珍珠、場上的大珍珠（js/pearl-elder.js）
+  if (typeof updateStreetVehicles === 'function') updateStreetVehicles(dt);   // K56 路邊會暴衝的機車、腳踏車（js/street-vehicles.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）

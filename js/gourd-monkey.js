@@ -389,7 +389,7 @@ function updateGourdBodies() {
 // ---- 被震飛：拋物線飛起來 → 落地揚塵 → 再小彈一下（只影響畫面位置；水平移動是 knockActor 的滑行）----
 // gourdToss 可以自帶 dur（飛幾秒）、bounce（落地小彈幾秒）、spin（往後仰幾度）；沒寫就用葫蘆猴的（花蓮老鼠戳飛也用這套）
 function updateGourdTosses(dt) {
-  const C = GOURD, list = [G.player, ...G.towers];
+  const C = GOURD, list = [G.player, ...G.towers, ...G.enemies];   // 怪物被 K56 的車撞飛也用這套（js/street-vehicles.js）
   for (const a of list) {
     const s = a && a.gourdToss;
     if (!s) continue;
