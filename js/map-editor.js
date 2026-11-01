@@ -927,11 +927,18 @@ function drawStamp(s) {
   const alpha = Number.isFinite(s.alpha) && s.alpha < 100 ? Math.max(0, s.alpha) / 100 : 1;
   if (!s.blend && alpha === 1) drawStampRaw(s);
   else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
+  if (s.still) drawStillBadge(s);
   if (s.glow) {   // 發光：畫一圈淡淡的虛線，標出照亮的範圍（只在編輯器裡看得到）
     const t = tileById(s.id) || {}, cx = OX + s.c * CELL + (s.ox || 0) + stampW(s, t) * CELL / 2, cy = OY + s.r * CELL + (s.oy || 0) + stampH(s, t) * CELL / 2;
     ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = 'rgba(255,214,102,.55)'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(cx, cy, s.glowR > 0 ? s.glowR : 160, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
   }
+}
+// 關掉會動的機車、手扶梯：左上角標「不動」（只在編輯器裡看得到）
+function drawStillBadge(s) {
+  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  ctx.save(); ctx.fillStyle = 'rgba(190,40,50,.9)'; ctx.fillRect(x, y, 30, 15);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('不動', x + 4, y + 8); ctx.restore();
 }
 function drawStampRaw(s) {
   const t = tileById(s.id); if (!t) return;
@@ -2293,6 +2300,37 @@ function selectedBlendTarget() {   // 只選一個物件時：{ s（大圖）或
   const s = sel.type === 'stamp' ? m.stamps[sel.index] : null, id = s ? s.id : m.layers[sel.layer]?.[sel.key];
   return id ? { sel, s, id } : null;
 }
+// ---- 會不會動的開關：K56 的機車／腳踏車（js/street-vehicles.js）、手扶梯（js/escalators.js）。關掉＝stamp.still，就只是一張圖 ----
+// 可以一次選好幾台一起切換；選到其他物件不受影響
+const STILL_VEHICLE_IDS = new Set(['tile_street_scooter_delivery_green', 'tile_street_scooter_delivery_pink', 'tile_street_ubike']);
+const STILL_VEHICLE_MAP = 'map_mvvdbiyx';   // 車子只有 K56 區-地下街會動（STREET_VEHICLES.maps），其他地圖不顯示開關
+const isStillEscalator = id => /^tile_mrt_escalator_front/.test(id);
+function selectedStillTargets() {
+  const m = curMap();
+  return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index])
+    .filter(s => s && (isStillEscalator(s.id) || (m.id === STILL_VEHICLE_MAP && STILL_VEHICLE_IDS.has(s.id))));
+}
+function refreshStillControl() {
+  let box = document.getElementById('stillControl');
+  if (!box) {
+    box = document.createElement('div'); box.id = 'stillControl'; box.className = 'blend-control';
+    box.innerHTML = '<label><input type="checkbox" id="stillToggle"> <span id="stillToggleText"></span></label>';
+    document.getElementById('selControls').appendChild(box);
+    document.getElementById('stillToggle').addEventListener('change', e => {
+      if (dropLockedSelections('切換會不會動')) return;
+      const list = selectedStillTargets(); if (!list.length) return;
+      pushUndo();
+      for (const s of list) { if (e.target.checked) delete s.still; else s.still = true; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus(list.length + ' 個物件已設為' + (e.target.checked ? '會動' : '不會動'), '#7ee0c0');
+    });
+  }
+  const list = selectedStillTargets(); box.classList.toggle('hidden', !list.length);
+  if (!list.length) return;
+  const toggle = document.getElementById('stillToggle'), off = list.filter(s => s.still).length;
+  toggle.checked = off === 0; toggle.indeterminate = off > 0 && off < list.length;
+  document.getElementById('stillToggleText').textContent = list.every(s => isStillEscalator(s.id)) ? '手扶梯會動' : list.some(s => isStillEscalator(s.id)) ? '會動' : '會暴衝撞人';
+}
 function refreshBlendControl() {
   let box = document.getElementById('blendControl');
   if (!box) {
@@ -2512,6 +2550,7 @@ function refreshSelPanel() {
   refreshCircuitControl();
   refreshLockTextControl();
   refreshBlendControl();   // 混合模式、不透明度、發光
+  refreshStillControl();   // 機車、手扶梯會不會動
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;
