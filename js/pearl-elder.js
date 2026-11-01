@@ -3,13 +3,17 @@
    - 觸發：溫特走到 wakeRange 格內（看得到）、或打中牠 → BOSS 戰開始（畫面上方 BOSS 血條＋中BOSS 音樂）。
    - 張殼：飄在空中、保持距離，蓄力後扇形散射珍珠。這時候是弱點。
    - 閉殼：張殼時被打中 → 蓋起來掉到地上，受到的傷害 × shell.defense（很硬），從天上降下大小珍珠：
-           地上先出現陰影圈，砸下來有傷害。小珍珠砸完就碎；大珍珠留在場上當掩體。時間到就張開，張開後 grace 秒內被打不會再閉殼（輸出時間）。
+           地上先出現陰影圈，砸下來有傷害。小珍珠砸完就碎；大珍珠留在場上當掩體。只有被爆炸炸到（pearlBossBlast）或被大珍珠撞到才會提早打開，不然要等 shell.time 秒；閉殼期間一直降珍珠。張開後 grace 秒內被打不會再閉殼（輸出時間）。
+   - 閉殼滾動：閉殼中每隔 roll.every 秒，蓄力（地上畫出路線）後整顆殼朝目標滾過去：撞飛溫特和隊員、建築直接撞爛、大珍珠撞碎；
+           撞到牆會反彈 roll.bounces 次，反彈完再撞到牆才停下來，殼被撞開、頭暈 roll.wallStun 秒。
+   - 身體碰撞：PEARL_ELDER.body 的橢圓碰到牆就停、被推也會被擠出來，不會看起來穿牆。
+   - 小滾珠：小珍珠砸下來會散出更小的滾珠，踩到會滑倒、滑行中撞到東西會頭暈（金蕉王香蕉皮那一套）。
    - 大珍珠：擋住雙方的子彈和射線（視線）、擋路。溫特走過去頂著就能推；用手槍打會推得更快。
            滾得夠快（big.ramSpeed 以上）撞到大童 → 大傷害、強制打開貝殼、暈眩（暈眩中受到的傷害變多），大珍珠碎掉；
            滾得慢只會把大童推開，沒有傷害。落地時畫面震動、地上砸出裂痕、噴石礫和煙霧（跟葫蘆猴落地同一套特效）。
            被珍珠（大童的散射）打太多下也會碎；場上最多 big.max 顆，超過就碎掉最舊的那顆。
    - 核心：牠活著時核心打不到；打在牠身上的傷害，核心跟著吃 coreShare（1 成），但核心不會在牠身上破掉（最少留 1 滴血）。
-           核心血量改成 coreHp（再乘地圖難度）。
+           核心血量改成 coreHp（再乘地圖難度）。BOSS 戰一開始核心就跟著甦醒（異質體狂暴化），但一樣打不到、炸不到。
            牠死掉後核心掉在原地，這時候才能把核心打爆（第一槍照樣會叫醒核心）。
    出現在哪張地圖、生在哪一格：PEARL_ELDER.maps（地圖 id → 欄、列）；牠自己帶一顆核心，地圖上原本的核心照樣留著（全部打破才過關）。
    數值都在下面的 PEARL_ELDER。必須在 pearl-kid.js、anomalous-core.js 之後、game.js 之前載入。
@@ -17,40 +21,61 @@
 const PEARL_ELDER = {
   name: '珍珠大童',
   maps: { map_mvvdbiyx: { c: 91, r: 32 } },   // 出現在哪幾張地圖、生在哪一格（K56區-地下街：右邊有斑馬線、電梯的大房間，斑馬線上方的中間；地圖改成 106×96 之後的座標）
-  hpMul: 25, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hpMul 25 → 血量 2000（再乘整體難度）
+  hp: 3500, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hp：血量（再乘整體難度）
   scale: 2.6,                    // 體型放大倍率
   speedMul: 1.2,                 // 飄的速度倍率（以珍珠小童為基準）
   hover: 26,                     // 張殼時飄多高（像素）
   wakeRange: 6,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
-  loseRange: 16, loseTime: 8,    // 目標離開幾格、超過幾秒沒有目標 → 放棄，回去閒晃
-  leash: 12,                     // 離原位超過幾格就飄回去
+  loseRange: 20, loseTime: 8,    // 目標離開幾格、超過幾秒沒有目標 → 放棄，回去閒晃
+  leash: 14,                     // 追人最遠追到離原位幾格：到了就停在那裡（射得到照樣射），不再往外追
+  returnAt: 18, returnTo: 10, returnMax: 6,   // 被推（或撞）到離原位幾格以外 → 飄回去；回到幾格內、或飄了幾秒就恢復戰鬥（不用回到原位，免得被大珍珠擋住卡住）
   wanderRadius: 4, wanderSpeedMul: .6, idle: [1.5, 3.5],   // 閒晃：繞著原位幾格內、速度倍率、每次發呆幾秒
   keepDistance: 4,               // 目標太近（格）：往後飄
+  body: { x: .4, y: .16 },       // 身體在地上佔的橢圓（左右、上下半徑，是圖寬的幾倍）：碰到牆就停、被推也不會擠進牆裡
   coreShare: .1,                 // 打在大童身上的傷害，核心跟著吃幾成
   coreHp: 1000,                  // 牠抱著的核心血量（地圖難度 1；難度越高照比例加）
   coreArt: { x: .40, y: .70, len: .5, angle: -73 },   // 核心圖疊在牠身上的位置：中心（圖寬、圖高的比例）、長度（圖寬的比例）、旋轉角度（度）
-  scatter: { count: 7, spread: 70, speed: 220, range: 9, windup: .8, cooldown: 2.4 },   // 散射：顆數、扇形角度、速度、射程（格）、蓄力、冷卻（秒）
-  shell: { time: 14, defense: .1, grace: 4 },          // 閉殼幾秒、閉殼時受到的傷害倍率、張開後幾秒內被打不會再閉殼
+  scatter: { count: 7, spread: 70, speed: 220, range: 18, windup: .8, cooldown: 2.4 },   // 散射：顆數、扇形角度、速度、射程（格）、蓄力、冷卻（秒）
+  shell: { time: 30, defense: .1, grace: 4 },          // 閉殼幾秒（只有被爆炸炸到、被大珍珠撞到才會提早打開）、閉殼時受到的傷害倍率、張開後幾秒內被打不會再閉殼
   stun: { time: 2.5, dmgMul: 1.3 },                   // 被大珍珠撞到：暈幾秒、暈眩中受到的傷害倍率
   rain: {                        // 閉殼時從天上降下的珍珠
-    smallEvery: .45, bigEvery: 2.2,   // 每隔幾秒降一顆小的、一顆大的
+    smallEvery: .35, bigEvery: 2.2,   // 每隔幾秒降一顆小的、一顆大的
     warn: 2.2, fall: .7,         // 陰影圈出現幾秒後砸下來；最後幾秒看得到珍珠掉下來
     smallR: 24, bigR: 38,        // 砸中的範圍（像素）
     smallDmg: 12, bigDmg: 25,    // 砸中溫特的傷害（隊員一樣，再扣防禦）
-    nearTarget: 2,               // 小珍珠落在目標身邊幾格內
-    bigMin: 3, bigMax: 6,        // 大珍珠落在大童身邊幾格～幾格（太近一落地就貼著大童）
-    towerChance: .3,             // 小珍珠有幾成機率瞄準隊員（不是溫特）
+    smallMin: 1, smallMax: 15,   // 小珍珠隨機落在大童身邊幾格～幾格（不瞄準我方，整個房間到處掉）
+    bigMin: 3, bigMax: 10,        // 大珍珠落在大童身邊幾格～幾格（太近一落地就貼著大童）
   },
   big: {                         // 留在場上的大珍珠
-    r: 34, max: 5, hp: 8,        // 半徑（像素）、最多幾顆、被珍珠打幾下會碎
+    r: 34, max: 10, hp: 8,        // 半徑（像素）、最多幾顆、被珍珠打幾下會碎
     pushSpeed: 110,              // 溫特頂著推的速度（像素／秒）
     shotPush: 150, maxSpeed: 380,// 手槍打一下加多少速度、最快多快
+    knockSpeed: 650,             // 擊退彈打中：直接彈出去的速度（一發就撞得痛大童，滾得比手槍推的遠）
     friction: 1.4, bounce: .45,  // 滾動減速（越大停越快）、撞牆反彈保留幾成速度
     hitSpeed: 40,                // 滾多快以上撞到其他怪物才有傷害
     ramSpeed: 140,               // 滾多快以上撞到大童才有傷害、撞開貝殼（溫特走路推是 pushSpeed，撞不痛；要開槍打）
     nudge: .8,                   // 滾得慢碰到大童：把牠推開（珍珠每走 1 像素，大童被推幾像素）
     bossDmg: .08,                // 撞到大童：最快速度時扣牠最大血量的幾成（最慢一半）
     monsterDmg: 60,              // 撞到其他怪物的傷害（最快速度時）
+  },
+  roll: {                        // 閉殼時整顆殼滾過去撞人（撞到建築直接撞爛、撞到大珍珠撞碎）
+    first: 2, every: 5,          // 閉殼後幾秒第一次滾、之後每隔幾秒滾一次
+    range: 18,                   // 目標在幾格內才滾（整個大房間）
+    windup: .9,                  // 蓄力幾秒（地上畫出滾動路線）
+    speed: 300, len: 18,          // 滾多快（像素／秒）、最遠滾幾格
+    hitR: 46,                    // 離殼中心幾像素算撞到
+    dmg: 22,                     // 撞到溫特的傷害（隊員一樣，再扣防禦）
+    knock: 1.6, knockTime: .3,   // 撞飛幾格、幾秒
+    bounces: [2, 3],             // 撞到牆反彈幾次（隨機挑一個），反彈完再撞到牆才停
+    bounceLen: 1,                // 每次反彈後再滾多遠（len 的幾倍）
+    wallStun: 1.5,               // 反彈完撞到牆：殼被撞開、暈幾秒（0＝不暈，停下來繼續閉著）
+  },
+  beads: {                       // 小珍珠砸下來散在地上的小滾珠：踩到會滑倒，滑行中撞到東西會頭暈（跟金蕉王的香蕉皮同一套，js/golden-banana-king.js）
+    chance: .6, per: 2,          // 小珍珠砸下來有幾成機率散出滾珠、一次幾顆
+    spread: 18, r: 4,            // 散多開（像素）、滾珠大小（半徑，比落下的小珍珠還小）
+    life: 14, max: 24,           // 留幾秒、場上最多幾顆
+    trigger: 14,                 // 離滾珠幾像素算踩到
+    safe: 2,                     // 滑倒（含頭暈）結束後幾秒內不會再被滾珠滑倒（避免被卡在牆邊連續滑倒）
   },
   land: { shakeMax: 10, shakeMin: 3, shakeRange: 12 },   // 大珍珠落地的畫面震動：就在旁邊、shakeRange 格外圍的強度（上限 16）
 };
@@ -61,7 +86,7 @@ const peDist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
 
 // ---- 開場：生在地圖指定的格子，抱著地圖上的核心（game.js 在 seedCores 之後呼叫）----
 function seedPearlElder() {
-  G.bigPearls = []; G.pearlFalls = [];
+  G.bigPearls = []; G.pearlFalls = []; G.pearlBeads = [];
   const spot = pearlElderSpot();
   if (!spot || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'pearl_kid');
@@ -74,7 +99,7 @@ function seedPearlElder() {
   G.cores.push(core);
   const P = PEARL_ELDER, S = P.scatter, e = createMonster(base, x, y);
   e.pearlBoss = true; e.eliteName = P.name;
-  e.hp = e.maxhp = Math.round(e.maxhp * P.hpMul);
+  e.hp = e.maxhp = Math.round(e.maxhp / base.hp * P.hp);   // createMonster 給的是珍珠小童血量 × 整體難度：換成大童的血量，難度照樣乘
   e.playerDamage = Math.round(e.playerDamage * P.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * P.dmgMul);
   e.buildingDamage = Math.round(e.buildingDamage * P.dmgMul);
@@ -87,6 +112,7 @@ function seedPearlElder() {
   e.home = { x, y };
   e.carryCore = core; core.carried = true; core.x = x; core.y = y;
   core.hp = core.maxhp = core.lastHp = Math.round(P.coreHp * core.maxhp / CORE.hp);   // 照地圖難度的比例（seedCores 給的是 CORE.hp × 難度）   // carried：核心打不到、阿瓦倫靠近也不會醒（js/game.js、js/anomalous-core.js）
+  e.deathSound = 'pearlElderDeath';   // 珍珠小童的死亡聲，放大、加回音（js/sfx.js 的 SOUND_ECHO）
   e.pk = { state: 'idle', t: 0, cd: 1, windup: 0, shellT: 0, bob: 0, wait: 1, grace: 0, lostT: 0, vz: 0 };
   e.slimeLift = P.hover;
   if (typeof GOURD !== 'undefined') monsterImage(GOURD.crackImage);   // 先載好地裂圖，第一顆大珍珠落地才不會沒有裂痕
@@ -95,7 +121,7 @@ function seedPearlElder() {
 
 function pearlBossSet(e, state, t = 0) {
   const pk = e.pk;
-  pk.state = state; pk.t = t; pk.windup = 0;
+  pk.state = state; pk.t = t; pk.windup = 0; pk.roll = null;
   pk.shellT = state === 'shell' ? 999 : 0;   // shellT > 0：畫閉起來的貝殼（js/pearl-kid.js 的 shooterFrame）
   if (state === 'shell' || state === 'stunned') { pk.vz = 0; pk.landed = false; }
   resetEnemyNavigation(e);
@@ -106,7 +132,9 @@ function pearlBossWake(e) {
   e.eliteAwake = true;
   pearlBossSet(e, 'wake', 1);
   e.alertT = ENEMY_ALERT_TIME; e.pk.cd = 1.2;
-  if (typeof coreBanner === 'function') coreBanner(PEARL_ELDER.name + '發現你了', '打中牠會閉殼降下珍珠：躲到大珍珠後面，把大珍珠推去撞牠！', '#f4d9ff');
+  const core = e.carryCore;   // 牠抱著的核心跟著甦醒：異質體狂暴化、核心音樂（還是打不到：carried 的核心不會被選成目標、扣的血會補回來，見 js/anomalous-core.js）
+  if (core && !core.dead && !core.awake) { wakeCore(core); core.lastHp = core.hp; pearlBossCorePool(core, false); }
+  if (typeof coreBanner === 'function') coreBanner(PEARL_ELDER.name + '發現你了', '', '#f4d9ff');   // 不寫提示：怎麼打讓玩家自己探索
   systemNotice(PEARL_ELDER.name + '發現你了！', true);
   const top = e.y - e.slimeLift - e.drawHeight * .6;
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: top, r: 8 + i * 6, r2: 100 + i * 36, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#f1dcff' : '#ffffff' });
@@ -116,7 +144,7 @@ function pearlBossWake(e) {
 // ---- 閉殼：掉到地上、開始降珍珠 ----
 function pearlBossClose(e) {
   pearlBossSet(e, 'shell', PEARL_ELDER.shell.time);
-  e.pk.rainSmall = .3; e.pk.rainBig = .7;
+  e.pk.rainSmall = .3; e.pk.rainBig = .7; e.pk.rollCd = PEARL_ELDER.roll.first;
   G.effects.push({ ring: true, x: e.x, y: e.y - e.slimeLift - e.drawHeight * .4, r: 6, r2: 60, life: .25, life0: .25, color: '#f4eef8' });
   flash('閉殼！', e.x, e.y - e.slimeLift - e.drawHeight - 6, '#f4e6ff');
   if (typeof sfxAt === 'function') sfxAt('knock2', e.x, e.y, .9, 'pearl-elder-close');
@@ -135,6 +163,26 @@ function pearlBossRammed(e, bp, speed) {
   if (typeof sfxAt === 'function') { sfxAt('knock2', e.x, e.y, 1.3, 'pearl-elder-ram'); sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-ram2'); }
   shatterBigPearl(bp);
 }
+// ---- 被爆炸炸到：閉著的貝殼被炸開（油桶、地雷、自爆史萊姆、希奧妮大招…呼叫 blastWalls 的地方一起呼叫）----
+// 爆炸的傷害在這之前已經扣了；這一幀結算時貝殼已經打開，所以不套閉殼減傷
+function pearlBossBlast(x, y, R) {
+  for (const e of pearlBosses()) {
+    if (!e.pk || e.pk.state !== 'shell' || Math.hypot(e.x - x, e.y - y) > R + e.drawWidth * .3) continue;
+    pearlBossSet(e, 'open'); e.pk.grace = PEARL_ELDER.shell.grace; e.pk.cd = Math.min(e.pk.cd, .6);
+    flash('炸開貝殼！', e.x, e.y - e.drawHeight - 10, '#fff2b0');
+    if (typeof sfxAt === 'function') sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-blast');
+  }
+}
+// 核心腳下的腐蝕痕跡：抱在身上時收掉（不然會留在甦醒的地方），掉到地上時在落點重新鋪上（js/anomalous-core.js 的 wakeCore 做的那一攤）
+function pearlBossCorePool(core, on) {
+  if (!core.pool) return;
+  G.acidPools = (G.acidPools || []).filter(p => p !== core.pool);
+  if (core.scorch) { G.scorchMarks = (G.scorchMarks || []).filter(s => s !== core.scorch); core.scorch = null; }
+  if (!on) return;
+  core.pool.x = core.x; core.pool.y = core.y + 8; core.pool.t = 999;
+  G.acidPools.push(core.pool);
+  keepCoreScorch(core);
+}
 // 打在大童身上的傷害，核心跟著吃 coreShare；核心在牠身上時不會破掉（最少 1 滴血）
 function pearlBossCoreShare(e, lost) {
   const core = e.carryCore;
@@ -151,8 +199,6 @@ function pearlBossArmor(e) {
   const P = PEARL_ELDER, pk = e.pk;
   if (pk.state === 'shell') {
     lost *= P.shell.defense;
-    const now = performance.now();
-    if (now > (e.hardNoteAt || 0)) { e.hardNoteAt = now + 1500; flash('好硬！', e.x, e.y - e.drawHeight * .5, '#d8d0e4'); }   // 偶爾提示：閉殼時打不太動
   } else if (pk.state === 'stunned') lost *= P.stun.dmgMul;
   e.hp = e.peHp - lost;
   pearlBossCoreShare(e, lost);
@@ -186,7 +232,7 @@ function pearlBossWander(e, dt) {
   for (let i = 0; i < 8; i++) {
     const a = Math.random() * Math.PI * 2, d = (.5 + Math.random() * (P.wanderRadius - .5)) * CELL;
     const x = e.home.x + Math.cos(a) * d, y = e.home.y + Math.sin(a) * d;
-    if (!enemyBlocked(x, y) && hasLineOfSight(e.x, e.y, x, y)) { pk.spot = { x, y }; return; }
+    if (!enemyBlocked(x, y) && !pearlBossBodyHits(e, x, y) && hasLineOfSight(e.x, e.y, x, y)) { pk.spot = { x, y }; return; }
   }
 }
 function pearlBossGoHome(e, dt) {
@@ -197,7 +243,34 @@ function pearlBossGoHome(e, dt) {
 }
 
 // ---- 每幀（enemy-ai.js 的 stepEnemy 呼叫）----
+// ---- 身體碰撞：大童很寬，只看腳底一點會看起來穿牆；用地上的橢圓檢查牆 ----
+// 回傳碰到牆的那些方向加總（指向牆），沒碰到回傳 null
+function pearlBossBodyHits(e, x, y) {
+  const B = PEARL_ELDER.body, rx = e.drawWidth * B.x, ry = e.drawWidth * B.y;
+  let hx = 0, hy = 0, n = 0;
+  for (let i = 0; i < 16; i++) {
+    const a = i * Math.PI / 8, px = x + Math.cos(a) * rx, py = y + Math.sin(a) * ry, [c, r] = cellAt(px, py);
+    if (!inGrid(c, r) || isWall(c, r) || solidBlocksPoint(px, py)) { hx += Math.cos(a); hy += Math.sin(a); n++; }
+  }
+  return n ? { x: hx, y: hy, n } : null;
+}
+// 身體擠進牆裡（被推、被撞、飄過去）：往牆的反方向推出來
+function pearlBossKeepOut(e) {
+  for (let k = 0; k < 24; k++) {
+    const h = pearlBossBodyHits(e, e.x, e.y);
+    if (!h) return;
+    const d = Math.hypot(h.x, h.y);
+    if (d < .01) return;   // 兩邊都碰到（太窄）：不硬推
+    const nx = e.x - h.x / d * 3, ny = e.y - h.y / d * 3, [c, r] = cellAt(nx, ny);
+    if (!inGrid(c, r) || isWall(c, r)) return;
+    e.x = nx; e.y = ny;
+  }
+}
 function stepPearlBoss(e, dt) {
+  stepPearlBossState(e, dt);
+  if (!e.dead) pearlBossKeepOut(e);
+}
+function stepPearlBossState(e, dt) {
   const P = PEARL_ELDER, pk = e.pk;
   pk.bob += dt; pk.t -= dt;
   if (pk.grace > 0) pk.grace -= dt;
@@ -226,10 +299,11 @@ function stepPearlBoss(e, dt) {
       return;
     }
     case 'wake': if (pk.t <= 0) pearlBossSet(e, 'open'); return;
-    case 'shell': pearlBossRain(e, dt); if (pk.t <= 0) { pearlBossSet(e, 'open'); pk.grace = P.shell.grace; pk.cd = Math.min(pk.cd, .6); } return;
+    case 'shell': pearlBossRain(e, dt); pearlBossRoll(e, dt); if (pk.state !== 'shell') return; if (pk.t <= 0) { pearlBossSet(e, 'open'); pk.grace = P.shell.grace; pk.cd = Math.min(pk.cd, .6); } return;
     case 'stunned': if (pk.t <= 0) { pearlBossSet(e, 'open'); pk.grace = P.shell.grace * .5; } return;
     case 'return':
-      if (pearlBossGoHome(e, dt * 1.3)) pearlBossSet(e, 'open');
+      pearlBossGoHome(e, dt * 1.3);
+      if (pk.t <= 0 || peDist(e, e.home) <= P.returnTo * CELL) pearlBossSet(e, 'open');
       return;
     case 'open': pearlBossOpen(e, dt); return;
     default: pearlBossSet(e, 'open');
@@ -257,13 +331,15 @@ function pearlBossOpen(e, dt) {
     return;
   }
   pk.lostT = 0;
-  if (peDist(e, e.home) > P.leash * CELL) { pearlBossSet(e, 'return'); return; }
+  const fromHome = peDist(e, e.home);
+  if (fromHome > P.returnAt * CELL) { pearlBossSet(e, 'return', P.returnMax); return; }
   const d = peDist(target, e);
   if (d <= S.range * CELL) {
     if (d < P.keepDistance * CELL) enemyBackOff(e, target, dt, .8);   // 太近：往後飄
     if (pk.cd <= 0) pk.windup = S.windup;
     return;
   }
+  if (fromHome >= P.leash * CELL && peDist(target, e.home) > fromHome) return;   // 追到範圍邊緣：停在這裡等，不再往外追
   const [gc, gr] = cellAt(target.x, target.y);
   const nav = enemyNavigate(e, gc, gr, dt, 'pearl-elder:' + gc + ',' + gr, 'detour');
   if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
@@ -275,12 +351,8 @@ function pearlBossRain(e, dt) {
   pk.rainSmall -= dt; pk.rainBig -= dt;
   if (pk.rainSmall <= 0) {
     pk.rainSmall += R.smallEvery;
-    const p = G.player, mates = G.towers.filter(t => t.hp > 0 && !t.berserk && peDist(t, e) <= PEARL_ELDER.loseRange * CELL);
-    const target = mates.length && (Math.random() < R.towerChance || !(p && p.hp > 0)) ? mates[Math.floor(Math.random() * mates.length)] : p;
-    if (target && target.hp > 0 && peDist(target, e) <= PEARL_ELDER.loseRange * CELL) {
-      const spot = pearlFallSpot(target, 0, R.nearTarget, false);
-      if (spot) pushPearlFall(spot.x, spot.y, false);
-    }
+    const spot = pearlFallSpot(e, R.smallMin, R.smallMax, false);   // 隨機落點：不瞄準溫特和隊員
+    if (spot) pushPearlFall(spot.x, spot.y, false);
   }
   if (pk.rainBig <= 0) {
     pk.rainBig += R.bigEvery;
@@ -288,6 +360,142 @@ function pearlBossRain(e, dt) {
     if (spot) pushPearlFall(spot.x, spot.y, true);
   }
 }
+// ---- 閉殼滾動：蓄力 → 沿直線滾過去，撞飛溫特和隊員、撞爛建築、撞碎大珍珠；撞到牆停下來 ----
+function pearlBossRoll(e, dt) {
+  const R = PEARL_ELDER.roll, pk = e.pk;
+  if (!pk.landed) return;   // 還在往下掉
+  const rl = pk.roll;
+  if (!rl) {
+    pk.rollCd -= dt;
+    if (pk.rollCd > 0) return;
+    const t = pearlBossTarget(e);
+    if (!t || peDist(t, e) > R.range * CELL) { pk.rollCd = .5; return; }
+    const dx = t.x - e.x, dy = t.y - e.y, d = Math.hypot(dx, dy) || 1, dir = { x: dx / d, y: dy / d };
+    pk.roll = { phase: 'aim', t: R.windup, dir, left: R.len * CELL, hit: new Set(), bounces: R.bounces[0] + Math.floor(Math.random() * (R.bounces[1] - R.bounces[0] + 1)) };
+    pk.roll.show = pearlRollWallDistance(e, dir, pk.roll.left);
+    if (typeof sfxAt === 'function') sfxAt('gourdDrag', e.x, e.y, .9, 'pearl-elder-roll-aim');
+    return;
+  }
+  if (rl.phase === 'aim') {
+    rl.t -= dt;
+    if (rl.t > 0) return;
+    rl.phase = 'roll';
+    G.effects.push({ ring: true, x: e.x, y: e.y + 10, r: 6, r2: 40, life: .25, life0: .25, color: '#d9d2c0' });
+    addShake(3);
+    return;
+  }
+  let move = Math.min(rl.left, R.speed * dt);
+  rl.left -= move;
+  while (move > 0) {
+    const s = Math.min(4, move); move -= s;
+    const nx = e.x + rl.dir.x * s, ny = e.y + rl.dir.y * s, [c, r] = cellAt(nx, ny);
+    const wall = pearlRollWallAhead(e, nx, ny, rl.dir);
+    if (wall) {
+      if (rl.bounces <= 0) { pearlBossRollBump(e); return; }
+      pearlBossRollBounce(e, rl, wall); move = 0; break;   // 反彈：換方向，下一幀繼續滾
+    }
+    const blocker = enemyBarrierAt(c, r);
+    if (blocker) pearlBossSmash(e, blocker, rl.dir);   // 建築：直接撞爛，繼續滾
+    e.x = nx; e.y = ny;
+    for (const bp of [...(G.bigPearls || [])]) if (Math.hypot(bp.x - e.x, bp.y - e.y) < bp.r + e.drawWidth * .3) shatterBigPearl(bp);
+    pearlBossRollHits(e, rl);
+  }
+  if (Math.random() < .5) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() * 2 - 1) * 20, y: e.y + 12,
+    vx: -rl.dir.x * 60 + (Math.random() * 2 - 1) * 30, vy: -rl.dir.y * 60 - 10, r: 2 + Math.random() * 2.5, life: .3, life0: .3, color: '#b9b2a2' });   // 滾過地面揚起的灰
+  if (rl.left <= 0) { pk.roll = null; pk.rollCd = R.every; }
+}
+// 滾到 (x, y) 會不會撞牆：腳底那格是牆，或身體往前那一側碰到牆（往後、旁邊碰到不算，才離得開牆）；回傳牆的方向（指向牆）或 null
+function pearlRollWallAhead(e, x, y, dir) {
+  const [c, r] = cellAt(x, y);
+  if (!inGrid(c, r) || isWall(c, r) || solidBlocksPoint(x, y)) return { x: dir.x, y: dir.y };
+  const h = pearlBossBodyHits(e, x, y);
+  return h && h.x * dir.x + h.y * dir.y > 0 ? h : null;
+}
+// 撞牆反彈：方向對著牆面鏡射，再滾 bounceLen 倍的距離；這段滾動可以再撞到同一個人
+function pearlBossRollBounce(e, rl, wall) {
+  const R = PEARL_ELDER.roll, d = Math.hypot(wall.x, wall.y) || 1, nx = wall.x / d, ny = wall.y / d;
+  const dot = rl.dir.x * nx + rl.dir.y * ny;
+  let vx = rl.dir.x - 2 * dot * nx, vy = rl.dir.y - 2 * dot * ny;
+  const len = Math.hypot(vx, vy) || 1;
+  rl.dir = { x: vx / len, y: vy / len };
+  rl.bounces--; rl.left = R.len * CELL * R.bounceLen; rl.hit.clear();
+  G.effects.push({ ring: true, x: e.x + nx * 40, y: e.y + ny * 20, r: 6, r2: 46, life: .25, life0: .25, color: '#c9c2b0' });
+  nearbyImpact(e.x, e.y, 6, .04);
+  if (typeof sfxAt === 'function') sfxAt('gourdSlam', e.x, e.y, .7, 'pearl-elder-roll-bounce');
+}
+// 蓄力時畫的路線：沿著方向往前找第一道牆（建築不算，會被撞爛）；回傳距離（像素），最多 maxLen
+function pearlRollWallDistance(e, dir, maxLen) {
+  for (let d = 8; d < maxLen; d += 8) if (pearlRollWallAhead(e, e.x + dir.x * d, e.y + dir.y * d, dir)) return d;
+  return maxLen;
+}
+function pearlBossRollHits(e, rl) {
+  const R = PEARL_ELDER.roll, p = G.player, dir = rl.dir;
+  if (p && p.hp > 0 && !rl.hit.has(p) && peDist(p, e) <= R.hitR) {
+    rl.hit.add(p);
+    pearlFallHitPlayer(p, R.dmg);
+    knockActor(p, dir.x, dir.y, R.knock * CELL, R.knockTime);
+    if (typeof sfxAt === 'function') sfxAt('knock2', p.x, p.y, 1, 'pearl-elder-roll-hit');
+  }
+  for (const t of G.towers) {
+    if (t.hp <= 0 || t.berserk || rl.hit.has(t) || peDist(t, e) > R.hitR) continue;
+    rl.hit.add(t);
+    pearlFallHitSentry(t, R.dmg);
+    knockActor(t, dir.x, dir.y, R.knock * CELL, R.knockTime);
+    t.navPath = null; t.navGoal = null;
+  }
+}
+// 滾到牆：停下來；wallStun > 0 時殼被撞開、頭暈（輸出時間）
+function pearlBossRollBump(e) {
+  const R = PEARL_ELDER.roll, pk = e.pk;
+  pk.roll = null; pk.rollCd = R.every;
+  G.effects.push({ ring: true, x: e.x, y: e.y + 6, r: 6, r2: 50, life: .3, life0: .3, color: '#c9c2b0' });
+  nearbyImpact(e.x, e.y, 7, .06);
+  if (typeof sfxAt === 'function') sfxAt('gourdSlam', e.x, e.y, .9, 'pearl-elder-roll-bump');
+  if (R.wallStun > 0) pearlBossSet(e, 'stunned', R.wallStun);
+}
+// 撞上建築：不管是什麼、血量多少，直接撞爛（跟鳥頭大隊長的衝撞一樣，js/elite-bird-head.js 的 eliteBirdSmash）
+function pearlBossSmash(e, o, dir) {
+  const ox = OX + (o.c + (o.w || 1) / 2) * CELL, oy = OY + (o.r + (o.h || 1) / 2) * CELL;
+  o.lastHitBy = 'monster'; o.hp = 0; o.hitT = HIT_DUR;   // lastHitBy：油桶被怪物撞壞只漏油、不爆炸（js/oil-barrels.js）
+  removeBarrier(o);
+  if (o.isBase) { flash('基地被摧毀！', ox, OY + o.r * CELL - 18, '#ff5b5b'); if (!G.over) baseLost(); }
+  G.effects.push({ ring: true, x: ox, y: oy, r: 6, r2: 44, life: .3, life0: .3, color: '#d9d2c0' });
+  for (let i = 0; i < 8; i++) {   // 碎片往滾動方向噴
+    const a = Math.atan2(dir.y, dir.x) + (Math.random() * 2 - 1) * .9, sp = 120 + Math.random() * 140;
+    G.effects.push({ particle: true, kind: 'spark', x: ox, y: oy, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30, r: 2 + Math.random() * 3, life: .4, life0: .4, color: '#9a9283' });
+  }
+  addShake(4); addHitstop(.05);
+  if (typeof sfxAt === 'function') sfxAt('knock2', ox, oy, 1, 'pearl-elder-smash');
+}
+
+// ---- 地上的小滾珠：踩到滑倒（滑倒、撞到頭暈都用金蕉王香蕉皮那一套：js/golden-banana-king.js 的 bkSlip）----
+function pearlBeadsDrop(x, y) {
+  const B = PEARL_ELDER.beads;
+  if (typeof bkSlip !== 'function' || Math.random() >= B.chance) return;
+  const list = G.pearlBeads = G.pearlBeads || [];
+  for (let i = 0; i < B.per; i++) {
+    const a = Math.random() * Math.PI * 2, d = Math.random() * B.spread, bx = x + Math.cos(a) * d, by = y + Math.sin(a) * d * .6, [c, r] = cellAt(bx, by);
+    if (!inGrid(c, r) || isWall(c, r)) continue;
+    list.push({ x: bx, y: by, life: B.life, seed: Math.random() * 9 });
+  }
+  while (list.length > B.max) list.shift();   // 太多了：最舊的先消失
+}
+function updatePearlBeads(dt) {
+  const B = PEARL_ELDER.beads, list = G.pearlBeads;
+  if (!list || !list.length) return;
+  const actors = typeof bkPeelVictims === 'function' ? bkPeelVictims() : [];
+  for (const a of actors) if (a.beadSafeT > 0) a.beadSafeT -= dt;
+  for (const b of [...list]) {
+    b.life -= dt;
+    if (b.life <= 0) { list.splice(list.indexOf(b), 1); continue; }
+    const a = actors.find(o => !(o.knockT > 0) && !(o.slipDizzyT > 0) && !(o.beadSafeT > 0) && Math.hypot(o.x - b.x, o.y - b.y) <= B.trigger);
+    if (!a) continue;
+    list.splice(list.indexOf(b), 1);   // 踩過就滾走了
+    bkSlip(a, b);
+    a.beadSafeT = BANANA_KING.slipTime + BANANA_KING.slipDizzy + B.safe;   // 滑完、暈完再過 safe 秒才會再滑倒
+  }
+}
+
 // 在 o 身邊 min～max 格內找一個能落下的地方；big＝大珍珠，要找空曠一點、不壓到其他大珍珠
 function pearlFallSpot(o, min, max, big) {
   const r = PEARL_ELDER.big.r;
@@ -319,6 +527,7 @@ function pearlFallImpact(f) {
     bigPearlLandFx(f.x, f.y);
   } else {
     pearlBurst(f.x, f.y, 4);
+    pearlBeadsDrop(f.x, f.y);
     if (typeof sfxAt === 'function') sfxAt('pearlHit', f.x, f.y, .7, 'pearl-small-land');
   }
 }
@@ -334,6 +543,7 @@ function bigPearlLandFx(x, y) {
   if (typeof sfxAt === 'function') { sfxAt('gourdSlam', x, y, .9, 'pearl-big-land'); sfxAt('pearlHit', x, y, .8, 'pearl-big-land2'); }
 }
 function pearlFallHitPlayer(p, dmg) {
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const d = Math.round(typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg);
   p.hp = Math.max(0, p.hp - d);
   p.hitT = .35; p.underAttackT = 5;
@@ -344,6 +554,7 @@ function pearlFallHitPlayer(p, dmg) {
 }
 function pearlFallHitSentry(t, dmg) {
   if (parryMiss(t, false)) return;   // 柯林的劍舞架勢：打空
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(t)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const d = dmg * (1 - sentryDefense(t));
   t.hp = Math.max(0, t.hp - d);
   t.hitT = Math.max(t.hitT || 0, .2);
@@ -366,7 +577,7 @@ function bigPearlBlockedAt(bp, x, y) {
   if (bigPearlWallHit(x, y, bp.r)) return true;
   const p = G.player;
   if (p && Math.hypot(p.x - x, p.y - y) < bp.r + PLAYER.r) return true;
-  for (const t of G.towers) if (t.hp > 0 && Math.hypot(t.x - x, t.y - y) < bp.r + 12) return true;
+  // 隊員不擋大珍珠：滾過去時把隊員擠開（bigPearlSeparate）
   for (const o of G.bigPearls) if (o !== bp && Math.hypot(o.x - x, o.y - y) < o.r + bp.r) return o;
   return null;
 }
@@ -493,6 +704,26 @@ function bigPearlShotTarget(p, aim, aimAng, bestD, bestOnBody) {
   }
   return pick;
 }
+// ---- 擊退彈：沿著彈道找第一顆大珍珠（js/special-guns.js 的 fireKnock 呼叫）；回傳 { bp, d } 或 null ----
+function bigPearlOnLine(x0, y0, ang, maxD) {
+  const ux = Math.cos(ang), uy = Math.sin(ang);
+  let best = null;
+  for (const bp of G.bigPearls || []) {
+    const along = (bp.x - x0) * ux + (bp.y - y0) * uy, off = Math.abs(-(bp.x - x0) * uy + (bp.y - y0) * ux), R = bp.r + 4;
+    if (along < 0 || off > R) continue;
+    const d = Math.max(0, along - Math.sqrt(R * R - off * off));
+    if (d <= maxD && (!best || d < best.d)) best = { bp, d };
+  }
+  return best;
+}
+// 擊退彈打中大珍珠：直接用 knockSpeed 往彈道方向彈出去（不用像手槍連打）
+function knockBigPearl(bp, ang) {
+  const v = PEARL_ELDER.big.knockSpeed;
+  bp.vx = Math.cos(ang) * v; bp.vy = Math.sin(ang) * v;
+  bp.hitT = .15; bp.hits.clear();
+  G.effects.push({ ring: true, x: bp.x, y: bp.y - bp.r * .6, r: 6, r2: bp.r * 1.6, life: .2, life0: .2, color: '#ffffff' });
+  if (typeof sfxAt === 'function') sfxAt('knockWall', bp.x, bp.y, .8, 'pearl-big-knock');
+}
 function shootBigPearl(bp, fromX, fromY) {
   const dx = bp.x - fromX, dy = bp.y - fromY, d = Math.hypot(dx, dy) || 1;
   bp.vx += dx / d * PEARL_ELDER.big.shotPush; bp.vy += dy / d * PEARL_ELDER.big.shotPush;
@@ -531,6 +762,8 @@ function updatePearlElder(dt) {
   for (const f of G.pearlFalls) { f.t -= dt; f.spin += dt * 6; if (f.t <= 0) pearlFallImpact(f); }
   G.pearlFalls = G.pearlFalls.filter(f => f.t > 0);
   for (const bp of [...G.bigPearls]) { stepBigPearl(bp, dt); if (!bp.gone) bigPearlSeparate(bp); }
+  updatePearlBeads(dt);
+  for (const e of pearlBosses()) pearlBossKeepOut(e);   // 被大珍珠推開之後：身體不擠進牆裡
 }
 
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）：核心掉在原地、大珍珠全部碎掉 ----
@@ -538,6 +771,7 @@ function pearlBossDown(e) {
   const core = e.carryCore;
   if (core && !core.dead) {
     core.carried = false; core.x = e.x; core.y = e.y; core.lastHp = core.hp;
+    if (core.awake) pearlBossCorePool(core, true);   // 腐蝕痕跡鋪在掉下來的地方
     G.effects.push({ ring: true, x: core.x, y: core.y, r: 8, r2: 80, life: .45, life0: .45, color: '#b56bff' });
     for (let i = 0; i < 6; i++) {
       const a = Math.random() * Math.PI * 2, sp = 8 + Math.random() * 16;
@@ -546,8 +780,9 @@ function pearlBossDown(e) {
   }
   for (const bp of [...(G.bigPearls || [])]) shatterBigPearl(bp);
   G.pearlFalls = [];
-  systemNotice(e.eliteName + '倒下了！異質核心掉在地上', true);
-  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '異質核心掉在地上，現在可以把它打爆！', '#f4d9ff');
+  if (typeof sfxAt === 'function') sfxAt('pearlElderDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著用同一個來源播的那聲會被 70ms 去重吃掉
+  systemNotice(e.eliteName + '倒下了！', true);
+  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#f4d9ff');   // 不提示核心可以打了
   nearbyImpact(e.x, e.y, 10, .08);
 }
 
@@ -588,7 +823,16 @@ function drawPearlBossCore(ctx, e, dx, dy, dw, dh) {
 }
 // 大珍珠：跟角色一起排前後（render.js 呼叫）
 function pearlElderSortables(list) {
+  for (const b of G.pearlBeads || []) if (isVisible(b.x, b.y)) list.push({ y: b.y - 14, draw: () => drawPearlBead(ctx, b) });   // 地上的小滾珠：排在同一列的角色後面
   for (const bp of G.bigPearls || []) list.push({ y: bp.y + bp.r * .3, draw: () => drawBigPearl(ctx, bp) });
+}
+function drawPearlBead(ctx, b) {
+  const r = PEARL_ELDER.beads.r;
+  ctx.save();
+  ctx.globalAlpha = Math.min(1, b.life / .6);   // 快消失時淡出
+  ctx.fillStyle = 'rgba(7,16,21,.35)'; ctx.beginPath(); ctx.ellipse(b.x, b.y + 1, r * 1.1, r * .45, 0, 0, Math.PI * 2); ctx.fill();
+  drawPearlBall(ctx, b.x, b.y - r * .7, r);
+  ctx.restore();
 }
 // 畫一顆珍珠球：x, y＝球心；裂痕照剩下的耐久畫
 function drawPearlBall(ctx, x, y, r, crack = 0, seed = 0, flashK = 0) {
@@ -654,6 +898,18 @@ function drawPearlElderTelegraphs(ctx) {
     ctx.beginPath(); ctx.ellipse(f.x, f.y, rad * k, rad * .45 * k, 0, 0, Math.PI * 2); ctx.fill();   // 由小變大、越來越深的影子
     ctx.globalAlpha = .5 + .4 * k; ctx.strokeStyle = f.big ? '#ffb4e6' : '#f4e6ff'; ctx.lineWidth = f.big ? 2.5 : 1.5;
     ctx.beginPath(); ctx.ellipse(f.x, f.y, rad, rad * .45, 0, 0, Math.PI * 2); ctx.stroke();
+    ctx.restore();
+  }
+  // 閉殼滾動的蓄力：地上畫出要滾過去的路線（畫到第一道牆）
+  for (const e of pearlBosses()) {
+    const rl = e.pk && e.pk.roll;
+    if (!rl || rl.phase !== 'aim' || !isVisible(e.x, e.y)) continue;
+    const k = 1 - rl.t / PEARL_ELDER.roll.windup, w = PEARL_ELDER.roll.hitR * 1.4;
+    ctx.save();
+    ctx.globalAlpha = .18 + .3 * k; ctx.strokeStyle = '#f4b8ff'; ctx.lineWidth = w; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(e.x, e.y + 8); ctx.lineTo(e.x + rl.dir.x * rl.show, e.y + 8 + rl.dir.y * rl.show); ctx.stroke();
+    ctx.globalAlpha = .5 + .4 * k; ctx.strokeStyle = '#ffffff'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(e.x, e.y + 8); ctx.lineTo(e.x + rl.dir.x * rl.show * k, e.y + 8 + rl.dir.y * rl.show * k); ctx.stroke();
     ctx.restore();
   }
   // 大童被撞暈：頭上冒星星

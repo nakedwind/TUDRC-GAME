@@ -263,6 +263,7 @@ function eliteBirdHitPlayer(e, p) {
 }
 function eliteBirdHitSentry(e, t, mul) {
   if (parryMiss(t, false)) { flashDmg('MISS', t.x, t.y - 30, '#c6d1dd'); return; }   // 柯林的劍舞架勢：打空
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(t)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const damage = e.sentryDamage * mul * (1 - sentryDefense(t));
   t.hp = Math.max(0, t.hp - damage);
   t.hitT = Math.max(t.hitT || 0, .2);

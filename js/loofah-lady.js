@@ -196,7 +196,7 @@ function llCatchNearby(v) {
   const p = G.player, inR = a => Math.hypot(a.x - v.x, a.y - v.y) <= C.eruptRadius && !v.caught.includes(a) && !(a.rootT > 0);
   if (p && p.hp > 0 && inR(p)) {
     v.caught.push(p); p.rootT = C.rootTime; p.rootT0 = C.rootTime; p.struggleCount = 0; p.knockT = 0; p.moving = false;
-    if (C.eruptDamage && e) {
+    if (C.eruptDamage && e && !(typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p))) {   // 剛被打過：照樣被纏住，只是不扣血（js/combat-feel.js）
       const dmg = Math.round(typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 6) : e.playerDamage ?? 6);
       p.hp = Math.max(0, p.hp - dmg); p.hitT = .35; p.underAttackT = 5; p.lastAttacker = e;
       G.damageVignetteT = Math.max(G.damageVignetteT || 0, .3);

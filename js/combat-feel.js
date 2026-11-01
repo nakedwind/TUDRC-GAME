@@ -91,8 +91,15 @@ function tintedSprite(img, hue) {
     const cv = document.createElement('canvas');
     cv.width = img.naturalWidth; cv.height = img.naturalHeight;
     const c = cv.getContext('2d');
-    c.filter = `hue-rotate(${hue}deg) saturate(1.35)`;
-    c.drawImage(img, 0, 0);
+    const mul = typeof hue === 'string' && hue.startsWith('multiply:') ? hue.slice(9) : null;
+    if (mul) {   // 'multiply:#色碼'：色彩增值疊一層顏色（例如順順宮主稍微偏紅，js/elite-cap-king.js），再用原圖的透明度剪回形狀
+      c.drawImage(img, 0, 0);
+      c.globalCompositeOperation = 'multiply'; c.fillStyle = mul; c.fillRect(0, 0, cv.width, cv.height);
+      c.globalCompositeOperation = 'destination-in'; c.drawImage(img, 0, 0);
+    } else {
+      c.filter = `hue-rotate(${hue}deg) saturate(1.35)`;
+      c.drawImage(img, 0, 0);
+    }
     tintedSpriteCache.set(key, cv);
   }
   return tintedSpriteCache.get(key);
@@ -192,6 +199,7 @@ function bomberShouldArm(e) {
 function slimeExplode(e, mul) {
   const R = SLIME_BOMB.radius, x = e.x, y = e.y;
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 自爆史萊姆也炸得開可炸開的牆（js/breakable-walls.js）
+  if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 炸開珍珠大童的貝殼（js/pearl-elder.js）
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 自爆史萊姆的爆炸波及順順宮帽：打開帽子
   const p = G.player;
   if (p && p.hp > 0 && Math.hypot(p.x - x, p.y - y) <= R) {
@@ -613,4 +621,20 @@ function drawAcidTop(ctx) {
     ctx.beginPath(); ctx.arc(x, by, 9, 0, Math.PI * 2); ctx.fill();
     ctx.restore();
   }
+}
+
+// ---- 受傷後的短暫無敵（溫特和隊友共用）----
+// 被怪物「直接打中」（近戰、丟帽子、噴珍珠、水柱、砸地、藤蔓、咬人…）之後 HURT_GRACE 秒內，其他怪物的直接攻擊都不扣血（不閃爍，看不出來）。
+// 爆炸（自爆史萊姆、油桶、地雷、粉塵爆炸、魚卵）和持續傷害（腐蝕、火、消化）不算，照舊扣。
+const HURT_GRACE = 0.4;
+// 回傳 true＝還在無敵中、這一下不算；false＝可以扣血，並從現在開始無敵（各怪物的攻擊在扣血前呼叫）
+function hurtGraceBlocked(o) {
+  if (!o) return false;
+  if ((o.hurtGraceT || 0) > 0) return true;
+  o.hurtGraceT = HURT_GRACE;
+  return false;
+}
+function updateHurtGrace(dt) {   // game.js 的 update 呼叫
+  if (!G) return;
+  for (const o of [G.player, ...(G.towers || [])]) if (o && o.hurtGraceT > 0) o.hurtGraceT = Math.max(0, o.hurtGraceT - dt);
 }

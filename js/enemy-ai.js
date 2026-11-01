@@ -108,6 +108,7 @@ function enemyAttackSentry(e, target, dt) {
   e.atkCd = 1;
   monsterSwingHit(e, target.x, target.y);
   if (parryMiss(target, false)) return;   // 柯林的劍舞架勢：打空
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(target)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const defense = sentryDefense(target);
   const damage = (e.sentryDamage ?? 14) * (1 - defense);
   target.hp = Math.max(0, target.hp - damage);
@@ -128,6 +129,7 @@ function enemyAttackPlayer(e, dt) {
   e.playerTouchCd = 1;
   monsterSwingHit(e, p.x, p.y);
   if (parryMiss(p, true)) return;   // 溫特在柯林身邊：有機會打空
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const damage = (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 12) : e.playerDamage ?? 12);   // 防護背心減傷（js/equipment.js）
   p.hp = Math.max(0, p.hp - damage);
   p.hitT = .45; p.underAttackT = 5; p.lastAttacker = e;

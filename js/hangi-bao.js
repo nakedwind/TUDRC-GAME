@@ -249,15 +249,17 @@ function stepBoomerangEnemy(e, dt) {
 function throwCap(e, target) {
   const cfg = hbCfg(e), z = (e.drawHeight || 52) * .55, sp = e.capSpread;
   const a0 = Math.atan2(target.y - e.y, target.x - e.x), n = sp ? sp.n : 1;
+  const hit = new Set();   // 同一次丟出去的幾頂共用：同一個人去程、回程各只會被打一次（不會三頂疊在一起打三下）
   for (let i = 0; i < n; i++) {
     const a = a0 + (i - (n - 1) / 2) * (sp ? sp.angle : 0) * Math.PI / 180;   // 散開：中間那頂對準目標，其餘往兩邊
     (G.capShots = G.capShots || []).push({ owner: e, x: e.x, y: e.y, z, ux: Math.cos(a), uy: Math.sin(a), speed: cfg.capSpeed,
-      phase: 'out', left: (cfg.throwRange + .8) * CELL, spin: 0, age: 0, hit: new Set(), trail: [], scale: sp ? sp.scale : 1, hitR: sp ? sp.hitR : HB_HIT_R });
+      phase: 'out', left: (cfg.throwRange + .8) * CELL, spin: 0, age: 0, hit, trail: [], scale: sp ? sp.scale : 1, hitR: sp ? sp.hitR : HB_HIT_R });
   }
   e.hb.capOut = true;
   if (typeof sfxAt === 'function') sfxAt('swordSwing', e.x, e.y, .45, 'hangi-throw');
 }
 function capHitPlayer(s) {
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(G.player)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const p = G.player, e = s.owner, dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 8) : e.playerDamage ?? 8));
   p.hp = Math.max(0, p.hp - dmg);
   p.hitT = .35; p.underAttackT = 5; p.lastAttacker = e;
@@ -328,7 +330,7 @@ function hangiCapSortables(sortables) {
 function drawHangiCap(ctx, cap) {
   const img = hbImg(cap.state === 'open' ? HANGI_CAP.openImage : HANGI_CAP.image);
   if (!img.complete || !img.naturalWidth) return;
-  const w = img.naturalWidth * HANGI_CAP.scale, h = img.naturalHeight * HANGI_CAP.scale;
+  const s = cap.scale || HANGI_CAP.scale, w = img.naturalWidth * s, h = img.naturalHeight * s;   // cap.scale：核心打破後交回來淡出的大宮帽（js/elite-cap-king.js），維持原本的大小
   const fade = cap.state === 'open' ? Math.max(0, Math.min(1, (HANGI_CAP.openStay - cap.t) / 1)) : 1;
   const pop = cap.state === 'open' && cap.t < .25 ? Math.sin(cap.t / .25 * Math.PI) * 8 : 0;   // 打開的瞬間彈一下
   ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = fade;

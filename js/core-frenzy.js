@@ -74,7 +74,7 @@ function coreBanner(text, sub, color = '#ff5a6e') { if (G) G.coreBanner = { text
 // 螢幕座標：上方的 BOSS 血條、中間的大橫幅（render.js 最後呼叫）
 function drawCoreBossUI(ctx, cv) {
   if (!G || MAP_SAFE || !G.cores) return;
-  const awake = G.cores.filter(c => c.awake && !c.dead);
+  const awake = G.cores.filter(c => c.awake && !c.dead && !c.carried);   // 抱在珍珠大童身上的核心：血條跟著大童畫（js/pearl-elder.js 的 pearlBossBars）
   awake.slice(0, 3).forEach((c, i) => {
     const w = Math.min(520, cv.width * .45), h = 14, x = (cv.width - w) / 2, y = 58 + i * 40;   // 放在任務文字下面
     const ratio = Math.max(0, c.hp / c.maxhp), hit = c.hitT > 0;

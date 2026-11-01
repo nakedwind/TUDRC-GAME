@@ -1083,7 +1083,7 @@ function updateChaosSentry(t, spec, dt) {
   for (const o of G.towers) if (o !== t && o.hp > 0) consider(o, o.x, o.y);
   if (G.player && G.player.hp > 0) consider(G.player, G.player.x, G.player.y);
   for (const o of G.obstacles) if (o.isBase && o.hp > 0) consider(o, (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2);
-  for (const c of G.cores) if (!c.dead && c.awake && !c.hidden) consider(c, c.x, c.y);
+  for (const c of G.cores) if (!c.dead && c.awake && !c.hidden && !c.carried) consider(c, c.x, c.y);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
   if (!best) return;
   const range = spec.range * CELL;
   const canSee = hasLineOfSight(t.x, t.y, best.x, best.y);
@@ -1688,7 +1688,7 @@ function pickSentryTarget(t, R) {
   }
   if (best || t.guardSummoned) return best;
   for (const core of G.cores) {
-    if (core.dead || !core.awake || core.hidden) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡的也打不到（js/elite-cap-king.js）
+    if (core.dead || !core.awake || core.hidden || core.carried) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡、抱在珍珠大童身上的也打不到（js/elite-cap-king.js、js/pearl-elder.js）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
     if (distance <= R + CORE_HIT_PAD && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
   }
@@ -2479,6 +2479,7 @@ function update(dt) {
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
   if (typeof updateHangi === 'function') updateHangi(dt);
+  if (typeof updateHurtGrace === 'function') updateHurtGrace(dt);   // 溫特、隊友被打後的短暫無敵倒數（js/combat-feel.js）
   if (typeof updateCapKing === 'function') updateCapKing(dt);   // 順順宮主：大宮帽打開、蓋回、蓋杯子洗牌（js/elite-cap-king.js）
   if (typeof updateGourd === 'function') updateGourd(dt);   // 葫蘆猴拖行的刮痕、砸出來的地裂（js/gourd-monkey.js）
   if (typeof updateMoths === 'function') updateMoths(dt);   // 人面蝶的鱗粉霧、吸入、中毒／混亂／睡眠、粉塵爆炸（js/human-face-butterfly.js）
@@ -2589,7 +2590,7 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '再挑戰');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;

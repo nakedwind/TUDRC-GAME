@@ -189,12 +189,12 @@ function updateCores(dt) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;
     if (core.hp < core.lastHp) {
-      if (core.awake && !core.hidden) core.hitT = .16;
-      else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）；躲在順順宮帽裡也不會（js/elite-cap-king.js）
+      if (core.awake && !core.hidden && !core.carried) core.hitT = .16;
+      else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）；躲在順順宮帽裡、抱在珍珠大童身上也不會（js/elite-cap-king.js、js/pearl-elder.js 自己扣）
     }
     core.lastHp = core.hp;
     if (!core.awake && !core.hidden && !core.carried && G.towers.some(t => t.type === 'avaren' && t.hp > 0 && Math.hypot(t.x - core.x, t.y - core.y) <= CORE.wakeAvarenCells * CELL)) wakeCore(core);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
-    if (core.awake && !core.hidden) {   // 躲在順順宮帽裡：不冒粒子、沒有腐蝕痕跡（js/elite-cap-king.js）
+    if (core.awake && !core.hidden && !core.carried) {   // 躲在順順宮帽裡、抱在珍珠大童身上：不冒粒子、沒有腐蝕痕跡（js/elite-cap-king.js、js/pearl-elder.js）
       core.awakeT += dt;
       if (core.phase === 1 && core.hp > 0 && core.hp <= core.maxhp * CORE.phase2At) enterPhase2(core);   // 一擊打破時不再跳第二階段
       keepCoreScorch(core);

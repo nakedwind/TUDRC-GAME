@@ -320,11 +320,14 @@ function sentryBlocked(x, y) {
   }
   return false;
 }
-// 身體邊緣也要留在光內，避免中心仍亮、人物已踏進黑暗。
+// 隊員能不能走到這裡：離最近的亮格 PERSONNEL_DARK_CELLS 格以內都算（光圈邊緣暗一點點也會跟過來）。
+// 設成 0＝舊的嚴格判定：身體中心和四個角都要在光內，一點點黑就不過去。
 const CORE_GLOW_WALK = 4;   // 醒著的異質核心會發光：周圍幾格內隊員也能走進去（才打得到核心）
+const PERSONNEL_DARK_CELLS = 1;
 function personnelInLight(x, y) {
   if (MAP_SAFE || !LIGHT.enabled) return true;
   if (G && G.cores && G.cores.some(c => c.awake && !c.dead && !c.hidden && Math.hypot(c.x - x, c.y - y) <= CORE_GLOW_WALK * CELL)) return true;
+  if (PERSONNEL_DARK_CELLS > 0) { const [c, r] = cellAt(x, y); return cellNearLight(c, r, PERSONNEL_DARK_CELLS * CELL); }
   return [[0,0],[-12,-12],[12,-12],[-12,12],[12,12]]
     .every(([dx,dy]) => isLit(x + dx, y + dy));
 }
@@ -547,7 +550,7 @@ function hasAggroTarget(t) {
   if (!G.enemies.length && !cores.some(c => !c.dead && c.awake && !c.hidden)) return false;
   const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
   for (const e of [...G.enemies, ...cores]) {
-    if (e.dead || e.awake === false || e.hidden) continue;   // 沉睡的核心不算目標；躲在順順宮帽裡的也不算（js/elite-cap-king.js）
+    if (e.dead || e.awake === false || e.hidden || e.carried) continue;   // 沉睡的核心不算目標；躲在順順宮帽裡、抱在珍珠大童身上的也不算（js/elite-cap-king.js、js/pearl-elder.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不主動接敵（js/elite-bird-head.js）
     if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
@@ -705,7 +708,7 @@ function updateSentry(t, dt) {
     const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
-      if (e.dead || e.awake === false || e.hidden) continue;   // 沉睡的核心不去追；躲在順順宮帽裡的也不追（js/elite-cap-king.js）
+      if (e.dead || e.awake === false || e.hidden || e.carried) continue;   // 沉睡的核心不去追；躲在順順宮帽裡、抱在珍珠大童身上的也不追（js/elite-cap-king.js、js/pearl-elder.js）
       if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不去追
       if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
       if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心

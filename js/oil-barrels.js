@@ -164,6 +164,7 @@ function oilExplode(x, y, it) {
   igniteSlicksNear(x, y, R);
   if (it.breaksOre && typeof blastOres === 'function') blastOres(x, y, R);   // 油桶、油箱、瓦斯爐爆炸皆可炸開附近異質礦物（js/ore.js）
   if (typeof blastWalls === 'function') blastWalls(x, y, R);   // 油桶、油箱、瓦斯爐都炸得開可炸開的牆（js/breakable-walls.js）
+  if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 也炸得開珍珠大童的貝殼（js/pearl-elder.js）
   if (it.fire) addOilFire(x, y, it.fire.radius * CELL, it.fire.life, it.fire.dps);
   if ((it.fire || it.gas) && typeof burnLifePilesNear === 'function') burnLifePilesNear(x, y, R);   // 爆焰燒掉生命體碎塊
   if ((it.fire || it.gas) && typeof cookFoodNear === 'function') cookFoodNear(x, y, R);   // 地上的食物烤熟（js/food.js）
@@ -184,7 +185,7 @@ function oilExplode(x, y, it) {
 }
 function damageCoresInBlast(x, y, radius, damage) {
   for (const core of G.cores || []) {
-    if (core.dead || core.hp <= 0 || core.hidden) continue;   // 躲在順順宮帽裡：炸不到、燒不到（js/elite-cap-king.js）
+    if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
     const d = Math.hypot(core.x - x, core.y - y);
     if (d > radius || !hasLineOfSight(x, y, core.x, core.y)) continue;
     const hurt = damage * (1 - .4 * d / radius);
@@ -277,7 +278,7 @@ function updateOil(dt) {
     return dps * FIRE_TICK;
   };
   for (const core of G.cores || []) {
-    if (core.dead || core.hp <= 0 || core.hidden) continue;   // 躲在順順宮帽裡：炸不到、燒不到（js/elite-cap-king.js）
+    if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
     const damage = fireTick(core); if (!damage) continue;
     wakeCore(core); core.lastHp = core.hp; core.hp = Math.max(0, core.hp - damage); core.hitT = .16;
     flashDmg('-' + Math.round(damage), core.x, core.y - 56, '#ff9a3c');
