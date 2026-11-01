@@ -184,7 +184,7 @@ function oilExplode(x, y, it) {
 }
 function damageCoresInBlast(x, y, radius, damage) {
   for (const core of G.cores || []) {
-    if (core.dead || core.hp <= 0 || core.hidden) continue;   // 躲在順順宮帽裡：炸不到、燒不到（js/elite-cap-king.js）
+    if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
     const d = Math.hypot(core.x - x, core.y - y);
     if (d > radius || !hasLineOfSight(x, y, core.x, core.y)) continue;
     const hurt = damage * (1 - .4 * d / radius);
@@ -277,7 +277,7 @@ function updateOil(dt) {
     return dps * FIRE_TICK;
   };
   for (const core of G.cores || []) {
-    if (core.dead || core.hp <= 0 || core.hidden) continue;   // 躲在順順宮帽裡：炸不到、燒不到（js/elite-cap-king.js）
+    if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
     const damage = fireTick(core); if (!damage) continue;
     wakeCore(core); core.lastHp = core.hp; core.hp = Math.max(0, core.hp - damage); core.hitT = .16;
     flashDmg('-' + Math.round(damage), core.x, core.y - 56, '#ff9a3c');

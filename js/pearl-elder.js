@@ -9,7 +9,7 @@
            滾得慢只會把大童推開，沒有傷害。落地時畫面震動、地上砸出裂痕、噴石礫和煙霧（跟葫蘆猴落地同一套特效）。
            被珍珠（大童的散射）打太多下也會碎；場上最多 big.max 顆，超過就碎掉最舊的那顆。
    - 核心：牠活著時核心打不到；打在牠身上的傷害，核心跟著吃 coreShare（1 成），但核心不會在牠身上破掉（最少留 1 滴血）。
-           核心血量改成 coreHp（再乘地圖難度）。
+           核心血量改成 coreHp（再乘地圖難度）。BOSS 戰一開始核心就跟著甦醒（異質體狂暴化），但一樣打不到、炸不到。
            牠死掉後核心掉在原地，這時候才能把核心打爆（第一槍照樣會叫醒核心）。
    出現在哪張地圖、生在哪一格：PEARL_ELDER.maps（地圖 id → 欄、列）；牠自己帶一顆核心，地圖上原本的核心照樣留著（全部打破才過關）。
    數值都在下面的 PEARL_ELDER。必須在 pearl-kid.js、anomalous-core.js 之後、game.js 之前載入。
@@ -23,14 +23,15 @@ const PEARL_ELDER = {
   hover: 26,                     // 張殼時飄多高（像素）
   wakeRange: 6,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
   loseRange: 16, loseTime: 8,    // 目標離開幾格、超過幾秒沒有目標 → 放棄，回去閒晃
-  leash: 12,                     // 離原位超過幾格就飄回去
+  leash: 12,                     // 追人最遠追到離原位幾格：到了就停在那裡（射得到照樣射），不再往外追
+  returnAt: 14, returnTo: 8, returnMax: 6,   // 被推（或撞）到離原位幾格以外 → 飄回去；回到幾格內、或飄了幾秒就恢復戰鬥（不用回到原位，免得被大珍珠擋住卡住）
   wanderRadius: 4, wanderSpeedMul: .6, idle: [1.5, 3.5],   // 閒晃：繞著原位幾格內、速度倍率、每次發呆幾秒
   keepDistance: 4,               // 目標太近（格）：往後飄
   coreShare: .1,                 // 打在大童身上的傷害，核心跟著吃幾成
   coreHp: 1000,                  // 牠抱著的核心血量（地圖難度 1；難度越高照比例加）
   coreArt: { x: .40, y: .70, len: .5, angle: -73 },   // 核心圖疊在牠身上的位置：中心（圖寬、圖高的比例）、長度（圖寬的比例）、旋轉角度（度）
   scatter: { count: 7, spread: 70, speed: 220, range: 9, windup: .8, cooldown: 2.4 },   // 散射：顆數、扇形角度、速度、射程（格）、蓄力、冷卻（秒）
-  shell: { time: 14, defense: .1, grace: 4 },          // 閉殼幾秒、閉殼時受到的傷害倍率、張開後幾秒內被打不會再閉殼
+  shell: { time: 20, defense: .1, grace: 4 },          // 閉殼幾秒、閉殼時受到的傷害倍率、張開後幾秒內被打不會再閉殼
   stun: { time: 2.5, dmgMul: 1.3 },                   // 被大珍珠撞到：暈幾秒、暈眩中受到的傷害倍率
   rain: {                        // 閉殼時從天上降下的珍珠
     smallEvery: .45, bigEvery: 2.2,   // 每隔幾秒降一顆小的、一顆大的
@@ -87,6 +88,7 @@ function seedPearlElder() {
   e.home = { x, y };
   e.carryCore = core; core.carried = true; core.x = x; core.y = y;
   core.hp = core.maxhp = core.lastHp = Math.round(P.coreHp * core.maxhp / CORE.hp);   // 照地圖難度的比例（seedCores 給的是 CORE.hp × 難度）   // carried：核心打不到、阿瓦倫靠近也不會醒（js/game.js、js/anomalous-core.js）
+  e.deathSound = 'pearlElderDeath';   // 珍珠小童的死亡聲，放大、加回音（js/sfx.js 的 SOUND_ECHO）
   e.pk = { state: 'idle', t: 0, cd: 1, windup: 0, shellT: 0, bob: 0, wait: 1, grace: 0, lostT: 0, vz: 0 };
   e.slimeLift = P.hover;
   if (typeof GOURD !== 'undefined') monsterImage(GOURD.crackImage);   // 先載好地裂圖，第一顆大珍珠落地才不會沒有裂痕
@@ -106,7 +108,9 @@ function pearlBossWake(e) {
   e.eliteAwake = true;
   pearlBossSet(e, 'wake', 1);
   e.alertT = ENEMY_ALERT_TIME; e.pk.cd = 1.2;
-  if (typeof coreBanner === 'function') coreBanner(PEARL_ELDER.name + '發現你了', '打中牠會閉殼降下珍珠：躲到大珍珠後面，把大珍珠推去撞牠！', '#f4d9ff');
+  const core = e.carryCore;   // 牠抱著的核心跟著甦醒：異質體狂暴化、核心音樂（還是打不到：carried 的核心不會被選成目標、扣的血會補回來，見 js/anomalous-core.js）
+  if (core && !core.dead && !core.awake) { wakeCore(core); core.lastHp = core.hp; pearlBossCorePool(core, false); }
+  if (typeof coreBanner === 'function') coreBanner(PEARL_ELDER.name + '發現你了', '牠抱著的異質核心跟著甦醒了', '#f4d9ff');
   systemNotice(PEARL_ELDER.name + '發現你了！', true);
   const top = e.y - e.slimeLift - e.drawHeight * .6;
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: top, r: 8 + i * 6, r2: 100 + i * 36, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#f1dcff' : '#ffffff' });
@@ -134,6 +138,16 @@ function pearlBossRammed(e, bp, speed) {
   nearbyImpact(e.x, e.y, 10, .08);
   if (typeof sfxAt === 'function') { sfxAt('knock2', e.x, e.y, 1.3, 'pearl-elder-ram'); sfxAt('pearlHurt', e.x, e.y, 1.4, 'pearl-elder-ram2'); }
   shatterBigPearl(bp);
+}
+// 核心腳下的腐蝕痕跡：抱在身上時收掉（不然會留在甦醒的地方），掉到地上時在落點重新鋪上（js/anomalous-core.js 的 wakeCore 做的那一攤）
+function pearlBossCorePool(core, on) {
+  if (!core.pool) return;
+  G.acidPools = (G.acidPools || []).filter(p => p !== core.pool);
+  if (core.scorch) { G.scorchMarks = (G.scorchMarks || []).filter(s => s !== core.scorch); core.scorch = null; }
+  if (!on) return;
+  core.pool.x = core.x; core.pool.y = core.y + 8; core.pool.t = 999;
+  G.acidPools.push(core.pool);
+  keepCoreScorch(core);
 }
 // 打在大童身上的傷害，核心跟著吃 coreShare；核心在牠身上時不會破掉（最少 1 滴血）
 function pearlBossCoreShare(e, lost) {
@@ -229,7 +243,8 @@ function stepPearlBoss(e, dt) {
     case 'shell': pearlBossRain(e, dt); if (pk.t <= 0) { pearlBossSet(e, 'open'); pk.grace = P.shell.grace; pk.cd = Math.min(pk.cd, .6); } return;
     case 'stunned': if (pk.t <= 0) { pearlBossSet(e, 'open'); pk.grace = P.shell.grace * .5; } return;
     case 'return':
-      if (pearlBossGoHome(e, dt * 1.3)) pearlBossSet(e, 'open');
+      pearlBossGoHome(e, dt * 1.3);
+      if (pk.t <= 0 || peDist(e, e.home) <= P.returnTo * CELL) pearlBossSet(e, 'open');
       return;
     case 'open': pearlBossOpen(e, dt); return;
     default: pearlBossSet(e, 'open');
@@ -257,13 +272,15 @@ function pearlBossOpen(e, dt) {
     return;
   }
   pk.lostT = 0;
-  if (peDist(e, e.home) > P.leash * CELL) { pearlBossSet(e, 'return'); return; }
+  const fromHome = peDist(e, e.home);
+  if (fromHome > P.returnAt * CELL) { pearlBossSet(e, 'return', P.returnMax); return; }
   const d = peDist(target, e);
   if (d <= S.range * CELL) {
     if (d < P.keepDistance * CELL) enemyBackOff(e, target, dt, .8);   // 太近：往後飄
     if (pk.cd <= 0) pk.windup = S.windup;
     return;
   }
+  if (fromHome >= P.leash * CELL && peDist(target, e.home) > fromHome) return;   // 追到範圍邊緣：停在這裡等，不再往外追
   const [gc, gr] = cellAt(target.x, target.y);
   const nav = enemyNavigate(e, gc, gr, dt, 'pearl-elder:' + gc + ',' + gr, 'detour');
   if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
@@ -538,6 +555,7 @@ function pearlBossDown(e) {
   const core = e.carryCore;
   if (core && !core.dead) {
     core.carried = false; core.x = e.x; core.y = e.y; core.lastHp = core.hp;
+    if (core.awake) pearlBossCorePool(core, true);   // 腐蝕痕跡鋪在掉下來的地方
     G.effects.push({ ring: true, x: core.x, y: core.y, r: 8, r2: 80, life: .45, life0: .45, color: '#b56bff' });
     for (let i = 0; i < 6; i++) {
       const a = Math.random() * Math.PI * 2, sp = 8 + Math.random() * 16;
@@ -546,6 +564,7 @@ function pearlBossDown(e) {
   }
   for (const bp of [...(G.bigPearls || [])]) shatterBigPearl(bp);
   G.pearlFalls = [];
+  if (typeof sfxAt === 'function') sfxAt('pearlElderDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著用同一個來源播的那聲會被 70ms 去重吃掉
   systemNotice(e.eliteName + '倒下了！異質核心掉在地上', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '異質核心掉在地上，現在可以把它打爆！', '#f4d9ff');
   nearbyImpact(e.x, e.y, 10, .08);

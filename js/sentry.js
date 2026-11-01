@@ -547,7 +547,7 @@ function hasAggroTarget(t) {
   if (!G.enemies.length && !cores.some(c => !c.dead && c.awake && !c.hidden)) return false;
   const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
   for (const e of [...G.enemies, ...cores]) {
-    if (e.dead || e.awake === false || e.hidden) continue;   // 沉睡的核心不算目標；躲在順順宮帽裡的也不算（js/elite-cap-king.js）
+    if (e.dead || e.awake === false || e.hidden || e.carried) continue;   // 沉睡的核心不算目標；躲在順順宮帽裡、抱在珍珠大童身上的也不算（js/elite-cap-king.js、js/pearl-elder.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不主動接敵（js/elite-bird-head.js）
     if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
@@ -705,7 +705,7 @@ function updateSentry(t, dt) {
     const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
-      if (e.dead || e.awake === false || e.hidden) continue;   // 沉睡的核心不去追；躲在順順宮帽裡的也不追（js/elite-cap-king.js）
+      if (e.dead || e.awake === false || e.hidden || e.carried) continue;   // 沉睡的核心不去追；躲在順順宮帽裡、抱在珍珠大童身上的也不追（js/elite-cap-king.js、js/pearl-elder.js）
       if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不去追
       if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
       if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心

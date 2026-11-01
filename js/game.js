@@ -1045,7 +1045,7 @@ function updateChaosSentry(t, spec, dt) {
   for (const o of G.towers) if (o !== t && o.hp > 0) consider(o, o.x, o.y);
   if (G.player && G.player.hp > 0) consider(G.player, G.player.x, G.player.y);
   for (const o of G.obstacles) if (o.isBase && o.hp > 0) consider(o, (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2);
-  for (const c of G.cores) if (!c.dead && c.awake && !c.hidden) consider(c, c.x, c.y);
+  for (const c of G.cores) if (!c.dead && c.awake && !c.hidden && !c.carried) consider(c, c.x, c.y);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
   if (!best) return;
   const range = spec.range * CELL;
   const canSee = hasLineOfSight(t.x, t.y, best.x, best.y);
@@ -1650,7 +1650,7 @@ function pickSentryTarget(t, R) {
   }
   if (best || t.guardSummoned) return best;
   for (const core of G.cores) {
-    if (core.dead || !core.awake || core.hidden) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡的也打不到（js/elite-cap-king.js）
+    if (core.dead || !core.awake || core.hidden || core.carried) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡、抱在珍珠大童身上的也打不到（js/elite-cap-king.js、js/pearl-elder.js）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
     if (distance <= R + CORE_HIT_PAD && distance < bestScore && hasLineOfSight(t.x, t.y, core.x, core.y)) { best = core; bestScore = distance; }
   }
@@ -2551,7 +2551,8 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '再挑戰');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && e.pearlBoss && e.eliteName) return e.eliteName;   // 珍珠大童（js/pearl-elder.js）
+  const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;
