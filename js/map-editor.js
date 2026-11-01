@@ -500,7 +500,7 @@ function fixMap(m) {
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
   m.rules = Object.assign({
-    money: 3000, guide: 100, guideRegen: 9,
+    money: 5000, guide: 100, guideRegen: 9,
     speed: 44, reward: 8,   // 舊地圖（沒設定怪物組合）的史萊姆速度與獎勵
   }, m.rules || {});
   for (const k of ["waves", "count", "countAdd", "hp", "hpAdd", "speedAdd", "gap", "gapSub", "lives"]) delete m.rules[k];   // 舊的波次規則：已經不用了

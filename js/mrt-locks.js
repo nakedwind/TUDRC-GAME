@@ -22,6 +22,12 @@ function mrtSaveUnlocked() { try { localStorage.setItem(MRT_STORE, JSON.stringif
 
 // 換地圖、重新開始時：哪些格子要擋（js/game.js 在 setupDoors 之後呼叫）
 let mrtAddedWalls = new Set();   // 這裡加進固定牆的格子（G 會整個換掉，所以另外記：重開時先全部還原）
+// 這張地圖有封鎖的入口，而且全部解封了（解封是永久的）：之後打破核心不再掉異質鑰匙，只掉 MRT_OPEN_CORE_REWARD 異質碎片
+const MRT_OPEN_CORE_REWARD = 350;
+function mrtExitsAllOpen() {
+  const exits = ((G && G.mrtLocks) || []).filter(l => l.cfg.kind === 'exit');
+  return exits.length > 0 && exits.every(l => l.open);
+}
 function setupMrtLocks() {
   for (const k of mrtAddedWalls) mapWalls.delete(k);
   mrtAddedWalls = new Set();

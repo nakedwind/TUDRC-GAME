@@ -13,6 +13,7 @@ const coreKeyGroundImg = new Image(); coreKeyGroundImg.src = CORE_KEY_DROP.image
 // js/anomalous-core.js 的 breakCore 呼叫：鑰匙從核心彈出來，掉在地上
 function coreKeyDrop(core) {
   const id = CORE_CLEAR.keyItem; if (typeof itemById !== 'function' || !itemById(id)) return;
+  if (mrtExitsAllOpen()) return;   // 這張地圖的捷運入口都解封了：不用再掉鑰匙（js/mrt-locks.js）
   const a = Math.random() * Math.PI * 2, sp = 25 + Math.random() * 25;
   (G.coreKeyDrops = G.coreKeyDrops || []).push({ id, x: core.x, y: core.y + 4, z: 50, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6, vz: 170, t: 0, spin: Math.random() * 6 });
 }

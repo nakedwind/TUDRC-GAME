@@ -21,7 +21,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=clawstock-20261101"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=y25skip-20261031">
+<link rel="stylesheet" href="css/style.css?v=pausebattle-20261101">
 <link rel="stylesheet" href="css/tpad-map.css?v=radio-nav-20261028">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=dogtree-20261029">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
@@ -275,9 +275,9 @@
   <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 開發工坊：裝備文字、圖片與外觀（開發工坊編輯器、背包編輯器都會存）；每次都讀最新的，兩邊改的說明才會馬上連動 -->
   <script src="js/workshop-config.js?v=radio-nav-20261028"></script>   <!-- 把上面的設定套用到裝備資料 -->
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
-  <script src="data/missions.js?v=y25entry-20261031"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
-  <script src="data/dialogues.js?v=y25entry-20261031"></script>  <!-- 所有台詞（對話編輯器） -->
-  <script src="data/balance.js?v=sgear-ws-20261028"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/missions.js?v=k56table-20261101"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
+  <script src="data/dialogues.js?v=pausebattle-20261101"></script>  <!-- 所有台詞（對話編輯器） -->
+  <script src="data/balance.js?v=money5000-20261101"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=mate-hurt-20261028"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
@@ -297,7 +297,7 @@
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js?v=sync-20261021"></script>
   <script src="js/pathfinding.js"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=warp-20261101"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=pausebattle-20261101"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=water-20261026"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/doors.js?v=nopadlock-20261101"></script> <!-- 門：手動門／自動門 -->
   <script src="js/memory-doors.js?v=nopadlock-20261101"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
@@ -306,7 +306,7 @@
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
   <script src="js/build.js?v=escalator-nobuild-20261031"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=hospicon-20261029"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=merge2-20261101"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=pausebattle-20261101"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
   <script src="js/npc-chats.js?v=discharge-20261101"></script> <!-- 基地 NPC 閒聊小表演：走到桌前、泡泡輪流說話 -->
   <script src="js/progression.js?v=achvimpl-20261023"></script>
@@ -369,7 +369,7 @@
   <script src="js/food.js?v=drop30b-20261031"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/ball-poses.js?v=ball-bark-20261027"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
-  <script src="js/missions.js?v=brief-standin-20261101"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
+  <script src="js/missions.js?v=pausebattle-20261101"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
   <script src="js/save.js?v=pcdesk2-20261029"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/boss-music.js?v=clawstock-20261101"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
@@ -379,7 +379,7 @@
   <script src="js/equipment.js?v=capking-20261101"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=knockpearl-20261101"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=box-fly3-20261029"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
-  <script src="js/combat-progress.js?v=y25entry-20261031"></script>
+  <script src="js/combat-progress.js?v=newbiemoney-20261101"></script>
   <script src="js/camp-interactions.js?v=ammorefill-20261026"></script>
   <script src="js/camp-supply.js?v=y25entry-20261031"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
@@ -387,12 +387,12 @@
   <script src="js/vitals.js?v=hospitalself-20261101"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
   <script src="js/camp-beds.js?v=poolbed-20261026"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
-  <script src="js/mrt-locks.js?v=stamppx-20261027"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
+  <script src="js/mrt-locks.js?v=pausebattle-20261101"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=hospitalself-20261101"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=pausemerge-20261101"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
-  <script src="js/core-clear.js?v=newbie-result-20261027"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
+  <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=custom2-20261028"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->
   <script src="js/quick-slots.js?v=merge-food-20261030"></script>   <!-- 下方快捷欄 1～0：把背包的道具拖進去（必須在 shop、backpack、equipment、graffiti 之後） -->
   <script src="js/hover-tip.js?v=hovertip-20261023"></script>   <!-- 懸停提示：快捷欄、建造欄的小道具，游標停 0.2 秒出現（上方框＝效果、下方＝名稱） -->

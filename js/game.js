@@ -735,6 +735,7 @@ function enterPortal(pt) {
     setTimeout(() => {
       setTimeout(() => {
         if (pauseHere) pauseBattleForStory();
+        else if (typeof suspendLeavingBattle === 'function') suspendLeavingBattle();   // 走去別張地圖：這裡的戰場暫停，走回來接著打（js/combat-progress.js）
         if (pauseHere || !resumePausedBattle(pt.to)) {       // 從劇情地圖走回暫停中的戰場：原樣接著打
           switchMap(mapIndexById(pt.to));       // 全黑維持半秒後換地圖
           begin(false);                         // 重建並進入遊玩狀態，不播放開始按鈕聲
@@ -1229,8 +1230,10 @@ function newGame() {
   if (MAP_STORY) G.money = typeof pausedBattle !== 'undefined' && pausedBattle ? pausedBattle.G.money : walletGet();   // 劇情地圖：只顯示暫停中那場作戰的經費（從基地來的就是錢包），不動錢包
   // 出勤：應變中心錢包裡的錢全部帶出來，加在這張地圖的作戰經費上（回基地時剩多少就帶回多少，js/progression.js）
   if (!MAP_SAFE && !window.TEST_MODE) {
-    // 新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
-    if (!isNewbieMap() && typeof walletGet === 'function') G.money += walletGet();
+    const moneyGiven = typeof missionMoneyGiven === 'function' && missionMoneyGiven(MAP && MAP.id);
+    if (moneyGiven) G.money = 0;   // 這張地圖的作戰經費只給一次，新手區也一樣（js/missions.js）
+    // 第一次進新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
+    if ((moneyGiven || !isNewbieMap()) && typeof walletGet === 'function') G.money += walletGet();
   }
   if (typeof renderBuildQuickSlots === 'function') renderBuildQuickSlots();   // 下方建築欄：這張地圖能蓋的（新手區只有幾種，js/build.js）
   if (isNewbieMap() && !window.TEST_MODE) {   // 新手區：照明彈裝好在彈匣、防護頭盔放在裝備箱（data/balance.js 的 NEWBIE_START）
@@ -2442,7 +2445,8 @@ function update(dt) {
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
-    earnCrystals(core.reward); if (G.battle) G.battle.cores++; flash('核心摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    const coreReward = mrtExitsAllOpen() ? MRT_OPEN_CORE_REWARD : core.reward;   // 捷運入口解封了：核心只掉碎片（js/mrt-locks.js）
+    earnCrystals(coreReward); if (G.battle) G.battle.cores++; flash('核心摧毀 +'+coreReward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + coreReward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -2592,7 +2596,7 @@ const LOSE_TEXT = {
 function loseOverlay(reason, cause) {
   const [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base;
   const causeLine = cause ? '<span class="lose-cause">倒下原因：<b>' + cause + '</b></span>' : '';
-  showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '再挑戰');
+  showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
 function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
@@ -2609,7 +2613,7 @@ function prepareMonsterPreview() {
   if (note) note.textContent = '🔍 ' + (spec?.name || '怪物') + '測試場 · WASD 移動，滑鼠射擊；不會寫入正式存檔';
   updateCamera(); updateHUD();
 }
-function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
+function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); if (typeof markMissionMapReached === 'function' && !PREVIEW) markMissionMapReached(MAP && MAP.id); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); achieveOnBattleEnd('win'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;

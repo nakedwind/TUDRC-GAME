@@ -53,18 +53,69 @@ function reclaimAddedWalls() {
   if (typeof restoreMrtLocks === 'function') restoreMrtLocks();               // 捷運閘門、封鎖的入口（js/mrt-locks.js）
   if (typeof restoreStorageBoxWalls === 'function') restoreStorageBoxWalls();  // 置物箱（js/storage-lockers.js）
 }
+// 重新部署＝這張地圖一切重來：開過的箱子、撿過的東西也回到原樣（封鎖的捷運入口除外，解封是永久的，js/mrt-locks.js）
+function resetMapLoot(mapId) {
+  const here = token => { try { return JSON.parse(token)[0] === mapId; } catch (_) { return false; } };
+  for (const set of [unlockedStorageLockers, collectedStorageKeys]) for (const token of [...set]) if (here(token)) set.delete(token);
+}
+function redeployCombat(mapId) {
+  clearCombatProgress(mapId); resetMapLoot(mapId);
+}
+// 同一張地圖直接重新部署（不經過換地圖）：剩下的經費留著，地圖的作戰經費不會再給一次（js/missions.js 的 missionMoneyGiven）
+function keepBattleMoney() {
+  if (!G || MAP_SAFE || G.moneySettled || window.TEST_MODE || typeof walletSet !== 'function') return;
+  G.moneySettled = true; walletSet(Math.max(0, Math.floor(G.money || 0)));
+}
+// 戰敗撤退：戰場像時間暫停一樣留著。回來時溫特站在營地；營地被打壞的話修回一半，不然一接續又馬上戰敗
+const DEFEAT_CAMP_HP = .5;
+function suspendDefeatedBattle() {
+  G.over = false; G.won = false; G.phase = 'playing'; G.playerDeath = null; G.baseLostT = 0;
+  for (const s of [...(G.destroyedBases || [])]) {
+    const o = seedBaseObstacle(s); if (o) o.hp = Math.ceil(o.maxhp * DEFEAT_CAMP_HP);
+    G.destroyedBases.delete(s);
+  }
+  const [x, y] = playerSpawnPos(); G.player.x = x; G.player.y = y; G.player.moving = false;
+  try { suspendCombatProgress(); } catch (_) { systemNotice('無法儲存作戰進度，請確認儲存空間', true); }
+}
+// 走出入口離開戰鬥地圖（js/game.js 的 enterPortal）：這張地圖一樣暫停，走回來接著打
+function suspendLeavingBattle() {
+  if (MAP_SAFE || !MAP || !G || G.over || isNewbieMap() || !missionOfMap(MAP.id)) return;
+  try { suspendCombatProgress(); } catch (_) { systemNotice('無法儲存作戰進度，請確認儲存空間', true); }
+}
+// 接續時從應變中心回來：在基地準備的東西要算數（換了隊員、帶了補給、休息過）。走出入口直接回來的就不用
+function resumeSquadFromBase(savedSupply) {
+  sortieLastSafe = true; onSortieNewGame();   // 吃掉這次帶的補給、彈匣補滿（js/sortie-supply.js）
+  sortie.active = { ...savedSupply, ...sortie.active }; saveSortie();
+  const team = getTeam();
+  G.towers = G.towers.filter(t => {
+    if (!TYPES[t.type] || team.includes(t.type)) return true;
+    t.hp = 0; return false;   // 換下來的隊員：怪物還瞄著他的話，當作倒下
+  });
+  const missing = team.filter(id => !G.towers.some(t => t.type === id));
+  if (missing.length) spawnSentries(missing);
+  for (const t of G.towers) {
+    if (!TYPES[t.type]) continue;
+    t.maxhp = TYPES[t.type].hp; t.buff = undefined; applySortieBuff(t);
+    if (TYPES[t.type].guide && typeof initGuideSP === 'function') { t.sp = undefined; initGuideSP(t); }   // 在基地休息過的 SP
+  }
+  if (typeof restoreSanitySP === 'function') restoreSanitySP();
+}
 function restoreCombatProgress() {
   if (MAP_SAFE || !MAP) return false;
   const saved = readCombatProgress()[MAP.id]; if (!saved) return false;
+  const lastSafe = sortieLastSafe;
   if (saved.signature !== combatMapSignature()) { clearCombatProgress(MAP.id); systemNotice('地圖已更新，本次作戰重新部署'); return false; }
   try {
     const data = combatGraphDecode(saved.graph, MAP.stamps || []);
     if (!data.state?.player || !(data.walls instanceof Set)) throw new Error('戰場資料不完整');
     G = data.state; mapWalls = data.walls; mapDoors = data.doors; doorAddedWalls = data.doorWalls; mapSolidOffsets = data.offsets;
-    sortie.active = data.activeSupply; sortieLastSafe = false; saveSortie();
+    if (lastSafe !== false) sortie.active = data.activeSupply;   // 走出入口回來的：這趟出勤的補給效果還在
+    sortieLastSafe = false; saveSortie();
+    if (!window.TEST_MODE && typeof walletGet === 'function') { G.money = walletGet(); G.moneySettled = false; }   // 錢包才是現在的錢：離開時帶回去了，基地裡可能花掉了
     poweredMap = MAP; mapPowerOn = new Set(Array.isArray(data.power) ? data.power : data.power ? [0] : []);   // 舊存檔：true＝沒編號的電路開著
     openElevatorStamp = data.elevator || null;   // 電梯開著還是關著（擋路格已經跟著 mapWalls 一起還原）
     reclaimAddedWalls();
+    if (lastSafe === true) resumeSquadFromBase(data.activeSupply);
     if (typeof resumeVitals === 'function') resumeVitals();   // 中間回應變中心治療過：換成現在的 HP、負荷（倒下的隊員治好了就站起來，js/vitals.js）
     sanitySP = G.guide; rememberGuideSP(); applyOutfits(); occCache = null; occCacheFor = null;
     computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
@@ -77,10 +128,10 @@ function executeCampPlan(action) {
   if (action !== 'restart' && mapIndexOf(MISSION_BASE.map) < 0) { systemNotice('找不到應變中心地圖', true); return; }
   if (mapTransitioning) return;
   try {
-    if (action === 'preserve') suspendCombatProgress(); else clearCombatProgress(MAP.id);
+    if (action === 'preserve') suspendCombatProgress(); else redeployCombat(MAP.id);
   } catch (_) { systemNotice('無法儲存作戰進度，請確認儲存空間後重試', true); return; }
   closeGroundMenu(); saveGame();
-  if (action === 'restart') { begin(false); updateCamera(); }
+  if (action === 'restart') { keepBattleMoney(); begin(false); updateCamera(); }
   else returnToBase();
   return true;
 }
