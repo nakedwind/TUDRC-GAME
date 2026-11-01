@@ -42,7 +42,7 @@ Object.keys(ORE_TYPES).forEach(oreGlowFor);   // 先載入
 // 被照亮的礦物：結晶疊上鮮豔紫光（由 render.js 的 drawObstacle 呼叫，跟礦物圖同一個前後順序）
 function drawOreGlow(ctx, o, x, y, w, h) {
   const c = oreCenter(o);
-  if (o.hp <= 0 || !isLit(c.x, c.y)) return;   // 黑暗中不發光
+  if (o.hp <= 0 || !isLit(c.x, c.y) || oreConcealed(o)) return;   // 黑暗中不發光；還沒炸開的隱藏區也不發光
   const imgs = oreGlowFor(o.type); if (!imgs) return;
   const now = performance.now() / 1000, C = ORE_CRYSTAL_GLOW;
   const k = 1 - C.pulse + C.pulse * (.5 + .5 * Math.sin(now * C.speed + o.c * 1.7 + o.r));
@@ -63,6 +63,16 @@ const oreCenter = o => {
   const ry = sol ? sol.reduce((sum, [, r]) => sum + r + .5, 0) / sol.length : (o.h || 1) / 2;
   return { x: OX + (o.c + (o.w || 1) / 2) * CELL, y: OY + (o.r + ry) * CELL };
 };
+// 礦物還藏在沒炸開的隱藏區裡：不發光，免得露餡；探測器照常顯示，算是找隱藏區的線索（js/breakable-walls.js、js/equipment.js）
+// 除了看位置，也看礦物圖本身是不是畫在隱藏區圖層上（mapSource：圖章物件，或格子素材的 "圖層:c,r" 字串）
+function oreConcealed(o) {
+  const c = oreCenter(o), src = o.mapSource;
+  if (typeof inHiddenArea === 'function' && inHiddenArea(c.x, c.y)) return true;
+  if (!src || typeof secretAlpha !== 'function') return false;
+  if (typeof src === 'object') return secretAlpha(src) <= 0;
+  const i = String(src).indexOf(':');
+  return i > 0 && secretAlpha(null, src.slice(0, i), src.slice(i + 1)) <= 0;
+}
 
 // 靠近礦物時的提示（礦物在 1.5 格內）
 function oreNearPlayer() {
@@ -246,7 +256,7 @@ function strayBoltOre(t, target) {
 function oreGlowLights() {
   if (!G || !G.obstacles) return [];
   const now = performance.now() / 1000;
-  const lights = G.obstacles.filter(o => o.ore && o.hp > 0 && isLit(oreCenter(o).x, oreCenter(o).y)).map(o => {   // 黑暗中不發光
+  const lights = G.obstacles.filter(o => o.ore && o.hp > 0 && isLit(oreCenter(o).x, oreCenter(o).y) && !oreConcealed(o)).map(o => {   // 黑暗中不發光；還沒炸開的隱藏區也不發光
     const c = oreCenter(o), spec = ORE_TYPES[o.type];
     return { x: c.x, y: c.y - 6, r: 70 + spec.glow * 60, life: 1, life0: 1,
       power: spec.glow * (.8 + .2 * Math.sin(now * 2 + o.c * 1.7 + o.r)), color: [190, 110, 255] };
