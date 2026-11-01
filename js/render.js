@@ -1128,7 +1128,7 @@ function draw() {
     else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）
     else if (typeof wardrobeNearPlayer === 'function' && !doorNearPlayer() && wardrobeNearPlayer()) { const w = wardrobeNearPlayer(); drawInteractPrompt(w.x, w.top - 4, '換裝'); }   // 衣櫃（js/costumes.js）
     else if (typeof gachaNearPlayer === 'function' && !doorNearPlayer() && gachaNearPlayer()) { const g = gachaNearPlayer(); drawInteractPrompt(g.x, g.top - 4, '扭蛋'); }   // 扭蛋機（js/gacha.js）
-    else if (typeof clawNearPlayer === 'function' && !doorNearPlayer() && clawNearPlayer()) { const c = clawNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '夾娃娃'); }   // 夾娃娃機（js/claw-machine.js）
+    else if (typeof clawNearPlayer === 'function' && !doorNearPlayer() && clawNearPlayer()) { const c = clawNearPlayer(); drawInteractPrompt(c.x, c.top - 4, clawPromptLabel(c)); }   // 夾娃娃機（js/claw-machine.js）
     else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '使用電腦'); }   // 2F應變中心的電腦：打開電腦桌面（js/bestiary.js、js/pc-desktop.js）
     else if (typeof armorChestNearPlayer === 'function' && !doorNearPlayer() && armorChestNearPlayer()) { const c = armorChestNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '整理防具'); }   // 裝備箱（js/backpack.js）
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）

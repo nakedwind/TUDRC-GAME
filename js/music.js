@@ -25,7 +25,8 @@ const MUSIC = (() => {
 
   // 回憶劇情有自己的 BGM（js/story-scene.js）：這裡停下來，不要兩首疊在一起
   // 劇情地圖（地圖屬性 story）：時間暫停，背景音樂也停
-  const wanted = () => window.STORY_MODE || (typeof MAP_STORY !== 'undefined' && MAP_STORY) ? 'story' : (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) ? 'safe' : 'battle';
+  // 夾娃娃機有自己的音樂（js/claw-machine.js）：開著的時候這裡也停下來
+  const wanted = () => window.STORY_MODE || (typeof clawOpen !== 'undefined' && clawOpen) || (typeof MAP_STORY !== 'undefined' && MAP_STORY) ? 'story' : (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) ? 'safe' : 'battle';
   const muted = () => typeof SFX !== 'undefined' && !SFX.enabled;
   const target = () => muted() ? 0 : Math.min(1, volume * MAX * (SOUNDS[mode] ? SFX.gainOf(SOUNDS[mode]) ?? 1 : 1));
 
