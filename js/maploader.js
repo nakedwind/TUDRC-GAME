@@ -423,9 +423,13 @@ const isEntrance = () => false;
 // 開局時把「可破壞」擺成障礙物（每次 newGame 呼叫）
 function seedMapObstacles() {
   if (!MAP) return;
-  for (const s of mapBases) {
+  for (const s of mapBases) seedBaseObstacle(s);
+  seedOtherMapObstacles();
+}
+// 把一個營地擺上場（戰敗撤退時修回被打壞的營地也用這個，js/combat-progress.js）
+function seedBaseObstacle(s) {
     const t = mapTileById(s.id);
-    if (!t) continue;
+    if (!t) return null;
     const w = mapStampW(s, t), h = mapStampH(s, t), baseW = mapTileW(t), baseH = mapTileH(t);
     const baseC = s.c + Math.round((s.ox || 0) / CELL), baseR = s.r + Math.round((s.oy || 0) / CELL);
     const hasCustomSolid = Array.isArray(s.baseSolid);
@@ -446,7 +450,9 @@ function seedMapObstacles() {
       if (inGrid(c, r)) G.grid[c + ',' + r] = o;
     });
     G.obstacles.push(o);
-  }
+    return o;
+}
+function seedOtherMapObstacles() {
   // 地圖編輯器的「障礙物」素材沿用可放置建築的碰撞格與 HP。
   // 不修改原始地圖；拆毀後只在本局隱藏該圖片。
   const addMapObstacle = (t, c, r, source, stamp = null) => {

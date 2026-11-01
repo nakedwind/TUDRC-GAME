@@ -245,7 +245,7 @@ function campSpawnCells(n = 24) {
   }
   return out;
 }
-function spawnSentries() {
+function spawnSentries(only = null) {   // only：只生這幾位（接續戰場時新編入的隊員，js/combat-progress.js）
   const cand = [], start = boxStartCells(), camp = campSpawnCells();
   if (camp.length > 1) cand.push(...camp.slice(1));   // 有營地：營地裡（第一格留給溫特）
   else if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
@@ -258,7 +258,7 @@ function spawnSentries() {
     ? (typeof ROSTER !== 'undefined' ? ROSTER : Object.keys(TYPES)).filter(npcHomeHere)
     : (typeof practiceOn === 'function' && practiceOn()) ? practice.team.slice()   // 訓練室：在塔納那裡選的隊員（js/practice.js）
     : ((typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES));
-  for (const type of team) {
+  for (const type of only || team) {
     const spec = TYPES[type]; if (!spec) continue;
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
