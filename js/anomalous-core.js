@@ -184,16 +184,17 @@ function keepCoreScorch(core) {
 
 function updateCores(dt) {
   if (typeof eliteShieldCores === 'function') eliteShieldCores();   // 菁英怪活著：核心少受傷（js/elite-bird-head.js）
+  if (typeof capKingShieldCore === 'function') capKingShieldCore();   // 大夯吉寶活著：核心少受傷（js/elite-cap-king.js）
   for (const core of G.cores) {
     if (core.dead) continue;
     if (core.hitT > 0) core.hitT -= dt;
     if (core.hp < core.lastHp) {
-      if (core.awake) core.hitT = .16;
-      else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）
+      if (core.awake && !core.hidden) core.hitT = .16;
+      else core.hp = core.lastHp;   // 沉睡中不會受傷（只有溫特的槍能叫醒它，見 game.js）；躲在順順宮帽裡也不會（js/elite-cap-king.js）
     }
     core.lastHp = core.hp;
-    if (!core.awake && !core.carried && G.towers.some(t => t.type === 'avaren' && t.hp > 0 && Math.hypot(t.x - core.x, t.y - core.y) <= CORE.wakeAvarenCells * CELL)) wakeCore(core);
-    if (core.awake) {
+    if (!core.awake && !core.hidden && !core.carried && G.towers.some(t => t.type === 'avaren' && t.hp > 0 && Math.hypot(t.x - core.x, t.y - core.y) <= CORE.wakeAvarenCells * CELL)) wakeCore(core);   // carried：抱在珍珠大童身上（js/pearl-elder.js）
+    if (core.awake && !core.hidden) {   // 躲在順順宮帽裡：不冒粒子、沒有腐蝕痕跡（js/elite-cap-king.js）
       core.awakeT += dt;
       if (core.phase === 1 && core.hp > 0 && core.hp <= core.maxhp * CORE.phase2At) enterPhase2(core);   // 一擊打破時不再跳第二階段
       keepCoreScorch(core);
@@ -226,7 +227,7 @@ function coreLift(core) {
 function coreGlowLights() {
   if (!G || !G.cores) return [];
   const now = performance.now() / 1000;
-  return G.cores.filter(c => c.awake && !c.dead).map(c => ({
+  return G.cores.filter(c => c.awake && !c.dead && !c.hidden).map(c => ({
     x: c.x, y: c.y - 30, r: c.phase === 2 ? 190 : 150, life: 1, life0: 1,
     power: (c.phase === 2 ? .7 : .55) + .1 * Math.sin(now * (c.phase === 2 ? 5 : 2.5) + c.seed),
     color: c.phase === 2 ? [230, 110, 255] : [180, 110, 255],

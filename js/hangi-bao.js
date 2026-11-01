@@ -1,11 +1,14 @@
 /* ===== 順順宮帽＆夯吉寶 =====
-   ・順順宮帽：戰鬥地圖開場時藏在隨機的黑暗角落（不會貼著牆；之後也會慢慢冒出新的）。黑暗中只看得到一點微微的閃光。
+   ・順順宮帽：跟夯吉寶綁在一起——這張地圖會出現夯吉寶才有帽子（判定同 js/monster-data.js 的 monsterChoices）。
+     戰鬥地圖開場時藏在隨機的黑暗角落（不會貼著牆；之後也會慢慢冒出新的）。黑暗中看不到，要照亮才看得到。
      攻擊帽子（溫特開槍打到、照明彈落在帽子上、地雷／油桶／瓦斯爐／自爆史萊姆爆炸波及、希奧妮的火焰、燒起來的油火），
      帽子就會打開，跳出 3～5 隻夯吉寶；
      有時候還會掉出有用的物品（物品表 HANGI_CAP.loot，之後再設定）。只是走近不會打開。
      關著的帽子像障礙物一樣擋路（佔住腳下那一格：玩家、哨兵、怪物都過不去）；打開後就不擋了。
    ・夯吉寶（behavior: "boomerang"）：看到玩家或哨兵就走近，丟出小順順宮帽。帽子像迴力鏢一樣飛出去再飛回自己身上，
      去程、回程都會打到人；帽子還沒回來之前不會再丟。數值在 data/monsters.js 的 boomerang（欄位見 js/monster-data.js 的 BOOMERANG_FIELDS）。
+   ・順順宮主的大宮帽（js/elite-cap-king.js）也放在 G.hangiCaps 裡（cap.boss），打開的方式一樣，但打開後交給那邊處理、不會消失；
+     不受上面「綁定夯吉寶」的限制（地圖有標大宮帽就有）。
    必須在 enemy-ai.js 之後、game.js 之前載入。
 */
 const HANGI_CAP = {
@@ -52,7 +55,7 @@ function hangiCapSpot(minFromPlayer) {
 function placeHangiCap(minFromPlayer) {
   const spot = hangiCapSpot(minFromPlayer);
   if (!spot) return;
-  const cap = { x: spot.x, y: spot.y, c: spot.c, r: spot.r, state: 'closed', t: 0, glint: Math.random() * 5 };
+  const cap = { x: spot.x, y: spot.y, c: spot.c, r: spot.r, state: 'closed', t: 0 };
   G.hangiCaps.push(cap);
   G.grid[cap.c + ',' + cap.r] = { kind: 'hangiCap', cap };   // 擋路：佔住腳下這一格
 }
@@ -60,44 +63,58 @@ function placeHangiCap(minFromPlayer) {
 function hangiCapAt(c, r) { const o = G.grid && G.grid[c + ',' + r]; return !!(o && o.kind === 'hangiCap'); }
 
 // ---- 每幀更新（game.js 的 update 呼叫）----
-// 這張地圖的異質體有勾夯吉寶才放帽子（地圖編輯器「這張地圖的異質體」）
-const mapHasHangi = () => !!MAP?.monsterMix?.some(m => m.id === 'hangi_bao' && Number(m.weight) > 0);
+// 帽子跟夯吉寶綁在一起：這張地圖真的會生成夯吉寶（地圖編輯器「這張地圖的異質體」有勾、怪物資料裡也有）才有帽子。
+// 跟異質核心挑怪物用同一套判定（js/monster-data.js 的 monsterChoices），兩邊才不會對不起來。
+const mapHasHangi = () => !!MAP && typeof monsterChoices === 'function' && monsterChoices(MAP, ACTIVE_MONSTERS).some(m => m.id === 'hangi_bao');
+const hangiCapsAllowed = () => !MAP_SAFE && LIGHT.enabled && mapHasHangi();
+// 現在場上的帽子（不該有帽子的地圖一律當成沒有：畫圖、打帽子都用這個；順順宮主的大宮帽例外）
+const liveHangiCaps = () => !G.hangiCaps ? null : hangiCapsAllowed() ? G.hangiCaps : G.hangiCaps.filter(cap => cap.boss);
+// 不該有帽子卻留著（例如練習結束、換了設定）：連同擋路格一起清掉（大宮帽留著，js/elite-cap-king.js 自己管）
+function clearHangiCaps() {
+  for (const cap of G.hangiCaps || []) {
+    if (cap.boss) continue;
+    const key = cap.c + ',' + cap.r;
+    if (G.grid[key] && G.grid[key].cap === cap) delete G.grid[key];
+  }
+  const boss = (G.hangiCaps || []).filter(cap => cap.boss);
+  G.hangiCaps = boss.length ? boss : null; G.hangiSeedT = 0; G.hangiSeeded = false;
+}
 function updateHangi(dt) {
-  if (MAP_SAFE || !LIGHT.enabled) return;
-  if (!mapHasHangi()) { updateCapShots(dt); return; }
-  if (!G.hangiCaps) {   // 開場：等亮光算好（約半秒）再把帽子藏進黑暗
+  if (!hangiCapsAllowed()) { if (G.hangiCaps && G.hangiCaps.some(cap => !cap.boss)) clearHangiCaps(); updateCapShots(dt); return; }
+  if (!G.hangiSeeded) {   // 開場：等亮光算好（約半秒）再把帽子藏進黑暗（順順宮主的大宮帽可能已經先放進 G.hangiCaps）
     G.hangiSeedT = (G.hangiSeedT || 0) + dt;
     if (G.hangiSeedT < 0.5) return;
-    G.hangiCaps = []; G.hangiRespawnT = hbRand(HANGI_CAP.respawnEvery);
+    G.hangiSeeded = true; G.hangiCaps = G.hangiCaps || []; G.hangiRespawnT = hbRand(HANGI_CAP.respawnEvery);
     const n = Math.round(hbRand(HANGI_CAP.startCount));
     for (let i = 0; i < n; i++) placeHangiCap(HANGI_CAP.minDistFromPlayer);
   }
   for (const cap of G.hangiCaps) {
-    cap.t += dt; cap.glint += dt;
+    if (cap.boss) continue;   // 順順宮主的大宮帽：js/elite-cap-king.js 自己管
+    cap.t += dt;
     // 燒起來的油火蔓延到帽子：打開帽子
     if (cap.state === 'closed' && G.oilFires && G.oilFires.some(f => f.t > 0 && Math.hypot(cap.x - f.x, (cap.y - f.y) / .7) <= f.r + 10)) openHangiCap(cap);
   }
-  G.hangiCaps = G.hangiCaps.filter(cap => cap.state === 'closed' || cap.t < HANGI_CAP.openStay);
+  G.hangiCaps = G.hangiCaps.filter(cap => cap.boss || cap.state === 'closed' || cap.t < HANGI_CAP.openStay);
   G.hangiRespawnT -= dt;
   if (G.hangiRespawnT <= 0) {
     G.hangiRespawnT = hbRand(HANGI_CAP.respawnEvery);
-    if (G.hangiCaps.filter(cap => cap.state === 'closed').length < HANGI_CAP.max) placeHangiCap(HANGI_CAP.minDistFromPlayer);
+    if (G.hangiCaps.filter(cap => !cap.boss && cap.state === 'closed').length < HANGI_CAP.max) placeHangiCap(HANGI_CAP.minDistFromPlayer);
   }
   updateCapShots(dt);
 }
 // ---- 攻擊帽子 ----
 // 帽子在畫面上的中心與大小（以關著的帽子圖計）
 function hangiCapBody(cap) {
-  const img = hbImg(HANGI_CAP.image), s = HANGI_CAP.scale;
+  const img = hbImg(HANGI_CAP.image), s = cap.scale || HANGI_CAP.scale;   // cap.scale：順順宮主的大宮帽
   const w = (img.naturalWidth || 69) * s, h = (img.naturalHeight || 59) * s;
   return { x: cap.x, y: cap.y + 13 - h / 2, r: Math.max(w, h) * .45 };
 }
 // 子彈從 (x1,y1) 射向 (x2,y2)：打到最近的那頂關著的帽子就打開，回傳命中點（game.js 開槍時呼叫；黑暗中也打得到）
 function shootHangiCapOnLine(x1, y1, x2, y2) {
-  if (!G.hangiCaps) return null;
+  const caps = liveHangiCaps(); if (!caps) return null;
   const dx = x2 - x1, dy = y2 - y1, len2 = dx * dx + dy * dy || 1;
   let best = null, bestT = Infinity;
-  for (const cap of G.hangiCaps) {
+  for (const cap of caps) {
     if (cap.state !== 'closed') continue;
     const b = hangiCapBody(cap), t = Math.max(0, Math.min(1, ((b.x - x1) * dx + (b.y - y1) * dy) / len2));
     if (Math.hypot(x1 + dx * t - b.x, y1 + dy * t - b.y) > b.r || t >= bestT) continue;
@@ -111,8 +128,8 @@ function shootHangiCapOnLine(x1, y1, x2, y2) {
 }
 // 爆炸或照明彈落在 (x,y)、半徑 R 內的帽子都會打開（地雷、油桶、照明彈呼叫）
 function hitHangiCapsAt(x, y, R) {
-  if (!G.hangiCaps) return;
-  for (const cap of G.hangiCaps) {
+  const caps = liveHangiCaps(); if (!caps) return;
+  for (const cap of caps) {
     if (cap.state !== 'closed') continue;
     const b = hangiCapBody(cap);
     if (Math.hypot(b.x - x, b.y - y) <= R + b.r || Math.hypot(cap.x - x, cap.y - y) <= R + b.r) openHangiCap(cap);
@@ -120,6 +137,7 @@ function hitHangiCapsAt(x, y, R) {
 }
 // 帽子打開：跳出夯吉寶，有機會掉物品
 function openHangiCap(cap) {
+  if (cap.boss && typeof openCapKingCap === 'function') { openCapKingCap(cap); return; }   // 順順宮主的大宮帽（js/elite-cap-king.js）
   cap.state = 'open'; cap.t = 0;
   if (typeof questEvent === 'function') questEvent('openCap');   // 支線進度（js/quests.js）
   if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮平安符（js/equipment.js）
@@ -227,11 +245,15 @@ function stepBoomerangEnemy(e, dt) {
 }
 
 // ---- 迴力鏢帽子 ----
+// e.capSpread＝{ n: 一次丟幾頂, angle: 相鄰兩頂差幾度, scale: 帽子放大, hitR: 打中判定半徑 }（大夯吉寶，js/elite-cap-king.js）
 function throwCap(e, target) {
-  const cfg = hbCfg(e), z = (e.drawHeight || 52) * .55;
-  const a = Math.atan2(target.y - e.y, target.x - e.x);
-  (G.capShots = G.capShots || []).push({ owner: e, x: e.x, y: e.y, z, ux: Math.cos(a), uy: Math.sin(a), speed: cfg.capSpeed,
-    phase: 'out', left: (cfg.throwRange + .8) * CELL, spin: 0, age: 0, hit: new Set(), trail: [] });
+  const cfg = hbCfg(e), z = (e.drawHeight || 52) * .55, sp = e.capSpread;
+  const a0 = Math.atan2(target.y - e.y, target.x - e.x), n = sp ? sp.n : 1;
+  for (let i = 0; i < n; i++) {
+    const a = a0 + (i - (n - 1) / 2) * (sp ? sp.angle : 0) * Math.PI / 180;   // 散開：中間那頂對準目標，其餘往兩邊
+    (G.capShots = G.capShots || []).push({ owner: e, x: e.x, y: e.y, z, ux: Math.cos(a), uy: Math.sin(a), speed: cfg.capSpeed,
+      phase: 'out', left: (cfg.throwRange + .8) * CELL, spin: 0, age: 0, hit: new Set(), trail: [], scale: sp ? sp.scale : 1, hitR: sp ? sp.hitR : HB_HIT_R });
+  }
   e.hb.capOut = true;
   if (typeof sfxAt === 'function') sfxAt('swordSwing', e.x, e.y, .45, 'hangi-throw');
 }
@@ -247,9 +269,9 @@ function capHitPlayer(s) {
 // 帽子打到人：去程、回程各打一次
 function capCheckHits(s) {
   const p = G.player, key = o => s.phase + ':' + (o === p ? 'p' : G.towers.indexOf(o));
-  if (p && p.hp > 0 && !s.hit.has(key(p)) && Math.hypot(p.x - s.x, p.y - s.y) <= HB_HIT_R) { s.hit.add(key(p)); capHitPlayer(s); }
+  if (p && p.hp > 0 && !s.hit.has(key(p)) && Math.hypot(p.x - s.x, p.y - s.y) <= s.hitR) { s.hit.add(key(p)); capHitPlayer(s); }
   for (const t of G.towers) {
-    if (t.hp <= 0 || t.berserk || s.hit.has(key(t)) || Math.hypot(t.x - s.x, t.y - s.y) > HB_HIT_R) continue;
+    if (t.hp <= 0 || t.berserk || s.hit.has(key(t)) || Math.hypot(t.x - s.x, t.y - s.y) > s.hitR) continue;
     s.hit.add(key(t));
     s.owner.atkCd = 0; enemyAttackSentry(s.owner, t, 0);
     if (typeof sfxAt === 'function') sfxAt('knock2', t.x, t.y, .6, 'hangi-hit');
@@ -281,14 +303,15 @@ function updateCapShots(dt) {
       }
     } else {   // 回程：朝夯吉寶飛回去（越過牆）
       const dx = e.x - s.x, dy = e.y - s.y, d = Math.hypot(dx, dy), step = s.speed * hbCfg(e).returnSpeedMul * dt;
-      if (d <= Math.max(14, step)) {   // 接住
-        s.done = true; e.hb.capOut = false; e.hb.cd = hbCfg(e).cooldown;
+      if (d <= Math.max(14, step)) {   // 接住（一次丟好幾頂的：全部接回來才算）
+        s.done = true;
+        if (!G.capShots.some(o => o !== s && o.owner === e && !o.done)) { e.hb.capOut = false; e.hb.cd = hbCfg(e).cooldown; }
         continue;
       }
       s.x += dx / d * step; s.y += dy / d * step;
       capCheckHits(s);
     }
-    if (s.age > 8) { s.done = true; if (e.hb) e.hb.capOut = false; }   // 保險：卡住太久就收回
+    if (s.age > 8) { s.done = true; if (e.hb && !G.capShots.some(o => o !== s && o.owner === e && !o.done)) e.hb.capOut = false; }   // 保險：卡住太久就收回
   }
   G.capShots = G.capShots.filter(s => !s.done);
 }
@@ -296,8 +319,11 @@ function updateCapShots(dt) {
 // ---- 繪圖 ----
 // 地上的帽子：跟角色、障礙物一起依前後排序（站在帽子後面的人會被帽子擋住；被照亮才看得到）
 function hangiCapSortables(sortables) {
-  if (!G.hangiCaps) return;
-  for (const cap of G.hangiCaps) if (isVisible(cap.x, cap.y)) sortables.push({ y: cap.y + 13, draw: () => drawHangiCap(ctx, cap) });
+  const caps = liveHangiCaps(); if (!caps) return;
+  for (const cap of caps) {
+    if (cap.boss && typeof capKingCapSortable === 'function') { capKingCapSortable(sortables, cap); continue; }   // 順順宮主的大宮帽（js/elite-cap-king.js）
+    if (isVisible(cap.x, cap.y)) sortables.push({ y: cap.y + 13, draw: () => drawHangiCap(ctx, cap) });
+  }
 }
 function drawHangiCap(ctx, cap) {
   const img = hbImg(cap.state === 'open' ? HANGI_CAP.openImage : HANGI_CAP.image);
@@ -310,20 +336,6 @@ function drawHangiCap(ctx, cap) {
   ctx.drawImage(img, Math.round(cap.x - w / 2), Math.round(cap.y + 13 - h - pop), Math.round(w), Math.round(h));
   ctx.restore();
 }
-// 黑暗中：關著的帽子偶爾閃一下金光（畫在黑幕上面，引人靠近）
-function drawHangiCapGlints(ctx) {
-  if (!G.hangiCaps) return;
-  for (const cap of G.hangiCaps) {
-    if (cap.state !== 'closed' || isVisible(cap.x, cap.y)) continue;
-    const t = cap.glint % 3.2; if (t > .6) continue;               // 每 3.2 秒閃一次
-    const k = Math.sin(t / .6 * Math.PI), x = cap.x + 6, y = cap.y - 4;
-    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = .75 * k;
-    ctx.fillStyle = '#ffd479';
-    ctx.fillRect(x - 6 * k, y - .75, 12 * k, 1.5); ctx.fillRect(x - .75, y - 6 * k, 1.5, 12 * k);
-    ctx.globalAlpha = .35 * k; ctx.beginPath(); ctx.arc(x, y, 3 * k, 0, Math.PI * 2); ctx.fill();
-    ctx.restore();
-  }
-}
 // 飛行中的帽子、準備丟時舉在手上的帽子（render.js 在角色之後畫）
 function drawCapShots(ctx) {
   for (const e of G.enemies) {
@@ -332,8 +344,9 @@ function drawCapShots(ctx) {
     if (!img.complete || !img.naturalWidth) continue;
     const k = 1 - e.hb.windup / hbCfg(e).windup, side = e.faceRight ? 1 : -1;
     ctx.save(); ctx.imageSmoothingEnabled = false;
-    ctx.translate(e.x + side * 16, e.y - (e.drawHeight || 52) * .7 - k * 6); ctx.rotate(side * k * .8);
-    ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+    const cs = e.capSpread ? e.capSpread.scale : 1, bw = (e.drawWidth || 80) / 80;   // 大夯吉寶：手上的帽子、舉的位置跟著放大
+    ctx.translate(e.x + side * 16 * bw, e.y - (e.drawHeight || 52) * .7 - k * 6); ctx.rotate(side * k * .8);
+    ctx.drawImage(img, -img.naturalWidth * cs / 2, -img.naturalHeight * cs / 2, img.naturalWidth * cs, img.naturalHeight * cs);
     ctx.restore();
   }
   for (const s of G.capShots || []) {
@@ -349,7 +362,8 @@ function drawCapShots(ctx) {
     if (img.complete && img.naturalWidth) {
       ctx.imageSmoothingEnabled = false;
       ctx.translate(s.x, s.y - s.z); ctx.rotate(s.spin);
-      ctx.drawImage(img, -img.naturalWidth / 2, -img.naturalHeight / 2);
+      const w = img.naturalWidth * (s.scale || 1), hh = img.naturalHeight * (s.scale || 1);   // 大夯吉寶丟的帽子比較大
+      ctx.drawImage(img, -w / 2, -hh / 2, w, hh);
     }
     ctx.restore();
   }

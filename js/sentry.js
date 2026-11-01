@@ -226,7 +226,8 @@ function boxStartCells(n = 16) {
 // （有放營地時不用畫的營地格：地圖編輯器預設會把最下面兩排畫成營地，常常跟真正的營地不在一起）
 function campSpawnCells(n = 24) {
   if (MAP_SAFE || !MAP || !campCells.size) return [];
-  const free = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r];
+  // 也要檢查站得下（sentryBlocked）：營地裡的行軍床、物資箱用像素微調擋路時，會擋到隔壁格，生在那裡就走不出來
+  const free = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r));
   const [cc, cr] = [...campCells][0].split(',').map(Number);
   const byDist = list => list.sort((a, b) => Math.hypot(a[0] - cc, a[1] - cr) - Math.hypot(b[0] - cc, b[1] - cr));
   const hasBase = typeof mapBases !== 'undefined' && mapBases.length > 0;
@@ -250,7 +251,7 @@ function spawnSentries() {
   else if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
   else if (start.length > 1) cand.push(...start.slice(1));   // 沒營地、有營地箱子：箱子前面（第一格留給溫特）
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
-  const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r]);
+  const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r)));
   // 應變中心是全員集合的安全區；戰鬥地圖仍只生成已編入的出勤隊伍。
   // 基地（安全區）：出勤隊伍不跟著溫特，只出現「平時在這張地圖」的人（data/npc-locations.js）；戰鬥地圖：出勤隊伍
   const team = MAP_SAFE
@@ -323,7 +324,7 @@ function sentryBlocked(x, y) {
 const CORE_GLOW_WALK = 4;   // 醒著的異質核心會發光：周圍幾格內隊員也能走進去（才打得到核心）
 function personnelInLight(x, y) {
   if (MAP_SAFE || !LIGHT.enabled) return true;
-  if (G && G.cores && G.cores.some(c => c.awake && !c.dead && Math.hypot(c.x - x, c.y - y) <= CORE_GLOW_WALK * CELL)) return true;
+  if (G && G.cores && G.cores.some(c => c.awake && !c.dead && !c.hidden && Math.hypot(c.x - x, c.y - y) <= CORE_GLOW_WALK * CELL)) return true;
   return [[0,0],[-12,-12],[12,-12],[-12,12],[12,12]]
     .every(([dx,dy]) => isLit(x + dx, y + dy));
 }
@@ -543,10 +544,10 @@ function sentryCompanionRule(t) {
 function hasAggroTarget(t) {
   const spec = TYPES[t.type]; if (!spec) return false;
   const cores = (typeof G.cores !== 'undefined') ? G.cores : [];
-  if (!G.enemies.length && !cores.some(c => !c.dead && c.awake)) return false;
+  if (!G.enemies.length && !cores.some(c => !c.dead && c.awake && !c.hidden)) return false;
   const detectR = (spec.aggroRange || spec.range + 1.5) * CELL;
   for (const e of [...G.enemies, ...cores]) {
-    if (e.dead || e.awake === false) continue;   // 沉睡的核心不算目標
+    if (e.dead || e.awake === false || e.hidden) continue;   // 沉睡的核心不算目標；躲在順順宮帽裡的也不算（js/elite-cap-king.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不主動接敵（js/elite-bird-head.js）
     if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && cores.includes(e))) continue;   // 醒著的核心會發光，暗處也算看得到
     if (Math.hypot(e.x - t.x, e.y - t.y) <= detectR) return true;
@@ -694,7 +695,7 @@ function updateSentry(t, dt) {
   // 主動接敵：看到亮處的怪物就靠近攻擊（開火由 game.js 處理；這裡只負責走過去）
   // 追多遠依模式：自由走動＝追得遠、原地巡邏／指派＝只追崗位附近，怪死或跑遠就回去巡邏。
   const litHere = !LIGHT.enabled || isLit(t.x, t.y);
-  const awakeCore = G.cores.some(c => !c.dead && c.awake);   // 醒著的核心會發光：在暗處也看得到、會走過去打
+  const awakeCore = G.cores.some(c => !c.dead && c.awake && !c.hidden);   // 醒著的核心會發光：在暗處也看得到、會走過去打
   if (!TYPES[t.type].noAttack && (litHere || awakeCore) && (G.enemies.length || awakeCore)) {   // 不攻擊的嚮導（塔納）：不去追怪
     const spec = TYPES[t.type];
     const atkR = spec.range * CELL;                       // 射程（像素）
@@ -704,7 +705,7 @@ function updateSentry(t, dt) {
     const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
     for (const e of (t.guardSummoned ? G.enemies : [...G.enemies, ...G.cores])) {
-      if (e.dead || e.awake === false) continue;   // 沉睡的核心不去追
+      if (e.dead || e.awake === false || e.hidden) continue;   // 沉睡的核心不去追；躲在順順宮帽裡的也不追（js/elite-cap-king.js）
       if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：不去追
       if (LIGHT.enabled && !isLit(e.x, e.y) && !(e.awake && G.cores.includes(e))) continue;    // 只追亮處看得見的怪（醒著的核心例外）
       if (!litHere && !G.cores.includes(e)) continue;      // 自己站在暗處：只會去打醒著的核心

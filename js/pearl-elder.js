@@ -12,6 +12,7 @@
            核心血量改成 coreHp（再乘地圖難度）。
            牠死掉後核心掉在原地，這時候才能把核心打爆（第一槍照樣會叫醒核心）。
    出現在哪張地圖、生在哪一格：PEARL_ELDER.maps（地圖 id → 欄、列）；地圖上的核心一開場就被牠抱過去。
+   同一張地圖有別的 BOSS 拿走核心（K56 的順順宮主，js/elite-cap-king.js）：挑剩下的核心，沒有剩就自己做一顆（要兩顆都打破才過關）。
    數值都在下面的 PEARL_ELDER。必須在 pearl-kid.js、anomalous-core.js 之後、game.js 之前載入。
 */
 const PEARL_ELDER = {
@@ -64,9 +65,17 @@ function seedPearlElder() {
   G.bigPearls = []; G.pearlFalls = [];
   const spot = pearlElderSpot();
   if (!spot || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
-  const base = ACTIVE_MONSTERS.find(m => m.id === 'pearl_kid'), core = G.cores[0];
-  if (!base || !core || !inGrid(spot.c, spot.r) || isWall(spot.c, spot.r)) return;
+  const base = ACTIVE_MONSTERS.find(m => m.id === 'pearl_kid');
+  if (!base || !inGrid(spot.c, spot.r) || isWall(spot.c, spot.r)) return;
   const [x, y] = center(spot.c, spot.r);
+  // 核心：挑沒被別的 BOSS 拿走的那顆（順順宮主藏進大宮帽的 hidden，js/elite-cap-king.js）；全被拿走就自己做一顆
+  let core = G.cores.find(k => !k.dead && !k.hidden && !k.carried);
+  if (!core) {
+    const difficulty = Math.max(1, Math.min(5, Number(MAP.difficulty) || 1)), hp = CORE.hp * difficulty;
+    core = { x, y, hp, maxhp: hp, lastHp: hp, dead: false, awake: false, phase: 0, awakeT: 0,
+      timer: 2 + Math.random() * 2.4, reward: CORE.reward * difficulty, moteT: 0, hitT: 0, seed: Math.random() * 10 };
+    G.cores.push(core);
+  }
   const P = PEARL_ELDER, S = P.scatter, e = createMonster(base, x, y);
   e.pearlBoss = true; e.eliteName = P.name;
   e.hp = e.maxhp = Math.round(e.maxhp * P.hpMul);
