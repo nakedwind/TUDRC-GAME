@@ -19,7 +19,7 @@ const CLAW_MACHINE = {
   moveSpeed: 135,        // 爪子左右移動的速度（畫面單位／秒；機台內部高 360）
   musicNearCells: 5,     // 音樂：離機台幾格內開始小聲播
   musicNearVolume: .35,  //       貼著機台時是打開機台時音量的幾倍（越遠越小，到範圍邊緣剛好沒聲音）
-  ballR: 54,             // 膠囊半徑
+  ballR: 43,             // 膠囊半徑
   costumeGrip: .4,       // N 服裝的夾力
   machines: [
     { stock: { medkit: 2, 'almond-water': 2, firstaid: 2, thermos: 1, 'anomaly-firstaid': 1, 'shards-5': 1 }, costumes: 1 },   // 第 1 台：補給
@@ -43,6 +43,6 @@ const CLAW_MACHINE = {
     { id: 'charm',            grip: .28, tier: 'rare' },
     { id: 'shards-10',        grip: .25, tier: 'rare', crystals: 10 },
     { id: 'anomaly-firstaid', grip: .17, tier: 'rare' },
-    { id: 'bird-green',       grip: .10, tier: 'jackpot', costume: true, r: 62 },   // 小鳥頭飾（綠繡眼）：大獎
+    { id: 'bird-green',       grip: .10, tier: 'jackpot', costume: true, r: 50 },   // 小鳥頭飾（綠繡眼）：大獎
   ],
 };

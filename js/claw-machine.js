@@ -11,7 +11,7 @@ const clawSave = (() => { try { return JSON.parse(localStorage.getItem(CLAW_STOR
 const clawPersist = () => { try { localStorage.setItem(CLAW_STORE, JSON.stringify(clawSave)); } catch (_) {} };
 
 // 機台內部的座標：高固定 360，寬在打開時照機台窗口的比例決定（clawFitWindow）
-const CW = { W: 640, H: 360, FLOOR: 346, WALL: 636, CHUTE_X: 184, CHUTE_TOP: 150, HOME_X: 92, AIM_MIN: 240, RAIL_Y: 16, ROPE_MIN: 96, GRAVITY: 1100 };
+const CW = { W: 640, H: 360, FLOOR: 346, WALL: 636, CHUTE_X: 147, CHUTE_TOP: 189, HOME_X: 74, AIM_MIN: 192, RAIL_Y: 16, ROPE_MIN: 80, GRAVITY: 1100 };
 const CW_TIER = {
   common: { name: '常見', tint: 'rgba(255,255,255,.34)', line: '#5d68bd' },
   rare: { name: '稀有', tint: 'rgba(255,150,205,.38)', line: '#c9367f' },
@@ -188,12 +188,12 @@ function clawTryGrab() {
   for (const p of cw.prizes) {
     if (p.chute) continue;
     const dx = Math.abs(tx - p.x);
-    if (dx < p.r + 16 && p.y - p.r < ty + 24 && dx < bestD) { best = p; bestD = dx; }
-    if (Math.hypot(tx - p.x, ty - p.y) < p.r + 46) { p.vx += Math.sign(p.x - tx || 1) * 70; p.vy -= 40; }   // 爪子戳進去，旁邊的會被推開
+    if (dx < p.r + 13 && p.y - p.r < ty + 19 && dx < bestD) { best = p; bestD = dx; }
+    if (Math.hypot(tx - p.x, ty - p.y) < p.r + 37) { p.vx += Math.sign(p.x - tx || 1) * 70; p.vy -= 40; }   // 爪子戳進去，旁邊的會被推開
   }
   clawSound('clawGrab');
   if (!best) { clawSay('什麼都沒夾到'); cw.held = null; return; }
-  const aim = Math.max(0, 1 - bestD / (best.r + 16)), chance = clawPityOn() ? 1 : best.def.grip * (CLAW_MACHINE.minAim + (1 - CLAW_MACHINE.minAim) * aim), roll = Math.random();
+  const aim = Math.max(0, 1 - bestD / (best.r + 13)), chance = clawPityOn() ? 1 : best.def.grip * (CLAW_MACHINE.minAim + (1 - CLAW_MACHINE.minAim) * aim), roll = Math.random();
   cw.held = best; best.vx = best.vy = 0;
   cw.startRope = cw.rope; cw.startX = cw.x;
   // 沒夾穩：差越多掉得越早；這裡先決定好，途中爪子才能抖給玩家看
@@ -322,8 +322,8 @@ function clawBuildBg() {   // 不會動的背景先畫好一張（窗景是遊�
   // 出口（左邊的洞＋壓克力擋板）
   g.fillStyle = '#34386b'; g.fillRect(0, CW.CHUTE_TOP, CW.CHUTE_X, CW.H - CW.CHUTE_TOP);
   g.fillStyle = '#1b1f46'; g.fillRect(6, CW.CHUTE_TOP + 8, CW.CHUTE_X - 12, CW.H - CW.CHUTE_TOP - 8);
-  g.fillStyle = '#ffd86e'; g.font = '700 24px "Microsoft JhengHei", sans-serif'; g.textAlign = 'center'; g.strokeStyle = '#34386b'; g.lineWidth = 5; g.lineJoin = 'round'; g.strokeText('出口', CW.CHUTE_X / 2, CW.CHUTE_TOP - 34); g.fillText('出口', CW.CHUTE_X / 2, CW.CHUTE_TOP - 34);
-  g.beginPath(); g.moveTo(CW.CHUTE_X / 2 - 15, CW.CHUTE_TOP - 26); g.lineTo(CW.CHUTE_X / 2 + 15, CW.CHUTE_TOP - 26); g.lineTo(CW.CHUTE_X / 2, CW.CHUTE_TOP - 8); g.closePath(); g.fill();
+  g.fillStyle = '#ffd86e'; g.font = '700 20px "Microsoft JhengHei", sans-serif'; g.textAlign = 'center'; g.strokeStyle = '#34386b'; g.lineWidth = 5; g.lineJoin = 'round'; g.strokeText('出口', CW.CHUTE_X / 2, CW.CHUTE_TOP - 28); g.fillText('出口', CW.CHUTE_X / 2, CW.CHUTE_TOP - 28);
+  g.beginPath(); g.moveTo(CW.CHUTE_X / 2 - 12, CW.CHUTE_TOP - 21); g.lineTo(CW.CHUTE_X / 2 + 12, CW.CHUTE_TOP - 21); g.lineTo(CW.CHUTE_X / 2, CW.CHUTE_TOP - 8); g.closePath(); g.fill();
   g.fillStyle = '#e7ecff'; g.fillRect(CW.CHUTE_X - 3, CW.CHUTE_TOP, 7, CW.FLOOR - CW.CHUTE_TOP);
   g.fillStyle = '#7f86c9'; g.fillRect(CW.CHUTE_X + 2, CW.CHUTE_TOP, 2, CW.FLOOR - CW.CHUTE_TOP);
   // 軌道
@@ -355,25 +355,25 @@ function clawDrawPrize(g, p, t) {
 }
 function clawDrawClaw(g, t) {
   const pity = clawPityOn(), metal = pity ? '#f5c14e' : '#9aa0b5', shade = pity ? '#b97a12' : '#5e6480', ink = '#191d3f';
-  const tx = cw.x + Math.sin(cw.swing) * cw.rope, ty = CW.RAIL_Y + Math.cos(cw.swing) * cw.rope, hubY = ty - 88;
+  const tx = cw.x + Math.sin(cw.swing) * cw.rope, ty = CW.RAIL_Y + Math.cos(cw.swing) * cw.rope, hubY = ty - 70;
   // 吊繩、吊架
-  g.strokeStyle = ink; g.lineWidth = 5; g.beginPath(); g.moveTo(cw.x, CW.RAIL_Y); g.lineTo(tx, hubY); g.stroke();
-  g.fillStyle = ink; g.fillRect(cw.x - 30, CW.RAIL_Y - 7, 60, 19);
-  g.fillStyle = '#6a6fa8'; g.fillRect(cw.x - 26, CW.RAIL_Y - 3, 52, 11);
+  g.strokeStyle = ink; g.lineWidth = 4; g.beginPath(); g.moveTo(cw.x, CW.RAIL_Y); g.lineTo(tx, hubY); g.stroke();
+  g.fillStyle = ink; g.fillRect(cw.x - 24, CW.RAIL_Y - 7, 48, 17);
+  g.fillStyle = '#6a6fa8'; g.fillRect(cw.x - 21, CW.RAIL_Y - 3, 42, 10);
   // 爪子：張開程度 open；夾著東西時貼著膠囊
-  const r = cw.held ? cw.held.r : 0, spreadTip = cw.held ? r * .8 : 14 + cw.open * 50, spreadMid = cw.held ? r + 8 : 32 + cw.open * 44, shake = cw.jitter * 4 * Math.sin(t * 60);
+  const r = cw.held ? cw.held.r : 0, spreadTip = cw.held ? r * .8 : 11 + cw.open * 40, spreadMid = cw.held ? r + 7 : 26 + cw.open * 35, shake = cw.jitter * 3 * Math.sin(t * 60);
   const prong = dir => {
-    g.beginPath(); g.moveTo(tx + dir * 14, hubY + 12);
-    g.quadraticCurveTo(tx + dir * (spreadMid + 8) + shake, hubY + 28, tx + dir * spreadMid + shake, ty - 32);
-    g.quadraticCurveTo(tx + dir * (spreadMid - 4) + shake, ty - 8, tx + dir * spreadTip + shake, ty);
-    g.strokeStyle = ink; g.lineWidth = 17; g.lineCap = 'round'; g.stroke();
-    g.strokeStyle = metal; g.lineWidth = 10; g.stroke();
+    g.beginPath(); g.moveTo(tx + dir * 11, hubY + 10);
+    g.quadraticCurveTo(tx + dir * (spreadMid + 6) + shake, hubY + 22, tx + dir * spreadMid + shake, ty - 26);
+    g.quadraticCurveTo(tx + dir * (spreadMid - 3) + shake, ty - 6, tx + dir * spreadTip + shake, ty);
+    g.strokeStyle = ink; g.lineWidth = 14; g.lineCap = 'round'; g.stroke();
+    g.strokeStyle = metal; g.lineWidth = 8; g.stroke();
   };
   prong(-1); prong(1);
   g.lineCap = 'butt';
-  g.fillStyle = ink; g.fillRect(tx - 30, hubY - 12, 60, 32);
-  g.fillStyle = metal; g.fillRect(tx - 25, hubY - 7, 50, 22);
-  g.fillStyle = shade; g.fillRect(tx - 25, hubY + 7, 50, 8);
+  g.fillStyle = ink; g.fillRect(tx - 24, hubY - 10, 48, 26);
+  g.fillStyle = metal; g.fillRect(tx - 20, hubY - 6, 40, 18);
+  g.fillStyle = shade; g.fillRect(tx - 20, hubY + 6, 40, 6);
 }
 function clawDraw(t) {
   const g = cw.ctx;
@@ -381,8 +381,8 @@ function clawDraw(t) {
   g.drawImage(cw.bg, 0, 0, CW.W, CW.H);
   if (cw.phase === 'aim') {   // 瞄準線：現在下爪大概落在哪
     const tx = cw.x + Math.sin(cw.swing) * (CW.FLOOR - CW.RAIL_Y);
-    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; g.setLineDash([3, 8]); g.beginPath(); g.moveTo(cw.x + Math.sin(cw.swing) * 112, 112); g.lineTo(tx, CW.FLOOR); g.stroke(); g.setLineDash([]);
-    g.fillStyle = 'rgba(20,24,70,.28)'; g.beginPath(); g.ellipse(tx, CW.FLOOR, 30, 6, 0, 0, 7); g.fill();
+    g.strokeStyle = 'rgba(255,255,255,.55)'; g.lineWidth = 2; g.setLineDash([3, 8]); g.beginPath(); g.moveTo(cw.x + Math.sin(cw.swing) * 96, 96); g.lineTo(tx, CW.FLOOR); g.stroke(); g.setLineDash([]);
+    g.fillStyle = 'rgba(20,24,70,.28)'; g.beginPath(); g.ellipse(tx, CW.FLOOR, 24, 5, 0, 0, 7); g.fill();
   }
   for (const p of cw.prizes) if (p !== cw.held) clawDrawPrize(g, p, t);
   if (cw.held) clawDrawPrize(g, cw.held, t);
@@ -406,10 +406,8 @@ function buildClaw() {
   const c = CLAW_MACHINE;
   el.id = 'clawMachine'; el.className = 'hidden';
   el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '夾娃娃機');
-  el.innerHTML = '<section class="cw-card"><header class="cw-head"><div class="cw-icon-box" aria-hidden="true"><img src="images/street/street-claw-machine.png" alt=""></div>'
-    + '<div class="cw-title"><h2>夾娃娃機</h2><p>花經費下爪，夾到的東西直接放進背包。指著膠囊可以看裡面是什麼。</p></div>'
-    + '<span class="cw-money"><i>經費</i><b></b></span><button type="button" class="cw-close" aria-label="關閉（Esc）">×</button></header>'
-    + '<div class="cw-body"><div class="cw-cabinet"><div class="cw-marquee"><span>NATURALWIND</span></div>'
+  el.innerHTML = '<section class="cw-card"><div class="cw-body"><div class="cw-cabinet"><header class="cw-marquee"><h2>NATURALWIND</h2>'
+    + '<div class="cw-marquee-right"><span class="cw-money"><i>經費</i><b></b></span><button type="button" class="cw-close" aria-label="關閉（Esc）">×</button></div></header>'
     + '<div class="cw-window"><canvas></canvas><div class="cw-tip hidden" role="tooltip"></div></div>'
     + '<div class="cw-deck"><div class="cw-led"><span class="cw-led-msg" role="status"></span>'
     + '<span class="cw-pity" title="連續 ' + c.pityPlays + ' 次沒拿到東西，下一爪碰到就夾得起來；拿到任何東西都會重新累積"><span class="cw-pity-top"><i>保夾</i><b class="cw-pity-count"></b></span><span class="cw-pity-bar">' + Array.from({ length: c.pityPlays }, () => '<i></i>').join('') + '</span></span>'
@@ -418,7 +416,7 @@ function buildClaw() {
     + '<div class="cw-coins"><button type="button" data-buy="1"><span>投 1 次</span><b>$' + c.playCost + '</b></button>'
     + '<button type="button" data-buy="pack"><span>投 ' + c.packPlays + ' 次</span><b>$' + c.packCost + '</b><em>省 $' + (c.playCost * c.packPlays - c.packCost) + '</em></button></div>'
     + '<button type="button" class="cw-go"></button></div></div></div>'
-    + '<p class="cw-keys"><kbd>←</kbd><kbd>→</kbd> 移動　<kbd>空白鍵</kbd> 開始／下爪　<kbd>Enter</kbd> 投 1 次　<kbd>Esc</kbd> 離開　爪子移動時會晃，停一下再下爪比較準</p></div>'
+    + '</div>'
     + '<div class="cw-reveal hidden" role="status"><i class="cw-rays"></i><div class="cw-reveal-box"><small class="cw-reveal-tag"></small><span class="cw-reveal-img"><img alt=""></span><h3></h3><p class="cw-reveal-effect"></p><p class="cw-reveal-note"></p><button type="button" class="cw-reveal-ok">收下 <kbd>空白鍵</kbd></button></div></div>'
     + '</section>';
   document.getElementById('wrap').appendChild(el);
@@ -557,7 +555,7 @@ function openClawMachine(spot) {
   Object.assign(cw, { phase: 'idle', x: CW.AIM_MIN, vx: 0, _pv: 0, rope: CW.ROPE_MIN, swing: 0, swingV: 0, open: 1, held: null, target: null, timer: 0, keysHeld: {}, btnDir: 0, hover: null, tipId: null, wins: [], pending: [], reveal: null, refund: 0, flash: 0, acc: 0, last: performance.now() });
   cw.el.classList.remove('hidden'); cw.el.querySelector('.cw-reveal').classList.add('hidden'); cw.el.querySelector('.cw-tip').classList.add('hidden');
   clawRefundIfEmpty();
-  clawSay(cw.m.credits > 0 ? '還有 ' + cw.m.credits + ' 次，按空白鍵開始' : '投幣開始');
+  clawSay(cw.m.credits > 0 ? '還有 ' + cw.m.credits + ' 次，按空白鍵開始' : '投幣開始，指著膠囊可以看獎品');
   renderClaw();
   clawFitWindow();   // 要等視窗顯示、文字都填好才量得準大小
   clawFillMachine();
