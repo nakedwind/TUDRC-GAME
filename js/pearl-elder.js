@@ -110,7 +110,7 @@ function pearlBossWake(e) {
   e.alertT = ENEMY_ALERT_TIME; e.pk.cd = 1.2;
   const core = e.carryCore;   // 牠抱著的核心跟著甦醒：異質體狂暴化、核心音樂（還是打不到：carried 的核心不會被選成目標、扣的血會補回來，見 js/anomalous-core.js）
   if (core && !core.dead && !core.awake) { wakeCore(core); core.lastHp = core.hp; pearlBossCorePool(core, false); }
-  if (typeof coreBanner === 'function') coreBanner(PEARL_ELDER.name + '發現你了', '牠抱著的異質核心跟著甦醒了', '#f4d9ff');
+  if (typeof coreBanner === 'function') coreBanner(PEARL_ELDER.name + '發現你了', '', '#f4d9ff');   // 不寫提示：怎麼打讓玩家自己探索
   systemNotice(PEARL_ELDER.name + '發現你了！', true);
   const top = e.y - e.slimeLift - e.drawHeight * .6;
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: e.x, y: top, r: 8 + i * 6, r2: 100 + i * 36, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#f1dcff' : '#ffffff' });
@@ -165,8 +165,6 @@ function pearlBossArmor(e) {
   const P = PEARL_ELDER, pk = e.pk;
   if (pk.state === 'shell') {
     lost *= P.shell.defense;
-    const now = performance.now();
-    if (now > (e.hardNoteAt || 0)) { e.hardNoteAt = now + 1500; flash('好硬！', e.x, e.y - e.drawHeight * .5, '#d8d0e4'); }   // 偶爾提示：閉殼時打不太動
   } else if (pk.state === 'stunned') lost *= P.stun.dmgMul;
   e.hp = e.peHp - lost;
   pearlBossCoreShare(e, lost);
@@ -567,8 +565,8 @@ function pearlBossDown(e) {
   for (const bp of [...(G.bigPearls || [])]) shatterBigPearl(bp);
   G.pearlFalls = [];
   if (typeof sfxAt === 'function') sfxAt('pearlElderDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著用同一個來源播的那聲會被 70ms 去重吃掉
-  systemNotice(e.eliteName + '倒下了！異質核心掉在地上', true);
-  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '異質核心掉在地上，現在可以把它打爆！', '#f4d9ff');
+  systemNotice(e.eliteName + '倒下了！', true);
+  if (typeof coreBanner === 'function') coreBanner(e.eliteName + '倒下了', '', '#f4d9ff');   // 不提示核心可以打了
   nearbyImpact(e.x, e.y, 10, .08);
 }
 
