@@ -117,7 +117,7 @@ const SOUND_SETTINGS = {
         "怪物/葫蘆猴/葫蘆猴落地02.mp3",
         "環境/破壞/挖礦.mp3"
       ],
-      "baseMusic": "../music/relaxing-piano-music.mp3",
+      "baseMusic": "../music/基地音樂/relaxing-piano-music.mp3",
       "bossElite": "../music/0-top-battle-game-bgm.mp3",
       "boxLand": "pop.mp3"
     },
