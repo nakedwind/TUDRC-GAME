@@ -888,6 +888,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     '<div class="ws-scroll">' + (list.length ? section('武器', weaponList) + section('彈匣', magList) + section('背包', bagList) + section('子彈', bulletList) + section('建築', buildEntryList) + WORKSHOP_GEAR_GROUPS.map(([k, title]) => section(title, gearList.filter(e => workshopGearGroup(e.def.kind) === k))).join('') + section('隊員裝備', sgearList) : '<p class="ws-empty">' + empty + '</p>') + '</div>' +
     '<div class="ws-info' + (e ? '' : ' empty') + '">' + info + '</div></div>' + side + '</div></section>';
   if (scroll) SCROLLERS.forEach((q, i) => { const el = workshopEl.querySelector(q); if (el) el.scrollTop = scroll[i]; });
+  if (typeof fitWorkshopDesc === 'function') fitWorkshopDesc(workshopEl);   // 說明盡量一行（js/workshop-config.js）
   attachWorkshopToast();
 }
 function openWorkshopResetScrap() { wsScrapSel = null; wsScrapArmed = false; wsPick = null; }

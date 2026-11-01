@@ -450,22 +450,34 @@ const WORKSHOP_CONFIG = {
       "infoParts": {
         "btn": {
           "y": -55
+        },
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
         }
       }
     },
     "navrecorder": {
       "infoParts": {
         "name": {
-          "y": -10
+          "y": -20
         },
         "tag": {
-          "y": -10
+          "y": -20
         },
         "desc": {
-          "y": -10
+          "y": -20
         },
         "stats": {
-          "y": -10
+          "y": -20
         },
         "btn": {
           "y": -55
@@ -499,16 +511,16 @@ const WORKSHOP_CONFIG = {
           "y": -55
         },
         "name": {
-          "y": -22
+          "y": -20
         },
         "tag": {
-          "y": -22
+          "y": -20
         },
         "stats": {
-          "y": -22
+          "y": -20
         },
         "desc": {
-          "y": -22
+          "y": -20
         }
       }
     },
@@ -545,16 +557,16 @@ const WORKSHOP_CONFIG = {
           "y": -55
         },
         "name": {
-          "y": -30
+          "y": -20
         },
         "tag": {
-          "y": -30
+          "y": -20
         },
         "stats": {
-          "y": -30
+          "y": -20
         },
         "desc": {
-          "y": -30
+          "y": -20
         }
       }
     },
@@ -598,6 +610,18 @@ const WORKSHOP_CONFIG = {
       "infoParts": {
         "btn": {
           "y": -55
+        },
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
         }
       }
     },
@@ -608,6 +632,18 @@ const WORKSHOP_CONFIG = {
       "infoParts": {
         "btn": {
           "y": -55
+        },
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
         }
       }
     },
@@ -615,16 +651,16 @@ const WORKSHOP_CONFIG = {
       "desc": "打中的怪物陷入沉睡；打中暴走的隊員會睡著，醒來後解除暴走狀態。對怪物「生命體」沒有效果。",
       "infoParts": {
         "name": {
-          "y": -11
+          "y": -20
         },
         "tag": {
-          "y": -11
+          "y": -20
         },
         "desc": {
-          "y": -11
+          "y": -20
         },
         "stats": {
-          "y": -11
+          "y": -20
         },
         "btn": {
           "y": -55
@@ -636,16 +672,16 @@ const WORKSHOP_CONFIG = {
       "desc": "打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。一次只能標一隻，打新的舊的就消失。",
       "infoParts": {
         "name": {
-          "y": -11
+          "y": -20
         },
         "tag": {
-          "y": -11
+          "y": -20
         },
         "desc": {
-          "y": -11
+          "y": -20
         },
         "stats": {
-          "y": -11
+          "y": -20
         },
         "btn": {
           "y": -55
@@ -679,16 +715,16 @@ const WORKSHOP_CONFIG = {
           "y": -55
         },
         "name": {
-          "y": -22
+          "y": -20
         },
         "tag": {
-          "y": -22
+          "y": -20
         },
         "stats": {
-          "y": -22
+          "y": -20
         },
         "desc": {
-          "y": -22
+          "y": -20
         }
       }
     },
@@ -698,16 +734,16 @@ const WORKSHOP_CONFIG = {
           "y": -55
         },
         "name": {
-          "y": -22
+          "y": -20
         },
         "tag": {
-          "y": -22
+          "y": -20
         },
         "desc": {
-          "y": -22
+          "y": -20
         },
         "stats": {
-          "y": -22
+          "y": -20
         }
       }
     },
@@ -717,16 +753,73 @@ const WORKSHOP_CONFIG = {
           "y": -55
         },
         "name": {
-          "y": -22
+          "y": -20
         },
         "tag": {
-          "y": -22
+          "y": -20
         },
         "desc": {
-          "y": -22
+          "y": -20
         },
         "stats": {
-          "y": -22
+          "y": -20
+        }
+      }
+    },
+    "b:knock": {
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
+    },
+    "vest_heavy": {
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
+        }
+      }
+    },
+    "vest_light": {
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        },
+        "stats": {
+          "y": -20
+        },
+        "btn": {
+          "y": -55
         }
       }
     }

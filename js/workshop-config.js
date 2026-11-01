@@ -117,6 +117,17 @@ function workshopMoneyHtml(key, money, attr, short, cfg) {
   return '<div class="ws-money' + (short ? ' short' : '') + '" data-wsp="money"' + (s.length ? ' style="' + s.join(';') + '"' : '') + ' title="開發／升級要花的經費">' + txt.replace(/</g, '&lt;') + '</div>';
 }
 
+// 下方說明欄的說明：盡量一行寫完——太長就把字縮小（最小 WS_DESC_MIN_FONT px），縮到最小還放不下才換行（遊戲、開發工坊編輯器的預覽都用）
+const WS_DESC_MIN_FONT = 10;
+function fitWorkshopDesc(root) {
+  const d = root && root.querySelector('.ws-info [data-wsp="desc"]'); if (!d) return;
+  d.style.whiteSpace = 'nowrap';
+  const room = d.clientWidth, need = d.scrollWidth; if (!room || need <= room) return;   // 還沒顯示（寬度 0）或放得下：不用縮
+  const base = parseFloat(getComputedStyle(d).fontSize);
+  d.style.fontSize = Math.max(WS_DESC_MIN_FONT, Math.floor(base * room / need * 10) / 10) + 'px';
+  if (d.scrollWidth > d.clientWidth) d.style.whiteSpace = '';   // 縮到最小還是太長：照原本換行
+}
+
 // ---- 下方說明欄的四塊，每件各自調位置、大小、字級（開發工坊編輯器每件的「下方說明欄的版面」）----
 // 存在設定檔 items[key].infoParts（新增的裝備存在 added 裡）：{ name: { x, y, w, h, font }, tag: {…}, desc: {…}, stats: {…}, btn: {…} }
 //   x／y＝位移（px，正數＝往右／往下）、w／h＝寬高（px，0／沒寫＝原本的）、font＝字級（px，0＝原本的）

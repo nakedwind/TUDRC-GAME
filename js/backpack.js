@@ -61,6 +61,8 @@ const backpackDetail = document.getElementById('backpackDetail');
 let backpackOpen = false, backpackTab = 'consumable', backpackSel = null;
 let backpackCampContext = null;
 let campArmorOpen = false;   // true＝背包視窗現在是防具視窗（openArmorPanel）
+let cabinetOpen = null, cabinetView = 'cabinet';   // 收納櫃視窗（js/storage-cabinet.js）：打開中的櫃子 { def, key }；view＝'cabinet' 櫃子預覽／'bag' 背包預覽
+const cabinetShowing = () => !!cabinetOpen && cabinetView === 'cabinet';
 let armorWho = 'winter';     // 防具視窗正在換誰的：'winter'＝部隊長（防具），其他＝隊員 type（隊員裝備，js/squad-gear.js）
 let armorSlotPick = null;    // 點了隊員的空格：「穿上」就放這一格
 const SQ_ARMOR_PREFIX = 'sgear:', SQ_WORN_PREFIX = 'sworn:';   // 右邊格子的 id／選到隊員身上第幾格
@@ -76,7 +78,7 @@ function bagCanManageEquipment() {
 // 能不能換防具：只有防具視窗裡、裝備箱旁邊
 const bagCanChangeArmor = () => campArmorOpen || !!armorChestNearPlayer();
 const armorWhereHint = () => '請到裝備箱調整防具';
-const bagTabVisible = category => campArmorOpen ? category === 'equip' : category !== 'equip' && (category !== 'squadgear' || bagCanManageEquipment());   // 防具視窗只有「防具」分頁；背包沒有
+const bagTabVisible = category => cabinetOpen ? CABINET_TABS.includes(category) : campArmorOpen ? category === 'equip' : category !== 'equip' && (category !== 'squadgear' || bagCanManageEquipment());   // 防具視窗只有「防具」分頁；背包沒有
 let bagDropQty = 1;   // 「放在地上」旁邊選的數量（換選別的物品就回到 1）
 // 能不能放在地上：重要物品不能；個別物品也可以在資料裡寫 noDrop: true（放下去的東西走過去可以撿回來，js/ground-items.js）
 const canDrop = item => !!item && !item.noDrop && item.category !== 'key';
@@ -132,6 +134,7 @@ function ownedGear(withWeapons) {
 const gearById = id => String(id || '').startsWith('gear:') ? ownedGear(true).find(g => g.id === id) || null : null;
 function ownedItems() {
   if (armorForMember()) return squadArmorItems();
+  if (cabinetShowing()) return cabinetItems();   // 收納櫃的櫃子預覽：櫃子裡的東西（不分分類）
   if (backpackTab === GEAR_TAB.id) return ownedGear();
   if (backpackTab === WEAPON_TAB.id) return [pistolEntry(), ...ownedBullets()].filter(Boolean);
   const items = allItems().filter(item => (supplyInventory.get(item.id) || 0) > 0 && item.category === backpackTab);
@@ -142,28 +145,30 @@ function ownedItems() {
 function renderBackpack() {
   if (!backpackEl) return;
   if (!bagTabVisible(backpackTab)) { backpackTab = 'consumable'; backpackSel = null; }
-  document.getElementById('backpackTitle').textContent = campArmorOpen ? '防具' : '背包';
-  document.getElementById('backpackCount').textContent = armorForMember() ? squadArmorItems().reduce((n, g) => n + g.count, 0) + ' 件' : campArmorOpen ? ownedGear().length + ' 件'
+  document.getElementById('backpackTitle').textContent = cabinetOpen ? cabinetOpen.def.name : campArmorOpen ? '防具' : '背包';
+  document.getElementById('backpackCount').textContent = cabinetShowing() ? cabinetUsed() + ' / ' + cabinetOpen.def.slots + ' 格' : armorForMember() ? squadArmorItems().reduce((n, g) => n + g.count, 0) + ' 件' : campArmorOpen ? ownedGear().length + ' 件'
     : bagUsedSlots(supplyInventory, backpackTab) + (bagUnlimited(backpackTab) ? ' 格（無上限）' : ' / ' + bagCapacity(backpackTab) + ' 格');
-  if (armorForMember()) renderSquadArmorPanel();   // 防具視窗選了隊員：左邊換成那位隊員的 3 格
+  if (cabinetOpen) {}   // 收納櫃：左邊不放溫特立繪（css 的 #backpack.cabinet-mode 把左欄收起來）
+  else if (armorForMember()) renderSquadArmorPanel();   // 防具視窗選了隊員：左邊換成那位隊員的 3 格
   else if (typeof renderEquipPanel === 'function') renderEquipPanel();   // 左邊的部隊長裝備（js/equipment.js）
   backpackEl.classList.toggle('armor-mode', campArmorOpen);
+  backpackEl.classList.toggle('cabinet-mode', !!cabinetOpen);
   if (campArmorOpen) addArmorWhoTabs();   // 防具視窗：左邊一條選要換誰的
   else document.getElementById('equipPanel')?.classList.remove('with-who');
   // 分類分頁：有格數上限的（物品、彈藥包）在左邊，後面標「用了幾格/幾格」；沒有上限的（重要物品…）放在「|」右邊
   const tabBtn = cat => `<button type="button" role="tab" data-bag-tab="${cat.id}" class="${backpackTab === cat.id ? 'active' : ''}" aria-selected="${backpackTab === cat.id}">${BAG_ICON[cat.id] || (cat.icon ? cat.icon + ' ' : '')}${cat.name}${bagUnlimited(cat.id) ? '' : `<em class="bag-tab-count">${bagUsedSlots(supplyInventory, cat.id)}/${bagCapacity(cat.id)}</em>`}</button>`;
   const cats = [...ITEM_CATEGORIES, WEAPON_TAB, GEAR_TAB].filter(cat => bagTabVisible(cat.id));
   const limited = cats.filter(cat => !bagUnlimited(cat.id)), unlimited = cats.filter(cat => bagUnlimited(cat.id));
-  document.getElementById('backpackTabs').innerHTML = limited.map(tabBtn).join('') + (limited.length && unlimited.length ? '<span class="bag-tab-sep" aria-hidden="true">|</span>' : '') + unlimited.map(tabBtn).join('');
+  document.getElementById('backpackTabs').innerHTML = cabinetOpen ? cabinetTabsHtml(tabBtn, cats) : limited.map(tabBtn).join('') + (limited.length && unlimited.length ? '<span class="bag-tab-sep" aria-hidden="true">|</span>' : '') + unlimited.map(tabBtn).join('');
   // 格子
   const items = ownedItems().flatMap(item => {
     if (item.bullet || item.gear || item.sgear) return [item];
-    const n = supplyInventory.get(item.id) || 0;
+    const n = cabinetShowing() ? cabinetCount(item.id) : supplyInventory.get(item.id) || 0;
     return Array.from({ length: Math.ceil(n / BAG_STACK_MAX) }, (_, i) => ({ ...item, stackCount: Math.min(BAG_STACK_MAX, n - i * BAG_STACK_MAX) }));
   });
   if (!items.some(item => item.id === backpackSel) && !(armorForMember() && String(backpackSel).startsWith(SQ_WORN_PREFIX))) backpackSel = items[0]?.id || null;
   const columns = window.innerWidth <= 560 ? 4 : window.innerWidth <= 900 ? 5 : 6;
-  const slots = bagUnlimited(backpackTab) ? items.length : Math.max(bagCapacity(backpackTab), items.length);
+  const slots = cabinetShowing() ? Math.max(cabinetOpen.def.slots, items.length) : bagUnlimited(backpackTab) ? items.length : Math.max(bagCapacity(backpackTab), items.length);
   if (backpackTab === WEAPON_TAB.id) { renderWeaponGrid(items, columns); renderBackpackDetail(); return; }
   if (armorForMember()) { renderSquadArmorGrid(items); renderBackpackDetail(); return; }
   if (backpackTab === GEAR_TAB.id) { renderGearGrid(items, columns); renderBackpackDetail(); return; }
@@ -295,6 +300,7 @@ function selectBackpackItem(id) {
 }
 function renderBackpackDetail() {
   if (armorForMember()) { renderSquadArmorDetail(); return; }
+  if (cabinetOpen) { renderCabinetDetail(); return; }   // 收納櫃：「放入櫃子」／「放到身上」（js/storage-cabinet.js）
   const bl = bulletEntryById(backpackSel); if (bl) { renderBulletDetail(bl); return; }
   const g = gearById(backpackSel); if (g) { renderGearDetail(g); return; }
   backpackDetail.classList.remove('gear-detail');
@@ -337,6 +343,7 @@ function dropFromBackpack(id) {
   (backpackDetail.querySelector('.bag-drop') || backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus();
 }
 function useBackpackItem(id) {
+  if (cabinetOpen) { cabinetMove(id, bagDropQty); return; }   // 收納櫃：連點兩下、Enter＝搬過去
   const bl = bulletEntryById(id);   // 子彈：連點兩下＝裝進彈匣／從彈匣拿下
   if (bl) { if (bl.free) return; const slot = magState().load.slice(0, magSlotCount()).indexOf(bl.bullet); if (slot >= 0) unloadMagazineSlot(slot); else loadBulletToMagazine(bl.bullet); return; }
   const item = itemById(id); if (!item) return;
@@ -363,7 +370,8 @@ function openBackpack(options = {}) {
 }
 function closeBackpack(silent = false) {
   if (!backpackOpen) return; backpackOpen = false; bagDropQty = 1; backpackEl.classList.add('hidden'); if (!silent) sfx('switch');
-  if (campArmorOpen) { campArmorOpen = false; backpackTab = 'consumable'; backpackSel = null; }   // 防具視窗關掉：下次按 B 是一般背包
+  if (campArmorOpen) { campArmorOpen = false; backpackTab = 'consumable'; backpackSel = null; }
+  if (cabinetOpen) { cabinetOpen = null; backpackTab = 'consumable'; backpackSel = null; }   // 收納櫃關掉：下次按 B 是一般背包   // 防具視窗關掉：下次按 B 是一般背包
   if (armorRemote) { const r = armorRemote; armorRemote = null; setTimeout(() => { if (typeof openSquadPageOf === 'function') openSquadPageOf(r.member, r.solo); }, 0); }   // 從 T-Pad 打開的：回到那位隊員的頁面
 }
 
@@ -372,13 +380,17 @@ backpackEl.addEventListener('click', e => {
   if (e.target === backpackEl) { closeBackpack(); return; }
   const tab = e.target.closest('[data-bag-tab]');
   if (tab) { if (!bagTabVisible(tab.dataset.bagTab)) return; backpackTab = tab.dataset.bagTab; backpackSel = null; bagDropQty = 1; renderBackpack(); sfx('switch'); return; }
+  const cv = e.target.closest('[data-cabinet-view]');
+  if (cv) { setCabinetView(cv.dataset.cabinetView); return; }   // 收納櫃：背包／櫃子預覽切換
+  const cm = e.target.closest('[data-cabinet-move]');
+  if (cm) { cabinetMove(cm.dataset.cabinetMove, bagDropQty); return; }
   if (handleSquadArmorClick(e)) return;   // 防具視窗：選人、隊員的格子、穿上／卸下
   const cell = e.target.closest('#backpackGrid [data-bag-item]');   // 只認格子：右邊說明欄身上也有 data-bag-item（js/backpack-layout.js 寫的），不能把說明欄的按鈕當成點格子
   if (cell) { if (backpackSel !== cell.dataset.bagItem) selectBackpackItem(cell.dataset.bagItem); backpackGrid.querySelector('.bag-cell.sel')?.focus(); return; }
   if (e.target.closest('[data-bag-drop]')) { dropFromBackpack(e.target.closest('[data-bag-drop]').dataset.bagDrop); return; }
   const qtyBtn = e.target.closest('[data-drop-qty]');
   if (qtyBtn) {
-    const max = supplyInventory.get(backpackSel) || 1, v = qtyBtn.dataset.dropQty;
+    const max = (cabinetShowing() ? cabinetCount(backpackSel) : supplyInventory.get(backpackSel)) || 1, v = qtyBtn.dataset.dropQty;
     bagDropQty = Math.max(1, Math.min(max, bagDropQty + Number(v)));
     renderBackpackDetail(); sfx('blip');
     (backpackDetail.querySelector(`[data-drop-qty="${v}"]:not(:disabled)`) || backpackDetail.querySelector('.bag-drop')).focus();
@@ -452,7 +464,7 @@ window.addEventListener('keydown', e => {
     return;
   }
   if (!backpackOpen) return;
-  if ((k === 'delete' || k === 'backspace') && backpackSel && itemById(backpackSel)) { e.preventDefault(); dropFromBackpack(backpackSel); return; }   // Delete：照目前選的數量放在地上
+  if ((k === 'delete' || k === 'backspace') && backpackSel && itemById(backpackSel) && !cabinetShowing()) { e.preventDefault(); dropFromBackpack(backpackSel); return; }   // Delete：照目前選的數量放在地上
   // 方向鍵在格子之間移動；Enter 使用
   const items = ownedItems(), i = items.findIndex(item => item.id === backpackSel);
   const cols = getComputedStyle(backpackGrid).gridTemplateColumns.split(' ').length || 6;

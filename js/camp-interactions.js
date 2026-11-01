@@ -26,14 +26,16 @@ const MAP_BOX = { reach: 30, kinds: [
   { kind: 'ammo', match: id => AMMO_CRATE.ids.includes(id), art: {} },   // 能打開、開出東西的彈藥箱（js/flare.js）
   { kind: 'refill', match: (id, t) => AMMO_REFILL.ids.includes(id) || AMMO_REFILL.file.test(String(t.file || '')), art: { tile_field_ammo_crate_open: [0, 16, 46, 80, 80, 80] } },   // 營地的補彈藥箱（js/flare.js）；最後兩個數字＝圖片寬高
   { kind: 'supply', match: id => isSupplyBoxId(id), art: { tile_field_supply_box: [0, 16, 46, 80, 80, 80], tile_mvot2yuu: [25, 23, 95, 120, 120, 120] } },   // field-base-01～03 都一樣；池核版 Poolcore_field-base-01～03 也一樣（js/camp-supply.js 的 boxSkins）
-  { kind: 'armor', match: (id, t) => ARMOR_CHEST.tiles.includes(id) || ARMOR_CHEST.names.includes(String(t.name || '').trim()), art: { tile_mvma4ws7: [0, 11, 76, 80, 80, 80] } },
+  { kind: 'armor', safe: true, match: (id, t) => ARMOR_CHEST.tiles.includes(id) || ARMOR_CHEST.names.includes(String(t.name || '').trim()), art: { tile_mvma4ws7: [0, 11, 76, 80, 80, 80] } },
+  { kind: 'stove', safe: true, match: id => typeof COOKING !== 'undefined' && COOKING.tiles.includes(id), art: { tile_restaurant_kitchen_workstation: [8, 40, 112, 118, 280, 120] } },   // 廚房工作台左邊的爐灶：烹飪（js/cooking.js）
+  { kind: 'cabinet', safe: true, match: (id, t, s) => typeof cabinetDefFor === 'function' && !!cabinetDefFor(s), art: {} },   // 收納櫃（js/storage-cabinet.js 的 STORAGE_CABINETS）
 ] };
 function mapBoxes() {
   if (!MAP) return [];
   const list = [];
   for (const s of MAP.stamps || []) {
     const t = mapTileById(s.id); if (!t) continue;
-    const k = MAP_BOX.kinds.find(k => k.match(s.id, t)); if (!k || (MAP_SAFE && k.kind !== 'armor')) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用
+    const k = MAP_BOX.kinds.find(k => k.match(s.id, t, s)); if (!k || (MAP_SAFE && !k.safe)) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用（safe＝基地裡也能用：裝備箱、收納櫃）
     if (k.kind === 'ammo' && typeof ammoCrateLooted === 'function' && ammoCrateLooted(s)) continue;   // 開過的彈藥箱：不能再開（js/flare.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     const a = k.art[s.id] || [0, 0, 1, 1, 1, 1], fx = u => s.fx ? w - u : u;   // 左右翻轉的箱子：範圍也翻過去

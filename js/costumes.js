@@ -143,7 +143,7 @@ function costumeSpots(test, safeOnly = true) {
   if (!MAP || (safeOnly && !MAP_SAFE)) return [];
   const spots = [];
   for (const s of MAP.stamps || []) {
-    const t = mapTileById(s.id); if (!t || !test(s.id, t)) continue;
+    const t = mapTileById(s.id); if (!t || !test(s.id, t, s)) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     spots.push({ x0, y0, x1: x0 + w, y1: y0 + h, x: x0 + w / 2, top: y0 });
   }
@@ -161,7 +161,7 @@ function costumeSpotNearPlayer(spots) {   // 溫特旁邊 30px 內最近的一�
 
 // ---- 衣櫃：靠近、打開 ----
 let wardrobeOpen = false;
-const wardrobeSpots = () => costumeSpots((id, t) => WARDROBE_TILES.includes(id) || /衣櫃/.test(t.name || ''));
+const wardrobeSpots = () => costumeSpots((id, t, s) => (WARDROBE_TILES.includes(id) || /衣櫃/.test(t.name || '')) && !(typeof cabinetDefFor === 'function' && cabinetDefFor(s)));   // 設成收納櫃的那一個（js/storage-cabinet.js）不當衣櫃
 const wardrobeNearPlayer = () => costumeSpotNearPlayer(wardrobeSpots());
 function useWardrobeNearPlayer() { if (!wardrobeNearPlayer()) return false; openWardrobe(); return true; }
 

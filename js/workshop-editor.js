@@ -729,6 +729,7 @@ function renderPreview() {
   const ws = stage.querySelector('#workshop');
   ws.style.padding = '16px';
   applyWorkshopStyle(ws, cfg);
+  if (typeof fitWorkshopDesc === 'function') fitWorkshopDesc(ws);   // 說明盡量一行，跟遊戲一樣
   const body = stage.querySelector('.ws-scroll'); if (body) body.scrollTop = keepScroll;
   const sideEl = stage.querySelector('.workshop-side'); if (sideEl) sideEl.scrollTop = keepSide;
   if (document.getElementById('assetGrid')) renderAssets();

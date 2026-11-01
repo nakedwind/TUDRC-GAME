@@ -580,6 +580,8 @@ window.addEventListener('keydown', e => {
     else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
     else if (typeof useClawNearPlayer === 'function' && useClawNearPlayer()) {}   // 夾娃娃機（js/claw-machine.js）
     else if (typeof useBestiaryNearPlayer === 'function' && useBestiaryNearPlayer()) {}   // 2F應變中心的電腦：電腦桌面（音樂、踩地雷、新接龍、怪物圖鑑；js/pc-desktop.js）
+    else if (typeof useStoveNearPlayer === 'function' && useStoveNearPlayer()) {}   // 廚房工作台的爐灶：煮生食（js/cooking.js）
+    else if (typeof useCabinetNearPlayer === 'function' && useCabinetNearPlayer()) {}   // 收納櫃：放東西（js/storage-cabinet.js）
     else if (typeof useArmorChestNearPlayer === 'function' && useArmorChestNearPlayer()) {}   // 裝備箱：防具視窗（js/backpack.js）
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
     else if (typeof usePosterNearPlayer === 'function' && usePosterNearPlayer()) {}   // 查看海報（js/posters.js）
@@ -2495,6 +2497,7 @@ function update(dt) {
   if (typeof updateCapKing === 'function') updateCapKing(dt);   // 順順宮主：大宮帽打開、蓋回、蓋杯子洗牌（js/elite-cap-king.js）
   if (typeof updateGourd === 'function') updateGourd(dt);   // 葫蘆猴拖行的刮痕、砸出來的地裂（js/gourd-monkey.js）
   if (typeof updateMoths === 'function') updateMoths(dt);   // 人面蝶的鱗粉霧、吸入、中毒／混亂／睡眠、粉塵爆炸（js/human-face-butterfly.js）
+  if (typeof updateCooking === 'function') updateCooking(dt);   // 爐灶上正在煮的東西（js/cooking.js）
   if (typeof updateFood === 'function') updateFood(dt);   // 地上的食物在火裡烤熟、吃到的 buff 倒數（js/food.js）
   if (typeof updateBananaKing === 'function') updateBananaKing(dt);   // 金蕉王的測試生成（js/golden-banana-king.js）   // 順順宮帽、夯吉寶的迴力鏢帽子（js/hangi-bao.js）
   // 波次（安全場景沒有波次，也不會有勝負）

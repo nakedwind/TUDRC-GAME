@@ -1130,6 +1130,8 @@ function draw() {
     else if (typeof gachaNearPlayer === 'function' && !doorNearPlayer() && gachaNearPlayer()) { const g = gachaNearPlayer(); drawInteractPrompt(g.x, g.top - 4, '扭蛋'); }   // 扭蛋機（js/gacha.js）
     else if (typeof clawNearPlayer === 'function' && !doorNearPlayer() && clawNearPlayer()) { const c = clawNearPlayer(); drawInteractPrompt(c.x, c.top - 4, clawPromptLabel(c)); }   // 夾娃娃機（js/claw-machine.js）
     else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '使用電腦'); }   // 2F應變中心的電腦：打開電腦桌面（js/bestiary.js、js/pc-desktop.js）
+    else if (typeof stoveNearPlayer === 'function' && !doorNearPlayer() && stoveNearPlayer()) { const c = stoveNearPlayer(); drawInteractPrompt(c.x, c.top - (cookingPots.some(p => p.stamp === c.stamp) ? 26 : 4), '烹飪'); }   // 正在煮：提示往上，不蓋到進度圈   // 廚房工作台的爐灶（js/cooking.js）
+    else if (typeof cabinetNearPlayer === 'function' && !doorNearPlayer() && cabinetNearPlayer()) { const c = cabinetNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '打開' + cabinetDefFor(c.stamp).name); }   // 收納櫃（js/storage-cabinet.js）
     else if (typeof armorChestNearPlayer === 'function' && !doorNearPlayer() && armorChestNearPlayer()) { const c = armorChestNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '整理防具'); }   // 裝備箱（js/backpack.js）
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）
@@ -1199,6 +1201,7 @@ function draw() {
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
+  if (typeof drawCooking === 'function') drawCooking(ctx);   // 爐灶：爐火、鍋上的食物、蒸氣、進度圈（js/cooking.js）
   if (typeof drawGuideSupplyBubbles === 'function') drawGuideSupplyBubbles(ctx);   // 嚮導缺急救包／杏仁水：頭上的思考泡泡（js/camp-supply.js）
   // ---- 角色頭上的東西：畫在建築、屋簷、黑幕之上（最上層），不會被擋住 ----
   drawInteractionPrompts();   // 互動提示（開門、對話、拾取…）：黑幕之上，暗處也看得到

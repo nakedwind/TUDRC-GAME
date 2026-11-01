@@ -2459,6 +2459,13 @@ const BASE_MAPS = [
         "fx": true,
         "ox": -2,
         "oy": -10
+      },
+      {
+        "id": "tile_prop_shelf_locker_unit",
+        "c": 37,
+        "r": 8,
+        "layer": "object4",
+        "oy": 20
       }
     ],
     "solid": [

@@ -199,11 +199,13 @@ gameCanvas.addEventListener('drop', e => {
 const quickOrigRenderBackpack = renderBackpack;
 renderBackpack = function () {
   quickOrigRenderBackpack();
+  if (typeof cabinetShowing === 'function' && cabinetShowing()) return;   // 收納櫃的櫃子預覽：櫃子裡的東西不能拖到快捷欄
   backpackGrid.querySelectorAll('.bag-cell[data-bag-item]').forEach(c => { if (quickAllowed(quickItem(c.dataset.bagItem))) c.draggable = true; });
 };
 const quickOrigRenderDetail = renderBackpackDetail;
 renderBackpackDetail = function () {
   quickOrigRenderDetail();
+  if (typeof cabinetOpen !== 'undefined' && cabinetOpen) return;   // 收納櫃：那一行改寫「身上／櫃子裡有幾個」（js/storage-cabinet.js）
   const it = quickItem(backpackSel); if (!quickAllowed(it)) return;
   const acts = backpackDetail.querySelector('.bag-actions'); if (!acts) return;
   const cur = quickSlotOf(it.id);

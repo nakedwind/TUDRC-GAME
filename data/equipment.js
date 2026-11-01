@@ -62,10 +62,10 @@ const EQUIPMENT = [
     ownedDesc: '減少火海燙傷，不抵擋爆炸傷害。',
     stat: lv => '火海燙傷 −' + Math.round(lv.fire * 100) + '%', levels: [{ fire: .4 }, { fire: .6 }, { fire: .8 }, { fire: .85 }, { fire: .9 }] },
   { id: 'acidboots', name: '防腐鞋', kind: 'legs', icon: '🥾', image: 'images/裝備/resistant-boots.png', source: 'develop', cost: [60, 120, 200, 290, 390],
-    ownedDesc: '減少踩到腐蝕池、酸液的傷害；\n可以跟防毒面具疊加。',
+    ownedDesc: '減少踩到腐蝕池、酸液的傷害；可以跟防毒面具疊加。',
     stat: lv => '腐蝕池、酸液傷害 −' + Math.round(lv.corrode * 100) + '%', levels: [{ corrode: .4 }, { corrode: .6 }, { corrode: .8 }, { corrode: .85 }, { corrode: .9 }] },
   { id: 'radio', name: '無線電', kind: 'acc', icon: '📻', image: 'images/裝備/handheld-radio.png', source: 'develop', cost: [60, 120, 200, 290, 390],
-    ownedDesc: '指派隊員時，隊員跑得更快；疏導、急救可以站遠一點。\n同時帶著慣性導航記錄器：地圖上看得到隊員在哪。',
+    ownedDesc: '指派隊員時，隊員跑得更快；疏導、急救可以站遠一點。同時帶著慣性導航記錄器：地圖上看得到隊員在哪。',
     stat: lv => '指派時隊員移動 +' + Math.round(lv.rush * 100) + '%・疏導、急救距離 +' + Math.round(lv.reach * 100) + '%',
     levels: [{ reach: .15, rush: .2 }, { reach: .3, rush: .25 }, { reach: .4, rush: .3 }, { reach: .5, rush: .4 }, { reach: .7, rush: .5 }] },
   { id: 'detector', name: '異質探測器', kind: 'acc', icon: '📡', image: 'images/裝備/anomaly-detector.png', source: 'field', where: '只能在戰鬥區域取得：打碎異質核心時有機會拿到', cost: [0, 120, 200, 290, 390],
@@ -122,7 +122,7 @@ const WEAPON_UPGRADES = {
     levels: [{ r: 1.1, burn: 6, reload: 2.2, reserve: 6 }, { r: 1.4, burn: 7, reload: 1.9, reserve: 8 }, { r: 1.6, burn: 9, reload: 1.6, reserve: 10, ignite: 4 }, { r: 1.8, burn: 10, reload: 1.4, reserve: 12, ignite: 5 }, { r: 2, burn: 12, reload: 1.2, reserve: 14, ignite: 6 }] },
   // 麻醉槍：sleep 睡幾秒、mag 彈匣、reload 裝填秒數、reserve 持有上限（備用彈最多帶幾發）、mist 麻醉霧半徑（格，Lv3 起）
   tranq: { name: '麻醉槍', icon: '💤', image: 'images/weapon/tranquilizer_gun.png', field: true, where: '只能在戰鬥區域取得：有機會在上鎖的置物箱裡找到', cost: [100, 180, 270, 370],
-    ownedDesc: '使怪物睡眠或使暴走隊員冷靜下來；\n大型怪物效果較短，對怪物「生命體」無效。',
+    ownedDesc: '使怪物睡眠或使暴走隊員冷靜下來；大型怪物效果較短，對怪物「生命體」無效。',
     stat: weaponStat,
     levels: [{ sleep: 3, mag: 2, reload: 2, reserve: 8 }, { sleep: 4, mag: 2, reload: 1.5, reserve: 10 }, { sleep: 5, mag: 3, reload: 1.5, reserve: 12, mist: 1.2 }, { sleep: 6, mag: 3, reload: 1.3, reserve: 14, mist: 1.4 }, { sleep: 7, mag: 4, reload: 1.1, reserve: 16, mist: 1.6 }] },
 };
