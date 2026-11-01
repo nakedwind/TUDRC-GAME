@@ -1,4 +1,4 @@
-/* 地圖物件自帶的行走碰撞（販賣機、營地的箱子）：由物件編輯器匯出。
+/* 地圖物件自帶的行走碰撞（販賣機、營地的箱子、扭蛋機、夾娃娃機）：由物件編輯器匯出。
    tile＝地圖上放的素材 id；h.solid＝從圖片左上角算，哪幾格擋路（[第幾欄, 第幾列]）。左右、上下翻轉的物件會跟著翻。 */
 const PROP_COLLISIONS = [
   {
@@ -145,6 +145,54 @@ const PROP_COLLISIONS = [
         [
           1,
           1
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-capsule-toy-machines",
+    "name": "扭蛋機（六台）",
+    "tile": "tile_street_capsule_toy_machines",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/street/street-capsule-toy-machines.png",
+      "w": 3,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-claw-machine",
+    "name": "夾娃娃機",
+    "tile": "tile_street_claw_machine",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/street/street-claw-machine.png",
+      "w": 2,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
         ]
       ]
     }

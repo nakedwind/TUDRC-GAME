@@ -6,7 +6,7 @@ const oreObjects=Object.entries(ORE_TYPES).map(([id,spec])=>{
   return {id,name:spec.name,cost:0,hp:spec.hp,h:clone(variant),v:clone(variant)};
 });
 const storageBoxIds=new Set(STORAGE_BOXES.map(o=>o.id));
-const propIds=new Set((typeof PROP_COLLISIONS!=='undefined'?PROP_COLLISIONS:[]).map(o=>o.id));   // 販賣機、營地箱子的自帶碰撞（data/prop-collisions.js）
+const propIds=new Set((typeof PROP_COLLISIONS!=='undefined'?PROP_COLLISIONS:[]).map(o=>o.id));   // 販賣機、營地箱子、扭蛋機、夾娃娃機的自帶碰撞（data/prop-collisions.js）
 const singleIds=id=>storageBoxIds.has(id)||propIds.has(id);   // 只有一種方向、不能蓋、沒有 HP
 const defaults=[...OBSTACLES,...DECORATIONS,...oreObjects,...STORAGE_BOXES,...(typeof PROP_COLLISIONS!=='undefined'?PROP_COLLISIONS:[])];
 const decorationIds=new Set(DECORATIONS.map(o=>o.id));
@@ -33,7 +33,7 @@ $('delObj').onclick=()=>{if(objects.length<=1){alert('至少要保留一個物�
 $('pickImg').onclick=()=>$('imgFile').click();
 $('imgFile').onchange=()=>{const f=$('imgFile').files[0];if(!f)return;const path='images/item-obstacle/'+f.name;const done=(w,h)=>{const v=variant();v.file=path;if(w){v.w=Math.max(1,Math.min(10,w));v.h=Math.max(1,Math.min(10,h))}v.solid=(v.solid||[]).filter(([x,y])=>x<v.w&&y<v.h);save();render();setTimeout(()=>{$('status').textContent='✓ 路徑已填入。記得把圖片「'+f.name+'」放進 images/item-obstacle/ 資料夾'},950)};const probe=new Image();probe.onload=()=>{done(Math.round(probe.naturalWidth/OBJ_CELL),Math.round(probe.naturalHeight/OBJ_CELL));URL.revokeObjectURL(probe.src)};probe.onerror=()=>{done()};probe.src=URL.createObjectURL(f);$('imgFile').value=''};
 function source(kind='obstacles'){
-  if(kind==='props')return '/* 地圖物件自帶的行走碰撞（販賣機、營地的箱子）：由物件編輯器匯出。\n   tile＝地圖上放的素材 id；h.solid＝從圖片左上角算，哪幾格擋路（[第幾欄, 第幾列]）。左右、上下翻轉的物件會跟著翻。 */\nconst PROP_COLLISIONS = '+JSON.stringify(objects.filter(o=>propIds.has(o.id)),null,2)+';\n';
+  if(kind==='props')return '/* 地圖物件自帶的行走碰撞（販賣機、營地的箱子、扭蛋機、夾娃娃機）：由物件編輯器匯出。\n   tile＝地圖上放的素材 id；h.solid＝從圖片左上角算，哪幾格擋路（[第幾欄, 第幾列]）。左右、上下翻轉的物件會跟著翻。 */\nconst PROP_COLLISIONS = '+JSON.stringify(objects.filter(o=>propIds.has(o.id)),null,2)+';\n';
   if(kind==='storageBoxes')return '/* 置物箱行走碰撞：由物件編輯器匯出。 */\nconst STORAGE_BOXES = '+JSON.stringify(objects.filter(o=>storageBoxIds.has(o.id)),null,2)+';\n';
   if(kind==='ores'){
     const data=Object.fromEntries(objects.filter(o=>oreIds.has(o.id)).map(o=>[o.id,{...ORE_TYPES[o.id],name:o.name,hp:o.hp,...o.h}]));

@@ -115,6 +115,7 @@ function restoreCombatProgress() {
   try {
     const data = combatGraphDecode(saved.graph, MAP.stamps || []);
     if (!data.state?.player || !(data.walls instanceof Set)) throw new Error('戰場資料不完整');
+    if (typeof rememberVitals === 'function' && G?.vitalsMapId !== MAP.id) rememberVitals();   // 不會跑 newGame：先記住剛離開那張地圖的 HP、負荷，resumeVitals 才不會套到舊數字
     G = data.state; mapWalls = data.walls; mapDoors = data.doors; doorAddedWalls = data.doorWalls; mapSolidOffsets = data.offsets;
     if (lastSafe !== false) sortie.active = data.activeSupply;   // 走出入口回來的：這趟出勤的補給效果還在
     sortieLastSafe = false; saveSortie();

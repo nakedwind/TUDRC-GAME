@@ -85,13 +85,16 @@ function renderSaveSlots() {
     info.append(title, detail); row.append(info);
     for (const [action, label] of [['save', slot ? '覆寫' : '存入'], ['load', '讀取']]) {
       const button = document.createElement('button'); button.type = 'button'; button.className = 'set-btn' + (action === 'save' ? ' primary' : ''); button.textContent = label;
-      button.dataset.slotAction = action; button.dataset.slot = n; button.disabled = action === 'load' && !slot; row.append(button);
+      button.dataset.slotAction = action; button.dataset.slot = n; button.disabled = action === 'load' ? !slot : !!window.TEST_MODE;   // 測試模式不能存入（全物品、$99999 會被帶進正式進度）
+      if (action === 'save' && window.TEST_MODE) button.title = '測試模式不能存入存檔';
+      row.append(button);
     }
     box.append(row);
   }
 }
 function storeSaveSlot(n) {
   if (!Number.isInteger(n) || n < 1 || n > SAVE_SLOT_COUNT) return;
+  if (window.TEST_MODE) { systemNotice('測試模式不能存入存檔', true); sfx('error'); return; }
   if (readSaveSlot(n) && !confirm('覆寫存檔 ' + n + '？')) return;
   try {
     saveGame();

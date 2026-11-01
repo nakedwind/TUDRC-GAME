@@ -21,7 +21,7 @@
 const PEARL_ELDER = {
   name: '珍珠大童',
   maps: { map_mvvdbiyx: { c: 91, r: 32 } },   // 出現在哪幾張地圖、生在哪一格（K56區-地下街：右邊有斑馬線、電梯的大房間，斑馬線上方的中間；地圖改成 106×96 之後的座標）
-  hp: 3500, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hp：血量（再乘整體難度）
+  hp: 3000, dmgMul: .75, rewardMul: 6, crystalMul: 6,   // 以珍珠小童（data/monsters.js）的數值為基準；hp：血量（再乘整體難度）
   scale: 2.6,                    // 體型放大倍率
   speedMul: 1.2,                 // 飄的速度倍率（以珍珠小童為基準）
   hover: 26,                     // 張殼時飄多高（像素）
