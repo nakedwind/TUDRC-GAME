@@ -47,7 +47,8 @@ const BossMusic = (() => {
   const coreAwake = () => (G.cores || []).some(c => c.awake && !c.dead);
   // 畫面上方還有 BOSS 血條（鳥頭大隊長、大夯吉寶、珍珠大童；跟 js/core-frenzy.js 的 drawCoreBossUI 同一份資料）
   const bossBarShown = () => [typeof eliteBossBars === 'function' && eliteBossBars(), typeof capKingBossBars === 'function' && capKingBossBars(),
-    typeof pearlBossBars === 'function' && pearlBossBars()].some(bars => bars && bars.length);
+    typeof pearlBossBars === 'function' && pearlBossBars()].some(bars => bars && bars.length)
+    || (typeof capKingMusicHold === 'function' && capKingMusicHold());   // 順順宮主：第一隻大夯吉寶出現後，直到全部（含帽子裡的）打倒都不停（js/elite-cap-king.js）
 
   function tick() {
     const now = performance.now(), dt = Math.min(.5, (now - last) / 1000); last = now;

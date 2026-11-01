@@ -30,6 +30,7 @@ const CAP_KING = {
   big: {                   // 大夯吉寶（以普通夯吉寶 data/monsters.js 的數值為基準）
     name: '大夯吉寶',
     scale: 2.6, hpMul: 18, dmgMul: 1.8, rewardMul: 5, crystalMul: 5,   // hpMul 18 → 血量 810
+    coreHpMul: 1.5,        // 跟核心躲在同一頂帽子裡的那隻：血量再乘幾倍（1.5 → 1215）
     speedMul: 1.5,         // 移動速度倍率（1＝跟普通夯吉寶一樣快）
     walkStride: 18,        // 走路動畫每走幾像素換一步（普通 10；體型大，步伐跟著放大）
     capSpread: { n: 3, angle: 22, scale: 1.8, hitR: 28 },   // 一次丟幾頂、相鄰兩頂差幾度、帽子放大、打中判定半徑（像素）
@@ -157,6 +158,11 @@ function capKingPool(core, on) {
 const capKingBigsAlive = K => (K.bigs || []).filter(e => e.hp > 0 && !e.dead);
 // 還躲在帽子裡、沒跳出來的大夯吉寶（核心打破後帽子交回一般帽子，就不會再跳出來了）
 const capKingBigsHidden = K => K.over ? 0 : K.caps.filter(c => c.hasBig && !c.spawned).length;
+// BOSS 音樂至少小聲播著（js/boss-music.js）：第一隻大夯吉寶跳出來之後，場上還有活的、或帽子裡還有沒跳出來的，就不會停
+function capKingMusicHold() {
+  const K = G && G.capKing; if (!K || !K.bigs.length) return false;
+  return capKingBigsAlive(K).length > 0 || capKingBigsHidden(K) > 0;
+}
 // 大夯吉寶盯上溫特：播 BOSS 音樂（js/boss-music.js）
 function capKingHunting() {
   const K = G && G.capKing; if (!K) return false;
@@ -167,7 +173,7 @@ function capKingSpawnBig(cap) {
   if (!spec) return;
   const B = CAP_KING.big, e = createMonster(spec, cap.x, cap.y + CELL * .6);
   e.capKing = true; e.eliteName = B.name;
-  e.hp = e.maxhp = Math.round(e.maxhp * B.hpMul);
+  e.hp = e.maxhp = Math.round(e.maxhp * B.hpMul * (cap === G.capKing.coreCap ? B.coreHpMul : 1));
   e.playerDamage = Math.round(e.playerDamage * B.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * B.dmgMul);
   e.buildingDamage = Math.round(e.buildingDamage * B.dmgMul);
