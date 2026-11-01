@@ -203,6 +203,7 @@ const SFX = (() => {
     whiteNoise: '環境/白噪音.mp3',
     // BOSS 音樂（js/boss-music.js）：一直循環、淡入淡出；音量在音效編輯器的「音樂」調整
     bossElite: '戰鬥/中BOSS.mp3',             // 鳥頭大隊長盯上玩家
+    clawMusic: '設施/娃娃機音樂.mp3',          // 夾娃娃機打開時循環播放（js/claw-machine.js）
     bossCore: '戰鬥/異質核心甦醒.mp3',        // 異質核心甦醒到被打破
     eliteScream: '怪物/鳥頭人/鳥頭人被打.mp3',   // 鳥頭大隊長甦醒時的尖叫：跟鳥頭人被打同一個音檔，開大聲、加回音（SOUND_ECHO）
     eliteStep: '戰鬥/heavy-walking-footsteps.mp3',   // 鳥頭大隊長沉重的腳步（js/elite-bird-head.js 的 eliteBirdFootsteps）
