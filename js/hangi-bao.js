@@ -258,6 +258,8 @@ function throwCap(e, target) {
   e.hb.capOut = true;
   if (typeof sfxAt === 'function') sfxAt('swordSwing', e.x, e.y, .45, 'hangi-throw');
 }
+// 路障（含紅色路障、地圖上畫的路障）比較矮，帽子從上面飛過去，不會被擋也不會打壞它
+const capFliesOver = o => /roadblock/.test(String(o.type || ''));
 function capHitPlayer(s) {
   if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(G.player)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const p = G.player, e = s.owner, dmg = Math.round((typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 8) : e.playerDamage ?? 8));
@@ -298,7 +300,7 @@ function updateCapShots(dt) {
         const nx = s.x + s.ux * step, ny = s.y + s.uy * step, [c, r] = cellAt(nx, ny);
         if (!inGrid(c, r) || isWall(c, r)) { s.phase = 'back'; break; }   // 撞牆就折回來
         const blocker = enemyBarrierAt(c, r);
-        if (blocker) { e.atkCd = 0; enemyAttackObstacle(e, blocker, 0); s.phase = 'back'; break; }   // 打到建築：損壞建築，再折回來
+        if (blocker && !capFliesOver(blocker)) { e.atkCd = 0; enemyAttackObstacle(e, blocker, 0); s.phase = 'back'; break; }   // 打到建築：損壞建築，再折回來（路障飛得過去）
         s.x = nx; s.y = ny;
         capCheckHits(s);
         if (s.left <= 0) s.phase = 'back';
