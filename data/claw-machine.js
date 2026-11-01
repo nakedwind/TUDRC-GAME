@@ -14,10 +14,10 @@ const CLAW_MACHINE = {
   aimTime: 15,           // 每次可以移動爪子幾秒
   pityPlays: 10,         // 保夾：連續幾次沒拿到東西後，下一爪必中
   minAim: .4,            // 對得最歪（剛好擦到）時夾力剩幾成
-  moveSpeed: 135,        // 爪子左右移動的速度（畫面單位／秒；機台內部寬 400）
-  stockSize: 12,         // 機台裝滿是幾個
-  restockBelow: 6,       // 剩不到幾個就補貨
-  ballR: 26,             // 膠囊半徑
+  moveSpeed: 135,        // 爪子左右移動的速度（畫面單位／秒；機台內部高 360）
+  stockSize: 18,         // 機台裝滿是幾個
+  restockBelow: 8,       // 剩不到幾個就補貨
+  ballR: 28,             // 膠囊半徑
   prizes: [
     { id: 'battery',          grip: .68, weight: 16, tier: 'common' },
     { id: 'medkit',           grip: .60, weight: 16, tier: 'common' },
@@ -28,6 +28,6 @@ const CLAW_MACHINE = {
     { id: 'eye-drops',        grip: .32, weight: 8,  tier: 'rare' },
     { id: 'charm',            grip: .28, weight: 8,  tier: 'rare' },
     { id: 'anomaly-firstaid', grip: .17, weight: 5,  tier: 'rare' },
-    { id: 'bird-green',       grip: .10, weight: 3,  tier: 'jackpot', costume: true, r: 33 },   // 小鳥頭飾（綠繡眼）：大獎，一台最多放一個
+    { id: 'bird-green',       grip: .10, weight: 3,  tier: 'jackpot', costume: true, r: 36 },   // 小鳥頭飾（綠繡眼）：大獎，一台最多放一個
   ],
 };

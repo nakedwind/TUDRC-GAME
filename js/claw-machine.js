@@ -10,7 +10,7 @@ const CLAW_STORE = 'tudrc_claw_machine_v1';
 const clawSave = (() => { try { return JSON.parse(localStorage.getItem(CLAW_STORE) || '{}') || {}; } catch (_) { return {}; } })();
 const clawPersist = () => { try { localStorage.setItem(CLAW_STORE, JSON.stringify(clawSave)); } catch (_) {} };
 
-// 機台內部的座標（畫布 800×720 的一半）
+// 機台內部的座標：高固定 360，寬在打開時照機台窗口的比例決定（clawFitWindow）
 const CW = { W: 400, H: 360, FLOOR: 346, WALL: 396, CHUTE_X: 92, CHUTE_TOP: 232, HOME_X: 46, AIM_MIN: 118, RAIL_Y: 16, ROPE_MIN: 52, GRAVITY: 1100 };
 const CW_TIER = {
   common: { name: '常見', tint: 'rgba(255,255,255,.34)', line: '#5d68bd' },
@@ -48,6 +48,7 @@ function clawMachineState(spot) {
     clawPersist();
   }
   m.stock = m.stock.filter(clawPrizeDef);   // 設定拿掉的獎品就不留在機台裡
+  if (m.stock.length < CLAW_MACHINE.restockBelow) { while (m.stock.length < CLAW_MACHINE.stockSize) m.stock.push(clawRollStock(m.stock)); clawPersist(); }
   return m;
 }
 const clawMoney = () => Math.floor((typeof G !== 'undefined' && G && G.money) || 0);
@@ -58,9 +59,18 @@ function clawSpawnPrize(id, x, y) {
   const def = clawPrizeDef(id), r = def.r || CLAW_MACHINE.ballR;
   return { id, def, r, x, y, vx: 0, vy: 0, a: (Math.random() - .5) * 1.2, va: 0, chute: false };
 }
+function clawFitWindow() {   // 機台內部的寬度配合窗口比例，不留黑邊
+  const box = cw.el.querySelector('.cw-window'), ratio = box.clientWidth / Math.max(1, box.clientHeight);
+  const W = Math.round(Math.max(420, Math.min(760, CW.H * ratio)));
+  if (W === CW.W && cw.bg) return;
+  CW.W = W; CW.WALL = W - 4;
+  cw.canvas.width = W * 2; cw.canvas.height = CW.H * 2;
+  cw.bg = clawBuildBg();
+}
 function clawFillMachine() {   // 打開機器時擺好：先從上面排著落下，模擬一下讓它們堆好
   const stock = [...cw.m.stock].sort(() => Math.random() - .5).sort((a, b) => (clawPrizeDef(a).tier === 'jackpot') - (clawPrizeDef(b).tier === 'jackpot'));   // 大獎擺在最上面，看得到也夾得到
-  cw.prizes = stock.map((id, i) => clawSpawnPrize(id, CW.CHUTE_X + 40 + (i % 5) * 58 + Math.random() * 6, CW.FLOOR - 30 - Math.floor(i / 5) * 62));
+  const gap = CLAW_MACHINE.ballR * 2 + 6, cols = Math.max(5, Math.floor((CW.WALL - CW.CHUTE_X - 40) / gap));
+  cw.prizes = stock.map((id, i) => clawSpawnPrize(id, CW.CHUTE_X + 40 + (i % cols) * gap + Math.random() * 6, CW.FLOOR - 30 - Math.floor(i / cols) * (gap + 4)));
   for (let i = 0; i < 420; i++) clawPhysics(1 / 120, true);
   for (const p of cw.prizes) { p.vx = p.vy = p.va = 0; }
 }
@@ -212,7 +222,7 @@ function clawRestock() {
   if (m.stock.length >= CLAW_MACHINE.restockBelow) return;
   while (m.stock.length < CLAW_MACHINE.stockSize) {
     const id = clawRollStock(m.stock); m.stock.push(id);
-    cw.prizes.push(clawSpawnPrize(id, CW.CHUTE_X + 40 + Math.random() * 240, -40 - Math.random() * 300));   // 從上面掉下來
+    cw.prizes.push(clawSpawnPrize(id, CW.CHUTE_X + 40 + Math.random() * (CW.WALL - CW.CHUTE_X - 80), -40 - Math.random() * 300));   // 從上面掉下來
   }
   clawPersist();
   if (!cw.wins.length) clawSay('機台補貨了');
@@ -367,12 +377,13 @@ function clawDraw(t) {
   g.fillStyle = '#34386b'; g.fillRect(0, CW.FLOOR - 4, CW.CHUTE_X - 3, CW.H - CW.FLOOR + 4);
   if (cw.flash > 0) { g.fillStyle = 'rgba(255,226,130,' + cw.flash * .85 + ')'; g.fillRect(0, CW.CHUTE_TOP, CW.CHUTE_X, CW.H - CW.CHUTE_TOP); }
   g.fillStyle = 'rgba(255,255,255,.12)';
-  g.beginPath(); g.moveTo(236, 0); g.lineTo(318, 0); g.lineTo(90, CW.H); g.lineTo(8, CW.H); g.closePath(); g.fill();
-  g.beginPath(); g.moveTo(336, 0); g.lineTo(352, 0); g.lineTo(124, CW.H); g.lineTo(108, CW.H); g.closePath(); g.fill();
+  const k = CW.W / 400;   // 玻璃反光跟著機台寬度
+  g.beginPath(); g.moveTo(236 * k, 0); g.lineTo(318 * k, 0); g.lineTo(90 * k, CW.H); g.lineTo(8 * k, CW.H); g.closePath(); g.fill();
+  g.beginPath(); g.moveTo(336 * k, 0); g.lineTo(352 * k, 0); g.lineTo(124 * k, CW.H); g.lineTo(108 * k, CW.H); g.closePath(); g.fill();
 }
 
 // ---- 介面 ----
-function clawGripPips(grip) {   // 夾力：幾格綠燈
+function clawGripPips(grip) {   // 夾力：幾格綠燈（指著膠囊時的說明）
   const n = Math.max(1, Math.round(grip * 5));
   return '<span class="cw-pips" aria-label="夾力 ' + n + '／5">' + [1, 2, 3, 4, 5].map(i => '<i class="' + (i <= n ? 'on' : '') + '"></i>').join('') + '</span>';
 }
@@ -382,25 +393,22 @@ function buildClaw() {
   el.id = 'clawMachine'; el.className = 'hidden';
   el.setAttribute('role', 'dialog'); el.setAttribute('aria-modal', 'true'); el.setAttribute('aria-label', '夾娃娃機');
   el.innerHTML = '<section class="cw-card"><header class="cw-head"><div class="cw-icon-box" aria-hidden="true"><img src="images/street/street-claw-machine.png" alt=""></div>'
-    + '<div class="cw-title"><h2>夾娃娃機</h2><p>花經費下爪，夾到的東西直接放進背包。</p></div>'
+    + '<div class="cw-title"><h2>夾娃娃機</h2><p>花經費下爪，夾到的東西直接放進背包。指著膠囊可以看裡面是什麼。</p></div>'
     + '<span class="cw-money"><i>經費</i><b></b></span><button type="button" class="cw-close" aria-label="關閉（Esc）">×</button></header>'
     + '<div class="cw-body"><div class="cw-cabinet"><div class="cw-marquee"><span>NATURALWIND</span></div>'
-    + '<div class="cw-window"><canvas width="' + CW.W * 2 + '" height="' + CW.H * 2 + '"></canvas></div>'
-    + '<div class="cw-deck"><div class="cw-led"><span class="cw-led-msg" role="status"></span><span class="cw-led-num"><i>次數</i><b class="cw-credits"></b></span><span class="cw-led-num"><i>時間</i><b class="cw-time"></b></span></div>'
-    + '<div class="cw-controls"><button type="button" class="cw-arrow" data-move="-1" aria-label="往左">◀</button><span class="cw-stick" aria-hidden="true"><i></i></span><button type="button" class="cw-arrow" data-move="1" aria-label="往右">▶</button>'
-    + '<button type="button" class="cw-go"></button></div></div></div>'
-    + '<aside class="cw-side"><div class="cw-coins"><button type="button" data-buy="1"><span>投 1 次</span><b>$' + c.playCost + '</b></button>'
+    + '<div class="cw-window"><canvas></canvas><div class="cw-tip hidden" role="tooltip"></div></div>'
+    + '<div class="cw-deck"><div class="cw-led"><span class="cw-led-msg" role="status"></span>'
+    + '<span class="cw-pity" title="連續 ' + c.pityPlays + ' 次沒拿到東西，下一爪碰到就夾得起來；拿到任何東西都會重新累積"><span class="cw-pity-top"><i>保夾</i><b class="cw-pity-count"></b></span><span class="cw-pity-bar">' + Array.from({ length: c.pityPlays }, () => '<i></i>').join('') + '</span></span>'
+    + '<span class="cw-led-num"><i>次數</i><b class="cw-credits"></b></span><span class="cw-led-num"><i>時間</i><b class="cw-time"></b></span></div>'
+    + '<div class="cw-controls"><div class="cw-move"><button type="button" class="cw-arrow" data-move="-1" aria-label="往左">◀</button><span class="cw-stick" aria-hidden="true"><i></i></span><button type="button" class="cw-arrow" data-move="1" aria-label="往右">▶</button></div>'
+    + '<div class="cw-coins"><button type="button" data-buy="1"><span>投 1 次</span><b>$' + c.playCost + '</b></button>'
     + '<button type="button" data-buy="pack"><span>投 ' + c.packPlays + ' 次</span><b>$' + c.packCost + '</b><em>省 $' + (c.playCost * c.packPlays - c.packCost) + '</em></button></div>'
-    + '<div class="cw-pity"><div class="cw-pity-top"><strong>保夾</strong><span class="cw-pity-count"></span></div><div class="cw-pity-bar">' + Array.from({ length: c.pityPlays }, () => '<i></i>').join('') + '</div><p class="cw-pity-note"></p></div>'
-    + '<div class="cw-prize-head"><strong>機台裡現在有</strong><span class="cw-legend"><i class="common"></i>常見<i class="rare"></i>稀有<i class="jackpot"></i>大獎</span></div>'
-    + '<div class="cw-prizes">' + c.prizes.map(def => { const info = clawItemInfo(def);
-      return '<div class="cw-prize t-' + def.tier + '" data-prize="' + def.id + '"><span class="cw-prize-img"><img src="' + info.image + '" alt=""></span><span class="cw-prize-name">' + info.name + '</span>' + clawGripPips(def.grip) + '<b class="cw-prize-n"></b></div>'; }).join('') + '</div>'
-    + '<p class="cw-detail"></p>'
-    + '<p class="cw-keys"><kbd>←</kbd><kbd>→</kbd> 移動　<kbd>空白鍵</kbd> 開始／下爪　<kbd>Enter</kbd> 投 1 次　<kbd>Esc</kbd> 離開</p></aside></div>'
+    + '<button type="button" class="cw-go"></button></div></div></div>'
+    + '<p class="cw-keys"><kbd>←</kbd><kbd>→</kbd> 移動　<kbd>空白鍵</kbd> 開始／下爪　<kbd>Enter</kbd> 投 1 次　<kbd>Esc</kbd> 離開　爪子移動時會晃，停一下再下爪比較準</p></div>'
     + '<div class="cw-reveal hidden" role="status"><i class="cw-rays"></i><div class="cw-reveal-box"><small class="cw-reveal-tag"></small><span class="cw-reveal-img"><img alt=""></span><h3></h3><p class="cw-reveal-effect"></p><p class="cw-reveal-note"></p><button type="button" class="cw-reveal-ok">收下 <kbd>空白鍵</kbd></button></div></div>'
     + '</section>';
   document.getElementById('wrap').appendChild(el);
-  cw.canvas = el.querySelector('canvas'); cw.ctx = cw.canvas.getContext('2d'); cw.bg = clawBuildBg();
+  cw.canvas = el.querySelector('canvas'); cw.ctx = cw.canvas.getContext('2d');
   for (const def of c.prizes) { const img = new Image(); img.src = clawItemInfo(def).image; cw.imgs[def.id] = img; }
   el.querySelector('.cw-close').addEventListener('click', closeClawMachine);
   el.querySelector('.cw-go').addEventListener('click', clawPressGo);
@@ -411,10 +419,31 @@ function buildClaw() {
     b.addEventListener('pointerdown', e => { e.preventDefault(); cw.btnDir = dir; clawStickPose(); });
     ['pointerup', 'pointerleave', 'pointercancel'].forEach(n => b.addEventListener(n, stop));
   });
-  el.querySelectorAll('[data-prize]').forEach(row => {   // 指到獎品：機台裡的那顆發光，下面顯示說明
-    row.addEventListener('pointerenter', () => { cw.hover = row.dataset.prize; clawRenderDetail(); });
-    row.addEventListener('pointerleave', () => { cw.hover = null; clawRenderDetail(); });
-  });
+  cw.canvas.addEventListener('pointermove', clawHoverAt);
+  cw.canvas.addEventListener('pointerleave', () => clawShowTip(null));
+}
+function clawHoverAt(e) {   // 指到膠囊：那顆發光，旁邊顯示裡面是什麼
+  const rect = cw.canvas.getBoundingClientRect(), scale = Math.min(rect.width / CW.W, rect.height / CW.H);
+  const x = (e.clientX - rect.left - (rect.width - CW.W * scale) / 2) / scale, y = (e.clientY - rect.top - (rect.height - CW.H * scale) / 2) / scale;
+  const hit = cw.prizes.find(p => Math.hypot(p.x - x, p.y - y) <= p.r);
+  clawShowTip(hit, e.clientX - rect.left, e.clientY - rect.top);
+}
+function clawShowTip(prize, x, y) {
+  const tip = cw.el.querySelector('.cw-tip');
+  cw.hover = prize ? prize.id : null;
+  if (!prize) { tip.classList.add('hidden'); cw.tipId = null; return; }
+  if (cw.tipId !== prize.id) {
+    cw.tipId = prize.id;
+    const info = clawItemInfo(prize.def), tier = CW_TIER[prize.def.tier] || CW_TIER.common;
+    tip.innerHTML = '<b></b><small></small><span class="cw-tip-grip">夾力 ' + clawGripPips(prize.def.grip) + '</span><p></p>';
+    tip.querySelector('b').textContent = info.name;
+    tip.querySelector('small').textContent = tier.name + (info.kind ? '・' + info.kind : '');
+    tip.querySelector('p').textContent = info.desc;
+    tip.classList.remove('hidden');
+  }
+  const box = cw.canvas.getBoundingClientRect(), w = tip.offsetWidth, h = tip.offsetHeight;
+  tip.style.left = Math.max(6, Math.min(box.width - w - 6, x - w / 2)) + 'px';
+  tip.style.top = Math.max(6, y - h - 16) + 'px';
 }
 function clawSay(text, tone = '') { cw.msg = text; cw.msgTone = tone; clawRenderLed(); }
 function clawRenderLed() {
@@ -424,14 +453,6 @@ function clawRenderLed() {
   cw.el.querySelector('.cw-credits').textContent = cw.m ? cw.m.credits : 0;
   const time = cw.el.querySelector('.cw-time'), aiming = cw.phase === 'aim', sec = Math.ceil(cw.timer);
   time.textContent = aiming ? sec : '--'; time.classList.toggle('low', aiming && sec <= 5);
-}
-function clawRenderDetail() {
-  const p = cw.el.querySelector('.cw-detail'), def = cw.hover && clawPrizeDef(cw.hover);
-  if (!def) { p.className = 'cw-detail tip'; p.textContent = '爪子移動時會晃，停一下再下爪比較準。連續 ' + CLAW_MACHINE.pityPlays + ' 次沒拿到東西就會開啟保夾。指著獎品可以看說明。'; return; }
-  const info = clawItemInfo(def);
-  p.className = 'cw-detail'; p.innerHTML = '';
-  const b = document.createElement('b'); b.textContent = info.name + (info.kind ? '　' + info.kind : '');
-  p.append(b, document.createTextNode(info.desc));
 }
 function renderClaw() {
   if (!cw.el || !cw.m) return;
@@ -445,15 +466,9 @@ function renderClaw() {
   go.classList.toggle('ready', aim || (cw.phase === 'idle' && m.credits > 0));
   el.querySelectorAll('[data-move]').forEach(b => { b.disabled = !aim; });
   el.querySelector('.cw-close').disabled = busy || aim;
-  el.querySelector('.cw-pity-count').textContent = pity ? '已開啟！' : Math.min(m.plays, c.pityPlays) + ' / ' + c.pityPlays;
+  el.querySelector('.cw-pity-count').textContent = pity ? '開啟！' : Math.min(m.plays, c.pityPlays) + '/' + c.pityPlays;
   el.querySelectorAll('.cw-pity-bar i').forEach((seg, i) => seg.classList.toggle('on', i < m.plays));
   el.querySelector('.cw-pity').classList.toggle('on', pity);
-  const left = c.pityPlays - m.plays;
-  el.querySelector('.cw-pity-note').textContent = pity ? '下一爪只要碰到就夾得起來，瞄準最想要的吧。拿到東西後重新累積。' : '再 ' + left + ' 次沒拿到東西，下一爪碰到就夾得起來。拿到任何東西都會重新累積。';
-  el.querySelectorAll('[data-prize]').forEach(row => {
-    const n = m.stock.filter(id => id === row.dataset.prize).length;
-    row.querySelector('.cw-prize-n').textContent = '×' + n; row.classList.toggle('none', !n);
-  });
   clawRenderLed();
 }
 function clawStickPose() {
@@ -495,11 +510,12 @@ function openClawMachine(spot) {
   clawOpen = true;
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
   cw.spot = spot; cw.m = clawMachineState(spot);
-  Object.assign(cw, { phase: 'idle', x: CW.AIM_MIN, vx: 0, _pv: 0, rope: CW.ROPE_MIN, swing: 0, swingV: 0, open: 1, held: null, target: null, timer: 0, keysHeld: {}, btnDir: 0, hover: null, wins: [], pending: [], reveal: null, flash: 0, acc: 0, last: performance.now() });
-  clawFillMachine();
-  cw.el.classList.remove('hidden'); cw.el.querySelector('.cw-reveal').classList.add('hidden');
+  Object.assign(cw, { phase: 'idle', x: CW.AIM_MIN, vx: 0, _pv: 0, rope: CW.ROPE_MIN, swing: 0, swingV: 0, open: 1, held: null, target: null, timer: 0, keysHeld: {}, btnDir: 0, hover: null, tipId: null, wins: [], pending: [], reveal: null, flash: 0, acc: 0, last: performance.now() });
+  cw.el.classList.remove('hidden'); cw.el.querySelector('.cw-reveal').classList.add('hidden'); cw.el.querySelector('.cw-tip').classList.add('hidden');
   clawSay(cw.m.credits > 0 ? '還有 ' + cw.m.credits + ' 次，按空白鍵開始' : '投幣開始');
-  clawRenderDetail(); renderClaw();
+  renderClaw();
+  clawFitWindow();   // 要等視窗顯示、文字都填好才量得準大小
+  clawFillMachine();
   SFX.play('vendingOpen', .8, 'claw-open');
   cw.raf = requestAnimationFrame(clawLoop);
 }
