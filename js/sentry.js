@@ -226,7 +226,8 @@ function boxStartCells(n = 16) {
 // （有放營地時不用畫的營地格：地圖編輯器預設會把最下面兩排畫成營地，常常跟真正的營地不在一起）
 function campSpawnCells(n = 24) {
   if (MAP_SAFE || !MAP || !campCells.size) return [];
-  const free = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r];
+  // 也要檢查站得下（sentryBlocked）：營地裡的行軍床、物資箱用像素微調擋路時，會擋到隔壁格，生在那裡就走不出來
+  const free = (c, r) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r));
   const [cc, cr] = [...campCells][0].split(',').map(Number);
   const byDist = list => list.sort((a, b) => Math.hypot(a[0] - cc, a[1] - cr) - Math.hypot(b[0] - cc, b[1] - cr));
   const hasBase = typeof mapBases !== 'undefined' && mapBases.length > 0;
@@ -250,7 +251,7 @@ function spawnSentries() {
   else if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
   else if (start.length > 1) cand.push(...start.slice(1));   // 沒營地、有營地箱子：箱子前面（第一格留給溫特）
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
-  const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r]);
+  const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r)));
   // 應變中心是全員集合的安全區；戰鬥地圖仍只生成已編入的出勤隊伍。
   // 基地（安全區）：出勤隊伍不跟著溫特，只出現「平時在這張地圖」的人（data/npc-locations.js）；戰鬥地圖：出勤隊伍
   const team = MAP_SAFE

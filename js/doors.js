@@ -218,15 +218,14 @@ function updateRandomDoors(dt) {
   }
 }
 // ---- 鎖鏈神秘門、上鎖的門：畫在門上（關著時）；鎖鏈解開時往下掉 ----
-function drawDoorLock(ctx, d) {   // 一扇門的鎖鏈＋大鎖（跟門一起排前後）
+function drawDoorLock(ctx, d) {   // 一扇門的鎖鏈（跟門一起排前後）
   if (d.open) return;
   if (d.mode === 'memory') {   // 記憶之門：門上有疊鎖鏈圖就用那張圖，沒有才畫程式的鎖鏈
-    if (!d.unlocked && !(d.chainArt || []).length) { drawChainX(ctx, d.left + 2, d.y0 + (d.y - d.y0) * .2, d.right - 2, d.y - 6, 0); drawPadlock(ctx, d.x, d.y0 + (d.y - d.y0) * .55, 1.25, '#b58cff', 0); }
+    if (!d.unlocked && !(d.chainArt || []).length) drawChainX(ctx, d.left + 2, d.y0 + (d.y - d.y0) * .2, d.right - 2, d.y - 6, 0);
     return;
   }
-  const h = d.y - d.y0;
-  if (d.mode === 'chain') drawChainX(ctx, d.left + 2, d.y0 + h * .2, d.right - 2, d.y - 6, 0);
-  if (d.mode === 'chain' || d.mode === 'key') drawPadlock(ctx, d.x, d.y0 + h * .55, d.mode === 'chain' ? 1.25 : .8, d.mode === 'chain' ? '#b58cff' : '#e9bd62', 0);
+  // 上鎖的門不畫大鎖（鑰匙門沒有任何記號、鎖鏈門只有鎖鏈）
+  if (d.mode === 'chain') drawChainX(ctx, d.left + 2, d.y0 + (d.y - d.y0) * .2, d.right - 2, d.y - 6, 0);
 }
 function drawDoorLocks(ctx) {   // 解開時掉下來的鎖鏈
   if (typeof drawMemoryShards === 'function') drawMemoryShards(ctx);   // 記憶之門碎掉的鎖鏈（js/memory-doors.js）

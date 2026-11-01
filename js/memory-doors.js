@@ -65,9 +65,9 @@ function shatterDoorChains(d) {
     if (!(a.img && a.img.complete && a.img.naturalWidth)) continue;
     g.save(); g.translate(a.x - x0 + a.w / 2, a.y - y0 + a.h / 2); g.scale(a.s.fx ? -1 : 1, a.s.fy ? -1 : 1);
     g.drawImage(a.img, -a.w / 2, -a.h / 2, a.w, a.h); g.restore();
-  } else {   // 沒有鎖鏈圖：碎掉的是程式畫的鎖鏈和大鎖
+  } else {   // 沒有鎖鏈圖：碎掉的是程式畫的鎖鏈
     const h = d.y - d.y0; g.translate(-x0, -y0);
-    drawChainX(g, d.left + 2, d.y0 + h * .2, d.right - 2, d.y - 6, 0); drawPadlock(g, d.x, d.y0 + h * .55, 1.25, '#b58cff', 0);
+    drawChainX(g, d.left + 2, d.y0 + h * .2, d.right - 2, d.y - 6, 0);
   }
   hideChainArt(d);
   let alpha = null; try { alpha = g.getImageData(0, 0, W, H).data; } catch (_) {}   // file:// 開啟時讀不到像素：每一塊都留
