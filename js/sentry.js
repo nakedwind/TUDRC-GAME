@@ -176,7 +176,7 @@ function reachableFromPlayer() {
     const [c, r] = queue.shift();
     for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
-      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr) || G.grid[k]) continue;
+      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr) || G.grid[k] || edgeBetween(c, r, nc, nr)) continue;
       const [x, y] = center(nc, nr); if (sentryBlocked(x, y)) continue;
       seen.add(k); queue.push([nc, nr]);
     }
@@ -317,6 +317,7 @@ function sentryBlocked(x, y) {
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
+    if (edgeWallBlocksPoint(px, py) || edgeWallBlocksPoint(x + sx, y) || edgeWallBlocksPoint(x, y + sy)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）：角和四邊中點
   }
   return false;
 }
@@ -443,7 +444,7 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!t.summonDark) {   //
     if (c === gc && r === gr) break;
     for (const [dc, dr] of [[0,-1],[1,0],[0,1],[-1,0]]) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (cameFrom.has(key) || !sentryCellWalkable(nc, nr, false, allowDark)) continue;
+      if (cameFrom.has(key) || edgeBetween(c, r, nc, nr) || !sentryCellWalkable(nc, nr, false, allowDark)) continue;   // edgeBetween：兩格中間有薄牆就繞路
       cameFrom.set(key, c + ',' + r); queue.push([nc, nr]);
     }
   }
@@ -469,7 +470,7 @@ function sentryFleeSpot(t, threat, maxSteps = 6) {
     if (steps >= maxSteps) continue;
     for (const [dc, dr] of dirs) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (seen.has(key) || !sentryCellWalkable(nc, nr)) continue;
+      if (seen.has(key) || edgeBetween(c, r, nc, nr) || !sentryCellWalkable(nc, nr)) continue;
       seen.add(key); queue.push([nc, nr, steps + 1]);
     }
   }

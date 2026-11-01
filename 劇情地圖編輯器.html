@@ -52,7 +52,8 @@
         <button class="tool" data-mode="erase" title="快捷鍵 E">🧽 清除</button>
         <button class="tool" data-mode="pick" title="快捷鍵 I（按住 Alt＝臨時吸管）">💧 吸管</button>
         <button class="tool" data-mode="solid">🧱 不可穿透</button>
-        <button class="tool" data-mode="solidnudge">🎯 碰撞微調</button>
+        <button class="tool" data-mode="solidnudge" title="點紅格、或點紅色的邊緣碰撞細線來選取（Shift＋點／拖曳＝多選），方向鍵移動、Shift 移多一點、Delete 歸零">🎯 碰撞微調</button>
+        <button class="tool" data-mode="edge" title="在格線上畫薄牆：只擋「跨過這條線」，兩邊的格子都能走（高台邊緣、階梯兩側）。點格線＝加上／拿掉，按著沿格線拖曳＝連續畫或擦">📏 邊緣碰撞</button>
         <button class="tool" data-mode="portal">🚪 出入口</button>
         <button class="tool" data-mode="core">💠 異質核心候選點</button>
         <button class="tool" data-mode="spawn" title="畫上後，這張地圖的怪物只會從這些格子出生（拖曳可以一次畫一片；再畫一次＝擦掉）">👾 怪物出生區</button>
@@ -219,7 +220,7 @@
     };
   </script>
   <script src="js/map-editor-store.js?v=story-20261021"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
-  <script>EditorStore.boot(["js/map-editor.js?v=money5000-20261101", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
+  <script>EditorStore.boot(["js/map-editor.js?v=zkmerge-20261101", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
