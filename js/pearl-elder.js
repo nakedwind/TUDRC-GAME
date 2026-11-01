@@ -50,6 +50,7 @@ const PEARL_ELDER = {
     r: 34, max: 10, hp: 8,        // 半徑（像素）、最多幾顆、被珍珠打幾下會碎
     pushSpeed: 110,              // 溫特頂著推的速度（像素／秒）
     shotPush: 150, maxSpeed: 380,// 手槍打一下加多少速度、最快多快
+    knockSpeed: 650,             // 擊退彈打中：直接彈出去的速度（一發就撞得痛大童，滾得比手槍推的遠）
     friction: 1.4, bounce: .45,  // 滾動減速（越大停越快）、撞牆反彈保留幾成速度
     hitSpeed: 40,                // 滾多快以上撞到其他怪物才有傷害
     ramSpeed: 140,               // 滾多快以上撞到大童才有傷害、撞開貝殼（溫特走路推是 pushSpeed，撞不痛；要開槍打）
@@ -576,7 +577,7 @@ function bigPearlBlockedAt(bp, x, y) {
   if (bigPearlWallHit(x, y, bp.r)) return true;
   const p = G.player;
   if (p && Math.hypot(p.x - x, p.y - y) < bp.r + PLAYER.r) return true;
-  for (const t of G.towers) if (t.hp > 0 && Math.hypot(t.x - x, t.y - y) < bp.r + 12) return true;
+  // 隊員不擋大珍珠：滾過去時把隊員擠開（bigPearlSeparate）
   for (const o of G.bigPearls) if (o !== bp && Math.hypot(o.x - x, o.y - y) < o.r + bp.r) return o;
   return null;
 }
@@ -702,6 +703,26 @@ function bigPearlShotTarget(p, aim, aimAng, bestD, bestOnBody) {
     bestD = d; bestOnBody = onBody;
   }
   return pick;
+}
+// ---- 擊退彈：沿著彈道找第一顆大珍珠（js/special-guns.js 的 fireKnock 呼叫）；回傳 { bp, d } 或 null ----
+function bigPearlOnLine(x0, y0, ang, maxD) {
+  const ux = Math.cos(ang), uy = Math.sin(ang);
+  let best = null;
+  for (const bp of G.bigPearls || []) {
+    const along = (bp.x - x0) * ux + (bp.y - y0) * uy, off = Math.abs(-(bp.x - x0) * uy + (bp.y - y0) * ux), R = bp.r + 4;
+    if (along < 0 || off > R) continue;
+    const d = Math.max(0, along - Math.sqrt(R * R - off * off));
+    if (d <= maxD && (!best || d < best.d)) best = { bp, d };
+  }
+  return best;
+}
+// 擊退彈打中大珍珠：直接用 knockSpeed 往彈道方向彈出去（不用像手槍連打）
+function knockBigPearl(bp, ang) {
+  const v = PEARL_ELDER.big.knockSpeed;
+  bp.vx = Math.cos(ang) * v; bp.vy = Math.sin(ang) * v;
+  bp.hitT = .15; bp.hits.clear();
+  G.effects.push({ ring: true, x: bp.x, y: bp.y - bp.r * .6, r: 6, r2: bp.r * 1.6, life: .2, life0: .2, color: '#ffffff' });
+  if (typeof sfxAt === 'function') sfxAt('knockWall', bp.x, bp.y, .8, 'pearl-big-knock');
 }
 function shootBigPearl(bp, fromX, fromY) {
   const dx = bp.x - fromX, dy = bp.y - fromY, d = Math.hypot(dx, dy) || 1;

@@ -377,12 +377,15 @@ function fireKnock(p, aim, b) {
   const ang = Math.atan2(aim.y - p.y, aim.x - p.x);
   aimPose(p, ang);
   const dist = clearDistance(p, ang, b.range * CELL), r = lineHit(p, ang, dist, glueTargets(), 16);
+  const pearl = typeof bigPearlOnLine === 'function' ? bigPearlOnLine(p.x, p.y, ang, r.target ? r.d : dist) : null;   // 珍珠大童的大珍珠擋在前面：打中大珍珠（js/pearl-elder.js）
+  if (pearl) { r.target = null; r.d = pearl.d; }
   const { x: mx, y: my } = gunMuzzleAt(p, ang);
   const end = r.target ? bodyPoint(r.target) : { x: p.x + Math.cos(ang) * r.d, y: p.y + Math.sin(ang) * r.d };
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: end.x, y2: end.y, life: .12, life0: .12, color: b.color });
   G.effects.push({ muzzle: true, x: mx, y: my, ang, life: .08, life0: .08 });
   G.effects.push({ ring: true, x: end.x, y: end.y, r: 3, r2: r.target ? 20 : 9, life: .2, life0: .2, color: b.color });
   sfx('shotKnock');
+  if (pearl) { knockBigPearl(pearl.bp, ang); return; }   // 一發就把大珍珠彈出去
   const e = r.target; if (!e) return;
   bulletHurtEnemy(e, b.dmg, b.color, p, 'hitKnock');
   const mul = Math.min(1.2, e.knockMul ?? 1);
