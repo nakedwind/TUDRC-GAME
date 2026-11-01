@@ -2551,7 +2551,7 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '再挑戰');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && e.capKing && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;

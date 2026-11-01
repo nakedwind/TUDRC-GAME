@@ -808,7 +808,7 @@ function updateTutorial(dt) {
     if (hurt) { tutorialSay('aid', { name: tutMateName(hurt) }); tutGuide = { kind: 'aid', t: hurt }; return; }
   }
   // 看到異質核心
-  if (!tutorialSeen('core') && (G.cores || []).some(c => !c.dead && near(c.x, c.y, TUTORIAL.coreCells) && (typeof isLit !== 'function' || isLit(c.x, c.y) || near(c.x, c.y, TUTORIAL.coreDarkCells))) && tutorialSay('core')) return;
+  if (!tutorialSeen('core') && (G.cores || []).some(c => !c.dead && !c.hidden && near(c.x, c.y, TUTORIAL.coreCells) && (typeof isLit !== 'function' || isLit(c.x, c.y) || near(c.x, c.y, TUTORIAL.coreDarkCells))) && tutorialSay('core')) return;
   // 出口
   if (!tutorialSeen('exit') && typeof mapPortals !== 'undefined' && (mapPortals || []).some(o => { const [x, y] = center(o.c, o.r); return near(x, y, TUTORIAL.exitCells); }) && tutorialSay('exit')) return;
 }

@@ -24,8 +24,8 @@ const CAP_KING = {
   exposeTime: 15,          // 核心露出來幾秒後蓋回去
   warnTime: 3,             // 蓋回去前幾秒：露出核心的那頂帽子開始發抖（提示快要蓋回去了）
   closeTime: .45,          // 蓋回去的動畫（秒）
-  shuffle: { rounds: 7, pairs: 2, swapTime: .55, arc: 34, pause: .12 },   // 洗牌：交換幾輪、每輪同時交換幾對、每次交換幾秒、交錯時往旁邊繞開幾像素、每輪之間停多久
-  coreShield: .5,          // 還有大夯吉寶活著時，核心少受幾成傷害
+  shuffle: { rounds: 7, pairs: 2, swapTime: .55, arc: 34, pause: .12, near: 1.5 },   // 洗牌：交換幾輪、每輪同時交換幾對、每次交換幾秒、交錯時往旁邊繞開幾像素、每輪之間停多久、只跟多近的帽子交換（最近兩頂帽子距離的幾倍；1.5＝只換上下左右相鄰的，不換斜對角、不跨過中間）
+  coreShield: .5,          // 還有大夯吉寶活著（含還躲在帽子裡沒跳出來的）時，核心少受幾成傷害
   big: {                   // 大夯吉寶（以普通夯吉寶 data/monsters.js 的數值為基準）
     name: '大夯吉寶',
     scale: 2.6, hpMul: 18, dmgMul: 1.8, rewardMul: 5, crystalMul: 5,   // hpMul 18 → 血量 810
@@ -100,7 +100,7 @@ function openCapKingCap(cap) {
   capKingBlock(cap, false);
   const first = !cap.spawned; cap.spawned = true;
   const hasCore = K.coreCap === cap && !K.core.dead;
-  if (typeof sfxAt === 'function') sfxAt('hangiPopOut', cap.x, cap.y, 1, 'hangi-cap');
+  if (typeof sfxAt === 'function') sfxAt('capKingPop', cap.x, cap.y, 1, 'hangi-cap');
   G.effects.push({ ring: true, x: cap.x, y: cap.y, r: 10, r2: 80, life: .4, life0: .4, color: hasCore ? '#c77bff' : '#ffd479' });
   if (typeof addLightFlash === 'function') addLightFlash('muzzle', cap.x, cap.y - 40);
   nearbyImpact(cap.x, cap.y, 3, 0);
@@ -154,6 +154,13 @@ function capKingPool(core, on) {
 
 // ---- 大夯吉寶 ----
 const capKingBigsAlive = K => (K.bigs || []).filter(e => e.hp > 0 && !e.dead);
+// 還躲在帽子裡、沒跳出來的大夯吉寶（核心打破後帽子交回一般帽子，就不會再跳出來了）
+const capKingBigsHidden = K => K.over ? 0 : K.caps.filter(c => c.hasBig && !c.spawned).length;
+// 大夯吉寶盯上溫特：播 BOSS 音樂（js/boss-music.js）
+function capKingHunting() {
+  const K = G && G.capKing; if (!K) return false;
+  return capKingBigsAlive(K).some(e => e.hb && !(e.hb.pop > 0) && e.hb.target === G.player && G.player && G.player.hp > 0);
+}
 function capKingSpawnBig(cap) {
   const spec = ACTIVE_MONSTERS.find(m => m.id === 'hangi_bao');
   if (!spec) return;
@@ -195,13 +202,16 @@ function capKingBigSteps(e) {
   G.effects.push({ ring: true, x: e.x, y: e.y + 12, r: 8, r2: 46, life: .3, life0: .3, color: '#b9b2a2' });
   for (let i = 0; i < 4; i++) G.effects.push({ particle: true, kind: 'spark', x: e.x + (Math.random() * 2 - 1) * 30, y: e.y + 12,
     vx: (Math.random() * 2 - 1) * 70, vy: -20 - Math.random() * 30, r: 2 + Math.random() * 2.5, life: .35, life0: .35, color: '#a9a292' });
-  if (typeof sfxAt === 'function') sfxAt('eliteStep', e.x, e.y, 1, 'cap-king-step');
+  if (typeof sfxAt === 'function') sfxAt('capKingStep', e.x, e.y, 1, 'cap-king-step');
 }
 // 核心護盾：大夯吉寶活著時，核心這段時間少掉的血只算一部分（game.js、anomalous-core.js 呼叫）
 function capKingShieldCore() {
-  const K = G && G.capKing; if (!K) return;
+  const K = G && G.capKing; if (!K || K.over) return;
   const core = K.core;
-  if (core.dead || !core.awake || !(core.hp < core.lastHp) || !capKingBigsAlive(K).length) return;
+  if (core.dead || !(core.hp < core.lastHp)) return;
+  // 躲在帽子裡：一滴血都不扣（哨兵在核心躲回去前就揮下去的刀、開的槍，game.js 結算時沒看 hidden）
+  if (core.hidden) { core.hp = core.lastHp; return; }
+  if (!core.awake || (!capKingBigsAlive(K).length && !capKingBigsHidden(K))) return;
   core.hp = core.lastHp - (core.lastHp - core.hp) * (1 - CAP_KING.coreShield);
   core.lastHp = core.hp; core.hitT = .16;
   const now = performance.now();
@@ -219,8 +229,13 @@ function capKingBossBars() {
 // 倒下（combat-feel.js 的 onEnemyDeath 呼叫）
 function capKingBigDown(e) {
   nearbyImpact(e.x, e.y, 10, .08);
-  const K = G.capKing, left = K ? capKingBigsAlive(K).filter(o => o !== e).length : 0;
-  if (left) { systemNotice(e.eliteName + '倒下了！還剩 ' + left + ' 隻', true); return; }   // 全部倒下才解除核心護盾
+  const K = G.capKing; if (!K) return;
+  const alive = capKingBigsAlive(K).filter(o => o !== e).length, hidden = capKingBigsHidden(K);
+  if (K.over) { systemNotice(e.eliteName + '倒下了！' + (alive ? '還剩 ' + alive + ' 隻' : ''), true); return; }   // 核心已經打破：沒有護盾可解除
+  if (alive || hidden) {   // 全部倒下（含還躲在帽子裡的）才解除核心護盾
+    systemNotice(e.eliteName + '倒下了！還剩 ' + (alive + hidden) + ' 隻' + (hidden ? '（' + hidden + ' 隻還躲在帽子裡）' : ''), true);
+    return;
+  }
   systemNotice(e.eliteName + '全部倒下了！核心護盾消失', true);
   if (typeof coreBanner === 'function') coreBanner(e.eliteName + '全部倒下了', '核心護盾消失，趁核心露出來的時候打破它！', '#ffd27a');
 }
@@ -232,7 +247,7 @@ function capKingClose() {
   for (const cap of K.caps) if (cap.state === 'open') { cap.state = 'closed'; cap.dropT = CAP_KING.closeTime; }
   K.core.hidden = true;
   capKingPool(K.core, false);
-  if (typeof sfxAt === 'function') sfxAt('knock2', K.coreCap.x, K.coreCap.y, .8, 'cap-king-close');
+  if (typeof sfxAt === 'function') sfxAt('capKingClose', K.coreCap.x, K.coreCap.y, .8, 'cap-king-close');
   systemNotice('核心躲回帽子裡了！注意帽子怎麼移動', true);
 }
 function capKingStartShuffle() {
@@ -240,24 +255,32 @@ function capKingStartShuffle() {
   for (const cap of K.caps) capKingBlock(cap, false);   // 洗牌中帽子滑來滑去，不擋路
   K.phase = 'shuffle'; K.round = 0; K.moves = []; K.t = CAP_KING.shuffle.pause;
 }
-// 下一輪：挑幾對帽子交換位置（同一頂帽子一輪只動一次）
+// 兩個帽子位置算不算相鄰：距離在「最近兩個位置的距離 × near」以內（只換旁邊的，眼睛才跟得上）
+function capKingNearLimit(K) {
+  if (K.nearLimit) return K.nearLimit;
+  let min = Infinity;
+  for (const a of K.spots) for (const b of K.spots) if (a !== b) min = Math.min(min, Math.hypot(a.x - b.x, a.y - b.y));
+  return (K.nearLimit = min * CAP_KING.shuffle.near + 1);
+}
+// 下一輪：挑幾對相鄰的帽子交換位置（同一頂帽子一輪只動一次）
 function capKingNextRound() {
-  const K = G.capKing, S = CAP_KING.shuffle, order = K.caps.slice().sort(() => Math.random() - .5);
+  const K = G.capKing, S = CAP_KING.shuffle, limit = capKingNearLimit(K);
+  const order = K.caps.slice().sort(() => Math.random() - .5);
+  if (Math.random() < .6) order.unshift(...order.splice(order.indexOf(K.coreCap), 1));   // 核心那頂多動幾次，不然太好猜
+  const used = new Set();
   K.moves = [];
-  for (let i = 0; i + 1 < order.length && K.moves.length < S.pairs * 2; i += 2) {
-    const a = order[i], b = order[i + 1], sa = K.spots[a.slot], sb = K.spots[b.slot];
+  for (const a of order) {
+    if (K.moves.length >= S.pairs * 2) break;
+    if (used.has(a)) continue;
+    const sa = K.spots[a.slot];
+    const near = order.filter(b => b !== a && !used.has(b) && Math.hypot(K.spots[b.slot].x - sa.x, K.spots[b.slot].y - sa.y) <= limit);
+    if (!near.length) continue;
+    const b = near[Math.floor(Math.random() * near.length)], sb = K.spots[b.slot];
+    used.add(a); used.add(b);
     K.moves.push({ cap: a, from: sa, to: sb, side: 1 }, { cap: b, from: sb, to: sa, side: -1 });
   }
-  if (K.coreCap && !K.moves.some(m => m.cap === K.coreCap) && Math.random() < .6) {   // 核心那頂多動幾次，不然太好猜
-    const other = K.moves.length ? K.moves[0] : null;
-    if (other) {   // 換掉第一對的其中一頂
-      const partner = K.moves[1], s0 = K.spots[K.coreCap.slot];
-      K.moves[0] = { cap: K.coreCap, from: s0, to: partner.from, side: 1 };
-      K.moves[1] = { cap: partner.cap, from: partner.from, to: s0, side: -1 };
-    }
-  }
   K.t = S.swapTime; K.round++;
-  if (typeof sfxAt === 'function') sfxAt('swordSwing', K.core.x, K.core.y, .35, 'cap-king-shuffle');
+  if (typeof sfxAt === 'function') sfxAt('capKingShuffle', K.core.x, K.core.y, .35, 'cap-king-shuffle');
 }
 function capKingShuffleStep(dt) {
   const K = G.capKing, S = CAP_KING.shuffle;
@@ -296,6 +319,10 @@ function updateCapKing(dt) {
   if (!K) return;
   const core = K.core;
   for (const e of capKingBigsAlive(K)) capKingBigSteps(e);
+  if (K.over) {   // 核心已經打破：只剩大夯吉寶（血條、腳步照舊），全部倒下就收掉
+    if (!capKingBigsAlive(K).length) G.capKing = null;
+    return;
+  }
   for (const cap of K.caps) {
     cap.t += dt;
     if (cap.dropT > 0) cap.dropT = Math.max(0, cap.dropT - dt);
@@ -305,9 +332,10 @@ function updateCapKing(dt) {
   if (core.dead) {   // 核心打破：大宮帽全部掀開，慢慢消失（交回一般順順宮帽的淡出）
     for (const cap of K.caps) {
       capKingBlock(cap, false);
-      cap.boss = false; cap.state = 'open'; cap.t = Math.max(0, HANGI_CAP.openStay - 3); cap.hop = 0;
+      cap.boss = false; cap.state = 'open'; cap.t = Math.max(0, HANGI_CAP.openStay - 3); cap.hop = 0; cap.shake = false;
     }
-    G.capKing = null;
+    K.over = true; K.caps = [];   // 場上還有大夯吉寶的話先留著 G.capKing（血條、腳步、倒下提示）
+    if (!capKingBigsAlive(K).length) G.capKing = null;
     return;
   }
   if (K.phase === 'shuffle') { capKingShuffleStep(dt); core.x = K.coreCap.x; core.y = K.coreCap.y; return; }

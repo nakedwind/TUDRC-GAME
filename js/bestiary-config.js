@@ -103,6 +103,7 @@ const bestiaryStyle = cfg => ({ ...BESTIARY_STYLE_DEFAULT, ...(bestiaryCfg(cfg).
 const BESTIARY_ELITES = [
   { of: 'bird_head', def: () => typeof ELITE_BIRD !== 'undefined' ? ELITE_BIRD : { name: '鳥頭大隊長', hue: -35 } },   // js/elite-bird-head.js（沒載入時用括號裡的）
   { of: 'pearl_kid', def: () => typeof PEARL_ELDER !== 'undefined' ? PEARL_ELDER : { name: '珍珠大童' } },   // js/pearl-elder.js
+  { of: 'hangi_bao', def: () => typeof CAP_KING !== 'undefined' ? CAP_KING.big : { name: '大夯吉寶' } },   // 順順宮主帽子裡的大夯吉寶（js/elite-cap-king.js）
 ];
 // ---- 遊戲裡有哪些怪物：怪物編輯器的怪物＋史萊姆變體＋菁英怪 ----
 function bestiaryBaseList() {

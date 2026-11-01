@@ -1,7 +1,7 @@
 // ============================================================
 //  戰鬥中的 BOSS 音樂（跟 js/music.js 的一般背景音樂分開）
 //  兩首各自獨立，條件都符合時一起播：
-//  ・鳥頭大隊長盯上玩家（醒著、有追打目標）→ 淡入「中BOSS」（每場戰鬥第一次被盯上時晚 startDelay 秒才開始）；失去仇恨（走回原位、目標跑掉）或倒下 → 淡出。
+//  ・鳥頭大隊長盯上玩家（醒著、有追打目標）、大夯吉寶盯上溫特（js/elite-cap-king.js）→ 淡入「中BOSS」（每場戰鬥第一次被盯上時晚 startDelay 秒才開始）；失去仇恨（走回原位、目標跑掉）或倒下 → 淡出。
 //  ・異質核心甦醒 → 馬上淡入「異質核心甦醒」，播放中音量慢慢忽大忽小；核心被打破 → 淡出。
 //  ・音檔、各自的音量在「音效編輯器」的「音樂」分類（bossElite、bossCore）調整；
 //    整體再乘上設定裡的「音樂」音量，按 M 靜音時也一起靜音。回到基地、劇情地圖時全部停掉。
@@ -38,6 +38,7 @@ const BossMusic = (() => {
   // 鳥頭大隊長有沒有在追打（醒著、活著、不是在走回原位、身邊有目標）
   function eliteHunting() {
     if (typeof pearlBossHunting === 'function' && pearlBossHunting()) return true;   // 珍珠大童的 BOSS 戰（js/pearl-elder.js）
+    if (typeof capKingHunting === 'function' && capKingHunting()) return true;   // 大夯吉寶盯上溫特（js/elite-cap-king.js）
     return (G.enemies || []).some(e => e.elite && e.eliteAwake && e.hp > 0 && !e.dead && e.eb
       && e.eb.state !== 'return' && (e.eb.state !== 'guard' || (typeof eliteBirdTarget === 'function' && eliteBirdTarget(e))));
   }
