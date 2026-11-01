@@ -5,7 +5,8 @@
    - 閉殼：張殼時被打中 → 蓋起來掉到地上，受到的傷害 × shell.defense（很硬），從天上降下大小珍珠：
            地上先出現陰影圈，砸下來有傷害。小珍珠砸完就碎；大珍珠留在場上當掩體。只有被爆炸炸到（pearlBossBlast）或被大珍珠撞到才會提早打開，不然要等 shell.time 秒；閉殼期間一直降珍珠。張開後 grace 秒內被打不會再閉殼（輸出時間）。
    - 閉殼滾動：閉殼中每隔 roll.every 秒，蓄力（地上畫出路線）後整顆殼朝目標滾過去：撞飛溫特和隊員、建築直接撞爛、大珍珠撞碎；
-           撞到牆停下來，殼被撞開、頭暈 roll.wallStun 秒。
+           撞到牆會反彈 roll.bounces 次，反彈完再撞到牆才停下來，殼被撞開、頭暈 roll.wallStun 秒。
+   - 身體碰撞：PEARL_ELDER.body 的橢圓碰到牆就停、被推也會被擠出來，不會看起來穿牆。
    - 小滾珠：小珍珠砸下來會散出更小的滾珠，踩到會滑倒、滑行中撞到東西會頭暈（金蕉王香蕉皮那一套）。
    - 大珍珠：擋住雙方的子彈和射線（視線）、擋路。溫特走過去頂著就能推；用手槍打會推得更快。
            滾得夠快（big.ramSpeed 以上）撞到大童 → 大傷害、強制打開貝殼、暈眩（暈眩中受到的傷害變多），大珍珠碎掉；
@@ -30,6 +31,7 @@ const PEARL_ELDER = {
   returnAt: 18, returnTo: 10, returnMax: 6,   // 被推（或撞）到離原位幾格以外 → 飄回去；回到幾格內、或飄了幾秒就恢復戰鬥（不用回到原位，免得被大珍珠擋住卡住）
   wanderRadius: 4, wanderSpeedMul: .6, idle: [1.5, 3.5],   // 閒晃：繞著原位幾格內、速度倍率、每次發呆幾秒
   keepDistance: 4,               // 目標太近（格）：往後飄
+  body: { x: .4, y: .16 },       // 身體在地上佔的橢圓（左右、上下半徑，是圖寬的幾倍）：碰到牆就停、被推也不會擠進牆裡
   coreShare: .1,                 // 打在大童身上的傷害，核心跟著吃幾成
   coreHp: 1000,                  // 牠抱著的核心血量（地圖難度 1；難度越高照比例加）
   coreArt: { x: .40, y: .70, len: .5, angle: -73 },   // 核心圖疊在牠身上的位置：中心（圖寬、圖高的比例）、長度（圖寬的比例）、旋轉角度（度）
@@ -64,7 +66,9 @@ const PEARL_ELDER = {
     hitR: 46,                    // 離殼中心幾像素算撞到
     dmg: 22,                     // 撞到溫特的傷害（隊員一樣，再扣防禦）
     knock: 1.6, knockTime: .3,   // 撞飛幾格、幾秒
-    wallStun: 1.5,               // 撞到牆：殼被撞開、暈幾秒（0＝不暈，停下來繼續閉著）
+    bounces: [2, 3],             // 撞到牆反彈幾次（隨機挑一個），反彈完再撞到牆才停
+    bounceLen: 1,                // 每次反彈後再滾多遠（len 的幾倍）
+    wallStun: 1.5,               // 反彈完撞到牆：殼被撞開、暈幾秒（0＝不暈，停下來繼續閉著）
   },
   beads: {                       // 小珍珠砸下來散在地上的小滾珠：踩到會滑倒，滑行中撞到東西會頭暈（跟金蕉王的香蕉皮同一套，js/golden-banana-king.js）
     chance: .6, per: 2,          // 小珍珠砸下來有幾成機率散出滾珠、一次幾顆
@@ -227,7 +231,7 @@ function pearlBossWander(e, dt) {
   for (let i = 0; i < 8; i++) {
     const a = Math.random() * Math.PI * 2, d = (.5 + Math.random() * (P.wanderRadius - .5)) * CELL;
     const x = e.home.x + Math.cos(a) * d, y = e.home.y + Math.sin(a) * d;
-    if (!enemyBlocked(x, y) && hasLineOfSight(e.x, e.y, x, y)) { pk.spot = { x, y }; return; }
+    if (!enemyBlocked(x, y) && !pearlBossBodyHits(e, x, y) && hasLineOfSight(e.x, e.y, x, y)) { pk.spot = { x, y }; return; }
   }
 }
 function pearlBossGoHome(e, dt) {
@@ -238,7 +242,34 @@ function pearlBossGoHome(e, dt) {
 }
 
 // ---- 每幀（enemy-ai.js 的 stepEnemy 呼叫）----
+// ---- 身體碰撞：大童很寬，只看腳底一點會看起來穿牆；用地上的橢圓檢查牆 ----
+// 回傳碰到牆的那些方向加總（指向牆），沒碰到回傳 null
+function pearlBossBodyHits(e, x, y) {
+  const B = PEARL_ELDER.body, rx = e.drawWidth * B.x, ry = e.drawWidth * B.y;
+  let hx = 0, hy = 0, n = 0;
+  for (let i = 0; i < 16; i++) {
+    const a = i * Math.PI / 8, px = x + Math.cos(a) * rx, py = y + Math.sin(a) * ry, [c, r] = cellAt(px, py);
+    if (!inGrid(c, r) || isWall(c, r) || solidBlocksPoint(px, py)) { hx += Math.cos(a); hy += Math.sin(a); n++; }
+  }
+  return n ? { x: hx, y: hy, n } : null;
+}
+// 身體擠進牆裡（被推、被撞、飄過去）：往牆的反方向推出來
+function pearlBossKeepOut(e) {
+  for (let k = 0; k < 24; k++) {
+    const h = pearlBossBodyHits(e, e.x, e.y);
+    if (!h) return;
+    const d = Math.hypot(h.x, h.y);
+    if (d < .01) return;   // 兩邊都碰到（太窄）：不硬推
+    const nx = e.x - h.x / d * 3, ny = e.y - h.y / d * 3, [c, r] = cellAt(nx, ny);
+    if (!inGrid(c, r) || isWall(c, r)) return;
+    e.x = nx; e.y = ny;
+  }
+}
 function stepPearlBoss(e, dt) {
+  stepPearlBossState(e, dt);
+  if (!e.dead) pearlBossKeepOut(e);
+}
+function stepPearlBossState(e, dt) {
   const P = PEARL_ELDER, pk = e.pk;
   pk.bob += dt; pk.t -= dt;
   if (pk.grace > 0) pk.grace -= dt;
@@ -343,7 +374,7 @@ function pearlBossRoll(e, dt) {
     const t = pearlBossTarget(e);
     if (!t || peDist(t, e) > R.range * CELL) { pk.rollCd = .5; return; }
     const dx = t.x - e.x, dy = t.y - e.y, d = Math.hypot(dx, dy) || 1, dir = { x: dx / d, y: dy / d };
-    pk.roll = { phase: 'aim', t: R.windup, dir, left: R.len * CELL, hit: new Set() };
+    pk.roll = { phase: 'aim', t: R.windup, dir, left: R.len * CELL, hit: new Set(), bounces: R.bounces[0] + Math.floor(Math.random() * (R.bounces[1] - R.bounces[0] + 1)) };
     pk.roll.show = pearlRollWallDistance(e, dir, pk.roll.left);
     if (typeof sfxAt === 'function') sfxAt('gourdDrag', e.x, e.y, .9, 'pearl-elder-roll-aim');
     return;
@@ -361,7 +392,11 @@ function pearlBossRoll(e, dt) {
   while (move > 0) {
     const s = Math.min(4, move); move -= s;
     const nx = e.x + rl.dir.x * s, ny = e.y + rl.dir.y * s, [c, r] = cellAt(nx, ny);
-    if (!inGrid(c, r) || isWall(c, r) || solidBlocksPoint(nx, ny)) { pearlBossRollBump(e); return; }
+    const wall = pearlRollWallAhead(e, nx, ny, rl.dir);
+    if (wall) {
+      if (rl.bounces <= 0) { pearlBossRollBump(e); return; }
+      pearlBossRollBounce(e, rl, wall); move = 0; break;   // 反彈：換方向，下一幀繼續滾
+    }
     const blocker = enemyBarrierAt(c, r);
     if (blocker) pearlBossSmash(e, blocker, rl.dir);   // 建築：直接撞爛，繼續滾
     e.x = nx; e.y = ny;
@@ -372,12 +407,28 @@ function pearlBossRoll(e, dt) {
     vx: -rl.dir.x * 60 + (Math.random() * 2 - 1) * 30, vy: -rl.dir.y * 60 - 10, r: 2 + Math.random() * 2.5, life: .3, life0: .3, color: '#b9b2a2' });   // 滾過地面揚起的灰
   if (rl.left <= 0) { pk.roll = null; pk.rollCd = R.every; }
 }
-// 沿著方向往前找第一道牆（建築不算，會被撞爛）；回傳距離（像素），最多 maxLen
+// 滾到 (x, y) 會不會撞牆：腳底那格是牆，或身體往前那一側碰到牆（往後、旁邊碰到不算，才離得開牆）；回傳牆的方向（指向牆）或 null
+function pearlRollWallAhead(e, x, y, dir) {
+  const [c, r] = cellAt(x, y);
+  if (!inGrid(c, r) || isWall(c, r) || solidBlocksPoint(x, y)) return { x: dir.x, y: dir.y };
+  const h = pearlBossBodyHits(e, x, y);
+  return h && h.x * dir.x + h.y * dir.y > 0 ? h : null;
+}
+// 撞牆反彈：方向對著牆面鏡射，再滾 bounceLen 倍的距離；這段滾動可以再撞到同一個人
+function pearlBossRollBounce(e, rl, wall) {
+  const R = PEARL_ELDER.roll, d = Math.hypot(wall.x, wall.y) || 1, nx = wall.x / d, ny = wall.y / d;
+  const dot = rl.dir.x * nx + rl.dir.y * ny;
+  let vx = rl.dir.x - 2 * dot * nx, vy = rl.dir.y - 2 * dot * ny;
+  const len = Math.hypot(vx, vy) || 1;
+  rl.dir = { x: vx / len, y: vy / len };
+  rl.bounces--; rl.left = R.len * CELL * R.bounceLen; rl.hit.clear();
+  G.effects.push({ ring: true, x: e.x + nx * 40, y: e.y + ny * 20, r: 6, r2: 46, life: .25, life0: .25, color: '#c9c2b0' });
+  nearbyImpact(e.x, e.y, 6, .04);
+  if (typeof sfxAt === 'function') sfxAt('gourdSlam', e.x, e.y, .7, 'pearl-elder-roll-bounce');
+}
+// 蓄力時畫的路線：沿著方向往前找第一道牆（建築不算，會被撞爛）；回傳距離（像素），最多 maxLen
 function pearlRollWallDistance(e, dir, maxLen) {
-  for (let d = 8; d < maxLen; d += 8) {
-    const x = e.x + dir.x * d, y = e.y + dir.y * d, [c, r] = cellAt(x, y);
-    if (!inGrid(c, r) || isWall(c, r) || solidBlocksPoint(x, y)) return d;
-  }
+  for (let d = 8; d < maxLen; d += 8) if (pearlRollWallAhead(e, e.x + dir.x * d, e.y + dir.y * d, dir)) return d;
   return maxLen;
 }
 function pearlBossRollHits(e, rl) {
@@ -693,6 +744,7 @@ function updatePearlElder(dt) {
   G.pearlFalls = G.pearlFalls.filter(f => f.t > 0);
   for (const bp of [...G.bigPearls]) { stepBigPearl(bp, dt); if (!bp.gone) bigPearlSeparate(bp); }
   updatePearlBeads(dt);
+  for (const e of pearlBosses()) pearlBossKeepOut(e);   // 被大珍珠推開之後：身體不擠進牆裡
 }
 
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）：核心掉在原地、大珍珠全部碎掉 ----
