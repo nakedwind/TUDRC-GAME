@@ -130,9 +130,9 @@ const WEAPON_UPGRADES = {
 // 一般子彈無限（彈匣、裝填、傷害看手槍等級）；特殊子彈有數量，打完會停在空的（扣扳機只會「喀」一聲），要自己滾回別的子彈。
 // 特殊子彈的效果固定、不會升級（只有手槍能找諾亞升級）。上面照明彈槍、燃燒彈槍、麻醉槍的等級表已經不用了。
 // 要先裝進彈匣（背包「武器」分頁）才換得到（js/magazine.js；只有一般子彈不佔彈匣）。
-// 一組子彈＝BULLET_SET 發：溫特每種子彈最多帶一組，營地的彈藥箱也是一組一組放（js/camp-supply.js 的彈藥箱）
+// 一組子彈＝BULLET_SET 發：彈藥包每一格放一組，同一種超過一組就再佔一格（js/flare.js 的 bulletStacks），營地的彈藥箱也是一組一組放（js/camp-supply.js 的彈藥箱）
 const BULLET_SET = 20;
-// image：子彈的圖（images/weapon/bullet/，統一 48×16）；max：最多帶幾發（＝一組）；gap：兩發至少隔幾秒；color：右下角、切換時的顏色
+// image：子彈的圖（images/weapon/bullet/，統一 48×16）；max：一組幾發（彈藥包一格放這麼多）；gap：兩發至少隔幾秒；color：右下角、切換時的顏色
 // source：怎麼拿到——develop＝諾亞的開發工坊開發（cost 碎片，每次出勤在營地的彈藥箱放一組）；field＝只能在後室（戰鬥區域）的置物櫃找到（打完就沒了）；supply＝補給箱、彈藥箱補
 const BULLETS = {
   pistol:     { name: '一般子彈', icon: '•', image: 'images/weapon/bullet/Ordinarybullets.png', color: '#ffe79a' },

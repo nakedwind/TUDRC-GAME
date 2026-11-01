@@ -1972,7 +1972,7 @@ function updateAmmoHud() {
   const p = G.player, mag = PLAYER_ATK.mag, ammo = p ? (p.ammo ?? mag) : mag;
   const w = playerWeapon(p), wi = WEAPONS.indexOf(w), n = bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;
   const text = w.id === 'pistol' ? ((p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞')
-    : '<b>' + n + '</b> / ' + BULLETS[w.id].max + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
+    : '<b>' + n + '</b> 發' + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
   const usable = WEAPONS.map((x, i) => weaponUsable(i) ? 1 : 0).join('');
   const key = w.id + '|' + text + '|' + usable;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）

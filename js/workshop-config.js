@@ -350,7 +350,7 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
 
 // ---- 子彈、彈匣（data/equipment.js 的 BULLETS、MAGAZINE）：名稱、圖片、說明、費用、數量 ----
 // 設定檔 items 裡的 key：子彈＝b:子彈id（例如 b:tranq）、彈匣＝m:magazine
-//   子彈：name 名稱、image 圖片、desc 說明、cost 開發要幾個異質碎片、max 最多帶幾發
+//   子彈：name 名稱、image 圖片、desc 說明、cost 開發要幾個異質碎片、max 一組幾發（彈藥包一格）
 //   彈匣：name 名稱、desc 說明、slots 每一級裝得下幾種子彈 [Lv1, Lv2, …]、cost 升級費用 [升到 Lv2, …]
 const WORKSHOP_MAG_DESC = '在背包的「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪就換得到。只有一般子彈不佔格子；照明彈也需要一格。';
 const WORKSHOP_AMMO_BASE = {};   // 還沒套用設定檔前的原始資料（編輯器的「恢復原本」用）
