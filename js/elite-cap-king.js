@@ -6,6 +6,7 @@
      其餘的帽子第一次打開跳出普通夯吉寶（spawnCount 隻）。蓋回去之後再打開，不管哪頂都只跳 reopenCount 隻。
    - 第一次找到核心：核心甦醒＝正式開戰（BOSS 血條、異質體狂暴化）。還有大夯吉寶活著時核心少受傷（coreShield）。
      提示文字不告訴玩家還有大夯吉寶躲著、也不說打倒大夯吉寶才能解除護盾（讓玩家自己發現）。
+   - 第一隻大夯吉寶（或順順宮主）跳出來之後，沒找到核心也每 cycleTime 秒全部蓋起來洗牌一次。
    - 核心露出來 exposeTime 秒後：所有打開的大宮帽一起蓋回去，接著「蓋杯子」洗牌——帽子兩兩交換位置，
      核心跟著它的帽子一起移動，眼睛跟得上就知道核心躲到哪一頂（暗處要靠照明彈或黑暗中的閃光）。
    - 之後再找到核心：不會再出現大夯吉寶，改跳 reopenCount 隻普通夯吉寶。一樣 exposeTime 秒後再蓋回去洗牌。
@@ -18,11 +19,12 @@ const CAP_KING = {
   capScale: 2.3,           // 大宮帽的大小（順順宮帽原圖的幾倍；一般地上的帽子是 1.2）
   blockW: 3, blockH: 2,    // 擋路範圍：寬幾格、高幾格（以標的那一格為下方中間）
   coreHp: 1000,            // 核心血量（取代 js/anomalous-core.js 的 CORE.hp × 難度）
-  bigCaps: 3,              // 幾頂帽子各藏一隻大夯吉寶（其中一頂一定是核心那頂；血條在畫面上方縮短並排，js/core-frenzy.js）
+  bigCaps: 4,              // 幾頂帽子各藏一隻（核心那頂＝順順宮主本人，其餘＝大夯吉寶；4＝順順宮主 1 隻＋大夯吉寶 3 隻；血條在畫面上方縮短並排，js/core-frenzy.js）
   bigCapHangi: 2,          // 沒有核心、有大夯吉寶的帽子：另外跳出幾隻普通夯吉寶
   spawnCount: [3, 5],      // 其餘的帽子第一次打開跳出幾隻普通夯吉寶
   reopenCount: [1, 1],     // 蓋回去之後再打開，跳出幾隻普通夯吉寶
   exposeTime: 10,          // 核心露出來幾秒後蓋回去
+  cycleTime: 30,           // 第一隻大夯吉寶（或順順宮主）跳出來之後：沒找到核心也每隔幾秒全部蓋起來洗牌一次（找到核心就改用 exposeTime）
   warnTime: 3,             // 蓋回去前幾秒：露出核心的那頂帽子開始發抖（提示快要蓋回去了）
   closeTime: .45,          // 蓋回去的動畫（秒）
   shuffle: { rounds: 7, pairs: 2, swapTime: .55, arc: 34, pause: .12, near: 1.5 },   // 洗牌：交換幾輪、每輪同時交換幾對、每次交換幾秒、交錯時往旁邊繞開幾像素、每輪之間停多久、只跟多近的帽子交換（最近兩頂帽子距離的幾倍；1.5＝只換上下左右相鄰的，不換斜對角、不跨過中間）
@@ -30,7 +32,7 @@ const CAP_KING = {
   big: {                   // 大夯吉寶（以普通夯吉寶 data/monsters.js 的數值為基準）
     name: '大夯吉寶',
     scale: 2.6, hpMul: 18, dmgMul: 1.8, rewardMul: 5, crystalMul: 5,   // hpMul 18 → 血量 810
-    coreHpMul: 1.5,        // 跟核心躲在同一頂帽子裡的那隻：血量再乘幾倍（1.5 → 1215）
+    lordHp: 1800,          // 跟核心躲在同一頂帽子裡的那隻（順順宮主本人）的血量
     coreTint: '#ffb4a6',   // 跟核心躲在同一頂帽子裡的那隻：用色彩增值疊這個顏色，看起來稍微偏紅（越接近白色越淡，越紅越明顯）
     speedMul: 1.5,         // 移動速度倍率（1＝跟普通夯吉寶一樣快）
     walkStride: 18,        // 走路動畫每走幾像素換一步（普通 10；體型大，步伐跟著放大）
@@ -109,7 +111,11 @@ function openCapKingCap(cap) {
   nearbyImpact(cap.x, cap.y, 3, 0);
   if (first) {
     if (typeof questEvent === 'function') questEvent('openCap');   // 支線進度（js/quests.js）
-    if (typeof tryEquipDrop === 'function') tryEquipDrop('charm', cap.x, cap.y);   // 偶爾掉出順順宮平安符（js/equipment.js）
+    if (typeof tryEquipDrop === 'function' && !K.charmDone) {   // 偶爾掉出順順宮平安符（js/equipment.js）：9 頂大宮帽加起來最多掉一次
+      const before = (G.equipmentDrops || []).length;
+      tryEquipDrop('charm', cap.x, cap.y);
+      if ((G.equipmentDrops || []).length > before) K.charmDone = true;
+    }
   }
   if (first && cap.hasBig) capKingSpawnBig(cap);   // 大夯吉寶：每頂只有第一次打開會跳出來
   if (hasCore) { capKingExpose(cap); if (!first) capKingPopHangi(cap, ckRand(CAP_KING.reopenCount)); return; }
@@ -176,7 +182,7 @@ function capKingSpawnBig(cap) {
   const withCore = cap === G.capKing.coreCap;
   e.capKing = true; e.eliteName = withCore ? CAP_KING.name : B.name;   // 跟核心躲在一起的那隻就是「順順宮主」本人（血條、倒下提示、擊殺統計都用這個名字）
   e.capKingLord = withCore;
-  e.hp = e.maxhp = Math.round(e.maxhp * B.hpMul * (withCore ? B.coreHpMul : 1));
+  e.hp = e.maxhp = withCore ? B.lordHp : Math.round(e.maxhp * B.hpMul);
   if (withCore && B.coreTint) e.tint = 'multiply:' + B.coreTint;   // 稍微偏紅（js/combat-feel.js 的 tintedSprite）
   e.playerDamage = Math.round(e.playerDamage * B.dmgMul);
   e.sentryDamage = Math.round(e.sentryDamage * B.dmgMul);
@@ -191,6 +197,7 @@ function capKingSpawnBig(cap) {
   e.ckStep = 0; e.ckX = e.x; e.ckY = e.y;
   G.enemies.push(e);
   G.capKing.bigs.push(e);
+  if (G.capKing.cycleT == null) G.capKing.cycleT = CAP_KING.cycleTime;   // 第一隻跳出來：開始每 cycleTime 秒蓋帽洗牌
   for (let i = 0; i < 3; i++) G.effects.push({ ring: true, x: cap.x, y: cap.y - 40, r: 10 + i * 8, r2: 120 + i * 40, life: .45 + i * .15, life0: .45 + i * .15, color: i ? '#ffd27a' : '#ffffff' });
   nearbyImpact(cap.x, cap.y, 9, .06);
   flash('！！', cap.x, cap.y - e.drawHeight - 20, '#ffd27a', 1.4);
@@ -248,13 +255,13 @@ function capKingBigDown(e) {
 
 // ---- 蓋回去、洗牌 ----
 function capKingClose() {
-  const K = G.capKing;
+  const K = G.capKing, wasExposed = K.phase === 'exposed';
   K.phase = 'closing'; K.t = CAP_KING.closeTime;
-  for (const cap of K.caps) if (cap.state === 'open') { cap.state = 'closed'; cap.dropT = CAP_KING.closeTime; }
+  for (const cap of K.caps) { cap.shake = false; if (cap.state === 'open') { cap.state = 'closed'; cap.dropT = CAP_KING.closeTime; } }
   K.core.hidden = true;
   capKingPool(K.core, false);
   if (typeof sfxAt === 'function') sfxAt('capKingClose', K.coreCap.x, K.coreCap.y, .8, 'cap-king-close');
-  systemNotice('核心躲回帽子裡了！注意帽子怎麼移動', true);
+  systemNotice(wasExposed ? '核心躲回帽子裡了！注意帽子怎麼移動' : '帽子全部蓋起來了！注意帽子怎麼移動', true);
 }
 function capKingStartShuffle() {
   const K = G.capKing;
@@ -317,6 +324,7 @@ function capKingEndShuffle() {
   for (const cap of K.caps) { cap.hop = 0; capKingBlock(cap, true); }
   K.core.x = K.coreCap.x; K.core.y = K.coreCap.y;
   K.phase = 'hidden';
+  if (K.cycleT != null) K.cycleT = CAP_KING.cycleTime;   // 洗完重新數 30 秒
 }
 
 // ---- 每幀（game.js 的 update 呼叫）----
@@ -350,6 +358,13 @@ function updateCapKing(dt) {
     K.t -= dt;
     K.coreCap.shake = K.t < CAP_KING.warnTime;   // 快要蓋回去：那頂帽子發抖
     if (K.t <= 0) { K.coreCap.shake = false; capKingClose(); }
+    return;
+  }
+  // 沒找到核心：第一隻大夯吉寶（或順順宮主）跳出來之後，每 cycleTime 秒照樣全部蓋起來洗牌
+  if (K.phase === 'hidden' && K.cycleT != null) {
+    K.cycleT -= dt;
+    for (const cap of K.caps) cap.shake = cap.state === 'open' && K.cycleT < CAP_KING.warnTime;   // 快要蓋回去：打開的帽子發抖
+    if (K.cycleT <= 0) capKingClose();
   }
 }
 
