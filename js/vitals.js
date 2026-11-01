@@ -22,6 +22,7 @@ const VITALS = {
   baseRegen: 1,           // 在應變中心：每秒回幾 HP／SP
   bedRegen: 10,           // 病床上（溫特自己躺、沒住院的隊員躺）：每秒回幾 HP
   hospitalPerMin: .1,     // 住院的隊員：每分鐘回最大 HP 的幾成（.1＝10%：倒下的人大約 10 分鐘才回滿）；回滿 100% 才出院，住院期間不能出勤
+  hospitalPerMinBy: { red: .2 },   // 個別隊員的住院速度（雷德 .2＝20%：倒下也只要 5 分鐘就回滿）
   sootheRoomFrom: 30,     // 負荷到多少以上：回應變中心時待在疏導室
   hospitalMap: '1F醫院', sootheRoomMap: '2F疏導室',   // 地圖名稱（基地編輯器裡的名稱）
   ash: 'ash', ashSootheTime: 3, ashSootheColor: [176, 196, 214], ashWalkMax: 4,   // 亞許：疏導一次幾秒、光點顏色、最多走幾秒過去
@@ -29,13 +30,14 @@ const VITALS = {
 };
 const VITALS_STORE = 'tudrc_vitals_v1';
 // 住院：每秒回幾 HP（最大 HP × 每分鐘幾成 ÷ 60）；max 不給就用原本的最大 HP
-const hospitalRate = (id, max) => (max || vitalsMax(id)) * VITALS.hospitalPerMin / 60;
+const hospitalPerMinOf = id => VITALS.hospitalPerMinBy[id] || VITALS.hospitalPerMin;
+const hospitalRate = (id, max) => (max || vitalsMax(id)) * hospitalPerMinOf(id) / 60;
 // 這位隊員是不是正在住院（js/team.js：住院中不能出勤）
 const isHospitalized = id => !!(vitals.mates[id] && vitals.mates[id].hospital && TYPES[id]);
 // 還要幾分鐘出院（無條件進位）
 function hospitalMinutesLeft(id) {
   const m = vitals.mates[id]; if (!m || !m.hospital) return 0;
-  return Math.max(1, Math.ceil((vitalsMax(id) - m.hp) / (vitalsMax(id) * VITALS.hospitalPerMin)));
+  return Math.max(1, Math.ceil((vitalsMax(id) - m.hp) / (vitalsMax(id) * hospitalPerMinOf(id))));
 }
 let vitalsHospitalNotice = false;
 // 從戰鬥地圖回來：跳出通知，列出誰在住院（借用「獲得新物品」的說明視窗，js/item-intro.js）
