@@ -112,6 +112,19 @@ const SFX = (() => {
     gachaUpgrade: '獎勵/扭蛋/SSR升格.wav',    // SSR 搖到一半：金色變彩虹
     gachaSSR: '獎勵/扭蛋/SSR出貨.wav',        // 出 SSR
     gachaHero: '獎勵/扭蛋/SSR獨照.wav',       // SSR 獨照展示
+    // 夾娃娃機（js/claw-machine.js；音檔用 tools/make_claw_sfx.py 合成）
+    clawCoin: '獎勵/夾娃娃機/投幣.wav',
+    clawMotor: '獎勵/夾娃娃機/馬達.wav',
+    clawDrop: '獎勵/夾娃娃機/下爪.wav',
+    clawLift: '獎勵/夾娃娃機/收爪.wav',
+    clawGrab: '獎勵/夾娃娃機/夾住.wav',
+    clawSlip: '獎勵/夾娃娃機/掉了.wav',
+    clawBump: '獎勵/夾娃娃機/碰撞.wav',
+    clawMiss: '獎勵/夾娃娃機/沒中.wav',
+    clawChute: '獎勵/夾娃娃機/出口.wav',
+    clawWin: '獎勵/夾娃娃機/中獎.wav',
+    clawPity: '獎勵/夾娃娃機/保夾.wav',
+    clawTick: '獎勵/夾娃娃機/倒數.wav',
     favorUp: '獎勵/升等.mp3',
     mineGrind: '設施/打磨.mp3',
     crystalGet: '獎勵/得到碎片.mp3',
