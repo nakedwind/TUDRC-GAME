@@ -145,6 +145,7 @@ function startSmilerBite(v, charmed = false) {   // charmed：平安符擋下，
 function smilerBite(v, s) {
   v.smilerCd = SMILER.biteCd;
   if (v.hp <= 0) return;
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(v)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const isPlayer = v === G.player, charmed = s && s.charmed;
   const dmg = charmed ? 0 : isPlayer ? (typeof equipPlayerDamage === 'function' ? equipPlayerDamage(SMILER.playerDmg) : SMILER.playerDmg) : SMILER.sentryDmg * (1 - sentryDefense(v));
   v.hp = Math.max(0, v.hp - dmg);

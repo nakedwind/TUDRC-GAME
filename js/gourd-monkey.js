@@ -293,6 +293,7 @@ function gourdImpact(e) {
   }
 }
 function gourdHitPlayer(e, p) {
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const dmg = Math.round(typeof equipPlayerDamage === 'function' ? equipPlayerDamage(e.playerDamage ?? 22) : e.playerDamage ?? 22);
   p.hp = Math.max(0, p.hp - dmg);
   p.hitT = .45; p.underAttackT = 5; p.lastAttacker = e;
@@ -302,6 +303,7 @@ function gourdHitPlayer(e, p) {
   if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + monsterNameOf(e) + '壓扁'); }
 }
 function gourdHitSentry(e, t) {
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(t)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const dmg = (e.sentryDamage ?? 28) * (1 - sentryDefense(t));
   t.hp = Math.max(0, t.hp - dmg);
   t.hitT = Math.max(t.hitT || 0, .25);

@@ -351,6 +351,7 @@ function bigPearlLandFx(x, y) {
   if (typeof sfxAt === 'function') { sfxAt('gourdSlam', x, y, .9, 'pearl-big-land'); sfxAt('pearlHit', x, y, .8, 'pearl-big-land2'); }
 }
 function pearlFallHitPlayer(p, dmg) {
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(p)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const d = Math.round(typeof equipPlayerDamage === 'function' ? equipPlayerDamage(dmg) : dmg);
   p.hp = Math.max(0, p.hp - d);
   p.hitT = .35; p.underAttackT = 5;
@@ -361,6 +362,7 @@ function pearlFallHitPlayer(p, dmg) {
 }
 function pearlFallHitSentry(t, dmg) {
   if (parryMiss(t, false)) return;   // 柯林的劍舞架勢：打空
+  if (typeof hurtGraceBlocked === 'function' && hurtGraceBlocked(t)) return;   // 剛被打過：短暫無敵（js/combat-feel.js）
   const d = dmg * (1 - sentryDefense(t));
   t.hp = Math.max(0, t.hp - d);
   t.hitT = Math.max(t.hitT || 0, .2);
