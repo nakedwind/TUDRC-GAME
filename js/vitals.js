@@ -4,6 +4,7 @@
        暴走中的隊員：解除暴走，負荷降到暴走邊緣（VITALS.berserkEdge）；其他人保留原本的負荷。
        HP 低於 VITALS.hospitalBelow（30%）的隊員：自動住院（待在 1F醫院、躺在病床上）。
        HP 歸零的隊員回來時至少剩 1。
+   ・戰鬥地圖之間走入口：倒下的隊員到了下一區還是倒著（異質急救包救得起來，不然要回應變中心住院）。
    ・在應變中心：溫特和每位隊員每秒回 VITALS.baseRegen（1）HP；溫特、嚮導每秒回 1 SP。負荷不會自己降（雷德的自癒照舊）。
    ・1F醫院：住院的隊員躺在病床上睡覺，每分鐘回最大 HP 的 VITALS.hospitalPerMin（10%），回滿 100% 才出院（下次回來待在平常的位置）；
        住院期間不能出勤（js/team.js），在戰鬥地圖的時候也照樣在恢復。溫特自己躺上去每秒回 VITALS.bedRegen（10）HP。
@@ -81,6 +82,7 @@ function rememberVitals() {
   if (typeof G === 'undefined' || !G || !G.player || G.vitalsSkip) return;   // 開遊戲第一次、訓練室：不記
   if (!G.vitalsSafe && G.vitalsMapId === (MAP && MAP.id) && vitals.sortie) {   // 同一張戰鬥地圖重新開始（再挑戰）：回到出勤時的狀態
     vitals = { ...vitals, ...JSON.parse(JSON.stringify(vitals.sortie)), sortie: vitals.sortie };
+    for (const m of Object.values(vitals.mates)) m.hp = Math.max(1, m.hp);   // 重新部署＝一切重來：出勤紀錄裡倒著的也站起來
     saveVitals(); return;
   }
   vitals.player = { hp: G.player.hp };
@@ -113,7 +115,7 @@ function arriveVitals() {
 function applyVitals(t) {
   const m = vitals.mates[t.type]; if (!m) return;
   const bonus = Math.max(0, t.maxhp - vitalsMax(t.type));   // 出勤補給加的生命上限：照樣多那麼多（js/sortie-supply.js）
-  t.hp = Math.max(1, Math.min(t.maxhp, m.hp + bonus));
+  t.hp = !MAP_SAFE && m.hp <= 0 ? 0 : Math.max(1, Math.min(t.maxhp, m.hp + bonus));   // 走入口到下一區：倒下的還是倒著
   t.taint = Math.min(m.berserk || m.taint >= 100 ? VITALS.berserkEdge : m.taint, 100);   // 暴走的不會一出場就暴走
 }
 // ---- 接續「保留進度」的戰場（js/combat-progress.js 的 restoreCombatProgress 呼叫；這時不會跑 newGame）----
