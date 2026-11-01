@@ -47,15 +47,11 @@ function seedCapKing() {
   const spots = (Array.isArray(cfg.caps) ? cfg.caps : []).map(k => String(k).split(',').map(Number))
     .filter(([c, r]) => inGrid(c, r) && !isWall(c, r)).map(([c, r]) => { const [x, y] = center(c, r); return { c, r, x, y }; });
   if (spots.length < 2) return;
-  const mid = spots.reduce((s, p) => ({ x: s.x + p.x / spots.length, y: s.y + p.y / spots.length }), { x: 0, y: 0 });
-  // 核心：用離帽子群最近的那顆（地圖的核心候選點在哪都沒關係，會被搬進帽子裡）；沒有核心就自己做一顆
-  let core = G.cores.filter(k => !k.dead).reduce((best, k) => !best || Math.hypot(k.x - mid.x, k.y - mid.y) < Math.hypot(best.x - mid.x, best.y - mid.y) ? k : best, null);
-  if (!core) {
-    const difficulty = Math.max(1, Math.min(5, Number(MAP.difficulty) || 1)), hp = CORE.hp * difficulty;
-    core = { x: 0, y: 0, hp, maxhp: hp, lastHp: hp, dead: false, awake: false, phase: 0, awakeT: 0,
-      timer: 2 + Math.random() * 2.4, reward: CORE.reward * difficulty, moteT: 0, hitT: 0, seed: Math.random() * 10 };
-    G.cores.push(core);
-  }
+  // 核心：宮主自己帶一顆（地圖上原本的核心照樣留在原位，要另外打破）
+  const difficulty = Math.max(1, Math.min(5, Number(MAP.difficulty) || 1)), hp = CORE.hp * difficulty;
+  const core = { x: 0, y: 0, hp, maxhp: hp, lastHp: hp, dead: false, awake: false, phase: 0, awakeT: 0,
+    timer: 2 + Math.random() * 2.4, reward: CORE.reward * difficulty, moteT: 0, hitT: 0, seed: Math.random() * 10 };
+  G.cores.push(core);
   core.hp = core.maxhp = core.lastHp = CAP_KING.coreHp;
   G.hangiCaps = G.hangiCaps || [];
   const caps = spots.map((p, i) => {

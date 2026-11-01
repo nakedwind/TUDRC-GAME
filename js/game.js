@@ -1215,7 +1215,7 @@ function newGame() {
   seedCores();
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
-  if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著核心閒晃的珍珠大童：要在順順宮主之後，挑宮主沒拿走的核心（js/pearl-elder.js）
+  if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
   if (typeof arriveVitals === 'function' && !MAP_STORY) arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
   if (!MAP_STORY) {     // 劇情地圖：只有溫特一個人，隊友和場景 NPC 都不會跟進來
     spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
