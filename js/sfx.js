@@ -191,6 +191,7 @@ const SFX = (() => {
     capKingStep: '戰鬥/heavy-walking-footsteps.mp3',   // 大夯吉寶的腳步
     capKingClose: '戰鬥/命中/敲打2.mp3',               // 大宮帽蓋回去
     capKingShuffle: '戰鬥/近戰/揮劍.mp3',              // 蓋杯子洗牌，每換一次
+    capKingDeath: '怪物/夯吉寶/夯吉死掉.mp3',          // 大夯吉寶死掉：跟夯吉寶同一個音檔，開大聲、加回音（SOUND_ECHO）
     radio: ['無線電.mp3', '無線電雜音.mp3'],   // 無線電接起來／掛斷：兩個一起播（新手區開場希奧妮的無線電，js/tutorial.js）
     baseMusic: '../music/基地音樂.mp3',      // 基地（安全區）背景音樂（js/music.js）；檔案在 music/ 資料夾
     // SP 低於 50：溫特聽到的怪聲（js/sanity.js；心跳用上面的 heartbeat）
@@ -216,7 +217,7 @@ const SFX = (() => {
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
-  const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
+  const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 }, capKingDeath: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
