@@ -177,12 +177,12 @@ function grantLockerLoot(loot,where='置物櫃'){
   }else if(loot.kind==='weapon'){
     // 以前的槍（照明彈槍、燃燒彈槍、麻醉槍）現在是手槍的子彈：給那種子彈（js/special-guns.js 的 grantBullets）
     const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
-    if(bulletCount(loot.id)>=b.max){systemNotice(b.name+'已經是滿的');return;}
+    if(bulletRoom(loot.id)<=0){systemNotice('彈藥包已滿，放不下'+b.name);return;}
     grantBullets(loot.id,GUN_FINDS.start[loot.id]||b.max,'在'+where+'找到');
   }else if(loot.kind==='bullet'){
-    // 1 組子彈（地圖編輯器「子彈（1 組）」）：補到滿為止
+    // 1 組子彈（地圖編輯器「子彈（1 組）」）：彈藥包放得下多少拿多少
     const b=BULLETS[loot.id];if(!b||b.removed||loot.id==='pistol')return;
-    if(bulletCount(loot.id)>=b.max){systemNotice(b.name+'已經是滿的');return;}
+    if(bulletRoom(loot.id)<=0){systemNotice('彈藥包已滿，放不下'+b.name);return;}
     const first=!bulletOwned(loot.id),got=grantBullets(loot.id,b.max,'在'+where+'找到');
     if(!got)return;
     if(!first&&typeof itemIntroForBullet==='function')itemIntroForBullet(loot.id,got);   // 開出來的東西每次都跳視窗（第一次 grantBullets 已經跳過）

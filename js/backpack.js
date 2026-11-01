@@ -5,7 +5,7 @@
 // ============================================================
 const supplyInventory = new Map();   // 背包裡的東西：物品 id → 數量
 // 格數：「物品」、「彈藥包」一開始各 12 格，開發工坊升級（data/equipment.js 的 BAG_UPGRADES，等級存在 equipState.bag）。
-// 同種物品每 20 個佔一格；彈藥包一種子彈一格。重要物品、隊員物資、防具沒有格數上限。
+// 同種物品每 20 個佔一格；彈藥包每種子彈一組（BULLET_SET 發）佔一格，多的再佔下一格（js/flare.js 的 bulletStacks）。重要物品、隊員物資、防具沒有格數上限。
 const BAG_STACK_MAX = 20;
 const bagUnlimited = category => category === 'equip' || category === 'squadgear' || category === 'key';
 const bagUpgradeKey = category => category === 'weapon' ? 'ammo' : 'items';
@@ -22,7 +22,7 @@ function bagCategory(x) {
   return (item && item.category) || (typeof x === 'object' && x.category) || 'consumable';
 }
 function bagUsedSlots(inventory = supplyInventory, category = null) {
-  if (category === 'weapon') return typeof ownedBullets === 'function' ? ownedBullets().length : 0;   // 彈藥包：一種子彈一格（手槍、一般子彈不佔）
+  if (category === 'weapon') return typeof ownedBullets === 'function' ? ownedBullets().reduce((sum, b) => sum + bulletStacks(b.bullet, b.count), 0) : 0;   // 彈藥包：每種子彈一組一格（手槍、一般子彈不佔）
   if (category === 'equip') return typeof ownedGear === 'function' ? ownedGear().length : 0;
   return [...inventory].reduce((sum, [id, n]) => sum + ((!category || bagCategory(id) === category) ? Math.ceil(Math.max(0, n) / BAG_STACK_MAX) : 0), 0);
 }
@@ -194,11 +194,12 @@ function renderGearGrid(items, columns) {
 }
 // ---- 武器分頁：第一排手槍＋彈匣格（可以拖曳子彈上去），下面是子彈 ----
 function bulletCellHtml(b) {
-  return `<button type="button" class="bag-cell bullet${b.loaded && !b.free ? ' loaded' : ''}${b.count <= 0 ? ' out' : ''}${b.id === backpackSel ? ' sel' : ''}" data-bag-item="${b.id}" draggable="true" data-drag-bullet="${b.bullet}" style="--bc:${b.def.color}" aria-label="${b.name} ${b.count}/${b.max}" aria-pressed="${b.id === backpackSel}">
-      ${b.image ? `<img src="${b.image}" alt="">` : `<i>${b.icon}</i>`}<b>${b.count}</b>${b.free ? '<u class="free">不佔格</u>' : b.loaded ? '<u>彈匣中</u>' : ''}<span class="bag-cell-name">${b.name}</span></button>`;
+  return `<button type="button" class="bag-cell bullet${b.loaded && !b.free ? ' loaded' : ''}${(b.stackCount ?? b.count) <= 0 ? ' out' : ''}${b.id === backpackSel ? ' sel' : ''}" data-bag-item="${b.id}" draggable="true" data-drag-bullet="${b.bullet}" style="--bc:${b.def.color}" aria-label="${b.name} ×${b.stackCount ?? b.count}" aria-pressed="${b.id === backpackSel}">
+      ${b.image ? `<img src="${b.image}" alt="">` : `<i>${b.icon}</i>`}<b>${b.stackCount ?? b.count}</b>${b.free ? '<u class="free">不佔格</u>' : b.loaded ? '<u>彈匣中</u>' : ''}<span class="bag-cell-name">${b.name}</span></button>`;
 }
 function renderWeaponGrid(items, columns) {
-  const pistol = items.find(x => x.weapon === 'pistol'), bullets = items.filter(x => x.bullet);
+  const pistol = items.find(x => x.weapon === 'pistol');
+  const bullets = items.filter(x => x.bullet).flatMap(b => Array.from({ length: bulletStacks(b.bullet, b.count) }, (_, i) => ({ ...b, stackCount: Math.max(0, Math.min(b.max, b.count - i * b.max)) })));   // 超過一組的分成好幾格
   const m = typeof magState === 'function' ? magState() : { load: [] }, n = typeof magSlotCount === 'function' ? magSlotCount() : 0, maxSlots = typeof MAGAZINE !== 'undefined' ? MAGAZINE.slots[MAGAZINE.slots.length - 1] : 0;
   let row = pistol ? `<button type="button" class="bag-cell gear weapon${equipTier(pistol.lv)}${pistol.id === backpackSel ? ' sel' : ''}" data-bag-item="${pistol.id}" aria-pressed="${pistol.id === backpackSel}"><img src="${pistol.image}" alt=""><b>Lv${pistol.lv}</b><span class="bag-cell-name">${pistol.name}</span></button>` : '';
   // 彈匣架：手槍右邊一整塊，裡面每一格中間有凹槽（可以把子彈拖進去）
@@ -215,7 +216,7 @@ function renderWeaponGrid(items, columns) {
   const total = Math.max(bagCapacity('weapon'), bullets.length);
   for (let i = bullets.length; i < total; i++) rest += '<span class="bag-cell empty" aria-hidden="true"></span>';
   backpackGrid.classList.add('no-anim');
-  backpackGrid.innerHTML = row + `<p class="bag-weapon-hint">子彈 <small>拖曳到上面的彈匣格就能換子彈；只有一般子彈不佔格子；照明彈也需要一格</small></p>` + rest;
+  backpackGrid.innerHTML = row + `<p class="bag-weapon-hint">子彈 <small>拖曳到上面的彈匣格就能換子彈；每格最多一組（${BULLET_SET} 發），多的會再佔一格；只有一般子彈不佔格子</small></p>` + rest;
   requestAnimationFrame(() => requestAnimationFrame(() => backpackGrid.classList.remove('no-anim')));
 }
 function afterMagazineChange() { renderBackpack(); if (typeof updateAmmoHud === 'function' && typeof G !== 'undefined' && G && G.player) { ammoHudKey = ''; updateAmmoHud(); } }

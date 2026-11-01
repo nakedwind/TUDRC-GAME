@@ -22,6 +22,12 @@ function mrtSaveUnlocked() { try { localStorage.setItem(MRT_STORE, JSON.stringif
 
 // 換地圖、重新開始時：哪些格子要擋（js/game.js 在 setupDoors 之後呼叫）
 let mrtAddedWalls = new Set();   // 這裡加進固定牆的格子（G 會整個換掉，所以另外記：重開時先全部還原）
+// 這張地圖有封鎖的入口，而且全部解封了（解封是永久的）：之後打破核心不再掉異質鑰匙，只掉 MRT_OPEN_CORE_REWARD 異質碎片
+const MRT_OPEN_CORE_REWARD = 350;
+function mrtExitsAllOpen() {
+  const exits = ((G && G.mrtLocks) || []).filter(l => l.cfg.kind === 'exit');
+  return exits.length > 0 && exits.every(l => l.open);
+}
 function setupMrtLocks() {
   for (const k of mrtAddedWalls) mapWalls.delete(k);
   mrtAddedWalls = new Set();
@@ -91,10 +97,13 @@ function mrtLockNearPlayer() {
   let best = null, bd = CELL * 1.6;
   for (const l of G.mrtLocks || []) {
     if (l.open) continue;
-    if (p.y < l.bottom - 12) continue;   // 從前面（下方）靠近
+    // 閘門可以從上下兩邊刷卡（距離算到擋路那排的上下緣）；入口只能從前面（下方）靠近
+    let dy;
+    if (l.cfg.kind === 'gate') dy = Math.max(0, p.y - l.bottom, l.bottom - CELL - p.y);
+    else { if (p.y < l.bottom - 12) continue; dy = l.bottom - p.y; }
     // 左右只算離素材邊緣多遠：很寬的入口（5 格）站在左右兩側前面也算靠近
     const dx = Math.max(0, Math.abs(l.x - p.x) - (l.c1 - l.c0) * CELL / 2);
-    const d = Math.hypot(dx, l.bottom - p.y);
+    const d = Math.hypot(dx, dy);
     if (d < bd) { bd = d; best = l; }
   }
   return best;

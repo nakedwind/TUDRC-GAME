@@ -408,6 +408,10 @@ function drawRigArm(e, fr, dx, dy, dw, dh) {
 const SHOW_ENEMY_ALERT = false;   // 怪物被槍吸引過來時頭上彈出「！」：true＝顯示
 function drawEnemy(e) {
   ctx.save();
+  if (e.gourdToss && typeof applyGourdTossTransform === 'function') {   // 被 K56 的車撞飛：影子留在地上，身體飛起來（js/street-vehicles.js）
+    ctx.save(); ctx.globalAlpha = .28; ctx.fillStyle = '#0b0906'; ctx.beginPath(); ctx.ellipse(e.x, e.y + 16, 18, 6, 0, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    applyGourdTossTransform(ctx, e);
+  }
   if (e.hitT > 0) ctx.translate((Math.random() * 2 - 1) * 2.5, (Math.random() * 2 - 1) * 1.5);
   else if (e.shockT > 0) ctx.translate((Math.random() * 2 - 1) * 1.3, (Math.random() * 2 - 1) * .6);   // 麻痺：微微顫抖
   const lift = e.slimeLift || 0, size = e.sizeMul || 1;
@@ -1043,6 +1047,7 @@ function draw() {
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
+  if (typeof streetVehicleSortables === 'function') streetVehicleSortables(sortables);   // K56 的機車、腳踏車（js/street-vehicles.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住
   for (const c of G.fxCorpses || []) if ((c.fall || c.drop) && isLit(c.x, c.y)) sortables.push({ y: c.y + 13, draw: () => drawCorpseSorted(c) });
@@ -1113,7 +1118,7 @@ function draw() {
     if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
-    else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, '進入 ' + portalTargetName(near.portal));
+    else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, near.portal.at ? '進入' : '進入 ' + portalTargetName(near.portal));   // at＝同地圖傳送點：不顯示地圖名稱
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
@@ -1123,6 +1128,7 @@ function draw() {
     else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）
     else if (typeof wardrobeNearPlayer === 'function' && !doorNearPlayer() && wardrobeNearPlayer()) { const w = wardrobeNearPlayer(); drawInteractPrompt(w.x, w.top - 4, '換裝'); }   // 衣櫃（js/costumes.js）
     else if (typeof gachaNearPlayer === 'function' && !doorNearPlayer() && gachaNearPlayer()) { const g = gachaNearPlayer(); drawInteractPrompt(g.x, g.top - 4, '扭蛋'); }   // 扭蛋機（js/gacha.js）
+    else if (typeof clawNearPlayer === 'function' && !doorNearPlayer() && clawNearPlayer()) { const c = clawNearPlayer(); drawInteractPrompt(c.x, c.top - 4, clawPromptLabel(c)); }   // 夾娃娃機（js/claw-machine.js）
     else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '使用電腦'); }   // 2F應變中心的電腦：打開電腦桌面（js/bestiary.js、js/pc-desktop.js）
     else if (typeof armorChestNearPlayer === 'function' && !doorNearPlayer() && armorChestNearPlayer()) { const c = armorChestNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '整理防具'); }   // 裝備箱（js/backpack.js）
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）

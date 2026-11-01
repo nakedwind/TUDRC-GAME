@@ -208,6 +208,7 @@ function enemyBarrierAt(c, r) {
 function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
   if (!inGrid(c, r) || isWall(c, r) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 順順宮帽也擋路（js/hangi-bao.js）
+  if (edgeWallBlocksPoint(x, y)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）
   return !!(actor && actor.wide && !enemyWideAt(c, r) && enemyWideAt(...cellAt(actor.x, actor.y)));   // 大體型：從寬的地方擠不進一格的窄道（已經在窄道裡就可以走出來）
 }
 // ---- 大體型（怪物編輯器的「大體型」、巨型史萊姆）：只有一格寬的通道（門口、窄走廊）擠不過去 ----
@@ -231,7 +232,7 @@ function wideEnemyRoute(e, goalC, goalR, canBreakBuildings = true, maxSteps = In
     if (steps >= maxSteps) continue;
     for (const [dc, dr] of ENEMY_NEIGHBORS) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (came.has(key)) continue;
+      if (came.has(key) || edgeBetween(c, r, nc, nr)) continue;   // 兩格中間有薄牆：繞路
       const wide = enemyWideAt(nc, nr);
       if (!wide && !(narrow && enemyWideOpen(nc, nr))) continue;
       if (!canBreakBuildings && enemyBarrierAt(nc, nr)) continue;
@@ -301,7 +302,7 @@ function enemyFleeCell(e, threats, minSteps = 3, maxSteps = 8) {
     if (steps >= maxSteps) continue;
     for (const [dc, dr] of ENEMY_NEIGHBORS) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (seen.has(key) || !open(nc, nr)) continue;
+      if (seen.has(key) || !open(nc, nr) || edgeBetween(c, r, nc, nr)) continue;
       seen.add(key); queue.push([nc, nr, steps + 1]);
     }
   }
@@ -353,7 +354,7 @@ function buildEnemyRoute(e, goalC, goalR, canBreakBuildings) {
     if (c === goalC && r === goalR) break;
     for (const [dc, dr] of ENEMY_NEIGHBORS) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key)) continue;
+      if (!inGrid(nc, nr) || isWall(nc, nr) || cameFrom.has(key) || edgeBetween(c, r, nc, nr)) continue;   // edgeBetween：兩格中間有薄牆就繞路
       if (enemyBarrierAt(nc, nr) && !canBreakBuildings) continue;
       if (typeof hangiCapAt === 'function' && hangiCapAt(nc, nr)) continue;   // 繞過順順宮帽
       cameFrom.set(key, [c, r]); queue.push([nc, nr]);

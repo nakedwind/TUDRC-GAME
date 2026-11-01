@@ -64,9 +64,55 @@ function doorCutoutRects(d) {
   return { s, t, cfg, x0, y0, w, h, outer: { x: x0 + p0, y: y0, w: p1 - p0, h }, inner: { x: x0 + p0 + f, y: y0 + f, w: p1 - p0 - f * 2, h: h - f } };
 }
 const openCutoutDoors = () => (typeof mapDoors !== 'undefined' ? mapDoors : []).filter(d => d.open && doorCutoutOf(d.stamp)).map(doorCutoutRects).filter(Boolean);
+// 大張的牆圖（例如池核的拱門 Poolcore_round_arch，14×8 格）：圖片下面常有一段透明、或牆腳比門低一點，
+// 只看圖片的下緣會以為它在門前面而不挖洞。所以改看「門那一段範圍裡，圖片真正有畫東西的最下緣」。
+const stampAlphaCache = new Map();   // 素材 id → 圖片每個像素的透明度（只讀一次）
+function stampVisibleBottom(s, xa, xb) {
+  if (!s || s.rot) return null;   // 旋轉過的不算（照原本的圖片下緣）
+  const t = mapTileById(s.id), img = t && tileImage(t); if (!img || !img.naturalWidth) return null;
+  let a = stampAlphaCache.get(s.id);
+  if (a === undefined) {
+    try {
+      const cv = document.createElement('canvas'); cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+      const g = cv.getContext('2d'); g.drawImage(img, 0, 0);
+      a = { w: cv.width, h: cv.height, data: g.getImageData(0, 0, cv.width, cv.height).data, rows: new Map() };
+    } catch (_) { a = null; }   // 讀不到像素（例如直接用檔案開網頁）：照原本的圖片下緣
+    stampAlphaCache.set(s.id, a);
+  }
+  if (!a) return null;
+  const w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL, sx = OX + s.c * CELL + (s.ox || 0), sy = OY + s.r * CELL + (s.oy || 0);
+  let l0 = Math.max(0, xa - sx), l1 = Math.min(w, xb - sx); if (l1 <= l0) return null;
+  if (s.fx) [l0, l1] = [w - l1, w - l0];
+  const k = a.w / w, i0 = Math.floor(l0 * k), i1 = Math.max(i0 + 1, Math.ceil(l1 * k)), key = i0 + ',' + i1;
+  let row = a.rows.get(key);   // 從上往下數，最後一排有畫東西的是第幾排（-1＝整段都透明）
+  if (row === undefined) {
+    row = -1;
+    for (let y = a.h - 1; y >= 0 && row < 0; y--) for (let x = i0; x < i1; x++) if (a.data[(y * a.w + x) * 4 + 3] > 16) { row = y; break; }
+    a.rows.set(key, row);
+  }
+  if (row < 0) return sy;   // 門那一段整個是透明的
+  const ky = a.h / h;
+  return s.fy ? sy + h - row / ky : sy + (row + 1) / ky;   // 上下翻轉：圖片最上面那排變成最下緣（近似）
+}
+// 這面牆算不算在門後面（或跟門同一排）：牆的下緣沒有比門的下緣低太多
+// 一般的格子／沒有圖片資料：圖片下緣最多低半格；大張的牆圖：用門那一段真正有畫的下緣，最多低一格（牆腳通常比門低一點）
+function wallBehindDoor(o, y, h, s) {
+  const vis = s ? stampVisibleBottom(s, o.x, o.x + o.w) : null;
+  return vis != null ? vis < o.y + o.h + CELL : y + h <= o.y + o.h + CELL / 2;
+}
+// 兩張牆圖重疊的地方，js/maploader.js 會把補畫的結果存起來重複用（drawOverdrawPatch）。
+// 門打開時那份存檔還是沒挖洞的舊圖，會整塊蓋回門洞上 → 把「這張圖上面有哪幾扇挖空門開著」算進存檔的狀態，門一開關就重做
+function doorCutoutSig(s) {
+  const t = mapTileById(s.id); if (!t) return '';
+  const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), x1 = x0 + mapStampW(s, t) * CELL, y1 = y0 + mapStampH(s, t) * CELL;
+  let sig = '';
+  for (const R of openCutoutDoors()) { const o = R.outer; if (R.s !== s && x0 < o.x + o.w && x1 > o.x && y0 < o.y + o.h && y1 > o.y) sig += 'd' + R.s.c + ',' + R.s.r; }
+  return sig;
+}
 // 畫立體物之前呼叫（js/maploader.js）：跟打開的門重疊、而且在門後面或跟門同一排的（牆）→ 把門的範圍挖掉（呼叫的人負責 restore）
-function doorCutoutClip(ctx, x, y, w, h) {
-  const holes = openCutoutDoors().filter(R => { const o = R.outer; return x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y && y + h <= o.y + o.h + CELL / 2; });
+// s＝正在畫的地圖物件（有給才能看圖片真正的下緣，見 wallBehindDoor）
+function doorCutoutClip(ctx, x, y, w, h, s = null) {
+  const holes = openCutoutDoors().filter(R => { const o = R.outer; return R.s !== s && x < o.x + o.w && x + w > o.x && y < o.y + o.h && y + h > o.y && wallBehindDoor(o, y, h, s); });
   if (!holes.length) return false;
   const rects = holes.map(R => R.outer);
   // 一塊一塊挖（每次 clip 都是「全部扣掉這一塊」，疊起來＝扣掉所有洞；洞重疊也沒關係）
@@ -84,7 +130,8 @@ function doorWallBottom(R) {
   const o = R.outer; let bot = o.y + o.h;
   for (const it of occ) {
     const x0 = it.x0 + OX, x1 = it.x1 + OX, y0 = it.y0 + OY, y1 = it.y1 + OY;
-    if (it.stamp !== R.s && x0 < o.x + o.w && x1 > o.x && y0 < o.y + o.h && y1 > o.y && y1 <= o.y + o.h + CELL / 2) bot = Math.max(bot, y1);
+    if (it.stamp === R.s || !(x0 < o.x + o.w && x1 > o.x && y0 < o.y + o.h && y1 > o.y) || !wallBehindDoor(o, y0, y1 - y0, it.stamp)) continue;
+    bot = Math.max(bot, (it.stamp && stampVisibleBottom(it.stamp, o.x, o.x + o.w)) ?? y1);   // 大張的牆圖：用圖片真正有畫的下緣
   }
   doorWallBotCache.set(R.s, { occ, bot });
   return bot;

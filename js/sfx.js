@@ -30,6 +30,12 @@ const SFX = (() => {
     sootheEnd: '玩家/疏導2.mp3',   // 溫特疏導的進度條跑完、疏導成功時（js/sentry.js 的 finishSoothe）；開始時播上面的 soothe
     drink: '喝飲料.mp3',   // 喝杏仁水（js/shop.js 的 useSupply）
     wearGear: '穿裝備.mp3',   // 穿上裝備：溫特的防具（js/equipment.js 的 equipToSlot）、幫隊員穿隊員裝備（js/backpack.js、js/squad-page.js）
+    // K56 路邊的機車、腳踏車（js/street-vehicles.js）：發動的聲音、撞到人的聲音
+    escalatorRide: '設施/手扶梯-緊握扶手.mp3',   // 溫特踩上手扶梯的廣播（js/escalators.js，冷卻 10 秒）
+    scooterRev: '環境/機車聲.mp3',
+    scooterHorn: '環境/機車喇叭聲.mp3',
+    bikeRide: '環境/腳踏車聲.mp3',
+    bikeBell: '環境/腳踏車鈴聲.mp3',
     door: '環境/門與機關/關門.mp3',
     backroomDoor: '環境/門與機關/後室開門.mp3',
     lockedDoor: '環境/門與機關/關門.mp3',     // 鎖住的房門：轉門把（js/locked-doors.js）
@@ -106,6 +112,19 @@ const SFX = (() => {
     gachaUpgrade: '獎勵/扭蛋/SSR升格.wav',    // SSR 搖到一半：金色變彩虹
     gachaSSR: '獎勵/扭蛋/SSR出貨.wav',        // 出 SSR
     gachaHero: '獎勵/扭蛋/SSR獨照.wav',       // SSR 獨照展示
+    // 夾娃娃機（js/claw-machine.js；音檔用 tools/make_claw_sfx.py 合成）
+    clawCoin: '獎勵/夾娃娃機/投幣.wav',
+    clawMotor: '獎勵/夾娃娃機/馬達.wav',
+    clawDrop: '獎勵/夾娃娃機/下爪.wav',
+    clawLift: '獎勵/夾娃娃機/收爪.wav',
+    clawGrab: '獎勵/夾娃娃機/夾住.wav',
+    clawSlip: '獎勵/夾娃娃機/掉了.wav',
+    clawBump: '獎勵/夾娃娃機/碰撞.wav',
+    clawMiss: '獎勵/夾娃娃機/沒中.wav',
+    clawChute: '獎勵/夾娃娃機/出口.wav',
+    clawWin: '獎勵/夾娃娃機/中獎.wav',
+    clawPity: '獎勵/夾娃娃機/保夾.wav',
+    clawTick: '獎勵/夾娃娃機/倒數.wav',
     favorUp: '獎勵/升等.mp3',
     mineGrind: '設施/打磨.mp3',
     crystalGet: '獎勵/得到碎片.mp3',
@@ -184,6 +203,7 @@ const SFX = (() => {
     whiteNoise: '環境/白噪音.mp3',
     // BOSS 音樂（js/boss-music.js）：一直循環、淡入淡出；音量在音效編輯器的「音樂」調整
     bossElite: '戰鬥/中BOSS.mp3',             // 鳥頭大隊長盯上玩家
+    clawMusic: '設施/娃娃機音樂.mp3',          // 夾娃娃機打開時循環播放（js/claw-machine.js）
     bossCore: '戰鬥/異質核心甦醒.mp3',        // 異質核心甦醒到被打破
     eliteScream: '怪物/鳥頭人/鳥頭人被打.mp3',   // 鳥頭大隊長甦醒時的尖叫：跟鳥頭人被打同一個音檔，開大聲、加回音（SOUND_ECHO）
     eliteStep: '戰鬥/heavy-walking-footsteps.mp3',   // 鳥頭大隊長沉重的腳步（js/elite-bird-head.js 的 eliteBirdFootsteps）

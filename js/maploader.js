@@ -284,7 +284,7 @@ function initMap() {
   });
   campCells = new Set(baseTargets.length ? baseTargets : ((MAP.camp && MAP.camp.length) ? MAP.camp : []));    // 空＝預設最下排
   mapBreakable = (MAP.breakable || []).map(k => k.split(',').map(Number));
-  mapPortals = (MAP.portals || []).map(p => ({ c: p.c, r: p.r, to: p.to, ...(p.hidden ? { hidden: true } : {}) }));   // hidden＝隱藏地道（js/rescue-dog.js）   // 出入口：走到門旁按鍵可換地圖
+  mapPortals = (MAP.portals || []).map(p => ({ c: p.c, r: p.r, to: p.to, ...(p.hidden ? { hidden: true } : {}), ...(p.to === MAP.id && Array.isArray(p.at) ? { at: [p.at[0], p.at[1]] } : {}) }));   // hidden＝隱藏地道（js/rescue-dog.js）；at＝同地圖傳送點送到哪一格（js/game.js 的 teleportInMap）   // 出入口：走到門旁按鍵可換地圖
 }
 // 出入口查詢
 function mapIndexById(id) { const list = mapList(); return list.findIndex(m => m && m.id === id); }
@@ -423,9 +423,13 @@ const isEntrance = () => false;
 // 開局時把「可破壞」擺成障礙物（每次 newGame 呼叫）
 function seedMapObstacles() {
   if (!MAP) return;
-  for (const s of mapBases) {
+  for (const s of mapBases) seedBaseObstacle(s);
+  seedOtherMapObstacles();
+}
+// 把一個營地擺上場（戰敗撤退時修回被打壞的營地也用這個，js/combat-progress.js）
+function seedBaseObstacle(s) {
     const t = mapTileById(s.id);
-    if (!t) continue;
+    if (!t) return null;
     const w = mapStampW(s, t), h = mapStampH(s, t), baseW = mapTileW(t), baseH = mapTileH(t);
     const baseC = s.c + Math.round((s.ox || 0) / CELL), baseR = s.r + Math.round((s.oy || 0) / CELL);
     const hasCustomSolid = Array.isArray(s.baseSolid);
@@ -446,7 +450,9 @@ function seedMapObstacles() {
       if (inGrid(c, r)) G.grid[c + ',' + r] = o;
     });
     G.obstacles.push(o);
-  }
+    return o;
+}
+function seedOtherMapObstacles() {
   // 地圖編輯器的「障礙物」素材沿用可放置建築的碰撞格與 HP。
   // 不修改原始地圖；拆毀後只在本局隱藏該圖片。
   const addMapObstacle = (t, c, r, source, stamp = null) => {
@@ -604,7 +610,7 @@ function drawMapStampRaw(ctx, s) {
     const gate=G.obstacles.find(o=>o.type==='irongate'&&o.mapSource===s);
     if(gate&&drawSlidingIronGate(ctx,gate,img,x,y,w,h))return;
     ctx.save();if(typeof isPoweredLightTile==='function'&&isPoweredLightTile(t)&&!mapPowerIsOn(circuitOf(s)))ctx.filter='brightness(0.35)';   // 電路編號（js/powered-lights.js）
-    if (typeof doorCutoutClip === 'function' && stampIsOcc(s)) doorCutoutClip(ctx, x, y, rot % 2 ? h : w, rot % 2 ? w : h);   // 打開的挖空門：牆在門的範圍裡不畫（js/doors.js）
+    if (typeof doorCutoutClip === 'function' && stampIsOcc(s)) doorCutoutClip(ctx, x, y, rot % 2 ? h : w, rot % 2 ? w : h, s);   // 打開的挖空門：牆在門的範圍裡不畫（js/doors.js）
     const drawW = rot % 2 ? h : w, drawH = rot % 2 ? w : h;
     if (s.fx || s.fy || rot) {
       ctx.save(); ctx.translate(x + drawW / 2, y + drawH / 2); if (rot) ctx.rotate(rot * Math.PI / 2);
@@ -853,7 +859,8 @@ function occluderStateSig(x) {
     + (destroyedBaseDisplayTile(s, mapTileById(s.id) || {}).id || '')
     + (typeof breakableWallStage === 'function' && breakableWallStage(s) ? 'w' + breakableWallStage(s) : '')
     + (typeof ballBedHidden === 'function' && ballBedHidden(s) ? 'b' : '')
-    + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '');   // 隱藏區圖層淡入中：補畫也要跟著重做
+    + (typeof secretAlpha === 'function' ? 'v' + Math.round(secretAlpha(s) * 10) : '')   // 隱藏區圖層淡入中：補畫也要跟著重做
+    + (typeof doorCutoutSig === 'function' ? doorCutoutSig(s) : '');   // 疊在這張圖上的挖空門開了／關了：門洞也要挖進補畫裡（js/doors.js）
 }
 function occluderImageReady(x) {
   const s = x.kind === 'cell' ? null : x.stamp;

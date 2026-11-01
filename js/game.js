@@ -578,6 +578,7 @@ window.addEventListener('keydown', e => {
     else if (typeof useNpcChatNearPlayer === 'function' && useNpcChatNearPlayer()) {}   // 有人在閒聊：聽閒聊（js/npc-chats.js）
     else if (typeof useWardrobeNearPlayer === 'function' && useWardrobeNearPlayer()) {}   // 衣櫃：服裝介面（js/costumes.js）
     else if (typeof useGachaNearPlayer === 'function' && useGachaNearPlayer()) {}   // 扭蛋機（js/gacha.js）
+    else if (typeof useClawNearPlayer === 'function' && useClawNearPlayer()) {}   // 夾娃娃機（js/claw-machine.js）
     else if (typeof useBestiaryNearPlayer === 'function' && useBestiaryNearPlayer()) {}   // 2F應變中心的電腦：電腦桌面（音樂、踩地雷、怪物圖鑑；js/pc-desktop.js）
     else if (typeof useArmorChestNearPlayer === 'function' && useArmorChestNearPlayer()) {}   // 裝備箱：防具視窗（js/backpack.js）
     else if (typeof useTargetTableNearPlayer === 'function' && useTargetTableNearPlayer()) {}   // 射擊訓練室的桌子：練習射擊（js/target-practice.js）
@@ -677,8 +678,46 @@ function autoStairTravel() {
   if (!pt) { stairArmed = true; return; }
   if (stairArmed && anyMoveKey()) { stairArmed = false; enterPortal(pt); }   // 要是自己走進去的（按著移動鍵）才會觸發
 }
+// ---- 同一張地圖裡的傳送點（地圖編輯器「🚪 出入口」選「這張地圖」設的，pt.at＝送到哪一格）----
+// 不重新載入地圖：怪物、戰況都照舊，只把溫特（和跟在身邊的隊員）移到對面那扇門前
+const WARP_FOLLOW_CELLS = 4;   // 離溫特幾格內的隊員會一起被傳送過去（跟隨護衛中的隊員不管多遠都會跟）
+function teleportInMap(pt) {
+  const p = G.player, [tc, tr] = pt.at;
+  if (!inGrid(tc, tr)) { flash('傳送點的目的地不在地圖裡', p.x, p.y - 30, '#ff8f8f'); return; }
+  const followers = (G.towers || []).filter(t => t.hp > 0 && !t.sitting && !t.berserk &&
+    (t.mode === 'escort' || Math.hypot(t.x - p.x, t.y - p.y) <= WARP_FOLLOW_CELLS * CELL));
+  mapTransitioning = true;
+  Object.keys(keys).forEach(key => { keys[key] = false; });
+  sfx('door');
+  requestAnimationFrame(() => {
+    mapTransition.classList.add('visible');
+    setTimeout(() => {
+      placePlayerNearPortal(mapPortals.find(q => q.c === tc && q.r === tr) || { c: tc, r: tr });
+      // 隊員排在溫特身邊的空格（由近到遠找，一人一格）
+      const [pc, pr] = cellAt(p.x, p.y), used = new Set([pc + ',' + pr]);
+      for (const t of followers) {
+        let spot = null;
+        for (let radius = 1; radius <= 4 && !spot; radius++) {
+          for (let dr = -radius; dr <= radius && !spot; dr++) for (let dc = -radius; dc <= radius && !spot; dc++) {
+            if (Math.max(Math.abs(dc), Math.abs(dr)) !== radius) continue;
+            const c = pc + dc, r = pr + dr;
+            if (!used.has(c + ',' + r) && sentryCellWalkable(c, r, true, true)) { used.add(c + ',' + r); spot = center(c, r); }
+          }
+        }
+        if (!spot) continue;   // 對面太擠：這位隊員留在原地
+        t.x = spot[0]; t.y = spot[1]; t.navPath = null; t.navGoal = null;
+        if (t.mode === 'goto') t.target = null;
+      }
+      stairArmed = false;
+      updateCamera(); draw();
+      requestAnimationFrame(() => mapTransition.classList.remove('visible'));
+      setTimeout(() => { mapTransitioning = false; }, PORTAL_FADE_MS);
+    }, PORTAL_FADE_MS + PORTAL_BLACK_MS);
+  });
+}
 function enterPortal(pt) {
   if (mapTransitioning) return;
+  if (pt.at && pt.to === MAP.id) { teleportInMap(pt); return; }   // 同一張地圖裡的傳送點
   if (mapIndexById(pt.to) < 0) { flash('地圖不存在', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
   const fromId = MAP.id;
   const pauseHere = !MAP_SAFE && !!mapList()[mapIndexById(pt.to)]?.story;   // 戰鬥地圖 → 劇情地圖：這裡的戰場暫停保存（js/combat-progress.js）
@@ -696,6 +735,7 @@ function enterPortal(pt) {
     setTimeout(() => {
       setTimeout(() => {
         if (pauseHere) pauseBattleForStory();
+        else if (typeof suspendLeavingBattle === 'function') suspendLeavingBattle();   // 走去別張地圖：這裡的戰場暫停，走回來接著打（js/combat-progress.js）
         if (pauseHere || !resumePausedBattle(pt.to)) {       // 從劇情地圖走回暫停中的戰場：原樣接著打
           switchMap(mapIndexById(pt.to));       // 全黑維持半秒後換地圖
           begin(false);                         // 重建並進入遊玩狀態，不播放開始按鈕聲
@@ -1190,8 +1230,10 @@ function newGame() {
   if (MAP_STORY) G.money = typeof pausedBattle !== 'undefined' && pausedBattle ? pausedBattle.G.money : walletGet();   // 劇情地圖：只顯示暫停中那場作戰的經費（從基地來的就是錢包），不動錢包
   // 出勤：應變中心錢包裡的錢全部帶出來，加在這張地圖的作戰經費上（回基地時剩多少就帶回多少，js/progression.js）
   if (!MAP_SAFE && !window.TEST_MODE) {
-    // 新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
-    if (!isNewbieMap() && typeof walletGet === 'function') G.money += walletGet();
+    const moneyGiven = typeof missionMoneyGiven === 'function' && missionMoneyGiven(MAP && MAP.id);
+    if (moneyGiven) G.money = 0;   // 這張地圖的作戰經費只給一次，新手區也一樣（js/missions.js）
+    // 第一次進新手區：只用地圖編輯器設的作戰經費，不疊加基地錢包
+    if ((moneyGiven || !isNewbieMap()) && typeof walletGet === 'function') G.money += walletGet();
   }
   if (typeof renderBuildQuickSlots === 'function') renderBuildQuickSlots();   // 下方建築欄：這張地圖能蓋的（新手區只有幾種，js/build.js）
   if (isNewbieMap() && !window.TEST_MODE) {   // 新手區：照明彈裝好在彈匣、防護頭盔放在裝備箱（data/balance.js 的 NEWBIE_START）
@@ -1210,6 +1252,7 @@ function newGame() {
   setupDoors();        // 門一開始都關著（js/doors.js）
   if (typeof setupMrtLocks === 'function') setupMrtLocks();   // 捷運閘門、封鎖的入口（js/mrt-locks.js）
   if (typeof setupBreakableWalls === 'function') setupBreakableWalls();   // 可炸開的牆：一開始都是完整的（js/breakable-walls.js）
+  if (typeof setupStreetVehicles === 'function') setupStreetVehicles();   // K56 路邊會暴衝的機車、腳踏車（js/street-vehicles.js）
   if (typeof restoreStoryBuilds === 'function') restoreStoryBuilds();   // 劇情地圖：上次蓋的建築擺回去（js/combat-progress.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
@@ -1289,6 +1332,8 @@ function playerBlocked(x, y) {
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
+  // 邊緣碰撞（薄牆，js/pathfinding.js）：四個角再加四邊的中點，薄牆的一端剛好卡在身體中間也擋得到
+  for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r], [0, -r], [0, r], [-r, 0], [r, 0]]) if (edgeWallBlocksPoint(x + sx, y + sy)) return true;
   if (typeof bigPearlBlocksPlayer === 'function' && bigPearlBlocksPlayer(x, y)) return true;   // 珍珠大童的大珍珠（js/pearl-elder.js）
   return false;
 }
@@ -1442,8 +1487,9 @@ function updatePlayer(dt) {
     * (typeof slowFactorAt === 'function' ? slowFactorAt(p.x, p.y, 'ally') : 1);   // 走在鐵絲網上變慢
   const nx = p.x + dx / len * step, ny = p.y + dy / len * step;
   const pushing = typeof bigPearlPlayerPush === 'function' && bigPearlPlayerPush(p, nx, ny, dx / len, dy / len);   // 頂到大珍珠：往前推，不自動往旁邊滑開（js/pearl-elder.js）
-  if (!playerBlocked(nx, p.y)) p.x = nx; else if (!dy && !pushing) slideIntoGap(p, 'x', nx - p.x, step);
-  if (!playerBlocked(p.x, ny)) p.y = ny; else if (!dx && !pushing) slideIntoGap(p, 'y', ny - p.y, step);
+  // edgeWallCrossed：一步走太遠（衝刺、畫面卡一下）時，不會直接跳過薄牆（js/pathfinding.js）
+  if (!playerBlocked(nx, p.y) && !edgeWallCrossed(p.x, p.y, nx, p.y, PLAYER.r)) p.x = nx; else if (!dy && !pushing) slideIntoGap(p, 'x', nx - p.x, step);
+  if (!playerBlocked(p.x, ny) && !edgeWallCrossed(p.x, p.y, p.x, ny, PLAYER.r)) p.y = ny; else if (!dx && !pushing) slideIntoGap(p, 'y', ny - p.y, step);
   if (p.dashPart > 0) {   // 衝刺中：身後留殘影（js/render.js 的 drawDashTrail）
     const now = performance.now() / 1000, tr = p.dashTrail || (p.dashTrail = []);
     if (!tr.length || now - tr[tr.length - 1].t >= DASH.trailGap) tr.push({ x: p.x, y: p.y, t: now });
@@ -1932,7 +1978,7 @@ function updateAmmoHud() {
   const p = G.player, mag = PLAYER_ATK.mag, ammo = p ? (p.ammo ?? mag) : mag;
   const w = playerWeapon(p), wi = WEAPONS.indexOf(w), n = bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;
   const text = w.id === 'pistol' ? ((p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞')
-    : '<b>' + n + '</b> / ' + BULLETS[w.id].max + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
+    : '<b>' + n + '</b> 發' + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
   const usable = WEAPONS.map((x, i) => weaponUsable(i) ? 1 : 0).join('');
   const key = w.id + '|' + text + '|' + usable;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
@@ -2033,6 +2079,7 @@ function frame(ts) {
     || (typeof targetPracticeOpen !== 'undefined' && targetPracticeOpen)   // 射擊練習（js/target-practice.js）
     || (typeof wardrobeOpen !== 'undefined' && wardrobeOpen)   // 衣櫃的服裝介面（js/costumes.js）
     || (typeof gachaOpen !== 'undefined' && gachaOpen)   // 扭蛋機（js/gacha.js）
+    || (typeof clawOpen !== 'undefined' && clawOpen)   // 夾娃娃機（js/claw-machine.js）
     || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)   // 怪物圖鑑（js/bestiary.js）
     || (typeof pcDesktopOpen !== 'undefined' && pcDesktopOpen)   // 2F應變中心的電腦桌面（js/pc-desktop.js）
     || (typeof tpadOpen !== 'undefined' && tpadOpen);   // T-Pad（js/tpad.js）
@@ -2043,7 +2090,7 @@ function frame(ts) {
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）
-  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
+  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !(typeof clawOpen !== 'undefined' && clawOpen) && !(typeof gachaOpen !== 'undefined' && gachaOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
@@ -2154,13 +2201,14 @@ function update(dt) {
       if (typeof spawnSootheMotes === 'function' && SOOTHE_MOTE_COLORS[t.type]) spawnSootheMotes([t, ...(t.sootheTargets || []).filter(o => o.hp > 0)], SOOTHE_MOTE_COLORS[t.type], dt, t);
     }
     if (t.ultCd > 0) t.ultCd -= dt;   // 大招冷卻
-    if (spec.hpRegen) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
-    if (sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
+    const inHospital = typeof hospitalResting === 'function' && hospitalResting(t);   // 住院中：HP 只照 js/vitals.js 的住院速度回，不能自己補血、也不幫別人治療
+    if (spec.hpRegen && !inHospital) t.hp = Math.min(t.maxhp, t.hp + spec.hpRegen * dt);
+    if (!inHospital && sentryAtBase(t)) t.hp = Math.min(t.maxhp, t.hp + (10 / 60) * dt);   // 在營地緩慢回 HP（1分鐘+10），污染不恢復
     if (spec.taintRegen && !t.berserk) t.taint = Math.max(0, t.taint - spec.taintRegen * dt);
     if (!t.berserk && !TYPES[t.type].guide && !spec.noRetreat && t.taint > 85) {   // 瀕臨暴走：自動退守營地（觸發一次）；noRetreat 的角色（路德）會留在前線
       if (!t.resting) { t.resting = true; sendSentryRest(t); }
     } else if (t.taint <= 80) t.resting = false;
-    if (spec.aura && !t.berserk && !t.gsCast) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
+    if (spec.aura && !t.berserk && !t.gsCast && !inHospital) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
       t.auraCd = Math.max(0, (t.auraCd || 0) - dt);
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;
@@ -2170,7 +2218,7 @@ function update(dt) {
           if (o.hp <= 0 || (o !== t && TYPES[o.type].guide) || Math.hypot(o.x - t.x, o.y - t.y) > spec.aura.r * CELL) continue;
           // 疏導消耗 SP；補血消耗急救包，兩項資源各自檢查。
           const needSoothe = !TYPES[o.type].guide && (o.berserk || (o.taint || 0) >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minTaint : 1));
-          const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1);
+          const needHeal = (spec.aura.heal || 0) > 0 && o.maxhp - o.hp >= (typeof CAMP_SUPPLY !== 'undefined' ? CAMP_SUPPLY.minHeal : 1) && !(typeof hospitalResting === 'function' && hospitalResting(o));   // 住院的人不靠嚮導補血
           const doSoothe = needSoothe && (typeof guideCanSoothe !== 'function' || guideCanSoothe(t));
           const doHeal = needHeal && (typeof guideCanHeal !== 'function' || guideCanHeal(t));
           if (!doSoothe && !doHeal) continue;   // 不需要、或身上沒東西可用就跳過
@@ -2400,7 +2448,8 @@ function update(dt) {
   for (const core of G.cores) if(core.hp<=0 && !core.dead) {
     core.dead=true; breakCore(core);
     SFX.play('glassBreak3', .85, 'core-break-3'); SFX.play('glassBreak4', .85, 'core-break-4');   // 核心碎裂：兩種玻璃碎裂聲疊在一起
-    earnCrystals(core.reward); if (G.battle) G.battle.cores++; flash('核心摧毀 +'+core.reward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + core.reward + ' 結晶');
+    const coreReward = mrtExitsAllOpen() ? MRT_OPEN_CORE_REWARD : core.reward;   // 捷運入口解封了：核心只掉碎片（js/mrt-locks.js）
+    earnCrystals(coreReward); if (G.battle) G.battle.cores++; flash('核心摧毀 +'+coreReward+' 結晶',core.x,core.y,'#d69bff'); systemNotice('異質核心已摧毀，獲得 ' + coreReward + ' 結晶');
   }
   G.enemies = G.enemies.filter(e => !e.dead);
   // 建築放置動畫計時（落地瞬間揚塵）＋受擊閃紅計時
@@ -2437,6 +2486,7 @@ function update(dt) {
   if (typeof updatePractice === 'function') updatePractice(dt);   // 訓練室：不扣血、不耗物資、補史萊姆（js/practice.js）
   updatePearls(dt);          // 珍珠小童噴出的珍珠（js/pearl-kid.js）
   if (typeof updatePearlElder === 'function') updatePearlElder(dt);   // 珍珠大童降下的珍珠、場上的大珍珠（js/pearl-elder.js）
+  if (typeof updateStreetVehicles === 'function') updateStreetVehicles(dt);   // K56 路邊會暴衝的機車、腳踏車（js/street-vehicles.js）
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
@@ -2549,7 +2599,7 @@ const LOSE_TEXT = {
 function loseOverlay(reason, cause) {
   const [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base;
   const causeLine = cause ? '<span class="lose-cause">倒下原因：<b>' + cause + '</b></span>' : '';
-  showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '再挑戰');
+  showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
 function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
@@ -2566,7 +2616,7 @@ function prepareMonsterPreview() {
   if (note) note.textContent = '🔍 ' + (spec?.name || '怪物') + '測試場 · WASD 移動，滑鼠射擊；不會寫入正式存檔';
   updateCamera(); updateHUD();
 }
-function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
+function begin(playSound = true) { if (StoryScene.active()) { StoryScene.start(); return; } if (playSound) sfx('button'); closeElevatorMenu(); closeSupplyShop(true); closeBackpack(true); closeDialogue(true); closeSentryMenu(); closeGroundMenu(); assigning = null; setPaused(false); if (!restoreCombatProgress()) newGame(); if (typeof markMissionMapReached === 'function' && !PREVIEW) markMissionMapReached(MAP && MAP.id); prepareMonsterPreview(); G.phase = 'playing'; hideOverlay(); G.running = true; G.betweenWaves = 0.01; if (typeof updateBurrowMouseTestSpawn === 'function') updateBurrowMouseTestSpawn(BURROW_MOUSE_TEST.delay, true); }
 function win() { G.over = true; G.won = true; G.running = false; G.phase = 'won'; setPaused(false); sfx('win'); addStat('wins'); achieveOnBattleEnd('win'); if (typeof questEvent === 'function') questEvent('win'); winOverlay(); }
 // 基地被打壞：先讓玩家看到壞掉的營地，BASE_LOSE_DELAY 秒後才跳失敗畫面
 const BASE_LOSE_DELAY = 5;

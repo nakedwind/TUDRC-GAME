@@ -20,6 +20,14 @@ const MISSION_BASE = {
   briefer: 'eldrin',              // 報告任務的通訊員（隊員或場景 NPC 都可以）
 };
 
+// BOSS 特別獎金：在任務地圖討伐後，回應變中心由通訊員報告並入帳（每次討伐都給，重新出擊再打倒可以再領；js/missions.js）
+// flag＝怪物身上用來認出這隻 BOSS 的標記；台詞在對話編輯器的「報告任務」那一區（data/dialogues.js 的 bounty_id，{money}＝金額）
+const BOSS_BOUNTIES = [
+  { id: 'bird', name: '鳥頭大隊長', flag: 'elite', money: 2000 },         // js/elite-bird-head.js
+  { id: 'capKing', name: '順順宮主', flag: 'capKingLord', money: 3000 },   // js/elite-cap-king.js（只算跟核心躲在一起的宮主本人，大夯吉寶不算）
+  { id: 'pearl', name: '珍珠大童', flag: 'pearlBoss', money: 3000 },       // js/pearl-elder.js
+];
+
 const MISSIONS = [
   {
     // 新手區：打贏，或走出入口看完救援劇情（不管留下還是撤退，js/story-triggers.js）都算控制了
@@ -29,6 +37,10 @@ const MISSIONS = [
   {
     id: 'y1', map: 'map_mvtnqrs7', name: 'Y25區地下街', x: 26, y: 69, after: ['y25_entry'],   // id 維持 y1（存檔的進度、艾德林的報告台詞 brief_y1 都用這個）
     desc: '入口往下的地下街，雷德小隊就是在這裡遇上虱目魚小子。異質體聚集得比平常多。',
+  },
+  {
+    id: 'k56', map: 'map_mvvdbiyx', name: 'Z62區地下街', x: 27, y: 44, after: ['y1'],   // 路線圖上 Y25區地下街往上的下一區
+    desc: 'Y25區地下街再過去的另一段地下街。路邊的機車、腳踏車會突然暴衝，深處還有很強的異質反應。',
   },
   {
     id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 42, y: 58, after: ['y1'],

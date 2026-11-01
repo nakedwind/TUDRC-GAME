@@ -4,8 +4,8 @@
 //  ・區域、台詞、作戰桌位置都在 data/missions.js。進度存在瀏覽器（localStorage）。
 // ============================================================
 const MISSION_STORE = 'tudrc_missions_v1';
-const missionState = { cleared: [], briefed: [] };   // 已控制的區域、亞許已經報告過的任務
-try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
+const missionState = { cleared: [], briefed: [], reached: [], bossBounty: [], fundedMaps: [] };   // 已控制的區域、亞許已經報告過的任務、進去過的區域、討伐了還沒領特別獎金的 BOSS（打倒幾次就有幾筆）、給過作戰經費的非任務戰鬥地圖
+try { const saved = JSON.parse(localStorage.getItem(MISSION_STORE) || '{}'); for (const k of ['cleared', 'briefed', 'reached', 'bossBounty', 'fundedMaps']) if (Array.isArray(saved[k])) missionState[k] = saved[k].filter(id => typeof id === 'string'); } catch (_) {}
 function saveMissions() { try { localStorage.setItem(MISSION_STORE, JSON.stringify(missionState)); } catch (_) {} }
 
 const missionById = id => MISSIONS.find(m => m.id === id) || null;
@@ -15,7 +15,19 @@ const mapIndexOf = id => mapList().findIndex(m => m && sameMapId(m.id, id));
 const missionOfMap = mapId => MISSIONS.find(m => sameMapId(m.map, mapId)) || null;
 // 後面的區域已經控制了，前面的也算（舊存檔：後來才在前面插進新的區域，例如新手區 Y25區入口）
 const missionCleared = m => missionState.cleared.includes(m.id) || MISSIONS.some(x => x.after.includes(m.id) && missionCleared(x));
-const missionOpen = m => m.after.every(id => missionCleared(missionById(id) || { id }));   // 前面的區域都控制了
+const missionOpen = m => missionState.reached.includes(m.id) || m.after.every(id => missionCleared(missionById(id) || { id }));   // 前面的區域都控制了，或已經進去過（戰敗回來才能再出發）
+// 進入戰鬥（game.js 的 begin 呼叫）：開始畫面的地圖選單可以跳過前面的區域直接進來，記下來之後作戰桌才選得到
+function markMissionMapReached(mapId) {
+  const m = missionOfMap(mapId);
+  if (!m) {   // 不是任務的戰鬥地圖（測試地圖 y1 等）：一樣記下來，經費只給一次；訓練室是基地變的，經費另外算（js/practice.js）
+    if (MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) || missionState.fundedMaps.some(id => sameMapId(id, mapId))) return;
+    missionState.fundedMaps.push(mapId); saveMissions(); return;
+  }
+  if (missionState.reached.includes(m.id)) return;
+  missionState.reached.push(m.id); saveMissions();
+}
+// 這張地圖的作戰經費給過了沒（進去過、或已經控制）：每張戰鬥地圖只給一次，重新部署、再次出擊、重新整理後再進去都不會再給
+const missionMoneyGiven = mapId => { const m = missionOfMap(mapId); return m ? missionState.reached.includes(m.id) || missionCleared(m) : missionState.fundedMaps.some(id => sameMapId(id, mapId)); };
 // 不用打贏也算控制（例如新手區：看完救援劇情離開，js/story-triggers.js 呼叫）
 function markMissionMapCleared(mapId) {
   const m = missionOfMap(mapId); if (!m || missionState.cleared.includes(m.id)) return;
@@ -42,7 +54,29 @@ const brieferHospitalized = () => typeof isHospitalized === 'function' && isHosp
 const isBriefStandIn = actor => brieferHospitalized() && onBaseMap() && !BRIEF_STAND_IN_EXCLUDE.includes(actorId(actor))
   && !actor.dead && !!(CHARACTERS[actorId(actor)] || TYPES[actorId(actor)]);
 const isBriefer = actor => !!actor && (actorId(actor) === MISSION_BASE.briefer || isBriefStandIn(actor));
-const missionBriefReady = actor => isBriefer(actor) && !!briefPending();
+// ---- BOSS 特別獎金（名單、金額在 data/missions.js 的 BOSS_BOUNTIES）----
+// 打倒就記下來（combat-feel.js 的 onEnemyDeath 呼叫），之後戰敗撤退也算數；測試模式、不是任務的地圖（測試地圖 y1）不算
+function recordBossBounty(e) {
+  const b = BOSS_BOUNTIES.find(x => e[x.flag]);
+  if (!b || window.TEST_MODE || !missionOfMap(MAP && MAP.id)) return;
+  missionState.bossBounty.push(b.id); saveMissions();
+}
+// 還沒領的獎金：同一隻打倒好幾次，金額加起來、台詞只說一次
+const bossBountiesPending = () => window.TEST_MODE ? [] : BOSS_BOUNTIES.filter(b => missionState.bossBounty.includes(b.id))
+  .map(b => ({ ...b, money: b.money * missionState.bossBounty.filter(id => id === b.id).length }));
+const bossBountyReady = () => MAP_SAFE && !MAP_STORY && bossBountiesPending().length > 0;   // 基地裡才入帳（戰鬥地圖的錢是作戰經費，劇情地圖不動錢包）
+// 通訊員開口報告：獎金馬上入帳，回傳要說的台詞（這格台詞被清空也要交代錢是哪來的）
+function payBossBounties() {
+  const list = bossBountiesPending(), total = list.reduce((sum, b) => sum + b.money, 0);
+  G.money += total; walletSet(G.money);
+  missionState.bossBounty = []; saveMissions();
+  updateHUD(); sfx('blip'); systemNotice('💰 特別獎金 +$' + total);
+  return list.flatMap(b => {
+    const lines = dialogueLines(MISSION_BASE.briefer, 'bounty_' + b.id);
+    return (lines && lines.length ? lines : ['部隊長，討伐' + b.name + '的特別獎金撥下來了，{money} 元。']).map(s => s.replace(/\{money\}/g, b.money));
+  });
+}
+const missionBriefReady = actor => isBriefer(actor) && (!!briefPending() || bossBountyReady());
 // 頭上打「！」、回應變中心時走過來報告的那一位：通訊員本人；他住院時改成離作戰桌最近的代報告的人
 const brieferNpc = () => {
   const all = G ? [...(G.npcs || []), ...(G.towers || [])] : [];
@@ -52,17 +86,20 @@ const brieferNpc = () => {
   return subs.reduce((a, b) => Math.hypot(a.x - t.x, a.y - t.y) <= Math.hypot(b.x - t.x, b.y - t.y) ? a : b);
 };
 
-// ---- 和通訊員對話：有新任務就先報告任務（game.js 的 openDialogue 呼叫）----
+// ---- 和通訊員對話：有特別獎金先報告獎金，有新任務接著報告任務（game.js 的 openDialogue 呼叫）----
 function missionDialogueLines(actor) {
+  if (!missionBriefReady(actor)) return null;
+  const bounty = bossBountyReady() ? payBossBounties() : [];
   const m = briefPending();
-  if (!m || !isBriefer(actor)) return null;
+  if (!m) return bounty;
   missionState.briefed.push(m.id); saveMissions();
-  return briefLines(m);   // briefPending 已經確認有台詞
+  return [...bounty, ...briefLines(m)];   // briefPending 已經確認有台詞
 }
 
 // ---- 左上角「目前任務」（game.js 的 updateHUD 呼叫）----
 function missionHudText() {
   if (MAP_SAFE) {
+    if (bossBountyReady()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告特別獎金' : '聽' + brieferName() + '報告特別獎金');
     const m = nextMission();
     if (!m) return '目前任務：Y 區已全部控制';
     if (briefPending()) return '目前任務：' + (brieferHospitalized() ? brieferName() + '住院中，聽應變中心的其他人代為報告下一個任務' : '聽' + brieferName() + '報告下一個任務');
@@ -142,7 +179,7 @@ function drawMissionMarks(ctx) {
     ctx.restore();
   };
   const ash = brieferNpc();
-  if (ash && briefPending()) mark(ash.x, ash.y - 70 + bob, '！', '#ffd479');
+  if (ash && (briefPending() || bossBountyReady())) mark(ash.x, ash.y - 70 + bob, '！', '#ffd479');
   else if (nextMission() && nextMission().map && !missionTableNear()) { const t = missionTablePos(); mark(t.x, t.top - 4 + bob, '作戰', '#ffd479'); }
 }
 
@@ -164,14 +201,14 @@ function missionTravel(mapId, after) {
     }, PORTAL_BLACK_MS), PORTAL_FADE_MS);
   });
 }
-// 回應變中心：站在作戰桌前；有新任務的話，亞許走過來報告
+// 回應變中心：站在作戰桌前；有特別獎金或新任務的話，亞許走過來報告
 function returnToBase() {
   missionTravel(MISSION_BASE.map, () => {
     const [ac, ar] = missionArriveCell();
     const [x, y] = center(ac, ar);
     if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; G.player.dir = 'back'; }
     const ash = brieferNpc();
-    if (ash && briefPending()) {
+    if (ash && (briefPending() || bossBountyReady())) {
       for (const [dc, dr] of [[1, 0], [-1, 0], [2, 0], [-2, 0], [0, 1]]) {
         const [ax, ay] = center(ac + dc, ar + dr);
         if (!playerBlocked(ax, ay)) { ash.x = ax; ash.y = ay; break; }
@@ -200,14 +237,15 @@ function missionWinOverlay() {
   return true;
 }
 function missionLoseExtra() {
-  return MAP && !MAP_SAFE && mapIndexOf(MISSION_BASE.map) >= 0 ? '<br><button type="button" id="missionRetreat" class="mission-retreat">撤退回應變中心</button>' : '';
+  return MAP && !MAP_SAFE && mapIndexOf(MISSION_BASE.map) >= 0 ? '<br><button type="button" id="missionRetreat" class="mission-retreat">撤退回應變中心（戰場暫停，之後接續）</button>' : '';
 }
 // 結算畫面的大按鈕：打贏了就回基地（回傳 true＝這裡處理掉了）
 function onOverlayButton() {
   if (G && G.over && G.won && !MAP_SAFE && missionOfMap(MAP && MAP.id)) { sfx('button'); returnToBase(); return true; }
+  if (G && G.over && !G.won && !MAP_SAFE && MAP) { redeployCombat(MAP.id); keepBattleMoney(); }   // 戰敗的「重新部署」：一切重來（js/combat-progress.js）
   return false;
 }
-document.getElementById('ov-text').addEventListener('click', e => { if (e.target.closest('#missionRetreat')) { sfx('button'); returnToBase(); } });
+document.getElementById('ov-text').addEventListener('click', e => { if (e.target.closest('#missionRetreat')) { sfx('button'); suspendDefeatedBattle(); returnToBase(); } });
 
 // ---- 作戰桌面板（外觀和商店、出勤配置同一套）----
 let missionBoard = null, missionBoardOpen = false, missionSel = null, boardTab = 'main';   // boardTab：main 主線／side 支線（js/quests.js）
@@ -224,6 +262,11 @@ function ensureMissionBoard() {
     const node = e.target.closest('[data-mission]');
     if (node) { missionSel = node.dataset.mission; sfx('blip'); renderMissionBoard(); return; }
     if (e.target.closest('.mission-team')) { closeMissionBoard(true); openTeamPanel(); return; }
+    if (e.target.closest('.mission-redeploy')) {
+      const m = missionById(missionSel);
+      if (confirm('放棄暫停中的戰場，重新部署？\n門、核心、建築、箱子都會重來（已解封的捷運入口不會），作戰經費不會再給一次。')) { redeployCombat(m.map); sortieTo(m); }
+      return;
+    }
     if (e.target.closest('.mission-go')) sortieTo(missionById(missionSel));
   });
   document.getElementById('wrap').appendChild(missionBoard);
@@ -240,6 +283,7 @@ function renderMissionBoard() {
   const team = getTeam(), cleared = MISSIONS.filter(missionCleared).length;
   const teamFaces = team.map(id => { const profile = teamProfile(id); return '<span class="mission-face" data-char="' + id + '" title="' + profile.name + '"><img src="' + memberPortraitPath(profile) + '" alt="' + profile.name + '"></span>'; }).join('');   // 胸像（裁切跟 Y102隊員面板的 .squad-portrait 一樣）
   const canGo = !!sel.map && st !== 'locked';
+  const paused = canGo && !!readCombatProgress()[sel.map];   // 有暫停中的戰場：出擊＝接續，另外可以重新部署（js/combat-progress.js）
   const side = boardTab === 'side' && typeof renderSideBoard === 'function';
   const ready = typeof readyCount === 'function' ? readyCount() : 0;
   const tabs = '<nav class="board-tabs" role="tablist">' +
@@ -254,10 +298,11 @@ function renderMissionBoard() {
           '<span class="mission-progress"><small>主線進度</small><b>' + cleared + ' / ' + MISSIONS.length + '</b></span></div>' +   // 主線進度：放在地圖左上角
         '<aside class="mission-detail">' +
           '<div class="mission-detail-main"><em class="mission-status ' + st + '">' + (sel.boss ? '⚠ BOSS 反應・' : '') + STATUS_TEXT[st] + '</em>' +
-            '<h3>' + sel.name + '</h3><p>' + (st === 'locked' ? '先控制前面的區域，才能前往這裡。' : sel.desc) + '</p></div>' +
+            '<h3>' + sel.name + '</h3><p>' + (st === 'locked' ? '先控制前面的區域，才能前往這裡。' : sel.desc) + '</p>' + (paused ? '<p class="mission-paused">⏸ 戰場暫停中：門、核心、建築都跟離開時一樣。</p>' : '') + '</div>' +
           '<div class="mission-team-row"><span>出勤人員 ' + team.length + ' 位</span><div class="mission-faces">' + (teamFaces || '<small>尚未編入</small>') + '</div>' +
             '<button type="button" class="mission-team">🧑‍🤝‍🧑 出勤配置</button></div>' +
-          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : STATUS_TEXT[st]) + '</button>' +
+          (paused ? '<button type="button" class="mission-redeploy">↺ 重新部署</button>' : '') +
+          '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : STATUS_TEXT[st]) + '</button>' +
         '</aside>' +
       '</div>' +
     '</section>'));

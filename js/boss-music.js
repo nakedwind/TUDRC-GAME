@@ -56,7 +56,8 @@ const BossMusic = (() => {
     const battle = inBattle();
     if (battle && eliteHunting()) eliteHateT = B.loseDelay; else eliteHateT = Math.max(0, eliteHateT - dt);
     if (!battle || G !== battleG) { battleG = battle ? G : null; eliteHeard = false; eliteWaitT = 0; }   // 離開戰鬥、新的一場：重算「第一次」
-    const want = { elite: battle && eliteHateT > 0, core: battle && coreAwake() };
+    const claw = typeof clawOpen !== 'undefined' && clawOpen;   // 夾娃娃機開著：放機台自己的音樂（js/claw-machine.js）
+    const want = { elite: battle && !claw && eliteHateT > 0, core: battle && !claw && coreAwake() };
     const bars = battle && bossBarShown();
     for (const key of Object.keys(B.sounds)) {
       let on = want[key];

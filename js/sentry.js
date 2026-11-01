@@ -176,7 +176,7 @@ function reachableFromPlayer() {
     const [c, r] = queue.shift();
     for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1]]) {
       const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
-      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr) || G.grid[k]) continue;
+      if (seen.has(k) || !inGrid(nc, nr) || isWall(nc, nr) || G.grid[k] || edgeBetween(c, r, nc, nr)) continue;
       const [x, y] = center(nc, nr); if (sentryBlocked(x, y)) continue;
       seen.add(k); queue.push([nc, nr]);
     }
@@ -245,7 +245,7 @@ function campSpawnCells(n = 24) {
   }
   return out;
 }
-function spawnSentries() {
+function spawnSentries(only = null) {   // only：只生這幾位（接續戰場時新編入的隊員，js/combat-progress.js）
   const cand = [], start = boxStartCells(), camp = campSpawnCells();
   if (camp.length > 1) cand.push(...camp.slice(1));   // 有營地：營地裡（第一格留給溫特）
   else if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
@@ -258,7 +258,7 @@ function spawnSentries() {
     ? (typeof ROSTER !== 'undefined' ? ROSTER : Object.keys(TYPES)).filter(npcHomeHere)
     : (typeof practiceOn === 'function' && practiceOn()) ? practice.team.slice()   // 訓練室：在塔納那裡選的隊員（js/practice.js）
     : ((typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES));
-  for (const type of team) {
+  for (const type of only || team) {
     const spec = TYPES[type]; if (!spec) continue;
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
@@ -274,10 +274,11 @@ function spawnSentries() {
 }
 
 // ---- 場景 NPC：從營地附近出生，只在亮處自由走動 ----
-function spawnWanderers() {
+function spawnWanderers(only = null) {   // only：只生這幾位（接續戰場時新編入的球球，js/combat-progress.js）
   // 基地（安全區）：只出現平時在這張地圖的人（data/npc-locations.js）；戰鬥地圖：勾了「場景 NPC」才有
   const deployed = typeof getTeam === 'function' ? getTeam() : [];
-  const list = MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id))
+  const list = only ? WANDERERS.filter(w => only.includes(w.id))
+    : MAP_SAFE || (typeof practiceOn === 'function' && practiceOn()) ? WANDERERS.filter(w => npcHomeHere(w.id))
     : WANDERERS.filter(w => w.id === 'ball' ? deployed.includes('ball') && hasDogHandler(deployed) : MAP_NPCS);
   if (!list.length) return;
   const candidates = [], seen = new Set();
@@ -317,6 +318,7 @@ function sentryBlocked(x, y) {
     const [c, rr] = cellAt(px, py);
     if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
+    if (edgeWallBlocksPoint(px, py) || edgeWallBlocksPoint(x + sx, y) || edgeWallBlocksPoint(x, y + sy)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）：角和四邊中點
   }
   return false;
 }
@@ -443,7 +445,7 @@ function buildSentryPath(t, targetX, targetY, allowDark = !!t.summonDark) {   //
     if (c === gc && r === gr) break;
     for (const [dc, dr] of [[0,-1],[1,0],[0,1],[-1,0]]) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (cameFrom.has(key) || !sentryCellWalkable(nc, nr, false, allowDark)) continue;
+      if (cameFrom.has(key) || edgeBetween(c, r, nc, nr) || !sentryCellWalkable(nc, nr, false, allowDark)) continue;   // edgeBetween：兩格中間有薄牆就繞路
       cameFrom.set(key, c + ',' + r); queue.push([nc, nr]);
     }
   }
@@ -469,7 +471,7 @@ function sentryFleeSpot(t, threat, maxSteps = 6) {
     if (steps >= maxSteps) continue;
     for (const [dc, dr] of dirs) {
       const nc = c + dc, nr = r + dr, key = nc + ',' + nr;
-      if (seen.has(key) || !sentryCellWalkable(nc, nr)) continue;
+      if (seen.has(key) || edgeBetween(c, r, nc, nr) || !sentryCellWalkable(nc, nr)) continue;
       seen.add(key); queue.push([nc, nr, steps + 1]);
     }
   }
@@ -574,6 +576,31 @@ function campAttackerFor(t, maxDistance = Infinity) {
   }
   return closest;
 }
+// 嚮導要先去照顧的隊員：門檻跟光環一樣（js/camp-supply.js 的 minTaint／minHeal、js/game.js 的嚮導隨身疏導），身上沒 SP／急救包的那項不算，免得走過去卻不動手
+// 不補溫特、不互補嚮導；前往指定地點途中不去；跟隨護衛時只照顧溫特附近（ESCORT.chaseCells）的人；應變中心裡不跟（受傷的人去醫院休養，js/vitals.js）
+const GUIDE_CARE_EVADE = 1.5;   // 正要去照顧人時，怪物貼到幾格內才往後退（平常是角色的 evade）
+function guideCareTarget(t, spec) {
+  if (MAP_SAFE || t.mode === 'goto' || !spec.aura) return null;
+  const canSoothe = typeof guideCanSoothe !== 'function' || guideCanSoothe(t);
+  const canHeal = (spec.aura.heal || 0) > 0 && (typeof guideCanHeal !== 'function' || guideCanHeal(t));
+  if (!canSoothe && !canHeal) return null;
+  const escortR = t.mode === 'escort' && G.player ? ESCORT.chaseCells * CELL : Infinity;
+  const needy = G.towers.filter(o =>
+    o !== t && o.hp > 0 && !TYPES[o.type].guide &&
+    ((canSoothe && (o.berserk || (o.taint || 0) >= CAMP_SUPPLY.minTaint)) || (canHeal && o.maxhp - o.hp >= CAMP_SUPPLY.minHeal)) &&
+    (escortR === Infinity || Math.hypot(o.x - G.player.x, o.y - G.player.y) <= escortR)
+  );
+  if (!needy.length) return null;
+  needy.sort((a, b) => {   // 暴走 → 汙染高 → 少血多 → 近
+    if (!!b.berserk !== !!a.berserk) return b.berserk ? 1 : -1;
+    const loadDiff = (b.taint || 0) - (a.taint || 0);
+    if (Math.abs(loadDiff) > 1) return loadDiff;
+    const injuryDiff = (b.maxhp - b.hp) - (a.maxhp - a.hp);
+    if (Math.abs(injuryDiff) > 1) return injuryDiff;
+    return Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y);
+  });
+  return needy.find(o => Math.hypot(o.x - t.x, o.y - t.y) <= spec.aura.r * CELL || buildSentryPath(t, o.x, o.y) !== null) || null;
+}
 function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; if (!(t.say && t.say.hurt)) t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉（倒下時喊的那句留著，js/mate-hurt-talk.js）
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
@@ -621,7 +648,9 @@ function updateSentry(t, dt) {
     moveSentryWithPath(t, marked.x, marked.y, (ownSpec.walkSpeed || 80) * 1.2, dt);
     return;
   }
+  const care = ownSpec.guide ? guideCareTarget(t, ownSpec) : null;   // 有隊員要補血／疏導：先去處理，不被怪吸走
   // 嚮導保持安全距離：敵人靠近時優先往反方向撤退，仍可在遠處攻擊與治療。
+  // 正要去照顧人時只在怪真的貼身（GUIDE_CARE_EVADE 格）才退，不然站不進光環範圍
   if (ownSpec.guide && G.enemies.length) {
     let threat = null, threatD = Infinity;
     for (const e of G.enemies) {
@@ -629,7 +658,7 @@ function updateSentry(t, dt) {
       const d = Math.hypot(e.x - t.x, e.y - t.y);
       if (d < threatD) { threat = e; threatD = d; }
     }
-    const safeDistance = (ownSpec.evade || 3) * CELL;
+    const safeDistance = (care ? GUIDE_CARE_EVADE : (ownSpec.evade || 3)) * CELL;
     if (threat && threatD < safeDistance) {
       const dx=t.x-threat.x,dy=t.y-threat.y,d=threatD||1,speed=(ownSpec.walkSpeed||80)*1.35,step=speed*dt;
       t.target=null; t.waitT=0;
@@ -644,31 +673,12 @@ function updateSentry(t, dt) {
   }
   // 嚮導身上的急救包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
   if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
-  // 艾德林完成移動指令後仍主動照顧需要疏導或治療的哨兵；正在前往指定地點時先遵守指令。
-  if (!MAP_SAFE && (t.type === 'eldrin' || ownSpec.careFollow) && t.mode !== 'goto' && t.mode !== 'escort') {   // careFollow：塔納也一樣；應變中心裡不跟（受傷的人去醫院休養，js/vitals.js）
-    const sentinels = G.towers.filter(o =>
-      o !== t && o.hp > 0 && !TYPES[o.type].guide &&
-      (o.berserk || (o.taint || 0) >= CAMP_SUPPLY.minTaint || o.maxhp - o.hp >= CAMP_SUPPLY.minHeal)   // 跟疏導／補血的門檻一樣（js/camp-supply.js），免得走過去卻不動手
-    );
-    if (sentinels.length) {
-      sentinels.sort((a, b) => {
-        const loadDiff = (b.taint || 0) - (a.taint || 0);
-        if (Math.abs(loadDiff) > 1) return loadDiff;
-        const injuryDiff = (b.maxhp - b.hp) - (a.maxhp - a.hp);
-        if (Math.abs(injuryDiff) > 1) return injuryDiff;
-        return Math.hypot(a.x - t.x, a.y - t.y) - Math.hypot(b.x - t.x, b.y - t.y);
-      });
-      const supportTarget = sentinels.find(o =>
-        Math.hypot(o.x - t.x, o.y - t.y) <= ownSpec.aura.r * CELL ||
-        buildSentryPath(t, o.x, o.y) !== null
-      );
-      if (supportTarget) {
-        t.supportTarget = supportTarget.type;
-        followTarget(t, supportTarget, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
-        t.target = null; t.waitT = 0;
-        return; // 支援位置優先；攻擊仍由 game.js 對射程內目標自動執行
-      }
-    }
+  // 所有嚮導：有人要補血／疏導就先走到他身邊，跳過下面的護衛圈和主動接敵（攻擊仍由 game.js 對射程內目標自動執行）
+  t.supportTarget = care ? care.type : null;
+  if (care) {
+    followTarget(t, care, { dist: CELL * 1.35, speed: (ownSpec.walkSpeed || 80) * 1.12 }, dt);
+    t.target = null; t.waitT = 0;
+    return;
   }
   // 玩家明確下達的前往指令優先於追敵與角色跟隨關係，避免目的地被接敵邏輯清除。
   if (t.mode === 'goto' && t.target) {
