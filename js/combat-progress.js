@@ -37,14 +37,57 @@ function readCombatProgress() {
 function clearCombatProgress(mapId) {
   const all = readCombatProgress(); delete all[mapId]; localStorage.setItem(COMBAT_PROGRESS_KEY, JSON.stringify(all));
 }
+// 不存進作戰進度的快取：讀檔後會自己重算。flickerLightsMap 指著整張地圖資料（js/flicker-light.js），
+// secretOwner 是暗區查詢表（js/breakable-walls.js）；存進去每張地圖多好幾百 KB，存檔欄位又各複製一份，瀏覽器空間會爆
+const COMBAT_SKIP_CACHES = ['flickerLightsMap', 'secretOwner'];
 function suspendCombatProgress() {
-  const all = readCombatProgress();
+  const all = readCombatProgress(), state = { ...G, effects: [] };
+  COMBAT_SKIP_CACHES.forEach(k => delete state[k]);
   all[MAP.id] = { signature: combatMapSignature(), graph: combatGraphEncode({
-    state: { ...G, effects: [] }, walls: mapWalls, doors: mapDoors, doorWalls: doorAddedWalls,
+    state, walls: mapWalls, doors: mapDoors, doorWalls: doorAddedWalls,
     offsets: mapSolidOffsets, activeSupply: sortie.active, power: [...mapPowerOn], elevator: openElevatorStamp,
   }, MAP.stamps || []) };
   localStorage.setItem(COMBAT_PROGRESS_KEY, JSON.stringify(all));
 }
+// 舊的作戰進度瘦身：從存好的資料裡拿掉上面那些快取，再丟掉沒人用到的節點（其他內容原封不動）
+function compactCombatGraph(graph) {
+  const rootNode = graph && graph.root && graph.nodes[graph.root.r], stateRef = rootNode && (rootNode.data.find(([k]) => k === 'state') || [])[1];
+  const stateNode = stateRef && stateRef.r !== undefined && graph.nodes[stateRef.r];
+  if (!stateNode || stateNode.type !== 'object') return false;
+  const before = stateNode.data.length;
+  stateNode.data = stateNode.data.filter(([k]) => !COMBAT_SKIP_CACHES.includes(k));
+  if (stateNode.data.length === before) return false;
+  const keep = new Map(), order = [], walk = v => {   // 從 root 走得到的節點才留下，照原本順序重新編號
+    if (!v || typeof v !== 'object') return;
+    if (Array.isArray(v)) return v.forEach(walk);
+    if ('r' in v && !keep.has(v.r)) { keep.set(v.r, -1); order.push(v.r); walk(graph.nodes[v.r].data); }
+  };
+  walk(graph.root);
+  order.sort((a, b) => a - b).forEach((old, i) => keep.set(old, i));
+  const remap = v => !v || typeof v !== 'object' ? v : Array.isArray(v) ? v.map(remap) : 'r' in v ? { r: keep.get(v.r) } : v;
+  graph.nodes = order.map(old => ({ ...graph.nodes[old], data: remap(graph.nodes[old].data) }));
+  graph.root = remap(graph.root);
+  return true;
+}
+function compactCombatProgressText(text) {
+  let all; try { all = JSON.parse(text || 'null'); } catch (_) { return null; }
+  if (!all || typeof all !== 'object') return null;
+  let changed = false;
+  for (const saved of Object.values(all)) if (saved && saved.graph && compactCombatGraph(saved.graph)) changed = true;
+  return changed ? JSON.stringify(all) : null;
+}
+(() => {   // 開遊戲時整理一次：目前進度、存檔欄位、開新遊戲／測試模式前的備份裡各有一份
+  try {
+    const now = compactCombatProgressText(localStorage.getItem(COMBAT_PROGRESS_KEY));
+    if (now) localStorage.setItem(COMBAT_PROGRESS_KEY, now);
+    for (const key of Object.keys(localStorage)) {
+      if (!/^tudrc-save-slot-v1-|^tudrc-before-(new-game|test)-v1$/.test(key)) continue;
+      const box = JSON.parse(localStorage.getItem(key) || 'null');
+      const small = box && box.values && compactCombatProgressText(box.values[COMBAT_PROGRESS_KEY]);
+      if (small) { box.values[COMBAT_PROGRESS_KEY] = small; localStorage.setItem(key, JSON.stringify(box)); }
+    }
+  } catch (_) {}
+})();
 // 不跑 newGame、直接把 mapWalls 整份換回來的地方（接續「保留進度」、劇情／回憶門看完回原地圖 js/story-scene.js 的 backToGame）都要呼叫：
 // 可炸牆、閘門、置物箱各自「加進牆裡的格子」清單是另外記的，不跟著牆一起換；中間換過別張地圖就會變成那張的，
 // 照換回來的牆重新認一次，不然打開／炸開時擋路格刪不掉（洞炸開了還是走不過去）
