@@ -24,6 +24,7 @@
 <link rel="stylesheet" href="css/style.css?v=mealbuff7-20261102">
 <link rel="stylesheet" href="css/tpad-map.css?v=radio-nav-20261028">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
+<link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
 <link rel="stylesheet" href="css/squad-page.css?v=dogtree-20261029">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 <link rel="stylesheet" href="css/claw-machine.css?v=clawbanner-20261101">
@@ -124,7 +125,7 @@
       <div class="dialogue-options">
         <button id="dialogueGift" class="hidden" type="button">🎁 送禮 <span>G</span></button>
         <button id="dialogueOutfit" class="hidden" type="button">👗 推薦穿搭</button>   <!-- 基地裡的隊友：打開他的服裝介面（js/costumes.js） -->
-        <button id="dialogueGear" class="hidden" type="button">🎽 推薦裝備</button>   <!-- 基地裡的隊友：打開 T-Pad 他的裝備頁（js/squad-page.js） -->
+        <button id="dialogueGear" class="hidden" type="button">🎽 隊員資訊</button>   <!-- 基地裡的隊友：打開 T-Pad 他的裝備頁（js/squad-page.js） -->
         <button id="dialogueWorkshop" class="hidden" type="button">🔧 開發工坊</button>
         <button id="dialoguePractice" class="hidden" type="button">🎯 開始訓練</button>
         <button id="dialogueHospital" class="hidden" type="button">🏥 去醫院休息</button>   <!-- 受傷的隊員（js/vitals.js） -->
@@ -259,10 +260,11 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=nomissing-20261102"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=clawstock-20261101"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=lvfx-20261102"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=clawstock-20261101"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
+  <script src="js/level-up-fx.js?v=lvfx-20261102"></script>   <!-- 升級特效：開發、升級、製作、學技能的光效＋音效 -->
 
   <script src="data/characters.js?v=guideability-20261025"></script>  <!-- 集中管理所有角色 -->
   <script src="data/gifts.js?v=giftrefuse-20261025"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
@@ -304,7 +306,7 @@
   <script src="js/breakable-walls.js?v=blastguard-20261101"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=eyedrops-20261030"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
-  <script src="js/build.js?v=escalator-nobuild-20261031"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
+  <script src="js/build.js?v=lvfx-20261102"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=hospicon-20261029"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
   <script src="js/sentry.js?v=meal-20261102"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
@@ -347,15 +349,15 @@
   <script src="js/ore.js?v=hiddenore-20261102"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
   <script src="js/landmine.js?v=shell30-20261101"></script> <!-- 9i. 地雷：怪物踩到爆炸 -->
   <script src="js/shop.js?v=merge-20261102"></script> <!-- 9i2. 商店、飲料店、販賣機：商品與購物車 -->
-  <script src="js/backpack.js?v=cabinet-20261102"></script> <!-- 9j. 背包：物品格與說明 -->
+  <script src="js/backpack.js?v=lvfx-20261102"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/storage-cabinet.js?v=cabinet-20261102"></script> <!-- 收納櫃：指定的櫃子打開放東西（借用背包視窗） -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
-  <script src="js/squad-gear.js?v=sgear-ws-20261028"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
+  <script src="js/squad-gear.js?v=lvfx-20261102"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=achvcustom-20261025"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=money2-20261102"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=strawberry-20261026"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
-  <script src="js/costume-draw.js?v=autofill-20261024"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
-  <script src="js/costumes.js?v=noblock-20261102"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
+  <script src="js/costume-draw.js?v=ballsit-20261102"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
+  <script src="js/costumes.js?v=wdnomode-20261102"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
   <script src="js/gacha.js?v=gacha-once-20261027"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
   <script src="data/claw-machine.js?v=clawbanner-20261101"></script> <!-- 夾娃娃機設定：價錢、獎品、夾力、保夾 -->
   <script src="js/claw-machine.js?v=clawbanner-20261101"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
@@ -370,7 +372,7 @@
   <script src="js/food.js?v=mealbuff-20261102"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/cooking.js?v=cooking-20261102"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
   <script src="js/meal.js?v=mealtrain-traybk2-20261102"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
-  <script src="js/ball-poses.js?v=ball-bark-20261027"></script>
+  <script src="js/ball-poses.js?v=ballsit-20261102"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
   <script src="js/missions.js?v=fundonce-20261102"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
@@ -378,10 +380,10 @@
   <script src="js/boss-music.js?v=clawstock-20261101"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=y25entry-20261031"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=merge-20261102"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
-  <script src="js/equipment.js?v=wsalign-20261102"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
+  <script src="js/flare.js?v=merge2-20261102"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/equipment.js?v=merge2-20261102"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=knockpearl-20261101"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
-  <script src="js/magazine.js?v=box-fly3-20261029"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
+  <script src="js/magazine.js?v=lvfx-20261102"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=slim-20261102"></script>
   <script src="js/camp-interactions.js?v=cratefile-20261102"></script>
   <script src="js/camp-supply.js?v=boxrestock-20261102"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
@@ -392,7 +394,7 @@
 
   <script src="js/mrt-locks.js?v=pausebattle-20261101"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
-  <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
+  <script src="js/ui-layout.js?v=minimap-20261102"></script>   <!-- 套用上面的 UI 版面 -->
   <script src="js/game.js?v=portalnudge-20261102"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
@@ -415,13 +417,15 @@
   <script src="js/battle-result.js?v=result-20261018"></script>   <!-- 打贏後的結算畫面 -->
   <script src="js/result-screen.js?v=result-20261018"></script>   <!-- 結算畫面版面：按鈕放進彈窗、一頁看完 -->
   <script src="js/practice.js?v=moth-20261029"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
+  <script src="js/defeat-aid.js?v=defeataid-20261102"></script>   <!-- 連續失利補助：同一區連續兩次全滅，撥款 $10,000 -->
   <script src="js/channel-actions.js?v=movecancel-20261025"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=grab-building-20261027"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=memory-20261025"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
   <script src="js/tpad-map.js?v=nav-floor-stamps-20261102"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->
   <script src="js/tpad-memories.js?v=20261025b"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->
   <script src="js/tpad.js?v=squad-v2-20261027"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
+  <script src="js/base-minimap.js?v=minimap-20261102"></script>   <!-- 基地右下角小地圖：目前樓層＋溫特位置；按鈕打開 T-Pad 地圖、收起（必須在 tpad-map.js、tpad.js 之後） -->
   <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->
-  <script src="js/squad-page.js?v=learnbtn-20261101"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
+  <script src="js/squad-page.js?v=lvfx-20261102"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
 </body>
 </html>

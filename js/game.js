@@ -361,7 +361,7 @@ function openDialogue(actor) {
   if (typeof onDialogueOpenedPractice === 'function') onDialogueOpenedPractice(actor);   // 塔納：開始訓練按鈕（js/practice.js）
   if (typeof onDialogueOpenedWorkshop === 'function') onDialogueOpenedWorkshop(actor);   // 諾亞：開發工坊按鈕（js/equipment.js）   // 好感度、送禮按鈕（js/gifts.js）
   if (typeof onDialogueOpenedOutfit === 'function') onDialogueOpenedOutfit(actor);   // 隊友：推薦穿搭按鈕（js/costumes.js）
-  if (typeof onDialogueOpenedGear === 'function') onDialogueOpenedGear(actor);   // 隊友：推薦裝備按鈕（js/squad-page.js）
+  if (typeof onDialogueOpenedGear === 'function') onDialogueOpenedGear(actor);   // 隊友：隊員資訊按鈕（js/squad-page.js）
   if (typeof onDialogueOpenedVitals === 'function') onDialogueOpenedVitals(actor);   // 受傷的隊員：去醫院休息；疏導室的亞許：請亞許疏導（js/vitals.js）
 }
 // 不是跟角色說話的對話框（海報、告示…）：name＝名稱欄、image＝左邊的圖、lines＝一句一句的文字

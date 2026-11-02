@@ -89,7 +89,7 @@ function squadGearWorkshopBuy(kind, id) {
   if (!spendWorkshop(cost.shards, cost.money)) return true;
   supplyInventory.set(id, (supplyInventory.get(id) || 0) + 1);
   if (typeof saveGame === 'function') saveGame();
-  SFX.play('achievement', .7, 'equip-up');
+  workshopLevelFx('craft', g.name);   // 升級特效（js/equipment.js）
   showWorkshopToast('🎽 諾亞做好了「' + g.name + '」，放進背包了（共 ' + squadGearHave(id) + ' 件）');
   return true;
 }

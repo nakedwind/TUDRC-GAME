@@ -153,7 +153,7 @@ function buildWorkshopBuy(kind, id) {
   equipState.builds[id] = true;
   const q = buildQuickState(), free = q.ids.indexOf(null);   // 快捷欄有空格：自動放進去
   if (free >= 0) q.ids[free] = id;
-  saveEquipment(); SFX.play('achievement', .7, 'equip-up');
+  saveEquipment(); workshopLevelFx('dev', o.name);   // 升級特效（js/equipment.js）
   showWorkshopToast('🧱 諾亞開發好了「' + o.name + '」' + (free >= 0 ? '，已經放進建築快捷欄' : '，可以從「🧱 建築」拖到快捷欄'));
   renderBuildQuickSlots(); renderBuildBar();
   return true;

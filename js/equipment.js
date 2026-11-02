@@ -287,33 +287,25 @@ function useEyeDrops() {
   say('👁️ 眼前清楚多了', '#9fe3ff'); sfx('soothe');
   systemNotice('點了眼藥水：' + Math.round(EYE_DROPS.dur / 60) + ' 分鐘內看得清楚地圖（暗處一樣會被微笑者咬）');
 }
-// ---- 工具箱（道具）：修理身邊的營地（TOOLBOX 在 data/equipment.js）----
-function toolboxBaseNear() {
-  const p = G.player, reach = TOOLBOX.reach * CELL;
-  let best = null, bestD = Infinity;
-  for (const o of G.obstacles) {
-    if (!o.isBase || o.hp <= 0) continue;
-    const left = o.artX ?? OX + o.c * CELL, top = o.artY ?? OY + o.r * CELL;
-    const dx = Math.max(left - p.x, 0, p.x - (left + o.w * CELL)), dy = Math.max(top - p.y, 0, p.y - (top + o.h * CELL));
-    const d = Math.hypot(dx, dy);
-    if (d <= reach && d < bestD) { best = o; bestD = d; }
-  }
-  return best;
-}
+// ---- 工具箱（道具）：營地＋溫特蓋的所有建築，各修好最大 HP 的 TOOLBOX.repair（data/equipment.js）；不用站在旁邊 ----
+// 地雷不算；地圖上本來就有的障礙物、礦石、被打壞（HP 歸零）的也不修
+const toolboxTargets = () => G.obstacles.filter(o => (o.isBase || (o.playerBuilt && !o.trap)) && o.hp > 0 && o.maxhp > 0 && o.hp < o.maxhp);
 function useToolbox() {
   if (!G?.player || G.player.hp <= 0) return;
   const p = G.player, say = (t, c = '#c9d3dc') => flash(t, p.x, p.y - 54, c);
   if (itemCount('toolbox') <= 0) { sfx('error'); say('沒有工具箱了'); return; }
   if (MAP_SAFE) { sfx('error'); say('戰鬥中才能用'); return; }
-  const o = toolboxBaseNear();
-  if (!o) { sfx('error'); say('要站在營地旁邊才能修'); return; }
-  if (o.hp >= o.maxhp) { sfx('error'); say('營地沒有損壞'); return; }
+  const list = toolboxTargets();
+  if (!list.length) { sfx('error'); say('建築都沒有損壞'); return; }
   consumeItem('toolbox');
-  const add = Math.min(o.maxhp - o.hp, Math.round(o.maxhp * TOOLBOX.repair));
-  o.hp += add;
-  const cx = (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, cy = (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2;
-  flash('🔧 營地 HP +' + add, cx, cy - o.h * CELL / 2 - 10, '#7ee0c0', 1.6); sfx('place');
-  G.effects.push({ ring: true, x: cx, y: cy, r: 10, r2: Math.max(o.w, o.h) * CELL * .7, life: .5, life0: .5, color: '#7ee0c0' });
+  for (const o of list) {
+    const add = Math.min(o.maxhp - o.hp, Math.round(o.maxhp * TOOLBOX.repair));
+    o.hp += add;
+    const cx = (o.artX ?? OX + o.c * CELL) + (o.w || 1) * CELL / 2, cy = (o.artY ?? OY + o.r * CELL) + (o.h || 1) * CELL / 2;
+    flash('🔧 +' + add, cx, cy - (o.h || 1) * CELL / 2 - 10, '#7ee0c0', 1.6);
+    G.effects.push({ ring: true, x: cx, y: cy, r: 8, r2: Math.max(o.w || 1, o.h || 1) * CELL * .7, life: .5, life0: .5, color: '#7ee0c0' });
+  }
+  say('🔧 修好了 ' + list.length + ' 個建築', '#7ee0c0'); sfx('place');
   if (typeof updateHUD === 'function') updateHUD();
 }
 // ---- 急救包（道具，H）：先點左上角的隊員頭像，選要治療誰（倒地的也行） ----
@@ -495,7 +487,7 @@ function drawDetector(ctx) {
 }
 
 // ---- 取得裝備（諾亞開發、戰鬥區域掉落）----
-function grantEquipment(id, how) {
+function grantEquipment(id, how, quiet = false) {   // quiet：不播「拿到」的聲音（開發工坊有自己的升級特效）
   const def = equipDef(id); if (!def || equipState.owned[id]) return false;
   equipState.owned[id] = 1;
   const free = EQUIP_SLOTS.find(s => s.kinds.includes(def.kind) && !equipState.equipped[s.id]);   // 有空格就直接穿上
@@ -504,7 +496,7 @@ function grantEquipment(id, how) {
   systemNotice('🎁 ' + how + '「' + def.name + '」' + (free ? '，已經裝備上了' : '，到背包換裝'));
   if (typeof itemIntroForEquipment === 'function') itemIntroForEquipment(id);   // 第一次拿到：跳說明（js/item-intro.js）
   if (typeof battleGot === 'function' && !MAP_SAFE) battleGot(def.name, def.image, 1);
-  SFX.play('favorUp', .8, 'equip-get');
+  if (!quiet) SFX.play('favorUp', .8, 'equip-get');
   if (typeof backpackOpen !== 'undefined' && backpackOpen) renderBackpack();
   return true;
 }
@@ -760,8 +752,19 @@ function spendWorkshop(shards, money) {
   }
   return true;
 }
+// 開發／升級成功的特效（js/level-up-fx.js）：從下方說明欄的大圖爆開，重畫後左邊那一格彈一下
+// wsFxAt：按下按鈕時（重畫前）先量好大圖的位置；kind：'dev' 開發／'up' 升級／'craft' 製作
+let wsFxAt = null;
+function workshopLevelFx(kind, sub, max = false) {
+  if (typeof levelUpFx !== 'function') { SFX.play('achievement', .7, 'equip-up'); return; }
+  const key = wsPick;
+  levelUpFx({ kind, sub, max, title: max ? '升到最高等級！' : '', at: wsFxAt,
+    pop: () => workshopEl && key && workshopEl.querySelector('[data-ws-pick="' + key + '"]') });
+}
 const wsMoney = (key, i, shards) => typeof workshopMoney === 'function' ? workshopMoney(key, i, shards) : 0;
 function workshopBuy(kind, id) {
+  const fxEl = workshopEl && (workshopEl.querySelector('.ws-info .bag-detail-image') || workshopEl.querySelector('.ws-info'));
+  wsFxAt = fxEl ? fxEl.getBoundingClientRect() : null;
   if (typeof magazineWorkshopBuy === 'function' && magazineWorkshopBuy(kind, id)) { renderWorkshop(); return; }   // 子彈開發、彈匣升級（js/magazine.js）
   if (typeof bagWorkshopBuy === 'function' && bagWorkshopBuy(kind, id)) { renderWorkshop(); return; }
   if (typeof buildWorkshopBuy === 'function' && buildWorkshopBuy(kind, id)) { renderWorkshop(); return; }
@@ -769,17 +772,17 @@ function workshopBuy(kind, id) {
   if (kind === 'dev') {
     const def = equipDef(id); if (!def || equipState.owned[id] || def.source !== 'develop') return;
     if (!spendWorkshop(def.cost[0], wsMoney(def.id, 0, def.cost[0]))) return;
-    grantEquipment(id, '諾亞開發好了');
+    grantEquipment(id, '諾亞開發好了', true); workshopLevelFx('dev', def.name + '　Lv1');
     showWorkshopToast('🎁 諾亞開發好了「' + def.name + '」');
   } else if (kind === 'up') {
     const def = equipDef(id), lv = equipState.owned[id]; if (!def || !lv || lv >= def.levels.length) return;
     if (!spendWorkshop(def.cost[lv], wsMoney(def.id, lv, def.cost[lv]))) return;
-    equipState.owned[id] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
+    equipState.owned[id] = lv + 1; saveEquipment(); workshopLevelFx('up', def.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= def.levels.length);
     showWorkshopToast('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
   } else if (kind === 'wp') {
     const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= w.levels.length) return;
     if (!spendWorkshop(w.cost[lv - 1], wsMoney('w:' + id, lv - 1, w.cost[lv - 1]))) return;
-    equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); SFX.play('achievement', .7, 'equip-up');
+    equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); workshopLevelFx('up', w.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= w.levels.length);
     showWorkshopToast('🔧 「' + w.name + '」升到 Lv' + (lv + 1));
   }
   renderWorkshop();

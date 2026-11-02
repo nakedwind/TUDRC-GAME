@@ -126,6 +126,11 @@ const SFX = (() => {
     clawPity: '獎勵/夾娃娃機/保夾.wav',
     clawTick: '獎勵/夾娃娃機/倒數.wav',
     favorUp: '獎勵/升等.mp3',
+    // 升級特效（js/level-up-fx.js）：開發工坊開發／升級／製作、隊員技能樹學技能；另外會疊一聲合成的 lvSparkle
+    wsDevelop: 'universfield-video-game-bonus-323603.mp3',
+    wsUpgrade: 'universfield-level-up-03-199576.mp3',
+    wsCraft: 'universfield-video-game-bonus-323603.mp3',
+    skillLearn: '技能樹升等.mp3',
     mineGrind: '設施/打磨.mp3',
     crystalGet: '獎勵/得到碎片.mp3',
     slimeHit: '怪物/史萊姆/slime-hit.mp3',
@@ -348,6 +353,12 @@ const SFX = (() => {
     menu() { tone({ freq: 380, type: 'triangle', dur: 0.08, gain: 0.18 }); tone({ freq: 570, type: 'triangle', dur: 0.1, gain: 0.15, when: 0.05 }); },
     switch() { tone({ freq: 720, freq2: 470, type: 'sine', dur: 0.07, gain: 0.15 }); },
     blip() { tone({ freq: 880, type: 'sine', dur: 0.05, gain: 0.13 }); },
+    // 升級特效的閃光聲：往上爬的琶音＋高音叮鈴（js/level-up-fx.js）
+    lvSparkle(g = 1) {
+      [523, 659, 784, 1047, 1319].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: .22, gain: .1 * g, when: i * .055 }));
+      [2093, 2637, 3136, 2637, 3520].forEach((f, i) => tone({ freq: f, type: 'sine', dur: .14, gain: .035 * g, when: .3 + i * .045 }));
+      noise({ dur: .35, gain: .025 * g, freq: 6000, q: .8, when: .25 });
+    },
     place() { tone({ freq: 190, freq2: 85, type: 'sine', dur: 0.15, gain: 0.32 }); noise({ dur: 0.12, gain: 0.12, freq: 900 }); },
     soothe() { tone({ freq: 660, type: 'sine', dur: 0.16, gain: 0.13 }); tone({ freq: 990, type: 'sine', dur: 0.2, gain: 0.11, when: 0.1 }); },
     wave() { tone({ freq: 300, type: 'sawtooth', dur: 0.16, gain: 0.15 }); tone({ freq: 300, type: 'sawtooth', dur: 0.16, gain: 0.15, when: 0.22 }); },

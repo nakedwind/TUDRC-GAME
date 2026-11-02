@@ -351,7 +351,7 @@ function useBackpackItem(id) {
   else if (item.act === 'adrenaline') { if (typeof useAdrenaline === 'function') { closeBackpack(); useAdrenaline(); } }
   else if (item.act === 'eyedrops') { if (typeof useEyeDrops === 'function') { closeBackpack(); useEyeDrops(); } }   // 眼藥水：黑幕變淡（js/equipment.js）
   else if (item.act === 'food') { if (typeof useFood === 'function') useFood(id); }   // 怪物掉的食物：馬上吃（js/food.js）
-  else if (item.act === 'toolbox') { if (typeof useToolbox === 'function') { closeBackpack(); useToolbox(); } }   // 工具箱：修營地（js/equipment.js）
+  else if (item.act === 'toolbox') { if (typeof useToolbox === 'function') { closeBackpack(); useToolbox(); } }   // 工具箱：修營地和所有建築（js/equipment.js）
   else if (item.act === 'graffiti') { if (typeof openGraffitiPalette === 'function') { closeBackpack(true); openGraffitiPalette(id); } }   // 塗鴉筆：選圖案再畫（js/graffiti.js）
   else if (typeof item.use === 'function') { item.use(); updateHUD(); }
   else if (item.use) useSupply(id);
@@ -492,7 +492,7 @@ function bagWorkshopBuy(kind, key) {
   if (kind !== 'bg' || !BAG_UPGRADES[key]) return false;
   const u = BAG_UPGRADES[key], lv = bagLevel(key); if (lv >= u.slots.length) return true;
   if (!spendWorkshop(u.cost[lv - 1], wsMoney('bag:' + key, lv - 1, u.cost[lv - 1]))) return true;
-  equipState.bag[key] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
+  equipState.bag[key] = lv + 1; saveEquipment(); workshopLevelFx('up', u.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= u.slots.length);   // 升級特效（js/equipment.js）
   showWorkshopToast(u.icon + ' ' + u.name + '：「' + u.tab + '」可以放 ' + u.slots[lv] + ' 格');
   return true;
 }

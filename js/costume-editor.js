@@ -6,7 +6,13 @@
    畫配件用 js/costume-draw.js（和遊戲共用），所以這裡看到的就是遊戲裡的樣子。
 */
 const CE_DIRS = ['front', 'left', 'back', 'right'];
-const CE_DIR_NAMES = { front: '正面', left: '左側', back: '背面', right: '右側' };
+const CE_DIR_NAMES = { front: '正面', left: '左側', back: '背面', right: '右側', sitLeft: '坐下（左）', sitRight: '坐下（右）' };
+// 有特別姿勢的角色（姿勢怎麼找位置見 js/costume-draw.js 的 COSTUME_POSES）：球球坐下只有一張朝左的圖，朝右時左右翻（跟遊戲一樣）
+const CE_POSE_DIRS = { ball: ['sitLeft', 'sitRight'] };
+const CE_SIT_IMGS = {};   // 'A'／'B' → 球球坐下圖（安全區 A、戰鬥區 B）
+for (const k of ['A', 'B']) { const img = new Image(); img.src = 'images/character/ball/ball' + k + '_sit.png'; CE_SIT_IMGS[k] = img; }
+const ceDirs = () => CE_DIRS.concat(CE_POSE_DIRS[ED.char] || []);   // 這個角色可以調的方向
+const CE_MIRROR = { left: 'right', right: 'left', sitLeft: 'sitRight', sitRight: 'sitLeft' };   // 側面：鏡射到另一側
 const CE_FRAME_NAMES = ['站立', '走路 1', '走路 2'];
 const CE_FILES = {
   front: ['0000_Front.png', '0001_Front-Walking01.png', '0002_Front-Walking02.png'],
@@ -138,7 +144,9 @@ const slotDefault = (acc, dir) => (COSTUME_SLOT_ANCHORS[acc.slot] || {})[dir] ||
 function effective(dir = ED.dir) {   // 目前範圍下這個方向的位置（調預設時不看配件專屬）
   const acc = curAcc();
   if (ED.scope === 'item') return accPlacement(acc, ED.char, dir);
-  return pick3(COSTUME_PLACEMENT.anchors, ED.char, acc.slot, dir) || slotDefault(acc, dir);
+  const own = d => pick3(COSTUME_PLACEMENT.anchors, ED.char, acc.slot, d);
+  if (COSTUME_POSES[dir] && !own(dir)) return posePlacementFallback(dir, d => own(d) ? { pl: own(d), from: 'anchor' } : { pl: COSTUME_POSES[d] ? effective(d) : slotDefault(acc, d), from: 'slot' }).pl;   // 坐下還沒調過：跟遊戲一樣先鏡射、再沿用站著的位置
+  return own(dir) || slotDefault(acc, dir);
 }
 function cleanPl(p) {
   for (const k of ['x', 'y']) p[k] = Math.round((Number(p[k]) || 0) * 2) / 2;
@@ -174,7 +182,18 @@ function wornAccs() {   // 要畫的配件：選中的那個＋（勾選時）�
   }
   return sortAccsByLayer(list);   // 照圖層由下往上畫
 }
+// 坐下圖：跟遊戲（js/ball-poses.js）一樣原尺寸、底邊對齊、左右置中，朝右時左右翻
+function drawSitImg(c, dir, dx, dy, size) {
+  const img = CE_SIT_IMGS[/_A$/.test(ceFolder()) ? 'A' : 'B'];
+  if (!ceReady(img)) return;
+  const k = size / 64, w = img.naturalWidth * k, h = img.naturalHeight * k, x = dx + (size - w) / 2, y = dy + size - h;
+  c.save(); c.imageSmoothingEnabled = false;
+  if (dir === 'sitRight') { c.translate(x + w, 0); c.scale(-1, 1); c.drawImage(img, 0, y, w, h); }
+  else c.drawImage(img, x, y, w, h);
+  c.restore();
+}
 function drawFigure(c, dir, frame, dx, dy, size, highlight) {
+  if (COSTUME_POSES[dir]) frame = 0;   // 坐下只有一張圖
   const set = ceSet(ceFolder()), img = set[dir] && set[dir][frame], acc = curAcc();
   let box = null;
   const one = (a, layer) => {
@@ -190,7 +209,8 @@ function drawFigure(c, dir, frame, dx, dy, size, highlight) {
     return r;
   };
   for (const a of wornAccs()) one(a, 'behind');
-  if (ceReady(img)) { c.imageSmoothingEnabled = false; c.drawImage(img, dx, dy, size, size); }
+  if (COSTUME_POSES[dir]) drawSitImg(c, dir, dx, dy, size);
+  else if (ceReady(img)) { c.imageSmoothingEnabled = false; c.drawImage(img, dx, dy, size, size); }
   for (const a of wornAccs()) one(a, 'front');
   return box;
 }
@@ -216,13 +236,20 @@ function drawStage() {
   c.restore();   // 整體預覽縮放結束
 }
 const strip = document.getElementById('strip');
-const stripCanvases = CE_DIRS.map(d => {
-  const cv = document.createElement('canvas'); cv.width = cv.height = 128; cv.title = CE_DIR_NAMES[d];
-  cv.addEventListener('click', () => setDir(d)); strip.appendChild(cv); return cv;
-});
+let stripCanvases = [], stripDirs = [];
+function buildStrip() {   // 下面的小圖：每個方向一張（球球多兩張坐下）
+  const dirs = ceDirs();
+  if (dirs.join() === stripDirs.join()) return;
+  stripDirs = dirs; strip.innerHTML = '';
+  stripCanvases = dirs.map(d => {
+    const cv = document.createElement('canvas'); cv.width = cv.height = 128; cv.title = CE_DIR_NAMES[d];
+    cv.addEventListener('click', () => setDir(d)); strip.appendChild(cv); return cv;
+  });
+}
+buildStrip();
 function drawStrip() {
   const frame = [1, 0, 2, 0][Math.floor((performance.now() - ED.t0) / 160) % 4];
-  CE_DIRS.forEach((d, i) => {
+  stripDirs.forEach((d, i) => {
     const cv = stripCanvases[i], c = cv.getContext('2d');
     c.clearRect(0, 0, 128, 128); cv.classList.toggle('on', d === ED.dir);
     drawFigure(c, d, frame, 0, 0, 128, false);
@@ -265,7 +292,9 @@ function renderSkins() {
   $('skinSel').innerHTML = ceSkins(ED.char).map(s => '<option value="' + s.folder + '"' + (s.folder === ceFolder() ? ' selected' : '') + '>' + esc(s.name) + '</option>').join('');
 }
 function renderBars() {
-  $('dirBar').innerHTML = CE_DIRS.map((d, i) => '<button type="button" data-dir="' + d + '" class="' + (d === ED.dir ? 'on' : '') + '" title="快捷鍵 ' + (i + 1) + '">' + CE_DIR_NAMES[d] + '</button>').join('');
+  if (!ceDirs().includes(ED.dir)) ED.dir = COSTUME_POSES[ED.dir] ? COSTUME_POSES[ED.dir].stand : 'front';   // 換到沒有坐下的角色
+  buildStrip();
+  $('dirBar').innerHTML = ceDirs().map((d, i) => '<button type="button" data-dir="' + d + '" class="' + (d === ED.dir ? 'on' : '') + '" title="快捷鍵 ' + (i + 1) + '">' + CE_DIR_NAMES[d] + '</button>').join('');
   $('frameBar').innerHTML = CE_FRAME_NAMES.map((n, i) => '<button type="button" data-frame="' + i + '" class="' + (!ED.play && i === ED.frame ? 'on' : '') + '">' + n + '</button>').join('')
     + '<button type="button" data-play class="' + (ED.play ? 'on' : '') + '" title="走路動畫（空白鍵）">▶</button>';
   renderSkins();
@@ -292,7 +321,8 @@ function renderPanel() {
   $('scopeAnchorName').textContent = '所有' + slotShort(acc.slot) + '預設';
   document.querySelectorAll('input[name=scope]').forEach(r => { r.checked = r.value === ED.scope; });
   const info = accPlacementInfo(acc, ED.char, ED.dir);
-  const fromText = { item: '「' + acc.name + '」的專屬位置', anchor: ch.name + '的' + SLOT_NAME[acc.slot] + '預設位置', slot: '欄位的通用位置（還沒替' + ch.name + '調過）' }[info.from];
+  const fromText = { item: '「' + acc.name + '」的專屬位置', anchor: ch.name + '的' + SLOT_NAME[acc.slot] + '預設位置', slot: '欄位的通用位置（還沒替' + ch.name + '調過）',
+    mirror: '坐下（左）左右對稱過來的位置（還沒調過坐下（右））', stand: '站著時' + CE_DIR_NAMES[(COSTUME_POSES[ED.dir] || {}).stand] + '的位置稍微往上（還沒調過坐下）' }[info.from];
   let note = '遊戲裡用：<b>' + fromText + '</b>';
   if (ED.scope === 'anchor' && info.from === 'item') note += '<br>⚠ 這個方向有專屬位置，遊戲會用專屬位置。';
   if (ED.scope === 'item' && info.from !== 'item') note += '<br>動一下就變成專屬位置。';
@@ -302,8 +332,8 @@ function renderPanel() {
   set('fx', pl.x ?? ''); set('fy', pl.y ?? ''); set('fscale', pl.scale || 1); set('frot', pl.rot || 0);
   renderLayer(acc);
   $('fbehind').checked = !!pl.behind; $('fhidden').checked = !!pl.hidden; $('fflip').checked = !!pl.flip;
-  const side = ED.dir === 'left' || ED.dir === 'right';
-  $('mirror').textContent = side ? (ED.dir === 'right' ? '⇋ 鏡射到左側' : '⇋ 鏡射到右側') : '⇋ 左右對調';
+  const side = !!CE_MIRROR[ED.dir];
+  $('mirror').textContent = side ? '⇋ 鏡射到' + CE_DIR_NAMES[CE_MIRROR[ED.dir]] : '⇋ 左右對調';
   $('mirror').title = side ? '把這一側的位置對稱複製到另一側（X 左右對稱、旋轉相反）' : '把配件移到臉的另一邊：X 左右對稱、旋轉相反、圖片翻面';
   const m = scopeMap(false);
   $('clearDir').disabled = !(m && m[ED.dir]); $('clearChar').disabled = !m; $('copyChars').disabled = !m;
@@ -476,8 +506,8 @@ $('aaCancel').addEventListener('click', () => $('addAccDlg').close());
 $('aaDelete').addEventListener('click', aaDelete);
 $('mirror').addEventListener('click', () => {
   const src = effective();
-  if (ED.dir === 'left' || ED.dir === 'right') {   // 側面：對稱複製到另一側（右側的圖本來就會自動翻面）
-    const other = ED.dir === 'left' ? 'right' : 'left';
+  if (CE_MIRROR[ED.dir]) {   // 側面（含坐下）：對稱複製到另一側（右側的圖本來就會自動翻面）
+    const other = CE_MIRROR[ED.dir];
     edit(p => { Object.assign(p, src, { x: 64 - src.x, rot: src.rot ? -src.rot : 0 }); }, other);
     status('已把' + CE_DIR_NAMES[ED.dir] + '鏡射到' + CE_DIR_NAMES[other] + '。');
   } else {   // 正面、背面：在同一個方向換到另一邊，圖片也翻面
@@ -487,8 +517,8 @@ $('mirror').addEventListener('click', () => {
 });
 $('copyAllDirs').addEventListener('click', () => {
   const src = effective();
-  for (const d of CE_DIRS) if (d !== ED.dir) edit(p => { p.scale = src.scale || 1; p.rot = src.rot || 0; }, d);
-  status('已把縮放、旋轉複製到其他三個方向。');
+  for (const d of ceDirs()) if (d !== ED.dir) edit(p => { p.scale = src.scale || 1; p.rot = src.rot || 0; }, d);
+  status('已把縮放、旋轉複製到其他' + (ceDirs().length - 1) + '個方向。');
 });
 $('accSearch').addEventListener('input', e => { ED.search = e.target.value; renderLists(); });
 // 右邊折疊區塊：開合記在這台瀏覽器
@@ -518,6 +548,8 @@ $('copyChars').addEventListener('click', () => {
     const copy = JSON.parse(JSON.stringify(m));
     const off = costumeCharOffset(ch.id), dx = off.x - srcOff.x, dy = off.y - srcOff.y;   // 身高偏移的差：矮的角色自動往下
     for (const d of Object.keys(copy)) { const p = copy[d]; if (!p) continue; if (typeof p.x === 'number') p.x += dx; if (typeof p.y === 'number') p.y += dy; }
+    const keep = (ED.scope === 'item' ? (COSTUME_PLACEMENT.items[acc.id] || {})[ch.id] : (COSTUME_PLACEMENT.anchors[ch.id] || {})[acc.slot]) || {};
+    for (const d of Object.keys(COSTUME_POSES)) { delete copy[d]; if (keep[d]) copy[d] = keep[d]; }   // 坐下這種特別姿勢不複製（別的角色沒有），對方自己調好的坐下保留
     if (ED.scope === 'item') (COSTUME_PLACEMENT.items[acc.id] = COSTUME_PLACEMENT.items[acc.id] || {})[ch.id] = copy;
     else (COSTUME_PLACEMENT.anchors[ch.id] = COSTUME_PLACEMENT.anchors[ch.id] || {})[acc.slot] = copy;
   }
@@ -563,7 +595,7 @@ document.addEventListener('keydown', e => {
   else if (e.key === 'e' || e.key === 'E') edit(p => { p.rot = (p.rot || 0) + (e.shiftKey ? 1 : 5); });
   else if (e.key === '+' || e.key === '=') edit(p => { p.scale = (p.scale || 1) + 0.05; });
   else if (e.key === '-' || e.key === '_') edit(p => { p.scale = (p.scale || 1) - 0.05; });
-  else if (/^[1-4]$/.test(e.key)) setDir(CE_DIRS[Number(e.key) - 1]);
+  else if (/^[1-9]$/.test(e.key) && ceDirs()[Number(e.key) - 1]) setDir(ceDirs()[Number(e.key) - 1]);
   else if (e.key === ' ') { e.preventDefault(); ED.play = !ED.play; ED.t0 = performance.now(); renderBars(); }
 });
 

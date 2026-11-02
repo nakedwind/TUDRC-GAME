@@ -33,6 +33,10 @@ const UI_ELEMENTS = [
       P('stack', '槍圖的範圍', '#ammoHud .gun-stack', ['w', 'h']),
       P('count', '子彈數字', '#ammoHud .ammo-text', ['font']),
       P('name', '武器名稱', '#ammoHud .ammo-text .weapon-name', ['font']) ] },
+  { key: 'baseMinimap',   group: '畫面下方', label: '小地圖（基地）',   sel: '#baseMinimap',             origin: 'right bottom', parts: [
+      P('title', '標題（樓層・房間）', '#baseMinimap .bmap-title', ['font']),
+      P('btn', '右上的按鈕', '#baseMinimap button', ['w', 'h', 'radius']) ] },
+  { key: 'baseMinimapShow', group: '畫面下方', label: '小地圖收起後的按鈕', sel: '#baseMinimapShow',      origin: 'right bottom', parts: [P('self', '按鈕', '#baseMinimapShow', ['w', 'h', 'radius'])] },
   { key: 'hud',           group: '下方資訊條', label: '整條資訊條',     sel: '#hud',                     origin: 'center', parts: [P('self', '資訊條', '#hud', ['h', 'radius'])] },
   { key: 'hudPlayer',     group: '下方資訊條', label: '溫特頭像與 HP／SP', sel: '#hud .hud-player',       origin: 'left center', parts: [
       P('self', '整塊', '#hud .hud-player', ['w']),
