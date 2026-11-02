@@ -3,7 +3,7 @@
    ・隊員（哨兵、嚮導）脫離戰鬥 CAMP_BED.calm 秒、而且 HP 低於 CAMP_BED.below（50%）：自己走回營地，躺上空的行軍床。
      躺 CAMP_BED.rest 秒，每秒回 CAMP_BED.regen HP；時間到自動下床，在床邊「原地巡邏」。
      躺滿起床後 CAMP_BED.cooldown 秒內不會再去躺（就算 HP 還是不到一半）；躺到一半被打斷的不算。
-     走過去的路上、躺著的時候被打：馬上起來應戰。
+     走過去的路上、躺著的時候被打：馬上起來應戰。走過去的路上 HP 被補到 CAMP_BED.healedStop（60%）以上：不去躺了。
    ・溫特自己躺（靠近行軍床按 Space）：身為主管正大光明睡覺不可取，每 2 秒只回 1 HP（CAMP_BED.winterRegen），一樣躺 10 秒自動起來。
    ・「脫離戰鬥」＝沒被打、沒在攻擊（附近有怪物但沒在打他、他也沒在打怪，一樣算）。
    必須在 js/game.js 之前載入（game.js 的 update 會呼叫這裡）。
@@ -12,6 +12,7 @@ const CAMP_BED = {
   ids: ['tile_field_camp_bed', 'tile_field_camp_bed_v', 'tile_poolcore_camp_bed', 'tile_poolcore_camp_bed_v'],   // 哪些素材算行軍床（池核版也算；壞掉的不能躺）
   calm: 5,              // 脫離戰鬥幾秒後才去躺
   below: .5,            // HP 低於最大值的幾成才去躺
+  healedStop: .6,       // 走回去的路上被補血到最大值的幾成以上：不去躺了（已經躺下的照樣躺完）
   rest: 10,             // 躺幾秒
   regen: 2,             // 隊員：每秒回幾 HP
   winterRegen: .5,      // 溫特：每秒回幾 HP（2 秒 1 HP）
@@ -44,7 +45,7 @@ function updateCampBeds(dt) {
     if (t.eatenBy || t.rootT > 0 || t.sleepT > 0 || t.dazeT > 0 || t.grabbed || t.grabFall || t.frozenT > 0 || t.berserk || t.mode === 'goto') continue;   // 玩家剛下的「前往」指令先照做
     const seat = beds.find(s => !seatTaken(s, t)), approach = seat && seatApproachPoint(seat);
     if (!approach) continue;
-    t.cot = { seat, approach, phase: 'walk', t: 0 }; t.seatGoal = { seat, approach };   // seatGoal：先佔住這張床，別人不會搶
+    t.cot = { seat, approach, phase: 'walk', t: 0 }; t.seatGoal = { seat, approach };   // seatGoal：先佔住這張床，別人不會搶（指令 t.mode 不動：半路補好血就照原本的繼續）
     t.target = null; t.navPath = null; t.navGoal = null;
     sentryStatus(t, '回營地行軍床休息', '#9fd3ff');
   }
@@ -68,6 +69,10 @@ function campBedStep(t, dt) {
   if (MAP_SAFE || t.hp <= 0 || t.berserk || t.eatenBy || t.grabbed || t.grabFall || t.sleepT > 0 || t.rootT > 0) return stop();
   if (c.phase === 'walk') {
     if (t.hitT > 0) return stop('被攻擊了，先應戰');
+    if (t.hp >= t.maxhp * CAMP_BED.healedStop) {   // 路上被嚮導、治療彈、補給補到 60% 以上：不去躺，照原本的指令（例如跟隨護衛部隊長）繼續
+      t.target = null; t.navPath = null; t.navGoal = null;   // 丟掉往床那邊的路線，重新找路（不然會沿著舊路線繼續往床走）
+      return stop('不用休息了');
+    }
     c.t += dt;
     const arrived = moveSentryWithPath(t, c.approach.x, c.approach.y, (TYPES[t.type].walkSpeed || 80) * CAMP_BED.walkSpeed, dt);
     if (t.navFailed || c.t > 25) return stop('', CAMP_BED.retry);   // 走不到：過一下再試
