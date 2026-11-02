@@ -13655,7 +13655,8 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "object",
         "fx": false,
-        "ox": 24
+        "ox": 24,
+        "sortDepth": 0
       },
       {
         "id": "tile_containment_wall_top_straight",
