@@ -221,10 +221,10 @@ function initMap() {
   if (MAP.cols) COLS = MAP.cols;
   if (MAP.rows) ROWS = MAP.rows;
 
-  // 短而寬的地圖以高度填滿畫面，左右由鏡頭跟隨玩家捲動；小房間仍等比例完整置中。
+  // 小房間等比例完整置中；比畫面大的地圖（不論寬或高）一律 1 倍再乘 VIEW_ZOOM，鏡頭跟著玩家捲動。
+  // （以前「短而寬的地圖以高度填滿畫面」會讓 3F／4F 走廊比 2F 大一圈，已拿掉：人物大小在每層樓都一樣）
   const fitWidth = VIEW_W / (COLS * CELL), fitHeight = VIEW_H / (ROWS * CELL);
   VIEW_SCALE = Math.max(1, Math.min(fitWidth, fitHeight));
-  if (fitWidth < 1 && fitHeight > 1) VIEW_SCALE = fitHeight;
   // 大於畫面、需要捲動的大型地圖再放大 VIEW_ZOOM 倍；
   // 塞得進畫面的房間至少也放大 VIEW_ZOOM 倍（人物大小跟大地圖一致），本來就放得更大的小房間照樣填滿畫面
   if (fitWidth < 1 || fitHeight < 1) VIEW_SCALE *= VIEW_ZOOM;

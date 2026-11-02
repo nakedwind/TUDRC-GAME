@@ -11584,7 +11584,6 @@ const BASE_MAPS = [
         "16,8": "tile_containment_floor_tile",
         "16,9": "tile_containment_floor_tile",
         "17,2": "tile_containment_floor_tile",
-        "17,3": "tile_containment_floor_tile",
         "17,4": "tile_containment_floor_tile",
         "17,5": "tile_containment_floor_tile",
         "17,6": "tile_containment_floor_tile",
@@ -11730,7 +11729,6 @@ const BASE_MAPS = [
       "ground2": {},
       "ground3": {},
       "object": {
-        "18,1": "tile_eoc_security_camera",
         "23,5": "tile_eoc_security_camera"
       },
       "object2": {},
@@ -11740,7 +11738,6 @@ const BASE_MAPS = [
         "15,6": "tile_eoc_floor_sign_b3"
       },
       "top": {
-        "19,1": "tile_containment_wall_top_straight",
         "0,5": "tile_containment_wall_top_straight",
         "0,6": "tile_containment_wall_top_straight",
         "0,7": "tile_containment_wall_top_straight",
@@ -12080,6 +12077,22 @@ const BASE_MAPS = [
         "layer": "top",
         "ox": 0,
         "oy": 2
+      },
+      {
+        "id": "tile_containment_floor_tile",
+        "c": 17,
+        "r": 3,
+        "layer": "floor",
+        "ox": 0,
+        "oy": 0
+      },
+      {
+        "id": "tile_eoc_security_camera",
+        "c": 16,
+        "r": 1,
+        "layer": "object",
+        "fx": true,
+        "ox": 30
       }
     ],
     "solid": [
@@ -12172,12 +12185,12 @@ const BASE_MAPS = [
       },
       {
         "c": 19,
-        "r": 1,
+        "r": 2,
         "to": "map_mvfpx57b"
       },
       {
         "c": 19,
-        "r": 2,
+        "r": 1,
         "to": "map_mvfpx57b"
       }
     ],
@@ -13557,7 +13570,6 @@ const BASE_MAPS = [
       },
       "object4": {},
       "overlay": {
-        "16,19": "tile_field_ammo_crate",
         "27,18": "tile_eoc_floor_sign_b1"
       },
       "top": {
@@ -14017,6 +14029,14 @@ const BASE_MAPS = [
         "c": 4,
         "r": 0,
         "layer": "ground"
+      },
+      {
+        "id": "tile_field_ammo_crate_open",
+        "c": 16,
+        "r": 18,
+        "layer": "overlay",
+        "ox": -4,
+        "oy": 0
       }
     ],
     "solid": [

@@ -45,8 +45,10 @@ function costumeProbe(folder) {
   if (folder in costumeHas) return costumeHas[folder];
   costumeHas[folder] = undefined;
   const img = new Image(), base = costumeBase(folder), letter = folder.slice(-1);
-  img.onload = () => { costumeHas[folder] = true; if (wardrobeOpen) renderWardrobe(); };
-  img.onerror = () => { costumeHas[folder] = false; if (wardrobeOpen) renderWardrobe(); };
+  // 查到了：衣櫃重畫；遊戲裡的角色也重新挑一次圖（還沒查到時先穿原本那套，見 costumeSkinSet）
+  const done = ok => { costumeHas[folder] = ok; if (wardrobeOpen) renderWardrobe(); if (typeof applyOutfits === 'function') applyOutfits(); };
+  img.onload = () => done(true);
+  img.onerror = () => done(false);
   img.src = `images/character/${folder}/${base}${letter}_0000_Front.png`;
   return undefined;
 }
@@ -56,7 +58,8 @@ const COSTUME_WEAR_NAMES = { base: '應變中心限定', battle: '出勤限定' 
 // 這個角色可以穿的 skin：內建 A、B（有圖的）＋擁有的專屬 skin
 function costumeSkinsFor(id) {
   const base = costumeBase(costumeFolderOf(id)), list = [];
-  for (const k of ['A', 'B']) if (costumeProbe(base + '_' + k) !== false) list.push({ id: k, name: COSTUME_DEFAULT_SKINS[k], folder: base + '_' + k, builtin: true });
+  // 確定有圖才列出來（還在查的，查到後衣櫃會自己重畫）
+  for (const k of ['A', 'B']) if (costumeProbe(base + '_' + k) === true) list.push({ id: k, name: COSTUME_DEFAULT_SKINS[k], folder: base + '_' + k, builtin: true });
   for (const s of COSTUME_SKINS) if (s.char === id && costumeCanWear(id, s.id)) list.push(s);
   return list;
 }
@@ -67,7 +70,9 @@ function costumeSkinSet(id, folder, skinId) {
   const rec = outfitRecord(folder), base = costumeBase(folder);
   let set;
   if (skinId === 'A' || skinId === 'B') {
-    if (costumeHas[base + '_' + skinId] === false) return null;
+    // 這套有沒有圖要先確定：沒有（例如柯林只有 B）或還在查，都先穿原本那套。
+    // 以前還沒查過就直接載入，圖不存在時角色會變成一塊有顏色的方塊（js/render.js 畫不出角色圖時的備用）
+    if (costumeProbe(base + '_' + skinId) !== true) return typeof outfitSet === 'function' ? outfitSet(folder) : null;
     set = rec[skinId] || (rec[skinId] = loadCharacterSprites(base + '_' + skinId));
   } else {
     const skin = SKIN_BY_ID[skinId]; if (!skin) return null;

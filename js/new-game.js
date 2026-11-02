@@ -12,6 +12,7 @@
     'tudrc_graffiti_v1',   // 牆上、地上的塗鴉（js/graffiti.js）
     'tudrc_camp_supply_v1',
     'tudrc_cabinets_v1',   // 收納櫃裡放的東西（js/storage-cabinet.js）
+    'tudrc_meal_buff_v1',   // 餐廳的飯後加成（js/meal.js）
     'tudrc_camp_ammo_v1',   // 營地彈藥箱（js/camp-supply.js）
     'tudrc_vending_stock_v1',   // 2F應變中心販賣機的庫存（js/shop.js 的 EOC_VENDING）   // 各地圖營地物資箱的數量（js/camp-supply.js）
     'tudrc_mrt_unlocked_v1',   // 已經解封的捷運入口（js/mrt-locks.js）

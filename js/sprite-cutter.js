@@ -21,6 +21,7 @@ function say(msg, err = false) { statusEl.textContent = msg; statusEl.classList.
 // ---- ① 角色與造型 ----
 const chars = Object.values(typeof CHARACTERS !== 'undefined' ? CHARACTERS : {}).filter(c => c && c.id);
 let charId = '', letter = 'B', sheet = null, sheetName = '';
+let letterPicked = false;   // 自己點過造型字母：之後再點角色也不會被換回「它現在用的那套」
 const folder = () => charId + '_' + letter;
 const prefix = () => charId + letter + '_';
 const facePath = c => { const f = String(c.sprite || ''); return f ? 'images/character/' + f + '/' + f.replace('_', '') + '_0000_Front.png' : ''; };
@@ -33,7 +34,8 @@ $('charList').addEventListener('click', e => {
   const b = e.target.closest('[data-id]'); if (!b) return;
   const c = chars.find(x => x.id === b.dataset.id);
   charId = c.id; $('charId').value = charId;
-  const m = /_([A-Z])$/.exec(c.sprite || ''); if (m) letter = m[1];   // 預設選它現在用的那套造型
+  // 預設選它現在用的那套造型（例如柯林＝B）；但已經自己選過造型就不換，不然選了 A 再點角色會被偷偷換回 B、存到 B 的資料夾
+  const m = /_([A-Z])$/.exec(c.sprite || ''); if (m && !letterPicked) letter = m[1];
   refreshTarget();
 });
 $('charId').addEventListener('input', () => { charId = $('charId').value.trim().toLowerCase().replace(/[^a-z0-9]/g, ''); refreshTarget(); });
@@ -42,7 +44,7 @@ function renderLetters() {
   const n = (LETTERS.find(x => x[0] === letter) || [])[1];
   $('letterNote').textContent = n ? letter + '＝' + n + (letter === 'A' ? '（在基地裡穿）' : letter === 'B' ? '（在戰鬥區域穿）' : '（到哪都穿這套）') : '';
 }
-$('letters').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (!b) return; letter = b.dataset.l; refreshTarget(); });
+$('letters').addEventListener('click', e => { const b = e.target.closest('[data-l]'); if (!b) return; letter = b.dataset.l; letterPicked = true; refreshTarget(); });
 function refreshTarget() {
   renderChars(); renderLetters();
   $('folderPath').textContent = charId ? 'images/character/' + folder() + '/' + prefix() + '0000_Front.png …（共 15 張）' : '先選一個角色，或在上面填新角色的代號';
@@ -126,6 +128,9 @@ function frameBlob(col, row) {
 async function writeBlob(dir, name, blob) { const w = await (await dir.getFileHandle(name, { create: true })).createWritable(); await w.write(blob); await w.close(); }
 async function save(pickAgain) {
   if (!sheet || !sheet.ok || !charId) return;
+  // 存之前再確認一次要存到哪一套（資料夾裡原本有圖就是覆蓋）：避免選錯造型字母把另一套蓋掉
+  const letterName = (LETTERS.find(x => x[0] === letter) || [])[1] || '';
+  if (!confirm('要存到「' + charId + ' 的 ' + letter + '（' + letterName + '）」嗎？\n\nimages/character/' + folder() + '/\n\n資料夾裡原本的圖會先備份再覆蓋。')) { say('已取消：沒有存檔'); return; }
   $('save').disabled = true;
   try {
     const root = await ProjectSave.projectDir(pickAgain, m => say(m));

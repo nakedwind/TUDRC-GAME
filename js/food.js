@@ -76,7 +76,7 @@ function addFoodBuff(kind, val, dur) {
   const B = (G.foodBuffs = G.foodBuffs || {}), b = B[kind];
   B[kind] = { val: b ? Math.max(b.val, val) : val, t: Math.max(b ? b.t : 0, dur), t0: dur };
 }
-const foodBuff = kind => { const b = G && G.foodBuffs && G.foodBuffs[kind]; return b && b.t > 0 ? b.val : 0; };
+const foodBuff = kind => { const b = G && G.foodBuffs && G.foodBuffs[kind]; return (b && b.t > 0 ? b.val : 0) + (typeof mealBuffVal === 'function' ? mealBuffVal(kind) : 0); };   // ＋餐廳的飯後加成（js/meal.js）
 const foodGuardMul = () => 1 - foodBuff('guard');   // 溫特受到的傷害（js/equipment.js 的 equipPlayerDamage）
 const foodRateMul = () => 1 + foodBuff('rate');     // 手槍射速（js/game.js）
 const foodSpeedMul = () => (1 + foodBuff('speed')) * (1 - foodBuff('sick'));   // 移動速度（js/equipment.js 的 equipSpeedMul）

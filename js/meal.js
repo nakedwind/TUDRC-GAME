@@ -17,10 +17,34 @@ const MEAL = {
   trayOnTable: { back: [0, -40], front: [0, 34], right: [28, -8], left: [-28, -8] },     // 坐下時餐盤放在哪（從座位往哪邊移，依坐的方向）
   trayArt: { file: 'images/餐廳/restaurant-tray-stack.png', crop: [2, 35, 36, 24], slots: [[6, 39, 8, 6], [19, 39, 15, 6], [6, 48, 17, 9], [28, 48, 6, 9]] },   // 餐盤：截餐盤架最上面那一個（圖片像素：左、上、寬、高）；四格＝左上小格、右上長格、左下長格、右下小格
   carryY: 4,           // 拿在手上時餐盤的高度（從角色的 y 往下幾 px；角色圖是 y-46～y+18，頭很大，胸前大約在 y+4）
+  takeLine: '有吃飯，才有力氣工作。',   // 拿起餐盤時溫特說的話
+  fullLine: '感覺現在活力充沛。',       // 吃完後溫特頭上的泡泡（「吃飽了！」消失才出現）
+  fullFlash: 1.2,      // 「吃飽了！」停留幾秒
   maxDishes: 4,
   eatTime: 4,          // 幾秒吃完（每秒少 1/4）
   npc: { chance: .6, firstCd: [3, 15], cooldown: [60, 150], stop: .6, dishes: [2, 4], linger: [2, 5] },   // NPC：去吃的機率、第一次／之後多久才會再吃（秒）、每站停幾秒、裝幾樣、吃完再坐幾秒
 };
+// ---- 打飯台上的菜：名稱、吃了有什麼加成（⚠️ 2026-11-02 Claude 擬的，等使用者確認）----
+// 每台三盤，順序＝圖上由左到右。加成：guard 減傷、rate 射速、speed 移速（小數，.05＝5%）；一盤裡的菜加起來就是這一餐的加成
+const MEAL_DISHES = {
+  tile_restaurant_buffet_counter_01: [
+    { name: '滷肉丸', eff: { guard: .06 } },
+    { name: '炒青菜', eff: { speed: .04 } },
+    { name: '三色豆', eff: { speed: .05 } },
+  ],
+  tile_restaurant_buffet_counter_02: [
+    { name: '咖哩', eff: { rate: .06 } },
+    { name: '白飯', eff: { guard: .04 } },
+    { name: '例湯', eff: { guard: .03, speed: .02 } },
+  ],
+  tile_musg7iyr: [
+    { name: '饅頭', eff: { guard: .04 } },
+    { name: '烤地瓜', eff: { speed: .03, rate: .02 } },
+    { name: '炸雞腿', eff: { rate: .08 } },
+  ],
+};
+const MEAL_EFF = { guard: { name: '減傷', color: '#ffd27a' }, rate: { name: '射速', color: '#ffe066' }, speed: { name: '移速', color: '#9ff0c0' } };
+const dishOf = key => { const [id, k] = String(key || '').split('#'); return (MEAL_DISHES[id] || [])[+k] || null; };
 const mealImgs = {};
 function mealImg(src) { if (!mealImgs[src]) { mealImgs[src] = new Image(); mealImgs[src].src = src; } return mealImgs[src]; }
 const mealTrays = () => G.mealTrays || (G.mealTrays = []);   // 桌上的餐盤（G 換地圖就重建：沒收的髒盤自己消失）
@@ -57,7 +81,7 @@ const newTray = () => ({ foods: [], left: 1, dirty: false });
 // ---- 溫特 ----
 function placeTrayAt(seat, tray, owner) {
   const pos = trayPosForSeat(seat); if (!pos || trayAtSeat(seat)) return false;
-  mealTrays().push({ ...tray, ...pos, seatKey: seat.key, owner, eatT: tray.eatT || 0, eating: false, turn: seat.dir === 'left' || seat.dir === 'right' });   // 側面的椅子：餐盤順時針轉 90 度（不然橫的餐盤會擋到臉）
+  mealTrays().push({ ...tray, ...pos, seatKey: seat.key, owner, eatT: tray.eatT || 0, eating: false, turn: seat.dir === 'left' || seat.dir === 'right', flip: seat.dir === 'front' });   // 面向鏡頭坐的（桌子另一邊）：餐盤上下翻轉，格子的順序才對   // 側面的椅子：餐盤順時針轉 90 度（不然橫的餐盤會擋到臉）
   return true;
 }
 function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼（畫提示用）：回傳 { label, x, y, run }
@@ -87,20 +111,21 @@ function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼
   const mine = mealTrays().filter(t => t.owner === 'player').find(t => Math.hypot(t.x - p.x, t.y - p.y) < 80);   // 起身後站的位置離桌上的餐盤大約一格多
   if (mine) return { label: mine.dirty ? '收髒盤' : '拿起餐盤', x: mine.x, y: mine.y - 22, run: () => { mealTrays().splice(mealTrays().indexOf(mine), 1); p.tray = { foods: mine.foods, left: mine.left, dirty: mine.dirty, eatT: mine.eatT }; sfx('switch'); } };
   const stack = mealNear(MEAL.trayTiles, p.x, p.y, MEAL.trayReach);
-  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); } };
+  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof winterSay === 'function') winterSay(MEAL.takeLine); } };
   return null;
 }
 const mealPrompt = () => mealPlayerAction(true);
 function useMealNearPlayer() { const a = mealPlayerAction(); if (!a) return false; a.run(); return true; }
 // ---- 吃：每秒少 1/4 ----
 function updateMeal(dt) {
+  if (G && G.player && G.player.mealSay) G.player.mealSay.t += dt;   // 泡泡跟「吃飽了！」一樣用遊戲時間算：它消失了泡泡才出來
   if (!G || !G.mealTrays) return;
   for (const t of G.mealTrays) {
     if (!t.eating || t.dirty) continue;
     const before = Math.floor(t.eatT); t.eatT += dt;
     if (Math.floor(t.eatT) > before && typeof sfxAt === 'function') sfxAt('pop', t.x, t.y, .25, 'meal-bite');
     t.left = Math.max(0, 1 - Math.floor(t.eatT) / 4);
-    if (t.eatT >= MEAL.eatTime) { t.eating = false; t.dirty = true; t.left = 0; if (t.owner === 'player') flash('吃飽了！', t.x, t.y - 30, '#9ff0c0'); }
+    if (t.eatT >= MEAL.eatTime) { t.eating = false; t.dirty = true; t.left = 0; if (t.owner === 'player') { const p = G.player; flash('吃飽了！', p.x, p.y - 64, '#9ff0c0', MEAL.fullFlash, true); grantMealBuff(t.foods); } }   // 「吃飽了！」在溫特頭頂上方（不蓋到人）
   }
 }
 // ---- NPC：拿餐盤 → 裝 2～4 樣 → 找有桌子的空位坐下吃 → 再坐一下 → 起身把髒盤拿去回收 ----
@@ -183,12 +208,12 @@ function mealStep(a, dt, speed) {
   endMeal(a); return false;
 }
 // ---- 畫 ----
-function drawMealTray(ctx, x, y, tray, s = 1) {
+function drawMealTray(ctx, x, y, tray, s = 1, shadow = true) {
   const A = MEAL.trayArt, img = mealImg(A.file), [cx, cy, cw, ch] = A.crop, w = cw * s, h = ch * s, x0 = Math.round(x - w / 2), y0 = Math.round(y - h / 2);
   if (!img.complete || !img.naturalWidth) return;
   ctx.save();
   ctx.imageSmoothingEnabled = false;
-  ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(x, y0 + h, w / 2, 2.2 * s, 0, 0, Math.PI * 2); ctx.fill();   // 影子
+  if (shadow) { ctx.fillStyle = 'rgba(0,0,0,.22)'; ctx.beginPath(); ctx.ellipse(x, y0 + h, w / 2, 2.2 * s, 0, 0, Math.PI * 2); ctx.fill(); }   // 影子（上下翻轉的不畫，不然影子會跑到上面）
   ctx.drawImage(img, cx, cy, cw, ch, x0, y0, w, h);   // 餐盤架最上面那個餐盤
   // 外框補一圈：縮小畫的時候最左邊那一欄像素會被吃掉；最下面截到的是下一個餐盤的邊，也蓋掉
   ctx.fillStyle = '#1d2228'; const L = Math.max(1, Math.round(s));
@@ -212,8 +237,8 @@ function drawMealTray(ctx, x, y, tray, s = 1) {
 function mealSortables(list) {
   if (!G || !MAP_SAFE) return;
   for (const t of G.mealTrays || []) list.push({ y: t.sortY, draw: () => {
-    if (!t.turn) { drawMealTray(ctx, t.x, t.y, t, .9); return; }
-    ctx.save(); ctx.translate(t.x, t.y); ctx.rotate(Math.PI / 2); drawMealTray(ctx, 0, 0, t, .9); ctx.restore();
+    if (!t.turn && !t.flip) { drawMealTray(ctx, t.x, t.y, t, .9); return; }
+    ctx.save(); ctx.translate(t.x, t.y); if (t.turn) ctx.rotate(Math.PI / 2); else ctx.scale(1, -1); drawMealTray(ctx, 0, 0, t, .9, !t.flip); ctx.restore();
   } });
   // 拿在手上：胸前（往左、右走時偏到那一邊）；背對鏡頭時畫在身體後面（被身體擋住）
   const carry = (a, tray) => list.push({ y: a.y + (a.dir === 'back' ? 15 : 17.2), draw: () => drawMealTray(ctx, a.x + (a.dir === 'left' ? -9 : a.dir === 'right' ? 9 : 0), a.y + MEAL.carryY, tray, .75) });
@@ -222,7 +247,10 @@ function mealSortables(list) {
 }
 // 桌上餐盤正在被吃：上面冒一點熱氣
 function drawMealFx(ctx) {
-  const now = performance.now() / 1000;
+  const p = G && G.player, say = p && p.mealSay, ms = performance.now(), from = MEAL.fullFlash + .15;
+  if (say && say.t >= from && say.t < from + 3 && typeof queueTowerBubble === 'function') queueTowerBubble(p, p.x, p.y - 50, say.text);   // 溫特頭上的泡泡：跟隊員的對話泡泡一起畫在最上層（js/render.js 的 flushTowerBubbles）
+  else if (say && say.t >= from + 3) p.mealSay = null;
+  const now = ms / 1000;
   for (const t of (G && G.mealTrays) || []) {
     if (!t.eating) continue;
     for (let i = 0; i < 3; i++) {
@@ -232,3 +260,72 @@ function drawMealFx(ctx) {
     }
   }
 }
+
+// ============================================================
+//  飯後加成：溫特吃完一盤，裡面每道菜的加成加起來（MEAL_DISHES）
+//  ・從吃完開始，到「下一次出勤結束、回到基地」才消失（不是幾秒）：在基地慢慢整理裝備再出發也來得及；再吃一盤＝換成新的
+//  ・存在瀏覽器（tudrc_meal_buff_v1）；效果接到 js/food.js 的 foodBuff（減傷、射速、移速）
+//  ・HP／SP 條右邊的「↑↑BUFF」按鈕：有加成才出現，點了跳出這餐吃了什麼、加了多少
+// ============================================================
+const MEAL_BUFF_KEY = 'tudrc_meal_buff_v1';
+let mealBuff = null;   // { dishes: [{ name, eff, file, rect }], active（出勤中了沒） }
+try { mealBuff = JSON.parse(localStorage.getItem(MEAL_BUFF_KEY) || 'null'); } catch (_) { mealBuff = null; }
+const saveMealBuff = () => { try { if (mealBuff) localStorage.setItem(MEAL_BUFF_KEY, JSON.stringify(mealBuff)); else localStorage.removeItem(MEAL_BUFF_KEY); } catch (_) {} };
+function mealBuffTotal(buff = mealBuff) {
+  const sum = {};
+  for (const d of (buff && buff.dishes) || []) for (const k in d.eff || {}) sum[k] = (sum[k] || 0) + d.eff[k];
+  return sum;
+}
+const mealBuffVal = kind => mealBuff ? mealBuffTotal()[kind] || 0 : 0;   // js/food.js 的 foodBuff 加上這個
+function grantMealBuff(foods) {
+  const dishes = foods.map(f => { const d = dishOf(f.key); return d && { name: d.name, eff: d.eff, file: f.file, rect: f.rect }; }).filter(Boolean);
+  if (!dishes.length) return;
+  mealBuff = { dishes, active: false }; saveMealBuff(); renderMealBuffButton();
+  if (G && G.player) G.player.mealSay = { text: MEAL.fullLine, t: 0 };   // 「吃飽了！」消失之後，頭上才冒泡泡說一句（加成的數字看 BUFF 按鈕）
+}
+// 進入地圖時（js/game.js 的 begin 呼叫）：進戰鬥地圖＝開始用；出勤完回到基地＝用完了（劇情地圖是出勤途中，不算）
+function mealBuffOnMap() {
+  if (!mealBuff || window.TEST_MODE || (typeof MAP_STORY !== 'undefined' && MAP_STORY)) { renderMealBuffButton(); return; }
+  if (!MAP_SAFE && !mealBuff.active) { mealBuff.active = true; saveMealBuff(); }
+  else if (MAP_SAFE && mealBuff.active) { mealBuff = null; saveMealBuff(); setTimeout(() => { if (typeof systemNotice === 'function') systemNotice('飯後加成用完了，記得再去餐廳吃飯'); }, 1200); }
+  renderMealBuffButton();
+}
+// ---- HUD 按鈕＋說明小框 ----
+const MEAL_UP_ICON = '<svg class="meal-up-icon" viewBox="0 0 286 337" aria-hidden="true"><polygon points="0,96 143,0 286,96 286,205 143,111 0,205" fill="#7be495"/><polygon points="7,232 143,146 278,232 278,334 143,245 7,334" fill="#3fbf6a"/></svg>';   // 跟開發工坊「可升級」同一個綠色雙箭頭
+function renderMealBuffButton() {
+  const player = document.querySelector('#hud .hud-player'); if (!player) return;
+  let btn = document.getElementById('mealBuffBtn');
+  if (!btn) {
+    btn = document.createElement('button'); btn.id = 'mealBuffBtn'; btn.type = 'button'; btn.className = 'meal-buff-btn';
+    btn.innerHTML = MEAL_UP_ICON + '<span>BUFF</span>'; btn.title = '飯後加成（點一下看詳細）';
+    btn.addEventListener('click', e => { e.stopPropagation(); toggleMealBuffPanel(); });
+    player.after(btn);   // 排在溫特狀態的右邊（自己佔位置，旁邊的快捷欄會讓開，不會疊在上面）
+  }
+  btn.hidden = !mealBuff;
+  document.getElementById('hud')?.classList.toggle('has-meal-buff', !!mealBuff);
+  if (!mealBuff) closeMealBuffPanel();
+  else if (document.getElementById('mealBuffPanel')) fillMealBuffPanel();
+}
+function fillMealBuffPanel() {
+  const box = document.getElementById('mealBuffPanel'); if (!box || !mealBuff) return;
+  const pct = v => '+' + Math.round(v * 100) + '%';
+  const effHtml = eff => Object.keys(eff).map(k => '<span style="color:' + MEAL_EFF[k].color + '">' + MEAL_EFF[k].name + ' ' + pct(eff[k]) + '</span>').join('');
+  const thumb = d => { const [x, y, w, h] = d.rect || [0, 0, 0, 0]; return '<i class="mbp-thumb" style="background-image:url(\'' + encodeURI(d.file) + '\');background-position:-' + x + 'px -' + y + 'px;width:' + w + 'px;height:' + h + 'px"></i>'; };   // 菜的小圖：打飯台圖上那一盤
+  box.innerHTML = '<header><b>' + MEAL_UP_ICON + '飯後加成</b><small>' + (mealBuff.active ? '出勤中・回到基地就結束' : '有效到下一次出勤結束') + '</small></header>' +
+    '<ul>' + mealBuff.dishes.map(d => '<li>' + thumb(d) + '<b>' + d.name + '</b><em>' + effHtml(d.eff) + '</em></li>').join('') + '</ul>' +
+    '<footer><span>合計</span><em>' + effHtml(mealBuffTotal()) + '</em></footer>';
+}
+function toggleMealBuffPanel() {
+  if (document.getElementById('mealBuffPanel')) { closeMealBuffPanel(); return; }
+  const btn = document.getElementById('mealBuffBtn'); if (!btn || !mealBuff) return;
+  const box = document.createElement('div'); box.id = 'mealBuffPanel'; box.className = 'meal-buff-panel';
+  document.body.appendChild(box); fillMealBuffPanel();
+  const r = btn.getBoundingClientRect();   // 放在按鈕正上方
+  box.style.left = Math.max(8, Math.min(window.innerWidth - box.offsetWidth - 8, r.left + r.width / 2 - box.offsetWidth / 2)) + 'px';
+  box.style.top = Math.max(8, r.top - box.offsetHeight - 8) + 'px';
+  sfx('menu');
+}
+function closeMealBuffPanel() { document.getElementById('mealBuffPanel')?.remove(); }
+document.addEventListener('click', e => { if (!e.target.closest || !e.target.closest('#mealBuffPanel, #mealBuffBtn')) closeMealBuffPanel(); });   // 點別的地方就關掉
+window.addEventListener('keydown', e => { if (e.key === 'Escape' && document.getElementById('mealBuffPanel')) closeMealBuffPanel(); });
+renderMealBuffButton();

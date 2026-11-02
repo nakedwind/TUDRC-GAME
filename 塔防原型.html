@@ -19,9 +19,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>台北地下災害應變中心 — 塔防原型</title>
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
-<script src="js/new-game.js?v=cabinet-20261102"></script>
+<script src="js/new-game.js?v=mealbuff-20261102"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=wsalign-20261102">
+<link rel="stylesheet" href="css/style.css?v=mealbuff4-20261102">
 <link rel="stylesheet" href="css/tpad-map.css?v=radio-nav-20261028">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/squad-page.css?v=dogtree-20261029">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
@@ -297,7 +297,7 @@
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js?v=sync-20261021"></script>
   <script src="js/pathfinding.js?v=edgenudge-20261101"></script>  <!-- 5. 固定牆與怪物尋路 -->
-  <script src="js/maploader.js?v=zkmerge-20261101"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=samezoom-20261102"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=water-20261026"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/doors.js?v=archcut2-20261101"></script> <!-- 門：手動門／自動門 -->
   <script src="js/memory-doors.js?v=nopadlock-20261101"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
@@ -355,7 +355,7 @@
   <script src="data/costumes.js?v=money2-20261102"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=strawberry-20261026"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=autofill-20261024"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
-  <script src="js/costumes.js?v=cabinet-20261102"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
+  <script src="js/costumes.js?v=noblock-20261102"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
   <script src="js/gacha.js?v=gacha-once-20261027"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
   <script src="data/claw-machine.js?v=clawbanner-20261101"></script> <!-- 夾娃娃機設定：價錢、獎品、夾力、保夾 -->
   <script src="js/claw-machine.js?v=clawbanner-20261101"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
@@ -367,9 +367,9 @@
   <script src="js/escalators.js?v=escside-20261101"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
   <script src="js/rescue-dog.js?v=dogtree-20261029"></script>
   <script src="js/ground-items.js?v=followlight-20261102"></script>   <!-- 背包裡的東西放在地上、撿回來；嚮導撿、球球叼急救包和杏仁水 -->
-  <script src="js/food.js?v=drop30b-20261031"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
+  <script src="js/food.js?v=mealbuff-20261102"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/cooking.js?v=cooking-20261102"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
-  <script src="js/meal.js?v=meal8-20261102"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
+  <script src="js/meal.js?v=mealbuff6-20261102"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
   <script src="js/ball-poses.js?v=ball-bark-20261027"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
   <script src="js/missions.js?v=fundonce-20261102"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
@@ -393,7 +393,7 @@
   <script src="js/mrt-locks.js?v=pausebattle-20261101"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=quick10-20261022"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=meal-20261102"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=mealbuff3-20261102"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=custom2-20261028"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->

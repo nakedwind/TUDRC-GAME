@@ -936,7 +936,8 @@ const DIALOGUES = {
       ],
       "confusedHit": [
         "沒事的，等等就會清醒了。"
-      ]
+      ],
+      "brief_y25_entry": []
     },
     "chris": {
       "lowSp": [
