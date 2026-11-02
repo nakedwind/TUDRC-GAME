@@ -4849,5 +4849,37 @@ const SHARED_TILES = [
     "file": "images/捷運車站/mrt-room-wall-straight.png",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_mvzbgmzf",
+    "name": "Poolcore_wall_coner_L_up",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_wall_coner_L_up.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvzbmx47",
+    "name": "Poolcore_wall_coner_L_up",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_wall_coner_L_up.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvzbn4vv",
+    "name": "Poolcore_wall_coner_R_dwn",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_wall_coner_R_dwn.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mvzbna04",
+    "name": "Poolcore_wall_coner_R_up",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_wall_coner_R_up.png",
+    "w": 2,
+    "h": 2
   }
 ];
