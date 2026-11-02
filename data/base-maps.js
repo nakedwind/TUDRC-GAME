@@ -6824,7 +6824,9 @@ const BASE_MAPS = [
         "id": "tile_eoc_distance_poster",
         "c": 47,
         "r": 8,
-        "layer": "ground2"
+        "layer": "ground2",
+        "oy": 16,
+        "ox": 0
       },
       {
         "id": "tile_new_decor_exit_sign",
@@ -7029,7 +7031,9 @@ const BASE_MAPS = [
         "id": "tile_new_decor_poster",
         "c": 11,
         "r": 8,
-        "layer": "object"
+        "layer": "object",
+        "oy": 16,
+        "ox": 0
       },
       {
         "id": "tile_eoc_locker",
@@ -8539,8 +8543,7 @@ const BASE_MAPS = [
         "c": 7,
         "r": 10,
         "layer": "object2",
-        "ox": 0,
-        "oy": 6
+        "oy": 16
       },
       {
         "id": "tile_new_decor_plant03",
@@ -8823,11 +8826,11 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_poster",
-        "c": 14,
+        "c": 13,
         "r": 5,
         "layer": "object2",
-        "ox": -4,
-        "oy": 6
+        "ox": 36,
+        "oy": 16
       },
       {
         "id": "tile_new_bg_wall",
@@ -15875,7 +15878,9 @@ const BASE_MAPS = [
         "id": "tile_eoc_distance_poster",
         "c": 47,
         "r": 8,
-        "layer": "ground2"
+        "layer": "ground2",
+        "oy": 16,
+        "ox": 0
       },
       {
         "id": "tile_new_decor_exit_sign",
@@ -16082,7 +16087,7 @@ const BASE_MAPS = [
         "r": 8,
         "layer": "object",
         "ox": -8,
-        "oy": 6
+        "oy": 18
       },
       {
         "id": "tile_eoc_locker",
@@ -16429,7 +16434,7 @@ const BASE_MAPS = [
         "c": 31,
         "r": 8,
         "layer": "object2",
-        "oy": 6,
+        "oy": 12,
         "ox": 0
       },
       {
