@@ -703,6 +703,15 @@ window.addEventListener('keydown', e => {
   // 方向鍵：微調選取物件的位置（不貼齊格線；按住 Shift 一次移多一點）
   // 1×1 小圖原本存成「格子」，格子只有格座標、沒有像素位移 → 第一次微調時先轉成 1×1 大圖。
   // 碰撞微調：方向鍵移動選中紅格的擋路範圍（可以多選，選中的格子一起移；Shift 一次多移一點，Delete 歸零，Esc 取消選取）
+  if (!inField && brush.mode === 'portalnudge' && portalNudgeTarget(curMap())) {   // 出入口微調：方向鍵移動、[ ] 調範圍、Delete 重設、Esc 取消選取
+    const p = portalNudgeTarget(curMap()), step = e.shiftKey ? 10 : 1;
+    if (e.key === 'Escape') { e.preventDefault(); portalNudgeKey = null; draw(); setStatus('已取消選取', '#9aa4b2'); return; }
+    if (e.key === 'Delete' || e.key === 'Backspace') { e.preventDefault(); setPortalNudge(p, { ox: 0, oy: 0, radius: PORTAL_RADIUS_DEFAULT }); return; }
+    const move = { ArrowLeft: [-step, 0], ArrowRight: [step, 0], ArrowUp: [0, -step], ArrowDown: [0, step] }[e.key];
+    if (move) { e.preventDefault(); setPortalNudge(p, { ox: (p.ox || 0) + move[0], oy: (p.oy || 0) + move[1] }); return; }
+    const size = { '[': -step, '{': -step, ']': step, '}': step }[e.key];
+    if (size) { e.preventDefault(); setPortalNudge(p, { radius: (p.radius || PORTAL_RADIUS_DEFAULT) + size }); return; }
+  }
   if (!inField && brush.mode === 'solidnudge' && (solidNudgeCells.size || solidNudgeEdges.size)) {
     const m = curMap();
     for (const k of [...solidNudgeCells]) if (m.solid.indexOf(k) < 0) solidNudgeCells.delete(k);   // 回復（Ctrl+Z）後已經不是紅格的不算
@@ -993,6 +1002,63 @@ const capKingCaps = m => (m.capKing && m.capKing.caps) || [];
 // ================= 畫布繪製 =================
 let showGrid = true;    // 格線開關（可用工具列按鈕切換）
 let showSolid = false;       // 不可穿透紅格的顯示開關（只影響顯示，設定本身不變）；載入／重新整理時預設關著
+// ---- 🎯 出入口微調：點出入口選取，方向鍵移動位置、[ ] 調判定範圍（存在 portal 的 ox、oy、radius；沒調過就不寫，跟原本一樣）----
+const PORTAL_RADIUS_DEFAULT = 52;   // 遊戲預設的判定範圍（js/game.js 的 PORTAL_RADIUS）
+const PORTAL_NUDGE_LIMIT = 200;     // 位移最多幾像素
+let portalNudgeKey = null;          // 選中的出入口（'c,r'）
+const portalNudgeTarget = m => portalNudgeKey ? (m.portals || []).find(p => p.c + ',' + p.r === portalNudgeKey) || null : null;
+// 這一下點到哪個出入口：先看畫出來的位置（含微調），再看原本的格子
+function portalHitAt(m, c, r) {
+  const list = m.portals || [];
+  if (pointerPx) for (let i = list.length - 1; i >= 0; i--) {
+    const p = list[i], x = OX + p.c * CELL + (p.ox || 0), y = OY + p.r * CELL + (p.oy || 0);
+    if (pointerPx.x >= x && pointerPx.x < x + CELL && pointerPx.y >= y && pointerPx.y < y + CELL) return p;
+  }
+  return list.find(p => p.c === c && p.r === r) || null;
+}
+function portalNudgeStatus(p) {
+  setStatus('出入口微調：位移 ' + (p.ox || 0) + ', ' + (p.oy || 0) + '、範圍 ' + (p.radius || PORTAL_RADIUS_DEFAULT) + ' 像素（方向鍵移動、[ ] 調範圍；按住 Shift 一次 10、Delete 全部重設）', '#ffd479');
+}
+function setPortalNudge(p, patch) {
+  pushUndo();
+  const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, Math.round(Number(v) || 0)));
+  if ('ox' in patch) { const v = clamp(patch.ox, -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT); if (v) p.ox = v; else delete p.ox; }
+  if ('oy' in patch) { const v = clamp(patch.oy, -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT); if (v) p.oy = v; else delete p.oy; }
+  if ('radius' in patch) { const v = clamp(patch.radius || PORTAL_RADIUS_DEFAULT, 10, 300); if (v !== PORTAL_RADIUS_DEFAULT) p.radius = v; else delete p.radius; }
+  saveMaps(); draw(); portalNudgeStatus(p);
+}
+// 工具列下面的數字欄：選到出入口才出現
+function syncPortalNudgePanel(m) {
+  const tool = document.querySelector('.tool[data-mode="portalnudge"]'); if (!tool) return;
+  let box = document.getElementById('portalNudgePanel');
+  if (!box) {
+    box = document.createElement('div'); box.id = 'portalNudgePanel';
+    box.style.cssText = 'flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;padding:6px 8px;border:1px solid #6a5a2c;border-radius:6px;background:#2a2618;font-size:12px;color:#ffe3a1';
+    const num = (id, label, min, max) => '<label style="display:flex;align-items:center;gap:4px">' + label + '<input type="number" data-pn="' + id + '" min="' + min + '" max="' + max + '" style="width:62px"></label>';
+    box.innerHTML = '<b data-pn-name></b>' + num('ox', '左右', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('oy', '上下', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('radius', '範圍', 10, 300) + '<button type="button" class="btn" data-pn-reset>↺ 重設</button>';
+    tool.parentElement.appendChild(box);
+    box.addEventListener('change', e => { const f = e.target.dataset && e.target.dataset.pn, p = portalNudgeTarget(curMap()); if (f && p) setPortalNudge(p, { [f]: e.target.value }); });
+    box.addEventListener('click', e => { const p = portalNudgeTarget(curMap()); if (p && e.target.closest('[data-pn-reset]')) setPortalNudge(p, { ox: 0, oy: 0, radius: PORTAL_RADIUS_DEFAULT }); });
+  }
+  const p = brush.mode === 'portalnudge' ? portalNudgeTarget(m) : null;
+  box.hidden = !p; box.style.display = p ? 'flex' : 'none'; if (!p) return;
+  box.querySelector('[data-pn-name]').textContent = '🚪 (' + p.c + ',' + p.r + ')';
+  const vals = { ox: p.ox || 0, oy: p.oy || 0, radius: p.radius || PORTAL_RADIUS_DEFAULT };
+  box.querySelectorAll('[data-pn]').forEach(i => { if (document.activeElement !== i) i.value = vals[i.dataset.pn]; });
+}
+// 微調工具開著時：每個出入口畫出判定範圍（圓圈），選中的亮起來；移動過的用虛線標出原本的格子
+function drawPortalNudge(m) {
+  if (brush.mode !== 'portalnudge') return;
+  for (const p of m.portals || []) {
+    const on = portalNudgeTarget(m) === p, cx = OX + (p.c + .5) * CELL + (p.ox || 0), cy = OY + (p.r + .5) * CELL + (p.oy || 0);
+    ctx.save();
+    if (p.ox || p.oy) { ctx.strokeStyle = 'rgba(255,212,121,.6)'; ctx.lineWidth = 1; ctx.setLineDash([3, 3]); ctx.strokeRect(OX + p.c * CELL + 1, OY + p.r * CELL + 1, CELL - 2, CELL - 2); ctx.setLineDash([]); }
+    ctx.fillStyle = on ? 'rgba(255,212,121,.14)' : 'rgba(181,140,255,.07)'; ctx.strokeStyle = on ? '#ffd479' : 'rgba(181,140,255,.55)'; ctx.lineWidth = on ? 2 : 1;
+    ctx.beginPath(); ctx.arc(cx, cy, p.radius || PORTAL_RADIUS_DEFAULT, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    if (on) { ctx.strokeStyle = '#ffd479'; ctx.lineWidth = 3; ctx.strokeRect(cx - CELL / 2 + 1, cy - CELL / 2 + 1, CELL - 2, CELL - 2); }
+    ctx.restore();
+  }
+}
 const solidNudgeCells = new Set();   // 目前用「碰撞微調」選中的紅格（'c,r'，可以多選）
 let solidNudgeAdd = true;            // 這次拖曳是「加選」還是「減選」（按下的那格決定）
 // ---- 📏 邊緣碰撞：畫在格線上的薄牆（m.edges = ['c,r,R'＝那格的右邊, 'c,r,B'＝那格的下邊]；遊戲裡 js/pathfinding.js 判斷）----
@@ -1131,7 +1197,7 @@ function draw() {
   // 同地圖傳送點：兩格之間畫一條青色虛線（箭頭指向送到的那格）
   for (const pt of (m.portals || [])) {
     if (!isSameMapPortal(pt, m)) continue;
-    const ax = OX + (pt.c + .5) * CELL, ay = OY + (pt.r + .5) * CELL, bx = OX + (pt.at[0] + .5) * CELL, by = OY + (pt.at[1] + .5) * CELL;
+    const ax = OX + (pt.c + .5) * CELL + (pt.ox || 0), ay = OY + (pt.r + .5) * CELL + (pt.oy || 0), bx = OX + (pt.at[0] + .5) * CELL, by = OY + (pt.at[1] + .5) * CELL;
     ctx.strokeStyle = 'rgba(90,230,230,.8)'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
     ctx.beginPath(); ctx.moveTo(ax, ay); ctx.lineTo(bx, by); ctx.stroke(); ctx.setLineDash([]);
     const ang = Math.atan2(by - ay, bx - ax), hx = bx - Math.cos(ang) * CELL * .5, hy = by - Math.sin(ang) * CELL * .5;
@@ -1144,7 +1210,7 @@ function draw() {
     }
   }
   for (const pt of (m.portals || [])) {
-    const x = OX + pt.c * CELL, y = OY + pt.r * CELL, hid = !!pt.hidden, warp = isSameMapPortal(pt, m);   // 隱藏地道：咖啡色＋🕳️；同地圖傳送點：青色＋🌀
+    const x = OX + pt.c * CELL + (pt.ox || 0), y = OY + pt.r * CELL + (pt.oy || 0), hid = !!pt.hidden, warp = isSameMapPortal(pt, m);   // 隱藏地道：咖啡色＋🕳️；同地圖傳送點：青色＋🌀
     ctx.fillStyle = hid ? 'rgba(140,100,50,.5)' : warp ? 'rgba(40,170,180,.45)' : 'rgba(150,90,220,.45)'; ctx.fillRect(x, y, CELL, CELL);
     ctx.strokeStyle = hid ? '#d9a55a' : warp ? '#5ae6e6' : '#b58cff'; ctx.lineWidth = 2; if (hid) ctx.setLineDash([5, 3]); ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4); ctx.setLineDash([]);
     ctx.fillStyle = '#fff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1154,6 +1220,7 @@ function draw() {
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText('→' + target, x + CELL / 2, y + CELL + 1);
     ctx.fillStyle = warp ? '#a8f4f4' : '#d9c6ff'; ctx.fillText('→' + target, x + CELL / 2, y + CELL + 1);
   }
+  drawPortalNudge(m); syncPortalNudgePanel(m);   // 🎯 出入口微調：判定範圍的圓圈、數字欄
   // 正在設傳送點：第一格閃黃框，等著點第二格
   if (portalLinkFrom && portalLinkFrom.mapId === m.id && brush.mode === 'portal') {
     const x = OX + portalLinkFrom.c * CELL, y = OY + portalLinkFrom.r * CELL;
@@ -1466,6 +1533,13 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       setStatus('已設隱藏地道 → ' + to.name + '（球球找到之前看不到、進不去）', '#7ee0c0');
     });
     return;
+  } else if (brush.mode === 'portalnudge') {   // 🎯 出入口微調：點一下選取
+    if (!isDown) return;
+    const pt = portalHitAt(m, c, r);
+    portalNudgeKey = pt ? pt.c + ',' + pt.r : null;
+    draw();
+    if (pt) portalNudgeStatus(pt); else setStatus('點一個出入口來微調', '#9aa4b2');
+    return;
   } else if (brush.mode === 'portal') {
     if (!isDown) return;   // 只在按下時處理，避免拖曳一直跳視窗
     // 傳送點第二步：上一步選了「這張地圖」，這一下點的是要送到的那一格
@@ -1481,7 +1555,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
         : there ? '已設單向傳送點（對面原本就有傳送點，沒有改它）' : '已設一對傳送點：兩邊都可以按 Space 傳送到對面', '#7ee0c0');
       return;
     }
-    const pi = m.portals.findIndex(p => p.c === c && p.r === r);
+    const pi = m.portals.indexOf(portalHitAt(m, c, r));   // 微調過的出入口：點它畫出來的位置也算
     if (pi >= 0) {
       const old = m.portals[pi]; m.portals.splice(pi, 1);
       // 同地圖傳送點：對面那個如果是指回這裡的，一起拿掉（不然會留下送到空地的半邊）
@@ -2214,7 +2288,7 @@ if (tileFlatCb) tileFlatCb.addEventListener('change', () => {
 });
 // ---- 水：勾「這是水」→ 角色走進這個素材的範圍會泡在水裡（遊戲裡的效果在 js/water.js）----
 // 存在素材的 water：{ depth：水深（角色身高的 %）, speed：水中走路速度（%）, see：水下看得見（%） }
-const WATER_EDIT_DEFAULT = { depth: 50, speed: 70, see: 45 };
+const WATER_EDIT_DEFAULT = { depth: 25, speed: 70, see: 45 };   // 角色是大頭比例：水深 25% 大約到腰
 const WATER_EDIT_RANGE = { depth: [5, 95], speed: [10, 100], see: [0, 100] };
 const tileWaterCb = document.getElementById('tileWater'), tileWaterOpts = document.getElementById('tileWaterOpts');
 const tileWaterInputs = { depth: document.getElementById('tileWaterDepth'), speed: document.getElementById('tileWaterSpeed'), see: document.getElementById('tileWaterSee') };

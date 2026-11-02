@@ -226,7 +226,7 @@ function portalUsable(pt) { return !pt.hidden || tunnelFound(pt); }
 function revealTunnel(pt, dog) {
   tunnelsFound.add(tunnelKey(pt));
   try { localStorage.setItem(TUNNEL_FOUND_KEY, JSON.stringify([...tunnelsFound])); } catch (_) {}
-  const [x, y] = center(pt.c, pt.r);
+  const [x, y] = portalXY(pt);
   G.effects.push({ ring: true, x, y: y + 6, r: 6, r2: 42, life: .45, life0: .45, color: '#c8a46a' });
   for (let i = 0; i < 10; i++) G.effects.push({ particle: true, kind: 'spark', x: x + (Math.random() - .5) * 24, y: y + 6, vx: (Math.random() - .5) * 60, vy: -(30 + Math.random() * 50), r: 2 + Math.random() * 2, life: .5 + Math.random() * .3, life0: .8, color: Math.random() < .5 ? '#a8936c' : '#cdbb91' });
   if (typeof systemNotice === 'function') systemNotice('🐾 球球發現了隱藏的地道！');
@@ -240,7 +240,7 @@ function updateDogTunnel(dog, anchor, dt) {
   const tn = dog.tunnel;
   if (tn) {
     if (tunnelFound(tn.pt) || Math.hypot(dog.x - anchor.x, dog.y - anchor.y) > dogSearchCells() * CELL * 1.3) { dog.tunnel = null; dog.navPath = null; return false; }
-    const [x, y] = center(tn.pt.c, tn.pt.r);
+    const [x, y] = portalXY(tn.pt);
     if (tn.state === 'go') {
       if (Math.hypot(dog.x - tn.goal.x, dog.y - tn.goal.y) < 10) { tn.state = 'bark'; tn.t = 0; tn.next = .5; dog.moving = false; dog.faceRight = x > dog.x; return true; }
       moveSentryWithPath(dog, tn.goal.x, tn.goal.y, DOG_PICKUP.speed * dogSpeedMul(), dt);
@@ -262,7 +262,7 @@ function updateDogTunnel(dog, anchor, dt) {
   if (dog.tunnelScan > 0) return false;
   dog.tunnelScan = DOG_TUNNEL.scanInterval;
   const R = dogSearchCells() * CELL;
-  const near = hiddenTunnelsHere().map(pt => { const [x, y] = center(pt.c, pt.r); return { pt, x, y, d: Math.hypot(x - dog.x, y - dog.y) }; })
+  const near = hiddenTunnelsHere().map(pt => { const [x, y] = portalXY(pt); return { pt, x, y, d: Math.hypot(x - dog.x, y - dog.y) }; })
     .filter(o => o.d <= R && Math.hypot(o.x - anchor.x, o.y - anchor.y) <= R && !(dog.tunnelIgnore && dog.tunnelIgnore.key === tunnelKey(o.pt)))
     .sort((a, b) => a.d - b.d);
   for (const o of near) {
@@ -284,7 +284,7 @@ function updateDogTunnel(dog, anchor, dt) {
 function drawHiddenTunnels(ctx) {
   for (const pt of (MAP && MAP.portals) || []) {
     if (!pt.hidden || !tunnelFound(pt)) continue;
-    const [x, y] = center(pt.c, pt.r);
+    const [x, y] = portalXY(pt);
     if (typeof isVisible === 'function' && !isVisible(x, y)) continue;
     ctx.save();
     ctx.fillStyle = 'rgba(122,101,69,.85)'; ctx.beginPath(); ctx.ellipse(x, y + 8, 19, 9, 0, 0, Math.PI * 2); ctx.fill();   // 翻起來的土

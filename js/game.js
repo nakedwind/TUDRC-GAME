@@ -631,14 +631,16 @@ function playerInsideElevator(stamp) {
   return G.player.x >= left + 25 && G.player.x <= left + 95 &&
     G.player.y >= top + 55 && G.player.y <= top + 115;
 }
+// 出入口實際的位置：格子中心＋編輯器「出入口微調」的位移（ox、oy）；radius＝這個出入口自己的判定範圍（沒設＝PORTAL_RADIUS）
+const portalXY = pt => { const [x, y] = center(pt.c, pt.r); return [x + (pt.ox || 0), y + (pt.oy || 0)]; };
 function portalNearPlayer() {
   const p = G.player; if (!p || typeof mapPortals === 'undefined') return null;
-  let best = null, bd = PORTAL_RADIUS;
+  let best = null, bd = Infinity;
   for (const pt of mapPortals) {
     if (typeof mrtPortalBlocked === 'function' && mrtPortalBlocked(pt)) continue;   // 封鎖中的捷運入口裡面的出入口不作用
     if (typeof portalUsable === 'function' && !portalUsable(pt)) continue;   // 隱藏地道：要先被球球找到（js/rescue-dog.js）
-    const [x, y] = center(pt.c, pt.r), d = Math.hypot(x - p.x, y - p.y);
-    if (d < bd) { bd = d; best = { portal: pt, x, y }; }
+    const [x, y] = portalXY(pt), d = Math.hypot(x - p.x, y - p.y);
+    if (d < (pt.radius || PORTAL_RADIUS) && d < bd) { bd = d; best = { portal: pt, x, y }; }
   }
   return best;
 }
@@ -653,7 +655,7 @@ function placePlayerNearPortal(portal) {
     }
   }
   for (const [dc, dr] of offsets) {
-    const c = portal.c + dc, r = portal.r + dr;
+    const c = portal.c + Math.round((portal.ox || 0) / CELL) + dc, r = portal.r + Math.round((portal.oy || 0) / CELL) + dr;   // 微調得比較遠的出入口：從它實際所在的那格開始找
     if (!inGrid(c, r)) continue;
     const [x, y] = center(c, r);
     if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; return; }

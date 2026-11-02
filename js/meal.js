@@ -1,6 +1,6 @@
 // ============================================================
 //  餐廳吃飯：拿餐盤 → 打飯區裝菜（最多 4 樣）→ 坐下放在桌上 →「開動！」4 秒吃完 → 髒盤拿去回收區（或直接離開）
-//  ・溫特：右邊的餐盤架按互動鍵拿餐盤；打飯台按互動鍵＝把最靠近的那盤菜裝進去（同一道不能裝兩次）；
+//  ・溫特：右邊的餐盤架按互動鍵拿餐盤（拿錯了：還沒吃過的餐盤回到餐盤架按互動鍵＝「放回餐盤」）；打飯台按互動鍵＝把最靠近的那盤菜裝進去（同一道不能裝兩次）；
 //    拿著有菜的餐盤到有桌子的椅子按互動鍵＝坐下並把餐盤放在桌上；坐著按互動鍵＝「開動！」（每秒少 1/4，4 秒吃完）；
 //    吃完起身，桌上的髒盤可以收起來拿去回收區，或直接走掉（換地圖再回來，桌上的髒盤就不見了：桌上的餐盤只存在這一趟）
 //  ・NPC（基地的人、隊員）：閒逛時有機率自己去吃一輪，一定會把髒盤拿去回收
@@ -14,6 +14,14 @@ const MEAL = {
   panImg: [160, 80],
   wasteTiles: ['tile_restaurant_waste_sorting_station'],                                  // 回收區
   tableTiles: ['tile_musc5wyq', 'tile_restaurant_partition_tall'],                        // 桌子：椅子前面是這些桌子才放得了餐盤
+  // 桌面上放餐盤不會碰到道具、也不會超出桌邊的位置（桌子圖片的像素）；w、h＝餐盤在這張桌上佔多大（側面的桌子餐盤是直放）
+  tableSpots: {
+    tile_musc5wyq: { w: 32, h: 22, spots: [[36, 18], [124, 18], [36, 46], [78, 46], [124, 46]] },   // 長桌：調味瓶、面紙盒、筷筒在 x 52～106、y 4～34
+    tile_restaurant_partition_tall: { w: 22, h: 32, spots: [[24, 20], [24, 54], [24, 205], [55, 20], [55, 56], [55, 92], [55, 128], [55, 164], [55, 200]] },   // 左邊的直桌：桌面 x 12～67，道具排在 x 22～41、y 74～180
+  },
+  // 餐盤要在桌子和桌上道具的中間：畫完餐盤，再把道具疊回去
+  bakedProps: { tile_musc5wyq: { rect: [48, 2, 62, 34], surface: [24, 44] } },   // 長桌的道具畫死在桌子圖裡：rect＝道具的範圍，surface＝拿來當桌面底色的那一點（跟它同色的就是桌面，不疊回去）
+  propTiles: ['tile_restaurant_condiment_bottles', 'tile_restaurant_napkin_holder', 'tile_restaurant_chopsticks_holder'],   // 另外擺在桌上的道具素材
   trayOnTable: { back: [0, -40], front: [0, 34], right: [28, -8], left: [-28, -8] },     // 坐下時餐盤放在哪（從座位往哪邊移，依坐的方向）
   trayArt: { file: 'images/餐廳/restaurant-tray-stack.png', crop: [2, 35, 36, 24], slots: [[6, 39, 8, 6], [19, 39, 15, 6], [6, 48, 17, 9], [28, 48, 6, 9]] },   // 餐盤：截餐盤架最上面那一個（圖片像素：左、上、寬、高）；四格＝左上小格、右上長格、左下長格、右下小格
   carryY: 4,           // 拿在手上時餐盤的高度（從角色的 y 往下幾 px；角色圖是 y-46～y+18，頭很大，胸前大約在 y+4）
@@ -71,17 +79,31 @@ function panOf(r, k) {
 }
 const nearestPan = (r, x) => MEAL.pans.map((_, k) => panOf(r, k)).reduce((a, b) => Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a);
 // 椅子前面有沒有桌子：有就回傳餐盤要放的位置
+// 一個位子的編號：長椅（卡座）的 key 整條都一樣，要加上座位的位置才分得開
+const seatIdOf = seat => seat.key + '@' + Math.round(seat.x) + ',' + Math.round(seat.y);
 function trayPosForSeat(seat) {
   const off = MEAL.trayOnTable[seat.dir] || MEAL.trayOnTable.back, x = seat.x + off[0], y = seat.y + off[1];
   const table = mealStamps(MEAL.tableTiles).find(r => x >= r.x0 && x <= r.x0 + r.w && y >= r.y0 && y <= r.y0 + r.h);
-  return table ? { x, y, sortY: table.bottom + .3 } : null;
+  if (!table) return null;
+  const sortY = table.bottom + .3, cfg = MEAL.tableSpots[table.s.id];
+  if (!cfg) return { x, y, sortY, tableId: table.s.id, tableX: table.x0, tableY: table.y0 };   // 這張桌子沒設擺放點：照坐的方向放
+  // 桌上有設擺放點（避開桌上的道具）：挑離座位最近的；別人的餐盤佔走的不選，背對鏡頭的人也不選會被自己的頭擋住的
+  const others = mealTrays().filter(t => t.seatKey !== seatIdOf(seat));
+  let best = null, bd = Infinity;
+  for (const [u, v] of cfg.spots) {
+    const sx = table.x0 + (table.s.fx ? table.w - u : u), sy = table.y0 + v, d = Math.hypot(sx - seat.x, sy - seat.y);
+    if (others.some(t => Math.abs(t.x - sx) < cfg.w && Math.abs(t.y - sy) < cfg.h)) continue;
+    if (seat.dir === 'back' && Math.abs(sx - seat.x) < 24 && sy + 11 > seat.y - 46) continue;   // 角色圖的頭頂在 y-46
+    if (d < bd) { bd = d; best = { x: sx, y: sy, sortY, tableId: table.s.id, tableX: table.x0, tableY: table.y0 }; }
+  }
+  return best;
 }
-const trayAtSeat = seat => mealTrays().find(t => t.seatKey === seat.key);
+const trayAtSeat = seat => mealTrays().find(t => t.seatKey === seatIdOf(seat));
 const newTray = () => ({ foods: [], left: 1, dirty: false });
 // ---- 溫特 ----
 function placeTrayAt(seat, tray, owner) {
   const pos = trayPosForSeat(seat); if (!pos || trayAtSeat(seat)) return false;
-  mealTrays().push({ ...tray, ...pos, seatKey: seat.key, owner, eatT: tray.eatT || 0, eating: false, turn: seat.dir === 'left' || seat.dir === 'right', flip: seat.dir === 'front' });   // 面向鏡頭坐的（桌子另一邊）：餐盤上下翻轉，格子的順序才對   // 側面的椅子：餐盤順時針轉 90 度（不然橫的餐盤會擋到臉）
+  mealTrays().push({ ...tray, ...pos, seatKey: seatIdOf(seat), seat, owner, eatT: tray.eatT || 0, eating: false, turn: seat.dir === 'left' || seat.dir === 'right', mirror: seat.dir === 'left', flip: seat.dir === 'front' });   // 面向鏡頭坐的（桌子另一邊）：餐盤上下翻轉，格子的順序才對   // 側面的椅子：餐盤順時針轉 90 度（不然橫的餐盤會擋到臉）
   return true;
 }
 function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼（畫提示用）：回傳 { label, x, y, run }
@@ -103,15 +125,20 @@ function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼
       return { label: '裝菜（' + p.tray.foods.length + '/' + MEAL.maxDishes + '）', x: pan.x, y: buffet.top - 4, run: () => { p.tray.foods.push({ ...pan.food, key: pan.key }); sfx('blip'); } };
     }
     const seat = !p.tray.dirty && p.tray.foods.length && typeof seatNearPlayer === 'function' ? seatNearPlayer() : null;
-    if (seat && trayPosForSeat(seat) && !trayAtSeat(seat)) return { label: '坐下用餐', x: seat.x, y: seat.top - 6, run: () => { toggleSit(); if (p.sitting === seat && placeTrayAt(seat, p.tray, 'player')) p.tray = null; } };
+    const sitHere = seat && trayPosForSeat(seat) && !trayAtSeat(seat) ? { label: '坐下用餐', x: seat.x, y: seat.top - 6, run: () => { toggleSit(); if (p.sitting === seat && placeTrayAt(seat, p.tray, 'player')) p.tray = null; } } : null;
     const stack = mealNear(MEAL.trayTiles, p.x, p.y, MEAL.trayReach);
-    if (stack) return { label: '手上已經有餐盤', x: stack.x, y: stack.top - 4, run: () => { sfx('error'); } };
-    return null;
+    // 不想吃了：乾淨的餐盤可以放回餐盤架（裝了菜也可以，菜就不要了）；髒盤要拿去回收區
+    const backHere = !stack ? null : p.tray.dirty
+      ? { label: '髒盤要拿去回收區', x: stack.x, y: stack.top - 4, run: () => { sfx('error'); systemNotice('吃過的餐盤請拿去回收區', true); } }
+      : { label: '放回餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = null; sfx('place'); systemNotice('餐盤放回去了'); } };
+    // 餐盤架旁邊剛好有椅子：哪個離溫特比較近就用哪個（站在餐盤架前＝放回、站在椅子旁＝坐下）
+    if (sitHere && backHere) return Math.hypot(seat.x - p.x, seat.y - p.y) < Math.hypot(stack.x - p.x, stack.bottom - p.y) ? sitHere : backHere;
+    return sitHere || backHere;
   }
-  const mine = mealTrays().filter(t => t.owner === 'player').find(t => Math.hypot(t.x - p.x, t.y - p.y) < 80);   // 起身後站的位置離桌上的餐盤大約一格多
+  const mine = mealTrays().filter(t => t.owner === 'player').find(t => Math.hypot(t.x - p.x, t.y - p.y) < 80 || (t.seat && Math.hypot(t.seat.x - p.x, t.seat.y - p.y) < 90));   // 離餐盤夠近，或站在自己剛剛坐的位子旁（餐盤可能放得比較遠）
   if (mine) return { label: mine.dirty ? '收髒盤' : '拿起餐盤', x: mine.x, y: mine.y - 22, run: () => { mealTrays().splice(mealTrays().indexOf(mine), 1); p.tray = { foods: mine.foods, left: mine.left, dirty: mine.dirty, eatT: mine.eatT }; sfx('switch'); } };
   const stack = mealNear(MEAL.trayTiles, p.x, p.y, MEAL.trayReach);
-  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof winterSay === 'function') winterSay(MEAL.takeLine); } };
+  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof winterSay === 'function') winterSay(MEAL.takeLine); systemNotice('不想吃了：回到餐盤架按互動鍵可以放回去'); } };
   return null;
 }
 const mealPrompt = () => mealPlayerAction(true);
@@ -164,7 +191,7 @@ function mealStep(a, dt, speed) {
     if (!a.seatGoal) {
       let best = null, bd = Infinity;
       for (const seat of mapSeats()) {
-        if (seat.bed || seatTaken(seat, a) || trayAtSeat(seat) || !trayPosForSeat(seat) || (m.bad || []).includes(seat.key)) continue;
+        if (seat.bed || seatTaken(seat, a) || trayAtSeat(seat) || !trayPosForSeat(seat) || (m.bad || []).includes(seatIdOf(seat))) continue;
         const ap = seatApproachPoint(seat), d = ap && Math.hypot(seat.x - a.x, seat.y - a.y);
         if (ap && d < bd) { bd = d; best = { seat, approach: ap }; }
       }
@@ -179,12 +206,12 @@ function mealStep(a, dt, speed) {
       placeTrayAt(g.seat, m.tray, a); m.tray = null;
       const t = trayAtSeat(g.seat); if (t) t.eating = true;
       m.stage = 'eat'; m.linger = mealRand(MEAL.npc.linger);
-    } else if (a.navFailed) { (m.bad = m.bad || []).push(g.seat.key); a.seatGoal = null; a.navPath = null; }   // 這個位子走不到：換一個
+    } else if (a.navFailed) { (m.bad = m.bad || []).push(seatIdOf(g.seat)); a.seatGoal = null; a.navPath = null; }   // 這個位子走不到：換一個
     return true;
   }
   if (m.stage === 'eat') {   // 坐著吃，吃完再坐一下
     const t = mealTrays().find(x => x.owner === a);
-    if (!a.sitting || !t || t.seatKey !== a.sitting.key) {   // 被打斷了（被叫起來、被抓走…）：把桌上的餐盤拿回來，沒吃完就再找位子吃、吃完了就去回收
+    if (!a.sitting || !t || t.seatKey !== seatIdOf(a.sitting)) {   // 被打斷了（被叫起來、被抓走…）：把桌上的餐盤拿回來，沒吃完就再找位子吃、吃完了就去回收
       if (a.sitting) npcStandUp(a);
       if (t) { mealTrays().splice(mealTrays().indexOf(t), 1); m.tray = { foods: t.foods, left: t.left, dirty: t.dirty, eatT: t.eatT }; }
       if (!m.tray) { endMeal(a); return false; }
@@ -234,11 +261,54 @@ function drawMealTray(ctx, x, y, tray, s = 1, shadow = true) {
   });
   ctx.restore();
 }
+// 桌上的餐盤：面向鏡頭坐的上下翻轉；側面轉 90 度，坐在桌子右邊的再水平翻轉（靠人的那一邊才對）
+function drawTableTray(t) {
+  if (!t.turn && !t.flip) { drawMealTray(ctx, t.x, t.y, t, .9); return; }
+  ctx.save(); ctx.translate(t.x, t.y);
+  if (t.turn) { if (t.mirror) ctx.scale(-1, 1); ctx.rotate(Math.PI / 2); } else ctx.scale(1, -1);
+  drawMealTray(ctx, 0, 0, t, .9, false);
+  ctx.restore();
+}
+// 長桌的道具畫死在桌子圖裡：把道具那一塊截下來、跟桌面同色的地方挖空（file:// 開啟時讀不到像素，就回傳 null，不疊回去）
+const bakedPropCache = {};
+function bakedPropMask(id) {
+  if (id in bakedPropCache) return bakedPropCache[id];
+  const cfg = MEAL.bakedProps[id], t = mapTileById(id); if (!cfg || !t) return bakedPropCache[id] = null;
+  const img = mealImg(t.file); if (!img.complete || !img.naturalWidth) return null;   // 圖還沒載入：下一幀再試
+  const [x, y, w, h] = cfg.rect, c = document.createElement('canvas'); c.width = w; c.height = h;
+  const g = c.getContext('2d'); g.drawImage(img, -x, -y);
+  try {
+    const probe = document.createElement('canvas'); probe.width = probe.height = 1;
+    const pg = probe.getContext('2d'); pg.drawImage(img, -cfg.surface[0], -cfg.surface[1]);
+    const base = pg.getImageData(0, 0, 1, 1).data, d = g.getImageData(0, 0, w, h);
+    for (let i = 0; i < d.data.length; i += 4) if (Math.abs(d.data[i] - base[0]) + Math.abs(d.data[i + 1] - base[1]) + Math.abs(d.data[i + 2] - base[2]) < 20) d.data[i + 3] = 0;
+    g.putImageData(d, 0, 0);
+  } catch (_) { return bakedPropCache[id] = null; }
+  return bakedPropCache[id] = c;
+}
+// 另外擺在桌上的道具（地圖編輯器放的）：這張地圖有哪些（換地圖才重算）
+let mealPropsFor = null, mealPropList = [];
+function mealLooseProps() {
+  if (mealPropsFor === MAP) return mealPropList;
+  mealPropsFor = MAP; mealPropList = [];
+  const add = (id, x, y) => { const t = mapTileById(id); if (t && MEAL.propTiles.includes(id)) mealPropList.push({ file: t.file, x, y, w: mapTileW(t) * CELL, h: mapTileH(t) * CELL }); };
+  for (const layer of Object.values((MAP && MAP.layers) || {})) for (const [k, id] of Object.entries(layer)) { const [c, r] = k.split(',').map(Number); add(id, OX + c * CELL, OY + r * CELL); }
+  for (const s of (MAP && MAP.stamps) || []) add(s.id, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0));
+  return mealPropList;
+}
+// 畫完餐盤，把碰到的道具疊回去：層級＝桌子 → 餐盤 → 桌上的道具
+function drawPropsOverTray(t) {
+  const w = (t.turn ? 24 : 36) * .9 / 2 + 1, h = (t.turn ? 36 : 24) * .9 / 2 + 1, hit = (x, y, pw, ph) => t.x + w > x && t.x - w < x + pw && t.y + h > y && t.y - h < y + ph;
+  ctx.save(); ctx.imageSmoothingEnabled = false;
+  const cfg = t.tableId && MEAL.bakedProps[t.tableId], mask = cfg && bakedPropMask(t.tableId);
+  if (mask && hit(t.tableX + cfg.rect[0], t.tableY + cfg.rect[1], cfg.rect[2], cfg.rect[3])) ctx.drawImage(mask, t.tableX + cfg.rect[0], t.tableY + cfg.rect[1]);
+  for (const p of mealLooseProps()) if (hit(p.x, p.y, p.w, p.h)) { const img = mealImg(p.file); if (img.complete && img.naturalWidth) ctx.drawImage(img, p.x, p.y, p.w, p.h); }
+  ctx.restore();
+}
 function mealSortables(list) {
   if (!G || !MAP_SAFE) return;
   for (const t of G.mealTrays || []) list.push({ y: t.sortY, draw: () => {
-    if (!t.turn && !t.flip) { drawMealTray(ctx, t.x, t.y, t, .9); return; }
-    ctx.save(); ctx.translate(t.x, t.y); if (t.turn) ctx.rotate(Math.PI / 2); else ctx.scale(1, -1); drawMealTray(ctx, 0, 0, t, .9, !t.flip); ctx.restore();
+    drawTableTray(t); drawPropsOverTray(t);
   } });
   // 拿在手上：胸前（往左、右走時偏到那一邊）；背對鏡頭時畫在身體後面（被身體擋住）
   const carry = (a, tray) => list.push({ y: a.y + (a.dir === 'back' ? 15 : 17.2), draw: () => drawMealTray(ctx, a.x + (a.dir === 'left' ? -9 : a.dir === 'right' ? 9 : 0), a.y + MEAL.carryY, tray, .75) });
@@ -276,7 +346,7 @@ function mealBuffTotal(buff = mealBuff) {
   for (const d of (buff && buff.dishes) || []) for (const k in d.eff || {}) sum[k] = (sum[k] || 0) + d.eff[k];
   return sum;
 }
-const mealBuffVal = kind => mealBuff ? mealBuffTotal()[kind] || 0 : 0;   // js/food.js 的 foodBuff 加上這個
+const mealBuffVal = kind => mealBuff && !(typeof practiceOn === 'function' && practiceOn()) ? mealBuffTotal()[kind] || 0 : 0;   // js/food.js 的 foodBuff 加上這個（訓練室裡沒有加成）
 function grantMealBuff(foods) {
   const dishes = foods.map(f => { const d = dishOf(f.key); return d && { name: d.name, eff: d.eff, file: f.file, rect: f.rect }; }).filter(Boolean);
   if (!dishes.length) return;
@@ -285,7 +355,7 @@ function grantMealBuff(foods) {
 }
 // 進入地圖時（js/game.js 的 begin 呼叫）：進戰鬥地圖＝開始用；出勤完回到基地＝用完了（劇情地圖是出勤途中，不算）
 function mealBuffOnMap() {
-  if (!mealBuff || window.TEST_MODE || (typeof MAP_STORY !== 'undefined' && MAP_STORY)) { renderMealBuffButton(); return; }
+  if (!mealBuff || window.TEST_MODE || (typeof MAP_STORY !== 'undefined' && MAP_STORY) || (typeof practiceOn === 'function' && practiceOn())) { renderMealBuffButton(); return; }   // 訓練室不算出勤：不會開始用，也不會用掉
   if (!MAP_SAFE && !mealBuff.active) { mealBuff.active = true; saveMealBuff(); }
   else if (MAP_SAFE && mealBuff.active) { mealBuff = null; saveMealBuff(); setTimeout(() => { if (typeof systemNotice === 'function') systemNotice('飯後加成用完了，記得再去餐廳吃飯'); }, 1200); }
   renderMealBuffButton();

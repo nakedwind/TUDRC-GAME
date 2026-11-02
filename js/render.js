@@ -678,10 +678,19 @@ function promptTopAbove(actor, top) {
 // 椅子上方的「[E] 坐」提示框
 // 拆除模式：滑鼠指到可以拆的建築時，紅框框起來＋上方顯示「拆除 退回 $X」
 // ---- 逃生樓梯的常駐箭頭：樓梯右邊的出入口＝上樓、左邊＝下樓 ----
+// 箭頭對齊樓梯圖（不是跟著出入口格）：
+//   一張樓梯圖只有一個去處 → 置中在整張圖；有兩個去處（上樓＋下樓）→ 各自置中在出入口那一側
+//   side：圖上「左邊那一側」「右邊那一側」的中間在圖寬的幾成（沒寫＝左半邊、右半邊的正中間）
+//   同一張樓梯圖上的箭頭從同一個高度算起；downDrop：下樓的箭頭再往下幾 px（遊戲畫面 1 格＝40 px）
 const STAIR_ARROW = { ids: [
   'tile_eoc_escape_stairs', 'tile_mvi1thjl', 'tile_hq_stairs',
   'tile_mrt_stairs_dark', 'tile_mrt_stairs_light', 'tile_mvcrmipy'
-] };
+], side: {
+  tile_eoc_escape_stairs: { left: .35, right: .66 },   // 逃生樓梯：左邊下樓口、右邊上樓梯（兩旁有牆，所以不是剛好一半）
+  tile_mvi1thjl: { left: .35, right: .66 },
+}, downDrop: {
+  tile_eoc_escape_stairs: 74,   // 逃生樓梯：下樓的箭頭放低，浮在下樓口的地板上方（上樓的箭頭不動）
+} };
 let stairArrowCache = null;
 // 從地圖名稱看樓層：「2F應變中心」→ 2、「B3」→ −3（舊寫法「B-3」也認得）；看不出來回傳 null
 function mapFloorNumber(name) {
@@ -701,14 +710,20 @@ function stairArrowSpots() {
       if (pt.c + .5 < left || pt.c + .5 >= left + w || pt.r + .5 < top || pt.r + .5 >= top + h) continue;
       (groups[pt.to] = groups[pt.to] || []).push(pt);
     }
-    const here = mapFloorNumber(MAP && MAP.name);
-    for (const [to, pts] of Object.entries(groups)) {
-      const x = pts.reduce((sum, pt) => sum + center(pt.c, pt.r)[0], 0) / pts.length;
-      const y = Math.min(...pts.map(pt => center(pt.c, pt.r)[1]));
+    const here = mapFloorNumber(MAP && MAP.name), entries = Object.entries(groups);
+    // 高度：這張樓梯圖上所有出入口最上面那格（每個箭頭一樣高）
+    const y = entries.length ? Math.min(...entries.flatMap(([, pts]) => pts.map(pt => portalXY(pt)[1]))) : 0;
+    const sides = STAIR_ARROW.side[s.id] || { left: .25, right: .75 };
+    for (const [to, pts] of entries) {
+      const px = pts.reduce((sum, pt) => sum + portalXY(pt)[0], 0) / pts.length;   // 出入口格的平均位置（判斷在左邊還是右邊）
+      const onRight = px >= OX + mid * CELL;
+      // 左右翻轉過的樓梯圖：畫面右邊其實是原圖的左側
+      const frac = entries.length > 1 ? (s.fx ? 1 - (onRight ? sides.left : sides.right) : (onRight ? sides.right : sides.left)) : .5;
+      const x = OX + (left + w * frac) * CELL;
       const there = mapFloorNumber(portalTargetName({ to }));
       // 看得出樓層就比樓層；看不出來就照位置：右邊上樓、左邊下樓
-      const dir = here != null && there != null && here !== there ? (there > here ? 'up' : 'down') : (x >= OX + mid * CELL ? 'up' : 'down');
-      list.push({ dir, x, y, portals: pts });
+      const dir = here != null && there != null && here !== there ? (there > here ? 'up' : 'down') : (onRight ? 'up' : 'down');
+      list.push({ dir, x, y: y + (dir === 'down' ? STAIR_ARROW.downDrop[s.id] || 0 : 0), portals: pts });
     }
   }
   stairArrowCache = { map: MAP, portals: typeof mapPortals !== 'undefined' ? mapPortals : null, list };
