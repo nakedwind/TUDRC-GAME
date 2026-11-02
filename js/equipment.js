@@ -287,33 +287,25 @@ function useEyeDrops() {
   say('👁️ 眼前清楚多了', '#9fe3ff'); sfx('soothe');
   systemNotice('點了眼藥水：' + Math.round(EYE_DROPS.dur / 60) + ' 分鐘內看得清楚地圖（暗處一樣會被微笑者咬）');
 }
-// ---- 工具箱（道具）：修理身邊的營地（TOOLBOX 在 data/equipment.js）----
-function toolboxBaseNear() {
-  const p = G.player, reach = TOOLBOX.reach * CELL;
-  let best = null, bestD = Infinity;
-  for (const o of G.obstacles) {
-    if (!o.isBase || o.hp <= 0) continue;
-    const left = o.artX ?? OX + o.c * CELL, top = o.artY ?? OY + o.r * CELL;
-    const dx = Math.max(left - p.x, 0, p.x - (left + o.w * CELL)), dy = Math.max(top - p.y, 0, p.y - (top + o.h * CELL));
-    const d = Math.hypot(dx, dy);
-    if (d <= reach && d < bestD) { best = o; bestD = d; }
-  }
-  return best;
-}
+// ---- 工具箱（道具）：營地＋溫特蓋的所有建築，各修好最大 HP 的 TOOLBOX.repair（data/equipment.js）；不用站在旁邊 ----
+// 地雷不算；地圖上本來就有的障礙物、礦石、被打壞（HP 歸零）的也不修
+const toolboxTargets = () => G.obstacles.filter(o => (o.isBase || (o.playerBuilt && !o.trap)) && o.hp > 0 && o.maxhp > 0 && o.hp < o.maxhp);
 function useToolbox() {
   if (!G?.player || G.player.hp <= 0) return;
   const p = G.player, say = (t, c = '#c9d3dc') => flash(t, p.x, p.y - 54, c);
   if (itemCount('toolbox') <= 0) { sfx('error'); say('沒有工具箱了'); return; }
   if (MAP_SAFE) { sfx('error'); say('戰鬥中才能用'); return; }
-  const o = toolboxBaseNear();
-  if (!o) { sfx('error'); say('要站在營地旁邊才能修'); return; }
-  if (o.hp >= o.maxhp) { sfx('error'); say('營地沒有損壞'); return; }
+  const list = toolboxTargets();
+  if (!list.length) { sfx('error'); say('建築都沒有損壞'); return; }
   consumeItem('toolbox');
-  const add = Math.min(o.maxhp - o.hp, Math.round(o.maxhp * TOOLBOX.repair));
-  o.hp += add;
-  const cx = (o.artX ?? OX + o.c * CELL) + o.w * CELL / 2, cy = (o.artY ?? OY + o.r * CELL) + o.h * CELL / 2;
-  flash('🔧 營地 HP +' + add, cx, cy - o.h * CELL / 2 - 10, '#7ee0c0', 1.6); sfx('place');
-  G.effects.push({ ring: true, x: cx, y: cy, r: 10, r2: Math.max(o.w, o.h) * CELL * .7, life: .5, life0: .5, color: '#7ee0c0' });
+  for (const o of list) {
+    const add = Math.min(o.maxhp - o.hp, Math.round(o.maxhp * TOOLBOX.repair));
+    o.hp += add;
+    const cx = (o.artX ?? OX + o.c * CELL) + (o.w || 1) * CELL / 2, cy = (o.artY ?? OY + o.r * CELL) + (o.h || 1) * CELL / 2;
+    flash('🔧 +' + add, cx, cy - (o.h || 1) * CELL / 2 - 10, '#7ee0c0', 1.6);
+    G.effects.push({ ring: true, x: cx, y: cy, r: 8, r2: Math.max(o.w || 1, o.h || 1) * CELL * .7, life: .5, life0: .5, color: '#7ee0c0' });
+  }
+  say('🔧 修好了 ' + list.length + ' 個建築', '#7ee0c0'); sfx('place');
   if (typeof updateHUD === 'function') updateHUD();
 }
 // ---- 急救包（道具，H）：先點左上角的隊員頭像，選要治療誰（倒地的也行） ----
