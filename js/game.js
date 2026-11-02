@@ -829,28 +829,18 @@ function assignSentryToGround(t, guard = false) {
   systemNotice(TYPES[t.type].name + '正前往巡邏點');
   closeGroundMenu();
 }
+// 「🛡️ 全員跟隨護衛」（點空地的彈窗）：全部改成跟隨護衛部隊長（js/sentry.js 的 setSentryEscort），不是叫到點的那格去巡邏
 function summonAllSentriesToGround() {
   if (!groundTarget) return;
-  const { c, r } = groundTarget, spots = [];
-  for (let dr = -3; dr <= 3; dr++) for (let dc = -3; dc <= 3; dc++) {
-    const cc = c + dc, rr = r + dr;
-    if (!inGrid(cc, rr) || !sentryCellWalkable(cc, rr) || isEntrance(cc, rr)) continue;
-    const [x, y] = center(cc, rr); if (isLit(x, y)) spots.push({ x, y, distance: dc * dc + dr * dr });
-  }
-  spots.sort((a, b) => a.distance - b.distance);
   let count = 0;
   for (const t of G.towers) {
-    if (t.hp <= 0 || t.berserk) continue;   // 嚮導也一起叫過來（以前會漏掉嚮導）
-    if (typeof leaveCampBed === 'function') leaveCampBed(t);   // 躺在行軍床上：先下床，人在床上會找不到路（js/camp-beds.js）
-    const index = spots.findIndex(p => buildSentryPath(t, p.x, p.y, true) !== null);   // 召喚：可以穿過黑暗
-    if (index < 0) continue;
-    const p = spots.splice(index, 1)[0];
-    t.mode = 'goto'; t.target = { x: p.x, y: p.y }; t.anchor = null; t.waitT = 0;
-    t.navPath = null; t.navGoal = null; t.navFailed = false; t.guardSummoned = true; t.guardBase = null; t.summonDark = true;
+    if (t.hp <= 0 || t.berserk) continue;   // 嚮導也一起
+    if (typeof leaveCampBed === 'function') leaveCampBed(t);   // 躺在行軍床上：先下床（js/camp-beds.js）
+    setSentryEscort(t);
     count++;
   }
   sfx(count ? 'button' : 'error');
-  systemNotice(count ? '已召喚 ' + count + ' 位隊員前往此處' : '沒人到得了');
+  systemNotice(count ? count + ' 位隊員跟隨護衛部隊長' : '沒有能跟隨的隊員');
   if (count) closeGroundMenu();
 }
 function summonNearestSentryToGround() {
@@ -1159,7 +1149,7 @@ function renderGroundActions() {
   addGroundCloseButton();
   const nearest = document.createElement('button');
   nearest.className = 'gm-nearest';
-  nearest.textContent = '🎯 召喚全部隊員';
+  nearest.textContent = '🛡️ 全員跟隨護衛';
   nearest.addEventListener('click', summonAllSentriesToGround);
   groundMenu.appendChild(nearest);
   for (const t of G.towers) {
