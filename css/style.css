@@ -384,6 +384,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   position: absolute; top: -2px; left: 50%; width: 54px; height: 54px; max-width: none;
   object-fit: contain; transform: translateX(-50%); image-rendering: pixelated;
 }
+/* 被虱目魚小子吃掉（js/milkfish-kid.js 的 t.eatenBy）：頭像上下顛倒、壓黑 50%。圖比頭像框大，以框的中心翻轉（框高 40px 的中心＝圖頂往下 22px），露出來的還是上半身 */
+.field-member.eaten .field-member-avatar img { transform: translateX(-50%) scaleY(-1); transform-origin: 50% 22px; filter: brightness(.5); }
 .field-member-status { min-width: 0; }
 .field-member-status > b { display: block; margin-bottom: 7px; color: #edf5fa; font-size: 10px; line-height: 1; white-space: nowrap; }
 .field-member-status > div + div { margin-top: 5px; }
