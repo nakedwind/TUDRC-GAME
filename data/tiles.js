@@ -4809,5 +4809,13 @@ const SHARED_TILES = [
     "file": "images/餐廳/Return Area.png",
     "w": 2,
     "h": 1
+  },
+  {
+    "id": "tile_mvymwgxl",
+    "name": "Poolcore_ammo-crate",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_ammo-crate.png",
+    "w": 2,
+    "h": 2
   }
 ];

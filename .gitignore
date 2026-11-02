@@ -10,6 +10,8 @@ desktop.ini
 output/
 backups/
 tools/normalize_image_canvases.py
+# Zk 自己的原檔、修圖資料夾（已搬到 D:\TUDRC_Z暫放，不上 GitHub）
+Z暫放/
 
 # 瀏覽器下載的重複檔
 data/maps (*).js
