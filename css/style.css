@@ -2348,7 +2348,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .core-stay:hover { border-color: #e7c47c; }
 
 /* ===== 結算畫面版面（js/result-screen.js）：彈窗加寬、按鈕在彈窗裡、一頁看完 ===== */
-#overlay.result [data-new-game], #overlay.result [data-test-mode], #overlay.result #mapPickRow { display: none !important; }
+#overlay.result [data-new-game], #overlay.result [data-new-game-from-start], #overlay.result [data-test-mode], #overlay.result #mapPickRow { display: none !important; }
 #overlay.result .overlay-card { width: min(820px, 96%); max-height: none; overflow: visible; flex-shrink: 0; margin-bottom: 0; padding: 22px 28px 20px; }
 #overlay.result .panel-kicker { display: none; }
 #overlay.result h2 { margin: 0 0 6px; font-size: 28px; }
