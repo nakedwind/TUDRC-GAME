@@ -60569,9 +60569,10 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_muftd54p",
-        "c": 20,
-        "r": 30,
-        "layer": "ground2"
+        "c": 21,
+        "r": 28,
+        "layer": "ground2",
+        "oy": 16
       },
       {
         "id": "tile_mrt_floor_tile",
@@ -62281,6 +62282,192 @@ const BATTLE_MAPS = [
         "c": 1,
         "r": 28,
         "layer": "ground"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 7,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 10,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 13,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 16,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 19,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 22,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 25,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 28,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 31,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 34,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 37,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 40,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 43,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 46,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 4,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 1,
+        "r": 10,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 45,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 42,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 39,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 36,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 33,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 30,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 27,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 24,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 21,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 18,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 15,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 12,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 9,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 6,
+        "r": 7,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_rail_track",
+        "c": 3,
+        "r": 7,
+        "layer": "floor"
       }
     ],
     "solid": [
