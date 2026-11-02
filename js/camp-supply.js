@@ -1,7 +1,8 @@
 // ============================================================
 //  營地物資箱：放醫療包、杏仁水、急救包（溫特也可以拿、可以補；嚮導拿杏仁水和急救包）
 //  ・箱子是地圖上放的「物資箱」物件（地圖編輯器的素材 tile_field_supply_box）；同一張地圖放幾個都共用同一份物資。第一次在這張地圖出任務時補滿 start 的數量，
-//    之後就一直維持（用掉就少了，中止任務再回來也不會補），要溫特自己放東西進去。
+//    之後用掉就少了；每次從應變中心出勤時，急救包、杏仁水各補到 sortie 的數量（自己放進去多的會留著，不會越積越多；醫療包不補，要自己帶）。
+//    直接「重新開始」不算出勤，不會補。
 //  ・嚮導身上最多帶 carry 個急救包、carry 瓶杏仁水：杏仁水恢復 SP，疏導花 SP，補血（隊友和自己）花急救包。
 //    其中一樣用完就自己走回物資箱拿；沒用完但沒帶滿，手上沒事時也會回去補滿（地上有溫特放的就先撿地上的，js/ground-items.js）；
 //    箱子裡也沒有的話，頭上冒思考泡泡顯示缺什麼。
@@ -11,6 +12,7 @@ const CAMP_SUPPLY = {
   slots: 20,                                   // 箱子幾格（一格放一個）
   items: ['medkit', 'almond-water', 'firstaid'],             // 能放什麼
   start: { medkit: 7, 'almond-water': 6, firstaid: 7 },      // 第一次出任務時箱子裡有多少
+  sortie: { 'almond-water': 6, firstaid: 7 },                 // 每次從應變中心出勤，箱子裡補到至少這麼多（應變中心配發）
   guideItems: ['firstaid', 'almond-water'],                   // 嚮導身上帶的（醫療包是給溫特自己用的）
   carry: 5,                                    // 嚮導每樣最多帶幾個
   minTaint: 30,                                // 隊員汙染到多少，嚮導才會花 SP 疏導（太少不浪費）
@@ -45,6 +47,14 @@ function campBox() {
   return campSupplyData[id];
 }
 const campBoxTotal = () => CAMP_SUPPLY.items.reduce((sum, k) => sum + (campBox()[k] || 0), 0);
+// 出勤（js/sortie-supply.js 的 onSortieNewGame 呼叫）：急救包、杏仁水補到 CAMP_SUPPLY.sortie；回傳補了哪些
+function stockCampSupplyForSortie() {
+  if (MAP_SAFE || !supplyBoxSpots().length) return [];
+  const box = campBox(), got = [];
+  for (const [k, n] of Object.entries(CAMP_SUPPLY.sortie)) if ((box[k] || 0) < n) { box[k] = n; got.push(itemById(k)?.name || k); }
+  if (got.length) saveCampSupply();
+  return got;
+}
 
 // ---- 物資箱：地圖上放的物資箱物件。圖片跟著箱子裡的數量換：10 個以上 01、1～9 個 02、0 個 03 ----
 function supplyBoxSpots() {   // js/camp-interactions.js 的互動點（kind 'supply'）也用這個

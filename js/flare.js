@@ -19,7 +19,12 @@ const FLARE = {
 // special＝效果寫在 js/special-guns.js 的子彈（一般子彈、照明彈、螢光漆彈另外處理）
 const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal', 'sticky', 'knock'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
 const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_poolcore_ammo_crate'], emptyId: 'tile_field_ammo_crate_empty',   // 能打開、開出東西的彈藥箱（ammo-crate.png；池核版 Poolcore_ammo-crate.png）
-  emptyOf: { tile_field_ammo_crate: 'tile_field_ammo_crate_empty', tile_poolcore_ammo_crate: 'tile_mvot3dds' } };   // 開過之後換成哪張空箱圖（池核版：Poolcore_field-base-03.png）
+  emptyOf: { tile_field_ammo_crate: 'tile_field_ammo_crate_empty', tile_poolcore_ammo_crate: 'tile_mvot3dds' },   // 開過之後換成哪張空箱圖（池核版：Poolcore_field-base-03.png）
+  // 照圖檔也認得：在編輯器用「加入磚塊」再加一次同一張圖，會變成新的素材 id（例如 Poolcore_ammo-crate），一樣當彈藥箱用（圖檔名 → 開過後的空箱圖）
+  files: { 'Poolcore_ammo-crate.png': 'tile_mvot3dds', 'ammo-crate.png': 'tile_field_ammo_crate_empty' } };
+const ammoCrateFileOf = t => String((t && t.file) || '').replace(/\\/g, '/').split('/').pop();
+const isAmmoCrateTile = (id, t) => AMMO_CRATE.ids.includes(id) || !!AMMO_CRATE.files[ammoCrateFileOf(t || mapTileById(id))];   // 這個素材是不是能開的彈藥箱
+const ammoCrateEmptyIdOf = id => AMMO_CRATE.emptyOf[id] || AMMO_CRATE.files[ammoCrateFileOf(mapTileById(id))] || null;   // 開過後換成哪張空箱
 // 營地的彈藥箱（ammo-crate-open-02.png；地圖上放的「彈藥箱（打開）」也算）：按 Space 打開彈藥箱介面（js/camp-supply.js 的 renderCampAmmo）
 const AMMO_REFILL = { ids: ['tile_field_ammo_crate_open', 'tile_mvotgy7w'], file: /(ammo-crate-open-02|Poolcore_ammo-crate-open)\.png$/ };   // 池核版：Poolcore_ammo-crate-open.png
 // 空的彈藥箱：素材庫（data/tiles.js）沒有這張時用這份，編輯器存檔蓋掉素材庫也不會變回關著的圖
@@ -237,7 +242,7 @@ function useAmmoRefillNearPlayer() {
 }
 // 開過的關著的彈藥箱畫成空箱（js/maploader.js 會問這裡）；本來就是打開圖的彈藥箱不換圖
 function ammoCrateOpenTile(s) {
-  const emptyId = AMMO_CRATE.emptyOf[s.id];
+  const emptyId = ammoCrateEmptyIdOf(s.id);
   if (!emptyId || !ammoCrateLooted(s)) return null;
   return mapTileById(emptyId) || AMMO_CRATE_EMPTY_FALLBACK[emptyId] || AMMO_CRATE_EMPTY_TILE;
 }

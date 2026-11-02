@@ -285,7 +285,7 @@
   <script src="js/monster-data.js?v=wide-20261031"></script>
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
-  <script src="data/tiles.js?v=nomissing-20261102"></script>      <!-- 4. 素材庫（兩個編輯器共用） -->
+  <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
   <script src="data/maps.js?v=z62map-20261102"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=merge-20261102"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
@@ -359,9 +359,9 @@
   <script src="js/gacha.js?v=gacha-once-20261027"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->
   <script src="data/claw-machine.js?v=clawbanner-20261101"></script> <!-- 夾娃娃機設定：價錢、獎品、夾力、保夾 -->
   <script src="js/claw-machine.js?v=clawbanner-20261101"></script> <!-- 夾娃娃機：花經費下爪夾道具 -->
-  <script src="js/sortie-supply.js?v=guideskill-20261024"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
-  <script src="js/powered-lights.js?v=nocircuitnum-20261018"></script>
-  <script src="js/storage-lockers.js?v=propscan-20261101"></script>
+  <script src="js/sortie-supply.js?v=boxrestock-20261102"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
+  <script src="js/powered-lights.js?v=poolpower-20261102"></script>
+  <script src="js/storage-lockers.js?v=merge-20261102"></script>
   <script src="data/prop-collisions.js?v=clawsolid-20261102"></script>   <!-- 販賣機、營地箱子自帶的擋路格（物件編輯器設定） -->
   <script src="js/prop-collisions.js?v=clawsolid-20261102"></script>
   <script src="js/escalators.js?v=escside-20261101"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
@@ -378,13 +378,13 @@
   <script src="js/boss-music.js?v=clawstock-20261101"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=y25entry-20261031"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
-  <script src="js/flare.js?v=box-fly3-20261029"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
+  <script src="js/flare.js?v=merge-20261102"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=wsalign-20261102"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=knockpearl-20261101"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=box-fly3-20261029"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=slim-20261102"></script>
-  <script src="js/camp-interactions.js?v=cooking-20261102"></script>
-  <script src="js/camp-supply.js?v=poolsupply-20261101"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
+  <script src="js/camp-interactions.js?v=cratefile-20261102"></script>
+  <script src="js/camp-supply.js?v=boxrestock-20261102"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
   <script src="js/guide-skills.js?v=load-text-20261027"></script>   <!-- 嚮導技能：戰鬥中自動發動（群體補血、增益、大招…） -->
   <script src="js/vitals.js?v=walkdown-20261102"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->

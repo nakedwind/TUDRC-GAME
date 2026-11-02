@@ -2567,7 +2567,8 @@ function selectedLocker() {
   const id = s ? s.id : m.layers[sel.layer]?.[sel.key];
   const t = tileById(id);
   if (!t) return null;
-  if (id === 'tile_field_ammo_crate' || id === 'tile_poolcore_ammo_crate') return { sel, s, id, ammo: true };   // 彈藥箱：不用鑰匙、只能開一次（js/flare.js）；營地的補彈藥箱（打開的）只補彈藥，不能放東西
+  // 照圖檔也認得（用「加入磚塊」再加一次同一張圖會變成新的素材 id）；要跟遊戲的 js/flare.js 的 AMMO_CRATE 一致
+  if (id === 'tile_field_ammo_crate' || id === 'tile_poolcore_ammo_crate' || /(^|\/)(Poolcore_ammo-crate|ammo-crate)\.png$/.test(String(t.file || '').replace(/\\/g, '/'))) return { sel, s, id, ammo: true };   // 彈藥箱：不用鑰匙、只能開一次（js/flare.js）；營地的補彈藥箱（打開的）只補彈藥，不能放東西
   if (!(id === 'tile_interactive_storage_locker' || /storage-locker-closed\.png$/.test(String(t.file || '')) || /置物[箱櫃].*關|置物[箱櫃]（上鎖）/.test(t.name || ''))) return null;
   return { sel, s, id };
 }
@@ -2626,7 +2627,8 @@ function refreshLockerControl() {
 }
 // 電源開關、電源控制的電燈：設定電路編號（1～5），同編號的開關只控制同編號的燈（js/powered-lights.js）
 const isCircuitTile = t => !!t && (/power-switch-(on|off)\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || /^tile_interactive_power_switch/.test(t.id)
-  || /electric-light-02\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || t.id === 'tile_interactive_electric_light_02');
+  || /electric-light-02\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || t.id === 'tile_interactive_electric_light_02'
+  || /\/Poolcore_LED\.png$/i.test(String(t.file || '').replace(/\\/g, '/')));   // 池核的 LED 燈條
 function selectedCircuitThing() {
   if (selections.length !== 1) return null;
   const sel = selections[0], m = curMap();
