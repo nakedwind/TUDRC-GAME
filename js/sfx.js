@@ -1,7 +1,7 @@
 /* ===== 音效：優先播放素材音檔，未對應的效果沿用 Web Audio 合成 =====
    呼叫：sfx('button' | 'menu' | 'switch' | 'blip' | 'place' | 'soothe'
             | 'wave' | 'win' | 'lose' | 'error' | 'berserk' | 'kill')
-   調整：改 sounds 裡的參數就能改音色；SFX.volume 設總音量；按 M 鍵可靜音。
+   調整：改 sounds 裡的參數就能改音色；SFX.volume 設總音量；靜音在設定裡勾選。
    音檔播放：開遊戲時就先把音檔解碼進記憶體（Web Audio），要播時立刻出聲、不會慢半拍。
             如果是直接雙擊 HTML 開啟（file://），瀏覽器不准預先載入，會自動退回舊的播放方式。
    音高變化：VARIED 裡的戰鬥音效每次播放音高、音量都會隨機偏一點，連續命中才不會像同一段錄音重播。
@@ -481,11 +481,4 @@ function sfxAt(name, x, y, baseGain = 0.4, sourceId = '') {
   if (distanceGain > 0) SFX.play(name, baseGain * distanceGain, sourceId ? name + ':' + sourceId : name);
 }
 
-// M 鍵：靜音開關
-window.addEventListener('keydown', e => {
-  if (!e.repeat && e.key.toLowerCase() === 'm') {
-    SFX.enabled = !SFX.enabled;
-    if (typeof flash === 'function' && typeof G !== 'undefined' && G && G.player)
-      flash(SFX.enabled ? '🔊 音效開' : '🔇 音效關', G.player.x, G.player.y - 40, '#8fd3ff');
-  }
-});
+// 靜音：在設定裡的「🔇 靜音」勾選（M 鍵改成打開 T-Pad 地圖，見 js/tpad-map.js）

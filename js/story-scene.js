@@ -667,7 +667,7 @@ const StoryScene = (() => {
     if (k > 0) SFX.play(name, gain * k, name + ':story-' + source);
   }
   // ---- BGM：bgm＝音樂檔（music/ 資料夾）、bgmVolume＝音量 0～1；整段循環，開始淡入、結尾淡出 ----
-  // 遊戲本身的背景音樂（js/music.js）是關著的，劇情自己播；按 M 靜音時也不出聲
+  // 遊戲本身的背景音樂（js/music.js）是關著的，劇情自己播；設定裡勾選靜音時也不出聲
   let bgm = null;
   const bgmTarget = () => (typeof SFX !== 'undefined' && !SFX.enabled) ? 0 : Math.max(0, Math.min(1, state?.cfg.bgmVolume ?? .5));
   function bgmFade(a, to, sec, done) {

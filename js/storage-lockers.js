@@ -28,7 +28,7 @@ function storagePropKind(id){
   if(file.endsWith('/storage-locker-key.png')||(file.endsWith('/置物箱鑰匙.png')||file.endsWith('/置物櫃鑰匙.png')))return 'key';
   if(file.endsWith('/items/battery.png'))return 'battery';
   if(file.endsWith('/items/almond-water-large.png')||file.endsWith('/items/almond-water-small.png'))return 'almond';
-  if(file.endsWith('/power-switch-on.png')||file.endsWith('/power-switch-off.png'))return 'power';
+  if(/power-switch-(on|off)\.png$/.test(file))return 'power';   // 後室的開關，和池核的 Poolcore_power-switch-on／off 都算
   if(file.endsWith('/storage-locker-open.png'))return 'open';
   if(file.endsWith('/storage-locker-closed.png'))return 'closed';
   return null;
@@ -205,10 +205,22 @@ function grantLockerLoot(loot,where='置物櫃'){
     showItemPickupNotice({name:b.name,image:b.image},got,false);
   }
 }
+// 電源開關開／關時換的圖：跟擺在地圖上的是同一套（池核的開關換池核的開／關圖，後室的換後室的）
+const powerSwitchSwap=new Map();   // 素材 id → { on, off }
+function powerSwitchTileFor(id,on){
+  if(!powerSwitchSwap.has(id)){
+    const t=mapTileById(id)||{},file=String(t.file||'').replaceAll('\\','/'),find=f=>Object.values(TILE_REGISTRY).find(x=>String(x.file||'').replaceAll('\\','/')===f);
+    const onT=find(file.replace(/power-switch-(on|off)\.png$/,'power-switch-on.png')),offT=find(file.replace(/power-switch-(on|off)\.png$/,'power-switch-off.png'));
+    powerSwitchSwap.set(id,{on:onT||mapTileById('tile_interactive_power_switch_on'),off:offT||mapTileById('tile_interactive_power_switch_off')});
+  }
+  const pair=powerSwitchSwap.get(id);return (on?pair.on:pair.off)||null;
+}
 function storagePropDisplayTile(id,c,r,layer,stamp=null){
+  // 池核的 LED 燈條：電源開著時畫成發光的圖（js/powered-lights.js）
+  if(typeof isPoolcoreLed==='function'&&isPoolcoreLed(mapTileById(id))){ return mapPowerIsOn(circuitOf(stamp))?poolcoreLedGlowTile():null; }
   const kind=storagePropKindCached(id);   // 畫地圖時每一格都會問：用記起來的結果
   if(!kind)return null;
-  if(kind==='power')return mapTileById(mapPowerIsOn(circuitOf(stamp))?'tile_interactive_power_switch_on':'tile_interactive_power_switch_off')||null;
+  if(kind==='power')return powerSwitchTileFor(id,mapPowerIsOn(circuitOf(stamp)));
   const token=storagePropToken(id,c,r,layer,stamp?.ox||0,stamp?.oy||0);
   if(isWorldPickup(kind))return false; // 實際物品藏起來，統一由小亮點顯示。
   if(kind==='closed'&&unlockedStorageLockers.has(token))return mapTileById('tile_interactive_storage_locker_open');

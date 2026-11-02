@@ -72,6 +72,8 @@ function onSortieNewGame() {
     saveSortie();
     if (fed) { sortieJustFed = true; systemNotice('🎒 已發放出勤補給 ' + fed + ' 份'); }
     if (missing.length) systemNotice('背包裡的' + [...new Set(missing)].join('、') + '不夠，沒帶上', true);
+    const restocked = typeof stockCampSupplyForSortie === 'function' ? stockCampSupplyForSortie() : [];   // 營地物資箱：急救包、杏仁水補到配發量（js/camp-supply.js）
+    if (restocked.length) systemNotice('🧰 應變中心在營地的物資箱補了' + restocked.join('、'));
     if (typeof onMagazineSortie === 'function') onMagazineSortie();   // 彈匣：開發的子彈補滿（js/magazine.js）
   }
   sortieLastSafe = MAP_SAFE;

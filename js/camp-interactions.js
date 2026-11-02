@@ -23,7 +23,7 @@ function campInteractionSpots() {
 // 判定範圍＝圖片裡真正有畫東西的地方（art：圖片像素的左、上、右、下；沒寫＝整張圖），溫特腳下離它 reach 以內就算靠近。
 // 同時靠近好幾個：算最近的那一個（每個箱子的 xxxNearPlayer 只在自己是最近的那個時才回傳）。換了圖記得重量 art。
 const MAP_BOX = { reach: 30, kinds: [
-  { kind: 'ammo', match: id => AMMO_CRATE.ids.includes(id), art: {} },   // 能打開、開出東西的彈藥箱（js/flare.js）
+  { kind: 'ammo', match: (id, t) => typeof isAmmoCrateTile === 'function' ? isAmmoCrateTile(id, t) : AMMO_CRATE.ids.includes(id), art: {} },   // 能打開、開出東西的彈藥箱（js/flare.js；照素材 id 或圖檔認）
   { kind: 'refill', match: (id, t) => AMMO_REFILL.ids.includes(id) || AMMO_REFILL.file.test(String(t.file || '')), art: { tile_field_ammo_crate_open: [0, 16, 46, 80, 80, 80] } },   // 營地的補彈藥箱（js/flare.js）；最後兩個數字＝圖片寬高
   { kind: 'supply', match: id => isSupplyBoxId(id), art: { tile_field_supply_box: [0, 16, 46, 80, 80, 80], tile_mvot2yuu: [25, 23, 95, 120, 120, 120] } },   // field-base-01～03 都一樣；池核版 Poolcore_field-base-01～03 也一樣（js/camp-supply.js 的 boxSkins）
   { kind: 'armor', safe: true, match: (id, t) => ARMOR_CHEST.tiles.includes(id) || ARMOR_CHEST.names.includes(String(t.name || '').trim()), art: { tile_mvma4ws7: [0, 11, 76, 80, 80, 80] } },

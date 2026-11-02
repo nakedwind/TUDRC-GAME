@@ -13573,7 +13573,8 @@ const BASE_MAPS = [
       },
       "object4": {},
       "overlay": {
-        "27,18": "tile_eoc_floor_sign_b1"
+        "27,18": "tile_eoc_floor_sign_b1",
+        "2,20": "tile_mu4yzgcg"
       },
       "top": {
         "20,15": "tile_containment_wall_top_straight",
@@ -13707,11 +13708,12 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
-        "c": 21,
+        "c": 20,
         "r": 19,
         "layer": "object3",
         "oy": 24,
-        "sortDepth": 0.75
+        "sortDepth": 0.75,
+        "ox": 30
       },
       {
         "id": "tile_eoc_locker",
@@ -13723,11 +13725,12 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_plant03",
-        "c": 23,
-        "r": 18,
+        "c": 3,
+        "r": 16,
         "layer": "object",
-        "oy": 26,
-        "sortDepth": 1.75
+        "oy": 22,
+        "sortDepth": 1.75,
+        "ox": -2
       },
       {
         "id": "tile_mu5e3ndv",
@@ -13874,7 +13877,7 @@ const BASE_MAPS = [
         "id": "tile_new_decor_fire_extinguisher",
         "c": 3,
         "r": 19,
-        "layer": "object3",
+        "layer": "overlay",
         "oy": 30,
         "ox": 30
       },
@@ -13894,14 +13897,6 @@ const BASE_MAPS = [
         "ox": -4
       },
       {
-        "id": "tile_eoc_walkie_talkie",
-        "c": 18,
-        "r": 18,
-        "layer": "object4",
-        "oy": 20,
-        "sortDepth": 1
-      },
-      {
         "id": "tile_eoc_drawer_unit",
         "c": 20,
         "r": 18,
@@ -13918,51 +13913,33 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_training_bench",
-        "c": 6,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_training_bench",
-        "c": 8,
-        "r": 22,
-        "layer": "floor"
+        "c": 7,
+        "r": 21,
+        "layer": "floor",
+        "oy": 20
       },
       {
         "id": "tile_training_bench",
         "c": 11,
-        "r": 22,
-        "layer": "floor"
+        "r": 21,
+        "layer": "floor",
+        "ox": 10,
+        "oy": 20
       },
       {
         "id": "tile_training_bench",
         "c": 13,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_training_bench",
-        "c": 2,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_training_bench",
-        "c": 4,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_training_bench",
-        "c": 7,
-        "r": 22,
-        "layer": "floor"
+        "r": 21,
+        "layer": "floor",
+        "ox": 10,
+        "oy": 20
       },
       {
         "id": "tile_training_bench",
         "c": 9,
-        "r": 22,
-        "layer": "floor"
+        "r": 21,
+        "layer": "floor",
+        "oy": 20
       },
       {
         "id": "tile_containment_wall",
@@ -14034,12 +14011,168 @@ const BASE_MAPS = [
         "layer": "ground"
       },
       {
+        "id": "tile_training_table",
+        "c": 15,
+        "r": 18,
+        "layer": "object4",
+        "ox": 4,
+        "oy": 20
+      },
+      {
         "id": "tile_field_ammo_crate_open",
-        "c": 16,
+        "c": 6,
         "r": 18,
         "layer": "overlay",
-        "ox": -4,
-        "oy": 0
+        "ox": 16
+      },
+      {
+        "id": "tile_prop_single_bed",
+        "c": 0,
+        "r": 22,
+        "layer": "object4",
+        "ox": 30
+      },
+      {
+        "id": "tile_mu4yyr9r",
+        "c": 29,
+        "r": 22,
+        "layer": "object4",
+        "ox": 10
+      },
+      {
+        "id": "tile_prop_tv_stand",
+        "c": 3,
+        "r": 18,
+        "layer": "object4",
+        "ox": 30
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 4,
+        "r": 17,
+        "layer": "object4",
+        "ox": 0,
+        "oy": 4
+      },
+      {
+        "id": "tile_new_decor_coffee_machine",
+        "c": 16,
+        "r": 18,
+        "layer": "object4",
+        "oy": 20
+      },
+      {
+        "id": "tile_mrt_planter",
+        "c": 21,
+        "r": 18,
+        "layer": "overlay",
+        "oy": 30,
+        "ox": 10
+      },
+      {
+        "id": "tile_eoc_plant_small_01",
+        "c": 19,
+        "r": 18,
+        "layer": "overlay",
+        "oy": 14,
+        "ox": 12
+      },
+      {
+        "id": "tile_hospital_plant_on_stool",
+        "c": 3,
+        "r": 22,
+        "layer": "object4",
+        "ox": 12,
+        "oy": -6
+      },
+      {
+        "id": "tile_hq_potted_plant",
+        "c": 20,
+        "r": 17,
+        "layer": "overlay",
+        "oy": 30
+      },
+      {
+        "id": "tile_eoc_pen_holder",
+        "c": 18,
+        "r": 18,
+        "layer": "overlay",
+        "ox": 12,
+        "oy": 14
+      },
+      {
+        "id": "tile_eoc_mug",
+        "c": 15,
+        "r": 18,
+        "layer": "object4",
+        "ox": 18,
+        "oy": 28,
+        "fx": true
+      },
+      {
+        "id": "tile_eoc_tissue_box",
+        "c": 18,
+        "r": 18,
+        "layer": "object4",
+        "ox": 28,
+        "oy": 14
+      },
+      {
+        "id": "tile_eoc_book_stack",
+        "c": 18,
+        "r": 19,
+        "layer": "overlay",
+        "ox": 36,
+        "oy": -8
+      },
+      {
+        "id": "tile_dorm_desk_lamp",
+        "c": 18,
+        "r": 18,
+        "layer": "overlay",
+        "oy": 16,
+        "ox": -2
+      },
+      {
+        "id": "tile_eoc_walkie_talkie",
+        "c": 18,
+        "r": 18,
+        "layer": "overlay",
+        "oy": 34,
+        "sortDepth": 1,
+        "ox": -4
+      },
+      {
+        "id": "tile_dorm_air_conditioner",
+        "c": 20,
+        "r": 16,
+        "layer": "object4",
+        "ox": 34,
+        "oy": 28
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 4,
+        "r": 17,
+        "layer": "object4",
+        "ox": 38,
+        "oy": 4
+      },
+      {
+        "id": "tile_interactive_flare_ammo",
+        "c": 1,
+        "r": 20,
+        "layer": "overlay",
+        "fx": true,
+        "oy": 10
+      },
+      {
+        "id": "tile_new_decor_box_three",
+        "c": 15,
+        "r": 19,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30
       }
     ],
     "solid": [
@@ -14190,7 +14323,8 @@ const BASE_MAPS = [
       "22,16",
       "21,16",
       "23,17",
-      "10,18"
+      "10,18",
+      "15,19"
     ],
     "breakable": [],
     "coreSpots": [],

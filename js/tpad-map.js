@@ -506,3 +506,22 @@ function tmapMiniUpdate() {
   ctx.fillStyle = '#4aa3ff'; ctx.fill(); ctx.lineWidth = 1.5; ctx.strokeStyle = '#fff'; ctx.stroke();
 }
 setInterval(tmapMiniUpdate, 100);
+
+// M 鍵：有右下角小地圖的地方（基地，見 js/base-minimap.js；戰鬥區域要裝備慣性導航記錄器），打開 T-Pad 的「地圖」；地圖開著時再按一次＝關掉
+window.addEventListener('keydown', e => {
+  if ((e.key || '').toLowerCase() !== 'm' || e.repeat || e.ctrlKey || e.altKey || e.metaKey) return;
+  if (e.target instanceof Element && e.target.closest('input, textarea, select, [contenteditable]')) return;   // 在打字
+  if (typeof tpadOpen === 'undefined' || typeof openTPad !== 'function') return;
+  if (tpadOpen) {
+    if (tpadView === 'map') { closeTPad(); e.preventDefault(); e.stopImmediatePropagation(); }
+    return;
+  }
+  const fieldMini = tmapMiniEl && tmapMiniEl.style.display !== 'none', baseMini = typeof bmapActive === 'function' && bmapActive();   // 基地小地圖收起來也算
+  if (!fieldMini && !baseMini) return;   // 戰鬥區域沒帶記錄器：M 沒有作用
+  if (G.over || (typeof paused !== 'undefined' && paused) || (typeof settingsOpen !== 'undefined' && settingsOpen)) return;
+  if (typeof dialogueState !== 'undefined' && dialogueState) return;   // 跟 Tab 一樣：對話、背包、其他介面開著時不要蓋上去
+  if (typeof backpackOpen !== 'undefined' && backpackOpen) return;
+  if (TPAD_APPS.some(a => { try { return a.isOpen && a.isOpen(); } catch (_) { return false; } })) return;
+  e.preventDefault();
+  openTPad(); if (tpadOpen) launchTPadApp('map');
+});

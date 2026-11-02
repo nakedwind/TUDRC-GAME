@@ -4,8 +4,13 @@ let poweredMap = null, mapPowerOn = new Set();   // 開著的電路編號
 const circuitOf = s => Math.max(0, Math.min(5, Math.floor(Number(s && s.circuit) || 0)));
 const isPoweredLightTile = tile => {
   const file=String(tile?.file||'').replaceAll('\\','/');
-  return file.endsWith('/electric-light-02.png') || /^electric-light-02(?:\.png)?$/i.test(String(tile?.name||'')) || tile?.id==='tile_interactive_electric_light_02';
+  return file.endsWith('/electric-light-02.png') || /^electric-light-02(?:\.png)?$/i.test(String(tile?.name||'')) || tile?.id==='tile_interactive_electric_light_02'
+    || isPoolcoreLed(tile);   // 池核的 LED 燈條（Poolcore_LED）
 };
+// 池核的 LED 燈條：關著＝Poolcore_LED，電源開著時畫成 Poolcore_LED_glow（js/storage-lockers.js 的 storagePropDisplayTile）
+const isPoolcoreLed = tile => /\/Poolcore_LED\.png$/i.test(String(tile?.file||'').replaceAll('\\','/'));
+const POOLCORE_LED_GLOW = 'images/Poolcore/Poolcore_LED_glow.png';
+function poolcoreLedGlowTile(){ return Object.values(TILE_REGISTRY).find(t=>String(t.file||'').replaceAll('\\','/')===POOLCORE_LED_GLOW)||null; }
 function resetMapPower(){poweredMap=MAP;mapPowerOn=new Set();}
 function mapPowerIsOn(circuit=0){return poweredMap===MAP&&mapPowerOn.has(circuit);}
 function toggleMapPower(circuit=0){if(poweredMap!==MAP)resetMapPower();if(mapPowerOn.has(circuit))mapPowerOn.delete(circuit);else mapPowerOn.add(circuit);}
