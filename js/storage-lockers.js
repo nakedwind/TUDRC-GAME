@@ -133,6 +133,8 @@ function useStoragePropNearPlayer(filter){
     flash('置物箱已打開',prop.x,prop.top-8,'#dce6ed',1.2);
   }else if((supplyInventory.get('storage-locker-key')||0)<=0){
     sfx('error');flash('需要鑰匙',prop.x,prop.top-8,'#ffcf89',1.4);
+  }else if(lockerBagFull(prop.stamp?.lockerLoot)){
+    showLockerBagFull(prop.stamp?.lockerLoot,'置物櫃');   // 箱子不打開、鑰匙不扣，東西留在裡面
   }else{
     const remainingKeys=supplyInventory.get('storage-locker-key')-1;
     if(remainingKeys>0)supplyInventory.set('storage-locker-key',remainingKeys);
@@ -158,6 +160,20 @@ function useStoragePropNearPlayer(filter){
     updateHUD();saveGame();
   }
   return true;
+}
+// 背包滿了：開箱前先看放不放得下。放不下＝跳視窗、箱子蓋回去（不算開過），東西留在箱子裡，整理背包後再來開
+// loot：地圖編輯器指定的內容物；沒指定＝隨機，開得出來的都是「物品」分類，那一類格子滿了就算滿
+const lockerLootIsBullet=loot=>loot?.kind==='bullet'||loot?.kind==='weapon';
+function lockerBagFull(loot){
+  if(!loot)return bagUsedSlots(supplyInventory,'consumable')>=bagCapacity('consumable');
+  if(loot.kind==='item')return carryRoom(loot.id)<=0;
+  if(lockerLootIsBullet(loot))return typeof bulletRoom==='function'&&bulletRoom(loot.id)<=0;
+  return false;   // 裝備、空箱：不佔背包
+}
+function showLockerBagFull(loot,where){
+  const bag=lockerLootIsBullet(loot)?'彈藥包':'背包';
+  itemIntro({key:'bag-full',always:true,headline:bag+'已滿',icon:'🎒',sound:'noticePopup',name:bag+'已經滿了',
+    desc:'這個'+where+'先不打開，裡面的東西會留在'+where+'裡。整理'+bag+'、空出位置後再回來打開。'});
 }
 // where：飄字裡說在哪裡找到的（彈藥箱也用這裡，js/flare.js）
 function grantLockerLoot(loot,where='置物櫃'){

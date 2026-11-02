@@ -217,6 +217,7 @@ const ammoCrateLooted = s => !!s && unlockedStorageLockers.has(ammoCrateToken(s)
 function useAmmoCrateNearPlayer() {
   const crate = ammoCrateNearPlayer(); if (!crate) return false;
   const s = crate.stamp; if (ammoCrateLooted(s)) return false;
+  if (lockerBagFull(s.lockerLoot)) { showLockerBagFull(s.lockerLoot, '彈藥箱'); return true; }   // 背包滿了：箱子不打開，東西留在裡面（js/storage-lockers.js）
   unlockedStorageLockers.add(ammoCrateToken(s)); sfx('door');
   // 開出來的東西跳視窗（js/item-intro.js）；什麼都沒有就飄字
   const before = typeof itemIntroCount !== 'undefined' ? itemIntroCount : 0;
