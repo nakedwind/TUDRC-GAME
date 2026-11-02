@@ -1062,6 +1062,7 @@ function draw() {
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
+  if (typeof mrtTrainSortables === 'function') mrtTrainSortables(sortables);   // 捷運列車（js/mrt-train.js）
   if (typeof streetVehicleSortables === 'function') streetVehicleSortables(sortables);   // K56 的機車、腳踏車（js/street-vehicles.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
   // 倒下的鳥頭人、珍珠小童的屍體：跟活著時一樣用腳底位置排前後，才不會被前面的牆蓋住

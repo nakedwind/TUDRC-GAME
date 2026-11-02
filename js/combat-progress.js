@@ -94,6 +94,7 @@ function compactCombatProgressText(text) {
 function reclaimAddedWalls() {
   if (typeof restoreBreakableWalls === 'function') restoreBreakableWalls();   // 可炸開的牆（js/breakable-walls.js）
   if (typeof restoreMrtLocks === 'function') restoreMrtLocks();               // 捷運閘門、封鎖的入口（js/mrt-locks.js）
+  if (typeof restoreMrtTrains === 'function') restoreMrtTrains();             // 停靠的捷運列車（js/mrt-train.js）
   if (typeof restoreStorageBoxWalls === 'function') restoreStorageBoxWalls();  // 置物箱（js/storage-lockers.js）
 }
 // 重新部署＝這張地圖一切重來：開過的箱子、撿過的東西也回到原樣（封鎖的捷運入口除外，解封是永久的，js/mrt-locks.js）

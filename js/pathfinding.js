@@ -14,10 +14,13 @@ const isWall = (c, r) => mapWalls.has(c + ',' + r);
 // 微調：MAP.edgeOffsets = { 'c,r,R': [dx, dy] }＝這條線整段平移幾像素（地圖編輯器「🎯 碰撞微調」，最多半格）
 const EDGE_WALL = { half: 5 };   // 薄牆的厚度一半（像素）：角色身體離線這麼近就算撞到
 let edgeSetMap = null, edgeSet = new Set(), edgeSegs = [];
+// 程式動態加的薄牆（停靠的捷運列車，js/mrt-train.js）：不存進地圖資料，換了就重建
+let edgeExtra = new Set(), edgeExtraVer = 0, edgeBuiltVer = -1;
+function setExtraEdges(set) { edgeExtra = set; edgeExtraVer++; }
 function mapEdgeSet() {   // 跟著目前的地圖重建（換地圖、從劇情地圖回到暫停的戰場都會自動對上）
   const m = typeof MAP !== 'undefined' ? MAP : null;
-  if (edgeSetMap !== m) {
-    edgeSetMap = m; edgeSet = new Set((m && m.edges) || []);
+  if (edgeSetMap !== m || edgeBuiltVer !== edgeExtraVer) {
+    edgeSetMap = m; edgeBuiltVer = edgeExtraVer; edgeSet = new Set([...((m && m.edges) || []), ...edgeExtra]);
     const offs = (m && m.edgeOffsets) || {};
     // 每條線換算成地圖上的線段（相對 OX、OY）：直線 x 固定、從 y0 到 y1；橫線 y 固定、從 x0 到 x1
     edgeSegs = [...edgeSet].map(k => {

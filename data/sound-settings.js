@@ -42,7 +42,7 @@ const SOUND_SETTINGS = {
     "hitShock": 1.2,
     "hitSplit": 1.3,
     "hitSticky": 2.25,
-    "hitTranq": 1.85,
+    "hitTranq": 2.1,
     "ironGateSlide": 2.8,
     "itemPickup": 1.65,
     "itemReveal": 1.2,
@@ -79,6 +79,7 @@ const SOUND_SETTINGS = {
     "shotShock": 1.3,
     "shotSplit": 1.4,
     "shotSticky": 1.5,
+    "shotTranq": 1.15,
     "smallBoom": 1.15,
     "stairsDown": 2.4,
     "stairsUp": 1.95,
@@ -119,7 +120,11 @@ const SOUND_SETTINGS = {
       ],
       "baseMusic": "../music/基地音樂/relaxing-piano-music.mp3",
       "bossElite": "../music/0-top-battle-game-bgm.mp3",
-      "boxLand": "pop.mp3"
+      "boxLand": "pop.mp3",
+      "bossCore": [
+        "戰鬥/異質核心甦醒.mp3",
+        "戰鬥/異質核心甦醒02.mp3"
+      ]
     },
     "extras": {},
     "meta": {}

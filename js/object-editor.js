@@ -33,6 +33,7 @@ $('delObj').onclick=()=>{if(objects.length<=1){alert('至少要保留一個物�
 $('pickImg').onclick=()=>$('imgFile').click();
 $('imgFile').onchange=()=>{const f=$('imgFile').files[0];if(!f)return;const path='images/item-obstacle/'+f.name;const done=(w,h)=>{const v=variant();v.file=path;if(w){v.w=Math.max(1,Math.min(10,w));v.h=Math.max(1,Math.min(10,h))}v.solid=(v.solid||[]).filter(([x,y])=>x<v.w&&y<v.h);save();render();setTimeout(()=>{$('status').textContent='✓ 路徑已填入。記得把圖片「'+f.name+'」放進 images/item-obstacle/ 資料夾'},950)};const probe=new Image();probe.onload=()=>{done(Math.round(probe.naturalWidth/OBJ_CELL),Math.round(probe.naturalHeight/OBJ_CELL));URL.revokeObjectURL(probe.src)};probe.onerror=()=>{done()};probe.src=URL.createObjectURL(f);$('imgFile').value=''};
 function source(kind='obstacles'){
+  if(kind==='mrtTrain')return MrtTrainEditor.source();   // 🚇 捷運列車（js/mrt-train-editor.js）
   if(kind==='props')return '/* 地圖物件自帶的行走碰撞（販賣機、營地的箱子、扭蛋機、夾娃娃機）：由物件編輯器匯出。\n   tile＝地圖上放的素材 id；h.solid＝從圖片左上角算，哪幾格擋路（[第幾欄, 第幾列]）。左右、上下翻轉的物件會跟著翻。 */\nconst PROP_COLLISIONS = '+JSON.stringify(objects.filter(o=>propIds.has(o.id)),null,2)+';\n';
   if(kind==='storageBoxes')return '/* 置物箱行走碰撞：由物件編輯器匯出。 */\nconst STORAGE_BOXES = '+JSON.stringify(objects.filter(o=>storageBoxIds.has(o.id)),null,2)+';\n';
   if(kind==='ores'){
@@ -44,5 +45,5 @@ function source(kind='obstacles'){
   return '/* ===== 物件資料（由物件編輯器匯出）===== */\nconst '+name+' = '+JSON.stringify(list,null,2)+';\n';
 }
 $('generate').onclick=()=>{$('out').value=source($('exportKind').value)};
-$('download').onclick=()=>{const kind=$('exportKind').value,a=document.createElement('a');a.href=URL.createObjectURL(new Blob([source(kind)],{type:'text/javascript'}));a.download=kind==='props'?'prop-collisions.js':kind==='storageBoxes'?'storage-boxes.js':kind==='ores'?'ores.js':kind==='decorations'?'decorations.js':'objects.js';a.click();URL.revokeObjectURL(a.href)};
+$('download').onclick=()=>{const kind=$('exportKind').value,a=document.createElement('a');a.href=URL.createObjectURL(new Blob([source(kind)],{type:'text/javascript'}));a.download=kind==='mrtTrain'?'mrt-train.js':kind==='props'?'prop-collisions.js':kind==='storageBoxes'?'storage-boxes.js':kind==='ores'?'ores.js':kind==='decorations'?'decorations.js':'objects.js';a.click();URL.revokeObjectURL(a.href)};
 $('reset').onclick=()=>{if(confirm('確定丟棄瀏覽器裡的編輯，從正式物件資料重新載入？')){objects=clone(defaults);localStorage.removeItem(STORE);index=0;render()}};render();

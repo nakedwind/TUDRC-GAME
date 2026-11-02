@@ -260,7 +260,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=nomissing-20261102"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=mkey-20261102"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=mrtsound-20261102"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=clawstock-20261101"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -288,7 +288,7 @@
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
-  <script src="data/maps.js?v=z62map-20261102"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
+  <script src="data/maps.js?v=mrtcars-20261102"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=merge-20261102"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=v2tiles-20261026"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
@@ -298,7 +298,7 @@
   <script src="js/chair-data.js?v=sync-20261021"></script>
   <script src="data/elevators.js?v=passage-20261002"></script> <!-- 電梯開關門的擋路格與遮擋深度 -->
   <script src="js/elevator-data.js?v=sync-20261021"></script>
-  <script src="js/pathfinding.js?v=edgenudge-20261101"></script>  <!-- 5. 固定牆與怪物尋路 -->
+  <script src="js/pathfinding.js?v=mrtride-20261102"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/maploader.js?v=portalnudge-20261102"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=waterdef-20261102"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/doors.js?v=archcut2-20261101"></script> <!-- 門：手動門／自動門 -->
@@ -339,7 +339,7 @@
   <script src="js/gourd-monkey.js?v=vehtoss-20261101"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=test-off-20261031"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=y25open9-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=stairarrow2-20261102"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=mrttrain-20261102"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=merge2-20261101"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/oil-barrels.js?v=merge2-20261101"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
@@ -384,7 +384,7 @@
   <script src="js/equipment.js?v=merge2-20261102"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
   <script src="js/special-guns.js?v=knockpearl-20261101"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=lvfx-20261102"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
-  <script src="js/combat-progress.js?v=slim-20261102"></script>
+  <script src="js/combat-progress.js?v=mrtride-20261102"></script>
   <script src="js/camp-interactions.js?v=cratefile-20261102"></script>
   <script src="js/camp-supply.js?v=boxrestock-20261102"></script>   <!-- 營地物資箱：嚮導的醫療包、杏仁水 -->
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
@@ -393,9 +393,11 @@
   <script src="js/camp-beds.js?v=healstop3-20261102"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
   <script src="js/mrt-locks.js?v=pausebattle-20261101"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
+  <script src="data/mrt-train.js?v=sound-20261102"></script>   <!-- 捷運列車的設定（物件編輯器匯出） -->
+  <script src="js/mrt-train.js?v=sound-20261102"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=minimap-20261102"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=summonescort2-20261102"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=mrttrain-20261102"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
   <script src="js/graffiti.js?v=custom2-20261028"></script>   <!-- 塗鴉筆：在牆上、地板、物品上畫記號 -->

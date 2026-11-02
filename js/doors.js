@@ -306,7 +306,18 @@ function drawPadlock(ctx, x, y, s, color, t) {
 function dropDoorChains(d) {
   (G.doorChainFx = G.doorChainFx || []).push({ left: d.left + 2, right: d.right - 2, top: d.y0 + (d.y - d.y0) * .2, bottom: d.y - 6, drop: 0, vy: 0, spin: 0, t: 0, life: .9 });
 }
+// ---- 敲門聲（data/doors.js 的 knock）：溫特每次走近關著的門，有機率聽到門後有人敲門（有沒有上鎖都一樣）----
+function updateDoorKnocks() {
+  const p = G.player; if (!p) return;
+  for (const d of mapDoors) {
+    const chance = DOOR_TILES[d.stamp.id] && DOOR_TILES[d.stamp.id].knock; if (!chance) continue;
+    const near = Math.hypot(d.x - p.x, Math.max(d.rowTopY, Math.min(d.rowBotY, p.y)) - p.y) < DOOR.radius;
+    if (near && !d.knockNear && !d.open && Math.random() < chance && typeof sfxAt === 'function') sfxAt('doorKnock', d.x, d.y, .7, 'door-knock');
+    d.knockNear = near;   // 要先走開再走近，才會再抽一次
+  }
+}
 function updateDoorFx(dt) {
+  updateDoorKnocks();
   if (typeof updateMemoryShards === 'function') updateMemoryShards(dt);
   if (!G.doorChainFx || !G.doorChainFx.length) return;
   for (const f of G.doorChainFx) { f.t += dt; f.vy += 600 * dt; f.drop += f.vy * dt; f.spin += dt * 1.5; }

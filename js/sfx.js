@@ -38,11 +38,18 @@ const SFX = (() => {
     bikeBell: '環境/腳踏車鈴聲.mp3',
     door: '環境/門與機關/關門.mp3',
     backroomDoor: '環境/門與機關/後室開門.mp3',
+    doorKnock: '環境/門與機關/敲門.mp3',      // 走近後室的門，20% 機率門後傳來敲門聲（data/doors.js 的 knock）
     lockedDoor: '環境/門與機關/關門.mp3',     // 鎖住的房門：轉門把（js/locked-doors.js）
     doorUnlock: '環境/門與機關/關門.mp3',     // 用後室門鑰匙開鎖（js/doors.js）
     chainUnlock: '設施/打磨.mp3',             // 解開神秘門的鎖鏈（js/doors.js）
     mrtGate: '環境/門與機關/剪票口.mp3',      // 捷運閘門刷好遊卡（js/mrt-locks.js）
     mrtUnlock: '設施/打磨.mp3',               // 用異質鑰匙解封捷運入口（js/mrt-locks.js）
+    mrtArrive: '環境/門與機關/板南線-藍線.mp3',               // 捷運列車：到站音樂（響 5 秒後列車才出現，js/mrt-train.js）
+    mrtDoorOpen: '環境/門與機關/台北捷運開門聲.mp3',          // 捷運列車：車門打開
+    mrtDepartWarn: '環境/門與機關/臺北捷運標準離站警示音.mp3', // 捷運列車：門開好 5 秒後的離站警示音
+    mrtDoorWarn: '環境/門與機關/車門即將關閉.mp3',            // 捷運列車：「車門即將關閉」
+    mrtDoorClose: '環境/門與機關/台北捷運關門聲.mp3',         // 捷運列車：車門關上
+    mrtDepart: '環境/門與機關/列車啟動音.m4a',                // 捷運列車：開走（列車啟動音）
     elevator: '環境/門與機關/電梯.mp3',
     storyDoor: '環境/門與機關/電梯.mp3',   // 回憶劇情的自動門開關（data/story-scenes.js 的 sfx；先借電梯聲，可在音效編輯器換）
     stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3',   // 走逃生樓梯下樓（js/game.js 的 enterPortal）

@@ -955,6 +955,8 @@ function drawStamp(s) {
   if (!s.blend && alpha === 1) drawStampRaw(s);
   else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
   if (s.still) drawStillBadge(s);
+  if (s.cars > 0 && s.id === 'tile_mrt_train_car_head') drawMrtExtraCars(s);
+  if (s.bothDoors && MRT_TRAIN_CAR_IDS.has(s.id)) drawMrtDoorsBadge(s);
   if (s.glow) {   // 發光：畫一圈淡淡的虛線，標出照亮的範圍（只在編輯器裡看得到）
     const t = tileById(s.id) || {}, cx = OX + s.c * CELL + (s.ox || 0) + stampW(s, t) * CELL / 2, cy = OY + s.r * CELL + (s.oy || 0) + stampH(s, t) * CELL / 2;
     ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = 'rgba(255,214,102,.55)'; ctx.lineWidth = 1.5;
@@ -966,6 +968,25 @@ function drawStillBadge(s) {
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
   ctx.save(); ctx.fillStyle = 'rgba(190,40,50,.9)'; ctx.fillRect(x, y, 30, 15);
   ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('不動', x + 4, y + 8); ctx.restore();
+}
+// 捷運車廂設成「兩側車門都開」：左上角標一下（js/mrt-train.js）
+function drawMrtDoorsBadge(s) {
+  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  ctx.save(); ctx.fillStyle = 'rgba(40,110,200,.9)'; ctx.fillRect(x, y, 62, 15);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('兩側開門', x + 4, y + 8); ctx.restore();
+}
+// 車頭後面自動接的車廂（stamp.cars）：半透明畫出來，看得出整列多長（遊戲裡才是真的車廂）
+function drawMrtExtraCars(s) {
+  const t = tileById('tile_mrt_train_car_middle'), rec = t && ensureTileImg(t); if (!rec || !rec.loaded) return;
+  const w = stampW(s, t) * CELL, h = stampH(s, t) * CELL, head = tileById(s.id), hw = head ? stampW(s, head) * CELL : w;
+  const x0 = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  ctx.save(); ctx.globalAlpha *= .45;
+  for (let i = 1; i <= Math.min(9, s.cars); i++) {
+    const x = s.fx ? x0 + hw + (i - 1) * w : x0 - i * w;
+    drawImageFlipped(rec.img, x, y, w, h, s.fx, false, 0, false);
+    ctx.strokeStyle = '#7ec8ff'; ctx.setLineDash([6, 4]); ctx.strokeRect(x + 1, y + 1, w - 2, h - 2);
+  }
+  ctx.restore();
 }
 function drawStampRaw(s) {
   const t = tileById(s.id); if (!t) return;
@@ -2523,6 +2544,46 @@ function refreshStillControl() {
   toggle.checked = off === 0; toggle.indeterminate = off > 0 && off < list.length;
   document.getElementById('stillToggleText').textContent = list.every(s => isStillEscalator(s.id)) ? '手扶梯會動' : list.some(s => isStillEscalator(s.id)) ? '會動' : '會暴衝撞人';
 }
+// ---- 捷運車廂：停靠時兩側車門都開（stamp.bothDoors），沒勾＝只開靠月台那側（js/mrt-train.js）----
+// 同一排的車廂算同一班車，其中一節勾了整班都兩側開；可以一次選好幾節一起切換
+const MRT_TRAIN_CAR_IDS = new Set(['tile_mrt_train_car_head', 'tile_mrt_train_car_middle']);
+function selectedMrtCars() {
+  const m = curMap();
+  return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(s => s && MRT_TRAIN_CAR_IDS.has(s.id));
+}
+function refreshMrtDoorsControl() {
+  let box = document.getElementById('mrtDoorsControl');
+  if (!box) {
+    box = document.createElement('div'); box.id = 'mrtDoorsControl'; box.className = 'blend-control';
+    box.innerHTML = '<label title="沒勾：只開靠月台這側（外側）的車門；勾了：對面的車門也一起開。同一排的車廂算同一班車"><input type="checkbox" id="mrtDoorsToggle"> 兩側車門都開</label>' +
+      '<label id="mrtCarsBox" title="遊戲裡自動在車頭後面接上中段車廂（地圖放不下也沒關係，軌道外的部分不會畫）">車頭後面接 <input type="number" id="mrtCarsInput" min="0" max="9" step="1" style="width:46px"> 節車廂</label>';
+    document.getElementById('selControls').appendChild(box);
+    document.getElementById('mrtCarsInput').addEventListener('change', e => {
+      if (dropLockedSelections('改車廂節數')) return;
+      const heads = selectedMrtCars().filter(s => s.id === 'tile_mrt_train_car_head'); if (!heads.length) return;
+      const n = Math.max(0, Math.min(9, Math.floor(+e.target.value || 0)));
+      pushUndo();
+      for (const s of heads) { if (n) s.cars = n; else delete s.cars; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus('車頭後面接 ' + n + ' 節車廂', '#7ee0c0');
+    });
+    document.getElementById('mrtDoorsToggle').addEventListener('change', e => {
+      if (dropLockedSelections('切換車門')) return;
+      const list = selectedMrtCars(); if (!list.length) return;
+      pushUndo();
+      for (const s of list) { if (e.target.checked) s.bothDoors = true; else delete s.bothDoors; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus(list.length + ' 節車廂已設為' + (e.target.checked ? '兩側車門都開' : '只開月台這側'), '#7ee0c0');
+    });
+  }
+  const list = selectedMrtCars(); box.classList.toggle('hidden', !list.length);
+  if (!list.length) return;
+  const toggle = document.getElementById('mrtDoorsToggle'), on = list.filter(s => s.bothDoors).length;
+  toggle.checked = on === list.length; toggle.indeterminate = on > 0 && on < list.length;
+  const heads = list.filter(s => s.id === 'tile_mrt_train_car_head');
+  document.getElementById('mrtCarsBox').classList.toggle('hidden', !heads.length);
+  if (heads.length) document.getElementById('mrtCarsInput').value = heads[0].cars || 0;
+}
 function refreshBlendControl() {
   let box = document.getElementById('blendControl');
   if (!box) {
@@ -2745,6 +2806,7 @@ function refreshSelPanel() {
   refreshLockTextControl();
   refreshBlendControl();   // 混合模式、不透明度、發光
   refreshStillControl();   // 機車、手扶梯會不會動
+  refreshMrtDoorsControl();   // 捷運車廂：兩側車門都開
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;
