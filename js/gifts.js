@@ -216,7 +216,9 @@ function giveCostumeGift(costumeId) {
 const giftItemList = () => allItems().filter(item => item.kind === 'snack' || item.kind === 'drink');
 function generateRequests() {
   for (const k of Object.keys(giftRequests)) delete giftRequests[k];
-  const present = [...new Set([...(G.npcs || []), ...(G.towers || [])].map(giftableId))].filter(canReceiveGifts);   // 在基地裡的人
+  const here = [...(G.npcs || []), ...(G.towers || [])].map(giftableId);   // 這層樓的人
+  const elsewhere = typeof npcLocationTable === 'function' ? Object.keys(npcLocationTable()).filter(id => npcLocation(id)) : [];   // 其他樓層的人（例：B1 訓練室的塔納、柯林）
+  const present = [...new Set([...here, ...elsewhere])].filter(canReceiveGifts);   // 在基地裡的人
   const n = Math.min(present.length, REQUEST_RULES.min + Math.floor(Math.random() * (REQUEST_RULES.max - REQUEST_RULES.min + 1)));
   const pool = [...present].sort(() => Math.random() - .5).slice(0, n);
   for (const id of pool) {

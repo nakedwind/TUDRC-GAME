@@ -88,7 +88,7 @@ const BACKPACK_LAYOUT = {
     "item:power-shard": {
       "size": 45
     },
-    "item:sloth-shard": {
+    "item:devotion-shard": {
       "size": 45
     },
     "item:burning-key": {
@@ -106,7 +106,7 @@ const BACKPACK_LAYOUT = {
     "item:power-key": {
       "size": 40
     },
-    "item:sloth-key": {
+    "item:devotion-key": {
       "size": 40
     },
     "item:quiet-key": {

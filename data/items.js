@@ -25,7 +25,7 @@ const ITEMS = [
   { id: 'warm-shard',    name: '溫暖的碎片',   category: 'key', image: SHARD_DIR + 'warm-shard.png',    noDrop: true, desc: '握在手心裡，有種讓人安心的溫度。' },
   { id: 'black-shard',   name: '漆黑的碎片',   category: 'key', image: SHARD_DIR + 'black-shard.png',   noDrop: true, desc: '漆黑得看不見底，邊緣像是被什麼侵蝕過。' },
   { id: 'power-shard',   name: '充滿力量的碎片', category: 'key', image: SHARD_DIR + 'power-shard.png', noDrop: true, desc: '沉甸甸的，裡面好像有股力量在脈動。' },
-  { id: 'sloth-shard',   name: '怠惰的碎片',   category: 'key', image: SHARD_DIR + 'sloth-shard.png',   noDrop: true, desc: '軟綿綿的光，看著看著就想打哈欠。' },
+  { id: 'devotion-shard', name: '奉獻的碎片', category: 'key', image: SHARD_DIR + 'sloth-shard.png',   noDrop: true, desc: '暖暖的光一直往外送，好像怎麼給都給不完。' },
   { id: 'quiet-shard',   name: '寂靜的碎片',   category: 'key', image: SHARD_DIR + 'quiet-shard.png',   noDrop: true, desc: '拿在手上，周圍的聲音好像都安靜了下來。' },
   { id: 'spirit-shard',  name: '精神的碎片',   category: 'key', image: SHARD_DIR + 'spirit-shard.png',  noDrop: true, desc: '透著深藍色的光，凝視久了，心情會慢慢沉靜。' },
   { id: 'regret-shard',  name: '遺憾的碎片',   category: 'key', image: SHARD_DIR + 'regret-shard.png',  noDrop: true, desc: '冰冷的淡藍色，像是沒能說出口的話。' },
@@ -35,7 +35,7 @@ const ITEMS = [
   { id: 'warm-key',    name: '溫暖的鑰匙',   category: 'key', image: SHARD_DIR + 'warm-key.png',    desc: '用溫暖的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
   { id: 'black-key',   name: '漆黑的鑰匙',   category: 'key', image: SHARD_DIR + 'black-key.png',   desc: '用漆黑的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
   { id: 'power-key',   name: '充滿力量的鑰匙', category: 'key', image: SHARD_DIR + 'power-key.png', desc: '用充滿力量的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
-  { id: 'sloth-key',   name: '怠惰的鑰匙',   category: 'key', image: SHARD_DIR + 'sloth-key.png',   desc: '用怠惰的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
+  { id: 'devotion-key', name: '奉獻的鑰匙', category: 'key', image: SHARD_DIR + 'sloth-key.png',   desc: '用奉獻的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
   { id: 'quiet-key',   name: '寂靜的鑰匙',   category: 'key', image: SHARD_DIR + 'quiet-key.png',   desc: '用寂靜的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
   { id: 'spirit-key',  name: '精神的鑰匙',   category: 'key', image: SHARD_DIR + 'spirit-key.png',  desc: '用精神的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
   { id: 'regret-key',  name: '遺憾的鑰匙',   category: 'key', image: SHARD_DIR + 'regret-key.png',  desc: '用遺憾的碎片拼成的鑰匙。可以打開某扇記憶之門。' },
@@ -48,7 +48,7 @@ const MEMORY_KEYS = [
   { shard: 'warm-shard',    key: 'warm-key',    need: 3 },   // 諾亞篇
   { shard: 'black-shard',   key: 'black-key',   need: 3 },   // 阿瓦倫篇
   { shard: 'power-shard',   key: 'power-key',   need: 3 },   // 路德篇
-  { shard: 'sloth-shard',   key: 'sloth-key',   need: 3 },   // 克莉思篇
+  { shard: 'devotion-shard', key: 'devotion-key', need: 3 },   // 柯林篇
   { shard: 'quiet-shard',   key: 'quiet-key',   need: 3 },   // 亞許篇
   { shard: 'spirit-shard',  key: 'spirit-key',  need: 3 },   // 溫特篇（溫特是玩家，碎片的取得方式待定）
   { shard: 'regret-shard',  key: 'regret-key',  need: 3 },   // 艾德林篇
