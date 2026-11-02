@@ -188,6 +188,9 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
   animation: shop-fade .16s ease-out both;
 }
 #wrap:has(#teamEditPanel:not(.hidden)) #systemNotices { z-index: 50; }
+/* 開發工坊開著：提示移到畫面正上方置中、蓋在工坊上面（不然在右上角被工坊的模糊背景蓋住看不清楚） */
+#wrap:has(#workshop:not(.hidden)) #systemNotices { z-index: 40; left: 50%; right: auto; transform: translateX(-50%); align-items: center; width: min(520px, calc(100% - 44px)); }
+#wrap:has(#workshop:not(.hidden)) .system-notice { text-align: center; background: rgba(0,0,0,.82); }
 .team-dialog {
   display: flex; flex-direction: column; width: min(1000px, 94%); max-height: 88%; min-height: 0; overflow: hidden;
   border: 1px solid rgba(255,212,121,.38); border-radius: 16px; color: #e8eef3;

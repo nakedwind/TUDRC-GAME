@@ -1013,11 +1013,10 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_poster",
-        "c": 38,
+        "c": 39,
         "r": 8,
         "layer": "object",
-        "ox": 40,
-        "oy": 8
+        "oy": 18
       },
       {
         "id": "tile_new_decor_water_dispenser",
@@ -1201,8 +1200,7 @@ const BASE_MAPS = [
         "c": 48,
         "r": 8,
         "layer": "ground2",
-        "ox": 0,
-        "oy": 6
+        "oy": 16
       },
       {
         "id": "tile_new_decor_chair_side",
@@ -1291,8 +1289,7 @@ const BASE_MAPS = [
         "c": 42,
         "r": 8,
         "layer": "object",
-        "ox": 0,
-        "oy": 6
+        "oy": 16
       },
       {
         "id": "tile_new_bg_wall",
@@ -1480,13 +1477,17 @@ const BASE_MAPS = [
         "id": "tile_new_decor_poster",
         "c": 11,
         "r": 8,
-        "layer": "object"
+        "layer": "object",
+        "oy": 16,
+        "ox": 0
       },
       {
         "id": "tile_eoc_distance_poster",
         "c": 15,
         "r": 8,
-        "layer": "object"
+        "layer": "object",
+        "oy": 16,
+        "ox": 0
       },
       {
         "id": "tile_eoc_locker",
@@ -2793,27 +2794,20 @@ const BASE_MAPS = [
       {
         "c": 22,
         "r": 10,
-        "to": "map_mubk73un"
-      },
-      {
-        "c": 14,
-        "r": 10,
-        "to": "map_mue26feq"
+        "to": "map_mubk73un",
+        "ox": 20
       },
       {
         "c": 13,
         "r": 10,
-        "to": "map_mue26feq"
-      },
-      {
-        "c": 23,
-        "r": 10,
-        "to": "map_mubk73un"
+        "to": "map_mue26feq",
+        "ox": 18
       },
       {
         "c": 58,
         "r": 5,
-        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734"
+        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734",
+        "ox": -8
       },
       {
         "c": 7,
@@ -2823,7 +2817,9 @@ const BASE_MAPS = [
       {
         "c": 56,
         "r": 7,
-        "to": "map_musbsgj3"
+        "to": "map_musbsgj3",
+        "ox": 12,
+        "oy": -8
       },
       {
         "c": 5,
@@ -3700,12 +3696,8 @@ const BASE_MAPS = [
       {
         "c": 14,
         "r": 4,
-        "to": "map_mufvtoiq"
-      },
-      {
-        "c": 14,
-        "r": 5,
-        "to": "map_mufvtoiq"
+        "to": "map_mufvtoiq",
+        "oy": 14
       }
     ],
     "solidOffsets": {
@@ -7490,12 +7482,16 @@ const BASE_MAPS = [
       {
         "c": 7,
         "r": 5,
-        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734"
+        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734",
+        "ox": -5,
+        "oy": 3
       },
       {
         "c": 5,
         "r": 7,
-        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734"
+        "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734",
+        "ox": 11,
+        "oy": -10
       },
       {
         "c": 56,
@@ -7503,6 +7499,12 @@ const BASE_MAPS = [
         "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734",
         "ox": 11,
         "oy": -15
+      },
+      {
+        "c": 58,
+        "r": 5,
+        "to": "map_mu5ad7t2",
+        "ox": -6
       }
     ],
     "solidOffsets": {
@@ -9228,12 +9230,8 @@ const BASE_MAPS = [
       {
         "c": 20,
         "r": 2,
-        "to": "map_mu5ad7t2"
-      },
-      {
-        "c": 20,
-        "r": 3,
-        "to": "map_mu5ad7t2"
+        "to": "map_mu5ad7t2",
+        "ox": -4
       },
       {
         "c": 23,
@@ -9258,7 +9256,9 @@ const BASE_MAPS = [
       {
         "c": 18,
         "r": 4,
-        "to": "map_mvfmo6c2"
+        "to": "map_mvfmo6c2",
+        "ox": 13,
+        "oy": -12
       }
     ],
     "cols": 27,
@@ -12184,17 +12184,15 @@ const BASE_MAPS = [
       {
         "c": 17,
         "r": 3,
-        "to": "map_mussl5gx"
-      },
-      {
-        "c": 19,
-        "r": 2,
-        "to": "map_mvfpx57b"
+        "to": "map_mussl5gx",
+        "ox": 11,
+        "oy": -2
       },
       {
         "c": 19,
         "r": 1,
-        "to": "map_mvfpx57b"
+        "to": "map_mvfpx57b",
+        "ox": -6
       }
     ],
     "cols": 25,
@@ -14359,17 +14357,15 @@ const BASE_MAPS = [
       {
         "c": 26,
         "r": 13,
-        "to": "map_musbsgj3"
-      },
-      {
-        "c": 26,
-        "r": 14,
-        "to": "map_musbsgj3"
+        "to": "map_musbsgj3",
+        "ox": -6
       },
       {
         "c": 24,
         "r": 15,
-        "to": "map_mvfpx57b"
+        "to": "map_mvfpx57b",
+        "ox": 11,
+        "oy": -10
       }
     ],
     "cols": 34,
@@ -15288,12 +15284,14 @@ const BASE_MAPS = [
       {
         "c": 23,
         "r": 6,
-        "to": "map_mvfmo6c2"
+        "to": "map_mvfmo6c2",
+        "ox": -5
       },
       {
         "c": 21,
         "r": 7,
-        "to": "map_musu0dlp"
+        "to": "map_musu0dlp",
+        "ox": 11
       }
     ],
     "cols": 29,
@@ -16696,22 +16694,28 @@ const BASE_MAPS = [
       {
         "c": 7,
         "r": 5,
-        "to": "map_mufyx9gj"
+        "to": "map_mufyx9gj",
+        "ox": -4
       },
       {
         "c": 5,
         "r": 7,
-        "to": "map_mu5ad7t2"
+        "to": "map_mu5ad7t2",
+        "ox": 11,
+        "oy": -5
       },
       {
         "c": 56,
         "r": 7,
-        "to": "map_mu5ad7t2"
+        "to": "map_mu5ad7t2",
+        "ox": 12,
+        "oy": -11
       },
       {
         "c": 58,
         "r": 5,
-        "to": "map_mufyx9gj"
+        "to": "map_mufyx9gj",
+        "ox": -6
       },
       {
         "c": 13,

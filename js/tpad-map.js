@@ -524,4 +524,4 @@ window.addEventListener('keydown', e => {
   if (TPAD_APPS.some(a => { try { return a.isOpen && a.isOpen(); } catch (_) { return false; } })) return;
   e.preventDefault();
   openTPad(); if (tpadOpen) launchTPadApp('map');
-});
+}, true);   // capture：比其他按鍵處理先收到（T-Pad 開著時別的處理會把按鍵擋掉）
