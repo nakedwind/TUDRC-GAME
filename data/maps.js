@@ -40068,7 +40068,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_mvvdbiyx",
-    "name": "K56區-地下街",
+    "name": "Z62區-地下街",
     "desc": "",
     "layers": {
       "floor": {
@@ -41192,7 +41192,10 @@ const BATTLE_MAPS = [
         "101,39": "tile_mr4czvpx",
         "101,28": "tile_mr4czvpx"
       },
-      "object2": {},
+      "object2": {
+        "18,88": "tile_interactive_storage_locker_key",
+        "15,69": "tile_interactive_storage_locker_key"
+      },
       "object3": {
         "61,68": "tile_street_plastic_stool",
         "45,28": "tile_street_plastic_stool",
@@ -60212,9 +60215,43 @@ const BATTLE_MAPS = [
         "c": 62,
         "r": 93,
         "to": "map_mvtnqrs7"
+      },
+      {
+        "c": 67,
+        "r": 5,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 68,
+        "r": 5,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 70,
+        "r": 5,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 69,
+        "r": 5,
+        "to": "map_mvxz356e"
+      },
+      {
+        "c": 71,
+        "r": 5,
+        "to": "map_mvxz356e"
       }
     ],
-    "hiddenPickups": [],
+    "hiddenPickups": [
+      "object7:46,86",
+      "object7:56,87",
+      "object7:67,66",
+      "object7:66,41",
+      "object7:99,31",
+      "object7:42,35",
+      "object7:87,89",
+      "object7:93,76"
+    ],
     "cols": 106,
     "rows": 96,
     "layerOrder": [
