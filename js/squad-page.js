@@ -14,7 +14,7 @@ const SQ_SKILL_TREE_HIDDEN = ['tino'];
 // 編輯器預覽（?squadedit=1）一律用舊版，排版編輯器調的位置才對得上
 const SQUAD_UI_V2 = true;
 const sqV2 = () => SQUAD_UI_V2 && !/[?&]squadedit=1(&|$)/.test(location.search);
-const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null, solo: null, card: null };   // card：V2 說明卡開著的是哪位隊員   // solo：只看這一位（對話的「推薦裝備」打開的，左邊不列其他隊員）
+const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null, solo: null, card: null };   // card：V2 說明卡開著的是哪位隊員   // solo：只看這一位（對話的「隊員資訊」打開的，左邊不列其他隊員）
 const SQ_STATS = [
   { id: 'atk', name: '攻擊', icon: 'atk', val: s => s.noAttack ? '—' : String(s.dmg), num: s => s.dmg },
   { id: 'def', name: '防禦', icon: 'def', val: s => Math.round((s.defense || 0) * 100) + '%', num: s => Math.round((s.defense || 0) * 100) },
@@ -750,7 +750,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
   requestAnimationFrame(loop);
 })();
 
-// ---- 跟隊友對話：「🎽 推薦裝備」按鈕（js/game.js 的 openDialogue 呼叫），只在基地：直接打開 T-Pad 這位隊員的裝備頁 ----
+// ---- 跟隊友對話：「🎽 隊員資訊」按鈕（js/game.js 的 openDialogue 呼叫），只在基地：直接打開 T-Pad 這位隊員的裝備頁 ----
 const gearTargetOf = actor => { const id = actor && (actor.kind === 'tower' ? actor.type : actor.id);
   return id && typeof ROSTER !== 'undefined' && ROSTER.includes(id) && TYPES[id] ? id : null; };
 function onDialogueOpenedGear(actor) {

@@ -88,9 +88,10 @@ function costumeSelectedSkin(id, mode, eqOverride) {
   if (mode === 'battle' && SKIN_BY_ID[eq.base] && SKIN_BY_ID[eq.base].sortie) return eq.base;
   return mode === 'base' ? eq.base : eq.battle;
 }
+const costumeModeNow = () => MAP_SAFE && !MAP_STORY ? 'base' : 'battle';   // 現在是基地還是出勤（劇情地圖：穿著原本出勤的那套）
 function costumeOutfit(id, folder) {
   const eq = costumeState.equip[id]; if (!eq) return null;
-  const mode = MAP_SAFE && !MAP_STORY ? 'base' : 'battle';   // 劇情地圖：穿著原本出勤的那套
+  const mode = costumeModeNow();
   const want = costumeSelectedSkin(id, mode);
   if (want && !costumeSkinFitsMode(SKIN_BY_ID[want], mode)) return null;   // 這裡不能穿：照原本
   return want ? costumeSkinSet(id, folder, want) : null;
@@ -181,7 +182,7 @@ function buildWardrobe() {
   el.innerHTML = '<section class="wd-card"><header class="wd-head"><div class="wd-title"><h2></h2><p></p></div>'
     + '<button type="button" class="wd-close" aria-label="關閉（Esc）">×</button></header>'
     + '<div class="wd-body">'
-    + '<div class="wd-stage"><nav class="wd-mode"><button type="button" data-mode="base">基地</button><button type="button" data-mode="battle">戰鬥</button></nav>'
+    + '<div class="wd-stage">'
     + '<canvas class="wd-preview" width="192" height="192"></canvas>'
     + '<div class="wd-turn"><button type="button" data-turn="-1" aria-label="往左轉">◀</button><span></span><button type="button" data-turn="1" aria-label="往右轉">▶</button></div>'
     + '<p class="wd-wearing"></p><button type="button" class="wd-confirm">確定更換</button></div>'
@@ -191,8 +192,7 @@ function buildWardrobe() {
   el.querySelector('.wd-confirm').addEventListener('click', confirmCostume);
   el.addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    if (b.dataset.mode) { wd.mode = b.dataset.mode; renderWardrobe(); }
-    else if (b.dataset.turn) { wd.dir = (wd.dir + Number(b.dataset.turn) + 4) % 4; renderWardrobe(); }
+    if (b.dataset.turn) { wd.dir = (wd.dir + Number(b.dataset.turn) + 4) % 4; renderWardrobe(); }
     else if (b.dataset.slot) { wd.slot = b.dataset.slot; renderWardrobe(); }
     else if ('wear' in b.dataset) wearCostume(b.dataset.wear);
   });
@@ -235,7 +235,6 @@ function renderWardrobe() {
   el.querySelector('.wd-title h2').textContent = self ? '衣櫃' : '推薦穿搭';
   el.querySelector('.wd-title p').textContent = self ? '換上服裝和配件' : '幫' + CHARACTERS[id].name + '挑選服裝和配件';
   el.setAttribute('aria-label', self ? '衣櫃' : '推薦穿搭');
-  el.querySelectorAll('.wd-mode [data-mode]').forEach(b => b.classList.toggle('on', b.dataset.mode === wd.mode));
   el.querySelector('.wd-turn span').textContent = WD_DIR_NAMES[WD_DIRS[wd.dir]];
   el.querySelector('.wd-tabs').innerHTML = COSTUME_SLOTS.map(s => '<button type="button" data-slot="' + s.id + '" class="' + (s.id === wd.slot ? 'on' : '') + '">' + s.name + '</button>').join('');
   // 衣服格：skin＝這個角色能穿的；配件＝擁有的、這個欄位的，第一格是「不戴」
@@ -282,6 +281,7 @@ function openWardrobe(who = 'winter') {
   if (wardrobeOpen || !CHARACTERS[who]) return;
   if (!wd.el) buildWardrobe();
   wardrobeOpen = true; wd.t0 = performance.now(); wd.who = who;
+  wd.mode = costumeModeNow();   // 不分基地／戰鬥：顯示、換的都是「現在」身上穿的那套（衣櫃在基地＝基地那套；出勤時另外照出勤的設定）
   wd.draft = Object.assign({}, costumeState.equip[who] || {});   // 試穿從身上這套開始；沒按「確定更換」就關掉＝不換
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
   wd.el.classList.remove('hidden'); renderWardrobe();

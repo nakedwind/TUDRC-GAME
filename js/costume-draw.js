@@ -66,12 +66,29 @@ function accImage(src) { if (!src) return null; let img = accImgCache[src]; if (
 for (const a of COSTUME_ACCESSORIES) for (const src of [...Object.values(a.art || {}), ...Object.values(a.blink || {})]) if (typeof src === 'string') accImage(src);   // 先載好，第一次畫就看得到
 
 const pick3 = (o, a, b, c) => o && o[a] && o[a][b] && o[a][b][c];
-// 這個配件在這個角色、這個方向要放哪裡；from＝用到哪一層（'item'、'anchor'、'slot'）
+// 特別姿勢（目前只有球球坐下，js/ball-poses.js）：位置一樣存在 items／anchors，方向名稱用 sitLeft、sitRight
+//   坐下圖（58×41）底邊對齊、左右置中放進 64×64 的框，跟走路圖同一個座標
+//   還沒調過：sitRight 先用 sitLeft 左右對稱；都沒調過就用站著那個方向（stand）的位置＋位移 dx、dy（坐下頭比走路高 2 像素）
+//   art＝配件用哪個方向的圖
+const COSTUME_POSES = {
+  sitLeft: { stand: 'left', art: 'left', dx: 0, dy: -2 },
+  sitRight: { stand: 'right', art: 'right', dx: 0, dy: -2, mirror: 'sitLeft' },
+};
+const mirrorPl = p => ({ ...p, x: 64 - p.x, rot: p.rot ? -p.rot : 0 });   // 左右對稱（跟服裝編輯器的「鏡射」一樣）
+// 特別姿勢沒調過時的位置；info(方向)＝那個方向的 { pl, from }
+function posePlacementFallback(dir, info) {
+  const pose = COSTUME_POSES[dir];
+  if (pose.mirror) { const m = info(pose.mirror); if (m.from === 'item' || m.from === 'anchor') return { pl: mirrorPl(m.pl), from: 'mirror' }; }
+  const s = info(pose.stand).pl;
+  return { pl: s.x == null ? s : { ...s, x: s.x + (pose.dx || 0), y: s.y + (pose.dy || 0) }, from: 'stand' };
+}
+// 這個配件在這個角色、這個方向要放哪裡；from＝用到哪一層（'item'、'anchor'、'slot'；特別姿勢還有 'mirror'、'stand'）
 function accPlacementInfo(acc, id, dir) {
   const own = pick3(COSTUME_PLACEMENT.items, acc.id, id, dir);
   if (own) return { pl: own, from: 'item' };
   const anchor = pick3(COSTUME_PLACEMENT.anchors, id, acc.slot, dir);
   if (anchor) return { pl: anchor, from: 'anchor' };
+  if (COSTUME_POSES[dir]) return posePlacementFallback(dir, d => accPlacementInfo(acc, id, d));
   const base = (COSTUME_SLOT_ANCHORS[acc.slot] || {})[dir] || { x: 32, y: 16 }, off = costumeCharOffset(id);   // 還沒調過：通用位置＋角色身高偏移
   return { pl: off.x || off.y ? { ...base, x: base.x + off.x, y: base.y + off.y } : base, from: 'slot' };
 }
@@ -88,6 +105,7 @@ function costumeCharOffset(id) { const o = (COSTUME_PLACEMENT.offsets || {})[id]
 // 這個方向用哪張圖、要不要左右翻（側面圖畫朝左，往右走時翻過來）
 // blinking＝現在是不是「眨眼」那一下：有畫第 2 張的方向就換成第 2 張
 function accArt(acc, dir, blinking) {
+  if (COSTUME_POSES[dir]) dir = COSTUME_POSES[dir].art;   // 坐下：用側面的圖
   const a = acc.art || {}, b = (blinking && acc.blink) || {}, pic = k => (typeof b[k] === 'string' && b[k]) || a[k];
   if (dir === 'back') return { src: a.back ? pic('back') : pic('front'), flip: false };
   if (dir === 'left') return { src: a.side ? pic('side') : pic('front'), flip: false };

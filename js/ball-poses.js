@@ -91,10 +91,15 @@ function drawBallPose(npc, size) {
   if (!ballImgReady(img)) return false;
   const w = img.naturalWidth, h = img.naturalHeight;
   const feetY = Math.round(npc.y + 18 - BALL_POSES.feetPad);   // 跟走路圖的腳底同一條線
+  // 配件（js/costumes.js）：坐下的位置在服裝編輯器的「坐下（左）／坐下（右）」調；框跟走路圖一樣，底邊對齊腳底
+  const who = { dir: npc.dir === 'right' ? 'sitRight' : 'sitLeft', frame: 0 };
+  const accs = layer => { if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, npc.id, who, npc.x - size / 2, feetY - size, size, layer); };
+  accs('behind');
   ctx.save(); ctx.imageSmoothingEnabled = false;
   if (npc.dir === 'right') { ctx.translate(Math.round(npc.x), 0); ctx.scale(-1, 1); ctx.drawImage(img, -w / 2, feetY - h, w, h); }
   else ctx.drawImage(img, Math.round(npc.x - w / 2), feetY - h, w, h);
   ctx.restore();
+  accs('front');
   return true;
 }
 
