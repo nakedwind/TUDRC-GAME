@@ -2078,6 +2078,7 @@ const PALETTE_CATEGORIES = [
   { id: 'scene', name: '場景物件' },
   { id: 'interactive', name: '互動與道具' },
   { id: 'storage', name: '收納' },
+  { id: 'plant', name: '植栽' },
   { id: 'restaurant', name: '餐廳' },
   { id: 'hospital', name: '醫院病房' },
   { id: 'containment', name: '收容觀察室' },
@@ -2125,8 +2126,11 @@ const STORAGE_TILE_IDS = new Set([
   'tile_mvfqc6g7', 'tile_restaurant_storage_cabinet', 'tile_hospital_bedside_cabinet', 'tile_hospital_bedside_cabinet_back', 'tile_containment_equipment_cabinets', 'tile_containment_tall_cabinet',
   'tile_research_lab_sample_storage', 'tile_research_lab_specimen_cabinet',
 ]);
+// 植栽：盆栽、植物系列，不管原本在哪個資料夾都放這一類（id／檔名有 plant，或名稱有「盆栽」「植栽」「植物」；新的植物照這樣取名就會自動分進來）
+const isPlantTile = t => /plant/i.test(String(t.id || '') + ' ' + String(t.file || '')) || /盆栽|植栽|植物/.test(String(t.name || ''));
 function tileCategory(t) {
   if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
+  if (isPlantTile(t)) return 'plant';
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
   if (/vending/.test(String(t.id || '')) || file.includes('vending-machine')) return 'interactive';   // 販賣機（紅、綠、紫）：可以互動（js/shop.js）

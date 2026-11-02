@@ -167,9 +167,6 @@ for (const key of ['music', 'sfx']) {
   input.addEventListener('change', () => { saveSettings(); if (key === 'sfx') sfx('button'); });   // 放開滑桿時播一聲，聽聽看大小
 }
 document.getElementById('muteAll').addEventListener('change', e => { SFX.enabled = !e.target.checked; MUSIC.refresh(); renderSettings(); });
-window.addEventListener('keydown', e => {   // M 鍵（js/sfx.js）切換靜音後，音樂跟著靜音
-  if (!e.repeat && e.key.toLowerCase() === 'm' && !(e.target instanceof Element && e.target.closest('input, textarea, select'))) setTimeout(() => { MUSIC.refresh(); if (settingsOpen) renderSettings(); });
-});
 // Esc 的層級：最上面開著的那個視窗先處理（只關掉它），都沒有視窗處理時，才打開 T-Pad 裡的設定（開始畫面還不能開 T-Pad：打開原本的設定視窗）
 // ・設定本身開著：這裡先關（capture，最先處理）
 // ・其他視窗：各自的 Esc 處理關掉自己，並呼叫 e.preventDefault()（或 stopImmediatePropagation）＝「這次 Esc 用掉了」

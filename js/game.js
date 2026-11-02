@@ -2012,7 +2012,7 @@ function updateFootsteps(menuOpen = false) {
   const want = MAP_SAFE ? 'Sound effects/環境/腳步/footsteps02.mp3' : 'Sound effects/環境/腳步/footsteps01.mp3';
   if (FOOT.file !== want) { FOOT.file = want; a.src = want; }
   a.volume = Math.min(1, 0.5 * SFX.volume / 0.35 * SFX.gainOf('footsteps'));   // 跟著設定裡的音效音量＋音效編輯器的倍率
-  a.muted = !SFX.enabled;                       // 跟著 M 鍵一起靜音
+  a.muted = !SFX.enabled;                       // 跟著設定裡的靜音
   if (walking) { if (a.paused) a.play().catch(() => {}); }
   else if (!a.paused) a.pause();
 }

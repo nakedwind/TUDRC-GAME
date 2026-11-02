@@ -58,7 +58,7 @@
               <label class="set-slider"><span>🎵 音樂</span><input id="musicVol" type="range" min="0" max="100" step="5"><output id="musicVolVal"></output></label>
               <p id="musicOffHint" class="set-hint hidden">背景音樂尚未開啟</p>
               <label class="set-slider"><span>🔊 音效</span><input id="sfxVol" type="range" min="0" max="100" step="5"><output id="sfxVolVal"></output></label>
-              <label class="set-toggle"><span>🔇 靜音 <kbd>M</kbd></span><input id="muteAll" type="checkbox"><i aria-hidden="true"></i></label>
+              <label class="set-toggle"><span>🔇 靜音</span><input id="muteAll" type="checkbox"><i aria-hidden="true"></i></label>
               <h3>畫面</h3>
               <label class="set-toggle"><span>🖼️ 平滑放大（減少鋸齒） <kbd>F9</kbd></span><input id="crispScale" type="checkbox"><i aria-hidden="true"></i></label>
             </section>
@@ -80,7 +80,7 @@
               <dt><kbd>Tab</kbd></dt><dd>T-Pad（隊員、任務、成就、怪物圖鑑…）</dd>
               <dt><kbd>G</kbd></dt><dd>對話中送禮</dd>
               <dt><kbd>P</kbd></dt><dd>暫停</dd>
-              <dt><kbd>M</kbd></dt><dd>靜音</dd>
+              <dt><kbd>M</kbd></dt><dd>地圖（基地；戰鬥區域要裝備慣性導航記錄器）</dd>
               <dt><kbd>Esc</kbd></dt><dd>關閉視窗／設定</dd>
             </dl>
           </section></div>
@@ -260,7 +260,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=nomissing-20261102"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=lvfx-20261102"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=mkey-20261102"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=clawstock-20261101"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -376,7 +376,7 @@
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
   <script src="js/missions.js?v=fundonce-20261102"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
-  <script src="js/save.js?v=merge-20261102"></script> <!-- 9k. 存檔、設定選單 -->
+  <script src="js/save.js?v=mkey-20261102"></script> <!-- 9k. 存檔、設定選單 -->
   <script src="js/boss-music.js?v=clawstock-20261101"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=y25entry-20261031"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
@@ -409,7 +409,7 @@
   <script>document.write('<script src="data/bestiary.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器）；每次都讀最新的 -->
   <script src="js/bestiary-config.js?v=capking3-20261101"></script>   <!-- 怪物圖鑑的畫面（跟怪物圖鑑編輯器共用） -->
   <script src="js/bestiary.js?v=capking3-20261101"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
-  <script src="js/pc-desktop.js?v=pcdesk3-20261102"></script>   <!-- 2F應變中心的電腦桌面：換基地音樂、踩地雷、新接龍、怪物圖鑑（必須在 bestiary.js 之後） -->
+  <script src="js/pc-desktop.js?v=mkey-20261102"></script>   <!-- 2F應變中心的電腦桌面：換基地音樂、踩地雷、新接龍、怪物圖鑑（必須在 bestiary.js 之後） -->
   <script src="js/pc-freecell.js?v=freecell-20261102"></script>   <!-- 2F應變中心電腦的新接龍（FreeCell） -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->
   <script src="js/target-practice.js?v=bulletsfx-20261027"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
@@ -421,7 +421,7 @@
   <script src="js/channel-actions.js?v=movecancel-20261025"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
   <script src="js/grab.js?v=grab-building-20261027"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=memory-20261025"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
-  <script src="js/tpad-map.js?v=nav-floor-stamps-20261102"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->
+  <script src="js/tpad-map.js?v=mkey2-20261102"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->
   <script src="js/tpad-memories.js?v=20261025b"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->
   <script src="js/tpad.js?v=squad-v2-20261027"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
   <script src="js/base-minimap.js?v=minimap-20261102"></script>   <!-- 基地右下角小地圖：目前樓層＋溫特位置；按鈕打開 T-Pad 地圖、收起（必須在 tpad-map.js、tpad.js 之後） -->

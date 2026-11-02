@@ -4529,22 +4529,6 @@ const SHARED_TILES = [
     "h": 1
   },
   {
-    "id": "tile_poolcore_power_switch_on",
-    "name": "Poolcore_power-switch-on",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_power-switch-on.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_poolcore_power_switch_off",
-    "name": "Poolcore_power-switch-off",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_power-switch-off.png",
-    "w": 1,
-    "h": 1
-  },
-  {
     "id": "tile_mvp8nxz4",
     "name": "Poolcore_LED_glow",
     "role": "floor",
@@ -4833,5 +4817,29 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_ammo-crate.png",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_mvyo15bc",
+    "name": "Poolcore_power-switch-off",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_power-switch-off.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_poolcore_power_switch_on",
+    "name": "Poolcore_power-switch-on",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_power-switch-on.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_poolcore_power_switch_off",
+    "name": "Poolcore_power-switch-off",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_power-switch-off.png",
+    "w": 1,
+    "h": 1
   }
 ];

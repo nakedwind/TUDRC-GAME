@@ -201,7 +201,7 @@ async function loadPcTracks() {   // 讀 music/基地音樂/ 的資料夾列表�
 function renderPcMusic(body) {
   const pick = MUSIC.baseTrack, muted = typeof SFX !== 'undefined' && !SFX.enabled;
   body.querySelector('.pcd-now').innerHTML = '🎶 現在的基地音樂：<b>' + pcdEsc(pick ? pcdTrackName(pick) : '預設（音效編輯器的設定）') + '</b>' +
-    (muted ? '<span class="pcd-muted">（目前靜音中，按 M 取消）</span>' : '');
+    (muted ? '<span class="pcd-muted">（目前靜音中，到設定取消勾選「靜音」）</span>' : '');
   body.querySelector('.pcd-tracks').innerHTML =
     '<button type="button" class="pcd-track' + (!pick ? ' on' : '') + '" data-track=""><span class="pcd-play">' + (!pick ? '▶' : '') + '</span>預設（音效編輯器的設定）</button>' +
     (pcd.tracks || []).map(f => '<button type="button" class="pcd-track' + (pick === f ? ' on' : '') + '" data-track="' + pcdEsc(f) + '"><span class="pcd-play">' + (pick === f ? '▶' : '') + '</span>' + pcdEsc(pcdTrackName(f)) + '</button>').join('');
