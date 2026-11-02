@@ -381,7 +381,17 @@ function handleSquadClick(body, e) {
   const pick = t.closest('[data-skill-pick]');
   if (pick) { st.skill[type] = pick.dataset.skillPick; sound('switch'); renderSquadPage(body); return; }
   const learn = t.closest('[data-skill-learn]');
-  if (learn) { if (learnSkill(type, learn.dataset.skillLearn)) sound('achievement'); else sound('error'); renderSquadPage(body); return; }
+  if (learn) {
+    const id = learn.dataset.skillLearn, nodeEl = body.querySelector('[data-skill-pick="' + id + '"]');
+    const at = nodeEl ? nodeEl.getBoundingClientRect() : learn.getBoundingClientRect();   // 重畫前先量好那一格的位置
+    if (!learnSkill(type, id)) { sound('error'); renderSquadPage(body); return; }
+    renderSquadPage(body);
+    if (typeof levelUpFx === 'function') {   // 學會技能的特效＋音效（js/level-up-fx.js）
+      const node = (typeof skillNodeOf === 'function' && skillNodeOf(type, id)) || {}, who = (TYPES[type] || CHARACTERS[type] || {}).name || '';
+      levelUpFx({ kind: 'skill', at, sub: (who ? who + '　' : '') + '「' + (node.name || id) + '」', pop: () => body.querySelector('[data-skill-pick="' + id + '"]') });
+    } else sound('achievement');
+    return;
+  }
   if (t.closest('[data-squad-reset]')) {
     if (!confirm('重置 ' + ((TYPES[type] || CHARACTERS[type] || {}).name || type) + ' 的技能？學技能花掉的碎片會全部退回。')) return;
     const refund = resetSkills(type);

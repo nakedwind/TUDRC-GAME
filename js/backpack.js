@@ -492,7 +492,7 @@ function bagWorkshopBuy(kind, key) {
   if (kind !== 'bg' || !BAG_UPGRADES[key]) return false;
   const u = BAG_UPGRADES[key], lv = bagLevel(key); if (lv >= u.slots.length) return true;
   if (!spendWorkshop(u.cost[lv - 1], wsMoney('bag:' + key, lv - 1, u.cost[lv - 1]))) return true;
-  equipState.bag[key] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
+  equipState.bag[key] = lv + 1; saveEquipment(); workshopLevelFx('up', u.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= u.slots.length);   // 升級特效（js/equipment.js）
   showWorkshopToast(u.icon + ' ' + u.name + '：「' + u.tab + '」可以放 ' + u.slots[lv] + ' 格');
   return true;
 }

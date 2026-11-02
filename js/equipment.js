@@ -487,7 +487,7 @@ function drawDetector(ctx) {
 }
 
 // ---- 取得裝備（諾亞開發、戰鬥區域掉落）----
-function grantEquipment(id, how) {
+function grantEquipment(id, how, quiet = false) {   // quiet：不播「拿到」的聲音（開發工坊有自己的升級特效）
   const def = equipDef(id); if (!def || equipState.owned[id]) return false;
   equipState.owned[id] = 1;
   const free = EQUIP_SLOTS.find(s => s.kinds.includes(def.kind) && !equipState.equipped[s.id]);   // 有空格就直接穿上
@@ -496,7 +496,7 @@ function grantEquipment(id, how) {
   systemNotice('🎁 ' + how + '「' + def.name + '」' + (free ? '，已經裝備上了' : '，到背包換裝'));
   if (typeof itemIntroForEquipment === 'function') itemIntroForEquipment(id);   // 第一次拿到：跳說明（js/item-intro.js）
   if (typeof battleGot === 'function' && !MAP_SAFE) battleGot(def.name, def.image, 1);
-  SFX.play('favorUp', .8, 'equip-get');
+  if (!quiet) SFX.play('favorUp', .8, 'equip-get');
   if (typeof backpackOpen !== 'undefined' && backpackOpen) renderBackpack();
   return true;
 }
@@ -752,8 +752,19 @@ function spendWorkshop(shards, money) {
   }
   return true;
 }
+// 開發／升級成功的特效（js/level-up-fx.js）：從下方說明欄的大圖爆開，重畫後左邊那一格彈一下
+// wsFxAt：按下按鈕時（重畫前）先量好大圖的位置；kind：'dev' 開發／'up' 升級／'craft' 製作
+let wsFxAt = null;
+function workshopLevelFx(kind, sub, max = false) {
+  if (typeof levelUpFx !== 'function') { SFX.play('achievement', .7, 'equip-up'); return; }
+  const key = wsPick;
+  levelUpFx({ kind, sub, max, title: max ? '升到最高等級！' : '', at: wsFxAt,
+    pop: () => workshopEl && key && workshopEl.querySelector('[data-ws-pick="' + key + '"]') });
+}
 const wsMoney = (key, i, shards) => typeof workshopMoney === 'function' ? workshopMoney(key, i, shards) : 0;
 function workshopBuy(kind, id) {
+  const fxEl = workshopEl && (workshopEl.querySelector('.ws-info .bag-detail-image') || workshopEl.querySelector('.ws-info'));
+  wsFxAt = fxEl ? fxEl.getBoundingClientRect() : null;
   if (typeof magazineWorkshopBuy === 'function' && magazineWorkshopBuy(kind, id)) { renderWorkshop(); return; }   // 子彈開發、彈匣升級（js/magazine.js）
   if (typeof bagWorkshopBuy === 'function' && bagWorkshopBuy(kind, id)) { renderWorkshop(); return; }
   if (typeof buildWorkshopBuy === 'function' && buildWorkshopBuy(kind, id)) { renderWorkshop(); return; }
@@ -761,17 +772,17 @@ function workshopBuy(kind, id) {
   if (kind === 'dev') {
     const def = equipDef(id); if (!def || equipState.owned[id] || def.source !== 'develop') return;
     if (!spendWorkshop(def.cost[0], wsMoney(def.id, 0, def.cost[0]))) return;
-    grantEquipment(id, '諾亞開發好了');
+    grantEquipment(id, '諾亞開發好了', true); workshopLevelFx('dev', def.name + '　Lv1');
     showWorkshopToast('🎁 諾亞開發好了「' + def.name + '」');
   } else if (kind === 'up') {
     const def = equipDef(id), lv = equipState.owned[id]; if (!def || !lv || lv >= def.levels.length) return;
     if (!spendWorkshop(def.cost[lv], wsMoney(def.id, lv, def.cost[lv]))) return;
-    equipState.owned[id] = lv + 1; saveEquipment(); SFX.play('achievement', .7, 'equip-up');
+    equipState.owned[id] = lv + 1; saveEquipment(); workshopLevelFx('up', def.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= def.levels.length);
     showWorkshopToast('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
   } else if (kind === 'wp') {
     const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= w.levels.length) return;
     if (!spendWorkshop(w.cost[lv - 1], wsMoney('w:' + id, lv - 1, w.cost[lv - 1]))) return;
-    equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); SFX.play('achievement', .7, 'equip-up');
+    equipState.weapons[id] = lv + 1; saveEquipment(); applyWeaponLevels(); workshopLevelFx('up', w.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= w.levels.length);
     showWorkshopToast('🔧 「' + w.name + '」升到 Lv' + (lv + 1));
   }
   renderWorkshop();

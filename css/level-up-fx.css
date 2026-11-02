@@ -1,0 +1,45 @@
+/* 升級特效（js/level-up-fx.js）：蓋在最上面、不擋滑鼠 */
+.lvfx-canvas { position: fixed; inset: 0; width: 100vw; height: 100vh; z-index: 10000; pointer-events: none;
+  background: transparent; border-radius: 0; box-shadow: none; cursor: default; }   /* 蓋掉全域 canvas 的深色底（css/style.css，那是給遊戲畫面用的），不然整個畫面會變黑 */
+.lvfx-flash { position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+  background: radial-gradient(circle at var(--lvfx-x) var(--lvfx-y), rgba(255,255,255,.55) 0, color-mix(in srgb, var(--lvfx-glow) 35%, transparent) 90px, transparent 360px);
+  animation: lvfx-flash .55s ease-out forwards; }
+@keyframes lvfx-flash { 0% { opacity: 0; } 12% { opacity: 1; } 100% { opacity: 0; } }
+
+.lvfx-banner { position: fixed; z-index: 10001; pointer-events: none; transform: translate(-50%, -50%); display: grid; justify-items: center; gap: 2px;
+  padding: 6px 22px 8px; white-space: nowrap; font-family: "Microsoft JhengHei", sans-serif; text-align: center; overflow: hidden;
+  border-radius: 10px; background: linear-gradient(180deg, rgba(10,14,22,.82), rgba(10,14,22,.6));
+  border: 2px solid var(--lvfx-color); box-shadow: 0 0 18px var(--lvfx-glow), inset 0 0 14px color-mix(in srgb, var(--lvfx-glow) 40%, transparent);
+  animation: lvfx-banner 1.65s cubic-bezier(.2,.9,.3,1) forwards; }
+.lvfx-banner b { font-size: 30px; font-weight: 900; letter-spacing: 2px; color: #fff; line-height: 1.1;
+  text-shadow: 0 0 6px var(--lvfx-glow), 0 0 14px var(--lvfx-glow), 0 2px 0 rgba(0,0,0,.6); }
+.lvfx-banner small { font-size: 15px; font-weight: 700; color: var(--lvfx-color); text-shadow: 0 1px 2px rgba(0,0,0,.8); }
+.lvfx-banner::after { content: ''; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%;   /* 掃過去的一道光 */
+  background: linear-gradient(100deg, transparent, rgba(255,255,255,.55), transparent); animation: lvfx-shine .7s .18s ease-out forwards; }
+.lvfx-banner.max b { background: linear-gradient(180deg, #fff6c8, #ffd166 55%, #ff9d00); -webkit-background-clip: text; background-clip: text; color: transparent;
+  text-shadow: none; filter: drop-shadow(0 0 6px #ff9d00); }
+@keyframes lvfx-banner {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.3); }
+  14% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
+  24% { transform: translate(-50%, -50%) scale(.95); }
+  32% { transform: translate(-50%, -50%) scale(1); }
+  75% { opacity: 1; transform: translate(-50%, -60%) scale(1); }
+  100% { opacity: 0; transform: translate(-50%, -110%) scale(.96); }
+}
+@keyframes lvfx-shine { to { left: 120%; } }
+
+/* 升級的那一格：彈一下＋發光 */
+.lvfx-pop { animation: lvfx-pop .85s cubic-bezier(.2,.9,.3,1.2); z-index: 5; }
+@keyframes lvfx-pop {
+  0% { transform: scale(1); box-shadow: 0 0 0 0 var(--lvfx-glow); filter: brightness(1); }
+  18% { transform: scale(1.28); box-shadow: 0 0 0 4px #fff, 0 0 26px 8px var(--lvfx-glow); filter: brightness(1.8); }
+  40% { transform: scale(.94); }
+  60% { transform: scale(1.06); box-shadow: 0 0 0 2px var(--lvfx-glow), 0 0 16px 4px var(--lvfx-glow); filter: brightness(1.2); }
+  100% { transform: scale(1); box-shadow: 0 0 0 0 transparent; filter: brightness(1); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lvfx-banner { animation: lvfx-fade 1.6s ease-out forwards; }
+  .lvfx-banner::after { display: none; }
+  .lvfx-pop { animation: none; }
+}
+@keyframes lvfx-fade { 0%, 70% { opacity: 1; } 100% { opacity: 0; } }
