@@ -4832,15 +4832,7 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/Poolcore_power-switch-on.png",
     "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_poolcore_power_switch_off",
-    "name": "Poolcore_power-switch-off",
-    "role": "floor",
-    "file": "images/Poolcore/Poolcore_power-switch-off.png",
-    "w": 1,
-    "h": 1
+    "h": 2
   },
   {
     "id": "tile_mvyw7lrk",

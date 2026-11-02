@@ -1079,14 +1079,15 @@ function draw() {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
-  // 電路編號（開關、電燈右上角的黃色小圓牌）
+  // 電路編號（開關、電燈右上角的小圓牌）：有編號＝黃色；還沒編號（全部連動）＝灰色「0」，選起來在上方的「電路編號」設定
   for (const s of (m.stamps || [])) {
-    if (!s.circuit) continue;
-    const x = OX + s.c * CELL + (s.ox || 0) + CELL - 6, y = OY + s.r * CELL + (s.oy || 0) + 6;
-    ctx.fillStyle = '#ffd66e'; ctx.strokeStyle = '#3a2a08'; ctx.lineWidth = 1.5;
+    const t = tileById(s.id);
+    if (!s.circuit && !isCircuitTile(t)) continue;
+    const x = OX + s.c * CELL + (s.ox || 0) + stampW(s, t || {}) * CELL - 6, y = OY + s.r * CELL + (s.oy || 0) + 6;
+    ctx.fillStyle = s.circuit ? '#ffd66e' : 'rgba(150,160,172,.9)'; ctx.strokeStyle = '#3a2a08'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     ctx.fillStyle = '#3a2a08'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(String(s.circuit), x, y + .5); ctx.textBaseline = 'alphabetic';
+    ctx.fillText(String(s.circuit || 0), x, y + .5); ctx.textBaseline = 'alphabetic';
   }
   // 出入口記號（紫格＋🚪＋通往哪張地圖）
   for (const pt of (m.portals || [])) {
@@ -2322,8 +2323,9 @@ function refreshLockerControl() {
   qty.value = loot?.qty || 1; qty.disabled = !select.value.startsWith('item:');
 }
 // 電源開關、電源控制的電燈：設定電路編號（1～5），同編號的開關只控制同編號的燈（js/powered-lights.js）
-const isCircuitTile = t => !!t && (/power-switch-(on|off)\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || /^tile_interactive_power_switch/.test(t.id)
-  || /electric-light-02\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || t.id === 'tile_interactive_electric_light_02');
+function isCircuitTile(t) { return !!t && (/power-switch-(on|off)\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || /^tile_interactive_power_switch/.test(t.id)
+  || /electric-light-02\.png$/.test(String(t.file || '').replace(/\\/g, '/')) || t.id === 'tile_interactive_electric_light_02'
+  || /\/Poolcore_LED\.png$/i.test(String(t.file || '').replace(/\\/g, '/'))); }   // 池核的 LED 燈條
 function selectedCircuitThing() {
   if (selections.length !== 1) return null;
   const sel = selections[0], m = curMap();

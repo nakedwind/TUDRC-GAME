@@ -13655,7 +13655,8 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "object",
         "fx": false,
-        "ox": 24
+        "ox": 24,
+        "sortDepth": 0
       },
       {
         "id": "tile_containment_wall_top_straight",
@@ -14076,7 +14077,8 @@ const BASE_MAPS = [
         "r": 18,
         "layer": "overlay",
         "oy": 14,
-        "ox": 12
+        "ox": 12,
+        "sortDepth": 0
       },
       {
         "id": "tile_hospital_plant_on_stool",
@@ -14099,7 +14101,8 @@ const BASE_MAPS = [
         "r": 18,
         "layer": "overlay",
         "ox": 12,
-        "oy": 14
+        "oy": 14,
+        "sortDepth": 0
       },
       {
         "id": "tile_eoc_mug",
@@ -14116,7 +14119,8 @@ const BASE_MAPS = [
         "r": 18,
         "layer": "object4",
         "ox": 28,
-        "oy": 14
+        "oy": 14,
+        "sortDepth": 0
       },
       {
         "id": "tile_eoc_book_stack",
@@ -14124,7 +14128,8 @@ const BASE_MAPS = [
         "r": 19,
         "layer": "overlay",
         "ox": 36,
-        "oy": -8
+        "oy": -8,
+        "sortDepth": 0
       },
       {
         "id": "tile_dorm_desk_lamp",
@@ -14132,7 +14137,8 @@ const BASE_MAPS = [
         "r": 18,
         "layer": "overlay",
         "oy": 16,
-        "ox": -2
+        "ox": -2,
+        "sortDepth": 0
       },
       {
         "id": "tile_eoc_walkie_talkie",
@@ -14140,7 +14146,7 @@ const BASE_MAPS = [
         "r": 18,
         "layer": "overlay",
         "oy": 34,
-        "sortDepth": 1,
+        "sortDepth": 0,
         "ox": -4
       },
       {
@@ -14325,7 +14331,13 @@ const BASE_MAPS = [
       "21,16",
       "23,17",
       "10,18",
-      "15,19"
+      "15,19",
+      "4,19",
+      "5,19",
+      "6,19",
+      "1,20",
+      "2,20",
+      "3,23"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14352,6 +14364,14 @@ const BASE_MAPS = [
       "25,14": [
         -10,
         0
+      ],
+      "4,20": [
+        -19,
+        -11
+      ],
+      "3,23": [
+        8,
+        -7
       ]
     },
     "safe": true,

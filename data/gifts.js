@@ -29,13 +29,15 @@ const GIFT_REACTION = {
 };
 
 // ---- 今日想吃委託 ----
-// 每次從戰鬥回到基地，隨機 min～max 位角色會說想吃某樣零食飲料（頭上冒出圖示）。
+// 每次從戰鬥回到基地，從整個基地（每一層樓）的人裡隨機 min～max 位，說想吃某樣零食飲料（頭上冒出圖示）。
+// 只收某幾樣的人（GIFT_PREFS 的 only）只會想要那幾樣：塔納＝少喝水、柯林＝好乖。
 // 照他說的送：好感度 ×favorMul，還會給回憶碎片（REQUEST_SHARDS 裡的人）或異質碎片（其他人，數量 crystals）。
 const REQUEST_RULES = { min: 1, max: 3, favorMul: 2, crystals: 15 };
 // 誰會給哪種回憶碎片（碎片資料在 data/items.js）；那段回憶的鑰匙已經拼好之後，改給異質碎片
 const REQUEST_SHARDS = {
   theonie: 'burning-shard', red: 'pure-shard', noah: 'warm-shard', avaren: 'black-shard', luther: 'power-shard',
-  chris: 'sloth-shard', ash: 'quiet-shard', eldrin: 'regret-shard',
+  colyn: 'devotion-shard', ash: 'quiet-shard', eldrin: 'regret-shard',
+  // 克莉思不給回憶碎片，完成委託給異質碎片
   // 溫特（精神的碎片）是玩家自己，不會透過委託拿到，之後再決定取得方式
 };
 // 想吃的時候說的話、完成委託把碎片交給溫特時說的話：在「對話編輯器」的「送禮與委託」（requestAsk、requestReward）
