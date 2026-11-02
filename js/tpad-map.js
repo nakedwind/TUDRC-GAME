@@ -311,6 +311,19 @@ function tmapHiddenKeys(m) {
   if (typeof breakableWallSolid !== 'undefined') for (const k of breakableWallSolid) keys.add(k);
   return keys;
 }
+// 地板格：一格一格刷的地板（layers.floor、ground…），加上整塊蓋上去的地板素材（stamps 放在 floor、ground… 圖層，例如 3×3 的後室地板）
+// 只看刷的地板的話，用大塊地板素材鋪的地圖（例如 Y25區-地下街）幾乎整張都不算地板，導航記錄器什麼都畫不出來
+function tmapFloorCells(m) {
+  const keys = new Set(), isFloorLayer = l => /^(floor|ground\d*)$/.test(l || '');
+  for (const [l, cells] of Object.entries(m.layers || {})) if (isFloorLayer(l) && cells) for (const k of Object.keys(cells)) keys.add(k);
+  for (const s of m.stamps || []) {
+    if (!isFloorLayer(s.layer)) continue;
+    const t = typeof mapTileById === 'function' ? mapTileById(s.id) : null, w = mapTileW(t), h = mapTileH(t);
+    const c0 = s.c + Math.round((s.ox || 0) / CELL), r0 = s.r + Math.round((s.oy || 0) / CELL);
+    for (let dc = 0; dc < w; dc++) for (let dr = 0; dr < h; dr++) keys.add((c0 + dc) + ',' + (r0 + dr));
+  }
+  return keys;
+}
 function tmapExploreState(m) {
   let st = tmapBitsCache.get(m.id);
   const hidden = tmapHiddenKeys(m), sig = hidden.size;   // 隱藏區炸開（格數變了）就重算一次可走的格子
@@ -321,9 +334,9 @@ function tmapExploreState(m) {
     bits = new Uint8Array(Math.ceil(n / 8)); const hex = tmapExplored[m.id] || '';
     for (let i = 0; i < bits.length && i * 2 + 1 < hex.length; i++) bits[i] = parseInt(hex.substr(i * 2, 2), 16) || 0;
   }
-  const floor = (m.layers && m.layers.floor) || {}, solid = new Set(m.solid || []), open = new Uint8Array(n);
+  const solid = new Set(m.solid || []), open = new Uint8Array(n);
   let total = 0, seen = 0;
-  for (const k of Object.keys(floor)) {
+  for (const k of tmapFloorCells(m)) {
     const [c, r] = k.split(',').map(Number);
     if (!(c >= 0 && r >= 0 && c < m.cols && r < m.rows) || solid.has(k) || hidden.has(k)) continue;
     const i = r * m.cols + c; open[i] = 1; total++;
