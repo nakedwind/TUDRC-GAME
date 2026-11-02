@@ -248,8 +248,8 @@ function getLights() {
       lamps.forEach(([x, y], i) => L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }));
     }
     const lr = o.type && LIGHT.buildings[o.type];
-    if (lr) {
-      const x = OX + (o.c + (o.w || 1) / 2) * CELL;
+    if (lr && !o.mrtHidden) {   // mrtHidden：跟著捷運開進隧道了（js/mrt-train.js）
+      const x = OX + (o.c + (o.w || 1) / 2) * CELL + (o.mrtShift || 0);   // mrtShift：蓋在捷運車廂裡、跟著列車移動
       const y = OY + (o.r + (o.h || 1) / 2) * CELL;
       // 燈頭在 1×2 圖片的上方；visualY 只影響光暈位置，不改遊戲照明判定。
       const visualY = OY + (o.r + Math.min(0.38, (o.h || 1) * 0.3)) * CELL + 10;

@@ -489,6 +489,7 @@ function updateSlimeJump(e, dt) {
 }
 
 function stepEnemy(e, dt) {
+  if (e.mrtRide) return;   // 搭捷運：跟著列車動（js/mrt-train.js）
   e.attackingObstacle = null;
   if (e.dummy) { updateEnemyEffects(e, dt); return; }   // 訓練室的沙包：不會動、不會打人（js/practice.js）
   updateEnemyEffects(e, dt);

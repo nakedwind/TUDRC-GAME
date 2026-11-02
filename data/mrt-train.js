@@ -17,6 +17,7 @@ const MRT_TRAIN_SETTINGS = {
   "warnTime": 3.76,
   "afterClose": 4.2,
   "rideTime": 6,
+  "rideFadeCells": 5,
   "rideShake": 1.6,
   "doorPassAt": 0.7,
   "frontSortDy": 10,

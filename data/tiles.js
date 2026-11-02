@@ -4841,5 +4841,13 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_power-switch-off.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_mvyw7lrk",
+    "name": "mrt-room-wall-straight",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wall-straight.png",
+    "w": 2,
+    "h": 2
   }
 ];

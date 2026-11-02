@@ -10,6 +10,7 @@
 const HIT_DUR = 0.3;   // 建築被攻擊時「閃紅＋震動」持續秒數
 const ORE_GUN_FLASH = { ms: 120, alpha: .65 };   // 手槍打異質礦的閃白：持續毫秒、最亮多少
 function drawObstacle(o) {
+  if (o.mrtHidden) return;   // 跟著捷運開進隧道的建築（js/mrt-train.js）
   if (o.mapSource && typeof secretAlpha === 'function' && (typeof o.mapSource === 'object' ? secretAlpha(o.mapSource)
     : secretAlpha(null, ...String(o.mapSource).split(':'))) <= 0) return;   // 隱藏區圖層上的礦石等：炸開前不畫（js/breakable-walls.js）
   const w = (o.w || 1) * CELL, h = (o.h || 1) * CELL;
@@ -17,7 +18,7 @@ function drawObstacle(o) {
   const hit = o.hitT > 0 ? o.hitT / HIT_DUR : 0;
   const shX = hit ? (Math.random() * 2 - 1) * 4 * hit : 0;
   const shY = hit ? (Math.random() * 2 - 1) * 4 * hit : 0;
-  const x = OX + o.c * CELL + shX, y = OY + o.r * CELL + shY;
+  const x = OX + o.c * CELL + shX + (o.mrtShift || 0), y = OY + o.r * CELL + shY;   // mrtShift：蓋在捷運車廂裡、跟著列車移動
   // 放置動畫：位移＋以「底部中央」為錨點的壓扁/回彈縮放
   const a = dropAnim(o.spawnT);
   if (a) {
@@ -1053,7 +1054,7 @@ function draw() {
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
   for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
-  for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 地雷另外畫在地面層
+  for (const o of G.obstacles) if (!o.trap) sortables.push({ y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
   for (const t of G.towers) sortables.push({ y: t.sitting ? seatDrawY(t.sitting) : t.y + 17, draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
