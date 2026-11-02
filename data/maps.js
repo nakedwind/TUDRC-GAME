@@ -14300,14 +14300,6 @@ const BATTLE_MAPS = [
         "ox": 20
       },
       {
-        "id": "tile_mvxf5so7",
-        "c": 15,
-        "r": 16,
-        "layer": "object11",
-        "ox": 30,
-        "sortDepth": 7.25
-      },
-      {
         "id": "tile_mvxgf9gt",
         "c": 14,
         "r": 15,
@@ -14322,15 +14314,6 @@ const BATTLE_MAPS = [
         "layer": "object11",
         "ox": 30,
         "oy": 24
-      },
-      {
-        "id": "tile_mvxf5so7",
-        "c": 1,
-        "r": 16,
-        "layer": "object5",
-        "sortDepth": 7.25,
-        "oy": 30,
-        "ox": 10
       },
       {
         "id": "tile_mvodgug9",
@@ -15907,30 +15890,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvxgf9gt",
-        "c": 14,
-        "r": 18,
-        "layer": "object11",
-        "oy": 20,
-        "ox": 30
-      },
-      {
-        "id": "tile_mvoa0cqd",
-        "c": 14,
-        "r": 20,
-        "layer": "object11",
-        "ox": 30,
-        "oy": 14
-      },
-      {
-        "id": "tile_mvqv5agz",
-        "c": 3,
-        "r": 18,
-        "layer": "object9",
-        "oy": 30,
-        "ox": 10
-      },
-      {
-        "id": "tile_mvxgf9gt",
         "c": 49,
         "r": 8,
         "layer": "object11",
@@ -15996,21 +15955,6 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mvp8n5zs",
         "c": 7,
-        "r": 18,
-        "layer": "top",
-        "ox": 10
-      },
-      {
-        "id": "tile_mvp8nxz4",
-        "c": 7,
-        "r": 18,
-        "layer": "top",
-        "blend": "hard-light",
-        "ox": 10
-      },
-      {
-        "id": "tile_mvp8n5zs",
-        "c": 7,
         "r": 14,
         "layer": "top",
         "ox": 10
@@ -16037,14 +15981,6 @@ const BATTLE_MAPS = [
         "layer": "top",
         "blend": "hard-light",
         "ox": 20
-      },
-      {
-        "id": "tile_poolcore_pillar",
-        "c": 14,
-        "r": 21,
-        "layer": "object11",
-        "ox": 30,
-        "oy": 30
       },
       {
         "id": "tile_poolcore_pillar",
@@ -16123,46 +16059,6 @@ const BATTLE_MAPS = [
         "ox": 30
       },
       {
-        "id": "tile_mvr32pqo",
-        "c": 9,
-        "r": 33,
-        "layer": "object5",
-        "ox": 10,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 10,
-        "r": 33,
-        "layer": "object5",
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 1,
-        "r": 33,
-        "layer": "object5",
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 7,
-        "r": 33,
-        "layer": "object5",
-        "ox": 10,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr3nuyx",
-        "c": 3,
-        "r": 33,
-        "layer": "object5",
-        "ox": 10,
-        "oy": 20
-      },
-      {
         "id": "tile_mvr40sp8",
         "c": 12,
         "r": 31,
@@ -16171,23 +16067,6 @@ const BATTLE_MAPS = [
         "oy": 34
       },
       {
-        "id": "tile_mvr2fi62",
-        "c": 12,
-        "r": 33,
-        "layer": "object5",
-        "ox": 10,
-        "sortDepth": 0,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 12,
-        "r": 30,
-        "layer": "object5",
-        "ox": 6,
-        "oy": 4
-      },
-      {
         "id": "tile_mvr40sp8",
         "c": 12,
         "r": 26,
@@ -16197,160 +16076,11 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mvr40sp8",
-        "c": 12,
-        "r": 28,
-        "layer": "object5",
-        "ox": 6,
-        "oy": 4
-      },
-      {
-        "id": "tile_mvr40sp8",
         "c": 1,
         "r": 26,
         "layer": "object5",
         "ox": 16,
         "oy": 34
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 1,
-        "r": 28,
-        "layer": "object5",
-        "ox": 16,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 1,
-        "r": 30,
-        "layer": "object5",
-        "ox": 16,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 1,
-        "r": 32,
-        "layer": "object5",
-        "ox": 16,
-        "oy": 24
-      },
-      {
-        "id": "tile_mvr2fi62",
-        "c": 1,
-        "r": 33,
-        "layer": "object5",
-        "ox": 20,
-        "sortDepth": 0,
-        "oy": 30
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 2,
-        "r": 26,
-        "layer": "object5",
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 3,
-        "r": 26,
-        "layer": "object5",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 10,
-        "r": 26,
-        "layer": "object5",
-        "ox": 20,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 9,
-        "r": 26,
-        "layer": "object5",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 5,
-        "r": 26,
-        "layer": "object5",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 7,
-        "r": 26,
-        "layer": "object5",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr2fi62",
-        "c": 12,
-        "r": 26,
-        "layer": "object5",
-        "ox": 10,
-        "sortDepth": 0,
-        "oy": 20
-      },
-      {
-        "id": "tile_mvr2fi62",
-        "c": 1,
-        "r": 26,
-        "layer": "object5",
-        "ox": 20,
-        "sortDepth": 0,
-        "oy": 20
-      },
-      {
-        "id": "tile_cvs_sign_twelve",
-        "c": 2,
-        "r": 26,
-        "layer": "object5",
-        "ox": 14,
-        "oy": 10
-      },
-      {
-        "id": "tile_cvs_back_counter",
-        "c": 4,
-        "r": 27,
-        "layer": "object5",
-        "fx": true,
-        "sortDepth": 2.5,
-        "ox": 20
-      },
-      {
-        "id": "tile_cvs_drink_cooler",
-        "c": 2,
-        "r": 27,
-        "layer": "object5",
-        "sortDepth": 2.5,
-        "ox": 10
-      },
-      {
-        "id": "tile_cvs_checkout_counter_backroom",
-        "c": 4,
-        "r": 28,
-        "layer": "object5",
-        "oy": 30,
-        "sortDepth": 1.75,
-        "ox": 20
-      },
-      {
-        "id": "tile_cvs_counter_extension",
-        "c": 2,
-        "r": 29,
-        "layer": "object5",
-        "oy": 30,
-        "sortDepth": 0.75,
-        "ox": 20
       },
       {
         "id": "tile_obstacle_ore_rare",
@@ -16522,14 +16252,6 @@ const BATTLE_MAPS = [
         "id": "tile_mvr40sp8",
         "c": 1,
         "r": 23,
-        "layer": "object5",
-        "ox": 16,
-        "oy": 14
-      },
-      {
-        "id": "tile_mvr40sp8",
-        "c": 1,
-        "r": 25,
         "layer": "object5",
         "ox": 16,
         "oy": 14
@@ -17247,6 +16969,39 @@ const BATTLE_MAPS = [
         "layer": "object",
         "oy": 24,
         "ox": 20
+      },
+      {
+        "id": "tile_mvzbna04",
+        "c": 16,
+        "r": 30,
+        "layer": "object",
+        "oy": 24,
+        "ox": 1.333333
+      },
+      {
+        "id": "tile_mvzbolt4",
+        "c": 24,
+        "r": 30,
+        "layer": "object",
+        "ox": 30,
+        "oy": 21.333333
+      },
+      {
+        "id": "tile_mvr40sp8",
+        "c": 1,
+        "r": 25,
+        "layer": "object5",
+        "ox": 16,
+        "oy": 14
+      },
+      {
+        "id": "tile_mvzbvnsy",
+        "c": 15,
+        "r": 29,
+        "layer": "object11",
+        "rot": 0,
+        "ox": 21.333333,
+        "oy": 22.666667
       }
     ],
     "solid": [
