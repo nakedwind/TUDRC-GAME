@@ -469,7 +469,10 @@ function animateSentry(t, mx, my, dt) {
   t.moving = Math.hypot(mx, my) > 0.01;
   if (!t.moving) { t.anim = 0; t.dir = t.dir || 'front'; updateBlink(t, dt); return; }
   t.blinkTime = -1;
-  t.dir = Math.abs(mx) >= Math.abs(my) ? (mx < 0 ? 'left' : 'right') : (my < 0 ? 'back' : 'front');
+  const nd = Math.abs(mx) >= Math.abs(my) ? (mx < 0 ? 'left' : 'right') : (my < 0 ? 'back' : 'front');
+  const sideways = (nd === 'left' || nd === 'right') !== (t.dir === 'left' || t.dir === 'right');   // 換成另一個軸（左右 ↔ 上下）
+  const keep = typeof mealGuest === 'function' && mealGuest(t) && sideways && Math.max(Math.abs(mx), Math.abs(my)) < Math.min(Math.abs(mx), Math.abs(my)) * 1.6;   // 被邀請吃飯的人斜著走時：明顯換方向才轉身（不然左、上一直跳，看起來在閃，js/meal-invite.js）
+  if (!keep) t.dir = nd;
   t.anim = (t.anim || 0) + dt;
 }
 const keys = {};                         // 目前按住的按鍵
