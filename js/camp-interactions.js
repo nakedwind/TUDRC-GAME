@@ -28,14 +28,14 @@ const MAP_BOX = { reach: 30, kinds: [
   { kind: 'supply', match: id => isSupplyBoxId(id), art: { tile_field_supply_box: [0, 16, 46, 80, 80, 80], tile_mvot2yuu: [25, 23, 95, 120, 120, 120] } },   // field-base-01～03 都一樣；池核版 Poolcore_field-base-01～03 也一樣（js/camp-supply.js 的 boxSkins）
   { kind: 'armor', safe: true, match: (id, t) => ARMOR_CHEST.tiles.includes(id) || ARMOR_CHEST.names.includes(String(t.name || '').trim()), art: { tile_mvma4ws7: [0, 11, 76, 80, 80, 80] } },
   { kind: 'stove', safe: true, match: id => typeof COOKING !== 'undefined' && COOKING.tiles.includes(id), art: { tile_restaurant_kitchen_workstation: [8, 40, 112, 118, 280, 120] } },   // 廚房工作台左邊的爐灶：烹飪（js/cooking.js）
-  { kind: 'cabinet', safe: true, match: (id, t, s) => typeof cabinetDefFor === 'function' && !!cabinetDefFor(s), art: {} },   // 收納櫃（js/storage-cabinet.js 的 STORAGE_CABINETS）
+  { kind: 'cabinet', safe: true, match: (id, t, s) => typeof cabinetDefFor === 'function' && !!cabinetDefFor(s), art: {} },   // 置物櫃（js/storage-cabinet.js 的 STORAGE_CABINETS）
 ] };
 function mapBoxes() {
   if (!MAP) return [];
   const list = [];
   for (const s of MAP.stamps || []) {
     const t = mapTileById(s.id); if (!t) continue;
-    const k = MAP_BOX.kinds.find(k => k.match(s.id, t, s)); if (!k || (MAP_SAFE && !k.safe)) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用（safe＝基地裡也能用：裝備箱、收納櫃）
+    const k = MAP_BOX.kinds.find(k => k.match(s.id, t, s)); if (!k || (MAP_SAFE && !k.safe)) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用（safe＝基地裡也能用：裝備箱、置物櫃）
     if (k.kind === 'ammo' && typeof ammoCrateLooted === 'function' && ammoCrateLooted(s)) continue;   // 開過的彈藥箱：不能再開（js/flare.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     const a = k.art[s.id] || [0, 0, 1, 1, 1, 1], fx = u => s.fx ? w - u : u;   // 左右翻轉的箱子：範圍也翻過去

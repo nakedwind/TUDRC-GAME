@@ -1847,7 +1847,7 @@ const BASE_MAPS = [
         "r": 16,
         "layer": "ground3",
         "ox": -10,
-        "oy": 26,
+        "oy": 36,
         "sortDepth": 4.5
       },
       {
@@ -1856,7 +1856,7 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "ground3",
         "ox": 14,
-        "oy": 4
+        "oy": 20
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -1976,7 +1976,7 @@ const BASE_MAPS = [
         "r": 19,
         "layer": "ground3",
         "ox": -26,
-        "oy": 12
+        "oy": 22
       },
       {
         "id": "tile_hq_potted_plant",
@@ -2728,7 +2728,8 @@ const BASE_MAPS = [
       "33,5",
       "34,5",
       "39,15",
-      "27,9"
+      "27,9",
+      "23,16"
     ],
     "breakable": [],
     "camp": [
@@ -2872,7 +2873,11 @@ const BASE_MAPS = [
       ],
       "23,17": [
         0,
-        18
+        33
+      ],
+      "23,16": [
+        0,
+        -27
       ]
     },
     "coreSpots": [],

@@ -9,7 +9,8 @@
 //  ・存檔：localStorage（CAMP_SUPPLY_KEY），依地圖分開存；開始新遊戲會清掉（js/new-game.js）。
 // ============================================================
 const CAMP_SUPPLY = {
-  slots: 20,                                   // 箱子幾格（一格放一個）
+  slots: 12,                                   // 箱子幾格
+  stack: 20,                                   // 一格放幾個（同種物品每 20 個佔一格，跟背包一樣）：12 格最多 240 個
   items: ['medkit', 'almond-water', 'firstaid'],             // 能放什麼
   start: { medkit: 7, 'almond-water': 6, firstaid: 7 },      // 第一次出任務時箱子裡有多少
   sortie: { 'almond-water': 6, firstaid: 7 },                 // 每次從應變中心出勤，箱子裡補到至少這麼多（應變中心配發）
@@ -47,6 +48,12 @@ function campBox() {
   return campSupplyData[id];
 }
 const campBoxTotal = () => CAMP_SUPPLY.items.reduce((sum, k) => sum + (campBox()[k] || 0), 0);
+const campBoxUsed = () => CAMP_SUPPLY.items.reduce((sum, k) => sum + Math.ceil(Math.max(0, campBox()[k] || 0) / CAMP_SUPPLY.stack), 0);
+// 還能放幾個 k：空格數 × 每格幾個，加上 k 最後一格沒放滿的部分
+function campBoxRoom(k) {
+  const n = campBox()[k] || 0, st = CAMP_SUPPLY.stack;
+  return Math.max(0, CAMP_SUPPLY.slots - campBoxUsed()) * st + (n % st ? st - n % st : 0);
+}
 // 出勤（js/sortie-supply.js 的 onSortieNewGame 呼叫）：急救包、杏仁水補到 CAMP_SUPPLY.sortie；回傳補了哪些
 function stockCampSupplyForSortie() {
   if (MAP_SAFE || !supplyBoxSpots().length) return [];
@@ -226,8 +233,8 @@ function stockCampAmmoForMapStart() {
 }
 
 // ============================================================
-//  箱子視窗（物資箱、彈藥箱共用）：外觀跟背包一樣。左邊箱子、右邊溫特的背包，點格子就搬到另一邊，也可以拖過去；
-//  下方說明列可以選數量再按「拿到背包」「放進箱子」。兩種箱子的差別寫在 CAMP_BOXES。
+//  箱子視窗（物資箱、彈藥箱、置物櫃共用）：外觀跟背包一樣。左邊箱子、右邊溫特的背包，點格子就搬到另一邊，也可以拖過去；
+//  下方說明列可以選數量再按「拿到背包」「放進箱子」。箱子之間的差別寫在 CAMP_BOXES（置物櫃的在 js/storage-cabinet.js 的 CABINET_BOX）。
 // ============================================================
 const ammoIdsOf = () => WEAPONS.map(w => w.id).filter(id => id !== 'pistol' && BULLETS[id] && !BULLETS[id].removed);
 const CAMP_BOXES = {
@@ -235,11 +242,12 @@ const CAMP_BOXES = {
     title: '營地物資箱', sub: '嚮導的急救包、杏仁水用完會自己回來拿', icon: () => CAMP_SUPPLY.box.art.full, bagName: '溫特的背包', unit: '個',
     ids: () => CAMP_SUPPLY.items,
     box: k => campBox()[k] || 0, bag: k => supplyInventory.get(k) || 0, bagRoom: () => Infinity,
-    boxRoom: () => CAMP_SUPPLY.slots - campBoxTotal(), boxCount: () => campBoxTotal() + ' / ' + CAMP_SUPPLY.slots + ' 個',
+    boxRoom: k => campBoxRoom(k), boxCount: () => '', minCells: () => CAMP_SUPPLY.slots, stack: CAMP_SUPPLY.stack,   // stack：同種物品每幾個分一格顯示
+    fullMsg: () => '箱子滿了（' + CAMP_SUPPLY.slots + ' 格，每格 ' + CAMP_SUPPLY.stack + ' 個）',
     name: k => itemById(k).name, image: k => itemById(k).image, desc: k => typeof itemDesc === 'function' ? itemDesc(itemById(k)) : '',
     clickTake: () => 1, clickPut: () => 1,
     take(k, n) { const box = campBox(); n = Math.min(n, box[k] || 0); const got = n > 0 ? supplyGain(k, n) : 0; box[k] -= got; return got; },   // 溫特拿不下（背包滿了）：留在箱子裡
-    put(k, n) { const box = campBox(), bag = supplyInventory.get(k) || 0; n = Math.min(n, bag, CAMP_SUPPLY.slots - campBoxTotal()); if (n <= 0) return 0;
+    put(k, n) { const box = campBox(), bag = supplyInventory.get(k) || 0; n = Math.min(n, bag, campBoxRoom(k)); if (n <= 0) return 0;
       if (bag - n <= 0) supplyInventory.delete(k); else supplyInventory.set(k, bag - n); box[k] = (box[k] || 0) + n; return n; },
     save: () => saveCampSupply(),
     footer: () => { const guides = (G.towers || []).filter(t => TYPES[t.type].guide && t.kit);
@@ -258,10 +266,12 @@ const CAMP_BOXES = {
     fillAll: true,
   },
 };
-const campBoxDef = () => CAMP_BOXES[campSupplyMode] || CAMP_BOXES.supply;
+const campBoxDef = () => campSupplyMode === 'cabinet' && typeof CABINET_BOX !== 'undefined' ? CABINET_BOX : CAMP_BOXES[campSupplyMode] || CAMP_BOXES.supply;
+// 沒寫的就用物資箱的說法：boxName 箱子、boxEmoji 📦、title 可以是字或函式
+const campBoxTitle = B => typeof B.title === 'function' ? B.title() : B.title, campBoxName = B => B.boxName || '箱子', campBoxEmoji = B => B.boxEmoji || (campSupplyMode === 'ammo' ? '🧰' : '📦');
 let campBoxSel = null, campBoxQty = 1, campBoxQtyKey = '', campBoxPop = false;   // campBoxPop：剛打開，視窗彈出來的動畫只播這一次（之後點格子重畫不再播）   // 選中的：{ side: 'box' | 'bag', id }；說明列的數量
 
-let campSupplyOpen = false, campSupplyEl = null, campSupplyMode = 'supply';   // mode：supply＝物資箱、ammo＝彈藥箱（共用同一個視窗）
+let campSupplyOpen = false, campSupplyEl = null, campSupplyMode = 'supply';   // mode：supply＝物資箱、ammo＝彈藥箱、cabinet＝置物櫃（共用同一個視窗）
 function openCampSupply(mode = 'supply') {
   if (campSupplyOpen || !G || G.over) return;
   campSupplyMode = mode; campBoxSel = null; campBoxPop = true;
@@ -316,7 +326,7 @@ function campBoxMove(id, dir, n, quiet) {
     updateHUD(); if (typeof saveGame === 'function') saveGame();
   } else {
     sfx('error');
-    if (dir === 'put' && B.boxRoom() <= 0) systemNotice('箱子滿了（' + CAMP_SUPPLY.slots + ' 個）', true);
+    if (dir === 'put' && B.boxRoom(id) <= 0) systemNotice(B.fullMsg(), true);
   }
   renderCampSupply();
   if (got > 0) campBoxFly(start, from === 'box' ? 'bag' : 'box', id, got);
@@ -338,15 +348,17 @@ function campBoxLocal(rect) {
   const o = campSupplyEl.getBoundingClientRect(), k = o.width / (campSupplyEl.offsetWidth || o.width) || 1;
   return { x: (rect.left - o.left) / k, y: (rect.top - o.top) / k, w: rect.width / k, h: rect.height / k };
 }
+// 同一種分成好幾格時，拿最後一格（沒放滿、數量會變的那格）
+const campBoxCellOf = (side, id) => campSupplyEl ? [...campSupplyEl.querySelectorAll('[data-cb-cell="' + side + ':' + id + '"]')].pop() || null : null;
 function campBoxFlyStart(side, id) {
-  const cell = campSupplyEl && campSupplyEl.querySelector('[data-cb-cell="' + side + ':' + id + '"]');
+  const cell = campBoxCellOf(side, id);
   const img = cell && cell.querySelector('img');
   return img ? campBoxLocal(img.getBoundingClientRect()) : null;
 }
 let campBoxLandAt = 0;   // 上次播落地音效的時間：連續點很快時只播一次
 function campBoxFly(start, toSide, id, n, silent) {
   if (!start || !campSupplyOpen) return;
-  const cell = campSupplyEl.querySelector('[data-cb-cell="' + toSide + ':' + id + '"]'); if (!cell) return;
+  const cell = campBoxCellOf(toSide, id); if (!cell) return;
   const img = cell.querySelector('img'), end = campBoxLocal((img || cell).getBoundingClientRect());
   const fly = document.createElement('div'); fly.className = 'cb-fly';
   fly.innerHTML = '<img src="' + campBoxDef().image(id) + '" alt="">' + (n > 1 ? '<b>' + n + '</b>' : '');
@@ -378,45 +390,50 @@ function renderCampSupply() {
     campBoxSel = other.includes(campBoxSel.id) ? { side: campBoxSel.side === 'box' ? 'bag' : 'box', id: campBoxSel.id } : null;
   }
   if (!campBoxSel) campBoxSel = boxIds[0] ? { side: 'box', id: boxIds[0] } : bagIds[0] ? { side: 'bag', id: bagIds[0] } : null;
-  const cell = (side, id) => {
-    const n = side === 'box' ? B.box(id) : B.bag(id), sel = campBoxSel && campBoxSel.side === side && campBoxSel.id === id;
+  // 有寫 B.stack（物資箱、置物櫃）：同種物品每 stack 個分一格，跟背包一樣；選取框畫在最後一格
+  const stacks = (side, id) => { const n = side === 'box' ? B.box(id) : B.bag(id); if (!B.stack) return [n];
+    return Array.from({ length: Math.ceil(n / B.stack) }, (_, i) => Math.min(B.stack, n - i * B.stack)); };
+  const cells = side => (side === 'box' ? boxIds : bagIds).flatMap(id => stacks(side, id).map((n, i, all) => cell(side, id, n, i === all.length - 1)));
+  const cell = (side, id, n, last) => {
+    const sel = last && campBoxSel && campBoxSel.side === side && campBoxSel.id === id;
     return '<button type="button" class="bag-cell' + (campSupplyMode === 'ammo' ? ' bullet' : '') + (sel ? ' sel' : '') + '" data-cb-cell="' + side + ':' + id + '" draggable="true"' +
-      (campSupplyMode === 'ammo' ? ' style="--bc:' + BULLETS[id].color + '"' : '') + ' title="' + (side === 'box' ? '點一下：拿到背包' : '點一下：放進箱子') + '" aria-label="' + B.name(id) + ' ' + n + '">' +
+      (campSupplyMode === 'ammo' ? ' style="--bc:' + BULLETS[id].color + '"' : '') + ' title="' + (side === 'box' ? '點一下：拿到背包' : '點一下：放進' + campBoxName(B)) + '" aria-label="' + B.name(id) + ' ' + n + '">' +
       '<img src="' + B.image(id) + '" alt=""><b>' + n + '</b><span class="bag-cell-name">' + B.name(id) + '</span></button>';
   };
+  const boxCells = cells('box'), bagCells = cells('bag');
   const pad = (list, min) => { let h = ''; for (let i = list.length; i < min; i++) h += '<span class="bag-cell empty" aria-hidden="true"></span>'; return h; };
   // 格數跟溫特身上一樣：彈藥箱＝彈藥包的格數、物資箱＝背包「物品」的格數（一開始 12 格，開發工坊升級會變多；js/backpack.js 的 bagCapacity）
   // 兩邊畫一樣多格；東西比格子多時再補一排
   const bagCap = typeof bagCapacity === 'function' ? bagCapacity(campSupplyMode === 'ammo' ? 'weapon' : 'consumable') || 8 : 8;
-  const minCells = Math.max(Math.ceil(bagCap / 4) * 4, Math.ceil(Math.max(boxIds.length, bagIds.length) / 4) * 4);
+  const minCells = Math.max(Math.ceil(Math.max(bagCap, B.minCells ? B.minCells() : 0) / 4) * 4, Math.ceil(Math.max(boxCells.length, bagCells.length) / 4) * 4);
   // 說明列
-  let detail = '<div class="bag-detail-empty cb-empty"><span>' + (campSupplyMode === 'ammo' ? '🧰' : '📦') + '</span><p>箱子和背包裡都沒有東西</p></div>';
+  let detail = '<div class="bag-detail-empty cb-empty"><span>' + campBoxEmoji(B) + '</span><p>' + campBoxName(B) + '和背包裡都沒有東西</p></div>';
   if (campBoxSel) {
     const id = campBoxSel.id, inBox = B.box(id), inBag = B.bag(id);
-    const canTake = Math.min(inBox, B.bagRoom(id)), canPut = Math.min(inBag, B.boxRoom()), qMax = Math.max(1, campBoxSel.side === 'box' ? canTake : canPut);
+    const canTake = Math.min(inBox, B.bagRoom(id)), canPut = Math.min(inBag, B.boxRoom(id)), qMax = Math.max(1, campBoxSel.side === 'box' ? canTake : canPut);
     const key = campSupplyMode + ':' + campBoxSel.side + ':' + id;
     if (key !== campBoxQtyKey) { campBoxQtyKey = key; campBoxQty = campSupplyMode === 'ammo' ? qMax : 1; }   // 換選別的：子彈預設整批、物資預設 1 個
     campBoxQty = Math.max(1, Math.min(qMax, campBoxQty | 0));
     detail = '<div class="bag-detail-image cb-image"><img src="' + B.image(id) + '" alt=""></div>' +
-      '<div class="cb-info"><h3>' + B.name(id) + '</h3><p class="cb-counts">箱子 <b>' + inBox + '</b>・' + (campSupplyMode === 'ammo' ? '身上' : '背包') + ' <b>' + inBag + '</b> ' + B.unit + '</p>' +
+      '<div class="cb-info"><h3>' + B.name(id) + '</h3>' +
       (B.desc(id) ? '<p class="bag-desc">' + B.desc(id) + '</p>' : '') + '</div>' +
       '<div class="cb-actions"><div class="bag-qty"><button type="button" data-cb-qty="-1" aria-label="少一個"' + (campBoxQty <= 1 ? ' disabled' : '') + '>−</button><b>' + campBoxQty + '</b><button type="button" data-cb-qty="1" aria-label="多一個"' + (campBoxQty >= qMax ? ' disabled' : '') + '>＋</button></div>' +
-      '<button type="button" class="bag-use" data-cb-move="take"' + (canTake <= 0 ? ' disabled' : '') + '>拿到' + (campSupplyMode === 'ammo' ? '身上' : '背包') + '</button>' +
-      '<button type="button" class="bag-drop" data-cb-move="put"' + (canPut <= 0 ? ' disabled' : '') + '>放進箱子</button></div>';
+      '<div class="cb-move-row">' +
+      '<button type="button" class="bag-use" data-cb-move="take"' + (canTake <= 0 ? ' disabled' : '') + '>' + (campSupplyMode === 'ammo' ? '拿到身上' : '拿進背包') + '</button>' +
+      '<button type="button" class="bag-drop" data-cb-move="put"' + (canPut <= 0 ? ' disabled' : '') + '>放進' + campBoxName(B) + '</button></div></div>';
   }
   const canFill = B.fillAll && ids.some(id => B.box(id) > 0 && B.bagRoom(id) > 0);
   const foot = B.footer ? B.footer() : '';
-  campSupplyEl.innerHTML = '<section class="backpack-card camp-box-card' + (campBoxPop ? ' pop' : '') + '" role="dialog" aria-modal="true" aria-label="' + B.title + '">' +
-    '<header class="backpack-head"><div class="backpack-icon cb-icon" aria-hidden="true"><span class="cb-icon-crop"><img src="' + B.icon() + '" alt=""></span></div>' +
-    '<div class="backpack-title"><h2>' + B.title + '</h2><p>' + B.sub + '</p></div>' +
+  campSupplyEl.innerHTML = '<section class="backpack-card camp-box-card' + (campBoxPop ? ' pop' : '') + '" role="dialog" aria-modal="true" aria-label="' + campBoxTitle(B) + '">' +
+    '<header class="backpack-head"><div class="backpack-icon cb-icon" aria-hidden="true">' + (B.crop === false ? '<img class="cb-icon-full" src="' + B.icon() + '" alt="">' : '<span class="cb-icon-crop"><img src="' + B.icon() + '" alt=""></span>') + '</div>' +
+    '<div class="backpack-title"><h2>' + campBoxTitle(B) + '</h2><p>' + B.sub + '</p></div>' +
     (B.fillAll ? '<button type="button" class="bag-use cb-fillall" data-cb-fillall' + (canFill ? '' : ' disabled') + '>全部補滿</button>' : '') +
     '<button type="button" class="camp-supply-close" aria-label="關閉（Esc）">×</button></header>' +
     '<div class="cb-body no-anim">' +
-      '<div class="cb-side" data-cb-side="box"><h4>' + (campSupplyMode === 'ammo' ? '🧰' : '📦') + ' 箱子 <em>' + B.boxCount() + '</em></h4><div class="cb-grid">' + boxIds.map(id => cell('box', id)).join('') + pad(boxIds, minCells) + '</div></div>' +
+      '<div class="cb-side" data-cb-side="box"><h4>' + campBoxEmoji(B) + ' ' + campBoxName(B) + (B.boxCount() ? ' <em>' + B.boxCount() + '</em>' : '') + '</h4><div class="cb-grid">' + boxCells.join('') + pad(boxCells, minCells) + '</div></div>' +
       '<div class="cb-arrows" aria-hidden="true"><span>→</span><span>←</span></div>' +
-      '<div class="cb-side" data-cb-side="bag"><h4>🎒 ' + B.bagName + '</h4><div class="cb-grid">' + bagIds.map(id => cell('bag', id)).join('') + pad(bagIds, minCells) + '</div></div>' +
+      '<div class="cb-side" data-cb-side="bag"><h4>🎒 ' + B.bagName + '</h4><div class="cb-grid">' + bagCells.join('') + pad(bagCells, minCells) + '</div></div>' +
     '</div>' +
-    '<p class="cb-hint">點格子就搬到另一邊，也可以拖過去' + (campSupplyMode === 'ammo' ? '（箱子 → 身上：彈藥包放得下的全部拿；身上 → 箱子：全部放回去）' : '（點一下搬 1 個；拖過去一次搬一整格，最多 20 個）') + '；要指定數量用下面的 − ＋</p>' +
     '<div class="cb-detail">' + detail + '</div>' +
     (foot ? '<footer class="cb-foot">' + foot + '</footer>' : '') +
     '</section>';

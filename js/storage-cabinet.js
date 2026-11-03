@@ -1,14 +1,13 @@
 // ============================================================
-//  收納櫃：指定的櫃子可以打開放東西。借用背包視窗（js/backpack.js），左邊不顯示溫特立繪。
-//  ・哪些櫃子算：STORAGE_CABINETS 認素材 id，任何地圖擺了這個素材都是收納櫃；每個擺放位置（地圖＋第幾欄、第幾列）各自分開放東西
-//  ・上方分類條最右邊「背包｜櫃子」切換預覽；背包裡的東西按「放入櫃子」，櫃子裡的按「放到身上」
+//  置物櫃：指定的櫃子可以打開放東西。借用物資箱的視窗（js/camp-supply.js 的 openCampSupply('cabinet')）：左邊櫃子、右邊溫特的背包，點格子或拖過去就搬到另一邊
+//  ・哪些櫃子算：STORAGE_CABINETS 認素材 id，任何地圖擺了這個素材都是置物櫃；每個擺放位置（地圖＋第幾欄、第幾列）各自分開放東西
 //  ・櫃子 slots 格，同種物品每 20 個佔一格（跟背包一樣）；只能放「物品」「隊員物資」，重要物品、子彈、防具不行
 //  ・存在瀏覽器（tudrc_cabinets_v1），每個櫃子分開
 // ============================================================
 const STORAGE_CABINETS = [
-  { tiles: ['tile_prop_shelf_locker_unit_02'], name: '層架置物櫃', slots: 15 },   // 層架置物櫃 02
+  { tiles: ['tile_prop_shelf_locker_unit_02'], name: '置物櫃', slots: 20 },   // 層架置物櫃 02：20 格 × 每格 20 個＝最多 400 個
 ];
-const CABINET_TABS = ['consumable', 'squadgear'];   // 能放進櫃子的分類（背包預覽也只顯示這幾個分頁）
+const CABINET_TABS = ['consumable', 'squadgear'];   // 能放進櫃子的分類
 const CABINET_KEY = 'tudrc_cabinets_v1';
 let cabinetData = {};
 try { cabinetData = JSON.parse(localStorage.getItem(CABINET_KEY) || '{}') || {}; } catch (_) { cabinetData = {}; }
@@ -19,12 +18,11 @@ const cabinetDefFor = s => !!s && typeof MAP !== 'undefined' && MAP && STORAGE_C
 // 靠近判定跟裝備箱一樣（js/camp-interactions.js 的 MAP_BOX，kind 'cabinet'）
 const cabinetNearPlayer = () => typeof mapBoxNearPlayer === 'function' ? mapBoxNearPlayer('cabinet') : null;
 function useCabinetNearPlayer() { const b = cabinetNearPlayer(); if (!b) return false; openCabinet(b.stamp); return true; }
+let cabinetOpen = null;   // 打開中的櫃子 { def, key, image }
 function openCabinet(s) {
   const def = cabinetDefFor(s); if (!def || !G?.player || G.over) return;
-  closeBackpack(true);
-  cabinetOpen = { def, key: MAP.id + '@' + s.c + ',' + s.r }; cabinetView = 'cabinet'; backpackTab = 'consumable'; backpackSel = null;
-  openBackpack();
-  if (!backpackOpen) cabinetOpen = null;
+  cabinetOpen = { def, key: MAP.id + '@' + s.c + ',' + s.r, image: mapTileById(s.id)?.file || '' };
+  openCampSupply('cabinet');
 }
 function cabinetStore() { return cabinetData[cabinetOpen.key] || (cabinetData[cabinetOpen.key] = {}); }
 const cabinetCount = id => cabinetOpen ? cabinetStore()[id] || 0 : 0;
@@ -33,55 +31,19 @@ function cabinetRoom(id) {
   const n = cabinetCount(id);
   return Math.max(0, cabinetOpen.def.slots - cabinetUsed()) * BAG_STACK_MAX + (n % BAG_STACK_MAX ? BAG_STACK_MAX - n % BAG_STACK_MAX : 0);
 }
-const cabinetItems = () => allItems().filter(item => cabinetCount(item.id) > 0);
-function setCabinetView(view) {
-  if (!cabinetOpen || cabinetView === view) return;
-  cabinetView = view; backpackSel = null; bagDropQty = 1; sfx('switch'); renderBackpack();
-}
-// 分類條：背包預覽＝能放的分頁；櫃子預覽＝一個「櫃子 幾格/幾格」。最右邊都是「背包｜櫃子」切換
-function cabinetTabsHtml(tabBtn, cats) {
-  const left = cabinetView === 'cabinet'
-    ? `<button type="button" role="tab" class="active" aria-selected="true">🗄️ ${cabinetOpen.def.name}<em class="bag-tab-count">${cabinetUsed()}/${cabinetOpen.def.slots}</em></button>`
-    : cats.map(tabBtn).join('');
-  const seg = v => `<button type="button" data-cabinet-view="${v}" class="${cabinetView === v ? 'active' : ''}" aria-pressed="${cabinetView === v}">${v === 'bag' ? '🎒 背包' : '🗄️ 櫃子'}</button>`;
-  return left + `<span class="bag-view-toggle" role="group" aria-label="切換背包／櫃子預覽">${seg('bag')}${seg('cabinet')}</span>`;
-}
-function renderCabinetDetail() {
-  backpackDetail.classList.remove('gear-detail');
-  const inCab = cabinetView === 'cabinet', item = itemById(backpackSel);
-  if (!item) { backpackDetail.innerHTML = `<div class="bag-detail-empty"><span>${inCab ? '🗄️' : '🎒'}</span><p>${inCab ? '櫃子裡沒有東西' : '沒有可以放進櫃子的物品'}</p></div>`; return; }
-  const cat = categoryOf(item.category), count = inCab ? cabinetCount(item.id) : supplyInventory.get(item.id) || 0;
-  const kind = item.use && SUPPLY_KIND[item.use], q = Math.min(bagDropQty, count);
-  const qty = count > 1 ? `<div class="bag-qty"><button type="button" data-drop-qty="-1" aria-label="少一個" ${q <= 1 ? 'disabled' : ''}>−</button><b>${q}</b><button type="button" data-drop-qty="1" aria-label="多一個" ${q >= count ? 'disabled' : ''}>＋</button></div>` : '';
-  backpackDetail.innerHTML = `
-    <div class="bag-detail-image"><img src="${item.image}" alt=""></div>
-    <div class="bag-item-heading"><h3>${item.name}</h3>
-    <div class="bag-tags"><span class="bag-tag">${BAG_ICON[cat.id] || cat.icon + ' '}${cat.name}</span>${kind ? `<span class="bag-tag effect ${item.use}">${kind.icon} ${supplyEffect(item)}</span>` : item.effect ? `<span class="bag-tag effect">${item.effect}</span>` : ''}</div></div>
-    ${itemDesc(item) ? `<p class="bag-desc">${itemDesc(item)}</p>` : ''}
-    <div class="bag-actions">
-      <div class="bag-quick bag-use-slot"><small>${inCab ? '櫃子裡有 ' + count + ' 個' : '身上有 ' + count + ' 個'}</small></div>
-      <button type="button" class="bag-use" data-cabinet-move="${item.id}">${inCab ? '放到身上' : '放入櫃子'}</button>
-      ${inCab ? `<div class="bag-drop-row">${qty}</div>` : canDrop(item) ? dropRowHtml(item, count) : `<div class="bag-drop-row">${qty}</div>`}
-    </div>`;
-}
-// 搬 n 個：背包預覽＝背包 → 櫃子；櫃子預覽＝櫃子 → 背包（背包放不下的留在櫃子裡）
-function cabinetMove(id, n) {
-  if (!cabinetOpen) return;
-  const item = itemById(id); if (!item) return;
-  const store = cabinetStore();
-  if (cabinetView === 'bag') {
-    if (!CABINET_TABS.includes(item.category)) { sfx('error'); systemNotice('這個不能放進櫃子', true); return; }
-    const have = supplyInventory.get(id) || 0, k = Math.min(n, have, cabinetRoom(id));
-    if (k <= 0) { sfx('error'); systemNotice('櫃子滿了（' + cabinetOpen.def.slots + ' 格，每格 ' + BAG_STACK_MAX + ' 個）', true); return; }
-    supplyInventory.set(id, have - k);
-    store[id] = (store[id] || 0) + k;
-  } else {
-    const have = store[id] || 0, k = supplyGain(id, Math.min(n, have));   // 背包放不下：supplyGain 會跳提示
-    if (k <= 0) { sfx('error'); return; }
-    store[id] = have - k; if (!store[id]) delete store[id];
-  }
-  saveCabinets(); bagDropQty = 1; sfx('place');
-  if (typeof updateHUD === 'function') updateHUD();
-  renderBackpack();
-  (backpackDetail.querySelector('.bag-use') || backpackGrid.querySelector('.bag-cell.sel') || document.getElementById('backpackClose')).focus();
-}
+// 物資箱視窗的設定（js/camp-supply.js 的 CAMP_BOXES 會拿這個）
+const CABINET_BOX = {
+  title: () => cabinetOpen.def.name, sub: '放身上的物品和隊員物資，每個櫃子分開放', icon: () => cabinetOpen.image, bagName: '溫特的背包', unit: '個',
+  boxName: '櫃子', boxEmoji: '🗄️', crop: false,
+  ids: () => allItems().filter(item => CABINET_TABS.includes(item.category)).map(item => item.id),
+  box: cabinetCount, bag: id => supplyInventory.get(id) || 0, bagRoom: () => Infinity,
+  boxRoom: id => cabinetRoom(id), boxCount: () => cabinetUsed() + ' / ' + cabinetOpen.def.slots + ' 格',
+  fullMsg: () => '櫃子滿了（' + cabinetOpen.def.slots + ' 格，每格 ' + BAG_STACK_MAX + ' 個）',
+  minCells: () => cabinetOpen.def.slots, stack: BAG_STACK_MAX,
+  name: id => itemById(id).name, image: id => itemById(id).image, desc: id => itemDesc(itemById(id)),
+  clickTake: () => 1, clickPut: () => 1,
+  take(id, n) { const store = cabinetStore(), have = store[id] || 0, got = supplyGain(id, Math.min(n, have)); store[id] = have - got; if (!store[id]) delete store[id]; return got; },   // 背包放不下：留在櫃子裡
+  put(id, n) { const have = supplyInventory.get(id) || 0, k = Math.min(n, have, cabinetRoom(id)); if (k <= 0) return 0;
+    if (have - k <= 0) supplyInventory.delete(id); else supplyInventory.set(id, have - k); const store = cabinetStore(); store[id] = (store[id] || 0) + k; return k; },
+  save: () => saveCabinets(),
+};

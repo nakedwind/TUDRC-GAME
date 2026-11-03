@@ -606,7 +606,7 @@ function tutorialFrame(dt) {
     else if (L.step.done && L.step.done(L)) tutNextStep();
   }
   drawTutFocus();
-  if (ok && typeof campSupplyOpen !== 'undefined' && campSupplyOpen && campSupplyMode !== 'ammo' && !tutorialState.boxes.supply) { tutorialState.boxes.supply = true; tutorialSave(); }
+  if (ok && typeof campSupplyOpen !== 'undefined' && campSupplyOpen && campSupplyMode === 'supply' && !tutorialState.boxes.supply) { tutorialState.boxes.supply = true; tutorialSave(); }
   drawTutMarks(ok && !tutLesson && !dialogueState && tutorialState.decided && !tutorialState.skip);
 }
 
