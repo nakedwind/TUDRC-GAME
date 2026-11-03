@@ -194,7 +194,7 @@ function renderGraffitiPick(penId) {
       return '<button type="button" class="graffiti-custom" data-graffiti-custom="' + c.id + '" title="自訂圖案" aria-label="自訂圖案"><span class="graffiti-del" data-graffiti-del="' + c.id + '" title="刪掉這個圖案">×</span></button>';
     }).join('') +
     (full ? '' : '<button type="button" class="graffiti-new" data-graffiti-new title="自己畫一個圖案">＋<small>自己畫</small></button>') + '</div>' +
-    '<footer><span>選好之後，點溫特附近的牆、地板或物品畫上去</span><button type="button" class="graffiti-cancel">取消</button></footer></section>';
+    '<footer><span>選好之後，點' + playerName() + '附近的牆、地板或物品畫上去</span><button type="button" class="graffiti-cancel">取消</button></footer></section>';
   graffitiPalette.querySelectorAll('[data-graffiti-sym]').forEach(b => {
     graffitiButtonCanvas(b, graffitiImage(b.dataset.graffitiSym, color), b.dataset.graffitiSym === 'help' ? 1 : 1.6);   // 按鈕裡顯示的大小（HELP 比較寬，不放大）
   });
@@ -258,7 +258,7 @@ function startGraffitiPlace(penId, sym, custom) {
   closeGraffitiPalette();
   graffitiPlace = { pen: penId, color: GRAFFITI_PENS[penId], sym, custom };   // custom＝自訂圖案的資料（sym 就是 null）
   cv.classList.add('graffiti-placing');
-  systemNotice('🖍️ 點溫特附近的牆、地板或物品畫上去（右鍵或 Esc 取消）');
+  systemNotice('🖍️ 點' + playerName() + '附近的牆、地板或物品畫上去（右鍵或 Esc 取消）');
 }
 function cancelGraffitiPlace(silent) {
   if (!graffitiPlace) return;

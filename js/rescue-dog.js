@@ -178,7 +178,7 @@ function dogFollowAnchor() {
   if (ok(picked)) return picked;
   return G.towers.find(t => RESCUE_DOG_HANDLERS.includes(t.type) && ok(t)) || G.player;
 }
-const dogFollowName = who => who === G.player ? '溫特' : (TYPES[who.type] || {}).name || '隊員';
+const dogFollowName = who => who === G.player ? playerName() : (TYPES[who.type] || {}).name || '隊員';
 // 地圖上點到的球球（只有出勤時）；沒點到＝null
 function dogAt(x, y) {
   if (MAP_SAFE || !getTeam().includes('ball')) return null;
@@ -197,7 +197,7 @@ function openDogFollowMenu(left, top) {
   };
   fieldCommandMenu.innerHTML = '<div class="field-command-head"><strong>球球要跟誰？</strong>' +
     '<button type="button" class="field-command-close" aria-label="關閉選單">×</button></div>' +
-    option('player', G.player, '溫特（自己）') + G.towers.map(t => option(t.type, t, (TYPES[t.type] || {}).name || t.type)).join('');
+    option('player', G.player, playerName() + '（自己）') + G.towers.map(t => option(t.type, t, (TYPES[t.type] || {}).name || t.type)).join('');
   fieldCommandMenu.querySelector('.field-command-close').addEventListener('click', () => { sfx('switch'); closeFieldCommandMenu(); });
   fieldCommandMenu.querySelectorAll('[data-dog-follow]').forEach(b => b.addEventListener('click', () => setDogFollow(b.dataset.dogFollow)));
   fieldCommandMenu.dataset.type = 'ball';

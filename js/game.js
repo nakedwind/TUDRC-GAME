@@ -14,8 +14,25 @@ let ctx = cv.getContext('2d');   // let：畫泡在水裡的角色時，會暫�
 
 // ---- 玩家角色（嚮導本人，可用 WASD／方向鍵操縱）----
 const PLAYER = CHARACTERS.winter.player;   // 移動速度、碰撞半徑、角色圖尺寸
-const PLAYER_CHARACTER = CHARACTERS.winter.id;
-const PLAYER_OUTFIT = CHARACTERS.winter.sprite.slice(-1);
+let PLAYER_CHARACTER = CHARACTERS.winter.id;   // 玩家操作的角色：平常是溫特；艾德林隊出擊時換成艾德林（js/team.js 的 squadLeader）
+let PLAYER_OUTFIT = CHARACTERS.winter.sprite.slice(-1);
+// 現在該操作誰：劇情地圖、新手區一定是溫特；其他照帶隊的人
+function syncPlayerCharacter() {
+  // 兵分兩路：走進哪一區就由負責那一區的隊伍帶隊（Z62＝艾德林隊；開始畫面直接選地圖、接續暫停的戰場也一樣）；不是任務的地圖照舊
+  if (!MAP_SAFE && !MAP_STORY && typeof setActiveSquad === 'function' && typeof missionOfMap === 'function') { const m = missionOfMap(MAP && MAP.id); if (m) setActiveSquad(squadOfMission(m)); }
+  const lead = typeof squadLeader === 'function' && !MAP_STORY && !isNewbieMap() ? squadLeader() : 'winter';
+  PLAYER_CHARACTER = CHARACTERS[lead] ? lead : 'winter';
+  PLAYER_OUTFIT = CHARACTERS[PLAYER_CHARACTER].sprite.slice(-1);
+  // 下方資訊條的頭像、名字跟著換
+  const name = playerName(), hud = document.querySelector('#hud .hud-player');
+  if (hud) {
+    const b = hud.querySelector('.hud-player-status > b'), img = hud.querySelector('.hud-player-avatar img'), folder = CHARACTERS[PLAYER_CHARACTER].sprite;
+    if (b) b.textContent = name + '．' + (PLAYER_CHARACTER === 'winter' ? '嚮導部隊長' : '嚮導隊長');
+    if (img) { img.src = 'images/character/' + folder + '/' + folder.replace('_', '') + '_0000_Front.png'; img.alt = name; }
+  }
+}
+// 現在操作的角色的名字（畫面上原本寫「溫特」的地方用這個）
+const playerName = () => (CHARACTERS[PLAYER_CHARACTER] || CHARACTERS.winter).name;
 // ---- 角色精靈圖（玩家與哨兵共用）----
 // 資料夾 images/character/<角色>_<服裝>/，檔名 <角色><服裝>_0000_Front.png …
 const CHARACTER_SPRITE_FILES = {
@@ -92,11 +109,13 @@ const sentrySprites = {};   // 哨兵類型 → 精靈圖（data/balance.js 的 
 const wandererSprites = {};
 function applyOutfits() {   // 每次開始遊戲／換地圖時呼叫；在衣櫃換了服裝也會呼叫（js/costumes.js）
   const costume = (id, folder) => typeof costumeOutfit === 'function' ? costumeOutfit(id, folder) : null;   // 衣櫃指定的服裝（沒指定＝照原本）
+  syncPlayerCharacter();
   const player = costume(PLAYER_CHARACTER, `${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`) || outfitSet(`${PLAYER_CHARACTER}_${PLAYER_OUTFIT}`);
   for (const k of Object.keys(playerSprites)) delete playerSprites[k];   // 換穿的那套沒有持槍圖時，不要留著上一套的
   Object.assign(playerSprites, player);
   for (const type of Object.keys(TYPES)) if (TYPES[type].sprite) sentrySprites[type] = costume(type, TYPES[type].sprite) || outfitSet(TYPES[type].sprite);
   for (const profile of WANDERERS) wandererSprites[profile.id] = costume(profile.id, profile.sprite) || (RANDOM_OUTFITS.includes(profile.id) ? randomOutfitSet(profile.sprite) : outfitSet(profile.sprite));
+  if (PLAYER_CHARACTER !== 'winter') wandererSprites.winter = costume('winter', CHARACTERS.winter.sprite) || outfitSet(CHARACTERS.winter.sprite);   // 艾德林帶隊時，溫特在基地當 NPC（js/missions.js 的 spawnBaseWinter）
 }
 // 每次進地圖隨機穿 A 或 B（各 50%），名單在 data/balance.js 的 RANDOM_OUTFITS
 function randomOutfitSet(folder) {
@@ -234,7 +253,7 @@ let dialogueTypeTimer = null;
 
 function dialogueKey(actor) { return actor.kind === 'tower' ? actor.type : actor.id; }
 function dialogueProfile(actor) {
-  return actor.kind === 'tower' ? TYPES[actor.type] : WANDERERS.find(profile => profile.id === actor.id);
+  return actor.kind === 'tower' ? TYPES[actor.type] : WANDERERS.find(profile => profile.id === actor.id) || CHARACTERS[actor.id];   // CHARACTERS：艾德林帶隊時在基地的溫特
 }
 function interactionNearPlayer() {
   const p = G && G.player; if (!p || p.sitting) return null;
@@ -1260,9 +1279,12 @@ function newGame() {
     spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
     if (typeof achieveOnSortie === 'function') achieveOnSortie();   // 成就：同時帶著○○出勤
     spawnWanderers();     // 場景 NPC 只會在亮處自由走動
+    if (typeof spawnBaseWinter === 'function') spawnBaseWinter();   // 艾德林帶隊回來：溫特在應變中心（js/missions.js）
   }
   const [px, py] = playerSpawnPos();
-  G.player = { x: px, y: py, hp: PLAYER.hp ?? 100, maxhp: PLAYER.hp ?? 100, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
+  const playerMaxHp = PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER] ? TYPES[PLAYER_CHARACTER].hp : PLAYER.hp ?? 100;   // 操作艾德林：用艾德林自己的 HP
+  G.player = { char: PLAYER_CHARACTER, x: px, y: py, hp: playerMaxHp, maxhp: playerMaxHp, hitT: 0, underAttackT: 0, dir: 'front', moving: false, anim: 0, blinkWait: 2 + Math.random() * 3, blinkTime: -1 };
+  if (typeof leaderOnSpawn === 'function') leaderOnSpawn();   // 艾德林帶隊：出勤補給的效果（js/leader-skills.js）
   if (typeof afterVitalsSpawn === 'function') afterVitalsSpawn();   // 溫特的 HP 帶到這張地圖、住院的隊員躺上病床（js/vitals.js）
   updateCamera();
   if (typeof restoreSanitySP === 'function') restoreSanitySP();   // SP 帶到這張地圖，不補滿（js/sanity.js）
@@ -1453,6 +1475,7 @@ function updatePlayer(dt) {
   p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
   if (p.mrtRide) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
+  if (typeof updateLeader === 'function' && updateLeader(p, dt)) { p.moving = false; p.anim = 0; p.dir = 'front'; return; }   // 艾德林帶隊：治癒光環、技能冷卻；詠唱中站著不動（js/leader-skills.js）
   if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼（按移動鍵會中斷疏導、急救，js/channel-actions.js）
     p.soothingT = Math.max(0, p.soothingT - dt);
     p.moving = false; p.anim = 0; p.dir = 'front';
@@ -1754,6 +1777,15 @@ const PLAYER_ATK = CHARACTERS.winter.playerAttack || { range: 6, dmg: 3, rate: 5
 if (typeof applyWeaponLevels === 'function') applyWeaponLevels();   // 武器等級（找諾亞升級；js/equipment.js）
 const GUIDE_GUN_TYPES = new Set(['eldrin', 'chris']);
 const GUIDE_GUN = { mag: 6, reloadTime: 2 };
+// 玩家現在用的槍：溫特＝PLAYER_ATK（手槍，找諾亞升級）；艾德林帶隊＝他自己的數值（data/characters.js 的 combat，技能樹、隊員裝備加過的），
+// 再加上出勤補給、守護祝福這類增益（atk 攻擊力、spd 攻擊速度）。LEADER_GUN.aggro＝幾乎不吸仇恨（溫特的槍會把怪拉過來）
+const LEADER_GUN = { aggro: 0.8 };
+function playerGun() {
+  const s = PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER];
+  if (!s) return PLAYER_ATK;
+  const p = G && G.player, buff = k => (p && typeof sortieBuff === 'function' ? sortieBuff(p, k) : 0);
+  return { ...PLAYER_ATK, dmg: s.dmg * (1 + buff('atk')), range: s.range, rate: s.rate * (1 + buff('spd')), aggro: LEADER_GUN.aggro, mag: GUIDE_GUN.mag, reloadTime: GUIDE_GUN.reloadTime, double: 0 };
+}
 let aimHeld = false, aimClient = null;
 // 快速連點：按下到放開比一幀還短（或剛好在射速冷卻中）時，這一下也要開得到槍 → 先記下來，SHOT_QUEUE 秒內冷卻好了就補開
 let shotQueuedAt = -Infinity;
@@ -1785,8 +1817,8 @@ function clientToWorld(cx, cy) {
   return { x: (cx - rect.left) * cv.width / rect.width / VIEW_SCALE + cam.x, y: (cy - rect.top) * cv.height / rect.height / VIEW_SCALE + cam.y };
 }
 function startReload(p) {
-  if (!p || p.reloadT > 0 || (p.ammo ?? PLAYER_ATK.mag) >= PLAYER_ATK.mag) return;
-  p.reloadT = PLAYER_ATK.reloadTime;
+  if (!p || p.reloadT > 0 || (p.ammo ?? playerGun().mag) >= playerGun().mag) return;
+  p.reloadT = playerGun().reloadTime;
   if (typeof sfx === 'function') sfx('reload');
 }
 // 溫特開槍時，這個目標能不能打：回傳 { d 距離, onBody 游標是不是直接點在牠身上 }，不能打就回傳 null。
@@ -1800,7 +1832,7 @@ function playerShotCheck(p, e, aim, angDiff) {
   const lit = bodyVisible(box, e.x, e.y) || isLit(e.x, e.y) || isLit(box.cx, box.cy);   // 畫面上看得到就打得到
   if (!lit) return null;
   const d = Math.hypot(e.x - p.x, e.y - p.y);
-  if (d > PLAYER_ATK.range * CELL) return null;
+  if (d > playerGun().range * CELL) return null;
   const pad = SHOT_BODY_PAD;
   const onBody = aim.x >= box.x0 - pad && aim.x <= box.x1 + pad && aim.y >= box.y0 - pad && aim.y <= box.y1 + pad;
   const ux = (p.x - e.x) / (d || 1), uy = (p.y - e.y) / (d || 1), h = box.y1 - box.y0;
@@ -1813,13 +1845,13 @@ function playerShotCheck(p, e, aim, angDiff) {
   ];
   if (!spots.some(([x, y]) => hasLineOfSight(p.x, p.y, x, y))) return null;   // 整個身體都被牆擋住
   const da = Math.min(angDiff(e.x, e.y), angDiff(box.cx, box.cy));
-  if (!onBody && da > PLAYER_ATK.cone) return null;
+  if (!onBody && da > playerGun().cone) return null;
   return { d, onBody };
 }
 function updatePlayerAttack(dt) {
   const p = G.player;
   if (!p || MAP_SAFE) { updateAmmoHud(); return; }
-  if (p.ammo == null) p.ammo = PLAYER_ATK.mag;
+  if (p.ammo == null) p.ammo = playerGun().mag;
   if (p.gunT > 0) p.gunT -= dt;
   if (p.recoilT > 0) p.recoilT -= dt;
   p.atkCd = (p.atkCd || 0) - dt;
@@ -1828,7 +1860,7 @@ function updatePlayerAttack(dt) {
   const wid = playerWeapon(p).id, paint = wid === 'paint';   // 裝的子彈（滾輪換，js/flare.js）
   if (p.reloadT > 0) {   // 手槍彈匣裝填中（換成特殊子彈時也會繼續裝）
     p.reloadT -= dt;
-    if (p.reloadT <= 0) { p.ammo = PLAYER_ATK.mag; }
+    if (p.reloadT <= 0) { p.ammo = playerGun().mag; }
     if (wid === 'pistol') { updateAmmoHud(); return; }
   }
   updateAmmoHud();
@@ -1843,7 +1875,7 @@ function updatePlayerAttack(dt) {
   else if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const adx = aim.x - p.x, ady = aim.y - p.y, aimAng = Math.atan2(ady, adx);
   if (paint) { p.atkCd = BULLETS.paint.gap; useBullet('paint'); }   // 漆彈：跟一般子彈一樣瞄準，打中的怪物被標記（不扣血）
-  else { p.atkCd = 1 / PLAYER_ATK.rate / (typeof foodRateMul === 'function' ? foodRateMul() : 1); p.ammo--; }   // 烤魚片：射速變快（js/food.js）
+  else { p.atkCd = 1 / playerGun().rate / (typeof foodRateMul === 'function' ? foodRateMul() : 1); p.ammo--; }   // 烤魚片：射速變快（js/food.js）
   p.dir = Math.abs(adx) >= Math.abs(ady) ? (adx < 0 ? 'left' : 'right') : (ady < 0 ? 'back' : 'front');
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   const vineMate = !paint && typeof vineShotTarget === 'function' ? vineShotTarget(aim) : null;   // 游標點在被絲瓜藤纏住的隊友身上：子彈射斷藤蔓（js/loofah-lady.js）
@@ -1853,7 +1885,7 @@ function updatePlayerAttack(dt) {
   // 朝游標方向、射程內、照亮的最近怪。
   // 浮在空中／很高的目標（珍珠小童、異質核心）畫面上的身體比腳底高：游標直接點在身體上就一定打中；
   // 扇形判定也同時看腳底和身體中心，取比較接近的角度。
-  let best = null, bestD = PLAYER_ATK.range * CELL, bestOnBody = false;
+  let best = null, bestD = playerGun().range * CELL, bestOnBody = false;
   const angDiff = (x, y) => { let da = Math.abs(Math.atan2(y - p.y, x - p.x) - aimAng); return da > Math.PI ? 2 * Math.PI - da : da; };
   for (const e of paint ? G.enemies : [...G.enemies, ...G.cores.filter(c => !c.hidden)]) {   // 漆彈只標記怪物；躲在順順宮帽裡的核心打不到（js/elite-cap-king.js）
     const shot = playerShotCheck(p, e, aim, angDiff);
@@ -1865,7 +1897,7 @@ function updatePlayerAttack(dt) {
     const isOil = oilItem(o), isOre = o.ore && typeof oreProxy === 'function';
     if ((!isOil && !isOre) || o.hp <= 0) continue;
     const c = isOil ? oilCenter(o) : oreCenter(o), d = Math.hypot(c.x - p.x, c.y - p.y);
-    if (d > PLAYER_ATK.range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
+    if (d > playerGun().range * CELL || !isLit(c.x, c.y) || !hasLineOfSight(p.x, p.y, c.x, c.y)) continue;
     if (isOil) {
       const left = o.artX ?? OX + o.c * CELL, top = o.artY ?? OY + o.r * CELL;
       if (aim.x >= left && aim.x <= left + (o.w || 1) * CELL && aim.y >= top && aim.y <= top + (o.h || 1) * CELL) {
@@ -1874,13 +1906,13 @@ function updatePlayerAttack(dt) {
     }
     if (bestOnBody) continue;
     let da = Math.abs(Math.atan2(c.y - p.y, c.x - p.x) - aimAng); if (da > Math.PI) da = 2 * Math.PI - da;
-    if (da <= PLAYER_ATK.cone && d < bestD) { bestD = d; best = isOil ? oilProxy(o) : oreProxy(o); }
+    if (da <= playerGun().cone && d < bestD) { bestD = d; best = isOil ? oilProxy(o) : oreProxy(o); }
   }
   const pearlShot = paint || typeof bigPearlShotTarget !== 'function' ? null : bigPearlShotTarget(p, aim, aimAng, bestD, bestOnBody);   // 珍珠大童的大珍珠：開槍推動（js/pearl-elder.js）
   if (pearlShot) { best = pearlShot; bestD = pearlShot.d; bestOnBody = pearlShot.onBody; }
   const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
-  let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * PLAYER_ATK.range * CELL;
-  let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * PLAYER_ATK.range * CELL;
+  let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * playerGun().range * CELL;
+  let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * playerGun().range * CELL;
   if (paint) {   // 漆彈：螢光綠的彈道（BULLETS.paint.color），打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
     const { x: mx, y: my } = gunMuzzleAt(p, aimAng), col = BULLETS.paint.color;
     G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .06, life0: .06 });
@@ -1908,11 +1940,11 @@ function updatePlayerAttack(dt) {
   G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .07, life0: .07, color: '#ffe79a' });   // 子彈曳光（飛向目標）
   if (best) G.effects.push({ ring: true, x: endX, y: endY, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });   // 命中小火花
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
-  if (best && best.oilRef) { damageOil(best.oilRef, Math.round(PLAYER_ATK.dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
-  if (best && best.oreRef) { pistolHitOre(best.oreRef, PLAYER_ATK.dmg); best = null; }   // 打到異質礦：累積傷害，打夠了才碎（js/ore.js）
+  if (best && best.oilRef) { damageOil(best.oilRef, Math.round(playerGun().dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
+  if (best && best.oreRef) { pistolHitOre(best.oreRef, playerGun().dmg); best = null; }   // 打到異質礦：累積傷害，打夠了才碎（js/ore.js）
   if (best && best.bigPearlRef) { shootBigPearl(best.bigPearlRef, p.x, p.y); best = null; }   // 打到大珍珠：往子彈的方向推（js/pearl-elder.js）
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
-    const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
+    const critMul = rollCrit('player'), shotDmg = Math.round(playerGun().dmg * (critMul || 1));
     wakeCore(best); best.lastHp = best.hp;
     best.hp -= shotDmg; markHit(critMul);
     if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
@@ -1920,11 +1952,11 @@ function updatePlayerAttack(dt) {
     best = null;
   }
   if (best) {
-    const critMul = rollCrit('player'), shotDmg = Math.round(PLAYER_ATK.dmg * (critMul || 1));
+    const critMul = rollCrit('player'), shotDmg = Math.round(playerGun().dmg * (critMul || 1));
     best.hp -= shotDmg;
     if (typeof addStat === 'function') addStat('pistolDamage', shotDmg);   // 成就：手槍累計傷害
     if (!(best.playerAggroT > 0)) best.alertT = ENEMY_ALERT_TIME;   // 這一槍才把牠吸引過來：頭上冒「！」
-    best.playerAggroT = PLAYER_ATK.aggro;   // 吸引仇恨
+    best.playerAggroT = playerGun().aggro;   // 吸引仇恨
     markHit(critMul);                       // 準星旁閃一下命中標記
     best.hitT = Math.max(best.hitT || 0, .14); best.hitColor = '#bfe0ff';
     enemyHitReact(best, p.x, p.y, !!critMul);   // 爆擊算重擊（會擊退、硬直）
@@ -1934,7 +1966,7 @@ function updatePlayerAttack(dt) {
   }
   if (typeof sfx === 'function') sfx('shotPistol');
   if (p.ammo <= 0) startReload(p);   // 打完最後一發→自動裝填
-  else if (PLAYER_ATK.double && Math.random() < PLAYER_ATK.double) p.atkCd = .07;   // 快速射擊（手槍 Lv3 起）：馬上再開一發
+  else if (playerGun().double && Math.random() < playerGun().double) p.atkCd = .07;   // 快速射擊（手槍 Lv3 起）：馬上再開一發
 }
 // 右下角：目前裝的子彈（上面名稱；下面子彈圖＋剩幾發）
 // 子彈圖跟以前換槍一樣疊兩張：正在用的在前面、後面露出滾輪往下會換到的那顆，換的時候彈一下
@@ -1972,7 +2004,7 @@ function updateAmmoHud() {
   if (typeof MAP_SAFE !== 'undefined' && MAP_SAFE) { if (ammoHudEl) ammoHudEl.style.display = 'none'; return; }
   if (!ammoHudEl) buildAmmoHud();
   ammoHudEl.style.display = '';
-  const p = G.player, mag = PLAYER_ATK.mag, ammo = p ? (p.ammo ?? mag) : mag;
+  const p = G.player, mag = playerGun().mag, ammo = p ? (p.ammo ?? mag) : mag;
   const w = playerWeapon(p), wi = WEAPONS.indexOf(w), n = bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;
   const text = w.id === 'pistol' ? ((p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞')
     : '<b>' + n + '</b> 發' + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
@@ -2597,7 +2629,8 @@ const LOSE_TEXT = {
 };
 // cause＝倒下原因（例：「被史萊姆攻擊」），會顯示在結算畫面上
 function loseOverlay(reason, cause) {
-  const [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base;
+  let [title, text] = LOSE_TEXT[reason] || LOSE_TEXT.base;
+  if (reason === 'player' && PLAYER_CHARACTER !== 'winter') { title = '💀 隊長倒下'; text = text.replace('溫特', playerName()); }   // 艾德林帶隊
   const causeLine = cause ? '<span class="lose-cause">倒下原因：<b>' + cause + '</b></span>' : '';
   showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
 }

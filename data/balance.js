@@ -17,6 +17,15 @@ const SOOTHE = {
   heal: 55,   // 每次疏導降多少汙染值
   time: 3,    // 溫特疏導隊員要幾秒（進度條跑完才算成功；期間溫特和隊員都不能動，js/channel-actions.js）
 };
+// 玩家親自補血、疏導的方式（疏導、急救包、醫療包都算）：乘在上面的 SOOTHE、data/equipment.js 的 FIRST_AID、醫療包的恢復量上
+//   time：花的時間 ×幾倍（小＝比較快）　amount：補的血／降的負荷 ×幾倍
+//   area：範圍（格）＝身邊這麼多格內需要的人一起補（補血連自己也算）；沒寫＝一對一，只有選的那個人
+//   花的 SP、急救包、醫療包都只算一次
+const CARE_STYLE = {
+  winter: { time: 0.75, amount: 1.3 },            // 溫特：一對一，比較快、補比較多
+  eldrin: { time: 1.3, amount: 0.7, area: 3 },    // 艾德林帶隊：範圍，比較慢、補比較少
+};
+const careStyle = () => (typeof PLAYER_CHARACTER !== 'undefined' && CARE_STYLE[PLAYER_CHARACTER]) || CARE_STYLE.winter;
 
 // ---- 角色資料相容入口 ----
 // 哨兵與嚮導的原始數值集中在 data/characters.js；這裡建立遊戲既有的 TYPES 介面。

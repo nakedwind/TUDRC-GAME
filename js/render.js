@@ -856,7 +856,7 @@ function drawSitPrompt(seat) { drawInteractPrompt(seat.x, seat.top, seat.prompt 
 function drawPlayerReloadCountdown(p, size) {
   if (!(p.reloadT > 0)) return;
   const w = 58, h = 20, x = Math.round(p.x - w / 2), y = Math.round(p.y - size - 14);
-  const progress = Math.max(0, Math.min(1, 1 - p.reloadT / PLAYER_ATK.reloadTime));
+  const progress = Math.max(0, Math.min(1, 1 - p.reloadT / playerGun().reloadTime));
   ctx.save();
   ctx.fillStyle = 'rgba(10,17,27,.94)'; roundRect(x, y, w, h, 6); ctx.fill();
   ctx.strokeStyle = '#5d88a8'; ctx.lineWidth = 1; ctx.stroke();

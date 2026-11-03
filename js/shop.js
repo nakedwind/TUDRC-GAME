@@ -355,17 +355,23 @@ function useSupply(id) {
   // 醫療包（補 HP）：站著包紮，進度條跑完才補血（js/channel-actions.js）；杏仁水照常馬上喝
   if (item.use === 'hp' && typeof startChannel === 'function') {
     if (playerChannel) return false;
-    if (supplyNeed('hp') <= 0) { sfx('error'); flash('HP 已滿', G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
-    startChannel({ kind: 'medkit', total: CHANNEL_TIME.medkit, target: G.player, label: '包紮中', color: '#79dbad', onDone: () => applySupplyNow(id) });
+    if (supplyNeed('hp') <= 0 && !careNearNeed()) { sfx('error'); flash('HP 已滿', G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
+    startChannel({ kind: 'medkit', total: CHANNEL_TIME.medkit * careStyle().time, target: G.player, label: '包紮中', color: '#79dbad', onDone: () => applySupplyNow(id) });   // 秒數：溫特快、艾德林慢（data/balance.js 的 CARE_STYLE）
     return true;
   }
   return applySupplyNow(id);
 }
+// 艾德林帶隊用醫療包：身邊受傷的隊友也一起補（data/balance.js 的 CARE_STYLE 的 area）
+const careNearNeed = () => !!careStyle().area && typeof careTargets === 'function' && careTargets(null, o => o.hp < o.maxhp, false).length > 0;
 function applySupplyNow(id) {
   const item = supplyById(id), count = supplyInventory.get(id) || 0;
   if (!item || !G?.player || count <= 0) return false;
-  const amount = item.restore;
+  const amount = item.use === 'hp' ? Math.round(item.restore * careStyle().amount) : item.restore;   // 醫療包：溫特補比較多、艾德林補比較少
   const restored = Math.min(amount, supplyNeed(item.use));
+  if (item.use === 'hp' && careNearNeed()) {
+    for (const o of careTargets(null, o => o.hp < o.maxhp, false)) { const before = o.hp; o.hp = Math.min(o.maxhp, o.hp + amount); if (o.hp - before >= 1) flash('+' + Math.round(o.hp - before) + ' HP', o.x, o.y - 50, '#79dbad', 1.6); }
+    if (restored <= 0) { if (count <= 1) supplyInventory.delete(id); else supplyInventory.set(id, count - 1); sfx('soothe'); updateHUD(); if (supplyShopOpen) renderSupplyShop(); if (backpackOpen) renderBackpack(); return true; }   // 自己滿血、只補到隊友
+  }
   if (restored <= 0) { sfx('error'); flash(`${SUPPLY_KIND[item.use].stat} 已滿`, G.player.x, G.player.y - 54, '#c9d3dc'); return false; }
   if (item.use === 'hp') G.player.hp += restored; else G.guide += restored;
   if (typeof achieveOnSupply === 'function') achieveOnSupply(item);   // 成就：一場戰鬥用了幾個醫療包、杏仁水

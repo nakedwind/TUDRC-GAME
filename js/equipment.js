@@ -99,11 +99,14 @@ function equipLv(id) {
 
 // ---- 效果（其他程式呼叫）----
 const equipVest = () => equipLv('vest_light') || equipLv('vest') || equipLv('vest_heavy');   // 三種防護背心（上身，只會穿一件）
-const equipPlayerDamage = d => { const v = equipVest(), h = equipLv('helmet'); return d * (v ? 1 - v.guard : 1) * (h ? 1 - h.guard : 1) * (typeof foodGuardMul === 'function' ? foodGuardMul() : 1); };   // 防護背心、防護頭盔、烤虱目魚肚（js/food.js）：溫特受到的傷害
+// 艾德林帶隊（玩家操作的不是溫特）：溫特的防護背心、頭盔、跑鞋不算，改用他自己的防禦率、移動速度（技能樹、隊員裝備、出勤補給、守護祝福都算）
+const leaderSpec = () => typeof PLAYER_CHARACTER !== 'undefined' && PLAYER_CHARACTER !== 'winter' ? TYPES[PLAYER_CHARACTER] || null : null;
+const leaderDefense = () => { const s = leaderSpec(); return s ? Math.max(0, Math.min(.75, (s.defense || 0) + (typeof sortieBuff === 'function' && G && G.player ? sortieBuff(G.player, 'def') : 0))) : 0; };
+const equipPlayerDamage = d => { if (leaderSpec()) return d * (1 - leaderDefense()) * (typeof foodGuardMul === 'function' ? foodGuardMul() : 1); const v = equipVest(), h = equipLv('helmet'); return d * (v ? 1 - v.guard : 1) * (h ? 1 - h.guard : 1) * (typeof foodGuardMul === 'function' ? foodGuardMul() : 1); };   // 防護背心、防護頭盔、烤虱目魚肚（js/food.js）：溫特受到的傷害
 const equipFireMul = () => { const v = equipLv('fireboots'); return v ? 1 - v.fire : 1; };   // 防火鞋：火海燙傷（js/oil-barrels.js）
 const equipAcidMul = () => { const v = equipLv('mask'), b = equipLv('acidboots'); return (v ? 1 - v.filter : 1) * (b ? 1 - b.corrode : 1); };   // 防腐鞋：一起減（可疊加）   // 防毒面具：腐蝕池、酸液的傷害
 const equipSootheCost = c => { const v = equipLv('bracelet'); return v ? Math.round(c * (1 - v.save)) : c; };   // 共感手環：疏導花的 SP
-const equipSpeedMul = () => { const v = equipLv('sneakers'), b = equipVest(); return (v ? 1 + v.speed : 1) * (b && b.speed ? 1 + b.speed : 1) * adrenalineSpeedMul() * (typeof foodSpeedMul === 'function' ? foodSpeedMul() : 1); };   // 輕量跑鞋、輕型／重型防護背心、腎上腺素（道具）、香蕉／烤香蕉、鬧肚子（js/food.js）
+const equipSpeedMul = () => { const ls = leaderSpec(); if (ls) { const base = (CHARACTERS[PLAYER_CHARACTER].combat || {}).walkSpeed || ls.walkSpeed || 1; return (ls.walkSpeed || base) / base * adrenalineSpeedMul() * (typeof foodSpeedMul === 'function' ? foodSpeedMul() : 1); } const v = equipLv('sneakers'), b = equipVest(); return (v ? 1 + v.speed : 1) * (b && b.speed ? 1 + b.speed : 1) * adrenalineSpeedMul() * (typeof foodSpeedMul === 'function' ? foodSpeedMul() : 1); };   // 輕量跑鞋、輕型／重型防護背心、腎上腺素（道具）、香蕉／烤香蕉、鬧肚子（js/food.js）
 // 降噪耳機＋手電筒亮著（黑暗恐懼）：理智下降的影響減少多少（最多減 90%）
 const equipCalm = () => { const v = equipLv('earmuffs'), f = flashlightOn() ? equipLv('headlamp').fear : 0, h = equipLv('lamphelmet'); return Math.min(.9, (v ? v.calm : 0) + f + (h && MAP_FIELD ? h.fear : 0)); };   // 照明頭盔也算
 const flashlightOn = () => !!(equipLv('headlamp') && MAP_FIELD && equipState.battery > 0);   // 劇情地圖也有黑幕：手電筒照樣亮
@@ -367,7 +370,7 @@ function firstAidOn(t) {
   const v = FIRST_AID;
   if (typeof playerChannel !== 'undefined' && playerChannel) return;   // 正在做別的事
   // 站著不動處理傷口：進度條跑完才治好（js/channel-actions.js；溫特和隊員都不能動）
-  firstAid.channel = startChannel({ kind: 'firstaid', total: v.time, target: t, heal: v.heal, kit: aidKitFor(t), label: t.hp <= 0 ? '救援中' : '急救中', color: '#79dbad',
+  firstAid.channel = startChannel({ kind: 'firstaid', total: v.time * careStyle().time, target: t, heal: Math.round(v.heal * careStyle().amount), kit: aidKitFor(t), label: t.hp <= 0 ? '救援中' : '急救中', color: '#79dbad',   // 秒數、補血量：溫特快又多、艾德林慢又少但範圍（data/balance.js 的 CARE_STYLE）
     onDone: finishFirstAid, onCancel: () => { firstAid.channel = null; if (SFX.fadeOut) SFX.fadeOut('first-aid-start', .3); } });
   if (firstAid.channel) SFX.play('aidStart', 1, 'first-aid-start');   // 開始急救：「補血」音效；急救完成時播「疏導」
 }
@@ -384,7 +387,10 @@ function finishFirstAid() {
   if (itemCount(kit) <= 0) return;
   consumeItem(kit);
   if (wasDown) { t.hp = Math.max(1, Math.round(t.maxhp * FIRST_AID.reviveHp)); flash('✚ 救回來了！HP ' + t.hp, t.x, t.y - 50, '#79dbad', 1.8); }   // 異質急救包：HP 變 30%
-  else { t.hp = Math.min(t.maxhp, t.hp + c.heal); flash('+' + c.heal, t.x, t.y - 50, '#79dbad', 1.6); }
+  else for (const o of typeof careTargets === 'function' ? careTargets(t, o => o.hp < o.maxhp, true) : [t]) {   // 艾德林：身邊受傷的人（含自己）一起補，只用一個急救包
+    const before = o.hp; o.hp = Math.min(o.maxhp, o.hp + c.heal);
+    if (o === t || o.hp - before >= 1) flash('+' + Math.round(o.hp - before || c.heal), o.x, o.y - 50, '#79dbad', 1.6);
+  }
   if (!isPlayer && wasDown && typeof sentryStatus === 'function') sentryStatus(t, '獲救了！', '#79dbad');
   if (!isPlayer && wasDown && typeof addStat === 'function') addStat('revives');   // 成就：把倒下的隊員救回來
   for (let i = 0; i < 8; i++) G.effects.push({ ember: true, x: t.x + (Math.random() - .5) * 26, y: t.y - 10, vx: 0, vy: -40 - Math.random() * 30, r: 2, life: .7, life0: .7, color: '#9ff0c0' });

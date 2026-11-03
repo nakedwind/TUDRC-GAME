@@ -42,8 +42,8 @@ function tryLockedDoorNearPlayer() {
 function winterSay(text) {
   if (typeof openTextDialogue !== 'function') return false;
   const face = typeof playerSprites !== 'undefined' && playerSprites.front && playerSprites.front[0];
-  openTextDialogue({ name: (typeof CHARACTERS !== 'undefined' && CHARACTERS.winter && CHARACTERS.winter.name) || '溫特',
-    image: face ? face.src : '', lines: String(text).split('\n').filter(Boolean), kind: 'winter' });
+  openTextDialogue({ name: typeof playerName === 'function' ? playerName() : '溫特',   // 艾德林帶隊時是艾德林在說
+    image: face ? face.src : '', lines: String(text).split('\n').filter(Boolean), kind: typeof PLAYER_CHARACTER !== 'undefined' ? PLAYER_CHARACTER : 'winter' });
   return true;
 }
 const lockedNeedKeyText = () => typeof LOCKED_NEED_KEY_TEXT !== 'undefined' ? LOCKED_NEED_KEY_TEXT : '門被鎖住了，好像需要特定的鑰匙。';

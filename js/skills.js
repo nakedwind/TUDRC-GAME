@@ -45,10 +45,10 @@ const DOG_SKILL_LAYOUT = [
 ];
 const DOG_SKILL = { searchMul: 1.6, speedMul: 1.35 };   // 搜尋範圍 ×1.6、移動速度 ×1.35
 const DOG_SKILL_TEXTS = {
-  'trait-1': { name: '嗅覺', icon: '🐾', cost: 0, desc: '球球會自己找附近地上的東西（異質碎片、拾取亮點、怪物掉的道具），叼回來給溫特。', effect: '初始技能' },
+  'trait-1': { name: '嗅覺', icon: '🐾', cost: 0, desc: '球球會自己找附近地上的東西（異質碎片、拾取亮點、怪物掉的道具），叼回來給隊長。', effect: '初始技能' },
   'a-1': { name: '靈敏鼻子', icon: '👃', cost: 40, desc: '鼻子更靈，聞得到更遠的東西。', effect: '搜尋物品的範圍 ×1.6' },
   'b-1': { name: '飛奔', icon: '💨', cost: 40, desc: '跑得更快，跟隊伍、去撿東西都更快。', effect: '移動速度 ×1.35' },
-  'core-1': { name: '尋寶犬', icon: '🔍', cost: 80, desc: '找得到沒有光點、藏在地上的隱藏物品，叼回來給溫特。', effect: '可以撿到隱藏的物品' },
+  'core-1': { name: '尋寶犬', icon: '🔍', cost: 80, desc: '找得到沒有光點、藏在地上的隱藏物品，叼回來給隊長。', effect: '可以撿到隱藏的物品' },
   'ult': { name: '密道搜索', icon: '🕳️', cost: 150, desc: '聞得出藏起來的地道、牆後面的隱藏區域、牆上的裂縫：走到那裡坐下汪汪叫，地道就會出現、可以進去；找到的牆會被標出來，用爆炸就能炸開。', effect: '可以找到隱藏的地道、隱藏區的牆、裂縫牆' },
 };
 const skillLayoutFor = type => isDogTree(type) ? DOG_SKILL_LAYOUT : isGuideTree(type) ? GUIDE_SKILL_LAYOUT : SKILL_LAYOUT;   // 這位隊員的技能樹有哪幾格

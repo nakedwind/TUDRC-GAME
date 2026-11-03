@@ -41,14 +41,26 @@ try { const v = Number(localStorage.getItem(SP_STORE)); if (localStorage.getItem
 let sanitySavedAt = 0, sanityWarned = false;
 
 // 換地圖前（game.js 的 newGame 一開始呼叫，這時 G 還是舊地圖的）：記住目前的 SP
+// 艾德林帶隊時，下方的 SP 條是艾德林自己的 SP（記在 js/guide-sp.js 的 guideSPRecords），溫特的 SP 不動
+const spOwner = (who = G && G.player && G.player.char) => who && who !== 'winter' && typeof TYPES !== 'undefined' && TYPES[who] && typeof guideSPRecords !== 'undefined' ? who : null;
+function syncSanitySP() {   // 把現在的 SP 記到對的人身上（換地圖、接續戰場時）
+  const who = spOwner(); if (who) { guideSPRecords[who] = G.guide; if (typeof saveGuideSP === 'function') saveGuideSP(); } else sanitySP = G.guide;
+}
 function rememberSanitySP() {
   if (typeof G === 'undefined' || !G || !Number.isFinite(G.guide)) return;
+  if (spOwner()) { syncSanitySP(); return; }
   sanitySP = G.guide;
   try { localStorage.setItem(SP_STORE, String(Math.round(sanitySP * 10) / 10)); } catch (_) {}
 }
 // 載入地圖後（game.js 的 newGame 呼叫）：把記住的 SP 帶進這張地圖，不要補滿
 function restoreSanitySP() {
   if (!G) return;
+  const who = spOwner();
+  if (who) {   // 艾德林帶隊：用他自己的 SP 上限和剩下的 SP
+    G.guideMax = guideSPMax(who);
+    G.guide = Math.max(0, Math.min(G.guideMax, guideSPRecords[who] ?? G.guideMax));
+    sanityWarned = G.guide < SANITY.swayBelow; return;
+  }
   if (sanitySP == null) sanitySP = G.guide;
   G.guide = Math.max(0, Math.min(G.guideMax, sanitySP));
   sanityWarned = G.guide < SANITY.swayBelow;   // 本來就很低：不要一進地圖就再說一次
@@ -110,14 +122,16 @@ function sanityAfterDraw() {
   const sp = G.guide, loss = (SANITY.grayFrom > 0 ? Math.max(0, Math.min(1, (SANITY.grayFrom - sp) / SANITY.grayFrom)) : 0) * sanityCalm();
   const filter = loss > .005 ? `grayscale(${(loss * SANITY.grayMax).toFixed(3)}) brightness(${(1 - loss * SANITY.dimMax).toFixed(3)})` : '';
   if (cv.style.filter !== filter) cv.style.filter = filter;
-  if (sanitySP !== sp) {
+  const spWho = spOwner();
+  if (spWho) { if (guideSPRecords[spWho] !== sp) { guideSPRecords[spWho] = sp; if (performance.now() - sanitySavedAt > 1000) { sanitySavedAt = performance.now(); if (typeof saveGuideSP === 'function') saveGuideSP(); } } }
+  else if (sanitySP !== sp) {
     sanitySP = sp;
     if (performance.now() - sanitySavedAt > 1000) { sanitySavedAt = performance.now(); try { localStorage.setItem(SP_STORE, String(Math.round(sp * 10) / 10)); } catch (_) {} }
   }
   sanitySounds(sp);
   if (sp < SANITY.swayBelow && !sanityWarned && G.player) {
     sanityWarned = true;
-    if (typeof systemNotice === 'function') systemNotice('溫特的理智正在下降', true);
+    if (typeof systemNotice === 'function') systemNotice(playerName() + '的理智正在下降', true);
     if (typeof flash === 'function') flash(SANITY.warnText, G.player.x, G.player.y - 60, '#c9b8ff', 3);
   } else if (sp >= SANITY.swayBelow + 5) sanityWarned = false;
 })();

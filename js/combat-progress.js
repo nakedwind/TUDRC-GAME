@@ -169,7 +169,7 @@ function restoreCombatProgress() {
     reclaimAddedWalls();
     if (lastSafe === true) resumeSquadFromBase(data.activeSupply);
     if (typeof resumeVitals === 'function') resumeVitals();   // 中間回應變中心治療過：換成現在的 HP、負荷（倒下的隊員治好了就站起來，js/vitals.js）
-    sanitySP = G.guide; rememberGuideSP(); applyOutfits(); occCache = null; occCacheFor = null;
+    applyOutfits(); if (typeof syncSanitySP === 'function') syncSanitySP(); else sanitySP = G.guide; rememberGuideSP(); occCache = null; occCacheFor = null;
     computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
     // 接續後消耗暫存；下次選「保留進度」才會建立新的暫存。
     clearCombatProgress(MAP.id); systemNotice('已接續上次保留的作戰進度'); return true;
@@ -219,7 +219,7 @@ function resumePausedBattle(toId) {
   if (b.breakCells) { breakableWallCells = b.breakCells; breakableWallSolid = b.breakSolid; }
   if (b.storageWalls) storageAddedWalls = b.storageWalls;
   poweredMap = MAP; mapPowerOn = b.power; openElevatorStamp = b.elevator;
-  sanitySP = G.guide; rememberGuideSP(); applyOutfits(); occCache = null; occCacheFor = null;
+  applyOutfits(); if (typeof syncSanitySP === 'function') syncSanitySP(); else sanitySP = G.guide; rememberGuideSP(); occCache = null; occCacheFor = null;
   computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();
   return true;
 }

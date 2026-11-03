@@ -20,6 +20,15 @@ const MISSION_BASE = {
   briefer: 'eldrin',              // 報告任務的通訊員（隊員或場景 NPC 都可以）
 };
 
+// 兵分兩路：溫特和艾德林各帶一隊（js/team.js）
+//   任務寫 squad: 'eldrin'＝那一區固定由艾德林隊去（出擊時玩家改操作艾德林，溫特不在場）；沒寫＝溫特隊。
+//   有艾德林隊的任務開放之後，出勤配置才會分成兩隊（同一個人只能在一隊）。
+//   briefer＝這一隊帶隊回到應變中心時，改由誰來報告任務（艾德林帶隊回來 → 溫特報告，台詞在對話編輯器的溫特「報告任務」）。
+const SQUADS = {
+  winter: { name: '溫特隊', leader: 'winter' },
+  eldrin: { name: '艾德林隊', leader: 'eldrin', briefer: 'winter' },
+};
+
 // BOSS 特別獎金：在任務地圖討伐後，回應變中心由通訊員報告並入帳（每次討伐都給，重新出擊再打倒可以再領；js/missions.js）
 // flag＝怪物身上用來認出這隻 BOSS 的標記；台詞在對話編輯器的「報告任務」那一區（data/dialogues.js 的 bounty_id，{money}＝金額）
 const BOSS_BOUNTIES = [
@@ -39,15 +48,15 @@ const MISSIONS = [
     desc: '入口往下的地下街，雷德小隊就是在這裡遇上虱目魚小子。異質體聚集得比平常多。',
   },
   {
-    id: 'k56', map: 'map_mvvdbiyx', name: 'Z62區地下街', x: 27, y: 44, after: ['y1'],   // 路線圖上 Y25區地下街往上的下一區
+    id: 'k56', map: 'map_mvvdbiyx', name: 'Z62區地下街', x: 27, y: 44, after: ['y1'], squad: 'eldrin',   // 路線圖上 Y25區地下街往上的下一區；分岔：由艾德林隊去
     desc: 'Y25區地下街再過去的另一段地下街。路邊的機車、腳踏車會突然暴衝，深處還有很強的異質反應。',
   },
   {
-    id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 42, y: 58, after: ['y1'],
+    id: 'station', map: 'map_mr4mbd88', name: '台北車站大廳', x: 42, y: 58, after: ['y1'], squad: 'winter',   // 分岔的另一邊：溫特隊
     desc: '地下街後方的大廳，空間開闊，異質體容易從各個方向包夾。',
   },
   {
-    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 58, y: 44, after: ['station'],
+    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 58, y: 44, after: ['station', 'k56'],   // 分岔兩邊（台北車站大廳、Z62區地下街）都控制了才開放
     desc: '大廳更深處的異質反應源，核心的反應特別強烈。',
   },
   {

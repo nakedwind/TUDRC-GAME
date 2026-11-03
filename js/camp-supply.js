@@ -239,7 +239,7 @@ function stockCampAmmoForMapStart() {
 const ammoIdsOf = () => WEAPONS.map(w => w.id).filter(id => id !== 'pistol' && BULLETS[id] && !BULLETS[id].removed);
 const CAMP_BOXES = {
   supply: {
-    title: '營地物資箱', sub: '嚮導的急救包、杏仁水用完會自己回來拿', icon: () => CAMP_SUPPLY.box.art.full, bagName: '溫特的背包', unit: '個',
+    title: '營地物資箱', sub: '嚮導的急救包、杏仁水用完會自己回來拿', icon: () => CAMP_SUPPLY.box.art.full, bagName: () => playerName() + '的背包', unit: '個',
     ids: () => CAMP_SUPPLY.items,
     box: k => campBox()[k] || 0, bag: k => supplyInventory.get(k) || 0, bagRoom: () => Infinity,
     boxRoom: k => campBoxRoom(k), boxCount: () => '', minCells: () => CAMP_SUPPLY.slots, stack: CAMP_SUPPLY.stack,   // stack：同種物品每幾個分一格顯示
@@ -254,7 +254,7 @@ const CAMP_BOXES = {
       return guides.map(t => TYPES[t.type].name + '身上：急救包 ' + (t.kit.firstaid || 0) + '・杏仁水 ' + (t.kit['almond-water'] || 0)).join('　'); },
   },
   ammo: {
-    title: '營地彈藥箱', sub: '每次出勤，照明彈和開發好的子彈會各放一組（' + BULLET_SET + ' 發）進來', icon: () => AMMO_BOX.image, bagName: '溫特的彈藥包', unit: '發',
+    title: '營地彈藥箱', sub: '每次出勤，照明彈和開發好的子彈會各放一組（' + BULLET_SET + ' 發）進來', icon: () => AMMO_BOX.image, bagName: () => playerName() + '的彈藥包', unit: '發',
     ids: ammoIdsOf,
     box: id => campAmmo()[id] || 0, bag: id => bulletOwned(id) ? bulletCount(id) : 0, bagRoom: id => bulletRoom(id),
     boxRoom: () => Infinity, boxCount: () => '',
@@ -432,7 +432,7 @@ function renderCampSupply() {
     '<div class="cb-body no-anim">' +
       '<div class="cb-side" data-cb-side="box"><h4>' + campBoxEmoji(B) + ' ' + campBoxName(B) + (B.boxCount() ? ' <em>' + B.boxCount() + '</em>' : '') + '</h4><div class="cb-grid">' + boxCells.join('') + pad(boxCells, minCells) + '</div></div>' +
       '<div class="cb-arrows" aria-hidden="true"><span>→</span><span>←</span></div>' +
-      '<div class="cb-side" data-cb-side="bag"><h4>🎒 ' + B.bagName + '</h4><div class="cb-grid">' + bagCells.join('') + pad(bagCells, minCells) + '</div></div>' +
+      '<div class="cb-side" data-cb-side="bag"><h4>🎒 ' + (typeof B.bagName === 'function' ? B.bagName() : B.bagName) + '</h4><div class="cb-grid">' + bagCells.join('') + pad(bagCells, minCells) + '</div></div>' +
     '</div>' +
     '<div class="cb-detail">' + detail + '</div>' +
     (foot ? '<footer class="cb-foot">' + foot + '</footer>' : '') +

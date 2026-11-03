@@ -18,7 +18,8 @@ const slotsOf = type => { const s = sortie.loadout[type] || []; return Array.fro
 // 已經被別的格子預訂了幾個
 function sortieReserved(itemId, except) {
   let n = 0;
-  for (const type of getTeam()) slotsOf(type).forEach((id, i) => { if (id === itemId && !(except && except.type === type && except.slot === i)) n++; });
+  const members = typeof SQUADS !== 'undefined' && twoSquads() ? [...new Set(Object.keys(SQUADS).flatMap(k => [...getTeam(k), SQUADS[k].leader]))] : getTeam();   // 兵分兩路：兩隊（含隊長艾德林）的補給格一起算
+  for (const type of members) slotsOf(type).forEach((id, i) => { if (id === itemId && !(except && except.type === type && except.slot === i)) n++; });
   return n;
 }
 const isLove = (type, itemId) => typeof giftReaction === 'function' && giftReaction(type, itemId) === 'love';
@@ -57,7 +58,8 @@ function onSortieNewGame() {
     sortie.active = {};
     const missing = [];
     let fed = 0;
-    for (const type of getTeam()) {
+    const lead = typeof squadLeader === 'function' ? squadLeader() : 'winter';
+    for (const type of lead !== 'winter' && TYPES[lead] ? [...getTeam(), lead] : getTeam()) {   // 艾德林帶隊：他自己的補給格也吃（js/leader-skills.js 的 leaderOnSpawn 套到玩家身上）
       const eaten = [];
       for (const id of slotsOf(type)) {
         if (!id) continue;

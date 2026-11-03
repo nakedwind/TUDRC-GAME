@@ -33,7 +33,7 @@ function cabinetRoom(id) {
 }
 // 物資箱視窗的設定（js/camp-supply.js 的 CAMP_BOXES 會拿這個）
 const CABINET_BOX = {
-  title: () => cabinetOpen.def.name, sub: '放身上的物品和隊員物資，每個櫃子分開放', icon: () => cabinetOpen.image, bagName: '溫特的背包', unit: '個',
+  title: () => cabinetOpen.def.name, sub: '放身上的物品和隊員物資，每個櫃子分開放', icon: () => cabinetOpen.image, bagName: () => playerName() + '的背包', unit: '個',
   boxName: '櫃子', boxEmoji: '🗄️', crop: false,
   ids: () => allItems().filter(item => CABINET_TABS.includes(item.category)).map(item => item.id),
   box: cabinetCount, bag: id => supplyInventory.get(id) || 0, bagRoom: () => Infinity,

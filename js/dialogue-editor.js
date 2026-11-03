@@ -89,9 +89,13 @@ if (usingDraft && typeof DIALOGUES !== 'undefined') {
   }
 }
 // 通訊員還沒有某個任務的報告格時，補一個空的，編輯器才會顯示（data/missions.js 的 MISSION_BASE.briefer）
-if (typeof MISSIONS !== 'undefined' && typeof MISSION_BASE !== 'undefined' && draft.characters[MISSION_BASE.briefer]) {
-  for (const m of MISSIONS) if (!(('brief_' + m.id) in draft.characters[MISSION_BASE.briefer])) draft.characters[MISSION_BASE.briefer]['brief_' + m.id] = [];
-  for (const b of typeof BOSS_BOUNTIES !== 'undefined' ? BOSS_BOUNTIES : []) if (!(('bounty_' + b.id) in draft.characters[MISSION_BASE.briefer])) draft.characters[MISSION_BASE.briefer]['bounty_' + b.id] = [];
+// 兵分兩路：艾德林帶隊回來時改由溫特報告（data/missions.js 的 SQUADS 的 briefer），溫特也有這幾格
+if (typeof CHARACTERS !== 'undefined' && CHARACTERS.winter && !draft.characters.winter) draft.characters.winter = DIALOGUES.characters && DIALOGUES.characters.winter ? clone(DIALOGUES.characters.winter) : { talk: [] };
+const BRIEFERS = typeof MISSION_BASE !== 'undefined' ? [MISSION_BASE.briefer, ...Object.values(typeof SQUADS !== 'undefined' ? SQUADS : {}).map(s => s.briefer).filter(Boolean)] : [];
+if (typeof MISSIONS !== 'undefined') for (const who of new Set(BRIEFERS)) {
+  const entry = draft.characters[who]; if (!entry) continue;
+  for (const m of MISSIONS) if (!(('brief_' + m.id) in entry)) entry['brief_' + m.id] = [];
+  for (const b of typeof BOSS_BOUNTIES !== 'undefined' ? BOSS_BOUNTIES : []) if (!(('bounty_' + b.id) in entry)) entry['bounty_' + b.id] = [];
 }
 // 還沒有台詞的角色也要列出來（data/characters.js 裡的每個人；玩家溫特除外）：
 // 1. 草稿是舊的時候，正式檔案裡新加的角色整組補進草稿；2. 檔案裡也沒有的，照身分給空白的情境格子。

@@ -41,19 +41,21 @@ function missionStatus(m) {
 // 下一個要打的任務（還沒控制、已開放的第一個）
 const nextMission = () => MISSIONS.find(m => !missionCleared(m) && missionOpen(m)) || null;
 // 通訊員（艾德林，data/missions.js 的 MISSION_BASE.briefer）有沒有新任務要報告
-const briefLines = m => (typeof dialogueLines === 'function' && dialogueLines(MISSION_BASE.briefer, 'brief_' + m.id)) || [];   // 對話編輯器裡的「報告任務」
+// 兵分兩路：艾德林帶隊回來（玩家操作艾德林）時改由溫特報告（data/missions.js 的 SQUADS.eldrin.briefer）
+const brieferId = () => (typeof currentSquad === 'function' && SQUADS[currentSquad()].briefer) || MISSION_BASE.briefer;
+const briefLines = m => (typeof dialogueLines === 'function' && dialogueLines(brieferId(), 'brief_' + m.id)) || [];   // 對話編輯器裡的「報告任務」
 const briefPending = () => { const m = nextMission(); return m && !missionState.briefed.includes(m.id) && briefLines(m).length ? m : null; };   // 沒填報告台詞的任務：不用報告
 // 通訊員可能是場景 NPC（用 id）或隊員（用 type，例如艾德林）
 const actorId = actor => actor.kind === 'tower' ? actor.type : actor.id;
 const onBaseMap = () => MAP_SAFE && MAP && sameMapId(MAP.id, MISSION_BASE.map);
-const brieferName = () => CHARACTERS[MISSION_BASE.briefer]?.name || TYPES[MISSION_BASE.briefer]?.name || '通訊員';
+const brieferName = () => CHARACTERS[brieferId()]?.name || TYPES[brieferId()]?.name || '通訊員';
 // 通訊員住院中（住院的隊員不能對話，js/vitals.js）：應變中心（MISSION_BASE.map）裡的任何一個人都可以代為報告，台詞照用通訊員的「報告任務」
 //   不能代為報告的：BRIEF_STAND_IN_EXCLUDE（諾亞），還有球球這種不是人的
 const BRIEF_STAND_IN_EXCLUDE = ['noah', 'ball'];
-const brieferHospitalized = () => typeof isHospitalized === 'function' && isHospitalized(MISSION_BASE.briefer);
+const brieferHospitalized = () => typeof isHospitalized === 'function' && isHospitalized(brieferId());
 const isBriefStandIn = actor => brieferHospitalized() && onBaseMap() && !BRIEF_STAND_IN_EXCLUDE.includes(actorId(actor))
   && !actor.dead && !!(CHARACTERS[actorId(actor)] || TYPES[actorId(actor)]);
-const isBriefer = actor => !!actor && (actorId(actor) === MISSION_BASE.briefer || isBriefStandIn(actor));
+const isBriefer = actor => !!actor && (actorId(actor) === brieferId() || isBriefStandIn(actor));
 // ---- BOSS 特別獎金（名單、金額在 data/missions.js 的 BOSS_BOUNTIES）----
 // 打倒就記下來（combat-feel.js 的 onEnemyDeath 呼叫），之後戰敗撤退也算數；測試模式、不是任務的地圖（測試地圖 y1）不算
 function recordBossBounty(e) {
@@ -72,15 +74,15 @@ function payBossBounties() {
   missionState.bossBounty = []; saveMissions();
   updateHUD(); sfx('blip'); systemNotice('💰 特別獎金 +$' + total);
   return list.flatMap(b => {
-    const lines = dialogueLines(MISSION_BASE.briefer, 'bounty_' + b.id);
-    return (lines && lines.length ? lines : ['部隊長，討伐' + b.name + '的特別獎金撥下來了，{money} 元。']).map(s => s.replace(/\{money\}/g, b.money));
+    const lines = dialogueLines(brieferId(), 'bounty_' + b.id);
+    return (lines && lines.length ? lines : [(brieferId() === 'winter' ? '艾德林，' : '部隊長，') + '討伐' + b.name + '的特別獎金撥下來了，{money} 元。']).map(s => s.replace(/\{money\}/g, b.money));
   });
 }
 const missionBriefReady = actor => isBriefer(actor) && (!!briefPending() || bossBountyReady());
 // 頭上打「！」、回應變中心時走過來報告的那一位：通訊員本人；他住院時改成離作戰桌最近的代報告的人
 const brieferNpc = () => {
   const all = G ? [...(G.npcs || []), ...(G.towers || [])] : [];
-  const own = all.find(a => actorId(a) === MISSION_BASE.briefer); if (own) return own;
+  const own = all.find(a => actorId(a) === brieferId()); if (own) return own;
   const subs = all.filter(isBriefStandIn); if (!subs.length) return null;
   const t = missionTablePos();
   return subs.reduce((a, b) => Math.hypot(a.x - t.x, a.y - t.y) <= Math.hypot(b.x - t.x, b.y - t.y) ? a : b);
@@ -220,9 +222,25 @@ function returnToBase() {
 }
 function sortieTo(m) {
   if (!m || !m.map) { sfx('error'); return; }
-  if (!getTeam().length) { sfx('error'); showBoardToast('還沒有編入出勤人員', true); return; }   // 作戰桌開著：提示出現在作戰桌上
+  const squad = squadOfMission(m), lead = SQUADS[squad].leader;
+  if (lead !== 'winter' && typeof isHospitalized === 'function' && isHospitalized(lead)) { sfx('error'); showBoardToast(SQUADS[squad].name + '的隊長' + teamProfile(lead).name + '住院中，不能出擊', true); return; }
+  if (!getTeam(squad).length) { sfx('error'); showBoardToast((twoSquads() ? SQUADS[squad].name : '') + '還沒有編入出勤人員', true); return; }   // 作戰桌開著：提示出現在作戰桌上
   closeMissionBoard(true); sfx('button');
+  setActiveSquad(squad);   // 兵分兩路：這次由哪一隊帶隊（進地圖時換成操作那一隊的隊長，js/game.js 的 newGame）
   missionTravel(m.map);
+}
+// ---- 艾德林帶隊回到應變中心：溫特在作戰桌旁（當 NPC，有任務時由他報告）----
+function spawnBaseWinter() {
+  if (!onBaseMap() || PLAYER_CHARACTER === 'winter' || G.npcs.some(n => n.id === 'winter')) return;
+  const t = missionTablePos(), [c0, r0] = cellAt(t.x, t.y);
+  let at = null;
+  for (let ring = 0; ring <= 4 && !at; ring++) for (let dc = -ring; dc <= ring && !at; dc++) for (const dr of [ring, -ring, 0]) {
+    const [x, y] = center(c0 + dc, r0 + dr);
+    if (inGrid(c0 + dc, r0 + dr) && !playerBlocked(x, y) && !sentryBlocked(x, y)) { at = [x, y]; break; }
+  }
+  const [x, y] = at || [t.x, t.y + CELL];
+  G.npcs.push({ kind: 'npc', id: 'winter', x, y, target: null, waitT: 99, dir: 'front', moving: false, anim: 0,
+    blinkWait: 2 + Math.random() * 3, blinkTime: -1, say: null, sayWait: 4 + Math.random() * 8 });
 }
 
 // ---- 打贏／打輸（game.js 的 winOverlay、loseOverlay、開始按鈕呼叫）----
@@ -261,7 +279,7 @@ function ensureMissionBoard() {
     if (boardTab === 'side' && typeof handleSideBoardClick === 'function' && handleSideBoardClick(e)) return;
     const node = e.target.closest('[data-mission]');
     if (node) { missionSel = node.dataset.mission; sfx('blip'); renderMissionBoard(); return; }
-    if (e.target.closest('.mission-team')) { closeMissionBoard(true); openTeamPanel(); return; }
+    if (e.target.closest('.mission-team')) { closeMissionBoard(true); openTeamPanel(squadOfMission(missionById(missionSel))); return; }   // 打開選中區域那一隊的出勤配置
     if (e.target.closest('.mission-redeploy')) {
       const m = missionById(missionSel);
       if (confirm('放棄暫停中的戰場，重新部署？\n門、核心、建築、箱子都會重來（已解封的捷運入口不會），作戰經費不會再給一次。')) { redeployCombat(m.map); sortieTo(m); }
@@ -278,9 +296,11 @@ function renderMissionBoard() {
   const nodes = MISSIONS.map(m => {
     const s = missionStatus(m);
     return '<button type="button" class="mission-node ' + s + (m.boss ? ' boss' : '') + (m.id === sel.id ? ' sel' : '') + '" data-mission="' + m.id + '" style="left:' + m.x + '%;top:' + m.y + '%">' +
-      '<i>' + (m.boss ? '⚠' : s === 'cleared' ? '✓' : s === 'available' ? '!' : '') + '</i><span>' + m.name + '</span></button>';
+      '<i>' + (m.boss ? '⚠' : s === 'cleared' ? '✓' : s === 'available' ? '!' : '') + '</i><span>' + m.name + '</span>' +
+      (twoSquads() && m.squad && m.squad !== 'winter' && SQUADS[m.squad] ? '<em class="squad">' + SQUADS[m.squad].name + '</em>' : '') + '</button>';   // 兵分兩路：不是溫特隊去的區域標上隊名
   }).join('');
-  const team = getTeam(), cleared = MISSIONS.filter(missionCleared).length;
+  const squad = squadOfMission(sel), lead = SQUADS[squad].leader, split = twoSquads();
+  const team = getTeam(squad), cleared = MISSIONS.filter(missionCleared).length;
   const teamFaces = team.map(id => { const profile = teamProfile(id); return '<span class="mission-face" data-char="' + id + '" title="' + profile.name + '"><img src="' + memberPortraitPath(profile) + '" alt="' + profile.name + '"></span>'; }).join('');   // 胸像（裁切跟 Y102隊員面板的 .squad-portrait 一樣）
   const canGo = !!sel.map && st !== 'locked';
   const paused = canGo && !!readCombatProgress()[sel.map];   // 有暫停中的戰場：出擊＝接續，另外可以重新部署（js/combat-progress.js）
@@ -299,7 +319,7 @@ function renderMissionBoard() {
         '<aside class="mission-detail">' +
           '<div class="mission-detail-main"><em class="mission-status ' + st + '">' + (sel.boss ? '⚠ BOSS 反應・' : '') + STATUS_TEXT[st] + '</em>' +
             '<h3>' + sel.name + '</h3><p>' + (st === 'locked' ? '先控制前面的區域，才能前往這裡。' : sel.desc) + '</p>' + (paused ? '<p class="mission-paused">⏸ 戰場暫停中：門、核心、建築都跟離開時一樣。</p>' : '') + '</div>' +
-          '<div class="mission-team-row"><span>出勤人員 ' + team.length + ' 位</span><div class="mission-faces">' + (teamFaces || '<small>尚未編入</small>') + '</div>' +
+          '<div class="mission-team-row"><span>' + (split ? SQUADS[squad].name + (lead !== 'winter' ? '・隊長 ' + teamProfile(lead).name : '') + '<br>' : '') + '出勤人員 ' + team.length + ' 位</span><div class="mission-faces">' + (teamFaces || '<small>尚未編入</small>') + '</div>' +
             '<button type="button" class="mission-team">🧑‍🤝‍🧑 出勤配置</button></div>' +
           (paused ? '<button type="button" class="mission-redeploy">↺ 重新部署</button>' : '') +
           '<button type="button" class="mission-go"' + (canGo ? '' : ' disabled') + '>' + (paused ? '接續作戰' : canGo ? (st === 'cleared' ? '再次出擊' : '出擊') : STATUS_TEXT[st]) + '</button>' +

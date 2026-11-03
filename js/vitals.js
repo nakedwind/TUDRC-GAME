@@ -75,6 +75,13 @@ const onHospitalMap = () => MAP_SAFE && vitalsMapName() === VITALS.hospitalMap;
 const hospitalResting = t => MAP_SAFE && isHospitalized(t.type);   // 這位隊員正在住院休養（js/game.js：不自己補血、不幫人治療，也不被嚮導補血）
 const onSootheRoom = () => MAP_SAFE && vitalsMapName() === VITALS.sootheRoomMap;
 const vitalsPractice = () => typeof practiceOn === 'function' && practiceOn();
+// 玩家操作的是隊員（艾德林帶隊）：他的 HP 記在隊員那邊（vitals.mates），溫特的 HP 留著不動
+const playerMate = () => typeof PLAYER_CHARACTER !== 'undefined' && PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER] ? PLAYER_CHARACTER : null;
+function storePlayerHp(hp, who = playerMate()) { if (who) vitalsMate(who).hp = hp; else vitals.player = { hp }; }
+function loadPlayerHp() {
+  const who = playerMate(), hp = who ? vitals.mates[who] && vitals.mates[who].hp : vitals.player && vitals.player.hp;
+  if (Number.isFinite(hp)) G.player.hp = Math.max(1, Math.min(G.player.maxhp, hp));
+}
 const briefWaiting = id => typeof MISSION_BASE !== 'undefined' && MISSION_BASE.briefer === id && typeof briefPending === 'function' && (!!briefPending() || bossBountiesPending().length > 0);
 
 // ---- 換地圖前（game.js 的 newGame 一開始呼叫，這時 G 還是上一張地圖的；MAP 已經是新地圖）----
@@ -85,7 +92,7 @@ function rememberVitals() {
     for (const m of Object.values(vitals.mates)) m.hp = Math.max(1, m.hp);   // 重新部署＝一切重來：出勤紀錄裡倒著的也站起來
     saveVitals(); return;
   }
-  vitals.player = { hp: G.player.hp };
+  storePlayerHp(G.player.hp, G.player.char && G.player.char !== 'winter' && TYPES[G.player.char] ? G.player.char : null);   // 上一張地圖操作的是誰
   for (const t of G.towers || []) {
     if (!TYPES[t.type]) continue;
     const m = vitalsMate(t.type);
@@ -99,7 +106,7 @@ function arriveVitals() {
   if (vitalsPractice()) return;
   if (MAP_SAFE && vitals.fromBattle) {   // 剛從戰鬥區回來
     for (const [id, m] of Object.entries(vitals.mates)) {
-      if (!TYPES[id]) continue;
+      if (!TYPES[id] || id === playerMate()) continue;   // 帶隊的艾德林是玩家：不會自動住院
       if (m.berserk || m.taint >= 100) { m.taint = Math.min(m.taint, VITALS.berserkEdge); m.berserk = false; }
       m.hp = Math.max(1, Math.min(vitalsMax(id), m.hp));
       if (m.hp < vitalsMax(id) * VITALS.hospitalBelow) admitHospital(m);   // 重傷：自動住院
@@ -128,14 +135,14 @@ function resumeVitals() {
     applyVitals(t); t.berserk = false;
     if (wasDown && t.hp > 0) { t.target = null; t.meleeSwing = null; t.gunSwing = null; t.navPath = null; t.moving = false; }   // 治好了：重新站起來
   }
-  if (vitals.player && Number.isFinite(vitals.player.hp)) G.player.hp = Math.max(1, Math.min(G.player.maxhp, vitals.player.hp));
+  loadPlayerHp();
   vitals.sortie = JSON.parse(JSON.stringify({ player: vitals.player, mates: vitals.mates }));   // 出勤：記下出發時的狀態（重新挑戰用）
   saveVitals();
 }
 // ---- G.player 建好之後（game.js 的 newGame 呼叫）：溫特的 HP、醫院病床、訓練室標記 ----
 function afterVitalsSpawn() {
   G.vitalsSafe = MAP_SAFE; G.vitalsMapId = MAP && MAP.id; G.vitalsSkip = vitalsPractice();
-  if (vitals.player && Number.isFinite(vitals.player.hp)) G.player.hp = Math.max(1, Math.min(G.player.maxhp, vitals.player.hp));
+  loadPlayerHp();
   if (onHospitalMap()) for (const id of hospitalPatients()) { const t = G.towers.find(o => o.type === id); if (t) putInBed(t); }   // 住院的隊員：照住院順序躺上病床
   if (vitalsHospitalNotice) { vitalsHospitalNotice = false; setTimeout(showHospitalNotice, 900); }   // 剛從戰鬥回來：誰在住院
 }
@@ -177,7 +184,7 @@ function updateVitals(dt) {
   const p = G.player;
   p.hp = Math.min(p.maxhp, p.hp + (inBed(p) ? VITALS.bedRegen : VITALS.baseRegen) * dt);
   G.guide = Math.min(G.guideMax, G.guide + VITALS.baseRegen * dt);   // 溫特的 SP
-  vitals.player = { hp: p.hp };
+  storePlayerHp(p.hp);
   const here = new Set();
   for (const t of G.towers) {
     if (!TYPES[t.type]) continue;

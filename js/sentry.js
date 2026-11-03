@@ -259,7 +259,7 @@ function spawnSentries(only = null) {   // only：只生這幾位（接續戰場
     : (typeof practiceOn === 'function' && practiceOn()) ? practice.team.slice()   // 訓練室：在塔納那裡選的隊員（js/practice.js）
     : ((typeof getTeam === 'function') ? getTeam() : Object.keys(TYPES));
   for (const type of only || team) {
-    const spec = TYPES[type]; if (!spec) continue;
+    const spec = TYPES[type]; if (!spec || type === PLAYER_CHARACTER) continue;   // 玩家正在操作的人（艾德林帶隊）不會再多一個
     const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : [Math.floor(COLS / 2), ROWS - 1];
     const [x, y] = center(cell[0], cell[1]);
     const t = { kind: 'tower', type, x, y, hp: spec.hp, maxhp: spec.hp, cd: 0, taint: 0, berserk: false, mode: 'free', target: null, anchor: null, waitT: 0.4 + Math.random() };
@@ -999,22 +999,29 @@ function soothe(t) {
   const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;   // 共感手環：花的 SP 變少（js/equipment.js）
   if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
   if (typeof startChannel !== 'function') { finishSoothe(t); return; }
-  spawnSootheCast(G.player, SOOTHE_COLORS.winter, 0);   // 溫特腳下法陣（跟以前一樣約 1 秒）
+  spawnSootheCast(G.player, SOOTHE_COLORS[PLAYER_CHARACTER] || SOOTHE_COLORS.winter, 0);   // 溫特腳下法陣（跟以前一樣約 1 秒）
   SFX.play('soothe', 1, 'winter-soothe');                 // 開始疏導：「疏導」音效
-  startChannel({ kind: 'soothe', total: SOOTHE.time || 3, target: t, label: '疏導中', color: '#8fd3ff', needAlive: true, onDone: () => finishSoothe(t),
+  startChannel({ kind: 'soothe', total: (SOOTHE.time || 3) * careStyle().time, target: t, label: '疏導中', color: '#8fd3ff', needAlive: true, onDone: () => finishSoothe(t),
     onTick: dt => sootheMotes(t, dt),   // 疏導期間：溫特和隊員身邊一直飄出藍色小光點
     onCancel: () => { if (SFX.fadeOut) SFX.fadeOut('winter-soothe', .3); } });   // 中斷：開始的音效淡掉
 }
 // 疏導期間的鮮豔藍色小光點：從溫特和隊員身邊冒出來，慢慢往上飄、淡掉（數值在 js/attack-fx.js 的 SOOTHE_MOTES）
 const winterMoteHolder = {};
-function sootheMotes(t, dt) { spawnSootheMotes([G.player, t], SOOTHE_MOTE_COLORS.winter, dt, winterMoteHolder); }
+function sootheMotes(t, dt) { spawnSootheMotes([G.player, t], SOOTHE_MOTE_COLORS[PLAYER_CHARACTER] || SOOTHE_MOTE_COLORS.winter, dt, winterMoteHolder); }
 function finishSoothe(t) {
   const cost = typeof equipSootheCost === 'function' ? equipSootheCost(SOOTHE.cost) : SOOTHE.cost;
   if (G.guide < cost) { sfx('error'); sentryStatus(t, '嚮導能量不足', '#ff8f8f', true); return; }
-  G.guide -= cost; t.taint = Math.max(0, t.taint - SOOTHE.heal);
-  if (t.berserk && t.taint < 60) t.berserk = false;
+  G.guide -= cost;
+  const amount = Math.round(SOOTHE.heal * careStyle().amount);   // 溫特：降比較多；艾德林：降比較少但身邊的哨兵一起（data/balance.js 的 CARE_STYLE）
+  const list = typeof careTargets === 'function' ? careTargets(t, o => !TYPES[o.type].guide && ((o.taint || 0) > 0 || o.berserk), false) : [t];
+  for (const o of list) {
+    o.taint = Math.max(0, o.taint - amount);
+    if (o.berserk && o.taint < 60) o.berserk = false;
+    spawnSootheEffect(o.x, o.y - 8, SOOTHE_COLORS[PLAYER_CHARACTER] || SOOTHE_COLORS.winter, o);   // 玩家溫特疏導：藍色（操作艾德林時用艾德林的綠色），光環跟隨哨兵
+    sentryStatus(o, '負荷 -' + amount, '#7ee0c0');
+  }
+  if (list.length > 1) spawnSootheCast(G.player, SOOTHE_COLORS[PLAYER_CHARACTER] || SOOTHE_COLORS.winter, careStyle().area * CELL);   // 範圍疏導：腳下的光圈
   sfx('sootheEnd');   // 疏導成功：「疏導2」音效
   addStat('soothes');   // 成就：親自疏導次數
-  spawnSootheEffect(t.x, t.y - 8, SOOTHE_COLORS.winter, t);   // 玩家溫特疏導：藍色，光環跟隨哨兵
-  sentryStatus(t, '負荷 -' + SOOTHE.heal, '#7ee0c0'); updateHUD();
+  updateHUD();
 }
