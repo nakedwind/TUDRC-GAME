@@ -13,6 +13,7 @@ const SITUATIONS = [
   { group: '日常（基地裡）', key: 'idleSoothe', label: '在疏導室閒晃（負荷高被送來）', when: '負荷 <b>30</b> 以上、回基地時被送到 <b>2F疏導室</b>：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞（每隔 5～13 秒隨機一句）。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'idleHospital', label: '住院時的頭上泡泡', when: '受傷住進 <b>1F醫院</b>（躺病床或在醫院走動）：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完。沒填就不說話。' },
+  { group: '日常（基地裡）', key: 'idleMeal', label: '在食堂閒晃', when: '在 <b>食堂</b>（有餐盤架、打飯台、回收區的地圖）閒晃、吃飯時的頭上泡泡：改說這裡的，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'mealInvite', label: '接受吃飯邀請', when: '在基地右鍵點他、選「🍽️ 一起去吃飯」時，頭上冒出這一句（隨機一句）。沒填就不說話（照樣跟去吃）。' },
   { group: '找他說話（特殊）', key: 'firstTalk', label: '第一次見面', ordered: true, when: '第一次走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完（只說一次）。' },
   { group: '找他說話（特殊）', key: 'talk', label: '平常說話（隨機一句）', when: '見過面之後，每次找他說話<b>隨機說一句</b>（大約四次有一次改說「偶爾閒聊」）。抽到的那一格沒填就不說話。' },
@@ -154,12 +155,15 @@ for (const [id, entry] of Object.entries(draft.characters)) {
   entry.talk = [];
   if (!('talk' in inFile)) autoAdded.add(id + '.talk');
 }
-// 可以邀請一起吃飯的人（球球以外的每個角色）都有「接受吃飯邀請」這一格（js/meal-invite.js；沒寫台詞的話匯出時拿掉）
+// 可以邀請一起吃飯的人（球球以外的每個角色）都有「接受吃飯邀請」「在食堂閒晃」這兩格（js/meal-invite.js、js/sentry.js；沒寫台詞的話匯出時拿掉）
 if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHARACTERS)) {
-  const entry = draft.characters[id]; if (!entry || id === 'ball' || 'mealInvite' in entry) continue;
+  const entry = draft.characters[id]; if (!entry || id === 'ball') continue;
   const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
-  entry.mealInvite = inFile.mealInvite ? clone(inFile.mealInvite) : [];   // 暫存是舊的：用正式檔案裡的預設台詞
-  if (!('mealInvite' in inFile)) autoAdded.add(id + '.mealInvite');
+  for (const k of ['mealInvite', 'idleMeal']) {
+    if (k in entry) continue;
+    entry[k] = inFile[k] ? clone(inFile[k]) : [];   // 暫存是舊的：用正式檔案裡的預設台詞
+    if (!(k in inFile)) autoAdded.add(id + '.' + k);
+  }
 }
 // 出勤隊員（哨兵、嚮導）都有「在疏導室閒晃」「住院時的頭上泡泡」這兩格：負荷高、受傷被送去時改說這裡的（沒寫台詞的話匯出時拿掉＝那時候不說話）
 if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHARACTERS)) {

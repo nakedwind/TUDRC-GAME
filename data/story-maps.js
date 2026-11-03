@@ -16978,15 +16978,16 @@ const STORY_MAPS = [
     },
     "stamps": [
       {
-        "id": "tile_bg_backroom_wall02_dmg_heavy",
-        "c": 16,
+        "id": "tile_bg_backroom_wall02_dmg_light",
+        "c": 14,
         "r": 2,
         "layer": "ground2",
+        "ox": 10,
         "oy": 30
       },
       {
-        "id": "tile_bg_backroom_wall02_dmg_light",
-        "c": 13,
+        "id": "tile_bg_backroom_wall02_dmg_heavy",
+        "c": 16,
         "r": 2,
         "layer": "ground2",
         "oy": 30
@@ -17087,65 +17088,72 @@ const STORY_MAPS = [
         "oy": 30
       },
       {
-        "id": "tile_bg_backroom_wall02",
+        "id": "tile_bg_backroom_pillar3",
         "c": 11,
+        "r": 2,
+        "layer": "ground2",
+        "oy": 12.666667000000018,
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 11,
+        "r": 4,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 11,
+        "r": 5,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 11,
+        "r": 6,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 18,
+        "r": 2,
+        "layer": "ground2",
+        "oy": 12.666667000000018,
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 18,
+        "r": 5,
+        "layer": "ground2",
+        "oy": 10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 18,
+        "r": 4,
+        "layer": "ground2",
+        "oy": 10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 18,
+        "r": 6,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_hole",
+        "c": 12,
         "r": 2,
         "layer": "ground2",
         "oy": 30
       },
       {
-        "id": "tile_bg_backroom_pillar3",
-        "c": 11,
-        "r": 2,
+        "id": "tile_bg_backroom_door_wood",
+        "c": 13,
+        "r": 3,
         "layer": "ground2",
-        "oy": 12.666667000000018,
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 11,
-        "r": 4,
-        "layer": "ground2"
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 11,
-        "r": 5,
-        "layer": "ground2"
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 11,
-        "r": 6,
-        "layer": "ground2"
-      },
-      {
-        "id": "tile_bg_backroom_pillar3",
-        "c": 18,
-        "r": 2,
-        "layer": "ground2",
-        "oy": 12.666667000000018,
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 18,
-        "r": 5,
-        "layer": "ground2",
-        "oy": 10
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 18,
-        "r": 4,
-        "layer": "ground2",
-        "oy": 10
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 18,
-        "r": 6,
-        "layer": "ground2"
+        "oy": 30
       }
     ],
     "solid": [],

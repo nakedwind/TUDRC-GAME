@@ -38,7 +38,8 @@ const STORY_KAI = {
       { "do": "say", "who": 1, "text": "我得快點回到大家身邊……", "shake": false },
       { "do": "act", "who": 1, "act": "sit", "on": false },
       { "do": "wait", "ms": 1500 },
-      { "do": "move", "who": 1, "at": [13.9, 6.5], "ms": 2500 }
+      { "do": "act", "who": 1, "act": "walk" },
+      { "do": "move", "who": 1, "at": [13.6, 6.1], "ms": 2500 }
     ]
   }
 };
