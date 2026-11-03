@@ -152,7 +152,7 @@ function updateMeal(dt) {
     const before = Math.floor(t.eatT); t.eatT += dt;
     if (Math.floor(t.eatT) > before && typeof sfxAt === 'function') sfxAt('pop', t.x, t.y, .25, 'meal-bite');
     t.left = Math.max(0, 1 - Math.floor(t.eatT) / 4);
-    if (t.eatT >= MEAL.eatTime) { t.eating = false; t.dirty = true; t.left = 0; if (t.owner === 'player') { const p = G.player; flash('吃飽了！', p.x, p.y - 64, '#9ff0c0', MEAL.fullFlash, true); grantMealBuff(t.foods); } }   // 「吃飽了！」在溫特頭頂上方（不蓋到人）
+    if (t.eatT >= MEAL.eatTime) { t.eating = false; t.dirty = true; t.left = 0; if (t.owner === 'player') { const p = G.player; flash('吃飽了！', p.x, p.y - 64, '#9ff0c0', MEAL.fullFlash, true); grantMealBuff(t.foods); } else if (typeof mealInviteAte === 'function') mealInviteAte(t.owner); }   // 別人吃完：一段時間內不能再邀他吃飯（js/meal-invite.js）   // 「吃飽了！」在溫特頭頂上方（不蓋到人）
   }
 }
 // ---- NPC：拿餐盤 → 裝 2～4 樣 → 找有桌子的空位坐下吃 → 再坐一下 → 起身把髒盤拿去回收 ----

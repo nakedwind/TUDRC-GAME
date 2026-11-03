@@ -5,13 +5,14 @@
 //  ・剛答應、或溫特站著時在旁邊自由走動過：用自己平常的速度走過去排隊，走到自己排的位置才算加入隊伍，之後才用跟隨溫特的速度
 //  ・個人房間（名字有「寢室」「房間」的地圖，宿舍樓走廊不算）：只有房間的主人跟進去，其他人在門外那張地圖等，溫特出來再跟上
 //  ・另外指定不能跟進去的地方：MEAL_INVITE.noEnter（地圖名字 → 誰不能進去），一樣在門外等
+//  ・冷卻：吃完一盤（被邀請去吃、自己去餐廳吃都算）MEAL_INVITE.cooldownMin 分鐘內不能再邀請；用真實時間算，存在瀏覽器（tudrc_meal_invite_cd_v1），重新整理也不會重來
 //  ・答應時頭上說的話：對話編輯器的「接受吃飯邀請」（data/dialogues.js 的 mealInvite），沒填就不說
 //  ・到了有餐盤架、打飯台、回收區的地圖（餐廳）：自己去拿餐盤、打飯、坐下吃、回收（js/meal.js 的 NPC 吃飯流程）
 //  ・吃完在餐廳逛一下（after 秒），再走回自己平常待的地方（同一張地圖＝走回活動範圍；別張地圖＝走往家的方向的出入口離開，homeExit），邀請結束
 //  ・飯後加成只有溫特有：桌上的餐盤是客人的（owner 不是 'player'），吃完不會加（js/meal.js 的 updateMeal）
 //  ・只存在這一趟（沒存進存檔）；離開基地去出勤、溫特先離開餐廳（還在吃的人留下）＝邀請結束，大家回到平常的位置
 // ============================================================
-const MEAL_INVITE = { noEnter: { '2F溫特辦公室': ['red'] }, max: 4, radiusCells: 5, queueCells: [1.2, 1], wait: [.6, 1.8], after: [8, 14], leaveTimeout: 25, npcSpeed: 65 };   // queueCells：排隊的間隔（第一位離溫特 1.2 格，之後每位再往後 1 格）；npcSpeed＝NPC 平常走路的速度（js/sentry.js 的 updateWanderer）
+const MEAL_INVITE = { cooldownMin: 10, noEnter: { '2F溫特辦公室': ['red'] }, max: 4, radiusCells: 5, queueCells: [1.2, 1], wait: [.6, 1.8], after: [8, 14], leaveTimeout: 25, npcSpeed: 65 };   // queueCells：排隊的間隔（第一位離溫特 1.2 格，之後每位再往後 1 格）；npcSpeed＝NPC 平常走路的速度（js/sentry.js 的 updateWanderer）
 const mealInvite = { guests: [], mapId: null, mapName: null, trail: [] };   // trail：溫特走過的路（新的在前面，每 4px 記一點），大家沿著這條路排隊   // guests：[{ id, stage: 'follow'|'eat'|'after', t（逛多久） }]
 const inviteId = a => a && (a.kind === 'tower' ? a.type : a.id);   // 隊員用 type、NPC 用 id（跟 npcLocation 一樣）
 const inviteName = a => a.kind === 'tower' ? TYPES[a.type].name : ((typeof CHARACTERS !== 'undefined' && CHARACTERS[a.id]) || {}).name || a.id;
@@ -48,10 +49,23 @@ function mealInviteLocation(id) {
 const canMealInvite = a => !!(a && MAP_SAFE && !NPC_NO_SEAT.includes(inviteId(a)) && !a.inviteLeave && !(typeof practiceOn === 'function' && practiceOn())
   && (a.kind === 'tower' ? TYPES[a.type] && a.hp > 0 && !a.berserk && !a.vitalsLeaving && !(typeof isHospitalized === 'function' && isHospitalized(a.type))
     : a.kind === 'npc' && !(typeof ashBusy === 'function' && ashBusy(a))));   // NPC：球球（狗）不去、亞許正在幫人疏導時不去
+// ---- 冷卻：誰什麼時候吃完的（真實時間，毫秒）----
+const MEAL_INVITE_CD_KEY = 'tudrc_meal_invite_cd_v1';
+let mealAteAt = {};
+try { mealAteAt = JSON.parse(localStorage.getItem(MEAL_INVITE_CD_KEY) || '{}') || {}; } catch (_) { mealAteAt = {}; }
+const inviteCdLeft = id => Math.max(0, (mealAteAt[id] || 0) + MEAL_INVITE.cooldownMin * 60000 - Date.now());   // 還要等多久（毫秒）
+function mealInviteAte(a) {   // 吃完一盤（js/meal.js 的 updateMeal 呼叫）：開始算冷卻
+  const id = inviteId(a); if (!id) return;
+  mealAteAt[id] = Date.now();
+  for (const k in mealAteAt) if (!inviteCdLeft(k)) delete mealAteAt[k];   // 過了冷卻的拿掉，存的東西不會越來越多
+  try { localStorage.setItem(MEAL_INVITE_CD_KEY, JSON.stringify(mealAteAt)); } catch (_) {}
+}
 // 選單上的按鈕（js/sentry.js 的 openSentryMenu、openNpcMenu）
 function mealInviteButton(a) {
   if (mealGuest(a)) return '<button data-act="mealInvite">🍽️ 不吃了（取消邀請）</button>';
   if (!canMealInvite(a)) return '';
+  const left = inviteCdLeft(inviteId(a));
+  if (left) return '<button data-act="mealInvite" style="opacity:.55">🍽️ 剛吃飽（' + Math.ceil(left / 60000) + ' 分鐘後才能再邀）</button>';   // 冷卻中：按了只會跳提示
   return '<button data-act="mealInvite">🍽️ 一起去吃飯（' + mealInvite.guests.length + '/' + MEAL_INVITE.max + '）</button>';
 }
 function toggleMealInvite(a) {
@@ -59,6 +73,8 @@ function toggleMealInvite(a) {
   const say = (text, col, warn) => { flash(text, a.x, a.y - 30, col, 3, true); systemNotice(inviteName(a) + '：' + text, warn); };
   if (mealGuest(a)) { endMealInvite(a, false); sfx('button'); say('取消邀請', '#9aa4b2'); return; }
   if (!canMealInvite(a)) { sfx('error'); return; }
+  const left = inviteCdLeft(inviteId(a));
+  if (left) { sfx('error'); systemNotice(inviteName(a) + '剛吃飽，' + Math.ceil(left / 60000) + ' 分鐘後才能再邀他吃飯', true); return; }
   if (mealInvite.guests.length >= MEAL_INVITE.max) { sfx('error'); systemNotice('一次最多邀 ' + MEAL_INVITE.max + ' 個人一起吃飯', true); return; }
   sfx('button');
   if (a.sitting) npcStandUp(a);
