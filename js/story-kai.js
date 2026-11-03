@@ -39,6 +39,7 @@ const StoryKai = (() => {
   const END_FADE = 1.8;                       // 結局：畫面變黑花幾秒
   const SHOW_FADE = .45;
   const HOP_TIME = .32;                       // 小跳：往上跳 5 像素再落下，花幾秒
+  const WALK_RATE = { walk: 1, run: 1.25, slow: .25 };   // 角色演出的走路、跑步、慢走：腳步動畫放快、放慢幾倍（只改看起來的樣子；走多久照「角色位置」的 ms）
   // 持槍：有持槍圖的角色用持槍圖；拿近戰武器的角色舉起平常的武器（圖片、大小跟遊戲揮擊時一樣，js/render.js 的 drawFireAxe）
   const MELEE_WEAPON = { red: [() => typeof redAxeImg !== 'undefined' && redAxeImg, 21, 32, 22], avaren: [() => typeof avarenKnifeImg !== 'undefined' && avarenKnifeImg, 9, 29, 20],
     luther: [() => typeof lutherAxeImg !== 'undefined' && lutherAxeImg, 28, 46, 26, true], colyn: [() => typeof colynSwordImg !== 'undefined' && colynSwordImg, 9, 46, 18] };
@@ -236,7 +237,8 @@ const StoryKai = (() => {
   }
 
   // ---- 跑指令：一行一行往下，遇到要等的就停在那裡 ----
-  const blocked = () => state.talk || state.time < state.waitUntil || state.camMove || (state.moveWait && state.moveWait.target) || state.ending;
+  // 鏡頭位移不擋：鏡頭一邊移，下一行一邊跑
+  const blocked = () => state.talk || state.time < state.waitUntil || (state.moveWait && state.moveWait.target) || state.ending;
   function run() {
     let guard = 0;
     while (state.playing && !blocked() && guard++ < 500) {
@@ -280,8 +282,9 @@ const StoryKai = (() => {
         state.waitUntil = state.time + sec;
         break;
       }
-      case 'act': {   // 角色演出：小跳（跳一下）、持槍、倒地、集氣（後面三個是開／關）
+      case 'act': {   // 角色演出：小跳（跳一下）、持槍、倒地、集氣（後面三個是開／關）、走路／跑步／慢走（之後走路的腳步快慢，換別的再改）
         const a = actor(s.who); if (!a) break;
+        if (WALK_RATE[s.act]) { a.animRate = WALK_RATE[s.act]; break; }
         const on = s.on !== false;
         if (s.act === 'hop') { if (!state.skipping) a.hopT = HOP_TIME; }
         else if (s.act === 'gun') a.armed = on;
@@ -520,7 +523,7 @@ const StoryKai = (() => {
     paintLayers(); applyCam(); draw();
   }
   function tickActor(a, dt) {
-    a.anim += dt;
+    a.anim += dt * (a.animRate || 1);   // 跑步時腳步快一點、慢走時慢一點
     if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
     tickCharge(a, dt);
     if (a.fade) {
