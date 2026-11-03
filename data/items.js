@@ -50,6 +50,6 @@ const MEMORY_KEYS = [
   { shard: 'power-shard',   key: 'power-key',   need: 3 },   // 路德篇
   { shard: 'devotion-shard', key: 'devotion-key', need: 3 },   // 柯林篇
   { shard: 'quiet-shard',   key: 'quiet-key',   need: 3 },   // 亞許篇
-  { shard: 'spirit-shard',  key: 'spirit-key',  need: 3 },   // 溫特篇（溫特是玩家，碎片的取得方式待定）
+  { shard: 'spirit-shard',  key: 'spirit-key',  need: 3 },   // 溫特篇（溫特是玩家：捷運入口都解封後打破異質核心掉，見 js/core-clear.js）
   { shard: 'regret-shard',  key: 'regret-key',  need: 3 },   // 艾德林篇
 ];

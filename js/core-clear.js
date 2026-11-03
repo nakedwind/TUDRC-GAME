@@ -2,20 +2,42 @@
 //  打破異質核心之後：掉異質鑰匙、結算、留下來清場、徹底控制
 //  ・每打破一個核心掉一把「異質鑰匙」（重要物品；之後拿來開捷運入口之類的地方）：
 //    先從核心彈出來掉在地上發光，過 CORE_KEY_DROP.wait 秒自動收進背包（地上的鑰匙消失、跳出說明視窗）。
+//  ・這張地圖的捷運入口都解封了（不用再掉鑰匙）：只給異質碎片（js/mrt-locks.js 的 MRT_OPEN_CORE_REWARD），
+//    精神的鑰匙還沒拼好的話，再多掉一片精神的碎片（溫特篇的回憶碎片只從這裡拿）。
 //  ・這張地圖的核心全部打破：跳出結算畫面，可以「返回應變中心」或「留下來繼續探索」。
 //  ・核心全破、異質體也清光：畫面中間跳「已徹底控制」的大橫幅，記一次成就（fullControls）。
 // ============================================================
-const CORE_CLEAR = { keyItem: 'anomaly-key', fullColor: '#7ee0a8', resultDelay: 3, newbieTitle: '✅ Y區入口已控制' };   // resultDelay：最後一個核心碎掉後幾秒才跳結算（先看碎裂表演）；newbieTitle：新手區結算的標題
+const CORE_CLEAR = { keyItem: 'anomaly-key', spiritShard: 'spirit-shard', fullColor: '#7ee0a8', resultDelay: 3, newbieTitle: '✅ Y區入口已控制' };   // resultDelay：最後一個核心碎掉後幾秒才跳結算（先看碎裂表演）；newbieTitle：新手區結算的標題
 
-const CORE_KEY_DROP = { wait: 3, image: 'images/碎片鑰匙/異質鑰匙小.png', w: 16, h: 36 };   // wait：掉在地上幾秒後自動收進背包
+const CORE_KEY_DROP = { wait: 3, image: 'images/碎片鑰匙/異質鑰匙小.png', w: 16, h: 36, shardW: 22, shardH: 22 };   // wait：掉在地上幾秒後自動收進背包；shardW／shardH：精神的碎片在地上的大小
 const coreKeyGroundImg = new Image(); coreKeyGroundImg.src = CORE_KEY_DROP.image;
+const coreDropImgs = {};   // 其他會從核心掉出來的東西（精神的碎片）的圖
+function coreDropImg(id) {
+  if (id === CORE_CLEAR.keyItem) return coreKeyGroundImg;
+  if (!coreDropImgs[id]) { coreDropImgs[id] = new Image(); coreDropImgs[id].src = itemById(id).image; }
+  return coreDropImgs[id];
+}
 
 // js/anomalous-core.js 的 breakCore 呼叫：鑰匙從核心彈出來，掉在地上
 function coreKeyDrop(core) {
   const id = CORE_CLEAR.keyItem; if (typeof itemById !== 'function' || !itemById(id)) return;
-  if (mrtExitsAllOpen()) return;   // 這張地圖的捷運入口都解封了：不用再掉鑰匙（js/mrt-locks.js）
+  if (mrtExitsAllOpen()) { coreRewardDrop(core); return; }   // 這張地圖的捷運入口都解封了：不用再掉鑰匙，改掉異質碎片（js/mrt-locks.js）
+  pushCoreDrop(id, core);
+}
+function pushCoreDrop(id, core) {
   const a = Math.random() * Math.PI * 2, sp = 25 + Math.random() * 25;
   (G.coreKeyDrops = G.coreKeyDrops || []).push({ id, x: core.x, y: core.y + 4, z: 50, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6, vz: 170, t: 0, spin: Math.random() * 6 });
+}
+// 不用掉鑰匙的時候（異質碎片在 js/game.js 給 MRT_OPEN_CORE_REWARD）：精神的鑰匙還沒拼好就多掉一片精神的碎片
+function coreRewardDrop(core) {
+  if (spiritShardWanted()) pushCoreDrop(CORE_CLEAR.spiritShard, core);
+}
+// 精神的鑰匙還沒拼好、手上的碎片（加上地上還沒收的）也還不夠拼：才掉精神的碎片
+function spiritShardWanted() {
+  const id = CORE_CLEAR.spiritShard, mk = MEMORY_KEYS.find(m => m.shard === id);
+  if (!mk || !itemById(id) || supplyInventory.get(mk.key) > 0) return false;
+  const onGround = (G.coreKeyDrops || []).filter(d => d.id === id).length;
+  return (supplyInventory.get(id) || 0) + onGround < mk.need;
 }
 // 每幀（game.js 的 update 呼叫）：拋物線落地、彈一下；時間到就收進背包
 function updateCoreKeyDrops(dt) {
@@ -41,6 +63,7 @@ function collectCoreKey(d) {
   G.coreKeyDrops = G.coreKeyDrops.filter(o => o !== d);
   G.effects.push({ ring: true, x: d.x, y: d.y - 10, r: 4, r2: 30, life: .35, life0: .35, color: '#f1ddff' });
   const id = d.id;
+  if (id !== CORE_CLEAR.keyItem) { collectCoreShard(d); return; }
   supplyGain(id, 1);
   if (typeof itemIntroSeen !== 'undefined') itemIntroSeen.add('item:' + id);   // 下面自己跳視窗，拾取提示就不要再跳「第一次拿到」
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
@@ -49,11 +72,24 @@ function collectCoreKey(d) {
   G.effects.push({ text: itemById(id).name, iconImage: CORE_KEY_DROP.image, x: d.x, y: d.y - 40, life: 3, life0: 3, color: '#d69bff', vy: -22 });   // 飄字前面放異質鑰匙小圖
   if (typeof updateHUD === 'function') updateHUD();
 }
+// 精神的碎片：收進背包、顯示幾片／幾片，集滿就拼成鑰匙（js/gifts.js 的 checkMemoryKeys）
+function collectCoreShard(d) {
+  const id = d.id, it = itemById(id), mk = MEMORY_KEYS.find(m => m.shard === id);
+  if (!supplyGain(id, 1)) { systemNotice('背包已滿，沒辦法收下「' + it.name + '」', true); return; }
+  const have = supplyInventory.get(id) || 0;
+  systemNotice(`獲得「${it.name}」（${Math.min(have, mk.need)}／${mk.need}）`);
+  if (typeof SFX !== 'undefined') SFX.play('crystalGet', .7, 'core-spirit-shard');
+  G.effects.push({ text: it.name, x: d.x, y: d.y - 40, life: 3, life0: 3, color: '#8fb8ff', vy: -22 });
+  if (typeof checkMemoryKeys === 'function') setTimeout(checkMemoryKeys, 600);
+  if (typeof updateHUD === 'function') updateHUD();
+}
 // 地上的鑰匙（render.js 在黑幕之後呼叫：畫在黑暗上面，暗處也看得到）
 function drawCoreKeyDrops(ctx) {
-  const list = G && G.coreKeyDrops; if (!list || !list.length || !coreKeyGroundImg.complete || !coreKeyGroundImg.naturalWidth) return;
-  const now = performance.now() / 1000, { w, h } = CORE_KEY_DROP;
+  const list = G && G.coreKeyDrops; if (!list || !list.length) return;
+  const now = performance.now() / 1000;
   for (const d of list) {
+    const img = coreDropImg(d.id); if (!img.complete || !img.naturalWidth) continue;
+    const isKey = d.id === CORE_CLEAR.keyItem, w = isKey ? CORE_KEY_DROP.w : CORE_KEY_DROP.shardW, h = isKey ? CORE_KEY_DROP.h : CORE_KEY_DROP.shardH;
     const bob = d.z === 0 ? Math.sin(now * 3 + d.spin) * 1.5 : 0, x = d.x, y = d.y - d.z + bob;
     const blink = d.t > CORE_KEY_DROP.wait - .6 ? .75 + .25 * Math.sin(now * 30) : 1;   // 快被收走前閃一下
     ctx.save();
@@ -63,7 +99,7 @@ function drawCoreKeyDrops(ctx) {
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y - h * .4, 26, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = blink; ctx.imageSmoothingEnabled = false;
     ctx.translate(x, y); ctx.rotate(d.z > 0 ? Math.sin(d.t * 14) * .6 : Math.sin(d.spin) * .12);   // 飛在空中時翻轉
-    ctx.drawImage(coreKeyGroundImg, -w / 2, -h, w, h);
+    ctx.drawImage(img, -w / 2, -h, w, h);
     ctx.restore();
   }
 }

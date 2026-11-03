@@ -38,7 +38,7 @@ const REQUEST_SHARDS = {
   theonie: 'burning-shard', red: 'pure-shard', noah: 'warm-shard', avaren: 'black-shard', luther: 'power-shard',
   colyn: 'devotion-shard', ash: 'quiet-shard', eldrin: 'regret-shard',
   // 克莉思不給回憶碎片，完成委託給異質碎片
-  // 溫特（精神的碎片）是玩家自己，不會透過委託拿到，之後再決定取得方式
+  // 溫特（精神的碎片）是玩家自己，不會透過委託拿到：捷運入口都解封後打破異質核心才會掉（js/core-clear.js）
 };
 // 想吃的時候說的話、完成委託把碎片交給溫特時說的話：在「對話編輯器」的「送禮與委託」（requestAsk、requestReward）
 

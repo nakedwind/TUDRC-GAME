@@ -40030,7 +40030,6 @@ const BATTLE_MAPS = [
     "coreFixed": [
       "5,7"
     ],
-    "mrtExitKeys": 2,
     "elite": {
       "of": "bird_head",
       "c": 5,
