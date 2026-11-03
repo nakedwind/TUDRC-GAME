@@ -56,6 +56,15 @@ const StoryKai = (() => {
   // ---- 角色圖 ----
   const spriteCache = {};
   const sprites = name => spriteCache[name] || (spriteCache[name] = loadCharacterSprites(name));
+  // 受傷差分：<資料夾>/<名字>_0000_Front_hurt_01～03.png（01＝張眼、02＝半閉、03＝閉眼）；只有正面，側面、背面、走路照原本的圖
+  const hurtCache = {};
+  function hurtSet(a) {
+    if (a.set.single) return null;
+    const name = a.cast.sprite, prefix = 'images/character/' + name + '/' + String(name).replace('_', '') + '_0000_Front_hurt_0';
+    const h = hurtCache[name] || (hurtCache[name] = [1, 2, 3].map(n => { const im = new Image(); im.src = prefix + n + '.png'; return im; }));
+    if (!readyImage(h[0])) return null;   // 還沒載好（或沒有畫）：先用原本的圖
+    return { ...a.set, front: [h[0], ...a.set.front.slice(1)], blink: [h[1], h[2], h[2]] };
+  }
   function imageSet(src) {   // 只有一張圖的路人（cast.image）：每個方向、走路都用同一張
     if (spriteCache[src]) return spriteCache[src];
     const im = new Image(); im.src = src; const one = [im, im, im];
@@ -237,8 +246,9 @@ const StoryKai = (() => {
   }
 
   // ---- 跑指令：一行一行往下，遇到要等的就停在那裡 ----
-  // 鏡頭位移不擋：鏡頭一邊移，下一行一邊跑
-  const blocked = () => state.talk || state.time < state.waitUntil || (state.moveWait && state.moveWait.target) || state.ending;
+  // 鏡頭位移不擋：鏡頭一邊移，下一行一邊跑；但下一行是「＋新鏡頭」時，要等上一個運鏡移完才切過去
+  const camBusy = () => state.camMove && state.steps[state.i]?.do === 'cam';
+  const blocked = () => state.talk || state.time < state.waitUntil || (state.moveWait && state.moveWait.target) || camBusy() || state.ending;
   function run() {
     let guard = 0;
     while (state.playing && !blocked() && guard++ < 500) {
@@ -290,6 +300,7 @@ const StoryKai = (() => {
         else if (s.act === 'gun') a.armed = on;
         else if (s.act === 'down') a.down = on;
         else if (s.act === 'charge') a.charging = on;
+        else if (s.act === 'hurt') { a.hurt = on; if (on) hurtSet(a); }   // 受傷：換成流血的差分
         break;
       }
       case 'sway': { const a = actor(s.who); if (a) a.sway = s.on === false ? 0 : SWAY_PX[clamp(Number(s.lv) || 2, 1, 5)] * .5; break; }   // 角色晃動：跟鏡頭晃動同樣的 1～5 級，慢慢左右晃（像站不穩）
@@ -574,7 +585,8 @@ const StoryKai = (() => {
     // 持槍：有持槍圖（GUN_FOLDERS）就用持槍圖；拿近戰武器的人擺出舉著武器的樣子
     const weapon = a.armed && !a.down && MELEE_WEAPON[a.cast.char];
     const pose = { ...a, sitting: null, gunT: a.armed && !weapon ? 1 : 0, meleeSwing: weapon ? { angle: FACE_ANGLE[a.dir] ?? Math.PI / 2, age: 0, wind: 1, impact: 2, duration: 3 } : null };
-    let img = a.down && readyImage(a.set.fail) ? a.set.fail : pickCharacterFrame(a.set, pose);
+    const set = (a.hurt && hurtSet(a)) || a.set;
+    let img = a.down && readyImage(a.set.fail) ? a.set.fail : pickCharacterFrame(set, pose);
     if (!readyImage(img)) img = a.set.front?.[0];
     if (!readyImage(img)) return;
     const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * a.tremble : 0;

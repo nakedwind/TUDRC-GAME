@@ -8,15 +8,17 @@ const STORY_KAI = {
     "cast": [{ "no": 1, "char": "colyn", "sprite": "colyn_B" }],
     "steps": [
       { "do": "map", "map": "map_mw0yxwzb" },
-      { "do": "cam", "at": [15, 30], "w": 20 },
+      { "do": "cam", "at": [15.7, 30], "w": 20 },
       { "do": "say", "who": "", "text": "……", "shake": false },
       { "do": "say", "who": "", "text": "聲音是一層一層剝落的。", "shake": false },
       { "do": "say", "who": "", "text": "最先遠去的是槍響，悶悶地，像隔著好幾道牆有人在敲門。", "shake": false },
       { "do": "say", "who": "", "text": "接著是那些叫聲：人的叫聲短促、破碎，帶著喘；怪物的叫聲則拖得很長，長到不像是從喉嚨裡發出來的，而像是走廊本身在哀鳴。", "shake": false },
       { "do": "show", "who": 1, "at": [16, 29.2], "face": "back" },
-      { "do": "camMove", "at": [15.1, 18.5], "w": 20, "ms": 3000 },
-      { "do": "move", "who": 1, "at": [16.1, 17.6], "ms": 3000, "face": "back" },
-      { "do": "act", "who": 1, "act": "slow" }
+      { "do": "camMove", "at": [15.8, 18.5], "w": 20, "ms": 6000 },
+      { "do": "act", "who": 1, "act": "slow" },
+      { "do": "move", "who": 1, "at": [16.1, 17.6], "ms": 6000, "face": "back" },
+      { "do": "wait", "ms": 800 },
+      { "do": "say", "who": 1, "text": "……這裡是哪裡？……大家都去哪了？", "shake": false }
     ]
   }
 };

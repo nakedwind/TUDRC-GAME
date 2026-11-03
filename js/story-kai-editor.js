@@ -62,7 +62,7 @@ const KINDS = {
   sfx: { name: '音效', make: () => ({ src: '', vol: 100 }) },
 };
 const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble', 'act', 'sway']);
-const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣'], ['walk', '走路'], ['run', '跑步'], ['slow', '慢走']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
+const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣'], ['hurt', '受傷'], ['walk', '走路'], ['run', '跑步'], ['slow', '慢走']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
 const FACES = [['', '面向：自動'], ['front', '正面'], ['back', '背面'], ['left', '朝左'], ['right', '朝右']];
 // ---- 怪物、道具：怪物用「怪物代號」、道具用「道具代號」，跟角色代號分開算（不用先加進演出者列表）----
 const MON_KINDS = new Set(['mshow', 'mhide', 'mact']), ITEM_KINDS = new Set(['ishow', 'ihide']);
@@ -161,7 +161,7 @@ function storyKaiExportText() {
 // ---- 跑到第 upto 行時：每個人在哪、鏡頭拍哪裡、後室黑幕開了沒（預覽窗用） ----
 const dirFrom = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1]; return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front'); };
 function simulate(upto) {
-  const st = { actors: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
+  const st = { actors: new Map(), hurt: new Set(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
   const steps = scene()?.steps || [];
   for (let i = 0; i <= upto && i < steps.length; i++) {
     const p = steps[i], no = Number(p.who), a = st.actors.get(no);
@@ -181,6 +181,7 @@ function simulate(upto) {
       if (i === upto && a?.shown) st.move = { from: a.at, to: p.at };
       st.actors.set(no, { at: p.at, face: p.face || (a?.shown ? dirFrom(a.at, p.at) : 'front'), src: i, shown: true });
     } else if (p.do === 'hide' && a) a.shown = false;
+    else if (p.do === 'act' && p.act === 'hurt') { if (p.on === false) st.hurt.delete(no); else st.hurt.add(no); }   // 受傷：開了之後一直是流血的樣子
     else if ((p.do === 'cam' || p.do === 'camMove') && p.at) st.cam = { at: p.at, w: Number(p.w) || 20, src: i };
     else if (p.do === 'dark') st.dark = p.on !== false;
     else if (p.do === 'vignette') st.vig = Number(p.lv) || 0;
@@ -248,12 +249,13 @@ function cornerHandle(x, y, on) {
   ctx.fillRect(x - 5, y - 5, 10, 10); ctx.strokeRect(x - 5, y - 5, 10, 10);
 }
 // 角色：跟遊戲一樣的大小，腳底在格子座標上；配件也一起畫
-function drawFigure(c, p, face) {
+function drawFigure(c, p, face, hurt) {
   if (c.image) {   // 圖片角色：照原本比例、跟人一樣高
     const img = image(c.image); if (!img) return;
     const w = SIZE * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, p[0] * C - w / 2, p[1] * C - SIZE + 18, w, SIZE); return;
   }
-  const img = image(faceSrc(c.sprite, face)) || image(faceSrc(c.sprite)); if (!img) return;
+  const hurtImg = hurt && (face || 'front') === 'front' && c.sprite ? image('images/character/' + c.sprite + '/' + c.sprite.replace('_', '') + '_0000_Front_hurt_01.png') : null;   // 受傷差分（只有正面）
+  const img = hurtImg || image(faceSrc(c.sprite, face)) || image(faceSrc(c.sprite)); if (!img) return;
   const x = p[0] * C - SIZE / 2, y = p[1] * C - SIZE + 18;
   const accs = typeof ACC_BY_ID !== 'undefined' ? Object.values(c.accs || {}).map(id => ACC_BY_ID[id]).filter(Boolean).sort((a, b) => accLayer(a) - accLayer(b)) : [];
   for (const a of accs) drawAccessory(ctx, a, c.char, face, 0, x, y, SIZE, 'behind');
@@ -293,7 +295,7 @@ function draw() {
   const actors = [...st.actors.entries()].filter(([, a]) => a.shown).sort((p, q) => p[1].at[1] - q[1].at[1]);
   const mons = [...st.mons.entries()].filter(([, x]) => x.shown), items = [...st.items.entries()].filter(([, x]) => x.shown);
   // 人、怪物、道具一起依腳底的高低排前後
-  const figs = [...actors.map(([no, a]) => ({ y: a.at[1], draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, a.face); } })),
+  const figs = [...actors.map(([no, a]) => ({ y: a.at[1], draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, a.face, st.hurt.has(no)); } })),
     ...mons.map(([, x]) => ({ y: x.at[1], draw: () => drawMonster(x, x.dying) })), ...items.map(([, x]) => ({ y: x.at[1] - .01, draw: () => drawProp(x) }))];
   figs.sort((p, q) => p.y - q.y).forEach(f => f.draw());
   ctx.restore();
@@ -672,7 +674,7 @@ function controls(st) {
     case 'hide': return [codeIn(st)];
     case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st)];
     case 'act': {
-      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地、集氣：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
+      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地、集氣、受傷：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
         st.act = e.target.value;
         if (WALK_ACTS.has(st.act)) delete st.on; else if (st.act !== 'hop' && st.on == null) st.on = true;
         commit();
@@ -712,7 +714,7 @@ function renderSteps() {
   const s = scene();
   $('stepCount').textContent = s ? s.steps.length + ' 行' : '';
   for (const id of ['playSide', 'playTop', 'playFrom']) $(id).disabled = !s;
-  $('delStep').hidden = !s || sel < 0 || sel >= s.steps.length;   // 選了某一行才出現
+  $('delStep').hidden = $('copyStep').hidden = !s || sel < 0 || sel >= s.steps.length;   // 選了某一行才出現
   if (!s) { box.append(h('div', { class: 'empty' }, '還沒有劇情。按上面的「＋新劇情」開始。')); return; }
   if (!s.steps.length) { box.append(h('div', { class: 'empty' }, '還沒有指令。\n按左邊的按鈕新增，例如先「＋新鏡頭」決定拍哪裡，再「角色出現」、「＋新對白」。')); return; }
   s.steps.forEach((st, i) => {
@@ -720,7 +722,7 @@ function renderSteps() {
     const row = h('div', { class: 'step' + (i === sel ? ' on' : '') + (warn ? ' warn' : ''), draggable: 'true', title: warn ? '⚠ ' + warn : '', 'data-i': i,
       onclick: () => { if (sel !== i) { sel = i; renderSteps(); drawSoon(); } } },
       h('span', { class: 'no' }, String(i + 1).padStart(3, '0') + '：'), h('span', { class: 'lbl' }, name, extra ? h('em', {}, extra) : null),
-      h('span', { class: 'ctl', onclick: e => e.stopPropagation(), onmousedown: e => e.stopPropagation() }, controls(st)),
+      h('span', { class: 'ctl', onclick: e => e.stopPropagation(), onmousedown: e => { e.stopPropagation(); if (e.target.closest('input, textarea')) row.draggable = false; } }, controls(st)),   // 在輸入框裡反白文字時，這一行先不能拖
       h('button', { type: 'button', class: 'x', title: '刪除這一行（Delete）', onclick: e => { e.stopPropagation(); removeStep(i); } }, '✕'));
     // 拖曳換順序
     row.addEventListener('dragstart', e => { if (e.target.closest('input,select,textarea')) { e.preventDefault(); return; } dragRow = i; e.dataTransfer.effectAllowed = 'move'; });
@@ -761,6 +763,8 @@ function removeStep(i) {
   setPick(null); commit();
 }
 $('delStep').onclick = () => { if (sel >= 0) removeStep(sel); };
+// 複製此行：一模一樣的設定放在下面一行，並選取新的那一行
+$('copyStep').onclick = () => { const s = scene(); if (!s || sel < 0 || sel >= s.steps.length) return; s.steps.splice(sel + 1, 0, structuredClone(s.steps[sel])); sel++; setPick(null); commit(); scrollToSel(); };
 document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addStep(b.dataset.add)));
 $('stepList').addEventListener('keydown', e => {
   if (e.target !== $('stepList')) return;
@@ -768,6 +772,7 @@ $('stepList').addEventListener('keydown', e => {
   if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = clamp(sel + (e.key === 'ArrowDown' ? 1 : -1), 0, scene().steps.length - 1); renderSteps(); scrollToSel(); drawSoon(); }
 });
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && pick) { setPick(null); } });
+window.addEventListener('mouseup', () => { for (const r of document.querySelectorAll('#stepList .step[draggable="false"]')) r.draggable = true; });   // 放開滑鼠：每一行又可以拖了
 
 // ---- 寫對白（彈窗）----
 let sayFor = null;

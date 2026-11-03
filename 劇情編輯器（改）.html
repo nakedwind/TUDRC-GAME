@@ -178,7 +178,7 @@
         <div class="cast" id="castList"></div>
       </div>
       <div class="box steps-box">
-        <div class="row"><button type="button" class="primary" id="playSide">▶ 從頭預覽</button><button type="button" class="small" id="playFrom" title="前面的行一次做完，從選取的這一行開始播">▶ 從選取的行</button><button type="button" class="small danger" id="delStep" hidden title="刪除選取的這一行（Delete）">刪除此行</button>
+        <div class="row"><button type="button" class="primary" id="playSide">▶ 從頭預覽</button><button type="button" class="small" id="playFrom" title="前面的行一次做完，從選取的這一行開始播">▶ 從選取的行</button><button type="button" class="small" id="copyStep" hidden title="在選取的這一行下面複製一行一樣設定的">複製此行</button><button type="button" class="small danger" id="delStep" hidden title="刪除選取的這一行（Delete）">刪除此行</button>
           <span class="grow" style="flex:1"></span><span class="note" id="stepCount"></span></div>
         <div class="steps" id="stepList" tabindex="0" aria-label="指令列表"></div>
         <div class="row" style="justify-content:flex-end"><button type="button" class="primary" id="saveBottom">💾 存到專案</button></div>
@@ -238,7 +238,7 @@
   <script src="js/story-kai-fx.js?v=kai-20261103"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-kai-editor.js?v=kai13-20261104"></script>
+  <script src="js/story-kai-editor.js?v=kai16-20261104"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],
