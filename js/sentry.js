@@ -28,6 +28,8 @@ function npcLocation(id) {
   const loc = npcLocationTable()[id] || null;
   const moved = loc && typeof vitalsLocation === 'function' ? vitalsLocation(id) : null;
   if (moved) return moved;
+  const followed = typeof baseFollowLocation === 'function' && baseFollowLocation(id, loc);   // 雷德在基地裡跟著溫特換地圖（js/base-follow.js）
+  if (followed) return followed;
   if (id === 'tino' && loc && loc.map === '2F應變中心' && tinoSootheVisit) return tinoSootheVisit;
   return loc;
 }
@@ -630,6 +632,7 @@ function updateSentry(t, dt) {
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
   if (t.mrtRide) { t.target = null; t.moving = false; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
   if (typeof mealInviteStep === 'function' && mealInviteStep(t, dt)) return;   // 被邀請一起去吃飯：跟著溫特、吃飯、吃完逛一下（js/meal-invite.js）
+  if (typeof baseFollowStep === 'function') baseFollowStep(t);   // 雷德跟著溫特換地圖：剛過來的放到溫特旁邊（js/base-follow.js）
   if (tinoSootheTripStep(t, dt)) return;
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(t, dt)) return;   // 基地：正在跟別人閒聊（js/npc-chats.js）
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子

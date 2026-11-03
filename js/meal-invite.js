@@ -12,7 +12,7 @@
 //  ・飯後加成只有溫特有：桌上的餐盤是客人的（owner 不是 'player'），吃完不會加（js/meal.js 的 updateMeal）
 //  ・只存在這一趟（沒存進存檔）；離開基地去出勤、溫特先離開餐廳（還在吃的人留下）＝邀請結束，大家回到平常的位置
 // ============================================================
-const MEAL_INVITE = { cooldownMin: 10, noEnter: { '2F溫特辦公室': ['red'] }, max: 4, radiusCells: 5, queueCells: [1.2, 1], wait: [.6, 1.8], after: [8, 14], leaveTimeout: 25, npcSpeed: 65 };   // queueCells：排隊的間隔（第一位離溫特 1.2 格，之後每位再往後 1 格）；npcSpeed＝NPC 平常走路的速度（js/sentry.js 的 updateWanderer）
+const MEAL_INVITE = { cooldownMin: 10, noEnter: { '2F溫特辦公室': ['red'] }, max: 4, radiusCells: 5, queueCells: [1.2, 1], wait: [.6, 1.8], after: [8, 14], cancelWander: [4, 8], leaveTimeout: 25, npcSpeed: 65 };   // queueCells：排隊的間隔（第一位離溫特 1.2 格，之後每位再往後 1 格）；npcSpeed＝NPC 平常走路的速度（js/sentry.js 的 updateWanderer）
 const mealInvite = { guests: [], mapId: null, mapName: null, trail: [] };   // trail：溫特走過的路（新的在前面，每 4px 記一點），大家沿著這條路排隊   // guests：[{ id, stage: 'follow'|'eat'|'after', t（逛多久） }]
 const inviteId = a => a && (a.kind === 'tower' ? a.type : a.id);   // 隊員用 type、NPC 用 id（跟 npcLocation 一樣）
 const inviteName = a => a.kind === 'tower' ? TYPES[a.type].name : ((typeof CHARACTERS !== 'undefined' && CHARACTERS[a.id]) || {}).name || a.id;
@@ -25,6 +25,8 @@ function roomOwner(id, name) {
   const c = typeof CHARACTERS !== 'undefined' && CHARACTERS[id], home = npcLocationTable()[id];   // 不問 npcLocation：那裡會先問被邀請的人在哪
   return !!((c && c.name && name.includes(c.name)) || (home && home.map === name));
 }
+// 能不能跟著溫特走進這張地圖：別人的個人房間、指定不能進去的地方（例如雷德不能進溫特辦公室）不行（js/base-follow.js 也用）
+const inviteCanEnter = (id, name) => !(MEAL_INVITE.noEnter[name] || []).includes(id) && (!privateRoom(name) || roomOwner(id, name));
 // 換地圖（js/sentry.js 的 npcLocation 在生人的時候就會問，所以在這裡檢查）：出勤＝全部結束；還沒到餐廳的跟過來，在餐廳吃到一半的留在原地（＝邀請結束）
 // 走進別人的個人房間：不是主人的在門外那張地圖等（waitMap），溫特走到不是個人房間的地方再跟上
 function mealInviteMapCheck() {
@@ -34,8 +36,7 @@ function mealInviteMapCheck() {
   mealInvite.guests = MAP_SAFE && !(typeof practiceOn === 'function' && practiceOn()) ? mealInvite.guests.filter(g => g.stage === 'follow') : [];
   const waiting = [];
   for (const g of mealInvite.guests) {
-    const banned = (MEAL_INVITE.noEnter[MAP.name] || []).includes(g.id);   // 指定不能進去的人（例如雷德不能進溫特辦公室）
-    if (!banned && (!privateRoom(MAP.name) || roomOwner(g.id, MAP.name))) { g.waitMap = null; continue; }
+    if (inviteCanEnter(g.id, MAP.name)) { g.waitMap = null; continue; }
     if (!g.waitMap) g.waitMap = from;   // 從哪張地圖進來的，就在那裡等（從別人房間再走進另一間房間：照樣在原本那裡等）
     waiting.push(g.id);
   }
@@ -72,7 +73,11 @@ function mealInviteButton(a) {
 function toggleMealInvite(a) {
   mealInviteMapCheck();
   const say = (text, col, warn) => { flash(text, a.x, a.y - 30, col, 3, true); systemNotice(inviteName(a) + '：' + text, warn); };
-  if (mealGuest(a)) { endMealInvite(a, false); sfx('button'); say('取消邀請', '#9aa4b2'); return; }
+  if (mealGuest(a)) {   // 不吃了：在他平常待的地圖＝照平常的樣子；在別張地圖＝在這裡徘徊一下（cancelWander 秒）再走回去
+    endMealInvite(a, false); sfx('button'); say('取消邀請', '#9aa4b2');
+    const home = npcLocation(inviteId(a)); if (!home || home.map !== MAP.name) a.inviteLinger = inviteRand(MEAL_INVITE.cancelWander);
+    return;
+  }
   if (!canMealInvite(a)) { sfx('error'); return; }
   const left = inviteCdLeft(inviteId(a));
   if (left) { sfx('error'); systemNotice(inviteName(a) + '剛吃飽，' + Math.ceil(left / 60000) + ' 分鐘後才能再邀他吃飯', true); return; }
@@ -80,7 +85,7 @@ function toggleMealInvite(a) {
   sfx('button');
   if (a.sitting) npcStandUp(a);
   if (a.meal && !a.meal.tray && a.meal.stage === 'tray') a.meal = null;   // 正要自己去拿餐盤：改成跟溫特一起（端著菜的照樣吃完再說）
-  mealInvite.guests.push({ id: inviteId(a), stage: 'follow' });
+  mealInvite.guests.push({ id: inviteId(a), stage: 'follow' }); a.inviteLinger = 0;   // 取消後還在徘徊的人又被邀：照樣跟
   a.inviteMapId = MAP.id; a.inviteJoined = false; if (a.kind === 'tower') a.mode = 'free';   // 還沒加入隊伍：先用自己平常的速度走過來
   a.target = null; a.navPath = null; a.seatGoal = null; a.waitT = 0;
   const line = pickDialogueLine(inviteId(a), 'mealInvite'); if (line) a.say = { text: line, life: 3 };   // 對話編輯器的「接受吃飯邀請」
@@ -91,8 +96,11 @@ function endMealInvite(a, goHome) {
   const id = inviteId(a);
   mealInvite.guests = mealInvite.guests.filter(g => g.id !== id);
   a.target = null; a.navPath = null; a.waitT = 0; if (a.kind === 'tower') a.mode = 'free';
-  if (!goHome) return;
-  const home = npcLocation(id);   // 已經不是客人了：問到的是平常的位置
+  if (goHome) inviteGoHome(a);
+}
+// 走回平常待的地方：同一張地圖走回活動範圍；別張地圖就走往家那個方向的出入口、離開這張地圖
+function inviteGoHome(a) {
+  const id = inviteId(a), home = npcLocation(id);   // 已經不是客人了：問到的是平常的位置
   if (!home || home.map !== MAP.name) { a.inviteLeave = { to: homeExit(a, home && home.map), t: 0 }; a.say = null; return; }
   const area = homeAreaOf(id); if (area) a.target = sampleHomeTarget(area, a);   // 先往活動範圍走，之後照平常閒逛
 }
@@ -191,6 +199,13 @@ function mealInviteStep(a, dt) {
     if (!L.to || Math.hypot(L.to.x - a.x, L.to.y - a.y) < CELL * 1.2 || L.t > MEAL_INVITE.leaveTimeout || (a.navFailed && L.t > 1)) {
       G.towers = G.towers.filter(o => o !== a); G.npcs = G.npcs.filter(o => o !== a);
     } else moveSentryWithPath(a, L.to.x, L.to.y, speed, dt);
+    return true;
+  }
+  if (a.inviteLinger > 0 && !mealGuest(a)) {   // 取消邀請、這裡不是他平常待的地圖：徘徊一下再回去
+    if (menuSentry === a) { a.target = null; return true; }   // 選單開著：先站好（還可以再邀一次）
+    updateNpcTalk(a, dt);
+    if ((a.inviteLinger -= dt) <= 0) { a.target = null; a.navPath = null; inviteGoHome(a); return true; }
+    inviteWander(a, a.x, a.y, 120, speed, dt);
     return true;
   }
   const g = mealGuestOf(inviteId(a)), p = G.player; if (!g || !p) return false;
