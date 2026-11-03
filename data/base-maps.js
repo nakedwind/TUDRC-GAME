@@ -266,7 +266,6 @@ const BASE_MAPS = [
         "34,14": "tile_new_bg_floor",
         "35,14": "tile_new_bg_floor",
         "36,14": "tile_new_bg_floor",
-        "37,14": "tile_new_bg_floor",
         "38,14": "tile_new_bg_floor",
         "39,14": "tile_new_bg_floor",
         "40,14": "tile_new_bg_floor",
@@ -669,7 +668,8 @@ const BASE_MAPS = [
         "14,20": "tile_hq_floor",
         "14,21": "tile_hq_floor",
         "12,18": "tile_hq_floor",
-        "37,19": "tile_hq_floor"
+        "37,19": "tile_hq_floor",
+        "37,14": "tile_new_bg_floor"
       },
       "ground": {},
       "ground2": {},
@@ -796,7 +796,7 @@ const BASE_MAPS = [
         "id": "tile_mu5e3ndv",
         "c": 37,
         "r": 7,
-        "layer": "object3"
+        "layer": "object2"
       },
       {
         "id": "tile_mu5e3ndv",
@@ -1016,7 +1016,8 @@ const BASE_MAPS = [
         "c": 39,
         "r": 8,
         "layer": "object",
-        "oy": 18
+        "oy": 18,
+        "ox": 40
       },
       {
         "id": "tile_new_decor_water_dispenser",
@@ -1028,11 +1029,9 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_plant03",
-        "c": 33,
-        "r": 3,
-        "layer": "overlay",
-        "ox": -2,
-        "oy": -28
+        "c": 28,
+        "r": 8,
+        "layer": "overlay"
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
@@ -1078,9 +1077,9 @@ const BASE_MAPS = [
         "id": "tile_new_decor_box_medium",
         "c": 36,
         "r": 9,
-        "layer": "object2",
+        "layer": "object3",
         "ox": 4,
-        "oy": 38
+        "oy": 36
       },
       {
         "id": "tile_new_decor_box_small_diagonal",
@@ -1176,7 +1175,7 @@ const BASE_MAPS = [
         "c": 41,
         "r": 9,
         "layer": "object4",
-        "ox": -20,
+        "ox": 20,
         "oy": -4
       },
       {
@@ -1289,7 +1288,8 @@ const BASE_MAPS = [
         "c": 42,
         "r": 8,
         "layer": "object",
-        "oy": 16
+        "oy": 16,
+        "ox": 40
       },
       {
         "id": "tile_new_bg_wall",
@@ -1536,14 +1536,6 @@ const BASE_MAPS = [
         "layer": "object2",
         "ox": -10,
         "oy": 26
-      },
-      {
-        "id": "tile_new_decor_cabinet_tall_metal",
-        "c": 10,
-        "r": 10,
-        "layer": "object2",
-        "ox": 0,
-        "oy": -16
       },
       {
         "id": "tile_mufxoi3i",
@@ -1843,11 +1835,11 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_hq_server_rack",
-        "c": 23,
-        "r": 15,
+        "c": 9,
+        "r": 14,
         "layer": "object3",
-        "ox": 0,
-        "oy": -22
+        "ox": -6,
+        "oy": 14
       },
       {
         "id": "tile_hq_desk_vertical",
@@ -1855,7 +1847,7 @@ const BASE_MAPS = [
         "r": 16,
         "layer": "ground3",
         "ox": -10,
-        "oy": 20,
+        "oy": 26,
         "sortDepth": 4.5
       },
       {
@@ -1864,7 +1856,7 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "ground3",
         "ox": 14,
-        "oy": 0
+        "oy": 4
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -1900,8 +1892,8 @@ const BASE_MAPS = [
         "r": 14,
         "layer": "object3",
         "fx": true,
-        "oy": 18,
-        "ox": 0
+        "oy": 16,
+        "ox": 2
       },
       {
         "id": "tile_hq_server_rack",
@@ -1909,8 +1901,8 @@ const BASE_MAPS = [
         "r": 14,
         "layer": "object3",
         "fx": true,
-        "ox": 0,
-        "oy": 18
+        "ox": 2,
+        "oy": 16
       },
       {
         "id": "tile_eoc_drawer_unit",
@@ -1964,11 +1956,11 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_hq_poster",
-        "c": 23,
-        "r": 14,
+        "c": 10,
+        "r": 15,
         "layer": "overlay",
-        "ox": 0,
-        "oy": -14
+        "ox": -44,
+        "oy": -58
       },
       {
         "id": "tile_hq_poster",
@@ -2165,13 +2157,13 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_eoc_locker",
-        "c": 9,
-        "r": 14,
+        "c": 37,
+        "r": 8,
         "layer": "object2",
         "fx": true,
-        "ox": -4,
-        "oy": -28,
-        "sortDepth": 2.75
+        "sortDepth": 2.75,
+        "ox": 36,
+        "oy": 12
       },
       {
         "id": "tile_research_lab_control_workstation",
@@ -2293,14 +2285,6 @@ const BASE_MAPS = [
         "oy": 12
       },
       {
-        "id": "tile_dorm_wardrobe_lab_coat",
-        "c": 26,
-        "r": 8,
-        "layer": "object3",
-        "ox": 20,
-        "oy": 10
-      },
-      {
         "id": "tile_eoc_ball_bed",
         "c": 39,
         "r": 21,
@@ -2322,8 +2306,8 @@ const BASE_MAPS = [
         "r": 14,
         "layer": "object4",
         "sortDepth": 1,
-        "oy": 28,
-        "ox": 0
+        "oy": 22,
+        "ox": 2
       },
       {
         "id": "tile_new_bg_floor",
@@ -2338,8 +2322,9 @@ const BASE_MAPS = [
         "c": 39,
         "r": 14,
         "layer": "object3",
-        "oy": 18,
-        "ox": 0
+        "oy": 16,
+        "ox": 2,
+        "sortDepth": 2
       },
       {
         "id": "tile_new_decor_box_large",
@@ -2383,10 +2368,10 @@ const BASE_MAPS = [
       {
         "id": "tile_halloween_pumpkin_large",
         "c": 23,
-        "r": 16,
+        "r": 14,
         "layer": "overlay",
         "ox": -4,
-        "oy": -2
+        "oy": -14
       },
       {
         "id": "tile_halloween_pumpkin_medium",
@@ -2462,11 +2447,20 @@ const BASE_MAPS = [
         "oy": -10
       },
       {
-        "id": "tile_prop_shelf_locker_unit",
-        "c": 37,
+        "id": "tile_prop_shelf_locker_unit_02",
+        "c": 23,
+        "r": 13,
+        "layer": "object3",
+        "ox": -8,
+        "oy": 22
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 38,
         "r": 8,
         "layer": "object4",
-        "oy": 20
+        "ox": 32,
+        "oy": 12
       }
     ],
     "solid": [
@@ -2509,7 +2503,6 @@ const BASE_MAPS = [
       "47,10",
       "48,10",
       "37,10",
-      "27,9",
       "36,10",
       "49,10",
       "50,10",
@@ -2722,10 +2715,6 @@ const BASE_MAPS = [
       "29,14",
       "28,14",
       "24,14",
-      "24,16",
-      "25,16",
-      "28,9",
-      "28,10",
       "36,9",
       "32,7",
       "33,7",
@@ -2738,7 +2727,8 @@ const BASE_MAPS = [
       "32,5",
       "33,5",
       "34,5",
-      "39,15"
+      "39,15",
+      "27,9"
     ],
     "breakable": [],
     "camp": [
@@ -2782,11 +2772,6 @@ const BASE_MAPS = [
     "npcs": true,
     "portals": [
       {
-        "c": 41,
-        "r": 10,
-        "to": "map_mua3askw"
-      },
-      {
         "c": 50,
         "r": 10,
         "to": "map_mubj5gxm"
@@ -2825,6 +2810,11 @@ const BASE_MAPS = [
         "c": 5,
         "r": 7,
         "to": "map_musbsgj3"
+      },
+      {
+        "c": 42,
+        "r": 10,
+        "to": "map_mua3askw"
       }
     ],
     "solidOffsets": {
@@ -2860,22 +2850,6 @@ const BASE_MAPS = [
         0,
         -16
       ],
-      "25,16": [
-        0,
-        -15
-      ],
-      "24,16": [
-        0,
-        -16
-      ],
-      "28,9": [
-        -21,
-        0
-      ],
-      "28,10": [
-        -20,
-        0
-      ],
       "33,8": [
         0,
         -18
@@ -2895,6 +2869,10 @@ const BASE_MAPS = [
       "34,5": [
         0,
         7
+      ],
+      "23,17": [
+        0,
+        18
       ]
     },
     "coreSpots": [],

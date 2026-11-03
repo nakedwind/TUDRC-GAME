@@ -1,20 +1,21 @@
 // ============================================================
 //  收納櫃：指定的櫃子可以打開放東西。借用背包視窗（js/backpack.js），左邊不顯示溫特立繪。
-//  ・哪些櫃子算：STORAGE_CABINETS（地圖 id＋第幾欄、第幾列＋素材 id），其他同樣的櫃子還是裝飾
+//  ・哪些櫃子算：STORAGE_CABINETS 認素材 id，任何地圖擺了這個素材都是收納櫃；每個擺放位置（地圖＋第幾欄、第幾列）各自分開放東西
 //  ・上方分類條最右邊「背包｜櫃子」切換預覽；背包裡的東西按「放入櫃子」，櫃子裡的按「放到身上」
 //  ・櫃子 slots 格，同種物品每 20 個佔一格（跟背包一樣）；只能放「物品」「隊員物資」，重要物品、子彈、防具不行
 //  ・存在瀏覽器（tudrc_cabinets_v1），每個櫃子分開
 // ============================================================
 const STORAGE_CABINETS = [
-  { map: 'map_mu5ad7t2', c: 37, r: 8, tiles: ['tile_prop_shelf_locker_unit', 'tile_prop_shelf_locker_unit_02'], name: '層架置物櫃', slots: 15 },   // 2F應變中心
+  { tiles: ['tile_prop_shelf_locker_unit_02'], name: '層架置物櫃', slots: 15 },   // 層架置物櫃 02
 ];
 const CABINET_TABS = ['consumable', 'squadgear'];   // 能放進櫃子的分類（背包預覽也只顯示這幾個分頁）
 const CABINET_KEY = 'tudrc_cabinets_v1';
 let cabinetData = {};
 try { cabinetData = JSON.parse(localStorage.getItem(CABINET_KEY) || '{}') || {}; } catch (_) { cabinetData = {}; }
+// 2F 的櫃子從 37,8 搬到 23,13：舊位置放的東西跟著搬過去
+if (cabinetData['map_mu5ad7t2@37,8'] && !cabinetData['map_mu5ad7t2@23,13']) { cabinetData['map_mu5ad7t2@23,13'] = cabinetData['map_mu5ad7t2@37,8']; delete cabinetData['map_mu5ad7t2@37,8']; }
 function saveCabinets() { try { localStorage.setItem(CABINET_KEY, JSON.stringify(cabinetData)); } catch (_) {} }
-const cabinetSameMap = (a, b) => !!a && !!b && String(a).toLowerCase() === String(b).toLowerCase();
-const cabinetDefFor = s => !!s && typeof MAP !== 'undefined' && MAP && STORAGE_CABINETS.find(d => cabinetSameMap(d.map, MAP.id) && d.c === s.c && d.r === s.r && d.tiles.includes(s.id)) || null;
+const cabinetDefFor = s => !!s && typeof MAP !== 'undefined' && MAP && STORAGE_CABINETS.find(d => d.tiles.includes(s.id)) || null;
 // 靠近判定跟裝備箱一樣（js/camp-interactions.js 的 MAP_BOX，kind 'cabinet'）
 const cabinetNearPlayer = () => typeof mapBoxNearPlayer === 'function' ? mapBoxNearPlayer('cabinet') : null;
 function useCabinetNearPlayer() { const b = cabinetNearPlayer(); if (!b) return false; openCabinet(b.stamp); return true; }

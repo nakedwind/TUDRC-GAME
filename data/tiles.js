@@ -1448,7 +1448,7 @@ const SHARED_TILES = [
     "name": "層架置物櫃 02",
     "role": "floor",
     "file": "images/scene-props/shelf-locker-unit02.png",
-    "w": 1,
+    "w": 2,
     "h": 3
   },
   {
