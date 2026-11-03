@@ -123,6 +123,11 @@
         <button type="button" data-add="show">角色出現</button><button type="button" data-add="hide">角色消失</button>
         <button type="button" data-add="map" title="在哪張劇情地圖演出；同一段回憶裡要換場景時再加一行"><b>＋</b>演出地圖</button><button type="button" data-add="act" title="小跳、持槍、倒地、集氣">角色演出</button>
       </div></details>
+      <details class="fold" open><summary>怪物與道具</summary><div class="btns">
+        <button type="button" data-add="mshow" title="怪物編輯器裡的怪物；用「怪物代號」分辨是哪一隻">怪物出現</button><button type="button" data-add="mhide">怪物消失</button>
+        <button type="button" data-add="mact" title="攻擊、移動、死亡">怪物演出</button><button type="button" data-add="ishow" title="背包裡的物品放在地上；用「道具代號」分辨是哪一個">道具出現</button>
+        <button type="button" data-add="ihide">道具消失</button>
+      </div></details>
       <details class="fold" open><summary>鏡頭 <small title="調整鏡頭大小時長寬比固定，玩家看的畫面才不會變形">🔒 鎖定 16:9</small></summary><div class="btns">
         <button type="button" data-add="cam"><b>＋</b>新鏡頭</button><button type="button" data-add="camMove">鏡頭位移</button>
         <button type="button" data-add="camShake">鏡頭震動</button><button type="button" data-add="camSway">鏡頭晃動</button>
@@ -223,12 +228,15 @@
   <script src="data/costumes.js?v=money2-20261102"></script>
   <script src="data/costume-placement.js?v=strawberry-20261026"></script>
   <script src="js/costume-draw.js?v=ballsit-20261102"></script>
+  <script src="data/monsters.js?v=wide-20261031"></script>   <!-- 怪物種類（怪物出現用） -->
+  <script src="data/items.js?v=devotion-20261103"></script>   <!-- 道具出現用：背包物品 -->
+  <script src="data/supplies.js?v=firstaid-shop-20261103"></script>
   <script src="data/story-scenes.js?v=y25skip2-20261031"></script>   <!-- 舊劇情編輯器的劇情：可以搬過來（js/story-kai-import.js） -->
   <script src="data/story-kai.js?v=kai-20261103"></script>
   <script src="js/story-kai-fx.js?v=kai-20261103"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-kai-editor.js?v=kai7-20261103"></script>
+  <script src="js/story-kai-editor.js?v=kai8-20261104"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],

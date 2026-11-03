@@ -49,6 +49,11 @@ const KINDS = {
   act: { name: '角色演出', make: () => ({ who: lastWho(), act: 'hop', on: true }) },
   sway: { name: '角色晃動', make: () => ({ who: lastWho(), on: true, lv: 2 }) },
   tremble: { name: '角色震動', make: () => ({ who: lastWho(), on: true, lv: 2 }) },
+  mshow: { name: '怪物出現', make: () => ({ mon: nextCode('mon'), type: lastMonType(), at: null }) },
+  mhide: { name: '怪物消失', make: () => ({ mon: lastCode('mon') }) },
+  mact: { name: '怪物演出', make: () => ({ mon: lastCode('mon'), act: 'attack' }) },
+  ishow: { name: '道具出現', make: () => ({ item: nextCode('item'), id: '', at: null }) },
+  ihide: { name: '道具消失', make: () => ({ item: lastCode('item') }) },
   fx: { name: '＋特效', make: () => ({ id: 'fx_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), box: null, chat: [] }) },
   dark: { name: '後室黑幕', make: () => ({ on: true }) },
   vignette: { name: '暗角', make: () => ({ lv: 5 }) },
@@ -59,6 +64,18 @@ const KINDS = {
 const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble', 'act', 'sway']);
 const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
 const FACES = [['', '面向：自動'], ['front', '正面'], ['back', '背面'], ['left', '朝左'], ['right', '朝右']];
+// ---- 怪物、道具：怪物用「怪物代號」、道具用「道具代號」，跟角色代號分開算（不用先加進演出者列表）----
+const MON_KINDS = new Set(['mshow', 'mhide', 'mact']), ITEM_KINDS = new Set(['ishow', 'ihide']);
+const MON_ACTS = [['attack', '攻擊'], ['move', '移動'], ['die', '死亡']];
+const MON_FACES = [['', '面向：不變'], ['front', '正面'], ['left', '朝左'], ['right', '朝右']];
+// 怪物種類：data/monsters.js（怪物編輯器）；道具：背包物品（data/items.js、data/supplies.js）
+const MONS = (typeof MONSTERS_DEFAULT !== 'undefined' ? MONSTERS_DEFAULT : []).map(m => ({ id: m.id, name: m.name || m.id, img: m.frames?.front || m.sprite, w: m.width || 42, h: m.height || 33,
+  side: m.frames?.side?.[0], sideFacing: m.frames?.sideFacing, walkFacing: m.frames?.walkFacing }));
+const PROPS = [...(typeof ITEMS !== 'undefined' ? ITEMS : []), ...(typeof SUPPLIES !== 'undefined' ? SUPPLIES : [])].filter(it => it.image).map(it => ({ id: it.id, name: it.name || it.id, img: it.image }));
+const monOf = id => MONS.find(m => m.id === id), propOf = id => PROPS.find(p => p.id === id);
+// 第 upto 行之前，這個代號最近一次「出現」的那一行（拿來知道是哪一種怪物、哪個道具）
+function shownBy(key, no, upto) { const st = scene()?.steps || []; for (let i = Math.min(upto, st.length - 1); i >= 0; i--) if (st[i].do === (key === 'mon' ? 'mshow' : 'ishow') && st[i][key] === no) return st[i]; return null; }
+const codeOk = v => v !== '' && v != null;
 
 // ---- 角色：角色資料頁的人＋路人 ----
 const CHARS = [...Object.values(typeof CHARACTERS !== 'undefined' ? CHARACTERS : {}).filter(c => c.sprite).map(c => ({ id: c.id, name: c.name || c.id, sprite: c.sprite })),
@@ -109,6 +126,9 @@ const whoText = no => { const c = castBy(no); return '[' + (no === '' || no == n
 // 新增指令時的預設：沿用上面最近一行的角色、鏡頭大小
 function lastOf(test) { const st = scene().steps; for (let i = Math.min(sel, st.length - 1); i >= 0; i--) if (test(st[i])) return st[i]; return null; }
 const lastWho = () => lastOf(s => s.who !== '' && s.who != null)?.who ?? (scene().cast[0]?.no ?? '');
+const lastCode = key => lastOf(s => codeOk(s[key]))?.[key] ?? 1;   // 怪物、道具：沿用上面最近一行的代號
+function nextCode(key) { return (scene()?.steps || []).reduce((m, s) => codeOk(s[key]) ? Math.max(m, Number(s[key])) : m, 0) + 1; }   // 新的怪物、道具：還沒用過的下一個號碼
+const lastMonType = () => lastOf(s => s.do === 'mshow' && s.type)?.type || MONS[0]?.id || '';
 const lastCamW = () => lastOf(s => (s.do === 'cam' || s.do === 'camMove') && s.w)?.w || 20;
 function nextUnshown() {   // 還沒出現過的第一個演出者
   const shown = new Set(scene().steps.filter(s => s.do === 'show').map(s => Number(s.who)));
@@ -139,11 +159,21 @@ function storyKaiExportText() {
 // ---- 跑到第 upto 行時：每個人在哪、鏡頭拍哪裡、後室黑幕開了沒（預覽窗用） ----
 const dirFrom = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1]; return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front'); };
 function simulate(upto) {
-  const st = { actors: new Map(), cam: null, dark: false, vig: 0, move: null };
+  const st = { actors: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
   const steps = scene()?.steps || [];
   for (let i = 0; i <= upto && i < steps.length; i++) {
     const p = steps[i], no = Number(p.who), a = st.actors.get(no);
-    if (p.do === 'map') { if (i > 0) { st.actors.clear(); st.cam = null; st.move = null; } }   // 換場景：大家先不在場、鏡頭重新決定
+    if (p.do === 'map') { if (i > 0) { st.actors.clear(); st.mons.clear(); st.items.clear(); st.cam = null; st.move = null; } }   // 換場景：大家先不在場、鏡頭重新決定
+    else if (p.do === 'mshow' && p.at && p.type) { const m = st.mons.get(Number(p.mon)); st.mons.set(Number(p.mon), { at: p.at, type: p.type, face: p.face || (m?.shown && m.type === p.type ? m.face : 'front'), src: i, shown: true }); }
+    else if (p.do === 'mhide' || p.do === 'mact') {
+      const m = st.mons.get(Number(p.mon)); if (!m?.shown) continue;
+      if (p.do === 'mhide') m.shown = false;
+      else if (p.act === 'die') { if (i === upto) m.dying = true; else m.shown = false; }   // 死亡：選到那一行時畫成半透明，之後就不在了
+      else if (p.act === 'move' && p.at) { if (i === upto) st.move = { from: m.at, to: p.at }; if (p.at[0] !== m.at[0]) m.face = p.at[0] < m.at[0] ? 'left' : 'right'; m.at = p.at; m.src = i; }
+      else if (p.face) m.face = p.face;
+    }
+    else if (p.do === 'ishow' && p.at && p.id) st.items.set(Number(p.item), { at: p.at, id: p.id, src: i, shown: true });
+    else if (p.do === 'ihide') { const it = st.items.get(Number(p.item)); if (it) it.shown = false; }
     else if (p.do === 'show' && p.at) st.actors.set(no, { at: p.at, face: p.face || a?.face || 'front', src: i, shown: true });
     else if (p.do === 'move' && p.at) {
       if (i === upto && a?.shown) st.move = { from: a.at, to: p.at };
@@ -228,6 +258,21 @@ function drawFigure(c, p, face) {
   ctx.drawImage(img, x, y, SIZE, SIZE);
   for (const a of accs) drawAccessory(ctx, a, c.char, face, 0, x, y, SIZE, 'front');
 }
+// 怪物：腳底在格子座標上（跟遊戲一樣，圖的底部在腳底下 13 像素）；朝左右時有側面圖就用側面圖
+function drawMonster(m, ghost) {
+  const def = monOf(m.type); if (!def) return;
+  const side = m.face === 'left' || m.face === 'right', img = (side && def.side && image(def.side)) || image(def.img); if (!img) return;
+  const facing = side && def.side ? def.sideFacing : def.walkFacing, flip = side && facing && (m.face === 'right') === (facing === 'left');
+  const x = m.at[0] * C, y = m.at[1] * C + 13;
+  ctx.save(); if (ghost) ctx.globalAlpha = .4;
+  ctx.translate(x, 0); if (flip) ctx.scale(-1, 1);
+  ctx.drawImage(img, -def.w / 2, y - def.h, def.w, def.h); ctx.restore();
+}
+function drawProp(it) {   // 道具：跟遊戲裡放在地上的東西一樣大（26 像素）
+  const def = propOf(it.id), img = def && image(def.img); if (!img) return;
+  const k = 26 / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * k, hh = img.naturalHeight * k;
+  ctx.drawImage(img, it.at[0] * C - w / 2, it.at[1] * C - hh + 2, w, hh);
+}
 function draw() {
   const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
   if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) { cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); }
@@ -244,7 +289,11 @@ function draw() {
   ctx.drawImage(mapCanvas(m), 0, 0);
   if (st.dark) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, m.cols * C, m.rows * C); }   // 後室黑幕：壓暗表示（遊戲裡只有燈照到的地方亮）
   const actors = [...st.actors.entries()].filter(([, a]) => a.shown).sort((p, q) => p[1].at[1] - q[1].at[1]);
-  for (const [no, a] of actors) { const c = castBy(no); if (c) drawFigure(c, a.at, a.face); }
+  const mons = [...st.mons.entries()].filter(([, x]) => x.shown), items = [...st.items.entries()].filter(([, x]) => x.shown);
+  // 人、怪物、道具一起依腳底的高低排前後
+  const figs = [...actors.map(([no, a]) => ({ y: a.at[1], draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, a.face); } })),
+    ...mons.map(([, x]) => ({ y: x.at[1], draw: () => drawMonster(x, x.dying) })), ...items.map(([, x]) => ({ y: x.at[1] - .01, draw: () => drawProp(x) }))];
+  figs.sort((p, q) => p.y - q.y).forEach(f => f.draw());
   ctx.restore();
   ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;
   const [mx0, my0] = toScreen(0, 0), [mx1, my1] = toScreen(m.cols, m.rows); ctx.strokeRect(mx0, my0, mx1 - mx0, my1 - my0);
@@ -259,6 +308,16 @@ function draw() {
     label(pad(no) + ' ' + (c ? castName(c) : '？'), x, y - (SIZE - 14) * view.z - 6, on ? '#ffd479' : '#fff');
     handles.push({ x, y, r: Math.max(12, 22 * view.z), cursor: 'grab', drag: p => { s.steps[a.src].at = p; }, step: a.src });
   }
+  // 怪物（紅點）、道具（藍點）：拖曳＝改那一行的位置
+  const dot = (list, color, text) => { for (const [no, x] of list) {
+    const [sx, sy] = toScreen(...x.at), on = x.src === sel;
+    ctx.fillStyle = on ? '#ffd479' : color; ctx.strokeStyle = '#000'; ctx.lineWidth = 1.5;
+    ctx.beginPath(); ctx.arc(sx, sy, on ? 7 : 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    label(text(no, x), sx, sy + 18, on ? '#ffd479' : color);
+    handles.push({ x: sx, y: sy, r: Math.max(12, 18 * view.z), cursor: 'grab', drag: p => { s.steps[x.src].at = p; }, step: x.src });
+  } };
+  dot(mons, '#ff7b7b', (no, x) => '怪' + pad(no) + ' ' + (monOf(x.type)?.name || x.type) + (x.dying ? '（死亡）' : ''));
+  dot(items, '#7fd0ff', (no, x) => '物' + pad(no) + ' ' + (propOf(x.id)?.name || x.id));
   // 鏡頭：虛線框＝劇情跑到這一行時拍到的範圍；下面那一塊是對話框會蓋住的地方
   const camStep = cur && (cur.do === 'cam' || cur.do === 'camMove');
   if (st.cam && ($('showCams').checked || camStep)) {
@@ -380,7 +439,7 @@ function setPick(p) {
 function startPick(step, kind) {
   const i = scene().steps.indexOf(step); if (i >= 0 && i !== sel) { sel = i; }
   if (kind === 'box') setPick({ kind: 'box', step, label: '第 ' + String(i + 1).padStart(3, '0') + ' 行：在預覽窗的地圖上按住拖曳，框出特效範圍', fn: b => { step.box = b; } });
-  else setPick({ kind: 'point', step, label: '第 ' + String(i + 1).padStart(3, '0') + ' 行：在預覽窗的地圖上點一下，設定' + (step.do === 'cam' || step.do === 'camMove' ? '鏡頭位置（鏡頭的中心）' : '角色位置（腳底）'), fn: p => { step.at = p; } });
+  else setPick({ kind: 'point', step, label: '第 ' + String(i + 1).padStart(3, '0') + ' 行：在預覽窗的地圖上點一下，設定' + (step.do === 'cam' || step.do === 'camMove' ? '鏡頭位置（鏡頭的中心）' : (MON_KINDS.has(step.do) ? '怪物位置（腳底）' : ITEM_KINDS.has(step.do) ? '道具位置' : '角色位置（腳底）')), fn: p => { step.at = p; } });
 }
 
 // ---- 右邊：劇情列表 ----
@@ -490,7 +549,12 @@ $('accOk').onclick = () => { $('accDlg').close(); renderCast(); };
 // ---- 右邊：指令列表 ----
 function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
   if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null)) && !castBy(st.who)) return '角色代號不在演出者列表裡';
-  if (['cam', 'camMove', 'show', 'move'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
+  if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
+  if (st.do === 'mact' && st.act === 'move' && !st.at) return '還沒在地圖上點要走到哪';
+  if (st.do === 'mshow' && !monOf(st.type)) return '還沒選怪物';
+  if (st.do === 'ishow' && !propOf(st.id)) return '還沒選道具';
+  if ((st.do === 'mhide' || st.do === 'mact') && !shownBy('mon', st.mon, scene().steps.indexOf(st))) return '上面沒有這個代號的「怪物出現」';
+  if (st.do === 'ihide' && !shownBy('item', st.item, scene().steps.indexOf(st))) return '上面沒有這個代號的「道具出現」';
   if (st.do === 'fx' && !st.box) return '還沒框特效範圍';
   if (st.do === 'map' && !st.map) return '還沒選地圖';
   if (st.do === 'map' && !storyMaps.some(m => m.id === st.map)) return '劇情地圖編輯器裡找不到這張地圖';
@@ -506,6 +570,14 @@ function rowLabel(st) {
   if ((st.do === 'bgm' || st.do === 'sfx') && st.src) extra = ' ' + st.src.split('/').pop();
   if (st.do === 'end' && st.title) extra = ' 「' + st.title + '」';
   if (st.do === 'map' && st.map) extra = ' ' + mapName(st.map);
+  if (MON_KINDS.has(st.do)) {
+    const src = st.do === 'mshow' ? st : shownBy('mon', st.mon, scene().steps.indexOf(st));
+    extra = ' [' + (codeOk(st.mon) ? pad(st.mon) : '??') + '/' + (monOf(src?.type)?.name || '怪物') + ']' + (st.do === 'mact' ? ' ' + ((MON_ACTS.find(a => a[0] === st.act) || [, '攻擊'])[1]) : '');
+  }
+  if (ITEM_KINDS.has(st.do)) {
+    const src = st.do === 'ishow' ? st : shownBy('item', st.item, scene().steps.indexOf(st));
+    extra = ' [' + (codeOk(st.item) ? pad(st.item) : '??') + '/' + (propOf(src?.id)?.name || '道具') + ']';
+  }
   if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && st.on === false ? '（停）' : '');
   return [name, extra];
 }
@@ -519,9 +591,19 @@ function lvSel(st, max = 5) {
   const s = h('select', { title: '幅度：數字越大越明顯', onchange: e => { st.lv = Number(e.target.value); commit(); } }, Array.from({ length: max }, (_, i) => h('option', { value: i + 1 }, String(i + 1))));
   s.value = st.lv || 1; return s;
 }
-function codeIn(st, placeholder = '代號') {
-  return h('input', { type: 'text', class: 'code', value: st.who === '' || st.who == null ? '' : pad(st.who), placeholder, inputmode: 'numeric', title: '角色代號（演出者列表左邊的數字）',
-    onchange: e => { const v = e.target.value.trim(); st.who = v === '' || isNaN(Number(v)) ? '' : Number(v); commit(); } });
+function codeIn(st, placeholder = '代號', key = 'who', title = '角色代號（演出者列表左邊的數字）') {
+  return h('input', { type: 'text', class: 'code', value: st[key] === '' || st[key] == null ? '' : pad(st[key]), placeholder, inputmode: 'numeric', title,
+    onchange: e => { const v = e.target.value.trim(); st[key] = v === '' || isNaN(Number(v)) ? '' : Number(v); commit(); } });
+}
+const monCode = st => codeIn(st, '代號', 'mon', '怪物代號：自己取的號碼，同一隻怪物的「出現、演出、消失」用同一個號碼');
+const itemCode = st => codeIn(st, '代號', 'item', '道具代號：自己取的號碼，同一個道具的「出現、消失」用同一個號碼');
+function listSel(st, key, list, empty, title) {
+  const s = h('select', { title, style: 'max-width:140px', onchange: e => { st[key] = e.target.value; commit(); } }, h('option', { value: '' }, empty), list.map(x => h('option', { value: x.id }, x.name)));
+  s.value = st[key] || ''; return s;
+}
+function monFaceSel(st, list = MON_FACES) {
+  const s = h('select', { title: '怪物面向哪邊（攻擊時朝這邊揮）', onchange: e => { if (e.target.value) st.face = e.target.value; else delete st.face; commit(); } }, list.map(([v, t]) => h('option', { value: v }, t)));
+  s.value = st.face || ''; return s;
 }
 function check(st, key, text, def = false) {
   return h('label', {}, h('input', { type: 'checkbox', checked: st[key] ?? def, onchange: e => { st[key] = e.target.checked; commit(); } }), text);
@@ -568,6 +650,16 @@ function controls(st) {
       pickAct.value = st.act || 'hop';
       return [codeIn(st), pickAct, st.act !== 'hop' ? check(st, 'on', '開', true) : null];
     }
+    case 'mshow': return [monCode(st), listSel(st, 'type', MONS, '（選怪物）', '哪一種怪物（怪物編輯器裡的）'), pickBtn(st, '怪物位置'), monFaceSel(st, [['', '正面'], ['left', '朝左'], ['right', '朝右']])];
+    case 'mhide': return [monCode(st)];
+    case 'mact': {
+      const pickAct = h('select', { title: '攻擊：朝面向的那邊揮一下；移動：走到地圖上點的位置（會等走到才跑下一行）；死亡：倒下、變黑、消失', onchange: e => { st.act = e.target.value; if (st.act === 'move' && st.ms == null) st.ms = 1000; commit(); } }, MON_ACTS.map(([v, t]) => h('option', { value: v }, t)));
+      pickAct.value = st.act || 'attack';
+      if (st.act === 'move') return [monCode(st), pickAct, pickBtn(st, '怪物位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）')];
+      return [monCode(st), pickAct, st.act === 'die' ? null : monFaceSel(st)];
+    }
+    case 'ishow': return [itemCode(st), listSel(st, 'id', PROPS, '（選道具）', '哪一個道具（背包裡的物品）'), pickBtn(st, '道具位置')];
+    case 'ihide': return [itemCode(st)];
     case 'sway': return [codeIn(st), check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
     case 'tremble': return [codeIn(st), check(st, 'on', '震動', true), h('label', {}, '幅度：', lvSel(st))];
     case 'say': return [codeIn(st, '旁白'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openSay(st); } }, '寫對白'), check(st, 'shake', '框震動')];
@@ -628,7 +720,7 @@ function addStep(kind) {
   s.steps.splice(at, 0, st); sel = at; setPick(null); commit(); scrollToSel();
   // 新增後直接進入下一步：要寫的打開視窗、要點位置的直接開始點
   if (kind === 'say') openSay(st);
-  else if (['cam', 'camMove', 'show', 'move'].includes(kind)) startPick(st, 'point');
+  else if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow'].includes(kind)) startPick(st, 'point');
   else if (kind === 'fx') startPick(st, 'box');
 }
 function removeStep(i) {

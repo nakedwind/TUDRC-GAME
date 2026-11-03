@@ -1,7 +1,7 @@
 /* ===== 回憶劇情播放器（改）：播放「🎬 劇情編輯器（改）」做的劇情 =====
    資料在 data/story-kai.js（STORY_KAI），特效在 js/story-kai-fx.js（STORY_KAI_FX）。
    跟舊的 js/story-scene.js 不同：劇情是一行一行的指令，從第 1 行往下跑，跑到「結局」或沒有下一行就結束。
-   ・有些指令要等它做完才跑下一行：對白（等玩家點）、等待時間、鏡頭位移、角色位置（走路）。
+   ・有些指令要等它做完才跑下一行：對白（等玩家點）、等待時間、鏡頭位移、角色位置（走路）、怪物演出的「移動」。
    ・其他指令一下就跑下一行，可以跟後面的指令疊在一起同時發生：黑幕／白幕淡入淡出、鏡頭震動、特效、音樂……
    遊戲本身只認得 StoryScene，所以檔案最後把 StoryScene 的入口接過來：播的是「改」版劇情時交給這裡，其他照舊。
    網址：?storyPreview=劇情id&storyKai=1（&storyDraft=1 用編輯器還沒存到專案的草稿；&storyFrom=N 從第 N 行開始）。
@@ -43,6 +43,9 @@ const StoryKai = (() => {
   const MELEE_WEAPON = { red: [() => typeof redAxeImg !== 'undefined' && redAxeImg, 21, 32, 22], avaren: [() => typeof avarenKnifeImg !== 'undefined' && avarenKnifeImg, 9, 29, 20],
     luther: [() => typeof lutherAxeImg !== 'undefined' && lutherAxeImg, 28, 46, 26, true], colyn: [() => typeof colynSwordImg !== 'undefined' && colynSwordImg, 9, 46, 18] };
   const FACE_ANGLE = { right: 0, front: Math.PI / 2, left: Math.PI, back: -Math.PI / 2 };                      // 角色出現、消失：淡入淡出幾秒
+  const MON_LUNGE = { windup: .3, strike: .12, back: .25 };   // 沒有攻擊圖的怪物（史萊姆…）：往後縮、往前撲、退回原位各幾秒
+  const MON_DIE = 2.6;                        // 怪物死亡：倒下、變黑、淡出總共幾秒（跟遊戲裡倒下的屍體一樣）
+  const ITEM_SIZE = 26;                       // 道具畫多大（跟遊戲裡放在地上的東西一樣，js/ground-items.js）
   const ratio = () => VIEW_H / VIEW_W;        // 鏡頭的長寬比跟遊戲畫面一樣（16:9），畫面才不會變形
 
   // ---- 音量：遊戲設定靜音、或測試時 Howler.mute(true) 都不出聲 ----
@@ -187,7 +190,7 @@ const StoryKai = (() => {
     // 第一個黑幕指令是「黑幕淡出」：劇情一開始畫面是黑的，等它慢慢亮起來
     const firstBlack = steps.find(s => s.do === 'blackIn' || s.do === 'blackOut');
     state = { cfg, steps, i: 0, time: 0, playing: false, ending: null, ended: false, waitUntil: 0, talk: null, moveWait: null,
-      actors: (cfg.cast || []).map(makeActor), cam: { x: COLS / 2, y: ROWS / 2, w: fullW }, camMove: null,
+      actors: (cfg.cast || []).map(makeActor), monsters: [], items: [], cam: { x: COLS / 2, y: ROWS / 2, w: fullW }, camMove: null,
       black: { from: firstBlack?.do === 'blackOut' ? 1 : 0, to: firstBlack?.do === 'blackOut' ? 1 : 0, t: 0, dur: 0 },
       white: { from: 0, to: 0, t: 0, dur: 0 }, shake: null, sway: 0, vignette: 0, fx: [], skipping: false };
     applyCam();
@@ -221,6 +224,12 @@ const StoryKai = (() => {
       if (a.fade < 0) a.hidden = true;
       a.fade = 0; a.alpha = 1;
     }
+    for (const e of state.monsters) {
+      if (e.target) { [e.x, e.y] = e.path.length ? e.path[e.path.length - 1] : e.target; e.target = null; e.path = []; }
+      e.alpha = 1; e.atk = null; e.swing = null;
+    }
+    state.monsters = state.monsters.filter(e => !e.dying && e.fade >= 0); for (const e of state.monsters) e.fade = 0;
+    state.items = state.items.filter(it => it.fade >= 0); for (const it of state.items) { it.fade = 0; it.alpha = 1; }
     if (state.camMove) { state.cam = { ...state.camMove.to }; state.camMove = null; }
     for (const f of [state.black, state.white]) f.t = f.dur;
     state.talk = null; state.waitUntil = state.time; state.moveWait = null; state.fx = []; state.shake = null;
@@ -282,6 +291,17 @@ const StoryKai = (() => {
       }
       case 'sway': { const a = actor(s.who); if (a) a.sway = s.on === false ? 0 : SWAY_PX[clamp(Number(s.lv) || 2, 1, 5)] * .5; break; }   // 角色晃動：跟鏡頭晃動同樣的 1～5 級，慢慢左右晃（像站不穩）
       case 'tremble': { const a = actor(s.who); if (a) a.tremble = s.on === false ? 0 : TREMBLE_PX[clamp(Number(s.lv) || 2, 1, 5)]; break; }
+      case 'mshow': showMonster(s); break;
+      case 'mhide': { const e = monster(s.mon); if (e) { e.target = null; e.path = []; if (state.skipping) dropMonster(e); else e.fade = -1; } break; }
+      case 'mact': {
+        const e = monster(s.mon); if (!e || e.dying) break;
+        if (s.act === 'move') moveMonster(e, s, sec);
+        else if (s.act === 'die') killMonster(e);
+        else { if (s.face) faceMonster(e, s.face); attackMonster(e); }
+        break;
+      }
+      case 'ishow': showItem(s); break;
+      case 'ihide': { const it = state.items.find(x => x.no === Number(s.item)); if (it) { if (state.skipping) state.items.splice(state.items.indexOf(it), 1); else it.fade = -1; } break; }
       case 'say':
         if (state.skipping) break;
         state.talk = { step: s, chars: 0 };
@@ -313,10 +333,125 @@ const StoryKai = (() => {
     LIGHT.enabled = dark;           // 後室黑幕開著的話繼續開著
     return true;
   }
+  // ---- 怪物：用遊戲本身的怪物（js/game.js 的 createMonster、js/render.js 的 drawEnemy），只是不打架、不畫血條 ----
+  const monster = no => state.monsters.find(e => e.no === Number(no) && !e.dying);
+  const dropMonster = e => { const i = state.monsters.indexOf(e); if (i >= 0) state.monsters.splice(i, 1); };
+  function faceMonster(e, face) {   // 正面：走路圖；朝左、朝右：有側面圖的用側面圖，沒有的左右翻
+    if (face === 'left' || face === 'right') { e.animSide = true; e.faceRight = face === 'right'; }
+    else if (face === 'front') { e.animSide = false; e.showBack = false; }
+  }
+  function showMonster(s) {
+    const spec = typeof ACTIVE_MONSTERS !== 'undefined' && ACTIVE_MONSTERS.find(m => m.id === s.type);
+    if (!spec || !s.at) { if (s.type) console.warn('劇情怪物不存在：' + s.type); return; }
+    let e = monster(s.mon);
+    if (e && e.type !== s.type) { dropMonster(e); e = null; }   // 同一個代號換了另一種怪物：重新做一隻
+    if (!e) {
+      e = Object.assign(createMonster(spec, 0, 0, 'normal'), { no: Number(s.mon), hideBar: true, alpha: 1, fade: 0, path: [], target: null, speed: 40 });   // 史萊姆固定用普通的（不隨機變成巨型、自爆…）
+      state.monsters.push(e);
+      if (!state.skipping) { e.alpha = 0; e.fade = 1; }
+    } else if (e.fade < 0) e.fade = state.skipping ? 0 : 1;
+    e.x = e.animX = s.at[0] * CELL; e.y = e.animY = s.at[1] * CELL; e.target = null; e.path = [];
+    faceMonster(e, s.face || 'front');
+  }
+  function moveMonster(e, s, sec) {
+    if (!s.at) return;
+    const tx = s.at[0] * CELL, ty = s.at[1] * CELL;
+    if (sec <= 0 || state.skipping) { e.x = e.animX = tx; e.y = e.animY = ty; e.target = null; e.path = []; return; }
+    e.path = findRoute(e.x, e.y, tx, ty);
+    let len = 0, px = e.x, py = e.y; for (const [x, y] of e.path) { len += Math.hypot(x - px, y - py); px = x; py = y; }
+    e.speed = Math.max(1, len / sec); e.target = e.path.shift();
+    state.moveWait = e; state.waitUntil = state.time + sec;   // 等牠走到才跑下一行
+  }
+  // 攻擊：朝面向的那邊揮一下（有攻擊圖的怪物照遊戲的揮擊動畫；沒有的往前撲一下），打下去時出現斬擊和衝擊
+  function attackMonster(e) {
+    if (state.skipping) return;
+    const right = !!e.faceRight, art = !!(e.frames && (e.frames.attack || e.frames.attackRig));
+    e.atk = { t: 0, art, right, hit: false, wind: art ? MONSTER_SWING.windup : MON_LUNGE.windup };
+    if (art) e.swing = { at: performance.now() / 1000, right };
+  }
+  function strike(e) {
+    const tx = e.x + (e.atk.right ? 1 : -1) * CELL * 1.3, ty = e.y, ang = Math.atan2(ty - e.y, tx - e.x);
+    if (typeof spawnMeleeSlash === 'function') spawnMeleeSlash(tx - Math.cos(ang) * 10, ty - 14, ang, true, e.undying ? 'dark' : 'purple');
+    if (typeof spawnMeleeImpact === 'function') spawnMeleeImpact(tx, ty - 10, true);
+    if (!state.shake) state.shake = { t: 0, dur: .15, amp: SHAKE_PX[1] };
+  }
+  const lungeX = e => {   // 沒有攻擊圖的怪物：先往後縮、再往前撲、再退回來（像素）
+    const a = e.atk; if (!a || a.art) return 0;
+    const dir = a.right ? 1 : -1, L = MON_LUNGE;
+    if (a.t < L.windup) return -dir * 4 * smooth(a.t / L.windup);
+    if (a.t < L.windup + L.strike) return dir * (-4 + 16 * (a.t - L.windup) / L.strike);
+    return dir * 12 * (1 - smooth(Math.min(1, (a.t - L.windup - L.strike) / L.back)));
+  };
+  // 死亡：倒下、慢慢變黑、淡出（跟遊戲裡鳥頭人倒下一樣，js/bird-head.js 的 drawFallCorpse）；史萊姆這種沒有走路圖的：壓扁變黑消失
+  function killMonster(e) {
+    e.target = null; e.path = []; e.atk = null; e.swing = null;
+    if (state.skipping) { dropMonster(e); return; }
+    if (state.moveWait === e) state.moveWait = null;
+    const img = monsterImage(e.lastFrameFile || e.frames?.front || e.sprite || 'images/monster/Monster_Slime.png');
+    e.dying = { fall: !!e.frames, img, x: e.x, y: e.y, w: e.drawWidth || 42, h: e.drawHeight || 33, t: 0, life: MON_DIE, dir: e.faceRight ? 1 : -1, flip: !!e.lastFrameFlip };
+  }
+  function tickMonster(e, dt) {
+    if (e.fade) {
+      e.alpha += e.fade * dt / SHOW_FADE;
+      if (e.alpha >= 1) { e.alpha = 1; e.fade = 0; }
+      if (e.alpha <= 0) { dropMonster(e); return; }
+    }
+    if (e.dying) {
+      const c = e.dying; c.t += dt; c.life -= dt;
+      if (c.fall && !c.landed && c.t >= .45) { c.landed = true; G.effects.push({ ring: true, x: c.x + c.dir * c.h * .45, y: c.y + 10, r: 6, r2: 30, life: .3, life0: .3, color: '#b9b2a2' }); }   // 倒地揚起灰塵
+      if (c.life <= 0) dropMonster(e);
+      return;
+    }
+    if (e.hitT > 0) e.hitT -= dt;
+    if (e.atk) { const a = e.atk; a.t += dt; if (!a.hit && a.t >= a.wind) { a.hit = true; strike(e); } if (a.t >= a.wind + (a.art ? MONSTER_SWING.strike + MONSTER_SWING.recover : MON_LUNGE.strike + MON_LUNGE.back)) e.atk = null; }
+    if (e.target) {   // 走路（走路圖由 drawEnemy 依位置變化自動換、自動轉向）
+      const dx = e.target[0] - e.x, dy = e.target[1] - e.y, d = Math.hypot(dx, dy), step = dt * e.speed;
+      if (d <= step) { [e.x, e.y] = e.target; e.target = e.path.shift() || null; } else { e.x += dx / d * step; e.y += dy / d * step; }
+    }
+  }
+  function drawMonster(e) {
+    ctx.save(); ctx.globalAlpha = clamp(e.alpha, 0, 1);
+    const c = e.dying;
+    if (c && c.fall && typeof drawFallCorpse === 'function') { ctx.imageSmoothingEnabled = false; drawFallCorpse(ctx, c); }
+    else if (c) {   // 壓扁、變黑、淡出
+      const k = Math.min(1, c.t / .35), img = c.img;
+      if (readyImage(img)) {
+        ctx.globalAlpha *= Math.min(1, c.life / .8); ctx.translate(c.x, c.y + 13); ctx.scale(1 + .35 * k, 1 - .7 * k); ctx.imageSmoothingEnabled = false;
+        ctx.drawImage(img, -c.w / 2, -c.h, c.w, c.h);
+        const black = typeof flashSprite === 'function' && flashSprite(img, '#07090c');
+        if (black) { ctx.globalAlpha *= Math.min(.9, c.t / .6); ctx.drawImage(black, -c.w / 2, -c.h, c.w, c.h); }
+      }
+    } else { ctx.translate(lungeX(e), 0); drawEnemy(e); }
+    ctx.restore();
+  }
+  // ---- 道具：背包裡的物品放在地上（圖跟背包一樣），出現、消失時淡入淡出 ----
+  function showItem(s) {
+    const def = typeof itemById === 'function' ? itemById(s.id) : null;
+    if (!def || !def.image || !s.at) return;
+    const old = state.items.find(x => x.no === Number(s.item)); if (old) state.items.splice(state.items.indexOf(old), 1);
+    const img = new Image(); img.src = def.image;
+    state.items.push({ no: Number(s.item), id: s.id, img, x: s.at[0] * CELL, y: s.at[1] * CELL, alpha: state.skipping || old ? 1 : 0, fade: state.skipping || old ? 0 : 1 });
+  }
+  function tickItem(it, dt) {
+    if (!it.fade) return;
+    it.alpha += it.fade * dt / SHOW_FADE;
+    if (it.alpha >= 1) { it.alpha = 1; it.fade = 0; }
+    if (it.alpha <= 0) state.items.splice(state.items.indexOf(it), 1);
+  }
+  function drawItem(it) {
+    if (!readyImage(it.img)) return;
+    const k = ITEM_SIZE / Math.max(it.img.naturalWidth, it.img.naturalHeight), w = it.img.naturalWidth * k, h = it.img.naturalHeight * k;
+    const bob = Math.sin(state.time * 2.5 + it.x * .05);   // 輕輕上下浮動（跟地上的東西一樣）
+    ctx.save(); ctx.globalAlpha = clamp(it.alpha, 0, 1);
+    ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(it.x, it.y + 2, ITEM_SIZE * .36, ITEM_SIZE * .13, 0, 0, Math.PI * 2); ctx.fill();   // 影子
+    ctx.imageSmoothingEnabled = false; ctx.drawImage(it.img, it.x - w / 2, it.y - h + 2 + bob, w, h);
+    ctx.restore();
+  }
   function changeMap(id) {
     if (MAP && MAP.id === id) return;
     if (!gotoMap(id)) { console.warn('演出地圖找不到：' + id); return; }
     for (const a of state.actors) { a.hidden = true; a.fade = 0; a.alpha = 1; a.target = null; a.path = []; a.moving = false; }
+    state.monsters = []; state.items = [];   // 怪物、道具也留在上一個場景
     state.moveWait = null; state.camMove = null;
     state.cam = { x: COLS / 2, y: ROWS / 2, w: VIEW_W / Math.max(.1, VIEW_SCALE) / CELL };
     state.lights = lights();
@@ -376,6 +511,8 @@ const StoryKai = (() => {
     }
     if (!state) return;
     for (const a of state.actors) tickActor(a, dt);
+    for (const e of [...state.monsters]) tickMonster(e, dt);
+    for (const it of [...state.items]) tickItem(it, dt);
     for (const f of state.fx) f.t += dt;
     state.fx = state.fx.filter(f => f.t < fxTime(f));
     updateWorldEffects(dt); updateLightFlashes(dt);
@@ -491,6 +628,8 @@ const StoryKai = (() => {
     drawMapGround(ctx);
     const sortables = []; collectMapOccluders(ctx, sortables);
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.y + 17, draw: () => drawActor(a) });
+    for (const e of state.monsters) sortables.push({ y: e.y + 13, draw: () => drawMonster(e) });
+    for (const it of state.items) sortables.push({ y: it.y + 10, draw: () => drawItem(it) });
     sortables.sort((p, q) => p.y - q.y).forEach(s => s.draw());
     drawMapTop(ctx);
     drawWorldEffects();
