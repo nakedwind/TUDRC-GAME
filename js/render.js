@@ -517,7 +517,7 @@ function seatRotate(actor, size) {
 // 特殊 NPC 名字前的白色小圖示（角色 id → 圖檔）；要幫別的 NPC 加圖示，在這裡多加一行
 const NPC_NAME_ICON_SRC = {
   noah: 'images/ui/noah-wrench.svg?v=20261021cute',   // 諾亞：開發工坊（扳手，粗圓版）
-  ash: 'images/ui/ash-clipboard.svg?v=20261021',   // 亞許：通訊員、報告任務（任務板）
+  eldrin: 'images/ui/ash-clipboard.svg?v=20261021',   // 艾德林：通訊員、報告任務（任務板；data/missions.js 的 MISSION_BASE.briefer）
   taana: 'images/ui/taana-whistle.svg?v=20261021', // 塔納：訓練室負責人（哨子）
   hospital: 'images/ui/hospital.svg?v=20261029', // 住院中的隊員（不是角色 id：js/vitals.js 的 isHospitalized）
 };
