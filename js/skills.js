@@ -33,7 +33,7 @@ const isGuideTree = type => !!(typeof TYPES !== 'undefined' && TYPES[type] && TY
 // ---- 球球（搜救犬）的技能樹：只有 5 格 ----
 //   🐾 嗅覺（一開始就會：找地上的東西叼給溫特）
 //   → 👃 搜尋範圍加大、💨 移動速度加快（兩條都接在嗅覺後面）
-//   → 🔍 找到隱藏的物品（先學上面其中一個）→ 🕳️ 找到隱藏的地道
+//   → 🔍 找到隱藏的物品（先學上面其中一個）→ 🕳️ 找到隱藏的地道、隱藏區的牆、裂縫牆
 //   效果寫在 js/rescue-dog.js（dogSearchCells、dogSpeedMul、dogFindsHidden、dogFindsTunnels）；數字在下面的 DOG_SKILL
 const isDogTree = type => type === 'ball';
 const DOG_SKILL_LAYOUT = [
@@ -49,7 +49,7 @@ const DOG_SKILL_TEXTS = {
   'a-1': { name: '靈敏鼻子', icon: '👃', cost: 40, desc: '鼻子更靈，聞得到更遠的東西。', effect: '搜尋物品的範圍 ×1.6' },
   'b-1': { name: '飛奔', icon: '💨', cost: 40, desc: '跑得更快，跟隊伍、去撿東西都更快。', effect: '移動速度 ×1.35' },
   'core-1': { name: '尋寶犬', icon: '🔍', cost: 80, desc: '找得到沒有光點、藏在地上的隱藏物品，叼回來給溫特。', effect: '可以撿到隱藏的物品' },
-  'ult': { name: '地道搜索', icon: '🕳️', cost: 150, desc: '聞得出藏起來的地道：走到那裡坐下汪汪叫，地道就會出現，可以進去。', effect: '可以找到隱藏的地道' },
+  'ult': { name: '密道搜索', icon: '🕳️', cost: 150, desc: '聞得出藏起來的地道、牆後面的隱藏區域、牆上的裂縫：走到那裡坐下汪汪叫，地道就會出現、可以進去；找到的牆會被標出來，用爆炸就能炸開。', effect: '可以找到隱藏的地道、隱藏區的牆、裂縫牆' },
 };
 const skillLayoutFor = type => isDogTree(type) ? DOG_SKILL_LAYOUT : isGuideTree(type) ? GUIDE_SKILL_LAYOUT : SKILL_LAYOUT;   // 這位隊員的技能樹有哪幾格
 const SKILL_TOTAL = SKILL_LAYOUT.length;

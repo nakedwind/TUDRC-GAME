@@ -167,7 +167,7 @@ function costumeSpotNearPlayer(spots) {   // 溫特旁邊 30px 內最近的一�
 
 // ---- 衣櫃：靠近、打開 ----
 let wardrobeOpen = false;
-const wardrobeSpots = () => costumeSpots((id, t, s) => (WARDROBE_TILES.includes(id) || /衣櫃/.test(t.name || '')) && !(typeof cabinetDefFor === 'function' && cabinetDefFor(s)));   // 設成收納櫃的那一個（js/storage-cabinet.js）不當衣櫃
+const wardrobeSpots = () => costumeSpots((id, t, s) => (WARDROBE_TILES.includes(id) || /衣櫃/.test(t.name || '')) && !(typeof cabinetDefFor === 'function' && cabinetDefFor(s)));   // 設成置物櫃的那一個（js/storage-cabinet.js）不當衣櫃
 const wardrobeNearPlayer = () => costumeSpotNearPlayer(wardrobeSpots());
 function useWardrobeNearPlayer() { if (!wardrobeNearPlayer()) return false; openWardrobe(); return true; }
 

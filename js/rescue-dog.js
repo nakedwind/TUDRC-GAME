@@ -8,7 +8,7 @@ const dogSkill = id => typeof hasSkill === 'function' && hasSkill('ball', id);
 const dogSearchCells = () => DOG_PICKUP.searchCells * (dogSkill('a-1') ? DOG_SKILL.searchMul : 1);   // 👃 搜尋範圍加大（牽繩距離跟著變大）
 const dogSpeedMul = () => dogSkill('b-1') ? DOG_SKILL.speedMul : 1;                                    // 💨 移動速度加快
 const dogFindsHidden = () => dogSkill('core-1');                                                      // 🔍 撿得到隱藏的物品（沒有光點的）
-const dogFindsTunnels = () => dogSkill('ult');                                                        // 🕳️ 找得到隱藏的地道
+const dogFindsTunnels = () => dogSkill('ult');                                                        // 🕳️ 找得到隱藏的地道、隱藏區的牆、裂縫牆
 
 function dogPickupTargetExists(target) {
   if (target.kind === 'shard') {
@@ -214,7 +214,7 @@ function setDogFollow(key) {
   sfx('button'); closeFieldCommandMenu();
 }
 
-// ===== 🕳️ 隱藏的地道：學會「地道搜索」後，球球聞到附近藏起來的地道 → 跑過去坐下汪汪叫 → 地道出現，可以進去 =====
+// ===== 🕳️ 隱藏的地道：學會「密道搜索」後，球球聞到附近藏起來的地道 → 跑過去坐下汪汪叫 → 地道出現，可以進去 =====
 // 隱藏地道＝地圖編輯器用「🕳️ 隱藏地道」工具設的出入口（portal.hidden）；發現過的記在瀏覽器（每張地圖、每個地道各自記）
 const TUNNEL_FOUND_KEY = 'tudrc_tunnels_found_v1';
 const DOG_TUNNEL = { barkTime: 2.2, barkEvery: .75, scanInterval: .6 };   // 叫多久地道才出現、多久叫一聲、多久聞一次
@@ -234,17 +234,50 @@ function revealTunnel(pt, dog) {
   if (typeof sfxAt === 'function') sfxAt('loofahVine', x, y, .5, 'tunnel-open');
 }
 function hiddenTunnelsHere() { return (MAP && MAP.portals || []).filter(pt => pt.hidden && !tunnelFound(pt)); }
-// 每幀由 js/sentry.js 呼叫（球球跟隊出勤時）；回傳 true＝這幀球球在忙著找地道
+// ===== 🧱 隱藏區的牆、裂縫牆：同一個技能也聞得出「後室牆面（可炸開・隱藏區）」後面藏著區域、「後室牆面（裂縫・可炸開）」可以炸開
+//   → 跑到牆腳坐下汪汪叫 → 牆被標出來（js/breakable-walls.js 畫提示；沒帶球球就沒有提示）=====
+// 發現過的跟地道記在同一份（每張地圖、每面牆各自記），開新遊戲一起清掉
+const wallKey = s => (MAP && (MAP.id || MAP_INDEX)) + '|wall:' + s.id + '@' + s.c + ',' + s.r;
+function dogFoundWall(s) { return tunnelsFound.has(wallKey(s)); }
+// 這張地圖上還沒被發現、還沒炸開、球球聞得出來的牆（隱藏區的牆、裂縫牆）
+function hiddenWallsHere() {
+  if (typeof breakableWallSpec !== 'function') return [];
+  return ((MAP && MAP.stamps) || []).filter(s => breakableWallSniffable(s) && !breakableWallOpened(s) && !dogFoundWall(s));
+}
+function revealHiddenWall(s, dog) {
+  tunnelsFound.add(wallKey(s));
+  try { localStorage.setItem(TUNNEL_FOUND_KEY, JSON.stringify([...tunnelsFound])); } catch (_) {}
+  const [x, y] = center(...breakableWallOpenCells(s)[0]);
+  G.effects.push({ ring: true, x, y, r: 6, r2: 46, life: .45, life0: .45, color: '#ffd479' });
+  const hidden = breakableWallHidesArea(s);
+  if (typeof systemNotice === 'function') systemNotice(hidden ? '🐾 球球發現牆後面有隱藏區域！用爆炸可以炸開' : '🐾 球球發現牆上的裂縫！');
+  if (typeof flash === 'function') flash(hidden ? '牆後有隱藏區域！' : '牆上有裂縫！', x, y - CELL * 2.2, '#ffd479', 1.6);
+}
+// 球球要去找的東西：隱藏地道＋隱藏區的牆、裂縫牆。stand：可以站著汪汪叫的格子（依序試）
+function dogHiddenSpots() {
+  const spots = hiddenTunnelsHere().map(pt => {
+    const [x, y] = portalXY(pt);
+    return { key: tunnelKey(pt), x, y, found: () => tunnelFound(pt), reveal: dog => revealTunnel(pt, dog),
+      stand: [[0, 1], [0, 0], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, 1]].map(([dc, dr]) => [pt.c + dc, pt.r + dr]) };   // 地道那一格常常是牆或門框：找一格走得到的
+  });
+  for (const s of hiddenWallsHere()) {
+    const [hc, hr] = breakableWallOpenCells(s)[0], [x, y] = center(hc, hr);   // 牆最下排中間（炸開的洞口）
+    spots.push({ key: wallKey(s), x, y, found: () => dogFoundWall(s) || breakableWallOpened(s), reveal: dog => revealHiddenWall(s, dog),
+      stand: [[0, 1], [-1, 1], [1, 1], [0, 2]].map(([dc, dr]) => [hc + dc, hr + dr]) });   // 站在牆腳下
+  }
+  return spots;
+}
+// 每幀由 js/sentry.js 呼叫（球球跟隊出勤時）；回傳 true＝這幀球球在忙著找地道／牆
 function updateDogTunnel(dog, anchor, dt) {
   if (dog.id !== 'ball' || MAP_SAFE || !anchor || !dogFindsTunnels() || dog.carryItem) { dog.tunnel = null; return false; }
   const tn = dog.tunnel;
   if (tn) {
-    if (tunnelFound(tn.pt) || Math.hypot(dog.x - anchor.x, dog.y - anchor.y) > dogSearchCells() * CELL * 1.3) { dog.tunnel = null; dog.navPath = null; return false; }
-    const [x, y] = portalXY(tn.pt);
+    if (tn.spot.found() || Math.hypot(dog.x - anchor.x, dog.y - anchor.y) > dogSearchCells() * CELL * 1.3) { dog.tunnel = null; dog.navPath = null; return false; }
+    const { x } = tn.spot;
     if (tn.state === 'go') {
       if (Math.hypot(dog.x - tn.goal.x, dog.y - tn.goal.y) < 10) { tn.state = 'bark'; tn.t = 0; tn.next = .5; dog.moving = false; dog.faceRight = x > dog.x; return true; }
       moveSentryWithPath(dog, tn.goal.x, tn.goal.y, DOG_PICKUP.speed * dogSpeedMul(), dt);
-      if (dog.navFailed) { dog.tunnel = null; dog.tunnelIgnore = { key: tunnelKey(tn.pt), t: 6 }; return false; }
+      if (dog.navFailed) { dog.tunnel = null; dog.tunnelIgnore = { key: tn.spot.key, t: 6 }; return false; }
       return true;
     }
     // 坐下汪汪叫（停住超過一下子會自動坐下：js/ball-poses.js）
@@ -254,7 +287,7 @@ function updateDogTunnel(dog, anchor, dt) {
       if (typeof sfxAt === 'function') sfxAt('ballBark', dog.x, dog.y, .8, 'dog-tunnel-bark');
       if (typeof flash === 'function') flash('汪！', dog.x + (Math.random() - .5) * 10, dog.y - 40, '#fff2c4', .6);
     }
-    if (tn.t >= DOG_TUNNEL.barkTime) { revealTunnel(tn.pt, dog); dog.tunnel = null; }
+    if (tn.t >= DOG_TUNNEL.barkTime) { tn.spot.reveal(dog); dog.tunnel = null; }
     return true;
   }
   if (dog.tunnelIgnore && (dog.tunnelIgnore.t -= dt) <= 0) dog.tunnelIgnore = null;
@@ -262,17 +295,15 @@ function updateDogTunnel(dog, anchor, dt) {
   if (dog.tunnelScan > 0) return false;
   dog.tunnelScan = DOG_TUNNEL.scanInterval;
   const R = dogSearchCells() * CELL;
-  const near = hiddenTunnelsHere().map(pt => { const [x, y] = portalXY(pt); return { pt, x, y, d: Math.hypot(x - dog.x, y - dog.y) }; })
-    .filter(o => o.d <= R && Math.hypot(o.x - anchor.x, o.y - anchor.y) <= R && !(dog.tunnelIgnore && dog.tunnelIgnore.key === tunnelKey(o.pt)))
+  const near = dogHiddenSpots().map(o => ({ ...o, d: Math.hypot(o.x - dog.x, o.y - dog.y) }))
+    .filter(o => o.d <= R && Math.hypot(o.x - anchor.x, o.y - anchor.y) <= R && !(dog.tunnelIgnore && dog.tunnelIgnore.key === o.key))
     .sort((a, b) => a.d - b.d);
   for (const o of near) {
-    // 站在地道旁邊（地道那一格常常是牆或門框）：找一格走得到的
-    for (const [dc, dr] of [[0, 1], [0, 0], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, 1]]) {
-      const c = o.pt.c + dc, r = o.pt.r + dr;
+    for (const [c, r] of o.stand) {
       if (!sentryCellWalkable(c, r)) continue;
       const [gx, gy] = center(c, r), path = buildSentryPath(dog, gx, gy);
       if (!path) continue;
-      dog.tunnel = { pt: o.pt, goal: { x: gx, y: gy }, state: 'go', t: 0 };
+      dog.tunnel = { spot: o, goal: { x: gx, y: gy }, state: 'go', t: 0 };
       dog.navPath = path; dog.navGoal = c + ',' + r; dog.navTimer = .75;
       if (typeof flash === 'function') flash('？', dog.x, dog.y - 40, '#fff2c4', .7);   // 聞到了
       return true;

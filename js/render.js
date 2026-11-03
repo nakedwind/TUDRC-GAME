@@ -517,7 +517,7 @@ function seatRotate(actor, size) {
 // 特殊 NPC 名字前的白色小圖示（角色 id → 圖檔）；要幫別的 NPC 加圖示，在這裡多加一行
 const NPC_NAME_ICON_SRC = {
   noah: 'images/ui/noah-wrench.svg?v=20261021cute',   // 諾亞：開發工坊（扳手，粗圓版）
-  ash: 'images/ui/ash-clipboard.svg?v=20261021',   // 亞許：通訊員、報告任務（任務板）
+  eldrin: 'images/ui/ash-clipboard.svg?v=20261021',   // 艾德林：通訊員、報告任務（任務板；data/missions.js 的 MISSION_BASE.briefer）
   taana: 'images/ui/taana-whistle.svg?v=20261021', // 塔納：訓練室負責人（哨子）
   hospital: 'images/ui/hospital.svg?v=20261029', // 住院中的隊員（不是角色 id：js/vitals.js 的 isHospitalized）
 };
@@ -1149,7 +1149,7 @@ function draw() {
     else if (typeof clawNearPlayer === 'function' && !doorNearPlayer() && clawNearPlayer()) { const c = clawNearPlayer(); drawInteractPrompt(c.x, c.top - 4, clawPromptLabel(c)); }   // 夾娃娃機（js/claw-machine.js）
     else if (typeof bestiaryNearPlayer === 'function' && !doorNearPlayer() && bestiaryNearPlayer()) { const b = bestiaryNearPlayer(); drawInteractPrompt(b.x, b.top - 4, '使用電腦'); }   // 2F應變中心的電腦：打開電腦桌面（js/bestiary.js、js/pc-desktop.js）
     else if (typeof stoveNearPlayer === 'function' && !doorNearPlayer() && stoveNearPlayer()) { const c = stoveNearPlayer(); drawInteractPrompt(c.x, c.top - (cookingPots.some(p => p.stamp === c.stamp) ? 26 : 4), '烹飪'); }   // 正在煮：提示往上，不蓋到進度圈   // 廚房工作台的爐灶（js/cooking.js）
-    else if (typeof cabinetNearPlayer === 'function' && !doorNearPlayer() && cabinetNearPlayer()) { const c = cabinetNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '打開' + cabinetDefFor(c.stamp).name); }   // 收納櫃（js/storage-cabinet.js）
+    else if (typeof cabinetNearPlayer === 'function' && !doorNearPlayer() && cabinetNearPlayer()) { const c = cabinetNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '打開' + cabinetDefFor(c.stamp).name); }   // 置物櫃（js/storage-cabinet.js）
     else if (typeof armorChestNearPlayer === 'function' && !doorNearPlayer() && armorChestNearPlayer()) { const c = armorChestNearPlayer(); drawInteractPrompt(c.x, c.top - 4, '整理防具'); }   // 裝備箱（js/backpack.js）
     else if (typeof targetTableNearPlayer === 'function' && !doorNearPlayer() && targetTableNearPlayer()) { const t = targetTableNearPlayer(); drawInteractPrompt(t.x, t.top - 4, '練習射擊'); }   // 射擊訓練室的桌子（js/target-practice.js）
     else if (typeof posterNearPlayer === 'function' && !doorNearPlayer() && posterNearPlayer()) { const s = posterNearPlayer(); drawInteractPrompt(s.x, s.top - 4, '查看' + s.cfg.title); }   // 海報（js/posters.js）
@@ -1219,6 +1219,7 @@ function draw() {
   if (typeof drawGrabBuildingTarget === 'function') drawGrabBuildingTarget(ctx);   // 抓著建築：要放下的位置（js/grab.js）
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
+  if (typeof drawBreakableWallHints === 'function') drawBreakableWallHints(ctx);   // 裂縫牆、球球找到的隱藏區牆：「可以炸開」提示（js/breakable-walls.js）
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
   if (typeof drawCooking === 'function') drawCooking(ctx);
