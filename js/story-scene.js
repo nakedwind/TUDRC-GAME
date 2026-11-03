@@ -24,7 +24,7 @@ const StoryScene = (() => {
     const want = forcedId ? scenes()[forcedId] : previewScene();
     return want && want.map === MAP.id ? want : Object.values(scenes()).find(s => s.map === MAP.id) || null;
   };
-  const active = () => !!window.STORY_MODE;
+  const active = () => !!window.STORY_MODE && !window.STORY_KAI_ON;   // 播的是「改」版劇情（js/story-kai.js）時，按鍵交給那邊處理
   const el = id => document.getElementById(id);
   const readyImage = im => im?.complete && im.naturalWidth;
   const rnd = (a, b) => a + Math.random() * (b - a);

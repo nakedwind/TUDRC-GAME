@@ -19,7 +19,8 @@ function refreshMemoryDoorFields(s, onChange) {
   if (!on) return;
   const items = typeof ITEMS !== 'undefined' ? ITEMS : [];
   const keys = (typeof MEMORY_KEYS !== 'undefined' ? MEMORY_KEYS : []).map(k => [k.key, (items.find(i => i.id === k.key) || {}).name || k.key]);
-  const scenes = Object.entries(typeof STORY_SCENES !== 'undefined' ? STORY_SCENES : {}).map(([id, sc]) => [id, (sc.title || id) + '（' + id + '）']);
+  const scenes = [...Object.entries(typeof STORY_SCENES !== 'undefined' ? STORY_SCENES : {}).map(([id, sc]) => [id, (sc.title || id) + '（' + id + '）']),
+    ...Object.entries(typeof STORY_KAI !== 'undefined' ? STORY_KAI : {}).map(([id, sc]) => [id, '【改】' + (sc.title || id) + '（' + id + '）'])];   // 「劇情編輯器（改）」做的劇情（data/story-kai.js）
   const fill = (sel, list, value, empty) => {
     sel.innerHTML = '';
     for (const [v, text] of [['', empty], ...list, ...(value && !list.some(o => o[0] === value) ? [[value, value + '（找不到）']] : [])]) {

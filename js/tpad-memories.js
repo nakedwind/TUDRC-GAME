@@ -20,17 +20,18 @@ function memoryDoorList() {
     if (s.doorMode === 'memory' && s.memoryScene) out.push({ map: m, stamp: s, key: s.memoryKey, scene: s.memoryScene });
   return out;
 }
+const memorySceneData = id => (typeof STORY_SCENES !== 'undefined' && STORY_SCENES[id]) || (typeof STORY_KAI !== 'undefined' && STORY_KAI[id]) || null;   // 舊劇情或「劇情編輯器（改）」做的（data/story-kai.js）
 function memoryEntries() {
   const opened = typeof memoryDoorsOpened === 'function' ? memoryDoorsOpened() : new Set(), doors = memoryDoorList(), list = [];
   for (const mk of typeof MEMORY_KEYS !== 'undefined' ? MEMORY_KEYS : []) {
     const owner = memoryOwner(mk.shard), hasKey = (supplyInventory.get(mk.key) || 0) > 0;
     const have = hasKey ? mk.need : Math.min(mk.need, supplyInventory.get(mk.shard) || 0);
     const base = { mk, owner, hasKey, have, locked: hasKey ? 'key' : have ? 'shards' : 'none' };
-    const mine = doors.filter(d => d.key === mk.key && typeof STORY_SCENES !== 'undefined' && STORY_SCENES[d.scene]);
+    const mine = doors.filter(d => d.key === mk.key && memorySceneData(d.scene));
     if (!mine.length) { list.push({ ...base, id: 'k:' + mk.key, noDoor: true, state: base.locked === 'none' ? 'closed' : base.locked }); continue; }   // 這把鑰匙還沒有記憶之門：照樣顯示碎片進度
     for (const d of mine) {
       const unlocked = opened.has(d.map.id + '@' + d.stamp.c + ',' + d.stamp.r);
-      list.push({ ...base, id: 'd:' + d.map.id + '@' + d.stamp.c + ',' + d.stamp.r, scene: d.scene, data: STORY_SCENES[d.scene], mapName: d.map.name,
+      list.push({ ...base, id: 'd:' + d.map.id + '@' + d.stamp.c + ',' + d.stamp.r, scene: d.scene, data: memorySceneData(d.scene), mapName: d.map.name,
         state: unlocked ? 'open' : base.locked });
     }
   }

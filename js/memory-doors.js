@@ -15,7 +15,8 @@ function rememberMemoryDoor(d) {
   const set = memoryDoorsOpened(); set.add(memoryDoorKey(d));
   try { localStorage.setItem(MEMORY_DOOR_STORE, JSON.stringify([...set])); } catch (_) {}
 }
-const memoryScene = d => (typeof STORY_SCENES !== 'undefined' && d.memoryScene && STORY_SCENES[d.memoryScene]) || null;
+const memoryScene = d => (typeof STORY_SCENES !== 'undefined' && d.memoryScene && STORY_SCENES[d.memoryScene])
+  || (typeof STORY_KAI !== 'undefined' && d.memoryScene && STORY_KAI[d.memoryScene]) || null;   // 也可以是「劇情編輯器（改）」做的劇情（data/story-kai.js）
 const isChainArt = t => !!t && /chain|鎖鏈/i.test([String(t.file || '').startsWith('data:') ? '' : t.file, t.name, t.id].join(' '));
 
 // ---- 開局時（js/doors.js 的 setupDoors）：讀設定、找疊在門上的鎖鏈圖、解開過就直接開著 ----

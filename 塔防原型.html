@@ -8,8 +8,12 @@
     try { const id = JSON.parse(localStorage.getItem('tudrc_map_preview_v1') || 'null')?.map?.id; window.STORY_PREVIEW = Object.values(STORY_SCENES).some(s => s.map === id); } catch (_) {}
   }
 </script>
-<script src="js/story-scene.js?v=y25entry-20261031"></script>
+<script src="js/story-scene.js?v=kai-20261103"></script>
+<script src="data/story-kai.js?v=kai-20261103"></script>   <!-- 回憶劇情（改）（🎬 劇情編輯器（改）） -->
+<script src="js/story-kai-fx.js?v=kai-20261103"></script>   <!-- 回憶劇情（改）的特效 -->
+<script src="js/story-kai.js?v=kai2-20261103"></script>   <!-- 回憶劇情（改）的播放器：要在 story-scene.js 後面、maploader.js 前面 -->
 <link rel="stylesheet" href="css/story-scene.css?v=y25skip-20261031">
+<link rel="stylesheet" href="css/story-kai.css?v=kai-20261103">
 <link rel="stylesheet" href="css/memory-doors.css?v=20261025c">
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
   { const readonlyPreview = /[?&](uiedit|bagedit|squadedit|monsterPreview)=1(&|$)/.test(location.search) || window.STORY_PREVIEW; const P = Storage.prototype, set = P.setItem, rem = P.removeItem, clr = P.clear, isLocal = s => { try { return s === window.localStorage && (readonlyPreview || window.STORY_MODE); } catch (_) { return false; } };
@@ -302,7 +306,7 @@
   <script src="js/maploader.js?v=portalnudge-20261102"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=waterdef-20261102"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/doors.js?v=archcut2-20261101"></script> <!-- 門：手動門／自動門 -->
-  <script src="js/memory-doors.js?v=nopadlock-20261101"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
+  <script src="js/memory-doors.js?v=kai-20261103"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
   <script src="js/breakable-walls.js?v=blastguard-20261101"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
   <script src="js/lighting.js?v=mrtcargo-20261102"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
@@ -425,7 +429,7 @@
   <script src="js/grab.js?v=grab-building-20261027"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=memory-20261025"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
   <script src="js/tpad-map.js?v=eatenmate-20261103"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->
-  <script src="js/tpad-memories.js?v=20261025b"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->
+  <script src="js/tpad-memories.js?v=kai-20261103"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->
   <script src="js/tpad.js?v=squad-v2-20261027"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
   <script src="js/base-minimap.js?v=minimap-20261102"></script>   <!-- 基地右下角小地圖：目前樓層＋溫特位置；按鈕打開 T-Pad 地圖、收起（必須在 tpad-map.js、tpad.js 之後） -->
   <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->

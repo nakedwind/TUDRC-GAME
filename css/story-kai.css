@@ -1,0 +1,27 @@
+/* ===== 回憶劇情（改）的畫面（js/story-kai.js）=====
+   播放時 body 一樣加上 story-scene，借用 css/story-scene.css 裡對話框、隱藏 HUD 的設定。 */
+/* css/story-scene.css 播劇情時會把 #wrap 裡其他東西藏起來；這裡的 id 重複寫好幾次只是為了讓這條規則比較「強」，蓋過那條 */
+body.story-scene #wrap > #storyKaiUI#storyKaiUI#storyKaiUI#storyKaiUI#storyKaiUI { display: block !important; }
+body.story-scene #wrap > #storyKaiUI#storyKaiUI#storyKaiUI#storyKaiUI#storyKaiUI[hidden] { display: none !important; }
+#storyKaiUI { position: absolute; inset: 0; z-index: 160; pointer-events: none; color: #f4eee1; font-family: "Microsoft JhengHei", sans-serif; }
+#storyKaiUI [hidden] { display: none !important; }
+#storyKaiUI button { pointer-events: auto; background: #171c20e8; border: 1px solid #8c8066; border-radius: 5px; color: #f4eee1; padding: 9px 17px; font: inherit; cursor: pointer; }
+#storyKaiUI button:hover, #storyKaiUI button:focus-visible { background: #39352d; outline: 2px solid #dac9a4; outline-offset: 3px; }
+/* 暗角、黑幕、白幕：透明度由程式每一幀設定 */
+#storyKaiVignette, #storyKaiBlack, #storyKaiWhite { position: absolute; inset: 0; pointer-events: none; opacity: 0; }
+#storyKaiBlack { background: #000; }
+#storyKaiWhite { background: #fff; }
+#storyKaiExit { position: absolute; top: 18px; right: 22px; z-index: 3; opacity: .75; }
+/* 結局：標題畫面 */
+#storyKaiEnd { position: absolute; z-index: 4; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #080b0e; pointer-events: auto; }
+#storyKaiEnd small { letter-spacing: .3em; color: #b7a27c; }
+#storyKaiEnd h2 { font-size: 32px; font-weight: 500; letter-spacing: .15em; margin: 20px 0 32px; }
+#storyKaiEnd div { display: flex; gap: 16px; }
+/* 對話框震動（對白的「框震動」）：大約 1.5 秒，越後面越小 */
+body.story-scene #dialogueBox.story-kai-shake { animation: story-kai-shake 1.5s linear; }
+@keyframes story-kai-shake {
+  0% { translate: 0 0; } 4% { translate: -8px -2px; } 8% { translate: 7px 2px; } 12% { translate: -7px 1px; } 16% { translate: 6px -2px; }
+  22% { translate: -6px 1px; } 28% { translate: 5px -1px; } 34% { translate: -5px 1px; } 42% { translate: 4px 0; } 50% { translate: -3px 1px; }
+  60% { translate: 3px 0; } 70% { translate: -2px 0; } 82% { translate: 1px 0; } 100% { translate: 0 0; }
+}
+@media (prefers-reduced-motion: reduce) { body.story-scene #dialogueBox.story-kai-shake { animation: none; } }

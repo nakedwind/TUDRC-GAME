@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>劇情編輯器（改）｜Y102 應變中心</title>
+<link rel="stylesheet" href="css/ui-feedback.css">
+<style>
+  /* 顏色跟其他編輯器一樣；另外三種提示色：藍＝下拉選單、紅＝要自己輸入的數字或文字、綠＝要到預覽窗的地圖上點 */
+  :root { color-scheme: dark; font-family: system-ui, 'Microsoft JhengHei', sans-serif; background: #10151c; color: #e8edf5;
+    --panel: #1b2530; --line: #3a4d60; --soft: #2f3e4d; --muted: #8c98a6; --gold: #ffd479;
+    --pick-bg: #18382a; --pick-line: #4fbf7f; --pick-text: #a9f0c6;
+    --sel-bg: #172c44; --sel-line: #4f8fd0;
+    --in-bg: #321c22; --in-line: #b8606a; }
+  * { box-sizing: border-box; }
+  body { margin: 0 auto; padding: 12px 16px 16px; max-width: 2000px; }
+  h1 { font-size: 22px; margin: 0 0 4px; } p { margin: 0; color: #aabacc; line-height: 1.5; }
+  .top { margin-bottom: 10px; display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: flex-end; } .top .grow { flex: 1 1 420px; }
+  .top .save { display: grid; justify-items: end; } .status { min-height: 18px; margin-top: 4px; font-size: 12px; color: #8be0c2; text-align: right; } .status.error { color: #ff9b9b; }
+  button { cursor: pointer; font: inherit; color: #eaf4ff; background: #2a3c50; border: 1px solid #57718b; border-radius: 7px; padding: 5px 10px; }
+  button:hover { background: #345169; } button.primary { background: #236b79; border-color: #69b9c1; }
+  button.danger { background: transparent; border-color: rgba(255,120,110,.45); color: #ff9d8f; } button.danger:hover { background: rgba(255,100,90,.12); }
+  button.small { padding: 2px 8px; font-size: 12px; } button:disabled { opacity: .4; cursor: default; }
+  select, input, textarea { background: #101923; border: 1px solid #536b80; border-radius: 6px; color: #edf5ff; font: inherit; padding: 3px 6px; min-width: 0; }
+  input[type=checkbox] { width: auto; accent-color: #69b9c1; }
+  textarea { width: 100%; resize: vertical; line-height: 1.6; }
+  .row { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+  .note { font-size: 12px; color: var(--muted); line-height: 1.5; }
+  [hidden] { display: none !important; }
+
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr) 560px; gap: 12px; height: calc(100vh - 150px); min-height: 560px; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 10px; min-width: 0; min-height: 0; }
+
+  /* 左邊：新增指令的按鈕（每一區都可以收起來） */
+  .tools { overflow: auto; display: grid; gap: 8px; align-content: start; }
+  details.fold { border: 1px solid var(--soft); border-radius: 9px; background: #15202b; }
+  details.fold > summary { cursor: pointer; padding: 7px 10px; font-weight: 700; color: #cfe0ee; list-style: none; display: flex; align-items: center; gap: 6px; }
+  details.fold > summary::-webkit-details-marker { display: none; }
+  details.fold > summary::after { content: '▾'; margin-left: auto; color: var(--muted); transition: rotate .15s; }
+  details.fold:not([open]) > summary::after { rotate: -90deg; }
+  details.fold > summary small { font-weight: 400; font-size: 11px; color: var(--muted); }
+  .btns { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 0 8px 9px; }
+  .btns button { padding: 7px 4px; font-size: 13px; }
+  .btns button b { color: #9fe3ea; }
+
+  /* 中間：預覽窗 */
+  .stagebox { display: flex; flex-direction: column; gap: 6px; }
+  .stage-head { display: flex; align-items: center; gap: 8px; font-size: 13px; }
+  .stage-head .grow { flex: 1; } .stage-head b { color: #cfe0ee; }
+  .stage { position: relative; flex: 1; min-height: 0; border: 1px solid var(--soft); border-radius: 8px; background: #0b1016; overflow: hidden; }
+  #map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  #map.picking { cursor: crosshair; } #map.panning { cursor: grabbing; }
+  #pickBar { padding: 6px 10px; border: 1px solid var(--pick-line); border-radius: 8px; background: var(--pick-bg); color: var(--pick-text); font-size: 13px; }
+  .hint { font-size: 12px; color: var(--muted); }
+
+  /* 右邊 */
+  .side { display: flex; flex-direction: column; gap: 8px; }
+  .box { border: 1px solid var(--soft); border-radius: 9px; background: #15202b; padding: 7px 8px; }
+  .box-head { display: flex; align-items: center; gap: 6px; font-weight: 700; color: #cfe0ee; font-size: 13px; }
+  .box-head .grow { flex: 1; }
+  .scenebar { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 6px; align-items: center; font-size: 13px; }
+  .scenebar label { color: #cfe0ee; font-weight: 700; white-space: nowrap; }
+  .settings { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 5px 8px; align-items: center; margin-top: 7px; font-size: 12px; color: #b9cad9; }
+  .cast { display: grid; gap: 4px; margin-top: 6px; max-height: 150px; overflow: auto; }
+  .cast-row { display: grid; grid-template-columns: 26px minmax(0, 1.1fr) minmax(0, 1fr) minmax(0, .9fr); gap: 5px; align-items: center; padding: 3px; border: 1px solid transparent; border-radius: 7px; }
+  .cast-row.on { border-color: var(--gold); background: #1f2a1e; }
+  .cast-row img { width: 26px; height: 26px; image-rendering: pixelated; object-fit: cover; object-position: top; }
+  .cast-row button { font-size: 12px; padding: 3px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .steps-box { flex: 1; min-height: 0; display: flex; flex-direction: column; gap: 6px; }
+  .steps { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--soft); }
+  .step { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 6px; border-bottom: 1px solid #24313d; font-size: 13px; cursor: pointer; min-height: 32px; }
+  .step:hover { background: #1a2632; } .step.on { background: #23301f; box-shadow: inset 3px 0 var(--gold); }
+  .step.warn .lbl { color: #ffb4a8; } .step.drop-before { box-shadow: inset 0 2px #69b9c1; } .step.drop-after { box-shadow: inset 0 -2px #69b9c1; }
+  .step .no { color: #7f93a6; font-variant-numeric: tabular-nums; flex: none; }
+  .step .lbl { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e3ebf3; }
+  .step .lbl em { font-style: normal; color: #9fd3ff; }
+  .step .ctl { display: flex; gap: 4px; align-items: center; flex: none; font-size: 12px; color: #b9cad9; }
+  .step .ctl label { display: inline-flex; gap: 3px; align-items: center; white-space: nowrap; }
+  .step .x { flex: none; padding: 0 6px; font-size: 12px; color: #8c98a6; background: transparent; border-color: transparent; visibility: hidden; }
+  .step:hover .x, .step.on .x { visibility: visible; } .step .x:hover { color: #ff9d8f; }
+  .empty { padding: 18px 8px; color: var(--muted); font-size: 13px; text-align: center; line-height: 1.7; }
+  /* 三種提示色 */
+  .ctl select, select.sel { background: var(--sel-bg); border-color: var(--sel-line); }
+  .ctl input[type=number], .ctl input[type=text], input.in { background: var(--in-bg); border-color: var(--in-line); }
+  .ctl input[type=number] { width: 66px; } .ctl input.code { width: 44px; text-align: center; }
+  button.pick { background: var(--pick-bg); border-color: var(--pick-line); color: var(--pick-text); font-size: 12px; padding: 2px 8px; }
+  button.pick.unset { border-style: dashed; } button.pick.active { outline: 2px solid var(--gold); }
+  .ctl button { font-size: 12px; padding: 2px 8px; }
+  .tag { font-size: 11px; padding: 1px 6px; border-radius: 99px; border: 1px solid #57718b; color: #b9cad9; white-space: nowrap; }
+  .tag.ok { border-color: #4fbf7f; color: #a9f0c6; } .tag.wait { border-color: var(--gold); color: var(--gold); }
+
+  /* 彈出視窗 */
+  dialog { background: #16202b; color: #e8edf5; border: 1px solid #57718b; border-radius: 12px; padding: 14px; width: min(640px, 94vw); }
+  dialog::backdrop { background: rgba(0,0,0,.55); }
+  dialog h3 { margin: 0 0 8px; font-size: 16px; }
+  dialog .acts { display: flex; justify-content: flex-end; gap: 8px; margin-top: 10px; }
+  .chat { display: grid; gap: 8px; max-height: 46vh; overflow: auto; padding: 8px; border: 1px solid var(--soft); border-radius: 8px; background: #101923; margin: 8px 0; }
+  .msg { max-width: 85%; padding: 7px 10px; border-radius: 10px; line-height: 1.55; white-space: pre-wrap; font-size: 13px; }
+  .msg small { display: block; font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+  .msg.me { justify-self: end; background: #23435a; } .msg.claude { justify-self: start; background: #2a2f22; }
+  /* 「從頭預覽」：在編輯器裡直接打開遊戲播放 */
+  #playModal { position: fixed; inset: 0; z-index: 50; background: rgba(0,0,0,.75); display: grid; place-items: center; }
+  #playModal .frame { position: relative; width: min(94vw, calc((100vh - 70px) * 16 / 9)); aspect-ratio: 16 / 9; border: 1px solid #57718b; border-radius: 8px; overflow: hidden; background: #000; }
+  #playModal iframe { width: 100%; height: 100%; border: 0; display: block; }
+  #playModal .close { position: absolute; top: -40px; right: 0; }
+  @media (max-width: 1400px) { .layout { grid-template-columns: 220px minmax(0, 1fr) 500px; } }
+  @media (max-width: 1150px) { .layout { grid-template-columns: 1fr; height: auto; } .stage { flex: none; height: 60vh; } .steps { max-height: 70vh; } }
+</style>
+</head>
+<body>
+  <div class="top">
+    <div class="grow"><h1>🎬 劇情編輯器（改）</h1><p>一行一行排出回憶劇情：左邊按鈕新增指令，右邊調整設定，中間的地圖上點一下或拖曳就能放鏡頭和角色。做好的劇情可以在記憶之門選來播放。</p></div>
+    <div class="save">
+      <div class="row"><button type="button" id="playTop">▶ 從頭預覽</button><button type="button" id="exportFile">下載 story-kai.js</button><button type="button" class="danger" id="resetFile">從檔案重新載入</button></div>
+      <div id="status" class="status" role="status"></div>
+    </div>
+  </div>
+  <div class="layout">
+    <!-- 左邊：新增指令 -->
+    <section class="panel tools" aria-label="新增指令">
+      <details class="fold" open><summary>劇情和角色</summary><div class="btns">
+        <button type="button" data-add="say"><b>＋</b>新對白</button><button type="button" data-add="end">結局</button>
+        <button type="button" data-add="show">角色出現</button><button type="button" data-add="hide">角色消失</button>
+        <button type="button" data-add="map" title="在哪張劇情地圖演出；同一段回憶裡要換場景時再加一行"><b>＋</b>演出地圖</button>
+      </div></details>
+      <details class="fold" open><summary>鏡頭 <small title="調整鏡頭大小時長寬比固定，玩家看的畫面才不會變形">🔒 鎖定 16:9</small></summary><div class="btns">
+        <button type="button" data-add="cam"><b>＋</b>新鏡頭</button><button type="button" data-add="camMove">鏡頭位移</button>
+        <button type="button" data-add="camShake">鏡頭震動</button><button type="button" data-add="camSway">鏡頭晃動</button>
+      </div></details>
+      <details class="fold" open><summary>特效</summary><div class="btns">
+        <button type="button" data-add="blackIn">黑幕淡入</button><button type="button" data-add="blackOut">黑幕淡出</button>
+        <button type="button" data-add="whiteIn">白幕淡入</button><button type="button" data-add="whiteOut">白幕淡出</button>
+        <button type="button" data-add="wait">等待時間</button><button type="button" data-add="move">角色位置</button>
+        <button type="button" data-add="tremble">角色震動</button><button type="button" data-add="fx"><b>＋</b>特效</button>
+        <button type="button" data-add="dark" title="只有燈照得到的地方是亮的">後室黑幕</button><button type="button" data-add="vignette">畫面暗角</button>
+      </div></details>
+      <details class="fold" open><summary>音效</summary><div class="btns">
+        <button type="button" data-add="bgm">背景音樂</button><button type="button" data-add="sfx">音效</button>
+        <button type="button" data-add="bgmStop">背景音樂停止</button>
+      </div></details>
+      <p class="note">新指令會加在右邊選取的那一行下面。<br>每一行的顏色：<span style="color:#9fc6ee">藍色</span>＝下拉選單、<span style="color:#e59aa3">紅色</span>＝自己輸入、<span style="color:#a9f0c6">綠色</span>＝到地圖上點。</p>
+    </section>
+
+    <!-- 中間：預覽窗 -->
+    <section class="panel stagebox" aria-label="預覽窗">
+      <div class="stage-head"><b id="mapTitle"></b><span class="grow"></span>
+        <label class="row"><input type="checkbox" id="showCams" checked>鏡頭範圍預覽（虛線）</label>
+        <button type="button" class="small" id="zoomOut" aria-label="縮小">－</button><span id="zoomText" style="min-width:44px;text-align:center"></span><button type="button" class="small" id="zoomIn" aria-label="放大">＋</button>
+      </div>
+      <div class="stage" id="stage"><canvas id="map"></canvas></div>
+      <div id="pickBar" hidden></div>
+      <div class="hint">Alt＋滑鼠中鍵拖曳：移動畫面　Alt＋滾輪：放大縮小預覽窗　鏡頭虛線框：拖中間移動、拖四個角落以中心點縮放（長寬比固定）　角色、特效框也可以直接拖</div>
+    </section>
+
+    <!-- 右邊：劇情、演出者、指令列表 -->
+    <section class="panel side" aria-label="劇情內容">
+      <div class="box">
+        <div class="scenebar">
+          <label for="sceneSel">劇情列表：</label><select id="sceneSel" class="sel"></select><button type="button" class="small" id="sceneNew">＋新劇情</button>
+          <label for="sceneId">劇情 ID：</label><input id="sceneId" class="in" spellcheck="false" title="記憶之門用這個名字找劇情；只能用英文、數字、底線"><button type="button" class="small" id="sceneMore" aria-expanded="false">⚙ 設定</button>
+        </div>
+        <div class="settings" id="sceneSettings" hidden>
+          <span>標題</span><input id="sceneTitle" class="in" placeholder="記憶之門問「要進入這段回憶嗎」時顯示">
+          <span>副標題</span><input id="sceneSub" class="in" placeholder="例如：六年前 · 臨時救護區">
+          <span></span><div class="row"><button type="button" class="small" id="sceneCopy">複製這段劇情</button><button type="button" class="small danger" id="sceneDel">刪除這段劇情</button></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="box-head"><span>演出者列表</span><button type="button" class="small" id="castAdd">Add</button><button type="button" class="small" id="castDel">Del</button><span class="grow"></span>
+          <button type="button" class="small" id="castFold" aria-expanded="true" aria-label="收起演出者列表">▴</button></div>
+        <div class="cast" id="castList"></div>
+      </div>
+      <div class="box steps-box">
+        <div class="row"><button type="button" class="primary" id="playSide">▶ 從頭預覽</button><button type="button" class="small" id="playFrom" title="前面的行一次做完，從選取的這一行開始播">▶ 從選取的行</button><button type="button" class="small danger" id="delStep" hidden title="刪除選取的這一行（Delete）">刪除此行</button>
+          <span class="grow" style="flex:1"></span><span class="note" id="stepCount"></span></div>
+        <div class="steps" id="stepList" tabindex="0" aria-label="指令列表"></div>
+        <div class="row" style="justify-content:flex-end"><button type="button" class="primary" id="saveBottom">💾 存到專案</button></div>
+      </div>
+    </section>
+  </div>
+
+  <!-- 寫對白 -->
+  <dialog id="sayDlg" aria-labelledby="sayTitle">
+    <h3 id="sayTitle">寫對白</h3>
+    <div class="row" style="margin-bottom:8px"><label>說話者（角色代號）<input id="sayWho" class="in" style="width:56px;text-align:center" placeholder="旁白"></label><b id="sayName" style="color:#9fd3ff"></b>
+      <label style="margin-left:auto"><input type="checkbox" id="sayShake">框震動</label></div>
+    <textarea id="sayText" rows="5" placeholder="台詞（Enter 換行；Ctrl＋Enter 確定）"></textarea>
+    <p class="note">說話者空白＝旁白（沒有頭像）。代號是演出者列表左邊的數字，例如 01。</p>
+    <div class="acts"><button type="button" id="sayCancel">取消</button><button type="button" class="primary" id="sayOk">確定</button></div>
+  </dialog>
+
+  <!-- 特效說明（跟 Claude 對話） -->
+  <dialog id="fxDlg" aria-labelledby="fxTitle">
+    <h3 id="fxTitle">特效說明</h3>
+    <div class="row"><span class="tag" id="fxState"></span><span class="note" id="fxIdText"></span></div>
+    <div class="chat" id="fxChat"></div>
+    <textarea id="fxInput" rows="3" placeholder="描述想要的特效，例如：框的中間冒出一團紫色的煙，慢慢往上飄、2 秒後散掉（Ctrl＋Enter 送出）"></textarea>
+    <p class="note">訊息會跟著劇情一起存檔。寫好後按「💾 存到專案」，再到 Claude 的對話裡說「看特效留言」，Claude 會照描述做好特效、在這裡回覆；之後要修改，直接在這裡接著寫就好。</p>
+    <div class="acts"><button type="button" id="fxClose">關閉</button><button type="button" class="primary" id="fxSend">送出</button></div>
+  </dialog>
+
+  <!-- 角色配件 -->
+  <dialog id="accDlg" aria-labelledby="accTitle">
+    <h3 id="accTitle">角色配件</h3>
+    <div class="settings" id="accSlots" style="margin:0"></div>
+    <p class="note">扭蛋機裡的配件。劇情裡這個角色會一直戴著。</p>
+    <div class="acts"><button type="button" class="primary" id="accOk">完成</button></div>
+  </dialog>
+
+  <!-- 從舊劇情搬過來的結果 -->
+  <dialog id="infoDlg" aria-labelledby="infoTitle">
+    <h3 id="infoTitle"></h3>
+    <div id="infoBody" class="note" style="font-size:13px;line-height:1.7;max-height:60vh;overflow:auto"></div>
+    <div class="acts"><button type="button" class="primary" id="infoOk">知道了</button></div>
+  </dialog>
+
+  <div id="playModal" hidden><div class="frame"><button type="button" class="close" id="playClose">✕ 關閉預覽</button><iframe id="playFrame" title="劇情預覽"></iframe></div></div>
+
+  <script src="js/draft-sync.js?v=sync-20261021"></script>
+  <script src="data/tiles.js?v=nomissing-20261102"></script>
+  <script src="data/story-maps.js?v=v2tiles-20261026"></script>
+  <script src="data/characters.js?v=guideability-20261025"></script>
+  <script src="data/costumes.js?v=money2-20261102"></script>
+  <script src="data/costume-placement.js?v=strawberry-20261026"></script>
+  <script src="js/costume-draw.js?v=ballsit-20261102"></script>
+  <script src="data/story-scenes.js?v=y25skip2-20261031"></script>   <!-- 舊劇情編輯器的劇情：可以搬過來（js/story-kai-import.js） -->
+  <script src="data/story-kai.js?v=kai-20261103"></script>
+  <script src="js/story-kai-fx.js?v=kai-20261103"></script>
+  <script src="js/ui-feedback.js"></script>
+  <script src="js/project-save.js?v=filewarn-20261026"></script>
+  <script src="js/story-kai-editor.js?v=kai4-20261103"></script>
+  <script src="js/story-kai-import.js?v=kai4-20261103"></script>
+  <script>const kaiSaver = ProjectSave.attach({
+    after: ['exportFile'],
+    files: [{ path: 'data/story-kai.js', label: '劇情（改）', text: () => storyKaiExportText() }],
+    status: (m, e) => status(m, e),
+  });
+  document.getElementById('saveBottom').onclick = e => kaiSaver.save(e.shiftKey);</script>
+  <script src="js/editor-nav.js?v=kai-20261103"></script>
+</body>
+</html>
