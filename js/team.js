@@ -304,15 +304,22 @@ function nearestPatrolPoint(x, y, predicate) {
   }
   return best;
 }
+// 返回基地巡邏的位置：營地中心附近「站得上去、走得到」的格子，避開其他隊員正要去／已經站著的地方。
+// 放了營地帳篷時 campCells 只有帳篷正中間一格（常被帳篷、行軍床、箱子佔住）：大家都擠過去會被推進道具縫裡卡住不動
 function basePatrolPoint(member) {
-  let best = null, bestDistance = Infinity;
-  if (typeof campCells !== 'undefined') for (const key of campCells) {
-    const [c, r] = key.split(',').map(Number);
-    if (!inGrid(c, r) || isWall(c, r) || isEntrance(c, r) || G.grid[c + ',' + r]) continue;
-    const [x, y] = center(c, r), distance = Math.hypot(x - member.x, y - member.y);
-    if (distance < bestDistance) { best = { x, y }; bestDistance = distance; }
+  const cells = typeof campCells !== 'undefined' ? [...campCells].map(k => k.split(',').map(Number)) : [];
+  if (!cells.length) return nearestPatrolPoint(member.x, member.y);
+  const cx = cells.reduce((s, p) => s + p[0], 0) / cells.length, cy = cells.reduce((s, p) => s + p[1], 0) / cells.length;
+  const taken = G.towers.filter(t => t !== member && t.hp > 0).map(t => t.mode === 'goto' && t.target ? t.target : t.mode === 'hold' && t.anchor ? t.anchor : t);
+  const spots = [];
+  for (let r = Math.floor(cy) - 6; r <= Math.ceil(cy) + 6; r++) for (let c = Math.floor(cx) - 6; c <= Math.ceil(cx) + 6; c++) {
+    if (!sentryCellWalkable(c, r)) continue;
+    const [x, y] = center(c, r);
+    const crowd = taken.reduce((n, p) => n + (Math.hypot(p.x - x, p.y - y) < CELL * 1.5 ? 1 : 0), 0);
+    spots.push({ x, y, score: Math.hypot(c - cx, r - cy) + crowd * 8 });
   }
-  return best || nearestPatrolPoint(member.x, member.y);
+  spots.sort((a, b) => a.score - b.score);
+  return spots.find(p => buildSentryPath(member, p.x, p.y) !== null) || nearestPatrolPoint(member.x, member.y);
 }
 function commandFieldMember(type, destination) {
   const member = G && G.towers && G.towers.find(t => t.type === type);

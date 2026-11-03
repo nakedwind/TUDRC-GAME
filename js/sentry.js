@@ -434,6 +434,14 @@ function nearestSentryGoal(c, r, allowDark = false) {   // allowDark：暗處的
   }
   return null;
 }
+// 被擠進道具縫裡：站的那格和上下左右都走不了，尋路永遠找不到路、整個人定住（以前只能拖曳出來）。
+// 挪到最近一格走得到的格子中心（跟拖曳放下一樣）
+function unwedgeSentry(t) {
+  const [c, r] = cellAt(t.x, t.y), open = (nc, nr) => sentryCellWalkable(nc, nr, true, true);   // 只看道具、牆：暗處、火海不算卡住
+  if (open(c, r) || [[0, -1], [1, 0], [0, 1], [-1, 0]].some(([dc, dr]) => open(c + dc, r + dr))) return;
+  const goal = nearestSentryGoal(c, r, true); if (!goal || Math.abs(goal[0] - c) + Math.abs(goal[1] - r) > 3) return;
+  [t.x, t.y] = center(...goal); t.navPath = null; t.navGoal = null; t.navTimer = 0;
+}
 // 哨兵用格線 BFS 尋路。與怪物的營地流場分開，因為哨兵的目的地會隨指令與敵人改變。
 function buildSentryPath(t, targetX, targetY, allowDark = !!(t.summonDark || t.followDark)) {   // allowDark：找一條可以穿過黑暗的路（召喚時、跟著溫特走時、去撿地上的東西時）
   const [sc, sr] = cellAt(t.x, t.y), [rawGc, rawGr] = cellAt(targetX, targetY);
@@ -488,7 +496,7 @@ function moveSentryWithPath(t, targetX, targetY, speed, dt) {
     t.navPath = buildSentryPath(t, targetX, targetY); t.navGoal = goalKey; t.navTimer = .75;
     t.navStall = 0;
   }
-  if (!t.navPath) { t.navFailed = true; return false; }
+  if (!t.navPath) { t.navFailed = true; unwedgeSentry(t); return false; }
   t.navFailed = false;
   // 必須到達轉彎格中心，不能剛跨入格子就跳過路點，否則會切角卡牆。
   while (t.navPath.length) {
