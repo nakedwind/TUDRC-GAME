@@ -157,9 +157,9 @@ function updateMeal(dt) {
 }
 // ---- NPC：拿餐盤 → 裝 2～4 樣 → 找有桌子的空位坐下吃 → 再坐一下 → 起身把髒盤拿去回收 ----
 const mealRand = ([a, b]) => a + Math.random() * (b - a);
-function tryStartMeal(a) {
+function tryStartMeal(a, force) {   // force＝一定去吃（被溫特邀請來的，js/meal-invite.js）
   if (a.mealCd == null) a.mealCd = mealRand(MEAL.npc.firstCd);
-  if (a.mealCd > 0 || a.meal || Math.random() >= MEAL.npc.chance || !mealMapReady()) return false;
+  if (a.mealCd > 0 || a.meal || (!force && Math.random() >= MEAL.npc.chance) || !mealMapReady()) return false;
   const stacks = mealStamps(MEAL.trayTiles), buffets = mealStamps(MEAL.buffetTiles);
   const pans = buffets.flatMap(r => MEAL.pans.map((_, k) => panOf(r, k))).sort(() => Math.random() - .5).slice(0, Math.round(mealRand(MEAL.npc.dishes)));
   const stack = stacks[Math.floor(Math.random() * stacks.length)];

@@ -1667,6 +1667,8 @@ function handleMapClick(e, isLeft) {
   if (dog) { closeGroundMenu(); closeSentryMenu(); openDogFollowMenu(e.clientX + 12, e.clientY - 20); return false; }
   const hit = !isLeft && G.towers.find(t => Math.hypot(t.x - x, t.y - (sentrySprites[t.type] ? 14 : 0) - y) <= hitR(t));
   if (hit) { closeGroundMenu(); openSentryMenu(hit); return false; }
+  const npcHit = !isLeft && MAP_SAFE && typeof openNpcMenu === 'function' && (G.npcs || []).find(n => n.id !== 'ball' && Math.hypot(n.x - x, n.y - 14 - y) <= 26);   // 基地的 NPC：右鍵＝對話、邀請吃飯（js/sentry.js）
+  if (npcHit) { closeGroundMenu(); if (openNpcMenu(npcHit)) return false; }
   const campBase = !isLeft && !MAP_SAFE && campBaseAt(x, y);
   if (campBase) { closeSentryMenu(); openCampMenu(campBase, e.clientX, e.clientY); return false; }
   closeSentryMenu();

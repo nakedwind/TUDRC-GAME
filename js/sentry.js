@@ -23,6 +23,8 @@ function npcLocationTable() {
 // 受傷住院、負荷高的隊員先問 js/vitals.js（醫院、疏導室）；只換地圖，平常就不在基地的人照樣不出現
 let tinoSootheVisit = null;   // 本次遊戲中，堤諾走進疏導室後改在室內活動。
 function npcLocation(id) {
+  const invited = typeof mealInviteLocation === 'function' && mealInviteLocation(id);   // 被邀請一起去吃飯：跟著溫特（js/meal-invite.js）
+  if (invited) return invited;
   const loc = npcLocationTable()[id] || null;
   const moved = loc && typeof vitalsLocation === 'function' ? vitalsLocation(id) : null;
   if (moved) return moved;
@@ -627,6 +629,7 @@ function updateSentry(t, dt) {
   if (t.hp <= 0) { t.target = null; t.moving = false; if (!(t.say && t.say.hurt)) t.say = null; return; }   // 失去戰鬥能力：頭上的泡泡也收掉（倒下時喊的那句留著，js/mate-hurt-talk.js）
   if (t.eatenBy) { t.target = null; t.moving = false; return; }   // 卡在虱目魚小子嘴裡（js/milkfish-kid.js）
   if (t.mrtRide) { t.target = null; t.moving = false; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
+  if (typeof mealInviteStep === 'function' && mealInviteStep(t, dt)) return;   // 被邀請一起去吃飯：跟著溫特、吃飯、吃完逛一下（js/meal-invite.js）
   if (tinoSootheTripStep(t, dt)) return;
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(t, dt)) return;   // 基地：正在跟別人閒聊（js/npc-chats.js）
   if (MAP_SAFE && npcSeatStep(t, dt, TYPES[t.type].walkSpeed || 80)) { updateNpcTalk(t, dt); return; }   // 安全區：坐著或正走向椅子
@@ -900,6 +903,7 @@ function npcSeatStep(a, dt, speed) {
 }
 
 function updateWanderer(npc, dt) {
+  if (typeof mealInviteStep === 'function' && mealInviteStep(npc, dt)) return;   // 被邀請一起去吃飯：跟著溫特、吃飯、吃完逛一下再回去（js/meal-invite.js）
   if (typeof ashBusy === 'function' && ashBusy(npc)) return;   // 亞許正在疏導室幫隊員疏導（js/vitals.js）
   if (MAP_SAFE && typeof npcChatStep === 'function' && npcChatStep(npc, dt)) return;   // 正在跟別人閒聊（js/npc-chats.js）
   if (npcSeatStep(npc, dt, 65)) { updateNpcTalk(npc, dt); return; }   // 坐著或正走向椅子
@@ -920,6 +924,7 @@ function updateWanderer(npc, dt) {
     const eldrin = G.npcs.find(n => n.id === 'eldrin');
     if (eldrin) { followTarget(npc, eldrin, FOLLOW.avaren, dt); npc.target = null; npc.waitT = 0; return; }
   }
+  if (menuSentry === npc) return;   // 右鍵選單開著：先站好（openNpcMenu）
   if (npc.waitT > 0) { npc.waitT -= dt; return; }
   if (!npc.target) {
     if (trySeatActor(npc)) return;   // 路過椅子／床：有機率去坐
@@ -967,7 +972,8 @@ function openSentryMenu(t, silent) {
     '<button data-act="goto">🎯 指派位置巡邏</button>' +
     (MAP_SAFE ? '' : '<button data-act="escort">🛡️ 跟隨護衛部隊長' + (t.mode === 'escort' ? '（護衛中）' : '') + '</button>') +
     (MAP_SAFE && typeof canTalk === 'function' && canTalk(t) ? '<button data-act="talk">💬 對話</button>' : '') +   // 基地裡、有「找他說話（基地）」的台詞才有
-    (typeof canSendToHospital === 'function' && canSendToHospital(t) ? '<button data-act="hospital">🏥 去醫院休息</button>' : '');   // 基地裡、HP 沒滿（js/vitals.js）
+    (typeof canSendToHospital === 'function' && canSendToHospital(t) ? '<button data-act="hospital">🏥 去醫院休息</button>' : '') +   // 基地裡、HP 沒滿（js/vitals.js）
+    (typeof mealInviteButton === 'function' ? mealInviteButton(t) : '');   // 基地裡：邀請一起去餐廳吃飯（js/meal-invite.js）   // 基地裡、HP 沒滿（js/vitals.js）
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
   const rect = cv.getBoundingClientRect();
@@ -975,6 +981,20 @@ function openSentryMenu(t, silent) {
   sentryMenu.style.left = Math.round(Math.min(sx + 22, rect.width - 170)) + 'px';
   sentryMenu.style.top = Math.round(Math.max(6, sy - 30)) + 'px';
   sentryMenu.classList.remove('hidden');
+}
+// 基地的 NPC（右鍵點）：只有「對話」「一起去吃飯」；兩個都沒有就不開，回傳 false
+function openNpcMenu(npc) {
+  const html = (typeof canTalk === 'function' && canTalk(npc) ? '<button data-act="talk">💬 對話</button>' : '') + (typeof mealInviteButton === 'function' ? mealInviteButton(npc) : '');
+  if (!html) return false;
+  sfx('menu'); menuSentry = npc; assigning = null;
+  sentryMenu.innerHTML = '<div class="sm-title">' + inviteName(npc) + '</div>' + html;
+  sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
+  const rect = cv.getBoundingClientRect();   // 選單位置：跟著 NPC 在畫面上的位置（跟 openSentryMenu 一樣）
+  const sx = (npc.x - cam.x) * VIEW_SCALE * (rect.width / VIEW_W), sy = (npc.y - cam.y) * VIEW_SCALE * (rect.height / VIEW_H);
+  sentryMenu.style.left = Math.round(Math.min(sx + 22, rect.width - 170)) + 'px';
+  sentryMenu.style.top = Math.round(Math.max(6, sy - 30)) + 'px';
+  sentryMenu.classList.remove('hidden');
+  return true;
 }
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
 // 跟隨護衛：持續跟在部隊長身邊，看到附近的怪會出手（哨兵選單與左上角頭像選單共用）
@@ -991,6 +1011,7 @@ function sentryMenuAct(act) {
   else if (act === 'talk') { openDialogue(t); return; }
   else if (act === 'hospital') { sfx('button'); sendToHospital(t); }
   else if (act === 'escort') { sfx('button'); setSentryEscort(t); }
+  else if (act === 'mealInvite') toggleMealInvite(t);   // 邀請／取消邀請一起去吃飯（js/meal-invite.js）
   closeSentryMenu();
 }
 window.addEventListener('keydown', e => {
