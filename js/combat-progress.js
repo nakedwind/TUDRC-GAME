@@ -168,6 +168,7 @@ function restoreCombatProgress() {
     openElevatorStamp = data.elevator || null;   // 電梯開著還是關著（擋路格已經跟著 mapWalls 一起還原）
     reclaimAddedWalls();
     if (lastSafe === true) resumeSquadFromBase(data.activeSupply);
+    if (lastSafe === true && typeof leaderOnSpawn === 'function') { applyOutfits(); leaderOnSpawn(true); }   // 艾德林帶隊：在基地帶的補給加在玩家身上（js/leader-skills.js）
     if (typeof resumeVitals === 'function') resumeVitals();   // 中間回應變中心治療過：換成現在的 HP、負荷（倒下的隊員治好了就站起來，js/vitals.js）
     applyOutfits(); if (typeof syncSanitySP === 'function') syncSanitySP(); else sanitySP = G.guide; rememberGuideSP(); occCache = null; occCacheFor = null;
     computeFlow(); updateCamera(); updateHUD(); updateBuildToggle();

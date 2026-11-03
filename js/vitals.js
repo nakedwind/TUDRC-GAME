@@ -76,7 +76,8 @@ const hospitalResting = t => MAP_SAFE && isHospitalized(t.type);   // 這位隊�
 const onSootheRoom = () => MAP_SAFE && vitalsMapName() === VITALS.sootheRoomMap;
 const vitalsPractice = () => typeof practiceOn === 'function' && practiceOn();
 // 玩家操作的是隊員（艾德林帶隊）：他的 HP 記在隊員那邊（vitals.mates），溫特的 HP 留著不動
-const playerMate = () => typeof PLAYER_CHARACTER !== 'undefined' && PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER] ? PLAYER_CHARACTER : null;
+// 看 G.player.char（這個玩家是誰建的）：接續暫停的戰場時，G 先換成存起來的、角色還沒切過去
+const playerMate = () => { const who = (typeof G !== 'undefined' && G && G.player && G.player.char) || (typeof PLAYER_CHARACTER !== 'undefined' ? PLAYER_CHARACTER : 'winter'); return who !== 'winter' && TYPES[who] ? who : null; };
 function storePlayerHp(hp, who = playerMate()) { if (who) vitalsMate(who).hp = hp; else vitals.player = { hp }; }
 function loadPlayerHp() {
   const who = playerMate(), hp = who ? vitals.mates[who] && vitals.mates[who].hp : vitals.player && vitals.player.hp;
@@ -93,6 +94,7 @@ function rememberVitals() {
     saveVitals(); return;
   }
   storePlayerHp(G.player.hp, G.player.char && G.player.char !== 'winter' && TYPES[G.player.char] ? G.player.char : null);   // 上一張地圖操作的是誰
+  vitals.lastLeader = G.player.char || 'winter';   // 剛帶隊的人：回應變中心時跟溫特一樣不會自動住院（arriveVitals）
   for (const t of G.towers || []) {
     if (!TYPES[t.type]) continue;
     const m = vitalsMate(t.type);
@@ -106,7 +108,7 @@ function arriveVitals() {
   if (vitalsPractice()) return;
   if (MAP_SAFE && vitals.fromBattle) {   // 剛從戰鬥區回來
     for (const [id, m] of Object.entries(vitals.mates)) {
-      if (!TYPES[id] || id === playerMate()) continue;   // 帶隊的艾德林是玩家：不會自動住院
+      if (!TYPES[id] || id === vitals.lastLeader) continue;   // 剛帶隊回來的艾德林：跟溫特一樣不會自動住院（HP 留著，在基地慢慢回）
       if (m.berserk || m.taint >= 100) { m.taint = Math.min(m.taint, VITALS.berserkEdge); m.berserk = false; }
       m.hp = Math.max(1, Math.min(vitalsMax(id), m.hp));
       if (m.hp < vitalsMax(id) * VITALS.hospitalBelow) admitHospital(m);   // 重傷：自動住院

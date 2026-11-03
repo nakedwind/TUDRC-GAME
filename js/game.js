@@ -20,6 +20,8 @@ let PLAYER_OUTFIT = CHARACTERS.winter.sprite.slice(-1);
 function syncPlayerCharacter() {
   // 兵分兩路：走進哪一區就由負責那一區的隊伍帶隊（Z62＝艾德林隊；開始畫面直接選地圖、接續暫停的戰場也一樣）；不是任務的地圖照舊
   if (!MAP_SAFE && !MAP_STORY && typeof setActiveSquad === 'function' && typeof missionOfMap === 'function') { const m = missionOfMap(MAP && MAP.id); if (m) setActiveSquad(squadOfMission(m)); }
+  // 回到安全區：基地裡一律是溫特（隊員的台詞都是對部隊長說的）；只有溫特還要在應變中心報告時，先留著艾德林聽完（js/missions.js 的 leaderWaitingBrief）
+  if (MAP_SAFE && !MAP_STORY && typeof setActiveSquad === 'function' && typeof leaderWaitingBrief === 'function' && !leaderWaitingBrief()) setActiveSquad('winter');
   const lead = typeof squadLeader === 'function' && !MAP_STORY && !isNewbieMap() ? squadLeader() : 'winter';
   PLAYER_CHARACTER = CHARACTERS[lead] ? lead : 'winter';
   PLAYER_OUTFIT = CHARACTERS[PLAYER_CHARACTER].sprite.slice(-1);
@@ -409,6 +411,7 @@ function closeDialogue(silent = false) {
   if (actor) actor.waitT = 0.6;
   dialogueState = null; dialogueText.classList.remove('typing'); dialogueBox.classList.add('hidden');
   if (typeof onDialogueClosed === 'function') onDialogueClosed();
+  if (typeof afterLeaderBrief === 'function') afterLeaderBrief(actor);   // 溫特對艾德林報告完：換回操作溫特（js/missions.js）
   if (!silent) sfx('switch');
 }
 dialogueNext.addEventListener('click', advanceDialogue);

@@ -20,6 +20,10 @@ const MISSION_BASE = {
   briefer: 'eldrin',              // 報告任務的通訊員（隊員或場景 NPC 都可以）
 };
 
+// ★ 兵分兩路（艾德林當隊長）的總開關：false＝先不實裝（功能都做好了，只是關著）；改成 true 就打開
+//   關著的時候：只有溫特一隊、Z62 也由溫特去、池核只要台北車站大廳控制就開放、溫特的補血疏導照原本的速度和量
+//   打開的時候：下面 SQUADS 的設定、池核要兩邊都控制、data/balance.js 的 CARE_STYLE 都會生效
+const TWO_SQUADS_ENABLED = false;
 // 兵分兩路：溫特和艾德林各帶一隊（js/team.js）
 //   任務寫 squad: 'eldrin'＝那一區固定由艾德林隊去（出擊時玩家改操作艾德林，溫特不在場）；沒寫＝溫特隊。
 //   有艾德林隊的任務開放之後，出勤配置才會分成兩隊（同一個人只能在一隊）。
@@ -56,7 +60,7 @@ const MISSIONS = [
     desc: '地下街後方的大廳，空間開闊，異質體容易從各個方向包夾。',
   },
   {
-    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 58, y: 44, after: ['station', 'k56'],   // 分岔兩邊（台北車站大廳、Z62區地下街）都控制了才開放
+    id: 'pool', map: 'map_mv1bzur4', name: '池核', x: 58, y: 44, after: TWO_SQUADS_ENABLED ? ['station', 'k56'] : ['station'],   // 兵分兩路打開時：分岔兩邊（台北車站大廳、Z62區地下街）都控制了才開放
     desc: '大廳更深處的異質反應源，核心的反應特別強烈。',
   },
   {

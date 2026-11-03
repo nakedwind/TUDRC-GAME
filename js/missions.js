@@ -229,6 +229,19 @@ function sortieTo(m) {
   setActiveSquad(squad);   // 兵分兩路：這次由哪一隊帶隊（進地圖時換成操作那一隊的隊長，js/game.js 的 newGame）
   missionTravel(m.map);
 }
+// ---- 艾德林帶隊回到應變中心：溫特報告完就換回操作溫特、艾德林歸隊 ----
+// 基地裡隊員的台詞都是對部隊長（溫特）說的，所以艾德林只留到聽完報告；沒有要報告的話，一回來就是溫特（js/game.js 的 syncPlayerCharacter）。
+// 以後補了「艾德林帶隊時」的基地台詞，再改成可以用艾德林在基地走動。
+const leaderWaitingBrief = () => typeof PLAYER_CHARACTER !== 'undefined' && PLAYER_CHARACTER !== 'winter' && onBaseMap() && (!!briefPending() || bossBountyReady());
+function afterLeaderBrief(actor) {
+  if (PLAYER_CHARACTER === 'winter' || !actor || actorId(actor) !== 'winter' || !onBaseMap() || leaderWaitingBrief()) return;
+  setActiveSquad('winter');
+  setTimeout(() => missionTravel(MISSION_BASE.map, () => {   // 黑幕一下：艾德林歸隊、換回溫特，站在作戰桌前
+    const [x, y] = center(...missionArriveCell());
+    if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; G.player.dir = 'back'; }
+    systemNotice('艾德林歸隊，換回溫特部隊長');
+  }), 250);
+}
 // ---- 艾德林帶隊回到應變中心：溫特在作戰桌旁（當 NPC，有任務時由他報告）----
 function spawnBaseWinter() {
   if (!onBaseMap() || PLAYER_CHARACTER === 'winter' || G.npcs.some(n => n.id === 'winter')) return;

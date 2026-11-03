@@ -25,7 +25,7 @@ const MEMBER_UNAVAILABLE = { tino: '負傷中：無法出勤' };
 const SQUAD_STORE = 'tudrc_squad_v1';
 const squadTeamStore = squad => squad === 'winter' ? TEAM_STORE : 'tudrc_team_' + squad + '_v1';
 let activeSquad = (() => { try { const s = localStorage.getItem(SQUAD_STORE); return SQUADS[s] ? s : 'winter'; } catch (_) { return 'winter'; } })();
-const twoSquads = () => typeof missionStatus === 'function' && MISSIONS.some(m => m.squad && m.squad !== 'winter' && missionStatus(m) !== 'locked');
+const twoSquads = () => typeof TWO_SQUADS_ENABLED !== 'undefined' && TWO_SQUADS_ENABLED && typeof missionStatus === 'function' && MISSIONS.some(m => m.squad && m.squad !== 'winter' && missionStatus(m) !== 'locked');   // 總開關 TWO_SQUADS_ENABLED 在 data/missions.js
 const currentSquad = () => twoSquads() ? activeSquad : 'winter';
 const squadLeader = (squad = currentSquad()) => SQUADS[squad].leader;
 const squadOfMission = m => (m && SQUADS[m.squad] && twoSquads() ? m.squad : 'winter');

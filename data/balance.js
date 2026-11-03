@@ -25,7 +25,9 @@ const CARE_STYLE = {
   winter: { time: 0.75, amount: 1.3 },            // 溫特：一對一，比較快、補比較多
   eldrin: { time: 1.3, amount: 0.7, area: 3 },    // 艾德林帶隊：範圍，比較慢、補比較少
 };
-const careStyle = () => (typeof PLAYER_CHARACTER !== 'undefined' && CARE_STYLE[PLAYER_CHARACTER]) || CARE_STYLE.winter;
+const CARE_STYLE_OFF = { time: 1, amount: 1 };   // 兵分兩路關著（data/missions.js 的 TWO_SQUADS_ENABLED）：照原本的速度和量
+const careStyle = () => typeof TWO_SQUADS_ENABLED !== 'undefined' && !TWO_SQUADS_ENABLED ? CARE_STYLE_OFF
+  : (typeof PLAYER_CHARACTER !== 'undefined' && CARE_STYLE[PLAYER_CHARACTER]) || CARE_STYLE.winter;
 
 // ---- 角色資料相容入口 ----
 // 哨兵與嚮導的原始數值集中在 data/characters.js；這裡建立遊戲既有的 TYPES 介面。

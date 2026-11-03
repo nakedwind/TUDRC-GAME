@@ -7,12 +7,15 @@
 const isLeaderPlay = () => typeof PLAYER_CHARACTER !== 'undefined' && PLAYER_CHARACTER !== 'winter' && !!TYPES[PLAYER_CHARACTER];
 
 // ---- 進地圖、G.player 建好之後（game.js 的 newGame 呼叫）：出勤補給的效果加在玩家身上 ----
-function leaderOnSpawn() {
+// resume＝接續暫停的戰場（js/combat-progress.js）：補給的生命上限照加，但不補滿 HP
+function leaderOnSpawn(resume = false) {
   const p = G && G.player; if (!p || !isLeaderPlay() || MAP_SAFE) return;
   const a = typeof sortie !== 'undefined' && sortie.active[PLAYER_CHARACTER];
-  if (!a) return;
+  if (resume) { p.buff = undefined; p.maxhp = TYPES[PLAYER_CHARACTER].hp; }
+  if (!a) { if (resume) p.hp = Math.min(p.hp, p.maxhp); return; }
   p.buff = { ...a.buff };
-  if (p.buff.hp) { p.maxhp = Math.round(p.maxhp * (1 + p.buff.hp)); p.hp = p.maxhp; }
+  if (p.buff.hp) { p.maxhp = Math.round(p.maxhp * (1 + p.buff.hp)); if (!resume) p.hp = p.maxhp; }
+  p.hp = Math.min(p.hp, p.maxhp);
 }
 
 // ---- 每一幀（game.js 的 updatePlayer 呼叫）：增益倒數；回傳 true＝要站著不動（目前沒有）----
