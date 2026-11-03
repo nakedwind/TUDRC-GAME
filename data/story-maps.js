@@ -16953,6 +16953,241 @@ const STORY_MAPS = [
         ]
       ]
     }
+  },
+  {
+    "id": "map_mw0yxwzb",
+    "name": "Zk用",
+    "desc": "",
+    "layers": {
+      "floor": {},
+      "ground": {},
+      "ground2": {
+        "11,7": "tile_mr4czvpx",
+        "18,7": "tile_mr4czvpx",
+        "11,8": "tile_mr4czvpx",
+        "18,8": "tile_mr4czvpx",
+        "11,9": "tile_mr4czvpx",
+        "18,9": "tile_mr4czvpx",
+        "11,10": "tile_mr4czvpx",
+        "18,10": "tile_mr4czvpx",
+        "18,11": "tile_mr4czvpx",
+        "18,12": "tile_mr4czvpx",
+        "11,11": "tile_mr4czvpx",
+        "18,13": "tile_mr4czvpx"
+      }
+    },
+    "stamps": [
+      {
+        "id": "tile_bg_backroom_wall02_dmg_heavy",
+        "c": 16,
+        "r": 2,
+        "layer": "ground2",
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_wall02_dmg_light",
+        "c": 13,
+        "r": 2,
+        "layer": "ground2",
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 11,
+        "r": 11,
+        "layer": "floor",
+        "oy": 2.666667000000018,
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_broken_wall_right",
+        "c": 12,
+        "r": 11,
+        "layer": "floor",
+        "fx": false
+      },
+      {
+        "id": "tile_dmg_broken_pillar_rebar",
+        "c": 18,
+        "r": 12,
+        "layer": "floor",
+        "oy": 2,
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_floor04",
+        "c": 14,
+        "r": 13,
+        "layer": "ground",
+        "rot": 3,
+        "oy": 30.666667000000018,
+        "ox": 24
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 16,
+        "r": 5,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 11,
+        "r": 11,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 14,
+        "r": 11,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 14,
+        "r": 8,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 11,
+        "r": 8,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 16,
+        "r": 11,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 16,
+        "r": 8,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 11,
+        "r": 5,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 14,
+        "r": 5,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_wall02",
+        "c": 11,
+        "r": 2,
+        "layer": "ground2",
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 11,
+        "r": 2,
+        "layer": "ground2",
+        "oy": 12.666667000000018,
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 11,
+        "r": 4,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 11,
+        "r": 5,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 11,
+        "r": 6,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 18,
+        "r": 2,
+        "layer": "ground2",
+        "oy": 12.666667000000018,
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 18,
+        "r": 5,
+        "layer": "ground2",
+        "oy": 10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 18,
+        "r": 4,
+        "layer": "ground2",
+        "oy": 10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 18,
+        "r": 6,
+        "layer": "ground2"
+      }
+    ],
+    "solid": [],
+    "breakable": [],
+    "coreSpots": [],
+    "spawnZone": [],
+    "coreCount": 1,
+    "monsterMix": [
+      {
+        "id": "slime",
+        "weight": 100
+      }
+    ],
+    "camp": [],
+    "rules": {
+      "money": 5000,
+      "guide": 100,
+      "guideRegen": 9,
+      "speed": 44,
+      "reward": 8
+    },
+    "solidOffsets": {},
+    "safe": true,
+    "npcs": false,
+    "portals": [],
+    "hiddenPickups": [],
+    "cols": 30,
+    "rows": 60,
+    "layerOrder": [
+      {
+        "id": "ground",
+        "name": "01_地板"
+      },
+      {
+        "id": "ground2",
+        "name": "02_牆壁"
+      },
+      {
+        "id": "floor",
+        "name": "03_牆壁（前）"
+      }
+    ]
   }
 ];
 // 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來

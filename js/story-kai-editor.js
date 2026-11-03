@@ -62,10 +62,11 @@ const KINDS = {
   sfx: { name: '音效', make: () => ({ src: '', vol: 100 }) },
 };
 const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble', 'act', 'sway']);
-const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
+const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣'], ['walk', '走路'], ['run', '跑步'], ['slow', '慢走']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
 const FACES = [['', '面向：自動'], ['front', '正面'], ['back', '背面'], ['left', '朝左'], ['right', '朝右']];
 // ---- 怪物、道具：怪物用「怪物代號」、道具用「道具代號」，跟角色代號分開算（不用先加進演出者列表）----
 const MON_KINDS = new Set(['mshow', 'mhide', 'mact']), ITEM_KINDS = new Set(['ishow', 'ihide']);
+const WALK_ACTS = new Set(['walk', 'run', 'slow']);   // 走路／跑步／慢走：之後「角色位置」走路時腳步看起來的快慢（走多久照角色位置的 ms）
 const MON_ACTS = [['attack', '攻擊'], ['move', '移動'], ['die', '死亡']];
 const MON_FACES = [['', '面向：不變'], ['front', '正面'], ['left', '朝左'], ['right', '朝右']];
 // 怪物種類：data/monsters.js（怪物編輯器）；道具：背包物品（data/items.js、data/supplies.js）
@@ -129,7 +130,8 @@ const lastWho = () => lastOf(s => s.who !== '' && s.who != null)?.who ?? (scene(
 const lastCode = key => lastOf(s => codeOk(s[key]))?.[key] ?? 1;   // 怪物、道具：沿用上面最近一行的代號
 function nextCode(key) { return (scene()?.steps || []).reduce((m, s) => codeOk(s[key]) ? Math.max(m, Number(s[key])) : m, 0) + 1; }   // 新的怪物、道具：還沒用過的下一個號碼
 const lastMonType = () => lastOf(s => s.do === 'mshow' && s.type)?.type || MONS[0]?.id || '';
-const lastCamW = () => lastOf(s => (s.do === 'cam' || s.do === 'camMove') && s.w)?.w || 20;
+const CAM_W = 20;   // 鏡頭的預設大小（寬幾格）：第一個鏡頭、「回到預設大小」用這個
+const lastCamW = () => lastOf(s => (s.do === 'cam' || s.do === 'camMove') && s.w)?.w || CAM_W;
 function nextUnshown() {   // 還沒出現過的第一個演出者
   const shown = new Set(scene().steps.filter(s => s.do === 'show').map(s => Number(s.who)));
   return (scene().cast.find(c => !shown.has(c.no)) || scene().cast[0])?.no ?? '';
@@ -320,6 +322,7 @@ function draw() {
   dot(items, '#7fd0ff', (no, x) => '物' + pad(no) + ' ' + (propOf(x.id)?.name || x.id));
   // 鏡頭：虛線框＝劇情跑到這一行時拍到的範圍；下面那一塊是對話框會蓋住的地方
   const camStep = cur && (cur.do === 'cam' || cur.do === 'camMove');
+  $('camCenter').hidden = $('camReset').hidden = !camStep;   // 選到鏡頭那一行才出現
   if (st.cam && ($('showCams').checked || camStep)) {
     if (cur?.do === 'camMove') { const prev = simulate(sel - 1).cam; if (prev) drawCam(prev, false, true); }
     drawCam(st.cam, st.cam.src === sel, false);
@@ -391,8 +394,9 @@ cv.addEventListener('mousedown', e => {
   const hd = hitHandle(x, y); if (!hd) return;
   const step = scene().steps[hd.step];
   drag = { h: hd, p0: p, at: step?.at && [...step.at], box: step?.box && [...step.box], moved: false };
+  nudge = step?.at ? step : null;   // 方向鍵微調的對象
   if (hd.step !== sel) flashRow(hd.step);
-  e.preventDefault();
+  e.preventDefault(); cv.focus();
 });
 window.addEventListener('mousemove', e => {
   if (rubber) { const [x, y] = eventXY(e); rubber.b = toCell(x, y); drawSoon(); return; }
@@ -423,6 +427,16 @@ cv.addEventListener('wheel', e => {
   view.x = before[0] * C - x / view.z; view.y = before[1] * C - y / view.z;   // 以游標為中心縮放
   drawSoon();
 }, { passive: false });
+// 方向鍵微調：最後拖過（點過）的角色、怪物、道具、鏡頭，每按一下 0.1 格，按住 Shift 一次 1 格
+let nudge = null;
+cv.addEventListener('keydown', e => {
+  const d = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+  if (!d || !nudge?.at || !scene()?.steps.includes(nudge)) return;
+  e.preventDefault();
+  const k = e.shiftKey ? 1 : .1;
+  nudge.at = [r1(Math.max(0, nudge.at[0] + d[0] * k)), r1(Math.max(0, nudge.at[1] + d[1] * k))];
+  commit();
+});
 cv.addEventListener('auxclick', e => { if (e.button === 1) e.preventDefault(); });
 function zoomBy(k) {
   const W = cv.clientWidth, H = cv.clientHeight, before = toCell(W / 2, H / 2);
@@ -430,6 +444,18 @@ function zoomBy(k) {
 }
 $('zoomIn').onclick = () => zoomBy(1.2); $('zoomOut').onclick = () => zoomBy(1 / 1.2);
 $('showCams').onchange = drawSoon;
+// 鏡頭置中：把選取那一行的鏡頭中心移到地圖正中間
+$('camCenter').onclick = () => {
+  const cur = scene()?.steps[sel], m = curMap();
+  if (!cur || !m || (cur.do !== 'cam' && cur.do !== 'camMove')) return;
+  cur.at = [r1(m.cols / 2), r1(m.rows / 2)]; commit();
+};
+// 回到預設大小：鏡頭寬度改回預設（中心點不動）
+$('camReset').onclick = () => {
+  const cur = scene()?.steps[sel];
+  if (!cur || (cur.do !== 'cam' && cur.do !== 'camMove')) return;
+  cur.w = CAM_W; commit();
+};
 new ResizeObserver(drawSoon).observe($('stage'));
 function setPick(p) {
   pick = p; cv.classList.toggle('picking', !!p);
@@ -578,7 +604,7 @@ function rowLabel(st) {
     const src = st.do === 'ishow' ? st : shownBy('item', st.item, scene().steps.indexOf(st));
     extra = ' [' + (codeOk(st.item) ? pad(st.item) : '??') + '/' + (propOf(src?.id)?.name || '道具') + ']';
   }
-  if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && st.on === false ? '（停）' : '');
+  if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && !WALK_ACTS.has(st.act) && st.on === false ? '（停）' : '');
   return [name, extra];
 }
 // 每一行最右邊的設定（藍＝下拉選單、紅＝自己輸入、綠＝到地圖上點）
@@ -637,7 +663,7 @@ function controls(st) {
       s.value = st.map || ''; return [s];
     }
     case 'cam': return [pickBtn(st, '鏡頭位置')];
-    case 'camMove': return [pickBtn(st, '鏡頭位置'), msIn(st, '等待時間（ms）：從上一個鏡頭移到這裡花多久')];
+    case 'camMove': return [pickBtn(st, '鏡頭位置'), msIn(st, '移動時間（ms）：從上一個鏡頭移到這裡花多久（不會等，下一行同時開始跑；要等就在下面加「等待時間」）')];
     case 'blackIn': case 'blackOut': case 'whiteIn': case 'whiteOut': return [h('label', {}, '秒數(ms)：', msIn(st))];
     case 'wait': return [h('label', {}, '秒數(ms)：', msIn(st, '停在這一行多久，再跑下一行'))];
     case 'camShake': return [h('label', {}, '秒數(ms)：', msIn(st, '震多久')), h('label', {}, '幅度：', lvSel(st))];
@@ -646,8 +672,14 @@ function controls(st) {
     case 'hide': return [codeIn(st)];
     case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st)];
     case 'act': {
-      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地、集氣：勾「開」開始，再加一行取消勾選就停', onchange: e => { st.act = e.target.value; commit(); } }, ACTS.map(([v, t]) => h('option', { value: v }, t)));
+      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地、集氣：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
+        st.act = e.target.value;
+        if (WALK_ACTS.has(st.act)) delete st.on; else if (st.act !== 'hop' && st.on == null) st.on = true;
+        commit();
+      } }, ACTS.map(([v, t]) => h('option', { value: v }, t)));
       pickAct.value = st.act || 'hop';
+      delete st.at; delete st.face;   // 角色演出不用位置（舊版的走路曾經有）
+      if (WALK_ACTS.has(st.act)) return [codeIn(st), pickAct];
       return [codeIn(st), pickAct, st.act !== 'hop' ? check(st, 'on', '開', true) : null];
     }
     case 'mshow': return [monCode(st), listSel(st, 'type', MONS, '（選怪物）', '哪一種怪物（怪物編輯器裡的）'), pickBtn(st, '怪物位置'), monFaceSel(st, [['', '正面'], ['left', '朝左'], ['right', '朝右']])];

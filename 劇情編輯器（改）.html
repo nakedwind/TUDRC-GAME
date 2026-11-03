@@ -49,7 +49,7 @@
   .stage-head .grow { flex: 1; } .stage-head b { color: #cfe0ee; }
   .stage { position: relative; flex: 1; min-height: 0; border: 1px solid var(--soft); border-radius: 8px; background: #0b1016; overflow: hidden; }
   #map { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-  #map.picking { cursor: crosshair; } #map.panning { cursor: grabbing; }
+  #map:focus { outline: none; } #map.picking { cursor: crosshair; } #map.panning { cursor: grabbing; }
   #pickBar { padding: 6px 10px; border: 1px solid var(--pick-line); border-radius: 8px; background: var(--pick-bg); color: var(--pick-text); font-size: 13px; }
   .hint { font-size: 12px; color: var(--muted); }
 
@@ -149,12 +149,14 @@
     <!-- 中間：預覽窗 -->
     <section class="panel stagebox" aria-label="預覽窗">
       <div class="stage-head"><b id="mapTitle"></b><span class="grow"></span>
+        <button type="button" class="small" id="camCenter" hidden title="把這一行的鏡頭移到地圖正中間（大小不變）">🎯 鏡頭置中</button>
+        <button type="button" class="small" id="camReset" hidden title="鏡頭寬度改回預設的 20 格（沒有放大縮小過的大小，中心點不動）">↺ 回到預設大小</button>
         <label class="row"><input type="checkbox" id="showCams" checked>鏡頭範圍預覽（虛線）</label>
         <button type="button" class="small" id="zoomOut" aria-label="縮小">－</button><span id="zoomText" style="min-width:44px;text-align:center"></span><button type="button" class="small" id="zoomIn" aria-label="放大">＋</button>
       </div>
-      <div class="stage" id="stage"><canvas id="map"></canvas></div>
+      <div class="stage" id="stage"><canvas id="map" tabindex="0"></canvas></div>
       <div id="pickBar" hidden></div>
-      <div class="hint">Alt＋滑鼠中鍵拖曳：移動畫面　Alt＋滾輪：放大縮小預覽窗　鏡頭虛線框：拖中間移動、拖四個角落以中心點縮放（長寬比固定）　角色、特效框也可以直接拖</div>
+      <div class="hint">Alt＋滑鼠中鍵拖曳：移動畫面　Alt＋滾輪：放大縮小預覽窗　鏡頭虛線框：拖中間移動、拖四個角落以中心點縮放（長寬比固定）　角色、特效框也可以直接拖　拖過（或點過）的角色、怪物、道具、鏡頭：方向鍵微調 0.1 格、Shift＋方向鍵 1 格</div>
     </section>
 
     <!-- 右邊：劇情、演出者、指令列表 -->
@@ -236,7 +238,7 @@
   <script src="js/story-kai-fx.js?v=kai-20261103"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-kai-editor.js?v=kai8-20261104"></script>
+  <script src="js/story-kai-editor.js?v=kai13-20261104"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],
