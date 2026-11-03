@@ -312,9 +312,9 @@
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
   <script src="js/build.js?v=lvfx-20261102"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=campspot-20261104"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=idlemeal-20261104"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=follow-20261104"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
-  <script src="js/npc-chats.js?v=mealnpc-20261104"></script> <!-- 基地 NPC 閒聊小表演：走到桌前、泡泡輪流說話 -->
+  <script src="js/npc-chats.js?v=linger-20261104"></script> <!-- 基地 NPC 閒聊小表演：走到桌前、泡泡輪流說話 -->
   <script src="js/progression.js?v=achvimpl-20261023"></script>
   <script src="data/skills.js?v=skilltree-20261022"></script>   <!-- 技能樹資料 -->
   <script>document.write('<script src="data/squad-skills.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 技能樹內容（Y102隊員裝備／技能編輯器匯出）；每次都讀最新的 -->
@@ -376,7 +376,8 @@
   <script src="js/food.js?v=mealbuff-20261102"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/cooking.js?v=cooking-20261102"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
   <script src="js/meal.js?v=mealcd-20261104"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
-  <script src="js/meal-invite.js?v=mealcd-20261104"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
+  <script src="js/meal-invite.js?v=linger-20261104"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
+  <script src="js/base-follow.js?v=office-20261104"></script>   <!-- 雷德在基地裡跟著溫特換地圖（不進溫特辦公室、別人寢室） -->
   <script src="js/ball-poses.js?v=ballsit-20261102"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
   <script src="js/missions.js?v=baseswap-20261103"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
@@ -402,7 +403,7 @@
   <script src="js/mrt-train.js?v=cargo3-20261102"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=care-20261103"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=mealnpc-20261104"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=lift-20261104"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->

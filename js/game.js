@@ -469,7 +469,10 @@ function animateSentry(t, mx, my, dt) {
   t.moving = Math.hypot(mx, my) > 0.01;
   if (!t.moving) { t.anim = 0; t.dir = t.dir || 'front'; updateBlink(t, dt); return; }
   t.blinkTime = -1;
-  t.dir = Math.abs(mx) >= Math.abs(my) ? (mx < 0 ? 'left' : 'right') : (my < 0 ? 'back' : 'front');
+  const nd = Math.abs(mx) >= Math.abs(my) ? (mx < 0 ? 'left' : 'right') : (my < 0 ? 'back' : 'front');
+  const sideways = (nd === 'left' || nd === 'right') !== (t.dir === 'left' || t.dir === 'right');   // 換成另一個軸（左右 ↔ 上下）
+  const keep = typeof mealGuest === 'function' && mealGuest(t) && sideways && Math.max(Math.abs(mx), Math.abs(my)) < Math.min(Math.abs(mx), Math.abs(my)) * 1.6;   // 被邀請吃飯的人斜著走時：明顯換方向才轉身（不然左、上一直跳，看起來在閃，js/meal-invite.js）
+  if (!keep) t.dir = nd;
   t.anim = (t.anim || 0) + dt;
 }
 const keys = {};                         // 目前按住的按鍵
@@ -778,6 +781,7 @@ function enterPortal(pt) {
             if (!playerBlocked(x, y)) { G.player.x = x; G.player.y = y; }
           }
         } else placePlayerNearPortal(back);
+        if (typeof placeArrivedFollowers === 'function') placeArrivedFollowers(!!pt.elevator);   // 跟過來的雷德、被邀請吃飯的人：馬上站到溫特旁邊（不會先出現在別的地方再瞬移，js/base-follow.js）
         stairArmed = false;   // 剛到的位置如果剛好在樓梯出入口上，不要馬上又被送回去
         updateCamera(); draw();
         requestAnimationFrame(() => mapTransition.classList.remove('visible'));
@@ -2172,6 +2176,7 @@ function update(dt) {
     if (t.ramCd > 0) t.ramCd -= dt;
   }
   // 哨兵走動（巡邏）
+  if (typeof baseFollowTick === 'function') baseFollowTick(dt);   // 每幀看溫特換了地圖沒（出勤時雷德不在隊上也要知道：回基地就回平常的位置）；跟過來的雷德晚一點從樓梯走出來（js/base-follow.js）
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
     if (t.grabbed || t.grabFall) { faceNpcFront(t); continue; }   // 被抓著／正在掉下來（js/grab.js）
