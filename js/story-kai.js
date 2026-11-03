@@ -33,6 +33,9 @@ const StoryKai = (() => {
   // ---- 幅度（編輯器裡選 1～5）換成實際的像素 ----
   const SHAKE_PX = [0, 2, 4, 7, 11, 16];      // 鏡頭震動：亂跳的幅度
   const SWAY_PX = [0, 3, 6, 10, 15, 22];      // 鏡頭晃動：慢慢晃的幅度（像拿著攝影機）
+  // 滴血：跟著角色走過的路，晚 0.3 秒滴到地上；顏色取自柯林受傷差分的血
+  const BLEED = { delay: .3, walkEvery: [.16, .5], standEvery: [.6, 1.5], bigChance: .25, max: 500, colors: ['#9b2624', '#8e1b19', '#7c1c16'], edge: '#590e05' };
+  const ACTOR_SWAY = { px: [0, .6, 1.2, 2, 3, 4.5], speed: 3.2 };   // 角色晃動：1～5 級左右晃的幅度（像素）、晃的速度（越大越快）；上下另外晃 1～2 像素
   const TREMBLE_PX = [0, .4, .8, 1.3, 2, 3];  // 角色震動（發抖）：左右快速晃的幅度
   const BOX_SHAKE_TIME = 1.5;                 // 對話框震動幾秒（css/story-kai.css 的動畫長度）
   const BGM_FADE = 1.5;                       // 背景音樂淡入、淡出幾秒
@@ -56,14 +59,27 @@ const StoryKai = (() => {
   // ---- 角色圖 ----
   const spriteCache = {};
   const sprites = name => spriteCache[name] || (spriteCache[name] = loadCharacterSprites(name));
-  // 受傷差分：<資料夾>/<名字>_0000_Front_hurt_01～03.png（01＝張眼、02＝半閉、03＝閉眼）；只有正面，側面、背面、走路照原本的圖
-  const hurtCache = {};
+  // 角色的差分圖：<資料夾>/<名字>_<方向>_<差分>.png；有畫才用，沒畫（或還沒載好）就用原本的圖
+  //   受傷：正面 0000_Front_hurt_01～03（01＝張眼、02＝半閉、03＝閉眼）；側面、背面 0003_Leftside_hurt、0006_right-side_hurt、0009_back_hurt
+  //   坐下：0003_Leftside_sit…；受傷時先找 0003_Leftside_hurt_sit
+  const DIR_FILE = { front: '0000_Front', left: '0003_Leftside', right: '0006_right-side', back: '0009_back' };
+  const extraCache = {};
+  function extraImage(a, file) {
+    if (a.set.single || !a.cast.sprite) return null;
+    const name = a.cast.sprite, src = 'images/character/' + name + '/' + String(name).replace('_', '') + '_' + file + '.png';
+    const im = extraCache[src] || (extraCache[src] = Object.assign(new Image(), { src }));
+    return readyImage(im) ? im : null;
+  }
   function hurtSet(a) {
     if (a.set.single) return null;
-    const name = a.cast.sprite, prefix = 'images/character/' + name + '/' + String(name).replace('_', '') + '_0000_Front_hurt_0';
-    const h = hurtCache[name] || (hurtCache[name] = [1, 2, 3].map(n => { const im = new Image(); im.src = prefix + n + '.png'; return im; }));
-    if (!readyImage(h[0])) return null;   // 還沒載好（或沒有畫）：先用原本的圖
-    return { ...a.set, front: [h[0], ...a.set.front.slice(1)], blink: [h[1], h[2], h[2]] };
+    const set = { ...a.set }, f = extraImage(a, '0000_Front_hurt_01');
+    if (f) { set.front = [f, ...a.set.front.slice(1)]; set.blink = [extraImage(a, '0000_Front_hurt_02') || f, extraImage(a, '0000_Front_hurt_03') || f, extraImage(a, '0000_Front_hurt_03') || f]; }
+    for (const d of ['left', 'right', 'back']) { const im = extraImage(a, DIR_FILE[d] + '_hurt'); if (im) set[d] = [im, ...a.set[d].slice(1)]; }   // 只換站著那張，走路照原本的圖
+    return set;
+  }
+  function sitImage(a) {   // 坐下：照現在的面向找坐下圖
+    const base = DIR_FILE[a.dir] || DIR_FILE.front;
+    return (a.hurt && extraImage(a, base + '_hurt_sit')) || extraImage(a, base + '_sit');
   }
   function imageSet(src) {   // 只有一張圖的路人（cast.image）：每個方向、走路都用同一張
     if (spriteCache[src]) return spriteCache[src];
@@ -200,9 +216,14 @@ const StoryKai = (() => {
     // 第一個黑幕指令是「黑幕淡出」：劇情一開始畫面是黑的，等它慢慢亮起來
     const firstBlack = steps.find(s => s.do === 'blackIn' || s.do === 'blackOut');
     state = { cfg, steps, i: 0, time: 0, playing: false, ending: null, ended: false, waitUntil: 0, talk: null, moveWait: null,
-      actors: (cfg.cast || []).map(makeActor), monsters: [], items: [], cam: { x: COLS / 2, y: ROWS / 2, w: fullW }, camMove: null,
+      actors: (cfg.cast || []).map(makeActor), monsters: [], items: [], blood: [], cam: { x: COLS / 2, y: ROWS / 2, w: fullW }, camMove: null,
       black: { from: firstBlack?.do === 'blackOut' ? 1 : 0, to: firstBlack?.do === 'blackOut' ? 1 : 0, t: 0, dur: 0 },
       white: { from: 0, to: 0, t: 0, dur: 0 }, shake: null, sway: 0, vignette: 0, fx: [], skipping: false };
+    // 劇情裡有用到受傷、坐下的人：先把差分圖載好（第一次切過去才不會閃一下原本的圖）
+    for (const s of steps) if (s.do === 'act' && (s.act === 'hurt' || s.act === 'sit')) {
+      const a = actor(s.who); if (!a) continue;
+      hurtSet(a); for (const d of Object.keys(DIR_FILE)) sitImage({ ...a, dir: d, hurt: true }), sitImage({ ...a, dir: d, hurt: false });
+    }
     applyCam();
     document.body.classList.add('story-scene');
     ui.hidden = true; el('storyKaiEnd').hidden = true;
@@ -230,6 +251,7 @@ const StoryKai = (() => {
   }
   function settle() {   // 快轉時：正在走的人直接到、淡入淡出直接做完、要等的時間直接過去
     for (const a of state.actors) {
+      if (a.trail) a.trail = [];   // 快轉：走過的路不滴血
       if (a.target) { [a.x, a.y] = a.path.length ? a.path[a.path.length - 1] : a.target; a.target = null; a.path = []; a.moving = false; if (a.arriveDir) a.dir = a.arriveDir; }
       if (a.fade < 0) a.hidden = true;
       a.fade = 0; a.alpha = 1;
@@ -300,10 +322,13 @@ const StoryKai = (() => {
         else if (s.act === 'gun') a.armed = on;
         else if (s.act === 'down') a.down = on;
         else if (s.act === 'charge') a.charging = on;
+        else if (s.act === 'bleed') { a.bleed = on; a.trail = []; a.dripIn = rnd(.1, .3); }   // 滴血：開著的時候一路滴
         else if (s.act === 'hurt') { a.hurt = on; if (on) hurtSet(a); }   // 受傷：換成流血的差分
+        else if (s.act === 'light') a.light = on ? clamp(Number(s.r) || 4, 1, 20) : 0;   // 光源：身上發光，照亮幾格（後室黑幕時看得出來）
+        else if (s.act === 'sit') { a.sit = on; if (on) sitImage(a); }   // 坐下：有畫坐下圖的方向才會坐（停下來的時候）
         break;
       }
-      case 'sway': { const a = actor(s.who); if (a) a.sway = s.on === false ? 0 : SWAY_PX[clamp(Number(s.lv) || 2, 1, 5)] * .5; break; }   // 角色晃動：跟鏡頭晃動同樣的 1～5 級，慢慢左右晃（像站不穩）
+      case 'sway': { const a = actor(s.who); if (a) a.sway = s.on === false ? 0 : ACTOR_SWAY.px[clamp(Number(s.lv) || 2, 1, 5)]; break; }   // 角色晃動：1～5 級，左右晃（像站不穩）
       case 'tremble': { const a = actor(s.who); if (a) a.tremble = s.on === false ? 0 : TREMBLE_PX[clamp(Number(s.lv) || 2, 1, 5)]; break; }
       case 'mshow': showMonster(s); break;
       case 'mhide': { const e = monster(s.mon); if (e) { e.target = null; e.path = []; if (state.skipping) dropMonster(e); else e.fade = -1; } break; }
@@ -465,7 +490,7 @@ const StoryKai = (() => {
     if (MAP && MAP.id === id) return;
     if (!gotoMap(id)) { console.warn('演出地圖找不到：' + id); return; }
     for (const a of state.actors) { a.hidden = true; a.fade = 0; a.alpha = 1; a.target = null; a.path = []; a.moving = false; }
-    state.monsters = []; state.items = [];   // 怪物、道具也留在上一個場景
+    state.monsters = []; state.items = []; state.blood = [];   // 怪物、道具、地上的血也留在上一個場景
     state.moveWait = null; state.camMove = null;
     state.cam = { x: COLS / 2, y: ROWS / 2, w: VIEW_W / Math.max(.1, VIEW_SCALE) / CELL };
     state.lights = lights();
@@ -528,6 +553,7 @@ const StoryKai = (() => {
     for (const e of [...state.monsters]) tickMonster(e, dt);
     for (const it of [...state.items]) tickItem(it, dt);
     for (const f of state.fx) f.t += dt;
+    for (const b of state.blood) if (b.t < .12) b.t += dt;
     state.fx = state.fx.filter(f => f.t < fxTime(f));
     updateWorldEffects(dt); updateLightFlashes(dt);
     if (typeof updateFlickerLights === 'function') updateFlickerLights(dt);
@@ -549,6 +575,35 @@ const StoryKai = (() => {
       else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
     }
     if (a.hidden || a.moving) a.blinkTime = -1; else updateBlink(a, dt);
+    if (a.bleed && !a.hidden) tickBleed(a, dt);
+  }
+  // 滴血：記下每一刻站在哪，0.3 秒後在那裡滴一滴；走路時滴得密、站著時滴得疏，大小、位置都隨機
+  function tickBleed(a, dt) {
+    a.trail.push({ t: state.time, x: a.x, y: a.y, moving: a.moving });
+    while (a.trail.length > 2 && a.trail[1].t <= state.time - BLEED.delay) a.trail.shift();
+    a.dripIn -= dt;
+    const p = a.trail[0];
+    if (a.dripIn > 0 || !p || p.t > state.time - BLEED.delay + dt) return;
+    a.dripIn = rnd(...(p.moving ? BLEED.walkEvery : BLEED.standEvery));
+    dropBlood(p.x + rnd(-5, 5), p.y + rnd(11, 18), Math.random() < BLEED.bigChance);
+  }
+  function dropBlood(x, y, big) {
+    const r = big ? rnd(1.7, 2.8) : rnd(.6, 1.3);
+    const parts = [{ dx: 0, dy: 0, rx: r * rnd(.85, 1.3), ry: r * rnd(.6, .9), rot: rnd(0, Math.PI) }];   // 主要那一灘：有點扁、方向隨機
+    const specks = big ? 1 + Math.floor(Math.random() * 3) : Math.random() < .3 ? 1 : 0;   // 旁邊濺開的小點
+    for (let i = 0; i < specks; i++) { const t = rnd(0, Math.PI * 2), d = r * rnd(1.3, 2.3), sr = r * rnd(.2, .45); parts.push({ dx: Math.cos(t) * d, dy: Math.sin(t) * d * .7, rx: sr, ry: sr * rnd(.7, 1), rot: 0 }); }
+    state.blood.push({ x, y, t: 0, color: BLEED.colors[Math.floor(Math.random() * BLEED.colors.length)], parts });
+    if (state.blood.length > BLEED.max) state.blood.shift();
+  }
+  function drawBlood() {
+    for (const b of state.blood) {
+      const k = Math.min(1, b.t / .12);   // 滴下去的一瞬間由小變大
+      for (const [color, grow] of [[BLEED.edge, .5], [b.color, 0]]) {   // 先畫暗一點的邊，再畫血
+        ctx.fillStyle = color; ctx.beginPath();
+        for (const p of b.parts) { ctx.moveTo(b.x + p.dx + (p.rx + grow) * k, b.y + p.dy); ctx.ellipse(b.x + p.dx, b.y + p.dy, (p.rx + grow) * k, (p.ry + grow) * k, p.rot, 0, Math.PI * 2); }
+        ctx.fill();
+      }
+    }
   }
   function paintLayers() {
     if (!ui) return;
@@ -586,14 +641,15 @@ const StoryKai = (() => {
     const weapon = a.armed && !a.down && MELEE_WEAPON[a.cast.char];
     const pose = { ...a, sitting: null, gunT: a.armed && !weapon ? 1 : 0, meleeSwing: weapon ? { angle: FACE_ANGLE[a.dir] ?? Math.PI / 2, age: 0, wind: 1, impact: 2, duration: 3 } : null };
     const set = (a.hurt && hurtSet(a)) || a.set;
-    let img = a.down && readyImage(a.set.fail) ? a.set.fail : pickCharacterFrame(set, pose);
+    let img = a.down && readyImage(a.set.fail) ? a.set.fail : (a.sit && !a.moving && !a.armed && sitImage(a)) || pickCharacterFrame(set, pose);
     if (!readyImage(img)) img = a.set.front?.[0];
     if (!readyImage(img)) return;
     const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * a.tremble : 0;
     const zap = a.charging ? Math.sin(state.time * 60) * .6 : 0;   // 集氣：全身微微發抖
     const hk = a.hopT > 0 ? 1 - a.hopT / HOP_TIME : 0;
-    const swayX = a.sway ? (Math.sin(state.time * 1.3 + a.no) + Math.sin(state.time * 2.1 + 1 + a.no) * .4) * a.sway : 0;
-    const x = Math.round(a.x) + shiver + zap + swayX, top = a.y - size + 18 - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
+    const sw = state.time * ACTOR_SWAY.speed, swayX = a.sway ? (Math.sin(sw * 1.3 + a.no) + Math.sin(sw * 2.1 + 1 + a.no) * .4) * a.sway : 0;
+    const swayY = a.sway ? (Math.sin(sw * 1.7 + 2 + a.no) * .7 + Math.sin(sw * 2.9 + a.no) * .3) * clamp(a.sway * .5, 1, 2) : 0;   // 也微微上下晃 1～2 像素
+    const x = Math.round(a.x) + shiver + zap + swayX, top = a.y - size + 18 + swayY - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
     ctx.save(); ctx.globalAlpha = clamp(a.alpha, 0, 1); ctx.imageSmoothingEnabled = false;
     const id = a.cast.char;
     if (a.equip && typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, a, x - size / 2, top, size, 'behind', a.equip);
@@ -635,12 +691,14 @@ const StoryKai = (() => {
   }
   function draw() {
     if (!state) return;
-    lightsCache = [...state.lights, ...(typeof flickerLightSources === 'function' ? flickerLightSources() : []), ...(typeof poweredLightSources === 'function' ? poweredLightSources() : [])];
+    const carried = state.actors.filter(a => a.light && !a.hidden).map(a => ({ x: a.x, y: a.y, r: a.light * CELL }));   // 角色演出「光源」：跟著人走的光
+    lightsCache = [...state.lights, ...carried, ...(typeof flickerLightSources === 'function' ? flickerLightSources() : []), ...(typeof poweredLightSources === 'function' ? poweredLightSources() : [])];
     computeLightField(); computeFlashField();
     ctx.clearRect(0, 0, cv.width, cv.height); ctx.save();
     ctx.scale(VIEW_SCALE, VIEW_SCALE); ctx.translate(-cam.x, -cam.y); ctx.imageSmoothingEnabled = false;
     ctx.fillStyle = '#000'; ctx.fillRect(cam.x, cam.y, viewW(), viewH());
     drawMapGround(ctx);
+    drawBlood();   // 地上的血：在人、怪物下面
     const sortables = []; collectMapOccluders(ctx, sortables);
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.y + 17, draw: () => drawActor(a) });
     for (const e of state.monsters) sortables.push({ y: e.y + 13, draw: () => drawMonster(e) });

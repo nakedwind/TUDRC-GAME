@@ -70,6 +70,8 @@
   .steps { flex: 1; min-height: 0; overflow: auto; border-top: 1px solid var(--soft); }
   .step { display: flex; align-items: center; gap: 6px; padding: 4px 4px 4px 6px; border-bottom: 1px solid #24313d; font-size: 13px; cursor: pointer; min-height: 32px; }
   .step:hover { background: #1a2632; } .step.on { background: #23301f; box-shadow: inset 3px 0 var(--gold); }
+  /* 對白那幾行：底色換成淺一點的青綠色，比較好找（只換底色，按鈕、字不變） */
+  .step.say { background: #1d4746; } .step.say:hover { background: #235553; } .step.say.on { background: #2a5f5b; box-shadow: inset 3px 0 var(--gold); }
   .step.warn .lbl { color: #ffb4a8; } .step.drop-before { box-shadow: inset 0 2px #69b9c1; } .step.drop-after { box-shadow: inset 0 -2px #69b9c1; }
   .step .no { color: #7f93a6; font-variant-numeric: tabular-nums; flex: none; }
   .step .lbl { flex: 1; min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: #e3ebf3; }
@@ -238,7 +240,7 @@
   <script src="js/story-kai-fx.js?v=kai-20261103"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-kai-editor.js?v=kai16-20261104"></script>
+  <script src="js/story-kai-editor.js?v=kai21-20261104"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],
