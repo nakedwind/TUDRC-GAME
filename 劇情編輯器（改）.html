@@ -121,7 +121,7 @@
       <details class="fold" open><summary>劇情和角色</summary><div class="btns">
         <button type="button" data-add="say"><b>＋</b>新對白</button><button type="button" data-add="end">結局</button>
         <button type="button" data-add="show">角色出現</button><button type="button" data-add="hide">角色消失</button>
-        <button type="button" data-add="map" title="在哪張劇情地圖演出；同一段回憶裡要換場景時再加一行"><b>＋</b>演出地圖</button>
+        <button type="button" data-add="map" title="在哪張劇情地圖演出；同一段回憶裡要換場景時再加一行"><b>＋</b>演出地圖</button><button type="button" data-add="act" title="小跳、持槍、倒地、集氣">角色演出</button>
       </div></details>
       <details class="fold" open><summary>鏡頭 <small title="調整鏡頭大小時長寬比固定，玩家看的畫面才不會變形">🔒 鎖定 16:9</small></summary><div class="btns">
         <button type="button" data-add="cam"><b>＋</b>新鏡頭</button><button type="button" data-add="camMove">鏡頭位移</button>
@@ -131,7 +131,7 @@
         <button type="button" data-add="blackIn">黑幕淡入</button><button type="button" data-add="blackOut">黑幕淡出</button>
         <button type="button" data-add="whiteIn">白幕淡入</button><button type="button" data-add="whiteOut">白幕淡出</button>
         <button type="button" data-add="wait">等待時間</button><button type="button" data-add="move">角色位置</button>
-        <button type="button" data-add="tremble">角色震動</button><button type="button" data-add="fx"><b>＋</b>特效</button>
+        <button type="button" data-add="tremble">角色震動</button><button type="button" data-add="sway" title="角色慢慢左右晃（幅度 1～5，跟鏡頭晃動一樣）">角色晃動</button><button type="button" data-add="fx"><b>＋</b>特效</button>
         <button type="button" data-add="dark" title="只有燈照得到的地方是亮的">後室黑幕</button><button type="button" data-add="vignette">畫面暗角</button>
       </div></details>
       <details class="fold" open><summary>音效</summary><div class="btns">
@@ -228,7 +228,7 @@
   <script src="js/story-kai-fx.js?v=kai-20261103"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-kai-editor.js?v=kai4-20261103"></script>
+  <script src="js/story-kai-editor.js?v=kai7-20261103"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],

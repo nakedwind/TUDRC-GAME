@@ -31,7 +31,7 @@ function h(tag, attrs = {}, ...kids) {
 
 // ---- 指令種類：名字、新增時的預設值 ----
 const KINDS = {
-  map: { name: '＋演出地圖', make: () => ({ map: mapAt(sel) || storyMaps[0]?.id || '' }) },
+  map: { name: '＋演出地圖', make: () => ({ map: '' }) },   // 地圖一開始空著，自己在右邊選單選
   say: { name: '對白', make: () => ({ who: lastWho(), text: '', shake: false }) },
   end: { name: '結局', make: () => ({ title: '' }) },
   show: { name: '角色出現', make: () => ({ who: nextUnshown(), at: null }) },
@@ -46,6 +46,8 @@ const KINDS = {
   whiteOut: { name: '白幕淡出', make: () => ({ ms: 1000 }) },
   wait: { name: '等待時間', make: () => ({ ms: 1000 }) },
   move: { name: '角色位置', make: () => ({ who: lastWho(), at: null, ms: 1000 }) },
+  act: { name: '角色演出', make: () => ({ who: lastWho(), act: 'hop', on: true }) },
+  sway: { name: '角色晃動', make: () => ({ who: lastWho(), on: true, lv: 2 }) },
   tremble: { name: '角色震動', make: () => ({ who: lastWho(), on: true, lv: 2 }) },
   fx: { name: '＋特效', make: () => ({ id: 'fx_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), box: null, chat: [] }) },
   dark: { name: '後室黑幕', make: () => ({ on: true }) },
@@ -54,7 +56,8 @@ const KINDS = {
   bgmStop: { name: '背景音樂停止', make: () => ({}) },
   sfx: { name: '音效', make: () => ({ src: '', vol: 100 }) },
 };
-const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble']);
+const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble', 'act', 'sway']);
+const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
 const FACES = [['', '面向：自動'], ['front', '正面'], ['back', '背面'], ['left', '朝左'], ['right', '朝右']];
 
 // ---- 角色：角色資料頁的人＋路人 ----
@@ -96,7 +99,7 @@ function saveDraft() { clearTimeout(saveTimer); try { localStorage.setItem(PENDI
 function commit(rerender = true) { syncMap(scene()); clearTimeout(saveTimer); saveTimer = setTimeout(saveDraft, 250); drawSoon(); if (rerender) renderAll(); }
 const scene = () => data[sceneId];
 // 劇情的 map（記憶之門、遊戲預覽用來找開頭的地圖）跟著第一行「＋演出地圖」
-function syncMap(s) { const first = s?.steps.find(st => st.do === 'map' && st.map); if (first) s.map = first.map; }
+function syncMap(s) { const first = s?.steps.find(st => st.do === 'map' && st.map); if (s) s.map = first ? first.map : ''; }   // 沒有「＋演出地圖」＝還沒選地圖
 // 跑到第 i 行時在哪張地圖演出（往上找最近一行「＋演出地圖」；都沒有就用劇情的 map）
 function mapAt(i) { const st = scene()?.steps || []; for (let j = Math.min(i, st.length - 1); j >= 0; j--) if (st[j].do === 'map' && st[j].map) return st[j].map; return scene()?.map || null; }
 const curMap = () => storyMaps.find(m => m.id === mapAt(sel)) || null;
@@ -232,7 +235,7 @@ function draw() {
   handles = [];
   const m = curMap(), s = scene();
   $('zoomText').textContent = Math.round(view.z * 100) + '%';
-  if (!m || !s) { $('mapTitle').textContent = s ? '找不到地圖：' + s.map : '還沒有劇情：按右上「＋新劇情」'; return; }
+  if (!m || !s) { $('mapTitle').textContent = !s ? '還沒有劇情：按右上「＋新劇情」' : s.map || mapAt(sel) ? '找不到地圖：' + (mapAt(sel) || s.map) : '還沒選地圖：按左邊「＋演出地圖」，再在那一行右邊選地圖'; return; }
   if (view.fitFor !== m.id) fitView(m);
   $('mapTitle').textContent = '🗺️ ' + (m.name || m.id) + (sel >= 0 ? '　｜　顯示跑到第 ' + String(sel + 1).padStart(3, '0') + ' 行時' : '');
   const st = simulate(sel), cur = s.steps[sel];
@@ -383,7 +386,7 @@ function startPick(step, kind) {
 // ---- 右邊：劇情列表 ----
 function renderScenes() {
   const sc = $('sceneSel'); sc.innerHTML = '';
-  for (const [id, s] of Object.entries(data)) sc.append(h('option', { value: id }, (s.title || id) + '（' + (storyMaps.find(m => m.id === s.map)?.name || s.map) + '）'));
+  for (const [id, s] of Object.entries(data)) sc.append(h('option', { value: id }, s.title || id));
   if (!sceneId) sc.append(h('option', { value: '' }, '（還沒有劇情）'));
   sc.value = sceneId || '';
   const s = scene();
@@ -410,11 +413,11 @@ function uniqueId(base) { let n = 1, id; do { id = base + pad(n++); } while (dat
 // 新劇情：直接建立，第一行是「＋演出地圖」（地圖在那一行右邊的選單換）；標題在「⚙ 設定」改
 function newScene() {
   let n = 1; while (Object.values(data).some(s => s.title === '新劇情' + n)) n++;
-  const id = uniqueId('memory_kai_'), map = mapAt(sel) || storyMaps[0]?.id || '';
-  data[id] = { map, title: '新劇情' + n, cast: pendingCast.splice(0), steps: [{ do: 'map', map }] };   // 先列好的演出者搬進來
+  const id = uniqueId('memory_kai_');
+  data[id] = { map: '', title: '新劇情' + n, cast: pendingCast.splice(0), steps: [] };   // 全部空的；只有還沒有劇情時先列好的演出者會搬進來
   sceneId = id; sel = 0; castSel = null; view.fitFor = null;
   $('sceneSettings').hidden = false; $('sceneMore').setAttribute('aria-expanded', 'true');
-  status('新增了「' + data[id].title + '」（ID：' + id + '）。標題可以在上面的「⚙ 設定」改；地圖在第 001 行「＋演出地圖」選。');
+  status('新增了「' + data[id].title + '」（ID：' + id + '）。標題可以在上面的「⚙ 設定」改；地圖用左邊「＋演出地圖」選。');
 }
 $('sceneNew').onclick = () => { newScene(); commit(); $('sceneTitle').select(); };
 $('sceneCopy').onclick = () => {
@@ -489,6 +492,7 @@ function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
   if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null)) && !castBy(st.who)) return '角色代號不在演出者列表裡';
   if (['cam', 'camMove', 'show', 'move'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
   if (st.do === 'fx' && !st.box) return '還沒框特效範圍';
+  if (st.do === 'map' && !st.map) return '還沒選地圖';
   if (st.do === 'map' && !storyMaps.some(m => m.id === st.map)) return '劇情地圖編輯器裡找不到這張地圖';
   if (st.do === 'say' && !st.text) return '還沒寫對白';
   if ((st.do === 'bgm' || st.do === 'sfx') && !st.src) return '還沒選音檔';
@@ -502,6 +506,7 @@ function rowLabel(st) {
   if ((st.do === 'bgm' || st.do === 'sfx') && st.src) extra = ' ' + st.src.split('/').pop();
   if (st.do === 'end' && st.title) extra = ' 「' + st.title + '」';
   if (st.do === 'map' && st.map) extra = ' ' + mapName(st.map);
+  if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && st.on === false ? '（停）' : '');
   return [name, extra];
 }
 // 每一行最右邊的設定（藍＝下拉選單、紅＝自己輸入、綠＝到地圖上點）
@@ -546,7 +551,7 @@ function controls(st) {
   switch (st.do) {
     case 'map': {
       const s = h('select', { title: '在哪張劇情地圖演出（📖 劇情地圖編輯器）', style: 'max-width:220px', onchange: e => { st.map = e.target.value; view.fitFor = null; commit(); } },
-        storyMaps.map(m => h('option', { value: m.id }, m.name || m.id)), st.map && !storyMaps.some(m => m.id === st.map) ? h('option', { value: st.map }, st.map + '（找不到）') : null);
+        h('option', { value: '' }, '（選地圖）'), storyMaps.map(m => h('option', { value: m.id }, m.name || m.id)), st.map && !storyMaps.some(m => m.id === st.map) ? h('option', { value: st.map }, st.map + '（找不到）') : null);
       s.value = st.map || ''; return [s];
     }
     case 'cam': return [pickBtn(st, '鏡頭位置')];
@@ -558,6 +563,12 @@ function controls(st) {
     case 'show': return [codeIn(st), pickBtn(st, '角色位置'), faceSel(st)];
     case 'hide': return [codeIn(st)];
     case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st)];
+    case 'act': {
+      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地、集氣：勾「開」開始，再加一行取消勾選就停', onchange: e => { st.act = e.target.value; commit(); } }, ACTS.map(([v, t]) => h('option', { value: v }, t)));
+      pickAct.value = st.act || 'hop';
+      return [codeIn(st), pickAct, st.act !== 'hop' ? check(st, 'on', '開', true) : null];
+    }
+    case 'sway': return [codeIn(st), check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
     case 'tremble': return [codeIn(st), check(st, 'on', '震動', true), h('label', {}, '幅度：', lvSel(st))];
     case 'say': return [codeIn(st, '旁白'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openSay(st); } }, '寫對白'), check(st, 'shake', '框震動')];
     case 'fx': { const [cls, text] = fxTag(st); return [pickBtn(st, '特效範圍', 'box'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openFx(st); } }, '特效說明'), h('span', { class: 'tag ' + cls }, text)]; }

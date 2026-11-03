@@ -37,7 +37,12 @@ const StoryKai = (() => {
   const BOX_SHAKE_TIME = 1.5;                 // 對話框震動幾秒（css/story-kai.css 的動畫長度）
   const BGM_FADE = 1.5;                       // 背景音樂淡入、淡出幾秒
   const END_FADE = 1.8;                       // 結局：畫面變黑花幾秒
-  const SHOW_FADE = .45;                      // 角色出現、消失：淡入淡出幾秒
+  const SHOW_FADE = .45;
+  const HOP_TIME = .32;                       // 小跳：往上跳 5 像素再落下，花幾秒
+  // 持槍：有持槍圖的角色用持槍圖；拿近戰武器的角色舉起平常的武器（圖片、大小跟遊戲揮擊時一樣，js/render.js 的 drawFireAxe）
+  const MELEE_WEAPON = { red: [() => typeof redAxeImg !== 'undefined' && redAxeImg, 21, 32, 22], avaren: [() => typeof avarenKnifeImg !== 'undefined' && avarenKnifeImg, 9, 29, 20],
+    luther: [() => typeof lutherAxeImg !== 'undefined' && lutherAxeImg, 28, 46, 26, true], colyn: [() => typeof colynSwordImg !== 'undefined' && colynSwordImg, 9, 46, 18] };
+  const FACE_ANGLE = { right: 0, front: Math.PI / 2, left: Math.PI, back: -Math.PI / 2 };                      // 角色出現、消失：淡入淡出幾秒
   const ratio = () => VIEW_H / VIEW_W;        // 鏡頭的長寬比跟遊戲畫面一樣（16:9），畫面才不會變形
 
   // ---- 音量：遊戲設定靜音、或測試時 Howler.mute(true) 都不出聲 ----
@@ -266,6 +271,16 @@ const StoryKai = (() => {
         state.waitUntil = state.time + sec;
         break;
       }
+      case 'act': {   // 角色演出：小跳（跳一下）、持槍、倒地、集氣（後面三個是開／關）
+        const a = actor(s.who); if (!a) break;
+        const on = s.on !== false;
+        if (s.act === 'hop') { if (!state.skipping) a.hopT = HOP_TIME; }
+        else if (s.act === 'gun') a.armed = on;
+        else if (s.act === 'down') a.down = on;
+        else if (s.act === 'charge') a.charging = on;
+        break;
+      }
+      case 'sway': { const a = actor(s.who); if (a) a.sway = s.on === false ? 0 : SWAY_PX[clamp(Number(s.lv) || 2, 1, 5)] * .5; break; }   // 角色晃動：跟鏡頭晃動同樣的 1～5 級，慢慢左右晃（像站不穩）
       case 'tremble': { const a = actor(s.who); if (a) a.tremble = s.on === false ? 0 : TREMBLE_PX[clamp(Number(s.lv) || 2, 1, 5)]; break; }
       case 'say':
         if (state.skipping) break;
@@ -369,6 +384,8 @@ const StoryKai = (() => {
   }
   function tickActor(a, dt) {
     a.anim += dt;
+    if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
+    tickCharge(a, dt);
     if (a.fade) {
       a.alpha += a.fade * dt / SHOW_FADE;
       if (a.alpha >= 1) { a.alpha = 1; a.fade = 0; }
@@ -398,18 +415,40 @@ const StoryKai = (() => {
   }
 
   // ---- 繪圖 ----
+  // 集氣：腳下法陣、身邊收束的光圈和電火花（跟舊劇情、遊戲的大招蓄力同一種畫法）
+  function tickCharge(a, dt) {
+    if (!a.charging || a.hidden) { if (a.sigil) { a.sigil.life = Math.min(a.sigil.life, .3); a.sigil = null; } a.chargeT = 0; return; }
+    a.chargeT = (a.chargeT || 0) + dt;
+    const k = Math.min(1, a.chargeT / 2.5);
+    const col = (typeof ULT_CHARGE_COLOR !== 'undefined' && ULT_CHARGE_COLOR[a.cast.char]) || '#aee9ff';
+    if (!a.sigil) { a.sigil = { sootheSigil: true, follow: a, col: typeof hexRgb === 'function' ? hexRgb(col) : [174, 233, 255], life: 999, life0: 999, spin: 0 }; G.effects.push(a.sigil); }
+    if ((a.chargeFx = (a.chargeFx || 0) - dt) <= 0) { a.chargeFx = .45 - .2 * k; if (typeof spawnChargeFx === 'function') spawnChargeFx(a.x, a.y - 12, col); }
+    if (k > .5 && Math.random() < dt * 3 * k && typeof addLightFlash === 'function') addLightFlash('lightning', a.x, a.y - 12, .5 * k);
+    if (Math.random() < dt * (14 + 26 * k)) {
+      const t = Math.random() * Math.PI * 2, d = rnd(14, 30 + 16 * k);
+      G.effects.push({ particle: true, kind: 'lightning', x: a.x + Math.cos(t) * d, y: a.y - 12 + Math.sin(t) * d * .8, vx: -Math.cos(t) * 40, vy: -Math.sin(t) * 40, r: rnd(1.4, 2.6), life: rnd(.15, .3), life0: .3, color: '#cbf2ff' });
+    }
+  }
   function drawActor(a) {
     const size = PLAYER.drawSize;
-    let img = pickCharacterFrame(a.set, { ...a, sitting: null });
+    // 持槍：有持槍圖（GUN_FOLDERS）就用持槍圖；拿近戰武器的人擺出舉著武器的樣子
+    const weapon = a.armed && !a.down && MELEE_WEAPON[a.cast.char];
+    const pose = { ...a, sitting: null, gunT: a.armed && !weapon ? 1 : 0, meleeSwing: weapon ? { angle: FACE_ANGLE[a.dir] ?? Math.PI / 2, age: 0, wind: 1, impact: 2, duration: 3 } : null };
+    let img = a.down && readyImage(a.set.fail) ? a.set.fail : pickCharacterFrame(a.set, pose);
     if (!readyImage(img)) img = a.set.front?.[0];
     if (!readyImage(img)) return;
     const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * a.tremble : 0;
-    const x = Math.round(a.x) + shiver, top = a.y - size + 18;
+    const zap = a.charging ? Math.sin(state.time * 60) * .6 : 0;   // 集氣：全身微微發抖
+    const hk = a.hopT > 0 ? 1 - a.hopT / HOP_TIME : 0;
+    const swayX = a.sway ? (Math.sin(state.time * 1.3 + a.no) + Math.sin(state.time * 2.1 + 1 + a.no) * .4) * a.sway : 0;
+    const x = Math.round(a.x) + shiver + zap + swayX, top = a.y - size + 18 - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
     ctx.save(); ctx.globalAlpha = clamp(a.alpha, 0, 1); ctx.imageSmoothingEnabled = false;
     const id = a.cast.char;
     if (a.equip && typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, a, x - size / 2, top, size, 'behind', a.equip);
     if (a.set.single) { const w = size * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, x - w / 2, top, w, size); }   // 圖片角色：照原本比例、跟人一樣高
+    else if (a.down && img !== a.set.fail) { ctx.save(); ctx.translate(x, a.y + 14); ctx.rotate(Math.PI / 2); ctx.drawImage(img, -size / 2, -size + 4, size, size); ctx.restore(); }   // 沒有倒地圖：整個人轉 90 度躺下
     else ctx.drawImage(img, x - size / 2, top, size, size);
+    if (weapon && typeof drawSwingWeapon === 'function') { const im = weapon[0](); if (im) drawSwingWeapon({ ...pose, x: x, y: a.y }, im, weapon[1], weapon[2], weapon[3], weapon[4]); }
     if (a.equip && typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, a, x - size / 2, top, size, 'front', a.equip);
     ctx.restore();
   }
