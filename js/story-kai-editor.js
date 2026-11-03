@@ -55,10 +55,12 @@ const KINDS = {
   ishow: { name: '道具出現', make: () => ({ item: nextCode('item'), id: '', at: null }) },
   ihide: { name: '道具消失', make: () => ({ item: lastCode('item') }) },
   fx: { name: '＋特效', make: () => ({ id: 'fx_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), box: null, chat: [] }) },
+  door: { name: '開關門', make: () => ({ at: null, open: true }) },
   dark: { name: '後室黑幕', make: () => ({ on: true }) },
   vignette: { name: '暗角', make: () => ({ lv: 5 }) },
   bgm: { name: '背景音樂', make: () => ({ src: '', fade: true, vol: 50 }) },
   bgmStop: { name: '背景音樂停止', make: () => ({}) },
+  sfxStop: { name: '停止音效', make: () => ({}) },
   sfx: { name: '音效', make: () => ({ src: '', vol: 100 }) },
 };
 const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble', 'act', 'sway']);
@@ -161,11 +163,11 @@ function storyKaiExportText() {
 // ---- 跑到第 upto 行時：每個人在哪、鏡頭拍哪裡、後室黑幕開了沒（預覽窗用） ----
 const dirFrom = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1]; return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front'); };
 function simulate(upto) {
-  const st = { actors: new Map(), hurt: new Set(), sit: new Set(), light: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
+  const st = { doors: new Map(), actors: new Map(), hurt: new Set(), sit: new Set(), light: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
   const steps = scene()?.steps || [];
   for (let i = 0; i <= upto && i < steps.length; i++) {
     const p = steps[i], no = Number(p.who), a = st.actors.get(no);
-    if (p.do === 'map') { if (i > 0) { st.actors.clear(); st.mons.clear(); st.items.clear(); st.cam = null; st.move = null; } }   // 換場景：大家先不在場、鏡頭重新決定
+    if (p.do === 'map') { if (i > 0) { st.doors.clear(); st.actors.clear(); st.mons.clear(); st.items.clear(); st.cam = null; st.move = null; } }   // 換場景：大家先不在場、鏡頭重新決定
     else if (p.do === 'mshow' && p.at && p.type) { const m = st.mons.get(Number(p.mon)); st.mons.set(Number(p.mon), { at: p.at, type: p.type, face: p.face || (m?.shown && m.type === p.type ? m.face : 'front'), src: i, shown: true }); }
     else if (p.do === 'mhide' || p.do === 'mact') {
       const m = st.mons.get(Number(p.mon)); if (!m?.shown) continue;
@@ -179,11 +181,14 @@ function simulate(upto) {
     else if (p.do === 'show' && p.at) st.actors.set(no, { at: p.at, face: p.face || a?.face || 'front', src: i, shown: true });
     else if (p.do === 'move' && p.at) {
       if (i === upto && a?.shown) st.move = { from: a.at, to: p.at };
-      st.actors.set(no, { at: p.at, face: p.face || (a?.shown ? dirFrom(a.at, p.at) : 'front'), src: i, shown: true });
+      const warp = warpTo(storyMaps.find(m => m.id === mapAt(i)), p.at);   // 走到同地圖傳送點：送到目的地
+      if (warp && i === upto) st.warp = { from: p.at, to: warp };
+      st.actors.set(no, { at: warp || p.at, face: p.face || (a?.shown ? dirFrom(a.at, p.at) : 'front'), src: i, shown: true });
     } else if (p.do === 'hide' && a) a.shown = false;
     else if (p.do === 'act' && p.act === 'light') { if (p.on === false) st.light.delete(no); else st.light.set(no, Number(p.r) || 4); }
     else if (p.do === 'act' && (p.act === 'hurt' || p.act === 'sit')) { if (p.on === false) st[p.act].delete(no); else st[p.act].add(no); }   // 受傷：開了之後一直是流血的樣子
     else if ((p.do === 'cam' || p.do === 'camMove') && p.at) st.cam = { at: p.at, w: Number(p.w) || 20, src: i };
+    else if (p.do === 'door' && p.at) st.doors.set(p.at.join(','), { at: p.at, open: p.open !== false, src: i });
     else if (p.do === 'dark') st.dark = p.on !== false;
     else if (p.do === 'vignette') st.vig = Number(p.lv) || 0;
   }
@@ -192,6 +197,30 @@ function simulate(upto) {
 
 // ---- 預覽窗 ----
 const tileMap = new Map((typeof SHARED_TILES !== 'undefined' ? SHARED_TILES : []).map(t => [t.id, t]));
+// 地圖上的同地圖傳送點（地圖編輯器的「出入口」通往自己這張地圖、有 at）：走到這一點會被送去哪（格子座標；跟遊戲 js/story-kai.js 的 warpAt 一樣）
+const WARP_RADIUS = 52 / C, WARP_SPOTS = [[0, 1], [0, 0], [1, 0], [-1, 0], [0, -1]];
+for (let radius = 2; radius <= 5; radius++) for (let dr = -radius; dr <= radius; dr++) for (let dc = -radius; dc <= radius; dc++) if (Math.max(Math.abs(dc), Math.abs(dr)) === radius) WARP_SPOTS.push([dc, dr]);
+function warpTo(m, p) {
+  const ports = m?.portals || [], pt = ports.find(q => q.to === m.id && Array.isArray(q.at) && Math.hypot(q.c + .5 + (q.ox || 0) / C - p[0], q.r + .5 + (q.oy || 0) / C - p[1]) < (q.radius ? q.radius / C : WARP_RADIUS));
+  if (!pt) return null;
+  const [tc, tr] = pt.at, dest = ports.find(q => q.c === tc && q.r === tr) || { c: tc, r: tr }, solid = new Set(m.solid || []);
+  for (const [dc, dr] of WARP_SPOTS) {
+    const c = dest.c + Math.round((dest.ox || 0) / C) + dc, r = dest.r + Math.round((dest.oy || 0) / C) + dr;
+    if (c >= 0 && r >= 0 && c < m.cols && r < m.rows && !solid.has(c + ',' + r)) return [c + .5, r + .5];
+  }
+  return null;
+}
+// 地圖上可以開關的門（data/doors.js 的 DOOR_TILES，例如後室木門）：中心點（格子）
+function mapDoorSpots(m) {
+  return (m?.stamps || []).filter(s => typeof DOOR_TILES !== 'undefined' && DOOR_TILES[s.id]).map(s => {
+    const t = tileMap.get(s.id) || {}; return { stamp: s, at: [s.c + (s.ox || 0) / C + (t.w || 1) / 2, s.r + (s.oy || 0) / C + (t.h || 1) / 2] };
+  });
+}
+function nearDoorSpot(m, p) {   // 點的位置 3 格以內最近的門
+  let best = null, bd = 3;
+  for (const d of mapDoorSpots(m)) { const dd = Math.hypot(d.at[0] - p[0], d.at[1] - p[1]); if (dd < bd) { bd = dd; best = d; } }
+  return best;
+}
 const imgCache = {};
 function image(src) {
   if (!src) return null;
@@ -210,17 +239,19 @@ function drawImg(g, img, x, y, w, hh, fx, fy, rot) {
   const iw = rot % 2 ? hh : w, ih = rot % 2 ? w : hh; g.drawImage(img, -iw / 2, -ih / 2, iw, ih); g.restore();
 }
 // 地圖本身先畫在另一張畫布上，拖曳時只要貼上去（圖片還沒載完會再重畫）
-const mapCache = { id: null, canvas: document.createElement('canvas'), dirty: true };
-function mapCanvas(m) {
-  if (mapCache.id === m.id && !mapCache.dirty) return mapCache.canvas;
+const mapCache = { id: null, open: '', canvas: document.createElement('canvas'), dirty: true };
+// open：打開著的門（stamp），這些門的圖片不畫（跟遊戲一樣，門打開＝門的圖片消失）
+function mapCanvas(m, open = new Set()) {
+  const openKey = (m.stamps || []).map((s, i) => open.has(s) ? i : '').join(',');
+  if (mapCache.id === m.id && mapCache.open === openKey && !mapCache.dirty) return mapCache.canvas;
   const g = mapCache.canvas.getContext('2d'), W = m.cols * C, H = m.rows * C;
-  mapCache.canvas.width = W; mapCache.canvas.height = H; mapCache.id = m.id; mapCache.dirty = false;
+  mapCache.canvas.width = W; mapCache.canvas.height = H; mapCache.id = m.id; mapCache.open = openKey; mapCache.dirty = false;
   g.fillStyle = '#0b1016'; g.fillRect(0, 0, W, H); g.imageSmoothingEnabled = false;
   const order = Array.isArray(m.layerOrder) && m.layerOrder.length ? m.layerOrder.map(l => l.id) : LAYER_ORDER;
   for (const lid of order) {
     for (const [k, id] of Object.entries((m.layers || {})[lid] || {})) { const t = tileMap.get(id), img = image(t?.file); if (!img) continue; const [c, r] = k.split(',').map(Number); g.drawImage(img, c * C, r * C, C, C); }
     for (const st of m.stamps || []) {
-      if ((st.layer || 'top') !== lid) continue;
+      if ((st.layer || 'top') !== lid || open.has(st)) continue;
       const t = tileMap.get(st.id), img = image(t?.file); if (!t || !img) continue;
       const rot = ((Number(st.rot) || 0) % 4 + 4) % 4, w = (rot % 2 ? (t.h || 1) : (t.w || 1)) * C, hh = (rot % 2 ? (t.w || 1) : (t.h || 1)) * C;
       drawImg(g, img, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, st.fx, st.fy, rot);
@@ -293,7 +324,8 @@ function draw() {
   const st = simulate(sel), cur = s.steps[sel];
   // 世界座標（地圖、角色）
   ctx.save(); ctx.scale(view.z, view.z); ctx.translate(-view.x, -view.y); ctx.imageSmoothingEnabled = false;
-  ctx.drawImage(mapCanvas(m), 0, 0);
+  const openDoors = new Set([...st.doors.values()].filter(d => d.open).map(d => nearDoorSpot(m, d.at)?.stamp).filter(Boolean));
+  ctx.drawImage(mapCanvas(m, openDoors), 0, 0);
   if (st.dark) { ctx.fillStyle = 'rgba(0,0,0,.5)'; ctx.fillRect(0, 0, m.cols * C, m.rows * C); }
   for (const [no, r] of st.light) {   // 角色演出「光源」：淡黃色圓圈＝照得到的範圍
     const a = st.actors.get(no); if (!a?.shown) continue;
@@ -313,6 +345,7 @@ function draw() {
   if (st.dark) label('🌑 後室黑幕', mx0 + 8, my0 + 18, '#c9b5ff', 'left');
   // 這一行之前的位置 → 這一行走到哪
   if (st.move) { const [x1, y1] = toScreen(...st.move.from), [x2, y2] = toScreen(...st.move.to); arrow(x1, y1, x2, y2, '#c39bff'); }
+  if (st.warp) { const [x1, y1] = toScreen(...st.warp.from), [x2, y2] = toScreen(...st.warp.to); ctx.save(); ctx.setLineDash([5, 5]); arrow(x1, y1, x2, y2, '#5fe0e0'); ctx.restore(); label('🌀 傳送', x1, y1 - 12, '#5fe0e0'); }   // 走到傳送點：青色虛線＝被送到哪
   // 角色：腳底圓點＋名字（拖曳＝改「讓他站到這裡」的那一行）
   for (const [no, a] of actors) {
     const c = castBy(no), [x, y] = toScreen(...a.at), on = a.src === sel;
@@ -321,6 +354,8 @@ function draw() {
     label(pad(no) + ' ' + (c ? castName(c) : '？'), x, y - (SIZE - 14) * view.z - 6, on ? '#ffd479' : '#fff');
     handles.push({ x, y, r: Math.max(12, 22 * view.z), cursor: 'grab', drag: p => { s.steps[a.src].at = p; }, step: a.src });
   }
+  // 開關過的門：門上標「開」「關」（預覽窗的地圖不會真的把門打開）
+  for (const d of st.doors.values()) { const [x, y] = toScreen(...d.at); label('🚪 ' + (d.open ? '開' : '關'), x, y, d.src === sel ? '#ffd479' : d.open ? '#a9f0c6' : '#ffb4a8'); }
   // 怪物（紅點）、道具（藍點）：拖曳＝改那一行的位置
   const dot = (list, color, text) => { for (const [no, x] of list) {
     const [sx, sy] = toScreen(...x.at), on = x.src === sel;
@@ -476,7 +511,7 @@ function setPick(p) {
 function startPick(step, kind) {
   const i = scene().steps.indexOf(step); if (i >= 0 && i !== sel) { sel = i; }
   if (kind === 'box') setPick({ kind: 'box', step, label: '第 ' + String(i + 1).padStart(3, '0') + ' 行：在預覽窗的地圖上按住拖曳，框出特效範圍', fn: b => { step.box = b; } });
-  else setPick({ kind: 'point', step, label: '第 ' + String(i + 1).padStart(3, '0') + ' 行：在預覽窗的地圖上點一下，設定' + (step.do === 'cam' || step.do === 'camMove' ? '鏡頭位置（鏡頭的中心）' : (MON_KINDS.has(step.do) ? '怪物位置（腳底）' : ITEM_KINDS.has(step.do) ? '道具位置' : '角色位置（腳底）')), fn: p => { step.at = p; } });
+  else setPick({ kind: 'point', step, label: '第 ' + String(i + 1).padStart(3, '0') + ' 行：在預覽窗的地圖上點一下，設定' + (step.do === 'cam' || step.do === 'camMove' ? '鏡頭位置（鏡頭的中心）' : (step.do === 'door' ? '要開關哪扇門（點門）' : MON_KINDS.has(step.do) ? '怪物位置（腳底）' : ITEM_KINDS.has(step.do) ? '道具位置' : '角色位置（腳底）')), fn: p => { const d = step.do === 'door' && nearDoorSpot(curMap(), p); step.at = d ? d.at.map(r1) : p; } });   // 開關門：對齊到最近那扇門的中心
 }
 
 // ---- 右邊：劇情列表 ----
@@ -586,7 +621,8 @@ $('accOk').onclick = () => { $('accDlg').close(); renderCast(); };
 // ---- 右邊：指令列表 ----
 function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
   if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null)) && !castBy(st.who)) return '角色代號不在演出者列表裡';
-  if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
+  if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
+  if (st.do === 'door' && !nearDoorSpot(storyMaps.find(m => m.id === mapAt(scene().steps.indexOf(st))), st.at)) return '點的地方附近沒有門（後室木門這類可以開關的門）';
   if (st.do === 'mact' && st.act === 'move' && !st.at) return '還沒在地圖上點要走到哪';
   if (st.do === 'mshow' && !monOf(st.type)) return '還沒選怪物';
   if (st.do === 'ishow' && !propOf(st.id)) return '還沒選道具';
@@ -607,6 +643,7 @@ function rowLabel(st) {
   if ((st.do === 'bgm' || st.do === 'sfx') && st.src) extra = ' ' + st.src.split('/').pop();
   if (st.do === 'end' && st.title) extra = ' 「' + st.title + '」';
   if (st.do === 'map' && st.map) extra = ' ' + mapName(st.map);
+  if (st.do === 'door') extra = ' ' + (st.open === false ? '關門' : '開門');
   if (MON_KINDS.has(st.do)) {
     const src = st.do === 'mshow' ? st : shownBy('mon', st.mon, scene().steps.indexOf(st));
     extra = ' [' + (codeOk(st.mon) ? pad(st.mon) : '??') + '/' + (monOf(src?.type)?.name || '怪物') + ']' + (st.do === 'mact' ? ' ' + ((MON_ACTS.find(a => a[0] === st.act) || [, '攻擊'])[1]) : '');
@@ -696,6 +733,7 @@ function controls(st) {
       return [codeIn(st), pickAct, st.act !== 'hop' ? check(st, 'on', '開', true) : null];
     }
     case 'mshow': return [monCode(st), listSel(st, 'type', MONS, '（選怪物）', '哪一種怪物（怪物編輯器裡的）'), pickBtn(st, '怪物位置'), monFaceSel(st, [['', '正面'], ['left', '朝左'], ['right', '朝右']])];
+    case 'door': return [pickBtn(st, '門的位置'), check(st, 'open', '開', true)];
     case 'mhide': return [monCode(st)];
     case 'mact': {
       const pickAct = h('select', { title: '攻擊：朝面向的那邊揮一下；移動：走到地圖上點的位置（會等走到才跑下一行）；死亡：倒下、變黑、消失', onchange: e => { st.act = e.target.value; if (st.act === 'move' && st.ms == null) st.ms = 1000; commit(); } }, MON_ACTS.map(([v, t]) => h('option', { value: v }, t)));
@@ -715,6 +753,7 @@ function controls(st) {
       onchange: e => { st.title = e.target.value.trim(); commit(); } }))];
     case 'bgm': return [...fileBtn(st), check(st, 'fade', '淡入', true), h('label', {}, '音量：', numIn(st, 'vol', 0, 100, '0～100'))];
     case 'bgmStop': return [h('span', { class: 'note' }, '背景音樂 1.5 秒淡出')];
+    case 'sfxStop': return [h('span', { class: 'note' }, '停掉上一個還在播的音效')];
     case 'sfx': return [...fileBtn(st), h('label', {}, '音量：', numIn(st, 'vol', 0, 100, '0～100'))];
   }
   return [];
@@ -765,7 +804,7 @@ function addStep(kind) {
   s.steps.splice(at, 0, st); sel = at; setPick(null); commit(); scrollToSel();
   // 新增後直接進入下一步：要寫的打開視窗、要點位置的直接開始點
   if (kind === 'say') openSay(st);
-  else if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow'].includes(kind)) startPick(st, 'point');
+  else if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(kind)) startPick(st, 'point');
   else if (kind === 'fx') startPick(st, 'box');
 }
 function removeStep(i) {

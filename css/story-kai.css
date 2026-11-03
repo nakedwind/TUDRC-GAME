@@ -12,16 +12,18 @@ body.story-scene #wrap > #storyKaiUI#storyKaiUI#storyKaiUI#storyKaiUI#storyKaiUI
 #storyKaiBlack { background: #000; }
 #storyKaiWhite { background: #fff; }
 #storyKaiExit { position: absolute; top: 18px; right: 22px; z-index: 3; opacity: .75; }
+/* 預覽時按住滑鼠左鍵快轉：左上角的提示 */
+#storyKaiFast { position: absolute; top: 18px; left: 22px; z-index: 3; padding: 4px 10px; border-radius: 6px; background: rgba(0,0,0,.55); color: #ffd479; font-size: 14px; letter-spacing: 1px; pointer-events: none; }
 /* 結局：標題畫面 */
 #storyKaiEnd { position: absolute; z-index: 4; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; background: #080b0e; pointer-events: auto; }
 #storyKaiEnd small { letter-spacing: .3em; color: #b7a27c; }
 #storyKaiEnd h2 { font-size: 32px; font-weight: 500; letter-spacing: .15em; margin: 20px 0 32px; }
 #storyKaiEnd div { display: flex; gap: 16px; }
-/* 對話框震動（對白的「框震動」）：大約 1.5 秒，越後面越小 */
-body.story-scene #dialogueBox.story-kai-shake { animation: story-kai-shake 1.5s linear; }
+/* 對話框震動（對白的「框震動」）：0.45 秒、上下左右亂抖，越後面越小 */
+body.story-scene #dialogueBox.story-kai-shake { animation: story-kai-shake .45s linear; }
 @keyframes story-kai-shake {
-  0% { translate: 0 0; } 4% { translate: -8px -2px; } 8% { translate: 7px 2px; } 12% { translate: -7px 1px; } 16% { translate: 6px -2px; }
-  22% { translate: -6px 1px; } 28% { translate: 5px -1px; } 34% { translate: -5px 1px; } 42% { translate: 4px 0; } 50% { translate: -3px 1px; }
-  60% { translate: 3px 0; } 70% { translate: -2px 0; } 82% { translate: 1px 0; } 100% { translate: 0 0; }
+  0% { translate: 0 0; } 7% { translate: -7px -5px; } 14% { translate: 6px 5px; } 21% { translate: 5px -6px; } 28% { translate: -6px 4px; }
+  35% { translate: -3px -5px; } 42% { translate: 5px 3px; } 50% { translate: -4px 3px; } 58% { translate: 3px -4px; } 66% { translate: -3px -2px; }
+  74% { translate: 2px 3px; } 82% { translate: -2px -1px; } 90% { translate: 1px 1px; } 100% { translate: 0 0; }
 }
 @media (prefers-reduced-motion: reduce) { body.story-scene #dialogueBox.story-kai-shake { animation: none; } }

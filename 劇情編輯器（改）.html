@@ -122,8 +122,9 @@
     <section class="panel tools" aria-label="新增指令">
       <details class="fold" open><summary>劇情和角色</summary><div class="btns">
         <button type="button" data-add="say"><b>＋</b>新對白</button><button type="button" data-add="end">結局</button>
-        <button type="button" data-add="show">角色出現</button><button type="button" data-add="hide">角色消失</button>
+        <button type="button" data-add="show">角色出現</button><button type="button" data-add="hide">角色消失</button><button type="button" data-add="move">角色位置</button>
         <button type="button" data-add="map" title="在哪張劇情地圖演出；同一段回憶裡要換場景時再加一行"><b>＋</b>演出地圖</button><button type="button" data-add="act" title="小跳、持槍、倒地、集氣">角色演出</button>
+        <button type="button" data-add="door" title="開關地圖上的門（後室木門這類）：點門，勾「開」＝開門、不勾＝關門">開關門</button>
       </div></details>
       <details class="fold" open><summary>怪物與道具</summary><div class="btns">
         <button type="button" data-add="mshow" title="怪物編輯器裡的怪物；用「怪物代號」分辨是哪一隻">怪物出現</button><button type="button" data-add="mhide">怪物消失</button>
@@ -137,13 +138,13 @@
       <details class="fold" open><summary>特效</summary><div class="btns">
         <button type="button" data-add="blackIn">黑幕淡入</button><button type="button" data-add="blackOut">黑幕淡出</button>
         <button type="button" data-add="whiteIn">白幕淡入</button><button type="button" data-add="whiteOut">白幕淡出</button>
-        <button type="button" data-add="wait">等待時間</button><button type="button" data-add="move">角色位置</button>
+        <button type="button" data-add="wait">等待時間</button>
         <button type="button" data-add="tremble">角色震動</button><button type="button" data-add="sway" title="角色慢慢左右晃（幅度 1～5，跟鏡頭晃動一樣）">角色晃動</button><button type="button" data-add="fx"><b>＋</b>特效</button>
         <button type="button" data-add="dark" title="只有燈照得到的地方是亮的">後室黑幕</button><button type="button" data-add="vignette">畫面暗角</button>
       </div></details>
       <details class="fold" open><summary>音效</summary><div class="btns">
         <button type="button" data-add="bgm">背景音樂</button><button type="button" data-add="sfx">音效</button>
-        <button type="button" data-add="bgmStop">背景音樂停止</button>
+        <button type="button" data-add="bgmStop">背景音樂停止</button><button type="button" data-add="sfxStop" title="停掉上一個還在播的音效（音效太長、只要前面一段時用）">停止音效</button>
       </div></details>
       <p class="note">新指令會加在右邊選取的那一行下面。<br>每一行的顏色：<span style="color:#9fc6ee">藍色</span>＝下拉選單、<span style="color:#e59aa3">紅色</span>＝自己輸入、<span style="color:#a9f0c6">綠色</span>＝到地圖上點。</p>
     </section>
@@ -232,6 +233,7 @@
   <script src="data/costumes.js?v=money2-20261102"></script>
   <script src="data/costume-placement.js?v=strawberry-20261026"></script>
   <script src="js/costume-draw.js?v=ballsit-20261102"></script>
+  <script src="data/doors.js?v=hugall-20261028"></script>   <!-- 可以開關的門（開關門用） -->
   <script src="data/monsters.js?v=wide-20261031"></script>   <!-- 怪物種類（怪物出現用） -->
   <script src="data/items.js?v=devotion-20261103"></script>   <!-- 道具出現用：背包物品 -->
   <script src="data/supplies.js?v=firstaid-shop-20261103"></script>
@@ -240,7 +242,7 @@
   <script src="js/story-kai-fx.js?v=kai-20261103"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-kai-editor.js?v=kai21-20261104"></script>
+  <script src="js/story-kai-editor.js?v=kai25-20261104"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],

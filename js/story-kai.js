@@ -37,7 +37,7 @@ const StoryKai = (() => {
   const BLEED = { delay: .3, walkEvery: [.16, .5], standEvery: [.6, 1.5], bigChance: .25, max: 500, colors: ['#9b2624', '#8e1b19', '#7c1c16'], edge: '#590e05' };
   const ACTOR_SWAY = { px: [0, .6, 1.2, 2, 3, 4.5], speed: 3.2 };   // 角色晃動：1～5 級左右晃的幅度（像素）、晃的速度（越大越快）；上下另外晃 1～2 像素
   const TREMBLE_PX = [0, .4, .8, 1.3, 2, 3];  // 角色震動（發抖）：左右快速晃的幅度
-  const BOX_SHAKE_TIME = 1.5;                 // 對話框震動幾秒（css/story-kai.css 的動畫長度）
+  const BOX_SHAKE_TIME = .45;                 // 對話框震動幾秒（css/story-kai.css 的動畫長度）
   const BGM_FADE = 1.5;                       // 背景音樂淡入、淡出幾秒
   const END_FADE = 1.8;                       // 結局：畫面變黑花幾秒
   const SHOW_FADE = .45;
@@ -136,7 +136,7 @@ const StoryKai = (() => {
     ui = document.createElement('section'); ui.id = 'storyKaiUI'; ui.hidden = true;
     ui.setAttribute('aria-label', '回憶劇情');
     ui.innerHTML = '<div id="storyKaiVignette" aria-hidden="true"></div><div id="storyKaiWhite" aria-hidden="true"></div><div id="storyKaiBlack" aria-hidden="true"></div>' +
-      '<button type="button" id="storyKaiExit" data-kai-action="exit">離開回憶</button>' +
+      '<button type="button" id="storyKaiExit" data-kai-action="exit">離開回憶</button><div id="storyKaiFast" hidden aria-hidden="true">▶▶ 3 倍速</div>' +
       '<section id="storyKaiEnd" hidden><small>回憶片段結束</small><h2 id="storyKaiEndTitle"></h2><div><button type="button" data-kai-action="replay" id="storyKaiReplay">重新播放</button><button type="button" data-kai-action="exit" id="storyKaiEndExit">回到現實</button></div></section>';
     el('wrap').appendChild(ui);
   }
@@ -185,6 +185,32 @@ const StoryKai = (() => {
       equip: Object.keys(cast.accs || {}).length ? cast.accs : null };
   }
   const actor = no => state.actors.find(a => a.no === Number(no));
+  // 地圖上的門（後室木門…）：劇情自己的場景沒有跑遊戲的 resetGame，這裡把門建起來（一開始都關著、擋路，js/doors.js）
+  function setupStoryDoors() { if (typeof setupDoors === 'function' && G) setupDoors(); }
+  // 地圖上的同地圖傳送點（地圖編輯器的「出入口」通往這張地圖、有設送到哪一格，像池核的重複房）：
+  // 「角色位置」走到傳送點範圍裡，就被送到目的地那格的前面（找空位的方法跟遊戲的 placePlayerNearPortal 一樣），在那裡淡入
+  const WARP_SPOTS = [[0, 1], [0, 0], [1, 0], [-1, 0], [0, -1]];
+  for (let radius = 2; radius <= 5; radius++) for (let dr = -radius; dr <= radius; dr++) for (let dc = -radius; dc <= radius; dc++) if (Math.max(Math.abs(dc), Math.abs(dr)) === radius) WARP_SPOTS.push([dc, dr]);
+  function warpAt(a) {
+    if (typeof mapPortals === 'undefined' || !MAP || a.hidden) return false;
+    const pt = mapPortals.find(q => q.to === MAP.id && Array.isArray(q.at) && Math.hypot(portalXY(q)[0] - a.x, portalXY(q)[1] - a.y) < (q.radius || PORTAL_RADIUS));
+    if (!pt) return false;
+    const [tc, tr] = pt.at, dest = mapPortals.find(q => q.c === tc && q.r === tr) || { c: tc, r: tr };
+    for (const [dc, dr] of WARP_SPOTS) {
+      const c = dest.c + Math.round((dest.ox || 0) / CELL) + dc, r = dest.r + Math.round((dest.oy || 0) / CELL) + dr;
+      if (!inGrid(c, r) || mapWalls.has(c + ',' + r)) continue;
+      [a.x, a.y] = center(c, r); a.target = null; a.path = []; a.moving = false;
+      if (!state.skipping) { a.alpha = 0; a.fade = 1; if (typeof sfx === 'function') sfx('door'); }   // 在出口淡入（遊戲裡傳送也是這個開門聲）
+      return true;
+    }
+    return false;
+  }
+  function nearDoor(at) {   // 離這一點最近的門（3 格以內）
+    if (!at || typeof mapDoors === 'undefined') return null;
+    const x = at[0] * CELL, y = at[1] * CELL; let best = null, bd = CELL * 3;
+    for (const d of mapDoors) { const dd = Math.hypot(d.x - x, (d.y0 + d.y) / 2 - y); if (dd < bd) { bd = dd; best = d; } }
+    return best;
+  }
   function lights() {   // 後室黑幕時的光：地圖上放的探照燈、露營燈（算法跟 js/story-scene.js 一樣）
     const out = [], seen = new Set();
     const add = (t, c, r, w, h, ox = 0, oy = 0) => {
@@ -210,6 +236,7 @@ const StoryKai = (() => {
       towers: [], npcs: [], enemies: [], obstacles: [], cores: [], effects: [], acidPools: [],
       grid: {}, mapDestroyed: new Set(), lightFlashes: [], selType: null, guide: NaN, vitalsSkip: true, moneySettled: true };
     LIGHT.enabled = false;
+    setupStoryDoors();
     const steps = Array.isArray(cfg.steps) ? cfg.steps : [];
     // 沒有寫鏡頭之前：整張地圖置中（跟一般地圖進來時一樣大）
     const fullW = viewW() / CELL;
@@ -252,7 +279,7 @@ const StoryKai = (() => {
   function settle() {   // 快轉時：正在走的人直接到、淡入淡出直接做完、要等的時間直接過去
     for (const a of state.actors) {
       if (a.trail) a.trail = [];   // 快轉：走過的路不滴血
-      if (a.target) { [a.x, a.y] = a.path.length ? a.path[a.path.length - 1] : a.target; a.target = null; a.path = []; a.moving = false; if (a.arriveDir) a.dir = a.arriveDir; }
+      if (a.target) { [a.x, a.y] = a.path.length ? a.path[a.path.length - 1] : a.target; a.target = null; a.path = []; a.moving = false; if (a.arriveDir) a.dir = a.arriveDir; warpAt(a); }
       if (a.fade < 0) a.hidden = true;
       a.fade = 0; a.alpha = 1;
     }
@@ -306,7 +333,7 @@ const StoryKai = (() => {
         const tx = s.at[0] * CELL, ty = s.at[1] * CELL;
         a.arriveDir = s.face || null;
         if (a.hidden) { a.hidden = false; a.alpha = 0; a.fade = 1; a.x = tx; a.y = ty; }   // 還沒出現的人：直接在那裡出現
-        if (sec <= 0 || state.skipping) { a.x = tx; a.y = ty; a.target = null; a.path = []; if (a.arriveDir) a.dir = a.arriveDir; break; }
+        if (sec <= 0 || state.skipping) { a.x = tx; a.y = ty; a.target = null; a.path = []; if (a.arriveDir) a.dir = a.arriveDir; warpAt(a); break; }
         a.path = findRoute(a.x, a.y, tx, ty);
         let len = 0, px = a.x, py = a.y; for (const [x, y] of a.path) { len += Math.hypot(x - px, y - py); px = x; py = y; }
         a.speed = Math.max(1, len / sec); a.target = a.path.shift();
@@ -326,6 +353,10 @@ const StoryKai = (() => {
         else if (s.act === 'hurt') { a.hurt = on; if (on) hurtSet(a); }   // 受傷：換成流血的差分
         else if (s.act === 'light') a.light = on ? clamp(Number(s.r) || 4, 1, 20) : 0;   // 光源：身上發光，照亮幾格（後室黑幕時看得出來）
         else if (s.act === 'sit') { a.sit = on; if (on) sitImage(a); }   // 坐下：有畫坐下圖的方向才會坐（停下來的時候）
+        break;
+      }
+      case 'door': {   // 開門／關門：地圖上點的位置附近那扇門（後室木門這類 data/doors.js 的門）；門口有人站著時關不起來
+        const d = nearDoor(s.at); if (d) setDoorOpen(d, s.open !== false, state.skipping);
         break;
       }
       case 'sway': { const a = actor(s.who); if (a) a.sway = s.on === false ? 0 : ACTOR_SWAY.px[clamp(Number(s.lv) || 2, 1, 5)]; break; }   // 角色晃動：1～5 級，左右晃（像站不穩）
@@ -355,6 +386,7 @@ const StoryKai = (() => {
         break;
       case 'bgmStop': if (state.skipping) state.skipBgm = null; else stopBgm(BGM_FADE); break;
       case 'sfx': if (!state.skipping && s.src) playSound(s.src, Number(s.vol ?? 100) / 100); break;
+      case 'sfxStop': stopSound(); break;
       case 'end': finish(s.title || ''); break;
     }
   }
@@ -369,6 +401,7 @@ const StoryKai = (() => {
     if (index < 0) return false;
     const dark = LIGHT.enabled;
     MAP_INDEX = index; initMap();   // window.STORY_MODE 照樣開著（這張地圖也是這段劇情用的）
+    setupStoryDoors();
     LIGHT.enabled = dark;           // 後室黑幕開著的話繼續開著
     return true;
   }
@@ -523,6 +556,8 @@ const StoryKai = (() => {
   function tick(dt) {
     if (!state) return;
     if (document.hidden) dt = 0;
+    const fast = fastOn(); if (fast) dt *= FAST.rate;   // 預覽時按住滑鼠左鍵：快轉
+    if (ui) el('storyKaiFast').hidden = !fast;
     if (state.playing) {
       state.time += dt;
       for (const f of [state.black, state.white]) f.t += dt;
@@ -571,7 +606,7 @@ const StoryKai = (() => {
     if (a.target) {
       const dx = a.target[0] - a.x, dy = a.target[1] - a.y, d = Math.hypot(dx, dy), step = dt * a.speed;
       a.moving = true;
-      if (d <= step) { [a.x, a.y] = a.target; a.target = a.path.shift() || null; if (!a.target) { a.moving = false; if (a.arriveDir) a.dir = a.arriveDir; } }
+      if (d <= step) { [a.x, a.y] = a.target; a.target = a.path.shift() || null; if (!a.target) { a.moving = false; if (a.arriveDir) a.dir = a.arriveDir; warpAt(a); } }
       else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
     }
     if (a.hidden || a.moving) a.blinkTime = -1; else updateBlink(a, dt);
@@ -737,9 +772,15 @@ const StoryKai = (() => {
     if (!sec) { clearInterval(a._fade); a.pause(); return; }
     fadeAudio(a, 0, sec, () => a.pause());
   }
+  let lastSfx = null;   // 最後一個播的音效（「停止音效」停它）
   function playSound(src, vol) {
     if (muted()) return;
     const a = new Audio(src); a.volume = clamp(vol * sfxMaster(), 0, 1); a.play().catch(() => {});
+    lastSfx = a;
+  }
+  function stopSound() {   // 停止音效：上一個音效很快淡掉（0.15 秒，不會「啪」一聲斷掉）
+    const a = lastSfx; lastSfx = null; if (!a || a.paused) return;
+    fadeAudio(a, 0, .15, () => a.pause());
   }
 
   // ---- 離開、回到遊戲 ----
@@ -749,7 +790,7 @@ const StoryKai = (() => {
   }
   function leave() {
     if (!state && !ui) return;
-    stopBgm(0); clearInput(); state = null;
+    stopBgm(0); stopSound(); clearInput(); state = null;
     if (ui) { ui.hidden = true; el('storyKaiEnd').hidden = true; }
     document.body.classList.remove('story-scene');
     if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-noface', 'story-kai-shake'); }
@@ -788,6 +829,13 @@ const StoryKai = (() => {
   const on = () => !!window.STORY_MODE && !!window.STORY_KAI_ON;
   const wakeSound = () => { if (typeof SFX !== 'undefined') SFX.unlock?.(); if (bgm && bgm.paused) bgm.play().catch(() => {}); };
   function action(name) { if (name === 'exit') exit(); else if (name === 'replay') start(); }
+  // 預覽時按住滑鼠左鍵＝3 倍速播放，放開回到原本速度；按住超過 hold 秒才算（短短點一下照樣是「下一句」，按住放開不會跳下一句）
+  const FAST = { rate: 3, hold: .25 };
+  let pressAt = 0, swallowClick = false;
+  const fastOn = () => pressAt > 0 && state?.playing && (performance.now() - pressAt) / 1000 >= FAST.hold;
+  window.addEventListener('pointerdown', e => { if (on() && isPreview() && e.button === 0 && el('wrap')?.contains(e.target) && !e.target.closest('[data-kai-action]')) pressAt = performance.now(); }, true);
+  window.addEventListener('pointerup', () => { if (pressAt && (performance.now() - pressAt) / 1000 >= FAST.hold) swallowClick = true; pressAt = 0; }, true);
+  window.addEventListener('blur', () => { pressAt = 0; });
   window.addEventListener('keydown', e => {
     if (!on()) return;
     wakeSound();
@@ -807,7 +855,7 @@ const StoryKai = (() => {
     if (!on()) return;
     const b = e.target.closest('[data-kai-action]');
     if (b) { e.preventDefault(); e.stopImmediatePropagation(); action(b.dataset.kaiAction); }
-    else if (state?.playing && el('wrap')?.contains(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); next(); }
+    else if (state?.playing && el('wrap')?.contains(e.target)) { e.preventDefault(); e.stopImmediatePropagation(); if (swallowClick) swallowClick = false; else next(); }
   }, true);
   const listener = () => state && { x: cam.x + viewW() / 2, y: cam.y + viewH() / 2 };
   return { has, current, isPreview, previewScene, config, prepare, start, tick, draw, leave, listener, playFromGame, ownsStamp: () => false, debug: () => state };   // debug：測試時在主控台看播放狀態
