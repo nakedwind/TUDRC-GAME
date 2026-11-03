@@ -242,6 +242,15 @@ function eliteBirdSmash(e, o) {
   if (typeof sfxAt === 'function') sfxAt('knock2', ox, oy, 1, 'elite-bird-smash');
 }
 
+// 走路（走近目標、走回原位）被建築擋住：跟衝撞一樣直接撞爛。以前是一下一下慢慢敲（3 秒 176），
+// 路障 1500 血要敲快半分鐘，大隊長就卡在路障前一動也不動。營地帳篷照舊慢慢打（一撞就爛會直接輸）
+function eliteBirdWalkBlocked(e, o, dt) {
+  if (o.isBase) { enemyAttackObstacle(e, o, dt); return; }
+  const ox = OX + (o.c + (o.w || 1) / 2) * CELL, oy = OY + (o.r + (o.h || 1) / 2) * CELL, d = Math.hypot(ox - e.x, oy - e.y) || 1;
+  e.eb.dir = e.ch.dir = { x: (ox - e.x) / d, y: (oy - e.y) / d };   // 碎片往撞過去的方向噴
+  e.attackingObstacle = null;
+  eliteBirdSmash(e, o);
+}
 // ---- 衝撞：穿過路線上的每一個人 ----
 function eliteBirdStartCharge(e) {
   e.eb.left = e.eb.len; e.eb.hit = new Set(); e.eb.hitAny = false; e.eb.speedK = ELITE_BIRD.chargeStart;
@@ -402,7 +411,7 @@ function stepEliteBird(e, dt) {
       const [tc, tr] = cellAt(target.x, target.y), hx = e.x, hy = e.y;
       const nav = enemyNavigate(e, tc, tr, dt, 'elite-approach:' + tc + ',' + tr, 'detour');   // 繞得過去就繞，不先打障礙物
       eliteBirdFootsteps(e, Math.hypot(e.x - hx, e.y - hy), false);
-      if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
+      if (nav.blocker) eliteBirdWalkBlocked(e, nav.blocker, dt);
       return;
     }
     case 'scream': if (eb.t <= 0) eliteBirdSet(e, 'recover', 0); return;
@@ -442,7 +451,7 @@ function stepEliteBird(e, dt) {
       const nav = enemyNavigate(e, hc, hr, dt * (dash ? E.chargeSpeed / (e.speed || 1) : E.returnSpeedMul), 'elite-home', true);
       eliteBirdFootsteps(e, Math.hypot(e.x - hx, e.y - hy), dash);
       eliteBirdReturnRam(e, dt);
-      if (nav.blocker) enemyAttackObstacle(e, nav.blocker, dt);
+      if (nav.blocker) eliteBirdWalkBlocked(e, nav.blocker, dt);
       else if (nav.reached && awayHome <= CELL) eliteBirdSet(e, 'guard');
       return;
     }
