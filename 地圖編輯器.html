@@ -56,7 +56,7 @@
         <button class="tool" data-mode="edge" title="在格線上畫薄牆：只擋「跨過這條線」，兩邊的格子都能走（高台邊緣、階梯兩側）。點格線＝加上／拿掉，按著沿格線拖曳＝連續畫或擦">📏 邊緣碰撞</button>
         <button class="tool" data-mode="portal">🚪 出入口</button>
         <button class="tool" data-mode="portalnudge" title="點出入口選取：方向鍵移動位置、[ ] 調判定範圍（Shift 一次 10），Delete 重設">🎯 出入口微調</button>
-        <button class="tool" data-mode="tunnel" title="點出入口：切換成隱藏地道／一般出入口；點空格：新增隱藏地道。球球學會「地道搜索」找到才會出現">🕳️ 隱藏地道</button>
+        <button class="tool" data-mode="tunnel" title="點出入口：切換成隱藏地道／一般出入口；點空格：新增隱藏地道。球球學會「密道搜索」找到才會出現">🕳️ 隱藏地道</button>
         <button class="tool" data-mode="hidepick" title="點地上的拾取物（拾取亮點、電池、杏仁水、鑰匙…）：切換隱藏（沒有亮點、靠近才有提示）">🙈 隱藏拾取</button>
         <button class="tool" data-mode="core">💠 異質核心候選點</button>
         <button class="tool" data-mode="capking" title="菁英 BOSS「順順宮主」：點空格放一頂大宮帽、再點一次拿掉。核心會躲在其中一頂裡（至少 2 頂）；虛線框是帽子蓋著時擋住的範圍">🎩 順順宮主帽子</button>
@@ -210,7 +210,7 @@
   <script src="js/map-picker.js?v=mappicker-20261024"></script>   <!-- 設出入口時選地圖的清單（取代 prompt，地圖多也不會被截斷） -->
   <script src="js/project-save.js?v=filewarn-20261026"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/map-editor-store.js?v=sync-20261021"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/map-editor.js?v=circuitbadge-20261102", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/map-editor.js?v=wallsniff-20261103", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>

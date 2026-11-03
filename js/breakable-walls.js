@@ -9,6 +9,8 @@
    「後室牆面（裂縫・可炸開）」「後室牆面（裂縫・可炸開・隱藏區）」（Back-room-wall02-damage-03 的圖）：已經裂開，炸一次就開。
    另一種做法：地圖編輯器把圖層設成「🧱 隱藏區」，那些圖層上的東西在炸開最近的可炸開牆之前不畫（secretLayerAreas、secretAlpha）。
    「後室牆面（裂縫）」本身只是裝飾（也是可炸開的牆被炸第一下時換上的圖），不能炸。
+   提示：隱藏區的牆、裂縫牆都要帶球球（學會密道搜索）才找得到，找到後牆上一直有白色狗腳印＋「?」的小牌子
+   （drawBreakableWallHints）；沒帶球球就沒有任何提示。
 */
 // 素材 id → stages：依序換成哪些圖；open：炸開後可以通過的格子（[第幾欄, 第幾列]，從大圖左上角算）
 // solid：一直擋路的格子（不管地圖編輯器有沒有畫擋路格；一般版本是牆最下排的左右兩格）
@@ -264,6 +266,43 @@ function blastWalls(x, y, R) {
       for (const a of G.hiddenAreas || []) if (a.stamp === s && !a.revealAt) a.revealAt = performance.now() / 1000;   // 隱藏區：黑幕開始淡出
     } else wallRubble(hx, hy, 7);   // 裂開：少量碎屑
   }
+}
+// ---- 球球找到的牆：牆上的白色狗腳印＋「?」小牌子（沒帶球球就沒有任何提示，要自己發現）----
+function breakableWallOpened(s) { const spec = breakableWallSpec(s); return !!spec && breakableWallStage(s) >= spec.stages.length; }
+// 牆後面藏著隱藏區（隱藏區版本的牆，或地圖編輯器「🧱 隱藏區」圖層綁到這面牆）
+function breakableWallHidesArea(s) {
+  const spec = breakableWallSpec(s);
+  return !!spec && (!!spec.hide || ((G && G.hiddenAreas) || []).some(a => a.stamp === s));
+}
+// 一開始就是裂縫的牆（「後室牆面（裂縫・可炸開）」系列：只有一個階段，炸一次就開）
+function breakableWallCrackType(s) { const spec = breakableWallSpec(s); return !!spec && spec.stages.length === 1; }
+// 球球（密道搜索）聞得出來的牆：隱藏區的牆＋裂縫牆
+function breakableWallSniffable(s) { return breakableWallHidesArea(s) || breakableWallCrackType(s); }
+// js/render.js 在黑幕之上呼叫（暗處也看得到）
+function drawBreakableWallHints(ctx) {
+  if (!G || !G.running || MAP_SAFE || !MAP || !(G.wallStage instanceof Map) || typeof dogFoundWall !== 'function') return;
+  const now = performance.now() / 1000;
+  for (const s of MAP.stamps || []) {
+    if (!breakableWallSpec(s) || breakableWallOpened(s) || !breakableWallSniffable(s) || !dogFoundWall(s)) continue;
+    const [hc, hr] = breakableWallOpenCells(s)[0], [hx, hy] = center(hc, hr);
+    if (typeof isVisible === 'function' && !isVisible(hx, hy)) continue;
+    const alpha = .8 + .2 * Math.sin(now * 4);   // 一直顯示、一閃一閃
+    const py = hy - 6 + Math.sin(now * 2.2) * 2, w = 40, h = 24;   // 畫在洞口（會炸開的地方）
+    ctx.save(); ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.globalAlpha = alpha;
+    ctx.fillStyle = 'rgba(0,0,0,.7)'; ctx.strokeStyle = '#ffd479'; ctx.lineWidth = 2;   // 黑底金框的小牌子，暗處、黃牆上都看得清楚
+    roundRect(hx - w / 2, py - h / 2, w, h, h / 2); ctx.fill(); ctx.stroke();
+    drawPawIcon(ctx, hx - 8, py + 1, .9, '#fff');
+    ctx.font = 'bold 15px sans-serif'; ctx.fillStyle = '#fff';
+    ctx.fillText('?', hx + 10, py + 1);
+    ctx.restore();
+  }
+}
+// 狗腳印：一個大肉墊＋上面四個分開的小趾頭（emoji 在黑底上會變暗，所以自己畫）；k＝大小倍數
+function drawPawIcon(ctx, x, y, k, color) {
+  ctx.fillStyle = color; ctx.beginPath();
+  ctx.ellipse(x, y + 3 * k, 4.6 * k, 3.8 * k, 0, 0, Math.PI * 2);
+  for (const [dx, dy, r] of [[-5.8, -1.6, 1.7], [-2.4, -5.4, 1.7], [2.4, -5.4, 1.7], [5.8, -1.6, 1.7]]) { ctx.moveTo(x + (dx + r) * k, y + dy * k); ctx.arc(x + dx * k, y + dy * k, r * k, 0, Math.PI * 2); }
+  ctx.fill();
 }
 // 碎石＋煙塵
 function wallRubble(x, y, n) {

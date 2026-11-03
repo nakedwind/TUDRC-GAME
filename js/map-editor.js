@@ -1543,7 +1543,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (pt) {
       if (pt.hidden) delete pt.hidden; else pt.hidden = true;
       saveMaps(); draw();
-      setStatus(pt.hidden ? '已設成隱藏地道：要球球學會「地道搜索」找到才會出現' : '已改回一般出入口', '#7ee0c0');
+      setStatus(pt.hidden ? '已設成隱藏地道：要球球學會「密道搜索」找到才會出現' : '已改回一般出入口', '#7ee0c0');
       return;
     }
     const others = maps.filter(x => x.id !== m.id);

@@ -1219,6 +1219,7 @@ function draw() {
   if (typeof drawGrabBuildingTarget === 'function') drawGrabBuildingTarget(ctx);   // 抓著建築：要放下的位置（js/grab.js）
   drawDemolishPreview();        // 拆除模式：滑鼠指著的建築框起來，顯示拆掉會退多少錢
   drawStairArrows();            // 逃生樓梯：右邊上樓、左邊下樓的浮動箭頭
+  if (typeof drawBreakableWallHints === 'function') drawBreakableWallHints(ctx);   // 裂縫牆、球球找到的隱藏區牆：「可以炸開」提示（js/breakable-walls.js）
   if (typeof drawGraffitiPreview === 'function') { drawGraffitiPreview(ctx); drawGraffitiErase(ctx); }   // 塗鴉：要畫在哪的預覽、擦掉的進度
   drawBuildRange();             // 放建築時能蓋的範圍（溫特 BUILD_RANGE 格內）
   if (typeof drawCooking === 'function') drawCooking(ctx);
