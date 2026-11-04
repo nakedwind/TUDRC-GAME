@@ -69,7 +69,7 @@ function baseFollowTick(dt) {
     baseFollow.pending = baseFollow.pending.filter(o => o !== w);
     const t = w.t; t.x = w.x; t.y = w.y;
     if (close) {   // 溫特一直站在門口：站到門口旁邊的空格
-      const [c0, r0] = cellAt(w.x, w.y), spot = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]].map(([dc, dr]) => [c0 + dc, r0 + dr]).find(([c, r]) => sentryCellWalkable(c, r, true) && Math.hypot(center(c, r)[0] - p.x, center(c, r)[1] - p.y) >= CELL);
+      const [c0, r0] = cellAt(w.x, w.y), spot = [[0, 1], [1, 0], [-1, 0], [0, -1], [1, 1], [-1, 1], [1, -1], [-1, -1]].map(([dc, dr]) => [c0 + dc, r0 + dr]).find(([c, r]) => sentryCellWalkable(c, r, true) && Math.hypot((center(c, r)[0] - p.x) / (CELL * .9), (center(c, r)[1] - p.y) / (CELL * 1.4)) >= 1);   // 左右 0.9、上下 1.4 格以內太近（正下方 1 格＝溫特踩在頭上）
       if (spot) [t.x, t.y] = center(...spot);
     }
     t.navPath = null; t.navGoal = null; t.waitT = 0; t.moving = false;

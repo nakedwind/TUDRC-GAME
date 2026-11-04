@@ -123,18 +123,20 @@ function homeExit(a, homeName) {
 }
 // 到新地圖：出現在溫特旁邊（從溫特的格子往外找沒人站的空格，第 i 位用第 i 格）
 function placeGuestNearPlayer(a, i) {
-  const p = G.player, [sc, sr] = cellAt(p.x, p.y), seen = new Set([sc + ',' + sr]), queue = [[sc, sr]], spots = [];
+  const p = G.player, [sc, sr] = cellAt(p.x, p.y), seen = new Set([sc + ',' + sr]), queue = [[sc, sr]], spots = [], roomy = [];
   const taken = new Set([...G.towers, ...G.npcs].filter(o => o !== a && !mealGuest(o)).map(o => cellAt(o.x, o.y).join(',')));
-  for (let h = 0; h < queue.length && spots.length <= i && h < 400; h++) {
+  // roomy＝不會跟溫特、前面挑好的人疊在一起的格子（正上下方只差 1 格＝溫特的腳踩在頭上）：左右 0.9、上下 1.4 格以內算太近
+  const apart = (u, v) => Math.hypot((u[0] - v[0]) / .9, (u[1] - v[1]) / 1.4) >= 1;
+  for (let h = 0; h < queue.length && roomy.length <= i && h < 400; h++) {
     const [c, r] = queue[h];
-    if (h && !taken.has(c + ',' + r)) spots.push([c, r]);
+    if (h && !taken.has(c + ',' + r)) { spots.push([c, r]); if (apart([c, r], [sc, sr]) && roomy.every(o => apart([c, r], o))) roomy.push([c, r]); }
     for (const [dc, dr] of [[0, 1], [1, 0], [-1, 0], [0, -1]]) {
       const nc = c + dc, nr = r + dr, k = nc + ',' + nr;
       if (seen.has(k) || edgeBetween(c, r, nc, nr) || !sentryCellWalkable(nc, nr, true)) continue;
       seen.add(k); queue.push([nc, nr]);
     }
   }
-  const cell = spots[Math.min(i, spots.length - 1)]; if (cell) [a.x, a.y] = center(...cell);
+  const cell = roomy[i] || spots[Math.min(i, spots.length - 1)]; if (cell) [a.x, a.y] = center(...cell);   // 都沒有空的：照原本最近的格子
   a.navPath = null; a.navGoal = null; a.target = null; a.inviteJoined = true;   // 跟著換地圖過來的：已經在隊伍裡
 }
 const inviteRand = ([a, b]) => a + Math.random() * (b - a);
