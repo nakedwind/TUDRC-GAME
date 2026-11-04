@@ -770,5 +770,71 @@ const PROP_COLLISIONS = [
         ]
       ]
     }
+  },
+  {
+    "id": "prop-drink-shop-narrow",
+    "name": "飲料店（窄型櫃台）",
+    "tile": "tile_street_drink_shop_narrow",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/street/drink-shop-narrow.png",
+      "w": 1,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-drink-shop-small",
+    "name": "飲料店（小型店面）",
+    "tile": "tile_street_drink_shop_small",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/street/drink-shop-small.png",
+      "w": 2,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ]
+      ]
+    }
+  },
+  {
+    "id": "prop-drink-shop-wide",
+    "name": "飲料店（寬型店面）",
+    "tile": "tile_street_drink_shop_wide",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/street/drink-shop-wide.png",
+      "w": 3,
+      "h": 3,
+      "solid": [
+        [
+          0,
+          2
+        ],
+        [
+          1,
+          2
+        ],
+        [
+          2,
+          2
+        ]
+      ]
+    }
   }
 ];
