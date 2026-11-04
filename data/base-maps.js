@@ -5206,7 +5206,8 @@ const BASE_MAPS = [
         "r": 4,
         "layer": "object3",
         "ox": 8,
-        "oy": -14
+        "oy": -14,
+        "sortDepth": 1
       },
       {
         "id": "tile_counseling_tissue_box",
@@ -5214,7 +5215,8 @@ const BASE_MAPS = [
         "r": 4,
         "layer": "object3",
         "ox": 4,
-        "oy": -16
+        "oy": -16,
+        "sortDepth": 1
       },
       {
         "id": "tile_eoc_binder_row",
@@ -5222,7 +5224,8 @@ const BASE_MAPS = [
         "r": 4,
         "layer": "object3",
         "ox": 0,
-        "oy": -14
+        "oy": -14,
+        "sortDepth": 1
       },
       {
         "id": "tile_new_decor_poster",
@@ -5340,15 +5343,15 @@ const BASE_MAPS = [
     "solidOffsets": {
       "10,7": [
         0,
-        10
+        9
       ],
       "8,7": [
         0,
-        6
+        8
       ],
       "9,7": [
         0,
-        8
+        9
       ]
     },
     "safe": true,
