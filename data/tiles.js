@@ -4897,5 +4897,445 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_wall_coner_02.png",
     "w": 3,
     "h": 2
+  },
+  {
+    "id": "tile_forest_bg_forest",
+    "name": "bg_forest",
+    "role": "decor",
+    "file": "images/森林/bg_forest.png",
+    "w": 18,
+    "h": 14
+  },
+  {
+    "id": "tile_forest_bg_forest_light",
+    "name": "bg_forest_light",
+    "role": "decor",
+    "file": "images/森林/bg_forest_light.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_bg_forest_nest",
+    "name": "bg_forest_Nest",
+    "role": "decor",
+    "file": "images/森林/bg_forest_Nest.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_bg_forest_nest_egg",
+    "name": "bg_forest_Nest_egg",
+    "role": "decor",
+    "file": "images/森林/bg_forest_Nest_egg.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_bg_forest_night",
+    "name": "bg_forest_night",
+    "role": "decor",
+    "file": "images/森林/bg_forest_night.png",
+    "w": 18,
+    "h": 14
+  },
+  {
+    "id": "tile_forest_bg_outside",
+    "name": "bg_outside",
+    "role": "decor",
+    "file": "images/森林/bg_outside.png",
+    "w": 18,
+    "h": 14
+  },
+  {
+    "id": "tile_forest_bg_outside_farm01",
+    "name": "bg_outside_farm01",
+    "role": "decor",
+    "file": "images/森林/bg_outside_farm01.png",
+    "w": 6,
+    "h": 4
+  },
+  {
+    "id": "tile_forest_bg_outside_house",
+    "name": "bg_outside_house",
+    "role": "decor",
+    "file": "images/森林/bg_outside_house.png",
+    "w": 9,
+    "h": 9
+  },
+  {
+    "id": "tile_forest_bg_outside_tree02",
+    "name": "bg_outside_tree02",
+    "role": "decor",
+    "file": "images/森林/bg_outside_tree02.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_forest_layer_114_copy_7",
+    "name": "forest_layer_114_copy_7",
+    "role": "decor",
+    "file": "images/森林/forest_layer_114_copy_7.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_115_copy_15",
+    "name": "forest_layer_115_copy_15",
+    "role": "decor",
+    "file": "images/森林/forest_layer_115_copy_15.png",
+    "w": 4,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_117",
+    "name": "forest_layer_117",
+    "role": "decor",
+    "file": "images/森林/forest_layer_117.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_123",
+    "name": "forest_layer_123",
+    "role": "decor",
+    "file": "images/森林/forest_layer_123.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_124_copy",
+    "name": "forest_layer_124_copy",
+    "role": "decor",
+    "file": "images/森林/forest_layer_124_copy.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_125",
+    "name": "forest_layer_125",
+    "role": "decor",
+    "file": "images/森林/forest_layer_125.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_126",
+    "name": "forest_layer_126",
+    "role": "decor",
+    "file": "images/森林/forest_layer_126.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_127",
+    "name": "forest_layer_127",
+    "role": "decor",
+    "file": "images/森林/forest_layer_127.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_130",
+    "name": "forest_layer_130",
+    "role": "decor",
+    "file": "images/森林/forest_layer_130.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_131",
+    "name": "forest_layer_131",
+    "role": "decor",
+    "file": "images/森林/forest_layer_131.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_132",
+    "name": "forest_layer_132",
+    "role": "decor",
+    "file": "images/森林/forest_layer_132.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_133",
+    "name": "forest_layer_133",
+    "role": "decor",
+    "file": "images/森林/forest_layer_133.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_134",
+    "name": "forest_layer_134",
+    "role": "decor",
+    "file": "images/森林/forest_layer_134.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_135",
+    "name": "forest_layer_135",
+    "role": "decor",
+    "file": "images/森林/forest_layer_135.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_136",
+    "name": "forest_layer_136",
+    "role": "decor",
+    "file": "images/森林/forest_layer_136.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_149",
+    "name": "forest_layer_149",
+    "role": "decor",
+    "file": "images/森林/forest_layer_149.png",
+    "w": 6,
+    "h": 5
+  },
+  {
+    "id": "tile_forest_layer_150",
+    "name": "forest_layer_150",
+    "role": "decor",
+    "file": "images/森林/forest_layer_150.png",
+    "w": 5,
+    "h": 6
+  },
+  {
+    "id": "tile_forest_layer_151",
+    "name": "forest_layer_151",
+    "role": "decor",
+    "file": "images/森林/forest_layer_151.png",
+    "w": 4,
+    "h": 6
+  },
+  {
+    "id": "tile_forest_layer_152",
+    "name": "forest_layer_152",
+    "role": "decor",
+    "file": "images/森林/forest_layer_152.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_153",
+    "name": "forest_layer_153",
+    "role": "decor",
+    "file": "images/森林/forest_layer_153.png",
+    "w": 5,
+    "h": 3
+  },
+  {
+    "id": "tile_forest_layer_155",
+    "name": "forest_layer_155",
+    "role": "decor",
+    "file": "images/森林/forest_layer_155.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_forest_layer_157_copy_2",
+    "name": "forest_layer_157_copy_2",
+    "role": "decor",
+    "file": "images/森林/forest_layer_157_copy_2.png",
+    "w": 7,
+    "h": 7
+  },
+  {
+    "id": "tile_forest_layer_157_copy_3",
+    "name": "forest_layer_157_copy_3",
+    "role": "decor",
+    "file": "images/森林/forest_layer_157_copy_3.png",
+    "w": 9,
+    "h": 10
+  },
+  {
+    "id": "tile_forest_layer_157_copy",
+    "name": "forest_layer_157_copy",
+    "role": "decor",
+    "file": "images/森林/forest_layer_157_copy.png",
+    "w": 5,
+    "h": 4
+  },
+  {
+    "id": "tile_forest_layer_158",
+    "name": "forest_layer_158",
+    "role": "decor",
+    "file": "images/森林/forest_layer_158.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_forest_layer_159",
+    "name": "forest_layer_159",
+    "role": "decor",
+    "file": "images/森林/forest_layer_159.png",
+    "w": 6,
+    "h": 9
+  },
+  {
+    "id": "tile_forest_layer_160",
+    "name": "forest_layer_160",
+    "role": "decor",
+    "file": "images/森林/forest_layer_160.png",
+    "w": 4,
+    "h": 9
+  },
+  {
+    "id": "tile_forest_layer_161",
+    "name": "forest_layer_161",
+    "role": "decor",
+    "file": "images/森林/forest_layer_161.png",
+    "w": 8,
+    "h": 10
+  },
+  {
+    "id": "tile_forest_layer_162",
+    "name": "forest_layer_162",
+    "role": "decor",
+    "file": "images/森林/forest_layer_162.png",
+    "w": 8,
+    "h": 9
+  },
+  {
+    "id": "tile_forest_layer_166",
+    "name": "forest_layer_166",
+    "role": "decor",
+    "file": "images/森林/forest_layer_166.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_forest_layer_167",
+    "name": "forest_layer_167",
+    "role": "decor",
+    "file": "images/森林/forest_layer_167.png",
+    "w": 3,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_168",
+    "name": "forest_layer_168",
+    "role": "decor",
+    "file": "images/森林/forest_layer_168.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_34_copy_4",
+    "name": "forest_layer_34_copy_4",
+    "role": "decor",
+    "file": "images/森林/forest_layer_34_copy_4.png",
+    "w": 4,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_45_copy",
+    "name": "forest_layer_45_copy",
+    "role": "decor",
+    "file": "images/森林/forest_layer_45_copy.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_46_copy",
+    "name": "forest_layer_46_copy",
+    "role": "decor",
+    "file": "images/森林/forest_layer_46_copy.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_layer_48_copy",
+    "name": "forest_layer_48_copy",
+    "role": "decor",
+    "file": "images/森林/forest_layer_48_copy.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_layer_49_copy",
+    "name": "forest_layer_49_copy",
+    "role": "decor",
+    "file": "images/森林/forest_layer_49_copy.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forest_gradient",
+    "name": "forest_gradient",
+    "role": "decor",
+    "file": "images/森林/forest_gradient.png",
+    "w": 1,
+    "h": 3
+  },
+  {
+    "id": "tile_forest_group_13_1",
+    "name": "forest_group_13_1",
+    "role": "decor",
+    "file": "images/森林/forest_group_13_1.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_forest_group_13",
+    "name": "forest_group_13",
+    "role": "decor",
+    "file": "images/森林/forest_group_13.png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_group_19",
+    "name": "forest_group_19",
+    "role": "decor",
+    "file": "images/森林/forest_group_19.png",
+    "w": 10,
+    "h": 12
+  },
+  {
+    "id": "tile_forest_group_20",
+    "name": "forest_group_20",
+    "role": "decor",
+    "file": "images/森林/forest_group_20.png",
+    "w": 7,
+    "h": 4
+  },
+  {
+    "id": "tile_forest_group_2002",
+    "name": "forest_group_2002",
+    "role": "decor",
+    "file": "images/森林/forest_group_2002.png",
+    "w": 7,
+    "h": 4
+  },
+  {
+    "id": "tile_forest_group_7_copy_12",
+    "name": "forest_group_7_copy_12",
+    "role": "decor",
+    "file": "images/森林/forest_group_7_copy_12.png",
+    "w": 3,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_group_8_copy_2",
+    "name": "forest_group_8_copy_2",
+    "role": "decor",
+    "file": "images/森林/forest_group_8_copy_2.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_forest_group_8_copy",
+    "name": "forest_group_8_copy",
+    "role": "decor",
+    "file": "images/森林/forest_group_8_copy.png",
+    "w": 1,
+    "h": 1
   }
 ];
