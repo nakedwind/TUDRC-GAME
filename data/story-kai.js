@@ -93,15 +93,17 @@ const STORY_KAI = {
       { "do": "camMove", "at": [34.3, 11.4], "w": 19.2, "ms": 1200 },
       { "do": "move", "who": 1, "at": [34.2, 10.4], "ms": 1400, "face": "back" },
       { "do": "sfxStop", "all": true },
-      { "do": "camMove", "at": [33.7, 8.7], "w": 27.7, "ms": 1500 },
+      { "do": "camMove", "at": [33.3, 8.7], "w": 27.7, "ms": 1500 },
       { "do": "wait", "ms": 1500 },
       { "do": "camShake", "ms": 150, "lv": 3 },
       { "do": "sfx", "src": "音效素材/對話.mp3", "vol": 100 },
       { "do": "act", "who": 1, "act": "hop", "on": true },
       { "do": "say", "who": 1, "text": "……這是怎麼回事！？", "shake": true },
       { "do": "wait", "ms": 600 },
+      { "do": "camMove", "at": [31.5, 6.9], "w": 24.4, "ms": 1200 },
       { "do": "act", "who": 1, "act": "run" },
       { "do": "move", "who": 1, "at": [31.5, 7.1], "ms": 1000, "face": "back" },
+      { "do": "camMove", "at": [32.6, 7.8], "w": 27, "ms": 600 },
       { "do": "wait", "ms": 150 },
       { "do": "camShake", "ms": 200, "lv": 4 },
       { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 1393, "to": 1784 },
@@ -116,9 +118,14 @@ const STORY_KAI = {
       { "do": "act", "who": 1, "act": "hop", "on": true },
       { "do": "move", "who": 1, "at": [31.9, 8.5], "ms": 700, "face": "back" },
       { "do": "wait", "ms": 400 },
-      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 815, "to": 1793, "speed": 0.75, "loop": true },
+      { "do": "camMove", "at": [32.4, 7.6], "w": 22.2, "ms": 600 },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 815, "to": 1793, "speed": 0.75, "loop": false },
       { "do": "wait", "ms": 200 },
-      { "do": "move", "who": 1, "at": [32.8, 10], "ms": 700, "face": "back" }
+      { "do": "move", "who": 1, "at": [32.6, 9.2], "ms": 700, "face": "back" },
+      { "do": "say", "who": 1, "text": "……誰！？", "shake": true },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 815, "to": 1793, "speed": 0.9, "loop": false },
+      { "do": "wait", "ms": 1000 },
+      { "do": "wait", "ms": 5000 }
     ]
   }
 };
