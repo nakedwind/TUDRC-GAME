@@ -370,7 +370,13 @@ const StoryKai = (() => {
         break;
       }
       case 'sway': { const a = actor(s.who); if (a) a.sway = s.on === false ? 0 : ACTOR_SWAY.px[clamp(Number(s.lv) || 2, 1, 5)]; break; }   // 角色晃動：1～5 級，左右晃（像站不穩）
-      case 'tremble': { const a = actor(s.who); if (a) a.tremble = s.on === false ? 0 : TREMBLE_PX[clamp(Number(s.lv) || 2, 1, 5)]; break; }
+      case 'tremble': {   // 角色震動：有填毫秒＝抖那麼久就停；沒填（或 0）＝一直抖到關掉
+        const a = actor(s.who); if (!a) break;
+        const ms = Number(s.ms) || 0;
+        a.tremble = s.on === false || (ms > 0 && state.skipping) ? 0 : TREMBLE_PX[clamp(Number(s.lv) || 2, 1, 5)];
+        a.trembleLeft = a.tremble && ms > 0 ? ms / 1000 : 0;
+        break;
+      }
       case 'mshow': showMonster(s); break;
       case 'mhide': { const e = monster(s.mon); if (e) { e.target = null; e.path = []; if (state.skipping) dropMonster(e); else e.fade = -1; } break; }
       case 'mact': {
@@ -635,6 +641,7 @@ const StoryKai = (() => {
   function tickActor(a, dt) {
     a.anim += dt * (a.animRate || 1);   // 跑步時腳步快一點、慢走時慢一點
     if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
+    if (a.trembleLeft > 0 && (a.trembleLeft -= dt) <= 0) { a.trembleLeft = 0; a.tremble = 0; }   // 角色震動時間到
     tickCharge(a, dt);
     if (a.fade) {
       a.alpha += a.fade * dt / SHOW_FADE;
@@ -645,7 +652,7 @@ const StoryKai = (() => {
       const dx = a.target[0] - a.x, dy = a.target[1] - a.y, d = Math.hypot(dx, dy), step = dt * a.speed;
       a.moving = true;
       if (d <= step) { [a.x, a.y] = a.target; a.target = a.path.shift() || null; if (!a.target) { a.moving = false; if (a.arriveDir) a.dir = a.arriveDir; warpAt(a); } }
-      else { a.x += dx / d * step; a.y += dy / d * step; a.dir = Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'; }
+      else { a.x += dx / d * step; a.y += dy / d * step; a.dir = a.arriveDir || (Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front'); }   // 有設面向：一路都朝那邊（倒退、側移）；沒設：照走的方向
     }
     if (a.hidden || a.moving) a.blinkTime = -1; else updateBlink(a, dt);
     if (a.bleed && !a.hidden) tickBleed(a, dt);

@@ -83,6 +83,7 @@ const STORY_KAI = {
       { "do": "blackIn", "ms": 500 },
       { "do": "move", "who": 1, "at": [31.3, 2.4], "ms": 1000 },
       { "do": "hide", "who": 1 },
+      { "do": "door", "at": [31.8, 5], "open": false },
       { "do": "wait", "ms": 300 },
       { "do": "camMove", "at": [34.2, 15.6], "w": 19.2, "ms": 0 },
       { "do": "blackOut", "ms": 500 },
@@ -97,7 +98,27 @@ const STORY_KAI = {
       { "do": "camShake", "ms": 150, "lv": 3 },
       { "do": "sfx", "src": "音效素材/對話.mp3", "vol": 100 },
       { "do": "act", "who": 1, "act": "hop", "on": true },
-      { "do": "say", "who": 1, "text": "……這是怎麼回事！？", "shake": true }
+      { "do": "say", "who": 1, "text": "……這是怎麼回事！？", "shake": true },
+      { "do": "wait", "ms": 600 },
+      { "do": "act", "who": 1, "act": "run" },
+      { "do": "move", "who": 1, "at": [31.5, 7.1], "ms": 1000, "face": "back" },
+      { "do": "wait", "ms": 150 },
+      { "do": "camShake", "ms": 200, "lv": 4 },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 1393, "to": 1784 },
+      { "do": "tremble", "who": 1, "on": true, "lv": 2, "ms": 150 },
+      { "do": "act", "who": 1, "act": "hop", "on": true },
+      { "do": "move", "who": 1, "at": [31.9, 7.4], "ms": 150, "face": "back" },
+      { "do": "wait", "ms": 800 },
+      { "do": "sfxStop", "all": true },
+      { "do": "camShake", "ms": 200, "lv": 4 },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 1212, "to": 1793 },
+      { "do": "tremble", "who": 1, "on": true, "lv": 2, "ms": 150 },
+      { "do": "act", "who": 1, "act": "hop", "on": true },
+      { "do": "move", "who": 1, "at": [31.9, 8.5], "ms": 700, "face": "back" },
+      { "do": "wait", "ms": 400 },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 815, "to": 1793, "speed": 0.75, "loop": true },
+      { "do": "wait", "ms": 200 },
+      { "do": "move", "who": 1, "at": [32.8, 10], "ms": 700, "face": "back" }
     ]
   }
 };

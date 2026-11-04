@@ -692,8 +692,8 @@ function monFaceSel(st, list = MON_FACES) {
 function check(st, key, text, def = false) {
   return h('label', {}, h('input', { type: 'checkbox', checked: st[key] ?? def, onchange: e => { st[key] = e.target.checked; commit(); } }), text);
 }
-function faceSel(st) {
-  const s = h('select', { title: '走到之後面向哪邊', onchange: e => { if (e.target.value) st.face = e.target.value; else delete st.face; commit(); } }, FACES.map(([v, t]) => h('option', { value: v }, t)));
+function faceSel(st, title = '走到之後面向哪邊') {
+  const s = h('select', { title, onchange: e => { if (e.target.value) st.face = e.target.value; else delete st.face; commit(); } }, FACES.map(([v, t]) => h('option', { value: v }, t)));
   s.value = st.face || ''; return s;
 }
 function pickBtn(st, text, kind = 'point') {
@@ -728,7 +728,7 @@ function controls(st) {
     case 'camSway': return [check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
     case 'show': return [codeIn(st), pickBtn(st, '角色位置'), faceSel(st)];
     case 'hide': return [codeIn(st)];
-    case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st)];
+    case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st, '走的途中、走到之後都面向這邊；自動＝照走的方向')];
     case 'act': {
       const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地、集氣、受傷、坐下（要先在角色出現、角色位置設好面向，有畫那個方向的坐下圖才會坐）、光源（身上發光，照亮幾格；開了「後室黑幕」才看得出來）、滴血（跟著走過的路晚 0.3 秒滴到地上）：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
         st.act = e.target.value;
@@ -754,7 +754,7 @@ function controls(st) {
     case 'ishow': return [itemCode(st), listSel(st, 'id', PROPS, '（選道具）', '哪一個道具（背包裡的物品）'), pickBtn(st, '道具位置')];
     case 'ihide': return [itemCode(st)];
     case 'sway': return [codeIn(st), check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
-    case 'tremble': return [codeIn(st), check(st, 'on', '震動', true), h('label', {}, '幅度：', lvSel(st))];
+    case 'tremble': return [codeIn(st), check(st, 'on', '震動', true), h('label', {}, '幅度：', lvSel(st)), h('label', {}, '秒數(ms)：', msIn(st, '震多久；空白或 0＝一直震到關掉'))];
     case 'say': return [codeIn(st, '旁白'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openSay(st); } }, '寫對白'), check(st, 'shake', '框震動')];
     case 'fx': { const [cls, text] = fxTag(st); return [pickBtn(st, '特效範圍', 'box'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openFx(st); } }, '特效說明'), h('span', { class: 'tag ' + cls }, text)]; }
     case 'dark': return [check(st, 'on', '開啟（只有燈照得到的地方亮）', true)];
