@@ -55,11 +55,14 @@ function costumeProbe(folder) {
 // skin 能不能在這裡穿：wear 'base'＝只能在應變中心、'battle'＝只能出勤；沒寫（含內建 A、B）＝都可以
 const costumeSkinFitsMode = (skin, mode) => !skin || !skin.wear || skin.wear === mode;
 const COSTUME_WEAR_NAMES = { base: '應變中心限定', battle: '出勤限定' };
+// 內建 A、B 的名稱：不出戰的人（不在 ROSTER，例如伊德、諾亞）沒有出勤，B 也叫「基地便服」（A 也有圖＝「基地便服 2」分得出來）
+const costumeDefaultName = (id, k) => k === 'B' && typeof ROSTER !== 'undefined' && !ROSTER.includes(id) && id !== 'winter'
+  ? COSTUME_DEFAULT_SKINS.A + (costumeHas[costumeBase(costumeFolderOf(id)) + '_A'] === true ? ' 2' : '') : COSTUME_DEFAULT_SKINS[k];
 // 這個角色可以穿的 skin：內建 A、B（有圖的）＋擁有的專屬 skin
 function costumeSkinsFor(id) {
   const base = costumeBase(costumeFolderOf(id)), list = [];
   // 確定有圖才列出來（還在查的，查到後衣櫃會自己重畫）
-  for (const k of ['A', 'B']) if (costumeProbe(base + '_' + k) === true) list.push({ id: k, name: COSTUME_DEFAULT_SKINS[k], folder: base + '_' + k, builtin: true });
+  for (const k of ['A', 'B']) if (costumeProbe(base + '_' + k) === true) list.push({ id: k, name: costumeDefaultName(id, k), folder: base + '_' + k, builtin: true });
   for (const s of COSTUME_SKINS) if (s.char === id && costumeCanWear(id, s.id)) list.push(s);
   return list;
 }
@@ -252,7 +255,7 @@ function renderWardrobe() {
     if (!COSTUME_ACCESSORIES.some(a => accFitsSlot(a, wd.slot) && costumeCanWear(id, a.id))) cards += '<p class="wd-empty">' + (id === 'winter' ? '還沒有這個欄位的配件' : '還沒送' + CHARACTERS[id].name + '這個欄位的配件<br><small>在對話裡按「🎁 送禮」→「服飾」送給他</small>') + '</p>';
   }
   el.querySelector('.wd-grid').innerHTML = cards;
-  const skin = wdSkinOf(id, wd.mode, wd.draft), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || COSTUME_DEFAULT_SKINS[skin] || skin;
+  const skin = wdSkinOf(id, wd.mode, wd.draft), skinName = (SKIN_BY_ID[skin] && SKIN_BY_ID[skin].name) || costumeDefaultName(id, skin) || skin;
   const accs = ACC_SLOTS.map(s => eq[s] && ACC_BY_ID[eq[s]] && ACC_BY_ID[eq[s]].name).filter(Boolean);
   el.querySelector('.wd-wearing').textContent = CHARACTERS[id].name + '：' + skinName + (accs.length ? '・' + accs.join('、') : '');
   const dirty = wdDirty(), ok = el.querySelector('.wd-confirm');
