@@ -55,8 +55,9 @@ function costumeProbe(folder) {
 // skin 能不能在這裡穿：wear 'base'＝只能在應變中心、'battle'＝只能出勤；沒寫（含內建 A、B）＝都可以
 const costumeSkinFitsMode = (skin, mode) => !skin || !skin.wear || skin.wear === mode;
 const COSTUME_WEAR_NAMES = { base: '應變中心限定', battle: '出勤限定' };
-// 內建 A、B 的名稱：不出戰的人（不在 ROSTER，例如伊德、諾亞）沒有出勤，B 也叫「基地便服」（A 也有圖＝「基地便服 2」分得出來）
-const costumeDefaultName = (id, k) => k === 'B' && typeof ROSTER !== 'undefined' && !ROSTER.includes(id) && id !== 'winter'
+// 內建 A、B 的名稱：後來加的、不出戰的人（不在 ROSTER，例如伊德、莎倫）沒有出勤，B 也叫「基地便服」（A 也有圖＝「基地便服 2」分得出來）
+const COSTUME_KEEP_NAMES = ['winter', 'claire', 'muomn', 'noah', 'ash'];   // 原本就在 2F 的人：名稱照舊（A 基地便服、B 出勤制服）
+const costumeDefaultName = (id, k) => k === 'B' && typeof ROSTER !== 'undefined' && !ROSTER.includes(id) && !COSTUME_KEEP_NAMES.includes(id)
   ? COSTUME_DEFAULT_SKINS.A + (costumeHas[costumeBase(costumeFolderOf(id)) + '_A'] === true ? ' 2' : '') : COSTUME_DEFAULT_SKINS[k];
 // 這個角色可以穿的 skin：內建 A、B（有圖的）＋擁有的專屬 skin
 function costumeSkinsFor(id) {
