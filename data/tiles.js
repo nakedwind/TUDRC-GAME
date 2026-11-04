@@ -4904,7 +4904,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/bg_forest.png",
     "w": 18,
-    "h": 14
+    "h": 14,
+    "flat": true
   },
   {
     "id": "tile_forest_bg_forest_light",
@@ -4936,7 +4937,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/bg_forest_night.png",
     "w": 18,
-    "h": 14
+    "h": 14,
+    "flat": true
   },
   {
     "id": "tile_forest_bg_outside",
@@ -4944,7 +4946,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/bg_outside.png",
     "w": 18,
-    "h": 14
+    "h": 14,
+    "flat": true
   },
   {
     "id": "tile_forest_bg_outside_farm01",
@@ -5008,7 +5011,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_124_copy.png",
     "w": 2,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_125",
@@ -5024,7 +5028,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_126.png",
     "w": 2,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_127",
@@ -5032,7 +5037,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_127.png",
     "w": 1,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_130",
@@ -5040,7 +5046,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_130.png",
     "w": 2,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_131",
@@ -5048,7 +5055,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_131.png",
     "w": 2,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_132",
@@ -5056,7 +5064,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_132.png",
     "w": 2,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_133",
@@ -5144,7 +5153,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_157_copy_2.png",
     "w": 7,
-    "h": 7
+    "h": 7,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_157_copy_3",
@@ -5152,7 +5162,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_157_copy_3.png",
     "w": 9,
-    "h": 10
+    "h": 10,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_157_copy",
@@ -5160,7 +5171,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_157_copy.png",
     "w": 5,
-    "h": 4
+    "h": 4,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_158",
@@ -5224,7 +5236,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_168.png",
     "w": 2,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_34_copy_4",
@@ -5280,7 +5293,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_group_13_1.png",
     "w": 3,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_forest_group_13",
@@ -5288,7 +5302,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_group_13.png",
     "w": 2,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_group_19",
@@ -5320,7 +5335,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_group_7_copy_12.png",
     "w": 3,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_group_8_copy_2",
@@ -5328,7 +5344,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_group_8_copy_2.png",
     "w": 1,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_group_8_copy",
@@ -5336,6 +5353,7 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_group_8_copy.png",
     "w": 1,
-    "h": 1
+    "h": 1,
+    "flat": true
   }
 ];
