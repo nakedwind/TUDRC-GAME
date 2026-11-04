@@ -110,7 +110,8 @@
   <script src="data/story-scenes.js?v=y25skip2-20261031"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-editor.js?v=tidy-20261031"></script>
+  <script src="js/stamp-transform.js?v=stampscale-20261105"></script>   <!-- 物件的大小、角度（跟遊戲共用同一套算法） -->
+  <script src="js/story-editor.js?v=stampscale-20261105"></script>
   <script>ProjectSave.attach({
     after: ['exportFile'],
     files: [{ path: 'data/story-scenes.js', label: '劇情', text: () => storyExportText() }],

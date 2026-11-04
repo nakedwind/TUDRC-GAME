@@ -584,7 +584,13 @@ function mapGlowLights() {
   }
   return out;
 }
+// 有設大小、角度的物件：整個畫法（門、閘門、手扶梯動畫…）都包在同一個變形裡（js/stamp-transform.js）
 function drawMapStampRaw(ctx, s) {
+  if (!stampHasTransform(s)) { drawMapStampPlain(ctx, s); return; }
+  const t = mapTileById(s.id); if (!t) return;
+  withStampTransform(ctx, s, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), mapStampW(s, t) * CELL, mapStampH(s, t) * CELL, () => drawMapStampPlain(ctx, s));
+}
+function drawMapStampPlain(ctx, s) {
   if (typeof G !== 'undefined' && G && G.mapDestroyed && G.mapDestroyed.has(s)) return;
   if (typeof doorStampOpen === 'function' && doorStampOpen(s)) return;   // 打開的門：圖片直接消失（挖空門洞的門：門洞、門框在 drawMapGround 最後畫、在角色下面，js/doors.js）
   if (typeof StoryScene !== 'undefined' && StoryScene.ownsStamp(s)) return;   // 回憶劇情的自動門：由 js/story-scene.js 自己畫開關動畫
@@ -689,7 +695,12 @@ function mapDrawCells() {
 // 一張大圖有沒有任何一部分在範圍內（旋轉過的圖用比較寬的範圍判斷，寧可多畫不要切掉）
 function stampInDrawRect(s) {
   const v = mapDrawRect; if (!v) return true;
-  const t = mapTileById(s.id) || {}, w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, half = Math.max(w, h) / 2;
+  const t = mapTileById(s.id) || {}, w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
+  if (stampHasTransform(s)) {   // 放大、轉過的物件：照畫出來的範圍算
+    const b = stampVisualBox(s, OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), mapStampW(s, t) * CELL, mapStampH(s, t) * CELL);
+    return b.x1 > v.x0 && b.x0 < v.x1 && b.y1 > v.y0 && b.y0 < v.y1;
+  }
+  const half = Math.max(w, h) / 2;
   const cx = OX + s.c * CELL + (s.ox || 0) + w / 2, cy = OY + s.r * CELL + (s.oy || 0) + h / 2;
   return cx + half > v.x0 && cx - half < v.x1 && cy + half > v.y0 && cy - half < v.y1;
 }
@@ -773,8 +784,9 @@ function mapOccluders() {
       const depth = chair ? y0 + (s.fy ? mapStampH(s, t) * CELL - chair.depth : chair.depth) : t.baseHp
         ? Math.max(0, Math.min(mapStampH(s, t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapStampH(s, t) - 2))))
         : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapStampH(s, t), s.sortDepth)) : null);
-      items.push({ li, x0, y0, x1: x0 + stampWpx, y1: y0 + stampHpx,
-        sortY: depth == null ? null : chair ? depth : y0 + depth * CELL, fixedDepth: depth != null, kind: 'stamp', stamp: s });
+      // 排序看物件原本佔的範圍（樹根還在原地，放大的樹冠不影響前後）；vis＝畫出來實際蓋到的範圍，補畫上層圖時用
+      items.push({ li, x0, y0, x1: x0 + stampWpx, y1: y0 + stampHpx, vis: stampHasTransform(s) ? stampVisualBox(s, x0, y0, stampWpx, stampHpx) : null,
+        sortY: depth == null ? null : chair ? depth : t.baseHp ? y0 + depth * CELL : stampDepthY(s, y0, stampHpx, depth * CELL), fixedDepth: depth != null, kind: 'stamp', stamp: s });
     }
   });
   // items 已依圖層由下往上排好，所以下層的 y 一定先算完；
@@ -803,7 +815,8 @@ function mapOccluders() {
 function buildLayerOverdraw(items) {
   const flats = (MAP.stamps || []).filter(s => !isElevatorStamp(s) && (s.layer || 'top') !== 'top' && !stampIsOcc(s)).map(s => {
     const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
-    return { flat: true, li: MAP_LAYER_ORDER.indexOf(s.layer || 'top'), x0, y0, x1: x0 + mapStampW(s, t) * CELL, y1: y0 + mapStampH(s, t) * CELL, kind: 'stamp', stamp: s };
+    const fw = mapStampW(s, t) * CELL, fh = mapStampH(s, t) * CELL;
+    return { flat: true, li: MAP_LAYER_ORDER.indexOf(s.layer || 'top'), x0, y0, x1: x0 + fw, y1: y0 + fh, vis: stampHasTransform(s) ? stampVisualBox(s, x0, y0, fw, fh) : null, kind: 'stamp', stamp: s };
   });
   // 立體物在遊戲裡的實際先後（底部Y，同樣的話照原本順序）
   const rank = new Map([...items].map((it, k) => ({ it, k })).sort((a, b) => a.it.y - b.it.y || a.k - b.k).map((o, n) => [o.it, n]));
@@ -816,7 +829,8 @@ function buildLayerOverdraw(items) {
     for (const a of [...items, ...flats]) {
       if (a === x || !higher(a, x)) continue;                  // 只管比它上層（或同層排在它前面）的圖
       if (!a.flat && rank.get(a) > rank.get(x)) continue;       // 本來就比它晚畫，不用補
-      const cx0 = Math.max(a.x0, x.x0), cy0 = Math.max(a.y0, x.y0), cx1 = Math.min(a.x1, x.x1), cy1 = Math.min(a.y1, x.y1);
+      const ab = a.vis || a, xb = x.vis || x;
+      const cx0 = Math.max(ab.x0, xb.x0), cy0 = Math.max(ab.y0, xb.y0), cx1 = Math.min(ab.x1, xb.x1), cy1 = Math.min(ab.y1, xb.y1);
       if (cx1 <= cx0 || cy1 <= cy0) continue;
       x.overdraw.push({ a, clip: [cx0, cy0, cx1 - cx0, cy1 - cy0] });
     }

@@ -84,7 +84,8 @@
   <script src="js/sfx.js?v=capking3-20261101"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/chat-editor.js?v=floorsort-20261023"></script>
+  <script src="js/stamp-transform.js?v=stampscale-20261105"></script>   <!-- 物件的大小、角度（跟遊戲共用同一套算法） -->
+  <script src="js/chat-editor.js?v=stampscale-20261105"></script>
   <script>ProjectSave.attach({
     after: ['exportFile'],
     files: [{ path: 'data/npc-chats.js', label: 'NPC 閒聊', text: () => chatExportText() }],

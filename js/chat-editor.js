@@ -77,7 +77,7 @@ function drawMap() {
       const t = tileMap.get(s.id), img = tileImg(t); if (!t) continue;
       const rot = ((Number(s.rot) || 0) % 4 + 4) % 4, w = (rot % 2 ? (t.h || 1) : (t.w || 1)) * C, h = (rot % 2 ? (t.w || 1) : (t.h || 1)) * C;
       const x = s.c * C + (s.ox || 0), y = s.r * C + (s.oy || 0);
-      if (img) drawImg(img, x, y, w, h, s.fx, s.fy, rot); else if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); }
+      withStampTransform(ctx, s, x, y, w, h, () => { if (img) drawImg(img, x, y, w, h, s.fx, s.fy, rot); else if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, w, h); } });
     }
   }
   if ($('showSolid').checked) {

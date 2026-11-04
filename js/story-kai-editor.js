@@ -261,7 +261,7 @@ function mapCanvas(m, open = new Set()) {
       if ((st.layer || 'top') !== lid || open.has(st)) continue;
       const t = tileMap.get(st.id), img = image(t?.file); if (!t || !img) continue;
       const rot = ((Number(st.rot) || 0) % 4 + 4) % 4, w = (rot % 2 ? (t.h || 1) : (t.w || 1)) * C, hh = (rot % 2 ? (t.w || 1) : (t.h || 1)) * C;
-      drawImg(g, img, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, st.fx, st.fy, rot);
+      withStampTransform(g, st, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, () => drawImg(g, img, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, st.fx, st.fy, rot));
     }
   }
   return mapCache.canvas;
