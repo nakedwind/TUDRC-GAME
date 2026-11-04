@@ -1,9 +1,9 @@
 // ---- 基地裡跟著溫特換地圖（雷德平常就跟著溫特：js/sentry.js 的 sentryCompanionRule、data/characters.js 的 follow）----
 // 溫特走到 2F 以外的地圖時，剛剛跟溫特在同一張地圖、又是「自由走動」（照平常跟著溫特）的話，就一起過去（走樓梯／門：晚一兩秒從那裡走出來；搭電梯：一起搭）
-// 2F 照原本的樣子：在平常的位置（data/npc-locations.js），不跟著溫特在 2F 的地圖之間換來換去；只有辦公室（溫特辦公室除外）會跟進去，再一起走回來
+// 2F 照原本的樣子：在平常的位置（data/npc-locations.js），不跟著溫特在 2F 的地圖之間換來換去；只有辦公室、哨兵休息室、疏導室（溫特辦公室除外）會跟進去，再一起走回來
 // 溫特辦公室、別人的寢室不進去（js/meal-invite.js 的 inviteCanEnter）：留在原本那張地圖等，溫特回到那張地圖時站在溫特旁邊（門口），再一起走
 // 出勤、練習＝回到平常的位置（data/npc-locations.js）
-const BASE_FOLLOW = { ids: ['red'], homeFloor: /^2F/, office: /辦公室/, delay: [1, 2] };   // homeFloor：這些地圖照原本的樣子（雷德在平常的位置，不跨地圖跟）；office：2F 裡面照樣跟進去的地方（溫特辦公室由 js/meal-invite.js 的 MEAL_INVITE.noEnter 擋掉）；其他地圖晚 delay 秒才從溫特走進來的樓梯／門口走出來
+const BASE_FOLLOW = { ids: ['red'], homeFloor: /^2F/, office: /辦公室|哨兵休息室|疏導室/, delay: [1, 2] };   // homeFloor：這些地圖照原本的樣子（雷德在平常的位置，不跨地圖跟）；office：2F 裡面照樣跟進去的地方（辦公室、哨兵休息室、疏導室；溫特辦公室由 js/meal-invite.js 的 MEAL_INVITE.noEnter 擋掉）；其他地圖晚 delay 秒才從溫特走進來的樓梯／門口走出來
 const baseFollow = { mapId: null, mapName: null, at: {}, came: {}, off: {}, waiting: {}, pending: [] };   // at[id]＝現在在哪張地圖（沒有＝平常的位置）；came[id]＝剛過來（'follow' 跟過來、'wait' 在門外等到溫特出來）；pending＝還沒從樓梯走出來的人；off[id]＝溫特叫他原地巡邏、去別的地方（不跟）
 function baseFollowMapCheck() {
   if (!MAP || baseFollow.mapId === MAP.id) return;
@@ -13,7 +13,7 @@ function baseFollowMapCheck() {
   for (const id of BASE_FOLLOW.ids) {
     const was = baseFollow.at[id] || (npcLocationTable()[id] || {}).map;   // 他剛剛在哪張地圖
     if (BASE_FOLLOW.homeFloor.test(MAP.name) && !(BASE_FOLLOW.office.test(MAP.name) && inviteCanEnter(id, MAP.name))) {   // 2F（辦公室以外）：照原本的設定（在平常的位置、只在同一張地圖裡跟著溫特）
-      const back = from && was === from && BASE_FOLLOW.office.test(from) && !baseFollow.off[id] && MAP.name === (npcLocationTable()[id] || {}).map;   // 跟著溫特從辦公室走回自己平常待的地圖：一樣晚一兩秒從門口走出來
+      const back = from && was === from && BASE_FOLLOW.office.test(from) && !baseFollow.off[id] && MAP.name === (npcLocationTable()[id] || {}).map;   // 跟著溫特從辦公室（休息室、疏導室）走回自己平常待的地圖：一樣晚一兩秒從門口走出來
       baseFollow.at[id] = null; baseFollow.waiting[id] = false; if (back) baseFollow.came[id] = 'follow';
       continue;
     }
