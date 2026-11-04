@@ -42,6 +42,14 @@ const StoryKai = (() => {
   const END_FADE = 1.8;                       // 結局：畫面變黑花幾秒
   const SHOW_FADE = .45;
   const HOP_TIME = .32;                       // 小跳：往上跳 5 像素再落下，花幾秒
+  // 回憶劇情很短：日光燈跳電得勤一點（只在播劇情時換成這組，離開劇情換回遊戲原本的 js/flicker-light.js 的 FLICKER）
+  const STORY_FLICKER = { outEvery: [2.6, 3.4], outFor: [2.25, 3.75] };   // 亮著大約 3 秒就跳電、熄掉 2.25～3.75 秒（再閃幾下亮回來）；一整輪大約 6～7 秒
+  let flickerSaved = null;
+  function storyFlicker(on) {
+    if (typeof FLICKER === 'undefined') return;
+    if (on && !flickerSaved) { flickerSaved = { outEvery: FLICKER.outEvery, outFor: FLICKER.outFor }; Object.assign(FLICKER, STORY_FLICKER); }
+    else if (!on && flickerSaved) { Object.assign(FLICKER, flickerSaved); flickerSaved = null; }
+  }
   const WALK_RATE = { walk: 1, run: 1.25, slow: .25 };   // 角色演出的走路、跑步、慢走：腳步動畫放快、放慢幾倍（只改看起來的樣子；走多久照「角色位置」的 ms）
   // 持槍：有持槍圖的角色用持槍圖；拿近戰武器的角色舉起平常的武器（圖片、大小跟遊戲揮擊時一樣，js/render.js 的 drawFireAxe）
   const MELEE_WEAPON = { red: [() => typeof redAxeImg !== 'undefined' && redAxeImg, 21, 32, 22], avaren: [() => typeof avarenKnifeImg !== 'undefined' && avarenKnifeImg, 9, 29, 20],
@@ -229,7 +237,7 @@ const StoryKai = (() => {
     return out;
   }
   function prepare() {
-    ensureUI(); clearInput(); stopSound(true, 0);   // 重新播放：上一次還在播的音效（循環的）先停掉
+    ensureUI(); clearInput(); stopSound(true, 0); storyFlicker(true);   // 重新播放：上一次還在播的音效（循環的）先停掉
     const cfg = config(); if (!cfg) return;
     for (const s of cfg.steps || []) if (s.do === 'sfx' && s.src && (s.loop || s.from || s.to)) loadBuffer(s.src);   // 裁切、循環的音效先解碼好，播的時候才不會慢半拍
     gotoMap(cfg.map);   // 重新播放時：中途換過地圖的話，先回到開頭的地圖
@@ -373,7 +381,7 @@ const StoryKai = (() => {
         break;
       }
       case 'ishow': showItem(s); break;
-      case 'ihide': { const it = state.items.find(x => x.no === Number(s.item)); if (it) { if (state.skipping) state.items.splice(state.items.indexOf(it), 1); else it.fade = -1; } break; }
+      case 'ihide': { const it = state.items.find(x => x.no === Number(s.item)); if (it) { if (state.skipping) dropItem(it); else it.fade = -1; } break; }
       case 'say':
         if (state.skipping) break;
         state.talk = { step: s, chars: 0 };
@@ -505,21 +513,43 @@ const StoryKai = (() => {
     ctx.restore();
   }
   // ---- 道具：背包裡的物品放在地上（圖跟背包一樣），出現、消失時淡入淡出 ----
+  // 可以當道具擺的地圖素材：彈藥箱、日光燈（日光燈跟地圖上的一樣閃、跳電、有嗡嗡聲，js/flicker-light.js）——編輯器的 PROP_TILES 是同一份
+  const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light'], FLICKER_PROP = 'tile_bg_electric_light';
+  function propDef(id) {
+    if (PROP_TILES.includes(id)) { const t = (typeof SHARED_TILES !== 'undefined' ? SHARED_TILES : []).find(x => x.id === id); return t ? { image: t.file, tile: [t.w || 1, t.h || 1] } : null; }
+    return typeof itemById === 'function' ? itemById(id) : null;
+  }
+  function dropItem(it) {   // 道具從場上拿掉（日光燈連光一起拿掉）
+    const i = state.items.indexOf(it); if (i >= 0) state.items.splice(i, 1);
+    if (it.light && typeof flickerLights === 'function') { const list = flickerLights(), j = list.indexOf(it.light); if (j >= 0) list.splice(j, 1); }
+  }
   function showItem(s) {
-    const def = typeof itemById === 'function' ? itemById(s.id) : null;
+    const def = propDef(s.id);
     if (!def || !def.image || !s.at) return;
-    const old = state.items.find(x => x.no === Number(s.item)); if (old) state.items.splice(state.items.indexOf(old), 1);
+    const old = state.items.find(x => x.no === Number(s.item)); if (old) dropItem(old);
     const img = new Image(); img.src = def.image;
-    state.items.push({ no: Number(s.item), id: s.id, img, x: s.at[0] * CELL, y: s.at[1] * CELL, alpha: state.skipping || old ? 1 : 0, fade: state.skipping || old ? 0 : 1 });
+    const it = { no: Number(s.item), id: s.id, img, tile: def.tile, x: s.at[0] * CELL, y: s.at[1] * CELL, alpha: state.skipping || old ? 1 : 0, fade: state.skipping || old ? 0 : 1 };
+    if (s.id === FLICKER_PROP && typeof flickerLights === 'function' && typeof FLICKER !== 'undefined') {   // 日光燈：加進這張地圖的日光燈清單（照遊戲的算法閃、跳電）
+      const left = it.x - def.tile[0] * CELL / 2, top = it.y - def.tile[1] * CELL;
+      it.light = { x: left + FLICKER.tube.dx, y: top + FLICKER.tube.dy, half: 19, glow: null, on: true, level: 1,
+        blinkT: flickRand(FLICKER.blinkEvery), outT: flickRand(FLICKER.outEvery), sparkT: flickRand(FLICKER.sparkEvery), flick: null, seed: Math.random() * 10 };
+      flickerLights().push(it.light);
+    }
+    state.items.push(it);
   }
   function tickItem(it, dt) {
     if (!it.fade) return;
     it.alpha += it.fade * dt / SHOW_FADE;
     if (it.alpha >= 1) { it.alpha = 1; it.fade = 0; }
-    if (it.alpha <= 0) state.items.splice(state.items.indexOf(it), 1);
+    if (it.alpha <= 0) dropItem(it);
   }
   function drawItem(it) {
     if (!readyImage(it.img)) return;
+    if (it.tile) {   // 地圖素材：照素材的格數畫，位置點在圖的下緣中間（不浮動、沒有影子）
+      const w = it.tile[0] * CELL, h = it.tile[1] * CELL;
+      ctx.save(); ctx.globalAlpha = clamp(it.alpha, 0, 1); ctx.imageSmoothingEnabled = false; ctx.drawImage(it.img, it.x - w / 2, it.y - h, w, h); ctx.restore();
+      return;
+    }
     const k = ITEM_SIZE / Math.max(it.img.naturalWidth, it.img.naturalHeight), w = it.img.naturalWidth * k, h = it.img.naturalHeight * k;
     const bob = Math.sin(state.time * 2.5 + it.x * .05);   // 輕輕上下浮動（跟地上的東西一樣）
     ctx.save(); ctx.globalAlpha = clamp(it.alpha, 0, 1);
@@ -836,7 +866,7 @@ const StoryKai = (() => {
   }
   function leave() {
     if (!state && !ui) return;
-    stopBgm(0); stopSound(true, 0); clearInput(); state = null;
+    stopBgm(0); stopSound(true, 0); storyFlicker(false); clearInput(); state = null;
     if (ui) { ui.hidden = true; el('storyKaiEnd').hidden = true; }
     document.body.classList.remove('story-scene');
     if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-noface', 'story-kai-shake'); }
