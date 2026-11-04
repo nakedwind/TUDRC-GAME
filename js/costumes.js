@@ -26,7 +26,7 @@ const costumeCollected = id => costumeOwned(id) || Object.values(costumeState.gi
 for (const [who, eq] of Object.entries(costumeState.equip)) {
   if (who === 'winter' || !eq) continue;
   for (const k of Object.keys(eq)) {
-    const v = eq[k]; if (!v || v === 'A' || v === 'B' || costumeGifted(who, v)) continue;
+    const v = eq[k]; if (!v || /^[A-Z]$/.test(v) || costumeGifted(who, v)) continue;   // 單一字母＝角色原本的造型（A、B、C）
     eq[k] = (k === 'base' || k === 'battle') ? undefined : null;
   }
 }
@@ -36,6 +36,7 @@ for (const eq of Object.values(costumeState.equip)) {
   if (!eq.hand && eq.hand2) eq.hand = eq.hand2;
   delete eq.hand2;
 }
+const COSTUME_SKIN_LOCKED = ['tino'];   // 衣服先固定角色資料那套的人（堤諾現在是受傷的樣子）：不能換成 A、B，配件照常可以送、可以戴
 const costumeBase = folder => String(folder).replace(/_[A-Z]$/, '');
 const costumeFolderOf = id => (CHARACTERS[id] && CHARACTERS[id].sprite) || '';
 
@@ -58,12 +59,14 @@ const COSTUME_WEAR_NAMES = { base: '應變中心限定', battle: '出勤限定' 
 // 內建 A、B 的名稱：後來加的、不出戰的人（不在 ROSTER，例如伊德、莎倫）沒有出勤，B 也叫「基地便服」（A 也有圖＝「基地便服 2」分得出來）
 const COSTUME_KEEP_NAMES = ['winter', 'claire', 'muomn', 'noah', 'ash'];   // 原本就在 2F 的人：名稱照舊（A 基地便服、B 出勤制服）
 const costumeDefaultName = (id, k) => k === 'B' && typeof ROSTER !== 'undefined' && !ROSTER.includes(id) && !COSTUME_KEEP_NAMES.includes(id)
-  ? COSTUME_DEFAULT_SKINS.A + (costumeHas[costumeBase(costumeFolderOf(id)) + '_A'] === true ? ' 2' : '') : COSTUME_DEFAULT_SKINS[k];
+  ? COSTUME_DEFAULT_SKINS.A + (costumeHas[costumeBase(costumeFolderOf(id)) + '_A'] === true ? ' 2' : '') : COSTUME_DEFAULT_SKINS[k] || COSTUME_DEFAULT_SKINS.A;   // 其他字母（C）＝基地便服
 // 這個角色可以穿的 skin：內建 A、B（有圖的）＋擁有的專屬 skin
 function costumeSkinsFor(id) {
   const base = costumeBase(costumeFolderOf(id)), list = [];
   // 確定有圖才列出來（還在查的，查到後衣櫃會自己重畫）
-  for (const k of ['A', 'B']) if (costumeProbe(base + '_' + k) === true) list.push({ id: k, name: costumeDefaultName(id, k), folder: base + '_' + k, builtin: true });
+  const builtin = k => ({ id: k, name: costumeDefaultName(id, k), folder: base + '_' + k, builtin: true });
+  if (!COSTUME_SKIN_LOCKED.includes(id)) for (const k of ['A', 'B']) if (costumeProbe(base + '_' + k) === true) list.push(builtin(k));   // 衣服固定的人只列角色資料那套
+  if (!list.length) list.push(builtin(costumeFolderOf(id).slice(-1)));   // A、B 都沒圖（羅恩、凱爾、赫真只有 C）：列出角色資料用的那套
   for (const s of COSTUME_SKINS) if (s.char === id && costumeCanWear(id, s.id)) list.push(s);
   return list;
 }
@@ -73,7 +76,7 @@ const costumeSkinCache = {};
 function costumeSkinSet(id, folder, skinId) {
   const rec = outfitRecord(folder), base = costumeBase(folder);
   let set;
-  if (skinId === 'A' || skinId === 'B') {
+  if (/^[A-Z]$/.test(skinId)) {   // 角色原本的造型（A、B、C）
     // 這套有沒有圖要先確定：沒有（例如柯林只有 B）或還在查，都先穿原本那套。
     // 以前還沒查過就直接載入，圖不存在時角色會變成一塊有顏色的方塊（js/render.js 畫不出角色圖時的備用）
     if (costumeProbe(base + '_' + skinId) !== true) return typeof outfitSet === 'function' ? outfitSet(folder) : null;
@@ -87,6 +90,7 @@ function costumeSkinSet(id, folder, skinId) {
   return !set.fail && fail ? Object.assign({}, set, { fail }) : set;
 }
 function costumeSelectedSkin(id, mode, eqOverride) {
+  if (COSTUME_SKIN_LOCKED.includes(id)) return undefined;   // 衣服固定：照角色資料那套（以前存過 A、B 也不穿）
   const eq = eqOverride || costumeState.equip[id] || {};
   // 在基地穿著 sortie 的服裝（例如女僕裝）：出勤時沿用身上的服裝
   if (mode === 'battle' && SKIN_BY_ID[eq.base] && SKIN_BY_ID[eq.base].sortie) return eq.base;

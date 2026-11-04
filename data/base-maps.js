@@ -288,7 +288,7 @@ const BASE_MAPS = [
         "13,14": "tile_new_bg_floor",
         "12,14": "tile_new_bg_floor",
         "11,14": "tile_new_bg_floor",
-        "10,14": "tile_new_bg_floor",
+        "10,14": "floor",
         "8,14": "tile_new_bg_floor",
         "9,14": "tile_new_bg_floor",
         "14,13": "tile_new_bg_floor",
@@ -5315,7 +5315,6 @@ const BASE_MAPS = [
       "8,8",
       "8,7",
       "9,7",
-      "10,7",
       "3,3",
       "4,3",
       "5,3",
@@ -5324,7 +5323,8 @@ const BASE_MAPS = [
       "8,3",
       "9,3",
       "10,3",
-      "11,3"
+      "11,3",
+      "10,7"
     ],
     "breakable": [],
     "camp": [
@@ -5337,7 +5337,20 @@ const BASE_MAPS = [
       "speed": 44,
       "reward": 8
     },
-    "solidOffsets": {},
+    "solidOffsets": {
+      "10,7": [
+        0,
+        10
+      ],
+      "8,7": [
+        0,
+        6
+      ],
+      "9,7": [
+        0,
+        8
+      ]
+    },
     "safe": true,
     "npcs": false,
     "portals": [
@@ -14326,9 +14339,7 @@ const BASE_MAPS = [
       "2,20",
       "3,23",
       "30,23",
-      "29,23",
-      "29,22",
-      "30,22"
+      "29,23"
     ],
     "breakable": [],
     "coreSpots": [],
