@@ -795,7 +795,18 @@ const StoryKai = (() => {
   function playSound(s) {
     if (muted() || !s.src) return;
     const vol = clamp(Number(s.vol ?? 100) / 100 * sfxMaster(), 0, 1), from = Math.max(0, Number(s.from) || 0) / 1000, to = Number(s.to) > 0 ? Number(s.to) / 1000 : 0;
+    const speed = clamp(Number(s.speed) || 1, .25, 4);
     const rec = { stopped: false }; sounds.push(rec);
+    if (speed !== 1) {   // 播放速度：<audio> 的變速不變調（瀏覽器內建）；裁切、循環用計時器看播到哪
+      const a = new Audio(s.src); a.volume = vol; a.preservesPitch = a.mozPreservesPitch = a.webkitPreservesPitch = true; a.playbackRate = speed;
+      const restart = () => { if (rec.stopped) return; a.currentTime = from; a.play().catch(() => {}); };
+      a.addEventListener('loadedmetadata', restart, { once: true });
+      const done = () => { clearInterval(timer); dropSound(rec); };
+      a.onended = () => { if (s.loop && !rec.stopped) restart(); else done(); };
+      const timer = setInterval(() => { if (to && a.currentTime >= to) { if (s.loop) a.currentTime = from; else { a.pause(); done(); } } }, 10);
+      rec.stop = sec => fadeAudio(a, 0, sec, () => { a.pause(); clearInterval(timer); });
+      return;
+    }
     if (!s.loop && !from && !to) {   // 整段播一次
       const a = new Audio(s.src); a.volume = vol; a.play().catch(() => {});
       a.onended = () => dropSound(rec);

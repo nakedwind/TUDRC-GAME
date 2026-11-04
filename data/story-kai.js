@@ -11,6 +11,8 @@ const STORY_KAI = {
       { "do": "cam", "at": [15.7, 30], "w": 20 },
       { "do": "vignette", "lv": 5 },
       { "do": "dark", "on": true },
+      { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100 },
+      { "do": "sfx", "src": "", "vol": 100 },
       { "do": "say", "who": "", "text": "……", "shake": false },
       { "do": "say", "who": "", "text": "聲音是一層一層剝落的。", "shake": false },
       { "do": "say", "who": "", "text": "最先遠去的是槍響，悶悶地，像隔著好幾道牆有人在敲門。", "shake": false },
@@ -32,6 +34,7 @@ const STORY_KAI = {
       { "do": "wait", "ms": 800 },
       { "do": "move", "who": 1, "at": [17.4, 12.5], "ms": 2000, "face": "back" },
       { "do": "camMove", "at": [17.2, 11.5], "w": 20, "ms": 3000 },
+      { "do": "sfxStop", "all": true },
       { "do": "sway", "who": 1, "on": false, "lv": 2 },
       { "do": "move", "who": 1, "at": [17.4, 12.5], "ms": 700, "face": "left" },
       { "do": "act", "who": 1, "act": "sit", "on": true },
@@ -44,8 +47,10 @@ const STORY_KAI = {
       { "do": "wait", "ms": 800 },
       { "do": "camMove", "at": [13.8, 5.5], "w": 20, "ms": 1200 },
       { "do": "act", "who": 1, "act": "walk" },
+      { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100, "speed": 2.5, "from": 2923, "to": 8098 },
       { "do": "move", "who": 1, "at": [13.6, 6.1], "ms": 2500 },
       { "do": "wait", "ms": 500 },
+      { "do": "sfxStop" },
       { "do": "door", "at": [14, 4.8], "open": true },
       { "do": "sfx", "src": "音效素材/關門.mp3", "vol": 50 },
       { "do": "blackIn", "ms": 500 },
@@ -53,7 +58,8 @@ const STORY_KAI = {
       { "do": "wait", "ms": 500 },
       { "do": "hide", "who": 1 },
       { "do": "blackOut", "ms": 1000 },
-      { "do": "wait", "ms": 2000 }
+      { "do": "wait", "ms": 800 },
+      { "do": "blackOut", "ms": 1000 }
     ]
   }
 };

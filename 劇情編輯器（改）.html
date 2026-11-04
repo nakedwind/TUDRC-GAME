@@ -207,12 +207,13 @@
     <div class="row" style="margin-top:8px;gap:10px;flex-wrap:wrap">
       <label>開始 <input id="trimFrom" type="number" min="0" step="10" class="in" style="width:80px"> ms</label>
       <label>結束 <input id="trimTo" type="number" min="0" step="10" class="in" style="width:80px"> ms</label>
+      <label title="變慢或變快、但不改變音高（1＝原速，0.25～4）">播放速度 <input id="trimSpeed" type="number" min="0.25" max="4" step="0.05" class="in" style="width:64px"> 倍</label>
       <span class="note" id="trimLen"></span>
       <span style="flex:1"></span>
       <label><input type="checkbox" id="trimLoop">循環</label>
       <button type="button" id="trimPlay">▶ 試聽選取的段</button><button type="button" id="trimAll">整段</button>
     </div>
-    <p class="note">在波形上按住拖曳＝選出要播的那一段；拖兩邊的黃線可以微調。播放時只播這一段，勾了「循環」就只重複這一段。</p>
+    <p class="note">在波形上按住拖曳＝選出要播的那一段；拖兩邊的黃線可以微調。播放時只播這一段，勾了「循環」就只重複這一段。播放速度：變慢或變快但音高不變（開始、結束照原本音檔的時間）。</p>
     <div class="acts"><button type="button" id="trimCancel">取消</button><button type="button" class="primary" id="trimOk">確定</button></div>
   </dialog>
 
@@ -259,7 +260,7 @@
   <script src="js/story-kai-fx.js?v=kai-20261103"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
-  <script src="js/story-kai-editor.js?v=kai30-20261104"></script>
+  <script src="js/story-kai-editor.js?v=kai31-20261104"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],

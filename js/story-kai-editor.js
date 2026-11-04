@@ -900,7 +900,7 @@ async function chooseAudio(st) {
 }
 let testing = null;
 function testAudio(st) {
-  if (st.do === 'sfx' && (st.from || st.to || st.loop)) { testSeg(st, st.from, st.to, st.loop); return; }   // 有裁切、循環：只試聽那一段（再按一次停）
+  if (st.do === 'sfx' && (st.from || st.to || st.loop || speedOf(st) !== 1)) { testSeg(st, st.from, st.to, st.loop, speedOf(st)); return; }   // 有裁切、循環：只試聽那一段（再按一次停）
   if (testing) { testing.pause(); const same = testing.src.endsWith(encodeURI(st.src)); testing = null; if (same) return; }
   testing = new Audio(st.src); testing.volume = clamp(Number(st.vol ?? (st.do === 'bgm' ? 50 : 100)) / 100, 0, 1);
   testing.play().catch(() => status('播放失敗：找不到 ' + st.src, true));
@@ -912,12 +912,27 @@ let actx = null; const bufCache = {};
 function audioCtx() { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); return actx; }
 const loadBuffer = src => bufCache[src] || (bufCache[src] = fetch(src).then(r => { if (!r.ok) throw new Error(); return r.arrayBuffer(); }).then(b => audioCtx().decodeAudioData(b)).catch(() => { delete bufCache[src]; return null; }));
 const secText = ms => (Math.round(ms) / 1000).toFixed(2);
-function trimText(st) { return st.from || st.to ? '✂ ' + secText(st.from || 0) + '～' + (st.to ? secText(st.to) : '尾') : '✂ 播放秒數'; }   // 列上的按鈕：✂ 0.15～0.45（秒）
+const speedOf = st => clamp(Number(st.speed) || 1, .25, 4);
+function trimText(st) { const sp = speedOf(st) !== 1 ? ' ×' + speedOf(st) : ''; return (st.from || st.to ? '✂ ' + secText(st.from || 0) + '～' + (st.to ? secText(st.to) : '尾') : '✂ 播放秒數') + sp; }   // 列上的按鈕：✂ 0.15～0.45（秒）×1.5（播放速度）
 let seg = null;   // 正在試聽的那一段 { key, node, t0, from, to（秒）, loop }
-function stopSeg() { if (seg) { try { seg.node.stop(); } catch (e) {} seg = null; } }
-async function testSeg(st, from = 0, to = 0, loop = false) {
-  const key = st.src + '|' + from + '|' + to + '|' + loop, again = seg?.key === key;
+function stopSeg() { if (seg) { try { seg.node.stop(); } catch (e) {} if (seg.el) { seg.el.pause(); clearInterval(seg.timer); } seg = null; } }
+// 變速不變調：<audio> 的 preservesPitch（瀏覽器內建）；裁切、循環用計時器看播到哪（循環接縫可能有一點點空隙）
+function playSpeedAudio(src, vol, from, to, loop, speed, onEnd) {
+  const el = new Audio(src); el.volume = vol; el.preservesPitch = el.mozPreservesPitch = el.webkitPreservesPitch = true; el.playbackRate = speed;
+  const a = from / 1000, b = to > from ? to / 1000 : 0;
+  const restart = () => { el.currentTime = a; el.play().catch(() => {}); };
+  el.addEventListener('loadedmetadata', restart, { once: true });
+  el.onended = () => { if (loop) restart(); else onEnd?.(); };
+  const timer = setInterval(() => { if (b && el.currentTime >= b) { if (loop) el.currentTime = a; else { el.pause(); clearInterval(timer); onEnd?.(); } } }, 10);
+  return { el, timer };
+}
+async function testSeg(st, from = 0, to = 0, loop = false, speed = 1) {
+  const key = st.src + '|' + from + '|' + to + '|' + loop + '|' + speed, again = seg?.key === key;
   stopSeg(); if (again) return;   // 再按一次同一段＝停
+  if (speed !== 1) {
+    const me = seg = { key, ...playSpeedAudio(st.src, clamp(Number(st.vol ?? 100) / 100, 0, 1), from || 0, to || 0, loop, speed, () => { if (seg === me) seg = null; }), speed, from: (from || 0) / 1000, to: (to || 0) / 1000, loop };
+    return;
+  }
   const buf = await loadBuffer(st.src); if (!buf) { status('播放失敗：讀不到 ' + st.src, true); return; }
   const ctx = audioCtx(), node = ctx.createBufferSource(), gain = ctx.createGain();
   node.buffer = buf; gain.gain.value = clamp(Number(st.vol ?? 100) / 100, 0, 1); node.connect(gain).connect(ctx.destination);
@@ -931,7 +946,7 @@ let trimFor = null, trim = null;   // trim＝{ buf, from, to（毫秒）, drag }
 async function openTrim(st) {
   trimFor = st; stopSeg();
   $('trimTitle').textContent = '播放秒數：第 ' + String(scene().steps.indexOf(st) + 1).padStart(3, '0') + ' 行';
-  $('trimFile').textContent = '🎵 ' + st.src + '（讀取中…）'; $('trimLoop').checked = !!st.loop;
+  $('trimFile').textContent = '🎵 ' + st.src + '（讀取中…）'; $('trimLoop').checked = !!st.loop; $('trimSpeed').value = speedOf(st);
   trim = { buf: null, from: Number(st.from) || 0, to: Number(st.to) || 0, drag: null };
   $('trimDlg').showModal(); drawTrim();
   const buf = await loadBuffer(st.src);
@@ -943,7 +958,8 @@ async function openTrim(st) {
   trimInputs(); drawTrim();
 }
 const trimTotal = () => trim?.buf ? Math.round(trim.buf.duration * 1000) : 0;
-function trimInputs() { $('trimFrom').value = Math.round(trim.from); $('trimTo').value = Math.round(trim.to); $('trimLen').textContent = '長度 ' + secText(trim.to - trim.from) + ' 秒'; }
+const trimSpeed = () => clamp(Number($('trimSpeed').value) || 1, .25, 4);
+function trimInputs() { $('trimFrom').value = Math.round(trim.from); $('trimTo').value = Math.round(trim.to); const sp = trimSpeed(); $('trimLen').textContent = '長度 ' + secText((trim.to - trim.from) / sp) + ' 秒' + (sp !== 1 ? '（原本 ' + secText(trim.to - trim.from) + ' 秒）' : ''); }
 function drawTrim() {
   const cv = $('trimWave'), g = cv.getContext('2d'), W = cv.width, H = cv.height;
   g.clearRect(0, 0, W, H);
@@ -962,8 +978,10 @@ function drawTrim() {
   for (let ms = 0; ms <= total; ms += tick) { const x = xOf(ms); g.fillRect(x, H - 6, 1, 6); g.fillText(secText(ms), x + 2, H - 8); }
   g.fillStyle = '#ffd479'; g.fillRect(x0 - 1, 0, 2, H); g.fillRect(x1 - 1, 0, 2, H);   // 開始、結束的黃線
   if (seg && trimFor && seg.key.startsWith(trimFor.src + '|')) {   // 試聽中：白線＝播到哪
-    const len = seg.to - seg.from; let p = audioCtx().currentTime - seg.t0; p = seg.loop ? p % len : Math.min(p, len);
-    g.fillStyle = '#fff'; g.fillRect(xOf((seg.from + p) * 1000), 0, 1, H);
+    const len = seg.to - seg.from; let pos;
+    if (seg.el) pos = seg.el.currentTime;
+    else { let p = audioCtx().currentTime - seg.t0; p = seg.loop ? p % len : Math.min(p, len); pos = seg.from + p; }
+    g.fillStyle = '#fff'; g.fillRect(xOf(pos * 1000), 0, 1, H);
     requestAnimationFrame(drawTrim);
   }
 }
@@ -991,8 +1009,9 @@ $('trimWave').addEventListener('pointerup', () => {
 });
 $('trimFrom').onchange = () => { trim.from = clamp(Number($('trimFrom').value) || 0, 0, trim.to); trimInputs(); drawTrim(); };
 $('trimTo').onchange = () => { trim.to = clamp(Number($('trimTo').value) || 0, trim.from, trimTotal()); trimInputs(); drawTrim(); };
+$('trimSpeed').onchange = () => { $('trimSpeed').value = trimSpeed(); trimInputs(); };
 $('trimAll').onclick = () => { trim.from = 0; trim.to = trimTotal(); trimInputs(); drawTrim(); };
-$('trimPlay').onclick = () => { if (!trim?.buf) return; testSeg(trimFor, trim.from, trim.to, $('trimLoop').checked).then(() => requestAnimationFrame(drawTrim)); };
+$('trimPlay').onclick = () => { if (!trim?.buf) return; testSeg(trimFor, trim.from, trim.to, $('trimLoop').checked, trimSpeed()).then(() => requestAnimationFrame(drawTrim)); };
 $('trimDlg').addEventListener('close', () => { stopSeg(); trimFor = null; });
 $('trimCancel').onclick = () => $('trimDlg').close();
 $('trimOk').onclick = () => {
@@ -1000,6 +1019,7 @@ $('trimOk').onclick = () => {
   const from = Math.round(trim.from), to = Math.round(trim.to);
   if (from <= 0 && to >= trimTotal() - 1) { delete st.from; delete st.to; } else { st.from = from; st.to = to; }   // 選整段＝不裁切
   if ($('trimLoop').checked) st.loop = true; else delete st.loop;
+  if (trimSpeed() !== 1) st.speed = trimSpeed(); else delete st.speed;
   $('trimDlg').close(); commit();
 };
 
