@@ -4288,7 +4288,6 @@ const BASE_MAPS = [
         "13,5": "tile_new_bg_floor",
         "14,4": "tile_new_bg_floor",
         "13,4": "tile_new_bg_floor",
-        "7,5": "tile_new_bg_floor",
         "8,5": "tile_new_bg_floor",
         "9,5": "tile_new_bg_floor",
         "10,5": "tile_new_bg_floor",
@@ -4326,7 +4325,6 @@ const BASE_MAPS = [
         "5,11": "tile_new_bg_floor",
         "6,2": "tile_new_bg_floor",
         "6,4": "tile_new_bg_floor",
-        "6,5": "tile_new_bg_floor",
         "6,6": "tile_new_bg_floor",
         "6,7": "tile_new_bg_floor",
         "6,8": "tile_new_bg_floor",
@@ -4393,7 +4391,9 @@ const BASE_MAPS = [
         "15,8": "tile_new_bg_floor",
         "15,9": "tile_new_bg_floor",
         "15,10": "tile_new_bg_floor",
-        "15,11": "tile_new_bg_floor"
+        "15,11": "tile_new_bg_floor",
+        "7,5": "tile_new_bg_floor",
+        "6,5": "tile_new_bg_floor"
       },
       "ground": {},
       "ground2": {},
@@ -4628,7 +4628,7 @@ const BASE_MAPS = [
         "c": 8,
         "r": 5,
         "layer": "object",
-        "ox": 20,
+        "ox": 30,
         "oy": -4,
         "sortDepth": 2.75
       },
@@ -4637,7 +4637,7 @@ const BASE_MAPS = [
         "c": 10,
         "r": 5,
         "layer": "object",
-        "ox": 20,
+        "ox": 30,
         "oy": 20,
         "sortDepth": 1
       },
@@ -4788,7 +4788,7 @@ const BASE_MAPS = [
         "r": 5,
         "layer": "floor",
         "fx": true,
-        "ox": 22,
+        "ox": 30,
         "oy": 20
       },
       {
@@ -4846,7 +4846,8 @@ const BASE_MAPS = [
       "4,10",
       "6,10",
       "14,11",
-      "15,11"
+      "15,11",
+      "10,6"
     ],
     "breakable": [],
     "camp": [
