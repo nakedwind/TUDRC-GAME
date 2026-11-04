@@ -5,7 +5,7 @@
 //  ・今日想吃委託：回到基地時有幾個人想吃某樣東西（頭上冒圖示），照著送好感度加倍，還會給回憶碎片或異質碎片。
 //  ・回憶碎片集滿 3 個會自動拼成鑰匙（data/items.js 的 MEMORY_KEYS）。
 //  ・喜好、點數、等級在 data/gifts.js；收禮、委託時說的話在「對話編輯器」的「送禮與委託」（data/dialogues.js），沒寫就不說。好感度會存檔（js/save.js）。
-//  ・服裝（扭蛋轉到的配件、skin）也能送：送出後對方馬上穿上（js/costumes.js 的 costumeGive；規則在 data/costumes.js 的 COSTUME_GIFT）。
+//  ・服裝（扭蛋轉到的配件、skin）也能送：送出後收進對方的衣櫃，要穿＝對話裡按「👗 推薦穿搭」（js/costumes.js 的 costumeGive；規則在 data/costumes.js 的 COSTUME_GIFT）。
 // ============================================================
 const favorPoints = {};        // 角色 id → 好感點數
 const giftKnown = {};          // 角色 id → { 物品 id: 反應 }（送過才知道對方喜不喜歡）
@@ -185,7 +185,7 @@ function giveGift(itemId) {
   updateHUD(); if (typeof backpackOpen !== 'undefined' && backpackOpen) renderBackpack();
   document.getElementById('dialogueNext').focus();
 }
-// 送服裝：對方馬上穿上，好感照喜好＋稀有度
+// 送服裝：收進對方的衣櫃（不會馬上穿上），好感照喜好＋稀有度
 function giveCostumeGift(costumeId) {
   const actor = giftTarget, id = giftableId(actor), item = typeof costumeItem === 'function' && costumeItem(costumeId);
   if (!actor || !item || giftLimitReached(id)) { sfx('error'); return; }
@@ -202,7 +202,7 @@ function giveCostumeGift(costumeId) {
   closeGiftPicker(true);
   const said = giftLine(id, reaction === 'dislike' ? 'giftDislike' : 'giftCostume', item.name);   // 「收到服裝」；不喜歡的服裝說「收到不喜歡的禮物」
   const afterSaid = giftAfterLine(id, item.name);
-  const lines = [...(said ? [said] : []), ...(afterSaid ? [afterSaid] : []), { speaker: '系統', text: `${profile.name}換上了「${item.name}」！` }];
+  const lines = [...(said ? [said] : []), ...(afterSaid ? [afterSaid] : []), { speaker: '系統', text: `${profile.name}收下了「${item.name}」！按「👗 推薦穿搭」可以幫${profile.name}換上。` }];
   if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
   dialogueState.lines = lines; dialogueState.index = 0; dialogueState.giftReply = true;
   renderDialogueLine(); renderDialogueFavor();
