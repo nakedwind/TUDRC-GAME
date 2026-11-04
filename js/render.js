@@ -51,7 +51,7 @@ function drawObstacle(o) {
   const sw = s ? mapStampW(s, t) * CELL : t ? CELL : w, sh = s ? mapStampH(s, t) * CELL : t ? CELL : h;   // 格子素材固定畫一格大
   const rot = s ? mapStampTurn(s) : 0, iw = rot % 2 ? sh : sw, ih = rot % 2 ? sw : sh;
   const inStamp = draw => {   // draw(x, y, w, h)：在圖章翻轉／旋轉後的座標裡畫
-    if (s && (s.fx || s.fy || rot)) { ctx.save(); ctx.translate(sx + sw / 2, sy + sh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); draw(-iw / 2, -ih / 2, iw, ih); ctx.restore(); }
+    if (s && (s.fx || s.fy || rot || stampHasTransform(s))) { ctx.save(); applyStampTransform(ctx, s, sx, sy, sw, sh); ctx.translate(sx + sw / 2, sy + sh / 2); if (rot) ctx.rotate(rot * Math.PI / 2); ctx.scale(s.fx ? -1 : 1, s.fy ? -1 : 1); draw(-iw / 2, -ih / 2, iw, ih); ctx.restore(); }
     else draw(sx, sy, sw, sh);
   };
   if (o.ore && typeof drawOreGlow === 'function') inStamp((gx, gy, gw, gh) => drawOreGlow(ctx, o, gx, gy, gw, gh));   // 被照亮時結晶發出紫光（js/ore.js）

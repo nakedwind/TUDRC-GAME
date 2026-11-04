@@ -178,6 +178,7 @@ let maps, curId, customTiles = [], brush = { mode: 'tile', tile: 'floor' }, acti
 let checkResult = null, hoverCell = null, painting = false, lastPaint = '', selection = null, selections = [];
 let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（大小圖都可用）
 let brushRotation = 0;
+let brushScale = 100, brushAngle = 0;   // 筆刷的大小（%）、多轉的角度（js/map-editor-transform.js）
 let tempTool = null, savedBrush = null, pickResult = null;   // Alt=臨時吸管 / Ctrl=臨時選取
 let pickedBrushPending = false;   // 吸管吸到的圖還沒放進地圖：這時按右鍵＝取消這次複製，回到「選取」
 let selectionDrag = null;
@@ -215,6 +216,7 @@ function topStampIndex(m, hit) {
 function stampIndexAtPx(m, x, y) {
   return topStampIndex(m, (s, t) => {
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
+    if (stampHasTransform(s)) return stampHitTest(s, x0, y0, stampW(s, t) * CELL, stampH(s, t) * CELL, x, y);   // 放大、轉過的物件：點畫出來的樣子
     return x >= x0 && x < x0 + stampW(s, t) * CELL && y >= y0 && y < y0 + stampH(s, t) * CELL;
   });
 }
@@ -620,6 +622,7 @@ function restoreEditorSnapshot(value) {
   maps = s.maps; customTiles = s.tiles; curId = s.curId;
   for (const [id, tile] of foreignTiles) if (!customTiles.some(x => x.id === id)) customTiles.push(tile);   // 另一個編輯器加的素材留著
   selection = null; selections = [];
+  if (typeof refreshStampTransformPanel === 'function') refreshStampTransformPanel();   // 復原後選取清空：面板改回顯示筆刷
   if (!maps.some(m => m.id === curId)) curId = maps[0].id;
   if (!tileById(brush.tile)) brush = { mode: brush.mode, tile: 'floor' };
   saveDeletedMaps();   // 復原／重做刪除地圖：「已刪除」記號跟著更新
@@ -784,6 +787,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/field-camp',
   'images/scene-props',
   'images/萬聖節裝飾',
+  'images/森林',
 ];   // 上傳的圖不在這些資料夾裡：會把整張圖嵌進素材庫（data:），之後改圖檔不會更新，所以新資料夾要加在這裡
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -930,8 +934,11 @@ function drawStamp(s) {
 }
 function drawStampRaw(s) {
   const t = tileById(s.id); if (!t) return;
-  const drawW = stampW(s, t) * CELL, drawH = stampH(s, t) * CELL;
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  withStampTransform(ctx, s, x, y, stampW(s, t) * CELL, stampH(s, t) * CELL, () => drawStampPlain(s, t, x, y));   // 大小、角度（js/stamp-transform.js）
+}
+function drawStampPlain(s, t, x, y) {
+  const drawW = stampW(s, t) * CELL, drawH = stampH(s, t) * CELL;
   if (t.color) { ctx.fillStyle = t.color; ctx.fillRect(x, y, drawW, drawH); return; }
   const rot = stampTurn(s);
   if (t.file) { const rec = ensureTileImg(t); if (rec && rec.loaded) { drawImageFlipped(rec.img, x, y, drawW, drawH, s.fx, s.fy, rot, KEEP_RATIO_TILES.has(t.id)); return; } }
@@ -1112,13 +1119,14 @@ function draw() {
       const pw = brushRotation % 2 ? h : w, ph = brushRotation % 2 ? w : h;
       const fits = c < COLS && r < ROWS && c + pw > 0 && r + ph > 0;   // 允許超出邊緣（純外觀），只要有一格在地圖內
       // 物件：預覽畫在四分之一格對齊的位置（跟實際放下去的一樣）；地板類小圖照整格
-      const free = big || brushFlip.fx || brushFlip.fy || brushRotation || isObjectLayer(activeLayer);
+      const brushTurned = brushFlip.fx || brushFlip.fy || brushRotation || brushScale !== 100 || brushAngle;
+      const free = big || brushTurned || isObjectLayer(activeLayer);
       const pos = free && pointerPx ? subPosAt(pointerPx.x, pointerPx.y) : { c, r, ox: 0, oy: 0 };
       const px = OX + pos.c * CELL + pos.ox, py = OY + pos.r * CELL + pos.oy;
       // 半透明預覽圖
       ctx.save();
       ctx.globalAlpha = 0.4;
-      if (big || brushFlip.fx || brushFlip.fy || brushRotation) drawStamp({ c: pos.c, r: pos.r, ox: pos.ox, oy: pos.oy, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy, rot: brushRotation });
+      if (big || brushTurned) drawStamp({ c: pos.c, r: pos.r, ox: pos.ox, oy: pos.oy, id: brush.tile, fx: brushFlip.fx, fy: brushFlip.fy, rot: brushRotation, scale: brushScale, angle: brushAngle });
       else drawTile(brush.tile, px, py);
       ctx.restore();
       // 外框（放不下時變紅）
@@ -1138,7 +1146,10 @@ function draw() {
     let rx = null, ry = 0, rw = CELL, rh = CELL;
     if (selected.type === 'stamp') { const s = m.stamps[selected.index]; if (s) { const t = tileById(s.id) || {}; rx = OX + s.c * CELL + (s.ox || 0); ry = OY + s.r * CELL + (s.oy || 0); rw = stampW(s, t) * CELL; rh = stampH(s, t) * CELL; } }
     else { const [c, r] = selected.key.split(',').map(Number); rx = OX + c * CELL; ry = OY + r * CELL; }
-    if (rx != null) { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3; ctx.setLineDash([7, 4]); ctx.strokeRect(rx + 1.5, ry + 1.5, rw - 3, rh - 3); ctx.setLineDash([]); }
+    if (rx != null) {
+      const shown = selected.type === 'stamp' ? m.stamps[selected.index] : null, k = stampScaleOf(shown);   // 放大、轉過的物件：框照畫出來的樣子
+      withStampTransform(ctx, shown, rx, ry, rw, rh, () => { ctx.strokeStyle = '#ffe14d'; ctx.lineWidth = 3 / k; ctx.setLineDash([7 / k, 4 / k]); ctx.strokeRect(rx + 1.5 / k, ry + 1.5 / k, rw - 3 / k, rh - 3 / k); ctx.setLineDash([]); });
+    }
   }
   // 選到基地時、或拿著「不可穿透」筆刷時，把基地目前的碰撞格直接疊在基地圖上，所見即所得。
   const baseOverlay = brush.mode === 'solid' ? m.stamps.map((s, i) => i).filter(i => (tileById(m.stamps[i].id) || {}).baseHp)
@@ -1159,7 +1170,7 @@ function draw() {
       ctx.fillText('深度線 ' + depth, x + 5, y - 4);
     } else if (s && t && (Number.isFinite(s.sortDepth) || (!t.flat && (s.layer || 'top') !== 'top' && (stampH(s, t) > 1 || /^object\d*$/.test(s.layer || '') || s.layer === 'overlay')))) {
       const depth = Number.isFinite(s.sortDepth) ? s.sortDepth : stampH(s, t);
-      const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0) + depth * CELL;
+      const x = OX + s.c * CELL + (s.ox || 0), y = stampDepthY(s, OY + s.r * CELL + (s.oy || 0), stampH(s, t) * CELL, depth * CELL);
       ctx.strokeStyle = '#55d9ff'; ctx.lineWidth = 3; ctx.setLineDash([9, 5]);
       ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x + stampW(s, t) * CELL, y); ctx.stroke(); ctx.setLineDash([]);
       ctx.fillStyle = '#55d9ff'; ctx.font = 'bold 12px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
@@ -1191,6 +1202,8 @@ function placeStamp(c, r, t, ox = 0, oy = 0) {
   if (brushFlip.fx) st.fx = true;
   if (brushFlip.fy) st.fy = true;
   if (brushRotation) st.rot = brushRotation;
+  if (brushScale !== 100) st.scale = brushScale;
+  if (brushAngle) st.angle = brushAngle;
   if (t.baseHp) {
     st.baseHp = t.baseHp;
     const defaultDepth = Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, h - 2);
@@ -1282,7 +1295,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     const t = tileById(brush.tile); if (!t) return;
     const pos = pointerPx ? subPosAt(pointerPx.x, pointerPx.y) : { c, r, ox: 0, oy: 0 };   // 四分之一格對齊的位置
     if (isBig(t)) { if (isDown) placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 大圖：只在按下時放一張
-    if (brushFlip.fx || brushFlip.fy || brushRotation) { placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 轉向小圖：以 1×1 stamp 保存方向
+    if (brushFlip.fx || brushFlip.fy || brushRotation || brushScale !== 100 || brushAngle) { placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 轉向小圖：以 1×1 stamp 保存方向
     if (isObjectLayer(activeLayer) && (pos.ox || pos.oy)) { placeStamp(pos.c, pos.r, t, pos.ox, pos.oy); return; }   // 物件圖層的小圖：沒對齊格線就存成可微調的物件
     // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
@@ -1833,6 +1846,7 @@ const PALETTE_CATEGORIES = [
   { id: 'training', name: '地下訓練室' },
   { id: 'memory', name: '回憶場景' },
   { id: 'halloween', name: '萬聖節' },
+  { id: 'forest', name: '森林' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -1871,6 +1885,7 @@ const STORAGE_TILE_IDS = new Set([
 // 植栽：盆栽、植物系列，不管原本在哪個資料夾都放這一類（id／檔名有 plant，或名稱有「盆栽」「植栽」「植物」；新的植物照這樣取名就會自動分進來）
 const isPlantTile = t => /plant/i.test(String(t.id || '') + ' ' + String(t.file || '')) || /盆栽|植栽|植物/.test(String(t.name || ''));
 function tileCategory(t) {
+  if (String(t.id || '').startsWith('tile_forest_') || String(t.file || '').includes('/森林/')) return 'forest';   // 森林：整個資料夾都放這一類（不管檔名）
   if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
   if (isPlantTile(t)) return 'plant';
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
@@ -2424,6 +2439,7 @@ function refreshSelPanel() {
   refreshCircuitControl();
   refreshLockTextControl();
   refreshBlendControl();   // 混合模式、不透明度、發光
+  if (typeof refreshStampTransformPanel === 'function') refreshStampTransformPanel();   // 大小、角度（js/map-editor-transform.js）
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;
@@ -2535,6 +2551,7 @@ function updateFlipUI() {
 }
 function rotateBrush() {
   brushRotation = (brushRotation + 1) % 4;
+  if (typeof refreshStampTransformPanel === 'function') refreshStampTransformPanel();
   draw();
   setStatus('筆刷已旋轉 ' + brushRotation * 90 + '°（R 可連續旋轉）', '#b39ddb');
 }
