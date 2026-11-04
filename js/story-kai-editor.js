@@ -68,13 +68,20 @@ const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge
 const FACES = [['', '面向：自動'], ['front', '正面'], ['back', '背面'], ['left', '朝左'], ['right', '朝右']];
 // ---- 怪物、道具：怪物用「怪物代號」、道具用「道具代號」，跟角色代號分開算（不用先加進演出者列表）----
 const MON_KINDS = new Set(['mshow', 'mhide', 'mact']), ITEM_KINDS = new Set(['ishow', 'ihide']);
+const SOUND_KINDS = new Set(['sfx', 'sfxStop', 'bgm', 'bgmStop']);   // 列表上套藍色底的行
 const WALK_ACTS = new Set(['walk', 'run', 'slow']);   // 走路／跑步／慢走：之後「角色位置」走路時腳步看起來的快慢（走多久照角色位置的 ms）
 const MON_ACTS = [['attack', '攻擊'], ['move', '移動'], ['die', '死亡']];
 const MON_FACES = [['', '面向：不變'], ['front', '正面'], ['left', '朝左'], ['right', '朝右']];
 // 怪物種類：data/monsters.js（怪物編輯器）；道具：背包物品（data/items.js、data/supplies.js）
 const MONS = (typeof MONSTERS_DEFAULT !== 'undefined' ? MONSTERS_DEFAULT : []).map(m => ({ id: m.id, name: m.name || m.id, img: m.frames?.front || m.sprite, w: m.width || 42, h: m.height || 33,
   side: m.frames?.side?.[0], sideFacing: m.frames?.sideFacing, walkFacing: m.frames?.walkFacing }));
-const PROPS = [...(typeof ITEMS !== 'undefined' ? ITEMS : []), ...(typeof SUPPLIES !== 'undefined' ? SUPPLIES : [])].filter(it => it.image).map(it => ({ id: it.id, name: it.name || it.id, img: it.image }));
+// 道具出現的清單：商店買得到的東西（data/supplies.js）、背包裡一般的物品（不含鑰匙、碎片這些重要物品），
+// 加上可以當道具擺的地圖素材（彈藥箱、日光燈；日光燈在遊戲裡會跟地圖上的一樣閃、跳電）——js/story-kai.js 的 PROP_TILES 是同一份
+const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light'];
+const PROPS = [...(typeof SUPPLIES !== 'undefined' ? SUPPLIES : []), ...(typeof ITEMS !== 'undefined' ? ITEMS : []).filter(it => it.category !== 'key')]
+  .filter(it => it.image).map(it => ({ id: it.id, name: it.name || it.id, img: it.image }))
+  .concat(PROP_TILES.map(id => (typeof SHARED_TILES !== 'undefined' ? SHARED_TILES : []).find(t => t.id === id)).filter(Boolean)
+    .map(t => ({ id: t.id, name: t.name, img: t.file, tile: [t.w || 1, t.h || 1] })));
 const monOf = id => MONS.find(m => m.id === id), propOf = id => PROPS.find(p => p.id === id);
 // 第 upto 行之前，這個代號最近一次「出現」的那一行（拿來知道是哪一種怪物、哪個道具）
 function shownBy(key, no, upto) { const st = scene()?.steps || []; for (let i = Math.min(upto, st.length - 1); i >= 0; i--) if (st[i].do === (key === 'mon' ? 'mshow' : 'ishow') && st[i][key] === no) return st[i]; return null; }
@@ -306,8 +313,9 @@ function drawMonster(m, ghost) {
   ctx.translate(x, 0); if (flip) ctx.scale(-1, 1);
   ctx.drawImage(img, -def.w / 2, y - def.h, def.w, def.h); ctx.restore();
 }
-function drawProp(it) {   // 道具：跟遊戲裡放在地上的東西一樣大（26 像素）
+function drawProp(it) {   // 道具：跟遊戲裡放在地上的東西一樣大（26 像素）；地圖素材（彈藥箱、日光燈）照素材的格數、位置點在圖的下緣中間
   const def = propOf(it.id), img = def && image(def.img); if (!img) return;
+  if (def.tile) { const w = def.tile[0] * C, hh = def.tile[1] * C; ctx.drawImage(img, it.at[0] * C - w / 2, it.at[1] * C - hh, w, hh); return; }
   const k = 26 / Math.max(img.naturalWidth, img.naturalHeight), w = img.naturalWidth * k, hh = img.naturalHeight * k;
   ctx.drawImage(img, it.at[0] * C - w / 2, it.at[1] * C - hh + 2, w, hh);
 }
@@ -772,7 +780,7 @@ function renderSteps() {
   if (!s.steps.length) { box.append(h('div', { class: 'empty' }, '還沒有指令。\n按左邊的按鈕新增，例如先「＋新鏡頭」決定拍哪裡，再「角色出現」、「＋新對白」。')); return; }
   s.steps.forEach((st, i) => {
     const warn = problem(st), [name, extra] = rowLabel(st);
-    const row = h('div', { class: 'step' + (st.do === 'say' ? ' say' : '') + (i === sel ? ' on' : '') + (warn ? ' warn' : ''), draggable: 'true', title: warn ? '⚠ ' + warn : '', 'data-i': i,
+    const row = h('div', { class: 'step' + (st.do === 'say' ? ' say' : SOUND_KINDS.has(st.do) ? ' snd' : st.do === 'camMove' ? ' cammove' : '') + (i === sel ? ' on' : '') + (warn ? ' warn' : ''), draggable: 'true', title: warn ? '⚠ ' + warn : '', 'data-i': i,
       onclick: () => { if (sel !== i) { sel = i; renderSteps(); drawSoon(); } } },
       h('span', { class: 'no' }, String(i + 1).padStart(3, '0') + '：'), h('span', { class: 'lbl' }, name, extra ? h('em', {}, extra) : null),
       h('span', { class: 'ctl', onclick: e => e.stopPropagation(), onmousedown: e => { e.stopPropagation(); if (e.target.closest('input, textarea')) row.draggable = false; } }, controls(st)),   // 在輸入框裡反白文字時，這一行先不能拖
