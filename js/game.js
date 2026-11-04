@@ -1428,14 +1428,14 @@ function mapSeats() {
 }
 function seatNearPlayer() {
   const p = G.player; if (!p) return null;
-  let best = null, bd = SIT.radius;
+  let best = null, bd = SIT.radius, bSeat = Infinity;
   for (const s of mapSeats()) {
     if (typeof seatTaken === 'function' && seatTaken(s, G.player)) continue;   // NPC 坐著的位子
     // 大床中央可能被碰撞格包住；互動距離要從家具外緣算，不能只量床中央。
     const dx = Math.max(s.x0 - p.x, 0, p.x - (s.x0 + s.w));
     const dy = Math.max(s.y0 - p.y, 0, p.y - (s.y0 + s.h));
-    const d = s.multi ? Math.max(0, Math.hypot(s.x - p.x, s.y - p.y) - 24) : Math.hypot(dx, dy);   // 長椅：量到各個位子，靠哪個坐哪個
-    if (d < bd) { bd = d; best = s; }
+    const d = Math.hypot(dx, dy), seatD = Math.hypot(s.x - p.x, s.y - p.y);
+    if (d < bd || (d === bd && seatD < bSeat)) { bd = d; bSeat = seatD; best = s; }   // 長椅：同一張椅子外緣一樣近，挑離自己最近的位子
   }
   return best;
 }

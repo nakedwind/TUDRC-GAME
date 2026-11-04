@@ -12,7 +12,10 @@ const PEARL_DEFAULT = validShooterCfg(null);
 const shooterCfg = e => e.shooterCfg || PEARL_DEFAULT;
 const PEARL_ART_W = 80, PEARL_ART_H = 74;      // 原圖大小（珍珠位置用這個比例換算）
 const PEARL_HAND = { x: 33, y: 54 };           // 小童手上那顆珍珠在原圖上的位置：珍珠從這裡噴出去
-const PEARL_HIT_R = 16;                        // 珍珠打中人的判定半徑（像素）
+// 珍珠打中人：珍珠的圖（半徑 PEARL_HIT.r）要真的碰到角色圖上不透明的像素才算；
+// depth＝珍珠在地上的位置跟角色腳底前後差幾像素以內才算（從角色前面或後面飛過去、圖疊在一起不算）；
+// bodyZ＝噴出去的珍珠往下飄到這個高度，剛好飛到目標時在身體中段（大童從高處噴也打得到人）
+const PEARL_HIT = { r: 6, depth: 12, bodyZ: 14, minZ: -6 };
 // 閉殼：被打到就閉起貝殼掉到地上（不動、不攻擊），閉著的時候受到的傷害變少；多久沒被打就張開
 const PEARL_SHELL = {
   reopen: 5,         // 幾秒沒被打就張開
@@ -151,10 +154,12 @@ function pearlShellArmor() {
 function firePearls(e, target) {
   const cfg = shooterCfg(e), hand = pearlHandPos(e);
   const base = Math.atan2(target.y - hand.y, target.x - hand.x);
+  const flyT = Math.max(.15, Math.hypot(target.x - hand.x, target.y - hand.y) / cfg.pearlSpeed);
+  const vz = (PEARL_HIT.bodyZ - hand.z) / flyT;   // 每秒往下（或往上）飄多少，飛到目標時剛好在身體中段
   const n = Math.max(1, Math.round(cfg.pearlCount));
   for (let i = 0; i < n; i++) {
     const a = base + (n > 1 ? (i / (n - 1) - .5) * cfg.pearlSpread * Math.PI / 180 : 0);
-    (G.pearls = G.pearls || []).push({ x: hand.x, y: hand.y, z: hand.z, vx: Math.cos(a) * cfg.pearlSpeed, vy: Math.sin(a) * cfg.pearlSpeed,
+    (G.pearls = G.pearls || []).push({ x: hand.x, y: hand.y, z: hand.z, vx: Math.cos(a) * cfg.pearlSpeed, vy: Math.sin(a) * cfg.pearlSpeed, vz,
       left: (cfg.shootRange + 2) * CELL, owner: e, spin: Math.random() * 6, trail: [] });
   }
   G.effects.push({ ring: true, x: hand.x, y: hand.y - hand.z, r: 3, r2: 14, life: .16, life0: .16, color: '#ffffff' });   // 噴出的白光
@@ -176,6 +181,42 @@ function pearlHitPlayer(pearl) {
   flashDmg('-' + dmg, p.x, p.y - 46, '#ff6b6b'); addShake(2);
   if (p.hp <= 0 && !G.over) { flash('部隊長失去戰鬥能力', p.x, p.y - 58, '#ff5b6e'); lose('player', '被' + monsterNameOf(e) + '的珍珠打中'); }
 }
+// 角色圖的透明度表（每張圖算一次）；file:// 開的頁面讀不到像素 → 用身體中間的方框代替
+const pearlAlphaCache = new WeakMap();
+function pearlSpriteAlpha(img) {
+  if (!img || !img.complete || !img.naturalWidth) return null;
+  if (pearlAlphaCache.has(img)) return pearlAlphaCache.get(img);
+  let a = null;
+  try {
+    const c = document.createElement('canvas'); c.width = img.naturalWidth; c.height = img.naturalHeight;
+    const g = c.getContext('2d', { willReadFrequently: true }); g.drawImage(img, 0, 0);
+    a = { w: c.width, h: c.height, data: g.getImageData(0, 0, c.width, c.height).data };
+  } catch (_) { a = null; }
+  pearlAlphaCache.set(img, a);
+  return a;
+}
+function pearlTowerFrame(t) {
+  let set = typeof sentrySprites !== 'undefined' && sentrySprites[t.type];
+  if (t.type === 'red' && t.shieldMode && !MAP_SAFE && !t.berserk && typeof redShieldSprites !== 'undefined' && redShieldSprites.front) set = redShieldSprites;
+  return set ? pickCharacterFrame(set, t) : null;
+}
+// 珍珠的圖有沒有碰到角色的圖（角色圖的位置跟 js/render.js 的 drawPlayer／drawTower 一樣：寬高 drawSize、底邊在腳底下 18 像素）
+function pearlTouches(pl, a, img) {
+  if (Math.abs(pl.y - a.y) > PEARL_HIT.depth) return false;
+  const size = PLAYER.drawSize, left = a.x - size / 2, top = a.y - size + 18;
+  const px = pl.x, py = pl.y - pl.z, R = PEARL_HIT.r;
+  if (px + R < left || px - R > left + size || py + R < top || py - R > top + size) return false;
+  const al = pearlSpriteAlpha(img);
+  for (const [ox, oy] of PEARL_PROBE) {
+    const x = px + ox * R, y = py + oy * R;
+    if (x < left || x >= left + size || y < top || y >= top + size) continue;
+    if (!al) { if (Math.abs(x - a.x) < size * .22 && y > top + size * .2) return true; continue; }
+    const ix = Math.floor((x - left) / size * al.w), iy = Math.floor((y - top) / size * al.h);
+    if (al.data[(iy * al.w + ix) * 4 + 3] > 80) return true;
+  }
+  return false;
+}
+const PEARL_PROBE = [[0, 0], ...Array.from({ length: 8 }, (_, i) => [Math.cos(i * Math.PI / 4), Math.sin(i * Math.PI / 4)]), ...Array.from({ length: 4 }, (_, i) => [Math.cos(i * Math.PI / 2 + Math.PI / 4) * .5, Math.sin(i * Math.PI / 2 + Math.PI / 4) * .5])];
 function updatePearls(dt) {
   if (!G.pearls || !G.pearls.length) { if (G.pearlBits) updatePearlBits(dt); return; }
   for (const pl of G.pearls) {
@@ -186,6 +227,7 @@ function updatePearls(dt) {
     while (move > 0 && !pl.done) {
       const s = Math.min(5, move); move -= s; pl.left -= s;
       pl.x += ux * s; pl.y += uy * s;
+      if (pl.vz) pl.z = Math.max(PEARL_HIT.minZ, pl.z + pl.vz * s / Math.hypot(pl.vx, pl.vy));
       const [c, r] = cellAt(pl.x, pl.y);
       if (!inGrid(c, r) || isWall(c, r)) { pl.done = true; pearlBurst(pl.x, pl.y, pl.z); break; }
       if (typeof bigPearlCatch === 'function' && bigPearlCatch(pl)) { pl.done = true; pearlBurst(pl.x, pl.y, pl.z); break; }   // 打到珍珠大童的大珍珠：被擋下來（js/pearl-elder.js）
@@ -196,13 +238,13 @@ function updatePearls(dt) {
         break;
       }
       const p = G.player;
-      if (p && p.hp > 0 && Math.hypot(p.x - pl.x, p.y - pl.y) <= PEARL_HIT_R) {
+      if (p && p.hp > 0 && !p.sitting && pearlTouches(pl, p, pickCharacterFrame(playerSprites, p))) {
         pl.done = true; pearlBurst(pl.x, pl.y, pl.z); pearlHitPlayer(pl);
         playPlayerHit(1, true);   // 溫特被珍珠打中
         break;
       }
       for (const t of G.towers) {
-        if (t.hp <= 0 || t.berserk || Math.hypot(t.x - pl.x, t.y - pl.y) > PEARL_HIT_R) continue;
+        if (t.hp <= 0 || t.berserk || t.eatenBy || !pearlTouches(pl, t, pearlTowerFrame(t))) continue;
         pl.done = true; pearlBurst(pl.x, pl.y, pl.z);
         pl.owner.atkCd = 0; enemyAttackSentry(pl.owner, t, 0);
         if (typeof sfxAt === 'function') sfxAt('pearlHit', pl.x, pl.y, .9, 'pearl-hit');

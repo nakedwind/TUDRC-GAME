@@ -180,9 +180,12 @@
         <div class="subhead">異質核心</div>
         <div class="field"><label>本局核心數量</label><input id="f_coreCount" type="number" min="1" max="20" step="1"></div>
         <div class="field"><small>先在地圖上標記候選點；每次進場會隨機抽取指定數量。</small></div>
+        <!-- 這張地圖的異質體（怪物權重）：劇情地圖一律是安全區、不會生怪，用不到，先藏起來（程式跟地圖編輯器共用，所以元素留著） -->
+        <div hidden>
         <div class="subhead">這張地圖的異質體</div>
         <div class="field"><small>勾選會出現的種類，權重越高越常出現；怪物能力與圖片到 <a href="怪物編輯器.html">怪物編輯器</a> 調整。</small></div>
         <div id="monsterMixList" style="display:grid;gap:8px;margin:10px 0"></div>
+        </div>
         </div>
       </details>
 

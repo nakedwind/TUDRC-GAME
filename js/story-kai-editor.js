@@ -640,7 +640,8 @@ function rowLabel(st) {
   let extra = '';
   if (WHO_KINDS.has(st.do)) extra = ' ' + whoText(st.who);
   if (st.do === 'say') { const t = String(st.text || '').replace(/\s+/g, ' '); extra = ' ' + (st.who === '' || st.who == null ? '[旁白]' : whoText(st.who)) + ' [「' + (t.length > 14 ? t.slice(0, 14) + '……' : t || '……') + '」]'; }
-  if ((st.do === 'bgm' || st.do === 'sfx') && st.src) extra = ' ' + st.src.split('/').pop();
+  if ((st.do === 'bgm' || st.do === 'sfx') && st.src) extra = ' ' + st.src.split('/').pop() + (st.loop ? ' 🔁' : '');
+  if (st.do === 'sfxStop' && st.all) extra = ' 全部';
   if (st.do === 'end' && st.title) extra = ' 「' + st.title + '」';
   if (st.do === 'map' && st.map) extra = ' ' + mapName(st.map);
   if (st.do === 'door') extra = ' ' + (st.open === false ? '關門' : '開門');
@@ -661,6 +662,7 @@ function numIn(st, key, min, max, title) {
     onchange: e => { const v = e.target.value === '' ? 0 : Number(e.target.value); st[key] = clamp(Math.round(v), min, max); commit(); } });
 }
 const msIn = (st, title = '毫秒（1000＝1 秒）') => numIn(st, 'ms', 0, 600000, title);
+const volIn = st => { const el = numIn(st, 'vol', 0, 100, '音量 0～100'); el.style.width = '46px'; return el; };   // 音量最多 3 位數：框小一點
 function lvSel(st, max = 5) {
   const s = h('select', { title: '幅度：數字越大越明顯', onchange: e => { st.lv = Number(e.target.value); commit(); } }, Array.from({ length: max }, (_, i) => h('option', { value: i + 1 }, String(i + 1))));
   s.value = st.lv || 1; return s;
@@ -693,7 +695,7 @@ function pickBtn(st, text, kind = 'point') {
 }
 function fileBtn(st) {
   const name = st.src ? st.src.split('/').pop() : '';
-  return [h('button', { type: 'button', title: st.src || '從電腦選一個音檔（要放在遊戲資料夾裡；不在裡面會自動複製進來）', style: 'max-width:150px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', onclick: e => { e.stopPropagation(); chooseAudio(st); } }, name ? '🎵 ' + name : '從檔案開啟'),
+  return [h('button', { type: 'button', title: st.src || '從電腦選一個音檔（要放在遊戲資料夾裡；不在裡面會自動複製進來）', style: 'max-width:68px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap', onclick: e => { e.stopPropagation(); chooseAudio(st); } }, name ? '🎵 ' + name : '從檔案開啟'),
     st.src ? h('button', { type: 'button', title: '試聽', onclick: e => { e.stopPropagation(); testAudio(st); } }, '▶') : null];
 }
 function fxTag(st) {
@@ -751,10 +753,11 @@ function controls(st) {
     case 'vignette': return [h('label', {}, '暗角範圍：', numIn(st, 'lv', 0, 10, '0～10：數字越大，四周變暗的範圍越大（0＝關掉暗角）'))];
     case 'end': return [h('label', {}, '結局標題：', h('input', { type: 'text', value: st.title || '', placeholder: '空白＝直接回到原本的地圖', style: 'width:150px',
       onchange: e => { st.title = e.target.value.trim(); commit(); } }))];
-    case 'bgm': return [...fileBtn(st), check(st, 'fade', '淡入', true), h('label', {}, '音量：', numIn(st, 'vol', 0, 100, '0～100'))];
+    case 'bgm': return [...fileBtn(st), check(st, 'fade', '淡入', true), h('label', {}, '音量：', volIn(st))];
     case 'bgmStop': return [h('span', { class: 'note' }, '背景音樂 1.5 秒淡出')];
-    case 'sfxStop': return [h('span', { class: 'note' }, '停掉上一個還在播的音效')];
-    case 'sfx': return [...fileBtn(st), h('label', {}, '音量：', numIn(st, 'vol', 0, 100, '0～100'))];
+    case 'sfxStop': return [h('span', { class: 'note' }, '停掉上一個還在播的音效'), check(st, 'all', '全部（含循環的）')];
+    case 'sfx': return [...fileBtn(st), h('label', {}, '音量', volIn(st)), check(st, 'loop', '循環'),
+      h('button', { type: 'button', disabled: !st.src, title: '只播音效裡的某一段：跳出波形，拖曳選出開始和結束', onclick: e => { e.stopPropagation(); openTrim(st); } }, trimText(st))];
   }
   return [];
 }
@@ -897,11 +900,108 @@ async function chooseAudio(st) {
 }
 let testing = null;
 function testAudio(st) {
+  if (st.do === 'sfx' && (st.from || st.to || st.loop)) { testSeg(st, st.from, st.to, st.loop); return; }   // 有裁切、循環：只試聽那一段（再按一次停）
   if (testing) { testing.pause(); const same = testing.src.endsWith(encodeURI(st.src)); testing = null; if (same) return; }
   testing = new Audio(st.src); testing.volume = clamp(Number(st.vol ?? (st.do === 'bgm' ? 50 : 100)) / 100, 0, 1);
   testing.play().catch(() => status('播放失敗：找不到 ' + st.src, true));
   testing.onended = () => { testing = null; };
 }
+
+// ---- 音效的播放秒數（裁切）、循環：Web Audio 解碼畫波形、試聽某一段 ----
+let actx = null; const bufCache = {};
+function audioCtx() { if (!actx) actx = new (window.AudioContext || window.webkitAudioContext)(); if (actx.state === 'suspended') actx.resume(); return actx; }
+const loadBuffer = src => bufCache[src] || (bufCache[src] = fetch(src).then(r => { if (!r.ok) throw new Error(); return r.arrayBuffer(); }).then(b => audioCtx().decodeAudioData(b)).catch(() => { delete bufCache[src]; return null; }));
+const secText = ms => (Math.round(ms) / 1000).toFixed(2);
+function trimText(st) { return st.from || st.to ? '✂ ' + secText(st.from || 0) + '～' + (st.to ? secText(st.to) : '尾') : '✂ 播放秒數'; }   // 列上的按鈕：✂ 0.15～0.45（秒）
+let seg = null;   // 正在試聽的那一段 { key, node, t0, from, to（秒）, loop }
+function stopSeg() { if (seg) { try { seg.node.stop(); } catch (e) {} seg = null; } }
+async function testSeg(st, from = 0, to = 0, loop = false) {
+  const key = st.src + '|' + from + '|' + to + '|' + loop, again = seg?.key === key;
+  stopSeg(); if (again) return;   // 再按一次同一段＝停
+  const buf = await loadBuffer(st.src); if (!buf) { status('播放失敗：讀不到 ' + st.src, true); return; }
+  const ctx = audioCtx(), node = ctx.createBufferSource(), gain = ctx.createGain();
+  node.buffer = buf; gain.gain.value = clamp(Number(st.vol ?? 100) / 100, 0, 1); node.connect(gain).connect(ctx.destination);
+  const a = Math.max(0, from || 0) / 1000, b = to > from ? Math.min(to / 1000, buf.duration) : buf.duration;
+  if (loop) { node.loop = true; node.loopStart = a; node.loopEnd = b; node.start(0, a); } else node.start(0, a, Math.max(.01, b - a));
+  const me = seg = { key, node, t0: ctx.currentTime, from: a, to: b, loop };
+  node.onended = () => { if (seg === me) seg = null; };
+}
+// 波形視窗
+let trimFor = null, trim = null;   // trim＝{ buf, from, to（毫秒）, drag }
+async function openTrim(st) {
+  trimFor = st; stopSeg();
+  $('trimTitle').textContent = '播放秒數：第 ' + String(scene().steps.indexOf(st) + 1).padStart(3, '0') + ' 行';
+  $('trimFile').textContent = '🎵 ' + st.src + '（讀取中…）'; $('trimLoop').checked = !!st.loop;
+  trim = { buf: null, from: Number(st.from) || 0, to: Number(st.to) || 0, drag: null };
+  $('trimDlg').showModal(); drawTrim();
+  const buf = await loadBuffer(st.src);
+  if (trimFor !== st) return;
+  if (!buf) { $('trimFile').textContent = '⚠ 讀不到音檔：' + st.src; return; }
+  trim.buf = buf; const total = trimTotal();
+  if (!trim.to || trim.to > total) trim.to = total; trim.from = Math.min(trim.from, trim.to);
+  $('trimFile').textContent = '🎵 ' + st.src + '（全長 ' + secText(total) + ' 秒）';
+  trimInputs(); drawTrim();
+}
+const trimTotal = () => trim?.buf ? Math.round(trim.buf.duration * 1000) : 0;
+function trimInputs() { $('trimFrom').value = Math.round(trim.from); $('trimTo').value = Math.round(trim.to); $('trimLen').textContent = '長度 ' + secText(trim.to - trim.from) + ' 秒'; }
+function drawTrim() {
+  const cv = $('trimWave'), g = cv.getContext('2d'), W = cv.width, H = cv.height;
+  g.clearRect(0, 0, W, H);
+  if (!trim?.buf) { g.fillStyle = '#7f93a6'; g.font = '14px sans-serif'; g.fillText('讀取音檔中…', 12, 24); return; }
+  const data = trim.buf.getChannelData(0), total = trimTotal(), step = Math.max(1, Math.floor(data.length / W));
+  const xOf = ms => ms / total * W, x0 = xOf(trim.from), x1 = xOf(trim.to);
+  g.fillStyle = 'rgba(255,212,121,.12)'; g.fillRect(x0, 0, x1 - x0, H);   // 選取的那一段
+  for (let x = 0; x < W; x++) {   // 波形：每一欄的最高、最低
+    let lo = 1, hi = -1;
+    for (let i = x * step, e = Math.min(data.length, i + step); i < e; i++) { const v = data[i]; if (v < lo) lo = v; if (v > hi) hi = v; }
+    g.fillStyle = x >= x0 && x <= x1 ? '#8fd3ff' : '#3c5266';
+    g.fillRect(x, (1 - hi) * H / 2, 1, Math.max(1, (hi - lo) * H / 2));
+  }
+  g.fillStyle = '#7f93a6'; g.font = '11px sans-serif';   // 時間刻度：每 0.5 秒（太長就每 1 秒）
+  const tick = total > 8000 ? 1000 : 500;
+  for (let ms = 0; ms <= total; ms += tick) { const x = xOf(ms); g.fillRect(x, H - 6, 1, 6); g.fillText(secText(ms), x + 2, H - 8); }
+  g.fillStyle = '#ffd479'; g.fillRect(x0 - 1, 0, 2, H); g.fillRect(x1 - 1, 0, 2, H);   // 開始、結束的黃線
+  if (seg && trimFor && seg.key.startsWith(trimFor.src + '|')) {   // 試聽中：白線＝播到哪
+    const len = seg.to - seg.from; let p = audioCtx().currentTime - seg.t0; p = seg.loop ? p % len : Math.min(p, len);
+    g.fillStyle = '#fff'; g.fillRect(xOf((seg.from + p) * 1000), 0, 1, H);
+    requestAnimationFrame(drawTrim);
+  }
+}
+function trimMs(e) { const r = $('trimWave').getBoundingClientRect(); return clamp((e.clientX - r.left) / r.width, 0, 1) * trimTotal(); }
+$('trimWave').addEventListener('pointerdown', e => {
+  if (!trim?.buf) return;
+  const ms = trimMs(e), near = trimTotal() * 8 / $('trimWave').getBoundingClientRect().width;   // 離黃線 8 像素內＝拖那條線
+  trim.drag = Math.abs(ms - trim.from) <= near ? 'from' : Math.abs(ms - trim.to) <= near ? 'to' : 'new';
+  if (trim.drag === 'new') { trim.anchor = ms; trim.from = trim.to = ms; }
+  try { $('trimWave').setPointerCapture(e.pointerId); } catch (err) {}   // 拖到波形外面也繼續算
+  trimInputs(); drawTrim();
+});
+$('trimWave').addEventListener('pointermove', e => {
+  if (!trim?.drag) return;
+  const ms = trimMs(e);
+  if (trim.drag === 'new') { trim.from = Math.min(trim.anchor, ms); trim.to = Math.max(trim.anchor, ms); }
+  else if (trim.drag === 'from') trim.from = Math.min(ms, trim.to);
+  else trim.to = Math.max(ms, trim.from);
+  trimInputs(); drawTrim();
+});
+$('trimWave').addEventListener('pointerup', () => {
+  if (!trim?.drag) return;
+  if (trim.drag === 'new' && trim.to - trim.from < 20) { trim.from = 0; trim.to = trimTotal(); }   // 只點一下沒拖：選整段
+  trim.drag = null; trimInputs(); drawTrim();
+});
+$('trimFrom').onchange = () => { trim.from = clamp(Number($('trimFrom').value) || 0, 0, trim.to); trimInputs(); drawTrim(); };
+$('trimTo').onchange = () => { trim.to = clamp(Number($('trimTo').value) || 0, trim.from, trimTotal()); trimInputs(); drawTrim(); };
+$('trimAll').onclick = () => { trim.from = 0; trim.to = trimTotal(); trimInputs(); drawTrim(); };
+$('trimPlay').onclick = () => { if (!trim?.buf) return; testSeg(trimFor, trim.from, trim.to, $('trimLoop').checked).then(() => requestAnimationFrame(drawTrim)); };
+$('trimDlg').addEventListener('close', () => { stopSeg(); trimFor = null; });
+$('trimCancel').onclick = () => $('trimDlg').close();
+$('trimOk').onclick = () => {
+  const st = trimFor; if (!st || !trim?.buf) { $('trimDlg').close(); return; }
+  const from = Math.round(trim.from), to = Math.round(trim.to);
+  if (from <= 0 && to >= trimTotal() - 1) { delete st.from; delete st.to; } else { st.from = from; st.to = to; }   // 選整段＝不裁切
+  if ($('trimLoop').checked) st.loop = true; else delete st.loop;
+  $('trimDlg').close(); commit();
+};
 
 // ---- 從頭預覽：在編輯器裡打開遊戲播放（用還沒存到專案的草稿）----
 function play(from = 1) {

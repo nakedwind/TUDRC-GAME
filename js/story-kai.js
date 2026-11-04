@@ -229,8 +229,9 @@ const StoryKai = (() => {
     return out;
   }
   function prepare() {
-    ensureUI(); clearInput();
+    ensureUI(); clearInput(); stopSound(true, 0);   // 重新播放：上一次還在播的音效（循環的）先停掉
     const cfg = config(); if (!cfg) return;
+    for (const s of cfg.steps || []) if (s.do === 'sfx' && s.src && (s.loop || s.from || s.to)) loadBuffer(s.src);   // 裁切、循環的音效先解碼好，播的時候才不會慢半拍
     gotoMap(cfg.map);   // 重新播放時：中途換過地圖的話，先回到開頭的地圖
     G = { story: true, phase: 'ready', running: false, over: false, player: null,
       towers: [], npcs: [], enemies: [], obstacles: [], cores: [], effects: [], acidPools: [],
@@ -271,10 +272,11 @@ const StoryKai = (() => {
     run();
   }
   function fastForward(to) {
-    state.skipping = true;
+    state.skipping = true; state.skipLoops = [];
     while (state.i < to) { const s = state.steps[state.i++]; if (s.do !== 'end') exec(s); settle(); }
     state.skipping = false;
     if (state.skipBgm) { const b = state.skipBgm; state.skipBgm = null; startBgm(b.src, Number(b.vol ?? 50) / 100, false); }
+    for (const s of state.skipLoops.splice(0)) playSound(s);   // 快轉前開始、還沒停的循環音效
   }
   function settle() {   // 快轉時：正在走的人直接到、淡入淡出直接做完、要等的時間直接過去
     for (const a of state.actors) {
@@ -385,8 +387,14 @@ const StoryKai = (() => {
         else if (s.src) startBgm(s.src, Number(s.vol ?? 50) / 100, s.fade !== false);
         break;
       case 'bgmStop': if (state.skipping) state.skipBgm = null; else stopBgm(BGM_FADE); break;
-      case 'sfx': if (!state.skipping && s.src) playSound(s.src, Number(s.vol ?? 100) / 100); break;
-      case 'sfxStop': stopSound(); break;
+      case 'sfx':
+        if (state.skipping) { if (s.loop && s.src) state.skipLoops.push(s); }   // 快轉：循環的音效記下來，快轉完再開始播（一般的音效跳過）
+        else playSound(s);
+        break;
+      case 'sfxStop':
+        if (state.skipping) { if (s.all) state.skipLoops = []; else state.skipLoops.pop(); }
+        else stopSound(!!s.all);
+        break;
       case 'end': finish(s.title || ''); break;
     }
   }
@@ -549,7 +557,7 @@ const StoryKai = (() => {
     if (state.ending) return;
     state.talk = null; showBox(false);
     state.ending = { t: 0, title, from: level(state.black) };
-    stopBgm(BGM_FADE);
+    stopBgm(BGM_FADE); stopSound(true, END_FADE);   // 結局：背景音樂、還在播的音效（循環的也是）跟著畫面一起淡掉
   }
 
   // ---- 每一幀 ----
@@ -772,15 +780,42 @@ const StoryKai = (() => {
     if (!sec) { clearInterval(a._fade); a.pause(); return; }
     fadeAudio(a, 0, sec, () => a.pause());
   }
-  let lastSfx = null;   // 最後一個播的音效（「停止音效」停它）
-  function playSound(src, vol) {
-    if (muted()) return;
-    const a = new Audio(src); a.volume = clamp(vol * sfxMaster(), 0, 1); a.play().catch(() => {});
-    lastSfx = a;
+  // 音效：一般的用 <audio> 播；有裁切（from～to 毫秒）或循環的用 Web Audio（可以準確從某一段開始、在某一段結束，循環接得很順）
+  // sounds＝正在播的音效（新的在後面）：「停止音效」停最後一個（勾「全部」就全停）；劇情結束、離開、重播時全部停掉
+  const sounds = [];
+  let actx = null; const bufCache = {};
+  function audioCtx() {
+    const AC = window.AudioContext || window.webkitAudioContext; if (!AC) return null;
+    if (!actx) actx = new AC();
+    if (actx.state === 'suspended') actx.resume().catch(() => {});
+    return actx;
   }
-  function stopSound() {   // 停止音效：上一個音效很快淡掉（0.15 秒，不會「啪」一聲斷掉）
-    const a = lastSfx; lastSfx = null; if (!a || a.paused) return;
-    fadeAudio(a, 0, .15, () => a.pause());
+  const loadBuffer = src => bufCache[src] || (bufCache[src] = audioCtx() ? fetch(src).then(r => r.arrayBuffer()).then(b => actx.decodeAudioData(b)).catch(() => null) : Promise.resolve(null));
+  const dropSound = rec => { const i = sounds.indexOf(rec); if (i >= 0) sounds.splice(i, 1); };
+  function playSound(s) {
+    if (muted() || !s.src) return;
+    const vol = clamp(Number(s.vol ?? 100) / 100 * sfxMaster(), 0, 1), from = Math.max(0, Number(s.from) || 0) / 1000, to = Number(s.to) > 0 ? Number(s.to) / 1000 : 0;
+    const rec = { stopped: false }; sounds.push(rec);
+    if (!s.loop && !from && !to) {   // 整段播一次
+      const a = new Audio(s.src); a.volume = vol; a.play().catch(() => {});
+      a.onended = () => dropSound(rec);
+      rec.stop = sec => fadeAudio(a, 0, sec, () => a.pause());
+      return;
+    }
+    rec.stop = () => {};
+    loadBuffer(s.src).then(buf => {
+      if (!buf || rec.stopped) { dropSound(rec); return; }
+      const ctx = actx, node = ctx.createBufferSource(), gain = ctx.createGain();
+      node.buffer = buf; gain.gain.value = vol; node.connect(gain).connect(ctx.destination);
+      const end = to > from ? Math.min(to, buf.duration) : buf.duration;
+      if (s.loop) { node.loop = true; node.loopStart = from; node.loopEnd = end; node.start(0, from); }   // 循環：只重複選取的那一段
+      else node.start(0, from, Math.max(.01, end - from));
+      node.onended = () => dropSound(rec);
+      rec.stop = sec => { const t = ctx.currentTime; gain.gain.cancelScheduledValues(t); gain.gain.setValueAtTime(gain.gain.value, t); gain.gain.linearRampToValueAtTime(0, t + sec); try { node.stop(t + sec + .02); } catch (e) {} };
+    });
+  }
+  function stopSound(all = false, sec = .15) {   // 停止音效：很快淡掉（0.15 秒，不會「啪」一聲斷掉）
+    for (const rec of all ? sounds.splice(0) : sounds.splice(-1)) { rec.stopped = true; rec.stop(sec); }
   }
 
   // ---- 離開、回到遊戲 ----
@@ -790,7 +825,7 @@ const StoryKai = (() => {
   }
   function leave() {
     if (!state && !ui) return;
-    stopBgm(0); stopSound(); clearInput(); state = null;
+    stopBgm(0); stopSound(true, 0); clearInput(); state = null;
     if (ui) { ui.hidden = true; el('storyKaiEnd').hidden = true; }
     document.body.classList.remove('story-scene');
     if (box()) { box().classList.add('hidden'); box().classList.remove('story-narration', 'story-noface', 'story-kai-shake'); }
