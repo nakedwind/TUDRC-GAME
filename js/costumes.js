@@ -4,7 +4,7 @@
    ・遊戲裡挑精靈圖時先問 costumeOutfit（js/game.js 的 applyOutfits）；配件由 drawCostumeAccessories 畫（js/render.js 畫角色的地方）
      配件的位置、怎麼畫在 js/costume-draw.js（和服裝編輯器共用）
    ・在衣櫃（data/costumes.js 的 WARDROBE_TILES）前按 Space 打開服裝介面（只換自己的）；開著的時候玩家停住（js/game.js 的 frame）
-   ・隊友的服裝：在基地跟隊友對話，按「👗 推薦穿搭」打開他的服裝介面
+   ・其他角色的服裝：在基地跟他對話，按「👗 推薦穿搭」打開他的服裝介面（送他的服裝收進他的衣櫃，不會馬上穿上）
    必須在 js/game.js 之前載入。
 */
 const COSTUME_STORE = 'tudrc_costumes_v1';
@@ -121,15 +121,12 @@ function costumeGiftable(who) {
   return [...COSTUME_ACCESSORIES, ...COSTUME_SKINS.filter(s => s.char === who)]
     .filter(item => item.giftable !== false && costumeOwned(item.id) && !costumeGifted(who, item.id) && (typeof costumeAllowed !== 'function' || costumeAllowed(who, item.id)));
 }
-// 送出：用掉一件、記成他的、馬上穿上
+// 送出：用掉一件、記成他的（收進他的衣櫃，不會馬上穿上；要穿＝對話裡按「👗 推薦穿搭」幫他換）
 function costumeGive(who, id) {
   const item = costumeItem(id); if (!item || !costumeOwned(id)) return false;
   costumeState.owned[id] -= 1; if (costumeState.owned[id] <= 0) delete costumeState.owned[id];
   const gifted = costumeState.gifted || (costumeState.gifted = {});
   (gifted[who] = gifted[who] || []).push(id);
-  const eq = costumeEquip(who);
-  if (item.slot) eq[item.slot] = id;
-  else for (const mode of ['base', 'battle']) if (costumeSkinFitsMode(item, mode)) eq[mode] = id;   // 限定場合的 skin 只換那一邊
   if (!costumeOwned(id)) {   // 你手上沒有了：別人身上穿的那件脫下來（送給他們的除外）
     for (const [other, e] of Object.entries(costumeState.equip)) {
       if (other === who || costumeGifted(other, id)) continue;
@@ -137,8 +134,7 @@ function costumeGive(who, id) {
     }
   }
   saveCostumes();
-  if (typeof applyOutfits === 'function') applyOutfits();
-  if (typeof checkAchievements === 'function') checkAchievements('allWear:');   // 成就：全員戴上某件配件
+  if (typeof applyOutfits === 'function') applyOutfits();   // 別人身上被脫下的那件要馬上看得到
   return true;
 }
 // 禮物選單、扭蛋收藏裡的小圖
@@ -293,9 +289,10 @@ function closeWardrobe() {
   wardrobeOpen = false; wd.el.classList.add('hidden');
   if (typeof sfx === 'function') sfx('switch');
 }
-// ---- 跟隊友對話：多一個「👗 推薦穿搭」按鈕（game.js 的 openDialogue 呼叫），只在基地 ----
+// ---- 跟角色對話：多一個「👗 推薦穿搭」按鈕（game.js 的 openDialogue 呼叫），只在基地 ----
+// 有角色圖的人都可以（以前只有 ROSTER 隊員，諾亞、亞許、克萊兒…收了服裝卻沒地方換）；溫特自己用衣櫃
 const outfitTargetOf = actor => { const id = actor && (actor.kind === 'tower' ? actor.type : actor.id);
-  return id && id !== 'winter' && typeof ROSTER !== 'undefined' && ROSTER.includes(id) && CHARACTERS[id] && CHARACTERS[id].sprite ? id : null; };
+  return id && id !== 'winter' && id !== (typeof PLAYER_CHARACTER !== 'undefined' && PLAYER_CHARACTER) && CHARACTERS[id] && CHARACTERS[id].sprite ? id : null; };
 function onDialogueOpenedOutfit(actor) {
   const btn = document.getElementById('dialogueOutfit'); if (!btn) return;
   btn.classList.toggle('hidden', !(MAP_SAFE && outfitTargetOf(actor)));
