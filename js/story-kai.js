@@ -170,7 +170,7 @@ const StoryKai = (() => {
     el('dialogueProgress').textContent = '';
     el('dialoguePortrait').style.filter = '';
     if (cast && !cast.image) {
-      const set = a ? a.set : sprites(cast.sprite);
+      const set = (a?.hurt && hurtSet(a)) || (a ? a.set : sprites(cast.sprite));   // 受傷中：頭像也換成正面流血的差分
       el('dialoguePortrait').src = set.front[0].src; el('dialoguePortrait').alt = name;
       el('dialoguePortraitFrame').dataset.char = String(cast.sprite).replace(/_[A-Z]$/, '');
     }

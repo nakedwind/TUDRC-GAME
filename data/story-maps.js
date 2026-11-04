@@ -16974,7 +16974,10 @@ const STORY_MAPS = [
         "18,12": "tile_mr4czvpx",
         "11,11": "tile_mr4czvpx",
         "18,13": "tile_mr4czvpx"
-      }
+      },
+      "ground4": {},
+      "object5": {},
+      "object6": {}
     },
     "stamps": [
       {
@@ -17154,6 +17157,325 @@ const STORY_MAPS = [
         "r": 3,
         "layer": "ground2",
         "oy": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 14,
+        "r": 2,
+        "layer": "ground2",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 31,
+        "r": 5,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 28,
+        "r": 5,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 33,
+        "r": 8,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 33,
+        "r": 11,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 28,
+        "r": 8,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 31,
+        "r": 8,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 31,
+        "r": 11,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 28,
+        "r": 11,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mvfjtda0",
+        "c": 33,
+        "r": 5,
+        "layer": "ground4",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 32,
+        "r": 3,
+        "layer": "object5",
+        "ox": 20
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 30,
+        "r": 4,
+        "layer": "object5",
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_backroom_wall02_hole",
+        "c": 29,
+        "r": 3,
+        "layer": "object5",
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_backroom_wall02_dmg_light",
+        "c": 32,
+        "r": 3,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_dmg_heavy",
+        "c": 33,
+        "r": 3,
+        "layer": "object5",
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 28,
+        "r": 2,
+        "layer": "object5",
+        "oy": 22.666667000000018,
+        "fx": true,
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 35,
+        "r": 2,
+        "layer": "object5",
+        "oy": 22.666667000000018,
+        "fx": true,
+        "ox": 30
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 35,
+        "r": 6,
+        "layer": "object5",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 35,
+        "r": 4,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 35,
+        "r": 5,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 30
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 28,
+        "r": 6,
+        "layer": "object5",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 28,
+        "r": 5,
+        "layer": "object5",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 28,
+        "r": 4,
+        "layer": "object5",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 7,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 8,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 9,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 10,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 11,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 12,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 13,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 29,
+        "r": 11,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 29,
+        "r": 10,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 29,
+        "r": 9,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 29,
+        "r": 8,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 29,
+        "r": 7,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 29,
+        "r": 12,
+        "layer": "object5",
+        "ox": -10
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 28,
+        "r": 13,
+        "layer": "object5",
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 28,
+        "r": 10,
+        "layer": "object6",
+        "oy": 32.66666700000002,
+        "fx": true,
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_backroom_pillar3",
+        "c": 35,
+        "r": 10,
+        "layer": "object6",
+        "oy": 32.66666700000002,
+        "fx": true,
+        "ox": 30
+      },
+      {
+        "id": "tile_bg_backroom_wall02_hole",
+        "c": 32,
+        "r": 11,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_backroom_wall02_dmg_medium",
+        "c": 29,
+        "r": 11,
+        "layer": "object6",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 32,
+        "r": 3,
+        "layer": "object6",
+        "ox": 20
       }
     ],
     "solid": [],
@@ -17180,7 +17502,7 @@ const STORY_MAPS = [
     "npcs": false,
     "portals": [],
     "hiddenPickups": [],
-    "cols": 30,
+    "cols": 90,
     "rows": 60,
     "layerOrder": [
       {
@@ -17189,11 +17511,23 @@ const STORY_MAPS = [
       },
       {
         "id": "ground2",
-        "name": "02_牆壁"
+        "name": "01_牆壁"
       },
       {
         "id": "floor",
-        "name": "03_牆壁（前）"
+        "name": "01_牆壁（前）"
+      },
+      {
+        "id": "ground4",
+        "name": "02_地板"
+      },
+      {
+        "id": "object5",
+        "name": "02_牆壁"
+      },
+      {
+        "id": "object6",
+        "name": "02_牆壁（前）"
       }
     ]
   }
