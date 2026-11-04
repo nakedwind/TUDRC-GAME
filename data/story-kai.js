@@ -52,7 +52,7 @@ const STORY_KAI = {
       { "do": "act", "who": 1, "act": "walk" },
       { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100, "speed": 2.5, "from": 2923, "to": 8098 },
       { "do": "move", "who": 1, "at": [13.6, 6.1], "ms": 2500 },
-      { "do": "wait", "ms": 500 },
+      { "do": "wait", "ms": 250 },
       { "do": "sfxStop", "all": true },
       { "do": "sfx", "src": "音效素材/關門.mp3", "vol": 30 },
       { "do": "door", "at": [14, 4.8], "open": true },
@@ -123,8 +123,14 @@ const STORY_KAI = {
       { "do": "wait", "ms": 200 },
       { "do": "move", "who": 1, "at": [32.6, 9.2], "ms": 700, "face": "back" },
       { "do": "say", "who": 1, "text": "……誰！？", "shake": true },
-      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 815, "to": 1793, "speed": 0.9, "loop": false },
+      { "do": "move", "who": 1, "at": [32.6, 9.2], "ms": 700, "face": "back" },
+      { "do": "say", "who": 1, "text": "是同伴嗎！？", "shake": true },
+      { "do": "wait", "ms": 800 },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 70, "from": 800, "to": 1460, "speed": 0.65 },
+      { "do": "wait", "ms": 800 },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 815, "to": 1793, "speed": 0.7 },
       { "do": "wait", "ms": 1000 },
+      { "do": "sfx", "src": "音效素材/敲門.mp3", "vol": 80, "from": 815, "to": 1793, "speed": 0.7 },
       { "do": "wait", "ms": 5000 }
     ]
   }

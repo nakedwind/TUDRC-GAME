@@ -109,6 +109,14 @@ const variantName = f => ({ mob_A: '嚮導', mob_B: '哨兵' }[f] || ({ A: 'A �
 // ---- 資料 ----
 const storyMaps = typeof STORY_MAPS !== 'undefined' ? STORY_MAPS : [];
 let data = null, sceneId = null, sel = -1, castSel = null, pick = null;
+// 多行選取：Shift＋點一下（或 Shift＋↑↓）從原本那行選到這行。{ from: 起點, at: 選到哪行 }；sel 被別的地方改掉就自動變回單行
+let multi = null;
+function selRange() {
+  const n = scene()?.steps.length || 0; if (sel < 0 || sel >= n) return null;
+  if (!multi || multi.at !== sel || multi.from >= n) return [sel, sel];
+  return [Math.min(multi.from, sel), Math.max(multi.from, sel)];
+}
+function selectTo(i) { const from = multi && multi.at === sel ? multi.from : sel; sel = i; multi = from === i ? null : { from, at: i }; }
 function loadData(useFile) {
   let d = null;
   if (!useFile) try { d = DraftSync.load(KAI_STORE, typeof STORY_KAI !== 'undefined' ? STORY_KAI : {}, { label: '劇情（改）' }); } catch (_) {}
@@ -775,13 +783,18 @@ function renderSteps() {
   const s = scene();
   $('stepCount').textContent = s ? s.steps.length + ' 行' : '';
   for (const id of ['playSide', 'playTop', 'playFrom']) $(id).disabled = !s;
-  $('delStep').hidden = $('copyStep').hidden = !s || sel < 0 || sel >= s.steps.length;   // 選了某一行才出現
+  const range = selRange(), count = range ? range[1] - range[0] + 1 : 0;
+  $('delStep').hidden = $('copyStep').hidden = !s || !range;   // 選了某一行才出現
+  $('copyStep').textContent = count > 1 ? '複製這 ' + count + ' 行' : '複製此行';
+  $('delStep').textContent = count > 1 ? '刪除這 ' + count + ' 行' : '刪除此行';
+  const clip = readClip(); $('pasteStep').hidden = !s || !clip.length; $('pasteStep').textContent = '貼上 ' + clip.length + ' 行';
   if (!s) { box.append(h('div', { class: 'empty' }, '還沒有劇情。按上面的「＋新劇情」開始。')); return; }
   if (!s.steps.length) { box.append(h('div', { class: 'empty' }, '還沒有指令。\n按左邊的按鈕新增，例如先「＋新鏡頭」決定拍哪裡，再「角色出現」、「＋新對白」。')); return; }
   s.steps.forEach((st, i) => {
     const warn = problem(st), [name, extra] = rowLabel(st);
-    const row = h('div', { class: 'step' + (st.do === 'say' ? ' say' : SOUND_KINDS.has(st.do) ? ' snd' : st.do === 'camMove' ? ' cammove' : '') + (i === sel ? ' on' : '') + (warn ? ' warn' : ''), draggable: 'true', title: warn ? '⚠ ' + warn : '', 'data-i': i,
-      onclick: () => { if (sel !== i) { sel = i; renderSteps(); drawSoon(); } } },
+    const row = h('div', { class: 'step' + (st.do === 'say' ? ' say' : SOUND_KINDS.has(st.do) ? ' snd' : st.do === 'camMove' ? ' cammove' : '') + (range && i >= range[0] && i <= range[1] ? ' on' : '') + (warn ? ' warn' : ''), draggable: 'true', title: warn ? '⚠ ' + warn : '', 'data-i': i,
+      onmousedown: e => { if (e.shiftKey) e.preventDefault(); },   // Shift＋點：不要反白文字
+      onclick: e => { if (e.shiftKey && sel >= 0) { selectTo(i); renderSteps(); drawSoon(); } else if (sel !== i || multi) { sel = i; multi = null; renderSteps(); drawSoon(); } } },
       h('span', { class: 'no' }, String(i + 1).padStart(3, '0') + '：'), h('span', { class: 'lbl' }, name, extra ? h('em', {}, extra) : null),
       h('span', { class: 'ctl', onclick: e => e.stopPropagation(), onmousedown: e => { e.stopPropagation(); if (e.target.closest('input, textarea')) row.draggable = false; } }, controls(st)),   // 在輸入框裡反白文字時，這一行先不能拖
       h('button', { type: 'button', class: 'x', title: '刪除這一行（Delete）', onclick: e => { e.stopPropagation(); removeStep(i); } }, '✕'));
@@ -823,14 +836,48 @@ function removeStep(i) {
   if (sel >= s.steps.length) sel = s.steps.length - 1;
   setPick(null); commit();
 }
-$('delStep').onclick = () => { if (sel >= 0) removeStep(sel); };
-// 複製此行：一模一樣的設定放在下面一行，並選取新的那一行
-$('copyStep').onclick = () => { const s = scene(); if (!s || sel < 0 || sel >= s.steps.length) return; s.steps.splice(sel + 1, 0, structuredClone(s.steps[sel])); sel++; setPick(null); commit(); scrollToSel(); };
+function removeRange() {   // 刪掉選取的那幾行
+  const s = scene(), r = selRange(); if (!r) return;
+  s.steps.splice(r[0], r[1] - r[0] + 1); sel = Math.min(r[0], s.steps.length - 1); multi = null;
+  setPick(null); commit();
+}
+$('delStep').onclick = removeRange;
+// 剪貼簿（複製的那幾行）：存在瀏覽器裡，換一段劇情、重新整理、開別的編輯器分頁都貼得到
+const CLIP_STORE = 'tudrc_story_kai_clip';
+function readClip() { try { const c = JSON.parse(localStorage.getItem(CLIP_STORE) || '[]'); return Array.isArray(c) ? c : []; } catch (_) { return []; } }
+function copyRange() {
+  const s = scene(), r = selRange(); if (!r) return;
+  const rows = structuredClone(s.steps.slice(r[0], r[1] + 1));
+  try { localStorage.setItem(CLIP_STORE, JSON.stringify(rows)); } catch (_) {}
+  status('已複製 ' + rows.length + ' 行（Ctrl＋V 貼在選取的行下面）'); renderSteps();
+}
+function insertRows(rows) {   // 貼在選取的行下面（沒選就貼在最後），貼上的那幾行變成選取
+  const s = scene(); if (!s || !rows.length) return;
+  const r = selRange(), at = r ? r[1] + 1 : s.steps.length;
+  s.steps.splice(at, 0, ...structuredClone(rows));
+  sel = at + rows.length - 1; multi = rows.length > 1 ? { from: at, at: sel } : null;
+  setPick(null); commit(); scrollToSel();
+}
+// 複製此行（選了好幾行就是那幾行）：一模一樣的設定直接放在下面
+$('copyStep').onclick = () => { const s = scene(), r = selRange(); if (r) insertRows(s.steps.slice(r[0], r[1] + 1)); };
+$('pasteStep').onclick = () => insertRows(readClip());
 document.querySelectorAll('[data-add]').forEach(b => b.addEventListener('click', () => addStep(b.dataset.add)));
 $('stepList').addEventListener('keydown', e => {
   if (e.target !== $('stepList')) return;
-  if ((e.key === 'Delete' || e.key === 'Backspace') && sel >= 0) { e.preventDefault(); removeStep(sel); }
-  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); sel = clamp(sel + (e.key === 'ArrowDown' ? 1 : -1), 0, scene().steps.length - 1); renderSteps(); scrollToSel(); drawSoon(); }
+  if ((e.key === 'Delete' || e.key === 'Backspace') && sel >= 0) { e.preventDefault(); removeRange(); }
+  if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault(); const to = clamp(sel + (e.key === 'ArrowDown' ? 1 : -1), 0, scene().steps.length - 1);
+    if (e.shiftKey) selectTo(to); else { sel = to; multi = null; }
+    renderSteps(); scrollToSel(); drawSoon();
+  }
+});
+// Ctrl＋C／Ctrl＋V：複製、貼上選取的行（在輸入框裡打字、反白了文字、開著視窗時照瀏覽器原本的）
+window.addEventListener('keydown', e => {
+  if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+  const k = e.key.toLowerCase(); if (k !== 'c' && k !== 'v') return;
+  if (e.target.closest?.('input, textarea, select, [contenteditable]') || document.querySelector('dialog[open]') || !$('playModal').hidden) return;
+  if (k === 'c') { if (String(window.getSelection?.() || '') || !selRange()) return; e.preventDefault(); copyRange(); }
+  else { const clip = readClip(); if (!clip.length || !scene()) return; e.preventDefault(); insertRows(clip); }
 });
 window.addEventListener('keydown', e => { if (e.key === 'Escape' && pick) { setPick(null); } });
 window.addEventListener('mouseup', () => { for (const r of document.querySelectorAll('#stepList .step[draggable="false"]')) r.draggable = true; });   // 放開滑鼠：每一行又可以拖了
