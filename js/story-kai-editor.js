@@ -77,11 +77,12 @@ const MONS = (typeof MONSTERS_DEFAULT !== 'undefined' ? MONSTERS_DEFAULT : []).m
   side: m.frames?.side?.[0], sideFacing: m.frames?.sideFacing, walkFacing: m.frames?.walkFacing }));
 // 道具出現的清單：商店買得到的東西（data/supplies.js）、背包裡一般的物品（不含鑰匙、碎片這些重要物品），
 // 加上可以當道具擺的地圖素材（彈藥箱、日光燈；日光燈在遊戲裡會跟地圖上的一樣閃、跳電）——js/story-kai.js 的 PROP_TILES 是同一份
-const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light'];
+const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light', 'tile_eoc_first_aid_bag'];
+const PROP_TILE_NAMES = { tile_eoc_first_aid_bag: '急救包（地上的袋子）' };   // 跟商店的急救包同名的素材：選單上分得出來
 const PROPS = [...(typeof SUPPLIES !== 'undefined' ? SUPPLIES : []), ...(typeof ITEMS !== 'undefined' ? ITEMS : []).filter(it => it.category !== 'key')]
   .filter(it => it.image).map(it => ({ id: it.id, name: it.name || it.id, img: it.image }))
   .concat(PROP_TILES.map(id => (typeof SHARED_TILES !== 'undefined' ? SHARED_TILES : []).find(t => t.id === id)).filter(Boolean)
-    .map(t => ({ id: t.id, name: t.name, img: t.file, tile: [t.w || 1, t.h || 1] })));
+    .map(t => ({ id: t.id, name: PROP_TILE_NAMES[t.id] || t.name, img: t.file, tile: [t.w || 1, t.h || 1] })));
 const monOf = id => MONS.find(m => m.id === id), propOf = id => PROPS.find(p => p.id === id);
 // 第 upto 行之前，這個代號最近一次「出現」的那一行（拿來知道是哪一種怪物、哪個道具）
 function shownBy(key, no, upto) { const st = scene()?.steps || []; for (let i = Math.min(upto, st.length - 1); i >= 0; i--) if (st[i].do === (key === 'mon' ? 'mshow' : 'ishow') && st[i][key] === no) return st[i]; return null; }
@@ -361,8 +362,9 @@ function draw() {
   const actors = [...st.actors.entries()].filter(([, a]) => a.shown).sort((p, q) => p[1].at[1] - q[1].at[1]);
   const mons = [...st.mons.entries()].filter(([, x]) => x.shown), items = [...st.items.entries()].filter(([, x]) => x.shown);
   // 人、怪物、道具一起依腳底的高低排前後
-  const figs = [...actors.map(([no, a]) => ({ y: a.at[1], draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, st.down.has(no) ? 'front' : a.face, st.hurt.has(no), st.sit.has(no) && !st.down.has(no), st.down.get(no)); } })),
-    ...mons.map(([, x]) => ({ y: x.at[1], draw: () => drawMonster(x, x.dying) })), ...items.map(([, x]) => ({ y: x.at[1] - .01, draw: () => drawProp(x) }))];
+  // 前後順序跟遊戲一樣（js/story-kai.js 的 draw）：人 +17、怪物 +13、道具 +10、地圖素材的道具 +0 像素
+  const figs = [...actors.map(([no, a]) => ({ y: a.at[1] + 17 / C, draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, st.down.has(no) ? 'front' : a.face, st.hurt.has(no), st.sit.has(no) && !st.down.has(no), st.down.get(no)); } })),
+    ...mons.map(([, x]) => ({ y: x.at[1] + 13 / C, draw: () => drawMonster(x, x.dying) })), ...items.map(([, x]) => ({ y: x.at[1] + (propOf(x.id)?.tile ? 0 : 10) / C, draw: () => drawProp(x) }))];
   figs.sort((p, q) => p.y - q.y).forEach(f => f.draw());
   ctx.restore();
   ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;

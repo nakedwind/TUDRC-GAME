@@ -17653,8 +17653,8 @@ const STORY_MAPS = [
     "npcs": false,
     "portals": [],
     "hiddenPickups": [],
-    "cols": 90,
-    "rows": 60,
+    "cols": 50,
+    "rows": 40,
     "layerOrder": [
       {
         "id": "ground",

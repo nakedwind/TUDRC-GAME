@@ -8,6 +8,7 @@
        block: false,         // true＝等特效播完才跑下一行（預設不等）
        noBox: false,         // true＝不用框範圍（例如聲音淡出）
        start(api, f) {},     // 跑到這一行時做一次：改劇情裡的東西（燈、圖層、黑幕、角色的光……，api 見 js/story-kai.js 的 fxApi）
+       tick(api, dt, f) {},  // 播的時候每一幀做一次（不是畫東西，例如冒光點）
        draw(ctx, k, f) {},   // 每一幀畫一次：k＝播到哪（0～1）；f＝{ t: 播了幾秒, x, y, w, h: 框的範圍（像素）, cx, cy: 框的中心 }
      };
    特效永遠以框的中心點發生；框越大，特效越大。
@@ -70,6 +71,64 @@ STORY_KAI_FX['fx_mw3x3c090pw'] = {
   draw() {},
 };
 
+// 第 285 行：所有音效都停掉，日光燈的嗡嗡聲、跳電聲也不出聲，直到第 303 行才恢復（不用框範圍）
+STORY_KAI_FX['fx_mw42huykaqf'] = {
+  time: .1, noBox: true,
+  start(api) { api.stopAllSounds(); api.ambient(false); },
+  draw() {},
+};
+
+// 第 303 行：紅光、血漬全部消失，同伴床藏起來，日光燈的嗡嗡聲、跳電聲恢復，燈也回到平常會閃、會跳電的樣子
+STORY_KAI_FX['fx_mw42sf67get'] = {
+  time: .1,
+  start(api, f) {
+    api.clearFx();
+    api.layer(COLYN_BED_LAYER, false);
+    // 清乾淨之後，只留柯林身體下的血灘（這一行在黑幕淡出之前，所以一亮起來就在那裡）
+    const colyn = api.actor(1);
+    if (colyn) { const pool = bodyPool(colyn); api.keep('ground', ctx => drawFloorBlood(ctx, [pool])); }
+    api.ambient(true);
+    for (const L of api.lamps(f)) {   // 第 236 行讓燈一直亮著：這裡把計時放回去
+      L.flick = null; L.on = true;
+      L.blinkT = flickRand(FLICKER.blinkEvery); L.outT = flickRand(FLICKER.outEvery);
+    }
+  },
+  draw() {},
+};
+
+// 第 315 行：塔納疏導柯林：戰鬥用的疏導特效（js/attack-fx.js、js/soothe-fx-v2.js），顏色是塔納的「特效顏色」（角色資料頁），演 2.5 秒
+const TAANA_SOOTHE = { time: 2.5, blessAt: 1 };   // blessAt：開始幾秒後柯林身上出現光環（光環演 1.5 秒，剛好 2.5 秒結束）
+// 剛冒出來的光點（G.effects 第 from 個之後）：壽命不超過特效剩下的時間，到結束時剛好淡掉
+function endMotesBy(from, left) { for (const e of G.effects.slice(from)) if (e.mote && e.life > left) e.life = e.life0 = Math.max(.05, left); }
+STORY_KAI_FX['fx_mw43v02jhqn'] = {
+  time: TAANA_SOOTHE.time,
+  start(api) {
+    const taana = api.actor(2), colyn = api.actor(1), col = SOOTHE_COLORS.taana; if (!taana || !colyn || !col) return;
+    taana.dir = 'back';   // 治療的時候背對鏡頭，特效結束才轉回朝右（快轉時 after 馬上做，直接是朝右）
+    api.after(TAANA_SOOTHE.time, () => { taana.dir = 'right'; });
+    if (api.skipping) return;   // 快轉經過：光就不用演了
+    spawnSootheCast(taana, col, 3 * CELL, TAANA_SOOTHE.time);   // 塔納腳下的法陣、光柱、往外的光波
+    api.after(TAANA_SOOTHE.blessAt, () => {   // 柯林身上的光環、光帶、光點
+      const from = G.effects.length; spawnSootheEffect(colyn.x, colyn.y - 8, col, colyn);
+      endMotesBy(from, TAANA_SOOTHE.time - TAANA_SOOTHE.blessAt);
+    });
+  },
+  tick(api, dt, f) {
+    const taana = api.actor(2), colyn = api.actor(1), col = SOOTHE_MOTE_COLORS.taana;
+    if (!taana || !colyn || !col) return;
+    const from = G.effects.length; spawnSootheMotes([taana, colyn], col, dt, this);   // 疏導期間兩個人身邊飄小光點
+    endMotesBy(from, TAANA_SOOTHE.time - f.t);
+  },
+  draw() {},
+};
+
+// 第 338 行：柯林說完話，日光燈的嗡嗡聲 0.5 秒淡出到無聲，跳電聲也不再響（不用框範圍）
+STORY_KAI_FX['fx_mw45qk7xz2l'] = {
+  time: .5, noBox: true,
+  start(api) { api.ambient(false, .5); },
+  draw() {},
+};
+
 // 第 256 行：心跳聲在 0.8 秒內淡出到無聲（不用框範圍，下一行照常接著跑）
 STORY_KAI_FX['fx_mw3yf1j82i2'] = {
   time: .8, noBox: true,
@@ -125,22 +184,78 @@ function drawWallBlood(ctx, drips, t) {
   }
 }
 
-// 床上的血漬：每張床幾灘，位置固定（每次播都一樣，不會亂跳）
+// 床上的痕跡：白布上的血跡、怪物爪痕（每張床照順序用固定的亂數，每次播都一樣，不會亂跳）
+const BED_TILE = 'tile_mvmums35';   // 同伴床的素材（圖層裡還有地上的裂痕、灰塵，那些不畫）
+const BED_CLOTH = { x0: .2, x1: .82, y0: .37, y1: .74 };   // 白布在床的圖裡的範圍（比例）
 function bedBlood(stamps) {
-  let seed = 7;
-  const rnd = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
-  const ox = typeof OX !== 'undefined' ? OX : 0, oy = typeof OY !== 'undefined' ? OY : 0, C = typeof CELL !== 'undefined' ? CELL : 40;
-  const out = [];
+  const rnd = seededRandom(7), C = 40, ox = typeof OX !== 'undefined' ? OX : 0, oy = typeof OY !== 'undefined' ? OY : 0, out = [];
   for (const s of stamps) {
-    const t = typeof mapTileById === 'function' ? mapTileById(s.id) || {} : {}, w = (t.w || 1) * C, h = (t.h || 1) * C;
-    const x = ox + s.c * C + (s.ox || 0), y = oy + s.r * C + (s.oy || 0);
-    for (let i = 0, n = rnd() < .35 ? 0 : 1 + Math.floor(rnd() * 2); i < n; i++) {
-      const r = 3 + rnd() * 6, blobs = [];
-      for (let j = 0; j < 5; j++) blobs.push([(rnd() - .5) * r * 1.4, (rnd() - .5) * r * .9, r * (.35 + rnd() * .5)]);
-      out.push({ x: x + w * (.3 + rnd() * .4), y: y + h * (.35 + rnd() * .45), r, blobs, dark: rnd() < .5 });
+    if (s.id !== BED_TILE) continue;
+    const t = mapTileById(s.id) || {}, w = (t.w || 1) * C, h = (t.h || 1) * C, x = ox + s.c * C + (s.ox || 0), y = oy + s.r * C + (s.oy || 0);
+    const at = () => [x + w * (BED_CLOTH.x0 + rnd() * (BED_CLOTH.x1 - BED_CLOTH.x0)), y + h * (BED_CLOTH.y0 + rnd() * (BED_CLOTH.y1 - BED_CLOTH.y0))];
+    const bed = { blots: [], claws: [], cloth: [x + w * BED_CLOTH.x0, y + h * BED_CLOTH.y0, w * (BED_CLOTH.x1 - BED_CLOTH.x0), h * (BED_CLOTH.y1 - BED_CLOTH.y0)] };   // cloth：痕跡只畫在白布上
+    for (let i = 0, n = 2 + Math.floor(rnd() * 3); i < n; i++) {   // 血跡：每張床 2～4 灘
+      const [bx, by] = at(), r = 2.5 + rnd() * 6, blobs = [];
+      for (let j = 0; j < 5; j++) blobs.push([bx + (rnd() - .5) * r * 1.5, by + (rnd() - .5) * r * .8, r * (.3 + rnd() * .5)]);
+      bed.blots.push({ blobs, dark: rnd() < .5 });
     }
+    if (rnd() < .55) {   // 怪物爪痕：3～4 條平行、細細長長的抓破痕跡（風格參考 images/破損建築/floor-crack-fork.png，不要小石塊）
+      const [X, Y, W, H] = bed.cloth, cx = X + W * (.3 + rnd() * .4), cy = Y + H * (.35 + rnd() * .3), n = 3 + Math.floor(rnd() * 2), tilt = (rnd() < .5 ? -1 : 1) * (.35 + rnd() * .4), gap = 4 + rnd() * 1.5;
+      const inset = 2, fit = (mx, my, dx, dy) => {   // 從 (mx, my) 往兩邊各伸 (dx, dy)：超出白布就縮短，頭尾才不會被切平
+        const room = (c, d, a, b) => d ? Math.max(0, Math.min((b - inset - c) / Math.abs(d), (c - a - inset) / Math.abs(d))) : 1;
+        return Math.min(1, room(mx, dx, X, X + W), room(my, dy, Y, Y + H));
+      };
+      for (let i = 0; i < n; i++) {
+        const off = (i - (n - 1) / 2) * gap, l = 26 + rnd() * 16, mx = cx - Math.sin(tilt) * off + (rnd() - .5) * 4, my = cy + Math.cos(tilt) * off;
+        const s = fit(mx, my, Math.cos(tilt) * l / 2, Math.sin(tilt) * l / 2), dx = Math.cos(tilt) * l / 2 * s, dy = Math.sin(tilt) * l / 2 * s;
+        if (Math.hypot(dx, dy) < 5) continue;   // 太靠邊、放不下：這條不畫
+        bed.claws.push(slashShape(mx - dx, my - dy, mx + dx, my + dy, 1.5 + rnd() * .9, rnd));
+        if (rnd() < .6) {   // 小分岔（只往白布裡面長）
+          const k = .3 + rnd() * .4, fx = mx - dx + dx * 2 * k, fy = my - dy + dy * 2 * k, a = tilt + (rnd() < .5 ? -1 : 1) * (.5 + rnd() * .4), fl = 5 + rnd() * 5, ex = fx + Math.cos(a) * fl, ey = fy + Math.sin(a) * fl;
+          if (ex > X + inset && ex < X + W - inset && ey > Y + inset && ey < Y + H - inset) bed.claws.push(slashShape(fx, fy, ex, ey, .7, rnd));
+        }
+      }
+    }
+    out.push(bed);
   }
   return out;
+}
+// 一條抓破的痕跡：沿著路線稍微歪來歪去，中間最寬、頭尾都是尖的
+function slashShape(x0, y0, x1, y1, width, rnd) {
+  const len = Math.hypot(x1 - x0, y1 - y0) || 1, nx = -(y1 - y0) / len, ny = (x1 - x0) / len, steps = Math.max(3, Math.round(len / 4)), pts = [];
+  for (let i = 0; i <= steps; i++) {
+    const k = i / steps, wob = i && i < steps ? (rnd() - .5) * 1.6 : 0;
+    pts.push([x0 + (x1 - x0) * k + nx * wob, y0 + (y1 - y0) * k + ny * wob, Math.sin(k * Math.PI) ** .8 * width / 2]);
+  }
+  return { pts, nx, ny };
+}
+function slashPath(ctx, c, grow) {
+  ctx.beginPath();
+  c.pts.forEach(([x, y, w], i) => ctx[i ? 'lineTo' : 'moveTo'](x + c.nx * w * grow, y + c.ny * w * grow));
+  for (let i = c.pts.length - 1; i >= 0; i--) { const [x, y, w] = c.pts[i]; ctx.lineTo(x - c.nx * w * grow, y - c.ny * w * grow); }
+  ctx.closePath();
+}
+function drawBedMarks(ctx, beds) {
+  for (const b of beds) {
+    ctx.save(); ctx.beginPath(); ctx.rect(...b.cloth); ctx.clip();
+    for (const bl of b.blots) {
+      ctx.fillStyle = bl.dark ? '#4a0a0b' : '#6e1214';
+      ctx.beginPath(); for (const [x, y, r] of bl.blobs) { ctx.moveTo(x + r, y); ctx.ellipse(x, y, r, r * .7, 0, 0, Math.PI * 2); } ctx.fill();
+    }
+    for (const c of b.claws) {   // 爪痕：外面一圈暗紅（血滲開），中間深色的裂口
+      ctx.fillStyle = 'rgba(110,18,20,.55)'; slashPath(ctx, c, 1.7); ctx.fill();
+      ctx.fillStyle = '#1e0a0a'; slashPath(ctx, c, 1); ctx.fill();
+    }
+    ctx.restore();
+  }
+}
+
+// 柯林身體下的血灘：以他躺著的位置為中心，頭那一邊多一點（倒地順時針＝頭朝右）
+function bodyPool(a) {
+  const rnd = seededRandom(23), head = a.down === 'cw' ? 1 : a.down === 'ccw' ? -1 : 0, cx = a.x + head * 16, cy = a.y + 15, blobs = [], drops = [];
+  for (let i = 0; i < 10; i++) blobs.push([cx + (rnd() - .5) * 42, cy + (rnd() - .5) * 13, 6 + rnd() * 7]);
+  for (let i = 0; i < 6; i++) { const k = rnd() * 6.28; drops.push([cx + Math.cos(k) * (30 + rnd() * 9), cy + Math.sin(k) * (10 + rnd() * 6), .8 + rnd() * 1.3]); }
+  return { blobs, drops };
 }
 
 // 停屍間的紅光：整間房乘上暗紅色（中間最紅、邊緣淡掉），微微一明一暗；床上畫血漬
@@ -157,10 +272,5 @@ function drawMorgue(ctx, f, beds, k, t) {
   glow.addColorStop(0, 'rgba(255,40,40,1)'); glow.addColorStop(1, 'rgba(255,40,40,0)');
   ctx.fillStyle = glow; ctx.fillRect(-R, -R, R * 2, R * 2);
   ctx.restore();
-  ctx.save(); ctx.globalAlpha = k * .9;
-  for (const b of beds) {
-    ctx.fillStyle = b.dark ? '#4a0a0b' : '#6e1214';
-    ctx.beginPath(); for (const [dx, dy, r] of b.blobs) { ctx.moveTo(b.x + dx + r, b.y + dy); ctx.ellipse(b.x + dx, b.y + dy, r, r * .7, 0, 0, Math.PI * 2); } ctx.fill();
-  }
-  ctx.restore();
+  ctx.save(); ctx.globalAlpha = k * .9; drawBedMarks(ctx, beds); ctx.restore();
 }

@@ -48,6 +48,7 @@ const StoryKai = (() => {
   let flickerSaved = null;
   function storyFlicker(on) {
     if (typeof FLICKER === 'undefined') return;
+    FLICKER.silent = false; FLICKER.humFade = 0;   // 開始播、離開回憶：環境音都先恢復（特效可能把它關掉了）
     if (on && !flickerSaved) { flickerSaved = { outEvery: FLICKER.outEvery, outFor: FLICKER.outFor }; Object.assign(FLICKER, STORY_FLICKER); }
     else if (!on && flickerSaved) { Object.assign(FLICKER, flickerSaved); flickerSaved = null; }
   }
@@ -89,6 +90,10 @@ const StoryKai = (() => {
     // 走路的那幾張：有畫 <原本檔名>_hurt（例如 0001_Front-Walking01_hurt）就換，沒畫就照原本的圖
     for (const d of Object.keys(DIR_FILE)) set[d] = set[d].map((im, i) => (i && WALK_FILES[d][i - 1] && extraImage(a, WALK_FILES[d][i - 1] + '_hurt')) || im);
     return set;
+  }
+  function downEyeImage(a, set) {   // 倒地的眼睛：半閉、閉眼借用眨眼的圖（受傷中是流血的）；張眼或圖還沒載好＝null
+    const im = !a?.down ? null : a.downEye === 'half' ? set.blink?.[0] : a.downEye === 'closed' ? set.blink?.[2] : null;
+    return readyImage(im) ? im : null;
   }
   function sitImage(a) {   // 坐下：照現在的面向找坐下圖
     const base = DIR_FILE[a.dir] || DIR_FILE.front;
@@ -178,7 +183,7 @@ const StoryKai = (() => {
     el('dialoguePortrait').style.filter = '';
     if (cast && !cast.image) {
       const set = (a?.hurt && hurtSet(a)) || (a ? a.set : sprites(cast.sprite));   // 受傷中：頭像也換成正面流血的差分
-      el('dialoguePortrait').src = set.front[0].src; el('dialoguePortrait').alt = name;
+      el('dialoguePortrait').src = (downEyeImage(a, set) || set.front[0]).src; el('dialoguePortrait').alt = name;   // 倒地半閉、閉眼：頭像也同樣的表情
       el('dialoguePortraitFrame').dataset.char = String(cast.sprite).replace(/_[A-Z]$/, '');
     }
     const b = box(); b.classList.remove('story-kai-shake');
@@ -536,7 +541,7 @@ const StoryKai = (() => {
   }
   // ---- 道具：背包裡的物品放在地上（圖跟背包一樣），出現、消失時淡入淡出 ----
   // 可以當道具擺的地圖素材：彈藥箱、日光燈（日光燈跟地圖上的一樣閃、跳電、有嗡嗡聲，js/flicker-light.js）——編輯器的 PROP_TILES 是同一份
-  const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light'], FLICKER_PROP = 'tile_bg_electric_light';
+  const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light', 'tile_eoc_first_aid_bag'], FLICKER_PROP = 'tile_bg_electric_light';
   function propDef(id) {
     if (PROP_TILES.includes(id)) { const t = (typeof SHARED_TILES !== 'undefined' ? SHARED_TILES : []).find(x => x.id === id); return t ? { image: t.file, tile: [t.w || 1, t.h || 1] } : null; }
     return typeof itemById === 'function' ? itemById(id) : null;
@@ -647,7 +652,10 @@ const StoryKai = (() => {
     for (const a of state.actors) tickActor(a, dt);
     for (const e of [...state.monsters]) tickMonster(e, dt);
     for (const it of [...state.items]) tickItem(it, dt);
-    for (const f of state.fx) f.t += dt;
+    for (const f of state.fx) {
+      f.t += dt;
+      if (f.def?.tick) try { f.def.tick(fxApi, dt, fxInfo(f)); } catch (e) { console.warn('特效出錯：' + f.step.id, e); f.def = null; }   // 特效播的時候每一幀要做的事
+    }
     for (const j of state.fxLater.filter(j => j.at <= state.time)) { state.fxLater.splice(state.fxLater.indexOf(j), 1); try { j.fn(); } catch (e) { console.warn('特效出錯', e); } }
     for (const b of state.blood) if (b.t < .12) b.t += dt;
     state.fx = state.fx.filter(f => f.t < fxTime(f));
@@ -738,8 +746,7 @@ const StoryKai = (() => {
     const weapon = a.armed && !a.down && MELEE_WEAPON[a.cast.char];
     const pose = { ...a, sitting: null, gunT: a.armed && !weapon ? 1 : 0, meleeSwing: weapon ? { angle: FACE_ANGLE[a.dir] ?? Math.PI / 2, age: 0, wind: 1, impact: 2, duration: 3 } : null };
     const set = (a.hurt && hurtSet(a)) || a.set;
-    const downEye = a.downEye === 'half' ? set.blink?.[0] : a.downEye === 'closed' ? set.blink?.[2] : null;   // 倒地的眼睛：借用眨眼的圖（受傷中是流血的）
-    let img = a.down ? (readyImage(downEye) ? downEye : set.front?.[0]) : (a.sit && !a.moving && !a.armed && sitImage(a)) || pickCharacterFrame(set, pose);   // 倒地：用正面那張（受傷中就是流血的），下面再整個轉 90 度
+    let img = a.down ? downEyeImage(a, set) || set.front?.[0] : (a.sit && !a.moving && !a.armed && sitImage(a)) || pickCharacterFrame(set, pose);   // 倒地：用正面那張（受傷中就是流血的），下面再整個轉 90 度
     if (!readyImage(img)) img = a.set.front?.[0];
     if (!readyImage(img)) return;
     const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * a.tremble : 0;
@@ -799,7 +806,12 @@ const StoryKai = (() => {
       for (const k of cells) show ? G.mapDestroyed.delete(lid + ':' + k) : G.mapDestroyed.add(lid + ':' + k);
     },
     black(to, sec = 0) { fade(state.black, to, sec); },   // 黑幕（跟「黑幕淡入／淡出」同一層，對白框在它上面）
-    light(x, y, r) { const L = { x, y, r }; state.lights.push(L); return L; },   // 加一個不會動的光源（像素）
+    light(x, y, r) { const L = { x, y, r, fx: true }; state.lights.push(L); return L; },   // 加一個不會動的光源（像素）
+    stopAllSounds() { if (state.skipping) state.skipLoops = []; else stopSound(true); },   // 停掉所有正在播的音效（背景音樂不算）
+    ambient(on, fadeSec = 0) { if (typeof FLICKER !== 'undefined') { FLICKER.silent = !on; FLICKER.humFade = on ? 0 : fadeSec; } },   // 環境音（日光燈的嗡嗡聲、跳電聲）開關；fadeSec＝嗡嗡聲幾秒淡出
+    clearFx() {   // 特效留下來的東西全部拿掉：一直畫著的畫面、特效加的光、還沒做的事、地上的血
+      state.fxKeep = []; state.fxLater = []; state.blood = []; state.lights = state.lights.filter(L => !L.fx);
+    },
     // 之後每一幀都畫：draw(ctx, 過了幾秒)。layer：'ground'＝地上（人下面）、'world'＝場景上面、'top'＝黑幕上面；有 sortY＝跟牆、人一起照上下排（貼在牆上的東西）
     keep(layer, draw, sortY) { state.fxKeep.push({ layer, draw, sortY, t0: state.time }); },
     fadeLoop(src, sec) { if (state.skipping) state.skipLoops = state.skipLoops.filter(x => !isLoopOf(src)(x)); else stopLoops(src, sec); },   // 某個循環音效幾秒內淡出到無聲
@@ -829,10 +841,11 @@ const StoryKai = (() => {
     drawMapGround(ctx);
     drawBlood();   // 地上的血：在人、怪物下面
     drawFx('ground');
+    if (typeof drawSootheGroundV2 === 'function') drawSootheGroundV2(ctx);   // 疏導的法陣、光柱：跟戰鬥一樣畫在人的下面（js/soothe-fx-v2.js）
     const sortables = []; collectMapOccluders(ctx, sortables);
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.y + 17, draw: () => drawActor(a) });
     for (const e of state.monsters) sortables.push({ y: e.y + 13, draw: () => drawMonster(e) });
-    for (const it of state.items) sortables.push({ y: it.y + 10, draw: () => drawItem(it) });
+    for (const it of state.items) sortables.push({ y: it.y + (it.tile ? 0 : 10), draw: () => drawItem(it) });   // 地圖素材的道具：位置點就是圖的下緣，直接用它排前後
     for (const kp of state.fxKeep) if (kp.sortY != null) sortables.push({ y: kp.sortY, draw: () => { ctx.save(); kp.draw(ctx, state.time - kp.t0); ctx.restore(); } });   // 特效貼在牆上的東西
     sortables.sort((p, q) => p.y - q.y).forEach(s => s.draw());
     drawMapTop(ctx);

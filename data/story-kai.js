@@ -8,7 +8,7 @@ const STORY_KAI = {
     "cast": [{ "no": 1, "char": "colyn", "sprite": "colyn_B" }, { "no": 2, "char": "taana", "sprite": "taana_B" }],
     "steps": [
       { "do": "map", "map": "map_mw0yxwzb" },
-      { "do": "sfx", "src": "音效素材/war-sound-effect-179574.mp3", "vol": 40, "from": 5018, "to": 16551 },
+      { "do": "sfx", "src": "音效素材/war-sound-effect-179574.mp3", "vol": 30, "from": 5612, "to": 16551 },
       {
         "do": "fx",
         "id": "fx_mw3x3w6o81z",
@@ -27,6 +27,7 @@ const STORY_KAI = {
       { "do": "dark", "on": true },
       { "do": "say", "who": "", "text": "……", "shake": false },
       { "do": "say", "who": "", "text": "聲音是一層一層剝落的。", "shake": false },
+      { "do": "sfx", "src": "音效素材/chiiri-monster-13-337347.mp3", "vol": 30, "from": 2536, "to": 18016, "speed": 4 },
       { "do": "say", "who": "", "text": "最先遠去的是槍響，悶悶地，像隔著好幾道牆有人在敲門。", "shake": false },
       { "do": "say", "who": "", "text": "接著是那些叫聲：人的叫聲短促、破碎，帶著喘；怪物的叫聲則拖得很長，長到不像是從喉嚨裡發出來的，而像是走廊本身在哀鳴。", "shake": false },
       { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100, "loop": true },
@@ -62,7 +63,7 @@ const STORY_KAI = {
       { "do": "act", "who": 1, "act": "sit", "on": false },
       { "do": "act", "who": 1, "act": "hop", "on": false },
       { "do": "sfx", "src": "音效素材/對話.mp3", "vol": 100 },
-      { "do": "say", "who": 1, "text": "不行……！我得快點回到大家身邊！", "shake": true },
+      { "do": "say", "who": 1, "text": "不行……！我得快點回到大家身邊幫忙！", "shake": true },
       { "do": "wait", "ms": 800 },
       { "do": "camMove", "at": [13.8, 5.5], "w": 20, "ms": 1200 },
       { "do": "act", "who": 1, "act": "walk" },
@@ -240,7 +241,7 @@ const STORY_KAI = {
       { "do": "move", "who": 1, "at": [32.9, 8.5], "ms": 1000 },
       { "do": "sfxStop", "loop": true, "src": "音效素材/walking-on-concrete.mp3" },
       { "do": "sfx", "src": "音效素材/心跳.mp3", "vol": 70, "loop": true },
-      { "do": "act", "who": 1, "act": "shiver", "on": true, "lv": 1 },
+      { "do": "act", "who": 1, "act": "shiver", "on": true, "lv": 2 },
       { "do": "wait", "ms": 800 },
       { "do": "say", "who": 1, "text": "剛才那是什麼……", "shake": true },
       { "do": "camShake", "ms": 300, "lv": 5 },
@@ -290,6 +291,18 @@ const STORY_KAI = {
             "from": "claude",
             "text": "做好了：走道上加了幾灘血漬，旁邊有小血滴（畫在人下面，走過去不會蓋到人）。裡面那面牆、下面那面牆都有血從上往下流，避開了門；一開始就流了一部分，之後慢慢往下、越流越慢。這些跟床一樣，燈在閃的時候就已經在那裡了，也會被暗紅色的光罩住。",
             "at": "2026-11-06 04:15"
+          },
+          { "from": "me", "text": "床上的白布的血跡再多一點點，也可以有一些怪物爪痕和人類抓皺布的痕跡。", "at": "2026-11-06 06:53" },
+          { "from": "claude", "text": "做好了：每張床的白布上有 2～4 灘血跡（比之前多），大約一半的床有 3～4 條平行的怪物爪痕，大約三分之二的床有人抓皺布留下的皺褶。每次播位置都一樣。", "at": "2026-11-06 06:58" },
+          {
+            "from": "me",
+            "text": "取消皺褶，爪痕可以參考D:\\TUDRC\\images\\破損建築 的floor-crack-fork.png的風格（不要旁邊的小石塊），細細長長的抓破痕跡，頭尾都是尖的。",
+            "at": "2026-11-06 07:19"
+          },
+          {
+            "from": "claude",
+            "text": "改好了：皺褶拿掉了。爪痕改成 floor-crack-fork.png 那種風格、沒有小石塊：3～4 條平行、細細長長的抓破痕跡，路線稍微歪來歪去，頭尾都是尖的，有些帶小分岔，外圍有一點滲開的暗紅。爪痕和血跡都只畫在白布上。",
+            "at": "2026-11-06 07:25"
           }
         ]
       },
@@ -309,6 +322,7 @@ const STORY_KAI = {
       { "do": "move", "who": 1, "at": [33.5, 10.2], "ms": 1200, "face": "right" },
       { "do": "sfxStop", "loop": true, "src": "音效素材/walking-on-concrete.mp3" },
       { "do": "wait", "ms": 700 },
+      { "do": "say", "who": 1, "text": "每個人……都被殺死了……", "shake": false },
       { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100, "speed": 1.3, "from": 2923, "to": 8098, "loop": true },
       { "do": "move", "who": 1, "at": [32.8, 8.6], "ms": 1200, "face": "back" },
       { "do": "sfxStop", "loop": true, "src": "音效素材/walking-on-concrete.mp3" },
@@ -327,9 +341,9 @@ const STORY_KAI = {
       { "do": "move", "who": 1, "at": [32.7, 6.2], "ms": 1500, "face": "back" },
       { "do": "sfxStop", "all": true },
       { "do": "move", "who": 1, "at": [32.7, 6.2], "ms": 0, "face": "front" },
-      { "do": "say", "who": 1, "text": "你們覺得只有我活著不公平嗎……？", "shake": false },
+      { "do": "say", "who": 1, "text": "你們是不是覺得，只有我活著很不公平……？", "shake": false },
       { "do": "wait", "ms": 500 },
-      { "do": "move", "who": 1, "at": [32.9, 6.2], "ms": 0, "face": "left" },
+      { "do": "move", "who": 1, "at": [32.8, 6.2], "ms": 0, "face": "left" },
       { "do": "camMove", "at": [32.8, 7.3], "w": 17.4, "ms": 1500 },
       { "do": "sfx", "src": "音效素材/freesound_community-rough-cloth-43926.mp3", "vol": 70, "from": 1331, "to": 2505, "speed": 1.5 },
       { "do": "act", "who": 1, "act": "sit", "on": true },
@@ -344,8 +358,21 @@ const STORY_KAI = {
       { "do": "sfx", "src": "音效素材/freesound_community-rough-cloth-43926.mp3", "vol": 70, "from": 1331, "to": 2505, "speed": 1.5 },
       { "do": "act", "who": 1, "act": "down", "on": true, "cw": true, "eye": "half" },
       { "do": "wait", "ms": 3000 },
-      { "do": "camMove", "at": [32.8, 6.6], "w": 11.4, "ms": 1500 },
+      { "do": "camMove", "at": [32.8, 6.6], "w": 11.4, "ms": 2000 },
       { "do": "blackIn", "ms": 1500 },
+      {
+        "do": "fx",
+        "id": "fx_mw42huykaqf",
+        "box": null,
+        "chat": [
+          { "from": "me", "text": "這裡停止所有音效，連背景的嗡嗡聲還有電燈聲也是，直到我再下特效指示恢復為止。", "at": "2026-11-06 05:39" },
+          {
+            "from": "claude",
+            "text": "做好了：播到這一行，正在播的音效全部停掉，日光燈的嗡嗡聲、跳電聲也不出聲，燈的閃爍照舊，一直到第 303 行才恢復。背景音樂沒有停（第 289 行的「停止背景音樂」會把它停掉）；這一行後面自己加的音效和開門聲還是會播。這個特效不用框範圍。",
+            "at": "2026-11-06 05:53"
+          }
+        ]
+      },
       { "do": "act", "who": 1, "act": "down", "on": true, "cw": true, "eye": "closed" },
       { "do": "wait", "ms": 2500 },
       { "do": "door", "at": [31.8, 5], "open": true },
@@ -353,20 +380,99 @@ const STORY_KAI = {
       { "do": "sfx", "src": "音效素材/關門.mp3", "vol": 30 },
       { "do": "wait", "ms": 300 },
       { "do": "sfxStop" },
-      { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100, "from": 2923, "to": 4788, "speed": 1.5, "loop": true },
+      { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100, "from": 2923, "to": 4351, "speed": 1.5, "loop": true },
       { "do": "wait", "ms": 1000 },
       { "do": "sfxStop", "loop": true, "src": "音效素材/walking-on-concrete.mp3" },
+      { "do": "show", "who": 2, "at": [31.2, 5.7], "face": "front" },
+      { "do": "ishow", "item": 1, "id": "tile_eoc_first_aid_bag", "at": [30.9, 6] },
       { "do": "say", "who": 666, "text": "喂。", "shake": false },
       { "do": "say", "who": 666, "text": "起來。你還沒有死。", "shake": false },
       { "do": "camMove", "at": [32.5, 6.1], "w": 6.2, "ms": 0 },
-      { "do": "camMove", "at": [32.5, 6.1], "w": 9.2, "ms": 3000 },
       { "do": "act", "who": 1, "act": "down", "on": true, "cw": true, "eye": "closed" },
-      { "do": "blackOut", "ms": 1000 },
-      { "do": "act", "who": 1, "act": "down", "on": false, "cw": true, "eye": "closed" },
-      { "do": "sfx", "src": "音效素材/freesound_community-rough-cloth-43926.mp3", "vol": 70, "from": 1331, "to": 2505, "speed": 1.5 },
-      { "do": "wait", "ms": 2000 },
-      { "do": "act", "who": 1, "act": "sit", "on": true },
-      { "do": "wait", "ms": 5000 }
+      { "do": "camMove", "at": [32.5, 6.1], "w": 11, "ms": 3000 },
+      {
+        "do": "fx",
+        "id": "fx_mw42sf67get",
+        "box": [27.6, 2, 10.3, 13.6],
+        "chat": [
+          { "from": "me", "text": "原本的紅光特效、血漬全都消失。「劇情地圖編輯器」裡的「同伴床」圖層完全隱藏關閉起來。原本的背景嗡嗡聲和電燈跳電聲重新開始播放。回到完全沒有畫面特效的樣子。", "at": "2026-11-06 05:48" },
+          {
+            "from": "claude",
+            "text": "做好了：紅光、床和牆上的血、地上的血漬（包括柯林滴的）全部消失，特效加的那道光也拿掉；「同伴床」圖層藏起來；嗡嗡聲、跳電聲恢復，燈也回到平常會閃、會跳電的樣子。這些都在黑幕底下一次換好，黑幕淡出時就是乾淨的房間。柯林的滴血（第 018 行）還開著，所以之後地上還會有新的血；鏡頭晃動、暗角、後室黑幕是你自己的指令，我沒有動。",
+            "at": "2026-11-06 05:53"
+          },
+          { "from": "me", "text": "請在柯林的身體下畫血灘。", "at": "2026-11-06 06:51" },
+          { "from": "me", "text": "在黑幕淡出前就必須有。", "at": "2026-11-06 06:52" },
+          {
+            "from": "claude",
+            "text": "做好了：這一行在第 304 行黑幕淡出之前，清掉紅光和血漬後，就在柯林身體下畫一灘血，頭那一邊多一點。黑幕一淡出就看得到，畫在人下面；之後一直留到劇情結束，柯林起身也不會消失。",
+            "at": "2026-11-06 06:58"
+          },
+          { "from": "me", "text": "血跡太大灘了，大概現在的一半就好，主要在柯林上半身偏右", "at": "2026-11-06 07:10" },
+          { "from": "claude", "text": "改好了：血灘縮成大約一半，中心往柯林上半身（頭那一邊，偏右）移。", "at": "2026-11-06 07:20" }
+        ]
+      },
+      { "do": "blackOut", "ms": 2500 },
+      { "do": "wait", "ms": 2200 },
+      { "do": "sfx", "src": "音效素材/walking-on-concrete.mp3", "vol": 100, "from": 2923, "to": 4351, "speed": 1.5, "loop": true },
+      { "do": "move", "who": 2, "at": [31.2, 6.2], "ms": 800, "face": "front" },
+      { "do": "move", "who": 2, "at": [31.9, 6.4], "ms": 800, "face": "right" },
+      { "do": "act", "who": 2, "act": "light", "on": true, "r": 3 },
+      { "do": "sfxStop", "loop": true, "src": "音效素材/walking-on-concrete.mp3" },
+      { "do": "wait", "ms": 1000 },
+      { "do": "act", "who": 1, "act": "down", "on": true, "cw": true, "eye": "half" },
+      { "do": "act", "who": 1, "act": "shiver", "on": true, "lv": 1 },
+      { "do": "say", "who": 1, "text": "……你是誰？", "shake": false },
+      { "do": "sfx", "src": "music/基地音樂/snowfall-music-box.mp3", "vol": 70, "from": 20240, "to": 82312, "loop": true },
+      { "do": "say", "who": 1, "text": "別管我，我已經沒用了……", "shake": false },
+      { "do": "act", "who": 1, "act": "down", "on": true, "cw": true, "eye": "closed" },
+      { "do": "camMove", "at": [32.1, 6.4], "w": 8.9, "ms": 800 },
+      { "do": "say", "who": 2, "text": "你還有用。", "shake": false },
+      { "do": "wait", "ms": 700 },
+      { "do": "act", "who": 1, "act": "down", "on": true, "cw": true, "eye": "half" },
+      { "do": "say", "who": 2, "text": "至少現在，你得活下去。", "shake": false },
+      {
+        "do": "fx",
+        "id": "fx_mw43v02jhqn",
+        "box": [29.9, 4, 4.8, 4.4],
+        "chat": [
+          { "from": "me", "text": "塔納對柯林進行治療，發出在戰鬥時的疏導特效藍光，我記得我有設訂塔納的特效的技能顏色色票。特效維持2500ms後結束。", "at": "2026-11-06 06:19" },
+          {
+            "from": "claude",
+            "text": "做好了：用戰鬥時同一套疏導特效，顏色是塔納在角色資料頁的特效顏色 #5266ff。塔納腳下出現法陣和光柱、光波往外擴散，兩個人身邊一直飄小光點；開始 1 秒後柯林身上出現光環和光帶，全部在 2.5 秒結束。這一行不會擋住後面的行，第 318 行的對白會在特效快結束時出現。",
+            "at": "2026-11-06 06:24"
+          },
+          { "from": "me", "text": "塔納治療時請用正面閉眼的立繪，特效結束後回到朝右睜眼。", "at": "2026-11-06 06:32" },
+          { "from": "me", "text": "正面閉眼改成背面，然後依然特效結束後回到朝右睜眼。", "at": "2026-11-06 06:33" },
+          { "from": "claude", "text": "做好了：這個特效一開始塔納就轉成背面，2.5 秒特效結束時轉回朝右（睜眼的側面圖）。從後面的行開始預覽時，她會直接是朝右。", "at": "2026-11-06 06:42" }
+        ]
+      },
+      { "do": "camMove", "at": [32.4, 6.2], "w": 7.5, "ms": 1000 },
+      { "do": "act", "who": 1, "act": "shiver", "on": false, "lv": 2 },
+      { "do": "sfx", "src": "Sound effects/玩家/疏導2.mp3", "vol": 100, "speed": 0.75 },
+      { "do": "wait", "ms": 1500 },
+      { "do": "camMove", "at": [32.9, 6.2], "w": 6.2, "ms": 2000 },
+      { "do": "wait", "ms": 1500 },
+      { "do": "say", "who": 1, "text": "……我還……", "shake": false },
+      { "do": "camMove", "at": [32.8, 6.2], "w": 5.7, "ms": 3000 },
+      { "do": "blackIn", "ms": 3000 },
+      { "do": "act", "who": 1, "act": "down", "on": true, "cw": true, "eye": "closed" },
+      { "do": "wait", "ms": 1500 },
+      { "do": "say", "who": 1, "text": "……有用……", "shake": false },
+      { "do": "wait", "ms": 1000 },
+      {
+        "do": "fx",
+        "id": "fx_mw45qk7xz2l",
+        "box": null,
+        "chat": [
+          { "from": "me", "text": "柯林說完台詞後停止播放背景嗡嗡聲和燈管聲，用500ms淡出到無聲。", "at": "2026-11-06 07:09" },
+          { "from": "claude", "text": "做好了：播到這一行，日光燈的嗡嗡聲在 0.5 秒內淡出到無聲；跳電的「啪」聲是一瞬間的聲音，這一行之後就不再響。之後一直安靜到劇情結束。這個特效不用框範圍。", "at": "2026-11-06 07:20" }
+        ]
+      },
+      { "do": "say", "who": 0, "text": "簡短到像是指令的話語，讓冷冽的房間多了一點生機。", "shake": false },
+      { "do": "say", "who": 0, "text": "即便只為了一個素未謀面的人……活下去吧。", "shake": false },
+      { "do": "say", "who": 0, "text": "他需要我。", "shake": false },
+      { "do": "end", "title": "" }
     ]
   }
 };
