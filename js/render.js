@@ -1359,6 +1359,7 @@ function drawWorldEffects() {
   if (typeof drawLightningV2 === 'function') drawLightningV2(ctx);   // 雷電特效 V2（js/lightning-fx-v2.js）
   if (typeof drawMeleeV2 === 'function') drawMeleeV2(ctx);   // 近戰特效 V2（js/melee-fx-v2.js）
   if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
+  if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];

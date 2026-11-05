@@ -136,14 +136,20 @@ function fireFlare(p, aim) {
 
 // ---- 照明彈：飛行、燃燒（每幀由 game.js 的 update 呼叫）----
 function updateFlares(dt) {
+  const fxV2 = typeof FLARE_FX_VERSION !== 'undefined' && FLARE_FX_VERSION === 2;   // 照明彈 V2：外觀換成 js/flare-fx-v2.js（玩法不變）
+  if (fxV2) updateFlareV2Puffs(dt);
   if (G.flareShots && G.flareShots.length) {
     for (const s of G.flareShots) {
       s.t += dt;
       if (s.t >= s.T) {   // 落地：開始燃燒
         (G.flares = G.flares || []).push({ x: s.x1, y: s.y1, t: FLARE.burn, emberT: 0, seed: Math.random() * 10 });
+        if (fxV2) flareV2Land(G.flares[G.flares.length - 1]);   // V2：落地一閃、火花濺開
         if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(s.x1, s.y1, 6);   // 照明彈落在順順宮帽上：打開帽子
         if (typeof sfxAt === 'function') sfxAt('hitFlare', s.x1, s.y1, .35, 'flare-land');
-      } else if (Math.random() < .6) {   // 飛行中拖出火星
+      } else if (fxV2) {   // V2：飛行中拖一條煙
+        const k = s.t / s.T;
+        if (Math.random() < FLARE_FX_V2.trail * dt) flareV2Trail(s.x0 + (s.x1 - s.x0) * k, s.y0 + (s.y1 - s.y0) * k);
+      } else if (Math.random() < .6) {   // 飛行中拖出火星（V1）
         const k = s.t / s.T, x = s.x0 + (s.x1 - s.x0) * k, y = s.y0 + (s.y1 - s.y0) * k;
         G.effects.push({ ember: true, spark: true, x, y, vx: (Math.random() - .5) * 30, vy: (Math.random() - .5) * 30, r: 1.2 + Math.random(), life: .3, life0: .3, color: '#ffb38a' });
       }
@@ -153,6 +159,7 @@ function updateFlares(dt) {
   if (G.flares && G.flares.length) {
     for (const f of G.flares) {
       f.t -= dt; f.emberT -= dt;
+      if (fxV2) { if (f.t > .3) flareV2Update(f, dt, flareLevel(f)); continue; }   // V2：噴火花、冒粉紅濃煙
       if (f.emberT <= 0 && f.t > .3) {   // 往上飄的紅色火星＋淡淡白煙
         f.emberT = .05 + Math.random() * .06;
         G.effects.push({ ember: true, x: f.x + (Math.random() - .5) * 4, y: f.y - 6, vx: (Math.random() - .5) * 18, vy: -(20 + Math.random() * 30),
@@ -186,6 +193,7 @@ function drawFlares(ctx) {   // 地上的照明棒（畫在角色下面）
 }
 function drawFlareShots(ctx) {   // 飛行中的照明彈（畫在角色上面）
   for (const s of (G.flareShots || [])) {
+    if (typeof FLARE_FX_VERSION !== 'undefined' && FLARE_FX_VERSION === 2) { drawFlareV2Shot(ctx, s); continue; }   // V2（js/flare-fx-v2.js）
     const k = Math.min(1, s.t / s.T), x = s.x0 + (s.x1 - s.x0) * k, y = s.y0 + (s.y1 - s.y0) * k;
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     // 拖尾：往回拉一小段亮線，看起來是高速直射
@@ -204,6 +212,7 @@ function drawFlareShots(ctx) {   // 飛行中的照明彈（畫在角色上面�
 function drawFlareGlow(ctx) {   // 紅橘色光暈與火焰（畫在黑幕上面，才看得出在發光）
   for (const f of (G.flares || [])) {
     const k = flareLevel(f); if (k <= .02) continue;
+    if (typeof FLARE_FX_VERSION !== 'undefined' && FLARE_FX_VERSION === 2) { drawFlareV2Glow(ctx, f, k); continue; }   // V2：呼吸的光、跳動的火焰、噴出的火花（js/flare-fx-v2.js）
     ctx.save(); ctx.globalCompositeOperation = 'lighter';
     const g = ctx.createRadialGradient(f.x, f.y - 4, 0, f.x, f.y - 4, 70);
     g.addColorStop(0, `rgba(255,170,130,${(.45 * k).toFixed(3)})`); g.addColorStop(.3, `rgba(255,90,60,${(.18 * k).toFixed(3)})`); g.addColorStop(1, 'rgba(255,60,40,0)');
