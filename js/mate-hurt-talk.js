@@ -23,6 +23,8 @@ const MATE_HURT_KEYS = {
   rooted: 3,      // 被絲瓜小姐的藤蔓纏住
   slammed: 3,     // 被葫蘆猴泰山壓頂砸到
   rammed: 3,      // 被鳥頭人（含鳥頭大隊長）衝撞撞到
+  vineGrab: 3,    // 被森林藤蔓纏住拉上去（js/vines.js）
+  vineLand: 3,    // 被藤蔓丟下來摔在地上（js/vines.js）
   down: 4,        // 倒下（失去戰鬥能力）
   swallowed: 5,   // 被虱目魚小子吞掉
 };

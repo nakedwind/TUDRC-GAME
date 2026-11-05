@@ -144,7 +144,7 @@ function vineGrab(v, a, isPlayer) {
     topH: (a.y - cam.y) + 110 });   // 拉到畫面上緣外面
   a.vineCap = true; a.dashT = 0;
   if (isPlayer) { flash('被藤蔓抓住了！', a.x, a.y - 56, '#9fe07a', .9); addShake(3); }
-  else sentryStatus(a, '被藤蔓抓住了！', '#9fe07a', true);
+  else if (!(typeof mateHurtSay === 'function' && mateHurtSay(a, 'vineGrab'))) sentryStatus(a, '被藤蔓抓住了！', '#9fe07a', true);   // 對話編輯器「被森林藤蔓抓走」；沒填台詞就照舊跳狀態字
   sfxAt('vineGrab', a.x, a.y, .8);
 }
 
@@ -179,7 +179,10 @@ function vineLand(a, cap) {
   a.vineLieInstant = true; a.vineBounced = false;
   if (!cap.bounces) G.effects.push({ ring: true, x: a.x, y: a.y + 14, r: 6, r2: 30, life: .35, life0: .35, color: '#d8dee6' });
   a.dir = 'front'; a.moving = false; a.anim = 0;   // 正面躺下（閉眼圖是正面的）
-  if (!cap.isPlayer) { a.navPath = null; a.navGoal = null; a.target = null; }   // 落地不震動畫面
+  if (!cap.isPlayer) {
+    a.navPath = null; a.navGoal = null; a.target = null;
+    if (typeof mateHurtSay === 'function') { if (a.mateHurt) a.mateHurt.hp = a.hp; mateHurtSay(a, 'vineLand'); }   // 對話編輯器「被藤蔓丟下來」（先記住摔完的血量，免得又喊一般被打）
+  }   // 落地不震動畫面
   if (!cap.bounces) { sfxAt('vineLand', a.x, a.y, cap.isPlayer ? .8 : .55); vineHitSound(cap); }
 }
 

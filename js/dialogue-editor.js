@@ -40,6 +40,8 @@ const SITUATIONS = [
   { group: '戰鬥中・被怪物攻擊', key: 'rooted', label: '被絲瓜藤纏住', when: '絲瓜小姐的藤蔓從地下冒出來、把他纏住時。' },
   { group: '戰鬥中・被怪物攻擊', key: 'slammed', label: '被葫蘆猴壓到', when: '被葫蘆猴的泰山壓頂砸到時。' },
   { group: '戰鬥中・被怪物攻擊', key: 'rammed', label: '被鳥頭人撞飛', when: '被鳥頭人（包括鳥頭大隊長）衝撞撞到時（雷德舉盾頂住不算）。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'vineGrab', label: '被森林藤蔓抓走', when: '碰到森林裡垂下來的藤蔓、被纏住拉上去時（泡泡留在被抓的地方，人被拉走就消失）。' },
+  { group: '戰鬥中・被怪物攻擊', key: 'vineLand', label: '被藤蔓丟下來', when: '被藤蔓從上面丟下來、摔在地上躺著頭暈時。' },
   { group: '戰鬥中・被怪物攻擊', key: 'confusedAttack', label: '混亂時打到自己人', name: '被他打到的人', when: '吸了人面蝶的混亂鱗粉、打到隊友或部隊長時說一句（每 <b>5 秒</b>最多一次）。' },
   { group: '戰鬥中・被怪物攻擊', key: 'confusedHit', label: '被混亂的隊友打到', name: true, when: '被吸了混亂鱗粉的隊友打到時（取代「被暴走的隊友打到」那句，每 <b>4 秒</b>最多一次）。' },
   { group: '汙染與暴走', key: 'taintWarn', label: '瀕臨暴走', when: '汙染超過 <b>85</b> 時說一句，之後沒人疏導，每 <b>8～12 秒</b>再說一句。' },
@@ -70,7 +72,7 @@ const RAGE_FIELDS = [
 ];
 // 可以收禮的角色（data/gifts.js 的 GIFT_PREFS）都有「送禮與委託」這幾格
 // 被怪物攻擊時的台詞（js/mate-hurt-talk.js）：出勤隊員都有這幾格
-const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed', 'confusedAttack', 'confusedHit'];
+const MATE_HURT_SITUATIONS = ['hurt', 'lowHp', 'down', 'swallowed', 'rooted', 'slammed', 'rammed', 'vineGrab', 'vineLand', 'confusedAttack', 'confusedHit'];
 const GIFT_SITUATIONS = ['giftLove', 'giftLike', 'giftNormal', 'giftDislike', 'giftCostume', 'giftAfter', 'giftRefuse', 'requestAsk', 'requestReward'];
 const SOOTHERS = { winter: '溫特', eldrin: '艾德林', chris: '克莉思' };
 const KIND_LABEL = { sentinel: '哨兵', guide: '嚮導', support: '非戰鬥人員', player: '玩家' };
