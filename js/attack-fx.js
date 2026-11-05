@@ -433,6 +433,7 @@ function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
 }
 function spawnFlameBurst(x, y, scale = 1) {
   addLightFlash('flame', x, y, scale);
+  if (typeof FIRE_FX_VERSION !== 'undefined' && FIRE_FX_VERSION === 2) { fireV2Burst(x, y, scale); return; }   // 火焰 V2：營火畫法（js/fire-fx-v2.js）；下面是原本畫法（V1）
   const L = 0.5, n = scale > 1.5 ? 6 : 4, tongues = [];   // 大招火舌更多
   for (let i = 0; i < n; i++) {
     const center = Math.pow(1 - Math.abs(i - (n - 1) / 2) / ((n - 1) / 2), 1.4);   // 中間主導

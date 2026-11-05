@@ -486,7 +486,10 @@ function drawEnemy(e) {
     ctx.fillStyle = '#e3c8ff'; ctx.font = 'bold 10px sans-serif'; ctx.textAlign = 'center';
     ctx.fillText(SLIME_VARIANTS.giant.name, e.x, barY - 4);
   }
-  if (e.burnT > 0) { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }
+  if (e.burnT > 0) {
+    if (typeof FIRE_FX_VERSION !== 'undefined' && FIRE_FX_VERSION === 2) drawBurnV2(ctx, e, size);   // 火焰 V2：身上冒小火舌（js/fire-fx-v2.js）
+    else { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }   // 原本畫法（V1）：腳下橘色圓框
+  }
   if (e.stunT > 0 && e.behavior !== 'burrow') { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.sleepT > 0 ? '睡著' : e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
   if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
   if (SHOW_ENEMY_ALERT && e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」（目前關掉）
@@ -1348,6 +1351,7 @@ function roundRect(x, y, w, h, r) {
 
 // 世界座標上的特效（槍口火光、子彈、彈殼、斬擊…）；劇情播放器也會呼叫（js/story-scene.js）
 function drawWorldEffects() {
+  if (typeof drawFiresV2 === 'function') drawFiresV2(ctx);   // 火焰特效 V2（js/fire-fx-v2.js）
   if (typeof drawBlastsV2 === 'function') drawBlastsV2(ctx);   // 爆炸特效 V2（js/blast-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {

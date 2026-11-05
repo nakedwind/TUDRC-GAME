@@ -325,6 +325,11 @@ function updateOil(dt) {
     }
     // 火焰、黑煙
     const k = Math.min(1, f.t / 1.5);   // 最後 1.5 秒火勢變小
+    if (typeof FIRE_FX_VERSION !== 'undefined' && FIRE_FX_VERSION === 2) {   // 火焰 V2：一片營火畫法的火海（js/fire-fx-v2.js）
+      if (!f.v2) f.v2 = fireV2Pool(f.x, f.y, f.r);
+      f.v2.power = f.t > .3 ? (.35 + .65 * k) : 0;
+      if (f.t <= 0) f.v2.life = f.v2.t;   // 火熄了：不再冒新的火，剩下的煙、火屑自己散掉
+    } else {   // 原本畫法（V1）
     f.flameT -= dt;
     if (f.flameT <= 0 && f.t > .3) {
       f.flameT = (.1 + Math.random() * .12) / Math.max(.4, k);
@@ -335,6 +340,7 @@ function updateOil(dt) {
     if (f.smokeT <= 0 && f.t > .3) {
       f.smokeT = .25 + Math.random() * .25;
       pushBlackSmoke(f.x + (Math.random() * 2 - 1) * f.r * .6, f.y - 8, false);
+    }
     }
     if (f.t <= 0 && !f.scorched) { f.scorched = true; addScorchMark(f.x, f.y, f.r * .9, null, 'flame'); }
   }

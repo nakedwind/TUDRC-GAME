@@ -2717,6 +2717,7 @@ requestAnimationFrame(loop);
 // 特效的移動與壽命；劇情播放器也會呼叫（js/story-scene.js）
 function updateWorldEffects(dt) {
   if (typeof updateBlastsV2 === 'function') updateBlastsV2(dt);   // 爆炸特效 V2（js/blast-fx-v2.js）
+  if (typeof updateFiresV2 === 'function') updateFiresV2(dt);   // 火焰特效 V2（js/fire-fx-v2.js）
   for (const f of G.effects) {
     f.life -= dt;
     if (f.coreMote) updateCoreMote(f, dt);   // 異質核心的黑紫粒子
