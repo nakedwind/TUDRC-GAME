@@ -5421,14 +5421,6 @@ const SHARED_TILES = [
     "h": 4
   },
   {
-    "id": "tile_forest_ancient_tree_crimson",
-    "name": "forest_ancient_tree_crimson",
-    "role": "decor",
-    "file": "images/森林/forest_ancient_tree_crimson.png",
-    "w": 34,
-    "h": 30
-  },
-  {
     "id": "tile_forest_group_19_crimson",
     "name": "forest_group_19_crimson",
     "role": "decor",
@@ -5523,13 +5515,5 @@ const SHARED_TILES = [
     "file": "images/森林/forest_tree_door_crimson.png",
     "w": 12,
     "h": 11
-  },
-  {
-    "id": "tile_forest_twisted_tree_crimson",
-    "name": "forest_twisted_tree_crimson",
-    "role": "decor",
-    "file": "images/森林/forest_twisted_tree_crimson.png",
-    "w": 27,
-    "h": 38
   }
 ];
