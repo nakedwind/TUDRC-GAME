@@ -5521,8 +5521,8 @@ const SHARED_TILES = [
     "name": "forest_tree_door_crimson",
     "role": "decor",
     "file": "images/森林/forest_tree_door_crimson.png",
-    "w": 33,
-    "h": 31
+    "w": 12,
+    "h": 11
   },
   {
     "id": "tile_forest_twisted_tree_crimson",
