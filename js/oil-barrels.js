@@ -170,6 +170,9 @@ function oilExplode(x, y, it) {
   if ((it.fire || it.gas) && typeof cookFoodNear === 'function') cookFoodNear(x, y, R);   // 地上的食物烤熟（js/food.js）
   // 畫面：爆閃、雙層衝擊環、火星、碎片、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
+  if (typeof BLAST_FX_VERSION !== 'undefined' && BLAST_FX_VERSION === 2) {   // 特效 V2：瓦斯爐＜油箱＜油桶（js/blast-fx-v2.js）
+    blastFxV2(x, y, it.gas ? 'stove' : it === OIL_ITEMS.deco_oil_tank ? 'tank' : 'drum');
+  } else {   // 原本畫法（V1）
   G.effects.push({ fglow: true, x, y: y - 8, r0: 20, r1: R * 1.15, life: .45, life0: .45 });
   G.effects.push({ ring: true, x, y, r: 12, r2: R, life: .45, life0: .45, color: '#ff8a3a' });
   G.effects.push({ ring: true, x, y, r: 6, r2: R * .6, life: .3, life0: .3, color: '#fff0c0' });
@@ -180,6 +183,7 @@ function oilExplode(x, y, it) {
   }
   for (let i = 0; i < 6; i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * R * .4, y - 10 - Math.random() * 10, true);
   for (let i = 0; i < 4; i++) spawnFlameBurst(x + (Math.random() * 2 - 1) * R * .35, y + (Math.random() * 2 - 1) * R * .2, 1.3);
+  }
   addScorchMark(x, y + 6, R * .75, null, 'flame');
   nearbyImpact(x, y, OIL_POWER_FLICKER.shake, .08);
 }

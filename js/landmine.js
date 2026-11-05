@@ -87,6 +87,9 @@ function detonateMine(o) {
   if (typeof pearlBossBlast === 'function') pearlBossBlast(x, y, R);   // 炸開珍珠大童的貝殼（js/pearl-elder.js）
   // 畫面：爆閃、衝擊環、火星、碎石、黑煙、焦痕
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y);
+  const fxV2 = typeof BLAST_FX_VERSION !== 'undefined' && BLAST_FX_VERSION === 2;
+  if (fxV2) blastFxV2(x, y, 'mine');   // 特效 V2：火少、泥土色的煙多、火星多（js/blast-fx-v2.js）
+  else {   // 原本畫法（V1）
   G.effects.push({ fglow: true, x, y: y - 6, r0: 16, r1: R, life: .35, life0: .35 });
   G.effects.push({ ring: true, x, y, r: 8, r2: R, life: .4, life0: .4, color: '#ffb060' });
   G.effects.push({ ring: true, x, y, r: 4, r2: R * .55, life: .26, life0: .26, color: '#fff0c8' });
@@ -95,9 +98,10 @@ function detonateMine(o) {
     G.effects.push({ ember: true, spark: true, x, y: y - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 50,
       r: 1.5 + Math.random() * 2.5, life: .35 + Math.random() * .3, life0: .65 });
   }
+  }
   if (typeof spawnGoo === 'function') spawnGoo(x, y - 4, '#6d6458', 10, 1.3);   // 炸飛的泥土碎石
   if (typeof rockBurstFx === 'function') rockBurstFx(x, y, 'mine');   // 石礫、灰塵噴飛（js/gourd-monkey.js）
-  for (let i = 0; i < 4; i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * 12, y - 8, true);
+  if (!fxV2) for (let i = 0; i < 4; i++) pushBlackSmoke(x + (Math.random() * 2 - 1) * 12, y - 8, true);
   addScorchMark(x, y + 4, R * .55, null, 'flame');
   nearbyImpact(x, y, 11, .07);
   if (typeof sfxAt === 'function') sfxAt('smallBoom', x, y, .9, 'mine-boom');

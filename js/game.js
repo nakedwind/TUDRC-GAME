@@ -1278,6 +1278,7 @@ function newGame() {
   if (typeof restoreStoryBuilds === 'function') restoreStoryBuilds();   // 劇情地圖：上次蓋的建築擺回去（js/combat-progress.js）
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
+  if (typeof seedFogTrees === 'function') seedFogTrees();   // 霧樹：燒掉就散掉那一區的霧（js/fog.js）
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
@@ -2505,6 +2506,7 @@ function update(dt) {
   updateCombatFeel(dt);   // 屍體、黏液、地上痕跡
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
+  if (typeof updateFogTrees === 'function') updateFogTrees(dt);   // 霧樹被火燒、火海周圍暫時散霧（js/fog.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
   if (typeof updateNpcChats === 'function') updateNpcChats(dt);   // 基地裡的 NPC 閒聊小表演（js/npc-chats.js）
   if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）
@@ -2714,6 +2716,7 @@ requestAnimationFrame(loop);
 
 // 特效的移動與壽命；劇情播放器也會呼叫（js/story-scene.js）
 function updateWorldEffects(dt) {
+  if (typeof updateBlastsV2 === 'function') updateBlastsV2(dt);   // 爆炸特效 V2（js/blast-fx-v2.js）
   for (const f of G.effects) {
     f.life -= dt;
     if (f.coreMote) updateCoreMote(f, dt);   // 異質核心的黑紫粒子

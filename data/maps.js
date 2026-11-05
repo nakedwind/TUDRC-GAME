@@ -73072,6 +73072,7 @@ const BATTLE_MAPS = [
     },
     "solidOffsets": {},
     "safe": false,
+    "fog": "heavy",
     "npcs": false,
     "portals": [],
     "hiddenPickups": [],

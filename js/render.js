@@ -1054,6 +1054,7 @@ function draw() {
   if (typeof graffitiSortables === 'function') graffitiSortables(sortables);
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
   for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
+  if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -1198,6 +1199,7 @@ function draw() {
   }
   // 情境選單或指定建築的目標格
   const actionCell = buildTargetCell || (groundTarget && !groundMenu.classList.contains('hidden') ? [groundTarget.c, groundTarget.r] : null);
+  if (typeof drawFog === 'function') drawFog(ctx);   // 起霧：蓋在所有東西上、黑幕之下（js/fog.js）
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 還沒炸開的隱藏區：當成地圖外的空白區塗黑（js/breakable-walls.js）
   drawDarkness();  // 蓋上黑幕、在光源處挖洞（同樣畫在世界座標上）
   if (typeof drawMapGlow === 'function') drawMapGlow(ctx);   // 設成「發光」的地圖物件：畫在黑幕上面，暗處也亮（js/maploader.js）
@@ -1346,6 +1348,7 @@ function roundRect(x, y, w, h, r) {
 
 // 世界座標上的特效（槍口火光、子彈、彈殼、斬擊…）；劇情播放器也會呼叫（js/story-scene.js）
 function drawWorldEffects() {
+  if (typeof drawBlastsV2 === 'function') drawBlastsV2(ctx);   // 爆炸特效 V2（js/blast-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];

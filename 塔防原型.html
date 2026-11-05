@@ -283,7 +283,7 @@
   <script src="data/quests.js?v=quests-20261015"></script>   <!-- 支線任務：角色委託 -->
   <script src="data/missions.js?v=squadflag-20261103"></script>   <!-- 任務：Y 區區域、作戰桌位置、通訊員台詞 -->
   <script src="data/dialogues.js?v=mealqueue-20261104"></script>  <!-- 所有台詞（對話編輯器） -->
-  <script src="data/balance.js?v=sitnear-20261104"></script>    <!-- 2. 遊戲數值（最常調整） -->
+  <script src="data/balance.js?v=fogtree-20261105"></script>    <!-- 2. 遊戲數值（最常調整） -->
   <script src="data/npc-locations.js?v=floornames-20261021"></script> <!-- 2a. 基地裡每個人平時在哪張地圖、哪一區（依章節） -->
   <script src="js/dialogue-data.js?v=dlg-20261006"></script>
   <script src="js/mate-hurt-talk.js?v=mate-hurt-20261028"></script>   <!-- 隊友被怪物攻擊時頭上冒泡泡（台詞在 data/dialogues.js） -->
@@ -292,7 +292,7 @@
   <!-- 3. 物件編輯器會直接改寫的資料（障礙物、裝飾、異質礦、置物箱）：每次都重新讀，編輯器存檔後重新整理遊戲就看得到，不會讀到瀏覽器記住的舊檔 -->
   <script>(() => { const v = Date.now(); for (const f of ['storage-boxes', 'ores', 'objects', 'decorations']) document.write('<script src="data/' + f + '.js?v=' + v + '"><\/script>'); })();</script>
   <script>document.write('<script src="data/tiles.js?t=' + Date.now() + '"><\/script>');</script>      <!-- 4. 素材庫（兩個編輯器共用；編輯器存的資料，每次都讀最新的，新加的素材才不會被瀏覽器舊檔擋住） -->
-  <script src="data/maps.js?v=z62name-20261103"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
+  <script src="data/maps.js?v=fog-20261105"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=counsel-20261104"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
   <script src="data/story-maps.js?v=v2tiles-20261026"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
@@ -304,12 +304,12 @@
   <script src="js/elevator-data.js?v=sync-20261021"></script>
   <script src="js/pathfinding.js?v=mrtride-20261102"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/stamp-transform.js?v=stampscale-20261105"></script>   <!-- 物件的大小、角度（跟遊戲共用同一套算法） -->
-  <script src="js/maploader.js?v=stampscale-20261105"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=fog2-20261105"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=waterdef-20261102"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/doors.js?v=archcut2-20261101"></script> <!-- 門：手動門／自動門 -->
   <script src="js/memory-doors.js?v=kai-20261103"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
   <script src="js/breakable-walls.js?v=wallsniff2-20261103"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
-  <script src="js/lighting.js?v=mrtcargo-20261102"></script>     <!-- 7. 黑暗與光源系統 -->
+  <script src="js/lighting.js?v=fogtree-20261105"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
   <script src="js/build.js?v=lvfx-20261102"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=campspot-20261104"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
@@ -344,11 +344,13 @@
   <script src="js/gourd-monkey.js?v=vehtoss-20261101"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=test-off-20261031"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=y25open9-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=stampscale-20261105"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=fogtree-20261105"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=merge2-20261101"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
+  <script src="js/blast-fx-v2.js?v=v2-20261105"></script> <!-- 9e2. 爆炸特效 V2：pixelfx 風格的煙霧、火星（BLAST_FX_VERSION 切換 1／2） -->
   <script src="js/oil-barrels.js?v=merge2-20261101"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=led-noline-20261101"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
+  <script src="js/fog.js?v=fogtree-20261105"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
   <script src="js/lifeform.js?v=life-burn-20261018"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
   <script src="js/smiler.js?v=capking3-20261101"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=hiddenore-20261102"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
@@ -404,7 +406,7 @@
   <script src="js/mrt-train.js?v=cargo3-20261102"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=care-20261103"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=sitnear-20261104"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=fogtree-20261105"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->

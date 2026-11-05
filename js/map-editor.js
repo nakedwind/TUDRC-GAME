@@ -497,6 +497,7 @@ function fixMap(m) {
   delete m.entrances;   // 舊的波次入口：已經不用了
   m.camp = m.camp || [];
   m.coreSpots = Array.isArray(m.coreSpots) ? [...new Set(m.coreSpots)] : [];
+  if (Array.isArray(m.fogTrees) && m.fogTrees.length) m.fogTrees = [...new Set(m.fogTrees)]; else delete m.fogTrees;   // 🌲 霧樹：['欄,列'…]（js/fog.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
@@ -1140,6 +1141,30 @@ function solidNudgeStatus(m) {
   return '已選 ' + what + (same ? '（目前偏移 ' + offs[0] + '）' : '（各自偏移不同，會一起移動）') +
     '：方向鍵移動、Shift 移多一點、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取' + (ne ? '（邊緣碰撞最多移半格）' : '');
 }
+// 🌲 霧樹：樹的位置＋（選了霧樹工具時）每棵樹負責的區域
+const FOG_ZONE_COLORS = ['#c08bff', '#6fd6ff', '#ffd36b', '#7cf0a0', '#ff8fb1', '#ffa45c', '#9fa8ff', '#e6f07a'];
+function drawFogTreeMarks(m) {
+  const trees = (m.fogTrees || []).map(k => k.split(',').map(Number));
+  if (!trees.length) return;
+  if (brush.mode === 'fogtree') {
+    ctx.globalAlpha = .16;
+    for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+      let best = 0, bd = Infinity;
+      trees.forEach(([tc, tr], j) => { const d = (tc - c) ** 2 + (tr - r) ** 2; if (d < bd) { bd = d; best = j; } });
+      ctx.fillStyle = FOG_ZONE_COLORS[best % FOG_ZONE_COLORS.length]; ctx.fillRect(OX + c * CELL, OY + r * CELL, CELL, CELL);
+    }
+    ctx.globalAlpha = 1;
+  }
+  trees.forEach(([c, r], j) => {
+    const x = OX + c * CELL, y = OY + r * CELL;
+    ctx.fillStyle = 'rgba(60,30,90,.6)'; ctx.fillRect(x, y, CELL, CELL);
+    ctx.strokeStyle = FOG_ZONE_COLORS[j % FOG_ZONE_COLORS.length]; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
+    ctx.font = '20px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🌲', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
+  });
+  ctx.fillStyle = '#c9a8ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('🌲 霧樹 ' + trees.length + ' 棵' + (m.fog ? '' : '（這張地圖還沒開起霧）'), OX + 6, OY + 52);
+}
 function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
@@ -1206,6 +1231,7 @@ function draw() {
       if (hit) { ctx.setLineDash([4, 3]); drawEdgeLine(hit.c, hit.r, hit.axis, 'rgba(255,140,140,.85)', 1.5); ctx.setLineDash([]); }
     }
   }
+  drawFogTreeMarks(m);
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
@@ -1532,6 +1558,14 @@ function paintCell(c, r, isDown, additiveSelect = false) {
       setStatus('請選空格作為核心候選點', '#ff8f8f'); return;
     }
     toggle(m.coreSpots, key);
+  } else if (brush.mode === 'fogtree') {   // 🌲 霧樹：點一格放一棵、再點一次拿掉
+    if (!isDown) return;
+    const trees = m.fogTrees || [], i = trees.indexOf(key);
+    if (i >= 0) trees.splice(i, 1); else trees.push(key);
+    if (trees.length) m.fogTrees = trees; else delete m.fogTrees;
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已拿掉這棵霧樹（剩 ' + trees.length + ' 棵）' : '已放上第 ' + trees.length + ' 棵霧樹：色塊是它負責的區域（每一格歸最近的那棵），燒掉它那一區的霧就散了' + (m.fog ? '' : '（記得在地圖設定把「🌫️ 起霧」打開）'), '#c9a8ff');
+    return;
   } else if (brush.mode === 'capking') {   // 🎩 順順宮主帽子：點空格放一頂、再點一次拿掉
     if (!isDown) return;
     const caps = [...capKingCaps(m)], i = caps.indexOf(key);
@@ -3223,6 +3257,8 @@ function loadRules() {
   if (storyField) storyField.checked = !!m.story;
   const safeField = document.getElementById('f_safe');
   if (safeField) safeField.checked = !!m.safe;
+  const fogField = document.getElementById('f_fog');
+  if (fogField) fogField.value = m.fog || '';
   document.getElementById('f_coreCount').value = m.coreCount;
   RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).value = m.rules[k]; });
   renderMonsterMix();
@@ -3254,6 +3290,7 @@ function shiftMapContent(m, dc, dr) {
   });
   (m.stamps || []).forEach(s => { s.c += dc; s.r += dr; });
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
+  if (m.fogTrees) m.fogTrees = m.fogTrees.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -3282,6 +3319,7 @@ function dropOutsideContent(m) {
     return s.c + stampW(s, t) > 0 && s.r + stampH(s, t) > 0 && s.c < m.cols && s.r < m.rows;   // 還有一格在地圖內就留著
   });
   removed += before - m.stamps.length;
+  if (m.fogTrees) { const n = m.fogTrees.length; m.fogTrees = m.fogTrees.filter(insideKey); removed += n - m.fogTrees.length; if (!m.fogTrees.length) delete m.fogTrees; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
     m[key] = (m[key] || []).filter(insideKey);
@@ -3342,6 +3380,11 @@ const safeField = document.getElementById('f_safe');
 if (safeField) safeField.addEventListener('change', e => {
   pushUndo(); curMap().safe = e.target.checked; saveMaps();
   setStatus(e.target.checked ? '這張劇情地圖是安全場景：不生怪、不套黑幕' : '這張劇情地圖是戰鬥場景：啟用怪物與黑幕', '#8fd3ff');
+});
+const fogField = document.getElementById('f_fog');
+if (fogField) fogField.addEventListener('change', e => {
+  pushUndo(); if (e.target.value) curMap().fog = e.target.value; else delete curMap().fog; saveMaps();
+  setStatus(e.target.value === 'heavy' ? '這張地圖會起濃霧' : e.target.value === 'light' ? '這張地圖會起薄霧' : '這張地圖沒有霧了', '#8fd3ff');
 });
 RULE_FIELDS.forEach(k => { document.getElementById('f_' + k).addEventListener('input', e => { const v = parseFloat(e.target.value); curMap().rules[k] = isNaN(v) ? 0 : v; saveMaps(); }); });
 document.getElementById('f_coreCount').addEventListener('change', e => {

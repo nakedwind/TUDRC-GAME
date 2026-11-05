@@ -480,7 +480,10 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
   // 火焰、雷電、近戰改用程式即時繪製；其餘維持原本序列圖／光束
   const proc = kind === 'flame' || kind === 'lightning' || kind === 'melee' || kind === 'sword' || kind === 'corrosion';
   if (kind === 'flame') {
-    spawnFlameBurst(impactPoint.x, impactPoint.y + 8, scale);
+    if (typeof BLAST_FX_VERSION !== 'undefined' && BLAST_FX_VERSION === 2) {   // 特效 V2：一般攻擊小火團、大招「烈焰新星」中型爆炸（js/blast-fx-v2.js）
+      addLightFlash('flame', impactPoint.x, impactPoint.y + 8, scale);
+      blastFxV2(impactPoint.x, impactPoint.y + 8, scale > 1.3 ? 'theonieUlt' : 'theonie');
+    } else spawnFlameBurst(impactPoint.x, impactPoint.y + 8, scale);   // 原本畫法（V1）
     addScorchMark(impactPoint.x, impactPoint.y + 10, 15 * scale, null, 'flame');   // 希奧妮：地上留焦痕
   } else if (kind === 'lightning') {
     spawnLightningBolt(impactPoint.x, impactPoint.y, scale);

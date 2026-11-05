@@ -31,6 +31,13 @@
       "port": 8767
     },
     {
+      "name": "pixelfx",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "8790", "--directory", "../pixelfx"],
+      "port": 8790,
+      "autoPort": false
+    },
+    {
       "name": "game-4",
       "runtimeExecutable": "python",
       "runtimeArgs": [
