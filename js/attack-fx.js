@@ -124,6 +124,7 @@ function spawnChargeFx(x, y, color) {   // 大招蓄力telegraph：收束的光�
   G.effects.push({ charge: true, x, y, color, life: ULT_SWING.impact, life0: ULT_SWING.impact });
 }
 function spawnUltShockwave(x, y, r, color) {   // 近戰大招：大範圍衝擊波（雙圈擴張＋四濺）
+  if (typeof MELEE_FX_VERSION !== 'undefined' && MELEE_FX_VERSION === 2) { meleeV2Shockwave(x, y, r, color); return; }   // 近戰 V2：貼地雙圈、灰塵、裂紋光（js/melee-fx-v2.js）
   G.effects.push({ ring: true, x, y, r: 10, r2: r, life: .38, life0: .38, color });
   G.effects.push({ ring: true, x, y, r: 5, r2: r * 0.65, life: .26, life0: .26, color });
   for (let i = 0; i < 16; i++) {
@@ -204,10 +205,12 @@ const SLASH_PALETTES = {
   purple: { after: '#8a3fff', outer: '#a860ff', glow: '#c77bff', core: '#f1e2ff', edge: '#ffffff' },
   dark:   { after: '#3a0a14', outer: '#7a1428', glow: '#ff2d4a', core: '#ffd3da', edge: '#ffffff' },   // 生命體：暗紅黑
 };
-function spawnMeleeSlash(x, y, angle, heavy, pal) {
+function spawnMeleeSlash(x, y, angle, heavy, pal, style) {   // style：角色種類（colyn／red／luther），近戰 V2 用來分不同揮法
+  if (typeof MELEE_FX_VERSION !== 'undefined' && MELEE_FX_VERSION === 2) { meleeV2Slash(x, y, angle, heavy, pal, style); return; }   // 近戰 V2（js/melee-fx-v2.js）；下面是原本畫法（V1）
   G.effects.push({ slash: true, x, y, angle, heavy, pal: SLASH_PALETTES[pal] || SLASH_PALETTES.blue, life: heavy ? .26 : .2, life0: heavy ? .26 : .2 });
 }
-function spawnMeleeImpact(x, y, heavy) {
+function spawnMeleeImpact(x, y, heavy, style) {
+  if (typeof MELEE_FX_VERSION !== 'undefined' && MELEE_FX_VERSION === 2) { meleeV2Impact(x, y, heavy, style); return; }   // 近戰 V2：星芒＋拉長的火花，重擊加衝擊環和灰塵（js/melee-fx-v2.js）
   G.effects.push({ ring: true, x, y, r: 5, r2: heavy ? 34 : 26, life: .2, life0: .2, color: '#dceaff' });
   for (let i = 0; i < (heavy ? 12 : 8); i++) {
     const a = Math.random() * Math.PI * 2, sp = 90 + Math.random() * 110;
@@ -493,7 +496,7 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
       lightningV2Chain(impactPoint, affected.filter(e => e !== target));
     addScorchMark(impactPoint.x, impactPoint.y + 10, (spec.splash > 0 ? Math.min(26, spec.splash * CELL * .3) : 16) * scale, null, 'lightning');   // 安柏：雷擊焦紋
   }
-  else if (kind === 'melee' || kind === 'sword') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0);
+  else if (kind === 'melee' || kind === 'sword') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0, attacker?.type);
   else if (kind === 'corrosion') spawnCorrosionSplash(impactPoint.x, impactPoint.y, spec.splash, spec.dmg, scale);
   else if (attacker && GUIDE_GUN_TYPES.has(attacker.type)) G.effects.push({ ring: true, x: target.x, y: target.y, r: 2, r2: 9, life: .14, life0: .14, color: '#ffe79a' });
   else G.effects.push({ attack: true, kind, x1: attacker.x, y1: attacker.y - 9, x2: target.x, y2: target.y, life: .28, life0: .28, color: spec.color, seed: Math.random() * 1000 });

@@ -2301,7 +2301,7 @@ function update(dt) {
       if (!swing.slashFx && swing.age >= swing.wind && !(swing.ult && ULTIMATES[t.type] && ULTIMATES[t.type].radius)) {   // 近戰大招用衝擊波，不噴小月牙
         swing.slashFx = true;
         const slashAng = Math.atan2(Math.sin(swing.angle) + 1.1, Math.cos(swing.angle));   // 偏向下前方（配合往下劈）
-        spawnMeleeSlash(t.x + Math.cos(swing.angle) * 20, t.y - 6 + Math.sin(swing.angle) * 16, slashAng, t.type === 'luther', t.type === 'avaren' ? 'purple' : 'blue');
+        spawnMeleeSlash(t.x + Math.cos(swing.angle) * 20, t.y - 6 + Math.sin(swing.angle) * 16, slashAng, t.type === 'luther', t.type === 'avaren' ? 'purple' : 'blue', t.type);
       }
       if (!swing.hit && swing.age >= swing.impact) {
         swing.hit = true;
@@ -2719,6 +2719,7 @@ function updateWorldEffects(dt) {
   if (typeof updateBlastsV2 === 'function') updateBlastsV2(dt);   // 爆炸特效 V2（js/blast-fx-v2.js）
   if (typeof updateFiresV2 === 'function') updateFiresV2(dt);   // 火焰特效 V2（js/fire-fx-v2.js）
   if (typeof updateLightningV2 === 'function') updateLightningV2(dt);   // 雷電特效 V2（js/lightning-fx-v2.js）
+  if (typeof updateMeleeV2 === 'function') updateMeleeV2(dt);   // 近戰特效 V2（js/melee-fx-v2.js）
   for (const f of G.effects) {
     f.life -= dt;
     if (f.coreMote) updateCoreMote(f, dt);   // 異質核心的黑紫粒子
