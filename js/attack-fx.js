@@ -429,6 +429,7 @@ function spawnCorrosionSplash(x, y, splash, dmg, scale = 1) {
     pushCorrosionMist(x + (Math.random() * 2 - 1) * 8, y + (Math.random() * 2 - 1) * 5, Math.cos(a) * sp, Math.sin(a) * sp);
   }
   // 幾滴暗紫液滴
+  if (typeof CORROSION_FX_VERSION !== 'undefined' && CORROSION_FX_VERSION === 2) { corrosionV2Splash(x, y, scale); return; }   // 腐蝕 V2：液體皇冠＋拋出去的酸液，落地變小灘冒泡（js/corrosion-fx-v2.js）；下面是原本畫法（V1）
   for (let i = 0; i < 6; i++) {
     const a = -Math.PI / 2 + (Math.random() * 2 - 1) * 1.2, sp = 40 + Math.random() * 70, L = .35 + Math.random() * .3;
     G.effects.push({ cdrop: true, x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp,

@@ -1352,6 +1352,7 @@ function roundRect(x, y, w, h, r) {
 
 // 世界座標上的特效（槍口火光、子彈、彈殼、斬擊…）；劇情播放器也會呼叫（js/story-scene.js）
 function drawWorldEffects() {
+  if (typeof drawCorrosionV2 === 'function') drawCorrosionV2(ctx);   // 腐蝕特效 V2（js/corrosion-fx-v2.js）：酸液、小灘、池子冒泡
   if (typeof drawFiresV2 === 'function') drawFiresV2(ctx);   // 火焰特效 V2（js/fire-fx-v2.js）
   if (typeof drawBlastsV2 === 'function') drawBlastsV2(ctx);   // 爆炸特效 V2（js/blast-fx-v2.js）
   if (typeof drawLightningV2 === 'function') drawLightningV2(ctx);   // 雷電特效 V2（js/lightning-fx-v2.js）

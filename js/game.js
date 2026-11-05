@@ -2720,6 +2720,7 @@ function updateWorldEffects(dt) {
   if (typeof updateFiresV2 === 'function') updateFiresV2(dt);   // 火焰特效 V2（js/fire-fx-v2.js）
   if (typeof updateLightningV2 === 'function') updateLightningV2(dt);   // 雷電特效 V2（js/lightning-fx-v2.js）
   if (typeof updateMeleeV2 === 'function') updateMeleeV2(dt);   // 近戰特效 V2（js/melee-fx-v2.js）
+  if (typeof updateCorrosionV2 === 'function' && typeof CORROSION_FX_VERSION !== 'undefined' && CORROSION_FX_VERSION === 2) updateCorrosionV2(dt);   // 腐蝕特效 V2（js/corrosion-fx-v2.js）
   for (const f of G.effects) {
     f.life -= dt;
     if (f.coreMote) updateCoreMote(f, dt);   // 異質核心的黑紫粒子
