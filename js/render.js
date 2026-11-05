@@ -1104,6 +1104,7 @@ function draw() {
   if (typeof drawPearlElderFx === 'function') drawPearlElderFx(ctx);   // 珍珠大童從天上降下的珍珠（js/pearl-elder.js）
   if (typeof drawCapShots === 'function') drawCapShots(ctx);   // 夯吉寶丟出的迴力鏢帽子（js/hangi-bao.js）
   if (typeof drawFishSprays === 'function') drawFishSprays(ctx);
+  if (typeof drawWaterV2 === 'function') drawWaterV2(ctx);   // 水柱 V2：水流白線、甩出的水珠、漣漪（js/water-fx-v2.js）
   if (typeof drawLoofahVines === 'function') drawLoofahVines(ctx);
   if (typeof drawGourdTop === 'function') drawGourdTop(ctx);   // 葫蘆猴落地：撞擊白光、飛起來的石礫、灰塵團（js/gourd-monkey.js）   // 冒出地面、纏住人的絲瓜藤（js/loofah-lady.js）   // 魚頭君噴出的水柱（js/fish-head.js）
   drawCombatFeelTop(ctx);      // 被打飛的屍體、飛濺黏液
