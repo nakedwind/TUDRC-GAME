@@ -21,6 +21,25 @@ const CV2_SPLAT_HI = 'rgba(90,64,110,.6)';   // 地上小灘邊緣的反光（�
 const CV2_BUBBLE = { fill: '#050307', rim: 'rgba(40,24,54,.9)', shine: 'rgba(64,50,78,.55)', ripple: '#2a1a38', drop: '#0c0710' };
 const cv2R = (a, b) => a + Math.random() * (b - a);
 
+// 不規則小滴的外形：n 個點的半徑比例（之後用平滑曲線連起來）
+function cv2Blob(n = 7) { const k = 2 + Math.floor(Math.random() * 2), ph = Math.random() * 6.28, out = []; for (let i = 0; i < n; i++) out.push(.72 + .2 * Math.sin(k * i / n * Math.PI * 2 + ph) + cv2R(-.16, .16)); return out; }
+function cv2BlobPath(ctx, x, y, r, shape, rot = 0) {   // 用平滑曲線畫出不規則小滴
+  const n = shape.length; ctx.beginPath();
+  for (let i = 0; i <= n; i++) {
+    const i0 = i % n, i1 = (i + 1) % n, t0 = i0 / n * Math.PI * 2 + rot, t1 = i1 / n * Math.PI * 2 + rot;
+    const x0 = x + Math.cos(t0) * r * shape[i0], y0 = y + Math.sin(t0) * r * shape[i0], x1 = x + Math.cos(t1) * r * shape[i1], y1 = y + Math.sin(t1) * r * shape[i1];
+    if (!i) ctx.moveTo((x0 + x1) / 2, (y0 + y1) / 2); else ctx.quadraticCurveTo(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+  }
+  ctx.closePath();
+}
+// 落地的小灘：不規則外形（大凸起＋細碎起伏）、順著飛來的方向拉長，旁邊濺出幾滴小點
+function cv2MakeSplat(b) {
+  const r = b.r * cv2R(1.6, 2.4), n = 16, k1 = 2 + Math.floor(Math.random() * 2), p1 = Math.random() * 6.28, k2 = 4 + Math.floor(Math.random() * 3), p2 = Math.random() * 6.28, radii = [];
+  for (let i = 0; i < n; i++) { const t = i / n * Math.PI * 2; radii.push(r * (.78 + .22 * Math.sin(k1 * t + p1) + .12 * Math.sin(k2 * t + p2) + cv2R(-.14, .14))); }
+  const dots = [];
+  for (let i = 0, nd = 2 + Math.floor(Math.random() * 3); i < nd; i++) { const a = cv2R(-.9, .9), d = r * cv2R(1.15, 1.8); dots.push({ a, d, r: r * cv2R(.14, .3), shape: cv2Blob(6), rot: Math.random() * 6.28 }); }   // 往前方噴出去的小點
+  return { x: b.x, y: b.y, r, radii, dots, dir: Math.atan2(b.vy * 2, b.vx), stretch: cv2R(1.15, 1.5), t: 0, life: cv2R(1.2, 1.8), fizz: 0, col: b.col };
+}
 // 命中（spawnCorrosionSplash 會呼叫）：皇冠＋拋出去的酸液
 function corrosionV2Splash(x, y, scale = 1) {
   const F = G.corrV2 || (G.corrV2 = { blobs: [], splats: [], crowns: [], pops: [], vapour: [] });
@@ -29,7 +48,7 @@ function corrosionV2Splash(x, y, scale = 1) {
   F.crowns.push({ x, y, s: scale, spikes: crown, t: 0, life: .28 });
   for (let i = 0; i < Math.round(CORROSION_FX_V2.blobs * (scale > 1 ? 1.5 : 1)); i++) {
     const a = Math.random() * Math.PI * 2, hs = cv2R(30, 80) * Math.sqrt(scale);   // 大招：多幾團，但不要噴太遠
-    F.blobs.push({ x, y, z: 6, vx: Math.cos(a) * hs, vy: Math.sin(a) * hs * .5, vz: cv2R(90, 200) * scale, r: cv2R(2.2, 4) * Math.min(1.4, scale), col: CV2_LIQ[Math.floor(Math.random() * 3)], s: scale });
+    F.blobs.push({ x, y, z: 6, vx: Math.cos(a) * hs, vy: Math.sin(a) * hs * .5, vz: cv2R(90, 200) * scale, r: cv2R(2.2, 4) * Math.min(1.4, scale), col: CV2_LIQ[Math.floor(Math.random() * 3)], s: scale, shape: cv2Blob(7), spin: cv2R(-8, 8), rot: Math.random() * 6.28 });
   }
 }
 
@@ -39,8 +58,8 @@ function updateCorrosionV2(dt) {
   F.crowns = F.crowns.filter(c => c.t < c.life);
   for (let i = F.blobs.length - 1; i >= 0; i--) {   // 酸液：拋物線飛、落地變小灘
     const b = F.blobs[i];
-    b.vz -= 520 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt;
-    if (b.z <= 0) { F.splats.push({ x: b.x, y: b.y, r: b.r * cv2R(1.6, 2.4), t: 0, life: cv2R(1.2, 1.8), fizz: 0, col: b.col }); F.blobs.splice(i, 1); }
+    b.vz -= 520 * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.z += b.vz * dt; b.rot += b.spin * dt;   // 飛的時候翻轉
+    if (b.z <= 0) { F.splats.push(cv2MakeSplat(b)); F.blobs.splice(i, 1); }
   }
   for (const s of F.splats) {   // 小灘：滋滋冒小泡
     s.t += dt; s.fizz -= dt;
@@ -81,9 +100,17 @@ function drawCorrosionV2(ctx) {
   ctx.save();
   for (const s of F.splats) {   // 小灘：深紫色、邊緣一點亮紫反光，慢慢淡掉
     const a = Math.min(1, s.t / .08) * Math.max(0, 1 - Math.max(0, s.t - s.life * .5) / (s.life * .5));
-    ctx.save(); ctx.translate(s.x, s.y); ctx.scale(1, .45);
-    ctx.globalAlpha = a * .85; ctx.fillStyle = s.col; ctx.beginPath(); ctx.arc(0, 0, s.r, 0, 6.283); ctx.fill();
-    ctx.globalAlpha = a * .5; ctx.strokeStyle = CV2_SPLAT_HI; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, s.r * .8, Math.PI * 1.1, Math.PI * 1.6); ctx.stroke();
+    ctx.save(); ctx.translate(s.x, s.y); ctx.scale(1, .45); ctx.rotate(s.dir); ctx.scale(s.stretch, 1);   // 貼地、順著飛來的方向拉長
+    ctx.globalAlpha = a * .85; ctx.fillStyle = s.col; ctx.beginPath();
+    const n = s.radii.length;
+    for (let i = 0; i <= n; i++) {   // 不規則外形：用平滑曲線把各點連起來
+      const i0 = i % n, i1 = (i + 1) % n, t0 = i0 / n * Math.PI * 2, t1 = i1 / n * Math.PI * 2;
+      const x0 = Math.cos(t0) * s.radii[i0], y0 = Math.sin(t0) * s.radii[i0], x1 = Math.cos(t1) * s.radii[i1], y1 = Math.sin(t1) * s.radii[i1];
+      if (!i) ctx.moveTo((x0 + x1) / 2, (y0 + y1) / 2); else ctx.quadraticCurveTo(x0, y0, (x0 + x1) / 2, (y0 + y1) / 2);
+    }
+    ctx.closePath(); ctx.fill();
+    for (const d of s.dots) { cv2BlobPath(ctx, Math.cos(d.a) * d.d, Math.sin(d.a) * d.d, d.r * 1.15, d.shape, d.rot); ctx.fill(); }   // 濺出去的小點（不規則）
+    ctx.globalAlpha = a * .5; ctx.strokeStyle = CV2_SPLAT_HI; ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(0, 0, s.r * .7, Math.PI * 1.1, Math.PI * 1.6); ctx.stroke();
     ctx.restore();
   }
   for (const v of F.vapour) {   // 蒸氣：淡紫、慢慢變大變淡
@@ -122,7 +149,7 @@ function drawCorrosionV2(ctx) {
     const g = ctx.createRadialGradient(b.x, sy, 0, b.x, sy, b.r * 2.6);
     g.addColorStop(0, `rgba(${CV2_GLOW},.35)`); g.addColorStop(1, `rgba(${CV2_GLOW},0)`);
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(b.x, sy, b.r * 2.6, 0, 6.283); ctx.fill();
-    ctx.fillStyle = b.col; ctx.beginPath(); ctx.ellipse(b.x, sy, b.r, b.r * 1.15, Math.atan2(b.vy - b.vz, b.vx) + Math.PI / 2, 0, 6.283); ctx.fill();
+    ctx.fillStyle = b.col; cv2BlobPath(ctx, b.x, sy, b.r * 1.15, b.shape, b.rot); ctx.fill();   // 不規則的酸液團
     ctx.fillStyle = CV2_HI; ctx.beginPath(); ctx.arc(b.x - b.r * .35, sy - b.r * .4, Math.max(.7, b.r * .3), 0, 6.283); ctx.fill();
   }
   ctx.restore();

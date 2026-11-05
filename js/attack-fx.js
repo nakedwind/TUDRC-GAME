@@ -144,6 +144,7 @@ function spawnSootheEffect(x, y, color, follow) {
     G.effects.push({ mote: true, x: x + (Math.random() * 2 - 1) * 18, y: y + (Math.random() * 2 - 1) * 11,
       vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 2.2 + Math.random() * 2.8, seed: Math.random() * 99, wob: 5 + Math.random() * 7, life: L, life0: L, col });
   }
+  if (typeof SOOTHE_FX_VERSION !== 'undefined' && SOOTHE_FX_VERSION === 2) sootheV2Bless(x, y, vivid || col, follow);   // 疏導 V2：光柱、螺旋光帶、星光、頭上光暈（js/soothe-fx-v2.js）
 }
 // ---- 疏導表演（嚮導施放疏導＝大招等級的演出）----
 // 施術者腳下展開法陣 → 光波擴散到疏導範圍 → 隊友身上的光環與療癒光點（spawnSootheEffect）。
@@ -155,6 +156,7 @@ function spawnSootheCast(caster, col, radius, dur = 1.1) {
   G.effects.push(sigil);
   if (radius > 0) G.effects.push({ sootheWave: true, x: caster.x, y: caster.y, r: radius, col, life: .7, life0: .7 });
   addLightFlash('soothe', caster.x, caster.y - 10, 1, col);
+  if (typeof SOOTHE_FX_VERSION !== 'undefined' && SOOTHE_FX_VERSION === 2) sootheV2Cast(caster, col, radius, dur);   // 疏導 V2：法陣光柱、波前星光（js/soothe-fx-v2.js）
   return sigil;
 }
 

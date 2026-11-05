@@ -1080,6 +1080,7 @@ function draw() {
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
   drawAcidWarnings(ctx);       // 腐蝕池的危險範圍圈（js/attack-fx.js）
+  if (typeof drawSootheGroundV2 === 'function') drawSootheGroundV2(ctx);   // 疏導 V2：法陣、光柱畫在地上（人物後面）（js/soothe-fx-v2.js）
   drawFlares(ctx);            // 地上燃燒的照明彈
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
@@ -1357,6 +1358,7 @@ function drawWorldEffects() {
   if (typeof drawBlastsV2 === 'function') drawBlastsV2(ctx);   // 爆炸特效 V2（js/blast-fx-v2.js）
   if (typeof drawLightningV2 === 'function') drawLightningV2(ctx);   // 雷電特效 V2（js/lightning-fx-v2.js）
   if (typeof drawMeleeV2 === 'function') drawMeleeV2(ctx);   // 近戰特效 V2（js/melee-fx-v2.js）
+  if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];
@@ -1485,7 +1487,10 @@ function drawWorldEffects() {
       ctx.globalAlpha = 0.2 + 0.6 * prog; ctx.fillStyle = f.color;
       ctx.beginPath(); ctx.arc(f.x, f.y, 3 + 15 * prog, 0, Math.PI * 2); ctx.fill();
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
-    } else if (f.sootheSigil) {                            // 疏導法陣：施術者腳下兩圈光環＋旋轉刻紋，展開後淡出
+    } else if (f.sootheSigil && typeof SOOTHE_FX_VERSION !== 'undefined' && SOOTHE_FX_VERSION === 2) {   // 疏導 V2：全部改成圓圈設計的法陣（js/soothe-fx-v2.js）
+      if (f.groundDrawn) f.groundDrawn = false;   // 這一幀已經在地面層（人物後面）畫過了
+      else drawSootheSigilV2(ctx, f);             // 沒有地面層的畫面（劇情播放器）：照舊在這裡畫
+    } else if (f.sootheSigil) {                            // 疏導法陣（原本 V1）：施術者腳下兩圈光環＋旋轉刻紋，展開後淡出
       const p = Math.max(0, f.life / f.life0), age = f.life0 - f.life;
       const open = Math.min(1, age / .25), a = Math.min(1, f.life / Math.min(.5, f.life0 * .45));   // 最後 0.5 秒淡出（法陣留比較久時，前面都維持全亮）
       const R = 30 * (.55 + .45 * open), [cr, cg, cb] = f.col, rgb = `rgb(${cr},${cg},${cb})`;
