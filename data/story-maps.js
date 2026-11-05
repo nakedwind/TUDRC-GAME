@@ -16977,7 +16977,10 @@ const STORY_MAPS = [
       },
       "ground4": {},
       "object5": {},
-      "object6": {}
+      "object6": {},
+      "object7": {
+        "33,11": "tile_new_decor_rock01"
+      }
     },
     "stamps": [
       {
@@ -17476,6 +17479,154 @@ const STORY_MAPS = [
         "r": 3,
         "layer": "object6",
         "ox": 20
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 33,
+        "r": 12,
+        "layer": "ground4",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_new_decor_crack04",
+        "c": 31,
+        "r": 10,
+        "layer": "object7",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_floor_stain_smudge",
+        "c": 32,
+        "r": 6,
+        "layer": "object7",
+        "oy": 20,
+        "ox": 10
+      },
+      {
+        "id": "tile_dmg_floor_crack_fork",
+        "c": 30,
+        "r": 7,
+        "layer": "object7",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 33,
+        "r": 5,
+        "layer": "object7",
+        "ox": 32.666667,
+        "oy": 1.333333,
+        "fx": true
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 33,
+        "r": 6,
+        "layer": "object7",
+        "ox": 32.66666699999996,
+        "oy": 1.3333330000000103,
+        "fx": true
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 33,
+        "r": 7,
+        "layer": "object7",
+        "ox": 32.66666699999996,
+        "oy": 1.3333330000000387,
+        "fx": true
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 33,
+        "r": 8,
+        "layer": "object7",
+        "ox": 32.66666699999996,
+        "oy": 1.3333330000000387,
+        "fx": true
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 33,
+        "r": 9,
+        "layer": "object7",
+        "ox": 32.66666699999996,
+        "oy": 1.3333330000000387,
+        "fx": true
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 33,
+        "r": 10,
+        "layer": "object7",
+        "ox": 32.66666699999996,
+        "oy": 1.3333330000000387,
+        "fx": true
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 29,
+        "r": 5,
+        "layer": "object7",
+        "ox": 26.666667,
+        "oy": 1.333333,
+        "fx": false
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 29,
+        "r": 6,
+        "layer": "object7",
+        "ox": 26.666667,
+        "oy": 1.333333,
+        "fx": false
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 29,
+        "r": 7,
+        "layer": "object7",
+        "ox": 26.666667,
+        "oy": 1.333333,
+        "fx": false
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 29,
+        "r": 8,
+        "layer": "object7",
+        "ox": 26.666667,
+        "fx": false,
+        "oy": 1.333333
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 29,
+        "r": 9,
+        "layer": "object7",
+        "ox": 26.666667,
+        "oy": 1.333333,
+        "fx": false
+      },
+      {
+        "id": "tile_mvmums35",
+        "c": 29,
+        "r": 10,
+        "layer": "object7",
+        "ox": 26.666667,
+        "oy": 1.333333,
+        "fx": false
+      },
+      {
+        "id": "tile_dmg_debris_dust",
+        "c": 31,
+        "r": 9,
+        "layer": "object7",
+        "ox": 20,
+        "oy": 20
       }
     ],
     "solid": [],
@@ -17524,6 +17675,10 @@ const STORY_MAPS = [
       {
         "id": "object5",
         "name": "02_牆壁"
+      },
+      {
+        "id": "object7",
+        "name": "同伴床"
       },
       {
         "id": "object6",

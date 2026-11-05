@@ -64,7 +64,7 @@ const KINDS = {
   sfx: { name: '音效', make: () => ({ src: '', vol: 100 }) },
 };
 const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble', 'act', 'sway']);
-const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣'], ['hurt', '受傷'], ['sit', '坐下'], ['light', '光源'], ['bleed', '滴血'], ['walk', '走路'], ['run', '跑步'], ['slow', '慢走']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
+const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣'], ['hurt', '受傷'], ['sit', '坐下'], ['light', '光源'], ['bleed', '滴血'], ['shiver', '顫抖'], ['walk', '走路'], ['run', '跑步'], ['slow', '慢走']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
 const FACES = [['', '面向：自動'], ['front', '正面'], ['back', '背面'], ['left', '朝左'], ['right', '朝右']];
 // ---- 怪物、道具：怪物用「怪物代號」、道具用「道具代號」，跟角色代號分開算（不用先加進演出者列表）----
 const MON_KINDS = new Set(['mshow', 'mhide', 'mact']), ITEM_KINDS = new Set(['ishow', 'ihide']);
@@ -178,7 +178,7 @@ function storyKaiExportText() {
 // ---- 跑到第 upto 行時：每個人在哪、鏡頭拍哪裡、後室黑幕開了沒（預覽窗用） ----
 const dirFrom = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1]; return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front'); };
 function simulate(upto) {
-  const st = { doors: new Map(), actors: new Map(), hurt: new Set(), sit: new Set(), light: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
+  const st = { doors: new Map(), actors: new Map(), hurt: new Set(), sit: new Set(), down: new Map(), light: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
   const steps = scene()?.steps || [];
   for (let i = 0; i <= upto && i < steps.length; i++) {
     const p = steps[i], no = Number(p.who), a = st.actors.get(no);
@@ -201,9 +201,10 @@ function simulate(upto) {
       st.actors.set(no, { at: warp || p.at, face: p.face || (a?.shown ? dirFrom(a.at, p.at) : 'front'), src: i, shown: true });
     } else if (p.do === 'hide' && a) a.shown = false;
     else if (p.do === 'act' && p.act === 'light') { if (p.on === false) st.light.delete(no); else st.light.set(no, Number(p.r) || 4); }
+    else if (p.do === 'act' && p.act === 'down') { if (p.on === false) st.down.delete(no); else st.down.set(no, { cw: !!p.cw, eye: p.eye || '' }); }
     else if (p.do === 'act' && (p.act === 'hurt' || p.act === 'sit')) { if (p.on === false) st[p.act].delete(no); else st[p.act].add(no); }   // 受傷：開了之後一直是流血的樣子
     else if ((p.do === 'cam' || p.do === 'camMove') && p.at) st.cam = { at: p.at, w: Number(p.w) || 20, src: i };
-    else if (p.do === 'door' && p.at) st.doors.set(p.at.join(','), { at: p.at, open: p.open !== false, src: i });
+    else if (p.do === 'door' && p.at) st.doors.set(nearDoorSpot(storyMaps.find(m => m.id === mapAt(i)), p.at)?.stamp || p.at.join(','), { at: p.at, open: p.open !== false, src: i });   // 同一扇門只記最後一次（開、關點的位置不一樣也算同一扇）
     else if (p.do === 'dark') st.dark = p.on !== false;
     else if (p.do === 'vignette') st.vig = Number(p.lv) || 0;
   }
@@ -296,7 +297,11 @@ function cornerHandle(x, y, on) {
   ctx.fillRect(x - 5, y - 5, 10, 10); ctx.strokeRect(x - 5, y - 5, 10, 10);
 }
 // 角色：跟遊戲一樣的大小，腳底在格子座標上；配件也一起畫
-function drawFigure(c, p, face, hurt, sit) {
+function drawFigure(c, p, face, hurt, sit, down, eye) {
+  if (down) {   // 倒地：正面的圖繞中心轉 90 度（逆時針或順時針），躺在原本腳下的位置（跟 js/story-kai.js 一樣）
+    ctx.save(); ctx.translate(p[0] * C, p[1] * C + 18 - SIZE / 4); ctx.rotate(down.cw ? Math.PI / 2 : -Math.PI / 2); ctx.translate(-p[0] * C, -(p[1] * C + 18 - SIZE / 2));
+    drawFigure(c, p, 'front', hurt, false, null, down.eye); ctx.restore(); return;
+  }
   if (c.image) {   // 圖片角色：照原本比例、跟人一樣高
     const img = image(c.image); if (!img) return;
     const w = SIZE * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, p[0] * C - w / 2, p[1] * C - SIZE + 18, w, SIZE); return;
@@ -304,7 +309,9 @@ function drawFigure(c, p, face, hurt, sit) {
   // 差分（受傷、坐下）：有畫才用
   const extra = suffix => c.sprite ? image(faceSrc(c.sprite, face).replace(/\.png$/, '') + suffix + '.png') : null;
   const front = (face || 'front') === 'front';
-  const img = (sit && ((hurt && extra('_hurt_sit')) || extra('_sit'))) || (hurt && extra(front ? '_hurt_01' : '_hurt')) || image(faceSrc(c.sprite, face)) || image(faceSrc(c.sprite)); if (!img) return;
+  // 倒地的眼睛：半閉、閉眼（跟遊戲一樣借用眨眼的圖，受傷中是流血的）
+  const eyeImg = !eye || !c.sprite ? null : hurt ? extra(eye === 'half' ? '_hurt_02' : '_hurt_03') : image(faceSrc(c.sprite).replace('0000_Front', eye === 'half' ? '0014_closeeyes01' : '0012_closeeyes03'));
+  const img = eyeImg || (sit && ((hurt && extra('_hurt_sit')) || extra('_sit'))) || (hurt && extra(front ? '_hurt_01' : '_hurt')) || image(faceSrc(c.sprite, face)) || image(faceSrc(c.sprite)); if (!img) return;
   const x = p[0] * C - SIZE / 2, y = p[1] * C - SIZE + 18;
   const accs = typeof ACC_BY_ID !== 'undefined' ? Object.values(c.accs || {}).map(id => ACC_BY_ID[id]).filter(Boolean).sort((a, b) => accLayer(a) - accLayer(b)) : [];
   for (const a of accs) drawAccessory(ctx, a, c.char, face, 0, x, y, SIZE, 'behind');
@@ -352,7 +359,7 @@ function draw() {
   const actors = [...st.actors.entries()].filter(([, a]) => a.shown).sort((p, q) => p[1].at[1] - q[1].at[1]);
   const mons = [...st.mons.entries()].filter(([, x]) => x.shown), items = [...st.items.entries()].filter(([, x]) => x.shown);
   // 人、怪物、道具一起依腳底的高低排前後
-  const figs = [...actors.map(([no, a]) => ({ y: a.at[1], draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, a.face, st.hurt.has(no), st.sit.has(no)); } })),
+  const figs = [...actors.map(([no, a]) => ({ y: a.at[1], draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, st.down.has(no) ? 'front' : a.face, st.hurt.has(no), st.sit.has(no) && !st.down.has(no), st.down.get(no)); } })),
     ...mons.map(([, x]) => ({ y: x.at[1], draw: () => drawMonster(x, x.dying) })), ...items.map(([, x]) => ({ y: x.at[1] - .01, draw: () => drawProp(x) }))];
   figs.sort((p, q) => p.y - q.y).forEach(f => f.draw());
   ctx.restore();
@@ -645,7 +652,7 @@ function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
   if (st.do === 'ishow' && !propOf(st.id)) return '還沒選道具';
   if ((st.do === 'mhide' || st.do === 'mact') && !shownBy('mon', st.mon, scene().steps.indexOf(st))) return '上面沒有這個代號的「怪物出現」';
   if (st.do === 'ihide' && !shownBy('item', st.item, scene().steps.indexOf(st))) return '上面沒有這個代號的「道具出現」';
-  if (st.do === 'fx' && !st.box) return '還沒框特效範圍';
+  if (st.do === 'fx' && !st.box && !(typeof STORY_KAI_FX !== 'undefined' && STORY_KAI_FX[st.id]?.noBox)) return '還沒框特效範圍';
   if (st.do === 'map' && !st.map) return '還沒選地圖';
   if (st.do === 'map' && !storyMaps.some(m => m.id === st.map)) return '劇情地圖編輯器裡找不到這張地圖';
   if (st.do === 'say' && !st.text) return '還沒寫對白';
@@ -670,7 +677,7 @@ function rowLabel(st) {
     const src = st.do === 'ishow' ? st : shownBy('item', st.item, scene().steps.indexOf(st));
     extra = ' [' + (codeOk(st.item) ? pad(st.item) : '??') + '/' + (propOf(src?.id)?.name || '道具') + ']';
   }
-  if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && !WALK_ACTS.has(st.act) && st.on === false ? '（停）' : '') + (st.act === 'light' && st.on !== false ? ' ' + (st.r || 4) + ' 格' : '');
+  if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && !WALK_ACTS.has(st.act) && st.on === false ? '（停）' : '') + (st.act === 'light' && st.on !== false ? ' ' + (st.r || 4) + ' 格' : '') + (st.act === 'shiver' && st.on !== false ? ' ' + (st.lv || 2) + ' 級' : '') + (st.act === 'down' && st.on !== false ? (st.cw ? ' 順時針' : ' 逆時針') + (st.eye === 'half' ? ' 半閉' : st.eye === 'closed' ? ' 閉眼' : '') : '');
   return [name, extra];
 }
 // 每一行最右邊的設定（藍＝下拉選單、紅＝自己輸入、綠＝到地圖上點）
@@ -753,16 +760,26 @@ function controls(st) {
     case 'hide': return [codeIn(st)];
     case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st, '走的途中、走到之後都面向這邊；自動＝照走的方向')];
     case 'act': {
-      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地、集氣、受傷、坐下（要先在角色出現、角色位置設好面向，有畫那個方向的坐下圖才會坐）、光源（身上發光，照亮幾格；開了「後室黑幕」才看得出來）、滴血（跟著走過的路晚 0.3 秒滴到地上）：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
+      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地（正面的圖轉 90 度躺下，可選逆時針或順時針）、集氣、受傷、坐下（要先在角色出現、角色位置設好面向，有畫那個方向的坐下圖才會坐）、光源（身上發光，照亮幾格；開了「後室黑幕」才看得出來）、滴血（跟著走過的路晚 0.3 秒滴到地上）、顫抖（上下左右不規則地抖，一陣強一陣弱；1～5 級）：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
         st.act = e.target.value;
         if (WALK_ACTS.has(st.act)) delete st.on; else if (st.act !== 'hop' && st.on == null) st.on = true;
         if (st.act === 'light') { if (st.r == null) st.r = 4; } else delete st.r;
+        if (st.act === 'shiver') { if (st.lv == null) st.lv = 2; } else delete st.lv;
+        if (st.act !== 'down') { delete st.cw; delete st.eye; }
         commit();
       } }, ACTS.map(([v, t]) => h('option', { value: v }, t)));
       pickAct.value = st.act || 'hop';
       delete st.at; delete st.face;   // 角色演出不用位置（舊版的走路曾經有）
       if (WALK_ACTS.has(st.act)) return [codeIn(st), pickAct];
       if (st.act === 'light') return [codeIn(st), pickAct, check(st, 'on', '開', true), h('label', {}, '範圍：', numIn(st, 'r', 1, 20, '照亮幾格（半徑）')), '格'];
+      if (st.act === 'down') {
+        const turn = h('select', { title: '往哪邊轉 90 度', onchange: e => { if (e.target.value === 'cw') st.cw = true; else delete st.cw; commit(); } }, [['ccw', '逆時針 90°'], ['cw', '順時針 90°']].map(([v, t]) => h('option', { value: v }, t)));
+        turn.value = st.cw ? 'cw' : 'ccw';
+        const eye = h('select', { title: '倒地時的眼睛（受傷中是流血的那幾張）', onchange: e => { if (e.target.value) st.eye = e.target.value; else delete st.eye; commit(); } }, [['', '張眼'], ['half', '半閉'], ['closed', '閉眼']].map(([v, t]) => h('option', { value: v }, t)));
+        eye.value = st.eye || '';
+        return [codeIn(st), pickAct, check(st, 'on', '開', true), turn, eye];
+      }
+      if (st.act === 'shiver') return [codeIn(st), pickAct, check(st, 'on', '開', true), h('label', {}, '幅度：', lvSel(st))];
       return [codeIn(st), pickAct, st.act !== 'hop' ? check(st, 'on', '開', true) : null];
     }
     case 'mshow': return [monCode(st), listSel(st, 'type', MONS, '（選怪物）', '哪一種怪物（怪物編輯器裡的）'), pickBtn(st, '怪物位置'), monFaceSel(st, [['', '正面'], ['left', '朝左'], ['right', '朝右']])];
