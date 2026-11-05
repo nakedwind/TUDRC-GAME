@@ -17989,68 +17989,34 @@ const BATTLE_MAPS = [
         "7,1": "tile_bg_extra_floor02_extra",
         "8,1": "tile_bg_extra_floor02_extra",
         "9,1": "tile_bg_extra_floor02_extra",
-        "14,20": "tile_bg_extra_floor02_extra"
-      },
-      "ground": {
+        "14,20": "tile_bg_extra_floor02_extra",
         "16,23": "tile_bg_extra_floor02_extra",
-        "15,23": "tile_bg_extra_floor02_extra",
         "14,23": "tile_bg_extra_floor02_extra",
         "13,23": "tile_bg_extra_floor02_extra",
-        "13,22": "tile_bg_extra_floor02_extra",
-        "13,21": "tile_bg_extra_floor02_extra",
-        "13,20": "tile_bg_extra_floor02_extra",
-        "13,19": "tile_bg_extra_floor02_extra",
-        "14,19": "tile_bg_extra_floor02_extra",
-        "15,19": "tile_bg_extra_floor02_extra",
-        "15,20": "tile_bg_extra_floor02_extra",
-        "12,20": "tile_bg_extra_floor02_extra",
-        "12,19": "tile_bg_extra_floor02_extra",
-        "11,18": "tile_bg_extra_floor02_extra",
-        "10,18": "tile_bg_extra_floor02_extra",
-        "10,17": "tile_bg_extra_floor02_extra",
-        "9,17": "tile_bg_extra_floor02_extra",
-        "9,18": "tile_bg_extra_floor02_extra",
-        "9,19": "tile_bg_extra_floor02_extra",
-        "9,20": "tile_bg_extra_floor02_extra",
-        "9,21": "tile_bg_extra_floor02_extra",
-        "10,20": "tile_bg_extra_floor02_extra",
-        "10,19": "tile_bg_extra_floor02_extra",
-        "11,17": "tile_bg_extra_floor02_extra",
-        "12,16": "tile_bg_extra_floor02_extra",
-        "13,16": "tile_bg_extra_floor02_extra",
-        "13,17": "tile_bg_extra_floor02_extra",
-        "11,21": "tile_bg_extra_floor02_extra",
-        "11,20": "tile_bg_extra_floor02_extra",
-        "11,19": "tile_bg_extra_floor02_extra",
-        "12,18": "tile_bg_extra_floor02_extra",
-        "12,17": "tile_bg_extra_floor02_extra",
-        "14,17": "tile_bg_extra_floor02_extra",
-        "15,17": "tile_bg_extra_floor02_extra",
-        "16,17": "tile_bg_extra_floor02_extra",
-        "17,17": "tile_bg_extra_floor02_extra",
-        "18,17": "tile_bg_extra_floor02_extra",
-        "19,17": "tile_bg_extra_floor02_extra",
-        "20,17": "tile_bg_extra_floor02_extra",
-        "20,18": "tile_bg_extra_floor02_extra",
-        "21,18": "tile_bg_extra_floor02_extra",
-        "21,19": "tile_bg_extra_floor02_extra",
-        "20,19": "tile_bg_extra_floor02_extra",
-        "20,20": "tile_bg_extra_floor02_extra",
+        "14,21": "tile_bg_extra_floor02_extra",
         "19,20": "tile_bg_extra_floor02_extra",
         "18,20": "tile_bg_extra_floor02_extra",
         "17,20": "tile_bg_extra_floor02_extra",
-        "16,20": "tile_bg_extra_floor02_extra",
-        "15,21": "tile_bg_extra_floor02_extra",
-        "15,22": "tile_bg_extra_floor02_extra",
-        "14,22": "tile_bg_extra_floor02_extra",
-        "14,24": "tile_bg_extra_floor02_extra",
-        "13,24": "tile_bg_extra_floor02_extra",
-        "12,24": "tile_bg_extra_floor02_extra",
-        "12,23": "tile_bg_extra_floor02_extra",
-        "12,22": "tile_bg_extra_floor02_extra",
-        "14,21": "tile_bg_extra_floor02_extra"
+        "15,20": "tile_bg_extra_floor02_extra",
+        "13,20": "tile_bg_extra_floor02_extra",
+        "11,20": "tile_bg_extra_floor02_extra",
+        "9,20": "tile_bg_extra_floor02_extra",
+        "21,19": "tile_bg_extra_floor02_extra",
+        "20,19": "tile_bg_extra_floor02_extra",
+        "15,19": "tile_bg_extra_floor02_extra",
+        "11,19": "tile_bg_extra_floor02_extra",
+        "9,19": "tile_bg_extra_floor02_extra",
+        "21,18": "tile_bg_extra_floor02_extra",
+        "20,18": "tile_bg_extra_floor02_extra",
+        "11,18": "tile_bg_extra_floor02_extra",
+        "9,18": "tile_bg_extra_floor02_extra",
+        "18,17": "tile_bg_extra_floor02_extra",
+        "16,17": "tile_bg_extra_floor02_extra",
+        "14,17": "tile_bg_extra_floor02_extra",
+        "12,17": "tile_bg_extra_floor02_extra",
+        "10,17": "tile_bg_extra_floor02_extra",
+        "9,17": "tile_bg_extra_floor02_extra"
       },
-      "ground2": {},
       "ground3": {
         "21,16": "tile_obstacle_ore_small"
       },
@@ -18060,8 +18026,6 @@ const BATTLE_MAPS = [
         "16,23": "tile_obstacle_camping_lights"
       },
       "object3": {},
-      "object4": {},
-      "overlay": {},
       "top": {
         "11,23": "tile_mr4czvpx",
         "11,24": "tile_mr4czvpx",
@@ -18628,6 +18592,20 @@ const BATTLE_MAPS = [
         "doorMode": "memory",
         "memoryKey": "pure-key",
         "memoryScene": "red_memory_03"
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 24,
+        "r": 14,
+        "layer": "object2",
+        "doorMode": "memory",
+        "memoryKey": "devotion-key"
+      },
+      {
+        "id": "tile_bg_extra_chained_door",
+        "c": 24,
+        "r": 14,
+        "layer": "object3"
       }
     ],
     "solid": [
@@ -18850,7 +18828,33 @@ const BATTLE_MAPS = [
     ],
     "cols": 32,
     "rows": 30,
-    "hiddenPickups": []
+    "hiddenPickups": [],
+    "layerOrder": [
+      {
+        "id": "floor",
+        "name": "🟫 地板"
+      },
+      {
+        "id": "ground3",
+        "name": "🩹 地面裝飾 3"
+      },
+      {
+        "id": "object",
+        "name": "📦 物件"
+      },
+      {
+        "id": "object2",
+        "name": "門"
+      },
+      {
+        "id": "top",
+        "name": "☁️ 上層"
+      },
+      {
+        "id": "object3",
+        "name": "鎖鏈"
+      }
+    ]
   },
   {
     "id": "map_a46c5e1a-9802-4db5-a3b9-486b4649c206",
