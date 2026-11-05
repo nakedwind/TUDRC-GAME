@@ -13,6 +13,7 @@ const LOOT_FX_VERSION = 2;
 const LOOT_FX_V2 = {
   oreShards: 10,     // 礦物碎掉時噴出幾片水晶碎片（純裝飾，不能撿）
   coreShards: 16,    // 核心碎掉時噴出幾片
+  shardGlint: false, // 地上的碎片：掃過的白光、往上飄的小光點（false＝不要，使用者 2026-11-05 決定拿掉）
   glintEvery: 2.2,   // 地上的碎片每隔幾秒閃一次白光
   collect: false,    // 撿起碎片時的光點效果（false＝不要，照原本只跳 +數字）
 };
@@ -109,7 +110,7 @@ function drawLootV2(ctx) {   // 世界層
 }
 // 地上的異質碎片（drawOreShards 每顆會呼叫）：定時掃過的白光、偶爾往上飄的小光點
 function lootV2ShardGlint(ctx, s, x, y) {
-  if (!lootV2On() || s.z > 0) return;
+  if (!lootV2On() || s.z > 0 || !LOOT_FX_V2.shardGlint) return;
   const now = performance.now() / 1000, per = LOOT_FX_V2.glintEvery, k = ((now + s.spin * 3) % per) / per;
   ctx.save(); ctx.globalCompositeOperation = 'lighter';
   if (k < .22) {   // 白光從上往下掃過結晶

@@ -436,6 +436,7 @@ function pickCharacterFrame(set, who) {
   if (mothFrame) return mothFrame;
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
+  if ((who.vineDazeT > .2 || (who.vineCap && who.vineBounced)) && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 被藤蔓丟下來躺在地上暈：正面閉眼（js/vines.js）
   if (who.slipT > 0 && who.slipPose) {   // 踩到香蕉皮滑倒：定格在隨機挑的那張走路圖（js/golden-banana-king.js 的 bkSlip）
     const g = set[who.slipPose.dir] && set[who.slipPose.dir][who.slipPose.frame];
     if (g && g.complete && g.naturalWidth) return g;
@@ -1208,6 +1209,7 @@ function openGroundMenu(c, r, clientX, clientY) {
 // ---- 鏡頭（相框位置）：跟著玩家，碰到地圖邊緣就停 ----
 let cam = { x: 0, y: 0 };
 function updateCamera() {
+  if (typeof vineCameraHold === 'function' && vineCameraHold()) return;   // 被藤蔓吊走：鏡頭停在原地（js/vines.js）
   const p = G && G.player;
   const mapW = COLS * CELL, mapH = ROWS * CELL;
   const vw = viewW(), vh = viewH();                  // 相框換算成世界座標的大小（含縮放）
@@ -1279,6 +1281,7 @@ function newGame() {
   computeFlow();        // 地圖障礙物接管舊固定碰撞後，重算可走路線
   seedCores();
   if (typeof seedFogTrees === 'function') seedFogTrees();   // 霧樹：燒掉就散掉那一區的霧（js/fog.js）
+  if (typeof seedVines === 'function') seedVines();   // 森林的垂吊藤蔓（js/vines.js）
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
@@ -1483,6 +1486,7 @@ function updatePlayer(dt) {
   p.dashT = Math.max(0, (p.dashT || 0) - dt); p.dashCd = Math.max(0, (p.dashCd || 0) - dt);
   if (npcArrangeMode) { p.moving = false; p.anim = 0; return; }
   if (p.mrtRide) { p.moving = false; p.anim = 0; return; }   // 搭捷運：跟著列車動（js/mrt-train.js）
+  if (p.vineCap || p.vineDazeT > 0) { p.moving = false; p.anim = 0; return; }   // 被藤蔓吊走、摔下來頭暈（js/vines.js）
   if (typeof updateLeader === 'function' && updateLeader(p, dt)) { p.moving = false; p.anim = 0; p.dir = 'front'; return; }   // 艾德林帶隊：治癒光環、技能冷卻；詠唱中站著不動（js/leader-skills.js）
   if (p.soothingT > 0) {                // 疏導中：站定、正面閉眼（按移動鍵會中斷疏導、急救，js/channel-actions.js）
     p.soothingT = Math.max(0, p.soothingT - dt);
@@ -1878,7 +1882,7 @@ function updatePlayerAttack(dt) {
   }
   updateAmmoHud();
   const queued = performance.now() - shotQueuedAt < SHOT_QUEUE * 1000;   // 剛點了一下（已經放開也算）
-  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.mothWakeT > 0 || p.slipDizzyT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中不開槍
+  const canFire = !(p.hp <= 0 || !(aimHeld || queued) || !aimClient || p.atkCd > 0 || p.soothingT > 0 || p.sleepT > 0 || p.mothWakeT > 0 || p.slipDizzyT > 0 || p.vineCap || p.vineDazeT > 0 || G.over || dialogueState || elevatorMenuOpen);   // 疏導中、被藤蔓吊走不開槍
   if (canFire) shotQueuedAt = -Infinity;   // 這一下開了：用掉
   if (wid === 'flare') { updateFlareGun(p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 照明彈（js/flare.js）
   if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
@@ -2184,6 +2188,7 @@ function update(dt) {
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
     if (t.grabbed || t.grabFall) { faceNpcFront(t); continue; }   // 被抓著／正在掉下來（js/grab.js）
+    if (t.vineCap || t.vineDazeT > 0) { t.moving = false; continue; }   // 被藤蔓吊走、摔下來頭暈（js/vines.js）
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
     else if (t.frozenT > 0) { t.frozenT -= dt; t.moving = false; t.navPath = null; if (t.hp > 0) t.dir = 'front'; }   // 溫特正在疏導／急救這位隊員：站著不動（js/channel-actions.js）
     else if (t.sleepT > 0 && t.hp > 0) { t.sleepT -= dt; t.moving = false; t.navPath = null; if (t.sleepT <= 0 && !t.mothSleep) sentryStatus(t, '醒來了', '#9ff0c0'); }   // 被麻醉槍打睡（js/special-guns.js）
@@ -2225,8 +2230,8 @@ function update(dt) {
   for (const t of G.towers) {
     const spec = TYPES[t.type];
     if (typeof tickSkillBuffs === 'function') tickSkillBuffs(t, dt);   // 嚮導技能給的增益倒數（js/guide-skills.js）
-    if (t.gsCast && (t.hp <= 0 || t.grabbed || t.grabFall || t.eatenBy || t.sleepT > 0 || t.dazeT > 0 || t.frozenT > 0)) cancelGuideCast(t);   // 嚮導詠唱中被打斷：技能取消
-    if (t.hp <= 0 || t.grabbed || t.grabFall) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 倒下、被抓著（js/grab.js）：不攻擊
+    if (t.gsCast && (t.hp <= 0 || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0 || t.eatenBy || t.sleepT > 0 || t.dazeT > 0 || t.frozenT > 0)) cancelGuideCast(t);   // 嚮導詠唱中被打斷：技能取消
+    if (t.hp <= 0 || t.grabbed || t.grabFall || t.vineCap || t.vineDazeT > 0) { t.meleeSwing = null; t.gunSwing = null; continue; }   // 倒下、被抓著（js/grab.js）、被藤蔓吊走（js/vines.js）：不攻擊
     if (t.gunT > 0) t.gunT -= dt;   // 持槍攻擊圖計時
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0) {
       t.gunReloadT = Math.max(0, t.gunReloadT - dt);
@@ -2550,6 +2555,7 @@ function update(dt) {
   if (typeof updateCoreKeyDrops === 'function') updateCoreKeyDrops(dt);   // 核心掉出的異質鑰匙：落地、幾秒後自動收進背包（js/core-clear.js）
   if (typeof checkCoreClear === 'function') checkCoreClear(dt);
   else if (!MAP_SAFE && G.cores.length && G.cores.every(c=>c.dead) && G.enemies.length===0 && !(typeof burrowLurkerCount === 'function' ? burrowLurkerCount() : 0)) win();   // 地底的老鼠也要清掉
+  if (typeof updateVines === 'function') updateVines(dt);   // 垂吊藤蔓：抓人、拉上去、丟回地面（js/vines.js；放最後，被吊著時扣的血補回來）
   updateHUD();
 }
 const FLASH_LIFE = 1.5;   // 提示字停留時間（秒）；想更久／更短改這裡

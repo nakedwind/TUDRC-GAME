@@ -36,7 +36,7 @@ const grabFalling = [];    // 正在掉下來的人
 
 // 滑鼠底下可以抓的人：隊友（哪裡都可以）、NPC（只有基地裡）
 function grabActorAt(x, y) {
-  const list = [...G.towers, ...(MAP_SAFE ? G.npcs : [])].filter(a => !a.eatenBy && !a.grabFall && (!grab || grab.actor !== a));
+  const list = [...G.towers, ...(MAP_SAFE ? G.npcs : [])].filter(a => !a.eatenBy && !a.grabFall && !a.vineCap && (!grab || grab.actor !== a));   // 被藤蔓吊走的抓不到（js/vines.js）
   return list.sort((a, b) => b.y - a.y).find(a => Math.abs(a.x - x) <= 26 && y >= a.y - 48 && y <= a.y + 18) || null;
 }
 function grabCanStart() {

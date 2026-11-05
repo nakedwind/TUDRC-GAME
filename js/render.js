@@ -1059,6 +1059,7 @@ function draw() {
   if (typeof drawDoorLock === 'function') for (const d of mapDoors) if (!d.open && doorLocked(d)) sortables.push({ y: d.y + 1.5, draw: () => drawDoorLock(ctx, d) });   // 門上的鎖鏈、大鎖（js/doors.js）：緊接在門後面畫   // 畫在牆、物品上的塗鴉：緊接在那個東西之後畫
   for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
+  if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -1215,6 +1216,7 @@ function draw() {
   drawEquipmentGroundDrops(ctx);
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 再塗一次：上面這些畫在黑幕之上的發光物、亮點，在隱藏區裡也不能露出來
+  if (typeof drawVineOverlay === 'function') drawVineOverlay(ctx);   // 被藤蔓拉上去、掉下來的人：離鏡頭近，畫在黑幕和霧上面（js/vines.js）
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
   if (typeof drawFogV2Glow === 'function') drawFogV2Glow(ctx);   // 起霧 V2 的螢火蟲（黑幕上面才看得到）（js/fog-fx-v2.js）
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）

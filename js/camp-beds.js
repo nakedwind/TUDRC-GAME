@@ -42,7 +42,7 @@ function updateCampBeds(dt) {
     if (t.hp <= 0 || inCombat(t)) t.calmT = 0; else t.calmT = (t.calmT || 0) + dt;
     if (t.bedRetryT > 0) t.bedRetryT -= dt;
     if (!beds.length || t.cot || t.hp <= 0 || t.hp >= t.maxhp * CAMP_BED.below || t.calmT < CAMP_BED.calm || t.bedRetryT > 0) continue;
-    if (t.eatenBy || t.rootT > 0 || t.sleepT > 0 || t.dazeT > 0 || t.grabbed || t.grabFall || t.frozenT > 0 || t.berserk || t.mode === 'goto') continue;   // 玩家剛下的「前往」指令先照做
+    if (t.eatenBy || t.rootT > 0 || t.sleepT > 0 || t.dazeT > 0 || t.grabbed || t.grabFall || t.vineCap || t.frozenT > 0 || t.berserk || t.mode === 'goto') continue;   // 玩家剛下的「前往」指令先照做
     const seat = beds.find(s => !seatTaken(s, t)), approach = seat && seatApproachPoint(seat);
     if (!approach) continue;
     t.cot = { seat, approach, phase: 'walk', t: 0 }; t.seatGoal = { seat, approach };   // seatGoal：先佔住這張床，別人不會搶（指令 t.mode 不動：半路補好血就照原本的繼續）
@@ -66,7 +66,7 @@ function campBedStep(t, dt) {
     if (msg) sentryStatus(t, msg, '#ffd479');
     return false;
   };
-  if (MAP_SAFE || t.hp <= 0 || t.berserk || t.eatenBy || t.grabbed || t.grabFall || t.sleepT > 0 || t.rootT > 0) return stop();
+  if (MAP_SAFE || t.hp <= 0 || t.berserk || t.eatenBy || t.grabbed || t.grabFall || t.vineCap || t.sleepT > 0 || t.rootT > 0) return stop();
   if (c.phase === 'walk') {
     if (t.hitT > 0) return stop('被攻擊了，先應戰');
     if (t.hp >= t.maxhp * CAMP_BED.healedStop) {   // 路上被嚮導、治療彈、補給補到 60% 以上：不去躺，照原本的指令（例如跟隨護衛部隊長）繼續

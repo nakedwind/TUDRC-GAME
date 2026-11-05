@@ -264,7 +264,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=nomissing-20261102"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=mrtsound-20261102"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=vinesfx-20261105"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=clawstock-20261101"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -329,7 +329,7 @@
   <script src="js/achievements.js?v=achv7-20261023"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=nofallback-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/burrowing-mouse.js?v=mouse-test-off-20261024"></script> <!-- 花蓮版權老鼠：出土與地底手 -->
-  <script src="js/enemy-ai.js?v=mrtride-20261102"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=vinemates-20261105"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=sticky-knock-20261029"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/elite-bird-head.js?v=walksmash-20261104"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
   <script src="js/pearl-kid.js?v=pearlhit-20261104"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
@@ -344,7 +344,7 @@
   <script src="js/gourd-monkey.js?v=vehtoss-20261101"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=test-off-20261031"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=y25open9-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=fogtree-20261105"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=vineflip2-20261105"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=merge2-20261101"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/blast-fx-v2.js?v=v2-20261105"></script> <!-- 9e2. 爆炸特效 V2：pixelfx 風格的煙霧、火星（BLAST_FX_VERSION 切換 1／2） -->
@@ -357,11 +357,12 @@
   <script src="js/flare-fx-v2.js?v=v2-20261105"></script> <!-- 9e9. 照明彈特效 V2：拖煙、落地火花、燃燒時噴火花＋粉紅濃煙＋呼吸的光（FLARE_FX_VERSION 切換 1／2） -->
   <script src="js/water-fx-v2.js?v=v2-20261105"></script> <!-- 9e10. 水柱特效 V2（魚頭君）：水流白線、兩側甩出水珠、打到處水珠拋出、漣漪（WATER_FX_VERSION 切換 1／2） -->
   <script src="js/fog-fx-v2.js?v=v2-20261105"></script> <!-- 9e11. 起霧 V2：貼地薄霧帶、螢火蟲、落葉（FOG_FX_VERSION 切換 1／2） -->
-  <script src="js/loot-fx-v2.js?v=v2-20261105"></script> <!-- 9e12. 挖礦／撿東西／核心碎掉 V2：水晶碎片、碎片閃光、撿起光點、光柱（LOOT_FX_VERSION 切換 1／2） -->
+  <script src="js/loot-fx-v2.js?v=noglint-20261105"></script> <!-- 9e12. 挖礦／撿東西／核心碎掉 V2：水晶碎片、碎片閃光、撿起光點、光柱（LOOT_FX_VERSION 切換 1／2） -->
   <script src="js/misc-fx-v2.js?v=v2-20261105"></script> <!-- 9e13. 其他特效 V2：吐酸、怪物撞擊落地、槍口火光子彈、柯林連刺、大招集氣（MISC_FX_VERSION 切換 1／2） -->
   <script src="js/oil-barrels.js?v=merge2-20261101"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=led-noline-20261101"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
   <script src="js/fog.js?v=fogtree-20261105"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
+  <script src="js/vines.js?v=vinehit-20261105"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
   <script src="js/lifeform.js?v=life-burn-20261018"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
   <script src="js/smiler.js?v=capking3-20261101"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
   <script src="js/ore.js?v=hiddenore-20261102"></script> <!-- 9m. 異質碎片礦物：逐顆拾取 -->
@@ -410,14 +411,14 @@
   <script src="js/guide-sp.js?v=guideskill-20261024"></script>
   <script src="js/guide-skills.js?v=load-text-20261027"></script>   <!-- 嚮導技能：戰鬥中自動發動（群體補血、增益、大招…） -->
   <script src="js/vitals.js?v=midreturn-20261103"></script>   <!-- HP、SP、負荷跨地圖保留；應變中心休養、醫院、疏導室 -->
-  <script src="js/camp-beds.js?v=healstop3-20261102"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
+  <script src="js/camp-beds.js?v=vinemates-20261105"></script>   <!-- 作戰基地的行軍床：殘血隊員回去躺、溫特躺床 -->
 
   <script src="js/mrt-locks.js?v=pausebattle-20261101"></script>   <!-- 捷運閘門（好遊卡）、封鎖的入口（異質鑰匙） -->
   <script src="data/mrt-train.js?v=cargo3-20261102"></script>   <!-- 捷運列車的設定（物件編輯器匯出） -->
   <script src="js/mrt-train.js?v=cargo3-20261102"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=care-20261103"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=fogtree-20261105"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=vinebounce3-20261105"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
@@ -443,7 +444,7 @@
   <script src="js/practice.js?v=moth-20261029"></script>   <!-- B-1 訓練室：練習模式（塔納、沙包） -->
   <script src="js/defeat-aid.js?v=defeataid-20261102"></script>   <!-- 連續失利補助：同一區連續兩次全滅，撥款 $10,000 -->
   <script src="js/channel-actions.js?v=movecancel-20261025"></script>   <!-- 疏導、急救、包紮：站定跑進度條 -->
-  <script src="js/grab.js?v=grab-building-20261027"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
+  <script src="js/grab.js?v=vinemates-20261105"></script>   <!-- 右鍵按住抓隊友／應變中心的 NPC，拖到別處放下 -->
   <script src="js/tpad-missions.js?v=twosquad2-20261103"></script>   <!-- T-Pad 的「任務」App：主線、角色委託、回憶 -->
   <script src="js/tpad-map.js?v=eatenmate-20261103"></script>   <!-- T-Pad 的「地圖」App：基地樓層示意圖、出入口、NPC 位置 -->
   <script src="js/tpad-memories.js?v=kai-20261103"></script>   <!-- T-Pad 的「回憶」App：還沒解鎖的回憶、重看解鎖過的回憶 -->

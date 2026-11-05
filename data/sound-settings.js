@@ -86,6 +86,8 @@ const SOUND_SETTINGS = {
     "storyDoor": 2.5,
     "vendingCheckout": 1.8,
     "vendingOpen": 3,
+    "vineLand": 2.15,
+    "vineLift": 1.3,
     "wearGear": 2.1
   },
   "files": {
@@ -124,7 +126,10 @@ const SOUND_SETTINGS = {
       "bossCore": [
         "戰鬥/異質核心甦醒.mp3",
         "戰鬥/異質核心甦醒02.mp3"
-      ]
+      ],
+      "vineLift": "環境/往上拉.mp3",
+      "vineLand": "戰鬥/命中/hit.mp3",
+      "vineGrab": "環境/藤蔓抓住.mp3"
     },
     "extras": {},
     "meta": {}
