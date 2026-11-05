@@ -504,7 +504,8 @@ function gourdImpactFx(x, y) {
   const F = GOURD.fx;
   // 撞擊圖跟鳥頭人衝撞同一組（images/Attack effects/charge-impact，原圖朝右）：轉成朝下，像從天上砸下來；再往四周噴暖色火花
   if (typeof playAttackSprite === 'function') playAttackSprite('charge-impact', x, y - 12, .42, Math.PI / 2);
-  for (let i = 0; i < 10; i++) {
+  if (typeof mfxOn === 'function' && mfxOn('monster')) heavyLandingV2(x, y, 70);   // V2：貼地雙圈、灰塵、裂紋光、拉長火花（js/misc-fx-v2.js）
+  else for (let i = 0; i < 10; i++) {
     const a = Math.PI * 2 * i / 10 + gmRand(-.25, .25), sp = gmRand(140, 260);
     G.effects.push({ particle: true, kind: 'spark', x, y: y - 8, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .5 - 30,
       r: 2 + Math.random() * 2, life: .16 + Math.random() * .14, life0: .3, color: i % 2 ? '#fff0c8' : '#ffb066' });

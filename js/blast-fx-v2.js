@@ -24,6 +24,7 @@ const BLAST_FX_V2 = {
   dust:       { R: 60,  fire: .55, column: .1,  soot: .15, sparks: .3,  embers: .7,  brands: 0,   ring: .7,  smoke: null, spread: .85 },   // 人面蝶粉塵爆炸：整片鱗粉一起閃燃（spread＝火團散在整個範圍）
 };
 
+const BLAST_FX_LOD = { calm: 3, min: .35 };   // 同時超過 calm 個爆炸時開始減量，最少減到 min 倍
 const BV2_FIRE = [[255, 255, 255], [255, 243, 166], [255, 226, 107], [255, 194, 61], [255, 138, 42], [242, 86, 29], [201, 40, 31], [138, 31, 23], [74, 23, 18]];
 const BV2_SMOKE = [[123, 111, 114], [93, 86, 96], [67, 61, 72], [43, 38, 48], [26, 23, 30]];
 const BV2_K = 1.8, BV2_FK = 1.3;   // pixelfx 像素 → 遊戲像素；火球和煙再放大一點（平滑圓比像素圓顯小）
@@ -35,7 +36,10 @@ function bv2Rgba(c, a) { return `rgba(${c[0] | 0},${c[1] | 0},${c[2] | 0},${Math
 
 // 放一個 V2 爆炸。kind：BLAST_FX_V2 的名稱；o.scale：再額外放大縮小
 function blastFxV2(x0, y0, kind, o = {}) {
-  const P = BLAST_FX_V2[kind] || BLAST_FX_V2.drum;
+  const P0 = BLAST_FX_V2[kind] || BLAST_FX_V2.drum;
+  // 效能：畫面上同時很多個爆炸（例如連環油桶）時，新的爆炸粒子自動變少一點，看起來差不多但不會卡
+  const busy = (G.blastsV2 || []).length, lod = busy > BLAST_FX_LOD.calm ? Math.max(BLAST_FX_LOD.min, BLAST_FX_LOD.calm / busy) : 1;
+  const P = lod < 1 ? { ...P0, fire: P0.fire * lod, column: P0.column * lod, soot: P0.soot * lod, sparks: P0.sparks * lod, embers: P0.embers * lod, brands: P0.brands * lod } : P0;
   const R = P.R * (o.scale || 1), s = Math.min(1.3, Math.pow(R / 140, .75)), K = BV2_K * s;
   const b = { x0, y0, cy: y0 - 10 * s, s, R, t: 0, fires: [], smokes: [], sparks: [], embers: [], brands: [], blazes: [],
     glow: { r0: 20 * s, r1: R * 1.15, life: .45, max: .45 }, core: { r: 26 * s, life: .12, max: .12 },
@@ -150,12 +154,30 @@ function drawBlastsV2(ctx) {
   ctx.restore();
   ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
 }
-function bv2SoftDisc(ctx, x, y, r, c, a) {
-  if (a <= .005 || r <= .5) return;
-  const g = ctx.createRadialGradient(x, y, 0, x, y, r);
-  g.addColorStop(0, bv2Rgba(c, a)); g.addColorStop(.7, bv2Rgba(c, a * .9)); g.addColorStop(1, bv2Rgba(c, 0));
-  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, r, 0, 6.283); ctx.fill();
+// ---- 效能：柔邊圓、光暈改用「事先畫好的小圖」貼上去，不用每顆粒子每一幀都重新做漸層（所有 V2 特效共用）----
+// profile：glow＝中間亮往外淡、disc＝實心一點的柔邊圓（煙）、soft＝中間濃外面淡（灰塵）
+const FX_SPRITE_PROFILES = { glow: [[0, 1], [1, 0]], disc: [[0, 1], [.7, .9], [1, 0]], soft: [[0, 1], [.6, .5], [1, 0]] };
+const fxSpriteCache = new Map();
+function fxSprite(c, profile = 'glow') {
+  const r = c[0] >> 3 << 3, gg = c[1] >> 3 << 3, b = c[2] >> 3 << 3, key = profile + r + ',' + gg + ',' + b;   // 顏色每 8 一階，小圖數量才不會太多
+  let cv = fxSpriteCache.get(key);
+  if (cv) return cv;
+  cv = document.createElement('canvas'); cv.width = cv.height = 64;
+  const x = cv.getContext('2d'), g = x.createRadialGradient(32, 32, 0, 32, 32, 32);
+  for (const [o, a] of FX_SPRITE_PROFILES[profile] || FX_SPRITE_PROFILES.glow) g.addColorStop(o, `rgba(${r},${gg},${b},${a})`);
+  x.fillStyle = g; x.fillRect(0, 0, 64, 64);
+  fxSpriteCache.set(key, cv);
+  return cv;
 }
+// 在 (x, y) 貼一個半徑 r、透明度 a 的柔光／柔邊圓（混色方式照目前的設定）
+function fxGlow(ctx, x, y, r, c, a, profile = 'glow') {
+  if (a <= .005 || r <= .5) return;
+  const prev = ctx.globalAlpha;
+  ctx.globalAlpha = prev * Math.min(1, a);
+  ctx.drawImage(fxSprite(c, profile), x - r, y - r, r * 2, r * 2);
+  ctx.globalAlpha = prev;
+}
+function bv2SoftDisc(ctx, x, y, r, c, a) { fxGlow(ctx, x, y, r, c, a, 'disc'); }
 function bv2DrawFire(ctx, p) {
   const k = p.life / p.max, age = 1 - k, heat = Math.min(.999, Math.pow(age, .62) + (p.seed % 1) * .1);
   const r = p.size * (.55 + .45 * Math.min(1, age * 7)) * (1 - age * .55);
@@ -180,9 +202,7 @@ function bv2Draw(ctx, b) {
   const { x0, y0, cy, s } = b;
   ctx.globalCompositeOperation = 'lighter';
   for (const z of b.blazes) {   // 落地小火的地面光
-    const k = z.life / z.max, r = (12 + 10 * k * z.power) * s, g = ctx.createRadialGradient(z.x, z.y, 0, z.x, z.y, r);
-    g.addColorStop(0, `rgba(255,138,42,${(.35 * k * z.power).toFixed(3)})`); g.addColorStop(1, 'rgba(255,138,42,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(z.x, z.y, r, 0, 6.283); ctx.fill();
+    const k = z.life / z.max; fxGlow(ctx, z.x, z.y, (12 + 10 * k * z.power) * s, [255, 138, 42], .35 * k * z.power);
   }
   if (b.glow.life > 0) {   // 底層爆閃光暈
     const p = b.glow.life / b.glow.max, r = b.glow.r0 + (b.glow.r1 - b.glow.r0) * (1 - p), g = ctx.createRadialGradient(x0, y0 - 8, 0, x0, y0 - 8, r);
@@ -207,9 +227,7 @@ function bv2Draw(ctx, b) {
     if (p.delay > 0) continue;
     const k = p.life / p.max, age = 1 - k, heat = Math.pow(age, .62);
     if (heat > .7) continue;
-    const r = p.size * (1 - age * .55) * 2.4 + 4, c = bv2Ramp(BV2_FIRE, heat), g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r);
-    g.addColorStop(0, bv2Rgba(c, .22 * k)); g.addColorStop(1, bv2Rgba(c, 0));
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, r, 0, 6.283); ctx.fill();
+    fxGlow(ctx, p.x, p.y, p.size * (1 - age * .55) * 2.4 + 4, bv2Ramp(BV2_FIRE, heat), .22 * k);
   }
   ctx.lineCap = 'round';
   for (const p of b.sparks) {   // 火星：沿速度方向拉長，越久越冷
@@ -220,16 +238,14 @@ function bv2Draw(ctx, b) {
     ctx.beginPath(); ctx.moveTo(sx - ux * len, sy - uy * len); ctx.lineTo(sx - ux * len * .4, sy - uy * len * .4); ctx.stroke();
     ctx.strokeStyle = bv2Rgba(head, Math.min(1, k * 2)); ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(sx - ux * len * .45, sy - uy * len * .45); ctx.lineTo(sx, sy); ctx.stroke();
-    const g = ctx.createRadialGradient(sx, sy, 0, sx, sy, 6); g.addColorStop(0, bv2Rgba(head, .45 * k)); g.addColorStop(1, bv2Rgba(head, 0));
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(sx, sy, 6, 0, 6.283); ctx.fill();
+    fxGlow(ctx, sx, sy, 6, head, .45 * k);
   }
   for (const p of b.embers) {   // 飄浮火屑：快熄時閃爍
     const k = p.life / p.max;
     if (k < .25 && Math.sin(b.t * 40 + p.seed) < 0) continue;
     const c = b.tint && (p.seed % 1) < .45 ? b.tint : k > .6 ? [255, 243, 166] : k > .3 ? [255, 226, 107] : [255, 138, 42];   // tint：一部分火屑帶鱗粉的顏色
     ctx.fillStyle = bv2Rgba(c, 1); ctx.beginPath(); ctx.arc(p.x, p.y, 1.4, 0, 6.283); ctx.fill();
-    const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 6); g.addColorStop(0, bv2Rgba(c, .35 * k)); g.addColorStop(1, bv2Rgba(c, 0));
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, 6.283); ctx.fill();
+    fxGlow(ctx, p.x, p.y, 6, c, .35 * k);
   }
   if (b.core.life > 0) {   // 爆開瞬間的白熱核心
     const p = b.core.life / b.core.max, g = ctx.createRadialGradient(x0, cy, 0, x0, cy, b.core.r * (1.6 - p * .6));

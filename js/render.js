@@ -1365,6 +1365,7 @@ function drawWorldEffects() {
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
   if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx);   // 起霧 V2 的落葉（js/fog-fx-v2.js）
   if (typeof drawLootV2 === 'function') drawLootV2(ctx);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
+  if (typeof drawMiscV2 === 'function') drawMiscV2(ctx);   // 槍、連刺、集氣等其他 V2（js/misc-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];
@@ -1468,6 +1469,8 @@ function drawWorldEffects() {
       ctx.globalAlpha = Math.min(1, p * 1.5); ctx.fillStyle = f.col;
       ctx.beginPath(); ctx.arc(f.x, f.y, Math.max(.6, f.r * (0.6 + 0.4 * p)), 0, Math.PI * 2); ctx.fill();
       ctx.globalAlpha = 1;
+    } else if (f.bullet && typeof mfxOn === 'function' && mfxOn('gun')) {   // V2 子彈（js/misc-fx-v2.js）
+      drawBulletV2(ctx, f);
     } else if (f.bullet) {                                 // 子彈曳光：一顆亮點＋短尾，從槍口快速飛向目標
       const prog = 1 - Math.max(0, f.life) / f.life0;
       const cx = f.x1 + (f.x2 - f.x1) * prog, cy = f.y1 + (f.y2 - f.y1) * prog;
@@ -1477,6 +1480,8 @@ function drawWorldEffects() {
       ctx.beginPath(); ctx.moveTo(tx, ty); ctx.lineTo(cx, cy); ctx.stroke();
       ctx.fillStyle = '#ffffff'; ctx.beginPath(); ctx.arc(cx, cy, 1.8, 0, Math.PI * 2); ctx.fill();
       ctx.restore(); ctx.globalCompositeOperation = 'source-over';
+    } else if (f.muzzle && typeof mfxOn === 'function' && mfxOn('gun')) {   // V2 槍口火光（js/misc-fx-v2.js）
+      drawMuzzleV2(ctx, f);
     } else if (f.muzzle) {                                 // 槍口閃光：短暫的亮星＋前射小扇
       const p = Math.max(0, f.life / f.life0);
       ctx.save(); ctx.translate(f.x, f.y); ctx.rotate(f.ang || 0); ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = p;
@@ -1484,6 +1489,8 @@ function drawWorldEffects() {
       ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(9, -3.5); ctx.lineTo(13, 0); ctx.lineTo(9, 3.5); ctx.closePath(); ctx.fill();
       ctx.beginPath(); ctx.arc(0, 0, 3.2, 0, Math.PI * 2); ctx.fill();
       ctx.restore(); ctx.globalCompositeOperation = 'source-over'; ctx.globalAlpha = 1;
+    } else if (f.charge && typeof mfxOn === 'function' && mfxOn('charge')) {   // V2 大招集氣（js/misc-fx-v2.js）
+      drawChargeV2(ctx, f);
     } else if (f.charge) {                                 // 大招蓄力：收束光圈＋漸亮核心（加色疊加）
       const prog = 1 - Math.max(0, f.life) / f.life0;
       ctx.save(); ctx.globalCompositeOperation = 'lighter';

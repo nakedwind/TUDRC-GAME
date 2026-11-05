@@ -575,6 +575,7 @@ function addSpitPool(x, y) {
   (G.spitPools = G.spitPools || []).push({ x, y, r, t: P.life, t0: P.life, shape: scorchShape(r, 18), bubbles: [], fizzT: 0 });
   spawnGoo(x, y - 8, SLIME_VARIANTS.spitter.goo, 8, .9);
   G.effects.push({ ring: true, x, y, r: 4, r2: r * 1.1, life: .25, life0: .25, color: '#e6f06a' });
+  if (typeof mfxOn === 'function' && mfxOn('acid')) acidSpitLandV2(x, y);   // V2：黃綠色液體皇冠、拋出去的酸液（js/misc-fx-v2.js）
   if (typeof sfxAt === 'function') sfxAt('corrosionImpact', x, y, .45, 'spitter-land');
 }
 // 地面層：酸液池＋落點警示（蓄力中、飛行中）
@@ -619,6 +620,7 @@ function drawAcidTop(ctx) {
     ctx.globalAlpha = .3; ctx.fillStyle = '#0a1005';
     ctx.beginPath(); ctx.ellipse(x, y + 8, 6, 2.5, 0, 0, Math.PI * 2); ctx.fill();
     const by = y - z;
+    if (typeof mfxOn === 'function' && mfxOn('acid')) { drawAcidShotV2(ctx, s, x, by); ctx.restore(); continue; }   // V2：會晃動變形、有反光的酸液球（js/misc-fx-v2.js）
     const g = ctx.createRadialGradient(x - 1.5, by - 1.5, 0, x, by, 9);
     g.addColorStop(0, 'rgba(250,255,190,1)'); g.addColorStop(.45, 'rgba(210,230,70,.95)'); g.addColorStop(1, 'rgba(150,190,30,0)');
     ctx.globalAlpha = 1; ctx.fillStyle = g;

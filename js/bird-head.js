@@ -106,7 +106,8 @@ function spawnChargeImpact(e, target) {
   const dir = e.ch.dir, ang = Math.atan2(dir.y, dir.x);
   const x = (e.x + target.x) / 2 + dir.x * 6, y = (e.y + target.y) / 2 - 18;
   playAttackSprite('charge-impact', x, y, .42, ang);   // 自畫的撞擊特效（images/Attack effects/charge-impact）
-  for (let i = 0; i < 6; i++) {   // 往前方噴幾顆火花，補動態感
+  if (typeof mfxOn === 'function' && mfxOn('monster')) birdChargeImpactV2(x, y, ang);   // V2：星芒、往前噴的拉長火花、灰塵（js/misc-fx-v2.js）
+  else for (let i = 0; i < 6; i++) {   // 往前方噴幾顆火花，補動態感
     const a = ang + (Math.random() * 2 - 1) * .7, sp = 160 + Math.random() * 160;
     G.effects.push({ particle: true, kind: 'spark', x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - 30,
       r: 2 + Math.random() * 2, life: .16 + Math.random() * .14, life0: .3, color: i % 2 ? '#fff0c8' : '#ffb066' });

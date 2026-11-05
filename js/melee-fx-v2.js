@@ -39,7 +39,7 @@ function meleeV2Impact(x, y, heavy, style) {
     dust.push({ x: x + Math.cos(a) * 6, y: y + 8 + Math.sin(a) * 3, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .4, r0: mv2R(5, 8), r1: mv2R(14, 20), life: mv2R(.4, .6), max: 0, shade: Math.random() });
   }
   for (const d of dust) d.max = d.life;
-  (G.meleeV2 = G.meleeV2 || []).push({ impact: true, x, y, heavy, sparks, dust, rot: Math.random() * Math.PI, spikes: Array.from({ length: 8 }, () => mv2R(.6, 1)), t: 0, life: .5 });
+  (G.meleeV2 = G.meleeV2 || []).push({ impact: true, warm: style === 'warm', x, y, heavy, sparks, dust, rot: Math.random() * Math.PI, spikes: Array.from({ length: 8 }, () => mv2R(.6, 1)), t: 0, life: .5 });
 }
 // 近戰大招衝擊波
 function meleeV2Shockwave(x, y, r, color) {
@@ -146,14 +146,12 @@ function mv2DrawImpact(ctx, f) {
     if (d.life <= 0) continue;
     const q = 1 - d.life / d.max, r = d.r0 + (d.r1 - d.r0) * (1 - (1 - q) * (1 - q)), a = (q < .15 ? q / .15 : (1 - q) / .85) * .4;
     const c = [Math.round(170 + d.shade * 30), Math.round(155 + d.shade * 25), Math.round(125 + d.shade * 20)];
-    const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, r);
-    g.addColorStop(0, `rgba(${c},${a.toFixed(3)})`); g.addColorStop(1, `rgba(${c},0)`);
-    ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(d.x, d.y, r, 0, 6.283); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over'; fxGlow(ctx, d.x, d.y, r, c, a);
   }
   // 貼地衝擊環（重擊）
   if (f.heavy && t < .25) {
     const q = t / .25; ctx.save(); ctx.translate(x, y + 8); ctx.scale(1, .45);
-    ctx.globalAlpha = (1 - q) * .7; ctx.strokeStyle = '#dceaff'; ctx.lineWidth = 1 + 3 * (1 - q);
+    ctx.globalAlpha = (1 - q) * .7; ctx.strokeStyle = f.warm ? '#fff0c8' : '#dceaff'; ctx.lineWidth = 1 + 3 * (1 - q);
     ctx.beginPath(); ctx.arc(0, 0, 8 + 30 * (1 - (1 - q) * (1 - q)), 0, 6.283); ctx.stroke(); ctx.restore();
   }
   ctx.globalCompositeOperation = 'lighter';
@@ -161,7 +159,7 @@ function mv2DrawImpact(ctx, f) {
   const flashT = f.heavy ? .13 : .1;
   if (t < flashT) {
     const k = 1 - t / flashT, R = (f.heavy ? 26 : 19) * (1 + t * 2);
-    mv2Glow(ctx, x, y, R * 1.3, 'rgba(160,200,255,A)', .7 * k);
+    mv2Glow(ctx, x, y, R * 1.3, f.warm ? 'rgba(255,190,110,A)' : 'rgba(160,200,255,A)', .7 * k);   // warm：怪物撞擊用暖色
     ctx.save(); ctx.translate(x, y); ctx.rotate(f.rot); ctx.globalAlpha = k;
     ctx.fillStyle = '#ffffff'; ctx.beginPath();
     for (let i = 0; i < 16; i++) { const a = i / 16 * Math.PI * 2, rr = i % 2 ? R * .28 : R * f.spikes[i >> 1]; i ? ctx.lineTo(Math.cos(a) * rr, Math.sin(a) * rr) : ctx.moveTo(Math.cos(a) * rr, Math.sin(a) * rr); }
@@ -171,7 +169,7 @@ function mv2DrawImpact(ctx, f) {
   for (const p of f.sparks) {
     if (p.life <= 0) continue;
     const k = p.life / p.max, sp = Math.hypot(p.vx, p.vy) || 1, len = Math.min(14, 2 + sp * .045) * H;
-    ctx.globalAlpha = Math.min(1, k * 2); ctx.strokeStyle = k > .5 ? '#ffffff' : '#9cc8ff'; ctx.lineWidth = f.heavy ? 2 : 1.6;
+    ctx.globalAlpha = Math.min(1, k * 2); ctx.strokeStyle = k > .5 ? '#ffffff' : (f.warm ? '#ffb066' : '#9cc8ff'); ctx.lineWidth = f.heavy ? 2 : 1.6;
     ctx.beginPath(); ctx.moveTo(p.x - p.vx / sp * len, p.y - p.vy / sp * len); ctx.lineTo(p.x, p.y); ctx.stroke();
   }
   ctx.globalAlpha = 1;
@@ -182,9 +180,7 @@ function mv2DrawShock(ctx, f) {
     if (d.life <= 0) continue;
     const q = 1 - d.life / d.max, rr = d.r0 + (d.r1 - d.r0) * (1 - (1 - q) * (1 - q)), a = (q < .12 ? q / .12 : (1 - q) / .88) * .42;
     const c = [Math.round(170 + d.shade * 30), Math.round(155 + d.shade * 25), Math.round(125 + d.shade * 20)];
-    const g = ctx.createRadialGradient(d.x, d.y, 0, d.x, d.y, rr);
-    g.addColorStop(0, `rgba(${c},${a.toFixed(3)})`); g.addColorStop(1, `rgba(${c},0)`);
-    ctx.globalCompositeOperation = 'source-over'; ctx.fillStyle = g; ctx.beginPath(); ctx.arc(d.x, d.y, rr, 0, 6.283); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over'; fxGlow(ctx, d.x, d.y, rr, c, a);
   }
   // 貼地雙圈
   for (const [dur, k0, w] of [[.38, 1, 4], [.26, .65, 2.5]]) {

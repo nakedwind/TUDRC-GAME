@@ -189,9 +189,7 @@ function fv2DrawCoals(ctx, src) {   // 火海底下發紅的炭床
   for (let i = 0; i < 14; i++) {   // 一明一暗呼吸的炭火
     const a = fv2Hash(i, 3) * 6.283, d = Math.sqrt(fv2Hash(i, 5)) * r * .8, px = x + Math.cos(a) * d, py = y + Math.sin(a) * d;
     const b = (.5 + .5 * Math.sin(t * 2.4 + i * 1.7)) * e, rr = 5 + fv2Hash(i, 7) * 6;
-    const cg = ctx.createRadialGradient(px, py, 0, px, py, rr);
-    cg.addColorStop(0, `rgba(255,190,80,${(.5 * b).toFixed(3)})`); cg.addColorStop(1, 'rgba(255,90,20,0)');
-    ctx.fillStyle = cg; ctx.beginPath(); ctx.arc(px, py, rr, 0, 6.283); ctx.fill();
+    fxGlow(ctx, px, py, rr, [255, 190, 80], .5 * b);
   }
   ctx.restore();
 }
@@ -205,12 +203,8 @@ function fv2DrawCluster(ctx, c, src) {
   if (gEnv > 0) {
     ctx.globalCompositeOperation = 'lighter';
     const br = .92 + .08 * fv2Noise(t * .67, c.flick + 3), lx = fv2Noise(t * .67, c.flick + 90) * 1.4;
-    let g = ctx.createRadialGradient(lx, -10, 0, lx, -10, 40 * br + 4);
-    g.addColorStop(0, `rgba(255,190,110,${(.28 * fl * gEnv).toFixed(3)})`); g.addColorStop(1, 'rgba(255,150,60,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(lx, -10, 40 * br + 4, 0, 6.283); ctx.fill();
-    ctx.save(); ctx.scale(1, .2); g = ctx.createRadialGradient(0, 0, 0, 0, 0, 34);
-    g.addColorStop(0, `rgba(255,170,80,${(.35 * fl * gEnv).toFixed(3)})`); g.addColorStop(1, 'rgba(255,120,40,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 34, 0, 6.283); ctx.fill(); ctx.restore();
+    fxGlow(ctx, lx, -10, 40 * br + 4, [255, 190, 110], .28 * fl * gEnv);
+    ctx.save(); ctx.scale(1, .2); fxGlow(ctx, 0, 0, 34, [255, 170, 80], .35 * fl * gEnv); ctx.restore();
     ctx.globalCompositeOperation = 'source-over';
   }
   ctx.restore();
@@ -221,7 +215,7 @@ function fv2DrawCluster(ctx, c, src) {
   ctx.globalCompositeOperation = 'lighter'; ctx.lineCap = 'round';
   for (const p of c.sparks) {
     const k = p.life / p.max;
-    if (p.flash) { const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 7); g.addColorStop(0, `rgba(255,255,230,${(.8 * k).toFixed(3)})`); g.addColorStop(1, 'rgba(255,230,140,0)'); ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 7, 0, 6.283); ctx.fill(); continue; }
+    if (p.flash) { fxGlow(ctx, p.x, p.y, 7, [255, 255, 230], .8 * k); continue; }
     const sp = Math.hypot(p.vx, p.vy) || 1, len = Math.min(5, .6 + sp * .012), ux = p.vx / sp, uy = p.vy / sp;
     ctx.strokeStyle = k > .6 ? FV2_HOT[1] : k > .3 ? FV2_HOT[2] : FV2_HOT[4]; ctx.globalAlpha = Math.min(1, k * 2); ctx.lineWidth = .8;
     ctx.beginPath(); ctx.moveTo(p.x - ux * len, p.y - uy * len); ctx.lineTo(p.x, p.y); ctx.stroke();
@@ -233,8 +227,7 @@ function fv2DrawCluster(ctx, c, src) {
     const x = p.x + 7 * (Math.sin(p.age * 2.3 + p.a) - Math.sin(p.a)), y = p.y + 2 * (Math.sin(p.age * 3 + p.b) - Math.sin(p.b));
     const col = k > .6 ? [255, 243, 166] : k > .3 ? [255, 226, 107] : [255, 138, 42];
     ctx.fillStyle = bv2Rgba(col, 1); ctx.beginPath(); ctx.arc(x, y, p.s * .55, 0, 6.283); ctx.fill();
-    const g = ctx.createRadialGradient(x, y, 0, x, y, 3); g.addColorStop(0, bv2Rgba(col, .35 * k)); g.addColorStop(1, bv2Rgba(col, 0));
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, 3, 0, 6.283); ctx.fill();
+    fxGlow(ctx, x, y, 3, col, .35 * k);
   }
   ctx.restore();
 }
@@ -254,9 +247,7 @@ function drawBurnV2(ctx, e, size = 1) {
   ctx.globalCompositeOperation = 'lighter';
   const flick = .8 + .2 * fv2Noise(t * 7.5, seed);
   ctx.save(); ctx.translate(e.x, by); ctx.scale(1, .22);
-  let g = ctx.createRadialGradient(0, 0, 0, 0, 0, 30 * k);
-  g.addColorStop(0, `rgba(255,150,60,${((.16 + .22 * fl) * flick * fade).toFixed(3)})`); g.addColorStop(1, 'rgba(255,120,40,0)');
-  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(0, 0, 30 * k, 0, 6.283); ctx.fill(); ctx.restore();
+  fxGlow(ctx, 0, 0, 30 * k, [255, 150, 60], (.16 + .22 * fl) * flick * fade); ctx.restore();
   ctx.globalCompositeOperation = 'source-over';
   // 淡淡的煙，往上、被風吹斜
   for (let i = 0; i < 6; i++) {
@@ -276,9 +267,7 @@ function drawBurnV2(ctx, e, size = 1) {
     ctx.restore();
     ctx.globalCompositeOperation = 'lighter';
     const gr = (9 + 6 * fl) * k * .8;
-    g = ctx.createRadialGradient(e.x + sx, by + sy - 2 * k, 0, e.x + sx, by + sy - 2 * k, gr);
-    g.addColorStop(0, `rgba(255,138,42,${((.22 + .35 * fl) * fade).toFixed(3)})`); g.addColorStop(1, 'rgba(255,138,42,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(e.x + sx, by + sy - 2 * k, gr, 0, 6.283); ctx.fill();
+    fxGlow(ctx, e.x + sx, by + sy - 2 * k, gr, [255, 138, 42], (.22 + .35 * fl) * fade);
     ctx.globalCompositeOperation = 'source-over';
   }
   // 往上飄走的火屑

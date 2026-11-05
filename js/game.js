@@ -1768,8 +1768,11 @@ function colynStabStep(t, spec, swing) {
     foe.hp -= dmg;
     swing.lungeAt = swing.age;   // 劍往前刺的動畫（js/render.js 的 drawColynSword）
     const a = Math.atan2(foe.y - t.y, foe.x - t.x);
-    G.effects.push({ bullet: true, x1: t.x + Math.cos(a) * 10, y1: t.y - 8 + Math.sin(a) * 8, x2: foe.x + Math.cos(a) * 8, y2: foe.y - 6, life: .12, life0: .12, color: col });   // 刺擊的劍光
+    if (typeof mfxOn === 'function' && mfxOn('stab')) colynStabV2(t.x + Math.cos(a) * 10, t.y - 8 + Math.sin(a) * 8, foe.x + Math.cos(a) * 8, foe.y - 6, col, swing.stabIdx === swing.stabs.length);   // V2：細長劍光、刀尖閃光、往前噴的火花（js/misc-fx-v2.js）
+    else {
+    G.effects.push({ bullet: true, stab: true, x1: t.x + Math.cos(a) * 10, y1: t.y - 8 + Math.sin(a) * 8, x2: foe.x + Math.cos(a) * 8, y2: foe.y - 6, life: .12, life0: .12, color: col });   // 刺擊的劍光
     G.effects.push({ ring: true, x: foe.x, y: foe.y, r: 3, r2: 14, life: .16, life0: .16, color: col });
+    }
     if (isEnemy) { aggroOnSentry(foe, t); foe.hitT = Math.max(foe.hitT || 0, .16); foe.hitColor = col; enemyHitReact(foe, t.x, t.y, swing.stabIdx === swing.stabs.length); sfxMonsterHit(foe, 0.48, 'colyn-ult'); }
     flashDmg('-' + Math.round(dmg * (isEnemy && foe.breakT > 0 ? U.breakMul : 1)), foe.x, foe.y - 26, col);
     playSentryAttackSound(t);
@@ -2724,6 +2727,7 @@ function updateWorldEffects(dt) {
   if (typeof updateWaterV2 === 'function') updateWaterV2(dt);   // 水柱特效 V2（js/water-fx-v2.js）
   if (typeof updateFogV2 === 'function') updateFogV2(dt);   // 起霧 V2：螢火蟲、落葉（js/fog-fx-v2.js）
   if (typeof updateLootV2 === 'function') updateLootV2(dt);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
+  if (typeof updateMiscV2 === 'function') updateMiscV2(dt);   // 槍、連刺、集氣等其他 V2（js/misc-fx-v2.js）
   if (typeof updateCorrosionV2 === 'function' && typeof CORROSION_FX_VERSION !== 'undefined' && CORROSION_FX_VERSION === 2) updateCorrosionV2(dt);   // 腐蝕特效 V2（js/corrosion-fx-v2.js）
   for (const f of G.effects) {
     f.life -= dt;
