@@ -1216,6 +1216,7 @@ function draw() {
   drawWorldPickupSparkles(ctx); // 拾取物：黑暗中仍可看到的小亮點
   if (typeof drawHiddenAreas === 'function') drawHiddenAreas(ctx);   // 再塗一次：上面這些畫在黑幕之上的發光物、亮點，在隱藏區裡也不能露出來
   drawFlareGlow(ctx);       // 照明彈的紅橘色光暈
+  if (typeof drawFogV2Glow === 'function') drawFogV2Glow(ctx);   // 起霧 V2 的螢火蟲（黑幕上面才看得到）（js/fog-fx-v2.js）
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
   if (typeof drawSlipDizzyStars === 'function') drawSlipDizzyStars(ctx);   // 踩香蕉皮撞到東西頭暈的星星（js/golden-banana-king.js）
@@ -1361,6 +1362,7 @@ function drawWorldEffects() {
   if (typeof drawMeleeV2 === 'function') drawMeleeV2(ctx);   // 近戰特效 V2（js/melee-fx-v2.js）
   if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
+  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx);   // 起霧 V2 的落葉（js/fog-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];

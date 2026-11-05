@@ -299,6 +299,7 @@ function drawFog(ctx) {
     }
   }
   fc.globalAlpha = 1;
+  if (typeof FOG_FX_VERSION !== 'undefined' && FOG_FX_VERSION === 2) fogV2Wisps(fc, t, P, vx, vy, vw, vh, px, py);   // 起霧 V2：貼地薄霧帶（js/fog-fx-v2.js）
 
   // ① 遠處白茫茫：溫特身邊透明，往外越來越濃
   const breathe = 1 + Math.sin(t * .4) * .04;   // 霧的邊界輕輕呼吸

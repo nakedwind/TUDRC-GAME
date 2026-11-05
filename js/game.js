@@ -2722,6 +2722,7 @@ function updateWorldEffects(dt) {
   if (typeof updateMeleeV2 === 'function') updateMeleeV2(dt);   // 近戰特效 V2（js/melee-fx-v2.js）
   if (typeof updateSootheV2 === 'function') updateSootheV2(dt);   // 疏導特效 V2（js/soothe-fx-v2.js）
   if (typeof updateWaterV2 === 'function') updateWaterV2(dt);   // 水柱特效 V2（js/water-fx-v2.js）
+  if (typeof updateFogV2 === 'function') updateFogV2(dt);   // 起霧 V2：螢火蟲、落葉（js/fog-fx-v2.js）
   if (typeof updateCorrosionV2 === 'function' && typeof CORROSION_FX_VERSION !== 'undefined' && CORROSION_FX_VERSION === 2) updateCorrosionV2(dt);   // 腐蝕特效 V2（js/corrosion-fx-v2.js）
   for (const f of G.effects) {
     f.life -= dt;
