@@ -5515,5 +5515,21 @@ const SHARED_TILES = [
     "file": "images/森林/forest_tree_door_crimson.png",
     "w": 12,
     "h": 11
+  },
+  {
+    "id": "tile_forest_wood_bridge_short",
+    "name": "forest_wood_bridge_short",
+    "role": "decor",
+    "file": "images/森林/forest_wood_bridge_short.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_forest_wood_bridge_long",
+    "name": "forest_wood_bridge_long",
+    "role": "decor",
+    "file": "images/森林/forest_wood_bridge_long.png",
+    "w": 3,
+    "h": 6
   }
 ];
