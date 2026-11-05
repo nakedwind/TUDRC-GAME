@@ -1581,6 +1581,7 @@ function drawWorldEffects() {
       else if (t < .35) { const u = t / .35; cr = 255; cg = 250 - u * 40; cb = 200 - u * 150; }
       else if (t < .7)  { const u = (t - .35) / .35; cr = 255; cg = 210 - u * 100; cb = 50 - u * 40; }
       else { const u = (t - .7) / .3; cr = 255 - u * 90; cg = 110 - u * 80; cb = 10; }
+      if (f.seed == null) f.seed = Math.random() * 99;   // 修正：油桶、地雷、自爆史萊姆、粉塵爆炸、照明彈的火星沒給 seed，位置會算成 NaN 而畫不出來
       const wob = Math.sin(f.seed + age * 22) * (f.wob || 6) * (1 - t) * 0.5;
       const alpha = Math.min(1, f.life / (f.life0 * .5)), rad = Math.max(.4, f.r * (1 - t * .7));
       ctx.globalCompositeOperation = 'lighter'; ctx.globalAlpha = alpha;
