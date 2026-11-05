@@ -181,6 +181,7 @@ function makeBolt(x0, y0, x1, y1, segs, jit) {
 }
 function spawnLightningBolt(x, y, scale = 1) {
   addLightFlash('lightning', x, y, scale);
+  if (typeof LIGHTNING_FX_VERSION !== 'undefined' && LIGHTNING_FX_VERSION === 2) { lightningV2(x, y, scale); return; }   // 雷電 V2（js/lightning-fx-v2.js）；下面是原本畫法（V1）
   const top = y - (95 + Math.random() * 30) * scale;
   const main = makeBolt(x + (Math.random() * 2 - 1) * 10 * scale, top, x, y, 8, 16 * scale);
   const branches = [];
@@ -488,6 +489,8 @@ function spawnAttackVisual(attacker, target, spec, affected, impactPoint = targe
     addScorchMark(impactPoint.x, impactPoint.y + 10, 15 * scale, null, 'flame');   // 希奧妮：地上留焦痕
   } else if (kind === 'lightning') {
     spawnLightningBolt(impactPoint.x, impactPoint.y, scale);
+    if (typeof LIGHTNING_FX_VERSION !== 'undefined' && LIGHTNING_FX_VERSION === 2 && affected && affected.length > 1)   // 雷電 V2：被同一擊波及的其他怪物，牽一道連鎖電弧過去
+      lightningV2Chain(impactPoint, affected.filter(e => e !== target));
     addScorchMark(impactPoint.x, impactPoint.y + 10, (spec.splash > 0 ? Math.min(26, spec.splash * CELL * .3) : 16) * scale, null, 'lightning');   // 安柏：雷擊焦紋
   }
   else if (kind === 'melee' || kind === 'sword') spawnMeleeImpact(impactPoint.x, impactPoint.y, spec.splash > 0);

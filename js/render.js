@@ -1354,6 +1354,7 @@ function roundRect(x, y, w, h, r) {
 function drawWorldEffects() {
   if (typeof drawFiresV2 === 'function') drawFiresV2(ctx);   // 火焰特效 V2（js/fire-fx-v2.js）
   if (typeof drawBlastsV2 === 'function') drawBlastsV2(ctx);   // 爆炸特效 V2（js/blast-fx-v2.js）
+  if (typeof drawLightningV2 === 'function') drawLightningV2(ctx);   // 雷電特效 V2（js/lightning-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];
