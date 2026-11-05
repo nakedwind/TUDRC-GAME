@@ -140,10 +140,12 @@ function mapAt(i) { const st = scene()?.steps || []; for (let j = Math.min(i, st
 const curMap = () => storyMaps.find(m => m.id === mapAt(sel)) || null;
 const mapName = id => { const m = storyMaps.find(x => x.id === id); return m ? m.name || m.id : id + '（找不到）'; };
 const castBy = no => no !== '' && no != null ? castOwner().cast.find(c => c.no === Number(no)) : null;
-const whoText = no => { const c = castBy(no); return '[' + (no === '' || no == null ? '??' : pad(no)) + '/' + (c ? castName(c) : '角色名') + ']'; };
+const MYSTERY_SPEAKER = 666;   // 對白說話者填這個號碼＝「？？？」（身分不明、沒頭像；js/story-kai.js 也有一份）
+const isMystery = no => Number(no) === MYSTERY_SPEAKER && !castBy(no);
+const whoText = no => { if (isMystery(no)) return '[' + MYSTERY_SPEAKER + '/？？？]'; const c = castBy(no); return '[' + (no === '' || no == null ? '??' : pad(no)) + '/' + (c ? castName(c) : '角色名') + ']'; };
 // 新增指令時的預設：沿用上面最近一行的角色、鏡頭大小
 function lastOf(test) { const st = scene().steps; for (let i = Math.min(sel, st.length - 1); i >= 0; i--) if (test(st[i])) return st[i]; return null; }
-const lastWho = () => lastOf(s => s.who !== '' && s.who != null)?.who ?? (scene().cast[0]?.no ?? '');
+const lastWho = () => lastOf(s => s.who !== '' && s.who != null && !isMystery(s.who))?.who ?? (scene().cast[0]?.no ?? '');
 const lastCode = key => lastOf(s => codeOk(s[key]))?.[key] ?? 1;   // 怪物、道具：沿用上面最近一行的代號
 function nextCode(key) { return (scene()?.steps || []).reduce((m, s) => codeOk(s[key]) ? Math.max(m, Number(s[key])) : m, 0) + 1; }   // 新的怪物、道具：還沒用過的下一個號碼
 const lastMonType = () => lastOf(s => s.do === 'mshow' && s.type)?.type || MONS[0]?.id || '';
@@ -643,7 +645,7 @@ $('accOk').onclick = () => { $('accDlg').close(); renderCast(); };
 
 // ---- 右邊：指令列表 ----
 function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
-  if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null)) && !castBy(st.who)) return '角色代號不在演出者列表裡';
+  if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null && !isMystery(st.who))) && !castBy(st.who)) return '角色代號不在演出者列表裡';
   if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
   if (st.do === 'sfxStop' && st.loop && st.src && !scene().steps.slice(0, scene().steps.indexOf(st)).some(x => x.do === 'sfx' && x.loop && x.src === st.src)) return '這一行前面沒有開過這個循環音效';
   if (st.do === 'door' && !nearDoorSpot(storyMaps.find(m => m.id === mapAt(scene().steps.indexOf(st))), st.at)) return '點的地方附近沒有門（後室木門這類可以開關的門）';
@@ -795,7 +797,7 @@ function controls(st) {
     case 'ihide': return [itemCode(st)];
     case 'sway': return [codeIn(st), check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
     case 'tremble': return [codeIn(st), check(st, 'on', '震動', true), h('label', {}, '幅度：', lvSel(st)), h('label', {}, '秒數(ms)：', msIn(st, '震多久；空白或 0＝一直震到關掉'))];
-    case 'say': return [codeIn(st, '旁白'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openSay(st); } }, '寫對白'), check(st, 'shake', '框震動')];
+    case 'say': return [codeIn(st, '旁白', 'who', '角色代號（演出者列表左邊的數字）；空白＝旁白；666＝「？？？」'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openSay(st); } }, '寫對白'), check(st, 'shake', '框震動')];
     case 'fx': { const [cls, text] = fxTag(st); return [pickBtn(st, '特效範圍', 'box'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openFx(st); } }, '特效說明'), h('span', { class: 'tag ' + cls }, text)]; }
     case 'dark': return [check(st, 'on', '開啟（只有燈照得到的地方亮）', true)];
     case 'vignette': return [h('label', {}, '暗角範圍：', numIn(st, 'lv', 0, 10, '0～10：數字越大，四周變暗的範圍越大（0＝關掉暗角）'))];
@@ -922,7 +924,7 @@ function openSay(st) {
   $('sayWho').value = st.who === '' || st.who == null ? '' : pad(st.who); $('sayText').value = st.text || ''; $('sayShake').checked = !!st.shake;
   sayName(); $('sayDlg').showModal(); $('sayText').focus();
 }
-function sayName() { const v = $('sayWho').value.trim(), c = v ? castBy(Number(v)) : null; $('sayName').textContent = !v ? '（旁白）' : c ? castName(c) : '⚠ 演出者列表裡沒有 ' + v; }
+function sayName() { const v = $('sayWho').value.trim(), c = v ? castBy(Number(v)) : null; $('sayName').textContent = !v ? '（旁白）' : isMystery(v) ? '？？？' : c ? castName(c) : '⚠ 演出者列表裡沒有 ' + v; }
 $('sayWho').oninput = sayName;
 $('sayCancel').onclick = () => $('sayDlg').close();
 $('sayOk').onclick = () => {

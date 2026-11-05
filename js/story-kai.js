@@ -162,15 +162,17 @@ const StoryKai = (() => {
 
   // ---- 對話框：借用遊戲的正式對話框（#dialogueBox）----
   const box = () => el('dialogueBox');
+  const MYSTERY_SPEAKER = 666;   // 對白說話者填這個號碼＝「？？？」（編輯器 js/story-kai-editor.js 也有一份）
   function showBox(on) {
     box().classList.toggle('hidden', !on);
     if (on) { el('dialogueText').classList.remove('line-in'); void el('dialogueText').offsetWidth; el('dialogueText').classList.add('line-in'); }
   }
   function setSpeaker(step) {
     const a = step.who ? actor(step.who) : null, cast = a ? a.cast : state.cfg.cast?.find(c => c.no === Number(step.who));
-    const name = cast ? charName(cast) : '';
-    box().classList.toggle('story-narration', !cast);   // 沒填說話者＝旁白（不放頭像，斜體字）
-    box().classList.toggle('story-noface', !!cast?.image);   // 圖片角色：有名字、沒頭像
+    const mystery = !cast && Number(step.who) === MYSTERY_SPEAKER;   // 說話者填 666：身分不明，名字顯示「？？？」、沒頭像
+    const name = mystery ? '？？？' : cast ? charName(cast) : '';
+    box().classList.toggle('story-narration', !cast && !mystery);   // 沒填說話者＝旁白（不放頭像，斜體字）
+    box().classList.toggle('story-noface', mystery || !!cast?.image);   // 圖片角色：有名字、沒頭像
     el('dialogueName').textContent = name;
     el('dialogueProgress').textContent = '';
     el('dialoguePortrait').style.filter = '';
