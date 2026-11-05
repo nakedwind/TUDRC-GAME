@@ -638,6 +638,7 @@ $('accOk').onclick = () => { $('accDlg').close(); renderCast(); };
 function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
   if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null)) && !castBy(st.who)) return '角色代號不在演出者列表裡';
   if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
+  if (st.do === 'sfxStop' && st.loop && st.src && !scene().steps.slice(0, scene().steps.indexOf(st)).some(x => x.do === 'sfx' && x.loop && x.src === st.src)) return '這一行前面沒有開過這個循環音效';
   if (st.do === 'door' && !nearDoorSpot(storyMaps.find(m => m.id === mapAt(scene().steps.indexOf(st))), st.at)) return '點的地方附近沒有門（後室木門這類可以開關的門）';
   if (st.do === 'mact' && st.act === 'move' && !st.at) return '還沒在地圖上點要走到哪';
   if (st.do === 'mshow' && !monOf(st.type)) return '還沒選怪物';
@@ -657,7 +658,7 @@ function rowLabel(st) {
   if (WHO_KINDS.has(st.do)) extra = ' ' + whoText(st.who);
   if (st.do === 'say') { const t = String(st.text || '').replace(/\s+/g, ' '); extra = ' ' + (st.who === '' || st.who == null ? '[旁白]' : whoText(st.who)) + ' [「' + (t.length > 14 ? t.slice(0, 14) + '……' : t || '……') + '」]'; }
   if ((st.do === 'bgm' || st.do === 'sfx') && st.src) extra = ' ' + st.src.split('/').pop() + (st.loop ? ' 🔁' : '');
-  if (st.do === 'sfxStop' && st.all) extra = ' 全部';
+  if (st.do === 'sfxStop') extra = st.all ? ' 全部' : st.loop ? ' 循環：' + (st.src ? st.src.split('/').pop() : '全部循環的') : '';
   if (st.do === 'end' && st.title) extra = ' 「' + st.title + '」';
   if (st.do === 'map' && st.map) extra = ' ' + mapName(st.map);
   if (st.do === 'door') extra = ' ' + (st.open === false ? '關門' : '開門');
@@ -696,6 +697,20 @@ function listSel(st, key, list, empty, title) {
 function monFaceSel(st, list = MON_FACES) {
   const s = h('select', { title: '怪物面向哪邊（攻擊時朝這邊揮）', onchange: e => { if (e.target.value) st.face = e.target.value; else delete st.face; commit(); } }, list.map(([v, t]) => h('option', { value: v }, t)));
   s.value = st.face || ''; return s;
+}
+// 停止音效要停哪個：上一個、全部、所有循環的、或某一個循環音效（列出這一行前面開過循環的音效檔）
+function stopSel(st) {
+  const s = scene(), at = s.steps.indexOf(st), srcs = [];
+  for (const x of s.steps.slice(0, at)) if (x.do === 'sfx' && x.loop && x.src && !srcs.includes(x.src)) srcs.push(x.src);
+  if (st.loop && st.src && !srcs.includes(st.src)) srcs.push(st.src);
+  const opts = [['', '停掉上一個還在播的音效'], ['all', '全部（含循環的）'], ['loops', '只停循環的：全部循環的'], ...srcs.map(src => ['loop:' + src, '只停循環的：' + src.split('/').pop()])];
+  const sel = h('select', { class: 'sel', title: '停哪個音效', onchange: e => {
+    const v = e.target.value; delete st.all; delete st.loop; delete st.src;
+    if (v === 'all') st.all = true; else if (v === 'loops') st.loop = true; else if (v.startsWith('loop:')) { st.loop = true; st.src = v.slice(5); }
+    commit();
+  } }, opts.map(([v, t]) => h('option', { value: v }, t)));
+  sel.value = st.all ? 'all' : st.loop ? (st.src ? 'loop:' + st.src : 'loops') : '';
+  return sel;
 }
 function check(st, key, text, def = false) {
   return h('label', {}, h('input', { type: 'checkbox', checked: st[key] ?? def, onchange: e => { st[key] = e.target.checked; commit(); } }), text);
@@ -771,7 +786,7 @@ function controls(st) {
       onchange: e => { st.title = e.target.value.trim(); commit(); } }))];
     case 'bgm': return [...fileBtn(st), check(st, 'fade', '淡入', true), h('label', {}, '音量：', volIn(st))];
     case 'bgmStop': return [h('span', { class: 'note' }, '背景音樂 1.5 秒淡出')];
-    case 'sfxStop': return [h('span', { class: 'note' }, '停掉上一個還在播的音效'), check(st, 'all', '全部（含循環的）')];
+    case 'sfxStop': return [stopSel(st)];
     case 'sfx': return [...fileBtn(st), h('label', {}, '音量', volIn(st)), check(st, 'loop', '循環'),
       h('button', { type: 'button', disabled: !st.src, title: '只播音效裡的某一段：跳出波形，拖曳選出開始和結束', onclick: e => { e.stopPropagation(); openTrim(st); } }, trimText(st))];
   }

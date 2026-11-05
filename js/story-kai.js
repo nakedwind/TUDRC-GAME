@@ -69,8 +69,10 @@ const StoryKai = (() => {
   const sprites = name => spriteCache[name] || (spriteCache[name] = loadCharacterSprites(name));
   // 角色的差分圖：<資料夾>/<名字>_<方向>_<差分>.png；有畫才用，沒畫（或還沒載好）就用原本的圖
   //   受傷：正面 0000_Front_hurt_01～03（01＝張眼、02＝半閉、03＝閉眼）；側面、背面 0003_Leftside_hurt、0006_right-side_hurt、0009_back_hurt
+  //   受傷走路：0001_Front-Walking01_hurt、0002_Front-Walking02_hurt（其他方向的走路圖也一樣在檔名後面加 _hurt）
   //   坐下：0003_Leftside_sit…；受傷時先找 0003_Leftside_hurt_sit
   const DIR_FILE = { front: '0000_Front', left: '0003_Leftside', right: '0006_right-side', back: '0009_back' };
+  const WALK_FILES = { front: ['0001_Front-Walking01', '0002_Front-Walking02'], left: ['0004_Leftside-walking01', '0005_Leftside-walking02'], right: ['0007_right-side-walking01', '0008_right-side-walking02'], back: ['0010_back-walking01', '0011_back-walking02'] };
   const extraCache = {};
   function extraImage(a, file) {
     if (a.set.single || !a.cast.sprite) return null;
@@ -82,7 +84,9 @@ const StoryKai = (() => {
     if (a.set.single) return null;
     const set = { ...a.set }, f = extraImage(a, '0000_Front_hurt_01');
     if (f) { set.front = [f, ...a.set.front.slice(1)]; set.blink = [extraImage(a, '0000_Front_hurt_02') || f, extraImage(a, '0000_Front_hurt_03') || f, extraImage(a, '0000_Front_hurt_03') || f]; }
-    for (const d of ['left', 'right', 'back']) { const im = extraImage(a, DIR_FILE[d] + '_hurt'); if (im) set[d] = [im, ...a.set[d].slice(1)]; }   // 只換站著那張，走路照原本的圖
+    for (const d of ['left', 'right', 'back']) { const im = extraImage(a, DIR_FILE[d] + '_hurt'); if (im) set[d] = [im, ...set[d].slice(1)]; }
+    // 走路的那幾張：有畫 <原本檔名>_hurt（例如 0001_Front-Walking01_hurt）就換，沒畫就照原本的圖
+    for (const d of Object.keys(DIR_FILE)) set[d] = set[d].map((im, i) => (i && WALK_FILES[d][i - 1] && extraImage(a, WALK_FILES[d][i - 1] + '_hurt')) || im);
     return set;
   }
   function sitImage(a) {   // 坐下：照現在的面向找坐下圖
@@ -406,7 +410,8 @@ const StoryKai = (() => {
         else playSound(s);
         break;
       case 'sfxStop':
-        if (state.skipping) { if (s.all) state.skipLoops = []; else state.skipLoops.pop(); }
+        if (state.skipping) { if (s.all) state.skipLoops = []; else if (s.loop) state.skipLoops = state.skipLoops.filter(x => !isLoopOf(s.src)(x)); else state.skipLoops.pop(); }
+        else if (s.loop) stopLoops(s.src || '');
         else stopSound(!!s.all);
         break;
       case 'end': finish(s.title || ''); break;
@@ -833,7 +838,7 @@ const StoryKai = (() => {
     if (muted() || !s.src) return;
     const vol = clamp(Number(s.vol ?? 100) / 100 * sfxMaster(), 0, 1), from = Math.max(0, Number(s.from) || 0) / 1000, to = Number(s.to) > 0 ? Number(s.to) / 1000 : 0;
     const speed = clamp(Number(s.speed) || 1, .25, 4);
-    const rec = { stopped: false }; sounds.push(rec);
+    const rec = { stopped: false, loop: !!s.loop, src: s.src }; sounds.push(rec);
     if (speed !== 1) {   // 播放速度：<audio> 的變速不變調（瀏覽器內建）；裁切、循環用計時器看播到哪
       const a = new Audio(s.src); a.volume = vol; a.preservesPitch = a.mozPreservesPitch = a.webkitPreservesPitch = true; a.playbackRate = speed;
       const restart = () => { if (rec.stopped) return; a.currentTime = from; a.play().catch(() => {}); };
@@ -864,6 +869,11 @@ const StoryKai = (() => {
   }
   function stopSound(all = false, sec = .15) {   // 停止音效：很快淡掉（0.15 秒，不會「啪」一聲斷掉）
     for (const rec of all ? sounds.splice(0) : sounds.splice(-1)) { rec.stopped = true; rec.stop(sec); }
+  }
+  const isLoopOf = src => x => x.loop && (!src || x.src === src);   // 停止音效「只停循環的」：src 空白＝所有循環的，有填＝只停這個檔案的循環
+  function stopLoops(src, sec = .15) {
+    const hit = sounds.filter(isLoopOf(src));
+    for (const rec of hit) { dropSound(rec); rec.stopped = true; rec.stop(sec); }
   }
 
   // ---- 離開、回到遊戲 ----
