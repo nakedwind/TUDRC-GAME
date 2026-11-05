@@ -5355,5 +5355,181 @@ const SHARED_TILES = [
     "w": 1,
     "h": 1,
     "flat": true
+  },
+  {
+    "id": "tile_forest_ancient_tree",
+    "name": "forest_ancient_tree",
+    "role": "decor",
+    "file": "images/森林/forest_ancient_tree.png",
+    "w": 12,
+    "h": 11
+  },
+  {
+    "id": "tile_forest_ancient_tree_crimson_small",
+    "name": "forest_ancient_tree_crimson_small",
+    "role": "decor",
+    "file": "images/森林/forest_ancient_tree_crimson_small.png",
+    "w": 12,
+    "h": 11
+  },
+  {
+    "id": "tile_forest_small_tree",
+    "name": "forest_small_tree",
+    "role": "decor",
+    "file": "images/森林/forest_small_tree.png",
+    "w": 4,
+    "h": 6
+  },
+  {
+    "id": "tile_forest_tree_door",
+    "name": "forest_tree_door",
+    "role": "decor",
+    "file": "images/森林/forest_tree_door.png",
+    "w": 12,
+    "h": 11
+  },
+  {
+    "id": "tile_forest_twisted_tree_crimson_small",
+    "name": "forest_twisted_tree_crimson_small",
+    "role": "decor",
+    "file": "images/森林/forest_twisted_tree_crimson_small.png",
+    "w": 8,
+    "h": 11
+  },
+  {
+    "id": "tile_forest_twisted_tree_dark",
+    "name": "forest_twisted_tree_dark",
+    "role": "decor",
+    "file": "images/森林/forest_twisted_tree_dark.png",
+    "w": 8,
+    "h": 11
+  },
+  {
+    "id": "tile_forest_twisted_tree_dark_crystal",
+    "name": "forest_twisted_tree_dark_crystal",
+    "role": "decor",
+    "file": "images/森林/forest_twisted_tree_dark_crystal.png",
+    "w": 8,
+    "h": 11
+  },
+  {
+    "id": "tile_forest_bg_outside_tree02_crimson",
+    "name": "bg_outside_tree02_crimson",
+    "role": "decor",
+    "file": "images/森林/bg_outside_tree02_crimson.png",
+    "w": 3,
+    "h": 4
+  },
+  {
+    "id": "tile_forest_ancient_tree_crimson",
+    "name": "forest_ancient_tree_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_ancient_tree_crimson.png",
+    "w": 34,
+    "h": 30
+  },
+  {
+    "id": "tile_forest_group_19_crimson",
+    "name": "forest_group_19_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_group_19_crimson.png",
+    "w": 10,
+    "h": 12
+  },
+  {
+    "id": "tile_forest_layer_149_crimson",
+    "name": "forest_layer_149_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_149_crimson.png",
+    "w": 6,
+    "h": 5
+  },
+  {
+    "id": "tile_forest_layer_150_crimson",
+    "name": "forest_layer_150_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_150_crimson.png",
+    "w": 5,
+    "h": 6
+  },
+  {
+    "id": "tile_forest_layer_151_crimson",
+    "name": "forest_layer_151_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_151_crimson.png",
+    "w": 4,
+    "h": 6
+  },
+  {
+    "id": "tile_forest_layer_159_crimson",
+    "name": "forest_layer_159_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_159_crimson.png",
+    "w": 3,
+    "h": 9
+  },
+  {
+    "id": "tile_forest_layer_160_crimson",
+    "name": "forest_layer_160_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_160_crimson.png",
+    "w": 4,
+    "h": 9
+  },
+  {
+    "id": "tile_forest_layer_161_crimson",
+    "name": "forest_layer_161_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_161_crimson.png",
+    "w": 6,
+    "h": 10
+  },
+  {
+    "id": "tile_forest_layer_16202",
+    "name": "forest_layer_16202",
+    "role": "decor",
+    "file": "images/森林/forest_layer_16202.png",
+    "w": 9,
+    "h": 12
+  },
+  {
+    "id": "tile_forest_layer_16202_crimson",
+    "name": "forest_layer_16202_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_16202_crimson.png",
+    "w": 9,
+    "h": 12
+  },
+  {
+    "id": "tile_forest_layer_162_crimson",
+    "name": "forest_layer_162_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_layer_162_crimson.png",
+    "w": 6,
+    "h": 9
+  },
+  {
+    "id": "tile_forest_small_tree_crimson",
+    "name": "forest_small_tree_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_small_tree_crimson.png",
+    "w": 4,
+    "h": 6
+  },
+  {
+    "id": "tile_forest_tree_door_crimson",
+    "name": "forest_tree_door_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_tree_door_crimson.png",
+    "w": 33,
+    "h": 31
+  },
+  {
+    "id": "tile_forest_twisted_tree_crimson",
+    "name": "forest_twisted_tree_crimson",
+    "role": "decor",
+    "file": "images/森林/forest_twisted_tree_crimson.png",
+    "w": 27,
+    "h": 38
   }
 ];
