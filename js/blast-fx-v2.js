@@ -9,6 +9,7 @@
 //
 //  BLAST_FX_VERSION：1＝原本畫法（V1 程式完整保留），2＝特效 V2
 //  BLAST_FX_V2：各種爆炸的強弱（R＝畫面大小，像素；其他是各種粒子的數量倍率，1＝油桶的量）
+//  blastFxV2 的 o：scale＝再放大縮小；ringColor＝衝擊環顏色；tint＝火屑、火星混一點這個顏色（[r,g,b]）
 // ============================================================
 const BLAST_FX_VERSION = 2;
 const BLAST_FX_V2 = {
@@ -19,6 +20,8 @@ const BLAST_FX_V2 = {
   mine:       { R: 64,  fire: .3,  column: .2,  soot: .8,  sparks: 1,   embers: .3,  brands: 0,   ring: 1,   smoke: [74, 64, 52] },  // 地雷：火少、泥土色的煙多、火星多
   tank:       { R: 80,  fire: .7,  column: .65, soot: .65, sparks: .8,  embers: .8,  brands: .6,  ring: 1,   smoke: null },   // 油箱
   drum:       { R: 140, fire: 1,   column: 1,   soot: 1,   sparks: 1,   embers: 1,   brands: 1,   ring: 1,   smoke: null },   // 油桶：最大
+  slime:      { R: 64,  fire: .3,  column: .15, soot: .25, sparks: .55, embers: .25, brands: 0,   ring: .9,  smoke: [78, 104, 70] },   // 自爆史萊姆：火少、帶綠的煙（黏液噴濺照舊用 spawnGoo）
+  dust:       { R: 60,  fire: .55, column: .1,  soot: .15, sparks: .3,  embers: .7,  brands: 0,   ring: .7,  smoke: null, spread: .85 },   // 人面蝶粉塵爆炸：整片鱗粉一起閃燃（spread＝火團散在整個範圍）
 };
 
 const BV2_FIRE = [[255, 255, 255], [255, 243, 166], [255, 226, 107], [255, 194, 61], [255, 138, 42], [242, 86, 29], [201, 40, 31], [138, 31, 23], [74, 23, 18]];
@@ -36,11 +39,16 @@ function blastFxV2(x0, y0, kind, o = {}) {
   const R = P.R * (o.scale || 1), s = Math.min(1.3, Math.pow(R / 140, .75)), K = BV2_K * s;
   const b = { x0, y0, cy: y0 - 10 * s, s, R, t: 0, fires: [], smokes: [], sparks: [], embers: [], brands: [], blazes: [],
     glow: { r0: 20 * s, r1: R * 1.15, life: .45, max: .45 }, core: { r: 26 * s, life: .12, max: .12 },
-    ring: P.ring ? { r: 12 * s, r2: R, life: .4, max: .4, a: P.ring } : null };
+    ring: P.ring ? { r: 12 * s, r2: R, life: .4, max: .4, a: P.ring, col: o.ringColor || '#fff0c0' } : null, tint: o.tint || null };
   const cy = b.cy, soot = P.smoke || [31, 26, 36];
   for (let i = 0; i < Math.max(1, bv2N(5, Math.sqrt(P.fire))); i++) bv2Fire(b, x0 + bv2Rnd(-5, 5) * s, cy + bv2Rnd(-5, 5) * s, bv2Rnd(-20, 20) * K, bv2Rnd(-40, -10) * K, bv2Rnd(.18, .28), bv2Rnd(9, 12) * K);
   for (let i = 0; i < bv2N(30, P.fire); i++) {   // 往四周（偏上方）爆出去的火球，一半燒完變煙
     const a = bv2Rnd(-Math.PI - .15, .15), d = bv2Rnd(0, 8) * K, sp = bv2Rnd(50, 190) * K;
+    if (P.spread) {   // 整片一起閃燃：火團散在整個範圍裡，往上冒、不往外衝
+      const q = bv2Rnd(0, Math.PI * 2), rr = Math.sqrt(Math.random()) * R * P.spread;
+      bv2Fire(b, x0 + Math.cos(q) * rr, y0 - 6 * s + Math.sin(q) * rr * .45, bv2Rnd(-20, 20) * K, -bv2Rnd(20, 70) * K, bv2Rnd(.35, .7), bv2Rnd(4, 8) * K, bv2Rnd(0, .1), bv2Chance(.35), false, false, P.smoke);
+      continue;
+    }
     bv2Fire(b, x0 + Math.cos(a) * d, cy + Math.sin(a) * d * .7, Math.cos(a) * sp, Math.sin(a) * sp * .6 - 40 * K, bv2Rnd(.55, 1.05), bv2Rnd(5, 10) * K, 0, bv2Chance(.5), true, false, P.smoke);
   }
   for (let i = 0; i < bv2N(12, P.column); i++)   // 往上衝的火柱
@@ -184,7 +192,7 @@ function bv2Draw(ctx, b) {
   ctx.globalCompositeOperation = 'source-over';
   if (b.ring && b.ring.life > 0) {   // 一道淡淡的衝擊環（貼地壓扁）
     const p = b.ring.life / b.ring.max, rr = b.ring.r + (b.ring.r2 - b.ring.r) * (1 - p * p);
-    ctx.save(); ctx.translate(x0, y0); ctx.scale(1, .5); ctx.globalAlpha = p * .55 * b.ring.a; ctx.strokeStyle = '#fff0c0'; ctx.lineWidth = 1 + p * 3;
+    ctx.save(); ctx.translate(x0, y0); ctx.scale(1, .5); ctx.globalAlpha = p * .55 * b.ring.a; ctx.strokeStyle = b.ring.col; ctx.lineWidth = 1 + p * 3;
     ctx.beginPath(); ctx.arc(0, 0, rr, 0, 6.283); ctx.stroke(); ctx.restore();
   }
   for (const p of b.fires) if (p.back && p.delay <= 0) bv2DrawFire(ctx, p);
@@ -218,7 +226,7 @@ function bv2Draw(ctx, b) {
   for (const p of b.embers) {   // 飄浮火屑：快熄時閃爍
     const k = p.life / p.max;
     if (k < .25 && Math.sin(b.t * 40 + p.seed) < 0) continue;
-    const c = k > .6 ? [255, 243, 166] : k > .3 ? [255, 226, 107] : [255, 138, 42];
+    const c = b.tint && (p.seed % 1) < .45 ? b.tint : k > .6 ? [255, 243, 166] : k > .3 ? [255, 226, 107] : [255, 138, 42];   // tint：一部分火屑帶鱗粉的顏色
     ctx.fillStyle = bv2Rgba(c, 1); ctx.beginPath(); ctx.arc(p.x, p.y, 1.4, 0, 6.283); ctx.fill();
     const g = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 6); g.addColorStop(0, bv2Rgba(c, .35 * k)); g.addColorStop(1, bv2Rgba(c, 0));
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(p.x, p.y, 6, 0, 6.283); ctx.fill();

@@ -242,6 +242,8 @@ function slimeExplode(e, mul) {
     enemyHitReact(other, x, y, true);
   }
   // 畫面：爆閃、雙層衝擊環、火星與黏液四濺
+  if (typeof BLAST_FX_VERSION !== 'undefined' && BLAST_FX_VERSION === 2) blastFxV2(x, y, 'slime', { scale: R / BLAST_FX_V2.slime.R, ringColor: '#ffb08a' });   // 特效 V2（js/blast-fx-v2.js）
+  else {   // 原本畫法（V1）
   G.effects.push({ fglow: true, x, y: y - 6, r0: 16, r1: R * 1.1, life: .35, life0: .35 });
   G.effects.push({ ring: true, x, y, r: 10, r2: R, life: .4, life0: .4, color: '#ff7b4a' });
   G.effects.push({ ring: true, x, y, r: 6, r2: R * .65, life: .28, life0: .28, color: '#ffe2b8' });
@@ -249,6 +251,7 @@ function slimeExplode(e, mul) {
     const a = Math.random() * Math.PI * 2, sp = 90 + Math.random() * 140;
     G.effects.push({ ember: true, spark: true, x, y: y - 6, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 30,
       r: 1.5 + Math.random() * 2.5, life: .35 + Math.random() * .3, life0: .65 });
+  }
   }
   spawnGoo(x, y, SLIME_VARIANTS.bomber.goo, 14, 1.3);
   addSlimeSplat(x, y, SLIME_VARIANTS.bomber.goo, 30);

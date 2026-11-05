@@ -490,8 +490,9 @@ function drawEnemy(e) {
     if (typeof FIRE_FX_VERSION !== 'undefined' && FIRE_FX_VERSION === 2) drawBurnV2(ctx, e, size);   // 火焰 V2：身上冒小火舌（js/fire-fx-v2.js）
     else { ctx.strokeStyle='#ff7b39';ctx.lineWidth=2;ctx.beginPath();ctx.arc(e.x,e.y,17,0,Math.PI*2);ctx.stroke(); }   // 原本畫法（V1）：腳下橘色圓框
   }
-  if (e.stunT > 0 && e.behavior !== 'burrow') { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.sleepT > 0 ? '睡著' : e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
-  if (e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
+  const statusDrawn = typeof STATUS_FX_VERSION !== 'undefined' && STATUS_FX_VERSION === 2 && drawStatusV2(ctx, e, barY - (e.variant === 'giant' ? 13 : 0), size);   // 狀態特效 V2：星星、電弧、問號（js/status-fx-v2.js）；畫了就不寫字
+  if (!statusDrawn && e.stunT > 0 && e.behavior !== 'burrow') { ctx.fillStyle='#ffe36e';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText(e.sleepT > 0 ? '睡著' : e.shockT > 0 ? '麻痺' : '顫抖',e.x,barY - 4 - (e.variant === 'giant' ? 13 : 0)); }   // 雷擊＝麻痺；其他停住＝顫抖
+  if (!statusDrawn && e.confuseT > 0) { ctx.fillStyle='#d6a0ff';ctx.font='bold 11px sans-serif';ctx.textAlign='center';ctx.fillText('混亂',e.x,e.y-33); }
   if (SHOW_ENEMY_ALERT && e.alertT > 0) {   // 剛被溫特的槍吸引過來：頭上彈出「！」（目前關掉）
     const age = ENEMY_ALERT_TIME - e.alertT, pop = age < .12 ? .6 + age / .12 * .7 : 1.3 - Math.min(.3, (age - .12) * 1.5);
     ctx.save(); ctx.translate(e.x, barY - 9); ctx.scale(pop, pop); ctx.globalAlpha = Math.min(1, e.alertT / .25);

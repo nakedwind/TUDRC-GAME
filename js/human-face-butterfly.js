@@ -359,6 +359,9 @@ function mothBlast(c) {
   // 畫面：帶著鱗粉顏色的爆閃、衝擊環、火星
   const col = MOTH_COLORS[c.kind] || MOTH_COLORS.poison;
   if (typeof addLightFlash === 'function') addLightFlash('explosion', x, y, .6);
+  if (typeof BLAST_FX_VERSION !== 'undefined' && BLAST_FX_VERSION === 2) {   // 特效 V2：整片鱗粉一起閃燃，火屑帶鱗粉顏色（js/blast-fx-v2.js）
+    blastFxV2(x, y, 'dust', { scale: R / BLAST_FX_V2.dust.R, ringColor: col.glow, tint: col.rgb });
+  } else {   // 原本畫法（V1）
   G.effects.push({ fglow: true, x, y: y - 8, r0: 14, r1: R * 1.1, life: .35, life0: .35 });
   G.effects.push({ ring: true, x, y, r: 8, r2: R, life: .35, life0: .35, color: '#ff9a3c' });
   G.effects.push({ ring: true, x, y, r: 4, r2: R * .7, life: .3, life0: .3, color: col.glow });
@@ -369,6 +372,7 @@ function mothBlast(c) {
   }
   if (typeof spawnFlameBurst === 'function') spawnFlameBurst(x, y, .9);
   if (typeof pushBlackSmoke === 'function') for (let i = 0; i < 2; i++) pushBlackSmoke(x + mothRand(-R, R) * .3, y - 8, false);
+  }
   if (typeof nearbyImpact === 'function') nearbyImpact(x, y, 6, .03);
 }
 
