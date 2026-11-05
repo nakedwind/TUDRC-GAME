@@ -1220,6 +1220,7 @@ function draw() {
   drawChargerEyeFlashes(ctx);   // 鳥頭人鎖定玩家時眼睛閃藍光（暗處也看得到）
   drawChargerDizzyStars(ctx);   // 鳥頭人暈眩時頭上的星星（暗處也看得到）
   if (typeof drawSlipDizzyStars === 'function') drawSlipDizzyStars(ctx);   // 踩香蕉皮撞到東西頭暈的星星（js/golden-banana-king.js）
+  if (typeof drawLootV2KeyBeams === 'function') drawLootV2KeyBeams(ctx);   // V2：地上鑰匙／碎片腳下的光柱（js/loot-fx-v2.js）
   if (typeof drawCoreKeyDrops === 'function') drawCoreKeyDrops(ctx);   // 核心掉出的異質鑰匙：畫在黑幕上面（js/core-clear.js）
   if (typeof drawPearlElderTelegraphs === 'function') drawPearlElderTelegraphs(ctx);   // 珍珠落點的陰影圈、大童暈眩的星星：畫在黑幕上面（js/pearl-elder.js）
   if (typeof drawEliteTelegraphs === 'function') drawEliteTelegraphs(ctx);   // 菁英鳥頭人的衝撞路線：畫在黑幕上面，暗處也閃得開（js/elite-bird-head.js）
@@ -1363,6 +1364,7 @@ function drawWorldEffects() {
   if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
   if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx);   // 起霧 V2 的落葉（js/fog-fx-v2.js）
+  if (typeof drawLootV2 === 'function') drawLootV2(ctx);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
   for (const f of G.effects) {
     if (f.spriteEffect) {
       const frames = attackEffectFrames[f.spriteEffect];

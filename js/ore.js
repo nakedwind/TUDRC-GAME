@@ -123,6 +123,7 @@ function breakOre(o, bx, by, msg) {
       r: 1.5 + Math.random() * 2, life: .5 + Math.random() * .3, life0: .8, color: '#c47dff' });
   }
   if (typeof spawnGoo === 'function') spawnGoo(c.x, c.y - 4, '#6b6372', 8, 1.1);   // 碎石
+  if (typeof LOOT_FX_VERSION !== 'undefined' && LOOT_FX_VERSION === 2) lootV2OreBreak(c.x, c.y - 6);   // V2：水晶碎片、星光、一閃（js/loot-fx-v2.js）
   if (typeof sfxAt === 'function') { sfxAt('glassBreak3', c.x, c.y, .6, 'ore-break'); sfxAt('oreMine', c.x, c.y, .7, 'ore-mine'); }   // 碎掉的玻璃聲＋挖礦聲
 }
 
@@ -170,6 +171,7 @@ function pickShard(shard, collector, reach = SHARD.reach) {
   earnCrystals(shard.value);
   showPickupToast(shard.value);
   flash('+' + shard.value, collector.x, collector.y - 50, '#d69bff', .9);
+  if (typeof LOOT_FX_VERSION !== 'undefined' && LOOT_FX_VERSION === 2) lootV2Collect(shard.x, shard.y - 6, collector);   // V2：撿起時炸開一圈小光點、飛向撿的人（js/loot-fx-v2.js）
   SFX.play('crystalGet', .7, 'shard-pickup');
   updateHUD();
   return true;
@@ -284,6 +286,7 @@ function drawOreShards(ctx) {
     ctx.beginPath(); ctx.moveTo(0, -7); ctx.lineTo(-4, -1); ctx.lineTo(0, 1); ctx.closePath(); ctx.fillStyle = '#b07cff'; ctx.fill();   // 亮面
     ctx.fillStyle = '#fff'; ctx.fillRect(-1, -4, 1.5, 1.5);   // 反光
     ctx.restore();
+    if (typeof lootV2ShardGlint === 'function') lootV2ShardGlint(ctx, s, x, y);   // V2：掃過的白光、往上飄的小光點（js/loot-fx-v2.js）
   }
 }
 // 靠近礦物時的提示（沒有按鍵，只說明要用爆炸）

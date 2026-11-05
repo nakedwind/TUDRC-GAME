@@ -322,6 +322,7 @@ function breakCore(core) {
   nearbyImpact(core.x, core.y, 12, .09);
   if (typeof sfxAt === 'function') { sfxAt('corrosionImpact', core.x, core.y, .9, 'core-break'); sfxAt('monsterDown', core.x, core.y, .8, 'core-break2'); sfxAt('oreMine', core.x, core.y, .8, 'core-mine'); }   // 核心碎掉：再加挖礦聲
   if (core.pool) core.pool.t = 1.5;   // 腳下腐蝕痕跡慢慢退去
+  if (typeof LOOT_FX_VERSION !== 'undefined' && LOOT_FX_VERSION === 2) lootV2CoreBreak(core.x, core.y - 30 - lift, bottom);   // V2：更多水晶碎片、貼地衝擊環、光柱（js/loot-fx-v2.js）
 }
 // 兩個外框點之間如果跨過圖片角落，要把角落也放進碎片的多邊形裡
 function cornerBetween(a, b) {
