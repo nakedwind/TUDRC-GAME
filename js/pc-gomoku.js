@@ -6,6 +6,7 @@
    ・電腦怎麼下：看棋盤上每個空位，算「自己下這裡能連成什麼」和「對手下這裡能連成什麼」，
      挑分數最高的位置（所以會進攻也會擋）；困難會再多想一步：下完之後對手最好的回應有多危險
    ・勝場數只記在這次開著的遊戲裡，重新整理就歸零
+   ・遊戲紀錄（js/pc-stats.js）：下了第一顆子算一局，之後每秒記時間，分出勝負就停
 */
 const PCG_N = 15;   // 棋盤 15 條線 × 15 條線
 const PCG_MODES = { ai: '對電腦', duo: '兩人對下' };
@@ -56,7 +57,7 @@ function initPcGomoku(body) {
 
 function newPcGomoku() {
   const g = pcd.gm;
-  clearTimeout(g.thinking); g.thinking = 0;
+  clearTimeout(g.thinking); g.thinking = 0; clearInterval(g.timer); g.timer = 0;
   Object.assign(g, { board: new Array(PCG_N * PCG_N).fill(0), turn: 1, hist: [], over: false, winner: 0, line: [] });   // 1＝黑、2＝白
   renderPcGomoku();
   fitPcGomoku();
@@ -72,13 +73,17 @@ function pcgClick(i) {
 }
 function pcgPlace(g, i) {
   g.board[i] = g.turn; g.hist.push(i);
+  if (!g.timer) {   // 這盤的第一顆子：遊戲紀錄算一局、開始記時間
+    minigameRound('gomoku');
+    g.timer = setInterval(() => { const w = pcd.wins.gomoku; if (pcDesktopOpen && w && !w.classList.contains('min')) minigameSecond('gomoku'); }, 1000);
+  }
   const line = pcgFiveAt(g.board, i);
   if (line) {   // 連成五顆：這一色贏了
-    g.over = true; g.winner = g.turn; g.line = line;
+    g.over = true; g.winner = g.turn; g.line = line; clearInterval(g.timer);
     if (g.mode === 'ai') { if (g.turn === pcgHuman(g)) { g.score.you++; sfx('achievement'); } else { g.score.cpu++; sfx('error'); } }
     else { g.score[g.turn === 1 ? 'b' : 'w']++; sfx('achievement'); }
   } else if (g.hist.length === PCG_N * PCG_N) {   // 下滿了：平手
-    g.over = true; g.score.draw++; sfx('switch');
+    g.over = true; g.score.draw++; clearInterval(g.timer); sfx('switch');
   } else {
     g.turn = 3 - g.turn; sfx('blip');
   }

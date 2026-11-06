@@ -30,6 +30,7 @@
     'tudrc_tunnels_found_v1',   // 球球找到的隱藏地道（js/rescue-dog.js）
     'tudrc_seen_items_v1',   // 看過說明的物品（js/item-intro.js）
     'tudrc_target_best_v1',   // 射擊練習最佳紀錄（js/target-practice.js）
+    'tudrc_minigame_stats_v1',   // 每款小遊戲玩了幾局、花了多少時間（js/pc-stats.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;
