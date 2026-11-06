@@ -27,7 +27,7 @@ const MAP_BOX = { reach: 30, kinds: [
   { kind: 'refill', match: (id, t) => AMMO_REFILL.ids.includes(id) || AMMO_REFILL.file.test(String(t.file || '')), art: { tile_field_ammo_crate_open: [0, 16, 46, 80, 80, 80] } },   // 營地的補彈藥箱（js/flare.js）；最後兩個數字＝圖片寬高
   { kind: 'supply', match: id => isSupplyBoxId(id), art: { tile_field_supply_box: [0, 16, 46, 80, 80, 80], tile_mvot2yuu: [25, 23, 95, 120, 120, 120] } },   // field-base-01～03 都一樣；池核版 Poolcore_field-base-01～03 也一樣（js/camp-supply.js 的 boxSkins）
   { kind: 'armor', safe: true, match: (id, t) => ARMOR_CHEST.tiles.includes(id) || ARMOR_CHEST.names.includes(String(t.name || '').trim()), art: { tile_mvma4ws7: [0, 11, 76, 80, 80, 80] } },
-  { kind: 'stove', safe: true, match: id => typeof COOKING !== 'undefined' && COOKING.tiles.includes(id), art: { tile_restaurant_kitchen_workstation: [8, 40, 112, 118, 280, 120] } },   // 廚房工作台左邊的爐灶：烹飪（js/cooking.js）
+  { kind: 'stove', safe: true, match: id => typeof COOKING !== 'undefined' && COOKING.tiles.includes(id), art: { tile_restaurant_kitchen_workstation: [8, 40, 112, 118, 280, 120], tile_mw5jkg1u: [4, 40, 108, 118, 112, 120] } },   // 廚房工作台左邊的爐灶：烹飪（js/cooking.js）
   { kind: 'cabinet', safe: true, match: (id, t, s) => typeof cabinetDefFor === 'function' && !!cabinetDefFor(s), art: {} },   // 置物櫃（js/storage-cabinet.js 的 STORAGE_CABINETS）
 ] };
 function mapBoxes() {

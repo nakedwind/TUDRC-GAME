@@ -8153,7 +8153,8 @@ const BASE_MAPS = [
         "0,7": "tile_new_bg_wall_front_edge",
         "0,6": "tile_new_bg_wall_front_edge",
         "0,5": "tile_new_bg_wall_front_edge"
-      }
+      },
+      "object5": {}
     },
     "stamps": [
       {
@@ -8278,50 +8279,18 @@ const BASE_MAPS = [
         "layer": "ground2"
       },
       {
-        "id": "tile_restaurant_kitchen_workstation",
-        "c": 10,
-        "r": 11,
-        "layer": "object",
-        "ox": -16,
-        "oy": -2
-      },
-      {
         "id": "tile_restaurant_waste_sorting_station",
         "c": 4,
         "r": 12,
-        "layer": "object"
+        "layer": "object5"
       },
       {
         "id": "tile_restaurant_storage_cabinet",
-        "c": 18,
-        "r": 11,
-        "layer": "object",
-        "ox": -28,
-        "oy": -2
-      },
-      {
-        "id": "tile_restaurant_buffet_counter_02",
-        "c": 14,
-        "r": 15,
-        "layer": "object",
-        "ox": -16,
-        "oy": -24
-      },
-      {
-        "id": "tile_restaurant_buffet_counter_01",
-        "c": 10,
-        "r": 15,
-        "layer": "object",
-        "ox": 20,
-        "oy": -24
-      },
-      {
-        "id": "tile_restaurant_serving_counter",
-        "c": 18,
-        "r": 15,
-        "layer": "object",
-        "ox": -34,
-        "oy": -24
+        "c": 17,
+        "r": 10,
+        "layer": "object5",
+        "ox": 22,
+        "oy": 38
       },
       {
         "id": "tile_restaurant_partition_tall",
@@ -8333,11 +8302,11 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_restaurant_trash_bin_small",
-        "c": 17,
-        "r": 13,
-        "layer": "object",
-        "ox": -22,
-        "oy": -12
+        "c": 16,
+        "r": 12,
+        "layer": "object5",
+        "ox": 34,
+        "oy": 32
       },
       {
         "id": "tile_musc5wyq",
@@ -8408,25 +8377,19 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_water_dispenser",
-        "c": 8,
-        "r": 12,
-        "layer": "object"
-      },
-      {
-        "id": "tile_musg7iyr",
-        "c": 7,
-        "r": 14,
-        "layer": "object",
-        "ox": 16,
-        "oy": 16
+        "c": 16,
+        "r": 11,
+        "layer": "object5",
+        "oy": 36,
+        "ox": -2
       },
       {
         "id": "tile_restaurant_storage_cabinet",
         "c": 19,
-        "r": 11,
-        "layer": "object2",
-        "ox": -6,
-        "oy": -2
+        "r": 10,
+        "layer": "object5",
+        "ox": 4,
+        "oy": 38
       },
       {
         "id": "tile_restaurant_water_dispenser_01",
@@ -8527,61 +8490,29 @@ const BASE_MAPS = [
         "sortDepth": 1.75
       },
       {
-        "id": "tile_restaurant_soup_warmer",
-        "c": 17,
-        "r": 14,
-        "layer": "object2",
-        "ox": 8,
-        "oy": -18
-      },
-      {
-        "id": "tile_restaurant_tray_stack",
-        "c": 18,
-        "r": 14,
-        "layer": "object2",
-        "ox": 6,
-        "oy": -16
-      },
-      {
-        "id": "tile_restaurant_bowl_stack",
-        "c": 19,
-        "r": 14,
-        "layer": "object2",
-        "ox": 2,
-        "oy": 10
-      },
-      {
-        "id": "tile_restaurant_chopsticks_holder",
-        "c": 19,
-        "r": 15,
-        "layer": "object3",
-        "ox": 2,
-        "oy": -12,
-        "sortDepth": 0.75
-      },
-      {
         "id": "tile_new_decor_poster",
         "c": 7,
         "r": 10,
         "layer": "object2",
         "oy": 16,
-        "sortDepth": 0
+        "sortDepth": 0,
+        "ox": -6
       },
       {
         "id": "tile_new_decor_plant03",
         "c": 21,
         "r": 13,
         "layer": "object4",
-        "ox": 0,
+        "ox": 4,
         "oy": -18,
         "sortDepth": 1.75
       },
       {
         "id": "tile_new_decor_plant01",
-        "c": 4,
-        "r": 14,
+        "c": 3,
+        "r": 15,
         "layer": "object2",
-        "ox": -20,
+        "ox": 26,
         "oy": 12
       },
       {
@@ -8985,6 +8916,101 @@ const BASE_MAPS = [
         "layer": "object",
         "ox": 20,
         "oy": 30
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 11,
+        "r": 11,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 0
+      },
+      {
+        "id": "tile_mw5jkg1u",
+        "c": 8,
+        "r": 11,
+        "layer": "object5",
+        "ox": 20
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 12,
+        "r": 11,
+        "layer": "object5",
+        "ox": 28,
+        "oy": 0
+      },
+      {
+        "id": "tile_restaurant_serving_counter",
+        "c": 17,
+        "r": 14,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 16
+      },
+      {
+        "id": "tile_restaurant_bowl_stack",
+        "c": 19,
+        "r": 14,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 18
+      },
+      {
+        "id": "tile_restaurant_buffet_counter_02",
+        "c": 13,
+        "r": 14,
+        "layer": "object5",
+        "ox": 26,
+        "oy": 16
+      },
+      {
+        "id": "tile_restaurant_buffet_counter_01",
+        "c": 10,
+        "r": 14,
+        "layer": "object5",
+        "ox": 24,
+        "oy": 16
+      },
+      {
+        "id": "tile_musg7iyr",
+        "c": 7,
+        "r": 14,
+        "layer": "object5",
+        "ox": 22,
+        "oy": 16
+      },
+      {
+        "id": "tile_restaurant_tray_stack",
+        "c": 18,
+        "r": 13,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 14,
+        "r": 11,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "tile_restaurant_green_tea",
+        "c": 15,
+        "r": 11,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 6
+      },
+      {
+        "id": "tile_restaurant_soup_warmer",
+        "c": 14,
+        "r": 11,
+        "layer": "object5",
+        "ox": 14,
+        "oy": 20
       }
     ],
     "solid": [
@@ -9212,7 +9238,8 @@ const BASE_MAPS = [
       "17,5",
       "16,5",
       "15,5",
-      "14,5"
+      "14,5",
+      "9,13"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -9288,7 +9315,53 @@ const BASE_MAPS = [
     ],
     "cols": 27,
     "rows": 24,
-    "spawnZone": []
+    "spawnZone": [],
+    "layerOrder": [
+      {
+        "id": "floor",
+        "name": "🟫 地板"
+      },
+      {
+        "id": "ground",
+        "name": "🌿 地面裝飾"
+      },
+      {
+        "id": "ground2",
+        "name": "🍂 地面裝飾 2"
+      },
+      {
+        "id": "ground3",
+        "name": "🩹 地面裝飾 3"
+      },
+      {
+        "id": "object",
+        "name": "📦 物件"
+      },
+      {
+        "id": "object5",
+        "name": "膳檯"
+      },
+      {
+        "id": "object2",
+        "name": "🧰 物件 2"
+      },
+      {
+        "id": "object3",
+        "name": "🪑 物件 3"
+      },
+      {
+        "id": "object4",
+        "name": "🚧 物件 4"
+      },
+      {
+        "id": "overlay",
+        "name": "🎯 物件裝飾"
+      },
+      {
+        "id": "top",
+        "name": "☁️ 上層"
+      }
+    ]
   },
   {
     "id": "map_muspgfxl",

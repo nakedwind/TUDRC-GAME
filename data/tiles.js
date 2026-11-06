@@ -5703,14 +5703,6 @@ const SHARED_TILES = [
     "h": 1
   },
   {
-    "id": "tile_prop_furniture_422",
-    "name": "L 型沙發",
-    "role": "floor",
-    "file": "images/scene-props/Furniture (422).png",
-    "w": 2,
-    "h": 1
-  },
-  {
     "id": "tile_prop_furniture_438",
     "name": "木矮櫃",
     "role": "floor",
@@ -5723,8 +5715,8 @@ const SHARED_TILES = [
     "name": "書櫃",
     "role": "floor",
     "file": "images/scene-props/Furniture (475).png",
-    "w": 1,
-    "h": 1
+    "w": 2,
+    "h": 2
   },
   {
     "id": "tile_forest_ancient_tree",
@@ -5901,5 +5893,29 @@ const SHARED_TILES = [
     "file": "images/森林/forest_wood_bridge_long.png",
     "w": 3,
     "h": 6
+  },
+  {
+    "id": "tile_mw5ha8w3",
+    "name": "Furniture (422)",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (422).png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_prop_furniture_422",
+    "name": "L 型沙發",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (422).png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_mw5jkg1u",
+    "name": "restaurant-gasstove",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-gasstove.png",
+    "w": 3,
+    "h": 3
   }
 ];

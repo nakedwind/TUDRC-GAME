@@ -8,11 +8,15 @@
 //    爐具被打爆了：鍋上還沒煮好的生食掉在地上
 // ============================================================
 const COOKING = {
-  tiles: ['tile_restaurant_kitchen_workstation'],
+  tiles: ['tile_mw5jkg1u', 'tile_restaurant_kitchen_workstation'],
   time: 1.5,   // 煮幾秒
-  burners: [[33, 67], [60, 67], [88, 67]],   // 爐口在圖片上的位置（圖片像素，圖 280×120）
-  img: [280, 120],
+  // 每種爐灶的爐口在圖片上的位置（圖片像素）；img＝圖片大小
+  layouts: {
+    tile_mw5jkg1u: { burners: [[27, 70], [56, 70], [85, 70]], img: [112, 120] },   // 瓦斯爐
+    tile_restaurant_kitchen_workstation: { burners: [[33, 67], [60, 67], [88, 67]], img: [280, 120] },   // 舊的廚房工作台
+  },
 };
+const cookLayout = s => COOKING.layouts[s && s.id] || COOKING.layouts.tile_mw5jkg1u;
 // 戰鬥區的爐具：依障礙物 type；at＝爐口在圖片上的位置、img＝圖片大小（圖片像素）；reach＝離多近能用
 const FIELD_STOVES = {
   reach: 26,
@@ -48,15 +52,15 @@ function fieldStoveNearPlayer() {
   return best;
 }
 const stoveNearPlayer = () => (typeof mapBoxNearPlayer === 'function' ? mapBoxNearPlayer('stove') : null) || fieldStoveNearPlayer();
-const stoveBurners = s => FIELD_STOVES.types[s && s.type] ? [0] : COOKING.burners;   // 戰鬥區的爐具只有一個爐口
+const stoveBurners = s => FIELD_STOVES.types[s && s.type] ? [0] : cookLayout(s).burners;   // 戰鬥區的爐具只有一個爐口
 const rawFoods = () => allItems().filter(it => it.cookTo && itemById(it.cookTo) && (supplyInventory.get(it.id) || 0) > 0);
 // 爐口在地圖上的位置（左右翻轉的工作台也跟著翻）
 function burnerPos(s, k) {
   const fs = FIELD_STOVES.types[s && s.type];
   if (fs) { const R = fieldStoveRect(s), u = fs.at[0] / fs.img[0] * R.w; return { x: R.x0 + (R.fx ? R.w - u : u), y: R.y0 + fs.at[1] / fs.img[1] * R.h }; }
-  const t = mapTileById(s.id), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL, [bx, by] = COOKING.burners[k];
-  const u = bx / COOKING.img[0] * w;
-  return { x: OX + s.c * CELL + (s.ox || 0) + (s.fx ? w - u : u), y: OY + s.r * CELL + (s.oy || 0) + by / COOKING.img[1] * h };
+  const t = mapTileById(s.id), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL, L = cookLayout(s), [bx, by] = L.burners[k];
+  const u = bx / L.img[0] * w;
+  return { x: OX + s.c * CELL + (s.ox || 0) + (s.fx ? w - u : u), y: OY + s.r * CELL + (s.oy || 0) + by / L.img[1] * h };
 }
 function useStoveNearPlayer() {
   const b = stoveNearPlayer(); if (!b) return false;
