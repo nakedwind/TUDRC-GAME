@@ -56,6 +56,7 @@ const KINDS = {
   ihide: { name: '道具消失', make: () => ({ item: lastCode('item') }) },
   fx: { name: '＋特效', make: () => ({ id: 'fx_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5), box: null, chat: [] }) },
   door: { name: '開關門', make: () => ({ at: null, open: true }) },
+  glow: { name: '光源', make: () => ({ glow: nextCode('glow'), at: null, r: 5, color: '#ffd27a', on: true }) },
   dark: { name: '後室黑幕', make: () => ({ on: true }) },
   vignette: { name: '暗角', make: () => ({ lv: 5 }) },
   bgm: { name: '背景音樂', make: () => ({ src: '', fade: true, vol: 50 }) },
@@ -64,6 +65,8 @@ const KINDS = {
   sfx: { name: '音效', make: () => ({ src: '', vol: 100 }) },
 };
 const WHO_KINDS = new Set(['show', 'hide', 'move', 'tremble', 'act', 'sway']);
+const DOWN_TURNS = [['ccw', '逆時針 90°'], ['cw', '順時針 90°'], ['180', '180°（上下顛倒）'], ['0', '0°（正面）']];   // 倒地怎麼轉
+const DOWN_TURN_TEXT = { ccw: ' 逆時針', cw: ' 順時針', 180: ' 180°', 0: ' 0°' };
 const ACTS = [['hop', '小跳'], ['gun', '持槍'], ['down', '倒地'], ['charge', '集氣'], ['hurt', '受傷'], ['sit', '坐下'], ['light', '光源'], ['bleed', '滴血'], ['shiver', '顫抖'], ['walk', '走路'], ['run', '跑步'], ['slow', '慢走']];   // 角色演出的種類（持槍：沒有槍的角色拿平常戰鬥用的武器）
 const FACES = [['', '面向：自動'], ['front', '正面'], ['back', '背面'], ['left', '朝左'], ['right', '朝右']];
 // ---- 怪物、道具：怪物用「怪物代號」、道具用「道具代號」，跟角色代號分開算（不用先加進演出者列表）----
@@ -181,11 +184,11 @@ function storyKaiExportText() {
 // ---- 跑到第 upto 行時：每個人在哪、鏡頭拍哪裡、後室黑幕開了沒（預覽窗用） ----
 const dirFrom = (a, b) => { const dx = b[0] - a[0], dy = b[1] - a[1]; return Math.abs(dx) > Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front'); };
 function simulate(upto) {
-  const st = { doors: new Map(), actors: new Map(), hurt: new Set(), sit: new Set(), down: new Map(), light: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
+  const st = { doors: new Map(), actors: new Map(), hurt: new Set(), sit: new Set(), down: new Map(), light: new Map(), fxPreview: [], glows: new Map(), mons: new Map(), items: new Map(), cam: null, dark: false, vig: 0, move: null };
   const steps = scene()?.steps || [];
   for (let i = 0; i <= upto && i < steps.length; i++) {
     const p = steps[i], no = Number(p.who), a = st.actors.get(no);
-    if (p.do === 'map') { if (i > 0) { st.doors.clear(); st.actors.clear(); st.mons.clear(); st.items.clear(); st.cam = null; st.move = null; } }   // 換場景：大家先不在場、鏡頭重新決定
+    if (p.do === 'map') { if (i > 0) { st.doors.clear(); st.actors.clear(); st.mons.clear(); st.items.clear(); st.glows.clear(); st.cam = null; st.move = null; } }   // 換場景：大家先不在場、鏡頭重新決定
     else if (p.do === 'mshow' && p.at && p.type) { const m = st.mons.get(Number(p.mon)); st.mons.set(Number(p.mon), { at: p.at, type: p.type, face: p.face || (m?.shown && m.type === p.type ? m.face : 'front'), src: i, shown: true }); }
     else if (p.do === 'mhide' || p.do === 'mact') {
       const m = st.mons.get(Number(p.mon)); if (!m?.shown) continue;
@@ -196,20 +199,31 @@ function simulate(upto) {
     }
     else if (p.do === 'ishow' && p.at && p.id) st.items.set(Number(p.item), { at: p.at, id: p.id, src: i, shown: true });
     else if (p.do === 'ihide') { const it = st.items.get(Number(p.item)); if (it) it.shown = false; }
-    else if (p.do === 'show' && p.at) st.actors.set(no, { at: p.at, face: p.face || a?.face || 'front', src: i, shown: true });
+    else if (p.do === 'show' && p.at) { if (a?.onSeat) st.sit.delete(no); st.actors.set(no, { at: p.at, face: p.face || a?.face || 'front', src: i, shown: true }); }
     else if (p.do === 'move' && p.at) {
       if (i === upto && a?.shown) st.move = { from: a.at, to: p.at };
       const warp = warpTo(storyMaps.find(m => m.id === mapAt(i)), p.at);   // 走到同地圖傳送點：送到目的地
       if (warp && i === upto) st.warp = { from: p.at, to: warp };
+      if (a?.onSeat) st.sit.delete(no);   // 坐在椅子上的人：先站起來再走
       st.actors.set(no, { at: warp || p.at, face: p.face || (a?.shown ? dirFrom(a.at, p.at) : 'front'), src: i, shown: true });
     } else if (p.do === 'hide' && a) a.shown = false;
     else if (p.do === 'act' && p.act === 'light') { if (p.on === false) st.light.delete(no); else st.light.set(no, Number(p.r) || 4); }
-    else if (p.do === 'act' && p.act === 'down') { if (p.on === false) st.down.delete(no); else st.down.set(no, { cw: !!p.cw, eye: p.eye || '' }); }
-    else if (p.do === 'act' && (p.act === 'hurt' || p.act === 'sit')) { if (p.on === false) st[p.act].delete(no); else st[p.act].add(no); }   // 受傷：開了之後一直是流血的樣子
+    else if (p.do === 'act' && p.act === 'down') { if (p.on === false) st.down.delete(no); else st.down.set(no, { turn: p.turn || (p.cw ? 'cw' : 'ccw'), eye: p.eye || '' }); }
+    else if (p.do === 'act' && p.act === 'sit' && a) {   // 坐下：附近有椅子就坐到椅子上；起身回到原本站的地方
+      if (p.on === false) { st.sit.delete(no); if (a.seatFrom) { a.at = a.seatFrom; a.seatFrom = null; } a.onSeat = false; }
+      else {
+        st.sit.add(no);
+        const seat = nearSeat(storyMaps.find(m => m.id === mapAt(i)), a.at, at => [...st.actors.values()].some(o => o !== a && o.onSeat && o.at[0] === at[0] && o.at[1] === at[1]));
+        if (seat && !a.onSeat) { a.seatFrom = a.at; a.at = seat.at; a.face = seat.dir; a.onSeat = true; a.seatStamp = seat.stamp; }
+      }
+    }
+    else if (p.do === 'act' && p.act === 'hurt') { if (p.on === false) st.hurt.delete(no); else st.hurt.add(no); }   // 受傷：開了之後一直是流血的樣子
     else if ((p.do === 'cam' || p.do === 'camMove') && p.at) st.cam = { at: p.at, w: Number(p.w) || 20, src: i };
     else if (p.do === 'door' && p.at) st.doors.set(nearDoorSpot(storyMaps.find(m => m.id === mapAt(i)), p.at)?.stamp || p.at.join(','), { at: p.at, open: p.open !== false, src: i });   // 同一扇門只記最後一次（開、關點的位置不一樣也算同一扇）
     else if (p.do === 'dark') st.dark = p.on !== false;
-    else if (p.do === 'vignette') st.vig = Number(p.lv) || 0;
+    else if (p.do === 'glow') { if (p.on === false || !p.at) st.glows.delete(Number(p.glow)); else st.glows.set(Number(p.glow), { at: p.at, r: Number(p.r) || 5, color: p.color || '#ffd27a', src: i }); }
+    else if (p.do === 'fx' && typeof STORY_KAI_FX !== 'undefined' && STORY_KAI_FX[p.id]?.preview) st.fxPreview.push(STORY_KAI_FX[p.id]);   // 特效留下來的畫面（例如房間的燈光）
+    else if (p.do === 'vignette') { st.vig = Number(p.lv) || 0; st.vigFixed = p.follow === false ? (st.cam ? { ...st.cam } : { at: [0, 0], whole: true }) : null; }   // 不跟隨鏡頭：記住這一行當下的鏡頭
   }
   return st;
 }
@@ -235,6 +249,23 @@ function mapDoorSpots(m) {
     const t = tileMap.get(s.id) || {}; return { stamp: s, at: [s.c + (s.ox || 0) / C + (t.w || 1) / 2, s.r + (s.oy || 0) / C + (t.h || 1) / 2] };
   });
 }
+// 「坐下」附近的椅子：算法跟遊戲一樣（js/game.js 的 mapSeats、seatNearPlayer），回傳座位的格子座標和面向；床不算
+const SIT_RADIUS = 28 / C;   // data/balance.js 的 SIT.radius
+function nearSeat(m, p, taken) {
+  let best = null, bd = SIT_RADIUS, bSeat = Infinity;
+  if (typeof chairConfig !== 'function') return null;
+  for (const s of m?.stamps || []) {
+    const cfg = chairConfig(s.id); if (!cfg || /bed|床/i.test(s.id)) continue;
+    const t = tileMap.get(s.id) || {}, w = (t.w || 1), h = (t.h || 1), x0 = s.c + (s.ox || 0) / C, y0 = s.r + (s.oy || 0) / C;
+    const at = [x0 + (s.fx ? w * C - cfg.seat.x : cfg.seat.x) / C, y0 + (s.fy ? h * C - cfg.seat.y : cfg.seat.y) / C]; if (taken(at)) continue;
+    let dir = cfg.seat.dir || 'front';
+    if (s.fx && (dir === 'left' || dir === 'right')) dir = dir === 'left' ? 'right' : 'left';
+    if (s.fy && (dir === 'front' || dir === 'back')) dir = dir === 'front' ? 'back' : 'front';
+    const d = Math.hypot(Math.max(x0 - p[0], 0, p[0] - (x0 + w)), Math.max(y0 - p[1], 0, p[1] - (y0 + h))), seatD = Math.hypot(at[0] - p[0], at[1] - p[1]);
+    if (d < bd || (d === bd && seatD < bSeat)) { bd = d; bSeat = seatD; best = { at, dir, stamp: s }; }
+  }
+  return best;
+}
 function nearDoorSpot(m, p) {   // 點的位置 3 格以內最近的門
   let best = null, bd = 3;
   for (const d of mapDoorSpots(m)) { const dd = Math.hypot(d.at[0] - p[0], d.at[1] - p[1]); if (dd < bd) { bd = dd; best = d; } }
@@ -257,6 +288,11 @@ function drawImg(g, img, x, y, w, hh, fx, fy, rot) {
   g.save(); g.translate(x + w / 2, y + hh / 2); if (rot) g.rotate(rot * Math.PI / 2); g.scale(fx ? -1 : 1, fy ? -1 : 1);
   const iw = rot % 2 ? hh : w, ih = rot % 2 ? w : hh; g.drawImage(img, -iw / 2, -ih / 2, iw, ih); g.restore();
 }
+function drawStamp(g, st) {   // 畫地圖上的一個物件
+  const t = tileMap.get(st.id), img = image(t?.file); if (!t || !img) return;
+  const rot = ((Number(st.rot) || 0) % 4 + 4) % 4, w = (rot % 2 ? (t.h || 1) : (t.w || 1)) * C, hh = (rot % 2 ? (t.w || 1) : (t.h || 1)) * C;
+  withStampTransform(g, st, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, () => drawImg(g, img, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, st.fx, st.fy, rot));
+}
 // 地圖本身先畫在另一張畫布上，拖曳時只要貼上去（圖片還沒載完會再重畫）
 const mapCache = { id: null, open: '', canvas: document.createElement('canvas'), dirty: true };
 // open：打開著的門（stamp），這些門的圖片不畫（跟遊戲一樣，門打開＝門的圖片消失）
@@ -271,9 +307,7 @@ function mapCanvas(m, open = new Set()) {
     for (const [k, id] of Object.entries((m.layers || {})[lid] || {})) { const t = tileMap.get(id), img = image(t?.file); if (!img) continue; const [c, r] = k.split(',').map(Number); g.drawImage(img, c * C, r * C, C, C); }
     for (const st of m.stamps || []) {
       if ((st.layer || 'top') !== lid || open.has(st)) continue;
-      const t = tileMap.get(st.id), img = image(t?.file); if (!t || !img) continue;
-      const rot = ((Number(st.rot) || 0) % 4 + 4) % 4, w = (rot % 2 ? (t.h || 1) : (t.w || 1)) * C, hh = (rot % 2 ? (t.w || 1) : (t.h || 1)) * C;
-      withStampTransform(g, st, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, () => drawImg(g, img, st.c * C + (st.ox || 0), st.r * C + (st.oy || 0), w, hh, st.fx, st.fy, rot));
+      drawStamp(g, st);
     }
   }
   return mapCache.canvas;
@@ -301,8 +335,9 @@ function cornerHandle(x, y, on) {
 }
 // 角色：跟遊戲一樣的大小，腳底在格子座標上；配件也一起畫
 function drawFigure(c, p, face, hurt, sit, down, eye) {
-  if (down) {   // 倒地：正面的圖繞中心轉 90 度（逆時針或順時針），躺在原本腳下的位置（跟 js/story-kai.js 一樣）
-    ctx.save(); ctx.translate(p[0] * C, p[1] * C + 18 - SIZE / 4); ctx.rotate(down.cw ? Math.PI / 2 : -Math.PI / 2); ctx.translate(-p[0] * C, -(p[1] * C + 18 - SIZE / 2));
+  if (down) {   // 倒地：正面的圖轉 90 度（逆時針或順時針，躺在原本腳下的位置）、180 度（繞圖片中心，上下顛倒）、0 度（不轉）；跟 js/story-kai.js 一樣
+    const midY = p[1] * C + 18 - SIZE / 2, flat = down.turn === 'cw' || down.turn === 'ccw';
+    ctx.save(); ctx.translate(p[0] * C, flat ? p[1] * C + 18 - SIZE / 4 : midY); ctx.rotate({ cw: Math.PI / 2, ccw: -Math.PI / 2, 180: Math.PI }[down.turn] || 0); ctx.translate(-p[0] * C, -midY);
     drawFigure(c, p, 'front', hurt, false, null, down.eye); ctx.restore(); return;
   }
   if (c.image) {   // 圖片角色：照原本比例、跟人一樣高
@@ -313,7 +348,7 @@ function drawFigure(c, p, face, hurt, sit, down, eye) {
   const extra = suffix => c.sprite ? image(faceSrc(c.sprite, face).replace(/\.png$/, '') + suffix + '.png') : null;
   const front = (face || 'front') === 'front';
   // 倒地的眼睛：半閉、閉眼（跟遊戲一樣借用眨眼的圖，受傷中是流血的）
-  const eyeImg = !eye || !c.sprite ? null : hurt ? extra(eye === 'half' ? '_hurt_02' : '_hurt_03') : image(faceSrc(c.sprite).replace('0000_Front', eye === 'half' ? '0014_closeeyes01' : '0012_closeeyes03'));
+  const eyeImg = !eye || !c.sprite ? null : hurt ? extra(eye === 'half' ? '_hurt_02' : '_hurt_03') : image(faceSrc(c.sprite).replace('0000_Front', eye === 'half' ? '0013_closeeyes02' : '0012_closeeyes03'));
   const img = eyeImg || (sit && ((hurt && extra('_hurt_sit')) || extra('_sit'))) || (hurt && extra(front ? '_hurt_01' : '_hurt')) || image(faceSrc(c.sprite, face)) || image(faceSrc(c.sprite)); if (!img) return;
   const x = p[0] * C - SIZE / 2, y = p[1] * C - SIZE + 18;
   const accs = typeof ACC_BY_ID !== 'undefined' ? Object.values(c.accs || {}).map(id => ACC_BY_ID[id]).filter(Boolean).sort((a, b) => accLayer(a) - accLayer(b)) : [];
@@ -363,10 +398,19 @@ function draw() {
   const mons = [...st.mons.entries()].filter(([, x]) => x.shown), items = [...st.items.entries()].filter(([, x]) => x.shown);
   // 人、怪物、道具一起依腳底的高低排前後
   // 前後順序跟遊戲一樣（js/story-kai.js 的 draw）：人 +17、怪物 +13、道具 +10、地圖素材的道具 +0 像素
-  const figs = [...actors.map(([no, a]) => ({ y: a.at[1] + 17 / C, draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, st.down.has(no) ? 'front' : a.face, st.hurt.has(no), st.sit.has(no) && !st.down.has(no), st.down.get(no)); } })),
+  const figs = [...actors.map(([no, a]) => ({ y: a.at[1] + 17 / C, draw: () => { const c = castBy(no); if (c) drawFigure(c, a.at, st.down.has(no) ? 'front' : a.face, st.hurt.has(no), st.sit.has(no) && !a.onSeat && !st.down.has(no), st.down.get(no)); } })),
     ...mons.map(([, x]) => ({ y: x.at[1] + 13 / C, draw: () => drawMonster(x, x.dying) })), ...items.map(([, x]) => ({ y: x.at[1] + (propOf(x.id)?.tile ? 0 : 10) / C, draw: () => drawProp(x) }))];
   figs.sort((p, q) => p.y - q.y).forEach(f => f.draw());
+  for (const [, a] of actors) if (a.onSeat && a.face === 'back') drawStamp(ctx, a.seatStamp);   // 背對鏡頭坐著：椅背擋在人前面（跟遊戲一樣）
+  for (const [, g] of st.glows) {   // ＋光源：畫法跟遊戲一樣（js/story-kai.js 的 drawGlows）
+    const n = parseInt(g.color.slice(1), 16), rgb = (n >> 16 & 255) + ',' + (n >> 8 & 255) + ',' + (n & 255), x = g.at[0] * C, y = g.at[1] * C, R = g.r * C;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, R);
+    grad.addColorStop(0, 'rgba(' + rgb + ',.5)'); grad.addColorStop(.35, 'rgba(' + rgb + ',.2)'); grad.addColorStop(1, 'rgba(' + rgb + ',0)');
+    ctx.save(); ctx.globalCompositeOperation = 'lighter'; ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(x, y, R, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+  }
+  for (const def of st.fxPreview) { ctx.save(); try { def.preview(ctx, m); } catch (e) { console.warn('特效預覽出錯', e); } ctx.restore(); }
   ctx.restore();
+  if (st.vig > 0) drawVignette(st.vigFixed?.whole ? null : st.vigFixed || st.cam, st.vig, m, st.cam);
   ctx.strokeStyle = 'rgba(255,255,255,.12)'; ctx.lineWidth = 1;
   const [mx0, my0] = toScreen(0, 0), [mx1, my1] = toScreen(m.cols, m.rows); ctx.strokeRect(mx0, my0, mx1 - mx0, my1 - my0);
   if (st.dark) label('🌑 後室黑幕', mx0 + 8, my0 + 18, '#c9b5ff', 'left');
@@ -393,6 +437,7 @@ function draw() {
   } };
   dot(mons, '#ff7b7b', (no, x) => '怪' + pad(no) + ' ' + (monOf(x.type)?.name || x.type) + (x.dying ? '（死亡）' : ''));
   dot(items, '#7fd0ff', (no, x) => '物' + pad(no) + ' ' + (propOf(x.id)?.name || x.id));
+  dot([...st.glows.entries()], '#ffd27a', (no, x) => '光' + pad(no) + ' ' + x.r + ' 格');
   // 鏡頭：虛線框＝劇情跑到這一行時拍到的範圍；下面那一塊是對話框會蓋住的地方
   const camStep = cur && (cur.do === 'cam' || cur.do === 'camMove');
   $('camCenter').hidden = $('camReset').hidden = !camStep;   // 選到鏡頭那一行才出現
@@ -407,6 +452,18 @@ function draw() {
     ctx.save(); ctx.setLineDash([7, 5]); ctx.strokeStyle = '#ffd479'; ctx.lineWidth = 2; ctx.strokeRect(x1, y1, x2 - x1, y2 - y1); ctx.restore();
   }
   if (pick) { ctx.fillStyle = 'rgba(79,191,127,.06)'; ctx.fillRect(0, 0, W, H); }
+}
+// 暗角：畫在鏡頭框裡（還沒有鏡頭就畫在整張地圖上），算法跟遊戲一樣（js/story-kai.js 的 vignetteCss）
+function drawVignette(c, lv, m, clip) {   // c＝暗角的中心和大小；clip＝畫在哪個鏡頭框裡
+  const w = c ? c.w : m.cols, hh = c ? c.w * RATIO : m.rows, cx = c ? c.at[0] : m.cols / 2, cy = c ? c.at[1] : m.rows / 2;
+  const [x0, y0] = toScreen(cx - w / 2, cy - hh / 2), [x1, y1] = toScreen(cx + w / 2, cy + hh / 2), W = x1 - x0, H = y1 - y0;
+  const clear = (66 - lv * 5) / 100, dark = clear + .28, stop = v => Math.max(0, Math.min(1, v));
+  const g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+  g.addColorStop(stop(clear), 'rgba(0,0,0,0)'); g.addColorStop(stop(clear + .14), 'rgba(0,0,0,.55)'); g.addColorStop(stop(dark), 'rgba(0,0,0,.92)'); g.addColorStop(1, '#000');
+  const f = clip || c, fw = f ? f.w : m.cols, fh = f ? f.w * RATIO : m.rows, [fx0, fy0] = f ? toScreen(f.at[0] - fw / 2, f.at[1] - fh / 2) : [x0, y0], [fx1, fy1] = f ? toScreen(f.at[0] + fw / 2, f.at[1] + fh / 2) : [x1, y1];
+  ctx.save(); ctx.beginPath(); ctx.rect(fx0, fy0, fx1 - fx0, fy1 - fy0); ctx.clip();
+  ctx.translate(x0 + W / 2, y0 + H / 2); ctx.scale(W * .72, H * .72);   // 橢圓：寬、高各 72%
+  ctx.fillStyle = g; ctx.fillRect(-30, -30, 60, 60); ctx.restore();
 }
 function drawCam(c, on, ghost) {
   const s = scene(), w = c.w, hh = w * RATIO;
@@ -648,7 +705,7 @@ $('accOk').onclick = () => { $('accDlg').close(); renderCast(); };
 // ---- 右邊：指令列表 ----
 function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
   if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null && !isMystery(st.who))) && !castBy(st.who)) return '角色代號不在演出者列表裡';
-  if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(st.do) && !st.at) return '還沒在地圖上點位置';
+  if ((['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(st.do) || (st.do === 'glow' && st.on !== false)) && !st.at) return '還沒在地圖上點位置';
   if (st.do === 'sfxStop' && st.loop && st.src && !scene().steps.slice(0, scene().steps.indexOf(st)).some(x => x.do === 'sfx' && x.loop && x.src === st.src)) return '這一行前面沒有開過這個循環音效';
   if (st.do === 'door' && !nearDoorSpot(storyMaps.find(m => m.id === mapAt(scene().steps.indexOf(st))), st.at)) return '點的地方附近沒有門（後室木門這類可以開關的門）';
   if (st.do === 'mact' && st.act === 'move' && !st.at) return '還沒在地圖上點要走到哪';
@@ -673,6 +730,7 @@ function rowLabel(st) {
   if (st.do === 'end' && st.title) extra = ' 「' + st.title + '」';
   if (st.do === 'map' && st.map) extra = ' ' + mapName(st.map);
   if (st.do === 'door') extra = ' ' + (st.open === false ? '關門' : '開門');
+  if (st.do === 'glow') extra = ' [' + (codeOk(st.glow) ? pad(st.glow) : '??') + ']' + (st.on === false ? '（熄）' : '');
   if (MON_KINDS.has(st.do)) {
     const src = st.do === 'mshow' ? st : shownBy('mon', st.mon, scene().steps.indexOf(st));
     extra = ' [' + (codeOk(st.mon) ? pad(st.mon) : '??') + '/' + (monOf(src?.type)?.name || '怪物') + ']' + (st.do === 'mact' ? ' ' + ((MON_ACTS.find(a => a[0] === st.act) || [, '攻擊'])[1]) : '');
@@ -681,7 +739,7 @@ function rowLabel(st) {
     const src = st.do === 'ishow' ? st : shownBy('item', st.item, scene().steps.indexOf(st));
     extra = ' [' + (codeOk(st.item) ? pad(st.item) : '??') + '/' + (propOf(src?.id)?.name || '道具') + ']';
   }
-  if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && !WALK_ACTS.has(st.act) && st.on === false ? '（停）' : '') + (st.act === 'light' && st.on !== false ? ' ' + (st.r || 4) + ' 格' : '') + (st.act === 'shiver' && st.on !== false ? ' ' + (st.lv || 2) + ' 級' : '') + (st.act === 'down' && st.on !== false ? (st.cw ? ' 順時針' : ' 逆時針') + (st.eye === 'half' ? ' 半閉' : st.eye === 'closed' ? ' 閉眼' : '') : '');
+  if (st.do === 'act') extra += ' ' + ((ACTS.find(a => a[0] === st.act) || [, '小跳'])[1]) + (st.act !== 'hop' && !WALK_ACTS.has(st.act) && st.on === false ? '（停）' : '') + (st.act === 'light' && st.on !== false ? ' ' + (st.r || 4) + ' 格' : '') + (st.act === 'shiver' && st.on !== false ? ' ' + (st.lv || 2) + ' 級' : '') + (st.act === 'down' && st.on !== false ? (DOWN_TURN_TEXT[st.turn || (st.cw ? 'cw' : 'ccw')]) + (st.eye === 'half' ? ' 半閉' : st.eye === 'closed' ? ' 閉眼' : '') : '');
   return [name, extra];
 }
 // 每一行最右邊的設定（藍＝下拉選單、紅＝自己輸入、綠＝到地圖上點）
@@ -764,12 +822,12 @@ function controls(st) {
     case 'hide': return [codeIn(st)];
     case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st, '走的途中、走到之後都面向這邊；自動＝照走的方向')];
     case 'act': {
-      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地（正面的圖轉 90 度躺下，可選逆時針或順時針）、集氣、受傷、坐下（要先在角色出現、角色位置設好面向，有畫那個方向的坐下圖才會坐）、光源（身上發光，照亮幾格；開了「後室黑幕」才看得出來）、滴血（跟著走過的路晚 0.3 秒滴到地上）、顫抖（上下左右不規則地抖，一陣強一陣弱；1～5 級）：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
+      const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地（用正面的圖，可選逆時針、順時針 90 度、180 度、0 度）、集氣、受傷、坐下（附近有椅子就坐到椅子上，面向、遮擋跟遊戲一樣；沒有椅子：要先在角色出現、角色位置設好面向，有畫那個方向的坐下圖才會坐）、光源（身上發光，照亮幾格；開了「後室黑幕」才看得出來）、滴血（跟著走過的路晚 0.3 秒滴到地上）、顫抖（上下左右不規則地抖，一陣強一陣弱；1～5 級）：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
         st.act = e.target.value;
         if (WALK_ACTS.has(st.act)) delete st.on; else if (st.act !== 'hop' && st.on == null) st.on = true;
         if (st.act === 'light') { if (st.r == null) st.r = 4; } else delete st.r;
         if (st.act === 'shiver') { if (st.lv == null) st.lv = 2; } else delete st.lv;
-        if (st.act !== 'down') { delete st.cw; delete st.eye; }
+        if (st.act !== 'down') { delete st.cw; delete st.turn; delete st.eye; }
         commit();
       } }, ACTS.map(([v, t]) => h('option', { value: v }, t)));
       pickAct.value = st.act || 'hop';
@@ -777,8 +835,8 @@ function controls(st) {
       if (WALK_ACTS.has(st.act)) return [codeIn(st), pickAct];
       if (st.act === 'light') return [codeIn(st), pickAct, check(st, 'on', '開', true), h('label', {}, '範圍：', numIn(st, 'r', 1, 20, '照亮幾格（半徑）')), '格'];
       if (st.act === 'down') {
-        const turn = h('select', { title: '往哪邊轉 90 度', onchange: e => { if (e.target.value === 'cw') st.cw = true; else delete st.cw; commit(); } }, [['ccw', '逆時針 90°'], ['cw', '順時針 90°']].map(([v, t]) => h('option', { value: v }, t)));
-        turn.value = st.cw ? 'cw' : 'ccw';
+        const turn = h('select', { title: '怎麼轉（用正面的圖）', onchange: e => { const v = e.target.value; delete st.cw; delete st.turn; if (v === 'cw') st.cw = true; else if (v !== 'ccw') st.turn = v; commit(); } }, DOWN_TURNS.map(([v, t]) => h('option', { value: v }, t)));
+        turn.value = st.turn || (st.cw ? 'cw' : 'ccw');
         const eye = h('select', { title: '倒地時的眼睛（受傷中是流血的那幾張）', onchange: e => { if (e.target.value) st.eye = e.target.value; else delete st.eye; commit(); } }, [['', '張眼'], ['half', '半閉'], ['closed', '閉眼']].map(([v, t]) => h('option', { value: v }, t)));
         eye.value = st.eye || '';
         return [codeIn(st), pickAct, check(st, 'on', '開', true), turn, eye];
@@ -800,9 +858,15 @@ function controls(st) {
     case 'sway': return [codeIn(st), check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
     case 'tremble': return [codeIn(st), check(st, 'on', '震動', true), h('label', {}, '幅度：', lvSel(st)), h('label', {}, '秒數(ms)：', msIn(st, '震多久；空白或 0＝一直震到關掉'))];
     case 'say': return [codeIn(st, '旁白', 'who', '角色代號（演出者列表左邊的數字）；空白＝旁白；666＝「？？？」'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openSay(st); } }, '寫對白'), check(st, 'shake', '框震動')];
+    case 'glow': {
+      const code = codeIn(st, '代號', 'glow', '光源代號：同一個代號再加一行＝改它（移動、改範圍、換顏色）；取消勾選「開」＝熄掉'), on = check(st, 'on', '開', true);
+      if (st.on === false) return [code, on];
+      const color = h('input', { type: 'color', value: st.color || '#ffd27a', title: '光源的顏色', style: 'width:34px;height:22px;padding:0;vertical-align:middle', onchange: e => { st.color = e.target.value; commit(); } });
+      return [code, on, pickBtn(st, '中心點'), h('label', {}, '範圍：', numIn(st, 'r', 1, 30, '照亮幾格（半徑）')), '格', color];
+    }
     case 'fx': { const [cls, text] = fxTag(st); return [pickBtn(st, '特效範圍', 'box'), h('button', { type: 'button', onclick: e => { e.stopPropagation(); openFx(st); } }, '特效說明'), h('span', { class: 'tag ' + cls }, text)]; }
     case 'dark': return [check(st, 'on', '開啟（只有燈照得到的地方亮）', true)];
-    case 'vignette': return [h('label', {}, '暗角範圍：', numIn(st, 'lv', 0, 10, '0～10：數字越大，四周變暗的範圍越大（0＝關掉暗角）'))];
+    case 'vignette': return [h('label', {}, '暗角範圍：', numIn(st, 'lv', 0, 10, '0～10：數字越大，四周變暗的範圍越大（0＝關掉暗角）')), h('label', { title: '勾選：暗角跟著鏡頭。取消勾選：暗角固定在這一行當下的鏡頭位置，之後鏡頭移動它不動' }, h('input', { type: 'checkbox', checked: st.follow !== false, onchange: e => { if (e.target.checked) delete st.follow; else st.follow = false; commit(); } }), '跟隨鏡頭')];
     case 'end': return [h('label', {}, '結局標題：', h('input', { type: 'text', value: st.title || '', placeholder: '空白＝直接回到原本的地圖', style: 'width:150px',
       onchange: e => { st.title = e.target.value.trim(); commit(); } }))];
     case 'bgm': return [...fileBtn(st), check(st, 'fade', '淡入', true), h('label', {}, '音量：', volIn(st))];
@@ -864,7 +928,7 @@ function addStep(kind) {
   s.steps.splice(at, 0, st); sel = at; setPick(null); commit(); scrollToSel();
   // 新增後直接進入下一步：要寫的打開視窗、要點位置的直接開始點
   if (kind === 'say') openSay(st);
-  else if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(kind)) startPick(st, 'point');
+  else if (['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door', 'glow'].includes(kind)) startPick(st, 'point');
   else if (kind === 'fx') startPick(st, 'box');
 }
 function removeStep(i) {

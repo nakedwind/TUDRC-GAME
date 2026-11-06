@@ -185,7 +185,7 @@ function defCamp() { const a = []; for (let c = 0; c < COLS; c++) { a.push(c + '
 const effCamp = (m) => new Set(m.camp.length ? m.camp : defCamp());
 
 // ================= 資料 =================
-let maps, curId, customTiles = [], brush = { mode: 'tile', tile: 'floor' }, activeLayer = 'floor';
+let maps, curId, customTiles = [], brush = { mode: 'select', tile: 'floor' }, activeLayer = 'floor';   // 一進來是「選取」：滑鼠上不會黏著一個方塊
 let checkResult = null, hoverCell = null, painting = false, lastPaint = '', selection = null, selections = [];
 let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（大小圖都可用）
 let brushRotation = 0;
@@ -2176,6 +2176,8 @@ const PALETTE_CATEGORIES = [
   { id: 'interactive', name: '互動與道具' },
   { id: 'storage', name: '收納' },
   { id: 'plant', name: '植栽' },
+  { id: 'chair', name: '椅子' },
+  { id: 'lamp', name: '燈' },
   { id: 'restaurant', name: '餐廳' },
   { id: 'hospital', name: '醫院病房' },
   { id: 'containment', name: '收容觀察室' },
@@ -2226,10 +2228,18 @@ const STORAGE_TILE_IDS = new Set([
 ]);
 // 植栽：盆栽、植物系列，不管原本在哪個資料夾都放這一類（id／檔名有 plant，或名稱有「盆栽」「植栽」「植物」；新的植物照這樣取名就會自動分進來）
 const isPlantTile = t => /plant/i.test(String(t.id || '') + ' ' + String(t.file || '')) || /盆栽|植栽|植物/.test(String(t.name || ''));
+// 可以坐的東西（椅子、沙發、凳子、長椅）：id、檔名或名稱有這些字就算；放在木凳上的盆栽算植栽
+const isChairTile = t => /chair|stool|bench|sofa|couch|seat/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /椅|沙發|凳/.test(String(t.name || ''));
+// 燈：名稱有「燈」，或 id／檔名是燈（只寫 light 不算，因為樓梯、海報、牆面的檔名也可能有 light，意思是淺色或月光）
+const isLampTile = t => /lamp|lantern|lightbox|(search|camping[ _-]|electric[_-]|elevator[_-]|ceiling[_-]|traffic[_-])light/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /燈/.test(String(t.name || ''));
+// 池核的素材不分進椅子、燈，一律留在「池核」
+const isPoolcoreTile = t => { const f = String(t.file || '').replace(/\\/g, '/').toLowerCase(); return String(t.id || '').startsWith('tile_poolcore_') || f.includes('/池核/') || f.includes('/poolcore/'); };
 function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_forest_') || String(t.file || '').includes('/森林/')) return 'forest';   // 森林：整個資料夾都放這一類（不管檔名）
   if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
   if (isPlantTile(t)) return 'plant';
+  if (isChairTile(t) && !isPoolcoreTile(t)) return 'chair';
+  if (isLampTile(t) && !isPoolcoreTile(t)) return 'lamp';
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
   if (/vending/.test(String(t.id || '')) || file.includes('vending-machine')) return 'interactive';   // 販賣機（紅、綠、紫）：可以互動（js/shop.js）
@@ -3212,9 +3222,20 @@ document.getElementById('clearLayout').addEventListener('click', () => {
 
 // ================= 地圖管理 =================
 const mapSelect = document.getElementById('mapSelect');
+// 選單排序：名稱開頭有數字的照數字排（02 → 02-a → 03，10 排在 9 後面），沒有數字開頭的放最後並維持原本順序。
+// 只影響選單顯示，不改地圖存檔裡的順序；新地圖或改名後也會自動照這個規則
+function mapNameOrder(m) {
+  const x = /^\s*(\d+)(?:-(\w+))?/.exec(String(m.name || ''));
+  return x ? [Number(x[1]), x[2] || ''] : [Infinity, ''];
+}
+function compareMapNames(a, b) {
+  const x = mapNameOrder(a), y = mapNameOrder(b);
+  if (x[0] !== y[0]) return x[0] < y[0] ? -1 : 1;
+  return x[1].localeCompare(y[1], undefined, { numeric: true });
+}
 function refreshMapSelect() {
   mapSelect.innerHTML = '';
-  maps.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
+  [...maps].sort(compareMapNames).forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], spawnZone: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], camp: [], rules: {} }); }
@@ -3475,7 +3496,7 @@ loadMaps();
 applyMapSize();
 preloadTiles();
 renderPalette();
-selectTile('floor');
+selectTile('floor'); brush = { mode: 'select', tile: 'floor' }; updateToolUI(); renderPalette();   // 一進來是「選取」：滑鼠上不會黏著一個方塊
 renderLayers();
 refreshMapSelect();
 loadRules();

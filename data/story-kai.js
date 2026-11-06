@@ -474,5 +474,43 @@ const STORY_KAI = {
       { "do": "say", "who": 0, "text": "他需要我。", "shake": false },
       { "do": "end", "title": "" }
     ]
+  },
+  "memory_kai_02": {
+    "map": "map_zk02_taana_room",
+    "title": "柯回憶02",
+    "cast": [{ "no": 1, "char": "colyn", "sprite": "colyn_A" }, { "no": 2, "char": "taana", "sprite": "taana_A" }],
+    "steps": [
+      { "do": "blackOut", "ms": 0 },
+      { "do": "cam", "at": [4, 4.1], "w": 4.6 },
+      { "do": "map", "map": "map_zk02_taana_room" },
+      { "do": "blackIn", "ms": 3500 },
+      {
+        "do": "fx",
+        "id": "fx_mw4cw1blocg",
+        "box": [-1.6, -4.9, 12.1, 15],
+        "chat": [
+          { "from": "me", "text": "整個房間呈現幽暗但安全、舒適的黃光，像是睡前的氛圍。光源是床頭上的黃光，光源大概５格。", "at": "2026-11-06 10:30" },
+          {
+            "from": "claude",
+            "text": "做好了：光源放在床頭的桌燈，照亮大概 5 格，越遠越暗；照不到的地方幽暗但還看得見，整間房都是暖黃色，一直留到劇情結束。這個特效不用「後室黑幕」，所以不要再開黑幕，不然會變全黑。",
+            "at": "2026-11-06 10:32"
+          }
+        ]
+      },
+      { "do": "vignette", "lv": 1 },
+      { "do": "glow", "glow": 1, "at": [4.7, 2.8], "r": 2, "color": "#fff1d6", "on": true },
+      { "do": "act", "who": 1, "act": "down", "on": true, "turn": "0", "eye": "closed" },
+      { "do": "show", "who": 1, "at": [4, 4.3] },
+      { "do": "show", "who": 2, "at": [5.6, 4.4] },
+      { "do": "act", "who": 2, "act": "sit", "on": true },
+      { "do": "camMove", "at": [4, 4.3], "w": 6.4, "ms": 2500 },
+      { "do": "wait", "ms": 1700 },
+      { "do": "act", "who": 1, "act": "down", "on": true, "turn": "0", "eye": "closed" },
+      { "do": "act", "who": 1, "act": "down", "on": true, "turn": "0", "eye": "half" },
+      { "do": "wait", "ms": 100 },
+      { "do": "act", "who": 1, "act": "down", "on": true, "turn": "0", "eye": "closed" },
+      { "do": "wait", "ms": 10000 },
+      { "do": "end", "title": "" }
+    ]
   }
 };

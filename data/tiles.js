@@ -5355,5 +5355,29 @@ const SHARED_TILES = [
     "w": 1,
     "h": 1,
     "flat": true
+  },
+  {
+    "id": "tile_mw47qirk",
+    "name": "Poolcore_slide",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_slide.png",
+    "w": 3,
+    "h": 6
+  },
+  {
+    "id": "tile_mw49f97t",
+    "name": "poolcore_ladder",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore_ladder.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_mw4d9qnu",
+    "name": "Poolcore_swimring",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_swimring.png",
+    "w": 1,
+    "h": 1
   }
 ];

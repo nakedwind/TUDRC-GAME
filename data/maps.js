@@ -9177,7 +9177,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_mr4mbd88",
-    "name": "台北車站大廳",
+    "name": "03. 台北車站大廳",
     "desc": "",
     "layers": {
       "floor": {
@@ -12534,7 +12534,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_mv1bzur4",
-    "name": "戰鬥-池核",
+    "name": "04. 池核",
     "desc": "",
     "layers": {
       "ground2": {},
@@ -12548,7 +12548,6 @@ const BATTLE_MAPS = [
       "object5": {},
       "object8": {},
       "object9": {},
-      "object10": {},
       "object11": {},
       "object12": {},
       "object13": {},
@@ -14384,20 +14383,6 @@ const BATTLE_MAPS = [
         "ox": 10
       },
       {
-        "id": "tile_mvodgug9",
-        "c": 50,
-        "r": 33,
-        "layer": "object",
-        "ox": 30
-      },
-      {
-        "id": "tile_mvocpp0c",
-        "c": 52,
-        "r": 33,
-        "layer": "object",
-        "ox": 30
-      },
-      {
         "id": "tile_mvocpp0c",
         "c": 27,
         "r": 31,
@@ -14964,68 +14949,6 @@ const BATTLE_MAPS = [
         "oy": 20
       },
       {
-        "id": "tile_obstacle_ore_rare",
-        "c": 42,
-        "r": 23,
-        "layer": "object10",
-        "ox": 30,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 44,
-        "r": 23,
-        "layer": "object10",
-        "ox": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 42,
-        "r": 24,
-        "layer": "object10",
-        "ox": 20,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 46,
-        "r": 23,
-        "layer": "object10",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 43,
-        "r": 25,
-        "layer": "object10",
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 46,
-        "r": 24,
-        "layer": "object10",
-        "ox": 30,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 46,
-        "r": 25,
-        "layer": "object10",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_new_decor_oil_drum",
-        "c": 45,
-        "r": 25,
-        "layer": "object10",
-        "oy": 30,
-        "ox": 10
-      },
-      {
         "id": "tile_poolcore_pillar",
         "c": 35,
         "r": 43,
@@ -15039,66 +14962,6 @@ const BATTLE_MAPS = [
         "r": 47,
         "layer": "object6",
         "oy": 10
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 46,
-        "r": 44,
-        "layer": "object10",
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 48,
-        "r": 44,
-        "layer": "object10",
-        "ox": 10,
-        "oy": 10
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 46,
-        "r": 45,
-        "layer": "object10",
-        "ox": 10,
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 50,
-        "r": 44,
-        "layer": "object10",
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 46,
-        "r": 46,
-        "layer": "object10",
-        "oy": 30,
-        "ox": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 50,
-        "r": 45,
-        "layer": "object10",
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 50,
-        "r": 46,
-        "layer": "object10",
-        "oy": 30
-      },
-      {
-        "id": "tile_new_decor_oil_drum",
-        "c": 49,
-        "r": 47,
-        "layer": "object10"
       },
       {
         "id": "tile_poolcore_floor_l",
@@ -15962,67 +15825,6 @@ const BATTLE_MAPS = [
         "oy": 10
       },
       {
-        "id": "tile_obstacle_ore_rare",
-        "c": 49,
-        "r": 23,
-        "layer": "object10",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 51,
-        "r": 23,
-        "layer": "object10"
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 49,
-        "r": 24,
-        "layer": "object10",
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 52,
-        "r": 23,
-        "layer": "object10",
-        "ox": 30,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 49,
-        "r": 25,
-        "layer": "object10",
-        "ox": 20,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 53,
-        "r": 24,
-        "layer": "object10",
-        "ox": 10,
-        "oy": 20
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 52,
-        "r": 25,
-        "layer": "object10",
-        "ox": 30,
-        "oy": 20
-      },
-      {
-        "id": "tile_new_decor_oil_drum",
-        "c": 51,
-        "r": 25,
-        "layer": "object10",
-        "oy": 30,
-        "ox": 30
-      },
-      {
         "id": "tile_mvr40sp8",
         "c": 12,
         "r": 31,
@@ -16045,67 +15847,6 @@ const BATTLE_MAPS = [
         "layer": "object5",
         "ox": 16,
         "oy": 34
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 53,
-        "r": 44,
-        "layer": "object10",
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 54,
-        "r": 44,
-        "layer": "object10",
-        "ox": 30,
-        "oy": 10
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 52,
-        "r": 45,
-        "layer": "object10",
-        "oy": 30,
-        "ox": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 56,
-        "r": 44,
-        "layer": "object10",
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 53,
-        "r": 46,
-        "layer": "object10",
-        "ox": 10,
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 57,
-        "r": 45,
-        "layer": "object10",
-        "oy": 30
-      },
-      {
-        "id": "tile_obstacle_ore_rare",
-        "c": 56,
-        "r": 46,
-        "layer": "object10",
-        "ox": 20,
-        "oy": 30
-      },
-      {
-        "id": "tile_new_decor_oil_drum",
-        "c": 55,
-        "r": 47,
-        "layer": "object10",
-        "ox": 20
       },
       {
         "id": "tile_mvp8n5zs",
@@ -16360,19 +16101,6 @@ const BATTLE_MAPS = [
         "layer": "top",
         "blend": "hard-light",
         "ox": 20
-      },
-      {
-        "id": "tile_mvr32pqo",
-        "c": 44,
-        "r": 32,
-        "layer": "object12"
-      },
-      {
-        "id": "tile_mvybeuxg",
-        "c": 54,
-        "r": 32,
-        "layer": "object",
-        "ox": 29.33333300000004
       },
       {
         "id": "tile_mvodgug9",
@@ -17013,6 +16741,37 @@ const BATTLE_MAPS = [
         "r": 35,
         "layer": "object6",
         "oy": 21.333333
+      },
+      {
+        "id": "tile_mw47qirk",
+        "c": 4,
+        "r": -1,
+        "layer": "object12",
+        "oy": 10,
+        "ox": 10
+      },
+      {
+        "id": "tile_mw49f97t",
+        "c": 19,
+        "r": 15,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 34,
+        "r": 26,
+        "layer": "object12",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_mw4d9qnu",
+        "c": 15,
+        "r": 44,
+        "layer": "object12",
+        "oy": 20
       }
     ],
     "solid": [
@@ -17454,10 +17213,6 @@ const BATTLE_MAPS = [
       {
         "id": "object13",
         "name": "池畔平台"
-      },
-      {
-        "id": "object10",
-        "name": "礦石"
       },
       {
         "id": "object8",
@@ -18858,7 +18613,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_a46c5e1a-9802-4db5-a3b9-486b4649c206",
-    "name": "Y25區入口-新手教學",
+    "name": "01. Y25區入口-新手教學",
     "desc": "",
     "layers": {
       "floor": {
@@ -24193,7 +23948,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_mvtnqrs7",
-    "name": "Y25區-地下街",
+    "name": "02. Y25區-地下街",
     "desc": "",
     "layers": {
       "floor": {
@@ -40071,7 +39826,7 @@ const BATTLE_MAPS = [
   },
   {
     "id": "map_mvvdbiyx",
-    "name": "Z62區-地下街",
+    "name": "02-a. Z62區-地下街",
     "desc": "",
     "layers": {
       "floor": {

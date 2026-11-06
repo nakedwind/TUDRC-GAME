@@ -85,15 +85,31 @@ const StoryKai = (() => {
   function hurtSet(a) {
     if (a.set.single) return null;
     const set = { ...a.set }, f = extraImage(a, '0000_Front_hurt_01'), half = extraImage(a, '0000_Front_hurt_02'), shut = extraImage(a, '0000_Front_hurt_03');   // 三張都先要（一開始就載好，第一次切過去才不會閃張眼的圖）
-    if (f) { set.front = [f, ...a.set.front.slice(1)]; set.blink = [half || f, shut || f, shut || f]; }
+    if (f) { set.front = [f, ...a.set.front.slice(1)]; set.blink = [f, half || f, shut || f]; }   // 順序跟一般眨眼圖一樣：第 1 張還是張眼，第 2 張半閉，第 3 張閉眼
     for (const d of ['left', 'right', 'back']) { const im = extraImage(a, DIR_FILE[d] + '_hurt'); if (im) set[d] = [im, ...set[d].slice(1)]; }
     // 走路的那幾張：有畫 <原本檔名>_hurt（例如 0001_Front-Walking01_hurt）就換，沒畫就照原本的圖
     for (const d of Object.keys(DIR_FILE)) set[d] = set[d].map((im, i) => (i && WALK_FILES[d][i - 1] && extraImage(a, WALK_FILES[d][i - 1] + '_hurt')) || im);
     return set;
   }
-  function downEyeImage(a, set) {   // 倒地的眼睛：半閉、閉眼借用眨眼的圖（受傷中是流血的）；張眼或圖還沒載好＝null
-    const im = !a?.down ? null : a.downEye === 'half' ? set.blink?.[0] : a.downEye === 'closed' ? set.blink?.[2] : null;
+  function downEyeImage(a, set) {   // 倒地的眼睛：半閉、閉眼借用眨眼的圖（受傷中是流血的）；張眼或圖還沒載好＝null。眨眼第 1 張 closeeyes01 其實跟張眼一樣，半閉要用第 2 張
+    const im = !a?.down ? null : a.downEye === 'half' ? set.blink?.[1] : a.downEye === 'closed' ? set.blink?.[2] : null;
     return readyImage(im) ? im : null;
+  }
+  // 演員附近的椅子（算法跟遊戲的 seatNearPlayer 一樣：量到家具外緣）；床不算
+  function seatNear(a) {
+    if (typeof mapSeats !== 'function') return null;
+    let best = null, bd = typeof SIT !== 'undefined' ? SIT.radius : CELL, bSeat = Infinity;
+    for (const s of mapSeats()) {
+      if (s.bed || state.actors.some(o => o !== a && o.seat === s)) continue;
+      const d = Math.hypot(Math.max(s.x0 - a.x, 0, a.x - (s.x0 + s.w)), Math.max(s.y0 - a.y, 0, a.y - (s.y0 + s.h))), seatD = Math.hypot(s.x - a.x, s.y - a.y);
+      if (d < bd || (d === bd && seatD < bSeat)) { bd = d; bSeat = seatD; best = s; }
+    }
+    return best;
+  }
+  function leaveSeat(a) {   // 從椅子上站起來：回到坐下前站的地方
+    if (!a.seat) return;
+    if (a.sitFrom) { a.x = a.sitFrom.x; a.y = a.sitFrom.y; }
+    a.seat = null; a.sitFrom = null; a.sit = false;
   }
   function sitImage(a) {   // 坐下：照現在的面向找坐下圖
     const base = DIR_FILE[a.dir] || DIR_FILE.front;
@@ -266,7 +282,7 @@ const StoryKai = (() => {
     state = { cfg, steps, i: 0, time: 0, playing: false, ending: null, ended: false, waitUntil: 0, talk: null, moveWait: null,
       actors: (cfg.cast || []).map(makeActor), monsters: [], items: [], blood: [], cam: { x: COLS / 2, y: ROWS / 2, w: fullW }, camMove: null,
       black: { from: firstBlack?.do === 'blackOut' ? 1 : 0, to: firstBlack?.do === 'blackOut' ? 1 : 0, t: 0, dur: 0 },
-      white: { from: 0, to: 0, t: 0, dur: 0 }, shake: null, sway: 0, vignette: 0, fx: [], fxLater: [], fxKeep: [], skipping: false };
+      white: { from: 0, to: 0, t: 0, dur: 0 }, shake: null, sway: 0, vignette: 0, fx: [], fxLater: [], fxKeep: [], glows: [], skipping: false };
     // 劇情裡有用到受傷、坐下的人：先把差分圖載好（第一次切過去才不會閃一下原本的圖）
     for (const s of steps) if (s.do === 'act' && (s.act === 'hurt' || s.act === 'sit')) {
       const a = actor(s.who); if (!a) continue;
@@ -344,6 +360,7 @@ const StoryKai = (() => {
       case 'wait': state.waitUntil = state.time + sec; break;
       case 'show': {
         const a = actor(s.who); if (!a || !s.at) break;
+        leaveSeat(a);
         a.x = s.at[0] * CELL; a.y = s.at[1] * CELL; a.target = null; a.path = []; a.moving = false;
         a.trail = [];   // 滴血：換位置出現，不要把血滴回原本的地方
         if (s.face) a.dir = s.face;
@@ -353,6 +370,7 @@ const StoryKai = (() => {
       case 'hide': { const a = actor(s.who); if (a && !a.hidden) { a.target = null; a.path = []; a.moving = false; if (state.skipping) a.hidden = true; else a.fade = -1; } break; }
       case 'move': {
         const a = actor(s.who); if (!a || !s.at) break;
+        leaveSeat(a);   // 坐在椅子上的人：先站起來再走
         const tx = s.at[0] * CELL, ty = s.at[1] * CELL;
         a.arriveDir = s.face || null;
         if (a.hidden) { a.hidden = false; a.alpha = 0; a.fade = 1; a.x = tx; a.y = ty; }   // 還沒出現的人：直接在那裡出現
@@ -370,12 +388,20 @@ const StoryKai = (() => {
         const on = s.on !== false;
         if (s.act === 'hop') { if (!state.skipping) a.hopT = HOP_TIME; }
         else if (s.act === 'gun') a.armed = on;
-        else if (s.act === 'down') { a.down = on ? (s.cw ? 'cw' : 'ccw') : false; a.downEye = on ? s.eye || '' : ''; }   // 倒地：預設逆時針轉 90 度，cw＝順時針；eye＝half 半閉、closed 閉眼（空白＝張眼）
+        else if (s.act === 'down') { a.down = on ? (s.turn || (s.cw ? 'cw' : 'ccw')) : false; a.downEye = on ? s.eye || '' : ''; }   // 倒地：預設逆時針轉 90 度，cw＝順時針，turn＝'180'（上下顛倒）、'0'（不轉）；eye＝half 半閉、closed 閉眼（空白＝張眼）
         else if (s.act === 'charge') a.charging = on;
         else if (s.act === 'bleed') { a.bleed = on; a.trail = []; a.dripIn = rnd(.1, .3); }   // 滴血：開著的時候一路滴
         else if (s.act === 'hurt') { a.hurt = on; if (on) hurtSet(a); }   // 受傷：換成流血的差分
         else if (s.act === 'light') a.light = on ? clamp(Number(s.r) || 4, 1, 20) : 0;   // 光源：身上發光，照亮幾格（後室黑幕時看得出來）
-        else if (s.act === 'sit') { a.sit = on; if (on) sitImage(a); }   // 坐下：有畫坐下圖的方向才會坐（停下來的時候）
+        else if (s.act === 'sit') {   // 坐下：附近有椅子就坐到椅子上（跟遊戲一樣的座位、面向、遮擋）；沒有椅子：有畫坐下圖的方向才會坐（停下來的時候）
+          a.sit = on;
+          if (!on) leaveSeat(a);
+          else {
+            const seat = seatNear(a);
+            if (seat) { a.seat = seat; a.sitFrom = { x: a.x, y: a.y }; a.x = seat.x; a.y = seat.y; a.dir = seat.dir; a.target = null; a.path = []; a.moving = false; }
+            else sitImage(a);
+          }
+        }
         else if (s.act === 'shiver') a.shiver = on ? SHIVER_PX[clamp(Number(s.lv) || 2, 1, 5)] : 0;   // 顫抖：1～5 級
         break;
       }
@@ -415,7 +441,16 @@ const StoryKai = (() => {
         break;
       }
       case 'dark': LIGHT.enabled = s.on !== false; break;
-      case 'vignette': state.vignette = clamp(Number(s.lv) || 0, 0, 10); el('storyKaiVignette').style.background = vignetteCss(state.vignette); break;
+      case 'glow': {   // ＋光源：從中心點發光，r＝照亮幾格、color＝色票；同一個代號再設一次就是改它，取消勾選「開」就熄掉
+        state.glows = state.glows.filter(g => g.no !== Number(s.glow));
+        if (s.on !== false && s.at) state.glows.push({ no: Number(s.glow), x: s.at[0] * CELL, y: s.at[1] * CELL, r: clamp(Number(s.r) || 5, 1, 30) * CELL, color: s.color || '#ffd27a' });
+        break;
+      }
+      case 'vignette':   // 暗角：預設跟著鏡頭（蓋在畫面上）；follow:false＝固定在這一行當下的鏡頭位置，之後鏡頭移動它不動
+        state.vignette = clamp(Number(s.lv) || 0, 0, 10);
+        state.vigFixed = s.follow === false ? { x: state.cam.x * CELL, y: state.cam.y * CELL, w: state.cam.w * CELL } : null;
+        el('storyKaiVignette').style.background = vignetteCss(state.vignette);
+        break;
       case 'bgm':
         if (state.skipping) state.skipBgm = s.src ? s : null;
         else if (s.src) startBgm(s.src, Number(s.vol ?? 50) / 100, s.fade !== false);
@@ -587,8 +622,8 @@ const StoryKai = (() => {
   function changeMap(id) {
     if (MAP && MAP.id === id) return;
     if (!gotoMap(id)) { console.warn('演出地圖找不到：' + id); return; }
-    for (const a of state.actors) { a.hidden = true; a.fade = 0; a.alpha = 1; a.target = null; a.path = []; a.moving = false; }
-    state.monsters = []; state.items = []; state.blood = [];   // 怪物、道具、地上的血也留在上一個場景
+    for (const a of state.actors) { a.seat = null; a.sitFrom = null; a.hidden = true; a.fade = 0; a.alpha = 1; a.target = null; a.path = []; a.moving = false; }
+    state.monsters = []; state.items = []; state.blood = []; state.glows = [];   // 怪物、道具、地上的血、光源也留在上一個場景
     state.moveWait = null; state.camMove = null;
     state.cam = { x: COLS / 2, y: ROWS / 2, w: VIEW_W / Math.max(.1, VIEW_SCALE) / CELL };
     state.lights = lights();
@@ -714,7 +749,7 @@ const StoryKai = (() => {
     if (!ui) return;
     el('storyKaiBlack').style.opacity = String(level(state.black));
     el('storyKaiWhite').style.opacity = String(level(state.white));
-    el('storyKaiVignette').style.opacity = state.vignette > 0 ? '1' : '0';
+    el('storyKaiVignette').style.opacity = state.vignette > 0 && !state.vigFixed ? '1' : '0';
   }
   // 鏡頭：中心點＋寬度（格數），高度照 16:9；縮放＝遊戲畫面寬度 ÷ 鏡頭寬度
   function applyCam() {
@@ -746,7 +781,7 @@ const StoryKai = (() => {
     const weapon = a.armed && !a.down && MELEE_WEAPON[a.cast.char];
     const pose = { ...a, sitting: null, gunT: a.armed && !weapon ? 1 : 0, meleeSwing: weapon ? { angle: FACE_ANGLE[a.dir] ?? Math.PI / 2, age: 0, wind: 1, impact: 2, duration: 3 } : null };
     const set = (a.hurt && hurtSet(a)) || a.set;
-    let img = a.down ? downEyeImage(a, set) || set.front?.[0] : (a.sit && !a.moving && !a.armed && sitImage(a)) || pickCharacterFrame(set, pose);   // 倒地：用正面那張（受傷中就是流血的），下面再整個轉 90 度
+    let img = a.down ? downEyeImage(a, set) || set.front?.[0] : (a.sit && !a.seat && !a.moving && !a.armed && sitImage(a)) || pickCharacterFrame(set, pose);   // 倒地：用正面那張（受傷中就是流血的），下面再整個轉 90 度
     if (!readyImage(img)) img = a.set.front?.[0];
     if (!readyImage(img)) return;
     const shiver = a.tremble ? Math.sin(state.time * 70 + a.x) * a.tremble : 0;
@@ -759,7 +794,8 @@ const StoryKai = (() => {
     const swayY = a.sway ? (Math.sin(sw * 1.7 + 2 + a.no) * .7 + Math.sin(sw * 2.9 + a.no) * .3) * clamp(a.sway * .5, 1, 2) : 0;   // 也微微上下晃 1～2 像素
     const x = Math.round(a.x) + shiver + zap + swayX + shakeX, top = a.y - size + 18 + swayY + shakeY - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
     ctx.save(); ctx.globalAlpha = clamp(a.alpha, 0, 1); ctx.imageSmoothingEnabled = false;
-    if (a.down) { const cy = top + size / 2, ly = a.y + 18 - size / 4; ctx.translate(x, ly); ctx.rotate(a.down === 'cw' ? Math.PI / 2 : -Math.PI / 2); ctx.translate(-x, -cy); }   // 倒地：繞圖片中心轉 90 度（逆時針或順時針），身體躺在原本腳下的位置（配件一起轉）
+    if (a.down === '180') { const cy = top + size / 2; ctx.translate(x, cy); ctx.rotate(Math.PI); ctx.translate(-x, -cy); }   // 倒地 180 度：繞圖片中心轉，上下顛倒
+    else if (a.down && a.down !== '0') { const cy = top + size / 2, ly = a.y + 18 - size / 4; ctx.translate(x, ly); ctx.rotate(a.down === 'cw' ? Math.PI / 2 : -Math.PI / 2); ctx.translate(-x, -cy); }   // 倒地：繞圖片中心轉 90 度（逆時針或順時針），身體躺在原本腳下的位置（配件一起轉）
     const id = a.cast.char, look = a.down ? { ...a, dir: 'front', moving: false } : a;
     if (a.equip && typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, look, x - size / 2, top, size, 'behind', a.equip);
     if (a.set.single) { const w = size * img.naturalWidth / img.naturalHeight; ctx.drawImage(img, x - w / 2, top, w, size); }   // 圖片角色：照原本比例、跟人一樣高
@@ -772,6 +808,23 @@ const StoryKai = (() => {
   function fxInfo(f) {
     const [bx, by, bw, bh] = f.step.box || [0, 0, 0, 0], x = bx * CELL, y = by * CELL, w = bw * CELL, h = bh * CELL;
     return { t: f.t, x, y, w, h, cx: x + w / 2, cy: y + h / 2 };
+  }
+  function drawFixedVignette() {   // 固定在地圖上的暗角：算法跟 vignetteCss 一樣，只是畫在地圖座標上
+    const v = state.vigFixed; if (!v || !(state.vignette > 0)) return;
+    const clear = (66 - state.vignette * 5) / 100, g = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+    g.addColorStop(Math.max(0, clear), 'rgba(0,0,0,0)'); g.addColorStop(clear + .14, 'rgba(0,0,0,.55)'); g.addColorStop(clear + .28, 'rgba(0,0,0,.92)'); g.addColorStop(1, '#000');
+    const rx = v.w * .72, ry = v.w * (VIEW_H / VIEW_W) * .72;
+    ctx.save(); ctx.translate(v.x, v.y); ctx.scale(rx, ry); ctx.fillStyle = g;
+    ctx.fillRect((cam.x - v.x) / rx, (cam.y - v.y) / ry, viewW() / rx, viewH() / ry); ctx.restore();
+  }
+  function drawGlows() {   // ＋光源：畫在黑幕上面，黑暗裡看得出顏色（照亮的範圍另外算進光源）
+    ctx.save(); ctx.globalCompositeOperation = 'lighter';
+    for (const g of state.glows) {
+      const [r, gr, b] = hexRgb(g.color), grad = ctx.createRadialGradient(g.x, g.y, 0, g.x, g.y, g.r);
+      grad.addColorStop(0, `rgba(${r},${gr},${b},.5)`); grad.addColorStop(.35, `rgba(${r},${gr},${b},.2)`); grad.addColorStop(1, `rgba(${r},${gr},${b},0)`);
+      ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(g.x, g.y, g.r, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.restore();
   }
   function drawFx(layer) {
     for (const kp of state.fxKeep) if (kp.layer === layer && kp.sortY == null) {   // 特效留下來的畫面（例如整間房的紅光）：一直畫到劇情結束
@@ -833,7 +886,8 @@ const StoryKai = (() => {
   function draw() {
     if (!state) return;
     const carried = state.actors.filter(a => a.light && !a.hidden).map(a => ({ x: a.x, y: a.y, r: a.light * CELL }));   // 角色演出「光源」：跟著人走的光
-    lightsCache = [...state.lights, ...carried, ...(typeof flickerLightSources === 'function' ? flickerLightSources() : []), ...(typeof poweredLightSources === 'function' ? poweredLightSources() : [])];
+    const glowLights = state.glows.map(g => ({ x: g.x, y: g.y, r: g.r }));   // ＋光源：開了後室黑幕時也照得亮
+    lightsCache = [...state.lights, ...carried, ...glowLights, ...(typeof flickerLightSources === 'function' ? flickerLightSources() : []), ...(typeof poweredLightSources === 'function' ? poweredLightSources() : [])];
     computeLightField(); computeFlashField();
     ctx.clearRect(0, 0, cv.width, cv.height); ctx.save();
     ctx.scale(VIEW_SCALE, VIEW_SCALE); ctx.translate(-cam.x, -cam.y); ctx.imageSmoothingEnabled = false;
@@ -843,7 +897,7 @@ const StoryKai = (() => {
     drawFx('ground');
     if (typeof drawSootheGroundV2 === 'function') drawSootheGroundV2(ctx);   // 疏導的法陣、光柱：跟戰鬥一樣畫在人的下面（js/soothe-fx-v2.js）
     const sortables = []; collectMapOccluders(ctx, sortables);
-    for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.y + 17, draw: () => drawActor(a) });
+    for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.seat ? seatDrawY(a.seat) : a.y + 17, draw: () => drawActor(a) });   // 坐在椅子上：跟遊戲一樣用椅子的遮擋線
     for (const e of state.monsters) sortables.push({ y: e.y + 13, draw: () => drawMonster(e) });
     for (const it of state.items) sortables.push({ y: it.y + (it.tile ? 0 : 10), draw: () => drawItem(it) });   // 地圖素材的道具：位置點就是圖的下緣，直接用它排前後
     for (const kp of state.fxKeep) if (kp.sortY != null) sortables.push({ y: kp.sortY, draw: () => { ctx.save(); kp.draw(ctx, state.time - kp.t0); ctx.restore(); } });   // 特效貼在牆上的東西
@@ -854,7 +908,9 @@ const StoryKai = (() => {
     drawDarkness();
     if (typeof drawPoweredLights === 'function') drawPoweredLights(ctx);
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);
+    drawGlows();
     drawFx('top');
+    drawFixedVignette();
     ctx.restore();
   }
 

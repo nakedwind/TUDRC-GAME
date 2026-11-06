@@ -9,6 +9,7 @@
        noBox: false,         // true＝不用框範圍（例如聲音淡出）
        start(api, f) {},     // 跑到這一行時做一次：改劇情裡的東西（燈、圖層、黑幕、角色的光……，api 見 js/story-kai.js 的 fxApi）
        tick(api, dt, f) {},  // 播的時候每一幀做一次（不是畫東西，例如冒光點）
+       preview(ctx, m) {},   // 編輯器中間的地圖：跑到這一行之後一直畫（m＝地圖；留下來的畫面才需要，沒寫就不畫）
        draw(ctx, k, f) {},   // 每一幀畫一次：k＝播到哪（0～1）；f＝{ t: 播了幾秒, x, y, w, h: 框的範圍（像素）, cx, cy: 框的中心 }
      };
    特效永遠以框的中心點發生；框越大，特效越大。
@@ -128,6 +129,70 @@ STORY_KAI_FX['fx_mw45qk7xz2l'] = {
   start(api) { api.ambient(false, .5); },
   draw() {},
 };
+
+// 柯回憶02 第 2 行：幽暗但安全、舒適的黃光，像睡前的氣氛。光源是床頭的桌燈，照亮大概 5 格，一直留到劇情結束
+const BEDSIDE_LAMP = { x: 172, y: 100, r: 5 * 40 };   // 桌燈的燈泡在地圖上的位置（像素）、照亮的範圍
+// 校色用（從你的改圖量出來的低解析度比例圖）：x0、y0＝左上角（地圖像素）、cell＝一格幾像素；每格 6 碼＝紅綠藍要留幾成（ff＝不變）
+const BEDSIDE_TONE = { x0: 65.6, y0: -3.1, cell: 20.0, rows: [
+  '4d4c684f4e6b54516e59546e5f586d635a6e625b705f59725b577558557656557657567758577959587a5a597b',
+  '4c4a674e4c68534f6a5c556a645a6b695e6d685e6f635c725d58755956765755765655765655765857785a597b',
+  '4b49654e4a645750646559657463687c696b7c6a6f746774696178605c7a5b59795856765655755856775a597a',
+  '4b48634f4a625d53617462638c73699c7f6f9f8477947f7e827684736c86686583605e7d5b59795a59785c5a7a',
+  '4b4861514b60645760846d67a88972c3a07fcaaa8bbda495a5969c8f889c7d79956e6c8a6362805f5e7d5f5e7d',
+  '4b4861514b60675a638e776ebc9f82e0c298ebd1a8dfcab3c9bbbab0a9b79794ac807e9a6f6e8b666583646381',
+  '4b4861504c62665b67907d79c2ac95e8d6b2f7eac5f1e7d0e2dbd6ccc8d1b0aec29391ab7b7a966e6d8a696885',
+  '4a48634f4c65635c6d8c7f84c0b1a6e9dec6f9f4dbf9f6e5f0ede9dedbe3c2c0d2a1a0b886859f7674916f6e8b',
+  '4a49654f4d68615d7388808ebdb2b3e8dfd5fbf6e9fcfbf1f6f4f3e6e4eccccbdbacabc2908faa7e7c9a767493',
+  '4c4b67514f6b62607a878397bab3bee4dedff9f5f2fcfaf8f6f5f8e8e7f1d1d1e1b5b4cb9a98b48685a47d7c9d',
+  '504f6c5554706766818b89a0b9b6c7e1dee6f6f4f7faf9fbf5f4fae9e8f3d5d5e6bcbbd3a3a1bf908eb08785a9',
+  '5655735c5b79706f8b9391aabdbccee1e0ebf4f3f9f8f8fcf4f4fae9eaf4d8d8e9c2c1daaba9c99997bc908db5',
+  '615f7f6866867c7b999e9db6c4c3d6e2e1edf3f2f9f7f7fcf3f4faeaeaf5dbdaecc7c5e0b1afd19f9dc69694c0',
+  '6f6e917775978b8aa9aaa9c3cacadde3e3eff1f1f8f5f5fbf2f2f9e9e8f5dbdaedc9c7e3b4b2d7a3a0cc9a98c7',
+  '807ea58886ab9b9abbb6b5cfd0cfe3e3e3f0efeef7f2f2f9efeef8e6e5f3dad8edc9c7e4b5b2daa4a2d09c99cc',
+  '918eb99896bea9a7cabfbddad2d1e7e1e1f0ebeaf6eeedf7eaeaf5e2e1f2d7d6edc7c5e5b4b2dba4a1d39c99ce',
+  '9d9ac7a4a2ccb2b0d5c3c2e0d2d1e9deddf0e6e5f4e9e8f5e6e5f3dedcf0d3d1eac5c3e4b3b0dba3a0d39b98cf',
+  'a6a3d0acaad4b8b6dcc5c4e3d1d0e9dbdaeee2e1f2e4e3f3e1e0f1d9d8eecfcde9c3c1e3b2b0dba3a0d49b98d0',
+  'aeacd6b4b2dabdbbdfc7c5e5d1cfe9d9d7eddeddf0e0dff1dddcf0d6d5eccdcbe8c2c0e3b2b0dca4a1d59d9ad2',
+  'b3b1d9b9b7dcc0bee1c8c6e5d1cfe9d8d6ecdcdbf0deddf1dcdbefd4d3ebcccbe8c2c0e3b3b0dca4a1d59f9cd3',
+] };
+STORY_KAI_FX['fx_mw4cw1blocg'] = {
+  time: .1,
+  start(api) { api.keep('world', ctx => drawBedsideLight(ctx, MAP)); },
+  preview(ctx, m) { drawBedsideLight(ctx, m); },
+  draw() {},
+};
+let bedsideToneCanvas = null;
+function bedsideToneImage() {   // 把比例圖畫成一張很小的圖（放大時會自動變平滑）
+  if (bedsideToneCanvas) return bedsideToneCanvas;
+  const { rows } = BEDSIDE_TONE, c = document.createElement('canvas'), W = rows[0].length / 6, g = c.getContext('2d');
+  c.width = W; c.height = rows.length;
+  const img = g.createImageData(W, rows.length);
+  rows.forEach((row, y) => { for (let x = 0; x < W; x++) for (let k = 0; k < 3; k++) img.data[(y * W + x) * 4 + k] = parseInt(row.substr(x * 6 + k * 2, 2), 16); });
+  for (let i = 3; i < img.data.length; i += 4) img.data[i] = 255;
+  g.putImageData(img, 0, 0);
+  return (bedsideToneCanvas = c);
+}
+function drawBedsideLight(ctx, m) {
+  const { x, y, r } = BEDSIDE_LAMP, W = m.cols * 40, H = m.rows * 40;
+  ctx.save();
+  // 整間房乘上暖色：燈旁邊幾乎是原本的亮度，照不到的地方幽暗但還看得見
+  const room = ctx.createRadialGradient(x, y, 0, x, y, r * 1.7);
+  room.addColorStop(0, 'rgb(255,226,165)'); room.addColorStop(.35, 'rgb(214,170,108)'); room.addColorStop(.59, 'rgb(128,98,64)'); room.addColorStop(1, 'rgb(74,58,44)');
+  ctx.globalCompositeOperation = 'multiply'; ctx.fillStyle = room; ctx.fillRect(0, 0, W, H);
+  // 燈附近多一點黃色的光暈
+  ctx.globalCompositeOperation = 'lighter';
+  const glow = ctx.createRadialGradient(x, y, 0, x, y, r);
+  glow.addColorStop(0, 'rgba(255,190,90,.3)'); glow.addColorStop(.2, 'rgba(255,175,80,.12)'); glow.addColorStop(1, 'rgba(255,170,70,0)');
+  ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill();
+  // 照改圖校色：中間（地板）幾乎不變，牆和外圍壓暗，燈附近偏橘
+  ctx.globalCompositeOperation = 'multiply';
+  ctx.imageSmoothingEnabled = true;
+  const tone = bedsideToneImage(), { x0, y0, cell, rows } = BEDSIDE_TONE;
+  const tw = rows[0].length / 6 * cell, th = rows.length * cell;
+  ctx.drawImage(tone, x0, y0, tw, th);
+  ctx.fillStyle = 'rgb(85,85,95)'; ctx.beginPath(); ctx.rect(0, 0, W, H); ctx.rect(x0, y0, tw, th); ctx.fill('evenodd');   // 比例圖外面（牆外）：跟邊緣差不多暗
+  ctx.restore();
+}
 
 // 第 256 行：心跳聲在 0.8 秒內淡出到無聲（不用框範圍，下一行照常接著跑）
 STORY_KAI_FX['fx_mw3yf1j82i2'] = {

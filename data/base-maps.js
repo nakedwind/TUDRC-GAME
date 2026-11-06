@@ -13018,13 +13018,6 @@ const BASE_MAPS = [
         "layer": "top",
         "ox": 10,
         "oy": -10
-      },
-      {
-        "id": "tile_eoc_door_exit_fade",
-        "c": 4,
-        "r": 8,
-        "layer": "top",
-        "ox": 20
       }
     ],
     "solid": [

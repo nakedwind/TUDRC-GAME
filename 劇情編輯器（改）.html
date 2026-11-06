@@ -142,7 +142,7 @@
         <button type="button" data-add="blackIn">黑幕淡入</button><button type="button" data-add="blackOut">黑幕淡出</button>
         <button type="button" data-add="whiteIn">白幕淡入</button><button type="button" data-add="whiteOut">白幕淡出</button>
         <button type="button" data-add="wait">等待時間</button>
-        <button type="button" data-add="tremble">角色震動</button><button type="button" data-add="sway" title="角色慢慢左右晃（幅度 1～5，跟鏡頭晃動一樣）">角色晃動</button><button type="button" data-add="fx"><b>＋</b>特效</button>
+        <button type="button" data-add="tremble">角色震動</button><button type="button" data-add="sway" title="角色慢慢左右晃（幅度 1～5，跟鏡頭晃動一樣）">角色晃動</button><button type="button" data-add="glow" title="從中心點發光：可以設定中心點、照亮幾格、顏色"><b>＋</b>光源</button><button type="button" data-add="fx"><b>＋</b>特效</button>
         <button type="button" data-add="dark" title="只有燈照得到的地方是亮的">後室黑幕</button><button type="button" data-add="vignette">畫面暗角</button>
       </div></details>
       <details class="fold" open><summary>音效</summary><div class="btns">
@@ -249,22 +249,24 @@
 
   <script src="js/draft-sync.js?v=sync-20261021"></script>
   <script src="data/tiles.js?v=nomissing-20261102"></script>
-  <script src="data/story-maps.js?v=v2tiles-20261026"></script>
+  <script src="data/story-maps.js?v=zk02-20261106"></script>
   <script src="data/characters.js?v=guideability-20261025"></script>
   <script src="data/costumes.js?v=money2-20261102"></script>
   <script src="data/costume-placement.js?v=strawberry-20261026"></script>
   <script src="js/costume-draw.js?v=ballsit-20261102"></script>
+  <script src="data/chairs.js?v=poolbed-20261026"></script>   <!-- 椅子的座位（「坐下」用） -->
+  <script src="js/chair-data.js?v=sync-20261021"></script>
   <script src="data/doors.js?v=hugall-20261028"></script>   <!-- 可以開關的門（開關門用） -->
   <script src="data/monsters.js?v=wide-20261031"></script>   <!-- 怪物種類（怪物出現用） -->
   <script src="data/items.js?v=devotionimg-20261106"></script>   <!-- 道具出現用：背包物品 -->
   <script src="data/supplies.js?v=firstaid-shop-20261103"></script>
   <script src="data/story-scenes.js?v=y25skip2-20261031"></script>   <!-- 舊劇情編輯器的劇情：可以搬過來（js/story-kai-import.js） -->
-  <script src="data/story-kai.js?v=colynfx12-20261106"></script>
-  <script src="js/story-kai-fx.js?v=colynfx13-20261106"></script>
+  <script src="data/story-kai.js?v=colynfx14-20261106"></script>
+  <script src="js/story-kai-fx.js?v=colynfx18-20261106"></script>
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>
   <script src="js/stamp-transform.js?v=stampscale-20261105"></script>   <!-- 物件的大小、角度（跟遊戲共用同一套算法） -->
-  <script src="js/story-kai-editor.js?v=kai48-20261106"></script>
+  <script src="js/story-kai-editor.js?v=kai56-20261106"></script>
   <script src="js/story-kai-import.js?v=kai4-20261103"></script>
   <script>const kaiSaver = ProjectSave.attach({
     after: ['exportFile'],
