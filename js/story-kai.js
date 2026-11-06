@@ -378,6 +378,7 @@ const StoryKai = (() => {
         a.path = findRoute(a.x, a.y, tx, ty);
         let len = 0, px = a.x, py = a.y; for (const [x, y] of a.path) { len += Math.hypot(x - px, y - py); px = x; py = y; }
         a.speed = Math.max(1, len / sec); a.target = a.path.shift();
+        if (s.nowait) break;   // 不等走到：一邊走，下一行一邊跑（路人在背景慢慢走、兩個人同時走）
         state.moveWait = a;   // 等這個人走到才跑下一行
         state.waitUntil = state.time + sec;
         break;
@@ -577,7 +578,15 @@ const StoryKai = (() => {
   // ---- 道具：背包裡的物品放在地上（圖跟背包一樣），出現、消失時淡入淡出 ----
   // 可以當道具擺的地圖素材：彈藥箱、日光燈（日光燈跟地圖上的一樣閃、跳電、有嗡嗡聲，js/flicker-light.js）——編輯器的 PROP_TILES 是同一份
   const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light', 'tile_eoc_first_aid_bag'], FLICKER_PROP = 'tile_bg_electric_light';
+  // 只在劇情裡用的小道具（拿在手上的東西）：照圖原本的大小畫（1 像素＝角色圖的 1 像素），不浮動、沒有影子——編輯器的 STORY_PROPS 是同一份
+  const STORY_PROPS = {
+    prop_red_bean_cake_bag: { name: '紅豆餅紙袋', image: 'images/道具/red-bean-cake-bag.png' },
+    prop_taro_wheel_cake: { name: '芋頭紅豆餅（咬一口）', image: 'images/道具/taro-wheel-cake.png' },
+  };
+  // 拿在手上：道具出現時填「拿在誰手上」，就跟著那個角色走。手的位置（角色腳底往上算，像素）依角色面向哪邊
+  const HOLD_AT = { right: [12, 4], left: [-12, 4], front: [14, 5], back: [-13, 3] };
   function propDef(id) {
+    if (STORY_PROPS[id]) return { image: STORY_PROPS[id].image, small: true };
     if (PROP_TILES.includes(id)) { const t = (typeof SHARED_TILES !== 'undefined' ? SHARED_TILES : []).find(x => x.id === id); return t ? { image: t.file, tile: [t.w || 1, t.h || 1] } : null; }
     return typeof itemById === 'function' ? itemById(id) : null;
   }
@@ -587,10 +596,12 @@ const StoryKai = (() => {
   }
   function showItem(s) {
     const def = propDef(s.id);
-    if (!def || !def.image || !s.at) return;
+    const hold = Number(s.hold) || 0;
+    if (!def || !def.image || (!s.at && !hold)) return;
     const old = state.items.find(x => x.no === Number(s.item)); if (old) dropItem(old);
     const img = new Image(); img.src = def.image;
-    const it = { no: Number(s.item), id: s.id, img, tile: def.tile, x: s.at[0] * CELL, y: s.at[1] * CELL, alpha: state.skipping || old ? 1 : 0, fade: state.skipping || old ? 0 : 1 };
+    const at = s.at || [0, 0];
+    const it = { no: Number(s.item), id: s.id, img, tile: def.tile, small: !!def.small, hold, x: at[0] * CELL, y: at[1] * CELL, alpha: state.skipping || old ? 1 : 0, fade: state.skipping || old ? 0 : 1 };
     if (s.id === FLICKER_PROP && typeof flickerLights === 'function' && typeof FLICKER !== 'undefined') {   // 日光燈：加進這張地圖的日光燈清單（照遊戲的算法閃、跳電）
       const left = it.x - def.tile[0] * CELL / 2, top = it.y - def.tile[1] * CELL;
       it.light = { x: left + FLICKER.tube.dx, y: top + FLICKER.tube.dy, half: 19, glow: null, on: true, level: 1,
@@ -605,8 +616,23 @@ const StoryKai = (() => {
     if (it.alpha >= 1) { it.alpha = 1; it.fade = 0; }
     if (it.alpha <= 0) dropItem(it);
   }
+  const holder = it => it.hold ? actor(it.hold) : null;
   function drawItem(it) {
     if (!readyImage(it.img)) return;
+    if (it.hold) {   // 拿在手上：畫在那個角色的手邊（角色不在場就不畫）
+      const a = holder(it); if (!a || a.hidden) return;
+      const [dx, dy] = HOLD_AT[a.dir] || HOLD_AT.front, w = it.img.naturalWidth, h = it.img.naturalHeight;
+      ctx.save(); ctx.globalAlpha = clamp(it.alpha, 0, 1) * clamp(a.alpha ?? 1, 0, 1); ctx.imageSmoothingEnabled = false;
+      ctx.drawImage(it.img, Math.round(a.x + dx - w / 2), Math.round(a.y + dy - h / 2), w, h); ctx.restore();
+      return;
+    }
+    if (it.small) {   // 劇情小道具放在地上：照原本大小、有影子
+      const w = it.img.naturalWidth, h = it.img.naturalHeight;
+      ctx.save(); ctx.globalAlpha = clamp(it.alpha, 0, 1);
+      ctx.fillStyle = 'rgba(0,0,0,.3)'; ctx.beginPath(); ctx.ellipse(it.x, it.y + 1, w * .45, 2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.imageSmoothingEnabled = false; ctx.drawImage(it.img, Math.round(it.x - w / 2), Math.round(it.y - h), w, h); ctx.restore();
+      return;
+    }
     if (it.tile) {   // 地圖素材：照素材的格數畫，位置點在圖的下緣中間（不浮動、沒有影子）
       const w = it.tile[0] * CELL, h = it.tile[1] * CELL;
       ctx.save(); ctx.globalAlpha = clamp(it.alpha, 0, 1); ctx.imageSmoothingEnabled = false; ctx.drawImage(it.img, it.x - w / 2, it.y - h, w, h); ctx.restore();
@@ -899,7 +925,10 @@ const StoryKai = (() => {
     const sortables = []; collectMapOccluders(ctx, sortables);
     for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.seat ? seatDrawY(a.seat) : a.y + 17, draw: () => drawActor(a) });   // 坐在椅子上：跟遊戲一樣用椅子的遮擋線
     for (const e of state.monsters) sortables.push({ y: e.y + 13, draw: () => drawMonster(e) });
-    for (const it of state.items) sortables.push({ y: it.y + (it.tile ? 0 : 10), draw: () => drawItem(it) });   // 地圖素材的道具：位置點就是圖的下緣，直接用它排前後
+    for (const it of state.items) {
+      const a = holder(it);   // 拿在手上：排在角色前面一點點（背對鏡頭時排在後面，被身體擋住）
+      sortables.push({ y: a ? a.y + 17 + (a.dir === 'back' ? -.5 : .5) : it.y + (it.tile || it.small ? 0 : 10), draw: () => drawItem(it) });
+    }   // 地圖素材的道具：位置點就是圖的下緣，直接用它排前後
     for (const kp of state.fxKeep) if (kp.sortY != null) sortables.push({ y: kp.sortY, draw: () => { ctx.save(); kp.draw(ctx, state.time - kp.t0); ctx.restore(); } });   // 特效貼在牆上的東西
     sortables.sort((p, q) => p.y - q.y).forEach(s => s.draw());
     drawMapTop(ctx);

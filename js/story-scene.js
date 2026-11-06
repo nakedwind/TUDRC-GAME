@@ -185,6 +185,8 @@ const StoryScene = (() => {
   // 大喊（每頁 shout: { 角色id: true }）：台詞出現的那一刻，那個人頓一下、對話框跟著震一下
   // 驚訝小跳（每頁 hop: { 角色id: true }）：同一個時機往上輕輕跳一下，對話框不震
   const SHOUT_TIME = .4, HOP_TIME = .32;
+  // 手上拿的小道具（carry 的圖長寬都不超過這麼多像素）：拿在手邊、照原圖大小；手的位置（腳底往上算，角色圖的像素）依面向哪邊
+  const SMALL_CARRY = 16, HAND_AT = { right: [12, 4], left: [-12, 4], front: [14, 5] };
   function shout(beat) {
     for (const [id, on] of Object.entries(beat.hop || {})) { const a = on && actor(id); if (a) a.hopT = HOP_TIME; }
     const ids = Object.keys(beat.shout || {}).filter(id => beat.shout[id]);
@@ -572,7 +574,7 @@ const StoryScene = (() => {
     for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
     for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
-    for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) a.emote = v || null; }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
+    for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
     for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p); }
     for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p); }   // 走到那裡後淡出消失（走進門裡）
@@ -822,7 +824,7 @@ const StoryScene = (() => {
     }
     if (state.playing || state.ended) {   // 回憶結束畫面後面，背景的戰鬥仍繼續
       for (const a of state.actors) {
-        a.anim += dt;
+        a.anim += dt; a.emoteT = (a.emoteT || 0) + dt;
         if (a.role === 'shooter') tickShooter(a, dt);
         if (a.role === 'medic') { if (!a.target) a.pause -= dt; tickMedic(a); }
         if (!a.target) continue;
@@ -868,13 +870,63 @@ const StoryScene = (() => {
     if (typeof tutDebrisFrame === 'function') tutDebrisFrame(state ? dt : 0);   // 大爆炸震下來的碎石、粉塵
     positionCamera(); draw();
   }
-  // ---- 頭上的情緒符號（每頁 emote: { 角色id: 'anger'／'sweat'／'' }），一直播到換掉為止 ----
+  // ---- 頭上的情緒符號（每頁 emote: { 角色id: 'anger' 生氣／'sweat' 冒汗／'shade' 陰影線／'flower' 小花／'sparkle' 閃亮亮／'flower+sparkle'／'' }），一直播到換掉為止 ----
   // anger：頭的左上角一個紅色「💢」，一跳一跳；sweat：頭的兩側汗滴一滴一滴滑下來
+  // 小花（flower）、閃亮亮（sparkle）：頭旁邊的位置 [左右, 往下]（像素，從頭頂算）與起始時間差，輪流冒出來
+  const FLOWER_SPOTS = [[-22, 10, 0], [21, 4, .33], [24, 24, .66]], FLOWER_COLORS = [['#ff9ec7', '#ffe36b'], ['#ffd1e6', '#ff8fb6'], ['#ffffff', '#ffc94a']];
+  // 陰影線：每條 [左右（從身體中線算）, 從頭頂往下第幾像素開始, 到第幾像素]（角色圖的像素）——越右邊越長
+  const SHADE_LINES = [[-2, 1, 17], [1, 1.3, 20], [5, 1, 20.4], [10.5, 1.3, 22.6], [15, .5, 24.9], [19, 2.8, 26]];
+  const DROP_AT = [-17.5, 16];   // 一顆汗滴：從哪裡開始往下滑（左右、從頭頂往下，像素）
+  const SPARKLE_SPOTS = [[-17, 0, 0], [14, -6, .25], [-25, 22, .5], [26, 14, .75]];
   function drawEmote(a) {
     if (!a.emote || a.hidden) return;
-    const size = PLAYER.drawSize, top = a.y - size + 18, t = state.time;
-    ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1)); ctx.lineCap = 'round';
-    if (a.emote === 'anger') {
+    const size = PLAYER.drawSize, top = a.y - size + 18, t = state.time, base = Math.max(0, Math.min(1, a.alpha ?? 1));
+    // 可以疊兩種：'flower+sparkle'＝小花＋閃亮亮
+    const kinds = String(a.emote).split('+');
+    if (kinds.length > 1) { for (const k of kinds) drawEmote({ ...a, emote: k }); return; }
+    ctx.save(); ctx.globalAlpha = base; ctx.lineCap = 'round';
+    if (a.emote === 'flower') {   // 小花：頭旁邊冒出幾朵小花，慢慢轉、輕輕上下飄，一朵一朵輪流開
+      FLOWER_SPOTS.forEach(([dx, dy, lag], i) => {
+        const p = (t * .55 + lag) % 1, grow = Math.min(1, p / .15), fade = p > .8 ? 1 - (p - .8) / .2 : 1;
+        const [petal, heart] = FLOWER_COLORS[i % FLOWER_COLORS.length], r = 3.2 * grow;
+        ctx.save(); ctx.globalAlpha = base * fade;
+        ctx.translate(Math.round(a.x + dx), Math.round(top + dy - p * 6)); ctx.rotate(t * 1.2 + i);
+        for (let k = 0; k < 5; k++) {
+          const ang = k * Math.PI * 2 / 5;
+          ctx.beginPath(); ctx.arc(Math.cos(ang) * r, Math.sin(ang) * r, r * .75, 0, Math.PI * 2);
+          ctx.fillStyle = petal; ctx.fill(); ctx.strokeStyle = 'rgba(120,40,70,.55)'; ctx.lineWidth = .8; ctx.stroke();
+        }
+        ctx.beginPath(); ctx.arc(0, 0, r * .55, 0, Math.PI * 2); ctx.fillStyle = heart; ctx.fill();
+        ctx.restore();
+      });
+    } else if (a.emote === 'sparkle') {   // 閃亮亮：四角星一閃一閃（變大再縮小），輪流亮
+      SPARKLE_SPOTS.forEach(([dx, dy, lag]) => {
+        const p = (t * 1.1 + lag) % 1, s = Math.sin(p * Math.PI);   // 0 → 1 → 0
+        if (s < .05) return;
+        const x = Math.round(a.x + dx), y = Math.round(top + dy + 10), L = 6 * s, W = 1.6 * s;
+        ctx.save(); ctx.globalAlpha = base * s;
+        ctx.beginPath(); ctx.moveTo(x, y - L); ctx.lineTo(x + W, y - W); ctx.lineTo(x + L, y); ctx.lineTo(x + W, y + W);
+        ctx.lineTo(x, y + L); ctx.lineTo(x - W, y + W); ctx.lineTo(x - L, y); ctx.lineTo(x - W, y - W); ctx.closePath();
+        ctx.fillStyle = '#fff6b0'; ctx.fill(); ctx.strokeStyle = '#e0a21a'; ctx.lineWidth = .9; ctx.stroke();
+        ctx.beginPath(); ctx.arc(x, y, 1.1 * s, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();
+        ctx.restore();
+      });
+    } else if (a.emote === 'shade') {   // 陰影線（｜｜｜｜｜｜）：頭頂往下垂幾條直線，嚇到、背脊發涼；位置照 SHADE_LINES
+      const grow = Math.min(1, (a.emoteT || 0) / .35);   // 剛出現時由上往下長出來
+      SHADE_LINES.forEach(([dx, y0, y1], i) => {
+        const x = Math.round(a.x + dx), wob = Math.sin(t * 3 + i) * .5, y = top + y0, len = (y1 - y0) * grow;
+        ctx.beginPath(); ctx.moveTo(x + wob, y); ctx.lineTo(x + wob, y + len);
+        ctx.strokeStyle = 'rgba(18,16,40,.85)'; ctx.lineWidth = 1.6; ctx.stroke();
+        ctx.strokeStyle = 'rgba(120,110,200,.55)'; ctx.lineWidth = .7; ctx.stroke();
+      });
+    } else if (a.emote === 'drop') {   // 一顆汗滴：頭的左上角一顆大汗滴慢慢往下滑、變淡，滑完再冒一顆
+      const p = (t * .7) % 1, [dx, dy] = DROP_AT, x = Math.round(a.x + dx), y = top + dy + p * 9;
+      ctx.globalAlpha = base * (p < .15 ? p / .15 : 1 - Math.max(0, p - .55) / .45);
+      // 上面尖、下面圓：兩側從尖端彎下來，底部接一個半圓
+      ctx.beginPath(); ctx.moveTo(x, y - 9); ctx.quadraticCurveTo(x + 4.2, y - 3.5, x + 4, y + .5); ctx.arc(x, y + .5, 4, 0, Math.PI); ctx.quadraticCurveTo(x - 4.2, y - 3.5, x, y - 9); ctx.closePath();
+      ctx.fillStyle = '#b5e6ff'; ctx.fill(); ctx.strokeStyle = '#1f5e8f'; ctx.lineWidth = 1.2; ctx.stroke();
+      ctx.beginPath(); ctx.arc(x - 1.5, y + .3, .9, 0, Math.PI * 2); ctx.fillStyle = '#ffffff'; ctx.fill();   // 亮點
+    } else if (a.emote === 'anger') {
       const s = 1 + .2 * Math.abs(Math.sin(t * 6));
       ctx.translate(Math.round(a.x - 13), Math.round(top + 18)); ctx.rotate(-15 * Math.PI / 180); ctx.scale(s, s);   // 頭的左上角，往左傾斜 15 度
       for (let i = 0; i < 4; i++) {   // 四個彎角圍成一個十字
@@ -920,7 +972,11 @@ const StoryScene = (() => {
     ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt);
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
     const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
-    if (readyImage(held)) {
+    const small = readyImage(held) && Math.max(held.naturalWidth, held.naturalHeight) <= SMALL_CARRY;
+    if (small) {   // 小道具（紅豆餅、紙袋…）：照原圖大小拿在手邊，位置跟劇情（改）的「手上」一樣（js/story-kai.js 的 HOLD_AT）
+      const k = size / 64, [dx, dy] = HAND_AT[a.dir] || HAND_AT.front, hw = held.naturalWidth * k, hh = held.naturalHeight * k;
+      ctx.drawImage(held, Math.round(dx * k - hw / 2), Math.round(size / 2 - 18 + (dy + (Number(a.carryDy) || 0)) * k - hh / 2), hw, hh);   // 畫布原點在身體中間，腳底在 size/2-18 的地方
+    } else if (readyImage(held)) {
       const k = size / 64 * Math.min(1, 24 / Math.max(held.naturalWidth, held.naturalHeight)), hw = held.naturalWidth * k, hh = held.naturalHeight * k;   // 太大的圖（急救包）縮到手拿得住
       ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDy：拿著的東西往上（負）／往下（正）幾像素
     }

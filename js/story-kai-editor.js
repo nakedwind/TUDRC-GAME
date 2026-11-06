@@ -82,7 +82,12 @@ const MONS = (typeof MONSTERS_DEFAULT !== 'undefined' ? MONSTERS_DEFAULT : []).m
 // 加上可以當道具擺的地圖素材（彈藥箱、日光燈；日光燈在遊戲裡會跟地圖上的一樣閃、跳電）——js/story-kai.js 的 PROP_TILES 是同一份
 const PROP_TILES = ['tile_field_ammo_crate', 'tile_field_ammo_crate_open', 'tile_bg_electric_light', 'tile_eoc_first_aid_bag'];
 const PROP_TILE_NAMES = { tile_eoc_first_aid_bag: '急救包（地上的袋子）' };   // 跟商店的急救包同名的素材：選單上分得出來
-const PROPS = [...(typeof SUPPLIES !== 'undefined' ? SUPPLIES : []), ...(typeof ITEMS !== 'undefined' ? ITEMS : []).filter(it => it.category !== 'key')]
+// 只在劇情裡用的小道具（拿在手上的東西）——js/story-kai.js 的 STORY_PROPS 是同一份
+const STORY_PROPS = [
+  { id: 'prop_red_bean_cake_bag', name: '紅豆餅紙袋', image: 'images/道具/red-bean-cake-bag.png' },
+  { id: 'prop_taro_wheel_cake', name: '芋頭紅豆餅（咬一口）', image: 'images/道具/taro-wheel-cake.png' },
+];
+const PROPS = [...STORY_PROPS, ...(typeof SUPPLIES !== 'undefined' ? SUPPLIES : []), ...(typeof ITEMS !== 'undefined' ? ITEMS : []).filter(it => it.category !== 'key')]
   .filter(it => it.image).map(it => ({ id: it.id, name: it.name || it.id, img: it.image }))
   .concat(PROP_TILES.map(id => (typeof SHARED_TILES !== 'undefined' ? SHARED_TILES : []).find(t => t.id === id)).filter(Boolean)
     .map(t => ({ id: t.id, name: PROP_TILE_NAMES[t.id] || t.name, img: t.file, tile: [t.w || 1, t.h || 1] })));
@@ -705,7 +710,8 @@ $('accOk').onclick = () => { $('accDlg').close(); renderCast(); };
 // ---- 右邊：指令列表 ----
 function problem(st) {   // 這一行哪裡還沒設定好（列表上標紅）
   if ((WHO_KINDS.has(st.do) || (st.do === 'say' && st.who !== '' && st.who != null && !isMystery(st.who))) && !castBy(st.who)) return '角色代號不在演出者列表裡';
-  if ((['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(st.do) || (st.do === 'glow' && st.on !== false)) && !st.at) return '還沒在地圖上點位置';
+  if ((['cam', 'camMove', 'show', 'move', 'mshow', 'ishow', 'door'].includes(st.do) || (st.do === 'glow' && st.on !== false)) && !st.at && !(st.do === 'ishow' && st.hold)) return '還沒在地圖上點位置';
+  if (st.do === 'ishow' && st.hold && !castBy(st.hold)) return '「手上」填的角色代號不在演出者列表裡';
   if (st.do === 'sfxStop' && st.loop && st.src && !scene().steps.slice(0, scene().steps.indexOf(st)).some(x => x.do === 'sfx' && x.loop && x.src === st.src)) return '這一行前面沒有開過這個循環音效';
   if (st.do === 'door' && !nearDoorSpot(storyMaps.find(m => m.id === mapAt(scene().steps.indexOf(st))), st.at)) return '點的地方附近沒有門（後室木門這類可以開關的門）';
   if (st.do === 'mact' && st.act === 'move' && !st.at) return '還沒在地圖上點要走到哪';
@@ -820,7 +826,8 @@ function controls(st) {
     case 'camSway': return [check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
     case 'show': return [codeIn(st), pickBtn(st, '角色位置'), faceSel(st)];
     case 'hide': return [codeIn(st)];
-    case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st, '走的途中、走到之後都面向這邊；自動＝照走的方向')];
+    case 'move': return [codeIn(st), pickBtn(st, '角色位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）'), faceSel(st, '走的途中、走到之後都面向這邊；自動＝照走的方向'),
+      h('span', { title: '勾起來：不等他走到，下一行馬上接著跑（路人在背景慢慢走、好幾個人同時走）' }, check(st, 'nowait', '不等走到'))];
     case 'act': {
       const pickAct = h('select', { title: '小跳：跳一下；持槍、倒地（用正面的圖，可選逆時針、順時針 90 度、180 度、0 度）、集氣、受傷、坐下（附近有椅子就坐到椅子上，面向、遮擋跟遊戲一樣；沒有椅子：要先在角色出現、角色位置設好面向，有畫那個方向的坐下圖才會坐）、光源（身上發光，照亮幾格；開了「後室黑幕」才看得出來）、滴血（跟著走過的路晚 0.3 秒滴到地上）、顫抖（上下左右不規則地抖，一陣強一陣弱；1～5 級）：勾「開」開始，再加一行取消勾選就停；走路、跑步、慢走：之後「角色位置」走路時，腳步看起來是普通、快（1.25 倍）、慢（0.25 倍）；走多久還是照角色位置的 ms', onchange: e => {
         st.act = e.target.value;
@@ -853,7 +860,9 @@ function controls(st) {
       if (st.act === 'move') return [monCode(st), pickAct, pickBtn(st, '怪物位置'), msIn(st, '等待時間（ms）：走過去花多久（0＝直接出現在那裡）')];
       return [monCode(st), pickAct, st.act === 'die' ? null : monFaceSel(st)];
     }
-    case 'ishow': return [itemCode(st), listSel(st, 'id', PROPS, '（選道具）', '哪一個道具（背包裡的物品）'), pickBtn(st, '道具位置')];
+    case 'ishow': return [itemCode(st), listSel(st, 'id', PROPS, '（選道具）', '哪一個道具（背包裡的物品）'),
+      h('label', { title: '填角色代號：道具拿在那個角色手上、跟著他走（空白＝放在地圖上點的位置）' }, '手上：', codeIn(st, '誰', 'hold', '拿在幾號角色手上（空白＝放在地圖上）')),
+      st.hold ? null : pickBtn(st, '道具位置')];
     case 'ihide': return [itemCode(st)];
     case 'sway': return [codeIn(st), check(st, 'on', '晃動開', true), h('label', {}, '幅度：', lvSel(st))];
     case 'tremble': return [codeIn(st), check(st, 'on', '震動', true), h('label', {}, '幅度：', lvSel(st)), h('label', {}, '秒數(ms)：', msIn(st, '震多久；空白或 0＝一直震到關掉'))];
