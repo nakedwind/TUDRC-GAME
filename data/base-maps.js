@@ -8564,7 +8564,8 @@ const BASE_MAPS = [
         "c": 7,
         "r": 10,
         "layer": "object2",
-        "oy": 16
+        "oy": 16,
+        "sortDepth": 0
       },
       {
         "id": "tile_new_decor_plant03",

@@ -5387,5 +5387,13 @@ const SHARED_TILES = [
     "file": "images/研究部/Army_box.png",
     "w": 3,
     "h": 3
+  },
+  {
+    "id": "tile_mw4rtg2b",
+    "name": "Furniture (40)",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (40).png",
+    "w": 1,
+    "h": 1
   }
 ];

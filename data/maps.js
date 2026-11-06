@@ -18354,7 +18354,8 @@ const BATTLE_MAPS = [
         "r": 14,
         "layer": "object2",
         "doorMode": "memory",
-        "memoryKey": "devotion-key"
+        "memoryKey": "devotion-key",
+        "memoryScene": "Col_memory_01"
       },
       {
         "id": "tile_bg_extra_chained_door",
