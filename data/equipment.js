@@ -25,7 +25,7 @@ const EQUIP_SLOTS = [
 
 const EQUIPMENT = [
   // id 沿用 headlamp（以前叫「頭燈」），舊存檔會直接變成高亮度手電筒
-  { id: 'headlamp', name: '高亮度手電筒', kind: 'acc', icon: '🔦', image: 'images/items/flashlight.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+  { id: 'headlamp', name: '高亮度手電筒', kind: 'acc', icon: '🔦', image: 'images/裝備/flashlight.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '朝游標方向照明、耗電後自動換電池。',
     stat: lv => '照明距離 ' + (lv.light / 40).toFixed(1) + ' 格・扇形 ' + lv.spread * 2 + '°・一顆電池撐 ' + lv.battery + ' 秒・黑暗恐懼 −' + Math.round(lv.fear * 100) + '%',
     levels: [{ light: 220, spread: 26, battery: 90, fear: .15 }, { light: 280, spread: 28, battery: 140, fear: .25 }, { light: 340, spread: 36, battery: 200, fear: .35 }, { light: 400, spread: 40, battery: 260, fear: .4 }, { light: 460, spread: 44, battery: 320, fear: .45 }] },
@@ -108,7 +108,7 @@ const weaponStat = lv => WEAPON_STAT_TERMS.filter(([k]) => typeof lv[k] === 'num
   .map(([k, name, unit]) => name + ' ' + lv[k] + (unit ? ' ' + unit : '')).join('・');
 
 const WEAPON_UPGRADES = {
-  pistol: { name: '手槍', icon: '🔫', image: 'images/weapon/winter-handgun-design.png', cost: [80, 160, 250, 350],
+  pistol: { name: '手槍', icon: '🔫', image: 'images/weapon/Pistol.png', cost: [80, 160, 250, 350],
     stat: weaponStat,
     levels: [{ dmg: 5, mag: 6, reload: 2 }, { dmg: 6, mag: 8, reload: 1.7 }, { dmg: 8, mag: 10, reload: 1.4, double: 20 }, { dmg: 10, mag: 12, reload: 1.2, double: 35 }, { dmg: 12, mag: 14, reload: 1, double: 50 }] },   // double：連發機率（%，Lv3 起；快速射擊）
   flare: { name: '照明彈槍', icon: '🔥', image: 'images/weapon/winter-flare-gun-design.png', cost: [70, 150, 240, 340],
@@ -162,11 +162,11 @@ const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal', 's
   ammoFind: { incendiary: 2, flash: 2, shock: 2, heal: 1, tranq: 3, paint: 4, sticky: 2, knock: 3 },
   start: { incendiary: 3, flash: 3, shock: 4, heal: 2, tranq: 5, paint: 6, sticky: 3, knock: 4 } };
 // ===== 彈匣（js/magazine.js）：在背包「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪只換得到彈匣裡的 =====
-// free：不佔彈匣、一定帶著；slots[等級-1]＝彈匣裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
-const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5], cost: [150, 250, 380], name: '彈匣', icon: '🧰', image: 'images/裝備/magazine.png' };   // image：開發工坊的圖（沒有就用 icon）
-// ===== 背包格數（js/backpack.js）：開發工坊升級；slots[等級-1]＝幾格，cost[i]＝從第 i+1 級升到下一級花幾個異質碎片 =====
+// free：不佔彈匣、一定帶著；跟裝備一樣最高 Lv5（slots 要有 5 筆、cost 有 4 筆）；slots[等級-1]＝彈匣裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
+const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5, 6], cost: [150, 250, 380, 520], name: '彈匣', icon: '🧰', image: 'images/裝備/magazine.png' };   // image：開發工坊的圖（沒有就用 icon）
+// ===== 背包格數（js/backpack.js）：開發工坊升級，跟裝備一樣最高 Lv5（slots 要有 5 筆、cost 有 4 筆）；slots[等級-1]＝幾格，cost[i]＝從第 i+1 級升到下一級花幾個異質碎片 =====
 // items＝「物品」分頁，ammo＝「彈藥包」分頁（一種子彈一格）。重要物品、隊員物資沒有格數上限。
 const BAG_UPGRADES = {
-  items: { name: '背包擴充', icon: '🎒', image: 'images/裝備/Backpack.png', tab: '物品', slots: [12, 18, 24, 30], cost: [150, 250, 380] },   // image：開發工坊的圖（檔名大寫 B，要跟檔案一樣，網頁上大小寫有差）
-  ammo: { name: '彈藥包擴充', icon: '🧰', image: 'images/裝備/ammo-pouch.png', tab: '彈藥包', slots: [12, 18, 24, 30, 36, 42], cost: [150, 250, 380, 520, 700] },   // image：開發工坊的圖（沒有就用 icon）
+  items: { name: '背包擴充', icon: '🎒', image: 'images/裝備/Backpack.png', tab: '物品', slots: [12, 18, 24, 30, 36], cost: [150, 250, 380, 520] },   // image：開發工坊的圖（檔名大寫 B，要跟檔案一樣，網頁上大小寫有差）
+  ammo: { name: '彈藥包擴充', icon: '🧰', image: 'images/裝備/ammo-pouch.png', tab: '彈藥包', slots: [12, 18, 24, 30, 36], cost: [150, 250, 380, 520] },   // image：開發工坊的圖（沒有就用 icon）
 };

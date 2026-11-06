@@ -1,7 +1,7 @@
 /* ===== 彈匣：出勤前選這次帶哪幾種特殊子彈（設定在 data/equipment.js 的 MAGAZINE、BULLETS）=====
    ・背包「武器」分頁：手槍右邊是彈匣格，把下面的子彈拖上去就換（js/backpack.js；隨時都能換）。只有一般子彈不佔格子；照明彈需裝進彈匣。
    ・戰鬥中滾輪只會換到彈匣裡的子彈（js/flare.js 的 weaponUsable）。
-   ・彈匣一開始 2 格，開發工坊可以升級（最多 5 格）；開發工坊也能開發 source: 'develop' 的子彈。
+   ・彈匣一開始 2 格，開發工坊可以升級（最多 6 格）；開發工坊也能開發 source: 'develop' 的子彈。
    ・出勤時（基地 → 戰鬥）：照明彈和開發的子彈（develop）在營地的彈藥箱各放一組（js/camp-supply.js），要自己去箱子補；後室撿的（field）打完就沒了。
    ・存在 equipState.magazine（跟裝備一起存，js/equipment.js 的 saveEquipment）：{ lv: 彈匣等級, load: [子彈 id…] }
    必須在 js/equipment.js、js/flare.js 之後載入。

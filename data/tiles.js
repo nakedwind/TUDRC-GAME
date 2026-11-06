@@ -322,7 +322,7 @@ const SHARED_TILES = [
     "id": "tile_new_decor_oil_drum",
     "name": "油桶",
     "role": "floor",
-    "file": "images/item-decorate/oil-drum.png",
+    "file": "images/item-decorate/Oil_drum_V2.png",
     "w": 1,
     "h": 2
   },
@@ -3888,7 +3888,7 @@ const SHARED_TILES = [
     "id": "tile_bg_extra_oil_drum_background",
     "name": "油桶（背景素材）",
     "role": "floor",
-    "file": "images/background/oil-drum.png",
+    "file": "images/item-decorate/Oil_drum_V2.png",
     "w": 1,
     "h": 2
   },

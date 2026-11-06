@@ -548,13 +548,7 @@ function skillsText() {
     '   這裡沒寫的隊員／格子，會從 data/skills.js（舊版技能資料）自動換算。 */\n' +
     'const SQUAD_SKILLS = ' + JSON.stringify({ members: state.skills.members }, null, 2) + ';\n';
 }
-function gearText() {
-  return '/* ===== Y102隊員裝備（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
-    '   溫特在諾亞的開發工坊製作（異質碎片＋price 當經費），做好放進背包；在 T-Pad「Y102隊員」→ 裝備頁給隊員穿（每人 3 格、不分種類，一件只能給一個人穿）。\n' +
-    '   每件：{ id, name：名稱, icon：沒有圖片時用的 emoji, image：圖片路徑（可不填）, price：價錢, desc：裝備說明, effect：裝備數值（顯示用；空白＝依 mods 自動產生）, mods：實際改的數值 }\n' +
-    '   mods 的寫法跟技能一樣：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }。 */\n' +
-    'const SQUAD_GEAR = ' + JSON.stringify(state.gear, null, 2) + ';\n';
-}
+function gearText() { return squadGearFileText(state.gear); }   // js/squad-gear.js（開發工坊編輯器也用同一段）
 const sqSave = ProjectSave.attach({ after: [], files: [
   { path: 'data/squad-layout.js', label: 'Y102隊員頁版面', text: layoutText },
   { path: 'data/squad-skills.js', label: '技能內容', text: skillsText },

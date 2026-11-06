@@ -196,16 +196,22 @@
     </div>
   </div>
 
-  <script src="data/equipment.js?v=wsalign-20261102"></script>   <!-- 裝備、武器的原始資料 -->
+  <script src="data/equipment.js?v=lvfive-20261106"></script>   <!-- 裝備、武器的原始資料 -->
   <script src="data/supplies.js?v=eyedrops2-20261030"></script>   <!-- 道具名稱（說明裡的道具上色用） -->
   <script src="data/items.js"></script>
+  <script src="data/characters.js?v=lvfive-20261106"></script>   <!-- 下一行的遊戲數值要用到角色資料 -->
+  <script src="data/balance.js?v=lvfive-20261106"></script>   <!-- 建築、隊員裝備的開發費用 -->
+  <script src="data/objects.js?v=lvfive-20261106"></script>   <!-- 建築（工坊的「建築」區要顯示） -->
+  <script src="data/decorations.js?v=oildrum-20261106"></script>
+  <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 隊員裝備（工坊的「隊員裝備」區要顯示、可以改） -->
+  <script src="js/squad-gear.js?v=sgtail-20261106"></script>
   <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 目前存在檔案裡的工坊設定；每次都讀最新的（背包編輯器改的說明也存在這裡） -->
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
-  <script src="js/workshop-config.js?v=wsalign-20261102"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
+  <script src="js/workshop-config.js?v=btnall-20261106"></script>  <!-- 預設外觀、套用設定的工具（跟遊戲共用） -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js?v=filewarn-20261026"></script>     <!-- 一鍵存到專案（所有編輯器共用） -->
-  <script src="js/workshop-file.js?v=infoimgsize-20261023"></script>   <!-- data/workshop.js 的存檔文字（跟背包編輯器共用） -->
-  <script src="js/workshop-editor.js?v=wsalign-20261102"></script>
+  <script src="js/workshop-file.js?v=wssync-20261106"></script>   <!-- data/workshop.js 的存檔文字（跟背包編輯器共用） -->
+  <script src="js/workshop-editor.js?v=btnall-20261106"></script>
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

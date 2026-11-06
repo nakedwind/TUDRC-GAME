@@ -7,7 +7,7 @@
      levels：Lv1～Lv5 的效果說明文字（空白＝照數值自動產生）
      values：Lv1～Lv5 改過的實際數值（例如 {"dmg": 7}；沒寫的＝data/equipment.js 原本的；填文字的話只顯示在效果說明）
      cost：要花幾個異質碎片（裝備：[開發, 升到 Lv2, …, 升到 Lv5]；武器：[升到 Lv2, …, 升到 Lv5]；null／沒寫的＝原本的）
-     子彈 b:子彈id（例如 b:tranq）：name、image、desc 說明、cost 開發費用、max 一組幾發（彈藥包一格）；彈匣 m:magazine：name、desc、slots 每一級裝得下幾種、cost 升級費用
+     子彈 b:子彈id（例如 b:tranq）：name、image、desc 說明、cost 開發費用、max 一組幾發（彈藥包一格）；彈匣 m:magazine：name、image、desc、slots 每一級裝得下幾種、cost 升級費用
    added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）
    removed：刪除的原本裝備 id（武器前面加 w:）
    order：開發工坊裡的排列順序（gear 裝備 id、weapons 武器 w:id；沒列到的接在後面）
@@ -55,9 +55,6 @@ const WORKSHOP_CONFIG = {
         "stats": {
           "y": -20
         },
-        "btn": {
-          "y": -55
-        },
         "money": {
           "w": 75,
           "h": 30,
@@ -89,9 +86,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -125,9 +119,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -163,9 +154,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -202,9 +190,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -238,9 +223,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -275,9 +257,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -313,9 +292,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -350,9 +326,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -388,9 +361,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -430,9 +400,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -448,9 +415,6 @@ const WORKSHOP_CONFIG = {
       ],
       "infoImgY": -17,
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -478,9 +442,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -507,9 +468,6 @@ const WORKSHOP_CONFIG = {
       "iconScale": 96,
       "infoImgY": -8,
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -553,9 +511,6 @@ const WORKSHOP_CONFIG = {
       "iconScale": 96,
       "infoImgY": -8,
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -608,9 +563,6 @@ const WORKSHOP_CONFIG = {
       ],
       "infoImgY": -12,
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -630,9 +582,6 @@ const WORKSHOP_CONFIG = {
       "where": "於戰鬥區域：有機率在上鎖的置物箱取得",
       "infoImgY": -6,
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -661,9 +610,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       },
       "iconScale": 110
@@ -682,9 +628,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       },
       "iconScale": 120
@@ -703,17 +646,11 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
     "m:magazine": {
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -730,9 +667,6 @@ const WORKSHOP_CONFIG = {
     },
     "bag:items": {
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -749,9 +683,6 @@ const WORKSHOP_CONFIG = {
     },
     "bag:ammo": {
       "infoParts": {
-        "btn": {
-          "y": -55
-        },
         "name": {
           "y": -20
         },
@@ -779,9 +710,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -798,9 +726,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     },
@@ -817,9 +742,6 @@ const WORKSHOP_CONFIG = {
         },
         "stats": {
           "y": -20
-        },
-        "btn": {
-          "y": -55
         }
       }
     }

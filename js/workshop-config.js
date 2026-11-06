@@ -6,6 +6,8 @@
 */
 // 外觀的預設值（＝沒用編輯器改過時的樣子）。編輯器的「恢復預設」就是回到這些數字。
 const WORKSHOP_STYLE_DEFAULT = {
+  // 金色按鈕（開發／升級／製作）所有項目共用的位移、寬、高、字級（px；0＝原本的）：開發工坊編輯器勾「套用到所有頁」時改的就是這幾個
+  infoBtnX: 0, infoBtnY: -35, infoBtnW: 0, infoBtnH: 0, infoBtnFont: 0,
   // 最上面的標題列：小標、大標題、說明的文字／大小／顏色，整塊的位移（px；正數＝往右／往下）
   headSmall: '諾亞的開發工坊', headSmallSize: 10, headSmallColor: '#d8ae5d',
   headTitle: '裝備開發・升級', headTitleSize: 22, headTitleColor: '#fff8e7',
@@ -137,7 +139,6 @@ const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）',
 const WORKSHOP_INFO_LABELS = {
   tag: [['dev', '還沒開發', '未開發'], ['field', '只能在戰鬥區域拿到、還沒拿到', '戰鬥區域取得'], ['lv', '拿到之後', 'Lv{lv}']],
   stats: [['dev', '還沒開發（效果框的標題）', '開發後（Lv1）'], ['now', '拿到之後', '目前效果（Lv{lv}）'], ['next', '還能升級時（下面那一格）', '升級後（Lv{next}）'], ['where', '只能在戰鬥區域拿到', '取得方式']],
-  btn: [['dev', '開發按鈕（後面接費用）', '開發'], ['up', '升級按鈕（後面接費用）', '升級']],
   money: [['fmt', '經費的寫法（{money}＝花多少錢，例如 1,500）', '-${money}']],
 };
 // 這一塊改過的字（沒改＝原本的字 fallback）；vars＝{ lv, next }
@@ -149,10 +150,18 @@ function workshopInfoLabel(key, part, field, fallback, vars, cfg) {
 function workshopInfoPartsOf(key, cfg) {
   const c = cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {});
   const src = (Array.isArray(c.added) && c.added.find(a => a && a.id === key)) || (c.items || {})[key] || {};
-  return src.infoParts || (/^(bld|sg):/.test(String(key)) ? WORKSHOP_BUILD_INFO_PARTS : {});   // 建築（js/build.js）、隊員裝備（js/squad-gear.js）沒在編輯器調過：跟其他裝備一樣往上移
+  const parts = src.infoParts || {}, out = { ...parts };
+  // 建築（js/build.js）、隊員裝備（js/squad-gear.js）：沒調過的那幾塊跟其他裝備一樣往上移
+  if (/^(bld|sg):/.test(String(key))) for (const [p, d] of Object.entries(WORKSHOP_BUILD_INFO_PARTS)) out[p] = { ...d, ...parts[p] };
+  const st = workshopStyle(c), shared = {};   // 金色按鈕：沒有單獨調過的，一律用共用的設定
+  for (const [f, k] of Object.entries(WORKSHOP_BTN_SHARED)) if (st[k]) shared[f] = st[k];
+  out.btn = { ...shared, ...parts.btn };
+  return out;
 }
-// 開發工坊的建築：說明欄各塊的位置（跟編輯器裡調好的裝備一樣：文字往上 20、按鈕往上 55）
-const WORKSHOP_BUILD_INFO_PARTS = { name: { y: -20 }, tag: { y: -20 }, desc: { y: -20 }, stats: { y: -20 }, btn: { y: -55 } };
+// 開發工坊的建築、隊員裝備：說明欄各塊的位置（跟編輯器裡調好的裝備一樣：文字往上 20）
+const WORKSHOP_BUILD_INFO_PARTS = { name: { y: -20 }, tag: { y: -20 }, desc: { y: -20 }, stats: { y: -20 } };
+// 金色按鈕每個欄位對應到外觀設定的哪一個（WORKSHOP_STYLE_DEFAULT）
+const WORKSHOP_BTN_SHARED = { x: 'infoBtnX', y: 'infoBtnY', w: 'infoBtnW', h: 'infoBtnH', font: 'infoBtnFont' };
 // 放在那一塊的標籤上：data-wsp（css/style.css 用它套字級）＋位移、寬高
 //   按鈕：寬、高、字級用原本「外觀 → 升級／開發按鈕」的那組變數（--ws-act-*），只蓋過這一件
 function workshopInfoPartAttr(key, part, cfg) {
@@ -363,7 +372,7 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
 // ---- 子彈、彈匣（data/equipment.js 的 BULLETS、MAGAZINE）：名稱、圖片、說明、費用、數量 ----
 // 設定檔 items 裡的 key：子彈＝b:子彈id（例如 b:tranq）、彈匣＝m:magazine
 //   子彈：name 名稱、image 圖片、desc 說明、cost 開發要幾個異質碎片、max 一組幾發（彈藥包一格）
-//   彈匣：name 名稱、desc 說明、slots 每一級裝得下幾種子彈 [Lv1, Lv2, …]、cost 升級費用 [升到 Lv2, …]
+//   彈匣：name 名稱、image 圖片、desc 說明、slots 每一級裝得下幾種子彈 [Lv1, Lv2, …]、cost 升級費用 [升到 Lv2, …]
 const WORKSHOP_MAG_DESC = '在背包的「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪就換得到。只有一般子彈不佔格子；照明彈也需要一格。';
 const WORKSHOP_AMMO_BASE = {};   // 還沒套用設定檔前的原始資料（編輯器的「恢復原本」用）
 // 子彈、彈匣的圖片：開發工坊格子裡的大小（iconScale，%）、位移（iconX／iconY），下方說明欄的位移、大小（infoImgX／infoImgY／infoImgSize）
@@ -382,10 +391,10 @@ function workshopAmmoImg(d, o) { for (const k of ['iconScale', 'iconX', 'iconY',
   }
   if (typeof MAGAZINE !== 'undefined') {
     if (!MAGAZINE.desc) MAGAZINE.desc = WORKSHOP_MAG_DESC;
-    WORKSHOP_AMMO_BASE['m:magazine'] = { name: MAGAZINE.name, image: '', desc: MAGAZINE.desc, icon: MAGAZINE.icon, cost: MAGAZINE.cost.slice(), slots: MAGAZINE.slots.slice() };
+    WORKSHOP_AMMO_BASE['m:magazine'] = { name: MAGAZINE.name, image: MAGAZINE.image || '', desc: MAGAZINE.desc, icon: MAGAZINE.icon, cost: MAGAZINE.cost.slice(), slots: MAGAZINE.slots.slice() };
     const o = items['m:magazine'];
     if (o) {
-      for (const f of ['name', 'desc']) if (str(o[f])) MAGAZINE[f] = o[f];
+      for (const f of ['name', 'image', 'desc']) if (str(o[f])) MAGAZINE[f] = o[f];
       if (Array.isArray(o.slots)) o.slots.forEach((n, i) => { if (num(n) && n >= 1 && i < MAGAZINE.slots.length) MAGAZINE.slots[i] = Math.round(n); });
       if (Array.isArray(o.cost)) o.cost.forEach((n, i) => { if (num(n) && i < MAGAZINE.cost.length) MAGAZINE.cost[i] = Math.round(n); });
       workshopAmmoImg(MAGAZINE, o);
@@ -396,3 +405,12 @@ function workshopAmmoImg(d, o) { for (const k of ['iconScale', 'iconX', 'iconY',
 if (typeof applyItemTexts === 'function') applyItemTexts();
 // 開發工坊裡會出現的子彈、彈匣（諾亞開發得出來的子彈＋彈匣）
 const workshopAmmoKeys = () => Object.keys(WORKSHOP_AMMO_BASE).filter(k => k === 'm:magazine' || (WORKSHOP_AMMO_BASE[k].source === 'develop' && !(BULLETS[k.slice(2)] || {}).removed));
+
+// ---- 背包擴充、建築、隊員裝備在開發工坊的文字：遊戲和開發工坊編輯器讀同一段，兩邊才不會對不上 ----
+const workshopBagAbout = u => '背包的「' + u.tab + '」分頁多 ' + (u.slots[1] - u.slots[0]) + ' 格（最多 ' + u.slots[u.slots.length - 1] + ' 格）';
+const workshopBagStat = (u, n) => u.tab + ' ' + u.slots[n - 1] + ' 格';
+const workshopBuildAbout = have => have ? '已經可以在戰鬥區域蓋了（新手區除外）。打開下方的「🧱 建築」，拖到快捷欄就能用。' : '開發好之後，在戰鬥區域就能蓋（新手區除外）。';
+const workshopBuildStat = o => '建造經費 $' + o.cost + '・HP ' + o.hp;
+// 隊員裝備在開發工坊的說明＝裝備說明＋後面接的提示。提示可以在開發工坊編輯器改（items['sg:裝備id'].aboutTail，空白＝不接）；{n}＝目前有幾件
+const WORKSHOP_SG_TAIL = '做好放進背包，在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）';
+const workshopSquadGearAbout = (g, have, tail) => [g.desc, (typeof tail === 'string' ? tail : WORKSHOP_SG_TAIL).replace(/\{n\}/g, have)].filter(Boolean).join(' ');

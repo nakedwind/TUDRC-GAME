@@ -15,8 +15,8 @@ const OIL_ITEMS = {
   // 露營燈可被射擊打破，只留下小火，不產生爆風或油汙。
   camping_lights: { name: '露營燈', smallFire: true, fire: { radius: .6, life: 2, dps: 5 } },
   // 三種的強弱：爐具（小爆炸、能炸礦）＜ 油箱 ＜ 油桶（最大最痛）
-  deco_oil_drum: { name: '油桶', breaksOre: true, file: 'images/item-decorate/oil-drum.png',   // 最強：範圍、傷害、火海都最大
-    alsoFiles: ['images/background/oil-drum.png'],   // 「油桶（背景素材）」長得一樣，也當成油桶（打得爆）
+  deco_oil_drum: { name: '油桶', breaksOre: true, file: 'images/item-decorate/Oil_drum_V2.png',   // 最強：範圍、傷害、火海都最大
+    alsoFiles: ['images/item-decorate/oil-drum.png', 'images/background/oil-drum.png'],   // 舊圖的路徑也當成油桶（打得爆）：瀏覽器暫存、舊存檔可能還記著舊路徑
     blast: { radius: 3.5, enemy: 150, sentry: 45, player: 40 },
     fire: { radius: 3.2, life: 6, dps: 18 },   // 打爆後的火海燒 6 秒（原本 12 秒）
     slick: { radius: 2, life: 300 } },   // 油汙留 5 分鐘

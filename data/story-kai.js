@@ -509,8 +509,7 @@ const STORY_KAI = {
       { "do": "act", "who": 1, "act": "down", "on": true, "turn": "0", "eye": "half" },
       { "do": "wait", "ms": 100 },
       { "do": "act", "who": 1, "act": "down", "on": true, "turn": "0", "eye": "closed" },
-      { "do": "wait", "ms": 10000 },
-      { "do": "end", "title": "" }
+      { "do": "wait", "ms": 10000 }
     ]
   }
 };
