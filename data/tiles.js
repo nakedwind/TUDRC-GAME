@@ -1793,6 +1793,276 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_restaurant_dish_apple_pie",
+    "name": "餐點－蘋果派",
+    "role": "floor",
+    "file": "images/餐廳/06_apple_pie_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_bacon",
+    "name": "餐點－培根",
+    "role": "floor",
+    "file": "images/餐廳/14_bacon_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_burger",
+    "name": "餐點－漢堡",
+    "role": "floor",
+    "file": "images/餐廳/16_burger_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_dumplings",
+    "name": "餐點－水餃",
+    "role": "floor",
+    "file": "images/餐廳/37_dumplings_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_fried_egg",
+    "name": "餐點－荷包蛋",
+    "role": "floor",
+    "file": "images/餐廳/39_friedegg_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_meatball",
+    "name": "餐點－肉丸",
+    "role": "floor",
+    "file": "images/餐廳/70_meatball_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_omelet",
+    "name": "餐點－歐姆蛋",
+    "role": "floor",
+    "file": "images/餐廳/74_omlet_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_roasted_chicken",
+    "name": "餐點－烤雞",
+    "role": "floor",
+    "file": "images/餐廳/86_roastedchicken_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_salmon",
+    "name": "餐點－鮭魚",
+    "role": "floor",
+    "file": "images/餐廳/89_salmon_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_strawberry_cake",
+    "name": "餐點－草莓蛋糕",
+    "role": "floor",
+    "file": "images/餐廳/91_strawberrycake_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_sandwich",
+    "name": "餐點－三明治",
+    "role": "floor",
+    "file": "images/餐廳/93_sandwich_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_steak",
+    "name": "餐點－牛排",
+    "role": "floor",
+    "file": "images/餐廳/96_steak_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_fried_chicken",
+    "name": "慶功宴－鹹酥雞",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-fried-chicken.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_lurou_rice",
+    "name": "慶功宴－滷肉飯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-lurou-rice.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_loofah_clam",
+    "name": "慶功宴－絲瓜蛤蜊",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-loofah-clam.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_oyster_omelet",
+    "name": "慶功宴－蚵仔煎",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-oyster-omelet.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_milkfish_congee",
+    "name": "慶功宴－虱目魚肚粥",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-milkfish-congee.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_fish_noodle_soup",
+    "name": "慶功宴－魚片米粉湯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-fish-noodle-soup.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_burnt",
+    "name": "慶功宴－烤焦的菜",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-burnt.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_chicken",
+    "name": "慶功宴食材－生雞腿",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-chicken.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_pork",
+    "name": "慶功宴食材－絞肉",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-pork.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_clam",
+    "name": "慶功宴食材－蛤蜊",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-clam.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_oyster",
+    "name": "慶功宴食材－蚵仔",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-oyster.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_egg",
+    "name": "慶功宴食材－雞蛋",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-egg.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_vermicelli",
+    "name": "慶功宴食材－米粉",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-vermicelli.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_basil",
+    "name": "慶功宴食材－九層塔",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-basil.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_ginger",
+    "name": "慶功宴食材－薑絲",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-ginger.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_rice",
+    "name": "慶功宴食材－白飯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-rice.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_chili_sauce",
+    "name": "慶功宴食材－甜辣醬",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-chili-sauce.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_broth",
+    "name": "慶功宴食材－高湯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-broth.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
     "id": "tile_restaurant_storage_cabinet",
     "name": "Storage Cabinet",
     "role": "floor",
@@ -5394,9 +5664,41 @@ const SHARED_TILES = [
   },
   {
     "id": "tile_mw4rtg2b",
-    "name": "Furniture (40)",
+    "name": "Furniture",
     "role": "floor",
-    "file": "images/scene-props/Furniture (40).png",
+    "file": "images/scene-props/Furniture.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_173",
+    "name": "長沙發",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (173).png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_422",
+    "name": "L 型沙發",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (422).png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_438",
+    "name": "木矮櫃",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (438).png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_475",
+    "name": "書櫃",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (475).png",
     "w": 1,
     "h": 1
   },
