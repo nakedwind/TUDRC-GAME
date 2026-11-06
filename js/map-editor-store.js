@@ -35,6 +35,7 @@ const TILES_KEY = 'tudrc_shared_tiles_v1';   // 素材庫：三個編輯器共�
     });
   }
   async function load() {
+    if (window.AssetMoves) await AssetMoves.ready;   // 素材搬家：先把暫存裡的舊路徑換好（js/asset-moves.js）
     try {
       db = await open();
       const st = db.transaction(STORE).objectStore(STORE);

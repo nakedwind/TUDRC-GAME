@@ -15,6 +15,8 @@ const FLICKER = {
   sparkEvery: [15, 60],            // 每隔幾秒噴一次火花
   humRange: 18,                     // 幾格內聽得到嗡嗡聲
   humVolume: 0.08,                 // 嗡嗡聲最大音量（小數要寫成 0.15 這樣，只能有一個小數點）
+  silent: false,                   // true＝嗡嗡聲、跳電聲都不出聲（回憶劇情的特效會用，燈還是照樣閃）
+  humFade: 0,                      // 嗡嗡聲變大變小要幾秒（0＝很快；回憶劇情的特效要慢慢淡出時才設）
   // 其他長得不一樣的燈管：檔名 → 燈管在圖片裡的位置（寬、高的比例）、燈管半長（寬的比例）、光暈圖（疊在燈上、跟著亮暗）
   // 地圖上跟燈疊在同一個位置的光暈圖物件，改由這裡畫（亮著才發光、畫在黑幕上面），不會被黑幕蓋掉
   variants: [
@@ -172,7 +174,7 @@ function updateFlickerHum() {
   const list = flickerLights(), p = flickerListener();
   humUpdatedAt = performance.now();
   let best = 0;
-  if (p && list.length && !flickerQuiet()) for (const L of list) {   // 應變中心（安全區）：不會有嗡嗡聲
+  if (p && list.length && !flickerQuiet() && !FLICKER.silent) for (const L of list) {   // 應變中心（安全區）：不會有嗡嗡聲
     if (!L.on) continue;
     const d = Math.hypot(L.x - p.x, L.y - p.y) / CELL;
     best = Math.max(best, Math.max(0, 1 - d / FLICKER.humRange));
@@ -181,7 +183,7 @@ function updateFlickerHum() {
   const h = humContext(); if (!h) return;
   const enabled = (typeof SFX === 'undefined' || SFX.enabled) && !(typeof previewBgMuted === 'function' && previewBgMuted());   // 編輯器的預覽視窗可以關掉背景音（js/preview-mute.js）
   const vol = enabled ? best * best * FLICKER.humVolume * ((typeof SFX !== 'undefined' ? SFX.volume : .35) / .35) : 0;
-  h.out.gain.setTargetAtTime(vol, h.ctx.currentTime, .05);
+  h.out.gain.setTargetAtTime(vol, h.ctx.currentTime, FLICKER.humFade > 0 ? FLICKER.humFade / 3 : .05);   // setTargetAtTime 的時間常數：大約 3 倍的時間才幾乎到目標
 }
 // 保險：遊戲邏輯沒在跑（換地圖、結算畫面、選單開著…）或回到安全區時，嗡嗡聲不會停在上一次的音量
 setInterval(() => {
@@ -190,6 +192,7 @@ setInterval(() => {
   if (idle || (typeof MAP_SAFE !== 'undefined' && flickerQuiet())) humAudio.out.gain.setTargetAtTime(0, humAudio.ctx.currentTime, .05);
 }, 200);
 function playZap(L) {
+  if (FLICKER.silent) return;
   const p = flickerListener(); if (!p || flickerQuiet()) return;
   const d = Math.hypot(L.x - p.x, L.y - p.y) / CELL; if (d > FLICKER.humRange + 4) return;
   if (typeof SFX !== 'undefined' && !SFX.enabled) return;

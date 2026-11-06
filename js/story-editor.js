@@ -667,7 +667,7 @@ function beatBody(s, b, i) {
     shout: () => many('shout', '大喊', () => h('small', {}, '台詞出現時這個人頓一下，對話框也震一下')),
     hop: () => many('hop', '小跳', () => h('small', {}, '台詞出現時驚訝地輕輕跳一下（對話框不震）')),
     tremble: () => many('tremble', '顫抖', id => onOff(b.tremble, id, '開始顫抖', '停止顫抖')),
-    emote: () => many('emote', '情緒符號', id => choose(b.emote, id, [['anger', '💢 生氣（紅色青筋一跳一跳）'], ['sweat', '💧 慌張冒汗（汗滴往下滑）'], ['', '收掉']])),
+    emote: () => many('emote', '情緒符號', id => choose(b.emote, id, [['anger', '💢 生氣（紅色青筋一跳一跳）'], ['sweat', '💧 慌張冒汗（汗滴往下滑）'], ['shade', '｜｜ 陰影線（嚇到、背脊發涼）'], ['drop', '💧 一顆汗滴（慢慢往下滴）'], ['shade+drop', '｜｜💧 陰影線＋一顆汗滴'], ['flower', '🌸 小花（開心、得意）'], ['sparkle', '✨ 閃亮亮'], ['flower+sparkle', '🌸✨ 小花＋閃亮亮'], ['', '收掉']])),
     carry: () => many('carry', '拿著', id => txt(b.carry, id, { placeholder: '圖片路徑；空白＝放下', style: 'flex:1' })),
     gun: () => many('gun', '持槍', id => onOff(b.gun, id, '拿槍預備', '放下槍')),
     shield: () => many('shield', '盾牌', id => onOff(b.shield, id, '舉盾（只有雷德）', '放下盾')),

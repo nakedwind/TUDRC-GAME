@@ -127,9 +127,10 @@ function guideWants(t) {
 }
 
 // ---- 嚮導自己回箱子拿（js/sentry.js 呼叫；回傳 true＝這一幀在走去拿，不做別的）----
-function guideSupplyStep(t, dt) {
+function guideSupplyStep(t, dt, care) {
   if (MAP_SAFE || t.berserk || t.hp <= 0 || t.mode === 'goto') { t.supplyTrip = null; return false; }
-  if (typeof guideGroundStep === 'function' && guideGroundStep(t, dt)) { t.supplyTrip = null; return true; }   // 地上有溫特放的急救包、杏仁水：先去撿（js/ground-items.js）
+  if (typeof guideGroundStep === 'function' && guideGroundStep(t, dt, care)) { t.supplyTrip = null; return true; }   // 地上有溫特放的急救包、杏仁水：先去撿（js/ground-items.js）
+  if (care) { t.supplyTrip = null; return false; }   // 現在能照顧的隊友（js/sentry.js 的 guideCareTarget）：補血、疏導優先，忙完才回營地拿；走到一半也會折返
   const box = campBox(), canGet = guideWants(t).filter(k => (box[k] || 0) > 0);
   if (!canGet.length) { t.supplyTrip = null; return false; }
   const spot = campSupplySpot(); if (!spot) { t.supplyTrip = null; return false; }

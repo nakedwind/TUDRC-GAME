@@ -322,7 +322,7 @@ const SHARED_TILES = [
     "id": "tile_new_decor_oil_drum",
     "name": "油桶",
     "role": "floor",
-    "file": "images/item-decorate/oil-drum.png",
+    "file": "images/item-decorate/Oil_drum_V2.png",
     "w": 1,
     "h": 2
   },
@@ -3888,7 +3888,7 @@ const SHARED_TILES = [
     "id": "tile_bg_extra_oil_drum_background",
     "name": "油桶（背景素材）",
     "role": "floor",
-    "file": "images/background/oil-drum.png",
+    "file": "images/item-decorate/Oil_drum_V2.png",
     "w": 1,
     "h": 2
   },
@@ -5355,6 +5355,38 @@ const SHARED_TILES = [
     "w": 1,
     "h": 1,
     "flat": true
+  },
+  {
+    "id": "tile_mw47qirk",
+    "name": "Poolcore_slide",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_slide.png",
+    "w": 3,
+    "h": 6
+  },
+  {
+    "id": "tile_mw49f97t",
+    "name": "poolcore_ladder",
+    "role": "floor",
+    "file": "images/Poolcore/poolcore_ladder.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_mw4d9qnu",
+    "name": "Poolcore_swimring",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_swimring.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_mw4mgrxq",
+    "name": "Army_box",
+    "role": "floor",
+    "file": "images/研究部/Army_box.png",
+    "w": 3,
+    "h": 3
   },
   {
     "id": "tile_forest_ancient_tree",

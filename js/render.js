@@ -544,6 +544,7 @@ const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 // 衣櫃裡戴上的配件（js/costumes.js）：behind＝畫在角色後面、front＝前面
 const costumeLayer = (id, who, x, y, size, layer) => {
   if (who && who.slipT > 0 && who.slipPose) who = { ...who, dir: who.slipPose.dir, frame: who.slipPose.frame };   // 滑倒定格的走路圖可能是別的方向：配件跟著那張圖的方向、那一幀
+  if (sitPoseFrame(id === PLAYER_CHARACTER ? playerSprites : sentrySprites[id] || wandererSprites[id], who)) y += SIT_POSE_DROP;   // 側面坐下圖：上半身比較低，配件跟著
   if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer);
 };
 function drawWanderer(npc) {
@@ -1060,6 +1061,7 @@ function draw() {
   for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
+  if (typeof leafPileSortables === 'function') leafPileSortables(sortables);   // 樹葉堆（js/leaf-piles.js）
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
@@ -1087,6 +1089,7 @@ function draw() {
   if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
   if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
+  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'ground');   // 起霧 V2：落到地上的葉子（畫在人物下面，js/fog-fx-v2.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   if (typeof drawFishWater === 'function') drawFishWater(ctx);
   if (typeof drawEliteGround === 'function') drawEliteGround(ctx);   // 鳥頭大隊長跑步踩出的小裂痕（js/elite-bird-head.js）
@@ -1365,7 +1368,7 @@ function drawWorldEffects() {
   if (typeof drawMeleeV2 === 'function') drawMeleeV2(ctx);   // 近戰特效 V2（js/melee-fx-v2.js）
   if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
-  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx);   // 起霧 V2 的落葉（js/fog-fx-v2.js）
+  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'air');   // 起霧 V2：還在空中飄的葉子（js/fog-fx-v2.js）
   if (typeof drawLootV2 === 'function') drawLootV2(ctx);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
   if (typeof drawMiscV2 === 'function') drawMiscV2(ctx);   // 槍、連刺、集氣等其他 V2（js/misc-fx-v2.js）
   for (const f of G.effects) {

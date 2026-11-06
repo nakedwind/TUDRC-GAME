@@ -65,7 +65,7 @@
   <div class="top">
     <div>
       <h1>🧑‍🚀 Y102隊員裝備／技能編輯器</h1>
-      <p>T-Pad「Y102隊員」頁（技能樹頁、隊員裝備頁）的版面、技能內容、隊員裝備清單。在中間的畫面<b>點一下選取、按住拖曳移動、拖右下角的小方塊改大小</b>，右邊可以微調數字。</p>
+      <p>T-Pad「Y102隊員」頁（跟遊戲同一個畫面：技能樹、點技能跳出的說明卡、隊員裝備列）的版面、技能內容、隊員裝備清單。在中間的畫面<b>點一下選取、按住拖曳移動、拖右下角的小方塊改大小</b>，右邊可以微調數字。</p>
       <p>改好按「💾 存到專案」（寫進 <code>data/squad-layout.js</code>、<code>data/squad-skills.js</code>、<code>data/squad-gear.js</code>），遊戲重新整理就會套用。</p>
     </div>
     <div class="nav"><a href="塔防原型.html">← 回遊戲</a><a href="背包編輯器.html">🎒 背包編輯器</a></div>
@@ -77,15 +77,12 @@
     </section>
     <section class="panel">
       <div class="modes">
-        <button type="button" data-page="skills" class="on">🌳 技能樹頁</button>
-        <button type="button" data-page="gear">🎽 裝備頁</button>
-        <i class="sep"></i>
         <button type="button" data-mode="edit" class="on">🖱️ 編輯模式</button>
         <button type="button" data-mode="play">🎮 試玩模式</button>
         <i class="sep"></i>
         <button type="button" id="undoBtn" title="Ctrl+Z">↶ 上一步</button>
         <button type="button" id="redoBtn" title="Ctrl+Y">↷ 下一步</button>
-        <span id="modeHint">點一下選取、拖曳移動；點隊員、技能、裝備格會順便換畫面</span>
+        <span id="modeHint">點一下選取、拖曳移動；點隊員會換人，點技能會跳出說明卡（點卡片外面關掉）</span>
       </div>
       <div class="stage-wrap" id="stageWrap"><iframe id="game" src="塔防原型.html?squadedit=1" title="Y102隊員頁預覽"></iframe></div>
     </section>
@@ -101,12 +98,14 @@
       <div class="hint">選取後可以用方向鍵微調位置（按住 <kbd>Shift</kbd>＝一次 10px）。<br><kbd>Ctrl</kbd>+<kbd>Z</kbd>＝上一步、<kbd>Ctrl</kbd>+<kbd>Y</kbd>＝下一步。<br>修改會自動暫存在這台瀏覽器，存到專案後才會套用到遊戲。</div>
     </section>
   </div>
+  <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script>document.write(['squad-layout', 'squad-skills', 'squad-gear'].map(f => '<script src="data/' + f + '.js?t=' + Date.now() + '"><\/script>').join(''));</script>   <!-- 每次都讀最新的設定 -->
   <script src="js/draft-sync.js"></script>
-  <script src="js/squad-gear.js?v=oneslot-20261025"></script>   <!-- 數值名稱（STAT_MOD_NAMES）、mods 轉文字，跟遊戲共用 -->
+  <script src="js/squad-gear.js?v=sgtail-20261106"></script>   <!-- 數值名稱（STAT_MOD_NAMES）、mods 轉文字，跟遊戲共用 -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js"></script>
-  <script src="js/squad-editor.js?v=sgear-ws-20261028"></script>
+  <script src="data/guide-skills.js?v=taanafast-20261106"></script>   <!-- 嚮導技能的預設台詞（編輯器顯示用） -->
+  <script src="js/squad-editor.js?v=squadv2ed-20261106"></script>
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

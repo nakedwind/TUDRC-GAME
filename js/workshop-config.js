@@ -6,6 +6,12 @@
 */
 // 外觀的預設值（＝沒用編輯器改過時的樣子）。編輯器的「恢復預設」就是回到這些數字。
 const WORKSHOP_STYLE_DEFAULT = {
+  // 金色按鈕（開發／升級／製作）所有項目共用的位移、寬、高、字級（px；0＝原本的）：開發工坊編輯器勾「套用到所有頁」時改的就是這幾個
+  infoBtnX: 0, infoBtnY: -35, infoBtnW: 0, infoBtnH: 0, infoBtnFont: 0,
+  // 效果框所有項目共用的位移、寬、高、字級、內文（「套用到所有頁」；null＝沒有共用設定，各件照自己的）
+  infoStatsX: null, infoStatsY: null, infoStatsW: null, infoStatsH: null, infoStatsFont: null, infoStatsDev: null, infoStatsNow: null, infoStatsNext: null, infoStatsWhere: null,
+  // 上面兩個分頁的文字（前面的圖示、後面的數量不用改）
+  tabDev: '可開發', tabUp: '可升級',
   // 最上面的標題列：小標、大標題、說明的文字／大小／顏色，整塊的位移（px；正數＝往右／往下）
   headSmall: '諾亞的開發工坊', headSmallSize: 10, headSmallColor: '#d8ae5d',
   headTitle: '裝備開發・升級', headTitleSize: 22, headTitleColor: '#fff8e7',
@@ -38,6 +44,11 @@ const WORKSHOP_STYLE_VARS = {
 };
 function workshopStyle(cfg) {   // 預設值＋設定檔裡改過的
   return { ...WORKSHOP_STYLE_DEFAULT, ...((cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {})).style || {}) };
+}
+// 上面兩個分頁：[代號, 圖示＋文字]（遊戲的開發工坊、編輯器的預覽共用）；文字空白＝原本的字
+function workshopTabs(cfg) {
+  const st = workshopStyle(cfg), e = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return [['dev', '⚙️ ' + e(st.tabDev || WORKSHOP_STYLE_DEFAULT.tabDev)], ['up', WS_UP_ICON + ' ' + e(st.tabUp || WORKSHOP_STYLE_DEFAULT.tabUp)]];
 }
 // 標題列的三行字（遊戲的開發工坊、編輯器的預覽共用）：空白＝不顯示那一行
 function workshopHeadHtml(cfg) {
@@ -84,6 +95,8 @@ function workshopColorize(text, st) {   // st：外觀設定（編輯器傳編�
     .replace(/\u2063([^\u2063]*)\u2063/g, '<i class="ws-num">$1</i>');   // 數值欄填的文字（例如 ∞）：跟數字一樣橘色
 }
 
+// 背包擴充、建築在開發工坊編輯器調的圖片大小、位移（data/workshop.js 的 items['bag:…']、items['bld:…']）
+const workshopExtraLook = key => (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.items && WORKSHOP_CONFIG.items[key]) || {};
 // ---- 開發工坊裡的圖片大小（iconScale，%）：圖示框不變，只放大縮小裡面的圖（css/style.css 的 --ws-img-scale）----
 // 圖片位移（iconX／iconY，px）：正數＝往右／往下（--ws-img-x／--ws-img-y）
 const workshopIconVars = (scale, x, y) => [scale && scale !== 100 ? '--ws-img-scale:' + scale / 100 : '', x ? '--ws-img-x:' + x + 'px' : '', y ? '--ws-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
@@ -107,15 +120,6 @@ function workshopMoney(key, i, shards, cfg) {
   const m = Array.isArray(src.money) ? src.money[i] : src.money;
   return typeof m === 'number' && Number.isFinite(m) && m >= 0 ? Math.round(m) : workshopMoneyAuto(shards);
 }
-// 經費的框（按鈕下面那個小框，看起來不像按鈕）：-$1,500；short＝錢不夠（字變紅）
-function workshopMoneyHtml(key, money, attr, short, cfg) {
-  if (!(money > 0)) return '';
-  const txt = (typeof workshopInfoLabel === 'function' ? workshopInfoLabel(key, 'money', 'fmt', '-${money}', null, cfg) : '-${money}').replace(/\{money\}/g, money.toLocaleString('en-US'));
-  const o = workshopInfoPartsOf(key, cfg).money || {}, n = v => Number.isFinite(v) && v > 0 ? v : 0, s = [];   // 框的寬高、字級直接寫在框上
-  if (n(o.w)) s.push('width:' + o.w + 'px'); if (n(o.h)) s.push('height:' + o.h + 'px'); if (n(o.font)) s.push('font-size:' + o.font + 'px');
-  if (n(o.x) || Number.isFinite(o.y) && o.y) s.push('translate:' + (o.x || 0) + 'px ' + (o.y || 0) + 'px');
-  return '<div class="ws-money' + (short ? ' short' : '') + '" data-wsp="money"' + (s.length ? ' style="' + s.join(';') + '"' : '') + ' title="開發／升級要花的經費">' + txt.replace(/</g, '&lt;') + '</div>';
-}
 
 // 下方說明欄的說明：盡量一行寫完——太長就把字縮小（最小 WS_DESC_MIN_FONT px），縮到最小還放不下才換行（遊戲、開發工坊編輯器的預覽都用）
 const WS_DESC_MIN_FONT = 10;
@@ -132,13 +136,11 @@ function fitWorkshopDesc(root) {
 // 存在設定檔 items[key].infoParts（新增的裝備存在 added 裡）：{ name: { x, y, w, h, font }, tag: {…}, desc: {…}, stats: {…}, btn: {…} }
 //   x／y＝位移（px，正數＝往右／往下）、w／h＝寬高（px，0／沒寫＝原本的）、font＝字級（px，0＝原本的）
 //   每一塊也可以改字（見下面 WORKSHOP_INFO_LABELS；名稱、說明照原本的欄位）
-const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）', desc: '說明', stats: '效果框（開發後／目前效果／取得方式）', btn: '按鈕（開發／升級）', money: '經費框（按鈕下面的 -$1,500）' };
+const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）', desc: '說明', stats: '效果框（開發後／目前效果／取得方式）', btn: '按鈕（開發／升級）' };
 // 每一塊可以改的字：[欄位, 什麼時候出現, 原本的字]；{lv}＝目前等級、{next}＝下一級
 const WORKSHOP_INFO_LABELS = {
   tag: [['dev', '還沒開發', '未開發'], ['field', '只能在戰鬥區域拿到、還沒拿到', '戰鬥區域取得'], ['lv', '拿到之後', 'Lv{lv}']],
   stats: [['dev', '還沒開發（效果框的標題）', '開發後（Lv1）'], ['now', '拿到之後', '目前效果（Lv{lv}）'], ['next', '還能升級時（下面那一格）', '升級後（Lv{next}）'], ['where', '只能在戰鬥區域拿到', '取得方式']],
-  btn: [['dev', '開發按鈕（後面接費用）', '開發'], ['up', '升級按鈕（後面接費用）', '升級']],
-  money: [['fmt', '經費的寫法（{money}＝花多少錢，例如 1,500）', '-${money}']],
 };
 // 這一塊改過的字（沒改＝原本的字 fallback）；vars＝{ lv, next }
 function workshopInfoLabel(key, part, field, fallback, vars, cfg) {
@@ -149,10 +151,24 @@ function workshopInfoLabel(key, part, field, fallback, vars, cfg) {
 function workshopInfoPartsOf(key, cfg) {
   const c = cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {});
   const src = (Array.isArray(c.added) && c.added.find(a => a && a.id === key)) || (c.items || {})[key] || {};
-  return src.infoParts || (/^(bld|sg):/.test(String(key)) ? WORKSHOP_BUILD_INFO_PARTS : {});   // 建築（js/build.js）、隊員裝備（js/squad-gear.js）沒在編輯器調過：跟其他裝備一樣往上移
+  const parts = src.infoParts || {}, out = { ...parts };
+  // 建築（js/build.js）、隊員裝備（js/squad-gear.js）：沒調過的那幾塊跟其他裝備一樣往上移
+  if (/^(bld|sg):/.test(String(key))) for (const [p, d] of Object.entries(WORKSHOP_BUILD_INFO_PARTS)) out[p] = { ...d, ...parts[p] };
+  const st = workshopStyle(c), shared = {};   // 金色按鈕：沒有單獨調過的，一律用共用的設定
+  for (const [f, k] of Object.entries(WORKSHOP_BTN_SHARED)) if (st[k]) shared[f] = st[k];
+  out.btn = { ...shared, ...parts.btn };
+  const sharedStats = {};   // 效果框：一樣；0 也算有設定（建築、隊員裝備才會跟著回到 0，不留在上面的 -20）
+  for (const [f, k] of Object.entries(WORKSHOP_STATS_SHARED)) if (st[k] != null) sharedStats[f] = st[k];
+  out.stats = { ...out.stats, ...sharedStats, ...parts.stats };
+  return out;
 }
-// 開發工坊的建築：說明欄各塊的位置（跟編輯器裡調好的裝備一樣：文字往上 20、按鈕往上 55）
-const WORKSHOP_BUILD_INFO_PARTS = { name: { y: -20 }, tag: { y: -20 }, desc: { y: -20 }, stats: { y: -20 }, btn: { y: -55 } };
+// 開發工坊的建築、隊員裝備：說明欄各塊的位置（跟編輯器裡調好的裝備一樣：文字往上 20）
+const WORKSHOP_BUILD_INFO_PARTS = { name: { y: -20 }, tag: { y: -20 }, desc: { y: -20 }, stats: { y: -20 } };
+// 金色按鈕每個欄位對應到外觀設定的哪一個（WORKSHOP_STYLE_DEFAULT）
+const WORKSHOP_BTN_SHARED = { x: 'infoBtnX', y: 'infoBtnY', w: 'infoBtnW', h: 'infoBtnH', font: 'infoBtnFont' };
+// 效果框每個欄位對應到外觀設定的哪一個；dev／now／next／where＝內文（WORKSHOP_INFO_LABELS.stats）
+const WORKSHOP_STATS_SHARED = { x: 'infoStatsX', y: 'infoStatsY', w: 'infoStatsW', h: 'infoStatsH', font: 'infoStatsFont', dev: 'infoStatsDev', now: 'infoStatsNow', next: 'infoStatsNext', where: 'infoStatsWhere' };
+const WORKSHOP_PART_SHARED = { btn: WORKSHOP_BTN_SHARED, stats: WORKSHOP_STATS_SHARED };   // 哪幾塊有「套用到所有頁」
 // 放在那一塊的標籤上：data-wsp（css/style.css 用它套字級）＋位移、寬高
 //   按鈕：寬、高、字級用原本「外觀 → 升級／開發按鈕」的那組變數（--ws-act-*），只蓋過這一件
 function workshopInfoPartAttr(key, part, cfg) {
@@ -183,7 +199,7 @@ function workshopInfoBtnStyle(key, btnHtml, cfg) {
   const o = workshopInfoPartsOf(key, cfg).btn || {}, n = v => Number.isFinite(v) && v > 0 ? v : 0, s = [];
   if (n(o.w)) s.push('width:' + o.w + 'px', 'min-width:0', 'max-width:none');
   if (n(o.h)) s.push('height:' + o.h + 'px');
-  if (n(o.font)) s.push('font-size:' + o.font + 'px');
+  if (n(o.font)) s.push('font-size:' + o.font + 'px', '--ws-btn-font:' + o.font + 'px');   // --ws-btn-font：金色按鈕裡的「開發／升級」和價錢跟著變（css/style.css 的 .ws-btn-price）
   return s.length ? String(btnHtml).replace(/<button type="button" class="ws-btn"/g, '$& style="' + s.join(';') + '"') : btnHtml;
 }
 
@@ -363,7 +379,7 @@ const WORKSHOP_REMOVED = {};   // 被刪掉的原本裝備／武器（key → �
 // ---- 子彈、彈匣（data/equipment.js 的 BULLETS、MAGAZINE）：名稱、圖片、說明、費用、數量 ----
 // 設定檔 items 裡的 key：子彈＝b:子彈id（例如 b:tranq）、彈匣＝m:magazine
 //   子彈：name 名稱、image 圖片、desc 說明、cost 開發要幾個異質碎片、max 一組幾發（彈藥包一格）
-//   彈匣：name 名稱、desc 說明、slots 每一級裝得下幾種子彈 [Lv1, Lv2, …]、cost 升級費用 [升到 Lv2, …]
+//   彈匣：name 名稱、image 圖片、desc 說明、slots 每一級裝得下幾種子彈 [Lv1, Lv2, …]、cost 升級費用 [升到 Lv2, …]
 const WORKSHOP_MAG_DESC = '在背包的「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪就換得到。只有一般子彈不佔格子；照明彈也需要一格。';
 const WORKSHOP_AMMO_BASE = {};   // 還沒套用設定檔前的原始資料（編輯器的「恢復原本」用）
 // 子彈、彈匣的圖片：開發工坊格子裡的大小（iconScale，%）、位移（iconX／iconY），下方說明欄的位移、大小（infoImgX／infoImgY／infoImgSize）
@@ -382,10 +398,10 @@ function workshopAmmoImg(d, o) { for (const k of ['iconScale', 'iconX', 'iconY',
   }
   if (typeof MAGAZINE !== 'undefined') {
     if (!MAGAZINE.desc) MAGAZINE.desc = WORKSHOP_MAG_DESC;
-    WORKSHOP_AMMO_BASE['m:magazine'] = { name: MAGAZINE.name, image: '', desc: MAGAZINE.desc, icon: MAGAZINE.icon, cost: MAGAZINE.cost.slice(), slots: MAGAZINE.slots.slice() };
+    WORKSHOP_AMMO_BASE['m:magazine'] = { name: MAGAZINE.name, image: MAGAZINE.image || '', desc: MAGAZINE.desc, icon: MAGAZINE.icon, cost: MAGAZINE.cost.slice(), slots: MAGAZINE.slots.slice() };
     const o = items['m:magazine'];
     if (o) {
-      for (const f of ['name', 'desc']) if (str(o[f])) MAGAZINE[f] = o[f];
+      for (const f of ['name', 'image', 'desc']) if (str(o[f])) MAGAZINE[f] = o[f];
       if (Array.isArray(o.slots)) o.slots.forEach((n, i) => { if (num(n) && n >= 1 && i < MAGAZINE.slots.length) MAGAZINE.slots[i] = Math.round(n); });
       if (Array.isArray(o.cost)) o.cost.forEach((n, i) => { if (num(n) && i < MAGAZINE.cost.length) MAGAZINE.cost[i] = Math.round(n); });
       workshopAmmoImg(MAGAZINE, o);
@@ -396,3 +412,12 @@ function workshopAmmoImg(d, o) { for (const k of ['iconScale', 'iconX', 'iconY',
 if (typeof applyItemTexts === 'function') applyItemTexts();
 // 開發工坊裡會出現的子彈、彈匣（諾亞開發得出來的子彈＋彈匣）
 const workshopAmmoKeys = () => Object.keys(WORKSHOP_AMMO_BASE).filter(k => k === 'm:magazine' || (WORKSHOP_AMMO_BASE[k].source === 'develop' && !(BULLETS[k.slice(2)] || {}).removed));
+
+// ---- 背包擴充、建築、隊員裝備在開發工坊的文字：遊戲和開發工坊編輯器讀同一段，兩邊才不會對不上 ----
+const workshopBagAbout = u => '背包的「' + u.tab + '」分頁多 ' + (u.slots[1] - u.slots[0]) + ' 格（最多 ' + u.slots[u.slots.length - 1] + ' 格）';
+const workshopBagStat = (u, n) => u.tab + ' ' + u.slots[n - 1] + ' 格';
+const workshopBuildAbout = have => have ? '已經可以在戰鬥區域蓋了（新手區除外）。打開下方的「🧱 建築」，拖到快捷欄就能用。' : '開發好之後，在戰鬥區域就能蓋（新手區除外）。';
+const workshopBuildStat = o => '建造經費 $' + o.cost + '・HP ' + o.hp;
+// 隊員裝備在開發工坊的說明＝裝備說明＋後面接的提示。提示可以在開發工坊編輯器改（items['sg:裝備id'].aboutTail，空白＝不接）；{n}＝目前有幾件
+const WORKSHOP_SG_TAIL = '做好放進背包，在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）';
+const workshopSquadGearAbout = (g, have, tail) => [g.desc, (typeof tail === 'string' ? tail : WORKSHOP_SG_TAIL).replace(/\{n\}/g, have)].filter(Boolean).join(' ');

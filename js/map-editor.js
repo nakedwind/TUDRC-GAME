@@ -185,7 +185,7 @@ function defCamp() { const a = []; for (let c = 0; c < COLS; c++) { a.push(c + '
 const effCamp = (m) => new Set(m.camp.length ? m.camp : defCamp());
 
 // ================= 資料 =================
-let maps, curId, customTiles = [], brush = { mode: 'tile', tile: 'floor' }, activeLayer = 'floor';
+let maps, curId, customTiles = [], brush = { mode: 'select', tile: 'floor' }, activeLayer = 'floor';   // 一進來是「選取」：滑鼠上不會黏著一個方塊
 let checkResult = null, hoverCell = null, painting = false, lastPaint = '', selection = null, selections = [];
 let brushFlip = { fx: false, fy: false };   // 筆刷翻轉（大小圖都可用）
 let brushRotation = 0;
@@ -499,6 +499,8 @@ function fixMap(m) {
   m.coreSpots = Array.isArray(m.coreSpots) ? [...new Set(m.coreSpots)] : [];
   if (Array.isArray(m.fogTrees) && m.fogTrees.length) m.fogTrees = [...new Set(m.fogTrees)]; else delete m.fogTrees;   // 🌲 霧樹：['欄,列'…]（js/fog.js）
   if (Array.isArray(m.vines) && m.vines.length) m.vines = [...new Set(m.vines)]; else delete m.vines;   // 🌿 垂吊藤蔓：['欄,列'…]（js/vines.js）
+  if (Array.isArray(m.vinesHang) && m.vinesHang.length) m.vinesHang = [...new Set(m.vinesHang)]; else delete m.vinesHang;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
+  if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
@@ -1168,6 +1170,16 @@ function drawFogTreeMarks(m) {
 }
 // 🌿 垂吊藤蔓：尖端垂到的那一格
 function drawVineMarks(m) {
+  const hang = (m.vinesHang || []).map(k => k.split(',').map(Number));
+  for (const [c, r] of hang) {   // 🪢 倒吊藤蔓
+    const x = OX + c * CELL, y = OY + r * CELL;
+    ctx.strokeStyle = 'rgba(150,130,40,.9)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x + CELL / 2, y - CELL * .8); ctx.quadraticCurveTo(x + CELL * .3, y + CELL * .2, x + CELL / 2, y + CELL * .7); ctx.stroke();
+    ctx.strokeStyle = '#e6c84a'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🪢', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
+  }
+  if (hang.length) { ctx.fillStyle = '#e6c84a'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('🪢 倒吊藤蔓 ' + hang.length + ' 條', OX + 6, OY + 106); }
   const vines = (m.vines || []).map(k => k.split(',').map(Number));
   if (!vines.length) return;
   for (const [c, r] of vines) {
@@ -1180,6 +1192,20 @@ function drawVineMarks(m) {
   }
   ctx.fillStyle = '#9fe07a'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('🌿 藤蔓 ' + vines.length + ' 條', OX + 6, OY + 70);
+}
+// 🍂 樹葉堆
+function drawLeafPileMarks(m) {
+  const piles = (m.leafPiles || []).map(k => k.split(',').map(Number));
+  if (!piles.length) return;
+  for (const [c, r] of piles) {
+    const x = OX + c * CELL, y = OY + r * CELL;
+    ctx.fillStyle = 'rgba(120,80,30,.45)'; ctx.fillRect(x, y, CELL, CELL);
+    ctx.strokeStyle = '#ffb36b'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🍂', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
+  }
+  ctx.fillStyle = '#ffb36b'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('🍂 樹葉堆 ' + piles.length + ' 堆', OX + 6, OY + 88);
 }
 function draw() {
   const m = curMap();
@@ -1249,6 +1275,7 @@ function draw() {
   }
   drawFogTreeMarks(m);
   drawVineMarks(m);
+  drawLeafPileMarks(m);
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
@@ -1583,11 +1610,29 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這棵霧樹（剩 ' + trees.length + ' 棵）' : '已放上第 ' + trees.length + ' 棵霧樹：色塊是它負責的區域（每一格歸最近的那棵），燒掉它那一區的霧就散了' + (m.fog ? '' : '（記得在地圖設定把「🌫️ 起霧」打開）'), '#c9a8ff');
     return;
+  } else if (brush.mode === 'leafpile') {   // 🍂 樹葉堆：點一格放一堆、再點一次拿掉
+    if (!isDown) return;
+    const piles = m.leafPiles || [], i = piles.indexOf(key);
+    if (i < 0 && m.solid.includes(key)) { setStatus('樹葉堆要放在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
+    if (i >= 0) piles.splice(i, 1); else piles.push(key);
+    if (piles.length) m.leafPiles = piles; else delete m.leafPiles;
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已拿掉這堆樹葉（剩 ' + piles.length + ' 堆）' : '已放上第 ' + piles.length + ' 堆樹葉：用燃燒彈或油桶的火燒掉，會露出小道具、跳出小史萊姆，或什麼都沒有', '#ffb36b');
+    return;
+  } else if (brush.mode === 'vinehang') {   // 🪢 倒吊藤蔓：點一格放一條、再點一次拿掉
+    if (!isDown) return;
+    const list = m.vinesHang || [], i = list.indexOf(key);
+    if (i < 0 && m.solid.includes(key)) { setStatus('藤蔓要垂在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
+    if (i >= 0) list.splice(i, 1); else { list.push(key); if (m.vines) { m.vines = m.vines.filter(k => k !== key); if (!m.vines.length) delete m.vines; } }   // 同一格只能有一種藤蔓
+    if (list.length) m.vinesHang = list; else delete m.vinesHang;
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已拿掉這條倒吊藤蔓（剩 ' + list.length + ' 條）' : '已放上第 ' + list.length + ' 條倒吊藤蔓：抓到隊友會把他倒吊在半空中，溫特要開槍打斷藤蔓才救得下來（溫特碰到照樣被捲走）', '#e6c84a');
+    return;
   } else if (brush.mode === 'vine') {   // 🌿 垂吊藤蔓：點一格放一條、再點一次拿掉
     if (!isDown) return;
     const vines = m.vines || [], i = vines.indexOf(key);
     if (i < 0 && m.solid.includes(key)) { setStatus('藤蔓要垂在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
-    if (i >= 0) vines.splice(i, 1); else vines.push(key);
+    if (i >= 0) vines.splice(i, 1); else { vines.push(key); if (m.vinesHang) { m.vinesHang = m.vinesHang.filter(k => k !== key); if (!m.vinesHang.length) delete m.vinesHang; } }   // 同一格只能有一種藤蔓
     if (vines.length) m.vines = vines; else delete m.vines;
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這條藤蔓（剩 ' + vines.length + ' 條）' : '已放上第 ' + vines.length + ' 條藤蔓：從畫面上方垂到這一格，溫特碰到會被拉上去、過一陣子丟回附近地面', '#9fe07a');
@@ -2176,6 +2221,8 @@ const PALETTE_CATEGORIES = [
   { id: 'interactive', name: '互動與道具' },
   { id: 'storage', name: '收納' },
   { id: 'plant', name: '植栽' },
+  { id: 'chair', name: '椅子' },
+  { id: 'lamp', name: '燈' },
   { id: 'restaurant', name: '餐廳' },
   { id: 'hospital', name: '醫院病房' },
   { id: 'containment', name: '收容觀察室' },
@@ -2226,10 +2273,18 @@ const STORAGE_TILE_IDS = new Set([
 ]);
 // 植栽：盆栽、植物系列，不管原本在哪個資料夾都放這一類（id／檔名有 plant，或名稱有「盆栽」「植栽」「植物」；新的植物照這樣取名就會自動分進來）
 const isPlantTile = t => /plant/i.test(String(t.id || '') + ' ' + String(t.file || '')) || /盆栽|植栽|植物/.test(String(t.name || ''));
+// 可以坐的東西（椅子、沙發、凳子、長椅）：id、檔名或名稱有這些字就算；放在木凳上的盆栽算植栽
+const isChairTile = t => /chair|stool|bench|sofa|couch|seat/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /椅|沙發|凳/.test(String(t.name || ''));
+// 燈：名稱有「燈」，或 id／檔名是燈（只寫 light 不算，因為樓梯、海報、牆面的檔名也可能有 light，意思是淺色或月光）
+const isLampTile = t => /lamp|lantern|lightbox|(search|camping[ _-]|electric[_-]|elevator[_-]|ceiling[_-]|traffic[_-])light/i.test(String(t.id || '') + ' ' + (String(t.file || '').startsWith('data:') ? '' : String(t.file || ''))) || /燈/.test(String(t.name || ''));
+// 池核的素材不分進椅子、燈，一律留在「池核」
+const isPoolcoreTile = t => { const f = String(t.file || '').replace(/\\/g, '/').toLowerCase(); return String(t.id || '').startsWith('tile_poolcore_') || f.includes('/池核/') || f.includes('/poolcore/'); };
 function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_forest_') || String(t.file || '').includes('/森林/')) return 'forest';   // 森林：整個資料夾都放這一類（不管檔名）
   if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
   if (isPlantTile(t)) return 'plant';
+  if (isChairTile(t) && !isPoolcoreTile(t)) return 'chair';
+  if (isLampTile(t) && !isPoolcoreTile(t)) return 'lamp';
   const file = String(t.file || '').replace(/\\/g, '/').toLowerCase();
   if (String(t.id || '').startsWith('tile_interactive_')) return 'interactive';
   if (/vending/.test(String(t.id || '')) || file.includes('vending-machine')) return 'interactive';   // 販賣機（紅、綠、紫）：可以互動（js/shop.js）
@@ -3212,9 +3267,20 @@ document.getElementById('clearLayout').addEventListener('click', () => {
 
 // ================= 地圖管理 =================
 const mapSelect = document.getElementById('mapSelect');
+// 選單排序：名稱開頭有數字的照數字排（02 → 02-a → 03，10 排在 9 後面），沒有數字開頭的放最後並維持原本順序。
+// 只影響選單顯示，不改地圖存檔裡的順序；新地圖或改名後也會自動照這個規則
+function mapNameOrder(m) {
+  const x = /^\s*(\d+)(?:-(\w+))?/.exec(String(m.name || ''));
+  return x ? [Number(x[1]), x[2] || ''] : [Infinity, ''];
+}
+function compareMapNames(a, b) {
+  const x = mapNameOrder(a), y = mapNameOrder(b);
+  if (x[0] !== y[0]) return x[0] < y[0] ? -1 : 1;
+  return x[1].localeCompare(y[1], undefined, { numeric: true });
+}
 function refreshMapSelect() {
   mapSelect.innerHTML = '';
-  maps.forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
+  [...maps].sort(compareMapNames).forEach(m => { const opt = document.createElement('option'); opt.value = m.id; opt.textContent = m.name; if (m.id === curId) opt.selected = true; mapSelect.appendChild(opt); });
 }
 function newId() { return 'map_' + Date.now().toString(36); }
 function blankMap(name) { return fixMap({ id: newId(), name: name || '新地圖', desc: '', layers: emptyLayers(), stamps: [], solid: [], breakable: [], coreSpots: [], spawnZone: [], coreCount: 1, monsterMix: [{ id: 'slime', weight: 100 }], camp: [], rules: {} }); }
@@ -3318,6 +3384,8 @@ function shiftMapContent(m, dc, dr) {
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
   if (m.fogTrees) m.fogTrees = m.fogTrees.map(shiftKey);
   if (m.vines) m.vines = m.vines.map(shiftKey);
+  if (m.vinesHang) m.vinesHang = m.vinesHang.map(shiftKey);
+  if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -3348,6 +3416,8 @@ function dropOutsideContent(m) {
   removed += before - m.stamps.length;
   if (m.fogTrees) { const n = m.fogTrees.length; m.fogTrees = m.fogTrees.filter(insideKey); removed += n - m.fogTrees.length; if (!m.fogTrees.length) delete m.fogTrees; }
   if (m.vines) { const n = m.vines.length; m.vines = m.vines.filter(insideKey); removed += n - m.vines.length; if (!m.vines.length) delete m.vines; }
+  if (m.vinesHang) { const n = m.vinesHang.length; m.vinesHang = m.vinesHang.filter(insideKey); removed += n - m.vinesHang.length; if (!m.vinesHang.length) delete m.vinesHang; }
+  if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
     m[key] = (m[key] || []).filter(insideKey);
@@ -3475,7 +3545,7 @@ loadMaps();
 applyMapSize();
 preloadTiles();
 renderPalette();
-selectTile('floor');
+selectTile('floor'); brush = { mode: 'select', tile: 'floor' }; updateToolUI(); renderPalette();   // 一進來是「選取」：滑鼠上不會黏著一個方塊
 renderLayers();
 refreshMapSelect();
 loadRules();

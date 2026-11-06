@@ -56,7 +56,7 @@ const DECORATIONS = [
     "cost": 40,
     "hp": 35,
     "h": {
-      "file": "images/item-decorate/oil-drum.png",
+      "file": "images/item-decorate/Oil_drum_V2.png",
       "w": 1,
       "h": 2,
       "solid": [
@@ -67,7 +67,7 @@ const DECORATIONS = [
       ]
     },
     "v": {
-      "file": "images/item-decorate/oil-drum.png",
+      "file": "images/item-decorate/Oil_drum_V2.png",
       "w": 1,
       "h": 2,
       "solid": [

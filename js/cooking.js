@@ -4,12 +4,22 @@
 //  ・COOKING.time 秒後煮好，熟食直接放進背包（背包放不下就放在爐灶前的地上）；三個爐口可以同時煮
 //  ・畫面：爐火、食物在鍋上抖動、油花、蒸氣、上面的進度圈；煮好彈一下＋「🍳 烤虱目魚肚」
 //  ・靠近判定跟裝備箱一樣（js/camp-interactions.js 的 MAP_BOX，kind 'stove'，範圍＝爐灶那一段）
+//  ・戰鬥區地圖上的爐具（瓦斯爐，js/oil-barrels.js 的 deco_gasstove／deco_gasstove2）也能煮：一個爐口（FIELD_STOVES）
+//    爐具被打爆了：鍋上還沒煮好的生食掉在地上
 // ============================================================
 const COOKING = {
   tiles: ['tile_restaurant_kitchen_workstation'],
   time: 1.5,   // 煮幾秒
   burners: [[33, 67], [60, 67], [88, 67]],   // 爐口在圖片上的位置（圖片像素，圖 280×120）
   img: [280, 120],
+};
+// 戰鬥區的爐具：依障礙物 type；at＝爐口在圖片上的位置、img＝圖片大小（圖片像素）；reach＝離多近能用
+const FIELD_STOVES = {
+  reach: 26,
+  types: {
+    deco_gasstove:  { at: [20, 50], img: [40, 80] },
+    deco_gasstove2: { at: [22, 6],  img: [40, 40] },
+  },
 };
 const cookingPots = [];   // 正在煮的：{ stamp, k（第幾個爐口）, id（生食）, to（熟食）, t, x, y }
 let cookSteam = [];       // 蒸氣、油花的小顆粒
@@ -19,10 +29,31 @@ function cookImg(item) {
   if (!cookImgs[src]) { cookImgs[src] = new Image(); cookImgs[src].src = src; }
   return cookImgs[src];
 }
-const stoveNearPlayer = () => typeof mapBoxNearPlayer === 'function' ? mapBoxNearPlayer('stove') : null;
+// 戰鬥區的爐具（障礙物）：圖片在地圖上的範圍
+function fieldStoveRect(o) {
+  const s = o.mapSource && typeof o.mapSource === 'object' ? o.mapSource : null;
+  const x0 = OX + (s ? s.c * CELL + (s.ox || 0) : o.c * CELL), y0 = OY + (s ? s.r * CELL + (s.oy || 0) : o.r * CELL);
+  const layer = typeof o.mapSource === 'string';   // 畫在圖層上的：圖片只畫一格大（js/maploader.js 的 drawMapTileImg）
+  return { x0, y0, w: layer ? CELL : (o.w || 1) * CELL, h: layer ? CELL : (o.h || 1) * CELL, fx: !!(s && s.fx) };
+}
+function fieldStoveNearPlayer() {
+  const p = G && G.player; if (!p || p.hp <= 0 || p.sitting || G.over || !G.obstacles) return null;
+  let best = null, bd = FIELD_STOVES.reach;
+  for (const o of G.obstacles) {
+    if (o.hp <= 0 || !FIELD_STOVES.types[o.type]) continue;
+    const R = fieldStoveRect(o), left = R.x0, right = R.x0 + R.w, top = R.y0 + R.h / 2, bottom = R.y0 + R.h;
+    const d = Math.hypot(Math.max(left - p.x, 0, p.x - right), Math.max(top - p.y, 0, p.y - bottom));
+    if (d <= bd) { bd = d; best = { kind: 'stove', field: true, stamp: o, x: R.x0 + R.w / 2, y: bottom, top: burnerPos(o, 0).y - 18 }; }
+  }
+  return best;
+}
+const stoveNearPlayer = () => (typeof mapBoxNearPlayer === 'function' ? mapBoxNearPlayer('stove') : null) || fieldStoveNearPlayer();
+const stoveBurners = s => FIELD_STOVES.types[s && s.type] ? [0] : COOKING.burners;   // 戰鬥區的爐具只有一個爐口
 const rawFoods = () => allItems().filter(it => it.cookTo && itemById(it.cookTo) && (supplyInventory.get(it.id) || 0) > 0);
 // 爐口在地圖上的位置（左右翻轉的工作台也跟著翻）
 function burnerPos(s, k) {
+  const fs = FIELD_STOVES.types[s && s.type];
+  if (fs) { const R = fieldStoveRect(s), u = fs.at[0] / fs.img[0] * R.w; return { x: R.x0 + (R.fx ? R.w - u : u), y: R.y0 + fs.at[1] / fs.img[1] * R.h }; }
   const t = mapTileById(s.id), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL, [bx, by] = COOKING.burners[k];
   const u = bx / COOKING.img[0] * w;
   return { x: OX + s.c * CELL + (s.ox || 0) + (s.fx ? w - u : u), y: OY + s.r * CELL + (s.oy || 0) + by / COOKING.img[1] * h };
@@ -32,8 +63,8 @@ function useStoveNearPlayer() {
   const raw = rawFoods()[0];
   if (!raw) { sfx('error'); systemNotice('身上沒有可以煮的生食（虱目魚肚、生魚片…）', true); return true; }
   const busy = new Set(cookingPots.filter(p => p.stamp === b.stamp).map(p => p.k));
-  const k = COOKING.burners.findIndex((_, i) => !busy.has(i));
-  if (k < 0) { sfx('error'); systemNotice('三個爐口都在煮了，等一下', true); return true; }
+  const burners = stoveBurners(b.stamp), k = burners.findIndex((_, i) => !busy.has(i));
+  if (k < 0) { sfx('error'); systemNotice(burners.length > 1 ? '三個爐口都在煮了，等一下' : '爐子上還在煮，等一下', true); return true; }
   consumeItem(raw.id);
   const pos = burnerPos(b.stamp, k);
   cookingPots.push({ stamp: b.stamp, k, id: raw.id, to: raw.cookTo, t: 0, x: pos.x, y: pos.y });
@@ -46,7 +77,7 @@ function finishCooking(p) {
   if (supplyGain(to.id, 1, true) < 1) {   // 背包滿了：放在爐灶前的地上（走過去可以撿）
     G.groundItems = G.groundItems || [];
     G.groundItems.push({ id: to.id, qty: 1, x: p.x, y: p.y + 40, at: performance.now() / 1000 });
-    systemNotice('背包滿了：' + to.name + ' 放在爐灶前');
+    systemNotice('背包滿了：' + to.name + ' 放在' + (FIELD_STOVES.types[p.stamp.type] ? '爐具' : '爐灶') + '前');
   }
   flash('🍳 ' + to.name, p.x, p.y - 34, '#ffb35c');
   G.effects.push({ ring: true, x: p.x, y: p.y - 6, r: 4, r2: 24, life: .4, life0: .4, color: '#ffb35c' });
@@ -56,7 +87,15 @@ function finishCooking(p) {
 function updateCooking(dt) {
   for (let i = cookingPots.length - 1; i >= 0; i--) {
     const p = cookingPots[i];
-    if (!MAP || !(MAP.stamps || []).includes(p.stamp)) { cookingPots.splice(i, 1); continue; }   // 換地圖了：鍋上的東西不見（生食已經放上去了）
+    if (FIELD_STOVES.types[p.stamp.type]) {   // 戰鬥區的爐具
+      if (!G.obstacles || !G.obstacles.includes(p.stamp)) {
+        if (p.stamp.hp <= 0) {   // 爐具被打爆：生食掉在地上（換地圖的話爐具血量還在，鍋上的東西就不見）
+          G.groundItems = G.groundItems || [];
+          G.groundItems.push({ id: p.id, qty: 1, x: p.x, y: p.y + 30, at: performance.now() / 1000 });
+        }
+        cookingPots.splice(i, 1); continue;
+      }
+    } else if (!MAP || !(MAP.stamps || []).includes(p.stamp)) { cookingPots.splice(i, 1); continue; }   // 換地圖了：鍋上的東西不見（生食已經放上去了）
     p.t += dt;
     if (Math.random() < dt * 14) cookSteam.push({ x: p.x + (Math.random() - .5) * 14, y: p.y - 8, vx: (Math.random() - .5) * 10, vy: -18 - Math.random() * 16, life: .8 + Math.random() * .5, age: 0, steam: Math.random() < .55 });
     if (p.t >= COOKING.time) { cookingPots.splice(i, 1); finishCooking(p); }

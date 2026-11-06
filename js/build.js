@@ -117,7 +117,6 @@ let buildCat = 'obstacle';     // 全部可建造物件統一歸為障礙物
 let buildTargetCell = null;    // 從地面情境選單指定的建築格
 const BUILD_CATS = [['obstacle', '🧱 障礙物']];
 const DECOS = (typeof DECORATIONS !== 'undefined') ? DECORATIONS : [];
-const DISABLED_BUILD_IDS = new Set(['redroadblocks','barricades','deco_gasstove','wirefence']);   // 暫時不能蓋的建築（鐵圍籬先停用）
 // 能不能蓋：一開始只有 NEWBIE_START.builds 那幾種（data/balance.js），其他的要到諾亞的開發工坊開發（下面的 buildWorkshopEntries）
 // 新手區照樣只能蓋那幾種（開發好的也不行）
 const buildStarter = id => !NEWBIE_START.builds || NEWBIE_START.builds.includes(id);
@@ -139,10 +138,10 @@ const buildDevCost = id => {
 };
 function buildWorkshopEntries() {
   return buildAll().filter(o => !buildStarter(o.id)).map(o => {
-    const have = buildUnlocked(o.id), cost = buildDevCost(o.id);
-    return { key: 'bld:' + o.id, kind: 'build', def: o, name: o.name, lv: have ? 1 : 0, max: 1, icon: '<img src="' + o.h.file + '" alt="">', image: o.h.file, emoji: '🧱',
-      tag: '建築', worn: false, about: have ? '已經可以在戰鬥區域蓋了（新手區除外）。打開下方的「🧱 建築」，拖到快捷欄就能用。' : '開發好之後，在戰鬥區域就能蓋（新手區除外）。',
-      stat: () => '建造經費 $' + o.cost + '・HP ' + o.hp, canDev: !have, where: '', devCost: cost.shards, upCost: 0, devMoney: cost.money, buy: 'bld:' + o.id };
+    const have = buildUnlocked(o.id), cost = buildDevCost(o.id), look = workshopExtraLook('bld:' + o.id);   // 圖片大小、位移（開發工坊編輯器）
+    return { key: 'bld:' + o.id, kind: 'build', def: { ...o, ...look }, name: o.name, lv: have ? 1 : 0, max: 1, icon: wsAmmoIcon('<img src="' + o.h.file + '" alt="">', look), image: o.h.file, emoji: '🧱',
+      tag: '建築', worn: false, about: workshopBuildAbout(have),
+      stat: () => workshopBuildStat(o), canDev: !have, where: '', devCost: cost.shards, upCost: 0, devMoney: cost.money, buy: 'bld:' + o.id };
   });
 }
 function buildWorkshopBuy(kind, id) {

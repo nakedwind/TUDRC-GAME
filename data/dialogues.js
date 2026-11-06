@@ -158,6 +158,10 @@ const DIALOGUES = {
       "idleMeal": [
         "又是這些東西。",
         "唉……"
+      ],
+      "fogThick": [
+        "……霧變濃了，正好看不到工作。",
+        "什麼都看不到……可以收工了嗎？"
       ]
     },
     "theonie": {
@@ -309,6 +313,10 @@ const DIALOGUES = {
       "confusedHit": [
         "{name}！你眼睛長哪去了！",
         "清醒點！"
+      ],
+      "fogThick": [
+        "嘖，霧變濃了，連瞄準都麻煩。",
+        "這種霧……別給我拖後腿。"
       ]
     },
     "amber": {
@@ -461,6 +469,10 @@ const DIALOGUES = {
       "confusedHit": [
         "{name}？您、您打錯人了！",
         "…請清醒一點！"
+      ],
+      "fogThick": [
+        "霧、霧變濃了！大家小心腳下！",
+        "看不清楚了……請不要離我太遠！"
       ]
     },
     "red": {
@@ -620,6 +632,10 @@ const DIALOGUES = {
       "confusedHit": [
         "{name}，我沒事，你清醒點！",
         "打我就好，別去碰別人！"
+      ],
+      "fogThick": [
+        "霧變濃了！大家靠緊一點！",
+        "看不太到前面……我走前面！"
       ]
     },
     "avaren": {
@@ -781,6 +797,10 @@ const DIALOGUES = {
       "confusedHit": [
         "……{name}，你搞錯對象了。",
         "……那隻蝴蝶，我要宰了牠。"
+      ],
+      "fogThick": [
+        "……霧變濃了。",
+        "……看不清楚，別亂跑。"
       ]
     },
     "luther": {
@@ -953,6 +973,10 @@ const DIALOGUES = {
       "confusedHit": [
         "……{name}，看清楚，是我。",
         "請保持清醒，{name}。"
+      ],
+      "fogThick": [
+        "……視線變差了，請大家保持隊形。",
+        "霧太濃了……防線不好守。"
       ]
     },
     "eldrin": {
@@ -1078,7 +1102,11 @@ const DIALOGUES = {
         "隊長，中心確認珍珠大童已經討伐了。大家都平安回來，真是太好了。",
         "上面特別撥了一筆獎金……{money} 元，已經幫您存進去了喔。"
       ],
-      "brief_y25_entry": []
+      "brief_y25_entry": [],
+      "fogThick": [
+        "霧變濃了，大家別走散！",
+        "視線很差，注意四周的動靜。"
+      ]
     },
     "chris": {
       "lowSp": [
@@ -1168,6 +1196,10 @@ const DIALOGUES = {
       ],
       "confusedHit": [
         "{name}！好痛！你要賠我！"
+      ],
+      "fogThick": [
+        "霧這麼濃……加班費可以多算一點嗎？",
+        "看不到啦！誰在我旁邊？"
       ]
     },
     "tino": {
@@ -1308,6 +1340,10 @@ const DIALOGUES = {
       "confusedHit": [
         "{name}？為什麼打我……",
         "嗚……{name}變得好可怕……"
+      ],
+      "fogThick": [
+        "霧好濃……只能用耳朵聽了。",
+        "……看不到，但聽得到。小心。"
       ]
     },
     "claire": {
@@ -1604,6 +1640,10 @@ const DIALOGUES = {
       "idleMeal": [
         "吃飯！吃飯！",
         "好香喔！"
+      ],
+      "fogThick": [
+        "哇，霧好濃！像在蒸籠裡一樣！",
+        "霧變濃了……聞起來像剛煮好的飯。"
       ]
     },
     "rowan": {

@@ -837,7 +837,7 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
   const tile = e => '<button type="button" class="ws-tile' + (e.lv ? tier(e.lv) + ' owned' : e.canDev ? ' unowned' : ' locked') + (wsPick === e.key ? ' sel' : '') + '" data-ws-pick="' + e.key + '" aria-pressed="' + (wsPick === e.key) + '">' +
     '<span class="ws-tile-icon">' + e.icon + '</span><b>' + e.name + '</b>' + (e.lv ? '<em>Lv' + e.lv + '</em>' : '') + '</button>';
   const section = (title, items) => items.length ? '<h3>' + title + '</h3><div class="ws-tiles">' + items.map(tile).join('') + '</div>' : '';
-  const empty = wsTab === 'up' ? '還沒有可以升級的裝備。先到「可開發」分頁開發吧！' : '所有裝備都已經拿到了！';
+  const empty = wsTab === 'up' ? '還沒有可以升級的裝備。先到「' + (workshopStyle().tabDev || WORKSHOP_STYLE_DEFAULT.tabDev) + '」分頁開發吧！' : '所有裝備都已經拿到了！';
   // 下方說明欄（跟背包的說明欄一樣：大圖｜名稱、說明、數值｜按鈕）
   const e = list.find(x => x.key === wsPick);
   let info;
@@ -864,12 +864,12 @@ function renderWorkshop(keepScroll = true) {   // keepScroll：升級、開發�
     // 經費：這一次開發／升級要花多少錢，寫在按鈕裡碎片的上面（能按的時候才有；錢不夠字變紅，js/workshop-config.js 的 workshopPriceBtn）
     const cash = e.lv ? (e.kind !== 'bullet' && e.kind !== 'build' && e.lv < e.max ? e.upMoney || 0 : 0) : e.canDev ? e.devMoney || 0 : 0;
     const styled = typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(wk, btn) : btn;
-    const money = '', priced = typeof workshopPriceBtn === 'function' ? workshopPriceBtn(styled, cash, cash > Math.floor(G.money || 0)) : styled;
+    const priced = typeof workshopPriceBtn === 'function' ? workshopPriceBtn(styled, cash, cash > Math.floor(G.money || 0)) : styled;
     info = '<div class="bag-detail-image"' + workshopInfoImgStyle(e.def) + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + e.name + '</h3><div class="bag-tags"' + part('tag') + '>' + tags + '</div></div>' +
-      (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + priced + money + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
+      (e.about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(e.about) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + priced + '</div>';   // 按鈕本身的寬高字級
   }
   const count = tab => [...all.gear, ...all.weapons, ...all.bullets, ...all.mags, ...all.bags, ...all.builds, ...all.sgear].filter(x => tabOf(x, tab)).length;
-  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '⚙️ 可開發'], ['up', WS_UP_ICON + ' 可升級']].map(([id, label]) =>
+  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + workshopTabs().map(([id, label]) =>
     '<button type="button" role="tab" data-ws-tab="' + id + '" class="' + (wsTab === id ? 'active' : '') + '" aria-selected="' + (wsTab === id) + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
   // 右側：跟背包一樣的紙娃娃（溫特＋主／副武器、頭部、上身、下身 ×2、隨身物品 ×2），點格子＝選它來分解
   const dollSlot = (key, slotName, icon, name, lv, weapon) => '<div class="doll-slot' + (weapon ? ' weapon' : '') + (key ? ' filled' + tier(lv) : '') + (key && wsScrapSel === key ? ' sel' : '') + '"' + (key ? ' data-scrap="' + key + '"' : '') + ' title="' + slotName + '：' + (key ? name + ' Lv' + lv : '未裝備') + '">' +

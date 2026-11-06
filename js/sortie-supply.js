@@ -3,6 +3,7 @@
 //  ・在基地打開「出勤配置」，已編入的隊員下面有 3 格補給，點格子放進背包裡的零食飲料。
 //  ・從基地出發到戰鬥地圖時吃掉（從背包扣），效果一直維持到回基地。
 //  ・每樣東西的效果寫在 data/supplies.js 的 buff；帶到他「最愛」的東西效果 ×1.5（SORTIE_RULES）。
+//  ・同一種效果疊加時會打折：最強的 100%、第 2 個 60%、第 3 個 30%（SORTIE_RULES.stack）。
 //  ・戰鬥裡用到的地方：攻擊（sentryDamageMul）、攻速、防禦（sentryDefense）、生命上限、負荷累積。
 // ============================================================
 const SORTIE_STORE = 'tudrc_sortie_v1';
@@ -40,9 +41,11 @@ function buffText(buff, type) {
     return kind.icon + ' ' + kind.name + (kind.minus ? ' −' : ' +') + pct(v);
   }).filter(Boolean).join('　');
 }
+// 幾樣東西的總效果：同一種效果由強到弱算，第 2、3 個打折（SORTIE_RULES.stack），跟放在第幾格無關
 function sumBuffs(list) {
-  const out = {};
-  for (const b of list) for (const [k, v] of Object.entries(b)) out[k] = (out[k] || 0) + v;
+  const vals = {}, out = {};
+  for (const b of list) for (const [k, v] of Object.entries(b)) (vals[k] = vals[k] || []).push(v);
+  for (const [k, arr] of Object.entries(vals)) out[k] = arr.sort((x, y) => y - x).reduce((sum, v, i) => sum + v * (SORTIE_RULES.stack[i] ?? 0), 0);
   return out;
 }
 
@@ -113,6 +116,7 @@ function sortiePickerHtml(type, slot) {
       '<img src="' + item.image + '" alt=""><b>' + item.name + (knownLove(type, item.id) ? ' 💖' : '') + '</b><small>' + buffText(itemBuff(type, item), type) + '</small><em>×' + left + '</em></button>').join('');
   return '<div class="sortie-picker" role="listbox" aria-label="選擇補給">' +
     (cells || '<p class="sortie-empty">背包裡沒有零食飲料，可以去便利商店買。</p>') +
+    '<p class="sortie-empty" style="margin:4px 0">同一種效果疊加會打折：第 2 個算 60%、第 3 個算 30%。</p>' +
     '<div class="sortie-picker-foot">' + (current ? '<button type="button" class="sortie-clear">拿掉</button>' : '') + '<button type="button" class="sortie-cancel">取消</button></div></div>';
 }
 function setSortieSlot(type, slot, itemId) {

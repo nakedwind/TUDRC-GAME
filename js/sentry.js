@@ -701,7 +701,7 @@ function updateSentry(t, dt) {
     }
   }
   // 嚮導身上的急救包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
-  if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
+  if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt, care)) return;
   // 所有嚮導：有人要補血／疏導就先走到他身邊，跳過下面的護衛圈和主動接敵（攻擊仍由 game.js 對射程內目標自動執行）
   t.supportTarget = care ? care.type : null;
   if (care) {
@@ -742,9 +742,10 @@ function updateSentry(t, dt) {
   const awakeCore = G.cores.some(c => !c.dead && c.awake && !c.hidden);   // 醒著的核心會發光：在暗處也看得到、會走過去打
   if (!TYPES[t.type].noAttack && (litHere || awakeCore) && (G.enemies.length || awakeCore)) {   // 不攻擊的嚮導（塔納）：不去追怪
     const spec = TYPES[t.type];
-    const atkR = spec.range * CELL;                       // 射程（像素）
+    const fogK = typeof fogRangeMul === 'function' ? fogRangeMul(t) : 1;   // 站在霧裡：看不遠（js/fog.js）
+    const atkR = spec.range * CELL * fogK;                // 射程（像素）
     const anchor = t.mode === 'escort' && G.player ? G.player : (t.mode !== 'free' && t.anchor) ? t.anchor : t;   // 護衛時以部隊長為中心
-    const detectR = t.guardSummoned ? Math.max(220, (spec.aggroRange || spec.range + 1.5) * CELL) : (spec.aggroRange || spec.range + 1.5) * CELL;
+    const detectR = (t.guardSummoned ? Math.max(220, (spec.aggroRange || spec.range + 1.5) * CELL) : (spec.aggroRange || spec.range + 1.5) * CELL) * fogK;
     const holdR = ((typeof PATROL !== 'undefined' && PATROL.holdChaseCells) || 6) * CELL;
     const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;

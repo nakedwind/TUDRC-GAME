@@ -57,6 +57,26 @@ function squadGearImage(g) {
 const squadGearList = () => (typeof SQUAD_GEAR !== 'undefined' && Array.isArray(SQUAD_GEAR) ? SQUAD_GEAR : []);
 const squadGearById = id => squadGearList().find(g => g.id === id) || null;
 const squadGearEffect = g => (g && (g.effect || modsText(g.mods))) || '';
+// 開發工坊編輯器調的圖片大小、位移、製作要花的碎片：存在 data/workshop.js 的 items['sg:裝備id']
+const squadGearLook = id => (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.items && WORKSHOP_CONFIG.items['sg:' + id]) || {};
+// 圖片大小、位移套用到遊戲裡每個顯示這張圖的地方（背包、裝備欄、T-Pad…）：照圖片路徑寫一條樣式，以後新增的畫面也會自動跟著。
+// 開發工坊的格子、說明欄有自己的設定，不重複套用；位移是在工坊格子（約 63px）裡調的，其他地方照比例換算。
+function applySquadGearLook() {
+  const rules = squadGearList().map(g => {
+    const o = squadGearLook(g.id), s = o.iconScale > 0 ? o.iconScale / 100 : 1, x = (Number(o.iconX) || 0) / 63 * 100, y = (Number(o.iconY) || 0) / 63 * 100;
+    if (!g.image || (s === 1 && !x && !y)) return '';
+    return 'img[src="' + String(g.image).replace(/["\\]/g, '\\$&') + '"]:not(.ws-tile-icon img, .ws-info img) { scale: ' + s + '; translate: ' + x + '% ' + y + '%; }';
+  }).join('\n');
+  if (!rules) return;
+  const el = document.createElement('style'); el.id = 'sgearLookStyle'; el.textContent = rules; document.head.appendChild(el);
+}
+applySquadGearLook();
+// data/squad-gear.js 的存檔文字（Y102隊員裝備編輯器、開發工坊編輯器共用，兩邊存出來才會一樣）
+const squadGearFileText = gear => '/* ===== Y102隊員裝備（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
+  '   溫特在諾亞的開發工坊製作（異質碎片＋price 當經費），做好放進背包；在 T-Pad「Y102隊員」→ 裝備頁給隊員穿（每人 3 格、不分種類，一件只能給一個人穿）。\n' +
+  '   每件：{ id, name：名稱, icon：沒有圖片時用的 emoji, image：圖片路徑（可不填）, price：價錢, desc：裝備說明, effect：裝備數值（顯示用；空白＝依 mods 自動產生）, mods：實際改的數值 }\n' +
+  '   mods 的寫法跟技能一樣：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }。 */\n' +
+  'const SQUAD_GEAR = ' + JSON.stringify(gear, null, 2) + ';\n';
 
 // ---- 放進物品清單：背包、存檔都認得這些 id ----
 function syncSquadGearItems() {
@@ -71,13 +91,14 @@ syncSquadGearItems();
 const squadGearHave = id => (typeof supplyInventory !== 'undefined' ? supplyInventory.get(id) || 0 : 0) + Object.values(squadGearState.equip).filter(list => (list || []).includes(id)).length;
 const squadGearDevCost = g => {
   const d = (typeof SQUAD_GEAR_DEV !== 'undefined' && (SQUAD_GEAR_DEV[g.id] || SQUAD_GEAR_DEV.default)) || { shards: 20 };
-  return { shards: d.shards | 0, money: Number.isFinite(d.money) ? d.money : Math.max(0, Number(g.price) || 0) };
+  const edited = squadGearLook(g.id).cost;   // 開發工坊編輯器改過要花幾個碎片
+  return { shards: Number.isFinite(edited) ? edited : d.shards | 0, money: Number.isFinite(d.money) ? d.money : Math.max(0, Number(g.price) || 0) };
 };
 function squadGearWorkshopEntries() {
   return squadGearList().filter(g => g.price > 0).map(g => {
     const have = squadGearHave(g.id), cost = squadGearDevCost(g);
-    return { key: 'sg:' + g.id, kind: 'sgear', def: g, name: g.name, lv: 0, max: 1, icon: '<img src="' + squadGearImage(g) + '" alt="">', image: squadGearImage(g), emoji: g.icon || '🎽',
-      tag: '隊員裝備', worn: false, about: (g.desc ? g.desc + ' ' : '') + '做好放進背包，在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 ' + have + ' 件）',
+    return { key: 'sg:' + g.id, kind: 'sgear', def: { ...g, ...squadGearLook(g.id) }, name: g.name, lv: 0, max: 1, icon: wsAmmoIcon('<img src="' + squadGearImage(g) + '" alt="">', squadGearLook(g.id)), image: squadGearImage(g), emoji: g.icon || '🎽',
+      tag: '隊員裝備', worn: false, about: workshopSquadGearAbout(g, have, squadGearLook(g.id).aboutTail),
       stat: () => squadGearEffect(g), canDev: true, where: '', devCost: cost.shards, upCost: 0, devMoney: cost.money, buy: 'sg:' + g.id };
   });
 }

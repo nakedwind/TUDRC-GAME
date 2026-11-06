@@ -65,6 +65,14 @@ function loadSwingSprites(set, folder, files) {
 }
 // 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
 const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png', winter_M: 'fail.png', eldrin_M: 'fail.png' };
+// 側面坐下圖（tools/make-sit-sprites.py 用柯林的腿做的）：腿是出勤制服的褲子，所以只有 B 款有；球球有自己的坐下圖（js/ball-poses.js）
+const hasSitPose = folder => /_B$/.test(folder) && !/^ball_/.test(folder);
+const SIT_POSE_DROP = 4;   // 坐下圖的上半身比站著低幾像素：衣櫃配件跟著往下
+function sitPoseFrame(set, who) {   // 坐在椅子上、朝左或朝右才有；沒有這張圖就回傳 null（照舊用站著的圖）
+  if (!who || !who.sitting || who.sitting.bed || !set || !set.sit) return null;
+  const g = set.sit[who.dir];
+  return g && g.complete && g.naturalWidth ? g : null;
+}
 function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
   const prefix = folder.replace('_', '') + '_';
   const revision = folder === 'chris_A' ? '?v=chris-a-20261021-2' : '';
@@ -81,6 +89,10 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
     }
   }
   if (SWING_FILES[folder]) loadSwingSprites(set, folder, SWING_FILES[folder]);   // 近戰揮擊圖
+  if (hasSitPose(folder)) {
+    set.sit = {};
+    for (const [dir, file] of [['left', '0003_Leftside'], ['right', '0006_right-side']]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}_sit.png`; set.sit[dir] = img; }
+  }
   return set;
 }
 // ---- 造型切換：安全區穿 A 版、戰鬥區穿 B 版 ----
@@ -437,6 +449,8 @@ function pickCharacterFrame(set, who) {
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
   if ((who.vineDazeT > .2 || (who.vineCap && who.vineBounced)) && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 被藤蔓丟下來躺在地上暈：正面閉眼（js/vines.js）
+  const sitFrame = sitPoseFrame(set, who);   // 坐在椅子上（側面）：腿彎起來
+  if (sitFrame) return sitFrame;
   if (who.slipT > 0 && who.slipPose) {   // 踩到香蕉皮滑倒：定格在隨機挑的那張走路圖（js/golden-banana-king.js 的 bkSlip）
     const g = set[who.slipPose.dir] && set[who.slipPose.dir][who.slipPose.frame];
     if (g && g.complete && g.naturalWidth) return g;
@@ -1282,6 +1296,7 @@ function newGame() {
   seedCores();
   if (typeof seedFogTrees === 'function') seedFogTrees();   // 霧樹：燒掉就散掉那一區的霧（js/fog.js）
   if (typeof seedVines === 'function') seedVines();   // 森林的垂吊藤蔓（js/vines.js）
+  if (typeof seedLeafPiles === 'function') seedLeafPiles();   // 森林的樹葉堆：燒掉露出道具或小史萊姆（js/leaf-piles.js）
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
@@ -1897,6 +1912,8 @@ function updatePlayerAttack(dt) {
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   const vineMate = !paint && typeof vineShotTarget === 'function' ? vineShotTarget(aim) : null;   // 游標點在被絲瓜藤纏住的隊友身上：子彈射斷藤蔓（js/loofah-lady.js）
   if (vineMate) { shootVine(p, vineMate, aim, aimAng); return; }
+  const hungMate = !paint && typeof vineHangShotTarget === 'function' ? vineHangShotTarget(aim) : null;   // 游標點在被森林倒吊藤蔓吊著的隊友身上：子彈打藤蔓（js/vines.js）
+  if (hungMate) { shootHangVine(p, hungMate, aim, aimAng); return; }
   const sleepMate = !paint && typeof mothSleepShotTarget === 'function' ? mothSleepShotTarget(aim) : null;   // 游標點在吸了睡眠鱗粉、睡著的隊友身上：開槍把他打醒（js/human-face-butterfly.js）
   if (sleepMate) { shootWakeMate(p, sleepMate, aim, aimAng); return; }
   // 朝游標方向、射程內、照亮的最近怪。
@@ -2333,7 +2350,7 @@ function update(dt) {
       if (!swingTarget) continue;
     } else if (t.cd > 0) continue;
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0 && !swingTarget) continue;
-    const R = spec.range * CELL;
+    const R = spec.range * CELL * (typeof fogRangeMul === 'function' ? fogRangeMul(t) : 1);   // 站在霧裡：鎖敵距離變短（js/fog.js）
     let target = swingTarget;
     if (!target) target = t.mode === 'goto' ? null : campAttackerFor(t, R);
     if (target && target !== swingTarget && !hasLineOfSight(t.x, t.y, target.x, target.y)) target = null;   // 隔牆看不到
@@ -2384,7 +2401,7 @@ function update(dt) {
         if (hitEnemy) sfxMonsterHit(hitEnemy, 0.48, t.type + '-ult');
       } else if (typeof mothDodgesMelee === 'function' && mothDodgesMelee(t, target)) {   // 近戰打飛在空中的人面蝶：有一半打不到（js/human-face-butterfly.js）
         flashDmg('打不到', target.x, target.y - 26 - (target.slimeLift || 0), '#c6d1dd');
-      } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy) {
+      } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy * (typeof fogHitMul === 'function' ? fogHitMul(t) : 1)) {   // 霧裡命中率下降（js/fog.js）
         const impactPoint = { x: target.x, y: target.y };
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
@@ -2515,6 +2532,7 @@ function update(dt) {
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   if (typeof updateFogTrees === 'function') updateFogTrees(dt);   // 霧樹被火燒、火海周圍暫時散霧（js/fog.js）
+  if (typeof updateLeafPiles === 'function') updateLeafPiles(dt);   // 樹葉堆被火燒（js/leaf-piles.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
   if (typeof updateNpcChats === 'function') updateNpcChats(dt);   // 基地裡的 NPC 閒聊小表演（js/npc-chats.js）
   if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）
