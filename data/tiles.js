@@ -1901,6 +1901,168 @@ const SHARED_TILES = [
     "flat": true
   },
   {
+    "id": "tile_restaurant_party_dish_fried_chicken",
+    "name": "慶功宴－鹹酥雞",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-fried-chicken.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_lurou_rice",
+    "name": "慶功宴－滷肉飯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-lurou-rice.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_loofah_clam",
+    "name": "慶功宴－絲瓜蛤蜊",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-loofah-clam.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_oyster_omelet",
+    "name": "慶功宴－蚵仔煎",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-oyster-omelet.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_milkfish_congee",
+    "name": "慶功宴－虱目魚肚粥",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-milkfish-congee.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_fish_noodle_soup",
+    "name": "慶功宴－魚片米粉湯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-fish-noodle-soup.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_dish_burnt",
+    "name": "慶功宴－烤焦的菜",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/dish-burnt.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_chicken",
+    "name": "慶功宴食材－生雞腿",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-chicken.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_pork",
+    "name": "慶功宴食材－絞肉",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-pork.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_clam",
+    "name": "慶功宴食材－蛤蜊",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-clam.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_oyster",
+    "name": "慶功宴食材－蚵仔",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-oyster.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_egg",
+    "name": "慶功宴食材－雞蛋",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-egg.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_vermicelli",
+    "name": "慶功宴食材－米粉",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-vermicelli.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_basil",
+    "name": "慶功宴食材－九層塔",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-basil.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_ginger",
+    "name": "慶功宴食材－薑絲",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-ginger.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_rice",
+    "name": "慶功宴食材－白飯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-rice.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_chili_sauce",
+    "name": "慶功宴食材－甜辣醬",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-chili-sauce.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_party_ing_broth",
+    "name": "慶功宴食材－高湯",
+    "role": "floor",
+    "file": "images/餐廳/慶功宴/ing-broth.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
     "id": "tile_restaurant_storage_cabinet",
     "name": "Storage Cabinet",
     "role": "floor",
