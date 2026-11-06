@@ -471,8 +471,8 @@ window.addEventListener('keydown', e => {
 // ---- 開發工坊：背包擴充、彈藥包擴充（js/equipment.js 的 workshopEntries、workshopBuy 呼叫）----
 function bagWorkshopEntries() {
   return Object.entries(BAG_UPGRADES).map(([key, u]) => {
-    const lv = bagLevel(key), cost = u.cost[lv - 1] || 0;
-    return { key: 'bag:' + key, kind: 'bag', def: u, name: u.name, lv, max: u.slots.length, icon: equipIcon(u), image: u.image || null, emoji: u.icon,
+    const lv = bagLevel(key), cost = u.cost[lv - 1] || 0, look = workshopExtraLook('bag:' + key);   // 圖片大小、位移（開發工坊編輯器）
+    return { key: 'bag:' + key, kind: 'bag', def: { ...u, ...look }, name: u.name, lv, max: u.slots.length, icon: wsAmmoIcon(equipIcon(u), look), image: u.image || null, emoji: u.icon,
       tag: '背包', worn: false, about: workshopBagAbout(u), stat: n => workshopBagStat(u, n),
       canDev: false, where: '', upCost: cost, upMoney: lv < u.slots.length ? wsMoney('bag:' + key, lv - 1, cost) : 0, buy: 'bg:' + key };
   });

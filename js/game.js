@@ -65,6 +65,14 @@ function loadSwingSprites(set, folder, files) {
 }
 // 失去戰鬥能力時的倒地圖（<資料夾>/<資料夾去掉底線>_fail.png）；有些角色用別張就寫在值裡（艾德林：躺在地上的那張，躺擔架的是 eldrinB_fail.png）
 const FAIL_FILES = { winter_B: 'fail.png', theonie_B: 'fail.png', amber_B: 'fail.png', red_B: 'fail.png', luther_B: 'fail.png', avaren_B: 'fail.png', eldrin_B: 'fail02.png', chris_B: 'fail.png', colyn_B: 'fail.png', taana_B: 'fail.png', winter_M: 'fail.png', eldrin_M: 'fail.png' };
+// 側面坐下圖（tools/make-sit-sprites.py 用柯林的腿做的）：腿是出勤制服的褲子，所以只有 B 款有；球球有自己的坐下圖（js/ball-poses.js）
+const hasSitPose = folder => /_B$/.test(folder) && !/^ball_/.test(folder);
+const SIT_POSE_DROP = 4;   // 坐下圖的上半身比站著低幾像素：衣櫃配件跟著往下
+function sitPoseFrame(set, who) {   // 坐在椅子上、朝左或朝右才有；沒有這張圖就回傳 null（照舊用站著的圖）
+  if (!who || !who.sitting || who.sitting.bed || !set || !set.sit) return null;
+  const g = set.sit[who.dir];
+  return g && g.complete && g.naturalWidth ? g : null;
+}
 function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
   const prefix = folder.replace('_', '') + '_';
   const revision = folder === 'chris_A' ? '?v=chris-a-20261021-2' : '';
@@ -81,6 +89,10 @@ function loadCharacterSprites(folder) {   // folder 例如 'winter_B'
     }
   }
   if (SWING_FILES[folder]) loadSwingSprites(set, folder, SWING_FILES[folder]);   // 近戰揮擊圖
+  if (hasSitPose(folder)) {
+    set.sit = {};
+    for (const [dir, file] of [['left', '0003_Leftside'], ['right', '0006_right-side']]) { const img = new Image(); img.src = `images/character/${folder}/${prefix}${file}_sit.png`; set.sit[dir] = img; }
+  }
   return set;
 }
 // ---- 造型切換：安全區穿 A 版、戰鬥區穿 B 版 ----
@@ -437,6 +449,8 @@ function pickCharacterFrame(set, who) {
   if (who.sitting && who.sitting.bed && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 躺床：正面閉眼
   if (who.soothingT > 0 && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 疏導中：正面閉眼
   if ((who.vineDazeT > .2 || (who.vineCap && who.vineBounced)) && set.blink && set.blink[2] && set.blink[2].complete && set.blink[2].naturalWidth) return set.blink[2];   // 被藤蔓丟下來躺在地上暈：正面閉眼（js/vines.js）
+  const sitFrame = sitPoseFrame(set, who);   // 坐在椅子上（側面）：腿彎起來
+  if (sitFrame) return sitFrame;
   if (who.slipT > 0 && who.slipPose) {   // 踩到香蕉皮滑倒：定格在隨機挑的那張走路圖（js/golden-banana-king.js 的 bkSlip）
     const g = set[who.slipPose.dir] && set[who.slipPose.dir][who.slipPose.frame];
     if (g && g.complete && g.naturalWidth) return g;

@@ -8,6 +8,10 @@
 const WORKSHOP_STYLE_DEFAULT = {
   // 金色按鈕（開發／升級／製作）所有項目共用的位移、寬、高、字級（px；0＝原本的）：開發工坊編輯器勾「套用到所有頁」時改的就是這幾個
   infoBtnX: 0, infoBtnY: -35, infoBtnW: 0, infoBtnH: 0, infoBtnFont: 0,
+  // 效果框所有項目共用的位移、寬、高、字級、內文（「套用到所有頁」；null＝沒有共用設定，各件照自己的）
+  infoStatsX: null, infoStatsY: null, infoStatsW: null, infoStatsH: null, infoStatsFont: null, infoStatsDev: null, infoStatsNow: null, infoStatsNext: null, infoStatsWhere: null,
+  // 上面兩個分頁的文字（前面的圖示、後面的數量不用改）
+  tabDev: '可開發', tabUp: '可升級',
   // 最上面的標題列：小標、大標題、說明的文字／大小／顏色，整塊的位移（px；正數＝往右／往下）
   headSmall: '諾亞的開發工坊', headSmallSize: 10, headSmallColor: '#d8ae5d',
   headTitle: '裝備開發・升級', headTitleSize: 22, headTitleColor: '#fff8e7',
@@ -40,6 +44,11 @@ const WORKSHOP_STYLE_VARS = {
 };
 function workshopStyle(cfg) {   // 預設值＋設定檔裡改過的
   return { ...WORKSHOP_STYLE_DEFAULT, ...((cfg || (typeof WORKSHOP_CONFIG !== 'undefined' ? WORKSHOP_CONFIG : {})).style || {}) };
+}
+// 上面兩個分頁：[代號, 圖示＋文字]（遊戲的開發工坊、編輯器的預覽共用）；文字空白＝原本的字
+function workshopTabs(cfg) {
+  const st = workshopStyle(cfg), e = t => String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  return [['dev', '⚙️ ' + e(st.tabDev || WORKSHOP_STYLE_DEFAULT.tabDev)], ['up', WS_UP_ICON + ' ' + e(st.tabUp || WORKSHOP_STYLE_DEFAULT.tabUp)]];
 }
 // 標題列的三行字（遊戲的開發工坊、編輯器的預覽共用）：空白＝不顯示那一行
 function workshopHeadHtml(cfg) {
@@ -86,6 +95,8 @@ function workshopColorize(text, st) {   // st：外觀設定（編輯器傳編�
     .replace(/\u2063([^\u2063]*)\u2063/g, '<i class="ws-num">$1</i>');   // 數值欄填的文字（例如 ∞）：跟數字一樣橘色
 }
 
+// 背包擴充、建築在開發工坊編輯器調的圖片大小、位移（data/workshop.js 的 items['bag:…']、items['bld:…']）
+const workshopExtraLook = key => (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.items && WORKSHOP_CONFIG.items[key]) || {};
 // ---- 開發工坊裡的圖片大小（iconScale，%）：圖示框不變，只放大縮小裡面的圖（css/style.css 的 --ws-img-scale）----
 // 圖片位移（iconX／iconY，px）：正數＝往右／往下（--ws-img-x／--ws-img-y）
 const workshopIconVars = (scale, x, y) => [scale && scale !== 100 ? '--ws-img-scale:' + scale / 100 : '', x ? '--ws-img-x:' + x + 'px' : '', y ? '--ws-img-y:' + y + 'px' : ''].filter(Boolean).join(';');
@@ -109,15 +120,6 @@ function workshopMoney(key, i, shards, cfg) {
   const m = Array.isArray(src.money) ? src.money[i] : src.money;
   return typeof m === 'number' && Number.isFinite(m) && m >= 0 ? Math.round(m) : workshopMoneyAuto(shards);
 }
-// 經費的框（按鈕下面那個小框，看起來不像按鈕）：-$1,500；short＝錢不夠（字變紅）
-function workshopMoneyHtml(key, money, attr, short, cfg) {
-  if (!(money > 0)) return '';
-  const txt = (typeof workshopInfoLabel === 'function' ? workshopInfoLabel(key, 'money', 'fmt', '-${money}', null, cfg) : '-${money}').replace(/\{money\}/g, money.toLocaleString('en-US'));
-  const o = workshopInfoPartsOf(key, cfg).money || {}, n = v => Number.isFinite(v) && v > 0 ? v : 0, s = [];   // 框的寬高、字級直接寫在框上
-  if (n(o.w)) s.push('width:' + o.w + 'px'); if (n(o.h)) s.push('height:' + o.h + 'px'); if (n(o.font)) s.push('font-size:' + o.font + 'px');
-  if (n(o.x) || Number.isFinite(o.y) && o.y) s.push('translate:' + (o.x || 0) + 'px ' + (o.y || 0) + 'px');
-  return '<div class="ws-money' + (short ? ' short' : '') + '" data-wsp="money"' + (s.length ? ' style="' + s.join(';') + '"' : '') + ' title="開發／升級要花的經費">' + txt.replace(/</g, '&lt;') + '</div>';
-}
 
 // 下方說明欄的說明：盡量一行寫完——太長就把字縮小（最小 WS_DESC_MIN_FONT px），縮到最小還放不下才換行（遊戲、開發工坊編輯器的預覽都用）
 const WS_DESC_MIN_FONT = 10;
@@ -134,12 +136,11 @@ function fitWorkshopDesc(root) {
 // 存在設定檔 items[key].infoParts（新增的裝備存在 added 裡）：{ name: { x, y, w, h, font }, tag: {…}, desc: {…}, stats: {…}, btn: {…} }
 //   x／y＝位移（px，正數＝往右／往下）、w／h＝寬高（px，0／沒寫＝原本的）、font＝字級（px，0＝原本的）
 //   每一塊也可以改字（見下面 WORKSHOP_INFO_LABELS；名稱、說明照原本的欄位）
-const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）', desc: '說明', stats: '效果框（開發後／目前效果／取得方式）', btn: '按鈕（開發／升級）', money: '經費框（按鈕下面的 -$1,500）' };
+const WORKSHOP_INFO_PARTS = { name: '名稱', tag: '標籤（未開發／Lv）', desc: '說明', stats: '效果框（開發後／目前效果／取得方式）', btn: '按鈕（開發／升級）' };
 // 每一塊可以改的字：[欄位, 什麼時候出現, 原本的字]；{lv}＝目前等級、{next}＝下一級
 const WORKSHOP_INFO_LABELS = {
   tag: [['dev', '還沒開發', '未開發'], ['field', '只能在戰鬥區域拿到、還沒拿到', '戰鬥區域取得'], ['lv', '拿到之後', 'Lv{lv}']],
   stats: [['dev', '還沒開發（效果框的標題）', '開發後（Lv1）'], ['now', '拿到之後', '目前效果（Lv{lv}）'], ['next', '還能升級時（下面那一格）', '升級後（Lv{next}）'], ['where', '只能在戰鬥區域拿到', '取得方式']],
-  money: [['fmt', '經費的寫法（{money}＝花多少錢，例如 1,500）', '-${money}']],
 };
 // 這一塊改過的字（沒改＝原本的字 fallback）；vars＝{ lv, next }
 function workshopInfoLabel(key, part, field, fallback, vars, cfg) {
@@ -156,12 +157,18 @@ function workshopInfoPartsOf(key, cfg) {
   const st = workshopStyle(c), shared = {};   // 金色按鈕：沒有單獨調過的，一律用共用的設定
   for (const [f, k] of Object.entries(WORKSHOP_BTN_SHARED)) if (st[k]) shared[f] = st[k];
   out.btn = { ...shared, ...parts.btn };
+  const sharedStats = {};   // 效果框：一樣；0 也算有設定（建築、隊員裝備才會跟著回到 0，不留在上面的 -20）
+  for (const [f, k] of Object.entries(WORKSHOP_STATS_SHARED)) if (st[k] != null) sharedStats[f] = st[k];
+  out.stats = { ...out.stats, ...sharedStats, ...parts.stats };
   return out;
 }
 // 開發工坊的建築、隊員裝備：說明欄各塊的位置（跟編輯器裡調好的裝備一樣：文字往上 20）
 const WORKSHOP_BUILD_INFO_PARTS = { name: { y: -20 }, tag: { y: -20 }, desc: { y: -20 }, stats: { y: -20 } };
 // 金色按鈕每個欄位對應到外觀設定的哪一個（WORKSHOP_STYLE_DEFAULT）
 const WORKSHOP_BTN_SHARED = { x: 'infoBtnX', y: 'infoBtnY', w: 'infoBtnW', h: 'infoBtnH', font: 'infoBtnFont' };
+// 效果框每個欄位對應到外觀設定的哪一個；dev／now／next／where＝內文（WORKSHOP_INFO_LABELS.stats）
+const WORKSHOP_STATS_SHARED = { x: 'infoStatsX', y: 'infoStatsY', w: 'infoStatsW', h: 'infoStatsH', font: 'infoStatsFont', dev: 'infoStatsDev', now: 'infoStatsNow', next: 'infoStatsNext', where: 'infoStatsWhere' };
+const WORKSHOP_PART_SHARED = { btn: WORKSHOP_BTN_SHARED, stats: WORKSHOP_STATS_SHARED };   // 哪幾塊有「套用到所有頁」
 // 放在那一塊的標籤上：data-wsp（css/style.css 用它套字級）＋位移、寬高
 //   按鈕：寬、高、字級用原本「外觀 → 升級／開發按鈕」的那組變數（--ws-act-*），只蓋過這一件
 function workshopInfoPartAttr(key, part, cfg) {
@@ -192,7 +199,7 @@ function workshopInfoBtnStyle(key, btnHtml, cfg) {
   const o = workshopInfoPartsOf(key, cfg).btn || {}, n = v => Number.isFinite(v) && v > 0 ? v : 0, s = [];
   if (n(o.w)) s.push('width:' + o.w + 'px', 'min-width:0', 'max-width:none');
   if (n(o.h)) s.push('height:' + o.h + 'px');
-  if (n(o.font)) s.push('font-size:' + o.font + 'px');
+  if (n(o.font)) s.push('font-size:' + o.font + 'px', '--ws-btn-font:' + o.font + 'px');   // --ws-btn-font：金色按鈕裡的「開發／升級」和價錢跟著變（css/style.css 的 .ws-btn-price）
   return s.length ? String(btnHtml).replace(/<button type="button" class="ws-btn"/g, '$& style="' + s.join(';') + '"') : btnHtml;
 }
 

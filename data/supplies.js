@@ -43,31 +43,32 @@ const SUPPLIES = [
   { id:'grilled-loofah', name:'烤絲瓜', kind:'medical', act:'food', price:30, special:true, file:'烤絲瓜.png',
     food:{ hp:8, sp:15 }, effect:'❤ HP +8　✦ SP +15', desc:'烤到軟嫩、湯汁滿滿的絲瓜。吃下去恢復一點 HP 和 SP。' },
   // ---- 零食 ----
-  { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.05 }, file:'小學麵.png' },
-  { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.07 }, file:'卡迪這.png' },
-  { id:'corn-snack', name:'可喜果', kind:'snack', price:22, buff:{ spd:.06 }, file:'可喜果.png' },
-  { id:'kuai-kuai', name:'好乖', kind:'snack', price:20, buff:{ calm:.08 }, file:'乖乖.png' },
-  { id:'oyster-omelet', name:'阿子煎', kind:'snack', price:30, buff:{ hp:.10 }, file:'阿子煎.png' },
-  { id:'fish-snack', name:'南海鱈魚香絲', kind:'snack', price:28, buff:{ def:.06 }, file:'南海鱈魚香絲.png' },
-  { id:'cream-puff', name:'美美小泡芙', kind:'snack', price:25, buff:{ hp:.08 }, file:'美美小泡芙.png' },
-  { id:'spicy-snack', name:'真有味', kind:'snack', price:34, buff:{ atk:.10 }, file:'真有味.png' },
-  { id:'shrimp-snack', name:'蝦未生', kind:'snack', price:28, buff:{ spd:.08 }, file:'蝦未生.png' },
-  { id:'cola', name:'口客', kind:'snack', price:20, buff:{ spd:.06 }, file:'口客.png' },
+  { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.03 }, file:'小學麵.png' },
+  { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.04 }, file:'卡迪這.png' },
+  { id:'corn-snack', name:'可喜果', kind:'snack', price:22, buff:{ spd:.04 }, file:'可喜果.png' },
+  { id:'kuai-kuai', name:'好乖', kind:'snack', price:20, buff:{ calm:.04 }, file:'乖乖.png' },
+  { id:'oyster-omelet', name:'阿子煎', kind:'snack', price:30, buff:{ hp:.05 }, file:'阿子煎.png' },
+  { id:'fish-snack', name:'南海鱈魚香絲', kind:'snack', price:28, buff:{ def:.03 }, file:'南海鱈魚香絲.png' },
+  { id:'cream-puff', name:'美美小泡芙', kind:'snack', price:25, buff:{ hp:.04 }, file:'美美小泡芙.png' },
+  { id:'spicy-snack', name:'真有味', kind:'snack', price:34, buff:{ atk:.05 }, file:'真有味.png' },
+  { id:'shrimp-snack', name:'蝦未生', kind:'snack', price:28, buff:{ spd:.05 }, file:'蝦未生.png' },
+  { id:'cola', name:'口客', kind:'snack', price:20, buff:{ spd:.03 }, file:'口客.png' },
   // ---- 飲料 ----
-  { id:'water', name:'少喝水', kind:'drink', price:16, buff:{ calm:.06 }, file:'少喝水.png' },
-  { id:'papaya-milk', name:'木瓜牛奶', kind:'drink', price:30, buff:{ hp:.10 }, file:'木瓜牛奶.png' },
-  { id:'tea', name:'玉茶元', kind:'drink', price:24, buff:{ calm:.08 }, file:'玉茶元.png' },
-  { id:'sarsaparilla', name:'白松沙士', kind:'drink', price:26, buff:{ spd:.07 }, file:'白松沙士.png' },
-  { id:'tea-collection', name:'吃冰室茶集', kind:'drink', price:34, buff:{ calm:.12 }, file:'吃冰室茶集.png' },
-  { id:'asparagus-juice', name:'聿聿蘆筍汁', kind:'drink', price:40, buff:{ def:.10 }, file:'聿聿蘆筍汁.png' },
-  { id:'vegetable-juice', name:'波蜜果菜汁', kind:'drink', price:38, buff:{ hp:.14 }, file:'波蜜果菜汁.png' },
-  { id:'pure-tea', name:'純喫茶', kind:'drink', price:30, buff:{ calm:.10 }, file:'純喫茶.png' },
-  { id:'milk-tea', name:'MY香奶茶', kind:'drink', price:32, buff:{ atk:.08 }, file:'麥香奶茶.png' },
-  { id:'tomato-soda', name:'番茄西打', kind:'drink', price:36, buff:{ atk:.09 }, file:'番茄西打.png' },
+  { id:'water', name:'少喝水', kind:'drink', price:16, buff:{ calm:.03 }, file:'少喝水.png' },
+  { id:'papaya-milk', name:'木瓜牛奶', kind:'drink', price:30, buff:{ hp:.05 }, file:'木瓜牛奶.png' },
+  { id:'tea', name:'玉茶元', kind:'drink', price:24, buff:{ calm:.05 }, file:'玉茶元.png' },
+  { id:'sarsaparilla', name:'白松沙士', kind:'drink', price:26, buff:{ spd:.04 }, file:'白松沙士.png' },
+  { id:'tea-collection', name:'吃冰室茶集', kind:'drink', price:34, buff:{ calm:.08 }, file:'吃冰室茶集.png' },
+  { id:'asparagus-juice', name:'聿聿蘆筍汁', kind:'drink', price:40, buff:{ def:.05 }, file:'聿聿蘆筍汁.png' },
+  { id:'vegetable-juice', name:'波蜜果菜汁', kind:'drink', price:38, buff:{ hp:.08 }, file:'波蜜果菜汁.png' },
+  { id:'pure-tea', name:'純喫茶', kind:'drink', price:30, buff:{ calm:.06 }, file:'純喫茶.png' },
+  { id:'milk-tea', name:'MY香奶茶', kind:'drink', price:32, buff:{ atk:.05 }, file:'麥香奶茶.png' },
+  { id:'tomato-soda', name:'番茄西打', kind:'drink', price:36, buff:{ atk:.06 }, file:'番茄西打.png' },
 ].map(item => ({ ...item, image: item.image || 'images/道具/' + item.file }));
 
 // ---- 出勤補給（js/sortie-supply.js）----
-const SORTIE_RULES = { slots: 3, loveMul: 1.5 };   // 每人帶幾格；帶到他「最愛」的東西效果 ×1.5
+// stack：同一種效果疊加時，效果最強的算 100%、第 2 個算 60%、第 3 個算 30%（鼓勵帶不同種類，不會一種效果疊到破表）
+const SORTIE_RULES = { slots: 3, loveMul: 1.5, stack: [1, .6, .3] };   // 每人帶幾格；帶到他「最愛」的東西效果 ×1.5
 const SORTIE_BUFF_KINDS = {
   atk:  { name: '攻擊',     icon: '⚔️' },
   spd:  { name: '攻速',     icon: '⚡' },

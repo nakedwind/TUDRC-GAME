@@ -97,9 +97,12 @@ function skillNodeOf(type, id) {
   // active：嚮導會自己發動的技能（群體補血、增益、大招…）的設定；編輯器存過的優先，沒有就用 data/guide-skills.js 的 GUIDE_SKILLS
   const activeDefault = isGuideTree(type) && typeof GUIDE_SKILLS !== 'undefined' && GUIDE_SKILLS[type] && GUIDE_SKILLS[type][id];
   const active = (saved && saved.active) || activeDefault || null;
+  // say：嚮導發動技能時喊的台詞；編輯器改過的優先，沒有就用 data/guide-skills.js 寫好的
+  const say = (saved && saved.say) || (guideDefault && guideDefault.say) || null;
   return {
     name: base.name || lay.tag, desc: base.desc || '', effect: base.effect || '', effect2: base.effect2 || '', note: base.note || '', icon: base.icon || '', mods: base.mods || [],
     ...(active ? { active: JSON.parse(JSON.stringify(active)) } : {}),
+    ...(say && say.length ? { say: [...say] } : {}),
     cost: id === 'trait-1' ? 0 : base.cost != null ? Number(base.cost) || 0 : SKILL_DEFAULT_COST[id] || 0,
   };
 }

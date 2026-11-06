@@ -82,8 +82,9 @@ function updateGuideSkills(t, dt) {
     if (!s || !hasSkill(t.type, id) || (t.gsCd[id] || 0) > 0) continue;
     if (s.sp && typeof guideSP === 'function' && !(typeof guideSPPractice === 'function' && guideSPPractice()) && guideSP(t) < s.sp) continue;
     if (!guideSkillWanted(t, s)) continue;
-    const name = (skillNodeOf(t.type, id) || {}).name;
-    if (name) t.say = { text: name + '！', life: 1.6 };
+    // 頭上喊的台詞（Y102隊員裝備／技能編輯器 → 技能內容）：有好幾句就隨機挑一句；沒填就喊技能名稱
+    const node = skillNodeOf(t.type, id) || {}, line = node.say ? node.say[Math.floor(Math.random() * node.say.length)] : node.name ? node.name + '！' : '';
+    if (line) t.say = { text: line, life: Math.max(1.6, line.length * .18) };   // 台詞長就多停一下
     if (s.cast > 0) {
       t.gsCast = { id, left: s.cast };
       t.soothingT = s.cast; t.gunSwing = null; t.gunT = 0; t.dir = 'front'; t.moving = false;

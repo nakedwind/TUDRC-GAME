@@ -701,7 +701,7 @@ function updateSentry(t, dt) {
     }
   }
   // 嚮導身上的急救包或杏仁水用完了：自己回營地物資箱拿（js/camp-supply.js）
-  if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt)) return;
+  if (ownSpec.guide && typeof guideSupplyStep === 'function' && guideSupplyStep(t, dt, care)) return;
   // 所有嚮導：有人要補血／疏導就先走到他身邊，跳過下面的護衛圈和主動接敵（攻擊仍由 game.js 對射程內目標自動執行）
   t.supportTarget = care ? care.type : null;
   if (care) {

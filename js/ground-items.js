@@ -4,7 +4,7 @@
 //  ・撿起：跟地上的道具一樣走 js/storage-lockers.js 的拾取（kind 'ground-item'），遵守持有上限，拿不下的留在地上。
 //  ・搜救犬球球：只撿 GROUND_ITEMS.kitItems（嚮導身上帶的急救包、杏仁水），叼去給身上還沒帶滿、最缺的嚮導（js/rescue-dog.js）；
 //    嚮導都帶滿了就不撿。其他東西球球不碰，怪物也不會撿。
-//  ・嚮導：身上急救包、杏仁水沒帶滿時，走過地上的就順手撿；用完了會先走去撿地上的，不用回營地物資箱（guideGroundStep）。
+//  ・嚮導：身上急救包、杏仁水沒帶滿時，地上的只要在玩家畫面內就會走去撿；在黑暗中的一律不撿。正在補血、疏導時不會走開去撿，忙完才去（guideGroundStep）。
 // ============================================================
 const GROUND_ITEMS = { size: 26, sortDy: 10, guideReach: 30, throwReach: 120, kitItems: ['firstaid', 'almond-water'] };   // size：地上畫多大；throwReach：從快捷欄拖到地圖上，最遠丟多遠（px）
 
@@ -65,26 +65,29 @@ function giveGuideItem(t, id) {
 }
 
 // ---- 嚮導自己撿（js/camp-supply.js 的 guideSupplyStep 呼叫；回傳 true＝這一幀在走去撿）----
-// 身上沒帶滿：走過旁邊順手撿；要補東西時（用完了、或手上沒事要補滿）：先走去撿地上的，不用回營地物資箱拿
-function guideGroundStep(t, dt) {
+// 身上沒帶滿：地上的在玩家畫面內就走去撿；要補東西時（用完了、或手上沒事要補滿）：畫面外的也去撿，不用回營地物資箱拿。在黑暗中的都不撿
+const groundOnScreen = g => g.x >= cam.x && g.x <= cam.x + viewW() && g.y >= cam.y && g.y <= cam.y + viewH();
+// care：現在能照顧的隊友（js/sentry.js 的 guideCareTarget；急救包用完、SP 不夠等幫不上忙的不算）：有的話補血、疏導優先，不走開
+function guideGroundStep(t, dt, care) {
   const list = G.groundItems || [], kit = guideKit(t);
-  const want = g => GROUND_ITEMS.kitItems.includes(g.id) && (kit[g.id] || 0) < CAMP_SUPPLY.carry;
+  const want = g => GROUND_ITEMS.kitItems.includes(g.id) && (kit[g.id] || 0) < CAMP_SUPPLY.carry && personnelInLight(g.x, g.y);
   for (const g of list) if (want(g) && Math.hypot(g.x - t.x, g.y - t.y) < GROUND_ITEMS.guideReach) { guideTakeGround(t, g); t.groundTrip = null; return false; }
+  if (care) { t.groundTrip = null; return false; }   // 走到一半有人要照顧：先去照顧（路徑不用清，換目標時 moveSentryWithPath 會重找）
   let trip = t.groundTrip;
   if (trip && (!list.includes(trip.g) || !want(trip.g))) trip = t.groundTrip = null;
   if (!trip) {
     if ((t.groundTripCd = Math.max(0, (t.groundTripCd || 0) - dt)) > 0) return false;   // 剛剛走不到：等一下再找
-    const wants = guideWants(t);   // 用完的、或手上沒事時沒帶滿的（js/camp-supply.js）：地上有就先撿，不回物資箱
+    const wants = guideWants(t);   // 用完的、或手上沒事時沒帶滿的（js/camp-supply.js）：畫面外的也去撿，不回物資箱
     let best = null, bd = Infinity;
     for (const g of list) {
-      if (!wants.includes(g.id)) continue;   // 暗處的也去撿：只要走得到（走不到的下面會放棄、改回營地拿）
+      if (!want(g) || !(wants.includes(g.id) || groundOnScreen(g))) continue;   // 走不到的下面會放棄、改回營地拿
       const d = Math.hypot(g.x - t.x, g.y - t.y); if (d < bd) { bd = d; best = g; }
     }
     if (!best) return false;
     trip = t.groundTrip = { g: best };
     if (typeof sentryStatus === 'function') sentryStatus(t, '去撿地上的' + groundItemName(best), '#8fd3ff');
   }
-  t.followDark = true;   // 東西丟在暗處：照樣走過去（js/sentry.js 的 moveSentryWithPath）
+  t.followDark = true;   // 東西在亮處，但路上可能經過暗處：照樣走過去（js/sentry.js 的 moveSentryWithPath）
   if (moveSentryWithPath(t, trip.g.x, trip.g.y, (TYPES[t.type].walkSpeed || 80) * 1.3, dt)) { guideTakeGround(t, trip.g); t.groundTrip = null; t.navPath = null; return true; }
   if (t.navFailed) { t.groundTrip = null; t.navFailed = false; t.groundTripCd = 3; return false; }   // 走不到：改回營地拿
   t.target = null;

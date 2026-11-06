@@ -21,7 +21,7 @@ let state = (() => {   // { layout: { elements, texts }, skills: { members }, ge
   out.skills = out.skills || {}; out.skills.members = out.skills.members || {}; out.gear = Array.isArray(out.gear) ? out.gear : [];
   return out;
 })();
-let selKey = null, play = false, page = 'skills', leftTab = 'parts', parts = [], members = [], nodes = [], skillMember = null, skillNode = null, gearSel = null;
+let selKey = null, play = false, leftTab = 'parts', parts = [], members = [], nodes = [], skillMember = null, skillNode = null, gearSel = null;
 const info = {};   // 遊戲畫面量到的：info[key] = { visible, count, values, text, skill }
 const ALIGN_NAMES = { left: '靠左', center: '置中', right: '靠右' };
 // 「複製當前數值」記下來的（下面的 copyLayout／pasteLayout）；記在瀏覽器裡，重新整理也還在
@@ -165,9 +165,19 @@ function skillsHtml() {
     '<div class="two"><label class="field">圖示（emoji 或圖片路徑）<input type="text" data-sk="icon" placeholder="空白＝預設圖示"></label>' +
     '<label class="field">價格（異質碎片）<input type="number" min="0" step="1" data-sk="cost"' + (skillNode === 'trait-1' ? ' disabled title="Lv1 一開始就會"' : '') + '></label></div>' +
     '<div class="field">實際改的數值' + modsHtml(node.mods, 'sk') + '</div>' +
+    (hasSkillSay(skillMember, skillNode) ? '<label class="field">' + skillSayLabel + '<textarea data-sk-say rows="2"></textarea></label>' : '') +
     (node.active ? activeHtml(node.active) : '') + '</div>';
   return h;
 }
+// ---- 嚮導發動技能時喊的台詞：一行一句（存成 say 陣列）；這格沒改過台詞就顯示 data/guide-skills.js 的預設 ----
+const skillSayLabel = '發動時喊的台詞（一行一句，有好幾句就隨機挑一句；清空＝用預設台詞）';
+const hasSkillSay = (member, id) => !!(typeof GUIDE_SKILLS !== 'undefined' && GUIDE_SKILLS[member] && GUIDE_SKILLS[member][id]);
+const skillSayOf = (member, id) => { const s = savedNode(member, id); return (s && s.say) || ((GUIDE_SKILL_TEXTS[member] || {})[id] || {}).say || []; };
+function setSkillSay(node, text) {
+  const lines = text.split(/\r?\n/).map(l => l.trim()).filter(Boolean);
+  if (lines.length) node.say = lines; else delete node.say;
+}
+function fillSkillSay(el, member, id) { if (el && document.activeElement !== el) el.value = skillSayOf(member, id).join('\n'); }
 // ---- 嚮導會自己發動的技能（群體補血、增益、大招…）：技能內容的 active，js/guide-skills.js 照這裡的數字執行 ----
 // 畫面上用好懂的單位：HP 條件、增益都用 %（50＝50%），存檔時換回小數（0.5）
 const ACT_WHEN = { hpBelow: '有隊友 HP 低於幾 %', taintAbove: '有隊友負荷幾以上', combat: '戰鬥中（8 格內有怪物）定時發動' };
@@ -217,6 +227,7 @@ function fillContentFields() {
   if (leftTab === 'skills') {
     const node = currentNode(); if (!node) return;
     for (const f of ['name', 'desc', 'effect', 'effect2', 'note', 'icon', 'cost']) { const el = box.querySelector('[data-sk="' + f + '"]'); if (el && document.activeElement !== el) el.value = node[f] != null ? node[f] : ''; }
+    fillSkillSay(box.querySelector('[data-sk-say]'), skillMember, skillNode);
     const auto = node.active ? guideActiveTexts(node.active) : null;   // 嚮導會自己發動的技能：空白時自動產生的字
     const eff = box.querySelector('[data-sk="effect"]'); if (eff) eff.placeholder = (auto ? auto.effect : modsText(node.mods)) || '（沒有數值效果）';
     const note = box.querySelector('[data-sk="note"]'); if (note) note.placeholder = auto ? auto.note : '';
@@ -263,6 +274,7 @@ $q('leftBody').addEventListener('click', e => {
 });
 $q('leftBody').addEventListener('input', e => {
   const t = e.target;
+  if (t.hasAttribute('data-sk-say')) { updateSkill(nd => setSkillSay(nd, t.value), 'sksay:' + skillMember + skillNode); syncRightSkill(); return; }
   if (t.dataset.sk) { const f = t.dataset.sk; updateSkill(nd => { nd[f] = f === 'cost' ? Math.max(0, Math.round(+t.value || 0)) : t.value; }, 'sk:' + skillMember + skillNode + f); syncRightSkill(); return; }
   if (t.matches('[data-sk-mod]')) { const box = t.closest('.mods'); updateSkill(nd => { nd.mods = readMods(box, 'sk'); }, 'skmod:' + skillMember + skillNode); fillContentFields(); return; }
   if (t.dataset.act) {   // 嚮導自動發動的技能：改數字
@@ -314,6 +326,7 @@ function renderProps(rebuild = true) {
       '<label class="field">技能效果（空白＝依數值自動產生）<input type="text" data-psk="effect"></label>' +
       '<label class="field">技能效果 2（第二段亮綠色字；空白＝不顯示）<textarea data-psk="effect2" rows="2"></textarea></label>' +
       '<label class="field">補充說明（技能本身的詳細說明，顯示在下方技能說明欄；空白＝不顯示）<textarea data-psk="note" rows="2"></textarea></label>' +
+      (hasSkillSay(sk.member, sk.id) ? '<label class="field">' + skillSayLabel + '<textarea data-psk-say rows="2"></textarea></label>' : '') +
       '<div class="orig">只改這位隊員的這一格；跟左邊「技能內容」改的是同一份</div></div>';
     else if (/^text\.(name|intro|role|ability|status)$|^text\.skill|^text\.(desc|stat)$/.test(selKey)) html += '<div class="sec"><div class="note">這段文字每個隊員／每格技能都不一樣：' +
       (/skill/.test(selKey) ? '到左邊「技能內容」改。' : /^text\.(desc|stat)$/.test(selKey) ? '到左邊「裝備清單」改。' : '名字、簡介在「角色資料頁」改。') + '</div></div>';
@@ -337,6 +350,7 @@ function renderProps(rebuild = true) {
   if (inf.gearText) fillGearText(box, inf.gearText);
   if (sk) {
     const node = savedNode(sk.member, sk.id) || sk.node;
+    fillSkillSay(box.querySelector('[data-psk-say]'), sk.member, sk.id);
     box.querySelectorAll('[data-psk]').forEach(el => { if (document.activeElement !== el) el.value = node[el.dataset.psk] != null ? node[el.dataset.psk] : ''; });
     const auto = node.active && typeof guideActiveTexts === 'function' ? guideActiveTexts(node.active) : null;   // 跟左邊「技能內容」同一套：空白時自動產生的字
     const eff = box.querySelector('[data-psk="effect"]'); if (eff) eff.placeholder = (auto ? auto.effect : modsText(node.mods)) || '（沒有數值效果）';
@@ -413,6 +427,14 @@ $q('props').addEventListener('input', e => {
     saveDraft(); sendState(); if (leftTab === 'gear') renderLeft(); fillGearText($q('props'), gt); return;
   }
   if (e.target.matches('[data-text]')) { const t = (info[selKey] || {}).text; if (t) { remember('text:' + selKey); setText(t, e.target.value); } return; }
+  if (e.target.hasAttribute('data-psk-say')) {
+    const s = (info[selKey] || {}).skill; if (!s) return;
+    const moved = skillMember !== s.member || skillNode !== s.id;
+    skillMember = s.member; skillNode = s.id;
+    updateSkill(nd => setSkillSay(nd, e.target.value), 'sksay:' + skillMember + skillNode);
+    if (leftTab === 'skills') { if (moved) renderLeft(); else fillContentFields(); }
+    return;
+  }
   if (e.target.dataset.psk) {
     const s = (info[selKey] || {}).skill, f = e.target.dataset.psk; if (!s) return;
     const moved = skillMember !== s.member || skillNode !== s.id;
@@ -490,7 +512,7 @@ frame.addEventListener('load', () => { gameReady = false; toGame({ type: 'ping' 
 window.addEventListener('message', e => {
   const m = e.data; if (!m || m.src !== 'squadedit-game' || e.source !== frame.contentWindow) return;
   if (m.type === 'ready') { if (!gameReady) { gameReady = true; toGame({ type: 'setup' }); } }
-  else if (m.type === 'opened') { sendState(); toGame({ type: 'page', page }); toGame({ type: 'mode', play }); if (selKey) toGame({ type: 'select', key: selKey }); }
+  else if (m.type === 'opened') { sendState(); toGame({ type: 'mode', play }); if (selKey) toGame({ type: 'select', key: selKey }); }
   else if (m.type === 'parts') { parts = m.list || []; members = m.members || members; nodes = m.nodes || nodes; renderLeft(); }
   else if (m.type === 'pick') { if (m.key !== selKey) { selKey = m.key; if (leftTab === 'parts') renderLeft(); renderProps(); } }
   else if (m.type === 'info') {
@@ -499,7 +521,6 @@ window.addEventListener('message', e => {
       skillMember = m.skill.member; skillNode = m.skill.id; if (leftTab === 'skills') renderLeft();
     }
     if (m.part && !parts.some(p => p.key === m.key)) parts.push(m.part);   // 每格技能各自的（@）不在清單裡：記下名字，右邊才顯示得出來
-    if (m.page && m.page !== page) { page = m.page; document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('on', x.dataset.page === page)); }
     if (m.skill && leftTab === 'skills' && m.skill.member === skillMember && m.skill.id === skillNode && !savedNode(skillMember, skillNode)) renderLeft();
     if (m.key === selKey) renderProps(false);
   }
@@ -513,8 +534,6 @@ window.addEventListener('message', e => {
   else if (m.type === 'save') sqSave.save(false);
 });
 document.querySelector('.modes').addEventListener('click', e => {
-  const p = e.target.closest('[data-page]');
-  if (p) { page = p.dataset.page; document.querySelectorAll('[data-page]').forEach(x => x.classList.toggle('on', x === p)); toGame({ type: 'page', page }); return; }
   const b = e.target.closest('[data-mode]'); if (!b) return;
   play = b.dataset.mode === 'play';
   document.querySelectorAll('[data-mode]').forEach(x => x.classList.toggle('on', x === b));
@@ -542,7 +561,7 @@ function layoutText() {
 }
 function skillsText() {
   return '/* ===== Y102隊員技能樹的內容（由「🧑‍🚀 Y102隊員裝備／技能編輯器」匯出，整段覆蓋即可）=====\n' +
-    '   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, effect2：技能效果 2（第二段亮綠色字）, note：補充說明（顯示在效果下面）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值, active：嚮導會自己發動的技能（數字說明見 data/guide-skills.js） }\n' +
+    '   members：隊員 id → 技能格 id → { name：名稱, desc：技能描述, effect：技能效果（顯示的數值文字）, effect2：技能效果 2（第二段亮綠色字）, note：補充說明（顯示在效果下面）, icon：圖示（emoji 或圖片路徑）, cost：要花幾個異質碎片, mods：實際改的數值, active：嚮導會自己發動的技能（數字說明見 data/guide-skills.js）, say：嚮導發動時喊的台詞（好幾句就隨機挑一句） }\n' +
     '   技能格 id：trait-1（普通技能 Lv1＝原本的特性）、trait-2（Lv2）、a-1／a-2（A 系列－生存）、core-1～3（核心技能）、ult（終極核心大招）、b-1／b-2（B 系列－攻擊）、aux-1／aux-2（輔助技能）\n' +
     '   mods：{ path: 數值名稱, mul: 乘多少 } 或 { path, add: 加多少 }（數值名稱見 js/skills.js 開頭）\n' +
     '   這裡沒寫的隊員／格子，會從 data/skills.js（舊版技能資料）自動換算。 */\n' +

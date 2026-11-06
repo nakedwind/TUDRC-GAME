@@ -168,5 +168,5 @@ const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5, 6], cost: [150, 250, 38
 // items＝「物品」分頁，ammo＝「彈藥包」分頁（一種子彈一格）。重要物品、隊員物資沒有格數上限。
 const BAG_UPGRADES = {
   items: { name: '背包擴充', icon: '🎒', image: 'images/裝備/Backpack.png', tab: '物品', slots: [12, 18, 24, 30, 36], cost: [150, 250, 380, 520] },   // image：開發工坊的圖（檔名大寫 B，要跟檔案一樣，網頁上大小寫有差）
-  ammo: { name: '彈藥包擴充', icon: '🧰', image: 'images/裝備/ammo-pouch.png', tab: '彈藥包', slots: [12, 18, 24, 30, 36], cost: [150, 250, 380, 520] },   // image：開發工坊的圖（沒有就用 icon）
+  ammo: { name: '彈藥包擴充', icon: '🧰', image: 'images/裝備/ammo-pouch-V2.png', tab: '彈藥包', slots: [12, 18, 24, 30, 36], cost: [150, 250, 380, 520] },   // image：開發工坊的圖（沒有就用 icon）
 };

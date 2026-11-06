@@ -413,6 +413,7 @@ function renderFieldSquadHud() {
         // 嚮導顯示 SP；哨兵顯示精神負荷。
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +
         '<div><i class="' + (spec.guide ? 'field-sp' : 'field-load') + '" aria-label="' + (spec.guide ? 'SP' : '精神負荷') + '"><u style="width:' + loadWidth + '%"></u></i><span class="field-bar-num">' + (spec.guide ? sp + '/' + guideSPMax(member.type) : taint + '/100') + '</span></div>' +
+        guideKitHudHtml(member, spec) +
         '</div>' + sootheAction +
         (hp <= 0 ? '<div class="field-down-banner">重傷｜失去戰鬥能力</div>' : '') +   // 倒下：資訊條上壓一條橫幅
         '</article>';
@@ -420,6 +421,14 @@ function renderFieldSquadHud() {
     ((G.npcs || []).some(npc => npc.id === 'ball') && getTeam().includes('ball')
       ? '<article class="field-member field-member-support" data-type="ball"><span class="field-member-avatar" data-char="ball" style="cursor:pointer" title="選球球要跟誰"><img src="' + memberPortraitPath(CHARACTERS.ball) + '" alt="球球"></span><div class="field-member-status"><b>球球</b><span>搜救犬・跟著' + dogFollowName(dogFollowAnchor()) + '</span></div></article>' : ''));
   fieldSquadHud.classList.remove('hidden');
+}
+// 嚮導身上還有幾個急救包、杏仁水：顯示在 SP 條下面、置中（基地裡用不到，不顯示；js/camp-supply.js 的 guideKit）
+function guideKitHudHtml(member, spec) {
+  if (!spec.guide || (typeof MAP_SAFE !== 'undefined' && MAP_SAFE)) return '';
+  // 嚮導本來要到第一次需要才去箱子拿，數字會一直是 0：開局就先拿好，顯示的才是真的（箱子還沒放好、還沒開局時先不拿）
+  const kit = member.kit || (G.running && campSupplySpot() ? guideKit(member) : {});
+  return '<div class="field-kit"><span class="field-kit-item" title="急救包"><img src="images/ui/hud-firstaid.png?v=2" alt="急救包">' + (kit.firstaid || 0) + '</span>' +
+    '<span class="field-kit-item" title="杏仁水"><img src="images/ui/hud-almond-water.png?v=2" alt="杏仁水">' + (kit['almond-water'] || 0) + '</span></div>';
 }
 // 隊員欄收起／展開：只切 class，CSS 負責滑順的動畫
 function applySquadCollapse() {

@@ -544,6 +544,7 @@ const NPC_HOP = { ball: { height: 3, perSec: 4.5 } };
 // 衣櫃裡戴上的配件（js/costumes.js）：behind＝畫在角色後面、front＝前面
 const costumeLayer = (id, who, x, y, size, layer) => {
   if (who && who.slipT > 0 && who.slipPose) who = { ...who, dir: who.slipPose.dir, frame: who.slipPose.frame };   // 滑倒定格的走路圖可能是別的方向：配件跟著那張圖的方向、那一幀
+  if (sitPoseFrame(id === PLAYER_CHARACTER ? playerSprites : sentrySprites[id] || wandererSprites[id], who)) y += SIT_POSE_DROP;   // 側面坐下圖：上半身比較低，配件跟著
   if (typeof drawCostumeAccessories === 'function') drawCostumeAccessories(ctx, id, who, x, y, size, layer);
 };
 function drawWanderer(npc) {

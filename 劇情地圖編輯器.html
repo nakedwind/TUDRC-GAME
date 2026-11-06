@@ -193,15 +193,16 @@
   </div>
 
   <!-- 劇情地圖有獨立清單與暫存，但直接共用戰鬥地圖編輯器的完整功能 -->
+  <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script src="js/draft-sync.js?v=sync-20261021"></script>   <!-- 編輯器暫存和專案檔自動合併（多人協作不掉資料） -->
   <script src="js/config.js"></script>       <!-- 格線與座標 -->
   <script src="data/monsters.js?v=gourd-speed-20261028"></script>  <!-- 怪物種類與數值 -->
   <script src="js/monster-data.js?v=gourd-20261028"></script>
   <script src="data/tiles.js?v=oildrum-20261106"></script>        <!-- 素材庫（兩個編輯器共用） -->
   <script src="data/story-maps.js?v=zk02-20261106"></script>        <!-- 劇情地圖資料（STORY_MAPS） -->
-  <script src="data/supplies.js?v=eyedrops2-20261030"></script>
+  <script src="data/supplies.js?v=sortiebal-20261106"></script>
   <script src="data/items.js?v=devotionimg-20261106"></script>
-  <script src="data/equipment.js?v=lvfive-20261106"></script>
+  <script src="data/equipment.js?v=pouchv2-20261106"></script>
   <script src="data/doors.js?v=hugall-20261028"></script>        <!-- 可開關的門 -->
   <script src="data/story-scenes.js?v=bgmlist-20261026"></script>   <!-- 記憶之門可以選的劇情 -->
   <script src="data/story-kai.js?v=colynfx14-20261106"></script>   <!-- 記憶之門也可以選「劇情編輯器（改）」做的劇情 -->
@@ -224,7 +225,7 @@
       exportDescription: '只放劇情地圖；每張圖可自行設定為安全場景或戰鬥場景。'
     };
   </script>
-  <script src="js/map-editor-store.js?v=story-20261021"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
+  <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
   <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=merge-20261106", "js/map-editor-transform.js?v=stampscale-20261105", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->

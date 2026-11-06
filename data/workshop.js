@@ -2,7 +2,7 @@
    items：要改哪件裝備／武器（沒寫的就用 data/equipment.js 原本的設定）
      key：裝備用 id（例如 headlamp）；武器前面加 w:（例如 w:pistol）
      name 名稱、image 圖片路徑、iconScale 圖片大小（%，100＝原本）、iconX／iconY 圖片位移（px，正數＝往右／往下）、infoImgX／infoImgY 下方說明欄裡的圖片位移（px）、infoImgSize 下方說明欄裡的圖片大小（px＝圖的寬，高度照比例；沒寫＝原本的 88，武器 100）、ownedDesc 說明（desc 舊的「還沒拿到時」說明，已經不用）、where 取得方式的說明（整段照寫的顯示，「戰鬥區域」等字會是紫色；只能在戰鬥區域取得的才會用到）
-     infoParts：下方說明欄各塊的位置、大小、字級 { name 名稱, tag 標籤, desc 說明, stats 效果框, btn 按鈕, money 經費框：{ x, y, w, h, font }（px），也可以寫改過的字 }（子彈、彈匣也可以寫）
+     infoParts：下方說明欄各塊的位置、大小、字級 { name 名稱, tag 標籤, desc 說明, stats 效果框, btn 按鈕：{ x, y, w, h, font }（px），也可以寫改過的字 }（子彈、彈匣也可以寫）
      money：開發／升級要花的經費（跟 cost 同一格對同一格，null＝照異質碎片自動算；子彈是一個數字）
      levels：Lv1～Lv5 的效果說明文字（空白＝照數值自動產生）
      values：Lv1～Lv5 改過的實際數值（例如 {"dmg": 7}；沒寫的＝data/equipment.js 原本的；填文字的話只顯示在效果說明）
@@ -39,7 +39,6 @@ const WORKSHOP_CONFIG = {
           "fear": 0
         }
       ],
-      "iconScale": 85,
       "infoImgY": -9,
       "infoImgSize": 80,
       "infoParts": {
@@ -51,14 +50,6 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
-        },
-        "money": {
-          "w": 75,
-          "h": 30,
-          "font": 15
         }
       }
     },
@@ -71,7 +62,7 @@ const WORKSHOP_CONFIG = {
         "照明半徑 2.9 格",
         "照明半徑 3.3 格"
       ],
-      "iconScale": 94,
+      "iconScale": 95,
       "iconY": -6,
       "infoImgY": -22,
       "infoParts": {
@@ -82,9 +73,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       }
@@ -115,9 +103,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       }
@@ -150,9 +135,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       }
@@ -187,8 +169,18 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
+        }
+      }
+    },
+    "vest_light": {
+      "infoParts": {
+        "name": {
+          "y": -20
         },
-        "stats": {
+        "tag": {
+          "y": -20
+        },
+        "desc": {
           "y": -20
         }
       }
@@ -220,8 +212,18 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
+        }
+      }
+    },
+    "vest_heavy": {
+      "infoParts": {
+        "name": {
+          "y": -20
         },
-        "stats": {
+        "tag": {
+          "y": -20
+        },
+        "desc": {
           "y": -20
         }
       }
@@ -253,9 +255,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       }
@@ -289,9 +288,6 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       }
     },
@@ -323,14 +319,10 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       }
     },
     "acidboots": {
-      "ownedDesc": "減少踩到腐蝕池、酸液的傷害；可以跟防毒面具疊加。",
       "values": [
         {
           "corrode": 0.2
@@ -358,35 +350,10 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       }
     },
     "radio": {
-      "values": [
-        {
-          "reach": 0.15,
-          "rush": 0.2
-        },
-        {
-          "reach": 0.3,
-          "rush": 0.25
-        },
-        {
-          "reach": 0.4,
-          "rush": 0.3
-        },
-        {
-          "reach": 0.5,
-          "rush": 0.4
-        },
-        {
-          "reach": 0.7,
-          "rush": 0.5
-        }
-      ],
       "infoImgY": -6,
       "infoParts": {
         "tag": {
@@ -396,9 +363,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       }
@@ -423,9 +387,6 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       }
     },
@@ -438,9 +399,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       }
@@ -465,16 +423,14 @@ const WORKSHOP_CONFIG = {
           "reload": 1.3
         }
       ],
-      "iconScale": 96,
+      "iconScale": 110,
+      "iconY": 3,
       "infoImgY": -8,
       "infoParts": {
         "name": {
           "y": -20
         },
         "tag": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         },
         "desc": {
@@ -515,9 +471,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "tag": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         },
         "desc": {
@@ -571,14 +524,10 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       }
     },
     "w:tranq": {
-      "ownedDesc": "使怪物睡眠或使暴走隊員冷靜下來；大型怪物效果較短，對怪物「生命體」無效。",
       "where": "於戰鬥區域：有機率在上鎖的置物箱取得",
       "infoImgY": -6,
       "infoParts": {
@@ -589,9 +538,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       }
@@ -606,9 +552,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "desc": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         }
       },
@@ -625,15 +568,11 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       },
       "iconScale": 120
     },
     "b:split": {
-      "desc": "一次扇形噴出好幾顆小子彈，近距離打一整群小怪。距離越遠越散。",
       "infoParts": {
         "name": {
           "y": -20
@@ -643,8 +582,18 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
+        }
+      }
+    },
+    "b:knock": {
+      "infoParts": {
+        "name": {
+          "y": -20
         },
-        "stats": {
+        "tag": {
+          "y": -20
+        },
+        "desc": {
           "y": -20
         }
       }
@@ -655,9 +604,6 @@ const WORKSHOP_CONFIG = {
           "y": -20
         },
         "tag": {
-          "y": -20
-        },
-        "stats": {
           "y": -20
         },
         "desc": {
@@ -675,9 +621,6 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       }
     },
@@ -691,64 +634,38 @@ const WORKSHOP_CONFIG = {
         },
         "desc": {
           "y": -20
-        },
-        "stats": {
-          "y": -20
         }
       }
     },
-    "b:knock": {
-      "infoParts": {
-        "name": {
-          "y": -20
-        },
-        "tag": {
-          "y": -20
-        },
-        "desc": {
-          "y": -20
-        },
-        "stats": {
-          "y": -20
-        }
-      }
+    "sg:sg-vest": {
+      "aboutTail": "在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）"
     },
-    "vest_heavy": {
-      "infoParts": {
-        "name": {
-          "y": -20
-        },
-        "tag": {
-          "y": -20
-        },
-        "desc": {
-          "y": -20
-        },
-        "stats": {
-          "y": -20
-        }
-      }
+    "sg:sg-gloves": {
+      "aboutTail": "在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）"
     },
-    "vest_light": {
-      "infoParts": {
-        "name": {
-          "y": -20
-        },
-        "tag": {
-          "y": -20
-        },
-        "desc": {
-          "y": -20
-        },
-        "stats": {
-          "y": -20
-        }
-      }
+    "sg:sg-scope": {
+      "aboutTail": "在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）"
+    },
+    "sg:sg-boots": {
+      "aboutTail": "在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）"
+    },
+    "sg:sg-pouch": {
+      "aboutTail": "在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）"
     }
   },
   "added": [],
   "removed": [],
   "style": {
+    "infoBtnY": -37,
+    "infoBtnH": 55,
+    "infoBtnFont": 18,
+    "infoStatsX": 0,
+    "infoStatsY": -20,
+    "infoStatsW": 0,
+    "infoStatsH": 60,
+    "infoStatsFont": 0,
+    "tabDev": "未開發",
+    "tabUp": "升級",
     "headSmallSize": 12,
     "panelW": 1100,
     "panelH": 610,

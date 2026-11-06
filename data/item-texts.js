@@ -12,18 +12,18 @@ const ITEM_TEXTS = {
   },
   "tomato-soda": {
     "desc": "番茄口味？到底誰會喜歡喝這種東西？",
-    "effect": "出勤 ⚔️ 攻擊 +8%"
+    "effect": "出勤 ⚔️ 攻擊 +6%"
   },
   "sarsaparilla": {
     "desc": "令人懷念的老味道。",
-    "effect": "出勤 ⚡ 攻速 +8%"
+    "effect": "出勤 ⚡ 攻速 +4%"
   },
   "youyou-card": {
     "desc": "捷運用的儲值卡，裡面只剩下一點點的錢，看來只能夠刷一次。"
   },
   "kuai-kuai": {
     "desc": "大家都太迷信了，辦公室裡都是這個傢伙的臉。",
-    "effect": "出勤 🍃 負荷累積 −5%"
+    "effect": "出勤 🍃 負荷累積 −4%"
   },
   "thermos": {
     "desc": "一整杯溫熱的杏仁水，喝了可以讓精神大幅穩定下來。\n可以在後室商店購買，也有機率在戰鬥區域拾取。"
@@ -77,13 +77,13 @@ const ITEM_TEXTS = {
     "effect": "出勤 ⚔️ 攻擊 +3%"
   },
   "cadina": {
-    "effect": "出勤 ⚔️ 攻擊 +5%"
+    "effect": "出勤 ⚔️ 攻擊 +4%"
   },
   "fish-snack": {
-    "effect": "出勤 🛡️ 防禦 +5%"
+    "effect": "出勤 🛡️ 防禦 +3%"
   },
   "cream-puff": {
-    "effect": "出勤 ❤️ 生命上限 +3%"
+    "effect": "出勤 ❤️ 生命上限 +4%"
   },
   "spicy-snack": {
     "effect": "出勤 ⚔️ 攻擊 +5%"
@@ -92,13 +92,13 @@ const ITEM_TEXTS = {
     "desc": "有機率在戰鬥區域拾取。"
   },
   "cola": {
-    "effect": "出勤 ⚡ 攻速 +4%"
+    "effect": "出勤 ⚡ 攻速 +3%"
   },
   "water": {
     "effect": "出勤 🍃 負荷累積 −3%"
   },
   "pure-tea": {
-    "effect": "出勤 🍃 負荷累積 −8%"
+    "effect": "出勤 🍃 負荷累積 −6%"
   },
   "papaya-milk": {
     "effect": "出勤 ❤️ 生命上限 +5%"
@@ -107,7 +107,7 @@ const ITEM_TEXTS = {
     "effect": "出勤 ⚔️ 攻擊 +5%"
   },
   "vegetable-juice": {
-    "effect": "出勤 ❤️ 生命上限 +10%"
+    "effect": "出勤 ❤️ 生命上限 +8%"
   },
   "bullet:paint": {
     "desc": "找諾亞的開發工坊開發，每次出勤會在營地的彈藥箱放一組。\n打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。同時只能標一隻，打新的舊的就消失；怪物死掉漆就跟著消失。"

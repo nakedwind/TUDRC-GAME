@@ -17,6 +17,7 @@
 
    GUIDE_SKILL_TEXTS：技能樹上顯示的名稱、說明，和不會自己發動的技能（mods：直接改數值）
      「Y102隊員裝備／技能編輯器」改過、存過的格子會用編輯器的（data/squad-skills.js），這裡就只是預設
+     say：發動時頭上泡泡喊的台詞（可以寫好幾句，隨機挑一句）；編輯器沒改過台詞的格子都用這裡的
      會自己發動的那幾格（上面 GUIDE_SKILLS 有的）：effect、note 留空白＝依數字自動產生文字（js/squad-gear.js 的 guideActiveTexts）
 
    ★ 想改數字：用「Y102隊員裝備／技能編輯器」→ 技能內容 → 選嚮導、選格子 →「自動發動的技能」，
@@ -29,7 +30,7 @@ const GUIDE_SKILLS = {
   },
   taana: {
     'a-1': { when: 'taintAbove', at: 30, soothe: 25, cast: 2.5, sp: 15, cd: 20 },              // 群體疏導（門檻跟被動疏導一樣 30：比被動疏導先判斷，才放得出來）
-    'b-1': { when: 'combat', buff: { spd: .15 }, time: 5, cd: 30 },                             // 輕快節拍：攻擊速度
+    'b-1': { when: 'combat', buff: { spd: .15 }, time: 5, cd: 30 },                             // 加快腳步：攻擊速度
     'ult': { when: 'taintAbove', at: 60, orBerserk: true, soothe: 35, wake: true, cast: 3, sp: 20, cd: 60 },   // 深眠搖籃
   },
   chris: {
@@ -48,23 +49,23 @@ const GUIDE_SKILL_COMMON = {
 const GUIDE_SKILL_TEXTS = {
   eldrin: {
     ...GUIDE_SKILL_COMMON,
-    'a-1': { name: '群體補血', desc: '為全隊送上溫柔的治癒。', effect: '', note: '', icon: '', mods: [] },
-    'b-1': { name: '守護祝福', desc: '讓隊友更能撐住攻擊。', effect: '', note: '', icon: '', mods: [] },
+    'a-1': { name: '群體補血', desc: '為全隊送上溫柔的治癒。', effect: '', note: '', icon: '', mods: [], say: ['群體補血！'] },
+    'b-1': { name: '守護祝福', desc: '讓隊友更能撐住攻擊。', effect: '', note: '', icon: '', mods: [], say: ['守護祝福！'] },
     'core-1': { name: '細心照護', desc: '把照顧的範圍再放大一點。', effect: '疏導光環範圍 +0.5 格', icon: '', mods: [{ path: 'aura.r', add: .5 }] },
-    'ult': { name: '生命之泉', desc: '危急時刻，為全隊注入大量生命力。', effect: '', note: '', icon: '', mods: [] },
+    'ult': { name: '生命之泉', desc: '危急時刻，為全隊注入大量生命力。', effect: '', note: '', icon: '', mods: [], say: ['生命之泉！'] },
   },
   taana: {
     ...GUIDE_SKILL_COMMON,
-    'a-1': { name: '群體疏導', desc: '一口氣安撫全隊的精神。', effect: '', note: '', icon: '', mods: [] },
-    'b-1': { name: '輕快節拍', desc: '讓隊友的動作更俐落。', effect: '', note: '', icon: '', mods: [] },
+    'a-1': { name: '群體疏導', desc: '一口氣安撫全隊的精神。', effect: '', note: '', icon: '', mods: [], say: ['群體疏導。'] },
+    'b-1': { name: '加快腳步', desc: '讓隊友的動作更俐落。', effect: '', note: '', icon: '', mods: [], say: ['加快腳步。'] },
     'core-1': { name: '熟睡守護', desc: '不攻擊的她，更懂得照顧好自己。', effect: '每秒回復 HP +1', icon: '', mods: [{ path: 'hpRegen', add: 1 }] },
-    'ult': { name: '深眠搖籃', desc: '讓失控邊緣的隊友沉沉睡去、重新清醒。', effect: '', note: '', icon: '', mods: [] },
+    'ult': { name: '深眠搖籃', desc: '讓失控邊緣的隊友沉沉睡去、重新清醒。', effect: '', note: '', icon: '', mods: [], say: ['深眠搖籃。'] },
   },
   chris: {
     ...GUIDE_SKILL_COMMON,
-    'a-1': { name: '緊急疏導', desc: '邊打邊顧，搶先穩住快失控的人。', effect: '', note: '', icon: '', mods: [] },
-    'b-1': { name: '火力支援', desc: '指揮隊友集中火力。', effect: '', note: '', icon: '', mods: [] },
+    'a-1': { name: '緊急疏導', desc: '邊打邊顧，搶先穩住快失控的人。', effect: '', note: '', icon: '', mods: [], say: ['緊急疏導！'] },
+    'b-1': { name: '火力支援', desc: '指揮隊友集中火力。', effect: '', note: '', icon: '', mods: [], say: ['火力支援！'] },
     'core-1': { name: '省力疏導', desc: '用最少的力氣做好疏導。', effect: '一般疏導少花 20% SP', icon: '', mods: [{ path: 'spCostCut', add: .2 }] },
-    'ult': { name: '戰術指揮', desc: '戰場指揮全開，全隊火力全面提升。', effect: '', note: '', icon: '', mods: [] },
+    'ult': { name: '戰術指揮', desc: '戰場指揮全開，全隊火力全面提升。', effect: '', note: '', icon: '', mods: [], say: ['戰術指揮！'] },
   },
 };

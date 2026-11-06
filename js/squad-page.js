@@ -1,4 +1,4 @@
-/* ===== T-Pad「Y102隊員」頁：技能樹頁／隊員裝備頁（右上的切換鈕換頁）=====
+/* ===== T-Pad「Y102隊員」頁：現在是 V2（上面技能樹、點技能跳出說明卡；下面隊員裝備列）；下面第 3～5 行是舊版的說明，舊版的程式還留著 =====
    ・左：隊員頭像列（◀＝目前選的人）　中：角色資料（立繪、名字、定位、簡介、HP／SP 或負荷、6 個數值）
    ・技能樹頁：右上＝技能樹（js/skills.js）、右下＝點到的技能的說明＋培養（還沒解鎖的顯示鎖頭和條件）
    ・裝備頁：右上＝隊員裝備 3 格＋外觀預覽＋外觀裝備 5 格（服裝系統 js/costumes.js）、右下＝裝備說明、數值、可用裝備、穿上／卸下
@@ -11,9 +11,9 @@ const SQ_W = 888, SQ_H = 520;
 const SQ_SKILL_TREE_HIDDEN = ['tino'];
 // 隊員頁版本：true＝V2（上面技能樹、點技能跳出說明卡；下面是現在穿的隊員裝備，「更換裝備」打開防具視窗）
 //            false＝舊版（右上角切換技能樹／裝備頁，在這裡直接換裝備）。舊版的程式和排版設定都還在，改回 false 就回去
-// 編輯器預覽（?squadedit=1）一律用舊版，排版編輯器調的位置才對得上
+// 編輯器預覽（?squadedit=1）跟遊戲用同一版：編輯器看到的就是遊戲裡的樣子
 const SQUAD_UI_V2 = true;
-const sqV2 = () => SQUAD_UI_V2 && !/[?&]squadedit=1(&|$)/.test(location.search);
+const sqV2 = () => SQUAD_UI_V2;
 const squadPageState = { member: null, page: 'skills', skill: {}, slot: { kind: 'gear', id: 0 }, avail: null, solo: null, card: null };   // card：V2 說明卡開著的是哪位隊員   // solo：只看這一位（對話的「隊員資訊」打開的，左邊不列其他隊員）
 const SQ_STATS = [
   { id: 'atk', name: '攻擊', icon: 'atk', val: s => s.noAttack ? '—' : String(s.dmg), num: s => s.dmg },
@@ -42,8 +42,8 @@ const sqSpriteOf = spec => typeof memberPortraitPath === 'function' ? memberPort
 
 // ---- 編輯器清單用：每個名字是什麼、屬於哪一組、是不是圖片 ----
 const SQ_PARTS = {
-  'panel.roster': ['面板區域', '左側隊員列'], 'panel.profile': ['面板區域', '角色資料'], 'panel.tree': ['面板區域', '技能樹（技能樹頁）'],
-  'panel.skillInfo': ['面板區域', '技能說明（技能樹頁）'], 'panel.gear': ['面板區域', '裝備欄（裝備頁）'], 'panel.gearInfo': ['面板區域', '裝備說明（裝備頁）'], 'panel.avail': ['面板區域', '可用裝備格子區（裝備頁）'],
+  'panel.roster': ['面板區域', '左側隊員列'], 'panel.profile': ['面板區域', '角色資料'], 'panel.tree': ['面板區域', '技能樹'],
+  'panel.skillInfo': ['面板區域', '技能說明卡（點技能跳出來）'], 'panel.gearBar': ['面板區域', '隊員裝備列（技能樹下面）'], 'panel.gear': ['面板區域', '裝備欄（裝備頁）'], 'panel.gearInfo': ['面板區域', '裝備說明（裝備頁）'], 'panel.avail': ['面板區域', '可用裝備格子區（裝備頁）'],
   'img.arrow': ['角色資料', '◀ 目前選的隊員'], 'btn.more': ['角色資料', '「深入了解」'], 'box.portrait': ['角色資料', '立繪的框'], 'img.portrait': ['角色資料', '角色立繪'],
   'box.job': ['角色資料', '嚮導／哨兵圖示的框'], 'img.job': ['角色資料', '嚮導／哨兵圖示'], 'text.name': ['角色資料', '角色名'], 'text.status': ['角色資料', '「已編入」「待命」'],
   'text.role': ['角色資料', '角色定位'], 'text.ability': ['角色資料', '異能力／疏導能力'], 'text.intro': ['角色資料', '角色簡介'], 'box.bars': ['角色資料', 'HP／負荷 區塊'],
@@ -54,15 +54,18 @@ const SQ_PARTS = {
   'btn.switch': ['技能樹頁', '切換按鈕'], 'text.noSkill': ['技能樹頁', '「支援人員沒有技能樹…」（選到支援人員時）'], 'img.switch': ['技能樹頁', '切換按鈕的圖'], 'btn.reset': ['技能樹頁', '「重置技能」'], 'svg.lines': ['技能樹頁', '技能之間的連線（整組）'],
   'box.skillIcon': ['技能說明', '技能圖示的框'], 'img.skillIcon': ['技能說明', '技能圖示'], 'text.skillName': ['技能說明', '技能名稱'], 'text.skillTag': ['技能說明', '技能分類（Lv1、A 系列…）'],
 'text.skillEffect': ['技能說明', '技能效果（數值）・所有技能一起'], 'text.skillEffect2': ['技能說明', '技能效果 2・所有技能一起'],'text.skillNote': ['技能說明', '補充說明（效果下面）'], 'box.learn': ['技能說明', '培養區塊（還沒學）'], 'box.learned': ['技能說明', '已學會：按鈕區塊'], 'text.costLabel': ['技能說明', '「需要」'],
-  'img.costIcon': ['技能說明', '異質碎片圖示（價格）'], 'text.cost': ['技能說明', '價格數字'], 'btn.learn': ['技能說明', '「培養」按鈕'], 'btn.learned': ['技能說明', '「已學會」按鈕'],
+  'img.costIcon': ['技能說明', '異質碎片圖示（價格）'], 'text.cost': ['技能說明', '價格數字'], 'btn.learn': ['技能說明', '「培養」的字（按鈕位置跟「已學會」共用）'], 'btn.learned': ['技能說明', '「已學會」按鈕'],
   'box.locked': ['技能說明', '還沒解鎖：整塊'], 'box.lockIcon': ['技能說明', '還沒解鎖：鎖頭的框'], 'img.lockIcon': ['技能說明', '還沒解鎖：鎖頭'], 'text.lockHint': ['技能說明', '還沒解鎖：條件提示'], 'text.lockDesc': ['技能說明', '還沒解鎖：技能說明'],
   'text.gearTitle': ['裝備頁', '「隊員裝備」'], 'box.preview': ['裝備頁', '角色外觀預覽的框'], 'img.preview': ['裝備頁', '角色外觀預覽'], 'text.lookTitle': ['裝備頁', '「外觀裝備」'],
   'text.switchLabelG': ['裝備頁', '「切換技能樹／裝備」'], 'btn.switchG': ['裝備頁', '切換按鈕'], 'img.switchG': ['裝備頁', '切換按鈕的圖'],
+  'text.gearBarTitle': ['隊員裝備列', '「隊員裝備」'], 'box.gearBarSlots': ['隊員裝備列', '3 格裝備的外框'], 'btn.gearBar': ['隊員裝備列', '「更換裝備」按鈕'], 'btn.cardClose': ['技能說明', '說明卡的關閉鈕（×）'],
   'text.descTitle': ['裝備說明', '「裝備說明」'], 'box.desc': ['裝備說明', '裝備說明的框'], 'text.desc': ['裝備說明', '裝備說明文字'],
   'text.statTitle': ['裝備說明', '「裝備數值」'], 'box.stat': ['裝備說明', '裝備數值的框'], 'text.stat': ['裝備說明', '裝備數值文字'], 'text.availTitle': ['裝備說明', '「可用裝備」'],
   'btn.unequip': ['裝備說明', '「卸下裝備」'], 'btn.equip': ['裝備說明', '「穿上裝備」'],
 };
 // 外觀裝備格：服裝系統的欄位，但「下身」不放在這一頁（服裝、頭飾、臉部、背部、手部 5 格）
+// 舊版才有的東西（切換鈕、裝備頁、舊的培養區塊）：現在的畫面上沒有，編輯器清單不列；版面設定留著，改回舊版時還用得到
+const sqIsLegacyPart = key => /^(text\.switchLabelG?|btn\.switchG?|img\.switchG?|box\.learn|text\.costLabel|text\.cost|img\.costIcon|panel\.(gear|gearInfo|avail)|text\.(gearTitle|lookTitle|descTitle|desc|statTitle|stat|availTitle)|box\.(preview|desc|stat)|img\.preview|btn\.(un)?equip)$|^(gearSlot|gearSlotImg|gearSlotName|lookSlot|lookSlotImg|lookSlotName|avail|availImg):/.test(String(key));
 const SQ_LOOK_HIDDEN = ['lower'];
 const SQ_LOOK_SLOTS = () => typeof COSTUME_SLOTS !== 'undefined' ? COSTUME_SLOTS.filter(s => !SQ_LOOK_HIDDEN.includes(s.id)) : [{ id: 'skin', name: '服裝' }];
 function squadPart(key) {
@@ -75,7 +78,7 @@ function squadPart(key) {
     return { ...bp, key, group: '技能說明（每格技能各自）', label: bp.label.replace('・所有技能一起', '') + '（只有這格：' + name + '・' + (lay ? lay.tag : id) + '）' };
   }
   // img＝圖片（大小＝寬，高度照比例）；box＝方形的框（大小＝寬＝高，長寬一起縮放）；其他＝面板、文字（寬、高分開）
-  const kind = /^img\.|Img:|Icon:|^img:/.test(key) ? 'img' : /^(roster|g?node|gearSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '';
+  const kind = /^img\.|Img:|Icon:|^img:/.test(key) ? 'img' : /^(roster|g?node|gearSlot|gearBarSlot|lookSlot|avail):|^box\.(job|skillIcon|lockIcon)$|^btn\.switchG?$/.test(key) ? 'box' : '';
   if (SQ_PARTS[key]) return { key, group: SQ_PARTS[key][0], label: SQ_PARTS[key][1], kind, text: key in SQ_TEXT_DEFAULT };
   const [p, ...rest] = key.split(':'), id = rest.join(':'), nm = t => (TYPES[t] || (typeof CHARACTERS !== 'undefined' && CHARACTERS[t]) || {}).name || t;
   const lay = typeof skillLayoutOf === 'function' ? (/^gnode/.test(p) ? GUIDE_SKILL_LAYOUT.find(n => n.id === id) : skillLayoutOf(id)) : null, st = SQ_STATS.find(s => s.id === id), look = SQ_LOOK_SLOTS().find(s => s.id === id);
@@ -87,6 +90,7 @@ function squadPart(key) {
     stat: ['數值格', '數值格：' + (st ? st.name : id)], statIcon: ['數值格', '數值圖示：' + (st ? st.name : id)], statLabel: ['數值格', '數值名稱：' + (st ? st.name : id)], statValue: ['數值格', '數值數字：' + (st ? st.name : id)],
     gearSlot: ['裝備格', '隊員裝備第 ' + (Number(id) + 1) + ' 格（框）'], gearSlotImg: ['裝備格', '隊員裝備第 ' + (Number(id) + 1) + ' 格（圖）'], gearSlotName: ['裝備格', '隊員裝備第 ' + (Number(id) + 1) + ' 格（名稱）'],
     lookSlot: ['外觀裝備格', '外觀：' + (look ? look.name : id) + '（框）'], lookSlotImg: ['外觀裝備格', '外觀：' + (look ? look.name : id) + '（圖）'], lookSlotName: ['外觀裝備格', '外觀：' + (look ? look.name : id) + '（名稱）'],
+    gearBarSlot: ['隊員裝備列', '第 ' + (Number(id) + 1) + ' 格（框）'], gearBarImg: ['隊員裝備列', '第 ' + (Number(id) + 1) + ' 格（圖）'],
     avail: ['可用裝備（每件各自）', '可用裝備格：' + gearName(id)], availImg: ['可用裝備（每件各自）', '可用裝備圖：' + gearName(id)],
   }[p];
   return L ? { key, group: L[0], label: L[1], kind, text: key in SQ_TEXT_DEFAULT } : null;
@@ -216,20 +220,21 @@ function squadV2Html(actor, safe) {
   else {
     const full = squadSkillHtml(actor, safe), cut = full.indexOf('<section class="sq-info');
     h = full.slice(0, cut);
-    if (st.card === type) h += full.slice(cut).replace('<section class="sq-info', '<section class="sq-info sq-card"').replace(/<\/section>$/, '<button type="button" class="sq-card-close" data-sq-card-close aria-label="關閉說明">×</button></section>');   // 說明卡：跟舊版右下的說明同一份
+    if (st.card === type) h += full.slice(cut).replace('<section class="sq-info', '<section class="sq-info sq-card"').replace(/<\/section>$/, '<button type="button" class="sq-card-close" data-sq-card-close data-sq="btn.cardClose" aria-label="關閉說明">×</button></section>');   // 說明卡：跟舊版右下的說明同一份
   }
   return h + (isDogTree(type) ? '' : squadGearBarHtml(type));   // 球球沒有隊員裝備
 }
 function squadGearBarHtml(type) {
-  return '<section class="sq-info sq-gearbar" data-sq="panel.gearBar"><b class="sq-gearbar-title">隊員裝備</b><div class="sq-gearbar-slots">' +
+  return '<section class="sq-info sq-gearbar" data-sq="panel.gearBar"><b class="sq-gearbar-title" data-sq="text.gearBarTitle">' + sqT('text.gearBarTitle', '隊員裝備') + '</b><div class="sq-gearbar-slots" data-sq="box.gearBarSlots">' +
     squadGearOf(type).map((id, i) => {
       const g = id && squadGearById(id);
-      return '<span class="sq-gearbar-slot' + (g ? ' filled' : '') + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="裝備 ' + (i + 1) + '：空"') + '>' +
-        (g ? '<img src="' + squadGearImage(g) + '" alt="">' : '<i>' + (i + 1) + '</i>') + '</span>';
-    }).join('') + '</div><button type="button" class="sq-gearbar-btn" data-sq-armor>更換裝備</button></section>';
+      return '<span class="sq-gearbar-slot' + (g ? ' filled' : '') + '" data-sq="gearBarSlot:' + i + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="裝備 ' + (i + 1) + '：空"') + '>' +
+        (g ? '<img data-sq="gearBarImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' : '<i>' + (i + 1) + '</i>') + '</span>';
+    }).join('') + '</div><button type="button" class="sq-gearbar-btn" data-sq-armor data-sq="btn.gearBar">' + sqT('btn.gearBar', '更換裝備') + '</button></section>';
 }
 // 「更換裝備」：打開防具視窗、選好這位隊員（js/backpack.js 的 openArmorPanelFor）；關掉後回到這一頁
 function squadOpenArmor(type) {
+  if (/[?&]squadedit=1(&|$)/.test(location.search)) { if (typeof tpadToast === 'function') tpadToast('編輯器預覽不開防具視窗；裝備內容請到左邊「裝備清單」改'); return; }   // 預覽裡 T-Pad 一直開著，防具視窗會被蓋住
   if (typeof openArmorPanelFor === 'function' && openArmorPanelFor(type)) return;
   if (typeof tpadToast === 'function') tpadToast('回基地，或到營地帳篷、裝備箱旁邊才能更換裝備');
 }
@@ -559,10 +564,8 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     for (const n of SKILL_LAYOUT) list.push('node:' + n.id, 'nodeIcon:' + n.id);
     for (const n of GUIDE_SKILL_LAYOUT) list.push('gnode:' + n.id, 'gnodeIcon:' + n.id);   // 嚮導的技能格（另外一組位置）
     for (const s of SQ_STATS) list.push('stat:' + s.id, 'statIcon:' + s.id, 'statLabel:' + s.id, 'statValue:' + s.id);
-    for (let i = 0; i < SQUAD_GEAR_SLOTS; i++) list.push('gearSlot:' + i, 'gearSlotImg:' + i, 'gearSlotName:' + i);
-    for (const s of SQ_LOOK_SLOTS()) list.push('lookSlot:' + s.id, 'lookSlotImg:' + s.id, 'lookSlotName:' + s.id);
-    for (const g of squadGearList()) list.push('avail:' + g.id, 'availImg:' + g.id);
-    post({ type: 'parts', list: list.map(k => squadPart(k)).filter(Boolean).map(p => ({ key: p.key, group: p.group, label: p.label, kind: p.kind })),
+    for (let i = 0; i < SQUAD_GEAR_SLOTS; i++) list.push('gearBarSlot:' + i, 'gearBarImg:' + i);
+    post({ type: 'parts', list: list.filter(k => !sqIsLegacyPart(k)).map(k => squadPart(k)).filter(Boolean).map(p => ({ key: p.key, group: p.group, label: p.label, kind: p.kind })),
       members: members.filter(m => TYPES[m.type]).map(m => ({ id: m.type, name: TYPES[m.type].name, guide: isGuideTree(m.type), nodes: skillLayoutFor(m.type).map(n => ({ id: n.id, tag: n.tag })) })),   // 每位隊員自己的格子（嚮導比較少）
       nodes: SKILL_LAYOUT.map(n => ({ id: n.id, tag: n.tag })) });
   }
@@ -633,21 +636,24 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     if (axis !== 'x') o.y = Math.round((o.y || 0) + (pr.top + pr.height / 2 - (r.top + r.height / 2)) / s);
     applySquadLayout(); post({ type: 'move', key, x: o.x || 0, y: o.y || 0 }); post({ type: 'moved', key }); sendInfo(key);
   }
-  // 從清單選到現在看不到的東西：換頁、換隊員、換格子，把它叫出來
+  // 從清單選到現在看不到的東西：換隊員、換格子、打開說明卡，把它叫出來
+  const isCardPart = key => /^(panel\.skillInfo|box\.(skillIcon|learned|locked|lockIcon)|img\.(skillIcon|lockIcon)|text\.(skill|lock)|btn\.(learned|cardClose))/.test(key);
   function reveal(key) {
     if (els(key).length) return;
     if (/@(trait|other)$/.test(key)) {   // 分組的：換到特性／其他技能
-      const st = squadPageState, m = st.member; st.page = 'skills';
+      const st = squadPageState, m = st.member; st.page = 'skills'; st.card = m;
       if (key.endsWith('@trait')) st.skill[m] = 'trait-1'; else if (!st.skill[m] || st.skill[m] === 'trait-1') st.skill[m] = 'trait-2';
       refreshSquadPage(); applySquadLayout(); return;
     }
-    if (key.includes('@')) { const [t, id] = key.split('@')[1].split('/'); squadPageState.page = 'skills'; squadPageState.member = t; squadPageState.skill[t] = id; refreshSquadPage(); applySquadLayout(); return; }
+    if (key.includes('@')) { const [t, id] = key.split('@')[1].split('/'); squadPageState.page = 'skills'; squadPageState.member = t; squadPageState.skill[t] = id; squadPageState.card = t; refreshSquadPage(); applySquadLayout(); return; }
     const st = squadPageState, [p, id] = key.split(':');
     if (/^(gnode|gnodeIcon)$/.test(p) && !isGuideTree(st.member)) { const g = squadMemberList().find(x => isGuideTree(x.type)); if (g) st.member = g.type; }   // 嚮導的技能格：換到一位嚮導
     if (/^(node|nodeIcon)$/.test(p) && isGuideTree(st.member)) { const s = squadMemberList().find(x => TYPES[x.type] && !isGuideTree(x.type)); if (s) st.member = s.type; }   // 哨兵的技能格：換到一位哨兵
     if (/^g?(node|nodeIcon)$/.test(p) || /^(text\.(switchLabel|progress|crystals|skill|cost|lock)|btn\.(switch|reset|learn|learned)$|img\.(switch|skillIcon|costIcon|lockIcon|crystalsIcon)$|box\.(skillIcon|learn|locked|lockIcon)|panel\.(tree|skillInfo)|svg\.)/.test(key)) st.page = 'skills';
     if (/^(gearSlot|gearSlotImg|gearSlotName|lookSlot|lookSlotImg|lookSlotName|avail|availImg)$/.test(p) || /(G$|^text\.(gearTitle|lookTitle|desc|stat|avail)|^box\.(preview|desc|stat)|^img\.preview|^btn\.(un)?equip|^panel\.(gear|gearInfo|avail))/.test(key)) st.page = 'gear';
     if (p === 'roster' || p === 'rosterImg') st.member = id;
+    if (p === 'gearBarImg' && !squadGearOf(st.member)[id]) { const g = squadGearList().find(x => supplyInventory.get(x.id) > 0); if (g) equipSquadGear(st.member, Number(id), g.id); }   // 這一格是空的：先穿一件才看得到圖
+    if (isCardPart(key)) st.card = st.member;   // 說明卡裡的東西：打開說明卡
     if (key === 'text.noSkill') { const m = squadMemberList().find(x => x.noncombat || !TYPES[x.type]); if (m) st.member = m.type; }   // 換到一位支援人員
     if (/^box\.(locked|lockIcon)$|^img\.lockIcon$|^text\.lock/.test(key)) { const n = skillLayoutFor(st.member).find(x => skillStateOf(st.member, x.id) === 'locked'); if (n) st.skill[st.member] = n.id; }
     if (/^(box\.skillIcon|img\.skillIcon|text\.skill|(box|btn)\.learn$|text\.cost|img\.costIcon)/.test(key)) {   // 培養按鈕、價格：要換到還沒學的格子；其他：不是鎖住的就好
@@ -666,7 +672,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     else if (m.type === 'center') center(m.key, m.axis);
     else if (m.type === 'mode') { play = !!m.play; hoverKey = null; }
     else if (m.type === 'page') { squadPageState.page = m.page === 'gear' ? 'gear' : 'skills'; refreshSquadPage(); if (selKey) sendInfo(selKey); }
-    else if (m.type === 'member') { squadPageState.member = m.member; if (m.node) { squadPageState.skill[m.member] = m.node; squadPageState.page = 'skills'; } refreshSquadPage(); if (selKey) sendInfo(selKey); }
+    else if (m.type === 'member') { squadPageState.member = m.member; squadPageState.card = m.node ? m.member : null; if (m.node) { squadPageState.skill[m.member] = m.node; squadPageState.page = 'skills'; } refreshSquadPage(); if (selKey) sendInfo(selKey); }
     else if (m.type === 'setup') setup();
     else if (m.type === 'ping' && document.readyState !== 'loading') post({ type: 'ready' });
   });
@@ -688,9 +694,11 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     // 點到隊員、技能格、裝備格、可用裝備：順便選它（畫面跟著換），方便接著調
     const t = ev.target, st = squadPageState, body = squadPageBody();
     const mem = t.closest('[data-squad-member]'), node = t.closest('[data-skill-pick]'), gs = t.closest('[data-gear-slot]'), ls = t.closest('[data-look-slot]'), av = t.closest('[data-avail]');
-    if (body && (mem || node || gs || ls || av)) {
+    const closeCard = st.card && !node && !t.closest('.sq-card');   // 跟遊戲一樣：點技能打開說明卡，點卡片外面就關掉
+    if (closeCard) st.card = null;
+    if (body && (mem || node || gs || ls || av || closeCard)) {
       if (mem) { st.member = mem.dataset.squadMember; st.avail = null; }
-      if (node) st.skill[st.member] = node.dataset.skillPick;
+      if (node) { st.skill[st.member] = node.dataset.skillPick; st.card = st.member; }
       if (gs) { st.slot = { kind: 'gear', id: Number(gs.dataset.gearSlot) }; st.avail = null; }
       if (ls) { st.slot = { kind: 'look', id: ls.dataset.lookSlot }; st.avail = null; }
       if (av) st.avail = av.dataset.avail;

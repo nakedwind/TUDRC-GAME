@@ -138,8 +138,8 @@ const buildDevCost = id => {
 };
 function buildWorkshopEntries() {
   return buildAll().filter(o => !buildStarter(o.id)).map(o => {
-    const have = buildUnlocked(o.id), cost = buildDevCost(o.id);
-    return { key: 'bld:' + o.id, kind: 'build', def: o, name: o.name, lv: have ? 1 : 0, max: 1, icon: '<img src="' + o.h.file + '" alt="">', image: o.h.file, emoji: '🧱',
+    const have = buildUnlocked(o.id), cost = buildDevCost(o.id), look = workshopExtraLook('bld:' + o.id);   // 圖片大小、位移（開發工坊編輯器）
+    return { key: 'bld:' + o.id, kind: 'build', def: { ...o, ...look }, name: o.name, lv: have ? 1 : 0, max: 1, icon: wsAmmoIcon('<img src="' + o.h.file + '" alt="">', look), image: o.h.file, emoji: '🧱',
       tag: '建築', worn: false, about: workshopBuildAbout(have),
       stat: () => workshopBuildStat(o), canDev: !have, where: '', devCost: cost.shards, upCost: 0, devMoney: cost.money, buy: 'bld:' + o.id };
   });

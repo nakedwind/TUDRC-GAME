@@ -66,7 +66,8 @@ function ammoVal(key, f) {
 const ammoChanged = key => { const o = cfg.items[key]; return !!o && Object.keys(o).length > 0; };
 // 給預覽、清單用的「裝備資料」（只有用得到的幾項）：彈匣的等級＝裝得下幾種子彈
 const ammoDef = key => ({ icon: ammoBase(key).icon || '•', kind: 'ammo', source: 'develop', levels: isMag(key) ? ammoVal(key, 'slots').map(n => ({ n })) : [{}] });
-// ---- 背包擴充、建築、隊員裝備（key：bag:、bld:、sg:）：跟遊戲的開發工坊一樣顯示，這裡只能看不能改（資料在各自的地方）----
+// ---- 背包擴充、建築、隊員裝備（key：bag:、bld:、sg:）：跟遊戲的開發工坊一樣顯示；背包、建築只能調圖片大小和位移（存在 data/workshop.js 的 items[key]），其他資料在各自的地方 ----
+const EXTRA_LOOK_KEYS = ['iconScale', 'iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize'];
 const isExtra = key => /^(bag|bld|sg):/.test(key || '');
 const EXTRA = new Map();
 const addExtra = (key, e) => EXTRA.set(key, e);
@@ -128,7 +129,7 @@ const baseCost = key => (WORKSHOP_BASE[key] || {}).cost || [];
 const effCost = (key, i) => { if (isCustom(key)) return getDef(key).cost[i]; const n = costEdits(key)[i]; return typeof n === 'number' ? n : baseCost(key)[i]; };
 const costChanged = key => costEdits(key).some((n, i) => typeof n === 'number' && n !== baseCost(key)[i]);
 const levelsChanged = key => levelEdits(key).some(t => typeof t === 'string' && t !== '');
-const itemChanged = key => { if (isSgear(key)) return sgChanged(key); if (isExtra(key)) return false; if (isAmmo(key)) return ammoChanged(key); const o = cfg.items[key]; return !!o && (!!o.infoParts || o.money != null || WORKSHOP_TEXT_FIELDS.some(f => typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]) || levelsChanged(key) || valuesChanged(key) || costChanged(key) || typeof o.iconScale === 'number' || ['iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize'].some(k => typeof o[k] === 'number')); };
+const itemChanged = key => { if (isSgear(key)) return sgChanged(key); if (isExtra(key)) return EXTRA_LOOK_KEYS.some(k => typeof (cfg.items[key] || {})[k] === 'number'); if (isAmmo(key)) return ammoChanged(key); const o = cfg.items[key]; return !!o && (!!o.infoParts || o.money != null || WORKSHOP_TEXT_FIELDS.some(f => typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]) || levelsChanged(key) || valuesChanged(key) || costChanged(key) || typeof o.iconScale === 'number' || ['iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize'].some(k => typeof o[k] === 'number')); };
 // 開發工坊裡圖片的大小（%）：新增的裝備存在 added 裡；原本的存在 items[key].iconScale（沒改＝原本的）
 const iconScaleOf = key => { if (isCustom(key)) return customEntry(key).iconScale || 100; const o = cfg.items[key]; return o && typeof o.iconScale === 'number' ? o.iconScale : ((WORKSHOP_BASE[key] || {}).iconScale || 100); };
 const iconScaleField = key => { const n = iconScaleOf(key);
@@ -226,20 +227,22 @@ document.addEventListener('click', e => {
 // ---- 下方說明欄的四塊（名稱＋標籤、說明、效果框、按鈕）：這件自己的位置、大小、字級 ----
 // 存在 items[key].infoParts（新增的裝備存在 added 裡）；套用見 js/workshop-config.js 的 workshopInfoPartAttr
 const INFO_PART_FIELDS = [['x', '左右'], ['y', '上下'], ['w', '寬'], ['h', '高'], ['font', '字級']];
-// 金色按鈕「套用到所有頁」：勾著的時候，改位置、大小會存成共用設定（外觀 style 的 infoBtn*），並清掉每一件單獨調過的同一格
-let btnAllOn = false;
-function setBtnAll(field, n) {
-  const k = WORKSHOP_BTN_SHARED[field];
-  if (n === WORKSHOP_STYLE_DEFAULT[k]) delete cfg.style[k]; else cfg.style[k] = n;
+// 金色按鈕、效果框「套用到所有頁」：勾著的時候，改的內容會存成共用設定（外觀 style 的 infoBtn*、infoStats*），並清掉每一件單獨調過的同一格
+const partAllOn = { btn: false, stats: false };
+const partAllActive = (p, f) => !!partAllOn[p] && f in WORKSHOP_PART_SHARED[p];
+function setPartAll(part, field, n) {
+  const k = WORKSHOP_PART_SHARED[part][field];
+  if (n === WORKSHOP_STYLE_DEFAULT[k] || n === '') delete cfg.style[k]; else cfg.style[k] = n;   // 內文空白＝原本的字
   for (const h of [...Object.values(cfg.items), ...cfg.added]) {
-    const b = h && h.infoParts && h.infoParts.btn; if (!b) continue;
+    const b = h && h.infoParts && h.infoParts[part]; if (!b) continue;
     delete b[field];
-    if (!Object.keys(b).length) delete h.infoParts.btn;
+    if (!Object.keys(b).length) delete h.infoParts[part];
     if (!Object.keys(h.infoParts).length) delete h.infoParts;
   }
   for (const [key, o] of Object.entries(cfg.items)) if (o && !Object.keys(o).length) delete cfg.items[key];
 }
-const INFO_PART_WHERE = { stats: '效果框裡的內容＝上面每一級的效果說明／數值（子彈：一組幾發）。', btn: '勾「套用到所有頁」時，這裡的位置、大小會同步到工坊裡所有的金色按鈕；不勾就只調這一件。', money: '花多少錢在上面「💎 要花幾個異質碎片、多少經費」改；寬、高＝框的大小。已達最高等級、已開發、還沒拿到時不會出現。' };
+const INFO_PART_WHERE = { stats: '效果框裡的內容＝上面每一級的效果說明／數值（子彈：一組幾發）。', btn: '勾「套用到所有頁」時，這裡的位置、大小會同步到工坊裡所有的金色按鈕；不勾就只調這一件。' };
+INFO_PART_WHERE.stats += '勾「套用到所有頁」時，這裡的位置、大小、內文會同步到工坊裡所有的效果框；不勾就只調這一件。';
 const infoPartsNow = key => workshopInfoPartsOf(key, cfg);
 const infoLabelFn = (key, lv) => (p, f, txt) => esc(workshopInfoLabel(key, p, f, txt, { lv, next: lv + 1 }, cfg));   // 預覽用：這件改過的字
 // attr／descAttr：名稱、說明原本那一格的欄位（原本的裝備 data-f、新增的裝備 data-c、子彈彈匣 data-a）——這裡的輸入框跟它連在一起
@@ -254,7 +257,7 @@ function infoPartsField(key, attr, descAttr, descOnly) {   // descOnly：有給�
   return '<span class="hint" style="display:block;margin-bottom:8px">在右邊預覽的說明欄點一下名稱、標籤、說明、效果框或按鈕，就會打開、跳到那一塊。左右／上下：位移（px，正數＝往右／往下）；寬、高、字級：0 或空白＝原本的。內文空白＝原本的字（灰色那段）；{lv}＝目前等級、{next}＝下一級。</span>' +
     Object.entries(WORKSHOP_INFO_PARTS).map(([p, label]) => { const o = parts[p] || {}, own = (isCustom(key) ? customEntry(key) : cfg.items[key] || {}).infoParts || {}, changed = Object.keys(own[p] || {}).length;   // 「調整過」只看這件自己調的（共用的預設值不算）
       return '<details class="info-part" data-part="' + p + '" data-sec="part:' + p + '"' + (isSecOpen('part:' + p, false) ? ' open' : '') + '><summary class="info-part-head"><b>' + esc(label) + '</b>' + (changed ? '<em>調整過</em>' : '') + '</summary>' +
-        '<div class="info-part-tools">' + (p === 'btn' ? '<label style="display:inline-flex;align-items:center;gap:6px;margin-right:auto;cursor:pointer"><input type="checkbox" data-wp-all' + (btnAllOn ? ' checked' : '') + '>套用到所有頁</label>' : '') + '<button type="button" class="ed-btn" data-wp-reset="' + p + '" title="這一塊回到原本的位置、大小、字">歸零</button></div>' +
+        '<div class="info-part-tools">' + (WORKSHOP_PART_SHARED[p] ? '<label style="display:inline-flex;align-items:center;gap:6px;margin-right:auto;cursor:pointer"><input type="checkbox" data-wp-all="' + p + '"' + (partAllOn[p] ? ' checked' : '') + '>套用到所有頁</label>' : '') + '<button type="button" class="ed-btn" data-wp-reset="' + p + '" title="這一塊回到原本的位置、大小、字">歸零</button></div>' +
         '<div class="cost-row" style="grid-template-columns:repeat(5, minmax(0, 1fr))">' + INFO_PART_FIELDS.map(([f, n]) =>
           '<label class="field">' + n + '<input type="number" step="1" data-wp="' + p + ':' + f + '" value="' + (Number.isFinite(o[f]) && o[f] ? o[f] : '') + '" placeholder="0"></label>').join('') + '</div>' +
         content(p) + (INFO_PART_WHERE[p] ? '<span class="hint">' + esc(INFO_PART_WHERE[p]) + '</span>' : '') + '</details>'; }).join('');
@@ -390,11 +393,13 @@ function onSgearInput(e) {
   if (f === 'image') { const th = document.querySelector('#itemForm .thumb'); if (th) th.innerHTML = iconHtml(selKey, { image: g.image }); }
   sgAfterEdit();
 }
-function renderExtraForm() {   // 背包擴充、建築、隊員裝備：只顯示，要改去資料原本的地方
+function renderExtraForm() {   // 背包擴充、建築：圖片大小和位移可以調（只影響開發工坊），其他只顯示，要改去資料原本的地方
   const key = selKey, x = EXTRA.get(key), v = itemView(key), lines = Array.from({ length: x.max }, (_, i) => '<li>' + (x.max > 1 ? 'Lv' + (i + 1) + '：' : '') + esc(x.stat(i + 1)) + '</li>').join('');
-  document.getElementById('itemForm').innerHTML = '<p class="hint" style="margin:0 0 8px">👀 這一項跟遊戲裡看到的一樣，但這裡只能看。要修改請到：' + esc(x.where) + '。</p>' +
+  document.getElementById('itemForm').innerHTML = '<p class="hint" style="margin:0 0 8px">👀 這裡可以調圖片的大小和位移（只影響開發工坊）。名稱、圖片檔、效果要修改請到：' + esc(x.where) + '。</p>' +
     '<div class="field">名稱<b>' + esc(v.name) + '</b></div><div class="field">圖片<span class="hint">' + esc(v.image.startsWith('data:') ? '（用符號 ' + x.icon + '）' : v.image) + '</span></div>' +
-    '<div class="field">說明<span class="hint">' + esc(v.ownedDesc) + '</span></div><div class="field">效果<ul style="margin:4px 0 0;padding-left:18px">' + lines + '</ul></div>';
+    '<div class="field">說明<span class="hint">' + esc(v.ownedDesc) + '</span></div><div class="field">效果<ul style="margin:4px 0 0;padding-left:18px">' + lines + '</ul></div>' +
+    sec('image', '🖼️ 圖片', iconScaleField(key) + iconOffField(key) + infoImgOffField(key) + infoImgSizeField(key)) +
+    '<div class="img-btns"><button type="button" class="ed-btn" id="itemReset"' + (itemChanged(key) ? '' : ' disabled') + '>恢復為初始設定</button></div>';
 }
 function renderItemForm() {
   renderStyleInfoImg();   // 外觀 → 下方說明欄的圖片位移：跟著換成這件
@@ -486,13 +491,14 @@ function onAmmoInput(e) {   // 子彈、彈匣：只記改過的（跟原本一�
   saveDraft(); renderList(); renderPreview();
 }
 document.getElementById('itemForm').addEventListener('input', e => {
-  if (e.target.hasAttribute('data-wp-all')) {   // 勾起來：這件現在的位置、大小先同步到全部
-    btnAllOn = e.target.checked;
-    if (btnAllOn) {
-      const now = workshopInfoPartsOf(selKey, cfg).btn || {};
-      for (const [f] of INFO_PART_FIELDS) setBtnAll(f, Number.isFinite(now[f]) ? now[f] : 0);
-      saveDraft(); renderList(); renderPreview();
-      setStatus('金色按鈕的位置、大小已同步到所有項目（還沒存到專案）');
+  if (e.target.hasAttribute('data-wp-all')) {   // 勾起來：這件現在的設定先同步到全部
+    const p = e.target.dataset.wpAll;
+    partAllOn[p] = e.target.checked;
+    if (partAllOn[p]) {
+      const now = workshopInfoPartsOf(selKey, cfg)[p] || {};
+      for (const f of Object.keys(WORKSHOP_PART_SHARED[p])) setPartAll(p, f, Number.isFinite(now[f]) ? now[f] : typeof now[f] === 'string' ? now[f] : (f in Object.fromEntries(INFO_PART_FIELDS) ? 0 : ''));
+      saveDraft(); renderList(); renderItemForm(); renderPreview();
+      setStatus((p === 'btn' ? '金色按鈕' : '效果框') + '的設定已同步到所有項目（還沒存到專案）');
     }
     return;
   }
@@ -505,12 +511,13 @@ document.getElementById('itemForm').addEventListener('input', e => {
   }
   if (e.target.dataset.wt) {   // 下方說明欄某一塊改過的字（空白＝原本的字）
     const [p, f] = e.target.dataset.wt.split(':');
+    if (partAllActive(p, f)) { setPartAll(p, f, e.target.value); saveDraft(); renderList(); renderPreview(); return; }   // 套用到所有頁
     setInfoPart(p, f, e.target.value); saveDraft(); renderList(); renderPreview(); return;
   }
   if (e.target.dataset.wp) {   // 下方說明欄的版面（每件各自；裝備、武器、子彈、彈匣都一樣）
     const [p, f] = e.target.dataset.wp.split(':'), txt = e.target.value.trim(), n = Math.round(Number(txt));
     if (txt !== '' && (!Number.isFinite(n) || (f !== 'x' && f !== 'y' && n < 0))) return;   // 打到一半、負的寬高先不套用
-    if (p === 'btn' && btnAllOn) { setBtnAll(f, txt === '' ? 0 : n); saveDraft(); renderList(); renderPreview(); return; }   // 套用到所有頁
+    if (partAllActive(p, f)) { setPartAll(p, f, txt === '' ? 0 : n); saveDraft(); renderList(); renderPreview(); return; }   // 套用到所有頁
     setInfoPart(p, f, txt === '' ? 0 : n); saveDraft(); renderList(); renderPreview(); return;
   }
   if (isSgear(selKey) && !e.target.matches('[data-io], [data-is], [data-iss]')) { onSgearInput(e); return; }
@@ -597,8 +604,8 @@ document.getElementById('itemForm').addEventListener('click', async e => {
   const wr = e.target.closest('[data-wp-reset]');
   if (wr) {   // 下方說明欄的某一塊歸零
     const p = wr.dataset.wpReset;
-    if (p === 'btn' && btnAllOn) {   // 勾著「套用到所有頁」：全部回到預設
-      for (const [f] of INFO_PART_FIELDS) setBtnAll(f, WORKSHOP_STYLE_DEFAULT[WORKSHOP_BTN_SHARED[f]]);
+    if (partAllOn[p]) {   // 勾著「套用到所有頁」：全部回到預設
+      for (const [f, k] of Object.entries(WORKSHOP_PART_SHARED[p])) setPartAll(p, f, WORKSHOP_STYLE_DEFAULT[k]);
       saveDraft(); renderList(); renderItemForm(); renderPreview(); return;
     }
     for (const [f] of INFO_PART_FIELDS) setInfoPart(p, f, 0);
@@ -623,6 +630,12 @@ document.getElementById('itemForm').addEventListener('click', async e => {
     else if (nb.dataset.nudge === 'i0') { setIconOff('ix', 0); setIconOff('iy', 0); }   // 說明欄的圖片位移歸零
     else { const [axis, d] = nb.dataset.nudge.split(':'); setIconOff(axis, iconOffOf(selKey, axis) + Number(d)); }
     saveDraft(); renderList(); renderPreview(); return;
+  }
+  if (id === 'itemReset' && isExtra(selKey)) {   // 背包擴充、建築：只拿掉圖片大小和位移（說明欄的版面照舊）
+    const o = cfg.items[selKey] || {}; EXTRA_LOOK_KEYS.forEach(k => delete o[k]);
+    if (!Object.keys(o).length) delete cfg.items[selKey];
+    saveDraft(); renderList(); renderItemForm(); renderPreview();
+    setStatus('「' + itemView(selKey).name + '」的圖片已恢復原本的大小和位置'); return;
   }
   if (id === 'itemReset') {
     delete cfg.items[selKey]; saveDraft(); renderList(); renderItemForm(); renderPreview();
@@ -678,6 +691,10 @@ const STYLE_FIELDS = [
     ['headSub', '說明的文字（空白＝不顯示）', 'text'], ['headSubSize', '說明的文字大小', 'num', 8, 24, 1], ['headSubColor', '說明的顏色', 'color'],
     ['headX', '整塊的左右位移（正數＝往右）', 'num', -100, 400, 1], ['headY', '整塊的上下位移（正數＝往下）', 'num', -30, 30, 1],
   ]],
+  ['上面的分頁', [
+    ['tabDev', '第一個分頁的文字（空白＝原本的「可開發」；前面的圖示、後面的數量不會變）', 'text'],
+    ['tabUp', '第二個分頁的文字（空白＝原本的「可升級」；前面的圖示、後面的數量不會變）', 'text'],
+  ]],
   ['下方說明欄', [
     ['infoY', '整塊的上下位移（圖片、文字、按鈕一起動；負數＝往上，往下超出視窗底的部分會被切掉）', 'num', -200, 100, 1],
     ['infoImg', '', 'infoImg'],   // 圖片的位移：每件分開，這裡調的是目前選的那件（renderStyleInfoImg）
@@ -713,7 +730,6 @@ function renderStyleForm() {
 const STYLE_INFO_IMG = [['ix', '左右', '正數＝往右', -150, 300], ['iy', '上下', '正數＝往下', -80, 80]];
 function renderStyleInfoImg() {
   const box = document.getElementById('styleInfoImg'); if (!box) return;
-  if (isExtra(selKey) && !isSgear(selKey)) { box.innerHTML = '<div class="field">圖片的位移<span class="hint">「' + esc(itemView(selKey).name) + '」在這裡只能看，不能調。</span></div>'; return; }
   if (isRemoved(selKey)) { box.innerHTML = '<div class="field">圖片的位移<span class="hint">目前選的「' + esc(itemView(selKey).name) + '」已經刪除。</span></div>'; return; }
   const name = esc(itemView(selKey).name);
   box.innerHTML = STYLE_INFO_IMG.map(([axis, dir, tip, min, max]) => { const n = iconOffOf(selKey, axis);
@@ -859,7 +875,7 @@ function renderPreview() {
   const pick = list.includes(selKey) || noTab ? selKey : list[0];
   const section = (title, keys) => keys.length ? '<h3>' + title + '</h3><div class="ws-tiles" data-kind="' + (title === '武器' ? 'weapons' : 'gear') + '">' + keys.map(previewTile).join('') + '</div>' : '';
   const count = tab => allKeys().concat(AMMO_KEYS, EXTRA_KEYS).filter(k => !isRemoved(k) && pvTabOf(k) === tab).length;
-  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + [['dev', '⚙️ 可開發'], ['up', WS_UP_ICON + ' 可升級']].map(([id, label]) =>
+  const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + workshopTabs(cfg).map(([id, label]) =>
     '<button type="button" role="tab" data-pv-tab="' + id + '" class="' + (pvTab === id ? 'active' : '') + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
   const empty = pvTab === 'up' ? '還沒有可以升級的裝備（換上面的「裝備狀態」看看）' : '所有裝備都已經拿到了';
   const side = pvSideHtml();   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
@@ -1163,8 +1179,8 @@ function exportText() {
     for (const k of ['iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize']) if (typeof o[k] === 'number' && o[k] !== 0) keep[k] = o[k];   // 圖片位移、說明欄的圖片大小（px）
     if (Object.keys(keep).length) items[key] = keep;
   }
-  // 背包擴充、彈藥包擴充（bag:items、bag:ammo）：這個編輯器還不能改，設定照原本的寫回去，存檔才不會弄丟
-  for (const key of Object.keys(cfg.items)) if (key.startsWith('bag:') && Object.keys(cfg.items[key] || {}).length) items[key] = cfg.items[key];
+  // 背包擴充、彈藥包擴充（bag:items、bag:ammo）、建築（bld:）：圖片大小和位移，還有原本的說明欄版面，照樣寫回去
+  for (const key of Object.keys(cfg.items)) if (/^(bag|bld):/.test(key) && Object.keys(cfg.items[key] || {}).length) items[key] = cfg.items[key];
   // 隊員裝備：圖片大小、位移、說明欄版面、碎片（名稱、說明、數值在 data/squad-gear.js）
   for (const key of Object.keys(cfg.items)) if (isSgear(key)) {
     const o = cfg.items[key] || {}, keep = {};
