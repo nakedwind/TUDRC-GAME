@@ -29,6 +29,7 @@ const SFX = (() => {
     soothe: '玩家/疏導.mp3',
     sootheEnd: '玩家/疏導2.mp3',   // 溫特疏導的進度條跑完、疏導成功時（js/sentry.js 的 finishSoothe）；開始時播上面的 soothe
     drink: '喝飲料.mp3',   // 喝杏仁水（js/shop.js 的 useSupply）
+    eat: '玩家/eat.mp3',   // 吃怪物掉的食物：香蕉、魚、絲瓜（js/food.js 的 useFood）
     wearGear: '穿裝備.mp3',   // 穿上裝備：溫特的防具（js/equipment.js 的 equipToSlot）、幫隊員穿隊員裝備（js/backpack.js、js/squad-page.js）
     // K56 路邊的機車、腳踏車（js/street-vehicles.js）：發動的聲音、撞到人的聲音
     escalatorRide: '設施/手扶梯-緊握扶手.mp3',   // 溫特踩上手扶梯的廣播（js/escalators.js，冷卻 10 秒）
