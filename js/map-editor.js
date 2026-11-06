@@ -2533,7 +2533,12 @@ async function deleteTile(id) {
 }
 
 // 工具按鈕
-function updateToolUI() { document.querySelectorAll('.tool').forEach(b => b.classList.toggle('sel', brush.mode === b.dataset.mode)); }
+function updateToolUI() {
+  document.querySelectorAll('.tool').forEach(b => b.classList.toggle('sel', brush.mode === b.dataset.mode));
+  // 收在「⋯ 更多」裡的地圖機關工具：選到時按鈕上直接寫出目前是哪個工具（不用打開選單才知道）
+  const more = document.querySelector('#mapbar .tool-more'), picked = more && more.querySelector('.tool.sel');
+  if (more) { more.classList.toggle('has-sel', !!picked); more.querySelector('summary').textContent = picked ? '⋯ ' + picked.textContent.trim() : '⋯ 更多'; }
+}
 document.querySelectorAll('.tool').forEach(btn => {
   btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); });
 });
@@ -2721,10 +2726,10 @@ function refreshBlendControl() {
   let box = document.getElementById('blendControl');
   if (!box) {
     box = document.createElement('div'); box.id = 'blendControl'; box.className = 'blend-control';
-    box.innerHTML = '<label>混合模式 <select id="blendMode">' + BLEND_MODES.map(([v, n]) => '<option value="' + v + '">' + n + '</option>').join('') + '</select></label>' +
-      '<label>不透明度 <input type="number" id="blendAlpha" min="0" max="100" step="5" style="width:56px"> %</label>' +
+    box.innerHTML = '<label title="混合模式">混合 <select id="blendMode">' + BLEND_MODES.map(([v, n]) => '<option value="' + v + '">' + n + '</option>').join('') + '</select></label>' +
+      '<label title="不透明度">不透明 <input type="number" id="blendAlpha" min="0" max="100" step="5" style="width:46px"> %</label>' +
       '<label title="黑幕畫完才畫這個物件（暗處也看得到），並且當成光源照亮周圍（光會被牆擋住）"><input type="checkbox" id="blendGlow"> 發光</label>' +   // 字短一點，混合模式這塊才擠得進選取列同一排（說明在 title）
-      '<label id="blendGlowRBox">照亮半徑 <input type="number" id="blendGlowR" min="20" max="800" step="10" style="width:60px"> px</label>';
+      '<label id="blendGlowRBox" title="照亮半徑（px）">半徑 <input type="number" id="blendGlowR" min="20" max="800" step="10" style="width:50px"></label>';
     document.getElementById('selControls').appendChild(box);
     const apply = () => {
       const picked = selectedBlendTarget(); if (!picked) return;
