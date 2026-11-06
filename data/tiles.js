@@ -5379,5 +5379,13 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_swimring.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_mw4mgrxq",
+    "name": "Army_box",
+    "role": "floor",
+    "file": "images/研究部/Army_box.png",
+    "w": 3,
+    "h": 3
   }
 ];
