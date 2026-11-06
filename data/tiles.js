@@ -1793,6 +1793,114 @@ const SHARED_TILES = [
     "h": 1
   },
   {
+    "id": "tile_restaurant_dish_apple_pie",
+    "name": "餐點－蘋果派",
+    "role": "floor",
+    "file": "images/餐廳/06_apple_pie_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_bacon",
+    "name": "餐點－培根",
+    "role": "floor",
+    "file": "images/餐廳/14_bacon_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_burger",
+    "name": "餐點－漢堡",
+    "role": "floor",
+    "file": "images/餐廳/16_burger_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_dumplings",
+    "name": "餐點－水餃",
+    "role": "floor",
+    "file": "images/餐廳/37_dumplings_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_fried_egg",
+    "name": "餐點－荷包蛋",
+    "role": "floor",
+    "file": "images/餐廳/39_friedegg_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_meatball",
+    "name": "餐點－肉丸",
+    "role": "floor",
+    "file": "images/餐廳/70_meatball_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_omelet",
+    "name": "餐點－歐姆蛋",
+    "role": "floor",
+    "file": "images/餐廳/74_omlet_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_roasted_chicken",
+    "name": "餐點－烤雞",
+    "role": "floor",
+    "file": "images/餐廳/86_roastedchicken_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_salmon",
+    "name": "餐點－鮭魚",
+    "role": "floor",
+    "file": "images/餐廳/89_salmon_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_strawberry_cake",
+    "name": "餐點－草莓蛋糕",
+    "role": "floor",
+    "file": "images/餐廳/91_strawberrycake_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_sandwich",
+    "name": "餐點－三明治",
+    "role": "floor",
+    "file": "images/餐廳/93_sandwich_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
+    "id": "tile_restaurant_dish_steak",
+    "name": "餐點－牛排",
+    "role": "floor",
+    "file": "images/餐廳/96_steak_dish.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
+  },
+  {
     "id": "tile_restaurant_storage_cabinet",
     "name": "Storage Cabinet",
     "role": "floor",
