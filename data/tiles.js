@@ -5394,9 +5394,41 @@ const SHARED_TILES = [
   },
   {
     "id": "tile_mw4rtg2b",
-    "name": "Furniture (40)",
+    "name": "Furniture",
     "role": "floor",
-    "file": "images/scene-props/Furniture (40).png",
+    "file": "images/scene-props/Furniture.png",
+    "w": 1,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_173",
+    "name": "長沙發",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (173).png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_422",
+    "name": "L 型沙發",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (422).png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_438",
+    "name": "木矮櫃",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (438).png",
+    "w": 2,
+    "h": 1
+  },
+  {
+    "id": "tile_prop_furniture_475",
+    "name": "書櫃",
+    "role": "floor",
+    "file": "images/scene-props/Furniture (475).png",
     "w": 1,
     "h": 1
   },
