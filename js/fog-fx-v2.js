@@ -4,7 +4,7 @@
 //  - 貼地的薄霧帶：又長又扁的霧貼著地面飄，比霧團飄得快一點，看起來有前後層次（一樣會被營地、燒掉的霧樹那區挖掉）
 //  - 螢火蟲：霧裡有幾隻黃綠色的小光點慢慢飄、一閃一閃（畫在黑幕上面，暗處也看得到；沒霧的地方不會有）
 //    目前先關掉：只有 FOG_FX_V2.fireflyMaps 列出的地圖才會出現
-//  - 落葉：幾片葉子從上面晃啊晃地飄下來，邊飄邊翻面，落到地上躺一下（leafRest 秒）再淡掉
+//  - 落葉：幾片點陣圖葉子（images/森林/leaves.png）從上面晃啊晃地飄下來，邊飄邊翻面，落到地上躺一下（leafRest 秒）再淡掉；霧要變濃前起風，落葉變多、往旁邊吹
 //  霧散掉的地方（營地、燒光的霧樹那一區）不會有螢火蟲和落葉。
 //
 //  FOG_FX_VERSION：1＝原本畫法（只有原本那套），2＝起霧 V2（原本那套＋上面這些）
@@ -20,7 +20,21 @@ const FOG_FX_V2 = {
   leafRest: 5,                           // 落葉飄到地上後停幾秒才消失（最後 0.8 秒淡掉）
   fireflyMaps: [],                       // 哪些地圖才有螢火蟲：填地圖名稱，例如 ['F307區']；空的＝都沒有
   leafColors: ['#6f8f3a', '#8a9a3e', '#a0863a', '#7a5a2e', '#566f2e'],
+  // 點陣圖落葉：images/森林/leaves.png（每格 13×13；橫的 3 種形狀：細長、圓、心形；直的 4 種顏色：綠、橄欖、黃、褐）
+  leafSheet: 'images/森林/leaves.png', leafCell: 13, leafShapes: 3,
+  leafRows: [0, 0, 1, 1, 2, 3],          // 抽顏色用：0 綠、1 橄欖、2 黃、3 褐（同一個數字放越多次越常出現）
+  leafPixel: 1.5,                        // 點陣圖放大幾倍（1＝原尺寸；2＝圖上一點畫成 2×2）
+  windLeaves: 3,                         // 霧要變濃前起風：落葉最多變成幾倍
 };
+const fogV2LeafImg = new Image();
+fogV2LeafImg.src = encodeURI(FOG_FX_V2.leafSheet);
+const fogV2LeafReady = () => fogV2LeafImg.complete && fogV2LeafImg.naturalWidth > 0;
+// 畫一片點陣圖葉子（原點在葉子中心；呼叫前先 translate／rotate／scale 好）
+function fogV2LeafSprite(ctx, l) {
+  const C = FOG_FX_V2, n = C.leafCell, k = C.leafPixel || 1;
+  ctx.imageSmoothingEnabled = false;
+  ctx.drawImage(fogV2LeafImg, l.shape * n, l.row * n, n, n, -n * k / 2, -n * k / 2, n * k, n * k);
+}
 const fgv2R = (a, b) => a + Math.random() * (b - a);
 const fogV2On = () => typeof FOG_FX_VERSION !== 'undefined' && FOG_FX_VERSION === 2 && typeof currentFogPreset === 'function' && !!currentFogPreset();
 
@@ -79,26 +93,41 @@ function updateFogV2(dt) {
   const rest = C.leafRest ?? 5;
   F.leaves = F.leaves.filter(l => l.landed ? l.restT < rest + .8 && l.x > vx - 200 && l.x < vx + vw + 200 && l.y > vy - 200 && l.y < vy + vh + 200
     : l.y < vy + vh + 40 && l.x > vx - 80 && l.x < vx + vw + 80);
-  const flying = F.leaves.filter(l => !l.landed).length, want = Math.round((heavy ? C.leaves.heavy : C.leaves.light) * (C.leafCount || 1));
-  if (flying < want && Math.random() < dt * 1.5 * (C.leafCount || 1)) {
+  const gust = typeof fogGust === 'function' ? fogGust() : 0;   // 霧要變濃前起風（js/fog.js）：落葉變多、往旁邊吹
+  const flying = F.leaves.filter(l => !l.landed).length, want = Math.round((heavy ? C.leaves.heavy : C.leaves.light) * (C.leafCount || 1) * (1 + ((C.windLeaves || 1) - 1) * gust));
+  if (flying < want && Math.random() < dt * 1.5 * (C.leafCount || 1) * (1 + 3 * gust)) {
     const x = vx + Math.random() * (vw + 160) - 120, y = vy - 20 + Math.random() * vh * .7, ground = y + fgv2R(70, 220);   // 從畫面任何高度飄出來（剛出現時淡入），往下飄一小段就落地
     if (fogV2DensityAt(x, Math.min(vy + vh, ground)) > .3)
-      F.leaves.push({ x, y, ground, vy: fgv2R(18, 34), sway: fgv2R(14, 28), ph: Math.random() * 6.28, spin: fgv2R(2, 4) * (Math.random() < .5 ? -1 : 1), s: fgv2R(4, 6.5) * (C.leafSize || 1), col: C.leafColors[Math.floor(Math.random() * C.leafColors.length)], landed: false, restT: 0, age: 0 });
+      F.leaves.push({ x, y, ground, vy: fgv2R(18, 34), sway: fgv2R(14, 28), ph: Math.random() * 6.28, spin: fgv2R(2, 4) * (Math.random() < .5 ? -1 : 1), s: fgv2R(4, 6.5) * (C.leafSize || 1), col: C.leafColors[Math.floor(Math.random() * C.leafColors.length)],
+        shape: Math.floor(Math.random() * C.leafShapes), row: C.leafRows[Math.floor(Math.random() * C.leafRows.length)], landed: false, restT: 0, age: 0 });
   }
   for (const l of F.leaves) {
     if (l.landed) { l.restT += dt; continue; }
-    l.age += dt; l.ph += dt; l.y += l.vy * dt; l.x += (Math.cos(l.ph * 1.6) * l.sway + 10) * dt;
+    l.age += dt; l.ph += dt * (1 + gust); l.y += l.vy * dt; l.x += (Math.cos(l.ph * 1.6) * l.sway + 10 + 70 * gust) * dt;   // 起風：吹得比較快、往右飄
     if (l.y >= l.ground) { l.landed = true; l.restAng = Math.sin(l.ph * 1.6) * .6 + fgv2R(-.6, .6); l.restFlip = Math.cos(l.ph * l.spin) >= 0 ? 1 : -1; }   // 落地：躺平
   }
 }
 
 // 落葉（世界層，黑幕之下：暗處的葉子也是暗的）
-function drawFogV2Leaves(ctx) {
+// layer：'ground'＝只畫落在地上的（js/render.js 在人物之前呼叫，葉子在人物腳下）；'air'＝只畫還在空中飄的
+function drawFogV2Leaves(ctx, layer) {
   const F = G.fogV2;
   if (!F || !F.leaves.length || !fogV2On()) return;
   ctx.save();
   const rest = FOG_FX_V2.leafRest ?? 5, LW = .8 * (FOG_FX_V2.leafWidth || 1);   // LW：葉子胖瘦
   for (const l of F.leaves) {
+    if (layer === 'ground' && !l.landed) continue;
+    if (layer === 'air' && l.landed) continue;
+    if (l.landed && fogV2LeafReady()) {   // 點陣圖：躺在地上不動，最後 0.8 秒淡掉
+      const a = l.restT < rest ? 1 : Math.max(0, 1 - (l.restT - rest) / .8);
+      ctx.save(); ctx.translate(Math.round(l.x), Math.round(l.y)); ctx.rotate(l.restAng); if (l.restFlip < 0) ctx.scale(-1, 1);
+      ctx.globalAlpha = .9 * a; fogV2LeafSprite(ctx, l); ctx.restore(); continue;
+    }
+    if (!l.landed && fogV2LeafReady()) {   // 點陣圖：邊飄邊翻面（寬度變窄＝轉到側面，翻過去就鏡射）
+      const flip = Math.cos(l.ph * l.spin);
+      ctx.save(); ctx.translate(Math.round(l.x), Math.round(l.y)); ctx.rotate(Math.sin(l.ph * 1.6) * .6); ctx.scale(Math.sign(flip || 1) * Math.max(.2, Math.abs(flip)), 1);
+      ctx.globalAlpha = .95 * Math.min(1, l.age / .5); fogV2LeafSprite(ctx, l); ctx.restore(); continue;
+    }
     if (l.landed) {   // 躺在地上：不動、壓扁一點（貼地），最後 0.8 秒淡掉
       const a = l.restT < rest ? 1 : Math.max(0, 1 - (l.restT - rest) / .8);
       ctx.save(); ctx.translate(l.x, l.y); ctx.scale(1, .6); ctx.rotate(l.restAng);

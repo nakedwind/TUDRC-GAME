@@ -38,6 +38,10 @@ const SUPPLIES = [
     food:{ hp:5, sp:10 }, effect:'❤ HP +5　✦ SP +10', desc:'小虱目魚小子和魚頭君掉下來的生魚片，清爽冰涼。吃下去恢復一點 HP 和 SP。放在地上用火烤，會變成烤魚片。' },
   { id:'grilled-fish-slice', name:'烤魚片', kind:'medical', act:'food', price:30, special:true, file:'烤魚片-金黃版.png',
     food:{ hp:12, buff:{ kind:'rate', val:.20, dur:60 } }, effect:'❤ HP +12　⚡ 射速 +20%', desc:'烤得香脆的魚片。吃下去恢復 HP，60 秒內開槍更快（射速 +20%）。' },
+  { id:'loofah', name:'絲瓜', kind:'medical', act:'food', price:12, special:true, file:'絲瓜.png', cookTo:'grilled-loofah',
+    food:{ hp:3, sp:8 }, effect:'❤ HP +3　✦ SP +8', desc:'打倒絲瓜小姐掉下來的絲瓜，水分很多、清清涼涼的。吃下去恢復一點 HP 和 SP。放在地上用火烤，會變成烤絲瓜。' },
+  { id:'grilled-loofah', name:'烤絲瓜', kind:'medical', act:'food', price:30, special:true, file:'烤絲瓜.png',
+    food:{ hp:8, sp:15 }, effect:'❤ HP +8　✦ SP +15', desc:'烤到軟嫩、湯汁滿滿的絲瓜。吃下去恢復一點 HP 和 SP。' },
   // ---- 零食 ----
   { id:'little-noodles', name:'小學麵', kind:'snack', price:18, buff:{ atk:.05 }, file:'小學麵.png' },
   { id:'cadina', name:'卡迪這', kind:'snack', price:25, buff:{ atk:.07 }, file:'卡迪這.png' },

@@ -10,6 +10,7 @@ const FOOD_DROPS = {   // 依怪物的 behavior：掉什麼、幾個、機率
   milkfish:      { id: 'milkfish-belly', min: 1, max: 1, chance: .3 },   // 虱目魚小子 → 虱目魚肚
   milkfishSmall: { id: 'sashimi',        min: 1, max: 1, chance: .3 },   // 小虱目魚小子 → 生魚片
   fishhead:      { id: 'sashimi',        min: 1, max: 2, chance: .3 },   // 魚頭君 → 生魚片
+  vine:          { id: 'loofah',         min: 1, max: 1, chance: .3 },   // 絲瓜小姐 → 絲瓜
 };
 const FOOD_COOK = { time: 1.2 };   // 待在火海裡幾秒會烤熟
 const FOOD_SICK = { dur: 6, slow: .25 };   // 生吃鬧肚子：幾秒、走慢多少
@@ -60,7 +61,7 @@ function useFood(id) {
   const hp = Math.min(f.hp || 0, p.maxhp - p.hp); if (hp > 0) { p.hp += hp; parts.push('+' + Math.ceil(hp) + ' HP'); }
   const sp = Math.min(f.sp || 0, G.guideMax - G.guide); if (sp > 0) { G.guide += sp; parts.push('+' + Math.ceil(sp) + ' SP'); }
   if (f.buff) { addFoodBuff(f.buff.kind, f.buff.val, f.buff.dur); parts.push(FOOD_BUFFS[f.buff.kind].icon); }
-  sfx(f.sp ? 'drink' : 'soothe');
+  sfx('eat');   // 吃東西的音效（香蕉、魚、絲瓜都一樣）
   flash(it.name + (parts.length ? ' ' + parts.join(' ') : ''), p.x, p.y - 54, '#ffd27a');
   if (f.sick && Math.random() < f.sick) {   // 生吃：鬧肚子
     addFoodBuff('sick', FOOD_SICK.slow, FOOD_SICK.dur);

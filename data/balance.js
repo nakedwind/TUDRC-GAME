@@ -208,7 +208,20 @@ const FOG = {
   campClear: 4,      // 營地周圍幾格內不起霧（再往外 2 格慢慢變濃）
   zoneFade: 3,       // 霧樹燒光後，這一區的霧幾秒內散光
   fireClear: { extra: 2.5, fadeIn: .8, linger: 5, fadeOut: 3 },   // 火海（燃燒彈、油桶）周圍再多 extra 格的霧暫時散開；火熄了 linger 秒後，霧花 fadeOut 秒慢慢回來
+  // 霧會隨機變濃、變淡（js/fog.js 的 updateFogWeather）：mul＝濃度倍率（看得清楚的範圍變小、白茫茫變濃），weight＝被抽到的機率
+  weather: {
+    levels: { thin: { mul: .55, weight: 1 }, normal: { mul: 1, weight: 2 }, thick: { mul: 1.5, weight: 1.3 } },
+    hold: [15, 35],    // 每一種濃度維持幾秒（隨機）
+    change: 5,         // 換濃度要花幾秒慢慢變
+    omen: 5,           // 霧要變濃之前，先起風幾秒（風聲、落葉變多往旁邊吹、霧團飄得快、霧慢慢聚過來），讓玩家有時間準備
+    omenWind: 4,       // 起風時霧團飄的速度變成幾倍
+    omenGather: .15,   // 起風時霧先變濃一點點（濃度倍率多加多少）
+  },
 };
+// 霧擋住隊友的視線（js/fog.js 的 fogSightAt）：站在越濃的霧裡影響越大；營地、燒掉霧樹那一區、火海周圍沒有影響
+// 數字＝在最濃的霧裡最多少掉幾成：range 鎖敵距離、miss 命中率、slow 走路速度
+// monster：怪物發現溫特、隊友的距離（站在霧裡的不管是怪物還是被看的人，都算看不清楚）
+const FOG_SIGHT = { range: .5, miss: .4, slow: .3, monster: .6 };
 // ---- 霧樹（js/fog.js）：地圖編輯器「🌲 霧樹」擺的變異樹 ----
 // 地圖會自動分區：每一格歸給離它最近的那棵霧樹。把樹燒光，它那一區的霧就散了。
 // 只有火燒得動：燃燒彈、油桶爆炸的火海碰到樹根就會著火。

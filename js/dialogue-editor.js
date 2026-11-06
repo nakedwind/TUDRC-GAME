@@ -32,6 +32,7 @@ const SITUATIONS = [
   { group: '戰鬥中', key: 'lowSp', label: '嚮導 SP 偏低・頭暈', when: '嚮導 SP 低於 <b>40</b> 時說一句；恢復到 45 以上後可再次觸發。' },
   { group: '戰鬥中', key: 'ultimate', label: '放大招時喊的話', when: '大招冷卻好、<b>放大招的瞬間</b>。' },
   { group: '戰鬥中', key: 'bitten', label: '在黑暗中被咬', when: '待在暗處被 Smiler 咬到、還站得住時。' },
+  { group: '戰鬥中', key: 'fogThick', label: '霧變濃了', when: '森林的霧<b>變濃</b>時，站在霧裡的其中一位隊友說一句（霧會隨機變濃、變淡；變濃時隊友看不遠、命中率下降、走路變慢）。' },
   { group: '戰鬥中', key: 'guard', label: '衝去保護部隊長', when: '部隊長被怪物攻擊、他衝過去保護時（每 <b>6 秒</b>最多一次）。' },
   { group: '戰鬥中・被怪物攻擊', key: 'hurt', label: '一般被打', when: '被怪物打到時<b>有時候</b>說一句（大約一半機率，說完至少隔 <b>7 秒</b>）。數值在 js/mate-hurt-talk.js 的 MATE_HURT_TALK。' },
   { group: '戰鬥中・被怪物攻擊', key: 'lowHp', label: '快沒血', when: '血量掉到 <b>3 成</b>以下時說一句；回到 5 成以上後，下次掉下去會再說。' },

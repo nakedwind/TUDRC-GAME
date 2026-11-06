@@ -1,10 +1,15 @@
 /* ===== 森林的垂吊藤蔓（地圖編輯器「🌿 藤蔓」擺放）=====
    ・藤蔓從畫面上方垂下來，尖端垂到地面那一格；溫特靠近時尖端會抽動（預告）
-   ・溫特或隊友碰到尖端：被纏住 → 翻成頭下腳上、往上捲，越拉越大（往鏡頭靠近）、太近就淡掉（鏡頭停在原地）→ 在畫面外吊 VINES.awayTime 秒
+   ・溫特或隊友碰到尖端：被纏住 → 翻成頭下腳上、往上捲，越拉越大（往鏡頭靠近）、太近就淡掉（鏡頭停在原地）→ 在畫面外吊 VINES.awayTime 秒（隊友 VINES.mateAwayTime 秒）
      → 從畫面上方被丟回附近的地面（摔一下扣一點血、頭暈一下）
    ・被吊走的期間：不能動、不能攻擊，怪物打不到（扣的血會補回來）；鏡頭只有溫特被抓時才會停住
    ・剛摔下來的人 VINES.safeTime 秒內不會又被抓
    ・藤蔓抓過人會縮上去，VINES.regrowTime 秒後再慢慢垂下來
+   ・倒吊藤蔓（地圖編輯器「🪢 倒吊藤蔓」）：抓到隊友不丟下來，而是把他倒吊在半空中晃來晃去；
+     溫特要開槍把藤蔓打斷（VINES.hangHits 發）才能救下來。溫特碰到倒吊藤蔓照樣被捲走、丟回來
+   ・藤蔓怕火：被火海（燃燒彈、油桶）燒到就縮回去，VINES.fireRegrow 秒後才重新垂下來；
+     正在纏人、倒吊隊友的藤蔓被燒到會放開（倒吊的隊友會掉下來）
+   ・藤蔓尖端正下方的地上有影子，看得出藤蔓垂在哪裡
    藤蔓圖：images/森林/vine.png（VINE_IMG）；被抓時身上的纏繞用絲瓜小姐的 drawWrap（js/loofah-lady.js）
    必須在 js/render.js、js/enemy-ai.js、js/combat-feel.js、js/loofah-lady.js 之後載入、js/grab.js 之前載入（會包住 drawPlayer、drawTower、enemyAttackPlayer、hurtGraceBlocked）。
 */
@@ -15,7 +20,8 @@ const VINES = {
   warnR: 90,         // 靠多近藤蔓尖端開始抽動
   wrapTime: .5,      // 纏住幾秒後開始往上拉
   liftTime: 1.2,     // 往上拉出畫面要幾秒
-  awayTime: 3,       // 在畫面外被吊幾秒
+  awayTime: 3,       // 溫特在畫面外被吊幾秒
+  mateAwayTime: 10,  // 隊友在畫面外被吊幾秒（被捲走比較久才回來）
   dropMin: 3,        // 丟回地面：離被抓的地方至少幾格
   dropMax: 6,        //               最多幾格
   fallDamage: 10,    // 摔下來扣多少 HP（不會摔死，最少留 1）
@@ -35,10 +41,21 @@ const VINES = {
   depthEnd: 1.05,    //                到畫面幾成高度最大（1＝畫面下緣）
   depthNear: 1,      //                到最下面時算多靠近鏡頭（1＝跟 nearScale 一樣大、完全淡掉）
   color: '#3f6b2a', dark: '#24401a', leaf: '#5d9a3a',
-  // 被抓時身上纏繞的顏色（絲瓜藤的畫法，但改成墨綠，跟藤蔓圖搭）
-  wrapCol: { line: '#132209', fill: '#3b5a2c', light: '#5f7d42', back: '#28401e' },
+  // 被抓時身上纏繞的顏色（絲瓜藤的畫法，但改成橄欖綠，跟藤蔓圖搭）
+  wrapCol: { line: '#1e220c', fill: '#7a8432', light: '#a6ae52', back: '#555c22' },   // 橄欖綠
   starDx: -10,       // 暈眩星星：往頭那一邊的反方向挪幾像素（往右倒＝往左挪，往左倒自動鏡射）
   starDy: -10,       //           往上挪幾像素（負的＝往上）
+  // 倒吊藤蔓
+  hangH: 70,         // 隊友被倒吊在離地多高（像素）
+  hangLiftTime: .9,  // 拉上去要幾秒
+  hangSwing: 12,     // 倒吊時左右晃多大（像素）
+  hangHits: 3,       // 溫特要打中幾發才打得斷
+  // 怕火
+  fireR: 34,         // 火海離藤蔓尖端（或被倒吊的隊友正下方）多近算燒到（像素）
+  fireRegrow: 60,    // 被火燒到縮回去後，幾秒才重新垂下來
+  retractTime: .6,   // 縮回去要幾秒
+  // 地上的影子（藤蔓尖端正下方）
+  shadowW: 16, shadowH: 6, shadowAlpha: .32,
 };
 
 // ---- 開場：照地圖上的 MAP.vines ['欄,列'…] 擺藤蔓 ----
@@ -46,12 +63,16 @@ const VINES = {
 function seedVines() {
   G.vines = []; G.vineCaps = [];
   for (const a of [G.player, ...(G.towers || [])]) if (a) { a.vineCap = false; a.vineDazeT = 0; a.vineSafeT = 0; }
-  if (MAP_SAFE || !MAP || !Array.isArray(MAP.vines)) return;
-  for (const key of MAP.vines) {
-    const [c, r] = key.split(',').map(Number);
-    if (!inGrid(c, r)) continue;
-    const [x, cy] = center(c, r);
-    G.vines.push({ c, r, x, y: cy + 6, state: 'hang', t: 0, len: 1, seed: Math.random() * 10, twitch: 0 });
+  if (MAP_SAFE || !MAP) return;
+  // MAP.vines＝一般藤蔓（捲走再丟回來）、MAP.vinesHang＝倒吊藤蔓（把隊友吊在半空中）
+  for (const [list, kind] of [[MAP.vines, 'toss'], [MAP.vinesHang, 'hang']]) {
+    if (!Array.isArray(list)) continue;
+    for (const key of list) {
+      const [c, r] = key.split(',').map(Number);
+      if (!inGrid(c, r)) continue;
+      const [x, cy] = center(c, r);
+      G.vines.push({ c, r, x, y: cy + 6, kind, state: 'hang', t: 0, len: 1, seed: Math.random() * 10, twitch: 0 });
+    }
   }
 }
 
@@ -82,6 +103,8 @@ function updateVines(dt) {
   for (const v of G.vines) {
     v.twitch = Math.max(0, v.twitch - dt * 2);
     if (v.state === 'gone') { if ((v.t -= dt) <= 0) { v.state = 'descend'; v.t = 0; v.len = 0; } continue; }
+    if (v.state === 'retract') { v.len -= dt / VINES.retractTime; if (v.len <= 0) { v.len = 0; v.state = 'gone'; v.t = v.regrowAfter || VINES.regrowTime; } continue; }
+    if (vineTouchesFire(v)) { vineScorch(v); continue; }   // 怕火：燒到就縮回去
     if (v.state === 'descend') { v.len = Math.min(1, v.len + dt / VINES.descendTime); if (v.len >= 1) v.state = 'hang'; continue; }
     if (v.state !== 'hang' || G.over) continue;
     const tip = vineTip(v, now);
@@ -108,13 +131,19 @@ function stepVineCap(cap, a, dt) {
   if (cap.phase !== 'fall') { a.x = cap.x0; a.y = cap.y0; }
   if (cap.phase === 'wrap') {
     if (cap.t >= VINES.wrapTime) { cap.phase = 'lift'; cap.t = 0; cap.v.state = 'lift'; sfxAt('vineLift', a.x, a.y, .5); }
+  } else if (cap.phase === 'lift' && cap.mode === 'hang') {   // 倒吊藤蔓：拉到半空中就停住
+    const k = Math.min(1, cap.t / VINES.hangLiftTime);
+    cap.h = VINES.hangH * (1 - Math.pow(1 - k, 3));
+    if (k >= 1) { cap.phase = 'hang'; cap.t = 0; cap.hits = 0; }
+  } else if (cap.phase === 'hang') {   // 倒吊中：一直吊著，等溫特把藤蔓打斷（或藤蔓被火燒到）
+    cap.h = VINES.hangH;
   } else if (cap.phase === 'lift') {
     const k = Math.min(1, cap.t / VINES.liftTime);
     cap.topH = Math.max(cap.topH, (a.y - cam.y) + 110);   // 鏡頭跟著溫特動：隊友要拉到「現在」的畫面上緣外面
     cap.h = cap.topH * k * k * (1.4 - .4 * k);   // 一開始慢、越拉越快
     if (k >= 1) { cap.phase = 'away'; cap.t = 0; cap.v.state = 'gone'; cap.v.t = VINES.regrowTime; pickVineDrop(cap); }
   } else if (cap.phase === 'away') {
-    if (cap.t >= VINES.awayTime) {
+    if (cap.t >= (cap.isPlayer ? VINES.awayTime : VINES.mateAwayTime)) {
       cap.phase = 'fall'; cap.t = 0; cap.fallV = 0;
       a.x = cap.dropX; a.y = cap.dropY;
       cap.h = Math.max(160, (a.y - cam.y) + 90);   // 從畫面上緣外面掉下來
@@ -140,12 +169,79 @@ function vineGrab(v, a, isPlayer) {
   if (isPlayer && a.sitting && typeof standUp === 'function') standUp();
   if (!isPlayer && typeof assigning !== 'undefined' && assigning === a) assigning = null;
   v.state = 'grab';
-  G.vineCaps.push({ v, actor: a, isPlayer, phase: 'wrap', t: 0, h: 0, x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y,
+  G.vineCaps.push({ v, actor: a, isPlayer, mode: v.kind === 'hang' && !isPlayer ? 'hang' : 'toss', phase: 'wrap', t: 0, h: 0, x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y,
     topH: (a.y - cam.y) + 110 });   // 拉到畫面上緣外面
   a.vineCap = true; a.dashT = 0;
   if (isPlayer) { flash('被藤蔓抓住了！', a.x, a.y - 56, '#9fe07a', .9); addShake(3); }
   else if (!(typeof mateHurtSay === 'function' && mateHurtSay(a, 'vineGrab'))) sentryStatus(a, '被藤蔓抓住了！', '#9fe07a', true);   // 對話編輯器「被森林藤蔓抓走」；沒填台詞就照舊跳狀態字
   sfxAt('vineGrab', a.x, a.y, .8);
+}
+
+// ---- 怕火：火海碰到藤蔓尖端（或倒吊的隊友正下方）就縮回去 ----
+function vineFireAt(x, y) {
+  for (const f of G.oilFires || []) if (f.t > 0 && Math.hypot(x - f.x, (y - f.y) / .7) <= f.r + VINES.fireR) return true;
+  return false;
+}
+function vineHeldCap(v) { return G.vineCaps.find(c => c.v === v && (c.phase === 'wrap' || c.phase === 'hang')) || null; }   // 正在纏人、倒吊隊友
+function vineTouchesFire(v) {
+  if (v.state === 'hang' || v.state === 'descend') return vineFireAt(v.x, v.y);
+  const cap = vineHeldCap(v);
+  return !!(cap && vineFireAt(cap.actor.x, cap.actor.y));
+}
+function vineScorch(v) {
+  const cap = vineHeldCap(v);
+  if (cap) {
+    if (cap.phase === 'hang') vineDropHung(cap);   // 倒吊的隊友掉下來
+    else { G.vineCaps = G.vineCaps.filter(c => c !== cap); cap.actor.vineCap = false; cap.actor.vineSafeT = VINES.safeTime; }   // 還沒拉上去：直接放開
+  }
+  v.state = 'retract'; v.regrowAfter = VINES.fireRegrow; v.twitch = 1;
+  const tipY = cap ? cap.actor.y - (cap.h || 0) - 30 : v.y;
+  for (let i = 0; i < 3; i++) spawnFlameBurst(v.x + (Math.random() * 2 - 1) * 8, tipY - Math.random() * 20, .6);
+  if (typeof sfxAt === 'function') sfxAt('hitIncendiary', v.x, v.y, .35, 'vine-scorch');
+}
+
+// ---- 倒吊藤蔓：溫特開槍打斷 ----
+// 游標點在被倒吊的隊友（或他上面那一段藤蔓）身上、在手槍射程內、看得到：這一槍打藤蔓（js/game.js 的 updatePlayerAttack 呼叫）
+function vineHangShotTarget(aim) {
+  const p = G && G.player; if (!p || !G.vineCaps) return null;
+  for (const cap of G.vineCaps) {
+    if (cap.phase !== 'hang') continue;
+    const a = cap.actor, bx = a.x + (cap.sx || 0), top = a.y - cap.h - 80, bottom = a.y - cap.h + 20;
+    if (Math.abs(aim.x - bx) > 22 || aim.y < top || aim.y > bottom) continue;
+    if (Math.hypot(a.x - p.x, a.y - p.y) > PLAYER_ATK.range * CELL || !hasLineOfSight(p.x, p.y, a.x, a.y)) continue;
+    return cap;
+  }
+  return null;
+}
+function shootHangVine(p, cap, aim, aimAng) {
+  const a = cap.actor, hx = a.x + (cap.sx || 0), hy = a.y - cap.h - VINE_BODY.feet - 12;   // 子彈打在腳上面那一段藤蔓
+  const m = gunMuzzleAt(p, aimAng), mx = m.x, my = m.y;
+  G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });
+  addLightFlash('muzzle', mx, my);
+  spawnShellCasing(mx, my, aimAng);
+  G.effects.push({ bullet: true, x1: mx, y1: my, x2: hx, y2: hy, life: .07, life0: .07, color: '#ffe79a' });
+  G.effects.push({ ring: true, x: hx, y: hy, r: 2, r2: 9, life: .14, life0: .14, color: '#a6ae52' });
+  sfx('shotPistol');
+  for (let i = 0; i < 4; i++) G.effects.push({ particle: true, kind: 'spark', x: hx, y: hy, vx: (Math.random() - .5) * 90, vy: -(10 + Math.random() * 40), r: 1.5 + Math.random(), life: .35, life0: .35, color: i % 2 ? '#7a8432' : '#a6ae52' });
+  if (typeof sfxAt === 'function') sfxAt('knock2', hx, hy, .3, 'vine-hit');
+  cap.hits = (cap.hits || 0) + 1; cap.kick = aim.x < a.x ? 1 : -1;   // 被打中：晃一下
+  if (cap.hits >= VINES.hangHits) {
+    vineDropHung(cap); cap.v.state = 'retract'; cap.v.len = 1; cap.v.regrowAfter = VINES.regrowTime;
+    if (typeof sfxAt === 'function') sfxAt('swordSwing', hx, hy, .4, 'vine-snap');
+  }
+  if (p.ammo <= 0) startReload(p);
+  else if (PLAYER_ATK.double && Math.random() < PLAYER_ATK.double) p.atkCd = .07;
+}
+// 倒吊的隊友掉下來（藤蔓被打斷或被火燒到）：從半空中翻成躺的姿勢掉到地上，跟被丟下來一樣彈兩下、躺著暈
+function vineDropHung(cap) {
+  const a = cap.actor;
+  cap.phase = 'fall'; cap.t = 0; cap.fallV = 0; cap.cut = true;
+  cap.fallH0 = Math.max(1, cap.h); cap.lieSide = Math.random() < .5 ? -1 : 1;
+  if (cap.v.state !== 'retract') { cap.v.state = 'retract'; cap.v.len = 1; }
+  for (let i = 0; i < 10; i++) {
+    const ang = Math.random() * Math.PI * 2, sp = 50 + Math.random() * 80;
+    G.effects.push({ particle: true, kind: 'spark', x: a.x, y: a.y - cap.h - 30, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp * .6 - 30, r: 2 + Math.random() * 1.5, life: .45, life0: .45, color: i % 2 ? '#7a8432' : '#a6ae52' });
+  }
 }
 
 // 丟回去的地方：離被抓的地方 dropMin～dropMax 格、走得到、旁邊沒有別的藤蔓
@@ -261,9 +357,9 @@ function vineSortables(list) {
   if (!G || !G.vines || !G.vines.length) return;
   const now = performance.now() / 1000, caps = G.vineCaps || [];
   for (const v of G.vines) {
-    if (v.state === 'gone' || caps.some(c => c.v === v && c.phase !== 'away')) continue;   // 抓著人的那條跟被抓的人一起畫
+    if (v.state === 'gone' || caps.some(c => c.v === v && (c.phase === 'wrap' || c.phase === 'lift' || c.phase === 'hang'))) continue;   // 抓著人的那條跟被抓的人一起畫
     const tip = vineTip(v, now), topY = cam.y - 30;
-    const ty = v.state === 'descend' ? topY + (tip.y - topY) * (1 - Math.pow(1 - v.len, 3)) : tip.y;
+    const ty = v.state === 'descend' || v.state === 'retract' ? topY + (tip.y - topY) * (1 - Math.pow(1 - v.len, 3)) : tip.y;   // 重新垂下來、被火燒到縮回去
     // 假 3D 景深：畫面越下面＝越靠近鏡頭 → 越大（尖端不動），到畫面下緣附近淡掉
     // （溫特往上走＝往前進，藤蔓就從畫面上方往下「迎面而來」，越來越大，最後淡出）
     const vh = viewH(), u = (tip.y - cam.y) / vh;
@@ -274,9 +370,21 @@ function vineSortables(list) {
     const tx = tip.x;   // 放大時尖端位置不動（以尖端為軸放大）：看得出碰到哪裡會被抓
     if (tx < cam.x - 80 * s || tx > cam.x + viewW() + 80 * s || ty < cam.y - 40) continue;
     const front = depthK > 0 ? 100000 : 0;   // 靠近鏡頭的畫在人物前面
+    // 地上的影子：尖端正下方（垂下來、縮回去時跟著變淡），畫在地面那一層（人物下面）
+    const shK = (v.state === 'descend' || v.state === 'retract' ? v.len * v.len : 1) * alpha;
+    if (shK > .02) list.push({ y: -1e6, draw: () => drawVineShadow(ctx, tip.x, tip.y, shK) });
     if (s === 1 && alpha === 1) { list.push({ y: tip.y + 2, draw: () => drawVineStem(ctx, v, tx, ty, now, false) }); continue; }
     list.push({ y: tip.y + 2 + front, draw: () => { ctx.save(); ctx.globalAlpha *= alpha; drawVineStem(ctx, v, tx, ty, now, false, s); ctx.restore(); } });
   }
+}
+
+function drawVineShadow(ctx, x, y, k) {
+  ctx.save();
+  ctx.fillStyle = 'rgba(0,0,0,' + (VINES.shadowAlpha * k).toFixed(3) + ')';
+  ctx.beginPath(); ctx.ellipse(x, y + 2, VINES.shadowW, VINES.shadowH, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.fillStyle = 'rgba(0,0,0,' + (VINES.shadowAlpha * .8 * k).toFixed(3) + ')';
+  ctx.beginPath(); ctx.ellipse(x, y + 2, VINES.shadowW * .5, VINES.shadowH * .5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.restore();
 }
 
 // ---- 往鏡頭靠近的假 3D：往上拉時越來越大、太近就淡掉；掉下來／重新垂下來時反過來 ----
@@ -338,19 +446,23 @@ function drawVineActor(a, baseDraw, overlay = false) {
   const now = performance.now() / 1000, h = Math.max(0, cap.h);
   // 翻轉：往上拉一開始翻成頭下腳上；掉下來的途中翻成躺的姿勢，躺著彈兩下
   let ang = 0, near = 0, lieK = 0;
+  const hangMode = cap.mode === 'hang';
   if (cap.phase === 'lift') {
     ang = Math.PI * Math.min(1, cap.t / VINES.flipTime);
-    near = Math.min(1, cap.t / VINES.liftTime);
+    near = hangMode ? 0 : Math.min(1, cap.t / VINES.liftTime);   // 倒吊藤蔓只拉到半空中：不往鏡頭靠近
+  } else if (cap.phase === 'hang') {
+    if (!overlay) cap.kick = (cap.kick || 0) * .94;   // 被打中的晃動慢慢停
+    ang = Math.PI + Math.sin(now * 2.2 + a.x * .01) * .12 + (cap.kick || 0) * .25;   // 倒吊著像鐘擺一樣晃
   } else if (cap.phase === 'fall') {
     const q = cap.fallH0 > 0 ? Math.max(0, h / cap.fallH0) : 0;   // 1＝剛開始掉、0＝落地
     lieK = Math.min(1, (1 - q) / .85);
     const target = cap.lieSide === 1 ? Math.PI / 2 : Math.PI * 1.5;   // 往右躺＝頭朝右、往左躺＝頭朝左（跟躺在地上暈的姿勢一樣）
     ang = Math.PI + (target - Math.PI) * lieK;
-    near = q * .9;
+    near = cap.cut ? 0 : q * .9;   // 從半空中掉下來的不用往鏡頭靠近
   }
   const flipK = cap.phase === 'fall' ? 1 : Math.min(1, ang / Math.PI);
   const { s, alpha } = vineNear(near);
-  const air = cap.phase === 'lift' || (cap.phase === 'fall' && h > 50);   // 快落地、彈跳時畫回一般那層（跟躺在地上的樣子接得起來）
+  const air = (cap.phase === 'lift' && !hangMode) || (cap.phase === 'fall' && h > 50 && !cap.cut);   // 快落地、彈跳時畫回一般那層（跟躺在地上的樣子接得起來）
   if (!overlay) {   // 地上的影子：離地越高越小越淡
     ctx.fillStyle = 'rgba(0,0,0,' + Math.max(.05, .3 - h * .002).toFixed(3) + ')';
     ctx.beginPath(); ctx.ellipse(a.x, a.y + 15, Math.max(4, 15 - h * .05) + 12 * lieK * Math.max(0, 1 - h / 80), Math.max(2, 5 - h * .02), 0, 0, Math.PI * 2); ctx.fill();   // 躺的姿勢快落地時影子變寬
@@ -358,7 +470,10 @@ function drawVineActor(a, baseDraw, overlay = false) {
   } else if (!air) return;
   if (alpha <= 0) return;
   // 被吊著左右晃、剛纏住時掙扎抖動
-  const sx = cap.phase === 'fall' ? 0 : (cap.phase === 'wrap' ? (Math.random() - .5) * 2.4 : Math.sin(now * 4 + (cap.isPlayer ? 0 : a.x)) * Math.min(8, h * .06));
+  const sx = cap.phase === 'fall' ? 0 : cap.phase === 'wrap' ? (Math.random() - .5) * 2.4
+    : cap.phase === 'hang' ? Math.sin(now * 2.2 + a.x * .01) * VINES.hangSwing + (cap.kick || 0) * 6
+    : Math.sin(now * 4 + (cap.isPlayer ? 0 : a.x)) * Math.min(8, h * .06);
+  cap.sx = sx;   // 開槍判定用（vineHangShotTarget）
   const px = a.x + sx, py = a.y - h - VINE_BODY.pivot + (VINE_BODY.pivot + 2) * lieK;   // 身體中心（翻轉、放大都以這裡為軸）；躺下時中心降到貼地
   // 藤蔓接的地方：正著的時候在腰後面，翻過來後在腳上（翻到頭上方）
   const off = VINE_BODY.waist + (VINE_BODY.feet - VINE_BODY.waist) * flipK;
@@ -374,10 +489,18 @@ function drawVineActor(a, baseDraw, overlay = false) {
     const grow = cap.phase === 'wrap' ? Math.min(1, cap.t / (VINES.wrapTime * .8)) : 1;
     cap.wrapSeed = cap.wrapSeed || (1 + Math.random() * 6);
     const C = typeof TENDRIL_COL !== 'undefined' ? TENDRIL_COL : null, keep = C && { ...C };
-    if (C) Object.assign(C, VINES.wrapCol);   // 暫時換成墨綠，畫完換回去（絲瓜小姐的藤照舊）
+    if (C) Object.assign(C, VINES.wrapCol);   // 暫時換成橄欖綠，畫完換回去（絲瓜小姐的藤照舊）
     try { drawWrap(ctx, { x: a.x, y: a.y, rootT: 0, struggleT: 0 }, grow, now, cap.wrapSeed); } finally { if (C) Object.assign(C, keep); }
   }
   ctx.restore();
+  if (cap.phase === 'hang') {   // 藤蔓還要打幾發：腳上面幾顆小點（打中一發暗一顆）
+    const n = VINES.hangHits, left = n - (cap.hits || 0), by = ay - 10;
+    for (let i = 0; i < n; i++) {
+      const x = ax + (i - (n - 1) / 2) * 7;
+      ctx.fillStyle = i < left ? '#c8d46a' : 'rgba(40,44,20,.6)'; ctx.strokeStyle = '#1e220c'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.arc(x, by, 2.5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+    }
+  }
 }
 function drawVineOverlay(ctx) {
   if (!G || !G.vineCaps || !G.vineCaps.length) return;
