@@ -26,7 +26,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=gamestats-20261107"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=fclose-20261107">
+<link rel="stylesheet" href="css/style.css?v=gomoku2-20261107">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
@@ -421,7 +421,7 @@
   <script src="js/mrt-train.js?v=cargo3-20261102"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=care-20261103"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=sitpose-20261106"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=ouch2-20261107"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
@@ -436,10 +436,11 @@
   <script>document.write('<script src="data/bestiary.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器）；每次都讀最新的 -->
   <script src="js/bestiary-config.js?v=capking3-20261101"></script>   <!-- 怪物圖鑑的畫面（跟怪物圖鑑編輯器共用） -->
   <script src="js/bestiary.js?v=capking3-20261101"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
-  <script src="js/pc-desktop.js?v=gamestats-20261107"></script>   <!-- 2F應變中心的電腦桌面：換基地音樂、踩地雷、新接龍、蜘蛛紙牌、怪物圖鑑（必須在 bestiary.js 之後） -->
+  <script src="js/pc-desktop.js?v=gomoku2-20261107"></script>   <!-- 2F應變中心的電腦桌面：換基地音樂、踩地雷、新接龍、蜘蛛紙牌、五子棋、遊戲紀錄、怪物圖鑑（必須在 bestiary.js 之後） -->
   <script src="js/pc-freecell.js?v=fclose-20261107"></script>   <!-- 2F應變中心電腦的新接龍（FreeCell） -->
   <script src="js/pc-spider.js?v=gamestats-20261107"></script>   <!-- 2F應變中心電腦的蜘蛛紙牌（要在 pc-freecell.js 之後，借用它的牌面） -->
-  <script src="js/pc-stats.js?v=gamestats-20261107"></script>   <!-- 電腦的遊戲紀錄：每款小遊戲的局數、時間 -->
+  <script src="js/pc-gomoku.js?v=gomoku2-20261107"></script>   <!-- 2F應變中心電腦的五子棋 -->
+  <script src="js/pc-stats.js?v=gomoku2-20261107"></script>   <!-- 電腦的遊戲紀錄：每款小遊戲的局數、時間 -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->
   <script src="js/target-practice.js?v=gamestats-20261107"></script>   <!-- 射擊訓練室：練習射擊（靶紙、彈孔） -->
   <script src="js/locked-doors.js?v=twosquad2-20261103"></script>   <!-- 鎖住的房門：溫特說好像被鎖住了 -->

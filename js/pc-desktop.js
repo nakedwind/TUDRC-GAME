@@ -5,6 +5,7 @@
        💣 踩地雷：左鍵翻開、右鍵插旗、點已翻開的數字＝旗子插夠了就把旁邊的一起翻開；笑臉＝重新開始
        🃏 新接龍：FreeCell，牌局在 js/pc-freecell.js
        🕷️ 蜘蛛紙牌：Spider（單色／雙色／四色），牌局在 js/pc-spider.js
+       ⚫ 五子棋：對電腦或兩人對下，棋局在 js/pc-gomoku.js
        📊 遊戲紀錄：每款小遊戲玩了幾局、花了多少時間，在 js/pc-stats.js
        📕 怪物圖鑑：打開原本的圖鑑視窗（js/bestiary.js 的 openBestiary）
    ・左下「開始」選單、右下的電源按鈕都可以關機
@@ -17,6 +18,7 @@ const PCD_APPS = [
   { id: 'mines', name: '踩地雷', icon: '💣', title: '踩地雷' },
   { id: 'freecell', name: '新接龍', icon: '🃏', title: '新接龍' },
   { id: 'spider', name: '蜘蛛紙牌', icon: '🕷️', title: '蜘蛛紙牌' },
+  { id: 'gomoku', name: '五子棋', icon: '⚫', title: '五子棋' },
   { id: 'stats', name: '遊戲紀錄', icon: '📊', title: '遊戲紀錄' },
   { id: 'bestiary', name: '怪物圖鑑', icon: '📕' },
 ];
@@ -137,6 +139,7 @@ function openPcApp(id) {
     if (id === 'mines') initPcMines(w.querySelector('.pcd-body'));
     if (id === 'freecell') initPcFreecell(w.querySelector('.pcd-body'));
     if (id === 'spider') initPcSpider(w.querySelector('.pcd-body'));
+    if (id === 'gomoku') initPcGomoku(w.querySelector('.pcd-body'));
     if (id === 'stats') initPcStats(w.querySelector('.pcd-body'));
     sfx('menu');
   }
@@ -144,6 +147,7 @@ function openPcApp(id) {
   if (id === 'mines') fitPcMines();
   if (id === 'freecell') fitPcFreecell();
   if (id === 'spider') fitPcSpider();
+  if (id === 'gomoku') fitPcGomoku();
 }
 function focusPcWin(id) {
   const w = pcd.wins[id]; if (!w) return;
@@ -158,6 +162,7 @@ function closePcWin(id) {
   if (id === 'mines' && pcd.mine) clearInterval(pcd.mine.timer);
   if (id === 'freecell' && pcd.fc) clearInterval(pcd.fc.timer);
   if (id === 'spider' && pcd.sp) clearInterval(pcd.sp.timer);
+  if (id === 'gomoku' && pcd.gm) { clearTimeout(pcd.gm.thinking); clearInterval(pcd.gm.timer); }   // 電腦還在想就不用下了
   w.remove(); delete pcd.wins[id]; renderPcTasks(); sfx('switch');
 }
 function topPcWin() {   // 最上面、沒有縮小的那個視窗
@@ -332,7 +337,7 @@ function renderPcMines() {
   });
 }
 
-window.addEventListener('resize', () => { if (pcDesktopOpen) { fitPcMines(); if (pcd.fc && pcd.fc.cols) { fitPcFreecell(); renderPcFreecell(true); } if (pcd.sp && pcd.sp.cols) { fitPcSpider(); renderPcSpider(true); } } });
+window.addEventListener('resize', () => { if (pcDesktopOpen) { fitPcMines(); if (pcd.fc && pcd.fc.cols) { fitPcFreecell(); renderPcFreecell(true); } if (pcd.sp && pcd.sp.cols) { fitPcSpider(); renderPcSpider(true); } if (pcd.gm) fitPcGomoku(); } });
 window.addEventListener('pointerup', () => { if (pcDesktopOpen && pcd.mine && pcd.mine.cells && !pcd.mine.over) setPcFace('🙂'); });   // 按住格子時笑臉張嘴，放開變回來
 
 // 開著的時候：Esc＝關掉開始選單／最上面的視窗／關機；其他按鍵都不要傳給遊戲（圖鑑開著時讓圖鑑自己處理）

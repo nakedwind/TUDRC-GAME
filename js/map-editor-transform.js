@@ -6,13 +6,13 @@
   const anchor = document.getElementById('selRotate'); if (!anchor) return;
   const box = document.createElement('span');
   box.id = 'stampTransformControl';
-  box.style.cssText = 'display:inline-flex;align-items:center;gap:6px;flex-wrap:wrap';
+  box.style.cssText = 'display:inline-flex;align-items:center;gap:6px;flex-wrap:nowrap;white-space:nowrap';
   box.innerHTML = '<span id="stampTransformWho" style="font-size:12px;opacity:.8"></span>' +
     '<label title="圖片放大幾 %（100＝原尺寸，可輸入 ' + SCALE_MIN + '～' + SCALE_MAX + '）。以圖片底部中央為基準，樹根留在原地往上長。只改外觀，碰撞和紅格不變。">大小 ' +
-    '<input id="stampScaleInput" type="number" min="' + SCALE_MIN + '" max="' + SCALE_MAX + '" step="5" style="width:58px"> %</label>' +
+    '<input id="stampScaleInput" type="number" min="' + SCALE_MIN + '" max="' + SCALE_MAX + '" step="5" style="width:48px"> %</label>' +
     '<label title="圖片轉幾度（順時針，可輸入任意度數）。只改外觀，碰撞和紅格不變。">角度 ' +
-    '<input id="stampAngleInput" type="number" step="5" style="width:58px"> °</label>' +
-    '<button class="btn" id="stampTransformReset" title="大小、角度都回到原樣">↺ 原樣</button>';
+    '<input id="stampAngleInput" type="number" step="5" style="width:44px"> °</label>' +
+    '<button class="btn" id="stampTransformReset" title="大小、角度都回到原樣">↺</button>';
   anchor.after(box);
   const scaleInput = box.querySelector('#stampScaleInput'), angleInput = box.querySelector('#stampAngleInput'), who = box.querySelector('#stampTransformWho');
 
@@ -28,7 +28,7 @@
       scale = s ? Math.round(stampScaleOf(s) * 100) : 100;
       angle = s ? fullAngle(stampTurn(s), stampAngleOf(s)) : 0;
     }
-    who.textContent = selections.length ? '選取物件：' : '筆刷：';
+    who.textContent = (selections.length || (typeof selection !== 'undefined' && selection)) ? '' : '筆刷：';   // 有選物件時不寫字（選取列才擠得進一行）
     scaleInput.value = scale; angleInput.value = angle;
   }
   window.refreshStampTransformPanel = refresh;

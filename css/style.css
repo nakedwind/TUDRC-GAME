@@ -3543,6 +3543,29 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .hosp-ico { width: 14px; height: 14px; margin-right: 4px; vertical-align: -2px; }
 .item-intro-image img.ui-icon { width: 72px; height: 72px; }
 
+/* 五子棋（js/pc-gomoku.js）：格子大小 --gm-cell 由 fitPcGomoku 依螢幕大小決定；棋子用按鈕的 ::before 畫 */
+.pcd-gm { --gm-cell: 30px; display: flex; flex-direction: column; gap: 6px; }
+.pcd-gm .pcd-fc-bar.hidden { display: none; }
+.pcd-gm-opts { display: flex; gap: 2px; margin-left: 8px; }
+.pcd-gm-opts:first-child { margin-left: 0; }
+.pcd-gm-opts button.on { background: #d6e4fb; border-color: #2f62d4; font-weight: bold; }
+.pcd-gm-board { position: relative; align-self: center; padding: 6px; border: 1px solid #7a5420; border-radius: 4px; background: radial-gradient(ellipse at 40% 30%, #f1cf8a, #dcae5e 70%, #c99a4c); box-shadow: inset 0 0 0 2px rgba(255,255,255,.25), 2px 3px 8px rgba(0,0,0,.3); }
+.pcd-gm-lines { position: absolute; left: calc(6px + var(--gm-cell) / 2); top: calc(6px + var(--gm-cell) / 2); width: calc(var(--gm-cell) * 14 + 1px); height: calc(var(--gm-cell) * 14 + 1px); pointer-events: none;
+  background-image: linear-gradient(to right, #5a3a14 1px, transparent 1px), linear-gradient(to bottom, #5a3a14 1px, transparent 1px); background-size: var(--gm-cell) var(--gm-cell); }
+.pcd-gm-grid { position: relative; display: grid; grid-template-columns: repeat(15, var(--gm-cell)); }
+.pcd-gm-pt { position: relative; width: var(--gm-cell); height: var(--gm-cell); padding: 0; border: 0; background: none; cursor: pointer; }
+.pcd-gm-pt.b, .pcd-gm-pt.w { cursor: default; }
+.pcd-gm-pt::before { content: ''; position: absolute; inset: 7%; border-radius: 50%; }
+.pcd-gm-pt.b::before { background: radial-gradient(circle at 35% 30%, #6b6b6b, #111 60%); box-shadow: 1px 2px 2px rgba(0,0,0,.45); }
+.pcd-gm-pt.w::before { background: radial-gradient(circle at 35% 30%, #fff, #ddd 65%, #b8b8b8); box-shadow: 1px 2px 2px rgba(0,0,0,.35); }
+.pcd-gm-board.turn-b .pcd-gm-pt:not(.b):not(.w):hover::before { background: rgba(0,0,0,.35); }
+.pcd-gm-board.turn-w .pcd-gm-pt:not(.b):not(.w):hover::before { background: rgba(255,255,255,.6); }
+.pcd-gm-pt.star:not(.b):not(.w)::after { content: ''; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -2.5px 0 0 -2.5px; border-radius: 50%; background: #5a3a14; }
+.pcd-gm-pt.last::after { content: ''; position: absolute; left: 50%; top: 50%; width: 22%; height: 22%; transform: translate(-50%, -50%); border-radius: 50%; background: #e0362c; }
+.pcd-gm-pt.win::before { box-shadow: 0 0 0 2px #e0362c, 0 0 8px 2px rgba(255,80,60,.8); }
+.pcd-gm-foot { display: flex; justify-content: space-between; gap: 10px; color: #333; font-size: 12px; }
+.pcd-gm-score { white-space: nowrap; }
+
 /* 住院通知：隊員頭像（正面圖裁到頭肩），右上角壓醫院圖示；好幾個人排一排 */
 .item-intro-image.custom { width: auto; min-width: 120px; height: auto; min-height: 120px; padding: 12px 16px; }
 .hosp-avs { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
