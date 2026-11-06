@@ -2168,6 +2168,30 @@ const SHARED_TILES = [
     "h": 2
   },
   {
+    "id": "tile_restaurant_green_tea",
+    "name": "綠茶",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-greentea.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_restaurant_kitchen_workstation_clear",
+    "name": "料理台（乾淨版）",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-kitchen-workstation-clear.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_restaurant_rice_cooker",
+    "name": "電鍋",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-ricecooker.png",
+    "w": 1,
+    "h": 1
+  },
+  {
     "id": "tile_musc5wyq",
     "name": "restaurant-partition",
     "role": "floor",
