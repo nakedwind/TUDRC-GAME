@@ -28,7 +28,7 @@
       scale = s ? Math.round(stampScaleOf(s) * 100) : 100;
       angle = s ? fullAngle(stampTurn(s), stampAngleOf(s)) : 0;
     }
-    who.textContent = selections.length ? '' : '筆刷：';   // 有選物件時不寫字（選取列才擠得進一行）
+    who.textContent = (selections.length || (typeof selection !== 'undefined' && selection)) ? '' : '筆刷：';   // 有選物件時不寫字（選取列才擠得進一行）
     scaleInput.value = scale; angleInput.value = angle;
   }
   window.refreshStampTransformPanel = refresh;

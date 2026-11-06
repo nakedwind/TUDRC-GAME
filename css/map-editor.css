@@ -292,3 +292,6 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 #selControls input[type="number"] { padding-left: 2px; padding-right: 2px; }
 #blendControl { flex-wrap: nowrap; }
 #selName.full { max-width: 200px; }
+/* 工具按鈕只留 emoji（名稱在滑鼠提示），工具列和選取列固定排同一排：選取列排不下就自己縮、在裡面左右捲 */
+#tools > .tool { padding: 6px 9px; font-size: 16px; line-height: 1.2; flex: 0 0 auto; }
+#tools #selControls { flex: 1 1 0; min-width: 320px; max-width: max-content; }   /* 從 0 起算寬度＝不會被擠到下一排；最多長到內容那麼寬，再多就在列裡左右捲 */
