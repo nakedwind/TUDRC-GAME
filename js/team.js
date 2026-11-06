@@ -408,7 +408,7 @@ function renderFieldSquadHud() {
       const aidPick = !!(aid && aid.picking);
       const aidCls = aidPick && aid.hover === member.type ? ' aid-hover' : '';
       const aidFx = aidPick ? '<span class="aid-glow" style="--aid-sync:-' + (nowS % 3.2).toFixed(2) + 's"><i class="s"></i><i class="m"></i></span><span class="aid-arrow"></span>' : '';
-      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + (member.eatenBy ? ' eaten' : '') + (lowSP ? ' sp-low' : '') + taintCls + hpLowCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
+      return '<article class="field-member' + (hp <= 0 ? ' down' : '') + (member.eatenBy || member.vineCap ? ' eaten' : '') + (lowSP ? ' sp-low' : '') + taintCls + hpLowCls + aidCls + '" data-type="' + member.type + '"' + syncStyle + '>' + aidFx +
         '<button class="field-member-avatar" type="button" data-type="' + member.type + '" aria-label="命令' + spec.name + '" style="position:relative"><img src="' + memberPortraitPath(spec) + '" alt="' + spec.name + '">' + cdRing + '</button><div class="field-member-status"><b>' + spec.name + roleIconHtml(spec) + stateLabel + '</b>' +
         // 嚮導顯示 SP；哨兵顯示精神負荷。
         '<div><i class="field-hp" aria-label="HP"><u style="width:' + hpPercent + '%"></u></i><span class="field-bar-num">' + hp + '/' + maxhp + '</span></div>' +

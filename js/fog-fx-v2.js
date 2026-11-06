@@ -109,12 +109,15 @@ function updateFogV2(dt) {
 }
 
 // 落葉（世界層，黑幕之下：暗處的葉子也是暗的）
-function drawFogV2Leaves(ctx) {
+// layer：'ground'＝只畫落在地上的（js/render.js 在人物之前呼叫，葉子在人物腳下）；'air'＝只畫還在空中飄的
+function drawFogV2Leaves(ctx, layer) {
   const F = G.fogV2;
   if (!F || !F.leaves.length || !fogV2On()) return;
   ctx.save();
   const rest = FOG_FX_V2.leafRest ?? 5, LW = .8 * (FOG_FX_V2.leafWidth || 1);   // LW：葉子胖瘦
   for (const l of F.leaves) {
+    if (layer === 'ground' && !l.landed) continue;
+    if (layer === 'air' && l.landed) continue;
     if (l.landed && fogV2LeafReady()) {   // 點陣圖：躺在地上不動，最後 0.8 秒淡掉
       const a = l.restT < rest ? 1 : Math.max(0, 1 - (l.restT - rest) / .8);
       ctx.save(); ctx.translate(Math.round(l.x), Math.round(l.y)); ctx.rotate(l.restAng); if (l.restFlip < 0) ctx.scale(-1, 1);

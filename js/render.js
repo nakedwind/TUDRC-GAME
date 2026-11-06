@@ -1088,6 +1088,7 @@ function draw() {
   if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
   if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
+  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'ground');   // 起霧 V2：落到地上的葉子（畫在人物下面，js/fog-fx-v2.js）
   drawOilGround(ctx);          // 油汙、火海底下的橘光（js/oil-barrels.js）
   if (typeof drawFishWater === 'function') drawFishWater(ctx);
   if (typeof drawEliteGround === 'function') drawEliteGround(ctx);   // 鳥頭大隊長跑步踩出的小裂痕（js/elite-bird-head.js）
@@ -1366,7 +1367,7 @@ function drawWorldEffects() {
   if (typeof drawMeleeV2 === 'function') drawMeleeV2(ctx);   // 近戰特效 V2（js/melee-fx-v2.js）
   if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
-  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx);   // 起霧 V2 的落葉（js/fog-fx-v2.js）
+  if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'air');   // 起霧 V2：還在空中飄的葉子（js/fog-fx-v2.js）
   if (typeof drawLootV2 === 'function') drawLootV2(ctx);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
   if (typeof drawMiscV2 === 'function') drawMiscV2(ctx);   // 槍、連刺、集氣等其他 V2（js/misc-fx-v2.js）
   for (const f of G.effects) {

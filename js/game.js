@@ -1898,6 +1898,8 @@ function updatePlayerAttack(dt) {
   p.gunT = 0.45; p.recoilT = 0.12; p.recoilAng = aimAng;   // 持槍姿勢（每發刷新，連射時持續舉槍）＋後座力
   const vineMate = !paint && typeof vineShotTarget === 'function' ? vineShotTarget(aim) : null;   // 游標點在被絲瓜藤纏住的隊友身上：子彈射斷藤蔓（js/loofah-lady.js）
   if (vineMate) { shootVine(p, vineMate, aim, aimAng); return; }
+  const hungMate = !paint && typeof vineHangShotTarget === 'function' ? vineHangShotTarget(aim) : null;   // 游標點在被森林倒吊藤蔓吊著的隊友身上：子彈打藤蔓（js/vines.js）
+  if (hungMate) { shootHangVine(p, hungMate, aim, aimAng); return; }
   const sleepMate = !paint && typeof mothSleepShotTarget === 'function' ? mothSleepShotTarget(aim) : null;   // 游標點在吸了睡眠鱗粉、睡著的隊友身上：開槍把他打醒（js/human-face-butterfly.js）
   if (sleepMate) { shootWakeMate(p, sleepMate, aim, aimAng); return; }
   // 朝游標方向、射程內、照亮的最近怪。

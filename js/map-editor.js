@@ -499,6 +499,7 @@ function fixMap(m) {
   m.coreSpots = Array.isArray(m.coreSpots) ? [...new Set(m.coreSpots)] : [];
   if (Array.isArray(m.fogTrees) && m.fogTrees.length) m.fogTrees = [...new Set(m.fogTrees)]; else delete m.fogTrees;   // 🌲 霧樹：['欄,列'…]（js/fog.js）
   if (Array.isArray(m.vines) && m.vines.length) m.vines = [...new Set(m.vines)]; else delete m.vines;   // 🌿 垂吊藤蔓：['欄,列'…]（js/vines.js）
+  if (Array.isArray(m.vinesHang) && m.vinesHang.length) m.vinesHang = [...new Set(m.vinesHang)]; else delete m.vinesHang;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
   if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
@@ -1169,6 +1170,16 @@ function drawFogTreeMarks(m) {
 }
 // 🌿 垂吊藤蔓：尖端垂到的那一格
 function drawVineMarks(m) {
+  const hang = (m.vinesHang || []).map(k => k.split(',').map(Number));
+  for (const [c, r] of hang) {   // 🪢 倒吊藤蔓
+    const x = OX + c * CELL, y = OY + r * CELL;
+    ctx.strokeStyle = 'rgba(150,130,40,.9)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x + CELL / 2, y - CELL * .8); ctx.quadraticCurveTo(x + CELL * .3, y + CELL * .2, x + CELL / 2, y + CELL * .7); ctx.stroke();
+    ctx.strokeStyle = '#e6c84a'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🪢', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
+  }
+  if (hang.length) { ctx.fillStyle = '#e6c84a'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('🪢 倒吊藤蔓 ' + hang.length + ' 條', OX + 6, OY + 106); }
   const vines = (m.vines || []).map(k => k.split(',').map(Number));
   if (!vines.length) return;
   for (const [c, r] of vines) {
@@ -1608,11 +1619,20 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這堆樹葉（剩 ' + piles.length + ' 堆）' : '已放上第 ' + piles.length + ' 堆樹葉：用燃燒彈或油桶的火燒掉，會露出小道具、跳出小史萊姆，或什麼都沒有', '#ffb36b');
     return;
+  } else if (brush.mode === 'vinehang') {   // 🪢 倒吊藤蔓：點一格放一條、再點一次拿掉
+    if (!isDown) return;
+    const list = m.vinesHang || [], i = list.indexOf(key);
+    if (i < 0 && m.solid.includes(key)) { setStatus('藤蔓要垂在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
+    if (i >= 0) list.splice(i, 1); else { list.push(key); if (m.vines) { m.vines = m.vines.filter(k => k !== key); if (!m.vines.length) delete m.vines; } }   // 同一格只能有一種藤蔓
+    if (list.length) m.vinesHang = list; else delete m.vinesHang;
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已拿掉這條倒吊藤蔓（剩 ' + list.length + ' 條）' : '已放上第 ' + list.length + ' 條倒吊藤蔓：抓到隊友會把他倒吊在半空中，溫特要開槍打斷藤蔓才救得下來（溫特碰到照樣被捲走）', '#e6c84a');
+    return;
   } else if (brush.mode === 'vine') {   // 🌿 垂吊藤蔓：點一格放一條、再點一次拿掉
     if (!isDown) return;
     const vines = m.vines || [], i = vines.indexOf(key);
     if (i < 0 && m.solid.includes(key)) { setStatus('藤蔓要垂在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
-    if (i >= 0) vines.splice(i, 1); else vines.push(key);
+    if (i >= 0) vines.splice(i, 1); else { vines.push(key); if (m.vinesHang) { m.vinesHang = m.vinesHang.filter(k => k !== key); if (!m.vinesHang.length) delete m.vinesHang; } }   // 同一格只能有一種藤蔓
     if (vines.length) m.vines = vines; else delete m.vines;
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這條藤蔓（剩 ' + vines.length + ' 條）' : '已放上第 ' + vines.length + ' 條藤蔓：從畫面上方垂到這一格，溫特碰到會被拉上去、過一陣子丟回附近地面', '#9fe07a');
@@ -3343,6 +3363,7 @@ function shiftMapContent(m, dc, dr) {
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
   if (m.fogTrees) m.fogTrees = m.fogTrees.map(shiftKey);
   if (m.vines) m.vines = m.vines.map(shiftKey);
+  if (m.vinesHang) m.vinesHang = m.vinesHang.map(shiftKey);
   if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
@@ -3374,6 +3395,7 @@ function dropOutsideContent(m) {
   removed += before - m.stamps.length;
   if (m.fogTrees) { const n = m.fogTrees.length; m.fogTrees = m.fogTrees.filter(insideKey); removed += n - m.fogTrees.length; if (!m.fogTrees.length) delete m.fogTrees; }
   if (m.vines) { const n = m.vines.length; m.vines = m.vines.filter(insideKey); removed += n - m.vines.length; if (!m.vines.length) delete m.vines; }
+  if (m.vinesHang) { const n = m.vinesHang.length; m.vinesHang = m.vinesHang.filter(insideKey); removed += n - m.vinesHang.length; if (!m.vinesHang.length) delete m.vinesHang; }
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
