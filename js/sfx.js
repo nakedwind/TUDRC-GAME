@@ -200,6 +200,8 @@ const SFX = (() => {
     vineGrab: '怪物/絲瓜小姐/絲瓜藤攻擊.mp3',   // 被藤蔓纏住
     vineLift: '怪物/絲瓜小姐/絲瓜藤攻擊.mp3',   // 被藤蔓往上拉
     vineLand: '戰鬥/命中/敲打2.mp3',            // 被藤蔓丟下來、摔到地上
+    fogWind: '環境/起風.mp3',                   // 森林起風：霧要變濃之前的風聲（js/fog.js）
+    fogLeaves: '環境/樹葉風聲.mp3',             // 森林起風：同時播的樹葉沙沙聲（js/fog.js）
     bananaSlip: '環境/踩到香蕉.mp3',   // 踩到香蕉皮滑倒（js/golden-banana-king.js 的 bkSlip）
     pop: 'pop.mp3',
     ballBark: { mode: 'random', files: ['狗/叫1聲.mp3', '狗/叫2聲.mp3'] },   // 球球叫：叫 1 聲或叫 2 聲隨機（js/ball-poses.js 的 updateBallBark）

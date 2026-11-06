@@ -499,6 +499,7 @@ function fixMap(m) {
   m.coreSpots = Array.isArray(m.coreSpots) ? [...new Set(m.coreSpots)] : [];
   if (Array.isArray(m.fogTrees) && m.fogTrees.length) m.fogTrees = [...new Set(m.fogTrees)]; else delete m.fogTrees;   // 🌲 霧樹：['欄,列'…]（js/fog.js）
   if (Array.isArray(m.vines) && m.vines.length) m.vines = [...new Set(m.vines)]; else delete m.vines;   // 🌿 垂吊藤蔓：['欄,列'…]（js/vines.js）
+  if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
@@ -1181,6 +1182,20 @@ function drawVineMarks(m) {
   ctx.fillStyle = '#9fe07a'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('🌿 藤蔓 ' + vines.length + ' 條', OX + 6, OY + 70);
 }
+// 🍂 樹葉堆
+function drawLeafPileMarks(m) {
+  const piles = (m.leafPiles || []).map(k => k.split(',').map(Number));
+  if (!piles.length) return;
+  for (const [c, r] of piles) {
+    const x = OX + c * CELL, y = OY + r * CELL;
+    ctx.fillStyle = 'rgba(120,80,30,.45)'; ctx.fillRect(x, y, CELL, CELL);
+    ctx.strokeStyle = '#ffb36b'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+    ctx.font = '18px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🍂', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic';
+  }
+  ctx.fillStyle = '#ffb36b'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
+  ctx.fillText('🍂 樹葉堆 ' + piles.length + ' 堆', OX + 6, OY + 88);
+}
 function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
@@ -1249,6 +1264,7 @@ function draw() {
   }
   drawFogTreeMarks(m);
   drawVineMarks(m);
+  drawLeafPileMarks(m);
   ctx.fillStyle = '#dab5ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('💠 核心候選點 ' + m.coreSpots.length + ' 個／本局抽 ' + m.coreCount + ' 個', OX + 6, OY + 16);
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
@@ -1582,6 +1598,15 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (trees.length) m.fogTrees = trees; else delete m.fogTrees;
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這棵霧樹（剩 ' + trees.length + ' 棵）' : '已放上第 ' + trees.length + ' 棵霧樹：色塊是它負責的區域（每一格歸最近的那棵），燒掉它那一區的霧就散了' + (m.fog ? '' : '（記得在地圖設定把「🌫️ 起霧」打開）'), '#c9a8ff');
+    return;
+  } else if (brush.mode === 'leafpile') {   // 🍂 樹葉堆：點一格放一堆、再點一次拿掉
+    if (!isDown) return;
+    const piles = m.leafPiles || [], i = piles.indexOf(key);
+    if (i < 0 && m.solid.includes(key)) { setStatus('樹葉堆要放在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
+    if (i >= 0) piles.splice(i, 1); else piles.push(key);
+    if (piles.length) m.leafPiles = piles; else delete m.leafPiles;
+    saveMaps(); draw();
+    setStatus(i >= 0 ? '已拿掉這堆樹葉（剩 ' + piles.length + ' 堆）' : '已放上第 ' + piles.length + ' 堆樹葉：用燃燒彈或油桶的火燒掉，會露出小道具、跳出小史萊姆，或什麼都沒有', '#ffb36b');
     return;
   } else if (brush.mode === 'vine') {   // 🌿 垂吊藤蔓：點一格放一條、再點一次拿掉
     if (!isDown) return;
@@ -3318,6 +3343,7 @@ function shiftMapContent(m, dc, dr) {
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => { m[key] = (m[key] || []).map(shiftKey); });
   if (m.fogTrees) m.fogTrees = m.fogTrees.map(shiftKey);
   if (m.vines) m.vines = m.vines.map(shiftKey);
+  if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -3348,6 +3374,7 @@ function dropOutsideContent(m) {
   removed += before - m.stamps.length;
   if (m.fogTrees) { const n = m.fogTrees.length; m.fogTrees = m.fogTrees.filter(insideKey); removed += n - m.fogTrees.length; if (!m.fogTrees.length) delete m.fogTrees; }
   if (m.vines) { const n = m.vines.length; m.vines = m.vines.filter(insideKey); removed += n - m.vines.length; if (!m.vines.length) delete m.vines; }
+  if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;
     m[key] = (m[key] || []).filter(insideKey);

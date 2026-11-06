@@ -1060,6 +1060,7 @@ function draw() {
   for(const core of G.cores) if(!core.dead && !core.hidden && !core.carried && enemyVisible(core)) sortables.push({y:core.y+23,draw:()=>drawCore(core)});
   if (typeof fogTreeSortables === 'function') fogTreeSortables(sortables);   // 霧樹（js/fog.js）
   if (typeof vineSortables === 'function') vineSortables(sortables);   // 垂吊藤蔓（js/vines.js）
+  if (typeof leafPileSortables === 'function') leafPileSortables(sortables);   // 樹葉堆（js/leaf-piles.js）
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL, draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）

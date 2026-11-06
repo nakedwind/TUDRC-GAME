@@ -8,6 +8,10 @@
    - 霧樹：地圖自動分區，每一格歸給離它最近的那棵霧樹（地圖編輯器「🌲 霧樹」擺的）。樹燒光，那一區的霧就散了。
    - 火海（燃燒彈、油桶）周圍的霧暫時散開，火熄了一陣子才慢慢回來。
    - 探照燈只照亮、不驅霧。
+   霧會隨機變濃、變淡（FOG.weather）；站在霧裡的隊友看不清楚：鎖敵距離變短、命中率下降、走路變慢（FOG_SIGHT）。
+   霧變濃時，霧裡的一位隊友會冒泡泡說一句（對話編輯器「戰鬥中・霧變濃了」）。
+   霧要變濃前先起風（FOG.weather.omen 秒）：風聲、落葉變多往旁邊吹、霧團飄得快、霧慢慢聚過來。
+   怪物在霧裡也看不清楚：發現溫特、隊友的距離變短（FOG_SIGHT.monster），可以趁濃霧繞過怪物。
    霧畫在黑幕之前：暗處還是黑的，有燈的地方才看得到霧。
 */
 
@@ -45,6 +49,7 @@ function fogTreeTouchesFire(tree) {
 }
 
 function updateFogTrees(dt) {
+  updateFogWeather(dt);
   if (!G.fogTrees) G.fogTrees = [];
   for (const tree of G.fogTrees) {
     if (tree.burnt) { tree.clearK = Math.min(1, tree.clearK + dt / Math.max(.1, FOG.zoneFade)); continue; }
@@ -266,7 +271,7 @@ const fogPuffs = (() => {
 
 const fogCv = document.createElement('canvas'), fogCtx = fogCv.getContext('2d');
 function drawFog(ctx) {
-  const P = currentFogPreset();
+  const P = fogWeatherPreset(currentFogPreset());
   if (!P) return;
   const t = performance.now() / 1000;
   const vx = cam.x, vy = cam.y, vw = viewW(), vh = viewH();
@@ -285,7 +290,8 @@ function drawFog(ctx) {
   for (let i = 0; i < n; i++) {
     const f = fogPuffs[i];
     const size = P.size * f.s;
-    const bx = f.x + t * P.wind * f.sp, by = f.y + Math.sin(t * .12 + f.ph) * 30;   // 往右飄，上下微微起伏
+    const wind = G.fogWx ? G.fogWx.wind : t;   // 累積的飄動距離（起風時飄得快）
+    const bx = f.x + wind * P.wind * f.sp, by = f.y + Math.sin(t * .12 + f.ph) * 30;   // 往右飄，上下微微起伏
     // 找出這團霧在畫面附近的所有重複位置
     const x0 = Math.floor((vx - size - bx) / FOG_TILE), x1 = Math.floor((vx + vw + size - bx) / FOG_TILE);
     const y0 = Math.floor((vy - size - by) / FOG_TILE), y1 = Math.floor((vy + vh + size - by) / FOG_TILE);
@@ -330,4 +336,95 @@ function drawFog(ctx) {
   fc.globalCompositeOperation = 'source-over';
 
   ctx.drawImage(fogCv, vx - 2, vy - 2, W, H);
+}
+
+// ================= 霧隨機變濃、變淡 =================
+// G.fogWx：{ level, m（現在的濃度倍率）, from, to, t（換濃度進行了幾秒）, hold（這種濃度還要維持幾秒） }
+function fogPickLevel(not) {
+  const L = FOG.weather.levels, keys = Object.keys(L).filter(k => k !== not);
+  let r = Math.random() * keys.reduce((s, k) => s + L[k].weight, 0);
+  for (const k of keys) { if ((r -= L[k].weight) <= 0) return k; }
+  return keys[keys.length - 1];
+}
+function updateFogWeather(dt) {
+  if (!currentFogPreset() || !FOG.weather) { G.fogWx = null; return; }
+  const W = FOG.weather, rnd = (a, b) => a + Math.random() * (b - a);
+  const wx = G.fogWx || (G.fogWx = { level: 'normal', m: 1, from: 1, to: 1, t: W.change, hold: rnd(W.hold[0], W.hold[1]), omen: 0, gust: 0, wind: 0 });
+  // 起風（預兆）：gust 0～1；風吹得越大，霧團飄越快（wind＝累積的飄動距離，換速度時霧團不會跳）
+  const gustWant = wx.omen > 0 ? 1 : 0;
+  wx.gust += (gustWant - wx.gust) * Math.min(1, dt * (gustWant ? 1.2 : .5));
+  wx.wind = (wx.wind || 0) + dt * (1 + ((W.omenWind || 1) - 1) * wx.gust);
+  if (wx.omen > 0) {   // 預兆中：時間到才真的開始變濃
+    wx.omen -= dt;
+    if (wx.omen <= 0) { wx.omen = 0; wx.from = wx.m; wx.to = W.levels.thick.mul; wx.t = 0; wx.level = 'thick'; fogThickTalk(); fogWindSound(false); }
+    return;
+  }
+  if (wx.t < W.change) {
+    wx.t = Math.min(W.change, wx.t + dt);
+    const k = wx.t / W.change, e = k * k * (3 - 2 * k);
+    wx.m = wx.from + (wx.to - wx.from) * e;
+    return;
+  }
+  if ((wx.hold -= dt) > 0) return;
+  const prev = wx.level, next = fogPickLevel(prev);
+  wx.hold = rnd(W.hold[0], W.hold[1]);
+  if (next === 'thick' && W.omen > 0) { wx.omen = W.omen; fogWindSound(true); return; }   // 要變濃：先起風
+  wx.level = next; wx.from = wx.m; wx.to = W.levels[next].mul; wx.t = 0;
+}
+// 現在風多大（0～1）：霧要變濃之前起風（js/fog-fx-v2.js 的落葉也會看）
+function fogGust() { return G && G.fogWx ? G.fogWx.gust || 0 : 0; }
+// 起風的聲音：風聲＋樹葉沙沙聲一起播（音效編輯器「森林起風」那兩格），霧開始變濃時一起淡掉
+function fogWindSound(on) {
+  if (typeof SFX === 'undefined' || !SFX.enabled) return;
+  if (on) { SFX.play('fogWind', .9, 'fog-wind'); SFX.play('fogLeaves', .9, 'fog-leaves'); }
+  else { SFX.fadeOut('fog-wind', 2.5); SFX.fadeOut('fog-leaves', 2.5); }
+}
+// 依現在的濃度調整霧的樣子：看得清楚的範圍變小、白茫茫和霧團變濃
+function fogWeatherPreset(P) {
+  const wx = G && G.fogWx, m = P && wx ? wx.m + (wx.omen > 0 ? (FOG.weather.omenGather || 0) * Math.min(1, 1 - wx.omen / FOG.weather.omen) : 0) : 1;   // 起風時霧慢慢聚過來
+  if (!P || m === 1) return P;
+  return { ...P, clear: P.clear / Math.pow(m, .8), far: P.far / Math.pow(m, .6), haze: Math.min(.95, P.haze * m), puffAlpha: Math.min(.75, P.puffAlpha * m) };
+}
+// 霧變濃：霧裡的一位隊友冒泡泡說一句（對話編輯器「霧變濃了」；沒填就不說）
+function fogThickTalk() {
+  if (!G || MAP_SAFE || typeof pickDialogueLine !== 'function') return;
+  const list = (G.towers || []).filter(t => t.hp > 0 && !t.berserk && !t.vineCap && !t.eatenBy && !(t.say && t.say.text && t.say.hurt) && fogSightAt(t.x, t.y) > .2);
+  for (let tries = 0; tries < 4 && list.length; tries++) {
+    const t = list.splice(Math.floor(Math.random() * list.length), 1)[0], text = pickDialogueLine(t.type, 'fogThick');
+    if (!text) continue;
+    t.say = { text, life: 3 };
+    t.sayWait = Math.max(t.sayWait || 0, 4);
+    return;
+  }
+}
+
+// ================= 霧擋住隊友的視線 =================
+// 這個位置的霧有多濃：0＝沒有霧（營地、燒掉霧樹那一區、火海旁邊）～1＝最濃
+function fogSightAt(x, y) {
+  const P = fogWeatherPreset(currentFogPreset());
+  if (!P || !G) return 0;
+  const c = Math.floor((x - OX) / CELL), r = Math.floor((y - OY) / CELL);
+  if (c < 0 || r < 0 || c >= COLS || r >= ROWS) return 0;
+  const S = fogStaticData(), i = r * COLS + c, z = S.zone[i], tree = z >= 0 && G.fogTrees ? G.fogTrees[z] : null;
+  let local = S.camp[i] * (tree ? 1 - tree.clearK : 1);
+  for (const f of G.fogClears || []) {   // 火海周圍暫時散開
+    const d = Math.hypot(x - f.x, y - f.y);
+    if (d < f.r) local *= 1 - f.k * Math.min(1, (1 - d / f.r) * 1.6);
+  }
+  return Math.max(0, Math.min(1, local * Math.min(1, P.haze)));
+}
+const fogMateOn = t => t && t.kind === 'tower' && !MAP_SAFE && typeof FOG_SIGHT !== 'undefined';
+// 隊友在霧裡：鎖敵距離倍率、命中率倍率、走路速度倍率（js/sentry.js、js/game.js 呼叫）
+function fogRangeMul(t) { return fogMateOn(t) ? 1 - FOG_SIGHT.range * fogSightAt(t.x, t.y) : 1; }
+function fogHitMul(t) { return fogMateOn(t) ? 1 - FOG_SIGHT.miss * fogSightAt(t.x, t.y) : 1; }
+function fogSpeedMul(t) { return fogMateOn(t) ? 1 - FOG_SIGHT.slow * fogSightAt(t.x, t.y) : 1; }
+// 怪物也看不清楚：怪物發現 target（溫特或隊友）的距離倍率；怪物或被看的人站在霧裡都算（js/enemy-ai.js 呼叫）
+function fogSenseMul(e, target) {
+  if (!e || !target || MAP_SAFE || typeof FOG_SIGHT === 'undefined' || !FOG_SIGHT.monster || !currentFogPreset()) return 1;
+  return 1 - FOG_SIGHT.monster * Math.max(fogSightAt(e.x, e.y), fogSightAt(target.x, target.y));
+}
+// 走路變慢：包住 js/sentry.js 的 moveSentryWithPath（隊友各種走路都經過這裡）
+if (typeof moveSentryWithPath === 'function') {
+  const fogBaseMoveSentry = moveSentryWithPath;
+  moveSentryWithPath = (t, x, y, speed, dt) => fogBaseMoveSentry(t, x, y, speed * fogSpeedMul(t), dt);
 }

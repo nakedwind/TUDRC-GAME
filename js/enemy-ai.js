@@ -168,7 +168,7 @@ function trySlimePounce(e, target, distance) {
   return true;
 }
 function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
-  if (!G.player || G.player.hp <= 0 || playerDistance > ENEMY_SENSE_RANGE) return false;
+  if (!G.player || G.player.hp <= 0 || playerDistance > ENEMY_SENSE_RANGE * (typeof fogSenseMul === 'function' ? fogSenseMul(e, G.player) : 1)) return false;   // 霧裡看不遠（js/fog.js）
   if (e.sweep ? playerDistance <= sweepReach(e) : playerDistance <= 30) { e.sweep ? sweepAttack(e, G.player, dt) : enemyAttackPlayer(e, dt); return true; }
   if (trySlimePounce(e, G.player, playerDistance)) return true;
   const [gc, gr] = cellAt(G.player.x, G.player.y);
@@ -572,7 +572,7 @@ function stepEnemy(e, dt) {
   const living = G.towers.filter(t => t.hp > 0 && !t.berserk && enemyNoticesSentry(e, t));   // 沒打過牠的阿瓦倫不算目標
   const sensedSentries = living
     .map(t => ({ t, d: Math.hypot(t.x - e.x, t.y - e.y) }))
-    .filter(item => item.d <= ENEMY_SENSE_RANGE)
+    .filter(item => item.d <= ENEMY_SENSE_RANGE * (typeof fogSenseMul === 'function' ? fogSenseMul(e, item.t) : 1))   // 霧裡看不遠（js/fog.js）
     .sort((a, b) => a.d - b.d);
   // 具有嘲諷能力的哨兵若在嘲諷範圍內，會把怪物的注意力拉到自己身上。
   const taunter = sensedSentries.find(item => {

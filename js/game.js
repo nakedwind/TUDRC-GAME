@@ -1282,6 +1282,7 @@ function newGame() {
   seedCores();
   if (typeof seedFogTrees === 'function') seedFogTrees();   // 霧樹：燒掉就散掉那一區的霧（js/fog.js）
   if (typeof seedVines === 'function') seedVines();   // 森林的垂吊藤蔓（js/vines.js）
+  if (typeof seedLeafPiles === 'function') seedLeafPiles();   // 森林的樹葉堆：燒掉露出道具或小史萊姆（js/leaf-piles.js）
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
@@ -2333,7 +2334,7 @@ function update(dt) {
       if (!swingTarget) continue;
     } else if (t.cd > 0) continue;
     if (GUIDE_GUN_TYPES.has(t.type) && t.gunReloadT > 0 && !swingTarget) continue;
-    const R = spec.range * CELL;
+    const R = spec.range * CELL * (typeof fogRangeMul === 'function' ? fogRangeMul(t) : 1);   // 站在霧裡：鎖敵距離變短（js/fog.js）
     let target = swingTarget;
     if (!target) target = t.mode === 'goto' ? null : campAttackerFor(t, R);
     if (target && target !== swingTarget && !hasLineOfSight(t.x, t.y, target.x, target.y)) target = null;   // 隔牆看不到
@@ -2384,7 +2385,7 @@ function update(dt) {
         if (hitEnemy) sfxMonsterHit(hitEnemy, 0.48, t.type + '-ult');
       } else if (typeof mothDodgesMelee === 'function' && mothDodgesMelee(t, target)) {   // 近戰打飛在空中的人面蝶：有一半打不到（js/human-face-butterfly.js）
         flashDmg('打不到', target.x, target.y - 26 - (target.slimeLift || 0), '#c6d1dd');
-      } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy) {
+      } else if (!G.enemies.includes(target) || Math.random() < spec.accuracy * (typeof fogHitMul === 'function' ? fogHitMul(t) : 1)) {   // 霧裡命中率下降（js/fog.js）
         const impactPoint = { x: target.x, y: target.y };
         const critMul = U ? 0 : rollCrit('sentry');   // 一般攻擊才會爆擊（js/combat-feel.js 的 CRIT）
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
@@ -2515,6 +2516,7 @@ function update(dt) {
   updateBerserkFx(dt);    // 瀕臨暴走黑霧、暴走瞬間、疏導吹散
   updateOil(dt);          // 油汙、火海（js/oil-barrels.js）
   if (typeof updateFogTrees === 'function') updateFogTrees(dt);   // 霧樹被火燒、火海周圍暫時散霧（js/fog.js）
+  if (typeof updateLeafPiles === 'function') updateLeafPiles(dt);   // 樹葉堆被火燒（js/leaf-piles.js）
   updateLandmines(dt);    // 地雷（js/landmine.js）
   if (typeof updateNpcChats === 'function') updateNpcChats(dt);   // 基地裡的 NPC 閒聊小表演（js/npc-chats.js）
   if (typeof updateFishEggs === 'function') updateFishEggs(dt);   // 比基尼小丑魚的魚卵（js/clownfish.js）

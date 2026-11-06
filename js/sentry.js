@@ -742,9 +742,10 @@ function updateSentry(t, dt) {
   const awakeCore = G.cores.some(c => !c.dead && c.awake && !c.hidden);   // 醒著的核心會發光：在暗處也看得到、會走過去打
   if (!TYPES[t.type].noAttack && (litHere || awakeCore) && (G.enemies.length || awakeCore)) {   // 不攻擊的嚮導（塔納）：不去追怪
     const spec = TYPES[t.type];
-    const atkR = spec.range * CELL;                       // 射程（像素）
+    const fogK = typeof fogRangeMul === 'function' ? fogRangeMul(t) : 1;   // 站在霧裡：看不遠（js/fog.js）
+    const atkR = spec.range * CELL * fogK;                // 射程（像素）
     const anchor = t.mode === 'escort' && G.player ? G.player : (t.mode !== 'free' && t.anchor) ? t.anchor : t;   // 護衛時以部隊長為中心
-    const detectR = t.guardSummoned ? Math.max(220, (spec.aggroRange || spec.range + 1.5) * CELL) : (spec.aggroRange || spec.range + 1.5) * CELL;
+    const detectR = (t.guardSummoned ? Math.max(220, (spec.aggroRange || spec.range + 1.5) * CELL) : (spec.aggroRange || spec.range + 1.5) * CELL) * fogK;
     const holdR = ((typeof PATROL !== 'undefined' && PATROL.holdChaseCells) || 6) * CELL;
     const leashR = t.guardSummoned ? 220 : t.mode === 'escort' ? ESCORT.chaseCells * CELL : t.mode === 'free' ? Math.max(260, detectR) : t.mode === 'hold' ? holdR : 110;
     let foe = null, fd = Infinity;
