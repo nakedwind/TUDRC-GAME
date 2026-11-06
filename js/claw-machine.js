@@ -165,6 +165,7 @@ function clawBuy(pack) {
 function clawStart() {
   if (cw.phase !== 'idle' || cw.m.credits <= 0 || cw.reveal) return;
   cw.m.credits -= 1; clawPersist();
+  if (typeof minigameRound === 'function') minigameRound('claw');   // 遊戲紀錄（js/pc-stats.js）：每下一爪算一局
   cw.phase = 'aim'; cw.timer = CLAW_MACHINE.aimTime; cw.ticked = 0;
   clawSay(clawPityOn() ? '保夾中！這一爪碰到就夾得起來' : '←→ 移動爪子，空白鍵下爪', clawPityOn() ? 'pity' : '');
   sfx('switch');
@@ -550,6 +551,7 @@ function openClawMachine(spot) {
   if (clawOpen) return;
   if (!cw.el) buildClaw();
   clawOpen = true;
+  if (typeof minigameTimer === 'function') minigameTimer('claw', true);   // 遊戲紀錄：開始算時間
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });
   cw.spot = spot; cw.m = clawMachineState(spot);
   Object.assign(cw, { phase: 'idle', x: CW.AIM_MIN, vx: 0, _pv: 0, rope: CW.ROPE_MIN, swing: 0, swingV: 0, open: 1, held: null, target: null, timer: 0, keysHeld: {}, btnDir: 0, hover: null, tipId: null, wins: [], pending: [], reveal: null, refund: 0, flash: 0, acc: 0, last: performance.now() });
@@ -565,6 +567,7 @@ function openClawMachine(spot) {
 function closeClawMachine() {
   if (!clawOpen || cw.reveal || cw.phase !== 'idle') return;
   clawOpen = false; cancelAnimationFrame(cw.raf); clawStopMotor();
+  if (typeof minigameTimer === 'function') minigameTimer('claw', false);
   cw.el.classList.add('hidden');
   sfx('switch');
   // 拿到的東西關掉才跳提示（第一次拿到的說明視窗也在這時候才跳，不會蓋住機台）

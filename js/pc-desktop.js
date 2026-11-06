@@ -5,6 +5,7 @@
        💣 踩地雷：左鍵翻開、右鍵插旗、點已翻開的數字＝旗子插夠了就把旁邊的一起翻開；笑臉＝重新開始
        🃏 新接龍：FreeCell，牌局在 js/pc-freecell.js
        🕷️ 蜘蛛紙牌：Spider（單色／雙色／四色），牌局在 js/pc-spider.js
+       📊 遊戲紀錄：每款小遊戲玩了幾局、花了多少時間，在 js/pc-stats.js
        📕 怪物圖鑑：打開原本的圖鑑視窗（js/bestiary.js 的 openBestiary）
    ・左下「開始」選單、右下的電源按鈕都可以關機
    樣式在 css/style.css 的「2F 電腦桌面」。
@@ -16,6 +17,7 @@ const PCD_APPS = [
   { id: 'mines', name: '踩地雷', icon: '💣', title: '踩地雷' },
   { id: 'freecell', name: '新接龍', icon: '🃏', title: '新接龍' },
   { id: 'spider', name: '蜘蛛紙牌', icon: '🕷️', title: '蜘蛛紙牌' },
+  { id: 'stats', name: '遊戲紀錄', icon: '📊', title: '遊戲紀錄' },
   { id: 'bestiary', name: '怪物圖鑑', icon: '📕' },
 ];
 // 列不出資料夾內容時（例如放到網路上的版本）用這份清單；在本機用 editor-server 開的話會自動讀 music/基地音樂/ 裡實際有的檔案
@@ -135,6 +137,7 @@ function openPcApp(id) {
     if (id === 'mines') initPcMines(w.querySelector('.pcd-body'));
     if (id === 'freecell') initPcFreecell(w.querySelector('.pcd-body'));
     if (id === 'spider') initPcSpider(w.querySelector('.pcd-body'));
+    if (id === 'stats') initPcStats(w.querySelector('.pcd-body'));
     sfx('menu');
   }
   focusPcWin(id);
@@ -261,7 +264,12 @@ function placePcMines(m, safe) {   // 第一下點的那格和旁邊一圈一定
   for (let k = 0; k < m.n; k++) { const j = k + Math.floor(Math.random() * (spots.length - k)); [spots[k], spots[j]] = [spots[j], spots[k]]; m.cells[spots[k]].mine = true; }
   m.cells.forEach((c, i) => { c.num = pcMinesAround(m, i).filter(j => m.cells[j].mine).length; });
   m.started = true;
-  m.timer = setInterval(() => { if (pcDesktopOpen && m.time < 999) { m.time++; renderPcMinesHead(); } }, 1000);
+  minigameRound('mines');
+  m.timer = setInterval(() => {
+    if (!pcDesktopOpen) return;
+    minigameSecond('mines');   // 牌面的計時器到 999 就不動了，遊戲紀錄的時間繼續算
+    if (m.time < 999) { m.time++; renderPcMinesHead(); }
+  }, 1000);
 }
 function pcMinesOpen(i) {
   const m = pcd.mine, c = m.cells[i]; if (m.over || c.flag) return;

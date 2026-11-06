@@ -3484,6 +3484,15 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-mmsg { color: #444; font-size: 12px; }
 
 /* 新接龍（js/pc-freecell.js）：牌的尺寸由 fitPcFreecell 依螢幕大小決定 */
+/* 遊戲紀錄 */
+.pcd-stats { min-width: 340px; color: #222; font-size: 14px; }
+.pcd-stats table { width: 100%; border-collapse: collapse; background: #fff; }
+.pcd-stats th, .pcd-stats td { padding: 7px 12px; border: 1px solid #c9c3b1; text-align: right; white-space: nowrap; }
+.pcd-stats th { background: #e2dcc9; font-weight: 700; }
+.pcd-stats th:first-child, .pcd-stats td:first-child { text-align: left; }
+.pcd-stats tfoot td { background: #f1ecdd; font-weight: 700; }
+.pcd-stats-ico { display: inline-block; width: 24px; }
+
 .pcd-fc { --fc-w: 76px; --fc-h: 103px; --fc-col: 400px; --fc-font: 15px; display: flex; flex-direction: column; gap: 6px; }
 .pcd-fc-bar { display: flex; align-items: center; gap: 4px; }
 .pcd-fc-bar button { padding: 3px 12px; border: 1px solid #8a8573; border-radius: 3px; background: linear-gradient(180deg, #fff, #e1dccb); font: inherit; cursor: pointer; }

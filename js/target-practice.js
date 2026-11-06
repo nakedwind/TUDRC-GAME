@@ -245,6 +245,7 @@ function tpPop(x, y, points) {
 // 自由練習：打完一整匣，看看有沒有破紀錄（依彈匣發數分開記，升級手槍後重新算）
 function finishMagazine() {
   tp.magDone = true;
+  if (typeof minigameRound === 'function') minigameRound('target');   // 遊戲紀錄（js/pc-stats.js）：打完一匣算一局
   const mag = tpMag(), best = tpBest.free[mag] || 0;
   if (tp.magScore > best) {
     tpBest.free[mag] = tp.magScore; saveTpBest(); tp.newBest = best > 0;
@@ -295,6 +296,7 @@ function endTimedRun(abort) {
   tpBig.hidden = true;
   if (abort) { tp.run = null; return; }
   run.phase = 'done';
+  if (typeof minigameRound === 'function') minigameRound('target');   // 遊戲紀錄：完成一次限時挑戰算一局
   if (typeof achieveMax === 'function') { achieveMax('tpBestScore', run.score); achieveMax('tpMostShots', run.shots); }   // 成就：限時挑戰的分數、發數
   if (run.score > (tpBest.timed || 0)) { run.newBest = (tpBest.timed || 0) > 0; tpBest.timed = run.score; saveTpBest(); }
   tpShowBig(run.newBest ? '新紀錄！' : '時間到', run.newBest ? 'record' : '');
@@ -389,6 +391,7 @@ function openTargetPractice() {
   if (targetPracticeOpen) return;
   if (!tpEl) buildTargetPractice();
   targetPracticeOpen = true;
+  if (typeof minigameTimer === 'function') minigameTimer('target', true);   // 遊戲紀錄：開始算時間
   if (typeof keys !== 'undefined') Object.keys(keys).forEach(k => { keys[k] = false; });   // 放掉方向鍵，關掉後不會自己走
   if (typeof sfx === 'function') sfx('reload');
   tp.ammo = tpMag(); tp.reloadT = 0; tp.magScore = 0; tp.magShots = 0; tp.magDone = false; tp.newBest = false;
@@ -399,6 +402,7 @@ function openTargetPractice() {
 function closeTargetPractice() {
   if (!targetPracticeOpen) return;
   targetPracticeOpen = false;
+  if (typeof minigameTimer === 'function') minigameTimer('target', false);
   endTimedRun(true);
   tpEl.classList.add('hidden');
   if (typeof sfx === 'function') sfx('menu');

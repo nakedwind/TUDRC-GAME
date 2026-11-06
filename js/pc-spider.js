@@ -112,13 +112,13 @@ function pcsAfter(g) {   // 走完一步：湊齊 K→A 的收走、最下面蓋
     if (s >= g.down[k] && pcsRank(col[s]) === 12 && pcsRun(g, k, s)) { g.done.push(col[s]); col.splice(s); g.score += 100; got = true; }
     if (col.length && g.down[k] >= col.length) g.down[k] = col.length - 1;
   });
-  if (!g.timer && !g.won) g.timer = setInterval(() => pcsTick(g), 1000);
+  if (!g.timer && !g.won) { minigameRound('spider'); g.timer = setInterval(() => pcsTick(g), 1000); }   // 第一步：算一局、開始計時
   if (g.done.length === 8) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('achievement'); }
   else sfx(got ? 'win' : 'blip');
 }
 function pcsTick(g) {
   const w = pcd.wins.spider;
-  if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; renderPcsInfo(g); }
+  if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; minigameSecond('spider'); renderPcsInfo(g); }
 }
 function pcsMoves(g) {   // 列出所有有意義的一步（提示、卡死判斷用），好的排前面
   const out = [];
