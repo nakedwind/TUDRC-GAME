@@ -29,7 +29,7 @@ function initPcSpider(body) {
       '<span class="pcd-sp-levels">' + Object.entries(PCS_LEVELS).map(([k, n]) => '<button type="button" data-suits="' + k + '">' + n + '</button>').join('') + '</span>' +
       '<span class="pcd-fc-info"></span></div>' +
     '<div class="pcd-fc-table"></div><div class="pcd-fc-msg"></div></div>';
-  body.querySelector('.pcd-fc-bar').addEventListener('click', e => {
+  body.querySelector('.pcd-sp').addEventListener('click', e => {   // 上方按鈕列和「這局輸了」提示裡的按鈕都走這裡
     const g = pcd.sp, lv = e.target.closest('[data-suits]'), b = e.target.closest('[data-sp]');
     if (lv) { newPcSpider(+lv.dataset.suits); sfx('button'); return; }
     if (!b) return;
@@ -50,7 +50,7 @@ function newPcSpider(suits, no) {
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   const cols = Array.from({ length: 10 }, (_, k) => deck.splice(0, k < 4 ? 6 : 5));
   Object.assign(g, { suits, no, cols, down: cols.map(c => c.length - 1), stock: deck, done: [], score: 500, moves: 0, hist: [], sel: null, hint: null, note: '',
-    time: 0, timer: 0, won: false, lastClick: 0, dealt: null });
+    time: 0, timer: 0, won: false, lost: false, lastClick: 0, dealt: null });
   g.body.querySelectorAll('[data-suits]').forEach(b => b.classList.toggle('on', +b.dataset.suits === suits));
   fitPcSpider();
   renderPcSpider(true);
@@ -114,11 +114,22 @@ function pcsAfter(g) {   // 走完一步：湊齊 K→A 的收走、最下面蓋
   });
   if (!g.timer && !g.won) { minigameRound('spider'); g.timer = setInterval(() => pcsTick(g), 1000); }   // 第一步：算一局、開始計時
   if (g.done.length === 8) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('achievement'); }
+  else if (pcsStuck(g)) { g.lost = true; clearInterval(g.timer); g.timer = 0; sfx('error'); }   // 真的一步都不能走：這局輸了（跟新接龍一樣跳出提示）
   else sfx(got ? 'win' : 'blip');
 }
 function pcsTick(g) {
   const w = pcd.wins.spider;
   if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; minigameSecond('spider'); renderPcsInfo(g); }
+}
+// 第 a 排從第 i 張開始的牌搬到第 b 排之後，上面露出來的那疊（同花色連著的）能不能接到別排去
+// 那疊本身也是放在大 1 的別花色牌上的話，要換到同花色的牌上才算（不然只是換個地方，沒有進展）
+function pcsFreesAbove(g, a, i, b) {
+  const col = g.cols[a];
+  let s = i - 1;
+  while (s > g.down[a] && pcsRank(col[s - 1]) === pcsRank(col[s]) + 1 && pcsSuit(g, col[s - 1]) === pcsSuit(g, col[s])) s--;
+  const top = col[s], onBigger = s > g.down[a] && pcsRank(col[s - 1]) === pcsRank(top) + 1;
+  return g.cols.some((dst, c) => c !== a && c !== b && dst.length && pcsFits(g, top, c)
+    && (!onBigger || pcsSuit(g, dst[dst.length - 1]) === pcsSuit(g, top)));
 }
 function pcsMoves(g) {   // 列出所有有意義的一步（提示、卡死判斷用），好的排前面
   const out = [];
@@ -129,17 +140,30 @@ function pcsMoves(g) {   // 列出所有有意義的一步（提示、卡死判�
       g.cols.forEach((dst, b) => {
         if (a === b || !dst.length || !pcsFits(g, id, b)) return;
         const same = pcsSuit(g, dst[dst.length - 1]) === pcsSuit(g, id);
-        // 本來就放在大 1 的牌上：只有換到同花色的牌上才有意義
-        if (above !== null && pcsRank(above) === pcsRank(id) + 1 && (!same || pcsSuit(g, above) === pcsSuit(g, id))) return;
-        out.push({ a, i, b, score: (same ? 3 : 1) + (i === g.down[a] ? 2 : 0) });
+        // 本來就放在大 1 的牌上：換到同花色的牌上才有意義；
+        // 換到別的花色上，只有「搬開後，露出來的那張能接到別排」才算（例：♠7 從 ♥8 搬到另一張 8，♥8 才能去接 ♠9）
+        let freeing = false;
+        if (above !== null && pcsRank(above) === pcsRank(id) + 1) {
+          if (pcsSuit(g, above) === pcsSuit(g, id)) return;   // 同花色連著的一疊：拆開沒有意義
+          if (!same) { if (!pcsFreesAbove(g, a, i, b)) return; freeing = true; }
+        }
+        out.push({ a, i, b, score: freeing ? 0 : (same ? 3 : 1) + (i === g.down[a] ? 2 : 0) });   // 這種兩步的走法排最後
       });
     }
   });
   return out.sort((x, y) => y.score - x.score);
 }
-const pcsHasMove = g => !!g.stock.length || pcsMoves(g).length > 0 || (g.cols.some(c => !c.length) && g.cols.some((c, k) => c.length > 1 || (c.length && g.down[k])));
+// 判輸用：右下角的牌堆發完了，而且「任何」合法的移動都沒有（就算是搬過去沒什麼用的也算還能動）才算輸。
+// 寧可少判，也不能在還能動的時候說輸了；有空的那排就一定還能動（任何牌都能放進空排）。
+function pcsStuck(g) {
+  if (g.stock.length) return false;
+  return !g.cols.some((col, a) => {
+    for (let i = pcsRunStart(g, a); i < col.length; i++) if (g.cols.some((_, b) => b !== a && pcsFits(g, col[i], b))) return true;
+    return false;
+  });
+}
 function pcsHint(g) {
-  if (g.won) return;
+  if (g.won || g.lost) return;
   clearTimeout(g.hintTimer);
   const m = pcsMoves(g)[0];
   if (m) { g.hint = m; g.note = ''; sfx('switch'); }
@@ -153,7 +177,9 @@ function pcsHint(g) {
 }
 function pcsUndo(g) {
   if (!g.hist.length || g.won) { sfx('error'); return; }
-  Object.assign(g, JSON.parse(g.hist.pop()), { sel: null, hint: null, note: '' });
+  const wasLost = g.lost;
+  Object.assign(g, JSON.parse(g.hist.pop()), { sel: null, hint: null, note: '', lost: false });
+  if (wasLost) g.timer = setInterval(() => pcsTick(g), 1000);   // 從輸掉的地方退回來：同一局繼續，時間接著算
   sfx('switch');
   renderPcSpider();
 }
@@ -161,7 +187,7 @@ function pcsUndo(g) {
 // ---- 操作：拖曳、點選 ----
 function pcsDown(e) {
   const g = pcd.sp;
-  if (e.button !== 0 || g.won) return;
+  if (e.button !== 0 || g.won || g.lost) return;
   const el = e.target.closest('[data-slot]');
   if (!el) { if (g.sel) { g.sel = null; renderPcSpider(true); } return; }
   const slot = el.dataset.slot, k = +slot.slice(1), i = el.dataset.i === undefined ? -1 : +el.dataset.i;
@@ -275,7 +301,8 @@ function renderPcSpider(noAnim) {
   const stock = Array.from({ length: piles }, (_, n) => pcsBack(' data-slot="s"', 'left:' + n * off + 'px')).join('');
   table.innerHTML = '<div class="pcd-fc-cols">' + cols + '</div><div class="pcd-sp-foot">' +
     '<div class="pcd-sp-done" style="width:calc(var(--fc-w) + ' + 7 * off + 'px)">' + (done || '<span class="pcd-sp-empty">收齊 K→A 會放這裡</span>') + '</div>' +
-    '<div class="pcd-sp-stock" data-slot="s" title="點一下：每排各發 1 張" style="width:calc(var(--fc-w) + ' + 4 * off + 'px)">' + (stock || '<span class="pcd-sp-empty">發完了</span>') + '</div></div>';
+    '<div class="pcd-sp-stock" data-slot="s" title="點一下：每排各發 1 張" style="width:calc(var(--fc-w) + ' + 4 * off + 'px)">' + (stock || '<span class="pcd-sp-empty">發完了</span>') + '</div></div>' +
+    (g.lost ? '<div class="pcd-fc-over"><div class="pcd-fc-overbox"><b>這局輸了</b><p>已經沒有牌可以移動了。</p><button type="button" data-sp="undo">↶ 復原</button><button type="button" data-sp="retry">重玩這局</button><button type="button" data-sp="new">新牌局</button></div></div>' : '');   // 「這局輸了」提示：跟新接龍用同一個樣子
   table.querySelectorAll('.pcd-fc-card[data-card]').forEach(el => {   // 牌從舊位置滑到新位置；剛發的牌從右下角的牌堆飛出來
     const dealt = g.dealt ? g.dealt.indexOf(+el.dataset.card) : -1;
     const o = old[el.dataset.card] || (dealt >= 0 && stockRect); if (!o) return;
@@ -287,8 +314,8 @@ function renderPcSpider(noAnim) {
   g.dealt = null;
   renderPcsInfo(g);
   g.body.querySelector('.pcd-fc-msg').textContent = g.won ? '🎉 破關了！分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '。按「新牌局」再玩一次'
-    : g.note || (!pcsHasMove(g) ? '沒有牌可以走了…按「復原」或「重玩這局」'
-    : '同花色、由大到小連著的牌才能一起搬；湊齊 K→A 自動收走。點右下角的牌堆發牌（還有 ' + piles + ' 次）');
+    : g.lost ? '這局輸了：沒有牌可以移動了。分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '、' + g.moves + ' 步'
+    : g.note || ('同花色、由大到小連著的牌才能一起搬；湊齊 K→A 自動收走。點右下角的牌堆發牌（還有 ' + piles + ' 次）');
   g.body.querySelector('[data-sp="undo"]').disabled = !g.hist.length || g.won;
 }
 function renderPcsInfo(g) {

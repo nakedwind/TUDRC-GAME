@@ -162,6 +162,16 @@ function partyRecycle(who) {
   sfx('place'); partyRenderHud();
 }
 function partyAddToTray(tray, food) { tray.foods.push(food); sfx('blip'); }
+// 溫特手上有煮好的菜又拿著餐盤：自動裝進去，不用再按一次。
+// 不裝的情況：餐盤滿了、已經有這道菜、這盤已經剛好符合某人的訂單（裝下去反而弄錯）；烤焦的也不裝
+function partyAutoFillTray() {
+  const T = G.player.tray; if (!T || T.dirty) return;
+  for (const id of [...party.foods]) {
+    if (!partyFood(id).from || T.foods.length >= MEAL.maxDishes || T.foods.some(f => f.key === id)) continue;
+    if (party.guests.some(g => g.state === 'food' && partyTrayMatches(T, g.order))) return;
+    party.foods.splice(party.foods.indexOf(id), 1); partyAddToTray(T, partyCookedFood(id));
+  }
+}
 // 煮：把手上的生食放上空的爐口
 const partyBurners = () => { const r = partyStation('stove'); return r ? stoveBurners(r.s).map((_, k) => burnerPos(r.s, k)) : []; };
 function partyStovePut(rawId, owner) {
@@ -301,21 +311,20 @@ function partyPlayerAction() {
       else if (F.length < PARTY.handLimit) add(r, '起鍋：' + to.name, () => { partyTakePot(q); F.push(q.to); sfx('blip'); }, yy);
     }
   }
-  // 手上有煮好的、也拿著餐盤：隨時可以裝進去（比其他動作不優先）
-  if (tray) for (const id of F) if (partyFood(id).from && tray.foods.length < MEAL.maxDishes && !tray.foods.some(f => f.key === id)) add(spot(p.x, p.y - 30, 1), '裝進餐盤：' + partyFood(id).name, () => { F.splice(F.indexOf(id), 1); partyAddToTray(tray, partyCookedFood(id)); }, p.y - 60, 34);
   // 打飯台
-  const pan = mealPanAt(p.x, p.y, 46, fx);
+  const pan = mealPanAt(p.x, p.y, 30);
   if (pan) {
     const r = spot(pan.x, pan.y, 16), nm = (dishOf(pan.key) || {}).name || '菜', isSoup = pan.key === PARTY.soupPan;
+    // 下面的 -10：人都站在這盤前面了，比旁邊的空檯子優先（除非正面向後面的料理台）
     const yy = mealHeadY(p) - (F.length ? 26 : 0);   // 提示放在溫特頭上才不會擋到人和餐盤；手上有食材時（圖畫在頭上）再往上一點
     if (isSoup) {
-      if (bowl && !bowl.soup) add(r, '裝湯', () => { bowl.soup = true; sfx('blip'); }, yy, 0, p.x);
-      else if (tray) add(r, '湯要用碗裝', () => partyError('湯不能裝在餐盤裡，要拿碗'), yy, 0, p.x);
+      if (bowl && !bowl.soup) add(r, '裝湯', () => { bowl.soup = true; sfx('blip'); }, yy, -10, p.x);
+      else if (tray) add(r, '湯要用碗裝', () => partyError('湯不能裝在餐盤裡，要拿碗'), yy, -10, p.x);
       else if (handsFree) add(r, nm + '：先拿碗', () => partyError('要先拿碗'), yy, 30, p.x);
     } else if (tray) {
-      if (tray.foods.length >= MEAL.maxDishes) add(r, '餐盤裝滿了', () => partyError('餐盤最多裝 ' + MEAL.maxDishes + ' 樣菜'), yy, 0, p.x);
-      else if (tray.foods.some(f => f.key === pan.key)) add(r, '已經裝過' + nm, () => partyError('這道菜裝過了'), yy, 0, p.x);
-      else add(r, '裝' + nm + '（' + tray.foods.length + '/' + MEAL.maxDishes + '）', () => partyAddToTray(tray, partyPanFoodByKey(pan.key)), yy, 0, p.x);
+      if (tray.foods.length >= MEAL.maxDishes) add(r, '餐盤裝滿了', () => partyError('餐盤最多裝 ' + MEAL.maxDishes + ' 樣菜'), yy, -10, p.x);
+      else if (tray.foods.some(f => f.key === pan.key)) add(r, '已經裝過' + nm, () => partyError('這道菜裝過了'), yy, -10, p.x);
+      else add(r, '裝' + nm + '（' + tray.foods.length + '/' + MEAL.maxDishes + '）', () => partyAddToTray(tray, partyPanFoodByKey(pan.key)), yy, -10, p.x);
     } else if (handsFree) add(r, nm + '：先拿餐盤', () => partyError('要先拿餐盤才能打菜'), yy, 30, p.x);
   }
   // 餐盤架、碗
@@ -332,10 +341,12 @@ function partyPlayerAction() {
     if (!near(s.x, s.y, 80)) continue;   // 料理台比較深，手可以伸遠一點
     const r = spot(s.x, s.y), yy = s.y - 22;
     if (s.item) {
-      if (handsFree) add(r, '拿起來', () => { if (s.item.kind === 'tray') p.tray = s.item.tray; else party.bowl = s.item.bowl; s.item = null; sfx('switch'); }, yy);
+      if (s.item.kind === 'food') { if (F.length < PARTY.handLimit) add(r, '拿起' + partyFood(s.item.id).name, () => { F.push(s.item.id); s.item = null; sfx('switch'); }, yy); }
+      else if (handsFree) add(r, '拿起來', () => { if (s.item.kind === 'tray') p.tray = s.item.tray; else party.bowl = s.item.bowl; s.item = null; sfx('switch'); }, yy);
       else for (const id of F) if (s.item.kind === 'tray' && !s.item.tray.dirty && partyFood(id).from && s.item.tray.foods.length < MEAL.maxDishes && !s.item.tray.foods.some(f => f.key === id)) add(r, '放進餐盤：' + partyFood(id).name, () => { F.splice(F.indexOf(id), 1); partyAddToTray(s.item.tray, partyCookedFood(id)); }, yy);
     } else if (T) add(r, '暫放餐盤', () => { s.item = { kind: 'tray', tray: T }; p.tray = null; sfx('place'); }, yy);
     else if (B) add(r, '暫放碗', () => { s.item = { kind: 'bowl', bowl: B }; party.bowl = null; sfx('place'); }, yy);
+    else if (F.length) { const id = F[0]; add(r, '暫放' + partyFood(id).name, () => { F.splice(F.indexOf(id), 1); s.item = { kind: 'food', id }; sfx('place'); }, yy); }   // 甜點、煮好的菜也能放
   }
   // 冰箱
   const fridge = partyNearStation('fridge', p.x, p.y);
@@ -495,6 +506,13 @@ const partyStepAtPan = (key, run) => {
 };
 function partyHelperStep(h, dt) {
   const a = h.a; updateNpcTalk(a, dt);
+  if (h.resting) {   // 坐著聊天（諾亞）：每 0.5 秒看一下有沒有要幫忙的，有就起身
+    const S = h.seat.seat; a.x = S.x; a.y = S.y; a.dir = S.dir; a.moving = false; a.sitting = S;
+    if ((h.wait -= dt) > 0) return;
+    h.wait = .5; h.plan = null; h.think(h);   // 先清掉走回座位那份已經做完的清單，才不會被當成有事要做
+    if (h.plan) { h.resting = false; npcStandUp(a); h.wait = 0; }
+    return;
+  }
   if (a.sitting) npcStandUp(a);
   // 艾德林手上沒拿東西時，檯子上一有做好的餐就放下手邊的事去端（正要去收髒盤、正要幫阿瓦倫裝餐都一樣）
   if (h.id === 'eldrin' && h.plan && !party.slots.some(s => s.claim === h) && !partyHasBox(a) && !a.partyFood) {
@@ -512,7 +530,7 @@ function partyHelperStep(h, dt) {
   }
 }
 // 空檯子上放著做好的餐，又正好有人點這個：端過去。canServe＝這個幫手可以送給誰
-const partySlotFits = (item, order) => item.kind === 'tray' ? partyTrayMatches(item.tray, order) : !!(order && order.type === 'soup' && item.bowl.soup && !item.bowl.dirty);
+const partySlotFits = (item, order) => item.kind === 'tray' ? partyTrayMatches(item.tray, order) : item.kind === 'food' ? !!(order && order.type === item.id) : !!(order && order.type === 'soup' && item.bowl.soup && !item.bowl.dirty);
 function partySlotPlan(h, canServe) {
   const a = h.a;
   for (const s of party.slots) {
@@ -523,15 +541,16 @@ function partySlotPlan(h, canServe) {
     return [
       partyStep(q.x, q.y, () => {
         s.claim = null; if (s.item !== item) return;   // 溫特先拿走了
-        if (item.kind === 'tray') a.meal = { tray: item.tray, stage: 'party' }; else a.partyBowl = item.bowl;
+        if (item.kind === 'tray') a.meal = { tray: item.tray, stage: 'party' }; else if (item.kind === 'food') a.partyFood = item.id; else a.partyBowl = item.bowl;
         s.item = null; sfx('switch');
       }),
       partyStep(g.approach.x, g.approach.y, () => {
-        if (!partyHasBox(a)) return;
-        const what = partyTrayOf(a) ? 'tray' : 'bowl';
-        if (g.state === 'food' && partySlotFits(item, g.order) && partyDeliver(g, a, what)) return;
+        if (!partyHasBox(a) && !a.partyFood) return;
+        const what = partyTrayOf(a) ? 'tray' : a.partyBowl ? 'bowl' : a.partyFood;
+        if (g.state === 'food' && partySlotFits(item, g.order) && partyDeliver(g, a, what)) { a.partyFood = null; return; }
         if (what === 'tray') partyWaste(partyTrayOf(a).foods.length); else partyWaste(1);   // 走到時對方已經有餐了：這份就浪費了
-        partyRecycle(a);
+        if (partyHasBox(a)) partyRecycle(a);
+        a.partyFood = null;
       }),
     ];
   }
@@ -576,12 +595,12 @@ function partyEldrinPlan(h, g) {
   steps.push(deliver('tray'));
   return steps;
 }
-function partyNoahThink(h) {   // 諾亞：偶爾順手把暫放在空位、剛好有人要的餐盤端過去
-  const a = h.a;
-  if ((h.gap = (h.gap == null ? PARTY.noahGap : h.gap) - .5) > 0) { h.wait = .5; return; }
-  h.plan = partySlotPlan(h, o => o.id !== 'avaren');
-  if (h.plan) { h.gap = PARTY.noahGap; partySay(a, PARTY.noahSay); return; }
-  h.wait = .5;
+function partyNoahThink(h) {   // 諾亞：平常坐著聊天；空檯子上有做好的東西、艾德林又騰不出手時，才起身去端（阿瓦倫的不端）
+  const a = h.a, eld = party.helpers.find(q => q.id === 'eldrin');
+  const eldrinBusy = !eld || partyHasBox(eld.a) || !!eld.a.partyFood;   // 艾德林手上空著的話，他自己會馬上去端
+  const plan = eldrinBusy ? partySlotPlan(h, o => o.id !== 'avaren') : null;
+  if (plan) { h.plan = plan; partySay(a, PARTY.noahSay); return; }
+  if (!h.resting && h.seat) h.plan = [partyStep(h.seat.approach.x, h.seat.approach.y, () => { partySeatGuest({ a, seat: h.seat.seat }); h.resting = true; })];   // 沒事：回座位
 }
 function partyActorStep(a, dt) {
   const g = party.guests.find(o => o.a === a); if (g) { partyGuestStep(g, dt); return true; }
@@ -606,6 +625,7 @@ function partyActorStep(a, dt) {
 function partyUpdate(dt) {
   if (!partyPlaying() || !G || !G.player) return;
   party.time += dt;
+  partyAutoFillTray();
   if (party.winterSay && (party.winterSay.life -= dt) <= 0) party.winterSay = null;
   if (party.arrive.length && (party.arriveT -= dt) <= 0) { const g = party.arrive.shift(); party.arriveT = PARTY.arriveGap; g.state = 'walk'; g.a.x = g.door.x; g.a.y = g.door.y; }
   for (const p of party.pots) { p.t += dt; if (Math.random() < dt * 10) party.steam.push({ x: p.x + (Math.random() - .5) * 12, y: p.y - 10, vy: -20 - Math.random() * 14, life: .8, age: 0 }); }
@@ -629,7 +649,7 @@ function partyDrawBowl(c, x, y, s, soup, dirty) {
   c.restore();
 }
 function partyDrawFoodPic(c, id, x, y, s) { const im = partyImg(partyFood(id).img); if (im.complete && im.naturalWidth) { c.save(); c.imageSmoothingEnabled = false; const k = s / Math.max(im.naturalWidth, im.naturalHeight), w = im.naturalWidth * k, h = im.naturalHeight * k; c.drawImage(im, x - w / 2, y - h / 2, w, h); c.restore(); } }
-function partyDrawSlot(s) { if (s.item.kind === 'tray') drawMealTray(ctx, s.x, s.y, s.item.tray, .8); else partyDrawBowl(ctx, s.x, s.y, 20, s.item.bowl.soup, s.item.bowl.dirty); }
+function partyDrawSlot(s) { if (s.item.kind === 'tray') drawMealTray(ctx, s.x, s.y, s.item.tray, .8); else if (s.item.kind === 'food') partyDrawFoodPic(ctx, s.item.id, s.x, s.y - 4, 22); else partyDrawBowl(ctx, s.x, s.y, 20, s.item.bowl.soup, s.item.bowl.dirty); }
 function partyDrawTableDish(d) {
   if (d.kind === 'bowl') partyDrawBowl(ctx, d.x, d.y, 20, !d.dirty, d.dirty);
   else { const im = partyImg(d.img); if (im.complete && im.naturalWidth) { ctx.save(); ctx.imageSmoothingEnabled = false; ctx.drawImage(im, d.x - 13, d.y - 15, 26, 26 * im.naturalHeight / im.naturalWidth); ctx.restore(); } }
@@ -809,7 +829,7 @@ function partyBegin() {
   const [dx, dy] = center(...PARTY.door);
   const addHelper = (id, think) => { const a = byId(id); if (!a) return; party.helpers.push({ a, id, wait: 0, plan: null, think }); if (a.y > dy + CELL) { a.x = dx; a.y = dy; } };
   addHelper('eldrin', partyEldrinThink);
-  addHelper('noah', partyNoahThink);   // 諾亞：偶爾順手端一盤
+  addHelper('noah', partyNoahThink);   // 諾亞：坐著聊天，艾德林忙不過來時起身幫忙端
   const taken = new Set(party.helpers.map(h => h.id));
   const pool = all.map(partyActorId).filter(id => !taken.has(id) && id !== 'ball');
   const must = PARTY.mustGuests.filter(id => pool.includes(id)), rest = pool.filter(id => !must.includes(id)).sort(() => Math.random() - .5);
@@ -834,6 +854,8 @@ function partyBegin() {
     a.seatGoal = { seat, approach };
     a.partyChat = { a, seat, approach, fail: 0, delay: PARTY.arriveGap * (i + .5), door: { x: dx, y: dy } };
   });
+  const noah = party.helpers.find(h => h.id === 'noah'), noahSeat = freeSeats[chatters.length];   // 諾亞也留一個位子，沒事就坐著聊天
+  if (noah && noahSeat) { noah.seat = { seat: noahSeat, approach: seatApproachPoint(noahSeat) }; noah.a.seatGoal = noah.seat; }
   for (const a of all) if (!party.guests.some(g => g.a === a) && !party.helpers.some(h => h.a === a) && !a.partyChat && a.y > dy + CELL) { a.x = dx; a.y = dy; }   // 球球不坐椅子，直接進來走動
   party.stage = 'play'; partyRenderHud(); partyRenderTickets();
   systemNotice('慶功宴開始！客人頭上出現問號時，走過去按空白鍵點餐');
