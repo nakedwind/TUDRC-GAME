@@ -1,9 +1,11 @@
 /* ===== 🎬 劇情編輯器（劇情編輯器.html）=====
    資料存在 data/story-scenes.js（STORY_SCENES），遊戲的播放器在 js/story-scene.js。
    ・最上面：預覽、下載、💾 存到專案。
-   ・左邊：選哪一段劇情、場上的人與鏡頭清單（只列有的，新增用「＋ 放到地圖上」）、檢查（找不到的人、站在牆裡…）。
-   ・中間：劇情地圖。點一下選取、按住拖曳移動；選到某一頁對話時，畫出那一頁的走位目標與鏡頭。
-   ・右邊分頁：每一頁的台詞與演出（只列這頁用到的，新增用「＋ 加演出」）、選取物件的屬性、說話者頭像、劇情設定。
+   ・版面跟劇情編輯器（改）一樣分三欄，整頁高度固定、各區自己捲動：
+   ・左邊：「放到地圖上」的按鈕（人物、怪物、鏡頭與地點、燈光，每區可收起來）、檢查（找不到的人、站在牆裡…）。
+   ・中間：劇情地圖預覽窗。點一下選取、按住拖曳移動；選到某一頁對話時，畫出那一頁的走位目標與鏡頭。
+   ・右邊：最上面選劇情、改劇情 ID（⚙ 設定裡改標題、副標題、複製、刪除）；中間是場上的人與鏡頭清單；
+     下面分頁：每一頁的台詞與演出（新增用「＋ 加演出」）、選取物件的屬性、說話者頭像、劇情設定；最下面 💾 存到專案。
    ・編輯自動存在瀏覽器（tudrc_story_scenes_v1），跟專案檔三方合併（js/draft-sync.js）；
      「▶ 預覽」開遊戲並使用草稿；「💾 存到專案」寫進 data/story-scenes.js。
 */
@@ -366,7 +368,10 @@ function renderScenes() {
   const ss = $('sceneSel'); ss.innerHTML = '';
   for (const [id, s] of Object.entries(data)) ss.append(h('option', { value: id, ...(id === sceneId ? { selected: true } : {}) }, (s.title || id) + '（' + id + '）'));
   const s = scene(), box = $('paneScene'); box.innerHTML = '';
-  if (!s) { box.append(h('p', { class: 'note' }, '還沒有劇情，按左上的「＋ 新劇情」。')); return; }
+  // 右上那一格：劇情 ID、標題、副標題（跟下面「劇情設定」分頁是同一份資料）
+  $('sceneIdInput').value = s ? sceneId : ''; $('sceneTitle').value = s?.title || ''; $('sceneSub').value = s?.subtitle || '';
+  for (const id of ['sceneIdInput', 'sceneTitle', 'sceneSub', 'sceneCopy', 'sceneDel']) $(id).disabled = !s;
+  if (!s) { box.append(h('p', { class: 'note' }, '還沒有劇情，按右上的「＋新劇情」。')); return; }
   const idInput = h('input', { type: 'text', value: sceneId, onchange: e => renameScene(e.target.value.trim()) });
   const on = [s.darkness && '黑幕', s.footsteps && '腳步聲', Number(s.vignette) > 0 && '壓暗', s.door && '自動門', s.explosions && '爆炸'].filter(Boolean).join('、');
   box.append(
@@ -434,6 +439,10 @@ function renameScene(id) {
   const next = {}; for (const [k, v] of Object.entries(data)) next[k === sceneId ? id : k] = v;
   data = next; sceneId = id; commit();
 }
+$('sceneIdInput').onchange = e => renameScene(e.target.value.trim());
+$('sceneTitle').onchange = e => { if (scene()) { scene().title = e.target.value; commit(); } };
+$('sceneSub').onchange = e => { if (scene()) { scene().subtitle = e.target.value; commit(); } };
+$('sceneMore').onclick = () => { const st = $('sceneSettings'); st.hidden = !st.hidden; $('sceneMore').setAttribute('aria-expanded', String(!st.hidden)); };
 $('sceneSel').onchange = e => { sceneId = e.target.value; sel = null; beatSel = 0; renderPanels(); drawSoon(); };
 $('sceneNew').onclick = () => {
   let n = Object.keys(data).length + 1; while (data['scene_' + String(n).padStart(2, '0')]) n++;
@@ -452,10 +461,13 @@ $('sceneDel').onclick = () => {
   delete data[sceneId]; sceneId = Object.keys(data)[0] || null; sel = null; beatSel = 0; commit();
 };
 
-// ---- 左邊：場上的人與鏡頭 ----
+// ---- 左邊：放到地圖上的按鈕／右邊：場上的人與鏡頭 ----
+// 左邊按鈕分成幾區（跟劇情編輯器（改）一樣可以收起來）；收起來的區會記住，重畫時不會又打開
+const ADD_GROUPS = [['人物', ['主要角色', '躺床的傷員', '開槍的哨兵', '走動的嚮導']], ['怪物', ['👾 怪物']], ['鏡頭與地點', ['🎥 鏡頭', '📍 地點']], ['燈光', ['💡 燈']]];
+const closedFolds = new Set();
 function renderObjects() {
-  const s = scene(), box = $('objList'); box.innerHTML = ''; if (!s) return;
-  // 清單只列有東西的分類；要放新的從最下面的「＋ 放到地圖上」選單挑
+  const s = scene(), box = $('objList'), tools = $('addTools'); box.innerHTML = ''; tools.innerHTML = ''; if (!s) return;
+  // 右邊清單只列有東西的分類；要放新的用左邊的按鈕
   const kinds = [];
   const list = (title, items, addText, add) => {
     kinds.push([addText, add]);
@@ -481,10 +493,19 @@ function renderObjects() {
     placeNew('嚮導的第一個停留點', q => { s.medics.push({ route: [{ at: q, wait: 2, face: 'front' }] }); return 'medic:' + (s.medics.length - 1); }));
   list('劇情的燈（黑幕時照亮，不畫燈）', s.lights.map((lt, i) => ['light:' + i, '#ffe36e', '💡 燈' + (i + 1), '半徑 ' + (lt[2] || 4) + ' 格']), '💡 燈',
     placeNew('燈', q => { s.lights.push([q[0], q[1], 4]); return 'light:' + (s.lights.length - 1); }));
-  const menu = h('details', { class: 'addmenu addobj' }, h('summary', {}, '＋ 放到地圖上'));
-  menu.append(h('div', { class: 'addmenu-body' }, h('div', { class: 'mgroup' }, kinds.map(([text, add]) => h('button', { type: 'button', class: 'small', onclick: () => { menu.open = false; add(); } }, text)))));
-  box.append(menu);
+  if (!box.children.length) box.append(h('p', { class: 'note' }, '地圖上還沒有東西，用左邊的按鈕放上去。'));
+  for (const [name, texts] of ADD_GROUPS) {
+    const d = h('details', { class: 'fold', ontoggle: () => d.open ? closedFolds.delete(name) : closedFolds.add(name) }, h('summary', {}, name),
+      h('div', { class: 'btns' }, kinds.filter(k => texts.includes(k[0])).map(([text, add]) => h('button', { type: 'button', onclick: add }, h('b', {}, '＋'), text))));
+    d.open = !closedFolds.has(name);
+    tools.append(d);
+  }
 }
+// 右上「場上的人與鏡頭」那一格可以收起來，讓下面的對話區更大
+$('objFold').onclick = () => {
+  const list = $('objList'), open = list.hidden;
+  list.hidden = !open; $('objFold').textContent = open ? '▴' : '▾'; $('objFold').setAttribute('aria-expanded', String(open));
+};
 
 // ---- 右邊：選取物件的屬性 ----
 function renameKey(objMap, oldKey, newKey, kind) {   // 鏡頭、地點改名：對話裡用到的地方一起改
@@ -879,6 +900,8 @@ async function preview(from = 1) {
   if (win) win.location.href = url; else window.open(url, 'story_preview');
 }
 $('previewGame').onclick = () => preview(1);
+$('playSide').onclick = () => preview(1);
+$('playFrom').onclick = () => preview(beatSel >= 0 ? beatSel + 1 : 1);   // 從選取的那一頁開始播（沒選就從頭）
 $('exportFile').onclick = () => {
   const url = URL.createObjectURL(new Blob([storyExportText()], { type: 'text/javascript' }));
   const a = document.createElement('a'); a.href = url; a.download = 'story-scenes.js'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
