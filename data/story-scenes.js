@@ -1133,7 +1133,7 @@ const STORY_SCENES = {
         "camera": "全景",
         "blow": { "colyn": true, "taana": true, "eldrin": true, "avaren": true }
       },
-      { "speaker": "", "text": "", "wait": 0.8, "banner": "2026/11/8\nJJ生日快樂！" }
+      { "speaker": "", "text": "", "wait": 0.8, "screen": "black", "screenFade": 1.8, "banner": "2026/11/8\nJJ生日快樂！", "bannerDelay": 2.1 }
     ]
   }
 

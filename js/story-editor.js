@@ -800,7 +800,8 @@ function beatBody(s, b, i) {
     banner: () => {
       const area = h('textarea', { rows: 2, placeholder: '畫面中間的大字；可以換行，最後一行最大（空白＝收掉）', style: 'flex:1;min-width:200px', oninput: e => { b.banner = e.target.value; commit(false); } });
       area.value = b.banner || '';
-      one('大字', ['banner'], area, h('small', { style: 'flex-basis:100%' }, '像蓋章一樣壓在畫面正中間，一直留著直到劇情結束或某頁清空；這頁沒台詞時不會跳出對話框'));
+      one('大字', ['banner', 'bannerDelay'], area, h('span', { class: 'row' }, '翻到這頁', num(b, 'bannerDelay', { min: 0, step: .1, optional: true, placeholder: '0' }), '秒後才壓出來（例如先等黑幕變黑）'),
+        h('small', { style: 'flex-basis:100%' }, '像蓋章一樣壓在畫面正中間，蓋在黑幕上面，劇情結束後也一直留著（結束畫面只留按鈕）；某頁清空就收掉；這頁沒台詞時不會跳出對話框'));
     },
     heal: () => {
       const hd = { v: b.heal === false ? 'stop' : 'start' };

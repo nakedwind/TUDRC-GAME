@@ -550,6 +550,7 @@ const StoryScene = (() => {
   const screenBusy = () => !!state.screen && !state.screen.free && state.screen.t < state.screen.dur;
   function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
     showCard(null);
+    if (state.bannerAt) { showBanner(state.bannerAt.text); state.bannerAt = null; }   // 大字還沒壓出來就按結束：直接出來
     state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(5);
   }
   function makeMonster(m) {
@@ -718,7 +719,13 @@ const StoryScene = (() => {
     }
     // confetti：true＝天上開始飄彩帶、false＝停（已經在飄的會飄完）；banner：畫面正中間壓一行大字（空白＝收掉，換行＝好幾行，最後一行最大）
     if ('confetti' in beat) state.party.rain = !!beat.confetti;
-    if ('banner' in beat) showBanner(state.skipping ? '' : beat.banner);
+    // bannerDelay：翻到這頁幾秒後才壓出來（例如先等黑幕變黑）；大字蓋在黑幕和結束畫面上面，一直留到劇情結束
+    state.bannerAt = null;
+    if ('banner' in beat) {
+      const wait = Number(beat.bannerDelay) || 0;
+      if (state.skipping || !beat.banner || wait <= 0) showBanner(state.skipping ? '' : beat.banner);
+      else state.bannerAt = { text: beat.banner, at: state.time + wait };
+    }
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
     for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p, beat.via?.[id]); }
@@ -942,13 +949,14 @@ const StoryScene = (() => {
       const beat = state.cfg.beats[state.index];
       if (state.screen) state.screen.t += dt;
       if (state.flash) state.flash.t += dt;
+      if (state.bannerAt && state.time >= state.bannerAt.at) { showBanner(state.bannerAt.text); state.bannerAt = null; }
       if (state.nextBgm && state.time >= state.nextBgm.at && !state.ending) { const src = state.nextBgm.src; state.nextBgm = null; startBgm(src); }
       if (state.ending) {
         el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
         if (state.beatTime >= state.endDelay + 1.8 && state.cfg.autoExit && resume) { backToGame(); return; }   // 開場這類：變黑後直接回遊戲
         if (state.beatTime >= state.endDelay + 1.8) {
           state.playing = false; state.ended = true; G.phase = 'story-ended';
-          el('storyEnd').hidden = false; el('storyEnd').querySelector('button').focus();
+          el('storyEnd').hidden = false; el('storyEnd').classList.toggle('with-banner', !el('storyBanner').hidden);   // 有大字：結束畫面只留按鈕，大字一直在正中間 el('storyEnd').querySelector('button').focus();
         }
       } else {
         const reveal = Math.max(0, Math.min(1, (state.time - state.openingBlack) / state.openingFade));
