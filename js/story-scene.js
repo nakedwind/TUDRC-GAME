@@ -31,40 +31,8 @@ const StoryScene = (() => {
   const image = src => { const im = new Image(); im.src = src; return im; };
   // 找路：地圖的不可穿透格（含床）做 8 方向格線搜尋，再把看得到的轉角拉直，人才不會一格一格轉彎
   const open = (c, r) => inGrid(c, r) && !isWall(c, r);
-  function clearLine(x1, y1, x2, y2) {   // 腳底一小塊範圍沿直線走過去都不碰到牆
-    const n = Math.ceil(Math.hypot(x2 - x1, y2 - y1) / 8);
-    for (let i = 1; i <= n; i++) {
-      const x = x1 + (x2 - x1) * i / n, y = y1 + (y2 - y1) * i / n;
-      for (const [ox, oy] of [[-9, -5], [9, -5], [-9, 5], [9, 5]]) if (!open(...cellAt(x + ox, y + oy))) return false;
-    }
-    return true;
-  }
-  function findRoute(x, y, tx, ty) {
-    if (clearLine(x, y, tx, ty)) return [[tx, ty]];
-    const [sc, sr] = cellAt(x, y), [gc, gr] = cellAt(tx, ty), key = (c, r) => c + ',' + r;
-    const from = new Map([[key(sc, sr), null]]), queue = [[sc, sr]];
-    for (let i = 0; i < queue.length; i++) {
-      const [c, r] = queue[i];
-      if (c === gc && r === gr) break;
-      for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
-        const nc = c + dc, nr = r + dr, k = key(nc, nr);
-        if (from.has(k) || !(open(nc, nr) || (nc === gc && nr === gr))) continue;
-        if (dc && dr && !(open(c + dc, r) && open(c, r + dr))) continue;   // 斜走不切牆角
-        from.set(k, key(c, r)); queue.push([nc, nr]);
-      }
-    }
-    if (!from.has(key(gc, gr))) return [[tx, ty]];   // 找不到路：直接走過去
-    const cells = [];
-    for (let k = key(gc, gr); k && k !== key(sc, sr); k = from.get(k)) cells.unshift(k.split(',').map(Number));
-    const pts = [...cells.slice(0, -1).map(([c, r]) => [(c + .5) * CELL, (r + .5) * CELL]), [tx, ty]];
-    const out = [];
-    for (let i = 0, px = x, py = y; i < pts.length;) {
-      let j = pts.length - 1;
-      while (j > i && !clearLine(px, py, ...pts[j])) j--;
-      out.push(pts[j]); [px, py] = pts[j]; i = j + 1;
-    }
-    return out;
-  }
+  // 實際的找路在 js/story-route.js（劇情編輯器也用同一份，畫出來的走位虛線＝這裡真的會走的路）
+  const findRoute = (x, y, tx, ty) => StoryRoute.find(x, y, tx, ty, open, cellAt, CELL);
   // 走到 p；via＝路上要先依序經過的點（[[x, y], …]，劇情編輯器的「經過點」），每一段都自己找路繞開牆
   function walkTo(a, p, via) {
     a.path = [];
@@ -1150,10 +1118,10 @@ const StoryScene = (() => {
     const small = readyImage(held) && Math.max(held.naturalWidth, held.naturalHeight) <= SMALL_CARRY;
     if (small) {   // 小道具（紅豆餅、紙袋…）：照原圖大小拿在手邊，位置跟劇情（改）的「手上」一樣（js/story-kai.js 的 HOLD_AT）
       const k = size / 64, [dx, dy] = HAND_AT[a.dir] || HAND_AT.front, hw = held.naturalWidth * k, hh = held.naturalHeight * k;
-      ctx.drawImage(held, Math.round(dx * k - hw / 2), Math.round(size / 2 - 18 + (dy + (Number(a.carryDy) || 0)) * k - hh / 2), hw, hh);   // 畫布原點在身體中間，腳底在 size/2-18 的地方
+      ctx.drawImage(held, Math.round((dx + (Number(a.carryDx) || 0)) * k - hw / 2), Math.round(size / 2 - 18 + (dy + (Number(a.carryDy) || 0)) * k - hh / 2), hw, hh);   // 畫布原點在身體中間，腳底在 size/2-18 的地方
     } else if (readyImage(held)) {
       const k = size / 64 * Math.min(1, 24 / Math.max(held.naturalWidth, held.naturalHeight)), hw = held.naturalWidth * k, hh = held.naturalHeight * k;   // 太大的圖（急救包）縮到手拿得住
-      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDy：拿著的東西往上（負）／往下（正）幾像素
+      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k + (Number(a.carryDx) || 0)), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDx／carryDy：拿著的東西往左（負）右（正）、往上（負）下（正）幾像素
     }
     ctx.restore();
     if (a.leak) drawSand(a);

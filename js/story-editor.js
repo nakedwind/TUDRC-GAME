@@ -159,6 +159,28 @@ function figure(src, p, color, key, text, dim = false) {   // 角色：正面圖
   ctx.beginPath(); ctx.arc(x, y, on ? 7 : 5, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
   if (text) label(text, x, y - 48, on ? '#ffd479' : '#fff');
 }
+// 走位路線：跟遊戲用同一套找路（js/story-route.js），遇到牆、椅子會繞過去，地圖上畫的就是遊戲裡真的會走的路
+const GAME_CELL = 40;   // 遊戲一格幾像素（js/config.js 的 CELL）
+let routeWallCache = null;
+function routeWalls(m) {
+  const elevator = id => typeof ELEVATORS_DEFAULT !== 'undefined' && String(tileMap.get(id)?.file || '').replace(/\\/g, '/').endsWith('/應變中心/elevator.png') ? ELEVATORS_DEFAULT[id] : null;   // 跟遊戲一樣只認電梯圖
+  if (routeWallCache?.m !== m) routeWallCache = { m, set: StoryRoute.mapWalls(m, id => { const t = tileMap.get(id) || {}; return [t.w || 1, t.h || 1]; }, seatCfg, GAME_CELL, elevator) };
+  return routeWallCache.set;
+}
+function routePoints(m, a, b) {   // a、b、回傳的點都是「格」為單位
+  const walls = routeWalls(m), G = GAME_CELL;
+  const open = (c, r) => c >= 0 && c < (m.cols || 0) && r >= 0 && r < (m.rows || 0) && !walls.has(c + ',' + r);
+  const cellAt = (x, y) => [Math.floor(x / G), Math.floor(y / G)];
+  return StoryRoute.find(a[0] * G, a[1] * G, b[0] * G, b[1] * G, open, cellAt, G).map(p => [p[0] / G, p[1] / G]);
+}
+function routeArrow(m, a, b, color) {   // 一段走位：中間轉彎的地方畫虛線，最後一段畫箭頭
+  const pts = [a, ...routePoints(m, a, b)];
+  ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 2.5; ctx.setLineDash([6, 5]);
+  for (let i = 1; i < pts.length - 1; i++) { ctx.beginPath(); ctx.moveTo(pts[i - 1][0] * C, pts[i - 1][1] * C); ctx.lineTo(pts[i][0] * C, pts[i][1] * C); ctx.stroke(); }
+  ctx.restore();
+  const p = pts[pts.length - 2], q = pts[pts.length - 1];
+  arrow(p[0] * C, p[1] * C, q[0] * C, q[1] * C, color, true);
+}
 function arrow(x1, y1, x2, y2, color, dash) {
   ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2.5; if (dash) ctx.setLineDash([6, 5]);
   ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke(); ctx.setLineDash([]);
@@ -267,12 +289,13 @@ function drawMap() {
   // 目前這一頁：走位目標（紫色箭頭，起點是上一個已知位置）
   // 離場（走過去後淡出，橘色）、瞬移（黑幕轉場時直接換位置，青色、不畫箭頭）
   if (beat) for (const [kind, color, text] of [['move', '#c39bff', '走到這'], ['exit', '#ffab5e', '走到這後消失'], ['place', '#5fe0d0', '瞬移到這']]) for (const [id, q] of Object.entries(beat[kind] || {})) {
-    const from = actorPosBefore(beatSel, id), key = kind + ':' + beatSel + ':' + id;
+    // 同一頁先瞬移再走位：遊戲裡是從瞬移後的位置開始走
+    const from = (kind !== 'place' && beat.place?.[id]) || actorPosBefore(beatSel, id), key = kind + ':' + beatSel + ':' + id;
     // 經過點（只有走位、離場有）：起點 → 經過點 1 → 經過點 2 → … → 終點，一段一段畫箭頭
     const via = kind !== 'place' && Array.isArray(beat.via?.[id]) ? beat.via[id] : [];
     let last = from;
     via.forEach((v, k) => {
-      if (last) arrow(last[0] * C, last[1] * C, v[0] * C, v[1] * C, color, true);
+      if (last) routeArrow(m, last, v, color);
       const vk = 'via:' + beatSel + ':' + id + ':' + k;
       ctx.fillStyle = '#10151c'; ctx.strokeStyle = selKey() === vk ? '#ffd479' : color; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.arc(v[0] * C, v[1] * C, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
@@ -280,7 +303,7 @@ function drawMap() {
       handle(vk, v, 12, p => { via[k] = p; });
       last = v;
     });
-    if (last && kind !== 'place') arrow(last[0] * C, last[1] * C, q[0] * C, q[1] * C, color, true);
+    if (last && kind !== 'place') routeArrow(m, last, q, color);
     ctx.fillStyle = color; ctx.strokeStyle = selKey() === key ? '#ffd479' : '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(q[0] * C, q[1] * C, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     label('第' + (beatSel + 1) + '頁：' + actorName(id) + text, q[0] * C, q[1] * C - 12, color);
@@ -549,6 +572,7 @@ function renderObj() {
       field('單張圖（只有一張圖的路人，例如家屬的背影；填了就不用角色圖資料夾）', txt(ac, 'image', { optional: true, rerender: true, placeholder: 'images/回憶場景/檔名.png' })),
       ac.image && field('單張圖照原圖大小畫（1＝跟角色同一個比例，例如擔架；空白＝跟人一樣高）', num(ac, 'imageScale', { optional: true, min: .1, step: .1, placeholder: '—' })),
       field('一開始手上拿著（圖片，例如遺物箱；空白＝沒拿東西）', txt(ac, 'carry', { optional: true, placeholder: 'images/回憶場景/relics.png' })),
+      field('拿著的東西往左／往右幾像素（負＝往左）', num(ac, 'carryDx', { optional: true, step: 1, placeholder: '0' })),
       field('拿著的東西往上／往下幾像素（負＝往上）', num(ac, 'carryDy', { optional: true, step: 1, placeholder: '0' })),
       field('位置', choose(posMode, 'mode', [['', '站著（自己選格子）'], ...beds], { parse: v => { if (v) { ac.bed = v.split(',').map(Number); delete ac.at; } else { delete ac.bed; ac.at = ac.at || [r1(curMap().cols / 2), r1(curMap().rows / 2)]; } return v; } })),
       !ac.bed && field('站的格子', xy(ac, 'at', '選' + (ac.name || '角色') + '站的位置')),
