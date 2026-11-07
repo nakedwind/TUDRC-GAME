@@ -849,7 +849,7 @@ const STORY_SCENES = {
       { "id": "sandbagB", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.39, "name": "哨兵B的沙包", "at": [14.4, 13.4], "dir": "front" },
       { "id": "sandbagC", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.39, "name": "哨兵C的沙包", "at": [15, 15.6], "dir": "front" },
       { "id": "noah", "sprite": "noah_A", "name": "諾亞", "at": [11.6, 19.8], "dir": "back", "speed": 60, "hidden": true, "carry": "images/道具/water.png" },
-      { "id": "winterSit", "sprite": "winter_A", "name": "溫特", "bed": [9, 21], "at": [9.5, 21] },
+      { "id": "winterSit", "sprite": "winter_A", "name": "溫特", "bed": [9, 21], "at": [9.5, 21], "carry": "images/道具/water.png" },
       { "id": "noahSit", "sprite": "noah_A", "name": "諾亞", "bed": [11, 21], "at": [11.5, 21] },
       { "id": "kobayashi", "sprite": "mob_B", "name": "小林", "at": [26.2, 16.1], "dir": "front", "speed": 30, "hidden": true }
     ],
@@ -866,10 +866,9 @@ const STORY_SCENES = {
         "camera": "沙包",
         "shout": { "winter": true },
         "sfx": "hitKnock",
-        "sfxVolume": 1.1,
-        "tremble": { "sandbag": true }
+        "sfxVolume": 1.1
       },
-      { "speaker": "", "text": "另一邊有幾個哨兵在做體能訓練，全都很自覺地站在離他很遠的地方。", "wait": 1.2, "camera": "全景", "tremble": { "sandbag": false } },
+      { "speaker": "", "text": "另一邊有幾個哨兵在做體能訓練，全都很自覺地站在離他很遠的地方。", "wait": 1.2, "camera": "全景" },
       { "speaker": "哨兵A", "text": "（小聲）……那是部隊長？", "wait": 0.3, "shout": { "winter": true }, "sfx": "hitKnock", "sfxVolume": 0.7 },
       { "speaker": "哨兵B", "text": "（小聲）別看了。你沒聽說上次海報那件事嗎？", "wait": 0.3, "emote": { "sentA": "drop" } },
       {
@@ -879,16 +878,14 @@ const STORY_SCENES = {
         "camera": "沙包",
         "shout": { "winter": true },
         "sfx": "hitKnock",
-        "sfxVolume": 1.8,
-        "tremble": { "sandbag": true }
+        "sfxVolume": 1.8
       },
-      { "speaker": "", "text": "沙包整個盪起來，鐵鍊「嘎——」地一聲斷了。沙子從破口沙沙地漏出來。", "wait": 0.3, "sfx": "chainUnlock", "punch": { "winter": false } },
+      { "speaker": "", "text": "沙包整個盪起來，鐵鍊「嘎——」地一聲斷了。沙子從破口沙沙地漏出來。", "wait": 0.3, "sfx": "chainUnlock", "punch": { "winter": false }, "leak": { "sandbag": true } },
       {
         "speaker": "",
         "text": "哨兵們趕緊跑掉了。",
         "wait": 0.4,
         "camera": "全景",
-        "tremble": { "sandbag": false },
         "emote": { "sentA": "" },
         "speed": { "sentA": 130, "sentB": 130, "sentC": 130 },
         "exit": { "sentA": [11.6, 20.4], "sentB": [12.1, 20.6], "sentC": [11.2, 20.8] }

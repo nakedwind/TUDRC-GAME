@@ -161,7 +161,7 @@ const StoryScene = (() => {
   function makeActor(a, seats) {
     const seat = a.bed && seats.find(s => s.key.endsWith('@' + a.bed.join(',')));
     if (a.bed && !seat) throw new Error('劇情床位不存在：' + (a.name || a.id) + '（' + a.bed + '）');
-    return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null,
+    return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null, bag: a.image ? BAGS[a.image] || null : null, swA: 0, swV: 0,
       x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL, alpha: 1,
       dir: a.dir || seat?.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!seat?.bed,   // bed 也可以是椅子：坐椅子的人眼睛睜開
       gunT: a.gun ? 1 : a.gunT || 0 };   // gun：拿著槍預備（用持槍圖，只有 GUN_FOLDERS 裡的角色有）
@@ -215,8 +215,16 @@ const StoryScene = (() => {
   const SHOUT_TIME = .4, HOP_TIME = .32;
   // 出拳（每頁 punch: { 角色id: true／false }）：一直揮拳，直到下一次 false 才停
   // 用角色資料夾裡的 xxx_0007_right-side-punch.png（收拳）、xxx_0007_right-side-punch02.png（打出去）；朝左時把圖左右翻過來
-  // every＝一拳幾秒、hit＝每拳打出去停留幾秒；沒有出拳圖的角色就照常站著
-  const PUNCH = { every: .5, hit: .18 };
+  // 打法像真人：一次連打幾拳（combo 隨機抽），連打中間間隔短、打完一輪喘口氣；一輪的最後一拳是重拳（停久一點、沙包晃大一點）
+  // 時間單位都是秒，[最短, 最長] 每次隨機；每打出去一拳播一次音效 storyPunch（音效編輯器可以換）
+  const PUNCH = { combo: [1, 2, 2, 3, 3, 4], jab: [.11, .16], heavy: .26, between: [.07, .15], rest: [.45, 1.1], volume: [.6, .9], heavyVolume: 1.2 };
+  // 被打的沙包（單張圖、檔名列在這裡的才會晃）：pivot＝搖晃的支點（圖片像素，支點以下的底座不動、以上整個左右晃）
+  // torn＝破掉的圖（每頁 leak 時換上）、spout＝破口漏沙的位置（圖片像素）
+  const BAGS = { 'images/地下訓練室/sandbag.png': { pivot: [38, 132], torn: 'images/地下訓練室/sandbag-torn.png', spout: [49, 106] } };
+  // 搖晃：stiff＝回彈力（越大晃得越快）、damp＝阻力（越大越快停）、max＝最多斜多少（弧度）；jab／heavy／burst＝輕拳、重拳、破掉那一下推多大力
+  const SWAY = { stiff: 55, damp: 3.2, max: .24, jab: 1.3, heavy: 2.4, burst: 3.8 };
+  // 漏沙：flow＝前幾秒全速流、fade＝之後幾秒慢慢流完、rate＝每秒幾粒、pileMax＝沙堆最大半徑（像素）、colors＝沙子的顏色（亮、中、暗）
+  const SAND = { flow: 9, fade: 5, rate: 45, pileMax: 10, colors: ['#e8c98c', '#c9a46a', '#96743f'] };
   const punchFrames = a => a.sprite ? ['', '02'].map(n => imageOnce('images/character/' + a.sprite + '/' + a.sprite.replace('_', '') + '_0007_right-side-punch' + n + '.png')) : null;
   // 手上拿的小道具（carry 的圖長寬都不超過這麼多像素）：拿在手邊、照原圖大小；手的位置（腳底往上算，角色圖的像素）依面向哪邊
   const SMALL_CARRY = 16, HAND_AT = { right: [12, 4], left: [-12, 4], front: [14, 5] };
@@ -542,7 +550,10 @@ const StoryScene = (() => {
         [a.x, a.y] = a.path?.length ? a.path[a.path.length - 1] : a.target;
         a.target = null; a.path = []; a.dir = arriveFace(a) || a.dir;
       }
-      for (const a of state.actors) { if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; }
+      for (const a of state.actors) {
+        if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; a.swA = a.swV = 0;
+        if (a.leak) { a.leak.t += 3; a.leak.pile = Math.max(a.leak.pile, 60); a.leak.grains = []; if (a.leak.pileX == null) a.leak.pileX = bagPoint(a, bagGeom(a), a.bag.spout)[0] + 3; }   // 快轉經過漏沙：沙堆直接堆好
+      }
       for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
       if (state.door) { if (state.door.auto) state.door.target = someoneAtDoor(state.door) ? 1 : 0; state.door.open = state.door.target; }
       if (state.screen) state.screen.t = state.screen.dur;
@@ -606,7 +617,13 @@ const StoryScene = (() => {
     }
     for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
     for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
-    for (const [id, v] of Object.entries(beat.punch || {})) { const a = actor(id); if (a) { a.punch = !!v; a.punchT = 0; } }
+    for (const [id, v] of Object.entries(beat.punch || {})) { const a = actor(id); if (a) { a.punch = !!v; a.pk = null; } }
+    // 沙包破掉漏沙（每頁 leak: { 沙包id: true／false }）：換成破掉的圖、整個大晃一下、破口一直漏沙、地上堆出一小堆；false＝恢復原狀
+    for (const [id, v] of Object.entries(beat.leak || {})) {
+      const a = actor(id); if (!a?.bag) continue;
+      a.set = imageSet(v ? a.bag.torn : a.image); a.leak = v ? { t: 0, pile: 0, grains: [] } : null;
+      if (v && !state.skipping) a.swV = (a.swV || 0) + SWAY.burst;
+    }
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
@@ -876,7 +893,7 @@ const StoryScene = (() => {
         if (a.charred && !a.hidden && (a.smokeT = (a.smokeT || 0) - dt) <= 0 && typeof pushBlackSmoke === 'function') { a.smokeT = rnd(.35, .6); pushBlackSmoke(a.x + rnd(-10, 10), a.y - 4); }   // 焦黑的人一直冒煙
         if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
         if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
-        if (a.punch) a.punchT = (a.punchT || 0) + dt;
+        tickPunch(a, dt); tickBag(a, dt);
         if (a.fading) { a.alpha -= dt / .45; if (a.alpha <= 0) { a.alpha = 1; a.hidden = true; a.fading = a.exiting = false; } }   // 走進門裡：淡出
         else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
       }
@@ -982,6 +999,73 @@ const StoryScene = (() => {
     }
     ctx.restore();
   }
+  // ---- 出拳的節奏：guard＝收拳（擺好架勢）、hit＝拳打出去 ----
+  function tickPunch(a, dt) {
+    if (!a.punch) return;
+    const p = a.pk || (a.pk = { phase: 'guard', t: rnd(.1, .3), left: 0, size: 0 });
+    if ((p.t -= dt) > 0) return;
+    if (p.phase === 'guard') {   // 打出去
+      if (p.left <= 0) p.size = p.left = PUNCH.combo[Math.floor(Math.random() * PUNCH.combo.length)];
+      p.left--; p.phase = 'hit';
+      const heavy = p.left === 0 && p.size >= 2;
+      p.t = heavy ? PUNCH.heavy : rnd(...PUNCH.jab);
+      landPunch(a, heavy);
+    } else {   // 收回來：還有拳就馬上接下一拳，打完一輪就喘口氣
+      p.phase = 'guard'; p.t = p.left > 0 ? rnd(...PUNCH.between) : rnd(...PUNCH.rest);
+    }
+  }
+  // 拳打到：播音效、面前的沙包被推一下（朝右打往右斜、朝左打往左斜）
+  function landPunch(a, heavy) {
+    const side = a.dir === 'left' ? -1 : 1;
+    const bag = state.actors.filter(b => b.bag && !b.hidden && (b.x - a.x) * side > 0 && Math.abs(b.x - a.x) < 2.5 * CELL && Math.abs(b.y - a.y) < CELL)
+      .sort((p, q) => Math.abs(p.x - a.x) - Math.abs(q.x - a.x))[0];
+    if (bag) bag.swV += side * (heavy ? SWAY.heavy : SWAY.jab) * rnd(.85, 1.15);
+    if (state.skipping || typeof SFX === 'undefined') return;
+    SFX.play('storyPunch', heavy ? PUNCH.heavyVolume : rnd(...PUNCH.volume), 'storyPunch:' + a.id);
+    if (heavy) state.shake = Math.max(state.shake, 1.2);
+  }
+  // 沙包搖晃（像不倒翁的彈簧）＋漏沙
+  function tickBag(a, dt) {
+    if (!a.bag) return;
+    a.swV += (-SWAY.stiff * a.swA - SWAY.damp * a.swV) * dt;
+    a.swA = Math.max(-SWAY.max, Math.min(SWAY.max, a.swA + a.swV * dt));
+    if (Math.abs(a.swA) < .002 && Math.abs(a.swV) < .01) a.swA = a.swV = 0;
+    const L = a.leak; if (!L || a.hidden) return;
+    L.t += dt;
+    const flow = L.t < SAND.flow ? 1 : Math.max(0, 1 - (L.t - SAND.flow) / SAND.fade);
+    L.carry = (L.carry || 0) + SAND.rate * flow * dt;
+    const g = bagGeom(a);
+    for (; L.carry >= 1; L.carry--) {   // 從破口掉出一粒沙（跟著沙包的晃動）
+      const [sx, sy] = bagPoint(a, g, a.bag.spout);
+      L.grains.push({ x: sx + rnd(-1, 1), y: sy, vx: rnd(4, 16) + a.swV * 8, vy: rnd(-4, 6), c: SAND.colors[Math.floor(Math.random() * 3)] });
+    }
+    for (const s of L.grains) { s.vy += 300 * dt; s.x += s.vx * dt; s.y += s.vy * dt; }
+    const floor = a.y + 18;
+    L.grains = L.grains.filter(s => { if (s.y < floor) return true; L.pile++; L.pileX = L.pileX == null ? s.x : L.pileX * .97 + s.x * .03; return false; });
+  }
+  // 沙包圖在世界座標裡的位置：k＝圖片一像素畫多大、(x0, y0)＝圖片左上角
+  function bagGeom(a) {
+    const img = a.set.front[0], k = (Number(a.imageScale) || 1) * PLAYER.drawSize / 64;
+    return { k, x0: a.x - img.naturalWidth * k / 2, y0: a.y + 18 - img.naturalHeight * k };
+  }
+  // 圖片上的一點（像素）→ 世界座標；支點以上的點跟著沙包斜過去
+  function bagPoint(a, g, [ix, iy]) {
+    const [px, py] = a.bag.pivot, ox = g.x0 + px * g.k, oy = g.y0 + py * g.k, dx = (ix - px) * g.k, dy = (iy - py) * g.k, c = Math.cos(a.swA), s = Math.sin(a.swA);
+    return [ox + dx * c - dy * s, oy + dx * s + dy * c];
+  }
+  // 漏出來的沙：地上一小堆（越漏越大）＋正在往下掉的沙粒
+  function drawSand(a) {
+    const L = a.leak, floor = a.y + 18;
+    ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1));
+    if (L.pile > 0) {
+      const r = Math.min(SAND.pileMax, 2 + Math.sqrt(L.pile) * .7), h = r * .45, x = Math.round(L.pileX ?? a.x);
+      ctx.fillStyle = SAND.colors[2]; ctx.beginPath(); ctx.ellipse(x, floor + 1, r + 1, h + 1, 0, Math.PI, 0); ctx.lineTo(x + r + 1, floor + 2); ctx.lineTo(x - r - 1, floor + 2); ctx.fill();   // 外框（暗）
+      ctx.fillStyle = SAND.colors[1]; ctx.beginPath(); ctx.ellipse(x, floor + 1, r, h, 0, Math.PI, 0); ctx.lineTo(x + r, floor + 1.5); ctx.lineTo(x - r, floor + 1.5); ctx.fill();
+      ctx.fillStyle = SAND.colors[0]; ctx.beginPath(); ctx.ellipse(x - r * .25, floor + 1 - h * .45, r * .45, h * .35, 0, 0, Math.PI * 2); ctx.fill();   // 沙堆頂上的亮面
+    }
+    for (const s of L.grains) { ctx.fillStyle = s.c; ctx.fillRect(Math.round(s.x), Math.round(s.y), 1.5, 1.5); }
+    ctx.restore();
+  }
   function drawActor(a) {
     const size = PLAYER.drawSize;
     const frameActor = { ...a, sitting: null };
@@ -990,7 +1074,7 @@ const StoryScene = (() => {
     if (!readyImage(img)) img = set.front?.[0];
     // 出拳：站著不動、面向左右時換成出拳圖（走路中、坐著、倒地時不換）
     const fist = a.punch && !a.target && !a.down && !a.sitting && (a.dir === 'right' || a.dir === 'left') && punchFrames(a);
-    const fistImg = fist && fist[(a.punchT || 0) % PUNCH.every < PUNCH.every - PUNCH.hit ? 0 : 1];
+    const fistImg = fist && fist[a.pk?.phase === 'hit' ? 1 : 0];
     if (readyImage(fistImg)) img = fistImg;
     if (!readyImage(img)) return;
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1));
@@ -1009,7 +1093,12 @@ const StoryScene = (() => {
     // 單張圖：照原本比例、跟人一樣高；imageScale＝照原圖像素大小畫（1＝跟角色同一個比例，例如擔架），底部對齊腳底
     const nat = a.set.single && Number(a.imageScale) > 0 ? Number(a.imageScale) * size / 64 : 0;
     const w = nat ? img.naturalWidth * nat : a.set.single ? size * img.naturalWidth / img.naturalHeight : size, hgt = nat ? img.naturalHeight * nat : size;
-    ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt);
+    if (a.bag && a.swA && img.naturalHeight) {   // 沙包：支點以下（底座）不動，以上繞著支點斜過去
+      const k = w / img.naturalWidth, [px, py] = a.bag.pivot, iw = img.naturalWidth, ih = img.naturalHeight, top = size / 2 - hgt;
+      ctx.drawImage(img, 0, py, iw, ih - py, -w / 2, top + py * k, w, (ih - py) * k);
+      ctx.save(); ctx.translate(-w / 2 + px * k, top + py * k); ctx.rotate(a.swA);
+      ctx.drawImage(img, 0, 0, iw, py + 1, -px * k, -py * k, w, (py + 1) * k); ctx.restore();   // 多畫一像素蓋住接縫
+    } else ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt);
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
     const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
     const small = readyImage(held) && Math.max(held.naturalWidth, held.naturalHeight) <= SMALL_CARRY;
@@ -1021,6 +1110,7 @@ const StoryScene = (() => {
       ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDy：拿著的東西往上（負）／往下（正）幾像素
     }
     ctx.restore();
+    if (a.leak) drawSand(a);
     drawEmote(a);
     // 雷德揮擊時手上的斧頭（跟遊戲一樣：fire_axe_01，衝撞那一下只用盾不拿斧）
     if (a.meleeSwing && !a.meleeSwing.ram && a.sprite === 'red_B' && typeof drawSwingWeapon === 'function' && typeof redAxeImg !== 'undefined') {
@@ -1159,5 +1249,5 @@ const StoryScene = (() => {
   }, true);
   // 劇情裡沒有玩家：要算「離聲音多遠」的地方（日光燈嗡嗡聲）改用鏡頭中心
   const listener = () => state && { x: cam.x + viewW() / 2, y: cam.y + viewH() * .42 };
-  return { config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame, ownsStamp };
+  return { config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame, ownsStamp, debug: () => state };   // debug：測試時在主控台看播放狀態
 })();

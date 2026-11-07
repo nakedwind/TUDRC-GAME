@@ -630,11 +630,11 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'punch', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
-const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
+const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
   b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
   'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
@@ -652,7 +652,7 @@ function renderBeats() {
 // 每頁的演出：只列出這頁有用到的；要加新的從「＋ 加演出」選單挑（照類別分好，順序也是畫面上列出來的順序）
 const ACT_MENU = [
   ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['speed', '速度']]],
-  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['emote', '情緒符號'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
+  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['emote', '情緒符號'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
   ['怪物', [['monsterMove', '怪物走位'], ['monsterPose', '怪物姿勢'], ['monsterWander', '繞著人走'], ['swallow', '吞人'], ['preyKick', '嘴裡的人抽一下'], ['spit', '吐出來'], ['thunder', '巨雷']]],
   ['畫面', [['camera', '換鏡頭'], ['screen', '黑幕'], ['card', '介紹卡'], ['door', '自動門'], ['heal', '治療光']]],
   ['聲音', [['sfx', '音效'], ['bgm', '音樂'], ['hush', '槍聲']]],
@@ -660,7 +660,7 @@ const ACT_MENU = [
   ['流程', [['label', '分支名字'], ['choices', '選項'], ['end', '自動結束']]],
 ];
 // 新增時的預設值（走位類要先在地圖上點位置，見 PICK_ACTS）
-const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, speed: 60, tremble: true, punch: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger',
+const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, speed: 60, tremble: true, punch: true, leak: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger',
   monsterPose: 'smile', preyKick: true, spit: true };
 const PICK_ACTS = { move: '走到哪', exit: '走到哪後消失', place: '瞬移到哪', monsterMove: '走到哪' };
 // 這頁有沒有這個演出（大部分看欄位在不在；頭像情緒、分支是好幾個欄位合成一列）
@@ -720,6 +720,8 @@ function beatBody(s, b, i) {
     tremble: () => many('tremble', '顫抖', id => onOff(b.tremble, id, '開始顫抖', '停止顫抖')),
     // 出拳：一直揮拳直到「停止出拳」；要有 xxx_0007_right-side-punch.png／punch02.png 的角色才看得到（目前只有溫特）
     punch: () => many('punch', '出拳', id => onOff(b.punch, id, '開始出拳', '停止出拳')),
+    // 沙包破掉漏沙：只對沙包圖有用（js/story-scene.js 的 BAGS）；換成破掉的圖、破口一直漏沙
+    leak: () => many('leak', '漏沙', id => onOff(b.leak, id, '破掉漏沙', '恢復原狀')),
     emote: () => many('emote', '情緒符號', id => choose(b.emote, id, [['anger', '💢 生氣（紅色青筋一跳一跳）'], ['sweat', '💧 慌張冒汗（汗滴往下滑）'], ['shade', '｜｜ 陰影線（嚇到、背脊發涼）'], ['drop', '💧 一顆汗滴（慢慢往下滴）'], ['shade+drop', '｜｜💧 陰影線＋一顆汗滴'], ['flower', '🌸 小花（開心、得意）'], ['sparkle', '✨ 閃亮亮'], ['flower+sparkle', '🌸✨ 小花＋閃亮亮'], ['', '收掉']])),
     carry: () => many('carry', '拿著', id => txt(b.carry, id, { placeholder: '圖片路徑；空白＝放下', style: 'flex:1' })),
     gun: () => many('gun', '持槍', id => onOff(b.gun, id, '拿槍預備', '放下槍')),
