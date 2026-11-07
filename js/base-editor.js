@@ -1027,7 +1027,35 @@ function solidNudgeStatus(m) {
   const offs = [...solidNudgeCells].map(k => (m.solidOffsets[k] || [0, 0]).join(', '));
   const same = offs.every(o => o === offs[0]);
   return '已選 ' + solidNudgeCells.size + ' 格紅格' + (same ? '（目前偏移 ' + offs[0] + '）' : '（各自偏移不同，會一起移動）') +
-    '：方向鍵移動、Shift 移多一點、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取';
+    '：按住選中的拖曳、或用方向鍵移動（Shift 移多一點）、Delete 歸零；Shift＋點／拖曳＝加選或減選，Esc 取消選取';
+}
+// ---- 碰撞微調：按住「已選中」的紅格拖曳＝選中的一起移動（跟方向鍵一樣，最多偏移一格內）----
+let nudgeDrag = null;   // { start: 按下時的滑鼠位置, cells: 每格原本的偏移, moved }
+function beginNudgeDrag() {
+  const m = curMap();
+  for (const k of [...solidNudgeCells]) if (m.solid.indexOf(k) < 0) solidNudgeCells.delete(k);   // 已經不是紅格的不算
+  if (!pointerPx) return false;
+  const hit = [...solidNudgeCells].some(k => {   // 照微調後畫出來的位置判斷有沒有按在選中的格子上
+    const [c, r] = k.split(',').map(Number), off = m.solidOffsets[k] || [0, 0];
+    const x = OX + c * CELL + off[0], y = OY + r * CELL + off[1];
+    return pointerPx.x >= x && pointerPx.x < x + CELL && pointerPx.y >= y && pointerPx.y < y + CELL;
+  });
+  if (!hit) return false;
+  nudgeDrag = { start: { ...pointerPx }, moved: false, cells: [...solidNudgeCells].map(k => [k, (m.solidOffsets[k] || [0, 0]).slice()]) };
+  return true;
+}
+function dragNudgeTo() {
+  if (!nudgeDrag || !pointerPx) return;
+  const m = curMap(), d = nudgeDrag;
+  const dx = Math.round(pointerPx.x - d.start.x), dy = Math.round(pointerPx.y - d.start.y);
+  if (d.dx === dx && d.dy === dy) return;
+  d.dx = dx; d.dy = dy; d.moved = d.moved || dx !== 0 || dy !== 0;
+  const clamp = v => Math.max(-39, Math.min(39, v));
+  for (const [k, o] of d.cells) {   // 每格照「按下時」的偏移再加上拖了多遠
+    const next = [clamp(o[0] + dx), clamp(o[1] + dy)];
+    if (next[0] === 0 && next[1] === 0) delete m.solidOffsets[k]; else m.solidOffsets[k] = next;
+  }
+  draw(); setStatus(solidNudgeStatus(m), '#ffd479');
 }
 function draw() {
   const m = curMap();
@@ -1086,15 +1114,15 @@ function draw() {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
   }
-  // 電路編號（開關、電燈右上角的小圓牌）：有編號＝黃色；還沒編號（全部連動）＝灰色「0」，選起來在上方的「電路編號」設定
+  // 電路編號（開關、電燈右上角的紅色小圓牌，1～5，沒設定的算 1）：選起來在上方的「電路編號」設定
   for (const s of (m.stamps || [])) {
     const t = tileById(s.id);
     if (!s.circuit && !isCircuitTile(t)) continue;
     const x = OX + s.c * CELL + (s.ox || 0) + stampW(s, t || {}) * CELL - 6, y = OY + s.r * CELL + (s.oy || 0) + 6;
-    ctx.fillStyle = s.circuit ? '#ffd66e' : 'rgba(150,160,172,.9)'; ctx.strokeStyle = '#3a2a08'; ctx.lineWidth = 1.5;
+    ctx.fillStyle = '#e8312f'; ctx.strokeStyle = '#fff'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
-    ctx.fillStyle = '#3a2a08'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(String(s.circuit || 0), x, y + .5); ctx.textBaseline = 'alphabetic';
+    ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(s.circuit || 1), x, y + .5); ctx.textBaseline = 'alphabetic';
   }
   // 出入口記號（紫格＋🚪＋通往哪張地圖）
   for (const pt of (m.portals || [])) {
@@ -1157,8 +1185,10 @@ function draw() {
   for (const bi of baseOverlay) {
     const s = m.stamps[bi], t = s && tileById(s.id);
     if (s && t && t.baseHp) {
+      // 基地的碰撞格在遊戲裡是「四捨五入到最近的整格」（js/maploader.js 的 seedBaseObstacle），這裡照同樣的位置畫，才不會跟遊戲差幾像素
+      const bc = s.c + Math.round((s.ox || 0) / CELL), br = s.r + Math.round((s.oy || 0) / CELL);
       for (const [dc, dr] of baseSolidForStamp(s, t)) {
-        const x = OX + (s.c + dc) * CELL + (s.ox || 0), y = OY + (s.r + dr) * CELL + (s.oy || 0);
+        const x = OX + (bc + dc) * CELL, y = OY + (br + dr) * CELL;
         ctx.fillStyle = 'rgba(235,55,55,.34)'; ctx.fillRect(x, y, CELL, CELL);
         ctx.strokeStyle = '#ff6b6b'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
       }
@@ -1300,7 +1330,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
-  } else if (brush.mode === 'solid' && baseAtCell(m, c, r)) {
+  } else if (brush.mode === 'solid' && baseAtCell(m, c, r) && m.solid.indexOf(key) < 0) {   // 這格本來就有紅格：先讓紅格能被刪掉（不然壓在基地範圍裡的紅格永遠刪不掉）
     // 點在基地上：改的是基地自己的碰撞格（跟著基地走、可受攻擊），不是地圖的紅格
     const { s, t, dc, dr } = baseAtCell(m, c, r);
     pushBaseSolidToggle(s, t, dc, dr);
@@ -1430,18 +1460,22 @@ function dragSelectionTo(c, r) {
 cv.addEventListener('pointerdown', e => {
   if (brush.mode === 'tile') pickedBrushPending = false;   // 吸管吸到的圖已經放下去了，右鍵就不再取消它
   playMapClickSound(); painting = true; cv.setPointerCapture(e.pointerId); pushUndo();
-  const [c, r] = cellFromEvent(e); lastPaint = c + ',' + r; paintCell(c, r, true, e.shiftKey);
+  const [c, r] = cellFromEvent(e); lastPaint = c + ',' + r;
+  if (brush.mode === 'solidnudge' && !e.shiftKey && beginNudgeDrag()) return;   // 按在已選中的紅格上：拖曳移動，不重新選
+  paintCell(c, r, true, e.shiftKey);
   if (!e.shiftKey) beginSelectionDrag(c, r);
 });
 cv.addEventListener('pointermove', e => {
   const [c, r] = cellFromEvent(e); hoverCell = inGrid(c, r) ? [c, r] : null;
   if (painting) {
-    if (selectionDrag) dragSelectionTo(c, r);
+    if (nudgeDrag) dragNudgeTo();
+    else if (selectionDrag) dragSelectionTo(c, r);
     else { const key = c + ',' + r; if (key !== lastPaint) { lastPaint = key; paintCell(c, r, false); } }
   } else draw();   // 懸停預覽跟著四分之一格移動
 });
 cv.addEventListener('pointerup', () => {
   painting = false;
+  if (nudgeDrag) { if (nudgeDrag.moved) saveMaps(); nudgeDrag = null; }   // 碰撞微調拖曳放開：存起來
   if (selectionDrag && selectionDrag.moved) { saveMaps(); refreshSelPanel(); setStatus('已移動 ' + selections.length + ' 個物件', '#7ee0c0'); }
   selectionDrag = null;
   if (undoStack.length && undoStack[undoStack.length - 1] === snapshot()) undoStack.pop();
@@ -1456,6 +1490,7 @@ cv.addEventListener('pointerleave', () => { hoverCell = null; draw(); });
 const isTypingField = el => !!(el && el.closest && el.closest('input, textarea, select, [contenteditable="true"]'));
 document.addEventListener('contextmenu', e => {
   if (isTypingField(e.target)) return;
+  if (e.target.closest && e.target.closest('a[href]')) return;   // 連結（例如最上面那排編輯器）：保留瀏覽器的選單，才能「在新分頁中開啟連結」
   e.preventDefault();
   // 吸管吸到的圖還沒放進地圖：取消這次複製，回到「選取」
   if (pickedBrushPending && brush.mode === 'tile') {
@@ -2397,7 +2432,7 @@ function refreshCircuitControl() {
     box = document.createElement('label'); box.id = 'circuitControl';
     box.append('電路編號：');
     const select = document.createElement('select'); select.id = 'circuitNumber';
-    [['0', '不編號（全部連動）'], ['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5']].forEach(([v, n]) => { const o = document.createElement('option'); o.value = v; o.textContent = n; select.appendChild(o); });
+    [['1', '1'], ['2', '2'], ['3', '3'], ['4', '4'], ['5', '5']].forEach(([v, n]) => { const o = document.createElement('option'); o.value = v; o.textContent = n; select.appendChild(o); });
     box.append(select); document.getElementById('selControls').appendChild(box);
     select.addEventListener('change', () => {
       const picked = selectedCircuitThing(); if (!picked) return;
@@ -2409,12 +2444,12 @@ function refreshCircuitControl() {
         delete curMap().layers[picked.sel.layer][picked.sel.key]; curMap().stamps.push(s);
         selections = [{ type: 'stamp', index: curMap().stamps.length - 1 }]; selection = selections[0];
       }
-      const n = Number(select.value); if (n) s.circuit = n; else delete s.circuit;
-      saveMaps(); refreshSelPanel(); draw(); setStatus(n ? '電路編號設為 ' + n + '：只跟同編號的開關／電燈連動' : '已取消電路編號', '#7ee0c0');
+      const n = Number(select.value); if (n > 1) s.circuit = n; else delete s.circuit;   // 1 是預設，不另外存
+      saveMaps(); refreshSelPanel(); draw(); setStatus('電路編號設為 ' + n + '：只跟同編號的開關／電燈連動', '#7ee0c0');
     });
   }
   const picked = selectedCircuitThing(); box.classList.toggle('hidden', !picked);
-  if (picked) document.getElementById('circuitNumber').value = String(picked.s?.circuit || 0);
+  if (picked) document.getElementById('circuitNumber').value = String(picked.s?.circuit || 1);
 }
 // 物件名稱太長會截成「…」，好讓選取列擠得進工具那一排；
 // 但如果怎麼擠都會換到下一排（例如門、置物箱、電源開關有額外設定），就不截、直接顯示全名。
@@ -2773,6 +2808,15 @@ document.getElementById('solidToggle').addEventListener('click', e => {
   setStatus(showSolid ? '已顯示紅格與怪物出生區綠格' : '已隱藏紅格與怪物出生區綠格（設定保留）', '#8fd3ff');
 });
 
+// 🧹 刪除全部碰撞：只清這張地圖的紅格和紅格的微調（圖片、可破壞格、基地自己的碰撞格都不動）
+document.getElementById('clearSolid')?.addEventListener('click', () => {
+  const m = curMap(), n = (m.solid || []).length;
+  if (!n) { setStatus('這張地圖沒有碰撞可以刪', '#9aa4b2'); return; }
+  if (!confirm('確定刪除「' + m.name + '」全部的碰撞？\n（' + n + ' 格紅格，連同微調一起刪；基地自己的碰撞格不動。刪錯可以按 Ctrl+Z 復原）')) return;
+  pushUndo();
+  m.solid = []; m.solidOffsets = {}; solidNudgeCells.clear(); checkResult = null;
+  saveMaps(); draw(); setStatus('已刪除這張地圖全部的碰撞（Ctrl+Z 可以復原）', '#ffd24a');
+});
 document.getElementById('clearLayout').addEventListener('click', () => {
   if (!confirm('確定清空這張地圖的所有圖層、大圖、不可穿透、可破壞與核心候選點？（規則數值不變）')) return;
   pushUndo();

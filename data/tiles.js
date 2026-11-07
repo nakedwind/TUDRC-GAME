@@ -3468,7 +3468,13 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/poolcore-floor-gradient.png",
     "w": 1,
-    "h": 2
+    "h": 2,
+    "water": {
+      "depth": 25,
+      "speed": 70,
+      "see": 45
+    },
+    "flat": true
   },
   {
     "id": "tile_poolcore_deep_water_gradient",

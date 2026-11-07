@@ -46,6 +46,7 @@
         <button class="btn" id="gridToggle">🔳 格線：開</button>
         <label class="btn" title="打勾：貼上、拖曳物件都只落在整格上；不打勾可微調到半格／1/4 格"><input type="checkbox" id="snapWhole"> 只貼在整格</label>
         <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透紅格與怪物出生區綠格（不影響設定）">🧱 紅綠格：開</button>
+        <button class="btn danger" id="clearSolid" title="刪除這張地圖所有的不可穿透紅格和碰撞微調（基地自己的碰撞格不動；可以 Ctrl+Z 復原）">🧹 刪除全部碰撞</button>
         <details class="tool-more">
           <summary class="btn">⋯ 更多</summary>
           <div class="tool-more-menu">
@@ -72,7 +73,7 @@
         <button class="tool" data-mode="erase" title="快捷鍵 E">🧽 清除</button>
         <button class="tool" data-mode="pick" title="快捷鍵 I（按住 Alt＝臨時吸管）">💧 吸管</button>
         <button class="tool" data-mode="solid">🧱 不可穿透</button>
-        <button class="tool" data-mode="solidnudge" title="點紅格選取（Shift＋點／拖曳＝多選），方向鍵移動、Shift 移多一點、Delete 歸零、Esc 取消選取">🎯 碰撞微調</button>
+        <button class="tool" data-mode="solidnudge" title="點紅格選取（Shift＋點／拖曳＝多選），按住選中的拖曳、或用方向鍵移動、Shift 移多一點、Delete 歸零、Esc 取消選取">🎯 碰撞微調</button>
         <button class="tool" data-mode="portal">🚪 出入口</button>
         <button class="tool" data-mode="portalnudge" title="點出入口選取：方向鍵移動位置、[ ] 調判定範圍（Shift 一次 10），Delete 重設">🎯 出入口微調</button>
         <button class="tool" data-mode="core" hidden>💠 異質核心候選點</button>
@@ -246,7 +247,7 @@
   <script src="data/npc-locations.js?v=floornames-20261021"></script>  <!-- NPC 平時位置（依章節） -->
   <script src="js/project-save.js?v=filewarn-20261026"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/base-editor-store.js?v=assetmove-20261106"></script>   <!-- 地圖暫存放在瀏覽器資料庫（基地編輯器自己的） -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/base-editor.js?v=layerdrag-20261107", "js/map-editor-transform.js?v=stampscale-20261105", "js/base-editor-save.js?v=sharedtiles-20261020", "js/base-editor-npc.js?v=walkarea-20261022", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/base-editor.js?v=navlink-20261108", "js/map-editor-transform.js?v=stampscale-20261105", "js/base-editor-save.js?v=sharedtiles-20261020", "js/base-editor-npc.js?v=walkarea-20261022", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
