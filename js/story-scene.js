@@ -1305,8 +1305,8 @@ const StoryScene = (() => {
     sortables.sort((a, b) => a.y - b.y).forEach(s => s.draw());
     drawMapTop(ctx);
     drawWorldEffects();
-    drawParty();   // 拉炮噴出來的、天上飄的彩帶：蓋在桌子、角色上面
     drawDarkness();
+    drawParty();   // 拉炮噴出來的、天上飄的彩帶：蓋在桌子、角色上面，也畫在黑幕上面（燈暗時彩帶照樣看得到）
     if (typeof drawPoweredLights === 'function') drawPoweredLights(ctx);
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
     if (typeof drawTextEffects === 'function') drawTextEffects();   // flash() 的提示字（「被吃掉了！」），跟遊戲一樣畫在黑幕上面

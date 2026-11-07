@@ -1047,6 +1047,9 @@ const STORY_SCENES = {
     "bgm": "music/birthday.mp3",
     "bgmVolume": 0.45,
     "opening": { "black": 1, "fade": 1.5 },
+    "darkness": true,
+    "lights": [[13.9, 18.4, 6.5], [13.9, 21.3, 6.5]],
+    "vignette": 0.3,
     "cameras": { "全景": [13.8, 19.2, 2.6], "壽星桌": [13.9, 18.6, 3.3], "朔": [14.3, 18.4, 4] },
     "portraits": {
       "朔": "saku_B",
