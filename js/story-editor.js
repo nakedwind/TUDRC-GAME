@@ -252,10 +252,10 @@ function drawMap() {
   // 劇情自己加的燈（lights: [欄, 列, 半徑格數]）：黃色圈＝照亮的範圍
   s.lights.forEach((lt, i) => {
     const key = 'light:' + i, on = selKey() === key, x = lt[0] * C, y = lt[1] * C;
-    ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = on ? '#ffd479' : 'rgba(255,228,120,.55)'; ctx.lineWidth = on ? 2.5 : 1.5;
+    ctx.save(); ctx.setLineDash([6, 5]); ctx.strokeStyle = lt[3] || (on ? '#ffd479' : 'rgba(255,228,120,.55)'); ctx.globalAlpha = lt[3] && !on ? .7 : 1; ctx.lineWidth = on ? 2.5 : 1.5;
     ctx.beginPath(); ctx.arc(x, y, (lt[2] || 4) * C, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
     label('💡 燈' + (i + 1), x, y + 4, on ? '#ffd479' : '#ffe9a0');
-    handle(key, lt, 12, q => { s.lights[i] = [q[0], q[1], lt[2] || 4]; });
+    handle(key, lt, 12, q => { s.lights[i] = [q[0], q[1], lt[2] || 4, ...lt.slice(3)]; });
   });
   // 生命體與哨兵
   s.monsters.forEach((mo, i) => {
@@ -419,6 +419,8 @@ function renderScenes() {
       chk(s, 'darkness', '後室黑幕（只有燈照得到的地方亮）'),
       chk(s, 'footsteps', '主要角色走路時有腳步聲（跑得快播得快）'),
       h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '畫面四周壓暗', num(s, 'vignette', { min: 0, step: .05, optional: true, placeholder: '0' }), h('small', { style: 'color:#8c98a6' }, '（0＝不壓暗，1＝最暗）')),
+      h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '壓黑的顏色', colorPick(s, 'darkColor', '#000000'), h('small', { style: 'color:#8c98a6' }, '黑幕的暗處、四周壓暗都用這個顏色（例如深藍、深紫）')),
+      s.darkness && h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '黑幕濃度', num(s, 'darkAmount', { min: 0, max: 1, step: .05, optional: true, placeholder: '1' }), h('small', { style: 'color:#8c98a6' }, '（燈照不到的地方多暗：1＝全暗，0.6＝還看得到一點）')),
       doorBox(s),
       explosionBox(s)),
     group('bgm', '🎵 背景音樂', s.bgm ? (Array.isArray(s.bgm) ? s.bgm.length + ' 首' : String(s.bgm).split('/').pop()) : '沒有', bgmBox(s)),
@@ -571,6 +573,12 @@ function equipField(ac, slot, title) {
     return v;
   } }));
 }
+// 選顏色：有設定就顯示「恢復預設」；fallback＝沒設定時顯示的顏色
+function colorPick(obj, key, fallback, onSet) {
+  const set = v => { if (onSet) onSet(v); else if (v) obj[key] = v; else delete obj[key]; };
+  const input = h('input', { type: 'color', value: obj[key] || fallback, oninput: e => { set(e.target.value); commit(false); }, onchange: () => commit() });   // 拖曳時即時存、放開才重畫表單
+  return h('span', { class: 'row', style: 'gap:4px' }, input, obj[key] && h('button', { type: 'button', class: 'small', onclick: () => { set(''); commit(); } }, '恢復預設'));
+}
 function renderObj() {
   const box = $('paneObj'); box.innerHTML = '';
   const s = scene(); if (!s || !sel) { box.append(h('p', { class: 'note' }, '在地圖上或左邊清單點一個人、鏡頭或地點。')); return; }
@@ -644,7 +652,9 @@ function renderObj() {
     const holder = { r: lt[2] || 4 };
     box.append(h('h2', {}, '💡 劇情的燈 ' + (i + 1)), h('p', { class: 'note' }, '地圖上沒有燈、但演出要看得到的地方（劇情設定要勾「後室黑幕」）。只照亮，畫面上不會多一盞燈。'),
       field('位置', xy(s.lights, i, '選燈的位置')),
-      field('照亮半徑（格）', h('input', { type: 'number', step: .5, min: 1, value: holder.r, onchange: e => { s.lights[i] = [lt[0], lt[1], Math.max(1, Number(e.target.value) || 4)]; commit(); } })),
+      field('照亮半徑（格）', h('input', { type: 'number', step: .5, min: 1, value: holder.r, onchange: e => { s.lights[i] = [lt[0], lt[1], Math.max(1, Number(e.target.value) || 4), ...lt.slice(3)]; commit(); } })),
+      field('光的顏色（空白＝白光，只照亮不上色）', colorPick({ c: lt[3] }, 'c', '#ffffff', v => { const cur = s.lights[i], n = [cur[0], cur[1], cur[2] || 4]; if (v) { n[3] = v; if (cur[4] != null) n[4] = cur[4]; } s.lights[i] = n; })),
+      lt[3] && field('顏色多濃（0～1，空白＝0.5）', h('input', { type: 'number', step: .05, min: 0, max: 1, value: lt[4] ?? '', placeholder: '0.5', onchange: e => { const v = e.target.value, cur = s.lights[i], n = [cur[0], cur[1], cur[2] || 4, cur[3]]; if (v !== '') n[4] = Math.max(0, Math.min(1, Number(v))); s.lights[i] = n; commit(); } })),
       del('這盞燈', () => s.lights.splice(i, 1)));
   } else if (kind === 'camera' || kind === 'point') {
     const map = kind === 'camera' ? s.cameras : s.points, name = sel.key.slice(kind.length + 1); if (!map[name]) return;

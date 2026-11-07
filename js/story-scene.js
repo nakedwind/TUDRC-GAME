@@ -228,6 +228,7 @@ const StoryScene = (() => {
   const CONFETTI = { rate: 22, fall: [22, 40], sway: [6, 14], ribbon: .45, len: [7, 13] };
   const PARTY_COLORS = ['#ff5a7a', '#ffd23f', '#4fc3ff', '#7be37b', '#c58bff', '#ff9f43', '#ffffff'];
   const pick = list => list[Math.floor(Math.random() * list.length)];
+  const hexRgb = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim()); if (!m) return null; const n = parseInt(m[1], 16); return [n >> 16, (n >> 8) & 255, n & 255]; };   // '#ffb347' → [255, 179, 71]
   // 角色圖上的一點（64×64 的像素）→ 世界座標
   const spritePoint = (a, px, py) => { const k = PLAYER.drawSize / 64; return [a.x + (px - 32) * k, a.y + 18 - PLAYER.drawSize + py * k]; };
   function popperTip(a) {
@@ -598,7 +599,12 @@ const StoryScene = (() => {
     el('storyFlash').style.opacity = '0'; el('storyExitEnd').textContent = resume ? '回到現實' : '返回開始畫面';
     showBox(false); el('storyEnd').hidden = true;
     el('storyFade').style.opacity = '1';
-    el('storyVignette').style.opacity = String(Math.max(0, Math.min(1, Number(cfg.vignette) || 0)));   // vignette：畫面四周壓暗的強度 0～1
+    el('storyVignette').style.opacity = String(Math.max(0, Math.min(1, Number(cfg.vignette) || 0)));
+    // darkColor：壓黑的顏色（黑幕暗處、四周壓暗都用這個色，例如深藍、深紫）；darkAmount：黑幕的濃度 0～1（空白＝全黑 1）
+    const dark = hexRgb(cfg.darkColor) || [0, 0, 0];
+    LIGHT.storyDark = { rgb: dark, amount: Number.isFinite(Number(cfg.darkAmount)) && cfg.darkAmount !== '' && cfg.darkAmount != null ? Math.max(0, Math.min(1, Number(cfg.darkAmount))) : NaN };
+    const dc = dark.join(',');
+    el('storyVignette').style.background = `radial-gradient(ellipse 58% 56% at 50% 46%, transparent 25%, rgba(${dc},.5) 52%, rgba(${dc},.85) 78%, rgb(${dc}) 100%)`;   // vignette：畫面四周壓暗的強度 0～1
     el('storyAudioStart').hidden = true;
     ui.querySelector('.story-head').style.opacity = '0';
     state.lights = lights();
@@ -1279,8 +1285,22 @@ const StoryScene = (() => {
     }
     for (const s of MAP.stamps || []) { const t = mapTileById(s.id); if (t) add(t, s.c, s.r, mapStampW(s, t), mapStampH(s, t), s.ox || 0, s.oy || 0); }
     // 劇情自己加的光（劇情設定 lights: [[欄, 列, 半徑格數], …]）：地圖上沒有燈、但演出要看得到的地方；只照亮，不畫燈頭光暈
-    for (const [c, r, rad] of state?.cfg.lights || []) out.push({ x: c * CELL, y: r * CELL, r: (Number(rad) || 4) * CELL, warm: false, phase: 0 });
+    // 第 4 個＝光的顏色（'#ffb347' 這種；空白＝白光，只照亮不上色）、第 5 個＝上色多濃（0～1，空白＝0.5）
+    for (const [c, r, rad, color, tint] of state?.cfg.lights || []) out.push({ x: c * CELL, y: r * CELL, r: (Number(rad) || 4) * CELL, warm: false, phase: 0,
+      tint: hexRgb(color), tintAmount: tint === undefined || tint === null || tint === '' ? .5 : Number(tint) });
     return out;
+  }
+  // 有顏色的劇情燈：黑幕蓋完後，在燈的範圍疊一層那個顏色的光（中間濃、往外淡掉）
+  function drawLightTint() {
+    if (!LIGHT.enabled) return;
+    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    for (const l of lightsCache) {
+      if (!l.tint || !(l.tintAmount > 0)) continue;
+      const [r, g, b] = l.tint, a = Math.min(1, l.tintAmount), grad = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
+      grad.addColorStop(0, `rgba(${r},${g},${b},${a * .6})`); grad.addColorStop(.45, `rgba(${r},${g},${b},${a * .32})`); grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grad; ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+    }
+    ctx.restore();
   }
   function drawScene() {
     if (!state) return;
@@ -1306,6 +1326,7 @@ const StoryScene = (() => {
     drawMapTop(ctx);
     drawWorldEffects();
     drawDarkness();
+    drawLightTint();
     drawParty();   // 拉炮噴出來的、天上飄的彩帶：蓋在桌子、角色上面，也畫在黑幕上面（燈暗時彩帶照樣看得到）
     if (typeof drawPoweredLights === 'function') drawPoweredLights(ctx);
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
