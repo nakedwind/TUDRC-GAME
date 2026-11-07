@@ -420,6 +420,8 @@ function renderScenes() {
       chk(s, 'footsteps', '主要角色走路時有腳步聲（跑得快播得快）'),
       h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '畫面四周壓暗', num(s, 'vignette', { min: 0, step: .05, optional: true, placeholder: '0' }), h('small', { style: 'color:#8c98a6' }, '（0＝不壓暗，1＝最暗）')),
       h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '壓黑的顏色', colorPick(s, 'darkColor', '#000000'), h('small', { style: 'color:#8c98a6' }, '黑幕的暗處、四周壓暗都用這個顏色（例如深藍、深紫）')),
+      h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '壓黑怎麼疊上去', choose(s, 'darkBlend', [['', '一般（直接蓋一層顏色）'], ['multiply', '色彩增值（畫面染上那個顏色，暗處還看得到圖案）']], { optional: true }),
+        h('small', { style: 'color:#8c98a6' }, '色彩增值要選亮一點的顏色才看得出來（例如 #6a5acd），全黑的話跟一般一樣')),
       s.darkness && h('div', { class: 'row', style: 'font-size:12px;margin:6px 0' }, '黑幕濃度', num(s, 'darkAmount', { min: 0, max: 1, step: .05, optional: true, placeholder: '1' }), h('small', { style: 'color:#8c98a6' }, '（燈照不到的地方多暗：1＝全暗，0.6＝還看得到一點）')),
       doorBox(s),
       explosionBox(s)),
@@ -653,8 +655,10 @@ function renderObj() {
     box.append(h('h2', {}, '💡 劇情的燈 ' + (i + 1)), h('p', { class: 'note' }, '地圖上沒有燈、但演出要看得到的地方（劇情設定要勾「後室黑幕」）。只照亮，畫面上不會多一盞燈。'),
       field('位置', xy(s.lights, i, '選燈的位置')),
       field('照亮半徑（格）', h('input', { type: 'number', step: .5, min: 1, value: holder.r, onchange: e => { s.lights[i] = [lt[0], lt[1], Math.max(1, Number(e.target.value) || 4), ...lt.slice(3)]; commit(); } })),
-      field('光的顏色（空白＝白光，只照亮不上色）', colorPick({ c: lt[3] }, 'c', '#ffffff', v => { const cur = s.lights[i], n = [cur[0], cur[1], cur[2] || 4]; if (v) { n[3] = v; if (cur[4] != null) n[4] = cur[4]; } s.lights[i] = n; })),
-      lt[3] && field('顏色多濃（0～1，空白＝0.5）', h('input', { type: 'number', step: .05, min: 0, max: 1, value: lt[4] ?? '', placeholder: '0.5', onchange: e => { const v = e.target.value, cur = s.lights[i], n = [cur[0], cur[1], cur[2] || 4, cur[3]]; if (v !== '') n[4] = Math.max(0, Math.min(1, Number(v))); s.lights[i] = n; commit(); } })),
+      field('光的顏色（空白＝白光，只照亮不上色）', colorPick({ c: lt[3] }, 'c', '#ffffff', v => { const cur = s.lights[i], n = [cur[0], cur[1], cur[2] || 4]; if (v) { n[3] = v; if (cur[4] != null || cur[5]) n[4] = cur[4] ?? .5; if (cur[5]) n[5] = cur[5]; } s.lights[i] = n; })),
+      lt[3] && field('光怎麼疊上去（混合方式）', choose({ v: lt[5] || '' }, 'v', [['', '濾色（預設，柔柔地變亮）'], ['overlay', '覆蓋（顏色更飽和、對比更強）'], ['soft-light', '柔光（淡淡地染色）'], ['lighter', '發光（加亮，最亮、會發白）'], ['color-dodge', '加亮顏色（很亮很刺眼）'], ['multiply', '色彩增值（變暗並染色）']],
+        { parse: v => { const cur = s.lights[i], n = [cur[0], cur[1], cur[2] || 4, cur[3], cur[4] ?? .5]; if (v) n[5] = v; else if (cur[4] == null) n.length = 4; s.lights[i] = n; return v; } })),
+      lt[3] && field('顏色多濃（0～1，空白＝0.5）', h('input', { type: 'number', step: .05, min: 0, max: 1, value: lt[4] ?? '', placeholder: '0.5', onchange: e => { const v = e.target.value, cur = s.lights[i], n = [cur[0], cur[1], cur[2] || 4, cur[3]]; if (v !== '' || cur[5]) n[4] = v !== '' ? Math.max(0, Math.min(1, Number(v))) : .5; if (cur[5]) n[5] = cur[5]; s.lights[i] = n; commit(); } })),
       del('這盞燈', () => s.lights.splice(i, 1)));
   } else if (kind === 'camera' || kind === 'point') {
     const map = kind === 'camera' ? s.cameras : s.points, name = sel.key.slice(kind.length + 1); if (!map[name]) return;

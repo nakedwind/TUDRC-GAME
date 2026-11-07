@@ -228,6 +228,8 @@ const StoryScene = (() => {
   const CONFETTI = { rate: 22, fall: [22, 40], sway: [6, 14], ribbon: .45, len: [7, 13] };
   const PARTY_COLORS = ['#ff5a7a', '#ffd23f', '#4fc3ff', '#7be37b', '#c58bff', '#ff9f43', '#ffffff'];
   const pick = list => list[Math.floor(Math.random() * list.length)];
+  // 混合方式（跟 Photoshop 圖層一樣）：劇情編輯器的選單也用這份清單
+  const BLENDS = { screen: '濾色', overlay: '覆蓋', 'soft-light': '柔光', lighter: '發光（加亮）', 'color-dodge': '加亮顏色', multiply: '色彩增值' };
   const hexRgb = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim()); if (!m) return null; const n = parseInt(m[1], 16); return [n >> 16, (n >> 8) & 255, n & 255]; };   // '#ffb347' → [255, 179, 71]
   // 角色圖上的一點（64×64 的像素）→ 世界座標
   const spritePoint = (a, px, py) => { const k = PLAYER.drawSize / 64; return [a.x + (px - 32) * k, a.y + 18 - PLAYER.drawSize + py * k]; };
@@ -604,7 +606,11 @@ const StoryScene = (() => {
     const dark = hexRgb(cfg.darkColor) || [0, 0, 0];
     LIGHT.storyDark = { rgb: dark, amount: Number.isFinite(Number(cfg.darkAmount)) && cfg.darkAmount !== '' && cfg.darkAmount != null ? Math.max(0, Math.min(1, Number(cfg.darkAmount))) : NaN };
     const dc = dark.join(',');
-    el('storyVignette').style.background = `radial-gradient(ellipse 58% 56% at 50% 46%, transparent 25%, rgba(${dc},.5) 52%, rgba(${dc},.85) 78%, rgb(${dc}) 100%)`;   // vignette：畫面四周壓暗的強度 0～1
+    el('storyVignette').style.background = `radial-gradient(ellipse 58% 56% at 50% 46%, transparent 25%, rgba(${dc},.5) 52%, rgba(${dc},.85) 78%, rgb(${dc}) 100%)`;
+    // darkBlend：壓黑怎麼疊上去：''＝一般（直接蓋一層顏色）、'multiply'＝色彩增值（用乘的，畫面染上那個顏色，暗處還看得到圖案）
+    // 色彩增值時四周壓暗改畫在遊戲畫面上（網頁那層沒辦法跟畫面做色彩增值），原本那層藏起來
+    LIGHT.storyDark.mode = BLENDS[cfg.darkBlend] ? cfg.darkBlend : '';
+    if (LIGHT.storyDark.mode) el('storyVignette').style.opacity = '0';
     el('storyAudioStart').hidden = true;
     ui.querySelector('.story-head').style.opacity = '0';
     state.lights = lights();
@@ -1286,21 +1292,34 @@ const StoryScene = (() => {
     for (const s of MAP.stamps || []) { const t = mapTileById(s.id); if (t) add(t, s.c, s.r, mapStampW(s, t), mapStampH(s, t), s.ox || 0, s.oy || 0); }
     // 劇情自己加的光（劇情設定 lights: [[欄, 列, 半徑格數], …]）：地圖上沒有燈、但演出要看得到的地方；只照亮，不畫燈頭光暈
     // 第 4 個＝光的顏色（'#ffb347' 這種；空白＝白光，只照亮不上色）、第 5 個＝上色多濃（0～1，空白＝0.5）
-    for (const [c, r, rad, color, tint] of state?.cfg.lights || []) out.push({ x: c * CELL, y: r * CELL, r: (Number(rad) || 4) * CELL, warm: false, phase: 0,
-      tint: hexRgb(color), tintAmount: tint === undefined || tint === null || tint === '' ? .5 : Number(tint) });
+    // 第 6 個＝光怎麼疊上去（BLENDS 裡的名字，空白＝濾色）
+    for (const [c, r, rad, color, tint, blend] of state?.cfg.lights || []) out.push({ x: c * CELL, y: r * CELL, r: (Number(rad) || 4) * CELL, warm: false, phase: 0,
+      tint: hexRgb(color), tintAmount: tint === undefined || tint === null || tint === '' ? .5 : Number(tint), blend: BLENDS[blend] ? blend : 'screen' });
     return out;
   }
   // 有顏色的劇情燈：黑幕蓋完後，在燈的範圍疊一層那個顏色的光（中間濃、往外淡掉）
   function drawLightTint() {
     if (!LIGHT.enabled) return;
-    ctx.save(); ctx.globalCompositeOperation = 'screen';
+    ctx.save();
     for (const l of lightsCache) {
       if (!l.tint || !(l.tintAmount > 0)) continue;
+      ctx.globalCompositeOperation = l.blend || 'screen';
       const [r, g, b] = l.tint, a = Math.min(1, l.tintAmount), grad = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
       grad.addColorStop(0, `rgba(${r},${g},${b},${a * .6})`); grad.addColorStop(.45, `rgba(${r},${g},${b},${a * .32})`); grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
       ctx.fillStyle = grad; ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
     }
     ctx.restore();
+  }
+  // 色彩增值的四周壓暗：畫在遊戲畫面上（螢幕座標），中間不動、往四周越乘越暗
+  function drawVignetteMultiply() {
+    const sd = LIGHT.storyDark, k = Math.max(0, Math.min(1, Number(state.cfg.vignette) || 0));
+    if (!sd?.mode || !k) return;
+    const [r, g, b] = sd.rgb, w = cv.width, hh = cv.height, mix = a => `rgb(${Math.round(255 - (255 - r) * a)},${Math.round(255 - (255 - g) * a)},${Math.round(255 - (255 - b) * a)})`;   // a＝離白色多遠（乘白色＝不變）
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'multiply';
+    ctx.translate(w / 2, hh * .46); ctx.scale(w * .58 / (hh * .56), 1);   // 橢圓：跟原本網頁那層的形狀一樣
+    const R = hh * .56 / .78, grad = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+    grad.addColorStop(.25 * .78, mix(0)); grad.addColorStop(.52 * .78, mix(.5 * k)); grad.addColorStop(.78, mix(.85 * k)); grad.addColorStop(1, mix(k));
+    ctx.fillStyle = grad; ctx.fillRect(-w * 2, -hh * 2, w * 4, hh * 4); ctx.restore();
   }
   function drawScene() {
     if (!state) return;
@@ -1332,6 +1351,7 @@ const StoryScene = (() => {
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
     if (typeof drawTextEffects === 'function') drawTextEffects();   // flash() 的提示字（「被吃掉了！」），跟遊戲一樣畫在黑幕上面
     ctx.restore();
+    drawVignetteMultiply();
   }
   function leave() {
     if (ui) { el('storyChoices').hidden = true; }
@@ -1414,5 +1434,5 @@ const StoryScene = (() => {
   }, true);
   // 劇情裡沒有玩家：要算「離聲音多遠」的地方（日光燈嗡嗡聲）改用鏡頭中心
   const listener = () => state && { x: cam.x + viewW() / 2, y: cam.y + viewH() * .42 };
-  return { config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame, ownsStamp, debug: () => state };   // debug：測試時在主控台看播放狀態
+  return { BLENDS, config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame, ownsStamp, debug: () => state };   // debug：測試時在主控台看播放狀態
 })();

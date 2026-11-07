@@ -358,9 +358,9 @@ function drawDarkness() {
     darkCtx.setTransform(1, 0, 0, 1, 0, 0);
     darkCtx.globalCompositeOperation = 'destination-out'; darkCtx.globalAlpha = FLASH_BEAM.reveal;
     darkCtx.drawImage(beam.cv, 0, 0);
-    ctx.drawImage(darkCv, beam.x, beam.y);
+    ctx.save(); if (sd?.mode) ctx.globalCompositeOperation = sd.mode; ctx.drawImage(darkCv, beam.x, beam.y); ctx.restore();
     drawFlashlightBeam(ctx, beam);   // 再疊一層淡淡的暖黃光
-  } else ctx.drawImage(fieldCv, mx, my, mw, mh);
+  } else { ctx.save(); if (sd?.mode) ctx.globalCompositeOperation = sd.mode; ctx.drawImage(fieldCv, mx, my, mw, mh); ctx.restore(); }   // 劇情的「色彩增值」：暗處用乘的，底下的畫面染上壓黑的顏色
 
   // 探照燈的環境暖光也使用格子擴散遮罩，因此不會穿過牆壁。
   const wp = warmImg.data;
