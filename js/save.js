@@ -21,6 +21,18 @@ applySettings();
 
 // ---------- 存檔 ----------
 let lastSavedAt = 0, lastSavedSnapshot = '';
+// 改名或合併掉的物品：舊存檔讀進來時換成新的 id（數量加在一起）
+// ・塗鴉筆：以前分紅、藍、黑三支，現在只有一支，畫的時候再選顏色（js/graffiti.js）
+const OLD_ITEM_IDS = { 'graffiti-red': 'graffiti', 'graffiti-blue': 'graffiti', 'graffiti-black': 'graffiti' };
+function migrateOldItems(list) {
+  const out = new Map();
+  for (const e of Array.isArray(list) ? list : []) {
+    if (!Array.isArray(e)) continue;
+    const id = OLD_ITEM_IDS[e[0]] || e[0];
+    out.set(id, (out.get(id) || 0) + (Number.isInteger(e[1]) ? e[1] : 0));
+  }
+  return [...out];
+}
 const saveSnapshot = () => JSON.stringify({ inventory: [...supplyInventory], unlockedStorageLockers: [...unlockedStorageLockers], collectedStorageKeys: [...collectedStorageKeys], cart: [...shopCart], favor: favorPoints, giftKnown, gifted: [...giftedThisVisit], requests: giftRequests, requestsStale });
 function saveGame(manual = false) {
   if (window.STORY_MODE || window.STORY_PREVIEW) return;
@@ -42,11 +54,11 @@ function loadGame() {
   try { data = JSON.parse(localStorage.getItem(SAVE_KEY) || 'null'); } catch (_) {}
   if (!data) return;
   const valid = ([id, n]) => itemById(id) && Number.isInteger(n) && n > 0;   // 已經刪掉的物品就不讀
-  supplyInventory.clear(); (data.inventory || []).filter(valid).forEach(([id, n]) => Map.prototype.set.call(supplyInventory, id, n));
+  supplyInventory.clear(); migrateOldItems(data.inventory).filter(valid).forEach(([id, n]) => Map.prototype.set.call(supplyInventory, id, n));
   unlockedStorageLockers.clear(); collectedStorageKeys.clear();
   (Array.isArray(data.unlockedStorageLockers)?data.unlockedStorageLockers:[]).filter(x=>typeof x==='string').forEach(x=>unlockedStorageLockers.add(x));
   (Array.isArray(data.collectedStorageKeys)?data.collectedStorageKeys:[]).filter(x=>typeof x==='string').forEach(x=>collectedStorageKeys.add(x));
-  shopCart.clear(); (data.cart || []).filter(valid).forEach(([id, n]) => shopCart.set(id, n));
+  shopCart.clear(); migrateOldItems(data.cart).filter(valid).forEach(([id, n]) => shopCart.set(id, n));
   Object.assign(favorPoints, data.favor || {}); Object.assign(giftKnown, data.giftKnown || {});   // 好感度（js/gifts.js）
   (data.gifted || []).forEach(g => Array.isArray(g) ? giftedThisVisit.set(g[0], g[1]) : giftedThisVisit.set(g, 1));   // 舊存檔只記誰收過（＝1 次）
   for (const [id, item] of Object.entries(data.requests || {})) if (itemById(item)) giftRequests[id] = item;   // 今日想吃

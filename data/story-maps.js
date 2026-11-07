@@ -2989,7 +2989,7 @@ const STORY_MAPS = [
         "8,13": "tile_mr4czvpx"
       },
       "object2": {
-        "3,73": "tile_interactive_pickup_graffiti_black",
+        "3,73": "tile_interactive_pickup_graffiti",
         "72,63": "tile_interactive_pickup_almond_water",
         "48,75": "tile_interactive_pickup_battery",
         "64,63": "tile_interactive_pickup_battery",
@@ -2997,9 +2997,9 @@ const STORY_MAPS = [
         "57,45": "tile_interactive_pickup_battery",
         "17,33": "tile_interactive_pickup_battery",
         "45,28": "tile_interactive_pickup_battery",
-        "43,58": "tile_interactive_pickup_graffiti_black",
-        "12,52": "tile_interactive_pickup_graffiti_black",
-        "40,16": "tile_interactive_pickup_graffiti_black",
+        "43,58": "tile_interactive_pickup_graffiti",
+        "12,52": "tile_interactive_pickup_graffiti",
+        "40,16": "tile_interactive_pickup_graffiti",
         "60,79": "tile_obstacle_ore_small",
         "66,84": "tile_obstacle_ore_small",
         "53,75": "tile_obstacle_ore_small",
@@ -3656,6 +3656,132 @@ const STORY_MAPS = [
           [
             10,
             6
+          ]
+        ]
+      },
+      {
+        "id": "tile_field_base",
+        "c": 14,
+        "r": 74,
+        "layer": "object",
+        "baseHp": 2000,
+        "baseDepth": 3,
+        "baseSolid": [
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
           ]
         ]
       },
@@ -16931,6 +17057,7 @@ const STORY_MAPS = [
     "coreFixed": [
       "5,7"
     ],
+    "mrtExitKeys": 2,
     "elite": {
       "of": "bird_head",
       "c": 5,
@@ -18290,7 +18417,7 @@ const STORY_MAPS = [
         "34,11": "tile_new_bg_floor",
         "34,12": "tile_new_bg_floor",
         "33,12": "tile_new_bg_floor",
-        "33,13": "floor",
+        "33,13": "tile_new_bg_floor",
         "44,13": "tile_new_bg_floor",
         "44,12": "tile_new_bg_floor",
         "44,11": "tile_new_bg_floor",
@@ -18701,8 +18828,8 @@ const STORY_MAPS = [
         "57,8": "tile_new_bg_floor",
         "59,8": "tile_new_bg_floor",
         "59,7": "tile_new_bg_floor",
-        "26,15": "tile_hq_floor",
-        "27,15": "tile_hq_floor",
+        "26,15": "tile_new_bg_floor",
+        "27,15": "tile_new_bg_floor",
         "28,15": "tile_hq_floor",
         "29,15": "tile_hq_floor",
         "30,15": "tile_hq_floor",
@@ -18712,8 +18839,8 @@ const STORY_MAPS = [
         "34,15": "tile_hq_floor",
         "35,15": "tile_hq_floor",
         "36,15": "tile_hq_floor",
-        "37,15": "tile_hq_floor",
-        "38,15": "tile_hq_floor",
+        "37,15": "tile_new_bg_floor",
+        "38,15": "tile_new_bg_floor",
         "39,15": "tile_hq_floor",
         "25,15": "tile_hq_floor",
         "25,16": "tile_hq_floor",
@@ -18732,7 +18859,6 @@ const STORY_MAPS = [
         "35,16": "tile_hq_floor",
         "36,16": "tile_hq_floor",
         "37,16": "tile_hq_floor",
-        "38,16": "tile_hq_floor",
         "39,16": "tile_hq_floor",
         "39,17": "tile_hq_floor",
         "39,18": "tile_hq_floor",
@@ -18880,8 +19006,6 @@ const STORY_MAPS = [
         "20,15": "tile_hq_floor",
         "19,15": "tile_hq_floor",
         "18,15": "tile_hq_floor",
-        "17,15": "tile_hq_floor",
-        "16,15": "tile_hq_floor",
         "15,15": "tile_hq_floor",
         "15,17": "tile_hq_floor",
         "15,18": "tile_hq_floor",
@@ -18939,7 +19063,35 @@ const STORY_MAPS = [
         "14,21": "tile_hq_floor",
         "12,18": "tile_hq_floor",
         "37,19": "tile_hq_floor",
-        "37,14": "tile_new_bg_floor"
+        "37,14": "tile_new_bg_floor",
+        "17,15": "tile_new_bg_floor",
+        "16,15": "tile_new_bg_floor",
+        "43,15": "tile_new_bg_floor",
+        "44,15": "tile_new_bg_floor",
+        "46,15": "tile_new_bg_floor",
+        "45,15": "tile_new_bg_floor",
+        "47,15": "tile_new_bg_floor",
+        "48,15": "tile_new_bg_floor",
+        "49,15": "tile_new_bg_floor",
+        "50,15": "tile_new_bg_floor",
+        "51,15": "tile_new_bg_floor",
+        "52,15": "tile_new_bg_floor",
+        "53,15": "tile_new_bg_floor",
+        "54,15": "tile_new_bg_floor",
+        "55,15": "tile_new_bg_floor",
+        "56,15": "tile_new_bg_floor",
+        "57,15": "tile_new_bg_floor",
+        "58,15": "tile_new_bg_floor",
+        "59,15": "tile_new_bg_floor",
+        "60,15": "tile_new_bg_floor",
+        "7,15": "tile_new_bg_floor",
+        "6,15": "tile_new_bg_floor",
+        "5,15": "tile_new_bg_floor",
+        "4,15": "tile_new_bg_floor",
+        "3,15": "tile_new_bg_floor",
+        "2,15": "tile_new_bg_floor",
+        "1,15": "tile_new_bg_floor",
+        "0,15": "tile_new_bg_floor"
       },
       "ground": {},
       "ground2": {},
@@ -19826,127 +19978,122 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall",
         "c": 29,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 30,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 31,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 32,
-        "r": 12,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_new_bg_wall",
-        "c": 33,
-        "r": 12,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_new_bg_wall",
-        "c": 34,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 35,
-        "r": 12,
+        "r": 13,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 33,
+        "r": 13,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 35,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 36,
-        "r": 12,
-        "layer": "object2",
-        "ox": 0,
-        "oy": 0
+        "r": 13,
+        "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 28,
-        "r": 12,
+        "r": 13,
         "layer": "object2",
         "fx": true
       },
       {
         "id": "tile_hq_monitor_wall",
         "c": 30,
-        "r": 13,
+        "r": 14,
         "layer": "object3",
-        "fx": true,
-        "ox": 0,
-        "oy": -14
+        "fx": true
       },
       {
         "id": "tile_hq_stairs",
         "c": 26,
-        "r": 15,
+        "r": 16,
         "layer": "object",
         "fx": true,
-        "ox": 0,
         "oy": -6
       },
       {
         "id": "tile_hq_wall_side",
         "c": 39,
-        "r": 12,
+        "r": 13,
         "layer": "object2",
         "fx": true
       },
       {
         "id": "tile_hq_wall_side",
         "c": 25,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 40,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 24,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 41,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 23,
-        "r": 12,
+        "r": 13,
         "layer": "object2",
         "fx": true
       },
       {
         "id": "tile_mu5e3ndv",
         "c": 22,
-        "r": 12,
+        "r": 13,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mu5e3ndv",
         "c": 42,
-        "r": 12,
+        "r": 13,
         "layer": "object",
         "fx": true
       },
@@ -20023,6 +20170,13 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall_front_edge",
         "c": 42,
+        "r": 16,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 42,
         "r": 15,
         "layer": "top",
         "fx": true
@@ -20036,15 +20190,8 @@ const STORY_MAPS = [
       },
       {
         "id": "tile_new_bg_wall_front_edge",
-        "c": 42,
-        "r": 13,
-        "layer": "top",
-        "fx": true
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
         "c": 22,
-        "r": 13,
+        "r": 14,
         "layer": "top",
         "fx": true
       },
@@ -20105,11 +20252,11 @@ const STORY_MAPS = [
       },
       {
         "id": "tile_hq_server_rack",
-        "c": 9,
-        "r": 14,
+        "c": 8,
+        "r": 15,
         "layer": "object3",
-        "ox": -6,
-        "oy": 14
+        "ox": 32.666667,
+        "oy": 19.333333
       },
       {
         "id": "tile_hq_desk_vertical",
@@ -20150,29 +20297,24 @@ const STORY_MAPS = [
       {
         "id": "tile_hq_stairs",
         "c": 37,
-        "r": 15,
+        "r": 16,
         "layer": "ground3",
         "fx": true,
-        "ox": 0,
-        "oy": -6
+        "oy": -4.666667
       },
       {
         "id": "tile_hq_server_rack",
         "c": 40,
-        "r": 14,
+        "r": 15,
         "layer": "object3",
-        "fx": true,
-        "oy": 16,
-        "ox": 2
+        "fx": true
       },
       {
         "id": "tile_hq_server_rack",
         "c": 41,
-        "r": 14,
+        "r": 15,
         "layer": "object3",
-        "fx": true,
-        "ox": 2,
-        "oy": 16
+        "fx": true
       },
       {
         "id": "tile_eoc_drawer_unit",
@@ -20180,8 +20322,7 @@ const STORY_MAPS = [
         "r": 15,
         "layer": "object3",
         "fx": true,
-        "ox": 4,
-        "oy": -24
+        "oy": 8
       },
       {
         "id": "tile_eoc_drawer_unit",
@@ -20189,26 +20330,23 @@ const STORY_MAPS = [
         "r": 15,
         "layer": "object3",
         "fx": true,
-        "ox": -6,
-        "oy": -24
+        "oy": 8
       },
       {
         "id": "tile_eoc_binder_row",
-        "c": 35,
-        "r": 14,
+        "c": 36,
+        "r": 15,
         "layer": "object4",
         "fx": true,
-        "ox": 24,
-        "oy": 18
+        "oy": 8
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
-        "c": 29,
-        "r": 15,
+        "c": 28,
+        "r": 16,
         "layer": "object3",
         "fx": true,
-        "ox": -34,
-        "oy": 12
+        "oy": 8
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -20219,26 +20357,18 @@ const STORY_MAPS = [
         "oy": -20
       },
       {
-        "id": "tile_hq_sign",
-        "c": 28,
-        "r": 13,
-        "layer": "object4"
-      },
-      {
         "id": "tile_hq_poster",
-        "c": 10,
-        "r": 15,
+        "c": 8,
+        "r": 14,
         "layer": "overlay",
-        "ox": -44,
-        "oy": -58
+        "ox": 36,
+        "oy": 22
       },
       {
         "id": "tile_hq_poster",
         "c": 41,
-        "r": 14,
-        "layer": "overlay",
-        "ox": 0,
-        "oy": -14
+        "r": 15,
+        "layer": "overlay"
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -20265,81 +20395,76 @@ const STORY_MAPS = [
       {
         "id": "tile_mu5e3ndv",
         "c": 8,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 10,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 11,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 12,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 13,
-        "r": 12,
-        "layer": "object",
-        "ox": 0,
-        "oy": 0
+        "r": 13,
+        "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 14,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 21,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 20,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 19,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_hq_stairs",
         "c": 16,
-        "r": 15,
+        "r": 16,
         "layer": "ground",
-        "ox": 0,
-        "oy": -4
+        "oy": -5.333333
       },
       {
         "id": "tile_hq_wall_side",
         "c": 15,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 18,
-        "r": 12,
+        "r": 13,
         "layer": "object",
-        "fx": true,
-        "ox": 0,
-        "oy": 0
+        "fx": true
       },
       {
         "id": "tile_hq_floor",
@@ -20386,7 +20511,7 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall",
         "c": 9,
-        "r": 12,
+        "r": 13,
         "layer": "object",
         "fx": true
       },
@@ -20407,6 +20532,13 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall_front_edge",
         "c": 8,
+        "r": 16,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 8,
         "r": 15,
         "layer": "top",
         "fx": true
@@ -20415,13 +20547,6 @@ const STORY_MAPS = [
         "id": "tile_new_bg_wall_front_edge",
         "c": 8,
         "r": 14,
-        "layer": "top",
-        "fx": true
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
-        "c": 8,
-        "r": 13,
         "layer": "top",
         "fx": true
       },
@@ -20440,44 +20565,34 @@ const STORY_MAPS = [
         "c": 10,
         "r": 15,
         "layer": "object2",
-        "ox": -6,
-        "oy": -22,
         "sortDepth": 2.5
       },
       {
         "id": "tile_research_lab_specimen_cabinet",
-        "c": 14,
-        "r": 14,
+        "c": 13,
+        "r": 15,
         "layer": "object2",
-        "ox": -38,
-        "oy": -20,
         "sortDepth": 2.75
       },
       {
         "id": "tile_research_lab_sample_storage",
         "c": 20,
-        "r": 14,
+        "r": 15,
         "layer": "object2",
-        "ox": 0,
-        "oy": -12,
         "sortDepth": 2.75
       },
       {
         "id": "tile_research_lab_crystal_containment_pod",
-        "c": 18,
-        "r": 13,
+        "c": 19,
+        "r": 14,
         "layer": "object2",
-        "ox": 32,
-        "oy": -12,
         "sortDepth": 3.75
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
         "c": 18,
-        "r": 15,
-        "layer": "object2",
-        "ox": 0,
-        "oy": 8
+        "r": 16,
+        "layer": "object2"
       },
       {
         "id": "tile_hq_office_chair_back",
@@ -20520,16 +20635,13 @@ const STORY_MAPS = [
         "c": 15,
         "r": 15,
         "layer": "object3",
-        "ox": -14,
-        "oy": -24
+        "oy": 11.333333
       },
       {
         "id": "tile_mv9qoz8k",
         "c": 14,
-        "r": 13,
-        "layer": "object3",
-        "ox": 4,
-        "oy": 0
+        "r": 14,
+        "layer": "object3"
       },
       {
         "id": "tile_eoc_floor_sign_2f",
@@ -20565,11 +20677,9 @@ const STORY_MAPS = [
       {
         "id": "tile_mvma4ws7",
         "c": 24,
-        "r": 14,
+        "r": 16,
         "layer": "object4",
-        "sortDepth": 1,
-        "oy": 22,
-        "ox": 2
+        "sortDepth": 1
       },
       {
         "id": "tile_new_bg_floor",
@@ -20582,10 +20692,8 @@ const STORY_MAPS = [
       {
         "id": "tile_hq_server_rack",
         "c": 39,
-        "r": 14,
+        "r": 15,
         "layer": "object3",
-        "oy": 16,
-        "ox": 2,
         "sortDepth": 2
       },
       {
@@ -20596,46 +20704,6 @@ const STORY_MAPS = [
         "oy": 10
       },
       {
-        "id": "tile_halloween_bunting",
-        "c": 30,
-        "r": 13,
-        "layer": "overlay",
-        "ox": -60,
-        "oy": -8
-      },
-      {
-        "id": "tile_halloween_bunting",
-        "c": 33,
-        "r": 13,
-        "layer": "overlay",
-        "ox": -22,
-        "oy": -8
-      },
-      {
-        "id": "tile_halloween_pumpkin_pile",
-        "c": 29,
-        "r": 16,
-        "layer": "overlay",
-        "ox": -8,
-        "oy": -32
-      },
-      {
-        "id": "tile_halloween_pumpkin_large",
-        "c": 34,
-        "r": 15,
-        "layer": "overlay",
-        "ox": 10,
-        "oy": 8
-      },
-      {
-        "id": "tile_halloween_pumpkin_large",
-        "c": 23,
-        "r": 14,
-        "layer": "overlay",
-        "ox": -4,
-        "oy": -14
-      },
-      {
         "id": "tile_halloween_pumpkin_medium",
         "c": 31,
         "r": 18,
@@ -20644,77 +20712,10 @@ const STORY_MAPS = [
         "oy": -26
       },
       {
-        "id": "tile_halloween_spider_web",
-        "c": 36,
-        "r": 13,
-        "layer": "overlay",
-        "ox": 6,
-        "oy": -6
-      },
-      {
-        "id": "tile_halloween_spider_web",
-        "c": 23,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -8,
-        "oy": -6
-      },
-      {
-        "id": "tile_halloween_spider_web",
-        "c": 39,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -6,
-        "oy": -6
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 40,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 28,
-        "r": 14,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 25,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 24,
-        "r": 14,
-        "layer": "overlay",
-        "fx": true,
-        "ox": 6,
-        "oy": -24
-      },
-      {
-        "id": "tile_halloween_pumpkin_pile",
-        "c": 35,
-        "r": 16,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -2,
-        "oy": -10
-      },
-      {
         "id": "tile_prop_shelf_locker_unit_02",
         "c": 23,
-        "r": 13,
-        "layer": "object3",
-        "ox": -8,
-        "oy": 22
+        "r": 15,
+        "layer": "object3"
       },
       {
         "id": "tile_eoc_locker",
@@ -20731,6 +20732,18 @@ const STORY_MAPS = [
         "layer": "object",
         "ox": 0,
         "oy": 16
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 34,
+        "r": 13,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 38,
+        "r": 16,
+        "layer": "floor"
       }
     ],
     "solid": [
@@ -20885,7 +20898,6 @@ const STORY_MAPS = [
       "19,15",
       "20,15",
       "21,15",
-      "22,16",
       "22,17",
       "22,18",
       "22,19",
@@ -20903,16 +20915,6 @@ const STORY_MAPS = [
       "23,18",
       "23,19",
       "23,20",
-      "43,15",
-      "44,15",
-      "45,15",
-      "46,15",
-      "47,15",
-      "48,15",
-      "49,15",
-      "50,15",
-      "51,15",
-      "52,15",
       "53,15",
       "54,15",
       "55,15",
@@ -20924,19 +20926,6 @@ const STORY_MAPS = [
       "61,15",
       "62,15",
       "63,15",
-      "22,14",
-      "23,14",
-      "25,14",
-      "30,14",
-      "31,14",
-      "32,14",
-      "33,14",
-      "34,14",
-      "35,14",
-      "36,14",
-      "39,14",
-      "41,14",
-      "42,14",
       "39,19",
       "1,13",
       "1,14",
@@ -20960,31 +20949,15 @@ const STORY_MAPS = [
       "21,18",
       "21,20",
       "20,20",
-      "19,14",
-      "20,14",
-      "21,14",
-      "18,14",
-      "15,14",
-      "13,14",
-      "14,14",
-      "12,14",
-      "11,14",
-      "10,14",
-      "9,14",
-      "8,14",
       "8,8",
       "55,8",
       "24,15",
       "25,15",
       "28,15",
       "40,15",
-      "40,14",
       "29,15",
       "30,15",
       "31,15",
-      "29,14",
-      "28,14",
-      "24,14",
       "36,9",
       "32,7",
       "33,7",
@@ -20999,7 +20972,39 @@ const STORY_MAPS = [
       "34,5",
       "39,15",
       "27,9",
-      "23,16"
+      "15,16",
+      "14,16",
+      "13,16",
+      "18,16",
+      "19,16",
+      "20,16",
+      "21,16",
+      "25,16",
+      "24,16",
+      "28,16",
+      "29,16",
+      "30,16",
+      "31,16",
+      "32,16",
+      "33,16",
+      "34,16",
+      "35,16",
+      "36,16",
+      "23,16",
+      "22,16",
+      "39,16",
+      "40,16",
+      "41,16",
+      "43,16",
+      "44,16",
+      "45,16",
+      "46,16",
+      "47,16",
+      "48,16",
+      "49,16",
+      "50,16",
+      "51,16",
+      "42,4"
     ],
     "breakable": [],
     "camp": [
@@ -21144,10 +21149,6 @@ const STORY_MAPS = [
       "23,17": [
         0,
         33
-      ],
-      "23,16": [
-        0,
-        -27
       ]
     },
     "coreSpots": [],
@@ -22412,7 +22413,2062 @@ const STORY_MAPS = [
     "portals": [],
     "cols": 34,
     "rows": 24,
-    "spawnZone": []
+    "spawnZone": [],
+    "hiddenPickups": []
+  },
+  {
+    "id": "map_4fe1f5d9-c9f2-4b3d-9f68-b5064dd38640",
+    "name": "1F餐廳（生日用)",
+    "desc": "",
+    "layers": {
+      "floor": {
+        "19,19": "tile_new_bg_floor",
+        "20,19": "tile_new_bg_floor",
+        "21,19": "tile_new_bg_floor",
+        "22,19": "tile_new_bg_floor",
+        "23,19": "tile_new_bg_floor",
+        "23,20": "tile_new_bg_floor",
+        "21,20": "tile_new_bg_floor",
+        "20,21": "tile_new_bg_floor",
+        "18,21": "tile_new_bg_floor",
+        "17,21": "tile_new_bg_floor",
+        "18,20": "tile_new_bg_floor",
+        "20,20": "tile_new_bg_floor",
+        "22,20": "tile_new_bg_floor",
+        "24,20": "tile_new_bg_floor",
+        "26,20": "tile_new_bg_floor",
+        "26,21": "tile_new_bg_floor",
+        "25,21": "tile_new_bg_floor",
+        "24,21": "tile_new_bg_floor",
+        "23,22": "tile_new_bg_floor",
+        "22,22": "tile_new_bg_floor",
+        "21,22": "tile_new_bg_floor",
+        "16,15": "tile_new_bg_floor",
+        "17,15": "tile_new_bg_floor",
+        "19,15": "tile_new_bg_floor",
+        "22,15": "tile_new_bg_floor",
+        "24,15": "tile_new_bg_floor",
+        "25,15": "tile_new_bg_floor",
+        "25,16": "tile_new_bg_floor",
+        "24,17": "tile_new_bg_floor",
+        "22,18": "tile_new_bg_floor",
+        "21,18": "tile_new_bg_floor",
+        "18,19": "tile_new_bg_floor",
+        "17,19": "tile_new_bg_floor",
+        "17,18": "tile_new_bg_floor",
+        "18,18": "tile_new_bg_floor",
+        "19,17": "tile_new_bg_floor",
+        "22,16": "tile_new_bg_floor",
+        "24,16": "tile_new_bg_floor",
+        "25,17": "tile_new_bg_floor",
+        "23,17": "tile_new_bg_floor",
+        "20,18": "tile_new_bg_floor",
+        "14,18": "tile_new_bg_floor",
+        "13,18": "tile_new_bg_floor",
+        "13,17": "tile_new_bg_floor",
+        "14,16": "tile_new_bg_floor",
+        "15,16": "tile_new_bg_floor",
+        "25,14": "tile_new_bg_floor",
+        "26,14": "tile_new_bg_floor",
+        "26,15": "tile_new_bg_floor",
+        "19,16": "tile_new_bg_floor",
+        "17,16": "tile_new_bg_floor",
+        "16,16": "tile_new_bg_floor",
+        "19,14": "tile_new_bg_floor",
+        "22,13": "tile_new_bg_floor",
+        "26,13": "tile_new_bg_floor",
+        "26,17": "tile_new_bg_floor",
+        "21,17": "tile_new_bg_floor",
+        "18,17": "tile_new_bg_floor",
+        "18,16": "tile_new_bg_floor",
+        "21,14": "tile_new_bg_floor",
+        "24,13": "tile_new_bg_floor",
+        "25,18": "tile_new_bg_floor",
+        "19,18": "tile_new_bg_floor",
+        "15,17": "tile_new_bg_floor",
+        "17,14": "tile_new_bg_floor",
+        "20,13": "tile_new_bg_floor",
+        "23,13": "tile_new_bg_floor",
+        "25,13": "tile_new_bg_floor",
+        "14,17": "tile_new_bg_floor",
+        "23,15": "tile_new_bg_floor",
+        "22,17": "tile_new_bg_floor",
+        "15,19": "tile_new_bg_floor",
+        "13,19": "tile_mw6x68fi",
+        "12,18": "tile_new_bg_floor",
+        "12,17": "tile_new_bg_floor",
+        "12,16": "tile_new_bg_floor",
+        "13,15": "tile_new_bg_floor",
+        "15,14": "tile_new_bg_floor",
+        "17,13": "tile_new_bg_floor",
+        "19,13": "tile_new_bg_floor",
+        "21,15": "tile_new_bg_floor",
+        "23,18": "tile_new_bg_floor",
+        "20,16": "tile_new_bg_floor",
+        "20,17": "tile_new_bg_floor",
+        "19,21": "tile_new_bg_floor",
+        "16,21": "tile_new_bg_floor",
+        "15,20": "tile_new_bg_floor",
+        "11,15": "tile_new_bg_floor",
+        "11,14": "tile_new_bg_floor",
+        "12,13": "tile_new_bg_floor",
+        "13,13": "tile_new_bg_floor",
+        "16,12": "tile_new_bg_floor",
+        "18,12": "tile_new_bg_floor",
+        "9,14": "tile_new_bg_floor",
+        "10,14": "tile_new_bg_floor",
+        "11,13": "tile_new_bg_floor",
+        "14,12": "tile_new_bg_floor",
+        "17,12": "tile_new_bg_floor",
+        "21,12": "tile_new_bg_floor",
+        "26,12": "tile_new_bg_floor",
+        "3,8": "tile_new_bg_floor",
+        "3,9": "tile_new_bg_floor",
+        "3,10": "tile_new_bg_floor",
+        "3,11": "tile_new_bg_floor",
+        "3,12": "tile_new_bg_floor",
+        "3,13": "tile_new_bg_floor",
+        "3,14": "tile_new_bg_floor",
+        "3,15": "tile_new_bg_floor",
+        "3,16": "tile_new_bg_floor",
+        "3,17": "tile_new_bg_floor",
+        "3,18": "tile_new_bg_floor",
+        "3,19": "tile_new_bg_floor",
+        "3,20": "tile_new_bg_floor",
+        "3,21": "tile_new_bg_floor",
+        "3,22": "tile_new_bg_floor",
+        "3,23": "tile_new_bg_floor",
+        "4,8": "tile_new_bg_floor",
+        "4,9": "tile_new_bg_floor",
+        "4,10": "tile_new_bg_floor",
+        "4,11": "tile_new_bg_floor",
+        "4,12": "tile_new_bg_floor",
+        "4,13": "tile_new_bg_floor",
+        "4,14": "tile_new_bg_floor",
+        "4,15": "tile_new_bg_floor",
+        "4,16": "tile_new_bg_floor",
+        "4,17": "tile_new_bg_floor",
+        "4,18": "tile_new_bg_floor",
+        "4,19": "tile_new_bg_floor",
+        "4,20": "tile_new_bg_floor",
+        "4,21": "tile_new_bg_floor",
+        "4,22": "tile_new_bg_floor",
+        "4,23": "tile_new_bg_floor",
+        "5,8": "tile_new_bg_floor",
+        "5,9": "tile_new_bg_floor",
+        "5,10": "tile_new_bg_floor",
+        "5,11": "tile_new_bg_floor",
+        "5,12": "tile_new_bg_floor",
+        "5,13": "tile_new_bg_floor",
+        "5,14": "tile_new_bg_floor",
+        "5,15": "tile_new_bg_floor",
+        "5,16": "tile_new_bg_floor",
+        "5,17": "tile_new_bg_floor",
+        "5,18": "tile_new_bg_floor",
+        "5,19": "tile_new_bg_floor",
+        "5,20": "tile_new_bg_floor",
+        "5,21": "tile_new_bg_floor",
+        "5,22": "tile_new_bg_floor",
+        "5,23": "tile_new_bg_floor",
+        "6,8": "tile_new_bg_floor",
+        "6,9": "tile_new_bg_floor",
+        "6,10": "tile_new_bg_floor",
+        "6,11": "tile_new_bg_floor",
+        "6,12": "tile_new_bg_floor",
+        "6,13": "tile_new_bg_floor",
+        "6,14": "tile_new_bg_floor",
+        "6,15": "tile_new_bg_floor",
+        "6,16": "tile_new_bg_floor",
+        "6,17": "tile_new_bg_floor",
+        "6,18": "tile_new_bg_floor",
+        "6,19": "tile_new_bg_floor",
+        "6,20": "tile_new_bg_floor",
+        "6,21": "tile_new_bg_floor",
+        "6,22": "tile_new_bg_floor",
+        "6,23": "tile_new_bg_floor",
+        "7,8": "tile_new_bg_floor",
+        "7,9": "tile_new_bg_floor",
+        "7,10": "tile_new_bg_floor",
+        "7,11": "tile_new_bg_floor",
+        "7,12": "tile_new_bg_floor",
+        "7,13": "tile_new_bg_floor",
+        "7,14": "tile_new_bg_floor",
+        "7,15": "tile_new_bg_floor",
+        "7,16": "tile_new_bg_floor",
+        "7,17": "tile_new_bg_floor",
+        "7,18": "tile_new_bg_floor",
+        "7,19": "tile_new_bg_floor",
+        "7,20": "tile_new_bg_floor",
+        "7,21": "tile_new_bg_floor",
+        "7,22": "tile_new_bg_floor",
+        "7,23": "tile_new_bg_floor",
+        "8,8": "tile_new_bg_floor",
+        "8,9": "tile_new_bg_floor",
+        "8,10": "tile_new_bg_floor",
+        "8,11": "tile_new_bg_floor",
+        "8,12": "tile_new_bg_floor",
+        "8,13": "tile_new_bg_floor",
+        "8,14": "tile_new_bg_floor",
+        "8,15": "tile_new_bg_floor",
+        "8,16": "tile_new_bg_floor",
+        "8,17": "tile_new_bg_floor",
+        "8,18": "tile_new_bg_floor",
+        "8,19": "tile_new_bg_floor",
+        "8,20": "tile_new_bg_floor",
+        "8,21": "tile_new_bg_floor",
+        "8,22": "tile_new_bg_floor",
+        "8,23": "tile_new_bg_floor",
+        "9,8": "tile_new_bg_floor",
+        "9,9": "tile_new_bg_floor",
+        "9,10": "tile_new_bg_floor",
+        "9,11": "tile_new_bg_floor",
+        "9,12": "tile_new_bg_floor",
+        "9,13": "tile_new_bg_floor",
+        "9,15": "tile_new_bg_floor",
+        "9,16": "tile_new_bg_floor",
+        "9,17": "tile_new_bg_floor",
+        "9,18": "tile_new_bg_floor",
+        "9,19": "tile_new_bg_floor",
+        "9,20": "tile_new_bg_floor",
+        "9,21": "tile_new_bg_floor",
+        "9,22": "tile_new_bg_floor",
+        "9,23": "tile_new_bg_floor",
+        "10,8": "tile_new_bg_floor",
+        "10,9": "tile_new_bg_floor",
+        "10,10": "tile_new_bg_floor",
+        "10,11": "tile_new_bg_floor",
+        "10,12": "tile_new_bg_floor",
+        "10,13": "tile_new_bg_floor",
+        "10,15": "tile_new_bg_floor",
+        "10,16": "tile_new_bg_floor",
+        "10,17": "tile_new_bg_floor",
+        "10,18": "tile_new_bg_floor",
+        "10,19": "tile_new_bg_floor",
+        "10,20": "tile_new_bg_floor",
+        "10,21": "tile_new_bg_floor",
+        "10,22": "tile_new_bg_floor",
+        "10,23": "tile_new_bg_floor",
+        "11,8": "tile_new_bg_floor",
+        "11,9": "tile_new_bg_floor",
+        "11,10": "tile_new_bg_floor",
+        "11,11": "tile_new_bg_floor",
+        "11,12": "tile_new_bg_floor",
+        "11,16": "tile_new_bg_floor",
+        "11,17": "tile_new_bg_floor",
+        "11,18": "tile_new_bg_floor",
+        "11,19": "tile_new_bg_floor",
+        "11,20": "tile_new_bg_floor",
+        "11,21": "tile_new_bg_floor",
+        "11,22": "tile_new_bg_floor",
+        "11,23": "tile_new_bg_floor",
+        "12,8": "tile_new_bg_floor",
+        "12,9": "tile_new_bg_floor",
+        "12,10": "tile_new_bg_floor",
+        "12,11": "tile_new_bg_floor",
+        "12,12": "tile_new_bg_floor",
+        "12,14": "tile_new_bg_floor",
+        "12,15": "tile_new_bg_floor",
+        "12,19": "tile_new_bg_floor",
+        "12,20": "tile_new_bg_floor",
+        "12,21": "tile_new_bg_floor",
+        "12,22": "tile_new_bg_floor",
+        "12,23": "tile_new_bg_floor",
+        "13,8": "tile_new_bg_floor",
+        "13,9": "tile_new_bg_floor",
+        "13,10": "tile_new_bg_floor",
+        "13,11": "tile_new_bg_floor",
+        "13,12": "tile_new_bg_floor",
+        "13,14": "tile_new_bg_floor",
+        "13,16": "tile_new_bg_floor",
+        "13,20": "tile_new_bg_floor",
+        "13,21": "tile_new_bg_floor",
+        "13,22": "tile_new_bg_floor",
+        "13,23": "tile_new_bg_floor",
+        "14,8": "tile_new_bg_floor",
+        "14,9": "tile_new_bg_floor",
+        "14,10": "tile_new_bg_floor",
+        "14,11": "tile_new_bg_floor",
+        "14,13": "tile_new_bg_floor",
+        "14,14": "tile_new_bg_floor",
+        "14,15": "tile_new_bg_floor",
+        "14,19": "tile_new_bg_floor",
+        "14,20": "tile_new_bg_floor",
+        "14,21": "tile_new_bg_floor",
+        "14,22": "tile_new_bg_floor",
+        "14,23": "tile_new_bg_floor",
+        "15,8": "tile_new_bg_floor",
+        "15,9": "tile_new_bg_floor",
+        "15,10": "tile_new_bg_floor",
+        "15,11": "tile_new_bg_floor",
+        "15,12": "tile_new_bg_floor",
+        "15,13": "tile_new_bg_floor",
+        "15,15": "tile_new_bg_floor",
+        "15,18": "tile_new_bg_floor",
+        "15,21": "tile_new_bg_floor",
+        "15,22": "tile_new_bg_floor",
+        "15,23": "tile_new_bg_floor",
+        "16,8": "tile_new_bg_floor",
+        "16,9": "tile_new_bg_floor",
+        "16,10": "tile_new_bg_floor",
+        "16,11": "tile_new_bg_floor",
+        "16,13": "tile_new_bg_floor",
+        "16,14": "tile_new_bg_floor",
+        "16,17": "tile_new_bg_floor",
+        "16,18": "tile_new_bg_floor",
+        "16,19": "tile_new_bg_floor",
+        "16,20": "tile_new_bg_floor",
+        "16,22": "tile_new_bg_floor",
+        "16,23": "tile_new_bg_floor",
+        "17,8": "tile_new_bg_floor",
+        "17,9": "tile_new_bg_floor",
+        "17,10": "tile_new_bg_floor",
+        "17,11": "tile_new_bg_floor",
+        "17,17": "tile_new_bg_floor",
+        "17,20": "tile_new_bg_floor",
+        "17,22": "tile_new_bg_floor",
+        "17,23": "tile_new_bg_floor",
+        "18,8": "tile_new_bg_floor",
+        "18,9": "tile_new_bg_floor",
+        "18,10": "tile_new_bg_floor",
+        "18,11": "tile_new_bg_floor",
+        "18,13": "tile_new_bg_floor",
+        "18,14": "tile_new_bg_floor",
+        "18,15": "tile_new_bg_floor",
+        "18,22": "tile_new_bg_floor",
+        "18,23": "tile_new_bg_floor",
+        "19,8": "tile_new_bg_floor",
+        "19,9": "tile_new_bg_floor",
+        "19,10": "tile_new_bg_floor",
+        "19,11": "tile_new_bg_floor",
+        "19,12": "tile_new_bg_floor",
+        "19,20": "tile_new_bg_floor",
+        "19,22": "tile_new_bg_floor",
+        "19,23": "tile_new_bg_floor",
+        "20,8": "tile_new_bg_floor",
+        "20,9": "tile_new_bg_floor",
+        "20,10": "tile_new_bg_floor",
+        "20,11": "tile_new_bg_floor",
+        "20,12": "tile_new_bg_floor",
+        "20,14": "tile_new_bg_floor",
+        "20,15": "tile_new_bg_floor",
+        "20,22": "tile_new_bg_floor",
+        "20,23": "tile_new_bg_floor",
+        "21,8": "tile_new_bg_floor",
+        "21,9": "tile_new_bg_floor",
+        "21,10": "tile_new_bg_floor",
+        "21,11": "tile_new_bg_floor",
+        "21,13": "tile_new_bg_floor",
+        "21,16": "tile_new_bg_floor",
+        "21,21": "tile_new_bg_floor",
+        "21,23": "tile_new_bg_floor",
+        "22,8": "tile_new_bg_floor",
+        "22,9": "tile_new_bg_floor",
+        "22,10": "tile_new_bg_floor",
+        "22,11": "tile_new_bg_floor",
+        "22,12": "tile_new_bg_floor",
+        "22,14": "tile_new_bg_floor",
+        "22,21": "tile_new_bg_floor",
+        "22,23": "tile_new_bg_floor",
+        "23,8": "tile_new_bg_floor",
+        "23,9": "tile_new_bg_floor",
+        "23,10": "tile_new_bg_floor",
+        "23,11": "tile_new_bg_floor",
+        "23,12": "tile_new_bg_floor",
+        "23,14": "tile_new_bg_floor",
+        "23,16": "tile_new_bg_floor",
+        "23,21": "tile_new_bg_floor",
+        "23,23": "tile_new_bg_floor",
+        "24,8": "tile_new_bg_floor",
+        "24,9": "tile_new_bg_floor",
+        "24,10": "tile_new_bg_floor",
+        "24,11": "tile_new_bg_floor",
+        "24,12": "tile_new_bg_floor",
+        "24,14": "tile_new_bg_floor",
+        "24,18": "tile_new_bg_floor",
+        "24,19": "tile_new_bg_floor",
+        "24,22": "tile_new_bg_floor",
+        "24,23": "tile_new_bg_floor",
+        "25,8": "tile_new_bg_floor",
+        "25,9": "tile_new_bg_floor",
+        "25,10": "tile_new_bg_floor",
+        "25,11": "tile_new_bg_floor",
+        "25,12": "tile_new_bg_floor",
+        "25,19": "tile_new_bg_floor",
+        "25,20": "tile_new_bg_floor",
+        "25,22": "tile_new_bg_floor",
+        "25,23": "tile_new_bg_floor",
+        "26,8": "tile_new_bg_floor",
+        "26,9": "tile_new_bg_floor",
+        "26,10": "tile_new_bg_floor",
+        "26,11": "tile_new_bg_floor",
+        "26,16": "tile_new_bg_floor",
+        "26,18": "tile_new_bg_floor",
+        "26,19": "tile_new_bg_floor",
+        "26,22": "tile_new_bg_floor",
+        "26,23": "tile_new_bg_floor",
+        "16,7": "tile_new_bg_floor",
+        "17,7": "tile_new_bg_floor",
+        "18,7": "tile_new_bg_floor",
+        "20,7": "tile_new_bg_floor",
+        "21,7": "tile_new_bg_floor",
+        "22,7": "tile_new_bg_floor",
+        "23,7": "tile_new_bg_floor",
+        "24,7": "tile_new_bg_floor",
+        "25,7": "tile_new_bg_floor",
+        "26,7": "tile_new_bg_floor",
+        "19,7": "tile_new_bg_floor",
+        "15,7": "tile_new_bg_floor",
+        "14,7": "tile_new_bg_floor",
+        "13,7": "tile_new_bg_floor",
+        "12,7": "tile_new_bg_floor",
+        "11,7": "tile_new_bg_floor",
+        "10,7": "tile_new_bg_floor",
+        "9,7": "tile_new_bg_floor",
+        "8,7": "tile_new_bg_floor",
+        "7,7": "tile_new_bg_floor",
+        "6,7": "tile_new_bg_floor",
+        "5,7": "tile_new_bg_floor",
+        "4,7": "tile_new_bg_floor",
+        "3,7": "tile_new_bg_floor",
+        "4,5": "tile_new_bg_floor",
+        "5,5": "tile_new_bg_floor",
+        "6,5": "tile_new_bg_floor",
+        "7,5": "tile_new_bg_floor",
+        "8,5": "tile_new_bg_floor",
+        "9,5": "tile_new_bg_floor",
+        "10,5": "tile_new_bg_floor",
+        "11,5": "tile_new_bg_floor",
+        "12,5": "tile_new_bg_floor",
+        "13,5": "tile_new_bg_floor",
+        "14,5": "tile_new_bg_floor",
+        "15,5": "tile_new_bg_floor",
+        "16,5": "tile_new_bg_floor",
+        "17,5": "tile_new_bg_floor",
+        "18,5": "tile_new_bg_floor",
+        "19,5": "tile_new_bg_floor",
+        "20,5": "tile_new_bg_floor",
+        "21,5": "tile_new_bg_floor",
+        "22,5": "tile_new_bg_floor",
+        "23,5": "tile_new_bg_floor",
+        "24,5": "tile_new_bg_floor",
+        "25,5": "tile_new_bg_floor",
+        "26,5": "tile_new_bg_floor",
+        "26,6": "tile_new_bg_floor",
+        "25,6": "tile_new_bg_floor",
+        "24,6": "tile_new_bg_floor",
+        "23,6": "tile_new_bg_floor",
+        "22,6": "tile_new_bg_floor",
+        "21,6": "tile_new_bg_floor",
+        "20,6": "tile_new_bg_floor",
+        "19,6": "tile_new_bg_floor",
+        "18,6": "tile_new_bg_floor",
+        "17,6": "tile_new_bg_floor",
+        "16,6": "tile_new_bg_floor",
+        "15,6": "tile_new_bg_floor",
+        "13,6": "tile_new_bg_floor",
+        "12,6": "tile_new_bg_floor",
+        "11,6": "tile_new_bg_floor",
+        "10,6": "tile_new_bg_floor",
+        "9,6": "tile_new_bg_floor",
+        "8,6": "tile_new_bg_floor",
+        "7,6": "tile_new_bg_floor",
+        "6,6": "tile_new_bg_floor",
+        "5,6": "tile_new_bg_floor",
+        "4,6": "tile_new_bg_floor",
+        "14,6": "tile_new_bg_floor",
+        "18,4": "tile_new_bg_floor",
+        "19,4": "tile_new_bg_floor",
+        "20,4": "tile_new_bg_floor",
+        "1,8": "tile_new_bg_floor",
+        "2,8": "tile_new_bg_floor",
+        "1,9": "tile_new_bg_floor",
+        "2,9": "tile_new_bg_floor",
+        "1,10": "tile_new_bg_floor",
+        "2,10": "tile_new_bg_floor",
+        "6,4": "tile_new_bg_floor",
+        "7,4": "tile_new_bg_floor",
+        "8,4": "tile_new_bg_floor",
+        "9,4": "tile_new_bg_floor",
+        "10,4": "tile_new_bg_floor",
+        "11,4": "tile_new_bg_floor",
+        "12,4": "tile_new_bg_floor",
+        "13,4": "tile_new_bg_floor",
+        "5,4": "tile_new_bg_floor",
+        "5,3": "tile_new_bg_floor",
+        "6,3": "tile_new_bg_floor",
+        "7,3": "tile_new_bg_floor",
+        "8,3": "tile_new_bg_floor",
+        "9,3": "tile_new_bg_floor",
+        "10,3": "tile_new_bg_floor",
+        "11,3": "tile_new_bg_floor",
+        "12,3": "tile_new_bg_floor",
+        "13,3": "tile_new_bg_floor",
+        "13,2": "tile_new_bg_floor",
+        "12,2": "tile_new_bg_floor",
+        "11,2": "tile_new_bg_floor",
+        "10,2": "tile_new_bg_floor",
+        "9,2": "tile_new_bg_floor",
+        "8,2": "tile_new_bg_floor",
+        "7,2": "tile_new_bg_floor",
+        "6,2": "tile_new_bg_floor",
+        "5,2": "tile_new_bg_floor",
+        "5,1": "tile_new_bg_floor",
+        "6,1": "tile_new_bg_floor",
+        "12,1": "tile_new_bg_floor",
+        "13,1": "tile_new_bg_floor",
+        "11,1": "tile_new_bg_floor",
+        "10,1": "tile_new_bg_floor",
+        "9,1": "tile_new_bg_floor",
+        "8,1": "tile_new_bg_floor",
+        "7,1": "tile_new_bg_floor",
+        "0,8": "tile_new_bg_floor",
+        "0,9": "tile_new_bg_floor",
+        "0,10": "tile_new_bg_floor",
+        "0,11": "tile_new_bg_floor",
+        "1,11": "tile_new_bg_floor",
+        "2,11": "tile_new_bg_floor",
+        "1,7": "tile_new_bg_floor",
+        "2,7": "tile_new_bg_floor",
+        "0,7": "tile_new_bg_floor",
+        "4,4": "tile_new_bg_floor"
+      },
+      "ground": {
+        "26,9": "tile_new_bg_wall_front_edge",
+        "26,8": "tile_new_bg_wall_front_edge",
+        "26,7": "tile_new_bg_wall_front_edge",
+        "13,2": "tile_new_bg_wall_front_edge",
+        "13,1": "tile_new_bg_wall_front_edge",
+        "13,3": "tile_new_bg_wall_front_edge",
+        "13,4": "tile_new_bg_wall_front_edge",
+        "0,9": "tile_new_bg_wall_front_edge",
+        "0,8": "tile_new_bg_wall_front_edge",
+        "0,7": "tile_new_bg_wall_front_edge",
+        "0,6": "tile_new_bg_wall_front_edge",
+        "0,5": "tile_new_bg_wall_front_edge"
+      },
+      "object": {
+        "7,13": "tile_restaurant_counter_stool_red",
+        "25,5": "tile_eoc_security_camera",
+        "21,10": "tile_new_bg_wall_front_edge",
+        "21,11": "tile_new_bg_wall_front_edge"
+      },
+      "object2": {
+        "20,10": "tile_eoc_security_camera"
+      },
+      "object3": {},
+      "object4": {},
+      "overlay": {
+        "21,17": "tile_new_bg_wall_front_edge",
+        "21,18": "tile_new_bg_wall_front_edge",
+        "21,19": "tile_new_bg_wall_front_edge",
+        "21,20": "tile_new_bg_wall_front_edge",
+        "22,6": "tile_eoc_floor_sign_1f"
+      },
+      "top": {
+        "3,10": "tile_new_bg_wall_front_edge",
+        "3,11": "tile_new_bg_wall_front_edge",
+        "3,12": "tile_new_bg_wall_front_edge",
+        "3,13": "tile_new_bg_wall_front_edge",
+        "3,14": "tile_new_bg_wall_front_edge",
+        "3,15": "tile_new_bg_wall_front_edge",
+        "3,16": "tile_new_bg_wall_front_edge",
+        "3,17": "tile_new_bg_wall_front_edge",
+        "3,18": "tile_new_bg_wall_front_edge",
+        "3,19": "tile_new_bg_wall_front_edge",
+        "3,20": "tile_new_bg_wall_front_edge",
+        "3,21": "tile_new_bg_wall_front_edge",
+        "3,22": "tile_new_bg_wall_front_edge",
+        "3,23": "tile_new_bg_wall_front_edge",
+        "26,23": "tile_new_bg_wall_front_edge",
+        "26,22": "tile_new_bg_wall_front_edge",
+        "26,21": "tile_new_bg_wall_front_edge",
+        "26,20": "tile_new_bg_wall_front_edge",
+        "26,19": "tile_new_bg_wall_front_edge",
+        "26,18": "tile_new_bg_wall_front_edge",
+        "26,17": "tile_new_bg_wall_front_edge",
+        "26,16": "tile_new_bg_wall_front_edge",
+        "26,12": "tile_new_bg_wall_front_edge",
+        "26,13": "tile_new_bg_wall_front_edge",
+        "26,14": "tile_new_bg_wall_front_edge",
+        "26,15": "tile_new_bg_wall_front_edge",
+        "26,11": "tile_new_bg_wall_front_edge",
+        "26,10": "tile_new_bg_wall_front_edge",
+        "26,7": "tile_new_bg_wall_front_edge",
+        "26,6": "tile_new_bg_wall_front_edge",
+        "26,5": "tile_new_bg_wall_front_edge",
+        "13,1": "tile_new_bg_wall_front_edge",
+        "13,2": "tile_new_bg_wall_front_edge",
+        "13,3": "tile_new_bg_wall_front_edge",
+        "4,1": "tile_new_bg_wall_front_edge",
+        "4,2": "tile_new_bg_wall_front_edge",
+        "4,3": "tile_new_bg_wall_front_edge",
+        "0,7": "tile_new_bg_wall_front_edge",
+        "0,6": "tile_new_bg_wall_front_edge",
+        "0,5": "tile_new_bg_wall_front_edge"
+      },
+      "object5": {},
+      "object6": {},
+      "object7": {},
+      "object8": {
+        "5,19": "tile_restaurant_condiment_bottles",
+        "5,20": "tile_restaurant_napkin_holder",
+        "5,21": "tile_restaurant_chopsticks_holder"
+      }
+    },
+    "stamps": [
+      {
+        "id": "tile_new_bg_wall",
+        "c": 4,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 5,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 6,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 7,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 8,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 9,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 10,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 11,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 12,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 13,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 14,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 15,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 16,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 17,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 18,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 19,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 20,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 3,
+        "r": 9,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 21,
+        "r": 9,
+        "layer": "ground",
+        "sortDepth": 3.5
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 26,
+        "r": 9,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_restaurant_waste_sorting_station",
+        "c": 4,
+        "r": 12,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_restaurant_storage_cabinet",
+        "c": 17,
+        "r": 10,
+        "layer": "object5",
+        "ox": 22,
+        "oy": 38
+      },
+      {
+        "id": "tile_restaurant_partition_tall",
+        "c": 5,
+        "r": 18,
+        "layer": "object8",
+        "ox": -12,
+        "oy": -22
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_02",
+        "c": 11,
+        "r": 17,
+        "layer": "object8",
+        "ox": -10,
+        "oy": 6
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_02",
+        "c": 17,
+        "r": 17,
+        "layer": "object8",
+        "ox": 4,
+        "oy": 6,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_02",
+        "c": 13,
+        "r": 17,
+        "layer": "object8",
+        "ox": -12,
+        "oy": 6
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_02",
+        "c": 9,
+        "r": 17,
+        "layer": "object8",
+        "ox": 16,
+        "oy": 6
+      },
+      {
+        "id": "tile_restaurant_trash_bin_small",
+        "c": 16,
+        "r": 12,
+        "layer": "object5",
+        "ox": 34,
+        "oy": 32
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_02",
+        "c": 16,
+        "r": 17,
+        "layer": "object8",
+        "ox": -4,
+        "oy": 6,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_restaurant_partition02",
+        "c": 9,
+        "r": 19,
+        "layer": "object8",
+        "sortDepth": 1.25,
+        "ox": -16,
+        "oy": -2
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_02",
+        "c": 14,
+        "r": 17,
+        "layer": "object8",
+        "ox": 0,
+        "oy": 6
+      },
+      {
+        "id": "tile_restaurant_partition02",
+        "c": 12,
+        "r": 19,
+        "layer": "object8",
+        "ox": -6,
+        "oy": -2,
+        "sortDepth": 1.25
+      },
+      {
+        "id": "tile_restaurant_partition02",
+        "c": 17,
+        "r": 19,
+        "layer": "object8",
+        "ox": -76,
+        "oy": -2,
+        "sortDepth": 1
+      },
+      {
+        "id": "tile_restaurant_booth_seating_vertical",
+        "c": 4,
+        "r": 17,
+        "layer": "object8",
+        "ox": -10,
+        "oy": -22
+      },
+      {
+        "id": "tile_restaurant_chair_side",
+        "c": 7,
+        "r": 17,
+        "layer": "object8",
+        "ox": -16,
+        "oy": 0
+      },
+      {
+        "id": "tile_restaurant_chair_side",
+        "c": 7,
+        "r": 19,
+        "layer": "object8",
+        "ox": -16,
+        "oy": -28
+      },
+      {
+        "id": "tile_restaurant_chair_side",
+        "c": 7,
+        "r": 21,
+        "layer": "object8",
+        "ox": -16,
+        "oy": -48
+      },
+      {
+        "id": "tile_restaurant_chair_side",
+        "c": 7,
+        "r": 23,
+        "layer": "object8",
+        "ox": -16,
+        "oy": -72
+      },
+      {
+        "id": "tile_new_decor_water_dispenser",
+        "c": 16,
+        "r": 11,
+        "layer": "object5",
+        "oy": 38,
+        "ox": -2
+      },
+      {
+        "id": "tile_restaurant_storage_cabinet",
+        "c": 19,
+        "r": 10,
+        "layer": "object5",
+        "ox": 4,
+        "oy": 38
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_01",
+        "c": 9,
+        "r": 20,
+        "layer": "object8",
+        "ox": 14,
+        "oy": -4
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_01",
+        "c": 11,
+        "r": 20,
+        "layer": "object8",
+        "ox": -12,
+        "oy": -4
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_01",
+        "c": 13,
+        "r": 20,
+        "layer": "object8",
+        "ox": -14,
+        "oy": -4
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_01",
+        "c": 14,
+        "r": 20,
+        "layer": "object8",
+        "ox": -2,
+        "oy": -4
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_01",
+        "c": 16,
+        "r": 20,
+        "layer": "object8",
+        "ox": -6,
+        "oy": -4
+      },
+      {
+        "id": "tile_restaurant_water_dispenser_01",
+        "c": 17,
+        "r": 20,
+        "layer": "object8",
+        "ox": 4,
+        "oy": -4
+      },
+      {
+        "id": "tile_new_decor_poster",
+        "c": 7,
+        "r": 10,
+        "layer": "object2",
+        "oy": 16,
+        "sortDepth": 0,
+        "ox": -6
+      },
+      {
+        "id": "tile_new_decor_plant03",
+        "c": 21,
+        "r": 13,
+        "layer": "object4",
+        "ox": 4,
+        "oy": -18,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_new_decor_plant01",
+        "c": 3,
+        "r": 15,
+        "layer": "object4",
+        "ox": 26,
+        "oy": 12
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 3,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 4,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 13,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 15,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 14,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 16,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 17,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 21,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 22,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 23,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 24,
+        "r": 4,
+        "layer": "ground",
+        "ox": 0,
+        "oy": 0
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 25,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 26,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 26,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_eoc_escape_stairs",
+        "c": 17,
+        "r": 3,
+        "layer": "floor",
+        "ox": 2,
+        "oy": -72,
+        "sortDepth": 1
+      },
+      {
+        "id": "tile_eoc_double_door_open",
+        "c": 18,
+        "r": 4,
+        "layer": "ground",
+        "ox": 0,
+        "oy": 0,
+        "sortDepth": 3.5
+      },
+      {
+        "id": "tile_mufxoi3i",
+        "c": 22,
+        "r": 5,
+        "layer": "object",
+        "ox": 26,
+        "oy": -4,
+        "sortDepth": 2.75
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 21,
+        "r": 4,
+        "layer": "object"
+      },
+      {
+        "id": "tile_eoc_hydrant_white",
+        "c": 15,
+        "r": 6,
+        "layer": "object",
+        "ox": 20,
+        "oy": 0
+      },
+      {
+        "id": "tile_mufxpxnl",
+        "c": 24,
+        "r": 5,
+        "layer": "object2",
+        "ox": -20,
+        "oy": -6
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 1,
+        "r": 5,
+        "layer": "object2",
+        "ox": 0,
+        "oy": 14
+      },
+      {
+        "id": "tile_eoc_locker",
+        "c": 2,
+        "r": 5,
+        "layer": "object2",
+        "ox": -6,
+        "oy": 14
+      },
+      {
+        "id": "tile_mu4yyr9r",
+        "c": 1,
+        "r": 8,
+        "layer": "object",
+        "ox": -4,
+        "oy": -6
+      },
+      {
+        "id": "tile_mu4yzgcg",
+        "c": 3,
+        "r": 9,
+        "layer": "object2",
+        "ox": -12,
+        "oy": -6
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 3,
+        "r": 20,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 21,
+        "r": 20,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 21,
+        "r": 16,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_decor_plant02",
+        "c": 19,
+        "r": 22,
+        "layer": "overlay",
+        "ox": 8,
+        "oy": 10
+      },
+      {
+        "id": "tile_new_decor_fire_extinguisher",
+        "c": 18,
+        "r": 23,
+        "layer": "overlay",
+        "ox": 26,
+        "oy": 0
+      },
+      {
+        "id": "tile_eoc_security_door",
+        "c": 24,
+        "r": 22,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_eoc_security_door",
+        "c": 23,
+        "r": 22,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 21,
+        "r": 10,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 2,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 1,
+        "r": 4,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 0,
+        "r": 4,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 0,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 2,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 4,
+        "r": 4,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 13,
+        "r": 4,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_new_decor_poster",
+        "c": 13,
+        "r": 5,
+        "layer": "object2",
+        "ox": 36,
+        "oy": 16
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 13,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 12,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 11,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 10,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 9,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 7,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 8,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 5,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 6,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_cvs_back_counter",
+        "c": 5,
+        "r": 2,
+        "layer": "object7",
+        "ox": -4,
+        "oy": 0,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_cvs_checkout_counter",
+        "c": 5,
+        "r": 4,
+        "layer": "object7",
+        "ox": 0,
+        "oy": 10,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_cvs_sign_home_mart",
+        "c": 5,
+        "r": 1,
+        "layer": "object7",
+        "ox": 0,
+        "oy": 2
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 4,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_mu5e3ndv",
+        "c": 13,
+        "r": 0,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_cvs_drink_cooler",
+        "c": 11,
+        "r": 2,
+        "layer": "object7",
+        "ox": -4,
+        "oy": -4,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_cvs_famiport",
+        "c": 4,
+        "r": 5,
+        "layer": "object7",
+        "ox": 0,
+        "oy": 18
+      },
+      {
+        "id": "tile_cvs_snack_shelf",
+        "c": 10,
+        "r": 4,
+        "layer": "object7",
+        "ox": 34,
+        "oy": 32,
+        "sortDepth": 2.5
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 1,
+        "r": 9,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvyf045t",
+        "c": 4,
+        "r": 10,
+        "layer": "object",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 11,
+        "r": 11,
+        "layer": "object5",
+        "ox": 6,
+        "oy": 0
+      },
+      {
+        "id": "tile_mw5jkg1u",
+        "c": 8,
+        "r": 11,
+        "layer": "object5",
+        "ox": 20
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 12,
+        "r": 11,
+        "layer": "object5",
+        "ox": 28,
+        "oy": 0
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 14,
+        "r": 11,
+        "layer": "object5",
+        "ox": 10,
+        "oy": 0
+      },
+      {
+        "id": "tile_restaurant_green_tea",
+        "c": 15,
+        "r": 11,
+        "layer": "object5",
+        "oy": 20,
+        "ox": 6
+      },
+      {
+        "id": "tile_restaurant_soup_warmer",
+        "c": 14,
+        "r": 11,
+        "layer": "object5",
+        "ox": 14,
+        "oy": 20
+      },
+      {
+        "id": "tile_restaurant_chopsticks_holder",
+        "c": 5,
+        "r": 19,
+        "layer": "object8"
+      },
+      {
+        "id": "tile_restaurant_condiment_bottles",
+        "c": 5,
+        "r": 19,
+        "layer": "object8",
+        "oy": 10,
+        "ox": 20
+      },
+      {
+        "id": "tile_restaurant_napkin_holder",
+        "c": 5,
+        "r": 19,
+        "layer": "object8",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_restaurant_waste_sorting_station",
+        "c": 4,
+        "r": 12,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_mw5yx368",
+        "c": 10,
+        "r": 14,
+        "layer": "object6",
+        "ox": 14,
+        "oy": 30
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 14,
+        "r": 11,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 12,
+        "r": 11,
+        "layer": "object6",
+        "ox": 28
+      },
+      {
+        "id": "tile_restaurant_kitchen_workstation_clear",
+        "c": 11,
+        "r": 11,
+        "layer": "object6",
+        "ox": 6
+      },
+      {
+        "id": "tile_mw5jkg1u",
+        "c": 8,
+        "r": 11,
+        "layer": "object6",
+        "ox": 20
+      },
+      {
+        "id": "tile_restaurant_soup_warmer",
+        "c": 14,
+        "r": 11,
+        "layer": "object6",
+        "ox": 14,
+        "oy": 20
+      },
+      {
+        "id": "tile_restaurant_green_tea",
+        "c": 15,
+        "r": 11,
+        "layer": "object6",
+        "oy": 20,
+        "ox": 6
+      },
+      {
+        "id": "tile_restaurant_serving_counter",
+        "c": 17,
+        "r": 14,
+        "layer": "object6",
+        "ox": 12,
+        "oy": 30
+      },
+      {
+        "id": "tile_restaurant_tray_stack",
+        "c": 17,
+        "r": 13,
+        "layer": "object6",
+        "oy": 34,
+        "ox": 30
+      },
+      {
+        "id": "tile_restaurant_bowl_stack",
+        "c": 19,
+        "r": 14,
+        "layer": "object6",
+        "oy": 32,
+        "ox": 0
+      },
+      {
+        "id": "tile_restaurant_storage_cabinet",
+        "c": 17,
+        "r": 10,
+        "layer": "object6",
+        "ox": 22,
+        "oy": 38
+      },
+      {
+        "id": "tile_restaurant_storage_cabinet",
+        "c": 19,
+        "r": 10,
+        "layer": "object6",
+        "ox": 4,
+        "oy": 38
+      },
+      {
+        "id": "tile_restaurant_trash_bin_small",
+        "c": 16,
+        "r": 12,
+        "layer": "object6",
+        "ox": 34,
+        "oy": 32
+      },
+      {
+        "id": "tile_new_decor_water_dispenser",
+        "c": 15,
+        "r": 11,
+        "layer": "object6",
+        "oy": 38,
+        "ox": 38
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 12,
+        "r": 10,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 8,
+        "r": 10,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 4,
+        "r": 10,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 16,
+        "r": 10,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_mw60u20k",
+        "c": 7,
+        "r": 14,
+        "layer": "object6",
+        "ox": 2,
+        "oy": 30
+      },
+      {
+        "id": "tile_mw628w22",
+        "c": 13,
+        "r": 14,
+        "layer": "object6",
+        "ox": 26,
+        "oy": 30
+      },
+      {
+        "id": "tile_mw6x68fi",
+        "c": 13,
+        "r": 18,
+        "layer": "object2",
+        "oy": 12.666667,
+        "scale": 80,
+        "ox": -4.666667
+      },
+      {
+        "id": "tile_restaurant_dish_chocolate_cake",
+        "c": 10,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 10
+      },
+      {
+        "id": "tile_restaurant_dish_apple_pie",
+        "c": 12,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 10
+      },
+      {
+        "id": "tile_restaurant_dish_chocolate_cake",
+        "c": 14,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 20
+      },
+      {
+        "id": "tile_restaurant_dish_strawberry_cake",
+        "c": 15,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 30
+      },
+      {
+        "id": "tile_restaurant_dish_strawberry_cake",
+        "c": 9,
+        "r": 19,
+        "layer": "object2",
+        "ox": 10,
+        "scale": 70
+      },
+      {
+        "id": "tile_restaurant_dish_apple_pie",
+        "c": 17,
+        "r": 19,
+        "layer": "object2",
+        "ox": 28.666667,
+        "scale": 70
+      },
+      {
+        "id": "tile_restaurant_dish_cheesecake",
+        "c": 16,
+        "r": 19,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 2,
+        "scale": 70
+      },
+      {
+        "id": "tile_restaurant_dish_cheesecake",
+        "c": 11,
+        "r": 19,
+        "layer": "object2",
+        "ox": 10,
+        "oy": 2,
+        "scale": 70
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 7,
+        "r": 16,
+        "layer": "object3",
+        "ox": 33.333333,
+        "oy": -0.666667
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 11,
+        "r": 16,
+        "layer": "object3",
+        "ox": 23.333333,
+        "oy": -0.666667
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 14,
+        "r": 16,
+        "layer": "object3",
+        "ox": 53.333333,
+        "oy": -0.666667
+      }
+    ],
+    "solid": [
+      "3,12",
+      "4,12",
+      "5,12",
+      "6,12",
+      "7,12",
+      "8,12",
+      "9,12",
+      "10,12",
+      "11,12",
+      "12,12",
+      "13,12",
+      "14,12",
+      "15,12",
+      "16,12",
+      "17,12",
+      "18,12",
+      "19,12",
+      "20,12",
+      "21,12",
+      "19,13",
+      "20,13",
+      "18,13",
+      "17,13",
+      "16,13",
+      "15,13",
+      "14,13",
+      "13,13",
+      "12,13",
+      "11,13",
+      "10,13",
+      "6,13",
+      "5,13",
+      "4,13",
+      "3,13",
+      "8,13",
+      "7,13",
+      "10,15",
+      "9,15",
+      "12,15",
+      "13,15",
+      "14,15",
+      "15,15",
+      "16,15",
+      "11,15",
+      "17,15",
+      "18,15",
+      "19,15",
+      "8,15",
+      "9,19",
+      "10,19",
+      "11,19",
+      "12,19",
+      "13,19",
+      "14,19",
+      "15,19",
+      "17,19",
+      "18,19",
+      "16,19",
+      "5,18",
+      "5,20",
+      "5,19",
+      "5,21",
+      "5,22",
+      "26,13",
+      "26,14",
+      "26,15",
+      "26,16",
+      "26,17",
+      "26,18",
+      "26,19",
+      "26,20",
+      "26,21",
+      "26,22",
+      "26,23",
+      "3,14",
+      "3,15",
+      "3,16",
+      "3,17",
+      "3,18",
+      "3,19",
+      "3,20",
+      "3,21",
+      "3,22",
+      "3,23",
+      "21,13",
+      "3,7",
+      "13,7",
+      "14,7",
+      "15,7",
+      "16,7",
+      "17,7",
+      "18,7",
+      "21,7",
+      "22,7",
+      "25,7",
+      "26,8",
+      "26,9",
+      "26,10",
+      "26,11",
+      "26,12",
+      "26,7",
+      "20,7",
+      "17,6",
+      "17,4",
+      "17,3",
+      "17,2",
+      "21,2",
+      "21,3",
+      "21,4",
+      "21,5",
+      "21,6",
+      "19,3",
+      "18,3",
+      "19,2",
+      "18,2",
+      "3,11",
+      "4,11",
+      "5,11",
+      "6,11",
+      "7,11",
+      "8,11",
+      "9,11",
+      "10,11",
+      "11,11",
+      "12,11",
+      "13,11",
+      "14,11",
+      "15,11",
+      "16,11",
+      "17,11",
+      "18,11",
+      "19,11",
+      "20,11",
+      "21,11",
+      "21,18",
+      "21,19",
+      "21,20",
+      "21,21",
+      "21,22",
+      "21,23",
+      "20,23",
+      "19,23",
+      "3,10",
+      "4,10",
+      "5,10",
+      "1,7",
+      "2,7",
+      "1,11",
+      "1,12",
+      "2,12",
+      "1,10",
+      "2,11",
+      "2,10",
+      "4,6",
+      "4,5",
+      "4,4",
+      "4,7",
+      "4,2",
+      "4,3",
+      "5,3",
+      "5,4",
+      "6,4",
+      "6,3",
+      "7,3",
+      "7,4",
+      "8,3",
+      "8,4",
+      "9,4",
+      "10,4",
+      "11,4",
+      "12,4",
+      "10,3",
+      "9,3",
+      "11,3",
+      "13,3",
+      "12,3",
+      "13,4",
+      "13,5",
+      "13,6",
+      "5,6",
+      "6,6",
+      "7,6",
+      "8,6",
+      "12,6",
+      "11,6",
+      "0,7",
+      "0,8",
+      "0,9",
+      "0,10",
+      "0,12",
+      "0,11",
+      "1,8",
+      "1,9",
+      "2,8",
+      "2,9",
+      "3,9",
+      "20,1",
+      "19,1",
+      "21,1",
+      "18,1",
+      "17,1",
+      "14,4",
+      "22,4",
+      "23,4",
+      "24,4",
+      "25,4",
+      "22,6",
+      "22,5",
+      "25,6",
+      "25,5",
+      "26,6",
+      "26,5",
+      "26,4",
+      "16,6",
+      "15,6",
+      "14,6",
+      "15,4",
+      "16,4",
+      "13,2",
+      "13,1",
+      "4,1",
+      "17,5",
+      "16,5",
+      "15,5",
+      "14,5",
+      "9,13",
+      "11,7",
+      "12,7",
+      "5,17",
+      "7,15"
+    ],
+    "breakable": [],
+    "coreSpots": [],
+    "coreCount": 1,
+    "monsterMix": [
+      {
+        "id": "slime",
+        "weight": 100
+      }
+    ],
+    "camp": [],
+    "rules": {
+      "money": 150,
+      "guide": 100,
+      "guideRegen": 9,
+      "speed": 44,
+      "reward": 8
+    },
+    "solidOffsets": {
+      "20,7": [
+        10,
+        0
+      ],
+      "18,7": [
+        -7,
+        0
+      ],
+      "19,2": [
+        -9,
+        0
+      ],
+      "19,3": [
+        -9,
+        0
+      ],
+      "5,17": [
+        0,
+        18
+      ],
+      "7,15": [
+        25,
+        0
+      ]
+    },
+    "safe": true,
+    "npcs": false,
+    "portals": [
+      {
+        "c": 20,
+        "r": 2,
+        "to": "map_mu5ad7t2",
+        "ox": -4
+      },
+      {
+        "c": 23,
+        "r": 23,
+        "to": "map_muspgfxl"
+      },
+      {
+        "c": 24,
+        "r": 23,
+        "to": "map_muspgfxl"
+      },
+      {
+        "c": 23,
+        "r": 22,
+        "to": "map_muspgfxl"
+      },
+      {
+        "c": 24,
+        "r": 22,
+        "to": "map_muspgfxl"
+      },
+      {
+        "c": 18,
+        "r": 4,
+        "to": "map_mvfmo6c2",
+        "ox": 13,
+        "oy": -12
+      }
+    ],
+    "cols": 27,
+    "rows": 24,
+    "spawnZone": [],
+    "layerOrder": [
+      {
+        "id": "floor",
+        "name": "🟫 地板"
+      },
+      {
+        "id": "ground",
+        "name": "🌿 地面裝飾"
+      },
+      {
+        "id": "object",
+        "name": "📦 物件"
+      },
+      {
+        "id": "object8",
+        "name": "餐桌"
+      },
+      {
+        "id": "object5",
+        "name": "普通膳檯（慶功宴時隱藏）"
+      },
+      {
+        "id": "object6",
+        "name": "慶功宴膳檯（慶功宴時顯現）"
+      },
+      {
+        "id": "object2",
+        "name": "🧰 物件 2"
+      },
+      {
+        "id": "object7",
+        "name": "超商"
+      },
+      {
+        "id": "object3",
+        "name": "🪑 物件 3"
+      },
+      {
+        "id": "object4",
+        "name": "🚧 物件 4"
+      },
+      {
+        "id": "overlay",
+        "name": "🎯 物件裝飾"
+      },
+      {
+        "id": "top",
+        "name": "☁️ 上層"
+      }
+    ],
+    "hiddenPickups": []
   }
 ];
 // 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來

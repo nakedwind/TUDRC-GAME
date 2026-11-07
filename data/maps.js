@@ -19214,7 +19214,7 @@ const BATTLE_MAPS = [
         "18,6": "tile_interactive_storage_locker_key",
         "16,35": "tile_interactive_storage_locker_key",
         "34,18": "tile_interactive_pickup_almond_water",
-        "35,32": "tile_interactive_pickup_graffiti_red"
+        "35,32": "tile_interactive_pickup_graffiti"
       },
       "object3": {},
       "object4": {
@@ -24447,7 +24447,7 @@ const BATTLE_MAPS = [
         "88,66": "tile_mr4czvpx"
       },
       "object2": {
-        "3,73": "tile_interactive_pickup_graffiti_black",
+        "3,73": "tile_interactive_pickup_graffiti",
         "72,63": "tile_interactive_pickup_almond_water",
         "48,75": "tile_interactive_pickup_battery",
         "64,63": "tile_interactive_pickup_battery",
@@ -24455,9 +24455,9 @@ const BATTLE_MAPS = [
         "57,45": "tile_interactive_pickup_battery",
         "17,33": "tile_interactive_pickup_battery",
         "45,28": "tile_interactive_pickup_battery",
-        "43,58": "tile_interactive_pickup_graffiti_black",
-        "12,52": "tile_interactive_pickup_graffiti_black",
-        "40,16": "tile_interactive_pickup_graffiti_black",
+        "43,58": "tile_interactive_pickup_graffiti",
+        "12,52": "tile_interactive_pickup_graffiti",
+        "40,16": "tile_interactive_pickup_graffiti",
         "53,75": "tile_obstacle_ore_small",
         "65,61": "tile_obstacle_ore_small",
         "37,67": "tile_obstacle_ore_small",
@@ -41186,12 +41186,12 @@ const BATTLE_MAPS = [
         "99,31": "tile_interactive_pickup_adrenaline",
         "80,35": "tile_interactive_pickup_adrenaline",
         "65,8": "tile_interactive_pickup_adrenaline",
-        "53,81": "tile_interactive_pickup_graffiti_red",
-        "67,66": "tile_interactive_pickup_graffiti_red",
-        "25,88": "tile_interactive_pickup_graffiti_red",
-        "35,48": "tile_interactive_pickup_graffiti_red",
-        "31,40": "tile_interactive_pickup_graffiti_red",
-        "74,17": "tile_interactive_pickup_graffiti_red"
+        "53,81": "tile_interactive_pickup_graffiti",
+        "67,66": "tile_interactive_pickup_graffiti",
+        "25,88": "tile_interactive_pickup_graffiti",
+        "35,48": "tile_interactive_pickup_graffiti",
+        "31,40": "tile_interactive_pickup_graffiti",
+        "74,17": "tile_interactive_pickup_graffiti"
       }
     },
     "stamps": [
@@ -63721,14 +63721,14 @@ const BATTLE_MAPS = [
         "38,39": "tile_interactive_pickup_adrenaline",
         "55,53": "tile_interactive_pickup_adrenaline",
         "98,36": "tile_interactive_pickup_adrenaline",
-        "64,62": "tile_interactive_pickup_graffiti_black",
-        "108,57": "tile_interactive_pickup_graffiti_black",
-        "83,95": "tile_interactive_pickup_graffiti_black",
-        "58,102": "tile_interactive_pickup_graffiti_black",
-        "43,49": "tile_interactive_pickup_graffiti_black",
-        "17,42": "tile_interactive_pickup_graffiti_black",
-        "37,37": "tile_interactive_pickup_graffiti_black",
-        "102,26": "tile_interactive_pickup_graffiti_black",
+        "64,62": "tile_interactive_pickup_graffiti",
+        "108,57": "tile_interactive_pickup_graffiti",
+        "83,95": "tile_interactive_pickup_graffiti",
+        "58,102": "tile_interactive_pickup_graffiti",
+        "43,49": "tile_interactive_pickup_graffiti",
+        "17,42": "tile_interactive_pickup_graffiti",
+        "37,37": "tile_interactive_pickup_graffiti",
+        "102,26": "tile_interactive_pickup_graffiti",
         "11,88": "tile_interactive_pickup_almond_water",
         "35,75": "tile_interactive_pickup_almond_water",
         "71,40": "tile_interactive_pickup_almond_water",

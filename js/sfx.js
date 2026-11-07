@@ -53,6 +53,10 @@ const SFX = (() => {
     mrtDepart: '環境/門與機關/列車啟動音.m4a',                // 捷運列車：開走（列車啟動音）
     elevator: '環境/門與機關/電梯.mp3',
     storyDoor: '環境/門與機關/電梯.mp3',   // 回憶劇情的自動門開關（data/story-scenes.js 的 sfx；先借電梯聲，可在音效編輯器換）
+    storyPunch: '戰鬥/命中/敲打2.mp3',   // 回憶劇情的出拳（每打出去一拳響一次；js/story-scene.js 的 PUNCH）
+    storySandbagBreak: ['戰鬥/元素/腐蝕.mp3', '戰鬥/命中/小撞擊.mp3'],   // 回憶劇情：沙包被打破（腐蝕＋小撞擊一起播）
+    storyPartyPopper: 'party-popper.wav',        // 回憶劇情：拉炮（啪一聲＋彩帶沙沙落下；js/story-scene.js 的 pop）
+    storyPartyHorn: 'birthday-party-horn.mp3',   // 回憶劇情：吹生日吹笛（js/story-scene.js 的 blow）
     stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3',   // 走逃生樓梯下樓（js/game.js 的 enterPortal）
     stairsUp: '環境/腳步/footsteps03 (mp3cut.net).mp3',     // 走逃生樓梯上樓（js/game.js 的 enterPortal）
     gunshot: '戰鬥/槍械/開槍.mp3',   // 隊員開槍、劇情裡開槍（溫特的手槍用下面的 shotPistol）
@@ -252,12 +256,14 @@ const SFX = (() => {
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
     'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'pearlElderDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'mothFlap', 'mothSpray', 'mothHurt', 'mothDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'vineGrab', 'vineLift', 'vineLand', 'eliteStep', 'capKingStep', 'capKingClose', 'capKingShuffle', 'pop', 'playerHit', 'playerHitMonster',
-    'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall']);
+    'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall', 'storyPunch', 'storyPartyPopper', 'storyPartyHorn']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
   const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 }, capKingDeath: { delay: .22, feedback: .5, wet: .65 }, pearlElderDeath: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
+  // 好幾個音檔一起播的音效：每一層各自的音量倍率（照 files 裡的順序；沒寫＝1）
+  const LAYER_GAIN = { storySandbagBreak: [1, 1.8] };   // 沙包被打破：小撞擊大聲一點
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
@@ -281,8 +287,9 @@ const SFX = (() => {
     lastPlayed.set(sourceKey, now);
     const vary = VARIED.has(name), rate = (vary ? jitter(VARY.pitch) : 1) * (SOUND_PITCH[name] || 1);
     if (vary) gain *= jitter(VARY.gain);
+    const base = gain;
     playbackLayers(files[name]).forEach(({ file, index }) => {
-      const key = name + ':' + index;
+      const key = name + ':' + index, gain = base * (LAYER_GAIN[name]?.[index] ?? 1);
       if (buffers[key]) {             // 已預先載入：所有疊加層在同一刻播放
         ensure();
         const src = ctx.createBufferSource(); src.buffer = buffers[key]; src.playbackRate.value = rate;

@@ -87,3 +87,15 @@ body.story-scene #dialogueBox.story-anger #storyPortraitEmote {
 }
 @keyframes story-anger { from { scale: 1; } to { scale: 1.2; } }
 @media (prefers-reduced-motion: reduce) { body.story-scene #dialogueBox.story-anger #storyPortraitEmote { animation: none; } }
+/* 結束畫面有大字時：標題、說明收起來，按鈕放到下面（大字留在正中間） */
+#storyEnd.with-banner { background:#000; }
+#storyEnd.with-banner > div { position:absolute; bottom:4%; }
+#storyEnd.with-banner > small, #storyEnd.with-banner h2, #storyEnd.with-banner p { display:none; }
+/* 畫面正中間壓的大字（蓋在黑幕、結束畫面上面）（每頁 banner，js/story-scene.js 的 showBanner）：像蓋章一樣從大縮回來；最後一行最大，前面的行小一點 */
+#storyBanner { position:absolute; inset:0; z-index:5; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; pointer-events:none; text-align:center; }
+#storyBanner .small { color:#fff6d8; font-size:clamp(20px, 3.4vw, 34px); font-weight:800; letter-spacing:.12em; text-shadow:0 0 6px #000, 3px 3px 0 #3a1f3d; }
+#storyBanner .big { color:#ffd23f; font-size:clamp(40px, 8vw, 84px); font-weight:900; letter-spacing:.06em; line-height:1.1;
+  text-shadow:-3px -3px 0 #3a1f3d, 3px -3px 0 #3a1f3d, -3px 3px 0 #3a1f3d, 3px 3px 0 #3a1f3d, 6px 7px 0 #ff5a7a, 0 0 22px rgba(255,210,63,.55); }
+#storyBanner.in { animation: story-banner-in .55s cubic-bezier(.2,.9,.3,1.25) both; }
+@keyframes story-banner-in { 0% { opacity:0; transform:scale(2.4) rotate(-6deg); } 60% { opacity:1; transform:scale(.94) rotate(1deg); } 100% { opacity:1; transform:scale(1) rotate(0); } }
+@media (prefers-reduced-motion: reduce) { #storyBanner.in { animation: none; } }

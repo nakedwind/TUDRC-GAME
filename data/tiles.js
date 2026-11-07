@@ -2128,6 +2128,14 @@ const SHARED_TILES = [
     "h": 2
   },
   {
+    "id": "tile_restaurant_partition02",
+    "name": "restaurant-partition02",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-partition02.png",
+    "w": 4,
+    "h": 2
+  },
+  {
     "id": "tile_musg7iyr",
     "name": "restaurant-buffet-counter-03",
     "role": "floor",
@@ -4166,24 +4174,8 @@ const SHARED_TILES = [
     "h": 5
   },
   {
-    "id": "tile_interactive_pickup_graffiti_red",
-    "name": "拾取亮點（塗鴉筆・紅）",
-    "role": "floor",
-    "file": "images/塗鴉筆/pen-red.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_interactive_pickup_graffiti_blue",
-    "name": "拾取亮點（塗鴉筆・藍）",
-    "role": "floor",
-    "file": "images/塗鴉筆/pen-blue.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_interactive_pickup_graffiti_black",
-    "name": "拾取亮點（塗鴉筆・黑）",
+    "id": "tile_interactive_pickup_graffiti",
+    "name": "拾取亮點（塗鴉筆）",
     "role": "floor",
     "file": "images/塗鴉筆/pen-black.png",
     "w": 1,
@@ -5891,5 +5883,14 @@ const SHARED_TILES = [
     "file": "images/餐廳/慶功宴/banquet-buffet-03.png",
     "w": 4,
     "h": 2
+  },
+  {
+    "id": "tile_mw6x68fi",
+    "name": "birthday-cake",
+    "role": "floor",
+    "file": "images/餐廳/birthday-cake.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
   }
 ];

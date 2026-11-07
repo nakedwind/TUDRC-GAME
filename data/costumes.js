@@ -72,6 +72,9 @@ const COSTUME_ACCESSORIES = [
   { id: 'minnie-ribbon', name: '鼠耳蝴蝶結', slot: 'head', rarity: 'R', art: { front: 'images/costumes/01.head/minnie_ribon/Head_minnie_front.png', side: 'images/costumes/01.head/minnie_ribon/Head_minnie_side.png', back: 'images/costumes/01.head/minnie_ribon/Head_minnie_back.png' } },
   { id: 'wolf-ears', name: '狼耳', slot: 'head', char: 'winter', rarity: 'R', art: { front: 'images/costumes/01.head/furry_ear_winter/Head_winter animal ear_front.png', side: 'images/costumes/01.head/furry_ear_winter/Head_winter animal ear_side.png', back: 'images/costumes/01.head/furry_ear_winter/Head_winter animal ear_back.png' } },
   { id: 'santa-hat', name: '聖誕帽', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/Santahat/Head_Santa hat.png' } },
+  // 生日派對：帽子只有一張圖（側面、背面都用它）；眼鏡有正面＋側面（背面看不到）
+  { id: 'birthday-hat', name: '生日帽', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/birthday_hat/birthday-hat.png' } },
+  { id: 'birthday-glasses', name: '生日眼鏡', slot: 'face', rarity: 'N', art: { front: 'images/costumes/02.face/birthday_glasses/birthday-glasses-front.png', side: 'images/costumes/02.face/birthday_glasses/birthday-glasses-side.png' } },
   { id: 'flower-blue', name: '藍色小花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_blue/Head_blue flower.png' } },
   { id: 'flower-blue-two', name: '藍色雙花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_blue/Head_blue flower two.png' } },
   { id: 'flower-white', name: '白色小花', slot: 'head', rarity: 'N', art: { front: 'images/costumes/01.head/flower_white/Head_white flower.png' } },

@@ -17,9 +17,7 @@ const SUPPLIES = [
   { id:'firstaid', name:'急救包', kind:'medical', act:'firstaid', price:60, image:'images/裝備/first-aid-kit.png', effect:'⛑️ 隊友 HP +30', desc:'幫受傷的隊員補 30 HP。走到隊員旁邊按 F；也可以按 H 再點隊員頭像。救不回已經倒下的隊員（要用異質急救包）。不能用在自己身上（溫特補血請用醫療包）。用掉一個。' },
   { id:'anomaly-firstaid', name:'異質急救包', kind:'medical', act:'firstaid', price:150, special:true, image:'images/裝備/first-aid-kit02.png', effect:'✚ 救回倒下的隊友', desc:'能把已經失去戰鬥能力的隊員救回來，救回來時 HP 是 30%。走到倒下的隊員旁邊按 F。只能在置物櫃裡找到。用掉一個。' },
   { id:'adrenaline', name:'腎上腺素', kind:'medical', act:'adrenaline', price:80, special:true, image:'images/裝備/adrenaline-injector.png', effect:'💉 加速', desc:'注射後一段時間內跑得更快，藥效退了會短暫變慢。用掉一個。' },
-  { id:'graffiti-red', name:'塗鴉筆（紅）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-red.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個紅色記號，會一直留在那裡。畫一個用掉一支。' },
-  { id:'graffiti-blue', name:'塗鴉筆（藍）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-blue.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個藍色記號，會一直留在那裡。畫一個用掉一支。' },
-  { id:'graffiti-black', name:'塗鴉筆（黑）', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-black.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個黑色記號，會一直留在那裡。畫一個用掉一支。' },
+  { id:'graffiti', name:'塗鴉筆', kind:'medical', act:'graffiti', price:15, special:true, image:'images/塗鴉筆/pen-black.png', effect:'🖍️ 畫記號', desc:'在牆上、地板或物品上畫一個記號（可以選紅、藍、黑），會一直留在那裡。畫一個用掉一支。' },
   { id:'charm', name:'順順宮平安符', kind:'medical', price:100, special:true, image:'images/裝備/lucky-charm.png', effect:'🧧 擋一次咬', note:'帶在身上就有效：被 Smiler 咬的時候自動用掉，擋下那一次。', desc:'順順宮求來的平安符。在黑暗中被 Smiler 咬的時候，會替你擋下一次（擋完就用掉了）。' },
   // 眼藥水：黑幕變淡一段時間（看得清地圖），但暗處還是暗處，微笑者照樣會咬；數值在 data/equipment.js 的 EYE_DROPS
   { id:'eye-drops', name:'眼藥水', kind:'medical', act:'eyedrops', price:120, special:true, file:'眼藥水.png', effect:'👁️ 看清黑暗 3 分鐘', note:'點了之後 3 分鐘內黑暗變淡，看得清楚地圖；站在暗處一樣會被微笑者咬。', desc:'清涼的眼藥水，點下去眼睛一亮，黑漆漆的地方也看得出輪廓了。' },

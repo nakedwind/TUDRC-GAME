@@ -31,41 +31,15 @@ const StoryScene = (() => {
   const image = src => { const im = new Image(); im.src = src; return im; };
   // 找路：地圖的不可穿透格（含床）做 8 方向格線搜尋，再把看得到的轉角拉直，人才不會一格一格轉彎
   const open = (c, r) => inGrid(c, r) && !isWall(c, r);
-  function clearLine(x1, y1, x2, y2) {   // 腳底一小塊範圍沿直線走過去都不碰到牆
-    const n = Math.ceil(Math.hypot(x2 - x1, y2 - y1) / 8);
-    for (let i = 1; i <= n; i++) {
-      const x = x1 + (x2 - x1) * i / n, y = y1 + (y2 - y1) * i / n;
-      for (const [ox, oy] of [[-9, -5], [9, -5], [-9, 5], [9, 5]]) if (!open(...cellAt(x + ox, y + oy))) return false;
-    }
-    return true;
+  // 實際的找路在 js/story-route.js（劇情編輯器也用同一份，畫出來的走位虛線＝這裡真的會走的路）
+  const findRoute = (x, y, tx, ty) => StoryRoute.find(x, y, tx, ty, open, cellAt, CELL);
+  // 走到 p；via＝路上要先依序經過的點（[[x, y], …]，劇情編輯器的「經過點」），每一段都自己找路繞開牆
+  function walkTo(a, p, via) {
+    a.path = [];
+    let x = a.x, y = a.y;
+    for (const q of [...(Array.isArray(via) ? via : []), p]) { const seg = findRoute(x, y, q[0] * CELL, q[1] * CELL); a.path.push(...seg); [x, y] = seg[seg.length - 1]; }
+    a.target = a.path.shift();
   }
-  function findRoute(x, y, tx, ty) {
-    if (clearLine(x, y, tx, ty)) return [[tx, ty]];
-    const [sc, sr] = cellAt(x, y), [gc, gr] = cellAt(tx, ty), key = (c, r) => c + ',' + r;
-    const from = new Map([[key(sc, sr), null]]), queue = [[sc, sr]];
-    for (let i = 0; i < queue.length; i++) {
-      const [c, r] = queue[i];
-      if (c === gc && r === gr) break;
-      for (const [dc, dr] of [[1, 0], [-1, 0], [0, 1], [0, -1], [1, 1], [1, -1], [-1, 1], [-1, -1]]) {
-        const nc = c + dc, nr = r + dr, k = key(nc, nr);
-        if (from.has(k) || !(open(nc, nr) || (nc === gc && nr === gr))) continue;
-        if (dc && dr && !(open(c + dc, r) && open(c, r + dr))) continue;   // 斜走不切牆角
-        from.set(k, key(c, r)); queue.push([nc, nr]);
-      }
-    }
-    if (!from.has(key(gc, gr))) return [[tx, ty]];   // 找不到路：直接走過去
-    const cells = [];
-    for (let k = key(gc, gr); k && k !== key(sc, sr); k = from.get(k)) cells.unshift(k.split(',').map(Number));
-    const pts = [...cells.slice(0, -1).map(([c, r]) => [(c + .5) * CELL, (r + .5) * CELL]), [tx, ty]];
-    const out = [];
-    for (let i = 0, px = x, py = y; i < pts.length;) {
-      let j = pts.length - 1;
-      while (j > i && !clearLine(px, py, ...pts[j])) j--;
-      out.push(pts[j]); [px, py] = pts[j]; i = j + 1;
-    }
-    return out;
-  }
-  function walkTo(a, p) { a.path = findRoute(a.x, a.y, p[0] * CELL, p[1] * CELL); a.target = a.path.shift(); }
   // 路人哨兵的持槍圖、受傷躺床圖（檔名跟主角的 _withgun 不同，另外載入）
   const MOB_B_EXTRA = { gunLeft: 'mobB_0003_Leftside_gun.png', gunRight: 'mobB_0006_right-side_gun.png' };
   const spriteCache = {};
@@ -93,12 +67,18 @@ const StoryScene = (() => {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><div id="storyChoices" role="group" aria-label="要怎麼做" hidden></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyBanner" hidden></div><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><div id="storyChoices" role="group" aria-label="要怎麼做" hidden></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
     // 頭像外面包一層：上下顛倒時只翻頭像，頭像框上的汗滴、陰沉線條不跟著翻（框裡原本的排版規則照樣套用）
     const pic = el('dialoguePortrait');
     if (pic && pic.parentNode.id === 'dialoguePortraitFrame') { const wrap = document.createElement('span'); wrap.id = 'storyPortraitFlip'; pic.before(wrap); wrap.appendChild(pic); }
     if (pic && !el('storyPortraitEmote')) { const mark = document.createElement('span'); mark.id = 'storyPortraitEmote'; mark.setAttribute('aria-hidden', 'true'); el('dialoguePortraitFrame').appendChild(mark); }   // 頭像上的生氣符號（css/story-scene.css）
+  }
+  function showBanner(text) {
+    const b = el('storyBanner'); if (!b) return;
+    if (!text) { b.hidden = true; return; }
+    b.replaceChildren(...String(text).split('\n').map((line, i, all) => { const d = document.createElement('div'); d.textContent = line; d.className = i === all.length - 1 ? 'big' : 'small'; return d; }));
+    b.hidden = false; b.classList.remove('in'); void b.offsetWidth; b.classList.add('in');   // 每次都重播蓋章動畫
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
   const box = () => el('dialogueBox');
@@ -155,19 +135,41 @@ const StoryScene = (() => {
   function makeActor(a, seats) {
     const seat = a.bed && seats.find(s => s.key.endsWith('@' + a.bed.join(',')));
     if (a.bed && !seat) throw new Error('劇情床位不存在：' + (a.name || a.id) + '（' + a.bed + '）');
-    return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null,
+    return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null, bag: a.image ? BAGS[a.image] || null : null, swA: 0, swV: 0,
       x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL, alpha: 1,
       dir: a.dir || seat?.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!seat?.bed,   // bed 也可以是椅子：坐椅子的人眼睛睜開
       gunT: a.gun ? 1 : a.gunT || 0 };   // gun：拿著槍預備（用持槍圖，只有 GUN_FOLDERS 裡的角色有）
   }
   // ---- 自動門（door: [欄, 列]＝地圖上門圖章的位置）：劇情自己畫，兩片門板往左右滑開 ----
-  // 門圖（images/回憶場景/building_door.png，120×120）裡兩片門板的範圍，單位是圖片像素：
-  // box＝門板整塊（左、上、寬、高），也是遮罩，門板滑出這塊就看不到；split＝兩片門板中間的縫（左片 0～57、右片 58～113）
-  const DOOR_PANELS = { box: [0, 32, 114, 88], split: 58 }, DOOR_TIME = .8;
+  // 每種門圖裡兩片門板的範圍，單位是圖片像素：
+  // box＝門板整塊（左、上、寬、高），也是遮罩，門板滑出這塊就看不到；split＝兩片門板中間的縫
+  // 沒列在這裡的門圖用 building_door 的數字
+  const DOOR_PANELS = {
+    building: { box: [0, 32, 114, 88], split: 58 },   // images/回憶場景/building_door.png（120×120）：左片 0～57、右片 58～113
+    tile_mvfonrdd: { box: [0, 37, 80, 83], split: 40 },   // B-2 訓練室的玻璃門 containment-glass-door03.png（80×120）：左片 0～39、右片 40～79
+  }, DOOR_TIME = .8;
+  // doorAuto（劇情設定「有人經過自動開關」）：有人走到門前這個範圍內就打開，走開就關上（單位：格，從門的下緣中間算）
+  const DOOR_SENSE = { side: 1.3, up: 2.2, down: .8 };
   function findDoor(cfg) {
     if (!Array.isArray(cfg.door)) return null;
     const stamp = (MAP.stamps || []).find(s => s.c === cfg.door[0] && s.r === cfg.door[1]);
-    return stamp ? { stamp, open: 0, target: 0 } : null;
+    return stamp ? { stamp, open: 0, target: 0, auto: !!cfg.doorAuto, panels: DOOR_PANELS[stamp.id] || DOOR_PANELS.building } : null;
+  }
+  // 門前有沒有人（隱藏的、已經淡出的不算）
+  function someoneAtDoor(d) {
+    const t = mapTileById(d.stamp.id); if (!t) return false;
+    const cx = (d.stamp.c + mapTileW(t) / 2) * CELL + (d.stamp.ox || 0), by = (d.stamp.r + mapTileH(t)) * CELL + (d.stamp.oy || 0);
+    return state.actors.some(a => !a.hidden && !a.fading && Math.abs(a.x - cx) < DOOR_SENSE.side * CELL && a.y > by - DOOR_SENSE.up * CELL && a.y < by + DOOR_SENSE.down * CELL);
+  }
+  function tickDoor(d, dt) {
+    if (d.auto) {
+      const want = someoneAtDoor(d) ? 1 : 0;
+      if (want !== d.target) {
+        d.target = want;
+        if (!state.skipping && typeof SFX !== 'undefined') SFX.play('storyDoor', .8, 'storyDoor:auto');   // 開、關都響一聲
+      }
+    }
+    const s = dt / DOOR_TIME; d.open = d.open < d.target ? Math.min(d.target, d.open + s) : Math.max(d.target, d.open - s);
   }
   const ownsStamp = s => !!state?.door && state.door.stamp === s;   // js/maploader.js 問：這張圖章由劇情自己畫嗎
   function drawDoor() {
@@ -175,7 +177,7 @@ const StoryScene = (() => {
     const s = d.stamp, t = mapTileById(s.id), img = t && tileImage(t); if (!readyImage(img)) return;
     const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
     const iw = img.naturalWidth, ih = img.naturalHeight, sx = w / iw, sy = h / ih;
-    const [bx, by, bw, bh] = DOOR_PANELS.box, cut = DOOR_PANELS.split;
+    const [bx, by, bw, bh] = d.panels.box, cut = d.panels.split;
     const k = d.open * d.open * (3 - 2 * d.open);   // 慢慢起步、慢慢停
     ctx.save(); ctx.beginPath(); ctx.rect(x + bx * sx, y + by * sy, bw * sx, bh * sy); ctx.clip();   // 門後直接露出地圖上鋪的地板
     ctx.drawImage(img, bx, by, cut - bx, bh, x + (bx - k * (cut - bx)) * sx, y + by * sy, (cut - bx) * sx, bh * sy);   // 左片往左滑
@@ -185,8 +187,131 @@ const StoryScene = (() => {
   // 大喊（每頁 shout: { 角色id: true }）：台詞出現的那一刻，那個人頓一下、對話框跟著震一下
   // 驚訝小跳（每頁 hop: { 角色id: true }）：同一個時機往上輕輕跳一下，對話框不震
   const SHOUT_TIME = .4, HOP_TIME = .32;
+  // 出拳（每頁 punch: { 角色id: true／false }）：一直揮拳，直到下一次 false 才停
+  // 用角色資料夾裡的 xxx_0007_right-side-punch.png（收拳）、xxx_0007_right-side-punch02.png（打出去）；朝左時把圖左右翻過來
+  // 打法像真人：一次連打幾拳（combo 隨機抽），連打中間間隔短、打完一輪喘口氣；一輪的最後一拳是重拳（停久一點、沙包晃大一點）
+  // 時間單位都是秒，[最短, 最長] 每次隨機；每打出去一拳播一次音效 storyPunch（音效編輯器可以換）
+  const PUNCH = { combo: [1, 2, 2, 3, 3, 4], jab: [.11, .16], heavy: .26, between: [.07, .15], rest: [.45, 1.1], volume: [.6, .9], heavyVolume: 1.2 };
+  // 被打的沙包（單張圖、檔名列在這裡的才會晃）：pivot＝搖晃的支點（圖片像素，支點以下的底座不動、以上整個左右晃）
+  // torn＝破掉的圖（每頁 leak 時換上）、spout＝破口漏沙的位置（圖片像素）
+  // spoutDir＝沙往哪邊噴（-1 左、1 右）
+  const BAGS = { 'images/地下訓練室/sandbag.png': { pivot: [38, 132], torn: 'images/地下訓練室/sandbag-torn.png', spout: [29, 106], spoutDir: -1 } };
+  // 搖晃：stiff＝回彈力（越大晃得越快）、damp＝阻力（越大越快停）、max＝最多斜多少（弧度）；jab／heavy／burst＝輕拳、重拳、破掉那一下推多大力
+  // slide＝斜過去時整個沙包（連底座）跟著往同一邊挪多少（斜 1 弧度挪幾像素），看起來比較有被打退的重量
+  const SWAY = { stiff: 55, damp: 3.2, max: .12, jab: .65, heavy: 1.2, burst: 1.9, slide: 22 };
+  // 出拳時身體往前衝（像素）：jab／heavy＝輕拳、重拳衝多遠，time＝衝出去再收回來共幾秒；重拳另外往下沉一點（sink）
+  const LUNGE = { jab: 2, heavy: 4.5, jabTime: .18, heavyTime: .32, sink: 1 };
+  const bagSlide = a => a.bag ? a.swA * SWAY.slide : 0;
+  // 打擊特效（拳頭打到沙包的那一點）：中間一下白光、往打的人那邊噴出幾道光芒；重拳多一圈往外擴的衝擊波和幾團灰塵
+  // life＝特效幾秒、spikes＝幾道光芒、len＝光芒長度 [最短, 最長]（像素）、spread＝光芒張開的角度（弧度）、ring＝衝擊波最後多大
+  const HIT_FX = { life: .16, heavyLife: .28, spikes: 6, heavySpikes: 10, len: [3, 7], heavyLen: [5, 13], spread: 2.6, flash: 3, heavyFlash: 6, ring: 16,
+    color: '#ffffff', edge: '#ffb43c', dust: 'rgba(210,210,215,' };
+  // 漏沙：flow＝前幾秒全速流、fade＝之後幾秒慢慢流完、rate＝每秒幾粒、pileMax＝沙堆最大半徑（像素）、colors＝沙子的顏色（亮、中、暗）
+  const SAND = { flow: 9, fade: 5, rate: 45, pileMax: 10, colors: ['#e8c98c', '#c9a46a', '#96743f'] };
+  const punchFrames = a => a.sprite ? ['', '02'].map(n => imageOnce('images/character/' + a.sprite + '/' + a.sprite.replace('_', '') + '_0007_right-side-punch' + n + '.png')) : null;
   // 手上拿的小道具（carry 的圖長寬都不超過這麼多像素）：拿在手邊、照原圖大小；手的位置（腳底往上算，角色圖的像素）依面向哪邊
   const SMALL_CARRY = 16, HAND_AT = { right: [12, 4], left: [-12, 4], front: [14, 5] };
+  // ---- 慶生道具（角色欄位 popper／horn，每頁 pop／blow）----
+  // 位置都是角色圖（64×64）的像素：hand＝拿拉炮的手（舉在肩膀旁邊）、mouth＝嘴巴（吹笛的吹嘴對準這裡）
+  // grip＝拉炮圖上被手握住的那一點、tip＝拉炮開口（彩帶從這裡噴出來）；pipe＝吹笛圖上吹嘴那一點（圖片像素）
+  // 吹笛只有吹嘴朝左的圖：面向右、正面時往右伸，面向左時左右翻；背對鏡頭看不到嘴巴就不畫
+  const PARTY = {
+    popper: { file: 'images/道具/party-popper.png', used: 'images/道具/party-popper-used.png', grip: [4, 10], usedGrip: [4, 11], tip: [4, 1],
+      hand: { front: [49, 34], back: [50, 31], left: [16, 34], right: [48, 34] } },   // 舉在頭旁邊（坐在背對鏡頭的椅子上也不會被椅背擋住）
+    horn: { file: 'images/道具/party-horn.png', blow: 'images/道具/party-horn-blow.png', pipe: [0, 3], blowPipe: [0, 2], blowTime: 1.1,
+      mouth: { front: [33, 41], left: [27, 41], right: [37, 41] } },
+  };
+  // 拉炮噴出來的彩帶：count＝幾片、speed＝噴多快（像素／秒，[最慢, 最快]）、spread＝往上散開多少（弧度）、gravity＝往下掉的力、life＝幾秒後消失
+  const POP = { count: 28, speed: [70, 150], spread: .6, gravity: 190, drag: 1.6, life: [1.2, 1.9] };
+  // 從天上飄下來的彩帶（每頁 confetti: true 開始、false 停止）：rate＝每秒幾片、fall＝往下掉的速度、sway＝左右飄多遠（像素）
+  // ribbon＝長條彩帶佔幾成（其他是小方塊紙片）、len＝長條彩帶多長
+  const CONFETTI = { rate: 22, fall: [22, 40], sway: [6, 14], ribbon: .45, len: [7, 13] };
+  const PARTY_COLORS = ['#ff5a7a', '#ffd23f', '#4fc3ff', '#7be37b', '#c58bff', '#ff9f43', '#ffffff'];
+  const pick = list => list[Math.floor(Math.random() * list.length)];
+  // 混合方式（跟 Photoshop 圖層一樣）：劇情編輯器的選單也用這份清單
+  const BLENDS = { screen: '濾色', overlay: '覆蓋', 'soft-light': '柔光', lighter: '發光（加亮）', 'color-dodge': '加亮顏色', multiply: '色彩增值' };
+  const hexRgb = hex => { const m = /^#?([0-9a-f]{6})$/i.exec(String(hex || '').trim()); if (!m) return null; const n = parseInt(m[1], 16); return [n >> 16, (n >> 8) & 255, n & 255]; };   // '#ffb347' → [255, 179, 71]
+  // 角色圖上的一點（64×64 的像素）→ 世界座標
+  const spritePoint = (a, px, py) => { const k = PLAYER.drawSize / 64; return [a.x + (px - 32) * k, a.y + 18 - PLAYER.drawSize + py * k]; };
+  function popperTip(a) {
+    const P = PARTY.popper, [hx, hy] = P.hand[a.dir] || P.hand.front;
+    return spritePoint(a, hx - P.grip[0] + P.tip[0], hy - P.grip[1] + P.tip[1]);
+  }
+  function popNow(a, gain = 1) {   // 拉下去：碰一聲，彩帶從開口往上噴（gain：同一頁很多人一起拉時每個小聲一點）
+    a.popped = true;
+    if (state.skipping) return;
+    const [x, y] = popperTip(a);
+    for (let i = 0; i < POP.count; i++) {
+      const ang = -Math.PI / 2 + rnd(-POP.spread, POP.spread) + (a.dir === 'left' ? -.25 : a.dir === 'right' ? .25 : 0), sp = rnd(...POP.speed);
+      state.party.bits.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, t: 0, life: rnd(...POP.life), color: pick(PARTY_COLORS),
+        ribbon: Math.random() < CONFETTI.ribbon, len: rnd(...CONFETTI.len) * .7, spin: rnd(0, 6.3), spinV: rnd(5, 11), wig: rnd(0, 6.3) });
+    }
+    state.party.puffs.push({ x, y, t: 0 });
+    playSfx('storyPartyPopper', rnd(.8, 1) * gain, a.x, a.y, a.id);
+  }
+  function tickParty(dt) {
+    const P = state.party;
+    for (const a of state.actors) if (a.blowT > 0) a.blowT = Math.max(0, a.blowT - dt);
+    if (P.rain) {   // 天上飄下來的彩帶：從畫面最上面一點點的地方出現
+      P.rainAcc += dt * CONFETTI.rate;
+      for (; P.rainAcc >= 1; P.rainAcc--) P.drift.push({ x: cam.x + rnd(-10, viewW() + 10), y: cam.y - rnd(4, 20), t: 0, color: pick(PARTY_COLORS),
+        ribbon: Math.random() < CONFETTI.ribbon, len: rnd(...CONFETTI.len), spin: rnd(0, 6.3), spinV: rnd(3, 8), wig: rnd(0, 6.3),
+        fall: rnd(...CONFETTI.fall), sway: rnd(...CONFETTI.sway), swayF: rnd(1.2, 2.4) });
+    }
+    for (const b of P.drift) { b.t += dt; b.y += b.fall * dt; b.spin += b.spinV * dt; }
+    P.drift = P.drift.filter(b => b.y < cam.y + viewH() + 20);
+    for (const b of P.bits) {   // 拉炮噴出來的：先往上衝，空氣阻力讓它很快慢下來，再飄著掉
+      b.t += dt; b.vx -= b.vx * POP.drag * dt; b.vy += (POP.gravity - b.vy * POP.drag) * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.spin += b.spinV * dt;
+    }
+    P.bits = P.bits.filter(b => b.t < b.life);
+    for (const f of P.puffs) f.t += dt;
+    P.puffs = P.puffs.filter(f => f.t < .35);
+  }
+  function drawBit(b, x, y, alpha) {   // 一片彩帶：長條會扭來扭去，小方塊會翻面（寬度跟著 cos 變）
+    ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = b.color; ctx.strokeStyle = b.color;
+    if (b.ribbon) {
+      ctx.lineWidth = 1.6; ctx.beginPath();
+      for (let i = 0; i <= 5; i++) { const k = i / 5, wx = Math.sin(b.spin + k * 4 + b.wig) * 2.2; if (i) ctx.lineTo(x + wx, y + k * b.len); else ctx.moveTo(x + wx, y); }
+      ctx.stroke();
+    } else {
+      ctx.translate(x, y); ctx.rotate(b.wig); ctx.scale(Math.cos(b.spin), 1); ctx.fillRect(-1.6, -1.6, 3.2, 3.2);
+    }
+    ctx.restore();
+  }
+  function drawParty() {
+    const P = state.party;
+    for (const b of P.drift) drawBit(b, b.x + Math.sin(b.t * b.swayF + b.wig) * b.sway, b.y, 1);
+    for (const b of P.bits) drawBit(b, b.x, b.y, Math.min(1, (b.life - b.t) / .4));
+    for (const f of P.puffs) {   // 拉炮開口一小團白煙
+      const k = f.t / .35; ctx.save(); ctx.globalAlpha = (1 - k) * .8; ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(f.x, f.y - 3 * k, 2 + 7 * k, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    }
+  }
+  // 畫拉炮、吹笛（在 drawActor 裡呼叫：畫布原點在角色圖中間，k＝角色圖一像素多大）
+  function drawPartyProps(a, size) {
+    const k = size / 64, at = (px, py) => [-size / 2 + px * k, -size / 2 + py * k];
+    if (a.horn && a.dir !== 'back') {
+      const H = PARTY.horn, blowing = a.blowT > 0, img = imageOnce(blowing ? H.blow : H.file), pipe = blowing ? H.blowPipe : H.pipe;
+      if (readyImage(img)) {
+        const [mx, my] = at(...(H.mouth[a.dir] || H.mouth.front));
+        ctx.save(); ctx.translate(Math.round(mx), Math.round(my)); if (a.dir === 'left') ctx.scale(-1, 1);
+        ctx.drawImage(img, -pipe[0] * k, -pipe[1] * k, img.naturalWidth * k, img.naturalHeight * k); ctx.restore();
+      }
+    }
+    if (a.popper) {
+      const P = PARTY.popper, img = imageOnce(a.popped ? P.used : P.file), grip = a.popped ? P.usedGrip : P.grip;
+      if (readyImage(img)) {
+        const [hx, hy] = at(...(P.hand[a.dir] || P.hand.front));
+        ctx.drawImage(img, Math.round(hx - grip[0] * k), Math.round(hy - grip[1] * k), img.naturalWidth * k, img.naturalHeight * k);
+      }
+    }
+  }
+  // 戴在身上的配件（角色欄位 equip: { head: 配件id, face: 配件id }）：跟遊戲、服裝編輯器同一套畫法和位置（js/costume-draw.js）
+  function drawEquip(a, size, layer) {
+    if (!a.equip || !a.sprite || typeof drawCostumeAccessories !== 'function') return;
+    const who = a.char || a.sprite.replace(/_[A-Z]$/, '');
+    drawCostumeAccessories(ctx, who, { dir: a.dir, moving: a.moving && !a.sitting, anim: a.anim }, -size / 2, -size / 2, size, layer, a.equip);
+  }
   function shout(beat) {
     for (const [id, on] of Object.entries(beat.hop || {})) { const a = on && actor(id); if (a) a.hopT = HOP_TIME; }
     const ids = Object.keys(beat.shout || {}).filter(id => beat.shout[id]);
@@ -428,6 +553,7 @@ const StoryScene = (() => {
   const screenBusy = () => !!state.screen && !state.screen.free && state.screen.t < state.screen.dur;
   function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
     showCard(null);
+    if (state.bannerAt) { showBanner(state.bannerAt.text); state.bannerAt = null; }   // 大字還沒壓出來就按結束：直接出來
     state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(5);
   }
   function makeMonster(m) {
@@ -463,10 +589,11 @@ const StoryScene = (() => {
       playing: false, ending: false, ended: false, nextAt: 0, cameraKey, camera: [...(cfg.cameras?.[cameraKey] || [COLS / 2, ROWS / 2])],
       heal: false, hush: false, shake: 0, rumble: null, moteT: 0, boomT: cfg.opening?.firstExplosion ?? rnd(3, 6),
       openingBlack: Math.max(0, Number(cfg.opening?.black) || 0), openingFade: Math.max(.1, Number(cfg.opening?.fade) || 1.5), waitingForSound: false,
-      door: findDoor(cfg), screen: null, endDelay: 1.4, baseZoom, zoom: camZoom(cfg.cameras?.[cameraKey], baseZoom), flash: null, zap: null };
+      door: findDoor(cfg), party: { rain: false, rainAcc: 0, drift: [], bits: [], puffs: [] }, screen: null, endDelay: 1.4, baseZoom, zoom: camZoom(cfg.cameras?.[cameraKey], baseZoom), flash: null, zap: null };
     VIEW_SCALE = state.zoom;
     document.body.classList.add('story-scene');
     ui.hidden = true;
+    showBanner('');   // 重新播放：收掉上次的大字
     el('storyTitle').textContent = cfg.title || ''; el('storySubtitle').textContent = cfg.subtitle || '';
     el('storyEndTitle').textContent = cfg.endTitle || cfg.title || ''; el('storyEndText').textContent = cfg.endText || '';
     // autoExit：從遊戲裡播的（例如新遊戲的開場）看完直接回遊戲，不出現結束畫面；上面的按鈕變成「跳過劇情」
@@ -474,7 +601,16 @@ const StoryScene = (() => {
     el('storyFlash').style.opacity = '0'; el('storyExitEnd').textContent = resume ? '回到現實' : '返回開始畫面';
     showBox(false); el('storyEnd').hidden = true;
     el('storyFade').style.opacity = '1';
-    el('storyVignette').style.opacity = String(Math.max(0, Math.min(1, Number(cfg.vignette) || 0)));   // vignette：畫面四周壓暗的強度 0～1
+    el('storyVignette').style.opacity = String(Math.max(0, Math.min(1, Number(cfg.vignette) || 0)));
+    // darkColor：壓黑的顏色（黑幕暗處、四周壓暗都用這個色，例如深藍、深紫）；darkAmount：黑幕的濃度 0～1（空白＝全黑 1）
+    const dark = hexRgb(cfg.darkColor) || [0, 0, 0];
+    LIGHT.storyDark = { rgb: dark, amount: Number.isFinite(Number(cfg.darkAmount)) && cfg.darkAmount !== '' && cfg.darkAmount != null ? Math.max(0, Math.min(1, Number(cfg.darkAmount))) : NaN };
+    const dc = dark.join(',');
+    el('storyVignette').style.background = `radial-gradient(ellipse 58% 56% at 50% 46%, transparent 25%, rgba(${dc},.5) 52%, rgba(${dc},.85) 78%, rgb(${dc}) 100%)`;
+    // darkBlend：壓黑怎麼疊上去：''＝一般（直接蓋一層顏色）、'multiply'＝色彩增值（用乘的，畫面染上那個顏色，暗處還看得到圖案）
+    // 色彩增值時四周壓暗改畫在遊戲畫面上（網頁那層沒辦法跟畫面做色彩增值），原本那層藏起來
+    LIGHT.storyDark.mode = BLENDS[cfg.darkBlend] ? cfg.darkBlend : '';
+    if (LIGHT.storyDark.mode) el('storyVignette').style.opacity = '0';
     el('storyAudioStart').hidden = true;
     ui.querySelector('.story-head').style.opacity = '0';
     state.lights = lights();
@@ -509,9 +645,12 @@ const StoryScene = (() => {
         [a.x, a.y] = a.path?.length ? a.path[a.path.length - 1] : a.target;
         a.target = null; a.path = []; a.dir = arriveFace(a) || a.dir;
       }
-      for (const a of state.actors) { if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; }
+      for (const a of state.actors) {
+        if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; a.swA = a.swV = 0;
+        if (a.leak) { a.leak.t += 3; a.leak.pile = Math.max(a.leak.pile, 60); a.leak.grains = []; if (a.leak.pileX == null) a.leak.pileX = bagPoint(a, bagGeom(a), a.bag.spout)[0] + 3; }   // 快轉經過漏沙：沙堆直接堆好
+      }
       for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
-      if (state.door) state.door.open = state.door.target;
+      if (state.door) { if (state.door.auto) state.door.target = someoneAtDoor(state.door) ? 1 : 0; state.door.open = state.door.target; }
       if (state.screen) state.screen.t = state.screen.dur;
     };
     state.skipping = true; settle();
@@ -573,11 +712,36 @@ const StoryScene = (() => {
     }
     for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
     for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
+    for (const [id, v] of Object.entries(beat.punch || {})) { const a = actor(id); if (a) { a.punch = !!v; a.pk = null; } }
+    // 沙包破掉漏沙（每頁 leak: { 沙包id: true／false }）：換成破掉的圖、整個大晃一下、破口一直漏沙、地上堆出一小堆；false＝恢復原狀
+    for (const [id, v] of Object.entries(beat.leak || {})) {
+      const a = actor(id); if (!a?.bag) continue;
+      a.set = imageSet(v ? a.bag.torn : a.image); a.leak = v ? { t: 0, pile: 0, grains: [] } : null;
+      if (v && !state.skipping) a.swV = (a.swV || 0) + SWAY.burst;
+    }
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
+    // 拉炮（pop: { 角色id: true }）：手上有拉炮（角色欄位 popper）的人拉下去；吹笛（blow: { 角色id: true }）：吹一下，吹笛伸直、嗶一聲
+    // 同一頁好幾個人一起：音量照人數開根號分（不會疊到爆音，又聽得出是一群人）
+    const crowd = key => 1 / Math.sqrt(Math.max(1, Object.values(beat[key] || {}).filter(Boolean).length));
+    for (const [id, v] of Object.entries(beat.pop || {})) { const a = actor(id); if (v && a && !a.popped) { a.popper = true; popNow(a, crowd('pop')); } }
+    for (const [id, v] of Object.entries(beat.blow || {})) {
+      const a = actor(id); if (!v || !a) continue;
+      a.horn = true; if (state.skipping) continue;
+      a.blowT = PARTY.horn.blowTime; playSfx('storyPartyHorn', rnd(.8, 1) * crowd('blow'), a.x, a.y, a.id);
+    }
+    // confetti：true＝天上開始飄彩帶、false＝停（已經在飄的會飄完）；banner：畫面正中間壓一行大字（空白＝收掉，換行＝好幾行，最後一行最大）
+    if ('confetti' in beat) state.party.rain = !!beat.confetti;
+    // bannerDelay：翻到這頁幾秒後才壓出來（例如先等黑幕變黑）；大字蓋在黑幕和結束畫面上面，一直留到劇情結束
+    state.bannerAt = null;
+    if ('banner' in beat) {
+      const wait = Number(beat.bannerDelay) || 0;
+      if (state.skipping || !beat.banner || wait <= 0) showBanner(state.skipping ? '' : beat.banner);
+      else state.bannerAt = { text: beat.banner, at: state.time + wait };
+    }
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
-    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p); }
-    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p); }   // 走到那裡後淡出消失（走進門裡）
+    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p, beat.via?.[id]); }
+    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
     for (const [id, d] of Object.entries(beat.face || {})) {   // 方向，或看向某個地點／某個人
       const a = actor(id); if (!a) continue;
       const point = state.cfg.points?.[d], other = !point && actor(d);
@@ -797,13 +961,14 @@ const StoryScene = (() => {
       const beat = state.cfg.beats[state.index];
       if (state.screen) state.screen.t += dt;
       if (state.flash) state.flash.t += dt;
+      if (state.bannerAt && state.time >= state.bannerAt.at) { showBanner(state.bannerAt.text); state.bannerAt = null; }
       if (state.nextBgm && state.time >= state.nextBgm.at && !state.ending) { const src = state.nextBgm.src; state.nextBgm = null; startBgm(src); }
       if (state.ending) {
         el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
         if (state.beatTime >= state.endDelay + 1.8 && state.cfg.autoExit && resume) { backToGame(); return; }   // 開場這類：變黑後直接回遊戲
         if (state.beatTime >= state.endDelay + 1.8) {
           state.playing = false; state.ended = true; G.phase = 'story-ended';
-          el('storyEnd').hidden = false; el('storyEnd').querySelector('button').focus();
+          el('storyEnd').hidden = false; el('storyEnd').classList.toggle('with-banner', !el('storyBanner').hidden);   // 有大字：結束畫面只留按鈕，大字一直在正中間 el('storyEnd').querySelector('button').focus();
         }
       } else {
         const reveal = Math.max(0, Math.min(1, (state.time - state.openingBlack) / state.openingFade));
@@ -811,7 +976,7 @@ const StoryScene = (() => {
         ui.querySelector('.story-head').style.opacity = String(reveal);
         if (Number.isFinite(beat.end) && state.beatTime >= beat.end) finish(true);   // end：這頁幾秒後自動結束（邊走邊轉場）
         else if (state.beatTime >= state.beatWait) {
-          if (!state.shown) { state.shown = true; showBox(true); shout(beat); }
+          if (!state.shown) { state.shown = true; if (beat.text || !beat.banner) showBox(true); shout(beat); }
           // 打字速度跟遊戲對話一樣（NPC_TALK.typeSpeed＝每個字幾毫秒）
           state.chars = Math.min(Array.from(beat.text).length, state.chars + dt * 1000 / Math.max(5, Number(NPC_TALK.typeSpeed) || 24));
           renderText();
@@ -842,10 +1007,12 @@ const StoryScene = (() => {
         if (a.charred && !a.hidden && (a.smokeT = (a.smokeT || 0) - dt) <= 0 && typeof pushBlackSmoke === 'function') { a.smokeT = rnd(.35, .6); pushBlackSmoke(a.x + rnd(-10, 10), a.y - 4); }   // 焦黑的人一直冒煙
         if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
         if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
+        tickPunch(a, dt); tickBag(a, dt);
         if (a.fading) { a.alpha -= dt / .45; if (a.alpha <= 0) { a.alpha = 1; a.hidden = true; a.fading = a.exiting = false; } }   // 走進門裡：淡出
         else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
       }
-      if (state.door) { const d = state.door, s = dt / DOOR_TIME; d.open = d.open < d.target ? Math.min(d.target, d.open + s) : Math.max(d.target, d.open - s); }
+      if (state.door) tickDoor(state.door, dt);
+      tickParty(dt);
       for (const e of state.monsters) tickMonster(e, dt);
       tickZap(dt);
       if (G.scorchMarks) for (const m of G.scorchMarks) m.t = Math.max(m.t - dt, (m.st.fade || 0) + .01);   // 雷擊焦痕：劇情裡一直留著（不淡掉）
@@ -947,12 +1114,117 @@ const StoryScene = (() => {
     }
     ctx.restore();
   }
+  // ---- 出拳的節奏：guard＝收拳（擺好架勢）、hit＝拳打出去 ----
+  function tickPunch(a, dt) {
+    if (a.lunge && (a.lunge.t += dt) >= a.lunge.dur) a.lunge = null;
+    if (!a.punch) return;
+    const p = a.pk || (a.pk = { phase: 'guard', t: rnd(.1, .3), left: 0, size: 0 });
+    if ((p.t -= dt) > 0) return;
+    if (p.phase === 'guard') {   // 打出去
+      if (p.left <= 0) p.size = p.left = PUNCH.combo[Math.floor(Math.random() * PUNCH.combo.length)];
+      p.left--; p.phase = 'hit';
+      const heavy = p.left === 0 && p.size >= 2;
+      p.t = heavy ? PUNCH.heavy : rnd(...PUNCH.jab);
+      landPunch(a, heavy);
+      a.lunge = { t: 0, dur: heavy ? LUNGE.heavyTime : LUNGE.jabTime, amt: heavy ? LUNGE.heavy : LUNGE.jab, heavy };
+    } else {   // 收回來：還有拳就馬上接下一拳，打完一輪就喘口氣
+      p.phase = 'guard'; p.t = p.left > 0 ? rnd(...PUNCH.between) : rnd(...PUNCH.rest);
+    }
+  }
+  // 拳打到：播音效、面前的沙包被推一下（朝右打往右斜、朝左打往左斜）
+  function landPunch(a, heavy) {
+    const side = a.dir === 'left' ? -1 : 1;
+    const bag = state.actors.filter(b => b.bag && !b.hidden && (b.x - a.x) * side > 0 && Math.abs(b.x - a.x) < 2.5 * CELL && Math.abs(b.y - a.y) < CELL)
+      .sort((p, q) => Math.abs(p.x - a.x) - Math.abs(q.x - a.x))[0];
+    if (bag) bag.swV += side * (heavy ? SWAY.heavy : SWAY.jab) * rnd(.85, 1.15);
+    if (bag && !state.skipping) addHitFx(bag, a, heavy, side);
+    if (state.skipping || typeof SFX === 'undefined') return;
+    SFX.play('storyPunch', heavy ? PUNCH.heavyVolume : rnd(...PUNCH.volume), 'storyPunch:' + a.id);
+    if (heavy) state.shake = Math.max(state.shake, 1.2);
+  }
+  // 打擊特效的位置：沙包朝著打的人那一側的邊上、跟拳頭差不多高
+  function addHitFx(bag, who, heavy, side) {
+    const g = bagGeom(bag), iy = Math.max(20, Math.min(110, (who.y - 9 - g.y0) / g.k));
+    const [x, y] = bagPoint(bag, g, [side > 0 ? 17 : 61, iy]);
+    const n = heavy ? HIT_FX.heavySpikes : HIT_FX.spikes, back = side > 0 ? Math.PI : 0;   // 光芒往打的人那邊噴
+    const spikes = Array.from({ length: n }, (_, i) => ({ ang: back + (i / (n - 1) - .5) * HIT_FX.spread + rnd(-.15, .15), len: rnd(...(heavy ? HIT_FX.heavyLen : HIT_FX.len)) }));
+    const dust = heavy ? Array.from({ length: 3 }, () => ({ vx: Math.cos(back) * rnd(10, 22), vy: rnd(-14, 4), r: rnd(1.5, 2.6) })) : [];
+    (bag.hits = bag.hits || []).push({ x, y, t: 0, life: heavy ? HIT_FX.heavyLife : HIT_FX.life, heavy, spikes, dust });
+  }
+  function drawHits(a) {
+    ctx.save();
+    for (const h of a.hits) {
+      const p = h.t / h.life, fade = 1 - p;
+      ctx.globalAlpha = fade;
+      if (p < .4) {   // 中間的白光
+        ctx.fillStyle = HIT_FX.color; ctx.beginPath(); ctx.arc(h.x, h.y, (h.heavy ? HIT_FX.heavyFlash : HIT_FX.flash) * (1 - p / .4 * .6), 0, Math.PI * 2); ctx.fill();
+      }
+      for (const s of h.spikes) {   // 光芒：一邊往外跑、一邊變短，外面一圈橘色
+        const r0 = 2 + p * s.len * .9, r1 = r0 + s.len * (1 - p * .6), c = Math.cos(s.ang), d = Math.sin(s.ang);
+        ctx.beginPath(); ctx.moveTo(h.x + c * r0, h.y + d * r0); ctx.lineTo(h.x + c * r1, h.y + d * r1);
+        ctx.strokeStyle = HIT_FX.edge; ctx.lineWidth = h.heavy ? 2.6 : 2; ctx.lineCap = 'round'; ctx.stroke();
+        ctx.strokeStyle = HIT_FX.color; ctx.lineWidth = h.heavy ? 1.2 : .9; ctx.stroke();
+      }
+      if (h.heavy) {   // 重拳：衝擊波＋灰塵
+        ctx.strokeStyle = HIT_FX.color; ctx.lineWidth = 1.6 * fade; ctx.beginPath(); ctx.arc(h.x, h.y, 3 + p * HIT_FX.ring, 0, Math.PI * 2); ctx.stroke();
+        for (const u of h.dust) { ctx.fillStyle = HIT_FX.dust + (.7 * fade) + ')'; ctx.beginPath(); ctx.arc(h.x + u.vx * h.t * 2, h.y + u.vy * h.t * 2, u.r * (1 + p), 0, Math.PI * 2); ctx.fill(); }
+      }
+    }
+    ctx.restore();
+  }
+  // 沙包搖晃（像不倒翁的彈簧）＋漏沙
+  function tickBag(a, dt) {
+    if (!a.bag) return;
+    if (a.hits?.length) { for (const h of a.hits) h.t += dt; a.hits = a.hits.filter(h => h.t < h.life); }
+    a.swV += (-SWAY.stiff * a.swA - SWAY.damp * a.swV) * dt;
+    a.swA = Math.max(-SWAY.max, Math.min(SWAY.max, a.swA + a.swV * dt));
+    if (Math.abs(a.swA) < .002 && Math.abs(a.swV) < .01) a.swA = a.swV = 0;
+    const L = a.leak; if (!L || a.hidden) return;
+    L.t += dt;
+    const flow = L.t < SAND.flow ? 1 : Math.max(0, 1 - (L.t - SAND.flow) / SAND.fade);
+    L.carry = (L.carry || 0) + SAND.rate * flow * dt;
+    const g = bagGeom(a);
+    for (; L.carry >= 1; L.carry--) {   // 從破口掉出一粒沙（跟著沙包的晃動）
+      const [sx, sy] = bagPoint(a, g, a.bag.spout);
+      L.grains.push({ x: sx + rnd(-1, 1), y: sy, vx: (a.bag.spoutDir || 1) * rnd(4, 16) + a.swV * 8, vy: rnd(-4, 6), c: SAND.colors[Math.floor(Math.random() * 3)] });
+    }
+    for (const s of L.grains) { s.vy += 300 * dt; s.x += s.vx * dt; s.y += s.vy * dt; }
+    const floor = a.y + 18;
+    L.grains = L.grains.filter(s => { if (s.y < floor) return true; L.pile++; L.pileX = L.pileX == null ? s.x : L.pileX * .97 + s.x * .03; return false; });
+  }
+  // 沙包圖在世界座標裡的位置：k＝圖片一像素畫多大、(x0, y0)＝圖片左上角
+  function bagGeom(a) {
+    const img = a.set.front[0], k = (Number(a.imageScale) || 1) * PLAYER.drawSize / 64;
+    return { k, x0: a.x + bagSlide(a) - img.naturalWidth * k / 2, y0: a.y + 18 - img.naturalHeight * k };
+  }
+  // 圖片上的一點（像素）→ 世界座標；支點以上的點跟著沙包斜過去
+  function bagPoint(a, g, [ix, iy]) {
+    const [px, py] = a.bag.pivot, ox = g.x0 + px * g.k, oy = g.y0 + py * g.k, dx = (ix - px) * g.k, dy = (iy - py) * g.k, c = Math.cos(a.swA), s = Math.sin(a.swA);
+    return [ox + dx * c - dy * s, oy + dx * s + dy * c];
+  }
+  // 漏出來的沙：地上一小堆（越漏越大）＋正在往下掉的沙粒
+  function drawSand(a) {
+    const L = a.leak, floor = a.y + 18;
+    ctx.save(); ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1));
+    if (L.pile > 0) {
+      const r = Math.min(SAND.pileMax, 2 + Math.sqrt(L.pile) * .7), h = r * .45, x = Math.round(L.pileX ?? a.x);
+      ctx.fillStyle = SAND.colors[2]; ctx.beginPath(); ctx.ellipse(x, floor + 1, r + 1, h + 1, 0, Math.PI, 0); ctx.lineTo(x + r + 1, floor + 2); ctx.lineTo(x - r - 1, floor + 2); ctx.fill();   // 外框（暗）
+      ctx.fillStyle = SAND.colors[1]; ctx.beginPath(); ctx.ellipse(x, floor + 1, r, h, 0, Math.PI, 0); ctx.lineTo(x + r, floor + 1.5); ctx.lineTo(x - r, floor + 1.5); ctx.fill();
+      ctx.fillStyle = SAND.colors[0]; ctx.beginPath(); ctx.ellipse(x - r * .25, floor + 1 - h * .45, r * .45, h * .35, 0, 0, Math.PI * 2); ctx.fill();   // 沙堆頂上的亮面
+    }
+    for (const s of L.grains) { ctx.fillStyle = s.c; ctx.fillRect(Math.round(s.x), Math.round(s.y), 1.5, 1.5); }
+    ctx.restore();
+  }
   function drawActor(a) {
     const size = PLAYER.drawSize;
     const frameActor = { ...a, sitting: null };
     const set = actorSet(a);
     let img = a.down && readyImage(a.set.fail) ? a.set.fail : a.wounded ? woundedFrame(a) : a.eyesClosed ? set.blink?.[2] : pickCharacterFrame(set, frameActor);
     if (!readyImage(img)) img = set.front?.[0];
+    // 出拳：站著不動、面向左右時換成出拳圖（走路中、坐著、倒地時不換）
+    const fist = a.punch && !a.target && !a.down && !a.sitting && (a.dir === 'right' || a.dir === 'left') && punchFrames(a);
+    const fistImg = fist && fist[a.pk?.phase === 'hit' ? 1 : 0];
+    if (readyImage(fistImg)) img = fistImg;
     if (!readyImage(img)) return;
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1));
     if (a.charred) ctx.filter = 'brightness(.5) saturate(.55) contrast(1.15)';   // 被雷劈到焦黑（還認得出是誰）
@@ -964,23 +1236,36 @@ const StoryScene = (() => {
     const sk = a.shoutT > 0 ? a.shoutT / SHOUT_TIME : 0;
     const hk = a.hopT > 0 ? 1 - a.hopT / HOP_TIME : 0;   // 小跳：拋物線往上 5 像素再落回
     const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = (sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0) - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
-    ctx.translate(Math.round(a.x + kick) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY);
+    // 出拳往前衝：一下子衝出去、再慢慢收回來（前 25% 的時間衝、後面收）
+    const L = a.lunge, lp = L ? L.t / L.dur : 0, lk = L ? (lp < .25 ? lp / .25 : 1 - (lp - .25) / .75) : 0;
+    const lungeX = L ? (a.dir === 'left' ? -1 : 1) * L.amt * lk : 0, lungeY = L?.heavy ? LUNGE.sink * lk : 0;
+    ctx.translate(Math.round(a.x + kick + lungeX + bagSlide(a)) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY + lungeY);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
+    if (img === fistImg && a.dir === 'left') ctx.scale(-1, 1);   // 出拳圖只有朝右的，朝左就翻過來
     // 單張圖：照原本比例、跟人一樣高；imageScale＝照原圖像素大小畫（1＝跟角色同一個比例，例如擔架），底部對齊腳底
     const nat = a.set.single && Number(a.imageScale) > 0 ? Number(a.imageScale) * size / 64 : 0;
     const w = nat ? img.naturalWidth * nat : a.set.single ? size * img.naturalWidth / img.naturalHeight : size, hgt = nat ? img.naturalHeight * nat : size;
-    ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt);
+    if (a.bag && a.swA && img.naturalHeight) {   // 沙包：支點以下（底座）不動，以上繞著支點斜過去
+      const k = w / img.naturalWidth, [px, py] = a.bag.pivot, iw = img.naturalWidth, ih = img.naturalHeight, top = size / 2 - hgt;
+      ctx.drawImage(img, 0, py, iw, ih - py, -w / 2, top + py * k, w, (ih - py) * k);
+      ctx.save(); ctx.translate(-w / 2 + px * k, top + py * k); ctx.rotate(a.swA);
+      ctx.drawImage(img, 0, 0, iw, py + 1, -px * k, -py * k, w, (py + 1) * k); ctx.restore();   // 多畫一像素蓋住接縫
+    } else { if (!a.set.single) drawEquip(a, size, 'behind'); ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt); if (!a.set.single) drawEquip(a, size, 'front'); }
+    drawPartyProps(a, size);
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
     const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
     const small = readyImage(held) && Math.max(held.naturalWidth, held.naturalHeight) <= SMALL_CARRY;
+    const sitDx = a.sitting ? Number(a.carrySitDx) || 0 : 0;   // carrySitDx：坐著時拿的東西往左（負）／往右（正）挪幾像素；站起來走路就回到原本的位置
     if (small) {   // 小道具（紅豆餅、紙袋…）：照原圖大小拿在手邊，位置跟劇情（改）的「手上」一樣（js/story-kai.js 的 HOLD_AT）
       const k = size / 64, [dx, dy] = HAND_AT[a.dir] || HAND_AT.front, hw = held.naturalWidth * k, hh = held.naturalHeight * k;
-      ctx.drawImage(held, Math.round(dx * k - hw / 2), Math.round(size / 2 - 18 + (dy + (Number(a.carryDy) || 0)) * k - hh / 2), hw, hh);   // 畫布原點在身體中間，腳底在 size/2-18 的地方
+      ctx.drawImage(held, Math.round((dx + sitDx) * k - hw / 2), Math.round(size / 2 - 18 + (dy + (Number(a.carryDy) || 0)) * k - hh / 2), hw, hh);   // 畫布原點在身體中間，腳底在 size/2-18 的地方
     } else if (readyImage(held)) {
       const k = size / 64 * Math.min(1, 24 / Math.max(held.naturalWidth, held.naturalHeight)), hw = held.naturalWidth * k, hh = held.naturalHeight * k;   // 太大的圖（急救包）縮到手拿得住
-      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDy：拿著的東西往上（負）／往下（正）幾像素
+      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k + sitDx), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDy：拿著的東西往上（負）／往下（正）幾像素
     }
     ctx.restore();
+    if (a.leak) drawSand(a);
+    if (a.hits?.length) drawHits(a);
     drawEmote(a);
     // 雷德揮擊時手上的斧頭（跟遊戲一樣：fire_axe_01，衝撞那一下只用盾不拿斧）
     if (a.meleeSwing && !a.meleeSwing.ram && a.sprite === 'red_B' && typeof drawSwingWeapon === 'function' && typeof redAxeImg !== 'undefined') {
@@ -1006,8 +1291,35 @@ const StoryScene = (() => {
     }
     for (const s of MAP.stamps || []) { const t = mapTileById(s.id); if (t) add(t, s.c, s.r, mapStampW(s, t), mapStampH(s, t), s.ox || 0, s.oy || 0); }
     // 劇情自己加的光（劇情設定 lights: [[欄, 列, 半徑格數], …]）：地圖上沒有燈、但演出要看得到的地方；只照亮，不畫燈頭光暈
-    for (const [c, r, rad] of state?.cfg.lights || []) out.push({ x: c * CELL, y: r * CELL, r: (Number(rad) || 4) * CELL, warm: false, phase: 0 });
+    // 第 4 個＝光的顏色（'#ffb347' 這種；空白＝白光，只照亮不上色）、第 5 個＝上色多濃（0～1，空白＝0.5）
+    // 第 6 個＝光怎麼疊上去（BLENDS 裡的名字，空白＝濾色）
+    for (const [c, r, rad, color, tint, blend] of state?.cfg.lights || []) out.push({ x: c * CELL, y: r * CELL, r: (Number(rad) || 4) * CELL, warm: false, phase: 0,
+      tint: hexRgb(color), tintAmount: tint === undefined || tint === null || tint === '' ? .5 : Number(tint), blend: BLENDS[blend] ? blend : 'screen' });
     return out;
+  }
+  // 有顏色的劇情燈：黑幕蓋完後，在燈的範圍疊一層那個顏色的光（中間濃、往外淡掉）
+  function drawLightTint() {
+    if (!LIGHT.enabled) return;
+    ctx.save();
+    for (const l of lightsCache) {
+      if (!l.tint || !(l.tintAmount > 0)) continue;
+      ctx.globalCompositeOperation = l.blend || 'screen';
+      const [r, g, b] = l.tint, a = Math.min(1, l.tintAmount), grad = ctx.createRadialGradient(l.x, l.y, 0, l.x, l.y, l.r);
+      grad.addColorStop(0, `rgba(${r},${g},${b},${a * .6})`); grad.addColorStop(.45, `rgba(${r},${g},${b},${a * .32})`); grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+      ctx.fillStyle = grad; ctx.fillRect(l.x - l.r, l.y - l.r, l.r * 2, l.r * 2);
+    }
+    ctx.restore();
+  }
+  // 色彩增值的四周壓暗：畫在遊戲畫面上（螢幕座標），中間不動、往四周越乘越暗
+  function drawVignetteMultiply() {
+    const sd = LIGHT.storyDark, k = Math.max(0, Math.min(1, Number(state.cfg.vignette) || 0));
+    if (!sd?.mode || !k) return;
+    const [r, g, b] = sd.rgb, w = cv.width, hh = cv.height, mix = a => `rgb(${Math.round(255 - (255 - r) * a)},${Math.round(255 - (255 - g) * a)},${Math.round(255 - (255 - b) * a)})`;   // a＝離白色多遠（乘白色＝不變）
+    ctx.save(); ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.globalCompositeOperation = 'multiply';
+    ctx.translate(w / 2, hh * .46); ctx.scale(w * .58 / (hh * .56), 1);   // 橢圓：跟原本網頁那層的形狀一樣
+    const R = hh * .56 / .78, grad = ctx.createRadialGradient(0, 0, 0, 0, 0, R);
+    grad.addColorStop(.25 * .78, mix(0)); grad.addColorStop(.52 * .78, mix(.5 * k)); grad.addColorStop(.78, mix(.85 * k)); grad.addColorStop(1, mix(k));
+    ctx.fillStyle = grad; ctx.fillRect(-w * 2, -hh * 2, w * 4, hh * 4); ctx.restore();
   }
   function drawScene() {
     if (!state) return;
@@ -1033,10 +1345,13 @@ const StoryScene = (() => {
     drawMapTop(ctx);
     drawWorldEffects();
     drawDarkness();
+    drawLightTint();
+    drawParty();   // 拉炮噴出來的、天上飄的彩帶：蓋在桌子、角色上面，也畫在黑幕上面（燈暗時彩帶照樣看得到）
     if (typeof drawPoweredLights === 'function') drawPoweredLights(ctx);
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）
     if (typeof drawTextEffects === 'function') drawTextEffects();   // flash() 的提示字（「被吃掉了！」），跟遊戲一樣畫在黑幕上面
     ctx.restore();
+    drawVignetteMultiply();
   }
   function leave() {
     if (ui) { el('storyChoices').hidden = true; }
@@ -1119,5 +1434,5 @@ const StoryScene = (() => {
   }, true);
   // 劇情裡沒有玩家：要算「離聲音多遠」的地方（日光燈嗡嗡聲）改用鏡頭中心
   const listener = () => state && { x: cam.x + viewW() / 2, y: cam.y + viewH() * .42 };
-  return { config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame, ownsStamp };
+  return { BLENDS, config, previewScene, active, prepare, start, tick, draw: drawScene, leave, listener, playFromGame, ownsStamp, debug: () => state };   // debug：測試時在主控台看播放狀態
 })();

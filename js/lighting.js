@@ -332,13 +332,16 @@ function drawDarkness() {
   ctx.restore();
 
   // 亮度場 → 黑幕小圖（一格一像素），放大貼上時自動平滑成漸層
-  const darkness = typeof currentDarkness === 'function' ? currentDarkness() : LIGHT.darkness;   // 點了眼藥水會變淡（js/equipment.js）
+  let darkness = typeof currentDarkness === 'function' ? currentDarkness() : LIGHT.darkness;   // 點了眼藥水會變淡（js/equipment.js）
+  // 劇情（js/story-scene.js）設的黑幕顏色、濃度：LIGHT.storyDark＝{ rgb: [r, g, b], amount: 0～1 }；不是劇情就照舊全黑
+  const sd = window.STORY_MODE && LIGHT.storyDark, [dr, dg, db] = sd?.rgb || [0, 0, 0];
+  if (sd && Number.isFinite(sd.amount)) darkness = sd.amount;
   const px = fieldImg.data, maxA = Math.round(darkness * 255);
   for (let i = 0; i < lightField.length; i++) {
     // 只改視覺曲線：中段亮度更柔順，實際的 isLit 判定仍使用原始 lightField。
     const b = Math.pow(Math.min(1, Math.max(visField[i], flashField[i])), 0.78);   // 攻擊閃光也會暫時掀開黑幕
     const o = i * 4;
-    px[o] = 0; px[o + 1] = 0; px[o + 2] = 0;
+    px[o] = dr; px[o + 1] = dg; px[o + 2] = db;
     px[o + 3] = Math.round(maxA * (1 - b));
   }
   fieldCtx.putImageData(fieldImg, 0, 0);
@@ -355,9 +358,9 @@ function drawDarkness() {
     darkCtx.setTransform(1, 0, 0, 1, 0, 0);
     darkCtx.globalCompositeOperation = 'destination-out'; darkCtx.globalAlpha = FLASH_BEAM.reveal;
     darkCtx.drawImage(beam.cv, 0, 0);
-    ctx.drawImage(darkCv, beam.x, beam.y);
+    ctx.save(); if (sd?.mode) ctx.globalCompositeOperation = sd.mode; ctx.drawImage(darkCv, beam.x, beam.y); ctx.restore();
     drawFlashlightBeam(ctx, beam);   // 再疊一層淡淡的暖黃光
-  } else ctx.drawImage(fieldCv, mx, my, mw, mh);
+  } else { ctx.save(); if (sd?.mode) ctx.globalCompositeOperation = sd.mode; ctx.drawImage(fieldCv, mx, my, mw, mh); ctx.restore(); }   // 劇情的「色彩增值」：暗處用乘的，底下的畫面染上壓黑的顏色
 
   // 探照燈的環境暖光也使用格子擴散遮罩，因此不會穿過牆壁。
   const wp = warmImg.data;
