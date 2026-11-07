@@ -260,6 +260,8 @@ const SFX = (() => {
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };
   // 回音（老鼠死掉：被打的聲音壓低、加回音；放大用音效編輯器的音量倍率）：delay＝每次回音間隔（秒）、feedback＝每次剩幾成、wet＝回音音量
   const SOUND_ECHO = { mouseDeath: { delay: .17, feedback: .45, wet: .55 }, eliteScream: { delay: .22, feedback: .5, wet: .65 }, capKingDeath: { delay: .22, feedback: .5, wet: .65 }, pearlElderDeath: { delay: .22, feedback: .5, wet: .65 } };   // eliteScream：鳥頭大隊長的尖叫，回音拉長一點，像在空曠的地下街迴盪
+  // 好幾個音檔一起播的音效：每一層各自的音量倍率（照 files 裡的順序；沒寫＝1）
+  const LAYER_GAIN = { storySandbagBreak: [1, 1.8] };   // 沙包被打破：小撞擊大聲一點
   const activeAudio = new Map();     // 舊播放方式（HTML Audio）正在播的音
   const activeSources = new Set();   // Web Audio 正在播的音（靜音時要一起停掉）
   const buffers = {};                // 已解碼好的音檔：name → AudioBuffer
@@ -283,8 +285,9 @@ const SFX = (() => {
     lastPlayed.set(sourceKey, now);
     const vary = VARIED.has(name), rate = (vary ? jitter(VARY.pitch) : 1) * (SOUND_PITCH[name] || 1);
     if (vary) gain *= jitter(VARY.gain);
+    const base = gain;
     playbackLayers(files[name]).forEach(({ file, index }) => {
-      const key = name + ':' + index;
+      const key = name + ':' + index, gain = base * (LAYER_GAIN[name]?.[index] ?? 1);
       if (buffers[key]) {             // 已預先載入：所有疊加層在同一刻播放
         ensure();
         const src = ctx.createBufferSource(); src.buffer = buffers[key]; src.playbackRate.value = rate;

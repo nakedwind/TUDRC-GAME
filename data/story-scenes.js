@@ -869,12 +869,12 @@ const STORY_SCENES = {
         "wait": 1.4,
         "screen": "black",
         "screenFade": 0.1,
-        "sfx": "hitKnock",
-        "sfxVolume": 0.5,
+        "sfx": "storyPunch",
+        "sfxVolume": 0.75,
         "punch": { "winter": true }
       },
-      { "speaker": "", "text": "砰砰。", "wait": 0.6, "sfx": "hitKnock", "sfxVolume": 0.9 },
-      { "speaker": "", "text": "砰！", "wait": 0.4, "sfx": "hitKnock", "sfxVolume": 1.4, "textSize": 24 },
+      { "speaker": "", "text": "砰砰。", "wait": 0.6, "sfx": "storyPunch", "sfxVolume": 1.35 },
+      { "speaker": "", "text": "砰！", "wait": 0.4, "sfx": "storyPunch", "sfxVolume": 2.1, "textSize": 24 },
       {
         "speaker": "",
         "text": "畫面亮起。訓練室角落，有人在打沙包。",
@@ -883,13 +883,13 @@ const STORY_SCENES = {
         "screenFade": 1.6,
         "camera": "沙包",
         "shout": { "winter": true },
-        "sfx": "hitKnock",
-        "sfxVolume": 1.1
+        "sfx": "storyPunch",
+        "sfxVolume": 1.65
       },
       { "speaker": "", "text": "另一邊有幾個哨兵在做體能訓練，全都很自覺地站在離他很遠的地方。", "wait": 1.2, "camera": "全景" },
-      { "speaker": "哨兵A", "text": "（小聲）……那是部隊長？", "wait": 0.3, "shout": { "winter": true }, "sfx": "hitKnock", "sfxVolume": 0.7 },
+      { "speaker": "哨兵A", "text": "（小聲）……那是部隊長？", "wait": 0.3, "shout": { "winter": true }, "sfx": "storyPunch", "sfxVolume": 1.05 },
       { "speaker": "哨兵B", "text": "（小聲）別看了。你沒聽說上次海報那件事嗎？", "wait": 0.3, "emote": { "sentA": "drop" } },
-      { "speaker": "", "text": "溫特最後一記重拳。", "wait": 0.5, "camera": "沙包", "shout": { "winter": true }, "sfx": "hitKnock", "sfxVolume": 1.8 },
+      { "speaker": "", "text": "溫特最後一記重拳。", "wait": 0.5, "camera": "沙包", "shout": { "winter": true }, "sfx": "storyPunch", "sfxVolume": 2.7 },
       {
         "speaker": "",
         "text": "沙包整個晃盪起來，啪的一聲，沙子從破口沙沙地漏出來。",
