@@ -767,8 +767,8 @@ const STORY_SCENES = {
         "wait": 2.6,
         "camera": "走廊",
         "speed": { "winter": 75 },
-        "move": { "winter": [43.7, 12.6] },
-        "face": { "winter": "right" },
+        "move": { "winter": [43.7, 12.6], "eldrin": [29.5, 8.7], "noah": [32.6, 10] },
+        "face": { "winter": "right", "eldrin": "winter", "noah": "winter" },
         "place": { "red": [48.5, 11.4] },
         "via": { "winter": [[34, 12.4]] }
       },
@@ -810,23 +810,24 @@ const STORY_SCENES = {
         "hop": { "red": true },
         "place": { "guide2": [52.9, 13.7] },
         "speed": { "guide2": 45 },
-        "move": { "guide2": [49.4, 12.9] },
+        "move": { "guide2": [48.5, 13.6] },
         "face": { "guide2": "back" },
         "emote": { "red": "flower+sparkle" }
       },
       { "speaker": "", "text": "路過的人停下腳步，表情很微妙。", "wait": 1, "face": { "guide2": "red" }, "emote": { "guide2": "drop" } },
-      { "speaker": "溫特", "text": "…………", "wait": 0.3, "speed": { "guide2": 22 }, "move": { "guide2": [37.5, 13] }, "face": { "guide2": "left" } },
+      { "speaker": "溫特", "text": "…………", "wait": 0.3, "speed": { "guide2": 22 }, "move": { "guide2": [37.5, 13.7] }, "face": { "guide2": "left" } },
       { "speaker": "", "text": "溫特盯著雷德。雷德一臉真誠地笑著，好像還在等他回話。", "wait": 0.3, "emote": { "guide2": "" } },
       { "speaker": "溫特", "text": "（阿諛奉承的傢伙……心機真不是普通的重。）", "wait": 0.3 },
       { "speaker": "溫特", "text": "（一直討好我是想得到什麼？真會演啊，一臉蠢樣……媽的，每個哨兵都不能相信。）", "wait": 0.3 },
-      { "speaker": "雷德", "text": "我等一下就回去跟隊員說，大家都要好好保持一點五公尺！", "wait": 0.3, "screen": "black", "screenFade": 7, "screenFree": true },
+      { "speaker": "雷德", "text": "我等一下就回去跟隊員說，大家都要好好保持一點五公尺！", "wait": 0.3, "screen": "black", "screenFade": 6, "screenFree": true },
       { "speaker": "雷德", "text": "部隊長真是好替大家著想耶！", "wait": 0.3 },
       { "speaker": "雷德", "text": "要不要我也幫忙去哨兵宿舍樓貼海報？", "wait": 0.3 },
       { "speaker": "雷德", "text": "我會貼得整整齊齊！", "wait": 0.3 }
     ],
     "opening": { "black": 1, "fade": 1.5 },
     "bgm": "music/基地音樂/sunset-piano-music.mp3",
-    "bgmVolume": 0.3
+    "bgmVolume": 0.3,
+    "vignette": 0.3
   },
   "winter_sandbag_01": {
     "map": "map_story_b1_training",
@@ -834,21 +835,26 @@ const STORY_SCENES = {
     "zoom": 2.4,
     "endTitle": "B2 訓練室的沙包",
     "footsteps": true,
-    "cameras": { "沙包": [10.3, 8.3, 2.7], "全景": [12.8, 8.6, 2.1], "長椅": [10.6, 20.8, 2.9], "樓梯口": [22.6, 20, 2.9] },
+    "door": [11, 16],
+    "doorAuto": true,
+    "cameras": { "沙包": [12, 14.6, 2.7], "全景": [12.3, 14, 2.1], "長椅": [10.6, 20.8, 2.9], "樓梯口": [22.6, 20, 2.9] },
     "portraits": { "溫特": "winter_A", "諾亞": "noah_A", "哨兵A": "mob_B", "哨兵B": "mob_B", "小林": "mob_B" },
     "actors": [
-      { "id": "sandbag", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.39, "name": "沙包", "at": [9.55, 8.75], "dir": "front" },
-      { "id": "winter", "sprite": "winter_A", "name": "溫特", "at": [8.45, 8.7], "dir": "right" },
-      { "id": "sentA", "sprite": "mob_B", "name": "哨兵A", "at": [17.4, 6.6], "dir": "left" },
-      { "id": "sentB", "sprite": "mob_B", "name": "哨兵B", "at": [18.5, 7.9], "dir": "left" },
-      { "id": "sentC", "sprite": "mob_B", "name": "哨兵C", "at": [17.6, 10.6], "dir": "left" },
-      { "id": "noah", "sprite": "noah_A", "name": "諾亞", "at": [11.6, 19.8], "dir": "back", "speed": 60, "hidden": true },
+      { "id": "sandbag", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.39, "name": "沙包", "at": [9.7, 15.1], "dir": "front" },
+      { "id": "winter", "sprite": "winter_A", "name": "溫特", "at": [8.5, 15], "dir": "right" },
+      { "id": "sentA", "sprite": "mob_B", "name": "哨兵A", "at": [15.7, 17.3], "dir": "left" },
+      { "id": "sentB", "sprite": "mob_B", "name": "哨兵B", "at": [15.6, 13.3], "dir": "left" },
+      { "id": "sentC", "sprite": "mob_B", "name": "哨兵C", "at": [16.2, 15.5], "dir": "left" },
+      { "id": "sandbagA", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.39, "name": "哨兵A的沙包", "at": [14.5, 17.4], "dir": "front" },
+      { "id": "sandbagB", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.39, "name": "哨兵B的沙包", "at": [14.4, 13.4], "dir": "front" },
+      { "id": "sandbagC", "image": "images/地下訓練室/sandbag.png", "imageScale": 0.39, "name": "哨兵C的沙包", "at": [15, 15.6], "dir": "front" },
+      { "id": "noah", "sprite": "noah_A", "name": "諾亞", "at": [11.6, 19.8], "dir": "back", "speed": 60, "hidden": true, "carry": "images/道具/water.png" },
       { "id": "winterSit", "sprite": "winter_A", "name": "溫特", "bed": [9, 21], "at": [9.5, 21] },
       { "id": "noahSit", "sprite": "noah_A", "name": "諾亞", "bed": [11, 21], "at": [11.5, 21] },
-      { "id": "kobayashi", "sprite": "mob_B", "name": "小林", "at": [25.2, 14.4], "dir": "front", "speed": 30, "hidden": true }
+      { "id": "kobayashi", "sprite": "mob_B", "name": "小林", "at": [26.2, 16.1], "dir": "front", "speed": 30, "hidden": true }
     ],
     "beats": [
-      { "speaker": "", "text": "砰。", "wait": 1.4, "screen": "black", "screenFade": 0.1, "sfx": "hitKnock", "sfxVolume": 0.5 },
+      { "speaker": "", "text": "砰。", "wait": 1.4, "screen": "black", "screenFade": 0.1, "sfx": "hitKnock", "sfxVolume": 0.5, "punch": { "winter": true } },
       { "speaker": "", "text": "砰。", "wait": 0.6, "sfx": "hitKnock", "sfxVolume": 0.9 },
       { "speaker": "", "text": "砰！", "wait": 0.4, "sfx": "hitKnock", "sfxVolume": 1.4, "textSize": 24 },
       {
@@ -876,7 +882,7 @@ const STORY_SCENES = {
         "sfxVolume": 1.8,
         "tremble": { "sandbag": true }
       },
-      { "speaker": "", "text": "沙包整個盪起來，鐵鍊「嘎——」地一聲斷了。沙子從破口沙沙地漏出來。", "wait": 0.3, "sfx": "chainUnlock" },
+      { "speaker": "", "text": "沙包整個盪起來，鐵鍊「嘎——」地一聲斷了。沙子從破口沙沙地漏出來。", "wait": 0.3, "sfx": "chainUnlock", "punch": { "winter": false } },
       {
         "speaker": "",
         "text": "哨兵們趕緊跑掉了。",
@@ -892,7 +898,7 @@ const STORY_SCENES = {
         "text": "諾亞拿著毛巾和一瓶水走了進來。",
         "wait": 1.4,
         "camera": "沙包",
-        "move": { "noah": [10.8, 9.3] },
+        "move": { "noah": [11, 16] },
         "face": { "noah": "left", "winter": "right" }
       },
       { "speaker": "諾亞", "text": "……這是這個月第幾個了？", "wait": 0.3, "face": { "noah": "front" } },
@@ -900,7 +906,7 @@ const STORY_SCENES = {
       { "speaker": "溫特", "text": "第三個。", "wait": 0.3 },
       { "speaker": "諾亞", "text": "塔納說，再這樣下去要跟你收沙包錢喔。", "wait": 0.3 },
       { "speaker": "溫特", "text": "大不了從薪水裡面扣。", "wait": 0.3, "screen": "black", "screenFade": 1.6 },
-      { "speaker": "", "text": "諾亞笑了笑，坐到旁邊的長椅上。", "wait": 1.2, "camera": "長椅", "hide": { "winter": true, "noah": true } },
+      { "speaker": "", "text": "諾亞笑了笑，兩人坐到訓練是的長椅上休息。", "wait": 1.2, "camera": "長椅", "hide": { "winter": true, "noah": true } },
       { "speaker": "諾亞", "text": "跟你說個好消息。這禮拜的騷擾投訴單，少了一半。", "wait": 1.4, "screen": "clear", "screenFade": 1.3 },
       { "speaker": "", "text": "溫特擦汗的手停了一下。", "wait": 0.3 },
       { "speaker": "溫特", "text": "……還不夠。", "wait": 0.3 },
@@ -920,7 +926,7 @@ const STORY_SCENES = {
         "text": "溫特站起來，把毛巾甩到肩上。",
         "wait": 0.3,
         "speed": { "winterSit": 40 },
-        "move": { "winterSit": [9.5, 20.1] },
+        "move": { "winterSit": [10.1, 23] },
         "face": { "winterSit": "front" }
       },
       { "speaker": "溫特", "text": "而且，哨兵這種生物，我本來就最討厭了。", "wait": 0.4 },
@@ -929,7 +935,7 @@ const STORY_SCENES = {
         "text": "溫特和諾亞一起往樓梯走去。諾亞在講八卦，溫特沒在聽。",
         "wait": 1.6,
         "camera": "樓梯口",
-        "move": { "winterSit": [21.2, 21], "noahSit": [20, 21.5] },
+        "move": { "winterSit": [21.8, 21.8], "noahSit": [20, 22] },
         "face": { "winterSit": "right", "noahSit": "right" },
         "speed": { "winterSit": 45, "noahSit": 45 }
       },
@@ -937,9 +943,10 @@ const STORY_SCENES = {
         "speaker": "",
         "text": "樓梯上一個哨兵低著頭走下來。臉頰凹下去，制服鬆垮垮的，皮帶多打了兩個洞。",
         "wait": 2.2,
-        "move": { "kobayashi": [23.2, 21] },
+        "move": { "kobayashi": [25, 21.5] },
         "face": { "kobayashi": "left" },
-        "place": { "kobayashi": [25.2, 14.4] }
+        "place": { "kobayashi": [26.4, 15.7] },
+        "via": { "kobayashi": [[25.8, 18.8]] }
       },
       { "speaker": "溫特", "text": "你。站住。", "wait": 0.3 },
       {
@@ -984,12 +991,20 @@ const STORY_SCENES = {
         "tremble": { "kobayashi": false },
         "emote": { "kobayashi": "" },
         "speed": { "kobayashi": 120 },
-        "move": { "kobayashi": [25, 19] },
-        "face": { "kobayashi": "right" }
+        "move": { "kobayashi": [25.6, 19.2] },
+        "face": { "kobayashi": "right" },
+        "via": { "kobayashi": [[25.4, 20.4]] }
       },
-      { "speaker": "", "text": "小林跑了兩步又回頭，九十度鞠躬——", "wait": 0.6, "face": { "kobayashi": "left" }, "hop": { "kobayashi": true } },
+      {
+        "speaker": "",
+        "text": "小林跑了兩步又回頭，九十度鞠躬——",
+        "wait": 0.6,
+        "face": { "kobayashi": "left" },
+        "hop": { "kobayashi": true },
+        "move": { "kobayashi": [25.6, 21.3] }
+      },
       { "speaker": "小林", "text": "謝謝部隊長！", "wait": 0.3, "shout": { "kobayashi": true } },
-      { "speaker": "", "text": "然後衝上樓梯，往餐廳跑去。", "wait": 1, "speed": { "kobayashi": 140 }, "exit": { "kobayashi": [25.4, 13.6] } },
+      { "speaker": "", "text": "然後衝上樓梯，往餐廳跑去。", "wait": 1, "speed": { "kobayashi": 140 }, "exit": { "kobayashi": [25.9, 15.7] } },
       { "speaker": "", "text": "走廊安靜下來。", "wait": 0.8 },
       { "speaker": "", "text": "諾亞看著溫特，笑得很無奈。", "wait": 0.3, "face": { "noahSit": "winterSit" } },
       { "speaker": "溫特", "text": "……看什麼。", "wait": 0.3, "face": { "winterSit": "noahSit" } },
