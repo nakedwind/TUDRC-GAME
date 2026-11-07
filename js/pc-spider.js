@@ -131,6 +131,16 @@ function pcsTick(g) {
   const w = pcd.wins.spider;
   if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; minigameSecond('spider'); renderPcsInfo(g); }
 }
+// 第 a 排從第 i 張開始的牌搬到第 b 排之後，上面露出來的那疊（同花色連著的）能不能接到別排去
+// 那疊本身也是放在大 1 的別花色牌上的話，要換到同花色的牌上才算（不然只是換個地方，沒有進展）
+function pcsFreesAbove(g, a, i, b) {
+  const col = g.cols[a];
+  let s = i - 1;
+  while (s > g.down[a] && pcsRank(col[s - 1]) === pcsRank(col[s]) + 1 && pcsSuit(g, col[s - 1]) === pcsSuit(g, col[s])) s--;
+  const top = col[s], onBigger = s > g.down[a] && pcsRank(col[s - 1]) === pcsRank(top) + 1;
+  return g.cols.some((dst, c) => c !== a && c !== b && dst.length && pcsFits(g, top, c)
+    && (!onBigger || pcsSuit(g, dst[dst.length - 1]) === pcsSuit(g, top)));
+}
 function pcsMoves(g) {   // 列出所有有意義的一步（提示、卡死判斷用），好的排前面
   const out = [];
   g.cols.forEach((col, a) => {
@@ -140,9 +150,14 @@ function pcsMoves(g) {   // 列出所有有意義的一步（提示、卡死判�
       g.cols.forEach((dst, b) => {
         if (a === b || !dst.length || !pcsFits(g, id, b)) return;
         const same = pcsSuit(g, dst[dst.length - 1]) === pcsSuit(g, id);
-        // 本來就放在大 1 的牌上：只有換到同花色的牌上才有意義
-        if (above !== null && pcsRank(above) === pcsRank(id) + 1 && (!same || pcsSuit(g, above) === pcsSuit(g, id))) return;
-        out.push({ a, i, b, score: (same ? 3 : 1) + (i === g.down[a] ? 2 : 0) });
+        // 本來就放在大 1 的牌上：換到同花色的牌上才有意義；
+        // 換到別的花色上，只有「搬開後，露出來的那張能接到別排」才算（例：♠7 從 ♥8 搬到另一張 8，♥8 才能去接 ♠9）
+        let freeing = false;
+        if (above !== null && pcsRank(above) === pcsRank(id) + 1) {
+          if (pcsSuit(g, above) === pcsSuit(g, id)) return;   // 同花色連著的一疊：拆開沒有意義
+          if (!same) { if (!pcsFreesAbove(g, a, i, b)) return; freeing = true; }
+        }
+        out.push({ a, i, b, score: freeing ? 0 : (same ? 3 : 1) + (i === g.down[a] ? 2 : 0) });   // 這種兩步的走法排最後
       });
     }
   });
