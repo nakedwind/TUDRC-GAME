@@ -220,9 +220,14 @@ const StoryScene = (() => {
   const PUNCH = { combo: [1, 2, 2, 3, 3, 4], jab: [.11, .16], heavy: .26, between: [.07, .15], rest: [.45, 1.1], volume: [.6, .9], heavyVolume: 1.2 };
   // 被打的沙包（單張圖、檔名列在這裡的才會晃）：pivot＝搖晃的支點（圖片像素，支點以下的底座不動、以上整個左右晃）
   // torn＝破掉的圖（每頁 leak 時換上）、spout＝破口漏沙的位置（圖片像素）
-  const BAGS = { 'images/地下訓練室/sandbag.png': { pivot: [38, 132], torn: 'images/地下訓練室/sandbag-torn.png', spout: [49, 106] } };
+  // spoutDir＝沙往哪邊噴（-1 左、1 右）
+  const BAGS = { 'images/地下訓練室/sandbag.png': { pivot: [38, 132], torn: 'images/地下訓練室/sandbag-torn.png', spout: [29, 106], spoutDir: -1 } };
   // 搖晃：stiff＝回彈力（越大晃得越快）、damp＝阻力（越大越快停）、max＝最多斜多少（弧度）；jab／heavy／burst＝輕拳、重拳、破掉那一下推多大力
-  const SWAY = { stiff: 55, damp: 3.2, max: .24, jab: 1.3, heavy: 2.4, burst: 3.8 };
+  // slide＝斜過去時整個沙包（連底座）跟著往同一邊挪多少（斜 1 弧度挪幾像素），看起來比較有被打退的重量
+  const SWAY = { stiff: 55, damp: 3.2, max: .12, jab: .65, heavy: 1.2, burst: 1.9, slide: 22 };
+  // 出拳時身體往前衝（像素）：jab／heavy＝輕拳、重拳衝多遠，time＝衝出去再收回來共幾秒；重拳另外往下沉一點（sink）
+  const LUNGE = { jab: 2, heavy: 4.5, jabTime: .18, heavyTime: .32, sink: 1 };
+  const bagSlide = a => a.bag ? a.swA * SWAY.slide : 0;
   // 漏沙：flow＝前幾秒全速流、fade＝之後幾秒慢慢流完、rate＝每秒幾粒、pileMax＝沙堆最大半徑（像素）、colors＝沙子的顏色（亮、中、暗）
   const SAND = { flow: 9, fade: 5, rate: 45, pileMax: 10, colors: ['#e8c98c', '#c9a46a', '#96743f'] };
   const punchFrames = a => a.sprite ? ['', '02'].map(n => imageOnce('images/character/' + a.sprite + '/' + a.sprite.replace('_', '') + '_0007_right-side-punch' + n + '.png')) : null;
@@ -1001,6 +1006,7 @@ const StoryScene = (() => {
   }
   // ---- 出拳的節奏：guard＝收拳（擺好架勢）、hit＝拳打出去 ----
   function tickPunch(a, dt) {
+    if (a.lunge && (a.lunge.t += dt) >= a.lunge.dur) a.lunge = null;
     if (!a.punch) return;
     const p = a.pk || (a.pk = { phase: 'guard', t: rnd(.1, .3), left: 0, size: 0 });
     if ((p.t -= dt) > 0) return;
@@ -1010,6 +1016,7 @@ const StoryScene = (() => {
       const heavy = p.left === 0 && p.size >= 2;
       p.t = heavy ? PUNCH.heavy : rnd(...PUNCH.jab);
       landPunch(a, heavy);
+      a.lunge = { t: 0, dur: heavy ? LUNGE.heavyTime : LUNGE.jabTime, amt: heavy ? LUNGE.heavy : LUNGE.jab, heavy };
     } else {   // 收回來：還有拳就馬上接下一拳，打完一輪就喘口氣
       p.phase = 'guard'; p.t = p.left > 0 ? rnd(...PUNCH.between) : rnd(...PUNCH.rest);
     }
@@ -1037,7 +1044,7 @@ const StoryScene = (() => {
     const g = bagGeom(a);
     for (; L.carry >= 1; L.carry--) {   // 從破口掉出一粒沙（跟著沙包的晃動）
       const [sx, sy] = bagPoint(a, g, a.bag.spout);
-      L.grains.push({ x: sx + rnd(-1, 1), y: sy, vx: rnd(4, 16) + a.swV * 8, vy: rnd(-4, 6), c: SAND.colors[Math.floor(Math.random() * 3)] });
+      L.grains.push({ x: sx + rnd(-1, 1), y: sy, vx: (a.bag.spoutDir || 1) * rnd(4, 16) + a.swV * 8, vy: rnd(-4, 6), c: SAND.colors[Math.floor(Math.random() * 3)] });
     }
     for (const s of L.grains) { s.vy += 300 * dt; s.x += s.vx * dt; s.y += s.vy * dt; }
     const floor = a.y + 18;
@@ -1046,7 +1053,7 @@ const StoryScene = (() => {
   // 沙包圖在世界座標裡的位置：k＝圖片一像素畫多大、(x0, y0)＝圖片左上角
   function bagGeom(a) {
     const img = a.set.front[0], k = (Number(a.imageScale) || 1) * PLAYER.drawSize / 64;
-    return { k, x0: a.x - img.naturalWidth * k / 2, y0: a.y + 18 - img.naturalHeight * k };
+    return { k, x0: a.x + bagSlide(a) - img.naturalWidth * k / 2, y0: a.y + 18 - img.naturalHeight * k };
   }
   // 圖片上的一點（像素）→ 世界座標；支點以上的點跟著沙包斜過去
   function bagPoint(a, g, [ix, iy]) {
@@ -1087,7 +1094,10 @@ const StoryScene = (() => {
     const sk = a.shoutT > 0 ? a.shoutT / SHOUT_TIME : 0;
     const hk = a.hopT > 0 ? 1 - a.hopT / HOP_TIME : 0;   // 小跳：拋物線往上 5 像素再落回
     const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = (sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0) - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
-    ctx.translate(Math.round(a.x + kick) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY);
+    // 出拳往前衝：一下子衝出去、再慢慢收回來（前 25% 的時間衝、後面收）
+    const L = a.lunge, lp = L ? L.t / L.dur : 0, lk = L ? (lp < .25 ? lp / .25 : 1 - (lp - .25) / .75) : 0;
+    const lungeX = L ? (a.dir === 'left' ? -1 : 1) * L.amt * lk : 0, lungeY = L?.heavy ? LUNGE.sink * lk : 0;
+    ctx.translate(Math.round(a.x + kick + lungeX + bagSlide(a)) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY + lungeY);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
     if (img === fistImg && a.dir === 'left') ctx.scale(-1, 1);   // 出拳圖只有朝右的，朝左就翻過來
     // 單張圖：照原本比例、跟人一樣高；imageScale＝照原圖像素大小畫（1＝跟角色同一個比例，例如擔架），底部對齊腳底
