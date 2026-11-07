@@ -1037,5 +1037,104 @@ const STORY_SCENES = {
     "opening": { "black": 1, "fade": 1.5 },
     "bgmVolume": 0.3,
     "vignette": 0.4
+  },
+  "saku_birthday": {
+    "map": "map_4fe1f5d9-c9f2-4b3d-9f68-b5064dd38640",
+    "title": "朔的生日",
+    "zoom": 2.6,
+    "endTitle": "朔的生日",
+    "endText": "2026/11/8",
+    "bgm": "music/birthday.mp3",
+    "bgmVolume": 0.45,
+    "opening": { "black": 1, "fade": 1.5 },
+    "cameras": { "全景": [13.8, 19.2, 2.6], "壽星桌": [13.9, 18.6, 3.3], "朔": [14.3, 18.4, 4] },
+    "portraits": {
+      "朔": "saku_B",
+      "赫真": "kakuma_C",
+      "雷德": "red_A",
+      "溫特": "winter_A",
+      "艾德林": "eldrin_A",
+      "阿瓦倫": "avaren_A",
+      "塔納": "taana_A",
+      "柯林": "colyn_A",
+      "伊德": "eden_B",
+      "薩冷": "salem_B",
+      "凱爾": "cael_C",
+      "羅恩": "rowan_C"
+    },
+    "actors": [
+      { "id": "eldrin", "sprite": "eldrin_A", "name": "艾德林", "bed": [9, 17], "horn": true },
+      { "id": "avaren", "sprite": "avaren_A", "name": "阿瓦倫", "bed": [11, 17], "horn": true },
+      {
+        "id": "kakuma",
+        "sprite": "kakuma_C",
+        "name": "赫真",
+        "bed": [13, 17],
+        "equip": { "head": "birthday-hat", "face": "birthday-glasses" },
+        "horn": true
+      },
+      { "id": "saku", "sprite": "saku_B", "name": "朔", "bed": [14, 17], "equip": { "head": "birthday-hat", "face": "birthday-glasses" } },
+      { "id": "taana", "sprite": "taana_A", "name": "塔納", "bed": [16, 17], "horn": true },
+      { "id": "colyn", "sprite": "colyn_A", "name": "柯林", "bed": [17, 17], "horn": true },
+      { "id": "eden", "sprite": "eden_B", "name": "伊德", "bed": [9, 20], "popper": true },
+      { "id": "salem", "sprite": "salem_B", "name": "薩冷", "bed": [11, 20], "popper": true },
+      { "id": "red", "sprite": "red_A", "name": "雷德", "bed": [13, 20], "popper": true },
+      { "id": "winter", "sprite": "winter_A", "name": "溫特", "bed": [14, 20], "popper": true },
+      { "id": "cael", "sprite": "cael_C", "name": "凱爾", "bed": [16, 20], "popper": true },
+      { "id": "rowan", "sprite": "rowan_C", "name": "羅恩", "bed": [17, 20], "popper": true }
+    ],
+    "beats": [
+      { "speaker": "", "text": "今天的餐廳，難得擠滿了人。", "wait": 1, "camera": "全景" },
+      { "speaker": "", "text": "長桌上擺滿了蛋糕，正中間是一個插著蠟燭的大蛋糕。", "wait": 0.6 },
+      { "speaker": "朔", "text": "……為什麼大家都在這裡。", "wait": 0.4, "camera": "壽星桌" },
+      { "speaker": "赫真", "text": "學長！今天是你生日耶！", "wait": 0.2, "hop": { "kakuma": true } },
+      { "speaker": "朔", "text": "……我知道。", "wait": 0.4 },
+      { "speaker": "赫真", "text": "帽子跟眼鏡都是我幫你戴的喔！很適合吧！", "wait": 0.3, "emote": { "kakuma": "sparkle" } },
+      { "speaker": "朔", "text": "……我還以為是今天的制服。", "wait": 0.4, "emote": { "kakuma": "" } },
+      { "speaker": "雷德", "text": "好了好了，壽星都坐好了。大家，拉炮拿好——", "wait": 0.4, "camera": "全景" },
+      { "speaker": "溫特", "text": "數到三。", "wait": 0.3 },
+      { "speaker": "溫特", "text": "一、二——", "wait": 0.3 },
+      {
+        "speaker": "大家",
+        "text": "朔，生日快樂！！",
+        "wait": 0.5,
+        "pop": { "eden": true, "salem": true, "red": true, "winter": true, "cael": true, "rowan": true },
+        "confetti": true,
+        "shout": { "kakuma": true },
+        "hop": { "colyn": true, "kakuma": true }
+      },
+      { "speaker": "赫真", "text": "噗噗——！學長生日快樂！！", "wait": 0.3, "blow": { "kakuma": true, "colyn": true, "eldrin": true } },
+      { "speaker": "柯林", "text": "生日快樂！所以蛋糕可以吃了嗎！", "wait": 0.3, "blow": { "colyn": true } },
+      { "speaker": "塔納", "text": "生日快樂。吃完蛋糕我就可以下班了吧。", "wait": 0.3, "blow": { "taana": true } },
+      { "speaker": "艾德林", "text": "朔，生日快樂。今年也要好好照顧自己喔。", "wait": 0.3 },
+      { "speaker": "", "text": "阿瓦倫看了艾德林一眼，才小聲開口。", "wait": 0.4 },
+      { "speaker": "阿瓦倫", "text": "……生日快樂。", "wait": 0.3, "blow": { "avaren": true } },
+      { "speaker": "伊德", "text": "生日快樂！今天的主角是你！", "wait": 0.3 },
+      { "speaker": "薩冷", "text": "生日快樂，願你新的一歲平安順利。", "wait": 0.3 },
+      { "speaker": "凱爾", "text": "生日快樂。羅恩，你也說一句吧。", "wait": 0.3 },
+      { "speaker": "羅恩", "text": "……生日快樂。", "wait": 0.4 },
+      { "speaker": "雷德", "text": "生日快樂，朔！以後也請多指教！", "wait": 0.3 },
+      { "speaker": "溫特", "text": "生日快樂。今天放你一天假，好好過。", "wait": 0.3 },
+      { "speaker": "", "text": "朔看著一桌的人，安靜了好一會兒。", "wait": 0.6, "camera": "朔" },
+      { "speaker": "朔", "text": "……謝謝大家。", "wait": 0.4, "emote": { "saku": "flower" } },
+      { "speaker": "朔", "text": "……赫真，你也是。謝謝。", "wait": 0.4 },
+      {
+        "speaker": "赫真",
+        "text": "嘿嘿！學長，快許願吹蠟燭！",
+        "wait": 0.3,
+        "hop": { "kakuma": true },
+        "blow": { "kakuma": true },
+        "emote": { "kakuma": "flower" }
+      },
+      {
+        "speaker": "",
+        "text": "大家一起拍手，彩帶還在一片一片地往下飄。",
+        "wait": 0.6,
+        "camera": "全景",
+        "blow": { "colyn": true, "taana": true, "eldrin": true, "avaren": true }
+      },
+      { "speaker": "", "text": "", "wait": 0.8, "banner": "2026/11/8\nJJ生日快樂！" }
+    ]
   }
+
 };

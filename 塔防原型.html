@@ -2,7 +2,7 @@
 <html lang="zh-Hant">
 <head>
 <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
-<script src="data/story-scenes.js?v=table02-20261108"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
+<script src="data/story-scenes.js?v=bday-20261108"></script>   <!-- 劇情（🎬 劇情編輯器）：要先載入，下面才知道哪些地圖是回憶劇情 -->
 <script>
   window.STORY_PREVIEW = /[?&]storyPreview=/.test(location.search);
   if (/[?&]preview=1(&|$)/.test(location.search)) {   // 劇情地圖編輯器預覽的是有劇情的地圖：同樣只讀
@@ -10,11 +10,11 @@
   }
 </script>
 <script src="js/story-route.js?v=route2-20261108"></script>   <!-- 劇情找路（劇情編輯器也用同一份） -->
-<script src="js/story-scene.js?v=sitdx-20261108"></script>
+<script src="js/story-scene.js?v=bday-20261108"></script>
 <script src="data/story-kai.js?v=colynfx14-20261106"></script>   <!-- 回憶劇情（改）（🎬 劇情編輯器（改）） -->
 <script src="js/story-kai-fx.js?v=colynfx18-20261106"></script>   <!-- 回憶劇情（改）的特效 -->
 <script src="js/story-kai.js?v=kai53-20261106"></script>   <!-- 回憶劇情（改）的播放器：要在 story-scene.js 後面、maploader.js 前面 -->
-<link rel="stylesheet" href="css/story-scene.css?v=y25skip-20261031">
+<link rel="stylesheet" href="css/story-scene.css?v=bday-20261108">
 <link rel="stylesheet" href="css/story-kai.css?v=shake2-20261104">
 <link rel="stylesheet" href="css/memory-doors.css?v=20261025c">
 <script>   /* UI 編輯器、背包編輯器裡的預覽遊戲（?uiedit=1、?bagedit=1）：瀏覽器存檔只能讀、不能寫，預覽怎麼點都不會動到真正的進度（UI編輯器.html） */
@@ -267,7 +267,7 @@
   <script src="js/asset-gate.js?v=playquiet-20261020"></script>   <!-- 0. 載入畫面：圖片還沒下載完先擋住（必須最先載入） -->
   <script src="js/config.js?v=cleanwaves-20261017"></script>       <!-- 1. 格線與座標設定 -->
   <script src="data/sound-settings.js?v=nomissing-20261102"></script> <!-- 1a. 音量、替換與自訂音效 -->
-  <script src="js/sfx.js?v=layergain-20261108"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
+  <script src="js/sfx.js?v=bday-20261108"></script>                    <!-- 1b. 音效（支援分類子資料夾、多檔疊加與隨機組） -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 編輯器「▶ 預覽遊戲」視窗可以關掉背景音（只影響預覽） -->
   <script src="js/music.js?v=clawstock-20261101"></script>        <!-- 1c. 背景音樂 -->
   <script src="js/ui-feedback.js?v=tpad-20261022"></script> <!-- 共用按鈕與切換回饋 -->
@@ -298,7 +298,7 @@
   <script src="data/maps.js?v=onepen-20261107"></script>       <!-- 4. 戰鬥地圖資料（🗺️ 地圖編輯器匯出） -->
   <script src="data/base-maps.js?v=partylayer-20261107"></script>  <!-- 4a. 基地地圖資料（🏠 基地編輯器匯出） -->
   <script src="data/base-floorplan.js?v=dorms-20261024"></script>  <!-- 4a-2. T-Pad 地圖：每層樓的房間怎麼排 -->
-  <script src="data/story-maps.js?v=table02-20261108"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
+  <script src="data/story-maps.js?v=bday-20261108"></script>      <!-- 4b. 劇情地圖資料（📖 劇情地圖編輯器匯出） -->
   <script src="js/map-data.js?v=story-20261021"></script>          <!-- 4c. 三份地圖合在一起給遊戲用（MAPS_DEFAULT） -->
   <script src="data/doors.js?v=hugall-20261028"></script> <!-- 可開關的門（哪些素材是門）-->
   <script src="data/chairs.js?v=poolbed-20261026"></script> <!-- 可互動椅子的坐姿、深度與碰撞 -->
@@ -378,7 +378,7 @@
   <script src="js/squad-gear.js?v=sgtail-20261106"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=giftonce-20261107"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=birthday-20261108"></script> <!-- 服裝資料：skin、配件 -->
-  <script src="data/costume-placement.js?v=strawberry-20261026"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
+  <script src="data/costume-placement.js?v=bday-20261108"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
   <script src="js/costume-draw.js?v=ballsit-20261102"></script> <!-- 配件怎麼畫（和服裝編輯器共用） -->
   <script src="js/costumes.js?v=skinc2-20261104"></script> <!-- 服裝系統：換 skin、戴配件、衣櫃的服裝介面 -->
   <script src="js/gacha.js?v=gacha-once-20261027"></script> <!-- 扭蛋機：花異質碎片轉服裝 -->

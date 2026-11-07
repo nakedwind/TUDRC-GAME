@@ -67,12 +67,18 @@ const StoryScene = (() => {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><div id="storyChoices" role="group" aria-label="要怎麼做" hidden></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyBanner" hidden></div><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><div id="storyChoices" role="group" aria-label="要怎麼做" hidden></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
     // 頭像外面包一層：上下顛倒時只翻頭像，頭像框上的汗滴、陰沉線條不跟著翻（框裡原本的排版規則照樣套用）
     const pic = el('dialoguePortrait');
     if (pic && pic.parentNode.id === 'dialoguePortraitFrame') { const wrap = document.createElement('span'); wrap.id = 'storyPortraitFlip'; pic.before(wrap); wrap.appendChild(pic); }
     if (pic && !el('storyPortraitEmote')) { const mark = document.createElement('span'); mark.id = 'storyPortraitEmote'; mark.setAttribute('aria-hidden', 'true'); el('dialoguePortraitFrame').appendChild(mark); }   // 頭像上的生氣符號（css/story-scene.css）
+  }
+  function showBanner(text) {
+    const b = el('storyBanner'); if (!b) return;
+    if (!text) { b.hidden = true; return; }
+    b.replaceChildren(...String(text).split('\n').map((line, i, all) => { const d = document.createElement('div'); d.textContent = line; d.className = i === all.length - 1 ? 'big' : 'small'; return d; }));
+    b.hidden = false; b.classList.remove('in'); void b.offsetWidth; b.classList.add('in');   // 每次都重播蓋章動畫
   }
   // 對話直接用遊戲裡的正式對話框（#dialogueBox）；翻頁與打字由劇情自己控制，不經過 dialogueState
   const box = () => el('dialogueBox');
@@ -205,6 +211,104 @@ const StoryScene = (() => {
   const punchFrames = a => a.sprite ? ['', '02'].map(n => imageOnce('images/character/' + a.sprite + '/' + a.sprite.replace('_', '') + '_0007_right-side-punch' + n + '.png')) : null;
   // 手上拿的小道具（carry 的圖長寬都不超過這麼多像素）：拿在手邊、照原圖大小；手的位置（腳底往上算，角色圖的像素）依面向哪邊
   const SMALL_CARRY = 16, HAND_AT = { right: [12, 4], left: [-12, 4], front: [14, 5] };
+  // ---- 慶生道具（角色欄位 popper／horn，每頁 pop／blow）----
+  // 位置都是角色圖（64×64）的像素：hand＝拿拉炮的手（舉在肩膀旁邊）、mouth＝嘴巴（吹笛的吹嘴對準這裡）
+  // grip＝拉炮圖上被手握住的那一點、tip＝拉炮開口（彩帶從這裡噴出來）；pipe＝吹笛圖上吹嘴那一點（圖片像素）
+  // 吹笛只有吹嘴朝左的圖：面向右、正面時往右伸，面向左時左右翻；背對鏡頭看不到嘴巴就不畫
+  const PARTY = {
+    popper: { file: 'images/道具/party-popper.png', used: 'images/道具/party-popper-used.png', grip: [4, 10], usedGrip: [4, 11], tip: [4, 1],
+      hand: { front: [49, 34], back: [50, 31], left: [16, 34], right: [48, 34] } },   // 舉在頭旁邊（坐在背對鏡頭的椅子上也不會被椅背擋住）
+    horn: { file: 'images/道具/party-horn.png', blow: 'images/道具/party-horn-blow.png', pipe: [0, 3], blowPipe: [0, 2], blowTime: 1.1,
+      mouth: { front: [33, 41], left: [27, 41], right: [37, 41] } },
+  };
+  // 拉炮噴出來的彩帶：count＝幾片、speed＝噴多快（像素／秒，[最慢, 最快]）、spread＝往上散開多少（弧度）、gravity＝往下掉的力、life＝幾秒後消失
+  const POP = { count: 28, speed: [70, 150], spread: .6, gravity: 190, drag: 1.6, life: [1.2, 1.9] };
+  // 從天上飄下來的彩帶（每頁 confetti: true 開始、false 停止）：rate＝每秒幾片、fall＝往下掉的速度、sway＝左右飄多遠（像素）
+  // ribbon＝長條彩帶佔幾成（其他是小方塊紙片）、len＝長條彩帶多長
+  const CONFETTI = { rate: 22, fall: [22, 40], sway: [6, 14], ribbon: .45, len: [7, 13] };
+  const PARTY_COLORS = ['#ff5a7a', '#ffd23f', '#4fc3ff', '#7be37b', '#c58bff', '#ff9f43', '#ffffff'];
+  const pick = list => list[Math.floor(Math.random() * list.length)];
+  // 角色圖上的一點（64×64 的像素）→ 世界座標
+  const spritePoint = (a, px, py) => { const k = PLAYER.drawSize / 64; return [a.x + (px - 32) * k, a.y + 18 - PLAYER.drawSize + py * k]; };
+  function popperTip(a) {
+    const P = PARTY.popper, [hx, hy] = P.hand[a.dir] || P.hand.front;
+    return spritePoint(a, hx - P.grip[0] + P.tip[0], hy - P.grip[1] + P.tip[1]);
+  }
+  function popNow(a, gain = 1) {   // 拉下去：碰一聲，彩帶從開口往上噴（gain：同一頁很多人一起拉時每個小聲一點）
+    a.popped = true;
+    if (state.skipping) return;
+    const [x, y] = popperTip(a);
+    for (let i = 0; i < POP.count; i++) {
+      const ang = -Math.PI / 2 + rnd(-POP.spread, POP.spread) + (a.dir === 'left' ? -.25 : a.dir === 'right' ? .25 : 0), sp = rnd(...POP.speed);
+      state.party.bits.push({ x, y, vx: Math.cos(ang) * sp, vy: Math.sin(ang) * sp, t: 0, life: rnd(...POP.life), color: pick(PARTY_COLORS),
+        ribbon: Math.random() < CONFETTI.ribbon, len: rnd(...CONFETTI.len) * .7, spin: rnd(0, 6.3), spinV: rnd(5, 11), wig: rnd(0, 6.3) });
+    }
+    state.party.puffs.push({ x, y, t: 0 });
+    playSfx('storyPartyPopper', rnd(.8, 1) * gain, a.x, a.y, a.id);
+  }
+  function tickParty(dt) {
+    const P = state.party;
+    for (const a of state.actors) if (a.blowT > 0) a.blowT = Math.max(0, a.blowT - dt);
+    if (P.rain) {   // 天上飄下來的彩帶：從畫面最上面一點點的地方出現
+      P.rainAcc += dt * CONFETTI.rate;
+      for (; P.rainAcc >= 1; P.rainAcc--) P.drift.push({ x: cam.x + rnd(-10, viewW() + 10), y: cam.y - rnd(4, 20), t: 0, color: pick(PARTY_COLORS),
+        ribbon: Math.random() < CONFETTI.ribbon, len: rnd(...CONFETTI.len), spin: rnd(0, 6.3), spinV: rnd(3, 8), wig: rnd(0, 6.3),
+        fall: rnd(...CONFETTI.fall), sway: rnd(...CONFETTI.sway), swayF: rnd(1.2, 2.4) });
+    }
+    for (const b of P.drift) { b.t += dt; b.y += b.fall * dt; b.spin += b.spinV * dt; }
+    P.drift = P.drift.filter(b => b.y < cam.y + viewH() + 20);
+    for (const b of P.bits) {   // 拉炮噴出來的：先往上衝，空氣阻力讓它很快慢下來，再飄著掉
+      b.t += dt; b.vx -= b.vx * POP.drag * dt; b.vy += (POP.gravity - b.vy * POP.drag) * dt; b.x += b.vx * dt; b.y += b.vy * dt; b.spin += b.spinV * dt;
+    }
+    P.bits = P.bits.filter(b => b.t < b.life);
+    for (const f of P.puffs) f.t += dt;
+    P.puffs = P.puffs.filter(f => f.t < .35);
+  }
+  function drawBit(b, x, y, alpha) {   // 一片彩帶：長條會扭來扭去，小方塊會翻面（寬度跟著 cos 變）
+    ctx.save(); ctx.globalAlpha = alpha; ctx.fillStyle = b.color; ctx.strokeStyle = b.color;
+    if (b.ribbon) {
+      ctx.lineWidth = 1.6; ctx.beginPath();
+      for (let i = 0; i <= 5; i++) { const k = i / 5, wx = Math.sin(b.spin + k * 4 + b.wig) * 2.2; if (i) ctx.lineTo(x + wx, y + k * b.len); else ctx.moveTo(x + wx, y); }
+      ctx.stroke();
+    } else {
+      ctx.translate(x, y); ctx.rotate(b.wig); ctx.scale(Math.cos(b.spin), 1); ctx.fillRect(-1.6, -1.6, 3.2, 3.2);
+    }
+    ctx.restore();
+  }
+  function drawParty() {
+    const P = state.party;
+    for (const b of P.drift) drawBit(b, b.x + Math.sin(b.t * b.swayF + b.wig) * b.sway, b.y, 1);
+    for (const b of P.bits) drawBit(b, b.x, b.y, Math.min(1, (b.life - b.t) / .4));
+    for (const f of P.puffs) {   // 拉炮開口一小團白煙
+      const k = f.t / .35; ctx.save(); ctx.globalAlpha = (1 - k) * .8; ctx.fillStyle = '#fff';
+      ctx.beginPath(); ctx.arc(f.x, f.y - 3 * k, 2 + 7 * k, 0, Math.PI * 2); ctx.fill(); ctx.restore();
+    }
+  }
+  // 畫拉炮、吹笛（在 drawActor 裡呼叫：畫布原點在角色圖中間，k＝角色圖一像素多大）
+  function drawPartyProps(a, size) {
+    const k = size / 64, at = (px, py) => [-size / 2 + px * k, -size / 2 + py * k];
+    if (a.horn && a.dir !== 'back') {
+      const H = PARTY.horn, blowing = a.blowT > 0, img = imageOnce(blowing ? H.blow : H.file), pipe = blowing ? H.blowPipe : H.pipe;
+      if (readyImage(img)) {
+        const [mx, my] = at(...(H.mouth[a.dir] || H.mouth.front));
+        ctx.save(); ctx.translate(Math.round(mx), Math.round(my)); if (a.dir === 'left') ctx.scale(-1, 1);
+        ctx.drawImage(img, -pipe[0] * k, -pipe[1] * k, img.naturalWidth * k, img.naturalHeight * k); ctx.restore();
+      }
+    }
+    if (a.popper) {
+      const P = PARTY.popper, img = imageOnce(a.popped ? P.used : P.file), grip = a.popped ? P.usedGrip : P.grip;
+      if (readyImage(img)) {
+        const [hx, hy] = at(...(P.hand[a.dir] || P.hand.front));
+        ctx.drawImage(img, Math.round(hx - grip[0] * k), Math.round(hy - grip[1] * k), img.naturalWidth * k, img.naturalHeight * k);
+      }
+    }
+  }
+  // 戴在身上的配件（角色欄位 equip: { head: 配件id, face: 配件id }）：跟遊戲、服裝編輯器同一套畫法和位置（js/costume-draw.js）
+  function drawEquip(a, size, layer) {
+    if (!a.equip || !a.sprite || typeof drawCostumeAccessories !== 'function') return;
+    const who = a.char || a.sprite.replace(/_[A-Z]$/, '');
+    drawCostumeAccessories(ctx, who, { dir: a.dir, moving: a.moving && !a.sitting, anim: a.anim }, -size / 2, -size / 2, size, layer, a.equip);
+  }
   function shout(beat) {
     for (const [id, on] of Object.entries(beat.hop || {})) { const a = on && actor(id); if (a) a.hopT = HOP_TIME; }
     const ids = Object.keys(beat.shout || {}).filter(id => beat.shout[id]);
@@ -481,10 +585,11 @@ const StoryScene = (() => {
       playing: false, ending: false, ended: false, nextAt: 0, cameraKey, camera: [...(cfg.cameras?.[cameraKey] || [COLS / 2, ROWS / 2])],
       heal: false, hush: false, shake: 0, rumble: null, moteT: 0, boomT: cfg.opening?.firstExplosion ?? rnd(3, 6),
       openingBlack: Math.max(0, Number(cfg.opening?.black) || 0), openingFade: Math.max(.1, Number(cfg.opening?.fade) || 1.5), waitingForSound: false,
-      door: findDoor(cfg), screen: null, endDelay: 1.4, baseZoom, zoom: camZoom(cfg.cameras?.[cameraKey], baseZoom), flash: null, zap: null };
+      door: findDoor(cfg), party: { rain: false, rainAcc: 0, drift: [], bits: [], puffs: [] }, screen: null, endDelay: 1.4, baseZoom, zoom: camZoom(cfg.cameras?.[cameraKey], baseZoom), flash: null, zap: null };
     VIEW_SCALE = state.zoom;
     document.body.classList.add('story-scene');
     ui.hidden = true;
+    showBanner('');   // 重新播放：收掉上次的大字
     el('storyTitle').textContent = cfg.title || ''; el('storySubtitle').textContent = cfg.subtitle || '';
     el('storyEndTitle').textContent = cfg.endTitle || cfg.title || ''; el('storyEndText').textContent = cfg.endText || '';
     // autoExit：從遊戲裡播的（例如新遊戲的開場）看完直接回遊戲，不出現結束畫面；上面的按鈕變成「跳過劇情」
@@ -602,6 +707,18 @@ const StoryScene = (() => {
       if (v && !state.skipping) a.swV = (a.swV || 0) + SWAY.burst;
     }
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
+    // 拉炮（pop: { 角色id: true }）：手上有拉炮（角色欄位 popper）的人拉下去；吹笛（blow: { 角色id: true }）：吹一下，吹笛伸直、嗶一聲
+    // 同一頁好幾個人一起：音量照人數開根號分（不會疊到爆音，又聽得出是一群人）
+    const crowd = key => 1 / Math.sqrt(Math.max(1, Object.values(beat[key] || {}).filter(Boolean).length));
+    for (const [id, v] of Object.entries(beat.pop || {})) { const a = actor(id); if (v && a && !a.popped) { a.popper = true; popNow(a, crowd('pop')); } }
+    for (const [id, v] of Object.entries(beat.blow || {})) {
+      const a = actor(id); if (!v || !a) continue;
+      a.horn = true; if (state.skipping) continue;
+      a.blowT = PARTY.horn.blowTime; playSfx('storyPartyHorn', rnd(.8, 1) * crowd('blow'), a.x, a.y, a.id);
+    }
+    // confetti：true＝天上開始飄彩帶、false＝停（已經在飄的會飄完）；banner：畫面正中間壓一行大字（空白＝收掉，換行＝好幾行，最後一行最大）
+    if ('confetti' in beat) state.party.rain = !!beat.confetti;
+    if ('banner' in beat) showBanner(state.skipping ? '' : beat.banner);
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
     for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p, beat.via?.[id]); }
@@ -839,7 +956,7 @@ const StoryScene = (() => {
         ui.querySelector('.story-head').style.opacity = String(reveal);
         if (Number.isFinite(beat.end) && state.beatTime >= beat.end) finish(true);   // end：這頁幾秒後自動結束（邊走邊轉場）
         else if (state.beatTime >= state.beatWait) {
-          if (!state.shown) { state.shown = true; showBox(true); shout(beat); }
+          if (!state.shown) { state.shown = true; if (beat.text || !beat.banner) showBox(true); shout(beat); }
           // 打字速度跟遊戲對話一樣（NPC_TALK.typeSpeed＝每個字幾毫秒）
           state.chars = Math.min(Array.from(beat.text).length, state.chars + dt * 1000 / Math.max(5, Number(NPC_TALK.typeSpeed) || 24));
           renderText();
@@ -875,6 +992,7 @@ const StoryScene = (() => {
         else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
       }
       if (state.door) tickDoor(state.door, dt);
+      tickParty(dt);
       for (const e of state.monsters) tickMonster(e, dt);
       tickZap(dt);
       if (G.scorchMarks) for (const m of G.scorchMarks) m.t = Math.max(m.t - dt, (m.st.fade || 0) + .01);   // 雷擊焦痕：劇情裡一直留著（不淡掉）
@@ -1112,7 +1230,8 @@ const StoryScene = (() => {
       ctx.drawImage(img, 0, py, iw, ih - py, -w / 2, top + py * k, w, (ih - py) * k);
       ctx.save(); ctx.translate(-w / 2 + px * k, top + py * k); ctx.rotate(a.swA);
       ctx.drawImage(img, 0, 0, iw, py + 1, -px * k, -py * k, w, (py + 1) * k); ctx.restore();   // 多畫一像素蓋住接縫
-    } else ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt);
+    } else { if (!a.set.single) drawEquip(a, size, 'behind'); ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt); if (!a.set.single) drawEquip(a, size, 'front'); }
+    drawPartyProps(a, size);
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
     const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
     const small = readyImage(held) && Math.max(held.naturalWidth, held.naturalHeight) <= SMALL_CARRY;
@@ -1178,6 +1297,7 @@ const StoryScene = (() => {
     sortables.sort((a, b) => a.y - b.y).forEach(s => s.draw());
     drawMapTop(ctx);
     drawWorldEffects();
+    drawParty();   // 拉炮噴出來的、天上飄的彩帶：蓋在桌子、角色上面
     drawDarkness();
     if (typeof drawPoweredLights === 'function') drawPoweredLights(ctx);
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）

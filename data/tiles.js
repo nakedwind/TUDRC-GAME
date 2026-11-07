@@ -5877,5 +5877,14 @@ const SHARED_TILES = [
     "file": "images/餐廳/慶功宴/banquet-buffet-03.png",
     "w": 4,
     "h": 2
+  },
+  {
+    "id": "tile_mw6x68fi",
+    "name": "birthday-cake",
+    "role": "floor",
+    "file": "images/餐廳/birthday-cake.png",
+    "w": 2,
+    "h": 2,
+    "flat": true
   }
 ];

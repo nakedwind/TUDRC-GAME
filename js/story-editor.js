@@ -40,7 +40,7 @@ const SPRITES = [...new Set([...Object.values(typeof CHARACTERS !== 'undefined' 
 document.body.append(h('datalist', { id: 'spriteList' }, SPRITES.map(s => h('option', { value: s }))));
 // 每頁的音效：js/sfx.js 的音效名字（音效編輯器裡看得到全部）；選單先列劇情常用的
 const STORY_SFX = [['storyDoor', '自動門開關'], ['door', '關門'], ['backroomDoor', '後室開門'], ['elevator', '電梯'], ['ironGateSlide', '鐵門滑動'], ['stairsDown', '腳步聲（樓梯）'],
-  ['soothe', '疏導'], ['itemPickup', '撿東西'], ['knock2', '敲打'], ['glassBreak3', '玻璃破掉'], ['midBoom', '中爆炸'], ['storyPunch', '出拳'], ['storySandbagBreak', '沙包破掉']];
+  ['soothe', '疏導'], ['itemPickup', '撿東西'], ['knock2', '敲打'], ['glassBreak3', '玻璃破掉'], ['midBoom', '中爆炸'], ['storyPunch', '出拳'], ['storySandbagBreak', '沙包破掉'], ['storyPartyPopper', '拉炮'], ['storyPartyHorn', '生日吹笛']];
 document.body.append(h('datalist', { id: 'sfxList' }, STORY_SFX.map(([v, t]) => h('option', { value: v }, t))));
 function testSfx(name, gain) {   // 編輯器沒有載入音效引擎：照 js/sfx.js 的檔名直接播
   const file = (typeof SFX !== 'undefined' && SFX.defaultFiles?.()[name]) || { storyDoor: '環境/門與機關/電梯.mp3', door: '環境/門與機關/關門.mp3', backroomDoor: '環境/門與機關/後室開門.mp3', elevator: '環境/門與機關/電梯.mp3', ironGateSlide: '環境/門與機關/鐵門滑動.mp3', stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3' }[name];
@@ -556,6 +556,21 @@ function renameKey(objMap, oldKey, newKey, kind) {   // 鏡頭、地點改名：
   }
   sel = { key: kind + ':' + newKey }; commit();
 }
+// 角色身上的配件（equip: { head, face }）：選單列出服裝資料裡這個欄位的配件（data/costumes.js＋服裝編輯器新增的）
+function accessoryList() {
+  const base = typeof COSTUME_ACCESSORIES !== 'undefined' ? COSTUME_ACCESSORIES : [];
+  const added = typeof COSTUME_PLACEMENT_DEFAULT !== 'undefined' ? COSTUME_PLACEMENT_DEFAULT.added || [] : [];
+  return [...base, ...added.filter(x => !base.some(a => a.id === x.id))];
+}
+function equipField(ac, slot, title) {
+  const hd = { v: ac.equip?.[slot] || '' };
+  const opts = [['', '不戴'], ...accessoryList().filter(x => x.slot === slot).map(x => [x.id, x.name + '（' + x.id + '）'])];
+  return field(title, choose(hd, 'v', opts, { parse: v => {
+    const e = { ...(ac.equip || {}) }; if (v) e[slot] = v; else delete e[slot];
+    if (Object.keys(e).length) ac.equip = e; else delete ac.equip;
+    return v;
+  } }));
+}
 function renderObj() {
   const box = $('paneObj'); box.innerHTML = '';
   const s = scene(); if (!s || !sel) { box.append(h('p', { class: 'note' }, '在地圖上或左邊清單點一個人、鏡頭或地點。')); return; }
@@ -574,6 +589,10 @@ function renderObj() {
       field('一開始手上拿著（圖片，例如遺物箱；空白＝沒拿東西）', txt(ac, 'carry', { optional: true, placeholder: 'images/回憶場景/relics.png' })),
       field('坐著時拿著的東西往左／往右幾像素（負＝往左；站起來就回原位）', num(ac, 'carrySitDx', { optional: true, step: 1, placeholder: '0' })),
       field('拿著的東西往上／往下幾像素（負＝往上）', num(ac, 'carryDy', { optional: true, step: 1, placeholder: '0' })),
+      ac.sprite && equipField(ac, 'head', '頭上戴的配件（服裝的配件，位置用服裝編輯器調的）'),
+      ac.sprite && equipField(ac, 'face', '臉上戴的配件'),
+      chk(ac, 'popper', '手上拿著拉炮（演出「拉炮」時拉下去）'),
+      chk(ac, 'horn', '嘴上咬著生日吹笛（演出「吹生日吹笛」時吹一下；背對鏡頭看不到）'),
       field('位置', choose(posMode, 'mode', [['', '站著（自己選格子）'], ...beds], { parse: v => { if (v) { ac.bed = v.split(',').map(Number); delete ac.at; } else { delete ac.bed; ac.at = ac.at || [r1(curMap().cols / 2), r1(curMap().rows / 2)]; } return v; } })),
       !ac.bed && field('站的格子', xy(ac, 'at', '選' + (ac.name || '角色') + '站的位置')),
       !ac.bed && field('一開始面向', choose(ac, 'dir', DIRS)),
@@ -654,13 +673,13 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
-const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
+const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.pop && '🎉', b.blow && '🎺', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
   b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
-  'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
+  'confetti' in b && '🎊', b.banner && '🅰', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
   s.beats.forEach((b, i) => {
@@ -676,15 +695,15 @@ function renderBeats() {
 // 每頁的演出：只列出這頁有用到的；要加新的從「＋ 加演出」選單挑（照類別分好，順序也是畫面上列出來的順序）
 const ACT_MENU = [
   ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['speed', '速度']]],
-  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['emote', '情緒符號'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
+  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['pop', '拉炮'], ['blow', '吹生日吹笛'], ['emote', '情緒符號'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
   ['怪物', [['monsterMove', '怪物走位'], ['monsterPose', '怪物姿勢'], ['monsterWander', '繞著人走'], ['swallow', '吞人'], ['preyKick', '嘴裡的人抽一下'], ['spit', '吐出來'], ['thunder', '巨雷']]],
-  ['畫面', [['camera', '換鏡頭'], ['screen', '黑幕'], ['card', '介紹卡'], ['door', '自動門'], ['heal', '治療光']]],
+  ['畫面', [['camera', '換鏡頭'], ['screen', '黑幕'], ['card', '介紹卡'], ['door', '自動門'], ['heal', '治療光'], ['confetti', '彩帶飄落'], ['banner', '中間壓大字']]],
   ['聲音', [['sfx', '音效'], ['bgm', '音樂'], ['hush', '槍聲']]],
   ['對話框', [['portrait', '頭像情緒']]],
   ['流程', [['label', '分支名字'], ['choices', '選項'], ['end', '自動結束']]],
 ];
 // 新增時的預設值（走位類要先在地圖上點位置，見 PICK_ACTS）
-const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, speed: 60, tremble: true, punch: true, leak: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger',
+const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, speed: 60, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger',
   monsterPose: 'smile', preyKick: true, spit: true };
 const PICK_ACTS = { move: '走到哪', exit: '走到哪後消失', place: '瞬移到哪', monsterMove: '走到哪' };
 // 這頁有沒有這個演出（大部分看欄位在不在；頭像情緒、分支是好幾個欄位合成一列）
@@ -746,6 +765,9 @@ function beatBody(s, b, i) {
     punch: () => many('punch', '出拳', id => onOff(b.punch, id, '開始出拳', '停止出拳')),
     // 沙包破掉漏沙：只對沙包圖有用（js/story-scene.js 的 BAGS）；換成破掉的圖、破口一直漏沙
     leak: () => many('leak', '漏沙', id => onOff(b.leak, id, '破掉漏沙', '恢復原狀')),
+    // 拉炮、吹笛：道具的圖、位置在 js/story-scene.js 的 PARTY；沒勾「手上拿著拉炮」「咬著吹笛」的人，這頁也會自動拿出來
+    pop: () => many('pop', '拉炮', () => h('small', {}, '拉下去：碰一聲，彩帶從開口往上噴（拉過就變成空的拉炮）')),
+    blow: () => many('blow', '吹笛', () => h('small', {}, '吹一下：吹笛伸直、嗶一聲（約 1 秒後捲回來）')),
     emote: () => many('emote', '情緒符號', id => choose(b.emote, id, [['anger', '💢 生氣（紅色青筋一跳一跳）'], ['sweat', '💧 慌張冒汗（汗滴往下滑）'], ['shade', '｜｜ 陰影線（嚇到、背脊發涼）'], ['drop', '💧 一顆汗滴（慢慢往下滴）'], ['shade+drop', '｜｜💧 陰影線＋一顆汗滴'], ['flower', '🌸 小花（開心、得意）'], ['sparkle', '✨ 閃亮亮'], ['flower+sparkle', '🌸✨ 小花＋閃亮亮'], ['', '收掉']])),
     carry: () => many('carry', '拿著', id => txt(b.carry, id, { placeholder: '圖片路徑；空白＝放下', style: 'flex:1' })),
     gun: () => many('gun', '持槍', id => onOff(b.gun, id, '拿槍預備', '放下槍')),
@@ -771,6 +793,15 @@ function beatBody(s, b, i) {
       txt(b.card, 'image', { placeholder: '圖片，例如 images/monster/milkfish-kid/milkfish-kid-front.png' }), txt(b.card, 'subtitle', { placeholder: '小標（例如 A級異質體 NO.727）' }),
       txt(b.card, 'title', { placeholder: '名字（大字）' }), txt(b.card, 'text', { placeholder: '說明' }))),
     door: () => one('自動門', ['door'], choose(b, 'door', [['open', '打開'], ['close', '關上']])),
+    confetti: () => {
+      const hd = { v: b.confetti ? 'on' : 'off' };
+      one('彩帶', ['confetti'], choose(hd, 'v', [['on', '天上開始飄彩帶'], ['off', '停止（已經在飄的會飄完）']], { parse: v => { b.confetti = v === 'on'; return v; } }));
+    },
+    banner: () => {
+      const area = h('textarea', { rows: 2, placeholder: '畫面中間的大字；可以換行，最後一行最大（空白＝收掉）', style: 'flex:1;min-width:200px', oninput: e => { b.banner = e.target.value; commit(false); } });
+      area.value = b.banner || '';
+      one('大字', ['banner'], area, h('small', { style: 'flex-basis:100%' }, '像蓋章一樣壓在畫面正中間，一直留著直到劇情結束或某頁清空；這頁沒台詞時不會跳出對話框'));
+    },
     heal: () => {
       const hd = { v: b.heal === false ? 'stop' : 'start' };
       one('治療光', ['heal'], choose(hd, 'v', [['start', '開始'], ['stop', '停止']], { parse: v => { b.heal = v === 'start' ? healPair(s) : false; return v; } }),
@@ -834,7 +865,7 @@ function addActMenu(s, b, i) {
     else if (MONSTER_ACTS.includes(key)) { const id = s.monsters.find(m => !(b[key] && m.id in b[key])).id; (b[key] = b[key] || {})[id] = key in ACT_DEFAULT ? ACT_DEFAULT[key] : s.actors[0]?.id || ''; }
     else ({
       thunder: () => { b.thunder = true; }, camera: () => { b.camera = beatCamera(i); }, screen: () => { b.screen = 'black'; },
-      card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, heal: () => { b.heal = healPair(s); },
+      card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, confetti: () => { b.confetti = true; }, banner: () => { b.banner = ''; }, heal: () => { b.heal = healPair(s); },
       sfx: () => { b.sfx = ''; }, bgm: () => { b.bgm = 'music/'; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; },
       label: () => { b.label = ''; }, choices: () => { b.choices = [{ text: '' }]; }, end: () => { b.end = 2; },
     })[key]();

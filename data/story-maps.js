@@ -22494,7 +22494,7 @@ const STORY_MAPS = [
         "23,15": "tile_new_bg_floor",
         "22,17": "tile_new_bg_floor",
         "15,19": "tile_new_bg_floor",
-        "13,19": "tile_new_bg_floor",
+        "13,19": "tile_mw6x68fi",
         "12,18": "tile_new_bg_floor",
         "12,17": "tile_new_bg_floor",
         "12,16": "tile_new_bg_floor",
@@ -24002,6 +24002,105 @@ const STORY_MAPS = [
         "layer": "object6",
         "ox": 26,
         "oy": 30
+      },
+      {
+        "id": "tile_mw6x68fi",
+        "c": 13,
+        "r": 18,
+        "layer": "object2",
+        "oy": 12.666667,
+        "scale": 80,
+        "ox": -4.666667
+      },
+      {
+        "id": "tile_restaurant_dish_chocolate_cake",
+        "c": 10,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 10
+      },
+      {
+        "id": "tile_restaurant_dish_apple_pie",
+        "c": 12,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 10
+      },
+      {
+        "id": "tile_restaurant_dish_chocolate_cake",
+        "c": 14,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 20
+      },
+      {
+        "id": "tile_restaurant_dish_strawberry_cake",
+        "c": 15,
+        "r": 19,
+        "layer": "object2",
+        "scale": 70,
+        "ox": 30
+      },
+      {
+        "id": "tile_restaurant_dish_strawberry_cake",
+        "c": 9,
+        "r": 19,
+        "layer": "object2",
+        "ox": 10,
+        "scale": 70
+      },
+      {
+        "id": "tile_restaurant_dish_apple_pie",
+        "c": 17,
+        "r": 19,
+        "layer": "object2",
+        "ox": 28.666667,
+        "scale": 70
+      },
+      {
+        "id": "tile_restaurant_dish_cheesecake",
+        "c": 16,
+        "r": 19,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 2,
+        "scale": 70
+      },
+      {
+        "id": "tile_restaurant_dish_cheesecake",
+        "c": 11,
+        "r": 19,
+        "layer": "object2",
+        "ox": 10,
+        "oy": 2,
+        "scale": 70
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 7,
+        "r": 16,
+        "layer": "object3",
+        "ox": 33.333333,
+        "oy": -0.666667
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 11,
+        "r": 16,
+        "layer": "object3",
+        "ox": 23.333333,
+        "oy": -0.666667
+      },
+      {
+        "id": "tile_mw5zi7xa",
+        "c": 14,
+        "r": 16,
+        "layer": "object3",
+        "ox": 53.333333,
+        "oy": -0.666667
       }
     ],
     "solid": [
