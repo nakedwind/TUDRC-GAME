@@ -637,7 +637,6 @@ const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b
   'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
-  box.append(h('p', { class: 'note' }, '一頁一句話。點一頁展開編輯；「等幾秒」＝翻到這頁後，先讓畫面演幾秒才出現文字（不會自動翻頁）。'));
   s.beats.forEach((b, i) => {
     const on = i === beatSel;
     const head = h('div', { class: 'beat-head', onclick: () => { beatSel = on ? -1 : i; renderBeats(); drawSoon(); } },
@@ -776,18 +775,16 @@ function beatBody(s, b, i) {
   };
   for (const [, items] of ACT_MENU) for (const [key] of items) if (beatHas(b, key)) ROW[key]();
   return h('div', { class: 'beat-body' },
-    dl, h('div', { class: 'row' }, h('label', { class: 'f', style: 'flex:1' }, '說話者（空白＝旁白）', txt(b, 'speaker', { list: 'speakerList', rerender: true, placeholder: '旁白' })),
-      h('label', { class: 'f' }, '等幾秒', num(b, 'wait', { min: 0 })),
+    dl, h('div', { class: 'row' }, h('label', { class: 'f', style: 'flex:1', title: '空白＝旁白' }, '說話者', txt(b, 'speaker', { list: 'speakerList', rerender: true, placeholder: '旁白' })),
+      h('label', { class: 'f', title: '翻到這頁後，先讓畫面演幾秒才出現文字（不會自動翻頁）' }, '等幾秒', num(b, 'wait', { min: 0 })),
       h('label', { class: 'f', title: '空白＝預設：一般台詞 17、大喊 23' }, '字體大小', num(b, 'textSize', { min: 8, step: 1, optional: true, placeholder: b.shout && Object.values(b.shout).some(Boolean) ? '23' : '17' }))),
     h('label', { class: 'f' }, '台詞', text),
-    acts.childElementCount ? h('div', { class: 'sub', style: 'margin:8px 0 2px' }, '這頁的演出') : null,
     acts,
     addActMenu(s, b, i),
-    s.actors.length > 1 && ACTOR_ACTS.some(k => beatHas(b, k)) ? h('p', { class: 'note' }, '同一個人一頁只能有一筆同類的演出；從選單加會先給還沒有的人，再用左邊的選單換人。') : null,
-    h('div', { class: 'row', style: 'margin-top:8px' },
-      h('button', { type: 'button', class: 'small', disabled: i === 0, onclick: () => { [s.beats[i - 1], s.beats[i]] = [s.beats[i], s.beats[i - 1]]; beatSel = i - 1; commit(); } }, '↑ 上移'),
-      h('button', { type: 'button', class: 'small', disabled: i === s.beats.length - 1, onclick: () => { [s.beats[i + 1], s.beats[i]] = [s.beats[i], s.beats[i + 1]]; beatSel = i + 1; commit(); } }, '↓ 下移'),
-      h('button', { type: 'button', class: 'small', onclick: () => { s.beats.splice(i + 1, 0, { speaker: b.speaker || '', text: '', wait: .3 }); beatSel = i + 1; commit(); } }, '＋ 在下面插入'),
+    h('div', { class: 'row', style: 'margin-top:6px' },
+      h('button', { type: 'button', class: 'small', title: '上移', disabled: i === 0, onclick: () => { [s.beats[i - 1], s.beats[i]] = [s.beats[i], s.beats[i - 1]]; beatSel = i - 1; commit(); } }, '↑'),
+      h('button', { type: 'button', class: 'small', title: '下移', disabled: i === s.beats.length - 1, onclick: () => { [s.beats[i + 1], s.beats[i]] = [s.beats[i], s.beats[i + 1]]; beatSel = i + 1; commit(); } }, '↓'),
+      h('button', { type: 'button', class: 'small', title: '在這頁下面插入一頁', onclick: () => { s.beats.splice(i + 1, 0, { speaker: b.speaker || '', text: '', wait: .3 }); beatSel = i + 1; commit(); } }, '＋ 插入'),
       h('button', { type: 'button', class: 'small danger', disabled: s.beats.length <= 1, onclick: () => { s.beats.splice(i, 1); beatSel = Math.min(i, s.beats.length - 1); commit(); } }, '刪除這頁'),
       h('span', { class: 'grow' }),
       h('button', { type: 'button', class: 'small primary', onclick: () => preview(i + 1) }, '▶ 從這頁預覽')));
@@ -795,7 +792,7 @@ function beatBody(s, b, i) {
 const healPair = s => ({ from: s.actors[1]?.id || s.actors[0]?.id || '', to: s.actors[0]?.id || '' });
 // 「＋ 加演出」選單：按類別列出全部演出；不能加的（沒有角色、每個人都加過、這頁已經有了）變灰並說明原因
 function addActMenu(s, b, i) {
-  const menu = h('details', { class: 'addmenu' }, h('summary', {}, '＋ 加演出'));
+  const menu = h('details', { class: 'addmenu' }, h('summary', { title: '同一個人一頁只能有一筆同類的演出；從選單加會先給還沒有的人，再用左邊的選單換人。' }, '＋ 加演出'));
   const add = key => {
     menu.open = false;
     if (key in PICK_ACTS) {
@@ -930,8 +927,6 @@ async function preview(from = 1) {
   if (win) win.location.href = url; else window.open(url, 'story_preview');
 }
 $('previewGame').onclick = () => preview(1);
-$('playSide').onclick = () => preview(1);
-$('playFrom').onclick = () => preview(beatSel >= 0 ? beatSel + 1 : 1);   // 從選取的那一頁開始播（沒選就從頭）
 $('exportFile').onclick = () => {
   const url = URL.createObjectURL(new Blob([storyExportText()], { type: 'text/javascript' }));
   const a = document.createElement('a'); a.href = url; a.download = 'story-scenes.js'; a.click(); setTimeout(() => URL.revokeObjectURL(url), 1000);
