@@ -1094,7 +1094,7 @@ const STORY_SCENES = {
       { "speaker": "朔", "text": "……我知道。", "wait": 0.4 },
       { "speaker": "赫真", "text": "帽子跟眼鏡都是我幫你戴的喔！很適合吧！", "wait": 0.3, "emote": { "kakuma": "sparkle" } },
       { "speaker": "朔", "text": "……我還以為是今天的制服。", "wait": 0.4, "emote": { "kakuma": "" } },
-      { "speaker": "雷德", "text": "好了好了，壽星都坐好了。大家，拉炮拿好——", "wait": 0.4, "camera": "全景" },
+      { "speaker": "雷德", "text": "耶～壽星坐好了！大家，拉炮拿好——", "wait": 0.4, "camera": "全景" },
       { "speaker": "溫特", "text": "數到三。", "wait": 0.3 },
       { "speaker": "溫特", "text": "一、二——", "wait": 0.3 },
       {
@@ -1118,9 +1118,7 @@ const STORY_SCENES = {
       { "speaker": "羅恩", "text": "……生日快樂。", "wait": 0.4 },
       { "speaker": "雷德", "text": "生日快樂，朔！以後也請多指教！", "wait": 0.3 },
       { "speaker": "溫特", "text": "生日快樂。今天放你一天假，好好過。", "wait": 0.3 },
-      { "speaker": "", "text": "朔看著一桌的人，安靜了好一會兒。", "wait": 0.6, "camera": "朔" },
       { "speaker": "朔", "text": "……謝謝大家。", "wait": 0.4, "emote": { "saku": "flower" } },
-      { "speaker": "朔", "text": "……赫真，你也是。謝謝。", "wait": 0.4 },
       {
         "speaker": "赫真",
         "text": "嘿嘿！學長，快許願吹蠟燭！",
@@ -1139,5 +1137,4 @@ const STORY_SCENES = {
       { "speaker": "", "text": "", "wait": 0.8, "screen": "black", "screenFade": 1.8, "banner": "2026/11/8\nJJ生日快樂！", "bannerDelay": 2.1 }
     ]
   }
-
 };
