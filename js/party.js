@@ -312,18 +312,19 @@ function partyPlayerAction() {
     }
   }
   // 打飯台
-  const pan = mealPanAt(p.x, p.y, 46, fx);
+  const pan = mealPanAt(p.x, p.y, 30);
   if (pan) {
     const r = spot(pan.x, pan.y, 16), nm = (dishOf(pan.key) || {}).name || '菜', isSoup = pan.key === PARTY.soupPan;
+    // 下面的 -10：人都站在這盤前面了，比旁邊的空檯子優先（除非正面向後面的料理台）
     const yy = mealHeadY(p) - (F.length ? 26 : 0);   // 提示放在溫特頭上才不會擋到人和餐盤；手上有食材時（圖畫在頭上）再往上一點
     if (isSoup) {
-      if (bowl && !bowl.soup) add(r, '裝湯', () => { bowl.soup = true; sfx('blip'); }, yy, 0, p.x);
-      else if (tray) add(r, '湯要用碗裝', () => partyError('湯不能裝在餐盤裡，要拿碗'), yy, 0, p.x);
+      if (bowl && !bowl.soup) add(r, '裝湯', () => { bowl.soup = true; sfx('blip'); }, yy, -10, p.x);
+      else if (tray) add(r, '湯要用碗裝', () => partyError('湯不能裝在餐盤裡，要拿碗'), yy, -10, p.x);
       else if (handsFree) add(r, nm + '：先拿碗', () => partyError('要先拿碗'), yy, 30, p.x);
     } else if (tray) {
-      if (tray.foods.length >= MEAL.maxDishes) add(r, '餐盤裝滿了', () => partyError('餐盤最多裝 ' + MEAL.maxDishes + ' 樣菜'), yy, 0, p.x);
-      else if (tray.foods.some(f => f.key === pan.key)) add(r, '已經裝過' + nm, () => partyError('這道菜裝過了'), yy, 0, p.x);
-      else add(r, '裝' + nm + '（' + tray.foods.length + '/' + MEAL.maxDishes + '）', () => partyAddToTray(tray, partyPanFoodByKey(pan.key)), yy, 0, p.x);
+      if (tray.foods.length >= MEAL.maxDishes) add(r, '餐盤裝滿了', () => partyError('餐盤最多裝 ' + MEAL.maxDishes + ' 樣菜'), yy, -10, p.x);
+      else if (tray.foods.some(f => f.key === pan.key)) add(r, '已經裝過' + nm, () => partyError('這道菜裝過了'), yy, -10, p.x);
+      else add(r, '裝' + nm + '（' + tray.foods.length + '/' + MEAL.maxDishes + '）', () => partyAddToTray(tray, partyPanFoodByKey(pan.key)), yy, -10, p.x);
     } else if (handsFree) add(r, nm + '：先拿餐盤', () => partyError('要先拿餐盤才能打菜'), yy, 30, p.x);
   }
   // 餐盤架、碗
