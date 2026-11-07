@@ -107,11 +107,19 @@ function mealPanAt(x, y, reach, aimX = x) {
 // 椅子前面有沒有桌子：有就回傳餐盤要放的位置
 // 一個位子的編號：長椅（卡座）的 key 整條都一樣，要加上座位的位置才分得開
 const seatIdOf = seat => seat.key + '@' + Math.round(seat.x) + ',' + Math.round(seat.y);
+// 餐盤（和疊回去的調味料、筷筒）排前後要跟著「桌子實際的排序值」，不能用桌子圖片的最底邊：
+// 桌子的排序值比圖片底邊高，用底邊的話，走在桌邊的人會先畫，餐盤和桌上道具反而蓋到他頭上。
+// 相鄰的桌子有重疊時取最晚畫的那張，餐盤才不會被隔壁桌蓋掉。
+function mealTableSortY(table) {
+  const near = mapOccluders().filter(it => it.kind === 'stamp' && MEAL.tableTiles.includes(it.stamp.id)
+    && it.x0 + OX < table.x0 + table.w && it.x1 + OX > table.x0 && it.y0 + OY < table.bottom && it.y1 + OY > table.y0);
+  return near.length ? Math.max(...near.map(it => it.y)) : table.bottom;
+}
 function trayPosForSeat(seat) {
   const off = MEAL.trayOnTable[seat.dir] || MEAL.trayOnTable.back, x = seat.x + off[0], y = seat.y + off[1];
   const table = mealStamps(MEAL.tableTiles).find(r => x >= r.x0 && x <= r.x0 + r.w && y >= r.y0 && y <= r.y0 + r.h);
   if (!table) return null;
-  const sortY = table.bottom + .3, cfg = MEAL.tableSpots[table.s.id];
+  const sortY = mealTableSortY(table) + .3, cfg = MEAL.tableSpots[table.s.id];
   if (!cfg) return { x, y, sortY, tableId: table.s.id, tableX: table.x0, tableY: table.y0 };   // 這張桌子沒設擺放點：照坐的方向放
   // 桌上有設擺放點（避開桌上的道具）：挑離座位最近的；別人的餐盤佔走的不選，背對鏡頭的人也不選會被自己的頭擋住的
   const others = mealTrays().filter(t => t.seatKey !== seatIdOf(seat));

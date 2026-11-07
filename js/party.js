@@ -162,6 +162,16 @@ function partyRecycle(who) {
   sfx('place'); partyRenderHud();
 }
 function partyAddToTray(tray, food) { tray.foods.push(food); sfx('blip'); }
+// 溫特手上有煮好的菜又拿著餐盤：自動裝進去，不用再按一次。
+// 不裝的情況：餐盤滿了、已經有這道菜、這盤已經剛好符合某人的訂單（裝下去反而弄錯）；烤焦的也不裝
+function partyAutoFillTray() {
+  const T = G.player.tray; if (!T || T.dirty) return;
+  for (const id of [...party.foods]) {
+    if (!partyFood(id).from || T.foods.length >= MEAL.maxDishes || T.foods.some(f => f.key === id)) continue;
+    if (party.guests.some(g => g.state === 'food' && partyTrayMatches(T, g.order))) return;
+    party.foods.splice(party.foods.indexOf(id), 1); partyAddToTray(T, partyCookedFood(id));
+  }
+}
 // 煮：把手上的生食放上空的爐口
 const partyBurners = () => { const r = partyStation('stove'); return r ? stoveBurners(r.s).map((_, k) => burnerPos(r.s, k)) : []; };
 function partyStovePut(rawId, owner) {
@@ -301,8 +311,6 @@ function partyPlayerAction() {
       else if (F.length < PARTY.handLimit) add(r, '起鍋：' + to.name, () => { partyTakePot(q); F.push(q.to); sfx('blip'); }, yy);
     }
   }
-  // 手上有煮好的、也拿著餐盤：隨時可以裝進去（比其他動作不優先）
-  if (tray) for (const id of F) if (partyFood(id).from && tray.foods.length < MEAL.maxDishes && !tray.foods.some(f => f.key === id)) add(spot(p.x, p.y - 30, 1), '裝進餐盤：' + partyFood(id).name, () => { F.splice(F.indexOf(id), 1); partyAddToTray(tray, partyCookedFood(id)); }, p.y - 60, 34);
   // 打飯台
   const pan = mealPanAt(p.x, p.y, 46, fx);
   if (pan) {
@@ -606,6 +614,7 @@ function partyActorStep(a, dt) {
 function partyUpdate(dt) {
   if (!partyPlaying() || !G || !G.player) return;
   party.time += dt;
+  partyAutoFillTray();
   if (party.winterSay && (party.winterSay.life -= dt) <= 0) party.winterSay = null;
   if (party.arrive.length && (party.arriveT -= dt) <= 0) { const g = party.arrive.shift(); party.arriveT = PARTY.arriveGap; g.state = 'walk'; g.a.x = g.door.x; g.a.y = g.door.y; }
   for (const p of party.pots) { p.t += dt; if (Math.random() < dt * 10) party.steam.push({ x: p.x + (Math.random() - .5) * 12, y: p.y - 10, vy: -20 - Math.random() * 14, life: .8, age: 0 }); }
