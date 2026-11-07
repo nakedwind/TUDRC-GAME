@@ -5155,7 +5155,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/bg_forest_Nest_egg.png",
     "w": 2,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_forest_bg_forest_night",
@@ -5181,7 +5182,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/bg_outside_farm01.png",
     "w": 6,
-    "h": 4
+    "h": 4,
+    "flat": true
   },
   {
     "id": "tile_forest_bg_outside_house",
@@ -5229,7 +5231,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_123.png",
     "w": 1,
-    "h": 1
+    "h": 1,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_124_copy",
@@ -5446,7 +5449,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_166.png",
     "w": 4,
-    "h": 3
+    "h": 3,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_167",
@@ -5454,7 +5458,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_layer_167.png",
     "w": 3,
-    "h": 2
+    "h": 2,
+    "flat": true
   },
   {
     "id": "tile_forest_layer_168",
@@ -5812,7 +5817,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_wood_bridge_short.png",
     "w": 3,
-    "h": 4
+    "h": 4,
+    "flat": true
   },
   {
     "id": "tile_forest_wood_bridge_long",
@@ -5820,7 +5826,8 @@ const SHARED_TILES = [
     "role": "decor",
     "file": "images/森林/forest_wood_bridge_long.png",
     "w": 3,
-    "h": 6
+    "h": 6,
+    "flat": true
   },
   {
     "id": "tile_mw5ha8w3",

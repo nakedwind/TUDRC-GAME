@@ -63061,433 +63061,715 @@ const BATTLE_MAPS = [
     "desc": "",
     "layers": {
       "floor": {
-        "91,42": "floor",
-        "91,43": "floor"
+        "97,66": "floor",
+        "97,67": "floor",
+        "16,61": "floor",
+        "17,61": "floor",
+        "18,61": "floor",
+        "19,61": "floor",
+        "20,61": "floor",
+        "21,61": "floor",
+        "16,59": "floor",
+        "17,59": "floor",
+        "18,59": "floor",
+        "19,59": "floor",
+        "20,59": "floor",
+        "21,59": "floor",
+        "16,60": "floor",
+        "17,60": "floor",
+        "18,60": "floor",
+        "19,60": "floor",
+        "20,60": "floor",
+        "21,60": "floor",
+        "22,60": "floor"
       },
       "ground": {
-        "98,62": "tile_forest_layer_127"
+        "104,86": "tile_forest_layer_127",
+        "93,102": "tile_forest_layer_127",
+        "88,102": "tile_forest_layer_127",
+        "90,100": "tile_forest_layer_127",
+        "111,96": "tile_forest_layer_127",
+        "113,93": "tile_forest_layer_127",
+        "49,84": "tile_forest_layer_127",
+        "41,86": "tile_forest_layer_127",
+        "36,85": "tile_forest_layer_127",
+        "67,50": "tile_forest_layer_127",
+        "76,50": "tile_forest_layer_127",
+        "73,39": "tile_forest_layer_127",
+        "69,56": "tile_forest_layer_127",
+        "54,32": "tile_forest_layer_127",
+        "58,31": "tile_forest_layer_127",
+        "63,33": "tile_forest_layer_127",
+        "53,28": "tile_forest_layer_127",
+        "39,28": "tile_forest_layer_127",
+        "36,31": "tile_forest_layer_127",
+        "38,33": "tile_forest_layer_127",
+        "37,38": "tile_forest_layer_127",
+        "13,40": "tile_forest_layer_127",
+        "10,41": "tile_forest_layer_127",
+        "12,46": "tile_forest_layer_127",
+        "14,48": "tile_forest_layer_127",
+        "17,43": "tile_forest_layer_127",
+        "20,81": "tile_forest_layer_127",
+        "12,77": "tile_forest_layer_127",
+        "16,87": "tile_forest_layer_127",
+        "17,87": "tile_forest_layer_127",
+        "23,92": "tile_forest_layer_127",
+        "13,81": "tile_forest_layer_127",
+        "11,84": "tile_forest_layer_127",
+        "18,94": "tile_forest_layer_127",
+        "110,59": "tile_forest_layer_127",
+        "86,48": "tile_forest_layer_127",
+        "86,40": "tile_forest_layer_127",
+        "84,34": "tile_forest_layer_127",
+        "105,27": "tile_forest_layer_127",
+        "103,32": "tile_forest_layer_127",
+        "96,40": "tile_forest_layer_127",
+        "99,38": "tile_forest_layer_127",
+        "104,38": "tile_forest_layer_127",
+        "110,28": "tile_forest_layer_127",
+        "113,95": "tile_forest_layer_127",
+        "65,100": "tile_forest_layer_127",
+        "63,102": "tile_forest_layer_127",
+        "53,103": "tile_forest_layer_127",
+        "45,103": "tile_forest_layer_127"
       },
       "ground2": {
-        "94,57": "tile_forest_layer_123"
+        "100,81": "tile_forest_layer_123",
+        "48,85": "tile_forest_group_8_copy",
+        "70,93": "tile_forest_group_8_copy",
+        "85,84": "tile_forest_group_8_copy",
+        "69,53": "tile_forest_group_8_copy",
+        "86,45": "tile_forest_group_8_copy",
+        "99,46": "tile_forest_group_8_copy",
+        "70,37": "tile_forest_group_8_copy",
+        "84,35": "tile_forest_group_8_copy",
+        "56,30": "tile_forest_group_8_copy",
+        "58,35": "tile_forest_group_8_copy",
+        "50,32": "tile_forest_group_8_copy",
+        "49,59": "floor",
+        "50,59": "floor",
+        "51,59": "floor",
+        "102,85": "tile_forest_layer_127",
+        "103,87": "tile_forest_layer_127",
+        "100,88": "tile_forest_layer_127",
+        "95,69": "tile_forest_layer_127",
+        "89,66": "tile_forest_layer_127",
+        "111,63": "tile_forest_layer_127",
+        "107,60": "tile_forest_layer_127",
+        "20,85": "tile_forest_group_8_copy",
+        "14,80": "tile_forest_group_8_copy",
+        "21,94": "tile_forest_group_8_copy",
+        "12,87": "tile_forest_group_8_copy",
+        "65,98": "tile_forest_group_8_copy",
+        "51,101": "tile_forest_group_8_copy",
+        "44,102": "tile_forest_group_8_copy",
+        "46,85": "tile_forest_group_8_copy",
+        "38,85": "tile_forest_group_8_copy",
+        "63,61": "tile_forest_group_8_copy",
+        "87,50": "tile_forest_group_8_copy",
+        "74,40": "tile_forest_group_8_copy",
+        "16,45": "tile_forest_group_8_copy",
+        "10,40": "tile_forest_group_8_copy",
+        "12,45": "tile_forest_group_8_copy",
+        "108,27": "tile_forest_group_8_copy_2",
+        "100,35": "tile_forest_group_8_copy_2",
+        "37,31": "tile_forest_group_8_copy_2",
+        "33,37": "tile_forest_group_8_copy_2"
       },
       "ground3": {},
       "object": {
-        "74,60": "tile_mr4czvpx",
-        "93,63": "tile_mr4czvpx",
-        "93,62": "tile_mr4czvpx",
-        "93,61": "tile_mr4czvpx",
-        "93,60": "tile_mr4czvpx",
-        "93,59": "tile_mr4czvpx",
-        "93,58": "tile_mr4czvpx",
-        "93,57": "tile_mr4czvpx",
-        "93,56": "tile_mr4czvpx",
-        "93,55": "tile_mr4czvpx",
-        "93,54": "tile_mr4czvpx",
-        "93,53": "tile_mr4czvpx",
-        "99,63": "tile_mr4czvpx",
-        "99,62": "tile_mr4czvpx",
-        "99,61": "tile_mr4czvpx",
-        "99,60": "tile_mr4czvpx",
-        "99,59": "tile_mr4czvpx",
-        "99,58": "tile_mr4czvpx",
-        "99,57": "tile_mr4czvpx",
-        "99,56": "tile_mr4czvpx",
-        "99,55": "tile_mr4czvpx",
-        "99,54": "tile_mr4czvpx",
-        "99,53": "tile_mr4czvpx",
-        "102,48": "tile_mr4czvpx",
-        "102,49": "tile_mr4czvpx",
-        "78,39": "tile_mr4czvpx",
-        "78,38": "tile_mr4czvpx",
-        "78,37": "tile_mr4czvpx",
-        "78,36": "tile_mr4czvpx",
-        "78,35": "tile_mr4czvpx",
-        "78,34": "tile_mr4czvpx",
-        "78,33": "tile_mr4czvpx",
-        "78,32": "tile_mr4czvpx",
-        "78,31": "tile_mr4czvpx",
-        "78,30": "tile_mr4czvpx",
-        "78,29": "tile_mr4czvpx",
-        "78,28": "tile_mr4czvpx",
-        "78,27": "tile_mr4czvpx",
-        "96,23": "tile_mr4czvpx",
-        "96,22": "tile_mr4czvpx",
-        "96,21": "tile_mr4czvpx",
-        "96,20": "tile_mr4czvpx",
-        "56,42": "tile_mr4czvpx",
-        "56,41": "tile_mr4czvpx",
-        "56,40": "tile_mr4czvpx",
-        "56,39": "tile_mr4czvpx",
-        "56,38": "tile_mr4czvpx",
-        "56,37": "tile_mr4czvpx",
-        "56,36": "tile_mr4czvpx",
-        "60,26": "tile_mr4czvpx",
-        "60,27": "tile_mr4czvpx",
-        "60,28": "tile_mr4czvpx",
-        "60,29": "tile_mr4czvpx",
-        "60,30": "tile_mr4czvpx",
-        "60,31": "tile_mr4czvpx",
-        "63,12": "tile_mr4czvpx",
-        "63,13": "tile_mr4czvpx",
-        "63,14": "tile_mr4czvpx",
-        "63,15": "tile_mr4czvpx",
-        "81,8": "tile_mr4czvpx",
-        "81,9": "tile_mr4czvpx",
-        "81,10": "tile_mr4czvpx",
-        "81,11": "tile_mr4czvpx",
-        "81,12": "tile_mr4czvpx",
-        "81,13": "tile_mr4czvpx",
-        "81,14": "tile_mr4czvpx",
-        "81,15": "tile_mr4czvpx",
-        "81,16": "tile_mr4czvpx",
-        "105,15": "tile_mr4czvpx",
-        "105,14": "tile_mr4czvpx",
-        "105,13": "tile_mr4czvpx",
-        "105,12": "tile_mr4czvpx",
-        "105,11": "tile_mr4czvpx",
-        "105,10": "tile_mr4czvpx",
-        "105,9": "tile_mr4czvpx",
-        "105,8": "tile_mr4czvpx",
-        "105,7": "tile_mr4czvpx",
-        "105,6": "tile_mr4czvpx",
-        "105,5": "tile_mr4czvpx",
-        "100,5": "tile_mr4czvpx",
-        "100,6": "tile_mr4czvpx",
-        "100,7": "tile_mr4czvpx",
-        "100,8": "tile_mr4czvpx",
-        "100,9": "tile_mr4czvpx",
-        "100,10": "tile_mr4czvpx",
-        "100,11": "tile_mr4czvpx",
-        "99,64": "tile_mr4czvpx",
-        "93,64": "tile_mr4czvpx",
-        "56,72": "tile_mr4czvpx",
-        "34,72": "tile_mr4czvpx",
-        "23,75": "tile_mr4czvpx",
-        "23,74": "tile_mr4czvpx",
-        "23,73": "tile_mr4czvpx",
-        "23,72": "tile_mr4czvpx"
+        "80,84": "tile_mr4czvpx",
+        "99,87": "tile_mr4czvpx",
+        "99,86": "tile_mr4czvpx",
+        "99,85": "tile_mr4czvpx",
+        "99,84": "tile_mr4czvpx",
+        "99,83": "tile_mr4czvpx",
+        "99,82": "tile_mr4czvpx",
+        "99,81": "tile_mr4czvpx",
+        "99,80": "tile_mr4czvpx",
+        "99,79": "tile_mr4czvpx",
+        "99,78": "tile_mr4czvpx",
+        "99,77": "tile_mr4czvpx",
+        "105,87": "tile_mr4czvpx",
+        "105,86": "tile_mr4czvpx",
+        "105,85": "tile_mr4czvpx",
+        "105,84": "tile_mr4czvpx",
+        "105,83": "tile_mr4czvpx",
+        "105,82": "tile_mr4czvpx",
+        "105,81": "tile_mr4czvpx",
+        "105,80": "tile_mr4czvpx",
+        "105,79": "tile_mr4czvpx",
+        "105,78": "tile_mr4czvpx",
+        "105,77": "tile_mr4czvpx",
+        "108,72": "tile_mr4czvpx",
+        "108,73": "tile_mr4czvpx",
+        "84,63": "tile_mr4czvpx",
+        "84,62": "tile_mr4czvpx",
+        "84,61": "tile_mr4czvpx",
+        "84,60": "tile_mr4czvpx",
+        "84,59": "tile_mr4czvpx",
+        "84,58": "tile_mr4czvpx",
+        "84,57": "tile_mr4czvpx",
+        "84,56": "tile_mr4czvpx",
+        "84,55": "tile_mr4czvpx",
+        "84,54": "tile_mr4czvpx",
+        "84,53": "tile_mr4czvpx",
+        "84,52": "tile_mr4czvpx",
+        "84,51": "tile_mr4czvpx",
+        "102,47": "tile_mr4czvpx",
+        "102,46": "tile_mr4czvpx",
+        "102,45": "tile_mr4czvpx",
+        "102,44": "tile_mr4czvpx",
+        "62,66": "tile_mr4czvpx",
+        "62,65": "tile_mr4czvpx",
+        "62,64": "tile_mr4czvpx",
+        "62,63": "tile_mr4czvpx",
+        "62,62": "tile_mr4czvpx",
+        "62,61": "tile_mr4czvpx",
+        "62,60": "tile_mr4czvpx",
+        "66,50": "tile_mr4czvpx",
+        "66,51": "tile_mr4czvpx",
+        "66,52": "tile_mr4czvpx",
+        "66,53": "tile_mr4czvpx",
+        "66,54": "tile_mr4czvpx",
+        "66,55": "tile_mr4czvpx",
+        "69,36": "tile_mr4czvpx",
+        "69,37": "tile_mr4czvpx",
+        "69,38": "tile_mr4czvpx",
+        "69,39": "tile_mr4czvpx",
+        "87,32": "tile_mr4czvpx",
+        "87,33": "tile_mr4czvpx",
+        "87,34": "tile_mr4czvpx",
+        "87,35": "tile_mr4czvpx",
+        "87,36": "tile_mr4czvpx",
+        "87,37": "tile_mr4czvpx",
+        "87,38": "tile_mr4czvpx",
+        "87,39": "tile_mr4czvpx",
+        "87,40": "tile_mr4czvpx",
+        "105,88": "tile_mr4czvpx",
+        "99,88": "tile_mr4czvpx",
+        "62,96": "tile_mr4czvpx",
+        "40,96": "tile_mr4czvpx",
+        "29,99": "tile_mr4czvpx",
+        "29,98": "tile_mr4czvpx",
+        "29,97": "tile_mr4czvpx",
+        "29,96": "tile_mr4czvpx",
+        "48,56": "tile_mr4czvpx",
+        "48,57": "tile_mr4czvpx",
+        "43,56": "tile_mr4czvpx",
+        "43,32": "tile_mr4czvpx",
+        "33,27": "tile_mr4czvpx",
+        "33,28": "tile_mr4czvpx",
+        "33,29": "tile_mr4czvpx",
+        "33,30": "tile_mr4czvpx",
+        "33,31": "tile_mr4czvpx",
+        "33,32": "tile_mr4czvpx",
+        "27,42": "tile_mr4czvpx",
+        "39,46": "tile_mr4czvpx",
+        "39,47": "tile_mr4czvpx",
+        "39,48": "tile_mr4czvpx",
+        "39,49": "tile_mr4czvpx",
+        "39,50": "tile_mr4czvpx",
+        "39,51": "tile_mr4czvpx",
+        "39,52": "tile_mr4czvpx",
+        "19,42": "tile_mr4czvpx",
+        "19,43": "tile_mr4czvpx",
+        "19,44": "tile_mr4czvpx",
+        "19,45": "tile_mr4czvpx",
+        "19,46": "tile_mr4czvpx",
+        "19,47": "tile_mr4czvpx",
+        "19,48": "tile_mr4czvpx",
+        "19,49": "tile_mr4czvpx",
+        "9,41": "tile_mr4czvpx",
+        "9,42": "tile_mr4czvpx",
+        "9,43": "tile_mr4czvpx",
+        "9,44": "tile_mr4czvpx",
+        "9,46": "tile_mr4czvpx",
+        "9,47": "tile_mr4czvpx",
+        "9,48": "tile_mr4czvpx",
+        "9,49": "tile_mr4czvpx",
+        "9,38": "tile_mr4czvpx",
+        "9,39": "tile_mr4czvpx",
+        "9,40": "tile_mr4czvpx",
+        "9,45": "tile_mr4czvpx",
+        "12,62": "tile_mr4czvpx",
+        "12,61": "tile_mr4czvpx",
+        "12,60": "tile_mr4czvpx",
+        "12,59": "tile_mr4czvpx",
+        "12,58": "tile_mr4czvpx",
+        "12,57": "tile_mr4czvpx",
+        "12,56": "tile_mr4czvpx",
+        "12,55": "tile_mr4czvpx",
+        "12,54": "tile_mr4czvpx",
+        "16,57": "tile_mr4czvpx",
+        "16,56": "tile_mr4czvpx",
+        "16,55": "tile_mr4czvpx",
+        "16,54": "tile_mr4czvpx",
+        "21,67": "tile_mr4czvpx",
+        "21,68": "tile_mr4czvpx",
+        "21,69": "tile_mr4czvpx",
+        "21,70": "tile_mr4czvpx",
+        "33,61": "tile_mr4czvpx",
+        "33,62": "tile_mr4czvpx",
+        "33,63": "tile_mr4czvpx",
+        "114,39": "tile_mr4czvpx",
+        "114,38": "tile_mr4czvpx",
+        "114,37": "tile_mr4czvpx",
+        "114,36": "tile_mr4czvpx",
+        "114,35": "tile_mr4czvpx",
+        "114,33": "tile_mr4czvpx",
+        "114,34": "tile_mr4czvpx",
+        "114,32": "tile_mr4czvpx",
+        "114,31": "tile_mr4czvpx",
+        "114,30": "tile_mr4czvpx"
       },
       "object2": {},
       "object3": {},
-      "object4": {},
+      "object4": {
+        "65,94": "tile_interactive_power_switch_on",
+        "27,72": "tile_interactive_power_switch_on",
+        "53,49": "tile_interactive_power_switch_on",
+        "92,43": "tile_interactive_power_switch_on"
+      },
       "overlay": {},
-      "top": {},
+      "top": {
+        "19,38": "tile_mr4czvpx",
+        "19,39": "tile_mr4czvpx",
+        "19,40": "tile_mr4czvpx",
+        "19,41": "tile_mr4czvpx",
+        "43,27": "tile_mr4czvpx",
+        "43,28": "tile_mr4czvpx",
+        "43,29": "tile_mr4czvpx",
+        "43,30": "tile_mr4czvpx",
+        "43,31": "tile_mr4czvpx",
+        "27,36": "tile_mr4czvpx",
+        "27,37": "tile_mr4czvpx",
+        "27,38": "tile_mr4czvpx",
+        "27,39": "tile_mr4czvpx",
+        "27,40": "tile_mr4czvpx",
+        "27,41": "tile_mr4czvpx",
+        "118,90": "tile_mr4czvpx",
+        "118,91": "tile_mr4czvpx",
+        "118,92": "tile_mr4czvpx",
+        "118,93": "tile_mr4czvpx",
+        "118,94": "tile_mr4czvpx",
+        "118,95": "tile_mr4czvpx",
+        "118,96": "tile_mr4czvpx",
+        "118,97": "tile_mr4czvpx",
+        "118,98": "tile_mr4czvpx",
+        "118,99": "tile_mr4czvpx",
+        "118,100": "tile_mr4czvpx",
+        "118,101": "tile_mr4czvpx",
+        "118,102": "tile_mr4czvpx",
+        "99,21": "tile_mr4czvpx",
+        "99,22": "tile_mr4czvpx",
+        "99,23": "tile_mr4czvpx",
+        "99,24": "tile_mr4czvpx",
+        "114,21": "tile_mr4czvpx",
+        "114,22": "tile_mr4czvpx",
+        "114,23": "tile_mr4czvpx",
+        "114,24": "tile_mr4czvpx"
+      },
       "ground4": {},
       "ground5": {},
       "object5": {},
-      "object6": {}
+      "object6": {},
+      "ground6": {},
+      "object7": {
+        "10,24": "tile_mr4czvpx",
+        "10,25": "tile_mr4czvpx",
+        "10,26": "tile_mr4czvpx",
+        "10,27": "tile_mr4czvpx",
+        "10,28": "tile_mr4czvpx",
+        "10,29": "tile_mr4czvpx",
+        "10,30": "tile_mr4czvpx",
+        "10,31": "tile_mr4czvpx",
+        "10,32": "tile_mr4czvpx",
+        "10,33": "tile_mr4czvpx",
+        "10,34": "tile_mr4czvpx",
+        "30,8": "tile_mr4czvpx",
+        "30,9": "tile_mr4czvpx",
+        "30,10": "tile_mr4czvpx",
+        "45,8": "tile_mr4czvpx",
+        "45,9": "tile_mr4czvpx",
+        "45,10": "tile_mr4czvpx",
+        "87,23": "tile_mr4czvpx",
+        "87,22": "tile_mr4czvpx",
+        "87,21": "tile_mr4czvpx",
+        "87,20": "tile_mr4czvpx",
+        "87,19": "tile_mr4czvpx",
+        "83,23": "tile_mr4czvpx",
+        "83,22": "tile_mr4czvpx",
+        "83,21": "tile_mr4czvpx",
+        "83,20": "tile_mr4czvpx",
+        "83,19": "tile_mr4czvpx"
+      },
+      "object8": {
+        "89,10": "tile_obstacle_ore_small",
+        "87,9": "tile_obstacle_ore_small"
+      },
+      "ground7": {},
+      "object9": {
+        "112,93": "tile_forest_group_8_copy"
+      },
+      "object10": {},
+      "ground8": {},
+      "object11": {},
+      "ground9": {
+        "87,90": "tile_interactive_storage_locker_key",
+        "63,84": "tile_interactive_storage_locker_key",
+        "54,91": "tile_interactive_storage_locker_key",
+        "74,70": "tile_interactive_storage_locker_key",
+        "69,79": "tile_interactive_storage_locker_key",
+        "33,73": "tile_interactive_storage_locker_key",
+        "23,93": "tile_interactive_storage_locker_key",
+        "14,57": "tile_interactive_storage_locker_key",
+        "11,42": "tile_interactive_storage_locker_key",
+        "34,31": "tile_interactive_storage_locker_key",
+        "56,35": "tile_interactive_storage_locker_key",
+        "112,38": "tile_interactive_storage_locker_key",
+        "111,61": "tile_interactive_storage_locker_key",
+        "77,46": "tile_interactive_storage_locker_key",
+        "49,103": "tile_interactive_pickup_battery",
+        "59,79": "tile_interactive_pickup_battery",
+        "24,68": "tile_interactive_pickup_battery",
+        "56,47": "tile_interactive_pickup_battery",
+        "85,34": "tile_interactive_pickup_battery",
+        "53,30": "tile_interactive_pickup_battery",
+        "116,103": "tile_interactive_pickup_adrenaline",
+        "17,96": "tile_interactive_pickup_adrenaline",
+        "24,58": "tile_interactive_pickup_adrenaline",
+        "38,39": "tile_interactive_pickup_adrenaline",
+        "55,53": "tile_interactive_pickup_adrenaline",
+        "98,36": "tile_interactive_pickup_adrenaline",
+        "64,62": "tile_interactive_pickup_graffiti_black",
+        "108,57": "tile_interactive_pickup_graffiti_black",
+        "83,95": "tile_interactive_pickup_graffiti_black",
+        "58,102": "tile_interactive_pickup_graffiti_black",
+        "43,49": "tile_interactive_pickup_graffiti_black",
+        "17,42": "tile_interactive_pickup_graffiti_black",
+        "37,37": "tile_interactive_pickup_graffiti_black",
+        "102,26": "tile_interactive_pickup_graffiti_black",
+        "11,88": "tile_interactive_pickup_almond_water",
+        "35,75": "tile_interactive_pickup_almond_water",
+        "71,40": "tile_interactive_pickup_almond_water",
+        "107,63": "tile_interactive_pickup_almond_water",
+        "96,94": "tile_obstacle_camping_lights",
+        "96,96": "tile_decor_gasstove02"
+      }
     },
     "stamps": [
       {
         "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
         "c": 86,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 74,
+        "r": 95,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 89,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 92,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 89,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 92,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 89,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 92,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 77,
+        "r": 95,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 83,
-        "r": 77,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 92,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 86,
-        "r": 77,
+        "r": 92,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 89,
-        "r": 77,
+        "r": 92,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 92,
-        "r": 77,
+        "r": 97,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 65,
+        "c": 92,
+        "r": 95,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 80,
-        "r": 65,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 89,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 92,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 89,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 92,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 77,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 74,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 77,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 74,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 83,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 71,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 68,
-        "r": 68,
+        "r": 92,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 71,
-        "r": 71,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 71,
+        "r": 89,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 68,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 65,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 65,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 65,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 62,
-        "r": 65,
+        "r": 89,
         "layer": "floor"
       },
       {
         "id": "tile_muftd54p",
-        "c": 92,
-        "r": 71,
+        "c": 98,
+        "r": 95,
         "layer": "ground"
       },
       {
         "id": "tile_field_base",
-        "c": 92,
-        "r": 71,
+        "c": 98,
+        "r": 95,
         "layer": "object",
         "baseHp": 2000,
         "baseDepth": 2,
@@ -63620,3892 +63902,3010 @@ const BATTLE_MAPS = [
             10,
             6
           ]
-        ]
+        ],
+        "oy": -11.333333
       },
       {
         "id": "tile_bg_backroom_floor_l",
-        "c": 62,
-        "r": 62,
+        "c": 68,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 71,
+        "r": 86,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 65,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 59,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 56,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 53,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 50,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 47,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 47,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 47,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 44,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 44,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 44,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 44,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 41,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 41,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 72,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 72,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 78,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 78,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 78,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 63,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 60,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 57,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 57,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 60,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 57,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 60,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 63,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 63,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 91,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 91,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 88,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 91,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 88,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 85,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 85,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 79,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 79,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 79,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 57,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 60,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 63,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 40,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 40,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 37,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 37,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 38,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 35,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 32,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 29,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 29,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 30,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 27,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 27,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 30,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 27,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 21,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 21,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 79,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 79,
-        "r": 29,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 29,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 29,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 29,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 29,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 79,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 82,
-        "r": 5,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 9,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 9,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 40,
-        "r": 27,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 37,
-        "r": 27,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 37,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 27,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 21,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 15,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 9,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 40,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 30,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 33,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 33,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 33,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 33,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 33,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 30,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 30,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 30,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 19,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 19,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 19,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 38,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 29,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 23,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 23,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 23,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 9,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 9,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 3,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 9,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 17,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 17,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 17,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 4,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 7,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 10,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 13,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 7,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 4,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 44,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 47,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 38,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 58,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 50,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 53,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 61,
-        "r": 59,
+        "r": 86,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 62,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 38,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 41,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 44,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 47,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 50,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 53,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 56,
-        "r": 80,
+        "r": 86,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 59,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 56,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 50,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 50,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 61,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 61,
         "r": 80,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
-        "c": 19,
+        "c": 61,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 52,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 52,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 78,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 81,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 81,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 78,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 84,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 84,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 84,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 81,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 66,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 63,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 63,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 66,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 66,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 97,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 97,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 94,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 97,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 94,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 91,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 91,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 46,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 46,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 43,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 43,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
         "r": 53,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
-        "c": 22,
-        "r": 53,
+        "c": 49,
+        "r": 50,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 53,
+        "c": 40,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 37,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 68,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 28,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 52,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 52,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 45,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 45,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
         "r": 53,
         "layer": "floor"
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 102,
-        "r": 65,
-        "layer": "object"
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 53,
+        "layer": "floor"
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 103,
-        "r": 65,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 104,
-        "r": 65,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 105,
-        "r": 65,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
+        "id": "tile_bg_backroom_floor_l",
         "c": 106,
-        "r": 65,
-        "layer": "object"
+        "r": 56,
+        "layer": "floor"
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 107,
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 53,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 53,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 53,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 46,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 43,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 43,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 40,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 40,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 40,
+        "r": 45,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 40,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 37,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 46,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 40,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 40,
+        "r": 57,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 37,
+        "r": 57,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 57,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 57,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 22,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 22,
         "r": 65,
-        "layer": "object"
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 22,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 22,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 22,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 19,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 16,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 53,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 64,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 56,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 59,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 67,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 68,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 44,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 47,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 50,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 56,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 59,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 62,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 65,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 77,
+        "layer": "floor"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 108,
-        "r": 65,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 109,
-        "r": 65,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 91,
-        "r": 65,
+        "c": 110,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 90,
-        "r": 65,
+        "c": 111,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 89,
-        "r": 65,
+        "c": 112,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 88,
-        "r": 65,
+        "c": 113,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 87,
-        "r": 65,
+        "c": 114,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 86,
-        "r": 65,
+        "c": 115,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 85,
-        "r": 65,
+        "c": 97,
+        "r": 89,
         "layer": "object"
       },
       {
-        "id": "tile_mvpa16jw",
-        "c": 83,
-        "r": 64,
+        "id": "tile_mr4cyy36",
+        "c": 96,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 95,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 94,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 93,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 92,
-        "r": 65,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 101,
-        "r": 65,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 100,
-        "r": 65,
+        "c": 91,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mvpa16jw",
-        "c": 67,
-        "r": 65,
+        "c": 89,
+        "r": 88,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 98,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 107,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 106,
+        "r": 89,
         "layer": "object"
       },
       {
         "id": "tile_mvpa16jw",
         "c": 73,
-        "r": 65,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 79,
+        "r": 89,
         "layer": "object5",
         "fx": true
       },
       {
         "id": "tile_mvpa0o8b",
+        "c": 88,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 86,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 84,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 88,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 86,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 79,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 98,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 105,
+        "r": 75,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 96,
+        "r": 74,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 107,
+        "r": 74,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 95,
+        "r": 71,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 108,
+        "r": 66,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 93,
+        "r": 70,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 92,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 91,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 90,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 89,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 87,
+        "r": 67,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 86,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 84,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 83,
+        "r": 48,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
         "c": 82,
+        "r": 47,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 90,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 94,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 97,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 96,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 95,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 94,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 52,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 53,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 54,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 55,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 56,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
         "r": 57,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 83,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 83,
-        "r": 62,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 83,
-        "r": 61,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 83,
-        "r": 60,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 74,
-        "r": 64,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 74,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 74,
-        "r": 62,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 74,
-        "r": 61,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 73,
-        "r": 54,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 92,
-        "r": 51,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 99,
-        "r": 51,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
         "c": 90,
-        "r": 50,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 101,
-        "r": 50,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 50,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 89,
-        "r": 47,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 102,
-        "r": 42,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 87,
-        "r": 46,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 86,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 85,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 84,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 83,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 81,
-        "r": 43,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 80,
-        "r": 41,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 78,
-        "r": 40,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 77,
-        "r": 24,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 76,
-        "r": 23,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 84,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 88,
-        "r": 41,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 91,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 90,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 89,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 88,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 28,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 29,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 30,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 31,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 32,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 33,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 34,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 35,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 36,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 37,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 84,
-        "r": 38,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 86,
-        "r": 39,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 87,
-        "r": 39,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 86,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 87,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 88,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 89,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 91,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 90,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 92,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 93,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 94,
-        "r": 25,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 95,
-        "r": 24,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 96,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 96,
-        "r": 42,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 94,
-        "r": 46,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 95,
-        "r": 46,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 98,
-        "r": 41,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 93,
-        "r": 43,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 92,
-        "r": 42,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 99,
-        "r": 27,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 107,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 107,
-        "r": 41,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 96,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 102,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 102,
-        "r": 46,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 102,
-        "r": 47,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 104,
-        "r": 42,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 105,
-        "r": 42,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 106,
-        "r": 42,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 40,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 38,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 37,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 36,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 35,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 34,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 33,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 32,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 31,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 99,
-        "r": 30,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 30,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 31,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 32,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 33,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 34,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 35,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 36,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 37,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 38,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 108,
-        "r": 40,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 101,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 103,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 102,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 104,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 106,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 105,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 44,
-        "layer": "floor",
-        "fx": false
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 74,
         "r": 58,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 74,
+        "c": 90,
+        "r": 59,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 60,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 61,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 90,
+        "r": 62,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 92,
+        "r": 63,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 93,
+        "r": 63,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 92,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 93,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 94,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 95,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 97,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 96,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 98,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 99,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 100,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 101,
+        "r": 48,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 102,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 102,
+        "r": 66,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 100,
+        "r": 70,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 101,
+        "r": 70,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 104,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 99,
+        "r": 67,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 98,
+        "r": 66,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 105,
+        "r": 51,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 113,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 113,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 102,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 108,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 108,
+        "r": 70,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 108,
+        "r": 71,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 110,
+        "r": 66,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 111,
+        "r": 66,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 112,
+        "r": 66,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 64,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 62,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 61,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 60,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 59,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 58,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
         "r": 57,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 74,
+        "c": 105,
+        "r": 56,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 55,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 105,
+        "r": 54,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 54,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 55,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 56,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 57,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 58,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
         "r": 59,
         "layer": "object",
         "fx": true
       },
       {
-        "id": "tile_mvpa16jw",
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 60,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 61,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 62,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 64,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 107,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 109,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 108,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 110,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 112,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 111,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 68,
+        "layer": "floor",
+        "fx": false
+      },
+      {
+        "id": "tile_mr4czvpx",
         "c": 80,
-        "r": 56,
+        "r": 82,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 83,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 86,
+        "r": 80,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 69,
-        "r": 66,
+        "c": 75,
+        "r": 90,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 70,
-        "r": 66,
+        "c": 76,
+        "r": 90,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 71,
-        "r": 66,
+        "c": 77,
+        "r": 90,
         "layer": "object5",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 72,
-        "r": 66,
+        "c": 78,
+        "r": 90,
         "layer": "object5",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
+        "c": 78,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 77,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 76,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 75,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 74,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
         "c": 72,
-        "r": 54,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 85,
+        "r": 72,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 86,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 86,
+        "r": 77,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 86,
+        "r": 76,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 86,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 86,
+        "r": 79,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
+        "c": 84,
+        "r": 72,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 83,
+        "r": 72,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 82,
+        "r": 72,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 81,
+        "r": 72,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 80,
+        "r": 72,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 79,
+        "r": 72,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 77,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
         "c": 71,
-        "r": 54,
+        "r": 68,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 70,
-        "r": 54,
+        "c": 65,
+        "r": 68,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 69,
-        "r": 54,
+        "c": 66,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 67,
+        "r": 68,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 68,
-        "r": 54,
+        "r": 68,
         "layer": "object",
         "fx": true
       },
       {
-        "id": "tile_mvpa16jw",
-        "c": 66,
-        "r": 53,
-        "layer": "object"
+        "id": "tile_mr4cyy36",
+        "c": 69,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 70,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 72,
+        "r": 71,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 72,
+        "r": 72,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 72,
+        "r": 73,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 72,
+        "r": 74,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 72,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 72,
+        "r": 76,
+        "layer": "object",
+        "fx": true
       },
       {
         "id": "tile_mvpa0o8b",
-        "c": 79,
-        "r": 48,
-        "layer": "object5",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 51,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 53,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 52,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 54,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 55,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 78,
-        "r": 48,
-        "layer": "object5",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 77,
-        "r": 48,
-        "layer": "object5",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
         "c": 76,
-        "r": 48,
-        "layer": "object5",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 75,
-        "r": 48,
-        "layer": "object5",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 74,
-        "r": 48,
+        "r": 63,
         "layer": "object",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 73,
-        "r": 48,
+        "id": "tile_mr4czvpx",
+        "c": 77,
+        "r": 66,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 77,
+        "r": 67,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 77,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 77,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 77,
+        "r": 70,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mvpa16jw",
         "c": 71,
+        "r": 62,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 73,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 74,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 75,
+        "r": 63,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 54,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 55,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 56,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 57,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 58,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 59,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 60,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 71,
+        "r": 61,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 71,
+        "r": 51,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 73,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 74,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 75,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 76,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 77,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 66,
         "r": 47,
         "layer": "object"
       },
       {
-        "id": "tile_mvpa16jw",
-        "c": 56,
-        "r": 43,
+        "id": "tile_mvpa0o8b",
+        "c": 62,
+        "r": 57,
         "layer": "object"
       },
       {
-        "id": "tile_mvpa0o8b",
+        "id": "tile_mvpa16jw",
         "c": 65,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 59,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 60,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 61,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 62,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 63,
-        "r": 44,
+        "r": 56,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 64,
-        "r": 44,
+        "r": 57,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 73,
+        "r": 46,
         "layer": "object",
         "fx": true
       },
       {
-        "id": "tile_mr4czvpx",
-        "c": 66,
+        "id": "tile_mr4cyy36",
+        "c": 68,
+        "r": 47,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 69,
+        "r": 47,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 70,
+        "r": 47,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 71,
+        "r": 47,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 72,
         "r": 47,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 66,
+        "c": 78,
         "r": 48,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 66,
+        "c": 78,
         "r": 49,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 66,
-        "r": 50,
+        "c": 78,
+        "r": 47,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 66,
-        "r": 51,
+        "c": 78,
+        "r": 46,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 66,
-        "r": 52,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 70,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 71,
-        "r": 42,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 71,
-        "r": 43,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 71,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 71,
+        "c": 78,
         "r": 45,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 71,
-        "r": 46,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 65,
-        "r": 38,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 67,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 68,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 69,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 30,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 31,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 32,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 33,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 34,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 35,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 36,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 65,
-        "r": 37,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 65,
-        "r": 27,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 67,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 68,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 69,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 70,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 71,
-        "r": 26,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 60,
-        "r": 23,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 56,
-        "r": 33,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 58,
+        "c": 78,
         "r": 44,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 59,
-        "r": 32,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 58,
-        "r": 33,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 67,
-        "r": 22,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 62,
-        "r": 23,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 63,
-        "r": 23,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 64,
-        "r": 23,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 65,
-        "r": 23,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 66,
-        "r": 23,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 24,
+        "c": 78,
+        "r": 43,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 25,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 23,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 22,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 21,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 20,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 19,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 18,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 17,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 16,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 15,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 14,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 12,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 72,
-        "r": 13,
+        "c": 78,
+        "r": 42,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mvpa16jw",
-        "c": 63,
-        "r": 16,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 67,
-        "r": 17,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 71,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 68,
-        "r": 21,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 68,
-        "r": 20,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 65,
-        "r": 17,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 66,
-        "r": 17,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 70,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
         "c": 69,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 68,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 67,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 66,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 65,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 63,
-        "r": 9,
+        "r": 40,
         "layer": "object"
       },
       {
         "id": "tile_mvpa0o8b",
         "c": 73,
-        "r": 0,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 83,
-        "r": 0,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 73,
-        "r": 4,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 83,
-        "r": 4,
+        "r": 41,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mvpa0o8b",
-        "c": 81,
-        "r": 5,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 75,
-        "r": 5,
+        "c": 77,
+        "r": 33,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 73,
-        "r": 3,
+        "c": 74,
+        "r": 45,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 84,
-        "r": 3,
+        "c": 74,
+        "r": 44,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 75,
-        "r": 0,
+        "c": 71,
+        "r": 41,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 72,
+        "r": 41,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 76,
-        "r": 0,
+        "r": 33,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 77,
-        "r": 0,
+        "c": 75,
+        "r": 33,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 78,
-        "r": 0,
+        "c": 74,
+        "r": 33,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 79,
-        "r": 0,
+        "c": 73,
+        "r": 33,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 72,
+        "r": 33,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 71,
+        "r": 33,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 69,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 73,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 89,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 73,
+        "r": 28,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 89,
+        "r": 28,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 87,
+        "r": 29,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 81,
+        "r": 29,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 73,
+        "r": 27,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 27,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 81,
-        "r": 0,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 80,
-        "r": 0,
+        "r": 24,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 82,
-        "r": 0,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 8,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 10,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 11,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 12,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 13,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 14,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 15,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 16,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 17,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 18,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 19,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 20,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 21,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 76,
-        "r": 22,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 81,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 87,
-        "r": 17,
+        "r": 24,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 83,
-        "r": 18,
+        "r": 24,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 84,
-        "r": 18,
+        "c": 87,
+        "r": 24,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 85,
-        "r": 18,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 86,
-        "r": 18,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 104,
-        "r": 16,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 99,
-        "r": 12,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 98,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 99,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 100,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 101,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 103,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 102,
-        "r": 17,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 98,
-        "r": 13,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 96,
-        "r": 12,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
         "c": 88,
-        "r": 6,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 82,
+        "r": 32,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 82,
+        "r": 33,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 82,
+        "r": 42,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 82,
+        "r": 43,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 82,
+        "r": 44,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 82,
+        "r": 45,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 82,
+        "r": 46,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 87,
+        "r": 41,
         "layer": "object"
       },
       {
-        "id": "tile_mvpa0o8b",
-        "c": 95,
-        "r": 6,
+        "id": "tile_mvpa16jw",
+        "c": 93,
+        "r": 41,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 89,
+        "r": 42,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 90,
-        "r": 6,
+        "r": 42,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 91,
-        "r": 6,
+        "r": 42,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 92,
-        "r": 6,
+        "r": 42,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 113,
+        "r": 40,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 94,
-        "r": 6,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 93,
-        "r": 6,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 16,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 15,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 14,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 13,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 12,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 11,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 10,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 88,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 96,
-        "r": 11,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 96,
-        "r": 10,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 96,
-        "r": 9,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
         "c": 104,
-        "r": 2,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 105,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 106,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 107,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 109,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 108,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 94,
+        "r": 30,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 96,
+        "r": 30,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 97,
+        "r": 30,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 40,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 39,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 38,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 37,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 36,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 35,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 34,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 94,
+        "r": 33,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mvpa0o8b",
-        "c": 100,
-        "r": 2,
+        "c": 113,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 99,
+        "r": 18,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 102,
-        "r": 2,
+        "c": 108,
+        "r": 18,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 103,
-        "r": 2,
+        "c": 109,
+        "r": 18,
         "layer": "object"
       },
       {
         "id": "tile_forest_layer_151",
-        "c": 89,
-        "r": 60,
+        "c": 95,
+        "r": 84,
         "layer": "object6",
         "scale": 135
       },
       {
         "id": "tile_forest_layer_151",
-        "c": 99,
-        "r": 59,
+        "c": 105,
+        "r": 83,
         "layer": "object6",
         "ox": 6,
         "oy": 22
       },
       {
         "id": "tile_forest_layer_160",
-        "c": 83,
-        "r": 57,
+        "c": 89,
+        "r": 81,
         "layer": "object6",
         "ox": 1.333333,
         "scale": 110
       },
       {
         "id": "tile_forest_layer_160",
-        "c": 92,
-        "r": 35,
+        "c": 98,
+        "r": 59,
         "layer": "object6",
         "scale": 140,
         "ox": -9.333333,
@@ -67513,1448 +66913,1442 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_forest_layer_152",
-        "c": 83,
-        "r": 68,
+        "c": 89,
+        "r": 92,
         "layer": "ground2"
       },
       {
         "id": "tile_forest_layer_157_copy_2",
-        "c": 76,
-        "r": 57,
+        "c": 82,
+        "r": 81,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
+        "c": 98,
+        "r": 70,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 96,
+        "r": 70,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 94,
+        "r": 70,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 96,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 94,
+        "r": 68,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 96,
+        "r": 66,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 94,
+        "r": 66,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
         "c": 92,
-        "r": 46,
+        "r": 66,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 90,
-        "r": 46,
+        "r": 66,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 88,
-        "r": 46,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 90,
-        "r": 44,
+        "r": 66,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 88,
-        "r": 44,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 90,
-        "r": 42,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 88,
-        "r": 42,
+        "r": 64,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 86,
-        "r": 42,
+        "r": 64,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 84,
-        "r": 42,
+        "r": 64,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 42,
+        "c": 88,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 40,
+        "c": 86,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 40,
+        "c": 84,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 40,
+        "c": 84,
+        "r": 60,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 38,
+        "c": 86,
+        "r": 60,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 38,
+        "c": 88,
+        "r": 60,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 38,
+        "c": 88,
+        "r": 58,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 36,
+        "c": 86,
+        "r": 58,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 36,
+        "c": 84,
+        "r": 58,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 36,
+        "c": 88,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 34,
+        "c": 86,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 34,
+        "c": 84,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 34,
+        "c": 84,
+        "r": 54,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 32,
+        "c": 86,
+        "r": 54,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 32,
+        "c": 88,
+        "r": 54,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 32,
+        "c": 88,
+        "r": 52,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 30,
+        "c": 86,
+        "r": 52,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 30,
+        "c": 84,
+        "r": 52,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 30,
+        "c": 84,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 28,
+        "c": 86,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 28,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 28,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 26,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 26,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 82,
-        "r": 26,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 43,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 41,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 102,
-        "r": 30,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 104,
-        "r": 30,
+        "c": 88,
+        "r": 50,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 106,
-        "r": 30,
+        "r": 67,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 106,
-        "r": 32,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 104,
-        "r": 32,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 102,
-        "r": 32,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 32,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 34,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 102,
-        "r": 34,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 104,
-        "r": 34,
+        "r": 65,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 106,
-        "r": 34,
+        "r": 54,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 108,
+        "r": 54,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 110,
+        "r": 54,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 54,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 110,
+        "r": 56,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 108,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 106,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 104,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 102,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 36,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 38,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 102,
-        "r": 38,
-        "layer": "ground4"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 104,
-        "r": 38,
+        "r": 56,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 106,
-        "r": 38,
+        "r": 58,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 108,
+        "r": 58,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 110,
+        "r": 58,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 58,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 60,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 110,
+        "r": 60,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 108,
+        "r": 60,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 106,
-        "r": 40,
+        "r": 60,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 104,
-        "r": 40,
+        "c": 106,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 102,
-        "r": 40,
+        "c": 108,
+        "r": 62,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 100,
-        "r": 40,
+        "c": 110,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 62,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 64,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 110,
+        "r": 64,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 108,
+        "r": 64,
+        "layer": "ground4"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 106,
+        "r": 64,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_133",
-        "c": 104,
-        "r": 65,
+        "c": 110,
+        "r": 89,
         "layer": "object2"
       },
       {
         "id": "tile_forest_layer_134",
-        "c": 100,
-        "r": 65,
+        "c": 106,
+        "r": 89,
         "layer": "object2"
       },
       {
         "id": "tile_forest_layer_117",
-        "c": 92,
-        "r": 65,
+        "c": 98,
+        "r": 89,
         "layer": "object2"
       },
       {
-        "id": "tile_forest_group_20",
-        "c": 93,
-        "r": 64,
-        "layer": "object",
-        "oy": 23.333333
-      },
-      {
         "id": "tile_forest_layer_114_copy_7",
-        "c": 93,
-        "r": 64,
+        "c": 99,
+        "r": 88,
         "layer": "object2"
       },
       {
         "id": "tile_forest_layer_115_copy_15",
-        "c": 98,
-        "r": 64,
+        "c": 104,
+        "r": 88,
         "layer": "object2"
       },
       {
         "id": "tile_forest_layer_149",
-        "c": 63,
-        "r": 64,
+        "c": 69,
+        "r": 88,
         "layer": "object4",
         "ox": 10.666667,
-        "oy": 6.666667
+        "oy": 6.666667,
+        "sortDepth": 4.5
       },
       {
         "id": "tile_forest_layer_167",
-        "c": 99,
-        "r": 67,
+        "c": 105,
+        "r": 91,
         "layer": "object2",
         "ox": -11.333333,
         "oy": -4
       },
       {
         "id": "tile_forest_layer_157_copy_3",
-        "c": 92,
-        "r": 62,
+        "c": 98,
+        "r": 86,
         "layer": "ground4"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 94,
-        "r": 61,
+        "c": 100,
+        "r": 85,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 96,
-        "r": 61,
+        "c": 102,
+        "r": 85,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 96,
-        "r": 62,
+        "c": 102,
+        "r": 86,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 97,
-        "r": 62,
+        "c": 103,
+        "r": 86,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 97,
-        "r": 60,
+        "c": 103,
+        "r": 84,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 97,
-        "r": 58,
+        "c": 103,
+        "r": 82,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 59,
+        "c": 101,
+        "r": 83,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 59,
+        "c": 99,
+        "r": 83,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 57,
+        "c": 99,
+        "r": 81,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 97,
-        "r": 57,
+        "c": 103,
+        "r": 81,
         "layer": "ground"
       },
       {
         "id": "tile_forest_layer_168",
-        "c": 94,
-        "r": 58,
+        "c": 100,
+        "r": 82,
         "layer": "ground2"
       },
       {
         "id": "tile_forest_layer_132",
-        "c": 97,
-        "r": 56,
+        "c": 103,
+        "r": 80,
         "layer": "ground2",
         "oy": 17.333333,
         "ox": -8
       },
       {
         "id": "tile_forest_gradient",
-        "c": 87,
-        "r": 47,
+        "c": 93,
+        "r": 71,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
-        "c": 88,
-        "r": 47,
+        "c": 94,
+        "r": 71,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
-        "c": 89,
-        "r": 47,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 90,
-        "r": 51,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 91,
-        "r": 51,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 92,
-        "r": 51,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 81,
-        "r": 44,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 82,
-        "r": 44,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 83,
-        "r": 44,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 84,
-        "r": 44,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 85,
-        "r": 44,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 86,
-        "r": 44,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 80,
-        "r": 41,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 79,
-        "r": 41,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 78,
-        "r": 41,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 100,
-        "r": 51,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 101,
-        "r": 51,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 102,
-        "r": 51,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 103,
-        "r": 42,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 104,
-        "r": 42,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 105,
-        "r": 42,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 106,
-        "r": 42,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 107,
-        "r": 42,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 108,
-        "r": 42,
+        "c": 95,
+        "r": 71,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 96,
-        "r": 25,
+        "r": 75,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
-        "c": 95,
-        "r": 25,
+        "c": 97,
+        "r": 75,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
-        "c": 94,
-        "r": 25,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 93,
-        "r": 25,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 91,
-        "r": 25,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 90,
-        "r": 25,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 92,
-        "r": 25,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 89,
-        "r": 25,
+        "c": 98,
+        "r": 75,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 87,
-        "r": 25,
+        "r": 68,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 88,
-        "r": 25,
+        "r": 68,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 68,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 68,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 68,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 68,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 86,
-        "r": 25,
+        "r": 65,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 85,
-        "r": 25,
+        "r": 65,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 84,
+        "r": 65,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 106,
+        "r": 75,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 107,
+        "r": 75,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 108,
+        "r": 75,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 109,
+        "r": 66,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 110,
+        "r": 66,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 111,
+        "r": 66,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 112,
+        "r": 66,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 113,
+        "r": 66,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 114,
+        "r": 66,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 102,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 101,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 100,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 99,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 97,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 96,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 98,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 95,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 93,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 94,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 49,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 83,
+        "r": 48,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 82,
+        "r": 48,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 78,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 78,
+        "r": 78,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 77,
-        "r": 24,
+        "r": 78,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
-        "c": 76,
-        "r": 24,
+        "c": 75,
+        "r": 78,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 74,
+        "r": 78,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 73,
-        "r": 54,
+        "r": 78,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
         "c": 72,
-        "r": 54,
+        "r": 78,
         "layer": "object3"
       },
       {
         "id": "tile_forest_gradient",
-        "c": 71,
-        "r": 54,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 69,
-        "r": 54,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 68,
-        "r": 54,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 67,
-        "r": 54,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 66,
-        "r": 54,
-        "layer": "object3"
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 70,
-        "r": 54,
+        "c": 76,
+        "r": 78,
         "layer": "object3"
       },
       {
         "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
         "c": 107,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 104,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 101,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 98,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 95,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 92,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 89,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
       },
       {
         "id": "tile_bg_backroom_floor_l",
         "c": 86,
-        "r": 80,
+        "r": 104,
         "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 83,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 84,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 85,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 86,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 87,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 88,
-        "r": 80,
-        "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 89,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 90,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 91,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 92,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 93,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 94,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 95,
-        "r": 80,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 96,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 97,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 101,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 96,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 98,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 99,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 100,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 102,
-        "r": 80,
+        "c": 101,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 103,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 104,
-        "r": 80,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 106,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 107,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 108,
-        "r": 80,
+        "c": 102,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 109,
-        "r": 80,
+        "c": 104,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
         "c": 105,
-        "r": 80,
+        "r": 104,
         "layer": "object"
       },
       {
         "id": "tile_mr4cyy36",
-        "c": 82,
-        "r": 80,
+        "c": 106,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 108,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 109,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 110,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 112,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 113,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 114,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 115,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 111,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 88,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 86,
+        "r": 103,
         "layer": "object"
       },
       {
         "id": "tile_mvpa16jw",
         "c": 80,
-        "r": 79,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 74,
-        "r": 75,
+        "r": 99,
         "layer": "object"
       },
       {
         "id": "tile_mvpa0o8b",
+        "c": 85,
+        "r": 100,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 82,
+        "r": 100,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 83,
+        "r": 100,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 84,
+        "r": 100,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
         "c": 79,
-        "r": 76,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 76,
-        "r": 76,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 77,
-        "r": 76,
+        "r": 95,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 78,
-        "r": 76,
+        "r": 95,
         "layer": "object",
         "fx": true
       },
       {
-        "id": "tile_mvpa0o8b",
+        "id": "tile_mr4cyy36",
+        "c": 76,
+        "r": 95,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 77,
+        "r": 95,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 75,
+        "r": 95,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 74,
+        "r": 95,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
         "c": 73,
-        "r": 71,
+        "r": 95,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4cyy36",
         "c": 72,
-        "r": 71,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 70,
-        "r": 71,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 71,
-        "r": 71,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 69,
-        "r": 71,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 68,
-        "r": 71,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 67,
-        "r": 71,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 66,
-        "r": 71,
+        "r": 95,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mvpa0o8b",
-        "c": 64,
-        "r": 71,
+        "c": 70,
+        "r": 95,
         "layer": "object"
       },
       {
         "id": "tile_mvpa16jw",
-        "c": 63,
-        "r": 74,
+        "c": 69,
+        "r": 98,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mr4czvpx",
-        "c": 74,
-        "r": 74,
+        "c": 80,
+        "r": 98,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 74,
-        "r": 76,
+        "c": 80,
+        "r": 100,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 81,
+        "r": 100,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 82,
+        "r": 100,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 83,
+        "r": 100,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 84,
+        "r": 100,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 85,
+        "r": 100,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 86,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 87,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 88,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 93,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 94,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 95,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 96,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 97,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 98,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 99,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 100,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 101,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 102,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 103,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 104,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 107,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 108,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 106,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 105,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 110,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 109,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 115,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 114,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 113,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 112,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 111,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 95,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 77,
+        "r": 95,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 78,
+        "r": 95,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 76,
+        "r": 95,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 75,
-        "r": 76,
+        "r": 95,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 76,
-        "r": 76,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 77,
-        "r": 76,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 78,
-        "r": 76,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 79,
-        "r": 76,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 80,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 81,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 83,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 82,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 84,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 86,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 85,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 87,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 88,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 89,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 90,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 91,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 92,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 93,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 94,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 95,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 96,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 97,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 98,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 101,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 102,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 100,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 99,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 104,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 103,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 109,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 108,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 107,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 106,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 105,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 73,
-        "r": 71,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 71,
-        "r": 71,
+        "c": 74,
+        "r": 95,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 72,
-        "r": 71,
+        "r": 95,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 70,
-        "r": 71,
+        "c": 71,
+        "r": 95,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 69,
-        "r": 71,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 68,
-        "r": 71,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 66,
-        "r": 71,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 65,
-        "r": 71,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 67,
-        "r": 71,
+        "c": 73,
+        "r": 95,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_layer_126",
-        "c": 94,
-        "r": 56,
+        "c": 100,
+        "r": 80,
         "layer": "object2",
         "fx": true,
         "ox": -13.333333,
@@ -68962,15 +68356,15 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_forest_layer_131",
-        "c": 97,
-        "r": 59,
+        "c": 103,
+        "r": 83,
         "layer": "ground2",
         "fx": true
       },
       {
         "id": "tile_forest_layer_131",
-        "c": 91,
-        "r": 47,
+        "c": 97,
+        "r": 71,
         "layer": "ground2",
         "fx": true,
         "rot": 0,
@@ -68979,183 +68373,183 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_forest_gradient",
-        "c": 86,
-        "r": 63,
+        "c": 92,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 87,
-        "r": 63,
+        "c": 93,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 88,
-        "r": 63,
+        "c": 94,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 89,
-        "r": 63,
+        "c": 95,
+        "r": 87,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 96,
+        "r": 87,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 97,
+        "r": 87,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 98,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 90,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 91,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 92,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 84,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 100,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 101,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 102,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 103,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 104,
-        "r": 63,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 105,
-        "r": 63,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 106,
-        "r": 63,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 107,
-        "r": 63,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 108,
-        "r": 63,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 109,
-        "r": 63,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 73,
-        "r": 64,
+        "c": 110,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 72,
-        "r": 64,
+        "c": 111,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 71,
-        "r": 64,
+        "c": 112,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 70,
-        "r": 64,
+        "c": 113,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 68,
-        "r": 64,
+        "c": 114,
+        "r": 87,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 69,
-        "r": 64,
+        "c": 115,
+        "r": 87,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 88,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 78,
+        "r": 88,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 77,
+        "r": 88,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 76,
+        "r": 88,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 74,
+        "r": 88,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 75,
+        "r": 88,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_layer_123",
-        "c": 100,
-        "r": 42,
+        "c": 106,
+        "r": 66,
         "layer": "ground2",
         "fx": true
       },
       {
         "id": "tile_forest_layer_168",
-        "c": 101,
-        "r": 43,
+        "c": 107,
+        "r": 67,
         "layer": "ground2",
         "fx": true,
         "ox": -28,
@@ -69164,22 +68558,22 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_forest_layer_157_copy",
-        "c": 98,
-        "r": 43,
+        "c": 104,
+        "r": 67,
         "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_layer_157_copy",
-        "c": 90,
-        "r": 47,
+        "c": 96,
+        "r": 71,
         "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_layer_126",
-        "c": 92,
-        "r": 47,
+        "c": 98,
+        "r": 71,
         "layer": "ground",
         "fx": true,
         "ox": 22,
@@ -69187,2249 +68581,2020 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_forest_layer_160",
-        "c": 77,
-        "r": 41,
+        "c": 83,
+        "r": 65,
         "layer": "object4",
         "fx": true,
-        "scale": 165,
-        "oy": 0.666667
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 72,
-        "r": 46,
-        "layer": "ground5",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 73,
-        "r": 46,
-        "layer": "ground5",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 74,
-        "r": 46,
-        "layer": "ground5",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 75,
-        "r": 46,
-        "layer": "ground5",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 76,
-        "r": 46,
-        "layer": "ground5",
-        "fx": true
+        "scale": 165
       },
       {
         "id": "tile_forest_gradient",
         "c": 78,
-        "r": 46,
+        "r": 70,
         "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 97,
-        "r": 17,
-        "layer": "object3",
+        "c": 79,
+        "r": 70,
+        "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 98,
-        "r": 17,
-        "layer": "object3",
+        "c": 80,
+        "r": 70,
+        "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 99,
-        "r": 17,
-        "layer": "object3",
+        "c": 81,
+        "r": 70,
+        "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 100,
-        "r": 17,
-        "layer": "object3",
+        "c": 82,
+        "r": 70,
+        "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 101,
-        "r": 17,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 102,
-        "r": 17,
-        "layer": "object3",
+        "c": 84,
+        "r": 70,
+        "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 103,
-        "r": 17,
+        "r": 41,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 104,
-        "r": 17,
+        "r": 41,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 105,
-        "r": 17,
+        "r": 41,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 82,
-        "r": 5,
+        "c": 106,
+        "r": 41,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 84,
-        "r": 5,
+        "c": 107,
+        "r": 41,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 83,
-        "r": 5,
+        "c": 108,
+        "r": 41,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 109,
+        "r": 41,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 110,
+        "r": 41,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 111,
+        "r": 41,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 88,
+        "r": 29,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 29,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 29,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 29,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 80,
+        "r": 29,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 81,
+        "r": 29,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 73,
-        "r": 5,
+        "r": 51,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 72,
+        "r": 51,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 74,
-        "r": 5,
+        "r": 51,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 75,
-        "r": 5,
+        "r": 51,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
+        "c": 76,
+        "r": 51,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 78,
+        "r": 51,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 77,
+        "r": 51,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
         "c": 67,
-        "r": 27,
+        "r": 99,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 66,
+        "r": 103,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 65,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 43,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 44,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 47,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 48,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 49,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 50,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 51,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 53,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 52,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 54,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 56,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 55,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 58,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 57,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 60,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 59,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 62,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 61,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 63,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 64,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 67,
+        "r": 102,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 38,
+        "r": 104,
+        "layer": "floor",
+        "fx": false
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 35,
+        "r": 104,
+        "layer": "floor",
+        "fx": false
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 41,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 42,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 39,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 38,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 37,
+        "r": 104,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 35,
+        "r": 103,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 34,
+        "r": 101,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 29,
+        "r": 100,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 31,
+        "r": 101,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 32,
+        "r": 101,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 33,
+        "r": 101,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 39,
+        "r": 93,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 40,
+        "r": 97,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 29,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 31,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 32,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 33,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 34,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 35,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 36,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 37,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 38,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 42,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 44,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 43,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 47,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 48,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 49,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 50,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 51,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 52,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 53,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 54,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 55,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 56,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 57,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 58,
+        "r": 98,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 59,
+        "r": 98,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 60,
+        "r": 98,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 61,
+        "r": 97,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 62,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 64,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 65,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 66,
+        "r": 92,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 66,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 61,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 60,
+        "r": 89,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 63,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 65,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 64,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 59,
+        "r": 90,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 58,
+        "r": 90,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 56,
+        "r": 90,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 55,
+        "r": 93,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 49,
+        "r": 93,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 51,
+        "r": 94,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 52,
+        "r": 94,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 53,
+        "r": 94,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 54,
+        "r": 94,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 48,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 49,
+        "r": 91,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 49,
+        "r": 90,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 49,
+        "r": 92,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 35,
+        "r": 86,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 37,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 38,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 39,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 41,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 42,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 43,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 44,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 47,
+        "r": 87,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 35,
+        "r": 81,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 51,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 37,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 38,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 39,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 41,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 43,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 42,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 44,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 49,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 48,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 47,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 50,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 52,
+        "r": 84,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 56,
+        "r": 84,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 54,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 55,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 56,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 48,
+        "r": 74,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 54,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 53,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 50,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 51,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 52,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 57,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 57,
+        "r": 82,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 57,
+        "r": 83,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 35,
+        "r": 84,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 35,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 67,
+        "r": 90,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 67,
+        "r": 91,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 72,
+        "r": 83,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 73,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 73,
+        "r": 88,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 73,
+        "r": 86,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 70,
+        "r": 82,
+        "layer": "object5",
+        "fx": false
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 69,
+        "r": 80,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 67,
+        "r": 80,
         "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_forest_gradient",
-        "c": 66,
-        "r": 27,
+        "id": "tile_mr4cyy36",
+        "c": 68,
+        "r": 80,
         "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 66,
+        "r": 80,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 65,
+        "r": 80,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 63,
+        "r": 79,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 63,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 52,
+        "r": 67,
+        "layer": "object",
+        "fx": false
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 47,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 72,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 73,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 39,
+        "r": 69,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 41,
+        "r": 69,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 69,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 42,
+        "r": 69,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 43,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 44,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 69,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 38,
+        "r": 69,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 36,
+        "r": 69,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 35,
+        "r": 76,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 72,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 73,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 74,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 36,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 52,
+        "r": 66,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 52,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 52,
+        "r": 55,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 56,
+        "r": 54,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 54,
+        "r": 55,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 55,
+        "r": 55,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 57,
+        "r": 51,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 60,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 59,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 61,
+        "r": 49,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 61,
+        "r": 48,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 61,
+        "r": 47,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 61,
+        "r": 46,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 61,
+        "r": 45,
+        "layer": "object",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 68,
-        "r": 27,
+        "r": 99,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 69,
-        "r": 27,
+        "r": 99,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 70,
-        "r": 27,
+        "r": 99,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 72,
-        "r": 27,
+        "c": 67,
+        "r": 104,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 71,
-        "r": 27,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 56,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 57,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 58,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 59,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 60,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 61,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 63,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 62,
-        "r": 44,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 64,
-        "r": 44,
+        "c": 66,
+        "r": 104,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 65,
-        "r": 44,
+        "r": 104,
         "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mvpa0o8b",
-        "c": 61,
-        "r": 75,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 60,
-        "r": 79,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 64,
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
+        "c": 63,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 62,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 61,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
         "c": 59,
-        "r": 80,
-        "layer": "object",
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 37,
-        "r": 80,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 60,
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 38,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 39,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 40,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 41,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 42,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 43,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 44,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 45,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 47,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 46,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 48,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 50,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 49,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 52,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 51,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 54,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 53,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 56,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 55,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 57,
-        "r": 80,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
         "c": 58,
-        "r": 80,
-        "layer": "object",
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4czvpx",
-        "c": 61,
-        "r": 78,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 57,
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 32,
-        "r": 80,
-        "layer": "floor",
-        "fx": false
+        "id": "tile_forest_gradient",
+        "c": 55,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
       },
       {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 29,
-        "r": 80,
-        "layer": "floor",
-        "fx": false
+        "id": "tile_forest_gradient",
+        "c": 54,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
+        "c": 56,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 53,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 52,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 50,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 48,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 47,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 49,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 51,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
         "c": 35,
-        "r": 80,
-        "layer": "object",
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
         "c": 36,
-        "r": 80,
-        "layer": "object",
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 34,
-        "r": 80,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 37,
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 33,
-        "r": 80,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 38,
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 32,
-        "r": 80,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 39,
+        "r": 104,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
+        "c": 41,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 40,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 42,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 43,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 44,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 45,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 46,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 29,
+        "r": 101,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
         "c": 31,
-        "r": 80,
-        "layer": "object",
+        "r": 101,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mvpa16jw",
-        "c": 29,
-        "r": 79,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 28,
-        "r": 77,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 32,
+        "r": 101,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mvpa16jw",
-        "c": 23,
-        "r": 76,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 25,
-        "r": 77,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 26,
-        "r": 77,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 27,
-        "r": 77,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 33,
-        "r": 69,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 34,
-        "r": 73,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 23,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 25,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 26,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 27,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 28,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 29,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
         "c": 30,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 31,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 32,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 36,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 38,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 37,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 39,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 40,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 41,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 42,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 43,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 44,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 45,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 46,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 47,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 48,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 49,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 50,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 51,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 52,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 53,
-        "r": 74,
-        "layer": "object",
+        "r": 101,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 54,
-        "r": 74,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 55,
-        "r": 73,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 56,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 58,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 59,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 60,
-        "r": 68,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 60,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 55,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 54,
-        "r": 65,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 57,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 59,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 58,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 53,
-        "r": 66,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 52,
-        "r": 66,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 50,
-        "r": 66,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 49,
-        "r": 69,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 43,
-        "r": 69,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 45,
-        "r": 70,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 46,
-        "r": 70,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 47,
-        "r": 70,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 48,
-        "r": 70,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 42,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 43,
-        "r": 67,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 43,
-        "r": 66,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 43,
-        "r": 68,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 29,
-        "r": 62,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 31,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 32,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
         "c": 33,
-        "r": 63,
-        "layer": "object"
+        "r": 101,
+        "layer": "object3",
+        "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
+        "id": "tile_forest_gradient",
         "c": 34,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 35,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 36,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 37,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 38,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 39,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 40,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 41,
-        "r": 63,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 29,
-        "r": 57,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 45,
-        "r": 57,
-        "layer": "object",
+        "r": 101,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 31,
-        "r": 57,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 62,
+        "r": 87,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 32,
-        "r": 57,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 63,
+        "r": 87,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 33,
-        "r": 57,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 64,
+        "r": 87,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 34,
-        "r": 57,
-        "layer": "object",
+        "id": "tile_forest_gradient",
+        "c": 65,
+        "r": 87,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4cyy36",
-        "c": 35,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 37,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 39,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 36,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 38,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 40,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 43,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 42,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 41,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 44,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 46,
-        "r": 60,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 50,
-        "r": 60,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 48,
-        "r": 61,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 49,
-        "r": 61,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 50,
-        "r": 54,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 42,
-        "r": 50,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 48,
-        "r": 53,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 47,
-        "r": 51,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 44,
-        "r": 51,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 45,
-        "r": 51,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 46,
-        "r": 51,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 51,
-        "r": 57,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 51,
-        "r": 58,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 51,
-        "r": 59,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 29,
-        "r": 60,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 29,
-        "r": 61,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 61,
-        "r": 66,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 61,
-        "r": 67,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
+        "id": "tile_forest_gradient",
         "c": 66,
-        "r": 59,
-        "layer": "object",
+        "r": 87,
+        "layer": "object3",
         "fx": true
       },
       {
-        "id": "tile_mr4czvpx",
-        "c": 67,
-        "r": 63,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 67,
-        "r": 64,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 67,
-        "r": 62,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 64,
-        "r": 58,
-        "layer": "object",
-        "fx": false
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 63,
-        "r": 56,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 61,
-        "r": 56,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 62,
-        "r": 56,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 60,
-        "r": 56,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 59,
-        "r": 56,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
+        "id": "tile_forest_gradient",
         "c": 57,
-        "r": 55,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 56,
-        "r": 50,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 57,
-        "r": 54,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 54,
-        "r": 50,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 55,
-        "r": 50,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 57,
-        "r": 53,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 52,
-        "r": 49,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 51,
-        "r": 47,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 49,
-        "r": 46,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 48,
-        "r": 44,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 46,
-        "r": 43,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 41,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 42,
-        "r": 48,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 42,
-        "r": 49,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 33,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 35,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 34,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 36,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 37,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 38,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 39,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 40,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 32,
-        "r": 45,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 30,
-        "r": 45,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 29,
-        "r": 52,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 30,
-        "r": 48,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 30,
-        "r": 49,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 30,
-        "r": 50,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 30,
-        "r": 51,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 42,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 41,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 40,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 39,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 38,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 37,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 36,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 35,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 46,
-        "r": 34,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 46,
-        "r": 31,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 50,
-        "r": 30,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 48,
-        "r": 31,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 49,
-        "r": 31,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 51,
-        "r": 27,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 54,
-        "r": 26,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 53,
-        "r": 27,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 25,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 24,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 23,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 22,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 21,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 20,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 19,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 18,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 17,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 16,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 15,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 14,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 55,
-        "r": 13,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 62,
-        "r": 75,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 63,
-        "r": 75,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 64,
-        "r": 75,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 61,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 60,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 59,
-        "r": 80,
+        "r": 90,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 58,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 57,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 56,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 55,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 53,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 54,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 52,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 51,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 49,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 48,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 50,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 47,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 46,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 44,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 42,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 41,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 43,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 45,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 29,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 30,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 31,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 32,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 33,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 35,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 34,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 36,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 37,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 38,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 39,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 40,
-        "r": 80,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 23,
-        "r": 77,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 25,
-        "r": 77,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 26,
-        "r": 77,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 24,
-        "r": 77,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 27,
-        "r": 77,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 28,
-        "r": 77,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 56,
-        "r": 63,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 57,
-        "r": 63,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 58,
-        "r": 63,
+        "r": 90,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 59,
-        "r": 63,
+        "r": 90,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 60,
-        "r": 63,
+        "r": 90,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 61,
+        "r": 90,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 49,
+        "r": 94,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 50,
+        "r": 94,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 51,
-        "r": 66,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 52,
-        "r": 66,
+        "r": 94,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 53,
-        "r": 66,
+        "r": 94,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 54,
-        "r": 66,
+        "r": 94,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 56,
+        "r": 94,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 55,
-        "r": 66,
+        "r": 94,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 43,
-        "r": 70,
+        "c": 52,
+        "r": 94,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 44,
-        "r": 70,
+        "c": 54,
+        "r": 78,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 45,
-        "r": 70,
+        "c": 55,
+        "r": 78,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 47,
-        "r": 70,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 48,
-        "r": 70,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 50,
-        "r": 70,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 49,
-        "r": 70,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 46,
-        "r": 70,
+        "c": 56,
+        "r": 78,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 48,
-        "r": 54,
+        "r": 75,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 49,
-        "r": 54,
+        "r": 75,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 50,
-        "r": 54,
+        "r": 75,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 42,
-        "r": 51,
+        "c": 51,
+        "r": 75,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 43,
-        "r": 51,
+        "c": 52,
+        "r": 75,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 44,
-        "r": 51,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 45,
-        "r": 51,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 46,
-        "r": 51,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 47,
-        "r": 51,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 31,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 33,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 34,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 32,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 35,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 36,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 38,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 41,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 40,
-        "r": 45,
-        "layer": "object3",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 39,
-        "r": 45,
+        "c": 53,
+        "r": 75,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 37,
-        "r": 45,
+        "r": 69,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 39,
+        "r": 69,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 40,
+        "r": 69,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 38,
+        "r": 69,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 41,
+        "r": 69,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 42,
+        "r": 69,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 44,
+        "r": 69,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 47,
+        "r": 69,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 46,
+        "r": 69,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 45,
+        "r": 69,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 43,
+        "r": 69,
         "layer": "object3",
         "fx": true
       },
       {
         "id": "tile_forest_layer_151",
-        "c": 106,
-        "r": 81,
+        "c": 86,
+        "r": 104,
         "layer": "top",
         "fx": true,
         "scale": 165
       },
       {
         "id": "tile_forest_layer_161",
-        "c": 72,
-        "r": 75,
+        "c": 76,
+        "r": 98,
         "layer": "top",
         "fx": true,
         "scale": 130
       },
       {
         "id": "tile_forest_layer_162",
-        "c": 69,
-        "r": 58,
+        "c": 75,
+        "r": 82,
         "layer": "object4",
         "fx": true,
         "scale": 150,
@@ -71438,1456 +70603,15472 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_forest_gradient",
-        "c": 56,
-        "r": 67,
+        "c": 62,
+        "r": 91,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 58,
-        "r": 67,
+        "c": 64,
+        "r": 91,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 57,
-        "r": 67,
+        "c": 63,
+        "r": 91,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 65,
+        "r": 91,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 66,
+        "r": 91,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 61,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 59,
-        "r": 67,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 60,
-        "r": 67,
+        "r": 96,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 58,
+        "r": 96,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 57,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 55,
-        "r": 72,
+        "r": 96,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 56,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 53,
-        "r": 72,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 54,
-        "r": 72,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 52,
-        "r": 72,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 51,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 49,
-        "r": 72,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 50,
-        "r": 72,
+        "r": 96,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 49,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 47,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 48,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 46,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 45,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 44,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 43,
-        "r": 72,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 41,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 35,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 36,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 37,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 38,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 39,
-        "r": 72,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_forest_gradient",
-        "c": 40,
-        "r": 72,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 42,
-        "r": 72,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 47,
-        "r": 59,
+        "c": 43,
+        "r": 96,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 44,
+        "r": 96,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 45,
+        "r": 96,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 46,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
         "c": 48,
-        "r": 59,
+        "r": 96,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 49,
-        "r": 59,
+        "c": 53,
+        "r": 83,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 50,
-        "r": 59,
+        "c": 54,
+        "r": 83,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_gradient",
-        "c": 95,
-        "r": 45,
+        "c": 55,
+        "r": 83,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 56,
+        "r": 83,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 101,
+        "r": 69,
         "layer": "floor",
         "fx": true
       },
       {
         "id": "tile_forest_layer_158",
-        "c": 100,
-        "r": 29,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 76,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 81,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 83,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 85,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 87,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 89,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 91,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 81,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 83,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 85,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 87,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 89,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 91,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 76,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 78,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 80,
-        "r": 20,
-        "layer": "floor"
+        "c": 105,
+        "r": 53,
+        "layer": "object2",
+        "ox": 20.666667,
+        "oy": -3.333333,
+        "sortDepth": 2
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 82,
-        "r": 20,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 84,
-        "r": 20,
+        "c": 85,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 86,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 88,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 90,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 92,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 94,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 8,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 8,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 74,
-        "r": 6,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 4,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 4,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 81,
-        "r": 4,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 83,
-        "r": 4,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 83,
-        "r": 2,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 81,
-        "r": 2,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 79,
-        "r": 2,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 77,
-        "r": 2,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 75,
-        "r": 2,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 75,
-        "r": 4,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 73,
-        "r": 2,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 73,
-        "r": 4,
+        "c": 87,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 89,
-        "r": 18,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 91,
-        "r": 18,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 93,
-        "r": 18,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 95,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 89,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 91,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 89,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 91,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 14,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 89,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 91,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 12,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 89,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 91,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 10,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 89,
-        "r": 8,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 91,
-        "r": 8,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 93,
-        "r": 8,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 95,
-        "r": 8,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 97,
-        "r": 16,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 99,
-        "r": 16,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 101,
-        "r": 16,
+        "r": 48,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 103,
-        "r": 16,
+        "c": 83,
+        "r": 46,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 101,
-        "r": 14,
+        "c": 85,
+        "r": 46,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 103,
-        "r": 12,
+        "c": 87,
+        "r": 46,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 101,
-        "r": 12,
+        "c": 89,
+        "r": 46,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 103,
-        "r": 5,
+        "c": 91,
+        "r": 46,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 101,
-        "r": 7,
+        "c": 93,
+        "r": 46,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 101,
-        "r": 9,
+        "c": 95,
+        "r": 46,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_157_copy_3",
-        "c": 80,
-        "r": 73,
-        "layer": "ground5"
-      },
-      {
-        "id": "tile_forest_layer_157_copy_3",
-        "c": 103,
-        "r": 65,
-        "layer": "ground5"
-      },
-      {
-        "id": "tile_forest_layer_157_copy_3",
+        "id": "tile_forest_layer_124_copy",
         "c": 97,
-        "r": 72,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 82,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 88,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 90,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 92,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 94,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 96,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 98,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 100,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 32,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 32,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 30,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 30,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 80,
+        "r": 30,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 28,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 28,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 87,
+        "r": 28,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 89,
+        "r": 28,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 89,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 87,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 85,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 83,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 81,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 81,
+        "r": 28,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 79,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 79,
+        "r": 28,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 95,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 97,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 95,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 97,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 95,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 97,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 95,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 97,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 95,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 97,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 95,
+        "r": 32,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 97,
+        "r": 32,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 32,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 32,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_157_copy_3",
+        "c": 86,
+        "r": 97,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_157_copy_3",
+        "c": 109,
+        "r": 89,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_157_copy_3",
+        "c": 103,
+        "r": 96,
         "layer": "ground5",
         "fx": true
       },
       {
         "id": "tile_forest_layer_157_copy",
-        "c": 98,
-        "r": 69,
+        "c": 104,
+        "r": 93,
         "layer": "ground5"
       },
       {
         "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 100,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 100,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 100,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 100,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 100,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 102,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 102,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 102,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 102,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 102,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 44,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 44,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 46,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 46,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 48,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 48,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 50,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 50,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 52,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 52,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 54,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 53,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 55,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 56,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 58,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 57,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 59,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 60,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 62,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 61,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 65,
+        "r": 103,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 64,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 99,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 66,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 65,
+        "r": 99,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 97,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 65,
+        "r": 97,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 97,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 69,
+        "r": 97,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 65,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 69,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 68,
+        "r": 93,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 68,
+        "r": 91,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 70,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 70,
+        "r": 91,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 70,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 43,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 70,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 72,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 74,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
         "c": 76,
+        "r": 36,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 70,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 72,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 74,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 76,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 76,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 74,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 72,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 72,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 70,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 77,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 75,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 73,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 71,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 69,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 75,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 77,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 74,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 76,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 74,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 76,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 76,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 74,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 72,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 70,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 68,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 52,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 69,
+        "r": 52,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 69,
+        "r": 54,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 69,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 58,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 69,
+        "r": 58,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 48,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 63,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 63,
+        "r": 33,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 48,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 61,
+        "r": 34,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 53,
+        "r": 34,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 50,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 53,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 51,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 52,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 55,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 54,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 56,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 57,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 58,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 59,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 60,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 61,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 62,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 50,
+        "r": 34,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 51,
+        "r": 34,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 52,
+        "r": 34,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 64,
+        "r": 27,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 64,
+        "r": 28,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 64,
+        "r": 29,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 64,
+        "r": 30,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 64,
+        "r": 31,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 64,
+        "r": 32,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 27,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 28,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 29,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 30,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 31,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 48,
+        "r": 32,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 54,
+        "r": 45,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 54,
+        "r": 46,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 53,
+        "r": 47,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 49,
+        "r": 47,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 51,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 52,
+        "r": 48,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 48,
+        "r": 45,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 45,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 45,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 47,
+        "r": 45,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 43,
+        "r": 44,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 42,
+        "r": 57,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 47,
+        "r": 53,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 43,
+        "r": 53,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 42,
+        "r": 62,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 53,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 53,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 44,
+        "r": 62,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 45,
+        "r": 62,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 46,
+        "r": 62,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 41,
+        "r": 64,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 35,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 37,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 38,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 39,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 36,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 25,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 27,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 28,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 29,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 30,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 31,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 32,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 33,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 34,
+        "r": 77,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 9,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 11,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 13,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 14,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 18,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 12,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 15,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 16,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 17,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 19,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 20,
+        "r": 71,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 21,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 22,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 23,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 24,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 25,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 26,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 27,
+        "r": 71,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 9,
+        "r": 98,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 24,
+        "r": 98,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 11,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 12,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 13,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 14,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 15,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 16,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 17,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 18,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 19,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 20,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 21,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 22,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 23,
+        "r": 99,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 74,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 76,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 77,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 79,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 80,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 82,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 83,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 84,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 86,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 88,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 89,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 90,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 91,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 92,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 93,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 94,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 95,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 96,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 9,
+        "r": 97,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 97,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 96,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 95,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 94,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 93,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 92,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 91,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 90,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 89,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 88,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 86,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 84,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 83,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 82,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 25,
+        "r": 80,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 35,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 36,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 37,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 38,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 39,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 41,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 21,
+        "r": 53,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 27,
+        "r": 50,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 35,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 36,
+        "r": 53,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 38,
+        "r": 53,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 20,
+        "r": 57,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 21,
+        "r": 56,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 21,
+        "r": 57,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 29,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 30,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 31,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 32,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 33,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 34,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 23,
+        "r": 53,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 24,
+        "r": 53,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 25,
+        "r": 53,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 26,
+        "r": 52,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 27,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 30,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 33,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 27,
+        "r": 42,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 27,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 40,
+        "r": 33,
+        "layer": "object",
+        "fx": false
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 42,
+        "r": 39,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 38,
+        "r": 43,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 43,
+        "r": 42,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 43,
+        "r": 43,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 40,
+        "r": 36,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 40,
+        "r": 37,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 40,
+        "r": 38,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 29,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 31,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 32,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 34,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 35,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 37,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 36,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 33,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 30,
+        "r": 43,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 29,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 30,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 31,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 32,
+        "r": 32,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 42,
+        "r": 32,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 42,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 33,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 40,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 41,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 39,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 35,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 45,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 47,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 49,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 51,
+        "r": 84,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 44,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 46,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 48,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 50,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 50,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 52,
+        "r": 87,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 9,
+        "r": 35,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 18,
+        "r": 35,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 9,
+        "r": 50,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 18,
+        "r": 50,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 14,
+        "r": 35,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 15,
+        "r": 35,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 16,
+        "r": 35,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 17,
+        "r": 35,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 11,
+        "r": 51,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 16,
+        "r": 51,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 12,
+        "r": 63,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 20,
+        "r": 64,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 16,
+        "r": 57,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 14,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 15,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 16,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 17,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 18,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 19,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 19,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 18,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 21,
+        "r": 70,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 28,
+        "r": 70,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 12,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 14,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 13,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 15,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 16,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 17,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 18,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 19,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 20,
+        "r": 64,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 34,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 35,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 37,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 38,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 36,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 40,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 39,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 41,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 42,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 43,
+        "r": 58,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 44,
+        "r": 53,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 45,
+        "r": 53,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 46,
+        "r": 53,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 47,
+        "r": 53,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 53,
+        "r": 55,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 54,
+        "r": 55,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 55,
+        "r": 55,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 56,
+        "r": 55,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 57,
+        "r": 55,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 58,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 59,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 60,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 61,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 48,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 49,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 51,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 52,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 53,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 50,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 41,
+        "r": 33,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 42,
+        "r": 33,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 43,
+        "r": 33,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 62,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 64,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 63,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 28,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 27,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 31,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 29,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 30,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 33,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 35,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 36,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 37,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 38,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 34,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 32,
+        "r": 43,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 17,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 18,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 19,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 9,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 10,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 11,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 26,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 27,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 28,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 29,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 30,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 31,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 32,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 33,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 34,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 35,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 36,
+        "r": 77,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 35,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 36,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 37,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 38,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 39,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 40,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 41,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 47,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 48,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 44,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 42,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 43,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 46,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 45,
+        "r": 87,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 9,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 10,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 11,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 12,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 13,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 14,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 15,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 16,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 17,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 18,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 19,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 20,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 21,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 22,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 23,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 24,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 25,
+        "r": 99,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 69,
+        "r": 41,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 71,
+        "r": 41,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 72,
+        "r": 41,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 73,
+        "r": 41,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 70,
+        "r": 41,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 60,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 65,
+        "r": 60,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 67,
+        "r": 60,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 65,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 64,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 65,
+        "r": 64,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 48,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 50,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 52,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 54,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 56,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 58,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 60,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 62,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 48,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 50,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 52,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 54,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 56,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 58,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 60,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 62,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 61,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 59,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 57,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 55,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 53,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 51,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 49,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 49,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 51,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 53,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 55,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 57,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 59,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 61,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 63,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 60,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 58,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 56,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 54,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 57,
+        "r": 37,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 27,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 29,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 33,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 28,
+        "r": 35,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 28,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 39,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 39,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 39,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 39,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 39,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 28,
+        "r": 39,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 28,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 17,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 42,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 46,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 48,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 50,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 52,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 52,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 76,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 78,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 82,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 82,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 82,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 82,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 82,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 82,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
         "r": 82,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 24,
-        "r": 72,
+        "r": 82,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 26,
-        "r": 72,
+        "c": 10,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 28,
-        "r": 72,
+        "c": 12,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 30,
-        "r": 72,
+        "c": 14,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 32,
-        "r": 72,
+        "c": 16,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 24,
-        "r": 74,
+        "c": 18,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 26,
-        "r": 74,
+        "c": 20,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 28,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 30,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 32,
-        "r": 74,
+        "c": 22,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 24,
-        "r": 76,
+        "r": 84,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 26,
-        "r": 76,
+        "c": 10,
+        "r": 86,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 28,
-        "r": 76,
+        "c": 12,
+        "r": 86,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 30,
-        "r": 76,
+        "c": 14,
+        "r": 86,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 32,
-        "r": 76,
+        "c": 16,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 86,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 24,
-        "r": 78,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 88,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 90,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 94,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 96,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 14,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 16,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 18,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 20,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 22,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 24,
+        "r": 98,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 26,
-        "r": 78,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 32,
-        "r": 78,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 30,
-        "r": 78,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 28,
-        "r": 78,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 34,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 34,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 36,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 36,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 36,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 38,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 38,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 40,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 40,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 42,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 42,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 44,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 44,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 46,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 46,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 48,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 47,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 49,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 50,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 52,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 51,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 53,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 54,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 56,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 55,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 57,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 59,
-        "r": 79,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 58,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 57,
         "r": 75,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 60,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 59,
-        "r": 75,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 57,
+        "c": 26,
         "r": 73,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 59,
-        "r": 73,
-        "layer": "floor"
+        "id": "tile_forest_group_20",
+        "c": 81,
+        "r": 86,
+        "layer": "object",
+        "sortDepth": 3.25,
+        "oy": -16
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 61,
-        "r": 73,
-        "layer": "floor"
+        "id": "tile_mr4cyy36",
+        "c": 88,
+        "r": 86,
+        "layer": "object",
+        "oy": 0.666667
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 63,
-        "r": 73,
-        "layer": "floor"
+        "id": "tile_forest_group_2002",
+        "c": 99,
+        "r": 89,
+        "layer": "object",
+        "oy": -16.666667,
+        "sortDepth": 3
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 57,
-        "r": 71,
-        "layer": "floor"
+        "id": "tile_forest_ancient_tree",
+        "c": 10,
+        "r": 61,
+        "layer": "object4",
+        "oy": 40.666667,
+        "ox": 14.666667
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 59,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 61,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 63,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 62,
+        "id": "tile_forest_gradient",
+        "c": 20,
         "r": 69,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 62,
-        "r": 67,
+        "id": "tile_forest_gradient",
+        "c": 19,
+        "r": 69,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 64,
-        "r": 68,
+        "id": "tile_forest_gradient",
+        "c": 18,
+        "r": 69,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 64,
-        "r": 67,
+        "id": "tile_forest_gradient",
+        "c": 17,
+        "r": 69,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 64,
-        "r": 70,
+        "id": "tile_forest_gradient",
+        "c": 13,
+        "r": 69,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 30,
-        "r": 60,
+        "id": "tile_forest_gradient",
+        "c": 12,
+        "r": 69,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 32,
-        "r": 60,
+        "id": "tile_forest_gradient",
+        "c": 11,
+        "r": 69,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
+        "id": "tile_forest_gradient",
+        "c": 10,
+        "r": 69,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 14,
+        "r": 69,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 9,
+        "r": 69,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_150",
+        "c": 39,
+        "r": 63,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_twisted_tree_dark_crystal",
+        "c": 108,
+        "r": 45,
+        "layer": "object2",
+        "oy": -13.333333,
+        "fx": false,
+        "sortDepth": 9.75
+      },
+      {
+        "id": "tile_forest_twisted_tree_dark_crystal",
+        "c": 74,
+        "r": 18,
+        "layer": "object2",
+        "sortDepth": 9
+      },
+      {
+        "id": "tile_forest_twisted_tree_dark_crystal",
+        "c": 58,
+        "r": 18,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_twisted_tree_dark_crystal",
+        "c": 10,
+        "r": 88,
+        "layer": "object2",
+        "sortDepth": 9.5
+      },
+      {
+        "id": "tile_forest_twisted_tree_dark_crystal",
+        "c": 14,
+        "r": 29,
+        "layer": "object2",
+        "ox": 10.666667
+      },
+      {
+        "id": "tile_forest_gradient",
         "c": 34,
-        "r": 60,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 35,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 36,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 37,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 38,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 39,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 40,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 41,
+        "r": 63,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 17,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 18,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 19,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 20,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 37,
+        "r": 52,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 38,
+        "r": 52,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 22,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 24,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 23,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 25,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 26,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 21,
+        "r": 51,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 61,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 61,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 61,
+        "r": 67,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 54,
+        "r": 68,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 55,
+        "r": 68,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 56,
+        "r": 68,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 57,
+        "r": 68,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 58,
+        "r": 68,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 59,
+        "r": 68,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 60,
+        "r": 68,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 53,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 55,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 54,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 56,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 57,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 58,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 59,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 60,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 61,
+        "r": 66,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_group_19",
+        "c": 60,
+        "r": 63,
+        "layer": "object2",
+        "ox": -5.333333,
+        "oy": 10,
+        "sortDepth": 7.5
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 64,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 67,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 70,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 64,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 67,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 70,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 63,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 66,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 63,
+        "r": 76,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_forest_layer_160",
+        "c": 70,
+        "r": 75,
+        "layer": "object4",
+        "scale": 115,
+        "ox": -14.666667,
+        "oy": -5.333333
+      },
+      {
+        "id": "tile_forest_wood_bridge_short",
+        "c": 79,
+        "r": 38,
+        "layer": "ground3",
+        "oy": 3.333333
+      },
+      {
+        "id": "tile_mvcsj5eh",
+        "c": 78,
+        "r": 34,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvcsj5eh",
+        "c": 82,
+        "r": 34,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 82,
+        "r": 39,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 37,
+        "c": 77,
+        "r": 39,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 78,
+        "r": 40,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 82,
+        "r": 40,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 79,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 80,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 81,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 78,
+        "r": 41,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_layer_16202",
+        "c": 77,
+        "r": 43,
+        "layer": "object4"
+      },
+      {
+        "id": "tile_forest_wood_bridge_long",
+        "c": 49,
+        "r": 59,
+        "layer": "ground2",
+        "oy": 5.333333,
+        "ox": -0.666667
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 56,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 47,
+        "r": 62,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 48,
+        "r": 61,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 52,
+        "r": 61,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 48,
+        "r": 56,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 52,
+        "r": 56,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 88,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 89,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 91,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 90,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 92,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 93,
+        "r": 40,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_16202_crimson",
+        "c": 30,
+        "r": 38,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_forest_layer_161_crimson",
+        "c": 51,
+        "r": 55,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_forest_layer_162_crimson",
+        "c": 44,
+        "r": 52,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_small_tree_crimson",
+        "c": 45,
+        "r": 58,
+        "layer": "object4",
+        "ox": 7.333333,
+        "oy": -37.333333
+      },
+      {
+        "id": "tile_forest_bg_outside_tree02_crimson",
+        "c": 22,
+        "r": 62,
+        "layer": "object2",
+        "scale": 145,
+        "ox": -11.333333,
+        "oy": -6
+      },
+      {
+        "id": "tile_forest_layer_158",
+        "c": 22,
+        "r": 64,
+        "layer": "object2",
+        "ox": -14,
+        "oy": -7.333333
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 21,
+        "r": 62,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_3",
+        "c": 61,
+        "r": 67,
+        "layer": "ground5",
+        "oy": -20
+      },
+      {
+        "id": "tile_forest_layer_16202_crimson",
+        "c": 45,
+        "r": 31,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_forest_layer_16202_crimson",
+        "c": 25,
+        "r": 21,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_forest_layer_16202",
+        "c": 71,
+        "r": 93,
+        "layer": "object5"
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 108,
+        "r": 84,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_forest_bg_outside_tree02",
+        "c": 92,
+        "r": 86,
+        "layer": "object6",
+        "scale": 150,
+        "ox": 9.333333,
+        "oy": -0.666667
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 112,
+        "r": 83,
+        "layer": "object6",
+        "scale": 135
+      },
+      {
+        "id": "tile_forest_layer_162",
+        "c": 90,
+        "r": 71,
+        "layer": "object4"
+      },
+      {
+        "id": "tile_forest_layer_162",
+        "c": 84,
+        "r": 70,
+        "layer": "overlay",
+        "scale": 120,
+        "ox": -8,
+        "oy": 2.666667
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 79,
+        "r": 88,
+        "layer": "overlay",
+        "sortDepth": 5.5
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 57,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
         "r": 60,
         "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 60,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 33,
+        "r": 58,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 33,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 30,
+        "r": 66,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_157_copy",
+        "c": 12,
+        "r": 51,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_157_copy",
+        "c": 38,
+        "r": 55,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_157_copy",
+        "c": 51,
+        "r": 87,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_132",
+        "c": 14,
+        "r": 51,
+        "layer": "ground2"
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 13,
+        "r": 52,
+        "layer": "ground2",
+        "oy": -18
+      },
+      {
+        "id": "tile_forest_layer_157_copy",
+        "c": 38,
+        "r": 40,
+        "layer": "ground2",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_150",
+        "c": 24,
+        "r": 61,
+        "layer": "object6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 36,
+        "r": 65,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_150",
+        "c": 34,
+        "r": 63,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 36,
+        "r": 65,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 41,
+        "r": 65,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy",
+        "c": 48,
+        "r": 63,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 49,
+        "r": 58,
+        "layer": "object6",
+        "fx": true,
+        "ox": -18.666667,
+        "oy": 5.333333
+      },
+      {
+        "id": "tile_forest_layer_153",
+        "c": 84,
+        "r": 55,
+        "layer": "ground3",
+        "fx": true,
+        "ox": -8,
+        "scale": 120
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 83,
+        "r": 52,
+        "layer": "object2",
+        "fx": true,
+        "oy": -12.666667
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 86,
+        "r": 54,
+        "layer": "object3",
+        "ox": 3.333333,
+        "oy": 2.666667,
+        "sortDepth": 4.5
+      },
+      {
+        "id": "tile_forest_layer_166",
+        "c": 84,
+        "r": 57,
+        "layer": "object6"
+      },
+      {
+        "id": "tile_forest_layer_166",
+        "c": 84,
+        "r": 60,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 89,
+        "r": 56,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 84,
+        "r": 54,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 86,
+        "r": 54,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 87,
+        "r": 56,
+        "layer": "object4",
+        "fx": true,
+        "oy": 14.666667,
+        "ox": -6
+      },
+      {
+        "id": "tile_forest_layer_48_copy",
+        "c": 85,
+        "r": 57,
+        "layer": "object4",
+        "fx": true,
+        "oy": -11.333333,
+        "ox": -16
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 86,
+        "r": 57,
+        "layer": "object4",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 100,
+        "r": 64,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 87,
+        "r": 60,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 108,
+        "r": 55,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 112,
+        "r": 55,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 113,
+        "r": 54,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 113,
+        "r": 58,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 106,
+        "r": 56,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 107,
+        "r": 66,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 97,
+        "r": 66,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 86,
+        "r": 59,
+        "layer": "object3",
+        "fx": true,
+        "ox": -14
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 98,
+        "r": 29,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 99,
+        "r": 25,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 99,
+        "r": 26,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 99,
+        "r": 27,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 99,
+        "r": 28,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 25,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 26,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 27,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 28,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 114,
+        "r": 29,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 101,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 102,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 103,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 104,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 105,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 106,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 107,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 30,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 30,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 28,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 28,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 26,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 26,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 24,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 24,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 24,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 24,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 106,
+        "r": 31,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 38,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 38,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 36,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 36,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 34,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 34,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 32,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 32,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 30,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 28,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 26,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 26,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 28,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 30,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 29,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 27,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 27,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 25,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 25,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 23,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 23,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_3",
+        "c": 99,
+        "r": 24,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_3",
+        "c": 93,
+        "r": 41,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_131",
+        "c": 107,
+        "r": 38,
+        "layer": "object2",
+        "angle": 20,
+        "oy": 17.333333,
+        "ox": 14.666667
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 100,
+        "r": 32,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 109,
+        "r": 30,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 98,
+        "r": 92,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 103,
+        "r": 81,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 92,
+        "r": 45,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 95,
+        "r": 39,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_rubble_brick_chunks",
+        "c": 51,
+        "r": 89,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_rubble_chips_02",
+        "c": 84,
+        "r": 82,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_rubble_chips_02",
+        "c": 111,
+        "r": 57,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_rubble_chips_02",
+        "c": 109,
+        "r": 37,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_rubble_pile_medium",
+        "c": 95,
+        "r": 32,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_cvs_back_counter",
+        "c": 30,
+        "r": 94,
+        "layer": "object2",
+        "fx": true,
+        "oy": -5.333333
+      },
+      {
+        "id": "tile_cvs_checkout_counter",
+        "c": 30,
+        "r": 96,
+        "layer": "object2",
+        "fx": true,
+        "ox": -19.333333,
+        "oy": -2
+      },
+      {
+        "id": "tile_cvs_sign_twelve",
+        "c": 31,
+        "r": 93,
+        "layer": "object2",
+        "ox": -40,
+        "oy": 14
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 39,
+        "r": 93,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 37,
+        "r": 93,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_133",
+        "c": 35,
+        "r": 93,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_134",
+        "c": 38,
+        "r": 93,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 35,
+        "r": 91,
+        "layer": "object4",
+        "ox": 9.333333,
+        "oy": 1.333333,
+        "sortDepth": 5.75
+      },
+      {
+        "id": "tile_forest_small_tree",
+        "c": 37,
+        "r": 92,
+        "layer": "object4",
+        "fx": false,
+        "oy": -16.666667,
+        "ox": 1.333333,
+        "sortDepth": 5.25
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 57,
+        "r": 94,
+        "layer": "object4",
+        "scale": 145
+      },
+      {
+        "id": "tile_forest_bg_outside_tree02",
+        "c": 41,
+        "r": 95,
+        "layer": "object4",
+        "scale": 115
+      },
+      {
+        "id": "tile_forest_layer_150",
+        "c": 43,
+        "r": 94,
+        "layer": "object4",
+        "scale": 115
+      },
+      {
+        "id": "tile_forest_layer_150",
+        "c": 51,
+        "r": 94,
+        "layer": "object4",
+        "scale": 130
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 46,
+        "r": 94,
+        "layer": "object4",
+        "scale": 115
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 55,
+        "r": 94,
+        "layer": "object4",
+        "scale": 115
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 54,
+        "r": 43,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 61,
+        "r": 43,
+        "layer": "ground3"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 54,
+        "r": 36,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 61,
+        "r": 36,
+        "layer": "object"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_half",
+        "c": 55,
+        "r": 42,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_half",
+        "c": 58,
+        "r": 42,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_half",
+        "c": 55,
+        "r": 37,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_half",
+        "c": 58,
+        "r": 37,
+        "layer": "ground5"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 55,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 59,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_secret",
+        "c": 11,
+        "r": 35,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 11,
+        "r": 36,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 13,
+        "r": 36,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 34,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 34,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 32,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 32,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 30,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 30,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 28,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 28,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 26,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 26,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 10,
+        "r": 24,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 12,
+        "r": 24,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 10,
+        "r": 21,
+        "layer": "object7"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 13,
+        "r": 21,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 24,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 25,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 26,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 27,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 28,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 29,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 30,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 31,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 32,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 33,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 14,
+        "r": 34,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_wall02_hole",
+        "c": 11,
+        "r": 28,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_wall02_hole",
+        "c": 11,
+        "r": 21,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 12,
+        "r": 29,
+        "layer": "object8",
+        "doorMode": "key"
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 12,
+        "r": 22,
+        "layer": "object8",
+        "doorMode": "picture"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 12,
+        "r": 31,
+        "layer": "object7"
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 11,
+        "r": 24,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 10,
+        "r": 33,
+        "layer": "object7",
+        "fx": true,
+        "ox": 14,
+        "oy": -20
+      },
+      {
+        "id": "tile_bg_backroom_wall02_secret",
+        "c": 36,
+        "r": 24,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 25,
+        "layer": "ground6",
+        "fx": true
       },
       {
         "id": "tile_forest_layer_124_copy",
         "c": 36,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 38,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 32,
+        "r": 13,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 34,
+        "r": 13,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 40,
+        "r": 13,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 42,
+        "r": 13,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_tree_door_crimson",
+        "c": 32,
+        "r": -2,
+        "layer": "object7",
+        "fx": true,
+        "oy": -8.666667
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 30,
+        "r": 5,
+        "layer": "object7"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 44,
+        "r": 5,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 13,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 30,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 44,
+        "r": 13,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 44,
+        "r": 11,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 44,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 44,
+        "r": 7,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 30,
+        "r": 11,
+        "layer": "object7"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 44,
+        "r": 11,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 41,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 42,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 43,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 32,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 33,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_153",
+        "c": 40,
+        "r": 6,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_160_crimson",
+        "c": 31,
+        "r": 0,
+        "layer": "object8",
+        "fx": true,
+        "ox": -20.666667,
+        "oy": -2
+      },
+      {
+        "id": "tile_forest_group_13_1",
+        "c": 39,
+        "r": 8,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_13_1",
+        "c": 33,
+        "r": 8,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_13_1",
+        "c": 35,
+        "r": 7,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_13_1",
+        "c": 40,
+        "r": 9,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 36,
+        "r": 11,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 33,
+        "r": 8,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_7_copy_12",
+        "c": 37,
+        "r": 10,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_7_copy_12",
+        "c": 37,
+        "r": 9,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_7_copy_12",
+        "c": 35,
+        "r": 10,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 34,
+        "r": 11,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_13_1",
+        "c": 31,
+        "r": 8,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_7_copy_12",
+        "c": 41,
+        "r": 9,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_7_copy_12",
+        "c": 32,
+        "r": 9,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_7_copy_12",
+        "c": 32,
+        "r": 11,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_7_copy_12",
+        "c": 38,
+        "r": 11,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 36,
+        "r": 12,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 43,
+        "r": 10,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 43,
+        "r": 9,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 43,
+        "r": 11,
+        "layer": "ground7"
+      },
+      {
+        "id": "tile_forest_layer_132",
+        "c": 109,
+        "r": 93,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_forest_layer_131",
+        "c": 110,
+        "r": 101,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_forest_layer_131",
+        "c": 89,
+        "r": 97,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_forest_layer_130",
+        "c": 86,
+        "r": 98,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 87,
+        "r": 97,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 94,
+        "r": 88,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 87,
+        "r": 85,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 79,
+        "r": 85,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 85,
+        "r": 85,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 88,
+        "r": 86,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 81,
+        "r": 86,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 105,
+        "r": 89,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_135",
+        "c": 97,
+        "r": 89,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 100,
+        "r": 89,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 86,
+        "r": 86,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 82,
+        "r": 86,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 88,
+        "r": 81,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_134",
+        "c": 89,
+        "r": 89,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_134",
+        "c": 87,
+        "r": 86,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_134",
+        "c": 87,
+        "r": 81,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 88,
+        "r": 66,
+        "layer": "ground2",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 111,
+        "r": 54,
+        "layer": "object9",
+        "fx": true,
+        "ox": -23.333333,
+        "oy": 2
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 105,
+        "r": 54,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 92,
+        "r": 88,
+        "layer": "object9",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 89,
+        "r": 88,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 106,
+        "r": 88,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 111,
+        "r": 88,
+        "layer": "object9",
+        "oy": -0.666667,
+        "ox": -0.666667
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 102,
+        "r": 90,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_127",
+        "c": 101,
+        "r": 92,
+        "layer": "object9",
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_group_8_copy",
+        "c": 100,
+        "r": 84,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_group_8_copy",
+        "c": 102,
+        "r": 87,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_group_8_copy",
+        "c": 106,
+        "r": 64,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_group_8_copy",
+        "c": 110,
+        "r": 64,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_group_8_copy",
+        "c": 112,
         "r": 60,
-        "layer": "floor"
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 64,
-        "r": 12,
-        "layer": "floor"
+        "id": "tile_forest_group_8_copy",
+        "c": 106,
+        "r": 58,
+        "layer": "object9",
+        "ox": 30
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 66,
-        "r": 12,
-        "layer": "floor"
+        "id": "tile_forest_layer_34_copy_4",
+        "c": 88,
+        "r": 44,
+        "layer": "object9",
+        "oy": 20
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 68,
-        "r": 12,
-        "layer": "floor"
+        "id": "tile_forest_layer_34_copy_4",
+        "c": 91,
+        "r": 44,
+        "layer": "object9",
+        "oy": 20
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 70,
-        "r": 12,
-        "layer": "floor"
+        "id": "tile_forest_bg_forest_light",
+        "c": 87,
+        "r": 89,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 64,
-        "r": 14,
-        "layer": "floor"
+        "id": "tile_forest_bg_forest_light",
+        "c": 34,
+        "r": 26,
+        "layer": "object9",
+        "fx": true
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 66,
-        "r": 14,
-        "layer": "floor"
+        "id": "tile_forest_bg_forest_light",
+        "c": 39,
+        "r": 33,
+        "layer": "object9",
+        "oy": 30
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 68,
-        "r": 14,
-        "layer": "floor"
+        "id": "tile_forest_bg_forest_light",
+        "c": 43,
+        "r": 46,
+        "layer": "object9",
+        "oy": 20,
+        "fx": true
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 70,
-        "r": 14,
-        "layer": "floor"
+        "id": "tile_forest_bg_forest_light",
+        "c": 47,
+        "r": 63,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 70,
-        "r": 16,
-        "layer": "floor"
+        "id": "tile_forest_bg_forest_light",
+        "c": 52,
+        "r": 69,
+        "layer": "object9",
+        "oy": 30,
+        "fx": true
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 68,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 66,
-        "r": 17,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 66,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 64,
-        "r": 16,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 71,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
+        "id": "tile_forest_bg_forest_light",
         "c": 69,
-        "r": 18,
-        "layer": "floor"
+        "r": 81,
+        "layer": "object9",
+        "oy": 30
       },
       {
-        "id": "tile_forest_layer_124_copy",
+        "id": "tile_forest_bg_forest_light",
+        "c": 83,
+        "r": 97,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_bg_outside_tree02_crimson",
+        "c": 33,
+        "r": 50,
+        "layer": "object4",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_151_crimson",
+        "c": 39,
+        "r": 26,
+        "layer": "object5",
+        "ox": 30,
+        "fx": true,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_150_crimson",
+        "c": 27,
+        "r": 32,
+        "layer": "object4",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_150_crimson",
+        "c": 27,
+        "r": 35,
+        "layer": "object4",
+        "fx": true,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_150_crimson",
+        "c": 39,
+        "r": 36,
+        "layer": "object4",
+        "oy": 30,
+        "fx": true,
+        "scale": 80
+      },
+      {
+        "id": "tile_forest_layer_152",
+        "c": 34,
+        "r": 34,
+        "layer": "object4",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_small_tree_crimson",
+        "c": 53,
+        "r": 65,
+        "layer": "object4",
+        "ox": 20,
+        "oy": 30,
+        "fx": true,
+        "sortDepth": 5
+      },
+      {
+        "id": "tile_forest_layer_160_crimson",
+        "c": 48,
+        "r": 67,
+        "layer": "ground3",
+        "ox": 10,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_159_crimson",
+        "c": 25,
+        "r": 40,
+        "layer": "top",
+        "oy": 30,
+        "fx": true,
+        "scale": 145,
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_ancient_tree_crimson_small",
+        "c": 26,
+        "r": 16,
+        "layer": "ground3",
+        "fx": true,
+        "oy": -8.666667,
+        "ox": 3.333333
+      },
+      {
+        "id": "tile_forest_layer_16202_crimson",
+        "c": 38,
+        "r": 10,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_16202_crimson",
+        "c": 22,
+        "r": 2,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_162_crimson",
+        "c": 42,
+        "r": 19,
+        "layer": "ground3",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_162_crimson",
+        "c": 44,
+        "r": 4,
+        "layer": "ground3",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_twisted_tree_crimson_small",
+        "c": 38,
+        "r": 18,
+        "layer": "object4",
+        "oy": 10,
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 34,
+        "r": 28,
+        "layer": "ground",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_group_13",
+        "c": 37,
+        "r": 35,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 52,
+        "r": 67,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 29,
+        "r": 50,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 25,
+        "r": 71,
+        "layer": "ground",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 49,
+        "r": 87,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
+        "c": 71,
+        "r": 90,
+        "layer": "ground",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_157_copy_2",
         "c": 67,
-        "r": 18,
-        "layer": "floor"
+        "r": 87,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 20,
+        "fx": true
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 65,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 63,
-        "r": 18,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 69,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 71,
-        "r": 20,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 68,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 70,
-        "r": 22,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 68,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 70,
-        "r": 24,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 70,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 68,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
-        "c": 66,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_forest_layer_124_copy",
+        "id": "tile_forest_layer_157_copy_2",
         "c": 64,
-        "r": 26,
-        "layer": "floor"
+        "r": 61,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 10
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 61,
-        "r": 26,
-        "layer": "floor"
+        "id": "tile_forest_layer_157_copy",
+        "c": 67,
+        "r": 57,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 30
       },
       {
-        "id": "tile_forest_layer_124_copy",
+        "id": "tile_forest_layer_132",
+        "c": 66,
+        "r": 61,
+        "layer": "ground2",
+        "ox": 20
+      },
+      {
+        "id": "tile_forest_layer_131",
+        "c": 65,
+        "r": 62,
+        "layer": "ground2",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
         "c": 62,
+        "r": 58,
+        "layer": "object4",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 66,
+        "r": 60,
+        "layer": "object4",
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 67,
+        "r": 69,
+        "layer": "object4",
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_45_copy",
+        "c": 56,
+        "r": 70,
+        "layer": "object4",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 53,
+        "r": 90,
+        "layer": "object4",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 49,
+        "r": 83,
+        "layer": "object4",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 50,
+        "r": 65,
+        "layer": "object4",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 42,
+        "r": 67,
+        "layer": "object4",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_125",
+        "c": 76,
+        "r": 39,
+        "layer": "object4",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_162",
+        "c": 69,
+        "r": 53,
+        "layer": "object4",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_162",
+        "c": 60,
+        "r": 47,
+        "layer": "object4",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_16202",
+        "c": 62,
+        "r": 35,
+        "layer": "object4"
+      },
+      {
+        "id": "tile_forest_layer_16202",
+        "c": 91,
+        "r": 53,
+        "layer": "object6",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_layer_16202",
+        "c": 106,
+        "r": 78,
+        "layer": "ground5",
+        "ox": 10,
+        "oy": 20,
+        "scale": 115
+      },
+      {
+        "id": "tile_forest_layer_159_crimson",
+        "c": 44,
+        "r": 38,
+        "layer": "object6",
+        "ox": 10,
+        "oy": 20,
+        "scale": 120
+      },
+      {
+        "id": "tile_forest_twisted_tree_dark_crystal",
+        "c": 61,
+        "r": 71,
+        "layer": "object2",
+        "fx": true,
+        "sortDepth": 9.75
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 38,
+        "r": 98,
+        "layer": "object4",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 52,
+        "r": 100,
+        "layer": "overlay",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 36,
+        "r": 102,
+        "layer": "overlay",
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 33,
+        "r": 98,
+        "layer": "overlay",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_152",
+        "c": 36,
+        "r": 96,
+        "layer": "overlay",
+        "oy": 10,
+        "sortDepth": 1.75
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 52,
+        "r": 84,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 54,
+        "r": 84,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 63,
+        "r": 79,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 81,
+        "r": 71,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 77,
+        "r": 72,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 95,
+        "r": 62,
+        "layer": "overlay",
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 92,
+        "r": 63,
+        "layer": "overlay",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 105,
+        "r": 50,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 49,
+        "r": 23,
+        "layer": "overlay",
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 101,
+        "r": 88,
+        "layer": "overlay",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 82,
+        "r": 85,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 74,
+        "r": 89,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 77,
+        "r": 89,
+        "layer": "overlay",
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 49,
+        "r": 80,
+        "layer": "overlay",
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 46,
+        "r": 81,
+        "layer": "overlay",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 57,
+        "r": 68,
+        "layer": "overlay",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 66,
+        "r": 68,
+        "layer": "overlay",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 68,
+        "r": 67,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 62,
+        "r": 56,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 42,
+        "r": 61,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 9,
+        "r": 70,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 18,
+        "r": 70,
+        "layer": "overlay",
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 24,
+        "r": 70,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 22,
+        "r": 70,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 16,
+        "r": 58,
+        "layer": "overlay",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 18,
+        "r": 57,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 86,
+        "r": 41,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 89,
+        "r": 41,
+        "layer": "overlay",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 87,
+        "r": 23,
+        "layer": "overlay",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 74,
+        "r": 24,
+        "layer": "overlay",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 97,
+        "r": 29,
+        "layer": "overlay",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 104,
+        "r": 18,
+        "layer": "overlay",
+        "fx": true,
+        "oy": -2,
+        "ox": 9.333333
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 108,
+        "r": 18,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 55,
+        "r": 23,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 51,
+        "r": 23,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 70,
+        "r": 32,
+        "layer": "overlay",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 75,
+        "r": 32,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 72,
+        "r": 32,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 43,
+        "r": 44,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 49,
+        "r": 47,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 28,
+        "r": 49,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 24,
+        "r": 52,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 22,
+        "r": 52,
+        "layer": "overlay",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 30,
+        "r": 49,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_ancient_tree",
+        "c": 99,
+        "r": 9,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_16202",
+        "c": 91,
+        "r": 18,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_16202",
+        "c": 101,
+        "r": 38,
+        "layer": "object5",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 65,
+        "r": 32,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 69,
+        "r": 31,
+        "layer": "ground5",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 56,
+        "r": 64,
+        "layer": "ground5",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 47,
+        "r": 23,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_bg_outside_tree02",
+        "c": 72,
+        "r": 33,
+        "layer": "object9",
+        "fx": true,
+        "sortDepth": 3.5
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 69,
+        "r": 31,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30,
+        "fx": true,
+        "sortDepth": 5.25
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 86,
+        "r": 22,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 106,
+        "r": 17,
+        "layer": "object9",
+        "fx": true,
+        "sortDepth": 4.25
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 99,
+        "r": 17,
+        "layer": "object5",
+        "fx": true,
+        "sortDepth": 4.25
+      },
+      {
+        "id": "tile_mvnn2p1x",
+        "c": 62,
+        "r": 94,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 59,
+        "r": 98,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 39,
+        "r": 98,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 36,
+        "r": 81,
+        "layer": "object3",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 40,
+        "r": 81,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 39,
+        "r": 82,
+        "layer": "object3",
+        "oy": 30
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 44,
+        "r": 82,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 43,
+        "r": 63,
+        "layer": "object3",
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 28,
+        "r": 51,
+        "layer": "object3",
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 31,
+        "r": 34,
+        "layer": "object3",
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 88,
+        "r": 58,
+        "layer": "object3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 107,
+        "r": 54,
+        "layer": "object3",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 69,
+        "r": 68,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 75,
+        "r": 33,
+        "layer": "object9",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 83,
+        "r": 73,
+        "layer": "object9",
+        "ox": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 46,
+        "r": 45,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 12,
+        "r": 71,
+        "layer": "object9",
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 16,
+        "r": 71,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 95,
+        "r": 63,
+        "layer": "object9",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_interactive_storage_locker",
+        "c": 87,
+        "r": 43,
+        "layer": "object9",
+        "ox": 2.666667
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 18,
+        "r": 38,
+        "layer": "object5",
+        "oy": 30
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 14,
+        "r": 72,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 10,
+        "r": 72,
+        "layer": "object5",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 23,
+        "r": 97,
+        "layer": "ground3",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 34,
+        "r": 76,
+        "layer": "ground3",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 15,
+        "r": 62,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 85,
+        "r": 51,
+        "layer": "ground3",
+        "ox": 20
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 79,
+        "r": 28,
+        "layer": "ground3",
+        "ox": 30
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 112,
+        "r": 65,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 92,
+        "r": 103,
+        "layer": "ground3",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 69,
+        "r": 98,
+        "layer": "ground3",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 43,
+        "r": 76,
+        "layer": "ground",
+        "oy": 30,
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_layer_149",
+        "c": 39,
+        "r": 77,
+        "layer": "ground",
+        "scale": 130,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 36,
+        "r": 76,
+        "layer": "ground",
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 28,
+        "r": 87,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 20,
+        "scale": 120
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 30,
+        "r": 88,
+        "layer": "ground",
+        "ox": 30,
+        "scale": 120,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 74,
+        "r": 88,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 70,
+        "r": 81,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 56,
+        "r": 96,
+        "layer": "overlay",
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 60,
+        "r": 96,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 51,
+        "r": 83,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 46,
+        "r": 68,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 18,
+        "r": 69,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 53,
+        "r": 23,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 56,
+        "r": 22,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 73,
+        "r": 23,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 70,
+        "r": 62,
+        "layer": "overlay",
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 37,
+        "r": 80,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 39,
+        "r": 79,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 22,
+        "r": 70,
+        "layer": "overlay",
+        "ox": 20
+      },
+      {
+        "id": "tile_forest_layer_115_copy_15",
+        "c": 19,
+        "r": 57,
+        "layer": "overlay",
+        "ox": 20
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 18,
+        "r": 57,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 16,
+        "r": 70,
+        "layer": "overlay",
+        "ox": 20
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 44,
+        "r": 68,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 48,
+        "r": 73,
+        "layer": "overlay",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 49,
+        "r": 74,
+        "layer": "overlay",
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 59,
+        "r": 67,
+        "layer": "overlay",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 56,
+        "r": 67,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 48,
+        "r": 46,
+        "layer": "overlay",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 42,
+        "r": 44,
+        "layer": "overlay",
+        "ox": 20
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 70,
+        "r": 60,
+        "layer": "overlay",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_155",
+        "c": 72,
+        "r": 63,
+        "layer": "overlay"
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 89,
+        "r": 62,
+        "layer": "overlay",
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 91,
+        "r": 62,
+        "layer": "overlay",
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_bg_forest_nest_egg",
+        "c": 34,
+        "r": 96,
+        "layer": "ground8",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_forest_bg_forest_nest_egg",
+        "c": 63,
+        "r": 62,
+        "layer": "ground8",
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_bg_forest_nest_egg",
+        "c": 111,
+        "r": 55,
+        "layer": "ground8",
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_bg_forest_nest_egg",
+        "c": 80,
+        "r": 27,
+        "layer": "ground8",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_bg_forest_nest_egg",
+        "c": 49,
+        "r": 27,
+        "layer": "ground8",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_bg_forest_nest_egg",
+        "c": 33,
+        "r": 67,
+        "layer": "ground8",
+        "ox": 30
+      },
+      {
+        "id": "tile_forest_layer_152",
+        "c": 19,
+        "r": 97,
+        "layer": "ground8",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_forest_layer_152",
+        "c": 16,
+        "r": 50,
+        "layer": "ground8",
+        "ox": 10
+      },
+      {
+        "id": "tile_forest_layer_166",
+        "c": 21,
+        "r": 65,
+        "layer": "ground8",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_166",
+        "c": 43,
+        "r": 47,
+        "layer": "ground8",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_166",
+        "c": 57,
+        "r": 48,
+        "layer": "ground8",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_46_copy",
+        "c": 17,
+        "r": 48,
+        "layer": "ground8",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_forest_layer_46_copy",
+        "c": 16,
+        "r": 48,
+        "layer": "ground8",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 87,
+        "r": 88,
+        "layer": "object11",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 87,
+        "r": 83,
+        "layer": "object11",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 103,
+        "r": 68,
+        "layer": "object11",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 85,
+        "r": 59,
+        "layer": "object11",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 88,
+        "r": 62,
+        "layer": "object11",
+        "ox": 30,
+        "oy": 10
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 98,
+        "r": 69,
+        "layer": "object11",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 111,
+        "r": 63,
+        "layer": "object11",
+        "ox": 30,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 86,
+        "r": 102,
+        "layer": "ground8",
+        "ox": 20,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 81,
+        "r": 96,
+        "layer": "ground8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 71,
+        "r": 84,
+        "layer": "object11",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 66,
+        "r": 70,
+        "layer": "object11"
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 65,
+        "r": 59,
+        "layer": "object11",
+        "ox": 10
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 69,
+        "r": 37,
+        "layer": "object11",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 84,
+        "r": 27,
+        "layer": "object11",
+        "ox": 30,
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 97,
+        "r": 31,
+        "layer": "object11",
+        "ox": 10,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 29,
+        "r": 36,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 30,
+        "r": 40,
+        "layer": "ground",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 23,
+        "r": 62,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 15,
+        "r": 97,
+        "layer": "ground",
+        "ox": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 9,
+        "r": 93,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 15,
+        "r": 45,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 49,
+        "r": 29,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 100,
+        "r": 20,
+        "layer": "object11",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 108,
+        "r": 38,
+        "layer": "object11",
+        "ox": 20
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 106,
+        "r": 58,
+        "layer": "object11",
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_brick_chunks",
+        "c": 64,
+        "r": 102,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_rubble_brick_chunks",
+        "c": 45,
+        "r": 101,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_rubble_brick_chunks",
+        "c": 21,
+        "r": 90,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 10,
+        "r": 76,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 33,
+        "r": 69,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 15,
+        "r": 48,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 10,
+        "r": 42,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 37,
+        "r": 29,
+        "layer": "ground",
+        "ox": 10
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 62,
+        "r": 31,
+        "layer": "ground",
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 75,
+        "r": 37,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 30
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 97,
+        "r": 38,
+        "layer": "ground",
+        "ox": 30,
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 91,
+        "r": 48,
+        "layer": "ground",
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_rocks",
+        "c": 70,
+        "r": 51,
+        "layer": "ground",
+        "oy": 20
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 21,
+        "r": 95,
+        "layer": "ground",
+        "ox": 10,
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_scatter",
+        "c": 11,
+        "r": 85,
+        "layer": "ground",
+        "oy": 10
+      },
+      {
+        "id": "tile_dmg_rubble_scatter",
+        "c": 22,
+        "r": 81,
+        "layer": "ground",
+        "ox": 20,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_dmg_broken_wall_breach",
+        "c": 10,
+        "r": 44,
+        "layer": "object",
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 14,
+        "r": 44,
+        "layer": "object",
+        "fx": true,
+        "oy": 6.666667
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 42,
+        "r": 98,
+        "layer": "object9",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_street_claw_machine",
+        "c": 46,
+        "r": 81,
+        "layer": "object9",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_street_capsule_toy_machines",
+        "c": 29,
+        "r": 50,
+        "layer": "object9",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_20",
+        "c": 95,
+        "r": 41,
+        "layer": "object",
+        "oy": 22,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 100,
+        "r": 41,
+        "layer": "object2",
+        "ox": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_114_copy_7",
+        "c": 94,
+        "r": 41,
+        "layer": "object2",
+        "ox": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 95,
+        "r": 41,
+        "layer": "object2",
+        "ox": 30,
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 100,
+        "r": 41,
+        "layer": "object2",
+        "oy": 30,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_117",
+        "c": 93,
+        "r": 42,
+        "layer": "object2",
+        "ox": 20,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 93,
+        "r": 40,
+        "layer": "object3",
+        "ox": 10,
+        "oy": 10,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 101,
+        "r": 43,
+        "layer": "object3",
+        "oy": 20,
+        "fx": true
+      },
+      {
+        "id": "tile_field_ammo_crate",
+        "c": 113,
+        "r": 20,
+        "layer": "object3",
+        "fx": true,
+        "ox": -2
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 110,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 111,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 112,
+        "r": 18,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 110,
+        "r": 41,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 111,
+        "r": 41,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 112,
+        "r": 41,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 112,
+        "r": 41,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 113,
+        "r": 41,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 114,
+        "r": 41,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 111,
+        "r": 24,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 113,
+        "r": 24,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 111,
+        "r": 26,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 113,
+        "r": 26,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 111,
+        "r": 28,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 113,
+        "r": 28,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 111,
+        "r": 30,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 113,
+        "r": 30,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 32,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 34,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 36,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 112,
+        "r": 38,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 111,
+        "r": 40,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 113,
+        "r": 40,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_130",
+        "c": 111,
+        "r": 32,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_bg_outside_farm01",
+        "c": 107,
+        "r": 24,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_bg_outside_farm01",
+        "c": 101,
+        "r": 27,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_bg_outside_farm01",
+        "c": 101,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_forest_bg_outside_farm01",
+        "c": 107,
+        "r": 31,
+        "layer": "object2",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_151",
+        "c": 90,
+        "r": 103,
+        "layer": "top",
+        "fx": true,
+        "scale": 140
+      },
+      {
+        "id": "tile_mrt_exit_2",
+        "c": 113,
+        "r": 86,
+        "layer": "object3",
+        "oy": 14,
+        "sortDepth": 3.5
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 116,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 116,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 116,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 116,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 116,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 116,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 117,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 118,
+        "r": 88,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 118,
+        "r": 103,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 116,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 117,
+        "r": 104,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 116,
+        "r": 104,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 117,
+        "r": 104,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_hole",
+        "c": 68,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 67,
+        "r": 51,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 69,
+        "r": 52,
+        "layer": "object3",
+        "doorMode": "key"
+      },
+      {
+        "id": "tile_bg_backroom_wall02_hole",
+        "c": 40,
+        "r": 44,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_bg_backroom_door_wood",
+        "c": 41,
+        "r": 45,
+        "layer": "object4",
+        "doorMode": "key"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 67,
+        "r": 47,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 40,
+        "r": 44,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 36,
+        "r": 54,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 32,
+        "r": 33,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 14,
+        "r": 71,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 60,
+        "r": 68,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 52,
+        "r": 68,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 45,
+        "r": 98,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 111,
+        "r": 89,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 103,
+        "r": 66,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 101,
+        "r": 71,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 98,
+        "r": 67,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 90,
+        "r": 63,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 75,
+        "r": 33,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_bg_electric_light",
+        "c": 89,
+        "r": 42,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 92,
+        "r": 89,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 66,
+        "r": 93,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 57,
+        "r": 98,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 67,
+        "r": 80,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 80,
+        "r": 72,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 75,
+        "r": 63,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 65,
+        "r": 57,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 67,
+        "r": 51,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 73,
+        "r": 47,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 95,
+        "r": 30,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 112,
+        "r": 18,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 43,
+        "r": 81,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 51,
+        "r": 98,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 23,
+        "r": 71,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 19,
+        "r": 71,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 20,
+        "r": 58,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 33,
+        "r": 65,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_interactive_electric_light_02",
+        "c": 38,
+        "r": 54,
+        "layer": "object10"
+      },
+      {
+        "id": "tile_street_drink_shop_small",
+        "c": 22,
+        "r": 54,
+        "layer": "object10",
+        "oy": -10.666667
+      },
+      {
+        "id": "tile_dmg_crack06",
+        "c": 27,
+        "r": 68,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_crack06",
+        "c": 26,
+        "r": 56,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 14,
+        "r": 60,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_crack05",
+        "c": 31,
+        "r": 63,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_floor_crack_cross",
+        "c": 46,
+        "r": 66,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_floor_crack_cross",
+        "c": 50,
+        "r": 52,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_floor_crack_cross",
+        "c": 58,
+        "r": 46,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 81,
+        "r": 90,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_dmg_floor_crater",
+        "c": 76,
+        "r": 75,
+        "layer": "ground8"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 22,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 22,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 22,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 22,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 99,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 101,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 103,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 105,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 21,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 107,
+        "r": 19,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 21,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 109,
+        "r": 19,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 111,
+        "r": 22,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 111,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 113,
+        "r": 22,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 113,
+        "r": 20,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 75,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 76,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 77,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 78,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 79,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 80,
+        "r": 24,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 75,
+        "r": 29,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 76,
+        "r": 29,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 78,
+        "r": 29,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 79,
+        "r": 29,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 80,
+        "r": 29,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 77,
+        "r": 29,
+        "layer": "object"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 78,
+        "r": 29,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 76,
+        "r": 29,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 75,
+        "r": 29,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 74,
+        "r": 29,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 73,
+        "r": 29,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 77,
+        "r": 29,
+        "layer": "object3"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 77,
         "r": 26,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 61,
+        "c": 75,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 73,
+        "r": 26,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 73,
         "r": 28,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 63,
+        "c": 75,
         "r": 28,
         "layer": "floor"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 61,
-        "r": 30,
+        "c": 77,
+        "r": 28,
         "layer": "floor"
       },
       {
-        "id": "tile_forest_layer_124_copy",
-        "c": 63,
-        "r": 30,
-        "layer": "floor"
+        "id": "tile_bg_backroom_wall02_secret",
+        "c": 84,
+        "r": 24,
+        "layer": "object"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 61,
-        "r": 32,
-        "layer": "floor"
+        "c": 84,
+        "r": 25,
+        "layer": "ground6"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 63,
-        "r": 32,
-        "layer": "floor"
+        "c": 86,
+        "r": 25,
+        "layer": "ground6"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 61,
-        "r": 34,
-        "layer": "floor"
+        "c": 84,
+        "r": 23,
+        "layer": "ground6"
       },
       {
         "id": "tile_forest_layer_124_copy",
-        "c": 63,
-        "r": 34,
+        "c": 86,
+        "r": 23,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 21,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 21,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 19,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 19,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 17,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 17,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 15,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 15,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 82,
+        "r": 15,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 82,
+        "r": 17,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 88,
+        "r": 15,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 88,
+        "r": 17,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 82,
+        "r": 13,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 13,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 13,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 88,
+        "r": 13,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 80,
+        "r": 13,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 80,
+        "r": 15,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 80,
+        "r": 17,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 80,
+        "r": 11,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 82,
+        "r": 11,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 11,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 11,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 88,
+        "r": 11,
+        "layer": "ground6"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 79,
+        "r": 6,
+        "layer": "object7"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 89,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 89,
+        "r": 15,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 82,
+        "r": 16,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 87,
+        "r": 16,
+        "layer": "object7",
+        "fx": false
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 79,
+        "r": 15,
+        "layer": "object7",
+        "fx": false
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 81,
+        "r": 16,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 82,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 83,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 85,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 87,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 88,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 86,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 84,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 81,
+        "r": 6,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 14,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 13,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 11,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 79,
+        "r": 11,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 79,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 79,
+        "r": 13,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 79,
+        "r": 14,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 9,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 90,
+        "r": 10,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 79,
+        "r": 9,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 79,
+        "r": 10,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 80,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 82,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 84,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 86,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 88,
+        "r": 9,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 80,
+        "r": 7,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 85,
+        "r": 9,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 82,
+        "r": 12,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 88,
+        "r": 12,
+        "layer": "object8"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 88,
+        "r": 7,
+        "layer": "object8"
+      },
+      {
+        "id": "tile_obstacle_ore_rare",
+        "c": 85,
+        "r": 16,
+        "layer": "object8"
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 84,
+        "r": 18,
+        "layer": "object8"
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 84,
+        "r": 14,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 80,
+        "r": 14,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 80,
+        "r": 10,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 83,
+        "r": 9,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_large",
+        "c": 85,
+        "r": 11,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 82,
+        "r": 9,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 86,
+        "r": 14,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 88,
+        "r": 11,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 81,
+        "r": 13,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_obstacle_ore_small",
+        "c": 82,
+        "r": 10,
+        "layer": "object8",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 85,
+        "r": 9,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 88,
+        "r": 12,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 81,
+        "r": 12,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 84,
+        "r": 13,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 88,
+        "r": 15,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 80,
+        "r": 14,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_126",
+        "c": 84,
+        "r": 17,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_8_copy_2",
+        "c": 84,
+        "r": 12,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_8_copy_2",
+        "c": 80,
+        "r": 12,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_8_copy_2",
+        "c": 87,
+        "r": 10,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_8_copy_2",
+        "c": 87,
+        "r": 13,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_8_copy_2",
+        "c": 83,
+        "r": 9,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_group_8_copy_2",
+        "c": 89,
+        "r": 11,
+        "layer": "ground7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_wood_bridge_long",
+        "c": 36,
+        "r": 13,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_wood_bridge_long",
+        "c": 36,
+        "r": 17,
+        "layer": "ground6",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_wood_bridge_long",
+        "c": 36,
+        "r": 21,
+        "layer": "ground6",
+        "fx": true,
+        "ox": 0.666667
+      },
+      {
+        "id": "tile_forest_layer_124_copy",
+        "c": 36,
+        "r": 25,
+        "layer": "floor",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 34,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 40,
+        "r": 12,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 35,
+        "r": 11,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyq54",
+        "c": 39,
+        "r": 11,
+        "layer": "object7",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_162_crimson",
+        "c": 26,
+        "r": 8,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_layer_162_crimson",
+        "c": 45,
+        "r": 9,
+        "layer": "ground3",
+        "fx": true
+      },
+      {
+        "id": "tile_forest_gradient",
+        "c": 118,
+        "r": 104,
+        "layer": "object3",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 92,
+        "r": 92,
         "layer": "floor"
       }
     ],
-    "solid": [],
+    "solid": [
+      "86,107",
+      "87,107",
+      "89,107",
+      "90,107",
+      "91,107",
+      "92,107",
+      "93,107",
+      "94,107",
+      "98,107",
+      "88,107",
+      "86,106",
+      "87,106",
+      "88,106",
+      "91,106",
+      "92,106",
+      "94,106",
+      "96,106",
+      "97,106",
+      "98,106",
+      "100,106",
+      "102,106",
+      "104,106",
+      "105,106",
+      "107,106",
+      "108,106",
+      "110,106",
+      "111,106",
+      "112,106",
+      "114,106",
+      "115,106",
+      "116,106",
+      "117,106",
+      "118,106",
+      "95,106",
+      "95,107",
+      "96,107",
+      "97,107",
+      "89,106",
+      "90,106",
+      "93,106",
+      "103,106",
+      "99,106",
+      "99,107",
+      "101,107",
+      "101,106",
+      "100,107",
+      "103,107",
+      "102,107",
+      "105,107",
+      "104,107",
+      "106,106",
+      "106,107",
+      "107,107",
+      "109,107",
+      "109,106",
+      "108,107",
+      "111,107",
+      "112,107",
+      "113,107",
+      "114,107",
+      "113,106",
+      "110,107",
+      "115,107",
+      "116,107",
+      "117,107",
+      "118,107",
+      "118,105",
+      "118,104",
+      "118,103",
+      "118,102",
+      "118,101",
+      "118,100",
+      "118,99",
+      "118,98",
+      "118,97",
+      "118,96",
+      "118,95",
+      "118,94",
+      "118,93",
+      "118,92",
+      "118,91",
+      "119,107",
+      "119,106",
+      "119,105",
+      "119,104",
+      "119,103",
+      "119,101",
+      "119,100",
+      "119,94",
+      "119,93",
+      "119,92",
+      "119,91",
+      "119,98",
+      "119,99",
+      "119,102",
+      "119,97",
+      "119,96",
+      "119,95",
+      "118,90",
+      "118,89",
+      "118,88",
+      "118,87",
+      "119,90",
+      "119,89",
+      "119,88",
+      "119,87",
+      "119,86",
+      "117,89",
+      "116,89",
+      "115,89",
+      "112,89",
+      "112,90",
+      "111,90",
+      "110,90",
+      "109,90",
+      "108,90",
+      "113,90",
+      "114,89",
+      "113,89",
+      "114,90",
+      "115,90",
+      "116,90",
+      "117,90",
+      "107,90",
+      "107,89",
+      "106,89",
+      "106,88",
+      "106,87",
+      "107,87",
+      "108,87",
+      "110,87",
+      "111,87",
+      "112,87",
+      "107,88",
+      "108,88",
+      "110,88",
+      "111,88",
+      "109,87",
+      "109,88",
+      "108,89",
+      "109,89",
+      "112,88",
+      "111,89",
+      "110,89",
+      "112,91",
+      "111,91",
+      "110,91",
+      "109,91",
+      "108,91",
+      "107,91",
+      "106,91",
+      "106,90",
+      "105,90",
+      "105,91",
+      "104,91",
+      "104,90",
+      "104,89",
+      "105,89",
+      "105,88",
+      "105,87",
+      "105,86",
+      "100,89",
+      "100,90",
+      "100,91",
+      "99,91",
+      "99,89",
+      "99,90",
+      "98,89",
+      "97,89",
+      "96,89",
+      "95,89",
+      "94,89",
+      "93,89",
+      "92,89",
+      "91,89",
+      "90,89",
+      "89,89",
+      "89,90",
+      "90,90",
+      "92,90",
+      "94,90",
+      "96,90",
+      "97,90",
+      "98,90",
+      "95,90",
+      "91,90",
+      "93,90",
+      "89,91",
+      "90,91",
+      "91,91",
+      "92,91",
+      "93,91",
+      "94,91",
+      "95,91",
+      "96,91",
+      "97,91",
+      "98,91",
+      "99,75",
+      "99,76",
+      "99,77",
+      "99,78",
+      "99,79",
+      "99,80",
+      "99,81",
+      "99,82",
+      "99,83",
+      "99,84",
+      "99,85",
+      "99,86",
+      "99,87",
+      "99,88",
+      "89,81",
+      "89,82",
+      "89,83",
+      "89,84",
+      "89,85",
+      "89,86",
+      "89,87",
+      "89,88",
+      "86,88",
+      "87,88",
+      "88,88",
+      "86,87",
+      "87,87",
+      "88,87",
+      "80,87",
+      "81,87",
+      "82,87",
+      "82,88",
+      "81,88",
+      "80,88",
+      "86,83",
+      "87,83",
+      "88,83",
+      "86,82",
+      "87,82",
+      "88,82",
+      "86,81",
+      "87,81",
+      "88,81",
+      "105,75",
+      "105,76",
+      "105,77",
+      "105,78",
+      "105,79",
+      "105,80",
+      "105,81",
+      "105,82",
+      "105,83",
+      "105,84",
+      "105,85",
+      "107,77",
+      "106,77",
+      "108,77",
+      "108,76",
+      "107,76",
+      "106,76",
+      "106,75",
+      "107,75",
+      "108,75",
+      "106,78",
+      "107,78",
+      "108,78",
+      "106,79",
+      "106,80",
+      "106,81",
+      "106,82",
+      "106,83",
+      "106,84",
+      "106,85",
+      "106,86",
+      "107,86",
+      "108,86",
+      "107,85",
+      "107,84",
+      "107,83",
+      "107,82",
+      "107,81",
+      "107,80",
+      "107,79",
+      "108,79",
+      "108,80",
+      "108,81",
+      "108,82",
+      "108,83",
+      "108,84",
+      "108,85",
+      "109,86",
+      "110,86",
+      "111,86",
+      "112,86",
+      "113,86",
+      "114,86",
+      "115,87",
+      "116,87",
+      "117,87",
+      "117,88",
+      "116,88",
+      "115,88",
+      "114,88",
+      "114,87",
+      "113,87",
+      "113,88",
+      "118,86",
+      "117,86",
+      "116,86",
+      "115,86",
+      "109,85",
+      "109,84",
+      "109,83",
+      "109,82",
+      "109,81",
+      "109,80",
+      "109,79",
+      "109,78",
+      "109,77",
+      "109,76",
+      "110,76",
+      "111,76",
+      "111,77",
+      "111,78",
+      "110,78",
+      "110,79",
+      "110,80",
+      "110,81",
+      "110,82",
+      "110,83",
+      "110,84",
+      "111,84",
+      "112,84",
+      "113,84",
+      "114,84",
+      "115,84",
+      "110,77",
+      "111,79",
+      "111,80",
+      "111,81",
+      "111,82",
+      "111,83",
+      "110,85",
+      "111,85",
+      "112,85",
+      "113,85",
+      "114,85",
+      "115,85",
+      "116,85",
+      "117,85",
+      "117,84",
+      "116,84",
+      "112,83",
+      "113,83",
+      "114,83",
+      "115,83",
+      "116,83",
+      "117,83",
+      "118,85",
+      "118,84",
+      "118,83",
+      "118,82",
+      "112,82",
+      "113,82",
+      "114,82",
+      "115,82",
+      "116,82",
+      "117,82",
+      "112,81",
+      "113,81",
+      "114,81",
+      "115,81",
+      "116,81",
+      "117,81",
+      "90,81",
+      "91,81",
+      "90,82",
+      "90,83",
+      "90,84",
+      "90,85",
+      "90,86",
+      "90,87",
+      "90,88",
+      "91,88",
+      "92,88",
+      "93,88",
+      "94,88",
+      "95,88",
+      "96,88",
+      "97,88",
+      "98,88",
+      "98,81",
+      "98,82",
+      "98,83",
+      "98,84",
+      "98,85",
+      "98,86",
+      "98,87",
+      "91,82",
+      "92,82",
+      "93,82",
+      "94,82",
+      "95,82",
+      "96,82",
+      "97,82",
+      "97,83",
+      "97,84",
+      "96,84",
+      "96,85",
+      "96,86",
+      "96,87",
+      "95,87",
+      "94,87",
+      "93,87",
+      "92,87",
+      "91,87",
+      "91,86",
+      "91,85",
+      "91,84",
+      "92,84",
+      "92,83",
+      "93,83",
+      "94,83",
+      "95,83",
+      "95,84",
+      "95,85",
+      "94,86",
+      "93,86",
+      "92,86",
+      "92,85",
+      "93,85",
+      "93,84",
+      "94,84",
+      "94,85",
+      "91,83",
+      "95,86",
+      "96,83",
+      "97,85",
+      "97,86",
+      "97,87",
+      "86,80",
+      "87,80",
+      "88,80",
+      "89,80",
+      "91,80",
+      "96,81",
+      "92,81",
+      "93,81",
+      "94,81",
+      "95,81",
+      "96,71",
+      "96,72",
+      "96,73",
+      "96,74",
+      "96,75",
+      "96,76",
+      "96,77",
+      "96,78",
+      "96,79",
+      "96,80",
+      "97,75",
+      "97,76",
+      "97,77",
+      "98,75",
+      "98,76",
+      "98,77",
+      "98,78",
+      "97,79",
+      "98,79",
+      "97,80",
+      "98,80",
+      "97,81",
+      "97,78",
+      "90,80",
+      "86,79",
+      "87,79",
+      "89,79",
+      "90,79",
+      "91,79",
+      "92,79",
+      "93,79",
+      "94,79",
+      "92,80",
+      "93,80",
+      "94,80",
+      "95,80",
+      "95,72",
+      "95,73",
+      "95,74",
+      "95,75",
+      "95,76",
+      "95,77",
+      "95,78",
+      "95,79",
+      "88,79",
+      "86,78",
+      "87,78",
+      "88,78",
+      "89,78",
+      "90,78",
+      "91,78",
+      "92,78",
+      "93,78",
+      "94,78",
+      "93,71",
+      "94,71",
+      "95,71",
+      "93,72",
+      "93,73",
+      "93,74",
+      "93,75",
+      "93,76",
+      "94,72",
+      "94,73",
+      "94,74",
+      "94,75",
+      "94,76",
+      "87,77",
+      "88,77",
+      "89,77",
+      "90,77",
+      "91,77",
+      "92,77",
+      "93,77",
+      "94,77",
+      "86,77",
+      "86,105",
+      "86,104",
+      "86,103",
+      "86,102",
+      "86,101",
+      "85,102",
+      "84,102",
+      "83,102",
+      "81,102",
+      "80,102",
+      "79,102",
+      "78,102",
+      "77,102",
+      "76,102",
+      "75,102",
+      "74,102",
+      "73,102",
+      "72,102",
+      "71,102",
+      "70,102",
+      "69,102",
+      "68,102",
+      "67,102",
+      "82,102",
+      "85,101",
+      "84,101",
+      "83,101",
+      "82,101",
+      "81,101",
+      "80,101",
+      "79,101",
+      "78,101",
+      "77,101",
+      "76,101",
+      "75,101",
+      "74,101",
+      "73,101",
+      "72,101",
+      "71,101",
+      "70,101",
+      "69,101",
+      "68,101",
+      "67,101",
+      "70,100",
+      "70,99",
+      "70,98",
+      "70,97",
+      "70,96",
+      "71,96",
+      "72,96",
+      "73,96",
+      "74,96",
+      "75,96",
+      "76,96",
+      "77,96",
+      "78,96",
+      "79,96",
+      "80,96",
+      "80,97",
+      "80,98",
+      "80,99",
+      "80,100",
+      "71,97",
+      "72,97",
+      "75,97",
+      "76,97",
+      "77,97",
+      "78,97",
+      "79,97",
+      "74,97",
+      "73,97",
+      "71,98",
+      "72,98",
+      "73,98",
+      "75,98",
+      "77,98",
+      "78,98",
+      "79,98",
+      "76,98",
+      "74,98",
+      "71,99",
+      "72,99",
+      "73,99",
+      "75,99",
+      "76,99",
+      "77,99",
+      "78,99",
+      "79,100",
+      "74,99",
+      "71,100",
+      "72,100",
+      "73,100",
+      "74,100",
+      "75,100",
+      "76,100",
+      "78,100",
+      "77,100",
+      "79,99",
+      "68,103",
+      "67,103",
+      "67,104",
+      "67,105",
+      "67,106",
+      "68,106",
+      "71,106",
+      "73,106",
+      "75,106",
+      "77,106",
+      "78,106",
+      "79,106",
+      "80,106",
+      "81,106",
+      "82,106",
+      "83,106",
+      "84,106",
+      "85,106",
+      "69,106",
+      "70,106",
+      "68,104",
+      "68,105",
+      "69,105",
+      "70,105",
+      "71,105",
+      "72,105",
+      "73,105",
+      "74,105",
+      "75,105",
+      "76,105",
+      "77,105",
+      "78,105",
+      "79,105",
+      "80,105",
+      "82,104",
+      "83,104",
+      "84,104",
+      "85,104",
+      "85,103",
+      "84,103",
+      "82,103",
+      "81,103",
+      "80,103",
+      "79,103",
+      "78,103",
+      "77,103",
+      "76,103",
+      "75,103",
+      "74,103",
+      "73,103",
+      "72,103",
+      "71,103",
+      "70,103",
+      "69,103",
+      "69,104",
+      "75,104",
+      "76,104",
+      "77,104",
+      "78,104",
+      "79,104",
+      "80,104",
+      "81,104",
+      "70,104",
+      "71,104",
+      "72,104",
+      "74,104",
+      "73,104",
+      "72,106",
+      "74,106",
+      "76,106",
+      "82,105",
+      "83,105",
+      "85,105",
+      "84,105",
+      "83,103",
+      "81,105",
+      "85,107",
+      "81,107",
+      "79,107",
+      "76,107",
+      "75,107",
+      "73,107",
+      "72,107",
+      "71,107",
+      "69,107",
+      "68,107",
+      "67,107",
+      "70,107",
+      "74,107",
+      "78,107",
+      "77,107",
+      "80,107",
+      "82,107",
+      "84,107",
+      "83,107",
+      "67,108",
+      "68,108",
+      "70,108",
+      "71,108",
+      "72,108",
+      "73,108",
+      "74,108",
+      "75,108",
+      "76,108",
+      "77,108",
+      "78,108",
+      "79,108",
+      "80,108",
+      "81,108",
+      "82,108",
+      "83,108",
+      "84,108",
+      "85,108",
+      "86,108",
+      "87,108",
+      "88,108",
+      "89,108",
+      "90,108",
+      "91,108",
+      "92,108",
+      "93,108",
+      "94,108",
+      "95,108",
+      "96,108",
+      "97,108",
+      "98,108",
+      "99,108",
+      "100,108",
+      "101,108",
+      "102,108",
+      "103,108",
+      "104,108",
+      "105,108",
+      "106,108",
+      "107,108",
+      "108,108",
+      "109,108",
+      "110,108",
+      "111,108",
+      "112,108",
+      "114,108",
+      "115,108",
+      "116,108",
+      "117,108",
+      "118,108",
+      "119,108",
+      "69,108",
+      "66,109",
+      "67,109",
+      "68,109",
+      "71,109",
+      "72,109",
+      "73,109",
+      "74,109",
+      "75,109",
+      "76,109",
+      "77,109",
+      "78,109",
+      "79,109",
+      "80,109",
+      "81,109",
+      "82,109",
+      "83,109",
+      "84,109",
+      "85,109",
+      "86,109",
+      "87,109",
+      "88,109",
+      "89,109",
+      "90,109",
+      "91,109",
+      "92,109",
+      "93,109",
+      "94,109",
+      "95,109",
+      "96,109",
+      "97,109",
+      "98,109",
+      "99,109",
+      "100,109",
+      "101,109",
+      "102,109",
+      "103,109",
+      "104,109",
+      "105,109",
+      "106,109",
+      "107,109",
+      "108,109",
+      "109,109",
+      "110,109",
+      "111,109",
+      "112,109",
+      "113,109",
+      "114,109",
+      "115,109",
+      "116,109",
+      "117,109",
+      "118,109",
+      "119,109",
+      "113,108",
+      "69,109",
+      "70,109",
+      "119,85",
+      "119,84",
+      "119,83",
+      "119,82",
+      "119,75",
+      "119,81",
+      "118,81",
+      "112,80",
+      "113,80",
+      "114,80",
+      "115,80",
+      "116,80",
+      "117,80",
+      "118,80",
+      "119,80",
+      "112,79",
+      "113,79",
+      "114,79",
+      "115,79",
+      "116,79",
+      "117,79",
+      "118,79",
+      "119,79",
+      "112,78",
+      "113,78",
+      "114,78",
+      "115,78",
+      "116,78",
+      "117,78",
+      "118,78",
+      "119,78",
+      "112,76",
+      "113,76",
+      "114,76",
+      "115,76",
+      "116,76",
+      "117,76",
+      "118,77",
+      "119,77",
+      "118,76",
+      "119,76",
+      "112,77",
+      "113,77",
+      "114,77",
+      "115,77",
+      "116,77",
+      "117,77",
+      "108,68",
+      "109,68",
+      "110,68",
+      "111,68",
+      "112,68",
+      "113,68",
+      "114,68",
+      "115,68",
+      "108,67",
+      "109,67",
+      "110,67",
+      "111,67",
+      "112,67",
+      "113,67",
+      "114,67",
+      "115,67",
+      "108,69",
+      "108,70",
+      "108,71",
+      "108,72",
+      "108,73",
+      "108,74",
+      "109,75",
+      "110,75",
+      "111,75",
+      "112,75",
+      "113,75",
+      "114,75",
+      "115,75",
+      "116,75",
+      "117,75",
+      "109,74",
+      "110,74",
+      "111,74",
+      "112,74",
+      "113,74",
+      "114,74",
+      "115,74",
+      "116,74",
+      "117,74",
+      "118,74",
+      "119,74",
+      "118,75",
+      "109,69",
+      "110,69",
+      "111,69",
+      "112,69",
+      "113,69",
+      "114,69",
+      "115,69",
+      "116,69",
+      "117,69",
+      "118,69",
+      "118,70",
+      "119,70",
+      "109,70",
+      "110,70",
+      "111,70",
+      "112,70",
+      "113,70",
+      "114,70",
+      "115,70",
+      "117,70",
+      "109,71",
+      "110,71",
+      "111,71",
+      "112,71",
+      "114,71",
+      "115,71",
+      "116,71",
+      "117,71",
+      "118,71",
+      "119,71",
+      "116,72",
+      "117,72",
+      "118,72",
+      "119,72",
+      "119,73",
+      "118,73",
+      "117,73",
+      "116,73",
+      "115,73",
+      "109,73",
+      "110,73",
+      "111,73",
+      "112,73",
+      "113,73",
+      "113,71",
+      "109,72",
+      "110,72",
+      "111,72",
+      "112,72",
+      "113,72",
+      "114,72",
+      "114,73",
+      "115,72",
+      "116,70",
+      "100,67",
+      "100,68",
+      "100,69",
+      "100,70",
+      "100,71",
+      "100,72",
+      "100,73",
+      "101,67",
+      "101,68",
+      "101,69",
+      "101,70",
+      "101,71",
+      "101,72",
+      "101,73",
+      "102,73",
+      "102,72",
+      "102,71",
+      "102,70",
+      "102,69",
+      "102,68",
+      "102,67",
+      "103,68",
+      "104,68",
+      "105,68",
+      "105,67",
+      "104,67",
+      "103,67",
+      "98,68",
+      "99,68",
+      "99,69",
+      "98,69",
+      "98,67",
+      "98,66",
+      "98,65",
+      "98,64",
+      "98,63",
+      "98,62",
+      "99,63",
+      "99,67",
+      "99,66",
+      "99,65",
+      "99,64",
+      "100,66",
+      "101,66",
+      "102,66",
+      "103,66",
+      "104,66",
+      "100,65",
+      "101,65",
+      "102,65",
+      "103,65",
+      "104,65",
+      "105,66",
+      "105,65",
+      "105,64",
+      "105,63",
+      "105,62",
+      "105,61",
+      "105,60",
+      "105,59",
+      "105,58",
+      "105,57",
+      "105,56",
+      "106,53",
+      "106,52",
+      "107,53",
+      "108,53",
+      "109,53",
+      "110,53",
+      "111,53",
+      "112,53",
+      "113,53",
+      "114,53",
+      "107,52",
+      "108,52",
+      "109,52",
+      "110,52",
+      "112,52",
+      "113,52",
+      "105,51",
+      "105,52",
+      "105,53",
+      "105,54",
+      "104,54",
+      "104,55",
+      "106,51",
+      "107,51",
+      "108,51",
+      "109,51",
+      "111,51",
+      "112,51",
+      "115,52",
+      "114,52",
+      "114,51",
+      "113,51",
+      "110,51",
+      "105,55",
+      "114,54",
+      "114,55",
+      "114,56",
+      "114,57",
+      "114,58",
+      "114,59",
+      "114,60",
+      "114,61",
+      "114,62",
+      "114,63",
+      "114,64",
+      "114,65",
+      "114,66",
+      "115,66",
+      "115,65",
+      "115,64",
+      "115,63",
+      "115,62",
+      "115,61",
+      "115,60",
+      "115,59",
+      "115,58",
+      "115,57",
+      "115,56",
+      "115,55",
+      "115,54",
+      "115,53",
+      "115,51",
+      "104,57",
+      "104,58",
+      "104,59",
+      "104,60",
+      "104,61",
+      "104,62",
+      "104,63",
+      "104,64",
+      "103,64",
+      "102,64",
+      "101,64",
+      "100,64",
+      "100,63",
+      "101,63",
+      "102,63",
+      "104,56",
+      "103,56",
+      "103,57",
+      "103,58",
+      "103,59",
+      "103,60",
+      "103,61",
+      "103,62",
+      "103,63",
+      "102,62",
+      "101,62",
+      "100,62",
+      "99,62",
+      "90,65",
+      "91,65",
+      "93,65",
+      "94,65",
+      "95,65",
+      "96,65",
+      "97,65",
+      "92,65",
+      "90,64",
+      "91,64",
+      "92,64",
+      "93,64",
+      "94,64",
+      "95,64",
+      "96,64",
+      "97,64",
+      "90,63",
+      "91,63",
+      "92,63",
+      "93,63",
+      "94,63",
+      "95,63",
+      "96,63",
+      "97,63",
+      "90,62",
+      "91,62",
+      "92,62",
+      "94,62",
+      "95,62",
+      "96,62",
+      "97,62",
+      "93,62",
+      "90,61",
+      "91,61",
+      "93,61",
+      "94,61",
+      "95,61",
+      "96,61",
+      "97,61",
+      "98,61",
+      "99,61",
+      "100,61",
+      "101,61",
+      "102,61",
+      "92,61",
+      "90,60",
+      "90,59",
+      "90,58",
+      "90,57",
+      "90,56",
+      "90,55",
+      "90,54",
+      "90,53",
+      "90,52",
+      "91,52",
+      "92,52",
+      "94,52",
+      "96,52",
+      "97,52",
+      "98,52",
+      "99,52",
+      "100,52",
+      "101,52",
+      "101,53",
+      "102,53",
+      "103,53",
+      "104,53",
+      "104,52",
+      "103,52",
+      "102,52",
+      "95,52",
+      "93,52",
+      "91,53",
+      "91,54",
+      "91,55",
+      "91,56",
+      "91,57",
+      "91,58",
+      "91,59",
+      "93,60",
+      "94,60",
+      "95,60",
+      "96,60",
+      "97,60",
+      "98,60",
+      "99,60",
+      "100,60",
+      "101,60",
+      "102,60",
+      "91,60",
+      "92,60",
+      "92,59",
+      "92,58",
+      "93,58",
+      "93,57",
+      "93,56",
+      "93,55",
+      "93,54",
+      "92,54",
+      "92,55",
+      "92,56",
+      "92,57",
+      "92,53",
+      "93,53",
+      "95,53",
+      "97,53",
+      "98,53",
+      "99,53",
+      "100,53",
+      "94,53",
+      "96,53",
+      "93,59",
+      "94,59",
+      "98,59",
+      "99,59",
+      "100,59",
+      "101,59",
+      "102,59",
+      "102,58",
+      "102,57",
+      "102,56",
+      "102,55",
+      "103,55",
+      "103,54",
+      "102,54",
+      "101,54",
+      "100,54",
+      "99,54",
+      "97,54",
+      "96,54",
+      "95,54",
+      "94,54",
+      "94,55",
+      "95,59",
+      "97,59",
+      "98,54",
+      "96,59",
+      "90,51",
+      "91,51",
+      "92,51",
+      "94,51",
+      "95,51",
+      "96,51",
+      "97,51",
+      "98,51",
+      "99,51",
+      "100,51",
+      "101,51",
+      "102,51",
+      "103,51",
+      "104,51",
+      "93,51",
+      "90,50",
+      "91,50",
+      "92,50",
+      "93,50",
+      "94,50",
+      "95,50",
+      "96,50",
+      "97,50",
+      "98,50",
+      "99,50",
+      "100,50",
+      "101,50",
+      "102,50",
+      "103,50",
+      "104,50",
+      "105,50",
+      "106,50",
+      "107,50",
+      "108,50",
+      "109,50",
+      "110,50",
+      "111,50",
+      "112,50",
+      "113,50",
+      "114,50",
+      "115,50",
+      "102,49",
+      "102,48",
+      "102,47",
+      "103,47",
+      "103,46",
+      "103,45",
+      "103,44",
+      "103,43",
+      "102,42",
+      "102,44",
+      "102,45",
+      "102,46",
+      "102,43",
+      "103,42",
+      "104,42",
+      "106,42",
+      "108,42",
+      "110,42",
+      "111,42",
+      "112,42",
+      "113,42",
+      "114,42",
+      "109,42",
+      "105,42",
+      "107,42",
+      "104,43",
+      "104,44",
+      "104,45",
+      "104,46",
+      "104,47",
+      "104,48",
+      "104,49",
+      "103,49",
+      "103,48",
+      "100,44",
+      "101,44",
+      "101,43",
+      "100,43",
+      "96,43",
+      "96,44",
+      "94,44",
+      "93,44",
+      "92,44",
+      "91,44",
+      "90,44",
+      "89,44",
+      "88,44",
+      "87,44",
+      "95,44",
+      "95,45",
+      "95,43",
+      "94,43",
+      "93,43",
+      "92,43",
+      "91,43",
+      "90,43",
+      "89,43",
+      "88,43",
+      "87,43",
+      "89,42",
+      "92,42",
+      "93,42",
+      "91,42",
+      "94,42",
+      "90,42",
+      "94,41",
+      "94,40",
+      "94,39",
+      "94,38",
+      "94,37",
+      "94,36",
+      "94,35",
+      "94,34",
+      "94,33",
+      "94,31",
+      "94,30",
+      "87,31",
+      "88,31",
+      "89,31",
+      "90,31",
+      "88,30",
+      "89,30",
+      "90,30",
+      "87,30",
+      "87,32",
+      "87,33",
+      "87,34",
+      "88,35",
+      "88,36",
+      "88,37",
+      "88,38",
+      "88,39",
+      "88,40",
+      "88,41",
+      "87,41",
+      "87,40",
+      "87,39",
+      "87,38",
+      "87,37",
+      "87,36",
+      "87,35",
+      "87,42",
+      "88,42",
+      "88,32",
+      "88,33",
+      "88,34",
+      "89,34",
+      "90,33",
+      "90,32",
+      "89,32",
+      "90,34",
+      "90,35",
+      "90,37",
+      "90,38",
+      "90,39",
+      "90,40",
+      "90,41",
+      "89,41",
+      "89,40",
+      "89,39",
+      "89,38",
+      "89,37",
+      "89,36",
+      "89,35",
+      "89,33",
+      "90,36",
+      "93,40",
+      "93,39",
+      "93,38",
+      "93,37",
+      "93,35",
+      "93,34",
+      "93,33",
+      "92,32",
+      "92,31",
+      "93,30",
+      "93,31",
+      "93,32",
+      "92,33",
+      "92,34",
+      "92,35",
+      "92,37",
+      "92,38",
+      "92,39",
+      "92,40",
+      "92,41",
+      "93,41",
+      "91,41",
+      "91,40",
+      "91,39",
+      "91,37",
+      "91,35",
+      "91,33",
+      "91,32",
+      "91,31",
+      "91,30",
+      "91,36",
+      "92,36",
+      "93,36",
+      "91,34",
+      "91,38",
+      "92,30",
+      "99,20",
+      "99,21",
+      "99,22",
+      "99,23",
+      "99,24",
+      "99,25",
+      "99,26",
+      "99,27",
+      "99,28",
+      "99,29",
+      "99,30",
+      "99,31",
+      "99,32",
+      "98,32",
+      "97,32",
+      "96,32",
+      "95,32",
+      "94,32",
+      "95,31",
+      "96,31",
+      "98,31",
+      "97,30",
+      "96,30",
+      "95,30",
+      "98,30",
+      "97,31",
+      "98,29",
+      "97,29",
+      "96,29",
+      "94,29",
+      "93,29",
+      "92,29",
+      "91,29",
+      "91,28",
+      "92,28",
+      "93,28",
+      "94,28",
+      "95,28",
+      "95,29",
+      "90,29",
+      "90,28",
+      "91,27",
+      "91,26",
+      "91,25",
+      "91,24",
+      "90,23",
+      "90,24",
+      "90,25",
+      "90,26",
+      "90,27",
+      "92,24",
+      "92,25",
+      "92,26",
+      "92,27",
+      "93,27",
+      "94,27",
+      "96,27",
+      "97,27",
+      "96,28",
+      "97,28",
+      "98,28",
+      "98,27",
+      "98,26",
+      "98,25",
+      "98,24",
+      "98,23",
+      "98,22",
+      "98,21",
+      "98,20",
+      "98,19",
+      "98,18",
+      "99,19",
+      "100,19",
+      "101,19",
+      "102,19",
+      "104,19",
+      "106,19",
+      "107,19",
+      "108,19",
+      "110,19",
+      "111,19",
+      "112,19",
+      "113,19",
+      "114,19",
+      "115,19",
+      "105,19",
+      "103,19",
+      "100,20",
+      "101,20",
+      "102,20",
+      "103,20",
+      "104,20",
+      "105,20",
+      "106,20",
+      "107,20",
+      "108,20",
+      "109,20",
+      "110,20",
+      "111,20",
+      "112,20",
+      "113,20",
+      "114,20",
+      "115,20",
+      "109,19",
+      "99,18",
+      "100,18",
+      "102,18",
+      "104,18",
+      "105,18",
+      "107,18",
+      "108,18",
+      "109,18",
+      "110,18",
+      "111,18",
+      "112,18",
+      "113,18",
+      "114,18",
+      "115,18",
+      "106,18",
+      "103,18",
+      "101,18",
+      "114,21",
+      "114,22",
+      "114,23",
+      "114,24",
+      "114,25",
+      "114,26",
+      "114,27",
+      "114,28",
+      "114,29",
+      "114,30",
+      "114,31",
+      "114,32",
+      "115,21",
+      "115,22",
+      "115,23",
+      "115,24",
+      "115,25",
+      "115,26",
+      "115,27",
+      "115,28",
+      "115,29",
+      "115,30",
+      "115,31",
+      "115,32",
+      "116,18",
+      "116,19",
+      "116,20",
+      "116,21",
+      "116,22",
+      "116,23",
+      "116,24",
+      "116,25",
+      "116,26",
+      "116,27",
+      "116,28",
+      "116,29",
+      "116,30",
+      "116,31",
+      "116,32",
+      "114,33",
+      "114,34",
+      "115,35",
+      "115,36",
+      "115,37",
+      "115,38",
+      "115,39",
+      "115,40",
+      "114,40",
+      "114,41",
+      "114,35",
+      "114,37",
+      "114,38",
+      "114,39",
+      "114,36",
+      "115,33",
+      "115,34",
+      "116,33",
+      "116,34",
+      "116,35",
+      "116,36",
+      "116,37",
+      "116,38",
+      "116,39",
+      "116,40",
+      "116,41",
+      "115,41",
+      "115,42",
+      "105,43",
+      "106,43",
+      "107,43",
+      "109,43",
+      "110,43",
+      "111,43",
+      "112,43",
+      "113,43",
+      "114,43",
+      "115,43",
+      "116,43",
+      "116,42",
+      "108,43",
+      "105,44",
+      "106,44",
+      "107,44",
+      "109,44",
+      "110,44",
+      "111,44",
+      "112,44",
+      "113,44",
+      "114,44",
+      "115,44",
+      "117,44",
+      "108,44",
+      "116,44",
+      "117,43",
+      "117,42",
+      "117,41",
+      "117,40",
+      "117,38",
+      "117,36",
+      "117,35",
+      "117,34",
+      "117,32",
+      "117,31",
+      "117,30",
+      "117,33",
+      "117,37",
+      "117,39",
+      "117,29",
+      "117,28",
+      "117,27",
+      "117,24",
+      "117,23",
+      "117,22",
+      "117,21",
+      "117,20",
+      "117,19",
+      "117,18",
+      "117,26",
+      "117,25",
+      "117,17",
+      "116,17",
+      "115,17",
+      "114,17",
+      "113,17",
+      "112,17",
+      "111,17",
+      "110,17",
+      "109,17",
+      "108,17",
+      "106,17",
+      "105,17",
+      "104,17",
+      "103,17",
+      "102,17",
+      "101,17",
+      "100,17",
+      "99,17",
+      "98,17",
+      "107,17",
+      "95,27",
+      "95,25",
+      "94,26",
+      "93,26",
+      "93,25",
+      "93,24",
+      "94,24",
+      "95,24",
+      "96,24",
+      "97,24",
+      "97,25",
+      "97,26",
+      "96,26",
+      "95,26",
+      "96,25",
+      "94,25",
+      "93,70",
+      "92,70",
+      "91,70",
+      "90,70",
+      "89,70",
+      "88,70",
+      "93,69",
+      "92,69",
+      "91,69",
+      "90,69",
+      "89,69",
+      "88,69",
+      "87,70",
+      "87,69",
+      "87,68",
+      "87,67",
+      "87,66",
+      "87,65",
+      "86,67",
+      "85,67",
+      "84,67",
+      "83,67",
+      "86,66",
+      "85,66",
+      "84,66",
+      "83,66",
+      "86,76",
+      "86,75",
+      "86,74",
+      "86,73",
+      "86,72",
+      "77,72",
+      "78,72",
+      "80,72",
+      "81,72",
+      "82,72",
+      "83,72",
+      "84,72",
+      "85,72",
+      "79,72",
+      "77,73",
+      "78,73",
+      "79,73",
+      "81,73",
+      "82,73",
+      "83,73",
+      "84,73",
+      "85,73",
+      "85,74",
+      "84,74",
+      "83,74",
+      "82,74",
+      "81,74",
+      "80,74",
+      "79,74",
+      "78,74",
+      "77,74",
+      "80,73",
+      "77,71",
+      "77,70",
+      "77,69",
+      "77,68",
+      "77,66",
+      "77,65",
+      "77,63",
+      "77,62",
+      "71,65",
+      "72,65",
+      "73,65",
+      "74,65",
+      "75,65",
+      "76,65",
+      "71,64",
+      "72,64",
+      "73,64",
+      "74,64",
+      "75,64",
+      "76,64",
+      "77,64",
+      "77,67",
+      "78,71",
+      "79,71",
+      "80,71",
+      "81,71",
+      "82,71",
+      "83,71",
+      "84,71",
+      "85,71",
+      "86,71",
+      "71,63",
+      "71,62",
+      "71,61",
+      "71,60",
+      "71,59",
+      "71,58",
+      "71,57",
+      "71,56",
+      "71,55",
+      "71,54",
+      "72,53",
+      "74,53",
+      "75,53",
+      "76,53",
+      "77,53",
+      "78,53",
+      "79,53",
+      "73,53",
+      "71,53",
+      "70,53",
+      "70,52",
+      "68,52",
+      "68,53",
+      "67,53",
+      "67,52",
+      "66,52",
+      "66,53",
+      "66,54",
+      "66,55",
+      "66,56",
+      "66,57",
+      "66,58",
+      "66,59",
+      "65,59",
+      "64,59",
+      "63,59",
+      "63,58",
+      "62,58",
+      "62,57",
+      "63,57",
+      "64,57",
+      "65,57",
+      "65,58",
+      "64,58",
+      "62,59",
+      "62,60",
+      "62,61",
+      "62,62",
+      "62,63",
+      "62,64",
+      "62,65",
+      "62,66",
+      "62,67",
+      "62,68",
+      "62,69",
+      "62,70",
+      "63,70",
+      "66,70",
+      "67,70",
+      "68,70",
+      "69,70",
+      "70,70",
+      "71,70",
+      "72,70",
+      "72,69",
+      "71,69",
+      "70,69",
+      "68,69",
+      "67,69",
+      "63,69",
+      "64,69",
+      "66,69",
+      "65,69",
+      "65,70",
+      "64,70",
+      "69,69",
+      "89,58",
+      "88,58",
+      "85,57",
+      "86,57",
+      "87,57",
+      "88,57",
+      "89,57",
+      "89,56",
+      "88,56",
+      "87,56",
+      "86,56",
+      "85,56",
+      "84,65",
+      "83,65",
+      "83,64",
+      "83,63",
+      "83,62",
+      "83,61",
+      "83,60",
+      "83,59",
+      "83,58",
+      "84,56",
+      "84,55",
+      "84,57",
+      "84,58",
+      "84,59",
+      "84,60",
+      "84,61",
+      "84,62",
+      "84,63",
+      "84,64",
+      "84,53",
+      "84,54",
+      "84,52",
+      "84,51",
+      "84,50",
+      "84,49",
+      "83,49",
+      "82,49",
+      "81,49",
+      "80,49",
+      "79,49",
+      "78,49",
+      "78,50",
+      "78,51",
+      "78,52",
+      "71,52",
+      "72,52",
+      "73,52",
+      "74,52",
+      "75,52",
+      "76,52",
+      "77,52",
+      "79,52",
+      "79,51",
+      "79,50",
+      "80,50",
+      "81,50",
+      "82,50",
+      "83,50",
+      "83,51",
+      "83,52",
+      "83,53",
+      "83,54",
+      "83,55",
+      "83,56",
+      "83,57",
+      "80,89",
+      "80,90",
+      "80,91",
+      "80,92",
+      "79,91",
+      "78,91",
+      "77,91",
+      "76,91",
+      "75,91",
+      "74,91",
+      "73,91",
+      "72,92",
+      "73,92",
+      "74,92",
+      "75,92",
+      "76,92",
+      "77,92",
+      "78,92",
+      "79,92",
+      "73,90",
+      "74,90",
+      "76,90",
+      "77,90",
+      "78,90",
+      "79,90",
+      "72,91",
+      "73,89",
+      "73,88",
+      "74,87",
+      "74,86",
+      "74,85",
+      "73,83",
+      "73,85",
+      "73,86",
+      "73,84",
+      "73,87",
+      "70,85",
+      "71,85",
+      "72,85",
+      "70,84",
+      "71,84",
+      "72,84",
+      "70,83",
+      "70,81",
+      "70,80",
+      "63,82",
+      "64,82",
+      "67,82",
+      "68,82",
+      "69,82",
+      "66,82",
+      "65,82",
+      "63,81",
+      "64,81",
+      "65,81",
+      "66,81",
+      "67,81",
+      "68,81",
+      "69,81",
+      "70,82",
+      "67,95",
+      "66,95",
+      "64,95",
+      "63,95",
+      "62,95",
+      "65,95",
+      "67,94",
+      "66,94",
+      "65,94",
+      "64,94",
+      "63,94",
+      "62,94",
+      "67,93",
+      "66,93",
+      "64,93",
+      "63,93",
+      "62,93",
+      "65,93",
+      "67,92",
+      "67,91",
+      "67,90",
+      "67,89",
+      "67,88",
+      "62,88",
+      "63,88",
+      "64,88",
+      "65,88",
+      "66,88",
+      "61,88",
+      "61,90",
+      "62,90",
+      "63,90",
+      "64,90",
+      "65,90",
+      "66,89",
+      "65,89",
+      "64,89",
+      "63,89",
+      "62,89",
+      "61,89",
+      "61,91",
+      "60,91",
+      "59,91",
+      "58,91",
+      "57,91",
+      "56,91",
+      "56,92",
+      "57,92",
+      "58,92",
+      "59,92",
+      "60,92",
+      "61,92",
+      "62,92",
+      "66,90",
+      "66,91",
+      "66,92",
+      "65,92",
+      "64,92",
+      "63,92",
+      "62,91",
+      "64,91",
+      "65,91",
+      "63,91",
+      "66,106",
+      "65,106",
+      "64,106",
+      "62,106",
+      "60,106",
+      "59,106",
+      "58,106",
+      "57,106",
+      "55,106",
+      "53,106",
+      "52,106",
+      "51,106",
+      "50,106",
+      "49,106",
+      "48,106",
+      "47,106",
+      "46,106",
+      "45,106",
+      "44,106",
+      "43,106",
+      "42,106",
+      "41,106",
+      "40,106",
+      "39,106",
+      "38,106",
+      "37,106",
+      "36,106",
+      "35,106",
+      "35,105",
+      "36,105",
+      "37,105",
+      "38,105",
+      "39,105",
+      "40,105",
+      "41,105",
+      "42,105",
+      "43,105",
+      "44,105",
+      "45,105",
+      "46,105",
+      "47,105",
+      "48,105",
+      "49,105",
+      "50,105",
+      "51,105",
+      "52,105",
+      "53,105",
+      "54,105",
+      "55,105",
+      "56,105",
+      "57,105",
+      "58,105",
+      "59,105",
+      "60,105",
+      "61,105",
+      "62,105",
+      "63,105",
+      "64,105",
+      "66,105",
+      "61,106",
+      "63,106",
+      "65,105",
+      "54,106",
+      "56,106",
+      "29,103",
+      "30,103",
+      "31,103",
+      "32,103",
+      "33,103",
+      "34,103",
+      "35,104",
+      "35,103",
+      "35,102",
+      "34,102",
+      "33,102",
+      "32,102",
+      "31,102",
+      "30,102",
+      "29,102",
+      "29,104",
+      "29,105",
+      "29,106",
+      "29,107",
+      "30,107",
+      "32,107",
+      "33,107",
+      "34,106",
+      "34,105",
+      "34,104",
+      "33,104",
+      "32,104",
+      "31,104",
+      "30,104",
+      "30,105",
+      "31,105",
+      "31,106",
+      "32,106",
+      "33,106",
+      "33,105",
+      "32,105",
+      "30,106",
+      "31,107",
+      "35,107",
+      "36,107",
+      "37,107",
+      "38,107",
+      "39,107",
+      "40,107",
+      "43,107",
+      "46,107",
+      "49,107",
+      "51,107",
+      "52,107",
+      "53,107",
+      "54,107",
+      "56,107",
+      "57,107",
+      "58,107",
+      "59,107",
+      "61,107",
+      "63,107",
+      "64,107",
+      "65,107",
+      "66,107",
+      "66,108",
+      "65,108",
+      "63,108",
+      "62,108",
+      "61,108",
+      "58,108",
+      "54,108",
+      "41,108",
+      "34,107",
+      "41,107",
+      "42,107",
+      "44,107",
+      "45,107",
+      "48,107",
+      "47,107",
+      "50,107",
+      "55,107",
+      "60,107",
+      "62,107",
+      "64,108",
+      "65,109",
+      "64,109",
+      "42,109",
+      "43,109",
+      "44,109",
+      "45,109",
+      "47,109",
+      "48,109",
+      "49,109",
+      "50,109",
+      "51,109",
+      "52,109",
+      "54,109",
+      "55,109",
+      "56,109",
+      "57,109",
+      "58,109",
+      "59,109",
+      "60,109",
+      "61,109",
+      "63,109",
+      "62,109",
+      "60,108",
+      "59,108",
+      "57,108",
+      "55,108",
+      "56,108",
+      "53,109",
+      "53,108",
+      "52,108",
+      "50,108",
+      "49,108",
+      "48,108",
+      "47,108",
+      "46,108",
+      "46,109",
+      "51,108",
+      "45,108",
+      "44,108",
+      "43,108",
+      "42,108",
+      "28,108",
+      "29,108",
+      "31,108",
+      "32,108",
+      "33,108",
+      "34,108",
+      "35,108",
+      "36,108",
+      "37,108",
+      "38,108",
+      "39,108",
+      "40,108",
+      "41,109",
+      "40,109",
+      "39,109",
+      "38,109",
+      "37,109",
+      "36,109",
+      "35,109",
+      "34,109",
+      "33,109",
+      "32,109",
+      "31,109",
+      "30,109",
+      "29,109",
+      "28,109",
+      "30,108",
+      "29,101",
+      "29,100",
+      "29,99",
+      "29,98",
+      "29,97",
+      "29,96",
+      "29,95",
+      "30,95",
+      "30,94",
+      "30,92",
+      "29,93",
+      "29,94",
+      "30,93",
+      "30,96",
+      "31,96",
+      "32,96",
+      "33,96",
+      "34,96",
+      "35,96",
+      "31,95",
+      "32,95",
+      "33,95",
+      "34,95",
+      "35,95",
+      "36,95",
+      "37,95",
+      "38,95",
+      "39,95",
+      "40,95",
+      "36,96",
+      "37,96",
+      "38,96",
+      "39,96",
+      "40,96",
+      "41,96",
+      "31,94",
+      "32,94",
+      "34,94",
+      "36,94",
+      "37,94",
+      "38,94",
+      "39,94",
+      "40,94",
+      "33,94",
+      "35,94",
+      "31,93",
+      "32,93",
+      "33,93",
+      "34,93",
+      "35,93",
+      "36,93",
+      "37,93",
+      "38,93",
+      "39,93",
+      "40,93",
+      "40,97",
+      "41,97",
+      "42,97",
+      "43,97",
+      "44,97",
+      "45,97",
+      "46,97",
+      "47,97",
+      "48,97",
+      "49,97",
+      "50,97",
+      "51,97",
+      "52,97",
+      "53,97",
+      "40,98",
+      "41,98",
+      "42,98",
+      "43,98",
+      "44,98",
+      "45,98",
+      "46,98",
+      "48,98",
+      "49,98",
+      "50,98",
+      "51,98",
+      "52,98",
+      "53,98",
+      "54,98",
+      "55,98",
+      "47,98",
+      "40,99",
+      "41,99",
+      "42,99",
+      "43,99",
+      "45,99",
+      "47,99",
+      "48,99",
+      "49,99",
+      "50,99",
+      "51,99",
+      "55,99",
+      "46,99",
+      "44,99",
+      "40,100",
+      "41,100",
+      "42,100",
+      "43,100",
+      "44,100",
+      "45,100",
+      "46,100",
+      "47,100",
+      "48,100",
+      "49,100",
+      "50,100",
+      "51,100",
+      "52,100",
+      "53,100",
+      "54,100",
+      "55,100",
+      "56,100",
+      "57,100",
+      "58,100",
+      "60,100",
+      "61,100",
+      "62,100",
+      "62,99",
+      "62,98",
+      "62,97",
+      "62,96",
+      "61,96",
+      "61,97",
+      "61,98",
+      "61,99",
+      "59,100",
+      "52,99",
+      "53,99",
+      "54,99",
+      "57,99",
+      "58,99",
+      "59,99",
+      "60,98",
+      "60,99",
+      "56,99",
+      "56,98",
+      "57,98",
+      "58,98",
+      "59,98",
+      "49,96",
+      "50,96",
+      "51,96",
+      "52,96",
+      "53,96",
+      "54,96",
+      "55,96",
+      "56,96",
+      "49,95",
+      "50,95",
+      "51,95",
+      "52,95",
+      "53,95",
+      "54,95",
+      "55,95",
+      "56,95",
+      "57,95",
+      "56,93",
+      "56,94",
+      "57,93",
+      "58,93",
+      "59,93",
+      "60,93",
+      "61,93",
+      "54,97",
+      "55,97",
+      "56,97",
+      "57,97",
+      "58,97",
+      "59,97",
+      "60,97",
+      "60,96",
+      "60,95",
+      "59,95",
+      "59,94",
+      "60,94",
+      "61,94",
+      "61,95",
+      "57,94",
+      "58,94",
+      "58,95",
+      "57,96",
+      "59,96",
+      "58,96",
+      "49,89",
+      "49,90",
+      "49,91",
+      "49,92",
+      "49,93",
+      "49,94",
+      "49,88",
+      "48,89",
+      "47,89",
+      "46,89",
+      "45,89",
+      "44,89",
+      "43,89",
+      "42,89",
+      "41,89",
+      "40,89",
+      "39,89",
+      "38,89",
+      "37,89",
+      "36,89",
+      "35,89",
+      "35,88",
+      "36,88",
+      "37,88",
+      "38,88",
+      "39,88",
+      "40,88",
+      "41,88",
+      "42,88",
+      "43,88",
+      "44,88",
+      "45,88",
+      "46,88",
+      "47,88",
+      "48,88",
+      "48,90",
+      "47,90",
+      "46,90",
+      "45,90",
+      "44,90",
+      "43,90",
+      "42,90",
+      "41,90",
+      "40,90",
+      "39,90",
+      "38,90",
+      "37,90",
+      "36,90",
+      "35,90",
+      "34,90",
+      "33,90",
+      "32,90",
+      "31,90",
+      "30,90",
+      "29,90",
+      "29,91",
+      "30,91",
+      "33,91",
+      "35,91",
+      "36,91",
+      "37,91",
+      "38,91",
+      "39,91",
+      "40,91",
+      "41,91",
+      "42,91",
+      "43,91",
+      "44,91",
+      "45,91",
+      "46,91",
+      "48,91",
+      "34,91",
+      "31,91",
+      "32,91",
+      "29,92",
+      "31,92",
+      "32,92",
+      "33,92",
+      "35,92",
+      "36,92",
+      "37,92",
+      "38,92",
+      "39,92",
+      "40,92",
+      "41,92",
+      "42,92",
+      "43,92",
+      "44,92",
+      "45,92",
+      "46,92",
+      "47,92",
+      "48,92",
+      "47,91",
+      "34,92",
+      "41,93",
+      "42,93",
+      "43,93",
+      "44,93",
+      "45,93",
+      "46,93",
+      "47,93",
+      "48,93",
+      "48,94",
+      "48,95",
+      "48,96",
+      "47,96",
+      "46,96",
+      "45,96",
+      "44,96",
+      "43,96",
+      "42,96",
+      "42,95",
+      "41,95",
+      "41,94",
+      "42,94",
+      "43,94",
+      "44,94",
+      "45,94",
+      "46,94",
+      "47,94",
+      "47,95",
+      "46,95",
+      "45,95",
+      "44,95",
+      "43,95",
+      "35,87",
+      "35,86",
+      "35,85",
+      "35,84",
+      "35,83",
+      "35,82",
+      "35,81",
+      "36,83",
+      "37,83",
+      "38,83",
+      "39,83",
+      "40,83",
+      "41,83",
+      "42,83",
+      "43,83",
+      "44,83",
+      "45,83",
+      "46,83",
+      "47,83",
+      "48,83",
+      "49,83",
+      "50,83",
+      "51,83",
+      "52,83",
+      "36,82",
+      "37,82",
+      "40,82",
+      "41,82",
+      "42,82",
+      "44,82",
+      "45,82",
+      "46,82",
+      "47,82",
+      "48,82",
+      "49,82",
+      "50,82",
+      "52,82",
+      "51,82",
+      "43,82",
+      "39,82",
+      "38,82",
+      "36,81",
+      "37,81",
+      "38,81",
+      "39,81",
+      "40,81",
+      "41,81",
+      "42,81",
+      "43,81",
+      "44,81",
+      "45,81",
+      "46,81",
+      "47,81",
+      "48,81",
+      "49,81",
+      "50,81",
+      "51,81",
+      "52,81",
+      "52,87",
+      "53,87",
+      "54,87",
+      "55,87",
+      "56,87",
+      "57,87",
+      "52,86",
+      "52,85",
+      "52,84",
+      "53,85",
+      "53,86",
+      "54,86",
+      "55,86",
+      "56,86",
+      "57,86",
+      "57,85",
+      "57,84",
+      "57,83",
+      "57,82",
+      "57,81",
+      "57,80",
+      "56,80",
+      "55,80",
+      "54,80",
+      "53,80",
+      "53,79",
+      "54,79",
+      "55,79",
+      "56,79",
+      "57,79",
+      "25,79",
+      "27,79",
+      "28,79",
+      "29,79",
+      "30,79",
+      "31,79",
+      "38,79",
+      "26,79",
+      "25,78",
+      "26,78",
+      "27,78",
+      "28,78",
+      "29,78",
+      "30,78",
+      "31,78",
+      "32,78",
+      "33,78",
+      "34,78",
+      "35,78",
+      "36,78",
+      "37,78",
+      "38,78",
+      "39,78",
+      "40,78",
+      "41,78",
+      "42,78",
+      "43,78",
+      "44,78",
+      "46,77",
+      "47,77",
+      "48,77",
+      "49,77",
+      "50,77",
+      "51,77",
+      "52,77",
+      "53,77",
+      "53,78",
+      "54,78",
+      "54,77",
+      "54,76",
+      "53,76",
+      "52,76",
+      "51,76",
+      "50,76",
+      "49,76",
+      "48,76",
+      "47,76",
+      "46,76",
+      "45,76",
+      "44,76",
+      "43,76",
+      "42,76",
+      "41,76",
+      "40,76",
+      "39,76",
+      "38,76",
+      "37,77",
+      "38,77",
+      "39,77",
+      "40,77",
+      "41,77",
+      "42,77",
+      "43,77",
+      "44,77",
+      "45,77",
+      "45,78",
+      "46,78",
+      "47,78",
+      "48,78",
+      "49,78",
+      "50,78",
+      "51,78",
+      "52,78",
+      "52,79",
+      "52,80",
+      "51,80",
+      "50,80",
+      "49,80",
+      "48,80",
+      "47,80",
+      "46,80",
+      "45,80",
+      "44,80",
+      "43,80",
+      "42,80",
+      "41,80",
+      "40,80",
+      "40,79",
+      "41,79",
+      "42,79",
+      "43,79",
+      "44,79",
+      "45,79",
+      "46,79",
+      "47,79",
+      "48,79",
+      "49,79",
+      "50,79",
+      "51,79",
+      "53,81",
+      "54,81",
+      "55,81",
+      "56,81",
+      "56,82",
+      "56,83",
+      "56,84",
+      "56,85",
+      "55,85",
+      "54,85",
+      "54,84",
+      "54,83",
+      "54,82",
+      "55,82",
+      "55,83",
+      "55,84",
+      "53,82",
+      "53,83",
+      "53,84",
+      "37,76",
+      "37,75",
+      "37,74",
+      "37,73",
+      "37,72",
+      "37,71",
+      "38,71",
+      "38,70",
+      "39,70",
+      "40,70",
+      "41,70",
+      "42,70",
+      "43,70",
+      "44,70",
+      "45,70",
+      "46,70",
+      "46,71",
+      "47,71",
+      "47,72",
+      "47,73",
+      "47,74",
+      "47,75",
+      "46,75",
+      "45,75",
+      "45,74",
+      "44,74",
+      "43,74",
+      "42,74",
+      "41,74",
+      "40,74",
+      "40,75",
+      "39,75",
+      "38,75",
+      "38,72",
+      "38,73",
+      "38,74",
+      "39,74",
+      "39,73",
+      "39,72",
+      "39,71",
+      "40,71",
+      "41,71",
+      "42,71",
+      "43,71",
+      "44,71",
+      "45,71",
+      "45,72",
+      "46,72",
+      "46,74",
+      "40,72",
+      "40,73",
+      "41,73",
+      "42,73",
+      "43,73",
+      "44,73",
+      "45,73",
+      "41,72",
+      "42,72",
+      "44,72",
+      "43,72",
+      "41,75",
+      "42,75",
+      "43,75",
+      "44,75",
+      "46,73",
+      "48,75",
+      "48,74",
+      "48,73",
+      "48,72",
+      "48,71",
+      "48,70",
+      "47,70",
+      "37,70",
+      "36,70",
+      "36,71",
+      "36,72",
+      "36,73",
+      "36,74",
+      "36,75",
+      "36,76",
+      "36,77",
+      "39,79",
+      "39,80",
+      "25,80",
+      "26,80",
+      "27,80",
+      "28,80",
+      "29,80",
+      "30,80",
+      "31,80",
+      "32,80",
+      "37,80",
+      "38,80",
+      "37,79",
+      "36,79",
+      "35,79",
+      "34,79",
+      "33,79",
+      "32,79",
+      "33,80",
+      "34,80",
+      "35,80",
+      "36,80",
+      "25,81",
+      "25,82",
+      "25,83",
+      "25,85",
+      "25,87",
+      "25,88",
+      "25,89",
+      "25,91",
+      "25,92",
+      "25,93",
+      "25,94",
+      "25,95",
+      "25,90",
+      "25,86",
+      "25,84",
+      "26,81",
+      "26,82",
+      "26,83",
+      "26,84",
+      "26,85",
+      "26,87",
+      "26,88",
+      "26,89",
+      "26,90",
+      "26,91",
+      "26,92",
+      "26,93",
+      "26,94",
+      "26,95",
+      "27,95",
+      "27,94",
+      "27,93",
+      "27,92",
+      "27,91",
+      "27,90",
+      "27,89",
+      "27,88",
+      "27,87",
+      "27,86",
+      "27,85",
+      "27,84",
+      "27,83",
+      "27,82",
+      "26,86",
+      "27,81",
+      "28,81",
+      "29,81",
+      "30,81",
+      "31,81",
+      "32,81",
+      "33,81",
+      "34,81",
+      "34,82",
+      "34,83",
+      "34,84",
+      "34,85",
+      "34,86",
+      "34,87",
+      "34,88",
+      "29,89",
+      "30,89",
+      "31,89",
+      "32,89",
+      "33,89",
+      "34,89",
+      "33,88",
+      "33,87",
+      "33,86",
+      "33,85",
+      "33,84",
+      "33,83",
+      "33,82",
+      "32,82",
+      "30,83",
+      "29,83",
+      "28,83",
+      "28,82",
+      "29,82",
+      "30,82",
+      "31,82",
+      "32,83",
+      "31,83",
+      "32,84",
+      "32,85",
+      "32,86",
+      "32,87",
+      "32,88",
+      "28,84",
+      "28,85",
+      "28,86",
+      "28,87",
+      "28,88",
+      "29,88",
+      "30,88",
+      "31,87",
+      "31,86",
+      "31,85",
+      "31,84",
+      "30,84",
+      "29,84",
+      "29,85",
+      "29,86",
+      "29,87",
+      "30,87",
+      "30,86",
+      "30,85",
+      "31,88",
+      "11,100",
+      "10,100",
+      "9,101",
+      "10,101",
+      "11,101",
+      "12,101",
+      "14,101",
+      "15,101",
+      "16,101",
+      "18,101",
+      "19,101",
+      "20,101",
+      "21,101",
+      "22,101",
+      "24,101",
+      "25,101",
+      "25,96",
+      "25,97",
+      "25,98",
+      "25,99",
+      "25,100",
+      "12,100",
+      "13,100",
+      "14,100",
+      "15,100",
+      "16,100",
+      "17,100",
+      "18,100",
+      "19,100",
+      "20,100",
+      "21,100",
+      "22,100",
+      "17,101",
+      "24,100",
+      "23,100",
+      "23,101",
+      "13,101",
+      "9,100",
+      "9,102",
+      "10,102",
+      "11,102",
+      "12,102",
+      "13,102",
+      "14,102",
+      "14,103",
+      "15,103",
+      "16,103",
+      "17,103",
+      "18,103",
+      "18,102",
+      "19,102",
+      "20,102",
+      "21,102",
+      "22,102",
+      "23,102",
+      "24,102",
+      "25,102",
+      "26,96",
+      "26,97",
+      "26,98",
+      "26,99",
+      "26,100",
+      "26,101",
+      "26,102",
+      "28,89",
+      "28,90",
+      "28,91",
+      "28,92",
+      "28,93",
+      "28,94",
+      "28,95",
+      "28,96",
+      "28,97",
+      "28,98",
+      "28,99",
+      "28,100",
+      "28,101",
+      "28,102",
+      "28,104",
+      "27,96",
+      "27,97",
+      "27,98",
+      "27,99",
+      "27,100",
+      "27,101",
+      "27,102",
+      "15,102",
+      "16,102",
+      "17,102",
+      "19,103",
+      "20,103",
+      "21,103",
+      "22,103",
+      "23,103",
+      "24,103",
+      "25,103",
+      "26,103",
+      "27,103",
+      "28,103",
+      "28,105",
+      "27,105",
+      "26,105",
+      "25,105",
+      "24,105",
+      "23,105",
+      "22,105",
+      "21,105",
+      "20,105",
+      "19,105",
+      "18,105",
+      "17,105",
+      "16,105",
+      "15,105",
+      "14,105",
+      "14,104",
+      "15,104",
+      "16,104",
+      "17,104",
+      "18,104",
+      "19,104",
+      "20,104",
+      "21,104",
+      "22,104",
+      "23,104",
+      "24,104",
+      "25,104",
+      "26,104",
+      "27,104",
+      "9,103",
+      "10,103",
+      "11,103",
+      "12,103",
+      "13,103",
+      "63,77",
+      "63,78",
+      "63,79",
+      "63,80",
+      "72,71",
+      "72,72",
+      "72,73",
+      "72,74",
+      "72,75",
+      "72,76",
+      "72,77",
+      "72,78",
+      "72,79",
+      "71,80",
+      "72,80",
+      "73,80",
+      "74,80",
+      "75,80",
+      "76,80",
+      "77,80",
+      "78,80",
+      "79,80",
+      "80,79",
+      "79,79",
+      "78,79",
+      "77,79",
+      "76,79",
+      "75,79",
+      "74,79",
+      "73,79",
+      "80,85",
+      "80,84",
+      "80,83",
+      "80,82",
+      "80,81",
+      "80,80",
+      "80,86",
+      "79,81",
+      "79,82",
+      "79,83",
+      "79,84",
+      "79,85",
+      "79,86",
+      "79,87",
+      "79,88",
+      "79,89",
+      "74,88",
+      "74,89",
+      "75,90",
+      "75,89",
+      "76,89",
+      "77,89",
+      "78,89",
+      "78,88",
+      "78,87",
+      "78,86",
+      "78,85",
+      "78,84",
+      "78,83",
+      "78,82",
+      "78,81",
+      "71,81",
+      "72,81",
+      "73,81",
+      "74,81",
+      "75,81",
+      "76,81",
+      "77,81",
+      "71,82",
+      "72,82",
+      "71,83",
+      "72,83",
+      "73,82",
+      "74,82",
+      "75,82",
+      "76,82",
+      "77,82",
+      "74,83",
+      "75,83",
+      "76,83",
+      "77,83",
+      "74,84",
+      "75,84",
+      "76,84",
+      "77,84",
+      "75,85",
+      "75,86",
+      "75,87",
+      "75,88",
+      "76,88",
+      "76,87",
+      "76,86",
+      "76,85",
+      "77,85",
+      "77,86",
+      "77,87",
+      "77,88",
+      "52,70",
+      "53,70",
+      "54,70",
+      "56,70",
+      "57,70",
+      "58,70",
+      "59,70",
+      "60,70",
+      "61,70",
+      "52,69",
+      "53,69",
+      "54,69",
+      "58,69",
+      "59,69",
+      "60,69",
+      "61,69",
+      "55,69",
+      "55,70",
+      "56,69",
+      "57,69",
+      "52,68",
+      "52,67",
+      "52,66",
+      "52,65",
+      "52,64",
+      "52,63",
+      "52,62",
+      "53,62",
+      "54,62",
+      "55,62",
+      "56,62",
+      "56,63",
+      "57,63",
+      "58,63",
+      "59,63",
+      "60,63",
+      "61,62",
+      "59,62",
+      "58,62",
+      "57,62",
+      "53,63",
+      "53,64",
+      "53,65",
+      "53,66",
+      "53,67",
+      "53,68",
+      "54,68",
+      "55,68",
+      "56,68",
+      "57,68",
+      "58,68",
+      "59,68",
+      "60,68",
+      "61,68",
+      "61,63",
+      "61,64",
+      "61,65",
+      "61,66",
+      "61,67",
+      "60,67",
+      "59,67",
+      "58,67",
+      "57,67",
+      "56,67",
+      "55,67",
+      "55,66",
+      "54,66",
+      "54,65",
+      "54,64",
+      "55,63",
+      "55,65",
+      "54,63",
+      "55,64",
+      "54,67",
+      "56,64",
+      "57,64",
+      "58,64",
+      "59,64",
+      "60,64",
+      "60,65",
+      "60,66",
+      "59,66",
+      "58,66",
+      "57,66",
+      "56,66",
+      "56,65",
+      "57,65",
+      "58,65",
+      "59,65",
+      "48,64",
+      "47,64",
+      "46,64",
+      "45,64",
+      "44,64",
+      "43,64",
+      "42,64",
+      "42,63",
+      "43,63",
+      "44,63",
+      "45,63",
+      "46,63",
+      "47,63",
+      "48,63",
+      "48,62",
+      "47,62",
+      "46,62",
+      "45,62",
+      "44,62",
+      "43,62",
+      "42,62",
+      "42,65",
+      "33,65",
+      "33,66",
+      "33,67",
+      "34,67",
+      "35,67",
+      "36,67",
+      "37,67",
+      "38,67",
+      "39,67",
+      "40,67",
+      "41,67",
+      "42,67",
+      "42,66",
+      "41,66",
+      "40,66",
+      "39,66",
+      "38,66",
+      "37,66",
+      "36,66",
+      "35,66",
+      "34,66",
+      "34,65",
+      "36,65",
+      "37,65",
+      "38,65",
+      "39,65",
+      "40,65",
+      "41,65",
+      "33,64",
+      "33,63",
+      "33,62",
+      "33,61",
+      "33,60",
+      "33,59",
+      "34,59",
+      "35,59",
+      "36,59",
+      "38,59",
+      "40,59",
+      "41,59",
+      "42,59",
+      "43,59",
+      "43,60",
+      "37,59",
+      "39,59",
+      "34,60",
+      "34,61",
+      "34,62",
+      "34,63",
+      "34,64",
+      "35,61",
+      "35,60",
+      "36,60",
+      "37,60",
+      "38,60",
+      "39,60",
+      "40,60",
+      "41,60",
+      "42,60",
+      "36,61",
+      "36,62",
+      "36,63",
+      "36,64",
+      "35,63",
+      "35,62",
+      "35,64",
+      "35,65",
+      "37,61",
+      "38,61",
+      "39,61",
+      "40,61",
+      "41,61",
+      "42,61",
+      "43,61",
+      "44,61",
+      "45,61",
+      "46,61",
+      "47,61",
+      "37,62",
+      "38,62",
+      "39,62",
+      "40,62",
+      "41,62",
+      "41,63",
+      "41,64",
+      "40,64",
+      "39,64",
+      "38,64",
+      "37,64",
+      "37,63",
+      "38,63",
+      "39,63",
+      "40,63",
+      "52,61",
+      "52,60",
+      "52,59",
+      "47,54",
+      "46,54",
+      "45,54",
+      "44,54",
+      "43,54",
+      "43,55",
+      "43,56",
+      "43,57",
+      "43,58",
+      "44,55",
+      "45,55",
+      "46,55",
+      "47,55",
+      "47,56",
+      "48,56",
+      "48,57",
+      "48,58",
+      "47,58",
+      "47,59",
+      "46,59",
+      "45,59",
+      "44,58",
+      "44,57",
+      "44,56",
+      "45,56",
+      "46,56",
+      "46,58",
+      "45,57",
+      "48,54",
+      "48,55",
+      "47,57",
+      "46,57",
+      "45,58",
+      "44,59",
+      "44,60",
+      "45,60",
+      "46,60",
+      "48,60",
+      "48,59",
+      "47,60",
+      "48,61",
+      "52,58",
+      "52,57",
+      "52,56",
+      "53,56",
+      "54,56",
+      "55,56",
+      "56,56",
+      "57,56",
+      "58,56",
+      "53,57",
+      "54,57",
+      "55,57",
+      "56,57",
+      "57,57",
+      "58,57",
+      "53,58",
+      "54,58",
+      "55,58",
+      "56,58",
+      "57,58",
+      "58,58",
+      "53,59",
+      "53,60",
+      "53,61",
+      "54,61",
+      "55,61",
+      "56,61",
+      "57,61",
+      "58,61",
+      "58,60",
+      "58,59",
+      "57,59",
+      "56,59",
+      "55,59",
+      "54,59",
+      "54,60",
+      "55,60",
+      "56,60",
+      "57,60",
+      "57,55",
+      "57,54",
+      "57,52",
+      "58,52",
+      "58,53",
+      "59,53",
+      "60,53",
+      "61,53",
+      "62,53",
+      "57,53",
+      "59,52",
+      "60,52",
+      "61,52",
+      "62,52",
+      "58,54",
+      "58,55",
+      "59,54",
+      "60,54",
+      "61,54",
+      "62,54",
+      "59,55",
+      "62,51",
+      "62,50",
+      "62,49",
+      "62,48",
+      "62,47",
+      "62,46",
+      "62,45",
+      "61,51",
+      "61,50",
+      "61,49",
+      "61,48",
+      "61,47",
+      "61,46",
+      "61,45",
+      "54,50",
+      "54,49",
+      "54,48",
+      "54,47",
+      "54,46",
+      "54,45",
+      "54,44",
+      "54,43",
+      "55,44",
+      "56,44",
+      "57,44",
+      "58,44",
+      "59,44",
+      "60,44",
+      "55,43",
+      "56,43",
+      "57,43",
+      "58,43",
+      "60,43",
+      "61,43",
+      "62,43",
+      "61,44",
+      "62,44",
+      "59,43",
+      "66,51",
+      "66,50",
+      "66,49",
+      "66,48",
+      "66,47",
+      "74,49",
+      "74,48",
+      "74,47",
+      "74,46",
+      "74,45",
+      "74,44",
+      "74,43",
+      "74,42",
+      "73,49",
+      "72,49",
+      "71,49",
+      "70,49",
+      "69,49",
+      "68,49",
+      "67,49",
+      "67,48",
+      "68,48",
+      "69,48",
+      "70,48",
+      "71,48",
+      "72,48",
+      "73,47",
+      "72,47",
+      "71,47",
+      "70,47",
+      "69,47",
+      "68,47",
+      "67,47",
+      "73,48",
+      "73,43",
+      "72,43",
+      "71,43",
+      "68,43",
+      "67,43",
+      "69,43",
+      "70,43",
+      "67,42",
+      "68,42",
+      "69,42",
+      "70,42",
+      "71,42",
+      "72,42",
+      "73,42",
+      "73,44",
+      "72,44",
+      "71,44",
+      "70,44",
+      "69,44",
+      "68,44",
+      "67,44",
+      "66,44",
+      "66,45",
+      "67,45",
+      "68,45",
+      "69,45",
+      "71,45",
+      "72,45",
+      "73,45",
+      "73,46",
+      "72,46",
+      "71,46",
+      "70,46",
+      "68,46",
+      "67,46",
+      "66,46",
+      "69,46",
+      "70,45",
+      "66,42",
+      "66,43",
+      "78,48",
+      "78,47",
+      "78,46",
+      "78,45",
+      "78,44",
+      "78,43",
+      "78,42",
+      "78,41",
+      "79,41",
+      "80,41",
+      "81,41",
+      "82,41",
+      "82,42",
+      "82,43",
+      "82,44",
+      "82,45",
+      "82,46",
+      "82,47",
+      "82,48",
+      "81,48",
+      "80,48",
+      "79,48",
+      "79,47",
+      "79,46",
+      "79,45",
+      "79,44",
+      "79,43",
+      "79,42",
+      "80,42",
+      "81,42",
+      "81,43",
+      "81,44",
+      "81,45",
+      "81,46",
+      "81,47",
+      "80,47",
+      "80,46",
+      "80,45",
+      "80,44",
+      "80,43",
+      "79,38",
+      "80,38",
+      "81,38",
+      "79,37",
+      "80,37",
+      "81,37",
+      "78,38",
+      "78,37",
+      "78,36",
+      "82,38",
+      "82,37",
+      "82,36",
+      "79,36",
+      "80,36",
+      "81,36",
+      "78,35",
+      "78,34",
+      "76,35",
+      "75,35",
+      "74,35",
+      "72,35",
+      "71,35",
+      "70,35",
+      "69,35",
+      "70,36",
+      "71,36",
+      "72,36",
+      "73,36",
+      "73,35",
+      "73,34",
+      "69,34",
+      "70,34",
+      "71,34",
+      "72,34",
+      "74,34",
+      "75,34",
+      "76,34",
+      "77,34",
+      "77,35",
+      "77,33",
+      "75,33",
+      "74,33",
+      "72,33",
+      "71,33",
+      "70,33",
+      "69,33",
+      "68,33",
+      "69,36",
+      "69,37",
+      "69,38",
+      "69,39",
+      "69,40",
+      "69,41",
+      "76,33",
+      "73,33",
+      "73,31",
+      "74,31",
+      "75,31",
+      "76,31",
+      "77,31",
+      "78,31",
+      "79,31",
+      "80,31",
+      "81,31",
+      "82,31",
+      "82,32",
+      "82,33",
+      "82,34",
+      "82,35",
+      "79,35",
+      "80,35",
+      "81,35",
+      "81,34",
+      "81,33",
+      "81,32",
+      "72,32",
+      "73,32",
+      "74,32",
+      "75,32",
+      "76,32",
+      "77,32",
+      "78,32",
+      "79,32",
+      "79,33",
+      "80,33",
+      "80,34",
+      "79,34",
+      "80,32",
+      "78,33",
+      "71,32",
+      "70,32",
+      "69,32",
+      "68,32",
+      "67,32",
+      "67,33",
+      "66,33",
+      "66,34",
+      "66,35",
+      "66,36",
+      "66,37",
+      "66,38",
+      "66,39",
+      "66,40",
+      "66,41",
+      "67,41",
+      "68,41",
+      "68,40",
+      "68,39",
+      "68,38",
+      "68,37",
+      "68,36",
+      "68,35",
+      "68,34",
+      "67,34",
+      "67,35",
+      "67,36",
+      "67,37",
+      "67,38",
+      "67,40",
+      "67,39",
+      "87,24",
+      "87,25",
+      "87,26",
+      "88,26",
+      "88,25",
+      "88,24",
+      "89,24",
+      "89,25",
+      "89,26",
+      "83,24",
+      "83,25",
+      "83,26",
+      "82,26",
+      "82,25",
+      "82,24",
+      "81,24",
+      "81,25",
+      "81,26",
+      "80,26",
+      "79,26",
+      "78,26",
+      "77,26",
+      "75,26",
+      "74,26",
+      "73,26",
+      "76,26",
+      "76,27",
+      "77,27",
+      "75,27",
+      "80,25",
+      "79,25",
+      "78,25",
+      "77,25",
+      "76,25",
+      "75,25",
+      "73,25",
+      "73,24",
+      "74,24",
+      "75,24",
+      "76,24",
+      "77,24",
+      "78,24",
+      "79,24",
+      "80,24",
+      "73,27",
+      "73,28",
+      "73,29",
+      "73,30",
+      "74,30",
+      "75,30",
+      "76,30",
+      "77,30",
+      "78,30",
+      "79,30",
+      "80,30",
+      "81,30",
+      "82,30",
+      "66,32",
+      "66,31",
+      "67,31",
+      "68,31",
+      "69,31",
+      "70,31",
+      "71,31",
+      "72,31",
+      "72,30",
+      "72,29",
+      "72,28",
+      "72,27",
+      "72,26",
+      "72,25",
+      "72,24",
+      "72,23",
+      "73,23",
+      "74,23",
+      "75,23",
+      "76,23",
+      "77,23",
+      "78,23",
+      "79,23",
+      "80,23",
+      "81,23",
+      "82,23",
+      "83,23",
+      "83,22",
+      "83,21",
+      "83,20",
+      "83,19",
+      "83,18",
+      "79,17",
+      "80,17",
+      "81,17",
+      "82,17",
+      "83,17",
+      "79,18",
+      "80,18",
+      "81,18",
+      "82,18",
+      "87,17",
+      "87,18",
+      "87,19",
+      "87,20",
+      "87,21",
+      "87,22",
+      "87,23",
+      "88,17",
+      "89,17",
+      "90,17",
+      "88,18",
+      "89,18",
+      "90,18",
+      "79,16",
+      "79,15",
+      "79,14",
+      "79,13",
+      "79,12",
+      "79,11",
+      "79,10",
+      "79,9",
+      "79,8",
+      "79,7",
+      "79,6",
+      "80,8",
+      "81,8",
+      "82,8",
+      "83,8",
+      "84,8",
+      "86,8",
+      "87,8",
+      "88,8",
+      "89,8",
+      "90,8",
+      "85,8",
+      "80,7",
+      "81,7",
+      "82,7",
+      "84,7",
+      "86,7",
+      "87,7",
+      "88,7",
+      "89,7",
+      "90,7",
+      "91,7",
+      "85,7",
+      "83,7",
+      "80,6",
+      "81,6",
+      "82,6",
+      "83,6",
+      "84,6",
+      "85,6",
+      "86,6",
+      "87,6",
+      "88,6",
+      "89,6",
+      "90,6",
+      "90,9",
+      "90,10",
+      "90,11",
+      "90,12",
+      "90,13",
+      "90,14",
+      "90,16",
+      "90,15",
+      "91,8",
+      "91,9",
+      "91,10",
+      "91,11",
+      "91,12",
+      "91,13",
+      "91,14",
+      "91,15",
+      "91,16",
+      "91,17",
+      "91,18",
+      "91,19",
+      "54,39",
+      "55,39",
+      "56,39",
+      "57,39",
+      "58,39",
+      "59,39",
+      "60,39",
+      "61,39",
+      "62,39",
+      "54,40",
+      "55,40",
+      "56,40",
+      "58,40",
+      "60,40",
+      "61,40",
+      "62,40",
+      "57,40",
+      "59,40",
+      "54,41",
+      "55,41",
+      "56,41",
+      "58,41",
+      "59,41",
+      "60,41",
+      "61,41",
+      "62,41",
+      "62,42",
+      "60,42",
+      "58,42",
+      "57,42",
+      "56,42",
+      "55,42",
+      "54,42",
+      "57,41",
+      "59,42",
+      "61,42",
+      "62,38",
+      "62,37",
+      "62,36",
+      "62,35",
+      "63,35",
+      "64,35",
+      "64,36",
+      "64,37",
+      "63,37",
+      "63,36",
+      "61,38",
+      "61,37",
+      "61,36",
+      "61,35",
+      "65,35",
+      "65,37",
+      "65,38",
+      "65,39",
+      "65,40",
+      "65,41",
+      "65,42",
+      "65,43",
+      "65,36",
+      "63,39",
+      "63,40",
+      "63,41",
+      "63,43",
+      "63,44",
+      "63,45",
+      "63,46",
+      "63,47",
+      "63,48",
+      "63,49",
+      "63,50",
+      "63,38",
+      "64,38",
+      "64,39",
+      "64,40",
+      "64,41",
+      "64,42",
+      "64,43",
+      "64,44",
+      "64,45",
+      "64,46",
+      "64,47",
+      "64,48",
+      "64,49",
+      "64,50",
+      "64,51",
+      "65,51",
+      "65,50",
+      "65,49",
+      "65,48",
+      "65,47",
+      "65,46",
+      "65,45",
+      "65,44",
+      "63,42",
+      "63,51",
+      "63,52",
+      "63,53",
+      "63,54",
+      "63,55",
+      "63,56",
+      "64,56",
+      "65,56",
+      "65,55",
+      "65,54",
+      "65,53",
+      "65,52",
+      "64,52",
+      "64,53",
+      "64,54",
+      "64,55",
+      "61,55",
+      "60,55",
+      "60,56",
+      "60,57",
+      "59,57",
+      "59,58",
+      "59,59",
+      "59,60",
+      "59,61",
+      "60,61",
+      "60,62",
+      "60,58",
+      "60,59",
+      "60,60",
+      "61,61",
+      "61,59",
+      "61,58",
+      "61,57",
+      "61,56",
+      "62,56",
+      "62,55",
+      "59,56",
+      "61,60",
+      "80,51",
+      "81,51",
+      "82,51",
+      "82,52",
+      "81,52",
+      "80,52",
+      "80,53",
+      "80,54",
+      "81,54",
+      "81,53",
+      "82,53",
+      "82,54",
+      "82,55",
+      "81,55",
+      "80,55",
+      "79,54",
+      "78,54",
+      "77,54",
+      "76,54",
+      "75,54",
+      "74,54",
+      "73,54",
+      "72,54",
+      "72,55",
+      "72,56",
+      "72,57",
+      "72,58",
+      "72,59",
+      "72,60",
+      "72,61",
+      "72,62",
+      "72,63",
+      "73,63",
+      "74,63",
+      "75,63",
+      "76,63",
+      "76,62",
+      "75,62",
+      "74,62",
+      "73,62",
+      "73,61",
+      "73,60",
+      "73,59",
+      "73,58",
+      "73,57",
+      "73,56",
+      "73,55",
+      "74,55",
+      "75,55",
+      "76,55",
+      "77,55",
+      "78,56",
+      "79,55",
+      "78,55",
+      "74,56",
+      "75,56",
+      "76,56",
+      "77,56",
+      "77,57",
+      "77,58",
+      "76,58",
+      "75,58",
+      "74,57",
+      "76,57",
+      "75,57",
+      "74,58",
+      "74,60",
+      "74,61",
+      "75,61",
+      "76,61",
+      "77,61",
+      "78,61",
+      "78,60",
+      "77,60",
+      "77,59",
+      "76,59",
+      "75,60",
+      "76,60",
+      "74,59",
+      "75,59",
+      "78,57",
+      "79,56",
+      "80,56",
+      "81,56",
+      "82,56",
+      "82,57",
+      "82,58",
+      "82,59",
+      "82,60",
+      "82,61",
+      "81,61",
+      "80,61",
+      "79,61",
+      "79,60",
+      "79,58",
+      "79,57",
+      "80,57",
+      "81,58",
+      "81,59",
+      "80,60",
+      "80,58",
+      "78,58",
+      "78,59",
+      "79,59",
+      "80,59",
+      "81,57",
+      "81,60",
+      "86,68",
+      "86,69",
+      "86,70",
+      "85,68",
+      "85,69",
+      "85,70",
+      "84,68",
+      "84,69",
+      "84,70",
+      "83,68",
+      "83,69",
+      "83,70",
+      "82,70",
+      "81,70",
+      "80,70",
+      "79,70",
+      "78,70",
+      "78,62",
+      "78,63",
+      "78,65",
+      "78,66",
+      "78,67",
+      "78,68",
+      "78,64",
+      "79,62",
+      "79,63",
+      "79,65",
+      "79,66",
+      "79,67",
+      "79,68",
+      "78,69",
+      "79,69",
+      "80,69",
+      "81,69",
+      "82,69",
+      "82,68",
+      "82,67",
+      "82,66",
+      "82,65",
+      "82,64",
+      "82,63",
+      "82,62",
+      "79,64",
+      "80,62",
+      "81,62",
+      "81,64",
+      "81,65",
+      "81,66",
+      "81,67",
+      "81,68",
+      "80,68",
+      "80,67",
+      "80,66",
+      "80,65",
+      "80,64",
+      "80,63",
+      "81,63",
+      "87,71",
+      "88,71",
+      "89,71",
+      "90,71",
+      "91,71",
+      "92,71",
+      "92,72",
+      "91,72",
+      "89,72",
+      "88,72",
+      "87,72",
+      "87,73",
+      "87,74",
+      "87,75",
+      "87,76",
+      "88,76",
+      "89,76",
+      "90,76",
+      "91,76",
+      "92,76",
+      "92,75",
+      "92,74",
+      "92,73",
+      "91,73",
+      "90,73",
+      "89,73",
+      "88,73",
+      "88,74",
+      "88,75",
+      "89,75",
+      "90,75",
+      "91,75",
+      "91,74",
+      "90,74",
+      "89,74",
+      "90,72",
+      "101,55",
+      "100,55",
+      "97,55",
+      "96,55",
+      "95,55",
+      "94,56",
+      "96,56",
+      "99,56",
+      "100,56",
+      "101,56",
+      "101,57",
+      "101,58",
+      "100,58",
+      "99,58",
+      "98,58",
+      "96,58",
+      "95,58",
+      "94,58",
+      "94,57",
+      "95,57",
+      "96,57",
+      "97,57",
+      "98,57",
+      "99,57",
+      "100,57",
+      "95,56",
+      "97,56",
+      "98,56",
+      "98,55",
+      "99,55",
+      "97,58"
+    ],
     "breakable": [],
-    "coreSpots": [],
+    "coreSpots": [
+      "58,30"
+    ],
     "spawnZone": [],
     "coreCount": 1,
     "monsterMix": [
       {
         "id": "slime",
         "weight": 100
+      },
+      {
+        "id": "lifeform",
+        "weight": 100
+      },
+      {
+        "id": "loofah_lady",
+        "weight": 100
+      },
+      {
+        "id": "golden_banana_king",
+        "weight": 100
+      },
+      {
+        "id": "gourd_monkey",
+        "weight": 50
       }
     ],
     "camp": [],
@@ -72903,13 +86084,41 @@ const BATTLE_MAPS = [
     "fog": "heavy",
     "npcs": false,
     "portals": [],
-    "hiddenPickups": [],
-    "cols": 110,
-    "rows": 86,
+    "hiddenPickups": [
+      "ground9:111,61",
+      "ground9:74,70",
+      "ground9:54,91",
+      "ground9:49,103",
+      "ground9:24,68",
+      "ground9:43,49",
+      "ground9:53,30"
+    ],
+    "cols": 120,
+    "rows": 110,
     "layerOrder": [
       {
         "id": "floor",
         "name": "🟫 地板"
+      },
+      {
+        "id": "ground6",
+        "name": "隱藏地板",
+        "secret": true
+      },
+      {
+        "id": "ground7",
+        "name": "隱藏花",
+        "secret": true
+      },
+      {
+        "id": "object7",
+        "name": "隱藏牆",
+        "secret": true
+      },
+      {
+        "id": "object8",
+        "name": "隱藏3",
+        "secret": true
       },
       {
         "id": "ground5",
@@ -72928,12 +86137,20 @@ const BATTLE_MAPS = [
         "name": "🍂 地面裝飾 2"
       },
       {
+        "id": "ground8",
+        "name": "地板裝飾0"
+      },
+      {
         "id": "object6",
         "name": "樹"
       },
       {
         "id": "ground3",
         "name": "🩹 地面裝飾 3"
+      },
+      {
+        "id": "ground9",
+        "name": "光點物品"
       },
       {
         "id": "object",
@@ -72956,13 +86173,84 @@ const BATTLE_MAPS = [
         "name": "物件5"
       },
       {
+        "id": "object11",
+        "name": "異質礦"
+      },
+      {
         "id": "overlay",
         "name": "🎯 物件裝飾"
+      },
+      {
+        "id": "object9",
+        "name": "物件6"
+      },
+      {
+        "id": "object10",
+        "name": "鳥巢"
       },
       {
         "id": "top",
         "name": "☁️ 上層"
       }
+    ],
+    "vines": [
+      "97,93",
+      "81,27",
+      "84,40",
+      "88,49",
+      "96,43",
+      "62,30",
+      "51,30",
+      "30,39",
+      "37,42",
+      "47,50",
+      "11,38",
+      "17,41",
+      "11,49",
+      "113,55",
+      "109,63",
+      "100,46",
+      "84,32",
+      "85,37",
+      "83,29",
+      "54,27",
+      "59,35",
+      "68,54",
+      "74,67",
+      "54,72",
+      "67,85",
+      "43,85",
+      "69,93",
+      "68,97",
+      "39,102",
+      "104,81",
+      "100,86"
+    ],
+    "vinesHang": [
+      "102,83",
+      "103,93",
+      "88,92",
+      "83,77",
+      "74,76",
+      "60,77",
+      "60,83",
+      "21,75",
+      "22,79",
+      "33,75",
+      "29,75",
+      "30,67",
+      "32,56",
+      "53,52",
+      "76,41",
+      "85,43",
+      "101,43",
+      "96,36",
+      "14,50",
+      "14,43",
+      "57,29",
+      "53,32",
+      "39,36",
+      "85,31"
     ]
   }
 ];
