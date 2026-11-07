@@ -649,7 +649,7 @@ const STORY_SCENES = {
       { "id": "guide2", "sprite": "mob_A", "name": "路過的嚮導", "at": [52.9, 13.7], "dir": "left", "hidden": true }
     ],
     "beats": [
-      { "speaker": "哨兵A", "text": "……有必要貼成這樣嗎？連電梯裡都有。", "wait": 1.6, "camera": "開場", "move": { "guide1": [12.2, 13] } },
+      { "speaker": "哨兵A", "text": "……有必要貼成這樣嗎？連電梯裡都有。", "wait": 1.6, "camera": "開場", "move": { "guide1": [20, 13] } },
       { "speaker": "哨兵B", "text": "欸，等一下。一點五公尺？那我們以後排隊打飯怎麼辦？", "wait": 0.3, "camera": "海報前", "face": { "sentB": "left" } },
       { "speaker": "哨兵B", "text": "還有旁邊為什麼要長滿花？這是宣導海報還是長輩圖？好醜喔哈哈哈。這誰做的？美感也太災難了吧。", "wait": 0.3, "face": { "sentB": "back" } },
       { "speaker": "哨兵A", "text": "新來的部隊長做的啦。", "wait": 0.3, "face": { "sentA": "right", "sentB": "left" } },
@@ -810,7 +810,7 @@ const STORY_SCENES = {
         "hop": { "red": true },
         "place": { "guide2": [52.9, 13.7] },
         "speed": { "guide2": 45 },
-        "move": { "guide2": [47.8, 13.6] },
+        "move": { "guide2": [49.4, 12.9] },
         "face": { "guide2": "back" },
         "emote": { "red": "flower+sparkle" }
       },
