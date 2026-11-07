@@ -1047,11 +1047,7 @@ const STORY_SCENES = {
     "bgm": "music/birthday.mp3",
     "bgmVolume": 0.45,
     "opening": { "black": 1, "fade": 1.5 },
-    "darkness": true,
-    "lights": [[13.9, 18.4, 6.5, "#ffb34d", 0.55], [13.9, 21.3, 6.5, "#ffb34d", 0.55]],
-    "vignette": 0.3,
-    "darkColor": "#1a1030",
-    "cameras": { "全景": [13.8, 19.2, 2.6], "壽星桌": [13.9, 18.6, 3.3], "朔": [14.3, 18.4, 4] },
+    "cameras": { "全景": [13.8, 19.2, 2.6], "壽星桌": [13.8, 18.5, 3.3], "朔": [14.4, 18.3, 4] },
     "portraits": {
       "朔": "saku_B",
       "赫真": "kakuma_C",
@@ -1136,6 +1132,11 @@ const STORY_SCENES = {
         "blow": { "colyn": true, "taana": true, "eldrin": true, "avaren": true }
       },
       { "speaker": "", "text": "", "wait": 0.8, "screen": "black", "screenFade": 1.8, "banner": "2026/11/8\nJJ生日快樂！", "bannerDelay": 2.1 }
-    ]
+    ],
+    "lights": [[13.9, 18.4, 6.5, "#fe9a9a", 0.55, "overlay"], [14.1, 21.3, 6.5, "#ffc7c7", 0.55, "overlay"]],
+    "darkness": true,
+    "vignette": 0.3,
+    "darkBlend": "multiply",
+    "darkColor": "#c9cae4"
   }
 };
