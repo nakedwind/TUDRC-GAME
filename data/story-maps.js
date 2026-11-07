@@ -2989,7 +2989,7 @@ const STORY_MAPS = [
         "8,13": "tile_mr4czvpx"
       },
       "object2": {
-        "3,73": "tile_interactive_pickup_graffiti_black",
+        "3,73": "tile_interactive_pickup_graffiti",
         "72,63": "tile_interactive_pickup_almond_water",
         "48,75": "tile_interactive_pickup_battery",
         "64,63": "tile_interactive_pickup_battery",
@@ -2997,9 +2997,9 @@ const STORY_MAPS = [
         "57,45": "tile_interactive_pickup_battery",
         "17,33": "tile_interactive_pickup_battery",
         "45,28": "tile_interactive_pickup_battery",
-        "43,58": "tile_interactive_pickup_graffiti_black",
-        "12,52": "tile_interactive_pickup_graffiti_black",
-        "40,16": "tile_interactive_pickup_graffiti_black",
+        "43,58": "tile_interactive_pickup_graffiti",
+        "12,52": "tile_interactive_pickup_graffiti",
+        "40,16": "tile_interactive_pickup_graffiti",
         "60,79": "tile_obstacle_ore_small",
         "66,84": "tile_obstacle_ore_small",
         "53,75": "tile_obstacle_ore_small",

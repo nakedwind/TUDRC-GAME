@@ -27,7 +27,7 @@ const DRINK_SHOP = { kinds: ['drink'], reach: 1.2, match: id => String(id).start
 // 後室商店：stock＝賣什麼（price 沒寫就用商品本身的價錢）；sellRate＝賣掉的東西拿回原價的幾成；sellPrice＝沒有原價的東西賣多少
 const BACKROOM_SHOP = {
   reach: 1.2, match: id => id === 'tile_cvs_checkout_counter_backroom',
-  stock: [{ id: 'almond-water' }, { id: 'thermos' }, { id: 'medkit' }, { id: 'firstaid' }, { id: 'adrenaline' }, { id: 'eye-drops' }, { id: 'battery', price: 20 }, { id: 'graffiti-red' }, { id: 'graffiti-blue' }, { id: 'graffiti-black' }],
+  stock: [{ id: 'almond-water' }, { id: 'thermos' }, { id: 'medkit' }, { id: 'firstaid' }, { id: 'adrenaline' }, { id: 'eye-drops' }, { id: 'battery', price: 20 }, { id: 'graffiti' }, { id: 'toolbox' }],
   sellRate: .5, crystalSellPrice: 5, sellPrice: { battery: 10 },
 };
 const BACKROOM_ONLY = ['almond-water'];   // 只有在後室（戰鬥地圖）裡的店買得到；基地的便利商店、飲料店、販賣機不賣
@@ -113,7 +113,7 @@ const SUPPLY_KIND = {
   hp: { name: '醫療包', stat: 'HP', key: 'Q', icon: '❤', color: '#79dbad' },
   sp: { name: '杏仁水', stat: 'SP', key: 'E', icon: '✦', color: '#8cc7ff' },
 };
-const SHOP_KIND_ORDER = ['medical', 'snack', 'drink', 'squadgear'];   // 商店排序：補給 → 零食 → 飲料 → 隊員裝備
+const SHOP_KIND_ORDER = ['medical', 'snack', 'drink', 'squadgear', 'ammo'];   // 商店排序：補給 → 零食 → 飲料 → 隊員裝備 → 子彈（後室商店的子彈放最下面）
 const supplyById = id => SUPPLIES.find(entry => entry.id === id);
 function supplyEffect(item) { return item.use ? `${SUPPLY_KIND[item.use].stat} +${item.restore}` : '送禮用'; }
 function supplyNeed(use) { return !G?.player ? 0 : use === 'hp' ? G.player.maxhp - G.player.hp : G.guideMax - G.guide; }

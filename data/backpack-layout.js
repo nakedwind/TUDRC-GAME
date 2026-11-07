@@ -121,13 +121,7 @@ const BACKPACK_LAYOUT = {
     "item:adrenaline": {
       "size": 15
     },
-    "item:graffiti-red": {
-      "size": 30
-    },
-    "item:graffiti-blue": {
-      "size": 30
-    },
-    "item:graffiti-black": {
+    "item:graffiti": {
       "size": 30
     },
     "item:charm": {

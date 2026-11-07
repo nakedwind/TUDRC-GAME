@@ -1,7 +1,8 @@
 // ============================================================
 //  塗鴉筆：在牆上、地板、固定的物品上畫記號（永久留在那張地圖上）
-//  ・塗鴉筆有紅、藍、黑三色（data/supplies.js 的 graffiti-red／blue／black），在地上、置物櫃撿到，後室商店也有賣。
-//  ・背包按「使用」→ 選圖案 → 滑鼠帶著預覽，點溫特附近的牆／地板／物品畫上去（右鍵或 Esc 取消）。畫一個用掉一支筆。
+//  ・塗鴉筆只有一種（data/supplies.js 的 graffiti），在地上、置物櫃撿到，後室商店也有賣。
+//  ・背包按「使用」→ 選顏色（紅、藍、黑）和圖案 → 滑鼠帶著預覽，點溫特附近的牆／地板／物品畫上去（右鍵或 Esc 取消）。畫一個用掉一支筆。
+//  ・上次選的顏色會記住（GRAFFITI_COLOR_KEY），下次打開直接是那個顏色。
 //  ・不能畫在會動、會壞、會變形的東西上：玩家蓋的建築、油桶、門、可以炸開的牆。
 //  ・擦掉：走到塗鴉旁邊按空白鍵「擦掉塗鴉」，站著不動擦一下就消失。
 //  ・圖案素材只有紅色一份（images/塗鴉筆/），藍、黑是程式換顏色。
@@ -16,7 +17,8 @@ const GRAFFITI = {
     { id: 'circle', name: '圈' }, { id: 'cross', name: '叉' }, { id: 'triangle', name: '三角' }, { id: 'exclaim', name: '驚嘆號' },
     { id: 'smile', name: '笑臉' }, { id: 'sad', name: '哭臉' }, { id: 'help', name: 'HELP' },
   ],
-  colors: { red: null, blue: '#3f7cff', black: '#1c1e22' },   // null＝用原圖的紅色
+  colors: { red: null, blue: '#3f7cff', black: '#1c1e22' },   // 可以選的顏色（順序＝選單排列）；null＝用原圖的紅色
+  colorNames: { red: '紅', blue: '藍', black: '黑' },
   scale: 1.5,          // 畫在地圖上放大幾倍（素材很小）
   reach: 2.5,          // 離溫特幾格內才畫得到
   eraseReach: 1.8,     // 離塗鴉幾格內可以擦
@@ -27,7 +29,11 @@ const GRAFFITI = {
   customMax: 8,        // 最多存幾個自訂圖案
 };
 const GRAFFITI_KEY = 'tudrc_graffiti_v1';
-const GRAFFITI_PENS = { 'graffiti-red': 'red', 'graffiti-blue': 'blue', 'graffiti-black': 'black' };
+const GRAFFITI_PEN = 'graffiti';   // 塗鴉筆的物品 id（以前的紅／藍／黑三支筆，讀檔時會換成這一支，js/save.js）
+const GRAFFITI_COLOR_KEY = 'tudrc_graffiti_color_v1';
+let graffitiColor = 'red';   // 現在選的顏色
+try { const c = localStorage.getItem(GRAFFITI_COLOR_KEY); if (c && c in GRAFFITI.colors) graffitiColor = c; } catch (_) {}
+const graffitiColorHex = c => GRAFFITI.colors[c] || GRAFFITI.red;
 let graffitiData = {};
 try { const d = JSON.parse(localStorage.getItem(GRAFFITI_KEY) || '{}'); if (d && typeof d === 'object') graffitiData = d; } catch (_) {}
 function saveGraffiti() { try { localStorage.setItem(GRAFFITI_KEY, JSON.stringify(graffitiData)); } catch (_) {} graffitiCache = null; }
@@ -142,7 +148,7 @@ function graffitiSortables(out) {
 // ---- 選圖案 ----
 let graffitiPalette = null, graffitiPlace = null, graffitiMouse = null;
 function openGraffitiPalette(penId) {
-  const color = GRAFFITI_PENS[penId]; if (!color) return;
+  if (penId !== GRAFFITI_PEN) return;
   if (!(supplyInventory.get(penId) > 0)) { sfx('error'); return; }
   if (!G || !G.running || G.over || !G.player) return;
   if (!graffitiPalette) {
@@ -158,6 +164,14 @@ function openGraffitiPalette(penId) {
       if (del) {   // 刪掉自訂圖案（已經畫在地圖上的不受影響）
         graffitiCustom = graffitiCustom.filter(c => c.id !== del.dataset.graffitiDel); saveGraffitiCustom();
         sfx('switch'); renderGraffitiPick(pen); return;
+      }
+      const cs = e.target.closest('[data-graffiti-color]');
+      if (cs) {   // 換顏色：圖案的預覽、畫板的顏色一起換
+        graffitiColor = cs.dataset.graffitiColor; try { localStorage.setItem(GRAFFITI_COLOR_KEY, graffitiColor); } catch (_) {}
+        sfx('switch');
+        if (graffitiPad && graffitiPalette.querySelector('.graffiti-pad')) { graffitiPad.color = graffitiColorHex(graffitiColor); drawGraffitiPad(); graffitiMarkColorButtons(); }
+        else renderGraffitiPick(pen);
+        return;
       }
       if (e.target.closest('[data-graffiti-new]')) { renderGraffitiDraw(pen); sfx('button'); return; }
       const cb = e.target.closest('[data-graffiti-custom]');
@@ -180,12 +194,25 @@ function graffitiButtonCanvas(b, img, k) {
   c.style.width = Math.round(c.width * k) + 'px'; c.style.height = Math.round(c.height * k) + 'px';
   b.insertBefore(c, b.firstChild);
 }
-// 選圖案：內建圖案＋自訂圖案＋「自己畫」
+// 選顏色的那一排按鈕
+function graffitiColorRow() {
+  return '<div class="graffiti-colors"><span>顏色</span>' + Object.keys(GRAFFITI.colors).map(c =>
+    '<button type="button" data-graffiti-color="' + c + '" title="' + GRAFFITI.colorNames[c] + '" aria-label="' + GRAFFITI.colorNames[c] + '色"><i style="background:' + graffitiColorHex(c) + '"></i>' + GRAFFITI.colorNames[c] + '</button>').join('') + '</div>';
+}
+// 標出現在選的是哪個顏色
+function graffitiMarkColorButtons() {
+  graffitiPalette.querySelectorAll('[data-graffiti-color]').forEach(b => {
+    const on = b.dataset.graffitiColor === graffitiColor;
+    b.classList.toggle('active', on); b.setAttribute('aria-pressed', on);
+  });
+}
+// 選圖案：選顏色＋內建圖案＋自訂圖案＋「自己畫」
 function renderGraffitiPick(penId) {
-  const color = GRAFFITI_PENS[penId], item = itemById(penId);
+  const color = graffitiColor, item = itemById(penId);
   const full = graffitiCustom.length >= GRAFFITI.customMax;
   graffitiPalette.innerHTML = '<section class="graffiti-card" role="dialog" aria-label="選擇塗鴉圖案">' +
     '<header><img src="' + item.image + '" alt=""><div><small>GRAFFITI</small><h3>要畫什麼？</h3><p>' + item.name + '・畫一個會用掉一支</p></div></header>' +
+    graffitiColorRow() +
     '<div class="graffiti-grid">' + GRAFFITI.symbols.map(s => {
       return '<button type="button" data-graffiti-sym="' + s.id + '" title="' + s.name + '" aria-label="' + s.name + '"></button>';
     }).join('') + '</div>' +
@@ -202,20 +229,22 @@ function renderGraffitiPick(penId) {
     const c = graffitiCustom.find(c => c.id === b.dataset.graffitiCustom);
     graffitiButtonCanvas(b, c && graffitiCustomImage(c.p, color), 1.6);
   });
+  graffitiMarkColorButtons();
 }
 
 // ---- 自己畫：24×24 的格子，左鍵畫、右鍵擦 ----
 const GRAFFITI_PAD_PX = 12;   // 畫板上每一格幾個像素
 let graffitiPad = null;   // { bits, canvas, color, mode }
 function renderGraffitiDraw(penId) {
-  const n = GRAFFITI.customSize, color = GRAFFITI_PENS[penId];
+  const n = GRAFFITI.customSize;
   graffitiPalette.innerHTML = '<section class="graffiti-card" role="dialog" aria-label="自己畫塗鴉圖案">' +
-    '<header><div><small>GRAFFITI</small><h3>自己畫一個圖案</h3><p>左鍵畫、右鍵擦。畫好按「存起來」</p></div></header>' +
+    '<header><div><small>GRAFFITI</small><h3>自己畫一個圖案</h3><p>左鍵畫、右鍵擦。畫好按「存起來」（顏色只是看看，畫到牆上時再選）</p></div></header>' +
+    graffitiColorRow() +
     '<div class="graffiti-pad-wrap"><canvas class="graffiti-pad" width="' + n * GRAFFITI_PAD_PX + '" height="' + n * GRAFFITI_PAD_PX + '"></canvas></div>' +
     '<footer><span><button type="button" class="graffiti-cancel graffiti-back">← 返回</button> <button type="button" class="graffiti-cancel graffiti-clear">全部清掉</button></span>' +
     '<button type="button" class="graffiti-cancel graffiti-save">存起來</button></footer></section>';
   const cvs = graffitiPalette.querySelector('.graffiti-pad');
-  graffitiPad = { bits: new Uint8Array(n * n), canvas: cvs, color: GRAFFITI.colors[color] || GRAFFITI.red, mode: 0 };
+  graffitiPad = { bits: new Uint8Array(n * n), canvas: cvs, color: graffitiColorHex(graffitiColor), mode: 0 };
   const cellOf = e => {
     const r = cvs.getBoundingClientRect();
     return [Math.floor((e.clientX - r.left) / r.width * n), Math.floor((e.clientY - r.top) / r.height * n)];
@@ -233,7 +262,7 @@ function renderGraffitiDraw(penId) {
   cvs.addEventListener('pointermove', e => { if (graffitiPad.drawing) paint(e); });
   const stop = () => { graffitiPad.drawing = false; };
   cvs.addEventListener('pointerup', stop); cvs.addEventListener('pointercancel', stop);
-  drawGraffitiPad();
+  drawGraffitiPad(); graffitiMarkColorButtons();
 }
 function drawGraffitiPad() {
   const p = graffitiPad, n = GRAFFITI.customSize, s = GRAFFITI_PAD_PX, x = p.canvas.getContext('2d');
@@ -256,7 +285,7 @@ function closeGraffitiPalette() { if (graffitiPalette) graffitiPalette.classList
 const graffitiPaletteOpen = () => !!(graffitiPalette && !graffitiPalette.classList.contains('hidden'));
 function startGraffitiPlace(penId, sym, custom) {
   closeGraffitiPalette();
-  graffitiPlace = { pen: penId, color: GRAFFITI_PENS[penId], sym, custom };   // custom＝自訂圖案的資料（sym 就是 null）
+  graffitiPlace = { pen: penId, color: graffitiColor, sym, custom };   // custom＝自訂圖案的資料（sym 就是 null）
   cv.classList.add('graffiti-placing');
   systemNotice('🖍️ 點' + playerName() + '附近的牆、地板或物品畫上去（右鍵或 Esc 取消）');
 }
@@ -362,7 +391,7 @@ const graffitiErasing = () => !!graffitiErase;
 // ---- 置物櫃：有機會找到塗鴉筆（js/storage-lockers.js 呼叫）----
 function tryGraffitiPenFind(x, y) {
   if (Math.random() >= GRAFFITI.lockerChance) return;
-  const ids = Object.keys(GRAFFITI_PENS), id = ids[Math.floor(Math.random() * ids.length)];
+  const id = GRAFFITI_PEN;
   if (!supplyGain(id, 1)) return;   // 持有上限
   if (typeof showItemPickupNotice === 'function') showItemPickupNotice(id, 1);
   if (typeof updateHUD === 'function') updateHUD();
