@@ -9045,8 +9045,8 @@ const BASE_MAPS = [
         "c": 10,
         "r": 14,
         "layer": "object6",
-        "ox": 24,
-        "oy": 16
+        "ox": 14,
+        "oy": 30
       },
       {
         "id": "tile_restaurant_kitchen_workstation_clear",
@@ -9097,15 +9097,15 @@ const BASE_MAPS = [
         "c": 17,
         "r": 14,
         "layer": "object6",
-        "ox": 6,
-        "oy": 16
+        "ox": 12,
+        "oy": 30
       },
       {
         "id": "tile_restaurant_tray_stack",
         "c": 17,
         "r": 13,
         "layer": "object6",
-        "oy": 20,
+        "oy": 34,
         "ox": 30
       },
       {
@@ -9113,7 +9113,8 @@ const BASE_MAPS = [
         "c": 19,
         "r": 14,
         "layer": "object6",
-        "oy": 18
+        "oy": 32,
+        "ox": 0
       },
       {
         "id": "tile_restaurant_storage_cabinet",
@@ -9180,8 +9181,8 @@ const BASE_MAPS = [
         "c": 7,
         "r": 14,
         "layer": "object6",
-        "ox": 22,
-        "oy": 16
+        "ox": 2,
+        "oy": 30
       },
       {
         "id": "tile_mw628w22",
@@ -9189,7 +9190,7 @@ const BASE_MAPS = [
         "r": 14,
         "layer": "object6",
         "ox": 26,
-        "oy": 16
+        "oy": 30
       }
     ],
     "solid": [

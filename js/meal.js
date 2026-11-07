@@ -12,6 +12,12 @@ const MEAL = {
   buffetTiles: ['tile_restaurant_buffet_counter_01', 'tile_restaurant_buffet_counter_02', 'tile_musg7iyr', 'tile_mw5yx368', 'tile_mw60u20k', 'tile_mw628w22'],   // 打飯台（每台三盤菜）
   pans: [[32, 22, 26, 24], [71, 22, 26, 24], [110, 22, 26, 24]],                          // 三盤菜在打飯台圖片上的位置（圖 160×80：左、上、寬、高）
   panImg: [160, 80],
+  // 換過圖、盤子位置不一樣的打飯台（圖片像素：左、上、寬、高；同樣三盤由左到右）；沒寫的用上面的 pans
+  pansByTile: {
+    tile_mw5yx368: [[25, 20, 25, 26], [68, 20, 25, 26], [111, 20, 25, 26]],   // 慶功宴 banquet-buffet-01（2026-11-07 加寬盤子間隔）
+    tile_mw60u20k: [[25, 20, 25, 26], [68, 20, 25, 26], [111, 20, 25, 26]],   // 慶功宴 banquet-buffet-02
+    tile_mw628w22: [[25, 20, 25, 26], [68, 20, 25, 26], [111, 20, 25, 26]],   // 慶功宴 banquet-buffet-03
+  },
   panReachX: 24,       // 站在盤子左右多遠以內才打得到這盤（px）：兩盤相隔 39～44，這個距離剛好接得起來又不會碰到更遠的
   wasteTiles: ['tile_restaurant_waste_sorting_station'],                                  // 回收區
   trashTiles: ['tile_restaurant_trash_bin_small'],                                        // 垃圾桶：裝錯菜可以倒掉，餐盤留在手上
@@ -94,10 +100,11 @@ function mealNear(ids, x, y, reach = 30) {
   return best;
 }
 // 打飯台上第 k 盤菜：在地圖上的中心、拿來畫的圖片範圍
+const mealPansOf = id => MEAL.pansByTile[id] || MEAL.pans;   // 這台打飯台三盤菜在圖上的位置
 function panOf(r, k) {
-  const [px, py, pw, ph] = MEAL.pans[k], sx = r.w / MEAL.panImg[0], sy = r.h / MEAL.panImg[1];
+  const rect = mealPansOf(r.s.id)[k], [px, py, pw, ph] = rect, sx = r.w / MEAL.panImg[0], sy = r.h / MEAL.panImg[1];
   const u = (px + pw / 2) * sx;
-  return { x: r.x0 + (r.s.fx ? r.w - u : u), y: r.y0 + (py + ph / 2) * sy, food: { file: r.t.file, rect: MEAL.pans[k] }, key: r.s.id + '#' + k };
+  return { x: r.x0 + (r.s.fx ? r.w - u : u), y: r.y0 + (py + ph / 2) * sy, food: { file: r.t.file, rect }, key: r.s.id + '#' + k };
 }
 // 站在 (x, y) 打得到的菜裡，正對面最近的一盤；都打不到就回傳 null。一律看人站的位置，不管面向哪邊，人站在哪盤前面就是打哪盤
 // 打飯台的圖左右有重疊，所以直接比每一盤，不能先挑「哪一台」，不然站在三色豆前面會裝到隔壁台的牛排

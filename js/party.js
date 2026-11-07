@@ -201,7 +201,7 @@ function partyPanFoodByKey(key) {
   const [id, k] = key.split('#'), r = (party.stations.buffet || []).find(o => o.s.id === id);
   if (r) return partyPanFood(r, +k);
   const t = mapTileById(id);   // 這台打飯台沒擺在地圖上：圖還是從素材庫截，訂單才有圖
-  return { key, file: t ? t.file : '', rect: t ? MEAL.pans[+k] : [0, 0, 1, 1] };
+  return { key, file: t ? t.file : '', rect: t ? mealPansOf(id)[+k] : [0, 0, 1, 1] };
 }
 // 這一餐的滿意度（0～100）：從這個人的最高分開始，等點餐太久、等上菜太久、送錯都會扣分（數字在 data/party.js 的 mood、natures）
 const partyPart = (t, grace, patience) => Math.max(0, Math.min(1, (t - grace) / patience));
