@@ -167,13 +167,35 @@ const StoryScene = (() => {
       gunT: a.gun ? 1 : a.gunT || 0 };   // gun：拿著槍預備（用持槍圖，只有 GUN_FOLDERS 裡的角色有）
   }
   // ---- 自動門（door: [欄, 列]＝地圖上門圖章的位置）：劇情自己畫，兩片門板往左右滑開 ----
-  // 門圖（images/回憶場景/building_door.png，120×120）裡兩片門板的範圍，單位是圖片像素：
-  // box＝門板整塊（左、上、寬、高），也是遮罩，門板滑出這塊就看不到；split＝兩片門板中間的縫（左片 0～57、右片 58～113）
-  const DOOR_PANELS = { box: [0, 32, 114, 88], split: 58 }, DOOR_TIME = .8;
+  // 每種門圖裡兩片門板的範圍，單位是圖片像素：
+  // box＝門板整塊（左、上、寬、高），也是遮罩，門板滑出這塊就看不到；split＝兩片門板中間的縫
+  // 沒列在這裡的門圖用 building_door 的數字
+  const DOOR_PANELS = {
+    building: { box: [0, 32, 114, 88], split: 58 },   // images/回憶場景/building_door.png（120×120）：左片 0～57、右片 58～113
+    tile_mvfonrdd: { box: [0, 37, 80, 83], split: 40 },   // B-2 訓練室的玻璃門 containment-glass-door03.png（80×120）：左片 0～39、右片 40～79
+  }, DOOR_TIME = .8;
+  // doorAuto（劇情設定「有人經過自動開關」）：有人走到門前這個範圍內就打開，走開就關上（單位：格，從門的下緣中間算）
+  const DOOR_SENSE = { side: 1.3, up: 2.2, down: 1.6 };
   function findDoor(cfg) {
     if (!Array.isArray(cfg.door)) return null;
     const stamp = (MAP.stamps || []).find(s => s.c === cfg.door[0] && s.r === cfg.door[1]);
-    return stamp ? { stamp, open: 0, target: 0 } : null;
+    return stamp ? { stamp, open: 0, target: 0, auto: !!cfg.doorAuto, panels: DOOR_PANELS[stamp.id] || DOOR_PANELS.building } : null;
+  }
+  // 門前有沒有人（隱藏的、已經淡出的不算）
+  function someoneAtDoor(d) {
+    const t = mapTileById(d.stamp.id); if (!t) return false;
+    const cx = (d.stamp.c + mapTileW(t) / 2) * CELL + (d.stamp.ox || 0), by = (d.stamp.r + mapTileH(t)) * CELL + (d.stamp.oy || 0);
+    return state.actors.some(a => !a.hidden && !a.fading && Math.abs(a.x - cx) < DOOR_SENSE.side * CELL && a.y > by - DOOR_SENSE.up * CELL && a.y < by + DOOR_SENSE.down * CELL);
+  }
+  function tickDoor(d, dt) {
+    if (d.auto) {
+      const want = someoneAtDoor(d) ? 1 : 0;
+      if (want !== d.target) {
+        d.target = want;
+        if (!state.skipping && typeof SFX !== 'undefined') SFX.play('storyDoor', .8, 'storyDoor:auto');   // 開、關都響一聲
+      }
+    }
+    const s = dt / DOOR_TIME; d.open = d.open < d.target ? Math.min(d.target, d.open + s) : Math.max(d.target, d.open - s);
   }
   const ownsStamp = s => !!state?.door && state.door.stamp === s;   // js/maploader.js 問：這張圖章由劇情自己畫嗎
   function drawDoor() {
@@ -181,7 +203,7 @@ const StoryScene = (() => {
     const s = d.stamp, t = mapTileById(s.id), img = t && tileImage(t); if (!readyImage(img)) return;
     const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0), w = mapTileW(t) * CELL, h = mapTileH(t) * CELL;
     const iw = img.naturalWidth, ih = img.naturalHeight, sx = w / iw, sy = h / ih;
-    const [bx, by, bw, bh] = DOOR_PANELS.box, cut = DOOR_PANELS.split;
+    const [bx, by, bw, bh] = d.panels.box, cut = d.panels.split;
     const k = d.open * d.open * (3 - 2 * d.open);   // 慢慢起步、慢慢停
     ctx.save(); ctx.beginPath(); ctx.rect(x + bx * sx, y + by * sy, bw * sx, bh * sy); ctx.clip();   // 門後直接露出地圖上鋪的地板
     ctx.drawImage(img, bx, by, cut - bx, bh, x + (bx - k * (cut - bx)) * sx, y + by * sy, (cut - bx) * sx, bh * sy);   // 左片往左滑
@@ -191,6 +213,11 @@ const StoryScene = (() => {
   // 大喊（每頁 shout: { 角色id: true }）：台詞出現的那一刻，那個人頓一下、對話框跟著震一下
   // 驚訝小跳（每頁 hop: { 角色id: true }）：同一個時機往上輕輕跳一下，對話框不震
   const SHOUT_TIME = .4, HOP_TIME = .32;
+  // 出拳（每頁 punch: { 角色id: true／false }）：一直揮拳，直到下一次 false 才停
+  // 用角色資料夾裡的 xxx_0007_right-side-punch.png（收拳）、xxx_0007_right-side-punch02.png（打出去）；朝左時把圖左右翻過來
+  // every＝一拳幾秒、hit＝每拳打出去停留幾秒；沒有出拳圖的角色就照常站著
+  const PUNCH = { every: .5, hit: .18 };
+  const punchFrames = a => a.sprite ? ['', '02'].map(n => imageOnce('images/character/' + a.sprite + '/' + a.sprite.replace('_', '') + '_0007_right-side-punch' + n + '.png')) : null;
   // 手上拿的小道具（carry 的圖長寬都不超過這麼多像素）：拿在手邊、照原圖大小；手的位置（腳底往上算，角色圖的像素）依面向哪邊
   const SMALL_CARRY = 16, HAND_AT = { right: [12, 4], left: [-12, 4], front: [14, 5] };
   function shout(beat) {
@@ -517,7 +544,7 @@ const StoryScene = (() => {
       }
       for (const a of state.actors) { if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; }
       for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
-      if (state.door) state.door.open = state.door.target;
+      if (state.door) { if (state.door.auto) state.door.target = someoneAtDoor(state.door) ? 1 : 0; state.door.open = state.door.target; }
       if (state.screen) state.screen.t = state.screen.dur;
     };
     state.skipping = true; settle();
@@ -579,6 +606,7 @@ const StoryScene = (() => {
     }
     for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
     for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
+    for (const [id, v] of Object.entries(beat.punch || {})) { const a = actor(id); if (a) { a.punch = !!v; a.punchT = 0; } }
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
@@ -848,10 +876,11 @@ const StoryScene = (() => {
         if (a.charred && !a.hidden && (a.smokeT = (a.smokeT || 0) - dt) <= 0 && typeof pushBlackSmoke === 'function') { a.smokeT = rnd(.35, .6); pushBlackSmoke(a.x + rnd(-10, 10), a.y - 4); }   // 焦黑的人一直冒煙
         if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
         if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
+        if (a.punch) a.punchT = (a.punchT || 0) + dt;
         if (a.fading) { a.alpha -= dt / .45; if (a.alpha <= 0) { a.alpha = 1; a.hidden = true; a.fading = a.exiting = false; } }   // 走進門裡：淡出
         else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
       }
-      if (state.door) { const d = state.door, s = dt / DOOR_TIME; d.open = d.open < d.target ? Math.min(d.target, d.open + s) : Math.max(d.target, d.open - s); }
+      if (state.door) tickDoor(state.door, dt);
       for (const e of state.monsters) tickMonster(e, dt);
       tickZap(dt);
       if (G.scorchMarks) for (const m of G.scorchMarks) m.t = Math.max(m.t - dt, (m.st.fade || 0) + .01);   // 雷擊焦痕：劇情裡一直留著（不淡掉）
@@ -959,6 +988,10 @@ const StoryScene = (() => {
     const set = actorSet(a);
     let img = a.down && readyImage(a.set.fail) ? a.set.fail : a.wounded ? woundedFrame(a) : a.eyesClosed ? set.blink?.[2] : pickCharacterFrame(set, frameActor);
     if (!readyImage(img)) img = set.front?.[0];
+    // 出拳：站著不動、面向左右時換成出拳圖（走路中、坐著、倒地時不換）
+    const fist = a.punch && !a.target && !a.down && !a.sitting && (a.dir === 'right' || a.dir === 'left') && punchFrames(a);
+    const fistImg = fist && fist[(a.punchT || 0) % PUNCH.every < PUNCH.every - PUNCH.hit ? 0 : 1];
+    if (readyImage(fistImg)) img = fistImg;
     if (!readyImage(img)) return;
     ctx.save(); ctx.imageSmoothingEnabled = false; ctx.globalAlpha = Math.max(0, Math.min(1, a.alpha ?? 1));
     if (a.charred) ctx.filter = 'brightness(.5) saturate(.55) contrast(1.15)';   // 被雷劈到焦黑（還認得出是誰）
@@ -972,6 +1005,7 @@ const StoryScene = (() => {
     const shoutX = sk ? Math.sin(a.shoutT * 95) * 2.2 * sk : 0, shoutY = (sk ? -Math.sin((1 - sk) * Math.PI) * 3 : 0) - (hk ? Math.sin(hk * Math.PI) * 5 : 0);
     ctx.translate(Math.round(a.x + kick) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY);
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
+    if (img === fistImg && a.dir === 'left') ctx.scale(-1, 1);   // 出拳圖只有朝右的，朝左就翻過來
     // 單張圖：照原本比例、跟人一樣高；imageScale＝照原圖像素大小畫（1＝跟角色同一個比例，例如擔架），底部對齊腳底
     const nat = a.set.single && Number(a.imageScale) > 0 ? Number(a.imageScale) * size / 64 : 0;
     const w = nat ? img.naturalWidth * nat : a.set.single ? size * img.naturalWidth / img.naturalHeight : size, hgt = nat ? img.naturalHeight * nat : size;
