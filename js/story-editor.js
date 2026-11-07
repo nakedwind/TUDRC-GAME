@@ -40,7 +40,7 @@ const SPRITES = [...new Set([...Object.values(typeof CHARACTERS !== 'undefined' 
 document.body.append(h('datalist', { id: 'spriteList' }, SPRITES.map(s => h('option', { value: s }))));
 // 每頁的音效：js/sfx.js 的音效名字（音效編輯器裡看得到全部）；選單先列劇情常用的
 const STORY_SFX = [['storyDoor', '自動門開關'], ['door', '關門'], ['backroomDoor', '後室開門'], ['elevator', '電梯'], ['ironGateSlide', '鐵門滑動'], ['stairsDown', '腳步聲（樓梯）'],
-  ['soothe', '疏導'], ['itemPickup', '撿東西'], ['knock2', '敲打'], ['glassBreak3', '玻璃破掉'], ['midBoom', '中爆炸']];
+  ['soothe', '疏導'], ['itemPickup', '撿東西'], ['knock2', '敲打'], ['glassBreak3', '玻璃破掉'], ['midBoom', '中爆炸'], ['storyPunch', '出拳'], ['storySandbagBreak', '沙包破掉']];
 document.body.append(h('datalist', { id: 'sfxList' }, STORY_SFX.map(([v, t]) => h('option', { value: v }, t))));
 function testSfx(name, gain) {   // 編輯器沒有載入音效引擎：照 js/sfx.js 的檔名直接播
   const file = (typeof SFX !== 'undefined' && SFX.defaultFiles?.()[name]) || { storyDoor: '環境/門與機關/電梯.mp3', door: '環境/門與機關/關門.mp3', backroomDoor: '環境/門與機關/後室開門.mp3', elevator: '環境/門與機關/電梯.mp3', ironGateSlide: '環境/門與機關/鐵門滑動.mp3', stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3' }[name];

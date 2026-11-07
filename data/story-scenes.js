@@ -894,7 +894,7 @@ const STORY_SCENES = {
         "speaker": "",
         "text": "沙包整個晃盪起來，啪的一聲，沙子從破口沙沙地漏出來。",
         "wait": 0.3,
-        "sfx": "chainUnlock",
+        "sfx": "storySandbagBreak",
         "punch": { "winter": false },
         "leak": { "sandbag": true }
       },

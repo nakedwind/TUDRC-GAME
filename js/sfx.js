@@ -53,7 +53,8 @@ const SFX = (() => {
     mrtDepart: '環境/門與機關/列車啟動音.m4a',                // 捷運列車：開走（列車啟動音）
     elevator: '環境/門與機關/電梯.mp3',
     storyDoor: '環境/門與機關/電梯.mp3',   // 回憶劇情的自動門開關（data/story-scenes.js 的 sfx；先借電梯聲，可在音效編輯器換）
-    storyPunch: '戰鬥/命中/hit.mp3',   // 回憶劇情的出拳（每打出去一拳響一次；js/story-scene.js 的 PUNCH）
+    storyPunch: '戰鬥/命中/敲打2.mp3',   // 回憶劇情的出拳（每打出去一拳響一次；js/story-scene.js 的 PUNCH）
+    storySandbagBreak: ['戰鬥/元素/腐蝕.mp3', '戰鬥/命中/小撞擊.mp3'],   // 回憶劇情：沙包被打破（腐蝕＋小撞擊一起播）
     stairsDown: '環境/腳步/footsteps03 (mp3cut.net).mp3',   // 走逃生樓梯下樓（js/game.js 的 enterPortal）
     stairsUp: '環境/腳步/footsteps03 (mp3cut.net).mp3',     // 走逃生樓梯上樓（js/game.js 的 enterPortal）
     gunshot: '戰鬥/槍械/開槍.mp3',   // 隊員開槍、劇情裡開槍（溫特的手槍用下面的 shotPistol）
