@@ -922,8 +922,7 @@ const STORY_SCENES = {
         "speaker": "",
         "text": "溫特站起來，把毛巾甩到肩上。",
         "wait": 0.3,
-        "speed": { "winterSit": 40 },
-        "move": { "winterSit": [10.1, 23] },
+        "place": { "winterSit": [9.5, 22.9] },
         "face": { "winterSit": "front" }
       },
       { "speaker": "溫特", "text": "而且，哨兵這種生物，我本來就最討厭了。", "wait": 0.4 },
