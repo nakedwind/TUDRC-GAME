@@ -228,6 +228,10 @@ const StoryScene = (() => {
   // 出拳時身體往前衝（像素）：jab／heavy＝輕拳、重拳衝多遠，time＝衝出去再收回來共幾秒；重拳另外往下沉一點（sink）
   const LUNGE = { jab: 2, heavy: 4.5, jabTime: .18, heavyTime: .32, sink: 1 };
   const bagSlide = a => a.bag ? a.swA * SWAY.slide : 0;
+  // 打擊特效（拳頭打到沙包的那一點）：中間一下白光、往打的人那邊噴出幾道光芒；重拳多一圈往外擴的衝擊波和幾團灰塵
+  // life＝特效幾秒、spikes＝幾道光芒、len＝光芒長度 [最短, 最長]（像素）、spread＝光芒張開的角度（弧度）、ring＝衝擊波最後多大
+  const HIT_FX = { life: .16, heavyLife: .28, spikes: 6, heavySpikes: 10, len: [3, 7], heavyLen: [5, 13], spread: 2.6, flash: 3, heavyFlash: 6, ring: 16,
+    color: '#ffffff', edge: '#ffb43c', dust: 'rgba(210,210,215,' };
   // 漏沙：flow＝前幾秒全速流、fade＝之後幾秒慢慢流完、rate＝每秒幾粒、pileMax＝沙堆最大半徑（像素）、colors＝沙子的顏色（亮、中、暗）
   const SAND = { flow: 9, fade: 5, rate: 45, pileMax: 10, colors: ['#e8c98c', '#c9a46a', '#96743f'] };
   const punchFrames = a => a.sprite ? ['', '02'].map(n => imageOnce('images/character/' + a.sprite + '/' + a.sprite.replace('_', '') + '_0007_right-side-punch' + n + '.png')) : null;
@@ -1027,13 +1031,45 @@ const StoryScene = (() => {
     const bag = state.actors.filter(b => b.bag && !b.hidden && (b.x - a.x) * side > 0 && Math.abs(b.x - a.x) < 2.5 * CELL && Math.abs(b.y - a.y) < CELL)
       .sort((p, q) => Math.abs(p.x - a.x) - Math.abs(q.x - a.x))[0];
     if (bag) bag.swV += side * (heavy ? SWAY.heavy : SWAY.jab) * rnd(.85, 1.15);
+    if (bag && !state.skipping) addHitFx(bag, a, heavy, side);
     if (state.skipping || typeof SFX === 'undefined') return;
     SFX.play('storyPunch', heavy ? PUNCH.heavyVolume : rnd(...PUNCH.volume), 'storyPunch:' + a.id);
     if (heavy) state.shake = Math.max(state.shake, 1.2);
   }
+  // 打擊特效的位置：沙包朝著打的人那一側的邊上、跟拳頭差不多高
+  function addHitFx(bag, who, heavy, side) {
+    const g = bagGeom(bag), iy = Math.max(20, Math.min(110, (who.y - 9 - g.y0) / g.k));
+    const [x, y] = bagPoint(bag, g, [side > 0 ? 17 : 61, iy]);
+    const n = heavy ? HIT_FX.heavySpikes : HIT_FX.spikes, back = side > 0 ? Math.PI : 0;   // 光芒往打的人那邊噴
+    const spikes = Array.from({ length: n }, (_, i) => ({ ang: back + (i / (n - 1) - .5) * HIT_FX.spread + rnd(-.15, .15), len: rnd(...(heavy ? HIT_FX.heavyLen : HIT_FX.len)) }));
+    const dust = heavy ? Array.from({ length: 3 }, () => ({ vx: Math.cos(back) * rnd(10, 22), vy: rnd(-14, 4), r: rnd(1.5, 2.6) })) : [];
+    (bag.hits = bag.hits || []).push({ x, y, t: 0, life: heavy ? HIT_FX.heavyLife : HIT_FX.life, heavy, spikes, dust });
+  }
+  function drawHits(a) {
+    ctx.save();
+    for (const h of a.hits) {
+      const p = h.t / h.life, fade = 1 - p;
+      ctx.globalAlpha = fade;
+      if (p < .4) {   // 中間的白光
+        ctx.fillStyle = HIT_FX.color; ctx.beginPath(); ctx.arc(h.x, h.y, (h.heavy ? HIT_FX.heavyFlash : HIT_FX.flash) * (1 - p / .4 * .6), 0, Math.PI * 2); ctx.fill();
+      }
+      for (const s of h.spikes) {   // 光芒：一邊往外跑、一邊變短，外面一圈橘色
+        const r0 = 2 + p * s.len * .9, r1 = r0 + s.len * (1 - p * .6), c = Math.cos(s.ang), d = Math.sin(s.ang);
+        ctx.beginPath(); ctx.moveTo(h.x + c * r0, h.y + d * r0); ctx.lineTo(h.x + c * r1, h.y + d * r1);
+        ctx.strokeStyle = HIT_FX.edge; ctx.lineWidth = h.heavy ? 2.6 : 2; ctx.lineCap = 'round'; ctx.stroke();
+        ctx.strokeStyle = HIT_FX.color; ctx.lineWidth = h.heavy ? 1.2 : .9; ctx.stroke();
+      }
+      if (h.heavy) {   // 重拳：衝擊波＋灰塵
+        ctx.strokeStyle = HIT_FX.color; ctx.lineWidth = 1.6 * fade; ctx.beginPath(); ctx.arc(h.x, h.y, 3 + p * HIT_FX.ring, 0, Math.PI * 2); ctx.stroke();
+        for (const u of h.dust) { ctx.fillStyle = HIT_FX.dust + (.7 * fade) + ')'; ctx.beginPath(); ctx.arc(h.x + u.vx * h.t * 2, h.y + u.vy * h.t * 2, u.r * (1 + p), 0, Math.PI * 2); ctx.fill(); }
+      }
+    }
+    ctx.restore();
+  }
   // 沙包搖晃（像不倒翁的彈簧）＋漏沙
   function tickBag(a, dt) {
     if (!a.bag) return;
+    if (a.hits?.length) { for (const h of a.hits) h.t += dt; a.hits = a.hits.filter(h => h.t < h.life); }
     a.swV += (-SWAY.stiff * a.swA - SWAY.damp * a.swV) * dt;
     a.swA = Math.max(-SWAY.max, Math.min(SWAY.max, a.swA + a.swV * dt));
     if (Math.abs(a.swA) < .002 && Math.abs(a.swV) < .01) a.swA = a.swV = 0;
@@ -1121,6 +1157,7 @@ const StoryScene = (() => {
     }
     ctx.restore();
     if (a.leak) drawSand(a);
+    if (a.hits?.length) drawHits(a);
     drawEmote(a);
     // 雷德揮擊時手上的斧頭（跟遊戲一樣：fire_axe_01，衝撞那一下只用盾不拿斧）
     if (a.meleeSwing && !a.meleeSwing.ram && a.sprite === 'red_B' && typeof drawSwingWeapon === 'function' && typeof redAxeImg !== 'undefined') {
