@@ -858,7 +858,7 @@ const STORY_SCENES = {
         "hidden": true,
         "carry": "images/道具/water.png"
       },
-      { "id": "winterSit", "sprite": "winter_A", "name": "溫特", "bed": [11, 21], "at": [9.5, 21], "carry": "images/道具/water.png", "carryDx": -11 },
+      { "id": "winterSit", "sprite": "winter_A", "name": "溫特", "bed": [11, 21], "at": [9.5, 21], "carry": "images/道具/water.png", "carrySitDx": -11 },
       { "id": "noahSit", "sprite": "noah_A", "name": "諾亞", "bed": [13, 21], "at": [11.5, 21] },
       { "id": "kobayashi", "sprite": "mob_B", "name": "小林", "at": [26.2, 16.1], "dir": "front", "speed": 30, "hidden": true }
     ],

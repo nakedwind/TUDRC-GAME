@@ -572,7 +572,7 @@ function renderObj() {
       field('單張圖（只有一張圖的路人，例如家屬的背影；填了就不用角色圖資料夾）', txt(ac, 'image', { optional: true, rerender: true, placeholder: 'images/回憶場景/檔名.png' })),
       ac.image && field('單張圖照原圖大小畫（1＝跟角色同一個比例，例如擔架；空白＝跟人一樣高）', num(ac, 'imageScale', { optional: true, min: .1, step: .1, placeholder: '—' })),
       field('一開始手上拿著（圖片，例如遺物箱；空白＝沒拿東西）', txt(ac, 'carry', { optional: true, placeholder: 'images/回憶場景/relics.png' })),
-      field('拿著的東西往左／往右幾像素（負＝往左）', num(ac, 'carryDx', { optional: true, step: 1, placeholder: '0' })),
+      field('坐著時拿著的東西往左／往右幾像素（負＝往左；站起來就回原位）', num(ac, 'carrySitDx', { optional: true, step: 1, placeholder: '0' })),
       field('拿著的東西往上／往下幾像素（負＝往上）', num(ac, 'carryDy', { optional: true, step: 1, placeholder: '0' })),
       field('位置', choose(posMode, 'mode', [['', '站著（自己選格子）'], ...beds], { parse: v => { if (v) { ac.bed = v.split(',').map(Number); delete ac.at; } else { delete ac.bed; ac.at = ac.at || [r1(curMap().cols / 2), r1(curMap().rows / 2)]; } return v; } })),
       !ac.bed && field('站的格子', xy(ac, 'at', '選' + (ac.name || '角色') + '站的位置')),

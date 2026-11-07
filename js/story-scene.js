@@ -143,7 +143,7 @@ const StoryScene = (() => {
     tile_mvfonrdd: { box: [0, 37, 80, 83], split: 40 },   // B-2 訓練室的玻璃門 containment-glass-door03.png（80×120）：左片 0～39、右片 40～79
   }, DOOR_TIME = .8;
   // doorAuto（劇情設定「有人經過自動開關」）：有人走到門前這個範圍內就打開，走開就關上（單位：格，從門的下緣中間算）
-  const DOOR_SENSE = { side: 1.3, up: 2.2, down: 1.6 };
+  const DOOR_SENSE = { side: 1.3, up: 2.2, down: .8 };
   function findDoor(cfg) {
     if (!Array.isArray(cfg.door)) return null;
     const stamp = (MAP.stamps || []).find(s => s.c === cfg.door[0] && s.r === cfg.door[1]);
@@ -1116,12 +1116,13 @@ const StoryScene = (() => {
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
     const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
     const small = readyImage(held) && Math.max(held.naturalWidth, held.naturalHeight) <= SMALL_CARRY;
+    const sitDx = a.sitting ? Number(a.carrySitDx) || 0 : 0;   // carrySitDx：坐著時拿的東西往左（負）／往右（正）挪幾像素；站起來走路就回到原本的位置
     if (small) {   // 小道具（紅豆餅、紙袋…）：照原圖大小拿在手邊，位置跟劇情（改）的「手上」一樣（js/story-kai.js 的 HOLD_AT）
       const k = size / 64, [dx, dy] = HAND_AT[a.dir] || HAND_AT.front, hw = held.naturalWidth * k, hh = held.naturalHeight * k;
-      ctx.drawImage(held, Math.round((dx + (Number(a.carryDx) || 0)) * k - hw / 2), Math.round(size / 2 - 18 + (dy + (Number(a.carryDy) || 0)) * k - hh / 2), hw, hh);   // 畫布原點在身體中間，腳底在 size/2-18 的地方
+      ctx.drawImage(held, Math.round((dx + sitDx) * k - hw / 2), Math.round(size / 2 - 18 + (dy + (Number(a.carryDy) || 0)) * k - hh / 2), hw, hh);   // 畫布原點在身體中間，腳底在 size/2-18 的地方
     } else if (readyImage(held)) {
       const k = size / 64 * Math.min(1, 24 / Math.max(held.naturalWidth, held.naturalHeight)), hw = held.naturalWidth * k, hh = held.naturalHeight * k;   // 太大的圖（急救包）縮到手拿得住
-      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k + (Number(a.carryDx) || 0)), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDx／carryDy：拿著的東西往左（負）右（正）、往上（負）下（正）幾像素
+      ctx.drawImage(held, Math.round(-hw / 2 + (a.dir === 'left' ? -6 : a.dir === 'right' ? 6 : 0) * k + sitDx), Math.round(size * .14 + (Number(a.carryDy) || 0)), hw, hh);   // carryDy：拿著的東西往上（負）／往下（正）幾像素
     }
     ctx.restore();
     if (a.leak) drawSand(a);
