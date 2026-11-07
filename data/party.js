@@ -94,8 +94,7 @@ const PARTY = {
     burnt: { name: '烤焦的菜', img: 'images/餐廳/慶功宴/dish-burnt.png' },
   },
   stoveImg: 'images/餐廳/慶功宴/icon-stove.png',
-  noahGap: 22,          // 諾亞大約隔幾秒順手端一盤
-  noahSay: '對了，你有聽說那件事嗎？',
+  noahSay: '對了，你有聽說那件事嗎？',   // 諾亞起身幫忙端餐時說的話
   lines: {
     ask: '最近的任務讓大家都很辛苦，要不要來辦一場慶功宴讓大家放鬆一下呢？當然，我也會幫忙的。',
     no: '真可惜……偶爾也要記得犒勞一下大家的努力喔！',
