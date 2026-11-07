@@ -3660,6 +3660,132 @@ const STORY_MAPS = [
         ]
       },
       {
+        "id": "tile_field_base",
+        "c": 14,
+        "r": 74,
+        "layer": "object",
+        "baseHp": 2000,
+        "baseDepth": 3,
+        "baseSolid": [
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
+          ]
+        ]
+      },
+      {
         "id": "tile_field_supply_box",
         "c": 19,
         "r": 76,
@@ -16931,6 +17057,7 @@ const STORY_MAPS = [
     "coreFixed": [
       "5,7"
     ],
+    "mrtExitKeys": 2,
     "elite": {
       "of": "bird_head",
       "c": 5,
@@ -18290,7 +18417,7 @@ const STORY_MAPS = [
         "34,11": "tile_new_bg_floor",
         "34,12": "tile_new_bg_floor",
         "33,12": "tile_new_bg_floor",
-        "33,13": "floor",
+        "33,13": "tile_new_bg_floor",
         "44,13": "tile_new_bg_floor",
         "44,12": "tile_new_bg_floor",
         "44,11": "tile_new_bg_floor",
@@ -18701,8 +18828,8 @@ const STORY_MAPS = [
         "57,8": "tile_new_bg_floor",
         "59,8": "tile_new_bg_floor",
         "59,7": "tile_new_bg_floor",
-        "26,15": "tile_hq_floor",
-        "27,15": "tile_hq_floor",
+        "26,15": "tile_new_bg_floor",
+        "27,15": "tile_new_bg_floor",
         "28,15": "tile_hq_floor",
         "29,15": "tile_hq_floor",
         "30,15": "tile_hq_floor",
@@ -18712,8 +18839,8 @@ const STORY_MAPS = [
         "34,15": "tile_hq_floor",
         "35,15": "tile_hq_floor",
         "36,15": "tile_hq_floor",
-        "37,15": "tile_hq_floor",
-        "38,15": "tile_hq_floor",
+        "37,15": "tile_new_bg_floor",
+        "38,15": "tile_new_bg_floor",
         "39,15": "tile_hq_floor",
         "25,15": "tile_hq_floor",
         "25,16": "tile_hq_floor",
@@ -18732,7 +18859,6 @@ const STORY_MAPS = [
         "35,16": "tile_hq_floor",
         "36,16": "tile_hq_floor",
         "37,16": "tile_hq_floor",
-        "38,16": "tile_hq_floor",
         "39,16": "tile_hq_floor",
         "39,17": "tile_hq_floor",
         "39,18": "tile_hq_floor",
@@ -18880,8 +19006,6 @@ const STORY_MAPS = [
         "20,15": "tile_hq_floor",
         "19,15": "tile_hq_floor",
         "18,15": "tile_hq_floor",
-        "17,15": "tile_hq_floor",
-        "16,15": "tile_hq_floor",
         "15,15": "tile_hq_floor",
         "15,17": "tile_hq_floor",
         "15,18": "tile_hq_floor",
@@ -18939,7 +19063,35 @@ const STORY_MAPS = [
         "14,21": "tile_hq_floor",
         "12,18": "tile_hq_floor",
         "37,19": "tile_hq_floor",
-        "37,14": "tile_new_bg_floor"
+        "37,14": "tile_new_bg_floor",
+        "17,15": "tile_new_bg_floor",
+        "16,15": "tile_new_bg_floor",
+        "43,15": "tile_new_bg_floor",
+        "44,15": "tile_new_bg_floor",
+        "46,15": "tile_new_bg_floor",
+        "45,15": "tile_new_bg_floor",
+        "47,15": "tile_new_bg_floor",
+        "48,15": "tile_new_bg_floor",
+        "49,15": "tile_new_bg_floor",
+        "50,15": "tile_new_bg_floor",
+        "51,15": "tile_new_bg_floor",
+        "52,15": "tile_new_bg_floor",
+        "53,15": "tile_new_bg_floor",
+        "54,15": "tile_new_bg_floor",
+        "55,15": "tile_new_bg_floor",
+        "56,15": "tile_new_bg_floor",
+        "57,15": "tile_new_bg_floor",
+        "58,15": "tile_new_bg_floor",
+        "59,15": "tile_new_bg_floor",
+        "60,15": "tile_new_bg_floor",
+        "7,15": "tile_new_bg_floor",
+        "6,15": "tile_new_bg_floor",
+        "5,15": "tile_new_bg_floor",
+        "4,15": "tile_new_bg_floor",
+        "3,15": "tile_new_bg_floor",
+        "2,15": "tile_new_bg_floor",
+        "1,15": "tile_new_bg_floor",
+        "0,15": "tile_new_bg_floor"
       },
       "ground": {},
       "ground2": {},
@@ -19826,127 +19978,122 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall",
         "c": 29,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 30,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 31,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 32,
-        "r": 12,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_new_bg_wall",
-        "c": 33,
-        "r": 12,
-        "layer": "object2"
-      },
-      {
-        "id": "tile_new_bg_wall",
-        "c": 34,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 35,
-        "r": 12,
+        "r": 13,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 33,
+        "r": 13,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 35,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 36,
-        "r": 12,
-        "layer": "object2",
-        "ox": 0,
-        "oy": 0
+        "r": 13,
+        "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 28,
-        "r": 12,
+        "r": 13,
         "layer": "object2",
         "fx": true
       },
       {
         "id": "tile_hq_monitor_wall",
         "c": 30,
-        "r": 13,
+        "r": 14,
         "layer": "object3",
-        "fx": true,
-        "ox": 0,
-        "oy": -14
+        "fx": true
       },
       {
         "id": "tile_hq_stairs",
         "c": 26,
-        "r": 15,
+        "r": 16,
         "layer": "object",
         "fx": true,
-        "ox": 0,
         "oy": -6
       },
       {
         "id": "tile_hq_wall_side",
         "c": 39,
-        "r": 12,
+        "r": 13,
         "layer": "object2",
         "fx": true
       },
       {
         "id": "tile_hq_wall_side",
         "c": 25,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 40,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 24,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 41,
-        "r": 12,
+        "r": 13,
         "layer": "object2"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 23,
-        "r": 12,
+        "r": 13,
         "layer": "object2",
         "fx": true
       },
       {
         "id": "tile_mu5e3ndv",
         "c": 22,
-        "r": 12,
+        "r": 13,
         "layer": "object",
         "fx": true
       },
       {
         "id": "tile_mu5e3ndv",
         "c": 42,
-        "r": 12,
+        "r": 13,
         "layer": "object",
         "fx": true
       },
@@ -20023,6 +20170,13 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall_front_edge",
         "c": 42,
+        "r": 16,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 42,
         "r": 15,
         "layer": "top",
         "fx": true
@@ -20036,15 +20190,8 @@ const STORY_MAPS = [
       },
       {
         "id": "tile_new_bg_wall_front_edge",
-        "c": 42,
-        "r": 13,
-        "layer": "top",
-        "fx": true
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
         "c": 22,
-        "r": 13,
+        "r": 14,
         "layer": "top",
         "fx": true
       },
@@ -20105,11 +20252,11 @@ const STORY_MAPS = [
       },
       {
         "id": "tile_hq_server_rack",
-        "c": 9,
-        "r": 14,
+        "c": 8,
+        "r": 15,
         "layer": "object3",
-        "ox": -6,
-        "oy": 14
+        "ox": 32.666667,
+        "oy": 19.333333
       },
       {
         "id": "tile_hq_desk_vertical",
@@ -20150,29 +20297,24 @@ const STORY_MAPS = [
       {
         "id": "tile_hq_stairs",
         "c": 37,
-        "r": 15,
+        "r": 16,
         "layer": "ground3",
         "fx": true,
-        "ox": 0,
-        "oy": -6
+        "oy": -4.666667
       },
       {
         "id": "tile_hq_server_rack",
         "c": 40,
-        "r": 14,
+        "r": 15,
         "layer": "object3",
-        "fx": true,
-        "oy": 16,
-        "ox": 2
+        "fx": true
       },
       {
         "id": "tile_hq_server_rack",
         "c": 41,
-        "r": 14,
+        "r": 15,
         "layer": "object3",
-        "fx": true,
-        "ox": 2,
-        "oy": 16
+        "fx": true
       },
       {
         "id": "tile_eoc_drawer_unit",
@@ -20180,8 +20322,7 @@ const STORY_MAPS = [
         "r": 15,
         "layer": "object3",
         "fx": true,
-        "ox": 4,
-        "oy": -24
+        "oy": 8
       },
       {
         "id": "tile_eoc_drawer_unit",
@@ -20189,26 +20330,23 @@ const STORY_MAPS = [
         "r": 15,
         "layer": "object3",
         "fx": true,
-        "ox": -6,
-        "oy": -24
+        "oy": 8
       },
       {
         "id": "tile_eoc_binder_row",
-        "c": 35,
-        "r": 14,
+        "c": 36,
+        "r": 15,
         "layer": "object4",
         "fx": true,
-        "ox": 24,
-        "oy": 18
+        "oy": 8
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
-        "c": 29,
-        "r": 15,
+        "c": 28,
+        "r": 16,
         "layer": "object3",
         "fx": true,
-        "ox": -34,
-        "oy": 12
+        "oy": 8
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -20219,26 +20357,18 @@ const STORY_MAPS = [
         "oy": -20
       },
       {
-        "id": "tile_hq_sign",
-        "c": 28,
-        "r": 13,
-        "layer": "object4"
-      },
-      {
         "id": "tile_hq_poster",
-        "c": 10,
-        "r": 15,
+        "c": 8,
+        "r": 14,
         "layer": "overlay",
-        "ox": -44,
-        "oy": -58
+        "ox": 36,
+        "oy": 22
       },
       {
         "id": "tile_hq_poster",
         "c": 41,
-        "r": 14,
-        "layer": "overlay",
-        "ox": 0,
-        "oy": -14
+        "r": 15,
+        "layer": "overlay"
       },
       {
         "id": "tile_eoc_office_chair_grey",
@@ -20265,81 +20395,76 @@ const STORY_MAPS = [
       {
         "id": "tile_mu5e3ndv",
         "c": 8,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 10,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 11,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 12,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 13,
-        "r": 12,
-        "layer": "object",
-        "ox": 0,
-        "oy": 0
+        "r": 13,
+        "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 14,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 21,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 20,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_new_bg_wall",
         "c": 19,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_hq_stairs",
         "c": 16,
-        "r": 15,
+        "r": 16,
         "layer": "ground",
-        "ox": 0,
-        "oy": -4
+        "oy": -5.333333
       },
       {
         "id": "tile_hq_wall_side",
         "c": 15,
-        "r": 12,
+        "r": 13,
         "layer": "object"
       },
       {
         "id": "tile_hq_wall_side",
         "c": 18,
-        "r": 12,
+        "r": 13,
         "layer": "object",
-        "fx": true,
-        "ox": 0,
-        "oy": 0
+        "fx": true
       },
       {
         "id": "tile_hq_floor",
@@ -20386,7 +20511,7 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall",
         "c": 9,
-        "r": 12,
+        "r": 13,
         "layer": "object",
         "fx": true
       },
@@ -20407,6 +20532,13 @@ const STORY_MAPS = [
       {
         "id": "tile_new_bg_wall_front_edge",
         "c": 8,
+        "r": 16,
+        "layer": "top",
+        "fx": true
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 8,
         "r": 15,
         "layer": "top",
         "fx": true
@@ -20415,13 +20547,6 @@ const STORY_MAPS = [
         "id": "tile_new_bg_wall_front_edge",
         "c": 8,
         "r": 14,
-        "layer": "top",
-        "fx": true
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
-        "c": 8,
-        "r": 13,
         "layer": "top",
         "fx": true
       },
@@ -20440,44 +20565,34 @@ const STORY_MAPS = [
         "c": 10,
         "r": 15,
         "layer": "object2",
-        "ox": -6,
-        "oy": -22,
         "sortDepth": 2.5
       },
       {
         "id": "tile_research_lab_specimen_cabinet",
-        "c": 14,
-        "r": 14,
+        "c": 13,
+        "r": 15,
         "layer": "object2",
-        "ox": -38,
-        "oy": -20,
         "sortDepth": 2.75
       },
       {
         "id": "tile_research_lab_sample_storage",
         "c": 20,
-        "r": 14,
+        "r": 15,
         "layer": "object2",
-        "ox": 0,
-        "oy": -12,
         "sortDepth": 2.75
       },
       {
         "id": "tile_research_lab_crystal_containment_pod",
-        "c": 18,
-        "r": 13,
+        "c": 19,
+        "r": 14,
         "layer": "object2",
-        "ox": 32,
-        "oy": -12,
         "sortDepth": 3.75
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
         "c": 18,
-        "r": 15,
-        "layer": "object2",
-        "ox": 0,
-        "oy": 8
+        "r": 16,
+        "layer": "object2"
       },
       {
         "id": "tile_hq_office_chair_back",
@@ -20520,16 +20635,13 @@ const STORY_MAPS = [
         "c": 15,
         "r": 15,
         "layer": "object3",
-        "ox": -14,
-        "oy": -24
+        "oy": 11.333333
       },
       {
         "id": "tile_mv9qoz8k",
         "c": 14,
-        "r": 13,
-        "layer": "object3",
-        "ox": 4,
-        "oy": 0
+        "r": 14,
+        "layer": "object3"
       },
       {
         "id": "tile_eoc_floor_sign_2f",
@@ -20565,11 +20677,9 @@ const STORY_MAPS = [
       {
         "id": "tile_mvma4ws7",
         "c": 24,
-        "r": 14,
+        "r": 16,
         "layer": "object4",
-        "sortDepth": 1,
-        "oy": 22,
-        "ox": 2
+        "sortDepth": 1
       },
       {
         "id": "tile_new_bg_floor",
@@ -20582,10 +20692,8 @@ const STORY_MAPS = [
       {
         "id": "tile_hq_server_rack",
         "c": 39,
-        "r": 14,
+        "r": 15,
         "layer": "object3",
-        "oy": 16,
-        "ox": 2,
         "sortDepth": 2
       },
       {
@@ -20596,46 +20704,6 @@ const STORY_MAPS = [
         "oy": 10
       },
       {
-        "id": "tile_halloween_bunting",
-        "c": 30,
-        "r": 13,
-        "layer": "overlay",
-        "ox": -60,
-        "oy": -8
-      },
-      {
-        "id": "tile_halloween_bunting",
-        "c": 33,
-        "r": 13,
-        "layer": "overlay",
-        "ox": -22,
-        "oy": -8
-      },
-      {
-        "id": "tile_halloween_pumpkin_pile",
-        "c": 29,
-        "r": 16,
-        "layer": "overlay",
-        "ox": -8,
-        "oy": -32
-      },
-      {
-        "id": "tile_halloween_pumpkin_large",
-        "c": 34,
-        "r": 15,
-        "layer": "overlay",
-        "ox": 10,
-        "oy": 8
-      },
-      {
-        "id": "tile_halloween_pumpkin_large",
-        "c": 23,
-        "r": 14,
-        "layer": "overlay",
-        "ox": -4,
-        "oy": -14
-      },
-      {
         "id": "tile_halloween_pumpkin_medium",
         "c": 31,
         "r": 18,
@@ -20644,77 +20712,10 @@ const STORY_MAPS = [
         "oy": -26
       },
       {
-        "id": "tile_halloween_spider_web",
-        "c": 36,
-        "r": 13,
-        "layer": "overlay",
-        "ox": 6,
-        "oy": -6
-      },
-      {
-        "id": "tile_halloween_spider_web",
-        "c": 23,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -8,
-        "oy": -6
-      },
-      {
-        "id": "tile_halloween_spider_web",
-        "c": 39,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -6,
-        "oy": -6
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 40,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 28,
-        "r": 14,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 25,
-        "r": 13,
-        "layer": "overlay",
-        "fx": true
-      },
-      {
-        "id": "tile_halloween_bat",
-        "c": 24,
-        "r": 14,
-        "layer": "overlay",
-        "fx": true,
-        "ox": 6,
-        "oy": -24
-      },
-      {
-        "id": "tile_halloween_pumpkin_pile",
-        "c": 35,
-        "r": 16,
-        "layer": "overlay",
-        "fx": true,
-        "ox": -2,
-        "oy": -10
-      },
-      {
         "id": "tile_prop_shelf_locker_unit_02",
         "c": 23,
-        "r": 13,
-        "layer": "object3",
-        "ox": -8,
-        "oy": 22
+        "r": 15,
+        "layer": "object3"
       },
       {
         "id": "tile_eoc_locker",
@@ -20731,6 +20732,18 @@ const STORY_MAPS = [
         "layer": "object",
         "ox": 0,
         "oy": 16
+      },
+      {
+        "id": "tile_new_bg_wall",
+        "c": 34,
+        "r": 13,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_hq_floor",
+        "c": 38,
+        "r": 16,
+        "layer": "floor"
       }
     ],
     "solid": [
@@ -20885,7 +20898,6 @@ const STORY_MAPS = [
       "19,15",
       "20,15",
       "21,15",
-      "22,16",
       "22,17",
       "22,18",
       "22,19",
@@ -20903,16 +20915,6 @@ const STORY_MAPS = [
       "23,18",
       "23,19",
       "23,20",
-      "43,15",
-      "44,15",
-      "45,15",
-      "46,15",
-      "47,15",
-      "48,15",
-      "49,15",
-      "50,15",
-      "51,15",
-      "52,15",
       "53,15",
       "54,15",
       "55,15",
@@ -20924,19 +20926,6 @@ const STORY_MAPS = [
       "61,15",
       "62,15",
       "63,15",
-      "22,14",
-      "23,14",
-      "25,14",
-      "30,14",
-      "31,14",
-      "32,14",
-      "33,14",
-      "34,14",
-      "35,14",
-      "36,14",
-      "39,14",
-      "41,14",
-      "42,14",
       "39,19",
       "1,13",
       "1,14",
@@ -20960,31 +20949,15 @@ const STORY_MAPS = [
       "21,18",
       "21,20",
       "20,20",
-      "19,14",
-      "20,14",
-      "21,14",
-      "18,14",
-      "15,14",
-      "13,14",
-      "14,14",
-      "12,14",
-      "11,14",
-      "10,14",
-      "9,14",
-      "8,14",
       "8,8",
       "55,8",
       "24,15",
       "25,15",
       "28,15",
       "40,15",
-      "40,14",
       "29,15",
       "30,15",
       "31,15",
-      "29,14",
-      "28,14",
-      "24,14",
       "36,9",
       "32,7",
       "33,7",
@@ -20999,7 +20972,39 @@ const STORY_MAPS = [
       "34,5",
       "39,15",
       "27,9",
-      "23,16"
+      "15,16",
+      "14,16",
+      "13,16",
+      "18,16",
+      "19,16",
+      "20,16",
+      "21,16",
+      "25,16",
+      "24,16",
+      "28,16",
+      "29,16",
+      "30,16",
+      "31,16",
+      "32,16",
+      "33,16",
+      "34,16",
+      "35,16",
+      "36,16",
+      "23,16",
+      "22,16",
+      "39,16",
+      "40,16",
+      "41,16",
+      "43,16",
+      "44,16",
+      "45,16",
+      "46,16",
+      "47,16",
+      "48,16",
+      "49,16",
+      "50,16",
+      "51,16",
+      "42,4"
     ],
     "breakable": [],
     "camp": [
@@ -21144,10 +21149,6 @@ const STORY_MAPS = [
       "23,17": [
         0,
         33
-      ],
-      "23,16": [
-        0,
-        -27
       ]
     },
     "coreSpots": [],
@@ -22412,7 +22413,8 @@ const STORY_MAPS = [
     "portals": [],
     "cols": 34,
     "rows": 24,
-    "spawnZone": []
+    "spawnZone": [],
+    "hiddenPickups": []
   }
 ];
 // 刪掉的地圖：別人的編輯器打開時，瀏覽器暫存裡的這幾張也會跟著刪掉，不會再被補回來
