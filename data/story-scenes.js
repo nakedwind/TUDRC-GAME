@@ -931,6 +931,7 @@ const STORY_SCENES = {
         "text": "溫特和諾亞一起往樓梯走去。諾亞在講八卦，溫特沒在聽。",
         "wait": 1.6,
         "camera": "樓梯口",
+        "place": { "noahSit": [11.5, 22.9] },
         "move": { "winterSit": [21.8, 21.8], "noahSit": [20, 22] },
         "face": { "winterSit": "right", "noahSit": "right" },
         "speed": { "winterSit": 45, "noahSit": 45 }
