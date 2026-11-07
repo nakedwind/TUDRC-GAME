@@ -7,11 +7,10 @@ const WORLD_PICKUPS = {
   almond: { item: 'almond-water', name: '杏仁水' },
   adrenaline: { item: 'adrenaline', name: '腎上腺素' },
   doorKey: { item: 'backroom-door-key', name: '後室門鑰匙' },
-  penRed: { item: 'graffiti-red', name: '塗鴉筆（紅）' },
-  penBlue: { item: 'graffiti-blue', name: '塗鴉筆（藍）' },
-  penBlack: { item: 'graffiti-black', name: '塗鴉筆（黑）' },
+  pen: { item: 'graffiti', name: '塗鴉筆' },
 };
-const GRAFFITI_PICKUP_TILES = { tile_interactive_pickup_graffiti_red: 'penRed', tile_interactive_pickup_graffiti_blue: 'penBlue', tile_interactive_pickup_graffiti_black: 'penBlack' };
+// 地上的塗鴉筆：現在只有一種素材；以前紅／藍／黑三種素材的 id 也認得（撿到的都是同一支筆）
+const GRAFFITI_PICKUP_TILES = { tile_interactive_pickup_graffiti: 'pen', tile_interactive_pickup_graffiti_red: 'pen', tile_interactive_pickup_graffiti_blue: 'pen', tile_interactive_pickup_graffiti_black: 'pen' };
 const isWorldPickup = kind => !!WORLD_PICKUPS[kind];
 const unlockedStorageLockers = new Set(), collectedStorageKeys = new Set();
 function storagePropKind(id){

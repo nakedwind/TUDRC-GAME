@@ -31,8 +31,15 @@ let quickSlots = (() => {
         return out;
       }
       if (s.slots && typeof s.slots === 'object') {
-        (Array.isArray(s.seen) ? s.seen : []).forEach(id => quickSeen.add(id));
-        return Object.fromEntries(QUICK_ALL_KEYS.map(k => [k, s.slots[k] || null]));
+        // 舊的紅／藍／黑塗鴉筆換成同一支（同一種道具只能在一格，重複的格子清空）
+        const OLD_PENS = { 'graffiti-red': 'graffiti', 'graffiti-blue': 'graffiti', 'graffiti-black': 'graffiti' }, used = new Set();
+        (Array.isArray(s.seen) ? s.seen : []).forEach(id => quickSeen.add(OLD_PENS[id] || id));
+        return Object.fromEntries(QUICK_ALL_KEYS.map(k => {
+          const id = OLD_PENS[s.slots[k]] || s.slots[k] || null;
+          if (id && used.has(id)) return [k, null];
+          if (id) used.add(id);
+          return [k, id];
+        }));
       }
     }
   } catch (_) {}

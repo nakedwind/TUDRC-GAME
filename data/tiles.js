@@ -4160,24 +4160,8 @@ const SHARED_TILES = [
     "h": 5
   },
   {
-    "id": "tile_interactive_pickup_graffiti_red",
-    "name": "拾取亮點（塗鴉筆・紅）",
-    "role": "floor",
-    "file": "images/塗鴉筆/pen-red.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_interactive_pickup_graffiti_blue",
-    "name": "拾取亮點（塗鴉筆・藍）",
-    "role": "floor",
-    "file": "images/塗鴉筆/pen-blue.png",
-    "w": 1,
-    "h": 1
-  },
-  {
-    "id": "tile_interactive_pickup_graffiti_black",
-    "name": "拾取亮點（塗鴉筆・黑）",
+    "id": "tile_interactive_pickup_graffiti",
+    "name": "拾取亮點（塗鴉筆）",
     "role": "floor",
     "file": "images/塗鴉筆/pen-black.png",
     "w": 1,

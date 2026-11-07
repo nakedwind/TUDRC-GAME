@@ -2293,6 +2293,13 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .graffiti-pad-wrap { display: grid; place-items: center; padding: 14px 16px; }
 #graffitiPalette canvas.graffiti-pad { display: block; width: min(288px, 100%); aspect-ratio: 1; border-radius: 6px; image-rendering: pixelated; cursor: crosshair; touch-action: none; box-shadow: 0 0 0 1px rgba(255,212,121,.3); }
 .graffiti-save { border-color: #d8ae5d; background: #5a4520; color: #fff3d6; }
+/* 塗鴉筆：選顏色的那一排 */
+.graffiti-colors { display: flex; align-items: center; gap: 8px; padding: 12px 16px 0; color: #d8ae5d; font-size: 12px; font-weight: 700; letter-spacing: .08em; }
+.graffiti-colors > span { margin-right: 4px; }
+.graffiti-colors button { display: flex; align-items: center; gap: 6px; padding: 5px 12px 5px 8px; border: 1px solid #59616c; border-radius: 999px; background: #202730; color: #dfe7ee; cursor: pointer; font: 700 12px "Microsoft JhengHei", sans-serif; }
+.graffiti-colors button i { width: 14px; height: 14px; border-radius: 50%; box-shadow: 0 0 0 1px rgba(255,255,255,.35); }
+.graffiti-colors button:hover, .graffiti-colors button:focus-visible { border-color: #ffd479; outline: none; }
+.graffiti-colors button.active { border-color: #ffd479; background: #5a4520; color: #fff3d6; box-shadow: 0 0 0 2px rgba(255,212,121,.35); }
 
 /* 像素背包圖示 */
 .backpack-button-image{display:inline-block;width:20px;height:24px;object-fit:contain;image-rendering:pixelated;vertical-align:middle;flex:none;}

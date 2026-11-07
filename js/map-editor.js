@@ -114,7 +114,9 @@ const STORAGE_BACKROOM_CORE_PILLARS = 'tudrc_asset_backroom_core_pillars_v1'; //
 const BACKROOM_CORE_PILLAR_IDS = new Set(['tile_bg_anomalous_core', 'tile_bg_backroom_pillar3', 'tile_bg_pillar', 'tile_bg_pillar02', 'tile_bg_pillar03', 'tile_bg_pillar04']);
 const BACKROOM_DAMAGE_EXTRA_IDS = new Set(["tile_bg_backroom_floor03", "tile_bg_backroom_floor04", "tile_bg_backroom_wall02", "tile_bg_backroom_wall02_dmg_light", "tile_bg_backroom_wall02_dmg_medium", "tile_bg_backroom_wall02_dmg_heavy", "tile_bg_electric_light", "tile_bg_road_signs", "tile_bg_word_y28", "tile_dmg_pillar_damaged", "tile_dmg_floor_crack_cross", "tile_dmg_floor_crack_fork", "tile_dmg_floor_crack_stained", "tile_dmg_floor_stain_seep", "tile_dmg_floor_stain_smudge", "tile_dmg_rubble_brick_chunks", "tile_dmg_rubble_chips_02", "tile_dmg_rubble_scatter_02", "tile_dmg_rubble_slab_fragments", "tile_dmg_rubble_wall_chunks", "tile_dmg_rubble_rebar_chunk"]);
 const STORAGE_OIL_TANK = 'tudrc_asset_pack_oil_tank_v2';   // 新增素材：油箱
-const STORAGE_GRAFFITI_PENS = 'tudrc_asset_pack_graffiti_pens_v1';   // 新增素材：地上撿的塗鴉筆（js/graffiti.js）
+const STORAGE_GRAFFITI_PENS = 'tudrc_asset_pack_graffiti_pens_v2';   // 新增素材：地上撿的塗鴉筆（js/graffiti.js）；v2＝紅藍黑三個合成一個
+// 塗鴉筆以前分紅、藍、黑三種拾取素材，現在合成一個：舊的 id → 新的 id（素材清單、地圖暫存都會換掉）
+const OLD_GRAFFITI_PEN_TILES = { tile_interactive_pickup_graffiti_red: 'tile_interactive_pickup_graffiti', tile_interactive_pickup_graffiti_blue: 'tile_interactive_pickup_graffiti', tile_interactive_pickup_graffiti_black: 'tile_interactive_pickup_graffiti' };
 const STORAGE_RESTAURANT_CHAIR_FIX = 'tudrc_fix_restaurant_folding_chairs_v1'; // 餐廳「飲水機」其實是折疊椅：改檔名與名稱
 const STORAGE_TILE_SIZE_FIX = 'tudrc_fix_tile_sizes_v1';         // 修正登記尺寸與圖片不符的素材
 const STORAGE_EOC_POSTER = 'tudrc_asset_eoc_distance_poster_v1'; // 後補的應變中心素材：安全距離海報
@@ -398,7 +400,9 @@ function loadTiles() {
   const backroomWallHalfHoleAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_wall02_half' || t.id === 'tile_bg_backroom_wall02_hole', STORAGE_BACKROOM_WALL_HALF_HOLE);
   const backroomDoorWoodAdded = mergeDefaultAssetPack(t => t.id === 'tile_bg_backroom_door_wood', STORAGE_BACKROOM_DOOR_WOOD);
   const oilTankAdded = mergeDefaultAssetPack(t => t.id === 'tile_new_decor_oil_tank', STORAGE_OIL_TANK);
-  const graffitiPensAdded = mergeDefaultAssetPack(t => String(t.id).startsWith('tile_interactive_pickup_graffiti_'), STORAGE_GRAFFITI_PENS);
+  const oldPenCount = customTiles.length;
+  customTiles = customTiles.filter(t => !OLD_GRAFFITI_PEN_TILES[t.id]);   // 拿掉舊的紅／藍／黑塗鴉筆素材
+  const graffitiPensAdded = mergeDefaultAssetPack(t => t.id === 'tile_interactive_pickup_graffiti', STORAGE_GRAFFITI_PENS) || customTiles.length !== oldPenCount;
   const trainingRoomAdded = mergeDefaultAssetPack('tile_training_', 'tudrc_asset_pack_training_room_v2');   // 地下訓練室素材包
   const floorSignsAdded = mergeDefaultAssetPack('tile_eoc_floor_sign_', 'tudrc_asset_eoc_floor_signs_v1', true);   // 應變中心：樓層標示 1F～4F、B1～B4
   const ballBedAdded = mergeDefaultAssetPack(t => t.id === 'tile_eoc_ball_bed', 'tudrc_asset_eoc_ball_bed_v1', true);   // 應變中心：球球的床（球球會去睡，js/ball-poses.js）
@@ -480,6 +484,8 @@ function fixMap(m) {
   if (!m.layers) { m.layers = {}; if (m.tiles) m.layers.floor = m.tiles; }
   if (m.layers.deco) { m.layers.object = Object.assign({}, m.layers.object || {}, m.layers.deco); delete m.layers.deco; }  // 舊「裝飾層」併入「物件」
   layersOf(m).forEach(l => { m.layers[l.id] = m.layers[l.id] || {}; });
+  for (const l in m.layers) for (const k in m.layers[l]) if (OLD_GRAFFITI_PEN_TILES[m.layers[l][k]]) m.layers[l][k] = OLD_GRAFFITI_PEN_TILES[m.layers[l][k]];   // 舊的紅／藍／黑塗鴉筆 → 同一支
+  (m.stamps || []).forEach(s => { if (OLD_GRAFFITI_PEN_TILES[s.id]) s.id = OLD_GRAFFITI_PEN_TILES[s.id]; });
   delete m.tiles;
   m.stamps = m.stamps || [];
   m.stamps.forEach(s => { if (!s.layer) s.layer = 'top'; });   // 舊大圖預設在最上層
