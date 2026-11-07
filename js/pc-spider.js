@@ -4,7 +4,7 @@
    ・規則：兩副牌（104 張）發成 10 排，前 4 排 6 張、後 6 排 5 張，每排只有最下面那張翻開；剩下 50 張放右下角
    ・任何牌都可以放在大 1 的牌上（花色不限）；但要一起搬好幾張，那幾張必須「同花色、由大到小連著」
    ・同一排湊齊同花色 K→A 就自動收走（左下角）；收滿 8 組＝破關
-   ・點右下角的牌堆＝每排各發 1 張（每一排都要有牌才能發）；沒有牌可以移動時會自動發
+   ・點右下角的牌堆＝每排各發 1 張（每一排都要有牌才能發）
    ・難度：單色（全部♠）、雙色（♠♥）、四色
    ・操作：拖曳，或點一下選牌再點目的地；點兩下＝自動搬到最好的位置；「提示」會把可以走的一步亮出來
    ・分數跟 Windows 一樣：開局 500，每走一步 −1，收走一組 +100
@@ -44,7 +44,7 @@ function initPcSpider(body) {
 }
 function newPcSpider(suits, no) {
   const g = pcd.sp;
-  clearInterval(g.timer); clearTimeout(g.hintTimer); clearTimeout(g.autoDealTimer);
+  clearInterval(g.timer); clearTimeout(g.hintTimer);
   no = no || 1 + Math.floor(Math.random() * 99999);
   const rnd = pcsRandom(no * 7 + suits), deck = Array.from({ length: 104 }, (_, i) => i);
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
@@ -94,7 +94,7 @@ function pcsMove(g, from, i, to) {
   pcsAfter(g);
   return true;
 }
-function pcsDeal(g, note) {
+function pcsDeal(g) {
   if (!g.stock.length) { sfx('error'); return; }
   if (g.cols.some(c => !c.length)) { g.note = '每一排都要有牌才能發牌：先把空的那排放一張牌'; sfx('error'); renderPcSpider(); return; }
   pcsSave(g);
@@ -102,16 +102,7 @@ function pcsDeal(g, note) {
   g.cols.forEach(col => col.push(g.stock.pop()));
   g.score--; g.moves++;
   pcsAfter(g);
-  if (note && !g.lost && !g.won) g.note = note;
   renderPcSpider();
-}
-// 沒有牌可以移動、右下角還有牌：等一下（讓剛走的那步先滑完）自動發牌
-// 有空的那排就不發（規定每一排都要有牌才能發，而且可以先把牌搬過去）
-const pcsShouldAutoDeal = g => !g.won && !g.lost && g.stock.length > 0 && g.cols.every(c => c.length) && !pcsMoves(g).length;
-function pcsQueueAutoDeal(g) {
-  clearTimeout(g.autoDealTimer);
-  if (!pcsShouldAutoDeal(g)) return;
-  g.autoDealTimer = setTimeout(() => { if (pcd.sp === g && pcsShouldAutoDeal(g)) pcsDeal(g, '沒有牌可以移動了，自動發了一次牌'); }, 450);
 }
 function pcsAfter(g) {   // 走完一步：湊齊 K→A 的收走、最下面蓋著的牌翻開、計時、破關
   g.sel = null; g.hint = null; g.note = '';
@@ -123,9 +114,8 @@ function pcsAfter(g) {   // 走完一步：湊齊 K→A 的收走、最下面蓋
   });
   if (!g.timer && !g.won) { minigameRound('spider'); g.timer = setInterval(() => pcsTick(g), 1000); }   // 第一步：算一局、開始計時
   if (g.done.length === 8) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('achievement'); }
-  else if (!pcsHasMove(g)) { g.lost = true; clearInterval(g.timer); g.timer = 0; sfx('error'); }   // 沒牌可走、也沒牌可發：這局輸了（跟新接龍一樣跳出提示）
+  else if (pcsStuck(g)) { g.lost = true; clearInterval(g.timer); g.timer = 0; sfx('error'); }   // 真的一步都不能走：這局輸了（跟新接龍一樣跳出提示）
   else sfx(got ? 'win' : 'blip');
-  pcsQueueAutoDeal(g);
 }
 function pcsTick(g) {
   const w = pcd.wins.spider;
@@ -163,7 +153,15 @@ function pcsMoves(g) {   // 列出所有有意義的一步（提示、卡死判�
   });
   return out.sort((x, y) => y.score - x.score);
 }
-const pcsHasMove = g => !!g.stock.length || pcsMoves(g).length > 0 || (g.cols.some(c => !c.length) && g.cols.some((c, k) => c.length > 1 || (c.length && g.down[k])));
+// 判輸用：右下角的牌堆發完了，而且「任何」合法的移動都沒有（就算是搬過去沒什麼用的也算還能動）才算輸。
+// 寧可少判，也不能在還能動的時候說輸了；有空的那排就一定還能動（任何牌都能放進空排）。
+function pcsStuck(g) {
+  if (g.stock.length) return false;
+  return !g.cols.some((col, a) => {
+    for (let i = pcsRunStart(g, a); i < col.length; i++) if (g.cols.some((_, b) => b !== a && pcsFits(g, col[i], b))) return true;
+    return false;
+  });
+}
 function pcsHint(g) {
   if (g.won || g.lost) return;
   clearTimeout(g.hintTimer);
@@ -180,7 +178,6 @@ function pcsHint(g) {
 function pcsUndo(g) {
   if (!g.hist.length || g.won) { sfx('error'); return; }
   const wasLost = g.lost;
-  clearTimeout(g.autoDealTimer);   // 按復原：不自動發牌（不然退回去又馬上發，等於退不回來）
   Object.assign(g, JSON.parse(g.hist.pop()), { sel: null, hint: null, note: '', lost: false });
   if (wasLost) g.timer = setInterval(() => pcsTick(g), 1000);   // 從輸掉的地方退回來：同一局繼續，時間接著算
   sfx('switch');
@@ -305,7 +302,7 @@ function renderPcSpider(noAnim) {
   table.innerHTML = '<div class="pcd-fc-cols">' + cols + '</div><div class="pcd-sp-foot">' +
     '<div class="pcd-sp-done" style="width:calc(var(--fc-w) + ' + 7 * off + 'px)">' + (done || '<span class="pcd-sp-empty">收齊 K→A 會放這裡</span>') + '</div>' +
     '<div class="pcd-sp-stock" data-slot="s" title="點一下：每排各發 1 張" style="width:calc(var(--fc-w) + ' + 4 * off + 'px)">' + (stock || '<span class="pcd-sp-empty">發完了</span>') + '</div></div>' +
-    (g.lost ? '<div class="pcd-fc-over"><div class="pcd-fc-overbox"><b>這局輸了</b><p>已經沒有牌可以走了。</p><button type="button" data-sp="undo">↶ 復原</button><button type="button" data-sp="retry">重玩這局</button><button type="button" data-sp="new">新牌局</button></div></div>' : '');   // 「這局輸了」提示：跟新接龍用同一個樣子
+    (g.lost ? '<div class="pcd-fc-over"><div class="pcd-fc-overbox"><b>這局輸了</b><p>已經沒有牌可以移動了。</p><button type="button" data-sp="undo">↶ 復原</button><button type="button" data-sp="retry">重玩這局</button><button type="button" data-sp="new">新牌局</button></div></div>' : '');   // 「這局輸了」提示：跟新接龍用同一個樣子
   table.querySelectorAll('.pcd-fc-card[data-card]').forEach(el => {   // 牌從舊位置滑到新位置；剛發的牌從右下角的牌堆飛出來
     const dealt = g.dealt ? g.dealt.indexOf(+el.dataset.card) : -1;
     const o = old[el.dataset.card] || (dealt >= 0 && stockRect); if (!o) return;
@@ -317,9 +314,8 @@ function renderPcSpider(noAnim) {
   g.dealt = null;
   renderPcsInfo(g);
   g.body.querySelector('.pcd-fc-msg').textContent = g.won ? '🎉 破關了！分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '。按「新牌局」再玩一次'
-    : g.lost ? '這局輸了：沒有牌可以走了。分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '、' + g.moves + ' 步'
-    : g.note || (!pcsHasMove(g) ? '沒有牌可以走了…按「復原」或「重玩這局」'
-    : '同花色、由大到小連著的牌才能一起搬；湊齊 K→A 自動收走。點右下角的牌堆發牌（還有 ' + piles + ' 次）');
+    : g.lost ? '這局輸了：沒有牌可以移動了。分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '、' + g.moves + ' 步'
+    : g.note || ('同花色、由大到小連著的牌才能一起搬；湊齊 K→A 自動收走。點右下角的牌堆發牌（還有 ' + piles + ' 次）');
   g.body.querySelector('[data-sp="undo"]').disabled = !g.hist.length || g.won;
 }
 function renderPcsInfo(g) {
