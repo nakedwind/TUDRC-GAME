@@ -920,7 +920,7 @@ const STORY_SCENES = {
       { "speaker": "溫特", "text": "第三個。", "wait": 0.3 },
       { "speaker": "諾亞", "text": "塔納說，再這樣下去要跟你收沙包錢喔。", "wait": 0.3 },
       { "speaker": "溫特", "text": "大不了從薪水裡面扣。", "wait": 0.3, "screen": "black", "screenFade": 1.6 },
-      { "speaker": "", "text": "諾亞笑了笑，兩人坐到訓練室的長椅上休息。", "wait": 1.2, "camera": "長椅", "hide": { "winter": true, "noah": true } },
+      { "speaker": "", "text": "諾亞笑了笑，兩人坐到訓練室的長椅上休息。", "wait": 1.2, "camera": "長椅", "hide": { "winter": true, "noah": true }, "bgm": "music/基地音樂/relaxing-piano-music.mp3" },
       { "speaker": "諾亞", "text": "跟你說個好消息。這禮拜的騷擾投訴單，少了一半。", "wait": 1.4, "screen": "clear", "screenFade": 1.3 },
       { "speaker": "", "text": "溫特擦汗的手停了一下。", "wait": 0.3 },
       { "speaker": "溫特", "text": "……還不夠。", "wait": 0.3 },
@@ -1019,6 +1019,7 @@ const STORY_SCENES = {
       { "speaker": "諾亞", "text": "唉……這就是哨兵會喜歡纏著你的理由吧？", "wait": 0.3 },
       { "speaker": "溫特", "text": "……嘖……真煩人。", "wait": 0.4 }
     ],
-    "opening": { "black": 1, "fade": 1.5 }
+    "opening": { "black": 1, "fade": 1.5 },
+    "bgmVolume": 0.3
   }
 };
