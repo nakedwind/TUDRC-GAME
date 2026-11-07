@@ -65,7 +65,13 @@ const StoryScene = (() => {
     }
     return out;
   }
-  function walkTo(a, p) { a.path = findRoute(a.x, a.y, p[0] * CELL, p[1] * CELL); a.target = a.path.shift(); }
+  // 走到 p；via＝路上要先依序經過的點（[[x, y], …]，劇情編輯器的「經過點」），每一段都自己找路繞開牆
+  function walkTo(a, p, via) {
+    a.path = [];
+    let x = a.x, y = a.y;
+    for (const q of [...(Array.isArray(via) ? via : []), p]) { const seg = findRoute(x, y, q[0] * CELL, q[1] * CELL); a.path.push(...seg); [x, y] = seg[seg.length - 1]; }
+    a.target = a.path.shift();
+  }
   // 路人哨兵的持槍圖、受傷躺床圖（檔名跟主角的 _withgun 不同，另外載入）
   const MOB_B_EXTRA = { gunLeft: 'mobB_0003_Leftside_gun.png', gunRight: 'mobB_0006_right-side_gun.png' };
   const spriteCache = {};
@@ -576,8 +582,8 @@ const StoryScene = (() => {
     for (const [id, v] of Object.entries(beat.carry || {})) { const a = actor(id); if (a) a.carry = v || null; }
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
-    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p); }
-    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p); }   // 走到那裡後淡出消失（走進門裡）
+    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p, beat.via?.[id]); }
+    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
     for (const [id, d] of Object.entries(beat.face || {})) {   // 方向，或看向某個地點／某個人
       const a = actor(id); if (!a) continue;
       const point = state.cfg.points?.[d], other = !point && actor(d);

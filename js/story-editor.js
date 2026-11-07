@@ -268,7 +268,19 @@ function drawMap() {
   // 離場（走過去後淡出，橘色）、瞬移（黑幕轉場時直接換位置，青色、不畫箭頭）
   if (beat) for (const [kind, color, text] of [['move', '#c39bff', '走到這'], ['exit', '#ffab5e', '走到這後消失'], ['place', '#5fe0d0', '瞬移到這']]) for (const [id, q] of Object.entries(beat[kind] || {})) {
     const from = actorPosBefore(beatSel, id), key = kind + ':' + beatSel + ':' + id;
-    if (from && kind !== 'place') arrow(from[0] * C, from[1] * C, q[0] * C, q[1] * C, color, true);
+    // 經過點（只有走位、離場有）：起點 → 經過點 1 → 經過點 2 → … → 終點，一段一段畫箭頭
+    const via = kind !== 'place' && Array.isArray(beat.via?.[id]) ? beat.via[id] : [];
+    let last = from;
+    via.forEach((v, k) => {
+      if (last) arrow(last[0] * C, last[1] * C, v[0] * C, v[1] * C, color, true);
+      const vk = 'via:' + beatSel + ':' + id + ':' + k;
+      ctx.fillStyle = '#10151c'; ctx.strokeStyle = selKey() === vk ? '#ffd479' : color; ctx.lineWidth = 2.5;
+      ctx.beginPath(); ctx.arc(v[0] * C, v[1] * C, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+      ctx.font = 'bold 11px system-ui'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = color; ctx.fillText(String(k + 1), v[0] * C, v[1] * C + .5); ctx.textBaseline = 'alphabetic';
+      handle(vk, v, 12, p => { via[k] = p; });
+      last = v;
+    });
+    if (last && kind !== 'place') arrow(last[0] * C, last[1] * C, q[0] * C, q[1] * C, color, true);
     ctx.fillStyle = color; ctx.strokeStyle = selKey() === key ? '#ffd479' : '#000'; ctx.lineWidth = 2;
     ctx.beginPath(); ctx.arc(q[0] * C, q[1] * C, 8, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
     label('第' + (beatSel + 1) + '頁：' + actorName(id) + text, q[0] * C, q[1] * C - 12, color);
@@ -324,7 +336,7 @@ window.addEventListener('keydown', e => { if (e.key === 'Escape' && pick) setPic
 function select(key) {
   sel = key ? { key } : null;
   const [kind, a] = (key || '').split(':');
-  if (kind === 'move' || kind === 'exit' || kind === 'place') { beatSel = Number(a); showTab('beats'); }
+  if (kind === 'move' || kind === 'exit' || kind === 'place' || kind === 'via') { beatSel = Number(a); showTab('beats'); }
   else if (key) showTab('obj');
   renderPanels(); drawSoon();
 }
@@ -598,7 +610,7 @@ function renderObj() {
       kind === 'camera' && field('縮放（越大拍得越近；空白＝用劇情的 ' + (s.zoom || '預設') + '）', h('input', { type: 'number', step: .05, min: .5, value: map[name][2] ?? '', placeholder: String(s.zoom || ''),
         onchange: e => { const v = Number(e.target.value); map[name] = v > 0 ? [map[name][0], map[name][1], v] : map[name].slice(0, 2); commit(false); } })),
       del(kind === 'camera' ? '這個鏡頭' : '這個地點', () => delete map[name]));
-  } else if (kind === 'move' || kind === 'exit' || kind === 'place') {
+  } else if (kind === 'move' || kind === 'exit' || kind === 'place' || kind === 'via') {
     showTab('beats');
   }
 }
@@ -616,7 +628,7 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
@@ -667,19 +679,36 @@ function beatBody(s, b, i) {
   const one = (title, keys, ...kids) => acts.append(h('div', { class: 'act' }, h('b', {}, title), ...kids, xBtn(() => keys.forEach(k => delete b[k]))));
   // 指名角色／怪物的演出：每列一個人（或一隻），左邊的選單可以換成別人（那個人在這頁還沒有同一種演出才行）
   const swap = (map, id, v, name) => { if (map[v] !== undefined) { status(name + '這頁已經有了。', true); return false; } const n = {}; for (const [k, x] of Object.entries(map)) n[k === id ? v : k] = x; for (const k of Object.keys(map)) delete map[k]; Object.assign(map, n); commit(); return true; };
-  const whoSelect = (map, id) => h('select', { onchange: e => { if (!swap(map, id, e.target.value, actorName(e.target.value))) e.target.value = id; } },
+  const whoSelect = (map, id) => h('select', { onchange: e => { const v = e.target.value; const hasVia = (map === b.move || map === b.exit) && b.via?.[id];
+      if (!swap(map, id, v, actorName(v))) { e.target.value = id; return; }
+      if (hasVia && !b.via[v]) { b.via[v] = b.via[id]; delete b.via[id]; commit(); } } },
     s.actors.map(a => h('option', { value: a.id, ...(a.id === id ? { selected: true } : {}) }, a.name || a.id)));
   const monSelect = (map, id) => h('select', { onchange: e => { if (!swap(map, id, e.target.value, e.target.value)) e.target.value = id; } },
     s.monsters.map(m => h('option', { value: m.id, ...(m.id === id ? { selected: true } : {}) }, m.id)));
   const many = (key, title, make, sel = whoSelect) => { for (const id of Object.keys(b[key] || {})) acts.append(h('div', { class: 'act' }, h('b', {}, title), sel(b[key], id), make(id),
-    xBtn(() => { delete b[key][id]; if (!Object.keys(b[key]).length) delete b[key]; }))); };
+    xBtn(() => { delete b[key][id]; if (!Object.keys(b[key]).length) delete b[key];
+      if ((key === 'move' || key === 'exit') && b.via?.[id] && !b.move?.[id] && !b.exit?.[id]) { delete b.via[id]; if (!Object.keys(b.via).length) delete b.via; } }))); };
+  // 走位／離場的經過點：角色會先依序走過這些點，最後才到終點（不是只能兩點一線）
+  const viaRows = (id, kind) => {
+    const list = b.via?.[id] || [], out = [];
+    list.forEach((v, k) => out.push(h('span', { class: 'row', style: 'flex-basis:100%;padding-left:62px;order:1' }, h('small', { style: 'color:#c39bff;width:52px' }, '經過 ' + (k + 1)),
+      xy(list, k, actorName(id) + '在第 ' + (i + 1) + ' 頁經過的第 ' + (k + 1) + ' 個點'),
+      h('button', { type: 'button', class: 'small', disabled: k === 0, title: '往前移', onclick: () => { [list[k - 1], list[k]] = [list[k], list[k - 1]]; commit(); } }, '↑'),
+      h('button', { type: 'button', class: 'small danger', title: '拿掉這個經過點', onclick: () => { list.splice(k, 1); if (!list.length) { delete b.via[id]; if (!Object.keys(b.via).length) delete b.via; } commit(); } }, '×'))));
+    out.push(h('span', { class: 'row', style: 'flex-basis:100%;padding-left:62px;order:1' },
+      h('button', { type: 'button', class: 'small', title: '在終點前面多加一個要先經過的點（到地圖上點）',
+        onclick: () => setPick({ label: actorName(id) + '在第 ' + (i + 1) + ' 頁' + (kind === 'exit' ? '離場' : '走位') + '途中經過的第 ' + (list.length + 1) + ' 個點',
+          fn: q => { ((b.via = b.via || {})[id] = b.via[id] || []).push(q); } }) }, '＋ 加經過點'),
+      h('small', {}, list.length ? '依序走過 ' + list.length + ' 個點後才到終點' : '加了就不是直直走過去，會照順序繞過去')));
+    return out;
+  };
   const mon = (key, title, make) => many(key, title, make, monSelect);
   const onOff = (map, id, on, off) => { const hd = { v: map[id] ? 'on' : 'off' }; return choose(hd, 'v', [['on', on], ['off', off]], { parse: v => { map[id] = v === 'on'; return v; } }); };
   const faceOptions = [...DIRS, ...Object.keys(s.points).map(k => [k, '看向📍' + k]), ...s.actors.map(a => [a.id, '看向' + (a.name || a.id)])];
   const labels = s.beats.map(x => x.label).filter(Boolean);
   const ROW = {
-    move: () => many('move', '走位', id => xy(b.move, id, actorName(id) + '在第 ' + (i + 1) + ' 頁走到哪')),
-    exit: () => many('exit', '離場', id => h('span', { class: 'row' }, xy(b.exit, id, actorName(id) + '在第 ' + (i + 1) + ' 頁走到哪後消失'), h('small', {}, '走到後淡出'))),
+    move: () => many('move', '走位', id => [h('small', {}, '終點'), xy(b.move, id, actorName(id) + '在第 ' + (i + 1) + ' 頁走到哪'), ...viaRows(id, 'move')]),
+    exit: () => many('exit', '離場', id => [h('span', { class: 'row' }, h('small', {}, '終點'), xy(b.exit, id, actorName(id) + '在第 ' + (i + 1) + ' 頁走到哪後消失'), h('small', {}, '走到後淡出')), ...viaRows(id, 'exit')]),
     place: () => many('place', '瞬移', id => h('span', { class: 'row' }, xy(b.place, id, actorName(id) + '在第 ' + (i + 1) + ' 頁瞬移到哪'), h('small', {}, '直接換位置（黑幕時用）'))),
     hide: () => many('hide', '消失', () => h('small', {}, '這頁一開始就不見')),
     speed: () => many('speed', '速度', id => h('span', { class: 'row' }, num(b.speed, id, { min: 1, step: 1 }), h('small', {}, '像素／秒（之後都用這個速度）'))),
@@ -842,6 +871,7 @@ function problems() {
     if (b.choices?.some(c => !c.text)) out.push([at + '有選項沒寫按鈕上的字', key]);
     for (const k of ACTOR_ACTS) for (const id of Object.keys(b[k] || {})) if (!ids.has(id)) out.push([at + '找不到角色「' + id + '」', key]);
     for (const k of ['move', 'exit', 'place']) for (const [id, q] of Object.entries(b[k] || {})) if (isSolid(m, q)) out.push([at + actorName(id) + '的目標位置在不可穿透的格子裡', key]);
+    for (const [id, list] of Object.entries(b.via || {})) (list || []).forEach((q, k) => { if (isSolid(m, q)) out.push([at + actorName(id) + '的第 ' + (k + 1) + ' 個經過點在不可穿透的格子裡', key]); });
     for (const k of MONSTER_ACTS) for (const id of Object.keys(b[k] || {})) if (!mons.has(id)) out.push([at + '找不到怪物「' + id + '」', key]);
     for (const [id, q] of Object.entries(b.monsterMove || {})) if (isSolid(m, q)) out.push([at + id + '的目標位置在不可穿透的格子裡', key]);
     for (const [id, who] of Object.entries(b.swallow || {})) if (!ids.has(who)) out.push([at + id + '要吞的角色「' + who + '」不存在', key]);
