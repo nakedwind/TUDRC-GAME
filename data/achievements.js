@@ -73,6 +73,7 @@ const ACHIEVEMENT_DATA = {
     { "id": "custom_10", "group": "互動．角色", "name": "累計送 穆恩 禮物 10 次", "stat": "giftsTo:muomn", "goal": 10, "desc": "累計送 穆恩 禮物 10 次", "note": "累計送 穆恩 禮物 10 次" },
     { "id": "tp_score_1000", "group": "小遊戲", "name": "神射手", "stat": "tpBestScore", "goal": 1000, "desc": "在射擊練習室的限時挑戰得到 1,000 分" },
     { "id": "tp_shots_130", "group": "小遊戲", "name": "子彈不用錢", "stat": "tpMostShots", "goal": 130, "desc": "在射擊練習室的限時挑戰發射 130 發子彈" },
+    { "id": "party_all_happy", "group": "小遊戲", "name": "連堤諾都說還可以", "stat": "partyAllHappy", "goal": 1, "desc": "在一場慶功宴裡，讓到場每個人的滿意程度都達到 75% 以上", "note": "75% 是 data/party.js 的 mood.high，改那邊的話這裡的說明也要跟著改。提早結束時沒吃到的人分數很低，不會達成" },
     { "id": "vend_items_100", "group": "互動．物品", "name": "在販賣機購買 100 件商品", "stat": "vendItems", "goal": 100, "desc": "在販賣機購買 100 件商品" },
     { "id": "vend_buys_50", "group": "互動．物品", "name": "在販賣機購買 50 次商品", "stat": "vendBuys", "goal": 50, "desc": "在販賣機購買 50 次商品" },
     { "id": "vend_spent_10000", "group": "互動．物品", "name": "在販賣機花費 10,000 元", "stat": "vendSpent", "goal": 10000, "desc": "在販賣機花費 10,000 元" },

@@ -3484,6 +3484,15 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-mmsg { color: #444; font-size: 12px; }
 
 /* 新接龍（js/pc-freecell.js）：牌的尺寸由 fitPcFreecell 依螢幕大小決定 */
+/* 遊戲紀錄 */
+.pcd-stats { min-width: 340px; color: #222; font-size: 14px; }
+.pcd-stats table { width: 100%; border-collapse: collapse; background: #fff; }
+.pcd-stats th, .pcd-stats td { padding: 7px 12px; border: 1px solid #c9c3b1; text-align: right; white-space: nowrap; }
+.pcd-stats th { background: #e2dcc9; font-weight: 700; }
+.pcd-stats th:first-child, .pcd-stats td:first-child { text-align: left; }
+.pcd-stats tfoot td { background: #f1ecdd; font-weight: 700; }
+.pcd-stats-ico { display: inline-block; width: 24px; }
+
 .pcd-fc { --fc-w: 76px; --fc-h: 103px; --fc-col: 400px; --fc-font: 15px; display: flex; flex-direction: column; gap: 6px; }
 .pcd-fc-bar { display: flex; align-items: center; gap: 4px; }
 .pcd-fc-bar button { padding: 3px 12px; border: 1px solid #8a8573; border-radius: 3px; background: linear-gradient(180deg, #fff, #e1dccb); font: inherit; cursor: pointer; }
@@ -3504,6 +3513,13 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-fc-corner { position: absolute; left: 3px; top: 0; font: bold var(--fc-font)/1.25 Tahoma, sans-serif; white-space: nowrap; letter-spacing: -.5px; }
 .pcd-fc-corner.flip { left: auto; right: 3px; top: auto; bottom: 0; transform: rotate(180deg); }
 .pcd-fc-suit { position: absolute; inset: 14% 0 0; display: grid; place-items: center; font-size: calc(var(--fc-w) * .6); line-height: 1; }
+/* 新接龍：輸了的提示（蓋在牌桌上） */
+.pcd-fc-over { position: absolute; inset: 0; z-index: 80; display: grid; place-items: center; border-radius: 3px; background: rgba(0,0,0,.55); }
+.pcd-fc-overbox { padding: 16px 20px; border: 2px solid #1c4fd6; border-radius: 6px; background: #efeadb; color: #222; text-align: center; font-size: 14px; }
+.pcd-fc-overbox b { font-size: 20px; color: #c62828; }
+.pcd-fc-overbox p { margin: 8px 0 12px; }
+.pcd-fc-overbox button { margin: 0 3px; padding: 4px 12px; border: 1px solid #8a8573; border-radius: 3px; background: linear-gradient(180deg, #fff, #e1dccb); font: inherit; cursor: pointer; }
+.pcd-fc-overbox button:hover { filter: brightness(1.05); border-color: #2f62d4; }
 .pcd-fc-ghost { position: absolute; z-index: 70; width: var(--fc-w); pointer-events: none; }
 .pcd-fc-ghost .pcd-fc-card { box-shadow: 2px 4px 8px rgba(0,0,0,.5); cursor: grabbing; }
 .pcd-fc-msg { color: #444; font-size: 12px; }

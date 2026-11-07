@@ -204,8 +204,21 @@ function switchMap(i) {                 // 切換到第 i 張並重新載入地�
   if (typeof AssetGate !== 'undefined' && AssetGate.arm) AssetGate.arm();   // 換地圖：這張地圖要的圖片下載好之前先擋住（js/asset-gate.js）
   if (i >= 0 && i < list.length) { MAP_INDEX = i; initMap(); }
 }
+// 活動限定圖層：基地編輯器裡，圖層名稱有「慶功宴時顯現」的只有慶功宴才出現，有「慶功宴時隱藏」的只有平常才出現。
+// 物件的外觀、擋路、椅子都跟著圖層走；不屬於這兩種的圖層不受影響。
+// （用手畫的「不可穿透格」不分圖層，慶功宴和平常共用同一份）
+function mapEventView(m) {
+  if (!m || !Array.isArray(m.layerOrder)) return m;
+  const hideMark = typeof partyOn === 'function' && partyOn() ? '慶功宴時隱藏' : '慶功宴時顯現';
+  const hide = new Set(m.layerOrder.filter(l => String(l.name || '').includes(hideMark)).map(l => l.id));
+  const stamps = (m.stamps || []).filter(s => !hide.has(s.layer || 'top'));
+  const hasCells = [...hide].some(id => Object.keys((m.layers || {})[id] || {}).length);
+  if (!hasCells && stamps.length === (m.stamps || []).length) return m;   // 這些圖層是空的：照原本的地圖
+  const layers = { ...m.layers }; hide.forEach(id => { layers[id] = {}; });
+  return { ...m, layers, stamps };
+}
 function initMap() {
-  const next = pickMap();
+  const next = mapEventView(pickMap());
   buildTileRegistry(next);
   MAP = next;
   window.STORY_MODE = !!StoryScene.config();

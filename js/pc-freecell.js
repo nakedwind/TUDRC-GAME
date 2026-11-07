@@ -2,7 +2,8 @@
    ・視窗、桌面圖示在 js/pc-desktop.js（這裡只管牌局）；樣式在 css/style.css 的「新接龍」
    ・規則：8 排牌全部翻開；左上 4 格暫存格各放 1 張；右上 4 個回收區從 A 收到 K；排上要紅黑相間、由大到小
    ・一次能搬幾張＝(空暫存格＋1) × 2^空排數（搬到空排時，那一排不算）
-   ・操作：拖曳，或點一下選牌再點目的地；點兩下＝收進回收區，收不了就放暫存格
+   ・操作：拖曳，或點一下選牌再點目的地；點兩下＝收進回收區，收不了就放暫存格；拖曳放不下去時，牌桌下方用紅字說原因
+   ・沒有任何一步可以走＝輸了：牌局結束（計時停止、不能再動牌），跳出提示，可以復原、重玩或開新牌局
    ・已經用不到的牌會自動收走（A、2 一定收；其他要等兩種相反顏色都收到前一張）；全部排好後自動收完
    ・牌局編號跟 Windows 的新接龍同一套發牌方式（1～32000，只有 11982 無解，所以不會抽到）
 */
@@ -30,7 +31,7 @@ function initPcFreecell(body) {
       '<button type="button" data-fc="new">新牌局</button><button type="button" data-fc="retry">重玩這局</button><button type="button" data-fc="undo">↶ 復原</button>' +
       '<span class="pcd-fc-info"></span></div>' +
     '<div class="pcd-fc-table"></div><div class="pcd-fc-msg"></div></div>';
-  body.querySelector('.pcd-fc-bar').addEventListener('click', e => {
+  body.querySelector('.pcd-fc').addEventListener('click', e => {   // 上方按鈕列和「輸了」提示裡的按鈕都走這裡
     const b = e.target.closest('[data-fc]'); if (!b) return;
     const g = pcd.fc;
     if (b.dataset.fc === 'new') { newPcFreecell(); sfx('button'); }
@@ -45,7 +46,7 @@ function newPcFreecell(no) {
   const g = pcd.fc;
   clearInterval(g.timer);
   if (!no) do { no = 1 + Math.floor(Math.random() * 32000); } while (no === 11982);
-  Object.assign(g, { no, cols: pcfDeal(no), free: [null, null, null, null], home: [0, 0, 0, 0], hist: [], sel: null, time: 0, timer: 0, won: false, lastClick: 0 });
+  Object.assign(g, { no, cols: pcfDeal(no), free: [null, null, null, null], home: [0, 0, 0, 0], hist: [], sel: null, time: 0, timer: 0, won: false, lost: false, lastClick: 0, notice: '' });
   fitPcFreecell();
   renderPcFreecell(true);
 }
@@ -106,15 +107,16 @@ function pcfMove(g, slot, i, to, exact) {
   else if (to[0] === 'f') g.free[+to[1]] = cards[0];
   else g.cols[+to[1]].push(...cards);
   g.sel = null;
-  if (!g.timer && !g.won) g.timer = setInterval(() => pcfTick(g), 1000);
+  if (!g.timer && !g.won) { minigameRound('freecell'); g.timer = setInterval(() => pcfTick(g), 1000); }   // 第一步：算一局、開始計時
   pcfAutoHome(g);
   if (g.home.every(n => n === 13)) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('achievement'); }
+  else if (!pcfHasMove(g)) { g.lost = true; clearInterval(g.timer); g.timer = 0; sfx('error'); }   // 沒步可走：這局輸了
   else sfx('blip');
   return true;
 }
 function pcfTick(g) {
   const w = pcd.wins.freecell;
-  if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; renderPcfInfo(g); }
+  if (pcDesktopOpen && w && !w.classList.contains('min')) { g.time++; minigameSecond('freecell'); renderPcfInfo(g); }
 }
 function pcfAutoHome(g) {   // 把用不到的牌自動收走；每一排都由大到小排好時，全部收完
   const done = g.cols.every(col => col.every((c, k) => !k || pcfRank(c) <= pcfRank(col[k - 1])));
@@ -132,7 +134,9 @@ function pcfHasMove(g) {   // 卡死判斷：還有沒有任何一步可以走
 }
 function pcfUndo(g) {
   if (!g.hist.length || g.won) { sfx('error'); return; }
-  Object.assign(g, JSON.parse(g.hist.pop()), { sel: null });
+  const wasLost = g.lost;
+  Object.assign(g, JSON.parse(g.hist.pop()), { sel: null, notice: '', lost: false });
+  if (wasLost) g.timer = setInterval(() => pcfTick(g), 1000);   // 從輸掉的地方退回來：同一局繼續，時間接著算
   sfx('switch');
   renderPcFreecell();
 }
@@ -140,7 +144,8 @@ function pcfUndo(g) {
 // ---- 操作：拖曳、點選 ----
 function pcfDown(e) {
   const g = pcd.fc;
-  if (e.button !== 0 || g.won) return;
+  if (e.button !== 0 || g.won || g.lost) return;
+  g.notice = '';   // 開始下一個動作：上次放不下去的提示就不用留著了
   const el = e.target.closest('[data-slot]');
   if (!el) { if (g.sel) { g.sel = null; renderPcFreecell(); } return; }
   const slot = el.dataset.slot, i = el.dataset.i === undefined ? -1 : +el.dataset.i;
@@ -177,6 +182,15 @@ function pcfStartDrag(g, slot, i) {
   table.appendChild(ghost);
   return ghost;
 }
+// 拖曳放不下去的原因（to＝放開時蓋住最多的位置），顯示在牌桌下方那行字
+function pcfWhyNot(g, slot, i, to) {
+  const run = pcfRun(g, slot, i), n = run.length;
+  if (to[0] === 'h') return n > 1 ? '回收區一次只能收 1 張' : '這張還不能收：要照 A、2、3… 的順序收';
+  if (to[0] === 'f') return n > 1 ? '暫存格一次只能放 1 張' : '這格暫存格已經有牌了';
+  const col = g.cols[+to[1]];
+  if (col.length && !pcfFits(run[0], col[col.length - 1])) return '接不上：要紅黑相間、由大到小';
+  return '這疊有 ' + n + ' 張，現在最多一次搬 ' + pcfMaxMove(g, !col.length) + ' 張：空出暫存格或空排就能搬更多';
+}
 function pcfDrop(g, slot, i, ghost, real) {   // 放開：跟哪個位置重疊最多就先試哪個
   const table = g.body.querySelector('.pcd-fc-table');
   if (real) {
@@ -185,7 +199,7 @@ function pcfDrop(g, slot, i, ghost, real) {   // 放開：跟哪個位置重疊�
       const b = el.getBoundingClientRect();
       return { to: el.dataset.slot, area: Math.max(0, Math.min(a.right, b.right) - Math.max(a.left, b.left)) * Math.max(0, Math.min(a.bottom, b.bottom) - Math.max(a.top, b.top)) };
     }).filter(s => s.area > 0 && s.to !== slot).sort((x, y) => y.area - x.area);
-    if (spots.length && !spots.some(s => pcfMove(g, slot, i, s.to, true))) sfx('error');
+    if (spots.length && !spots.some(s => pcfMove(g, slot, i, s.to, true))) { g.notice = pcfWhyNot(g, slot, i, spots[0].to); sfx('error'); }
   }
   renderPcFreecell();   // 牌會從鬼影的位置滑過去；沒放成就滑回原位
 }
@@ -238,7 +252,8 @@ function renderPcFreecell(noAnim) {
     const off = col.length > 1 ? Math.min(maxOff, (g.colH - g.ch) / (col.length - 1)) : 0;
     return '<div class="pcd-fc-spot pcd-fc-col" data-slot="c' + k + '">' + col.map((c, i) => pcfCardHtml(c, 'c' + k, i, Math.round(i * off), isSel('c' + k, i) ? ' sel' : '')).join('') + '</div>';
   }).join('');
-  table.innerHTML = '<div class="pcd-fc-top">' + free + home + '</div><div class="pcd-fc-cols">' + cols + '</div>';
+  const over = g.lost ? '<div class="pcd-fc-over"><div class="pcd-fc-overbox"><b>這局輸了</b><p>已經沒有牌可以走了。</p><button type="button" data-fc="undo">↶ 復原</button><button type="button" data-fc="retry">重玩這局</button><button type="button" data-fc="new">新牌局</button></div></div>' : '';
+  table.innerHTML = '<div class="pcd-fc-top">' + free + home + '</div><div class="pcd-fc-cols">' + cols + '</div>' + over;
   table.querySelectorAll('.pcd-fc-card').forEach(el => {   // 牌從舊位置滑到新位置
     const o = old[el.dataset.card]; if (!o) return;
     const n = el.getBoundingClientRect(), dx = o.left - n.left, dy = o.top - n.top;
@@ -247,8 +262,11 @@ function renderPcFreecell(noAnim) {
     el.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 150, easing: 'ease-out' }).onfinish = () => { el.style.zIndex = ''; };
   });
   renderPcfInfo(g);
-  g.body.querySelector('.pcd-fc-msg').textContent = g.won ? '🎉 破關了！花了 ' + pcfTime(g.time) + '、' + g.hist.length + ' 步。按「新牌局」再玩一次'
-    : !pcfHasMove(g) ? '沒有牌可以走了…按「復原」或「重玩這局」'
+  const msg = g.body.querySelector('.pcd-fc-msg');
+  msg.style.color = g.notice ? '#c62828' : '';   // 放不下去的提示用紅字
+  msg.textContent = g.notice ? g.notice
+    : g.won ? '🎉 破關了！花了 ' + pcfTime(g.time) + '、' + g.hist.length + ' 步。按「新牌局」再玩一次'
+    : g.lost ? '這局輸了：沒有牌可以走了。花了 ' + pcfTime(g.time) + '、' + g.hist.length + ' 步'
     : '拖曳或點選移牌；點兩下收進回收區或放暫存格。現在最多一次搬 ' + pcfMaxMove(g, false) + ' 張';
   g.body.querySelector('[data-fc="undo"]').disabled = !g.hist.length || g.won;
 }

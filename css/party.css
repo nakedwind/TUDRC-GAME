@@ -1,0 +1,66 @@
+/* 慶功宴（js/party.js）的畫面：顏色、邊框照遊戲原本的深色面板（.workshop-card、對話框）
+   對話直接用原本的對話框；結算用 .workshop-card；這裡只放慶功宴多出來的東西 */
+#wrap:has(#partyHud) #missionText { display: none; }   /* 活動中左上角換成訂單 */
+#partyHud { position: absolute; left: 20px; top: 16px; z-index: 12; max-width: calc(100% - 40px); pointer-events: none; color: #e8eef3; font-family: "Microsoft JhengHei", sans-serif; }
+#partyHud .ph-top { display: inline-flex; align-items: center; gap: 12px; padding: 5px 8px 5px 12px; border: 1px solid rgba(255,212,121,.38); border-radius: 10px; background: linear-gradient(160deg, rgba(29,34,41,.95), rgba(12,17,23,.97)); font-size: 14px; }
+#partyHud .ph-top b { color: #fff8e7; }
+#partyHud .ph-time { color: #ffd479; font-variant-numeric: tabular-nums; }
+#partyHud .ph-stock { color: #929dab; font-size: 13px; }
+#partyHud .ph-end { pointer-events: auto; padding: 2px 9px; border: 1px solid rgba(255,255,255,.2); border-radius: 7px; background: rgba(37,43,51,.7); color: #c9d3dc; font: inherit; font-size: 12px; cursor: pointer; }
+#partyHud .ph-end:hover { border-color: rgba(255,212,121,.6); color: #fff8e7; }
+#partyHud .ph-tickets { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+.ph-ticket { min-width: 118px; padding-bottom: 5px; overflow: hidden; border: 1px solid rgba(255,212,121,.38); border-radius: 10px; background: linear-gradient(160deg, rgba(29,34,41,.96), rgba(12,17,23,.98)); color: #e8eef3; text-align: center; }
+.ph-bar { height: 5px; background: rgba(255,255,255,.1); }
+.ph-bar i { display: block; width: 100%; height: 100%; }
+.ph-who { display: flex; align-items: center; justify-content: center; gap: 4px; padding-top: 3px; color: #ffe3a1; font-size: 13px; font-weight: 700; }
+.ph-face { display: inline-block; flex: none; width: 22px; height: 22px; border: 1px solid rgba(255,212,121,.38); border-radius: 50%; background-color: #202730; background-position: 50% 0; background-repeat: no-repeat; background-size: 150%; image-rendering: pixelated; }
+.ph-face[data-char="ball"] { background-position: 8% 61%; background-size: 220%; }   /* 球球是狗：頭在圖的左邊 27%、高度 56% 的地方，放大後對準它（跟隊員名單同一個裁法） */
+.ph-kind { margin-top: 2px; color: #c9d3dc; font-size: 11px; line-height: 1.2; }
+.ph-note { color: #d8ae5d; font-size: 11px; }
+.ph-ings .ib.pan { width: 24px; height: 22px; padding: 0; background-repeat: no-repeat; border: 1px solid rgba(143,211,255,.3); image-rendering: pixelated; }
+.ph-ings { display: flex; justify-content: center; gap: 2px; margin-top: 3px; }
+.ph-ings .stack { display: flex; flex-direction: column; align-items: center; }
+.ph-ings .ib { display: block; padding: 1px; border-radius: 5px; background: rgba(143,211,255,.16); line-height: 0; }
+.ph-ings .ib img { width: 26px; height: 26px; object-fit: contain; image-rendering: pixelated; }
+.ph-ings .fl { display: block; width: 13px; height: 13px; margin-top: 1px; image-rendering: pixelated; }
+#partyPicker { position: absolute; left: 50%; bottom: 24px; z-index: 31; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; max-width: calc(100% - 48px); padding: 9px 13px; border: 1px solid rgba(255,212,121,.38); border-radius: 14px; background: linear-gradient(160deg, rgba(29,34,41,.96), rgba(12,17,23,.98)); color: #e8eef3; font-family: "Microsoft JhengHei", sans-serif; transform: translateX(-50%); }
+#partyPicker > b { width: 100%; color: #ffe3a1; font-size: 13px; text-align: center; }
+#partyPicker button { position: relative; display: flex; flex-direction: column; align-items: center; width: 66px; padding: 4px 2px; border: 1px solid rgba(255,255,255,.2); border-radius: 9px; background: rgba(37,43,51,.7); color: #e8eef3; font: inherit; font-size: 12px; cursor: pointer; }
+#partyPicker button:hover { border-color: #e9bd62; background: rgba(255,212,121,.14); }
+#partyPicker button i { position: absolute; left: 4px; top: 1px; color: #ffd479; font-size: 11px; font-style: normal; }
+#partyPicker button img { width: 34px; height: 34px; object-fit: contain; image-rendering: pixelated; }
+#partyPicker .pk-back { width: auto; min-width: 86px; justify-content: center; border-color: rgba(143,211,255,.45); background: rgba(30,75,110,.35); color: #d6efff; }
+#partyPicker .pk-back small { color: #92b6cf; font-size: 10px; }
+#partyPicker button img.fl { position: absolute; right: 2px; top: 2px; width: 14px; height: 14px; }
+.dialogue-options > button.party-choice { padding: 6px 11px; border: 1px solid rgba(143,211,255,.45); border-radius: 8px; background: rgba(30,75,110,.35); color: #d6efff; font-size: 14px; cursor: pointer; }   /* 跟「開始訓練」按鈕同色 */
+.dialogue-options > button.party-choice:hover { border-color: #8fd3ff; background: rgba(40,95,140,.5); }
+#dialogueParty { padding: 6px 11px; border: 1px solid rgba(255,212,121,.45); border-radius: 8px; background: rgba(110,80,25,.35); color: #ffe3a1; cursor: pointer; font-size: 14px; }   /* 艾德林：慶功宴，大小和送禮、推薦穿搭、隊員資訊一樣，用金色 */
+#dialogueParty:hover { border-color: #ffd479; background: rgba(140,100,30,.5); }
+/* 慶功宴按鈕出現時多一顆：每顆上下拉窄、間距縮小，對話框才不會被撐高（其他時候維持原本大小） */
+.dialogue-options:has(#dialogueParty:not(.hidden)) { gap: 4px; }
+.dialogue-options:has(#dialogueParty:not(.hidden)) > button { padding-top: 2px; padding-bottom: 2px; }
+#partyPanel { position: absolute; inset: 10px; z-index: 30; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); }
+.party-result { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 6px 18px; margin: 10px 0 4px; padding: 0; color: #c9d3dc; font-size: 15px; list-style: none; }
+.party-result li { display: flex; justify-content: space-between; padding-bottom: 4px; border-bottom: 1px solid rgba(255,212,121,.13); }
+.party-result b { color: #ffd479; }
+/* 結算卡片比訓練室的寬：下面要排三欄的滿意程度名單 */
+#partyPanel .party-card { width: min(920px, 100%); }
+#partyPanel .party-card h3 { margin: 6px 0 0; }
+/* 好感度：滑鼠移過去（或用鍵盤選到）才列出是誰加的 */
+.party-favor { position: relative; cursor: help; }
+.party-favor-tip { display: none; position: absolute; left: 0; top: calc(100% + 4px); z-index: 3; width: 260px; grid-template-columns: 1fr 1fr; gap: 3px 12px; padding: 8px 10px; border: 1px solid rgba(255,212,121,.38); border-radius: 10px; background: #12171d; box-shadow: 0 10px 26px rgba(0,0,0,.5); font-size: 13px; }
+.party-favor-tip span { white-space: nowrap; }
+.party-favor:hover .party-favor-tip, .party-favor:focus .party-favor-tip { display: grid; }
+/* 滿意程度名單：一列一個人（頭像、名字、滿意度條、看評語）；人多所以排三欄 */
+.party-moods { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 1fr)); gap: 3px 16px; margin: 2px 0 0; padding: 0; list-style: none; }
+.party-moods li { display: flex; align-items: center; gap: 7px; min-height: 28px; }
+.party-moods .ph-face { width: 26px; height: 26px; }
+.pm-name { flex: none; width: 3.4em; overflow: hidden; color: #e8eef3; font-size: 14px; white-space: nowrap; }
+.pm-bar { flex: 1; min-width: 40px; height: 9px; overflow: hidden; border-radius: 5px; background: rgba(255,255,255,.2); }   /* 灰底＝滿分的長度 */
+.pm-bar i { display: block; height: 100%; border-radius: 5px; background: #ff7f92; }   /* 粉紅色＝這次的滿意程度 */
+.pm-btn { flex: none; padding: 1px 7px; border: 1px solid rgba(255,212,121,.45); border-radius: 6px; background: rgba(110,80,25,.35); color: #ffe3a1; font: inherit; font-size: 12px; cursor: pointer; }
+.pm-btn:hover { border-color: #ffd479; background: rgba(140,100,30,.5); }
+/* 看評語的小視窗 */
+.pm-comment { position: absolute; z-index: 5; width: min(300px, calc(100% - 16px)); padding: 9px 12px; border: 1px solid rgba(255,212,121,.5); border-radius: 12px; background: linear-gradient(160deg, #1d2229, #0c1117); box-shadow: 0 14px 34px rgba(0,0,0,.55); color: #e8eef3; }
+.pm-comment-who { display: flex; align-items: center; gap: 6px; color: #ffe3a1; font-size: 14px; font-weight: 700; }
+.pm-comment p { margin: 5px 0 0; font-size: 14px; line-height: 1.5; }

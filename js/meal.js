@@ -1,6 +1,6 @@
 // ============================================================
 //  餐廳吃飯：拿餐盤 → 打飯區裝菜（最多 4 樣）→ 坐下放在桌上 →「開動！」4 秒吃完 → 髒盤拿去回收區（或直接離開）
-//  ・溫特：右邊的餐盤架按互動鍵拿餐盤（拿錯了：還沒吃過的餐盤回到餐盤架按互動鍵＝「放回餐盤」）；打飯台按互動鍵＝把最靠近的那盤菜裝進去（同一道不能裝兩次）；
+//  ・溫特：右邊的餐盤架按互動鍵拿餐盤（空的餐盤回到餐盤架按互動鍵＝「放回餐盤」；裝錯了到垃圾桶倒掉，盤子留在手上）；打飯台按互動鍵＝把最靠近的那盤菜裝進去（同一道不能裝兩次）；
 //    拿著有菜的餐盤到有桌子的椅子按互動鍵＝坐下並把餐盤放在桌上；坐著按互動鍵＝「開動！」（每秒少 1/4，4 秒吃完）；
 //    吃完起身，桌上的髒盤可以收起來拿去回收區，或直接走掉（換地圖再回來，桌上的髒盤就不見了：桌上的餐盤只存在這一趟）
 //  ・NPC（基地的人、隊員）：閒逛時有機率自己去吃一輪，一定會把髒盤拿去回收
@@ -9,10 +9,11 @@
 const MEAL = {
   trayTiles: ['tile_restaurant_tray_stack'],                                              // 餐盤架
   trayReach: 44,       // 餐盤架放在出菜台後面：從客人那一側伸手拿，判定範圍比較大（px）
-  buffetTiles: ['tile_restaurant_buffet_counter_01', 'tile_restaurant_buffet_counter_02', 'tile_musg7iyr'],   // 打飯台（每台三盤菜）
+  buffetTiles: ['tile_restaurant_buffet_counter_01', 'tile_restaurant_buffet_counter_02', 'tile_musg7iyr', 'tile_mw5yx368', 'tile_mw60u20k', 'tile_mw628w22'],   // 打飯台（每台三盤菜）
   pans: [[32, 22, 26, 24], [71, 22, 26, 24], [110, 22, 26, 24]],                          // 三盤菜在打飯台圖片上的位置（圖 160×80：左、上、寬、高）
   panImg: [160, 80],
   wasteTiles: ['tile_restaurant_waste_sorting_station'],                                  // 回收區
+  trashTiles: ['tile_restaurant_trash_bin_small'],                                        // 垃圾桶：裝錯菜可以倒掉，餐盤留在手上
   tableTiles: ['tile_musc5wyq', 'tile_restaurant_partition_tall'],                        // 桌子：椅子前面是這些桌子才放得了餐盤
   // 桌面上放餐盤不會碰到道具、也不會超出桌邊的位置（桌子圖片的像素）；w、h＝餐盤在這張桌上佔多大（側面的桌子餐盤是直放）
   tableSpots: {
@@ -51,8 +52,28 @@ const MEAL_DISHES = {
     { name: '炸雞腿', eff: { rate: .08 } },
   ],
 };
+// 慶功宴的三台打飯台，整排由右到左是：濃湯、白飯、牛排｜三色豆、花椰菜、獅子頭｜炒米粉、炸湯圓、東坡肉
+// 下面每台寫的順序跟上面一樣是圖上由左到右，所以跟念的順序相反；慶功宴不會吃出加成，eff 先比照平常類似的菜
+MEAL_DISHES.tile_mw60u20k = [   // 左邊那台（banquet-buffet-02）
+  { name: '東坡肉', eff: { guard: .06 } },
+  { name: '炸湯圓', eff: { speed: .03, rate: .02 } },
+  { name: '炒米粉', eff: { rate: .06 } },
+];
+MEAL_DISHES.tile_mw5yx368 = [   // 中間那台（banquet-buffet-01）
+  { name: '獅子頭', eff: { guard: .06 } },
+  { name: '花椰菜', eff: { speed: .04 } },
+  { name: '三色豆', eff: { speed: .05 } },
+];
+MEAL_DISHES.tile_mw628w22 = [   // 右邊那台（banquet-buffet-03）；濃湯是哪一盤寫在 data/party.js 的 soupPan
+  { name: '牛排', eff: { rate: .08 } },
+  { name: '白飯', eff: { guard: .04 } },
+  { name: '濃湯', eff: { guard: .03, speed: .02 } },
+];
 const MEAL_EFF = { guard: { name: '減傷', color: '#ffd27a' }, rate: { name: '射速', color: '#ffe066' }, speed: { name: '移速', color: '#9ff0c0' } };
 const dishOf = key => { const [id, k] = String(key || '').split('#'); return (MEAL_DISHES[id] || [])[+k] || null; };
+// 誰絕對不吃什麼（寫菜名，哪一台的都算）：平常自己打飯不會拿，慶功宴不會點，端給他也不收
+const MEAL_NEVER_EAT = { taana: ['三色豆'] };
+const mealWontEat = (id, key) => (MEAL_NEVER_EAT[id] || []).includes((dishOf(key) || {}).name);
 const mealImgs = {};
 function mealImg(src) { if (!mealImgs[src]) { mealImgs[src] = new Image(); mealImgs[src].src = src; } return mealImgs[src]; }
 const mealTrays = () => G.mealTrays || (G.mealTrays = []);   // 桌上的餐盤（G 換地圖就重建：沒收的髒盤自己消失）
@@ -77,7 +98,12 @@ function panOf(r, k) {
   const u = (px + pw / 2) * sx;
   return { x: r.x0 + (r.s.fx ? r.w - u : u), y: r.y0 + (py + ph / 2) * sy, food: { file: r.t.file, rect: MEAL.pans[k] }, key: r.s.id + '#' + k };
 }
-const nearestPan = (r, x) => MEAL.pans.map((_, k) => panOf(r, k)).reduce((a, b) => Math.abs(b.x - x) < Math.abs(a.x - x) ? b : a);
+// 站在 (x, y) 伸手打得到的菜裡，離 aimX 最近的一盤；都打不到就回傳 null
+// 打飯台的圖左右有重疊，所以直接比每一盤，不能先挑「哪一台」，不然站在三色豆前面會裝到隔壁台的牛排
+function mealPanAt(x, y, reach, aimX = x) {
+  const pans = mealStamps(MEAL.buffetTiles).filter(r => mealDist(r, x, y) <= reach).flatMap(r => MEAL.pans.map((_, k) => panOf(r, k)));
+  return pans.length ? pans.reduce((a, b) => Math.abs(b.x - aimX) < Math.abs(a.x - aimX) ? b : a) : null;
+}
 // 椅子前面有沒有桌子：有就回傳餐盤要放的位置
 // 一個位子的編號：長椅（卡座）的 key 整條都一樣，要加上座位的位置才分得開
 const seatIdOf = seat => seat.key + '@' + Math.round(seat.x) + ',' + Math.round(seat.y);
@@ -106,6 +132,7 @@ function placeTrayAt(seat, tray, owner) {
   mealTrays().push({ ...tray, ...pos, seatKey: seatIdOf(seat), seat, owner, eatT: tray.eatT || 0, eating: false, turn: seat.dir === 'left' || seat.dir === 'right', mirror: seat.dir === 'left', flip: seat.dir === 'front' });   // 面向鏡頭坐的（桌子另一邊）：餐盤上下翻轉，格子的順序才對   // 側面的椅子：餐盤順時針轉 90 度（不然橫的餐盤會擋到臉）
   return true;
 }
+const mealHeadY = p => p.y - 62;   // 溫特頭上：打菜的提示放這裡，才不會擋到人和手上的餐盤
 function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼（畫提示用）：回傳 { label, x, y, run }
   const p = G && G.player; if (!p || p.hp <= 0 || !mealMapReady()) return null;
   if (p.sitting) {
@@ -117,19 +144,22 @@ function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼
   if (p.tray) {
     const waste = mealNear(MEAL.wasteTiles, p.x, p.y);
     if (waste) return { label: '回收餐盤', x: waste.x, y: waste.top - 4, run: () => { p.tray = null; sfx('place'); systemNotice('餐盤收好了'); } };
-    const buffet = !p.tray.dirty && mealNear(MEAL.buffetTiles, p.x, p.y);
-    if (buffet) {
-      const pan = nearestPan(buffet, p.x);
-      if (p.tray.foods.length >= MEAL.maxDishes) return { label: '餐盤裝滿了', x: pan.x, y: buffet.top - 4, run: () => { sfx('error'); systemNotice('餐盤最多裝 ' + MEAL.maxDishes + ' 樣菜', true); } };
-      if (p.tray.foods.some(f => f.key === pan.key)) return { label: '已經裝過這道', x: pan.x, y: buffet.top - 4, run: () => { sfx('error'); systemNotice('這道菜裝過了，換一道吧', true); } };
-      return { label: '裝菜（' + p.tray.foods.length + '/' + MEAL.maxDishes + '）', x: pan.x, y: buffet.top - 4, run: () => { p.tray.foods.push({ ...pan.food, key: pan.key }); sfx('blip'); } };
+    const trash = !p.tray.dirty && p.tray.foods.length && mealNear(MEAL.trashTiles, p.x, p.y);
+    if (trash) return { label: '倒掉餐盤裡的菜', x: trash.x, y: trash.top - 4, run: () => { p.tray.foods = []; sfx('place'); systemNotice('菜倒掉了，餐盤還在手上'); } };
+    const pan = !p.tray.dirty && mealPanAt(p.x, p.y, 30);
+    if (pan) {
+      if (p.tray.foods.length >= MEAL.maxDishes) return { label: '餐盤裝滿了', x: p.x, y: mealHeadY(p), run: () => { sfx('error'); systemNotice('餐盤最多裝 ' + MEAL.maxDishes + ' 樣菜', true); } };
+      if (p.tray.foods.some(f => f.key === pan.key)) return { label: '已經裝過這道', x: p.x, y: mealHeadY(p), run: () => { sfx('error'); systemNotice('這道菜裝過了，換一道吧', true); } };
+      return { label: '裝' + ((dishOf(pan.key) || {}).name || '菜') + '（' + p.tray.foods.length + '/' + MEAL.maxDishes + '）', x: p.x, y: mealHeadY(p), run: () => { p.tray.foods.push({ ...pan.food, key: pan.key }); sfx('blip'); } };
     }
     const seat = !p.tray.dirty && p.tray.foods.length && typeof seatNearPlayer === 'function' ? seatNearPlayer() : null;
     const sitHere = seat && trayPosForSeat(seat) && !trayAtSeat(seat) ? { label: '坐下用餐', x: seat.x, y: seat.top - 6, run: () => { toggleSit(); if (p.sitting === seat && placeTrayAt(seat, p.tray, 'player')) p.tray = null; } } : null;
     const stack = mealNear(MEAL.trayTiles, p.x, p.y, MEAL.trayReach);
-    // 不想吃了：乾淨的餐盤可以放回餐盤架（裝了菜也可以，菜就不要了）；髒盤要拿去回收區
+    // 不想吃了：空的餐盤才能放回餐盤架（裡面有菜要先倒進垃圾桶）；髒盤要拿去回收區
     const backHere = !stack ? null : p.tray.dirty
       ? { label: '髒盤要拿去回收區', x: stack.x, y: stack.top - 4, run: () => { sfx('error'); systemNotice('吃過的餐盤請拿去回收區', true); } }
+      : p.tray.foods.length
+      ? { label: '餐盤裡有菜', x: stack.x, y: stack.top - 4, run: () => { sfx('error'); systemNotice('餐盤裡有菜時不能放回去，先倒進垃圾桶', true); } }
       : { label: '放回餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = null; sfx('place'); systemNotice('餐盤放回去了'); } };
     // 餐盤架旁邊剛好有椅子：哪個離溫特比較近就用哪個（站在餐盤架前＝放回、站在椅子旁＝坐下）
     if (sitHere && backHere) return Math.hypot(seat.x - p.x, seat.y - p.y) < Math.hypot(stack.x - p.x, stack.bottom - p.y) ? sitHere : backHere;
@@ -138,7 +168,7 @@ function mealPlayerAction(dry) {   // dry＝只問現在按互動鍵會做什麼
   const mine = mealTrays().filter(t => t.owner === 'player').find(t => Math.hypot(t.x - p.x, t.y - p.y) < 80 || (t.seat && Math.hypot(t.seat.x - p.x, t.seat.y - p.y) < 90));   // 離餐盤夠近，或站在自己剛剛坐的位子旁（餐盤可能放得比較遠）
   if (mine) return { label: mine.dirty ? '收髒盤' : '拿起餐盤', x: mine.x, y: mine.y - 22, run: () => { mealTrays().splice(mealTrays().indexOf(mine), 1); p.tray = { foods: mine.foods, left: mine.left, dirty: mine.dirty, eatT: mine.eatT }; sfx('switch'); } };
   const stack = mealNear(MEAL.trayTiles, p.x, p.y, MEAL.trayReach);
-  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof winterSay === 'function') winterSay(MEAL.takeLine); systemNotice('不想吃了：回到餐盤架按互動鍵可以放回去'); } };
+  if (stack) return { label: '拿餐盤', x: stack.x, y: stack.top - 4, run: () => { p.tray = newTray(); sfx('switch'); if (typeof winterSay === 'function') winterSay(MEAL.takeLine); systemNotice('不想吃了：回到餐盤架可以放回去（裡面有菜要先倒進垃圾桶）'); } };
   return null;
 }
 const mealPrompt = () => mealPlayerAction(true);
@@ -161,7 +191,8 @@ function tryStartMeal(a, force) {   // force＝一定去吃（被溫特邀請來
   if (a.mealCd == null) a.mealCd = mealRand(MEAL.npc.firstCd);
   if (a.mealCd > 0 || a.meal || (!force && Math.random() >= MEAL.npc.chance) || !mealMapReady()) return false;
   const stacks = mealStamps(MEAL.trayTiles), buffets = mealStamps(MEAL.buffetTiles);
-  const pans = buffets.flatMap(r => MEAL.pans.map((_, k) => panOf(r, k))).sort(() => Math.random() - .5).slice(0, Math.round(mealRand(MEAL.npc.dishes)));
+  const eater = a.kind === 'tower' ? a.type : a.id;
+  const pans = buffets.flatMap(r => MEAL.pans.map((_, k) => panOf(r, k))).filter(p => !mealWontEat(eater, p.key)).sort(() => Math.random() - .5).slice(0, Math.round(mealRand(MEAL.npc.dishes)));
   const stack = stacks[Math.floor(Math.random() * stacks.length)];
   a.meal = { stage: 'tray', stops: [{ x: stack.x, y: stack.bottom + MEAL.trayReach - 4, act: 'tray' }, ...pans.sort((p, q) => q.x - p.x).map(p => ({ x: p.x, y: buffets.find(r => p.key.startsWith(r.s.id)).bottom + 14, act: 'dish', food: { ...p.food, key: p.key } }))], wait: 0 };
   a.target = null; a.navPath = null; a.waitT = 0;
@@ -252,7 +283,8 @@ function drawMealTray(ctx, x, y, tray, s = 1, shadow = true) {
     if (tray.left > 0) {   // 菜：從打飯台的菜盤截一塊跟這格一樣比例的，吃掉多少就縮多少
       const food = mealImg(f.file), k = Math.sqrt(tray.left);
       if (food.complete && food.naturalWidth) {
-        const [rx, ry, rw, rh] = f.rect, fx = food.naturalWidth / MEAL.panImg[0], fy = food.naturalHeight / MEAL.panImg[1], ar = sw0 / sh0;
+        // whole＝整張圖都是這道菜（慶功宴現煮的菜）；其他是打飯台圖上的一盤
+        const [rx, ry, rw, rh] = f.whole ? [0, 0, food.naturalWidth, food.naturalHeight] : f.rect, fx = f.whole ? 1 : food.naturalWidth / MEAL.panImg[0], fy = f.whole ? 1 : food.naturalHeight / MEAL.panImg[1], ar = sw0 / sh0;
         const uw = Math.min(rw, rh * ar), uh = uw / ar, dw = sw * k, dh = sh * k;
         ctx.drawImage(food, (rx + (rw - uw) / 2) * fx, (ry + (rh - uh) / 2) * fy, uw * fx, uh * fy, sx + (sw - dw) / 2, sy + (sh - dh) / 2, dw, dh);
       }
