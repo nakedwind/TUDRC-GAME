@@ -8431,7 +8431,7 @@ const BASE_MAPS = [
         "c": 16,
         "r": 11,
         "layer": "object5",
-        "oy": 36,
+        "oy": 38,
         "ox": -2
       },
       {
@@ -8954,7 +8954,6 @@ const BASE_MAPS = [
         "c": 19,
         "r": 14,
         "layer": "object5",
-        "ox": 10,
         "oy": 18
       },
       {
@@ -8983,10 +8982,10 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_restaurant_tray_stack",
-        "c": 18,
+        "c": 17,
         "r": 13,
         "layer": "object5",
-        "ox": 10,
+        "ox": 30,
         "oy": 20
       },
       {
@@ -9103,18 +9102,17 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_restaurant_tray_stack",
-        "c": 18,
+        "c": 17,
         "r": 13,
         "layer": "object6",
-        "ox": 10,
-        "oy": 20
+        "oy": 20,
+        "ox": 30
       },
       {
         "id": "tile_restaurant_bowl_stack",
         "c": 19,
         "r": 14,
         "layer": "object6",
-        "ox": 10,
         "oy": 18
       },
       {

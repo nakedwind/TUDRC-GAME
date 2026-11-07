@@ -7,17 +7,19 @@ const PARTY = {
   mapName: '1F餐廳',
   start: { winter: [22, 14], eldrin: [22, 12] },   // 轉場後溫特、艾德林站的格子（格子座標）
   door: [23, 21],                                  // 大家從哪裡走進餐廳
-  guestCount: 8,        // 幾個人會點餐（其他人在旁邊走動聊天）
+  guestCount: 8,        // 幾個人會點餐（其他人找位子坐著聊天）
   mustGuests: ['red', 'chris', 'avaren', 'theonie'],   // 優先請這些人坐下點餐（他們有專屬反應）
   timeLimit: 300,       // 一場最多幾秒，時間到就收尾
   arriveGap: 1.6,       // 大家隔幾秒走進來一個
-  thinkTime: [3, 9],    // 坐下後想多久才要點餐（秒）
-  againThink: [2, 6],   // 吃完之後想多久才追加（秒）
-  orderPatience: 30,    // 等人來點餐可以等幾秒，超過會抱怨
-  foodPatience: 90,     // 點完餐可以等幾秒，超過會抱怨
+  thinkTime: [2, 7],    // 坐下後想多久才要點餐（秒）
+  againThink: [1, 4],   // 吃完之後想多久才追加（秒）
+  idleGap: 3,           // 溫特沒事做超過幾秒，就有人會點餐（還在想的人馬上想好 → 坐著聊天的人也餓了 → 吃飽的人再追加）
+  idleStop: 5,          // 時間剩幾秒以內不再找人點餐（這時大家都吃完了就提早結算）；結束前才剛點餐的人不算沒吃到，不會扣分
+  orderPatience: 30,    // 個性普通的人，等人來點餐可以等幾秒，超過會抱怨（每個人的耐心在下面的 natures）
+  foodPatience: 90,     // 個性普通的人，點完餐可以等幾秒，超過會抱怨
   snackTime: 4,         // 吃甜點、喝湯要幾秒（餐盤的時間在 js/meal.js 的 MEAL.eatTime）
   burnAfter: 9,         // 煮好後再放幾秒會烤焦
-  handLimit: 2,         // 手上最多拿幾樣食材
+  handLimit: 1,         // 手上最多拿幾樣食材
   plates: 8, bowls: 6,  // 餐盤、碗各有幾個（要回收才能再用）
   favorPerGuest: 2,     // 吃到餐的人加多少好感
   // 克莉思偷吃：隔一段時間自己去開冰箱，要走到她旁邊按互動鍵才能阻止
@@ -26,19 +28,46 @@ const PARTY = {
   sneakEat: 6,          // 站在冰箱前吃幾秒（來不及阻止就算「被偷吃」）
   // 滿意程度（0～100）：每一餐從 100 分開始扣，最後取平均；結算畫面的粉紅色條就是這個數字
   mood: {
-    orderGrace: 10, orderPenalty: 25,   // 等人來點餐：超過 10 秒開始扣，再等滿 orderPatience 秒時扣滿 25 分
-    foodGrace: 35, foodPenalty: 40,     // 等上菜：超過 35 秒開始扣，再等滿 foodPatience 秒時扣滿 40 分
+    orderGrace: 10, orderPenalty: 25,   // 等人來點餐（個性普通的人）：超過 10 秒開始扣，再等滿 orderPatience 秒時扣滿 25 分
+    foodGrace: 35, foodPenalty: 40,     // 等上菜（個性普通的人）：超過 35 秒開始扣，再等滿 foodPatience 秒時扣滿 40 分
     wrongPenalty: 30,   // 送錯餐扣幾分
     unserved: 15,       // 時間到了還沒吃到的那一餐算幾分
     noMeal: 30,         // 整場一餐都沒吃到（例如提早結束，還沒輪到）算幾分
     min: 5,             // 一餐最低幾分
     high: 75, mid: 45,  // 評語：75 分以上用 high、45 分以上用 mid、其他用 low
   },
+  // 每個人的個性怎麼影響滿意程度（沒寫的欄位用 natureDefault）
+  // start＝招待得再好最高幾分；wrong＝多在意送錯餐
+  // order／food＝等點餐／等上菜有多急（1 是普通，2 是耐心只有一半，.5 是耐心多一倍）：頭上等待條掉的速度、什麼時候抱怨、什麼時候開始扣分都看這個
+  natureDefault: { start: 90, order: 1, food: 1, wrong: 1 },
+  natures: {
+    red: { start: 100, order: .5, food: .5, wrong: .2 },       // 什麼都吃，很難不開心
+    ball: { start: 100, order: .3, food: .3, wrong: .2 },      // 狗狗有吃的就開心
+    muomn: { start: 98, order: .7, food: .8, wrong: .7 },      // 不用加班就是天堂
+    claire: { start: 96, order: .9, food: 1, wrong: .8 },      // 樂觀，什麼都覺得好吃
+    eldrin: { start: 96, order: .5, food: .5, wrong: .6 },     // 溫柔，看大家開心就開心
+    colyn: { start: 95, order: 1.2, food: 1.5, wrong: .6 },    // 大胃王：好吃就好，但餓了很急
+    rowan: { start: 95, order: .8, food: .8, wrong: .8 },      // 乖巧、會替人著想
+    chris: { start: 92, order: 1.2, food: 1.3, wrong: .7 },    // 貪吃，等不及就想開冰箱
+    amber: { start: 90, order: 1, food: 1, wrong: 1.6 },       // 認真，很在意有沒有照點單
+    salem: { start: 90, order: .7, food: .7, wrong: .7 },      // 不挑食，等餐時都在觀察別人
+    noah: { start: 88, order: .8, food: .8, wrong: .8 },       // 隨和，有八卦聽就好
+    luther: { start: 88, order: .4, food: .4, wrong: .6 },     // 不急，總叫你先顧別人
+    ash: { start: 85, order: .3, food: .3, wrong: .3 },        // 「都可以的」，很少起伏
+    avaren: { start: 85, order: .6, food: .6, wrong: 1.5 },    // 只在乎艾德林，其他都還好
+    cael: { start: 86, order: 1, food: 1, wrong: .8 },         // 比較在意羅恩有沒有吃飽
+    kakuma: { start: 86, order: 1.6, food: 1.8, wrong: 1.3 },  // 好勝，出餐速度就是輸贏
+    taana: { start: 84, order: 1.3, food: 1.6, wrong: 1 },     // 只想趕快吃完下班
+    saku: { start: 82, order: .6, food: .6, wrong: .9 },       // 冷淡，不討厭也不喜歡
+    eden: { start: 80, order: 1.2, food: 1.5, wrong: 1.2 },    // 疑神疑鬼，上菜慢就覺得有人搞鬼
+    theonie: { start: 80, order: 1, food: 1.4, wrong: 1.8 },   // 挑剔，對料理很有意見
+    tino: { start: 78, order: 1.2, food: 1.4, wrong: 1.2 },    // 嫌人多味道雜，很難討好
+  },
   // 點餐內容
   trayDishes: [3, 4],   // 一盤要幾樣菜（最少、最多）
   cookedChance: .45,    // 一盤裡有多少機率要一樣打飯台沒有、要現煮的菜
-  againChance: .6,      // 吃完後有多少機率追加
-  againMax: 2,          // 一個人最多追加幾次
+  againChance: .7,      // 吃完後有多少機率追加
+  againMax: 3,          // 一個人最多追加幾次
   againKinds: { tray: 3, applePie: 2, cheesecake: 2, chocolateCake: 2, cake: 2, soup: 2 },   // 追加時選到每一種的比重（tray＝第二盤）
   soupPan: 'tile_mw628w22#2',        // 打飯台上哪一盤是湯，全場只有這裡裝得到湯（不能裝進餐盤，要用碗）
   // 工作站：哪些地圖素材算哪一種
@@ -81,6 +110,7 @@ const PARTY = {
     wrongFlash: '裝錯了',   // 送錯餐時，被送餐的人頭上跳的提示
     refuse: '艾德林呢？',
     refuseNotice: '阿瓦倫拒絕你送的餐點',
+    wontEat: '{dish}拿走，我絕對不吃。',   // 餐盤裡有這個人絕對不吃的菜（js/meal.js 的 MEAL_NEVER_EAT）
     sneakNotice: '克莉思跑去開冰箱了！',
     sneakGo: ['走一下、走一下～', '冰箱應該還有東西吧？'],
     sneakEat: ['先吃一口，沒人會發現的～', '這個看起來沒人要吧？'],

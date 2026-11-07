@@ -1,6 +1,6 @@
 /* ===== 慶功宴：食堂出餐小遊戲（試玩版，設定在 data/party.js）=====
    流程：在作戰桌旁跟艾德林對話 →「🎉 慶功宴」→ 選要不要辦 → 轉場到餐廳 → 大家入座 → 點餐、打菜、出餐、回收 → 結算。
-   ・溫特手上可以同時有：一個餐盤或碗，加上最多兩樣食材。空白鍵／Enter 操作面向的東西，畫面會提示能做什麼。
+   ・溫特手上可以同時有：一個餐盤或碗，加上一樣食材。空白鍵／Enter 操作面向的東西，畫面會提示能做什麼。
    ・主餐：拿四格餐盤到打飯台打菜；有人要打飯台沒有的菜，就從冰箱拿生食去爐口煮。湯不能裝餐盤，要拿碗。
    ・裝錯：可以走到垃圾桶把餐盤倒空（盤子還在手上，算「浪費食物」）；也可以直接端給隊員，對方會吃，但滿意程度會下降。
    ・克莉思：隔一段時間會自己去開冰箱偷吃，走到她旁邊按互動鍵才能阻止。
@@ -22,7 +22,7 @@ const partySay = (a, text) => { if (a) a.say = { text, life: 3.2 }; };
 const partyFood = id => PARTY.foods[id];
 
 // ===== 活動進行中，暫時關掉其他互動（門、椅子、對話、商店…），人才不會端著菜走掉 =====
-for (const name of ['interactionNearPlayer', 'seatNearPlayer', 'portalNearPlayer', 'elevatorNearPlayer', 'shopCounterNearPlayer', 'vendingNearPlayer', 'drinkShopNearPlayer', 'backroomShopNearPlayer', 'doorNearPlayer', 'toggleDoorNearPlayer', 'useStoragePropNearPlayer', 'useCampInteractionNearPlayer', 'pickupPropNearPlayer', 'usePosterNearPlayer', 'useNpcChatNearPlayer', 'tryStartMeal', 'npcChatStep', 'missionTableUsable', 'mealInviteAte', 'mapBoxNearPlayer']) {
+for (const name of ['interactionNearPlayer', 'seatNearPlayer', 'portalNearPlayer', 'elevatorNearPlayer', 'shopCounterNearPlayer', 'vendingNearPlayer', 'drinkShopNearPlayer', 'backroomShopNearPlayer', 'doorNearPlayer', 'toggleDoorNearPlayer', 'useStoragePropNearPlayer', 'useCampInteractionNearPlayer', 'pickupPropNearPlayer', 'usePosterNearPlayer', 'useNpcChatNearPlayer', 'updateNpcChats', 'tryStartMeal', 'npcChatStep', 'missionTableUsable', 'mealInviteAte', 'mapBoxNearPlayer']) {
   const orig = window[name]; if (typeof orig !== 'function') continue;
   window[name] = function (...args) { if (partyOn()) return name === 'tryStartMeal' || name === 'npcChatStep' ? false : null; return orig.apply(this, args); };
 }
@@ -125,10 +125,10 @@ function partyMenuX(key) {
   const [id, k] = key.split('#'), r = (party.stations.buffet || []).find(o => o.s.id === id);
   return r ? panOf(r, +k).x : -1;
 }
-function partyMakeOrder(kind) {
+function partyMakeOrder(kind, id) {
   if (kind !== 'tray') return { type: kind };
   const n = Math.round(partyRand(PARTY.trayDishes)), cooked = Math.random() < PARTY.cookedChance;
-  const pool = partyBuffetKeys().sort(() => Math.random() - .5), items = [];
+  const pool = partyBuffetKeys().filter(key => !mealWontEat(id, key)).sort(() => Math.random() - .5), items = [];
   if (cooked) items.push(partyPick(['grilledFish', 'grilledLoofah']));
   while (items.length < n && pool.length) items.push(pool.shift());
   items.sort((a, b) => partyMenuX(b) - partyMenuX(a));   // 大家都照打飯台由右到左的順序點餐：台詞、訂單都跟著這個順序
@@ -182,8 +182,8 @@ function partyTableSpot(g) {
 // ===== 客人 =====
 function partyTakeOrder(g) {
   g.orderWait = party.time - (g.t0 == null ? party.time : g.t0); g.t0 = party.time;   // 等人來點餐等了幾秒；接著開始算等上菜
-  g.order = partyMakeOrder(g.nextKind || 'tray'); g.nextKind = null;
-  g.state = 'food'; g.wait = PARTY.foodPatience; g.complained = false;
+  g.order = partyMakeOrder(g.nextKind || 'tray', g.id); g.nextKind = null;
+  g.state = 'food'; g.wait = g.waitMax = PARTY.foodPatience / partyNature(g.id).food; g.complained = false;   // 每個人耐心不同（waitMax＝等待條滿格是幾秒）
   if (g.order.type === 'tray') g.preview = { foods: g.order.items.map(k => partyFood(k) ? partyCookedFood(k) : partyPanFoodByKey(k)), left: 1, dirty: false };
   sfx('blip'); partySay(g.a, partyOrderName(g.order) + '，麻煩了！'); partyRenderTickets();
 }
@@ -193,14 +193,18 @@ function partyPanFoodByKey(key) {
   const t = mapTileById(id);   // 這台打飯台沒擺在地圖上：圖還是從素材庫截，訂單才有圖
   return { key, file: t ? t.file : '', rect: t ? MEAL.pans[+k] : [0, 0, 1, 1] };
 }
-// 這一餐的滿意度（0～100）：等點餐太久、等上菜太久、送錯都會扣分（數字在 data/party.js 的 mood）
+// 這一餐的滿意度（0～100）：從這個人的最高分開始，等點餐太久、等上菜太久、送錯都會扣分（數字在 data/party.js 的 mood、natures）
 const partyPart = (t, grace, patience) => Math.max(0, Math.min(1, (t - grace) / patience));
-function partyMealScore(orderWait, foodWait, wrong) {
-  const M = PARTY.mood;
-  return Math.max(M.min, 100 - M.orderPenalty * partyPart(orderWait, M.orderGrace, PARTY.orderPatience) - M.foodPenalty * partyPart(foodWait, M.foodGrace, PARTY.foodPatience) - (wrong ? M.wrongPenalty : 0));
+const partyNature = id => ({ ...PARTY.natureDefault, ...(PARTY.natures[id] || {}) });
+function partyMealScore(id, orderWait, foodWait, wrong) {
+  const M = PARTY.mood, n = partyNature(id);
+  // 越沒耐心的人，越早開始扣、也越快扣滿（跟頭上等待條用同一個耐心）
+  const orderLoss = M.orderPenalty * partyPart(orderWait, M.orderGrace / n.order, PARTY.orderPatience / n.order);
+  const foodLoss = M.foodPenalty * partyPart(foodWait, M.foodGrace / n.food, PARTY.foodPatience / n.food);
+  return Math.max(M.min, n.start - orderLoss - foodLoss - (wrong ? M.wrongPenalty * n.wrong : 0));
 }
 function partyServed(g, burnt, wrong) {
-  (g.scores = g.scores || []).push(partyMealScore(g.orderWait || 0, party.time - (g.t0 == null ? party.time : g.t0), wrong));
+  (g.scores = g.scores || []).push(partyMealScore(g.id, g.orderWait || 0, party.time - (g.t0 == null ? party.time : g.t0), wrong));
   g.served = true; party.stats.served++; if (g.wait < 0) party.stats.late++;
   if (wrong) party.stats.wrong++;
   if (wrong) { g.a.say = null; flash(PARTY.lines.wrongFlash, g.a.x, g.a.y - 64, '#ff8f7a', 1.8, true); }   // 送錯了：被送餐的人頭上跳提示（先收掉剛才的對話泡泡才不會蓋住）
@@ -224,6 +228,8 @@ function partyDeliver(g, who, what) {
     }
     return false;
   }
+  const hated = what === 'tray' && partyTrayOf(who).foods.find(f => mealWontEat(g.id, f.key));
+  if (hated) { sfx('error'); partySay(g.a, PARTY.lines.wontEat.replace('{dish}', dishOf(hated.key).name)); return false; }
   const spot = partyTableSpot(g), wrong = partyIsWrong(g, who, what);
   if (what === 'tray') {
     const tray = partyTrayOf(who);
@@ -354,7 +360,7 @@ function partyOpenPicker() {
   const list = Object.keys(PARTY.foods).filter(id => partyFood(id).fridge);
   const back = party.foods.filter(id => partyFood(id).fridge);
   const el = document.createElement('div'); el.id = 'partyPicker'; partyPickerEl = el;
-  el.innerHTML = '<b>冰箱（手上 ' + party.foods.length + ' / ' + PARTY.handLimit + '）</b>' + list.map((id, i) => '<button type="button" data-id="' + id + '"><i>' + (i + 1) + '</i><img src="' + partyFood(id).img + '" alt=""><span>' + partyFood(id).name + '</span>' + (partyFood(id).cookTo ? '<img class="fl" src="' + PARTY.stoveImg + '" alt="要煮">' : '') + '</button>').join('') +
+  el.innerHTML = '<b>冰箱</b>' + list.map((id, i) => '<button type="button" data-id="' + id + '"><i>' + (i + 1) + '</i><img src="' + partyFood(id).img + '" alt=""><span>' + partyFood(id).name + '</span>' + (partyFood(id).cookTo ? '<img class="fl" src="' + PARTY.stoveImg + '" alt="要煮">' : '') + '</button>').join('') +
     (back.length ? '<button type="button" class="pk-back" data-back="1"><i>0</i><span>放回冰箱</span><small>' + back.map(id => partyFood(id).name).join('、') + '</small></button>' : '');
   el.addEventListener('click', e => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.back) partyPutBack(); else partyPickFood(b.dataset.id); });
   document.getElementById('wrap').appendChild(el);
@@ -387,12 +393,33 @@ function partySeatGuest(g) {
   a.sitFrom = { x: a.x, y: a.y }; a.sitting = g.seat; a.seatGoal = null; a.navPath = null; a.target = null;
   a.x = g.seat.x; a.y = g.seat.y; a.dir = g.seat.dir; a.moving = false;
 }
+function partyWantMore(g) {   // 這個人決定再點一份
+  g.again = (g.again || 0) + 1; g.nextKind = partyPickAgain();
+  g.state = 'think'; g.t = partyRand(PARTY.againThink); g.complained = false; g.againSay = PARTY.lines.again[g.nextKind];
+}
 function partyAfterMeal(g) {   // 吃完（桌子也清空了）：可能追加，不然就結束
-  if ((g.again || 0) < PARTY.againMax && Math.random() < PARTY.againChance) {
-    g.again = (g.again || 0) + 1; g.nextKind = partyPickAgain();
-    g.state = 'think'; g.t = partyRand(PARTY.againThink); g.complained = false; g.againSay = PARTY.lines.again[g.nextKind];
-  } else g.state = 'done';
+  if ((g.again || 0) < PARTY.againMax && Math.random() < PARTY.againChance) partyWantMore(g);
+  else g.state = 'done';
   partyRenderTickets();
+}
+// ---- 節奏：不讓溫特閒著發呆 ----
+// 溫特現在有沒有事可做：有人等點餐，或有人等餐而且還沒有做好的放在檯子上（阿瓦倫只吃艾德林拿的，不算溫特的事）
+function partyPlayerHasWork() {
+  return party.guests.some(g => g.state === 'order' || (g.state === 'food' && g.id !== 'avaren' && !party.slots.some(s => s.item && partySlotFits(s.item, g.order))));
+}
+// 找下一個人點餐：還在想的人馬上想好 → 坐著聊天的人也餓了 → 吃飽的人再追加（阿瓦倫、偷吃中的克莉思不找）
+function partyCallNext() {
+  const thinking = party.guests.find(g => g.state === 'think' && !g.sneak);
+  if (thinking) { thinking.t = 0; return; }
+  const chatters = [...G.towers, ...G.npcs].filter(a => a.partyChat && a.sitting && trayPosForSeat(a.partyChat.seat) && partySeatServable(a.partyChat.seat));
+  if (chatters.length) {
+    const a = partyPick(chatters), C = a.partyChat;
+    a.partyChat = null;
+    party.guests.push({ a, id: partyActorId(a), seat: C.seat, approach: C.approach, state: 'think', t: 0, order: null, wait: 0, again: 0, joined: true });
+    return;
+  }
+  const full = party.guests.filter(g => g.state === 'done' && g.id !== 'avaren' && !g.sneak);
+  if (full.length) { const g = partyPick(full); partyWantMore(g); g.t = 0; partyRenderTickets(); }
 }
 function partyGuestStep(g, dt) {
   const a = g.a;
@@ -408,7 +435,7 @@ function partyGuestStep(g, dt) {
   if (g.id === PARTY.sneaker && (g.sneakCd = (g.sneakCd == null ? partyRand(PARTY.sneakGap) : g.sneakCd) - dt) <= 0 && ['think', 'order', 'food', 'done'].includes(g.state)) { partySneakStart(g); return; }
   a.x = g.seat.x; a.y = g.seat.y; a.dir = g.seat.dir; a.moving = false; a.sitting = g.seat;
   if (g.state === 'think') {
-    if ((g.t -= dt) <= 0) { g.state = 'order'; g.wait = PARTY.orderPatience; g.t0 = party.time; sfx('blip'); if (g.againSay) { partySay(a, g.againSay); g.againSay = null; } }
+    if ((g.t -= dt) <= 0) { g.state = 'order'; g.wait = g.waitMax = PARTY.orderPatience / partyNature(g.id).order; g.t0 = party.time; sfx('blip'); if (g.againSay) { partySay(a, g.againSay); g.againSay = null; } }
   } else if (g.state === 'order') {
     g.wait -= dt;
     if (g.wait <= 0 && !g.complained) { g.complained = true; party.stats.late++; partySay(a, partyLine(PARTY.lines.complainOrder, g.id)); }
@@ -469,6 +496,11 @@ const partyStepAtPan = (key, run) => {
 function partyHelperStep(h, dt) {
   const a = h.a; updateNpcTalk(a, dt);
   if (a.sitting) npcStandUp(a);
+  // 艾德林手上沒拿東西時，檯子上一有做好的餐就放下手邊的事去端（正要去收髒盤、正要幫阿瓦倫裝餐都一樣）
+  if (h.id === 'eldrin' && h.plan && !party.slots.some(s => s.claim === h) && !partyHasBox(a) && !a.partyFood) {
+    const urgent = partySlotPlan(h, () => true);
+    if (urgent) { h.plan = urgent; h.wait = 0; a.navPath = null; }
+  }
   if (h.wait > 0) { h.wait -= dt; a.moving = false; return; }
   const st = h.plan && h.plan[0];
   if (!st) { h.plan = null; h.think(h); if (!h.plan && h.wait <= 0) h.wait = .5; return; }
@@ -505,9 +537,11 @@ function partySlotPlan(h, canServe) {
   }
   return null;
 }
-function partyEldrinThink(h) {   // 艾德林：阿瓦倫拒絕過溫特之後，幫阿瓦倫裝餐、送餐；再來收髒盤；沒事就把空檯子上做好的餐端給對應的人
+function partyEldrinThink(h) {   // 艾德林挑工作的順序：檯子上做好的餐（有人在等、一趟就好）→ 阿瓦倫拒絕過溫特之後幫他裝餐 → 收髒盤
+  h.plan = partySlotPlan(h, () => true);
+  if (h.plan) return;
   const a = h.a, ava = party.avarenRefused && party.guests.find(g => g.id === 'avaren' && g.state === 'food' && g.order);
-  if (ava) { h.plan = partyEldrinPlan(h, ava); return; }
+  if (ava && partyEldrinHasBox(ava.order)) { h.plan = partyEldrinPlan(h, ava); return; }
   const g = party.guests.find(o => partyHasDirty(o) && !party.helpers.some(q => q !== h && q.target === o));
   if (g) {
     h.plan = [
@@ -516,15 +550,17 @@ function partyEldrinThink(h) {   // 艾德林：阿瓦倫拒絕過溫特之後�
     ];
     return;
   }
-  h.plan = partySlotPlan(h, () => true);
-  if (!h.plan) h.wait = .5;
+  h.wait = .5;
 }
+// 要裝阿瓦倫這份，現在有沒有乾淨的餐盤或碗可以拿：沒有就先去收髒盤，不然大家都在等他回收
+const partyEldrinHasBox = o => o.type === 'tray' ? party.stock.plate > 0 : o.type === 'soup' ? party.stock.bowl > 0 : true;
 function partyEldrinPlan(h, g) {
   const a = h.a, o = g.order, steps = [], fridge = partyStation('fridge'), stove = partyStation('stove');
   const deliver = what => partyStep(g.approach.x, g.approach.y, () => { if (g.state === 'food') partyDeliver(g, a, what); else if (partyHasBox(a)) partyRecycle(a); a.partyFood = null; });
   if (partyFood(o.type)) return [partyStepAt(fridge, () => { a.partyFood = o.type; sfx('switch'); }), deliver(o.type)];
-  if (o.type === 'soup') return [partyStepAt(partyStation('bowl'), () => { if (!partyTakeBox(a, 'bowl')) return false; }), partyStepAtPan(PARTY.soupPan, () => { a.partyBowl.soup = true; sfx('blip'); }), deliver('bowl')];
-  steps.push(partyStepAt(partyStation('plate'), () => { if (!partyTakeBox(a, 'plate')) return false; }));
+  const takeBox = kind => partyStepAt(partyStation(kind), () => { if (!partyTakeBox(a, kind)) { h.plan = []; return false; } });   // 走到時剛好被拿光：這趟取消，回頭重新挑工作
+  if (o.type === 'soup') return [takeBox('bowl'), partyStepAtPan(PARTY.soupPan, () => { a.partyBowl.soup = true; sfx('blip'); }), deliver('bowl')];
+  steps.push(takeBox('plate'));
   for (const key of o.items) {
     if (partyFood(key)) {   // 要現煮：冰箱拿生的 → 放上爐口 → 等煮好 → 裝進餐盤
       let pot = null; const raw = partyFood(key).from;
@@ -551,8 +587,13 @@ function partyActorStep(a, dt) {
   const g = party.guests.find(o => o.a === a); if (g) { partyGuestStep(g, dt); return true; }
   const h = party.helpers.find(o => o.a === a); if (h) { if (partyPlaying()) partyHelperStep(h, dt); else { a.moving = false; updateNpcTalk(a, dt); } return true; }
   if (party.stage !== 'play') { a.moving = false; return true; }   // 開場對話時大家先別動
-  if (a.partyChat) {   // 坐在點不到餐的位置：走過去坐下，之後只聊天
+  if (a.partyChat) {   // 沒點餐的人：輪到時從門口進來，走到分配的位子坐下，之後只聊天
     const C = a.partyChat; updateNpcTalk(a, dt);
+    if (C.delay > 0) {
+      C.delay -= dt; a.moving = false;
+      if (C.delay <= 0) { a.x = C.door.x; a.y = C.door.y; }
+      return true;
+    }
     if (a.sitting) { a.x = C.seat.x; a.y = C.seat.y; a.dir = C.seat.dir; a.moving = false; }
     else if (moveSentryWithPath(a, C.approach.x, C.approach.y, partySpeed(a), dt) || (a.navFailed && (C.fail += dt) > 2)) partySeatGuest(C);
     return true;
@@ -572,8 +613,11 @@ function partyUpdate(dt) {
   party.steam = party.steam.filter(s => s.age < s.life);
   if (partyPickerEl && !partyNearStation('fridge', G.player.x, G.player.y, 70)) partyClosePicker();
   partyUpdateBars();
+  const lastStretch = PARTY.timeLimit - party.time <= PARTY.idleStop;   // 快結束了：不再找人點餐
+  party.idleT = party.arrive.length || partyPlayerHasWork() ? 0 : party.idleT + dt;
+  if (party.idleT >= PARTY.idleGap && !lastStretch) { party.idleT = 0; partyCallNext(); }
   const allDone = !party.arrive.length && party.guests.length && party.guests.every(g => g.state === 'done');
-  if (allDone || party.time >= PARTY.timeLimit) partyFinish();
+  if ((allDone && lastStretch) || party.time >= PARTY.timeLimit) partyFinish();
 }
 
 // ===== 畫面（地圖上）=====
@@ -630,10 +674,10 @@ function partyDraw(c) {
     if (g.state === 'order') {
       c.fillStyle = '#fff6c9'; c.strokeStyle = '#6d5a24'; c.lineWidth = 1.5; c.beginPath(); c.arc(a.x, y - 6, 9 + Math.sin(now * 5), 0, Math.PI * 2); c.fill(); c.stroke();
       c.font = 'bold 13px sans-serif'; c.textAlign = 'center'; c.fillStyle = '#6d5a24'; c.fillText('?', a.x, y - 1);
-      const k = g.wait / PARTY.orderPatience; partyBar(c, a.x, y + 6, 26, k, partyBarCol(k));
+      const k = g.wait / g.waitMax; partyBar(c, a.x, y + 6, 26, k, partyBarCol(k));
     }
     if (g.state === 'food' && g.order) {
-      const k = g.wait / PARTY.foodPatience;
+      const k = g.wait / g.waitMax;
       if (g.preview) drawMealTray(c, a.x, y - 8, g.preview, .6, false);
       else if (g.order.type === 'soup') partyDrawBowl(c, a.x, y - 8, 18, true);
       else partyDrawFoodPic(c, g.order.type, a.x, y - 8, 22);
@@ -662,6 +706,8 @@ function partyFace(id) {
   const set = (typeof sentrySprites !== 'undefined' && sentrySprites[id]) || (typeof wandererSprites !== 'undefined' && wandererSprites[id]);
   return (set && set.front && set.front[0] && set.front[0].src) || '';
 }
+// 圓形小頭像；data-char 讓 css 可以替個別角色另外裁（球球是狗，頭不在圖的正上方）
+const partyFaceTag = id => '<span class="ph-face" data-char="' + id + '" style="background-image:url(\'' + encodeURI(partyFace(id)) + '\')"></span>';
 function partyRenderHud() {
   if (!partyHudEl) {
     partyHudEl = document.createElement('div'); partyHudEl.id = 'partyHud';
@@ -675,7 +721,7 @@ function partyRenderTickets() {
   if (!partyHudEl) return;
   const open = party.guests.filter(g => g.state === 'food' && g.order);
   partyHudEl.querySelector('.ph-tickets').innerHTML = open.map(g => {
-    const o = g.order, who = '<div class="ph-who"><span class="ph-face" style="background-image:url(\'' + encodeURI(partyFace(g.id)) + '\')"></span>' + partyName(g.id) + '</div>';
+    const o = g.order, who = '<div class="ph-who">' + partyFaceTag(g.id) + partyName(g.id) + '</div>';
     let body;
     if (o.type === 'tray') body = '<div class="ph-kind">四格餐盤</div><div class="ph-ings">' + o.items.map(partyTicketChip).join('') + '</div>';
     else if (o.type === 'soup') body = '<div class="ph-kind">一碗湯（要拿碗）</div><div class="ph-ings">' + partyTicketChip(PARTY.soupPan) + '</div>';
@@ -690,7 +736,7 @@ function partyUpdateBars() {
   for (const g of party.guests) {
     if (g.state !== 'food') continue;
     const bar = partyHudEl.querySelector('.ph-ticket[data-g="' + g.id + '"] .ph-bar i'); if (!bar) continue;
-    const k = Math.max(0, g.wait / PARTY.foodPatience); bar.style.width = (k * 100) + '%'; bar.style.background = partyBarCol(k);
+    const k = Math.max(0, g.wait / g.waitMax); bar.style.width = (k * 100) + '%'; bar.style.background = partyBarCol(k);
   }
 }
 
@@ -745,7 +791,7 @@ function partyGoToRestaurant() {
   practiceTravel(() => {
     switchMap(idx); begin(false);
     if (typeof stairArmed !== 'undefined') stairArmed = false;
-    Object.assign(party, { pots: [], steam: [], dishesAtTable: [], guests: [], helpers: [], arrive: [], foods: [], bowl: null, time: 0, arriveT: 0, avarenRefused: false, winterSay: null, stock: { plate: PARTY.plates, bowl: PARTY.bowls }, stats: { served: 0, burnt: 0, late: 0, stolen: 0, waste: 0, wrong: 0 } });
+    Object.assign(party, { pots: [], steam: [], dishesAtTable: [], guests: [], helpers: [], arrive: [], foods: [], bowl: null, time: 0, arriveT: 0, idleT: 0, avarenRefused: false, winterSay: null, stock: { plate: PARTY.plates, bowl: PARTY.bowls }, stats: { served: 0, burnt: 0, late: 0, stolen: 0, waste: 0, wrong: 0 } });
     const [wx, wy] = center(...PARTY.start.winter); G.player.x = wx; G.player.y = wy; G.player.dir = 'back'; G.player.tray = null; G.player.sitting = null;
     const all = [...G.towers, ...G.npcs];
     const [ex, ey] = center(...PARTY.start.eldrin);
@@ -769,7 +815,6 @@ function partyBegin() {
   const must = PARTY.mustGuests.filter(id => pool.includes(id)), rest = pool.filter(id => !must.includes(id)).sort(() => Math.random() - .5);
   const usable = mapSeats().filter(s => !s.bed && seatApproachPoint(s));
   const seats = usable.filter(s => trayPosForSeat(s) && partySeatServable(s)).sort(() => Math.random() - .5);
-  const chatSeats = usable.filter(s => !partySeatServable(s));   // 溫特碰不到的位置：不點餐，坐著聊天就好
   const guests = [...must, ...rest].slice(0, Math.min(PARTY.guestCount, seats.length));
   guests.forEach((id, i) => {
     const a = byId(id), seat = seats[i], approach = seatApproachPoint(seat);
@@ -778,23 +823,40 @@ function partyBegin() {
     party.guests.push(g); party.arrive.push(g);
     a.x = dx; a.y = dy + CELL * 40;
   });
-  for (const a of all) if (!party.guests.some(g => g.a === a) && !party.helpers.some(h => h.a === a) && a.y > dy + CELL) { a.x = dx; a.y = dy; }   // 不點餐的人：走進來在旁邊聊天
+  // 不點餐的人也都找位子坐著聊天，跟點餐的人穿插著進來。先坐溫特碰不到的位置，再坐剩下有桌子的，最後才是沒桌子的高腳椅
   const chatters = all.filter(a => partyActorId(a) !== 'ball' && !party.guests.some(g => g.a === a) && !party.helpers.some(h => h.a === a));
-  chatSeats.forEach((seat, i) => { const a = chatters[i]; if (a) { const approach = seatApproachPoint(seat); a.seatGoal = { seat, approach }; a.partyChat = { a, seat, approach, fail: 0 }; } });
+  const orderSeats = seats.slice(0, guests.length), freeSeats = usable.filter(s => !orderSeats.includes(s));
+  const seatRank = s => !partySeatServable(s) ? 0 : trayPosForSeat(s) ? 1 : 2;
+  freeSeats.sort((p, q) => seatRank(p) - seatRank(q));
+  chatters.forEach((a, i) => {
+    const seat = freeSeats[i]; if (!seat) return;
+    const approach = seatApproachPoint(seat);
+    a.seatGoal = { seat, approach };
+    a.partyChat = { a, seat, approach, fail: 0, delay: PARTY.arriveGap * (i + .5), door: { x: dx, y: dy } };
+  });
+  for (const a of all) if (!party.guests.some(g => g.a === a) && !party.helpers.some(h => h.a === a) && !a.partyChat && a.y > dy + CELL) { a.x = dx; a.y = dy; }   // 球球不坐椅子，直接進來走動
   party.stage = 'play'; partyRenderHud(); partyRenderTickets();
   systemNotice('慶功宴開始！客人頭上出現問號時，走過去按空白鍵點餐');
 }
 // 每個來的人這次的滿意程度（0～100），高的排前面
-// 有點餐的人：每一餐分數的平均，時間到還沒吃到的那一餐算很低分；只在旁邊聊天、幫忙的人：跟著全場平均走
+// 有點餐的人：每一餐分數的平均，時間到還沒吃到的那一餐算很低分；只在旁邊聊天、幫忙的人：看點餐的人平均被扣了多少（氣氛），再看他多在意
 function partyMoods() {
   const M = PARTY.mood, avg = list => list.reduce((s, v) => s + v, 0) / list.length, byId = {};
+  // 吃不到的分數也看個性：越沒耐心掉越多（score＝這種情況對普通人來說算幾分）
+  const hungry = (id, score) => { const n = partyNature(id); return Math.max(M.min, n.start - (100 - score) * Math.min(1, n.food)); };
   for (const g of party.guests) {
-    const list = [...(g.scores || [])];
-    if (g.state === 'order' || g.state === 'food') list.push(M.unserved);
-    byId[g.id] = avg(list.length ? list : [M.noMeal]);
+    const list = [...(g.scores || [])], waiting = g.state === 'order' || g.state === 'food';
+    // 時間到時才剛點餐、還沒等超過這個人的耐心：不算沒吃到（結束前才點的，來不及做不是溫特的錯）
+    const justAsked = waiting && party.time - (g.t0 == null ? party.time : g.t0) <= M.foodGrace / partyNature(g.id).food;
+    if (waiting && !justAsked) list.push(hungry(g.id, M.unserved));
+    if (list.length) byId[g.id] = avg(list);
+    else if (!justAsked && !g.joined) byId[g.id] = hungry(g.id, M.noMeal);   // 本來就排定要點餐，卻一餐都沒吃到
+    // 其他情況（半路才加入、一餐都還沒吃到）：分數跟旁邊聊天的人一樣算
   }
-  const whole = party.guests.length ? avg(Object.values(byId)) : M.noMeal;
-  return [...G.towers, ...G.npcs].map(partyActorId).map(id => ({ id, mood: Math.round(byId[id] == null ? whole : byId[id]) })).sort((a, b) => b.mood - a.mood);
+  const rated = party.guests.filter(g => byId[g.id] != null);
+  const loss = rated.length ? avg(rated.map(g => partyNature(g.id).start - byId[g.id])) : 100 - M.noMeal;
+  const onlooker = id => { const n = partyNature(id); return Math.max(M.min, n.start - loss * n.food * .6); };
+  return [...G.towers, ...G.npcs].map(partyActorId).map(id => ({ id, mood: Math.round(byId[id] == null ? onlooker(id) : byId[id]) })).sort((a, b) => b.mood - a.mood);
 }
 function partyCommentOf(m) {   // 依滿意程度挑這個人的評語（data/party.js 的 comments）
   const M = PARTY.mood, set = PARTY.comments[m.id] || PARTY.comments.default;
@@ -806,7 +868,7 @@ function partyToggleComment(el, btn, m) {   // 看評語：小視窗跳在按鈕
   if (same) return;
   sfx('menu');
   const c = document.createElement('div'); c.className = 'pm-comment'; c.dataset.id = m.id;
-  c.innerHTML = '<div class="pm-comment-who"><span class="ph-face" style="background-image:url(\'' + encodeURI(partyFace(m.id)) + '\')"></span>' + partyName(m.id) + '</div><p>' + partyCommentOf(m) + '</p>';
+  c.innerHTML = '<div class="pm-comment-who">' + partyFaceTag(m.id) + partyName(m.id) + '</div><p>' + partyCommentOf(m) + '</p>';
   el.appendChild(c);
   // 位置：放在按鈕下面，下面放不下就放上面（畫面可能有縮放，所以要換算）
   const P = el.getBoundingClientRect(), B = btn.getBoundingClientRect(), k = P.width / el.offsetWidth || 1;
@@ -820,11 +882,12 @@ function partyFinish() {
   const fans = party.guests.filter(g => g.served);
   if (typeof favorPoints !== 'undefined') for (const g of fans) favorPoints[g.id] = Math.max(0, (favorPoints[g.id] || 0) + PARTY.favorPerGuest);
   const S = party.stats, moods = partyMoods();
+  if (typeof addStat === 'function' && moods.every(m => m.mood >= PARTY.mood.high)) addStat('partyAllHappy');   // 成就：全場都滿意
   const row = (k, v) => '<li><span>' + k + '</span><b>' + v + '</b></li>';
   // 好感度：滑鼠移過去才列出是誰加的
   const favorTip = fans.length ? fans.map(g => '<span>' + partyName(g.id) + ' <b>+' + PARTY.favorPerGuest + '</b></span>').join('') : '<span>這次沒有人加好感度</span>';
   const favorRow = '<li class="party-favor" tabindex="0"><span>好感度</span><b>' + fans.length + ' 人各 +' + PARTY.favorPerGuest + '</b><div class="party-favor-tip">' + favorTip + '</div></li>';
-  const moodRows = moods.map(m => '<li><span class="ph-face" style="background-image:url(\'' + encodeURI(partyFace(m.id)) + '\')"></span><span class="pm-name">' + partyName(m.id) + '</span><span class="pm-bar" title="滿意程度 ' + m.mood + '%"><i style="width:' + m.mood + '%"></i></span><button type="button" class="pm-btn" data-id="' + m.id + '">看評語</button></li>').join('');
+  const moodRows = moods.map(m => '<li>' + partyFaceTag(m.id) + '<span class="pm-name">' + partyName(m.id) + '</span><span class="pm-bar" title="滿意程度 ' + m.mood + '%"><i style="width:' + m.mood + '%"></i></span><button type="button" class="pm-btn" data-id="' + m.id + '">看評語</button></li>').join('');
   partyPanel('<section class="workshop-card practice-card party-card" role="dialog" aria-modal="true" aria-label="慶功宴結算"><header class="workshop-head"><div class="workshop-title"><small>1F 餐廳・慶功宴</small><h2>慶功宴結算</h2><p>' + PARTY.lines.end + '</p></div></header><div class="workshop-body practice-body"><ul class="party-result">' +
     row('送出餐點', S.served) + row('浪費食物', S.waste) + row('烤焦', S.burnt) + row('讓人等太久', S.late) + row('被克莉思偷吃', S.stolen) + row('用時', Math.round(party.time) + ' 秒') + favorRow + row('送錯餐的次數', S.wrong) +
     '</ul><h3>大家的滿意程度</h3><ul class="party-moods">' + moodRows + '</ul><div class="pr-actions"><button type="button" class="ws-btn pp-go">結束</button></div></div></section>', el => {

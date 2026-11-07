@@ -510,7 +510,8 @@ function drawEnemy(e) {
   ctx.restore();
 }
 // 坐著的人畫在椅子的前或後：一般椅子／床畫在上面（+0.5）；背面的椅子讓椅背蓋住人（-0.5）
-function seatDrawY(seat) { return seat.sortY + (seat.chairInFront ? -0.5 : 0.5); }
+// 長椅上每個位子的 sortY 都一樣：再用位子的 y 分前後（數字很小，不會影響跟其他東西的順序），下面的人才會擋住上面的人
+function seatDrawY(seat) { return seat.sortY + (seat.chairInFront ? -0.5 : 0.5) + (seat.y || 0) / 100000; }
 // 椅子設定有旋轉角度（橫放的床）時，以角色圖中心旋轉（呼叫前要先 ctx.save()）
 function seatRotate(actor, size) {
   const deg = actor.sitting && actor.sitting.rotation;

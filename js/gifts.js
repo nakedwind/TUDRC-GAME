@@ -20,7 +20,7 @@ let requestsStale = true;      // 出勤過後回到基地要重新抽委託
 const giftableId = actor => actor && (actor.kind === 'tower' ? actor.type : actor.id);
 // 收禮、委託的台詞（對話編輯器「送禮與委託」）：隨機一句，{item} 換成東西的名稱；沒寫就回傳 null（不說話）
 const GIFT_LINE_KEY = { love: 'giftLove', like: 'giftLike', normal: 'giftNormal', dislike: 'giftDislike' };
-const giftAfterLine = (id, itemName) => giftLine(id, 'giftAfter', itemName);   // 收下任何禮物之後再說的一句（對話編輯器「收到禮物後會說的台詞」）；沒寫就不說
+const giftAfterLine = (id, itemName) => giftLine(id, 'giftAfter', itemName);   // 備用台詞（對話編輯器「收到禮物後會說的台詞」）：這次的反應沒寫台詞才用它，一次送禮只說一句，才不會像道謝兩次
 function giftLine(id, key, itemName) { const line = pickDialogueLine(id, key); return line ? line.replaceAll('{item}', itemName || '') : null; }
 // 所有角色都能收禮（溫特＝玩家自己除外）；喜好沒寫在 GIFT_PREFS 的全部算普通
 const canReceiveGifts = id => !!id && id !== 'winter' && (!!GIFT_PREFS[id] || (typeof CHARACTERS !== 'undefined' && !!CHARACTERS[id]));
@@ -168,9 +168,8 @@ function giveGift(itemId) {
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
   // 對話框換成收到禮物的反應
-  const said = giftLine(id, GIFT_LINE_KEY[reaction], item.name);   // 沒寫台詞：只顯示系統訊息
+  const said = giftLine(id, GIFT_LINE_KEY[reaction], item.name) || giftAfterLine(id, item.name);   // 只說一句：先用這個反應的台詞，沒有才用備用台詞；都沒寫就只顯示系統訊息
   const lines = [said || { speaker: '系統', text: `${profile.name}收下了「${item.name}」。` }];
-  const afterSaid = giftAfterLine(id, item.name); if (afterSaid) lines.push(afterSaid);
   const reward = wanted ? fulfillRequest(id) : null;   // 委託完成：回憶碎片或異質碎片
   if (reward) { if (reward.line) lines.push(reward.line); lines.push({ speaker: '系統', text: reward.text }); }
   if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
@@ -200,9 +199,8 @@ function giveCostumeGift(costumeId) {
   if (typeof addStat === 'function') { addStat('gifts'); addStat('giftsTo:' + id); if (id === 'ball') addStat('ballInteracts'); }   // 成就：送禮次數（全部、送給這個人）；送球球也算跟球球互動
   const after = favorInfo(id), profile = dialogueProfile(actor) || { name: '' };
   closeGiftPicker(true);
-  const said = giftLine(id, reaction === 'dislike' ? 'giftDislike' : 'giftCostume', item.name);   // 「收到服裝」；不喜歡的服裝說「收到不喜歡的禮物」
-  const afterSaid = giftAfterLine(id, item.name);
-  const lines = [...(said ? [said] : []), ...(afterSaid ? [afterSaid] : []), { speaker: '系統', text: `${profile.name}收下了「${item.name}」！按「👗 推薦穿搭」可以幫${profile.name}換上。` }];
+  const said = giftLine(id, reaction === 'dislike' ? 'giftDislike' : 'giftCostume', item.name) || giftAfterLine(id, item.name);   // 「收到服裝」；不喜歡的服裝說「收到不喜歡的禮物」；沒寫才用備用台詞
+  const lines = [...(said ? [said] : []), { speaker: '系統', text: `${profile.name}收下了「${item.name}」！按「👗 推薦穿搭」可以幫${profile.name}換上。` }];
   if (after.lv > before.lv) lines.push({ speaker: '系統', text: `和${profile.name}的好感度提升到「${after.name}」了！` });
   dialogueState.lines = lines; dialogueState.index = 0; dialogueState.giftReply = true;
   renderDialogueLine(); renderDialogueFavor();
@@ -272,7 +270,7 @@ function showKeyToast(key) {
 // 頭上的「想吃」泡泡（在基地裡才顯示）
 const requestImgCache = {};
 function drawRequestBubbles(ctx) {
-  if (!MAP_SAFE || !G) return;
+  if (!MAP_SAFE || !G || (typeof partyOn === 'function' && partyOn())) return;   // 慶功宴時大家是來吃飯的，不冒想吃零食的泡泡
   const now = performance.now() / 1000;
   for (const actor of [...(G.npcs || []), ...(G.towers || [])]) {
     const id = giftableId(actor), want = giftRequests[id];

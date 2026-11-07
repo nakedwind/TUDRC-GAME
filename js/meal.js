@@ -71,6 +71,9 @@ MEAL_DISHES.tile_mw628w22 = [   // 右邊那台（banquet-buffet-03）；濃湯�
 ];
 const MEAL_EFF = { guard: { name: '減傷', color: '#ffd27a' }, rate: { name: '射速', color: '#ffe066' }, speed: { name: '移速', color: '#9ff0c0' } };
 const dishOf = key => { const [id, k] = String(key || '').split('#'); return (MEAL_DISHES[id] || [])[+k] || null; };
+// 誰絕對不吃什麼（寫菜名，哪一台的都算）：平常自己打飯不會拿，慶功宴不會點，端給他也不收
+const MEAL_NEVER_EAT = { taana: ['三色豆'] };
+const mealWontEat = (id, key) => (MEAL_NEVER_EAT[id] || []).includes((dishOf(key) || {}).name);
 const mealImgs = {};
 function mealImg(src) { if (!mealImgs[src]) { mealImgs[src] = new Image(); mealImgs[src].src = src; } return mealImgs[src]; }
 const mealTrays = () => G.mealTrays || (G.mealTrays = []);   // 桌上的餐盤（G 換地圖就重建：沒收的髒盤自己消失）
@@ -188,7 +191,8 @@ function tryStartMeal(a, force) {   // force＝一定去吃（被溫特邀請來
   if (a.mealCd == null) a.mealCd = mealRand(MEAL.npc.firstCd);
   if (a.mealCd > 0 || a.meal || (!force && Math.random() >= MEAL.npc.chance) || !mealMapReady()) return false;
   const stacks = mealStamps(MEAL.trayTiles), buffets = mealStamps(MEAL.buffetTiles);
-  const pans = buffets.flatMap(r => MEAL.pans.map((_, k) => panOf(r, k))).sort(() => Math.random() - .5).slice(0, Math.round(mealRand(MEAL.npc.dishes)));
+  const eater = a.kind === 'tower' ? a.type : a.id;
+  const pans = buffets.flatMap(r => MEAL.pans.map((_, k) => panOf(r, k))).filter(p => !mealWontEat(eater, p.key)).sort(() => Math.random() - .5).slice(0, Math.round(mealRand(MEAL.npc.dishes)));
   const stack = stacks[Math.floor(Math.random() * stacks.length)];
   a.meal = { stage: 'tray', stops: [{ x: stack.x, y: stack.bottom + MEAL.trayReach - 4, act: 'tray' }, ...pans.sort((p, q) => q.x - p.x).map(p => ({ x: p.x, y: buffets.find(r => p.key.startsWith(r.s.id)).bottom + 14, act: 'dish', food: { ...p.food, key: p.key } }))], wait: 0 };
   a.target = null; a.navPath = null; a.waitT = 0;

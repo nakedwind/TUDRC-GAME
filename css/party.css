@@ -14,6 +14,7 @@
 .ph-bar i { display: block; width: 100%; height: 100%; }
 .ph-who { display: flex; align-items: center; justify-content: center; gap: 4px; padding-top: 3px; color: #ffe3a1; font-size: 13px; font-weight: 700; }
 .ph-face { display: inline-block; flex: none; width: 22px; height: 22px; border: 1px solid rgba(255,212,121,.38); border-radius: 50%; background-color: #202730; background-position: 50% 0; background-repeat: no-repeat; background-size: 150%; image-rendering: pixelated; }
+.ph-face[data-char="ball"] { background-position: 8% 61%; background-size: 220%; }   /* 球球是狗：頭在圖的左邊 27%、高度 56% 的地方，放大後對準它（跟隊員名單同一個裁法） */
 .ph-kind { margin-top: 2px; color: #c9d3dc; font-size: 11px; line-height: 1.2; }
 .ph-note { color: #d8ae5d; font-size: 11px; }
 .ph-ings .ib.pan { width: 24px; height: 22px; padding: 0; background-repeat: no-repeat; border: 1px solid rgba(143,211,255,.3); image-rendering: pixelated; }
