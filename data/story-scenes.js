@@ -10,7 +10,7 @@ const STORY_SCENES = {
     "darkness": true,
     "bgm": "music/雷德回憶01.mp3",
     "bgmVolume": 0.25,
-    "cameras": { "左側戰場": [8, 8.5], "右側": [20, 9.5], "全景": [16, 9], "床邊": [15.6, 10.4], "耶魯": [13.6, 8.4] },
+    "cameras": { "左側戰場": [8, 8.5], "右側": [20, 9.5], "全景": [16, 9, 2], "床邊": [15.6, 10.4, 2.2], "耶魯": [13.6, 8.4] },
     "points": { "耶魯的床": [11.2, 7.2] },
     "portraits": { "雷德": "red_B", "溫特": "winter_B", "哨兵": "mob_B", "嚮導": "mob_A" },
     "actors": [
@@ -109,7 +109,7 @@ const STORY_SCENES = {
     "endTitle": "天使的庇護",
     "door": [10, 6],
     "footsteps": true,
-    "cameras": { "開場": [11.2, 10.7, 2], "門口": [11.2, 10.2], "人行道": [11.3, 10.4], "近景": [11.2, 11.1, 2.1], "兩人近景": [11.3, 11.6, 2.1] },
+    "cameras": { "開場": [11.2, 10.7, 2.2], "門口": [11.2, 10.2, 1.8], "人行道": [11.3, 10.4, 1.8], "近景": [11.2, 11.1, 2.1], "兩人近景": [11.3, 11.4, 2.5] },
     "portraits": { "雷德": "red_B", "溫特": "winter_A" },
     "actors": [
       { "id": "red", "sprite": "red_B", "name": "雷德", "at": [11.2, 10.8], "dir": "front", "carry": "images/回憶場景/relics.png" },
@@ -233,7 +233,7 @@ const STORY_SCENES = {
       { "speaker": "艾德林", "text": "……你說的天使……\n難道是指溫特嚮導嗎？", "wait": 0.6 },
       { "speaker": "雷德", "text": "……溫特？", "wait": 0.3 },
       { "speaker": "艾德林", "text": "那天最後趕到救護區支援的 S 級嚮導。\n聽說是他一個人，把救護區的重傷員撐了下來。", "wait": 0.3 },
-      { "speaker": "艾德林", "text": "長得很漂亮的……那一位。", "wait": 0.3 },
+      { "speaker": "艾德林", "text": "長得很好看，能力也很強的那一位。", "wait": 0.3 },
       { "speaker": "雷德", "text": "……原來，天使有名字啊。\n溫特……溫特嚮導……", "wait": 0.6 },
       { "speaker": "雷德", "text": "我得去跟他道謝才行！\n他還跟我說……我的隊友已經沒事了。", "wait": 0.3 },
       { "speaker": "艾德林", "text": "…………", "wait": 0.6 },
@@ -877,7 +877,7 @@ const STORY_SCENES = {
       { "speaker": "", "text": "砰！", "wait": 0.4, "sfx": "storyPunch", "sfxVolume": 2.1, "textSize": 24 },
       {
         "speaker": "",
-        "text": "畫面亮起。訓練室角落，有人在打沙包。",
+        "text": "訓練室的一角傳來了有人在打沙包的聲音。",
         "wait": 1.8,
         "screen": "clear",
         "screenFade": 1.6,
@@ -887,8 +887,16 @@ const STORY_SCENES = {
         "sfxVolume": 1.65
       },
       { "speaker": "", "text": "另一邊有幾個哨兵在做體能訓練，全都很自覺地站在離他很遠的地方。", "wait": 1.2, "camera": "全景" },
-      { "speaker": "哨兵A", "text": "（小聲）……那是部隊長？", "wait": 0.3, "shout": { "winter": true }, "sfx": "storyPunch", "sfxVolume": 1.05 },
-      { "speaker": "哨兵B", "text": "（小聲）別看了。你沒聽說上次海報那件事嗎？", "wait": 0.3, "emote": { "sentA": "drop" } },
+      {
+        "speaker": "哨兵A",
+        "text": "（小聲）……那是部隊長？",
+        "wait": 0.3,
+        "shout": { "winter": true },
+        "sfx": "storyPunch",
+        "sfxVolume": 1.05,
+        "emote": { "sentB": "drop" }
+      },
+      { "speaker": "哨兵B", "text": "（小聲）別看了。你沒聽說上次海報那件事嗎？", "wait": 0.3, "emote": { "sentC": "drop" } },
       { "speaker": "", "text": "溫特最後一記重拳。", "wait": 0.5, "camera": "沙包", "shout": { "winter": true }, "sfx": "storyPunch", "sfxVolume": 2.7 },
       {
         "speaker": "",
@@ -918,7 +926,7 @@ const STORY_SCENES = {
       { "speaker": "諾亞", "text": "……這是這個月第幾個了？", "wait": 0.3, "face": { "noah": "left" } },
       { "speaker": "", "text": "溫特接過毛巾。", "wait": 0.3, "face": { "noah": "left" } },
       { "speaker": "溫特", "text": "第三個。", "wait": 0.3 },
-      { "speaker": "諾亞", "text": "塔納說，再這樣下去要跟你收沙包錢喔。", "wait": 0.3 },
+      { "speaker": "諾亞", "text": "塔納說，再這樣下去要跟你收沙包的錢喔。", "wait": 0.3 },
       { "speaker": "溫特", "text": "大不了從薪水裡面扣。", "wait": 0.3, "screen": "black", "screenFade": 1.6 },
       {
         "speaker": "",
@@ -943,7 +951,7 @@ const STORY_SCENES = {
       { "speaker": "諾亞", "text": "……辛苦了。", "wait": 0.3 },
       { "speaker": "溫特", "text": "不辛苦。習慣了。", "wait": 0.6 },
       { "speaker": "", "text": "溫特站起來，把毛巾甩到肩上。", "wait": 0.3, "place": { "winterSit": [11.8, 20.9] }, "face": { "winterSit": "front" } },
-      { "speaker": "溫特", "text": "而且，哨兵這種生物，我本來就最討厭了。", "wait": 0.4 },
+      { "speaker": "溫特", "text": "而且哨兵這種生物，我本來就最討厭了。", "wait": 0.4 },
       {
         "speaker": "",
         "text": "溫特和諾亞一起往樓梯走去。諾亞聊著最近隊員們發生的瑣碎小事，但溫特都沒聽進去",
@@ -957,7 +965,7 @@ const STORY_SCENES = {
       {
         "speaker": "",
         "text": "樓梯上一個哨兵低著頭走下來。臉頰凹下去，制服鬆垮垮的，皮帶多打了兩個洞。",
-        "wait": 2.2,
+        "wait": 2.5,
         "move": { "kobayashi": [24.3, 21.6] },
         "face": { "kobayashi": "left" },
         "place": { "kobayashi": [26.4, 15.7] },
@@ -1027,6 +1035,7 @@ const STORY_SCENES = {
       { "speaker": "溫特", "text": "……嘖……真煩人。", "wait": 0.4 }
     ],
     "opening": { "black": 1, "fade": 1.5 },
-    "bgmVolume": 0.3
+    "bgmVolume": 0.3,
+    "vignette": 0.4
   }
 };

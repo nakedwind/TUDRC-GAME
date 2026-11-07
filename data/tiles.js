@@ -2128,6 +2128,14 @@ const SHARED_TILES = [
     "h": 2
   },
   {
+    "id": "tile_restaurant_partition02",
+    "name": "restaurant-partition02",
+    "role": "floor",
+    "file": "images/餐廳/restaurant-partition02.png",
+    "w": 4,
+    "h": 2
+  },
+  {
     "id": "tile_musg7iyr",
     "name": "restaurant-buffet-counter-03",
     "role": "floor",
