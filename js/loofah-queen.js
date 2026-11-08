@@ -33,6 +33,12 @@ const LOOFAH_QUEEN = {
     hangChance: .5,              // 每條有幾成是「倒吊藤蔓」（綁隊友），其餘是「捲走藤蔓」（拉走再丟下來）
     gap: 1.5,                    // 兩條藤蔓至少隔幾格
     life: 6,                     // 完全垂下來之後停幾秒就縮回去
+    ground: {                    // 從地面鑽出來的藤蔓：把人抓到半空中，不能動、不能打
+      count: 2,                  // 每次踏地鑽出幾條（瞄準我方站的地方；先挑沒被天上藤蔓瞄準的人）
+      warn: .9,                  // 地面先冒土、震動幾秒才鑽出來（這段時間走開就躲得掉）
+      grabR: 32,                 // 鑽出來時離多近的人會被抓（像素）
+      hold: 4,                   // 抓在半空中最久幾秒（隊友可以被溫特開槍打斷藤蔓救下來；火燒也會放開）
+    },
   },
   core: {
     hp: 1000,                    // 核心血量（地圖難度 1；難度越高照比例加）
@@ -244,6 +250,10 @@ function lqStomp(e) {
     const ang = Math.random() * Math.PI * 2, j = Math.random() * V.aimJitter * CELL;
     if (lqDropVine(a.x + Math.cos(ang) * j, a.y + Math.sin(ang) * j, e)) made++;
   }
+  // 從地面鑽出來的藤蔓：瞄準我方站的地方（先挑沒被天上藤蔓瞄準的人）
+  const all = [G.player, ...G.towers].filter(a => a && a.hp > 0 && !a.vineCap && lqDist(a, e) <= Q.loseRange * CELL && hasLineOfSight(e.x, e.y, a.x, a.y));
+  const picks = [...all.filter(a => !people.includes(a)), ...all.filter(a => people.includes(a))].slice(0, V.ground.count);
+  for (const a of picks) (G.lqGround = G.lqGround || []).push({ x: a.x, y: a.y + 12, t: V.ground.warn, puff: 0, owner: e });
   // 其他：隨機落在她身邊（看得到的地方，不會穿牆垂到隔壁房間）
   for (let k = 0; k < 60 && made < V.count; k++) {
     const ang = Math.random() * Math.PI * 2, d = (V.spreadMin + Math.random() * (V.spreadMax - V.spreadMin)) * CELL;
@@ -275,10 +285,78 @@ function updateLoofahQueen(dt) {
     G.vines = G.vines.filter(v => !(v.lqTemp && v.state === 'gone'));
   }
   for (const a of [G.player, ...G.towers]) if (a && a.lqFarmSafeT > 0) a.lqFarmSafeT = Math.max(0, a.lqFarmSafeT - dt);
+  lqUpdateGroundVines(dt);
   for (const rec of G.loofahQueens) {
     lqUpdateCore(rec, dt);
     for (const plot of rec.plots) lqUpdatePlot(plot, dt);
   }
+}
+
+// ---- 從地面鑽出來的藤蔓：先冒土震動 → 鑽出來，旁邊的人被藤蔓纏住抬到半空中（用 js/vines.js 倒吊藤蔓那一套，cap.ground＝從下面撐著、不翻過來）----
+function lqUpdateGroundVines(dt) {
+  const V = LOOFAH_QUEEN.vines.ground;
+  if (G.lqGround && G.lqGround.length) {
+    for (const g of G.lqGround) {
+      g.t -= dt; g.puff -= dt;
+      if (g.t > 0) {   // 預警：地面一直冒土、小小的震動圈
+        if (g.puff <= 0) { g.puff = .12; llDust(g.x + (Math.random() - .5) * 26, g.y, Math.random() < .5); G.effects.push({ ring: true, x: g.x, y: g.y, r: 4, r2: V.grabR, life: .3, life0: .3, color: '#8a7a50' }); }
+        continue;
+      }
+      lqGroundErupt(g);
+    }
+    G.lqGround = G.lqGround.filter(g => g.t > 0);
+  }
+  // 被抓在半空中的人：時間到、或被火燒到就放下來
+  for (const cap of G.vineCaps || []) {
+    if (!cap.ground || (cap.phase !== 'hang' && cap.phase !== 'wrap' && cap.phase !== 'lift')) continue;
+    const a = cap.actor, burnt = typeof anyFireAt === 'function' && anyFireAt(a.x, a.y + 10, 30);
+    if (cap.phase === 'hang') cap.holdT -= dt;
+    if (burnt) for (let i = 0; i < 3; i++) spawnFlameBurst(a.x + (Math.random() - .5) * 12, a.y - Math.random() * cap.h, .55);
+    if (burnt || cap.holdT <= 0) {
+      if (cap.phase === 'wrap') { G.vineCaps = G.vineCaps.filter(c => c !== cap); a.vineCap = false; a.vineSafeT = VINES.safeTime; }
+      else vineDropHung(cap);
+    }
+  }
+}
+function lqGroundErupt(g) {
+  const V = LOOFAH_QUEEN.vines.ground, p = G.player;
+  G.effects.push({ ring: true, x: g.x, y: g.y, r: 6, r2: V.grabR + 14, life: .35, life0: .35, color: '#7fbf5a' });
+  for (let i = 0; i < 8; i++) llDust(g.x + (Math.random() - .5) * 30, g.y, true);
+  for (let i = 0; i < 10; i++) {   // 碎土、葉片往上噴
+    const a = -Math.PI / 2 + (Math.random() - .5) * 1.4, sp = 80 + Math.random() * 120;
+    G.effects.push({ particle: true, x: g.x + (Math.random() - .5) * 14, y: g.y - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 1.6 + Math.random() * 2, life: .5, life0: .5, color: Math.random() < .5 ? '#7a6a48' : '#7fbf5a' });
+  }
+  if (typeof sfxAt === 'function') sfxAt('loofahVine', g.x, g.y, .9, 'loofah-queen-ground-vine');
+  if (G.over) return;
+  for (const a of [p, ...G.towers]) {
+    if (!a || typeof vineCanGrab !== 'function' || !vineCanGrab(a, a === p)) continue;
+    if (Math.hypot(a.x - g.x, (a.y + 12 - g.y) * 1.3) > V.grabR) continue;
+    lqGroundGrab(a, a === p, g);
+  }
+}
+function lqGroundGrab(a, isPlayer, g) {
+  if (isPlayer && typeof cancelChannel === 'function' && typeof playerChannel !== 'undefined' && playerChannel) cancelChannel();
+  if (isPlayer && a.sitting && typeof standUp === 'function') standUp();
+  const v = { x: a.x, y: a.y, kind: 'hang', state: 'grab', t: 0, len: 1, seed: Math.random() * 10, twitch: 0, temp: true };   // 假的藤蔓（不放進 G.vines）
+  G.vineCaps.push({ v, actor: a, isPlayer, mode: 'hang', ground: true, holdT: LOOFAH_QUEEN.vines.ground.hold, phase: 'wrap', t: 0, h: 0,
+    x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y, topH: (a.y - cam.y) + 110, seed: Math.random() * 10 });
+  a.vineCap = true; a.dashT = 0; a.knockT = 0; a.rootT = 0;
+  if (!isPlayer) { a.navPath = null; a.navGoal = null; a.meleeSwing = null; a.gunSwing = null; }
+  flash(isPlayer ? '被藤蔓抓到半空中了！' : '隊友被藤蔓抓住了！', a.x, a.y - 56, '#9fe07a', .9);
+  if (isPlayer) addShake(3);
+  if (typeof sfxAt === 'function') sfxAt('vineGrab', a.x, a.y, .8);
+}
+// 畫從地面撐起來的藤（js/vines.js 的 drawVineActor 呼叫）：從腳下的地面長上來，接到腰上；兩三根粗細不一的藤交纏
+function lqDrawGroundStalk(ctx, cap, a, ax, ay) {
+  const gx = a.x, gy = a.y + 14, h = gy - ay;
+  if (h < 4 || typeof vineStroke !== 'function') return;
+  const seed = cap.seed || 1, now = performance.now() / 1000;
+  for (let i = 0; i < 3; i++) {
+    const off = (i - 1) * 7, sway = Math.sin(now * 2 + seed + i) * 4;
+    vineStroke(ctx, [[gx + off, gy], [gx + off * 1.8 + sway + (i - 1) * 10, gy - h * .55], [ax + off * .3, ay + 4]], (i === 1 ? 11 : 7), seed + i);
+  }
+  ctx.fillStyle = 'rgba(70,52,30,.55)';   // 地面被撐破的土
+  ctx.beginPath(); ctx.ellipse(gx, gy + 1, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
 }
 
 // ---- 核心：吊在女王頭上 → 她倒下後吊在原地 → 被火燒斷藤蔓掉下來 ----

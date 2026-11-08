@@ -242,7 +242,7 @@ function vineHangShotTarget(aim) {
   return null;
 }
 function shootHangVine(p, cap, aim, aimAng) {
-  const a = cap.actor, hx = a.x + (cap.sx || 0), hy = a.y - cap.h - VINE_BODY.feet - 12;   // 子彈打在腳上面那一段藤蔓
+  const a = cap.actor, hx = a.x + (cap.sx || 0), hy = cap.ground ? a.y - cap.h + 16 : a.y - cap.h - VINE_BODY.feet - 12;   // 子彈打在腳上面那一段藤蔓（從地面撐起來的：打腳下那一段）
   const m = gunMuzzleAt(p, aimAng), mx = m.x, my = m.y;
   G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .07, life0: .07 });
   addLightFlash('muzzle', mx, my);
@@ -505,6 +505,7 @@ function drawVineActor(a, baseDraw, overlay = false) {
     ang = Math.PI + (target - Math.PI) * lieK;
     near = cap.cut ? 0 : q * .9;   // 從半空中掉下來的不用往鏡頭靠近
   }
+  if (cap.ground && cap.phase !== 'fall') ang = Math.sin(now * 2.2 + a.x * .01) * .08 + (cap.kick || 0) * .2;   // 從地面撐起來的（絲瓜女王，js/loofah-queen.js）：頭上腳下、微微晃
   const flipK = cap.phase === 'fall' ? 1 : Math.min(1, ang / Math.PI);
   const { s, alpha } = vineNear(near);
   const air = (cap.phase === 'lift' && !hangMode) || (cap.phase === 'fall' && h > 50 && !cap.cut);   // 快落地、彈跳時畫回一般那層（跟躺在地上的樣子接得起來）
@@ -525,7 +526,10 @@ function drawVineActor(a, baseDraw, overlay = false) {
   const ax = px - Math.sin(ang) * off * s, ay = py + Math.cos(ang) * off * s;
   ctx.save();
   ctx.globalAlpha *= alpha;
-  if (cap.phase !== 'fall' && !cap.wind) drawVineStem(ctx, cap.v, ax, ay, now, true, s);   // wind：被金蕉大王的狂風吹上天（js/banana-emperor.js），沒有藤蔓   // 藤蔓從畫面上緣垂下來，接到身上（先畫，在人後面）
+  if (cap.phase !== 'fall' && !cap.wind) {
+    if (cap.ground) { if (typeof lqDrawGroundStalk === 'function') lqDrawGroundStalk(ctx, cap, a, ax, ay); }   // 藤從地面長上來撐著（js/loofah-queen.js）
+    else drawVineStem(ctx, cap.v, ax, ay, now, true, s);
+  }   // wind：被金蕉大王的狂風吹上天（js/banana-emperor.js），沒有藤蔓   // 藤蔓從畫面上緣垂下來，接到身上（先畫，在人後面）
   ctx.translate(px, py); ctx.rotate(ang); ctx.scale(s, s); ctx.translate(-a.x, -(a.y - VINE_BODY.pivot));
   const shadow = typeof drawCharacterShadow === 'function' ? drawCharacterShadow : null;
   if (shadow) drawCharacterShadow = () => {};   // 影子另外畫在地上

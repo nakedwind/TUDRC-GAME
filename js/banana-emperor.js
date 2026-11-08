@@ -28,7 +28,7 @@ const BANANA_EMPEROR = {
     speed: .5,                   // 走路速度：金蕉王的幾倍（.5＝一半，慢慢走）
     pause: [1.5, 3.5],           // 走到之後停下來站幾秒～幾秒，再走下一段
   },
-  hp: 2500, rewardMul: 6, crystalMul: 6,   // hp：血量（再乘整體難度）
+  hp: 2000, rewardMul: 6, crystalMul: 6,   // hp：血量（再乘整體難度）
   scale: 2.3,                    // 體型放大倍率（以金蕉王為準）
   wakeRange: 8,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
   castEvery: 4.5,                // 兩次施法間隔幾秒（BOSS 戰開始後）
@@ -40,7 +40,7 @@ const BANANA_EMPEROR = {
   spells: {                      // color：魔法陣、權杖的光、地上裂縫、身上光點的顏色
     heal:  { name: '補血',     color: [125, 255, 138], amount: 80 },              // amount：每隻怪物補多少 HP
     atk:   { name: '攻擊上升', color: [255, 84, 70],   mul: 1.5, time: 12 },       // 攻擊力 × mul，持續 time 秒
-    def:   { name: '防禦上升', color: [80, 170, 255],  cut: .4,  time: 12 },       // 受到的傷害減少 cut（.4＝少 4 成）
+    def:   { name: '防禦上升', color: [80, 170, 255],  cut: .2,  time: 12 },       // 受到的傷害減少 cut（.2＝少 2 成）
     spd:   { name: '速度上升', color: [196, 120, 255], mul: 1.5, time: 10 },       // 移動速度 × mul
     peels: { name: '香蕉皮雨', color: [255, 224, 80],  count: 7, aimed: 3, near: 2, far: 7, fall: 1.1, height: 420 },   // 一次掉幾個、幾個瞄準我方、其他落在離他幾～幾格、掉多久、從多高
     wind:  { name: '召喚狂風', color: [235, 245, 255], dist: 8, away: .5,          // dist：吹到離他最多幾格（撞到牆就停在牆前）；away：在天上停幾秒才掉下來
