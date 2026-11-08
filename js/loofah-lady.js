@@ -31,6 +31,7 @@ const LOOFAH = {
   wanderRadius: 2.5, wanderSpeedMul: 0.55, idleMin: 1.5, idleMax: 3.5,
   stompFrame: 'images/monster/loofah-lady/loofah-lady-stomp.png',
   stepEvery: 20,        // 走幾像素響一次腳步聲
+  fireR: 22,            // 怕火：火（火海、燃燒彈、希奧妮的火）離藤蔓多近就燒掉（像素）；鑽地中的藤蔓碰到火也會燒掉
 };
 const llRand = (a, b) => a + Math.random() * (b - a);
 
@@ -135,6 +136,8 @@ function updateLoofahVines(dt) {
       if (v.farm) {   // 絲瓜女王農田上的藤蔓（js/loofah-queen.js）：一直長在那裡，碰到就纏；被火燒掉才縮回去
         if (v.state === 'grab') { if (typeof lqFarmVineStep === 'function') lqFarmVineStep(v, dt); }
         else if (v.state === 'retract') { v.rt += dt; if (v.rt > .35) v.done = true; }
+      } else if ((v.state === 'dig' || v.state === 'grab') && typeof anyFireAt === 'function' && anyFireAt(v.x, v.y, C.fireR)) {
+        loofahVineBurn(v);   // 怕火：燒到就縮回去，被纏住的人放開
       } else if (v.state === 'dig') {
         // 追目標：朝目標現在的腳下慢慢轉彎（轉彎速度有上限，跑得快還是閃得掉）；鑽到腳下就冒出來
         const tg = v.target;
@@ -184,6 +187,13 @@ function updateLoofahVines(dt) {
     tick(t);
     if (t.rootT > 0 && !(t.struggleT > 0) && Math.random() < dt * 1.6) { t.struggleT = .18; t.struggleDir = [Math.random() < .5 ? -1 : 1, 0]; }   // 隊友自己扭動
   }
+}
+// 絲瓜藤被火燒到：冒火、縮回去、放開被纏住的人
+function loofahVineBurn(v) {
+  for (const a of v.caught || []) { a.rootT = 0; a.struggleT = 0; }
+  v.caught = []; v.state = 'retract'; v.rt = 0; v.lingerT = 0;
+  for (let i = 0; i < 2; i++) spawnFlameBurst(v.x + (Math.random() - .5) * 12, v.y - 4, .55);
+  if (typeof sfxAt === 'function') sfxAt('hitIncendiary', v.x, v.y, .4, 'loofah-vine-burn');
 }
 function loofahErupt(v) {
   const C = LOOFAH, e = v.owner;

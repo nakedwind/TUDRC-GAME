@@ -391,6 +391,11 @@ function lqFarmVineStep(v, dt) {
 // 回傳假的目標（不是怪物、不會扣誰的血），同一個地方每次都回傳同一個物件，瞄準動畫才接得上。
 function loofahFireTargets() {
   const out = [];
+  for (const v of G.loofahVines || []) {   // 絲瓜小姐纏住我方的藤蔓：燒掉就放開（js/loofah-lady.js 的 loofahVineBurn）
+    if (v.farm || v.state !== 'grab' || !(v.caught || []).some(a => a.rootT > 0 && a.hp > 0)) continue;
+    v.fireTarget = v.fireTarget || { fireSpot: true, dead: false, hp: 1e9, maxhp: 0, x: v.x, y: v.y };
+    out.push(v.fireTarget);
+  }
   for (const rec of G.loofahQueens || []) {
     if (rec.state === 'hung' && rec.core && !rec.core.dead) {
       rec.fireTarget = rec.fireTarget || { fireSpot: true, dead: false, hp: 1e9, maxhp: 0 };
