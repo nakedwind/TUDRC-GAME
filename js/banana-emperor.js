@@ -15,9 +15,9 @@
 const BANANA_EMPEROR = {
   name: '金蕉大王',
   maps: { map_f307boss: { c: 19, r: 51 }, map_mw2dn6re: { c: 18, r: 87 } },   // 核心在哪一格（測試：F307 BOSS 場地、F307 本圖的大草地房）；他站在核心右邊 standOff 格
-  standOff: 2.4,                 // 站在核心右邊幾格（太近權杖會被核心擋住）
+  standOff: 3.5,                 // 站在核心右邊幾格（太近權杖會被核心擋住；體型越大要站越遠）
   hp: 2500, rewardMul: 6, crystalMul: 6,   // hp：血量（再乘整體難度）
-  scale: 1.5,                    // 體型放大倍率（以金蕉王為準）
+  scale: 2.5,                    // 體型放大倍率（以金蕉王為準）
   wakeRange: 8,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
   castEvery: 4.5,                // 兩次施法間隔幾秒（BOSS 戰開始後）
   firstCast: 1.5,                // BOSS 戰開始後幾秒放第一次
