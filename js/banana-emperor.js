@@ -14,7 +14,8 @@
        有人受傷就優先補血；其他時候輪流挑沒剛用過的。
    - 地上的裂痕：每敲一次就多裂幾片，整場戰鬥都不會消失（他倒下後才慢慢淡掉）；我方踩在裂痕上走路很慢。
    - 隊伍（都比一般的大、比較慢、但比較痛）：大鳥頭人、大史萊姆、大生命體各 count 隻，再加兩隻普通金蕉王（只負責補血：不逃跑、不丟香蕉皮、不帶小怪）。
-       有紀律：離核心超過 squad.leash 格就放下目標走回來（金蕉王隊員的牽繩，js/golden-banana-king.js 的 stepSquadLeash）。
+       站位：大隻的排成 V 字（尖端在核心下面、往左上右上張開），金蕉王站在核心上方（squad.formation）。
+       有紀律：離自己的站位超過 squad.leash 格就放下目標走回去（金蕉王隊員的牽繩，js/golden-banana-king.js 的 stepSquadLeash）。
    出現在哪張地圖、哪一格：BANANA_EMPEROR.maps（地圖 id → 核心那一格的欄、列）。附近有地圖本來的核心就用那顆（core.adopt／core.pull），沒有就自己帶一顆。
    數值都在下面的 BANANA_EMPEROR。必須在 golden-banana-king.js、vines.js、loofah-queen.js、attack-fx.js 之後、game.js 之前載入。
 */
@@ -34,7 +35,7 @@ const BANANA_EMPEROR = {
   firstCast: 1.5,                // BOSS 戰開始後幾秒放第一次
   raiseTime: .9,                 // 舉高權杖蓄力幾秒（魔法陣慢慢畫出來；這段時間可以走出魔法陣）
   tapHold: .45,                  // 敲下去後停在敲地姿勢幾秒
-  circle: 6,                     // 魔法陣半徑（格）：陣裡的怪物得到 BUFF、我方得到 DEBUFF
+  circle: 9,                     // 魔法陣半徑（格）：陣裡的怪物得到 BUFF、我方得到 DEBUFF
   healBelow: .85,                // 陣裡有怪物血量低於幾成：優先補血
   spells: {                      // color：魔法陣、權杖的光、地上裂縫、身上光點的顏色
     heal:  { name: '補血',     color: [125, 255, 138], amount: 80 },              // amount：每隻怪物補多少 HP
@@ -62,16 +63,22 @@ const BANANA_EMPEROR = {
   },
   core: { adopt: 4, pull: 12 },  // 核心那一格附近 adopt 格內有地圖本來的核心：用那顆；pull 格內有的話：把那顆搬過來用（不會多一顆）
   squad: {                       // 隊伍
-    leash: 6,                    // 離核心超過幾格就走回來
-    regroup: 2.5,                // 走回到離核心幾格內，才恢復自由行動
-    roam: 3,                     // 閒晃時離核心最多幾格
+    leash: 6,                    // 離自己的站位超過幾格就走回來
+    regroup: 1.5,                // 走回到離站位幾格內，才恢復自由行動
+    roam: 1,                     // 閒晃時離站位最多幾格
+    formation: {                 // 站位：大隻的排成 V 字（尖端在核心下面，兩邊往左上、右上張開），金蕉王站在核心上方
+      vertexDown: 1.5,           // V 的尖端在核心下面幾格
+      armAngle: 30,              // 兩邊往上張開的角度（度；越小越扁、越寬）
+      spacing: 2.4,              // 同一邊兩隻之間隔幾格
+      kingsUp: 2,                // 金蕉王站在核心上面幾格
+      kingsApart: 2.4,           // 兩隻金蕉王左右隔幾格
+    },
     big: [                       // 大隻的隊員：id、count 幾隻、scale 放大、slow 慢幾倍、atk 攻擊力倍率、hp 血量倍率
       { id: 'bird_head', count: 3, scale: 1.8, slow: 1.5, atk: 1.8, hp: 3 },
       { id: 'slime',     count: 3, scale: 1.8, slow: 1.5, atk: 1.8, hp: 3 },
       { id: 'lifeform',  count: 3, scale: 1.4, slow: 1.5, atk: 1.8, hp: 3 },   // 生命體本來就很高：放大少一點，才不會比金蕉大王還大
     ],
     kings: 2,                    // 普通金蕉王幾隻（只負責補血）
-    radius: [2, 4],              // 生在離核心幾格～幾格的地方
   },
 };
 const BE_ART = {
@@ -90,7 +97,7 @@ for (const [id, s] of Object.entries(BANANA_EMPEROR.spells))
     c0: [30, 26, 18], c1: [44, 38, 26], c2: [70, 60, 40], crack: '#120e08', fleck: '#3a3020', glow: s.color };
 
 // ---- 開場（game.js 在 seedLoofahQueen 之後呼叫）----
-// G.bananaEmperors：[{ e, core, anchor, squad }]；anchor＝隊伍的牽繩中心（核心的位置，固定不動）
+// G.bananaEmperors：[{ e, core, anchor, squad }]；anchor＝核心的位置；隊員各自的站位在 m.squadLeader（V 字隊形）
 function seedBananaEmperor() {
   G.bananaEmperors = []; G.beCracks = []; G.beCircles = [];
   const spot = beSpot();
@@ -125,20 +132,27 @@ function seedBananaEmperor() {
   const anchor = { anchor: true, x: core.x, y: core.y, leash: B.squad.leash, regroup: B.squad.regroup, roam: B.squad.roam };
   const rec = { e, core, anchor, squad: [] };
   G.bananaEmperors.push(rec);
-  // 隊伍：大隻的各幾隻＋普通金蕉王，圍在核心旁邊（一近一遠交錯排）
-  const list = [];
-  for (const g of B.squad.big) for (let i = 0; i < (g.count || 1); i++) list.push(g);
-  for (let i = 0; i < B.squad.kings; i++) list.push({ id: 'golden_banana_king' });
-  list.forEach((g, i) => {
-    const spec = ACTIVE_MONSTERS.find(m => m.id === g.id); if (!spec) return;
-    const a = Math.PI * .5 + i / list.length * Math.PI * 2, rad = B.squad.radius[i % 2] * CELL;
-    const p = lqFreeSpot(core.x + Math.cos(a) * rad, core.y + Math.sin(a) * rad); if (!p) return;
+  // 隊伍：大隻的排成 V 字、金蕉王站在核心上方；每隻有自己的站位（anchor），離站位太遠就走回去
+  const F = B.squad.formation, ang = F.armAngle * Math.PI / 180, vx = core.x, vy = core.y + F.vertexDown * CELL;
+  const pools = B.squad.big.map(g => Array(g.count || 1).fill(g)), order = [];
+  while (pools.some(q => q.length)) for (const q of pools) if (q.length) order.push(q.shift());   // 鳥頭人、史萊姆、生命體輪流排，兩邊都混著
+  const posts = order.map((g, i) => {
+    if (i === 0) return { g, x: vx, y: vy };   // 第一隻站在 V 的尖端
+    const k = Math.ceil(i / 2), side = i % 2 ? -1 : 1;
+    return { g, x: vx + side * Math.cos(ang) * k * F.spacing * CELL, y: vy - Math.sin(ang) * k * F.spacing * CELL };
+  });
+  for (let i = 0; i < B.squad.kings; i++)
+    posts.push({ g: { id: 'golden_banana_king' }, x: core.x + (i - (B.squad.kings - 1) / 2) * F.kingsApart * CELL, y: core.y - F.kingsUp * CELL });
+  for (const post of posts) {
+    const g = post.g, spec = ACTIVE_MONSTERS.find(m => m.id === g.id); if (!spec) continue;
+    const p = lqFreeSpot(post.x, post.y); if (!p) continue;
     const m = createMonster(spec, p.x, p.y, g.id === 'slime' ? 'normal' : undefined);
     if (g.scale) beEnlarge(m, g);
     if (g.id === 'golden_banana_king') m.bkSquad = true;   // 普通金蕉王：不另外帶小怪
-    m.squadLeader = anchor; m.beOwner = e;
+    m.squadLeader = { anchor: true, x: p.x, y: p.y, leash: B.squad.leash, regroup: B.squad.regroup, roam: B.squad.roam };   // 自己的站位
+    m.beOwner = e;
     G.enemies.push(m); rec.squad.push(m);
-  });
+  }
 }
 // 大隻的隊員：放大、變慢、攻擊和血量提高
 function beEnlarge(m, g) {
