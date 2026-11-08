@@ -14,7 +14,7 @@
 */
 const BANANA_EMPEROR = {
   name: '金蕉大王',
-  maps: { map_f307boss: { c: 19, r: 51 }, map_mw2dn6re: { c: 18, r: 87 } },   // 核心在哪一格（測試：F307 BOSS 場地、F307 本圖的大草地房）；他站在核心右邊 standOff 格
+  maps: { map_f307boss: { c: 19, r: 58 }, map_mw2dn6re: { c: 18, r: 94 } },   // 核心在哪一格（測試：F307 BOSS 場地、F307 本圖的大草地房，都在房間下面）；他站在核心右邊 standOff 格
   standOff: 3.5,                 // 一開始站在核心右邊幾格（太近權杖會被核心擋住；體型越大要站越遠）
   wander: {                      // 沒在施法的時候：在核心旁邊慢慢走來走去
     near: 3, far: 5.5,           // 走到離核心幾格～幾格的地方（他身體很寬，太近會跟核心疊在一起）
@@ -40,7 +40,7 @@ const BANANA_EMPEROR = {
   shake: 7,                      // 敲地時畫面震多大
   crackR: 46,                    // 地上焦黑的大小（像素）
   cracks: { count: 8, len: [55, 120], glow: 1.4, life: 5, fade: 2 },   // 發光裂縫：幾條、每條多長（像素）、發光幾秒、留在地上幾秒、最後幾秒淡出
-  core: { adopt: 4 },            // 核心那一格附近幾格內有地圖本來的核心：用那顆
+  core: { adopt: 4, pull: 12 },  // 核心那一格附近 adopt 格內有地圖本來的核心：用那顆；pull 格內有的話：把那顆搬過來用（不會多一顆）
   squad: {                       // 隊伍
     leash: 6,                    // 離核心超過幾格就走回來
     regroup: 2.5,                // 走回到離核心幾格內，才恢復自由行動
@@ -80,6 +80,10 @@ function seedBananaEmperor() {
   // 核心：附近有地圖本來的核心就用那顆，沒有就自己帶一顆
   const difficulty = Math.max(1, Math.min(5, Number(MAP.difficulty) || 1));
   let core = G.cores.find(c => !c.dead && Math.hypot(c.x - cx, c.y - cy) <= B.core.adopt * CELL);
+  if (!core) {   // 同一間房裡（pull 格內）有地圖本來的核心：搬到他要守的那一格（核心還沒醒，腳下的腐蝕痕跡醒了才會鋪）
+    core = G.cores.find(c => !c.dead && !c.awake && !c.carried && Math.hypot(c.x - cx, c.y - cy) <= B.core.pull * CELL && hasLineOfSight(c.x, c.y, cx, cy));
+    if (core) { core.x = cx; core.y = cy; }
+  }
   if (!core) {
     const hp = CORE.hp * difficulty;
     core = { x: cx, y: cy, hp, maxhp: hp, lastHp: hp, dead: false, awake: false, phase: 0, awakeT: 0,
