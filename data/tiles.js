@@ -6533,5 +6533,46 @@ const SHARED_TILES = [
     "w": 3,
     "h": 4,
     "flat": true
+  },
+  {
+    "id": "tile_forestblue_backroom_pillar",
+    "name": "Back-room-Pillar_blue",
+    "role": "floor",
+    "file": "images/森林藍/Back-room-Pillar_blue.png",
+    "w": 1,
+    "h": 4
+  },
+  {
+    "id": "tile_forestblue_backroom_door",
+    "name": "Back-room-door-v2_blue",
+    "role": "floor",
+    "file": "images/森林藍/Back-room-door-v2_blue.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_forestblue_backroom_wall_04",
+    "name": "Back-room-wall - 04_blue",
+    "role": "floor",
+    "file": "images/森林藍/Back-room-wall - 04_blue.png",
+    "w": 1,
+    "h": 3,
+    "flat": true
+  },
+  {
+    "id": "tile_forestblue_backroom_wall05",
+    "name": "Back-room-wall05_blue",
+    "role": "floor",
+    "file": "images/森林藍/Back-room-wall05_blue.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_forestblue_backroom_wall06",
+    "name": "Back-room-wall06_blue",
+    "role": "floor",
+    "file": "images/森林藍/Back-room-wall06_blue.png",
+    "w": 2,
+    "h": 4
   }
 ];
