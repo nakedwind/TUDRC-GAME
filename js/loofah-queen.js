@@ -7,7 +7,7 @@
        「倒吊藤蔓」：隊友碰到會被倒吊在半空中，溫特要開槍把藤蔓打斷才救得下來（溫特碰到照樣被捲走丟回來）。
        垂下來的藤蔓停 vines.life 秒就縮回去；一樣怕火。
    - 核心：被異質絲瓜藤纏著吊在她頭上的半空中，跟著她走。打不到、炸不到。
-       她活著時異質絲瓜藤燒不掉；她倒下後，核心還吊在原地，這時用火（燃燒彈、油桶的火海、希奧妮的攻擊）燒正下方 → 藤蔓燒斷、核心掉下來，才打得到。
+       她活著時異質絲瓜藤燒不掉；她倒下後，地上長出一根藤把核心撐在空中，這時用火（燃燒彈、油桶的火海、希奧妮的攻擊）燒藤的根部 → 藤蔓燒斷、核心掉下來，才打得到。
    - 4 片農田：一直長著會纏人的絲瓜藤（走上去就被纏住，跟絲瓜小姐的藤蔓一樣：連按方向鍵掙扎、溫特開槍幫隊友射斷）。
        怕火：被火海或希奧妮的火燒到 → 整片藤蔓消失 farm.burnTime 秒，之後再長出來。
    - 守衛：她身邊另外有 guards.count 隻普通絲瓜小姐（金蕉王隊員那一套，離她太遠會走回來）。
@@ -54,7 +54,7 @@ const LOOFAH_QUEEN = {
     hp: 1000,                    // 核心血量（地圖難度 1；難度越高照比例加）
     adopt: 9,                    // 出生格幾格內有地圖本來的核心：用那顆（沒有就自己帶一顆；核心會吊在她頭上跟著走，所以原本在哪都沒關係）
     above: 26,                   // 吊在她頭頂上方多高（像素，從頭頂往上量）
-    hungH: 90,                   // 她倒下後：藤蔓鬆掉，核心慢慢降到離地多高（像素）
+    hungH: 90,                   // 她倒下後：地上長出來的藤把核心撐在離地多高（像素；從她頭上慢慢降到這個高度）
     lowerSpeed: 110,             // 降下來的速度（像素／秒）
     fireR: 30,                   // 她倒下後：火海離核心正下方多近（像素）就把藤蔓燒斷
     fall: 1700,                  // 掉下來的重力
@@ -498,7 +498,7 @@ function lqUpdateCore(rec, dt) {
     }
     const want = lqHangRoom(core, Q.core.hungH);   // 藤蔓鬆掉：慢慢降下來，看得到也知道要燒哪裡
     rec.h += Math.sign(want - rec.h) * Math.min(Math.abs(want - rec.h), Q.core.lowerSpeed * dt);   // 慢慢移到 want（太高就降、被拖進房間後空間夠了就盪回 hungH 高度）
-    core.lqHangH = rec.h;
+    core.lqHangH = rec.h; rec.hungT = (rec.hungT || 0) + dt;
     if (typeof anyFireAt === 'function' && anyFireAt(core.x, core.y, Q.core.fireR)) {   // 燒斷吊著核心的藤蔓
       rec.state = 'falling'; rec.fallV = 0; lqCoreLandSpot(core, rec);
       for (let i = 0; i < 4; i++) spawnFlameBurst(core.x + (Math.random() * 2 - 1) * 10, core.y - rec.h + Math.random() * 30, .8);
@@ -544,7 +544,12 @@ function loofahQueenDown(e) {
   const rec = (G.loofahQueens || []).find(r => r.e === e);
   for (const g of G.lqGround || []) if (g.owner === e) { if (g.state === 'up') { g.state = 'retract'; g.rt = 0; } else if (!g.state) g.state = 'gone'; }   // 地面的藤：還沒鑽出來的取消、晃著的縮回去
   if (G.lqGround) G.lqGround = G.lqGround.filter(g => g.state !== 'gone');
-  if (rec && rec.state === 'carried') { rec.state = 'hung'; rec.core.x = e.x; rec.core.y = e.y; }
+  if (rec && rec.state === 'carried') {
+    rec.state = 'hung'; rec.hungT = 0; rec.core.x = e.x; rec.core.y = e.y;
+    // 核心底下的地面裂開、長出一根藤把核心撐住
+    G.effects.push({ ring: true, x: e.x, y: e.y + 4, r: 6, r2: 46, life: .4, life0: .4, color: '#7fbf5a' });
+    for (let i = 0; i < 8; i++) llDust(e.x + (Math.random() - .5) * 34, e.y + 4, true);
+  }
   for (const v of G.vines || []) if (v.lqTemp && v.lqOwner === e && (v.state === 'hang' || v.state === 'descend')) { v.state = 'retract'; v.regrowAfter = 1e9; }
   if (typeof sfxAt === 'function') sfxAt('loofahDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著播的那聲會被去重吃掉
   systemNotice(e.eliteName + '倒下了！', true);
@@ -673,8 +678,14 @@ function drawLoofahQueenCore(ctx, rec) {
     ctx.beginPath(); ctx.ellipse(core.x, core.y + 6, 24 + 4 * k, 8 + 1.5 * k, 0, 0, Math.PI * 2); ctx.stroke();
   }
   ctx.restore();
-  // 從天上垂下來吊著核心的異質絲瓜藤（掉下來時已經燒斷，不畫）
-  if (rec.state !== 'falling' && typeof drawVineStem === 'function')
+  // 吊著核心的異質絲瓜藤：她活著時從天上垂下來；她倒下後改成從地上長出來的藤把核心撐在空中（要燒藤的根部才會掉）
+  if (rec.state === 'hung' && typeof drawTendril === 'function') {
+    ctx.save();
+    ctx.fillStyle = 'rgba(70,52,30,.55)'; ctx.beginPath(); ctx.ellipse(core.x, core.y + 4, 16, 5.5, 0, 0, Math.PI * 2); ctx.fill();   // 地面被撐破的土
+    const grow = Math.min(1, (rec.hungT || 0) / .5);   // 剛倒下：藤從地上冒出來
+    drawTendril(ctx, core.x, core.y + 3, { h: (rec.h + len * .3) * grow, grow: 1, lean: sway * .8, turns: 2.4, r: 12, w: 8, phase: core.seed, side: Math.sin(core.seed * 5) > 0 ? 1 : -1, leaf: true });
+    ctx.restore();
+  } else if (rec.state !== 'falling' && typeof drawVineStem === 'function')
     drawVineStem(ctx, { x: core.x, seed: core.seed }, cx, cy - len * .35, now, true);
   if (coreImg.complete && coreImg.naturalWidth) {
     ctx.save(); ctx.imageSmoothingEnabled = false;
