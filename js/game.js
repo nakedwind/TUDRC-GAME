@@ -1753,6 +1753,11 @@ function pickSentryTarget(t, R) {
     if (score < bestScore) { best = e; bestScore = score; }
   }
   if (best || t.guardSummoned) return best;
+  if (TYPES[t.type]?.ability === '火焰' && typeof loofahFireTargets === 'function')   // 希奧妮：沒有怪物可打時，燒絲瓜女王的農田藤蔓、吊著核心的藤（js/loofah-queen.js）
+    for (const f of loofahFireTargets()) {
+      const distance = Math.hypot(f.x - t.x, f.y - t.y);
+      if (distance <= R && distance < bestScore && hasLineOfSight(t.x, t.y, f.x, f.y)) { best = f; bestScore = distance; }
+    }
   for (const core of G.cores) {
     if (core.dead || !core.awake || core.hidden || core.carried) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡、抱在珍珠大童身上的也打不到（js/elite-cap-king.js、js/pearl-elder.js）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
@@ -2384,7 +2389,7 @@ function update(dt) {
       if (!swingTarget) {   // 遠程角色：即使沒有持槍素材，也先做瞄準／後座動畫再判定命中
         const dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
-        const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
+        const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0 && !target.fireSpot);   // fireSpot：希奧妮在燒藤蔓，不放大招
         if (isUlt) { t.ultCd = ULTIMATES[t.type].cd * (1 - (spec.ultCdCut || 0)); const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
         const sw = isUlt ? ULT_SWING : { wind: .14, impact: .21, duration: .4 };
         t.gunSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, fired: false, ult: isUlt };
@@ -2416,6 +2421,7 @@ function update(dt) {
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
         const atkDmg = spec.dmg * (U ? U.dmgMul * (1 + (spec.ultDmgBonus || 0)) : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
+        if (spec.ability === '火焰' && typeof addFlameMark === 'function') addFlameMark(impactPoint.x, impactPoint.y, (atkSplash || 0) * CELL);   // 希奧妮：打中的地方短暫算有火（絲瓜藤怕火，js/oil-barrels.js）
         onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);
         if (typeof sentryHitOre === 'function') sentryHitOre(t, impactPoint, (atkSplash || 0) * CELL);   // 路德：拳頭剛好波及礦物（js/ore.js）   // 安柏／希奧妮：不小心波及附近的油桶、油汙
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];

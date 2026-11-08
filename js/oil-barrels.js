@@ -241,6 +241,22 @@ function oilFireAt(x, y, pad = 0) {
   for (const f of G.oilFires) if (f.t > 0 && Math.hypot(x - f.x, (y - f.y) / .7) <= f.r + pad) return f;
   return null;
 }
+// ---- 希奧妮的火焰攻擊：打中的地方短暫算「有火」----
+// 絲瓜藤（女王吊核心的藤、農田藤蔓）、森林垂吊藤蔓怕火時，除了火海也看這個（js/loofah-queen.js、js/vines.js）
+// life：打中後幾秒內還算有火；minR：最小範圍（像素）；splashK：有範圍攻擊時，範圍的幾成算燒到
+const FLAME_MARK = { life: .6, minR: 24, splashK: .6 };
+function addFlameMark(x, y, splashPx = 0) {
+  (G.flameMarks = G.flameMarks || []).push({ x, y, r: Math.max(FLAME_MARK.minR, splashPx * FLAME_MARK.splashK), until: performance.now() / 1000 + FLAME_MARK.life });
+}
+// 這個點有沒有火：火海，或是希奧妮剛燒過的地方（pad＝範圍外再多算幾像素）
+function anyFireAt(x, y, pad = 0) {
+  const f = oilFireAt(x, y, pad);
+  if (f || !G.flameMarks || !G.flameMarks.length) return f;
+  const now = performance.now() / 1000;
+  G.flameMarks = G.flameMarks.filter(m => m.until > now);
+  for (const m of G.flameMarks) if (Math.hypot(x - m.x, (y - m.y) / .7) <= m.r + pad) return m;
+  return null;
+}
 function addOilFire(x, y, r, life, dps) {
   (G.oilFires = G.oilFires || []).push({ x, y, r, t: life, t0: life, dps, flameT: 0, smokeT: 0 });
   for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }   // 哨兵重新找路，繞開剛燒起來的火

@@ -7,16 +7,16 @@
        「倒吊藤蔓」：隊友碰到會被倒吊在半空中，溫特要開槍把藤蔓打斷才救得下來（溫特碰到照樣被捲走丟回來）。
        垂下來的藤蔓停 vines.life 秒就縮回去；一樣怕火。
    - 核心：被異質絲瓜藤纏著吊在她頭上的半空中，跟著她走。打不到、炸不到。
-       她活著時異質絲瓜藤燒不掉；她倒下後，核心還吊在原地，這時用火（燃燒彈、油桶的火海）燒正下方 → 藤蔓燒斷、核心掉下來，才打得到。
+       她活著時異質絲瓜藤燒不掉；她倒下後，核心還吊在原地，這時用火（燃燒彈、油桶的火海、希奧妮的攻擊）燒正下方 → 藤蔓燒斷、核心掉下來，才打得到。
    - 4 片農田：一直長著會纏人的絲瓜藤（走上去就被纏住，跟絲瓜小姐的藤蔓一樣：連按方向鍵掙扎、溫特開槍幫隊友射斷）。
-       怕火：被火海燒到 → 整片藤蔓消失 farm.burnTime 秒，之後再長出來。
+       怕火：被火海或希奧妮的火燒到 → 整片藤蔓消失 farm.burnTime 秒，之後再長出來。
    - 守衛：她身邊另外有 guards.count 隻普通絲瓜小姐（金蕉王隊員那一套，離她太遠會走回來）。
    出現在哪張地圖、生在哪一格：LOOFAH_QUEEN.maps（地圖 id → 欄、列）。那一格附近 core.adopt 格內有地圖本來的核心就用那顆，沒有就自己帶一顆。
    數值都在下面的 LOOFAH_QUEEN。必須在 loofah-lady.js、vines.js、anomalous-core.js 之後、game.js 之前載入。
 */
 const LOOFAH_QUEEN = {
   name: '絲瓜女王',
-  maps: { map_f307boss: { c: 86, r: 25 } },   // 出現在哪幾張地圖、生在哪一格（測試：F307 BOSS 場地的農田房中間）
+  maps: { map_f307boss: { c: 86, r: 25 }, map_mw2dn6re: { c: 113, r: 33 } },   // 出現在哪幾張地圖、生在哪一格（測試：F307 BOSS 場地、F307 本圖的農田房中間）
   hp: 3000, dmgMul: 1.5, rewardMul: 6, crystalMul: 6,   // 以絲瓜小姐（data/monsters.js）為基準；hp：血量（再乘整體難度）
   scale: 2.5,                    // 體型放大倍率
   slow: 2,                       // 動作慢幾倍：走路速度 ÷ slow；抬腳、收腳、踏地間隔 × slow（以絲瓜小姐的 LOOFAH 為基準）
@@ -288,12 +288,12 @@ function lqUpdateCore(rec, dt) {
   if (rec.state === 'carried') {
     if (!lqAlive(e)) { rec.state = 'hung'; return; }
     core.x = e.x; core.y = e.y; rec.h = e.drawHeight + Q.core.above;
-    if (typeof oilFireAt === 'function' && oilFireAt(core.x, core.y, Q.core.fireR) && Math.random() < dt * 6)   // 她活著：火燒不斷，只冒幾顆綠色火星
+    if (typeof anyFireAt === 'function' && anyFireAt(core.x, core.y, Q.core.fireR) && Math.random() < dt * 6)   // 她活著：火燒不斷，只冒幾顆綠色火星
       G.effects.push({ particle: true, kind: 'spark', x: core.x + (Math.random() - .5) * 20, y: core.y - rec.h + 10, vx: (Math.random() - .5) * 40, vy: -(20 + Math.random() * 30), r: 1.5 + Math.random(), life: .4, life0: .4, color: '#9fe07a' });
     return;
   }
   if (rec.state === 'hung') {
-    if (typeof oilFireAt === 'function' && oilFireAt(core.x, core.y, Q.core.fireR)) {   // 燒斷吊著核心的藤蔓
+    if (typeof anyFireAt === 'function' && anyFireAt(core.x, core.y, Q.core.fireR)) {   // 燒斷吊著核心的藤蔓
       rec.state = 'falling'; rec.fallV = 0;
       for (let i = 0; i < 4; i++) spawnFlameBurst(core.x + (Math.random() * 2 - 1) * 10, core.y - rec.h + Math.random() * 30, .8);
       if (typeof sfxAt === 'function') sfxAt('hitIncendiary', core.x, core.y, .6, 'loofah-queen-core-burn');
@@ -365,9 +365,9 @@ function lqUpdatePlot(plot, dt) {
 }
 // 農田有沒有被火海燒到：看每一條藤蔓長的位置（燒掉後照同樣的位置看，等火滅了才長回來）
 function lqPlotOnFire(plot) {
-  if (typeof oilFireAt !== 'function') return false;
+  if (typeof anyFireAt !== 'function') return false;
   const F = LOOFAH_QUEEN.farm;
-  return F.cols.some(dc => F.rows.some(dr => oilFireAt(OX + (plot.c + dc) * CELL, OY + (plot.r + dr) * CELL, F.fireR)));
+  return F.cols.some(dc => F.rows.some(dr => anyFireAt(OX + (plot.c + dc) * CELL, OY + (plot.r + dr) * CELL, F.fireR)));
 }
 // 一條農田藤蔓每幀（js/loofah-lady.js 的 updateLoofahVines 呼叫）：碰到的人纏住；放開的人一陣子內不會再被纏
 function lqFarmVineStep(v, dt) {
@@ -386,6 +386,26 @@ function lqFarmVineStep(v, dt) {
 }
 
 // ---- 畫面上方的 BOSS 血條（core-frenzy.js 的 drawCoreBossUI 呼叫）：女王＋吊著的核心 ----
+// ---- 希奧妮附近沒有怪物可打時，會自己去燒的地方（js/game.js 的 pickSentryTarget 呼叫）----
+// 長滿藤蔓的農田（燒農田中間）、女王倒下後還吊著的核心（燒核心正下方）。
+// 回傳假的目標（不是怪物、不會扣誰的血），同一個地方每次都回傳同一個物件，瞄準動畫才接得上。
+function loofahFireTargets() {
+  const out = [];
+  for (const rec of G.loofahQueens || []) {
+    if (rec.state === 'hung' && rec.core && !rec.core.dead) {
+      rec.fireTarget = rec.fireTarget || { fireSpot: true, dead: false, hp: 1e9, maxhp: 0 };
+      rec.fireTarget.x = rec.core.x; rec.fireTarget.y = rec.core.y;
+      out.push(rec.fireTarget);
+    }
+    for (const plot of rec.plots) {
+      if (plot.state !== 'grown') continue;
+      plot.fireTarget = plot.fireTarget || { fireSpot: true, dead: false, hp: 1e9, maxhp: 0, x: OX + (plot.c + plot.w / 2) * CELL, y: OY + (plot.r + plot.h / 2) * CELL };
+      out.push(plot.fireTarget);
+    }
+  }
+  return out;
+}
+
 function loofahQueenBars() {
   const out = [];
   for (const rec of G.loofahQueens || []) {

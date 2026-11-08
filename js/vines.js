@@ -7,7 +7,7 @@
    ・藤蔓抓過人會縮上去，VINES.regrowTime 秒後再慢慢垂下來
    ・倒吊藤蔓（地圖編輯器「🪢 倒吊藤蔓」）：抓到隊友不丟下來，而是把他倒吊在半空中晃來晃去；
      溫特要開槍把藤蔓打斷（VINES.hangHits 發）才能救下來。溫特碰到倒吊藤蔓照樣被捲走、丟回來
-   ・藤蔓怕火：被火海（燃燒彈、油桶）燒到就縮回去，VINES.fireRegrow 秒後才重新垂下來；
+   ・藤蔓怕火：被火海（燃燒彈、油桶）或希奧妮的火燒到就縮回去，VINES.fireRegrow 秒後才重新垂下來；
      正在纏人、倒吊隊友的藤蔓被燒到會放開（倒吊的隊友會掉下來）
    ・藤蔓尖端正下方的地上有影子，看得出藤蔓垂在哪裡
    ・傳送藤蔓（地圖編輯器「🌿➡ 傳送藤蔓」，MAP.vinesFerry）：抓到人丟到編輯器設的落點（走不過去的地方靠它過去）；
@@ -206,6 +206,7 @@ function ferryFollowers(v, p) {
 
 // ---- 怕火：火海碰到藤蔓尖端（或倒吊的隊友正下方）就縮回去 ----
 function vineFireAt(x, y) {
+  if (typeof anyFireAt === 'function') return !!anyFireAt(x, y, VINES.fireR);   // 火海＋希奧妮的火（js/oil-barrels.js）
   for (const f of G.oilFires || []) if (f.t > 0 && Math.hypot(x - f.x, (y - f.y) / .7) <= f.r + VINES.fireR) return true;
   return false;
 }
