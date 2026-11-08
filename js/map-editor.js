@@ -532,7 +532,7 @@ function fixMap(m) {
 }
 // 同地圖傳送點：出入口通往自己這張地圖，at 記著要送到哪一格（遊戲裡 js/game.js 的 teleportInMap）
 const isSameMapPortal = (p, m) => !!(p && m && p.to === m.id && Array.isArray(p.at));
-let solidSize = 1, solidPaintAdd = true;   // 🧱 不可穿透筆刷大小（1＝1格、2＝2×2）；按下那一格決定這一筆是「畫」還是「擦」
+let solidSize = 1, solidPaintAdd = true;   // 🧱 不可穿透筆刷大小（1＝1×1、2＝2×2、3＝3×3，按 🧱 跳出選單選）；按下那一格決定這一筆是「畫」還是「擦」
 let ferryFrom = null;   // 正在放傳送藤蔓：已點了藤蔓那一格、等點落點 { mapId, key }
 let portalLinkFrom = null;   // 正在設傳送點：已點了第一格、等第二格 { mapId, c, r, oneWay }（oneWay＝單向，不在對面放回程的傳送點）
 // ---- 遊戲畫質：畫布用跟遊戲一樣的放大倍率畫（js/config.js 的 VIEW_ZOOM，1.5 倍＝一格 60px）----
@@ -1467,7 +1467,7 @@ function draw() {
         ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(px + 1, py + 1, CELL - 2, CELL - 2);
       }
     } else {
-      // 非貼圖工具（選取／不可穿透／清除等）維持單格外框；🧱² 筆刷框出 2×2
+      // 非貼圖工具（選取／不可穿透／清除等）維持單格外框；🧱 選了 2×2／3×3 就框出那麼大
       const n = brush.mode === 'solid' ? solidSize : 1;
       ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, n * CELL - 2, n * CELL - 2);
     }
@@ -1641,7 +1641,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
   } else if (brush.mode === 'solid' && solidSize > 1) {
-    // 🧱² 2×2 筆刷：滑鼠那格是左上角，一次畫（或擦）四格；按下的那格本來沒紅格＝畫，有紅格＝擦，拖曳時照同一個動作
+    // 🧱 2×2／3×3 筆刷：滑鼠那格是左上角，一次畫（或擦）整塊；按下的那格本來沒紅格＝畫，有紅格＝擦，拖曳時照同一個動作
     if (isDown) solidPaintAdd = !m.solid.includes(key);
     let skipped = 0;
     for (let dr = 0; dr < solidSize; dr++) for (let dc = 0; dc < solidSize; dc++) {
@@ -2667,14 +2667,36 @@ async function deleteTile(id) {
 
 // 工具按鈕
 function updateToolUI() {
-  document.querySelectorAll('.tool').forEach(b => b.classList.toggle('sel', brush.mode === b.dataset.mode && (b.dataset.mode !== 'solid' || (+b.dataset.size || 1) === solidSize)));
+  document.querySelectorAll('.tool').forEach(b => b.classList.toggle('sel', brush.mode === b.dataset.mode));
+  const solidBtn = document.querySelector('.tool[data-mode="solid"]');   // 🧱 按鈕上標出目前的大小（1×1 就不標）
+  if (solidBtn) solidBtn.textContent = solidBtn.textContent.replace(/^🧱[²³]?/u, '🧱' + ['', '', '²', '³'][solidSize]);   // 只換開頭的磚塊（劇情地圖編輯器的按鈕後面還有字）
   // 收在「⋯ 更多」裡的地圖機關工具：選到時按鈕上直接寫出目前是哪個工具（不用打開選單才知道）
   const more = document.querySelector('#mapbar .tool-more'), picked = more && more.querySelector('.tool.sel');
   if (more) { more.classList.toggle('has-sel', !!picked); more.querySelector('summary').textContent = picked ? '⋯ ' + picked.textContent.trim() : '⋯ 更多'; }
 }
 document.querySelectorAll('.tool').forEach(btn => {
-  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; if (btn.dataset.mode === 'solid') solidSize = +btn.dataset.size || 1; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); });
+  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn); });
 });
+// 🧱 不可穿透：按下去在按鈕下面跳出小選單，選筆刷大小 1×1／2×2／3×3（點選單外面或按 Esc 就關掉，大小照舊）
+function openSolidSizeMenu(btn) {
+  closeSolidSizeMenu();
+  const menu = document.createElement('div'); menu.className = 'solid-size-menu'; menu.id = 'solidSizeMenu';
+  [1, 2, 3].forEach(n => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (n === solidSize ? ' sel' : '');
+    b.textContent = n + '×' + n;
+    b.addEventListener('click', () => {
+      solidSize = n; closeSolidSizeMenu(); updateToolUI(); draw();
+      setStatus('不可穿透筆刷：' + n + '×' + n + (n > 1 ? '（滑鼠那格是左上角；在紅格上按下去拖＝擦掉）' : ''), '#ff8f8f');
+    });
+    menu.appendChild(b);
+  });
+  const rc = btn.getBoundingClientRect();
+  menu.style.left = rc.left + 'px'; menu.style.top = (rc.bottom + 4) + 'px';
+  document.body.appendChild(menu);
+}
+function closeSolidSizeMenu() { const old = document.getElementById('solidSizeMenu'); if (old) old.remove(); }
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#solidSizeMenu, .tool[data-mode="solid"]')) closeSolidSizeMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSolidSizeMenu(); });
 
 // Alt=臨時吸管、Ctrl=臨時選取；放開還原（吸到圖則保留新筆刷）
 function enterTemp(mode) {
