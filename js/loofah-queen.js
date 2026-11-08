@@ -34,7 +34,7 @@ const LOOFAH_QUEEN = {
     gap: 1.5,                    // 兩條藤蔓至少隔幾格
     life: 6,                     // 完全垂下來之後停幾秒就縮回去
     ground: {                    // 從地面鑽出來的藤蔓：把人抓到半空中，不能動、不能打
-      count: 2,                  // 每次踏地鑽出幾條（瞄準我方站的地方；先挑沒被天上藤蔓瞄準的人）
+      count: 4,                  // 每次踏地鑽出幾條（天上藤蔓的一半左右）：先瞄準我方站的地方（每人一條，先挑沒被天上藤蔓瞄準的人），剩下的隨機在她身邊
       warn: .9,                  // 地面先冒土、震動幾秒才鑽出來（這段時間走開就躲得掉）
       grabR: 32,                 // 鑽出來時離多近的人會被抓（像素）
       hold: 4,                   // 抓在半空中最久幾秒（隊友可以被溫特開槍打斷藤蔓救下來；火燒也會放開）
@@ -50,7 +50,9 @@ const LOOFAH_QUEEN = {
   core: {
     hp: 1000,                    // 核心血量（地圖難度 1；難度越高照比例加）
     adopt: 9,                    // 出生格幾格內有地圖本來的核心：用那顆（沒有就自己帶一顆；核心會吊在她頭上跟著走，所以原本在哪都沒關係）
-    above: 26,                   // 吊在她頭頂上方多高（像素，從頭頂往上量）
+    above: 26,                   // 吊在她頭頂上方多高（像素，從頭頂往上量）；上面是牆的話會自動放低，不會吊進牆裡
+    hungH: 90,                   // 她倒下後：藤蔓鬆掉，核心慢慢降到離地多高（像素）
+    lowerSpeed: 110,             // 降下來的速度（像素／秒）
     fireR: 30,                   // 她倒下後：火海離核心正下方多近（像素）就把藤蔓燒斷
     fall: 1700,                  // 掉下來的重力
   },
@@ -260,7 +262,15 @@ function lqStomp(e) {
   // 從地面鑽出來的藤蔓：瞄準我方站的地方（先挑沒被天上藤蔓瞄準的人）
   const all = [G.player, ...G.towers].filter(a => a && a.hp > 0 && !a.vineCap && lqDist(a, e) <= Q.loseRange * CELL && hasLineOfSight(e.x, e.y, a.x, a.y));
   const picks = [...all.filter(a => !people.includes(a)), ...all.filter(a => people.includes(a))].slice(0, V.ground.count);
-  for (const a of picks) (G.lqGround = G.lqGround || []).push({ x: a.x, y: a.y + 12, t: V.ground.warn, puff: 0, owner: e });
+  const ground = (G.lqGround = G.lqGround || []);
+  for (const a of picks) ground.push({ x: a.x, y: a.y + 12, t: V.ground.warn, puff: 0, owner: e });
+  for (let k = 0, left = V.ground.count - picks.length; k < 60 && left > 0; k++) {   // 剩下的：隨機在她身邊鑽出來
+    const ang = Math.random() * Math.PI * 2, d = (V.spreadMin + Math.random() * (V.spreadMax - V.spreadMin)) * CELL;
+    const x = e.x + Math.cos(ang) * d, y = e.y + Math.sin(ang) * d, [c, r] = cellAt(x, y);
+    if (!inGrid(c, r) || isWall(c, r) || (typeof mapFloorCells === 'function' && !mapFloorCells().has(c + ',' + r)) || !hasLineOfSight(e.x, e.y, x, y)) continue;
+    if (ground.some(g => Math.hypot(g.x - x, g.y - 12 - y) < V.gap * CELL)) continue;
+    ground.push({ x, y: y + 12, t: V.ground.warn + Math.random() * .3, puff: 0, owner: e }); left--;
+  }
   // 其他：隨機落在她身邊（看得到的地方，不會穿牆垂到隔壁房間）
   for (let k = 0; k < 60 && made < V.count; k++) {
     const ang = Math.random() * Math.PI * 2, d = (V.spreadMin + Math.random() * (V.spreadMax - V.spreadMin)) * CELL;
@@ -438,12 +448,19 @@ function lqUpdateCore(rec, dt) {
   if (!core || core.dead) return;
   if (rec.state === 'carried') {
     if (!lqAlive(e)) { rec.state = 'hung'; return; }
-    core.x = e.x; core.y = e.y; rec.h = e.drawHeight + Q.core.above;
+    core.x = e.x; core.y = e.y; rec.h = lqHangRoom(core, e.drawHeight + Q.core.above); core.lqHangH = rec.h;
     if (typeof anyFireAt === 'function' && anyFireAt(core.x, core.y, Q.core.fireR) && Math.random() < dt * 6)   // 她活著：火燒不斷，只冒幾顆綠色火星
       G.effects.push({ particle: true, kind: 'spark', x: core.x + (Math.random() - .5) * 20, y: core.y - rec.h + 10, vx: (Math.random() - .5) * 40, vy: -(20 + Math.random() * 30), r: 1.5 + Math.random(), life: .4, life0: .4, color: '#9fe07a' });
     return;
   }
   if (rec.state === 'hung') {
+    if (lqHangRoom(core, Q.core.hungH) < Q.core.hungH) {   // 上面太靠牆（吊不到 hungH）：藤蔓把核心慢慢往房間裡面拖，免得卡在牆邊、被畫面上方的血條擋住
+      const ny = core.y + 60 * dt, [c, r] = cellAt(core.x, ny);
+      if (inGrid(c, r) && !isWall(c, r) && (typeof mapFloorCells !== 'function' || mapFloorCells().has(c + ',' + r))) core.y = ny;
+    }
+    const want = lqHangRoom(core, Q.core.hungH);   // 藤蔓鬆掉：慢慢降下來，看得到也知道要燒哪裡
+    rec.h += Math.sign(want - rec.h) * Math.min(Math.abs(want - rec.h), Q.core.lowerSpeed * dt);   // 慢慢移到 want（太高就降、被拖進房間後空間夠了就盪回 hungH 高度）
+    core.lqHangH = rec.h;
     if (typeof anyFireAt === 'function' && anyFireAt(core.x, core.y, Q.core.fireR)) {   // 燒斷吊著核心的藤蔓
       rec.state = 'falling'; rec.fallV = 0;
       for (let i = 0; i < 4; i++) spawnFlameBurst(core.x + (Math.random() * 2 - 1) * 10, core.y - rec.h + Math.random() * 30, .8);
@@ -454,7 +471,7 @@ function lqUpdateCore(rec, dt) {
   if (rec.state === 'falling') {
     rec.fallV += Q.core.fall * dt; rec.h -= rec.fallV * dt;
     if (rec.h > 0) return;
-    rec.h = 0; rec.state = 'down';
+    rec.h = 0; rec.state = 'down'; core.lqHangH = 0;
     core.carried = false; core.lastHp = core.hp;   // 掉到地上：打得到了
     if (core.awake) lqCorePool(core, true);
     G.effects.push({ ring: true, x: core.x, y: core.y, r: 8, r2: 80, life: .45, life0: .45, color: '#b56bff' });
@@ -468,6 +485,15 @@ function lqUpdateCore(rec, dt) {
   }
 }
 
+// 核心最多能吊多高：從地上往上找，碰到牆、地圖外面就停（核心整顆都要在房間裡看得到）
+function lqHangRoom(core, want) {
+  const floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null, top = CORE.h * .8 * .5 + 8;
+  for (let h = 0; h <= want; h += 8) {
+    const [c, r] = cellAt(core.x, core.y - h - top);
+    if (!inGrid(c, r) || isWall(c, r) || (floor && !floor.has(c + ',' + r))) return Math.max(24, h - 8);
+  }
+  return want;
+}
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）：核心留在半空中、她垂下來的藤蔓縮回去 ----
 function loofahQueenDown(e) {
   const rec = (G.loofahQueens || []).find(r => r.e === e);
@@ -592,6 +618,11 @@ function drawLoofahQueenCore(ctx, rec) {
   ctx.save();
   ctx.fillStyle = 'rgba(0,0,0,' + (.28 * Math.max(.3, 1 - rec.h / 400)).toFixed(3) + ')';
   ctx.beginPath(); ctx.ellipse(core.x, core.y + 6, 18, 6, 0, 0, Math.PI * 2); ctx.fill();
+  if (rec.state === 'hung') {   // 她倒下後：正下方地上一圈一明一暗的紫色記號（不寫字，只讓人知道核心在這裡上面）
+    const k = .5 + .5 * Math.sin(now * 3 + core.seed);
+    ctx.strokeStyle = 'rgba(190,120,255,' + (.35 + .35 * k).toFixed(3) + ')'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.ellipse(core.x, core.y + 6, 24 + 4 * k, 8 + 1.5 * k, 0, 0, Math.PI * 2); ctx.stroke();
+  }
   ctx.restore();
   // 從天上垂下來吊著核心的異質絲瓜藤（掉下來時已經燒斷，不畫）
   if (rec.state !== 'falling' && typeof drawVineStem === 'function')

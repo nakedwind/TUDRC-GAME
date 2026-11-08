@@ -422,6 +422,7 @@ function squadWanderCell(e) {
 // ---- 打死：掉香蕉在地上（js/combat-feel.js 的 onEnemyDeath 呼叫）----
 function bananaKingDeath(e) {
   const C = BANANA_KING;
+  if (e.bananaEmperor) return;   // 金蕉大王：固定掉 5 根，在 js/food.js 的 BOSS_FOOD_DROPS
   if (typeof itemById === 'function' && !itemById(C.dropId)) return;
   const n = C.dropMin + Math.floor(Math.random() * (C.dropMax - C.dropMin + 1));
   if (n <= 0) return;
