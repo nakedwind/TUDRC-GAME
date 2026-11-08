@@ -295,3 +295,15 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 /* 工具按鈕只留 emoji（名稱在滑鼠提示），工具列和選取列固定排同一排：選取列排不下就自己縮、在裡面左右捲 */
 #tools > .tool { padding: 6px 9px; font-size: 16px; line-height: 1.2; flex: 0 0 auto; }
 #tools #selControls { flex: 1 1 0; min-width: 320px; max-width: max-content; }   /* 從 0 起算寬度＝不會被擠到下一排；最多長到內容那麼寬，再多就在列裡左右捲 */
+
+/* ===== 上方固定工具列縮矮一點（固定在畫面最上面，太高會擋到編輯區）：只縮上下，左右不動 ===== */
+#topbar { padding-top: 6px; }
+#topbar #mapbar { padding: 4px 8px; margin-bottom: 4px; }
+#topbar #mapbar select { padding-top: 2px; padding-bottom: 2px; }
+#topbar .btn { padding-top: 3px; padding-bottom: 3px; }
+#topbar .toolrow { margin: 4px 0; }
+#topbar #tools > .tool { padding-top: 2px; padding-bottom: 2px; }
+#topbar #tools #selControls { padding-top: 2px; padding-bottom: 2px; }
+#topbar #selControls .btn { padding-top: 2px; padding-bottom: 2px; }
+#topbar #selControls select { padding-top: 2px; padding-bottom: 2px; }
+#topbar #selControls input[type="number"] { padding-top: 1px; padding-bottom: 1px; }

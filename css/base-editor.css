@@ -279,3 +279,15 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 .asset-path { color: #8a96a3; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .asset-row label { display: flex; align-items: center; gap: 4px; font-size: 12px; color: #c4ccd5; white-space: nowrap; }
 .asset-row input[type=number] { width: 44px; background: #0d1117; border: 1px solid #333c49; border-radius: 5px; color: #e6e9ee; padding: 3px 4px; }
+
+/* ===== 上方固定工具列縮矮一點（固定在畫面最上面，太高會擋到編輯區）：只縮上下，左右不動 ===== */
+#topbar { padding-top: 6px; }
+#topbar #mapbar { padding: 4px 8px; margin-bottom: 4px; }
+#topbar #mapbar select { padding-top: 2px; padding-bottom: 2px; }
+#topbar .btn { padding-top: 3px; padding-bottom: 3px; }
+#topbar .toolrow { margin: 4px 0; }
+#topbar #tools > .tool { padding-top: 2px; padding-bottom: 2px; }
+#topbar #tools #selControls { padding-top: 2px; padding-bottom: 2px; }
+#topbar #selControls .btn { padding-top: 2px; padding-bottom: 2px; }
+#topbar #selControls select { padding-top: 2px; padding-bottom: 2px; }
+#topbar #selControls input[type="number"] { padding-top: 1px; padding-bottom: 1px; }
