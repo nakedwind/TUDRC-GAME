@@ -61410,12 +61410,6 @@ const BATTLE_MAPS = [
         "layer": "floor"
       },
       {
-        "id": "tile_mrt_room_wall",
-        "c": 34,
-        "r": 37,
-        "layer": "object"
-      },
-      {
         "id": "tile_mrt_pillar_a02",
         "c": 48,
         "r": 30,
@@ -61423,19 +61417,7 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_room_wall",
-        "c": 41,
-        "r": 37,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_room_wall",
         "c": 43,
-        "r": 37,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mrt_room_wall",
-        "c": 42,
         "r": 37,
         "layer": "object"
       },
@@ -61489,12 +61471,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_floor_tile",
-        "c": 49,
-        "r": 26,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile",
         "c": 37,
         "r": 29,
         "layer": "floor"
@@ -61545,12 +61521,6 @@ const BATTLE_MAPS = [
         "id": "tile_mrt_floor_tile",
         "c": 46,
         "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile",
-        "c": 49,
-        "r": 29,
         "layer": "floor"
       },
       {
@@ -61574,18 +61544,6 @@ const BATTLE_MAPS = [
       {
         "id": "tile_mrt_floor_tile",
         "c": 46,
-        "r": 35,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile",
-        "c": 49,
-        "r": 32,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_floor_tile",
-        "c": 49,
         "r": 35,
         "layer": "floor"
       },
@@ -62116,8 +62074,8 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_map_kiosk",
-        "c": 43,
-        "r": 31,
+        "c": 48,
+        "r": 38,
         "layer": "object"
       },
       {
@@ -62797,6 +62755,242 @@ const BATTLE_MAPS = [
         "c": 46,
         "r": 44,
         "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_exit_2",
+        "c": 50,
+        "r": 34,
+        "layer": "object2"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 49,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 49,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 52,
+        "r": 44,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 52,
+        "r": 41,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 52,
+        "r": 38,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_pillar_a02",
+        "c": 55,
+        "r": 30,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvyw7lrk",
+        "c": 55,
+        "r": 33,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mvyw7lrk",
+        "c": 55,
+        "r": 35,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mvyw7lrk",
+        "c": 55,
+        "r": 37,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mvyw7lrk",
+        "c": 55,
+        "r": 39,
+        "layer": "top"
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 34,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 34,
+        "r": 40,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 55,
+        "r": 41,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_pillar_large",
+        "c": 41,
+        "r": 33,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 3,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 6,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 9,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 12,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 15,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 45,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 42,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 39,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 36,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 33,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_ticket_gate",
+        "c": 18,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_ticket_gate",
+        "c": 21,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_ticket_gate",
+        "c": 24,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_ticket_gate",
+        "c": 27,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_glass_railing",
+        "c": 30,
+        "r": 11,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mrt_train_car_head",
+        "c": 4,
+        "r": 6,
+        "layer": "ground3",
+        "bothDoors": true,
+        "cars": 3
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 47,
+        "r": 5,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 44,
+        "r": 5,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 41,
+        "r": 5,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 38,
+        "r": 5,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 35,
+        "r": 5,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 32,
+        "r": 5,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 29,
+        "r": 5,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mrt_floor_tile",
+        "c": 26,
+        "r": 5,
+        "layer": "floor"
       }
     ],
     "solid": [
@@ -62906,12 +63100,6 @@ const BATTLE_MAPS = [
       "32,38",
       "33,38",
       "34,38",
-      "35,38",
-      "36,38",
-      "37,38",
-      "38,38",
-      "39,38",
-      "40,38",
       "41,38",
       "42,38",
       "43,38",
@@ -62925,12 +63113,6 @@ const BATTLE_MAPS = [
       "43,39",
       "42,39",
       "41,39",
-      "40,39",
-      "39,39",
-      "38,39",
-      "37,39",
-      "36,39",
-      "35,39",
       "34,39",
       "33,39",
       "32,39",
@@ -63327,7 +63509,7 @@ const BATTLE_MAPS = [
     "npcs": false,
     "portals": [],
     "hiddenPickups": [],
-    "cols": 50,
+    "cols": 60,
     "rows": 47,
     "edges": [
       "37,38,B"
