@@ -157,14 +157,42 @@ function pcsMoves(g) {   // 列出所有有意義的一步（提示、卡死判�
   });
   return out.sort((x, y) => y.score - x.score);
 }
-// 判輸用：右下角的牌堆發完了，而且「任何」合法的移動都沒有（就算是搬過去沒什麼用的也算還能動）才算輸。
-// 寧可少判，也不能在還能動的時候說輸了；有空的那排就一定還能動（任何牌都能放進空排）。
+// 判輸用：右下角的牌堆發完了，而且不管怎麼搬，都再也「翻不開蓋著的牌、也湊不齊一組 K→A」才算輸。
+// 做法：從現在的牌面開始，把所有走得到的排法一個一個試（同一種排法只試一次），
+// 只要有一條路能翻牌或收牌就不算輸。只是把牌搬來搬去、沒有進展的，不算還有路。
+// 排法太多試不完（超過 PCS_STUCK_LIMIT 種）就當作還有路，寧可不判，也不要判錯。
+const PCS_STUCK_LIMIT = 6000;
 function pcsStuck(g) {
   if (g.stock.length) return false;
-  return !g.cols.some((col, a) => {
-    for (let i = pcsRunStart(g, a); i < col.length; i++) if (g.cols.some((_, b) => b !== a && pcsFits(g, col[i], b))) return true;
-    return false;
-  });
+  const down = g.down, R = pcsRank, S = id => pcsSuit(g, id);
+  const linked = (x, y) => R(y) === R(x) - 1 && S(y) === S(x);   // y 能跟在 x 下面一起搬（同花色、小 1）
+  const keyOf = cols => cols.map(c => c.join(',')).join('|');
+  const start = g.cols.map(c => c.slice()), seen = new Set([keyOf(start)]), queue = [start];
+  for (let q = 0; q < queue.length; q++) {
+    if (seen.size > PCS_STUCK_LIMIT) return false;
+    const cols = queue[q];
+    for (let a = 0; a < cols.length; a++) {
+      const col = cols[a]; if (!col.length) continue;
+      let rs = col.length - 1;   // 這排最下面能一起拿的那疊從第幾張開始
+      while (rs > down[a] && linked(col[rs - 1], col[rs])) rs--;
+      for (let i = rs; i < col.length; i++) {
+        let usedEmpty = false;
+        for (let b = 0; b < cols.length; b++) {
+          if (b === a) continue;
+          const dst = cols[b];
+          if (dst.length) { if (R(dst[dst.length - 1]) !== R(col[i]) + 1) continue; }
+          else { if (usedEmpty || i === 0) continue; usedEmpty = true; }   // 空排都一樣，試一個就好；整排搬進空排沒有意義
+          if (i > 0 && i === down[a]) return false;   // 搬走後會翻開蓋著的牌：還有路
+          const moved = dst.concat(col.slice(i)), s = moved.length - 13;
+          if (s >= down[b] && R(moved[s]) === 12 && moved.slice(s).every((id, j) => !j || linked(moved[s + j - 1], id))) return false;   // 湊齊一組 K→A：還有路
+          const next = cols.slice(); next[a] = col.slice(0, i); next[b] = moved;
+          const k = keyOf(next);
+          if (!seen.has(k)) { seen.add(k); queue.push(next); }
+        }
+      }
+    }
+  }
+  return true;
 }
 function pcsHint(g) {
   if (g.won || g.lost) return;
@@ -306,7 +334,7 @@ function renderPcSpider(noAnim) {
   table.innerHTML = '<div class="pcd-fc-cols">' + cols + '</div><div class="pcd-sp-foot">' +
     '<div class="pcd-sp-done" style="width:calc(var(--fc-w) + ' + 7 * off + 'px)">' + (done || '<span class="pcd-sp-empty">收齊 K→A 會放這裡</span>') + '</div>' +
     '<div class="pcd-sp-stock" data-slot="s" title="點一下：每排各發 1 張" style="width:calc(var(--fc-w) + ' + 4 * off + 'px)">' + (stock || '<span class="pcd-sp-empty">發完了</span>') + '</div></div>' +
-    (g.lost ? '<div class="pcd-fc-over"><div class="pcd-fc-overbox"><b>這局輸了</b><p>已經沒有牌可以移動了。</p><button type="button" data-sp="undo">↶ 復原</button><button type="button" data-sp="retry">重玩這局</button><button type="button" data-sp="new">新牌局</button></div></div>' : '');   // 「這局輸了」提示：跟新接龍用同一個樣子
+    (g.lost ? '<div class="pcd-fc-over"><div class="pcd-fc-overbox"><b>這局輸了</b><p>不管怎麼搬，都翻不開蓋著的牌、也湊不齊 K→A 了。</p><button type="button" data-sp="undo">↶ 復原</button><button type="button" data-sp="retry">重玩這局</button><button type="button" data-sp="new">新牌局</button></div></div>' : '');   // 「這局輸了」提示：跟新接龍用同一個樣子
   table.querySelectorAll('.pcd-fc-card[data-card]').forEach(el => {   // 牌從舊位置滑到新位置；剛發的牌從右下角的牌堆飛出來
     const dealt = g.dealt ? g.dealt.indexOf(+el.dataset.card) : -1;
     const o = old[el.dataset.card] || (dealt >= 0 && stockRect); if (!o) return;
@@ -318,7 +346,7 @@ function renderPcSpider(noAnim) {
   g.dealt = null;
   renderPcsInfo(g);
   g.body.querySelector('.pcd-fc-msg').textContent = g.won ? '🎉 破關了！分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '。按「新牌局」再玩一次'
-    : g.lost ? '這局輸了：沒有牌可以移動了。分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '、' + g.moves + ' 步'
+    : g.lost ? '這局輸了：怎麼搬都沒有進展了。分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '、' + g.moves + ' 步'
     : g.note || ('同花色、由大到小連著的牌才能一起搬；湊齊 K→A 自動收走。點右下角的牌堆發牌（還有 ' + piles + ' 次）');
   g.body.querySelector('[data-sp="undo"]').disabled = !g.hist.length || g.won;
   renderJJGift(g);

@@ -26,6 +26,7 @@
         <button class="btn" id="gridToggle">🔳 格線：開</button>
         <label class="btn" title="打勾：貼上、拖曳物件都只落在整格上；不打勾可微調到半格／1/4 格"><input type="checkbox" id="snapWhole"> 只貼在整格</label>
         <button class="btn" id="solidToggle" title="顯示／隱藏不可穿透紅格與怪物出生區綠格（不影響設定）">🧱 紅綠格：開</button>
+        <button class="btn danger" id="clearSolid" title="刪除這張地圖所有的不可穿透紅格、碰撞微調和邊緣碰撞線（基地自己的碰撞格不動；可以 Ctrl+Z 復原）">🧹 刪除全部碰撞</button>
         <details class="tool-more">
           <summary class="btn">⋯ 更多</summary>
           <div class="tool-more-menu">
@@ -226,7 +227,7 @@
     };
   </script>
   <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 劇情地圖自己的暫存；素材暫存仍與其他編輯器共用 -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=onepen-20261107", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
+  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=merge-20261108", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=story-20261021", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>

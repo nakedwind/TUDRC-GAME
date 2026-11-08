@@ -1,7 +1,7 @@
 /* 電源控制燈：進入地圖時預設關閉。
-   電路編號（地圖編輯器選開關／電燈設定，1～5）：開關只控制同編號的燈；沒設定編號的＝0，彼此連動（舊地圖照舊）。 */
+   電路編號（地圖編輯器選開關／電燈設定，1～5）：開關只控制同編號的燈；沒設定編號的算 1。 */
 let poweredMap = null, mapPowerOn = new Set();   // 開著的電路編號
-const circuitOf = s => Math.max(0, Math.min(5, Math.floor(Number(s && s.circuit) || 0)));
+const circuitOf = s => Math.max(1, Math.min(5, Math.floor(Number(s && s.circuit) || 1)));
 const isPoweredLightTile = tile => {
   const file=String(tile?.file||'').replaceAll('\\','/');
   return file.endsWith('/electric-light-02.png') || /^electric-light-02(?:\.png)?$/i.test(String(tile?.name||'')) || tile?.id==='tile_interactive_electric_light_02'
@@ -12,8 +12,8 @@ const isPoolcoreLed = tile => /\/Poolcore_LED\.png$/i.test(String(tile?.file||''
 const POOLCORE_LED_GLOW = 'images/Poolcore/Poolcore_LED_glow.png';
 function poolcoreLedGlowTile(){ return Object.values(TILE_REGISTRY).find(t=>String(t.file||'').replaceAll('\\','/')===POOLCORE_LED_GLOW)||null; }
 function resetMapPower(){poweredMap=MAP;mapPowerOn=new Set();}
-function mapPowerIsOn(circuit=0){return poweredMap===MAP&&mapPowerOn.has(circuit);}
-function toggleMapPower(circuit=0){if(poweredMap!==MAP)resetMapPower();if(mapPowerOn.has(circuit))mapPowerOn.delete(circuit);else mapPowerOn.add(circuit);}
+function mapPowerIsOn(circuit=1){return poweredMap===MAP&&mapPowerOn.has(circuit);}
+function toggleMapPower(circuit=1){if(poweredMap!==MAP)resetMapPower();if(mapPowerOn.has(circuit))mapPowerOn.delete(circuit);else mapPowerOn.add(circuit);}
 let poweredFixturesCache=null,poweredFixturesFor=null,poweredFixturesStamps=-1;   // 燈的位置只跟地圖有關：同一張地圖不用每幀重掃全部格子、物件
 function poweredLightFixtures(){
   if(!MAP)return [];

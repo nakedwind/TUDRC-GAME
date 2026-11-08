@@ -3364,6 +3364,130 @@ const BATTLE_MAPS = [
         "ox": 0
       },
       {
+        "id": "tile_field_base",
+        "c": 22,
+        "r": 49,
+        "layer": "object",
+        "baseHp": 2000,
+        "baseDepth": 2,
+        "baseSolid": [
+          [
+            10,
+            1
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            10,
+            6
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            4,
+            3
+          ],
+          [
+            5,
+            3
+          ],
+          [
+            8,
+            3
+          ],
+          [
+            6,
+            3
+          ],
+          [
+            7,
+            3
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            0,
+            1
+          ]
+        ],
+        "oy": 10,
+        "ox": 0
+      },
+      {
         "id": "tile_dmg_broken_wall_right",
         "c": 51,
         "r": 45,
@@ -16784,6 +16908,22 @@ const BATTLE_MAPS = [
         "r": 44,
         "layer": "object12",
         "oy": 20
+      },
+      {
+        "id": "tile_poolcore_floor_gradient",
+        "c": 17,
+        "r": 41,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
+      },
+      {
+        "id": "tile_poolcore_floor_gradient",
+        "c": 18,
+        "r": 41,
+        "layer": "object12",
+        "ox": 10,
+        "oy": 30
       }
     ],
     "solid": [
@@ -60463,6 +60603,144 @@ const BATTLE_MAPS = [
         ]
       },
       {
+        "id": "tile_field_base",
+        "c": 21,
+        "r": 28,
+        "layer": "object",
+        "baseHp": 2000,
+        "baseDepth": 2,
+        "baseSolid": [
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            10,
+            1
+          ],
+          [
+            0,
+            1
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            10,
+            6
+          ]
+        ]
+      },
+      {
         "id": "tile_muftd54p",
         "c": 21,
         "r": 28,
@@ -63461,326 +63739,36 @@ const BATTLE_MAPS = [
     },
     "stamps": [
       {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 89,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 89,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 92,
-        "r": 97,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 92,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 89,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 92,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 104,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 101,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 89,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 92,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 95,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 98,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 77,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 74,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 80,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 83,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 71,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 71,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 71,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 68,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_muftd54p",
-        "c": 98,
-        "r": 95,
-        "layer": "ground"
-      },
-      {
         "id": "tile_field_base",
-        "c": 98,
-        "r": 95,
+        "c": 92,
+        "r": 71,
         "layer": "object",
         "baseHp": 2000,
         "baseDepth": 2,
         "baseSolid": [
           [
-            0,
-            1
+            1,
+            6
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            1,
+            2
           ],
           [
             1,
             1
+          ],
+          [
+            1,
+            3
           ],
           [
             2,
@@ -63791,7 +63779,7 @@ const BATTLE_MAPS = [
             1
           ],
           [
-            4,
+            6,
             1
           ],
           [
@@ -63799,7 +63787,7 @@ const BATTLE_MAPS = [
             1
           ],
           [
-            6,
+            4,
             1
           ],
           [
@@ -63813,703 +63801,84 @@ const BATTLE_MAPS = [
           [
             9,
             1
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            4,
+            3
           ],
           [
             10,
             1
           ],
           [
-            1,
-            2
-          ],
-          [
-            2,
-            2
-          ],
-          [
-            3,
-            2
-          ],
-          [
-            4,
-            2
-          ],
-          [
-            5,
-            2
-          ],
-          [
-            6,
-            2
-          ],
-          [
-            7,
-            2
-          ],
-          [
-            8,
-            2
-          ],
-          [
-            9,
-            2
-          ],
-          [
-            1,
-            3
-          ],
-          [
-            2,
-            3
-          ],
-          [
-            3,
-            3
-          ],
-          [
-            9,
-            3
-          ],
-          [
-            1,
-            4
-          ],
-          [
-            9,
-            4
-          ],
-          [
-            1,
-            5
-          ],
-          [
-            9,
-            5
+            0,
+            1
           ],
           [
             0,
-            6
-          ],
-          [
-            1,
-            6
-          ],
-          [
-            9,
             6
           ],
           [
             10,
             6
           ]
-        ],
-        "oy": -11.333333
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 68,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 71,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 65,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 62,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 59,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 56,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 53,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 53,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 53,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 50,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 50,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 61,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 61,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 61,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 58,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 55,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 52,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 72,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 78,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 81,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 81,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 78,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 72,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 86,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 84,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 84,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 84,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 81,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 110,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 113,
-        "r": 92,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 110,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 113,
-        "r": 95,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 110,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 113,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 107,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 110,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 113,
-        "r": 101,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 72,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 72,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 63,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 63,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 66,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 86,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 100,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 103,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 109,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 109,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 109,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 112,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 112,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 112,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 97,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 94,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 91,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 88,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 88,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 91,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 88,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 88,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 85,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 85,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 85,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 69,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 49,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 46,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 43,
-        "r": 65,
-        "layer": "floor"
+        ]
       },
       {
         "id": "tile_bg_backroom_floor_l",
@@ -64888,512 +64257,6 @@ const BATTLE_MAPS = [
         "c": 19,
         "r": 62,
         "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 16,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 62,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 59,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 56,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 13,
-        "r": 53,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 109,
-        "r": 37,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 109,
-        "r": 34,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 109,
-        "r": 31,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 34,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 68,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 71,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 72,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 75,
-        "r": 65,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 58,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 58,
-        "r": 80,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 64,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 56,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 59,
-        "r": 89,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 67,
-        "r": 83,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 68,
-        "r": 98,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 44,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 47,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 50,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 53,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 56,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 59,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 62,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 65,
-        "r": 104,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 25,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 28,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 31,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 34,
-        "r": 77,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 108,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 109,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 110,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 111,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 112,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 113,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 114,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 115,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 97,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 96,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 95,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 94,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 93,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 92,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 91,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 89,
-        "r": 88,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 98,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 107,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 106,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 73,
-        "r": 89,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 79,
-        "r": 89,
-        "layer": "object5",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 88,
-        "r": 81,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 89,
-        "r": 87,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 89,
-        "r": 86,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 89,
-        "r": 85,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 89,
-        "r": 84,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 88,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 87,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 86,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4czvpx",
-        "c": 80,
-        "r": 85,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 79,
-        "r": 78,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 98,
-        "r": 75,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 105,
-        "r": 75,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 96,
-        "r": 74,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 107,
-        "r": 74,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_bg_backroom_floor_l",
-        "c": 106,
-        "r": 74,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 95,
-        "r": 71,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 108,
-        "r": 66,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 93,
-        "r": 70,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 92,
-        "r": 68,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 91,
-        "r": 68,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 90,
-        "r": 68,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mr4cyy36",
-        "c": 89,
-        "r": 68,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 87,
-        "r": 67,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 86,
-        "r": 65,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 84,
-        "r": 64,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 83,
-        "r": 48,
-        "layer": "object",
-        "fx": true
-      },
-      {
-        "id": "tile_mvpa16jw",
-        "c": 82,
-        "r": 47,
-        "layer": "object"
-      },
-      {
-        "id": "tile_mvpa0o8b",
-        "c": 90,
-        "r": 49,
-        "layer": "object"
       },
       {
         "id": "tile_bg_backroom_floor_l",
@@ -72458,6 +71321,512 @@ const BATTLE_MAPS = [
         "c": 25,
         "r": 77,
         "layer": "object"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 53,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 37,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 31,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 34,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 64,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 56,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 59,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 67,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 68,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 44,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 47,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 50,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 56,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 59,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 62,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 65,
+        "r": 104,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 25,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 28,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 31,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 34,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 108,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 109,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 110,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 111,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 112,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 113,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 114,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 115,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 97,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 96,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 95,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 94,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 93,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 92,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 91,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 89,
+        "r": 88,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 98,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 107,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 106,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 73,
+        "r": 89,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 79,
+        "r": 89,
+        "layer": "object5",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 88,
+        "r": 81,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 86,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 89,
+        "r": 84,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 88,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 87,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 86,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4czvpx",
+        "c": 80,
+        "r": 85,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 79,
+        "r": 78,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 98,
+        "r": 75,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 105,
+        "r": 75,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 96,
+        "r": 74,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 107,
+        "r": 74,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 95,
+        "r": 71,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 108,
+        "r": 66,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 93,
+        "r": 70,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 92,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 91,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 90,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mr4cyy36",
+        "c": 89,
+        "r": 68,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 87,
+        "r": 67,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 86,
+        "r": 65,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 84,
+        "r": 64,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 83,
+        "r": 48,
+        "layer": "object",
+        "fx": true
+      },
+      {
+        "id": "tile_mvpa16jw",
+        "c": 82,
+        "r": 47,
+        "layer": "object"
+      },
+      {
+        "id": "tile_mvpa0o8b",
+        "c": 90,
+        "r": 49,
+        "layer": "object"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 56,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 16,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 13,
+        "r": 62,
+        "layer": "floor"
       },
       {
         "id": "tile_mr4cyy36",
@@ -81658,6 +81027,1057 @@ const BATTLE_MAPS = [
         "id": "tile_bg_backroom_floor_l",
         "c": 92,
         "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 89,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 89,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 92,
+        "r": 97,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 92,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 89,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 92,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 104,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 101,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 89,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 92,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 95,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 98,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 77,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 74,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 77,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 74,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 80,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 83,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 71,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 71,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 71,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 68,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_muftd54p",
+        "c": 98,
+        "r": 95,
+        "layer": "ground"
+      },
+      {
+        "id": "tile_field_base",
+        "c": 98,
+        "r": 95,
+        "layer": "object",
+        "baseHp": 2000,
+        "baseDepth": 2,
+        "baseSolid": [
+          [
+            0,
+            1
+          ],
+          [
+            1,
+            1
+          ],
+          [
+            2,
+            1
+          ],
+          [
+            3,
+            1
+          ],
+          [
+            4,
+            1
+          ],
+          [
+            5,
+            1
+          ],
+          [
+            6,
+            1
+          ],
+          [
+            7,
+            1
+          ],
+          [
+            8,
+            1
+          ],
+          [
+            9,
+            1
+          ],
+          [
+            10,
+            1
+          ],
+          [
+            1,
+            2
+          ],
+          [
+            2,
+            2
+          ],
+          [
+            3,
+            2
+          ],
+          [
+            4,
+            2
+          ],
+          [
+            5,
+            2
+          ],
+          [
+            6,
+            2
+          ],
+          [
+            7,
+            2
+          ],
+          [
+            8,
+            2
+          ],
+          [
+            9,
+            2
+          ],
+          [
+            1,
+            3
+          ],
+          [
+            2,
+            3
+          ],
+          [
+            3,
+            3
+          ],
+          [
+            9,
+            3
+          ],
+          [
+            1,
+            4
+          ],
+          [
+            9,
+            4
+          ],
+          [
+            1,
+            5
+          ],
+          [
+            9,
+            5
+          ],
+          [
+            0,
+            6
+          ],
+          [
+            1,
+            6
+          ],
+          [
+            9,
+            6
+          ],
+          [
+            10,
+            6
+          ]
+        ],
+        "oy": -11.333333
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 68,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 71,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 65,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 62,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 59,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 56,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 53,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 50,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 50,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 61,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 61,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 61,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 58,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 55,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 52,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 52,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 78,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 81,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 81,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 78,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 75,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 86,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 84,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 84,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 84,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 81,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 92,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 95,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 98,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 107,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 110,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 113,
+        "r": 101,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 72,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 66,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 63,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 63,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 66,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 66,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 80,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 83,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 86,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 89,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 77,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 100,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 103,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 106,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 109,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 112,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 97,
+        "r": 74,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 97,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 94,
+        "r": 71,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 97,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 94,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 91,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 91,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 88,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 62,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 85,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 69,
+        "r": 59,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 49,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 46,
+        "r": 65,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 46,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 43,
+        "r": 68,
+        "layer": "floor"
+      },
+      {
+        "id": "tile_bg_backroom_floor_l",
+        "c": 43,
+        "r": 65,
         "layer": "floor"
       }
     ],
