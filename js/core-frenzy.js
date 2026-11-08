@@ -23,7 +23,7 @@ function updateCoreFrenzy(dt) {
   if (!G || !G.enemies) return;
   const on = coreFrenzyActive();
   for (const e of G.enemies) {
-    if (e.elite || e.capKing || e.pearlBoss) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js、js/elite-cap-king.js、js/pearl-elder.js）
+    if (e.elite || e.capKing || e.pearlBoss || e.bananaEmperor) continue;   // 菁英怪用自己的數值，不套狂暴加成（js/elite-bird-head.js、js/elite-cap-king.js、js/pearl-elder.js；金蕉大王要一直慢慢走，js/banana-emperor.js）
     if (e.coreGiveUpT > 0) e.coreGiveUpT -= dt;
     if (on && !e.frenzy && e.hp > 0) {
       e.frenzy = { speed: e.speed, sentryDamage: e.sentryDamage, playerDamage: e.playerDamage };

@@ -1,5 +1,5 @@
 /* ===== 菁英金蕉王「金蕉大王」（F307 左下大草地房的地圖 BOSS）=====
-   - 外觀：金蕉王放大 BANANA_EMPEROR.scale 倍。站在核心旁邊守著，不逃跑、不離開（被推開會走回原位）。
+   - 外觀：金蕉王放大 BANANA_EMPEROR.scale 倍。守在核心旁邊，不逃跑；沒施法時在核心旁邊慢慢走來走去（wander）。
    - 觸發：溫特走到 wakeRange 格內（看得到）、或他和他的隊伍被打 → BOSS 戰開始（BOSS 血條＋中BOSS 音樂），核心一起甦醒。
    - 施法：每次都是同一個姿勢——舉高權杖（cast-02）→ 往下用力敲地板（cast-02-tap），地板顫動、裂開。
        權杖的光和地上裂縫的顏色代表這次施的是哪一種法術（spells）：
@@ -15,9 +15,14 @@
 const BANANA_EMPEROR = {
   name: '金蕉大王',
   maps: { map_f307boss: { c: 19, r: 51 }, map_mw2dn6re: { c: 18, r: 87 } },   // 核心在哪一格（測試：F307 BOSS 場地、F307 本圖的大草地房）；他站在核心右邊 standOff 格
-  standOff: 3.5,                 // 站在核心右邊幾格（太近權杖會被核心擋住；體型越大要站越遠）
+  standOff: 3.5,                 // 一開始站在核心右邊幾格（太近權杖會被核心擋住；體型越大要站越遠）
+  wander: {                      // 沒在施法的時候：在核心旁邊慢慢走來走去
+    near: 3, far: 5.5,           // 走到離核心幾格～幾格的地方（他身體很寬，太近會跟核心疊在一起）
+    speed: .5,                   // 走路速度：金蕉王的幾倍（.5＝一半，慢慢走）
+    pause: [1.5, 3.5],           // 走到之後停下來站幾秒～幾秒，再走下一段
+  },
   hp: 2500, rewardMul: 6, crystalMul: 6,   // hp：血量（再乘整體難度）
-  scale: 2.5,                    // 體型放大倍率（以金蕉王為準）
+  scale: 2.3,                    // 體型放大倍率（以金蕉王為準）
   wakeRange: 8,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
   castEvery: 4.5,                // 兩次施法間隔幾秒（BOSS 戰開始後）
   firstCast: 1.5,                // BOSS 戰開始後幾秒放第一次
@@ -89,6 +94,7 @@ function seedBananaEmperor() {
   e.drawWidth = Math.round(base.width * B.scale); e.drawHeight = Math.round(base.height * B.scale);
   e.knockMul = 0; e.staggerTime = 0; e.unpushable = true; e.noHitSquash = true; e.wide = true;
   e.faceRight = false; e.forceFrame = BE_ART.stand;
+  e.speed = base.speed * B.wander.speed;
   e.be = { home: { x: at.x, y: at.y }, cd: B.firstCast, phase: null, t: 0, spell: null, last: null, hp0: e.hp };
   G.enemies.push(e);
   const anchor = { anchor: true, x: core.x, y: core.y, leash: B.squad.leash, regroup: B.squad.regroup, roam: B.squad.roam };
@@ -130,7 +136,7 @@ function beWake(rec) {
   if (typeof sfxAt === 'function') sfxAt('bananaHeal', e.x, e.y, 1.2, 'banana-emperor-wake');
 }
 
-// ---- 行為（enemy-ai.js 的 stepEnemy 呼叫）：站在原位，輪流施法 ----
+// ---- 行為（enemy-ai.js 的 stepEnemy 呼叫）：在核心旁邊慢慢走，時間到就停下來施法 ----
 function stepBananaEmperor(e, dt) {
   const B = BANANA_EMPEROR, be = e.be, rec = (G.bananaEmperors || []).find(r => r.e === e);
   if (!rec) return;
@@ -142,25 +148,46 @@ function stepBananaEmperor(e, dt) {
   if (e.stunT > 0 && !be.phase) { e.forceFrame = BE_ART.stand; return; }
   if (be.phase === 'raise') { beRaise(e, rec, dt); return; }
   if (be.phase === 'tap') { be.t -= dt; e.forceFrame = BE_ART.tap; e.forceFlip = !!e.faceRight; if (be.t <= 0) { be.phase = null; e.forceFrame = BE_ART.stand; } return; }
-  e.forceFrame = BE_ART.stand; e.forceFlip = !!e.faceRight;
-  // 被推開了：走回原位
-  if (Math.hypot(e.x - be.home.x, e.y - be.home.y) > CELL * .6) {
-    e.forceFrame = null;
-    const [hc, hr] = cellAt(be.home.x, be.home.y);
-    enemyNavigate(e, hc, hr, dt, 'bemperor-home', true);
-    return;
-  }
-  if (!e.eliteAwake) return;
-  const foe = beFoe(e);
-  if (foe) e.faceRight = foe.x > e.x;
+  if (!e.eliteAwake) { beWander(e, rec, dt); return; }
   be.cd -= dt;
-  if (be.cd > 0) return;
+  if (be.cd > 0) { beWander(e, rec, dt); return; }
+  // 時間到：停下腳步、面向我方，開始施法
+  const foe = beFoe(e);
   be.spell = bePickSpell(e, foe);
-  if (!be.spell) { be.cd = .5; return; }
+  if (!be.spell) { be.cd = .5; beWander(e, rec, dt); return; }
+  e.aiPath = null; be.goal = null; e.moving = false;
+  if (foe) e.faceRight = foe.x > e.x;
   be.phase = 'raise'; be.t = B.raiseTime; be.aim = foe;
   const [sx, sy] = beStaffTip(e), col = B.spells[be.spell].color;
   G.effects.push({ fglow: true, pal: beGlowPal(col), grow: true, x: sx, y: sy, r0: 8, r1: 46, life: B.raiseTime, life0: B.raiseTime });
   if (typeof sfxAt === 'function') sfxAt('bananaHeal', e.x, e.y, .7, 'banana-emperor-raise');
+}
+// 沒在施法：在核心旁邊挑一個地方慢慢走過去，到了站一下，再挑下一個
+function beWander(e, rec, dt) {
+  const W = BANANA_EMPEROR.wander, be = e.be;
+  if (be.wait > 0) { be.wait -= dt; e.forceFrame = BE_ART.stand; e.forceFlip = !!e.faceRight; return; }
+  if (!be.goal) be.goal = beWanderSpot(rec);
+  if (!be.goal) { be.wait = 1; return; }
+  e.forceFrame = null;   // 用金蕉王的走路圖
+  const [gc, gr] = cellAt(be.goal.x, be.goal.y);
+  const nav = enemyNavigate(e, gc, gr, dt, 'bemperor-walk:' + gc + ',' + gr, true);
+  if ((nav && (nav.reached || nav.blocker)) || Math.hypot(be.goal.x - e.x, be.goal.y - e.y) < CELL * .4) {
+    be.goal = null; e.aiPath = null; e.moving = false;
+    be.wait = W.pause[0] + Math.random() * (W.pause[1] - W.pause[0]);
+  }
+}
+function beWanderSpot(rec) {
+  const W = BANANA_EMPEROR.wander, c = rec.core;
+  for (let i = 0; i < 24; i++) {
+    const a = Math.random() * Math.PI * 2, d = (W.near + Math.random() * (W.far - W.near)) * CELL;
+    const p = lqFreeSpot(c.x + Math.cos(a) * d, c.y + Math.sin(a) * d);
+    if (!p || Math.hypot(p.x - c.x, p.y - c.y) < W.near * CELL * .9 || Math.hypot(p.x - rec.e.x, p.y - rec.e.y) <= CELL) continue;
+    // 走過去的直線不能穿過核心（離核心至少 near－1 格）：不然會從核心身上走過去
+    const ex = rec.e.x, ey = rec.e.y, dx = p.x - ex, dy = p.y - ey, L2 = dx * dx + dy * dy || 1;
+    const k = Math.max(0, Math.min(1, ((c.x - ex) * dx + (c.y - ey) * dy) / L2));
+    if (Math.hypot(ex + dx * k - c.x, ey + dy * k - c.y) >= (W.near - 1) * CELL) return p;
+  }
+  return null;
 }
 // 舉杖蓄力：顏色光點往權杖頂端聚過來
 function beRaise(e, rec, dt) {
