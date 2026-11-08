@@ -26,7 +26,7 @@ const LOOFAH_QUEEN = {
   stompRange: 9,                 // 目標在幾格內（看得到）就踏地
   keepDistance: 3,               // 目標太近（格）：往後退一點
   vines: {                       // 每次踏地垂下來的藤蔓
-    count: 6,                    // 一次幾條
+    count: 7,                    // 一次幾條（原本 6 條，使用者要多 1.2 倍）
     aimed: 3,                    // 其中最多幾條瞄準我方（溫特、隊友站的地方；其他隨機落在她身邊）
     aimJitter: .5,               // 瞄準的那幾條會偏開多少（格）
     spreadMin: 2, spreadMax: 7,  // 隨機的那幾條：落在離她幾格～幾格
@@ -39,7 +39,8 @@ const LOOFAH_QUEEN = {
       grabR: 32,                 // 鑽出來時離多近的人會被抓（像素）
       hold: 4,                   // 抓在半空中最久幾秒（隊友可以被溫特開槍打斷藤蔓救下來；火燒也會放開）
       throwChance: .5,           // 幾成的藤蔓不是抓著，而是把人往最近的牆丟過去
-      throwAfter: .35,           // 往上拉幾秒後甩出去
+      throwAfter: 3,             // 抓在半空中幾秒後甩出去（這段時間一樣可以開槍、用火救下來）
+      windup: .6,                // 甩出去前幾秒開始用力晃（預告要甩了）
       throwRange: 8,             // 往幾格內最近的牆丟（範圍內沒有牆：就丟往隨便一個方向，落地而已）
       throwSpeed: 430,           // 飛出去的速度（像素／秒）
       throwUp: 160,              // 飛出去時往上的速度（拋物線；像素／秒）
@@ -317,7 +318,16 @@ function lqUpdateGroundVines(dt) {
   // 被抓在半空中的人：時間到、或被火燒到就放下來；要丟的那一半：拉起來一下就甩出去
   for (const cap of G.vineCaps || []) {
     if (!cap.ground || (cap.phase !== 'hang' && cap.phase !== 'wrap' && cap.phase !== 'lift')) continue;
-    if (cap.throwWall && cap.phase === 'lift' && cap.t >= V.throwAfter) { lqThrowStart(cap); continue; }
+    if (cap.throwWall && cap.phase === 'hang') {   // 要甩的那一半：先吊著 throwAfter 秒，最後 windup 秒往後拉、用力晃，然後甩出去
+      cap.hangT = (cap.hangT || 0) + dt;
+      const left = V.throwAfter - cap.hangT;
+      if (left <= V.windup) {
+        if (cap.tx == null) { lqThrowAim(cap); flash('要被甩出去了！', cap.actor.x, cap.actor.y - 56 - cap.h, '#ffd27a', .7); }
+        cap.windK = Math.min(1, 1 - left / V.windup);
+        cap.kick = Math.sin(cap.hangT * 32) * 1.2 * cap.windK;
+      }
+      if (left <= 0) { lqThrowStart(cap); continue; }
+    }
     const a = cap.actor, burnt = typeof anyFireAt === 'function' && anyFireAt(a.x, a.y + 10, 30);
     if (cap.phase === 'hang') cap.holdT -= dt;
     if (burnt) for (let i = 0; i < 3; i++) spawnFlameBurst(a.x + (Math.random() - .5) * 12, a.y - Math.random() * cap.h, .55);
@@ -357,7 +367,7 @@ function lqGroundGrab(a, isPlayer, g) {
   if (typeof sfxAt === 'function') sfxAt('vineGrab', a.x, a.y, .8);
 }
 // 把人往最近的牆丟：16 個方向一格一格往外找，找到最近的牆就往那邊飛
-function lqThrowStart(cap) {
+function lqThrowAim(cap) {
   const V = LOOFAH_QUEEN.vines.ground, a = cap.actor;
   const blocked = cap.isPlayer ? playerBlocked : (typeof sentryBlocked === 'function' ? sentryBlocked : playerBlocked);
   let best = null, bestD = Infinity;
@@ -368,7 +378,12 @@ function lqThrowStart(cap) {
     }
   }
   const ang = best ?? Math.random() * Math.PI * 2;
-  cap.phase = 'thrown'; cap.t = 0; cap.tx = Math.cos(ang); cap.ty = Math.sin(ang); cap.vh = V.throwUp; cap.spin = 0;
+  cap.tx = Math.cos(ang); cap.ty = Math.sin(ang);
+}
+function lqThrowStart(cap) {
+  const V = LOOFAH_QUEEN.vines.ground, a = cap.actor;
+  if (cap.tx == null) lqThrowAim(cap);
+  cap.phase = 'thrown'; cap.t = 0; cap.vh = V.throwUp; cap.spin = 0; cap.kick = 0; cap.windK = 0;
   cap.spinDir = cap.tx >= 0 ? 1 : -1; cap.lieSide = cap.spinDir;
   G.effects.push({ ring: true, x: a.x, y: a.y - cap.h, r: 6, r2: 34, life: .3, life0: .3, color: '#9fe07a' });
   if (typeof sfxAt === 'function') sfxAt('swordSwing', a.x, a.y, .5, 'loofah-queen-throw');
@@ -401,18 +416,20 @@ function lqThrowLand(cap, wall) {
   cap.phase = 'fall'; cap.t = 0; cap.fallV = wall ? 60 : Math.max(0, -cap.vh); cap.cut = true;
   cap.h = Math.max(1, cap.h); cap.fallH0 = Math.max(1, cap.h);
 }
-// 畫從地面撐起來的藤（js/vines.js 的 drawVineActor 呼叫）：從腳下的地面長上來，接到腰上；兩三根粗細不一的藤交纏
+// 畫從地面撐起來的藤（js/vines.js 的 drawVineActor 呼叫）：一根粗的絲瓜捲鬚（跟絲瓜小姐的藤同一種畫法，js/loofah-lady.js 的 drawTendril），
+// 從腳下的地面長上來、中段繞成彈簧圈、接到腰上；要甩人之前往反方向拉、晃
 function lqDrawGroundStalk(ctx, cap, a, ax, ay) {
-  if (cap.phase === 'thrown') return;   // 已經被甩出去：沒有藤
-  const gx = a.x, gy = a.y + 14, h = gy - ay;
-  if (h < 4 || typeof vineStroke !== 'function') return;
-  const seed = cap.seed || 1, now = performance.now() / 1000;
-  for (let i = 0; i < 3; i++) {
-    const off = (i - 1) * 7, sway = Math.sin(now * 2 + seed + i) * 4;
-    vineStroke(ctx, [[gx + off, gy], [gx + off * 1.8 + sway + (i - 1) * 10, gy - h * .55], [ax + off * .3, ay + 4]], (i === 1 ? 11 : 7), seed + i);
-  }
+  if (cap.phase === 'thrown' || typeof drawTendril !== 'function') return;   // 已經被甩出去：沒有藤
+  const gx = a.x, gy = a.y + 14, now = performance.now() / 1000, seed = cap.seed || 1;
+  const grow = cap.phase === 'wrap' ? Math.min(1, cap.t / .4) : 1;
+  const h = Math.max(30, gy - ay + 14);   // 長到腰再高一點（尖端勾在身上）
+  const pull = (cap.windK || 0) * -(cap.tx || 0) * 22;   // 要甩之前：往反方向拉
   ctx.fillStyle = 'rgba(70,52,30,.55)';   // 地面被撐破的土
-  ctx.beginPath(); ctx.ellipse(gx, gy + 1, 14, 5, 0, 0, Math.PI * 2); ctx.fill();
+  ctx.beginPath(); ctx.ellipse(gx, gy + 1, 15, 5, 0, 0, Math.PI * 2); ctx.fill();
+  drawTendril(ctx, gx, gy, {
+    h: h * grow, grow: 1, lean: (ax - gx) + pull + Math.sin(now * 2.2 + seed) * 3,
+    turns: 2.2, r: 11, w: 6.5, phase: seed, side: Math.sin(seed * 5) > 0 ? 1 : -1, leaf: true,
+  });
 }
 
 // ---- 核心：吊在女王頭上 → 她倒下後吊在原地 → 被火燒斷藤蔓掉下來 ----
