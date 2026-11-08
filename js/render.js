@@ -1372,6 +1372,7 @@ function drawWorldEffects() {
   if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
   if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'air');   // 起霧 V2：還在空中飄的葉子（js/fog-fx-v2.js）
+  if (typeof drawBananaEmperorAir === 'function') drawBananaEmperorAir(ctx);   // 金蕉大王的狂風捲起來的葉子（js/banana-emperor.js）
   if (typeof drawLootV2 === 'function') drawLootV2(ctx);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
   if (typeof drawMiscV2 === 'function') drawMiscV2(ctx);   // 槍、連刺、集氣等其他 V2（js/misc-fx-v2.js）
   for (const f of G.effects) {

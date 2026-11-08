@@ -5,12 +5,12 @@
        舉杖的時候，他腳下會畫出一個魔法陣（半徑 circle 格），敲下去那一刻才生效：
          陣裡的怪物得到 BUFF，陣裡的我方（溫特、隊友）得到 DEBUFF。看到魔法陣就可以先走出去躲掉。
        魔法陣、權杖的光、地上裂縫的顏色代表這次施的是哪一種法術（spells）：
-         綠＝補血（怪物補血；我方被吸走一點血）
+         綠＝補血（怪物、異質核心補血；我方被吸走一點血）
          紅＝攻擊（怪物攻擊上升；我方攻擊下降）
          藍＝防禦（怪物受到的傷害變少；我方受到的傷害變多）
          紫＝速度（怪物變快；我方變慢）
          黃＝香蕉皮雨（天上掉下香蕉皮，落點先出現影子；我方踩到會滑倒，js/golden-banana-king.js 那一套）
-         白＝召喚狂風（陣裡的我方被吹上天，再掉到離他很遠的地方，摔一下、暈一下；用 js/vines.js 被丟下來那一套）
+         白＝召喚狂風（地上的葉子被捲上天；陣裡的我方被吹上天，再掉到離他很遠的地方，摔一下、暈一下；用 js/vines.js 被丟下來那一套）
        有人受傷就優先補血；其他時候輪流挑沒剛用過的。
    - 地上的裂痕：每敲一次就多裂幾片，整場戰鬥都不會消失（他倒下後才慢慢淡掉）；我方踩在裂痕上走路很慢。
    - 隊伍（都比一般的大、比較慢、但比較痛）：大鳥頭人、大史萊姆、大生命體各 count 隻，再加兩隻普通金蕉王（只負責補血：不逃跑、不丟香蕉皮、不帶小怪）。
@@ -43,7 +43,8 @@ const BANANA_EMPEROR = {
     def:   { name: '防禦上升', color: [80, 170, 255],  cut: .4,  time: 12 },       // 受到的傷害減少 cut（.4＝少 4 成）
     spd:   { name: '速度上升', color: [196, 120, 255], mul: 1.5, time: 10 },       // 移動速度 × mul
     peels: { name: '香蕉皮雨', color: [255, 224, 80],  count: 7, aimed: 3, near: 2, far: 7, fall: 1.1, height: 420 },   // 一次掉幾個、幾個瞄準我方、其他落在離他幾～幾格、掉多久、從多高
-    wind:  { name: '召喚狂風', color: [235, 245, 255], dist: 8, away: .5 },       // dist：吹到離他最多幾格（撞到牆就停在牆前）；away：在天上停幾秒才掉下來
+    wind:  { name: '召喚狂風', color: [235, 245, 255], dist: 8, away: .5,          // dist：吹到離他最多幾格（撞到牆就停在牆前）；away：在天上停幾秒才掉下來
+             leaves: 36, leafRise: [140, 260], leafLife: [1.4, 2.4] },           // 起風時被捲上天的葉子：幾片、往上飄的速度（像素／秒）、飄幾秒
   },
   debuffs: {                     // 站在魔法陣裡的我方（溫特、隊友）得到的 DEBUFF
     heal: { name: '生命被吸走', drain: 10 },                 // 綠：每人扣幾 HP（不會扣到倒下，最少留 1）
@@ -52,7 +53,6 @@ const BANANA_EMPEROR = {
     spd:  { name: '速度下降',   mul: .6,  time: 8 },          // 紫：走路速度 × mul
   },
   shake: 7,                      // 敲地時畫面震多大
-  crackR: 46,                    // 地上焦黑的大小（像素）
   cracks: {                      // 地上的裂痕（整場戰鬥都在，越敲越多）
     count: 8, len: [55, 120],    // 每片幾條裂縫、每條多長（像素）
     extra: 2, extraScale: .7,    // 每敲一次，魔法陣裡另外再裂幾片小的、小的是幾倍大
@@ -91,15 +91,11 @@ const beAlive = e => !!(e && !e.dead && e.hp > 0 && G.enemies.includes(e));
 const beRgb = (c, a = 1) => `rgba(${c[0]},${c[1]},${c[2]},${a})`;
 const beHex = c => '#' + c.map(v => Math.round(v).toString(16).padStart(2, '0')).join('');
 const bePeople = () => [G.player, ...(G.towers || [])].filter(a => a && a.hp > 0);
-// 地上裂縫：用焦痕那一套畫（js/attack-fx.js 的 SCORCH），每種法術一個顏色，裂縫剛裂開時透出那個顏色的光
-for (const [id, s] of Object.entries(BANANA_EMPEROR.spells))
-  SCORCH.styles['bananaTap_' + id] = { life: 6, fade: 2, size: 1, cracks: 7, heat: 1.6, halo: '#2a2418',
-    c0: [30, 26, 18], c1: [44, 38, 26], c2: [70, 60, 40], crack: '#120e08', fleck: '#3a3020', glow: s.color };
 
 // ---- 開場（game.js 在 seedLoofahQueen 之後呼叫）----
 // G.bananaEmperors：[{ e, core, anchor, squad }]；anchor＝核心的位置；隊員各自的站位在 m.squadLeader（V 字隊形）
 function seedBananaEmperor() {
-  G.bananaEmperors = []; G.beCracks = []; G.beCircles = [];
+  G.bananaEmperors = []; G.beCracks = []; G.beCircles = []; G.beLeaves = [];
   const spot = beSpot();
   if (!spot || MAP_SAFE || (typeof practiceOn === 'function' && practiceOn())) return;
   const base = ACTIVE_MONSTERS.find(m => m.id === 'golden_banana_king');
@@ -262,7 +258,6 @@ const beGlowPal = c => [c.map(v => Math.min(255, v + 90)), c, c.map(v => v * .3)
 // 敲地的畫面：地上裂開（越裂越多）、畫面震動、塵土、顏色光圈往外擴
 function beTapFx(e, col) {
   const B = BANANA_EMPEROR, K = B.cracks, [fx, fy] = beStaffFoot(e);
-  addScorchMark(fx, fy, B.crackR, null, 'bananaTap_' + e.be.spell);
   beAddCracks(fx, fy, col, 1);
   for (let i = 0; i < K.extra; i++) {   // 魔法陣裡另外裂開幾片小的
     const a = Math.random() * Math.PI * 2, d = (1.5 + Math.random() * (B.circle - 2)) * CELL;
@@ -285,23 +280,43 @@ function beTapFx(e, col) {
 }
 
 // ---- 地上的裂痕：從敲下的地方往外裂開，先透出法術顏色的光，之後變成暗暗的裂痕留在地上（踩到會變慢）----
+// 畫得像地面被敲碎：中間一個小凹坑＋幾塊碎土；主裂縫由粗變細、彎彎曲曲；相鄰的主裂縫之間有橫向的細裂縫連起來（像蜘蛛網）
 function beAddCracks(x, y, col, scale = 1) {
-  const K = BANANA_EMPEROR.cracks, lines = [], a0 = Math.random() * Math.PI * 2;
+  const K = BANANA_EMPEROR.cracks, a0 = Math.random() * Math.PI * 2, mains = [], lines = [], chunks = [];
+  const sq = .55;   // 上下壓扁：貼在地上的透視
   let R = 0;
   for (let i = 0; i < K.count; i++) {
-    let a = a0 + i / K.count * Math.PI * 2 + (Math.random() - .5) * .5, d = 0;
-    const len = (K.len[0] + Math.random() * (K.len[1] - K.len[0])) * scale, pts = [[0, 0]];
-    while (d < len) { d += 10 + Math.random() * 12; a += (Math.random() - .5) * .7; pts.push([Math.cos(a) * d, Math.sin(a) * d * .55]); }   // 上下壓扁：貼在地上的透視
+    let a = a0 + i / K.count * Math.PI * 2 + (Math.random() - .5) * .6, d = 4 + Math.random() * 4;
+    const len = (K.len[0] + Math.random() * (K.len[1] - K.len[0])) * scale * (.6 + Math.random() * .5), pts = [[Math.cos(a) * d, Math.sin(a) * d * sq]];
+    while (d < len) { d += 6 + Math.random() * 9; a += (Math.random() - .5) * .55; pts.push([Math.cos(a) * d, Math.sin(a) * d * sq]); }
     R = Math.max(R, d);
-    lines.push({ pts, w: 2.6 * Math.max(.7, scale) });
-    if (Math.random() < .7) {   // 岔出去的細裂縫
-      const k = 1 + Math.floor(Math.random() * (pts.length - 2)), [bx, by] = pts[k], br = [[bx, by]];
-      let ba = a + (Math.random() < .5 ? -1 : 1) * (.6 + Math.random() * .6), bd = 0;
-      for (let j = 0; j < 3; j++) { bd += 8 + Math.random() * 8; ba += (Math.random() - .5) * .5; br.push([bx + Math.cos(ba) * bd, by + Math.sin(ba) * bd * .55]); }
-      lines.push({ pts: br, w: 1.5 });
+    const main = { pts, w: (3.2 + Math.random() * 1.4) * Math.max(.75, scale), taper: true };
+    mains.push(main); lines.push(main);
+    for (let b = 0; b < 2; b++) {   // 岔出去的細裂縫（從主裂縫中段長出去，也是越來越細）
+      if (Math.random() > .55 || pts.length < 4) continue;
+      const k = 1 + Math.floor(Math.random() * (pts.length - 3)), [bx, by] = pts[k], br = [[bx, by]];
+      let ba = Math.atan2(by / sq, bx) + (Math.random() < .5 ? -1 : 1) * (.5 + Math.random() * .6), bd = 0;
+      const bl = (12 + Math.random() * 22) * scale;
+      while (bd < bl) { bd += 5 + Math.random() * 6; ba += (Math.random() - .5) * .6; br.push([bx + Math.cos(ba) * bd, by + Math.sin(ba) * bd * sq]); }
+      lines.push({ pts: br, w: main.w * .55, taper: true });
     }
   }
-  (G.beCracks = G.beCracks || []).push({ x, y, col, lines, R: R * .8, t: 0 });
+  for (let i = 0; i < mains.length; i++) {   // 相鄰兩條主裂縫之間，橫著裂開連起來（不是每一格都有）
+    if (Math.random() > .6) continue;
+    const A = mains[i].pts, Bp = mains[(i + 1) % mains.length].pts, t = .35 + Math.random() * .3;
+    const pa = A[Math.min(A.length - 1, Math.round(A.length * t))], pb = Bp[Math.min(Bp.length - 1, Math.round(Bp.length * t))];
+    const mx = (pa[0] + pb[0]) / 2 * (1.05 + Math.random() * .15), my = (pa[1] + pb[1]) / 2 * (1.05 + Math.random() * .15);
+    lines.push({ pts: [pa, [mx + (Math.random() - .5) * 6, my + (Math.random() - .5) * 3], pb], w: 1.3 * Math.max(.75, scale), taper: false });
+  }
+  for (let i = 0, n = 4 + Math.floor(Math.random() * 3); i < n; i++) {   // 中間被敲碎翹起來的小土塊
+    const a = Math.random() * Math.PI * 2, d = (5 + Math.random() * 14) * scale, r = (3 + Math.random() * 3.5) * scale, cx = Math.cos(a) * d, cy = Math.sin(a) * d * sq, rot = Math.random() * Math.PI;
+    const poly = [];
+    for (let k = 0; k < 4; k++) { const t = rot + k / 4 * Math.PI * 2 + (Math.random() - .5) * .6, rr = r * (.7 + Math.random() * .5); poly.push([cx + Math.cos(t) * rr, cy + Math.sin(t) * rr * sq]); }
+    chunks.push(poly);
+  }
+  const pit = [];   // 中間的小凹坑（不規則）
+  for (let k = 0; k < 9; k++) { const t = k / 9 * Math.PI * 2, rr = (6 + Math.random() * 4) * scale; pit.push([Math.cos(t) * rr, Math.sin(t) * rr * sq]); }
+  (G.beCracks = G.beCracks || []).push({ x, y, col, lines, chunks, pit, R: R * .8, t: 0 });
   while (G.beCracks.length > K.max) G.beCracks.shift();
 }
 // 這個人有沒有踩在裂痕上（裂痕是壓扁的：上下的距離放大來算）
@@ -313,16 +328,33 @@ function beOnCrack(a) {
 function drawBananaEmperorGround(ctx) {
   const K = BANANA_EMPEROR.cracks, now = performance.now() / 1000;
   for (const c of G.beCracks || []) {
-    const grow = Math.min(1, c.t / .12), glow = Math.max(0, 1 - c.t / K.glow), fade = c.fadeOut == null ? 1 : Math.max(0, c.fadeOut / K.fade);
+    const grow = Math.min(1, c.t / .15), glow = Math.max(0, 1 - c.t / K.glow), fade = c.fadeOut == null ? 1 : Math.max(0, c.fadeOut / K.fade);
     if (fade <= 0) continue;
     ctx.save(); ctx.translate(c.x, c.y); ctx.lineCap = 'round'; ctx.lineJoin = 'round';
-    const path = l => { const n = Math.max(2, Math.ceil(l.pts.length * grow)); ctx.beginPath(); ctx.moveTo(l.pts[0][0], l.pts[0][1]); for (let i = 1; i < n; i++) ctx.lineTo(l.pts[i][0], l.pts[i][1]); };
-    ctx.globalAlpha = .85 * fade; ctx.strokeStyle = '#140f08';   // 暗色的裂痕本體
-    for (const l of c.lines) { ctx.lineWidth = l.w + 1; path(l); ctx.stroke(); }
+    const poly = (pts, dx = 0, dy = 0) => { ctx.beginPath(); pts.forEach(([x, y], i) => i ? ctx.lineTo(x + dx, y + dy) : ctx.moveTo(x + dx, y + dy)); ctx.closePath(); };
+    // 一條裂縫一段一段畫：越往外越細（taper），剛裂開時從中間往外長出來（grow）
+    const crack = (l, wMul, dx, dy) => {
+      const n = Math.max(2, Math.ceil(l.pts.length * grow));
+      for (let i = 1; i < n; i++) {
+        const k = l.taper ? Math.pow(1 - (i - 1) / (l.pts.length - 1), .8) : 1;
+        ctx.lineWidth = Math.max(.6, l.w * k * wMul);
+        ctx.beginPath(); ctx.moveTo(l.pts[i - 1][0] + dx, l.pts[i - 1][1] + dy); ctx.lineTo(l.pts[i][0] + dx, l.pts[i][1] + dy); ctx.stroke();
+      }
+    };
+    ctx.globalAlpha = fade;
+    ctx.fillStyle = 'rgba(12,8,4,.45)'; poly(c.pit); ctx.fill();                                  // 中間凹下去
+    ctx.strokeStyle = 'rgba(0,0,0,.18)'; for (const l of c.lines) crack(l, 2.2, 0, 0);          // 裂縫邊緣淡淡的陰影
+    ctx.strokeStyle = 'rgba(16,11,6,.85)'; for (const l of c.lines) crack(l, 1, 0, 0);         // 裂縫本體（深色）
+    ctx.strokeStyle = 'rgba(255,238,205,.22)'; for (const l of c.lines) crack(l, .45, .8, 1.3);  // 下緣被光照到的亮邊：看起來有深度
+    for (const ch of c.chunks) {   // 碎土塊：亮的上面＋暗的影子
+      ctx.fillStyle = 'rgba(0,0,0,.28)'; poly(ch, .8, 1.6); ctx.fill();
+      ctx.fillStyle = 'rgba(210,190,150,.32)'; poly(ch); ctx.fill();
+      ctx.strokeStyle = 'rgba(30,20,10,.5)'; ctx.lineWidth = .8; poly(ch); ctx.stroke();
+    }
     if (glow > 0) {   // 剛裂開：裂縫裡透出法術顏色的光
       ctx.globalCompositeOperation = 'lighter';
-      ctx.strokeStyle = beRgb(c.col, .55 * glow); for (const l of c.lines) { ctx.lineWidth = l.w + 6; path(l); ctx.stroke(); }
-      ctx.strokeStyle = beRgb(c.col.map(v => Math.min(255, v + 120)), .95 * glow); for (const l of c.lines) { ctx.lineWidth = l.w * .7; path(l); ctx.stroke(); }
+      ctx.strokeStyle = beRgb(c.col, .5 * glow * fade); for (const l of c.lines) crack(l, 2.4, 0, 0);
+      ctx.strokeStyle = beRgb(c.col.map(v => Math.min(255, v + 120)), .9 * glow * fade); for (const l of c.lines) crack(l, .55, 0, 0);
     }
     ctx.restore();
   }
@@ -373,6 +405,11 @@ function beAllies(e) {
   const R = BANANA_EMPEROR.circle * CELL;
   return G.enemies.filter(o => !o.dead && o.hp > 0 && !o.dummy && Math.hypot(o.x - e.x, o.y - e.y) <= R);
 }
+// 陣裡的異質核心（補血用；js/golden-banana-king.js 的 bkHealCores）
+function beCores(e) {
+  const R = BANANA_EMPEROR.circle * CELL;
+  return (typeof bkHealCores === 'function' ? bkHealCores() : []).filter(c => Math.hypot(c.x - e.x, c.y - e.y) <= R);
+}
 function beVictims(e) {
   const R = BANANA_EMPEROR.circle * CELL;
   return bePeople().filter(a => !a.vineCap && !a.grabbed && !a.grabFall && Math.hypot(a.x - e.x, a.y - e.y) <= R);
@@ -380,11 +417,11 @@ function beVictims(e) {
 // ---- 挑法術：有人受傷優先補血；其他輪流挑沒剛用過的；有人站在陣裡比較會叫狂風 ----
 function bePickSpell(e, foe) {
   const B = BANANA_EMPEROR, allies = beAllies(e), inside = beVictims(e).length > 0;
-  if (e.be.last !== 'heal' && allies.some(o => o.hp < o.maxhp * B.healBelow)) return 'heal';
+  if (e.be.last !== 'heal' && [...allies, ...beCores(e)].some(o => o.hp < o.maxhp * B.healBelow)) return 'heal';   // 怪物或核心受傷：優先補血
   const pool = ['atk', 'def', 'spd'].filter(id => id !== e.be.last && allies.some(o => o !== e && !(o.beBuff && o.beBuff[id] > 2)));
   if (foe && e.be.last !== 'peels') pool.push('peels', 'peels');   // 有看到人：比較常下香蕉皮雨
   if (inside && e.be.last !== 'wind') pool.push('wind', 'wind');   // 有人靠太近：比較常叫狂風把人吹走
-  if (!pool.length) return allies.some(o => o.hp < o.maxhp) ? 'heal' : (foe ? 'peels' : null);
+  if (!pool.length) return [...allies, ...beCores(e)].some(o => o.hp < o.maxhp) ? 'heal' : (foe ? 'peels' : null);
   return pool[Math.floor(Math.random() * pool.length)];
 }
 // ---- 施法效果：陣裡的怪物 BUFF、陣裡的我方 DEBUFF ----
@@ -393,12 +430,13 @@ function beCast(e, rec, id, foe) {
   flash(S.name + '！', e.x, e.y - e.drawHeight - 12, beHex(S.color));
   if (id === 'peels') { bePeelRain(e, foe); return; }
   if (id === 'wind') { beWindBurst(e); for (const a of beVictims(e)) beWindBlow(e, a); return; }
-  for (const o of beAllies(e)) {
+  for (const o of id === 'heal' ? [...beAllies(e), ...beCores(e)] : beAllies(e)) {   // 補血：異質核心也補
     const h = o.drawHeight || 50;
     if (id === 'heal') {
       if (o.hp >= o.maxhp) continue;
       const add = Math.min(S.amount, o.maxhp - o.hp);
       o.hp += add; if (o.cf) o.cf.hp0 = o.hp;
+      if (o.lastHp != null) o.lastHp = o.hp;   // 異質核心：補血不要被當成被打
       if (o.beHp != null) o.beHp = o.hp;   // 防禦 BUFF 不要把補的血當成扣血
       flashDmg('+' + Math.round(add), o.x, o.y - h * .6, beHex(S.color));
     } else {
@@ -484,6 +522,23 @@ function beWindBurst(e) {
     G.effects.push({ particle: true, x: e.x + Math.cos(a) * d, y: e.y + Math.sin(a) * d * .7, vx: Math.cos(a + .9) * sp, vy: Math.sin(a + .9) * sp * .7 - 30, r: 1.2 + Math.random() * 1.8, life: .5 + Math.random() * .3, life0: .8, color: Math.random() < .5 ? '#ffffff' : '#cfe6ff' });
   }
   if (typeof addShake === 'function') addShake(4);
+  const S = BANANA_EMPEROR.spells.wind;
+  for (let i = 0; i < S.leaves; i++) {   // 地上的葉子被捲起來：繞著他轉圈、越轉越高、越轉越開
+    const a = Math.random() * Math.PI * 2, d = (.15 + Math.random() * .8) * R;
+    beAddLeaf(e.x, e.y, a, d, Math.random() * .35);
+  }
+}
+// 一片被風捲上天的葉子：cx, cy＝繞著轉的中心；a, d＝一開始在中心的哪個方向、多遠；delay＝晚幾秒才被捲起來
+function beAddLeaf(cx, cy, a, d, delay = 0, follow = null) {
+  const S = BANANA_EMPEROR.spells.wind, rows = typeof FOG_FX_V2 !== 'undefined' ? FOG_FX_V2.leafRows : [0, 1, 2, 3];
+  (G.beLeaves = G.beLeaves || []).push({ cx, cy, a, d, follow, delay, age: 0, z: 0,
+    vz: S.leafRise[0] + Math.random() * (S.leafRise[1] - S.leafRise[0]),
+    w: (Math.random() < .5 ? -1 : 1) * (2.2 + Math.random() * 2),     // 轉圈的速度（弧度／秒）
+    out: 25 + Math.random() * 45,                                       // 每秒往外飄多遠
+    life: S.leafLife[0] + Math.random() * (S.leafLife[1] - S.leafLife[0]),
+    ph: Math.random() * 6.28, spin: (4 + Math.random() * 5) * (Math.random() < .5 ? -1 : 1),
+    shape: Math.floor(Math.random() * 3), row: rows[Math.floor(Math.random() * rows.length)] });
+  if (G.beLeaves.length > 160) G.beLeaves.shift();
 }
 function beWindBlow(e, a) {
   if (!G.vineCaps || a.vineCap || a.grabbed || a.grabFall || a.eatenBy || a.mrtRide) return;
@@ -523,10 +578,20 @@ function updateBananaEmperor(dt) {
     for (const c of G.beCracks) { c.t += dt; if (!alive) c.fadeOut = (c.fadeOut ?? K.fade) - dt; }
     G.beCracks = G.beCracks.filter(c => c.fadeOut == null || c.fadeOut > 0);
   }
-  // 被狂風吹上天的人：身邊捲著白色的風
-  for (const cap of G.vineCaps || []) if (cap.wind && cap.phase === 'lift' && Math.random() < dt * 30) {
-    const a = cap.actor, ang = Math.random() * Math.PI * 2;
-    G.effects.push({ particle: true, x: a.x + Math.cos(ang) * 18, y: a.y - cap.h - 20 + Math.sin(ang) * 10, vx: -Math.sin(ang) * 90, vy: -60 - Math.random() * 60, r: 1.2 + Math.random() * 1.4, life: .35, life0: .35, color: '#f2f8ff' });
+  // 被狂風吹上天的人：身邊捲著白色的風和葉子
+  for (const cap of G.vineCaps || []) if (cap.wind && cap.phase === 'lift') {
+    const a = cap.actor;
+    if (Math.random() < dt * 30) { const ang = Math.random() * Math.PI * 2; G.effects.push({ particle: true, x: a.x + Math.cos(ang) * 18, y: a.y - cap.h - 20 + Math.sin(ang) * 10, vx: -Math.sin(ang) * 90, vy: -60 - Math.random() * 60, r: 1.2 + Math.random() * 1.4, life: .35, life0: .35, color: '#f2f8ff' }); }
+    if (Math.random() < dt * 14) beAddLeaf(a.x, a.y, Math.random() * Math.PI * 2, 14 + Math.random() * 16, 0, cap);
+  }
+  // 被風捲起來的葉子：繞圈往上飄，邊飄邊翻面，最後淡掉
+  if (G.beLeaves && G.beLeaves.length) {
+    for (const l of G.beLeaves) {
+      if (l.delay > 0) { l.delay -= dt; continue; }
+      l.age += dt; l.a += l.w * dt; l.d += l.out * dt; l.vz += 160 * dt; l.z += l.vz * dt; l.ph += dt;
+      if (l.follow) l.z = Math.max(l.z, (l.follow.h || 0) * .8 + 10);   // 跟著被吹上天的人一起往上
+    }
+    G.beLeaves = G.beLeaves.filter(l => l.age < l.life);
   }
   // 怪物的 BUFF
   for (const o of G.enemies) {
@@ -567,6 +632,25 @@ function updateBananaEmperor(dt) {
     }
     a.beLX = a.x; a.beLY = a.y;
   }
+}
+// 畫被風捲起來的葉子（畫在角色上面，js/render.js 呼叫）；用起霧落葉那張點陣圖（js/fog-fx-v2.js），還沒載好就畫小色塊
+function drawBananaEmperorAir(ctx) {
+  if (!G || !G.beLeaves || !G.beLeaves.length) return;
+  const sprite = typeof fogV2LeafReady === 'function' && fogV2LeafReady() && typeof fogV2LeafSprite === 'function';
+  const cols = typeof FOG_FX_V2 !== 'undefined' ? FOG_FX_V2.leafColors : ['#6f8f3a', '#a0863a'];
+  ctx.save();
+  for (const l of G.beLeaves) {
+    if (l.delay > 0) continue;
+    const x = l.cx + Math.cos(l.a) * l.d, y = l.cy + Math.sin(l.a) * l.d * .55 - l.z;
+    const a = Math.min(1, l.age / .15) * Math.min(1, (l.life - l.age) / .4);
+    const flip = Math.cos(l.ph * l.spin);
+    ctx.save(); ctx.translate(Math.round(x), Math.round(y)); ctx.rotate(l.ph * l.spin * .5); ctx.scale(Math.sign(flip || 1) * Math.max(.2, Math.abs(flip)), 1);
+    ctx.globalAlpha = .95 * a;
+    if (sprite) fogV2LeafSprite(ctx, l);
+    else { ctx.fillStyle = cols[l.row % cols.length]; ctx.beginPath(); ctx.ellipse(0, 0, 5, 2.5, 0, 0, Math.PI * 2); ctx.fill(); }
+    ctx.restore();
+  }
+  ctx.restore();
 }
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）----
 function bananaEmperorDown(e) {

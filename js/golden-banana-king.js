@@ -72,13 +72,18 @@ function bkHealTargets(e) {
   const C = BANANA_KING, R = C.healRange * CELL;
   const near = o => Math.hypot(o.x - e.x, o.y - e.y) <= R;
   return [...G.enemies.filter(o => bkAlive(o) && (o !== e || C.healSelf) && near(o)),
-    ...G.towers.filter(t => C.healSentries.includes(t.type) && t.hp > 0 && near(t))];
+    ...G.towers.filter(t => C.healSentries.includes(t.type) && t.hp > 0 && near(t)),
+    ...bkHealCores().filter(near)];   // 異質核心也補
+}
+// 會被金蕉王補血的異質核心：還沒被打掉的（金蕉大王也用這個，js/banana-emperor.js）
+function bkHealCores() {
+  return (G.cores || []).filter(c => !c.dead && c.hp > 0 && c.maxhp > 0);
 }
 // ---- 看得到的傷患（最近的那隻，不含自己）----
 function bkHurtAlly(e) {
   const R = BANANA_KING.seeRange * CELL;
   let best = null, bestD = R;
-  for (const o of G.enemies) {
+  for (const o of [...G.enemies, ...bkHealCores()]) {   // 受傷的怪物、受傷的異質核心
     if (o === e || !bkHurt(o)) continue;
     const d = Math.hypot(o.x - e.x, o.y - e.y);
     if (d <= bestD && hasLineOfSight(e.x, e.y, o.x, o.y)) { best = o; bestD = d; }
@@ -131,6 +136,7 @@ function bkHealPulse(e) {
     const add = Math.min(C.healAmount, o.maxhp - o.hp);
     o.hp += add;
     if (o.cf) o.cf.hp0 = o.hp;   // 比基尼小丑魚用 hp 變化判斷被打：補血不要被當成受驚
+    if (o.lastHp != null) o.lastHp = o.hp;   // 異質核心用 hp 變化判斷被打：補血不要被當成被打
     const h = o.drawHeight || 50;
     G.effects.push({ fglow: true, green: true, strength: BANANA_KING.glow, grow: true, x: o.x, y: o.y - h * .35, r0: 10, r1: 30 + h * .25, life: .8, life0: .8 });
     G.effects.push({ ring: true, x: o.x, y: o.y, r: 4, r2: 26, life: .45, life0: .45, color: '#9dff7a' });
