@@ -53,7 +53,7 @@ const LOOFAH_QUEEN = {
   core: {
     hp: 1000,                    // 核心血量（地圖難度 1；難度越高照比例加）
     adopt: 9,                    // 出生格幾格內有地圖本來的核心：用那顆（沒有就自己帶一顆；核心會吊在她頭上跟著走，所以原本在哪都沒關係）
-    above: 26,                   // 吊在她頭頂上方多高（像素，從頭頂往上量）；上面是牆的話會自動放低，不會吊進牆裡
+    above: 26,                   // 吊在她頭頂上方多高（像素，從頭頂往上量）
     hungH: 90,                   // 她倒下後：藤蔓鬆掉，核心慢慢降到離地多高（像素）
     lowerSpeed: 110,             // 降下來的速度（像素／秒）
     fireR: 30,                   // 她倒下後：火海離核心正下方多近（像素）就把藤蔓燒斷
@@ -486,7 +486,7 @@ function lqUpdateCore(rec, dt) {
   if (!core || core.dead) return;
   if (rec.state === 'carried') {
     if (!lqAlive(e)) { rec.state = 'hung'; return; }
-    core.x = e.x; core.y = e.y; rec.h = lqHangRoom(core, e.drawHeight + Q.core.above); core.lqHangH = rec.h;
+    core.x = e.x; core.y = e.y; rec.h = e.drawHeight + Q.core.above; core.lqHangH = rec.h;   // 吊在她頭上的空中（她靠著上面的牆時會畫到牆上，沒關係；倒下後才拖進房間）
     if (typeof anyFireAt === 'function' && anyFireAt(core.x, core.y, Q.core.fireR) && Math.random() < dt * 6)   // 她活著：火燒不斷，只冒幾顆綠色火星
       G.effects.push({ particle: true, kind: 'spark', x: core.x + (Math.random() - .5) * 20, y: core.y - rec.h + 10, vx: (Math.random() - .5) * 40, vy: -(20 + Math.random() * 30), r: 1.5 + Math.random(), life: .4, life0: .4, color: '#9fe07a' });
     return;
@@ -500,7 +500,7 @@ function lqUpdateCore(rec, dt) {
     rec.h += Math.sign(want - rec.h) * Math.min(Math.abs(want - rec.h), Q.core.lowerSpeed * dt);   // 慢慢移到 want（太高就降、被拖進房間後空間夠了就盪回 hungH 高度）
     core.lqHangH = rec.h;
     if (typeof anyFireAt === 'function' && anyFireAt(core.x, core.y, Q.core.fireR)) {   // 燒斷吊著核心的藤蔓
-      rec.state = 'falling'; rec.fallV = 0;
+      rec.state = 'falling'; rec.fallV = 0; lqCoreLandSpot(core, rec);
       for (let i = 0; i < 4; i++) spawnFlameBurst(core.x + (Math.random() * 2 - 1) * 10, core.y - rec.h + Math.random() * 30, .8);
       if (typeof sfxAt === 'function') sfxAt('hitIncendiary', core.x, core.y, .6, 'loofah-queen-core-burn');
     }
@@ -523,6 +523,13 @@ function lqUpdateCore(rec, dt) {
   }
 }
 
+// 核心要掉下來之前：正下方不能站（牆、不可穿透的格子、障礙物）就改掉到最近一格空地，吊著的畫面位置不變（高度一起調）
+function lqCoreLandSpot(core, rec) {
+  const [c, r] = cellAt(core.x, core.y), floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null;
+  if (inGrid(c, r) && !isWall(c, r) && (!floor || floor.has(c + ',' + r)) && !enemyBlocked(core.x, core.y)) return;
+  const p = lqFreeSpot(core.x, core.y); if (!p) return;
+  rec.h = Math.max(0, rec.h + (p.y - core.y)); core.x = p.x; core.y = p.y;
+}
 // 核心最多能吊多高：從地上往上找，碰到牆、地圖外面就停（核心整顆都要在房間裡看得到）
 function lqHangRoom(core, want) {
   const floor = typeof mapFloorCells === 'function' ? mapFloorCells() : null, top = CORE.h * .8 * .5 + 8;
