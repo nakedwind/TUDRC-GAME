@@ -23,18 +23,21 @@ const LOOFAH_QUEEN = {
   wakeRange: 7,                  // 溫特走到幾格內（看得到）就觸發 BOSS 戰
   loseRange: 16,                 // 目標離她幾格以外就不追
   leash: 9,                      // 最遠走到離原位幾格（不會被引出農田房）
-  stompRange: 9,                 // 目標在幾格內（看得到）就踏地
+  stompRange: 13.5,              // 目標在幾格內（看得到）就踏地（原本 9 格，使用者要大 1.5 倍）
   keepDistance: 3,               // 目標太近（格）：往後退一點
   vines: {                       // 每次踏地垂下來的藤蔓
     count: 7,                    // 一次幾條（原本 6 條，使用者要多 1.2 倍）
     aimed: 3,                    // 其中最多幾條瞄準我方（溫特、隊友站的地方；其他隨機落在她身邊）
     aimJitter: .5,               // 瞄準的那幾條會偏開多少（格）
-    spreadMin: 2, spreadMax: 7,  // 隨機的那幾條：落在離她幾格～幾格
+    spreadMin: 3, spreadMax: 10.5,   // 隨機的那幾條：落在離她幾格～幾格（原本 2～7，大 1.5 倍）
+    down: .75,                   // 隨機的那幾條有幾成往她下方（房間裡面）落：她站在房間上面，往上落會落到牆裡
     hangChance: .5,              // 每條有幾成是「倒吊藤蔓」（綁隊友），其餘是「捲走藤蔓」（拉走再丟下來）
     gap: 1.5,                    // 兩條藤蔓至少隔幾格
     life: 6,                     // 完全垂下來之後停幾秒就縮回去
     ground: {                    // 從地面鑽出來的藤蔓：把人抓到半空中，不能動、不能打
-      count: 4,                  // 每次踏地鑽出幾條（天上藤蔓的一半左右）：先瞄準我方站的地方（每人一條，先挑沒被天上藤蔓瞄準的人），剩下的隨機在她身邊
+      count: 8,                  // 每次踏地鑽出幾條（原本 4 條，使用者要 2 倍）：先瞄準我方站的地方（每人一條，先挑沒被天上藤蔓瞄準的人），剩下的隨機在她身邊
+      linger: 6,                 // 鑽出來沒抓到人：留在地上晃幾秒，這段時間碰到一樣會被抓（一半吊起來、一半甩出去）
+      touchR: 26,                // 留在地上的藤：離多近算碰到（像素）
       warn: .9,                  // 地面先冒土、震動幾秒才鑽出來（這段時間走開就躲得掉）
       grabR: 32,                 // 鑽出來時離多近的人會被抓（像素）
       hold: 4,                   // 抓在半空中最久幾秒（隊友可以被溫特開槍打斷藤蔓救下來；火燒也會放開）
@@ -265,7 +268,7 @@ function lqStomp(e) {
   const ground = (G.lqGround = G.lqGround || []);
   for (const a of picks) ground.push({ x: a.x, y: a.y + 12, t: V.ground.warn, puff: 0, owner: e });
   for (let k = 0, left = V.ground.count - picks.length; k < 60 && left > 0; k++) {   // 剩下的：隨機在她身邊鑽出來
-    const ang = Math.random() * Math.PI * 2, d = (V.spreadMin + Math.random() * (V.spreadMax - V.spreadMin)) * CELL;
+    const ang = lqRandAng(), d = (V.spreadMin + Math.random() * (V.spreadMax - V.spreadMin)) * CELL;
     const x = e.x + Math.cos(ang) * d, y = e.y + Math.sin(ang) * d, [c, r] = cellAt(x, y);
     if (!inGrid(c, r) || isWall(c, r) || (typeof mapFloorCells === 'function' && !mapFloorCells().has(c + ',' + r)) || !hasLineOfSight(e.x, e.y, x, y)) continue;
     if (ground.some(g => Math.hypot(g.x - x, g.y - 12 - y) < V.gap * CELL)) continue;
@@ -273,11 +276,15 @@ function lqStomp(e) {
   }
   // 其他：隨機落在她身邊（看得到的地方，不會穿牆垂到隔壁房間）
   for (let k = 0; k < 60 && made < V.count; k++) {
-    const ang = Math.random() * Math.PI * 2, d = (V.spreadMin + Math.random() * (V.spreadMax - V.spreadMin)) * CELL;
+    const ang = lqRandAng(), d = (V.spreadMin + Math.random() * (V.spreadMax - V.spreadMin)) * CELL;
     const x = e.x + Math.cos(ang) * d, y = e.y + Math.sin(ang) * d;
     if (!hasLineOfSight(e.x, e.y, x, y)) continue;
     if (lqDropVine(x, y, e)) made++;
   }
+}
+// 隨機方向：有 down 成往她下方（房間裡面），其他隨便哪個方向
+function lqRandAng() {
+  return Math.random() < LOOFAH_QUEEN.vines.down ? (.08 + Math.random() * .84) * Math.PI : Math.random() * Math.PI * 2;
 }
 // 在 (x, y) 垂下一條藤蔓（放進 G.vines，js/vines.js 負責垂下來、抓人、怕火；lqTemp：時間到就縮回去、用完就拿掉）
 function lqDropVine(x, y, e) {
@@ -313,15 +320,31 @@ function updateLoofahQueen(dt) {
 function lqUpdateGroundVines(dt) {
   const V = LOOFAH_QUEEN.vines.ground;
   if (G.lqGround && G.lqGround.length) {
+    const now = performance.now() / 1000;
     for (const g of G.lqGround) {
+      if (g.state === 'up') {   // 留在地上晃：碰到就抓；被火燒到縮回去；時間到縮回去
+        g.age += dt; g.life -= dt;
+        if (typeof anyFireAt === 'function' && anyFireAt(g.x, g.y, 20)) { g.state = 'retract'; g.rt = 0; for (let i = 0; i < 2; i++) spawnFlameBurst(g.x + (Math.random() - .5) * 10, g.y - 10, .55); continue; }
+        if (g.life <= 0) { g.state = 'retract'; g.rt = 0; continue; }
+        if (G.over) continue;
+        const p = G.player;
+        for (const a of [p, ...G.towers]) {
+          if (!a || typeof vineCanGrab !== 'function' || !vineCanGrab(a, a === p)) continue;
+          if (Math.hypot(a.x - g.x, (a.y + 12 - g.y) * 1.3) > V.touchR) continue;
+          lqGroundGrab(a, a === p, g); g.state = 'gone'; break;   // 抓到人：這根藤跟著那個人（js/vines.js 畫在人身上）
+        }
+        continue;
+      }
+      if (g.state === 'retract') { g.rt += dt; if (g.rt > .35) g.state = 'gone'; continue; }
       g.t -= dt; g.puff -= dt;
       if (g.t > 0) {   // 預警：地面一直冒土、小小的震動圈
         if (g.puff <= 0) { g.puff = .12; llDust(g.x + (Math.random() - .5) * 26, g.y, Math.random() < .5); G.effects.push({ ring: true, x: g.x, y: g.y, r: 4, r2: V.grabR, life: .3, life0: .3, color: '#8a7a50' }); }
         continue;
       }
-      lqGroundErupt(g);
+      if (lqGroundErupt(g)) g.state = 'gone';
+      else { g.state = 'up'; g.age = 0; g.life = V.linger; g.seed = Math.random() * 10; }   // 沒抓到人：留在地上晃
     }
-    G.lqGround = G.lqGround.filter(g => g.t > 0);
+    G.lqGround = G.lqGround.filter(g => g.state !== 'gone');
   }
   // 被丟出去的人：飛向牆，撞到就摔下來
   for (const cap of G.vineCaps || []) if (cap.ground && cap.phase === 'thrown') lqThrowStep(cap, dt);
@@ -356,12 +379,27 @@ function lqGroundErupt(g) {
     G.effects.push({ particle: true, x: g.x + (Math.random() - .5) * 14, y: g.y - 4, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp, r: 1.6 + Math.random() * 2, life: .5, life0: .5, color: Math.random() < .5 ? '#7a6a48' : '#7fbf5a' });
   }
   if (typeof sfxAt === 'function') sfxAt('loofahVine', g.x, g.y, .9, 'loofah-queen-ground-vine');
-  if (G.over) return;
+  if (G.over) return false;
+  let caught = false;
   for (const a of [p, ...G.towers]) {
     if (!a || typeof vineCanGrab !== 'function' || !vineCanGrab(a, a === p)) continue;
     if (Math.hypot(a.x - g.x, (a.y + 12 - g.y) * 1.3) > V.grabR) continue;
-    lqGroundGrab(a, a === p, g);
+    lqGroundGrab(a, a === p, g); caught = true;
   }
+  return caught;
+}
+// 留在地上晃的藤（js/render.js 跟角色一起排前後）：一根絲瓜捲鬚，冒出來時長高、縮回去時變矮，靠近的人會被它往那邊歪
+function lqDrawGroundVine(ctx, g) {
+  if (typeof drawTendril !== 'function' || !isVisible(g.x, g.y)) return;
+  const now = performance.now() / 1000;
+  const grow = g.state === 'retract' ? Math.max(0, 1 - g.rt / .35) : Math.min(1, g.age / .25);
+  let lean = Math.sin(now * 2.6 + g.seed) * 7;
+  const near = [G.player, ...G.towers].filter(a => a && a.hp > 0).map(a => ({ a, d: Math.hypot(a.x - g.x, a.y + 12 - g.y) })).sort((x, y) => x.d - y.d)[0];
+  if (near && near.d < 90 && g.state === 'up') lean += Math.sign(near.a.x - g.x) * 12 * (1 - near.d / 90);   // 有人靠近：往那個人歪過去
+  ctx.save();
+  ctx.fillStyle = 'rgba(70,52,30,.5)'; ctx.beginPath(); ctx.ellipse(g.x, g.y + 1, 13, 4.5, 0, 0, Math.PI * 2); ctx.fill();   // 地面被撐破的土
+  drawTendril(ctx, g.x, g.y, { h: 52 * grow, grow: 1, lean, turns: 2, r: 9, w: 5.5, phase: g.seed, side: Math.sin(g.seed * 5) > 0 ? 1 : -1, leaf: true });
+  ctx.restore();
 }
 function lqGroundGrab(a, isPlayer, g) {
   if (isPlayer && typeof cancelChannel === 'function' && typeof playerChannel !== 'undefined' && playerChannel) cancelChannel();
@@ -497,6 +535,8 @@ function lqHangRoom(core, want) {
 // ---- 倒下（combat-feel.js 的 onEnemyDeath 呼叫）：核心留在半空中、她垂下來的藤蔓縮回去 ----
 function loofahQueenDown(e) {
   const rec = (G.loofahQueens || []).find(r => r.e === e);
+  for (const g of G.lqGround || []) if (g.owner === e) { if (g.state === 'up') { g.state = 'retract'; g.rt = 0; } else if (!g.state) g.state = 'gone'; }   // 地面的藤：還沒鑽出來的取消、晃著的縮回去
+  if (G.lqGround) G.lqGround = G.lqGround.filter(g => g.state !== 'gone');
   if (rec && rec.state === 'carried') { rec.state = 'hung'; rec.core.x = e.x; rec.core.y = e.y; }
   for (const v of G.vines || []) if (v.lqTemp && v.lqOwner === e && (v.state === 'hang' || v.state === 'descend')) { v.state = 'retract'; v.regrowAfter = 1e9; }
   if (typeof sfxAt === 'function') sfxAt('loofahDeath', e.x, e.y, 2.2, 'monster-death');   // 先大聲播；game.js 接著播的那聲會被去重吃掉
@@ -568,6 +608,7 @@ function lqFarmVineStep(v, dt) {
 // 回傳假的目標（不是怪物、不會扣誰的血），同一個地方每次都回傳同一個物件，瞄準動畫才接得上。
 function loofahFireTargets() {
   const out = [];
+  for (const g of G.lqGround || []) if (g.state === 'up') { g.fireTarget = g.fireTarget || { fireSpot: true, dead: false, hp: 1e9, maxhp: 0, x: g.x, y: g.y - 12 }; out.push(g.fireTarget); }   // 留在地上晃的藤
   for (const v of G.loofahVines || []) {   // 絲瓜小姐纏住我方的藤蔓：燒掉就放開（js/loofah-lady.js 的 loofahVineBurn）
     if (v.farm || v.state !== 'grab' || !(v.caught || []).some(a => a.rootT > 0 && a.hp > 0)) continue;
     v.fireTarget = v.fireTarget || { fireSpot: true, dead: false, hp: 1e9, maxhp: 0, x: v.x, y: v.y };
@@ -603,6 +644,7 @@ const loofahQueenHunting = () => (G.loofahQueens || []).some(rec => lqAlive(rec.
 
 // ---- 畫面：吊在半空中的核心（render.js 跟角色一起排前後）----
 function loofahQueenSortables(list) {
+  for (const g of G.lqGround || []) if (g.state === 'up' || g.state === 'retract') list.push({ y: g.y - 2, draw: () => lqDrawGroundVine(ctx, g) });   // 留在地上晃的藤
   for (const rec of G.loofahQueens || []) {
     const core = rec.core;
     if (!core || core.dead || rec.state === 'down') continue;
