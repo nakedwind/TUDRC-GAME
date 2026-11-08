@@ -219,6 +219,11 @@ const enemyVisible = e => !(typeof inHiddenArea === 'function' && inHiddenArea(e
 const BASE_ART_LAMPS = [
   { file: /Poolcore_field-base\.png$/i, lamps: [[.094, .2], [.904, .2], [.094, .767], [.904, .767]] },   // 池核基地：四角的燈頭
 ];
+// 會亮的燈具素材：放在地圖上就發出溫暖的燈光（不用另外設定「發光」）。lamps＝燈泡在圖上的位置（寬、高的比例），r＝照亮半徑 px
+// 吊燈這種不畫往上的光束（lantern），只有燈旁邊的暖色光暈和亮芯
+const MAP_LAMP_TILES = [
+  { file: /\/森林(藍)?\/bg_forest_light(_blue)?\.png$/i, lamps: [[.24, .68]], r: 170, lantern: true },   // 森林的木柱吊燈（藍色版也會亮）
+];
 function getLights() {
   const L = [];
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
@@ -268,6 +273,12 @@ function getLights() {
     const lampR = LIGHT.baseLampR || 190;
     spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * fy; L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }); });
   }
+  if (typeof MAP !== 'undefined' && MAP) for (const s of MAP.stamps || []) {   // 會亮的燈具素材（MAP_LAMP_TILES）
+    const t = mapTileById(s.id), spec = t && MAP_LAMP_TILES.find(b => b.file.test(String(t.file || '')));
+    if (!spec || (G && G.mapDestroyed && G.mapDestroyed.has(s))) continue;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
+    spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * (s.fy ? 1 - fy : fy); L.push({ x, y, visualX: x, visualY: y, r: spec.r, warm: true, single: true, lantern: !!spec.lantern, phase: s.c * 7 + s.r * 13 + i }); });
+  }
   if (typeof flareLightSources === 'function') L.push(...flareLightSources());   // 燃燒中的照明彈（js/flare.js）
   if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());
   if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
@@ -314,7 +325,7 @@ function drawDarkness() {
     ctx.closePath(); ctx.fill();
   }
   for (const l of lightsCache) {
-    if (!l.warm) continue;
+    if (!l.warm || l.lantern) continue;   // 吊燈：不畫往上的光束
     const sx = (l.visualX ?? l.x), sy = (l.visualY ?? l.y);   // 世界座標（黑幕跟著畫面縮放一起畫）
     const beamLen = Math.min(l.r * 0.78, 220);
     const pulse = 0.95 + 0.05 * Math.sin(now * 1.8 + l.phase);
@@ -391,6 +402,11 @@ function drawDarkness() {
     halo.addColorStop(0.58, 'rgba(255,177,72,.08)');
     halo.addColorStop(1, 'rgba(255,154,45,0)');
     ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(sx, sy, haloR, 0, Math.PI * 2); ctx.fill();
+    if (l.lantern) {   // 吊燈：周圍再染一圈淡淡的橘黃色，讓照到的地方看起來是暖色的燈光
+      const warmR = l.r * .85 * pulse, wg = ctx.createRadialGradient(sx, sy, 0, sx, sy, warmR);
+      wg.addColorStop(0, 'rgba(255,170,70,.22)'); wg.addColorStop(.45, 'rgba(255,150,55,.10)'); wg.addColorStop(1, 'rgba(255,130,40,0)');
+      ctx.fillStyle = wg; ctx.beginPath(); ctx.arc(sx, sy, warmR, 0, Math.PI * 2); ctx.fill();
+    }
 
     for (const lampX of (l.single ? [sx] : [sx - 9, sx + 9])) {
       const coreR = 5.5 * pulse;

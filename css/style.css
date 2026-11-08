@@ -3537,6 +3537,12 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-fc-bar .pcd-sp-levels button.on { background: linear-gradient(180deg, #cfe0ff, #9fbcf2); border-color: #2f62d4; }
 .pcd-fc-card.back { border: 2px solid #f4f4f4; background: repeating-linear-gradient(45deg, #2a55b4 0 4px, #3c6cd2 4px 8px); box-shadow: 0 0 0 1px #2a3a66, 0 1px 2px rgba(0,0,0,.4); cursor: default; }
 .pcd-fc-card.hint { background: #fff3b0; border-color: #d39b00; box-shadow: 0 0 0 2px #f0b400; }
+/* 🎁 給JJ的禮物：蜘蛛紙牌上方的禮物說明列，贏了變成「觀看朔的生日」按鈕 */
+.pcd-sp-gift { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 32px; padding: 3px 10px; border: 1px solid #e0a9c4; border-radius: 4px; background: linear-gradient(180deg, #fff3f8, #ffd9ea); color: #8a2350; font-weight: bold; }
+.pcd-sp-gift.hidden { display: none; }
+.pcd-sp-gift button { padding: 4px 14px; border: 1px solid #b8326c; border-radius: 4px; background: linear-gradient(180deg, #ff8fbf, #e04b8a); color: #fff; font: inherit; font-weight: bold; cursor: pointer; animation: pcd-gift-pulse 1s ease-in-out infinite alternate; }
+.pcd-sp-gift button:hover { filter: brightness(1.1); }
+@keyframes pcd-gift-pulse { from { box-shadow: 0 0 0 0 rgba(224,75,138,.5); } to { box-shadow: 0 0 0 5px rgba(224,75,138,0); } }
 .pcd-sp-foot { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 8px; }
 .pcd-sp-done, .pcd-sp-stock { position: relative; height: var(--fc-h); }
 .pcd-sp-done .pcd-fc-card { cursor: default; }

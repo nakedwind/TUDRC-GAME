@@ -72,13 +72,18 @@ function bkHealTargets(e) {
   const C = BANANA_KING, R = C.healRange * CELL;
   const near = o => Math.hypot(o.x - e.x, o.y - e.y) <= R;
   return [...G.enemies.filter(o => bkAlive(o) && (o !== e || C.healSelf) && near(o)),
-    ...G.towers.filter(t => C.healSentries.includes(t.type) && t.hp > 0 && near(t))];
+    ...G.towers.filter(t => C.healSentries.includes(t.type) && t.hp > 0 && near(t)),
+    ...bkHealCores().filter(near)];   // 異質核心也補
+}
+// 會被金蕉王補血的異質核心：還沒被打掉的（金蕉大王也用這個，js/banana-emperor.js）
+function bkHealCores() {
+  return (G.cores || []).filter(c => !c.dead && c.hp > 0 && c.maxhp > 0);
 }
 // ---- 看得到的傷患（最近的那隻，不含自己）----
 function bkHurtAlly(e) {
   const R = BANANA_KING.seeRange * CELL;
   let best = null, bestD = R;
-  for (const o of G.enemies) {
+  for (const o of [...G.enemies, ...bkHealCores()]) {   // 受傷的怪物、受傷的異質核心
     if (o === e || !bkHurt(o)) continue;
     const d = Math.hypot(o.x - e.x, o.y - e.y);
     if (d <= bestD && hasLineOfSight(e.x, e.y, o.x, o.y)) { best = o; bestD = d; }
@@ -131,6 +136,7 @@ function bkHealPulse(e) {
     const add = Math.min(C.healAmount, o.maxhp - o.hp);
     o.hp += add;
     if (o.cf) o.cf.hp0 = o.hp;   // 比基尼小丑魚用 hp 變化判斷被打：補血不要被當成受驚
+    if (o.lastHp != null) o.lastHp = o.hp;   // 異質核心用 hp 變化判斷被打：補血不要被當成被打
     const h = o.drawHeight || 50;
     G.effects.push({ fglow: true, green: true, strength: BANANA_KING.glow, grow: true, x: o.x, y: o.y - h * .35, r0: 10, r1: 30 + h * .25, life: .8, life0: .8 });
     G.effects.push({ ring: true, x: o.x, y: o.y, r: 4, r2: 26, life: .45, life0: .45, color: '#9dff7a' });
@@ -171,6 +177,7 @@ function stepHealerEnemy(e, dt) {
   if (!e.bkSquad) bkSpawnSquad(e);   // 剛出現：叫隊員出來
   if (bk.cast > 0) { bkCast(e, dt); return; }   // 施法中站著不動
   if (bk.tossT > 0) { bk.tossT -= dt; if (bk.tossT <= 0) e.forceFrame = null; }   // 拋香蕉皮的舉手姿勢
+  if (e.squadLeader && stepSquadLeash(e, dt)) { bk.flee = null; return; }   // 金蕉大王隊伍裡的金蕉王：逃太遠也要走回核心旁邊（js/banana-emperor.js）
   if (e.stunT > 0) { e.forceFrame = null; return; }
   bk.cd -= dt;
   bk.peelCd = (bk.peelCd || 0) - dt;
@@ -185,6 +192,7 @@ function stepHealerEnemy(e, dt) {
     }
     return;
   }
+  if (e.beOwner) { bk.flee = null; bkWander(e, dt); return; }   // 金蕉大王隊伍裡的金蕉王：只負責補血，不逃跑、不丟香蕉皮（js/banana-emperor.js）
   const threats = bkThreats(e);
   if (threats.length) bk.threats = threats;
   // 核心醒著：跟著回去守核心（隊員會跟著他走）；我方貼得很近才先逃
@@ -333,12 +341,14 @@ function drawBananaPeels(ctx) {
   const ready = img && img.complete && img.naturalWidth, w = ready ? img.naturalWidth * C.peelScale : 32, h = ready ? img.naturalHeight * C.peelScale : 24, s = w;
   for (const peel of peels) {
     const k = Math.min(1, peel.t / peel.fly), air = k < 1;
-    const x = peel.sx + (peel.x - peel.sx) * k, y = peel.sy + (peel.y - peel.sy) * k - Math.sin(Math.PI * k) * C.peelHeight;
+    const x = peel.sx + (peel.x - peel.sx) * k, y = peel.sy + (peel.y - peel.sy) * (peel.sky ? k * k : k) - (peel.sky ? 0 : Math.sin(Math.PI * k) * C.peelHeight);   // sky：直直往下掉，越掉越快
     const fade = peel.life < 3 ? Math.max(.2, peel.life / 3) : 1;
     ctx.save();
     ctx.globalAlpha = .25 * fade; ctx.fillStyle = '#071015';   // 影子畫在落點方向的地上
-    const shx = peel.sx + (peel.x - peel.sx) * k, shy = peel.sy + 50 + (peel.y - peel.sy - 50) * k;
-    ctx.beginPath(); ctx.ellipse(shx, shy - 3, s * .38, s * .16, 0, 0, Math.PI * 2); ctx.fill();
+    const shx = peel.sky ? peel.x : peel.sx + (peel.x - peel.sx) * k, shy = peel.sky ? peel.y : peel.sy + 50 + (peel.y - peel.sy - 50) * k;
+    const sk = peel.sky ? .35 + .65 * k : 1;   // 從天上掉下來（金蕉大王的香蕉皮雨）：落點的影子先出現、越來越大
+    if (peel.sky && air) ctx.globalAlpha = (.15 + .35 * k) * fade;
+    ctx.beginPath(); ctx.ellipse(shx, shy - 3, s * .38 * sk, s * .16 * sk, 0, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = fade;
     ctx.translate(x, y - h / 2 + 3);
     if (air) ctx.rotate(peel.rot);
@@ -377,10 +387,10 @@ function stepSquadLeash(e, dt) {
   if (L === e) { e.squadReturn = false; return false; }   // 隊長不在了：自由行動
   const d = Math.hypot(L.x - e.x, L.y - e.y);
   if (!e.squadReturn) {
-    if (d <= C.squadLeash * CELL || (e.ch && e.ch.state === 'charge')) return false;   // 鳥頭人衝撞到一半不打斷
+    if (d <= (L.leash ?? C.squadLeash) * CELL || (e.ch && e.ch.state === 'charge')) return false;   // 鳥頭人衝撞到一半不打斷
     e.squadReturn = true; e.aiPath = null; e.wanderCell = null;
     if (e.behavior !== 'clownfish') e.forceFrame = null;   // 絲瓜小姐抬腳之類的動作圖：收起來再走
-  } else if (d <= C.squadRegroup * CELL) { e.squadReturn = false; e.aiPath = null; return false; }
+  } else if (d <= (L.regroup ?? C.squadRegroup) * CELL) { e.squadReturn = false; e.aiPath = null; return false; }
   const moveDt = e.behavior === 'clownfish' && typeof updateClownfishHop === 'function' ? updateClownfishHop(e, dt) : e.frames ? dt : updateSlimeJump(e, dt);
   e.faceRight = L.x > e.x;
   if (!moveDt) return true;
@@ -392,14 +402,15 @@ function stepSquadLeash(e, dt) {
 // ---- 隊員散步的中心點：隊長還在就繞著隊長，不然繞著自己（魚頭君、鳥頭人、珍珠小童、絲瓜小姐的散步呼叫）----
 function squadAnchor(e) {
   const L = e.squadLeader;
+  if (L && L.anchor) return L;   // 固定的中心點（金蕉大王的隊伍：圍著核心，js/banana-emperor.js）
   if (!L || L.dead || L.hp <= 0 || !G.enemies.includes(L)) { if (L) e.squadLeader = null; return e; }
   return L;
 }
 // ---- 隊員閒晃時挑金蕉王附近的格子（js/enemy-ai.js 的 chooseDarkWanderCell 呼叫）；隊長死了就各自解散 ----
 function squadWanderCell(e) {
   const L = e.squadLeader;
-  if (!L || L.dead || L.hp <= 0 || !G.enemies.includes(L)) { e.squadLeader = null; return null; }
-  const [lc, lr] = cellAt(L.x, L.y), R = BANANA_KING.squadRange, choices = [];
+  if (!L || (!L.anchor && (L.dead || L.hp <= 0 || !G.enemies.includes(L)))) { e.squadLeader = null; return null; }
+  const [lc, lr] = cellAt(L.x, L.y), R = L.roam ?? BANANA_KING.squadRange, choices = [];
   for (let r = lr - R; r <= lr + R; r++) for (let c = lc - R; c <= lc + R; c++) {
     const d = Math.abs(c - lc) + Math.abs(r - lr);
     if (d < 1 || d > R || !inGrid(c, r) || isWall(c, r) || enemyBarrierAt(c, r)) continue;
@@ -411,6 +422,7 @@ function squadWanderCell(e) {
 // ---- 打死：掉香蕉在地上（js/combat-feel.js 的 onEnemyDeath 呼叫）----
 function bananaKingDeath(e) {
   const C = BANANA_KING;
+  if (e.bananaEmperor) return;   // 金蕉大王：固定掉 5 根，在 js/food.js 的 BOSS_FOOD_DROPS
   if (typeof itemById === 'function' && !itemById(C.dropId)) return;
   const n = C.dropMin + Math.floor(Math.random() * (C.dropMax - C.dropMin + 1));
   if (n <= 0) return;

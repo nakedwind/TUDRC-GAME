@@ -27,7 +27,7 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=gamestats-20261107"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=onepen-20261107">
+<link rel="stylesheet" href="css/style.css?v=jjgift-20261108">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
@@ -307,16 +307,16 @@
   <script src="js/elevator-data.js?v=sync-20261021"></script>
   <script src="js/pathfinding.js?v=mrtride-20261102"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/stamp-transform.js?v=stampscale-20261105"></script>   <!-- 物件的大小、角度（跟遊戲共用同一套算法） -->
-  <script src="js/maploader.js?v=partylayer2-20261107"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=vinefire-20261109"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=waterdef-20261102"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/doors.js?v=archcut2-20261101"></script> <!-- 門：手動門／自動門 -->
   <script src="js/memory-doors.js?v=kai-20261103"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
   <script src="js/breakable-walls.js?v=wallsniff2-20261103"></script>   <!-- 可以炸開的牆（裂痕 → 破洞） -->
-  <script src="js/lighting.js?v=blend-20261108"></script>     <!-- 7. 黑暗與光源系統 -->
+  <script src="js/lighting.js?v=forestlamp2-20261108"></script>     <!-- 7. 黑暗與光源系統 -->
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
   <script src="js/build.js?v=extralook-20261106"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=guidekit3-20261106"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=groundcare-20261106"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=magic-20261109"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
   <script src="js/npc-chats.js?v=linger-20261104"></script> <!-- 基地 NPC 閒聊小表演：走到桌前、泡泡輪流說話 -->
   <script src="js/progression.js?v=achvimpl-20261023"></script>
@@ -324,15 +324,15 @@
   <script>document.write('<script src="data/squad-skills.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 技能樹內容（Y102隊員裝備／技能編輯器匯出）；每次都讀最新的 -->
   <script src="data/guide-skills.js?v=taanafast-20261106"></script>   <!-- 嚮導技能樹：技能內容與數值（必須在 js/skills.js 之前） -->
   <script src="js/skills.js?v=say-20261106"></script>   <!-- 技能樹：12 格、花碎片學技能 -->
-  <script src="js/anomalous-core.js?v=hiddenzone-20261102"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
-  <script src="js/core-frenzy.js?v=k56merge-20261101"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
-  <script src="js/combat-feel.js?v=bossbounty-20261102"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
+  <script src="js/anomalous-core.js?v=bossdrop-20261109"></script> <!-- 異質核心：沉睡／甦醒／兩階段召喚／碎裂 -->
+  <script src="js/core-frenzy.js?v=emperorwalk-20261108"></script>   <!-- 核心甦醒：異質體狂暴化、燈光變紅、BOSS 血條 -->
+  <script src="js/combat-feel.js?v=bossdrop-20261109"></script> <!-- 9b. 戰鬥表演：史萊姆變體、受擊回饋、死亡表演 -->
   <script src="data/achievements.js?v=party1-20261107"></script>   <!-- 9d. 成就的內容（分類、名稱、條件、文字；用「🏆 成就編輯器」編輯） -->
   <script src="js/achievement-config.js?v=party1-20261107"></script>   <!-- 成就的設定（跟成就編輯器共用） -->
   <script src="js/achievements.js?v=achv7-20261023"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=nofallback-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/burrowing-mouse.js?v=mouse-test-off-20261024"></script> <!-- 花蓮版權老鼠：出土與地底手 -->
-  <script src="js/enemy-ai.js?v=fogomen-20261106"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=emperor-20261108"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=sticky-knock-20261029"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/elite-bird-head.js?v=walksmash-20261104"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
   <script src="js/pearl-kid.js?v=pearlhit-20261104"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
@@ -341,13 +341,13 @@
   <script src="js/elite-cap-king.js?v=k56merge-20261101"></script> <!-- 9f4a. 菁英 BOSS「順順宮主」：核心躲在大宮帽裡、大夯吉寶、蓋杯子洗牌 -->
   <script src="js/street-vehicles.js?v=stillsw-20261101"></script> <!-- 9f4b. K56 路邊會暴衝的機車、腳踏車：敵我都撞飛 -->
   <script src="js/fish-head.js?v=k56merge-20261101"></script> <!-- 9f5. 魚頭君：噴水擊退、去滅火、水漬和積水 -->
-  <script src="js/loofah-lady.js?v=k56merge-20261101"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
+  <script src="js/loofah-lady.js?v=vinefire-20261109"></script> <!-- 9f6. 絲瓜小姐：重踏、藤蔓鑽地纏人、左鍵幫隊友掙脫 -->
   <script src="js/clownfish.js?v=merge-monster-vitals-20261023"></script> <!-- 9f7. 比基尼小丑魚：彈跳移動、每跳有機會生 0～3 顆魚卵（怪物版地雷）、一半會孵化 -->
-  <script src="js/golden-banana-king.js?v=newsfx-20261027"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
+  <script src="js/golden-banana-king.js?v=bossdrop-20261109"></script> <!-- 9f8. 金蕉王：每 10 秒幫附近怪物補血、看到人就逃、打死掉香蕉 -->
   <script src="js/gourd-monkey.js?v=vehtoss-20261101"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=test-off-20261031"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=y25open9-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=party1-20261107"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=windleaf-20261109"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=merge2-20261101"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/blast-fx-v2.js?v=v2-20261105"></script> <!-- 9e2. 爆炸特效 V2：pixelfx 風格的煙霧、火星（BLAST_FX_VERSION 切換 1／2） -->
@@ -362,10 +362,12 @@
   <script src="js/fog-fx-v2.js?v=leaflayer-20261106"></script> <!-- 9e11. 起霧 V2：貼地薄霧帶、螢火蟲、落葉（FOG_FX_VERSION 切換 1／2） -->
   <script src="js/loot-fx-v2.js?v=noglint-20261105"></script> <!-- 9e12. 挖礦／撿東西／核心碎掉 V2：水晶碎片、碎片閃光、撿起光點、光柱（LOOT_FX_VERSION 切換 1／2） -->
   <script src="js/misc-fx-v2.js?v=v2-20261105"></script> <!-- 9e13. 其他特效 V2：吐酸、怪物撞擊落地、槍口火光子彈、柯林連刺、大招集氣（MISC_FX_VERSION 切換 1／2） -->
-  <script src="js/oil-barrels.js?v=oildrum-20261106"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
+  <script src="js/oil-barrels.js?v=queenfire-20261108"></script> <!-- 9h. 油桶／油箱：爆炸、漏油、燃燒 -->
   <script src="js/flicker-light.js?v=silent2-20261106"></script> <!-- 9n. 不穩定的日光燈：閃爍、跳電、嗡嗡聲、火花 -->
-  <script src="js/fog.js?v=fogwind-20261106"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
-  <script src="js/vines.js?v=hangvine-20261106"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
+  <script src="js/fog.js?v=nofogtest-20261109"></script> <!-- 9n2. 起霧：遠處白茫茫、飄動的霧團（地圖編輯器設定） -->
+  <script src="js/vines.js?v=throwwall-20261109"></script> <!-- 9n3. 森林的垂吊藤蔓：碰到被拉上去、再丟回地面（地圖編輯器擺放） -->
+  <script src="js/loofah-queen.js?v=corestalk-20261109"></script> <!-- 9n4. 菁英絲瓜小姐「絲瓜女王」：踏地垂下藤蔓、核心吊在頭上、農田長藤蔓 -->
+  <script src="js/banana-emperor.js?v=groundvine-20261109"></script> <!-- 9n5. 菁英金蕉王「金蕉大王」：守核心、舉杖敲地施法（補血／加攻／加防／加速／香蕉皮雨）、大隻隊員 -->
   <script src="js/leaf-piles.js?v=leafpile4-20261106"></script> <!-- 9n4. 森林的樹葉堆：燒掉露出道具或小史萊姆（地圖編輯器擺放） -->
   <script src="js/lifeform.js?v=life-burn-20261018"></script> <!-- 9o. 生命體：碎掉、復活、被火燒死 -->
   <script src="js/smiler.js?v=capking3-20261101"></script> <!-- 9o2. Smiler：黑暗中注視玩家、咬傷待在暗處的人 -->
@@ -392,7 +394,7 @@
   <script src="js/escalators.js?v=escside-20261101"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
   <script src="js/rescue-dog.js?v=twosquad2-20261103"></script>
   <script src="js/ground-items.js?v=groundcare2-20261106"></script>   <!-- 背包裡的東西放在地上、撿回來；嚮導撿、球球叼急救包和杏仁水 -->
-  <script src="js/food.js?v=eat-20261106"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
+  <script src="js/food.js?v=bossdrop-20261109"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/cooking.js?v=party2-20261107"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
   <script src="js/meal.js?v=party11-20261107"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
   <script src="js/meal-invite.js?v=liftspot-20261104"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
@@ -402,7 +404,7 @@
   <script src="js/missions.js?v=baseswap-20261103"></script> <!-- 9l3. 任務流程：作戰桌、返回應變中心、通訊員報告 -->
   <script src="js/quests.js?v=carry-20261023"></script> <!-- 9l4. 支線任務：委託、回憶任務（作戰桌的支線分頁） -->
   <script src="js/save.js?v=onepen-20261107"></script> <!-- 9k. 存檔、設定選單 -->
-  <script src="js/boss-music.js?v=clawstock-20261101"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
+  <script src="js/boss-music.js?v=emperor-20261108"></script> <!-- 9k1. BOSS 音樂：鳥頭大隊長追玩家、異質核心甦醒時淡入，結束淡出 -->
   <script src="js/ambience.js?v=pmute-20261026"></script> <!-- 9k2. 環境背景音：Y 區地圖循環播放白噪音、忽大忽小 -->
   <script src="js/sanity.js?v=leader2-20261103"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=merge2-20261102"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
@@ -422,7 +424,7 @@
   <script src="js/mrt-train.js?v=cargo3-20261102"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=care-20261103"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=ouch2-20261107"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=magic-20261109"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
@@ -437,9 +439,9 @@
   <script>document.write('<script src="data/bestiary.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 怪物圖鑑：版面、文字、每隻怪物的介紹（怪物圖鑑編輯器）；每次都讀最新的 -->
   <script src="js/bestiary-config.js?v=capking3-20261101"></script>   <!-- 怪物圖鑑的畫面（跟怪物圖鑑編輯器共用） -->
   <script src="js/bestiary.js?v=capking3-20261101"></script>   <!-- 怪物圖鑑：2F應變中心的電腦、消滅次數 -->
-  <script src="js/pc-desktop.js?v=gomoku2-20261107"></script>   <!-- 2F應變中心的電腦桌面：換基地音樂、踩地雷、新接龍、蜘蛛紙牌、五子棋、遊戲紀錄、怪物圖鑑（必須在 bestiary.js 之後） -->
+  <script src="js/pc-desktop.js?v=jjgift-20261108"></script>   <!-- 2F應變中心的電腦桌面：換基地音樂、踩地雷、新接龍、蜘蛛紙牌、五子棋、給JJ的禮物、遊戲紀錄、怪物圖鑑（必須在 bestiary.js 之後） -->
   <script src="js/pc-freecell.js?v=fclose-20261107"></script>   <!-- 2F應變中心電腦的新接龍（FreeCell） -->
-  <script src="js/pc-spider.js?v=spsearch-20261107"></script>   <!-- 2F應變中心電腦的蜘蛛紙牌（要在 pc-freecell.js 之後，借用它的牌面） -->
+  <script src="js/pc-spider.js?v=jjgift2-20261108"></script>   <!-- 2F應變中心電腦的蜘蛛紙牌（要在 pc-freecell.js 之後，借用它的牌面） -->
   <script src="js/pc-gomoku.js?v=gomoku2-20261107"></script>   <!-- 2F應變中心電腦的五子棋 -->
   <script src="js/pc-stats.js?v=gomoku2-20261107"></script>   <!-- 電腦的遊戲紀錄：每款小遊戲的局數、時間 -->
   <script src="data/target-papers.js?v=tp11-20261020"></script>   <!-- 靶紙圖片內嵌版（雙擊開遊戲時計分用；tools/build-target-papers.py 產生） -->

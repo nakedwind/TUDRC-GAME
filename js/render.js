@@ -1071,6 +1071,7 @@ function draw() {
   for (const e of G.enemies) if (enemyVisible(e) && e.behavior !== 'moth') sortables.push({ y: e.y + 13, draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
+  if (typeof loofahQueenSortables === 'function') loofahQueenSortables(sortables);   // 絲瓜女王頭上吊著的核心（js/loofah-queen.js）
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
   if (typeof mrtTrainSortables === 'function') mrtTrainSortables(sortables);   // 捷運列車（js/mrt-train.js）
   if (typeof streetVehicleSortables === 'function') streetVehicleSortables(sortables);   // K56 的機車、腳踏車（js/street-vehicles.js）
@@ -1088,6 +1089,7 @@ function draw() {
   drawFlares(ctx);            // 地上燃燒的照明彈
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
+  if (typeof drawBananaEmperorGround === 'function') drawBananaEmperorGround(ctx);   // 金蕉大王敲地的發光裂縫（js/banana-emperor.js）
   if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'ground');   // 起霧 V2：落到地上的葉子（畫在人物下面，js/fog-fx-v2.js）
@@ -1370,6 +1372,7 @@ function drawWorldEffects() {
   if (typeof drawSootheV2 === 'function') drawSootheV2(ctx);   // 疏導特效 V2（js/soothe-fx-v2.js）
   if (typeof drawFlareV2Smoke === 'function') drawFlareV2Smoke(ctx);   // 照明彈 V2 的煙（js/flare-fx-v2.js）
   if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'air');   // 起霧 V2：還在空中飄的葉子（js/fog-fx-v2.js）
+  if (typeof drawBananaEmperorAir === 'function') drawBananaEmperorAir(ctx);   // 金蕉大王的狂風捲起來的葉子（js/banana-emperor.js）
   if (typeof drawLootV2 === 'function') drawLootV2(ctx);   // 挖礦／撿東西／核心碎掉 V2（js/loot-fx-v2.js）
   if (typeof drawMiscV2 === 'function') drawMiscV2(ctx);   // 槍、連刺、集氣等其他 V2（js/misc-fx-v2.js）
   for (const f of G.effects) {
@@ -1572,7 +1575,7 @@ function drawWorldEffects() {
     } else if (f.fglow) {                                  // 火焰爆閃光暈（加色疊加）
       const p = Math.max(0, f.life / f.life0), r = f.r0 + (f.r1 - f.r0) * (1 - p);
       const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
-      const pal = f.green ? [[220, 255, 200], [90, 230, 110], [10, 90, 30]] : [[255, 240, 190], [255, 150, 40], [120, 20, 0]];   // green：金蕉王補血的綠色光暈（js/golden-banana-king.js）
+      const pal = f.pal || (f.green ? [[220, 255, 200], [90, 230, 110], [10, 90, 30]] : [[255, 240, 190], [255, 150, 40], [120, 20, 0]]);   // green：金蕉王補血的綠色光暈（js/golden-banana-king.js）；pal：自己指定三段顏色（金蕉大王各種施法，js/banana-emperor.js）
       const fade = (f.grow ? Math.min(1, (1 - p) * 4) * p * 1.6 : p) * (f.strength ?? 1);   // grow：先亮起來再淡出（不是一出現就最亮）；strength：亮度倍率
       g.addColorStop(0, `rgba(${pal[0]},${(0.9 * fade).toFixed(3)})`);
       g.addColorStop(0.4, `rgba(${pal[1]},${(0.6 * fade).toFixed(3)})`);

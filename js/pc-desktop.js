@@ -6,6 +6,7 @@
        🃏 新接龍：FreeCell，牌局在 js/pc-freecell.js
        🕷️ 蜘蛛紙牌：Spider（單色／雙色／四色），牌局在 js/pc-spider.js
        ⚫ 五子棋：對電腦或兩人對下，棋局在 js/pc-gomoku.js
+       🎁 給JJ的禮物：玩單色蜘蛛紙牌，贏了可以看朔的生日劇情（js/pc-spider.js 的 openJJGift）
        📊 遊戲紀錄：每款小遊戲玩了幾局、花了多少時間，在 js/pc-stats.js
        📕 怪物圖鑑：打開原本的圖鑑視窗（js/bestiary.js 的 openBestiary）
    ・左下「開始」選單、右下的電源按鈕都可以關機
@@ -19,6 +20,7 @@ const PCD_APPS = [
   { id: 'freecell', name: '新接龍', icon: '🃏', title: '新接龍' },
   { id: 'spider', name: '蜘蛛紙牌', icon: '🕷️', title: '蜘蛛紙牌' },
   { id: 'gomoku', name: '五子棋', icon: '⚫', title: '五子棋' },
+  { id: 'jjgift', name: '給JJ的禮物', icon: '🎁' },   // 沒有自己的視窗：用蜘蛛紙牌的視窗玩單色版（js/pc-spider.js 的 openJJGift）
   { id: 'stats', name: '遊戲紀錄', icon: '📊', title: '遊戲紀錄' },
   { id: 'bestiary', name: '怪物圖鑑', icon: '📕' },
 ];
@@ -122,7 +124,8 @@ function selectPcIcon(id) {
 // ---- 視窗 ----
 function openPcApp(id) {
   selectPcIcon(null);
-  if (id === 'bestiary') { openBestiary(); return; }   // 圖鑑用原本的視窗（蓋在桌面上，關掉回到桌面）
+  if (id === 'bestiary') { openBestiary(); return; }
+  if (id === 'jjgift') { openJJGift(); return; }   // 圖鑑用原本的視窗（蓋在桌面上，關掉回到桌面）
   const app = PCD_APPS.find(a => a.id === id); if (!app) return;
   let w = pcd.wins[id];
   if (!w) {

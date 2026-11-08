@@ -1308,6 +1308,8 @@ function newGame() {
   if (typeof seedEliteGuards === 'function') seedEliteGuards();   // 守在核心旁的菁英怪（js/elite-bird-head.js）
   if (typeof seedCapKing === 'function') seedCapKing();   // 順順宮主：核心躲在 9 頂大宮帽其中一頂（js/elite-cap-king.js）
   if (typeof seedPearlElder === 'function') seedPearlElder();   // 抱著自己的核心閒晃的珍珠大童（js/pearl-elder.js）
+  if (typeof seedLoofahQueen === 'function') seedLoofahQueen();
+  if (typeof seedBananaEmperor === 'function') seedBananaEmperor();   // 金蕉大王：守在核心旁邊、大隻隊員＋兩隻金蕉王（js/banana-emperor.js）   // 絲瓜女王：核心吊在她頭上、農田長藤蔓、3 隻絲瓜小姐守著（js/loofah-queen.js）
   if (typeof arriveVitals === 'function' && !MAP_STORY) arriveVitals();   // 剛回應變中心：暴走的降回邊緣、重傷的住院（js/vitals.js）
   if (!MAP_STORY) {     // 劇情地圖：只有溫特一個人，隊友和場景 NPC 都不會跟進來
     spawnSentries();      // 三位哨兵開場就在基地（隨機位置）
@@ -1752,6 +1754,11 @@ function pickSentryTarget(t, R) {
     if (score < bestScore) { best = e; bestScore = score; }
   }
   if (best || t.guardSummoned) return best;
+  if (TYPES[t.type]?.ability === '火焰' && typeof loofahFireTargets === 'function')   // 希奧妮：沒有怪物可打時，燒絲瓜女王的農田藤蔓、吊著核心的藤（js/loofah-queen.js）
+    for (const f of loofahFireTargets()) {
+      const distance = Math.hypot(f.x - t.x, f.y - t.y);
+      if (distance <= R && distance < bestScore && hasLineOfSight(t.x, t.y, f.x, f.y)) { best = f; bestScore = distance; }
+    }
   for (const core of G.cores) {
     if (core.dead || !core.awake || core.hidden || core.carried) continue;   // 沉睡的核心不打（只有溫特開槍或阿瓦倫靠近才會叫醒）；躲在順順宮帽裡、抱在珍珠大童身上的也打不到（js/elite-cap-king.js、js/pearl-elder.js）
     const distance = Math.hypot(core.x - t.x, core.y - t.y);
@@ -1822,9 +1829,10 @@ const GUIDE_GUN = { mag: 6, reloadTime: 2 };
 const LEADER_GUN = { aggro: 0.8 };
 function playerGun() {
   const s = PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER];
-  if (!s) return PLAYER_ATK;
+  const weak = typeof bananaDebuffAtk === 'function' ? bananaDebuffAtk(G && G.player) : 1;   // 金蕉大王紅色魔法陣：攻擊下降（js/banana-emperor.js）
+  if (!s) return weak === 1 ? PLAYER_ATK : { ...PLAYER_ATK, dmg: PLAYER_ATK.dmg * weak };
   const p = G && G.player, buff = k => (p && typeof sortieBuff === 'function' ? sortieBuff(p, k) : 0);
-  return { ...PLAYER_ATK, dmg: s.dmg * (1 + buff('atk')), range: s.range, rate: s.rate * (1 + buff('spd')), aggro: LEADER_GUN.aggro, mag: GUIDE_GUN.mag, reloadTime: GUIDE_GUN.reloadTime, double: 0 };
+  return { ...PLAYER_ATK, dmg: s.dmg * (1 + buff('atk')) * weak, range: s.range, rate: s.rate * (1 + buff('spd')), aggro: LEADER_GUN.aggro, mag: GUIDE_GUN.mag, reloadTime: GUIDE_GUN.reloadTime, double: 0 };
 }
 let aimHeld = false, aimClient = null;
 // 快速連點：按下到放開比一幀還短（或剛好在射速冷卻中）時，這一下也要開得到槍 → 先記下來，SHOT_QUEUE 秒內冷卻好了就補開
@@ -2383,7 +2391,7 @@ function update(dt) {
       if (!swingTarget) {   // 遠程角色：即使沒有持槍素材，也先做瞄準／後座動畫再判定命中
         const dx = target.x - t.x, dy = target.y - t.y;
         t.dir = Math.abs(dx) >= Math.abs(dy) ? (dx < 0 ? 'left' : 'right') : (dy < 0 ? 'back' : 'front');
-        const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0);
+        const isUlt = !!(ULTIMATES[t.type] && (t.ultCd || 0) <= 0 && !target.fireSpot);   // fireSpot：希奧妮在燒藤蔓，不放大招
         if (isUlt) { t.ultCd = ULTIMATES[t.type].cd * (1 - (spec.ultCdCut || 0)); const ultLine = pickDialogueLine(t.type, 'ultimate'); if (ultLine) t.say = { text: ultLine, life: 2.5 }; spawnChargeFx(t.x, t.y - 8, ULT_CHARGE_COLOR[t.type] || spec.color); }
         const sw = isUlt ? ULT_SWING : { wind: .14, impact: .21, duration: .4 };
         t.gunSwing = { target, angle: Math.atan2(dy, dx), age: 0, wind: sw.wind, impact: sw.impact, duration: sw.duration, fired: false, ult: isUlt };
@@ -2415,6 +2423,7 @@ function update(dt) {
         const rageMul = sentryDamageMul(t);   // 路德：汙染越高打越痛
         const atkDmg = spec.dmg * (U ? U.dmgMul * (1 + (spec.ultDmgBonus || 0)) : 1) * (critMul || 1) * rageMul, atkSplash = U ? U.splash : spec.splash;
         target.hp -= atkDmg;
+        if (spec.ability === '火焰' && typeof addFlameMark === 'function') addFlameMark(impactPoint.x, impactPoint.y, (atkSplash || 0) * CELL);   // 希奧妮：打中的地方短暫算有火（絲瓜藤怕火，js/oil-barrels.js）
         onSentryHitOil(t, target, atkDmg, impactPoint, (atkSplash || 0) * CELL);
         if (typeof sentryHitOre === 'function') sentryHitOre(t, impactPoint, (atkSplash || 0) * CELL);   // 路德：拳頭剛好波及礦物（js/ore.js）   // 安柏／希奧妮：不小心波及附近的油桶、油汙
         const affected = target.maxhp && G.enemies.includes(target) ? [target] : [];
@@ -2566,6 +2575,8 @@ function update(dt) {
   if (typeof updateFishHead === 'function') updateFishHead(dt);
   if (typeof updateMilkfish === 'function') updateMilkfish(dt);   // 虱目魚小子：嘴裡的隊友跟著走、消化扣血、打死救出來（js/milkfish-kid.js）
   if (typeof updateLoofahVines === 'function') updateLoofahVines(dt);   // 絲瓜藤（js/loofah-lady.js）   // 魚頭君的水柱、地上的水（js/fish-head.js）
+  if (typeof updateLoofahQueen === 'function') updateLoofahQueen(dt);
+  if (typeof updateBananaEmperor === 'function') updateBananaEmperor(dt);   // 金蕉大王的 BUFF：計時、防禦減傷（js/banana-emperor.js）   // 絲瓜女王：垂下來的藤蔓收回、吊著的核心、農田藤蔓怕火（js/loofah-queen.js）
   if (typeof updateHangi === 'function') updateHangi(dt);
   if (typeof updateHurtGrace === 'function') updateHurtGrace(dt);   // 溫特、隊友被打後的短暫無敵倒數（js/combat-feel.js）
   if (typeof updateCapKing === 'function') updateCapKing(dt);   // 順順宮主：大宮帽打開、蓋回、蓋杯子洗牌（js/elite-cap-king.js）
@@ -2682,7 +2693,7 @@ function loseOverlay(reason, cause) {
   showOverlay(title, causeLine + text + (typeof missionLoseExtra === 'function' ? missionLoseExtra() : ''), '重新部署');
 }
 // 怪物的中文名稱（怪物編輯器裡的名字）
-function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
+function monsterNameOf(e) { if (e && (e.capKing || e.pearlBoss || e.loofahQueen || e.bananaEmperor) && e.eliteName) return e.eliteName;   /* 大夯吉寶（js/elite-cap-king.js）、珍珠大童（js/pearl-elder.js）：擊殺統計、死因顯示自己的名字 */ const spec = e && ACTIVE_MONSTERS.find(m => m.id === e.type); return (spec && spec.name) || '異質體'; }
 
 function prepareMonsterPreview() {
   if (!MONSTER_PREVIEW_ID) return;
@@ -2723,7 +2734,7 @@ function lose(reason, cause) {
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
-const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2', 'map_mvtnqrs7', 'map_mvvdbiyx'];   // map_mvtnqrs7＝Y25區地下街、map_mvvdbiyx＝K56區地下街（順順宮主，js/elite-cap-king.js）；用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
+const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2', 'map_mvtnqrs7', 'map_mvvdbiyx', 'map_f307boss'];   // map_mvtnqrs7＝Y25區地下街、map_mvvdbiyx＝K56區地下街（順順宮主，js/elite-cap-king.js）、map_f307boss＝F307 BOSS 測試場（絲瓜女王、金蕉大王）；用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
 if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {

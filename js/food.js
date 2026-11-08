@@ -12,6 +12,11 @@ const FOOD_DROPS = {   // 依怪物的 behavior：掉什麼、幾個、機率
   fishhead:      { id: 'sashimi',        min: 1, max: 2, chance: .3 },   // 魚頭君 → 生魚片
   vine:          { id: 'loofah',         min: 1, max: 1, chance: .3 },   // 絲瓜小姐 → 絲瓜
 };
+// BOSS 打倒一定掉（散在倒下的地方旁邊）：哪一種 BOSS（怪物身上的旗標）→ 掉什麼、幾個
+const BOSS_FOOD_DROPS = [
+  { flag: 'loofahQueen',   id: 'loofah', qty: 5 },   // 絲瓜女王 → 5 條絲瓜（js/loofah-queen.js）
+  { flag: 'bananaEmperor', id: 'banana', qty: 5 },   // 金蕉大王 → 5 根香蕉（js/banana-emperor.js；一般金蕉王的香蕉在 js/golden-banana-king.js）
+];
 const FOOD_COOK = { time: 1.2 };   // 待在火海裡幾秒會烤熟
 const FOOD_SICK = { dur: 6, slow: .25 };   // 生吃鬧肚子：幾秒、走慢多少
 const FOOD_BUFFS = {
@@ -23,6 +28,17 @@ const FOOD_BUFFS = {
 
 // ---- 打死掉食物 ----
 function foodDeathDrop(e) {
+  const boss = BOSS_FOOD_DROPS.find(b => e[b.flag]);
+  if (boss) {   // BOSS：一定掉，一個一個散開在旁邊
+    if (typeof itemById !== 'function' || !itemById(boss.id)) return;
+    G.groundItems = G.groundItems || [];
+    for (let i = 0; i < boss.qty; i++) {
+      const a = i / boss.qty * Math.PI * 2 + Math.random() * .5, d = 16 + Math.random() * 22;
+      G.groundItems.push({ id: boss.id, qty: 1, x: e.x + Math.cos(a) * d, y: e.y + 8 + Math.sin(a) * d * .6, at: performance.now() / 1000 });
+    }
+    flash((boss.id === 'banana' ? '🍌 ' : '') + itemById(boss.id).name + ' ×' + boss.qty, e.x, e.y - 60, '#ffe066');
+    return;
+  }
   const d = FOOD_DROPS[e.behavior];
   if (!d || Math.random() >= d.chance || typeof itemById !== 'function' || !itemById(d.id)) return;
   const n = d.min + Math.floor(Math.random() * (d.max - d.min + 1)); if (n <= 0) return;

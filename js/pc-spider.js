@@ -8,6 +8,8 @@
    ・難度：單色（全部♠）、雙色（♠♥）、四色
    ・操作：拖曳，或點一下選牌再點目的地；點兩下＝自動搬到最好的位置；「提示」會把可以走的一步亮出來
    ・分數跟 Windows 一樣：開局 500，每走一步 −1，收走一組 +100
+   ・🎁 給JJ的禮物（桌面圖示，js/pc-desktop.js）：用這個視窗玩單色版（g.gift＝true，上面多一條禮物說明），
+     贏了就出現「觀看朔的生日」按鈕，播 data/story-scenes.js 的 saku_birthday；中途換成雙色／四色就回到一般的蜘蛛紙牌
 */
 const PCS_LEVELS = { 1: '單色', 2: '雙色', 4: '四色' };
 const PCS_SUIT_SETS = { 1: [3, 3, 3, 3, 3, 3, 3, 3], 2: [3, 2, 3, 2, 3, 2, 3, 2], 4: [3, 2, 1, 0, 3, 2, 1, 0] };   // 8 組各 13 張的花色（號碼跟新接龍的 PCF_SUITS 一樣）
@@ -28,9 +30,10 @@ function initPcSpider(body) {
       '<button type="button" data-sp="new">新牌局</button><button type="button" data-sp="retry">重玩這局</button><button type="button" data-sp="undo">↶ 復原</button><button type="button" data-sp="hint">💡 提示</button>' +
       '<span class="pcd-sp-levels">' + Object.entries(PCS_LEVELS).map(([k, n]) => '<button type="button" data-suits="' + k + '">' + n + '</button>').join('') + '</span>' +
       '<span class="pcd-fc-info"></span></div>' +
-    '<div class="pcd-fc-table"></div><div class="pcd-fc-msg"></div></div>';
+    '<div class="pcd-sp-gift hidden"></div><div class="pcd-fc-table"></div><div class="pcd-fc-msg"></div></div>';
   body.querySelector('.pcd-sp').addEventListener('click', e => {   // 上方按鈕列和「這局輸了」提示裡的按鈕都走這裡
     const g = pcd.sp, lv = e.target.closest('[data-suits]'), b = e.target.closest('[data-sp]');
+    if (e.target.closest('[data-gift-play]')) { playJJGiftStory(); return; }
     if (lv) { newPcSpider(+lv.dataset.suits); sfx('button'); return; }
     if (!b) return;
     if (b.dataset.sp === 'new') { newPcSpider(g.suits); sfx('button'); }
@@ -45,6 +48,7 @@ function initPcSpider(body) {
 function newPcSpider(suits, no) {
   const g = pcd.sp;
   clearInterval(g.timer); clearTimeout(g.hintTimer);
+  if (suits !== 1) g.gift = false;   // 禮物只算單色版：換成雙色／四色就變回一般的蜘蛛紙牌
   no = no || 1 + Math.floor(Math.random() * 99999);
   const rnd = pcsRandom(no * 7 + suits), deck = Array.from({ length: 104 }, (_, i) => i);
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
@@ -58,7 +62,7 @@ function newPcSpider(suits, no) {
 function fitPcSpider() {   // 依螢幕大小決定牌的尺寸；視窗超出螢幕就往內移
   const g = pcd.sp, w = pcd.wins.spider; if (!g || !g.cols || !w || !pcd.el) return;
   const screen = pcd.el.querySelector('.pcd-screen'), H = screen.clientHeight - 34, W = screen.clientWidth;
-  const CHROME = 128, GAP = 6;   // 標題列、按鈕列、訊息列、留白加起來的高度
+  const CHROME = 128 + (g.gift ? 38 : 0), GAP = 6;   // 標題列、按鈕列、訊息列、留白加起來的高度
   const cw = Math.max(32, Math.min(70, Math.floor((W - 30 - GAP * 9) / 10), Math.floor((H - CHROME - 200) / 2 / 1.36)));
   const ch = Math.round(cw * 1.36);
   g.ch = ch; g.cw = cw; g.colH = Math.max(ch + 150, Math.min(460, H - CHROME - ch - 10));
@@ -345,7 +349,34 @@ function renderPcSpider(noAnim) {
     : g.lost ? '這局輸了：怎麼搬都沒有進展了。分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '、' + g.moves + ' 步'
     : g.note || ('同花色、由大到小連著的牌才能一起搬；湊齊 K→A 自動收走。點右下角的牌堆發牌（還有 ' + piles + ' 次）');
   g.body.querySelector('[data-sp="undo"]').disabled = !g.hist.length || g.won;
+  renderJJGift(g);
 }
 function renderPcsInfo(g) {
   g.body.querySelector('.pcd-fc-info').textContent = '分數 ' + g.score + '　步數 ' + g.moves + '　時間 ' + pcfTime(g.time);
+}
+
+// ---- 🎁 給JJ的禮物：贏一局單色蜘蛛紙牌，就能看朔的生日劇情 ----
+const JJ_GIFT_SCENE = 'saku_birthday';   // 劇情 id（data/story-scenes.js，🎬 劇情編輯器可以改內容）
+function openJJGift() {   // 桌面點「給JJ的禮物」：打開蜘蛛紙牌視窗，換成禮物模式、單色、發一局新的
+  openPcApp('spider');
+  const g = pcd.sp;
+  g.gift = true;
+  newPcSpider(1);
+}
+function renderJJGift(g) {
+  const bar = g.body.querySelector('.pcd-sp-gift'), w = pcd.wins.spider;
+  bar.classList.toggle('hidden', !g.gift);
+  if (w) w.querySelector('.pcd-ttext').textContent = g.gift ? '給JJ的禮物－蜘蛛紙牌（單色）' : '蜘蛛紙牌';
+  if (!g.gift) return;
+  const html = g.won
+    ? '<span>🎉 禮物打開了！</span><button type="button" data-gift-play="1">🎂 觀看朔的生日</button>'
+    : '<span>🎁 給JJ的禮物：贏一局單色蜘蛛紙牌，就能打開禮物！</span>';
+  if (bar.innerHTML !== html) bar.innerHTML = html;
+}
+function playJJGiftStory() {   // 關掉電腦、先存檔（劇情播放中不存檔），再播生日劇情；看完回到應變中心
+  if (window.STORY_MODE) return;
+  sfx('button');
+  closePcDesktop();
+  if (typeof saveGame === 'function') saveGame();
+  if (!StoryScene.playFromGame(JJ_GIFT_SCENE, () => systemNotice('🎂 生日快樂！'))) systemNotice('禮物打不開…找不到朔的生日劇情', true);
 }

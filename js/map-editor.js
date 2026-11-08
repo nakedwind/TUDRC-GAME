@@ -505,7 +505,9 @@ function fixMap(m) {
   m.coreSpots = Array.isArray(m.coreSpots) ? [...new Set(m.coreSpots)] : [];
   if (Array.isArray(m.fogTrees) && m.fogTrees.length) m.fogTrees = [...new Set(m.fogTrees)]; else delete m.fogTrees;   // 🌲 霧樹：['欄,列'…]（js/fog.js）
   if (Array.isArray(m.vines) && m.vines.length) m.vines = [...new Set(m.vines)]; else delete m.vines;   // 🌿 垂吊藤蔓：['欄,列'…]（js/vines.js）
-  if (Array.isArray(m.vinesHang) && m.vinesHang.length) m.vinesHang = [...new Set(m.vinesHang)]; else delete m.vinesHang;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
+  if (Array.isArray(m.vinesHang) && m.vinesHang.length) m.vinesHang = [...new Set(m.vinesHang)]; else delete m.vinesHang;
+  if (Array.isArray(m.vinesFerry)) m.vinesFerry = m.vinesFerry.filter(f => f && typeof f.at === 'string' && typeof f.to === 'string');   // 🌿➡ 傳送藤蔓：[{ at: '欄,列', to: '落點欄,列' }]（js/vines.js）
+  if (!(m.vinesFerry && m.vinesFerry.length)) delete m.vinesFerry;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
   if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
@@ -530,6 +532,8 @@ function fixMap(m) {
 }
 // 同地圖傳送點：出入口通往自己這張地圖，at 記著要送到哪一格（遊戲裡 js/game.js 的 teleportInMap）
 const isSameMapPortal = (p, m) => !!(p && m && p.to === m.id && Array.isArray(p.at));
+let solidSize = 1, solidPaintAdd = true;   // 🧱 不可穿透筆刷大小（1＝1×1、2＝2×2、3＝3×3，按 🧱 跳出選單選）；按下那一格決定這一筆是「畫」還是「擦」
+let ferryFrom = null;   // 正在放傳送藤蔓：已點了藤蔓那一格、等點落點 { mapId, key }
 let portalLinkFrom = null;   // 正在設傳送點：已點了第一格、等第二格 { mapId, c, r, oneWay }（oneWay＝單向，不在對面放回程的傳送點）
 // ---- 遊戲畫質：畫布用跟遊戲一樣的放大倍率畫（js/config.js 的 VIEW_ZOOM，1.5 倍＝一格 60px）----
 // 遊戲裡地圖放大 1.5 倍，60px 的素材剛好 1 個像素對 1 個像素；編輯器原本一格只畫 40px，
@@ -829,6 +833,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/scene-props',
   'images/萬聖節裝飾',
   'images/森林',
+  'images/森林藍',   // 森林素材疊 #3f6deb 色彩增值的版本（檔名 <原檔名>_blue.png）
 ];   // 上傳的圖不在這些資料夾裡：會把整張圖嵌進素材庫（data:），之後改圖檔不會更新，所以新資料夾要加在這裡
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -1216,8 +1221,42 @@ function drawFogTreeMarks(m) {
   ctx.fillStyle = '#c9a8ff'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left';
   ctx.fillText('🌲 霧樹 ' + trees.length + ' 棵' + (m.fog ? '' : '（這張地圖還沒開起霧）'), OX + 6, OY + 52);
 }
+// 同一格只能有一種藤蔓：放了一種，就把這格的其他種拿掉
+function dropOtherVinesAt(m, key, keep) {
+  if (keep !== 'toss' && m.vines) { m.vines = m.vines.filter(k => k !== key); if (!m.vines.length) delete m.vines; }
+  if (keep !== 'hang' && m.vinesHang) { m.vinesHang = m.vinesHang.filter(k => k !== key); if (!m.vinesHang.length) delete m.vinesHang; }
+  if (keep !== 'ferry' && m.vinesFerry) { m.vinesFerry = m.vinesFerry.filter(f => f.at !== key); if (!m.vinesFerry.length) delete m.vinesFerry; }
+}
+// 🌿➡ 傳送藤蔓：藤蔓那一格、虛線弧線箭頭指到落點（落點畫一個圈）
+function drawFerryVineMarks(m) {
+  const list = m.vinesFerry || [], cellXY = k => { const [c, r] = k.split(',').map(Number); return [OX + c * CELL, OY + r * CELL]; };
+  ctx.save();
+  for (const f of list) {
+    const [x, y] = cellXY(f.at), [tx, ty] = cellXY(f.to);
+    const ax = x + CELL / 2, ay = y + CELL / 2, bx = tx + CELL / 2, by = ty + CELL / 2, qx = (ax + bx) / 2, qy = Math.min(ay, by) - CELL * 2.5;
+    ctx.strokeStyle = 'rgba(127,224,200,.9)'; ctx.lineWidth = 2.5; ctx.setLineDash([8, 6]);
+    ctx.beginPath(); ctx.moveTo(ax, ay); ctx.quadraticCurveTo(qx, qy, bx, by); ctx.stroke(); ctx.setLineDash([]);
+    const ang = Math.atan2(by - qy, bx - qx);   // 箭頭方向：曲線最後一段
+    ctx.fillStyle = '#7fe0c8'; ctx.beginPath(); ctx.moveTo(bx, by); ctx.lineTo(bx - Math.cos(ang - .45) * 14, by - Math.sin(ang - .45) * 14); ctx.lineTo(bx - Math.cos(ang + .45) * 14, by - Math.sin(ang + .45) * 14); ctx.closePath(); ctx.fill();
+    ctx.strokeStyle = '#7fe0c8'; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(bx, by, CELL * .42, 0, Math.PI * 2); ctx.stroke();
+    ctx.strokeStyle = 'rgba(60,150,130,.9)'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(ax, y - CELL * .8); ctx.quadraticCurveTo(x + CELL * .3, y + CELL * .2, ax, y + CELL * .7); ctx.stroke();
+    ctx.strokeStyle = '#7fe0c8'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
+    ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff';
+    ctx.fillText('🌿➡', ax, ay);
+  }
+  if (ferryFrom && ferryFrom.mapId === m.id) {   // 放到一半：藤蔓那一格用黃色虛線框起來，等點落點
+    const [x, y] = cellXY(ferryFrom.key);
+    ctx.strokeStyle = '#ffe36b'; ctx.lineWidth = 3; ctx.setLineDash([5, 4]); ctx.strokeRect(x + 1, y + 1, CELL - 2, CELL - 2); ctx.setLineDash([]);
+    ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = '#fff'; ctx.fillText('🌿➡', x + CELL / 2, y + CELL / 2);
+  }
+  ctx.textBaseline = 'alphabetic';
+  if (list.length) { ctx.fillStyle = '#7fe0c8'; ctx.font = '13px sans-serif'; ctx.textAlign = 'left'; ctx.fillText('🌿➡ 傳送藤蔓 ' + list.length + ' 條', OX + 6, OY + 124); }
+  ctx.restore();
+}
 // 🌿 垂吊藤蔓：尖端垂到的那一格
 function drawVineMarks(m) {
+  drawFerryVineMarks(m);
   const hang = (m.vinesHang || []).map(k => k.split(',').map(Number));
   for (const [c, r] of hang) {   // 🪢 倒吊藤蔓
     const x = OX + c * CELL, y = OY + r * CELL;
@@ -1428,8 +1467,9 @@ function draw() {
         ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(px + 1, py + 1, CELL - 2, CELL - 2);
       }
     } else {
-      // 非貼圖工具（選取／不可穿透／清除等）維持單格外框
-      ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, CELL - 2, CELL - 2);
+      // 非貼圖工具（選取／不可穿透／清除等）維持單格外框；🧱 選了 2×2／3×3 就框出那麼大
+      const n = brush.mode === 'solid' ? solidSize : 1;
+      ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.strokeRect(OX + c * CELL + 1, OY + r * CELL + 1, n * CELL - 2, n * CELL - 2);
     }
   }
   // 選取高亮（黃色虛線框）
@@ -1600,6 +1640,19 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     // 普通小圖覆蓋同格同層的翻轉小圖，避免兩張疊在一起。
     m.stamps = m.stamps.filter(s => !((s.layer || 'top') === activeLayer && s.c === c && s.r === r && tileW(tileById(s.id) || {}) === 1 && tileH(tileById(s.id) || {}) === 1));
     m.layers[activeLayer][key] = brush.tile;                      // 小圖：貼到目前圖層
+  } else if (brush.mode === 'solid' && solidSize > 1) {
+    // 🧱 2×2／3×3 筆刷：滑鼠那格是左上角，一次畫（或擦）整塊；按下的那格本來沒紅格＝畫，有紅格＝擦，拖曳時照同一個動作
+    if (isDown) solidPaintAdd = !m.solid.includes(key);
+    let skipped = 0;
+    for (let dr = 0; dr < solidSize; dr++) for (let dc = 0; dc < solidSize; dc++) {
+      const cc = c + dc, rr = r + dr; if (!inGrid(cc, rr)) continue;
+      const k = cc + ',' + rr;
+      if (solidPaintAdd) {
+        if (m.coreSpots.includes(k)) { skipped++; continue; }   // 核心候選點不能變牆
+        removeFrom(m.breakable, k); if (!m.solid.includes(k)) m.solid.push(k);
+      } else if (m.solid.includes(k)) { removeFrom(m.solid, k); delete m.solidOffsets[k]; solidNudgeCells.delete(k); }
+    }
+    if (skipped && isDown) setStatus('有 ' + skipped + ' 格是核心候選點，沒有設成不可穿透', '#ffd24a');
   } else if (brush.mode === 'solid' && baseAtCell(m, c, r) && m.solid.indexOf(key) < 0) {
     // 點在基地上：改的是基地自己的碰撞格（跟著基地走、可受攻擊），不是地圖的紅格
     // （但這格本來就有地圖的紅格時，先讓它能被刪掉，不然壓在基地範圍裡的紅格永遠刪不掉）
@@ -1670,12 +1723,33 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這堆樹葉（剩 ' + piles.length + ' 堆）' : '已放上第 ' + piles.length + ' 堆樹葉：用燃燒彈或油桶的火燒掉，會露出小道具、跳出小史萊姆，或什麼都沒有', '#ffb36b');
     return;
+  } else if (brush.mode === 'vineferry') {   // 🌿➡ 傳送藤蔓：點一格放藤蔓、再點落點；點已經放好的藤蔓＝拿掉
+    if (!isDown) return;
+    const list = m.vinesFerry || [];
+    if (ferryFrom && ferryFrom.mapId === m.id) {
+      const from = ferryFrom.key;
+      if (key === from) { ferryFrom = null; draw(); setStatus('已取消放傳送藤蔓', '#8fd3ff'); return; }
+      if (m.solid.includes(key)) { setStatus('落點要選走得到的格子（不能是紅格）', '#ff8f8f'); return; }
+      ferryFrom = null;
+      list.push({ at: from, to: key }); m.vinesFerry = list;
+      dropOtherVinesAt(m, from, 'ferry');
+      saveMaps(); draw();
+      setStatus('已放上傳送藤蔓：碰到的人會被捲走、丟到落點（溫特被抓時，跟在旁邊的隊友也會一起被丟過去）', '#7fe0c8');
+      return;
+    }
+    const i = list.findIndex(f => f.at === key);
+    if (i >= 0) { list.splice(i, 1); if (list.length) m.vinesFerry = list; else delete m.vinesFerry; saveMaps(); draw(); setStatus('已拿掉這條傳送藤蔓', '#7fe0c8'); return; }
+    if (m.solid.includes(key)) { setStatus('藤蔓要垂在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
+    ferryFrom = { mapId: m.id, key }; draw();
+    setStatus('藤蔓放在這一格了，再點一下要把人丟過去的落點（點同一格＝取消）', '#7fe0c8');
+    return;
   } else if (brush.mode === 'vinehang') {   // 🪢 倒吊藤蔓：點一格放一條、再點一次拿掉
     if (!isDown) return;
     const list = m.vinesHang || [], i = list.indexOf(key);
     if (i < 0 && m.solid.includes(key)) { setStatus('藤蔓要垂在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
     if (i >= 0) list.splice(i, 1); else { list.push(key); if (m.vines) { m.vines = m.vines.filter(k => k !== key); if (!m.vines.length) delete m.vines; } }   // 同一格只能有一種藤蔓
     if (list.length) m.vinesHang = list; else delete m.vinesHang;
+    if (i < 0) dropOtherVinesAt(m, key, 'hang');
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這條倒吊藤蔓（剩 ' + list.length + ' 條）' : '已放上第 ' + list.length + ' 條倒吊藤蔓：抓到隊友會把他倒吊在半空中，溫特要開槍打斷藤蔓才救得下來（溫特碰到照樣被捲走）', '#e6c84a');
     return;
@@ -1685,6 +1759,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     if (i < 0 && m.solid.includes(key)) { setStatus('藤蔓要垂在走得到的格子（不能放紅格）', '#ff8f8f'); return; }
     if (i >= 0) vines.splice(i, 1); else { vines.push(key); if (m.vinesHang) { m.vinesHang = m.vinesHang.filter(k => k !== key); if (!m.vinesHang.length) delete m.vinesHang; } }   // 同一格只能有一種藤蔓
     if (vines.length) m.vines = vines; else delete m.vines;
+    if (i < 0) dropOtherVinesAt(m, key, 'toss');
     saveMaps(); draw();
     setStatus(i >= 0 ? '已拿掉這條藤蔓（剩 ' + vines.length + ' 條）' : '已放上第 ' + vines.length + ' 條藤蔓：從畫面上方垂到這一格，溫特碰到會被拉上去、過一陣子丟回附近地面', '#9fe07a');
     return;
@@ -2292,6 +2367,7 @@ const PALETTE_CATEGORIES = [
   { id: 'memory', name: '回憶場景' },
   { id: 'halloween', name: '萬聖節' },
   { id: 'forest', name: '森林' },
+  { id: 'forestblue', name: '森林（藍）' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -2336,6 +2412,7 @@ const isLampTile = t => /lamp|lantern|lightbox|(search|camping[ _-]|electric[_-]
 // 池核的素材不分進椅子、燈，一律留在「池核」
 const isPoolcoreTile = t => { const f = String(t.file || '').replace(/\\/g, '/').toLowerCase(); return String(t.id || '').startsWith('tile_poolcore_') || f.includes('/池核/') || f.includes('/poolcore/'); };
 function tileCategory(t) {
+  if (String(t.id || '').startsWith('tile_forestblue_') || String(t.file || '').includes('/森林藍/')) return 'forestblue';   // 森林（藍）：images/森林藍 整個資料夾
   if (String(t.id || '').startsWith('tile_forest_') || String(t.file || '').includes('/森林/')) return 'forest';   // 森林：整個資料夾都放這一類（不管檔名）
   if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
   if (isPlantTile(t)) return 'plant';
@@ -2591,13 +2668,35 @@ async function deleteTile(id) {
 // 工具按鈕
 function updateToolUI() {
   document.querySelectorAll('.tool').forEach(b => b.classList.toggle('sel', brush.mode === b.dataset.mode));
+  const solidBtn = document.querySelector('.tool[data-mode="solid"]');   // 🧱 按鈕上標出目前的大小（1×1 就不標）
+  if (solidBtn) solidBtn.textContent = solidBtn.textContent.replace(/^🧱[²³]?/u, '🧱' + ['', '', '²', '³'][solidSize]);   // 只換開頭的磚塊（劇情地圖編輯器的按鈕後面還有字）
   // 收在「⋯ 更多」裡的地圖機關工具：選到時按鈕上直接寫出目前是哪個工具（不用打開選單才知道）
   const more = document.querySelector('#mapbar .tool-more'), picked = more && more.querySelector('.tool.sel');
   if (more) { more.classList.toggle('has-sel', !!picked); more.querySelector('summary').textContent = picked ? '⋯ ' + picked.textContent.trim() : '⋯ 更多'; }
 }
 document.querySelectorAll('.tool').forEach(btn => {
-  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); });
+  btn.addEventListener('click', () => { pickedBrushPending = false; portalLinkFrom = null; ferryFrom = null; brush = { mode: btn.dataset.mode, tile: brush.tile }; if (brush.mode !== 'select') clearSelection(); updateToolUI(); renderPalette(); if (btn.dataset.mode === 'solid') openSolidSizeMenu(btn); });
 });
+// 🧱 不可穿透：按下去在按鈕下面跳出小選單，選筆刷大小 1×1／2×2／3×3（點選單外面或按 Esc 就關掉，大小照舊）
+function openSolidSizeMenu(btn) {
+  closeSolidSizeMenu();
+  const menu = document.createElement('div'); menu.className = 'solid-size-menu'; menu.id = 'solidSizeMenu';
+  [1, 2, 3].forEach(n => {
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'btn' + (n === solidSize ? ' sel' : '');
+    b.textContent = n + '×' + n;
+    b.addEventListener('click', () => {
+      solidSize = n; closeSolidSizeMenu(); updateToolUI(); draw();
+      setStatus('不可穿透筆刷：' + n + '×' + n + (n > 1 ? '（滑鼠那格是左上角；在紅格上按下去拖＝擦掉）' : ''), '#ff8f8f');
+    });
+    menu.appendChild(b);
+  });
+  const rc = btn.getBoundingClientRect();
+  menu.style.left = rc.left + 'px'; menu.style.top = (rc.bottom + 4) + 'px';
+  document.body.appendChild(menu);
+}
+function closeSolidSizeMenu() { const old = document.getElementById('solidSizeMenu'); if (old) old.remove(); }
+document.addEventListener('pointerdown', e => { if (!e.target.closest('#solidSizeMenu, .tool[data-mode="solid"]')) closeSolidSizeMenu(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeSolidSizeMenu(); });
 
 // Alt=臨時吸管、Ctrl=臨時選取；放開還原（吸到圖則保留新筆刷）
 function enterTemp(mode) {
@@ -3455,6 +3554,7 @@ function shiftMapContent(m, dc, dr) {
   if (m.fogTrees) m.fogTrees = m.fogTrees.map(shiftKey);
   if (m.vines) m.vines = m.vines.map(shiftKey);
   if (m.vinesHang) m.vinesHang = m.vinesHang.map(shiftKey);
+  if (m.vinesFerry) m.vinesFerry = m.vinesFerry.map(f => ({ ...f, at: shiftKey(f.at), to: shiftKey(f.to) }));
   if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
@@ -3487,6 +3587,7 @@ function dropOutsideContent(m) {
   if (m.fogTrees) { const n = m.fogTrees.length; m.fogTrees = m.fogTrees.filter(insideKey); removed += n - m.fogTrees.length; if (!m.fogTrees.length) delete m.fogTrees; }
   if (m.vines) { const n = m.vines.length; m.vines = m.vines.filter(insideKey); removed += n - m.vines.length; if (!m.vines.length) delete m.vines; }
   if (m.vinesHang) { const n = m.vinesHang.length; m.vinesHang = m.vinesHang.filter(insideKey); removed += n - m.vinesHang.length; if (!m.vinesHang.length) delete m.vinesHang; }
+  if (m.vinesFerry) { const n = m.vinesFerry.length; m.vinesFerry = m.vinesFerry.filter(f => insideKey(f.at) && insideKey(f.to)); removed += n - m.vinesFerry.length; if (!m.vinesFerry.length) delete m.vinesFerry; }
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;

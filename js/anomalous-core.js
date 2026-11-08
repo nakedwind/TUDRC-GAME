@@ -229,7 +229,7 @@ function coreGlowLights() {
   if (!G || !G.cores) return [];
   const now = performance.now() / 1000;
   return G.cores.filter(c => c.awake && !c.dead && !c.hidden).map(c => ({
-    x: c.x, y: c.y - 30, r: c.phase === 2 ? 190 : 150, life: 1, life0: 1,
+    x: c.x, y: c.y - 30 - (c.lqHangH || 0), r: c.phase === 2 ? 190 : 150, life: 1, life0: 1,   // lqHangH：被絲瓜女王的藤吊在半空中多高（js/loofah-queen.js），光跟著核心
     power: (c.phase === 2 ? .7 : .55) + .1 * Math.sin(now * (c.phase === 2 ? 5 : 2.5) + c.seed),
     color: c.phase === 2 ? [230, 110, 255] : [180, 110, 255],
   }));

@@ -295,6 +295,9 @@ details.collapsible[open] > .panel-body { margin-top: 8px; }
 /* 工具按鈕只留 emoji（名稱在滑鼠提示），工具列和選取列固定排同一排：選取列排不下就自己縮、在裡面左右捲 */
 #tools > .tool { padding: 6px 9px; font-size: 16px; line-height: 1.2; flex: 0 0 auto; }
 #tools #selControls { flex: 1 1 0; min-width: 320px; max-width: max-content; }   /* 從 0 起算寬度＝不會被擠到下一排；最多長到內容那麼寬，再多就在列裡左右捲 */
+/* 🧱 不可穿透：按下去跳出的筆刷大小選單（1×1／2×2／3×3） */
+.solid-size-menu { position: fixed; z-index: 50; display: flex; gap: 6px; padding: 6px; border: 1px solid #333c49; border-radius: 8px; background: #1d222b; box-shadow: 0 10px 30px rgba(0,0,0,.45); }
+.solid-size-menu .btn.sel { border-color: #ff8f8f; background: #4a2b2b; color: #fff; }
 
 /* ===== 上方固定工具列縮矮一點（固定在畫面最上面，太高會擋到編輯區）：只縮上下，左右不動 ===== */
 #topbar { padding-top: 6px; }

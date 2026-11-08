@@ -17,7 +17,7 @@
 
 // 目前地圖的霧設定（null＝沒有霧）：每幀直接看 MAP.fog，不用管換地圖、檔案載入順序
 function currentFogPreset() {
-  if (window.STORY_MODE || typeof FOG === 'undefined' || typeof MAP === 'undefined' || !MAP) return null;
+  if (window.STORY_MODE || window.TEST_MODE || typeof FOG === 'undefined' || typeof MAP === 'undefined' || !MAP) return null;   // TEST_MODE：開始畫面的 🧪 測試模式不起霧（方便測 BOSS）
   return (MAP.fog === 'light' || MAP.fog === 'heavy') ? FOG[MAP.fog] : null;
 }
 

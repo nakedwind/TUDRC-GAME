@@ -439,6 +439,8 @@ function seedMapObstacles() {
   for (const s of mapBases) seedBaseObstacle(s);
   seedOtherMapObstacles();
 }
+// 測試模式（開始畫面的 🧪 測試模式）：營地血量直接用這個，打不太壞，方便測 BOSS
+const TEST_MODE_BASE_HP = 99999;
 // 把一個營地擺上場（戰敗撤退時修回被打壞的營地也用這個，js/combat-progress.js）
 function seedBaseObstacle(s) {
     const t = mapTileById(s.id);
@@ -450,7 +452,7 @@ function seedBaseObstacle(s) {
     // 編輯器存的 s.baseSolid 已經是翻轉、旋轉後畫面上的格子（js/map-editor.js 的 baseSolidForStamp），不要再翻一次
     const solid = hasCustomSolid ? sourceSolid.map(cell => cell.slice())
       : mapStampCells(sourceSolid, baseW, baseH, mapStampTurn(s)).map(([dc, dr]) => [s.fx ? w - 1 - dc : dc, s.fy ? h - 1 - dr : dr]);
-    const hp = Math.max(1, Number(s.baseHp != null ? s.baseHp : t.baseHp) || 2000);
+    const hp = window.TEST_MODE ? TEST_MODE_BASE_HP : Math.max(1, Number(s.baseHp != null ? s.baseHp : t.baseHp) || 2000);
     const o = {
       kind: 'obstacle', isBase: true, mapTileId: t.id, baseStamp: s,
       c: baseC, r: baseR, w, h, solid, hp, maxhp: hp,
