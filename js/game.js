@@ -2723,7 +2723,7 @@ function lose(reason, cause) {
 ovBtn.addEventListener('click', () => { if (typeof onOverlayButton === 'function' && onOverlayButton()) return; begin(); });   // 打贏任務＝返回應變中心（js/missions.js）
 
 // ---- 地圖選單（有兩張以上地圖才顯示；在開始畫面切換要玩哪張）----
-const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2', 'map_mvtnqrs7', 'map_mvvdbiyx'];   // map_mvtnqrs7＝Y25區地下街、map_mvvdbiyx＝K56區地下街（順順宮主，js/elite-cap-king.js）；用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
+const MAP_PICK_IDS = ['y1', NEWBIE_START.mapId, 'map_mu5ad7t2', 'map_mvtnqrs7', 'map_mvvdbiyx', 'map_f307boss'];   // map_mvtnqrs7＝Y25區地下街、map_mvvdbiyx＝K56區地下街（順順宮主，js/elite-cap-king.js）、map_f307boss＝F307 BOSS 測試場（絲瓜女王、金蕉大王）；用固定 ID 篩選，編輯器改名稱不影響選單；清空＝全部地圖都能選。
 const mapPick = document.getElementById('mapPick');
 const mapPickRow = document.getElementById('mapPickRow');
 if (mapPick && mapPickRow && !PREVIEW && typeof MAPS_DEFAULT !== 'undefined' && MAPS_DEFAULT.length > 1) {
