@@ -1089,6 +1089,7 @@ function draw() {
   drawFlares(ctx);            // 地上燃燒的照明彈
   drawLandmines(ctx);          // 地雷（js/landmine.js）
   if (typeof drawFishEggs === 'function') drawFishEggs(ctx);   // 比基尼小丑魚的魚卵（js/clownfish.js）
+  if (typeof drawBananaEmperorGround === 'function') drawBananaEmperorGround(ctx);   // 金蕉大王敲地的發光裂縫（js/banana-emperor.js）
   if (typeof drawBananaPeels === 'function') drawBananaPeels(ctx);   // 金蕉王拋出的香蕉皮（js/golden-banana-king.js）
   drawOreShards(ctx);          // 炸開礦物後掉在地上的異質碎片（js/ore.js）
   if (typeof drawFogV2Leaves === 'function') drawFogV2Leaves(ctx, 'ground');   // 起霧 V2：落到地上的葉子（畫在人物下面，js/fog-fx-v2.js）
@@ -1573,7 +1574,7 @@ function drawWorldEffects() {
     } else if (f.fglow) {                                  // 火焰爆閃光暈（加色疊加）
       const p = Math.max(0, f.life / f.life0), r = f.r0 + (f.r1 - f.r0) * (1 - p);
       const g = ctx.createRadialGradient(f.x, f.y, 0, f.x, f.y, r);
-      const pal = f.green ? [[220, 255, 200], [90, 230, 110], [10, 90, 30]] : [[255, 240, 190], [255, 150, 40], [120, 20, 0]];   // green：金蕉王補血的綠色光暈（js/golden-banana-king.js）
+      const pal = f.pal || (f.green ? [[220, 255, 200], [90, 230, 110], [10, 90, 30]] : [[255, 240, 190], [255, 150, 40], [120, 20, 0]]);   // green：金蕉王補血的綠色光暈（js/golden-banana-king.js）；pal：自己指定三段顏色（金蕉大王各種施法，js/banana-emperor.js）
       const fade = (f.grow ? Math.min(1, (1 - p) * 4) * p * 1.6 : p) * (f.strength ?? 1);   // grow：先亮起來再淡出（不是一出現就最亮）；strength：亮度倍率
       g.addColorStop(0, `rgba(${pal[0]},${(0.9 * fade).toFixed(3)})`);
       g.addColorStop(0.4, `rgba(${pal[1]},${(0.6 * fade).toFixed(3)})`);
