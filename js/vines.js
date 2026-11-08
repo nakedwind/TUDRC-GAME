@@ -10,6 +10,8 @@
    ・藤蔓怕火：被火海（燃燒彈、油桶）燒到就縮回去，VINES.fireRegrow 秒後才重新垂下來；
      正在纏人、倒吊隊友的藤蔓被燒到會放開（倒吊的隊友會掉下來）
    ・藤蔓尖端正下方的地上有影子，看得出藤蔓垂在哪裡
+   ・傳送藤蔓（地圖編輯器「🌿➡ 傳送藤蔓」，MAP.vinesFerry）：抓到人丟到編輯器設的落點（走不過去的地方靠它過去）；
+     溫特被抓時，跟在身邊的隊友也各被一條藤蔓捲走、一個接一個丟到落點旁邊。摔下來扣 VINES.ferryFallDamage（預設 0）
    藤蔓圖：images/森林/vine.png（VINE_IMG）；被抓時身上的纏繞用絲瓜小姐的 drawWrap（js/loofah-lady.js）
    必須在 js/render.js、js/enemy-ai.js、js/combat-feel.js、js/loofah-lady.js 之後載入、js/grab.js 之前載入（會包住 drawPlayer、drawTower、enemyAttackPlayer、hurtGraceBlocked）。
 */
@@ -56,6 +58,9 @@ const VINES = {
   retractTime: .6,   // 縮回去要幾秒
   // 地上的影子（藤蔓尖端正下方）
   shadowW: 16, shadowH: 6, shadowAlpha: .32,
+  // 傳送藤蔓（地圖編輯器「🌿➡ 傳送藤蔓」）：抓到人丟到指定的落點（過不去的地方靠它過去）
+  ferryFallDamage: 0,   // 被丟過去摔下來扣多少 HP（這是必經的路，預設不扣血；照樣躺著暈一下）
+  ferryMateGap: .4,     // 跟著溫特一起被捲過去的隊友：一個接一個掉下來，每人間隔幾秒
 };
 
 // ---- 開場：照地圖上的 MAP.vines ['欄,列'…] 擺藤蔓 ----
@@ -73,6 +78,13 @@ function seedVines() {
       const [x, cy] = center(c, r);
       G.vines.push({ c, r, x, y: cy + 6, kind, state: 'hang', t: 0, len: 1, seed: Math.random() * 10, twitch: 0 });
     }
+  }
+  // MAP.vinesFerry＝傳送藤蔓 [{ at: '欄,列', to: '欄,列' }]：抓到人丟到 to 那一格
+  for (const f of Array.isArray(MAP.vinesFerry) ? MAP.vinesFerry : []) {
+    const [c, r] = String(f.at || '').split(',').map(Number), to = String(f.to || '').split(',').map(Number);
+    if (!inGrid(c, r) || !inGrid(to[0], to[1])) continue;
+    const [x, cy] = center(c, r);
+    G.vines.push({ c, r, x, y: cy + 6, kind: 'ferry', to, state: 'hang', t: 0, len: 1, seed: Math.random() * 10, twitch: 0 });
   }
 }
 
@@ -141,9 +153,9 @@ function stepVineCap(cap, a, dt) {
     const k = Math.min(1, cap.t / VINES.liftTime);
     cap.topH = Math.max(cap.topH, (a.y - cam.y) + 110);   // 鏡頭跟著溫特動：隊友要拉到「現在」的畫面上緣外面
     cap.h = cap.topH * k * k * (1.4 - .4 * k);   // 一開始慢、越拉越快
-    if (k >= 1) { cap.phase = 'away'; cap.t = 0; cap.v.state = 'gone'; cap.v.t = VINES.regrowTime; pickVineDrop(cap); }
+    if (k >= 1) { cap.phase = 'away'; cap.t = 0; cap.v.state = 'gone'; cap.v.t = VINES.regrowTime; if (cap.mode === 'ferry') pickFerryDrop(cap); else pickVineDrop(cap); }
   } else if (cap.phase === 'away') {
-    if (cap.t >= (cap.isPlayer ? VINES.awayTime : VINES.mateAwayTime)) {
+    if (cap.t >= (cap.awayT ?? (cap.isPlayer ? VINES.awayTime : VINES.mateAwayTime))) {
       cap.phase = 'fall'; cap.t = 0; cap.fallV = 0;
       a.x = cap.dropX; a.y = cap.dropY;
       cap.h = Math.max(160, (a.y - cam.y) + 90);   // 從畫面上緣外面掉下來
@@ -169,12 +181,27 @@ function vineGrab(v, a, isPlayer) {
   if (isPlayer && a.sitting && typeof standUp === 'function') standUp();
   if (!isPlayer && typeof assigning !== 'undefined' && assigning === a) assigning = null;
   v.state = 'grab';
-  G.vineCaps.push({ v, actor: a, isPlayer, mode: v.kind === 'hang' && !isPlayer ? 'hang' : 'toss', phase: 'wrap', t: 0, h: 0, x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y,
-    topH: (a.y - cam.y) + 110 });   // 拉到畫面上緣外面
+  const mode = v.kind === 'ferry' ? 'ferry' : v.kind === 'hang' && !isPlayer ? 'hang' : 'toss';
+  const cap = { v, actor: a, isPlayer, mode, phase: 'wrap', t: 0, h: 0, x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y,
+    topH: (a.y - cam.y) + 110 };   // 拉到畫面上緣外面
+  if (mode === 'ferry') { cap.to = v.to; cap.awayT = VINES.awayTime; }
+  G.vineCaps.push(cap);
   a.vineCap = true; a.dashT = 0;
   if (isPlayer) { flash('被藤蔓抓住了！', a.x, a.y - 56, '#9fe07a', .9); addShake(3); }
   else if (!(typeof mateHurtSay === 'function' && mateHurtSay(a, 'vineGrab'))) sentryStatus(a, '被藤蔓抓住了！', '#9fe07a', true);   // 對話編輯器「被森林藤蔓抓走」；沒填台詞就照舊跳狀態字
   sfxAt('vineGrab', a.x, a.y, .8);
+  if (mode === 'ferry' && isPlayer) ferryFollowers(v, a);
+}
+// 傳送藤蔓抓到溫特：跟在身邊的隊友（護衛中、或離溫特 WARP_FOLLOW_CELLS 格內）也各被一條藤蔓捲走，一起丟到對面（不然隊友會卡在這一邊）
+function ferryFollowers(v, p) {
+  const near = typeof WARP_FOLLOW_CELLS !== 'undefined' ? WARP_FOLLOW_CELLS : 4;
+  const mates = (G.towers || []).filter(t => vineCanGrab(t, false) && (t.mode === 'escort' || Math.hypot(t.x - p.x, t.y - p.y) <= near * CELL));
+  mates.forEach((t, i) => {
+    const own = { x: t.x, y: t.y, kind: 'ferry', to: v.to, state: 'grab', t: 0, len: 1, seed: Math.random() * 10, twitch: 0, temp: true };   // 每人一條（不放進 G.vines：用完就不見）
+    vineGrab(own, t, false);
+    const cap = G.vineCaps[G.vineCaps.length - 1];
+    if (cap && cap.actor === t) cap.awayT = VINES.awayTime + VINES.ferryMateGap * (i + 1);   // 溫特先落地，隊友一個接一個掉下來
+  });
 }
 
 // ---- 怕火：火海碰到藤蔓尖端（或倒吊的隊友正下方）就縮回去 ----
@@ -256,6 +283,23 @@ function pickVineDrop(cap) {
   }
   cap.dropX = cap.x0; cap.dropY = cap.y0;   // 找不到：丟回原地
 }
+// 傳送藤蔓的落點：編輯器設的那一格；已經有人要掉在那裡就往外一圈一圈找空的、走得到的格子（一人一格）
+function pickFerryDrop(cap) {
+  const blocked = cap.isPlayer ? playerBlocked : (typeof sentryBlocked === 'function' ? sentryBlocked : playerBlocked);
+  const [tc, tr] = cap.to;
+  const taken = G.vineCaps.filter(c => c !== cap && c.mode === 'ferry' && c.dropX != null).map(c => cellAt(c.dropX, c.dropY).join(','));
+  for (let radius = 0; radius <= 4; radius++) {
+    for (let dr = -radius; dr <= radius; dr++) for (let dc = -radius; dc <= radius; dc++) {
+      if (Math.max(Math.abs(dc), Math.abs(dr)) !== radius) continue;
+      const c = tc + dc, r = tr + dr;
+      if (!inGrid(c, r) || taken.includes(c + ',' + r)) continue;
+      const [x, y] = center(c, r);
+      if (blocked(x, y)) continue;
+      cap.dropX = x; cap.dropY = y; return;
+    }
+  }
+  const [x, y] = center(tc, tr); cap.dropX = x; cap.dropY = y;   // 都滿了：照樣丟在落點
+}
 
 // 溫特摔到地上：播共通的「溫特受傷」音效（js/game.js 的 playPlayerHit；音效編輯器的「溫特受傷」）
 function vineHitSound(cap) {
@@ -266,7 +310,7 @@ function vineLand(a, cap) {
   G.vineCaps = G.vineCaps.filter(c => c !== cap); a.vineCap = false;
   a.vineDazeT = VINES.dazeTime;
   a.vineSafeT = VINES.safeTime;   // 剛摔下來：一陣子不會又被抓
-  const dmg = Math.min(VINES.fallDamage, Math.max(0, a.hp - 1));
+  const dmg = Math.min(cap.mode === 'ferry' ? VINES.ferryFallDamage : VINES.fallDamage, Math.max(0, a.hp - 1));
   if (dmg > 0 && !(typeof practiceOn === 'function' && practiceOn())) {
     a.hp -= dmg;   // 不閃紅
     flashDmg('-' + dmg, a.x, a.y - 46, '#ff6b6b');
