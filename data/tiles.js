@@ -6574,5 +6574,22 @@ const SHARED_TILES = [
     "file": "images/森林藍/Back-room-wall06_blue.png",
     "w": 2,
     "h": 4
+  },
+  {
+    "id": "tile_mw7ooxaw",
+    "name": "moonlake",
+    "role": "floor",
+    "file": "images/森林/moonlake.png",
+    "w": 24,
+    "h": 38,
+    "flat": true
+  },
+  {
+    "id": "tile_mw7p831v",
+    "name": "Back-room-wall-blue",
+    "role": "floor",
+    "file": "images/森林藍/Back-room-wall-blue.png",
+    "w": 1,
+    "h": 1
   }
 ];
