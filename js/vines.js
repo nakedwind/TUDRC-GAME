@@ -505,7 +505,7 @@ function drawVineActor(a, baseDraw, overlay = false) {
     ang = Math.PI + (target - Math.PI) * lieK;
     near = cap.cut ? 0 : q * .9;   // 從半空中掉下來的不用往鏡頭靠近
   }
-  if (cap.ground && cap.phase !== 'fall') ang = Math.sin(now * 2.2 + a.x * .01) * .08 + (cap.kick || 0) * .2;   // 從地面撐起來的（絲瓜女王，js/loofah-queen.js）：頭上腳下、微微晃
+  if (cap.ground && cap.phase !== 'fall') ang = cap.phase === 'thrown' ? cap.spin || 0 : Math.sin(now * 2.2 + a.x * .01) * .08 + (cap.kick || 0) * .2;   // 從地面撐起來的（絲瓜女王，js/loofah-queen.js）：頭上腳下、微微晃；被甩出去：在空中翻滾
   const flipK = cap.phase === 'fall' ? 1 : Math.min(1, ang / Math.PI);
   const { s, alpha } = vineNear(near);
   const air = (cap.phase === 'lift' && !hangMode) || (cap.phase === 'fall' && h > 50 && !cap.cut);   // 快落地、彈跳時畫回一般那層（跟躺在地上的樣子接得起來）
@@ -534,7 +534,7 @@ function drawVineActor(a, baseDraw, overlay = false) {
   const shadow = typeof drawCharacterShadow === 'function' ? drawCharacterShadow : null;
   if (shadow) drawCharacterShadow = () => {};   // 影子另外畫在地上
   try { baseDraw(a); } finally { if (shadow) drawCharacterShadow = shadow; }
-  if (cap.phase !== 'fall' && !cap.wind && typeof drawWrap === 'function') {   // 身上的纏繞跟著人一起翻、一起放大
+  if (cap.phase !== 'fall' && cap.phase !== 'thrown' && !cap.wind && typeof drawWrap === 'function') {   // 身上的纏繞跟著人一起翻、一起放大
     const grow = cap.phase === 'wrap' ? Math.min(1, cap.t / (VINES.wrapTime * .8)) : 1;
     cap.wrapSeed = cap.wrapSeed || (1 + Math.random() * 6);
     const C = typeof TENDRIL_COL !== 'undefined' ? TENDRIL_COL : null, keep = C && { ...C };

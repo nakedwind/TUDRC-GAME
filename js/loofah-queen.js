@@ -38,6 +38,12 @@ const LOOFAH_QUEEN = {
       warn: .9,                  // 地面先冒土、震動幾秒才鑽出來（這段時間走開就躲得掉）
       grabR: 32,                 // 鑽出來時離多近的人會被抓（像素）
       hold: 4,                   // 抓在半空中最久幾秒（隊友可以被溫特開槍打斷藤蔓救下來；火燒也會放開）
+      throwChance: .5,           // 幾成的藤蔓不是抓著，而是把人往最近的牆丟過去
+      throwAfter: .35,           // 往上拉幾秒後甩出去
+      throwRange: 8,             // 往幾格內最近的牆丟（範圍內沒有牆：就丟往隨便一個方向，落地而已）
+      throwSpeed: 430,           // 飛出去的速度（像素／秒）
+      throwUp: 160,              // 飛出去時往上的速度（拋物線；像素／秒）
+      wallDamage: 15,            // 撞到牆扣多少 HP（不會撞到倒下，最少留 1）；之後跟被丟下來一樣躺著暈
     },
   },
   core: {
@@ -306,9 +312,12 @@ function lqUpdateGroundVines(dt) {
     }
     G.lqGround = G.lqGround.filter(g => g.t > 0);
   }
-  // 被抓在半空中的人：時間到、或被火燒到就放下來
+  // 被丟出去的人：飛向牆，撞到就摔下來
+  for (const cap of G.vineCaps || []) if (cap.ground && cap.phase === 'thrown') lqThrowStep(cap, dt);
+  // 被抓在半空中的人：時間到、或被火燒到就放下來；要丟的那一半：拉起來一下就甩出去
   for (const cap of G.vineCaps || []) {
     if (!cap.ground || (cap.phase !== 'hang' && cap.phase !== 'wrap' && cap.phase !== 'lift')) continue;
+    if (cap.throwWall && cap.phase === 'lift' && cap.t >= V.throwAfter) { lqThrowStart(cap); continue; }
     const a = cap.actor, burnt = typeof anyFireAt === 'function' && anyFireAt(a.x, a.y + 10, 30);
     if (cap.phase === 'hang') cap.holdT -= dt;
     if (burnt) for (let i = 0; i < 3; i++) spawnFlameBurst(a.x + (Math.random() - .5) * 12, a.y - Math.random() * cap.h, .55);
@@ -338,7 +347,8 @@ function lqGroundGrab(a, isPlayer, g) {
   if (isPlayer && typeof cancelChannel === 'function' && typeof playerChannel !== 'undefined' && playerChannel) cancelChannel();
   if (isPlayer && a.sitting && typeof standUp === 'function') standUp();
   const v = { x: a.x, y: a.y, kind: 'hang', state: 'grab', t: 0, len: 1, seed: Math.random() * 10, twitch: 0, temp: true };   // 假的藤蔓（不放進 G.vines）
-  G.vineCaps.push({ v, actor: a, isPlayer, mode: 'hang', ground: true, holdT: LOOFAH_QUEEN.vines.ground.hold, phase: 'wrap', t: 0, h: 0,
+  const V = LOOFAH_QUEEN.vines.ground;
+  G.vineCaps.push({ v, actor: a, isPlayer, mode: 'hang', ground: true, holdT: V.hold, phase: 'wrap', t: 0, h: 0, throwWall: Math.random() < V.throwChance,
     x0: a.x, y0: a.y, hp: a.hp, camX: cam.x, camY: cam.y, topH: (a.y - cam.y) + 110, seed: Math.random() * 10 });
   a.vineCap = true; a.dashT = 0; a.knockT = 0; a.rootT = 0;
   if (!isPlayer) { a.navPath = null; a.navGoal = null; a.meleeSwing = null; a.gunSwing = null; }
@@ -346,8 +356,54 @@ function lqGroundGrab(a, isPlayer, g) {
   if (isPlayer) addShake(3);
   if (typeof sfxAt === 'function') sfxAt('vineGrab', a.x, a.y, .8);
 }
+// 把人往最近的牆丟：16 個方向一格一格往外找，找到最近的牆就往那邊飛
+function lqThrowStart(cap) {
+  const V = LOOFAH_QUEEN.vines.ground, a = cap.actor;
+  const blocked = cap.isPlayer ? playerBlocked : (typeof sentryBlocked === 'function' ? sentryBlocked : playerBlocked);
+  let best = null, bestD = Infinity;
+  for (let i = 0; i < 16; i++) {
+    const ang = i / 16 * Math.PI * 2, dx = Math.cos(ang), dy = Math.sin(ang);
+    for (let d = 10; d <= V.throwRange * CELL; d += 10) {
+      if (blocked(a.x + dx * d, a.y + dy * d)) { if (d < bestD) { bestD = d; best = ang; } break; }
+    }
+  }
+  const ang = best ?? Math.random() * Math.PI * 2;
+  cap.phase = 'thrown'; cap.t = 0; cap.tx = Math.cos(ang); cap.ty = Math.sin(ang); cap.vh = V.throwUp; cap.spin = 0;
+  cap.spinDir = cap.tx >= 0 ? 1 : -1; cap.lieSide = cap.spinDir;
+  G.effects.push({ ring: true, x: a.x, y: a.y - cap.h, r: 6, r2: 34, life: .3, life0: .3, color: '#9fe07a' });
+  if (typeof sfxAt === 'function') sfxAt('swordSwing', a.x, a.y, .5, 'loofah-queen-throw');
+  flash('被甩出去了！', a.x, a.y - 56 - cap.h, '#9fe07a', .8);
+}
+function lqThrowStep(cap, dt) {
+  const V = LOOFAH_QUEEN.vines.ground, a = cap.actor;
+  const blocked = cap.isPlayer ? playerBlocked : (typeof sentryBlocked === 'function' ? sentryBlocked : playerBlocked);
+  cap.t += dt; cap.vh -= 900 * dt; cap.h = Math.max(0, cap.h + cap.vh * dt);
+  cap.spin += cap.spinDir * 9 * dt;   // 在空中翻滾
+  const step = V.throwSpeed * dt, nx = cap.x0 + cap.tx * step, ny = cap.y0 + cap.ty * step;
+  if (blocked(nx, ny)) {   // 撞牆！
+    const dmg = Math.min(V.wallDamage, Math.max(0, a.hp - 1));
+    if (dmg > 0 && !(typeof practiceOn === 'function' && practiceOn())) { a.hp -= dmg; cap.hp = a.hp; flashDmg('-' + dmg, a.x, a.y - 46, '#ff6b6b'); }
+    flash('撞到牆了！', a.x, a.y - 60, '#ffd27a', .8);
+    G.effects.push({ ring: true, x: nx, y: ny - cap.h, r: 4, r2: 30, life: .3, life0: .3, color: '#e8dcc0' });
+    for (let i = 0; i < 8; i++) G.effects.push({ particle: true, x: nx, y: ny - cap.h - 10, vx: -cap.tx * (40 + Math.random() * 80) + (Math.random() - .5) * 60, vy: -30 - Math.random() * 60, r: 1.5 + Math.random() * 1.5, life: .45, life0: .45, color: '#b9a27a' });
+    if (typeof nearbyImpact === 'function') nearbyImpact(a.x, a.y, cap.isPlayer ? 8 : 5, .08); else addShake(5);
+    if (typeof sfxAt === 'function') sfxAt('knock2', a.x, a.y, .9, 'loofah-queen-wall');
+    lqThrowLand(cap, true);
+    return;
+  }
+  cap.x0 = nx; cap.y0 = ny;   // js/vines.js 的 stepVineCap 會把人放到 x0, y0
+  if (cap.h <= 0 && cap.vh < 0) lqThrowLand(cap, false);   // 沒撞到牆：落地
+}
+// 撞牆或落地：交給 js/vines.js 的「掉下來」那一段（彈兩下、躺著暈）
+function lqThrowLand(cap, wall) {
+  const a = cap.actor;
+  a.x = cap.x0; a.y = cap.y0;
+  cap.phase = 'fall'; cap.t = 0; cap.fallV = wall ? 60 : Math.max(0, -cap.vh); cap.cut = true;
+  cap.h = Math.max(1, cap.h); cap.fallH0 = Math.max(1, cap.h);
+}
 // 畫從地面撐起來的藤（js/vines.js 的 drawVineActor 呼叫）：從腳下的地面長上來，接到腰上；兩三根粗細不一的藤交纏
 function lqDrawGroundStalk(ctx, cap, a, ax, ay) {
+  if (cap.phase === 'thrown') return;   // 已經被甩出去：沒有藤
   const gx = a.x, gy = a.y + 14, h = gy - ay;
   if (h < 4 || typeof vineStroke !== 'function') return;
   const seed = cap.seed || 1, now = performance.now() / 1000;
