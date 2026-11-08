@@ -1829,9 +1829,10 @@ const GUIDE_GUN = { mag: 6, reloadTime: 2 };
 const LEADER_GUN = { aggro: 0.8 };
 function playerGun() {
   const s = PLAYER_CHARACTER !== 'winter' && TYPES[PLAYER_CHARACTER];
-  if (!s) return PLAYER_ATK;
+  const weak = typeof bananaDebuffAtk === 'function' ? bananaDebuffAtk(G && G.player) : 1;   // 金蕉大王紅色魔法陣：攻擊下降（js/banana-emperor.js）
+  if (!s) return weak === 1 ? PLAYER_ATK : { ...PLAYER_ATK, dmg: PLAYER_ATK.dmg * weak };
   const p = G && G.player, buff = k => (p && typeof sortieBuff === 'function' ? sortieBuff(p, k) : 0);
-  return { ...PLAYER_ATK, dmg: s.dmg * (1 + buff('atk')), range: s.range, rate: s.rate * (1 + buff('spd')), aggro: LEADER_GUN.aggro, mag: GUIDE_GUN.mag, reloadTime: GUIDE_GUN.reloadTime, double: 0 };
+  return { ...PLAYER_ATK, dmg: s.dmg * (1 + buff('atk')) * weak, range: s.range, rate: s.rate * (1 + buff('spd')), aggro: LEADER_GUN.aggro, mag: GUIDE_GUN.mag, reloadTime: GUIDE_GUN.reloadTime, double: 0 };
 }
 let aimHeld = false, aimClient = null;
 // 快速連點：按下到放開比一幀還短（或剛好在射速冷卻中）時，這一下也要開得到槍 → 先記下來，SHOT_QUEUE 秒內冷卻好了就補開

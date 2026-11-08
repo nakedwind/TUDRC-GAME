@@ -952,7 +952,7 @@ function updateWanderer(npc, dt) {
 const sentryMenu = document.getElementById('sentryMenu');
 // 怪力加成：汙染值越高攻擊力越高。rageDmg＝汙染 100 時「額外」增加的倍率（1 → 2 倍、0.5 → 1.5 倍）
 function sentryDamageMul(t) {
-  const spec = TYPES[t.type], food = 1 + sortieBuff(t, 'atk');   // 出勤補給＋嚮導技能的攻擊加成
+  const spec = TYPES[t.type], food = (1 + sortieBuff(t, 'atk')) * (typeof bananaDebuffAtk === 'function' ? bananaDebuffAtk(t) : 1);   // 出勤補給＋嚮導技能的攻擊加成；金蕉大王紅色魔法陣的攻擊下降（js/banana-emperor.js）
   if (!spec || !spec.rageDmg) return food;
   return food * (1 + spec.rageDmg * Math.max(0, Math.min(100, t.taint || 0)) / 100);
 }

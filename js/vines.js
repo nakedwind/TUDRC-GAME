@@ -161,7 +161,7 @@ function stepVineCap(cap, a, dt) {
       cap.h = Math.max(160, (a.y - cam.y) + 90);   // 從畫面上緣外面掉下來
       cap.fallH0 = cap.h;
       cap.lieSide = Math.random() < .5 ? -1 : 1;   // 掉下來時翻成躺的姿勢：往左或往右躺
-      if (cap.isPlayer) flash('被丟下來了！', a.x, a.y - 60, '#c6f08a', .8);
+      if (cap.isPlayer) flash(cap.wind ? '掉下來了！' : '被丟下來了！', a.x, a.y - 60, cap.wind ? '#eaf4ff' : '#c6f08a', .8);
     }
   } else if (cap.phase === 'fall') {
     cap.fallV += VINES.gravity * dt; cap.h -= cap.fallV * dt;
@@ -525,12 +525,12 @@ function drawVineActor(a, baseDraw, overlay = false) {
   const ax = px - Math.sin(ang) * off * s, ay = py + Math.cos(ang) * off * s;
   ctx.save();
   ctx.globalAlpha *= alpha;
-  if (cap.phase !== 'fall') drawVineStem(ctx, cap.v, ax, ay, now, true, s);   // 藤蔓從畫面上緣垂下來，接到身上（先畫，在人後面）
+  if (cap.phase !== 'fall' && !cap.wind) drawVineStem(ctx, cap.v, ax, ay, now, true, s);   // wind：被金蕉大王的狂風吹上天（js/banana-emperor.js），沒有藤蔓   // 藤蔓從畫面上緣垂下來，接到身上（先畫，在人後面）
   ctx.translate(px, py); ctx.rotate(ang); ctx.scale(s, s); ctx.translate(-a.x, -(a.y - VINE_BODY.pivot));
   const shadow = typeof drawCharacterShadow === 'function' ? drawCharacterShadow : null;
   if (shadow) drawCharacterShadow = () => {};   // 影子另外畫在地上
   try { baseDraw(a); } finally { if (shadow) drawCharacterShadow = shadow; }
-  if (cap.phase !== 'fall' && typeof drawWrap === 'function') {   // 身上的纏繞跟著人一起翻、一起放大
+  if (cap.phase !== 'fall' && !cap.wind && typeof drawWrap === 'function') {   // 身上的纏繞跟著人一起翻、一起放大
     const grow = cap.phase === 'wrap' ? Math.min(1, cap.t / (VINES.wrapTime * .8)) : 1;
     cap.wrapSeed = cap.wrapSeed || (1 + Math.random() * 6);
     const C = typeof TENDRIL_COL !== 'undefined' ? TENDRIL_COL : null, keep = C && { ...C };

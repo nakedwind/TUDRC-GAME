@@ -186,6 +186,7 @@ function stepHealerEnemy(e, dt) {
     }
     return;
   }
+  if (e.beOwner) { bk.flee = null; bkWander(e, dt); return; }   // 金蕉大王隊伍裡的金蕉王：只負責補血，不逃跑、不丟香蕉皮（js/banana-emperor.js）
   const threats = bkThreats(e);
   if (threats.length) bk.threats = threats;
   // 核心醒著：跟著回去守核心（隊員會跟著他走）；我方貼得很近才先逃
