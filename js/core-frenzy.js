@@ -99,6 +99,8 @@ function drawCoreBossUI(ctx, cv) {
   if (capBars.length) rows.push(capBars);
   const pearlBars = typeof pearlBossBars === 'function' ? pearlBossBars() : [];
   if (pearlBars.length) rows.push(pearlBars);
+  const queenBars = typeof loofahQueenBars === 'function' ? loofahQueenBars() : [];   // 絲瓜女王和吊著的核心（js/loofah-queen.js）
+  if (queenBars.length) rows.push(queenBars);
   rows.slice(0, 3).forEach((row, j) => {
     const i = Math.min(3, awake.length) + j;
     const W = Math.min(520, cv.width * .45), gap = 14, h = 14, y = 58 + i * 40;

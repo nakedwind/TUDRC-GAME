@@ -132,7 +132,10 @@ function updateLoofahVines(dt) {
     const C = LOOFAH;
     for (const v of G.loofahVines) {
       v.t += dt;
-      if (v.state === 'dig') {
+      if (v.farm) {   // 絲瓜女王農田上的藤蔓（js/loofah-queen.js）：一直長在那裡，碰到就纏；被火燒掉才縮回去
+        if (v.state === 'grab') { if (typeof lqFarmVineStep === 'function') lqFarmVineStep(v, dt); }
+        else if (v.state === 'retract') { v.rt += dt; if (v.rt > .35) v.done = true; }
+      } else if (v.state === 'dig') {
         // 追目標：朝目標現在的腳下慢慢轉彎（轉彎速度有上限，跑得快還是閃得掉）；鑽到腳下就冒出來
         const tg = v.target;
         if (tg && tg.hp > 0 && !(tg.rootT > 0)) {
@@ -305,7 +308,7 @@ function loofahBreakFree(p) {
   p.rootT = 0;
   // 纏住他的藤蔓：不再停留抓人；藤蔓上沒有別人被纏著就馬上縮回地底（不會留在身上）
   for (const v of G.loofahVines || []) {
-    if (v.state !== 'grab' || !v.caught.includes(p)) continue;
+    if (v.state !== 'grab' || !v.caught.includes(p) || v.farm) continue;   // 農田的藤蔓（js/loofah-queen.js）掙脫後照樣長在那裡
     v.lingerT = 0;
     if (!v.caught.some(a => a !== p && a.rootT > 0 && a.hp > 0)) { v.state = 'retract'; v.rt = 0; }
   }

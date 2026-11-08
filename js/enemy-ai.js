@@ -513,6 +513,7 @@ function stepEnemy(e, dt) {
   if (e.playerPounceT > 0 && e.playerPounceGoal) { updateSlimePounce(e, dt); return; }
   if (e.squadLeader && typeof stepSquadLeash === 'function' && stepSquadLeash(e, dt)) return;   // 金蕉王的隊員：離隊長太遠就走回去（js/golden-banana-king.js）
   if (e.elite) { stepEliteBird(e, dt); return; }   // 菁英鳥頭人：守在核心旁、自己管走回原位（js/elite-bird-head.js）
+  if (e.loofahQueen) { stepLoofahQueen(e, dt); return; }   // 絲瓜女王：踏地垂下藤蔓、不離開農田房（js/loofah-queen.js）
   if (e.pearlBoss) { stepPearlBoss(e, dt); return; }   // 珍珠大童：抱著核心閒晃、閉殼降珍珠，自己管回原位（js/pearl-elder.js）
   if (e.guardPose && stepEliteGuardPose(e, dt)) return;   // 大隊長身邊的手下：背對玩家站崗，大隊長大叫才轉身
   // 核心醒著：狂暴的異質體離核心太遠就衝回去守著（js/core-frenzy.js）；溫特貼在旁邊時照樣先打溫特

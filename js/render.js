@@ -1071,6 +1071,7 @@ function draw() {
   for (const e of G.enemies) if (enemyVisible(e) && e.behavior !== 'moth') sortables.push({ y: e.y + 13, draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
+  if (typeof loofahQueenSortables === 'function') loofahQueenSortables(sortables);   // 絲瓜女王頭上吊著的核心（js/loofah-queen.js）
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
   if (typeof mrtTrainSortables === 'function') mrtTrainSortables(sortables);   // 捷運列車（js/mrt-train.js）
   if (typeof streetVehicleSortables === 'function') streetVehicleSortables(sortables);   // K56 的機車、腳踏車（js/street-vehicles.js）

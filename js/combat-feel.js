@@ -273,6 +273,7 @@ function onEnemyDeath(e) {
   if (e.behavior === 'charger') { pushFallCorpse(e); return; }   // 鳥頭人：倒下變黑（js/bird-head.js），不爆黏液（腎上腺素改成只在後室商店、置物櫃、地上的拾取亮點拿得到）
   if (e.behavior === 'moth' && typeof mothDeathBurst === 'function') { mothDeathBurst(e); return; }   // 人面蝶：炸出一大團鱗粉，從空中掉下來化成灰（js/human-face-butterfly.js）
   if (e.pearlBoss && typeof pearlBossDown === 'function') pearlBossDown(e);   // 珍珠大童：核心掉在原地、大珍珠碎掉（js/pearl-elder.js）
+  if (e.loofahQueen && typeof loofahQueenDown === 'function') loofahQueenDown(e);   // 絲瓜女王：核心留在半空中，要用火燒斷藤蔓（js/loofah-queen.js）
   if (e.behavior === 'shooter') { pushDropCorpse(e); return; }   // 珍珠小童
   if (e.behavior === 'gourd') { gourdDeathCorpse(e); return; }   // 葫蘆猴：不倒下，原地閉眼變黑、碎成灰燼飄散（跟珍珠小童一樣；js/gourd-monkey.js）   // 珍珠小童：掉到地上、珍珠滾出來（js/pearl-kid.js）
   if (e.behavior === 'fishhead' && typeof fishDeathPuddle === 'function') fishDeathPuddle(e);   // 魚頭君：死掉留下一大攤水（js/fish-head.js）
