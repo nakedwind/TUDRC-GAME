@@ -4,6 +4,7 @@
    ・一次能搬幾張＝(空暫存格＋1) × 2^空排數（搬到空排時，那一排不算）
    ・操作：拖曳，或點一下選牌再點目的地；點兩下＝收進回收區，收不了就放暫存格；拖曳放不下去時，牌桌下方用紅字說原因
    ・沒有任何一步可以走＝輸了：牌局結束（計時停止、不能再動牌），跳出提示，可以復原、重玩或開新牌局
+   ・一種花色收到 K、破關時有慶祝特效（js/pc-desktop.js 的 pcCelebrate）和音效（pcCardRun、pcCardWin）
    ・已經用不到的牌會自動收走（A、2 一定收；其他要等兩種相反顏色都收到前一張）；全部排好後自動收完
    ・牌局編號跟 Windows 的新接龍同一套發牌方式（1～32000，只有 11982 無解，所以不會抽到）
 */
@@ -101,6 +102,7 @@ function pcfMove(g, slot, i, to, exact) {
     if (exact && n !== run.length) n = 0;
   }
   if (!n) return false;
+  const homeBefore = g.home.slice();   // 搬之前回收區的樣子（用來判斷這一步有沒有讓某個花色收齊）
   g.hist.push(JSON.stringify({ cols: g.cols, free: g.free, home: g.home }));
   const cards = pcfTake(g, slot, n);
   if (to[0] === 'h') g.home[pcfSuit(cards[0])]++;
@@ -109,8 +111,10 @@ function pcfMove(g, slot, i, to, exact) {
   g.sel = null;
   if (!g.timer && !g.won) { minigameRound('freecell'); g.timer = setInterval(() => pcfTick(g), 1000); }   // 第一步：算一局、開始計時
   pcfAutoHome(g);
-  if (g.home.every(n => n === 13)) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('achievement'); }
+  const full = [0, 1, 2, 3].filter(s => g.home[s] === 13 && homeBefore[s] < 13);   // 這一步讓哪個花色收到 K
+  if (g.home.every(n => n === 13)) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('pcCardRun'); setTimeout(() => sfx('pcCardWin'), 450); g.party = { kind: 'win' }; }
   else if (!pcfHasMove(g)) { g.lost = true; clearInterval(g.timer); g.timer = 0; sfx('error'); }   // 沒步可走：這局輸了
+  else if (full.length) { sfx('pcCardRun'); g.party = { kind: 'run', suit: full[0] }; }
   else sfx('blip');
   return true;
 }
@@ -261,6 +265,11 @@ function renderPcFreecell(noAnim) {
     el.style.zIndex = 60;
     el.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: 150, easing: 'ease-out' }).onfinish = () => { el.style.zIndex = ''; };
   });
+  if (g.party) {   // 收齊一種花色／破關：畫面好了之後放慶祝特效（js/pc-desktop.js 的 pcCelebrate）
+    const p = g.party; g.party = null;
+    if (p.kind === 'win') pcCelebrate('freecell', { kind: 'win' });
+    else pcCelebrate('freecell', { kind: 'run', at: table.querySelector('[data-slot="h' + p.suit + '"]') });
+  }
   renderPcfInfo(g);
   const msg = g.body.querySelector('.pcd-fc-msg');
   msg.style.color = g.notice ? '#c62828' : '';   // 放不下去的提示用紅字

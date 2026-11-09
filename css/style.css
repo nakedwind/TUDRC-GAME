@@ -3531,13 +3531,13 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-fc-ghost .pcd-fc-card { box-shadow: 2px 4px 8px rgba(0,0,0,.5); cursor: grabbing; }
 .pcd-fc-msg { color: #444; font-size: 12px; }
 
-/* 蜘蛛紙牌（js/pc-spider.js）：牌面借用新接龍的 .pcd-fc-card，這裡只放 10 排的排法、牌背、左下收好的牌、右下發牌堆 */
+/* 連環新接龍（js/pc-spider.js）：牌面借用新接龍的 .pcd-fc-card，這裡只放 10 排的排法、牌背、左下收好的牌、右下發牌堆 */
 .pcd-sp .pcd-fc-cols { grid-template-columns: repeat(10, var(--fc-w)); gap: 6px; }
 .pcd-sp-levels { display: flex; gap: 2px; margin-left: 8px; padding-left: 8px; border-left: 1px solid #b8b3a2; }
 .pcd-fc-bar .pcd-sp-levels button.on { background: linear-gradient(180deg, #cfe0ff, #9fbcf2); border-color: #2f62d4; }
 .pcd-fc-card.back { border: 2px solid #f4f4f4; background: repeating-linear-gradient(45deg, #2a55b4 0 4px, #3c6cd2 4px 8px); box-shadow: 0 0 0 1px #2a3a66, 0 1px 2px rgba(0,0,0,.4); cursor: default; }
 .pcd-fc-card.hint { background: #fff3b0; border-color: #d39b00; box-shadow: 0 0 0 2px #f0b400; }
-/* 🎁 給JJ的禮物：蜘蛛紙牌上方的禮物說明列，贏了變成「觀看朔的生日」按鈕 */
+/* 🎁 給JJ的禮物：連環新接龍上方的禮物說明列，贏了變成「觀看朔的生日」按鈕 */
 .pcd-sp-gift { display: flex; align-items: center; justify-content: center; gap: 12px; min-height: 32px; padding: 3px 10px; border: 1px solid #e0a9c4; border-radius: 4px; background: linear-gradient(180deg, #fff3f8, #ffd9ea); color: #8a2350; font-weight: bold; }
 .pcd-sp-gift.hidden { display: none; }
 .pcd-sp-gift button { padding: 4px 14px; border: 1px solid #b8326c; border-radius: 4px; background: linear-gradient(180deg, #ff8fbf, #e04b8a); color: #fff; font: inherit; font-weight: bold; cursor: pointer; animation: pcd-gift-pulse 1s ease-in-out infinite alternate; }
@@ -3579,6 +3579,49 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .pcd-gm-foot { display: flex; justify-content: space-between; gap: 10px; color: #333; font-size: 12px; }
 .pcd-gm-score { white-space: nowrap; }
 
+/* 2F 電腦：🐍 貪食蛇、🧱 俄羅斯方塊（js/pc-arcade.js）——上方按鈕列沿用新接龍的 .pcd-fc-bar */
+.pcd-arc { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.pcd-arc .pcd-fc-bar { align-self: stretch; }
+.pcd-arc-info { display: flex; gap: 16px; align-self: stretch; justify-content: center; color: #333; font-size: 12px; }
+.pcd-arc-info b, .pct-stat b { font-family: Consolas, monospace; font-size: 14px; color: #1d3f9a; }
+.pcd-arc-cv { display: block; border: 2px solid #5a6a8a; border-radius: 3px; box-shadow: 2px 3px 8px rgba(0,0,0,.3); }
+.pcd-arc-main { display: flex; gap: 10px; align-items: flex-start; }
+.pcd-arc-side { display: flex; flex-direction: column; gap: 6px; width: 84px; }
+.pct-box { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 4px; border: 1px solid #a8a390; border-radius: 3px; background: #f4f1e6; font-size: 11px; color: #555; }
+.pct-box canvas { display: block; background: #141a2a; border-radius: 2px; }
+.pct-stat { display: flex; flex-direction: column; padding: 3px 6px; border: 1px solid #a8a390; border-radius: 3px; background: #fff; font-size: 11px; color: #555; }
+.pcd-arc-pad { display: none; gap: 4px; flex-wrap: wrap; justify-content: center; }
+.pcd-arc-pad button { min-width: 40px; height: 34px; padding: 0 8px; border: 1px solid #8a8573; border-radius: 4px; background: linear-gradient(180deg, #fff, #e1dccb); font: inherit; font-size: 14px; cursor: pointer; touch-action: manipulation; }
+@media (pointer: coarse) { .pcd-arc-pad { display: flex; } .pcd-arc-msg { display: none; } }   /* 手機才顯示方向按鈕（電腦用鍵盤，改顯示按鍵說明） */
+.pcd-arc-msg { color: #444; font-size: 12px; }
+/* 紙牌集成一組／破關的慶祝特效（js/pc-desktop.js 的 pcCelebrate）：彩帶畫在蓋在視窗上面的透明畫布、不擋滑鼠 */
+.pcd-party { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 90; pointer-events: none; background: transparent; border-radius: 0; box-shadow: none; }   /* 蓋掉全域 canvas 的深色底，才看得到底下的牌 */
+/* 彈珠檯「Y102 救援彈珠台」（js/pc-pinball.js）：桌面往後傾斜看起來有立體感；右邊是點陣式計分板 */
+.pcd-pinball { background: #0d0f1a; margin: -6px; padding: 6px; }
+.pcd-pinball .pcd-arc-msg { color: #9aa6c4; }
+.pb-wrap { display: flex; gap: 8px; align-items: stretch; }
+.pb-table { perspective: 900px; padding-top: 4px; }
+.pb-table .pb-cv { transform: rotateX(13deg); transform-origin: 50% 100%; border: 3px solid #39405c; border-radius: 6px; box-shadow: 0 0 0 1px #000, 0 10px 24px rgba(0,0,0,.6); background: #0b1240; cursor: default; }
+.pb-side { width: 170px; display: flex; flex-direction: column; gap: 6px; padding: 6px; border: 2px solid #39405c; border-radius: 6px; background: linear-gradient(180deg, #1c2038, #0c0e1a); }
+.pb-logo { display: flex; flex-direction: column; align-items: center; padding: 8px 4px; border-radius: 4px; background: radial-gradient(ellipse at 50% 40%, #3a1d6a, #120a28 75%); box-shadow: inset 0 0 0 1px #6a4bb8; }
+.pb-logo b { font: 900 30px/1 "Arial Black", Consolas, sans-serif; letter-spacing: 2px; background: linear-gradient(180deg, #fff6c0, #ffb02e 55%, #ff5a2e); -webkit-background-clip: text; background-clip: text; color: transparent; filter: drop-shadow(0 2px 0 #4a1a00); }
+.pb-logo span { margin-top: 2px; font: 900 14px "Microsoft JhengHei", sans-serif; color: #c9b8ff; letter-spacing: 3px; text-shadow: 0 0 6px #8a4dff; }
+/* 點陣顯示：黑底、橘色發光字，上面疊一層小點點 */
+.pb-lcd { position: relative; padding: 5px 8px; border-radius: 3px; background: #050505; box-shadow: inset 0 0 0 1px #2a2a2a, inset 0 2px 6px #000; color: #ff9a1f; font: bold 13px/1.35 Consolas, "Microsoft JhengHei", monospace; text-shadow: 0 0 4px rgba(255,140,30,.85); overflow: hidden; }
+.pb-lcd::after { content: ''; position: absolute; inset: 0; pointer-events: none; background-image: radial-gradient(rgba(0,0,0,.55) 30%, transparent 32%); background-size: 3px 3px; }
+.pb-ballrow { display: flex; justify-content: space-between; align-items: center; }
+.pb-ballrow b { font-size: 22px; }
+.pb-score { text-align: right; font-size: 22px; letter-spacing: 1px; }
+.pb-rank { display: flex; justify-content: space-between; color: #6fd8ff; text-shadow: 0 0 4px rgba(80,200,255,.85); }
+.pb-rank i { font-style: normal; color: #ffe14a; text-shadow: 0 0 4px rgba(255,225,74,.85); }
+.pb-mission { min-height: 58px; font-size: 12px; }
+.pb-mission b { display: block; font-size: 13px; color: #ffcf5a; }
+.pb-mission span { color: #fff; }
+.pb-msg { min-height: 20px; color: #5be37a; text-shadow: 0 0 4px rgba(90,230,120,.85); font-size: 12px; }
+.pb-best { margin-top: auto; color: #9aa6c4; font-size: 11px; text-align: center; }
+.pb-best b { color: #fff; }
+.pcd-arc-pad.pcp-pad button { min-width: 72px; height: 44px; user-select: none; -webkit-user-select: none; }   /* 彈珠檯（js/pc-pinball.js）：按鈕大一點，要按住 */
+
 /* 住院通知：隊員頭像（正面圖裁到頭肩），右上角壓醫院圖示；好幾個人排一排 */
 .item-intro-image.custom { width: auto; min-width: 120px; height: auto; min-height: 120px; padding: 12px 16px; }
 .hosp-avs { display: flex; flex-wrap: wrap; justify-content: center; gap: 14px; }
@@ -3606,3 +3649,10 @@ em.r-N { color: #b9c6d3 !important; } em.r-R { color: #6fc3ff !important; backgr
 .meal-buff-panel em, .meal-buff-panel footer em { display: flex; gap: 8px; font-style: normal; font-weight: 700; font-size: 11px; }
 .meal-buff-panel .mbp-thumb { flex: none; display: block; border-radius: 4px; background-repeat: no-repeat; image-rendering: pixelated; transform: scale(.8); margin: -2px; }
 .meal-buff-panel footer { display: flex; align-items: center; justify-content: space-between; margin-top: 8px; padding-top: 7px; border-top: 1px solid rgba(255,255,255,.08); color: #8e9aa7; font-size: 11px; }
+
+/* Custom desktop icons: transparent PNGs, high-DPI source. */
+.pcd-app-img { display: inline-block; width: 20px; height: 20px; object-fit: contain; vertical-align: middle; }
+.pcd-ico { display: block; width: 40px; height: 40px; font-size: 0; }
+.pcd-ico .pcd-app-img { display: block; width: 40px; height: 40px; }
+.pcd-start-list .pcd-app-img { width: 24px; height: 24px; }
+.pcd-ticon .pcd-app-img, .pcd-task .pcd-app-img { width: 18px; height: 18px; }

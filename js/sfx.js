@@ -369,6 +369,13 @@ const SFX = (() => {
     src.connect(bp); bp.connect(g); g.connect(master);
     src.start(t0); src.stop(t0 + dur + 0.02);
   }
+  // 俄羅斯方塊消排的叮聲：n＝消了幾排（1～3）
+  function pcLineChime(n, g) {
+    noise({ dur: .18 + n * .04, gain: .06 * g, freq: 2600 + n * 600, q: .7 });
+    const notes = [[784, 988], [880, 1109, 1319], [988, 1245, 1480, 1976]][n - 1];
+    notes.forEach((f, i) => tone({ freq: f, type: 'triangle', dur: .18, gain: .11 * g, when: .04 + i * .05 }));
+    tone({ freq: notes[notes.length - 1] * 2, type: 'sine', dur: .25, gain: .04 * g, when: .06 + notes.length * .05 });
+  }
   const sounds = {
     button() { tone({ freq: 520, freq2: 660, type: 'square', dur: 0.06, gain: 0.16 }); },
     menu() { tone({ freq: 380, type: 'triangle', dur: 0.08, gain: 0.18 }); tone({ freq: 570, type: 'triangle', dur: 0.1, gain: 0.15, when: 0.05 }); },
@@ -426,6 +433,72 @@ const SFX = (() => {
       tone({ freq: 1850 * k, freq2: 1500 * k, type: 'triangle', dur: .12, gain: .14 * g });
       tone({ freq: 2770 * k, type: 'sine', dur: .08, gain: .06 * g, when: .01 });
       noise({ dur: .04, gain: .06 * g, freq: 4200, q: 1 });
+    },
+    // ---- 2F 電腦小遊戲（js/pc-arcade.js、js/pc-spider.js、js/pc-freecell.js）的合成音效 ----
+    // 俄羅斯方塊：方塊放下去「喀噠」——清脆的塑膠卡進去聲（筆電喇叭也聽得到）＋一點低音
+    pcDrop(g = 1) {
+      noise({ dur: .03, gain: .22 * g, freq: 2600, q: 3 });
+      tone({ freq: 520, freq2: 240, type: 'square', dur: .045, gain: .09 * g });
+      tone({ freq: 210, freq2: 110, type: 'triangle', dur: .09, gain: .22 * g, when: .01 });
+    },
+    // 俄羅斯方塊：空白鍵直接落到底「咻—碰」，比一般放下重一點
+    pcHardDrop(g = 1) {
+      noise({ dur: .06, gain: .1 * g, freq: 4200, q: .8 });
+      noise({ dur: .05, gain: .26 * g, freq: 1800, q: 2.5, when: .04 });
+      tone({ freq: 440, freq2: 150, type: 'square', dur: .07, gain: .1 * g, when: .04 });
+      tone({ freq: 160, freq2: 60, type: 'sine', dur: .16, gain: .32 * g, when: .04 });
+    },
+    // 俄羅斯方塊消 1／2／3 排：亮晶晶的「刷—叮」，排數越多音越高、疊越多聲
+    pcLine1(g = 1) { pcLineChime(1, g); },
+    pcLine2(g = 1) { pcLineChime(2, g); },
+    pcLine3(g = 1) { pcLineChime(3, g); },
+    // 俄羅斯方塊一次消 4 排：往上衝的琶音＋低音「轟」＋和弦拉長
+    pcTetris(g = 1) {
+      tone({ freq: 110, freq2: 45, type: 'sine', dur: .45, gain: .32 * g });
+      noise({ dur: .5, gain: .08 * g, freq: 2400, q: .5 });
+      [523, 659, 784, 1047, 1319, 1568, 2093].forEach((f, i) => tone({ freq: f, type: 'square', dur: .12, gain: .06 * g, when: i * .045 }));
+      [1047, 1319, 1568].forEach(f => tone({ freq: f, type: 'triangle', dur: .7, gain: .1 * g, when: .32, attack: .02 }));
+      [3136, 2637, 3520].forEach((f, i) => tone({ freq: f, type: 'sine', dur: .12, gain: .04 * g, when: .4 + i * .07 }));
+    },
+    // 俄羅斯方塊升級：四個音往上跳
+    pcLevelUp(g = 1) { [392, 523, 659, 784].forEach((f, i) => tone({ freq: f, type: 'square', dur: .1, gain: .07 * g, when: i * .07 })); tone({ freq: 1047, type: 'triangle', dur: .4, gain: .12 * g, when: .28 }); },
+    // 紙牌：集成一組（連環新接龍 K→A 收走、新接龍一種花色收到 K）：牌刷刷飛過去＋一串往上的叮叮
+    pcCardRun(g = 1) {
+      for (let i = 0; i < 8; i++) noise({ dur: .035, gain: .05 * g, freq: 3000 + i * 250, q: 2, when: i * .03 });
+      [784, 988, 1175, 1568, 1976].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: .16, gain: .1 * g, when: .2 + i * .06 }));
+      tone({ freq: 2637, type: 'sine', dur: .35, gain: .05 * g, when: .52 });
+    },
+    // 連環新接龍收起一組：13 張牌一張一張飛下去的「刷刷刷…」（每 0.055 秒一聲，跟動畫一樣快），最後一張到時「叮」
+    pcCardFly(g = 1) {
+      for (let i = 0; i < 13; i++) noise({ dur: .035, gain: .055 * g, freq: 2400 + i * 170, q: 2.2, when: i * .055 });
+      [1175, 1568, 1976].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: .18, gain: .1 * g, when: .9 + i * .05 }));
+      tone({ freq: 2637, type: 'sine', dur: .35, gain: .045 * g, when: 1.05 });
+    },
+    // ---- 彈珠檯「Y102 救援彈珠台」（js/pc-pinball.js）----
+    pbFlipper(g = 1) { noise({ dur: .03, gain: .14 * g, freq: 1500, q: 2 }); tone({ freq: 180, freq2: 90, type: 'square', dur: .05, gain: .07 * g }); },   // 擋板「喀」
+    pbBumper(g = 1) { tone({ freq: 880, freq2: 440, type: 'square', dur: .09, gain: .08 * g }); tone({ freq: 1320, type: 'triangle', dur: .07, gain: .07 * g }); noise({ dur: .04, gain: .08 * g, freq: 3000, q: 1.5 }); },   // 警示燈「噹」
+    pbSling(g = 1) { noise({ dur: .04, gain: .12 * g, freq: 2200, q: 2 }); tone({ freq: 620, freq2: 300, type: 'square', dur: .05, gain: .06 * g }); },   // 彈弓「啪」
+    pbTarget(g = 1) { tone({ freq: 1050, type: 'triangle', dur: .07, gain: .1 * g }); noise({ dur: .03, gain: .08 * g, freq: 2600, q: 2 }); },   // 補給燈「叮」
+    pbDrop(g = 1) { noise({ dur: .05, gain: .16 * g, freq: 1200, q: 1.5 }); tone({ freq: 300, freq2: 120, type: 'square', dur: .1, gain: .09 * g }); },   // 掉落目標倒下「咔」
+    pbLane(g = 1) { tone({ freq: 1568, type: 'sine', dur: .1, gain: .08 * g }); tone({ freq: 2093, type: 'sine', dur: .12, gain: .06 * g, when: .05 }); },   // 通道亮燈
+    pbRamp(g = 1) { tone({ freq: 300, freq2: 1500, type: 'sawtooth', dur: .35, gain: .06 * g }); [1047, 1319, 1568].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: .1, gain: .07 * g, when: .3 + i * .06 })); },   // 救援通道「咻—叮叮叮」
+    pbSaucer(g = 1) { tone({ freq: 200, freq2: 70, type: 'sine', dur: .2, gain: .25 * g }); [523, 659, 784].forEach((f, i) => tone({ freq: f, type: 'square', dur: .08, gain: .05 * g, when: .15 + i * .07 })); },   // 掉進基地洞
+    pbKick(g = 1) { noise({ dur: .05, gain: .15 * g, freq: 900, q: 1.2 }); tone({ freq: 160, freq2: 320, type: 'square', dur: .08, gain: .07 * g }); },   // 基地洞吐出珠子
+    pbLaunch(g = 1) { noise({ dur: .18, gain: .12 * g, freq: 2600, q: .6 }); tone({ freq: 140, freq2: 600, type: 'sawtooth', dur: .18, gain: .06 * g }); },   // 發射
+    pbBonus(g = 1) { [784, 988, 1175, 1568].forEach((f, i) => tone({ freq: f, type: 'square', dur: .09, gain: .06 * g, when: i * .06 })); },   // 倍數、目標全倒、補給到齊
+    pbMission(g = 1) {   // 任務完成：一段小號＋和弦
+      [[523, 0], [659, .1], [784, .2], [1047, .32]].forEach(([f, w]) => { tone({ freq: f, type: 'square', dur: .12, gain: .07 * g, when: w }); tone({ freq: f * 2, type: 'triangle', dur: .12, gain: .05 * g, when: w }); });
+      [523, 659, 784, 1047].forEach(f => tone({ freq: f, type: 'triangle', dur: .8, gain: .05 * g, when: .45, attack: .02 }));
+    },
+    pbSave(g = 1) { [659, 880, 1175].forEach((f, i) => tone({ freq: f, type: 'triangle', dur: .12, gain: .09 * g, when: i * .08 })); },   // 救回珠子
+    pbDrain(g = 1) { [392, 330, 262, 196].forEach((f, i) => tone({ freq: f, type: 'square', dur: .16, gain: .06 * g, when: i * .12 })); },   // 珠子掉了
+    // 紙牌破關：小號式的勝利曲＋拉長的和弦＋一陣像撒彩帶的沙沙聲
+    pcCardWin(g = 1) {
+      const n = [[523, 0, .14], [523, .15, .1], [523, .26, .1], [698, .38, .5], [622, .9, .3], [784, 1.2, .3], [698, 1.5, .9]];
+      n.forEach(([f, w, d]) => { tone({ freq: f, type: 'square', dur: d, gain: .07 * g, when: w, attack: .01 }); tone({ freq: f * 2, type: 'triangle', dur: d, gain: .06 * g, when: w, attack: .01 }); });
+      [349, 440, 523, 698].forEach(f => tone({ freq: f, type: 'triangle', dur: 1.3, gain: .06 * g, when: 1.5, attack: .03 }));
+      for (let i = 0; i < 14; i++) noise({ dur: .06, gain: .035 * g, freq: 5000 + (i % 4) * 900, q: 1.5, when: 1.5 + i * .07 });
+      [2093, 2637, 3136, 4186].forEach((f, i) => tone({ freq: f, type: 'sine', dur: .2, gain: .035 * g, when: 1.6 + i * .12 }));
     },
     hit() { const k = jitter(VARY.pitch); tone({ freq: 160 * k, freq2: 70 * k, type: 'square', dur: 0.07, gain: 0.15 * jitter(VARY.gain) }); noise({ dur: 0.06, gain: 0.08, freq: 700 * k }); },
   };

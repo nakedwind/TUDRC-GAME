@@ -31,6 +31,7 @@
     'tudrc_seen_items_v1',   // 看過說明的物品（js/item-intro.js）
     'tudrc_target_best_v1',   // 射擊練習最佳紀錄（js/target-practice.js）
     'tudrc_minigame_stats_v1',   // 每款小遊戲玩了幾局、花了多少時間（js/pc-stats.js）
+    'tudrc_arcade_best_v1',   // 電腦裡貪食蛇、俄羅斯方塊、彈珠檯的最高分（js/pc-arcade.js）
   ];
   window.GAME_PROGRESS_KEYS = Object.freeze([...progressKeys]);
   let startedFresh = false;

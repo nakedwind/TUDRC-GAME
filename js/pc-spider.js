@@ -1,6 +1,6 @@
-/* ===== 2F應變中心的電腦：🕷️ 蜘蛛紙牌（Spider）=====
+/* ===== 2F應變中心的電腦：🕷️ 連環新接龍（原本叫「蜘蛛紙牌」，英文 Spider）=====
    ・視窗、桌面圖示在 js/pc-desktop.js（這裡只管牌局）；牌的樣子借用新接龍的（css/style.css 的「新接龍」），
-     蜘蛛紙牌自己的部分在「蜘蛛紙牌」
+     連環新接龍自己的部分在「連環新接龍」
    ・規則：兩副牌（104 張）發成 10 排，前 4 排 6 張、後 6 排 5 張，每排只有最下面那張翻開；剩下 50 張放右下角
    ・任何牌都可以放在大 1 的牌上（花色不限）；但要一起搬好幾張，那幾張必須「同花色、由大到小連著」
    ・同一排湊齊同花色 K→A 就自動收走（左下角）；收滿 8 組＝破關
@@ -8,8 +8,10 @@
    ・難度：單色（全部♠）、雙色（♠♥）、四色
    ・操作：拖曳，或點一下選牌再點目的地；點兩下＝自動搬到最好的位置；「提示」會把可以走的一步亮出來
    ・分數跟 Windows 一樣：開局 500，每走一步 −1，收走一組 +100
+   ・收走一組時，13 張牌從 A 開始一張一張飛到左下角（pcsFlyRuns），飛完再放慶祝特效
+   ・收走一組、破關時有慶祝特效（js/pc-desktop.js 的 pcCelebrate）和音效（pcCardRun、pcCardWin，在音效編輯器可以換）
    ・🎁 給JJ的禮物（桌面圖示，js/pc-desktop.js）：用這個視窗玩單色版（g.gift＝true，上面多一條禮物說明），
-     贏了就出現「觀看朔的生日」按鈕，播 data/story-scenes.js 的 saku_birthday；中途換成雙色／四色就回到一般的蜘蛛紙牌
+     贏了就出現「觀看朔的生日」按鈕，播 data/story-scenes.js 的 saku_birthday；中途換成雙色／四色就回到一般的連環新接龍
 */
 const PCS_LEVELS = { 1: '單色', 2: '雙色', 4: '四色' };
 const PCS_SUIT_SETS = { 1: [3, 3, 3, 3, 3, 3, 3, 3], 2: [3, 2, 3, 2, 3, 2, 3, 2], 4: [3, 2, 1, 0, 3, 2, 1, 0] };   // 8 組各 13 張的花色（號碼跟新接龍的 PCF_SUITS 一樣）
@@ -48,7 +50,7 @@ function initPcSpider(body) {
 function newPcSpider(suits, no) {
   const g = pcd.sp;
   clearInterval(g.timer); clearTimeout(g.hintTimer);
-  if (suits !== 1) g.gift = false;   // 禮物只算單色版：換成雙色／四色就變回一般的蜘蛛紙牌
+  if (suits !== 1) g.gift = false;   // 禮物只算單色版：換成雙色／四色就變回一般的連環新接龍
   no = no || 1 + Math.floor(Math.random() * 99999);
   const rnd = pcsRandom(no * 7 + suits), deck = Array.from({ length: 104 }, (_, i) => i);
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
@@ -110,16 +112,19 @@ function pcsDeal(g) {
 }
 function pcsAfter(g) {   // 走完一步：湊齊 K→A 的收走、最下面蓋著的牌翻開、計時、破關
   g.sel = null; g.hint = null; g.note = '';
-  let got = false;
+  let got = 0;
   g.cols.forEach((col, k) => {
     const s = col.length - 13;
-    if (s >= g.down[k] && pcsRank(col[s]) === 12 && pcsRun(g, k, s)) { g.done.push(col[s]); col.splice(s); g.score += 100; got = true; }
+    if (s >= g.down[k] && pcsRank(col[s]) === 12 && pcsRun(g, k, s)) {
+      (g.flying = g.flying || []).push(col.slice(s));   // 這 13 張等一下要一張一張飛到左下角（renderPcSpider 的 pcsFlyRuns）
+      g.done.push(col[s]); col.splice(s); g.score += 100; got++; g.party = { kind: 'run' };
+    }
     if (col.length && g.down[k] >= col.length) g.down[k] = col.length - 1;
   });
   if (!g.timer && !g.won) { minigameRound('spider'); g.timer = setInterval(() => pcsTick(g), 1000); }   // 第一步：算一局、開始計時
-  if (g.done.length === 8) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('achievement'); }
-  else if (pcsStuck(g)) { g.lost = true; clearInterval(g.timer); g.timer = 0; sfx('error'); }   // 真的一步都不能走：這局輸了（跟新接龍一樣跳出提示）
-  else sfx(got ? 'win' : 'blip');
+  if (g.done.length === 8) { g.won = true; clearInterval(g.timer); g.timer = 0; sfx('pcCardFly'); setTimeout(() => sfx('pcCardWin'), 1050); g.party = { kind: 'win' }; }   // 勝利曲等最後一組牌飛完再播
+  else if (pcsStuck(g)) { g.lost = true; clearInterval(g.timer); g.timer = 0; sfx('error'); g.party = null; }   // 真的一步都不能走：這局輸了（跟新接龍一樣跳出提示）
+  else sfx(got ? 'pcCardFly' : 'blip');
 }
 function pcsTick(g) {
   const w = pcd.wins.spider;
@@ -335,7 +340,9 @@ function renderPcSpider(noAnim) {
     '<div class="pcd-sp-done" style="width:calc(var(--fc-w) + ' + 7 * off + 'px)">' + (done || '<span class="pcd-sp-empty">收齊 K→A 會放這裡</span>') + '</div>' +
     '<div class="pcd-sp-stock" data-slot="s" title="點一下：每排各發 1 張" style="width:calc(var(--fc-w) + ' + 4 * off + 'px)">' + (stock || '<span class="pcd-sp-empty">發完了</span>') + '</div></div>' +
     (g.lost ? '<div class="pcd-fc-over"><div class="pcd-fc-overbox"><b>這局輸了</b><p>不管怎麼搬，都翻不開蓋著的牌、也湊不齊 K→A 了。</p><button type="button" data-sp="undo">↶ 復原</button><button type="button" data-sp="retry">重玩這局</button><button type="button" data-sp="new">新牌局</button></div></div>' : '');   // 「這局輸了」提示：跟新接龍用同一個樣子
+  const flyK = new Set((g.flying || []).map(run => String(run[0])));
   table.querySelectorAll('.pcd-fc-card[data-card]').forEach(el => {   // 牌從舊位置滑到新位置；剛發的牌從右下角的牌堆飛出來
+    if (flyK.has(el.dataset.card)) return;
     const dealt = g.dealt ? g.dealt.indexOf(+el.dataset.card) : -1;
     const o = old[el.dataset.card] || (dealt >= 0 && stockRect); if (!o) return;
     const n = el.getBoundingClientRect(), dx = o.left - n.left, dy = o.top - n.top;
@@ -344,6 +351,15 @@ function renderPcSpider(noAnim) {
     el.animate([{ transform: 'translate(' + dx + 'px,' + dy + 'px)' }, { transform: 'none' }], { duration: dealt >= 0 ? 220 : 150, delay: Math.max(0, dealt) * 30, easing: 'ease-out', fill: 'backwards' }).onfinish = () => { el.style.zIndex = ''; };
   });
   g.dealt = null;
+  let flyMs = 0;
+  if (g.flying) { flyMs = pcsFlyRuns(g, table, old, g.flying); g.flying = null; }
+  if (g.party) {   // 集成一組／破關：牌飛完之後放慶祝特效（js/pc-desktop.js 的 pcCelebrate）
+    const p = g.party; g.party = null;
+    setTimeout(() => {
+      if (p.kind === 'win') pcCelebrate('spider', { kind: 'win' });
+      else { const last = g.body.querySelectorAll('.pcd-sp-done .pcd-fc-card'); pcCelebrate('spider', { kind: 'run', at: last[last.length - 1] }); }
+    }, flyMs);
+  }
   renderPcsInfo(g);
   g.body.querySelector('.pcd-fc-msg').textContent = g.won ? '🎉 破關了！分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '。按「新牌局」再玩一次'
     : g.lost ? '這局輸了：怎麼搬都沒有進展了。分數 ' + g.score + '、花了 ' + pcfTime(g.time) + '、' + g.moves + ' 步'
@@ -351,13 +367,42 @@ function renderPcSpider(noAnim) {
   g.body.querySelector('[data-sp="undo"]').disabled = !g.hist.length || g.won;
   renderJJGift(g);
 }
+// 收起一組：13 張牌從 A 開始、一張接一張快速飛到左下角收好的那疊（K 最後到，到了才露出收好的那張）
+// old＝重畫之前每張牌在畫面上的位置；回傳整段動畫要多久（毫秒），慶祝特效等它飛完再放
+const PCS_FLY_GAP = 55, PCS_FLY_MS = 260;
+function pcsFlyRuns(g, table, old, runs) {
+  const tr = table.getBoundingClientRect();
+  let n = 0;
+  runs.forEach(run => {
+    const real = table.querySelector('.pcd-sp-done [data-card="' + run[0] + '"]'); if (!real) return;
+    const to = real.getBoundingClientRect();
+    real.style.visibility = 'hidden';
+    run.slice().reverse().forEach((id, i) => {   // 反過來：A 先飛、K 最後
+      const from = old[id] || to;
+      const el = document.createElement('div');
+      el.innerHTML = pcsCardHtml(g, id, '', 'left:' + (to.left - tr.left - table.clientLeft) + 'px;top:' + (to.top - tr.top - table.clientTop) + 'px;z-index:' + (70 + n) + ';pointer-events:none');
+      const card = el.firstChild; table.appendChild(card);
+      const last = i === run.length - 1;
+      card.animate([
+        { transform: 'translate(' + (from.left - to.left) + 'px,' + (from.top - to.top) + 'px)' },
+        { transform: 'translate(' + (from.left - to.left) * .5 + 'px,' + ((from.top - to.top) * .5 - 18) + 'px) rotate(' + (i % 2 ? 8 : -8) + 'deg)', offset: .5 },   // 中途微微往上拋、轉一下
+        { transform: 'none' }
+      ], { duration: PCS_FLY_MS, delay: n * PCS_FLY_GAP, easing: 'ease-in', fill: 'both' }).onfinish = () => {
+        card.remove();
+        if (last && real.isConnected) real.style.visibility = '';
+      };
+      n++;
+    });
+  });
+  return n ? (n - 1) * PCS_FLY_GAP + PCS_FLY_MS : 0;
+}
 function renderPcsInfo(g) {
   g.body.querySelector('.pcd-fc-info').textContent = '分數 ' + g.score + '　步數 ' + g.moves + '　時間 ' + pcfTime(g.time);
 }
 
-// ---- 🎁 給JJ的禮物：贏一局單色蜘蛛紙牌，就能看朔的生日劇情 ----
+// ---- 🎁 給JJ的禮物：贏一局單色連環新接龍，就能看朔的生日劇情 ----
 const JJ_GIFT_SCENE = 'saku_birthday';   // 劇情 id（data/story-scenes.js，🎬 劇情編輯器可以改內容）
-function openJJGift() {   // 桌面點「給JJ的禮物」：打開蜘蛛紙牌視窗，換成禮物模式、單色、發一局新的
+function openJJGift() {   // 桌面點「給JJ的禮物」：打開連環新接龍視窗，換成禮物模式、單色、發一局新的
   openPcApp('spider');
   const g = pcd.sp;
   g.gift = true;
@@ -366,11 +411,11 @@ function openJJGift() {   // 桌面點「給JJ的禮物」：打開蜘蛛紙牌�
 function renderJJGift(g) {
   const bar = g.body.querySelector('.pcd-sp-gift'), w = pcd.wins.spider;
   bar.classList.toggle('hidden', !g.gift);
-  if (w) w.querySelector('.pcd-ttext').textContent = g.gift ? '給JJ的禮物－蜘蛛紙牌（單色）' : '蜘蛛紙牌';
+  if (w) w.querySelector('.pcd-ttext').textContent = g.gift ? '給JJ的禮物－連環新接龍（單色）' : '連環新接龍';
   if (!g.gift) return;
   const html = g.won
     ? '<span>🎉 禮物打開了！</span><button type="button" data-gift-play="1">🎂 觀看朔的生日</button>'
-    : '<span>🎁 給JJ的禮物：贏一局單色蜘蛛紙牌，就能打開禮物！</span>';
+    : '<span>🎁 給JJ的禮物：贏一局單色連環新接龍，就能打開禮物！</span>';
   if (bar.innerHTML !== html) bar.innerHTML = html;
 }
 function playJJGiftStory() {   // 關掉電腦、先存檔（劇情播放中不存檔），再播生日劇情；看完回到應變中心

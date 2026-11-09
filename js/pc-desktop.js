@@ -4,9 +4,11 @@
        🎵 音樂播放器：換基地的背景音樂（music/基地音樂/ 裡的檔案；js/music.js 的 MUSIC.setBaseTrack，記在瀏覽器）
        💣 踩地雷：左鍵翻開、右鍵插旗、點已翻開的數字＝旗子插夠了就把旁邊的一起翻開；笑臉＝重新開始
        🃏 新接龍：FreeCell，牌局在 js/pc-freecell.js
-       🕷️ 蜘蛛紙牌：Spider（單色／雙色／四色），牌局在 js/pc-spider.js
+       🕷️ 連環新接龍：Spider（單色／雙色／四色），牌局在 js/pc-spider.js
        ⚫ 五子棋：對電腦或兩人對下，棋局在 js/pc-gomoku.js
-       🎁 給JJ的禮物：玩單色蜘蛛紙牌，贏了可以看朔的生日劇情（js/pc-spider.js 的 openJJGift）
+       🐍 貪食蛇、🧱 俄羅斯方塊：用鍵盤玩（手機有方向按鈕），遊戲在 js/pc-arcade.js
+       🎱 彈珠檯：Z／／ 控制擋板、空白鍵發射，遊戲在 js/pc-pinball.js
+       🎁 給JJ的禮物：玩單色連環新接龍，贏了可以看朔的生日劇情（js/pc-spider.js 的 openJJGift）
        📊 遊戲紀錄：每款小遊戲玩了幾局、花了多少時間，在 js/pc-stats.js
        📕 怪物圖鑑：打開原本的圖鑑視窗（js/bestiary.js 的 openBestiary）
    ・左下「開始」選單、右下的電源按鈕都可以關機
@@ -15,14 +17,17 @@
 let pcDesktopOpen = false;
 const pcd = { el: null, z: 10, sel: null, wins: {}, tracks: null, mine: null, clock: 0 };
 const PCD_APPS = [
-  { id: 'music', name: '音樂播放器', icon: '🎵', title: '音樂播放器－基地音樂' },
-  { id: 'mines', name: '踩地雷', icon: '💣', title: '踩地雷' },
-  { id: 'freecell', name: '新接龍', icon: '🃏', title: '新接龍' },
-  { id: 'spider', name: '蜘蛛紙牌', icon: '🕷️', title: '蜘蛛紙牌' },
-  { id: 'gomoku', name: '五子棋', icon: '⚫', title: '五子棋' },
-  { id: 'jjgift', name: '給JJ的禮物', icon: '🎁' },   // 沒有自己的視窗：用蜘蛛紙牌的視窗玩單色版（js/pc-spider.js 的 openJJGift）
-  { id: 'stats', name: '遊戲紀錄', icon: '📊', title: '遊戲紀錄' },
-  { id: 'bestiary', name: '怪物圖鑑', icon: '📕' },
+  { id: 'music', name: '音樂播放器', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/music-player.png" srcset="images/ui/desktop-icons/96/music-player.png 2x" alt="" draggable="false">', title: '音樂播放器－基地音樂' },
+  { id: 'mines', name: '踩地雷', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/minesweeper.png" srcset="images/ui/desktop-icons/96/minesweeper.png 2x" alt="" draggable="false">', title: '踩地雷' },
+  { id: 'freecell', name: '新接龍', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/freecell.png" srcset="images/ui/desktop-icons/96/freecell.png 2x" alt="" draggable="false">', title: '新接龍' },
+  { id: 'spider', name: '連環新接龍', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/spider-solitaire.png" srcset="images/ui/desktop-icons/96/spider-solitaire.png 2x" alt="" draggable="false">', title: '連環新接龍' },
+  { id: 'gomoku', name: '五子棋', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/gomoku.png" srcset="images/ui/desktop-icons/96/gomoku.png 2x" alt="" draggable="false">', title: '五子棋' },
+  { id: 'snake', name: '貪食蛇', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/snake.png" srcset="images/ui/desktop-icons/96/snake.png 2x" alt="" draggable="false">', title: '貪食蛇' },
+  { id: 'tetris', name: '俄羅斯方塊', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/tetris.png" srcset="images/ui/desktop-icons/96/tetris.png 2x" alt="" draggable="false">', title: '俄羅斯方塊' },
+  { id: 'pinball', name: '彈珠檯', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/pinball.png" srcset="images/ui/desktop-icons/96/pinball.png 2x" alt="" draggable="false">', title: '彈珠檯' },
+  { id: 'jjgift', name: '給JJ的禮物', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/gift.png" srcset="images/ui/desktop-icons/96/gift.png 2x" alt="" draggable="false">' },   // 沒有自己的視窗：用連環新接龍的視窗玩單色版（js/pc-spider.js 的 openJJGift）
+  { id: 'stats', name: '遊戲紀錄', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/game-records.png" srcset="images/ui/desktop-icons/96/game-records.png 2x" alt="" draggable="false">', title: '遊戲紀錄' },
+  { id: 'bestiary', name: '怪物圖鑑', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/monster-book.png" srcset="images/ui/desktop-icons/96/monster-book.png 2x" alt="" draggable="false">' },
 ];
 // 列不出資料夾內容時（例如放到網路上的版本）用這份清單；在本機用 editor-server 開的話會自動讀 music/基地音樂/ 裡實際有的檔案
 const PCD_TRACK_FALLBACK = ['fluffy -cute piano.mp3', 'relaxing-piano-music.mp3', 'snowfall-music-box.mp3', 'sunset-piano-music.mp3'];
@@ -143,6 +148,9 @@ function openPcApp(id) {
     if (id === 'freecell') initPcFreecell(w.querySelector('.pcd-body'));
     if (id === 'spider') initPcSpider(w.querySelector('.pcd-body'));
     if (id === 'gomoku') initPcGomoku(w.querySelector('.pcd-body'));
+    if (id === 'snake') initPcSnake(w.querySelector('.pcd-body'));
+    if (id === 'tetris') initPcTetris(w.querySelector('.pcd-body'));
+    if (id === 'pinball') initPcPinball(w.querySelector('.pcd-body'));
     if (id === 'stats') initPcStats(w.querySelector('.pcd-body'));
     sfx('menu');
   }
@@ -151,6 +159,9 @@ function openPcApp(id) {
   if (id === 'freecell') fitPcFreecell();
   if (id === 'spider') fitPcSpider();
   if (id === 'gomoku') fitPcGomoku();
+  if (id === 'snake') fitPcSnake();
+  if (id === 'tetris') fitPcTetris();
+  if (id === 'pinball') fitPcPinball();
 }
 function focusPcWin(id) {
   const w = pcd.wins[id]; if (!w) return;
@@ -166,6 +177,7 @@ function closePcWin(id) {
   if (id === 'freecell' && pcd.fc) clearInterval(pcd.fc.timer);
   if (id === 'spider' && pcd.sp) clearInterval(pcd.sp.timer);
   if (id === 'gomoku' && pcd.gm) { clearTimeout(pcd.gm.thinking); clearInterval(pcd.gm.timer); }   // 電腦還在想就不用下了
+  if (id === 'snake' || id === 'tetris' || id === 'pinball') stopPcArcade(id);
   w.remove(); delete pcd.wins[id]; renderPcTasks(); sfx('switch');
 }
 function topPcWin() {   // 最上面、沒有縮小的那個視窗
@@ -340,12 +352,70 @@ function renderPcMines() {
   });
 }
 
+// ---- 🎉 慶祝特效（紙牌遊戲用）：彩帶、煙火（只有畫面表演，不跳文字、分數）----
+// pcCelebrate('spider', { kind: 'run', at: 某個元素 })
+//   kind 'run'＝集成一組：從 at 那個位置噴一小團彩色碎片
+//   kind 'win'＝破關：整個視窗下彩帶雨、放三發煙火
+// 特效畫在視窗上面一層透明畫布，不會擋到滑鼠；視窗關掉或特效跑完就自己清掉
+const PCD_PARTY_COLORS = ['#ff4d6d', '#ffd23f', '#3ec1ff', '#5be37a', '#b26bff', '#ff8a3d', '#ffffff'];
+function pcCelebrate(id, opt) {
+  const w = pcd.wins[id]; if (!w) return;
+  const win = opt.kind === 'win', wr = w.getBoundingClientRect(), W = wr.width, H = wr.height;
+  const cv = document.createElement('canvas'); cv.className = 'pcd-party';
+  const r = window.devicePixelRatio || 1; cv.width = W * r; cv.height = H * r;
+  w.appendChild(cv);
+  const ctx = cv.getContext('2d'); ctx.scale(r, r);
+  const parts = [];
+  const burst = (x, y, n, power) => {   // 從一點往外噴
+    for (let i = 0; i < n; i++) {
+      const a = Math.random() * Math.PI * 2, sp = power * (.35 + Math.random() * .65);
+      parts.push({ x, y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp - power * .35, g: 520, drag: .985, rot: Math.random() * 6, vr: (Math.random() - .5) * 14,
+        w: 4 + Math.random() * 5, h: 3 + Math.random() * 4, color: PCD_PARTY_COLORS[i % PCD_PARTY_COLORS.length], t: 0, life: 900 + Math.random() * 700, star: Math.random() < .3 });
+    }
+  };
+  let ax = W / 2, ay = H / 2;
+  if (opt.at) { const ar = opt.at.getBoundingClientRect(); ax = ar.left + ar.width / 2 - wr.left; ay = ar.top + ar.height / 2 - wr.top; }
+  const timers = [];
+  if (win) {
+    for (let i = 0; i < 160; i++)   // 彩帶雨：從上面慢慢飄下來
+      parts.push({ x: Math.random() * W, y: -20 - Math.random() * H * .8, vx: (Math.random() - .5) * 60, vy: 60 + Math.random() * 90, g: 40, drag: 1, rot: Math.random() * 6, vr: (Math.random() - .5) * 10,
+        w: 6 + Math.random() * 6, h: 3 + Math.random() * 4, color: PCD_PARTY_COLORS[i % PCD_PARTY_COLORS.length], t: 0, life: 3600 + Math.random() * 1200, sway: Math.random() * 6 });
+    [[.25, .35, 0], [.75, .3, 450], [.5, .22, 900]].forEach(([fx, fy, d]) => timers.push(setTimeout(() => burst(W * fx, H * fy, 70, 380), d)));   // 三發煙火
+  } else burst(ax, ay, 46, 300);
+  const end = win ? 5200 : 1700;
+  let last = performance.now();
+  const t0 = last;
+  const frame = now => {
+    const dt = Math.min(50, now - last) / 1000; last = now;
+    if (!w.isConnected || now - t0 > end) { cv.remove(); timers.forEach(clearTimeout); return; }
+    ctx.clearRect(0, 0, W, H);
+    for (let i = parts.length - 1; i >= 0; i--) {
+      const p = parts[i];
+      p.t += dt * 1000; if (p.t > p.life) { parts.splice(i, 1); continue; }
+      p.vy += p.g * dt; p.vx *= p.drag; p.vy *= p.drag;
+      p.x += (p.vx + (p.sway ? Math.sin(p.t / 300 + p.sway) * 40 : 0)) * dt; p.y += p.vy * dt; p.rot += p.vr * dt;
+      ctx.save(); ctx.globalAlpha = Math.min(1, (p.life - p.t) / 400);
+      ctx.translate(p.x, p.y); ctx.rotate(p.rot); ctx.fillStyle = p.color;
+      if (p.star) { ctx.beginPath(); for (let k = 0; k < 10; k++) { const rr = k % 2 ? p.w * .4 : p.w; ctx.lineTo(Math.cos(k * Math.PI / 5) * rr, Math.sin(k * Math.PI / 5) * rr); } ctx.fill(); }
+      else ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h * Math.abs(Math.cos(p.rot * 1.3)) + 1);   // 彩帶翻面的感覺
+      ctx.restore();
+    }
+    requestAnimationFrame(frame);
+  };
+  requestAnimationFrame(frame);
+}
+
 window.addEventListener('resize', () => { if (pcDesktopOpen) { fitPcMines(); if (pcd.fc && pcd.fc.cols) { fitPcFreecell(); renderPcFreecell(true); } if (pcd.sp && pcd.sp.cols) { fitPcSpider(); renderPcSpider(true); } if (pcd.gm) fitPcGomoku(); } });
 window.addEventListener('pointerup', () => { if (pcDesktopOpen && pcd.mine && pcd.mine.cells && !pcd.mine.over) setPcFace('🙂'); });   // 按住格子時笑臉張嘴，放開變回來
 
 // 開著的時候：Esc＝關掉開始選單／最上面的視窗／關機；其他按鍵都不要傳給遊戲（圖鑑開著時讓圖鑑自己處理）
 window.addEventListener('keydown', e => {
   if (!pcDesktopOpen || (typeof bestiaryOpen !== 'undefined' && bestiaryOpen)) return;
+  // 最上面的視窗是貪食蛇／俄羅斯方塊：方向鍵、空白鍵等交給遊戲（Esc 還是照樣關視窗）
+  const topWin = topPcWin();
+  if (e.key !== 'Escape' && topWin && pcd.el.querySelector('.pcd-start').classList.contains('hidden') && typeof pcArcadeKey === 'function' && pcArcadeKey(topWin.dataset.app, e)) {
+    e.preventDefault(); e.stopImmediatePropagation(); return;
+  }
   if (e.key === 'Escape' && !e.repeat) {
     const top = topPcWin();
     if (!pcd.el.querySelector('.pcd-start').classList.contains('hidden')) toggleStartMenu(false);
