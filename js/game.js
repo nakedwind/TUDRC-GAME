@@ -489,7 +489,8 @@ function pickCharacterFrame(set, who) {
   }
   if (!who.moving && who.dir === 'front' && who.blinkTime >= 0) {
     const blinkOrder = [0, 1, 2, 2, 1, 0];
-    return set.blink[blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(who.blinkTime / 0.07))]];
+    // 這張眨眼圖沒有（例如柯林基地便服少了全閉眼 0012）：往前用比較張開的那張；都沒有就用站著的圖（以前會畫成一塊方塊，眨眼時閃一下）
+    for (let i = blinkOrder[Math.min(blinkOrder.length - 1, Math.floor(who.blinkTime / 0.07))]; i >= 0; i--) { const g = set.blink && set.blink[i]; if (g && g.complete && g.naturalWidth) return g; }
   }
   const frames = set[who.dir || 'front'];
   const walkOrder = TWO_FRAME_WALK.has(who.id || who.type) ? [1, 2] : [1, 0, 2, 0];
@@ -2183,7 +2184,8 @@ function frame(ts) {
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）
-  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !(typeof clawOpen !== 'undefined' && clawOpen) && !(typeof gachaOpen !== 'undefined' && gachaOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
+  // 衣櫃／推薦穿搭開著也要停（以前只停住溫特，被換衣服的人會自己走掉）
+  if (!paused && !introOpen && G.running && !G.over && !dialogueState && !elevatorMenuOpen && !supplyShopOpen && !backpackOpen && !(typeof tpadOpen !== 'undefined' && tpadOpen) && !(typeof clawOpen !== 'undefined' && clawOpen) && !(typeof gachaOpen !== 'undefined' && gachaOpen) && !(typeof wardrobeOpen !== 'undefined' && wardrobeOpen) && !settingsOpen && !campPlanOpen && !campArmorOpen && !campSupplyOpen && !mapTransitioning && !frozen) {
     // 遊戲邏輯出錯只記錄、不影響畫面：畫面照常畫，不會整片黑掉（畫面本身出錯才由 recoverFrame 重設畫布）
     try { update(sdt); } catch (err) { reportFrameError(err, '遊戲邏輯'); }
     if (typeof battleTick === 'function') battleTick(sdt);   // 結算畫面的作戰時間（js/battle-result.js）
