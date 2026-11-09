@@ -17,7 +17,7 @@ const FLARE = {
 };
 // 滾輪切換的順序
 // special＝效果寫在 js/special-guns.js 的子彈（一般子彈、照明彈、螢光漆彈另外處理）
-const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal', 'sticky', 'knock'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
+const WEAPONS = ['pistol', 'flare', 'incendiary', 'tranq', 'paint', 'split', 'flash', 'shock', 'heal', 'sticky', 'knock', 'confuse'].filter(id => BULLETS[id]).map(id => ({ id, ...BULLETS[id], special: !['pistol', 'flare', 'paint'].includes(id) }));
 const AMMO_CRATE = { ids: ['tile_field_ammo_crate', 'tile_poolcore_ammo_crate'], emptyId: 'tile_field_ammo_crate_empty',   // 能打開、開出東西的彈藥箱（ammo-crate.png；池核版 Poolcore_ammo-crate.png）
   emptyOf: { tile_field_ammo_crate: 'tile_field_ammo_crate_empty', tile_poolcore_ammo_crate: 'tile_mvot3dds' },   // 開過之後換成哪張空箱圖（池核版：Poolcore_field-base-03.png）
   // 照圖檔也認得：在編輯器用「加入磚塊」再加一次同一張圖，會變成新的素材 id（例如 Poolcore_ammo-crate），一樣當彈藥箱用（圖檔名 → 開過後的空箱圖）
@@ -145,7 +145,7 @@ function updateFlares(dt) {
         (G.flares = G.flares || []).push({ x: s.x1, y: s.y1, t: FLARE.burn, emberT: 0, seed: Math.random() * 10 });
         if (fxV2) flareV2Land(G.flares[G.flares.length - 1]);   // V2：落地一閃、火花濺開
         if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(s.x1, s.y1, 6);   // 照明彈落在順順宮帽上：打開帽子
-        if (typeof sfxAt === 'function') sfxAt('hitFlare', s.x1, s.y1, .35, 'flare-land');
+        if (typeof sfxAt === 'function') sfxAt('hitFlare', s.x1, s.y1, 1, 'flare-land');
       } else if (fxV2) {   // V2：飛行中拖一條煙
         const k = s.t / s.T;
         if (Math.random() < FLARE_FX_V2.trail * dt) flareV2Trail(s.x0 + (s.x1 - s.x0) * k, s.y0 + (s.y1 - s.y0) * k);

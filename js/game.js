@@ -1976,8 +1976,8 @@ function updatePlayerAttack(dt) {
     G.effects.push({ muzzle: true, x: mx, y: my, ang: aimAng, life: .06, life0: .06 });
     G.effects.push({ bullet: true, x1: mx, y1: my, x2: endX, y2: endY, life: .09, life0: .09, color: col });
     G.effects.push({ ring: true, x: endX, y: endY, r: 3, r2: best ? 14 : 8, life: .2, life0: .2, color: col });
-    if (best) { paintMark(best); sfxAt('hitPaint', endX, endY, .4, 'paint-hit'); }
-    SFX.play('shotPaint', .55, 'paint-shot');
+    if (best) { paintMark(best); sfxAt('hitPaint', endX, endY, 1, 'paint-hit'); }
+    SFX.play('shotPaint', 1, 'paint-shot');
     return;
   }
   const wild = typeof mothWildShot === 'function' ? mothWildShot(p, aimAng) : null;   // 吸了人面蝶的混亂鱗粉：八成打偏（js/human-face-butterfly.js）

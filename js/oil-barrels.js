@@ -257,8 +257,8 @@ function anyFireAt(x, y, pad = 0) {
   for (const m of G.flameMarks) if (Math.hypot(x - m.x, (y - m.y) / .7) <= m.r + pad) return m;
   return null;
 }
-function addOilFire(x, y, r, life, dps) {
-  (G.oilFires = G.oilFires || []).push({ x, y, r, t: life, t0: life, dps, flameT: 0, smokeT: 0 });
+function addOilFire(x, y, r, life, dps, foeDps = dps) {   // foeDps：燒怪物、核心的每秒傷害（燃燒彈比較燙，js/special-guns.js；沒給＝跟 dps 一樣）
+  (G.oilFires = G.oilFires || []).push({ x, y, r, t: life, t0: life, dps, foeDps, flameT: 0, smokeT: 0 });
   for (const t of G.towers) { t.navPath = null; t.navGoal = null; t.navTimer = 0; }   // 哨兵重新找路，繞開剛燒起來的火
 }
 
@@ -284,13 +284,13 @@ function updateOil(dt) {
     G.oilSlicks = G.oilSlicks.filter(s => !s.lit && s.t > 0);
   }
   if (!G.oilFires || !G.oilFires.length) return;
-  const fireDps = o => {   // 站在哪幾片火裡 → 取最燙的那片
+  const fireDps = (o, foe) => {   // 站在哪幾片火裡 → 取最燙的那片；foe＝怪物、核心（用 foeDps）
     let best = 0;
-    for (const f of G.oilFires) if (f.t > 0 && Math.hypot(o.x - f.x, (o.y - f.y) / .7) <= f.r) best = Math.max(best, f.dps);
+    for (const f of G.oilFires) if (f.t > 0 && Math.hypot(o.x - f.x, (o.y - f.y) / .7) <= f.r) best = Math.max(best, foe ? (f.foeDps ?? f.dps) : f.dps);
     return best;
   };
-  const fireTick = o => {
-    const dps = fireDps(o);
+  const fireTick = (o, foe) => {
+    const dps = fireDps(o, foe);
     if (!dps) { o.fireT = FIRE_TICK * .5; return 0; }   // 踩進火裡 0.5 秒就開始燙
     o.fireT = (o.fireT ?? FIRE_TICK * .5) - dt;
     if (o.fireT > 0) return 0;
@@ -299,13 +299,13 @@ function updateOil(dt) {
   };
   for (const core of G.cores || []) {
     if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
-    const damage = fireTick(core); if (!damage) continue;
+    const damage = fireTick(core, true); if (!damage) continue;
     wakeCore(core); core.lastHp = core.hp; core.hp = Math.max(0, core.hp - damage); core.hitT = .16;
     flashDmg('-' + Math.round(damage), core.x, core.y - 56, '#ff9a3c');
   }
   for (const e of G.enemies) {
     if (e.dead) continue;
-    const d = fireTick(e); if (!d) continue;
+    const d = fireTick(e, true); if (!d) continue;
     e.hp -= d; e.fireDmg = (e.fireDmg || 0) + d; e.hitT = Math.max(e.hitT || 0, .16); e.hitColor = '#ff8a3a'; e.fireHitAt = performance.now() / 1000;   // 被火燒到（生命體會被燒死）
     flashDmg('-' + Math.round(d), e.x, e.y - 26, '#ff9a3c');
   }

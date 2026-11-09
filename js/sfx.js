@@ -70,6 +70,8 @@ const SFX = (() => {
     hitIncendiary: { mode: 'random', files: ['戰鬥/元素/火焰.mp3', '戰鬥/元素/火焰02.mp3'] },   // 燃燒彈落地燒出火海
     shotTranq: '戰鬥/槍械/開槍.mp3',
     hitTranq: '戰鬥/命中/hit.mp3',
+    shotConfuse: '戰鬥/槍械/開槍.mp3',       // 混亂彈（先借麻醉彈的聲音）
+    hitConfuse: '戰鬥/命中/hit.mp3',
     shotPaint: '戰鬥/槍械/開槍.mp3',
     hitPaint: '戰鬥/命中/hit.mp3',
     shotSplit: '戰鬥/槍械/開槍.mp3',
@@ -256,7 +258,7 @@ const SFX = (() => {
   const VARY = { pitch: 0.08, gain: 0.12 };
   const VARIED = new Set(['gunshot', 'monsterHit', 'fireImpact', 'lightningImpact', 'corrosionImpact', 'avarenCorrosion', 'monsterDown',
     'rangedShot', 'knock2', 'cleaver', 'meleeAttack', 'swordSwing', 'slimeHit', 'slimeLand', 'kill', 'hit', 'birdHurt', 'birdDeath', 'pearlHurt', 'pearlDeath', 'pearlElderDeath', 'lifeformAttack', 'lifeformWalk', 'smilerBite', 'hangiHurt', 'hangiDeath', 'fishStep', 'fishSpray', 'fishDouse', 'fishHurt', 'fishDeath', 'loofahStomp', 'loofahVine', 'loofahStep', 'loofahHurt', 'loofahDeath', 'milkfishHurt', 'milkfishDeath', 'mothFlap', 'mothSpray', 'mothHurt', 'mothDeath', 'clownfishHop1', 'clownfishHop2', 'clownfishHurt', 'clownfishDeath', 'clownfishSmallDeath', 'mouseDig', 'mouseOut', 'mouseAttack', 'mouseHurt', 'mouseDeath', 'bananaHurt', 'bananaDeath', 'gourdDrag', 'gourdSlam', 'gourdLandCry', 'gourdDeath', 'gourdTossLand', 'vineGrab', 'vineLift', 'vineLand', 'eliteStep', 'capKingStep', 'capKingClose', 'capKingShuffle', 'pop', 'playerHit', 'playerHitMonster',
-    'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall', 'storyPunch', 'storyPartyPopper', 'storyPartyHorn']);
+    'shotPistol', 'hitPistol', 'hitFlare', 'hitIncendiary', 'shotTranq', 'hitTranq', 'shotConfuse', 'hitConfuse', 'shotPaint', 'hitPaint', 'shotSplit', 'hitSplit', 'shotShock', 'hitShock', 'shotHeal', 'shotSticky', 'hitSticky', 'shotKnock', 'hitKnock', 'knockWall', 'storyPunch', 'storyPartyPopper', 'storyPartyHorn']);
   const jitter = amount => 1 + (Math.random() * 2 - 1) * amount;
   // 固定把某些音效播快／播慢（1.4＝音調高、比較短；0.8＝低沉）：同一個音檔做出不同的聲音
   const SOUND_PITCH = { clownfishSmallDeath: 1.6, mouseDeath: .72 };

@@ -135,6 +135,10 @@ const WEAPON_UPGRADES = {
 const BULLET_SET = 20;
 // image：子彈的圖（images/weapon/bullet/，統一 48×16）；max：一組幾發（彈藥包一格放這麼多）；gap：兩發至少隔幾秒；color：右下角、切換時的顏色
 // source：怎麼拿到——develop＝諾亞的開發工坊開發（cost 碎片，每次出勤在營地的彈藥箱放一組）；field＝只能在後室（戰鬥區域）的置物櫃找到（打完就沒了）；supply＝補給箱、彈藥箱補
+// 特殊子彈對「怪物」的效果倍率：傷害、睡／暈／麻痺／混亂的秒數、擊退距離、黏膠的減速、燃燒彈火海燒怪物的傷害都乘上這個數。
+// 對溫特和隊員的效果不變（麻醉彈、閃光彈讓隊員睡／暈的秒數，雷電彈電到隊員、火海燙到隊員的傷害，黏膠讓隊員變慢都照下面原本的數字）。
+// 照明彈、螢光漆彈、治療彈不受影響（治療彈打到怪物不會補兩倍）。下面 BULLETS 寫的都是「原本的數字」。
+const BULLET_FOE_MUL = 2;
 const BULLETS = {
   pistol:     { name: '一般子彈', icon: '•', image: 'images/weapon/bullet/Ordinarybullets.png', color: '#ffe79a' },
   flare:      { name: '照明彈', icon: '🔥', image: 'images/weapon/bullet/Flare.png', color: '#ff8a5c', max: BULLET_SET, gap: .8, shine: 24, source: 'supply',   // shine：落地後亮幾秒
@@ -145,8 +149,8 @@ const BULLETS = {
     desc: '打中的怪物睡著（不動、不攻擊）；打中暴走的隊員會睡一下，醒來恢復正常。對怪物「生命體」沒有效果。' },
   paint:      { name: '螢光漆彈', icon: '🎨', image: 'images/weapon/bullet/Paintball.png', color: '#39ff14', max: BULLET_SET, gap: .3, source: 'develop', cost: 100,
     desc: '打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。同時只能標一隻，打新的舊的就消失；怪物死掉漆就跟著消失。' },
-  split:      { name: '分裂彈', icon: '✳️', image: 'images/weapon/bullet/SplitBullet.png', color: '#9fe3ff', max: BULLET_SET, gap: .5, pellets: 5, spread: .55, dmg: 4, range: 5, source: 'develop', cost: 150,   // pellets：一次幾顆、spread：扇形角度（弧度）、dmg：每顆傷害、range：射程（格）
-    desc: '一次扇形噴出好幾顆小子彈，近距離打一整群小怪。距離越遠越散。' },
+  split:      { name: '分裂彈', icon: '✳️', image: 'images/weapon/bullet/SplitBullet.png', color: '#9fe3ff', max: BULLET_SET, gap: .5, pellets: 8, spread: .7, dmg: 4, range: 5, near: 1, farMul: .4, source: 'develop', cost: 150,   // 像散彈槍：pellets 一次幾顆、spread 扇形角度（弧度，越大越散）、dmg 每顆傷害、range 射程（格）；near 格以內每顆全傷害，越遠越弱，到射程盡頭只剩 farMul 倍
+    desc: '像散彈槍一樣一次噴出一大把小子彈。貼得越近，打中的顆數越多、每顆也越痛；離遠了子彈散開，只會擦到幾顆。' },
   flash:      { name: '閃光彈', icon: '💥', image: 'images/weapon/bullet/Flashbang.png', color: '#fff6a8', max: BULLET_SET, gap: .7, r: 2.4, stun: 2.5, range: 8, source: 'field',   // r：閃光半徑（格）、stun：暈幾秒、range：最遠丟幾格
     desc: '丟出去爆出強光，範圍內的怪物暈眩幾秒。範圍內的隊員也會被閃到、暈一下。對怪物「生命體」沒有效果。' },
   shock:      { name: '雷電彈', icon: '⚡', image: 'images/weapon/bullet/ElectronBomb.png', color: '#8fd8ff', max: BULLET_SET, gap: .5, dmg: 10, chain: 3, chainR: 3, stun: 1.2, source: 'field',   // dmg：傷害、chain：最多再跳幾隻、chainR：跳躍距離（格）、stun：麻痺幾秒
@@ -157,11 +161,13 @@ const BULLETS = {
     desc: '打出去落地噴出一灘黏膠（打中怪物就黏在牠腳下），黏膠會留在地上 30 秒。踩進去的怪物會變很慢；溫特和隊員踩到也一樣會被黏住，小心打的位置。飛在空中、鑽在地底的怪物不受影響。' },
   knock:      { name: '擊退彈', icon: '💨', image: 'images/weapon/bullet/KnockbackBullet.png', color: '#6f9bff', max: BULLET_SET, gap: .5, dmg: 6, push: 2.2, slide: .2, wallStun: 1.8, wallDmg: 8, range: 9, source: 'develop', cost: 130,   // dmg：傷害、push：推幾格、slide：推出去花幾秒、wallStun：撞牆暈幾秒（大型怪物一半）、wallDmg：撞牆再扣多少、range：射程（格）
     desc: '打中的怪物被往後推開；推去撞到牆壁或建築會暈一下、再受一點傷。很重的怪物推不動，在空中飛的人面蝶推得開但不會撞牆。' },
+  confuse:    { name: '混亂彈', icon: '🌀', image: 'images/weapon/bullet/ConfusionBullet.png', color: '#c98bff', max: BULLET_SET, gap: .5, confuse: 6, brawl: 3, range: 9, source: 'develop', cost: 150,   // confuse：混亂幾秒（大型怪物一半）、brawl：被混亂的怪物打到的那隻會回手打牠幾秒、range：射程（格）
+    desc: '打中的怪物陷入混亂幾秒：不理溫特和隊員，跑去攻擊身邊的其他怪物；被打的怪物也會回頭打牠，讓牠們自相殘殺。大型怪物混亂的時間減半；頭目、怪物「生命體」沒有效果。打不中隊員（會穿過去）。' },
 };
 // 在置物箱裡找到特殊子彈（只有後室才找得到的 field 子彈）：ammo 找到子彈的機率；kinds 會找到哪幾種；ammoFind 一次給幾發；start 第一次拿到（設定好的置物櫃）給幾發
 const GUN_FINDS = { ammo: .5, kinds: ['incendiary', 'flash', 'shock', 'heal', 'sticky'],
-  ammoFind: { incendiary: 2, flash: 2, shock: 2, heal: 1, tranq: 3, paint: 4, sticky: 2, knock: 3 },
-  start: { incendiary: 3, flash: 3, shock: 4, heal: 2, tranq: 5, paint: 6, sticky: 3, knock: 4 } };
+  ammoFind: { incendiary: 2, flash: 2, shock: 2, heal: 1, tranq: 3, paint: 4, sticky: 2, knock: 3, confuse: 3 },
+  start: { incendiary: 3, flash: 3, shock: 4, heal: 2, tranq: 5, paint: 6, sticky: 3, knock: 4, confuse: 4 } };
 // ===== 彈匣（js/magazine.js）：在背包「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪只換得到彈匣裡的 =====
 // free：不佔彈匣、一定帶著；跟裝備一樣最高 Lv5（slots 要有 5 筆、cost 有 4 筆）；slots[等級-1]＝彈匣裝得下幾種；cost[i]＝從第 i+1 級升到下一級花幾個異質碎片（開發工坊）
 const MAGAZINE = { free: ['pistol'], slots: [2, 3, 4, 5, 6], cost: [150, 250, 380, 520], name: '彈匣', icon: '🧰', image: 'images/裝備/magazine.png' };   // image：開發工坊的圖（沒有就用 icon）

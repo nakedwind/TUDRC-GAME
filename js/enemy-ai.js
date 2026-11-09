@@ -283,6 +283,44 @@ function moveEnemyToward(e, target, dt) {
   return moved;
 }
 
+// ---- 混亂：不理溫特和隊員，去打最近的其他怪物（混亂彈 js/special-guns.js、會混亂的隊員 data/characters.js 的 confuse）----
+// 被混亂的怪物打到的那隻會「回手」：brawlT 秒內專打牠（brawlWith），所以兩隻會互打。
+// 回傳 true＝這一幀由這裡處理完了；false＝照平常的行為（版權老鼠有自己的混亂處理、暈眩中）
+const CONFUSE_AI = { reach: 30, cd: 1, sense: 10 };   // 貼多近才打得到（px）、多久打一下（秒）、找幾格內的怪物
+function stepConfusedEnemy(e, dt) {
+  if (e.behavior === 'burrow') return false;   // 版權老鼠：js/burrowing-mouse.js 自己處理
+  if (e.brawlT > 0) { e.brawlT -= dt; if (!e.brawlWith || e.brawlWith.dead || e.brawlWith.hp <= 0) e.brawlT = 0; }
+  if (!(e.confuseT > 0) && !(e.brawlT > 0)) return false;
+  if (e.stunT > 0) { e.moving = false; return true; }   // 暈著、睡著：不動
+  const alive = o => o && o !== e && !o.dead && o.hp > 0 && !o.dummy && !(typeof burrowUnderground === 'function' && burrowUnderground(o));
+  let foe = e.brawlT > 0 && alive(e.brawlWith) ? e.brawlWith : null;
+  if (!foe && e.confuseT > 0) {
+    let best = CONFUSE_AI.sense * CELL;
+    for (const o of G.enemies) { if (!alive(o)) continue; const d = Math.hypot(o.x - e.x, o.y - e.y); if (d < best) { best = d; foe = o; } }
+  }
+  if (!foe) { e.moving = false; return e.confuseT > 0; }   // 附近沒有別的怪物：混亂中就原地發呆（不攻擊人）
+  const d = Math.hypot(foe.x - e.x, foe.y - e.y);
+  const moveDt = e.behavior === 'clownfish' && typeof updateClownfishHop === 'function' ? updateClownfishHop(e, dt) : e.frames ? dt : updateSlimeJump(e, dt);
+  if (d > CONFUSE_AI.reach) {
+    if (e.behavior === 'moth' || hasLineOfSight(e.x, e.y, foe.x, foe.y)) moveEnemyToward(e, foe, moveDt);
+    else { const [gc, gr] = cellAt(foe.x, foe.y), nav = enemyNavigate(e, gc, gr, moveDt, 'brawl:' + gc + ',' + gr, false); if (nav.blocker) e.moving = false; }
+    e.dir = foe.x < e.x ? 'left' : 'right';
+    return true;
+  }
+  e.moving = false;
+  e.confuseCd = (e.confuseCd || 0) - dt;
+  monsterSwingCue(e, e.confuseCd, foe.x, foe.y);
+  if (e.confuseCd > 0) return true;
+  e.confuseCd = CONFUSE_AI.cd;
+  monsterSwingHit(e, foe.x, foe.y);
+  const dmg = Math.max(10, e.sentryDamage || e.playerDamage || 0);   // 平常不近戰的怪物（傷害 0）：混亂時至少打 10
+  foe.hp -= dmg; foe.hitT = Math.max(foe.hitT || 0, .14); foe.hitColor = '#c98bff';
+  flashDmg('-' + Math.round(dmg), foe.x, foe.y - 26, '#d6a0ff');
+  if (typeof sfxMonsterHit === 'function') sfxMonsterHit(foe, .4, 'monster');
+  if (!(foe.confuseT > 0) && foe.hp > 0) { foe.brawlWith = e; foe.brawlT = ((typeof BULLETS !== 'undefined' && BULLETS.confuse && BULLETS.confuse.brawl) || 3) * (typeof BULLET_FOE_MUL !== 'undefined' ? BULLET_FOE_MUL : 1); }   // 被打的回手
+  return true;
+}
+
 // ---- 異質體行為：18 格感知、尋路與黑暗遊蕩 ----
 const ENEMY_SENSE_RANGE = 18 * CELL;
 const ENEMY_NEIGHBORS = [[0, -1], [-1, 0], [1, 0], [0, 1]];
@@ -496,6 +534,7 @@ function stepEnemy(e, dt) {
   updateEnemyEffects(e, dt);
   if (e.hp <= 0) return;
   if (updateEnemyFeel(e, dt)) return;   // 擊退滑行、重擊硬直、自爆引信
+  if ((e.confuseT > 0 || e.brawlT > 0) && stepConfusedEnemy(e, dt)) return;   // 混亂（混亂彈、會混亂的隊員）：改打其他怪物；被混亂的怪物打到：回手打牠
   if (e.behavior === 'moth') { stepMothEnemy(e, dt); return; }   // 人面蝶：在空中飛（飛得過牆，不用下面的卡牆檢查）、撒鱗粉、趨光（js/human-face-butterfly.js）
   const blocked = (x, y) => enemyBlocked(x, y, e);
   if (blocked(e.x, e.y)) {
@@ -558,16 +597,6 @@ function stepEnemy(e, dt) {
     return;
   }
   const moveDt = e.frames ? dt : updateSlimeJump(e, dt);   // 有走路動畫的怪物（鳥頭人）一路走，不像史萊姆一跳一跳
-  if (e.confuseT > 0) {
-    const allies = G.enemies.filter(o => o !== e && !o.dead && o.hp > 0).sort((a,b) => Math.hypot(a.x-e.x,a.y-e.y)-Math.hypot(b.x-e.x,b.y-e.y));
-    const foe = allies[0];
-    if (foe) {
-      const d = Math.hypot(foe.x-e.x,foe.y-e.y);
-      if (d > 22) moveEnemyToward(e, foe, moveDt);
-      else { e.confuseCd=(e.confuseCd||0)-dt; if(e.confuseCd<=0){e.confuseCd=.8;foe.hp-=10;flash('混亂攻擊',foe.x,foe.y-24,'#c791ff');} }
-    }
-    return;
-  }
   const playerDistance = G.player && G.player.hp > 0 ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
   // 玩家進入撲擊距離（3 格內）時，比探照燈更優先——否則燈附近的史萊姆永遠不會撲向玩家。
   if (playerDistance <= SLIME_POUNCE.range && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
