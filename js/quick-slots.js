@@ -119,7 +119,7 @@ function useQuickSlot(slot) {
   if (it.act === 'adrenaline') { if (typeof useAdrenaline === 'function') useAdrenaline(); return; }   // js/equipment.js
   if (it.act === 'eyedrops') { if (typeof useEyeDrops === 'function') useEyeDrops(); return; }   // 眼藥水（js/equipment.js）
   if (it.act === 'food') { if (typeof useFood === 'function') useFood(it.id); return; }   // 怪物掉的食物（js/food.js）
-  if (it.act === 'toolbox') { if (typeof useToolbox === 'function') useToolbox(); return; }   // 工具箱：修營地和所有建築（js/equipment.js）
+  if (it.act === 'toolbox') { if (typeof useToolbox === 'function') useToolbox(); return; }   // 工具箱：修身邊 1.5 格內的建築（js/equipment.js）
   if (it.act === 'firstaid') { if (typeof useFirstAid === 'function') useFirstAid(); return; }   // 急救包、異質急救包：選要治療的隊員（js/equipment.js；再按一次＝取消）
   useSupply(it.id);   // 醫療包、杏仁水…（js/shop.js）
 }

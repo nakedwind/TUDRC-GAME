@@ -448,30 +448,133 @@ function renderFieldMapApp(el) {
   el.innerHTML = '<div class="aa tm tmf">' + side + main + '</div>';
 }
 
+// ================= 小地圖拖移（基地小地圖 js/base-minimap.js、戰鬥小地圖 #navMinimap 共用）=================
+// 按住小地圖上面的標題列可以拖到畫面上任何地方；雙擊標題列＝回到原本的位置。
+// 拖到哪裡記在瀏覽器（tudrc_minimap_pos），記的是「離原本位置差多少 px」，所以 UI 編輯器改原本位置時會一起跟著動。
+// UI 編輯器預覽（?uiedit=1）裡不套用玩家拖過的位置，編輯器看到的永遠是原本位置。
+const MINIMAP_POS_KEY = 'tudrc_minimap_pos';
+const MINIMAP_UIEDIT = /[?&]uiedit=1(&|$)/.test(location.search);
+let minimapPosCache = null;   // 讀一次就記在這裡；拖的時候先改這裡，放開才寫進瀏覽器
+function minimapPos(id) {
+  if (MINIMAP_UIEDIT) return { x: 0, y: 0 };
+  if (!minimapPosCache) { try { minimapPosCache = JSON.parse(localStorage.getItem(MINIMAP_POS_KEY) || '{}') || {}; } catch (_) { minimapPosCache = {}; } }
+  const p = minimapPosCache[id];
+  return p ? { x: +p.x || 0, y: +p.y || 0 } : { x: 0, y: 0 };
+}
+function minimapPosSave(id, p, keep = true) {   // keep＝寫進瀏覽器（拖動中只改記憶體）
+  minimapPos(id); minimapPosCache[id] = { x: Math.round(p.x), y: Math.round(p.y) };
+  if (keep) try { localStorage.setItem(MINIMAP_POS_KEY, JSON.stringify(minimapPosCache)); } catch (_) {}
+}
+// 把小地圖放到「原本位置＋拖過的距離」；超出遊戲畫面就推回來（視窗變小時也不會跑到外面）
+// def＝原本離右下角幾 px：{ right, bottom }
+function minimapPlace(el, id, def, p) {
+  p = p || minimapPos(id);
+  el.style.right = (def.right - p.x) + 'px'; el.style.bottom = (def.bottom - p.y) + 'px';
+  const wrap = el.offsetParent; if (!wrap || !el.offsetWidth) return p;
+  const r = el.getBoundingClientRect(), wr = wrap.getBoundingClientRect(), m = 4;
+  let dx = 0, dy = 0;
+  if (r.left < wr.left + m) dx = wr.left + m - r.left; else if (r.right > wr.right - m) dx = wr.right - m - r.right;
+  if (r.top < wr.top + m) dy = wr.top + m - r.top; else if (r.bottom > wr.bottom - m) dy = wr.bottom - m - r.bottom;
+  if (dx || dy) { p = { x: p.x + dx, y: p.y + dy }; el.style.right = (def.right - p.x) + 'px'; el.style.bottom = (def.bottom - p.y) + 'px'; }
+  return p;
+}
+// 讓 el 可以拖：handle＝按住哪裡拖（按到按鈕不算）
+function minimapDraggable(el, handle, id, def) {
+  let drag = null;
+  handle.style.cursor = 'move'; handle.title = handle.title || '按住拖動小地圖；雙擊回到原本位置';
+  handle.addEventListener('pointerdown', e => {
+    if (e.button !== 0 || e.target.closest('button')) return;
+    e.preventDefault(); e.stopPropagation();
+    drag = { sx: e.clientX, sy: e.clientY, p: minimapPos(id), now: null };
+    handle.setPointerCapture(e.pointerId);
+  });
+  handle.addEventListener('pointermove', e => {
+    if (!drag) return;
+    drag.now = minimapPlace(el, id, def, { x: drag.p.x + e.clientX - drag.sx, y: drag.p.y + e.clientY - drag.sy });
+    minimapPosSave(id, drag.now, false);   // 每 0.1 秒的畫面更新也會用到位置，先記著才不會被拉回去
+  });
+  const end = () => { if (!drag) return; if (drag.now) minimapPosSave(id, drag.now); drag = null; };
+  handle.addEventListener('pointerup', end); handle.addEventListener('pointercancel', end);
+  handle.addEventListener('dblclick', e => { if (e.target.closest('button')) return; minimapPosSave(id, { x: 0, y: 0 }); minimapPlace(el, id, def); });
+}
+// 兩個小地圖共用的按鈕圖示
+const MINIMAP_ICON_FULL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+const MINIMAP_ICON_HIDE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
+const MINIMAP_ICON_MAP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="currentColor" stroke-width="2"/></svg>';
+// 打開 T-Pad 並直接進「地圖」App（小地圖的 ⛶ 按鈕）
+function minimapOpenFull() {
+  if (typeof openTPad !== 'function' || typeof launchTPadApp !== 'function') return;
+  if (!(typeof tpadOpen !== 'undefined' && tpadOpen)) openTPad();
+  if (typeof tpadOpen !== 'undefined' && tpadOpen) launchTPadApp('map');
+}
+
 // ================= 右下角小地圖（裝備慣性導航記錄器、在戰鬥區域時）=================
 // 以溫特為中心、畫附近記過的格子；右下角的子彈（js/game.js 的 #ammoHud）往左讓位到小地圖左邊。
-const TMAP_MINI = { w: 184, h: 132, cell: 6, gap: 12, right: 14 };   // 大小（px）、一格幾 px、跟子彈之間的距離、離右邊幾 px（背景 60% 不透明寫在下面的 CSS；地面、牆不透明）
-let tmapMiniEl = null, tmapMiniCtx = null;
+// 上面一條標題列：按住可以拖動；⛶ 打開完整地圖（T-Pad「地圖」）、— 收起；收起後右下角留一個小按鈕可以再叫出來（記在瀏覽器 tudrc_nav_minimap_hidden）。
+// 小地圖畫面本身不擋滑鼠（在戰鬥中點下去還是照常射擊），只有標題列和按鈕可以按。
+// UI編輯器可以調位置：js/ui-layout.js 的 UI_ELEMENTS（navMinimap、navMinimapShow）。
+const TMAP_MINI = { w: 184, h: 132, head: 22, cell: 6, gap: 12, right: 14, bottom: 14 };   // 地圖區大小（px）、標題列高度、一格幾 px、跟子彈之間的距離、離右下角幾 px（背景 60% 不透明寫在下面的 CSS；地面、牆不透明）
+const TMAP_MINI_HIDE_KEY = 'tudrc_nav_minimap_hidden';
+let tmapMiniHidden = false;
+try { tmapMiniHidden = localStorage.getItem(TMAP_MINI_HIDE_KEY) === '1'; } catch (_) {}
+let tmapMiniEl = null, tmapMiniCtx = null, tmapMiniShowBtn = null, tmapMiniOn = false;
 function tmapMiniBuild() {
   const css = document.createElement('style');
-  css.textContent = '#navMinimap{position:absolute;right:' + TMAP_MINI.right + 'px;bottom:14px;z-index:9;width:' + TMAP_MINI.w + 'px;height:' + TMAP_MINI.h + 'px;border-radius:10px;overflow:hidden;pointer-events:none;' +
-    'background:rgba(0,4,10,.6);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45)}' +
-    '#navMinimap canvas{display:block;width:100%;height:100%;image-rendering:pixelated;background:none;border-radius:0;box-shadow:none;cursor:inherit}';   // 蓋掉 css/style.css 全域 canvas 的深色底（不然外圍永遠不透明）
+  css.textContent = '#navMinimap{position:absolute;right:' + TMAP_MINI.right + 'px;bottom:' + TMAP_MINI.bottom + 'px;z-index:9;width:' + TMAP_MINI.w + 'px;border-radius:10px;overflow:hidden;pointer-events:none;user-select:none;' +
+    'background:rgba(0,4,10,.6);box-shadow:0 0 0 1px rgba(255,255,255,.14),0 4px 14px rgba(0,0,0,.45);font-family:"Microsoft JhengHei",sans-serif}' +
+    '#navMinimap .nmap-head{display:flex;align-items:center;gap:4px;height:' + TMAP_MINI.head + 'px;padding:0 3px 0 8px;pointer-events:auto;touch-action:none;background:rgba(143,211,255,.08);border-bottom:1px solid rgba(143,211,255,.14)}' +
+    '#navMinimap .nmap-title{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#dbe8f3;font-size:12px;font-weight:700}' +
+    '#navMinimap button,#navMinimapShow{display:grid;place-items:center;padding:0;border:0;border-radius:6px;cursor:pointer;color:#cfe2f0;background:rgba(255,255,255,.06);transition:background .12s,color .12s}' +
+    '#navMinimap button{width:20px;height:17px}' +
+    '#navMinimap button:hover,#navMinimapShow:hover{background:rgba(127,215,255,.28);color:#fff}' +
+    '#navMinimap button svg{width:13px;height:13px}' +
+    '#navMinimap canvas{display:block;width:' + TMAP_MINI.w + 'px;height:' + TMAP_MINI.h + 'px;image-rendering:pixelated;background:none;border-radius:0;box-shadow:none;cursor:inherit}' +   // 蓋掉 css/style.css 全域 canvas 的深色底（不然外圍永遠不透明）
+    '#navMinimapShow{position:absolute;right:' + TMAP_MINI.right + 'px;bottom:' + TMAP_MINI.bottom + 'px;z-index:9;width:34px;height:34px;border-radius:10px;' +
+      'background:rgba(0,4,10,.62);box-shadow:0 0 0 1px rgba(143,211,255,.22),0 4px 14px rgba(0,0,0,.45)}' +
+    '#navMinimapShow svg{width:19px;height:19px}';
   document.head.appendChild(css);
+  const wrap = document.getElementById('wrap') || document.body;
   tmapMiniEl = document.createElement('div'); tmapMiniEl.id = 'navMinimap';
+  tmapMiniEl.innerHTML = '<div class="nmap-head"><span class="nmap-title">導航記錄器</span>' +
+    '<button type="button" data-nmap="full" title="打開完整地圖（T-Pad 地圖，M 鍵）">' + MINIMAP_ICON_FULL + '</button>' +
+    '<button type="button" data-nmap="hide" title="收起小地圖">' + MINIMAP_ICON_HIDE + '</button></div>';
   const cv = document.createElement('canvas'); cv.width = TMAP_MINI.w; cv.height = TMAP_MINI.h;
   tmapMiniEl.append(cv);   // 完整度只在 T-Pad「地圖」裡看
-  (document.getElementById('wrap') || document.body).appendChild(tmapMiniEl);
+  tmapMiniShowBtn = document.createElement('button'); tmapMiniShowBtn.type = 'button'; tmapMiniShowBtn.id = 'navMinimapShow';
+  tmapMiniShowBtn.title = '顯示小地圖'; tmapMiniShowBtn.innerHTML = MINIMAP_ICON_MAP; tmapMiniShowBtn.style.display = 'none';
+  wrap.append(tmapMiniEl, tmapMiniShowBtn);
   tmapMiniCtx = cv.getContext('2d');
+  tmapMiniEl.addEventListener('click', e => {
+    const b = e.target.closest('[data-nmap]'); if (!b) return;
+    if (b.dataset.nmap === 'hide') tmapMiniSetHidden(true); else minimapOpenFull();
+  });
+  tmapMiniShowBtn.addEventListener('click', () => tmapMiniSetHidden(false));
+  // 按完不要讓按鈕留著焦點（不然之後按空白鍵會再按一次）
+  [tmapMiniEl, tmapMiniShowBtn].forEach(el => el.addEventListener('mouseup', () => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }));
+  // 按鈕、標題列不要觸發戰鬥中的射擊／移動
+  [tmapMiniEl.querySelector('.nmap-head'), tmapMiniShowBtn].forEach(el => ['pointerdown', 'mousedown'].forEach(t => el.addEventListener(t, e => e.stopPropagation())));
+  minimapDraggable(tmapMiniEl, tmapMiniEl.querySelector('.nmap-head'), 'field', TMAP_MINI);
+}
+function tmapMiniSetHidden(v) {
+  tmapMiniHidden = v;
+  try { localStorage.setItem(TMAP_MINI_HIDE_KEY, v ? '1' : '0'); } catch (_) {}
+  if (typeof sfx === 'function') sfx(v ? 'switch' : 'blip');
+  tmapMiniUpdate();
 }
 function tmapMiniUpdate() {
   const ammo = document.getElementById('ammoHud');
   const on = typeof MAP_FIELD !== 'undefined' && MAP_FIELD && typeof MAP !== 'undefined' && MAP && typeof G !== 'undefined' && G && G.player &&
-    typeof equipLv === 'function' && !!equipLv('navrecorder');
-  if (!on) { if (tmapMiniEl) tmapMiniEl.style.display = 'none'; if (ammo) ammo.style.right = ''; return; }
+    (MINIMAP_UIEDIT || (typeof equipLv === 'function' && !!equipLv('navrecorder')));   // UI 編輯器預覽：沒帶記錄器也顯示，才能調位置
+  tmapMiniOn = !!on;
+  if (!on) { if (tmapMiniEl) { tmapMiniEl.style.display = 'none'; tmapMiniShowBtn.style.display = 'none'; } if (ammo) ammo.style.right = ''; return; }
   if (!tmapMiniEl) tmapMiniBuild();
-  tmapMiniEl.style.display = '';
-  if (ammo) ammo.style.right = (TMAP_MINI.right + TMAP_MINI.w + TMAP_MINI.gap) + 'px';
+  const hidden = tmapMiniHidden && !MINIMAP_UIEDIT;
+  tmapMiniEl.style.display = hidden ? 'none' : '';
+  tmapMiniShowBtn.style.display = hidden ? '' : 'none';
+  // 子彈往左讓位：小地圖在原本的右下角才需要讓；收起時只讓出小按鈕的寬度；拖去別的地方就不用讓
+  const p = hidden ? { x: 0, y: 0 } : minimapPlace(tmapMiniEl, 'field', TMAP_MINI);
+  if (ammo) ammo.style.right = hidden ? (TMAP_MINI.right + 34 + TMAP_MINI.gap) + 'px' : (p.x === 0 && p.y === 0) ? (TMAP_MINI.right + TMAP_MINI.w + TMAP_MINI.gap) + 'px' : '';
+  if (hidden) return;
   const m = MAP, st = tmapExploreState(m), ctx = tmapMiniCtx, S = TMAP_MINI.cell, W = TMAP_MINI.w, H = TMAP_MINI.h;
   const [pc, pr] = tmapCellOf(G.player), ox = W / 2 - pc * S, oy = H / 2 - pr * S;   // 格子 → 小地圖上的 px（溫特在正中間）
   const c0 = Math.max(0, Math.floor(-ox / S)), c1 = Math.min(m.cols - 1, Math.ceil((W - ox) / S));
@@ -516,7 +619,7 @@ window.addEventListener('keydown', e => {
     if (tpadView === 'map') { closeTPad(); e.preventDefault(); e.stopImmediatePropagation(); }
     return;
   }
-  const fieldMini = tmapMiniEl && tmapMiniEl.style.display !== 'none', baseMini = typeof bmapActive === 'function' && bmapActive();   // 基地小地圖收起來也算
+  const fieldMini = tmapMiniOn, baseMini = typeof bmapActive === 'function' && bmapActive();   // 小地圖收起來也算
   if (!fieldMini && !baseMini) return;   // 戰鬥區域沒帶記錄器：M 沒有作用
   if (G.over || (typeof paused !== 'undefined' && paused) || (typeof settingsOpen !== 'undefined' && settingsOpen)) return;
   if (typeof dialogueState !== 'undefined' && dialogueState) return;   // 跟 Tab 一樣：對話、背包、其他介面開著時不要蓋上去

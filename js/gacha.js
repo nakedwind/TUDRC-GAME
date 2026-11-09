@@ -2,7 +2,8 @@
    ・按鈕：轉 1 次、轉 10 次各一欄，上面花異質碎片、下面花經費（基地裡花的是錢包的錢）
    ・地圖上的扭蛋機（GACHA.machineTiles，或名稱有「扭蛋機」的地圖素材；基地、戰鬥地圖都可以）前按 Space 打開
    ・轉到的 skin、配件加進擁有的服裝（js/costumes.js 的 costumeGrant），到衣櫃就能換上
-   ・「收藏」分頁：看扭蛋池裡有哪些、拿到幾個；重複的可以分解換回碎片（每樣至少留 1 個）
+   ・「收藏」分頁：看扭蛋池裡有哪些、拿到幾個；重複的可以分解換回碎片（每樣至少留 1 個，分解前會跳確認視窗）
+     衣櫃也有同一個「收藏」分頁（js/costumes.js 呼叫這裡的 gachaBookHTML、gachaBookClick）
    必須在 js/costumes.js 之後載入。
 */
 let gachaOpen = false;
@@ -136,28 +137,67 @@ function gachaRevealDone() {   // 動畫結束（或點一下跳過）：收掉�
   gc.el.querySelector('.gc-stage').classList.add('done');
   renderGacha();
 }
-function gachaDismantle(id, all) {
-  const item = costumeItem(id), have = costumeState.owned[id] || 0; if (!item || have <= 1) return;
-  const n = all ? have - 1 : 1, gain = n * (GACHA.dismantle[rarityOf(item)] || 0);
-  costumeState.owned[id] = have - n; saveCostumes();
-  if (gain) earnCrystals(gain);
-  if (typeof SFX !== 'undefined') SFX.play('crystalGet', .7, 'gacha-dismantle');
-  gc.msg = '分解了 ' + n + ' 個「' + item.name + '」，拿回 ' + gain + ' 個異質碎片';
-  if (typeof updateHUD === 'function') updateHUD();
-  renderGacha();
+// ---- 分解重複的服裝（扭蛋機「收藏」分頁、衣櫃「收藏」分頁共用）----
+// 分解 1 個換回幾個碎片：看稀有度，數字在 data/costumes.js 的 GACHA.dismantle（服裝編輯器可以改）
+const gachaDismantleValue = item => GACHA.dismantle[rarityOf(item)] || 0;
+const gachaExtra = item => Math.max(0, (costumeState.owned[item.id] || 0) - 1);   // 多出來（可以分解）的數量：每樣至少留 1 個
+// 算好要分解哪些、拿回多少（還沒真的分解）：id＝某一件；all＝那件多的全部；id 沒給＝所有重複的
+function gachaDismantlePlan(id, all) {
+  const items = id ? [costumeItem(id)].filter(Boolean) : gachaPool();
+  const list = items.map(item => ({ item, n: id && !all ? Math.min(1, gachaExtra(item)) : gachaExtra(item) })).filter(x => x.n > 0);
+  return { list, n: list.reduce((s, x) => s + x.n, 0), gain: list.reduce((s, x) => s + x.n * gachaDismantleValue(x.item), 0) };
 }
-function gachaDismantleAll() {
-  let n = 0, gain = 0;
-  for (const item of gachaPool()) {
-    const extra = (costumeState.owned[item.id] || 0) - 1; if (extra <= 0) continue;
-    n += extra; gain += extra * (GACHA.dismantle[rarityOf(item)] || 0); costumeState.owned[item.id] = 1;
-  }
-  if (!n) return;
-  saveCostumes(); if (gain) earnCrystals(gain);
+// 真的分解：數量扣掉、碎片加上、存檔
+function gachaDoDismantle(plan) {
+  for (const { item, n } of plan.list) costumeState.owned[item.id] = Math.max(1, (costumeState.owned[item.id] || 0) - n);
+  saveCostumes();
+  if (plan.gain) earnCrystals(plan.gain);
   if (typeof SFX !== 'undefined') SFX.play('crystalGet', .7, 'gacha-dismantle');
-  gc.msg = '分解了 ' + n + ' 個重複的服裝，拿回 ' + gain + ' 個異質碎片';
   if (typeof updateHUD === 'function') updateHUD();
-  renderGacha();
+  return '分解了 ' + plan.n + ' 個' + (plan.list.length === 1 ? '「' + plan.list[0].item.name + '」' : '重複的服裝') + '，拿回 ' + plan.gain + ' 個異質碎片';
+}
+// 確認視窗：蓋在 host（扭蛋機或衣櫃的卡片）上面，按「分解」才真的分解；done(訊息) 是分解完要做的事
+function gachaAskDismantle(host, plan, done) {
+  if (!plan.n) return;
+  host.querySelector('.gc-confirm')?.remove();
+  const box = document.createElement('div');
+  box.className = 'gc-confirm';
+  // 精簡：標題一行說分解什麼，下面一行說拿回多少
+  const what = plan.list.length === 1 ? '「' + plan.list[0].item.name + '」×' + plan.n : '重複服裝 ×' + plan.n;
+  box.innerHTML = '<div class="gc-confirm-box" role="alertdialog" aria-label="確認分解"><h3>分解' + what + '？</h3>'
+    + '<p class="gc-confirm-gain">拿回 <img src="images/碎片鑰匙/anomalous-shard.png" alt="">' + plan.gain + ' 個異質碎片</p>'
+    + '<div class="gc-confirm-btns"><button type="button" data-confirm-no>取消</button><button type="button" data-confirm-yes class="primary">分解</button></div></div>';
+  box.addEventListener('click', e => {
+    e.stopPropagation();
+    if (e.target.closest('[data-confirm-yes]')) { box.remove(); done(gachaDoDismantle(plan)); }
+    else if (e.target.closest('[data-confirm-no]') || e.target === box) { box.remove(); if (typeof sfx === 'function') sfx('switch'); }
+  });
+  host.appendChild(box);
+  if (typeof sfx === 'function') sfx('button');
+  box.querySelector('[data-confirm-yes]').focus();
+}
+// 確認視窗開著時按 Esc：只關確認視窗（扭蛋機、衣櫃的 Esc 會先問這個）
+function gachaCloseConfirm(host) { const box = host && host.querySelector('.gc-confirm'); if (!box) return false; box.remove(); return true; }
+// 收藏一覽（扭蛋池裡全部的服裝、拿到幾個、重複的可以分解）：扭蛋機和衣櫃都用這一份
+function gachaBookHTML() {
+  const pool = gachaPool(), dupes = pool.reduce((n, i) => n + gachaExtra(i), 0);
+  return '<div class="gc-book-bar"><span class="gc-book-shards"><img src="images/碎片鑰匙/anomalous-shard.png" alt="">' + training.crystals + '</span>'
+    + '已收集 ' + pool.filter(i => costumeCollected(i.id)).length + '／' + pool.length + ' 種'
+    + (dupes ? '・重複的 ' + dupes + ' 個<button type="button" data-dismantle-all>全部分解</button>' : '') + '</div>'
+    + pool.map(item => {
+      const have = costumeState.owned[item.id] || 0, r = rarityOf(item);
+      if (!have && costumeCollected(item.id)) return '<div class="gc-item r-' + r + '">' + gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '・已送出</small>' + rarityTag(r) + '</div>';
+      if (!have) return '<div class="gc-item gc-locked r-' + r + '">' + gachaArt(item) + '<b>？？？</b><small>' + gachaKind(item) + '</small>' + rarityTag(r) + '</div>';
+      return '<div class="gc-item r-' + r + '">' + gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(r)
+        + (have > 1 ? '<i class="gc-count">×' + have + '</i><button type="button" class="gc-dismantle" data-dismantle="' + item.id + '" title="分解 1 個（按住 Shift 分解這件全部重複的）">分解 +' + gachaDismantleValue(item) + '</button>' : '') + '</div>';
+    }).join('');
+}
+// 收藏裡的分解按鈕被按到：先跳確認視窗。回傳 true＝這個按鈕是分解按鈕
+function gachaBookClick(b, e, host, done) {
+  if (b.dataset.dismantle) gachaAskDismantle(host, gachaDismantlePlan(b.dataset.dismantle, e.shiftKey), done);
+  else if ('dismantleAll' in b.dataset) gachaAskDismantle(host, gachaDismantlePlan(null, true), done);
+  else return false;
+  return true;
 }
 
 // ---- 介面 ----
@@ -199,8 +239,7 @@ function buildGacha() {
     const b = e.target.closest('button'); if (!b) return;
     if (b.dataset.pull) gachaPull(Number(b.dataset.pull), b.dataset.pay);
     else if (b.dataset.tab) { gc.tab = b.dataset.tab; gc.msg = ''; sfx('switch'); renderGacha(); }
-    else if (b.dataset.dismantle) gachaDismantle(b.dataset.dismantle, e.shiftKey);
-    else if ('dismantleAll' in b.dataset) gachaDismantleAll();
+    else gachaBookClick(b, e, el.querySelector('.gc-card'), msg => { gc.msg = msg; renderGacha(); });
   });
 }
 function renderGacha() {
@@ -226,15 +265,7 @@ function renderGacha() {
       + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(rarityOf(item)) + (isNew ? '<i class="gc-new">NEW</i>' : '') + '</div>').join('');
   } else {
     list.className = 'gc-list gc-book';
-    const dupes = pool.reduce((n, i) => n + Math.max(0, (costumeState.owned[i.id] || 0) - 1), 0);
-    list.innerHTML = (dupes ? '<div class="gc-book-bar">重複的服裝 ' + dupes + ' 個<button type="button" data-dismantle-all>全部分解</button></div>' : '')
-      + pool.map(item => {
-        const have = costumeState.owned[item.id] || 0, r = rarityOf(item);
-        if (!have && costumeCollected(item.id)) return '<div class="gc-item r-' + r + '">' + gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '・已送出</small>' + rarityTag(r) + '</div>';
-        if (!have) return '<div class="gc-item gc-locked r-' + r + '">' + gachaArt(item) + '<b>？？？</b><small>' + gachaKind(item) + '</small>' + rarityTag(r) + '</div>';
-        return '<div class="gc-item r-' + r + '">' + gachaArt(item) + '<b>' + item.name + '</b><small>' + gachaKind(item) + '</small>' + rarityTag(r)
-          + (have > 1 ? '<i class="gc-count">×' + have + '</i><button type="button" class="gc-dismantle" data-dismantle="' + item.id + '" title="分解 1 個（按住 Shift 分解全部重複的）">分解 +' + (GACHA.dismantle[r] || 0) + '</button>' : '') + '</div>';
-      }).join('');
+    list.innerHTML = gachaBookHTML();
   }
 }
 function openGacha() {
@@ -249,14 +280,14 @@ function openGacha() {
 }
 function closeGacha() {
   if (!gachaOpen) return;
-  gachaOpen = false; gc.busy = false; gc.timers.forEach(clearTimeout); gc.timers = []; gc.el.classList.add('hidden');
+  gachaOpen = false; gc.busy = false; gc.timers.forEach(clearTimeout); gc.timers = []; gc.el.classList.add('hidden'); gachaCloseConfirm(gc.el);
   SFX.fadeOut('gacha-charge', .15);
   sfx('switch');
 }
 // 開著的時候：Esc 關掉，其他按鍵都不要傳給遊戲
 window.addEventListener('keydown', e => {
   if (!gachaOpen) return;
-  if (e.key === 'Escape') closeGacha();
+  if (e.key === 'Escape') { if (!gachaCloseConfirm(gc.el)) closeGacha(); }
   if (e.key === ' ' || e.key.startsWith('Arrow')) e.preventDefault();
   e.stopImmediatePropagation();
 }, { capture: true });

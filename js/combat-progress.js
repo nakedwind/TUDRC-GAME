@@ -137,12 +137,13 @@ function resumeSquadFromBase(savedSupply) {
   });
   const missing = team.filter(id => !G.towers.some(t => t.type === id));
   if (missing.length) spawnSentries(missing);
+  if (typeof regroupSquadAtCamp === 'function') regroupSquadAtCamp();   // 全員回營地重新出現（不留在上次倒下的地方，js/sentry.js）
   // 球球不在 TYPES（是 G.npcs），上面換人管不到：移出了就帶走，新編入就生在要跟的人旁邊
   if (!team.includes('ball')) G.npcs = G.npcs.filter(n => n.id !== 'ball');
-  else if (!G.npcs.some(n => n.id === 'ball')) {
-    spawnWanderers(['ball']);
-    const dog = G.npcs.find(n => n.id === 'ball'), who = dogFollowAnchor();
-    if (dog) { dog.x = who.x; dog.y = who.y; }
+  else {
+    if (!G.npcs.some(n => n.id === 'ball')) spawnWanderers(['ball']);
+    const dog = G.npcs.find(n => n.id === 'ball'), who = dogFollowAnchor();   // 球球也回到要跟的人（在營地）旁邊
+    if (dog) { dog.x = who.x; dog.y = who.y; dog.target = null; dog.moving = false; }
   }
   for (const t of G.towers) {
     if (!TYPES[t.type]) continue;

@@ -162,6 +162,11 @@ const DIALOGUES = {
       "fogThick": [
         "……霧變濃了，正好看不到工作。",
         "什麼都看不到……可以收工了嗎？"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "theonie": {
@@ -317,6 +322,11 @@ const DIALOGUES = {
       "fogThick": [
         "嘖，霧變濃了，連瞄準都麻煩。",
         "這種霧……別給我拖後腿。"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "amber": {
@@ -473,6 +483,11 @@ const DIALOGUES = {
       "fogThick": [
         "霧、霧變濃了！大家小心腳下！",
         "看不清楚了……請不要離我太遠！"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "red": {
@@ -636,6 +651,11 @@ const DIALOGUES = {
       "fogThick": [
         "霧變濃了！大家靠緊一點！",
         "看不太到前面……我走前面！"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "avaren": {
@@ -801,6 +821,11 @@ const DIALOGUES = {
       "fogThick": [
         "……霧變濃了。",
         "……看不清楚，別亂跑。"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "luther": {
@@ -977,6 +1002,11 @@ const DIALOGUES = {
       "fogThick": [
         "……視線變差了，請大家保持隊形。",
         "霧太濃了……防線不好守。"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "eldrin": {
@@ -1106,6 +1136,11 @@ const DIALOGUES = {
       "fogThick": [
         "霧變濃了，大家別走散！",
         "視線很差，注意四周的動靜。"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "chris": {
@@ -1200,6 +1235,11 @@ const DIALOGUES = {
       "fogThick": [
         "霧這麼濃……加班費可以多算一點嗎？",
         "看不到啦！誰在我旁邊？"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "tino": {
@@ -1344,6 +1384,11 @@ const DIALOGUES = {
       "fogThick": [
         "霧好濃……只能用耳朵聽了。",
         "……看不到，但聽得到。小心。"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "claire": {
@@ -1644,6 +1689,11 @@ const DIALOGUES = {
       "fogThick": [
         "哇，霧好濃！像在蒸籠裡一樣！",
         "霧變濃了……聞起來像剛煮好的飯。"
+      ],
+      "talkHospital": [
+        "Zzz……Zzz……",
+        "呼……嗯……Zzz……",
+        "（睡得很熟，叫不醒）Zzz……"
       ]
     },
     "rowan": {

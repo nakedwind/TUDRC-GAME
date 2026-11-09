@@ -1147,6 +1147,7 @@ function draw() {
     const pickShard = typeof shardNearPlayer === 'function' ? shardNearPlayer() : null;
     const pickProp = !pickShard && typeof pickupPropNearPlayer === 'function' ? pickupPropNearPlayer() : null;
     if (mate) drawTowerPrompts(mate, mate.y - 57);   // 隊員：急救／疏導（位置固定，泡泡會排到上面）
+    if (G.running && typeof drawRepairPrompt === 'function' && !(typeof playerChannel !== 'undefined' && playerChannel)) drawRepairPrompt();   // 身上有工具箱、旁邊有受損的建築：「R 修理」（js/equipment.js）
     if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');

@@ -144,7 +144,9 @@ function renderSupplyShop() {
   renderBackroomTabs();
   supplyShop.classList.toggle('selling', shopCanSell() && backroomTab === 'sell');
   if (shopCanSell() && backroomTab === 'sell') { renderSellList(money); renderCart(money); return; }
-  const visible = shopItems().filter(item => vendingMode || backroomMode || supplyShopTab === 'all' || item.kind === supplyShopTab)
+  // 分類分頁只有便利商店看得到；販賣機、飲料店、後室商店把分頁藏起來了，所以不能套用上次在便利商店點的分類
+  // （不然在便利商店點過「飲料」，後室 60BLUE 賣的杏仁水是「補給」，就會整排被藏掉、看起來沒東西賣）
+  const visible = shopItems().filter(item => vendingMode || backroomMode || drinkShopMode || supplyShopTab === 'all' || item.kind === supplyShopTab)
     .sort((a, b) => (SHOP_KIND_ORDER.indexOf(a.kind) - SHOP_KIND_ORDER.indexOf(b.kind)) || a.price - b.price);   // 補給 → 零食 → 飲料，各自由便宜到貴
   supplyShopList.innerHTML = visible.map(item => {
     const use = item.use && SUPPLY_KIND[item.use], inCart = shopCart.get(item.id) || 0, short = item.price - left;

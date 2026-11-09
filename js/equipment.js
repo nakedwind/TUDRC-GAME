@@ -290,16 +290,55 @@ function useEyeDrops() {
   say('👁️ 眼前清楚多了', '#9fe3ff'); sfx('soothe');
   systemNotice('點了眼藥水：' + Math.round(EYE_DROPS.dur / 60) + ' 分鐘內看得清楚地圖（暗處一樣會被微笑者咬）');
 }
-// ---- 工具箱（道具）：營地＋溫特蓋的所有建築，各修好最大 HP 的 TOOLBOX.repair（data/equipment.js）；不用站在旁邊 ----
-// 地雷不算；地圖上本來就有的障礙物、礦石、被打壞（HP 歸零）的也不修
-const toolboxTargets = () => G.obstacles.filter(o => (o.isBase || (o.playerBuilt && !o.trap)) && o.hp > 0 && o.maxhp > 0 && o.hp < o.maxhp);
+// ---- 工具箱（道具）：像幫隊友急救一樣，走到建築旁邊才修得了 ----
+// ・身上有工具箱、旁邊 TOOLBOX.radius 格內有受損的建築（營地、溫特蓋的建築）時，建築上方出現「R 修理」，受損的建築外面有綠色虛線框。
+// ・按 R（或快捷欄、背包的「使用」）＝站著修 TOOLBOX.time 秒，進度條跑完才修好：範圍內每個受損的建築各修好最大 HP 的 TOOLBOX.repair，用掉一個工具箱。
+//   修到一半按移動鍵＝中斷，不消耗（js/channel-actions.js）。
+// ・R 平常是手動裝填彈匣（js/game.js）；有「R 修理」提示時 R 改成修理。
+// ・地雷不算；地圖上本來就有的障礙物、礦石、被打壞（HP 歸零）的也不修。數值都在 data/equipment.js 的 TOOLBOX。
+const toolboxRepairable = o => (o.isBase || (o.playerBuilt && !o.trap)) && o.hp > 0 && o.maxhp > 0 && o.hp < o.maxhp;
+const toolboxRect = o => ({ x: OX + o.c * CELL, y: OY + o.r * CELL, w: (o.w || 1) * CELL, h: (o.h || 1) * CELL });
+// 溫特到建築最近的那一點有多遠（px）：大建築站在任何一邊都算得到
+function toolboxDist(o, p) {
+  const r = toolboxRect(o), dx = Math.max(r.x - p.x, 0, p.x - (r.x + r.w)), dy = Math.max(r.y - p.y, 0, p.y - (r.y + r.h));
+  return Math.hypot(dx, dy);
+}
+// 溫特身邊 TOOLBOX.radius 格內、受損的建築（近的排前面）
+function toolboxTargets() {
+  const p = G && G.player; if (!p) return [];
+  const reach = TOOLBOX.radius * CELL;
+  return G.obstacles.filter(toolboxRepairable).map(o => ({ o, d: toolboxDist(o, p) })).filter(x => x.d <= reach).sort((a, b) => a.d - b.d).map(x => x.o);
+}
+let toolboxChannel = null;
+// 現在可以按 R 修理嗎：回傳要修的建築清單（不行就回傳 null）
+function repairKeyTargets() {
+  const p = G && G.player;
+  if (!p || p.hp <= 0 || p.sitting || MAP_SAFE || G.over || !G.running || toolboxChannel || itemCount('toolbox') <= 0) return null;
+  if (typeof playerChannel !== 'undefined' && playerChannel) return null;   // 正在急救、疏導…
+  const list = toolboxTargets();
+  return list.length ? list : null;
+}
+// 快捷欄、背包的「使用」也走這裡（附近沒有可修的就提示）
 function useToolbox() {
   if (!G?.player || G.player.hp <= 0) return;
   const p = G.player, say = (t, c = '#c9d3dc') => flash(t, p.x, p.y - 54, c);
   if (itemCount('toolbox') <= 0) { sfx('error'); say('沒有工具箱了'); return; }
   if (MAP_SAFE) { sfx('error'); say('戰鬥中才能用'); return; }
-  const list = toolboxTargets();
-  if (!list.length) { sfx('error'); say('建築都沒有損壞'); return; }
+  if (toolboxChannel) return;
+  if (!toolboxTargets().length) { sfx('error'); say('附近 ' + TOOLBOX.radius + ' 格內沒有損壞的建築'); return; }
+  startToolboxRepair();
+}
+function startToolboxRepair() {
+  if (!repairKeyTargets()) return false;
+  toolboxChannel = startChannel({ kind: 'toolbox', total: TOOLBOX.time, target: null, label: '修理中', color: '#7ee0c0',
+    onDone: finishToolboxRepair, onCancel: () => { toolboxChannel = null; } });
+  if (toolboxChannel) sfx('place');
+  return !!toolboxChannel;
+}
+function finishToolboxRepair() {
+  toolboxChannel = null;
+  const list = toolboxTargets();   // 修好那一刻還在範圍內、還沒修好的
+  if (!list.length || itemCount('toolbox') <= 0) return;
   consumeItem('toolbox');
   for (const o of list) {
     const add = Math.min(o.maxhp - o.hp, Math.round(o.maxhp * TOOLBOX.repair));
@@ -308,8 +347,33 @@ function useToolbox() {
     flash('🔧 +' + add, cx, cy - (o.h || 1) * CELL / 2 - 10, '#7ee0c0', 1.6);
     G.effects.push({ ring: true, x: cx, y: cy, r: 8, r2: Math.max(o.w || 1, o.h || 1) * CELL * .7, life: .5, life0: .5, color: '#7ee0c0' });
   }
-  say('🔧 修好了 ' + list.length + ' 個建築', '#7ee0c0'); sfx('place');
+  flash('🔧 修好了 ' + list.length + ' 個建築', G.player.x, G.player.y - 54, '#7ee0c0'); sfx('soothe');
   if (typeof updateHUD === 'function') updateHUD();
+}
+// 提示（js/render.js 的互動提示呼叫）：要修的建築外面畫綠色虛線框，最近那個上方出現「R 修理」
+function drawRepairPrompt() {
+  const list = repairKeyTargets(); if (!list) return;
+  ctx.save();
+  ctx.strokeStyle = 'rgba(126,224,192,.75)'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]);
+  for (const o of list) { const r = toolboxRect(o); ctx.strokeRect(r.x + 1, r.y + 1, r.w - 2, r.h - 2); }
+  ctx.setLineDash([]);
+  const r = toolboxRect(list[0]), top = Math.min(r.y, list[0].artY ?? r.y);
+  const label = list.length > 1 ? '修理（' + list.length + ' 個）' : '修理', key = 'R', boxH = 20;
+  ctx.textBaseline = 'alphabetic'; ctx.font = 'bold 10px sans-serif';
+  const kw = ctx.measureText(key).width + 8 + 4;
+  ctx.font = 'bold 13px sans-serif';
+  const lw = ctx.measureText(label).width, boxW = kw + lw + 14, p = G.player;
+  // 營地這種很大的建築：提示不放在正上方（可能在畫面外），改放在靠溫特那一側、最多在溫特頭上一點
+  const cx = Math.max(r.x + boxW / 2, Math.min(r.x + r.w - boxW / 2, p.x)), topY = Math.max(top, p.y - 80);
+  const x = Math.round(cx - boxW / 2), y = Math.round(topY - boxH - 6), left = cx - (kw + lw) / 2;
+  ctx.fillStyle = 'rgba(12,16,22,.9)'; roundRect(x, y, boxW, boxH, 6); ctx.fill();
+  ctx.strokeStyle = 'rgba(126,224,192,.7)'; ctx.lineWidth = 1.5; roundRect(x, y, boxW, boxH, 6); ctx.stroke();
+  ctx.font = 'bold 10px sans-serif';   // 按鍵小框（跟隊員頭上的「F 急救」同一種樣子）
+  ctx.fillStyle = 'rgba(255,255,255,.14)'; roundRect(left, y + 4, kw - 4, boxH - 8, 3); ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,.45)'; ctx.lineWidth = 1; roundRect(left, y + 4, kw - 4, boxH - 8, 3); ctx.stroke();
+  ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.fillText(key, left + (kw - 4) / 2, y + 14);
+  ctx.font = 'bold 13px sans-serif'; ctx.fillStyle = '#e6ebf2'; ctx.textAlign = 'left'; ctx.fillText(label, left + kw, y + 15);
+  ctx.restore();
 }
 // ---- 急救包（道具，H）：先點左上角的隊員頭像，選要治療誰（倒地的也行） ----
 // ・不能用在溫特自己身上：溫特補血請用醫療包。

@@ -8,6 +8,7 @@
    added＝[配件, …]：服裝編輯器「＋ 新增配件」加的配件（寫法跟 data/costumes.js 的 COSTUME_ACCESSORIES 一樣），遊戲裡跟其他配件一起用。
    配件的 blink＝偶爾換成第 2 張圖（像眨眼）：{ front, side, back：第 2 張圖, every：大約每幾秒一次, hold：第 2 張停幾秒 }
    artFill[配件]＝{ art, blink }：服裝編輯器打開時自動找到、幫 data/costumes.js 的配件補上的側面／背面／第 2 張圖（沒寫的方向才補）。
+   dismantle[稀有度]＝分解 1 個重複的服裝換回幾個異質碎片（服裝編輯器「扭蛋分解」改的，蓋過 data/costumes.js 的 GACHA.dismantle）。
    layers[配件]＝圖層數字：同時戴好幾個配件時，數字大的蓋在上面（沒寫＝照欄位：下身 1、背部 2、手部 3、頭飾 4、臉部 5）。
      例如尾巴要蓋在翅膀上面：尾巴填 3（比背部的 2 大）。
    從服裝編輯器按「▶ 暫存設定預覽」開的遊戲（?previewCostumes=1）用編輯器裡還沒存到專案的位置。
@@ -18,7 +19,7 @@ const COSTUME_PLACEMENT = (() => {
   if (/[?&]previewCostumes=1(&|$)/.test(location.search)) {
     try { const d = JSON.parse(localStorage.getItem(COSTUME_PLACEMENT_KEY) || 'null'); if (d && typeof d === 'object') p = d; } catch (_) {}
   }
-  return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {}, offsets: p.offsets || {}, blocked: p.blocked || {}, layers: p.layers || {}, names: p.names || {}, rarity: p.rarity || {}, added: p.added || [], artFill: p.artFill || {} };
+  return { anchors: p.anchors || {}, items: p.items || {}, bob: p.bob || {}, offsets: p.offsets || {}, blocked: p.blocked || {}, layers: p.layers || {}, names: p.names || {}, rarity: p.rarity || {}, added: p.added || [], artFill: p.artFill || {}, dismantle: p.dismantle || {} };
 })();
 const ACC_BY_ID = {};   // 配件 id → 配件（data/costumes.js 的＋服裝編輯器新增的）
 // 配件名稱、稀有等級：服裝編輯器改的（names[配件]、rarity[配件]）蓋過 data/costumes.js 的 name、rarity；衣櫃、扭蛋、送禮…遊戲裡所有地方都用改過的
@@ -49,6 +50,11 @@ function applyAccNames() {
     }
     a.name = names[a.id] ? names[a.id] : a.baseName;
     if (rarity[a.id]) a.rarity = rarity[a.id]; else if (a.baseRarity === undefined) delete a.rarity; else a.rarity = a.baseRarity;
+  }
+  // 分解重複服裝換回幾個碎片：服裝編輯器改的（dismantle[稀有度]）蓋過 data/costumes.js 的 GACHA.dismantle；扭蛋機、衣櫃都讀改過的 GACHA.dismantle
+  if (typeof GACHA !== 'undefined' && GACHA.dismantle) {
+    if (!GACHA.baseDismantle) GACHA.baseDismantle = Object.assign({}, GACHA.dismantle);   // 原本的（恢復預設用）
+    GACHA.dismantle = Object.assign({}, GACHA.baseDismantle, COSTUME_PLACEMENT.dismantle || {});
   }
 }
 applyAccNames();

@@ -31,7 +31,7 @@ function loadDraft(useFile) {
   let data = COSTUME_PLACEMENT_DEFAULT;
   if (!useFile) { const merged = DraftSync.load(COSTUME_PLACEMENT_KEY, COSTUME_PLACEMENT_DEFAULT, { label: '配件位置' }); if (merged) data = merged; }
   data = JSON.parse(JSON.stringify(data));
-  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {}; COSTUME_PLACEMENT.offsets = data.offsets || {}; COSTUME_PLACEMENT.blocked = data.blocked || {}; COSTUME_PLACEMENT.layers = data.layers || {}; COSTUME_PLACEMENT.names = data.names || {}; COSTUME_PLACEMENT.rarity = data.rarity || {}; COSTUME_PLACEMENT.added = data.added || []; COSTUME_PLACEMENT.artFill = data.artFill || {};
+  COSTUME_PLACEMENT.anchors = data.anchors || {}; COSTUME_PLACEMENT.items = data.items || {}; COSTUME_PLACEMENT.bob = data.bob || {}; COSTUME_PLACEMENT.offsets = data.offsets || {}; COSTUME_PLACEMENT.blocked = data.blocked || {}; COSTUME_PLACEMENT.layers = data.layers || {}; COSTUME_PLACEMENT.names = data.names || {}; COSTUME_PLACEMENT.rarity = data.rarity || {}; COSTUME_PLACEMENT.added = data.added || []; COSTUME_PLACEMENT.artFill = data.artFill || {}; COSTUME_PLACEMENT.dismantle = data.dismantle || {};
   applyAccNames();
 }
 loadDraft(false);
@@ -46,6 +46,7 @@ function saveDraft() {
   for (const [id, list] of Object.entries(COSTUME_PLACEMENT.blocked || {})) if (!list || !list.length) delete COSTUME_PLACEMENT.blocked[id];
   for (const [id, n] of Object.entries(COSTUME_PLACEMENT.names || {})) if (!n || !ACC_BY_ID[id] || n === ACC_BY_ID[id].baseName) delete COSTUME_PLACEMENT.names[id];   // 空白、跟原本一樣＝不用存
   for (const [id, r] of Object.entries(COSTUME_PLACEMENT.rarity || {})) if (!r || !ACC_BY_ID[id] || r === (ACC_BY_ID[id].baseRarity || 'N')) delete COSTUME_PLACEMENT.rarity[id];   // 跟原本一樣＝不用存
+  for (const [r, v] of Object.entries(COSTUME_PLACEMENT.dismantle || {})) if (!isFinite(v) || v === '' || Number(v) === (GACHA.baseDismantle || {})[r]) delete COSTUME_PLACEMENT.dismantle[r];   // 跟 data/costumes.js 一樣＝不用存
   applyAccNames();   // 上一步／下一步也會走到這裡：名字、稀有等級跟著回去
   try { localStorage.setItem(COSTUME_PLACEMENT_KEY, JSON.stringify(COSTUME_PLACEMENT)); status('已自動儲存到這台瀏覽器。'); }
   catch (e) { status('暫存失敗：' + e.message, true); }
@@ -70,7 +71,7 @@ function stepHistory(from, to, word) {
   Object.assign(COSTUME_PLACEMENT, data);
   restoring = true; saveDraft(); restoring = false;
   lastSnap = JSON.stringify(COSTUME_PLACEMENT); lastStepAt = 0;
-  renderAll(); if (typeof drawStage === 'function') drawStage();
+  renderAll(); renderDismantle(); if (typeof drawStage === 'function') drawStage();
   status(word === 'undo' ? '↶ 回到上一步（已自動儲存到這台瀏覽器）' : '↷ 重做下一步（已自動儲存到這台瀏覽器）');
 }
 document.addEventListener('keydown', e => {
@@ -89,7 +90,7 @@ function fmt(v, ind) {
 }
 function costumePlacementText() {
   saveDraft();
-  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob, offsets: COSTUME_PLACEMENT.offsets || {}, blocked: COSTUME_PLACEMENT.blocked || {}, layers: COSTUME_PLACEMENT.layers || {}, names: COSTUME_PLACEMENT.names || {}, rarity: COSTUME_PLACEMENT.rarity || {}, added: COSTUME_PLACEMENT.added || [], artFill: COSTUME_PLACEMENT.artFill || {} };
+  const data = { anchors: COSTUME_PLACEMENT.anchors, items: COSTUME_PLACEMENT.items, bob: COSTUME_PLACEMENT.bob, offsets: COSTUME_PLACEMENT.offsets || {}, blocked: COSTUME_PLACEMENT.blocked || {}, layers: COSTUME_PLACEMENT.layers || {}, names: COSTUME_PLACEMENT.names || {}, rarity: COSTUME_PLACEMENT.rarity || {}, added: COSTUME_PLACEMENT.added || [], artFill: COSTUME_PLACEMENT.artFill || {}, dismantle: COSTUME_PLACEMENT.dismantle || {} };
   return '/* 由服裝編輯器匯出：配件戴在每個角色身上的位置（配件、角色清單在 data/costumes.js）。\n'
     + '   anchors[角色][欄位][方向]＝這個角色每個欄位的預設位置（新配件沒調過就用這個）\n'
     + '   items[配件][角色][方向]＝某個配件專屬的位置（優先）\n'
@@ -100,10 +101,11 @@ function costumePlacementText() {
     + '   layers[配件]＝圖層：同時戴好幾個配件時數字大的蓋在上面（沒寫＝下身 1、背部 2、手部 3、頭飾 4、臉部 5）\n'
     + '   names[配件]＝配件名稱（服裝編輯器改的，蓋過 data/costumes.js 的 name；遊戲裡也用這個名字）\n'
     + '   rarity[配件]＝稀有等級（N／R／SR／SSR，扭蛋機的機率看這個；蓋過 data/costumes.js 的 rarity）\n'
+    + '   dismantle[稀有度]＝扭蛋機／衣櫃「收藏」分解 1 個重複的服裝換回幾個異質碎片（蓋過 data/costumes.js 的 GACHA.dismantle；沒寫＝照 data/costumes.js）\n'
     + '   added＝服裝編輯器「＋ 新增配件」加的配件（寫法跟 data/costumes.js 的 COSTUME_ACCESSORIES 一樣；blink＝偶爾換成第 2 張圖）\n'
     + '   artFill[配件]＝{ art, blink }：編輯器打開時自動找到、幫 data/costumes.js 的配件補上的側面／背面／第 2 張圖 */\n'
     + 'const COSTUME_PLACEMENT_DEFAULT = {\n'
-    + ['anchors', 'items', 'bob', 'offsets', 'blocked', 'layers', 'names', 'rarity', 'artFill'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n')
+    + ['anchors', 'items', 'bob', 'offsets', 'blocked', 'layers', 'names', 'rarity', 'artFill', 'dismantle'].map(k => '  ' + JSON.stringify(k) + ': ' + fmt(data[k], 1)).join(',\n')
     + ',\n  "added": ' + (data.added.length ? '[\n' + data.added.map(x => '    ' + JSON.stringify(x)).join(',\n') + '\n  ]' : '[]') + '\n};\n';   // 新增的配件：一個一行
 }
 
@@ -302,7 +304,7 @@ function renderBars() {
 function renderPanel() {
   const acc = curAcc(), ch = CHARACTERS[ED.char];
   const off = !acc;
-  document.querySelectorAll('.settings input, .settings button').forEach(el => { if (!['previewGame', 'exportFile', 'resetFile', 'bobAuto', 'bobAutoAll', 'offAuto', 'offAutoAll', 'offx', 'offy'].includes(el.id) && !/^b[12][xy]$/.test(el.id) && !el.classList.contains('project-save-btn')) el.disabled = off; });
+  document.querySelectorAll('.settings input, .settings button').forEach(el => { if (!['previewGame', 'exportFile', 'resetFile', 'bobAuto', 'bobAutoAll', 'offAuto', 'offAutoAll', 'offx', 'offy'].includes(el.id) && !/^b[12][xy]$/.test(el.id) && !el.closest('#gachaDis, #gachaDisReset') && !el.classList.contains('project-save-btn')) el.disabled = off; });
   $('bobWho').textContent = ch.name; $('bobDir').textContent = CE_DIR_NAMES[ED.dir];
   $('offWho').textContent = ch.name;
   if (!off) { const blocked = !costumeAllowed(ED.char, acc.id); $('fblock').checked = blocked; $('blockWho').textContent = ch.name; $('blockAcc').textContent = '「' + acc.name + '」'; $('blockNote').hidden = !blocked; }
@@ -392,6 +394,25 @@ $('accRarity').addEventListener('change', e => {
   saveDraft(); renderLists(); renderPanel();
   status('「' + acc.name + '」的稀有等級改成 ' + e.target.value);
 });
+// ---- 扭蛋分解：分解 1 個重複的服裝換回幾個異質碎片（每個稀有度一格，全部配件共用）----
+// 原本的數字在 data/costumes.js 的 GACHA.dismantle；這裡改的存在 dismantle[稀有度]，遊戲裡的扭蛋機、衣櫃收藏都會用這個
+function renderDismantle() {
+  const box = $('gachaDis'); if (!box) return;
+  const base = GACHA.baseDismantle || {}, over = COSTUME_PLACEMENT.dismantle || {};
+  box.innerHTML = ACC_RARITIES.map(r => '<label class="r-' + r + '">' + r + '<input type="number" min="0" step="1" data-dis="' + r + '" value="' + (GACHA.dismantle[r] || 0) + '"'
+    + ' title="分解 1 個 ' + r + ' 換回幾個碎片（原本 ' + (base[r] || 0) + '）"></label>').join('');
+  $('gachaDisNote').textContent = Object.keys(over).length ? '（改過，原本 ' + ACC_RARITIES.map(r => r + ' ' + (base[r] || 0)).join('、') + '）' : '';
+}
+$('gachaDis').addEventListener('change', e => {
+  const r = e.target.dataset.dis; if (!r) return;
+  const v = Math.max(0, Math.round(Number(e.target.value) || 0));
+  const all = COSTUME_PLACEMENT.dismantle = COSTUME_PLACEMENT.dismantle || {};
+  if (v === (GACHA.baseDismantle || {})[r]) delete all[r]; else all[r] = v;
+  saveDraft(); renderDismantle();
+  status('分解 1 個 ' + r + ' 的服裝改成換回 ' + v + ' 個異質碎片');
+});
+$('gachaDisReset').addEventListener('click', () => { COSTUME_PLACEMENT.dismantle = {}; saveDraft(); renderDismantle(); status('扭蛋分解的碎片數已恢復成 data/costumes.js 的數字'); });
+renderDismantle();
 $('faccName').addEventListener('blur', () => renderPanel());   // 清空後離開欄位：顯示回原本的名字
 $('accNameReset').addEventListener('click', () => { setAccName(''); status('配件名稱已恢復成「' + curAcc().baseName + '」'); });
 // ---- 置中：以預覽框（角色圖 64×64）的正中間為準；只改目前這個角色、這個方向 ----

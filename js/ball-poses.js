@@ -1,5 +1,5 @@
 /* ===== 球球（搜救犬）的額外姿勢：坐下、睡在自己的床上 =====
-   ・停下來超過 sitAfter 秒就坐下：安全區 ballA_sit.png、戰鬥區 ballB_sit.png（images/character/ball/；圖是朝左，朝右時左右翻）
+   ・停下來超過 sitAfter 秒就坐下：穿 A 款坐 ballA_sit.png、穿 B 款（有背心）坐 ballB_sit.png，跟著衣櫃選的那款走（ballOutfitLetter）（images/character/ball/；圖是朝左，朝右時左右翻）
    ・安全區閒逛時，有機率走到「球球的床」（基地編輯器的素材 tile_eoc_ball_bed）睡一陣子；
      睡覺時在床的位置畫 ballsleep.png（狗躺在床上的整張圖），原本的床先藏起來（js/maploader.js 問 ballBedHidden）
    ・走路只用 Walking01、02 兩張：js/game.js 的 pickCharacterFrame（TWO_FRAME_WALK）
@@ -71,6 +71,14 @@ function ballBedHidden(src, id) {
 // 排前後用的 y（js/render.js）：睡覺圖底邊對齊床底，就用床底；其他時候回傳 null 照一般角色算
 const ballSortY = npc => ballSleeping(npc) ? npc.ballSleep.bed.y0 + npc.ballSleep.bed.h : null;
 
+// 球球現在穿哪一款：看他身上實際用的那套走路圖（衣櫃可以讓他在基地也穿 B 款背心）
+// 是 A 款的圖就坐 A、是 B 款的就坐 B；認不出來（例如換成其他服裝）才照地圖：安全區 A、戰鬥區 B
+function ballOutfitLetter(npc) {
+  const set = typeof wandererSprites !== 'undefined' && wandererSprites[npc.id];
+  const rec = typeof OUTFIT_SETS !== 'undefined' && OUTFIT_SETS.ball;
+  if (set && rec) { if (set === rec.A) return 'A'; if (set === rec.B) return 'B'; }
+  return MAP_SAFE ? 'A' : 'B';
+}
 // 畫球球（js/render.js 的 drawWanderer 先問這裡）：睡覺、坐著時畫特別的圖並回傳 true；其他時候照一般走路圖
 function drawBallPose(npc, size) {
   const now = performance.now();
@@ -87,7 +95,7 @@ function drawBallPose(npc, size) {
     return true;
   }
   if (npc.moving || !npc.stillSince || now - npc.stillSince < BALL_POSES.sitAfter * 1000) return false;
-  const img = ballPoseImgs[MAP_SAFE ? 'A' : 'B'];
+  const img = ballPoseImgs[ballOutfitLetter(npc)];
   if (!ballImgReady(img)) return false;
   const w = img.naturalWidth, h = img.naturalHeight;
   const feetY = Math.round(npc.y + 18 - BALL_POSES.feetPad);   // 跟走路圖的腳底同一條線

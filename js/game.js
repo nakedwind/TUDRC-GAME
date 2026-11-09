@@ -372,10 +372,7 @@ function openDialogue(actor) {
   if (actor.berserk) { flash('無法對話', actor.x, actor.y - 32, '#ff8f8f'); sfx('error'); return; }
   // 住院中的隊員（躺在醫院病床上休養）：不能聊天，只告訴玩家還要幾分鐘出院（js/vitals.js）
   // 通訊員也一樣：他住院時改由應變中心的其他人代為報告任務（js/missions.js 的 isBriefStandIn）
-  if (actor.kind === 'tower' && typeof isHospitalized === 'function' && isHospitalized(actor.type)) {
-    systemNotice('這個隊員正在休養中，還需要' + hospitalMinutesLeft(actor.type) + '分鐘出院。');
-    return;
-  }
+  if (actor.kind === 'tower' && typeof isHospitalized === 'function' && isHospitalized(actor.type)) { openHospitalDialogue(actor); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
   const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
     || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」
@@ -400,6 +397,14 @@ function openDialogue(actor) {
   if (typeof onDialogueOpenedOutfit === 'function') onDialogueOpenedOutfit(actor);   // 隊友：推薦穿搭按鈕（js/costumes.js）
   if (typeof onDialogueOpenedGear === 'function') onDialogueOpenedGear(actor);   // 隊友：隊員資訊按鈕（js/squad-page.js）
   if (typeof onDialogueOpenedVitals === 'function') onDialogueOpenedVitals(actor);   // 受傷的隊員：去醫院休息；疏導室的亞許：請亞許疏導（js/vitals.js）
+}
+// 住院中的隊員：打開對話框，他在睡覺，先說一句（對話編輯器「住院中找他說話（睡覺）」talkHospital，隨機一句；沒填就不說），
+// 下一句由系統說還要幾分鐘出院；沒有送禮、穿搭等按鈕
+function openHospitalDialogue(actor) {
+  const profile = dialogueProfile(actor) || { name: '隊員' }, set = sentrySprites[actor.type], portrait = set && set.front && set.front[0];
+  openTextDialogue({ name: profile.name, image: portrait ? portrait.src : '', kind: actor.type,   // kind＝角色 id：頭像照一般對話的方式裁切
+    lines: [pickDialogueLine(actor.type, 'talkHospital'),
+      { speaker: '系統', text: profile.name + '正在住院休養，還需要 ' + hospitalMinutesLeft(actor.type) + ' 分鐘出院。' }].filter(Boolean) });
 }
 // 不是跟角色說話的對話框（海報、告示…）：name＝名稱欄、image＝左邊的圖、lines＝一句一句的文字
 function openTextDialogue({ name, image, lines, kind = 'text' }) {
@@ -595,7 +600,10 @@ window.addEventListener('keydown', e => {
   keys[k] = true;
   if(isInteractKey(k) && G && G.running && !G.over)e.preventDefault();
   if (k.startsWith('arrow') || k === ' ') e.preventDefault();   // 方向鍵／空白鍵不要捲動網頁
-  if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) startReload(G.player);   // 手動裝填手槍的彈匣（特殊子彈不用裝填）
+  if (!e.repeat && k === 'r' && G && G.running && !G.over && !MAP_SAFE && G.player && G.player.hp > 0) {
+    if (typeof repairKeyTargets === 'function' && repairKeyTargets()) startToolboxRepair();   // 旁邊有受損的建築、身上有工具箱：R＝修理（js/equipment.js）
+    else startReload(G.player);   // 平常：手動裝填手槍的彈匣（特殊子彈不用裝填）
+  }
   if (npcArrangeMode) return;
   if (!e.repeat && isInteractKey(k) && G && G.running && !G.over) { // 互動鍵：Enter 或空白鍵（isInteractKey）
     holdPickupT = HOLD_PICKUP.first;   // 按住不放：過一下開始連續拾取（holdPickupTick）
@@ -2289,7 +2297,8 @@ function update(dt) {
     if (!t.berserk && !TYPES[t.type].guide && !spec.noRetreat && t.taint > 85) {   // 瀕臨暴走：自動退守營地（觸發一次）；noRetreat 的角色（路德）會留在前線
       if (!t.resting) { t.resting = true; sendSentryRest(t); }
     } else if (t.taint <= 80) t.resting = false;
-    if (spec.aura && !t.berserk && !t.gsCast && !inHospital) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
+    // 應變中心（安全區）裡嚮導不幫人補血、疏導：負荷高的哨兵要叫去 2F疏導室，由溫特（C）或亞許疏導（js/vitals.js）；受傷的去醫院休養
+    if (spec.aura && !t.berserk && !t.gsCast && !inHospital && !MAP_SAFE) {   // 嚮導隨身疏導（嚮導技能詠唱中不做）：改成「冷卻一到就一次清一批」，不再每幀連續疏導
       t.auraCd = Math.max(0, (t.auraCd || 0) - dt);
       if (t.auraCd <= 0) {
         const AURA_CD = SOOTHE_AURA_CD, sc = SOOTHE_COLORS[t.type] || SOOTHE_COLORS.eldrin;

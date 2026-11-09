@@ -249,13 +249,17 @@ function campSpawnCells(n = 24) {
   }
   return out;
 }
-function spawnSentries(only = null) {   // only：只生這幾位（接續戰場時新編入的隊員，js/combat-progress.js）
+// 隊員出生可以站的格子（營地裡；沒營地就營地箱子前面、最下排）：spawnSentries、regroupSquadAtCamp 共用
+function squadSpawnCells() {
   const cand = [], start = boxStartCells(), camp = campSpawnCells();
   if (camp.length > 1) cand.push(...camp.slice(1));   // 有營地：營地裡（第一格留給溫特）
   else if (campCells.size) campCells.forEach(k => cand.push(k.split(',').map(Number)));
   else if (start.length > 1) cand.push(...start.slice(1));   // 沒營地、有營地箱子：箱子前面（第一格留給溫特）
   else for (let c = 0; c < COLS; c++) cand.push([c, ROWS - 1]);   // 沒自訂營地＝最下排
-  const ok = cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r)));
+  return cand.filter(([c, r]) => inGrid(c, r) && !isWall(c, r) && !isEntrance(c, r) && !G.grid[c + ',' + r] && !sentryBlocked(...center(c, r)));
+}
+function spawnSentries(only = null) {   // only：只生這幾位（接續戰場時新編入的隊員，js/combat-progress.js）
+  const ok = squadSpawnCells();
   // 應變中心是全員集合的安全區；戰鬥地圖仍只生成已編入的出勤隊伍。
   // 基地（安全區）：出勤隊伍不跟著溫特，只出現「平時在這張地圖」的人（data/npc-locations.js）；戰鬥地圖：出勤隊伍
   const team = MAP_SAFE
@@ -274,6 +278,19 @@ function spawnSentries(only = null) {   // only：只生這幾位（接續戰場
     const configuredSpawn = placeAtConfiguredSpawn(t, type);
     if (!configuredSpawn) placeInHomeArea(t, type);   // 未指定出生格時，沿用活動範圍內的隨機出生
     if (MAP_SAFE && !configuredSpawn && !homeAreaOf(type)) placeAnywhere(t);   // 沒有指定出生格或活動範圍：整張地圖隨機一個位置
+  }
+}
+
+// 從應變中心再次出擊、接續保留的戰場時（js/combat-progress.js 的 resumeSquadFromBase）：
+// 出勤隊員全部回到營地裡重新出現（不然會站在上次倒下、或離開時的位置），跟剛出勤時一樣的擺法
+function regroupSquadAtCamp() {
+  const ok = squadSpawnCells();
+  for (const t of G.towers) {
+    if (!TYPES[t.type] || t.type === PLAYER_CHARACTER) continue;
+    const cell = ok.length ? ok.splice(Math.floor(Math.random() * ok.length), 1)[0] : null;
+    if (cell) [t.x, t.y] = center(cell[0], cell[1]);
+    if (!placeAtConfiguredSpawn(t, t.type)) placeInHomeArea(t, t.type);
+    Object.assign(t, { target: null, navPath: null, moving: false, meleeSwing: null, gunSwing: null, waitT: 0.4 + Math.random() });
   }
 }
 

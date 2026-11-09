@@ -37,6 +37,10 @@ const UI_ELEMENTS = [
       P('title', '標題（樓層・房間）', '#baseMinimap .bmap-title', ['font']),
       P('btn', '右上的按鈕', '#baseMinimap button', ['w', 'h', 'radius']) ] },
   { key: 'baseMinimapShow', group: '畫面下方', label: '小地圖收起後的按鈕', sel: '#baseMinimapShow',      origin: 'right bottom', parts: [P('self', '按鈕', '#baseMinimapShow', ['w', 'h', 'radius'])] },
+  { key: 'navMinimap',    group: '畫面下方', label: '小地圖（戰鬥・導航記錄器）', sel: '#navMinimap',      origin: 'right bottom', parts: [
+      P('title', '標題（導航記錄器）', '#navMinimap .nmap-title', ['font']),
+      P('btn', '右上的按鈕', '#navMinimap button', ['w', 'h', 'radius']) ] },
+  { key: 'navMinimapShow', group: '畫面下方', label: '戰鬥小地圖收起後的按鈕', sel: '#navMinimapShow',  origin: 'right bottom', parts: [P('self', '按鈕', '#navMinimapShow', ['w', 'h', 'radius'])] },
   { key: 'hud',           group: '下方資訊條', label: '整條資訊條',     sel: '#hud',                     origin: 'center', parts: [P('self', '資訊條', '#hud', ['h', 'radius'])] },
   { key: 'hudPlayer',     group: '下方資訊條', label: '溫特頭像與 HP／SP', sel: '#hud .hud-player',       origin: 'left center', parts: [
       P('self', '整塊', '#hud .hud-player', ['w']),

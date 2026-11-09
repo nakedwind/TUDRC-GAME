@@ -80,8 +80,9 @@ const EQUIPMENT = [
 const EQUIP_DROPS = { detector: .5 };
 // 後室道具掉落的機率（data/supplies.js 的道具，可以重複拿）：平安符＝順順宮帽、保溫杯＝置物櫃、腎上腺素＝置物櫃（打怪不會掉）、異質急救包＝置物櫃
 const ITEM_DROPS = { charm: .35, thermos: .4, adrenaline: .2, 'anomaly-firstaid': .15, toolbox: .25 };   // toolbox：置物櫃、沒指定內容物的彈藥箱都會抽
-// 工具箱（道具；快捷欄或背包使用）：repair＝營地和溫特蓋的所有建築，各修好最大 HP 的幾成（在哪裡用都可以）
-const TOOLBOX = { repair: .3 };
+// 工具箱（道具）：走到受損的建築旁邊按 R（或快捷欄、背包使用）。radius＝溫特身邊幾格內的建築才修得到；
+// time＝要站著修幾秒；repair＝範圍內每個受損的建築（營地、溫特蓋的）各修好最大 HP 的幾成；修一次用掉一個
+const TOOLBOX = { repair: .3, radius: 1.5, time: 1.5 };
 // 腎上腺素（道具；快捷欄或背包使用）：speed 跑速加成、dur 持續秒數、side 藥效退了變慢幾秒、slow 變慢多少
 const ADRENALINE = { speed: .45, dur: 8, side: 2, slow: .3 };
 // 眼藥水（道具）：dur 秒內黑幕的濃度改成 darkness（原本 data/balance.js 的 LIGHT.darkness＝1 全黑）；只改看起來多黑，照不照得到光（微笑者咬不咬）不變

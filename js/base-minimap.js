@@ -3,6 +3,7 @@
    ・標出：自己在的房間（框線變亮）、溫特的位置（藍點）、同層的人（哨兵／嚮導／其他人員的顏色點）、樓梯（黃色小方塊）。
    ・右上兩個按鈕：⛶ 打開完整地圖（T-Pad「地圖」App）、— 收起小地圖；收起後右下角留一個小按鈕可以再叫出來（記在瀏覽器 tudrc_base_minimap_hidden）。
    ・點小地圖本身也會打開完整地圖。
+   ・按住標題列可以拖到畫面上任何地方，雙擊標題列回到原本位置（js/tpad-map.js 的 minimapDraggable，記在瀏覽器 tudrc_minimap_pos）。
    ・戰鬥區域、回憶劇情地圖不顯示（戰鬥區域有自己的導航記錄器小地圖：js/tpad-map.js 的 #navMinimap）。
    ・UI編輯器可以調位置：js/ui-layout.js 的 UI_ELEMENTS（baseMinimap、baseMinimapShow）。
    必須在 js/tpad-map.js、js/tpad.js 之後載入。
@@ -15,16 +16,14 @@ let bmapEl = null, bmapShowBtn = null, bmapCtx = null, bmapTitle = null;
 let bmapFloorCache = null;   // { key, floor, img, S, ox, oy }：整層樓的房間先畫好一張圖，每次更新只要貼上去
 let bmapPeople = [], bmapPeopleAt = 0;   // 同層的人：每秒重算一次就夠
 
-const BMAP_ICON_FULL = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9V4h5M15 4h5v5M20 15v5h-5M9 20H4v-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>';
-const BMAP_ICON_HIDE = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"/></svg>';
-const BMAP_ICON_MAP = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 6.5 9 4l6 2.5L21 4v13.5L15 20l-6-2.5L3 20z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v13.5M15 6.5V20" stroke="currentColor" stroke-width="2"/></svg>';
+const BMAP_ICON_FULL = MINIMAP_ICON_FULL, BMAP_ICON_HIDE = MINIMAP_ICON_HIDE, BMAP_ICON_MAP = MINIMAP_ICON_MAP;   // 圖示跟戰鬥小地圖共用（js/tpad-map.js）
 
 function bmapBuild() {
   const css = document.createElement('style');
   css.textContent =
     '#baseMinimap{position:absolute;right:' + BMAP.right + 'px;bottom:' + BMAP.bottom + 'px;z-index:9;width:' + BMAP.w + 'px;border-radius:10px;overflow:hidden;' +
       'background:rgba(0,4,10,.62);box-shadow:0 0 0 1px rgba(143,211,255,.22),0 4px 14px rgba(0,0,0,.45);font-family:"Microsoft JhengHei",sans-serif;user-select:none}' +
-    '#baseMinimap .bmap-head{display:flex;align-items:center;gap:4px;height:' + BMAP.head + 'px;padding:0 3px 0 8px;background:rgba(143,211,255,.08);border-bottom:1px solid rgba(143,211,255,.14)}' +
+    '#baseMinimap .bmap-head{touch-action:none;display:flex;align-items:center;gap:4px;height:' + BMAP.head + 'px;padding:0 3px 0 8px;background:rgba(143,211,255,.08);border-bottom:1px solid rgba(143,211,255,.14)}' +
     '#baseMinimap .bmap-title{flex:1;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:#dbe8f3;font-size:12px;font-weight:700;letter-spacing:.02em}' +
     '#baseMinimap .bmap-title b{color:#7fd7ff;margin-right:5px}' +
     '#baseMinimap button,#baseMinimapShow{display:grid;place-items:center;padding:0;border:0;border-radius:6px;cursor:pointer;color:#cfe2f0;background:rgba(255,255,255,.06);transition:background .12s,color .12s}' +
@@ -56,6 +55,7 @@ function bmapBuild() {
   bmapShowBtn.addEventListener('click', () => bmapSetHidden(false));
   // 點小地圖不要讓按鈕留著焦點（不然之後按空白鍵會再按一次）
   [bmapEl, bmapShowBtn].forEach(el => el.addEventListener('mouseup', () => { if (document.activeElement && document.activeElement.blur) document.activeElement.blur(); }));
+  minimapDraggable(bmapEl, bmapEl.querySelector('.bmap-head'), 'base', BMAP);
 }
 function bmapSetHidden(v) {
   bmapHidden = v;
@@ -64,11 +64,7 @@ function bmapSetHidden(v) {
   bmapUpdate();
 }
 // 打開 T-Pad 並直接進「地圖」App
-function bmapOpenFull() {
-  if (typeof openTPad !== 'function' || typeof launchTPadApp !== 'function') return;
-  if (!(typeof tpadOpen !== 'undefined' && tpadOpen)) openTPad();
-  if (typeof tpadOpen !== 'undefined' && tpadOpen) launchTPadApp('map');
-}
+function bmapOpenFull() { minimapOpenFull(); }
 
 // 現在要不要顯示：在基地（有樓層的安全區地圖）、遊戲開始了、開始畫面沒蓋著
 function bmapActive() {
@@ -117,6 +113,7 @@ function bmapUpdate() {
   bmapEl.style.display = on && !bmapHidden ? '' : 'none';
   bmapShowBtn.style.display = on && bmapHidden ? '' : 'none';
   if (!on || bmapHidden) return;
+  minimapPlace(bmapEl, 'base', BMAP);   // 玩家拖過的位置（超出畫面會推回來）
   const here = tmapHereMap(), floor = tmapFloors().find(f => f.rooms.some(r => r.map.id === here.id));
   if (!floor) return;
   const room = floor.rooms.find(r => r.map.id === here.id), info = tmapParseFloor(here.name);

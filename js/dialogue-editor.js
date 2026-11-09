@@ -12,6 +12,7 @@ const SITUATIONS = [
   { group: '日常（基地裡）', key: 'idle', label: '閒晃時的頭上泡泡', when: '在基地等安全場景閒晃時，每隔 <b>5～13 秒</b>隨機冒出一句。' },
   { group: '日常（基地裡）', key: 'idleSoothe', label: '在疏導室閒晃（負荷高被送來）', when: '負荷 <b>30</b> 以上、回基地時被送到 <b>2F疏導室</b>：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞（每隔 5～13 秒隨機一句）。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'idleHospital', label: '住院時的頭上泡泡', when: '受傷住進 <b>1F醫院</b>（躺病床或在醫院走動）：改說這裡的泡泡，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
+  { group: '日常（基地裡）', key: 'talkHospital', label: '住院中找他說話（睡覺）', when: '他受傷<b>住院</b>時找他說話：打開對話框，他在睡覺，<b>隨機說一句</b>（例如 Zzz……），下一句由系統說還要幾分鐘出院。沒填就只顯示系統那一句。' },
   { group: '日常（基地裡）', key: 'npc', label: '找他說話（基地）', ordered: true, when: '在基地走到他旁邊按 <b>Space</b>，會<b>依序</b>一句一句說完。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'idleMeal', label: '在食堂閒晃', when: '在 <b>食堂</b>（有餐盤架、打飯台、回收區的地圖）閒晃、吃飯時的頭上泡泡：改說這裡的，<b>不說</b>平常的閒晃台詞。沒填就不說話。' },
   { group: '日常（基地裡）', key: 'mealInvite', label: '接受吃飯邀請', when: '在基地右鍵點他、選「🍽️ 一起去吃飯」時，頭上冒出這一句（隨機一句）。沒填就不說話（照樣跟去吃）。' },
@@ -168,13 +169,13 @@ if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHAR
     if (!(k in inFile)) autoAdded.add(id + '.' + k);
   }
 }
-// 出勤隊員（哨兵、嚮導）都有「在疏導室閒晃」「住院時的頭上泡泡」這兩格：負荷高、受傷被送去時改說這裡的（沒寫台詞的話匯出時拿掉＝那時候不說話）
+// 出勤隊員（哨兵、嚮導）都有「在疏導室閒晃」「住院時的頭上泡泡」「住院中找他說話（睡覺）」這幾格：負荷高、受傷被送去時改說這裡的（沒寫台詞的話匯出時拿掉＝那時候不說話）
 if (typeof CHARACTERS !== 'undefined') for (const [id, c] of Object.entries(CHARACTERS)) {
   if (c.kind !== 'sentinel' && c.kind !== 'guide') continue;
   const entry = draft.characters[id]; if (!entry) continue;
   const inFile = (typeof DIALOGUES !== 'undefined' && DIALOGUES.characters && DIALOGUES.characters[id]) || {};
-  for (const k of c.kind === 'guide' ? ['idleHospital'] : ['idleSoothe', 'idleHospital']) {   // 嚮導不會被送去疏導室
-    if (!(k in entry)) entry[k] = [];
+  for (const k of c.kind === 'guide' ? ['idleHospital', 'talkHospital'] : ['idleSoothe', 'idleHospital', 'talkHospital']) {   // 嚮導不會被送去疏導室
+    if (!(k in entry)) entry[k] = inFile[k] ? clone(inFile[k]) : [];   // 暫存是舊的：用正式檔案裡的台詞
     if (!(k in inFile) && Array.isArray(entry[k]) && !entry[k].length) autoAdded.add(id + '.' + k);
   }
 }
