@@ -702,7 +702,11 @@ const BASE_MAPS = [
         "18,8": "tile_new_decor_exit_sign"
       },
       "overlay": {},
-      "top": {},
+      "top": {
+        "0,10": "tile_new_bg_wall_front_edge",
+        "0,9": "tile_new_bg_wall_front_edge",
+        "0,8": "tile_new_bg_wall_front_edge"
+      },
       "object2": {
         "63,8": "tile_new_bg_wall_front_edge",
         "63,9": "tile_new_bg_wall_front_edge",
@@ -1387,7 +1391,7 @@ const BASE_MAPS = [
         "id": "tile_mu5e3ndv",
         "c": 0,
         "r": 7,
-        "layer": "ground2"
+        "layer": "object"
       },
       {
         "id": "tile_eoc_double_door_open",
