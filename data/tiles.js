@@ -6591,5 +6591,14 @@ const SHARED_TILES = [
     "file": "images/森林藍/Back-room-wall-blue.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_forest_time_circle",
+    "name": "時間法陣",
+    "role": "decor",
+    "file": "images/森林/forest_time_circle.png",
+    "w": 10,
+    "h": 10,
+    "flat": true
   }
 ];
