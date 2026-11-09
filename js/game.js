@@ -1971,7 +1971,9 @@ function updatePlayerAttack(dt) {
   }
   const pearlShot = paint || typeof bigPearlShotTarget !== 'function' ? null : bigPearlShotTarget(p, aim, aimAng, bestD, bestOnBody);   // 珍珠大童的大珍珠：開槍推動（js/pearl-elder.js）
   if (pearlShot) { best = pearlShot; bestD = pearlShot.d; bestOnBody = pearlShot.onBody; }
-  const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
+  const crystalShot = paint || typeof fogCrystalShotTarget !== 'function' ? null : fogCrystalShotTarget(p, aim, angDiff, playerGun().range * CELL);   // 霧樹上的紫水晶（js/fog.js）
+  if (crystalShot && ((crystalShot.onBody && !bestOnBody) || (crystalShot.onBody === bestOnBody && crystalShot.d < bestD))) { best = crystalShot.proxy; bestD = crystalShot.d; bestOnBody = crystalShot.onBody; }
+  const hitPt = best && !best.oilRef && !best.oreRef && !best.bigPearlRef && !best.fogTreeRef ? (() => { const b = targetBodyBox(best); return { x: b.cx, y: b.cy }; })() : best;   // 子彈打在身體上，不是腳底
   let endX = best ? hitPt.x : p.x + Math.cos(aimAng) * playerGun().range * CELL;
   let endY = best ? hitPt.y : p.y + Math.sin(aimAng) * playerGun().range * CELL;
   if (paint) {   // 漆彈：螢光綠的彈道（BULLETS.paint.color），打中的怪物沾上螢光漆（js/special-guns.js 的 paintMark）
@@ -2003,6 +2005,7 @@ function updatePlayerAttack(dt) {
   igniteSlicksOnLine(p.x, p.y, endX, endY);   // 子彈穿過油汙 → 點燃
   if (best && best.oilRef) { damageOil(best.oilRef, Math.round(playerGun().dmg * (rollCrit('player') || 1)), 'player'); best = null; }   // 打到油桶
   if (best && best.oreRef) { pistolHitOre(best.oreRef, playerGun().dmg); best = null; }   // 打到異質礦：累積傷害，打夠了才碎（js/ore.js）
+  if (best && best.fogTreeRef) { const cm = rollCrit('player'); damageFogCrystal(best.fogTreeRef, Math.round(playerGun().dmg * (cm || 1))); markHit(cm); best = null; }   // 打到霧樹的水晶：打破就散霧（js/fog.js）
   if (best && best.bigPearlRef) { shootBigPearl(best.bigPearlRef, p.x, p.y); best = null; }   // 打到大珍珠：往子彈的方向推（js/pearl-elder.js）
   if (best && G.cores.includes(best)) {   // 打中異質核心：叫醒它並扣血，不吸仇恨、不擊退
     const critMul = rollCrit('player'), shotDmg = Math.round(playerGun().dmg * (critMul || 1));

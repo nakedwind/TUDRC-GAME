@@ -2535,7 +2535,8 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-tile b { max-width: 100%; font-size: 13px; line-height: 1.3; text-align: center; word-break: keep-all; overflow-wrap: anywhere; }
 .ws-tile em { position: absolute; top: 6px; right: 6px; padding: 0 6px; border-radius: 99px; background: #ffd479; color: #3b2304; font-size: 10px; font-weight: 800; font-style: normal; line-height: 16px; }
 .ws-tile.unowned .ws-tile-icon { opacity: .75; }            /* 還沒開發 */
-.ws-tile.build.unowned .ws-tile-icon { opacity: 1; filter: brightness(.5); }   /* 還沒開發的建築：圖壓黑 50%（遊戲和開發工坊編輯器的預覽共用） */
+.ws-tile.build.unowned { filter: brightness(.35); }   /* 還沒開發的建築：整個格子（圖、字、框）壓黑 65%（亮度剩 35%）（遊戲和開發工坊編輯器的預覽共用） */
+.ws-tile.build.unowned .ws-tile-icon { opacity: 1; }   /* 圖不用再另外變淡 */
 .ws-tile.locked { opacity: .55; }                          /* 只能在戰鬥區域撿到、還沒拿到 */
 .ws-tile.locked .ws-tile-icon { filter: grayscale(1); }
 /* ===== 裝備等級的顏色（全遊戲共用）：Lv1 原本的、Lv2 綠、Lv3 藍、Lv4 紫、Lv5 金 =====
@@ -2636,6 +2637,10 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-tiles { grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; }   /* 一排 6 格 */
 .ws-tile b { font-size: 11px; }
 .ws-tile em { top: 4px; right: 4px; padding: 0 5px; font-size: 9px; line-height: 14px; }
+/* 等級標籤放大 1.5 倍（字、高度、左右留白一起放大）：工坊格子右上角、紙娃娃格子、背包裡的裝備；背包的紙娃娃也一樣 */
+.ws-tile em { padding: 0 7.5px; font-size: 13.5px; line-height: 21px; }
+.doll-slots .doll-slot em { top: -8px; padding: 0 7.5px; font-size: 15px; line-height: 22.5px; }
+.wss-item em { font-size: 13.5px; }
 @media (max-width: 760px) { .ws-tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
 /* 圖示框是正方形：圖片用絕對定位塞滿框再 contain，瘦長的圖（無線電、探測器）才不會照寬度放大、撐破格子 */
 .ws-tile-icon { position: relative; }

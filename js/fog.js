@@ -5,7 +5,7 @@
    ② 一團團的霧：在地圖上慢慢隨風飄（靠近溫特的霧團會變淡，自己腳邊不會整個看不到）。
    然後用「每一格的霧濃度」把不該有霧的地方挖掉：
    - 營地附近不起霧。
-   - 霧樹：地圖自動分區，每一格歸給離它最近的那棵霧樹（地圖編輯器「🌲 霧樹」擺的）。樹燒光，那一區的霧就散了。
+   - 霧樹：地圖自動分區，每一格歸給離它最近的那棵霧樹（地圖編輯器「🌲 霧樹」擺的）。把樹上的水晶打破，那一區的霧就散了。
    - 火海（燃燒彈、油桶）周圍的霧暫時散開，火熄了一陣子才慢慢回來。
    - 探照燈只照亮、不驅霧。
    霧會隨機變濃、變淡（FOG.weather）；站在霧裡的隊友看不清楚：鎖敵距離變短、命中率下降、走路變慢（FOG_SIGHT）。
@@ -22,6 +22,12 @@ function currentFogPreset() {
 }
 
 // ================= 霧樹 =================
+// 霧樹的樹幹上嵌著一顆紫水晶：把水晶打破，那一區的霧就散了，樹變成沒有水晶的樣子。
+// 霧樹有兩種擺法，玩法完全一樣：
+//   ① 地圖編輯器直接擺「有水晶的樹」那張物件圖（FOG_TREE.tiles 列的那幾張）→ 自動變成霧樹，破掉時換成沒有水晶的那張。
+//   ② 地圖編輯器「🌲 霧樹」點一格 → 由這裡畫 FOG_TREE.image / burntImage。
+// 打得到水晶的方式：溫特開槍（游標點在水晶上，或水晶在槍口的扇形範圍內）、爆炸（地雷、油桶、魚卵…）、火海燒到樹根（慢慢扣）。
+// 程式裡 tree.burnt 沿用舊名字，意思是「水晶破了、這一區不再有霧」。
 const fogTreeImg = new Image(), fogTreeBurntImg = new Image();
 if (typeof FOG_TREE !== 'undefined') {
   if (FOG_TREE.image) fogTreeImg.src = FOG_TREE.image;
@@ -29,17 +35,50 @@ if (typeof FOG_TREE !== 'undefined') {
 }
 const imgReady = img => img.complete && img.naturalWidth > 0;
 
-// 換地圖、開新局時（js/game.js）：照地圖的 fogTrees 種樹
+// 換地圖、開新局時（js/game.js）：照地圖種樹
 function seedFogTrees() {
-  G.fogTrees = []; G.fogClears = [];
-  if (MAP_SAFE || typeof FOG_TREE === 'undefined' || !MAP || !Array.isArray(MAP.fogTrees)) return;
-  for (const key of MAP.fogTrees) {
+  G.fogTrees = []; G.fogClears = []; G.fogTreeByStamp = new Map();
+  if (MAP_SAFE || typeof FOG_TREE === 'undefined' || !MAP) return;
+  const hp = Math.max(1, FOG_TREE.crystalHp || 60);
+  const add = (c, r, rect, stamp) => {
+    const tree = { c, r, x: rect.x + rect.w / 2, y: rect.y + rect.h, rect, stamp, hp, maxhp: hp, hitT: 0, barT: 0, fireT: 0, burnt: false, clearK: 0, seed: Math.random() * 10 };
+    G.fogTrees.push(tree);
+    if (stamp) G.fogTreeByStamp.set(stamp, tree);
+  };
+  // ① 地圖上擺的「有水晶的樹」物件圖
+  const tiles = FOG_TREE.tiles || {};
+  for (const s of MAP.stamps || []) {
+    if (!tiles[s.id]) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const w0 = mapTileW(t) * CELL, h0 = mapTileH(t) * CELL, k = typeof stampScaleOf === 'function' ? stampScaleOf(s) : 1;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
+    const rect = { x: x0 + w0 / 2 - w0 * k / 2, y: y0 + h0 - h0 * k, w: w0 * k, h: h0 * k, flip: !!s.fx };   // 放大以圖片底部中央為準（js/stamp-transform.js）
+    const c = Math.floor((rect.x + rect.w / 2 - OX) / CELL), r = Math.floor((rect.y + rect.h - 1 - OY) / CELL);   // 樹根那一格（分霧區用）
+    add(Math.max(0, Math.min(COLS - 1, c)), Math.max(0, Math.min(ROWS - 1, r)), rect, s);
+  }
+  // ② 地圖編輯器「🌲 霧樹」點的格子
+  for (const key of Array.isArray(MAP.fogTrees) ? MAP.fogTrees : []) {
     const [c, r] = key.split(',').map(Number);
     if (!inGrid(c, r)) continue;
-    const [x, cy] = center(c, r);
-    G.fogTrees.push({ c, r, x, y: cy + CELL / 2 - 4, burn: 0, fireT: 0, burnt: false, clearK: 0, flameT: 0, smokeT: 0, seed: Math.random() * 10 });
+    const [x, cy] = center(c, r), y = cy + CELL / 2 - 4;
+    add(c, r, { x: x - FOG_TREE.w / 2, y: y - FOG_TREE.h, w: FOG_TREE.w, h: FOG_TREE.h, flip: false }, null);
   }
 }
+
+// 擺在地圖上的霧樹物件：水晶破了就換成沒有水晶的那張圖（js/maploader.js 的 drawMapStampPlain 呼叫）
+function fogTreeDisplayTile(s, t) {
+  const tree = G && G.fogTreeByStamp && G.fogTreeByStamp.get(s);
+  if (!tree || !tree.burnt) return t;
+  return mapTileById(FOG_TREE.tiles[s.id]) || t;
+}
+const fogTreeStampBroken = s => !!(G && G.fogTreeByStamp && G.fogTreeByStamp.get(s)?.burnt);
+
+// 水晶在畫面上的位置（在圖上的比例：data/balance.js 的 FOG_TREE.crystalX / crystalY；左右翻轉的物件跟著翻）
+function fogCrystalPos(t) {
+  const R = t.rect, fx = FOG_TREE.crystalX ?? .5;
+  return { x: R.x + (R.flip ? 1 - fx : fx) * R.w, y: R.y + (FOG_TREE.crystalY ?? .5) * R.h };
+}
+const fogCrystalScale = t => Math.max(.4, t.rect.w / 320);   // 光暈、血條跟著樹的大小縮放（原圖寬 320）
 
 // 火海有沒有碰到樹根
 function fogTreeTouchesFire(tree) {
@@ -48,53 +87,102 @@ function fogTreeTouchesFire(tree) {
   return false;
 }
 
+// ---- 傷害水晶（溫特開槍、爆炸、火海都走這裡）；quiet＝不跳數字、不出聲（火燒的每幀小傷害）----
+function damageFogCrystal(tree, amount, color, quiet) {
+  if (!tree || tree.burnt || !(amount > 0)) return;
+  tree.hp -= amount; tree.barT = 3;   // 頭上的血條顯示 3 秒
+  const cp = fogCrystalPos(tree);
+  if (!quiet) {
+    tree.hitT = .18;   // 閃白、抖一下
+    flashDmg('-' + Math.round(amount), cp.x, cp.y - 20, color || '#d69bff');
+    for (let i = 0; i < 4; i++) {   // 小碎屑
+      const a = Math.random() * Math.PI * 2, sp = 40 + Math.random() * 70;
+      G.effects.push({ ember: true, spark: true, x: cp.x, y: cp.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 40,
+        r: 1.2 + Math.random() * 1.4, life: .35 + Math.random() * .2, life0: .55, color: '#c47dff' });
+    }
+    if (typeof sfxAt === 'function') sfxAt('knock2', cp.x, cp.y, .45, 'fogcrystal-hit');
+  }
+  if (tree.hp <= 0) shatterFogCrystal(tree);
+}
+
+// 爆炸波及水晶（js/oil-barrels.js 的 damageCoresInBlast 呼叫：地雷、油桶、魚卵爆炸都會經過）
+function damageFogCrystalsInBlast(x, y, radius, damage) {
+  for (const t of G.fogTrees || []) {
+    if (t.burnt) continue;
+    const cp = fogCrystalPos(t), d = Math.min(Math.hypot(cp.x - x, cp.y - y), Math.hypot(t.x - x, t.y - y));
+    if (d > radius + 20) continue;
+    damageFogCrystal(t, damage * (1 - .4 * Math.min(1, d / radius)), '#ff9a3c');
+  }
+}
+
+// ---- 溫特開槍瞄準用：跟油桶、異質礦一樣做一個「假目標」（js/game.js 的 updatePlayerAttack 讀）----
+function fogCrystalProxy(t) {
+  const cp = fogCrystalPos(t);
+  if (!t.proxy) t.proxy = { hp: 1, maxhp: 1, fogTreeRef: t };
+  t.proxy.x = cp.x; t.proxy.y = cp.y;
+  return t.proxy;
+}
+// 找出這一槍能打到的水晶：回傳 { proxy, d, onBody }；onBody＝游標直接點在水晶附近
+function fogCrystalShotTarget(p, aim, angDiff, range) {
+  let best = null;
+  for (const t of G.fogTrees || []) {
+    if (t.burnt) continue;
+    const cp = fogCrystalPos(t), d = Math.hypot(cp.x - p.x, cp.y - p.y);
+    // 視線：看得到水晶、或看得到樹根（樹根本身、樹根前面一點），任一個就算打得到（水晶常常畫在牆的上方）
+    if (d > range || !(hasLineOfSight(p.x, p.y, cp.x, cp.y) || hasLineOfSight(p.x, p.y, t.x, t.y - 8) || hasLineOfSight(p.x, p.y, t.x, t.y + 12))) continue;
+    if (!isLit(cp.x, cp.y) && !isLit(t.x, t.y)) continue;
+    const onBody = Math.hypot(aim.x - cp.x, aim.y - cp.y) <= (FOG_TREE.crystalR || 18) * fogCrystalScale(t);
+    if (!onBody && angDiff(cp.x, cp.y) > playerGun().cone) continue;
+    if (!best || (onBody && !best.onBody) || (onBody === best.onBody && d < best.d)) best = { proxy: fogCrystalProxy(t), d, onBody };
+  }
+  return best;
+}
+
 function updateFogTrees(dt) {
   updateFogWeather(dt);
   if (!G.fogTrees) G.fogTrees = [];
   for (const tree of G.fogTrees) {
     if (tree.burnt) { tree.clearK = Math.min(1, tree.clearK + dt / Math.max(.1, FOG.zoneFade)); continue; }
+    if (tree.hitT > 0) tree.hitT -= dt;
+    if (tree.barT > 0) tree.barT -= dt;
+    // 火海燒到樹根：水晶被燒得慢慢扣血（不跳數字）
     if (fogTreeTouchesFire(tree)) {
-      if (tree.fireT <= 0) flash('霧樹著火了！', tree.x, tree.y - FOG_TREE.h, '#ffb070', 1.2);
-      tree.fireT = FOG_TREE.selfBurn;   // 碰到火：著火（離開火之後還會自己燒一陣子）
-    }
-    if (tree.fireT > 0) {
-      tree.fireT -= dt; tree.burn += dt;
-      // 火焰、煙
-      tree.flameT -= dt;
-      if (tree.flameT <= 0) {
-        tree.flameT = .22 + Math.random() * .18;
-        const k = tree.burn / FOG_TREE.burnNeed;   // 越燒越旺
-        spawnFlameBurst(tree.x + (Math.random() * 2 - 1) * FOG_TREE.w * .28, tree.y - 10 - Math.random() * FOG_TREE.h * (.3 + .4 * k), .8 + k * .7);
-      }
-      if (tree.burn >= FOG_TREE.burnNeed) burnDownFogTree(tree);
-    } else if (tree.burn > 0) tree.burn = Math.max(0, tree.burn - dt * .25);   // 火熄了：慢慢回復一點點（要一口氣燒完比較快）
+      tree.fireT = .5;
+      if (FOG_TREE.fireDps > 0) damageFogCrystal(tree, FOG_TREE.fireDps * dt, null, true);
+      tree.barT = Math.max(tree.barT, .6);
+    } else if (tree.fireT > 0) tree.fireT -= dt;
   }
   updateFogClears(dt);
 }
 
-function burnDownFogTree(tree) {
-  tree.burnt = true; tree.fireT = 0; tree.burnAt = performance.now() / 1000;
-  const left = G.fogTrees.filter(t => !t.burnt).length;
-  G.effects.push({ ring: true, x: tree.x, y: tree.y - 40, r: 10, r2: 170, life: .6, life0: .6, color: '#ffb070' });
-  G.effects.push({ ring: true, x: tree.x, y: tree.y - 40, r: 6, r2: 110, life: .45, life0: .45, color: '#e6f0ea' });
-  for (let i = 0; i < 6; i++) spawnFlameBurst(tree.x + (Math.random() * 2 - 1) * FOG_TREE.w * .35, tree.y - Math.random() * FOG_TREE.h * .6, 1.3);
-  addLightFlash('flame', tree.x, tree.y - 50, 2);
-  if (typeof nearbyImpact === 'function') nearbyImpact(tree.x, tree.y, 8, .06);
-  if (typeof sfxAt === 'function') sfxAt('hitIncendiary', tree.x, tree.y, .9, 'fogtree-down');
-  flash('霧樹燒毀了！', tree.x, tree.y - FOG_TREE.h, '#ffd6a0', 1.6);
-  systemNotice(left ? '霧樹燒毀了，這一區的霧散了！（還剩 ' + left + ' 棵霧樹）' : '所有霧樹都燒毀了，森林的霧散了！');
+// 水晶破掉：換成沒有水晶的樹圖，那一區的霧慢慢散開
+function shatterFogCrystal(tree) {
+  tree.burnt = true; tree.hp = 0; tree.fireT = 0; tree.burnAt = performance.now() / 1000;
+  if (tree.proxy) { tree.proxy.dead = true; tree.proxy.hp = 0; }
+  const cp = fogCrystalPos(tree);   // 不跳文字提示：看樹換圖、霧散開就知道
+  G.effects.push({ ring: true, x: cp.x, y: cp.y, r: 8, r2: 150, life: .6, life0: .6, color: '#d69bff' });
+  G.effects.push({ ring: true, x: cp.x, y: cp.y, r: 4, r2: 90, life: .45, life0: .45, color: '#f2e6ff' });
+  for (let i = 0; i < 18; i++) {   // 紫色水晶碎片噴開
+    const a = Math.random() * Math.PI * 2, sp = 70 + Math.random() * 140;
+    G.effects.push({ ember: true, spark: true, x: cp.x, y: cp.y, vx: Math.cos(a) * sp, vy: Math.sin(a) * sp * .6 - 70,
+      r: 1.5 + Math.random() * 2.2, life: .6 + Math.random() * .4, life0: 1, color: i % 3 ? '#c47dff' : '#f2e6ff' });
+  }
+  if (typeof LOOT_FX_VERSION !== 'undefined' && LOOT_FX_VERSION === 2 && typeof lootV2OreBreak === 'function') lootV2OreBreak(cp.x, cp.y);   // V2：水晶碎片、星光、一閃
+  if (typeof nearbyImpact === 'function') nearbyImpact(tree.x, tree.y, 6, .05);
+  if (typeof sfxAt === 'function') sfxAt('glassBreak3', cp.x, cp.y, .8, 'fogtree-down');
 }
 
-// 黑暗中淡淡的紫光（著火時變成橘光）：js/lighting.js 的 visualLights 會讀這裡
+// 黑暗中淡淡的紫光（水晶發出來的；火燒到樹根時變橘光）：js/lighting.js 的 visualLights 會讀這裡
 function fogTreeLights() {
   if (!G || !G.fogTrees || !G.fogTrees.length || typeof FOG_TREE === 'undefined') return [];
   const now = performance.now() / 1000, out = [];
   for (const t of G.fogTrees) {
+    const cp = fogCrystalPos(t);
     if (t.burnt) {
-      const ember = Math.max(0, 1 - (now - (t.burnAt || now)) / 8);   // 燒光後餘燼慢慢熄
-      if (ember > .02) out.push({ x: t.x, y: t.y - 20, r: 90, life: 1, life0: 1, power: .45 * ember, color: [255, 120, 50] });
-    } else if (t.fireT > 0) out.push({ x: t.x, y: t.y - 50, r: 200, life: 1, life0: 1, power: .75 + .1 * Math.sin(now * 9 + t.seed), color: [255, 150, 60] });
-    else if (FOG_TREE.glowR > 0) out.push({ x: t.x, y: t.y - 60, r: FOG_TREE.glowR, life: 1, life0: 1, power: .32 + .06 * Math.sin(now * 1.6 + t.seed), color: [170, 120, 220] });
+      const fade = Math.max(0, 1 - (now - (t.burnAt || now)) / 3);   // 碎掉後殘光很快熄掉
+      if (fade > .02) out.push({ x: cp.x, y: cp.y, r: 120, life: 1, life0: 1, power: .5 * fade, color: [200, 150, 255] });
+    } else if (t.fireT > 0) out.push({ x: t.x, y: t.y - 30, r: 160, life: 1, life0: 1, power: .6 + .1 * Math.sin(now * 9 + t.seed), color: [255, 150, 60] });
+    else if (FOG_TREE.glowR > 0) out.push({ x: cp.x, y: cp.y, r: FOG_TREE.glowR * fogCrystalScale(t), life: 1, life0: 1, power: .34 + .08 * Math.sin(now * 1.6 + t.seed), color: [170, 120, 220] });
   }
   return out;
 }
@@ -105,29 +193,35 @@ function fogTreeSortables(list) {
 }
 
 function drawFogTree(t) {
-  const W = FOG_TREE.w, H = FOG_TREE.h, now = performance.now() / 1000;
+  const W = t.rect.w, H = t.rect.h, now = performance.now() / 1000, sc = fogCrystalScale(t);
+  const shake = t.hitT > 0 ? Math.sin(now * 90) * 1.5 : 0;   // 被打中：水晶的光抖一下
   ctx.save();
-  ctx.fillStyle = 'rgba(0,0,0,.32)';
-  ctx.beginPath(); ctx.ellipse(t.x, t.y - 2, W * .3, 9, 0, 0, Math.PI * 2); ctx.fill();
-  const custom = t.burnt ? (imgReady(fogTreeBurntImg) ? fogTreeBurntImg : null) : (imgReady(fogTreeImg) ? fogTreeImg : null);
-  if (custom) {
-    ctx.imageSmoothingEnabled = false;
-    ctx.drawImage(custom, Math.round(t.x - W / 2), Math.round(t.y - H), W, H);
-  } else if (t.burnt) drawFogTreeBurntPlaceholder(t, W, H);
-  else drawFogTreePlaceholder(t, W, H, now);
-  // 著火：整棵樹泛橘光、頭上有燒毀進度條
-  if (!t.burnt && t.fireT > 0) {
-    ctx.globalCompositeOperation = 'lighter';
-    const g = ctx.createRadialGradient(t.x, t.y - H * .45, 0, t.x, t.y - H * .45, W * .6);
-    const a = .25 + .1 * Math.sin(now * 12 + t.seed);
-    g.addColorStop(0, 'rgba(255,140,50,' + a.toFixed(3) + ')'); g.addColorStop(1, 'rgba(255,90,20,0)');
-    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(t.x, t.y - H * .45, W * .6, 0, Math.PI * 2); ctx.fill();
-    ctx.globalCompositeOperation = 'source-over';
+  if (!t.stamp) {   // 「🌲 霧樹」點的：樹也由這裡畫（物件圖的樹由地圖自己畫）
+    ctx.fillStyle = 'rgba(0,0,0,.32)';
+    ctx.beginPath(); ctx.ellipse(t.x, t.y - 2, W * .3, 9 * sc, 0, 0, Math.PI * 2); ctx.fill();
+    const custom = t.burnt ? (imgReady(fogTreeBurntImg) ? fogTreeBurntImg : null) : (imgReady(fogTreeImg) ? fogTreeImg : null);
+    if (custom) ctx.drawImage(custom, Math.round(t.rect.x + shake), Math.round(t.rect.y), W, H);
+    else if (t.burnt) drawFogTreeBurntPlaceholder(t, W, H);
+    else drawFogTreePlaceholder(t, W, H, now);
   }
-  if (!t.burnt && t.burn > 0) {
-    const bw = 60, by = t.y - H - 10;
-    ctx.fillStyle = '#2a1d16'; ctx.fillRect(t.x - bw / 2, by, bw, 6);
-    ctx.fillStyle = t.fireT > 0 ? '#ff8a3a' : '#a0663a'; ctx.fillRect(t.x - bw / 2, by, bw * Math.min(1, t.burn / FOG_TREE.burnNeed), 6);
+  if (!t.burnt) {
+    const cp = fogCrystalPos(t);
+    // 水晶一明一暗地發光（被打中時閃白），讓玩家知道要打這裡
+    ctx.globalCompositeOperation = 'lighter';
+    const k = t.hitT > 0 ? 1 : .45 + .25 * Math.sin(now * 2.2 + t.seed), R = 22 * sc;
+    const g = ctx.createRadialGradient(cp.x + shake, cp.y, 0, cp.x + shake, cp.y, R);
+    g.addColorStop(0, t.hitT > 0 ? 'rgba(255,240,255,' + (.7 * k).toFixed(3) + ')' : 'rgba(200,140,255,' + (.45 * k).toFixed(3) + ')');
+    g.addColorStop(1, 'rgba(150,90,230,0)');
+    ctx.fillStyle = g; ctx.beginPath(); ctx.arc(cp.x + shake, cp.y, R, 0, Math.PI * 2); ctx.fill();
+    ctx.globalCompositeOperation = 'source-over';
+    // 水晶的血條：被打過才出現，幾秒後收起
+    if (t.barT > 0 && t.hp < t.maxhp) {
+      const bw = 50, by = t.rect.y + H * .08;   // 樹冠上方（圖片頂端有一段空白）
+      ctx.globalAlpha = Math.min(1, t.barT / .4);
+      ctx.fillStyle = '#1d1528'; ctx.fillRect(t.x - bw / 2, by, bw, 6);
+      ctx.fillStyle = '#c47dff'; ctx.fillRect(t.x - bw / 2, by, bw * Math.max(0, t.hp / t.maxhp), 6);
+      ctx.globalAlpha = 1;
+    }
   }
   ctx.restore();
 }
@@ -185,7 +279,7 @@ function updateFogClears(dt) {
   }
   // 正在燒的霧樹：火的熱度把整棵樹周圍的霧逼開（才看得到樹在燒）
   for (const t of G.fogTrees || []) {
-    if (t.fireT > 0 && !t.burnt && !list.some(c => c.ref === t)) list.push({ ref: t, tree: true, x: t.x, y: t.y - FOG_TREE.h * .4, r: FOG_TREE.w * .6 + F.extra * CELL, k: 0, hold: F.linger });
+    if (t.fireT > 0 && !t.burnt && !list.some(c => c.ref === t)) list.push({ ref: t, tree: true, x: t.x, y: t.y - t.rect.h * .3, r: t.rect.w * .4 + F.extra * CELL, k: 0, hold: F.linger });
   }
   for (const c of list) {
     if (fogClearAlive(c)) { c.k = Math.min(1, c.k + dt / F.fadeIn); c.hold = F.linger; }

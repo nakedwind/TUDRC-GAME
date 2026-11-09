@@ -189,6 +189,7 @@ function oilExplode(x, y, it) {
   nearbyImpact(x, y, OIL_POWER_FLICKER.shake, .08);
 }
 function damageCoresInBlast(x, y, radius, damage) {
+  if (typeof damageFogCrystalsInBlast === 'function') damageFogCrystalsInBlast(x, y, radius, damage);   // 爆炸也會震碎霧樹的水晶（js/fog.js）
   for (const core of G.cores || []) {
     if (core.dead || core.hp <= 0 || core.hidden || core.carried) continue;   // 躲在順順宮帽裡、抱在珍珠大童身上：炸不到、燒不到（js/elite-cap-king.js、js/pearl-elder.js）
     const d = Math.hypot(core.x - x, core.y - y);
