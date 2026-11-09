@@ -14,6 +14,7 @@ function workshopConfigText(obj) {
     '     values：Lv1～Lv5 改過的實際數值（例如 {"dmg": 7}；沒寫的＝data/equipment.js 原本的；填文字的話只顯示在效果說明）\n' +
     '     cost：要花幾個異質碎片（裝備：[開發, 升到 Lv2, …, 升到 Lv5]；武器：[升到 Lv2, …, 升到 Lv5]；null／沒寫的＝原本的）\n' +
     '     子彈 b:子彈id（例如 b:tranq）：name、image、desc 說明、cost 開發費用、max 一組幾發（彈藥包一格）；彈匣 m:magazine：name、image、desc、slots 每一級裝得下幾種、cost 升級費用\n' +
+    '     建築 bld:建築id（例如 bld:barricade）：about 還沒開發時的說明、aboutOwned 開發好了的說明（沒寫＝原本的）、hp／dmg／cook 每一級的 %、cost 升級費用、圖片大小位移\n' +
     '   added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）\n' +
     '   removed：刪除的原本裝備 id（武器前面加 w:）\n' +
     '   order：開發工坊裡的排列順序（gear 裝備 id、weapons 武器 w:id；沒列到的接在後面）\n' +

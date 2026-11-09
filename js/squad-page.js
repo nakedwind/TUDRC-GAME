@@ -126,7 +126,7 @@ function renderSquadPage(body) {
     else html += squadSkillHtml(actor, safe);
   }
   const keep = body.querySelector('.sq-roster-list')?.scrollTop || 0;
-  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas' + (st.solo ? ' sq-solo' : '') + (sqV2() ? ' sq-v2' : '') + '" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
+  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas' + (st.solo ? ' sq-solo' : '') + (sqV2() ? ' sq-v2' : '') + (SQUAD_GEAR_SLOTS > 3 ? ' sq-gear4' : '') + '" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
   const list = body.querySelector('.sq-roster-list'); if (list) list.scrollTop = keep;
   fitSquadCanvas(body); afterSquadRender(body);
 }
@@ -228,8 +228,8 @@ function squadGearBarHtml(type) {
   return '<section class="sq-info sq-gearbar" data-sq="panel.gearBar"><b class="sq-gearbar-title" data-sq="text.gearBarTitle">' + sqT('text.gearBarTitle', '隊員裝備') + '</b><div class="sq-gearbar-slots" data-sq="box.gearBarSlots">' +
     squadGearOf(type).map((id, i) => {
       const g = id && squadGearById(id);
-      return '<span class="sq-gearbar-slot' + (g ? ' filled' : '') + '" data-sq="gearBarSlot:' + i + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="裝備 ' + (i + 1) + '：空"') + '>' +
-        (g ? '<img data-sq="gearBarImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' : '<i>' + (i + 1) + '</i>') + '</span>';
+      return '<span class="sq-gearbar-slot' + (g ? ' filled' : '') + '" data-sq="gearBarSlot:' + i + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="' + squadGearSlotName(i) + '：空"') + '>' +
+        (g ? '<img data-sq="gearBarImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' : '<i>' + (SQUAD_GEAR_SLOTS > 3 ? squadGearSlotName(i) : i + 1) + '</i>') + '</span>';   // 空格：新版寫部位（頭部、上身…），舊版寫 1～3
     }).join('') + '</div><button type="button" class="sq-gearbar-btn" data-sq-armor data-sq="btn.gearBar">' + sqT('btn.gearBar', '更換裝備') + '</button></section>';
 }
 // 「更換裝備」：打開防具視窗、選好這位隊員（js/backpack.js 的 openArmorPanelFor）；關掉後回到這一頁
@@ -261,7 +261,7 @@ const sqLookText = (id, f, def) => { const t = typeof SQUAD_LAYOUT !== 'undefine
 let squadShownItem = null;   // 下方「裝備說明／裝備數值」現在顯示的是哪一件：{ kind: 'gear'|'look', id }（編輯器改字用）
 function squadAvailList(type) {   // 下面「可用裝備」：選的是隊員裝備格→背包裡的隊員裝備；外觀格→能穿的服裝／配件
   const sl = squadPageState.slot;
-  if (sl.kind === 'gear') return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0).map(g => ({ id: g.id, ref: { kind: 'gear', id: g.id }, name: g.name, image: squadGearImage(g), n: supplyInventory.get(g.id), desc: g.desc, stat: squadGearEffect(g) }));
+  if (sl.kind === 'gear') return squadGearList().filter(g => (supplyInventory.get(g.id) || 0) > 0 && squadGearFits(g.id, sl.id)).map(g => ({ id: g.id, ref: { kind: 'gear', id: g.id }, name: g.name, image: squadGearImage(g), n: supplyInventory.get(g.id), desc: g.desc, stat: squadGearEffect(g) }));
   if (typeof costumeSkinsFor === 'undefined') return [];
   if (sl.id === 'skin') return costumeSkinsFor(type).map(s => ({ id: 'skin-' + s.id, wear: s.id, name: s.name, image: 'images/character/' + s.folder + '/' + s.folder.replace('_', '') + '_0000_Front.png', ref: { kind: 'look', id: s.id }, desc: sqLookText(s.id, 'desc', s.builtin ? '原本的服裝。' : '扭蛋得到的服裝' + (s.rarity ? '（' + s.rarity + '）' : '') + '。'), stat: sqLookText(s.id, 'stat', '外觀裝備，不影響數值') }));
   return COSTUME_ACCESSORIES.filter(a => accFitsSlot(a, sl.id) && costumeCanWear(type, a.id)).map(a => ({ id: a.id, wear: a.id, name: a.name, image: a.art.front, ref: { kind: 'look', id: a.id }, desc: sqLookText(a.id, 'desc', '扭蛋得到的配件' + (a.rarity ? '（' + a.rarity + '）' : '') + '。'), stat: sqLookText(a.id, 'stat', '外觀裝備，不影響數值') }));
@@ -304,7 +304,7 @@ function squadGearHtml(actor, safe) {
     '<div class="sq-avail" data-sq="panel.avail">' + (avail.length ? avail.map(a => '<button type="button" class="sq-avail-item' + (a.id === st.avail ? ' sel' : '') + '" data-avail="' + sqEsc(a.id) + '" data-sq="avail:' + sqEsc(a.id) + '" title="' + sqEsc(a.name) + '"><img data-sq="availImg:' + sqEsc(a.id) + '" src="' + sqEsc(a.image) + '" alt="">' + (a.n > 1 ? '<em>×' + a.n + '</em>' : '') + '</button>').join('')
       : '<p class="sq-dim">' + (st.slot.kind === 'gear' ? '背包裡沒有隊員裝備（找諾亞的開發工坊製作）' : '還沒有這個欄位的外觀裝備') + '</p>') + '</div>' +
     '<button type="button" class="sq-btn unequip" data-gear-unequip data-sq="btn.unequip"' + (cur && safe && !(st.slot.kind === 'look' && st.slot.id === 'skin' && cur.desc === '原本的服裝。') ? '' : ' disabled') + '>' + sqT('btn.unequip', '卸下裝備') + '</button>' +
-    '<button type="button" class="sq-btn equip" data-gear-equip data-sq="btn.equip"' + (pick && safe && wornAt < 0 ? '' : ' disabled') + '>' + (wornAt >= 0 ? '已穿在第 ' + (wornAt + 1) + ' 格' : sqT('btn.equip', '穿上裝備')) + '</button></section>';
+    '<button type="button" class="sq-btn equip" data-gear-equip data-sq="btn.equip"' + (pick && safe && wornAt < 0 ? '' : ' disabled') + '>' + (wornAt >= 0 ? '已穿在「' + squadGearSlotName(wornAt) + '」' : sqT('btn.equip', '穿上裝備')) + '</button></section>';
   return h;
 }
 
@@ -652,7 +652,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
     if (/^g?(node|nodeIcon)$/.test(p) || /^(text\.(switchLabel|progress|crystals|skill|cost|lock)|btn\.(switch|reset|learn|learned)$|img\.(switch|skillIcon|costIcon|lockIcon|crystalsIcon)$|box\.(skillIcon|learn|locked|lockIcon)|panel\.(tree|skillInfo)|svg\.)/.test(key)) st.page = 'skills';
     if (/^(gearSlot|gearSlotImg|gearSlotName|lookSlot|lookSlotImg|lookSlotName|avail|availImg)$/.test(p) || /(G$|^text\.(gearTitle|lookTitle|desc|stat|avail)|^box\.(preview|desc|stat)|^img\.preview|^btn\.(un)?equip|^panel\.(gear|gearInfo|avail))/.test(key)) st.page = 'gear';
     if (p === 'roster' || p === 'rosterImg') st.member = id;
-    if (p === 'gearBarImg' && !squadGearOf(st.member)[id]) { const g = squadGearList().find(x => supplyInventory.get(x.id) > 0); if (g) equipSquadGear(st.member, Number(id), g.id); }   // 這一格是空的：先穿一件才看得到圖
+    if (p === 'gearBarImg' && !squadGearOf(st.member)[id]) { const g = squadGearList().find(x => supplyInventory.get(x.id) > 0 && squadGearFits(x.id, Number(id))); if (g) equipSquadGear(st.member, Number(id), g.id); }   // 這一格是空的：先穿一件才看得到圖
     if (isCardPart(key)) st.card = st.member;   // 說明卡裡的東西：打開說明卡
     if (key === 'text.noSkill') { const m = squadMemberList().find(x => x.noncombat || !TYPES[x.type]); if (m) st.member = m.type; }   // 換到一位支援人員
     if (/^box\.(locked|lockIcon)$|^img\.lockIcon$|^text\.lock/.test(key)) { const n = skillLayoutFor(st.member).find(x => skillStateOf(st.member, x.id) === 'locked'); if (n) st.skill[st.member] = n.id; }
@@ -661,7 +661,7 @@ if (/[?&]squadedit=1(&|$)/.test(location.search)) (() => {
       if (n && (cur === 'locked' || (cur === 'owned' && /^(box|btn)\.learn$|^text\.cost|^img\.costIcon/.test(key)))) st.skill[st.member] = n.id;
     }
     if (/^(box|btn)\.learned$/.test(key)) { const n = skillLayoutFor(st.member).find(x => skillStateOf(st.member, x.id) === 'owned'); if (n) st.skill[st.member] = n.id; }   // 換到學會的格子
-    if (p === 'gearSlotImg') { st.slot = { kind: 'gear', id: Number(id) }; if (!squadGearOf(st.member)[id]) { const g = squadGearList().find(x => supplyInventory.get(x.id) > 0); if (g) equipSquadGear(st.member, Number(id), g.id); } }
+    if (p === 'gearSlotImg') { st.slot = { kind: 'gear', id: Number(id) }; if (!squadGearOf(st.member)[id]) { const g = squadGearList().find(x => supplyInventory.get(x.id) > 0 && squadGearFits(x.id, Number(id))); if (g) equipSquadGear(st.member, Number(id), g.id); } }
     if (p === 'avail' || p === 'availImg') st.slot = { kind: 'gear', id: st.slot.kind === 'gear' ? st.slot.id : 0 };
     refreshSquadPage(); applySquadLayout();
   }

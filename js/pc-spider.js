@@ -6,6 +6,8 @@
    ・同一排湊齊同花色 K→A 就自動收走（左下角）；收滿 8 組＝破關
    ・點右下角的牌堆＝每排各發 1 張（每一排都要有牌才能發）
    ・難度：單色（全部♠）、雙色（♠♥）、四色
+   ・每一局都解得開：「新牌局」從 data/pc-spider-deals.js 的清單挑牌局編號（電腦事先試玩過、確定解得開的；tools/spider-deals.js 產生）。
+     洗牌方式（pcsRandom、newPcSpider 裡的洗牌）改了的話，要重新跑那個工具
    ・操作：拖曳，或點一下選牌再點目的地；點兩下＝自動搬到最好的位置；「提示」會把可以走的一步亮出來
    ・分數跟 Windows 一樣：開局 500，每走一步 −1，收走一組 +100
    ・收走一組時，13 張牌從 A 開始一張一張飛到左下角（pcsFlyRuns），飛完再放慶祝特效
@@ -51,7 +53,11 @@ function newPcSpider(suits, no) {
   const g = pcd.sp;
   clearInterval(g.timer); clearTimeout(g.hintTimer);
   if (suits !== 1) g.gift = false;   // 禮物只算單色版：換成雙色／四色就變回一般的連環新接龍
-  no = no || 1 + Math.floor(Math.random() * 99999);
+  if (!no) {   // 新牌局：從「確定解得開」的清單裡挑一個（跟現在這局不一樣的）；清單沒載入才完全隨機
+    const list = (typeof PCS_SOLVABLE !== 'undefined' && PCS_SOLVABLE[suits]) || [];
+    const pick = list.filter(n => n !== g.no);
+    no = pick.length ? pick[Math.floor(Math.random() * pick.length)] : 1 + Math.floor(Math.random() * 99999);
+  }
   const rnd = pcsRandom(no * 7 + suits), deck = Array.from({ length: 104 }, (_, i) => i);
   for (let i = deck.length - 1; i > 0; i--) { const j = Math.floor(rnd() * (i + 1)); [deck[i], deck[j]] = [deck[j], deck[i]]; }
   const cols = Array.from({ length: 10 }, (_, k) => deck.splice(0, k < 4 ? 6 : 5));

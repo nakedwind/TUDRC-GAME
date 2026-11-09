@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- 補充彈藥：三顆站著的子彈（中間那顆比較高），彈殼和彈頭之間有一條縫，白色剪影 -->
+  <defs>
+    <g id="bullet">
+      <!-- 彈頭（圓尖） -->
+      <path d="M0 5.4C0 2.4 1.3 0 2.6 0C3.9 0 5.2 2.4 5.2 5.4Z" fill="#fff"/>
+      <!-- 彈殼＋底部的邊 -->
+      <rect x="0" y="6.4" width="5.2" height="9" rx=".6" fill="#fff"/>
+      <rect x="-.4" y="15" width="6" height="1.8" rx=".6" fill="#fff"/>
+    </g>
+  </defs>
+  <use href="#bullet" transform="translate(2 6)"/>
+  <use href="#bullet" transform="translate(9.4 3.6)"/>
+  <use href="#bullet" transform="translate(16.8 6)"/>
+</svg>

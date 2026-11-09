@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
+  <!-- 升級裝備：圓角方塊裡一個往上的粗箭頭＋底下一條等級線（挖空），白色剪影 -->
+  <defs>
+    <mask id="upCut">
+      <rect x="2.4" y="2.4" width="19.2" height="19.2" rx="4.6" fill="#fff"/>
+      <path d="M12 5.4L17.6 11.2H14.2V15H9.8V11.2H6.4Z" fill="#000" stroke="#000" stroke-width="1" stroke-linejoin="round"/>
+      <rect x="7.4" y="16.8" width="9.2" height="2.2" rx="1.1" fill="#000"/>
+    </mask>
+  </defs>
+  <rect width="24" height="24" fill="#fff" mask="url(#upCut)"/>
+</svg>

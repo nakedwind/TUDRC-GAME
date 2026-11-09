@@ -33,7 +33,13 @@
     {
       "name": "pixelfx",
       "runtimeExecutable": "python",
-      "runtimeArgs": ["-m", "http.server", "8790", "--directory", "../pixelfx"],
+      "runtimeArgs": [
+        "-m",
+        "http.server",
+        "8790",
+        "--directory",
+        "../pixelfx"
+      ],
       "port": 8790,
       "autoPort": false
     },
@@ -45,6 +51,26 @@
         "8772"
       ],
       "port": 8772,
+      "autoPort": false
+    },
+    {
+      "name": "game-5",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "tools/editor-server.py",
+        "8775"
+      ],
+      "port": 8775,
+      "autoPort": false
+    },
+    {
+      "name": "game-6",
+      "runtimeExecutable": "python",
+      "runtimeArgs": [
+        "tools/editor-server.py",
+        "8776"
+      ],
+      "port": 8776,
       "autoPort": false
     }
   ]

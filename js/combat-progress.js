@@ -236,7 +236,7 @@ function rememberStoryBuilds() {
   if (!MAP_STORY || !MAP || !G || !Array.isArray(G.obstacles) || window.STORY_MODE) return;
   const all = readStoryBuilds();
   all[MAP.id] = G.obstacles.filter(o => o.playerBuilt && !(o.hp <= 0)).map(o => ({
-    type: o.type, orient: o.orient, c: o.c, r: o.r, w: o.w, h: o.h, solid: o.solid || [], hp: o.hp, maxhp: o.maxhp, trap: !!o.trap, slow: o.slow || null }));
+    type: o.type, orient: o.orient, c: o.c, r: o.r, w: o.w, h: o.h, solid: o.solid || [], hp: o.hp, maxhp: o.maxhp, blv: o.blv || 1, trap: !!o.trap, slow: o.slow || null }));   // blv：蓋的時候的建築等級（js/build.js）
   if (!all[MAP.id].length) delete all[MAP.id];
   try { localStorage.setItem(STORY_BUILDS_KEY, JSON.stringify(all)); } catch (_) {}
 }
@@ -246,7 +246,7 @@ function restoreStoryBuilds() {
     const cells = (b.solid || []).map(([dc, dr]) => (b.c + dc) + ',' + (b.r + dr));
     if (cells.some(k => G.grid[k] || mapWalls.has(k))) continue;   // 地圖改過、那裡被擋住了：這個就不放
     const o = { kind: 'obstacle', playerBuilt: true, type: b.type, orient: b.orient, c: b.c, r: b.r, w: b.w, h: b.h,
-      solid: (b.solid || []).map(x => x.slice()), hp: b.hp, maxhp: b.maxhp, trap: !!b.trap, slow: b.slow || null };
+      solid: (b.solid || []).map(x => x.slice()), hp: b.hp, maxhp: b.maxhp, blv: b.blv || 1, trap: !!b.trap, slow: b.slow || null };
     for (const k of cells) G.grid[k] = o;
     G.obstacles.push(o);
   }

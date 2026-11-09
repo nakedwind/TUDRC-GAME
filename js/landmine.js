@@ -36,19 +36,19 @@ function detonateMine(o) {
   const { x, y } = mineCenter(o);
   o.lastHitBy = 'demolish';   // 從清單移除時不要觸發其他效果
   removeBarrier(o);
-  const R = LANDMINE.radius * CELL;
-  damageCoresInBlast(x, y, R, LANDMINE.damage);
+  const R = LANDMINE.radius * CELL, power = LANDMINE.damage * (typeof buildBoost === 'function' ? buildBoost(o, 'dmg') : 1);   // 炸怪物的傷害：建築等級越高越痛（js/build.js）
+  damageCoresInBlast(x, y, R, power);
   if (typeof hitHangiCapsAt === 'function') hitHangiCapsAt(x, y, R);   // 爆炸波及順順宮帽：打開帽子
   for (const e of G.enemies) {   // 怪物
     if (e.dead || e.hp <= 0) continue;
     const d = Math.hypot(e.x - x, e.y - y);
     if (d > R || !hasLineOfSight(x, y, e.x, e.y)) continue;
-    const dmg = LANDMINE.damage * (1 - .4 * d / R);
+    const dmg = power * (1 - .4 * d / R);
     e.hp -= dmg; e.hitT = .2; e.hitColor = '#ff9a3c';
     flashDmg('-' + Math.round(dmg), e.x, e.y - 26, '#ff9a3c');
     enemyHitReact(e, x, y, true);
   }
-  if (typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, LANDMINE.damage);   // 地底的版權老鼠被炸出地面（js/burrowing-mouse.js）
+  if (typeof burrowMouseBlast === 'function') burrowMouseBlast(x, y, R, power);   // 地底的版權老鼠被炸出地面（js/burrowing-mouse.js）
   for (const t of G.towers) {   // 隊友也會被炸傷（依防禦減免）
     if (t.hp <= 0) continue;
     const d = Math.hypot(t.x - x, t.y - y);

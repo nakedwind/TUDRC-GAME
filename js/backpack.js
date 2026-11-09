@@ -178,7 +178,7 @@ function renderBackpack() {
 function gearCellHtml(item) {
   const drag = campArmorOpen && !item.weapon ? ` draggable="true" data-drag-gear="${item.gear.id}"` : '';   // 防具視窗：可以拖到左邊的裝備格
   return `<button type="button" class="bag-cell gear${item.weapon ? ' weapon' : ''}${equipTier(item.lv)}${item.worn ? ' worn' : ''}${item.id === backpackSel ? ' sel' : ''}" data-bag-item="${item.id}"${drag} aria-label="${item.name} Lv${item.lv}${item.worn ? '（穿戴中）' : ''}" aria-pressed="${item.id === backpackSel}">
-      ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn && !item.weapon ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}<span class="bag-cell-name">${item.name}</span></button>`;
+      ${item.image ? `<img src="${item.image}" alt="">` : `<i>${item.icon}</i>`}<b>Lv${item.lv}</b>${item.worn && !item.weapon ? `<u>${item.wornAs || '穿戴中'}</u>` : ''}<span class="bag-cell-name">${item.name}${item.count > 1 ? ' ×' + item.count : ''}</span></button>`;   // count：新版裝備背包裡有幾件（js/gear-v2.js）
 }
 // ---- 防具分頁：依部位分段，整個分類共 35 格 ----
 function renderGearGrid(items, columns) {
@@ -266,7 +266,7 @@ function renderGearDetail(g) {
   backpackDetail.classList.add('gear-detail');
   backpackDetail.innerHTML = `
     <div class="bag-detail-image">${g.image ? `<img src="${g.image}" alt=""${g.weapon ? ' class="weapon"' : ''}>` : `<i class="bag-gear-emoji">${g.icon}</i>`}</div>
-    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? BAG_ICON.weapon + '武器' : BAG_ICON.equip + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}</div></div>
+    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">${g.weapon ? BAG_ICON.weapon + '武器' : BAG_ICON.equip + (GEAR_KIND_NAME[d.kind] || '裝備')}</span><span class="bag-tag effect">Lv${g.lv}</span>${g.worn ? `<span class="bag-tag worn">${g.wornAs || '穿戴中'}</span>` : ''}${g.extraTags || ''}</div></div>
     ${(d.bagDesc || d.ownedDesc || d.desc) ? `<p class="bag-desc">${d.bagDesc || d.ownedDesc || d.desc}</p>` : ''}<!-- 說明：跟開發工坊連通（js/backpack-layout.js 的 applyWorkshopTexts） -->
     <div class="bag-gear-stats"><div class="bag-gear-stat"><small>目前效果</small><b>${d.stat(d.levels[g.lv - 1])}</b></div></div>
     <div class="bag-actions">${gearButtons(g)}<p class="bag-note gear-hint">升級找諾亞</p></div>`;
@@ -516,8 +516,8 @@ function renderSquadArmorPanel() {
   const spec = TYPES[armorWho] || {}, gear = squadGearOf(armorWho);
   const slots = gear.map((id, i) => {
     const g = id && squadGearById(id), sel = backpackSel === SQ_WORN_PREFIX + i || (!g && armorSlotPick === i);
-    return `<button type="button" class="doll-slot${g ? ' filled' : ''}${sel ? ' picking' : ''}" data-sq-slot="${i}" title="裝備 ${i + 1}${g ? '：' + g.name : '：未裝備'}">`
-      + `<span>${g ? `<img src="${squadGearImage(g)}" alt="">` : '＋'}</span><small>${g ? g.name : '裝備 ' + (i + 1)}</small></button>`;
+    return `<button type="button" class="doll-slot${g ? ' filled' : ''}${sel ? ' picking' : ''}" data-sq-slot="${i}" title="${squadGearSlotName(i)}${g ? '：' + g.name : '：未裝備'}">`
+      + `<span>${g ? `<img src="${squadGearImage(g)}" alt="">` : '＋'}</span><small>${g ? g.name : squadGearSlotName(i)}</small></button>`;   // 格子名稱：舊版「裝備 1～3」、新版「頭部、上身…」（js/squad-gear.js、js/gear-v2.js）
   }).join('');
   box.classList.remove('with-who');
   box.innerHTML = `<h3>${spec.name || armorWho}${spec.guide ? '嚮導' : '哨兵'}裝備</h3><div class="equip-doll sq-doll"><img class="doll-art sprite" data-member="${armorWho}" src="${memberPortraitPath(spec)}" alt="${spec.name || ''}"><div class="doll-slots">${slots}</div></div>`;
@@ -543,10 +543,10 @@ function renderSquadArmorDetail() {
   const name = (TYPES[armorWho]?.name || armorWho) + (TYPES[armorWho]?.guide ? '嚮導' : '哨兵'), dup = !worn && squadGearWornAt(armorWho, g.id, -1) >= 0;
   const btn = worn ? `<button type="button" class="bag-unequip" data-sq-off="${slot}">卸下</button>`
     : dup ? `<p class="bag-note">${name}已經穿著同一種裝備了</p>`
-    : `<button type="button" class="bag-use" data-sq-wear="${g.id}">穿上${armorSlotPick != null ? '（裝備 ' + (armorSlotPick + 1) + '）' : ''}</button>`;
+    : `<button type="button" class="bag-use" data-sq-wear="${g.id}">穿上${armorSlotPick != null && squadGearFits(g.id, armorSlotPick) ? '（' + squadGearSlotName(armorSlotPick) + '）' : ''}</button>`;
   backpackDetail.innerHTML = `
     <div class="bag-detail-image"><img src="${squadGearImage(g)}" alt=""></div>
-    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">🎽 隊員裝備</span>${worn ? `<span class="bag-tag worn">${name}・裝備 ${slot + 1}</span>` : ''}</div></div>
+    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">🎽 隊員裝備</span>${worn ? `<span class="bag-tag worn">${name}・${squadGearSlotName(slot)}</span>` : ''}</div></div>
     ${g.desc ? `<p class="bag-desc">${g.desc}</p>` : ''}
     <div class="bag-gear-stats"><div class="bag-gear-stat"><small>效果</small><b>${squadGearEffect(g) || '—'}</b></div></div>
     <div class="bag-actions">${btn}</div>`;
@@ -554,7 +554,7 @@ function renderSquadArmorDetail() {
 // 穿上：slot 沒指定就放剛剛點的空格，再不然放第一個空格；都滿了就請玩家拖到要換掉的那格
 function wearSquadArmor(id, slot) {
   const list = squadGearOf(armorWho);
-  if (slot == null) slot = armorSlotPick != null ? armorSlotPick : list.indexOf(null);
+  slot = squadGearSlotFor(armorWho, id, slot != null ? slot : armorSlotPick);   // 舊版：指定的格子，沒指定就第一個空格；新版：照裝備的部位（js/gear-v2.js）
   if (slot < 0) { sfx('error'); systemNotice('三格都穿滿了：先卸下一件，或把裝備拖到要換掉的那一格', true); return; }
   if (equipSquadGear(armorWho, slot, id)) { sfx('wearGear'); armorSlotPick = null; backpackSel = SQ_WORN_PREFIX + slot; }
   else sfx('error');
@@ -569,7 +569,7 @@ function handleSquadArmorClick(e) {
   if (slot) {
     const i = Number(slot.dataset.sqSlot);
     if (squadGearOf(armorWho)[i]) { backpackSel = SQ_WORN_PREFIX + i; armorSlotPick = null; }
-    else { armorSlotPick = i; const first = squadArmorItems().find(g => squadGearWornAt(armorWho, g.sgear.id, -1) < 0); backpackSel = first ? first.id : null; if (!first) systemNotice('背包裡沒有可以穿的隊員裝備，可以找諾亞的開發工坊製作'); }
+    else { armorSlotPick = i; const first = squadArmorItems().find(g => squadGearWornAt(armorWho, g.sgear.id, -1) < 0 && squadGearFits(g.sgear.id, i)); backpackSel = first ? first.id : null; if (!first) systemNotice('背包裡沒有可以穿的隊員裝備，可以找諾亞的開發工坊製作'); }
     sfx('blip'); renderBackpack(); return true;
   }
   const wear = e.target.closest('[data-sq-wear]');

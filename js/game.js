@@ -264,7 +264,9 @@ let dialogueState = null;
 // 對話框右邊的選項欄（送禮、推薦穿搭…）：有任何一個按鈕顯示時才出現，對話框跟著變寬
 const dialogueOptions = dialogueBox.querySelector('.dialogue-options');
 function updateDialogueOptions() {
-  dialogueBox.classList.toggle('has-options', !!dialogueOptions && [...dialogueOptions.children].some(b => !b.classList.contains('hidden')));
+  const shown = dialogueOptions ? [...dialogueOptions.children].filter(b => !b.classList.contains('hidden')).length : 0;
+  dialogueBox.classList.toggle('has-options', shown > 0);
+  if (dialogueOptions) dialogueOptions.classList.toggle('two-col', shown > 4);   // 選項超過 4 個（例如諾亞）：分成左右兩排（css/style.css 的 .dialogue-options.two-col）
 }
 if (dialogueOptions) new MutationObserver(updateDialogueOptions).observe(dialogueOptions, { subtree: true, attributes: true, attributeFilter: ['class'] });
 let dialogueTypeTimer = null;
@@ -414,6 +416,7 @@ function openTextDialogue({ name, image, lines, kind = 'text' }) {
   closeSentryMenu(); closeGroundMenu(); closeBuildMenu();
   dialoguePortrait.src = image || ''; dialoguePortrait.alt = name || '';
   dialoguePortrait.parentElement.dataset.char = kind;   // css：整張圖縮進框裡（不是裁半身像）
+  document.querySelectorAll('.dialogue-ws').forEach(b => b.classList.add('hidden'));   // 諾亞的開發工坊四個選項（js/equipment.js）
   for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueOutfit', 'dialogueGear', 'dialogueHospital', 'dialogueAshSoothe']) document.getElementById(id)?.classList.add('hidden');
   document.getElementById('dialogueFavor')?.classList.add('hidden');
   dialogueBox.classList.remove('hidden');

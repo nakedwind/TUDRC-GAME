@@ -69,7 +69,7 @@ function renderDialogueFavor() {
   // ↑ 一定要是 true／false：還沒送過禮時 giftReply 是 undefined，toggle 收到 undefined 會變成「切換」，按鈕就會一次有、一次沒有
   const done = giftLimitReached(id);
   btn.disabled = done;
-  btn.innerHTML = done ? '這次已送完' : '🎁 送禮 <span>G</span>';
+  btn.innerHTML = done ? '這次已送完' : '<i class="dlg-ic dlg-ic-gift"></i>送禮 <span>G</span>';
 }
 function onDialogueOpened(actor) {
   const id = giftableId(actor), want = MAP_SAFE && giftRequests[id] && !giftLimitReached(id) ? itemById(giftRequests[id]) : null;

@@ -8,6 +8,7 @@
      values：Lv1～Lv5 改過的實際數值（例如 {"dmg": 7}；沒寫的＝data/equipment.js 原本的；填文字的話只顯示在效果說明）
      cost：要花幾個異質碎片（裝備：[開發, 升到 Lv2, …, 升到 Lv5]；武器：[升到 Lv2, …, 升到 Lv5]；null／沒寫的＝原本的）
      子彈 b:子彈id（例如 b:tranq）：name、image、desc 說明、cost 開發費用、max 一組幾發（彈藥包一格）；彈匣 m:magazine：name、image、desc、slots 每一級裝得下幾種、cost 升級費用
+     建築 bld:建築id（例如 bld:barricade）：about 還沒開發時的說明、aboutOwned 開發好了的說明（沒寫＝原本的）、hp／dmg／cook 每一級的 %、cost 升級費用、圖片大小位移
    added：新增的裝備（id、名稱、部位 kind、圖片、取得方式 source、費用 cost、每一級的效果說明 levels）
    removed：刪除的原本裝備 id（武器前面加 w:）
    order：開發工坊裡的排列順序（gear 裝備 id、weapons 武器 w:id；沒列到的接在後面）
@@ -354,6 +355,7 @@ const WORKSHOP_CONFIG = {
       }
     },
     "radio": {
+      "ownedDesc": "指派隊員時，隊員速度更快，同時帶著慣性導航記錄器：地圖上看得到隊員在哪。",
       "infoImgY": -6,
       "infoParts": {
         "tag": {
@@ -391,6 +393,46 @@ const WORKSHOP_CONFIG = {
       }
     },
     "navrecorder": {
+      "ownedDesc": "裝備後在戰鬥區域也能打開 T-Pad 的「地圖」",
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        }
+      }
+    },
+    "gloves": {
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        }
+      }
+    },
+    "scope": {
+      "infoParts": {
+        "name": {
+          "y": -20
+        },
+        "tag": {
+          "y": -20
+        },
+        "desc": {
+          "y": -20
+        }
+      }
+    },
+    "pouch": {
       "infoParts": {
         "name": {
           "y": -20
@@ -542,8 +584,11 @@ const WORKSHOP_CONFIG = {
         }
       }
     },
+    "b:flare": {
+      "desc": "打出去落地後燃燒、照亮周圍一大片"
+    },
     "b:tranq": {
-      "desc": "打中的怪物陷入沉睡；打中暴走的隊員會睡著，醒來後解除暴走狀態。對怪物「生命體」沒有效果。",
+      "desc": "打中的怪物陷入沉睡；打中暴走的隊員會睡著",
       "infoParts": {
         "name": {
           "y": -20
@@ -558,7 +603,7 @@ const WORKSHOP_CONFIG = {
       "iconScale": 110
     },
     "b:paint": {
-      "desc": "打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。一次只能標一隻，打新的舊的就消失。",
+      "desc": "打中的怪物沾上螢光漆：隊員會優先集火牠，躲進黑暗也看得到。",
       "infoParts": {
         "name": {
           "y": -20
@@ -573,6 +618,7 @@ const WORKSHOP_CONFIG = {
       "iconScale": 120
     },
     "b:split": {
+      "desc": "像散彈槍一樣一次噴出一大把小子彈。貼得越近，打中的顆數越多、每顆也越痛",
       "infoParts": {
         "name": {
           "y": -20
@@ -586,6 +632,7 @@ const WORKSHOP_CONFIG = {
       }
     },
     "b:knock": {
+      "desc": "打中的怪物被往後推開；推去撞到牆壁或建築會暈一下、再受一點傷。很重的怪物推不動，",
       "infoParts": {
         "name": {
           "y": -20
@@ -598,7 +645,11 @@ const WORKSHOP_CONFIG = {
         }
       }
     },
+    "b:confuse": {
+      "desc": "打中的異質體陷入混亂幾秒，會攻擊自己人"
+    },
     "m:magazine": {
+      "desc": "在背包的「武器」分頁把子彈拖進彈匣格，戰鬥中滾輪就換得到。一般子彈不佔格子",
       "infoParts": {
         "name": {
           "y": -20
@@ -636,6 +687,42 @@ const WORKSHOP_CONFIG = {
           "y": -20
         }
       }
+    },
+    "bld:deco_oil_tank": {
+      "aboutOwned": "打破以後會流出一小片汽油，小心火燭！",
+      "about": "打破以後會流出一小片汽油，小心火燭！"
+    },
+    "bld:deco_gasstove2": {
+      "about": "開發好之後，可以烹飪食物，要注意使用不當而爆炸。",
+      "aboutOwned": "開發好之後，可以烹飪食物，要注意使用不當而爆炸。"
+    },
+    "bld:irongate": {
+      "about": "左邊和右邊的可以開門，關上門安心感滿滿。",
+      "aboutOwned": "左邊和右邊的可以開門，關上門安心感滿滿。"
+    },
+    "bld:landmine": {
+      "about": "異質體踩到就會爆炸。",
+      "aboutOwned": "異質體踩到就會爆炸。"
+    },
+    "bld:searchlight": {
+      "about": "照亮大面積的區域的燈。",
+      "aboutOwned": "照亮大面積的區域的燈。"
+    },
+    "bld:camping_lights": {
+      "about": "可以小範圍照明的燈，放置在地上不會擋路。",
+      "aboutOwned": "可以小範圍照明的燈，放置在地上不會擋路。"
+    },
+    "bld:roadblocks": {
+      "about": "可以阻擋道路的障礙物。",
+      "aboutOwned": "可以阻擋道路的障礙物。"
+    },
+    "bld:wirecloth": {
+      "about": "讓大家走的更慢更小心。",
+      "aboutOwned": "讓大家走的更慢更小心。"
+    },
+    "bld:deco_oil_drum": {
+      "about": "打破以後會流出大量汽油，小心火燭！",
+      "aboutOwned": "打破以後會流出大量汽油，小心火燭！"
     },
     "sg:sg-vest": {
       "aboutTail": "在 T-Pad「Y102隊員」→ 裝備頁給隊員穿。（目前有 {n} 件）"
@@ -692,7 +779,10 @@ const WORKSHOP_CONFIG = {
       "acidboots",
       "radio",
       "detector",
-      "navrecorder"
+      "navrecorder",
+      "gloves",
+      "scope",
+      "pouch"
     ],
     "weapons": [
       "w:pistol",

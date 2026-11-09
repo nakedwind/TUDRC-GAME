@@ -101,11 +101,14 @@
   <script src="data/asset-moves.js?v=init-20261106"></script><script src="js/asset-moves.js?v=init-20261106"></script>   <!-- 素材搬家：瀏覽器暫存裡的舊路徑換成新路徑（必須最先載入） -->
   <script>document.write(['squad-layout', 'squad-skills', 'squad-gear'].map(f => '<script src="data/' + f + '.js?t=' + Date.now() + '"><\/script>').join(''));</script>   <!-- 每次都讀最新的設定 -->
   <script src="js/draft-sync.js"></script>
-  <script src="js/squad-gear.js?v=sgtail-20261106"></script>   <!-- 數值名稱（STAT_MOD_NAMES）、mods 轉文字，跟遊戲共用 -->
+  <script src="data/equipment.js?v=wspages-20261109"></script>   <!-- 裝備清單（新版裝備：溫特和隊員共用；GEAR_SYSTEM 總開關） -->
+  <script>document.write('<script src="data/workshop.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 開發工坊編輯器改過的裝備名稱、數值、誰能穿 -->
+  <script src="js/workshop-config.js?v=bldabout-20261109"></script>   <!-- 把上面的設定套用到裝備資料（跟遊戲共用） -->
+  <script src="js/squad-gear.js?v=gearv2-20261109"></script>   <!-- 數值名稱（STAT_MOD_NAMES）、mods 轉文字，跟遊戲共用 -->
   <script src="js/ui-feedback.js"></script>
   <script src="js/project-save.js"></script>
   <script src="data/guide-skills.js?v=taanafast-20261106"></script>   <!-- 嚮導技能的預設台詞（編輯器顯示用） -->
-  <script src="js/squad-editor.js?v=squadv2ed-20261106"></script>
+  <script src="js/squad-editor.js?v=gearv2-20261109"></script>
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
 </html>

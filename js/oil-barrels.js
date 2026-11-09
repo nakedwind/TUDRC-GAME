@@ -75,7 +75,8 @@ function onObstacleRemoved(o) {
     if (typeof burnLifePilesNear === 'function') burnLifePilesNear(p.x, p.y, it.fire.radius * CELL);
     return;
   }
-  if (it.gas || OIL_IGNITERS.has(o.lastHitBy)) oilExplode(p.x, p.y, it);   // 瓦斯爐被誰打壞都會爆
+  const boost = typeof buildBoost === 'function' ? buildBoost(o, 'dmg') : 1;   // 溫特蓋的油桶、油箱：建築等級越高，炸怪物越痛（js/build.js；只加怪物的傷害）
+  if (it.gas || OIL_IGNITERS.has(o.lastHitBy)) oilExplode(p.x, p.y, boost === 1 ? it : { ...it, blast: { ...it.blast, enemy: it.blast.enemy * boost } });   // 瓦斯爐被誰打壞都會爆
   else addOilSlick(p.x, p.y, it.slick.radius * CELL, it.slick.life);
 }
 

@@ -170,8 +170,10 @@ function lockerBagFull(loot){
   return false;   // 裝備、空箱：不佔背包
 }
 function showLockerBagFull(loot,where){
-  const bag=lockerLootIsBullet(loot)?'彈藥包':'背包';
-  itemIntro({key:'bag-full',always:true,headline:bag+'已滿',icon:'🎒',sound:'noticePopup',name:bag+'已經滿了',
+  const ammo=lockerLootIsBullet(loot),bag=ammo?'彈藥包':'背包';
+  // 圖：背包＝畫面下方背包按鈕的那張圖；彈藥包＝開發工坊「彈藥包擴充」的圖（data/equipment.js 的 BAG_UPGRADES）
+  const image=ammo?(typeof BAG_UPGRADES!=='undefined'&&BAG_UPGRADES.ammo?.image)||'':'images/weapon/Backpack.png';
+  itemIntro({key:'bag-full',always:true,headline:bag+'已滿',image,icon:ammo?'🧰':'🎒',sound:'noticePopup',name:bag+'已經滿了',
     desc:'這個'+where+'先不打開，裡面的東西會留在'+where+'裡。整理'+bag+'、空出位置後再回來打開。'});
 }
 // where：飄字裡說在哪裡找到的（彈藥箱也用這裡，js/flare.js）

@@ -99,7 +99,8 @@ function placeObstacle(ob, c, r) {
   // 地雷（trap）埋在地上、減速建築（鐵絲網）可以走過去：都不登記擋路格
   const slow = typeof SLOW_BUILDINGS !== 'undefined' && SLOW_BUILDINGS[ob.id];
   const solid = ob.trap || slow ? [] : variantSolidCells(v).map(cell => cell.slice());
-  const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp: ob.hp, maxhp: ob.hp, spawnT: 0, trap: !!ob.trap, slow: slow || null };
+  const blv = buildLevel(ob.id) || 1, hp = Math.max(1, Math.round(ob.hp * buildBoost({ playerBuilt: true, type: ob.id, blv }, 'hp')));   // 建築等級：血量（開發工坊「開發建築物」升級）
+  const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, blv, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp, maxhp: hp, spawnT: 0, trap: !!ob.trap, slow: slow || null };
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
   if (typeof rememberStoryBuilds === 'function') rememberStoryBuilds();   // 劇情地圖：蓋好就記下來（js/combat-progress.js）
@@ -136,15 +137,36 @@ const buildDevCost = id => {
   const shards = d.shards | 0;
   return { shards, money: Number.isFinite(d.money) ? d.money : wsMoney('bld:' + id, 0, shards) };
 };
+// ---- 建築等級（開發工坊「開發建築物」頁升級；每一級的數值在 data/balance.js 的 BUILD_UPGRADE，js/workshop-config.js 的 buildUpgradeData）----
+// 等級存在 equipState.buildLv（跟裝備一起存檔）；開發好、或一開始就能蓋的＝Lv1；還沒開發＝0
+const buildLevel = id => buildUnlocked(id) ? Math.max(1, Math.min(buildUpgradeData(id).max, ((typeof equipState !== 'undefined' && equipState.buildLv) || {})[id] | 0 || 1)) : 0;
+// 溫特蓋的這個建築：k（hp 血量、dmg 攻擊力、cook 煮飯速度）是原本的幾倍。蓋下去時的等級記在 o.blv；地圖上原本擺的＝1 倍
+function buildBoost(o, k) {
+  if (!o || !o.playerBuilt) return 1;
+  const arr = buildUpgradeData(o.type)[k]; if (!arr) return 1;
+  return (arr[Math.max(1, Math.min(arr.length, o.blv || 1)) - 1] ?? 100) / 100;
+}
 function buildWorkshopEntries() {
-  return buildAll().filter(o => !buildStarter(o.id)).map(o => {
-    const have = buildUnlocked(o.id), cost = buildDevCost(o.id), look = workshopExtraLook('bld:' + o.id);   // 圖片大小、位移（開發工坊編輯器）
-    return { key: 'bld:' + o.id, kind: 'build', def: { ...o, ...look }, name: o.name, lv: have ? 1 : 0, max: 1, icon: wsAmmoIcon('<img src="' + o.h.file + '" alt="">', look), image: o.h.file, emoji: '🧱',
-      tag: '建築', worn: false, about: workshopBuildAbout(have),
-      stat: () => workshopBuildStat(o), canDev: !have, where: '', devCost: cost.shards, upCost: 0, devMoney: cost.money, buy: 'bld:' + o.id };
+  return buildAll().map(o => {
+    const lv = buildLevel(o.id), u = buildUpgradeData(o.id), cost = buildDevCost(o.id), look = workshopExtraLook('bld:' + o.id);   // 圖片大小、位移（開發工坊編輯器）
+    const up = lv && lv < u.max ? u.cost[lv - 1] || 0 : 0;
+    return { key: 'bld:' + o.id, kind: 'build', def: { ...o, ...look }, name: o.name, lv, max: u.max, icon: wsAmmoIcon('<img src="' + o.h.file + '" alt="">', look), image: o.h.file, emoji: '🧱',
+      tag: '建築', worn: false, about: workshopBuildAbout(lv > 0, 'bld:' + o.id),   // 說明：開發工坊編輯器可以改（js/workshop-config.js）
+     
+      stat: n => workshopBuildStat(o, n), canDev: !lv, where: '', devCost: cost.shards, upCost: up, devMoney: cost.money,
+      upMoney: up ? wsMoney('bld:' + o.id, lv, up) : 0, buy: lv ? 'bu:' + o.id : 'bld:' + o.id };
   });
 }
 function buildWorkshopBuy(kind, id) {
+  if (kind === 'bu') {   // 升級建築
+    const o = buildAll().find(x => x.id === id), lv = buildLevel(id), u = buildUpgradeData(id); if (!o || !lv || lv >= u.max) return true;
+    const shards = u.cost[lv - 1] || 0;
+    if (!spendWorkshop(shards, wsMoney('bld:' + id, lv, shards))) return true;
+    (equipState.buildLv || (equipState.buildLv = {}))[id] = lv + 1;
+    saveEquipment(); workshopLevelFx('up', o.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= u.max);
+    showWorkshopToast('🧱 「' + o.name + '」升到 Lv' + (lv + 1) + '（之後蓋的才會變強）');
+    return true;
+  }
   if (kind !== 'bld') return false;
   const o = buildAll().find(x => x.id === id); if (!o || buildUnlocked(id)) return true;
   const cost = buildDevCost(id);

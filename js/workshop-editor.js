@@ -74,16 +74,22 @@ const addExtra = (key, e) => EXTRA.set(key, e);
 for (const [k, u] of Object.entries(BAG_UPGRADES)) addExtra('bag:' + k, { group: 'bag', tag: '背包', name: u.name, image: u.image || '', icon: u.icon, max: u.slots.length,
   about: () => workshopBagAbout(u), stat: n => workshopBagStat(u, n), upCost: lv => u.cost[lv - 1] || 0, where: 'data/equipment.js 的 BAG_UPGRADES' });
 const buildStarterId = id => !NEWBIE_START.builds || NEWBIE_START.builds.includes(id);   // 一開始就能蓋的不用開發（跟 js/build.js 的 buildStarter 一樣）
-for (const o of [...OBSTACLES, ...DECORATIONS].filter(o => !DISABLED_BUILD_IDS.has(o.id) && !buildStarterId(o.id))) {
+for (const o of [...OBSTACLES, ...DECORATIONS].filter(o => !DISABLED_BUILD_IDS.has(o.id))) {   // 一開始就能蓋的也列出來（不用開發，但可以升級）
   const d = BUILD_DEV[o.id] || BUILD_DEV.default || { shards: 50 };
-  addExtra('bld:' + o.id, { group: 'build', tag: '建築', name: o.name, image: o.h.file, icon: '🧱', max: 1, about: have => workshopBuildAbout(have), stat: () => workshopBuildStat(o),
-    devCost: d.shards | 0, devMoney: key => Number.isFinite(d.money) ? d.money : workshopMoney(key, 0, d.shards | 0, cfg), where: '物件編輯器' });
+  addExtra('bld:' + o.id, { group: 'build', tag: '建築', name: o.name, image: o.h.file, icon: '🧱', get max() { return buildUpgradeData(o.id, cfg).max; }, about: have => workshopBuildAbout(have, 'bld:' + o.id, cfg), stat: n => workshopBuildStat(o, n, cfg),
+    upCost: lv => buildUpgradeData(o.id, cfg).cost[lv - 1] || 0, starter: buildStarterId(o.id), obj: o,
+    devCost: d.shards | 0, devMoney: key => Number.isFinite(d.money) ? d.money : workshopMoney(key, 0, d.shards | 0, cfg), where: '物件編輯器（名稱、圖片、原本的 HP、建造經費）' });
 }
+// 建築升級的數值（%）、費用：原本的（data/balance.js 的 BUILD_UPGRADE）和編輯中的
+const BUILD_UP_ROWS = [['hp', '血量（原本 HP 的 %）'], ['dmg', '攻擊力（%）'], ['cook', '煮飯速度（%）']];
+const buildUpBase = id => buildUpgradeData(id, { items: {} });
+const buildUpChanged = key => { const o = cfg.items[key] || {}; return ['hp', 'dmg', 'cook', 'cost'].some(k => Array.isArray(o[k]) && o[k].some(n => typeof n === 'number')) || ['about', 'aboutOwned'].some(k => typeof o[k] === 'string'); };   // 說明有改也算
 // 隊員裝備：可以改。名稱、說明、圖片、數值、經費直接改 data/squad-gear.js（遊戲各處讀的就是這份）；圖片大小位移、碎片存在 data/workshop.js 的 items['sg:裝備id']
 const isSgear = key => /^sg:/.test(key || '');
 const sgOf = key => cfg.sgear.find(g => 'sg:' + g.id === key);
 const sgShards = key => { const n = (cfg.items[key] || {}).cost, g = sgOf(key), d = SQUAD_GEAR_DEV[g.id] || SQUAD_GEAR_DEV.default || { shards: 20 }; return typeof n === 'number' ? n : d.shards | 0; };
-for (const g0 of cfg.sgear) {
+const GEAR_V2_ED = typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2;   // 新版裝備：隊員裝備已經併進上面的「裝備」，這一區不用了（舊版的資料 data/squad-gear.js 留著，切回舊版還在）
+for (const g0 of GEAR_V2_ED ? [] : cfg.sgear) {
   const k = 'sg:' + g0.id;
   addExtra(k, { group: 'sgear', tag: '隊員裝備', get name() { return sgOf(k).name; }, get image() { return squadGearImage(sgOf(k)); }, get icon() { return sgOf(k).icon || '🎽'; }, max: 1,
     about: () => workshopSquadGearAbout(sgOf(k), 0, (cfg.items[k] || {}).aboutTail), stat: () => squadGearEffect(sgOf(k)), get devCost() { return sgShards(k); },
@@ -129,7 +135,7 @@ const baseCost = key => (WORKSHOP_BASE[key] || {}).cost || [];
 const effCost = (key, i) => { if (isCustom(key)) return getDef(key).cost[i]; const n = costEdits(key)[i]; return typeof n === 'number' ? n : baseCost(key)[i]; };
 const costChanged = key => costEdits(key).some((n, i) => typeof n === 'number' && n !== baseCost(key)[i]);
 const levelsChanged = key => levelEdits(key).some(t => typeof t === 'string' && t !== '');
-const itemChanged = key => { if (isSgear(key)) return sgChanged(key); if (isExtra(key)) return EXTRA_LOOK_KEYS.some(k => typeof (cfg.items[key] || {})[k] === 'number'); if (isAmmo(key)) return ammoChanged(key); const o = cfg.items[key]; return !!o && (!!o.infoParts || o.money != null || WORKSHOP_TEXT_FIELDS.some(f => typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]) || levelsChanged(key) || valuesChanged(key) || costChanged(key) || typeof o.iconScale === 'number' || ['iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize'].some(k => typeof o[k] === 'number')); };
+const itemChanged = key => { if (isSgear(key)) return sgChanged(key); if (isExtra(key)) return EXTRA_LOOK_KEYS.some(k => typeof (cfg.items[key] || {})[k] === 'number') || (key.startsWith('bld:') && buildUpChanged(key)); if (isAmmo(key)) return ammoChanged(key); const o = cfg.items[key]; return !!o && (!!o.infoParts || o.money != null || o.who != null || o.make != null || o.makeMoney != null || WORKSHOP_TEXT_FIELDS.some(f => typeof o[f] === 'string' && o[f] !== '' && o[f] !== (WORKSHOP_BASE[key] || {})[f]) || levelsChanged(key) || valuesChanged(key) || costChanged(key) || typeof o.iconScale === 'number' || ['iconX', 'iconY', 'infoImgX', 'infoImgY', 'infoImgSize'].some(k => typeof o[k] === 'number')); };
 // 開發工坊裡圖片的大小（%）：新增的裝備存在 added 裡；原本的存在 items[key].iconScale（沒改＝原本的）
 const iconScaleOf = key => { if (isCustom(key)) return customEntry(key).iconScale || 100; const o = cfg.items[key]; return o && typeof o.iconScale === 'number' ? o.iconScale : ((WORKSHOP_BASE[key] || {}).iconScale || 100); };
 const iconScaleField = key => { const n = iconScaleOf(key);
@@ -285,7 +291,7 @@ function renderList() {
   };
   box.innerHTML = '<div class="list-head">裝備</div>' + gearKeys().map(btn).join('') + '<div class="list-head">武器</div>' + weaponKeys().map(btn).join('') +
     '<div class="list-head">子彈・彈匣</div>' + AMMO_KEYS.map(btn).join('') +
-    '<div class="list-head">背包</div>' + extraKeys('bag').map(btn).join('') + '<div class="list-head">建築</div>' + extraKeys('build').map(btn).join('') + '<div class="list-head">隊員裝備</div>' + extraKeys('sgear').map(btn).join('');
+    '<div class="list-head">背包</div>' + extraKeys('bag').map(btn).join('') + '<div class="list-head">建築</div>' + extraKeys('build').map(btn).join('') + (extraKeys('sgear').length ? '<div class="list-head">隊員裝備</div>' + extraKeys('sgear').map(btn).join('') : '');
 }
 document.getElementById('itemList').addEventListener('click', e => {
   const b = e.target.closest('[data-key]'); if (!b) return;
@@ -397,9 +403,81 @@ function renderExtraForm() {   // 背包擴充、建築：圖片大小和位移�
   const key = selKey, x = EXTRA.get(key), v = itemView(key), lines = Array.from({ length: x.max }, (_, i) => '<li>' + (x.max > 1 ? 'Lv' + (i + 1) + '：' : '') + esc(x.stat(i + 1)) + '</li>').join('');
   document.getElementById('itemForm').innerHTML = '<p class="hint" style="margin:0 0 8px">👀 這裡可以調圖片的大小和位移（只影響開發工坊）。名稱、圖片檔、效果要修改請到：' + esc(x.where) + '。</p>' +
     '<div class="field">名稱<b>' + esc(v.name) + '</b></div><div class="field">圖片<span class="hint">' + esc(v.image.startsWith('data:') ? '（用符號 ' + x.icon + '）' : v.image) + '</span></div>' +
-    '<div class="field">說明<span class="hint">' + esc(v.ownedDesc) + '</span></div><div class="field">效果<ul style="margin:4px 0 0;padding-left:18px">' + lines + '</ul></div>' +
+    (key.startsWith('bld:') ? buildAboutFields(key) : '<div class="field">說明<span class="hint">' + esc(v.ownedDesc) + '</span></div>') + '<div class="field">效果<ul style="margin:4px 0 0;padding-left:18px">' + lines + '</ul></div>' +
+    (key.startsWith('bld:') ? sec('buildup', '📈 每一級的數值、升級費用', buildUpFields(key)) : '') +
     sec('image', '🖼️ 圖片', iconScaleField(key) + iconOffField(key) + infoImgOffField(key) + infoImgSizeField(key)) +
     '<div class="img-btns"><button type="button" class="ed-btn" id="itemReset"' + (itemChanged(key) ? '' : ' disabled') + '>恢復為初始設定</button></div>';
+}
+// 建築的說明（還沒開發／開發好了兩段）：存在 data/workshop.js 的 items['bld:建築id'] 的 about、aboutOwned；空白＝用原本的（js/workshop-config.js 的 WORKSHOP_BUILD_ABOUT_DEFAULT）
+function buildAboutFields(key) {
+  const o = cfg.items[key] || {};
+  const box = (f, label) => '<label class="field">' + label + '<textarea rows="3" data-bab="' + f + '" placeholder="' + esc(WORKSHOP_BUILD_ABOUT_DEFAULT[f]) + '"' + (typeof o[f] === 'string' ? ' class="is-edited"' : '') + '>' + esc(typeof o[f] === 'string' ? o[f] : WORKSHOP_BUILD_ABOUT_DEFAULT[f]) + '</textarea></label>';
+  return box('about', '說明（還沒開發）') + box('aboutOwned', '說明（開發好了）') + '<span class="hint">清空＝用原本的文字。</span>';
+}
+function onBuildAboutInput(e) {
+  const f = e.target.dataset.bab, txt = e.target.value, o = cfg.items[selKey] || (cfg.items[selKey] = {});
+  if (txt.trim() === '' || txt === WORKSHOP_BUILD_ABOUT_DEFAULT[f]) delete o[f]; else o[f] = txt;   // 空白或跟原本一樣＝不用記
+  if (!Object.keys(o).length) delete cfg.items[selKey];
+  e.target.classList.toggle('is-edited', typeof o[f] === 'string');
+  document.getElementById('itemReset').disabled = !itemChanged(selKey);
+  saveDraft(); renderList(); renderPreview();
+}
+// 建築升級：每一級的血量／攻擊力／煮飯速度（%），升到下一級要幾個異質碎片（存在 data/workshop.js 的 items['bld:建築id']）
+function buildUpFields(key) {
+  const id = key.slice(4), now = buildUpgradeData(id, cfg), base = buildUpBase(id), o = EXTRA.get(key).obj;
+  const numIn = (k, i, val, b) => '<input type="text" inputmode="numeric" data-bu="' + k + ':' + i + '" value="' + esc(val) + '" placeholder="' + esc(b) + '"' + (val !== b ? ' class="is-edited"' : '') + '>';
+  const row = (k, label) => now[k] ? '<div class="field">' + label + '</div><div class="cost-row" style="grid-template-columns:repeat(' + now[k].length + ', minmax(0, 1fr))">' +
+    now[k].map((n, i) => '<label class="field">Lv' + (i + 1) + numIn(k, i, n, base[k][i]) + '</label>').join('') + '</div>' : '';
+  return '<span class="hint">開發好（或一開始就能蓋的）＝Lv1。升級之後，之後蓋的才會變強；地圖上原本擺的不受影響。' + (o.hp > 1 ? '原本的 HP＝' + o.hp + '（物件編輯器）。' : '') + '</span>' +
+    BUILD_UP_ROWS.map(([k, label]) => row(k, label)).join('') +
+    '<div class="field">升級要花幾個異質碎片<span class="hint">經費照碎片自動算</span></div><div class="cost-row" style="grid-template-columns:repeat(' + now.cost.length + ', minmax(0, 1fr))">' +
+    now.cost.map((n, i) => '<label class="field">升到 Lv' + (i + 2) + numIn('cost', i, n, base.cost[i]) + '</label>').join('') + '</div>' +
+    '<div class="field">效果<ul class="bu-effects" style="margin:4px 0 0;padding-left:18px">' + buildUpEffects(key) + '</ul></div>';
+}
+const buildUpEffects = key => { const o = EXTRA.get(key).obj; return buildUpgradeData(o.id, cfg).hp.map((_, i) => '<li>Lv' + (i + 1) + '：' + esc(workshopBuildStat(o, i + 1, cfg)) + '</li>').join(''); };
+function onBuildUpInput(e) {
+  const [k, i] = e.target.dataset.bu.split(':'), txt = e.target.value.trim(), id = selKey.slice(4), base = buildUpBase(id)[k];
+  if (txt !== '' && !/^\d+$/.test(txt)) return;   // 只收整數（打到一半先不套用）
+  const o = cfg.items[selKey] || (cfg.items[selKey] = {}), arr = Array.isArray(o[k]) ? o[k] : base.map(() => null);
+  const n = txt === '' ? null : Number(txt);
+  arr[+i] = n === null || n === base[+i] ? null : n;   // 空白或跟原本一樣＝不用記
+  if (arr.some(x => x !== null)) o[k] = arr; else delete o[k];
+  if (!Object.keys(o).length) delete cfg.items[selKey];
+  e.target.classList.toggle('is-edited', arr[+i] !== null);
+  document.getElementById('itemReset').disabled = !itemChanged(selKey);
+  const ul = document.querySelector('#itemForm .bu-effects'); if (ul) ul.innerHTML = buildUpEffects(selKey);   // 下面的效果跟著變
+  saveDraft(); renderList(); renderPreview();
+}
+// ---- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：誰能穿、製作一件要花多少 ----
+// 存在 data/workshop.js：原本的裝備＝items[id].who／make／makeMoney；新增的裝備＝added 裡那件（遊戲由 js/workshop-config.js 的 workshopGearV2Fields 套用）
+const gearV2Src = key => isCustom(key) ? customEntry(key) : (cfg.items[key] || {});
+const gearV2BaseWho = key => isCustom(key) ? 'winter' : ((WORKSHOP_BASE[key] || {}).who || 'winter');
+const gearV2WhoNow = key => gearV2Src(key).who || gearV2BaseWho(key);
+function gearV2MakeNow(key) {   // 編輯中的製作費（跟遊戲同一套算法：js/workshop-config.js 的 gearMakeCost）
+  const o = gearV2Src(key);
+  return gearMakeCost({ cost: [effCost(key, 0), effCost(key, 1)], make: o.make, makeMoney: o.makeMoney });
+}
+function gearV2Fields(key) {
+  const o = gearV2Src(key), who = gearV2WhoNow(key), mk = gearV2MakeNow(key);
+  const keys = Object.keys(((WORKSHOP_BASE[key] || {}).levels || [])[0] || {});
+  const squadKeys = keys.filter(k => GEAR_SQUAD_MODS[k]).map(k => valueInfo(k).label || k);
+  return '<div class="row2"><div class="field">誰能穿<select data-g2="who">' + Object.entries(GEAR_WHO_NAME).map(([k, n]) => '<option value="' + k + '"' + (who === k ? ' selected' : '') + '>' + n + '</option>').join('') + '</select></div><div></div></div>' +
+    '<span class="hint">隊員穿上時有效果的數值：' + (squadKeys.length ? squadKeys.join('、') : '（沒有，這件的數值只對溫特有用）') + '（換算表在 data/equipment.js 的 GEAR_SQUAD_MODS）。' +
+    '溫特身上的效果是程式寫好的：本來不是溫特的裝備改成溫特能穿，要另外寫程式才有效果。</span>' +
+    '<div class="row2"><div class="field">製作一件要幾個異質碎片<input type="text" inputmode="numeric" data-g2="make" value="' + esc(typeof o.make === 'number' ? o.make : '') + '" placeholder="' + mk.autoShards + '"></div>' +
+    '<div class="field">製作一件的經費（$）<input type="text" inputmode="numeric" data-g2="makeMoney" value="' + esc(typeof o.makeMoney === 'number' ? o.makeMoney : '') + '" placeholder="' + workshopMoneyAuto(mk.shards) + '"></div></div>' +
+    '<span class="hint">開發好之後，在開發工坊按「製作一件」再做一件（一件只能給一個人穿）。空白＝自動算（開發費的 1/3，經費＝碎片 × 2）。</span>';
+}
+function onGearV2Input(e) {
+  const key = selKey, f = e.target.dataset.g2, txt = e.target.value.trim(), custom = isCustom(key);
+  const o = custom ? customEntry(key) : (cfg.items[key] || (cfg.items[key] = {}));
+  if (f === 'who') { if (!custom && txt === gearV2BaseWho(key)) delete o.who; else o.who = txt; }
+  else if (txt === '') delete o[f];
+  else if (/^\d+$/.test(txt)) o[f] = Number(txt);
+  else return;   // 打到一半（不是整數）先不套用
+  if (!custom && !Object.keys(o).length) delete cfg.items[key];
+  const r = document.getElementById('itemReset'); if (r) r.disabled = !itemChanged(key);
+  saveDraft(); renderList(); renderPreview();
 }
 function renderItemForm() {
   renderStyleInfoImg();   // 外觀 → 下方說明欄的圖片位移：跟著換成這件
@@ -426,6 +504,7 @@ function renderItemForm() {
         WORKSHOP_LV_INDEX.map(i => i ? '升到 Lv' + (i + 1) : '開發').map((n, i) => '<div class="field">' + n + '<input type="text" inputmode="numeric" data-c="cost' + i + '" value="' + esc(a.cost[i]) + '"></div>').join('') + '</div>' +
         moneyFields(key, WORKSHOP_LV_INDEX.map(i => i ? '升到 Lv' + (i + 1) : '開發'), i => a.cost[i])) +
       sec('levels', '📈 每一級的效果說明', WORKSHOP_LV_INDEX.map(i => '<div class="field">Lv' + (i + 1) + ' 的效果說明<input type="text" data-c="lv' + i + '" value="' + esc(a.levels[i]) + '"></div>').join('')) +
+      (GEAR_V2_ED ? sec('gearv2', '👥 誰能穿、製作一件的費用', gearV2Fields(key)) : '') +
       '<button type="button" class="ed-btn danger" id="itemDelete">🗑 刪除這件裝備</button>';
     return;
   }
@@ -438,6 +517,7 @@ function renderItemForm() {
     sec('image', '🖼️ 圖片', imageField(key, v, 'data-f') + iconScaleField(key) + iconOffField(key) + infoImgOffField(key) + infoImgSizeField(key)) +
     sec('layout', '📐 下方說明欄的版面（只調這件）', infoPartsField(key, 'data-f', 'data-f="ownedDesc"')) +
     sec('values', '🔢 每一級的實際數值', valueTable(key)) +
+    (GEAR_V2_ED && !isWeapon(key) ? sec('gearv2', '👥 誰能穿、製作一件的費用', gearV2Fields(key)) : '') +
     sec('cost', '💎 要花幾個異質碎片、多少經費', costFields(key, def) +
       moneyFields(key, baseCost(key).map((_, i) => isWeapon(key) ? '升到 Lv' + (i + 2) : i ? '升到 Lv' + (i + 1) : '開發'), i => effCost(key, i))) +
     sec('levels', '📈 每一級的效果說明', '<div class="field">開發工坊、背包、裝備欄都會顯示<span class="hint">會跟著上面的數值自動更新；也可以自己改成別的文字，清空＝回到自動產生。</span></div>' +
@@ -450,7 +530,7 @@ function renderItemForm() {
 function renderAmmoForm() {
   const key = selKey, v = itemView(key), b = ammoBase(key), form = document.getElementById('itemForm');
   const numIn = (attr, val, base) => '<input type="text" inputmode="numeric" ' + attr + ' value="' + esc(val) + '" placeholder="' + esc(base) + '"' + (val !== base ? ' class="is-edited"' : '') + '>';
-  let h = '<p class="hint" style="margin:0 0 8px">' + (isMag(key) ? '🧰 彈匣：在開發工坊升級，等級越高裝得下越多種子彈（一般子彈不佔格子）。' : '🔫 子彈：找諾亞開發一次就有，每次出勤自動補滿。子彈的效果固定、不會升級。') + '</p>' + secTools() +
+  let h = '<p class="hint" style="margin:0 0 8px">' + (isMag(key) ? '🧰 彈匣：在開發工坊「升級裝備」升級，等級越高裝得下越多種子彈（一般子彈不佔格子）。' : '🔫 子彈：在開發工坊「彈藥」頁用經費買，可以自己選買幾發。子彈的效果固定、不會升級。') + '</p>' + secTools() +
     sec('text', '📝 名稱與說明', '<div class="field">名稱<input type="text" data-a="name" value="' + esc(v.name) + '"></div>' +
       '<div class="field">說明<textarea data-a="desc" placeholder="空白＝原本的說明">' + esc(v.ownedDesc) + '</textarea><span class="hint">顯示在開發工坊下方說明欄的名稱下面。跟背包編輯器連通（換行各自保留）。</span></div>') +
     sec('image', '🖼️ 圖片', imageField(key, v, 'data-a') + iconScaleField(key) + iconOffField(key) + infoImgOffField(key) + infoImgSizeField(key)) +
@@ -463,9 +543,8 @@ function renderAmmoForm() {
       cost.map((n, i) => '<label class="field">升到 Lv' + (i + 2) + numIn('data-a="cost" data-ai="' + i + '"', n, b.cost[i]) + '</label>').join('') + '</div>' +
       moneyFields(key, cost.map((_, i) => '升到 Lv' + (i + 2)), i => ammoVal(key, 'cost')[i]));
   } else {
-    h += sec('cost', '💎 費用與數量', '<div class="row2"><label class="field">開發要幾個異質碎片' + numIn('data-a="cost"', ammoVal(key, 'cost'), b.cost) + '</label>' +
-      '<label class="field">一組幾發（彈藥包一格）' + numIn('data-a="max"', ammoVal(key, 'max'), b.max) + '</label></div>' +
-      moneyFields(key, ['開發'], () => ammoVal(key, 'cost')));
+    h += sec('cost', '💰 價錢與數量', '<div class="row2"><label class="field">一發多少錢（$）' + numIn('data-a="price"', ammoVal(key, 'price'), b.price) + '</label>' +
+      '<label class="field">一組幾發（彈藥包一格）' + numIn('data-a="max"', ammoVal(key, 'max'), b.max) + '</label></div>');
   }
   h += '<div class="img-btns"><button type="button" class="ed-btn" id="itemReset"' + (ammoChanged(key) ? '' : ' disabled') + '>恢復為初始設定</button></div>' +
     (b.name !== v.name ? '<span class="hint">原本叫「' + esc(b.name) + '」</span>' : '');
@@ -520,6 +599,9 @@ document.getElementById('itemForm').addEventListener('input', e => {
     if (partAllActive(p, f)) { setPartAll(p, f, txt === '' ? 0 : n); saveDraft(); renderList(); renderPreview(); return; }   // 套用到所有頁
     setInfoPart(p, f, txt === '' ? 0 : n); saveDraft(); renderList(); renderPreview(); return;
   }
+  if (e.target.dataset.g2) { onGearV2Input(e); return; }   // 新版裝備：誰能穿、製作費
+  if (e.target.dataset.bu) { onBuildUpInput(e); return; }   // 建築每一級的數值、升級費用
+  if (e.target.dataset.bab) { onBuildAboutInput(e); return; }   // 建築的說明
   if (isSgear(selKey) && !e.target.matches('[data-io], [data-is], [data-iss]')) { onSgearInput(e); return; }
   if (isAmmo(selKey) && !e.target.matches('[data-io], [data-is], [data-iss]')) { onAmmoInput(e); return; }   // 圖片大小、位移：子彈、彈匣也用下面同一套
   const f = e.target.dataset.f, cf = e.target.dataset.c, lvi = e.target.dataset.lv, vk = e.target.dataset.vk, ci = e.target.dataset.cost;
@@ -631,11 +713,11 @@ document.getElementById('itemForm').addEventListener('click', async e => {
     else { const [axis, d] = nb.dataset.nudge.split(':'); setIconOff(axis, iconOffOf(selKey, axis) + Number(d)); }
     saveDraft(); renderList(); renderPreview(); return;
   }
-  if (id === 'itemReset' && isExtra(selKey)) {   // 背包擴充、建築：只拿掉圖片大小和位移（說明欄的版面照舊）
-    const o = cfg.items[selKey] || {}; EXTRA_LOOK_KEYS.forEach(k => delete o[k]);
+  if (id === 'itemReset' && isExtra(selKey)) {   // 背包擴充、建築：只拿掉圖片大小和位移、建築的等級數值（說明欄的版面照舊）
+    const o = cfg.items[selKey] || {}; EXTRA_LOOK_KEYS.concat(['hp', 'dmg', 'cook', 'cost', 'about', 'aboutOwned']).forEach(k => delete o[k]);   // 建築的說明也改回原本的
     if (!Object.keys(o).length) delete cfg.items[selKey];
     saveDraft(); renderList(); renderItemForm(); renderPreview();
-    setStatus('「' + itemView(selKey).name + '」的圖片已恢復原本的大小和位置'); return;
+    setStatus('「' + itemView(selKey).name + '」已恢復初始設定'); return;
   }
   if (id === 'itemReset') {
     delete cfg.items[selKey]; saveDraft(); renderList(); renderItemForm(); renderPreview();
@@ -692,8 +774,10 @@ const STYLE_FIELDS = [
     ['headX', '整塊的左右位移（正數＝往右）', 'num', -100, 400, 1], ['headY', '整塊的上下位移（正數＝往下）', 'num', -30, 30, 1],
   ]],
   ['上面的分頁', [
-    ['tabDev', '第一個分頁的文字（空白＝原本的「可開發」；前面的圖示、後面的數量不會變）', 'text'],
-    ['tabUp', '第二個分頁的文字（空白＝原本的「可升級」；前面的圖示、後面的數量不會變）', 'text'],
+    ['pageMake', '「製作裝備」頁的名稱（上面的分頁；空白＝原本的字；跟諾亞對話的選項不會變）', 'text'],
+    ['pageUp', '「升級裝備」頁的名稱', 'text'],
+    ['pageAmmo', '「補充彈藥」頁的名稱', 'text'],
+    ['pageBuild', '「開發建築物」頁的名稱', 'text'],
   ]],
   ['下方說明欄', [
     ['infoY', '整塊的上下位移（圖片、文字、按鈕一起動；負數＝往上，往下超出視窗底的部分會被切掉）', 'num', -200, 100, 1],
@@ -766,9 +850,21 @@ document.getElementById('styleReset').addEventListener('click', () => {
 // ---- 預覽：照遊戲的 renderWorkshop（js/equipment.js）排出一樣的畫面 ----
 // 遊戲 v3 的樣子：上面分頁（開發／升級）＋一排 6 格的正方形格子（武器在上、裝備在下）＋下面固定的說明欄＋右邊紙娃娃
 const wsColor = text => workshopColorize(text, styleNow());   // js/workshop-config.js（跟遊戲同一套：數字、戰鬥區域、道具名稱）
-let pvTab = 'dev';   // 預覽的分頁：'dev' 開發／'up' 升級
+let pvTab = 'make';   // 預覽的頁面：'make' 製作裝備／'up' 升級裝備／'ammo' 彈藥／'build' 開發建築物（跟遊戲一樣，js/workshop-config.js 的 WORKSHOP_PAGES）
 let pvLastSel = null;   // 上次畫預覽時選的是哪一件（換選了才跟著切分頁；自己點分頁就停在那一頁）
-const pvTabOf = key => isSgear(key) && !(Number(sgOf(key).price) > 0) ? null : pvOwned(key) ? 'up' : isField(key, getDef(key)) ? null : 'dev';   // 跟遊戲一樣：只能在後室撿到的（武器、異質探測器…）不放開發分頁
+// 這一件在不在這一頁（跟遊戲的 workshopOnPage 一樣，js/equipment.js）
+function pvOnPage(key, page) {
+  if (isRemoved(key) || !getDef(key)) return false;
+  if (isSgear(key)) return page === 'make' && Number(sgOf(key).price) > 0;
+  if (isExtra(key)) return key.startsWith('bld:') ? page === 'build' : page === 'up';   // 建築／背包擴充
+  if (isMag(key)) return page === 'up';
+  if (isAmmo(key)) return page === 'ammo';
+  if (isWeapon(key)) return page === 'up' && pvOwned(key);
+  if (pvOwned(key)) return page === 'up' || (page === 'make' && GEAR_V2_ED);   // 新版：開發過的裝備在製作裝備頁也有（再做一件）
+  return page === 'make' && !isField(key, getDef(key));   // 只能在後室撿到的（異質探測器…）不放
+}
+const pvTabOf = key => WORKSHOP_PAGES.map(p => p[0]).find(pg => pvOnPage(key, pg)) || null;
+const PV_EMPTY = { make: '所有裝備都已經開發好了', up: '還沒有可以升級的東西（換上面的「裝備狀態」看看）', ammo: '目前沒有可以補充的子彈', build: '沒有可以開發的建築' };
 const pvTier = lv => ' tier-' + Math.max(1, Math.min(5, lv || 1));
 function pvIcon(key) {   // 格子裡的圖（套用編輯中的圖片大小、位移；跟遊戲一樣，js/workshop-config.js）
   const def = getDef(key), v = itemView(key);
@@ -777,7 +873,7 @@ function pvIcon(key) {   // 格子裡的圖（套用編輯中的圖片大小、�
 }
 function previewTile(key) {
   const def = getDef(key), v = itemView(key), owned = pvOwned(key), lv = owned ? pvLv(key) : 0;
-  return '<button type="button" class="ws-tile' + (lv ? pvTier(lv) + ' owned' : isField(key, def) ? ' locked' : ' unowned') + (key === selKey ? ' sel ed-sel' : '') + '" draggable="true" data-key="' + esc(key) + '">' +
+  return '<button type="button" class="ws-tile' + (key.startsWith('bld:') ? ' build' : '') + (lv ? pvTier(lv) + ' owned' : isField(key, def) ? ' locked' : ' unowned') + (key === selKey ? ' sel ed-sel' : '') + '" draggable="true" data-key="' + esc(key) + '">' +
     '<span class="ws-tile-icon">' + pvIcon(key) + '</span><b>' + esc(v.name) + '</b>' + (lv ? '<em>Lv' + lv + '</em>' : '') + '</button>';
 }
 // 下方說明欄（跟遊戲、背包一樣：大圖｜名稱、說明、數值｜按鈕）
@@ -787,9 +883,13 @@ function previewInfo(key) {
   const img = v.image ? '<img src="' + esc(v.image) + '" alt=""' + (w ? ' class="weapon"' : '') + '>' : '<i class="bag-gear-emoji">' + esc(def.icon || '') + '</i>';
   const worn = Object.values(pv.equipped).includes(key);
   const L = infoLabelFn(key, lv);   // 五塊改過的字（編輯中的值）
-  const tags = (lv ? '<span class="bag-tag effect">' + L('tag', 'lv', 'Lv' + lv) + '</span>' : isField(key, def) ? '<span class="bag-tag">' + L('tag', 'field', '戰鬥區域取得') + '</span>' : '<span class="bag-tag">' + L('tag', 'dev', '未開發') + '</span>') + (worn ? '<span class="bag-tag worn">穿戴中</span>' : '');
+  let tags = (lv ? '<span class="bag-tag effect">' + L('tag', 'lv', 'Lv' + lv) + '</span>' : isField(key, def) ? '<span class="bag-tag">' + L('tag', 'field', '戰鬥區域取得') + '</span>' : '<span class="bag-tag">' + L('tag', 'dev', '未開發') + '</span>') + (worn ? '<span class="bag-tag worn">穿戴中</span>' : '');
   let stats, btn;
-  if (lv) {
+  const makeOnly = lv && GEAR_V2_ED && !w && pvTab === 'make';   // 製作裝備頁：開發過的只能「製作一件」（跟遊戲一樣）
+  if (makeOnly) {
+    stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + lv + '）') + '</small><b>' + wsColor(esc(statText(key, lv - 1))) + '</b></div>';
+    btn = '';
+  } else if (lv) {
     stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + lv + '）') + '</small><b>' + wsColor(esc(statText(key, lv - 1))) + '</b></div>' +
       (lv < maxLv ? '<div class="bag-gear-stat next"><small>' + L('stats', 'next', '升級後（Lv' + (lv + 1) + '）') + '</small><b>' + wsColor(esc(statText(key, lv))) + '</b></div>' : '');
     btn = lv < maxLv ? '<button type="button" class="ws-btn">' + L('btn', 'up', '升級') + ' ' + cost(effCost(key, w ? lv - 1 : lv)) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
@@ -803,11 +903,16 @@ function previewInfo(key) {
   // 經費（跟遊戲一樣：能開發／升級的時候才有，寫在按鈕裡碎片的上面，js/workshop-config.js 的 workshopPriceBtn）
   const mi = lv ? (lv < maxLv ? (w ? lv - 1 : lv) : -1) : isField(key, def) ? -1 : 0;
   const cash = mi < 0 ? 0 : workshopMoney(key, mi, effCost(key, mi), cfg);
+  let makeBtn = '';   // 新版裝備：研發過了多一顆「製作一件」、標籤加「誰能穿」（跟遊戲一樣，js/gear-v2.js）
+  if (GEAR_V2_ED && !w) {
+    tags += '<span class="bag-tag">' + GEAR_WHO_NAME[gearV2WhoNow(key)] + '</span>' + (lv ? '<span class="bag-tag">持有 1 件</span>' : '');
+    if (makeOnly) { const mk = gearV2MakeNow(key); makeBtn = workshopPriceBtn('<button type="button" class="ws-btn" data-ws="mk:' + esc(key) + '">製作一件 ' + cost(mk.shards) + '</button>', mk.money, false); }
+  }
   const about = v.ownedDesc || v.desc || '';   // 說明只有一段（跟遊戲一樣）
   const io = workshopInfoImgVars(iconOffOf(key, 'ix'), iconOffOf(key, 'iy'), iconOffOf(key, 'is'));   // 這件自己的圖片位移、大小（編輯中的值）
   const part = p => workshopInfoPartAttr(key, p, cfg);   // 五塊每件各自的位置、大小、字級（編輯中的值）
   return '<div class="bag-detail-image"' + (io ? ' style="' + io + '"' : '') + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + esc(v.name) + '</h3><div class="bag-tags"' + part('tag') + '>' + tags + '</div></div>' +
-    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + workshopPriceBtn(workshopInfoBtnStyle(key, btn, cfg), cash, false) + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
+    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + (makeOnly ? makeBtn : workshopPriceBtn(workshopInfoBtnStyle(key, btn, cfg), cash, false)) + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框；makeBtn：新版的「製作一件」
 }
 // 子彈、彈匣的說明欄（跟遊戲一樣：js/equipment.js 的 renderWorkshop＋js/magazine.js）
 function ammoPreviewInfo(key) {
@@ -822,33 +927,31 @@ function ammoPreviewInfo(key) {
     stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + lv + '）') + '</small><b>' + wsColor('彈匣 ' + slots[lv - 1] + ' 格') + '</b></div>' +
       (lv < slots.length ? '<div class="bag-gear-stat next"><small>' + L('stats', 'next', '升級後（Lv' + (lv + 1) + '）') + '</small><b>' + wsColor('彈匣 ' + slots[lv] + ' 格') + '</b></div>' : '');
     btn = lv < slots.length ? '<button type="button" class="ws-btn">' + L('btn', 'up', '升級') + ' ' + cost(costs[lv - 1]) + '</button>' : '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
-  } else {
-    const line = wsColor('一組 ' + ammoVal(key, 'max') + ' 發（彈藥包一格）・每次出勤在營地的彈藥箱放一組' + (owned ? '・到背包的「武器」分頁裝進彈匣' : ''));
-    tag = owned ? '<span class="bag-tag effect">' + L('tag', 'lv', 'Lv1') + '</span>' : '<span class="bag-tag">' + L('tag', 'dev', '未開發') + '</span>';
-    stats = '<div class="bag-gear-stat' + (owned ? '' : ' next') + '"><small>' + (owned ? L('stats', 'now', '目前效果（Lv1）') : L('stats', 'dev', '開發後（Lv1）')) + '</small><b>' + line + '</b></div>';
-    btn = owned ? '<button type="button" class="ws-btn" disabled>已開發</button>' : '<button type="button" class="ws-btn">' + L('btn', 'dev', '開發') + ' ' + cost(ammoVal(key, 'cost')) + '</button>';
+  } else {   // 子彈：跟遊戲的彈藥頁一樣（預覽：身上 0 發、選一組、彈藥包放得下一組）
+    const set = ammoVal(key, 'max'), h = workshopAmmoBuyHtml({ id: key.slice(2), price: ammoVal(key, 'price'), qty: set, have: 0, room: set, set, cash: 99999 });
+    tag = '<span class="bag-tag effect">子彈</span>';
+    stats = h.stats; btn = h.btn;
   }
   const about = v.ownedDesc || '';
   // 經費：彈匣還能升級／子彈還沒開發的時候才有（寫在按鈕裡碎片的上面）
-  const cash = isMag(key) ? (lv < ammoVal(key, 'slots').length ? workshopMoney(key, lv - 1, ammoVal(key, 'cost')[lv - 1], cfg) : 0)
-    : owned ? 0 : workshopMoney(key, 0, ammoVal(key, 'cost'), cfg);
+  const cash = isMag(key) ? (lv < ammoVal(key, 'slots').length ? workshopMoney(key, lv - 1, ammoVal(key, 'cost')[lv - 1], cfg) : 0) : 0;
   const part = p => workshopInfoPartAttr(key, p, cfg);   // 五塊每件各自的位置、大小、字級（編輯中的值）
   const io = workshopInfoImgVars(iconOffOf(key, 'ix'), iconOffOf(key, 'iy'), iconOffOf(key, 'is'));   // 這件自己的說明欄圖片位移、大小
   return '<div class="bag-detail-image"' + (io ? ' style="' + io + '"' : '') + '>' + img + '</div><div class="ws-info-text"><div class="bag-gear-heading"><h3' + part('name') + '>' + esc(v.name) + '</h3><div class="bag-tags"' + part('tag') + '>' + tag + '</div></div>' +
-    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + workshopPriceBtn(workshopInfoBtnStyle(key, btn, cfg), cash, false) + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框
+    (about ? '<p class="bag-desc"' + part('desc') + '>' + wsColor(esc(about)) + '</p>' : '') + '<div class="ws-info-stats"' + part('stats') + '>' + stats + '</div></div><div class="bag-actions"' + part('btn') + '>' + (isMag(key) ? workshopPriceBtn(workshopInfoBtnStyle(key, btn, cfg), cash, false) : btn) + '</div>';   // 按鈕本身的寬高字級；按鈕下面接經費框（子彈的購買按鈕自己有總價）
 }
 // 背包擴充、建築、隊員裝備的說明欄（跟遊戲一樣：js/equipment.js 的 renderWorkshop）
 function extraPreviewInfo(key) {
   const x = EXTRA.get(key), v = itemView(key), lv = pvOwned(key) ? pvLv(key) : 0;
   const cost = n => '<b><i class="ws-shard" role="img" aria-label="異質碎片"></i>' + n + '</b>';
   const img = v.image ? '<img src="' + esc(v.image) + '" alt="">' : '<i class="bag-gear-emoji">' + esc(x.icon) + '</i>';
-  const L = infoLabelFn(key, lv), isBag = x.group === 'bag';
+  const L = infoLabelFn(key, lv), isBag = x.group === 'bag', isBuild = x.group === 'build';
   let stats, btn, cash = 0;
   if (lv) {
     stats = '<div class="bag-gear-stat"><small>' + L('stats', 'now', '目前效果（Lv' + lv + '）') + '</small><b>' + wsColor(esc(x.stat(lv))) + '</b></div>' +
       (lv < x.max ? '<div class="bag-gear-stat next"><small>' + L('stats', 'next', '升級後（Lv' + (lv + 1) + '）') + '</small><b>' + wsColor(esc(x.stat(lv + 1))) + '</b></div>' : '');
-    if (!isBag) btn = '<button type="button" class="ws-btn" disabled>已開發</button>';
-    else if (lv < x.max) { btn = '<button type="button" class="ws-btn">' + L('btn', 'up', '升級') + ' ' + cost(x.upCost(lv)) + '</button>'; cash = workshopMoney(key, lv - 1, x.upCost(lv), cfg); }
+    if (!isBag && !isBuild) btn = '<button type="button" class="ws-btn" disabled>已開發</button>';
+    else if (lv < x.max) { btn = '<button type="button" class="ws-btn">' + L('btn', 'up', '升級') + ' ' + cost(x.upCost(lv)) + '</button>'; cash = workshopMoney(key, isBuild ? lv : lv - 1, x.upCost(lv), cfg); }   // 建築的經費：[開發, 升到 Lv2…]，跟裝備一樣
     else btn = '<button type="button" class="ws-btn" disabled>已達最高等級</button>';
   } else {
     stats = '<div class="bag-gear-stat next"><small>' + L('stats', 'dev', '開發後（Lv1）') + '</small><b>' + wsColor(esc(x.stat(1))) + '</b></div>';
@@ -864,9 +967,10 @@ function renderPreview() {
   const st = styleNow(), stage = document.getElementById('previewStage');
   const keepScroll = stage.querySelector('.ws-scroll')?.scrollTop || 0, keepSide = stage.querySelector('.workshop-side')?.scrollTop || 0;
   stage.style.width = (st.panelW + 32) + 'px'; stage.style.height = (st.panelH + 32) + 'px';   // 跟遊戲一樣：視窗外面留 16px
-  if (selKey !== pvLastSel && selKey && !isRemoved(selKey) && getDef(selKey) && pvTabOf(selKey)) pvTab = pvTabOf(selKey);   // 左邊換選了別件：預覽切到它在的分頁
+  if (selKey !== pvLastSel && selKey && !isRemoved(selKey) && getDef(selKey) && pvTabOf(selKey) && !pvOnPage(selKey, pvTab)) pvTab = pvTabOf(selKey);   // 左邊換選了別件：這一頁沒有它才切到它在的頁
   pvLastSel = selKey;
-  const shown = k => !isRemoved(k) && pvTabOf(k) === pvTab;   // 刪掉的不顯示；新增的接在最後面
+  if (selKey && !pvOnPage(selKey, pvTab) && pvTabOf(selKey) && selKey !== pvLastSel) pvTab = pvTabOf(selKey);
+  const shown = k => pvOnPage(k, pvTab);   // 刪掉的不顯示；新增的接在最後面
   const gearKind = k => workshopGearGroup(getDef(k).kind);   // 頭部／上身／下身／隨身物品（跟遊戲一樣分組）
   const weapons = weaponKeys().filter(shown), gear = WORKSHOP_GEAR_GROUPS.flatMap(([g]) => gearKeys().filter(k => shown(k) && gearKind(k) === g));
   const mags = AMMO_KEYS.filter(k => isMag(k) && shown(k)), bullets = AMMO_KEYS.filter(k => !isMag(k) && shown(k)), bags = extraKeys('bag').filter(shown), builds = extraKeys('build').filter(shown), sgear = extraKeys('sgear').filter(shown), list = weapons.concat(mags, bags, bullets, builds, gear, sgear);   // 順序跟遊戲一樣
@@ -874,11 +978,11 @@ function renderPreview() {
   const noTab = selKey && !isRemoved(selKey) && getDef(selKey) && !pvTabOf(selKey);
   const pick = list.includes(selKey) || noTab ? selKey : list[0];
   const section = (title, keys) => keys.length ? '<h3>' + title + '</h3><div class="ws-tiles" data-kind="' + (title === '武器' ? 'weapons' : 'gear') + '">' + keys.map(previewTile).join('') + '</div>' : '';
-  const count = tab => allKeys().concat(AMMO_KEYS, EXTRA_KEYS).filter(k => !isRemoved(k) && pvTabOf(k) === tab).length;
+  const count = tab => allKeys().concat(AMMO_KEYS, EXTRA_KEYS).filter(k => pvOnPage(k, tab)).length;
   const tabs = '<div class="backpack-tabs ws-tabs" role="tablist">' + workshopTabs(cfg).map(([id, label]) =>
     '<button type="button" role="tab" data-pv-tab="' + id + '" class="' + (pvTab === id ? 'active' : '') + '">' + label + ' <em>' + count(id) + '</em></button>').join('') + '</div>';
-  const empty = pvTab === 'up' ? '還沒有可以升級的裝備（換上面的「裝備狀態」看看）' : '所有裝備都已經拿到了';
-  const side = pvSideHtml();   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
+  const empty = PV_EMPTY[pvTab] || '';
+  const side = pvTab === 'ammo' || pvTab === 'build' ? '' : pvSideHtml();   // 彈藥、建築頁沒有右邊的紙娃娃（跟遊戲一樣）   // 右側：目前裝備、背包裡的裝備、分解（預覽用，不會影響遊戲）
   stage.innerHTML = '<div id="workshop"><section class="workshop-card" role="dialog" aria-label="開發工坊預覽">' +
     '<header class="workshop-head">' + workshopHeadHtml(cfg) +
     '<button type="button" class="workshop-close" aria-label="關閉">×</button></header>' +
@@ -905,7 +1009,7 @@ const PV_SLOTS = [
 const pv = { equipped: {}, scrapped: new Set(), sel: null, armed: false, menu: null };
 let pvArmTimer = null;
 function pvOwned(key) {
-  if (isExtra(key)) return key.startsWith('bag:') || (key.startsWith('bld:') && previewMode !== 'start');   // 背包、彈藥包一開始就有；建築要開發；隊員裝備每次都是製作，永遠在「可開發」
+  if (isExtra(key)) return key.startsWith('bag:') || (key.startsWith('bld:') && (previewMode !== 'start' || EXTRA.get(key).starter));   // 背包、彈藥包一開始就有；建築要開發；隊員裝備每次都是製作，永遠在「可開發」
   if (isMag(key)) return true;   // 彈匣一開始就有（Lv1）
   if (isRemoved(key) || pv.scrapped.has(key) || !getDef(key)) return false;
   return previewMode === 'start' ? isWeapon(key) && !isField(key, getDef(key)) : true;
@@ -1072,7 +1176,7 @@ document.getElementById('previewStage').addEventListener('click', e => {
   if (pvSideClick(e)) return;   // 右側：穿上／卸下、分解
   const tb = e.target.closest('[data-pv-tab]');   // 上面的分頁：開發／升級（選那一頁的第一件）
   if (tb) {
-    const first = weaponKeys().concat(gearKeys()).find(k => !isRemoved(k) && pvTabOf(k) === tb.dataset.pvTab);
+    const first = weaponKeys().concat(AMMO_KEYS, extraKeys('bag'), extraKeys('build'), gearKeys()).find(k => pvOnPage(k, tb.dataset.pvTab));
     pvTab = tb.dataset.pvTab;
     if (first) { selKey = first; pvLastSel = first; renderList(); renderItemForm(); }
     renderPreview(); return;

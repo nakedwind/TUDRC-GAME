@@ -25,6 +25,8 @@ const FIELD_STOVES = {
     deco_gasstove2: { at: [22, 6],  img: [40, 40] },
   },
 };
+// 煮一份要幾秒：溫特蓋的爐具升級過就煮得快（js/build.js 的 buildBoost，cook＝煮飯速度）
+const cookTime = p => COOKING.time / (p && p.stamp && typeof buildBoost === 'function' ? buildBoost(p.stamp, 'cook') : 1);
 const cookingPots = [];   // 正在煮的：{ stamp, k（第幾個爐口）, id（生食）, to（熟食）, t, x, y }
 let cookSteam = [];       // 蒸氣、油花的小顆粒
 const cookImgs = {};
@@ -102,7 +104,7 @@ function updateCooking(dt) {
     } else if (!MAP || !(MAP.stamps || []).includes(p.stamp)) { cookingPots.splice(i, 1); continue; }   // 換地圖了：鍋上的東西不見（生食已經放上去了）
     p.t += dt;
     if (Math.random() < dt * 14) cookSteam.push({ x: p.x + (Math.random() - .5) * 14, y: p.y - 8, vx: (Math.random() - .5) * 10, vy: -18 - Math.random() * 16, life: .8 + Math.random() * .5, age: 0, steam: Math.random() < .55 });
-    if (p.t >= COOKING.time) { cookingPots.splice(i, 1); finishCooking(p); }
+    if (p.t >= cookTime(p)) { cookingPots.splice(i, 1); finishCooking(p); }
   }
   for (const s of cookSteam) { s.age += dt; s.x += s.vx * dt; s.y += s.vy * dt; if (!s.steam) s.vy += 60 * dt; }   // 油花：跳起來再掉下去
   cookSteam = cookSteam.filter(s => s.age < s.life);
@@ -123,7 +125,7 @@ function drawCooking(ctx) {
       ctx.beginPath(); ctx.moveTo(fx - 1.6, fy); ctx.lineTo(fx, fy - fh); ctx.lineTo(fx + 1.6, fy); ctx.closePath(); ctx.fill();
     }
     // 食物：放在爐口上，越煮越焦黃、會抖
-    const k = Math.min(1, p.t / COOKING.time), shake = Math.sin(now * 40 + p.k) * 1.2, img = cookImg(itemById(p.id));
+    const k = Math.min(1, p.t / cookTime(p)), shake = Math.sin(now * 40 + p.k) * 1.2, img = cookImg(itemById(p.id));
     if (img && img.complete && img.naturalWidth) {
       const s = 22;
       ctx.imageSmoothingEnabled = false;

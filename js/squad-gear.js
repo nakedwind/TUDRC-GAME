@@ -6,7 +6,7 @@
    存檔：localStorage（SQUAD_GEAR_STORE）＝ { equip: { 隊員: [裝備 id 或 null ×3] } }
 */
 const SQUAD_GEAR_STORE = 'tudrc_squad_gear_v1';
-const SQUAD_GEAR_SLOTS = 3;
+const SQUAD_GEAR_SLOTS = typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2 ? 4 : 3;   // 新版（data/equipment.js 的 GEAR_SYSTEM＝2）：頭部、上身、下身、隨身物品各 1 格（js/gear-v2.js）
 const SQUAD_GEAR_CATEGORY = { id: 'squadgear', name: '隊員物資', icon: '🎽' };
 // 數值名稱（技能、裝備的 mods 共用；編輯器的下拉選單也用這份）。pct：加的時候用百分比顯示；unit：單位
 const STAT_MOD_NAMES = {
@@ -54,9 +54,14 @@ function squadGearImage(g) {
   const icon = (g && g.icon) || '🎽';
   return 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><text x="32" y="44" font-size="40" text-anchor="middle">' + icon + '</text></svg>');
 }
-const squadGearList = () => (typeof SQUAD_GEAR !== 'undefined' && Array.isArray(SQUAD_GEAR) ? SQUAD_GEAR : []);
-const squadGearById = id => squadGearList().find(g => g.id === id) || null;
-const squadGearEffect = g => (g && (g.effect || modsText(g.mods))) || '';
+// 下面這幾個用 function 寫：新版裝備（js/gear-v2.js）會換成新版的寫法
+function squadGearList() { return typeof SQUAD_GEAR !== 'undefined' && Array.isArray(SQUAD_GEAR) ? SQUAD_GEAR : []; }
+function squadGearById(id) { return squadGearList().find(g => g.id === id) || null; }
+function squadGearEffect(g) { return (g && (g.effect || modsText(g.mods))) || ''; }
+// 隊員身上第 i 格的名稱、這件能不能放第 i 格、要放哪一格（舊版：3 格不分種類；新版改成分部位，js/gear-v2.js）
+function squadGearSlotName(i) { return '裝備 ' + (i + 1); }
+function squadGearFits(id, slot) { return true; }
+function squadGearSlotFor(type, id, slot) { return slot != null ? slot : squadGearOf(type).indexOf(null); }
 // 開發工坊編輯器調的圖片大小、位移、製作要花的碎片：存在 data/workshop.js 的 items['sg:裝備id']
 const squadGearLook = id => (typeof WORKSHOP_CONFIG !== 'undefined' && WORKSHOP_CONFIG.items && WORKSHOP_CONFIG.items['sg:' + id]) || {};
 // 圖片大小、位移套用到遊戲裡每個顯示這張圖的地方（背包、裝備欄、T-Pad…）：照圖片路徑寫一條樣式，以後新增的畫面也會自動跟著。
@@ -85,10 +90,10 @@ function syncSquadGearItems() {
   for (let i = ITEMS.length - 1; i >= 0; i--) if (ITEMS[i].squadGear) ITEMS.splice(i, 1);
   for (const g of squadGearList()) ITEMS.push({ id: g.id, name: g.name, category: SQUAD_GEAR_CATEGORY.id, image: squadGearImage(g), desc: g.desc || '', effect: squadGearEffect(g), note: '在諾亞的開發工坊製作；在 T-Pad「Y102隊員」→ 裝備頁，或裝備箱的防具視窗給隊員穿', squadGear: true });
 }
-syncSquadGearItems();
+if (typeof GEAR_SYSTEM === 'undefined' || GEAR_SYSTEM !== 2) syncSquadGearItems();   // 新版：背包裡的裝備改由 js/gear-v2.js 放進物品清單
 // ---- 諾亞的開發工坊：製作隊員裝備（js/equipment.js 的 workshopEntries／workshopBuy 會呼叫）----
 // 價錢 0 的不能做（跟以前「商店不賣」一樣）；每按一次做一件放進背包，可以一直做（幾位隊員就做幾件）
-const squadGearHave = id => (typeof supplyInventory !== 'undefined' ? supplyInventory.get(id) || 0 : 0) + Object.values(squadGearState.equip).filter(list => (list || []).includes(id)).length;
+function squadGearHave(id) { return (typeof supplyInventory !== 'undefined' ? supplyInventory.get(id) || 0 : 0) + Object.values(squadGearState.equip).filter(list => (list || []).includes(id)).length; }
 const squadGearDevCost = g => {
   const d = (typeof SQUAD_GEAR_DEV !== 'undefined' && (SQUAD_GEAR_DEV[g.id] || SQUAD_GEAR_DEV.default)) || { shards: 20 };
   const edited = squadGearLook(g.id).cost;   // 開發工坊編輯器改過要花幾個碎片
@@ -118,14 +123,14 @@ function squadGearWorkshopBuy(kind, id) {
 // ---- 誰穿了什麼 ----
 let squadGearState = { equip: {} };
 try { const s = JSON.parse(localStorage.getItem(SQUAD_GEAR_STORE) || 'null'); if (s && s.equip) squadGearState = s; } catch (_) {}
-const saveSquadGear = () => { try { localStorage.setItem(SQUAD_GEAR_STORE, JSON.stringify(squadGearState)); } catch (_) {} };
+function saveSquadGear() { try { localStorage.setItem(SQUAD_GEAR_STORE, JSON.stringify(squadGearState)); } catch (_) {} }
 function squadGearOf(type) {
   const list = squadGearState.equip[type] || [];
   return Array.from({ length: SQUAD_GEAR_SLOTS }, (_, i) => (list[i] && squadGearById(list[i]) ? list[i] : null));
 }
 function squadGearMods(type) { return [...new Set(squadGearOf(type).filter(Boolean))].flatMap(id => squadGearById(id).mods || []); }   // 同一種只算一次（舊存檔可能疊過）
 // 這位隊員的另一格已經穿著同一種裝備嗎？回傳那一格（0 起算），沒有＝-1
-const squadGearWornAt = (type, id, slot) => squadGearOf(type).findIndex((g, i) => g === id && i !== slot);
+function squadGearWornAt(type, id, slot) { return squadGearOf(type).findIndex((g, i) => g === id && i !== slot); }
 // 穿上：背包裡要有一件；那一格原本有穿的放回背包
 function equipSquadGear(type, slot, id) {
   if (!bagCanManageEquipment()) { systemNotice('請到營地帳篷調整隊員物資', true); return false; }

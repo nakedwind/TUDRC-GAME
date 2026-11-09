@@ -14,6 +14,19 @@ const EQUIP_PORTRAIT = { image: 'images/character/winter_portrait.png', fallback
 
 const EQUIP_MAX_LV = 5;   // 裝備、武器最高幾級（每件的 levels 要有這麼多筆，cost 也要跟著有）
 
+/* ===== 裝備系統的總開關（2026-11-09）=====
+   1＝舊版：溫特的裝備是「解鎖制」（開發一次就永久有、只有一件）；隊員裝備是另一套（data/squad-gear.js，每人 3 格不分部位、沒有等級）。
+   2＝新版（溫特和隊員共用同一份裝備清單，就是下面的 EQUIPMENT）：
+      ・研發等級：在諾亞的開發工坊「開發」一次＝學會做這種裝備（Lv1），之後「升級」的是這一種裝備，所有同種的一起變強。
+      ・實體物品：開發時送 1 件；之後按「製作」再做（每件花 GEAR_MAKE 算出來的碎片＋經費），做好放進背包。一件只能給一個人穿。
+      ・誰能穿（who）：'winter'＝只有部隊長（溫特）能穿（手電筒、防毒面具這類特殊效果）；'all'＝溫特和隊員都能穿；'squad'＝只有隊員能穿。
+        沒寫＝'winter'。可以在開發工坊編輯器改。
+      ・格子：溫特＝頭部、上身、下身 ×2、隨身物品 ×2；隊員＝頭部、上身、下身、隨身物品各 1 格。
+      ・隊員穿上之後，裝備的數值照 GEAR_SQUAD_MODS 換成隊員的數值（例如 guard 減傷 → 隊員的防禦）。
+      程式在 js/gear-v2.js；切回 1 時舊版的程式完全照舊（舊版的檔案也備份在 backups/gear-v1-20261109/）。
+      注意：從舊版轉成新版時存檔會自動轉換一次；切回舊版時存檔「不會」轉回去。 */
+const GEAR_SYSTEM = 2;
+
 const EQUIP_SLOTS = [
   { id: 'head', name: '頭部', kinds: ['head'] },
   { id: 'body', name: '上身', kinds: ['body'] },
@@ -36,26 +49,26 @@ const EQUIPMENT = [
   { id: 'mask', name: '防毒面具', kind: 'head', icon: '😷', image: 'images/裝備/gas-mask.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '減少腐蝕池與酸液傷害。',
     stat: lv => '腐蝕、酸液的傷害 −' + Math.round(lv.filter * 100) + '%', levels: [{ filter: .4 }, { filter: .6 }, { filter: .8 }, { filter: .85 }, { filter: .9 }] },
-  { id: 'helmet', name: '防護頭盔', kind: 'head', icon: '🪖', image: 'images/裝備/protective-helmet.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+  { id: 'helmet', name: '防護頭盔', kind: 'head', who: 'all', icon: '🪖', image: 'images/裝備/protective-helmet.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '減少受到的傷害。可與防護背心疊加。',
     stat: lv => '受到的傷害 −' + Math.round(lv.guard * 100) + '%', levels: [{ guard: .08 }, { guard: .12 }, { guard: .16 }, { guard: .2 }, { guard: .24 }] },
   { id: 'earmuffs', name: '降噪耳機', kind: 'head', icon: '🎧', image: 'images/裝備/noise-cancelling-earmuffs.png', source: 'develop', cost: [50, 100, 180, 270, 370],
     ownedDesc: '減輕低理智時的視覺與聲音干擾。',
     stat: lv => '理智下降的影響 −' + Math.round(lv.calm * 100) + '%', levels: [{ calm: .3 }, { calm: .5 }, { calm: .7 }, { calm: .78 }, { calm: .85 }] },
   // 防護背心三種（都是上身，一次只能穿一件）：輕型＝跑得快、擋得少；標準＝只減傷；重型＝擋得多、跑得慢（js/equipment.js 的 equipPlayerDamage、equipSpeedMul）
-  { id: 'vest_light', name: '輕型防護背心', kind: 'body', icon: '🦺', image: 'images/裝備/protective-vest-light.png', source: 'develop', cost: [50, 100, 170, 250, 350],
+  { id: 'vest_light', name: '輕型防護背心', kind: 'body', who: 'all', icon: '🦺', image: 'images/裝備/protective-vest-light.png', source: 'develop', cost: [50, 100, 170, 250, 350],
     ownedDesc: '比較輕，穿著也跑得快；但擋下的傷害比較少。',
     stat: lv => '受到的傷害 −' + Math.round(lv.guard * 100) + '%・移動速度 +' + Math.round(lv.speed * 100) + '%', levels: [{ guard: .04, speed: .05 }, { guard: .07, speed: .06 }, { guard: .09, speed: .08 }, { guard: .11, speed: .09 }, { guard: .13, speed: .1 }] },
-  { id: 'vest', name: '標準防護背心', kind: 'body', icon: '🦺', image: 'images/裝備/protective-vest.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+  { id: 'vest', name: '標準防護背心', kind: 'body', who: 'all', icon: '🦺', image: 'images/裝備/protective-vest.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '減少受到的傷害，不影響移動速度。',
     stat: lv => '受到的傷害 −' + Math.round(lv.guard * 100) + '%', levels: [{ guard: .1 }, { guard: .15 }, { guard: .2 }, { guard: .25 }, { guard: .3 }] },
-  { id: 'vest_heavy', name: '重型防護背心', kind: 'body', icon: '🦺', image: 'images/裝備/protective-vest-heavy.png', source: 'develop', cost: [80, 150, 240, 340, 460],
+  { id: 'vest_heavy', name: '重型防護背心', kind: 'body', who: 'all', icon: '🦺', image: 'images/裝備/protective-vest-heavy.png', source: 'develop', cost: [80, 150, 240, 340, 460],
     ownedDesc: '厚重的防彈板，擋下很多傷害；但穿著跑不快。',
     stat: lv => '受到的傷害 −' + Math.round(lv.guard * 100) + '%・移動速度 −' + Math.round(-lv.speed * 100) + '%', levels: [{ guard: .15, speed: -.12 }, { guard: .24, speed: -.11 }, { guard: .3, speed: -.1 }, { guard: .34, speed: -.08 }, { guard: .38, speed: -.06 }] },
   { id: 'bracelet', name: '共感手環', kind: 'acc', icon: '💠', image: 'images/裝備/empathy-bracelet.png', source: 'develop', cost: [70, 130, 220, 320, 430],
     ownedDesc: '降低疏導消耗的 SP。',
     stat: lv => '疏導花的 SP −' + Math.round(lv.save * 100) + '%', levels: [{ save: .15 }, { save: .25 }, { save: .35 }, { save: .45 }, { save: .55 }] },
-  { id: 'sneakers', name: '輕量跑鞋', kind: 'legs', icon: '👟', image: 'images/裝備/lightweight-sneakers.png', source: 'develop', cost: [40, 90, 160, 240, 330],
+  { id: 'sneakers', name: '輕量跑鞋', kind: 'legs', who: 'all', icon: '👟', image: 'images/裝備/lightweight-sneakers.png', source: 'develop', cost: [40, 90, 160, 240, 330],
     ownedDesc: '提高移動速度。',
     stat: lv => '移動速度 +' + Math.round(lv.speed * 100) + '%', levels: [{ speed: .08 }, { speed: .12 }, { speed: .16 }, { speed: .2 }, { speed: .24 }] },
   { id: 'fireboots', name: '防火鞋', kind: 'legs', icon: '🥾', image: 'images/裝備/fire-resistant-boots.png', source: 'develop', cost: [60, 120, 200, 290, 390],
@@ -75,7 +88,40 @@ const EQUIPMENT = [
   { id: 'navrecorder', name: '慣性導航記錄器', kind: 'acc', icon: '🧭', image: 'images/裝備/inertial-navigation-recorder-concept-v2.png', source: 'develop', cost: [60, 120, 200, 290, 390],
     ownedDesc: '不靠訊號，自動記錄走過的路線並畫成地圖。裝備後在戰鬥區域也能打開 T-Pad 的「地圖」；把整張地圖走過一遍，就能得到完整的地圖。',
     stat: lv => '記錄範圍 ' + lv.range + ' 格', levels: [{ range: 3 }, { range: 4 }, { range: 5 }, { range: 6 }, { range: 7 }] },
+  // ---- 下面三件是新版（GEAR_SYSTEM＝2）才有的：原本的隊員裝備（data/squad-gear.js），只有隊員能穿（who: 'squad'）----
+  //   舊版的「輕量防護背心」併進上面的輕型防護背心、「機動戰術靴」併進輕量跑鞋（舊存檔會自動換過去，見 GEAR_V1_SQUAD_MAP）
+  //   atk：攻擊力加成（0.1＝+10%）、accuracy：命中率加成（0.1＝+10%）、atkRange：射程加幾格、hpRegen：每秒回復 HP
+  { id: 'gloves', name: '強化戰術手套', kind: 'acc', who: 'squad', v2only: true, icon: '🧤', image: 'images/裝備/隊員裝備/gloves.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+    ownedDesc: '加了護甲片的手套，出手更有力。',
+    stat: lv => '攻擊力 +' + Math.round(lv.atk * 100) + '%', levels: [{ atk: .1 }, { atk: .13 }, { atk: .16 }, { atk: .2 }, { atk: .25 }] },
+  { id: 'scope', name: '戰術瞄準鏡', kind: 'head', who: 'squad', v2only: true, icon: '🔭', image: 'images/裝備/隊員裝備/scope.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+    ownedDesc: '戴在頭上的瞄準鏡，看得更遠、更準。',
+    stat: lv => '命中率 +' + Math.round(lv.accuracy * 100) + '%・射程 +' + lv.atkRange + ' 格',
+    levels: [{ accuracy: .1, atkRange: .5 }, { accuracy: .12, atkRange: .6 }, { accuracy: .15, atkRange: .75 }, { accuracy: .18, atkRange: .9 }, { accuracy: .2, atkRange: 1 }] },
+  { id: 'pouch', name: '急救腰包', kind: 'acc', who: 'squad', v2only: true, icon: '🩹', image: 'images/裝備/隊員裝備/pouch.png', source: 'develop', cost: [60, 120, 200, 290, 390],
+    ownedDesc: '隨身的急救用品，受傷時可以自己處理。',
+    stat: lv => '每秒回復 HP +' + lv.hpRegen, levels: [{ hpRegen: .2 }, { hpRegen: .3 }, { hpRegen: .4 }, { hpRegen: .5 }, { hpRegen: .6 }] },
 ];
+// 舊版（GEAR_SYSTEM＝1）沒有上面三件新版才有的裝備：從清單拿掉
+if (GEAR_SYSTEM !== 2) for (let i = EQUIPMENT.length - 1; i >= 0; i--) if (EQUIPMENT[i].v2only) EQUIPMENT.splice(i, 1);
+// ---- 新版裝備（GEAR_SYSTEM＝2）用到的設定 ----
+// 誰能穿（who）顯示的字
+const GEAR_WHO_NAME = { winter: '部隊長專用', all: '全隊可穿', squad: '隊員專用' };
+// 隊員穿上時：裝備每一級的數值換成隊員的哪個數值（js/skills.js 的 applySkills 套上去）。
+//   左邊＝裝備數值的名稱；path＝隊員的數值（名稱見 js/squad-gear.js 的 STAT_MOD_NAMES）；add＝直接加；mul＝乘（1＋數值）
+//   沒列在這裡的裝備數值（照明、防毒、理智…）只對溫特有用，隊員穿了不會有效果
+const GEAR_SQUAD_MODS = {
+  guard: { path: 'defense', add: true },      // 受到的傷害 −10% → 隊員的防禦（減傷）+10%
+  speed: { path: 'walkSpeed', mul: true },    // 移動速度 +5% → 隊員移動速度 ×1.05（重型背心是負的＝變慢）
+  atk: { path: 'dmg', mul: true },            // 攻擊力 +10% → 隊員攻擊力 ×1.1
+  accuracy: { path: 'accuracy', add: true },  // 命中率 +10%
+  atkRange: { path: 'range', add: true },     // 射程 +0.5 格
+  hpRegen: { path: 'hpRegen', add: true },    // 每秒回復 HP
+};
+// 製作一件要花多少：shards＝異質碎片（沒在開發工坊編輯器另外填的話＝開發費的 rate 倍，最少 min 個）；經費照開發工坊的算法（碎片 × 2）
+const GEAR_MAKE = { rate: 1 / 3, min: 10 };
+// 舊版的隊員裝備 id → 新版的裝備 id（舊存檔轉換用）
+const GEAR_V1_SQUAD_MAP = { 'sg-vest': 'vest_light', 'sg-gloves': 'gloves', 'sg-scope': 'scope', 'sg-boots': 'sneakers', 'sg-pouch': 'pouch' };
 // 戰鬥區域掉落的機率（裝備：還沒拿到的時候；拿到之後就不會再掉）
 const EQUIP_DROPS = { detector: .5 };
 // 後室道具掉落的機率（data/supplies.js 的道具，可以重複拿）：平安符＝順順宮帽、保溫杯＝置物櫃、腎上腺素＝置物櫃（打怪不會掉）、異質急救包＝置物櫃
@@ -139,6 +185,9 @@ const BULLET_SET = 20;
 // 對溫特和隊員的效果不變（麻醉彈、閃光彈讓隊員睡／暈的秒數，雷電彈電到隊員、火海燙到隊員的傷害，黏膠讓隊員變慢都照下面原本的數字）。
 // 照明彈、螢光漆彈、治療彈不受影響（治療彈打到怪物不會補兩倍）。下面 BULLETS 寫的都是「原本的數字」。
 const BULLET_FOE_MUL = 2;
+// 諾亞的開發工坊「彈藥」頁：子彈一發多少經費（$）。可以自己選要買幾發。
+// 只能在後室（戰鬥區域）找到的子彈（source: 'field'）不賣；開發工坊編輯器可以改價錢（data/workshop.js 的 items['b:子彈id'].price）
+const BULLET_PRICE = { flare: 5, tranq: 15, paint: 10, split: 15, knock: 12, confuse: 15, default: 10 };
 const BULLETS = {
   pistol:     { name: '一般子彈', icon: '•', image: 'images/weapon/bullet/Ordinarybullets.png', color: '#ffe79a' },
   flare:      { name: '照明彈', icon: '🔥', image: 'images/weapon/bullet/Flare.png', color: '#ff8a5c', max: BULLET_SET, gap: .8, shine: 24, source: 'supply',   // shine：落地後亮幾秒

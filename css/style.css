@@ -1413,7 +1413,16 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #dialogueBox.has-options { width: min(880px, calc(100% - 48px)); }
 .dialogue-options { display:none; flex:none; flex-direction:column; justify-content:center; gap:7px; align-self:stretch; min-width:136px; padding-left:16px; border-left:1px solid rgba(143,211,255,.22); }
 #dialogueBox.has-options .dialogue-options { display:flex; }
+#dialogueBox.has-options .dialogue-options.two-col { display:grid; grid-template-columns:repeat(2, 1fr); align-content:center; gap:7px; }   /* 選項超過 4 個：左右兩排（js/game.js 的 updateDialogueOptions） */
 .dialogue-options > button { width:100%; text-align:left; white-space:nowrap; }
+/* 對話選項前面的小圖示（images/ui/dialogue/*.svg）：白色剪影當遮罩，顏色跟著按鈕文字走（風格跟角色名字前的圖示一樣） */
+.dlg-ic { display:inline-block; width:1.1em; height:1.1em; margin-right:.35em; vertical-align:-.18em; background:currentColor; -webkit-mask:var(--ic) center / contain no-repeat; mask:var(--ic) center / contain no-repeat; }
+.dlg-ic-gift { --ic:url(../images/ui/dialogue/gift.svg?v=20261109); }
+.dlg-ic-outfit { --ic:url(../images/ui/dialogue/outfit.svg?v=20261109c); }
+.dlg-ic-make { --ic:url(../images/ui/dialogue/make.svg?v=20261109); }
+.dlg-ic-upgrade { --ic:url(../images/ui/dialogue/upgrade.svg?v=20261109); }
+.dlg-ic-ammo { --ic:url(../images/ui/dialogue/ammo.svg?v=20261109); }
+.dlg-ic-build { --ic:url(../images/ui/dialogue/build.svg?v=20261109); }
 #dialogueGear { padding: 6px 11px; border: 1px solid rgba(126,224,192,.45); border-radius: 8px; background: rgba(30,90,75,.35); color: #d8fff1; cursor: pointer; font-size: 14px; }   /* 隊友：隊員資訊（js/squad-page.js） */
 #dialogueGear:hover { border-color: #7ee0c0; background: rgba(40,115,95,.5); }
 @media (max-width: 620px) {   /* 窄螢幕：選項排到對話下面 */
@@ -1721,8 +1730,18 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .equip-tip { margin: 4px 2px 0; color: #82909d; font-size: 10px; text-align: center; }
 @media (max-width: 860px) { .backpack-body { grid-template-columns: 1fr; grid-template-rows: auto minmax(0,1fr) auto; } .equip-panel { max-height: 180px; border-right: 0; border-bottom: 1px solid rgba(255,212,121,.13); } }
 /* 對話框：和諾亞對話時的「開發工坊」按鈕 */
-#dialogueWorkshop { padding: 6px 11px; border: 1px solid rgba(255,212,121,.45); border-radius: 8px; background: rgba(110,80,25,.35); color: #ffe3a1; cursor: pointer; font-size: 14px; }
-#dialogueWorkshop:hover { border-color: #ffd479; background: rgba(140,100,30,.5); }
+#dialogueWorkshop, .dialogue-ws { padding: 6px 11px; border: 1px solid rgba(255,212,121,.45); border-radius: 8px; background: rgba(110,80,25,.35); color: #ffe3a1; cursor: pointer; font-size: 14px; }   /* 諾亞的開發工坊四個選項 */
+#dialogueWorkshop:hover, .dialogue-ws:hover { border-color: #ffd479; background: rgba(140,100,30,.5); }
+/* 開發工坊「彈藥」頁：選要買幾發、購買按鈕（js/workshop-config.js 的 workshopAmmoBuyHtml） */
+.ws-qty { display: flex; flex-wrap: wrap; align-items: center; gap: 4px; padding: 6px 10px; border-radius: 8px; background: rgba(255,255,255,.04); }
+.ws-qty small { width: 100%; color: #9aa6b2; font-size: 11px; }
+.ws-qty button { padding: 3px 7px; border: 1px solid rgba(255,212,121,.4); border-radius: 6px; background: rgba(60,48,25,.55); color: #ffe3a1; font: 700 12px "Microsoft JhengHei", sans-serif; cursor: pointer; }
+.ws-qty button:hover { border-color: #ffd479; background: rgba(110,80,25,.6); }
+.ws-qty input { width: 58px; padding: 3px 6px; border: 1px solid rgba(255,255,255,.2); border-radius: 6px; background: #10151b; color: #fff; font: 700 13px Consolas, sans-serif; text-align: center; }
+.ws-btn.ws-buy { display: inline-flex; align-items: center; justify-content: center; gap: 10px; }
+.ws-btn.ws-buy .ws-btn-label { font-size: var(--ws-btn-font, 20px); letter-spacing: .08em; }
+.ws-btn.ws-buy .ws-buy-total { margin: 0; font: 700 calc(var(--ws-btn-font, 20px) * .9) Consolas, "Microsoft JhengHei", sans-serif; }
+.ws-btn.ws-buy.short .ws-buy-total { color: #b3261e; }   /* 經費不夠：總價變紅 */
 #dialoguePractice { padding: 6px 11px; border: 1px solid rgba(143,211,255,.45); border-radius: 8px; background: rgba(30,75,110,.35); color: #d6efff; cursor: pointer; font-size: 14px; }   /* 塔納：開始訓練（js/practice.js） */
 #dialoguePractice:hover { border-color: #8fd3ff; background: rgba(40,95,140,.5); }
 #dialogueOutfit { padding: 6px 11px; border: 1px solid rgba(201,160,255,.45); border-radius: 8px; background: rgba(75,45,110,.35); color: #eadcff; cursor: pointer; font-size: 14px; }   /* 隊友：推薦穿搭（js/costumes.js） */
@@ -1765,6 +1784,7 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 .wss-item { position: relative; display: grid; place-items: center; aspect-ratio: 1; border: 1px solid rgba(255,255,255,.08); border-radius: 9px; background: rgba(37,43,51,.55); }
 .wss-item img { width: 80%; height: auto; aspect-ratio: 1; object-fit: contain; image-rendering: pixelated; }   /* 高度跟寬度算（格子是 aspect-ratio 撐出來的，height:% 會失效、大圖會撐爆格子） */
 .wss-item em { position: absolute; right: 3px; bottom: 1px; font-size: 9px; text-shadow: 0 1px 2px #000; }
+.wss-item .wss-n { position: absolute; left: 4px; top: 1px; font-size: 9px; color: #e8eef5; text-shadow: 0 1px 2px #000; }   /* 新版裝備：背包裡有幾件（js/gear-v2.js） */
 .wss-empty, .wss-tip { margin: 0; color: #7f8a96; font-size: 11px; }
 .wss-tip { margin-top: auto; padding-top: 8px; }
 /* 分解：右側點一下選它（亮框），最下面出現「分解裝備」（背包裡的裝備變多也一直在最下面） */
@@ -2515,6 +2535,7 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-tile b { max-width: 100%; font-size: 13px; line-height: 1.3; text-align: center; word-break: keep-all; overflow-wrap: anywhere; }
 .ws-tile em { position: absolute; top: 6px; right: 6px; padding: 0 6px; border-radius: 99px; background: #ffd479; color: #3b2304; font-size: 10px; font-weight: 800; font-style: normal; line-height: 16px; }
 .ws-tile.unowned .ws-tile-icon { opacity: .75; }            /* 還沒開發 */
+.ws-tile.build.unowned .ws-tile-icon { opacity: 1; filter: brightness(.5); }   /* 還沒開發的建築：圖壓黑 50%（遊戲和開發工坊編輯器的預覽共用） */
 .ws-tile.locked { opacity: .55; }                          /* 只能在戰鬥區域撿到、還沒拿到 */
 .ws-tile.locked .ws-tile-icon { filter: grayscale(1); }
 /* ===== 裝備等級的顏色（全遊戲共用）：Lv1 原本的、Lv2 綠、Lv3 藍、Lv4 紫、Lv5 金 =====
@@ -2596,6 +2617,9 @@ img[src$="anomalous-shard.png"][src] { filter: drop-shadow(0 0 3px rgba(200,130,
 .ws-info i.ws-where, .ws-info i.ws-item { font-style: normal; color: var(--ws-where-color, #A958E2); }
 .ws-info .bag-gear-stat.next i.ws-num { color: var(--ws-num-color, #CF9447); }   /* 升級後（綠框）裡的數字也是橘色，跟目前效果一樣 */
 .ws-info .bag-actions { position: relative; }
+/* 新版裝備（js/gear-v2.js）：升級按鈕下面多一顆「製作一件」，做得矮一點，兩顆才放得下 */
+.ws-info .bag-actions:has(.ws-btn[data-ws^="mk:"]) { gap: 5px; }
+.ws-info .ws-btn[data-ws^="mk:"] { flex: none; height: auto; padding: 3px 10px; --ws-btn-font: 14px; }
 /* 開發／升級按鈕：左邊大字「開發／升級」，右邊兩行＝經費、異質碎片（同一個字體、顏色；js/workshop-config.js 的 workshopPriceBtn） */
 .ws-btn.ws-btn-price { display: inline-flex; align-items: center; justify-content: center; gap: 12px; }   /* gap：左邊「開發／升級」和右邊花費中間的空隙 */
 .ws-btn-price .ws-btn-label { font-size: var(--ws-btn-font, 20px); line-height: 1.2; letter-spacing: .08em; }

@@ -207,7 +207,31 @@ function readActive(box) {
   put('cast', v('cast')); put('sp', v('sp')); put('cd', v('cd'));
   return a;
 }
+// ---- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用同一份裝備清單 ----
+// 資料只有一份（data/equipment.js＋開發工坊編輯器存的 data/workshop.js），這裡只列出「隊員能穿的」給你看，要改請到開發工坊編輯器，
+// 兩個編輯器才不會各存一份、數值對不上。
+const GEAR_V2_SQ = typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2 && typeof EQUIPMENT !== 'undefined';
+let gear2Sel = null;
+function gearV2Html() {
+  const who = d => GEAR_WHO_NAME[d.who] ? d.who : 'winter', parts = { head: '頭部', body: '上身', legs: '下身', acc: '隨身物品' };
+  const list = EQUIPMENT.filter(d => who(d) !== 'winter');
+  let h = '<p class="note" style="margin-top:0">新版裝備：溫特和隊員共用同一份裝備清單。這裡列出隊員能穿的；要改名稱、說明、圖片、數值、誰能穿、製作費，請到 ' +
+    '<a href="開發工坊編輯器.html" target="_blank">🔧 開發工坊編輯器</a>（存在 data/workshop.js，遊戲和兩個編輯器讀同一份）。</p>' +
+    '<div class="list" style="margin-top:8px">' + list.map(d => '<button type="button" data-gear2="' + esc(d.id) + '" class="' + (d.id === gear2Sel ? 'on' : '') + '"><img src="' + esc(squadGearImage(d)) + '" alt="">' + esc(d.name) +
+      '<em>' + esc(parts[d.kind] || '') + '・' + esc(GEAR_WHO_NAME[who(d)]) + '</em></button>').join('') + '</div>';
+  const d = list.find(x => x.id === gear2Sel);
+  if (!d) return h + '<p class="note" style="margin-top:10px">選一件裝備看內容。</p>';
+  const mk = gearMakeCost(d), squadKeys = Object.keys(d.levels[0] || {}).filter(k => GEAR_SQUAD_MODS[k]);
+  h += '<div class="sec"><div class="sec-head">' + esc(d.name) + '</div>' +
+    '<div class="orig">部位：' + esc(parts[d.kind] || d.kind) + '　誰能穿：' + esc(GEAR_WHO_NAME[who(d)]) + '　代號：' + esc(d.id) + '</div>' +
+    (d.ownedDesc ? '<p class="note">' + esc(d.ownedDesc) + '</p>' : '') +
+    '<div class="field">每一級的效果（研發等級）' + d.levels.map((lv, i) => '<div class="orig">Lv' + (i + 1) + '：' + esc(d.stat ? d.stat(lv) : '') + '</div>').join('') + '</div>' +
+    '<div class="orig">隊員穿上時有效果的數值：' + esc(squadKeys.map(k => (WORKSHOP_VALUE_INFO[k] || {}).label || k).join('、') || '（沒有）') + '</div>' +
+    '<div class="orig">開發：異質碎片 ' + (d.cost[0] || 0) + '　製作一件：異質碎片 ' + mk.shards + '＋$' + mk.money + '</div></div>';
+  return h;
+}
 function gearHtml() {
+  if (GEAR_V2_SQ) return gearV2Html();
   let h = '<div class="btns" style="margin-top:0"><button type="button" class="primary" id="gearAdd">＋ 新增裝備</button></div><div class="list" style="margin-top:8px">' +
     state.gear.map(g => '<button type="button" data-gear="' + esc(g.id) + '" class="' + (g.id === gearSel ? 'on' : '') + '"><img src="' + esc(squadGearImage(g)) + '" alt="">' + esc(g.name || g.id) + '<em>$' + (g.price || 0) + '</em></button>').join('') + '</div>';
   const g = state.gear.find(x => x.id === gearSel);
@@ -259,6 +283,7 @@ $q('leftBody').addEventListener('click', e => {
   if (t.id === 'skReset') { remember(); const m = state.skills.members[skillMember]; if (m) { delete m[skillNode]; if (!Object.keys(m).length) delete state.skills.members[skillMember]; } saveDraft(); sendState(); renderLeft(); setStatus('這格技能恢復預設（還沒存到專案）'); return; }
   if (t.matches('[data-sk-mod-add]')) { updateSkill(nd => { nd.mods = (nd.mods || []).concat([{ path: 'dmg', mul: 1.1 }]); }); renderLeft(); return; }
   if (t.matches('[data-sk-mod-del]')) { const i = Number(t.closest('.mod').dataset.mod); updateSkill(nd => { nd.mods.splice(i, 1); }); renderLeft(); return; }
+  const g2 = t.closest('[data-gear2]'); if (g2) { gear2Sel = g2.dataset.gear2; renderLeft(); return; }   // 新版裝備：只是看內容
   const g = t.closest('[data-gear]'); if (g) { gearSel = g.dataset.gear; renderLeft(); return; }
   if (t.id === 'gearAdd') {
     remember(); let i = 1; while (state.gear.some(x => x.id === 'sg-new' + i)) i++;

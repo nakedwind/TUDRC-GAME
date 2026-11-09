@@ -195,8 +195,9 @@ function drawGuideSupplyBubbles(ctx) {
 // ============================================================
 //  營地彈藥箱：地圖上的「彈藥箱（打開）」（js/flare.js 的 AMMO_REFILL）。按 Space 打開，可以補子彈、把子彈放進去
 //  ・一樣依地圖分開存（CAMP_AMMO_KEY）；開始新遊戲會清掉（js/new-game.js）
-//  ・每次出勤（js/magazine.js 的 onMagazineSortie）：AMMO_BOX.sortie 裡拿到過（照明彈一開始就有、其他要開發）的子彈，
-//    箱子裡各補到至少一組（BULLET_SET 發）；自己放進去多的會留著，不會越積越多
+//  ・出勤（js/magazine.js 的 onMagazineSortie）：跟作戰經費一樣，每張地圖只有「第一次出勤」會送——
+//    AMMO_BOX.sortie 裡拿到過（照明彈一開始就有、其他要買過）的子彈，箱子裡各補到至少一組（BULLET_SET 發）；
+//    之後再出勤到同一張地圖就不送了（子彈到諾亞的開發工坊「彈藥」頁買）。送過的地圖記在 campAmmoData._sortie，開新遊戲會清掉
 // ============================================================
 const AMMO_BOX = { sortie: ['flare', 'tranq', 'paint', 'split', 'knock', 'confuse'], image: 'images/field-camp/ammo-crate-open.png',
   // 不是從基地出勤進去的地圖（新手區、Y25區地下街）：第一次進去時箱子裡先放好這些（地圖 id → { 子彈 id: 幾發 }）；開新遊戲會重新放
@@ -211,9 +212,12 @@ function saveCampAmmo() { try { localStorage.setItem(CAMP_AMMO_KEY, JSON.stringi
 function campAmmo() { const id = campSupplyMapId(); return campAmmoData[id] || (campAmmoData[id] = {}); }
 // 這張地圖有沒有彈藥箱
 const mapHasAmmoBox = () => !!MAP && (MAP.stamps || []).some(s => { const t = mapTileById(s.id); return AMMO_REFILL.ids.includes(s.id) || (t && AMMO_REFILL.file.test(String(t.file || ''))); });
-// 出勤：箱子裡每種補到一組；回傳補了哪些
+// 出勤：這張地圖第一次出勤才送，箱子裡每種補到一組；回傳補了哪些（送過了＝空的）
 function stockCampAmmoForSortie() {
   if (MAP_SAFE || !mapHasAmmoBox()) return [];
+  const mapId = campSupplyMapId(), done = campAmmoData._sortie || (campAmmoData._sortie = []);
+  if (done.includes(mapId)) return [];   // 這張地圖已經送過了
+  done.push(mapId);
   const box = campAmmo(), got = [];
   for (const id of AMMO_BOX.sortie) {
     const b = BULLETS[id]; if (!b || b.removed || !bulletOwned(id)) continue;
