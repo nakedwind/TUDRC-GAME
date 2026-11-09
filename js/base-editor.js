@@ -794,6 +794,7 @@ const TILE_IMAGE_FOLDERS = [
   'images/scene-props',
   'images/萬聖節裝飾',
   'images/森林',
+  'images/德林小屋',
 ];   // 上傳的圖不在這些資料夾裡：會把整張圖嵌進素材庫（data:），之後改圖檔不會更新，所以新資料夾要加在這裡
 function tileImageSources(file) {
   if (!file || /^(data:|blob:)/i.test(file)) return file ? [file] : [];
@@ -1897,6 +1898,7 @@ const PALETTE_CATEGORIES = [
   { id: 'memory', name: '回憶場景' },
   { id: 'halloween', name: '萬聖節' },
   { id: 'forest', name: '森林' },
+  { id: 'delin', name: '德林小屋' },
   { id: 'other', name: '其他' },
 ];
 let activePaletteCategory = 'all';
@@ -1942,6 +1944,7 @@ const isLampTile = t => /lamp|lantern|lightbox|(search|camping[ _-]|electric[_-]
 const isPoolcoreTile = t => { const f = String(t.file || '').replace(/\\/g, '/').toLowerCase(); return String(t.id || '').startsWith('tile_poolcore_') || f.includes('/池核/') || f.includes('/poolcore/'); };
 function tileCategory(t) {
   if (String(t.id || '').startsWith('tile_forest_') || String(t.file || '').includes('/森林/')) return 'forest';   // 森林：整個資料夾都放這一類（不管檔名）
+  if (String(t.id || '').startsWith('tile_delin_') || String(t.file || '').includes('/德林小屋/')) return 'delin';   // 德林小屋：整個資料夾都放這一類（椅子也不分去「椅子」）
   if (STORAGE_TILE_IDS.has(t.id)) return 'storage';
   if (isPlantTile(t)) return 'plant';
   if (isChairTile(t) && !isPoolcoreTile(t)) return 'chair';

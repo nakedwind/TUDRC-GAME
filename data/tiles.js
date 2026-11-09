@@ -6597,8 +6597,99 @@ const SHARED_TILES = [
     "name": "時間法陣",
     "role": "decor",
     "file": "images/森林/forest_time_circle.png",
-    "w": 10,
+    "w": 12,
     "h": 10,
     "flat": true
+  },
+  {
+    "id": "tile_mw9j55ks",
+    "name": "time-sigil-320",
+    "role": "floor",
+    "file": "images/森林/time-sigil-320.png",
+    "w": 10,
+    "h": 8,
+    "flat": true
+  },
+  {
+    "id": "tile_delin_bg_lobby_night",
+    "name": "德林小屋大廳（夜）",
+    "role": "decor",
+    "file": "images/德林小屋/bg_lobby_night.png",
+    "w": 12,
+    "h": 9,
+    "flat": true
+  },
+  {
+    "id": "tile_delin_bg_room_night",
+    "name": "德林小屋房間（夜）",
+    "role": "decor",
+    "file": "images/德林小屋/bg_room_night.png",
+    "w": 11,
+    "h": 9,
+    "flat": true
+  },
+  {
+    "id": "tile_delin_bg_lobby_counter",
+    "name": "德林小屋櫃台",
+    "role": "decor",
+    "file": "images/德林小屋/bg_lobby_counter.png",
+    "w": 7,
+    "h": 3
+  },
+  {
+    "id": "tile_delin_bg_lobby_table",
+    "name": "德林小屋桌子",
+    "role": "decor",
+    "file": "images/德林小屋/bg_lobby_table.png",
+    "w": 2,
+    "h": 3
+  },
+  {
+    "id": "tile_delin_bg_lobby_chair",
+    "name": "德林小屋椅子",
+    "role": "decor",
+    "file": "images/德林小屋/bg_lobby_chair.png",
+    "w": 1,
+    "h": 3
+  },
+  {
+    "id": "tile_delin_bg_room_bed",
+    "name": "德林小屋床",
+    "role": "decor",
+    "file": "images/德林小屋/bg_room_bed.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_delin_bg_room_bed02",
+    "name": "德林小屋床02",
+    "role": "decor",
+    "file": "images/德林小屋/bg_room_bed02.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_delin_bg_room_bedside_table",
+    "name": "德林小屋床頭櫃",
+    "role": "decor",
+    "file": "images/德林小屋/bg_room_bedside table.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_delin_bg_room_dhair01",
+    "name": "德林小屋椅子01",
+    "role": "decor",
+    "file": "images/德林小屋/bg_room_dhair01.png",
+    "w": 1,
+    "h": 2
+  },
+  {
+    "id": "tile_delin_bg_room_dhair02",
+    "name": "德林小屋椅子02",
+    "role": "decor",
+    "file": "images/德林小屋/bg_room_dhair02.png",
+    "w": 1,
+    "h": 1
   }
 ];
