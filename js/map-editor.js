@@ -198,6 +198,7 @@ let selectionDrag = null;
 // 拉框選取：用「選取」工具在空白的地方按住拖曳，拉出一個框，框裡的物件全部選起來
 // （按著 Shift 拉框＝加到原本的選取裡）。marquee＝{ x0, y0, x1, y1（畫布像素）, base（拉框前就選好的） }
 let marquee = null, lastSelectHit = false;
+let forceMarquee = false;   // 按著 Alt 按下去：就算點在地板上也拉框
 // 物件擺放用「四分之一格」對齊（10px），不用整格整格跳；地板類小圖還是整格
 const SUB = CELL / 4;
 let pointerPx = null;   // 滑鼠目前在畫布上的像素位置
@@ -630,6 +631,7 @@ function snapshot() { return JSON.stringify({ maps, tiles: customTiles, curId })
 function pushUndo() {
   const current = snapshot();
   if (redoStack.length && current !== redoBaseSnapshot) redoStack = [];
+  if (undoStack.length && undoStack[undoStack.length - 1] === current) return;   // 跟上一步一模一樣（只是點選、拉框）就不用多存一筆，不然 Ctrl+Z 會一直退到空步驟
   undoStack.push(current); if (undoStack.length > 60) undoStack.shift();
 }
 function undo() {
@@ -1616,7 +1618,7 @@ function paintCell(c, r, isDown, additiveSelect = false) {
         if (existing >= 0) selections.splice(existing, 1); else selections.push(picked);
       }
       selection = selections.length ? selections[selections.length - 1] : null;
-      lastSelectHit = !!picked && selectionLayer(picked) !== 'floor';   // 點到空白（或只點到地板）：按住拖曳就變成拉框選取
+      lastSelectHit = !!picked && (selectionLayer(picked) !== 'floor' || !forceMarquee);   // 點到空白（或按著 Alt 點地板）：按住拖曳就變成拉框選取；不按 Alt 點到地板＝照常選取、拖曳
       if (!picked) setStatus('這格沒有可選的物件（按住拖曳可以拉框選取）', '#9aa4b2');
       else setStatus('已選取 ' + selections.length + ' 個物件' + (additiveSelect ? '（Shift 多選）' : ''), '#ffd479');
       refreshSelPanel(); draw();
@@ -1978,7 +1980,7 @@ cv.addEventListener('pointerdown', e => {
   playMapClickSound(); painting = true; cv.setPointerCapture(e.pointerId); pushUndo();
   const [c, r] = cellFromEvent(e); lastPaint = c + ',' + r;
   if (brush.mode === 'solidnudge' && !e.shiftKey && beginNudgeDrag()) return;   // 按在已選中的紅格／線上：拖曳移動，不重新選
-  lastSelectHit = false;
+  lastSelectHit = false; forceMarquee = e.altKey;
   paintCell(c, r, true, e.shiftKey);
   if (brush.mode === 'select' && !lastSelectHit && pointerPx) {   // 按在空白的地方：開始拉框（Shift＝加到原本的選取）
     marquee = { x0: pointerPx.x, y0: pointerPx.y, x1: pointerPx.x, y1: pointerPx.y, base: e.shiftKey ? selections.slice() : [], moved: false };
