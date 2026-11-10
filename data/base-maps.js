@@ -13983,12 +13983,12 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
-        "c": 20,
+        "c": 23,
         "r": 19,
         "layer": "object3",
-        "oy": 24,
+        "oy": 14,
         "sortDepth": 0.75,
-        "ox": 30
+        "ox": 10
       },
       {
         "id": "tile_eoc_locker",
@@ -14305,7 +14305,8 @@ const BASE_MAPS = [
         "c": 0,
         "r": 22,
         "layer": "object4",
-        "ox": 30
+        "ox": 30,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_mu4yyr9r",
@@ -14338,11 +14339,11 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_mrt_planter",
-        "c": 21,
-        "r": 18,
-        "layer": "overlay",
-        "oy": 30,
-        "ox": 10
+        "c": 0,
+        "r": 21,
+        "layer": "object3",
+        "ox": 30,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_eoc_plant_small_01",
@@ -14356,10 +14357,11 @@ const BASE_MAPS = [
       {
         "id": "tile_hospital_plant_on_stool",
         "c": 3,
-        "r": 22,
+        "r": 20,
         "layer": "object4",
-        "ox": 12,
-        "oy": -6
+        "ox": 16,
+        "oy": 34,
+        "sortDepth": 0
       },
       {
         "id": "tile_hq_potted_plant",
@@ -14453,6 +14455,22 @@ const BASE_MAPS = [
         "layer": "overlay",
         "ox": 10,
         "oy": 30
+      },
+      {
+        "id": "tile_decor_medicalkit",
+        "c": 22,
+        "r": 19,
+        "layer": "object4",
+        "oy": 24,
+        "ox": -4
+      },
+      {
+        "id": "tile_counseling_medical_kit",
+        "c": 20,
+        "r": 19,
+        "layer": "object4",
+        "ox": 20,
+        "oy": 24
       }
     ],
     "solid": [
@@ -14610,9 +14628,11 @@ const BASE_MAPS = [
       "6,19",
       "1,20",
       "2,20",
-      "3,23",
       "30,23",
-      "29,23"
+      "29,23",
+      "1,22",
+      "2,22",
+      "3,22"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14643,10 +14663,6 @@ const BASE_MAPS = [
       "4,20": [
         -19,
         -11
-      ],
-      "3,23": [
-        8,
-        -7
       ]
     },
     "safe": true,
