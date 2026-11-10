@@ -342,7 +342,7 @@ const BASE_MAPS = [
         "2,13": "tile_new_bg_floor",
         "1,13": "tile_new_bg_floor",
         "0,13": "tile_new_bg_floor",
-        "7,14": "tile_new_bg_floor",
+        "7,14": "tile_hq_floor",
         "6,14": "tile_new_bg_floor",
         "5,14": "tile_new_bg_floor",
         "4,14": "tile_new_bg_floor",
@@ -669,7 +669,20 @@ const BASE_MAPS = [
         "14,21": "tile_hq_floor",
         "12,18": "tile_hq_floor",
         "37,19": "tile_hq_floor",
-        "37,14": "tile_new_bg_floor"
+        "37,14": "tile_new_bg_floor",
+        "7,15": "tile_hq_floor",
+        "7,21": "tile_hq_floor",
+        "7,20": "tile_hq_floor",
+        "7,19": "tile_hq_floor",
+        "7,18": "tile_hq_floor",
+        "7,17": "tile_hq_floor",
+        "7,16": "tile_hq_floor",
+        "8,16": "tile_hq_floor",
+        "8,17": "tile_hq_floor",
+        "8,18": "tile_hq_floor",
+        "8,20": "tile_hq_floor",
+        "8,21": "tile_hq_floor",
+        "8,19": "tile_hq_floor"
       },
       "ground": {},
       "ground2": {},
@@ -2071,69 +2084,11 @@ const BASE_MAPS = [
         "oy": 0
       },
       {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 16,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 17,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 18,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 19,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 20,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 21,
-        "layer": "floor",
-        "fx": true
-      },
-      {
         "id": "tile_new_bg_wall",
         "c": 9,
         "r": 12,
         "layer": "object",
         "fx": true
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
-        "c": 6,
-        "r": 17,
-        "layer": "ground",
-        "fx": true,
-        "ox": 30
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
-        "c": 6,
-        "r": 16,
-        "layer": "ground",
-        "fx": true,
-        "ox": 30
       },
       {
         "id": "tile_new_bg_wall_front_edge",
@@ -2486,6 +2441,20 @@ const BASE_MAPS = [
         "c": 6,
         "r": 12,
         "layer": "object",
+        "ox": 30
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 6,
+        "r": 16,
+        "layer": "top",
+        "ox": 30
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 6,
+        "r": 17,
+        "layer": "top",
         "ox": 30
       }
     ],
@@ -7533,7 +7502,8 @@ const BASE_MAPS = [
         "c": 58,
         "r": 5,
         "to": "map_mu5ad7t2",
-        "ox": -6
+        "ox": -6,
+        "locked": true
       }
     ],
     "solidOffsets": {
@@ -8159,7 +8129,8 @@ const BASE_MAPS = [
         "5,19": "tile_restaurant_condiment_bottles",
         "5,20": "tile_restaurant_napkin_holder",
         "5,21": "tile_restaurant_chopsticks_holder"
-      }
+      },
+      "object9": {}
     },
     "stamps": [
       {
@@ -8892,14 +8863,6 @@ const BASE_MAPS = [
         "sortDepth": 2.5
       },
       {
-        "id": "tile_cvs_famiport",
-        "c": 4,
-        "r": 5,
-        "layer": "object7",
-        "ox": 0,
-        "oy": 18
-      },
-      {
         "id": "tile_cvs_snack_shelf",
         "c": 10,
         "r": 4,
@@ -9195,6 +9158,13 @@ const BASE_MAPS = [
         "layer": "object6",
         "ox": 26,
         "oy": 30
+      },
+      {
+        "id": "tile_cvs_famiport",
+        "c": 4,
+        "r": 5,
+        "layer": "object9",
+        "oy": 20
       }
     ],
     "solid": [
@@ -9560,6 +9530,10 @@ const BASE_MAPS = [
       {
         "id": "top",
         "name": "☁️ 上層"
+      },
+      {
+        "id": "object9",
+        "name": "超商2"
       }
     ]
   },
@@ -10902,7 +10876,6 @@ const BASE_MAPS = [
         "10,11": "tile_containment_wall_top_straight"
       },
       "object": {
-        "24,2": "tile_eoc_security_camera",
         "28,5": "tile_eoc_security_camera"
       },
       "object2": {
@@ -11628,6 +11601,14 @@ const BASE_MAPS = [
         "layer": "top",
         "ox": 0,
         "oy": 2
+      },
+      {
+        "id": "tile_eoc_security_camera",
+        "c": 24,
+        "r": 2,
+        "layer": "object",
+        "ox": 12,
+        "oy": 0
       }
     ],
     "solid": [

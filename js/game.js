@@ -704,6 +704,13 @@ function portalNearPlayer() {
   }
   return best;
 }
+// 鎖住的出入口：轉一下門把的聲音＋溫特說話（沒寫台詞就用 data/doors.js 的 LOCKED_DOOR_TEXT）
+function portalLockedSay(pt) {
+  const [x, y] = portalXY(pt);
+  if (typeof sfxAt === 'function') sfxAt('lockedDoor', x, y, .35, 'locked-door');
+  if (typeof winterSay === 'function' && winterSay(pt.lockText || (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '……好像被鎖住了。'))) return;
+  flash('鎖住了', x, y - 30, '#ffcf89', 1.8);   // 沒有對話框（不應該發生）：至少飄字
+}
 function portalTargetName(pt) { const i = mapIndexById(pt.to), list = mapList(); return (i >= 0 && list[i] && list[i].name) || '另一張地圖'; }
 function placePlayerNearPortal(portal) {
   if (!portal || !G.player) return;
@@ -782,6 +789,7 @@ function teleportInMap(pt) {
 }
 function enterPortal(pt) {
   if (mapTransitioning) return;
+  if (pt.locked) { portalLockedSay(pt); return; }   // 鎖住的出入口（基地編輯器🎯出入口微調勾「鎖住」）：人留在原地，溫特說一句
   if (pt.at && pt.to === MAP.id) { teleportInMap(pt); return; }   // 同一張地圖裡的傳送點
   if (mapIndexById(pt.to) < 0) { flash('地圖不存在', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
   const fromId = MAP.id;
