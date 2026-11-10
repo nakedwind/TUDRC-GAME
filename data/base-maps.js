@@ -7483,7 +7483,8 @@ const BASE_MAPS = [
         "r": 5,
         "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734",
         "ox": -5,
-        "oy": 3
+        "oy": 3,
+        "locked": true
       },
       {
         "c": 5,
