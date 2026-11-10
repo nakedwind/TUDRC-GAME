@@ -63,11 +63,14 @@ function addBullets(id, n) {
 }
 // 補到至少一組（已經超過一組的不動）
 function fillBullets(id) { const s = bulletState(), b = BULLETS[id]; if (!b || id === 'pistol' || !s.owned[id]) return 0; const got = Math.max(0, Math.min(b.max - (s.n[id] || 0), bulletRoom(id))); s.n[id] = (s.n[id] || 0) + got; bulletSave(); return got; }
-function useBullet(id) { const s = bulletState(); s.n[id] = Math.max(0, (s.n[id] || 0) - 1); bulletSave(); }
+// 訓練室的試用彈藥（js/practice.js 的 trainingAmmo）：開著的時候每種子彈都能換、打不完，也不會扣到真正的子彈
+const trialAmmo = () => typeof trainingAmmoActive === 'function' && trainingAmmoActive();
+const bulletReady = id => trialAmmo() || bulletCount(id) > 0;   // 這種子彈現在打得出去嗎
+function useBullet(id) { if (trialAmmo()) return; const s = bulletState(); s.n[id] = Math.max(0, (s.n[id] || 0) - 1); bulletSave(); }
 
 // ---- 目前裝的子彈 ----
 const UNARMED = { id: 'none', name: '空手', icon: '✋' };   // 舊的：現在一定拿著手槍
-const weaponUsable = i => !!WEAPONS[i] && bulletOwned(WEAPONS[i].id) && (typeof magazineCarries !== 'function' || magazineCarries(WEAPONS[i].id));   // 拿到過、而且這次有裝進彈匣（js/magazine.js）
+const weaponUsable = i => !!WEAPONS[i] && (trialAmmo() ? !BULLETS[WEAPONS[i].id].removed : bulletOwned(WEAPONS[i].id) && (typeof magazineCarries !== 'function' || magazineCarries(WEAPONS[i].id)));   // 拿到過、而且這次有裝進彈匣（js/magazine.js）；訓練室試用彈藥：全部都能換
 function playerWeapon(p) {
   if (p && !weaponUsable(p.weaponIndex || 0)) p.weaponIndex = 0;   // 這種子彈沒了（例如被編輯器拿掉）：換回一般子彈
   return WEAPONS[(p && p.weaponIndex) || 0];
@@ -110,7 +113,7 @@ function dryFire(p, aim, id) {
 // 每幀由 updatePlayerAttack 呼叫；回傳 true＝這幀已處理
 function updateFlareGun(p, dt, aim, canFire) {
   if (!canFire) return true;
-  if (bulletCount('flare') <= 0) { dryFire(p, aim, 'flare'); return true; }
+  if (!bulletReady('flare')) { dryFire(p, aim, 'flare'); return true; }
   useBullet('flare'); p.atkCd = BULLETS.flare.gap;
   fireFlare(p, aim);
   return true;
@@ -246,6 +249,7 @@ function useAmmoCrateNearPlayer() {
 const ammoRefillNearPlayer = () => mapBoxNearPlayer('refill');   // 判定範圍：js/camp-interactions.js 的 MAP_BOX
 function useAmmoRefillNearPlayer() {
   if (!ammoRefillNearPlayer()) return false;
+  if (typeof isPracticeMap === 'function' && isPracticeMap()) { openTrainingAmmo(ammoRefillNearPlayer()); return true; }   // 訓練室的彈藥箱：試用彈藥（js/practice.js）
   if (typeof openCampSupply === 'function') openCampSupply('ammo');
   return true;
 }

@@ -35,7 +35,7 @@ function mapBoxes() {
   const list = [];
   for (const s of MAP.stamps || []) {
     const t = mapTileById(s.id); if (!t) continue;
-    const k = MAP_BOX.kinds.find(k => k.match(s.id, t, s)); if (!k || (MAP_SAFE && !k.safe)) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用（safe＝基地裡也能用：裝備箱、置物櫃）
+    const k = MAP_BOX.kinds.find(k => k.match(s.id, t, s)); if (!k || (MAP_SAFE && !k.safe && !(k.kind === 'refill' && typeof isPracticeMap === 'function' && isPracticeMap()))) continue;   // 彈藥箱、物資箱只在戰鬥地圖有用（safe＝基地裡也能用：裝備箱；訓練室的補彈藥箱也能用＝試用彈藥、置物櫃）
     if (k.kind === 'ammo' && typeof ammoCrateLooted === 'function' && ammoCrateLooted(s)) continue;   // 開過的彈藥箱：不能再開（js/flare.js）
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
     const a = k.art[s.id] || [0, 0, 1, 1, 1, 1], fx = u => s.fx ? w - u : u;   // 左右翻轉的箱子：範圍也翻過去

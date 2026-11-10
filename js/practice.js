@@ -7,6 +7,7 @@
      ・沒有任何獎勵：異質碎片、成就、支線任務進度都不算。
      ・房間中間放一個沙包：打不壞、不會動，頭上顯示每秒傷害（DPS），比較武器和隊員的輸出用。
    - 結束：走到門邊按 Space → 選單（結束訓練、開關燈光、開關污染）。
+   - 門邊的彈藥箱（打開）：按 Space 打開「試用彈藥」，每種子彈都能換、無限發；離開訓練室就收回（下面的 trainingAmmo）。
 */
 const PRACTICE = {
   mapId: 'map_mvfmo6c2',               // 哪一張地圖是訓練室（地圖的 id：在基地編輯器改地圖名稱也不會壞）
@@ -220,8 +221,28 @@ function practiceDps() {
   return practice.hits.reduce((s, h) => s + h.d, 0) / span;
 }
 
+// ---- 訓練室的彈藥箱（地圖上的「彈藥箱（打開）」）：試用彈藥 ----
+// 打開之後，在訓練室裡每一種子彈都能用滾輪換、打不完（不用拿到過、也不用裝進彈匣），開始訓練就能打打看。
+// 試用的子彈不會放進溫特真正的彈藥包：打的時候也不會扣到自己的子彈，所以一離開訓練室，身上的子彈就跟進來時一模一樣。
+// （子彈怎麼用的判斷在 js/flare.js 的 trialAmmo、bulletReady、weaponUsable）
+const trainingAmmo = { on: false };
+const trainingAmmoActive = () => trainingAmmo.on && isPracticeMap();
+function openTrainingAmmo(box) {
+  const p = G.player, x = box ? box.x : p.x, y = box ? box.top : p.y - 60;
+  if (!trainingAmmo.on) { trainingAmmo.on = true; sfx('door'); flash('試用彈藥：每種子彈無限發', x, y - 8, '#ffd479', 2); }
+  else { sfx('button'); flash('試用彈藥開著', x, y - 8, '#ffd479', 1.4); }
+  systemNotice('🧰 所有子彈都可以無限試用。開始訓練後用滾輪切換，離開訓練室就會收回。');
+  if (typeof updateAmmoHud === 'function') updateAmmoHud();
+}
+function endTrainingAmmo() {
+  trainingAmmo.on = false;
+  if (G && G.player) playerWeapon(G.player);   // 手上是試用的子彈：換回一般子彈
+  if (typeof updateAmmoHud === 'function') updateAmmoHud();
+}
+
 // ---- 每幀（game.js 的 update 呼叫）----
 function updatePractice(dt) {
+  if (trainingAmmo.on && !isPracticeMap()) endTrainingAmmo();   // 離開訓練室：試用彈藥收回
   if (!practice.active || !G || MAP_SAFE) return;
   const p = G.player;
   G.money = PRACTICE.money;
