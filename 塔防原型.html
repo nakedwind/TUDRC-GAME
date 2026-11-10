@@ -27,12 +27,12 @@
 <script src="js/tab-key.js?v=tab-20261022"></script>   <!-- Tab 鍵只用來開關 T-Pad：最先載入，擋掉瀏覽器的「Tab 切換焦點」 -->
 <script src="js/new-game.js?v=gearv2-20261109"></script>
 <!-- 樣式（畫面外觀）放在獨立檔案 -->
-<link rel="stylesheet" href="css/style.css?v=lvtag15-20261109">
+<link rel="stylesheet" href="css/style.css?v=mealdlg-20261110">
 <link rel="stylesheet" href="css/tpad-map.css?v=eatenmate-20261103">   <!-- T-Pad「地圖」App（js/tpad-map.js） -->
 <link rel="stylesheet" href="css/ui-feedback.css">
 <link rel="stylesheet" href="css/level-up-fx.css?v=lvfx2-20261102">   <!-- 升級特效（js/level-up-fx.js） -->
 <link rel="stylesheet" href="css/party.css?v=party4-20261107">   <!-- 慶功宴的畫面 -->
-<link rel="stylesheet" href="css/squad-page.css?v=gearv2-20261109">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
+<link rel="stylesheet" href="css/squad-page.css?v=gear3slot-20261110">   <!-- T-Pad「Y102隊員」頁（js/squad-page.js） -->
 <link rel="stylesheet" href="css/item-pickup-notice.css?v=item-pickup-rounded-20261013">
 <link rel="stylesheet" href="css/claw-machine.css?v=clawbanner-20261101">
 </head>
@@ -141,6 +141,7 @@
         <button id="dialoguePractice" class="hidden" type="button">🎯 開始訓練</button>
         <button id="dialogueHospital" class="hidden" type="button">🏥 去醫院休息</button>   <!-- 受傷的隊員（js/vitals.js） -->
         <button id="dialogueAshSoothe" class="hidden" type="button">🫶 請亞許疏導</button>   <!-- 疏導室的亞許（js/vitals.js） -->
+        <button id="dialogueMealInvite" class="hidden" type="button">🍽️ 一起去吃飯</button>   <!-- 基地裡：邀請（或取消邀請）一起去餐廳吃飯（js/meal-invite.js） -->
       </div>
     </div>
     <!-- 送禮選單（對話中按「送禮」打開） -->
@@ -281,7 +282,7 @@
   <script src="data/gifts.js?v=devotion-20261103"></script>   <!-- 送禮：角色喜好、台詞、好感度等級 -->
   <script src="data/items.js?v=devotionimg-20261106"></script>   <!-- 背包物品分類與其他物品 -->
   <script src="data/supplies.js?v=toolbox15-20261109"></script>   <!-- 溫特可購買、使用的個人補給 -->
-  <script src="data/equipment.js?v=wspages-20261109"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
+  <script src="data/equipment.js?v=gear3slot-20261110"></script>   <!-- 部隊長裝備：裝備、武器升級的數值 -->
   <script>document.write('<script src="data/backpack-layout.js?t=' + Date.now() + '"><\/script><script src="data/item-texts.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 背包版面、物品文字（背包編輯器匯出）；每次都讀最新的 -->
   <script src="js/workshop-file.js?v=bldabout-20261109"></script>   <!-- 開發工坊和背包的說明連通用的小工具（子彈、裝備、武器） -->
   <script src="js/backpack-layout.js?v=dropfix-20261025"></script>   <!-- 套用上面的背包版面、物品文字（必須在 items、supplies 之後） -->
@@ -320,7 +321,7 @@
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
   <script src="js/build.js?v=bldabout-20261109"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=guidekit3-20261106"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=regroup-20261109"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=mealdlg-20261110"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
   <script src="js/npc-chats.js?v=linger-20261104"></script> <!-- 基地 NPC 閒聊小表演：走到桌前、泡泡輪流說話 -->
   <script src="js/progression.js?v=achvimpl-20261023"></script>
@@ -381,7 +382,7 @@
   <script src="js/backpack.js?v=gearv2-20261109"></script> <!-- 9j. 背包：物品格與說明 -->
   <script src="js/storage-cabinet.js?v=twosquad2-20261103"></script> <!-- 置物櫃：指定的櫃子打開放東西（借用物資箱視窗） -->
   <script>document.write('<script src="data/squad-gear.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員裝備資料（Y102隊員裝備／技能編輯器匯出） -->
-  <script src="js/squad-gear.js?v=gearv2-20261109"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
+  <script src="js/squad-gear.js?v=gear3slot-20261110"></script>   <!-- Y102隊員裝備：買、穿、數值（必須在 backpack、skills 之後、save 之前） -->
   <script src="js/gifts.js?v=dlgicon2-20261109"></script> <!-- 9l. 送禮與好感度 -->
   <script src="data/costumes.js?v=dismantle-20261109"></script> <!-- 服裝資料：skin、配件 -->
   <script src="data/costume-placement.js?v=bday-20261108"></script> <!-- 配件戴在每個角色身上的位置（服裝編輯器匯出） -->
@@ -401,7 +402,7 @@
   <script src="js/food.js?v=bossdrop-20261109"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
   <script src="js/cooking.js?v=wspages-20261109"></script>   <!-- 烹飪：廚房工作台的爐灶把生食煮熟 -->
   <script src="js/meal.js?v=party11-20261107"></script>   <!-- 餐廳吃飯：拿餐盤、打飯、坐下吃、回收（NPC 也會） -->
-  <script src="js/meal-invite.js?v=liftspot-20261104"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
+  <script src="js/meal-invite.js?v=ownspeed2-20261110"></script>   <!-- 邀請隊員一起去餐廳吃飯：跟著溫特、吃完走回原本的地方 -->
   <script src="js/base-follow.js?v=rooms2f-20261104"></script>   <!-- 雷德在基地裡跟著溫特換地圖（不進溫特辦公室、別人寢室） -->
   <script src="js/ball-poses.js?v=ballsit-20261109"></script>
   <script src="js/bed-zzz.js?v=20261026"></script> <!-- 躺床睡覺：頭上飄 ZZZ -->
@@ -413,7 +414,7 @@
   <script src="js/sanity.js?v=leader2-20261103"></script> <!-- 9k3. SP＝理智：不會自己恢復、越低畫面越灰、低於 40 會搖晃 -->
   <script src="js/flare.js?v=bulletx2-20261109"></script> <!-- 溫特的武器切換（滾輪／1、2）、照明彈槍、彈藥箱 -->
   <script src="js/equipment.js?v=bldunowned-20261109"></script> <!-- 部隊長裝備：背包裝備欄、諾亞的開發工坊、頭燈、探測器 -->
-  <script src="js/gear-v2.js?v=gearv2-20261109"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
+  <script src="js/gear-v2.js?v=gear3slot-20261110"></script>   <!-- 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：溫特和隊員共用、研發等級＋製作；舊版時什麼都不做（必須在 equipment、squad-gear、backpack、save 之後） -->
   <script src="js/special-guns.js?v=shotgun-20261109"></script> <!-- 後室撿到的槍：燃燒彈槍、麻醉槍 -->
   <script src="js/magazine.js?v=ammoname2-20261109"></script> <!-- 彈匣：出勤前選這次帶哪幾種特殊子彈 -->
   <script src="js/combat-progress.js?v=wspages-20261109"></script>
@@ -429,7 +430,7 @@
   <script src="js/mrt-train.js?v=cargo3-20261102"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=mmdrag-20261109"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=blinkfix-20261110"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=mealdlg-20261110"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->
@@ -469,6 +470,6 @@
   <script src="js/tpad.js?v=squad-v2-20261027"></script>   <!-- 📱 T-Pad：隊員、任務、成就、怪物圖鑑…（按 Tab）；出勤配置請到作戰桌 -->
   <script src="js/base-minimap.js?v=mmdrag-20261109"></script>   <!-- 基地右下角小地圖：目前樓層＋溫特位置；按鈕打開 T-Pad 地圖、收起（必須在 tpad-map.js、tpad.js 之後） -->
   <script>document.write('<script src="data/squad-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- Y102隊員頁的版面（Y102隊員裝備／技能編輯器匯出） -->
-  <script src="js/squad-page.js?v=gearv2-20261109"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
+  <script src="js/squad-page.js?v=gear3slot-20261110"></script>   <!-- T-Pad「Y102隊員」頁：技能樹頁、裝備頁（必須在 tpad.js 之後） -->
 </body>
 </html>

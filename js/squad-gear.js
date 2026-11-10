@@ -6,7 +6,7 @@
    存檔：localStorage（SQUAD_GEAR_STORE）＝ { equip: { 隊員: [裝備 id 或 null ×3] } }
 */
 const SQUAD_GEAR_STORE = 'tudrc_squad_gear_v1';
-const SQUAD_GEAR_SLOTS = typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2 ? 4 : 3;   // 新版（data/equipment.js 的 GEAR_SYSTEM＝2）：頭部、上身、下身、隨身物品各 1 格（js/gear-v2.js）
+const SQUAD_GEAR_SLOTS = 3;   // 舊版：3 格不分種類；新版（data/equipment.js 的 GEAR_SYSTEM＝2）也是 3 格，但分成頭部、上身、隨身物品（js/gear-v2.js）
 const SQUAD_GEAR_CATEGORY = { id: 'squadgear', name: '隊員物資', icon: '🎽' };
 // 數值名稱（技能、裝備的 mods 共用；編輯器的下拉選單也用這份）。pct：加的時候用百分比顯示；unit：單位
 const STAT_MOD_NAMES = {

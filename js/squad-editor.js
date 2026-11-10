@@ -215,7 +215,7 @@ let gear2Sel = null;
 function gearV2Html() {
   const who = d => GEAR_WHO_NAME[d.who] ? d.who : 'winter', parts = { head: '頭部', body: '上身', legs: '下身', acc: '隨身物品' };
   const list = EQUIPMENT.filter(d => who(d) !== 'winter');
-  let h = '<p class="note" style="margin-top:0">新版裝備：溫特和隊員共用同一份裝備清單。這裡列出隊員能穿的；要改名稱、說明、圖片、數值、誰能穿、製作費，請到 ' +
+  let h = '<p class="note" style="margin-top:0">新版裝備：溫特和隊員共用同一份裝備清單。隊員有頭部、上身、隨身物品 3 格（鞋子穿在隨身物品格）。這裡列出隊員能穿的；要改名稱、說明、圖片、數值、誰能穿、製作費，請到 ' +
     '<a href="開發工坊編輯器.html" target="_blank">🔧 開發工坊編輯器</a>（存在 data/workshop.js，遊戲和兩個編輯器讀同一份）。</p>' +
     '<div class="list" style="margin-top:8px">' + list.map(d => '<button type="button" data-gear2="' + esc(d.id) + '" class="' + (d.id === gear2Sel ? 'on' : '') + '"><img src="' + esc(squadGearImage(d)) + '" alt="">' + esc(d.name) +
       '<em>' + esc(parts[d.kind] || '') + '・' + esc(GEAR_WHO_NAME[who(d)]) + '</em></button>').join('') + '</div>';
@@ -223,7 +223,7 @@ function gearV2Html() {
   if (!d) return h + '<p class="note" style="margin-top:10px">選一件裝備看內容。</p>';
   const mk = gearMakeCost(d), squadKeys = Object.keys(d.levels[0] || {}).filter(k => GEAR_SQUAD_MODS[k]);
   h += '<div class="sec"><div class="sec-head">' + esc(d.name) + '</div>' +
-    '<div class="orig">部位：' + esc(parts[d.kind] || d.kind) + '　誰能穿：' + esc(GEAR_WHO_NAME[who(d)]) + '　代號：' + esc(d.id) + '</div>' +
+    '<div class="orig">部位：' + esc(parts[d.kind] || d.kind) + (d.kind === 'legs' ? '（隊員穿在隨身物品格）' : '') + '　誰能穿：' + esc(GEAR_WHO_NAME[who(d)]) + '　代號：' + esc(d.id) + '</div>' +
     (d.ownedDesc ? '<p class="note">' + esc(d.ownedDesc) + '</p>' : '') +
     '<div class="field">每一級的效果（研發等級）' + d.levels.map((lv, i) => '<div class="orig">Lv' + (i + 1) + '：' + esc(d.stat ? d.stat(lv) : '') + '</div>').join('') + '</div>' +
     '<div class="orig">隊員穿上時有效果的數值：' + esc(squadKeys.map(k => (WORKSHOP_VALUE_INFO[k] || {}).label || k).join('、') || '（沒有）') + '</div>' +

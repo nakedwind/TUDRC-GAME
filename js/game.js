@@ -367,6 +367,7 @@ const fieldTalkBlocked = actor => !MAP_SAFE && (actor.kind === 'tower' || actor.
 function canTalk(actor) {   // 有沒有可以說的台詞（沒有就不顯示「與○○對話」、選單也沒有「對話」）
   if (!actor || fieldTalkBlocked(actor)) return false;   // 戰鬥中的隊員與球球不對話；保留疏導、急救與跟隨指令。
   if (typeof missionBriefReady === 'function' && missionBriefReady(actor)) return true;
+  if (typeof mealInviteOffered === 'function' && mealInviteOffered(actor)) return true;   // 基地裡可以邀請一起去吃飯：沒台詞也能打開對話框選「一起去吃飯」（js/meal-invite.js）
   return hasSpecialTalk(actor) || (dialogueLines(dialogueKey(actor), talkKeyOf(actor)) || []).length > 0;
 }
 function openDialogue(actor) {
@@ -376,8 +377,9 @@ function openDialogue(actor) {
   // 通訊員也一樣：他住院時改由應變中心的其他人代為報告任務（js/missions.js 的 isBriefStandIn）
   if (actor.kind === 'tower' && typeof isHospitalized === 'function' && isHospitalized(actor.type)) { openHospitalDialogue(actor); return; }
   const key = dialogueKey(actor), profile = dialogueProfile(actor);
-  const lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
+  let lines = (typeof missionDialogueLines === 'function' && missionDialogueLines(actor))   // 通訊員有新任務要報告（js/missions.js）
     || (hasSpecialTalk(actor) ? specialTalkLines(actor) : dialogueLines(key, talkKeyOf(actor)));   // 第一次見面／平常說話／偶爾閒聊（例如塔納），或基地／出勤中的「找他說話」
+  if ((!lines || !lines.length) && typeof mealInviteOffered === 'function' && mealInviteOffered(actor)) lines = ['……'];   // 沒台詞、但可以邀請吃飯：照樣打開對話框（說「……」），右邊有「一起去吃飯」
   if (!lines || !lines.length) return;   // 這一格沒填：不說話
   if (typeof achieveRemember === 'function') achieveRemember('talked', key, 'talkedAll');   // 成就：跟每一位角色說過話
   if (key === 'ball' && typeof addStat === 'function') addStat('ballInteracts');   // 成就：跟球球互動（說話）
@@ -399,6 +401,7 @@ function openDialogue(actor) {
   if (typeof onDialogueOpenedOutfit === 'function') onDialogueOpenedOutfit(actor);   // 隊友：推薦穿搭按鈕（js/costumes.js）
   if (typeof onDialogueOpenedGear === 'function') onDialogueOpenedGear(actor);   // 隊友：隊員資訊按鈕（js/squad-page.js）
   if (typeof onDialogueOpenedVitals === 'function') onDialogueOpenedVitals(actor);   // 受傷的隊員：去醫院休息；疏導室的亞許：請亞許疏導（js/vitals.js）
+  if (typeof onDialogueOpenedMealInvite === 'function') onDialogueOpenedMealInvite(actor);   // 基地裡：一起去吃飯（js/meal-invite.js）
 }
 // 住院中的隊員：打開對話框，他在睡覺，先說一句（對話編輯器「住院中找他說話（睡覺）」talkHospital，隨機一句；沒填就不說），
 // 下一句由系統說還要幾分鐘出院；沒有送禮、穿搭等按鈕
@@ -417,7 +420,7 @@ function openTextDialogue({ name, image, lines, kind = 'text' }) {
   dialoguePortrait.src = image || ''; dialoguePortrait.alt = name || '';
   dialoguePortrait.parentElement.dataset.char = kind;   // css：整張圖縮進框裡（不是裁半身像）
   document.querySelectorAll('.dialogue-ws').forEach(b => b.classList.add('hidden'));   // 諾亞的開發工坊四個選項（js/equipment.js）
-  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueOutfit', 'dialogueGear', 'dialogueHospital', 'dialogueAshSoothe']) document.getElementById(id)?.classList.add('hidden');
+  for (const id of ['dialogueGift', 'dialogueWorkshop', 'dialoguePractice', 'dialogueOutfit', 'dialogueGear', 'dialogueHospital', 'dialogueAshSoothe', 'dialogueMealInvite']) document.getElementById(id)?.classList.add('hidden');
   document.getElementById('dialogueFavor')?.classList.add('hidden');
   dialogueBox.classList.remove('hidden');
   renderDialogueLine(); sfx('menu');
@@ -1713,8 +1716,6 @@ function handleMapClick(e, isLeft) {
   if (dog) { closeGroundMenu(); closeSentryMenu(); openDogFollowMenu(e.clientX + 12, e.clientY - 20); return false; }
   const hit = !isLeft && G.towers.find(t => Math.hypot(t.x - x, t.y - (sentrySprites[t.type] ? 14 : 0) - y) <= hitR(t));
   if (hit) { closeGroundMenu(); openSentryMenu(hit); return false; }
-  const npcHit = !isLeft && MAP_SAFE && typeof openNpcMenu === 'function' && (G.npcs || []).find(n => n.id !== 'ball' && Math.hypot(n.x - x, n.y - 14 - y) <= 26);   // 基地的 NPC：右鍵＝對話、邀請吃飯（js/sentry.js）
-  if (npcHit) { closeGroundMenu(); if (openNpcMenu(npcHit)) return false; }
   const campBase = !isLeft && !MAP_SAFE && campBaseAt(x, y);
   if (campBase) { closeSentryMenu(); openCampMenu(campBase, e.clientX, e.clientY); return false; }
   closeSentryMenu();

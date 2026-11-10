@@ -344,7 +344,7 @@ const SQUAD_SKILLS = {
         "desc": "單體攻擊。使目標燒傷 5 秒，每秒受到一次傷害。",
         "effect": "初始技能",
         "note": "被動「餘燼烙印」：使目標燒傷 5 秒，每秒受到一次傷害。\n大招「烈焰新星」：每 8 秒放出一次大範圍爆炎（傷害 2.6 倍，範圍 2.2 格）",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/ember-brand.png",
         "mods": [],
         "cost": 0
       },
@@ -352,7 +352,7 @@ const SQUAD_SKILLS = {
         "name": "灼痕加深",
         "desc": "火焰燒得更久，目標很難甩掉。",
         "effect": "燃燒時間 +2 秒",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/deep-scorch.png",
         "mods": [
           {
             "path": "burn.duration",
@@ -365,7 +365,7 @@ const SQUAD_SKILLS = {
         "name": "耐熱體質",
         "desc": "習慣高溫的身體，撐得比看起來久。",
         "effect": "最大 HP +15%",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/heat-resilience.png",
         "mods": [
           {
             "path": "hp",
@@ -378,7 +378,7 @@ const SQUAD_SKILLS = {
         "name": "冷靜呼吸",
         "desc": "學著放慢節奏，不讓自信變成負擔。",
         "effect": "每次攻擊增加的精神負荷 −25%，受到的傷害再減少 5%",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/calm-breath.png",
         "mods": [
           {
             "path": "taint",
@@ -395,7 +395,7 @@ const SQUAD_SKILLS = {
         "name": "烈焰",
         "desc": "火勢更猛，燒傷每一跳都更痛。",
         "effect": "燃燒每秒傷害 +3",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/fierce-flame.png",
         "mods": [
           {
             "path": "burn.damage",
@@ -408,7 +408,7 @@ const SQUAD_SKILLS = {
         "name": "助燃",
         "desc": "對準要害點火。",
         "effect": "攻擊力 +10%，燃燒每秒傷害再 +2",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/kindling.png",
         "mods": [
           {
             "path": "dmg",
@@ -425,7 +425,7 @@ const SQUAD_SKILLS = {
         "name": "業火",
         "desc": "火焰幾乎不會熄滅。",
         "effect": "燃燒時間再 +3 秒，大招冷卻 −10%",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/eternal-inferno.png",
         "mods": [
           {
             "path": "burn.duration",
@@ -442,7 +442,7 @@ const SQUAD_SKILLS = {
         "name": "烈焰新星・焚天",
         "desc": "把「烈焰新星」推到極限。",
         "effect": "大招傷害 +35%，大招冷卻 −20%",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/blazing-nova.png",
         "mods": [
           {
             "path": "ultDmgBonus",
@@ -459,7 +459,7 @@ const SQUAD_SKILLS = {
         "name": "精準點火",
         "desc": "鎖定目標後才出手。",
         "effect": "攻擊力 +10%",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/precision-ignition.png",
         "mods": [
           {
             "path": "dmg",
@@ -472,7 +472,7 @@ const SQUAD_SKILLS = {
         "name": "遠程壓制",
         "desc": "站得更遠，打得更狠。",
         "effect": "攻擊力 +15%，射程 +1 格",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/ranged-suppression.png",
         "mods": [
           {
             "path": "dmg",
@@ -489,7 +489,7 @@ const SQUAD_SKILLS = {
         "name": "天才的節奏",
         "desc": "出手越來越流暢。",
         "effect": "攻擊速度 +10%",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/genius-rhythm.png",
         "mods": [
           {
             "path": "rate",
@@ -502,7 +502,7 @@ const SQUAD_SKILLS = {
         "name": "火光引路",
         "desc": "火光讓她更早發現敵人。",
         "effect": "發現敵人的距離 +2 格",
-        "icon": "",
+        "icon": "images/ui/skills/theonie/guiding-fire.png",
         "mods": [
           {
             "path": "aggroRange",
@@ -518,7 +518,7 @@ const SQUAD_SKILLS = {
         "desc": "範圍攻擊；吸引異質體仇恨，並持續恢復生命與精神負荷。",
         "effect": "初始技能",
         "note": "被動「鐵壁守護」：吸引異質體仇恨，並持續恢復生命與精神負荷。\n大招「盾擊衝鋒」：每 10 秒用盾牌衝撞周圍 2.8 格（傷害 2.2 倍），擊退 1.6 格，自己恢復 40 HP、降低 40 精神負荷。",
-        "icon": "",
+        "icon": "images/ui/skills/red/ironwall-guard.png",
         "mods": [],
         "cost": 0
       },
@@ -526,7 +526,7 @@ const SQUAD_SKILLS = {
         "name": "再生",
         "desc": "傷口好得更快。",
         "effect": "每秒回復 HP +2",
-        "icon": "",
+        "icon": "images/ui/skills/red/regeneration.png",
         "mods": [
           {
             "path": "hpRegen",
@@ -539,7 +539,7 @@ const SQUAD_SKILLS = {
         "name": "隊長的體格",
         "desc": "站在最前面的本錢。",
         "effect": "最大 HP +15%",
-        "icon": "",
+        "icon": "images/ui/skills/red/captain-vitality.png",
         "mods": [
           {
             "path": "hp",
@@ -552,7 +552,7 @@ const SQUAD_SKILLS = {
         "name": "鋼鐵意志",
         "desc": "不管多痛都不退。",
         "effect": "受到的傷害再減少 8%，每秒回復 HP 再 +2",
-        "icon": "",
+        "icon": "images/ui/skills/red/iron-will.png",
         "mods": [
           {
             "path": "defense",
@@ -569,7 +569,7 @@ const SQUAD_SKILLS = {
         "name": "挑釁",
         "desc": "大聲把怪物都叫過來。",
         "effect": "嘲諷範圍 +1 格",
-        "icon": "",
+        "icon": "images/ui/skills/red/taunt.png",
         "mods": [
           {
             "path": "taunt",
@@ -582,7 +582,7 @@ const SQUAD_SKILLS = {
         "name": "堅盾",
         "desc": "盾牌舉得更穩。",
         "effect": "受到的傷害再減少 7%",
-        "icon": "",
+        "icon": "images/ui/skills/red/steadfast-shield.png",
         "mods": [
           {
             "path": "defense",
@@ -595,7 +595,7 @@ const SQUAD_SKILLS = {
         "name": "穩住陣腳",
         "desc": "越打越冷靜。",
         "effect": "精神負荷每秒恢復 +0.5，嘲諷範圍再 +0.5 格",
-        "icon": "",
+        "icon": "images/ui/skills/red/hold-ground.png",
         "mods": [
           {
             "path": "taintRegen",
@@ -612,7 +612,7 @@ const SQUAD_SKILLS = {
         "name": "盾擊衝鋒・不倒之盾",
         "desc": "把全隊的危險撞回去。",
         "effect": "大招傷害 +25%，大招冷卻 −30%",
-        "icon": "",
+        "icon": "images/ui/skills/red/unyielding-charge.png",
         "mods": [
           {
             "path": "ultDmgBonus",
@@ -629,7 +629,7 @@ const SQUAD_SKILLS = {
         "name": "盾緣打擊",
         "desc": "用盾牌邊緣反擊。",
         "effect": "攻擊力 +15%",
-        "icon": "",
+        "icon": "images/ui/skills/red/shield-edge.png",
         "mods": [
           {
             "path": "dmg",
@@ -642,7 +642,7 @@ const SQUAD_SKILLS = {
         "name": "重盾橫掃",
         "desc": "一揮掃開一片。",
         "effect": "攻擊力 +20%，攻擊範圍 +0.3 格",
-        "icon": "",
+        "icon": "images/ui/skills/red/shield-sweep.png",
         "mods": [
           {
             "path": "dmg",
@@ -659,7 +659,7 @@ const SQUAD_SKILLS = {
         "name": "可靠的背影",
         "desc": "跟上隊伍的腳步。",
         "effect": "移動速度 +10%",
-        "icon": "",
+        "icon": "images/ui/skills/red/reliable-vanguard.png",
         "mods": [
           {
             "path": "walkSpeed",
@@ -672,7 +672,7 @@ const SQUAD_SKILLS = {
         "name": "不用一個人扛",
         "desc": "學著讓隊友分擔，自己也輕鬆一點。",
         "effect": "每次攻擊增加的精神負荷 −25%",
-        "icon": "",
+        "icon": "images/ui/skills/red/shared-burden.png",
         "mods": [
           {
             "path": "taint",
@@ -688,7 +688,7 @@ const SQUAD_SKILLS = {
         "desc": "範圍攻擊；在小片區域降下雷電，使異質體顫抖並停止 2 秒。",
         "effect": "初始技能",
         "note": "被動「靜電麻痺」：在小片區域降下雷電，使異質體顫抖並停止 2 秒。\n大招「天雷落」：每 9 秒降下一次大片落雷（傷害 2.6 倍，範圍 2.4 格）。",
-        "icon": "",
+        "icon": "images/ui/skills/amber/static-paralysis.png",
         "mods": [],
         "cost": 0
       },
@@ -696,7 +696,7 @@ const SQUAD_SKILLS = {
         "name": "麻痺延長",
         "desc": "照著教範反覆練習，雷擊控得更久。",
         "effect": "麻痺時間 +0.5 秒",
-        "icon": "",
+        "icon": "images/ui/skills/amber/extended-paralysis.png",
         "mods": [
           {
             "path": "stun",
@@ -709,7 +709,7 @@ const SQUAD_SKILLS = {
         "name": "基礎體能",
         "desc": "實習課表裡最紮實的一項。",
         "effect": "最大 HP +15%",
-        "icon": "",
+        "icon": "images/ui/skills/amber/basic-fitness.png",
         "mods": [
           {
             "path": "hp",
@@ -722,7 +722,7 @@ const SQUAD_SKILLS = {
         "name": "避雷針",
         "desc": "學會把多餘的電流導開。",
         "effect": "受到的傷害再減少 10%，最大 HP +10%",
-        "icon": "",
+        "icon": "images/ui/skills/amber/lightning-rod.png",
         "mods": [
           {
             "path": "defense",
@@ -739,7 +739,7 @@ const SQUAD_SKILLS = {
         "name": "瞄準守則",
         "desc": "一步一步照規矩瞄準。",
         "effect": "命中率 +15%",
-        "icon": "",
+        "icon": "images/ui/skills/amber/aiming-protocol.png",
         "mods": [
           {
             "path": "accuracy",
@@ -752,7 +752,7 @@ const SQUAD_SKILLS = {
         "name": "落雷範圍",
         "desc": "雷電涵蓋的範圍更大。",
         "effect": "雷擊範圍 +0.4 格",
-        "icon": "",
+        "icon": "images/ui/skills/amber/lightning-area.png",
         "mods": [
           {
             "path": "splash",
@@ -765,7 +765,7 @@ const SQUAD_SKILLS = {
         "name": "精準雷擊",
         "desc": "終於能把雷打在想打的地方。",
         "effect": "命中率再 +15%，麻痺時間再 +0.5 秒",
-        "icon": "",
+        "icon": "images/ui/skills/amber/precise-strike.png",
         "mods": [
           {
             "path": "accuracy",
@@ -782,7 +782,7 @@ const SQUAD_SKILLS = {
         "name": "天雷落・雷神降臨",
         "desc": "實習生的全力一擊。",
         "effect": "大招傷害 +40%，大招冷卻 −20%",
-        "icon": "",
+        "icon": "images/ui/skills/amber/thunder-descent.png",
         "mods": [
           {
             "path": "ultDmgBonus",
@@ -799,7 +799,7 @@ const SQUAD_SKILLS = {
         "name": "加壓電流",
         "desc": "電壓再調高一格。",
         "effect": "攻擊力 +15%",
-        "icon": "",
+        "icon": "images/ui/skills/amber/boosted-current.png",
         "mods": [
           {
             "path": "dmg",
@@ -812,7 +812,7 @@ const SQUAD_SKILLS = {
         "name": "雷霆萬鈞",
         "desc": "雷擊又重又廣。",
         "effect": "攻擊力 +20%，雷擊範圍 +0.3 格",
-        "icon": "",
+        "icon": "images/ui/skills/amber/mighty-thunder.png",
         "mods": [
           {
             "path": "dmg",
@@ -829,7 +829,7 @@ const SQUAD_SKILLS = {
         "name": "規律作息",
         "desc": "守規矩的人，精神也穩。",
         "effect": "每次攻擊增加的精神負荷 −20%",
-        "icon": "",
+        "icon": "images/ui/skills/amber/regular-routine.png",
         "mods": [
           {
             "path": "taint",
@@ -842,7 +842,7 @@ const SQUAD_SKILLS = {
         "name": "快速充能",
         "desc": "充電的空檔變短。",
         "effect": "攻擊速度 +15%",
-        "icon": "",
+        "icon": "images/ui/skills/amber/rapid-charge.png",
         "mods": [
           {
             "path": "rate",

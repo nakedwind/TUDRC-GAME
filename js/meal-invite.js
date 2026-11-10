@@ -1,8 +1,8 @@
 // ============================================================
-//  邀請隊員、基地的 NPC 一起去餐廳吃飯（基地裡右鍵點人 →「🍽️ 一起去吃飯」）
+//  邀請隊員、基地的 NPC 一起去餐廳吃飯（基地裡靠近對方按空白鍵打開對話框 → 右邊選項「🍽️ 一起去吃飯」）
 //  ・同時最多邀 MEAL_INVITE.max 人（隊員、NPC 合起來算）；再點一次＝取消邀請
-//  ・跟著溫特：溫特站著不動時，在溫特周圍 radiusCells 格內走來走去；溫特一走，大家照邀請的順序沿著溫特走過的路排成一列跟上（換樓層、換地圖也跟著，到了出現在溫特旁邊）
-//  ・剛答應、或溫特站著時在旁邊自由走動過：用自己平常的速度走過去排隊，走到自己排的位置才算加入隊伍，之後才用跟隨溫特的速度
+//  ・跟著溫特：不排隊，一直在溫特周圍 radiusCells 格以內自由走來走去；溫特走開、離超過 radiusCells 格，就挑溫特附近一個點，用自己平常的速度慢慢追過去（不會加速）
+//    換樓層、換地圖也跟著，到了出現在溫特旁邊
 //  ・個人房間（名字有「寢室」「房間」又有角色名字的地圖，宿舍樓走廊、B3-管制寢室這種整層樓不算）：只有房間的主人跟進去，其他人在門外那張地圖等，溫特出來再跟上
 //  ・另外指定不能跟進去的地方：MEAL_INVITE.noEnter（地圖名字 → 誰不能進去），一樣在門外等
 //  ・冷卻：吃完一盤（被邀請去吃、自己去餐廳吃都算）MEAL_INVITE.cooldownMin 分鐘內不能再邀請；用真實時間算，存在瀏覽器（tudrc_meal_invite_cd_v1），重新整理也不會重來
@@ -12,8 +12,8 @@
 //  ・飯後加成只有溫特有：桌上的餐盤是客人的（owner 不是 'player'），吃完不會加（js/meal.js 的 updateMeal）
 //  ・只存在這一趟（沒存進存檔）；離開基地去出勤、溫特先離開餐廳（還在吃的人留下）＝邀請結束，大家回到平常的位置
 // ============================================================
-const MEAL_INVITE = { cooldownMin: 10, noEnter: { '2F溫特辦公室': ['red'] }, max: 4, radiusCells: 5, queueCells: [1.2, 1], wait: [.6, 1.8], after: [8, 14], cancelWander: [4, 8], leaveTimeout: 25, npcSpeed: 65 };   // queueCells：排隊的間隔（第一位離溫特 1.2 格，之後每位再往後 1 格）；npcSpeed＝NPC 平常走路的速度（js/sentry.js 的 updateWanderer）
-const mealInvite = { guests: [], mapId: null, mapName: null, trail: [] };   // trail：溫特走過的路（新的在前面，每 4px 記一點），大家沿著這條路排隊   // guests：[{ id, stage: 'follow'|'eat'|'after', t（逛多久） }]
+const MEAL_INVITE = { cooldownMin: 10, noEnter: { '2F溫特辦公室': ['red'] }, max: 4, radiusCells: 2, wait: [.6, 1.8], after: [8, 14], cancelWander: [4, 8], leaveTimeout: 25, npcSpeed: 65 };   // radiusCells＝跟著溫特時，離溫特幾格以內自由走動；npcSpeed＝NPC 平常走路的速度（js/sentry.js 的 updateWanderer）
+const mealInvite = { guests: [], mapId: null, mapName: null };   // guests：[{ id, stage: 'follow'|'eat'|'after', t（逛多久） }]
 const inviteId = a => a && (a.kind === 'tower' ? a.type : a.id);   // 隊員用 type、NPC 用 id（跟 npcLocation 一樣）
 const inviteName = a => a.kind === 'tower' ? TYPES[a.type].name : ((typeof CHARACTERS !== 'undefined' && CHARACTERS[a.id]) || {}).name || a.id;
 const mealGuestOf = id => mealInvite.guests.find(g => g.id === id) || null;
@@ -32,7 +32,7 @@ const inviteCanEnter = (id, name) => !(MEAL_INVITE.noEnter[name] || []).includes
 function mealInviteMapCheck() {
   if (!MAP || mealInvite.mapId === MAP.id) return;
   const from = mealInvite.mapName;
-  mealInvite.mapId = MAP.id; mealInvite.mapName = MAP.name; mealInvite.trail = [];   // 換了地圖：走過的路重新記
+  mealInvite.mapId = MAP.id; mealInvite.mapName = MAP.name;
   mealInvite.guests = MAP_SAFE && !(typeof practiceOn === 'function' && practiceOn()) ? mealInvite.guests.filter(g => g.stage === 'follow') : [];
   const waiting = [];
   for (const g of mealInvite.guests) {
@@ -62,14 +62,25 @@ function mealInviteAte(a) {   // 吃完一盤（js/meal.js 的 updateMeal 呼叫
   for (const k in mealAteAt) if (!inviteCdLeft(k)) delete mealAteAt[k];   // 過了冷卻的拿掉，存的東西不會越來越多
   try { localStorage.setItem(MEAL_INVITE_CD_KEY, JSON.stringify(mealAteAt)); } catch (_) {}
 }
-// 選單上的按鈕（js/sentry.js 的 openSentryMenu、openNpcMenu）
-function mealInviteButton(a) {
-  if (mealGuest(a)) return '<button data-act="mealInvite">🍽️ 不吃了（取消邀請）</button>';
-  if (!canMealInvite(a)) return '';
-  const left = inviteCdLeft(inviteId(a));
-  if (left) return '<button data-act="mealInvite" style="opacity:.55">🍽️ 剛吃飽（' + Math.ceil(left / 60000) + ' 分鐘後才能再邀）</button>';   // 冷卻中：按了只會跳提示
-  return '<button data-act="mealInvite">🍽️ 一起去吃飯（' + mealInvite.guests.length + '/' + MEAL_INVITE.max + '）</button>';
+// 對話框右邊要不要出現「一起去吃飯」這個選項：在基地裡、可以邀請（或已經邀請了，可以取消）的人才有
+// （js/game.js 的 canTalk 也問這裡：沒有台詞、但可以邀請吃飯的人，靠近一樣能按空白鍵打開對話框）
+const mealInviteOffered = a => !!(a && MAP_SAFE && (mealGuest(a) || canMealInvite(a)));
+// 打開對話框時（js/game.js 的 openDialogue 呼叫）：設定「一起去吃飯」按鈕的字、要不要顯示
+function onDialogueOpenedMealInvite(a) {
+  const b = document.getElementById('dialogueMealInvite'); if (!b) return;
+  const show = mealInviteOffered(a);
+  b.classList.toggle('hidden', !show); b.style.opacity = '';
+  if (!show) return;
+  const left = mealGuest(a) ? 0 : inviteCdLeft(inviteId(a));
+  if (mealGuest(a)) b.textContent = '🍽️ 不吃了（取消邀請）';
+  else if (left) { b.textContent = '🍽️ 剛吃飽（' + Math.ceil(left / 60000) + ' 分鐘後）'; b.style.opacity = '.55'; }   // 冷卻中：按了只會跳提示
+  else b.textContent = '🍽️ 一起去吃飯（' + mealInvite.guests.length + '/' + MEAL_INVITE.max + '）';
 }
+// 按下對話框的「一起去吃飯」：關掉對話框，邀請（或取消邀請）這個人
+document.getElementById('dialogueMealInvite')?.addEventListener('click', () => {
+  const a = dialogueState && dialogueState.actor; closeDialogue(true);
+  if (a) toggleMealInvite(a);
+});
 function toggleMealInvite(a) {
   mealInviteMapCheck();
   const say = (text, col, warn) => { flash(text, a.x, a.y - 30, col, 3, true); systemNotice(inviteName(a) + '：' + text, warn); };
@@ -86,7 +97,7 @@ function toggleMealInvite(a) {
   if (a.sitting) npcStandUp(a);
   if (a.meal && !a.meal.tray && a.meal.stage === 'tray') a.meal = null;   // 正要自己去拿餐盤：改成跟溫特一起（端著菜的照樣吃完再說）
   mealInvite.guests.push({ id: inviteId(a), stage: 'follow' }); a.inviteLinger = 0;   // 取消後還在徘徊的人又被邀：照樣跟
-  a.inviteMapId = MAP.id; a.inviteJoined = false; if (a.kind === 'tower') a.mode = 'free';   // 還沒加入隊伍：先用自己平常的速度走過來
+  a.inviteMapId = MAP.id; if (a.kind === 'tower') a.mode = 'free';
   a.target = null; a.navPath = null; a.seatGoal = null; a.waitT = 0;
   const line = pickDialogueLine(inviteId(a), 'mealInvite'); if (line) a.say = { text: line, life: 3 };   // 對話編輯器的「接受吃飯邀請」
   systemNotice(inviteName(a) + '跟著你去餐廳吃飯（' + mealInvite.guests.length + '/' + MEAL_INVITE.max + '）');
@@ -137,7 +148,7 @@ function placeGuestNearPlayer(a, i) {
     }
   }
   const cell = roomy[i] || spots[Math.min(i, spots.length - 1)]; if (cell) [a.x, a.y] = center(...cell);   // 都沒有空的：照原本最近的格子
-  a.navPath = null; a.navGoal = null; a.target = null; a.inviteJoined = true;   // 跟著換地圖過來的：已經在隊伍裡
+  a.navPath = null; a.navGoal = null; a.target = null;
 }
 const inviteRand = ([a, b]) => a + Math.random() * (b - a);
 // 這個點會不會跟別人（溫特、其他被邀請的人，和他們正要走去的地方）站得太近：上下 1.4 格、左右 0.9 格以內算太近（頭會蓋住別人的臉）
@@ -157,34 +168,7 @@ function inviteWander(a, cx, cy, radius, speed, dt) {
   }
   if (moveSentryWithPath(a, a.target.x, a.target.y, speed, dt) || a.navFailed) { a.target = null; a.navPath = null; a.waitT = inviteRand(MEAL_INVITE.wait); }
 }
-// 排隊把上下的距離算短一點（INVITE_Y）：Q 版角色頭很大，上下只差 1 格的話前面那個人的頭會蓋住後面的臉，看起來像圖層錯了
-// 所以上下排隊時間隔約 1 / INVITE_Y 格，左右走照樣 1 格
-const INVITE_Y = .7;
-const inviteLen = (dx, dy) => Math.hypot(dx, dy * INVITE_Y);
-// 溫特走過的路：離上一點 4px 以上就記一點（瞬間移動、搭電梯這種一下跳很遠的，路重新記）；只留排隊用得到的長度
-function inviteTrail() {
-  const p = G.player, T = mealInvite.trail, last = T[0], d = last ? Math.hypot(p.x - last.x, p.y - last.y) : Infinity;
-  if (d > CELL * 3) { T.length = 0; T.push({ x: p.x, y: p.y }); return; }
-  if (d < 4) return;
-  T.unshift({ x: p.x, y: p.y });
-  const need = (MEAL_INVITE.queueCells[0] + MEAL_INVITE.max * MEAL_INVITE.queueCells[1]) * CELL / INVITE_Y / 4 + 20 | 0; if (T.length > need) T.length = need;
-}
-// 第 i 位排隊的位置：從溫特沿著走過的路往回量 back（上下的距離照 inviteLen 算）
-// 路還不夠長（剛邀請完、剛開始走）：順著最後一段路的方向往後延伸（連一段都沒有＝溫特背後），大家才不會擠在同一點
-const INVITE_BEHIND = { left: [1, 0], right: [-1, 0], front: [0, -1], back: [0, 1] };   // 溫特面向哪邊 → 背後是哪個方向
-function queueSpot(i) {
-  const p = G.player, T = mealInvite.trail, back = (MEAL_INVITE.queueCells[0] + i * MEAL_INVITE.queueCells[1]) * CELL;
-  let x = p.x, y = p.y, left = back, ux = 0, uy = 0;
-  for (const q of T) {
-    const d = inviteLen(q.x - x, q.y - y);
-    if (d >= left) return { x: x + (q.x - x) * left / d, y: y + (q.y - y) * left / d };
-    if (d > 0) { ux = (q.x - x) / d; uy = (q.y - y) / d; }
-    left -= d; x = q.x; y = q.y;
-  }
-  if (!ux && !uy) { const [bx, by] = INVITE_BEHIND[p.dir] || [0, 1]; ux = bx; uy = by / INVITE_Y; }
-  return { x: x + ux * left, y: y + uy * left };
-}
-// 走去排隊的位置：中間沒東西擋就直線平順地走、剛好停在位置上（照格子走的話，每到一格中心那一幀會頓一下、重找路時還會往回退一步，走快的時候看起來抖抖的）；被牆、道具擋住才照格子繞路
+// 追上溫特時走去挑好的點：中間沒東西擋就直線平順地走、剛好停在位置上（照格子走的話，每到一格中心那一幀會頓一下、重找路時還會往回退一步，走快的時候看起來抖抖的）；被牆、道具擋住才照格子繞路
 // 不管別人：跟原本地圖的人一樣可以直接穿過去（不會被推開、也不會繞路）
 function inviteFollow(a, spot, speed, dt) {
   const dx = spot.x - a.x, dy = spot.y - a.y, d = Math.hypot(dx, dy);
@@ -192,6 +176,15 @@ function inviteFollow(a, spot, speed, dt) {
   const step = Math.min(d, speed * dt);
   if (personnelStepAllowed(a.x, a.y, spot.x, spot.y, true)) { a.x += dx / d * step; a.y += dy / d * step; a.navPath = null; a.navGoal = null; a.navFailed = false; return; }
   moveSentryWithPath(a, spot.x, spot.y, speed, dt);
+}
+// 追上溫特要走去哪：在溫特 2 格內挑幾個點，選離自己最近、又不會跟別人擠在一起的（走最短的路追上，不會繞到溫特另一邊）；都挑不到就走向溫特
+function inviteCatchSpot(a, p, R) {
+  let best = null, bd = Infinity;
+  for (let k = 0; k < 6; k++) {
+    const t = sampleWanderTarget(p.x, p.y, Math.max(10, R * .8 - 30)); if (!t || inviteCrowded(a, t.x, t.y)) continue;
+    const d = Math.hypot(t.x - a.x, t.y - a.y); if (d < bd) { best = t; bd = d; }
+  }
+  return best || { x: p.x, y: p.y };
 }
 // 每幀（js/sentry.js 的 updateSentry、updateWanderer 最前面問這裡）：回傳 true＝這幀由這裡控制
 function mealInviteStep(a, dt) {
@@ -222,21 +215,18 @@ function mealInviteStep(a, dt) {
     }
     if (menuSentry === a) { a.target = null; return true; }   // 選單開著：先站好
     const far = Math.hypot(p.x - a.x, p.y - a.y), R = MEAL_INVITE.radiusCells * CELL;
-    inviteTrail();
-    const seen = a.inviteSeenP; a.invitePWalk = seen && seen.x === p.x && seen.y === p.y ? (a.invitePWalk || 0) - dt : .25; a.inviteSeenP = { x: p.x, y: p.y };   // 溫特真的有在移動（0.25 秒內位置有變）：按著方向鍵頂著牆不算在走，不然大家會一直排隊、疊在一起站著
-    if ((p.moving && a.invitePWalk > 0) || far > R) {   // 溫特在走（或離太遠）：照邀請順序排隊跟上
-      const spot = queueSpot(mealInvite.guests.indexOf(g)), behind = Math.hypot(spot.x - a.x, spot.y - a.y);
-      a.target = null; a.waitT = .3 + Math.random() * .6;   // 溫特停下來後，先站一下才開始走動
-      if (behind < CELL * .8) a.inviteJoined = true;   // 走到自己排的位置＝加入隊伍
-      const ps = PLAYER.speed * (typeof equipSpeedMul === 'function' ? equipSpeedMul() : 1);   // 溫特走很快（平常走路的 3 倍左右）：跟的時候用溫特的速度，落後太多再快一點追上
-      inviteFollow(a, spot, a.inviteJoined ? Math.max(speed, ps * Math.min(2, 1.02 + behind / CELL * .3)) : speed, dt);   // 加入隊伍後：落後越多走越快（最多 2 倍）；還沒加入：自己平常的速度
-      a.inviteStuck = a.navFailed && behind > CELL * 2 ? (a.inviteStuck || 0) + dt : 0;   // 找不到路走到溫特那裡（卡在被隔開的角落）
+    if (a.target && Math.hypot(a.target.x - p.x, a.target.y - p.y) > R) { a.target = null; a.navPath = null; }   // 溫特走開了：原本要去的點離溫特太遠，換一個
+    if (far > R) {   // 離溫特超過 2 格：挑溫特附近一個點追過去（不排隊，每個人各自挑）
+      a.waitT = 0;
+      if (!a.target) a.target = inviteCatchSpot(a, p, R);
+      inviteFollow(a, a.target, speed, dt);   // 用自己平常走路的速度慢慢追（不會加速）：溫特走得快就會落後，溫特停下來後才慢慢走回 2 格以內
+      if (Math.hypot(a.target.x - a.x, a.target.y - a.y) < 2) { a.target = null; a.navPath = null; a.waitT = inviteRand(MEAL_INVITE.wait); }
+      if (a.navFailed && a.target) { a.target = null; a.navPath = null; }   // 走不到挑好的點：下一幀換一個點
+      a.inviteStuck = a.navFailed ? (a.inviteStuck || 0) + dt : 0;   // 一直找不到路走到溫特那裡（卡在被隔開的角落）
       if (a.inviteStuck > 2) { placeGuestNearPlayer(a, mealInvite.guests.indexOf(g)); a.inviteStuck = 0; }   // 卡超過 2 秒：直接到溫特身邊，不會一直丟在原地
       return true;
     }
-    a.inviteJoined = false;   // 溫特站著、在旁邊自由走動＝暫時離開隊伍：溫特再走時，用自己平常的速度走回排隊的位置
-    if (a.target && Math.hypot(a.target.x - p.x, a.target.y - p.y) > R) { a.target = null; a.navPath = null; }   // 溫特站著：在溫特周圍 R 以內走來走去
-    inviteWander(a, p.x, p.y, R - 30, speed, dt);
+    inviteWander(a, p.x, p.y, Math.max(10, R - 30), speed, dt);   // 在溫特 2 格以內：用平常的速度自由走來走去
     return true;
   }
   if (g.stage === 'eat') {   // 吃飯：拿餐盤 → 打飯 → 坐下吃 → 回收（mealStep 回傳 false＝收完了）

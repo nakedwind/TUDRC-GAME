@@ -136,10 +136,6 @@
 .sq-slot.gear.s0 { left: 38px; top: 42px; } .sq-slot.gear.s1 { left: 38px; top: 120px; } .sq-slot.gear.s2 { left: 38px; top: 198px; }
 .sq-slot-name { position: absolute; font-size: 11px; color: #cfd8e2; text-align: center; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sq-slot-name.gear { left: 0; width: 124px; } .sq-slot-name.gear.s0 { top: 94px; } .sq-slot-name.gear.s1 { top: 172px; } .sq-slot-name.gear.s2 { top: 250px; }
-/* 新版裝備（data/equipment.js 的 GEAR_SYSTEM＝2）：隊員有 4 格（頭部、上身、下身、隨身物品），排得密一點 */
-.sq-slot.gear.s3 { left: 38px; top: 246px; } .sq-slot-name.gear.s3 { top: 296px; }
-.sq-gear4 .sq-slot.gear.s0 { top: 36px; } .sq-gear4 .sq-slot.gear.s1 { top: 100px; } .sq-gear4 .sq-slot.gear.s2 { top: 164px; } .sq-gear4 .sq-slot.gear.s3 { top: 228px; }
-.sq-gear4 .sq-slot-name.gear.s0 { top: 86px; } .sq-gear4 .sq-slot-name.gear.s1 { top: 150px; } .sq-gear4 .sq-slot-name.gear.s2 { top: 214px; } .sq-gear4 .sq-slot-name.gear.s3 { top: 278px; }
 .sq-preview { position: absolute; left: 196px; top: 40px; width: 152px; height: 216px; display: flex; align-items: flex-end; justify-content: center; border: 1px solid rgba(255,255,255,.14); border-radius: 10px; background: radial-gradient(80% 60% at 50% 80%, rgba(120,170,230,.2), transparent 70%), #151b23; }
 .sq-preview canvas { width: 128px; image-rendering: pixelated; margin-bottom: 12px; }
 .sq-slot.look { width: 42px; height: 42px; } .sq-slot.look img { width: 32px; }
@@ -196,3 +192,12 @@
 .sq-tree.dog .sq-node[data-skill-pick="a-1"] { left: 170px; top: 44px; } .sq-tree.dog .sq-node[data-skill-pick="b-1"] { left: 170px; top: 192px; }
 .sq-tree.dog .sq-node[data-skill-pick="core-1"] { left: 270px; top: 118px; }
 .sq-tree.dog .sq-node[data-skill-pick="ult"] { left: 372px; top: 108px; }
+
+/* Smooth 64px Theonie ability artwork at the existing skill-node sizes. */
+.sq-node img[src^="images/ui/skills/theonie/"], .sq-info-icon img[src^="images/ui/skills/theonie/"] { image-rendering: auto; object-fit: contain; }
+
+/* Smooth 64px Amber ability artwork at the existing skill-node sizes. */
+.sq-node img[src^="images/ui/skills/amber/"], .sq-info-icon img[src^="images/ui/skills/amber/"] { image-rendering: auto; object-fit: contain; }
+
+/* Smooth 64px Red ability artwork at the existing skill-node sizes. */
+.sq-node img[src^="images/ui/skills/red/"], .sq-info-icon img[src^="images/ui/skills/red/"] { image-rendering: auto; object-fit: contain; }

@@ -126,7 +126,7 @@ function renderSquadPage(body) {
     else html += squadSkillHtml(actor, safe);
   }
   const keep = body.querySelector('.sq-roster-list')?.scrollTop || 0;
-  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas' + (st.solo ? ' sq-solo' : '') + (sqV2() ? ' sq-v2' : '') + (SQUAD_GEAR_SLOTS > 3 ? ' sq-gear4' : '') + '" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
+  body.innerHTML = '<div class="sq-fit"><div class="sq-canvas' + (st.solo ? ' sq-solo' : '') + (sqV2() ? ' sq-v2' : '') + '" data-page="' + st.page + '">' + html + '<div class="sq-tip" hidden></div></div></div>';
   const list = body.querySelector('.sq-roster-list'); if (list) list.scrollTop = keep;
   fitSquadCanvas(body); afterSquadRender(body);
 }
@@ -229,7 +229,7 @@ function squadGearBarHtml(type) {
     squadGearOf(type).map((id, i) => {
       const g = id && squadGearById(id);
       return '<span class="sq-gearbar-slot' + (g ? ' filled' : '') + '" data-sq="gearBarSlot:' + i + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="' + squadGearSlotName(i) + '：空"') + '>' +
-        (g ? '<img data-sq="gearBarImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' : '<i>' + (SQUAD_GEAR_SLOTS > 3 ? squadGearSlotName(i) : i + 1) + '</i>') + '</span>';   // 空格：新版寫部位（頭部、上身…），舊版寫 1～3
+        (g ? '<img data-sq="gearBarImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' : '<i>' + (typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2 ? squadGearSlotName(i) : i + 1) + '</i>') + '</span>';   // 空格：新版寫部位（頭部、上身…），舊版寫 1～3
     }).join('') + '</div><button type="button" class="sq-gearbar-btn" data-sq-armor data-sq="btn.gearBar">' + sqT('btn.gearBar', '更換裝備') + '</button></section>';
 }
 // 「更換裝備」：打開防具視窗、選好這位隊員（js/backpack.js 的 openArmorPanelFor）；關掉後回到這一頁

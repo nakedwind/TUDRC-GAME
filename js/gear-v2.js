@@ -5,8 +5,9 @@
    ・實體物品：開發工坊按「製作一件」再做，放進背包（supplyInventory，物品 id＝裝備 id，分類是「防具」，沒有格數上限）。
      一件只能給一個人穿：穿上＝從背包拿走一件，卸下＝放回背包。
    ・溫特：背包左邊的部隊長裝備（頭部、上身、下身 ×2、隨身物品 ×2），在裝備箱旁邊換。
-   ・隊員：頭部、上身、下身、隨身物品各 1 格（T-Pad「Y102隊員」→ 更換裝備，或裝備箱的防具視窗選隊員）。
-     隊員身上的裝備存在 localStorage 的 tudrc_squad_gear_v2：{ equip: { 隊員: [頭部, 上身, 下身, 隨身物品] } }
+   ・隊員：頭部、上身、隨身物品各 1 格（鞋子這類下身裝備穿在「隨身物品」格；T-Pad「Y102隊員」→ 更換裝備，或裝備箱的防具視窗選隊員）。
+     隊員身上的裝備存在 localStorage 的 tudrc_squad_gear_v2：{ equip: { 隊員: [頭部, 上身, 隨身物品] } }
+     （11/09 第一版是 4 格 [頭部, 上身, 下身, 隨身物品]，讀到舊的會自動改成 3 格，放不下的放回背包）
    ・誰能穿：每件的 who（'winter' 部隊長專用、'all' 全隊可穿、'squad' 隊員專用）。
    ・每種研發好的裝備至少會有 1 件（全部分解掉也會留 1 件），所以不會「有等級卻沒東西穿」。
    ・舊版存檔：第一次用新版時自動轉換一次（溫特已經開發的裝備＝研發等級，背包裡放 1 件；舊的隊員裝備換成新版的同一件）。
@@ -16,8 +17,9 @@
 const GEAR_V2 = typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2;
 const GEAR_V2_SQUAD_STORE = 'tudrc_squad_gear_v2';
 const GEAR_V2_MIGRATED = 'tudrc_gear_v2_migrated';   // 舊存檔轉換過了沒（單獨一格：切回舊版再切回來，也不會再轉一次、東西不會變兩倍）
-const GEAR_V2_SLOT_KINDS = ['head', 'body', 'legs', 'acc'];   // 隊員的 4 格各放哪一種
-const GEAR_V2_SLOT_NAMES = { head: '頭部', body: '上身', legs: '下身', acc: '隨身物品' };
+// 隊員的 3 格：name 格子名稱、kinds 這一格能放哪些部位的裝備（data/equipment.js 的 kind）。鞋子（legs）也放隨身物品格
+const GEAR_V2_SQUAD_SLOTS = [{ name: '頭部', kinds: ['head'] }, { name: '上身', kinds: ['body'] }, { name: '隨身物品', kinds: ['acc', 'legs'] }];
+const gearSquadSlotOfKind = kind => GEAR_V2_SQUAD_SLOTS.findIndex(s => s.kinds.includes(kind));   // 這個部位放隊員的第幾格（-1＝沒有）
 
 // ---- 小工具（舊版也定義，但只有新版會用到）----
 const gearWho = d => (d && ['winter', 'all', 'squad'].includes(d.who) ? d.who : 'winter');   // 沒寫＝部隊長專用
@@ -51,20 +53,28 @@ if (GEAR_V2) {
   };
   syncSquadGearItems();
 
-  // ---- 隊員身上的裝備（新版：4 格分部位）----
+  // ---- 隊員身上的裝備（新版：3 格分部位）----
   squadGearState = { equip: {} };
   try { const s = JSON.parse(localStorage.getItem(GEAR_V2_SQUAD_STORE) || 'null'); if (s && s.equip) squadGearState = s; } catch (_) {}
+  // 第一版的 4 格存檔 [頭部, 上身, 下身, 隨身物品] → 3 格：隨身物品格優先留原本的隨身物品，沒有才放鞋子；放不下的等讀完背包再放回去
+  const gearV2Returns = [];
+  for (const [type, list] of Object.entries(squadGearState.equip)) {
+    if (!Array.isArray(list) || list.length !== 4) continue;
+    const [h, b, l, a] = list;
+    squadGearState.equip[type] = [h || null, b || null, a || l || null];
+    if (a && l) gearV2Returns.push(l);
+  }
   saveSquadGear = function () { try { localStorage.setItem(GEAR_V2_SQUAD_STORE, JSON.stringify(squadGearState)); } catch (_) {} };
   squadGearList = () => EQUIPMENT.filter(gearSquadCan);
   squadGearById = id => { const d = typeof equipDef === 'function' ? equipDef(id) : null; return gearSquadCan(d) ? d : null; };
   squadGearEffect = g => gearEffectText(g);
   squadGearHave = id => gearTotal(id);
-  squadGearSlotName = i => GEAR_V2_SLOT_NAMES[GEAR_V2_SLOT_KINDS[i]] || '裝備 ' + (i + 1);
-  squadGearFits = (id, slot) => { const d = squadGearById(id); return !!d && d.kind === GEAR_V2_SLOT_KINDS[slot]; };
-  squadGearSlotFor = (type, id, slot) => { const d = squadGearById(id); return d ? GEAR_V2_SLOT_KINDS.indexOf(d.kind) : -1; };   // 新版：照部位，一定放那一格
+  squadGearSlotName = i => (GEAR_V2_SQUAD_SLOTS[i] || {}).name || '裝備 ' + (i + 1);
+  squadGearFits = (id, slot) => { const d = squadGearById(id); return !!d && !!GEAR_V2_SQUAD_SLOTS[slot] && GEAR_V2_SQUAD_SLOTS[slot].kinds.includes(d.kind); };
+  squadGearSlotFor = (type, id, slot) => { const d = squadGearById(id); return d ? gearSquadSlotOfKind(d.kind) : -1; };   // 新版：照部位，一定放那一格
   squadGearOf = function (type) {
     const list = squadGearState.equip[type] || [];
-    return GEAR_V2_SLOT_KINDS.map((k, i) => { const d = list[i] && squadGearById(list[i]); return d && d.kind === k ? list[i] : null; });
+    return GEAR_V2_SQUAD_SLOTS.map((s, i) => { const d = list[i] && squadGearById(list[i]); return d && s.kinds.includes(d.kind) ? list[i] : null; });
   };
   // 隊員穿著的裝備 → 隊員數值的加成（照研發等級；換算表在 data/equipment.js 的 GEAR_SQUAD_MODS）
   squadGearMods = function (type) {
@@ -85,7 +95,7 @@ if (GEAR_V2) {
     const d = squadGearById(id);
     if (!d) { systemNotice('這件裝備只有部隊長能穿', true); return false; }
     if (gearBagCount(id) < 1) return false;
-    slot = GEAR_V2_SLOT_KINDS.indexOf(d.kind);
+    slot = gearSquadSlotOfKind(d.kind); if (slot < 0) return false;
     const list = squadGearOf(type), old = list[slot];
     gearBagAdd(id, -1); if (old) gearBagAdd(old, 1);
     list[slot] = id; squadGearState.equip[type] = list;
@@ -225,6 +235,7 @@ if (GEAR_V2) {
 
   // ---- 讀檔之後：舊存檔轉換一次、補齊每種至少 1 件、重新算隊員數值 ----
   window.addEventListener('DOMContentLoaded', () => {   // js/save.js 的 loadGame 比這裡早登記，會先跑
+    if (gearV2Returns.length) { for (const id of gearV2Returns) gearBagAdd(id, 1); saveSquadGear(); if (typeof saveGame === 'function') saveGame(); }   // 4 格改 3 格放不下的
     gearV2Migrate();
     gearEnsureCopies();
     if (typeof applySkills === 'function') applySkills();
@@ -257,7 +268,7 @@ function gearV2Migrate() {
   for (const [type, list] of Object.entries(v1)) for (const old of Array.isArray(list) ? list : []) {
     const id = GEAR_V1_SQUAD_MAP[old], d = id && equipDef(id); if (!d) continue;
     research(id);
-    const slot = GEAR_V2_SLOT_KINDS.indexOf(d.kind), cur = squadGearOf(type);
+    const slot = gearSquadSlotOfKind(d.kind), cur = squadGearOf(type);
     if (slot >= 0 && !cur[slot]) { cur[slot] = id; squadGearState.equip[type] = cur; } else gearBagAdd(id, 1);
   }
   // 3. 溫特已經開發的裝備：沒穿著的放 1 件進背包（gearEnsureCopies 會做）

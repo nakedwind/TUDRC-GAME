@@ -993,8 +993,7 @@ function openSentryMenu(t, silent) {
     '<button data-act="goto">🎯 指派位置巡邏</button>' +
     (MAP_SAFE ? '' : '<button data-act="escort">🛡️ 跟隨護衛部隊長' + (t.mode === 'escort' ? '（護衛中）' : '') + '</button>') +
     (MAP_SAFE && typeof canTalk === 'function' && canTalk(t) ? '<button data-act="talk">💬 對話</button>' : '') +   // 基地裡、有「找他說話（基地）」的台詞才有
-    (typeof canSendToHospital === 'function' && canSendToHospital(t) ? '<button data-act="hospital">🏥 去醫院休息</button>' : '') +   // 基地裡、HP 沒滿（js/vitals.js）
-    (typeof mealInviteButton === 'function' ? mealInviteButton(t) : '');   // 基地裡：邀請一起去餐廳吃飯（js/meal-invite.js）   // 基地裡、HP 沒滿（js/vitals.js）
+    (typeof canSendToHospital === 'function' && canSendToHospital(t) ? '<button data-act="hospital">🏥 去醫院休息</button>' : '');   // 基地裡、HP 沒滿（js/vitals.js）   // 邀請吃飯改在對話框的選項（js/meal-invite.js）
   sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
   // 選單位置：跟著哨兵在畫面上的位置（換算成 CSS 座標）
   const rect = cv.getBoundingClientRect();
@@ -1002,20 +1001,6 @@ function openSentryMenu(t, silent) {
   sentryMenu.style.left = Math.round(Math.min(sx + 22, rect.width - 170)) + 'px';
   sentryMenu.style.top = Math.round(Math.max(6, sy - 30)) + 'px';
   sentryMenu.classList.remove('hidden');
-}
-// 基地的 NPC（右鍵點）：只有「對話」「一起去吃飯」；兩個都沒有就不開，回傳 false
-function openNpcMenu(npc) {
-  const html = (typeof canTalk === 'function' && canTalk(npc) ? '<button data-act="talk">💬 對話</button>' : '') + (typeof mealInviteButton === 'function' ? mealInviteButton(npc) : '');
-  if (!html) return false;
-  sfx('menu'); menuSentry = npc; assigning = null;
-  sentryMenu.innerHTML = '<div class="sm-title">' + inviteName(npc) + '</div>' + html;
-  sentryMenu.querySelectorAll('button').forEach(b => b.addEventListener('click', () => sentryMenuAct(b.dataset.act)));
-  const rect = cv.getBoundingClientRect();   // 選單位置：跟著 NPC 在畫面上的位置（跟 openSentryMenu 一樣）
-  const sx = (npc.x - cam.x) * VIEW_SCALE * (rect.width / VIEW_W), sy = (npc.y - cam.y) * VIEW_SCALE * (rect.height / VIEW_H);
-  sentryMenu.style.left = Math.round(Math.min(sx + 22, rect.width - 170)) + 'px';
-  sentryMenu.style.top = Math.round(Math.max(6, sy - 30)) + 'px';
-  sentryMenu.classList.remove('hidden');
-  return true;
 }
 function closeSentryMenu() { menuSentry = null; sentryMenu.classList.add('hidden'); }
 // 跟隨護衛：持續跟在部隊長身邊，看到附近的怪會出手（哨兵選單與左上角頭像選單共用）
@@ -1032,7 +1017,6 @@ function sentryMenuAct(act) {
   else if (act === 'talk') { openDialogue(t); return; }
   else if (act === 'hospital') { sfx('button'); sendToHospital(t); }
   else if (act === 'escort') { sfx('button'); setSentryEscort(t); }
-  else if (act === 'mealInvite') toggleMealInvite(t);   // 邀請／取消邀請一起去吃飯（js/meal-invite.js）
   closeSentryMenu();
 }
 window.addEventListener('keydown', e => {

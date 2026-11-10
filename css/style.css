@@ -1750,6 +1750,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 #dialogueHospital:hover { border-color: #ff9a9a; background: rgba(140,50,55,.5); }
 #dialogueAshSoothe { padding: 6px 11px; border: 1px solid rgba(176,196,214,.5); border-radius: 8px; background: rgba(60,75,95,.4); color: #e4edf7; cursor: pointer; font-size: 14px; }   /* 疏導室的亞許：請亞許疏導（js/vitals.js） */
 #dialogueAshSoothe:hover { border-color: #c8d8ea; background: rgba(80,98,120,.55); }
+#dialogueMealInvite { padding: 6px 11px; border: 1px solid rgba(255,196,120,.5); border-radius: 8px; background: rgba(110,75,30,.38); color: #ffe8c8; cursor: pointer; font-size: 14px; }   /* 基地裡：一起去吃飯（js/meal-invite.js） */
+#dialogueMealInvite:hover { border-color: #ffc478; background: rgba(140,95,40,.55); }
 /* ===== 諾亞的開發工坊 ===== */
 #workshop { position: absolute; inset: 10px; z-index: 30; display: grid; place-items: center; padding: 16px; border-radius: 12px; background: rgba(4,7,11,.3); backdrop-filter: blur(8px) saturate(1.1); -webkit-backdrop-filter: blur(8px) saturate(1.1); font-family: "Microsoft JhengHei", sans-serif; }
 #workshop.hidden { display: none; }

@@ -40,8 +40,8 @@ const CHAIRS_DEFAULT = {
       ]
     ],
     "seat": {
-      "x": 10,
-      "y": 25,
+      "x": 16,
+      "y": 42,
       "dir": "left"
     }
   },
@@ -679,7 +679,7 @@ const CHAIRS_DEFAULT = {
     ],
     "seat": {
       "x": 20,
-      "y": 45,
+      "y": 36,
       "dir": "front",
       "rotation": 0
     }
@@ -744,6 +744,286 @@ const CHAIRS_DEFAULT = {
     ],
     "seat": {
       "x": 37,
+      "y": 22,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_poolcore_camp_bed_fail": {
+    "enabled": true,
+    "depth": 72,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 45,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_poolcore_camp_bed_fail02": {
+    "enabled": true,
+    "depth": 72,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 40,
+      "y": 45,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_mvmum9xe": {
+    "enabled": false,
+    "depth": 72,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 20,
+      "y": 45,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_mvmums35": {
+    "enabled": false,
+    "depth": 72,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 40,
+      "y": 45,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_prop_furniture_173": {
+    "enabled": true,
+    "depth": 32,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ]
+    ],
+    "seat": {
+      "x": 40,
+      "y": 22,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_prop_furniture_422": {
+    "enabled": true,
+    "depth": 32,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        1,
+        0
+      ]
+    ],
+    "seat": {
+      "x": 40,
+      "y": 22,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_delin_bg_lobby_chair": {
+    "enabled": true,
+    "depth": 112,
+    "solid": [
+      [
+        0,
+        2
+      ]
+    ],
+    "seat": {
+      "x": 19,
+      "y": 71,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_delin_bg_room_bed": {
+    "enabled": true,
+    "depth": 112,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ]
+    ],
+    "seat": {
+      "x": 60,
+      "y": 74,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_delin_bg_room_bed02": {
+    "enabled": false,
+    "depth": 112,
+    "solid": [
+      [
+        0,
+        0
+      ],
+      [
+        0,
+        1
+      ],
+      [
+        0,
+        2
+      ],
+      [
+        1,
+        0
+      ],
+      [
+        1,
+        1
+      ],
+      [
+        1,
+        2
+      ],
+      [
+        2,
+        0
+      ],
+      [
+        2,
+        1
+      ],
+      [
+        2,
+        2
+      ]
+    ],
+    "seat": {
+      "x": 61,
+      "y": 44,
+      "dir": "front",
+      "rotation": 0
+    }
+  },
+  "tile_delin_bg_room_dhair01": {
+    "enabled": true,
+    "depth": 76,
+    "solid": [
+      [
+        0,
+        1
+      ]
+    ],
+    "seat": {
+      "x": 19,
+      "y": 25,
+      "dir": "back",
+      "rotation": 0
+    }
+  },
+  "tile_delin_bg_room_dhair02": {
+    "enabled": false,
+    "depth": 32,
+    "solid": [
+      [
+        0,
+        0
+      ]
+    ],
+    "seat": {
+      "x": 20,
       "y": 22,
       "dir": "front",
       "rotation": 0
