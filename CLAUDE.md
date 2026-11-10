@@ -24,5 +24,8 @@
 ## 其他
 - 改了 js 或 css 之後，要更新 HTML 裡那個檔案的 `?v=` 版本號（每一個有載入它的 HTML 都要改），不然瀏覽器會繼續用舊檔。
 - 不要自己 commit 或 push，兩個人都用 Fork 自己 commit。
+  - **nakedwind 例外**（這台電腦的 `git config user.name` 是 nakedwind）：nakedwind 說「推」時，不用再問、不用提醒上面這條，
+    直接 commit 目前所有變更 → 拉遠端（`git pull --no-rebase`）合併 → 有衝突自己解好（版本號衝突就換新的版本號）→ push。
+    沒說「推」就不要自己 commit 或 push。推完回報推了哪些東西，並說明哪些是別人（例如 Zk）的變更。
 - 素材要改資料夾或搬位置時，先 commit，再用 `素材搬家.bat` 更新路徑（說明在 `tools/asset-move.py` 開頭）。
 - 在預覽裡測試時要把遊戲靜音（`Howler.mute(true)`）。
