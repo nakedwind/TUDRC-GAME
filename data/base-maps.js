@@ -2723,7 +2723,8 @@ const BASE_MAPS = [
       "7,21",
       "8,19",
       "8,14",
-      "8,15"
+      "8,15",
+      "12,20"
     ],
     "breakable": [],
     "camp": [
@@ -12639,14 +12640,6 @@ const BASE_MAPS = [
         "oy": 0
       },
       {
-        "id": "tile_mufv6z24",
-        "c": 3,
-        "r": 9,
-        "layer": "object2",
-        "ox": -24,
-        "oy": 0
-      },
-      {
         "id": "tile_mufv9ytk",
         "c": 7,
         "r": 2,
@@ -12769,6 +12762,13 @@ const BASE_MAPS = [
         "r": 8,
         "layer": "top",
         "ox": 20
+      },
+      {
+        "id": "tile_mufv6z24",
+        "c": 2,
+        "r": 9,
+        "layer": "object",
+        "ox": 30
       }
     ],
     "solid": [
