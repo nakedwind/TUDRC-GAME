@@ -42,7 +42,7 @@ const sqSpriteOf = spec => typeof memberPortraitPath === 'function' ? memberPort
 
 // ---- 編輯器清單用：每個名字是什麼、屬於哪一組、是不是圖片 ----
 const SQ_PARTS = {
-  'panel.roster': ['面板區域', '左側隊員列'], 'panel.profile': ['面板區域', '角色資料'], 'panel.tree': ['面板區域', '技能樹'],
+  'panel.roster': ['面板區域', '左側隊員列'], 'box.rosterOn': ['面板區域', '隊員列：「可出勤」區塊'], 'text.rosterOn': ['面板區域', '「可出勤」標題'], 'box.rosterOff': ['面板區域', '隊員列：「不可出勤」區塊'], 'text.rosterOff': ['面板區域', '「不可出勤」標題'], 'panel.profile': ['面板區域', '角色資料'], 'panel.tree': ['面板區域', '技能樹'],
   'panel.skillInfo': ['面板區域', '技能說明卡（點技能跳出來）'], 'panel.gearBar': ['面板區域', '隊員裝備列（技能樹下面）'], 'panel.gear': ['面板區域', '裝備欄（裝備頁）'], 'panel.gearInfo': ['面板區域', '裝備說明（裝備頁）'], 'panel.avail': ['面板區域', '可用裝備格子區（裝備頁）'],
   'img.arrow': ['角色資料', '◀ 目前選的隊員'], 'btn.more': ['角色資料', '「深入了解」'], 'box.portrait': ['角色資料', '立繪的框'], 'img.portrait': ['角色資料', '角色立繪'],
   'box.job': ['角色資料', '嚮導／哨兵圖示的框'], 'img.job': ['角色資料', '嚮導／哨兵圖示'], 'text.name': ['角色資料', '角色名'], 'text.status': ['角色資料', '「已編入」「待命」'],
@@ -97,11 +97,13 @@ function squadPart(key) {
 }
 
 // ---- 畫面 ----
+// 可以出勤的隊員（data/balance.js 的 ROSTER，球球也算）；其他是不可出勤的人員，名單裡放在下面的「不可出勤」區塊
+const sqCanSortie = m => typeof ROSTER !== 'undefined' ? ROSTER.includes(m.type) : !m.noncombat;
 function squadMemberList() {
   const prio = ['red', 'avaren', 'theonie', 'amber'];
   return (typeof squadMembers === 'function' ? squadMembers() : []).sort((a, b) => {
     const ar = prio.indexOf(a.type), br = prio.indexOf(b.type);
-    return (ar < 0 ? prio.length : ar) - (br < 0 ? prio.length : br);
+    return Number(!sqCanSortie(a)) - Number(!sqCanSortie(b)) || (ar < 0 ? prio.length : ar) - (br < 0 ? prio.length : br);   // 可出勤的排前面
   });
 }
 function renderSquadPage(body) {
@@ -111,11 +113,16 @@ function renderSquadPage(body) {
   if (!members.some(m => m.type === st.member)) st.member = members[0] ? members[0].type : null;
   const actor = members.find(m => m.type === st.member) || null;
   body.classList.add('tpad-squad-app', 'sq-app');
-  const roster = '<aside class="sq-roster" data-sq="panel.roster"><div class="sq-roster-list">' + members.map(m => {
+  // 名單分成上下兩個區塊：上面「可出勤」、下面「不可出勤」，各有自己的標題（沒有人的區塊不顯示）
+  const memberBtn = m => {
     const spec = TYPES[m.type] || m.profile || {}, on = m.type === st.member;
     return '<button type="button" class="sq-member' + (on ? ' on' : '') + '" data-squad-member="' + m.type + '" data-sq="roster:' + m.type + '" title="' + sqEsc(spec.name || m.type) + '">' +
       '<img data-sq="rosterImg:' + m.type + '" src="' + sqSpriteOf(spec) + '" alt=""></button>';
-  }).join('') + '</div></aside><span class="sq-arrow" data-sq="img.arrow">◀</span>';
+  };
+  const group = (id, label, list) => list.length ? '<div class="sq-roster-group ' + id + '" data-sq="box.' + id + '"><b class="sq-roster-head" data-sq="text.' + id + '">' + sqT('text.' + id, label) + '</b>' + list.map(memberBtn).join('') + '</div>' : '';
+  const roster = '<aside class="sq-roster" data-sq="panel.roster"><div class="sq-roster-list">' +
+    group('rosterOn', '可出勤', members.filter(sqCanSortie)) + group('rosterOff', '不可出勤', members.filter(m => !sqCanSortie(m))) +
+    '</div></aside><span class="sq-arrow" data-sq="img.arrow">◀</span>';
   let html = roster;
   if (!actor) html += '<section class="sq-profile" data-sq="panel.profile"><p class="sq-empty">本次任務沒有攜帶隊員。</p></section>';
   else {
@@ -326,7 +333,7 @@ function placeSquadArrow(body) {
   const arrow = body.querySelector('.sq-arrow'), btn = body.querySelector('.sq-member.on'), canvas = body.querySelector('.sq-canvas');
   if (!arrow || !canvas) return;
   if (!btn) { arrow.style.visibility = 'hidden'; return; }
-  const s = sqScale(canvas), cr = canvas.getBoundingClientRect(), br = btn.getBoundingClientRect(), list = btn.parentElement.getBoundingClientRect();
+  const s = sqScale(canvas), cr = canvas.getBoundingClientRect(), br = btn.getBoundingClientRect(), list = (btn.closest('.sq-roster-list') || btn.parentElement).getBoundingClientRect();   // 名單分成兩個區塊後，捲動的是外面那層
   const visible = br.bottom > list.top && br.top < list.bottom;
   arrow.style.visibility = visible ? '' : 'hidden';
   arrow.style.top = ((br.top + br.height / 2 - cr.top) / s - arrow.offsetHeight / 2) + 'px';

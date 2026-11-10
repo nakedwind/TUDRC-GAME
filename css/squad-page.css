@@ -14,6 +14,14 @@
 .sq-roster { left: 8px; top: 8px; width: 66px; height: 504px; padding: 6px 0; }
 .sq-roster-list { height: 100%; overflow-y: auto; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 2px 0; scrollbar-width: none; }
 .sq-roster-list::-webkit-scrollbar { display: none; }
+/* 隊員名單分成兩個區塊：上面「可出勤」（金色）、下面「不可出勤」（灰色），各有標題（js/squad-page.js 的 sqCanSortie） */
+.sq-roster-group { flex: none; width: 58px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 0 7px; border-radius: 9px; overflow: hidden; }
+.sq-roster-group.rosterOn { border: 1px solid rgba(247,216,134,.45); background: rgba(230,176,74,.08); }
+.sq-roster-group.rosterOff { margin-top: 6px; border: 1px solid rgba(160,175,195,.35); background: rgba(120,135,155,.08); }
+.sq-roster-head { width: 100%; padding: 4px 0 3px; font-size: 10px; font-weight: 800; line-height: 1.15; text-align: center; white-space: nowrap; text-shadow: 0 1px 2px #000; }
+.sq-roster-group.rosterOn .sq-roster-head { color: #3b2304; text-shadow: none; background: linear-gradient(180deg, #f7d886, #e6b04a); }
+.sq-roster-group.rosterOff .sq-roster-head { color: #dfe6ee; background: linear-gradient(180deg, #5d6878, #434c59); }
+.sq-roster-group.rosterOff .sq-member img { filter: saturate(.75); }
 .sq-member { position: relative; flex: none; width: 52px; height: 52px; padding: 0; overflow: hidden; border: 2px solid rgba(255,255,255,.14); border-radius: 10px; background: #1b222c; cursor: pointer; }
 .sq-member img { position: absolute; left: 50%; top: -4px; width: 104px; transform: translateX(-50%); image-rendering: pixelated; }   /* 置中用 transform：在編輯器改大小也不會跑掉 */
 .sq-member:hover { border-color: rgba(255,214,120,.55); }

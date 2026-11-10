@@ -29,8 +29,24 @@ const PCD_APPS = [
   { id: 'stats', name: '遊戲紀錄', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/game-records.png" srcset="images/ui/desktop-icons/96/game-records.png 2x" alt="" draggable="false">', title: '遊戲紀錄' },
   { id: 'bestiary', name: '怪物圖鑑', icon: '<img class="pcd-app-img" src="images/ui/desktop-icons/48/monster-book.png" srcset="images/ui/desktop-icons/96/monster-book.png 2x" alt="" draggable="false">' },
 ];
-// 列不出資料夾內容時（例如放到網路上的版本）用這份清單；在本機用 editor-server 開的話會自動讀 music/基地音樂/ 裡實際有的檔案
-const PCD_TRACK_FALLBACK = ['fluffy -cute piano.mp3', 'relaxing-piano-music.mp3', 'snowfall-music-box.mp3', 'sunset-piano-music.mp3'];
+// 列不出資料夾內容時（直接雙擊 HTML 打開、或放到網路上的版本）用這份清單；在本機用 editor-server 開的話會自動讀 music/基地音樂/ 裡實際有的檔案
+// music/基地音樂/ 加了新歌、改了檔名，這份清單也要跟著加（檔名要一模一樣，含大小寫和空白）
+const PCD_TRACK_FALLBACK = [
+  'calm-piano.mp3',
+  'cute-and-lovely-smiles-sunny_師版.mp3',
+  'fluffy -cute piano.mp3',
+  'gentle-peaceful-gentle.mp3',
+  'harumachimusic-a-mysterious-little-box-ancient-like-folk-music-233859.mp3',
+  'monument_music-gentle-fields-194622.mp3',
+  'relaxing-piano-music.mp3',
+  'snowfall-music-box.mp3',
+  'soft-piano.mp3',
+  'soft-piano02.mp3',
+  'spring-day.mp3',
+  'spring-sunshine.mp3',
+  'sunset-piano-music.mp3',
+  'wiggle-until-you-giggle.mp3',
+];
 const PCD_LEVELS = { easy: { name: '初級', w: 9, h: 9, n: 10 }, mid: { name: '中級', w: 16, h: 16, n: 40 } };
 const pcdEsc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 const pcdTrackName = f => f.replace(/\.[^.]+$/, '');   // 顯示時不要副檔名
