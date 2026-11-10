@@ -6690,5 +6690,22 @@ const SHARED_TILES = [
     "file": "images/德林小屋/bg_room_dhair02.png",
     "w": 1,
     "h": 1
+  },
+  {
+    "id": "tile_mwawwm0n",
+    "name": "mrt-rail-track25",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-rail-track25.png",
+    "w": 3,
+    "h": 2,
+    "flat": true
+  },
+  {
+    "id": "tile_mwayj4gp",
+    "name": "mrt-room-wall-02",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-room-wall-02.png",
+    "w": 1,
+    "h": 4
   }
 ];
