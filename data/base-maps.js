@@ -342,7 +342,7 @@ const BASE_MAPS = [
         "2,13": "tile_new_bg_floor",
         "1,13": "tile_new_bg_floor",
         "0,13": "tile_new_bg_floor",
-        "7,14": "tile_new_bg_floor",
+        "7,14": "tile_hq_floor",
         "6,14": "tile_new_bg_floor",
         "5,14": "tile_new_bg_floor",
         "4,14": "tile_new_bg_floor",
@@ -669,7 +669,20 @@ const BASE_MAPS = [
         "14,21": "tile_hq_floor",
         "12,18": "tile_hq_floor",
         "37,19": "tile_hq_floor",
-        "37,14": "tile_new_bg_floor"
+        "37,14": "tile_new_bg_floor",
+        "7,15": "tile_hq_floor",
+        "7,21": "tile_hq_floor",
+        "7,20": "tile_hq_floor",
+        "7,19": "tile_hq_floor",
+        "7,18": "tile_hq_floor",
+        "7,17": "tile_hq_floor",
+        "7,16": "tile_hq_floor",
+        "8,16": "tile_hq_floor",
+        "8,17": "tile_hq_floor",
+        "8,18": "tile_hq_floor",
+        "8,20": "tile_hq_floor",
+        "8,21": "tile_hq_floor",
+        "8,19": "tile_hq_floor"
       },
       "ground": {},
       "ground2": {},
@@ -2071,69 +2084,11 @@ const BASE_MAPS = [
         "oy": 0
       },
       {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 16,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 17,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 18,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 19,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 20,
-        "layer": "floor",
-        "fx": true
-      },
-      {
-        "id": "tile_hq_floor",
-        "c": 8,
-        "r": 21,
-        "layer": "floor",
-        "fx": true
-      },
-      {
         "id": "tile_new_bg_wall",
         "c": 9,
         "r": 12,
         "layer": "object",
         "fx": true
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
-        "c": 6,
-        "r": 17,
-        "layer": "ground",
-        "fx": true,
-        "ox": 30
-      },
-      {
-        "id": "tile_new_bg_wall_front_edge",
-        "c": 6,
-        "r": 16,
-        "layer": "ground",
-        "fx": true,
-        "ox": 30
       },
       {
         "id": "tile_new_bg_wall_front_edge",
@@ -2487,6 +2442,20 @@ const BASE_MAPS = [
         "r": 12,
         "layer": "object",
         "ox": 30
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 6,
+        "r": 16,
+        "layer": "top",
+        "ox": 30
+      },
+      {
+        "id": "tile_new_bg_wall_front_edge",
+        "c": 6,
+        "r": 17,
+        "layer": "top",
+        "ox": 30
       }
     ],
     "solid": [
@@ -2754,7 +2723,8 @@ const BASE_MAPS = [
       "7,21",
       "8,19",
       "8,14",
-      "8,15"
+      "8,15",
+      "12,20"
     ],
     "breakable": [],
     "camp": [
@@ -7513,7 +7483,8 @@ const BASE_MAPS = [
         "r": 5,
         "to": "map_0274a8df-95c2-4099-84aa-7946f4f4a734",
         "ox": -5,
-        "oy": 3
+        "oy": 3,
+        "locked": true
       },
       {
         "c": 5,
@@ -7533,7 +7504,8 @@ const BASE_MAPS = [
         "c": 58,
         "r": 5,
         "to": "map_mu5ad7t2",
-        "ox": -6
+        "ox": -6,
+        "locked": true
       }
     ],
     "solidOffsets": {
@@ -8159,7 +8131,8 @@ const BASE_MAPS = [
         "5,19": "tile_restaurant_condiment_bottles",
         "5,20": "tile_restaurant_napkin_holder",
         "5,21": "tile_restaurant_chopsticks_holder"
-      }
+      },
+      "object9": {}
     },
     "stamps": [
       {
@@ -8892,14 +8865,6 @@ const BASE_MAPS = [
         "sortDepth": 2.5
       },
       {
-        "id": "tile_cvs_famiport",
-        "c": 4,
-        "r": 5,
-        "layer": "object7",
-        "ox": 0,
-        "oy": 18
-      },
-      {
         "id": "tile_cvs_snack_shelf",
         "c": 10,
         "r": 4,
@@ -9195,6 +9160,13 @@ const BASE_MAPS = [
         "layer": "object6",
         "ox": 26,
         "oy": 30
+      },
+      {
+        "id": "tile_cvs_famiport",
+        "c": 4,
+        "r": 5,
+        "layer": "object9",
+        "oy": 20
       }
     ],
     "solid": [
@@ -9560,6 +9532,10 @@ const BASE_MAPS = [
       {
         "id": "top",
         "name": "☁️ 上層"
+      },
+      {
+        "id": "object9",
+        "name": "超商2"
       }
     ]
   },
@@ -10902,7 +10878,6 @@ const BASE_MAPS = [
         "10,11": "tile_containment_wall_top_straight"
       },
       "object": {
-        "24,2": "tile_eoc_security_camera",
         "28,5": "tile_eoc_security_camera"
       },
       "object2": {
@@ -11628,6 +11603,14 @@ const BASE_MAPS = [
         "layer": "top",
         "ox": 0,
         "oy": 2
+      },
+      {
+        "id": "tile_eoc_security_camera",
+        "c": 24,
+        "r": 2,
+        "layer": "object",
+        "ox": 12,
+        "oy": 0
       }
     ],
     "solid": [
@@ -12658,14 +12641,6 @@ const BASE_MAPS = [
         "oy": 0
       },
       {
-        "id": "tile_mufv6z24",
-        "c": 3,
-        "r": 9,
-        "layer": "object2",
-        "ox": -24,
-        "oy": 0
-      },
-      {
         "id": "tile_mufv9ytk",
         "c": 7,
         "r": 2,
@@ -12788,6 +12763,13 @@ const BASE_MAPS = [
         "r": 8,
         "layer": "top",
         "ox": 20
+      },
+      {
+        "id": "tile_mufv6z24",
+        "c": 2,
+        "r": 9,
+        "layer": "object",
+        "ox": 30
       }
     ],
     "solid": [
@@ -14002,12 +13984,12 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
-        "c": 20,
+        "c": 23,
         "r": 19,
         "layer": "object3",
-        "oy": 24,
+        "oy": 14,
         "sortDepth": 0.75,
-        "ox": 30
+        "ox": 10
       },
       {
         "id": "tile_eoc_locker",
@@ -14015,7 +13997,8 @@ const BASE_MAPS = [
         "r": 17,
         "layer": "object",
         "oy": 18,
-        "ox": -4
+        "ox": -4,
+        "sortDepth": 2.75
       },
       {
         "id": "tile_new_decor_plant03",
@@ -14165,7 +14148,8 @@ const BASE_MAPS = [
         "r": 18,
         "layer": "object3",
         "oy": 20,
-        "ox": 4
+        "ox": 4,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_new_decor_fire_extinguisher",
@@ -14195,7 +14179,8 @@ const BASE_MAPS = [
         "c": 20,
         "r": 18,
         "layer": "overlay",
-        "oy": 30
+        "oy": 30,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_hq_office_chair_back",
@@ -14210,7 +14195,8 @@ const BASE_MAPS = [
         "c": 7,
         "r": 21,
         "layer": "floor",
-        "oy": 20
+        "oy": 20,
+        "sortDepth": 0.75
       },
       {
         "id": "tile_training_bench",
@@ -14218,7 +14204,8 @@ const BASE_MAPS = [
         "r": 21,
         "layer": "floor",
         "ox": 10,
-        "oy": 20
+        "oy": 20,
+        "sortDepth": 0.75
       },
       {
         "id": "tile_training_bench",
@@ -14226,14 +14213,16 @@ const BASE_MAPS = [
         "r": 21,
         "layer": "floor",
         "ox": 10,
-        "oy": 20
+        "oy": 20,
+        "sortDepth": 0.75
       },
       {
         "id": "tile_training_bench",
         "c": 9,
         "r": 21,
         "layer": "floor",
-        "oy": 20
+        "oy": 20,
+        "sortDepth": 0.75
       },
       {
         "id": "tile_containment_wall",
@@ -14317,28 +14306,32 @@ const BASE_MAPS = [
         "c": 6,
         "r": 18,
         "layer": "overlay",
-        "ox": 16
+        "ox": 16,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_prop_single_bed",
         "c": 0,
         "r": 22,
         "layer": "object4",
-        "ox": 30
+        "ox": 30,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_mu4yyr9r",
         "c": 29,
         "r": 22,
         "layer": "object4",
-        "ox": 10
+        "ox": 10,
+        "sortDepth": 0.75
       },
       {
         "id": "tile_prop_tv_stand",
         "c": 3,
         "r": 18,
         "layer": "object4",
-        "ox": 30
+        "ox": 30,
+        "sortDepth": 1.75
       },
       {
         "id": "tile_field_ammo_crate",
@@ -14357,11 +14350,11 @@ const BASE_MAPS = [
       },
       {
         "id": "tile_mrt_planter",
-        "c": 21,
-        "r": 18,
-        "layer": "overlay",
-        "oy": 30,
-        "ox": 10
+        "c": 0,
+        "r": 21,
+        "layer": "object3",
+        "ox": 30,
+        "sortDepth": 1.5
       },
       {
         "id": "tile_eoc_plant_small_01",
@@ -14375,10 +14368,11 @@ const BASE_MAPS = [
       {
         "id": "tile_hospital_plant_on_stool",
         "c": 3,
-        "r": 22,
+        "r": 20,
         "layer": "object4",
-        "ox": 12,
-        "oy": -6
+        "ox": 16,
+        "oy": 34,
+        "sortDepth": 0
       },
       {
         "id": "tile_hq_potted_plant",
@@ -14403,7 +14397,8 @@ const BASE_MAPS = [
         "layer": "object4",
         "ox": 18,
         "oy": 28,
-        "fx": true
+        "fx": true,
+        "sortDepth": 0
       },
       {
         "id": "tile_eoc_tissue_box",
@@ -14471,7 +14466,26 @@ const BASE_MAPS = [
         "r": 19,
         "layer": "overlay",
         "ox": 10,
-        "oy": 30
+        "oy": 30,
+        "sortDepth": 0.75
+      },
+      {
+        "id": "tile_decor_medicalkit",
+        "c": 22,
+        "r": 19,
+        "layer": "object4",
+        "oy": 24,
+        "ox": -4,
+        "sortDepth": 0.75
+      },
+      {
+        "id": "tile_counseling_medical_kit",
+        "c": 20,
+        "r": 19,
+        "layer": "object4",
+        "ox": 20,
+        "oy": 24,
+        "sortDepth": 0.75
       }
     ],
     "solid": [
@@ -14528,7 +14542,6 @@ const BASE_MAPS = [
       "3,17",
       "3,18",
       "3,19",
-      "4,20",
       "19,3",
       "18,3",
       "17,3",
@@ -14629,9 +14642,13 @@ const BASE_MAPS = [
       "6,19",
       "1,20",
       "2,20",
-      "3,23",
       "30,23",
-      "29,23"
+      "29,23",
+      "1,22",
+      "2,22",
+      "3,22",
+      "30,22",
+      "29,22"
     ],
     "breakable": [],
     "coreSpots": [],
@@ -14659,13 +14676,17 @@ const BASE_MAPS = [
         -10,
         0
       ],
-      "4,20": [
-        -19,
-        -11
+      "29,23": [
+        13,
+        0
       ],
-      "3,23": [
-        8,
-        -7
+      "29,22": [
+        14,
+        23
+      ],
+      "30,22": [
+        0,
+        23
       ]
     },
     "safe": true,

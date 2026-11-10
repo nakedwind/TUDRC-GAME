@@ -3467,8 +3467,7 @@ const SHARED_TILES = [
     "role": "floor",
     "file": "images/Poolcore/poolcore-floor-blue.png",
     "w": 1,
-    "h": 1,
-    "flat": true
+    "h": 1
   },
   {
     "id": "tile_poolcore_floor_gradient",

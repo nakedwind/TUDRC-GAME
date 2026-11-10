@@ -995,6 +995,13 @@ function setPortalNudge(p, patch) {
   if ('radius' in patch) { const v = clamp(patch.radius || PORTAL_RADIUS_DEFAULT, 10, 300); if (v !== PORTAL_RADIUS_DEFAULT) p.radius = v; else delete p.radius; }
   saveMaps(); draw(); portalNudgeStatus(p);
 }
+// 🔒 鎖住的出入口：存在 portal 的 locked、lockText（遊戲：js/game.js 的 enterPortal 只讓溫特說話、不換地圖）
+function setPortalLock(p, patch) {
+  pushUndo();
+  if ('locked' in patch) { if (patch.locked) p.locked = true; else { delete p.locked; delete p.lockText; } }
+  if ('lockText' in patch) { const t = String(patch.lockText || '').trim(); if (t && p.locked) p.lockText = t; else delete p.lockText; }
+  saveMaps(); draw(); setStatus(p.locked ? '🔒 這個出入口鎖住了：溫特走到這裡只會說「' + (p.lockText || '……好像被鎖住了。') + '」' : '已解除鎖住', '#ffd479');
+}
 // 工具列下面的數字欄：選到出入口才出現
 function syncPortalNudgePanel(m) {
   const tool = document.querySelector('.tool[data-mode="portalnudge"]'); if (!tool) return;
@@ -1003,9 +1010,16 @@ function syncPortalNudgePanel(m) {
     box = document.createElement('div'); box.id = 'portalNudgePanel';
     box.style.cssText = 'flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-top:6px;padding:6px 8px;border:1px solid #6a5a2c;border-radius:6px;background:#2a2618;font-size:12px;color:#ffe3a1';
     const num = (id, label, min, max) => '<label style="display:flex;align-items:center;gap:4px">' + label + '<input type="number" data-pn="' + id + '" min="' + min + '" max="' + max + '" style="width:62px"></label>';
-    box.innerHTML = '<b data-pn-name></b>' + num('ox', '左右', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('oy', '上下', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('radius', '範圍', 10, 300) + '<button type="button" class="btn" data-pn-reset>↺ 重設</button>';
+    box.innerHTML = '<b data-pn-name></b>' + num('ox', '左右', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('oy', '上下', -PORTAL_NUDGE_LIMIT, PORTAL_NUDGE_LIMIT) + num('radius', '範圍', 10, 300) + '<button type="button" class="btn" data-pn-reset>↺ 重設</button>' +
+      '<label style="display:flex;align-items:center;gap:4px" title="勾了：這個出入口不通，溫特走到／按空白鍵只會說鎖住的台詞，人留在原地"><input type="checkbox" data-pn-lock>🔒 鎖住</label>' +
+      '<input type="text" data-pn-locktext placeholder="鎖住時說的話（空白＝……好像被鎖住了。）" style="flex:1;min-width:180px">';
     tool.parentElement.appendChild(box);
-    box.addEventListener('change', e => { const f = e.target.dataset && e.target.dataset.pn, p = portalNudgeTarget(curMap()); if (f && p) setPortalNudge(p, { [f]: e.target.value }); });
+    box.addEventListener('change', e => {
+      const d = e.target.dataset || {}, p = portalNudgeTarget(curMap()); if (!p) return;
+      if ('pnLock' in d) setPortalLock(p, { locked: e.target.checked });   // 🔒 鎖住
+      else if ('pnLocktext' in d) setPortalLock(p, { lockText: e.target.value });   // 鎖住時說的話
+      else if (d.pn) setPortalNudge(p, { [d.pn]: e.target.value });
+    });
     box.addEventListener('click', e => { const p = portalNudgeTarget(curMap()); if (p && e.target.closest('[data-pn-reset]')) setPortalNudge(p, { ox: 0, oy: 0, radius: PORTAL_RADIUS_DEFAULT }); });
   }
   const p = brush.mode === 'portalnudge' ? portalNudgeTarget(m) : null;
@@ -1013,6 +1027,8 @@ function syncPortalNudgePanel(m) {
   box.querySelector('[data-pn-name]').textContent = '🚪 (' + p.c + ',' + p.r + ')';
   const vals = { ox: p.ox || 0, oy: p.oy || 0, radius: p.radius || PORTAL_RADIUS_DEFAULT };
   box.querySelectorAll('[data-pn]').forEach(i => { if (document.activeElement !== i) i.value = vals[i.dataset.pn]; });
+  box.querySelector('[data-pn-lock]').checked = !!p.locked;
+  const lt = box.querySelector('[data-pn-locktext]'); lt.disabled = !p.locked; if (document.activeElement !== lt) lt.value = p.lockText || '';
 }
 // 微調工具開著時：每個出入口畫出判定範圍（圓圈），選中的亮起來；移動過的用虛線標出原本的格子
 function drawPortalNudge(m) {
@@ -1137,11 +1153,11 @@ function draw() {
     ctx.fillStyle = 'rgba(150,90,220,.45)'; ctx.fillRect(x, y, CELL, CELL);
     ctx.strokeStyle = '#b58cff'; ctx.lineWidth = 2; ctx.strokeRect(x + 2, y + 2, CELL - 4, CELL - 4);
     ctx.fillStyle = '#fff'; ctx.font = '16px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText('🚪', x + CELL / 2, y + CELL / 2);
+    ctx.fillText(pt.locked ? '🔒' : '🚪', x + CELL / 2, y + CELL / 2);   // 🔒＝鎖住（🎯出入口微調設定）
     const target = (maps.find(mm => mm.id === pt.to) || {}).name || '（目標已刪除）';
     ctx.font = 'bold 10px sans-serif'; ctx.textBaseline = 'top';
     ctx.lineWidth = 3; ctx.strokeStyle = 'rgba(0,0,0,.85)'; ctx.strokeText('→' + target, x + CELL / 2, y + CELL + 1);
-    ctx.fillStyle = '#d9c6ff'; ctx.fillText('→' + target, x + CELL / 2, y + CELL + 1);
+    ctx.fillStyle = pt.locked ? '#ffb0a0' : '#d9c6ff'; ctx.fillText((pt.locked ? '🔒' : '→') + target, x + CELL / 2, y + CELL + 1);
   }
   drawPortalNudge(m); syncPortalNudgePanel(m);   // 🎯 出入口微調：判定範圍的圓圈、數字欄
   ctx.textAlign = 'left'; ctx.textBaseline = 'alphabetic';

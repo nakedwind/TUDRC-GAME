@@ -386,6 +386,31 @@ function campBoxFly(start, toSide, id, n, silent) {
     campSupplyEl.appendChild(tip); setTimeout(() => tip.remove(), 700);
   };
 }
+// 視窗左上角的圖示（置物櫃整張素材）：素材圖四周常有透明的空白（櫃子只畫在圖片左下角），直接縮進框裡會偏一邊
+// → 第一次用到時把透明的邊切掉（存成小圖），之後框裡就是置中的；還沒切好前先用原圖
+const campIconTrimCache = {};
+function campIconTrimmed(src) {
+  if (!src) return src;
+  if (campIconTrimCache[src]) return campIconTrimCache[src] === 'busy' ? src : campIconTrimCache[src];
+  campIconTrimCache[src] = 'busy';
+  const img = new Image();
+  img.onload = () => {
+    try {
+      const w = img.naturalWidth, h = img.naturalHeight, c = document.createElement('canvas'); c.width = w; c.height = h;
+      const x = c.getContext('2d'); x.drawImage(img, 0, 0); const d = x.getImageData(0, 0, w, h).data;
+      let x0 = w, y0 = h, x1 = -1, y1 = -1;   // 不透明的範圍
+      for (let yy = 0; yy < h; yy++) for (let xx = 0; xx < w; xx++) if (d[(yy * w + xx) * 4 + 3] > 10) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (yy < y0) y0 = yy; if (yy > y1) y1 = yy; }
+      if (x1 < 0) { campIconTrimCache[src] = src; return; }   // 整張都透明：照原圖
+      const t = document.createElement('canvas'); t.width = x1 - x0 + 1; t.height = y1 - y0 + 1;
+      t.getContext('2d').drawImage(c, x0, y0, t.width, t.height, 0, 0, t.width, t.height);
+      campIconTrimCache[src] = t.toDataURL();
+    } catch (_) { campIconTrimCache[src] = src; }   // 讀不到像素（例如用 file:// 開）：照原圖
+    document.querySelectorAll('img[data-trim]').forEach(el => { if (el.dataset.trim === src) el.src = campIconTrimCache[src]; });   // 已經開著的視窗馬上換成切好的
+  };
+  img.onerror = () => { campIconTrimCache[src] = src; };
+  img.src = src;
+  return src;
+}
 function renderCampSupply() {
   if (!campSupplyEl) return;
   const B = campBoxDef(), ids = B.ids();
@@ -430,7 +455,7 @@ function renderCampSupply() {
   const canFill = B.fillAll && ids.some(id => B.box(id) > 0 && B.bagRoom(id) > 0);
   const foot = B.footer ? B.footer() : '';
   campSupplyEl.innerHTML = '<section class="backpack-card camp-box-card' + (campBoxPop ? ' pop' : '') + '" role="dialog" aria-modal="true" aria-label="' + campBoxTitle(B) + '">' +
-    '<header class="backpack-head"><div class="backpack-icon cb-icon" aria-hidden="true">' + (B.crop === false ? '<img class="cb-icon-full" src="' + B.icon() + '" alt="">' : '<span class="cb-icon-crop"><img src="' + B.icon() + '" alt=""></span>') + '</div>' +
+    '<header class="backpack-head"><div class="backpack-icon cb-icon" aria-hidden="true">' + (B.crop === false ? '<img class="cb-icon-full" data-trim="' + B.icon() + '" src="' + campIconTrimmed(B.icon()) + '" alt="">' : '<span class="cb-icon-crop"><img src="' + B.icon() + '" alt=""></span>') + '</div>' +
     '<div class="backpack-title"><h2>' + campBoxTitle(B) + '</h2><p>' + B.sub + '</p></div>' +
     (B.fillAll ? '<button type="button" class="bag-use cb-fillall" data-cb-fillall' + (canFill ? '' : ' disabled') + '>全部補滿</button>' : '') +
     '<button type="button" class="camp-supply-close" aria-label="關閉（Esc）">×</button></header>' +

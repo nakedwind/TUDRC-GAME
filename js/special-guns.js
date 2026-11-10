@@ -50,7 +50,7 @@ function grantBullets(id, n, how, x, y) {
 // ---- 開火（game.js 的 updatePlayerAttack 呼叫）----
 function updateSpecialGun(id, p, dt, aim, canFire) {
   if (!canFire) return;
-  if (bulletCount(id) <= 0) { dryFire(p, aim, id); return; }
+  if (!bulletReady(id)) { dryFire(p, aim, id); return; }
   useBullet(id);
   const b = BULLETS[id];
   const fire = { incendiary: fireIncendiary, tranq: fireTranq, split: fireSplit, flash: fireFlashBang, shock: fireShock, heal: fireHeal, sticky: fireSticky, knock: fireKnock, confuse: fireConfuse }[id];

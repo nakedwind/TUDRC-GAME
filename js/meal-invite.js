@@ -119,12 +119,12 @@ function inviteGoHome(a) {
 // 出入口連不到（要搭電梯的樓層）：走去電梯；都沒有：最近的出入口
 function homeExit(a, homeName) {
   const maps = mapList(), goal = maps.find(m => m.name === homeName), near = list => list.reduce((b, q) => !b || Math.hypot(q.x - a.x, q.y - a.y) < Math.hypot(b.x - a.x, b.y - a.y) ? q : b, null);
-  const doors = (mapPortals || []).filter(pt => !pt.hidden && !pt.elevator && pt.to !== MAP.id).map(pt => ({ to: pt.to, x: center(pt.c, pt.r)[0], y: center(pt.c, pt.r)[1] }));
+  const doors = (mapPortals || []).filter(pt => !pt.hidden && !pt.locked && !pt.elevator && pt.to !== MAP.id).map(pt => ({ to: pt.to, x: center(pt.c, pt.r)[0], y: center(pt.c, pt.r)[1] }));
   if (goal) {
     const first = new Map(doors.map(d => [d.to, d.to])), queue = [...first.keys()];   // 每張地圖：從這裡出去要先走哪個出口
     for (let i = 0; i < queue.length && !first.has(goal.id); i++) {
       const m = maps.find(x => x.id === queue[i]);
-      for (const pt of (m && m.portals) || []) if (!pt.hidden && !pt.elevator && !first.has(pt.to) && pt.to !== MAP.id) { first.set(pt.to, first.get(queue[i])); queue.push(pt.to); }
+      for (const pt of (m && m.portals) || []) if (!pt.hidden && !pt.locked && !pt.elevator && !first.has(pt.to) && pt.to !== MAP.id) { first.set(pt.to, first.get(queue[i])); queue.push(pt.to); }
     }
     if (first.has(goal.id)) return near(doors.filter(d => d.to === first.get(goal.id)));
     const lift = (MAP.stamps || []).find(s => typeof isElevatorStamp === 'function' && isElevatorStamp(s));   // 要搭電梯：走到電梯門口（跟 js/game.js 的 enterPortal 出電梯的位置一樣）

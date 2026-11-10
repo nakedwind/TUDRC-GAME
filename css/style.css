@@ -2337,7 +2337,8 @@ canvas.cursor-crosshair, canvas.cursor-crosshair.cursor-pressed { cursor: url(".
 /* 箱子圖（80×80，箱子只畫在左下 46×65 那塊）：裁出箱子那塊放在框的正中間 */
 .cb-icon-crop { position: relative; width: 23px; height: 32px; overflow: hidden; }
 .cb-icon-crop img { position: absolute; left: 0; top: -7.5px; width: 40px; height: 40px; image-rendering: pixelated; }
-.cb-icon-full { max-width: 80%; max-height: 86%; image-rendering: pixelated; }   /* 置物櫃：整張素材縮進框裡 */
+.cb-icon:has(.cb-icon-full) { position: relative; }   /* 讓下面的圖以框為準置中 */
+.cb-icon-full { position: absolute; inset: 0; margin: auto; max-width: 72%; max-height: 76%; image-rendering: pixelated; }   /* 置物櫃：整張素材（透明的邊已切掉，js/camp-supply.js 的 campIconTrimmed）縮進框裡、置中 */
 .camp-supply-close { width: 32px; height: 32px; flex: none; padding: 0; border: 1px solid #59616c; border-radius: 50%; background: #202730; color: #dfe7ee; cursor: pointer; font-size: 19px; line-height: 1; }
 .camp-supply-close:hover { border-color: #c9d3dc; background: #2b3440; }
 .cb-fillall { width: auto; flex: none; padding: 7px 16px; font-size: 14px; }

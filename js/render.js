@@ -715,7 +715,8 @@ function stairArrowSpots() {
     const groups = {};   // 同一個目的地的出入口格合成一個箭頭
     for (const pt of mapPortals) {
       if (pt.c + .5 < left || pt.c + .5 >= left + w || pt.r + .5 < top || pt.r + .5 >= top + h) continue;
-      (groups[pt.to] = groups[pt.to] || []).push(pt);
+      const key = pt.to + (pt.locked ? '#locked' : '');   // 鎖住的出入口自己一組：箭頭才會畫在還能走的那半邊（例如只剩平台能下樓）
+      (groups[key] = groups[key] || []).push(pt);
     }
     const here = mapFloorNumber(MAP && MAP.name), entries = Object.entries(groups);
     // 高度：這張樓梯圖上所有出入口最上面那格（每個箭頭一樣高）
@@ -727,7 +728,7 @@ function stairArrowSpots() {
       // 左右翻轉過的樓梯圖：畫面右邊其實是原圖的左側
       const frac = entries.length > 1 ? (s.fx ? 1 - (onRight ? sides.left : sides.right) : (onRight ? sides.right : sides.left)) : .5;
       const x = OX + (left + w * frac) * CELL;
-      const there = mapFloorNumber(portalTargetName({ to }));
+      const there = mapFloorNumber(portalTargetName({ to: pts[0].to }));
       // 看得出樓層就比樓層；看不出來就照位置：右邊上樓、左邊下樓
       const dir = here != null && there != null && here !== there ? (there > here ? 'up' : 'down') : (onRight ? 'up' : 'down');
       list.push({ dir, x, y: y + (dir === 'down' ? STAIR_ARROW.downDrop[s.id] || 0 : 0), portals: pts });
@@ -748,6 +749,7 @@ function drawStairArrows() {
   if (!G?.running) return;
   const bob = Math.sin(performance.now() / 1000 * Math.PI * 2 / 1.8) * 3;
   for (const a of stairArrowSpots()) {
+    if (a.portals.every(p => p.locked)) continue;   // 鎖住的樓梯：不畫箭頭（走上去只會說「鎖住了」）
     const x = Math.round(a.x), y = a.y - CELL * 1.1 + bob, direction = a.dir === 'up' ? -1 : 1;
     ctx.save(); ctx.globalAlpha = .9; ctx.fillStyle = '#a0a5aa'; ctx.strokeStyle = 'rgba(0,0,0,.8)'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.moveTo(x, y + direction * 4); ctx.lineTo(x - 7, y - direction * 3); ctx.lineTo(x + 7, y - direction * 3); ctx.closePath(); ctx.stroke(); ctx.fill(); ctx.restore();
@@ -1151,11 +1153,11 @@ function draw() {
     if (pickShard) drawInteractPrompt(pickShard.x, pickShard.y - 26, '拾取');   // 地上的異質碎片（js/ore.js）
     else if (pickProp) drawInteractPrompt(pickProp.x, pickProp.top - 6, storagePropPrompt(pickProp));   // 地上的道具（js/storage-lockers.js）
     else if (elevator) drawInteractPrompt(elevator.x, elevator.top, elevator.mode === 'opening' ? '開門中…' : elevator.mode === 'inside' ? '選擇樓層' : '電梯');
-    else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, near.portal.at ? '進入' : '進入 ' + portalTargetName(near.portal));   // at＝同地圖傳送點：不顯示地圖名稱
+    else if (near && !isStairPortal(near.portal)) drawInteractPrompt(near.x, near.y - CELL / 2, near.portal.locked ? '鎖住了' : near.portal.at ? '進入' : '進入 ' + portalTargetName(near.portal));   // at＝同地圖傳送點：不顯示地圖名稱
     else if (typeof shardNearPlayer === 'function' && shardNearPlayer()) { const s = shardNearPlayer(); drawInteractPrompt(s.x, s.y - 26, '拾取'); }   // 地上的異質碎片（js/ore.js）
     else if (storagePropNearPlayer()) { const prop=storagePropNearPlayer(); drawInteractPrompt(prop.x,prop.top-6,storagePropPrompt(prop)); }
     else if (campInteractionNearPlayer()) { const c = campInteractionNearPlayer(); drawInteractPrompt(c.x, c.top - 6, c.kind === 'retreat' ? '更動作戰計畫' : c.kind === 'supply' ? '物資箱' : '補充彈藥'); }
-    else if (ammoRefillNearPlayer()) { const c = ammoRefillNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '打開彈藥箱'); }   // 營地的彈藥箱（js/flare.js）
+    else if (ammoRefillNearPlayer()) { const c = ammoRefillNearPlayer(); drawInteractPrompt(c.x, c.top - 6, typeof isPracticeMap === 'function' && isPracticeMap() ? (trialAmmo() ? '試用彈藥：開著' : '打開訓練用彈藥箱') : '打開彈藥箱'); }   // 營地的彈藥箱；訓練室的是試用彈藥（js/practice.js）（js/flare.js）
     else if (ammoCrateNearPlayer()) { const c = ammoCrateNearPlayer(); drawInteractPrompt(c.x, c.top - 6, '打開彈藥箱'); }
     else if (ironGateNearPlayer()) { const gate=ironGateNearPlayer();drawInteractPrompt(gate.x,gate.top-6,gate.o.gateSide===gate.side?'關閉鐵門':'開啟'+(gate.side==='left'?'左':'右')+'側鐵門'); }
     else if (typeof npcChatNearPlayer === 'function' && npcChatNearPlayer()) { const m = npcChatNearPlayer(); drawInteractPrompt(m.x, m.top, '聽閒聊'); }   // 有人在閒聊（js/npc-chats.js）

@@ -529,9 +529,16 @@ document.getElementById('elevatorClose').addEventListener('click', () => { sfx('
 elevatorMenu.addEventListener('click', e => { if (e.target === elevatorMenu) { sfx('switch'); closeElevatorMenu(); } });
 // 電梯能去的樓層：放了電梯的地圖（名稱開頭要有樓層：「1F餐廳」「4F哨兵宿舍樓」「B3」…；舊寫法「B-3」也認得），高樓層排上面。
 // 房間（溫特辦公室…）名稱前面也有樓層，但沒有電梯，所以不會出現在電梯選單。
+// 劇情地圖（📖 劇情地圖編輯器的 data/story-maps.js）不列：劇情用的副本常常是從基地複製的（連電梯一起），列出來會出現兩個一樣的樓層。
 const ELEVATOR_FLOOR_RE = /^\s*(B-?\d+F?|\d+F)\s*[-－・]?\s*/i;
+const elevatorStoryOnly = (() => {   // 只存在劇情地圖裡的地圖 id（基地、戰鬥地圖也有同一個 id 的不算）
+  if (typeof MAP_DATA_STORY === 'undefined') return new Set();
+  const keep = new Set([...(typeof MAP_DATA_BATTLE !== 'undefined' ? MAP_DATA_BATTLE : []), ...(typeof MAP_DATA_BASE !== 'undefined' ? MAP_DATA_BASE : [])].map(m => m.id));
+  return new Set(MAP_DATA_STORY.map(m => m.id).filter(id => !keep.has(id)));
+})();
 function elevatorFloors() {
   return mapList().map(m => {
+    if (elevatorStoryOnly.has(m.id)) return null;   // 劇情地圖：電梯不停
     if (!(m.stamps || []).some(isElevatorStamp)) return null;   // 沒有電梯的房間：電梯不停
     const hit = ELEVATOR_FLOOR_RE.exec(String(m.name || '')); if (!hit) return null;
     const label = hit[1].toUpperCase().replace('-', ''), rest = String(m.name).slice(hit[0].length).trim();   // 「B-3」顯示成「B3」（正式寫法不加 -）
@@ -707,6 +714,13 @@ function portalNearPlayer() {
   }
   return best;
 }
+// 鎖住的出入口：轉一下門把的聲音＋溫特說話（沒寫台詞就用 data/doors.js 的 LOCKED_DOOR_TEXT）
+function portalLockedSay(pt) {
+  const [x, y] = portalXY(pt);
+  if (typeof sfxAt === 'function') sfxAt('lockedDoor', x, y, .35, 'locked-door');
+  if (typeof winterSay === 'function' && winterSay(pt.lockText || (typeof LOCKED_DOOR_TEXT !== 'undefined' ? LOCKED_DOOR_TEXT : '……好像被鎖住了。'))) return;
+  flash('鎖住了', x, y - 30, '#ffcf89', 1.8);   // 沒有對話框（不應該發生）：至少飄字
+}
 function portalTargetName(pt) { const i = mapIndexById(pt.to), list = mapList(); return (i >= 0 && list[i] && list[i].name) || '另一張地圖'; }
 function placePlayerNearPortal(portal) {
   if (!portal || !G.player) return;
@@ -785,6 +799,7 @@ function teleportInMap(pt) {
 }
 function enterPortal(pt) {
   if (mapTransitioning) return;
+  if (pt.locked) { portalLockedSay(pt); return; }   // 鎖住的出入口（基地編輯器🎯出入口微調勾「鎖住」）：人留在原地，溫特說一句
   if (pt.at && pt.to === MAP.id) { teleportInMap(pt); return; }   // 同一張地圖裡的傳送點
   if (mapIndexById(pt.to) < 0) { flash('地圖不存在', G.player.x, G.player.y - 30, '#ff8f8f'); return; }
   const fromId = MAP.id;
@@ -1932,7 +1947,7 @@ function updatePlayerAttack(dt) {
   if (playerWeapon(p).special) { updateSpecialGun(wid, p, dt, canFire ? clientToWorld(aimClient.x, aimClient.y) : null, canFire); return; }   // 燃燒彈、麻醉彈（js/special-guns.js）
   if (!canFire) return;
   const aim = clientToWorld(aimClient.x, aimClient.y);
-  if (paint) { if (bulletCount('paint') <= 0) { dryFire(p, aim, 'paint'); return; } }   // 漆彈打完：只會「喀」一聲
+  if (paint) { if (!bulletReady('paint')) { dryFire(p, aim, 'paint'); return; } }   // 漆彈打完：只會「喀」一聲
   else if (p.ammo <= 0) { startReload(p); return; }   // 空彈匣→自動裝填
   const adx = aim.x - p.x, ady = aim.y - p.y, aimAng = Math.atan2(ady, adx);
   if (paint) { p.atkCd = BULLETS.paint.gap; useBullet('paint'); }   // 漆彈：跟一般子彈一樣瞄準，打中的怪物被標記（不扣血）
@@ -2071,9 +2086,9 @@ function updateAmmoHud() {
   if (!ammoHudEl) buildAmmoHud();
   ammoHudEl.style.display = '';
   const p = G.player, mag = playerGun().mag, ammo = p ? (p.ammo ?? mag) : mag;
-  const w = playerWeapon(p), wi = WEAPONS.indexOf(w), n = bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;
+  const w = playerWeapon(p), wi = WEAPONS.indexOf(w), n = trialAmmo() ? Infinity : bulletCount(w.id), empty = w.id !== 'pistol' && n <= 0;   // 訓練室試用彈藥：顯示 ∞
   const text = w.id === 'pistol' ? ((p && p.reloadT > 0) ? 'Reload' : ammo + ' / ∞')
-    : '<b>' + n + '</b> 發' + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
+    : '<b>' + (n === Infinity ? '∞' : n) + '</b> 發' + (empty ? '<small>沒有子彈了・滾輪換子彈</small>' : '');
   const usable = WEAPONS.map((x, i) => weaponUsable(i) ? 1 : 0).join('');
   const key = w.id + '|' + text + '|' + usable;
   if (key === ammoHudKey) return;   // 沒變就不動 DOM（每幀都會呼叫）
