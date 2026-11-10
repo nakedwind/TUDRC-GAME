@@ -62797,61 +62797,6 @@ const BATTLE_MAPS = [
         "layer": "floor"
       },
       {
-        "id": "tile_mrt_escalator_front_high04",
-        "c": 38,
-        "r": 59,
-        "layer": "ground3",
-        "oy": -8
-      },
-      {
-        "id": "tile_mrt_room_highwall03",
-        "c": 37,
-        "r": 59,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mrt_room_highwall03",
-        "c": 36,
-        "r": 59,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mrt_room_highwall03",
-        "c": 35,
-        "r": 59,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mrt_room_highwall03",
-        "c": 43,
-        "r": 59,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mrt_room_highwall03",
-        "c": 44,
-        "r": 59,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mrt_room_highwall03",
-        "c": 45,
-        "r": 59,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mrt_pillar_a02",
-        "c": 33,
-        "r": 58,
-        "layer": "ground3"
-      },
-      {
-        "id": "tile_mrt_pillar_a02",
-        "c": 46,
-        "r": 58,
-        "layer": "ground3"
-      },
-      {
         "id": "tile_mrt_pillar_a02",
         "c": 48,
         "r": 62,
