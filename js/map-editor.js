@@ -195,6 +195,9 @@ let brushScale = 100, brushAngle = 0;   // 筆刷的大小（%）、多轉的角
 let tempTool = null, savedBrush = null, pickResult = null;   // Alt=臨時吸管 / Ctrl=臨時選取
 let pickedBrushPending = false;   // 吸管吸到的圖還沒放進地圖：這時按右鍵＝取消這次複製，回到「選取」
 let selectionDrag = null;
+// 拉框選取：用「選取」工具在空白的地方按住拖曳，拉出一個框，框裡的物件全部選起來
+// （按著 Shift 拉框＝加到原本的選取裡）。marquee＝{ x0, y0, x1, y1（畫布像素）, base（拉框前就選好的） }
+let marquee = null, lastSelectHit = false;
 // 物件擺放用「四分之一格」對齊（10px），不用整格整格跳；地板類小圖還是整格
 const SUB = CELL / 4;
 let pointerPx = null;   // 滑鼠目前在畫布上的像素位置
@@ -1512,6 +1515,7 @@ function draw() {
     }
   }
   drawLocateFlash();   // 從圖層物件清單選取時，物件周圍閃一個圈
+  drawMarquee();   // 拉框選取的藍色虛線框
 }
 
 // ================= 可翻轉圖片放置 / 查詢 =================
@@ -1612,7 +1616,8 @@ function paintCell(c, r, isDown, additiveSelect = false) {
         if (existing >= 0) selections.splice(existing, 1); else selections.push(picked);
       }
       selection = selections.length ? selections[selections.length - 1] : null;
-      if (!picked) setStatus('這格沒有可選的物件', '#9aa4b2');
+      lastSelectHit = !!picked && selectionLayer(picked) !== 'floor';   // 點到空白（或只點到地板）：按住拖曳就變成拉框選取
+      if (!picked) setStatus('這格沒有可選的物件（按住拖曳可以拉框選取）', '#9aa4b2');
       else setStatus('已選取 ' + selections.length + ' 個物件' + (additiveSelect ? '（Shift 多選）' : ''), '#ffd479');
       refreshSelPanel(); draw();
     }
@@ -1863,6 +1868,55 @@ function cellFromEvent(e) {
   pointerPx = { x, y };   // 物件擺放、選取用的像素位置
   return cellAt(x, y);
 }
+// ---- 拉框選取 ----
+// 框住的規則：物件（大圖、小圖）整個都在框裡面才算選到，只碰到邊不算（才不會一拉就把大片的牆、建築一起選走）。
+// 「地板」圖層不會被框選（不然整片地板都會選起來）；隱藏或鎖定的圖層也選不到，跟用點的一樣。
+function marqueeRect() {
+  const d = marquee;
+  return { x: Math.min(d.x0, d.x1), y: Math.min(d.y0, d.y1), w: Math.abs(d.x1 - d.x0), h: Math.abs(d.y1 - d.y0) };
+}
+function itemsInMarquee() {
+  const m = curMap(), box = marqueeRect(), picked = [];
+  const inside = (x, y, w, h) => x >= box.x - 0.5 && y >= box.y - 0.5 && x + w <= box.x + box.w + 0.5 && y + h <= box.y + box.h + 0.5;
+  const canPick = lid => lid !== 'floor' && !hiddenLayers.has(lid) && !isLockedLayer(lid);
+  // 小圖：照圖層由下到上
+  for (const l of LAYERS) {
+    if (!canPick(l.id)) continue;
+    for (const key of Object.keys(m.layers[l.id] || {})) {
+      if (!m.layers[l.id][key]) continue;
+      const [c, r] = key.split(',').map(Number);
+      if (inside(OX + c * CELL, OY + r * CELL, CELL, CELL)) picked.push({ type: 'tile', layer: l.id, key });
+    }
+  }
+  // 大圖（物件）：用畫出來的位置（含微調）
+  m.stamps.forEach((s, i) => {
+    if (!canPick(s.layer || 'top')) return;
+    const t = tileById(s.id) || {};
+    if (inside(OX + s.c * CELL + (s.ox || 0), OY + s.r * CELL + (s.oy || 0), stampW(s, t) * CELL, stampH(s, t) * CELL)) picked.push({ type: 'stamp', index: i });
+  });
+  return picked;
+}
+function updateMarquee() {
+  if (!marquee || !pointerPx) return;
+  marquee.x1 = pointerPx.x; marquee.y1 = pointerPx.y;
+  const box = marqueeRect();
+  if (!marquee.moved && box.w < 4 && box.h < 4) return;   // 只動一點點：還當成「點一下」（點地板＝選那格地板）
+  marquee.moved = true;
+  const seen = new Set(marquee.base.map(selectionId));
+  selections = marquee.base.slice();
+  for (const sel of itemsInMarquee()) if (!seen.has(selectionId(sel))) { seen.add(selectionId(sel)); selections.push(sel); }
+  selection = selections.length ? selections[selections.length - 1] : null;
+  setStatus('拉框選取中：' + selections.length + ' 個物件', '#8fd3ff');
+  draw();
+}
+function drawMarquee() {   // 在 draw() 最後畫出藍色虛線框
+  if (!marquee || !marquee.moved) return;
+  const b = marqueeRect();
+  ctx.save();
+  ctx.fillStyle = 'rgba(120,190,255,.15)'; ctx.fillRect(b.x, b.y, b.w, b.h);
+  ctx.strokeStyle = '#8fd3ff'; ctx.lineWidth = 2; ctx.setLineDash([6, 4]); ctx.strokeRect(b.x + 1, b.y + 1, b.w - 2, b.h - 2);
+  ctx.restore();
+}
 function beginSelectionDrag(c, r) {
   if (brush.mode !== 'select' || !selections.length) { selectionDrag = null; return; }
   if (selections.some(sel => isLockedLayer(selectionLayer(sel)))) {   // 鎖定圖層上的物件不能拖
@@ -1924,13 +1978,19 @@ cv.addEventListener('pointerdown', e => {
   playMapClickSound(); painting = true; cv.setPointerCapture(e.pointerId); pushUndo();
   const [c, r] = cellFromEvent(e); lastPaint = c + ',' + r;
   if (brush.mode === 'solidnudge' && !e.shiftKey && beginNudgeDrag()) return;   // 按在已選中的紅格／線上：拖曳移動，不重新選
+  lastSelectHit = false;
   paintCell(c, r, true, e.shiftKey);
+  if (brush.mode === 'select' && !lastSelectHit && pointerPx) {   // 按在空白的地方：開始拉框（Shift＝加到原本的選取）
+    marquee = { x0: pointerPx.x, y0: pointerPx.y, x1: pointerPx.x, y1: pointerPx.y, base: e.shiftKey ? selections.slice() : [], moved: false };
+    selectionDrag = null; return;
+  }
   if (!e.shiftKey) beginSelectionDrag(c, r);
 });
 cv.addEventListener('pointermove', e => {
   const [c, r] = cellFromEvent(e); hoverCell = inGrid(c, r) ? [c, r] : null;
   if (painting) {
     if (nudgeDrag) dragNudgeTo();
+    else if (marquee) updateMarquee();
     else if (selectionDrag) dragSelectionTo(c, r);
     else { const key = c + ',' + r; if (key !== lastPaint) { lastPaint = key; paintCell(c, r, false); } }
   } else draw();   // 懸停預覽跟著四分之一格移動
@@ -1940,6 +2000,11 @@ cv.addEventListener('pointerup', () => {
   if (nudgeDrag) { if (nudgeDrag.moved) saveMaps(); nudgeDrag = null; }   // 碰撞微調拖曳放開：存起來
   if (selectionDrag && selectionDrag.moved) { saveMaps(); refreshSelPanel(); setStatus('已移動 ' + selections.length + ' 個物件', '#7ee0c0'); }
   selectionDrag = null;
+  if (marquee) {   // 拉框放開：告訴使用者選到幾個，右邊面板跟著更新
+    const was = marquee; marquee = null;
+    if (was.moved) setStatus(selections.length ? '已框選 ' + selections.length + ' 個物件（可以一起拖曳、方向鍵移動、Delete 刪除、Ctrl+C 複製）' : '框裡沒有可選的物件', selections.length ? '#ffd479' : '#9aa4b2');
+    refreshSelPanel(); draw();
+  }
   if (undoStack.length && undoStack[undoStack.length - 1] === snapshot()) undoStack.pop();
 });
 cv.addEventListener('pointerleave', () => { hoverCell = null; draw(); });
