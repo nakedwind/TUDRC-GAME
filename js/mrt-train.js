@@ -179,7 +179,12 @@ function mrtTrainUpdateSolid(tr) {
     const open = key === 'open', far = open && tr.bothDoors;
     const type = new Map();
     let rMax = -Infinity;
-    for (const car of tr.cars) for (const x of mrtCarCells(car).cells) { type.set(x.c + ',' + x.r, x.t); rMax = Math.max(rMax, x.r); }
+    // 超出軌道範圍（隧道裡、畫面上看不到）的車廂格子不算：不然看不到的車廂會在旁邊的手扶梯上造出看不見的牆和地板
+    for (const car of tr.cars) for (const x of mrtCarCells(car).cells) {
+      const cx = OX + x.c * CELL;
+      if (cx < tr.clipL - 1 || cx + CELL > tr.clipR + 1) continue;
+      type.set(x.c + ',' + x.r, x.t); rMax = Math.max(rMax, x.r);
+    }
     const pass = t => t === '.' || t === 'D' || (t === 'F' && far);
     for (const [k, t] of type) {
       const [c, r] = k.split(',').map(Number);

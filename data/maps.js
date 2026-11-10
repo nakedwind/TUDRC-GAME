@@ -60391,18 +60391,6 @@ const BATTLE_MAPS = [
       },
       {
         "id": "tile_mrt_rail_track",
-        "c": 4,
-        "r": 23,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_rail_track",
-        "c": 7,
-        "r": 23,
-        "layer": "floor"
-      },
-      {
-        "id": "tile_mrt_rail_track",
         "c": 10,
         "r": 23,
         "layer": "floor"
