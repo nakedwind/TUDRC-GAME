@@ -57,7 +57,7 @@ const GUIDE_SKILL_TEXTS = {
   taana: {
     ...GUIDE_SKILL_COMMON,
     'a-1': { name: '群體疏導', desc: '一口氣安撫全隊的精神。', effect: '', note: '', icon: '', mods: [], say: ['群體疏導。'] },
-    'b-1': { name: '加快腳步', desc: '讓隊友的動作更俐落。', effect: '', note: '', icon: '', mods: [], say: ['加快腳步。'] },
+    'b-1': { name: '加快腳步', desc: '讓隊友的動作更俐落。', effect: '', note: '', icon: 'images/ui/skills/taana/quick-steps.png', mods: [], say: ['加快腳步。'] },
     'core-1': { name: '熟睡守護', desc: '不攻擊的她，更懂得照顧好自己。', effect: '每秒回復 HP +1', icon: '', mods: [{ path: 'hpRegen', add: 1 }] },
     'ult': { name: '深眠搖籃', desc: '讓失控邊緣的隊友沉沉睡去、重新清醒。', effect: '', note: '', icon: '', mods: [], say: ['深眠搖籃。'] },
   },

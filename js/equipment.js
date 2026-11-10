@@ -864,6 +864,7 @@ function workshopBuy(kind, id) {
     if (!spendWorkshop(def.cost[lv], wsMoney(def.id, lv, def.cost[lv]))) return;
     equipState.owned[id] = lv + 1; saveEquipment(); workshopLevelFx('up', def.name + '　Lv' + lv + ' → Lv' + (lv + 1), lv + 1 >= def.levels.length);
     showWorkshopToast('🔧 「' + def.name + '」升到 Lv' + (lv + 1));
+    if (typeof applySkills === 'function') applySkills();   // 隊員穿著同一種裝備的：數值馬上換成新等級（js/skills.js；新版裝備的等級是整種一起算）
   } else if (kind === 'wp') {
     const w = WEAPON_UPGRADES[id], lv = equipState.weapons[id]; if (!w || !lv || lv >= w.levels.length) return;
     if (!spendWorkshop(w.cost[lv - 1], wsMoney('w:' + id, lv - 1, w.cost[lv - 1]))) return;

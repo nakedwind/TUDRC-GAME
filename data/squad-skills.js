@@ -10,7 +10,7 @@ const SQUAD_SKILLS = {
         "name": "特性",
         "desc": "單體攻擊；長劍快攻，吸引附近異質體的仇恨。",
         "effect": "初始技能",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/sword-dance.png",
         "mods": [],
         "cost": 0,
         "note": "被動「劍舞架勢」： 怪物打柯林有 30% 會打空；溫特在他 7 格內時，怪物打溫特有 20% 會打空。\n大招「突擊連刺」： 每 8 秒蓄力一次，在 0.5 秒內連刺 3 下（每下 20 傷害，整招 1 秒）。從第一刺起讓目標破甲 3 秒，受到所有人的傷害 +10%。"
@@ -19,7 +19,7 @@ const SQUAD_SKILLS = {
         "name": "劍舞架勢．二段",
         "desc": "步伐更輕盈。",
         "effect": "自己被打空的機率 +10%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/sword-dance-2.png",
         "mods": [
           {
             "path": "parry.self",
@@ -33,7 +33,7 @@ const SQUAD_SKILLS = {
         "name": "吃飽有力",
         "desc": "很會吃的身體很耐操。",
         "effect": "最大 HP +15%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/hearty-meal.png",
         "mods": [
           {
             "path": "hp",
@@ -46,7 +46,7 @@ const SQUAD_SKILLS = {
         "name": "格擋",
         "desc": "用劍身擋開攻擊。",
         "effect": "受到的傷害減少 10%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/parry.png",
         "mods": [
           {
             "path": "defense",
@@ -59,7 +59,7 @@ const SQUAD_SKILLS = {
         "name": "護衛之劍",
         "desc": "把溫特護在劍圈裡。",
         "effect": "溫特被打空的機率 +10%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/guardian-blade.png",
         "mods": [
           {
             "path": "parry.guard",
@@ -72,7 +72,7 @@ const SQUAD_SKILLS = {
         "name": "寬廣劍圈",
         "desc": "守護的範圍更大。",
         "effect": "保護溫特的範圍 +2 格，嘲諷範圍 +0.5 格",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/wide-circle.png",
         "mods": [
           {
             "path": "parry.guardRange",
@@ -89,7 +89,7 @@ const SQUAD_SKILLS = {
         "name": "見切",
         "desc": "看穿每一次攻擊。",
         "effect": "自己被打空的機率再 +10%，大招冷卻 −10%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/foresight.png",
         "mods": [
           {
             "path": "parry.self",
@@ -106,7 +106,7 @@ const SQUAD_SKILLS = {
         "name": "突擊連刺・流星",
         "desc": "連刺的節奏快到看不清。",
         "effect": "大招冷卻 −30%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/meteor-thrust.png",
         "mods": [
           {
             "path": "ultCdCut",
@@ -119,7 +119,7 @@ const SQUAD_SKILLS = {
         "name": "快劍",
         "desc": "出劍更快。",
         "effect": "攻擊速度 +15%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/swift-blade.png",
         "mods": [
           {
             "path": "rate",
@@ -132,7 +132,7 @@ const SQUAD_SKILLS = {
         "name": "重刺",
         "desc": "每一劍都刺得更深。",
         "effect": "攻擊力 +30%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/heavy-thrust.png",
         "mods": [
           {
             "path": "dmg",
@@ -145,7 +145,7 @@ const SQUAD_SKILLS = {
         "name": "精神飽滿",
         "desc": "永遠活力滿滿。",
         "effect": "移動速度 +10%",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/full-spirit.png",
         "mods": [
           {
             "path": "walkSpeed",
@@ -158,7 +158,7 @@ const SQUAD_SKILLS = {
         "name": "飯後好心情",
         "desc": "吃飽了，心情就穩。",
         "effect": "精神負荷每秒恢復 +0.3",
-        "icon": "",
+        "icon": "images/ui/skills/colyn/after-meal.png",
         "mods": [
           {
             "path": "taintRegen",
@@ -1354,7 +1354,7 @@ const SQUAD_SKILLS = {
         "desc": "不攻擊、無精神負荷；恢復附近哨兵的生命與精神負荷，\n遇敵時保持距離。",
         "effect": "初始技能",
         "note": "被動「安眠光環」：每 3 秒為 3 格內的隊員降低 26 汙染、恢復 13 HP；平時跟在需要照顧的哨兵身邊。",
-        "icon": "",
+        "icon": "images/ui/skills/taana/sleep-aura.png",
         "mods": [],
         "cost": 0
       },
@@ -1364,7 +1364,7 @@ const SQUAD_SKILLS = {
         "effect": "每秒疏導量 +1",
         "effect2": "",
         "note": "",
-        "icon": "",
+        "icon": "images/ui/skills/taana/smooth-guidance.png",
         "mods": [
           {
             "path": "aura.rate",
@@ -1379,7 +1379,7 @@ const SQUAD_SKILLS = {
         "effect": "每秒回復 HP +1",
         "effect2": "",
         "note": "塔納自己每秒會回復少量 HP，能在隊員身邊待得更久。",
-        "icon": "",
+        "icon": "images/ui/skills/taana/sound-sleep.png",
         "mods": [
           {
             "path": "hpRegen",
@@ -1394,7 +1394,7 @@ const SQUAD_SKILLS = {
         "effect": "最大 HP +20",
         "effect2": "",
         "note": "HP 上限提升，在隊員身邊待得更久。",
-        "icon": "",
+        "icon": "images/ui/skills/taana/stamina-training.png",
         "mods": [
           {
             "path": "hp",
@@ -1409,7 +1409,7 @@ const SQUAD_SKILLS = {
         "effect": "SP 上限 +20",
         "effect2": "",
         "note": "SP 上限提升，能發動更多次疏導技能。",
-        "icon": "",
+        "icon": "images/ui/skills/taana/mind-training.png",
         "mods": [
           {
             "path": "spMax",
@@ -1424,7 +1424,7 @@ const SQUAD_SKILLS = {
         "effect": "",
         "effect2": "",
         "note": "有兩名以上隊友加總負荷值超過50以上或暴走時自動發動；\n詠唱 3 秒、花 20 SP；冷卻 60 秒。",
-        "icon": "",
+        "icon": "images/ui/skills/taana/deep-cradle.png",
         "mods": [],
         "active": {
           "when": "taintAbove",
@@ -1444,7 +1444,7 @@ const SQUAD_SKILLS = {
         "effect": "",
         "effect2": "",
         "note": "有兩名以上隊友加總負荷值超過50以上或暴走時自動發動；\n詠唱 2.5 秒、花 15 SP；冷卻 20 秒。",
-        "icon": "",
+        "icon": "images/ui/skills/taana/group-guidance.png",
         "mods": [],
         "active": {
           "when": "taintAbove",
