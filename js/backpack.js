@@ -516,8 +516,9 @@ function renderSquadArmorPanel() {
   const spec = TYPES[armorWho] || {}, gear = squadGearOf(armorWho);
   const slots = gear.map((id, i) => {
     const g = id && squadGearById(id), sel = backpackSel === SQ_WORN_PREFIX + i || (!g && armorSlotPick === i);
-    return `<button type="button" class="doll-slot${g ? ' filled' : ''}${sel ? ' picking' : ''}" data-sq-slot="${i}" title="${squadGearSlotName(i)}${g ? '：' + g.name : '：未裝備'}">`
-      + `<span>${g ? `<img src="${squadGearImage(g)}" alt="">` : '＋'}</span><small>${g ? g.name : squadGearSlotName(i)}</small></button>`;   // 格子名稱：舊版「裝備 1～3」、新版「頭部、上身…」（js/squad-gear.js、js/gear-v2.js）
+    const lv = g && typeof squadGearLv === 'function' ? squadGearLv(id) : 0;   // 等級：新版裝備才有（js/gear-v2.js）；右上角小標、等級框色跟溫特的格子一樣
+    return `<button type="button" class="doll-slot${g ? ' filled' + (lv ? equipTier(lv) : '') : ''}${sel ? ' picking' : ''}" data-sq-slot="${i}" title="${squadGearSlotName(i)}${g ? '：' + g.name + (lv ? ' Lv' + lv : '') : '：未裝備'}">`
+      + `<span>${g ? `<img src="${squadGearImage(g)}" alt="">` + (lv ? `<em>Lv${lv}</em>` : '') : '＋'}</span><small>${g ? g.name : squadGearSlotName(i)}</small></button>`;   // 格子名稱：舊版「裝備 1～3」、新版「頭部、上身…」（js/squad-gear.js、js/gear-v2.js）
   }).join('');
   box.classList.remove('with-who');
   box.innerHTML = `<h3>${spec.name || armorWho}${spec.guide ? '嚮導' : '哨兵'}裝備</h3><div class="equip-doll sq-doll"><img class="doll-art sprite" data-member="${armorWho}" src="${memberPortraitPath(spec)}" alt="${spec.name || ''}"><div class="doll-slots">${slots}</div></div>`;
@@ -546,7 +547,7 @@ function renderSquadArmorDetail() {
     : `<button type="button" class="bag-use" data-sq-wear="${g.id}">穿上${armorSlotPick != null && squadGearFits(g.id, armorSlotPick) ? '（' + squadGearSlotName(armorSlotPick) + '）' : ''}</button>`;
   backpackDetail.innerHTML = `
     <div class="bag-detail-image"><img src="${squadGearImage(g)}" alt=""></div>
-    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags"><span class="bag-tag">🎽 隊員裝備</span>${worn ? `<span class="bag-tag worn">${name}・${squadGearSlotName(slot)}</span>` : ''}</div></div>
+    <div class="bag-gear-heading"><h3>${g.name}</h3><div class="bag-tags">${typeof squadGearLv === 'function' && squadGearLv(g.id) ? `<span class="bag-tag effect">Lv${squadGearLv(g.id)}</span>` : ''}<span class="bag-tag">🎽 隊員裝備</span>${worn ? `<span class="bag-tag worn">${name}・${squadGearSlotName(slot)}</span>` : ''}</div></div>
     ${g.desc ? `<p class="bag-desc">${g.desc}</p>` : ''}
     <div class="bag-gear-stats"><div class="bag-gear-stat"><small>效果</small><b>${squadGearEffect(g) || '—'}</b></div></div>
     <div class="bag-actions">${btn}</div>`;

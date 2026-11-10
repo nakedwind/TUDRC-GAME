@@ -30,6 +30,8 @@ const gearBagCount = id => (typeof supplyInventory !== 'undefined' && supplyInve
 const gearSquadWorn = id => Object.values((typeof squadGearState !== 'undefined' && squadGearState.equip) || {}).reduce((n, list) => n + (list || []).filter(x => x === id).length, 0);   // 隊員身上穿了幾件
 const gearTotal = id => gearBagCount(id) + (typeof isEquipped === 'function' && isEquipped(id) ? 1 : 0) + gearSquadWorn(id);   // 全部加起來幾件
 // 製作一件要花多少：gearMakeCost（js/workshop-config.js，開發工坊編輯器也用同一個）
+// 隊員穿的這件裝備要顯示幾級（防具視窗、T-Pad 隊員頁的格子右上角）：新版才有等級；舊版、沒研發過的＝0（不顯示）
+const squadGearLv = id => (GEAR_V2 && id && typeof equipState !== 'undefined' && equipState.owned[id]) ? gearLvOf(id) : 0;
 // 這一件現在（照研發等級）的效果說明
 const gearEffectText = d => (d && d.stat ? d.stat(d.levels[gearLvOf(d.id) - 1] || d.levels[0]) : '');
 // 背包裡放進／拿出一件（防具分類沒有格數上限）
@@ -180,7 +182,8 @@ if (GEAR_V2) {
       e.extraTags = '<span class="bag-tag">' + GEAR_WHO_NAME[gearWho(d)] + '</span>' + (e.lv ? '<span class="bag-tag">持有 ' + tot + ' 件</span>' : '');
       if (e.lv) {   // 研發過了：多一顆「製作一件」
         const c = gearMakeCost(d);
-        e.extraBtn = workshopPriceBtn('<button type="button" class="ws-btn" data-ws="mk:' + d.id + '">製作一件 <b>' + WS_SHARD_IMG + c.shards + '</b></button>', c.money, c.money > cash);
+        const mkBtn = '<button type="button" class="ws-btn" data-ws="mk:' + d.id + '">製作一件 <b>' + WS_SHARD_IMG + c.shards + '</b></button>';
+        e.extraBtn = workshopPriceBtn(typeof workshopInfoBtnStyle === 'function' ? workshopInfoBtnStyle(d.id, mkBtn) : mkBtn, c.money, c.money > cash);   // 寬高字級跟「開發」按鈕一樣套開發工坊編輯器的設定（要在加價錢之前套）
       }
     }
     return all;

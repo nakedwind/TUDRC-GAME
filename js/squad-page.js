@@ -227,9 +227,9 @@ function squadV2Html(actor, safe) {
 function squadGearBarHtml(type) {
   return '<section class="sq-info sq-gearbar" data-sq="panel.gearBar"><b class="sq-gearbar-title" data-sq="text.gearBarTitle">' + sqT('text.gearBarTitle', '隊員裝備') + '</b><div class="sq-gearbar-slots" data-sq="box.gearBarSlots">' +
     squadGearOf(type).map((id, i) => {
-      const g = id && squadGearById(id);
-      return '<span class="sq-gearbar-slot' + (g ? ' filled' : '') + '" data-sq="gearBarSlot:' + i + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="' + squadGearSlotName(i) + '：空"') + '>' +
-        (g ? '<img data-sq="gearBarImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' : '<i>' + (typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2 ? squadGearSlotName(i) : i + 1) + '</i>') + '</span>';   // 空格：新版寫部位（頭部、上身…），舊版寫 1～3
+      const g = id && squadGearById(id), lv = g && typeof squadGearLv === 'function' ? squadGearLv(id) : 0;   // 等級：新版裝備才有（js/gear-v2.js），右上角小標＋等級框色（css/squad-page.css）
+      return '<span class="sq-gearbar-slot' + (g ? ' filled' + (lv ? equipTier(lv) : '') : '') + '" data-sq="gearBarSlot:' + i + '"' + (g ? ' data-sq-tip="' + sqEsc(g.name + (lv ? ' Lv' + lv : '')) + '" data-sq-tip-desc="' + sqEsc(squadGearEffect(g)) + '"' : ' title="' + squadGearSlotName(i) + '：空"') + '>' +
+        (g ? '<img data-sq="gearBarImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' + (lv ? '<em class="sq-lv">Lv' + lv + '</em>' : '') : '<i>' + (typeof GEAR_SYSTEM !== 'undefined' && GEAR_SYSTEM === 2 ? squadGearSlotName(i) : i + 1) + '</i>') + '</span>';   // 空格：新版寫部位（頭部、上身…），舊版寫 1～3
     }).join('') + '</div><button type="button" class="sq-gearbar-btn" data-sq-armor data-sq="btn.gearBar">' + sqT('btn.gearBar', '更換裝備') + '</button></section>';
 }
 // 「更換裝備」：打開防具視窗、選好這位隊員（js/backpack.js 的 openArmorPanelFor）；關掉後回到這一頁
@@ -272,9 +272,9 @@ function squadGearHtml(actor, safe) {
   let h = '<section class="sq-main sq-gear" data-sq="panel.gear">' + squadSwitchHtml('G') +
     '<b class="sq-title gear" data-sq="text.gearTitle">' + sqT('text.gearTitle', '隊員裝備') + '</b>' +
     gear.map((id, i) => {
-      const g = id && squadGearById(id), on = st.slot.kind === 'gear' && st.slot.id === i;
-      return '<button type="button" class="sq-slot gear s' + i + (on ? ' sel' : '') + (g ? ' filled' : '') + '" data-gear-slot="' + i + '" data-sq="gearSlot:' + i + '" title="' + sqEsc(g ? g.name : '空') + '">' +
-        (g ? '<img data-sq="gearSlotImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' : '<i class="sq-plus-icon">+</i>') + '</button>' +
+      const g = id && squadGearById(id), on = st.slot.kind === 'gear' && st.slot.id === i, lv = g && typeof squadGearLv === 'function' ? squadGearLv(id) : 0;   // 等級：新版裝備才有（js/gear-v2.js）
+      return '<button type="button" class="sq-slot gear s' + i + (on ? ' sel' : '') + (g ? ' filled' + (lv ? equipTier(lv) : '') : '') + '" data-gear-slot="' + i + '" data-sq="gearSlot:' + i + '" title="' + sqEsc(g ? g.name + (lv ? ' Lv' + lv : '') : '空') + '">' +
+        (g ? '<img data-sq="gearSlotImg:' + i + '" src="' + squadGearImage(g) + '" alt="">' + (lv ? '<em class="sq-lv">Lv' + lv + '</em>' : '') : '<i class="sq-plus-icon">+</i>') + '</button>' +
         '<span class="sq-slot-name gear s' + i + '" data-sq="gearSlotName:' + i + '">' + sqEsc(g ? g.name : '未裝備') + '</span>';
     }).join('') +
     '<div class="sq-preview" data-sq="box.preview"><canvas data-sq="img.preview" width="128" height="128"></canvas></div>' +
