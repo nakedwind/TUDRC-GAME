@@ -715,7 +715,8 @@ function stairArrowSpots() {
     const groups = {};   // 同一個目的地的出入口格合成一個箭頭
     for (const pt of mapPortals) {
       if (pt.c + .5 < left || pt.c + .5 >= left + w || pt.r + .5 < top || pt.r + .5 >= top + h) continue;
-      (groups[pt.to] = groups[pt.to] || []).push(pt);
+      const key = pt.to + (pt.locked ? '#locked' : '');   // 鎖住的出入口自己一組：箭頭才會畫在還能走的那半邊（例如只剩平台能下樓）
+      (groups[key] = groups[key] || []).push(pt);
     }
     const here = mapFloorNumber(MAP && MAP.name), entries = Object.entries(groups);
     // 高度：這張樓梯圖上所有出入口最上面那格（每個箭頭一樣高）
@@ -727,7 +728,7 @@ function stairArrowSpots() {
       // 左右翻轉過的樓梯圖：畫面右邊其實是原圖的左側
       const frac = entries.length > 1 ? (s.fx ? 1 - (onRight ? sides.left : sides.right) : (onRight ? sides.right : sides.left)) : .5;
       const x = OX + (left + w * frac) * CELL;
-      const there = mapFloorNumber(portalTargetName({ to }));
+      const there = mapFloorNumber(portalTargetName({ to: pts[0].to }));
       // 看得出樓層就比樓層；看不出來就照位置：右邊上樓、左邊下樓
       const dir = here != null && there != null && here !== there ? (there > here ? 'up' : 'down') : (onRight ? 'up' : 'down');
       list.push({ dir, x, y: y + (dir === 'down' ? STAIR_ARROW.downDrop[s.id] || 0 : 0), portals: pts });
