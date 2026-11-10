@@ -2789,6 +2789,13 @@ newGame(); renderBuildBar();
 if (PREVIEW) {                 // 從地圖編輯器來的預覽：直接進場，標題列標示是預覽
   const note = document.querySelector('.header-note');
   if (note) note.textContent = '🔍 預覽模式 · ' + ((MAP && MAP.name) || '編輯中的地圖');
+  // 預覽時溫特身上自動裝高亮度手電筒、電量補滿（不然黑暗的地圖一進去就嚇死）。只改這一次預覽，不存回真正的存檔
+  if (typeof equipState !== 'undefined' && equipState.equipped) {
+    equipState.owned.headlamp = Math.max(1, equipState.owned.headlamp | 0);
+    if (!Object.values(equipState.equipped).includes('headlamp')) equipState.equipped[['acc1', 'acc2'].find(k => !equipState.equipped[k]) || 'acc1'] = 'headlamp';
+    equipState.battery = 100;
+    saveEquipment = () => {};
+  }
   begin();
 } else showStart();
 requestAnimationFrame(loop);
