@@ -258,6 +258,7 @@ function initMap() {
 
   // 結構：固定牆、可破壞、入口、營地
   mapWalls = new Set(MAP.solid || []);                                   // pathfinding.js 的全域
+  setMapFloors(MAP.deck, MAP.ramps);                                     // 陸橋：2 樓地面、樓層出入口（js/pathfinding.js）
   // 牆格整組重建了：上一張地圖的門、捷運閘門、可炸牆、置物箱「加進去的格子」不能再拿來刪
   // （不然上一張地圖剛好在同一格有門，就會把這張地圖本來畫好的牆刪掉，人可以穿牆）
   if (typeof doorAddedWalls !== 'undefined') doorAddedWalls = new Set();
@@ -418,6 +419,7 @@ function solidBlocksPoint(x, y) {
   const elevator = elevatorBlocksPoint(x, y);
   if (elevator !== null) return elevator;
   const [c, r] = cellAt(x, y);
+  if (floorCtx === 2) return isWall(c, r);                      // 二樓：只看有沒有陸橋地面（不吃一樓牆的微調）
   if (isWall(c, r) && !solidOffsetAt(c, r)) return true;        // 沒微調過：整格都擋
   for (let dc = -1; dc <= 1; dc++) for (let dr = -1; dr <= 1; dr++) {
     const cc = c + dc, rr = r + dr;
@@ -678,7 +680,7 @@ function hasImageAt(c, r) {
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
-const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !!s.deck2 || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
 // ---- 只畫畫面看得到的地方 ----
 // 大地圖（例如 Y 區 56×60 格）如果每一幀都把整張地圖的每一格、每張圖重畫一次，會很卡。
@@ -819,6 +821,8 @@ function mapOccluders() {
       if (overlapX > 0 && (smallDecoration ? overlapY > 0 : overlapY >= CELL / 4)) it.y = other.y;
     }
   }
+  // 標了「2樓」的圖（陸橋）：排在所有一樓的東西後面（蓋在一樓的人上面）；地板類的排在二樓的人後面、牆柱類的照底部Y跟二樓的人排前後
+  for (const it of items) if (it.kind === 'stamp' && it.stamp.deck2) it.y = isOccLayer(MAP_LAYER_ORDER[it.li]) ? it.y + FLOOR2_SORT : FLOOR2_SORT - 50000 + it.li;
   buildLayerOverdraw(items);
   occCache = items; occCacheFor = MAP;
   return items;
