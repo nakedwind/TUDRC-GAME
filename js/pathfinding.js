@@ -62,7 +62,7 @@ function updateActorFloor(a) {
 }
 const actorFloor = a => (hasFloors && a && a.floor) || 1;
 // 畫面前後：二樓的人、二樓的圖都加上這個大數字，排在所有一樓的東西後面畫（蓋在一樓的人上面）
-const FLOOR2_SORT = 100000, floorSortY = a => hasFloors && a && (a.floor === 2 || rampUpperCells.has(cellAt(a.x, a.y).join(','))) ? FLOOR2_SORT : 0;
+const FLOOR2_SORT = 100000, floorSortY = a => hasFloors && a && (a.floor === 2 || rampUpperCells.has(cellAt(a.x, a.y).join(',')) || (typeof inStairUpper === 'function' && inStairUpper(a.x, a.y))) ? FLOOR2_SORT : 0;
 const sameFloor = (a, b) => actorFloor(a) === actorFloor(b);
 
 // ---- 邊緣碰撞（地圖編輯器「📏 邊緣碰撞」畫的薄牆）----

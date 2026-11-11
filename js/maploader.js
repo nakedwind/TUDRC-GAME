@@ -835,7 +835,8 @@ function drawMapTop(ctx) {
 // 所以先算「有效底部Y」：跟它重疊、而且在更下層的圖，底部比它低就跟著用那個的，
 // 這樣它會緊接在那張圖之後畫出來，跟編輯器看到的上下關係一致。
 // 重疊用「實際像素範圍」判斷（含方向鍵微調的 ox/oy），因為常常是靠微調才疊在一起、格子並沒有交集。
-let occCache = null, occCacheFor = null;
+let occCache = null, occCacheFor = null, stairUpperRects = [];
+function inStairUpper(x, y) { if (hasFloors && MAP) mapOccluders(); for (const b of stairUpperRects) if (x >= b.x0 && x < b.x1 && y >= b.y0 && y < b.y1) return true; return false; }
 function mapOccluders() {
   if (occCache && occCacheFor === MAP) return occCache;
   const items = [];
@@ -887,10 +888,15 @@ function mapOccluders() {
   // 標了「2樓」的圖（陸橋）：排在所有一樓的東西後面（蓋在一樓的人上面）；地板類的排在二樓的人後面、牆柱類的照底部Y跟二樓的人排前後
   for (const it of items) {
     const lid = MAP_LAYER_ORDER[it.li];
-    if (it.part === 'upper') { it.y = FLOOR2_SORT + it.splitY; continue; }   // 連接柱的上半段：從分界那條線起算，跟二樓的人排前後
+    const flat = it.kind === 'stamp' && !!(mapTileById(it.stamp.id) || {}).flat;   // 平貼的圖（樓梯、手扶梯、地上的線）：人是踩在上面的，不能蓋住人
+    if (it.part === 'lower') { if (flat) it.y = -1; continue; }   // 樓梯的下半段：一樓的地面，永遠在一樓的人下面
+    if (it.part === 'upper') { it.y = flat ? FLOOR2_SORT - 50000 + it.li : FLOOR2_SORT + it.splitY; continue; }   // 上半段：樓梯＝二樓的地面；柱子＝從分界那條線起算，跟二樓的人排前後
     if (!itemOn2F(it)) continue;
+    if (flat) { it.y = FLOOR2_SORT - 50000 + it.li; continue; }
     it.y = MAP_FLOOR2_TOP.has(lid) ? FLOOR2_SORT + 50000 + it.li : isOccLayer(lid) ? it.y + FLOOR2_SORT : FLOOR2_SORT - 50000 + it.li;
   }
+  // 樓梯（平貼、連接 1、2 樓的圖）的上半段範圍：站在裡面的人畫面上算 2 樓（js/pathfinding.js 的 floorSortY）
+  stairUpperRects = items.filter(it => it.part === 'upper' && (mapTileById(it.stamp.id) || {}).flat).map(it => ({ x0: OX + it.x0, x1: OX + it.x1, y0: OY + it.y0, y1: OY + it.splitY }));
   buildLayerOverdraw(items);
   occCache = items; occCacheFor = MAP;
   return items;
