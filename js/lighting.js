@@ -224,14 +224,26 @@ const BASE_ART_LAMPS = [
 const MAP_LAMP_TILES = [
   { file: /\/森林(藍)?\/bg_forest_light(_blue)?\.png$/i, lamps: [[.24, .68]], r: 170, lantern: true },   // 森林的木柱吊燈（藍色版也會亮）
 ];
+// 這盞燈的位置有沒有落在「2樓」物件圖層的圖上（電燈、日光燈沒有自己的圖層資料，用位置判斷是 2 樓的燈還是 1 樓的燈）
+function lightOn2FObject(x, y) {
+  if (!MAP) return false;
+  for (const s of MAP.stamps || []) {
+    const lid = s.layer || 'top';
+    if (!MAP_FLOOR2_LAYERS.has(lid) || !isOccLayer(lid)) continue;
+    const t = mapTileById(s.id); if (!t) continue;
+    const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0);
+    if (x >= x0 - 4 && x <= x0 + mapStampW(s, t) * CELL + 4 && y >= y0 - 4 && y <= y0 + mapStampH(s, t) * CELL + 4) return true;
+  }
+  return false;
+}
 function getLights() {
   const L = [];
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
   if (G && G.player && LIGHT.playerLightOn) L.push({ x: G.player.x, y: G.player.y, r: LIGHT.playerR });
   if (typeof equipLight === 'function') L.push(...equipLight());   // 照明頭盔、手電筒（js/equipment.js）
   // 營地常亮（沒自訂營地就用預設最下排）
-  if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); const [x, y] = center(c, r); L.push({ x, y, r: LIGHT.campR }); });
-  else for (let c = 0; c < COLS; c++) { const [x, y] = center(c, ROWS - 1); L.push({ x, y, r: LIGHT.campR }); }
+  if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); const [x, y] = center(c, r); L.push({ x, y, r: LIGHT.campR, floor: 1 }); });   // 營地在 1 樓
+  else for (let c = 0; c < COLS; c++) { const [x, y] = center(c, ROWS - 1); L.push({ x, y, r: LIGHT.campR, floor: 1 }); }
   // 會發光的建築（探照燈等，半徑設定在 balance.js 的 LIGHT.buildings）
   // 光照範圍固定；warm/phase 是給「暖色呼吸光暈」裝飾用的（每盞燈相位錯開）
   if (G) for (const o of G.obstacles) {
@@ -284,8 +296,10 @@ function getLights() {
     spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * (s.fy ? 1 - fy : fy); L.push({ floor: f2, x, y, visualX: x, visualY: y, r: spec.r, warm: true, single: true, lantern: !!spec.lantern, phase: s.c * 7 + s.r * 13 + i }); });
   }
   if (typeof flareLightSources === 'function') L.push(...flareLightSources());   // 燃燒中的照明彈（js/flare.js）
+  const nFix = L.length;
   if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());
-  if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
+  if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());
+  if (hasFloors) for (let k = nFix; k < L.length; k++) L[k].floor = lightOn2FObject(L[k].visualX ?? L[k].x, L[k].visualY ?? L[k].y) ? 2 : 1;   // 電燈、日光燈：看它是不是掛在 2 樓的物件圖層上   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
   if (typeof mapGlowLights === 'function') L.push(...mapGlowLights());   // 地圖上設成「發光」的物件（地圖編輯器／基地編輯器；js/maploader.js）
   // 陸橋：標了樓層的燈只照溫特所在的那一層（沒標的＝兩層都亮）
   const vf = actorFloor(G && G.player), lit = hasFloors ? L.filter(l => l.floor == null || l.floor === vf) : L;
