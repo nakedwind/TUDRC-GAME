@@ -734,8 +734,20 @@ function stampConnects(s) {
   if (!hasFloors || !stampOn2F(s) || !isOccLayer(lid) || MAP_FLOOR2_TOP.has(lid)) return false;
   const t = mapTileById(s.id); if (!t) return false;
   const w = mapStampW(s, t), h = mapStampH(s, t); if (h < 2) return false;
-  const c = Math.floor(s.c + (s.ox || 0) / CELL + w / 2), r = Math.floor(s.r + (s.oy || 0) / CELL + h - .5), k = c + ',' + r;
-  return !deckCells.has(k) && !floor2ArtCells().floor.has(k);
+  // 下半段蓋到的每一格都不能是 2 樓的地面／2 樓地板的圖：只要碰到一格，就是站在陸橋上的牆（整張算 2 樓），不拆
+  const c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL, fl = floor2ArtCells().floor;
+  for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 + h / 2 - .5); r + .5 < r0 + h; r++) {
+    const k = c + ',' + r; if (deckCells.has(k) || fl.has(k)) return false;
+  }
+  return true;
+}
+// 樓梯類的連接物（人是踩在上面走的，不能蓋住人）：平貼的圖、手扶梯、或圖蓋到「樓層出入口」的格子
+function stampIsStairs(s) {
+  const t = mapTileById(s.id) || {};
+  if (t.flat || (typeof escalatorSpec === 'function' && escalatorSpec(s.id))) return true;
+  const w = mapStampW(s, t), h = mapStampH(s, t), c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL;
+  for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r0 + h; r++) if (rampCells.has(c + ',' + r)) return true;
+  return false;
 }
 const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return stampOn2F(s) || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
@@ -888,7 +900,7 @@ function mapOccluders() {
   // 標了「2樓」的圖（陸橋）：排在所有一樓的東西後面（蓋在一樓的人上面）；地板類的排在二樓的人後面、牆柱類的照底部Y跟二樓的人排前後
   for (const it of items) {
     const lid = MAP_LAYER_ORDER[it.li];
-    const flat = it.kind === 'stamp' && !!(mapTileById(it.stamp.id) || {}).flat;   // 平貼的圖（樓梯、手扶梯、地上的線）：人是踩在上面的，不能蓋住人
+    const flat = it.kind === 'stamp' && (it.part ? stampIsStairs(it.stamp) : !!(mapTileById(it.stamp.id) || {}).flat);   // 平貼的圖（樓梯、手扶梯、地上的線）：人是踩在上面的，不能蓋住人
     if (it.part === 'lower') { if (flat) it.y = -1; continue; }   // 樓梯的下半段：一樓的地面，永遠在一樓的人下面
     if (it.part === 'upper') { it.y = flat ? FLOOR2_SORT - 50000 + it.li : FLOOR2_SORT + it.splitY; continue; }   // 上半段：樓梯＝二樓的地面；柱子＝從分界那條線起算，跟二樓的人排前後
     if (!itemOn2F(it)) continue;
@@ -896,7 +908,7 @@ function mapOccluders() {
     it.y = MAP_FLOOR2_TOP.has(lid) ? FLOOR2_SORT + 50000 + it.li : isOccLayer(lid) ? it.y + FLOOR2_SORT : FLOOR2_SORT - 50000 + it.li;
   }
   // 樓梯（平貼、連接 1、2 樓的圖）的上半段範圍：站在裡面的人畫面上算 2 樓（js/pathfinding.js 的 floorSortY）
-  stairUpperRects = items.filter(it => it.part === 'upper' && (mapTileById(it.stamp.id) || {}).flat).map(it => ({ x0: OX + it.x0, x1: OX + it.x1, y0: OY + it.y0, y1: OY + it.splitY }));
+  stairUpperRects = items.filter(it => it.part === 'upper' && stampIsStairs(it.stamp)).map(it => ({ x0: OX + it.x0, x1: OX + it.x1, y0: OY + it.y0, y1: OY + it.splitY }));
   buildLayerOverdraw(items);
   occCache = items; occCacheFor = MAP;
   return items;
