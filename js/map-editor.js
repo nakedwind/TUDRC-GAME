@@ -514,6 +514,8 @@ function fixMap(m) {
   if (!(m.vinesFerry && m.vinesFerry.length)) delete m.vinesFerry;   // 🪢 倒吊藤蔓：['欄,列'…]（js/vines.js）
   if (Array.isArray(m.leafPiles) && m.leafPiles.length) m.leafPiles = [...new Set(m.leafPiles)]; else delete m.leafPiles;   // 🍂 樹葉堆：['欄,列'…]（js/leaf-piles.js）
   m.spawnZone = Array.isArray(m.spawnZone) ? [...new Set(m.spawnZone)] : [];   // 怪物出生區（空的＝照舊：黑暗處都可能生怪）
+  if (Array.isArray(m.deck) && m.deck.length) m.deck = [...new Set(m.deck)]; else delete m.deck;   // 🌉 2樓地面：['欄,列'…]（js/pathfinding.js）
+  if (Array.isArray(m.ramps) && m.ramps.length) m.ramps = [...new Set(m.ramps)]; else delete m.ramps;   // 🛗 樓層出入口：['欄,列'…]（手扶梯、樓梯：走出去就換樓層）
   m.coreCount = m.coreCount != null && Number.isFinite(Number(m.coreCount))
     ? Math.max(1, Math.min(20, Math.floor(Number(m.coreCount))))
     : Math.max(1, Math.min(20, Math.floor(Number(m.difficulty) || 1)));
@@ -980,6 +982,7 @@ function drawStamp(s) {
   if (!s.blend && alpha === 1) drawStampRaw(s);
   else { ctx.save(); if (s.blend) ctx.globalCompositeOperation = s.blend; ctx.globalAlpha *= alpha; drawStampRaw(s); ctx.restore(); }
   if (s.still) drawStillBadge(s);
+  if (s.deck2) drawDeck2Badge(s);
   if (s.cars > 0 && s.id === 'tile_mrt_train_car_head') drawMrtExtraCars(s);
   if (s.bothDoors && MRT_TRAIN_CAR_IDS.has(s.id)) drawMrtDoorsBadge(s);
   if (s.glow) {   // 發光：畫一圈淡淡的虛線，標出照亮的範圍（只在編輯器裡看得到）
@@ -993,6 +996,12 @@ function drawStillBadge(s) {
   const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
   ctx.save(); ctx.fillStyle = 'rgba(190,40,50,.9)'; ctx.fillRect(x, y, 30, 15);
   ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('不動', x + 4, y + 8); ctx.restore();
+}
+// 標了「2樓」的圖（陸橋）：左上角標一下
+function drawDeck2Badge(s) {
+  const x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+  ctx.save(); ctx.fillStyle = 'rgba(40,120,220,.9)'; ctx.fillRect(x, y, 34, 15);
+  ctx.fillStyle = '#fff'; ctx.font = 'bold 11px sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'middle'; ctx.fillText('🌉2樓', x + 3, y + 8); ctx.restore();
 }
 // 捷運車廂設成「兩側車門都開」：左上角標一下（js/mrt-train.js）
 function drawMrtDoorsBadge(s) {
@@ -1304,6 +1313,7 @@ function draw() {
   const m = curMap();
   const solid = new Set(m.solid), breakable = new Set(m.breakable);
   const coreSpots = new Set(m.coreSpots), spawnZone = new Set(m.spawnZone || []);
+  const deckSet = new Set(m.deck || []), rampSet = new Set(m.ramps || []);   // 陸橋：2樓地面、樓層出入口
 
   ctx.setTransform(EDITOR_RES, 0, 0, EDITOR_RES, 0, 0);   // 遊戲畫質：放大畫（座標照舊用一格 40）
   ctx.imageSmoothingEnabled = false;
@@ -1345,6 +1355,14 @@ function draw() {
       ctx.globalAlpha = .7; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
       ctx.fillText('👾', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
     }
+    if ((showSolid || brush.mode === 'deck' || brush.mode === 'ramp') && (deckSet.has(key) || rampSet.has(key))) {   // 🌉 2樓地面（藍）、🛗 樓層出入口（橘）
+      const isRamp = rampSet.has(key);
+      ctx.fillStyle = isRamp ? 'rgba(255,160,40,.32)' : 'rgba(70,150,255,.28)'; ctx.fillRect(x, y, CELL, CELL);
+      ctx.strokeStyle = isRamp ? 'rgba(255,200,120,.9)' : 'rgba(140,200,255,.85)'; ctx.lineWidth = 1.5; ctx.setLineDash([4, 3]);
+      ctx.strokeRect(x + 2.5, y + 2.5, CELL - 5, CELL - 5); ctx.setLineDash([]);
+      ctx.globalAlpha = .8; ctx.font = '14px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillText(isRamp ? '🛗' : '🌉', x + CELL / 2, y + CELL / 2); ctx.textBaseline = 'alphabetic'; ctx.globalAlpha = 1;
+    }
     if (coreSpots.has(key)) {
       ctx.fillStyle = 'rgba(158,83,241,.38)'; ctx.fillRect(x, y, CELL, CELL);
       ctx.strokeStyle = '#dab5ff'; ctx.lineWidth = 2; ctx.strokeRect(x + 3, y + 3, CELL - 6, CELL - 6);
@@ -1374,6 +1392,10 @@ function draw() {
   if (showSolid && (brush.mode === 'spawn' || (m.spawnZone || []).length)) {
     ctx.fillStyle = '#8cf5b0';
     ctx.fillText('👾 怪物出生區 ' + (m.spawnZone || []).length + ' 格' + ((m.spawnZone || []).length ? '' : '（沒畫＝黑暗處都可能生怪）'), OX + 6, OY + 34);
+  }
+  if (brush.mode === 'deck' || brush.mode === 'ramp' || (m.deck || []).length || (m.ramps || []).length) {
+    ctx.fillStyle = '#8fc8ff'; ctx.textAlign = 'left';
+    ctx.fillText('🌉 2樓地面 ' + (m.deck || []).length + ' 格／🛗 樓層出入口 ' + (m.ramps || []).length + ' 格' + ((m.deck || []).length && (m.ramps || []).length ? '' : '（兩種都要畫，遊戲才會有 2 樓）'), OX + 6, OY + 52);
   }
   // 電路編號（開關、電燈右上角的紅色小圓牌，1～5，沒設定的算 1）：選起來在上方的「電路編號」設定
   for (const s of (m.stamps || [])) {
@@ -1581,6 +1603,7 @@ function pickAt(m, c, r) {
 }
 
 // ================= 畫格子（依目前畫筆）=================
+let deckPaintAdd = true;   // 2樓地面、樓層出入口筆刷：這一筆是畫上還是擦掉
 let spawnPaintAdd = true;   // 怪物出生區筆刷：這一筆是畫上還是擦掉
 // 這一格在哪個基地（臨時基地）上：回傳 { s, t, dc, dr }（dc、dr＝在基地圖裡的第幾格）；沒有＝null
 function baseAtCell(m, c, r) {
@@ -1702,6 +1725,11 @@ function paintCell(c, r, isDown, additiveSelect = false) {
     saveMaps(); draw();
     setStatus((edgePaint.add ? '已加上' : '已拿掉') + '邊緣碰撞（這張地圖共 ' + ((m.edges || []).length) + ' 條）：按著沿格線拖曳可以連續' + (edgePaint.add ? '畫' : '擦'), '#ffb347');
     return;
+  } else if (brush.mode === 'deck' || brush.mode === 'ramp') {   // 🌉 2樓地面／🛗 樓層出入口：拖曳畫一片、再畫一次＝擦掉（兩種各自一組格子）
+    const f = brush.mode === 'deck' ? 'deck' : 'ramps', list = m[f] || (m[f] = []);
+    if (isDown) deckPaintAdd = !list.includes(key);
+    if (deckPaintAdd) { if (!list.includes(key)) list.push(key); } else removeFrom(list, key);
+    if (!list.length) delete m[f];
   } else if (brush.mode === 'spawn') {
     m.spawnZone = m.spawnZone || [];
     if (isDown) spawnPaintAdd = !m.spawnZone.includes(key);   // 按下的那格決定這一筆是「畫」還是「擦」
@@ -2914,6 +2942,28 @@ function selectedMrtCars() {
   const m = curMap();
   return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(s => s && MRT_TRAIN_CAR_IDS.has(s.id));
 }
+// ---- 陸橋（2 樓）的圖：勾了＝這張圖在遊戲裡蓋在一樓的人上面（stamp.deck2，js/maploader.js）；站在 2 樓地面上的人畫在它上面 ----
+function refreshDeck2Control() {
+  let box = document.getElementById('deck2Control');
+  if (!box) {
+    box = document.createElement('div'); box.id = 'deck2Control'; box.className = 'blend-control';
+    box.innerHTML = '<label title="勾了：這張圖是 2 樓（陸橋）的一部分，遊戲裡蓋在一樓的人上面、2 樓的人走在它上面。2 樓能不能走要另外用「🌉 2樓地面」「🛗 樓層出入口」畫格子"><input type="checkbox" id="deck2Toggle"> 🌉 2樓的圖（蓋在一樓的人上面）</label>';
+    document.getElementById('selControls').appendChild(box);
+    document.getElementById('deck2Toggle').addEventListener('change', e => {
+      if (dropLockedSelections('切換 2 樓')) return;
+      const m = curMap(), list = selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(Boolean); if (!list.length) return;
+      pushUndo();
+      for (const s of list) { if (e.target.checked) s.deck2 = true; else delete s.deck2; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus(list.length + ' 個物件已設為' + (e.target.checked ? '2 樓的圖' : '一般（1 樓）'), '#7ee0c0');
+    });
+  }
+  const m = curMap(), list = selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index]).filter(Boolean);
+  box.classList.toggle('hidden', !list.length);
+  if (!list.length) return;
+  const toggle = document.getElementById('deck2Toggle'), on = list.filter(s => s.deck2).length;
+  toggle.checked = on === list.length; toggle.indeterminate = on > 0 && on < list.length;
+}
 function refreshMrtDoorsControl() {
   let box = document.getElementById('mrtDoorsControl');
   if (!box) {
@@ -3171,6 +3221,7 @@ function refreshSelPanel() {
   if (typeof refreshStampTransformPanel === 'function') refreshStampTransformPanel();   // 大小、角度（js/map-editor-transform.js）
   refreshStillControl();   // 機車、手扶梯會不會動
   refreshMrtDoorsControl();   // 捷運車廂：兩側車門都開
+  refreshDeck2Control();   // 陸橋：2 樓的圖
   layerSelect.disabled = !hasSelection;
   ['selUp', 'selDown', 'selFlipX', 'selFlipY', 'selRotate', 'selReset', 'selDelete'].forEach(id => {
     document.getElementById(id).disabled = !hasSelection;
@@ -3626,6 +3677,8 @@ function shiftMapContent(m, dc, dr) {
   if (m.vinesHang) m.vinesHang = m.vinesHang.map(shiftKey);
   if (m.vinesFerry) m.vinesFerry = m.vinesFerry.map(f => ({ ...f, at: shiftKey(f.at), to: shiftKey(f.to) }));
   if (m.leafPiles) m.leafPiles = m.leafPiles.map(shiftKey);
+  if (m.deck) m.deck = m.deck.map(shiftKey);
+  if (m.ramps) m.ramps = m.ramps.map(shiftKey);
   const off = {};
   for (const k in (m.solidOffsets || {})) off[shiftKey(k)] = m.solidOffsets[k];
   m.solidOffsets = off;
@@ -3658,6 +3711,8 @@ function dropOutsideContent(m) {
   if (m.vines) { const n = m.vines.length; m.vines = m.vines.filter(insideKey); removed += n - m.vines.length; if (!m.vines.length) delete m.vines; }
   if (m.vinesHang) { const n = m.vinesHang.length; m.vinesHang = m.vinesHang.filter(insideKey); removed += n - m.vinesHang.length; if (!m.vinesHang.length) delete m.vinesHang; }
   if (m.vinesFerry) { const n = m.vinesFerry.length; m.vinesFerry = m.vinesFerry.filter(f => insideKey(f.at) && insideKey(f.to)); removed += n - m.vinesFerry.length; if (!m.vinesFerry.length) delete m.vinesFerry; }
+  if (m.deck) { m.deck = m.deck.filter(insideKey); if (!m.deck.length) delete m.deck; }
+  if (m.ramps) { m.ramps = m.ramps.filter(insideKey); if (!m.ramps.length) delete m.ramps; }
   if (m.leafPiles) { const n = m.leafPiles.length; m.leafPiles = m.leafPiles.filter(insideKey); removed += n - m.leafPiles.length; if (!m.leafPiles.length) delete m.leafPiles; }
   ['solid', 'breakable', 'camp', 'coreSpots', 'spawnZone'].forEach(key => {
     const n = (m[key] || []).length;

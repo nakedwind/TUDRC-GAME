@@ -1410,16 +1410,19 @@ function groundDrawnAt(c, r) {
 // ---- 玩家移動與碰撞（牆、哨兵、障礙物都擋路；水平垂直分開判斷可貼牆滑行）----
 function playerBlocked(x, y) {
   const r = PLAYER.r;
+  const keepCtx = floorCtx, keepRamp = floorOnRamp; setFloorCtx(G.player);   // 溫特在幾樓就照幾樓的規則（js/pathfinding.js）
+  try {
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
-    if (!inGrid(c, rr) || G.grid[c + ',' + rr]) return true;
+    if (!inGrid(c, rr) || (floorCtx !== 2 && G.grid[c + ',' + rr])) return true;
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
   // 邊緣碰撞（薄牆，js/pathfinding.js）：四個角再加四邊的中點，薄牆的一端剛好卡在身體中間也擋得到
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r], [0, -r], [0, r], [-r, 0], [r, 0]]) if (edgeWallBlocksPoint(x + sx, y + sy)) return true;
   if (typeof bigPearlBlocksPlayer === 'function' && bigPearlBlocksPlayer(x, y)) return true;   // 珍珠大童的大珍珠（js/pearl-elder.js）
   return false;
+  } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; }
 }
 // 救援機制：角色若被卡在牆／建築裡（例如放置時的邊角誤差），
 // 由近到遠繞圈找最近的空位，把角色推出去。
@@ -2196,7 +2199,7 @@ function frame(ts) {
   if (menuOpen && G.cameraShakeT) G.cameraShakeT = 0;   // 暫停中（教學、對話、選單…）：被打到的鏡頭震動倒數在 update 裡跑、不會減少，不歸零畫面會一直抖
   if (typeof updateGrab === 'function') updateGrab(dt, menuOpen || frozen || mapTransitioning);   // 右鍵抓隊友／NPC（js/grab.js）
   if (!menuOpen && !frozen && typeof updateBallBark === 'function') updateBallBark(dt);   // 球球偶爾叫一下（js/ball-poses.js）
-  if (!menuOpen && !frozen) { updatePlayer(sdt); autoStairTravel(); holdPickupTick(dt); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓；按住空白鍵連續拾取
+  if (!menuOpen && !frozen) { setFloorCtx(G.player); updatePlayer(sdt); updateActorFloor(G.player); clearFloorCtx(); autoStairTravel(); holdPickupTick(dt); }   // 對話、商店或轉場時暫停玩家與戰場；走到樓梯盡頭自動上下樓；按住空白鍵連續拾取
   updateFootsteps(!!menuOpen && !mapTransitioning);   // 走路腳步聲：打開選單時停掉（命中頓格很短，不停）；走樓梯、進門換地圖的過場中照樣響，跟樓梯音效一起聽起來才像在走樓梯
   updateCamera();
   if (typeof tutorialFrame === 'function') tutorialFrame(dt);   // 新手教學的動畫提示：畫面變暗、目標發光（暫停中也要跟著畫，js/tutorial.js）
@@ -2236,7 +2239,7 @@ function update(dt) {
   G.cameraShakeT = Math.max(0, (G.cameraShakeT || 0) - dt);
   if (typeof SANITY === 'undefined' || SANITY.autoRegen) G.guide = Math.min(G.guideMax, G.guide + G.guideRegen * dt);   // SP 不會自己恢復，要喝杏仁水（js/sanity.js）
   // 怪物移動
-  for (const e of G.enemies) stepEnemy(e, dt);
+  for (const e of G.enemies) { setFloorCtx(e); stepEnemy(e, dt); updateActorFloor(e); } clearFloorCtx();   // 每隻怪物照自己在幾樓的規則走（js/pathfinding.js）
   if (typeof mateHurtTick === 'function') mateHurtTick(dt);   // 隊友被打、快沒血、倒下時頭上冒泡泡（js/mate-hurt-talk.js）
   // 雷德：偵測最近怪物，3 格內進入「舉盾衝撞」模式（供移動衝刺、撞擊、繪製共用）
   for (const t of G.towers) {
@@ -2252,6 +2255,7 @@ function update(dt) {
   if (typeof baseFollowTick === 'function') baseFollowTick(dt);   // 每幀看溫特換了地圖沒（出勤時雷德不在隊上也要知道：回基地就回平常的位置）；跟過來的雷德晚一點從樓梯走出來（js/base-follow.js）
   for (const t of G.towers) {
     const ox = t.x, oy = t.y;
+    setFloorCtx(t);   // 隊員在幾樓就照幾樓的規則走（js/pathfinding.js）
     if (t.grabbed || t.grabFall) { faceNpcFront(t); continue; }   // 被抓著／正在掉下來（js/grab.js）
     if (t.vineCap || t.vineDazeT > 0) { t.moving = false; continue; }   // 被藤蔓吊走、摔下來頭暈（js/vines.js）
     if (MAP_SAFE && (npcArrangeMode || t.npcPosed)) faceNpcFront(t);
@@ -2267,6 +2271,7 @@ function update(dt) {
     avoidOilFires(t, dt, Math.hypot(t.x - ox, t.y - oy) > .3);    // 被火海推開（js/oil-barrels.js 的火）；這幀有沒有在走
     animateSentry(t, t.x - ox, t.y - oy, dt);
   }
+  clearFloorCtx();
   // 雷德衝撞：舉盾模式下撞到怪物 → 擊退＋少量傷害（有冷卻，避免連續觸發）
   for (const t of G.towers) {
     if (t.type !== 'red' || !t.shieldMode || t.ramCd > 0 || t.hp <= 0 || t.berserk || t.eatenBy || t.sleepT > 0) continue;
@@ -2286,11 +2291,14 @@ function update(dt) {
   }
   for (const npc of G.npcs) {
     const ox = npc.x, oy = npc.y;
+    setFloorCtx(npc);
     if (npc.grabbed || npc.grabFall) { faceNpcFront(npc); continue; }   // 被抓著／正在掉下來（js/grab.js）
     if (MAP_SAFE && (npcArrangeMode || npc.npcPosed)) faceNpcFront(npc);
     else updateWanderer(npc, dt);
     animateSentry(npc, npc.x - ox, npc.y - oy, dt);
   }
+  clearFloorCtx();
+  if (hasFloors) { for (const t of G.towers) updateActorFloor(t); for (const n of G.npcs) updateActorFloor(n); }   // 走出樓層出入口就換樓層（js/pathfinding.js）
   // 哨兵攻擊
   for (const t of G.towers) {
     const spec = TYPES[t.type];
