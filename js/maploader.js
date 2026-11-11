@@ -827,6 +827,7 @@ function mapOccluders() {
     for (const other of items) {                    // 找它底下那層、又跟它重疊的東西（牆、櫃子…）
       if (other.li >= it.li || other.y <= it.y) continue;
       if (itemOn2F(other) !== itemOn2F(it)) continue;    // 1 樓的東西（例如柱子）不能拿來當 2 樓牆壁的深度，不然 2 樓的牆會蓋住 2 樓的人
+      if (itemOn2F(other) && !isOccLayer(MAP_LAYER_ORDER[other.li])) continue;   // 2 樓的地板不是「牆、櫃子」：不能拿來借深度（跟 1 樓的地板不在排序裡一樣）
       const overlapX = Math.min(it.x1, other.x1) - Math.max(it.x0, other.x0);
       const overlapY = Math.min(it.y1, other.y1) - Math.max(it.y0, other.y0);
       // 小杯子、海報等可貼在下層物件上；大型家具只碰到幾個像素的邊緣時不能借用對方的深度。
