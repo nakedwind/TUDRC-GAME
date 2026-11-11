@@ -3830,12 +3830,7 @@ function generateDeckFromLayers() {
   const floor = cells(floorIds, false), walls = cells(wallIds, true, floor), deck = new Set(m.deck || []);
   const inWalls = [...deck].filter(k => walls.has(k)).length;
   // 先問要做到哪：只清掉牆裡面的格子（不會多出能走的地方），還是連地板蓋到的格子也一起加
-  const addFloor = confirm('🌉 從 2 樓圖層整理「2樓地面」
-
-目前有 ' + inWalls + ' 格 2 樓地面畫在 2 樓牆壁的圖裡面（人走進去會被牆切掉一半）。
-
-【確定】＝把「2樓地板」蓋到的格子也加進來，再拿掉牆裡面的格子
-【取消】＝只拿掉牆裡面的格子，其他不動');
+  const addFloor = confirm('🌉 從 2 樓圖層整理「2樓地面」\n\n目前有 ' + inWalls + ' 格 2 樓地面畫在 2 樓牆壁的圖裡面（人走進去會被牆切掉一半）。\n\n【確定】＝把「2樓地板」蓋到的格子也加進來，再拿掉牆裡面的格子\n【取消】＝只拿掉牆裡面的格子，其他不動');
   const before = deck.size; let added = 0, removed = 0;
   if (addFloor) for (const k of floor) { const [c, r] = k.split(',').map(Number); if (!inGrid(c, r) || walls.has(k) || (m.ramps || []).includes(k)) continue; if (!deck.has(k)) { deck.add(k); added++; } }
   for (const k of walls) if (deck.delete(k)) removed++;
