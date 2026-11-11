@@ -3808,26 +3808,42 @@ function generateDeckFromLayers() {
   const isObj = id => /^object\d*$/.test(id) || id === 'overlay' || id === 'top';
   const floorIds = new Set(f2.filter(l => !isObj(l.id) && !/牆/.test(l.name)).map(l => l.id));
   const wallIds = new Set(f2.filter(l => /牆/.test(l.name)).map(l => l.id));
-  const cells = (ids) => {
+  // skipPass＝閘門、門這種走得過去的圖不算牆；halfLow＝底部沒踩在 2 樓地板上的圖（連接 1、2 樓的柱子）只算上半段
+  const cells = (ids, asWalls, floorSet) => {
     const out = new Set();
     for (const id of ids) for (const k of Object.keys((m.layers || {})[id] || {})) if (m.layers[id][k]) out.add(k);
     for (const s of m.stamps || []) {
       if (!ids.has(s.layer || 'top')) continue;
       const t = tileById(s.id); if (!t) continue;
+      if (asWalls && /gate|door|閘門|門/i.test(String(s.id) + String(t.name || '') + String(t.file || ''))) continue;
       const w = stampW(s, t), h = stampH(s, t), c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL;
-      for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r0 + h; r++) out.add(c + ',' + r);
+      let r1 = r0 + h;
+      if (asWalls && h >= 2) {   // 下半段完全沒碰到 2 樓地面／2 樓地板 → 連接柱：只有上半段在 2 樓
+        let touches = false;
+        for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w && !touches; c++) for (let r = Math.ceil(r0 + h / 2 - .5); r + .5 < r0 + h; r++) if (floorSet.has(c + ',' + r) || (m.deck || []).includes(c + ',' + r)) { touches = true; break; }
+        if (!touches) r1 = r0 + h / 2;
+      }
+      for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r1; r++) out.add(c + ',' + r);
     }
     return out;
   };
-  const floor = cells(floorIds), walls = cells(wallIds), deck = new Set(m.deck || []);
+  const floor = cells(floorIds, false), walls = cells(wallIds, true, floor), deck = new Set(m.deck || []);
+  const inWalls = [...deck].filter(k => walls.has(k)).length;
+  // 先問要做到哪：只清掉牆裡面的格子（不會多出能走的地方），還是連地板蓋到的格子也一起加
+  const addFloor = confirm('🌉 從 2 樓圖層整理「2樓地面」
+
+目前有 ' + inWalls + ' 格 2 樓地面畫在 2 樓牆壁的圖裡面（人走進去會被牆切掉一半）。
+
+【確定】＝把「2樓地板」蓋到的格子也加進來，再拿掉牆裡面的格子
+【取消】＝只拿掉牆裡面的格子，其他不動');
   const before = deck.size; let added = 0, removed = 0;
-  for (const k of floor) { const [c, r] = k.split(',').map(Number); if (!inGrid(c, r) || walls.has(k) || (m.ramps || []).includes(k)) continue; if (!deck.has(k)) { deck.add(k); added++; } }
+  if (addFloor) for (const k of floor) { const [c, r] = k.split(',').map(Number); if (!inGrid(c, r) || walls.has(k) || (m.ramps || []).includes(k)) continue; if (!deck.has(k)) { deck.add(k); added++; } }
   for (const k of walls) if (deck.delete(k)) removed++;
-  if (!added && !removed) { setStatus('沒有可以加的格子：「2樓」的地板圖層（名稱不能有「牆」、不能是物件／上層類）裡沒有圖', '#ff8f8f'); return; }
+  if (!added && !removed) { setStatus('沒有要改的格子（2 樓地面沒有畫在 2 樓牆壁的圖裡面' + (addFloor ? '，地板圖層也沒有新的格子' : '') + '）', '#9aa4b2'); return; }
   pushUndo();
   if (deck.size) m.deck = [...deck]; else delete m.deck;
   saveMaps(); draw();
-  setStatus('已從 2 樓圖層產生 2 樓地面：加 ' + added + ' 格、拿掉被 2 樓牆蓋到的 ' + removed + ' 格（原有 ' + before + ' 格，現在 ' + deck.size + ' 格）。可以用 🌉 筆刷微調', '#7ee0c0');
+  setStatus('已整理 2 樓地面：加 ' + added + ' 格、拿掉牆裡面的 ' + removed + ' 格（原有 ' + before + ' 格，現在 ' + deck.size + ' 格；閘門、門不算牆）。不對可以 Ctrl+Z，或用 🌉 筆刷微調', '#7ee0c0');
 }
 { const gd = document.getElementById('genDeck'); if (gd) gd.addEventListener('click', generateDeckFromLayers); }
 const safeField = document.getElementById('f_safe');
