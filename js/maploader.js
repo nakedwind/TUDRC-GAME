@@ -38,6 +38,16 @@ const DEFAULT_MAP_LAYER_ORDER = ['floor', 'ground', 'ground2', 'ground3', 'objec
 // 目前這張地圖的圖層順序（由底到上）：編輯器裡新增／刪除過圖層的地圖存在 MAP.layerOrder，沒改過的用上面的預設。
 // 圖層的畫法看 id：ground…＝地面（在角色下面）、object…／overlay＝立體物（跟角色排前後）、top＝永遠在角色上面
 let MAP_LAYER_ORDER = DEFAULT_MAP_LAYER_ORDER;
+// 陸橋（2 樓）的圖層：圖層名稱有「2樓」（或「二樓」）的整層都算 2 樓——裡面的圖蓋在一樓的人上面、2 樓的人走在它上面（js/pathfinding.js 的樓層）。
+// 名稱還有「上層」的（例如「2樓上層」）永遠蓋在 2 樓的人上面（像屋簷）；其他照底部Y跟 2 樓的人排前後，地板類（非物件圖層）永遠在人下面。
+let MAP_FLOOR2_LAYERS = new Set(), MAP_FLOOR2_TOP = new Set();
+function computeFloor2Layers(m) {
+  MAP_FLOOR2_LAYERS = new Set(); MAP_FLOOR2_TOP = new Set();
+  for (const l of (m && Array.isArray(m.layerOrder) ? m.layerOrder : [])) {
+    const nm = String(l.name || ''); if (!/2樓|二樓/.test(nm)) continue;
+    MAP_FLOOR2_LAYERS.add(l.id); if (nm.includes('上層')) MAP_FLOOR2_TOP.add(l.id);
+  }
+}
 const mapLayerOrderOf = m => (m && Array.isArray(m.layerOrder) && m.layerOrder.length) ? m.layerOrder.map(l => l.id) : DEFAULT_MAP_LAYER_ORDER;
 const TILE_REGISTRY = {};
 // map＝要載入的地圖：戰鬥地圖用地圖編輯器的素材設定、基地用基地編輯器的（js/map-data.js 的 mapTileCatalog）
@@ -223,6 +233,7 @@ function initMap() {
   MAP = next;
   window.STORY_MODE = !!StoryScene.config();
   MAP_LAYER_ORDER = mapLayerOrderOf(MAP);   // 這張地圖自己的圖層
+  computeFloor2Layers(MAP);                 // 名稱有「2樓」的圖層＝陸橋
   if(typeof resetMapPower==='function')resetMapPower();
   preloadMapTiles(MAP);
   openElevatorStamp = null;
@@ -680,7 +691,8 @@ function hasImageAt(c, r) {
 const OCC_MIN_H = 2;                                   // 幾格高(含)以上算「立體物」
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
-const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return !!s.deck2 || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
+const stampOn2F = s => !!s.deck2 || MAP_FLOOR2_LAYERS.has(s.layer || 'top');   // 標了「2樓的圖」，或放在「2樓」圖層裡
+const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return stampOn2F(s) || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
 // ---- 只畫畫面看得到的地方 ----
 // 大地圖（例如 Y 區 56×60 格）如果每一幀都把整張地圖的每一格、每張圖重畫一次，會很卡。
@@ -760,7 +772,7 @@ function drawMapGround(ctx) {
   const { ground } = mapStampGroups();
   for (const lid of MAP_LAYER_ORDER) {
     if (lid === 'top') continue;
-    if (!isOccLayer(lid)) drawLayerCellsInView(ctx, lid);
+    if (!isOccLayer(lid) && !MAP_FLOOR2_LAYERS.has(lid)) drawLayerCellsInView(ctx, lid);   // 2 樓圖層的小圖改走排序（蓋在一樓的人上面）
     for (const s of ground.get(lid) || []) if (stampInDrawRect(s)) drawMapStampImg(ctx, s);
   }
   if (typeof drawOpenDoorsGround === 'function') drawOpenDoorsGround(ctx);   // 打開的挖空門：門洞的地板＋門框（在角色下面，js/doors.js）
@@ -786,7 +798,7 @@ function mapOccluders() {
     const layer = MAP.layers ? (MAP.layers[lid] || {}) : {};
     for (const key in layer) {
       const chair = chairConfig(layer[key]);
-      if (!chair && (lid === 'top' || !isOccLayer(lid))) continue;
+      if (!chair && !(MAP_FLOOR2_LAYERS.has(lid) && lid !== 'top') && (lid === 'top' || !isOccLayer(lid))) continue;
       const [c, r] = key.split(',').map(Number), id = layer[key];
       const y0 = r * CELL;
       items.push({ li, x0: c * CELL, y0, x1: (c + 1) * CELL, y1: (r + 1) * CELL,
@@ -822,7 +834,11 @@ function mapOccluders() {
     }
   }
   // 標了「2樓」的圖（陸橋）：排在所有一樓的東西後面（蓋在一樓的人上面）；地板類的排在二樓的人後面、牆柱類的照底部Y跟二樓的人排前後
-  for (const it of items) if (it.kind === 'stamp' && it.stamp.deck2) it.y = isOccLayer(MAP_LAYER_ORDER[it.li]) ? it.y + FLOOR2_SORT : FLOOR2_SORT - 50000 + it.li;
+  for (const it of items) {
+    const lid = MAP_LAYER_ORDER[it.li];
+    if (!(it.kind === 'stamp' ? stampOn2F(it.stamp) : MAP_FLOOR2_LAYERS.has(lid))) continue;
+    it.y = MAP_FLOOR2_TOP.has(lid) ? FLOOR2_SORT + 50000 + it.li : isOccLayer(lid) ? it.y + FLOOR2_SORT : FLOOR2_SORT - 50000 + it.li;
+  }
   buildLayerOverdraw(items);
   occCache = items; occCacheFor = MAP;
   return items;
