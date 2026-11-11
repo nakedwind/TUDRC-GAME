@@ -62,6 +62,7 @@ function refreshLightWalls() {
   }
 }
 // 陸橋用：lightSurf＝每一格最上面是哪一層（0 一樓、1 二樓地面、2 樓層出入口：兩層都算）；lightWalls2＝二樓的人看到的牆（不是 2 樓地面的格子都算牆）
+let beamNoLos = false;
 let lightSurf = new Uint8Array(COLS * ROWS), lightWalls2 = new Uint8Array(COLS * ROWS), lightSkipSurf = -1;
 function refreshLightFloors() {
   if (lightSurf.length !== COLS * ROWS) { lightSurf = new Uint8Array(COLS * ROWS); lightWalls2 = new Uint8Array(COLS * ROWS); }
@@ -70,6 +71,8 @@ function refreshLightFloors() {
   if (typeof floor2ArtCells === 'function') for (const k of floor2ArtCells().all) { const i = idx(k); if (i >= 0) lightSurf[i] = 1; }   // 2 樓的圖（牆、柱子上半段…）蓋到的格子：畫面上是 2 樓的東西，吃 2 樓的光（但還是擋路、擋光）
   for (const k of deckCells) { const i = idx(k); if (i >= 0) { lightSurf[i] = 1; lightWalls2[i] = 0; } }
   for (const k of rampCells) { const i = idx(k); if (i >= 0) { lightSurf[i] = 2; lightWalls2[i] = lightWalls[i]; } }
+  // 樓梯／手扶梯的上半段（js/maploader.js 的 stairUpperRects）：跟樓層出入口一樣兩層的光都吃、二樓的光也走得過去
+  if (typeof stairUpperRects !== 'undefined') { if (MAP) mapOccluders(); for (const b of stairUpperRects) for (let c = Math.floor((b.x0 - OX) / CELL); c * CELL + OX < b.x1; c++) for (let r = Math.floor((b.y0 - OY) / CELL); r * CELL + OY < b.y1; r++) { if (!inGrid(c, r)) continue; const i = r * COLS + c; if (lightSurf[i] !== 1 || lightWalls2[i] !== 0) { lightSurf[i] = 2; lightWalls2[i] = lightWalls[i]; } } }
   return true;
 }
 // 2 樓的牆面：牆的圖有好幾格高，光只擴散得到牆腳那一格 → 牆面跟著「正下方最近的 2 樓地面」一起亮（往下找最多 4 格），不然整面牆是黑的
@@ -106,8 +109,11 @@ function computeLightField() {
   const walls1 = lightWalls, twoFloors = hasFloors && refreshLightFloors();
   const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
   losNoFloors = true;
-  for (const l of lightsCache) {
-    const f2 = twoFloors && l.floor === 2;
+  // floor 0 的燈（溫特站在樓梯上時手上的燈）兩層各照一次
+  const passes = []; for (const l of lightsCache) { if (twoFloors && l.floor === 0) passes.push([l, 1], [l, 2]); else passes.push([l, l.floor === 2 ? 2 : 1]); }
+  for (const [l, lf] of passes) {
+    const f2 = twoFloors && lf === 2;
+    beamNoLos = f2 && l.floor === 0;   // 從樓梯往 2 樓照：樓梯在二樓的規則裡算牆，視線判定會全擋掉，這時只靠格子擴散
     if (twoFloors) { lightWalls = f2 ? lightWalls2 : walls1; lightSkipSurf = f2 ? 0 : 1; floorCtx = f2 ? 2 : 1; floorOnRamp = false; floorOnDeck = false; }
     spreadLight(l, (i, b) => {
       if (twoFloors && lightSurf[i] === lightSkipSurf) return;   // 這一格屬於另一層
@@ -118,6 +124,7 @@ function computeLightField() {
     });
     if (l.smooth) markBeamMask(l);   // 頭燈、手電筒畫面上照得到的格子（牆後面不會亮）
   }
+  beamNoLos = false;
   if (twoFloors) lightFloor2WallFaces();
   lightWalls = walls1; lightSkipSurf = -1; losNoFloors = false; floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck;
   if (typeof lightBreakableWallFaces === 'function') lightBreakableWallFaces([lightField, visField, warmField]);   // 可炸開的牆：牆面跟著牆腳一起亮（js/breakable-walls.js）
@@ -134,7 +141,7 @@ function markBeamMask(l) {
     if (d > CELL * 1.2 && (dx * ca + dy * sa) / d < wide) return;   // 離扇形太遠的不用管（省時間）
     if (lightWall(c, r)) { const k = Math.max(0, (d - CELL * .5) / (d || 1)); x = l.x + dx * k; y = l.y + dy * k; }   // 牆本身：看朝向手電筒那一面
     if (lightSkipSurf >= 0 && lightSurf[i] === lightSkipSurf) return;   // 陸橋：另一層的格子不照
-    if (d <= CELL * .75 || hasLineOfSight(l.x, l.y, x, y)) beamMask[i] = 1;
+    if (beamNoLos || d <= CELL * .75 || hasLineOfSight(l.x, l.y, x, y)) beamMask[i] = 1;
   });
 }
 // 從一個光源沿格子擴散，對每個被照到的格子呼叫 onCell(格子編號, 亮度 0～1)
@@ -280,7 +287,9 @@ function getLights() {
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
   const pf = actorFloor(G && G.player);   // 溫特在幾樓：他身上的燈（頭燈、手電筒）就照那一層
   if (G && G.player && LIGHT.playerLightOn) L.push({ x: G.player.x, y: G.player.y, r: LIGHT.playerR, floor: pf });
-  if (typeof equipLight === 'function') for (const l of equipLight()) { l.floor = pf; L.push(l); }   // 照明頭盔、手電筒（js/equipment.js）
+  // 站在樓梯／手扶梯上（樓層出入口的格子、或畫面上已經算 2 樓但人還沒踏上去）：手上的燈兩層都照（floor 0）
+  const onStairs = hasFloors && G && G.player && (rampCells.has(cellAt(G.player.x, G.player.y).join(',')) || visualFloor(G.player) !== pf);
+  if (typeof equipLight === 'function') for (const l of equipLight()) { l.floor = onStairs ? 0 : pf; L.push(l); }   // 照明頭盔、手電筒（js/equipment.js）
   // 營地常亮（沒自訂營地就用預設最下排）
   if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); const [x, y] = center(c, r); L.push({ x, y, r: LIGHT.campR, floor: 1 }); });   // 營地在 1 樓
   else for (let c = 0; c < COLS; c++) { const [x, y] = center(c, ROWS - 1); L.push({ x, y, r: LIGHT.campR, floor: 1 }); }
