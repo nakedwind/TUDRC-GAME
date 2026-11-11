@@ -608,7 +608,7 @@ function mapGlowLights() {
     if (!s.glow || (typeof secretAlpha === 'function' && secretAlpha(s) <= 0)) continue;   // 還沒炸開的隱藏區：不發光
     const t = mapTileById(s.id) || {};
     out.push({ x: OX + s.c * CELL + (s.ox || 0) + mapStampW(s, t) * CELL / 2, y: OY + s.r * CELL + (s.oy || 0) + mapStampH(s, t) * CELL / 2,
-      r: s.glowR > 0 ? s.glowR : MAP_GLOW_R });
+      r: s.glowR > 0 ? s.glowR : MAP_GLOW_R, floor: stampOn2F(s) ? 2 : 1 });
   }
   return out;
 }
@@ -848,6 +848,7 @@ function mapOccluders() {
 // 例如牆上的監視器（平貼）、床頭牆板、比書桌低一點的椅子，進遊戲會被下層的牆／書桌蓋掉。
 // 做法：畫完一個立體物之後，把「圖層比它高、跟它重疊、卻比它先畫」的圖，
 // 只在重疊的範圍內再補畫一次。這樣只修正圖跟圖之間的上下，角色被遮擋的方式不變。
+const itemOn2F = it => it.kind === 'stamp' ? stampOn2F(it.stamp) : MAP_FLOOR2_LAYERS.has(MAP_LAYER_ORDER[it.li]);
 function buildLayerOverdraw(items) {
   const flats = (MAP.stamps || []).filter(s => !isElevatorStamp(s) && (s.layer || 'top') !== 'top' && !stampIsOcc(s)).map(s => {
     const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
@@ -864,6 +865,7 @@ function buildLayerOverdraw(items) {
     x.overdraw = [];
     for (const a of [...items, ...flats]) {
       if (a === x || !higher(a, x)) continue;                  // 只管比它上層（或同層排在它前面）的圖
+      if (itemOn2F(a) !== itemOn2F(x)) continue;               // 1 樓的圖和 2 樓的圖前後由樓層決定，不互相補畫
       if (!a.flat && rank.get(a) > rank.get(x)) continue;       // 本來就比它晚畫，不用補
       const ab = a.vis || a, xb = x.vis || x;
       const cx0 = Math.max(ab.x0, xb.x0), cy0 = Math.max(ab.y0, xb.y0), cx1 = Math.min(ab.x1, xb.x1), cy1 = Math.min(ab.y1, xb.y1);

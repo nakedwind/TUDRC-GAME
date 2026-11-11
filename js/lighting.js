@@ -253,6 +253,7 @@ function getLights() {
       ];
       lamps.forEach(([x, y], i) => L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }));
     }
+    const nObs = L.length;   // 這個建築加的燈：都在 1 樓（建築只蓋在 1 樓）
     const lr = o.type && LIGHT.buildings[o.type];
     if (lr && !o.mrtHidden) {   // mrtHidden：跟著捷運開進隧道了（js/mrt-train.js）
       const x = OX + (o.c + (o.w || 1) / 2) * CELL + (o.mrtShift || 0);   // mrtShift：蓋在捷運車廂裡、跟著列車移動
@@ -262,6 +263,7 @@ function getLights() {
       L.push({ x, y, visualX: x, visualY, r: lr, warm: true,
         single: o.type === 'camping_lights', phase: o.c * 7 + o.r * 13 });
     }
+    for (let k = nObs; k < L.length; k++) if (L[k].floor == null) L[k].floor = 1;
   }
   // 長得像臨時基地、但只是圖片的基地（沒有 baseHp、不會被打壞的）：一樣有中央的光和四角的燈。
   // 四盞燈的位置用圖片寬高的比例（池核那張圖比較大）：x 左右、y 上下
@@ -269,22 +271,26 @@ function getLights() {
     const t = mapTileById(s.id), spec = t && !t.baseHp && BASE_ART_LAMPS.find(b => b.file.test(String(t.file || '')));
     if (!spec || (G && G.mapDestroyed && G.mapDestroyed.has(s))) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
-    L.push({ x: x0 + w / 2, y: y0 + h / 2, r: LIGHT.baseR || 300 });
+    const f2 = stampOn2F(s) ? 2 : 1;   // 陸橋：2 樓的燈只照 2 樓
+    L.push({ x: x0 + w / 2, y: y0 + h / 2, r: LIGHT.baseR || 300, floor: f2 });
     const lampR = LIGHT.baseLampR || 190;
-    spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * fy; L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }); });
+    spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * fy; L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7, floor: f2 }); });
   }
   if (typeof MAP !== 'undefined' && MAP) for (const s of MAP.stamps || []) {   // 會亮的燈具素材（MAP_LAMP_TILES）
     const t = mapTileById(s.id), spec = t && MAP_LAMP_TILES.find(b => b.file.test(String(t.file || '')));
     if (!spec || (G && G.mapDestroyed && G.mapDestroyed.has(s))) continue;
     const x0 = OX + s.c * CELL + (s.ox || 0), y0 = OY + s.r * CELL + (s.oy || 0), w = mapStampW(s, t) * CELL, h = mapStampH(s, t) * CELL;
-    spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * (s.fy ? 1 - fy : fy); L.push({ x, y, visualX: x, visualY: y, r: spec.r, warm: true, single: true, lantern: !!spec.lantern, phase: s.c * 7 + s.r * 13 + i }); });
+    const f2 = stampOn2F(s) ? 2 : 1;
+    spec.lamps.forEach(([fx, fy], i) => { const x = x0 + w * (s.fx ? 1 - fx : fx), y = y0 + h * (s.fy ? 1 - fy : fy); L.push({ floor: f2, x, y, visualX: x, visualY: y, r: spec.r, warm: true, single: true, lantern: !!spec.lantern, phase: s.c * 7 + s.r * 13 + i }); });
   }
   if (typeof flareLightSources === 'function') L.push(...flareLightSources());   // 燃燒中的照明彈（js/flare.js）
   if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());
   if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
   if (typeof mapGlowLights === 'function') L.push(...mapGlowLights());   // 地圖上設成「發光」的物件（地圖編輯器／基地編輯器；js/maploader.js）
-  if (typeof inHiddenArea === 'function') return L.filter(l => !inHiddenArea(l.x, l.y));   // 還沒炸開的隱藏區裡的燈不亮（js/breakable-walls.js）
-  return L;
+  // 陸橋：標了樓層的燈只照溫特所在的那一層（沒標的＝兩層都亮）
+  const vf = actorFloor(G && G.player), lit = hasFloors ? L.filter(l => l.floor == null || l.floor === vf) : L;
+  if (typeof inHiddenArea === 'function') return lit.filter(l => !inHiddenArea(l.x, l.y));   // 還沒炸開的隱藏區裡的燈不亮（js/breakable-walls.js）
+  return lit;
 }
 function isLit(x, y) {
   if (!LIGHT.enabled) return true;

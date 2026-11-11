@@ -3799,6 +3799,37 @@ if (storyField) storyField.addEventListener('change', e => {
   pushUndo(); if (e.target.checked) curMap().story = true; else delete curMap().story; saveMaps();
   setStatus(e.target.checked ? '這張是劇情地圖：不生怪、沒有核心、有黑幕（要自己放燈），只有溫特一個人進來；從戰鬥地圖進來時那邊會時間暫停' : '這張地圖不是劇情地圖了', '#8fd3ff');
 });
+// 🌉 從 2樓圖層產生「2樓地面」：名稱有「2樓」的圖層裡，地板類圖層（不是物件、上層）蓋到的格子＝可以走；名稱有「牆」的 2 樓圖層蓋到的格子＝不能走（拿掉）。
+// 原本畫好的 2 樓地面保留（只加、只拿掉牆），畫完還能用 🌉 筆刷微調。
+function generateDeckFromLayers() {
+  const m = curMap(), order = layersOf(m);
+  const f2 = order.filter(l => /2樓|二樓/.test(l.name || ''));
+  if (!f2.length) { setStatus('這張地圖沒有名稱含「2樓」的圖層：先在圖層面板把 2 樓的圖層改名（例如「2樓地板」「2樓牆壁」）', '#ff8f8f'); return; }
+  const isObj = id => /^object\d*$/.test(id) || id === 'overlay' || id === 'top';
+  const floorIds = new Set(f2.filter(l => !isObj(l.id) && !/牆/.test(l.name)).map(l => l.id));
+  const wallIds = new Set(f2.filter(l => /牆/.test(l.name)).map(l => l.id));
+  const cells = (ids) => {
+    const out = new Set();
+    for (const id of ids) for (const k of Object.keys((m.layers || {})[id] || {})) if (m.layers[id][k]) out.add(k);
+    for (const s of m.stamps || []) {
+      if (!ids.has(s.layer || 'top')) continue;
+      const t = tileById(s.id); if (!t) continue;
+      const w = stampW(s, t), h = stampH(s, t), c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL;
+      for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r0 + h; r++) out.add(c + ',' + r);
+    }
+    return out;
+  };
+  const floor = cells(floorIds), walls = cells(wallIds), deck = new Set(m.deck || []);
+  const before = deck.size; let added = 0, removed = 0;
+  for (const k of floor) { const [c, r] = k.split(',').map(Number); if (!inGrid(c, r) || walls.has(k) || (m.ramps || []).includes(k)) continue; if (!deck.has(k)) { deck.add(k); added++; } }
+  for (const k of walls) if (deck.delete(k)) removed++;
+  if (!added && !removed) { setStatus('沒有可以加的格子：「2樓」的地板圖層（名稱不能有「牆」、不能是物件／上層類）裡沒有圖', '#ff8f8f'); return; }
+  pushUndo();
+  if (deck.size) m.deck = [...deck]; else delete m.deck;
+  saveMaps(); draw();
+  setStatus('已從 2 樓圖層產生 2 樓地面：加 ' + added + ' 格、拿掉被 2 樓牆蓋到的 ' + removed + ' 格（原有 ' + before + ' 格，現在 ' + deck.size + ' 格）。可以用 🌉 筆刷微調', '#7ee0c0');
+}
+{ const gd = document.getElementById('genDeck'); if (gd) gd.addEventListener('click', generateDeckFromLayers); }
 const safeField = document.getElementById('f_safe');
 if (safeField) safeField.addEventListener('change', e => {
   pushUndo(); curMap().safe = e.target.checked; saveMaps();

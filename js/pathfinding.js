@@ -12,7 +12,7 @@ let mapWalls = new Set();               // 存 'c,r' 字串
 // floorCtx＝現在在處理哪一層的人：game.js 的 update 處理每個角色前先設好（isWall、flowAt、邊緣碰撞都看它）。
 let deckCells = new Set(), rampCells = new Set(), hasFloors = false, floorCtx = 1;
 function setMapFloors(deck, ramps) {
-  deckCells = new Set(deck || []); rampCells = new Set(ramps || []); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false;
+  deckCells = new Set(deck || []); rampCells = new Set(ramps || []); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
 }
 function wallOnFloor(f, c, r) {
   const k = c + ',' + r;
@@ -21,10 +21,10 @@ function wallOnFloor(f, c, r) {
   return !deckCells.has(k);
 }
 // 站在樓層出入口上的人，走出去的格子照「走出去之後在哪一層」判斷：走到 2 樓地面不管一樓有沒有牆都走得過去，走到一般格子照一樓的牆
-let floorOnRamp = false;
+let floorOnRamp = false, floorOnDeck = false;
 function wallNow(c, r) {
   const k = c + ',' + r;
-  if (rampCells.has(k)) return mapWalls.has(k);
+  if (rampCells.has(k)) return mapWalls.has(k) || (floorCtx !== 2 && !floorOnRamp && floorOnDeck);   // 一樓的人站在 2 樓地面的格子上：不能從這邊走進手扶梯（只能從一樓那頭上去）
   if (floorOnRamp) return deckCells.has(k) ? false : mapWalls.has(k);
   return floorCtx === 2 ? !deckCells.has(k) : mapWalls.has(k);
 }
@@ -32,9 +32,11 @@ const isWall = (c, r) => hasFloors ? wallNow(c, r) : mapWalls.has(c + ',' + r);
 // 處理某個角色之前先呼叫：設好「他在幾樓、是不是站在樓層出入口上」（算完用 clearFloorCtx 還原）
 function setFloorCtx(a) {
   floorCtx = actorFloor(a);
-  floorOnRamp = !!(hasFloors && a && rampCells.has(cellAt(a.x, a.y).join(',')));
+  const k = hasFloors && a ? cellAt(a.x, a.y).join(',') : '';
+  floorOnRamp = !!(k && rampCells.has(k));
+  floorOnDeck = !!(k && deckCells.has(k) && !floorOnRamp);
 }
-function clearFloorCtx() { floorCtx = 1; floorOnRamp = false; }
+function clearFloorCtx() { floorCtx = 1; floorOnRamp = false; floorOnDeck = false; }
 // 角色走出「樓層出入口」時換樓層（每幀、每個角色呼叫一次；a._fk＝上一幀站的格子）
 function updateActorFloor(a) {
   if (!hasFloors || !a) return;
@@ -119,7 +121,7 @@ const isCamp = (c, r) => campCells.size ? campCells.has(c + ',' + r) : (r === RO
 // ---- 流場（每格到營地的最短步數，會繞過固定牆）----
 let flow = [], flow2 = [];   // flow2＝二樓的人用的（有陸橋的地圖才有）
 function computeFlow() {
-  const keepCtx = floorCtx, keepRamp = floorOnRamp; floorCtx = 1; floorOnRamp = false;   // 算一樓的薄牆要用一樓的規則
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;   // 算一樓的薄牆要用一樓的規則
   flow = new Array(COLS * ROWS).fill(Infinity);
   flow2 = hasFloors ? new Array(COLS * ROWS).fill(Infinity) : [];
   const q = [];   // [樓層, c, r]：營地在一樓；二樓的人要先走到樓層出入口、下到一樓才到得了
@@ -139,11 +141,12 @@ function computeFlow() {
       for (const pf of hasFloors ? [1, 2] : [1]) {
         if (wallOnFloor(pf, pc, pr) || landing(pf, pc, pr, c, r) !== f) continue;
         if (pf !== 2 && edgeBetween(pc, pr, c, r)) continue;   // 薄牆只擋一樓
+        if (pf !== 2 && deckCells.has(pc + ',' + pr) && rampCells.has(c + ',' + r) && !rampCells.has(pc + ',' + pr)) continue;   // 一樓的人不能從 2 樓地面那側走進手扶梯
         const A = arr(pf);
         if (A[pr * COLS + pc] > d + 1) { A[pr * COLS + pc] = d + 1; q.push([pf, pc, pr]); }
       }
     }
   }
-  floorCtx = keepCtx; floorOnRamp = keepRamp;
+  floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck;
 }
 const flowAt = (c, r) => inGrid(c, r) ? (floorCtx === 2 ? flow2 : flow)[r * COLS + c] : Infinity;

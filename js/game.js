@@ -1410,7 +1410,7 @@ function groundDrawnAt(c, r) {
 // ---- 玩家移動與碰撞（牆、哨兵、障礙物都擋路；水平垂直分開判斷可貼牆滑行）----
 function playerBlocked(x, y) {
   const r = PLAYER.r;
-  const keepCtx = floorCtx, keepRamp = floorOnRamp; setFloorCtx(G.player);   // 溫特在幾樓就照幾樓的規則（js/pathfinding.js）
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck; setFloorCtx(G.player);   // 溫特在幾樓就照幾樓的規則（js/pathfinding.js）
   try {
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
@@ -1422,7 +1422,7 @@ function playerBlocked(x, y) {
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r], [0, -r], [0, r], [-r, 0], [r, 0]]) if (edgeWallBlocksPoint(x + sx, y + sy)) return true;
   if (typeof bigPearlBlocksPlayer === 'function' && bigPearlBlocksPlayer(x, y)) return true;   // 珍珠大童的大珍珠（js/pearl-elder.js）
   return false;
-  } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; }
+  } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
 }
 // 救援機制：角色若被卡在牆／建築裡（例如放置時的邊角誤差），
 // 由近到遠繞圈找最近的空位，把角色推出去。

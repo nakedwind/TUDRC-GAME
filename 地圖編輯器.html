@@ -46,6 +46,7 @@
             <button class="tool" data-mode="vineferry" title="傳送藤蔓：先點一格放藤蔓，再點一格當落點。碰到的人會被捲走、丟到落點（過不去的地方靠它過去）；溫特被抓時，跟在旁邊的隊友也會一起被丟過去。點已經放好的藤蔓＝拿掉">🌿➡ 傳送藤蔓</button>
             <button class="tool" data-mode="capking" title="菁英 BOSS「順順宮主」：點空格放一頂大宮帽、再點一次拿掉。核心會躲在其中一頂裡（至少 2 頂）；虛線框是帽子蓋著時擋住的範圍">🎩 順順宮主帽子</button>
             <button class="tool" data-mode="deck" title="畫陸橋（2 樓）走得到的格子（藍色）。2 樓的人只能走在這些格子和「樓層出入口」上，下面一樓的牆、柱子不擋 2 樓；一樓的人照樣能從下面走過去（拖曳畫一片；再畫一次＝擦掉）">🌉 2樓地面</button>
+            <button class="btn" id="genDeck" title="照名稱有「2樓」的圖層自動畫 2 樓地面：地板圖層（例如「2樓地板」）蓋到的格子加進來，名稱有「牆」的 2 樓圖層蓋到的格子拿掉。畫完再用 🌉 筆刷微調">🌉 從2樓圖層產生</button>
             <button class="tool" data-mode="ramp" title="畫連接 1 樓和 2 樓的格子（橘色，例如手扶梯、樓梯）。從這裡走到「2樓地面」＝上 2 樓，走到其他格子＝回 1 樓。扶手、隔板照一般碰撞擋（拖曳畫一片；再畫一次＝擦掉）">🛗 樓層出入口</button>
             <button class="tool" data-mode="spawn" title="畫上後，這張地圖的怪物只會從這些格子出生（拖曳可以一次畫一片；再畫一次＝擦掉）">👾 怪物出生區</button>
           </div>
@@ -222,7 +223,7 @@
   <script src="js/map-picker.js?v=mappicker-20261024"></script>   <!-- 設出入口時選地圖的清單（取代 prompt，地圖多也不會被截斷） -->
   <script src="js/project-save.js?v=savecheck-20261111"></script>   <!-- 一鍵存到專案（所有編輯器共用） -->
   <script src="js/map-editor-store.js?v=assetmove-20261106"></script>   <!-- 地圖暫存放在瀏覽器資料庫（地圖編輯器自己的） -->
-  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=floors2-20261112", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
+  <script>EditorStore.boot(["js/stamp-transform.js?v=stampscale-20261105", "js/map-editor.js?v=floors3-20261112", "js/map-editor-transform.js?v=onebar-20261106", "js/map-editor-save.js?v=sharedtiles-20261020", "js/map-editor-copy.js?v=copy-20261021", "js/asset-finder.js?v=finder2-20261026"]);</script>   <!-- 等資料庫讀好再載入編輯器 -->
   <script src="js/preview-mute.js?v=pmute-20261026"></script>   <!-- 「▶ 預覽遊戲」視窗的背景音開關 -->
   <script src="js/editor-nav.js?v=navfold-20261026"></script>   <!-- 最上方的編輯器入口（所有編輯器共用） -->
 </body>
