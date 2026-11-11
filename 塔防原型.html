@@ -312,7 +312,7 @@
   <script src="js/elevator-data.js?v=sync-20261021"></script>
   <script src="js/pathfinding.js?v=floors10-20261112"></script>  <!-- 5. 固定牆與怪物尋路 -->
   <script src="js/stamp-transform.js?v=stampscale-20261105"></script>   <!-- 物件的大小、角度（跟遊戲共用同一套算法） -->
-  <script src="js/maploader.js?v=floors11-20261112"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
+  <script src="js/maploader.js?v=escside2-20261112"></script>    <!-- 6. 把編輯器地圖接進遊戲 -->
   <script src="js/water.js?v=waterdef-20261102"></script>   <!-- 6a. 水：角色泡在水裡（下半身半透明、走路變慢）；哪些素材是水在地圖／基地編輯器設定 -->
   <script src="js/doors.js?v=archcut2-20261101"></script> <!-- 門：手動門／自動門 -->
   <script src="js/memory-doors.js?v=kai-20261103"></script> <!-- 記憶之門：回憶鑰匙解鎖、鎖鏈碎掉、進入回憶劇情 -->
@@ -321,7 +321,7 @@
   <script src="js/iron-gate.js?v=merge-monster-vitals-20261023"></script>
   <script src="js/build.js?v=floors10-20261112"></script>        <!-- 8. 建築系統（放置/選單/動畫） -->
   <script src="js/team.js?v=guidekit3-20261106"></script>         <!-- 8b. 出勤隊伍（編隊面板／登場名單） -->
-  <script src="js/sentry.js?v=mealdlg-20261110"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
+  <script src="js/sentry.js?v=escside2-20261112"></script>       <!-- 9. 哨兵系統（巡邏AI/選單） -->
   <script src="data/npc-chats.js?v=chatlisten-20261023"></script> <!-- 基地 NPC 閒聊小表演：誰、在哪、聊什麼 -->
   <script src="js/npc-chats.js?v=linger-20261104"></script> <!-- 基地 NPC 閒聊小表演：走到桌前、泡泡輪流說話 -->
   <script src="js/progression.js?v=achvimpl-20261023"></script>
@@ -337,7 +337,7 @@
   <script src="js/achievements.js?v=achv7-20261023"></script> <!-- 9d. 成就系統：累計戰績、右下角彈出通知 -->
   <script src="js/berserk-fx.js?v=nofallback-20261022"></script> <!-- 9c. 暴走表演：瀕臨暴走黑霧、暴走瞬間、疏導吹散 -->
   <script src="js/burrowing-mouse.js?v=mouse-test-off-20261024"></script> <!-- 花蓮版權老鼠：出土與地底手 -->
-  <script src="js/enemy-ai.js?v=floors7-20261112"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
+  <script src="js/enemy-ai.js?v=escside2-20261112"></script> <!-- 9f. 怪物 AI：尋路、感知、攻擊、史萊姆跳躍 -->
   <script src="js/bird-head.js?v=floors7-20261112"></script> <!-- 9f2. 鳥頭人：發呆、散步、衝撞、倒下 -->
   <script src="js/elite-bird-head.js?v=walksmash-20261104"></script> <!-- 9f2b. 菁英鳥頭人「鳥頭大隊長」：守核心、大叫、穿透衝撞、3 隻手下 -->
   <script src="js/pearl-kid.js?v=floors7-20261112"></script> <!-- 9f3. 珍珠小童：飄浮、噴珍珠、生氣狀態 -->
@@ -352,7 +352,7 @@
   <script src="js/gourd-monkey.js?v=floors7-20261112"></script> <!-- 9f9. 葫蘆猴：慢慢拖行、升空泰山壓頂、不硬直不擊退、一格窄道過不去 -->
   <script src="js/human-face-butterfly.js?v=floors7-20261112"></script> <!-- 9f10. 人面蝶：在空中慢慢飛、撒三色鱗粉（毒／混亂／睡眠）、粉塵爆炸、趨光 -->
   <script src="js/milkfish-kid.js?v=y25open9-20261030"></script> <!-- 9f7. 虱目魚小子：吃隊友（卡在魚嘴）、吃一格的物品 -->
-  <script src="js/render.js?v=floors7-20261112"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
+  <script src="js/render.js?v=escside2-20261112"></script> <!-- 9g. 繪圖：各種角色物件的畫法與每幀繪製 -->
   <script src="js/crisp-scale.js?v=crisp-20261026"></script> <!-- 9g2. 平滑放大：先整數倍放大再平滑縮回，減少 1.5 倍的鋸齒（F9 切換） -->
   <script src="js/attack-fx.js?v=merge2-20261101"></script> <!-- 9e. 攻擊特效：打擊感、火焰／雷電／揮砍／腐蝕／槍擊 -->
   <script src="js/blast-fx-v2.js?v=v2-20261105"></script> <!-- 9e2. 爆炸特效 V2：pixelfx 風格的煙霧、火星（BLAST_FX_VERSION 切換 1／2） -->
@@ -394,9 +394,9 @@
   <script src="js/sortie-supply.js?v=sortiebal-20261106"></script> <!-- 9l2. 出勤補給：隊員帶零食飲料出勤，戰鬥中加成 -->
   <script src="js/powered-lights.js?v=floors7-20261112"></script>
   <script src="js/storage-lockers.js?v=bagfullimg-20261109"></script>
-  <script src="data/prop-collisions.js?v=drinkshop-20261104"></script>   <!-- 販賣機、營地箱子自帶的擋路格（物件編輯器設定） -->
+  <script src="data/prop-collisions.js?v=escside2-20261112"></script>   <!-- 販賣機、營地箱子自帶的擋路格（物件編輯器設定） -->
   <script src="js/prop-collisions.js?v=clawsolid-20261102"></script>
-  <script src="js/escalators.js?v=escside-20261101"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
+  <script src="js/escalators.js?v=escside2-20261112"></script>   <!-- 捷運手扶梯：階梯動畫、站在上面會被帶著走 -->
   <script src="js/rescue-dog.js?v=twosquad2-20261103"></script>
   <script src="js/ground-items.js?v=groundcare2-20261106"></script>   <!-- 背包裡的東西放在地上、撿回來；嚮導撿、球球叼急救包和杏仁水 -->
   <script src="js/food.js?v=bossdrop-20261109"></script>   <!-- 怪物掉的食物：火烤、吃了補血＋buff -->
@@ -430,7 +430,7 @@
   <script src="js/mrt-train.js?v=mrtesc-20261111"></script>   <!-- 捷運列車：到站開門、關門離站 -->
   <script>document.write('<script src="data/ui-layout.js?t=' + Date.now() + '"><\/script>');</script>   <!-- 遊戲畫面 UI 的位置、大小（UI編輯器匯出）；每次都讀最新的，存完不用清快取 -->
   <script src="js/ui-layout.js?v=mmdrag-20261109"></script>   <!-- 套用上面的 UI 版面 -->
-  <script src="js/game.js?v=floors7-20261112"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
+  <script src="js/game.js?v=escside2-20261112"></script>         <!-- 10. 遊戲主邏輯（啟動遊戲，必須最後） -->
   <script src="js/leader-skills.js?v=midreturn-20261103"></script>   <!-- 艾德林帶隊：範圍補血疏導、隊長的補給（兵分兩路） -->
   <script src="js/dialogue-click.js?v=dlgclick-20261028"></script>   <!-- 對話框：點畫面任何地方都能換下一句 -->
   <script src="js/core-clear.js?v=pausebattle-20261101"></script>   <!-- 核心全破：異質鑰匙、結算、留下來清場、徹底控制 -->

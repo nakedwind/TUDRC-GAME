@@ -1068,13 +1068,14 @@ function draw() {
   for (const o of G.obstacles) if (!o.trap) sortables.push({ y: (typeof mrtObstacleSortY === 'function' ? mrtObstacleSortY(o) : (o.r + (o.h || 1)) * CELL) + (hasFloors && o.floor === 2 ? FLOOR2_SORT : 0), draw: () => drawObstacle(o) });   // 捷運車廂裡的建築排在車殼後面（js/mrt-train.js）   // 地雷另外畫在地面層
   if (typeof grabBuildingSortables === 'function') grabBuildingSortables(sortables);   // 右鍵抓著的建築（js/grab.js）
   // 坐在椅子／躺在床上時，跟溫特一樣沿用椅子的排序值 +0.5（畫在椅子上面）
-  for (const t of G.towers) sortables.push({ y: (t.sitting ? seatDrawY(t.sitting) : t.y + 17) + floorSortY(t), draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
-  for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ y: (npc.sitting ? seatDrawY(npc.sitting) : bedY != null ? bedY : npc.y + 17) + floorSortY(npc), draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
-  for (const e of G.enemies) if (enemyVisible(e) && e.behavior !== 'moth') sortables.push({ y: e.y + 13 + floorSortY(e), draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
+  for (const t of G.towers) sortables.push({ y: (t.sitting ? seatDrawY(t.sitting) : escalatorRiderSortY(t, t.y + 17)) + floorSortY(t), draw: () => wadeDraw(t, 'char', () => drawTower(t)) });
+  for (const npc of G.npcs) { const bedY = npc.id === 'ball' && typeof ballSortY === 'function' ? ballSortY(npc) : null; sortables.push({ y: (npc.sitting ? seatDrawY(npc.sitting) : bedY != null ? bedY : escalatorRiderSortY(npc, npc.y + 17)) + floorSortY(npc), draw: () => wadeDraw(npc, 'char', () => { drawWanderer(npc); if (npc.carryItem && typeof drawDogCarry === 'function') drawDogCarry(ctx, npc); }) }); }   // carryItem：球球嘴裡叼著、要送去給溫特或嚮導的東西（js/ground-items.js、js/rescue-dog.js）   // 球球睡在床上：用床底排（js/ball-poses.js）
+  for (const e of G.enemies) if (enemyVisible(e) && e.behavior !== 'moth') sortables.push({ y: escalatorRiderSortY(e, e.y + 13) + floorSortY(e), draw: () => wadeDraw(e, 'enemy', () => { if (e.dummy && typeof drawSandbag === 'function') { drawSandbag(ctx, e); return; } if (e.frenzy && typeof drawFrenzyAura === 'function') drawFrenzyAura(ctx, e); drawEnemy(e); }) });   // 狂暴的異質體腳下冒紅光
   if (typeof hangiCapSortables === 'function') hangiCapSortables(sortables);   // 順順宮帽：跟角色一起排前後（js/hangi-bao.js）
   if (typeof burrowingMouseSortables === 'function') burrowingMouseSortables(sortables);   // 獨立手洞依落點排序，不跟著本體漂移
   if (typeof loofahQueenSortables === 'function') loofahQueenSortables(sortables);   // 絲瓜女王頭上吊著的核心（js/loofah-queen.js）
   if (typeof pearlElderSortables === 'function') pearlElderSortables(sortables);   // 珍珠大童的大珍珠（js/pearl-elder.js）
+  if (typeof escalatorSortables === 'function') escalatorSortables(sortables);   // 側面手扶梯前面的扶手外殼：蓋在站在上面的人身上（js/escalators.js）
   if (typeof mrtTrainSortables === 'function') mrtTrainSortables(sortables);   // 捷運列車（js/mrt-train.js）
   if (typeof streetVehicleSortables === 'function') streetVehicleSortables(sortables);   // K56 的機車、腳踏車（js/street-vehicles.js）
   if (typeof lifePileSortables === 'function') lifePileSortables(sortables);   // 生命體碎掉的那堆（js/lifeform.js）   // 黑暗中的怪物看不到（堤諾感知到的另外畫在黑幕上）
@@ -1083,7 +1084,7 @@ function draw() {
   // 坐著時沿用椅子的排序值再 +0.5 → 畫在椅子上面（坐進椅子裡而不是被椅背蓋住）
   if (typeof drawGroundItem === 'function') for (const g of G.groundItems || []) sortables.push({ y: g.y + GROUND_ITEMS.sortDy, draw: () => drawGroundItem(ctx, g) });   // 溫特從背包放在地上的東西（js/ground-items.js）
   if (typeof mealSortables === 'function') mealSortables(sortables);   // 餐廳：桌上的餐盤、拿在手上的餐盤（js/meal.js）
-  if (G.player) sortables.push({ y: (G.player.sitting ? seatDrawY(G.player.sitting) : G.player.y + 16) + floorSortY(G.player), draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
+  if (G.player) sortables.push({ y: (G.player.sitting ? seatDrawY(G.player.sitting) : escalatorRiderSortY(G.player, G.player.y + 16)) + floorSortY(G.player), draw: () => wadeDraw(G.player, 'char', () => drawPlayer(G.player)) });
   // 地上腐蝕焦痕（畫在單位腳下：焦黑燒痕，還在扣血時透出紫色餘燼）
   drawScorchMarks(ctx);
   drawAcidWarnings(ctx);       // 腐蝕池的危險範圍圈（js/attack-fx.js）

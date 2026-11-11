@@ -8,7 +8,15 @@
    ・音效：溫特踩上會動的手扶梯時播廣播，冷卻 rideSoundCd 秒
    ・扶手、中間隔板擋不擋路：物件編輯器（data/prop-collisions.js 的「手扶梯」）設定
    ・不會動的手扶梯：地圖編輯器選手扶梯、取消「手扶梯會動」（stamp.still）：階梯不捲、不帶人
-   ・左右翻轉的手扶梯：兩條階梯跟著換邊（方向不變）；上下翻轉：方向也跟著反過來；旋轉過的只有動畫、不帶人 */
+   ・左右翻轉的手扶梯：兩條階梯跟著換邊（方向不變）；上下翻轉：方向也跟著反過來；旋轉過的只有動畫、不帶人
+   ===== 側面的手扶梯（斜的那種，tile_mrt_escalator_side）=====
+   設定在下面 ESCALATOR.side（數字一樣是「原始圖片」的像素）。圖片分三層：-bottom（後面的扶手和牆）、-middle（階梯）、-cover（前面的扶手和外殼）
+   ・畫：整張圖先畫（排在人後面），階梯那一段照時間斜斜地捲；前面的扶手外殼（-cover）另外再畫一次、蓋在站在上面的人身上（escalatorSortables）
+   ・走道：人的腳只能踩在前後扶手中間那一條斜斜的範圍（band），只能從兩頭上下；其他地方（扶手、外殼、底下的三角形）整個擋住（escalatorSideBlocks）
+   ・在上面左右走會自動跟著斜坡上下；會動的手扶梯在斜坡那一段把人往上（或往下）帶，兩頭的平台不帶
+   ・會不會動（stamp.still）、往上還是往下（stamp.escDown）：地圖編輯器選手扶梯之後勾選
+   ・底下實心的格子（擋子彈、怪物繞路用）：物件編輯器（data/prop-collisions.js 的「手扶梯（側面）」）
+   ・上下翻轉、旋轉、調過大小角度的側面手扶梯：只是一張圖（不動、不擋、不帶人） */
 const ESCALATOR = {
   speed: 36,     // 階梯移動速度（像素／秒；溫特走路 230、隊員 90 上下）
   againstSlow: .5,   // 逆著階梯走：自己的走路速度少幾成（.5＝只剩一半，再扣掉階梯本身的速度）
@@ -24,6 +32,25 @@ const ESCALATOR = {
     tile_mrt_escalator_front_high03: { y: 26, h: 270, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
     tile_mrt_escalator_front_high04: { y: 26, h: 390, lanes: [{ x: 39, w: 43, dir: 1 }, { x: 118, w: 43, dir: -1 }] },
   },
+  // 側面的手扶梯（斜的）
+  side: {
+    xSpeed: .78,   // 斜著走時，左右方向的速度是 speed 的幾成（階梯每往旁邊 10 像素就升高 8 像素）
+    edge: 4,       // 站在上面的人離走道上下邊緣至少幾像素（太貼邊左右走會卡住）
+    tiles: {
+      tile_mrt_escalator_side: {
+        size: 240,                                   // 原始圖片的寬高
+        bottom: 'images/捷運車站/mrt-escalator-side-bottom.png',   // 後面的扶手和牆
+        middle: 'images/捷運車站/mrt-escalator-side-middle.png',   // 階梯
+        cover: 'images/捷運車站/mrt-escalator-side-cover.png',     // 前面的扶手和外殼
+        mx: 23, my: 51,                              // 階梯那張圖貼在整張圖的哪裡
+        stepX: 10, stepY: 8,                         // 一階寬 10、高 8 像素
+        x0: 45, x1: 194,                             // 斜坡（會動的階梯）從第幾個像素到第幾個像素；左邊、右邊是不會動的平台
+        yLow: 172, yHigh: 52,                        // 階梯面最上緣：下面平台的高度、上面平台的高度
+        band: [18, 54],                              // 腳可以踩的範圍：從階梯面上緣往下第幾～第幾像素（前後扶手中間）
+        back: 24,                                    // 後面的扶手：階梯面上緣往上幾像素以內也擋住
+      },
+    },
+  },
 };
 let escalatorPhase = 0;   // 階梯捲了多遠（世界像素）；遊戲暫停時不動
 
@@ -31,6 +58,7 @@ function escalatorSpec(id) { return ESCALATOR.tiles[id] || null; }
 
 // 畫手扶梯：回傳 true＝已經畫好（整張圖＋捲動的階梯）
 function drawEscalatorAnimation(ctx, s, img, x, y, w, h) {
+  if (escalatorSideSpec(s.id)) return drawSideEscalator(ctx, s, img, x, y, w, h);
   const spec = escalatorSpec(s.id);
   if (!spec || s.still || !img.naturalWidth) return false;   // still：地圖編輯器關掉的手扶梯，當一般圖片畫
   ctx.drawImage(img, x, y, w, h);
@@ -77,7 +105,7 @@ function escalatorLanes() {
 function escalatorCoversCell(c, r) {
   if (typeof MAP === 'undefined' || !MAP) return false;
   for (const s of MAP.stamps || []) {
-    if (!escalatorSpec(s.id)) continue;
+    if (!escalatorSpec(s.id) && !escalatorSideSpec(s.id)) continue;
     const t = mapTileById(s.id); if (!t) continue;
     const o = stampSolidOrigin(s), side = mapStampTurn(s) % 2;
     const w = side ? mapTileH(t) : mapTileW(t), h = side ? mapTileW(t) : mapTileH(t);
@@ -124,12 +152,142 @@ function escalatorRideSound(p, on) {
 function updateEscalators(dt) {
   escalatorPhase = (escalatorPhase + ESCALATOR.speed * dt) % 100000;
   escalatorRideCd = Math.max(0, escalatorRideCd - dt);
-  if (!escalatorLanes().length || !G) return;
+  if (!G || (!escalatorLanes().length && !escalatorSideLanes().length)) return;
   const still = a => a.sitting || a.grabbed || a.grabFall || a.eatenBy;
-  if (G.player && !still(G.player)) escalatorRideSound(G.player, carryOnEscalator(G.player, ESCALATOR.footDy, dt, playerBlocked));
-  for (const t of [...(G.towers || []), ...(G.npcs || [])]) if (!still(t)) carryOnEscalator(t, ESCALATOR.footDy, dt, sentryBlocked);
+  // 正面的（直的）和側面的（斜的）都試：回傳有沒有被會動的階梯帶著
+  const ride = (a, footDy, blocked) => { const front = carryOnEscalator(a, footDy, dt, blocked), side = rideSideEscalator(a, footDy, dt, blocked); return front || side; };
+  if (G.player && !still(G.player)) escalatorRideSound(G.player, ride(G.player, ESCALATOR.footDy, playerBlocked));
+  for (const t of [...(G.towers || []), ...(G.npcs || [])]) if (!still(t)) ride(t, ESCALATOR.footDy, sentryBlocked);
   for (const e of G.enemies || []) {
     if (e.dead || e.hp <= 0 || e.behavior === 'moth' || still(e)) continue;   // 人面蝶飛在空中
-    carryOnEscalator(e, ESCALATOR.enemyFootDy, dt, (x, y) => enemyBlocked(x, y, e));
+    ride(e, ESCALATOR.enemyFootDy, (x, y) => enemyBlocked(x, y, e));
+  }
+}
+
+/* ===================== 側面的手扶梯（斜的） ===================== */
+function escalatorSideSpec(id) { return ESCALATOR.side.tiles[id] || null; }
+// 這個手扶梯能不能當「真的手扶梯」用：上下翻轉、旋轉、調過大小角度的只當一張圖
+function escalatorSideUsable(s) {
+  return !!escalatorSideSpec(s.id) && !s.fy && !mapStampTurn(s) && !(typeof stampHasTransform === 'function' && stampHasTransform(s));
+}
+// 三層圖片（第一次用到才下載）
+const escalatorSideImgs = {};
+function escalatorSideImg(file) {
+  let rec = escalatorSideImgs[file];
+  if (!rec) { rec = escalatorSideImgs[file] = { img: new Image(), ok: false }; rec.img.onload = () => { rec.ok = true; }; rec.img.src = file; }
+  return rec.ok ? rec.img : null;
+}
+// 階梯面上緣在圖片的第幾個像素高（ix＝圖片的 x）：左邊平台 → 斜坡 → 右邊平台
+function escalatorSideTopPx(spec, ix) {
+  const t = Math.max(0, Math.min(1, (ix - spec.x0) / (spec.x1 + 1 - spec.x0)));
+  return spec.yLow + (spec.yHigh - spec.yLow) * t;
+}
+// 這張地圖上每座側面手扶梯的位置（世界座標）；換地圖、物件數量變了才重算
+let escalatorSideCache = { map: null, n: -1, lanes: [] };
+function escalatorSideLanes() {
+  if (typeof MAP === 'undefined' || !MAP) return [];
+  const n = (MAP.stamps || []).length;
+  if (escalatorSideCache.map === MAP && escalatorSideCache.n === n) return escalatorSideCache.lanes;
+  const lanes = [];
+  for (const s of MAP.stamps || []) {
+    if (!escalatorSideUsable(s)) continue;
+    const spec = escalatorSideSpec(s.id), t = mapTileById(s.id); if (!t) continue;
+    const w = mapTileW(t) * CELL, h = mapTileH(t) * CELL, x = OX + s.c * CELL + (s.ox || 0), y = OY + s.r * CELL + (s.oy || 0);
+    // k＝圖片 1 像素在地圖上多大；sortY＝站在上面的人排前後用的值（整張圖之後、前面外殼之前）
+    lanes.push({ map: MAP, stamp: s, spec, x, y, w, h, k: w / spec.size, fx: !!s.fx, sortY: s.r * CELL + (s.oy || 0) + h - 1.5 });
+  }
+  escalatorSideCache = { map: MAP, n, lanes };
+  return lanes;
+}
+const escalatorSideIx = (L, x) => { const ix = (x - L.x) / L.k; return L.fx ? L.spec.size - ix : ix; };   // 世界 x → 圖片 x（左右翻轉的反過來算）
+const escalatorSideTopY = (L, x) => L.y + escalatorSideTopPx(L.spec, escalatorSideIx(L, x)) * L.k;        // 這個 x 的階梯面上緣（世界 y）
+// 這個點（腳）踩在哪一座側面手扶梯的走道上
+function escalatorSideAt(x, y) {
+  for (const L of escalatorSideLanes()) {
+    if (x < L.x || x >= L.x + L.w) continue;
+    const rel = (y - escalatorSideTopY(L, x)) / L.k;
+    if (rel >= L.spec.band[0] && rel <= L.spec.band[1]) return L;
+  }
+  return null;
+}
+// 這個點（腳）是不是踩進側面手扶梯不能走的地方：後面的扶手以下、整張圖的底部以上，扣掉中間那條走道
+function escalatorSideBlocks(x, y) {
+  for (const L of escalatorSideLanes()) {
+    if (x < L.x || x >= L.x + L.w || y >= L.y + L.h) continue;
+    const rel = (y - escalatorSideTopY(L, x)) / L.k;
+    if (rel >= -L.spec.back && (rel < L.spec.band[0] || rel > L.spec.band[1])) return true;
+  }
+  return false;
+}
+// 階梯往哪邊帶（世界 x 的方向）：沒翻轉的圖右邊高，往上＝往右；左右翻轉、勾了「往下」各反一次
+const escalatorSideDir = L => (L.fx ? -1 : 1) * (L.stamp.escDown ? -1 : 1);
+// 站在側面手扶梯上的角色：左右走跟著斜坡上下、被階梯帶著走、不能超出扶手。回傳這一幀有沒有被會動的階梯帶著
+function rideSideEscalator(a, footDy, dt, blocked) {
+  const L = escalatorSideAt(a.x, a.y + footDy);
+  if (!L) { a.escSide = null; return false; }
+  const top = x => escalatorSideTopY(L, x), S = ESCALATOR.side;
+  // 1. 這一幀自己左右走了多遠：高度跟著斜坡變（被撞飛、瞬移不算）
+  const walked = a.escSide === L && a.escSX != null && !(a.knockT > 0) && Math.abs(a.x - a.escSX) < CELL ? a.x - a.escSX : 0;
+  if (walked) a.y += top(a.x) - top(a.escSX);
+  // 2. 會動的手扶梯：在斜坡那一段把人帶著走（逐小步檢查，撞到東西就停）；逆著走會變慢
+  let carried = false;
+  const onSlope = () => { const ix = escalatorSideIx(L, a.x); return ix >= L.spec.x0 && ix <= L.spec.x1; };
+  if (!L.stamp.still && onSlope()) {
+    const dir = escalatorSideDir(L), carry = ESCALATOR.speed * S.xSpeed * dt, against = walked * dir < 0 ? Math.abs(walked) : 0;
+    let move = carry + (against ? Math.max(0, Math.min(against * ESCALATOR.againstSlow, against * (1 - ESCALATOR.againstMinKeep) - carry)) : 0);
+    carried = true;
+    while (move > 0) {
+      const s = Math.min(4, move); move -= s;
+      const nx = a.x + dir * s, ny = a.y + top(nx) - top(a.x);
+      if (blocked(nx, ny)) break;
+      a.x = nx; a.y = ny;
+      if (!onSlope()) break;   // 到平台了
+    }
+  }
+  // 3. 不能貼到扶手：腳離走道上下邊緣至少 edge 像素
+  const rel = (a.y + footDy - top(a.x)) / L.k, keep = Math.max(L.spec.band[0] + S.edge, Math.min(L.spec.band[1] - S.edge, rel));
+  if (keep !== rel) a.y += (keep - rel) * L.k;
+  a.escSide = L; a.escSX = a.x;
+  return carried;
+}
+// 站在側面手扶梯上的人排前後用的值（js/render.js）：排在整張手扶梯之後、前面的扶手外殼之前；不在上面就用原本的 y
+function escalatorRiderSortY(a, y) {
+  const L = a && a.escSide;
+  return L && L.map === MAP ? L.sortY + a.y * 1e-4 : y;
+}
+// 整張側面手扶梯排前後用的值（js/maploader.js 的 mapOccluders）：比站在上面的人早一點；不是側面手扶梯回傳 null
+function escalatorSideSortY(s, bottomY) { return escalatorSideUsable(s) ? bottomY - 2 : null; }
+// 畫整張側面手扶梯（已經在翻轉好的座標裡）：回傳 true＝已經畫好
+function drawSideEscalator(ctx, s, img, x, y, w, h) {
+  const spec = escalatorSideSpec(s.id);
+  if (s.still || !escalatorSideUsable(s) || !img.naturalWidth) return false;   // 不會動的：當一般圖片畫
+  const bottom = escalatorSideImg(spec.bottom), middle = escalatorSideImg(spec.middle), cover = escalatorSideImg(spec.cover);
+  if (!bottom || !middle || !cover) return false;
+  ctx.drawImage(img, x, y, w, h);
+  const k = w / spec.size, P = spec.stepX;
+  let p = Math.floor(escalatorPhase * ESCALATOR.side.xSpeed / k) % P;   // 階梯往旁邊捲了幾個原始像素（取整數，像素圖才不會糊）
+  if (s.escDown) p = (P - p) % P;
+  if (!p) return true;
+  // 只拿階梯圖裡「階梯」那一段來捲（sx 起、寬 sw），兩頭平台的部分不要跟著跑
+  const up = Math.round(p * spec.stepY / P), sx = spec.x0 - spec.mx, sw = spec.x1 - spec.x0, sh = middle.naturalHeight;
+  const steps = (dx, dy) => ctx.drawImage(middle, sx, 0, sw, sh, x + (spec.x0 + dx) * k, y + (spec.my + dy) * k, sw * k, sh * k);
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x + spec.x0 * k, y, (spec.x1 - spec.x0) * k, h); ctx.clip();   // 只重畫斜坡那一段，兩頭的平台不動
+  ctx.drawImage(bottom, x, y, w, h);   // 先用後面的牆把原本的階梯蓋掉
+  steps(p, -up);                       // 整排階梯斜斜地往上移
+  steps(p - P, -up + spec.stepY);      // 後面再接一排，補上最下面空出來的那一階
+  ctx.restore();
+  ctx.drawImage(cover, x, y, w, h);
+  return true;
+}
+// 前面的扶手和外殼：跟角色一起排前後，蓋在站在手扶梯上的人身上（js/render.js）
+function escalatorSortables(out) {
+  for (const L of escalatorSideLanes()) {
+    const cover = escalatorSideImg(L.spec.cover); if (!cover) continue;
+    if (typeof stampInDrawRect === 'function' && !stampInDrawRect(L.stamp)) continue;   // 不在畫面上
+    out.push({ y: L.sortY + 1, draw: () => {
+      if (L.fx) { ctx.save(); ctx.translate(L.x + L.w, L.y); ctx.scale(-1, 1); ctx.drawImage(cover, 0, 0, L.w, L.h); ctx.restore(); }
+      else ctx.drawImage(cover, L.x, L.y, L.w, L.h);
+    } });
   }
 }

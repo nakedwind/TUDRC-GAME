@@ -334,6 +334,7 @@ function spawnWanderers(only = null) {   // only：只生這幾位（接續戰�
 // 模式：free=自由走動（亮處隨便逛）/ hold=在錨點附近小範圍巡邏 / goto=走去指派位置後轉 hold
 function sentryBlocked(x, y) {
   const r = 12;
+  if (typeof escalatorSideBlocks === 'function' && escalatorSideBlocks(x, y + ESCALATOR.footDy)) return true;   // 側面手扶梯的扶手、外殼（看腳的位置，js/escalators.js）
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);

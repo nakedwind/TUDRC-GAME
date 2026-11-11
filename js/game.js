@@ -1421,6 +1421,7 @@ function playerBlocked(x, y) {
   }
   // 邊緣碰撞（薄牆，js/pathfinding.js）：四個角再加四邊的中點，薄牆的一端剛好卡在身體中間也擋得到
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r], [0, -r], [0, r], [-r, 0], [r, 0]]) if (edgeWallBlocksPoint(x + sx, y + sy)) return true;
+  if (typeof escalatorSideBlocks === 'function' && escalatorSideBlocks(x, y + ESCALATOR.footDy)) return true;   // 側面手扶梯的扶手、外殼（看腳的位置，js/escalators.js）
   if (typeof bigPearlBlocksPlayer === 'function' && bigPearlBlocksPlayer(x, y)) return true;   // 珍珠大童的大珍珠（js/pearl-elder.js）
   return false;
   } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }

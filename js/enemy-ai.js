@@ -211,6 +211,7 @@ function enemyBlocked(x, y, actor = null) {
   const [c, r] = cellAt(x, y);
   if (!inGrid(c, r) || isWall(c, r) || !!enemyBarrierAt(c, r) || (typeof hangiCapAt === 'function' && hangiCapAt(c, r))) return true;   // 順順宮帽也擋路（js/hangi-bao.js）
   if (edgeWallBlocksPoint(x, y)) return true;   // 邊緣碰撞（薄牆，js/pathfinding.js）
+  if (typeof escalatorSideBlocks === 'function' && !(actor && actor.behavior === 'moth') && escalatorSideBlocks(x, y + ESCALATOR.enemyFootDy)) return true;   // 側面手扶梯的扶手、外殼（js/escalators.js）
   return !!(actor && actor.wide && !enemyWideAt(c, r) && enemyWideAt(...cellAt(actor.x, actor.y)));   // 大體型：從寬的地方擠不進一格的窄道（已經在窄道裡就可以走出來）
 }
 // ---- 大體型（怪物編輯器的「大體型」、巨型史萊姆）：只有一格寬的通道（門口、窄走廊）擠不過去 ----

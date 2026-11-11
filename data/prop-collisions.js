@@ -198,6 +198,44 @@ const PROP_COLLISIONS = [
     }
   },
   {
+    "id": "prop-mrt-escalator-side",
+    "name": "手扶梯（側面）",
+    "tile": "tile_mrt_escalator_side",
+    "cost": 0,
+    "hp": 0,
+    "h": {
+      "file": "images/捷運車站/mrt-escalator-side.png",
+      "w": 6,
+      "h": 6,
+      "solid": [
+        [
+          5,
+          3
+        ],
+        [
+          4,
+          4
+        ],
+        [
+          5,
+          4
+        ],
+        [
+          3,
+          5
+        ],
+        [
+          4,
+          5
+        ],
+        [
+          5,
+          5
+        ]
+      ]
+    }
+  },
+  {
     "id": "prop-mrt-escalator-front",
     "name": "手扶梯（正面）",
     "tile": "tile_mrt_escalator_front",

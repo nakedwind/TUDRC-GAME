@@ -875,6 +875,8 @@ function mapOccluders() {
       // 排序看物件原本佔的範圍（樹根還在原地，放大的樹冠不影響前後）；vis＝畫出來實際蓋到的範圍，補畫上層圖時用
       const item = { li, x0, y0, x1: x0 + stampWpx, y1: y0 + stampHpx, vis: stampHasTransform(s) ? stampVisualBox(s, x0, y0, stampWpx, stampHpx) : null,
         sortY: depth == null ? null : chair ? depth : t.baseHp ? y0 + depth * CELL : stampDepthY(s, y0, stampHpx, depth * CELL), fixedDepth: depth != null, kind: 'stamp', stamp: s };
+      const escY = typeof escalatorSideSortY === 'function' ? escalatorSideSortY(s, y0 + stampHpx) : null;   // 側面的手扶梯：排在站在上面的人之前（js/escalators.js）
+      if (escY != null) { item.sortY = escY; item.fixedDepth = true; }
       if (stampConnects(s)) {   // 連接 1、2 樓的柱子：拆成下半段（一樓）、上半段（二樓）兩個，各畫各的那一半
         const mid = y0 + stampHpx / 2;
         items.push({ ...item, part: 'lower', splitY: mid }, { ...item, part: 'upper', splitY: mid });

@@ -2937,7 +2937,8 @@ function selectedBlendTarget() {   // 只選一個物件時：{ s（大圖）或
 // 可以一次選好幾台一起切換；選到其他物件不受影響
 const STILL_VEHICLE_IDS = new Set(['tile_street_scooter_delivery_green', 'tile_street_scooter_delivery_pink', 'tile_street_ubike']);
 const STILL_VEHICLE_MAP = 'map_mvvdbiyx';   // 車子只有 K56 區-地下街會動（STREET_VEHICLES.maps），其他地圖不顯示開關
-const isStillEscalator = id => /^tile_mrt_escalator_front/.test(id);
+const isSideEscalator = id => id === 'tile_mrt_escalator_side';   // 側面（斜的）手扶梯：多一個「往上／往下」可以選（stamp.escDown）
+const isStillEscalator = id => /^tile_mrt_escalator_front/.test(id) || isSideEscalator(id);
 function selectedStillTargets() {
   const m = curMap();
   return selections.filter(sel => sel.type === 'stamp').map(sel => m.stamps[sel.index])
@@ -2947,8 +2948,17 @@ function refreshStillControl() {
   let box = document.getElementById('stillControl');
   if (!box) {
     box = document.createElement('div'); box.id = 'stillControl'; box.className = 'blend-control';
-    box.innerHTML = '<label><input type="checkbox" id="stillToggle"> <span id="stillToggleText"></span></label>';
+    box.innerHTML = '<label><input type="checkbox" id="stillToggle"> <span id="stillToggleText"></span></label>'
+      + '<label id="escDownLabel" title="側面的手扶梯：沒勾＝把人往上帶，勾了＝往下帶。要先勾「手扶梯會動」才有差"><input type="checkbox" id="escDownToggle"> 手扶梯往下（沒勾＝往上）</label>';
     document.getElementById('selControls').appendChild(box);
+    document.getElementById('escDownToggle').addEventListener('change', e => {
+      if (dropLockedSelections('切換手扶梯方向')) return;
+      const list = selectedStillTargets().filter(s => isSideEscalator(s.id)); if (!list.length) return;
+      pushUndo();
+      for (const s of list) { if (e.target.checked) s.escDown = true; else delete s.escDown; }
+      saveMaps(); draw(); refreshSelPanel();
+      setStatus(list.length + ' 座手扶梯已設為' + (e.target.checked ? '往下' : '往上'), '#7ee0c0');
+    });
     document.getElementById('stillToggle').addEventListener('change', e => {
       if (dropLockedSelections('切換會不會動')) return;
       const list = selectedStillTargets(); if (!list.length) return;
@@ -2962,6 +2972,9 @@ function refreshStillControl() {
   if (!list.length) return;
   const toggle = document.getElementById('stillToggle'), off = list.filter(s => s.still).length;
   toggle.checked = off === 0; toggle.indeterminate = off > 0 && off < list.length;
+  const sides = list.filter(s => isSideEscalator(s.id)), downToggle = document.getElementById('escDownToggle'), downN = sides.filter(s => s.escDown).length;
+  document.getElementById('escDownLabel').classList.toggle('hidden', !sides.length);
+  downToggle.checked = sides.length > 0 && downN === sides.length; downToggle.indeterminate = downN > 0 && downN < sides.length;
   document.getElementById('stillToggleText').textContent = list.every(s => isStillEscalator(s.id)) ? '手扶梯會動' : list.some(s => isStillEscalator(s.id)) ? '會動' : '會暴衝撞人';
 }
 // ---- 捷運車廂：停靠時兩側車門都開（stamp.bothDoors），沒勾＝只開靠月台那側（js/mrt-train.js）----

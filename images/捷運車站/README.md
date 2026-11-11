@@ -29,6 +29,7 @@
 | mrt-gate-card-readers-small.png | 閘門讀卡機（小） | 3 × 2 |
 | mrt-escalator-side.png | 手扶梯（側面） | 6 × 6 |
 | mrt-escalator-side-cover.png | 手扶梯（側面外殼） | 6 × 6 |
+| mrt-escalator-side-bottom.png、-middle.png | 側面手扶梯的分層圖（後面的扶手和牆、階梯）：遊戲拿來做階梯動畫（js/escalators.js），不用放進地圖 | — |
 | mrt-escalator-front.png | 手扶梯（正面） | 5 × 4 |
 | mrt-stairs-dark.png | 樓梯（深色） | 2 × 3 |
 | mrt-stairs-light.png | 樓梯（淺色） | 2 × 3 |
