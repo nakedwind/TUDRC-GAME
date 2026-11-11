@@ -1914,7 +1914,8 @@ function marqueeRect() {
 function itemsInMarquee() {
   const m = curMap(), box = marqueeRect(), picked = [];
   const inside = (x, y, w, h) => x >= box.x - 0.5 && y >= box.y - 0.5 && x + w <= box.x + box.w + 0.5 && y + h <= box.y + box.h + 0.5;
-  const canPick = lid => lid !== 'floor' && !hiddenLayers.has(lid) && !isLockedLayer(lid);
+  const withFloor = !!marquee.floor;   // 按著 Alt 拉框＝連地板圖層的圖也框進來（要把整片陸橋地板一次標成 2 樓用）
+  const canPick = lid => (withFloor || lid !== 'floor') && !hiddenLayers.has(lid) && !isLockedLayer(lid);
   // 小圖：照圖層由下到上
   for (const l of LAYERS) {
     if (!canPick(l.id)) continue;
@@ -2017,7 +2018,7 @@ cv.addEventListener('pointerdown', e => {
   lastSelectHit = false; forceMarquee = e.altKey;
   paintCell(c, r, true, e.shiftKey);
   if (brush.mode === 'select' && !lastSelectHit && pointerPx) {   // 按在空白的地方：開始拉框（Shift＝加到原本的選取）
-    marquee = { x0: pointerPx.x, y0: pointerPx.y, x1: pointerPx.x, y1: pointerPx.y, base: e.shiftKey ? selections.slice() : [], moved: false };
+    marquee = { x0: pointerPx.x, y0: pointerPx.y, x1: pointerPx.x, y1: pointerPx.y, base: e.shiftKey ? selections.slice() : [], moved: false, floor: e.altKey };
     selectionDrag = null; return;
   }
   if (!e.shiftKey) beginSelectionDrag(c, r);
