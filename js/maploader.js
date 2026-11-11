@@ -710,6 +710,33 @@ const OCC_MIN_H = 2;                                   // 幾格高(含)以上�
 const isOccLayer = lid => /^object\d*$/.test(lid) || lid === 'overlay';   // 物件、物件2～4、物件裝飾都是「立體物」
 // flat:true 的圖＝平貼地面（紅線、裂痕、碎石等），永遠畫在角色下方、不遮擋
 const stampOn2F = s => !!s.deck2 || MAP_FLOOR2_LAYERS.has(s.layer || 'top');   // 標了「2樓的圖」，或放在「2樓」圖層裡
+// 2 樓「地板類」圖層（名稱有 2樓、不是物件／上層類）的圖蓋到哪些格子；all＝所有 2 樓的圖蓋到的格子（連接柱只算上半段）。換地圖、物件數量變了才重算
+let floor2CellsCache = null;
+function floor2ArtCells() {
+  const n = (MAP.stamps || []).length;
+  if (floor2CellsCache && floor2CellsCache.map === MAP && floor2CellsCache.n === n) return floor2CellsCache;
+  const floor = new Set(), all = new Set();
+  const cover = (s, out, half) => {
+    const t = mapTileById(s.id); if (!t) return;
+    const w = mapStampW(s, t), h = mapStampH(s, t), c0 = s.c + (s.ox || 0) / CELL, r0 = s.r + (s.oy || 0) / CELL, r1 = half ? r0 + h / 2 : r0 + h;
+    for (let c = Math.ceil(c0 - .5); c + .5 < c0 + w; c++) for (let r = Math.ceil(r0 - .5); r + .5 < r1; r++) out.add(c + ',' + r);
+  };
+  for (const lid of MAP_FLOOR2_LAYERS) for (const k of Object.keys((MAP.layers || {})[lid] || {})) { all.add(k); if (!isOccLayer(lid) && lid !== 'top') floor.add(k); }
+  for (const s of MAP.stamps || []) if (stampOn2F(s) && !isOccLayer(s.layer || 'top') && (s.layer || 'top') !== 'top') cover(s, floor, false);
+  floor2CellsCache = { map: MAP, n, floor, all };
+  for (const s of MAP.stamps || []) if (stampOn2F(s)) cover(s, all, stampConnects(s));
+  return floor2CellsCache;
+}
+// 連接 1、2 樓的東西（從一樓立到二樓的柱子、牆）：2 樓物件圖層裡的圖，底部沒有踩在 2 樓的地板上（底下那格不是 2 樓地面、也沒有 2 樓地板的圖）、高 2 格以上。
+// 這種圖從圖片一半的高度分成上下兩段：下半段算一樓的東西（跟一樓的人照底部排前後），上半段算二樓的（蓋在一樓的人上面、跟二樓的人排前後）。
+function stampConnects(s) {
+  const lid = s.layer || 'top';
+  if (!hasFloors || !stampOn2F(s) || !isOccLayer(lid) || MAP_FLOOR2_TOP.has(lid)) return false;
+  const t = mapTileById(s.id); if (!t) return false;
+  const w = mapStampW(s, t), h = mapStampH(s, t); if (h < 2) return false;
+  const c = Math.floor(s.c + (s.ox || 0) / CELL + w / 2), r = Math.floor(s.r + (s.oy || 0) / CELL + h - .5), k = c + ',' + r;
+  return !deckCells.has(k) && !floor2ArtCells().floor.has(k);
+}
 const stampIsOcc = s => { const t = mapTileById(s.id) || {}; return stampOn2F(s) || Number.isFinite(s.sortDepth) || !!chairConfig(s.id) || !!t.baseHp || (!t.flat && (mapStampH(s, t) > 1 || isOccLayer(s.layer || 'top'))); };
 
 // ---- 只畫畫面看得到的地方 ----
@@ -833,8 +860,12 @@ function mapOccluders() {
         ? Math.max(0, Math.min(mapStampH(s, t), Number.isFinite(s.baseDepth) ? s.baseDepth : (Number.isFinite(t.baseDepth) ? t.baseDepth : Math.max(1, mapStampH(s, t) - 2))))
         : (Number.isFinite(s.sortDepth) ? Math.max(0, Math.min(mapStampH(s, t), s.sortDepth)) : null);
       // 排序看物件原本佔的範圍（樹根還在原地，放大的樹冠不影響前後）；vis＝畫出來實際蓋到的範圍，補畫上層圖時用
-      items.push({ li, x0, y0, x1: x0 + stampWpx, y1: y0 + stampHpx, vis: stampHasTransform(s) ? stampVisualBox(s, x0, y0, stampWpx, stampHpx) : null,
-        sortY: depth == null ? null : chair ? depth : t.baseHp ? y0 + depth * CELL : stampDepthY(s, y0, stampHpx, depth * CELL), fixedDepth: depth != null, kind: 'stamp', stamp: s });
+      const item = { li, x0, y0, x1: x0 + stampWpx, y1: y0 + stampHpx, vis: stampHasTransform(s) ? stampVisualBox(s, x0, y0, stampWpx, stampHpx) : null,
+        sortY: depth == null ? null : chair ? depth : t.baseHp ? y0 + depth * CELL : stampDepthY(s, y0, stampHpx, depth * CELL), fixedDepth: depth != null, kind: 'stamp', stamp: s };
+      if (stampConnects(s)) {   // 連接 1、2 樓的柱子：拆成下半段（一樓）、上半段（二樓）兩個，各畫各的那一半
+        const mid = y0 + stampHpx / 2;
+        items.push({ ...item, part: 'lower', splitY: mid }, { ...item, part: 'upper', splitY: mid });
+      } else items.push(item);
     }
   });
   // items 已依圖層由下往上排好，所以下層的 y 一定先算完；
@@ -856,7 +887,8 @@ function mapOccluders() {
   // 標了「2樓」的圖（陸橋）：排在所有一樓的東西後面（蓋在一樓的人上面）；地板類的排在二樓的人後面、牆柱類的照底部Y跟二樓的人排前後
   for (const it of items) {
     const lid = MAP_LAYER_ORDER[it.li];
-    if (!(it.kind === 'stamp' ? stampOn2F(it.stamp) : MAP_FLOOR2_LAYERS.has(lid))) continue;
+    if (it.part === 'upper') { it.y = FLOOR2_SORT + it.splitY; continue; }   // 連接柱的上半段：從分界那條線起算，跟二樓的人排前後
+    if (!itemOn2F(it)) continue;
     it.y = MAP_FLOOR2_TOP.has(lid) ? FLOOR2_SORT + 50000 + it.li : isOccLayer(lid) ? it.y + FLOOR2_SORT : FLOOR2_SORT - 50000 + it.li;
   }
   buildLayerOverdraw(items);
@@ -868,7 +900,7 @@ function mapOccluders() {
 // 例如牆上的監視器（平貼）、床頭牆板、比書桌低一點的椅子，進遊戲會被下層的牆／書桌蓋掉。
 // 做法：畫完一個立體物之後，把「圖層比它高、跟它重疊、卻比它先畫」的圖，
 // 只在重疊的範圍內再補畫一次。這樣只修正圖跟圖之間的上下，角色被遮擋的方式不變。
-const itemOn2F = it => it.kind === 'stamp' ? stampOn2F(it.stamp) : MAP_FLOOR2_LAYERS.has(MAP_LAYER_ORDER[it.li]);
+const itemOn2F = it => it.part ? it.part === 'upper' : it.kind === 'stamp' ? stampOn2F(it.stamp) : MAP_FLOOR2_LAYERS.has(MAP_LAYER_ORDER[it.li]);
 function buildLayerOverdraw(items) {
   const flats = (MAP.stamps || []).filter(s => !isElevatorStamp(s) && (s.layer || 'top') !== 'top' && !stampIsOcc(s)).map(s => {
     const t = mapTileById(s.id) || {}, x0 = s.c * CELL + (s.ox || 0), y0 = s.r * CELL + (s.oy || 0);
@@ -900,6 +932,14 @@ function drawOccluderItem(ctx, it) {
     if (!G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) drawMapTileImg(ctx, it.id, OX + it.c * CELL, OY + it.r * CELL, MAP_LAYER_ORDER[it.li]);
   } else drawMapStampImg(ctx, it.stamp);
 }
+// 連接 1、2 樓的柱子：只畫自己那一半（下半段／上半段，分界在 it.splitY）
+function withPartClip(ctx, it, fn) {
+  if (!it.part) { fn(); return; }
+  ctx.save(); ctx.beginPath();
+  const x = OX + it.x0 - CELL * 6, w = it.x1 - it.x0 + CELL * 12, my = OY + it.splitY;
+  if (it.part === 'lower') ctx.rect(x, my, w, CELL * 40); else ctx.rect(x, my - CELL * 40, w, CELL * 40);
+  ctx.clip(); fn(); ctx.restore();
+}
 function collectMapOccluders(ctx, out) {
   if (!MAP) return;
   const v = mapDrawFull ? null : (mapDrawRect || updateMapDrawRect());
@@ -907,10 +947,10 @@ function collectMapOccluders(ctx, out) {
     if (v && (it.kind === 'stamp' ? !stampInDrawRect(it.stamp)   // 在畫面範圍外：這一幀不畫
       : (it.x1 + OX <= v.x0 || it.x0 + OX >= v.x1 || it.y1 + OY <= v.y0 || it.y0 + OY >= v.y1))) continue;
     if (it.kind === 'cell' && G.mapDestroyed.has(MAP_LAYER_ORDER[it.li] + ':' + it.c + ',' + it.r)) continue;
-    out.push({ y: it.y, draw: () => {
+    out.push({ y: it.y, draw: () => withPartClip(ctx, it, () => {
       drawOccluderItem(ctx, it);
       for (const od of it.overdraw || []) drawOverdrawPatch(ctx, it, od);   // 上層圖在重疊處補畫回來
-    } });
+    }) });
   }
 }
 // 補畫上層圖時，只補在「下層這張圖有畫東西的像素」上，不是整個重疊的長方形：

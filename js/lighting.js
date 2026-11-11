@@ -67,9 +67,27 @@ function refreshLightFloors() {
   if (lightSurf.length !== COLS * ROWS) { lightSurf = new Uint8Array(COLS * ROWS); lightWalls2 = new Uint8Array(COLS * ROWS); }
   lightSurf.fill(0); lightWalls2.fill(1);
   const idx = k => { let i = lightWallKeyIdx.get(k); if (i === undefined) { const [c, r] = k.split(',').map(Number); i = inGrid(c, r) ? r * COLS + c : -1; lightWallKeyIdx.set(k, i); } return i; };
+  if (typeof floor2ArtCells === 'function') for (const k of floor2ArtCells().all) { const i = idx(k); if (i >= 0) lightSurf[i] = 1; }   // 2 樓的圖（牆、柱子上半段…）蓋到的格子：畫面上是 2 樓的東西，吃 2 樓的光（但還是擋路、擋光）
   for (const k of deckCells) { const i = idx(k); if (i >= 0) { lightSurf[i] = 1; lightWalls2[i] = 0; } }
   for (const k of rampCells) { const i = idx(k); if (i >= 0) { lightSurf[i] = 2; lightWalls2[i] = lightWalls[i]; } }
   return true;
+}
+// 2 樓的牆面：牆的圖有好幾格高，光只擴散得到牆腳那一格 → 牆面跟著「正下方最近的 2 樓地面」一起亮（往下找最多 4 格），不然整面牆是黑的
+const LIGHT_F2_WALL_ROWS = 4;
+function lightFloor2WallFaces() {
+  for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
+    const i = r * COLS + c;
+    if (lightSurf[i] !== 1 || lightWalls2[i] === 0) continue;   // 只處理「2 樓的圖蓋著、但不是 2 樓地面」的格子（牆、柱子）
+    for (let d = 1; d <= LIGHT_F2_WALL_ROWS && r + d < ROWS; d++) {
+      const j = (r + d) * COLS + c;
+      if (lightWalls2[j] !== 0) continue;
+      if (lightField[j] > lightField[i]) lightField[i] = lightField[j];
+      if (visField[j] > visField[i]) visField[i] = visField[j];
+      if (warmField[j] > warmField[i]) warmField[i] = warmField[j];
+      if (beamMask[j] > beamMask[i]) beamMask[i] = beamMask[j];
+      break;
+    }
+  }
 }
 const lightWall = (c, r) => c >= 0 && c < COLS && r >= 0 && r < ROWS && lightWalls[r * COLS + c] === 1;   // 跟 isWall 一樣，只是查表
 
@@ -100,6 +118,7 @@ function computeLightField() {
     });
     if (l.smooth) markBeamMask(l);   // 頭燈、手電筒畫面上照得到的格子（牆後面不會亮）
   }
+  if (twoFloors) lightFloor2WallFaces();
   lightWalls = walls1; lightSkipSurf = -1; losNoFloors = false; floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck;
   if (typeof lightBreakableWallFaces === 'function') lightBreakableWallFaces([lightField, visField, warmField]);   // 可炸開的牆：牆面跟著牆腳一起亮（js/breakable-walls.js）
 }

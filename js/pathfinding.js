@@ -11,8 +11,21 @@ let mapWalls = new Set();               // 存 'c,r' 字串
 // 換樓層：從「樓層出入口」走出去的那一步決定——走到 2 樓地面＝2 樓，走到其他格子＝1 樓。沒畫 2 樓地面的地圖完全不受影響。
 // floorCtx＝現在在處理哪一層的人：game.js 的 update 處理每個角色前先設好（isWall、flowAt、邊緣碰撞都看它）。
 let deckCells = new Set(), rampCells = new Set(), hasFloors = false, floorCtx = 1;
+// 樓層出入口（樓梯、手扶梯）靠 2 樓那一半的格子：站在上面的人雖然還算一樓，畫面上先畫到 2 樓那一批（不會被 2 樓地板的圖蓋住）
+let rampUpperCells = new Set();
+function computeRampUpper() {
+  rampUpperCells = new Set();
+  const N = [[0, 1], [0, -1], [1, 0], [-1, 0]], dist = test => {   // 在樓層出入口的格子之間，離「符合 test 的鄰格」幾步
+    const d = new Map(), q = [];
+    for (const k of rampCells) { const [c, r] = k.split(',').map(Number); if (N.some(([dc, dr]) => { const n = (c + dc) + ',' + (r + dr); return !rampCells.has(n) && test(n); })) { d.set(k, 0); q.push(k); } }
+    for (let h = 0; h < q.length; h++) { const [c, r] = q[h].split(',').map(Number); for (const [dc, dr] of N) { const n = (c + dc) + ',' + (r + dr); if (rampCells.has(n) && !d.has(n)) { d.set(n, d.get(q[h]) + 1); q.push(n); } } }
+    return d;
+  };
+  const up = dist(n => deckCells.has(n)), down = dist(n => !deckCells.has(n) && !mapWalls.has(n));
+  for (const k of rampCells) if ((up.get(k) ?? Infinity) <= (down.get(k) ?? Infinity)) rampUpperCells.add(k);
+}
 function setMapFloors(deck, ramps) {
-  deckCells = new Set(deck || []); rampCells = new Set(ramps || []); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
+  deckCells = new Set(deck || []); rampCells = new Set(ramps || []); computeRampUpper(); hasFloors = deckCells.size > 0 && rampCells.size > 0; floorCtx = 1; floorOnRamp = false; floorOnDeck = false;
 }
 function wallOnFloor(f, c, r) {
   const k = c + ',' + r;
@@ -49,7 +62,7 @@ function updateActorFloor(a) {
 }
 const actorFloor = a => (hasFloors && a && a.floor) || 1;
 // 畫面前後：二樓的人、二樓的圖都加上這個大數字，排在所有一樓的東西後面畫（蓋在一樓的人上面）
-const FLOOR2_SORT = 100000, floorSortY = a => actorFloor(a) === 2 ? FLOOR2_SORT : 0;
+const FLOOR2_SORT = 100000, floorSortY = a => hasFloors && a && (a.floor === 2 || rampUpperCells.has(cellAt(a.x, a.y).join(','))) ? FLOOR2_SORT : 0;
 const sameFloor = (a, b) => actorFloor(a) === actorFloor(b);
 
 // ---- 邊緣碰撞（地圖編輯器「📏 邊緣碰撞」畫的薄牆）----
