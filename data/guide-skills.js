@@ -49,8 +49,8 @@ const GUIDE_SKILL_COMMON = {
 const GUIDE_SKILL_TEXTS = {
   eldrin: {
     ...GUIDE_SKILL_COMMON,
-    'a-1': { name: '群體補血', desc: '為全隊送上溫柔的治癒。', effect: '', note: '', icon: '', mods: [], say: ['群體補血！'] },
-    'b-1': { name: '守護祝福', desc: '讓隊友更能撐住攻擊。', effect: '', note: '', icon: '', mods: [], say: ['守護祝福！'] },
+    'a-1': { name: '群體補血', desc: '為全隊送上溫柔的治癒。', effect: '', note: '', icon: 'images/ui/skills/eldrin/group-heal.png', mods: [], say: ['群體補血！'] },
+    'b-1': { name: '守護祝福', desc: '讓隊友更能撐住攻擊。', effect: '', note: '', icon: 'images/ui/skills/eldrin/guardian-blessing.png', mods: [], say: ['守護祝福！'] },
     'core-1': { name: '細心照護', desc: '把照顧的範圍再放大一點。', effect: '疏導光環範圍 +0.5 格', icon: '', mods: [{ path: 'aura.r', add: .5 }] },
     'ult': { name: '生命之泉', desc: '危急時刻，為全隊注入大量生命力。', effect: '', note: '', icon: '', mods: [], say: ['生命之泉！'] },
   },
@@ -63,9 +63,9 @@ const GUIDE_SKILL_TEXTS = {
   },
   chris: {
     ...GUIDE_SKILL_COMMON,
-    'a-1': { name: '緊急疏導', desc: '邊打邊顧，搶先穩住快失控的人。', effect: '', note: '', icon: '', mods: [], say: ['緊急疏導！'] },
-    'b-1': { name: '火力支援', desc: '指揮隊友集中火力。', effect: '', note: '', icon: '', mods: [], say: ['火力支援！'] },
+    'a-1': { name: '緊急疏導', desc: '邊打邊顧，搶先穩住快失控的人。', effect: '', note: '', icon: 'images/ui/skills/chris/emergency-soothing.png', mods: [], say: ['緊急疏導！'] },
+    'b-1': { name: '火力支援', desc: '指揮隊友集中火力。', effect: '', note: '', icon: 'images/ui/skills/chris/fire-support.png', mods: [], say: ['火力支援！'] },
     'core-1': { name: '省力疏導', desc: '用最少的力氣做好疏導。', effect: '一般疏導少花 20% SP', icon: '', mods: [{ path: 'spCostCut', add: .2 }] },
-    'ult': { name: '戰術指揮', desc: '戰場指揮全開，全隊火力全面提升。', effect: '', note: '', icon: '', mods: [], say: ['戰術指揮！'] },
+    'ult': { name: '戰術指揮', desc: '戰場指揮全開，全隊火力全面提升。', effect: '', note: '', icon: 'images/ui/skills/chris/tactical-command.png', mods: [], say: ['戰術指揮！'] },
   },
 };

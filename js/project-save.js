@@ -38,12 +38,15 @@ const ProjectSave = (() => {
     return dir;
   }
   async function subDir(dir, parts, create) { for (const p of parts) dir = await dir.getDirectoryHandle(p, { create }); return dir; }
-  // 寫一個檔案：回傳 'same'（沒變動）或 'saved'
+  // 換行符號不算內容：git（core.autocrlf）拉取或切換時會把檔案的換行從 LF 改成 CRLF，內容其實一樣，不能因此說「檔案被更新了」
+  const sameText = (a, b) => a === b || (a != null && b != null && a.replace(/\r\n/g, '\n') === b.replace(/\r\n/g, '\n'));
+  // 寫一個檔案：回傳 'same'（沒變動）或 'saved'；照硬碟上原本的換行格式寫回去，git 才不會覺得整份檔案都變了
   async function writeFile(root, path, text, stamp) {
     const parts = path.split('/'), name = parts.pop(), dir = await subDir(root, parts, false);
     try {   // 備份舊檔
       const old = await (await (await dir.getFileHandle(name)).getFile()).text();
-      if (old === text) return 'same';
+      if (sameText(old, text)) return 'same';
+      if (old.includes('\r\n') && !text.includes('\r\n')) text = text.replace(/\n/g, '\r\n');
       const bdir = await subDir(root, BACKUP_DIR, true), base = name.replace(/\.js$/, '');
       const bf = await (await bdir.getFileHandle(base + '-' + stamp + '.js', { create: true })).createWritable();
       await bf.write(old); await bf.close();
@@ -71,7 +74,7 @@ const ProjectSave = (() => {
         const fresh = await res.text();
         let stale = false;
         const tag = [...document.scripts].find(sc => (sc.getAttribute('src') || '').split('?')[0] === path);
-        if (tag) { try { stale = (await (await fetch(tag.getAttribute('src'))).text()) !== fresh; } catch (_) {} }
+        if (tag) { try { stale = !sameText(await (await fetch(tag.getAttribute('src'))).text(), fresh); } catch (_) {} }
         return { fresh, stale };
       } catch (_) { return null; }
     })());
@@ -87,7 +90,7 @@ const ProjectSave = (() => {
       const text = f.text();
       if (bl.stale) throw new Error('「' + f.label + '」：這個編輯器讀到的是瀏覽器快取的舊檔案，直接存會蓋掉新內容。請按 Ctrl+F5 重新整理這個頁面（你的修改會自動合併進來），再存一次。');
       const disk = await readDisk(root, f.path);
-      if (disk != null && disk !== bl.fresh && disk !== text)
+      if (disk != null && !sameText(disk, bl.fresh) && !sameText(disk, text))
         throw new Error('「' + f.label + '」在你打開編輯器之後被更新了（例如剛拉取了朋友的版本）。為了不蓋掉新內容，這次先不存。請重新整理這個編輯器頁面（你的修改會自動和新版本合併），再存一次。');
     }
   }

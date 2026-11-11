@@ -47,6 +47,28 @@ function testSfx(name, gain) {   // 編輯器沒有載入音效引擎：照 js/s
   if (typeof file !== 'string') { status('這個音效只能在遊戲預覽裡聽：' + name, true); return; }
   const a = new Audio('Sound effects/' + file); a.volume = Math.min(1, .5 * (Number(gain) > 0 ? Number(gain) : 1)); a.play().catch(() => status('播放失敗：' + file, true));
 }
+// ---- 每頁換音樂：music/ 資料夾裡的音樂清單（含子資料夾，例如 基地音樂/），讓「音樂」那列直接用選的，不用自己打檔名 ----
+// 清單是向編輯器小幫手（tools/editor-server.py）要資料夾列表算出來的，新放進 music/ 的音樂重新整理編輯器就會出現
+let BGM_FILES = null;   // null＝還在讀（或沒有用小幫手開，讀不到）
+async function listMusic(dir, depth) {
+  const html = await (await fetch(encodeURI(dir), { cache: 'no-store' })).text();
+  const out = [];
+  for (const a of new DOMParser().parseFromString(html, 'text/html').querySelectorAll('a[href]')) {
+    const name = decodeURIComponent(a.getAttribute('href') || '');
+    if (!name || name.startsWith('/') || name.startsWith('?') || name.startsWith('..')) continue;
+    if (name.endsWith('/')) { if (depth < 2) out.push(...await listMusic(dir + name, depth + 1)); }
+    else if (/\.(mp3|ogg|wav|m4a)$/i.test(name)) out.push(dir + name);
+  }
+  return out;
+}
+listMusic('music/', 0).then(list => { BGM_FILES = list; if (typeof renderBeats === 'function' && data) renderBeats(); }).catch(() => {});
+let pageBgmTest = null;   // 「▶ 試聽」正在播的音樂（再按一次停掉）
+function testPageBgm(src) {
+  if (pageBgmTest) { pageBgmTest.pause(); const same = pageBgmTest.dataset.src === src; pageBgmTest = null; if (same) { status('停止試聽'); return; } }
+  if (!src || src === 'music/') { status('先選一首音樂', true); return; }
+  const a = pageBgmTest = new Audio(src); a.dataset.src = src; a.volume = .4;
+  a.play().then(() => status('試聽中：' + src + '（再按一次停止）')).catch(() => { pageBgmTest = null; status('播不出來，找不到這個檔案：' + src, true); });
+}
 const faceSrc = sprite => sprite ? 'images/character/' + sprite + '/' + sprite.replace('_', '') + '_0000_Front.png' : '';
 
 // ---- 資料 ----
@@ -458,12 +480,15 @@ function bgmBox(s) {
   const test = h('button', { type: 'button', class: 'small', onclick: e => {
     if (bgmTest) { stopTest(); e.target.textContent = '▶ 試聽'; return; }
     if (!s.bgm) return;
-    bgmTest = new Audio(Array.isArray(s.bgm) ? s.bgm[0] : s.bgm);   // 清單：試聽第一首 bgmTest.volume = Math.max(0, Math.min(1, s.bgmVolume ?? .5)); bgmTest.loop = true;
+    bgmTest = new Audio(Array.isArray(s.bgm) ? s.bgm[0] : s.bgm);   // 清單：試聽第一首
+    bgmTest.volume = Math.max(0, Math.min(1, s.bgmVolume ?? .5)); bgmTest.loop = true;
     bgmTest.play().then(() => { e.target.textContent = '■ 停止'; }).catch(() => { stopTest(); status('播放失敗：找不到音樂檔 ' + s.bgm, true); });
   } }, bgmTest ? '■ 停止' : '▶ 試聽');
   return h('div', {},
     field('BGM（音樂檔，放在 music/ 資料夾；一行一首，照順序播放，最後一首一直循環；空白＝沒有音樂）', bgmList(s, stopTest)),
-    s.bgm && h('div', { class: 'row', style: 'font-size:12px' }, '音量', num(s, 'bgmVolume', { min: 0, step: .05, optional: true, placeholder: '0.5' }), h('small', { style: 'color:#8c98a6' }, '（0～1）'), test));
+    s.bgm && h('div', { class: 'row', style: 'font-size:12px' }, '音量', num(s, 'bgmVolume', { min: 0, step: .05, optional: true, placeholder: '0.5' }), h('small', { style: 'color:#8c98a6' }, '（0～1）'), test),
+    // 整段劇情的淡入淡出：開頭音樂花幾秒淡入（空白＝1.5）、劇情結束時花幾秒淡出（空白＝5；每頁換的音樂結束時也照這個）
+    h('div', { class: 'row', style: 'font-size:12px' }, '開頭花', num(s, 'bgmFadeIn', { min: 0, step: .1, optional: true, placeholder: '1.5' }), '秒淡入，劇情結束時花', num(s, 'bgmFadeOut', { min: 0, step: .1, optional: true, placeholder: '5' }), '秒淡出'));
 }
 function explosionBox(s) {   // 遠處爆炸：explosions: { min, max, gain, shake }，沒有這個欄位＝不會爆炸
   const box = h('div', {}, h('label', { class: 'row', style: 'font-size:12px' }, h('input', { type: 'checkbox', checked: !!s.explosions,
@@ -605,7 +630,8 @@ function renderObj() {
       chk(ac, 'horn', '嘴上咬著生日吹笛（演出「吹生日吹笛」時吹一下；背對鏡頭看不到）'),
       field('位置', choose(posMode, 'mode', [['', '站著（自己選格子）'], ...beds], { parse: v => { if (v) { ac.bed = v.split(',').map(Number); delete ac.at; } else { delete ac.bed; ac.at = ac.at || [r1(curMap().cols / 2), r1(curMap().rows / 2)]; } return v; } })),
       !ac.bed && field('站的格子', xy(ac, 'at', '選' + (ac.name || '角色') + '站的位置')),
-      !ac.bed && field('一開始面向', choose(ac, 'dir', DIRS)),
+      ac.bed && field('坐的位置微調（像素；往右／往下是正數，往左／往上填負數）', h('span', { class: 'row' }, '往右', num(ac, 'seatDx', { optional: true, step: 1, placeholder: '0' }), '往下', num(ac, 'seatDy', { optional: true, step: 1, placeholder: '0' }))),
+      field('一開始面向' + (ac.bed ? '（坐著的人空白＝跟椅子的方向）' : ''), choose(ac, 'dir', ac.bed ? [['', '跟椅子一樣'], ...DIRS] : DIRS, { optional: !!ac.bed })),
       field('走路速度（像素／秒，預設 26，溫特用 90）', num(ac, 'speed', { optional: true, step: 1, placeholder: '26' })),
       chk(ac, 'hidden', '一開始先隱藏（第一次走位才出現）'),
       chk(ac, 'gun', '一開始拿著槍預備（持槍圖：希奧妮、安柏、艾德林、克里斯、溫特有）'),
@@ -687,13 +713,13 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
 const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.pop && '🎉', b.blow && '🎺', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
-  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
-  'confetti' in b && '🎊', b.banner && '🅰', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
+  b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.bubble && '💭', b.tug && '✊', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
+  b.bgmLevel && '🔉', 'confetti' in b && '🎊', b.banner && '🅰', b.caption && '🎬', 'meter' in b && '📊', 'records' in b && '📋', 'filter' in b && '🎞', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
   s.beats.forEach((b, i) => {
@@ -709,15 +735,15 @@ function renderBeats() {
 // 每頁的演出：只列出這頁有用到的；要加新的從「＋ 加演出」選單挑（照類別分好，順序也是畫面上列出來的順序）
 const ACT_MENU = [
   ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['speed', '速度']]],
-  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['pop', '拉炮'], ['blow', '吹生日吹笛'], ['emote', '情緒符號'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
+  ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['pop', '拉炮'], ['blow', '吹生日吹笛'], ['emote', '情緒符號'], ['bubble', '泡泡框'], ['tug', '扯呆毛'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
   ['怪物', [['monsterMove', '怪物走位'], ['monsterPose', '怪物姿勢'], ['monsterWander', '繞著人走'], ['swallow', '吞人'], ['preyKick', '嘴裡的人抽一下'], ['spit', '吐出來'], ['thunder', '巨雷']]],
-  ['畫面', [['camera', '換鏡頭'], ['screen', '黑幕'], ['card', '介紹卡'], ['door', '自動門'], ['heal', '治療光'], ['confetti', '彩帶飄落'], ['banner', '中間壓大字']]],
-  ['聲音', [['sfx', '音效'], ['bgm', '音樂'], ['hush', '槍聲']]],
+  ['畫面', [['camera', '換鏡頭'], ['screen', '黑幕'], ['card', '介紹卡'], ['door', '自動門'], ['heal', '治療光'], ['confetti', '彩帶飄落'], ['banner', '中間壓大字'], ['caption', '過場字卡（同一時間）'], ['meter', '數值條（負荷率）'], ['records', '紀錄表'], ['filter', '回想濾鏡']]],
+  ['聲音', [['sfx', '音效'], ['bgm', '音樂'], ['bgmLevel', '音樂音量'], ['hush', '槍聲']]],
   ['對話框', [['portrait', '頭像情緒']]],
   ['流程', [['label', '分支名字'], ['choices', '選項'], ['end', '自動結束']]],
 ];
 // 新增時的預設值（走位類要先在地圖上點位置，見 PICK_ACTS）
-const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, speed: 60, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger',
+const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, speed: 60, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger', bubble: '……', tug: '',
   monsterPose: 'smile', preyKick: true, spit: true };
 const PICK_ACTS = { move: '走到哪', exit: '走到哪後消失', place: '瞬移到哪', monsterMove: '走到哪' };
 // 這頁有沒有這個演出（大部分看欄位在不在；頭像情緒、分支是好幾個欄位合成一列）
@@ -782,7 +808,9 @@ function beatBody(s, b, i) {
     // 拉炮、吹笛：道具的圖、位置在 js/story-scene.js 的 PARTY；沒勾「手上拿著拉炮」「咬著吹笛」的人，這頁也會自動拿出來
     pop: () => many('pop', '拉炮', () => h('small', {}, '拉下去：碰一聲，彩帶從開口往上噴（拉過就變成空的拉炮）')),
     blow: () => many('blow', '吹笛', () => h('small', {}, '吹一下：吹笛伸直、嗶一聲（約 1 秒後捲回來）')),
-    emote: () => many('emote', '情緒符號', id => choose(b.emote, id, [['anger', '💢 生氣（紅色青筋一跳一跳）'], ['sweat', '💧 慌張冒汗（汗滴往下滑）'], ['shade', '｜｜ 陰影線（嚇到、背脊發涼）'], ['drop', '💧 一顆汗滴（慢慢往下滴）'], ['shade+drop', '｜｜💧 陰影線＋一顆汗滴'], ['flower', '🌸 小花（開心、得意）'], ['sparkle', '✨ 閃亮亮'], ['flower+sparkle', '🌸✨ 小花＋閃亮亮'], ['', '收掉']])),
+    emote: () => many('emote', '情緒符號', id => choose(b.emote, id, [['anger', '💢 生氣（紅色青筋一跳一跳）'], ['sweat', '💧 慌張冒汗（汗滴往下滑）'], ['shade', '｜｜ 陰影線（嚇到、背脊發涼）'], ['drop', '💧 一顆汗滴（慢慢往下滴）'], ['shade+drop', '｜｜💧 陰影線＋一顆汗滴'], ['flower', '🌸 小花（開心、得意）'], ['sparkle', '✨ 閃亮亮'], ['flower+sparkle', '🌸✨ 小花＋閃亮亮'], ['smoke', '💨 頭頂冒煙（焦掉）'], ['', '收掉']])),
+    bubble: () => many('bubble', '泡泡框', id => txt(b.bubble, id, { placeholder: '頭上泡泡裡的心裡話；空白＝收掉（不清空會一直留著）', style: 'flex:1' })),
+    tug: () => many('tug', '扯呆毛', id => h('span', { class: 'row' }, '被', choose(b.tug, id, [['', '（放手）'], ...actorOptions().filter(o => o[0] !== id)]), h('small', {}, '扯著呆毛，一下一下往上拉；選「放手」就停'))),
     carry: () => many('carry', '拿著', id => txt(b.carry, id, { placeholder: '圖片路徑；空白＝放下', style: 'flex:1' })),
     gun: () => many('gun', '持槍', id => onOff(b.gun, id, '拿槍預備', '放下槍')),
     shield: () => many('shield', '盾牌', id => onOff(b.shield, id, '舉盾（只有雷德）', '放下盾')),
@@ -806,6 +834,28 @@ function beatBody(s, b, i) {
     card: () => one('介紹卡', ['card'], h('small', {}, '從右邊滑出一張介紹卡（翻下一頁收起來）'), h('div', { style: 'display:grid;gap:4px;width:100%' },
       txt(b.card, 'image', { placeholder: '圖片，例如 images/monster/milkfish-kid/milkfish-kid-front.png' }), txt(b.card, 'subtitle', { placeholder: '小標（例如 A級異質體 NO.727）' }),
       txt(b.card, 'title', { placeholder: '名字（大字）' }), txt(b.card, 'text', { placeholder: '說明' }))),
+    // 數值條：右上角的小面板（例如負荷率），數字從現在的值慢慢跳到這頁的值；收掉＝meter: false
+    meter: () => {
+      const hd = { v: b.meter ? 'show' : 'hide' };
+      one('數值條', ['meter'], choose(hd, 'v', [['show', '顯示／改數字'], ['hide', '收掉']], { parse: v => { b.meter = v === 'show' ? (b.meter || { label: '負荷率', value: 50, line: 80 }) : false; return v; } }),
+        b.meter && h('span', { class: 'row', style: 'flex-basis:100%' }, '名稱', txt(b.meter, 'label', { placeholder: '負荷率', style: 'width:80px' }), '數字', num(b.meter, 'value', { min: 0, step: 1 }), '%，警戒線', num(b.meter, 'line', { min: 0, step: 1, optional: true, placeholder: '不畫' }),
+          '%，花', num(b.meter, 'secs', { min: .05, step: .1, optional: true, placeholder: '1.2' }), '秒跳過去'),
+        h('small', { style: 'flex-basis:100%' }, '一直留到某頁選「收掉」；疏導時填比較小的數字、比較長的秒數，就會慢慢往下降'));
+    },
+    // 紀錄表：一行一行跳出來；每行用「｜」分欄（例如「11 月｜名額轉讓｜→ 路德」，第二欄是紅字）
+    records: () => {
+      const hd = { v: b.records ? 'show' : 'hide' };
+      const area = b.records && h('textarea', { rows: 4, placeholder: '一行一筆紀錄，用「｜」分欄，例如：11 月｜名額轉讓｜→ 路德', style: 'flex:1;min-width:220px',
+        oninput: e => { b.records.rows = e.target.value.split('\n').filter(x => x.trim()); commit(false); } });
+      if (area) area.value = (b.records.rows || []).join('\n');
+      one('紀錄表', ['records'], choose(hd, 'v', [['show', '顯示'], ['hide', '收掉']], { parse: v => { b.records = v === 'show' ? (b.records || { title: '', rows: [] }) : false; return v; } }),
+        b.records && h('span', { class: 'row', style: 'flex-basis:100%' }, '標題', txt(b.records, 'title', { placeholder: '例如 雷德・疏導紀錄', style: 'flex:1' }), '小字', txt(b.records, 'sub', { optional: true, placeholder: '例如 近六個月', style: 'width:110px' })), area,
+        h('small', { style: 'flex-basis:100%' }, '每一行隔 0.35 秒跳出來，一直留到某頁選「收掉」'));
+    },
+    // 過場字卡：黑底，中間一行小字＋一行大字慢慢浮出（跟新手區開場的「同一時間」一樣），翻到下一頁就淡出
+    caption: () => one('過場字卡', ['caption'], h('span', { class: 'row', style: 'flex-basis:100%' }, '小字', txt(b.caption, 0, { placeholder: '例如 同一時間', style: 'width:110px' }), '大字', txt(b.caption, 1, { placeholder: '例如 Y25區入口', style: 'flex:1' })),
+      h('small', { style: 'flex-basis:100%' }, '黑底蓋住整個畫面，翻到下一頁就淡出；這頁沒台詞時不會跳出對話框；下一頁換鏡頭會直接切過去')),
+    filter: () => one('回想濾鏡', ['filter'], choose(b, 'filter', [['memory', '泛黃回想（四邊亮邊）'], ['', '收掉']]), h('small', {}, '慢慢淡入淡出，一直留到收掉；對話框不受影響')),
     door: () => one('自動門', ['door'], choose(b, 'door', [['open', '打開'], ['close', '關上']])),
     confetti: () => {
       const hd = { v: b.confetti ? 'on' : 'off' };
@@ -826,8 +876,19 @@ function beatBody(s, b, i) {
       '音量', num(b, 'sfxVolume', { min: 0, step: .1, optional: true, placeholder: '1' }), h('button', { type: 'button', class: 'small', onclick: () => testSfx(b.sfx, b.sfxVolume) }, '▶ 試聽')),
     bgm: () => {
       const hd = { v: b.bgm ? 'change' : 'stop' };
-      one('音樂', ['bgm', 'bgmDelay'], choose(hd, 'v', [['change', '換成別首'], ['stop', '停掉']], { parse: v => { b.bgm = v === 'stop' ? '' : (b.bgm || 'music/'); return v; } }),
-        b.bgm !== '' && txt(b, 'bgm', { placeholder: 'music/檔名.mp3', style: 'width:180px' }), '先停掉現在的音樂，', num(b, 'bgmDelay', { min: 0, optional: true, placeholder: '0' }), '秒後' + (b.bgm ? '播新的' : '（不放音樂）'));
+      one('音樂', ['bgm', 'bgmDelay', 'bgmFadeOut', 'bgmFadeIn', 'bgmVol'], choose(hd, 'v', [['change', '換成別首'], ['stop', '停掉']], { parse: v => { b.bgm = v === 'stop' ? '' : (b.bgm || 'music/'); return v; } }),
+        b.bgm !== '' && bgmPicker(b),
+        // 淡出／淡入秒數：空白＝預設（舊的 0.4 秒淡出、新的 1.5 秒淡入）；填 0＝直接切掉／直接全音量
+        h('span', { class: 'row', style: 'flex-basis:100%' }, '現在的音樂花', num(b, 'bgmFadeOut', { min: 0, step: .1, optional: true, placeholder: '0.4' }), '秒淡出，',
+          num(b, 'bgmDelay', { min: 0, optional: true, placeholder: '0' }), '秒後' + (b.bgm ? '播新的，花' : '（不放音樂）'),
+          b.bgm ? num(b, 'bgmFadeIn', { min: 0, step: .1, optional: true, placeholder: '1.5' }) : null, b.bgm ? '秒淡入，音量' : null,
+          // 新的音樂音量：空白＝劇情設定的音量（⚙️ 劇情設定 → 背景音樂）
+          b.bgm ? num(b, 'bgmVol', { min: 0, step: .05, optional: true, placeholder: String(s.bgmVolume ?? .5) }) : null, b.bgm ? h('small', {}, '（0～1，空白＝劇情設定的音量）') : null));
+    },
+    // 音樂音量：不換歌，只把正在播的音樂調大／調小（花幾秒慢慢變過去），之後一直保持
+    bgmLevel: () => {
+      one('音樂音量', ['bgmLevel'], '現在的音樂音量改成', num(b.bgmLevel, 'vol', { min: 0, step: .05 }), h('small', {}, '（0～1）'), '，花', num(b.bgmLevel, 'secs', { min: 0, step: .1, optional: true, placeholder: '1' }), '秒慢慢變過去',
+        h('small', { style: 'flex-basis:100%' }, '不換歌；之後每頁都保持這個音量，直到再換歌或再調一次'));
     },
     hush: () => {
       const hd = { v: b.hush ? 'on' : 'off' };
@@ -865,6 +926,15 @@ function beatBody(s, b, i) {
       h('span', { class: 'grow' }),
       h('button', { type: 'button', class: 'small primary', onclick: () => preview(i + 1) }, '▶ 從這頁預覽')));
 }
+// 音樂選單：有清單就用下拉選單選（顯示 music/ 後面的路徑）；讀不到清單才退回手打；不在清單裡的檔名會標「找不到」
+function bgmPicker(b) {
+  const test = h('button', { type: 'button', class: 'small', onclick: () => testPageBgm(b.bgm) }, '▶ 試聽');
+  if (!BGM_FILES) return h('span', { class: 'row' }, txt(b, 'bgm', { placeholder: 'music/資料夾/檔名.mp3', style: 'width:220px' }), test);
+  const opts = [['music/', '— 選一首 —'], ...BGM_FILES.map(f => [f, f.replace(/^music\//, '')])];
+  const sel = choose(b, 'bgm', opts, { rerender: true }); sel.style.maxWidth = '260px';
+  const missing = b.bgm && b.bgm !== 'music/' && !BGM_FILES.includes(b.bgm);
+  return h('span', { class: 'row' }, sel, test, missing && h('small', { style: 'color:#ff8a80' }, '找不到這個檔案，請重新選一首'));
+}
 const healPair = s => ({ from: s.actors[1]?.id || s.actors[0]?.id || '', to: s.actors[0]?.id || '' });
 // 「＋ 加演出」選單：按類別列出全部演出；不能加的（沒有角色、每個人都加過、這頁已經有了）變灰並說明原因
 function addActMenu(s, b, i) {
@@ -876,12 +946,12 @@ function addActMenu(s, b, i) {
       setPick({ label: (isMon ? id : actorName(id)) + '在第 ' + (i + 1) + ' 頁' + PICK_ACTS[key] + '（加好後可以換' + (isMon ? '別隻' : '人') + '）', fn: q => { (b[key] = b[key] || {})[id] = q; } });
       return;
     }
-    if (ACTOR_ACTS.includes(key)) { const id = s.actors.find(a => !(b[key] && a.id in b[key])).id; (b[key] = b[key] || {})[id] = ACT_DEFAULT[key]; }
+    if (ACTOR_ACTS.includes(key)) { const id = s.actors.find(a => !(b[key] && a.id in b[key])).id; (b[key] = b[key] || {})[id] = key === 'tug' ? (s.actors.find(a => a.id !== id)?.id || '') : ACT_DEFAULT[key]; }   // 扯呆毛：先給另一個人當扯的人
     else if (MONSTER_ACTS.includes(key)) { const id = s.monsters.find(m => !(b[key] && m.id in b[key])).id; (b[key] = b[key] || {})[id] = key in ACT_DEFAULT ? ACT_DEFAULT[key] : s.actors[0]?.id || ''; }
     else ({
       thunder: () => { b.thunder = true; }, camera: () => { b.camera = beatCamera(i); }, screen: () => { b.screen = 'black'; },
-      card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, confetti: () => { b.confetti = true; }, banner: () => { b.banner = ''; }, heal: () => { b.heal = healPair(s); },
-      sfx: () => { b.sfx = ''; }, bgm: () => { b.bgm = 'music/'; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; },
+      card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, confetti: () => { b.confetti = true; }, banner: () => { b.banner = ''; }, caption: () => { b.caption = ['同一時間', '']; }, meter: () => { b.meter = { label: '負荷率', value: 50, line: 80 }; }, records: () => { b.records = { title: '', rows: [] }; }, filter: () => { b.filter = 'memory'; }, heal: () => { b.heal = healPair(s); },
+      sfx: () => { b.sfx = ''; }, bgm: () => { b.bgm = 'music/'; }, bgmLevel: () => { b.bgmLevel = { vol: .3, secs: 1 }; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; },
       label: () => { b.label = ''; }, choices: () => { b.choices = [{ text: '' }]; }, end: () => { b.end = 2; },
     })[key]();
     commit();
@@ -981,10 +1051,14 @@ function renderPanels() {
 // 這時編輯器記憶體裡還是舊資料：直接預覽或存檔會把舊的蓋回去（例如新加的 BGM 不見）。
 // 重新整理頁面就會跟暫存自動合併（js/draft-sync.js），所以偵測到就提醒重新整理。
 const FILE_AT_LOAD = JSON.stringify(typeof STORY_SCENES !== 'undefined' ? STORY_SCENES : {});
+const parseScenesText = text => JSON.stringify(new Function(text.replace('const STORY_SCENES =', 'return ').replace(/;\s*$/, ''))());
 async function fileChangedOnDisk() {
   try {   // 雙擊開啟（file://）讀不到檔案：當作沒變
-    const text = await (await fetch('data/story-scenes.js?t=' + Date.now(), { cache: 'no-store' })).text();
-    return JSON.stringify(new Function(text.replace('const STORY_SCENES =', 'return ').replace(/;\s*$/, ''))()) !== FILE_AT_LOAD;
+    const now = parseScenesText(await (await fetch('data/story-scenes.js?t=' + Date.now(), { cache: 'no-store' })).text());
+    if (now === FILE_AT_LOAD) return false;
+    // 檔案跟這頁現在的內容一樣（例如剛按 💾 存到專案，或別的分頁存了一樣的東西）：不是別人改的，不用重新整理
+    try { if (now === parseScenesText(storyExportText())) return false; } catch (_) {}
+    return true;
   } catch (_) { return false; }
 }
 async function askReloadIfStale() {

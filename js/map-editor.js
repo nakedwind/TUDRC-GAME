@@ -238,6 +238,9 @@ function stampIndexAtPx(m, x, y) {
   });
 }
 const hiddenLayers = new Set();
+// 圖層透明度（0～100）：只是蓋地圖時方便看下面的圖層，不存進地圖、遊戲裡也不會變透明
+const layerOpacity = new Map();
+const layerOpacityOf = lid => layerOpacity.has(lid) ? layerOpacity.get(lid) : 100;
 // 鎖定的圖層：看得到、但不能貼圖／擦除／選取／搬動（跟「隱藏」不一樣）
 const lockedLayers = new Set();
 const isLockedLayer = lid => lockedLayers.has(lid || 'top');
@@ -1313,8 +1316,11 @@ function draw() {
   // 由下往上：每層先畫小圖、再畫「屬於這層」的大圖
   for (const l of LAYERS) {
     if (hiddenLayers.has(l.id)) continue;
+    const op = layerOpacityOf(l.id);   // 這層調了透明度（只在編輯器）就整層畫淡一點
+    if (op < 100) { ctx.save(); ctx.globalAlpha = op / 100; }
     for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) { const id = m.layers[l.id][c + ',' + r]; if (id) drawTile(id, OX + c * CELL, OY + r * CELL); }
     for (const s of m.stamps) if ((s.layer || 'top') === l.id) drawStamp(s);
+    if (op < 100) ctx.restore();
   }
   // 效果層 + 格線（畫在圖片之上）
   for (let c = 0; c < COLS; c++) for (let r = 0; r < ROWS; r++) {
@@ -2307,6 +2313,7 @@ function renderLayers() {
     mk('🗑 刪除圖層', '刪除目前圖層（上面的物件會一起刪掉）', () => deleteLayer(), 'danger'),
     mk('🧱 隱藏區', '把目前圖層設成／取消「隱藏區」：遊戲裡這層的東西平常全黑，炸開最近的可炸開牆才出現', () => toggleSecretLayer()));
   layerBtnsEl.appendChild(tools);
+  layerBtnsEl.appendChild(renderLayerOpacityRow());
   // 顯示順序反轉：上層在最上、地板在最下（不改 LAYERS 本身的疊圖 z 順序）
   [...LAYERS].reverse().forEach(l => {
     const group = document.createElement('span'); group.className = 'layer-group';
@@ -2314,6 +2321,10 @@ function renderLayers() {
     const b = document.createElement('button'); b.className = 'layer' + (l.id === activeLayer ? ' sel' : ''); b.dataset.layer = l.id;
     b.innerHTML = '<span class="layer-arrow">' + (expandedLayer === l.id ? '▾' : '▸') + '</span><span class="layer-label"></span><span class="layer-count">' + count + '</span>';
     b.querySelector('.layer-label').textContent = (l.secret ? '🧱 ' : '') + l.name;
+    if (layerOpacityOf(l.id) < 100) {   // 調過透明度的圖層：名字旁標出百分比，免得忘記
+      const tag = document.createElement('span'); tag.className = 'layer-op-tag'; tag.textContent = layerOpacityOf(l.id) + '%';
+      tag.title = '這層在編輯器裡調成半透明（遊戲裡不會變）'; b.querySelector('.layer-label').after(tag);
+    }
     b.title = '點一下：在這層編輯並展開物件清單；雙擊：改名';
     b.addEventListener('click', () => {
       const wasActive = activeLayer === l.id;
@@ -2346,6 +2357,23 @@ function renderLayers() {
   });
   const newList = layerBtnsEl.querySelector('.layer-objs'); if (newList) newList.scrollTop = keepScroll;
   updateLayerUI();
+}
+// ---- 圖層透明度：拉桿調「目前圖層」，只影響編輯器畫面（不存檔、遊戲不套用）----
+function renderLayerOpacityRow() {
+  const row = document.createElement('div'); row.className = 'layer-opacity';
+  const name = layerName(activeLayer), val = layerOpacityOf(activeLayer);
+  row.title = '只是蓋地圖時方便看下面的東西，不會存進地圖，遊戲裡也不會變透明';
+  const label = document.createElement('span'); label.className = 'layer-op-label'; label.textContent = '透明度'; label.title = '調的是目前選中的圖層「' + name + '」';
+  const slider = document.createElement('input'); slider.type = 'range'; slider.min = '0'; slider.max = '100'; slider.step = '5'; slider.value = String(val);
+  const num = document.createElement('span'); num.className = 'layer-op-num'; num.textContent = val + '%';
+  const reset = document.createElement('button'); reset.type = 'button'; reset.className = 'btn'; reset.textContent = '全部還原';
+  reset.title = '所有圖層都回到 100%（不透明）'; reset.disabled = !layerOpacity.size;
+  const apply = v => { if (v >= 100) layerOpacity.delete(activeLayer); else layerOpacity.set(activeLayer, v); num.textContent = v + '%'; draw(); };
+  slider.addEventListener('input', () => apply(Number(slider.value)));                 // 拉的時候即時變
+  slider.addEventListener('change', () => { renderLayers(); setStatus('「' + name + '」透明度 ' + layerOpacityOf(activeLayer) + '%（只在編輯器裡，遊戲不受影響）', '#8fd3ff'); });   // 放開後更新圖層旁的百分比
+  reset.addEventListener('click', () => { layerOpacity.clear(); renderLayers(); draw(); setStatus('所有圖層透明度已還原成 100%', '#8fd3ff'); });
+  row.append(label, slider, num, reset);
+  return row;
 }
 // ---- 拖曳圖層改前後：抓住圖層名稱拖到別的圖層上，放在它上面或下面（看放在那一格的上半還是下半）----
 // 圖層上的物件跟著圖層走（物件記的是圖層 id，不用搬）；遊戲照 layerOrder 的順序疊圖（js/maploader.js），

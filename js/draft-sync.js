@@ -72,7 +72,7 @@ const DraftSync = (() => {
         if (d.some(y => String(y.id) === id)) return;
         const v = merge(bm.get(id), undefined, x, ctx, path + '[' + id + ']');
         if (v === undefined) return;
-        let at = out.length;   // 插在檔案裡它前一個元素的後面
+        let at = 0;   // 插在檔案裡它前一個元素的後面；前面找不到（它在檔案裡排第一）就放最前面（以前放最後面，會把開頭幾頁搬到最後）
         for (let j = i - 1; j >= 0; j--) { const k = ids().indexOf(String(f[j].id)); if (k >= 0) { at = k + 1; break; } }
         out.splice(at, 0, v);
       });
@@ -92,7 +92,7 @@ const DraftSync = (() => {
     f.forEach((x, i) => {
       const k = canon(x); if (!((want.get(k) || 0) > 0)) return;
       want.set(k, want.get(k) - 1);
-      let at = out.length;
+      let at = 0;   // 同上：前面找不到就放最前面
       for (let j = i - 1; j >= 0; j--) { const p = keys.lastIndexOf(canon(f[j])); if (p >= 0) { at = p + 1; break; } }
       out.splice(at, 0, x); keys.splice(at, 0, k);
     });

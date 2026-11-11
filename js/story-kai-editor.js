@@ -1216,8 +1216,11 @@ async function askReloadIfStale() {
   if (location.protocol === 'file:') return;
   try {
     const text = await (await fetch('data/story-kai.js?t=' + Date.now(), { cache: 'no-store' })).text();
-    const now = JSON.stringify(new Function(text.replace('const STORY_KAI =', 'return ').replace(/;\s*$/, ''))());
+    const parse = t => JSON.stringify(new Function(t.replace('const STORY_KAI =', 'return ').replace(/;\s*$/, ''))());
+    const now = parse(text);
     if (now === FILE_AT_LOAD) return;
+    // 檔案跟這頁現在的內容一樣（例如剛按 💾 存到專案）：不是別人改的，不用重新整理
+    try { if (now === parse(storyKaiExportText())) return; } catch (_) {}
   } catch (_) { return; }
   status('專案檔 data/story-kai.js 有新的內容（例如 Claude 回覆了特效留言），請重新整理這頁（你的修改會自動合併保留）。', true);
   if (confirm('專案檔 data/story-kai.js 在這頁開著時被更新了（例如 Claude 回覆了特效留言）。\n\n現在重新整理編輯器嗎？你在這裡的修改會先存好，再跟新內容自動合併。')) { saveDraft(); location.reload(); }

@@ -99,3 +99,37 @@ body.story-scene #dialogueBox.story-anger #storyPortraitEmote {
 #storyBanner.in { animation: story-banner-in .55s cubic-bezier(.2,.9,.3,1.25) both; }
 @keyframes story-banner-in { 0% { opacity:0; transform:scale(2.4) rotate(-6deg); } 60% { opacity:1; transform:scale(.94) rotate(1deg); } 100% { opacity:1; transform:scale(1) rotate(0); } }
 @media (prefers-reduced-motion: reduce) { #storyBanner.in { animation: none; } }
+/* 回想濾鏡（每頁 filter: 'memory'）：畫面泛黃、顏色變淡，四邊一圈柔柔的亮邊；慢慢淡入淡出（對話框不受影響） */
+#storyFilter { position:absolute; inset:0; pointer-events:none; opacity:0; transition:opacity 1s ease; }
+#storyFilter.on { opacity:1; }
+#storyFilter.memory { backdrop-filter:sepia(.55) saturate(.75) brightness(1.04); -webkit-backdrop-filter:sepia(.55) saturate(.75) brightness(1.04);
+  box-shadow:inset 0 0 90px 30px rgba(255,236,196,.55); background:rgba(255,226,170,.08); }
+/* 數值條（每頁 meter，例如負荷率）：右上角的小面板，數字會跳；到警戒線的七成五變黃、超過警戒線變紅 */
+#storyMeter { position:absolute; z-index:2; right:4%; top:14%; width:min(240px, 46%); padding:12px 16px 14px; pointer-events:none;
+  background:rgba(12,16,22,.9); border:1px solid #4a5868; border-left:5px solid var(--meter, #59d38a); border-radius:6px; box-shadow:0 8px 22px rgba(0,0,0,.5);
+  animation:story-meter-in .35s ease-out both; }
+#storyMeter[data-level="ok"] { --meter:#59d38a; } #storyMeter[data-level="warn"] { --meter:#ffc23f; } #storyMeter[data-level="danger"] { --meter:#ff4d4d; }
+#storyMeter small { display:block; color:#b9c4d0; font-size:13px; font-weight:700; letter-spacing:.14em; }
+#storyMeter b { display:block; margin:2px 0 8px; color:var(--meter); font-size:34px; font-weight:900; line-height:1.1; font-variant-numeric:tabular-nums; text-shadow:0 0 10px rgba(0,0,0,.6); }
+#storyMeter .bar { position:relative; height:10px; border-radius:5px; background:#232b35; overflow:visible; }
+#storyMeter .bar i { position:absolute; left:0; top:0; bottom:0; border-radius:5px; background:var(--meter); }
+#storyMeter .bar span { position:absolute; top:-4px; bottom:-4px; width:2px; margin-left:-1px; background:#ff4d4d; box-shadow:0 0 4px #ff4d4d; }   /* 警戒線 */
+@keyframes story-meter-in { from { opacity:0; translate:20px 0; } to { opacity:1; translate:0 0; } }
+/* 紀錄表（每頁 records）：外觀照背包介面（深藍半透明卡片、淺藍框線、左上方塊圖示），一行一行跳出來；「｜」分欄，第二欄是小標籤 */
+#storyRecords { position:absolute; z-index:2; left:3%; top:12%; width:min(360px, 48%); overflow:hidden; pointer-events:none;
+  border:1px solid rgba(143,211,255,.35); border-radius:14px; background:linear-gradient(160deg,rgba(24,33,44,.9),rgba(10,15,22,.94));
+  box-shadow:0 18px 50px rgba(0,0,0,.5),inset 0 1px rgba(255,255,255,.1); color:#d8ecff; font-family:"Microsoft JhengHei",sans-serif; animation:story-meter-in .35s ease-out both; }
+#storyRecords header { display:flex; align-items:center; gap:10px; padding:10px 14px 9px; border-bottom:1px solid rgba(143,211,255,.13); background:linear-gradient(90deg,rgba(143,211,255,.08),transparent 60%); }
+#storyRecords .rec-icon { flex:none; display:grid; place-items:center; width:34px; height:34px; border-radius:8px; background:linear-gradient(135deg,#3f6f99,#24405c); font-size:18px; box-shadow:0 4px 14px rgba(0,0,0,.35),inset 0 0 0 2px rgba(255,255,255,.18); }
+#storyRecords h4 { margin:0; color:#f2f8ff; font-size:16px; line-height:1.2; letter-spacing:.04em; }
+#storyRecords p { margin:2px 0 0; color:#8c9aa8; font-size:11px; }
+#storyRecords ol { list-style:none; margin:0; padding:8px 10px 10px; display:grid; gap:5px; }
+#storyRecords li { display:grid; grid-template-columns:3.6em auto 1fr; align-items:center; gap:8px; padding:6px 10px; border:1px solid rgba(255,255,255,.06); border-radius:9px;
+  background:rgba(7,12,18,.55); font-size:13px; animation:story-record-in .3s ease-out both; }
+#storyRecords li span:first-child { color:#8c9aa8; font-variant-numeric:tabular-nums; }
+#storyRecords li span:last-child { color:#d8ecff; text-align:right; }
+#storyRecords .tag { padding:1px 9px; border:1px solid rgba(255,170,90,.45); border-radius:999px; background:rgba(255,150,60,.14); color:#ffc48a; font-size:12px; font-weight:700; }
+#storyRecords .tag.ok { border-color:rgba(120,230,160,.45); background:rgba(90,210,140,.14); color:#9df0bd; }
+@keyframes story-record-in { from { opacity:0; translate:-14px 0; } to { opacity:1; translate:0 0; } }
+@media (prefers-reduced-motion: reduce) { #storyMeter, #storyRecords, #storyRecords li { animation:none; } #storyFilter { transition:none; } }
+@media (max-width:620px) { #storyMeter { top:16%; } #storyMeter b { font-size:26px; } #storyRecords { width:86%; } #storyRecords li { font-size:12px; } }

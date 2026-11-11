@@ -98,7 +98,8 @@ function squadPart(key) {
 
 // ---- 畫面 ----
 // 可以出勤的隊員（data/balance.js 的 ROSTER，球球也算）；其他是不可出勤的人員，名單裡放在下面的「不可出勤」區塊
-const sqCanSortie = m => typeof ROSTER !== 'undefined' ? ROSTER.includes(m.type) : !m.noncombat;
+// 劇情上暫時不能出勤的（js/team.js 的 MEMBER_UNAVAILABLE，例如負傷中的堤諾）也放「不可出勤」；那邊拿掉就會自動回到上面
+const sqCanSortie = m => (typeof MEMBER_UNAVAILABLE === 'undefined' || !MEMBER_UNAVAILABLE[m.type]) && (typeof ROSTER !== 'undefined' ? ROSTER.includes(m.type) : !m.noncombat);
 function squadMemberList() {
   const prio = ['red', 'avaren', 'theonie', 'amber'];
   return (typeof squadMembers === 'function' ? squadMembers() : []).sort((a, b) => {

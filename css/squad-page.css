@@ -18,7 +18,7 @@
 .sq-roster-group { flex: none; width: 58px; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 0 0 7px; border-radius: 9px; overflow: hidden; }
 .sq-roster-group.rosterOn { border: 1px solid rgba(247,216,134,.45); background: rgba(230,176,74,.08); }
 .sq-roster-group.rosterOff { margin-top: 6px; border: 1px solid rgba(160,175,195,.35); background: rgba(120,135,155,.08); }
-.sq-roster-head { width: 100%; padding: 4px 0 3px; font-size: 10px; font-weight: 800; line-height: 1.15; text-align: center; white-space: nowrap; text-shadow: 0 1px 2px #000; }
+.sq-roster-head { width: 100%; padding: 4px 0 3px; font-size: 12px; font-weight: 800; line-height: 1.15; text-align: center; white-space: nowrap; text-shadow: 0 1px 2px #000; }
 .sq-roster-group.rosterOn .sq-roster-head { color: #3b2304; text-shadow: none; background: linear-gradient(180deg, #f7d886, #e6b04a); }
 .sq-roster-group.rosterOff .sq-roster-head { color: #dfe6ee; background: linear-gradient(180deg, #5d6878, #434c59); }
 .sq-roster-group.rosterOff .sq-member img { filter: saturate(.75); }
@@ -77,9 +77,10 @@
 .sq-switch { position: absolute; right: 12px; top: 10px; width: 40px; height: 40px; display: grid; place-items: center; padding: 0; border: 1px solid rgba(130,180,255,.55); border-radius: 10px; background: linear-gradient(160deg, #2b3c55, #1a2433); cursor: pointer; }
 .sq-switch img { width: 28px; }
 .sq-switch:hover { border-color: #9cc8ff; filter: brightness(1.15); }
-.sq-node { position: absolute; width: 44px; height: 44px; display: grid; place-items: center; padding: 0; border: 2px solid rgba(255,255,255,.22); border-radius: 9px; background: #1c232d; color: #fff; cursor: pointer; transition: transform .12s, box-shadow .12s; }
-.sq-node img { width: 30px; image-rendering: pixelated; }
-.sq-node .sq-emoji { font-size: 20px; line-height: 1; }
+/* 技能格：2026-11-11 格子和圖放大 1.2 倍（44→53px、大招 64→77px）；位置不動，用負的 margin 讓格子以原本的中心往外長大 */
+.sq-node { position: absolute; width: 53px; height: 53px; margin: -4.5px 0 0 -4.5px; display: grid; place-items: center; padding: 0; border: 2px solid rgba(255,255,255,.22); border-radius: 9px; background: #1c232d; color: #fff; cursor: pointer; transition: transform .12s, box-shadow .12s; }
+.sq-node img { width: 36px; image-rendering: pixelated; }
+.sq-node .sq-emoji { font-size: 24px; line-height: 1; }
 .sq-node:hover { transform: translateY(-2px); }
 .sq-node.owned { border-color: #e8c25a; background: linear-gradient(160deg, #3c3420, #231e12); box-shadow: 0 0 10px rgba(232,194,90,.35); }
 .sq-node.open { border-color: rgba(255,255,255,.6); }
@@ -89,8 +90,8 @@
 .sq-node[data-skill-pick="trait-1"] { left: 16px; top: 118px; } .sq-node[data-skill-pick="trait-2"] { left: 84px; top: 118px; }
 .sq-node[data-skill-pick="a-1"] { left: 170px; top: 44px; } .sq-node[data-skill-pick="a-2"] { left: 240px; top: 44px; }
 .sq-node[data-skill-pick="core-1"] { left: 200px; top: 118px; } .sq-node[data-skill-pick="core-2"] { left: 266px; top: 118px; } .sq-node[data-skill-pick="core-3"] { left: 332px; top: 118px; }
-.sq-node[data-skill-pick="ult"] { left: 418px; top: 108px; width: 64px; height: 64px; border-radius: 12px; }
-.sq-node[data-skill-pick="ult"] .sq-emoji { font-size: 30px; } .sq-node[data-skill-pick="ult"] img { width: 44px; }
+.sq-node[data-skill-pick="ult"] { left: 418px; top: 108px; width: 77px; height: 77px; margin: -6.5px 0 0 -6.5px; border-radius: 12px; }
+.sq-node[data-skill-pick="ult"] .sq-emoji { font-size: 36px; } .sq-node[data-skill-pick="ult"] img { width: 53px; }
 .sq-node[data-skill-pick="b-1"] { left: 170px; top: 192px; } .sq-node[data-skill-pick="b-2"] { left: 240px; top: 192px; }
 .sq-node.g-aux { border-radius: 50%; }
 .sq-node[data-skill-pick="aux-1"] { left: 404px; top: 204px; } .sq-node[data-skill-pick="aux-2"] { left: 468px; top: 204px; }
@@ -215,3 +216,14 @@
 .sq-slot em.sq-lv, .sq-gearbar-slot em.sq-lv { position: absolute; top: -7px; right: -9px; padding: 0 5px; border-radius: 99px; background: #ffd479; color: #3b2304; font-size: 10px; font-weight: 800; font-style: normal; line-height: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.5); pointer-events: none; }
 :is(.sq-slot.gear, .sq-gearbar-slot).filled:is(.tier-2, .tier-3, .tier-4, .tier-5) {
   border-color: rgba(var(--tier), .6); background: radial-gradient(circle at 50% 45%, rgba(var(--tier), .42), rgba(var(--tier), .12) 48%, rgba(7,10,14,.78) 76%); box-shadow: inset 0 0 14px rgba(var(--tier), .28), 0 0 10px rgba(var(--tier), .18); }
+
+/* Smooth 64px Avaren ability artwork at the existing skill-node sizes. */
+.sq-node img[src^="images/ui/skills/avaren/"], .sq-info-icon img[src^="images/ui/skills/avaren/"] { image-rendering: auto; object-fit: contain; }
+
+.sq-node img[src^="images/ui/skills/eldrin/"], .sq-info-icon img[src^="images/ui/skills/eldrin/"] { image-rendering: auto; object-fit: contain; }
+
+.sq-node img[src^="images/ui/skills/chris/"], .sq-info-icon img[src^="images/ui/skills/chris/"] { image-rendering: auto; object-fit: contain; }
+
+.sq-node img[src^="images/ui/skills/luther/"], .sq-info-icon img[src^="images/ui/skills/luther/"] { image-rendering: auto; object-fit: contain; }
+
+.sq-node img[src^="images/ui/skills/ball/"], .sq-info-icon img[src^="images/ui/skills/ball/"] { image-rendering: auto; object-fit: contain; }

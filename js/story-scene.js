@@ -67,7 +67,8 @@ const StoryScene = (() => {
     if (ui) return;
     ui = document.createElement('section'); ui.id = 'storySceneUI';
     ui.setAttribute('aria-label', '回憶劇情');
-    ui.innerHTML = '<div id="storyVignette" aria-hidden="true"></div><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyBanner" hidden></div><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><div id="storyChoices" role="group" aria-label="要怎麼做" hidden></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
+    // storyFilter：回想濾鏡；storyMeter：右上角的數值條（例如負荷率）；storyRecords：紀錄表（一行一行跳出來）
+    ui.innerHTML = '<div id="storyFilter" aria-hidden="true"></div><div id="storyVignette" aria-hidden="true"></div><aside id="storyMeter" hidden><small id="storyMeterLabel"></small><b id="storyMeterNum"></b><div class="bar"><i id="storyMeterFill"></i><span id="storyMeterLine"></span></div></aside><aside id="storyRecords" hidden><header><span class="rec-icon" aria-hidden="true">📋</span><div><h4 id="storyRecordsTitle"></h4><p id="storyRecordsSub"></p></div></header><ol id="storyRecordsRows"></ol></aside><header class="story-head"><div><small id="storySubtitle"></small><h1 id="storyTitle"></h1></div><button type="button" data-story-action="exit" id="storyExitTop">離開預覽</button></header><div id="storyBanner" hidden></div><div id="storyFade" aria-hidden="true"></div><div id="storyFlash" aria-hidden="true"></div><div id="storyChoices" role="group" aria-label="要怎麼做" hidden></div><aside id="storyCard" hidden><img id="storyCardImg" alt=""><div><small id="storyCardSub"></small><h3 id="storyCardTitle"></h3><p id="storyCardText"></p></div></aside><button id="storyAudioStart" type="button" data-story-action="opening" hidden>點一下開始回憶</button><section id="storyEnd" hidden><small>回憶片段結束</small><h2 id="storyEndTitle"></h2><p id="storyEndText"></p><div><button type="button" data-story-action="replay">重新播放</button><button type="button" data-story-action="exit" id="storyExitEnd">返回開始畫面</button></div></section>';
     el('wrap').appendChild(ui);
     // 頭像外面包一層：上下顛倒時只翻頭像，頭像框上的汗滴、陰沉線條不跟著翻（框裡原本的排版規則照樣套用）
     const pic = el('dialoguePortrait');
@@ -136,7 +137,8 @@ const StoryScene = (() => {
     const seat = a.bed && seats.find(s => s.key.endsWith('@' + a.bed.join(',')));
     if (a.bed && !seat) throw new Error('劇情床位不存在：' + (a.name || a.id) + '（' + a.bed + '）');
     return { ...a, set: a.image ? imageSet(a.image) : sprites(a.sprite), sitting: seat || null, bag: a.image ? BAGS[a.image] || null : null, swA: 0, swV: 0,
-      x: seat ? seat.x : a.at[0] * CELL, y: seat ? seat.y : a.at[1] * CELL, alpha: 1,
+      // seatDx／seatDy：坐在椅子、床上的人往右／往下微調幾像素（負＝往左／往上）
+      x: seat ? seat.x + (Number(a.seatDx) || 0) : a.at[0] * CELL, y: seat ? seat.y + (Number(a.seatDy) || 0) : a.at[1] * CELL, alpha: 1,
       dir: a.dir || seat?.dir || 'front', anim: 0, moving: false, blinkTime: -1, blinkWait: 2 + Math.random() * 4, eyesClosed: !!seat?.bed,   // bed 也可以是椅子：坐椅子的人眼睛睜開
       gunT: a.gun ? 1 : a.gunT || 0 };   // gun：拿著槍預備（用持槍圖，只有 GUN_FOLDERS 裡的角色有）
   }
@@ -210,7 +212,7 @@ const StoryScene = (() => {
   const SAND = { flow: 9, fade: 5, rate: 45, pileMax: 10, colors: ['#e8c98c', '#c9a46a', '#96743f'] };
   const punchFrames = a => a.sprite ? ['', '02'].map(n => imageOnce('images/character/' + a.sprite + '/' + a.sprite.replace('_', '') + '_0007_right-side-punch' + n + '.png')) : null;
   // 手上拿的小道具（carry 的圖長寬都不超過這麼多像素）：拿在手邊、照原圖大小；手的位置（腳底往上算，角色圖的像素）依面向哪邊
-  const SMALL_CARRY = 16, HAND_AT = { right: [12, 4], left: [-12, 4], front: [14, 5] };
+  const SMALL_CARRY = 16, HAND_AT = { right: [12, 4], left: [-12, 4], front: [14, 5], back: [-14, 5] };   // back：背對鏡頭時小道具拿在身體旁邊（看得到）
   // ---- 慶生道具（角色欄位 popper／horn，每頁 pop／blow）----
   // 位置都是角色圖（64×64）的像素：hand＝拿拉炮的手（舉在肩膀旁邊）、mouth＝嘴巴（吹笛的吹嘴對準這裡）
   // grip＝拉炮圖上被手握住的那一點、tip＝拉炮開口（彩帶從這裡噴出來）；pipe＝吹笛圖上吹嘴那一點（圖片像素）
@@ -329,6 +331,61 @@ const StoryScene = (() => {
     el('storyCardImg').src = card.image || ''; el('storyCardImg').hidden = !card.image;
     el('storyCardSub').textContent = card.subtitle || ''; el('storyCardTitle').textContent = card.title || ''; el('storyCardText').textContent = card.text || '';
     box.hidden = false; box.classList.remove('in'); void box.offsetWidth; box.classList.add('in');   // 每次都重播滑入動畫
+  }
+  // ---- 數值條（每頁 meter: { label: '負荷率', value: 68, line: 80, secs: 1.2 }；false＝收掉）----
+  // 右上角一個小面板：數字從現在的值慢慢跳到 value（secs 秒），超過 line（警戒線）變紅；疏導時填比較小的數字＋比較長的秒數，就會慢慢往下降
+  const METER = { secs: 1.2, warn: .75 };   // warn：到警戒線的幾成開始變黃
+  function setMeter(m) {
+    const box = el('storyMeter'); if (!box) return;
+    if (!m) { state.meter = null; box.hidden = true; return; }
+    const now = state.meter ? meterValue() : 0, to = Math.max(0, Math.min(100, Number(m.value) || 0));
+    state.meter = { from: state.skipping ? to : now, to, t: 0, dur: Math.max(.05, Number(m.secs) || METER.secs), line: Number(m.line) > 0 ? Number(m.line) : 0 };
+    el('storyMeterLabel').textContent = m.label || '';
+    el('storyMeterLine').hidden = !state.meter.line; el('storyMeterLine').style.left = state.meter.line + '%';
+    box.hidden = false; drawMeter();
+  }
+  function meterValue() { const m = state.meter; if (!m) return 0; const k = Math.min(1, m.t / m.dur), e = 1 - Math.pow(1 - k, 3); return m.from + (m.to - m.from) * e; }
+  function drawMeter() {
+    const m = state.meter; if (!m) return;
+    const v = meterValue(), line = m.line || 100;
+    el('storyMeterNum').textContent = Math.round(v) + '%';
+    el('storyMeterFill').style.width = v + '%';
+    el('storyMeter').dataset.level = v >= line ? 'danger' : v >= line * METER.warn ? 'warn' : 'ok';   // 顏色在 css/story-scene.css
+  }
+  // ---- 紀錄表（每頁 records: { title, rows: ['11 月｜名額轉讓｜→ 路德', …] }；false＝收掉）：一行一行跳出來，一直留到收掉；用「｜」分欄 ----
+  const RECORD_STEP = .35;   // 每一行隔幾秒跳出來
+  function setRecords(r) {
+    const box = el('storyRecords'); if (!box) return;
+    if (!r || !(r.rows || []).length) { box.hidden = true; return; }
+    el('storyRecordsTitle').textContent = r.title || '';
+    el('storyRecordsSub').textContent = r.sub || ''; el('storyRecordsSub').hidden = !r.sub;   // sub：標題下面的小字（例如「近六個月」）
+    el('storyRecordsRows').replaceChildren(...r.rows.map((row, i) => {
+      const li = document.createElement('li');
+      String(row).split('｜').forEach((cell, k) => {
+        const s = document.createElement('span'); s.textContent = cell.trim();
+        if (k === 1) s.className = 'tag' + (/完成|正常/.test(cell) ? ' ok' : '');   // 第二欄做成小標籤：完成＝綠色，其他（例如名額轉讓）＝橘色
+        li.appendChild(s);
+      });
+      li.style.animationDelay = state.skipping ? '0s' : (i * RECORD_STEP) + 's';
+      return li;
+    }));
+    box.hidden = false;
+  }
+  // ---- 過場字卡（每頁 caption: ['同一時間', 'Y25區入口']＝[小字, 大字]）：黑底蓋住畫面，小字＋大字慢慢浮出，翻到下一頁就淡出 ----
+  // 樣式跟新手區開場的「同一時間」字卡共用（css/style.css 的 #tutCaption, #storyCaption）
+  function showCaption(cap) {
+    const old = el('storyCaption'), want = Array.isArray(cap) && (cap[0] || cap[1]);
+    if (!want) { state.captionOn = false; if (old && !old.classList.contains('out')) { old.classList.add('out'); setTimeout(() => old.remove(), 900); } return; }
+    old?.remove();
+    const box = document.createElement('div'); box.id = 'storyCaption'; box.setAttribute('role', 'status');
+    const small = document.createElement('small'), big = document.createElement('b');
+    small.textContent = cap[0] || ''; big.textContent = cap[1] || '';
+    box.append(small, big); ui.appendChild(box); state.captionOn = true;
+  }
+  // ---- 回想濾鏡（每頁 filter: 'memory' 泛黃回想／'' 收掉）：蓋在畫面上，慢慢淡入淡出 ----
+  function setFilter(kind) {
+    const f = el('storyFilter'); if (!f) return;
+    f.className = kind ? 'on ' + kind : '';
   }
   // ---- 嘴裡的人抽一下（每頁 preyKick: { 怪物名字: true }）：被吞的人的腳踢幾下、魚嘴冒一縷煙（還活著） ----
   function kickPrey(e) {
@@ -554,7 +611,7 @@ const StoryScene = (() => {
   function finish(auto) {   // 劇情結束：畫面淡黑；auto＝這頁設了 end 秒數，不用等點擊、馬上開始變黑
     showCard(null);
     if (state.bannerAt) { showBanner(state.bannerAt.text); state.bannerAt = null; }   // 大字還沒壓出來就按結束：直接出來
-    state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(5);
+    state.ending = true; state.beatTime = 0; state.endDelay = auto ? 0 : 1.4; showBox(false); stopBgm(secOr(state.cfg.bgmFadeOut, 5));   // 劇情結束：音樂花幾秒淡出（劇情設定 bgmFadeOut，空白＝5 秒）
   }
   function makeMonster(m) {
     const spec = ACTIVE_MONSTERS.find(s => s.id === (m.type || 'lifeform'));
@@ -594,6 +651,7 @@ const StoryScene = (() => {
     document.body.classList.add('story-scene');
     ui.hidden = true;
     showBanner('');   // 重新播放：收掉上次的大字
+    setMeter(null); setRecords(null); setFilter(''); el('storyCaption')?.remove();   // 重新播放：收掉數值條、紀錄表、回想濾鏡、過場字卡
     el('storyTitle').textContent = cfg.title || ''; el('storySubtitle').textContent = cfg.subtitle || '';
     el('storyEndTitle').textContent = cfg.endTitle || cfg.title || ''; el('storyEndText').textContent = cfg.endText || '';
     // autoExit：從遊戲裡播的（例如新遊戲的開場）看完直接回遊戲，不出現結束畫面；上面的按鈕變成「跳過劇情」
@@ -652,6 +710,7 @@ const StoryScene = (() => {
       for (const e of state.monsters) if (e.goal) { [e.x, e.y] = e.goal; e.goal = null; }
       if (state.door) { if (state.door.auto) state.door.target = someoneAtDoor(state.door) ? 1 : 0; state.door.open = state.door.target; }
       if (state.screen) state.screen.t = state.screen.dur;
+      if (state.meter) { state.meter.t = state.meter.dur; drawMeter(); }   // 快轉經過數值條：數字直接到位
     };
     state.skipping = true; settle();
     for (let i = from; i < to; i++) { setBeat(i); settle(); }
@@ -690,7 +749,12 @@ const StoryScene = (() => {
     el('dialogueText').style.fontSize = Number(beat.textSize) > 0 ? Number(beat.textSize) + 'px' : '';
     state.beatWait = index === 0 ? Math.max(beat.wait || 0, state.openingBlack + state.openingFade) : (beat.wait || 0);
     state.nextAt = state.time + state.beatWait;
-    if (beat.camera) state.cameraKey = beat.camera;
+    if (beat.camera) {
+      state.cameraKey = beat.camera;
+      // 畫面已經全黑時換鏡頭：直接切過去（不然亮回來時還看得到鏡頭慢慢滑到別的房間）
+      const p = state.cfg.cameras?.[beat.camera];
+      if (p && ((state.screen && screenDark() >= .99) || state.captionOn)) { state.camera = [p[0], p[1]]; state.zoom = VIEW_SCALE = camZoom(p, state.baseZoom); }   // 過場字卡蓋著（全黑）時也一樣
+    }
     if (beat.screen === 'black' || beat.screen === 'clear') {   // 黑幕：從現在的亮度慢慢變過去
       const from = state.screen ? screenDark() : 0;
       // screenFree：變暗途中也可以翻頁（一邊說話一邊慢慢變黑）
@@ -700,8 +764,11 @@ const StoryScene = (() => {
     // sfx：翻到這頁時播一個音效（js/sfx.js 的名字，例如 storyDoor 自動門）；sfxVolume＝音量倍率；快轉（storyFrom）時不播
     // bgm：這頁換音樂（先把現在的收掉，bgmDelay 秒後播新的；空白＝只停掉）
     if ('bgm' in beat) {
+      // bgmVol：新的音樂音量 0～1（空白＝劇情設定的音量）；之後每頁都沿用，直到再換歌或「音樂音量」
+      state.bgmVol = beat.bgm && beat.bgmVol !== '' && beat.bgmVol != null && Number.isFinite(Number(beat.bgmVol)) ? Number(beat.bgmVol) : null;
       if (state.skipping) state.skipBgm = beat.bgm || '';
-      else { stopBgm(.4); state.nextBgm = beat.bgm ? { src: beat.bgm, at: state.time + (Number(beat.bgmDelay) || 0) } : null; }
+      // bgmFadeOut：現在的音樂花幾秒淡出（空白＝0.4）；bgmFadeIn：新的音樂花幾秒淡入（空白＝1.5）
+      else { stopBgm(secOr(beat.bgmFadeOut, .4)); state.nextBgm = beat.bgm ? { src: beat.bgm, at: state.time + (Number(beat.bgmDelay) || 0), fadeIn: secOr(beat.bgmFadeIn, 1.5) } : null; }
     }
     if (beat.sfx && typeof SFX !== 'undefined' && !state.skipping) SFX.play(beat.sfx, Number(beat.sfxVolume) > 0 ? Number(beat.sfxVolume) : 1, beat.sfx + ':story-beat');
     const show = a => { if (a.hidden) { a.hidden = false; a.alpha = 0; } a.fading = false; };   // 先隱藏的人：淡入出現
@@ -739,6 +806,12 @@ const StoryScene = (() => {
       else state.bannerAt = { text: beat.banner, at: state.time + wait };
     }
     for (const [id, v] of Object.entries(beat.emote || {})) { const a = actor(id); if (a) { if ((v || null) !== a.emote) a.emoteT = 0; a.emote = v || null; } }   // 頭上的情緒符號：anger 生氣、sweat 慌張冒汗、空白＝收掉
+    for (const [id, v] of Object.entries(beat.bubble || {})) { const a = actor(id); if (a) { if ((v || '') !== (a.bubble || '')) a.bubbleT = 0; a.bubble = v || ''; } }   // 頭上的泡泡框（心裡話）：一直留到清空
+    for (const [id, v] of Object.entries(beat.tug || {})) { const a = actor(id); if (a) { a.tug = v || ''; a.tugT = 0; } }   // 扯呆毛：tug: { 被扯的人: 扯的人 }，空白＝放手
+    showCaption(state.skipping ? null : beat.caption);   // 過場字卡：只在這頁，翻頁就淡出
+    if ('meter' in beat) setMeter(beat.meter);
+    if ('records' in beat) setRecords(beat.records);
+    if ('filter' in beat) setFilter(beat.filter);
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
     for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p, beat.via?.[id]); }
     for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
@@ -769,6 +842,11 @@ const StoryScene = (() => {
     for (const [id, v] of Object.entries(beat.preyKick || {})) { const e = monster(id) || state.monsters.find(m => m.id === id); if (v && e && e.mf?.prey && !state.skipping) kickPrey(e); }
     if ('heal' in beat) state.heal = beat.heal;
     if ('hush' in beat) state.hush = beat.hush;
+    // 音樂音量（每頁 bgmLevel: { vol: 0～1, secs: 幾秒變過去 }）：不換歌，只把現在的音樂調大／調小，之後一直保持
+    if (beat.bgmLevel && Number.isFinite(Number(beat.bgmLevel.vol))) {
+      state.bgmVol = Number(beat.bgmLevel.vol);
+      if (bgm) bgmFade(bgm, bgmTarget(), state.skipping ? .01 : Math.max(.01, secOr(beat.bgmLevel.secs, 1)));
+    }
     setSpeaker(beat);   // 眼睛狀態套用後，頭像才跟著切換睜眼／閉眼受傷圖。
   }
   function next() {
@@ -835,7 +913,7 @@ const StoryScene = (() => {
   // ---- BGM：bgm＝音樂檔（music/ 資料夾）、bgmVolume＝音量 0～1；整段循環，開始淡入、結尾淡出 ----
   // 遊戲本身的背景音樂（js/music.js）是關著的，劇情自己播；設定裡勾選靜音時也不出聲
   let bgm = null;
-  const bgmTarget = () => (typeof SFX !== 'undefined' && !SFX.enabled) ? 0 : Math.max(0, Math.min(1, state?.cfg.bgmVolume ?? .5));
+  const bgmTarget = () => (typeof SFX !== 'undefined' && !SFX.enabled) ? 0 : Math.max(0, Math.min(1, state?.bgmVol ?? state?.cfg.bgmVolume ?? .5));   // bgmVol：某頁調過的音量（換歌時的音量、「音樂音量」）
   function bgmFade(a, to, sec, done) {
     clearInterval(a._fade);
     const from = a.volume, t0 = performance.now();
@@ -847,7 +925,8 @@ const StoryScene = (() => {
   }
   // bgm 也可以是清單：["music/a.mp3", "music/a.mp3", "music/b.mp3"]＝照順序播，最後一首一直循環
   // src：換成這首（每頁 bgm）；沒給就用劇情設定的 bgm
-  function startBgm(src) {
+  // fadeIn：花幾秒淡入（沒給＝劇情設定的 bgmFadeIn，空白＝1.5 秒）
+  function startBgm(src, fadeIn) {
     stopBgm(0);
     const want = src !== undefined ? src : state?.cfg.bgm;
     const list = (Array.isArray(want) ? want : [want]).filter(Boolean);
@@ -859,11 +938,12 @@ const StoryScene = (() => {
       i++; a.src = list[i]; a.loop = i === list.length - 1; a.play().catch(() => {});
     });
     a.play().catch(() => {});
-    bgmFade(a, bgmTarget(), 1.5);
+    bgmFade(a, bgmTarget(), Math.max(.01, fadeIn ?? secOr(state?.cfg.bgmFadeIn, 1.5)));
   }
+  const secOr = (v, d) => v === '' || v == null || !Number.isFinite(Number(v)) ? d : Math.max(0, Number(v));   // 秒數欄位：空白＝預設值
   function stopBgm(sec = 1.5) {
     const a = bgm; bgm = null; if (!a) return;
-    if (!sec) { clearInterval(a._fade); a.pause(); return; }
+    if (!(sec > 0)) { clearInterval(a._fade); a.pause(); return; }
     bgmFade(a, 0, sec, () => a.pause());
   }
   // 遠處的爆炸（explosions: { min, max, gain, shake }＝每隔 min～max 秒一次）：聲音、鏡頭晃動、天花板落下一點灰塵
@@ -962,7 +1042,7 @@ const StoryScene = (() => {
       if (state.screen) state.screen.t += dt;
       if (state.flash) state.flash.t += dt;
       if (state.bannerAt && state.time >= state.bannerAt.at) { showBanner(state.bannerAt.text); state.bannerAt = null; }
-      if (state.nextBgm && state.time >= state.nextBgm.at && !state.ending) { const src = state.nextBgm.src; state.nextBgm = null; startBgm(src); }
+      if (state.nextBgm && state.time >= state.nextBgm.at && !state.ending) { const { src, fadeIn } = state.nextBgm; state.nextBgm = null; startBgm(src, fadeIn); }
       if (state.ending) {
         el('storyFade').style.opacity = String(Math.max(screenDark(), Math.min(1, Math.max(0, (state.beatTime - state.endDelay) / 1.8))));
         if (state.beatTime >= state.endDelay + 1.8 && state.cfg.autoExit && resume) { backToGame(); return; }   // 開場這類：變黑後直接回遊戲
@@ -976,7 +1056,7 @@ const StoryScene = (() => {
         ui.querySelector('.story-head').style.opacity = String(reveal);
         if (Number.isFinite(beat.end) && state.beatTime >= beat.end) finish(true);   // end：這頁幾秒後自動結束（邊走邊轉場）
         else if (state.beatTime >= state.beatWait) {
-          if (!state.shown) { state.shown = true; if (beat.text || !beat.banner) showBox(true); shout(beat); }
+          if (!state.shown) { state.shown = true; if (beat.text || !(beat.banner || beat.caption)) showBox(true); shout(beat); }   // 只有大字／過場字卡、沒台詞的頁：不跳出對話框
           // 打字速度跟遊戲對話一樣（NPC_TALK.typeSpeed＝每個字幾毫秒）
           state.chars = Math.min(Array.from(beat.text).length, state.chars + dt * 1000 / Math.max(5, Number(NPC_TALK.typeSpeed) || 24));
           renderText();
@@ -1007,18 +1087,22 @@ const StoryScene = (() => {
         if (a.charred && !a.hidden && (a.smokeT = (a.smokeT || 0) - dt) <= 0 && typeof pushBlackSmoke === 'function') { a.smokeT = rnd(.35, .6); pushBlackSmoke(a.x + rnd(-10, 10), a.y - 4); }   // 焦黑的人一直冒煙
         if (a.shoutT > 0) a.shoutT = Math.max(0, a.shoutT - dt);
         if (a.hopT > 0) a.hopT = Math.max(0, a.hopT - dt);
+        a.bubbleT = (a.bubbleT || 0) + dt; if (a.tug) a.tugT = (a.tugT || 0) + dt;
         tickPunch(a, dt); tickBag(a, dt);
         if (a.fading) { a.alpha -= dt / .45; if (a.alpha <= 0) { a.alpha = 1; a.hidden = true; a.fading = a.exiting = false; } }   // 走進門裡：淡出
         else if (a.alpha < 1) a.alpha = Math.min(1, a.alpha + dt / .45);   // 剛出現：淡入
       }
       if (state.door) tickDoor(state.door, dt);
+      if (state.meter && state.meter.t < state.meter.dur) { state.meter.t += dt; drawMeter(); }   // 數值條的數字慢慢跳
       tickParty(dt);
       for (const e of state.monsters) tickMonster(e, dt);
       tickZap(dt);
       if (G.scorchMarks) for (const m of G.scorchMarks) m.t = Math.max(m.t - dt, (m.st.fade || 0) + .01);   // 雷擊焦痕：劇情裡一直留著（不淡掉）
       // heal：{ from: 治療者, to: 被治療的人 }；光點用治療者的疏導色
+      // 治療者的代號可以是 winterSit 這種（坐著的溫特）：找不到就用他的角色圖（winter_A → winter）去查疏導色
+      const healColor = id => SOOTHE_MOTE_COLORS[id] || SOOTHE_MOTE_COLORS[String(actor(id)?.sprite || '').replace(/_[A-Z]$/, '')] || [90, 230, 140];
       const patient = state.heal && actor(state.heal.to);
-      if (patient && (state.moteT -= dt) <= 0) { state.moteT = .12; motes(patient.x, patient.y - 10, SOOTHE_MOTE_COLORS[state.heal.from] || [90, 230, 140], 22); }
+      if (patient && (state.moteT -= dt) <= 0) { state.moteT = .12; motes(patient.x, patient.y - 10, healColor(state.heal.from), 22); }
       updateWorldEffects(dt); updateLightFlashes(dt);
       if (typeof updateFlickerLights === 'function') updateFlickerLights(dt);   // 日光燈偶爾閃、跳電、噴火花
       const boom = state.cfg.explosions;
@@ -1045,6 +1129,41 @@ const StoryScene = (() => {
   const SHADE_LINES = [[-2, 1, 17], [1, 1.3, 20], [5, 1, 20.4], [10.5, 1.3, 22.6], [15, .5, 24.9], [19, 2.8, 26]];
   const DROP_AT = [-17.5, 16];   // 一顆汗滴：從哪裡開始往下滑（左右、從頭頂往下，像素）
   const SPARKLE_SPOTS = [[-17, 0, 0], [14, -6, .25], [-25, 22, .5], [26, 14, .75]];
+  const SMOKE = { x: [-6, 1, 7], y: 12, rise: 10, len: 12 };   // 頭頂冒煙：三縷煙的左右位置、從頭頂往下第幾像素冒出來、往上飄多高、每縷多長
+  // ---- 扯呆毛（tug）：被扯的人一下一下被往上拉，頭頂一撮頭髮被拉長，末端一隻手捏著 ----
+  const TUG = { every: .42, lift: 3.5, hairX: 2, hairY: 15, reach: 9, hair: '#b8322a', hand: '#f3d2b6' };
+  const tugLift = a => { if (!a.tug) return 0; const p = (a.tugT % TUG.every) / TUG.every; return p < .3 ? Math.sin(p / .3 * Math.PI / 2) * TUG.lift : TUG.lift * (1 - (p - .3) / .7); };
+  function drawTug(a) {
+    if (!a.tug || a.hidden) return;
+    const by = actor(a.tug), size = PLAYER.drawSize, lift = tugLift(a);
+    const side = by && by.x < a.x ? -1 : 1, x0 = a.x + TUG.hairX, y0 = a.y - size + 18 + TUG.hairY - lift;
+    const x1 = x0 + side * 4, y1 = y0 - TUG.reach - lift * 1.4;
+    ctx.save(); ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo(x0 - side * 2, y0 - TUG.reach * .6, x1, y1);   // 被拉長的呆毛
+    ctx.strokeStyle = '#3a0c0c'; ctx.lineWidth = 3; ctx.stroke(); ctx.strokeStyle = TUG.hair; ctx.lineWidth = 1.7; ctx.stroke();
+    ctx.beginPath(); ctx.ellipse(x1 + side * 1.5, y1 - 2, 3.4, 2.6, 0, 0, Math.PI * 2);   // 捏著的手（小小的拳頭）
+    ctx.fillStyle = TUG.hand; ctx.fill(); ctx.strokeStyle = '#5a3a2a'; ctx.lineWidth = 1; ctx.stroke();
+    ctx.restore();
+  }
+  // ---- 泡泡框（bubble）：頭上冒出一個心裡話的泡泡，下面拖兩顆小泡泡；字太長自動換行 ----
+  // dx／up：泡泡的左下角放在頭頂往右幾像素、往上幾像素（放在頭的右上方，才不會擋住上面的人）
+  const BUBBLE = { font: '700 10px "Microsoft JhengHei", "Noto Sans TC", sans-serif', line: 13, maxW: 150, pad: 5, dx: 10, up: -2, pop: .25 };
+  function drawBubble(a) {
+    if (!a.bubble || a.hidden) return;
+    const size = PLAYER.drawSize, grow = Math.min(1, (a.bubbleT || 0) / BUBBLE.pop);
+    ctx.save(); ctx.font = BUBBLE.font;
+    const lines = [];   // 一個字一個字量，超過寬度就換行（中文沒有空白可以斷）
+    for (const para of String(a.bubble).split('\n')) { let cur = ''; for (const ch of para) { if (cur && ctx.measureText(cur + ch).width > BUBBLE.maxW) { lines.push(cur); cur = ch; } else cur += ch; } lines.push(cur); }
+    const w = Math.max(...lines.map(l => ctx.measureText(l).width)) + BUBBLE.pad * 2, hh = lines.length * BUBBLE.line + BUBBLE.pad * 2;
+    const headTop = a.y - size + 18 + 14, x = a.x + BUBBLE.dx, bottom = headTop - BUBBLE.up, y = bottom - hh;
+    ctx.translate(x, bottom); ctx.scale(grow, grow); ctx.translate(-x, -bottom); ctx.globalAlpha = Math.min(1, grow * 1.5);
+    ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, hh, 6) : ctx.rect(x, y, w, hh);
+    ctx.fillStyle = '#fffdf6'; ctx.fill(); ctx.strokeStyle = '#2b2440'; ctx.lineWidth = 1.4; ctx.stroke();
+    for (const [dx, dy, rr] of [[-1, 5, 2.6], [-6, 9, 1.6]]) { ctx.beginPath(); ctx.arc(x + dx, bottom + dy, rr, 0, Math.PI * 2); ctx.fill(); ctx.stroke(); }   // 往頭的方向拖兩顆小泡泡
+    ctx.fillStyle = '#2b2440'; ctx.textBaseline = 'top'; ctx.textAlign = 'left';
+    lines.forEach((l, i) => ctx.fillText(l, x + BUBBLE.pad, y + BUBBLE.pad + i * BUBBLE.line + .5));
+    ctx.restore();
+  }
   function drawEmote(a) {
     if (!a.emote || a.hidden) return;
     const size = PLAYER.drawSize, top = a.y - size + 18, t = state.time, base = Math.max(0, Math.min(1, a.alpha ?? 1));
@@ -1102,6 +1221,18 @@ const StoryScene = (() => {
         ctx.strokeStyle = '#3a0c0c'; ctx.lineWidth = 4; ctx.stroke();
         ctx.strokeStyle = '#ff3b3b'; ctx.lineWidth = 2.2; ctx.stroke();
         ctx.restore();
+      }
+    } else if (a.emote === 'smoke') {   // 頭頂冒煙（被雷劈過、頭髮焦掉）：幾縷灰煙從頭頂捲上去、變淡
+      for (let i = 0; i < 3; i++) {
+        const p = (t * .45 + i / 3) % 1, x0 = a.x + SMOKE.x[i], y0 = top + SMOKE.y;
+        ctx.globalAlpha = base * (p < .15 ? p / .15 : 1 - (p - .15) / .85) * .8;
+        ctx.beginPath();
+        for (let k = 0; k <= 6; k++) {   // 一縷煙：往上一路左右彎
+          const q = k / 6, yy = y0 - p * SMOKE.rise - q * SMOKE.len, xx = x0 + Math.sin(q * 4 + t * 2.4 + i) * (1.5 + q * 2.5);
+          if (k) ctx.lineTo(xx, yy); else ctx.moveTo(xx, yy);
+        }
+        ctx.strokeStyle = 'rgba(70,70,76,.9)'; ctx.lineWidth = 2.6; ctx.stroke();
+        ctx.strokeStyle = 'rgba(190,190,196,.95)'; ctx.lineWidth = 1.3; ctx.stroke();
       }
     } else if (a.emote === 'sweat') {
       for (let i = 0; i < 3; i++) {   // 左、右、右兩顆輪流滑下
@@ -1239,7 +1370,8 @@ const StoryScene = (() => {
     // 出拳往前衝：一下子衝出去、再慢慢收回來（前 25% 的時間衝、後面收）
     const L = a.lunge, lp = L ? L.t / L.dur : 0, lk = L ? (lp < .25 ? lp / .25 : 1 - (lp - .25) / .75) : 0;
     const lungeX = L ? (a.dir === 'left' ? -1 : 1) * L.amt * lk : 0, lungeY = L?.heavy ? LUNGE.sink * lk : 0;
-    ctx.translate(Math.round(a.x + kick + lungeX + bagSlide(a)) + shiver + shoutX + zap, a.y - size / 2 + 18 + breath + shoutY + lungeY);
+    const tugX = a.tug ? Math.sin(state.time * 55) * .5 : 0;   // 被扯呆毛：一下一下往上拉，還會微微抖
+    ctx.translate(Math.round(a.x + kick + lungeX + bagSlide(a)) + shiver + shoutX + zap + tugX, a.y - size / 2 + 18 + breath + shoutY + lungeY - tugLift(a));
     if (a.sitting?.rotation) ctx.rotate(a.sitting.rotation * Math.PI / 180);
     if (img === fistImg && a.dir === 'left') ctx.scale(-1, 1);   // 出拳圖只有朝右的，朝左就翻過來
     // 單張圖：照原本比例、跟人一樣高；imageScale＝照原圖像素大小畫（1＝跟角色同一個比例，例如擔架），底部對齊腳底
@@ -1253,8 +1385,10 @@ const StoryScene = (() => {
     } else { if (!a.set.single) drawEquip(a, size, 'behind'); ctx.drawImage(img, -w / 2, size / 2 - hgt, w, hgt); if (!a.set.single) drawEquip(a, size, 'front'); }
     drawPartyProps(a, size);
     // 手上拿的東西（carry＝圖片）：畫在身體前面、腰的高度；背對鏡頭時被身體擋住
-    const held = a.carry && a.dir !== 'back' && imageOnce(a.carry);
-    const small = readyImage(held) && Math.max(held.naturalWidth, held.naturalHeight) <= SMALL_CARRY;
+    // 背對鏡頭：小道具（紙袋、紅豆餅…）拿在身體旁邊照樣畫；大東西（遺物箱…）被身體擋住不畫
+    const img0 = a.carry && imageOnce(a.carry), isSmall = readyImage(img0) && Math.max(img0.naturalWidth, img0.naturalHeight) <= SMALL_CARRY;
+    const held = a.carry && (a.dir !== 'back' || isSmall) && img0;
+    const small = readyImage(held) && isSmall;
     const sitDx = a.sitting ? Number(a.carrySitDx) || 0 : 0;   // carrySitDx：坐著時拿的東西往左（負）／往右（正）挪幾像素；站起來走路就回到原本的位置
     if (small) {   // 小道具（紅豆餅、紙袋…）：照原圖大小拿在手邊，位置跟劇情（改）的「手上」一樣（js/story-kai.js 的 HOLD_AT）
       const k = size / 64, [dx, dy] = HAND_AT[a.dir] || HAND_AT.front, hw = held.naturalWidth * k, hh = held.naturalHeight * k;
@@ -1346,6 +1480,7 @@ const StoryScene = (() => {
     drawWorldEffects();
     drawDarkness();
     drawLightTint();
+    for (const a of state.actors) { drawTug(a); drawBubble(a); }   // 扯呆毛的手、泡泡框：蓋在地圖上層、黑幕上面，不會被櫃子擋住
     drawParty();   // 拉炮噴出來的、天上飄的彩帶：蓋在桌子、角色上面，也畫在黑幕上面（燈暗時彩帶照樣看得到）
     if (typeof drawPoweredLights === 'function') drawPoweredLights(ctx);
     if (typeof drawFlickerLights === 'function') drawFlickerLights(ctx);   // 日光燈的光暈、電弧（畫在黑幕上面）

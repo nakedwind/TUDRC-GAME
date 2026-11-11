@@ -2395,6 +2395,15 @@ const SHARED_TILES = [
     "flat": true
   },
   {
+    "id": "tile_mrt_floor_tile_1f",
+    "name": "車站地板（-1F）",
+    "role": "floor",
+    "file": "images/捷運車站/mrt-floor-tile -1F.png",
+    "w": 3,
+    "h": 3,
+    "flat": true
+  },
+  {
     "id": "tile_mrt_floor_tile_strip",
     "name": "地磚（長條）",
     "role": "floor",
@@ -6707,5 +6716,13 @@ const SHARED_TILES = [
     "file": "images/捷運車站/mrt-room-wall-02.png",
     "w": 1,
     "h": 4
+  },
+  {
+    "id": "tile_mwbro91n",
+    "name": "dynamo-close",
+    "role": "floor",
+    "file": "images/捷運車站/dynamo-close.png",
+    "w": 2,
+    "h": 2
   }
 ];

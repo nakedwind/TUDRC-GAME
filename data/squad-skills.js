@@ -174,7 +174,7 @@ const SQUAD_SKILLS = {
         "desc": "範圍攻擊，不主動吸引仇恨。",
         "effect": "初始技能",
         "note": "被動「蝕心毒霧」：腐蝕使異質體混亂 3 秒並攻擊同類。\n腐蝕會在地上留下約 6 秒的腐蝕痕跡：異質體踩到會持續受傷；溫特和隊友踩到每秒受到 10 點傷害（隊友會自己避開，阿瓦倫本人不受影響）。\n大招「腐蝕綻放」：每 10 秒放出一次大範圍腐蝕（傷害 2.3 倍，範圍 2.8 格）。",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/corrosive-mist.png",
         "mods": [],
         "cost": 0
       },
@@ -182,7 +182,7 @@ const SQUAD_SKILLS = {
         "name": "侵蝕神智",
         "desc": "腐蝕直接侵入異質體的意識。",
         "effect": "混亂時間 +1 秒",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/mind-erosion.png",
         "mods": [
           {
             "path": "confuse",
@@ -195,7 +195,7 @@ const SQUAD_SKILLS = {
         "name": "戒備",
         "desc": "永遠留一分注意力在自己身上。",
         "effect": "受到的傷害再減少 6%",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/vigilance.png",
         "mods": [
           {
             "path": "defense",
@@ -208,7 +208,7 @@ const SQUAD_SKILLS = {
         "name": "隱匿",
         "desc": "安靜地移動，不讓敵人盯上。",
         "effect": "最大 HP +15%，移動速度 +15%",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/concealment.png",
         "mods": [
           {
             "path": "hp",
@@ -225,7 +225,7 @@ const SQUAD_SKILLS = {
         "name": "腐蝕擴散",
         "desc": "毒霧擴散得更開。",
         "effect": "腐蝕範圍 +0.3 格",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/corrosion-spread.png",
         "mods": [
           {
             "path": "splash",
@@ -238,7 +238,7 @@ const SQUAD_SKILLS = {
         "name": "同類相殘",
         "desc": "讓異質體自相殘殺得更久。",
         "effect": "混亂時間再 +1 秒",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/friendly-conflict.png",
         "mods": [
           {
             "path": "confuse",
@@ -251,7 +251,7 @@ const SQUAD_SKILLS = {
         "name": "劇毒",
         "desc": "腐蝕濃到連外殼都會融。",
         "effect": "攻擊力 +10%，腐蝕範圍再 +0.3 格",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/virulent-toxin.png",
         "mods": [
           {
             "path": "dmg",
@@ -268,7 +268,7 @@ const SQUAD_SKILLS = {
         "name": "腐蝕綻放・腐蝕領域",
         "desc": "整片區域都成了他的領域。",
         "effect": "大招傷害 +30%，大招冷卻 −20%",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/corrosion-domain.png",
         "mods": [
           {
             "path": "ultDmgBonus",
@@ -285,7 +285,7 @@ const SQUAD_SKILLS = {
         "name": "致命刺擊",
         "desc": "找到最脆弱的地方。",
         "effect": "攻擊力 +8%",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/lethal-strike.png",
         "mods": [
           {
             "path": "dmg",
@@ -298,7 +298,7 @@ const SQUAD_SKILLS = {
         "name": "連續侵蝕",
         "desc": "一波接一波。",
         "effect": "攻擊速度 +15%，攻擊力 +8%",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/successive-erosion.png",
         "mods": [
           {
             "path": "rate",
@@ -315,7 +315,7 @@ const SQUAD_SKILLS = {
         "name": "安心的距離",
         "desc": "知道艾德林在附近，心就穩下來。",
         "effect": "每次攻擊增加的精神負荷 −30%",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/reassuring-distance.png",
         "mods": [
           {
             "path": "taint",
@@ -328,7 +328,7 @@ const SQUAD_SKILLS = {
         "name": "伸長的毒手",
         "desc": "腐蝕能觸及更遠的地方。",
         "effect": "射程 +0.5 格",
-        "icon": "",
+        "icon": "images/ui/skills/avaren/extended-corrosion.png",
         "mods": [
           {
             "path": "range",
@@ -858,7 +858,7 @@ const SQUAD_SKILLS = {
         "desc": "範圍攻擊；吸引異質體仇恨，擊退 1 格並使其停止 1 秒。",
         "effect": "初始技能",
         "note": "被動「狂怒之血」：汙染值越高攻擊力越高（汙染 100 時為 2 倍），瀕臨暴走也不會自動撤退。\n大招「崩地重擊」：每 11 秒重擊周圍 3 格（傷害 3 倍），擊退 0.8 格並暈眩 2.5 秒。",
-        "icon": "",
+        "icon": "images/ui/skills/luther/rage-blood.png",
         "mods": [],
         "cost": 0
       },
@@ -866,7 +866,7 @@ const SQUAD_SKILLS = {
         "name": "震退",
         "desc": "一拳把怪物打得更遠。",
         "effect": "擊退距離 +0.5 格",
-        "icon": "",
+        "icon": "images/ui/skills/luther/knockback.png",
         "mods": [
           {
             "path": "knockback",
@@ -879,7 +879,7 @@ const SQUAD_SKILLS = {
         "name": "硬骨頭",
         "desc": "比外表還耐打。",
         "effect": "最大 HP +15%",
-        "icon": "",
+        "icon": "images/ui/skills/luther/tough-core.png",
         "mods": [
           {
             "path": "hp",
@@ -892,7 +892,7 @@ const SQUAD_SKILLS = {
         "name": "硬漢",
         "desc": "咬緊牙關硬撐。",
         "effect": "受到的傷害再減少 10%，最大 HP +10%",
-        "icon": "",
+        "icon": "images/ui/skills/luther/unyielding.png",
         "mods": [
           {
             "path": "defense",
@@ -909,7 +909,7 @@ const SQUAD_SKILLS = {
         "name": "重擊暈眩",
         "desc": "打得怪物站不穩。",
         "effect": "停住時間 +0.5 秒",
-        "icon": "",
+        "icon": "images/ui/skills/luther/stunning-impact.png",
         "mods": [
           {
             "path": "stun",
@@ -922,7 +922,7 @@ const SQUAD_SKILLS = {
         "name": "狂暴",
         "desc": "負荷越重，力氣越大。",
         "effect": "汙染加成再 +30%（汙染 100 時為 2.3 倍）",
-        "icon": "",
+        "icon": "images/ui/skills/luther/frenzy.png",
         "mods": [
           {
             "path": "rageDmg",
@@ -935,7 +935,7 @@ const SQUAD_SKILLS = {
         "name": "守住身邊的人",
         "desc": "默默把怪物拉到自己這裡。",
         "effect": "嘲諷範圍 +1 格，擊退距離再 +0.3 格",
-        "icon": "",
+        "icon": "images/ui/skills/luther/protect-allies.png",
         "mods": [
           {
             "path": "taunt",
@@ -952,7 +952,7 @@ const SQUAD_SKILLS = {
         "name": "崩地重擊・崩山",
         "desc": "連地面都打碎。",
         "effect": "大招傷害 +40%，大招冷卻 −15%",
-        "icon": "",
+        "icon": "images/ui/skills/luther/mountain-breaker.png",
         "mods": [
           {
             "path": "ultDmgBonus",
@@ -969,7 +969,7 @@ const SQUAD_SKILLS = {
         "name": "怪力",
         "desc": "全身的力氣灌進拳頭。",
         "effect": "攻擊力 +12%",
-        "icon": "",
+        "icon": "images/ui/skills/luther/super-strength.png",
         "mods": [
           {
             "path": "dmg",
@@ -982,7 +982,7 @@ const SQUAD_SKILLS = {
         "name": "破壞拳",
         "desc": "一拳到底。",
         "effect": "攻擊力 +20%，攻擊範圍 +0.3 格",
-        "icon": "",
+        "icon": "images/ui/skills/luther/destructive-strike.png",
         "mods": [
           {
             "path": "dmg",
@@ -999,7 +999,7 @@ const SQUAD_SKILLS = {
         "name": "沉默的步伐",
         "desc": "不多話，只是走得更快。",
         "effect": "移動速度 +10%",
-        "icon": "",
+        "icon": "images/ui/skills/luther/silent-steps.png",
         "mods": [
           {
             "path": "walkSpeed",
@@ -1012,7 +1012,7 @@ const SQUAD_SKILLS = {
         "name": "壓抑",
         "desc": "把怒氣收好一點。",
         "effect": "每次攻擊增加的精神負荷 −20%",
-        "icon": "",
+        "icon": "images/ui/skills/luther/restraint.png",
         "mods": [
           {
             "path": "taint",
@@ -1202,7 +1202,7 @@ const SQUAD_SKILLS = {
         "desc": "無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。",
         "effect": "初始技能",
         "note": "被動「溫柔疏導」：每 3 秒為 2.8 格內的隊員降低約 30 汙染、恢復約 18 HP；遇敵時保持 3 格距離。",
-        "icon": "",
+        "icon": "images/ui/skills/eldrin/gentle-soothing.png",
         "mods": [],
         "cost": 0
       },
@@ -1212,7 +1212,7 @@ const SQUAD_SKILLS = {
         "effect": "每秒疏導量 +1",
         "effect2": "",
         "note": "",
-        "icon": "",
+        "icon": "images/ui/skills/eldrin/soothing-mastery.png",
         "mods": [
           {
             "path": "aura.rate",
@@ -1227,7 +1227,7 @@ const SQUAD_SKILLS = {
         "effect": "全隊 HP +40",
         "effect2": "",
         "note": "有隊友 HP 負荷值 35% 時自動發動；詠唱 3 秒，花 20 SP，冷卻 60 秒。",
-        "icon": "",
+        "icon": "images/ui/skills/eldrin/life-fountain.png",
         "mods": [],
         "cost": 250
       },
@@ -1237,7 +1237,7 @@ const SQUAD_SKILLS = {
         "effect": "疏導光環範圍 +0.5 格",
         "effect2": "",
         "note": "疏導光環的範圍變大，能照顧到更遠的隊員。",
-        "icon": "",
+        "icon": "images/ui/skills/eldrin/careful-care.png",
         "mods": [
           {
             "path": "aura.r",
@@ -1252,7 +1252,7 @@ const SQUAD_SKILLS = {
         "effect": "最大 HP +20",
         "effect2": "",
         "note": "HP 上限提升，在隊員身邊待得更久。",
-        "icon": "",
+        "icon": "images/ui/skills/eldrin/physical-training.png",
         "mods": [
           {
             "path": "hp",
@@ -1267,7 +1267,7 @@ const SQUAD_SKILLS = {
         "effect": "SP 上限 +20",
         "effect2": "",
         "note": "SP 上限提升，能發動更多次疏導技能。",
-        "icon": "",
+        "icon": "images/ui/skills/eldrin/mental-training.png",
         "mods": [
           {
             "path": "spMax",
@@ -1283,7 +1283,7 @@ const SQUAD_SKILLS = {
         "desc": "無精神負荷；恢復附近哨兵的生命與精神負荷，遇敵時保持距離。",
         "effect": "初始技能",
         "note": "被動「戰地疏導」：每 3 秒為 2.5 格內的隊員降低約 18 汙染、恢復約 12 HP；遇敵時保持 3.5 格距離。",
-        "icon": "",
+        "icon": "images/ui/skills/chris/battlefield-soothing.png",
         "mods": [],
         "cost": 0
       },
@@ -1293,7 +1293,7 @@ const SQUAD_SKILLS = {
         "effect": "疏導量 +1／秒",
         "effect2": "",
         "note": "說明說明說明說明",
-        "icon": "",
+        "icon": "images/ui/skills/chris/soothing-mastery.png",
         "mods": [
           {
             "path": "aura.rate",
@@ -1308,7 +1308,7 @@ const SQUAD_SKILLS = {
         "effect": "一般疏導少花 20% SP",
         "effect2": "",
         "note": "一般疏導花的 SP 減少，同樣的 SP 能疏導更多次。",
-        "icon": "",
+        "icon": "images/ui/skills/chris/efficient-soothing.png",
         "mods": [
           {
             "path": "spCostCut",
@@ -1323,7 +1323,7 @@ const SQUAD_SKILLS = {
         "effect": "最大 HP +20",
         "effect2": "",
         "note": "HP 上限提升，在隊員身邊待得更久。",
-        "icon": "",
+        "icon": "images/ui/skills/chris/physical-training.png",
         "mods": [
           {
             "path": "hp",
@@ -1338,7 +1338,7 @@ const SQUAD_SKILLS = {
         "effect": "SP 上限 +20",
         "effect2": "",
         "note": "SP 上限提升，能發動更多次疏導技能。",
-        "icon": "",
+        "icon": "images/ui/skills/chris/mental-training.png",
         "mods": [
           {
             "path": "spMax",
