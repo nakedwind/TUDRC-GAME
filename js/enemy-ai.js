@@ -168,7 +168,7 @@ function trySlimePounce(e, target, distance) {
   return true;
 }
 function enemyPursuePlayer(e, playerDistance, moveDt, dt) {
-  if (!G.player || G.player.hp <= 0 || playerDistance > ENEMY_SENSE_RANGE * (typeof fogSenseMul === 'function' ? fogSenseMul(e, G.player) : 1)) return false;   // 霧裡看不遠（js/fog.js）
+  if (!G.player || G.player.hp <= 0 || !sameFloor(e, G.player) || playerDistance > ENEMY_SENSE_RANGE * (typeof fogSenseMul === 'function' ? fogSenseMul(e, G.player) : 1)) return false;   // 霧裡看不遠（js/fog.js）
   if (e.sweep ? playerDistance <= sweepReach(e) : playerDistance <= 30) { e.sweep ? sweepAttack(e, G.player, dt) : enemyAttackPlayer(e, dt); return true; }
   if (trySlimePounce(e, G.player, playerDistance)) return true;
   const [gc, gr] = cellAt(G.player.x, G.player.y);
@@ -183,6 +183,7 @@ const SENTRY_AGGRO_TIME = 5;
 // 「不主動吸引仇恨」的哨兵（阿瓦倫，資料裡的 noAggro）：怪物平常當作沒看到他，
 // 只有被他打中、正在記仇（sentryAggro）的那一隻才會攻擊他。
 function enemyNoticesSentry(e, t) {
+  if (t && !sameFloor(e, t)) return false;   // 不同樓層（陸橋上／下）：打不到、也不追（js/pathfinding.js）
   if (t && t.eatenBy) return false;   // 被虱目魚小子吃掉、卡在魚嘴裡（js/milkfish-kid.js）
   if (t && (t.grabbed || t.grabFall)) return false;   // 被溫特抓起來（js/grab.js）：怪物不理他
   if (t && t.vineCap) return false;   // 被藤蔓吊走（js/vines.js）：怪物不理他
@@ -490,7 +491,7 @@ function updateSlimePounce(e, dt) {
   const hitRadius = SLIME_POUNCE.hitRadius * (e.sizeMul || 1);
   if (playerD <= hitRadius) addShake(9);          // 被撲中：重震
   else nearbyImpact(e.x, e.y, 3, 0);              // 沒撲中：附近才輕震
-  if (G.player && G.player.hp > 0 && playerD <= hitRadius) {
+  if (G.player && G.player.hp > 0 && sameFloor(e, G.player) && playerD <= hitRadius) {
     e.playerTouchCd = 0;
     enemyAttackPlayer(e, dt);
     addHitstop(.06);
@@ -579,7 +580,7 @@ function stepEnemy(e, dt) {
   if (e.behavior === 'vine') { stepVineEnemy(e, dt); return; }   // 絲瓜小姐：重踏、放藤蔓（js/loofah-lady.js）   // 魚頭君：噴水、去滅火（js/fish-head.js）   // 夯吉寶：丟迴力鏢帽子（js/hangi-bao.js）
   // 玩家碰到史萊姆本體就會受傷，與史萊姆目前鎖定誰或正在做什麼無關。
   // 每隻史萊姆各自有 1 秒碰撞冷卻；哨兵仍沿用原本的主動攻擊規則。
-  if (G.player && G.player.hp > 0 && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= (e.sweep ? sweepReach(e) : 30)) {
+  if (G.player && G.player.hp > 0 && sameFloor(e, G.player) && Math.hypot(G.player.x - e.x, G.player.y - e.y) <= (e.sweep ? sweepReach(e) : 30)) {
     if (e.sweep) sweepAttack(e, G.player, dt); else enemyAttackPlayer(e, dt);   // 生命體：範圍攻擊
     return;
   }
@@ -597,7 +598,7 @@ function stepEnemy(e, dt) {
     return;
   }
   const moveDt = e.frames ? dt : updateSlimeJump(e, dt);   // 有走路動畫的怪物（鳥頭人）一路走，不像史萊姆一跳一跳
-  const playerDistance = G.player && G.player.hp > 0 ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
+  const playerDistance = G.player && G.player.hp > 0 && sameFloor(e, G.player) ? Math.hypot(G.player.x - e.x, G.player.y - e.y) : Infinity;
   // 玩家進入撲擊距離（3 格內）時，比探照燈更優先——否則燈附近的史萊姆永遠不會撲向玩家。
   if (playerDistance <= SLIME_POUNCE.range && enemyPursuePlayer(e, playerDistance, moveDt, dt)) return;
   const living = G.towers.filter(t => t.hp > 0 && !t.berserk && enemyNoticesSentry(e, t));   // 沒打過牠的阿瓦倫不算目標

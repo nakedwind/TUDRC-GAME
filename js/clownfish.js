@@ -80,7 +80,7 @@ const cfState = e => e.cf || (e.cf = { phase: 'rest', t: Math.random() * CLOWNFI
 function cfPickTarget(e) {
   const C = CLOWNFISH, dist = t => Math.hypot(t.x - e.x, t.y - e.y);
   const list = [];
-  if (G.player && G.player.hp > 0) list.push(G.player);
+  if (G.player && G.player.hp > 0 && sameFloor(e, G.player)) list.push(G.player);   // 不同樓層的打不到（js/pathfinding.js）
   for (const t of G.towers) if (t.hp > 0 && !t.berserk && enemyNoticesSentry(e, t)) list.push(t);
   if ((e.playerAggroT || 0) > 0 && list.includes(G.player) && dist(G.player) <= ENEMY_SENSE_RANGE) return G.player;
   if (e.sentryAggroT > 0 && list.includes(e.sentryAggro) && dist(e.sentryAggro) <= ENEMY_SENSE_RANGE) return e.sentryAggro;

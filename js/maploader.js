@@ -411,7 +411,25 @@ function elevatorBlocksPoint(x, y) {
 // ---- 視線：兩點之間有沒有被固定牆擋住 ----
 // 只有地圖的固定牆（含微調過的牆面、關著的電梯門）會擋；玩家蓋的路障、鐵絲網等比較矮，可以從上面打過去。
 // 沿線每 6px 檢查一次；線剛好擦過牆角時，左右各偏 5px 再試一次，有一條通就算看得到（避免卡卡的誤判）。
+// 陸橋：這個點上站的是誰（溫特、隊員、怪物、NPC）、在幾樓；找不到人＝0（不知道）。視線、瞄準用
+function actorFloorNear(x, y) {
+  let best = 0, bd = 26 * 26;
+  const look = a => { if (!a) return; const dx = a.x - x, dy = a.y - y, d = dx * dx + dy * dy; if (d < bd) { bd = d; best = actorFloor(a); } };
+  look(G.player); for (const t of G.towers) look(t); for (const e of G.enemies) if (!e.dead) look(e); for (const n of G.npcs) look(n);
+  return best;
+}
+let losNoFloors = false;   // 算光照時設成 true：光照自己管樓層，不用每條線都找人
 function hasLineOfSight(x0, y0, x1, y1) {
+  if (hasFloors && !losNoFloors && typeof G !== 'undefined' && G && G.towers) {
+    const fa = actorFloorNear(x0, y0), fb = actorFloorNear(x1, y1);
+    if (fa && fb && fa !== fb) return false;   // 一個在陸橋上、一個在下面：互相看不到、打不到
+    const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
+    floorCtx = fa || fb || floorCtx; floorOnRamp = false; floorOnDeck = false;   // 照這一層的牆算視線
+    try { return lineOfSightRaw(x0, y0, x1, y1); } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
+  }
+  return lineOfSightRaw(x0, y0, x1, y1);
+}
+function lineOfSightRaw(x0, y0, x1, y1) {
   if (typeof bigPearlBlocksLine === 'function' && bigPearlBlocksLine(x0, y0, x1, y1)) return false;   // 珍珠大童的大珍珠：擋住雙方的子彈和射線（js/pearl-elder.js）
   const clear = (ox, oy) => {
     const ax = x0 + ox, ay = y0 + oy, bx = x1 + ox, by = y1 + oy;

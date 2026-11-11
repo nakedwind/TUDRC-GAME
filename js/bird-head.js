@@ -15,7 +15,7 @@ const chargerCfg = e => e.chargerCfg || BIRD_HEAD;
 function chargerTargets(e) {
   const list = [];
   const p = G.player;
-  if (p && p.hp > 0) list.push(p);
+  if (p && p.hp > 0 && sameFloor(e, p)) list.push(p);   // 不同樓層的打不到（js/pathfinding.js）
   for (const t of G.towers) if (t.hp > 0 && !t.berserk && enemyNoticesSentry(e, t)) list.push(t);
   return list;
 }

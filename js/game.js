@@ -1415,7 +1415,8 @@ function playerBlocked(x, y) {
   for (const [sx, sy] of [[-r, -r], [r, -r], [-r, r], [r, r]]) {
     const px = x + sx, py = y + sy;
     const [c, rr] = cellAt(px, py);
-    if (!inGrid(c, rr) || (floorCtx !== 2 && G.grid[c + ',' + rr])) return true;
+    const go = G.grid[c + ',' + rr];
+    if (!inGrid(c, rr) || (go && (!hasFloors || (go.floor === 2 ? 2 : 1) === floorCtx))) return true;   // 建築只擋同一層的人
     if (solidBlocksPoint(px, py)) return true;      // 不可穿透（含像素微調）
   }
   // 邊緣碰撞（薄牆，js/pathfinding.js）：四個角再加四邊的中點，薄牆的一端剛好卡在身體中間也擋得到
@@ -1775,7 +1776,7 @@ function pickSentryTarget(t, R) {
   if (marked && Math.hypot(marked.x - t.x, marked.y - t.y) <= R && hasLineOfSight(t.x, t.y, marked.x, marked.y)) return marked;
   let best = null, bestScore = Infinity;
   for (const e of G.enemies) {
-    if (e.dead) continue;
+    if (e.dead || !sameFloor(e, t)) continue;   // 不同樓層的打不到（js/pathfinding.js）
     if (typeof eliteHoldFire === 'function' && eliteHoldFire(e)) continue;   // 還在站崗的鳥頭大隊長與手下：等溫特先開槍（js/elite-bird-head.js）
     const distance = Math.hypot(e.x - t.x, e.y - t.y);
     if (distance > R) continue;
@@ -1906,7 +1907,8 @@ function startReload(p) {
 const SHOT_BODY_PAD = 8;   // 游標點在身體框外幾像素內也算點到
 function playerShotCheck(p, e, aim, angDiff) {
   const isCore = G.cores.includes(e);
-  if (e.dead || e.carried) return null;   // carried：抱在珍珠大童身上的核心打不到（js/pearl-elder.js）
+  if (e.dead || e.carried) return null;
+  if (!isCore && !sameFloor(p, e)) return null;   // 不同樓層的怪物打不到（js/pathfinding.js）   // carried：抱在珍珠大童身上的核心打不到（js/pearl-elder.js）
   const box = targetBodyBox(e);
   const lit = bodyVisible(box, e.x, e.y) || isLit(e.x, e.y) || isLit(box.cx, box.cy);   // 畫面上看得到就打得到
   if (!lit) return null;
@@ -2245,7 +2247,7 @@ function update(dt) {
   for (const t of G.towers) {
     if (t.type !== 'red') continue;
     let nd = Infinity, near = null;
-    if (!MAP_SAFE && !t.berserk && t.hp > 0 && !t.eatenBy && !(t.sleepT > 0)) for (const e of G.enemies) { if (e.dead || (typeof eliteHoldFire === 'function' && eliteHoldFire(e))) continue; const d = Math.hypot(e.x - t.x, e.y - t.y); if (d < nd) { nd = d; near = e; } }   // 被虱目魚小子吃掉、睡著時不舉盾（不然會一直撞吃掉他的虱目魚小子）
+    if (!MAP_SAFE && !t.berserk && t.hp > 0 && !t.eatenBy && !(t.sleepT > 0)) for (const e of G.enemies) { if (e.dead || !sameFloor(e, t) || (typeof eliteHoldFire === 'function' && eliteHoldFire(e))) continue; const d = Math.hypot(e.x - t.x, e.y - t.y); if (d < nd) { nd = d; near = e; } }   // 被虱目魚小子吃掉、睡著時不舉盾（不然會一直撞吃掉他的虱目魚小子）
     t.shieldMode = nd <= 3 * CELL;
     t.ramTarget = t.shieldMode ? near : null;
     t.nearestEnemyDist = nd;

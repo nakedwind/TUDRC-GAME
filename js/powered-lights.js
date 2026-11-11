@@ -21,13 +21,13 @@ function poweredLightFixtures(){
   if(poweredFixturesCache&&poweredFixturesFor===MAP&&poweredFixturesStamps===stampCount)return poweredFixturesCache;
   poweredFixturesFor=MAP;poweredFixturesStamps=stampCount;
   const lamps=poweredFixturesCache=[];
-  const add=(id,c,r,s=null)=>{
+  const add=(id,c,r,s=null,lid=null)=>{   // lid＝小圖所在的圖層；floor＝這盞燈在幾樓（名稱有「2樓」的圖層＝2，js/maploader.js）
     const tile=mapTileById(id);if(!isPoweredLightTile(tile))return;
     const w=mapTileW(tile)*CELL,h=mapTileH(tile)*CELL;
     const dx=w*.5,dy=h*.9;
-    lamps.push({x:OX+c*CELL+(s?.ox||0)+(s?.fx?w-dx:dx),y:OY+r*CELL+(s?.oy||0)+(s?.fy?h-dy:dy),circuit:circuitOf(s),top:OY+r*CELL+(s?.oy||0)});
+    lamps.push({x:OX+c*CELL+(s?.ox||0)+(s?.fx?w-dx:dx),y:OY+r*CELL+(s?.oy||0)+(s?.fy?h-dy:dy),circuit:circuitOf(s),top:OY+r*CELL+(s?.oy||0),floor:(s?stampOn2F(s):MAP_FLOOR2_LAYERS.has(lid))?2:1});
   };
-  for(const layer of Object.values(MAP.layers||{}))for(const [key,id] of Object.entries(layer)){const [c,r]=key.split(',').map(Number);add(id,c,r);}
+  for(const [lid,layer] of Object.entries(MAP.layers||{}))for(const [key,id] of Object.entries(layer)){const [c,r]=key.split(',').map(Number);add(id,c,r,null,lid);}
   for(const s of MAP.stamps||[])add(s.id,s.c,s.r,s);
   return lamps;
 }

@@ -113,7 +113,7 @@ function mothFlyToward(e, x, y, dt, mul = 1) {
 // ---- 目標：溫特、隊友（不用看得到，飛得過牆）----
 function mothTargets(e) {
   const list = [], p = G.player;
-  if (p && p.hp > 0) list.push(p);
+  if (p && p.hp > 0 && sameFloor(e, p)) list.push(p);   // 不同樓層的打不到（js/pathfinding.js）
   for (const t of G.towers) if (t.hp > 0 && !t.berserk && enemyNoticesSentry(e, t)) list.push(t);
   return list;
 }

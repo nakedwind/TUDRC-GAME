@@ -61,6 +61,16 @@ function refreshLightWalls() {
     if (i >= 0) lightWalls[i] = 1;
   }
 }
+// 陸橋用：lightSurf＝每一格最上面是哪一層（0 一樓、1 二樓地面、2 樓層出入口：兩層都算）；lightWalls2＝二樓的人看到的牆（不是 2 樓地面的格子都算牆）
+let lightSurf = new Uint8Array(COLS * ROWS), lightWalls2 = new Uint8Array(COLS * ROWS), lightSkipSurf = -1;
+function refreshLightFloors() {
+  if (lightSurf.length !== COLS * ROWS) { lightSurf = new Uint8Array(COLS * ROWS); lightWalls2 = new Uint8Array(COLS * ROWS); }
+  lightSurf.fill(0); lightWalls2.fill(1);
+  const idx = k => { let i = lightWallKeyIdx.get(k); if (i === undefined) { const [c, r] = k.split(',').map(Number); i = inGrid(c, r) ? r * COLS + c : -1; lightWallKeyIdx.set(k, i); } return i; };
+  for (const k of deckCells) { const i = idx(k); if (i >= 0) { lightSurf[i] = 1; lightWalls2[i] = 0; } }
+  for (const k of rampCells) { const i = idx(k); if (i >= 0) { lightSurf[i] = 2; lightWalls2[i] = lightWalls[i]; } }
+  return true;
+}
 const lightWall = (c, r) => c >= 0 && c < COLS && r >= 0 && r < ROWS && lightWalls[r * COLS + c] === 1;   // 跟 isWall 一樣，只是查表
 
 // 8 方向擴散（斜向成本 1.4，讓光圈接近圓形）
@@ -73,8 +83,16 @@ function computeLightField() {
   beamMask.fill(0);
   if (!LIGHT.enabled) return;
   refreshLightWalls();   // 這一幀的牆（門開關、炸牆都會改 mapWalls）；緊接著的 computeFlashField 也沿用
+  // 陸橋：一樓的燈照一樓的牆擴散、只照亮「不是 2 樓地面」的格子；二樓的燈只在 2 樓地面（和樓層出入口）上擴散、只照亮那些格子。
+  // 畫面上每一格看到的是最上面那一層：2 樓地面的格子顯示二樓的亮度，其他格子顯示一樓的亮度。
+  const walls1 = lightWalls, twoFloors = hasFloors && refreshLightFloors();
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
+  losNoFloors = true;
   for (const l of lightsCache) {
+    const f2 = twoFloors && l.floor === 2;
+    if (twoFloors) { lightWalls = f2 ? lightWalls2 : walls1; lightSkipSurf = f2 ? 0 : 1; floorCtx = f2 ? 2 : 1; floorOnRamp = false; floorOnDeck = false; }
     spreadLight(l, (i, b) => {
+      if (twoFloors && lightSurf[i] === lightSkipSurf) return;   // 這一格屬於另一層
       b *= l.intensity ?? 1;
       if (b > lightField[i]) lightField[i] = b;          // 遊戲判定（亮處）：手電筒照常用格子扇形
       if (!l.smooth && b > visField[i]) visField[i] = b;   // 畫面：頭燈、手電筒另外畫
@@ -82,6 +100,7 @@ function computeLightField() {
     });
     if (l.smooth) markBeamMask(l);   // 頭燈、手電筒畫面上照得到的格子（牆後面不會亮）
   }
+  lightWalls = walls1; lightSkipSurf = -1; losNoFloors = false; floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck;
   if (typeof lightBreakableWallFaces === 'function') lightBreakableWallFaces([lightField, visField, warmField]);   // 可炸開的牆：牆面跟著牆腳一起亮（js/breakable-walls.js）
 }
 // 頭燈、手電筒畫面上照得到的格子：格子擴散（不限扇形，讓柔邊也有地方亮；範圍多一點給柔邊）＋從燈到格子要「直線看得到」。
@@ -95,6 +114,7 @@ function markBeamMask(l) {
     const dx = x - l.x, dy = y - l.y, d = Math.hypot(dx, dy);
     if (d > CELL * 1.2 && (dx * ca + dy * sa) / d < wide) return;   // 離扇形太遠的不用管（省時間）
     if (lightWall(c, r)) { const k = Math.max(0, (d - CELL * .5) / (d || 1)); x = l.x + dx * k; y = l.y + dy * k; }   // 牆本身：看朝向手電筒那一面
+    if (lightSkipSurf >= 0 && lightSurf[i] === lightSkipSurf) return;   // 陸橋：另一層的格子不照
     if (d <= CELL * .75 || hasLineOfSight(l.x, l.y, x, y)) beamMask[i] = 1;
   });
 }
@@ -239,8 +259,9 @@ function lightOn2FObject(x, y) {
 function getLights() {
   const L = [];
   // 玩家（嚮導提燈）：目前關閉（data/balance.js 的 LIGHT.playerLightOn）
-  if (G && G.player && LIGHT.playerLightOn) L.push({ x: G.player.x, y: G.player.y, r: LIGHT.playerR });
-  if (typeof equipLight === 'function') L.push(...equipLight());   // 照明頭盔、手電筒（js/equipment.js）
+  const pf = actorFloor(G && G.player);   // 溫特在幾樓：他身上的燈（頭燈、手電筒）就照那一層
+  if (G && G.player && LIGHT.playerLightOn) L.push({ x: G.player.x, y: G.player.y, r: LIGHT.playerR, floor: pf });
+  if (typeof equipLight === 'function') for (const l of equipLight()) { l.floor = pf; L.push(l); }   // 照明頭盔、手電筒（js/equipment.js）
   // 營地常亮（沒自訂營地就用預設最下排）
   if (campCells.size) campCells.forEach(k => { const [c, r] = k.split(',').map(Number); const [x, y] = center(c, r); L.push({ x, y, r: LIGHT.campR, floor: 1 }); });   // 營地在 1 樓
   else for (let c = 0; c < COLS; c++) { const [x, y] = center(c, ROWS - 1); L.push({ x, y, r: LIGHT.campR, floor: 1 }); }
@@ -265,7 +286,7 @@ function getLights() {
       ];
       lamps.forEach(([x, y], i) => L.push({ x, y, visualX: x, visualY: y, r: lampR, warm: true, single: true, phase: i * 1.7 }));
     }
-    const nObs = L.length;   // 這個建築加的燈：都在 1 樓（建築只蓋在 1 樓）
+    const nObs = L.length;   // 這個建築加的燈
     const lr = o.type && LIGHT.buildings[o.type];
     if (lr && !o.mrtHidden) {   // mrtHidden：跟著捷運開進隧道了（js/mrt-train.js）
       const x = OX + (o.c + (o.w || 1) / 2) * CELL + (o.mrtShift || 0);   // mrtShift：蓋在捷運車廂裡、跟著列車移動
@@ -275,7 +296,7 @@ function getLights() {
       L.push({ x, y, visualX: x, visualY, r: lr, warm: true,
         single: o.type === 'camping_lights', phase: o.c * 7 + o.r * 13 });
     }
-    for (let k = nObs; k < L.length; k++) if (L[k].floor == null) L[k].floor = 1;
+    for (let k = nObs; k < L.length; k++) if (L[k].floor == null) L[k].floor = o.floor === 2 ? 2 : 1;   // 建築的燈：蓋在哪一層就照哪一層（js/build.js 的 o.floor）
   }
   // 長得像臨時基地、但只是圖片的基地（沒有 baseHp、不會被打壞的）：一樣有中央的光和四角的燈。
   // 四盞燈的位置用圖片寬高的比例（池核那張圖比較大）：x 左右、y 上下
@@ -299,12 +320,12 @@ function getLights() {
   const nFix = L.length;
   if (typeof poweredLightSources === 'function') L.push(...poweredLightSources());
   if (typeof flickerLightSources === 'function') L.push(...flickerLightSources());
-  if (hasFloors) for (let k = nFix; k < L.length; k++) L[k].floor = lightOn2FObject(L[k].visualX ?? L[k].x, L[k].visualY ?? L[k].y) ? 2 : 1;   // 電燈、日光燈：看它是不是掛在 2 樓的物件圖層上   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
+  if (hasFloors) for (let k = nFix; k < L.length; k++) if (L[k].floor == null) L[k].floor = lightOn2FObject(L[k].visualX ?? L[k].x, L[k].visualY ?? L[k].y) ? 2 : 1;   // 電燈、日光燈：看它是不是掛在 2 樓的物件圖層上   // 不穩定的日光燈：亮著時才算光（js/flicker-light.js）
   if (typeof mapGlowLights === 'function') L.push(...mapGlowLights());   // 地圖上設成「發光」的物件（地圖編輯器／基地編輯器；js/maploader.js）
-  // 陸橋：標了樓層的燈只照溫特所在的那一層（沒標的＝兩層都亮）
-  const vf = actorFloor(G && G.player), lit = hasFloors ? L.filter(l => l.floor == null || l.floor === vf) : L;
-  if (typeof inHiddenArea === 'function') return lit.filter(l => !inHiddenArea(l.x, l.y));   // 還沒炸開的隱藏區裡的燈不亮（js/breakable-walls.js）
-  return lit;
+  // 陸橋：每盞燈都有樓層（floor）。還沒標的（照明彈…）看位置：落在 2 樓地面上，而且底下一樓是牆、或溫特人在 2 樓 → 算 2 樓的
+  if (hasFloors) for (const l of L) if (l.floor == null) { const k = cellAt(l.x, l.y).join(','); l.floor = deckCells.has(k) && (mapWalls.has(k) || pf === 2) ? 2 : 1; }
+  if (typeof inHiddenArea === 'function') return L.filter(l => !inHiddenArea(l.x, l.y));   // 還沒炸開的隱藏區裡的燈不亮（js/breakable-walls.js）
+  return L;
 }
 function isLit(x, y) {
   if (!LIGHT.enabled) return true;

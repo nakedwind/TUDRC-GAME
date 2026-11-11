@@ -6,7 +6,7 @@ window.addEventListener('keydown', e => { if (!e.repeat && e.key.toLowerCase() =
 
 // ---- 佈署物件查詢 ----
 const buildAt = (c, r) => G.grid[c + ',' + r];
-const barrierAt = (c, r) => { const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle') ? o : null; };
+const barrierAt = (c, r) => { const o = G.grid[c + ',' + r]; return (o && o.kind === 'obstacle' && (!hasFloors || (o.floor === 2 ? 2 : 1) === floorCtx)) ? o : null; };   // 陸橋：建築只擋同一層的（js/pathfinding.js）
 function removeBarrier(o) {
   if (o.isBase && o.hp <= 0 && o.baseStamp) {
     if (!G.destroyedBases) G.destroyedBases = new Set();
@@ -46,6 +46,12 @@ function placeCheckCells(v) {
   return cells;
 }
 function canPlaceObstacle(v, c, r, lightExtra = 0) {
+  // 陸橋：溫特在幾樓就蓋在幾樓（二樓只能蓋在 2 樓地面上，js/pathfinding.js）
+  const keepCtx = floorCtx, keepRamp = floorOnRamp, keepDeck = floorOnDeck;
+  floorCtx = actorFloor(G && G.player); floorOnRamp = false; floorOnDeck = false;
+  try { return canPlaceObstacleNow(v, c, r, lightExtra); } finally { floorCtx = keepCtx; floorOnRamp = keepRamp; floorOnDeck = keepDeck; }
+}
+function canPlaceObstacleNow(v, c, r, lightExtra = 0) {
   if (c < 0 || r < 0 || c + v.w > COLS || r + v.h > ROWS) return false;
   if (typeof elevatorCoversCell === 'function')   // 電梯（含門口前面一排）：整個佔地都不能壓到
     for (let dc = 0; dc < (v.w || 1); dc++) for (let dr = 0; dr < (v.h || 1); dr++) if (elevatorCoversCell(c + dc, r + dr)) return false;
@@ -57,6 +63,7 @@ function canPlaceObstacle(v, c, r, lightExtra = 0) {
     const cc = c + dc, rr = r + dr;
     if (!inGrid(cc, rr)) return false;
     if (isWall(cc, rr) || isEntrance(cc, rr)) return false;
+    if (hasFloors && rampCells.has(cc + ',' + rr)) return false;   // 樓層出入口（手扶梯）上不能蓋
     if (G.grid[cc + ',' + rr]) return false;         // 既有建築的擋路格
     if (!cellNearLight(cc, rr, lightExtra)) return false;
     // （蓋在玩家／哨兵身上是允許的：放下去的瞬間，救援機制會自動把人推到旁邊空位）
@@ -101,6 +108,7 @@ function placeObstacle(ob, c, r) {
   const solid = ob.trap || slow ? [] : variantSolidCells(v).map(cell => cell.slice());
   const blv = buildLevel(ob.id) || 1, hp = Math.max(1, Math.round(ob.hp * buildBoost({ playerBuilt: true, type: ob.id, blv }, 'hp')));   // 建築等級：血量（開發工坊「開發建築物」升級）
   const o = { kind: 'obstacle', playerBuilt: true, type: ob.id, blv, orient: buildOrient, c, r, w: v.w, h: v.h, solid, hp, maxhp: hp, spawnT: 0, trap: !!ob.trap, slow: slow || null };
+  if (hasFloors && actorFloor(G.player) === 2) o.floor = 2;   // 蓋在陸橋上：只擋 2 樓的人、燈只照 2 樓、畫在 2 樓
   solid.forEach(([dc, dr]) => { G.grid[(c + dc) + ',' + (r + dr)] = o; });
   G.obstacles.push(o);
   if (typeof rememberStoryBuilds === 'function') rememberStoryBuilds();   // 劇情地圖：蓋好就記下來（js/combat-progress.js）
