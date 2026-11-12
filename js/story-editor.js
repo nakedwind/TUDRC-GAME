@@ -621,9 +621,11 @@ function renderObj() {
       field('角色圖資料夾', txt(ac, 'sprite', { list: 'spriteList', rerender: true, optional: true })),
       field('單張圖（只有一張圖的路人，例如家屬的背影；填了就不用角色圖資料夾）', txt(ac, 'image', { optional: true, rerender: true, placeholder: 'images/回憶場景/檔名.png' })),
       ac.image && field('單張圖照原圖大小畫（1＝跟角色同一個比例，例如擔架；空白＝跟人一樣高）', num(ac, 'imageScale', { optional: true, min: .1, step: .1, placeholder: '—' })),
+      ac.image && field('放在桌面上（桌面會蓋住所有人和東西；勾了才會畫在桌面上面）', chk(ac, 'onTop', '放在桌面上')),
       field('一開始手上拿著（圖片，例如遺物箱；空白＝沒拿東西）', txt(ac, 'carry', { optional: true, placeholder: 'images/回憶場景/relics.png' })),
       field('坐著時拿著的東西往左／往右幾像素（負＝往左；站起來就回原位）', num(ac, 'carrySitDx', { optional: true, step: 1, placeholder: '0' })),
       field('拿著的東西往上／往下幾像素（負＝往上）', num(ac, 'carryDy', { optional: true, step: 1, placeholder: '0' })),
+      ac.sprite && field('餐盤（坐在餐桌前＝放在面前桌上；站起來走路＝端著一起走）', chk(ac, 'tray', '有餐盤')),
       ac.sprite && equipField(ac, 'head', '頭上戴的配件（服裝的配件，位置用服裝編輯器調的）'),
       ac.sprite && equipField(ac, 'face', '臉上戴的配件'),
       chk(ac, 'popper', '手上拿著拉炮（演出「拉炮」時拉下去）'),
@@ -713,13 +715,13 @@ function renameActor(s, old, v) {   // 主要角色改 id：對話演出裡的�
 
 // ---- 右邊：對話與演出 ----
 // 每頁可以指名角色的演出（同一個人一頁只能有一筆）
-const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'show', 'trail', 'holdAt', 'face', 'eyes', 'speed', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug'];
+const ACTOR_ACTS = ['move', 'exit', 'place', 'via', 'hide', 'show', 'trail', 'holdAt', 'face', 'eyes', 'speed', 'moveDelay', 'tremble', 'punch', 'leak', 'pop', 'blow', 'shout', 'hop', 'carry', 'gun', 'shield', 'down', 'charge', 'fight', 'emote', 'bubble', 'tug'];
 // 每頁指名怪物的演出（monsterMove 走位、monsterPose 姿勢、swallow 吞掉哪個角色）
 const MONSTER_ACTS = ['monsterMove', 'monsterPose', 'swallow', 'monsterWander', 'preyKick', 'spit'];
 const MONSTER_POSES = [['', '站好（一般站姿、走路圖）'], ['smile', '笑（笑臉圖交替）'], ['attack', '張嘴（朝最近的人）']];
-const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.show && '✨', b.trail && '👣', b.holdAt && '⏳', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.pop && '🎉', b.blow && '🎺', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
+const beatTags = b => [b.camera && '🎥', b.move && '🚶', b.exit && '🚪', b.place && '⤴', b.hide && '👻', b.show && '✨', b.trail && '👣', b.moveDelay && '⏱', b.holdAt && '⏳', b.face && '↻', b.eyes && '👁', b.tremble && '〰', b.punch && '👊', b.leak && '⏳', b.pop && '🎉', b.blow && '🎺', b.shout && '❗', b.hop && '⤒', b.carry && '📦',
   b.gun && '🔫', b.shield && '🛡', b.down && '⤓', b.charge && '✦', b.fight && '⚔', b.emote && '💢', b.bubble && '💭', b.tug && '✊', b.monsterMove && '🐟', b.monsterPose && '🐟', b.monsterWander && '🐟', b.swallow && '🍽', b.preyKick && '🦵', b.spit && '💦', b.choices && '🔀', b.label && '🏷', b.stop && '⏹', b.card && '🃏', b.thunder && '⚡', b.sweat && '💧', (b.gloom || b.portraitFlip || b.portraitDark) && '😶',
-  b.bgmLevel && '🔉', 'confetti' in b && '🎊', b.banner && '🅰', b.caption && '🎬', 'meter' in b && '📊', 'records' in b && '📋', 'filter' in b && '🎞', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number(b.shake) > 0 && '📳', b.elevator && '🛗', 'follow' in b && '🎯', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
+  b.bgmLevel && '🔉', 'confetti' in b && '🎊', b.banner && '🅰', b.caption && '🎬', 'meter' in b && '📊', 'records' in b && '📋', 'filter' in b && '🎞', 'heal' in b && '✚', 'hush' in b && '🔇', b.door && '⇆', b.sfx && '🔊', Number(b.textSize) > 0 && '🔠', 'bgm' in b && '🎵', b.screen && '⬛', Number(b.shake) > 0 && '📳', b.elevator && '🛗', 'follow' in b && '🎯', 'auto' in b && '⏩', Number.isFinite(b.end) && '⏹'].filter(Boolean).join('');
 function renderBeats() {
   const box = $('paneBeats'), s = scene(); box.innerHTML = ''; if (!s) return;
   s.beats.forEach((b, i) => {
@@ -734,16 +736,16 @@ function renderBeats() {
 }
 // 每頁的演出：只列出這頁有用到的；要加新的從「＋ 加演出」選單挑（照類別分好，順序也是畫面上列出來的順序）
 const ACT_MENU = [
-  ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['show', '出現'], ['trail', '跟在後面'], ['holdAt', '等他走到才能翻頁'], ['speed', '速度']]],
+  ['走位', [['move', '走位'], ['exit', '離場'], ['place', '瞬移'], ['hide', '消失'], ['show', '出現'], ['trail', '跟在後面'], ['holdAt', '等他走到才能翻頁'], ['speed', '速度'], ['moveDelay', '晚幾秒才走']]],
   ['角色動作', [['face', '轉向'], ['eyes', '眼睛'], ['shout', '大喊'], ['hop', '小跳'], ['tremble', '顫抖'], ['punch', '出拳'], ['leak', '沙包破掉漏沙'], ['pop', '拉炮'], ['blow', '吹生日吹笛'], ['emote', '情緒符號'], ['bubble', '泡泡框'], ['tug', '扯呆毛'], ['carry', '拿著'], ['gun', '持槍'], ['shield', '盾牌'], ['down', '倒地'], ['charge', '集氣'], ['fight', '打架']]],
   ['怪物', [['monsterMove', '怪物走位'], ['monsterPose', '怪物姿勢'], ['monsterWander', '繞著人走'], ['swallow', '吞人'], ['preyKick', '嘴裡的人抽一下'], ['spit', '吐出來'], ['thunder', '巨雷']]],
   ['畫面', [['camera', '換鏡頭'], ['follow', '鏡頭跟著人'], ['screen', '黑幕'], ['shake', '鏡頭晃一下'], ['card', '介紹卡'], ['door', '自動門'], ['elevator', '電梯門'], ['heal', '治療光'], ['confetti', '彩帶飄落'], ['banner', '中間壓大字'], ['caption', '過場字卡（同一時間）'], ['meter', '數值條（負荷率）'], ['records', '紀錄表'], ['filter', '回想濾鏡']]],
   ['聲音', [['sfx', '音效'], ['exitSfx', '離場音效（走進門那一刻）'],['bgm', '音樂'], ['bgmLevel', '音樂音量'], ['hush', '槍聲']]],
   ['對話框', [['portrait', '頭像情緒']]],
-  ['流程', [['label', '分支名字'], ['choices', '選項'], ['end', '自動結束']]],
+  ['流程', [['label', '分支名字'], ['choices', '選項'], ['auto', '自動翻頁（點了也不翻）'], ['end', '自動結束']]],
 ];
 // 新增時的預設值（走位類要先在地圖上點位置，見 PICK_ACTS）
-const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, show: true, trail: '', speed: 60, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger', bubble: '……', tug: '',
+const ACT_DEFAULT = { face: 'front', eyes: 'open', hide: true, show: true, trail: '', speed: 60, moveDelay: 1, tremble: true, punch: true, leak: true, pop: true, blow: true, shout: true, hop: true, carry: '', gun: true, shield: true, down: true, charge: true, fight: true, emote: 'anger', bubble: '……', tug: '',
   monsterPose: 'smile', preyKick: true, spit: true };
 const PICK_ACTS = { holdAt: '走到哪才能翻頁', move: '走到哪', exit: '走到哪後消失', place: '瞬移到哪', monsterMove: '走到哪' };
 // 這頁有沒有這個演出（大部分看欄位在不在；頭像情緒、分支是好幾個欄位合成一列）
@@ -796,11 +798,12 @@ function beatBody(s, b, i) {
     place: () => many('place', '瞬移', id => h('span', { class: 'row' }, xy(b.place, id, actorName(id) + '在第 ' + (i + 1) + ' 頁瞬移到哪'), h('small', {}, '直接換位置（黑幕時用）'))),
     hide: () => many('hide', '消失', () => h('small', {}, '這頁一開始就不見')),
     // 跟在後面：先用自己的速度追上去，追到身後就配合對方的速度一路跟著（邊走邊講話用）；選「不跟了」或對方離場就停下來
-    trail: () => many('trail', '跟在後面', id => h('span', { class: 'row' }, '跟著', choose(b.trail, id, [['', '（不跟了）'], ...actorOptions().filter(o => o[0] !== id)]), h('small', {}, '先追上去，再配合對方的速度跟在身後；對方走進門就停下來'))),
+    trail: () => many('trail', '跟在後面', id => h('span', { class: 'row' }, '跟著', choose(b.trail, id, [['', '（不跟了）'], ...actorOptions().filter(o => o[0] !== id)]), h('small', {}, '先追上去，再配合對方的速度跟在身後；對方走進門就停下來。跟的途中用「速度」改他的速度，對方加速時他就會被甩開'))),
     // 等他走到才能翻頁：這個人走到（經過）這個位置之前，這一頁不能翻（邊走邊講話時，讓下一頁的演出等人走到定點才開始）
     holdAt: () => many('holdAt', '等他走到', id => h('span', { class: 'row' }, xy(b.holdAt, id, actorName(id) + '走到哪，第 ' + (i + 1) + ' 頁才能翻頁'), h('small', {}, '走到（經過）這裡之前這頁不能翻；他沒在走路就不等'))),
     // 出現：先隱藏的人在原地淡入出現（坐在椅子上的照樣坐著；用走位／瞬移讓人出現的話會變成站著）
     show: () => many('show', '出現', () => h('small', {}, '先隱藏的人在這頁原地淡入出現（坐著的照樣坐著）')),
+    moveDelay: () => many('moveDelay', '晚幾秒才走', id => h('span', { class: 'row' }, num(b.moveDelay, id, { min: 0, step: .1 }), h('small', {}, '秒；這頁的走位／離場先站著等這麼久才起步'))),
     speed: () => many('speed', '速度', id => h('span', { class: 'row' }, num(b.speed, id, { min: 1, step: 1 }), h('small', {}, '像素／秒（之後都用這個速度）'))),
     face: () => many('face', '轉向', id => choose(b.face, id, faceOptions.filter(o => o[0] !== id))),
     eyes: () => many('eyes', '眼睛', id => choose(b.eyes, id, [['open', '睜開'], ['closed', '閉上']])),
@@ -922,6 +925,7 @@ function beatBody(s, b, i) {
         h('small', {}, '台詞打完字後出現按鈕，選了才往下；「結果」交給遊戲決定接下來怎麼走（js/story-triggers.js）'));
       acts.append(box);
     },
+    auto: () => one('自動翻頁', ['auto'], '台詞出完後再停', num(b, 'auto', { min: 0 }), '秒，自己翻到下一頁', h('small', {}, '這頁玩家點了也不會翻頁；有「等他走到」會先等人走到才開始數')),
     end: () => one('自動結束', ['end'], '這頁', num(b, 'end', { min: 0 }), '秒後自動結束劇情'),
   };
   for (const [, items] of ACT_MENU) for (const [key] of items) if (beatHas(b, key)) ROW[key]();
@@ -966,7 +970,7 @@ function addActMenu(s, b, i) {
       thunder: () => { b.thunder = true; }, camera: () => { b.camera = beatCamera(i); }, screen: () => { b.screen = 'black'; }, shake: () => { b.shake = 4; },
       card: () => { b.card = { image: '', subtitle: '', title: '', text: '' }; }, door: () => { b.door = 'open'; }, elevator: () => { b.elevator = 'open'; }, follow: () => { b.follow = s.actors[0]?.id || ''; }, confetti: () => { b.confetti = true; }, banner: () => { b.banner = ''; }, caption: () => { b.caption = ['同一時間', '']; }, meter: () => { b.meter = { label: '負荷率', value: 50, line: 80 }; }, records: () => { b.records = { title: '', rows: [] }; }, filter: () => { b.filter = 'memory'; }, heal: () => { b.heal = healPair(s); },
       sfx: () => { b.sfx = ''; }, exitSfx: () => { b.exitSfx = 'door'; }, bgm: () => { b.bgm = 'music/'; }, bgmLevel: () => { b.bgmLevel = { vol: .3, secs: 1 }; }, hush: () => { b.hush = true; }, portrait: () => { b.sweat = true; },
-      label: () => { b.label = ''; }, choices: () => { b.choices = [{ text: '' }]; }, end: () => { b.end = 2; },
+      label: () => { b.label = ''; }, choices: () => { b.choices = [{ text: '' }]; }, auto: () => { b.auto = 1.5; }, end: () => { b.end = 2; },
     })[key]();
     commit();
   };

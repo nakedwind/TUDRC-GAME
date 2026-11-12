@@ -140,6 +140,13 @@ function trayPosForSeat(seat) {
   }
   return best;
 }
+// 劇情用（js/story-scene.js 角色欄位 tray）：一份裝好菜的餐盤。菜從打飯台的圖上截，跟遊戲裡打的菜是同一套；seed 不同、菜色就不同
+function mealSampleTray(seed = 0, count = 3) {
+  const pans = [], tray = newTray();
+  for (const id of MEAL.buffetTiles) { const t = mapTileById(id); if (t) mealPansOf(id).forEach(rect => pans.push({ file: t.file, rect })); }
+  for (let i = 0; i < count && pans.length; i++) tray.foods.push(pans[(seed * 5 + i * 7) % pans.length]);
+  return tray;
+}
 const trayAtSeat = seat => mealTrays().find(t => t.seatKey === seatIdOf(seat));
 const newTray = () => ({ foods: [], left: 1, dirty: false });
 // ---- 溫特 ----
