@@ -640,12 +640,13 @@ function restoreEditorSnapshot(value) {
 // ---- 複製／貼上（Ctrl+C／Ctrl+V）：把選取的物件（可以多選）整組複製，貼在滑鼠所在的格子 ----
 // ・貼上時整組的形狀不變：整組最左上的那一格對到滑鼠的格子（大圖的格內微調 ox、oy 照抄）；滑鼠不在地圖上就貼在原本那組的右邊
 // ・同一層同一格已經有小圖的話會蓋過去（跟貼圖一樣）；貼好的那一組會變成選取狀態，可以直接拖曳、再貼、或刪除
+// ・貼上的物件會排在原本那個物件的正上方（圖層物件清單裡就在它上面一格），不會跑到整個圖層的最上層
 // ・剪貼簿只存在這個編輯器頁面裡（可以貼到別張地圖）；Ctrl+Z 可以復原
 let editorClipboard = null;
 function copySelection() {
   const m = curMap(), items = [];
   for (const sel of selections) {
-    if (sel.type === 'stamp') { const s = m.stamps[sel.index]; if (s) items.push({ stamp: clone(s) }); }
+    if (sel.type === 'stamp') { const s = m.stamps[sel.index]; if (s) items.push({ stamp: clone(s), src: s, srcMap: m.id }); }   // src＝原本那個物件：貼上時插在它上面
     else { const id = m.layers[sel.layer] && m.layers[sel.layer][sel.key]; if (!id) continue; const [c, r] = sel.key.split(',').map(Number); items.push({ tile: { layer: sel.layer, c, r, id } }); }
   }
   if (!items.length) return;
@@ -659,7 +660,7 @@ function pasteClipboard() {
   const [tc, tr] = hoverCell || [cb.from[0] + cb.w, cb.from[1]];   // 滑鼠不在地圖上：貼在原本那組的右邊
   const dc = tc - cb.c0, dr = tr - cb.r0, layerOk = lid => m.layers[lid] ? lid : activeLayer;   // 貼到別張地圖、沒有那個圖層：改放目前圖層
   pushUndo();
-  const picked = []; let skipped = 0;
+  const picked = [], stampsToAdd = []; let skipped = 0;
   for (const it of cb.items) {
     if (it.tile) {
       const c = it.tile.c + dc, r = it.tile.r + dr, lid = layerOk(it.tile.layer);
@@ -669,9 +670,17 @@ function pasteClipboard() {
     } else {
       const s = clone(it.stamp); s.c += dc; s.r += dr; s.layer = layerOk(s.layer || 'top');
       if (!inGrid(s.c, s.r) || isLockedLayer(s.layer) || hiddenLayers.has(s.layer)) { skipped++; continue; }
-      m.stamps.push(s); picked.push({ type: 'stamp', index: m.stamps.length - 1 });
+      stampsToAdd.push({ s, it });
     }
   }
+  // 物件：插在「原本那個物件」的正上方（物件清單裡緊接在它後面＝畫在它上面），不要一律跑到圖層最上層；
+  // 貼到別張地圖、或原本那個已經刪掉了，才放到最上層
+  for (const { s, it } of stampsToAdd) {
+    let at = it.srcMap === m.id ? m.stamps.indexOf(it.src) : -1;
+    if (at < 0 && it.srcMap === m.id) { const want = JSON.stringify(it.stamp); at = m.stamps.findIndex(x => JSON.stringify(x) === want); }   // 復原（Ctrl+Z）過後物件會換成新的一份：用內容找
+    if (at >= 0) m.stamps.splice(at + 1, 0, s); else m.stamps.push(s);
+  }
+  for (const { s } of stampsToAdd) picked.push({ type: 'stamp', index: m.stamps.indexOf(s) });
   if (brush.mode !== 'select') { brush = { mode: 'select', tile: brush.tile }; updateToolUI(); renderPalette(); }
   selections = picked; selection = picked[picked.length - 1] || null;
   saveMaps(); draw(); refreshSelPanel(); refreshLayerListSoon();
