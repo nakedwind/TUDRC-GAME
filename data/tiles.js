@@ -6780,5 +6780,14 @@ const SHARED_TILES = [
     "file": "images/Poolcore/Poolcore_pool_2_middle.png",
     "w": 4,
     "h": 3
+  },
+  {
+    "id": "tile_mwdqrv1c",
+    "name": "Poolcore_wall_shadow",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_wall_shadow.png",
+    "w": 1,
+    "h": 1,
+    "flat": true
   }
 ];
