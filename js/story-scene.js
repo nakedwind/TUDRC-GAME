@@ -207,7 +207,7 @@ const StoryScene = (() => {
   // ---- 跟在後面（每頁 trail: { 跟的人: 被跟的人 }，空白＝不跟了）----
   // 先用自己的速度追上去，追到對方身後就配合對方的速度一路跟著（邊走邊講話用）；對方離場（走進門）或不跟了，就停在原地
   // gap＝跟在身後多遠、side＝往下錯開多少（像素，才不會兩個人疊在一起）、near＝離這麼近就算追上了
-  const TRAIL = { gap: 44, side: 16, near: 8 };
+  const TRAIL = { gap: 60, side: 6, near: 8 };
   const trailSpot = (a, L) => [L.x + ((L.dir === 'left' ? 1 : L.dir === 'right' ? -1 : a.x >= L.x ? 1 : -1) * TRAIL.gap), L.y + TRAIL.side];
   function stopTrail(a) {
     const L = actor(a.trail);
@@ -765,7 +765,7 @@ const StoryScene = (() => {
     const settle = () => {
       for (const a of state.actors) if (a.target && a.role !== 'medic') {
         [a.x, a.y] = a.path?.length ? a.path[a.path.length - 1] : a.target;
-        a.target = null; a.path = []; a.dir = arriveFace(a) || a.dir;
+        a.target = null; a.path = []; a.walkHold = 0; a.dir = arriveFace(a) || a.dir;
       }
       for (const a of state.actors) {
         if (a.exiting) a.hidden = true; a.exiting = a.fading = false; a.alpha = 1; a.swA = a.swV = 0;
@@ -806,7 +806,7 @@ const StoryScene = (() => {
     return Math.abs(dx) > Math.abs(dy) ? dx < 0 ? 'left' : 'right' : dy < 0 ? 'back' : 'front';
   }
   function setBeat(index) {
-    state.index = index; state.beatTime = 0; state.chars = 0; state.held = null; state.holding = false;
+    state.index = index; state.beatTime = 0; state.chars = 0; state.held = null; state.holding = false; state.autoT = 0;
     const beat = state.cfg.beats[index];
     state.shown = false; showBox(false);
     el('dialogueProgress').textContent = (index + 1) + ' / ' + state.cfg.beats.length;
@@ -848,7 +848,7 @@ const StoryScene = (() => {
       const a = actor(id); if (!a) continue;
       a.hidden = false; a.alpha = 1; a.fading = a.exiting = false; a.target = null; a.path = []; a.x = p[0] * CELL; a.y = p[1] * CELL; a.sitting = null;
     }
-    for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) a.speed = Number(v); }
+    for (const [id, v] of Object.entries(beat.speed || {})) { const a = actor(id); if (a && Number(v) > 0) { a.speed = Number(v); if (a.trail) a.trailSpeed = Number(v); } }   // 正在跟著別人的人：這就是他之後的速度（對方加速、他照這個速度走，就會被甩開）
     for (const [id, v] of Object.entries(beat.tremble || {})) { const a = actor(id); if (a) a.tremble = !!v; }
     for (const [id, v] of Object.entries(beat.punch || {})) { const a = actor(id); if (a) { a.punch = !!v; a.pk = null; } }
     // 沙包破掉漏沙（每頁 leak: { 沙包id: true／false }）：換成破掉的圖、整個大晃一下、破口一直漏沙、地上堆出一小堆；false＝恢復原狀
@@ -885,9 +885,11 @@ const StoryScene = (() => {
     if ('filter' in beat) setFilter(beat.filter);
     const rise = a => { if (a.sitting && !a.sitting.bed) a.sitting = null; };   // 坐在椅子上的人：站起來再走（躺床的不會自己下床）
     for (const id of [...Object.keys(beat.move || {}), ...Object.keys(beat.exit || {}), ...Object.keys(beat.place || {})]) { const a = actor(id); if (a?.trail && !(beat.trail && id in beat.trail)) stopTrail(a); }   // 自己走位／離場／瞬移：不再跟著別人
-    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; walkTo(a, p, beat.via?.[id]); }
+    // 晚幾秒才走（每頁 moveDelay: { 角色id: 幾秒 }）：這頁的走位／離場先在原地等這麼多秒才起步（例如一個人先跑、另一個慢一拍才追）
+    const walkHold = id => state.skipping ? 0 : Math.max(0, Number(beat.moveDelay?.[id]) || 0);
+    for (const [id, p] of Object.entries(beat.move || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = false; a.walkHold = walkHold(id); walkTo(a, p, beat.via?.[id]); }
     // exitSfx（離場音效）：這頁離場的人真的走到、開始淡出的那一刻才播（例如關門聲）——人還在路上就翻頁也不會先響
-    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; a.exitSfx = beat.exitSfx || ''; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
+    for (const [id, p] of Object.entries(beat.exit || {})) { const a = actor(id); if (!a) continue; show(a); rise(a); a.exiting = true; a.walkHold = walkHold(id); a.exitSfx = beat.exitSfx || ''; walkTo(a, p, beat.via?.[id]); }   // 走到那裡後淡出消失（走進門裡）
     for (const [id, who] of Object.entries(beat.trail || {})) {   // 跟在後面：先隱藏的人會淡入出現；空白＝不跟了，停在原地
       const a = actor(id); if (!a) continue;
       if (a.trail) stopTrail(a);
@@ -931,12 +933,17 @@ const StoryScene = (() => {
     }
     setSpeaker(beat);   // 眼睛狀態套用後，頭像才跟著切換睜眼／閉眼受傷圖。
   }
-  function next() {
+  // ---- 自動翻頁（每頁 auto: 幾秒）----
+  // 台詞整句出來（要等人走到的也等到了）之後，再停這麼多秒就自己翻到下一頁；這一頁玩家怎麼點、怎麼按都不會翻頁
+  // 用在「邊走邊講話」的段落：每頁的時間固定，人走到哪、講到哪才對得上。有選項的頁不會自動翻
+  const autoSecs = beat => beat && beat.auto !== '' && beat.auto != null && Number(beat.auto) >= 0 && !beat.choices?.length ? Number(beat.auto) : null;
+  function next(byAuto) {
     if (!state?.playing || state.ending || state.time < state.nextAt || screenBusy()) return;   // 黑幕還在變：等它變完才能翻頁
     const beat = state.cfg.beats[state.index], length = Array.from(beat.text).length;
+    if (autoSecs(beat) != null && byAuto !== true) return;   // 自動翻頁的頁：玩家點了也不翻、也不會把字一次跳出來
     if (state.chars >= length && holdBusy()) return;   // 等人走到定點（holdAt）：字都出來了也先不能翻頁
     state.nextAt = state.time + .18;
-    if (typeof sfx === 'function') sfx('blip');
+    if (typeof sfx === 'function' && byAuto !== true) sfx('blip');
     if (state.chars < length) { state.chars = length; renderText(); return; }
     if (state.choosing) return;   // 有選項：要選了才能往下
     if (beat.stop) { finish(false); return; }   // stop：這頁之後就結束（分支的最後一頁，後面接的是另一條分支）
@@ -975,7 +982,7 @@ const StoryScene = (() => {
     if (el('dialogueText').textContent !== text) el('dialogueText').textContent = text;
     el('dialogueText').classList.toggle('typing', typing);
     state.holding = !typing && holdBusy();
-    setDialogueNextLabel(typing ? '快速顯示' : state.holding ? '……' : state.index === state.cfg.beats.length - 1 ? '結束' : '下一句');   // 等人走到定點時按鈕顯示「……」
+    setDialogueNextLabel(autoSecs(beat) != null ? '自動播放' : typing ? '快速顯示' : state.holding ? '……' : state.index === state.cfg.beats.length - 1 ? '結束' : '下一句');   // 等人走到定點時按鈕顯示「……」
   }
   function positionCamera() {
     const vw = viewW(), vh = viewH(), mw = COLS * CELL, mh = ROWS * CELL;
@@ -1144,6 +1151,9 @@ const StoryScene = (() => {
           // 打字速度跟遊戲對話一樣（NPC_TALK.typeSpeed＝每個字幾毫秒）
           state.chars = Math.min(Array.from(beat.text).length, state.chars + dt * 1000 / Math.max(5, Number(NPC_TALK.typeSpeed) || 24));
           renderText();
+          // 自動翻頁：字都出來、該等的人也走到了，才開始數秒
+          const auto = autoSecs(beat);
+          if (auto != null && state.chars >= Array.from(beat.text).length && !holdBusy() && !screenBusy() && (state.autoT += dt) >= auto) next(true);
         }
       }
     }
@@ -1158,6 +1168,7 @@ const StoryScene = (() => {
         if (a.role === 'medic') { if (!a.target) a.pause -= dt; tickMedic(a); }
         if (a.trail) { tickTrail(a, dt); continue; }   // 跟在別人後面：位置由 tickTrail 決定
         if (!a.target) continue;
+        if (a.walkHold > 0) { a.walkHold -= dt; a.moving = false; continue; }   // 晚幾秒才走（moveDelay）：先站在原地等
         const dx = a.target[0] - a.x, dy = a.target[1] - a.y, d = Math.hypot(dx, dy), step = dt * (a.speed || 26);
         a.moving = d > step;
         if (a.exiting && a.exitSfx && !a.path?.length && d <= (a.speed || 26) * EXIT_SFX_LEAD) { if (typeof SFX !== 'undefined') SFX.play(a.exitSfx, 1, a.exitSfx + ':story-exit'); a.exitSfx = ''; }   // 離場音效：最後一小段路、快到門口時播
@@ -1557,7 +1568,8 @@ const StoryScene = (() => {
     const sortables = []; collectMapOccluders(ctx, sortables);
     // 電梯（關著／開著／開關門動畫，js/maploader.js）：排在它後面那面牆的前面、站在電梯門口的人後面
     if (typeof drawElevators === 'function') for (const s of elevatorStamps()) sortables.push({ y: (s.r + mapTileH(mapTileById(s.id))) * CELL + (s.oy || 0) + 8, draw: () => drawElevators(ctx, s) });
-    for (const a of state.actors) if (!a.hidden) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
+    for (const a of state.actors) if (!a.hidden && !a.onTop) sortables.push({ y: a.sitting ? seatDrawY(a.sitting) : a.y + 17, draw: () => drawActor(a) });
+    for (const a of state.actors) if (a.tray && !a.hidden) pushActorTray(a, sortables);
     const drawFried = e => {   // 被雷劈：焦黑；倒下時以腳底為軸往後轉 90 度，躺在地上
       const k = Math.max(0, Math.min(1, (e.friedT - THUNDER.fry) / THUNDER.fall)), fy = e.y + 13;
       ctx.save(); ctx.filter = 'brightness(.25) contrast(1.4)';
@@ -1567,6 +1579,7 @@ const StoryScene = (() => {
     for (const e of state.monsters) if (!e.gone) sortables.push({ y: e.y + 13, draw: () => e.fried ? drawFried(e) : drawEnemy(e) });
     sortables.sort((a, b) => a.y - b.y).forEach(s => s.draw());
     drawMapTop(ctx);
+    for (const a of state.actors) if (!a.hidden && a.onTop) drawActor(a);   // onTop：放在桌面上的東西（零食…）。桌面屬於地圖上層、會蓋住所有人，所以這些要等桌面畫完才畫
     drawWorldEffects();
     drawDarkness();
     drawLightTint();
@@ -1577,6 +1590,24 @@ const StoryScene = (() => {
     if (typeof drawTextEffects === 'function') drawTextEffects();   // flash() 的提示字（「被吃掉了！」），跟遊戲一樣畫在黑幕上面
     ctx.restore();
     drawVignetteMultiply();
+  }
+  // ---- 餐盤（角色欄位 tray: true）----
+  // 坐在餐桌前：餐盤放在面前的桌上；站起來走路：端在手上一起帶走。畫法、擺的位置都直接用餐廳吃飯的程式（js/meal.js），跟遊戲裡看到的一樣
+  function pushActorTray(a, list) {
+    if (typeof drawMealTray !== 'function') return;
+    const tray = a.trayObj || (a.trayObj = mealSampleTray(state.actors.indexOf(a)));
+    const faded = fn => () => { ctx.save(); ctx.globalAlpha *= a.alpha ?? 1; fn(); ctx.restore(); };   // 人淡入、淡出時餐盤跟著
+    const seat = a.sitting;
+    if (seat && !seat.bed) {
+      if (a.traySeat !== seat) {   // 桌上的位置算一次就好（換座位才重算）
+        const off = MEAL.trayOnTable[seat.dir] || MEAL.trayOnTable.back;
+        a.traySeat = seat; a.trayPos = trayPosForSeat(seat) || { x: seat.x + off[0], y: seat.y + off[1], sortY: seat.y + off[1] + 12 };   // 面前沒有餐桌：照坐的方向放
+      }
+      const t = { ...tray, ...a.trayPos, turn: seat.dir === 'left' || seat.dir === 'right', mirror: seat.dir === 'left', flip: seat.dir === 'front' };
+      list.push({ y: t.sortY, draw: faded(() => { drawTableTray(t); drawPropsOverTray(t); }) });
+    } else if (!seat) {   // 端在胸前（往左、右走時偏到那一邊）；背對鏡頭時被身體擋住
+      list.push({ y: a.y + (a.dir === 'back' ? 15 : 17.2), draw: faded(() => drawMealTray(ctx, a.x + (a.dir === 'left' ? -9 : a.dir === 'right' ? 9 : 0), a.y + MEAL.carryY, tray, .75)) });
+    }
   }
   function leave() {
     if (ui) { el('storyChoices').hidden = true; }
