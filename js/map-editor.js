@@ -3892,10 +3892,17 @@ document.getElementById('f_coreCount').addEventListener('change', e => {
 // ================= 預覽遊戲畫面 =================
 // 把「目前這張地圖」和自訂磚塊暫存起來，再開遊戲頁（?preview=1）讀它。
 // 不用先匯出 maps.js，也不會動到 data/maps.js 或遊戲原本的地圖清單。
+// 關掉眼睛（隱藏）的圖層，預覽時也不出現：交給遊戲的那份拿掉這些圖層的小圖和大圖（編輯中的地圖不受影響）
+function previewMapCopy(m) {
+  const copy = clone(m);
+  for (const lid of hiddenLayers) if (copy.layers && copy.layers[lid]) copy.layers[lid] = {};
+  copy.stamps = (copy.stamps || []).filter(s => !hiddenLayers.has(s.layer || 'top'));
+  return copy;
+}
 document.getElementById('previewGame').addEventListener('click', () => {
   const m = curMap();
   try {
-    localStorage.setItem(STORAGE_PREVIEW, JSON.stringify({ map: clone(m), tiles: customTiles, at: Date.now() }));
+    localStorage.setItem(STORAGE_PREVIEW, JSON.stringify({ map: previewMapCopy(m), tiles: customTiles, at: Date.now() }));
   } catch (e) {
     setStatus('預覽失敗：暫存空間不足（地圖或圖片太大）', '#ff8f8f');
     return;
