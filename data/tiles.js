@@ -6724,5 +6724,61 @@ const SHARED_TILES = [
     "file": "images/捷運車站/dynamo-close.png",
     "w": 2,
     "h": 2
+  },
+  {
+    "id": "tile_mwdka8vr",
+    "name": "Poolcore_Traffic_cone",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_Traffic_cone.png",
+    "w": 2,
+    "h": 2
+  },
+  {
+    "id": "tile_mwdkb1l7",
+    "name": "Poolcore_pool_1",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_1.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_mwdkcaac",
+    "name": "Poolcore_pool_2",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_2.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mwdkcn5r",
+    "name": "Poolcore_pool_3",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_3.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_mwdkcymx",
+    "name": "Poolcore_pool_1_dwn",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_1_dwn.png",
+    "w": 3,
+    "h": 3
+  },
+  {
+    "id": "tile_mwdklejx",
+    "name": "Poolcore_pool_2_dwn",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_2_dwn.png",
+    "w": 4,
+    "h": 3
+  },
+  {
+    "id": "tile_mwdlevxi",
+    "name": "Poolcore_pool_2_middle",
+    "role": "floor",
+    "file": "images/Poolcore/Poolcore_pool_2_middle.png",
+    "w": 4,
+    "h": 3
   }
 ];
